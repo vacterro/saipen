@@ -1,0 +1,1370 @@
+{
+  "ok": true,
+  "code": "HOST_DOCTOR",
+  "source": {
+    "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "kind": "source-checkout",
+    "adapter": null,
+    "canonical": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+    "proven": true,
+    "detail": null,
+    "version": "8.2.0"
+  },
+  "policy": {
+    "mode": "degraded",
+    "label": "DEGRADED_ALLOWED",
+    "source": "operator",
+    "path": "C:\\Users\\vac34\\.saipen\\authority.json"
+  },
+  "authority": {
+    "running": true,
+    "pid": 14472,
+    "instance": "broker-afa92e1b43351ad7515e73a5",
+    "generation": "svc-285ee3e47ebd8f1a89f247cb",
+    "expected_generation": "svc-285ee3e47ebd8f1a89f247cb",
+    "saipen_root": "C:\\Users\\vac34\\.claude\\skills\\saipen",
+    "endpoint": "\\\\.\\pipe\\saipen-authority-336850628174a20c242c9247",
+    "log": "C:\\Users\\vac34\\.saipen\\authority\\broker.log",
+    "identity_supported": true,
+    "mode": "degraded",
+    "mode_label": "DEGRADED_ALLOWED",
+    "mode_source": "operator",
+    "mode_path": "C:\\Users\\vac34\\.saipen\\authority.json",
+    "generation_current": true
+  },
+  "machine_runtime": {
+    "code": "MACHINE_RUNTIME_STALE",
+    "root": "C:\\ProgramData\\SAI\\SAIPEN",
+    "saipen_runtime_ready": false,
+    "generation": "gen-sha256:be78d49b47d0e9d7fa9dedcb340ae70237ea648a4ff2aa04974092ee98ac9649",
+    "current": false,
+    "saipen_version": "8.2.0",
+    "state_schema": 3,
+    "launcher": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+    "python_bundled": true,
+    "source": "MACHINE_RUNTIME",
+    "reasons": [
+      "the machine runtime is not the generation of the canonical source"
+    ],
+    "action": "saipen host machine install"
+  },
+  "path_launcher": {
+    "code": "PATH_LAUNCHER_READY",
+    "directory": "C:\\Users\\vac34\\bin",
+    "files": {
+      "saipen.cmd": "owned",
+      "saipen": "owned"
+    },
+    "reasons": []
+  },
+  "hosts": [
+    {
+      "id": "opencode",
+      "profile": null,
+      "name": "OpenCode",
+      "state": "STALE_RUNTIME",
+      "reasons": [
+        "installed runtime is not the source generation (saipen/REGISTRY.json, tools/saipen.py, tools/saipen_engine/isolated_release.py)",
+        "installer record: runtime_fingerprint"
+      ],
+      "action": "saipen host repair",
+      "installed": true,
+      "host_present": true,
+      "runtime": "stale",
+      "hook": "current",
+      "instruction": "current",
+      "admission": "ADVISORY",
+      "response_enforcement": "MECHANICAL",
+      "last_health": null,
+      "recoverable": true,
+      "contract": {
+        "id": "opencode",
+        "name": "OpenCode",
+        "install_surfaces": {
+          "home": "~/.config/opencode",
+          "skill": "~/.config/opencode/skills/saipen",
+          "instruction": "~/.config/opencode/AGENTS.md",
+          "hook": "~/.config/opencode/plugins/saipen-guard.js"
+        },
+        "tool_interception": "BLOCKING",
+        "prompt_interception": "COMPLETED_TEXT_PART",
+        "response_interception": "NONE",
+        "response_enforcement": "MECHANICAL",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "generic OpenCode launch; no SAIPEN seat required",
+          "mode": "NATIVE_OR_OPTIONAL_LAUNCHER",
+          "launcher_command": "python ~/.config/opencode/skills/saipen/tools/saipen.py --agent <seat> launch opencode -- [arguments]",
+          "executable": "opencode"
+        },
+        "auto_recovery": "PRELAUNCH_RESYNC",
+        "degraded_mode": "DEGRADED_ALLOWED_DEFAULT"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:be78d49b47d0e9d7fa9dedcb340ae70237ea648a4ff2aa04974092ee98ac9649",
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": false,
+          "diff": [
+            "saipen/REGISTRY.json",
+            "tools/saipen.py",
+            "tools/saipen_engine/isolated_release.py",
+            "tools/saipen_engine/release_authority.py",
+            "tools/test_isolated_release.py",
+            "tools/test_release_approval_contract.py"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.config\\opencode\\plugins\\saipen-guard.js",
+          "installed": true,
+          "status": "current",
+          "delegated_root": null,
+          "delegated_current": null,
+          "problems": [],
+          "installed_at": 1792643598.4150546
+        },
+        "host_home": "C:\\Users\\vac34\\.config\\opencode"
+      }
+    },
+    {
+      "id": "claude",
+      "profile": "C:\\Users\\vac34\\.claude",
+      "name": "Claude Code",
+      "state": "STALE_RUNTIME",
+      "reasons": [
+        "installed runtime is not the source generation (saipen/REGISTRY.json, tools/saipen.py, tools/saipen_engine/isolated_release.py)",
+        "installer record: runtime_fingerprint",
+        "host hook is not the installed generation: config-entry-differs:SessionStart, config-entry-differs:UserPromptSubmit, config-entry-differs:PostToolUse, config-entry-differs:PostModelSwitch, config-entry-differs:PreToolUse, config-entry-differs:Stop, delegated-root-stale"
+      ],
+      "action": "saipen host repair",
+      "installed": true,
+      "host_present": true,
+      "runtime": "stale",
+      "hook": "stale",
+      "instruction": "current",
+      "admission": "DEGRADED_UNVERIFIED",
+      "response_enforcement": "INACTIVE",
+      "last_health": {
+        "host": "claude",
+        "event": "UserPromptSubmit",
+        "state": "ADMITTED",
+        "at": 1793890159.1402142,
+        "elapsed_ms": 371,
+        "saipen_root": "C:\\Users\\vac34\\.claude\\skills\\saipen",
+        "hook": "C:\\Users\\vac34\\.claude\\hooks\\saipen-guard.py"
+      },
+      "recoverable": true,
+      "contract": {
+        "id": "claude",
+        "name": "Claude Code",
+        "install_surfaces": {
+          "home": "C:\\Users\\vac34\\.claude",
+          "skill": "C:\\Users\\vac34\\.claude\\skills\\saipen",
+          "instruction": "C:\\Users\\vac34\\.claude\\CLAUDE.md",
+          "hook": "C:\\Users\\vac34\\.claude\\hooks\\saipen-guard.py"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "PROMPT_LEVEL",
+        "response_interception": "MECHANICAL",
+        "response_enforcement": "MECHANICAL",
+        "admission_enforcement": "MECHANICAL",
+        "host_authority_source": "tools/saipen_engine/host_authority_broker.py",
+        "separated_authority": true,
+        "mechanical_admission": true,
+        "prompt_blocking": true,
+        "launch": {
+          "routine": "native Claude Code launch (desktop app, IDE extension or `claude`); no SAIPEN seat, wrapper, launcher, environment variable or prompt phrase is ever required",
+          "mode": "NATIVE_OR_OPTIONAL_LAUNCHER",
+          "launcher_command": "saipen --agent <seat> launch claude -- [arguments]",
+          "executable": "claude"
+        },
+        "auto_recovery": "AUTHORITY_RESTART_THEN_DEGRADE",
+        "degraded_mode": "DEGRADED_ALLOWED_DEFAULT"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.claude\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:be78d49b47d0e9d7fa9dedcb340ae70237ea648a4ff2aa04974092ee98ac9649",
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": false,
+          "diff": [
+            "saipen/REGISTRY.json",
+            "tools/saipen.py",
+            "tools/saipen_engine/isolated_release.py",
+            "tools/saipen_engine/release_authority.py",
+            "tools/test_isolated_release.py",
+            "tools/test_release_approval_contract.py"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.claude\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.claude\\hooks\\saipen-guard.py",
+          "installed": true,
+          "status": "stale",
+          "delegated_root": "C:/Users/vac34/.claude/skills/saipen",
+          "delegated_current": false,
+          "problems": [
+            "config-entry-differs:SessionStart",
+            "config-entry-differs:UserPromptSubmit",
+            "config-entry-differs:PostToolUse",
+            "config-entry-differs:PostModelSwitch",
+            "config-entry-differs:PreToolUse",
+            "config-entry-differs:Stop",
+            "delegated-root-stale"
+          ],
+          "installed_at": 1793200307.1502793,
+          "style_hook_conflicts": [
+            {
+              "event": "UserPromptSubmit",
+              "command": "printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"STYLE CHECK: caveman-ded is ON (saipen STYLE.md). Blunt, compressed, fragments fine, short profanity where i"
+            }
+          ]
+        },
+        "host_home": "C:\\Users\\vac34\\.claude"
+      }
+    },
+    {
+      "id": "claude",
+      "profile": "C:\\Users\\vac34\\.claude-account2",
+      "name": "Claude Code",
+      "state": "STALE_RUNTIME",
+      "reasons": [
+        "installed runtime is not the source generation (saipen/REGISTRY.json, tools/saipen.py, tools/saipen_engine/isolated_release.py)",
+        "installer record: runtime_fingerprint",
+        "host hook is not the installed generation: config-entry-differs:SessionStart, config-entry-differs:UserPromptSubmit, config-entry-differs:PostToolUse, config-entry-differs:PostModelSwitch, config-entry-differs:PreToolUse, config-entry-differs:Stop, delegated-root-stale"
+      ],
+      "action": "saipen host repair --host claude --profile \"C:\\Users\\vac34\\.claude-account2\"",
+      "installed": true,
+      "host_present": true,
+      "runtime": "stale",
+      "hook": "stale",
+      "instruction": "current",
+      "admission": "DEGRADED_UNVERIFIED",
+      "response_enforcement": "INACTIVE",
+      "last_health": {
+        "host": "claude",
+        "event": "UserPromptSubmit",
+        "state": "DEGRADED",
+        "at": 1793886753.114073,
+        "elapsed_ms": 1023,
+        "saipen_root": "C:\\Users\\vac34\\.claude-account2\\skills\\saipen",
+        "hook": "C:\\Users\\vac34\\.claude-account2\\hooks\\saipen-guard.py",
+        "code": "HOOK_STALE"
+      },
+      "recoverable": true,
+      "contract": {
+        "id": "claude",
+        "name": "Claude Code",
+        "install_surfaces": {
+          "home": "C:\\Users\\vac34\\.claude-account2",
+          "skill": "C:\\Users\\vac34\\.claude-account2\\skills\\saipen",
+          "instruction": "C:\\Users\\vac34\\.claude-account2\\CLAUDE.md",
+          "hook": "C:\\Users\\vac34\\.claude-account2\\hooks\\saipen-guard.py"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "PROMPT_LEVEL",
+        "response_interception": "MECHANICAL",
+        "response_enforcement": "MECHANICAL",
+        "admission_enforcement": "MECHANICAL",
+        "host_authority_source": "tools/saipen_engine/host_authority_broker.py",
+        "separated_authority": true,
+        "mechanical_admission": true,
+        "prompt_blocking": true,
+        "launch": {
+          "routine": "native Claude Code launch (desktop app, IDE extension or `claude`); no SAIPEN seat, wrapper, launcher, environment variable or prompt phrase is ever required",
+          "mode": "NATIVE_OR_OPTIONAL_LAUNCHER",
+          "launcher_command": "saipen --agent <seat> launch claude -- [arguments]",
+          "executable": "claude"
+        },
+        "auto_recovery": "AUTHORITY_RESTART_THEN_DEGRADE",
+        "degraded_mode": "DEGRADED_ALLOWED_DEFAULT"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.claude-account2\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:bb2590d0a8bdf798d91d86883e34cb237d7a6dee97fb9f2546d7519c4ab8c473",
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": false,
+          "diff": [
+            "saipen/REGISTRY.json",
+            "tools/saipen.py",
+            "tools/saipen_engine/isolated_release.py",
+            "tools/saipen_engine/release_authority.py",
+            "tools/test_isolated_release.py",
+            "tools/test_release_approval_contract.py"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.claude-account2\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.claude-account2\\hooks\\saipen-guard.py",
+          "installed": true,
+          "status": "stale",
+          "delegated_root": "C:/Users/vac34/.claude-account2/skills/saipen",
+          "delegated_current": false,
+          "problems": [
+            "config-entry-differs:SessionStart",
+            "config-entry-differs:UserPromptSubmit",
+            "config-entry-differs:PostToolUse",
+            "config-entry-differs:PostModelSwitch",
+            "config-entry-differs:PreToolUse",
+            "config-entry-differs:Stop",
+            "delegated-root-stale"
+          ],
+          "installed_at": 1791907116.7351592
+        },
+        "host_home": "C:\\Users\\vac34\\.claude-account2"
+      }
+    },
+    {
+      "id": "codex",
+      "profile": null,
+      "name": "Codex CLI",
+      "state": "STALE_RUNTIME",
+      "reasons": [
+        "installed runtime is not the source generation (saipen/REGISTRY.json, tools/saipen.py, tools/saipen_engine/isolated_release.py)",
+        "installer record: runtime_fingerprint"
+      ],
+      "action": "saipen host repair",
+      "installed": true,
+      "host_present": true,
+      "runtime": "stale",
+      "hook": "current",
+      "instruction": "current",
+      "admission": "UNAVAILABLE",
+      "response_enforcement": "MECHANICAL",
+      "last_health": null,
+      "recoverable": true,
+      "contract": {
+        "id": "codex",
+        "name": "Codex CLI",
+        "install_surfaces": {
+          "home": "~/.codex",
+          "skill": "~/.codex/skills/saipen",
+          "instruction": "~/.codex/AGENTS.md",
+          "hook": "~/.codex/hooks/saipen-guard.py"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "MECHANICAL",
+        "response_enforcement": "MECHANICAL",
+        "admission_enforcement": "UNAVAILABLE",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native Codex CLI launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.codex\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:be78d49b47d0e9d7fa9dedcb340ae70237ea648a4ff2aa04974092ee98ac9649",
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": false,
+          "diff": [
+            "saipen/REGISTRY.json",
+            "tools/saipen.py",
+            "tools/saipen_engine/isolated_release.py",
+            "tools/saipen_engine/release_authority.py",
+            "tools/test_isolated_release.py",
+            "tools/test_release_approval_contract.py"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.codex\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.codex\\hooks\\saipen-guard.py",
+          "installed": true,
+          "status": "current",
+          "delegated_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "delegated_current": true,
+          "problems": [],
+          "installed_at": 1793200314.4254105
+        },
+        "host_home": "C:\\Users\\vac34\\.codex"
+      }
+    },
+    {
+      "id": "zaicode",
+      "profile": null,
+      "name": "ZAICODE",
+      "state": "STALE_RUNTIME",
+      "reasons": [
+        "installed runtime is not the source generation (saipen/REGISTRY.json, tools/saipen.py, tools/saipen_engine/isolated_release.py)",
+        "installer record: runtime_fingerprint"
+      ],
+      "action": "saipen host repair",
+      "installed": true,
+      "host_present": true,
+      "runtime": "stale",
+      "hook": "current",
+      "instruction": "current",
+      "admission": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "last_health": null,
+      "recoverable": true,
+      "contract": {
+        "id": "zaicode",
+        "name": "ZAICODE",
+        "install_surfaces": {
+          "home": "$ZAICODE_HOME/.zcode",
+          "skill": "$ZAICODE_HOME/.zcode/skills/saipen",
+          "instruction": "$ZAICODE_HOME/.zcode/AGENTS.md",
+          "hook": "~/.zcode/hooks/saipen-guard.py"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "ADVISORY",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": true,
+        "separated_authority": true,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native ZAICODE launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:be78d49b47d0e9d7fa9dedcb340ae70237ea648a4ff2aa04974092ee98ac9649",
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": false,
+          "diff": [
+            "saipen/REGISTRY.json",
+            "tools/saipen.py",
+            "tools/saipen_engine/isolated_release.py",
+            "tools/saipen_engine/release_authority.py",
+            "tools/test_isolated_release.py",
+            "tools/test_release_approval_contract.py"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.zcode\\hooks\\saipen-guard.py",
+          "installed": true,
+          "status": "current",
+          "delegated_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "delegated_current": true,
+          "problems": [],
+          "installed_at": 1793841673.4792206
+        },
+        "host_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode"
+      }
+    },
+    {
+      "id": "zcode-production",
+      "profile": null,
+      "name": "ZCode (production ~/.zcode home)",
+      "state": "STALE_RUNTIME",
+      "reasons": [
+        "installed runtime is not the source generation (saipen/REGISTRY.json, tools/saipen.py, tools/saipen_engine/isolated_release.py)",
+        "installer record: runtime_fingerprint"
+      ],
+      "action": "saipen host repair",
+      "installed": true,
+      "host_present": true,
+      "runtime": "stale",
+      "hook": "not-applicable",
+      "instruction": "current",
+      "admission": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "last_health": null,
+      "recoverable": true,
+      "contract": {
+        "id": "zcode-production",
+        "name": "ZCode (production ~/.zcode home)",
+        "install_surfaces": {
+          "home": "~/.zcode",
+          "skill": "~/.agents/skills/saipen",
+          "instruction": "~/.zcode/AGENTS.md"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "ADVISORY",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native ZCode (production ~/.zcode home) launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:be78d49b47d0e9d7fa9dedcb340ae70237ea648a4ff2aa04974092ee98ac9649",
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": false,
+          "diff": [
+            "saipen/REGISTRY.json",
+            "tools/saipen.py",
+            "tools/saipen_engine/isolated_release.py",
+            "tools/saipen_engine/release_authority.py",
+            "tools/test_isolated_release.py",
+            "tools/test_release_approval_contract.py"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.agents\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "status": "not-applicable",
+          "delegated_root": null,
+          "delegated_current": null,
+          "problems": [],
+          "installed_at": null
+        },
+        "host_home": "C:\\Users\\vac34\\.zcode"
+      }
+    },
+    {
+      "id": "gemini",
+      "profile": null,
+      "name": "Gemini CLI / Antigravity",
+      "state": "STALE_RUNTIME",
+      "reasons": [
+        "installed runtime is not the source generation (saipen/REGISTRY.json, tools/saipen.py, tools/saipen_engine/isolated_release.py)",
+        "installer record: runtime_fingerprint"
+      ],
+      "action": "saipen host repair",
+      "installed": true,
+      "host_present": true,
+      "runtime": "stale",
+      "hook": "current",
+      "instruction": "current",
+      "admission": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "last_health": null,
+      "recoverable": true,
+      "contract": {
+        "id": "gemini",
+        "name": "Gemini CLI / Antigravity",
+        "install_surfaces": {
+          "home": "~/.gemini",
+          "skill": "~/.gemini/skills/saipen",
+          "instruction": "~/.gemini/GEMINI.md",
+          "hook": "~/.gemini/hooks/saipen-guard.py"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "ADVISORY",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native Gemini CLI / Antigravity launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.gemini\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:be78d49b47d0e9d7fa9dedcb340ae70237ea648a4ff2aa04974092ee98ac9649",
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": false,
+          "diff": [
+            "saipen/REGISTRY.json",
+            "tools/saipen.py",
+            "tools/saipen_engine/isolated_release.py",
+            "tools/saipen_engine/release_authority.py",
+            "tools/test_isolated_release.py",
+            "tools/test_release_approval_contract.py"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.gemini\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.gemini\\hooks\\saipen-guard.py",
+          "installed": true,
+          "status": "current",
+          "delegated_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "delegated_current": true,
+          "problems": [],
+          "installed_at": 1793509818.1910655
+        },
+        "host_home": "C:\\Users\\vac34\\.gemini"
+      }
+    },
+    {
+      "id": "codebuddy",
+      "profile": null,
+      "name": "CodeBuddy Code",
+      "state": "STALE_RUNTIME",
+      "reasons": [
+        "installed runtime is not the source generation (saipen/REGISTRY.json, tools/saipen.py, tools/saipen_engine/isolated_release.py)",
+        "installer record: runtime_fingerprint"
+      ],
+      "action": "saipen host repair",
+      "installed": true,
+      "host_present": true,
+      "runtime": "stale",
+      "hook": "not-applicable",
+      "instruction": "not-applicable",
+      "admission": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "last_health": null,
+      "recoverable": true,
+      "contract": {
+        "id": "codebuddy",
+        "name": "CodeBuddy Code",
+        "install_surfaces": {
+          "home": "~/.codebuddy",
+          "skill": "~/.codebuddy/skills/saipen"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "ADVISORY",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native CodeBuddy Code launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.codebuddy\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:be78d49b47d0e9d7fa9dedcb340ae70237ea648a4ff2aa04974092ee98ac9649",
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": false,
+          "diff": [
+            "saipen/REGISTRY.json",
+            "tools/saipen.py",
+            "tools/saipen_engine/isolated_release.py",
+            "tools/saipen_engine/release_authority.py",
+            "tools/test_isolated_release.py",
+            "tools/test_release_approval_contract.py"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.codebuddy\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "status": "not-applicable",
+          "delegated_root": null,
+          "delegated_current": null,
+          "problems": [],
+          "installed_at": null
+        },
+        "host_home": "C:\\Users\\vac34\\.codebuddy"
+      }
+    },
+    {
+      "id": "freebuff",
+      "profile": null,
+      "name": "FreeBuff / generic ~/.agents skills",
+      "state": "STALE_RUNTIME",
+      "reasons": [
+        "installed runtime is not the source generation (saipen/REGISTRY.json, tools/saipen.py, tools/saipen_engine/isolated_release.py)",
+        "installer record: runtime_fingerprint"
+      ],
+      "action": "saipen host repair",
+      "installed": true,
+      "host_present": true,
+      "runtime": "stale",
+      "hook": "not-applicable",
+      "instruction": "not-applicable",
+      "admission": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "last_health": null,
+      "recoverable": true,
+      "contract": {
+        "id": "freebuff",
+        "name": "FreeBuff / generic ~/.agents skills",
+        "install_surfaces": {
+          "home": "~/.agents",
+          "skill": "~/.agents/skills/saipen",
+          "bespoke": "freebuff-backstop"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "ADVISORY",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native FreeBuff / generic ~/.agents skills launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:be78d49b47d0e9d7fa9dedcb340ae70237ea648a4ff2aa04974092ee98ac9649",
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": false,
+          "diff": [
+            "saipen/REGISTRY.json",
+            "tools/saipen.py",
+            "tools/saipen_engine/isolated_release.py",
+            "tools/saipen_engine/release_authority.py",
+            "tools/test_isolated_release.py",
+            "tools/test_release_approval_contract.py"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.agents\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "status": "not-applicable",
+          "delegated_root": null,
+          "delegated_current": null,
+          "problems": [],
+          "installed_at": null
+        },
+        "host_home": "C:\\Users\\vac34\\.agents"
+      }
+    },
+    {
+      "id": "aider",
+      "profile": null,
+      "name": "Aider",
+      "state": "UNINSTALLED",
+      "reasons": [
+        "the host application is not set up on this machine"
+      ],
+      "action": null,
+      "installed": false,
+      "host_present": false,
+      "runtime": "absent",
+      "hook": "not-applicable",
+      "instruction": "not-applicable",
+      "admission": "NONE",
+      "response_enforcement": "NONE",
+      "last_health": null,
+      "recoverable": false,
+      "contract": {
+        "id": "aider",
+        "name": "Aider",
+        "install_surfaces": {
+          "bespoke": "aider-conf"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "ADVISORY",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native Aider launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        },
+        "hook": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "status": "not-applicable",
+          "delegated_root": null,
+          "delegated_current": null,
+          "problems": [],
+          "installed_at": null
+        },
+        "host_home": null
+      }
+    },
+    {
+      "id": "antigravity",
+      "profile": null,
+      "name": "Antigravity CLI",
+      "state": "STALE_RUNTIME",
+      "reasons": [
+        "installed runtime is not the source generation (saipen/REGISTRY.json, tools/saipen.py, tools/saipen_engine/isolated_release.py)",
+        "installer record: runtime_fingerprint"
+      ],
+      "action": "saipen host repair",
+      "installed": true,
+      "host_present": true,
+      "runtime": "stale",
+      "hook": "current",
+      "instruction": "current",
+      "admission": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "last_health": null,
+      "recoverable": true,
+      "contract": {
+        "id": "antigravity",
+        "name": "Antigravity CLI",
+        "install_surfaces": {
+          "home": "~/.gemini",
+          "skill": "~/.gemini/skills/saipen",
+          "instruction": "~/.gemini/GEMINI.md",
+          "hook": "~/.gemini/hooks/antigravity-saipen-guard.py",
+          "bespoke": "antigravity-plugins"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "ADVISORY",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native Antigravity CLI launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.gemini\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:be78d49b47d0e9d7fa9dedcb340ae70237ea648a4ff2aa04974092ee98ac9649",
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": false,
+          "diff": [
+            "saipen/REGISTRY.json",
+            "tools/saipen.py",
+            "tools/saipen_engine/isolated_release.py",
+            "tools/saipen_engine/release_authority.py",
+            "tools/test_isolated_release.py",
+            "tools/test_release_approval_contract.py"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.gemini\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.gemini\\hooks\\antigravity-saipen-guard.py",
+          "installed": true,
+          "status": "current",
+          "delegated_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "delegated_current": true,
+          "problems": [],
+          "installed_at": 1793509818.0223017
+        },
+        "host_home": "C:\\Users\\vac34\\.gemini"
+      }
+    },
+    {
+      "id": "kiro",
+      "profile": null,
+      "name": "Kiro",
+      "state": "UNINSTALLED",
+      "reasons": [
+        "the host application is not set up on this machine"
+      ],
+      "action": null,
+      "installed": false,
+      "host_present": false,
+      "runtime": "absent",
+      "hook": "absent",
+      "instruction": "not-applicable",
+      "admission": "NONE",
+      "response_enforcement": "NONE",
+      "last_health": null,
+      "recoverable": false,
+      "contract": {
+        "id": "kiro",
+        "name": "Kiro",
+        "install_surfaces": {
+          "home": "~/.kiro",
+          "skill": "~/.kiro/skills/saipen",
+          "hook": "~/.kiro/hooks/saipen-guard.py"
+        },
+        "tool_interception": "ENFORCEMENT_GAP",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "UNAVAILABLE",
+        "admission_enforcement": "UNAVAILABLE",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native Kiro launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.kiro\\skills\\saipen",
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        },
+        "hook": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.kiro\\hooks\\saipen-guard.py",
+          "installed": false,
+          "status": "absent",
+          "delegated_root": null,
+          "delegated_current": null,
+          "problems": [],
+          "installed_at": null
+        },
+        "host_home": "C:\\Users\\vac34\\.kiro"
+      }
+    },
+    {
+      "id": "deepseek",
+      "profile": null,
+      "name": "DeepSeek",
+      "state": "UNINSTALLED",
+      "reasons": [
+        "this host has no installable surface in the registry"
+      ],
+      "action": null,
+      "installed": false,
+      "host_present": false,
+      "runtime": "absent",
+      "hook": "not-applicable",
+      "instruction": "not-applicable",
+      "admission": "NONE",
+      "response_enforcement": "NONE",
+      "last_health": null,
+      "recoverable": false,
+      "contract": {
+        "id": "deepseek",
+        "name": "DeepSeek",
+        "install_surfaces": {},
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "ADVISORY",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native DeepSeek launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        },
+        "hook": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "status": "not-applicable",
+          "delegated_root": null,
+          "delegated_current": null,
+          "problems": [],
+          "installed_at": null
+        },
+        "host_home": null
+      }
+    },
+    {
+      "id": "openai",
+      "profile": null,
+      "name": "OpenAI",
+      "state": "UNINSTALLED",
+      "reasons": [
+        "this host has no installable surface in the registry"
+      ],
+      "action": null,
+      "installed": false,
+      "host_present": false,
+      "runtime": "absent",
+      "hook": "not-applicable",
+      "instruction": "not-applicable",
+      "admission": "NONE",
+      "response_enforcement": "NONE",
+      "last_health": null,
+      "recoverable": false,
+      "contract": {
+        "id": "openai",
+        "name": "OpenAI",
+        "install_surfaces": {},
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "ADVISORY",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native OpenAI launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        },
+        "hook": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "status": "not-applicable",
+          "delegated_root": null,
+          "delegated_current": null,
+          "problems": [],
+          "installed_at": null
+        },
+        "host_home": null
+      }
+    },
+    {
+      "id": "qwen",
+      "profile": null,
+      "name": "Qwen",
+      "state": "UNINSTALLED",
+      "reasons": [
+        "this host has no installable surface in the registry"
+      ],
+      "action": null,
+      "installed": false,
+      "host_present": false,
+      "runtime": "absent",
+      "hook": "not-applicable",
+      "instruction": "not-applicable",
+      "admission": "NONE",
+      "response_enforcement": "NONE",
+      "last_health": null,
+      "recoverable": false,
+      "contract": {
+        "id": "qwen",
+        "name": "Qwen",
+        "install_surfaces": {},
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "ADVISORY",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native Qwen launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        },
+        "hook": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "status": "not-applicable",
+          "delegated_root": null,
+          "delegated_current": null,
+          "problems": [],
+          "installed_at": null
+        },
+        "host_home": null
+      }
+    },
+    {
+      "id": "generic",
+      "profile": null,
+      "name": "Generic (no interception)",
+      "state": "UNINSTALLED",
+      "reasons": [
+        "this host has no installable surface in the registry"
+      ],
+      "action": null,
+      "installed": false,
+      "host_present": false,
+      "runtime": "absent",
+      "hook": "not-applicable",
+      "instruction": "not-applicable",
+      "admission": "NONE",
+      "response_enforcement": "NONE",
+      "last_health": null,
+      "recoverable": false,
+      "contract": {
+        "id": "generic",
+        "name": "Generic (no interception)",
+        "install_surfaces": {},
+        "tool_interception": "ENFORCEMENT_GAP",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "UNAVAILABLE",
+        "admission_enforcement": "UNAVAILABLE",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native Generic (no interception) launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:625cc2c5ab55e19298bc890dd1364814f332a4917ff7910b40692a79476a2450",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        },
+        "hook": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "status": "not-applicable",
+          "delegated_root": null,
+          "delegated_current": null,
+          "problems": [],
+          "installed_at": null
+        },
+        "host_home": null
+      }
+    }
+  ],
+  "broken": [],
+  "needs_action": [
+    "opencode",
+    "claude",
+    "claude",
+    "codex",
+    "zaicode",
+    "zcode-production",
+    "gemini",
+    "codebuddy",
+    "freebuff",
+    "antigravity"
+  ],
+  "problems": [],
+  "next_action": "saipen host repair"
+}

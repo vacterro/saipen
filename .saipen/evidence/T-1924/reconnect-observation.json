@@ -1,0 +1,13 @@
+{
+  "observed_at": "2026-10-25T14:01:26.514883+00:00",
+  "kind": "isolated_actual_resolver_probe",
+  "subject": "V:\\___VAC\\__K\\__CODE\\_PY\\_FastPrompter\\src\\fastprompter\\core\\sound_library.py",
+  "subject_sha256": "222ab67f2a6275c101ca451e9b60cae3183d5b2a01602eb9a1a62ae343a15f63",
+  "personal_mode": true,
+  "initial_resolution_is_bundled": true,
+  "after_personal_reconnect_is_personal": false,
+  "defect_reproduced": true,
+  "live_configuration_accessed": false,
+  "live_configuration_written": false,
+  "fixture_audio_claimed_as_original": false
+}

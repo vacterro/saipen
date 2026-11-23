@@ -1,0 +1,14 @@
+{
+  "command": ".saipen/evidence/T-1361-scenario-remesure-20260921/focused.py run_scenario_fixture_probes",
+  "head": "d97abdc097db432bafe2316b1e3577e44cd9cc4c",
+  "harness_sha256": "f15edd84483f38b0ae43e751b0f3b66c370a3adb28e75b6cf5f02f60e6771c9c",
+  "results": [
+    {
+      "function": "run_scenario_fixture_probes",
+      "elapsed": 15.702999999979511,
+      "checked": 38,
+      "skipped": 34,
+      "failures": []
+    }
+  ]
+}

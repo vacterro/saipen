@@ -1,0 +1,7 @@
+== P1: current routing dead end
+projection action: saipen audit ingest work: T-2016
+owns: False
+route_violation(saipen crew): None
+== P5: restore an already-present gate row (direct function boundary)
+already-present row occurrences before/after: 1 2
+parsed T-900 section: None

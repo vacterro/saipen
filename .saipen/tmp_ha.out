@@ -1,0 +1,20 @@
+def hook_artifacts(host: str, home: object = None) -> tuple[str, ...]:
+    """Where a host's hook is installed: the registry's surface under the
+    operator's home (or the diagnostic home a test carrier names). A path
+    alone admits nobody -- the bytes there must be the shipped ones and the
+    host itself must have started them. One reader for the service's proof
+    and for the client's decision whether a start makes sense at all."""
+    try:
+        from . import protocol_admission as pa
+
+        entry = pa._adapters(pa.Context(project_root=None, session_id="", host=host)).get(host)
+    except Exception:
+        entry = None
+    surface = str((entry or {}).get("hook_install_surface") or "")
+    if not surface:
+        return ()
+    base = Path(str(home)) if home else Path.home()
+    if surface.startswith("~"):
+        return (str(base / surface[1:].lstrip("/\\")),)
+    return (surface,)
+

@@ -1,0 +1,16 @@
+test_actual_interrupted_close_settlement_reports_repair (test_src276_closure_outcomes.ClosureOutcomeTests.test_actual_interrupted_close_settlement_reports_repair) ... ok
+test_corrupt_archive_preserves_active_residue_for_recovery (test_src276_closure_outcomes.ClosureOutcomeTests.test_corrupt_archive_preserves_active_residue_for_recovery) ... ok
+test_healthy_repeat_is_verified_already_closed_and_changes_nothing (test_src276_closure_outcomes.ClosureOutcomeTests.test_healthy_repeat_is_verified_already_closed_and_changes_nothing) ... ok
+test_malformed_metadata_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_malformed_metadata_refuses_without_writes) ... ok
+test_missing_body_still_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_missing_body_still_refuses_without_writes) ... ok
+test_missing_contract_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_missing_contract_refuses_without_writes) ... ok
+test_missing_coverage_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_missing_coverage_refuses_without_writes) ... ok
+test_missing_metadata_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_missing_metadata_refuses_without_writes) ... ok
+test_public_cli_refuses_the_same_missing_sidecar (test_src276_closure_outcomes.ClosureOutcomeTests.test_public_cli_refuses_the_same_missing_sidecar) ... ok
+test_real_residue_cleanup_is_distinct_from_archive_repair (test_src276_closure_outcomes.ClosureOutcomeTests.test_real_residue_cleanup_is_distinct_from_archive_repair) ... ok
+test_weakened_archived_coverage_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_weakened_archived_coverage_refuses_without_writes) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 5.062s
+
+OK

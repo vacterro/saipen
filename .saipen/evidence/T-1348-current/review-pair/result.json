@@ -1,0 +1,105 @@
+{
+  "pair_ok": true,
+  "live_unchanged": true,
+  "live_matches_corrected": true,
+  "verifier": "54dc2e106871b3c9e25fc5a9898596de5c2189420fdc17af06b8b4afd00ec252",
+  "records": [
+    {
+      "name": "original",
+      "exit_code": 1,
+      "collected": 35,
+      "verifier": "54dc2e106871b3c9e25fc5a9898596de5c2189420fdc17af06b8b4afd00ec252",
+      "subject": "e8da2b7d2ad80a567f4758a1eed1ed8899f2c4b2477f19ceb178e8b1a365ca34",
+      "verifier_identity": {
+        "command": [
+          "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-m",
+          "unittest",
+          "tools.test_tool_module_identity",
+          "tools.test_module_duplication_guard",
+          "tools.test_engine_module_identity",
+          "-q"
+        ],
+        "timeout": 300,
+        "files": {
+          "tools/test_tool_module_identity.py": "28f2e696f7042f6f6351a75a8409f56f9669af064f54f1c605c9db4a202801a5",
+          "tools/test_module_duplication_guard.py": "1f3bc559fdaebafcdf22179567b35fc7a0dff07882bd38fc80f80862d5bceeca",
+          "tools/test_engine_module_identity.py": "7bfed77f301a8af0b8aa1d41f1ea62c704884dc140ecdd3a732b2ec90b02f4d2",
+          "tools/test_hermetic_env.py": "f5b562bf643af06f7e5f7deb7f82adcde6d98f9861896083d7df0581c5ef5156"
+        }
+      },
+      "subject_identity": {
+        "tools/__init__.py": "c2d3810531422035901e2bb7894d3d1bd414aad5c1c1f6b2f2ab9d8511978c39",
+        "tools/_module_identity.py": "ABSENT"
+      },
+      "output_sha256": "3ece7baca0683094ce65ea7088e58261bec1e2f88844537a269eefb4f7be4207"
+    },
+    {
+      "name": "earlier",
+      "exit_code": 1,
+      "collected": 35,
+      "verifier": "54dc2e106871b3c9e25fc5a9898596de5c2189420fdc17af06b8b4afd00ec252",
+      "subject": "6b9eef6a45ab118a0353384e27c15c58f08db53a0384d13ae25bf866a0b8c348",
+      "verifier_identity": {
+        "command": [
+          "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-m",
+          "unittest",
+          "tools.test_tool_module_identity",
+          "tools.test_module_duplication_guard",
+          "tools.test_engine_module_identity",
+          "-q"
+        ],
+        "timeout": 300,
+        "files": {
+          "tools/test_tool_module_identity.py": "28f2e696f7042f6f6351a75a8409f56f9669af064f54f1c605c9db4a202801a5",
+          "tools/test_module_duplication_guard.py": "1f3bc559fdaebafcdf22179567b35fc7a0dff07882bd38fc80f80862d5bceeca",
+          "tools/test_engine_module_identity.py": "7bfed77f301a8af0b8aa1d41f1ea62c704884dc140ecdd3a732b2ec90b02f4d2",
+          "tools/test_hermetic_env.py": "f5b562bf643af06f7e5f7deb7f82adcde6d98f9861896083d7df0581c5ef5156"
+        }
+      },
+      "subject_identity": {
+        "tools/__init__.py": "3e652fdf2d80d073138cd1b1b8d37caaf772f5652dfa9ac21db104e6494ceb88",
+        "tools/_module_identity.py": "46489b3c258e8bf620826972288a2a6cb4baf686ddf4c3ffc66ae29e94e8746a"
+      },
+      "output_sha256": "2bd91b817c49f71902820f7812527b08f5925a0af57ecbf16782eba92bbdbfb5"
+    },
+    {
+      "name": "corrected",
+      "exit_code": 0,
+      "collected": 35,
+      "verifier": "54dc2e106871b3c9e25fc5a9898596de5c2189420fdc17af06b8b4afd00ec252",
+      "subject": "0844adfd4892eae01d4cd93139f8163bb8a079160b4f7a123e37f1621749f803",
+      "verifier_identity": {
+        "command": [
+          "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-m",
+          "unittest",
+          "tools.test_tool_module_identity",
+          "tools.test_module_duplication_guard",
+          "tools.test_engine_module_identity",
+          "-q"
+        ],
+        "timeout": 300,
+        "files": {
+          "tools/test_tool_module_identity.py": "28f2e696f7042f6f6351a75a8409f56f9669af064f54f1c605c9db4a202801a5",
+          "tools/test_module_duplication_guard.py": "1f3bc559fdaebafcdf22179567b35fc7a0dff07882bd38fc80f80862d5bceeca",
+          "tools/test_engine_module_identity.py": "7bfed77f301a8af0b8aa1d41f1ea62c704884dc140ecdd3a732b2ec90b02f4d2",
+          "tools/test_hermetic_env.py": "f5b562bf643af06f7e5f7deb7f82adcde6d98f9861896083d7df0581c5ef5156"
+        }
+      },
+      "subject_identity": {
+        "tools/__init__.py": "3e652fdf2d80d073138cd1b1b8d37caaf772f5652dfa9ac21db104e6494ceb88",
+        "tools/_module_identity.py": "add6a51a6ea3a271adeecb2ebd4486ecccbb36ed4441c1bf34d2b2f946cb815b"
+      },
+      "output_sha256": "d9ab6871bf3651f46f8f7104829db3c84c32fb258edc882be07ad9291ff36737"
+    }
+  ],
+  "driver_sha256": "912b01db167c03885051a2ff7dfb86bdfbe6e92b58f00670e8fef718e9a4b2b5",
+  "temp_root": "V:\\_TEMP_\\saipen-evidence-t1348-review-pair-7690o2ig",
+  "root_metadata_excluded": true,
+  "nested_metadata_retained": true
+}

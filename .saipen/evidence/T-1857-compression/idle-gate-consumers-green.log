@@ -1,0 +1,9 @@
+test_public_wait_uses_canonical_human_obligation_with_a_binding_blocker (test_response_fact_binding.CanonicalResponseFacts.test_public_wait_uses_canonical_human_obligation_with_a_binding_blocker) ... ok
+test_a_genuine_operator_boundary_passes_on_its_own_turn (test_codex_stop_hook.CanonicalClassifierTests.test_a_genuine_operator_boundary_passes_on_its_own_turn) ... ok
+test_reentry_with_a_corrected_response_passes (test_codex_stop_hook.CodexStopHookTests.test_reentry_with_a_corrected_response_passes) ... ok
+test_real_wait_allows_the_required_human_boundary (test_t1557_autonomy_sentinels.ActiveSentinelRegression.test_real_wait_allows_the_required_human_boundary) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 17.654s
+
+OK

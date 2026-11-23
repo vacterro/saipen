@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-3015",
+    "operation_id": "claim-7e1c6c80fde34ac9916bb4c74143b159",
+    "reason": "existing/proposed oversized BOARD record requires canonical claim update"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-279/T-279-fa3758af8c75a563967c8afe.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 1206,
+  "original_record_path": ".saipen/recovery/board-compaction/T-279/T-279-fa3758af8c75a563967c8afe.BOARD.md",
+  "original_record_sha256": "fa3758af8c75a563967c8afe4934103e4ca603747b694ab64b8cab45f12e16f5",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": "",
+  "ticket_id": "T-279"
+}

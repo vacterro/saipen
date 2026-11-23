@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-391:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20519",
+      "text": "Blocked release cannot stop independently authorized maintenance.",
+      "verification": "record:.saipen/evidence/regression/regression-execution-d7b7f3af3abb473a9bc4166c5a2db339.json tools/test_t2021_false_idle_maintenance.py .saipen/evidence/T-2021/coverage.md",
+      "work": "T-2021"
+    },
+    "SRC-391:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20519",
+      "text": "Incomplete persistent goal survives an otherwise blocked Board.",
+      "verification": "record:.saipen/evidence/focused-unit/6ecdb202de93c590-20261104T053217296652Z.json tools/test_t2021_false_idle_maintenance.py tools/test_t1875_maintenance_wiring.py tools/test_t2010_publication_staging_reconciliation.py tools/test_installed_host_acceptance.py tools/test_t1853_dispatch_admission.py tools/test_t1619_goal_terminality.py .saipen/evidence/T-2021/coverage.md .saipen/evidence/T-2021/REPORT.md",
+      "work": "T-2021"
+    },
+    "SRC-391:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20519",
+      "text": "No valid grant means no unauthorized mutation.",
+      "verification": "record:.saipen/evidence/focused-unit/6ecdb202de93c590-20261104T053217296652Z.json tools/test_t2021_false_idle_maintenance.py tools/test_t1875_maintenance_wiring.py tools/test_t2010_publication_staging_reconciliation.py tools/test_installed_host_acceptance.py tools/test_t1853_dispatch_admission.py tools/test_t1619_goal_terminality.py .saipen/evidence/T-2021/coverage.md .saipen/evidence/T-2021/REPORT.md",
+      "work": "T-2021"
+    },
+    "SRC-391:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20519",
+      "text": "Valid standing grant permits bounded autonomous replenishment.",
+      "verification": "record:.saipen/evidence/focused-unit/6ecdb202de93c590-20261104T053217296652Z.json tools/test_t2021_false_idle_maintenance.py tools/test_t1875_maintenance_wiring.py tools/test_t2010_publication_staging_reconciliation.py tools/test_installed_host_acceptance.py tools/test_t1853_dispatch_admission.py tools/test_t1619_goal_terminality.py .saipen/evidence/T-2021/coverage.md .saipen/evidence/T-2021/REPORT.md",
+      "work": "T-2021"
+    },
+    "SRC-391:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20519",
+      "text": "Live staging verification failure never becomes verified zero.",
+      "verification": "record:.saipen/evidence/focused-unit/6ecdb202de93c590-20261104T053217296652Z.json tools/test_t2021_false_idle_maintenance.py tools/test_t1875_maintenance_wiring.py tools/test_t2010_publication_staging_reconciliation.py tools/test_installed_host_acceptance.py tools/test_t1853_dispatch_admission.py tools/test_t1619_goal_terminality.py .saipen/evidence/T-2021/coverage.md .saipen/evidence/T-2021/REPORT.md",
+      "work": "T-2021"
+    },
+    "SRC-391:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20519",
+      "text": "Unknown owner never becomes approved release scope.",
+      "verification": "record:.saipen/evidence/focused-unit/6ecdb202de93c590-20261104T053217296652Z.json tools/test_t2021_false_idle_maintenance.py tools/test_t1875_maintenance_wiring.py tools/test_t2010_publication_staging_reconciliation.py tools/test_installed_host_acceptance.py tools/test_t1853_dispatch_admission.py tools/test_t1619_goal_terminality.py .saipen/evidence/T-2021/coverage.md .saipen/evidence/T-2021/REPORT.md",
+      "work": "T-2021"
+    },
+    "SRC-391:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20519",
+      "text": "Expired historical blockers are reconciled only with new proof.",
+      "verification": "record:.saipen/evidence/focused-unit/6ecdb202de93c590-20261104T053217296652Z.json tools/test_t2021_false_idle_maintenance.py tools/test_t1875_maintenance_wiring.py tools/test_t2010_publication_staging_reconciliation.py tools/test_installed_host_acceptance.py tools/test_t1853_dispatch_admission.py tools/test_t1619_goal_terminality.py .saipen/evidence/T-2021/coverage.md .saipen/evidence/T-2021/REPORT.md",
+      "work": "T-2021"
+    },
+    "SRC-391:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20519",
+      "text": "Genuine external tickets remain blocked.",
+      "verification": "record:.saipen/evidence/focused-unit/6ecdb202de93c590-20261104T053217296652Z.json tools/test_t2021_false_idle_maintenance.py tools/test_t1875_maintenance_wiring.py tools/test_t2010_publication_staging_reconciliation.py tools/test_installed_host_acceptance.py tools/test_t1853_dispatch_admission.py tools/test_t1619_goal_terminality.py .saipen/evidence/T-2021/coverage.md .saipen/evidence/T-2021/REPORT.md",
+      "work": "T-2021"
+    },
+    "SRC-391:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20519",
+      "text": "Finished ticket never implies complete project objective.",
+      "verification": "record:.saipen/evidence/focused-unit/6ecdb202de93c590-20261104T053217296652Z.json tools/test_t2021_false_idle_maintenance.py tools/test_t1875_maintenance_wiring.py tools/test_t2010_publication_staging_reconciliation.py tools/test_installed_host_acceptance.py tools/test_t1853_dispatch_admission.py tools/test_t1619_goal_terminality.py .saipen/evidence/T-2021/coverage.md .saipen/evidence/T-2021/REPORT.md",
+      "work": "T-2021"
+    },
+    "SRC-391:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20519",
+      "text": "Read-only status and discovery checks do not alter the Git index.",
+      "verification": "record:.saipen/evidence/focused-unit/6ecdb202de93c590-20261104T053217296652Z.json tools/test_t2021_false_idle_maintenance.py tools/test_t1875_maintenance_wiring.py tools/test_t2010_publication_staging_reconciliation.py tools/test_installed_host_acceptance.py tools/test_t1853_dispatch_admission.py tools/test_t1619_goal_terminality.py .saipen/evidence/T-2021/coverage.md .saipen/evidence/T-2021/REPORT.md",
+      "work": "T-2021"
+    },
+    "SRC-391:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20519",
+      "text": "Native host absence never produces fake execution receipts.",
+      "verification": "record:.saipen/evidence/focused-unit/6ecdb202de93c590-20261104T053217296652Z.json tools/test_t2021_false_idle_maintenance.py tools/test_t1875_maintenance_wiring.py tools/test_t2010_publication_staging_reconciliation.py tools/test_installed_host_acceptance.py tools/test_t1853_dispatch_admission.py tools/test_t1619_goal_terminality.py .saipen/evidence/T-2021/coverage.md .saipen/evidence/T-2021/REPORT.md",
+      "work": "T-2021"
+    },
+    "SRC-391:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20519",
+      "text": "No repeated cc is needed across genuinely supported and authorized native successor turns. EXECUTION Reproduce the idle/goal masking issue. Add failing controls. Repair the canonical router, not a parallel workflow. Verify authorized replenishment and current host readiness. Run focused and applicable broader conformance. Keep release and third-party ownership separate. Continue real permitted work until the finite campaign budget, a genuine dependency or an actual absence of admissible work. FINAL REPORT CURRENT_ACTIVE_GOALS: MAINTENANCE_GRANT_PROOF: BOARD_IDLE_CLASSIFICATION: CURRENT_BLOCKER_ROOTS: LIVE_GIT_INVENTORY: PUBLICATION_AUTHORITY: INDEPENDENT_WORK_DISCOVERED: WORK_ADMITTED_AND_COMPLETED: CONFORMANCE_REPAIRS: HOST_SCHEDULER: REAL_SUCCESSOR_TURNS: VALIDATION_STATUS: ORIGINAL_INDEX_PRESERVED: TRUE_STOP_REASON: ONE_OPERATOR_ACTION_IF_GENUINELY_REQUIRED: NEXT_AUTOMATIC_ACTION: NEXT_WAKE_CONDITION: Never declare the project complete simply because all remaining Board rows are BLOCKED. Never claim authorization merely because the user wants autonomy. END SAIHANDOFF",
+      "verification": "record:.saipen/evidence/focused-unit/6ecdb202de93c590-20261104T053217296652Z.json tools/test_t2021_false_idle_maintenance.py tools/test_t1875_maintenance_wiring.py tools/test_t2010_publication_staging_reconciliation.py tools/test_installed_host_acceptance.py tools/test_t1853_dispatch_admission.py tools/test_t1619_goal_terminality.py .saipen/evidence/T-2021/coverage.md .saipen/evidence/T-2021/REPORT.md",
+      "work": "T-2021"
+    }
+  },
+  "schema_version": 1
+}

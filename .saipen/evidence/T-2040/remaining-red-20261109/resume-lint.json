@@ -1,0 +1,1517 @@
+[
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 2156
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 2156
+    },
+    "message": "Line too long (101 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 2156,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 110,
+      "row": 2735
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 2735
+    },
+    "message": "Line too long (109 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 2735,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 149,
+      "row": 3762
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 3762
+    },
+    "message": "Line too long (148 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 3762,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 123,
+      "row": 3806
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 3806
+    },
+    "message": "Line too long (122 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 3806,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 108,
+      "row": 3810
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 3810
+    },
+    "message": "Line too long (107 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 3810,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 120,
+      "row": 6419
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 6419
+    },
+    "message": "Line too long (119 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 6419,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 120,
+      "row": 6429
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 6429
+    },
+    "message": "Line too long (119 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 6429,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 106,
+      "row": 6435
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 6435
+    },
+    "message": "Line too long (105 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 6435,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 158,
+      "row": 6438
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 6438
+    },
+    "message": "Line too long (157 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 6438,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 7336
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 7336
+    },
+    "message": "Line too long (106 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 7336,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "RUF010",
+    "end_location": {
+      "column": 59,
+      "row": 13060
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "f\"installed={row['installed']!s:<5} auth={row['authenticated']:<13} \"",
+          "end_location": {
+            "column": 97,
+            "row": 13060
+          },
+          "location": {
+            "column": 25,
+            "row": 13060
+          }
+        }
+      ],
+      "message": "Replace with conversion flag"
+    },
+    "location": {
+      "column": 38,
+      "row": 13060
+    },
+    "message": "Use explicit conversion flag",
+    "name": "explicit-f-string-type-conversion",
+    "noqa_row": 13060,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/explicit-f-string-type-conversion"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 14710
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14710
+    },
+    "message": "Line too long (106 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14710,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 79,
+      "row": 14712
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from saipen_engine.persistent_goal import (\r\n                list_goals, get_goal, save_goal, PersistentGoal\r\n            )",
+          "end_location": {
+            "column": 14,
+            "row": 14713
+          },
+          "location": {
+            "column": 13,
+            "row": 14711
+          }
+        }
+      ],
+      "message": "Remove unused import: `saipen_engine.persistent_goal.STATUS_ACTIVE`"
+    },
+    "location": {
+      "column": 66,
+      "row": 14712
+    },
+    "message": "`saipen_engine.persistent_goal.STATUS_ACTIVE` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 14712,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 14719
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14719
+    },
+    "message": "Line too long (104 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14719,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 122,
+      "row": 14726
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14726
+    },
+    "message": "Line too long (121 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14726,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 111,
+      "row": 14731
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14731
+    },
+    "message": "Line too long (110 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14731,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 14738
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14738
+    },
+    "message": "Line too long (104 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14738,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 117,
+      "row": 14742
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14742
+    },
+    "message": "Line too long (116 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14742,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 14747
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14747
+    },
+    "message": "Line too long (124 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14747,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 115,
+      "row": 14751
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14751
+    },
+    "message": "Line too long (114 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14751,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 126,
+      "row": 14759
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14759
+    },
+    "message": "Line too long (125 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14759,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 115,
+      "row": 14763
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14763
+    },
+    "message": "Line too long (114 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14763,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 117,
+      "row": 14772
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14772
+    },
+    "message": "Line too long (116 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14772,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 197,
+      "row": 14775
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14775
+    },
+    "message": "Line too long (196 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14775,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 113,
+      "row": 14797
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14797
+    },
+    "message": "Line too long (112 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14797,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 14868
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 14868
+    },
+    "message": "Line too long (101 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 14868,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "SIM105",
+    "end_location": {
+      "column": 29,
+      "row": 15005
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "from contextlib import redirect_stdout, suppress",
+          "end_location": {
+            "column": 49,
+            "row": 21
+          },
+          "location": {
+            "column": 1,
+            "row": 21
+          }
+        },
+        {
+          "content": "with suppress(ValueError)",
+          "end_location": {
+            "column": 24,
+            "row": 15002
+          },
+          "location": {
+            "column": 21,
+            "row": 15002
+          }
+        },
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 15006
+          },
+          "location": {
+            "column": 1,
+            "row": 15004
+          }
+        }
+      ],
+      "message": "Replace `try`-`except`-`pass` with `with contextlib.suppress(ValueError): ...`"
+    },
+    "location": {
+      "column": 21,
+      "row": 15002
+    },
+    "message": "Use `contextlib.suppress(ValueError)` instead of `try`-`except`-`pass`",
+    "name": "suppressible-exception",
+    "noqa_row": 15002,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/suppressible-exception"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 15037
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 15037
+    },
+    "message": "Line too long (106 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 15037,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 121,
+      "row": 15042
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 15042
+    },
+    "message": "Line too long (120 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 15042,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 123,
+      "row": 15051
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 15051
+    },
+    "message": "Line too long (122 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 15051,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "SIM105",
+    "end_location": {
+      "column": 29,
+      "row": 15085
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "from contextlib import redirect_stdout, suppress",
+          "end_location": {
+            "column": 49,
+            "row": 21
+          },
+          "location": {
+            "column": 1,
+            "row": 21
+          }
+        },
+        {
+          "content": "with suppress(ValueError)",
+          "end_location": {
+            "column": 24,
+            "row": 15082
+          },
+          "location": {
+            "column": 21,
+            "row": 15082
+          }
+        },
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 15086
+          },
+          "location": {
+            "column": 1,
+            "row": 15084
+          }
+        }
+      ],
+      "message": "Replace `try`-`except`-`pass` with `with contextlib.suppress(ValueError): ...`"
+    },
+    "location": {
+      "column": 21,
+      "row": 15082
+    },
+    "message": "Use `contextlib.suppress(ValueError)` instead of `try`-`except`-`pass`",
+    "name": "suppressible-exception",
+    "noqa_row": 15082,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/suppressible-exception"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 15119
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 15119
+    },
+    "message": "Line too long (106 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 15119,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 131,
+      "row": 15126
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 15126
+    },
+    "message": "Line too long (130 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 15126,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 124,
+      "row": 15358
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 15358
+    },
+    "message": "Line too long (123 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 15358,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 124,
+      "row": 15368
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 15368
+    },
+    "message": "Line too long (123 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 15368,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 131,
+      "row": 15378
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 15378
+    },
+    "message": "Line too long (130 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 15378,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 110,
+      "row": 15384
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 15384
+    },
+    "message": "Line too long (109 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 15384,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 15515
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 15515
+    },
+    "message": "Line too long (124 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 15515,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "FURB110",
+    "end_location": {
+      "column": 73,
+      "row": 15976
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "custom_budget or None",
+          "end_location": {
+            "column": 73,
+            "row": 15976
+          },
+          "location": {
+            "column": 33,
+            "row": 15976
+          }
+        }
+      ],
+      "message": "Replace with `or` operator"
+    },
+    "location": {
+      "column": 33,
+      "row": 15976
+    },
+    "message": "Replace ternary `if` expression with `or` operator",
+    "name": "if-exp-instead-of-or-operator",
+    "noqa_row": 15976,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/if-exp-instead-of-or-operator"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 116,
+      "row": 16014
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 16014
+    },
+    "message": "Line too long (115 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 16014,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 115,
+      "row": 1146
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\journal.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1146
+    },
+    "message": "Line too long (114 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 1146,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 117,
+      "row": 4161
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\journal.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 4161
+    },
+    "message": "Line too long (116 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 4161,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 108,
+      "row": 4169
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\journal.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 4169
+    },
+    "message": "Line too long (107 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 4169,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 4199
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\journal.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 4199
+    },
+    "message": "Line too long (101 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 4199,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 4202
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\journal.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 4202
+    },
+    "message": "Line too long (102 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 4202,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 4211
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\journal.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 4211
+    },
+    "message": "Line too long (104 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 4211,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 4218
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\journal.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 4218
+    },
+    "message": "Line too long (104 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 4218,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 110,
+      "row": 4220
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\journal.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 4220
+    },
+    "message": "Line too long (109 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 4220,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "RUF059",
+    "end_location": {
+      "column": 16,
+      "row": 12536
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\operations.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "_state",
+          "end_location": {
+            "column": 16,
+            "row": 12536
+          },
+          "location": {
+            "column": 11,
+            "row": 12536
+          }
+        }
+      ],
+      "message": "Prefix it with an underscore or any other dummy variable pattern"
+    },
+    "location": {
+      "column": 11,
+      "row": 12536
+    },
+    "message": "Unpacked variable `state` is never used",
+    "name": "unused-unpacked-variable",
+    "noqa_row": 12536,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-unpacked-variable"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 116,
+      "row": 12579
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\operations.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 12579
+    },
+    "message": "Line too long (115 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 12579,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 17179
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\operations.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 17179
+    },
+    "message": "Line too long (101 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 17179,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 17181
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\operations.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 17181
+    },
+    "message": "Line too long (101 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 17181,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 108,
+      "row": 17407
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\operations.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 17407
+    },
+    "message": "Line too long (107 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 17407,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 111,
+      "row": 17521
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\operations.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 17521
+    },
+    "message": "Line too long (110 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 17521,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 104,
+      "row": 18152
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\operations.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 18152
+    },
+    "message": "Line too long (103 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 18152,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 18157
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\operations.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 18157
+    },
+    "message": "Line too long (104 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 18157,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 18880
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\operations.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 18880
+    },
+    "message": "Line too long (102 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 18880,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 18883
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\operations.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 18883
+    },
+    "message": "Line too long (104 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 18883,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 22857
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\operations.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 22857
+    },
+    "message": "Line too long (102 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 22857,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 990
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\reconcile.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 990
+    },
+    "message": "Line too long (106 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 990,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 111,
+      "row": 1099
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\reconcile.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1099
+    },
+    "message": "Line too long (110 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 1099,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 104,
+      "row": 1151
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\reconcile.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1151
+    },
+    "message": "Line too long (103 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 1151,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 114,
+      "row": 1185
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\reconcile.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1185
+    },
+    "message": "Line too long (113 > 100)",
+    "name": "line-too-long",
+    "noqa_row": 1185,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "invalid-syntax",
+    "end_location": {
+      "column": 15,
+      "row": 65
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2022_protocol_home_maintenance_distinction.py",
+    "fix": null,
+    "location": {
+      "column": 14,
+      "row": 65
+    },
+    "message": "Cannot use parentheses within a `with` statement on Python 3.8 (syntax was added in Python 3.9)",
+    "name": "invalid-syntax",
+    "noqa_row": null,
+    "severity": "error",
+    "url": null
+  },
+  {
+    "cell": null,
+    "code": "invalid-syntax",
+    "end_location": {
+      "column": 15,
+      "row": 77
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2022_protocol_home_maintenance_distinction.py",
+    "fix": null,
+    "location": {
+      "column": 14,
+      "row": 77
+    },
+    "message": "Cannot use parentheses within a `with` statement on Python 3.8 (syntax was added in Python 3.9)",
+    "name": "invalid-syntax",
+    "noqa_row": null,
+    "severity": "error",
+    "url": null
+  },
+  {
+    "cell": null,
+    "code": "RUF100",
+    "end_location": {
+      "column": 55,
+      "row": 186
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2022_protocol_home_maintenance_distinction.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 55,
+            "row": 186
+          },
+          "location": {
+            "column": 41,
+            "row": 186
+          }
+        }
+      ],
+      "message": "Remove unused `noqa` directive"
+    },
+    "location": {
+      "column": 43,
+      "row": 186
+    },
+    "message": "Unused `noqa` directive (unused: `E402`)",
+    "name": "unused-noqa",
+    "noqa_row": 186,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-noqa"
+  },
+  {
+    "cell": null,
+    "code": "RUF100",
+    "end_location": {
+      "column": 55,
+      "row": 249
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2022_protocol_home_maintenance_distinction.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 55,
+            "row": 249
+          },
+          "location": {
+            "column": 41,
+            "row": 249
+          }
+        }
+      ],
+      "message": "Remove unused `noqa` directive"
+    },
+    "location": {
+      "column": 43,
+      "row": 249
+    },
+    "message": "Unused `noqa` directive (unused: `E402`)",
+    "name": "unused-noqa",
+    "noqa_row": 249,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-noqa"
+  },
+  {
+    "cell": null,
+    "code": "RUF100",
+    "end_location": {
+      "column": 55,
+      "row": 261
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2022_protocol_home_maintenance_distinction.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 55,
+            "row": 261
+          },
+          "location": {
+            "column": 41,
+            "row": 261
+          }
+        }
+      ],
+      "message": "Remove unused `noqa` directive"
+    },
+    "location": {
+      "column": 43,
+      "row": 261
+    },
+    "message": "Unused `noqa` directive (unused: `E402`)",
+    "name": "unused-noqa",
+    "noqa_row": 261,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-noqa"
+  },
+  {
+    "cell": null,
+    "code": "RUF100",
+    "end_location": {
+      "column": 55,
+      "row": 273
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2022_protocol_home_maintenance_distinction.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 55,
+            "row": 273
+          },
+          "location": {
+            "column": 41,
+            "row": 273
+          }
+        }
+      ],
+      "message": "Remove unused `noqa` directive"
+    },
+    "location": {
+      "column": 43,
+      "row": 273
+    },
+    "message": "Unused `noqa` directive (unused: `E402`)",
+    "name": "unused-noqa",
+    "noqa_row": 273,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-noqa"
+  }
+]

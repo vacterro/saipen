@@ -1,0 +1,28 @@
+{
+  "scope": "full-state copy and discovery observation; not verification acceptance",
+  "executed_suite": false,
+  "runtime": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "platform": "linux",
+  "stages": {
+    "first_copy_wall_s": 135.860405
+  },
+  "cleanup": [
+    {
+      "path": "/tmp/saipen-core-unit-61d55p7q",
+      "removed": true,
+      "wall_s": 15.391061
+    }
+  ],
+  "copy_metrics": null,
+  "input_inventory": {
+    "files_or_links": 126351,
+    "bytes": 1622323227,
+    "sha256": "97ba952d4921486f74101eea92cb7cd4d8b3490762410e67e85e1717ac88db78",
+    "inventory_wall_s": 34.754514
+  },
+  "matches_windows_frozen_input": false,
+  "experiment_error": {
+    "type": "RuntimeError",
+    "detail": "native copy is not the same frozen full input"
+  }
+}

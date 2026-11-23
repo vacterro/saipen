@@ -1,0 +1,97 @@
+"""Review probe: hostile host events through the repaired hook and the REAL engine.
+
+Usage: python hostile.py <repo root> <scratch dir>
+Everything is isolated: scratch home, scratch authority runtime, scratch project.
+"""
+
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(sys.argv[1]).resolve()
+BASE = Path(sys.argv[2]).resolve()
+HOOK = ROOT / "extensions" / "adapters" / "claude" / "saipen-guard.py"
+
+home = BASE / "home"
+runtime = BASE / "runtime"
+project = BASE / "project"
+for path in (home, runtime, project / ".saipen"):
+    path.mkdir(parents=True, exist_ok=True)
+(project / ".saipen" / "STATE.md").write_text("---\nphase: DONE\n---\n", encoding="utf-8")
+
+env = {key: value for key, value in os.environ.items() if not key.startswith("SAIPEN_")}
+env["USERPROFILE"] = env["HOME"] = str(home)
+
+
+def run(event, raw=None):
+    started = time.perf_counter()
+    proc = subprocess.run(
+        [sys.executable, str(HOOK), "--host", "claude", "--saipen-root", str(ROOT),
+         "--home", str(home), "--runtime", str(runtime)],
+        input=raw if raw is not None else json.dumps(event).encode("utf-8"),
+        capture_output=True, cwd=str(project), env=env, timeout=120, check=False,
+    )
+    out = proc.stdout.decode("utf-8", errors="replace").strip()
+    try:
+        answer = json.loads(out) if out else None
+    except ValueError:
+        answer = {"UNPARSEABLE": out[:200]}
+    return proc.returncode, answer, time.perf_counter() - started
+
+
+base = {"hook_event_name": "UserPromptSubmit", "cwd": str(project), "session_id": "s-1"}
+cases = {
+    "ordinary": base,
+    "session traversal": {**base, "session_id": "../../../x"},
+    "session with quotes and spaces": {**base, "session_id": "a b\"c'd;&|"},
+    "session 10k": {**base, "session_id": "s" * 10000},
+    "session unicode": {**base, "session_id": "sess-\u00f5\u00e4\u00f6\u00fc-\u0434\u0435\u0434"},
+    "session is a number": {**base, "session_id": 12345},
+    "session is a list": {**base, "session_id": ["a"]},
+    "cwd is a number": {**base, "cwd": 123},
+    "cwd missing dir": {**base, "cwd": str(BASE / "nope")},
+    "cwd is a file": {**base, "cwd": str(project / ".saipen" / "STATE.md")},
+    "model is hostile": {**base, "model": "--project-root=C:/ --fresh"},
+    "model is a flag": {**base, "model": "--help"},
+    "transcript missing": {**base, "transcript_path": str(BASE / "no.jsonl")},
+    "transcript is a dir": {**base, "transcript_path": str(project)},
+    "event is a list": None,
+    "event empty object": {},
+    "event name unknown": {**base, "hook_event_name": "Whatever"},
+    "session start": {**base, "hook_event_name": "SessionStart", "source": "resume"},
+    "session start hostile source": {**base, "hook_event_name": "SessionStart",
+                                     "source": "x --fresh --project-root C:/"},
+    "model switch": {**base, "hook_event_name": "PostModelSwitch"},
+    "stop no text": {**base, "hook_event_name": "Stop"},
+    "stop plain": {**base, "hook_event_name": "Stop", "last_assistant_message": "ok"},
+    "stop reentry": {**base, "hook_event_name": "Stop", "last_assistant_message": "ok",
+                     "stop_hook_active": True},
+    "post tool init": {**base, "hook_event_name": "PostToolUse", "tool_name": "Bash",
+                       "tool_input": {"command": "saipen init"}},
+    "post tool init foreign root": {
+        **base, "hook_event_name": "PostToolUse", "tool_name": "Bash", "cwd": str(BASE),
+        "tool_input": {"command": "saipen init --project-root " + str(BASE / "nope")}},
+}
+bad = 0
+for name, event in cases.items():
+    raw = b"[1, 2]" if event is None else None
+    status, answer, took = run(event, raw)
+    decision = answer.get("decision") if isinstance(answer, dict) else None
+    reason = (answer or {}).get("reason") if isinstance(answer, dict) else None
+    message = (answer or {}).get("systemMessage") if isinstance(answer, dict) else None
+    verdict = "ok"
+    if status != 0:
+        verdict = "NONZERO-EXIT"
+    elif decision == "block" and name.startswith(("ordinary", "session", "cwd", "model",
+                                                  "transcript", "event", "post")):
+        verdict = "BLOCKED-UNDER-DEFAULT"
+    elif decision == "block" and not str(reason or "").strip():
+        verdict = "EMPTY-BLOCK"
+    if verdict != "ok":
+        bad += 1
+    shown = (reason or message or "")[:150].replace("\n", " ")
+    print(f"{verdict:22} {status} {took:5.2f}s {name:32} {decision or '-':6} {shown}")
+print("BAD", bad)

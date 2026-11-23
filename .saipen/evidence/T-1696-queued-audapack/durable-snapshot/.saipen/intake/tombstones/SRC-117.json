@@ -1,0 +1,16 @@
+{
+  "actionable": 12,
+  "archive_ref": ".saipen/archive/source/SRC-117.md",
+  "closed_at": "2026-10-05T02:43:16Z",
+  "closure_event": null,
+  "linked_work": "T-270",
+  "linked_works": [
+    "T-270"
+  ],
+  "receipt_id": "SRC-117",
+  "requirements": 12,
+  "schema_version": 1,
+  "source_sha256": "9d7cdf7bd1a1e8f3771078fa04130a2aa86521811d11591044f7b69f664ac5ea",
+  "status": "CLOSED",
+  "unresolved": 0
+}

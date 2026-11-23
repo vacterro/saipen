@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-1537",
+    "operation_id": "ticket-229b73da01c842019c122e7290611115",
+    "reason": "existing/proposed oversized BOARD record requires canonical ticket block update"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-198/T-198-f59ea428028896f980f7aaa0.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 1433,
+  "original_record_path": ".saipen/recovery/board-compaction/T-198/T-198-f59ea428028896f980f7aaa0.BOARD.md",
+  "original_record_sha256": "f59ea428028896f980f7aaa0623b32b4e746dccaec32817d016958d65fb52f5d",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": "",
+  "ticket_id": "T-198"
+}

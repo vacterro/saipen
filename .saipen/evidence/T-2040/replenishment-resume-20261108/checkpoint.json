@@ -1,0 +1,9 @@
+{
+  "owned_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\replenishment.py",
+  "rollback_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\replenishment-resume-20261108\\replenishment.py.before",
+  "owned_sha256_before": "3460f8ce2d07605dce940571b51b2c40aa210eca487867fbb2bd062fd13b3707",
+  "oracle_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_maintenance_authority.py",
+  "oracle_sha256": "e3db65c922fe1b2f0a394980b4a6bb22a0650940e90f539ce1de3ff1d45185d9",
+  "frozen_nine_sha256": "b4657213c6287291e3a5f5f34b08380ebcdb3d48c339278dc2941fe8089c9490",
+  "owned_index_sha256": "09063ea8ad7c1f69c83a8b1c3186adb9faaff3dd591b0ce97024b9cb85d7273d"
+}

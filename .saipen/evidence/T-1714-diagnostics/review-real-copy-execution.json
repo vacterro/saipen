@@ -1,0 +1,19 @@
+{
+  "label": "review-real-copy-execution",
+  "phase": "REVIEW",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    ".saipen/evidence/T-1714-diagnostics/review-real-copy.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 19.687,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "{\"ok\": true, \"copy\": \"V:\\\\_TEMP_\\\\saipen-a05-real-copy-q4r4tdyp\\\\project\", \"copied_regular_files\": 8242, \"commands\": [{\"exit_code\": 1, \"command\": [\"V:\\\\_TEMP_\\\\saipen-a05-real-copy-q4r4tdyp\\\\project\", \"status\", \"--json\"]}, {\"exit_code\": 1, \"command\": [\"recover\", \"--dry-run\", \"--json\"]}, {\"exit_code\": 1, \"command\": [\"V:\\\\_TEMP_\\\\saipen-a05-real-copy-q4r4tdyp\\\\project\", \"next\", \"--json\"]}, {\"exit_code\": 0, \"command\": [\"V:\\\\_TEMP_\\\\saipen-a05-real-copy-q4r4tdyp\\\\project\", \"explain-next\", \"--json\"]}], \"record\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\T-1714-diagnostics\\\\review-real-copy.json\"}\r\n",
+  "stderr": "",
+  "stdout_sha256": "f6e6d117d7a19b219ae60368742e8a0ab13511d001106fc228aa0f4e1afa0db0",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

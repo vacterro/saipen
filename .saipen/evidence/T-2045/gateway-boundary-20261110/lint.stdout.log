@@ -1,0 +1,72 @@
+[
+  {
+    "cell": null,
+    "code": "RUF100",
+    "end_location": {
+      "column": 48,
+      "row": 23
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_operator_gateway.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 48,
+            "row": 23
+          },
+          "location": {
+            "column": 34,
+            "row": 23
+          }
+        }
+      ],
+      "message": "Remove unused `noqa` directive"
+    },
+    "location": {
+      "column": 36,
+      "row": 23
+    },
+    "message": "Unused `noqa` directive (unused: `E402`)",
+    "name": "unused-noqa",
+    "noqa_row": 23,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-noqa"
+  },
+  {
+    "cell": null,
+    "code": "RUF100",
+    "end_location": {
+      "column": 67,
+      "row": 28
+    },
+    "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_operator_gateway.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 67,
+            "row": 28
+          },
+          "location": {
+            "column": 53,
+            "row": 28
+          }
+        }
+      ],
+      "message": "Remove unused `noqa` directive"
+    },
+    "location": {
+      "column": 55,
+      "row": 28
+    },
+    "message": "Unused `noqa` directive (unused: `E402`)",
+    "name": "unused-noqa",
+    "noqa_row": 28,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-noqa"
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-441:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2139 rebind land: intake.rebind_work_to + saipen source rebind CLI + journal writer class source-rebind- + REGISTRY REBIND_NOOP; controls tools/test_t2139_source_rebind.py 6/6; family record .saipen/evidence/core-unit/aea93f0e425bc8d2-20261121T230801372259Z.json PASS 8910 ran",
+      "text": "ZAICODE unblock: T-435/T-444/T-500 ROW_LOST with zero backups answer ROWS_UNRECOVERABLE while HOST_PROVENANCE_UNAVAILABLE hard_wait (20/20) blocks saipen start --file, so the operator cannot continue Work in the ZAICODE project; the engine needs a lawful recover/rebind path for this measured case (audit findings B/C/D of audit/SAIHANDOFF_ZAICODE_20261121_SAIPEN_RECOVER_REBIND.md), and the deployed runtime needs the update after T-2136 registers the refusal codes",
+      "verification": "python tools/test_t2139_source_rebind.py exit 0; saipen validate CURRENT_PASS",
+      "work": "T-2139"
+    }
+  },
+  "schema_version": 1
+}

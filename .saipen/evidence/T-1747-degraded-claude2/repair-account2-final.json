@@ -1,0 +1,177 @@
+{
+  "ok": true,
+  "code": "HOST_REPAIRED",
+  "source": {
+    "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "kind": "source-checkout",
+    "adapter": null,
+    "canonical": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "generation": "gen-sha256:675374e0145ae375e020de41a3b2571fca98faebb9a63a600cd2dab1ba52128f",
+    "proven": true,
+    "detail": null,
+    "version": "8.1.0"
+  },
+  "policy": {
+    "mode": "degraded",
+    "label": "DEGRADED_ALLOWED",
+    "source": "operator",
+    "path": "C:\\Users\\vac34\\.saipen\\authority.json"
+  },
+  "authority": {
+    "running": false,
+    "pid": null,
+    "instance": null,
+    "generation": null,
+    "expected_generation": "svc-d6a2c0140f90b08d8cd79a84",
+    "saipen_root": null,
+    "endpoint": "\\\\.\\pipe\\saipen-authority-336850628174a20c242c9247",
+    "log": "C:\\Users\\vac34\\.saipen\\authority\\broker.log",
+    "identity_supported": true,
+    "mode": "degraded",
+    "mode_label": "DEGRADED_ALLOWED",
+    "mode_source": "operator",
+    "mode_path": "C:\\Users\\vac34\\.saipen\\authority.json",
+    "generation_current": null,
+    "unanswered": "impostor"
+  },
+  "machine_runtime": {
+    "code": "MACHINE_RUNTIME_READY",
+    "root": "C:\\ProgramData\\SAI\\SAIPEN",
+    "saipen_runtime_ready": true,
+    "generation": "gen-sha256:675374e0145ae375e020de41a3b2571fca98faebb9a63a600cd2dab1ba52128f",
+    "current": true,
+    "saipen_version": "8.1.0",
+    "state_schema": 3,
+    "launcher": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+    "python_bundled": false,
+    "source": "MACHINE_RUNTIME",
+    "reasons": [],
+    "action": null
+  },
+  "path_launcher": {
+    "code": "PATH_LAUNCHER_READY",
+    "directory": "C:\\Users\\vac34\\bin",
+    "files": {
+      "saipen.cmd": "owned",
+      "saipen": "owned"
+    },
+    "reasons": []
+  },
+  "hosts": [
+    {
+      "id": "claude",
+      "profile": "C:\\Users\\vac34\\.claude-account2",
+      "name": "Claude Code",
+      "state": "AUTHORITY_UNAVAILABLE",
+      "reasons": [
+        "The SAIPEN authority service did not answer. (AUTHORITY_UNREACHABLE/HOOK_CHAIN_UNRECOGNIZED)"
+      ],
+      "action": "saipen host repair --host claude --profile \"C:\\Users\\vac34\\.claude-account2\"",
+      "installed": true,
+      "host_present": true,
+      "runtime": "current",
+      "hook": "current",
+      "instruction": "current",
+      "admission": "DEGRADED_UNVERIFIED",
+      "response_enforcement": "MECHANICAL",
+      "last_health": {
+        "host": "claude",
+        "event": "SessionStart",
+        "state": "DEGRADED",
+        "at": 1791907189.473761,
+        "elapsed_ms": 677,
+        "saipen_root": "C:\\Users\\vac34\\.claude-account2\\skills\\saipen",
+        "hook": "C:\\Users\\vac34\\.claude-account2\\hooks\\saipen-guard.py",
+        "code": "AUTHORITY_UNREACHABLE",
+        "step": "HOOK_CHAIN_UNRECOGNIZED"
+      },
+      "recoverable": true,
+      "contract": {
+        "id": "claude",
+        "name": "Claude Code",
+        "install_surfaces": {
+          "home": "C:\\Users\\vac34\\.claude-account2",
+          "skill": "C:\\Users\\vac34\\.claude-account2\\skills\\saipen",
+          "instruction": "C:\\Users\\vac34\\.claude-account2\\CLAUDE.md",
+          "hook": "C:\\Users\\vac34\\.claude-account2\\hooks\\saipen-guard.py"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "PROMPT_LEVEL",
+        "response_interception": "MECHANICAL",
+        "response_enforcement": "MECHANICAL",
+        "admission_enforcement": "MECHANICAL",
+        "host_authority_source": "tools/saipen_engine/host_authority_broker.py",
+        "separated_authority": true,
+        "mechanical_admission": true,
+        "prompt_blocking": true,
+        "launch": {
+          "routine": "native Claude Code launch (desktop app, IDE extension or `claude`); no SAIPEN seat, wrapper, launcher, environment variable or prompt phrase is ever required",
+          "mode": "NATIVE_OR_OPTIONAL_LAUNCHER",
+          "launcher_command": "saipen --agent <seat> launch claude -- [arguments]",
+          "executable": "claude"
+        },
+        "auto_recovery": "AUTHORITY_RESTART_THEN_DEGRADE",
+        "degraded_mode": "DEGRADED_ALLOWED_DEFAULT"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.claude-account2\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:675374e0145ae375e020de41a3b2571fca98faebb9a63a600cd2dab1ba52128f",
+          "expected_generation": "gen-sha256:675374e0145ae375e020de41a3b2571fca98faebb9a63a600cd2dab1ba52128f",
+          "current": true,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.claude-account2\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.claude-account2\\hooks\\saipen-guard.py",
+          "installed": true,
+          "status": "current",
+          "delegated_root": "C:/Users/vac34/.claude-account2/skills/saipen",
+          "delegated_current": true,
+          "problems": [],
+          "installed_at": 1791907116.7351592
+        },
+        "host_home": "C:\\Users\\vac34\\.claude-account2"
+      }
+    }
+  ],
+  "broken": [],
+  "needs_action": [
+    "claude"
+  ],
+  "problems": [],
+  "next_action": "saipen host repair --host claude --profile \"C:\\Users\\vac34\\.claude-account2\"",
+  "steps": [
+    {
+      "step": "install:claude",
+      "ok": true,
+      "code": "INSTALLED",
+      "installer_rc": 0,
+      "detail": "Claude Code provenance       verified\nClaude Code instructions     already\nClaude Code guard hook       guard hook and configuration installed; health unproven\nClaude Code legacy hook      clean\n------------------------------------------------------------\nDone. Test: open any project in any agent, say: saipen set"
+    },
+    {
+      "step": "authority:stop",
+      "ok": true,
+      "stopped": true,
+      "detail": "shut down on request"
+    },
+    {
+      "step": "authority:start",
+      "ok": true,
+      "code": "AUTHORITY_STARTED",
+      "detail": "started"
+    }
+  ],
+  "remaining": [],
+  "mechanical_hosts": [
+    "claude"
+  ]
+}

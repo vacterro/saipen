@@ -1,0 +1,56 @@
+fix present in scan site : True
+fix present in audit site: True
+pre-fix text differs     : True
+PRE-FIX exit code = 1
+PRE-FIX output tail:
+ge.py", line 363, in _scan_receipt_members
+    record["receipt_id"],
+    ~~~~~~^^^^^^^^^^^^^^
+KeyError: 'receipt_id'
+
+======================================================================
+ERROR: test_deep_audit_ingests_a_v1_receipt (__main__.TestLegacyIngest.test_deep_audit_ingests_a_v1_receipt)
+RED against pre-fix code: validate_lineage_deep raised KeyError too.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1283_lineage_legacy_ingest.py", line 115, in test_deep_audit_ingests_a_v1_receipt
+    CL.rebuild_lineage(self.root)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\conformance_lineage.py", line 383, in rebuild_lineage
+    members = _scan_receipt_members(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\conformance_lineage.py", line 363, in _scan_receipt_members
+    record["receipt_id"],
+    ~~~~~~^^^^^^^^^^^^^^
+KeyError: 'receipt_id'
+
+======================================================================
+ERROR: test_deep_rebuild_ingests_a_v1_receipt (__main__.TestLegacyIngest.test_deep_rebuild_ingests_a_v1_receipt)
+RED against pre-fix code: raised KeyError: 'receipt_id'.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1283_lineage_legacy_ingest.py", line 108, in test_deep_rebuild_ingests_a_v1_receipt
+    result = CL.rebuild_lineage(self.root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\conformance_lineage.py", line 383, in rebuild_lineage
+    members = _scan_receipt_members(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\conformance_lineage.py", line 363, in _scan_receipt_members
+    record["receipt_id"],
+    ~~~~~~^^^^^^^^^^^^^^
+KeyError: 'receipt_id'
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.202s
+
+FAILED (errors=10)
+
+RESTORED: True
+POST-FIX exit code = 0
+v1_receipt_is_accepted_by_the_canonical_scan (__main__.TestLegacyIngest.test_v1_receipt_is_accepted_by_the_canonical_scan)
+The premise. If this fails the engine no longer admits v1 receipts and ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.482s
+
+OK
+ok

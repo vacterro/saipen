@@ -1,0 +1,3 @@
+_SAIPEN: boundary E-12933, from LOG text ['T-1656'], engine ['T-1656'], same
+_FastPrompter: boundary E-4488, from LOG text ['T-1440', 'T-1441', 'T-1442'], engine ['T-1440', 'T-1441', 'T-1442'], same
+_AUDAPACK: boundary E-3073, from LOG text ['T-290'], engine ['T-290'], same

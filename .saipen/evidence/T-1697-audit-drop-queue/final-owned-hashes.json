@@ -1,0 +1,32 @@
+{
+  "owned_current_sha256": {
+    "saipen/COMMANDS.md": "a51aa5a4f40796b5f872fe01d1884b0005f68fa16c2f2430c8314b3eeb1eff50",
+    "saipen/REGISTRY.json": "6078e409098510e29bc97b3360487b1f55ca8003e59f1c3ec98a202684c8a918",
+    "saipen/SOURCES.md": "97bbb2fb7cbd85b3a820c2926f388ac674944c572b27328f7455b02c0a6d21c7",
+    "tools/saipen.py": "8e43b4749f0dca94853056e90b84e0730b2f678dd5e3082b96435165bddab148",
+    "tools/saipen_engine/audit_enqueue.py": "e6b923fb437f78584500d07b9501cd7a4c0355772a630dde19151af565a7305d",
+    "tools/saipen_engine/audit_inbox.py": "7421355627f2b55b109e0df4644a5b49580f2f21173e6bf33d3544dc37968e06",
+    "tools/saipen_engine/router.py": "b2076c1ada9083998e4833e30536e431a7dad6ef4ba98e297487314b8ffb6ed5",
+    "tools/test_audit_inbox.py": "370927381ec5eb6db4db1a8723620963a4b6c22a2bee05cb4e9df7998e8e265a",
+    "tools/test_automation_block.py": "96e25e3d3f265c4fb3b439678eca54c1b69e53a598fda17731ca6a060f3d6b2e"
+  },
+  "owned_pre_sha256": {
+    "saipen/COMMANDS.md": "844e8e539d3a533b116b267b3ff5b375708806d78681dab1876aa603a310892a",
+    "saipen/REGISTRY.json": "c25171bd998719c1471ccc190516bf65aebe57fee41f2e3bbfc6a04c9f2485e4",
+    "saipen/SOURCES.md": "95269cc83af42f6505541e7f889d857e97096362be54cbf1383129eef8ae383f",
+    "tools/saipen.py": "4c7f6ebfc5681d25dd44a9bad25bd977d52efe5834bd08260928add9329079b6",
+    "tools/saipen_engine/audit_enqueue.py": "738f0c87b43bc460070248e4312117112cbbb77602d17a854f7a6cca711c6026",
+    "tools/saipen_engine/audit_inbox.py": "aada9fb01baa4a6ee6b36af67d3c6cc4becd6e2712c3ca201b04a41408532d3f",
+    "tools/saipen_engine/router.py": "a069b87b15b59ab01856c697dce5c7d8ac4989c8cab04b432fa32ca033256a1b",
+    "tools/test_audit_inbox.py": "7b1e95dafa7778f5bb338436b0f0586a2fafaaf42a32509ca1f710ae7a44e1ee",
+    "tools/test_automation_block.py": "662ff5fd5a66ed93ec114c21daaa71f90fd81ee4c159cf0213ff1ac8be8bd67e"
+  },
+  "independent_oracle_sha256": "1d521a7db3953a9198545fcd79a9164c2368c760b00da4b77bd1cdfdb71c3d22",
+  "base_fixture_and_routing_helpers_unchanged": true,
+  "command_resolution": 55251,
+  "command_resolution_limit_unchanged": 55296,
+  "cancelled_run": "Incomplete partial output only; not completion evidence",
+  "reverification": "RV-000005 executed for historical T-1695 closure against final tree",
+  "instrument_refusal": "final-core.json is the rejected --json invocation; canonical completed output is final-core.out.txt",
+  "outside_owner_validate_sha256": "64355ea00c7953faed7911fe771de2c66da23ef7fec84cba15e19ddf77d0196e"
+}

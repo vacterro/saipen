@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-441.md",
+  "closed_at": "2026-11-21T23:09:33Z",
+  "closure_event": null,
+  "linked_work": "T-2139",
+  "linked_works": [
+    "T-2139"
+  ],
+  "receipt_id": "SRC-441",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "ac135f4f514f131777b40bb574d12fe1969d5d04b2a0aa85b1bf6a7751251b3e",
+  "status": "CLOSED",
+  "unresolved": 0
+}

@@ -1,0 +1,144 @@
+...F..................FF..FFFFFFF..FF...F..............F......F........................................ [ 70%]
+........F...........F.........F............                              [100%]
+================================== FAILURES ===================================
+____________ ClosedVocabulary.test_live_project_continues_with_cc _____________
+tools\test_automation_block.py:201: in test_live_project_continues_with_cc
+    self.assertEqual(block["disposition"], CONTINUE)
+E   AssertionError: 'BLOCKED' != 'CONTINUE'
+E   - BLOCKED
+E   + CONTINUE
+________________ ClosureGate.test_audit_quiescence_is_required ________________
+tools\test_automation_block.py:475: in test_audit_quiescence_is_required
+    self.assertEqual(block["disposition"], CONTINUE)
+E   AssertionError: 'BLOCKED' != 'CONTINUE'
+E   - BLOCKED
+E   + CONTINUE
+________________ ClosureGate.test_binding_wait_vetoes_closure _________________
+tools\test_automation_block.py:516: in test_binding_wait_vetoes_closure
+    self.assertEqual(block["disposition"], CONTINUE)
+E   AssertionError: 'BLOCKED' != 'CONTINUE'
+E   - BLOCKED
+E   + CONTINUE
+_____ ClosureGate.test_done_phase_and_empty_board_alone_are_insufficient ______
+tools\test_automation_block.py:577: in test_done_phase_and_empty_board_alone_are_insufficient
+    self.assertEqual(block["disposition"], CONTINUE)
+E   AssertionError: 'BLOCKED' != 'CONTINUE'
+E   - BLOCKED
+E   + CONTINUE
+_ ClosureGate.test_empty_physical_folder_with_unsettled_intake_is_not_complete _
+tools\test_automation_block.py:604: in test_empty_physical_folder_with_unsettled_intake_is_not_complete
+    self.assertEqual(block["disposition"], CONTINUE)
+E   AssertionError: 'BLOCKED' != 'CONTINUE'
+E   - BLOCKED
+E   + CONTINUE
+_____________ ClosureGate.test_full_closure_gate_yields_complete ______________
+tools\test_automation_block.py:465: in test_full_closure_gate_yields_complete
+    self.assertEqual(block["disposition"], automation.COMPLETE)
+E   AssertionError: 'BLOCKED' != 'COMPLETE'
+E   - BLOCKED
+E   + COMPLETE
+___________ ClosureGate.test_no_convergence_evidence_vetoes_closure ___________
+tools\test_automation_block.py:493: in test_no_convergence_evidence_vetoes_closure
+    self.assertEqual(block["disposition"], CONTINUE)
+E   AssertionError: 'BLOCKED' != 'CONTINUE'
+E   - BLOCKED
+E   + CONTINUE
+_____ ClosureGate.test_race_rule_consume_after_convergence_vetoes_closure _____
+tools\test_automation_block.py:532: in test_race_rule_consume_after_convergence_vetoes_closure
+    self.assertEqual(block["disposition"], CONTINUE)
+E   AssertionError: 'BLOCKED' != 'CONTINUE'
+E   - BLOCKED
+E   + CONTINUE
+____ ClosureGate.test_race_rule_consume_before_convergence_allows_closure _____
+tools\test_automation_block.py:565: in test_race_rule_consume_before_convergence_allows_closure
+    self.assertEqual(block["disposition"], automation.COMPLETE)
+E   AssertionError: 'BLOCKED' != 'COMPLETE'
+E   - BLOCKED
+E   + COMPLETE
+___ ClosureGate.test_residue_vetoes_closure_although_dir_is_empty_of_layers ___
+tools\test_automation_block.py:484: in test_residue_vetoes_closure_although_dir_is_empty_of_layers
+    self.assertEqual(block["disposition"], CONTINUE)
+E   AssertionError: 'BLOCKED' != 'CONTINUE'
+E   - BLOCKED
+E   + CONTINUE
+_____________ ClosureGate.test_workable_board_work_vetoes_closure _____________
+tools\test_automation_block.py:506: in test_workable_board_work_vetoes_closure
+    self.assertEqual(block["disposition"], CONTINUE)
+E   AssertionError: 'BLOCKED' != 'CONTINUE'
+E   - BLOCKED
+E   + CONTINUE
+_____________ AcceptanceFixture.test_full_run_to_closure_sequence _____________
+tools\test_automation_block.py:764: in test_full_run_to_closure_sequence
+    self.assertEqual(block["disposition"], CONTINUE)
+E   AssertionError: 'BLOCKED' != 'CONTINUE'
+E   - BLOCKED
+E   + CONTINUE
+_ WaitBoundary.test_genuine_complete_requires_all_current_closure_conditions __
+tools\test_t1739_wait_boundary.py:111: in test_genuine_complete_requires_all_current_closure_conditions
+    self.assertEqual(block["disposition"], automation.COMPLETE)
+E   AssertionError: 'BLOCKED' != 'COMPLETE'
+E   - BLOCKED
+E   + COMPLETE
+_ CanonicalResponseFacts.test_public_checker_binds_completed_project_phase (status='DONE') _
+tools\test_response_fact_binding.py:168: in test_public_checker_binds_completed_project_phase
+    self.assertEqual(proc.returncode, expected, proc.stdout + proc.stderr)
+E   AssertionError: 1 != 0 : {
+E     "ok": false,
+E     "code": "EXEC_RESPONSE_INVALID",
+E     "errors": [
+E       "STATUS must name current phase DONE"
+E     ],
+E     "detail_mode": "NONE",
+E     "detail": "STATUS must name current phase DONE",
+E     "overflow": null
+E   }
+____________ CanonicalClassifierTests.test_a_valid_boundary_passes ____________
+tools\test_codex_stop_hook.py:162: in test_a_valid_boundary_passes
+    self.assertEqual(rc, 0, out)
+E   AssertionError: 1 != 0 : {'ok': False, 'code': 'EXEC_RESPONSE_INVALID', 'class': 'INVALID_OPERATIONAL_PROSE', 'layer': 'EXEC_RESPONSE', 'layers': {'admission': 'NOT_CONSULTED', 'exec_response': 'FAIL', 'chat_style': 'NOT_REACHED'}, 'errors': ['STATUS must name current phase DONE'], 'detail_mode': 'NONE', 'turn_decision': 'ORDINARY', 'detail': 'STATUS must name current phase DONE', 'diagnostic': None, 'delivery': 'STATUS: BLOCKED  \nRESULT: Peatatud operaatori soovil  \nNEXT EXACT ACTION: saipen continue  \nVALIDATION: NOT_RUN', 'overflow': None, 'contract': "SAIPEN chat contract, generated from STYLE.md (ded-069a4c52). Reply language is pinned to Estonian (et) by STYLE.md: answer in it on every reply, whatever language the user wrote in. Voice: caveman-ded, blunt and compressed. Higher-priority host instructions retain precedence. Chat prose is at most 8 lines (target 5) and 900 characters unless witnessed human ingress explicitly requests depth or a typed artifact. Summary, brief and ordinary final report stay compact. Fences never escape the total budget. Never open with: Sure, Certainly, Okay, Here is, I will, Let me, Based on my analysis, I'd be happy to. Never close with: Hope this helps, Let me know if you need anything else, Feel free to ask. Never apologize with: Sorry, My apologies, I made a mistake. Commands, PASS/FAIL, file:line, error strings and code stay exact. An operational boundary is the EXEC-RESPONSE-01 control surface generated from machine facts (`saipen response digest --project-root ROOT --reason final|stop|status`), never a model retrospective. The low-level diagnostic renderer is `saipen response render --stdin`. Completed-part gates replace default operational output. Post-render Stop gates request one correction; they cannot retract visible text. Runnable work continues silently. Evidence remains durable, not narrated."}
+__________ CodexStopHookTests.test_a_valid_boundary_passes_untouched __________
+tools\test_codex_stop_hook.py:273: in test_a_valid_boundary_passes_untouched
+    self.assertIsNone(out)
+E   AssertionError: {'decision': 'block', 'reason': 'SAIPEN canonical delivery (INVALID_OPERATIONAL_PROSE; do not add prose):\nSTATUS: BLOCKED  \nRESULT: Peatatud operaatori soovil  \nNEXT EXACT ACTION: saipen continue  \nVALIDATION: NOT_RUN'} is not None
+_______________ Exposure.test_render_fills_auto_from_the_owner ________________
+tools\test_t1576_efficiency_kpi.py:394: in test_render_fills_auto_from_the_owner
+    self.assertTrue(payload.get("ok"), payload)
+E   AssertionError: False is not true : {'ok': False, 'code': 'EXEC_RESPONSE_INVALID', 'detail': 'STATUS must name current phase DONE'}
+__ RealCLIValues.test_response_request_spelling_dry_run_reaches_real_checker __
+tools\test_t1684_operand_grammar.py:165: in test_response_request_spelling_dry_run_reaches_real_checker
+    self.assertEqual(ordinary.returncode, 0, ordinary.stdout + ordinary.stderr)
+E   AssertionError: 1 != 0 : {
+E     "ok": false,
+E     "code": "EXEC_RESPONSE_INVALID",
+E     "errors": [
+E       "STATUS must name current phase DONE"
+E     ],
+E     "detail_mode": "NONE",
+E     "detail": "STATUS must name current phase DONE",
+E     "overflow": null
+E   }
+______ ProtocolHomeIsNotMaintenanceGrant.test_proven_grant_is_authorized ______
+tools\test_t2022_protocol_home_maintenance_distinction.py:95: in test_proven_grant_is_authorized
+    self.assertTrue(result["authorized"])
+E   AssertionError: False is not true
+=========================== short test summary info ===========================
+FAILED tools/test_automation_block.py::ClosedVocabulary::test_live_project_continues_with_cc
+FAILED tools/test_automation_block.py::ClosureGate::test_audit_quiescence_is_required
+FAILED tools/test_automation_block.py::ClosureGate::test_binding_wait_vetoes_closure
+FAILED tools/test_automation_block.py::ClosureGate::test_done_phase_and_empty_board_alone_are_insufficient
+FAILED tools/test_automation_block.py::ClosureGate::test_empty_physical_folder_with_unsettled_intake_is_not_complete
+FAILED tools/test_automation_block.py::ClosureGate::test_full_closure_gate_yields_complete
+FAILED tools/test_automation_block.py::ClosureGate::test_no_convergence_evidence_vetoes_closure
+FAILED tools/test_automation_block.py::ClosureGate::test_race_rule_consume_after_convergence_vetoes_closure
+FAILED tools/test_automation_block.py::ClosureGate::test_race_rule_consume_before_convergence_allows_closure
+FAILED tools/test_automation_block.py::ClosureGate::test_residue_vetoes_closure_although_dir_is_empty_of_layers
+FAILED tools/test_automation_block.py::ClosureGate::test_workable_board_work_vetoes_closure
+FAILED tools/test_automation_block.py::AcceptanceFixture::test_full_run_to_closure_sequence
+FAILED tools/test_t1739_wait_boundary.py::WaitBoundary::test_genuine_complete_requires_all_current_closure_conditions
+SUBFAILED(status='DONE') tools/test_response_fact_binding.py::CanonicalResponseFacts::test_public_checker_binds_completed_project_phase
+FAILED tools/test_codex_stop_hook.py::CanonicalClassifierTests::test_a_valid_boundary_passes
+FAILED tools/test_codex_stop_hook.py::CodexStopHookTests::test_a_valid_boundary_passes_untouched
+FAILED tools/test_t1576_efficiency_kpi.py::Exposure::test_render_fills_auto_from_the_owner
+FAILED tools/test_t1684_operand_grammar.py::RealCLIValues::test_response_request_spelling_dry_run_reaches_real_checker
+FAILED tools/test_t2022_protocol_home_maintenance_distinction.py::ProtocolHomeIsNotMaintenanceGrant::test_proven_grant_is_authorized
+19 failed, 128 passed, 40 subtests passed in 78.38s (0:01:18)

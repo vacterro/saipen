@@ -1,0 +1,16 @@
+{
+  "phase": "REVIEW",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\audit_checks.py"
+  ],
+  "returncode": 0,
+  "timeout_seconds": 3600,
+  "fixture_git_core_longpaths": "true",
+  "global_git_configuration_changed": false,
+  "cases_or_predicates_changed": false,
+  "summary": "AUDIT: 12 of 14 probes passed; failed: none; skipped: none; unproven (host capability): mutation-sweep, symlink-restore",
+  "stdout": "REVIEW-audit-longpaths.stdout",
+  "stderr": "REVIEW-audit-longpaths.stderr"
+}

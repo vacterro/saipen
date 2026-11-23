@@ -1,0 +1,27 @@
+{
+  "captured_utc": "2026-11-09T20:35:39.375095+00:00",
+  "rollback_checkpoint": "E-20814",
+  "owned_files": [
+    "tools/saipen_engine/isolated_release.py",
+    "tools/test_release_reconciliation.py"
+  ],
+  "takeover_sha256": {
+    "tools/saipen_engine/isolated_release.py": "45d5ce0b6d45b7bc5836853221ce744c66ae385aa5cb5fdaf199aa3326b050b7",
+    "tools/test_release_reconciliation.py": "a53f0290faff83c3a2b64ce11cfe5b52bbf902a51bd1f52bf71c5dd68549d1a6"
+  },
+  "checkpoint_preimages_valid": {
+    "tools/saipen_engine/isolated_release.py": true,
+    "tools/test_release_reconciliation.py": true
+  },
+  "protected_sha256": {
+    ".git/index": "13ce8fa52f179aeea8c347b5319866265931bfcb4d2c82bad13a6652de845539",
+    ".git/config": "038b722bd3dc1e8d824130b0a9fe77b180b64613e7c932becd56a10bd2ba3225",
+    ".git/HEAD": "28d25bf82af4c0e2b72f50959b2beb859e3e60b9630a5e8c603dad4ddb2b6e80",
+    ".saipen/STATE.md": "bf7814d90da39a9dc7ae868e66135bb09eaba5e235cbbcc2b631096ff510f556",
+    ".saipen/BOARD.md": "fea8e213c2bb2718876b58449f935daf18f54865d73aa542fa3a1f9f130dae5c",
+    ".saipen/LOG.md": "3d3b5350f87594ce613dfeb0d49d88cea0d77d73e9aaa8cbd6395e934bca59d1",
+    "tools/saipen_engine/release.py": "dbdbbc01537ac21ca5863686c1a48253b0d1fb6bab33a210e605bc0a7a435833",
+    "tools/saipen_engine/release_authority.py": "09d99267166ed916e8c80e6adac1b79d27b523b73d6e64d8fcc19b3a4f5dee37"
+  },
+  "inherited_status": "AM tools/saipen_engine/isolated_release.py\nAM tools/test_release_reconciliation.py\n"
+}

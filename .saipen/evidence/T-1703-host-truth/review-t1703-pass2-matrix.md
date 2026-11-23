@@ -1,0 +1,31 @@
+# Current host capability truth — B01
+
+Registry declarations, installed currentness and actual execution probes are separate.
+All four live boundary probes are NOT_PROBED; no host was started or repaired.
+The effective-strength owner receives no fabricated positive guard/health evidence.
+
+| Host/profile | TOOL_BLOCK | ADMISSION | QUESTION | FINAL_RESPONSE | Runtime / hook | Tool owner without probe |
+| --- | --- | --- | --- | --- | --- | --- |
+| opencode | BLOCKING | ADVISORY | MECHANICAL | MECHANICAL | current / current | UNKNOWN |
+| claude / C:\Users\SAIAG_9fabb0d5\.claude | ADVISORY | MECHANICAL | MECHANICAL | MECHANICAL | absent / absent | ENFORCEMENT_GAP |
+| codex | ADVISORY | UNAVAILABLE | ADVISORY | MECHANICAL | absent / absent | ENFORCEMENT_GAP |
+| zaicode | ADVISORY | ADVISORY | ADVISORY | ADVISORY | absent / not-applicable | ADVISORY |
+| zcode-production | ADVISORY | ADVISORY | ADVISORY | ADVISORY | current / not-applicable | ADVISORY |
+| gemini | ADVISORY | ADVISORY | ADVISORY | ADVISORY | current / current | UNKNOWN |
+| codebuddy | ADVISORY | ADVISORY | ADVISORY | ADVISORY | absent / not-applicable | ADVISORY |
+| freebuff | ADVISORY | ADVISORY | ADVISORY | ADVISORY | current / not-applicable | ADVISORY |
+| aider | ADVISORY | ADVISORY | ADVISORY | ADVISORY | absent / not-applicable | ADVISORY |
+| antigravity | ADVISORY | ADVISORY | ADVISORY | ADVISORY | absent / not-applicable | ADVISORY |
+| kiro | ENFORCEMENT_GAP | UNAVAILABLE | ADVISORY | UNAVAILABLE | absent / absent | ENFORCEMENT_GAP |
+| deepseek | ADVISORY | ADVISORY | ADVISORY | ADVISORY | absent / not-applicable | ADVISORY |
+| openai | ADVISORY | ADVISORY | ADVISORY | ADVISORY | absent / not-applicable | ADVISORY |
+| qwen | ADVISORY | ADVISORY | ADVISORY | ADVISORY | absent / not-applicable | ADVISORY |
+| generic | ENFORCEMENT_GAP | UNAVAILABLE | ADVISORY | UNAVAILABLE | absent / not-applicable | ENFORCEMENT_GAP |
+
+Native doctor exit: 0; broken hosts: . These are retained observed conditions.
+Machine runtime: MACHINE_RUNTIME_BROKEN; authority running: False.
+
+A source checkout proves this report's code identity, not the loaded generation of another host.
+Historical prompt health and an owner projection of MECHANICAL do not prove a live QUESTION or FINAL_RESPONSE probe.
+ADVISORY is the registry ceiling for FreeBuff/Antigravity; no blocking transport is invented.
+A same-user hook/broker is not an NTFS isolation boundary. C01-C06 remain distinct operator-gated work.

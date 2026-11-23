@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-107:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Widget still shows READY during a live A3 audit: veto READY on a rejected in-composer stop control, close voice-hole, expose build+generation in the widget UI"
+    }
+  },
+  "derived_at": "2026-09-29T17:44:08Z",
+  "derived_from": "SRC-107",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "329488356f427be7a80739ea3dd2711085a3e35de7e59fa75b3cb7856bfd1a12"
+}

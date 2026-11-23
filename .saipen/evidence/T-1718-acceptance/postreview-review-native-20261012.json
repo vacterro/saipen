@@ -1,0 +1,19 @@
+{
+  "label": "postreview-review-native-20261012",
+  "phase": "REVIEW",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    "tools/test_t1718_acceptance_contract.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 29.25,
+  "fingerprint": "f07ab6d183ddcf28ac4990b50dd4ec0cde675bf3a66e716c07d941d1e0d5e9f1",
+  "stdout": "",
+  "stderr": "......................................\r\n----------------------------------------------------------------------\r\nRan 38 tests in 28.863s\r\n\r\nOK\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "40ee6e86c4bb2859568fbd1c0017c52029fe65373346fded5a74654c046e7419",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

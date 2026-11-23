@@ -1,0 +1,157 @@
+{
+  "observed_at": "2026-11-09T20:03:14.128950+00:00",
+  "files": [
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1446_supervise.py",
+      "preimage_verified": true,
+      "postimage_matches_worktree": true,
+      "unchanged_test_names": [
+        "test_a_cut_inside_a_line_drops_the_fragment",
+        "test_a_cut_on_a_line_boundary_keeps_the_whole_line",
+        "test_a_fenced_generation_is_dead_immediately",
+        "test_a_frozen_generation_dies_with_every_process_it_started",
+        "test_a_genuine_error_line_after_a_long_read_still_classifies",
+        "test_a_healthy_foreign_worker_is_awaited_never_stolen",
+        "test_a_killed_generation_after_a_long_read_is_a_crash",
+        "test_a_long_read_never_stops_the_run_on_a_clean_exit",
+        "test_a_retryable_host_outage_is_retried_not_unknown",
+        "test_a_runtime_without_tools_moves_only_to_an_authorized_runtime",
+        "test_a_short_output_is_whole",
+        "test_a_slow_generation_that_keeps_progressing_is_not_killed",
+        "test_a_torn_event_is_transcript_not_error_text",
+        "test_an_absent_host_executable_is_a_capability_absence",
+        "test_an_idle_generation_is_still_bounded",
+        "test_auth_failure_never_falls_back",
+        "test_corrupt_lease_state_fails_closed",
+        "test_death_freeze_and_provider_failure_never_lose_the_mission",
+        "test_error_events_and_stderr_still_classify",
+        "test_missing_model_falls_back_only_to_an_authorized_model",
+        "test_model_identity_never_enters_canonical_truth",
+        "test_one_line_longer_than_the_tail_leaves_nothing",
+        "test_quota_without_authorized_fallback_is_an_operator_stop",
+        "test_repeated_no_progress_stops_instead_of_burning_budget",
+        "test_supervisor_restart_with_zero_memory_continues",
+        "test_the_failure_vocabulary_is_closed_and_ordered",
+        "test_the_host_bound_ends_a_progressing_slice_without_failure",
+        "test_transcript_content_never_names_the_failure",
+        "test_unknown_failure_stops_after_the_repeat_bound",
+        "test_without_an_authorized_runtime_the_blocker_is_truthful"
+      ],
+      "sha256_after": "66c47843a58257ca2b202181255f870bbfb2b89d2f608d25a4c0dc60e16fe1bb"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1748_worker_clock.py",
+      "preimage_verified": true,
+      "postimage_matches_worktree": true,
+      "unchanged_test_names": [
+        "test_a_disabled_host_bound_turns_the_subject_check_red",
+        "test_a_too_early_host_bound_turns_the_subject_check_red",
+        "test_interruption_inside_state_write_preserves_the_successor",
+        "test_normal_real_process_control",
+        "test_worker_without_cpu_beyond_old_idle_budget_stays_green"
+      ],
+      "sha256_after": "3f809c279fcac164743d294743f484c248830b65c0936e305911e24cf1dd418d"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_worker_turnover.py",
+      "preimage_verified": true,
+      "postimage_matches_worktree": true,
+      "unchanged_test_names": [
+        "test_a_corrupt_checkpoint_is_ignored_not_trusted",
+        "test_a_fenced_generation_cannot_finish_its_own_slice",
+        "test_a_second_worker_cannot_run_against_a_live_generation",
+        "test_a_supervisor_restart_from_zero_ram_reconstructs_the_picture",
+        "test_a_worker_refuses_to_run_under_ambiguous_authority",
+        "test_every_work_blocked_is_an_answer_not_a_crash",
+        "test_the_checkpoint_is_derived_runtime_state_not_canonical_truth",
+        "test_the_same_worker_resumes_its_own_generation",
+        "test_three_real_generations_recover_the_exact_next_work"
+      ],
+      "sha256_after": "bd72aa9b81603308bfadafa47fba297c8471ec299420e41243e5c797ab835395"
+    }
+  ],
+  "module_counts": [
+    {
+      "module": "test_t1446_supervise",
+      "before_tests": 30,
+      "before_failures": 10,
+      "after_tests": 30,
+      "after_failures": 0,
+      "after_errors": 0,
+      "after_skips": 0
+    },
+    {
+      "module": "test_t1748_worker_clock",
+      "before_tests": 5,
+      "before_failures": 3,
+      "after_tests": 5,
+      "after_failures": 0,
+      "after_errors": 0,
+      "after_skips": 0
+    },
+    {
+      "module": "test_worker_turnover",
+      "before_tests": 9,
+      "before_failures": 1,
+      "after_tests": 9,
+      "after_failures": 0,
+      "after_errors": 0,
+      "after_skips": 0
+    }
+  ],
+  "removed_assertions": [
+    {
+      "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1446_supervise.py",
+      "count": 9,
+      "assertion_ast": "Call(func=Attribute(value=Name(id='self', ctx=Load()), attr='assertEqual', ctx=Load()), args=[Subscript(value=Name(id='result', ctx=Load()), slice=Constant(value='stop'), ctx=Load()), Attribute(value=Name(id='supervisor', ctx=Load()), attr='IDLE', ctx=Load()), Name(id='result', ctx=Load())], keywords=[])",
+      "reason": "stale terminal success/IDLE expectation only"
+    },
+    {
+      "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1446_supervise.py",
+      "count": 1,
+      "assertion_ast": "Call(func=Attribute(value=Name(id='self', ctx=Load()), attr='assertTrue', ctx=Load()), args=[Subscript(value=Name(id='result', ctx=Load()), slice=Constant(value='ok'), ctx=Load()), Name(id='result', ctx=Load())], keywords=[])",
+      "reason": "stale terminal success/IDLE expectation only"
+    },
+    {
+      "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1446_supervise.py",
+      "count": 1,
+      "assertion_ast": "Call(func=Attribute(value=Name(id='self', ctx=Load()), attr='assertIn', ctx=Load()), args=[Subscript(value=Name(id='second', ctx=Load()), slice=Constant(value='stop'), ctx=Load()), Tuple(elts=[Attribute(value=Name(id='supervisor', ctx=Load()), attr='IDLE', ctx=Load())], ctx=Load()), Name(id='second', ctx=Load())], keywords=[])",
+      "reason": "stale terminal success/IDLE expectation only"
+    },
+    {
+      "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1748_worker_clock.py",
+      "count": 1,
+      "assertion_ast": "Assert(test=Compare(left=Subscript(value=Name(id='result', ctx=Load()), slice=Constant(value='stop'), ctx=Load()), ops=[Eq()], comparators=[Attribute(value=Attribute(value=Name(id='subject', ctx=Load()), attr='supervisor', ctx=Load()), attr='IDLE', ctx=Load())]), msg=Name(id='result', ctx=Load()))",
+      "reason": "stale terminal success/IDLE expectation only"
+    },
+    {
+      "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_worker_turnover.py",
+      "count": 1,
+      "assertion_ast": "Call(func=Attribute(value=Name(id='self', ctx=Load()), attr='assertEqual', ctx=Load()), args=[Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='code'), ctx=Load()), Attribute(value=Name(id='supervisor', ctx=Load()), attr='IDLE', ctx=Load())], keywords=[])",
+      "reason": "stale terminal success/IDLE expectation only"
+    }
+  ],
+  "production_defects_observed": [],
+  "fixture_script_changed": false,
+  "before_tests": 44,
+  "before_failures": 14,
+  "after_tests": 44,
+  "after_failures": 0,
+  "removed_assertion_count": 13,
+  "nonterminal_assertions_removed": 0,
+  "production_differences_from_restoration": [
+    "tools\\saipen_engine\\operations.py"
+  ],
+  "production_difference_attribution": "No production writes performed by this task; coordinator reported ongoing production work. Hash differences, if any, are observations only.",
+  "canonical_current_sha256": {
+    ".saipen\\STATE.md": "8aac4e8653643f67b0009f3ec8a6fcfe06bcfcfa0e35f0bc369eed57c9f1e34e",
+    ".saipen\\BOARD.md": "e8edada584c2b94671a6550a46c678f392d475f39e232e785f28816e2d814ffd",
+    ".saipen\\LOG.md": "ff893678e1bb252db90d4c524a6c8e1303a3d2e4132c935ccca6b9f5e132d667"
+  },
+  "canonical_difference_from_initial_snapshot": [
+    ".saipen\\STATE.md",
+    ".saipen\\BOARD.md",
+    ".saipen\\LOG.md"
+  ],
+  "diff_check_returncode": 0
+}

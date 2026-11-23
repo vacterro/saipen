@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "state": "DEGRADED",
+  "permitted": true,
+  "verified": false,
+  "applies": true,
+  "problems": [
+    {
+      "component": "host",
+      "code": "HOST_EVIDENCE_UNAVAILABLE",
+      "reason": "host codex declares admission_enforcement=UNAVAILABLE: no evidence channel to prove it"
+    }
+  ],
+  "stale": [],
+  "unobserved": [],
+  "warnings": [],
+  "generation": "adm-53b137f56a9f2e32affc452aa8e9deef",
+  "degraded": true,
+  "marker": "SAIPEN_ADMISSION_UNVERIFIED",
+  "failure": "HOST_EVIDENCE_UNAVAILABLE",
+  "failure_step": null,
+  "delivery": "",
+  "mode": "degraded",
+  "code": "ADMISSION_CURRENT",
+  "diagnostic": null,
+  "contract": "SAIPEN chat contract, generated from STYLE.md (ded-069a4c52). Reply language is pinned to Estonian (et) by STYLE.md: answer in it on every reply, whatever language the user wrote in. Voice: caveman-ded, blunt and compressed. Higher-priority host instructions retain precedence. Chat prose is at most 8 lines (target 5) and 900 characters unless witnessed human ingress explicitly requests depth or a typed artifact. Summary, brief and ordinary final report stay compact. Fences never escape the total budget. Never open with: Sure, Certainly, Okay, Here is, I will, Let me, Based on my analysis, I'd be happy to. Never close with: Hope this helps, Let me know if you need anything else, Feel free to ask. Never apologize with: Sorry, My apologies, I made a mistake. Commands, PASS/FAIL, file:line, error strings and code stay exact. An operational boundary is the EXEC-RESPONSE-01 control surface generated from machine facts (`saipen response digest --project-root ROOT --reason final|stop|status`), never a model retrospective. The low-level diagnostic renderer is `saipen response render --stdin`. Completed-part gates replace default operational output. Post-render Stop gates request one correction; they cannot retract visible text. Runnable work continues silently. Evidence remains durable, not narrated."
+}

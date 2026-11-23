@@ -1,0 +1,18 @@
+{
+  "checks": {
+    "verifier": false,
+    "contract_bytes": true,
+    "pre_fix_subject_bytes": true,
+    "complete_context_bytes": true,
+    "current_subject_bytes": true,
+    "runtime_path_and_bytes": true
+  },
+  "runtime": {
+    "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+  },
+  "prior_verifier": "8c180eb169c109e9b26e8572b91b7855501c1b24205b43aec0bd812d89c3da4d",
+  "current_verifier": "9d23c022536c5aabdfcefd5207723f55f13cc9f07e0b5ceb7e9068a14ee4eaad",
+  "environment_values_recorded": false,
+  "diagnostic": "Only the environment can differ when contract, full context, both subjects and runtime are equal; its original values were not preserved, so no changed key is attributed."
+}

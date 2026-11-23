@@ -1,0 +1,102 @@
+saipen conformance validation starting (tools/validate.py)...
+Project root: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN (git-worktree)
+Project lineage: lineage-b512942bac884a8691f6c98afcd6ddb9
+PASS: state.schema.json and the engine STATE contract constants agree
+PASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)
+PASS: STATE.md schema valid (checked against state.schema.json)
+PASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-b512942bac884a8691f6c98afcd6ddb9)
+PASS: subSaipen STATE.md shape valid (7 checked, live + shipped library)
+PASS: .saipen/extensions/subs/MANIFEST.md parses strictly (5 entries)
+PASS: extensions/subs/MANIFEST.md parses strictly (4 entries)
+PASS: BOARD.md has all required section headings
+PASS: BOARD.md no duplicate tickets
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md Work supersession relations are terminal, existing and acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+PASS: BOARD.md at most one ## DOING ticket (0 claimed)
+PASS: every DONE closure provenance satisfies its declared closure contract
+PASS: converge clean-HUNT marker present, next_action avoids ADD
+PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 21 segment(s))
+PASS: history: 92 event(s) carry an off-grammar `[op: ...]` id no writer emits, exempt as sealed, at or below the resolved floor, or backed by a real operation record (first .saipen/logs/LOG-012.md:125 E-2882; T-1577)
+PASS: improve seat report schema valid (20 report(s) scanned)
+PASS: core sweep linkage valid: every disposition resolves to a real finding/ticket, no unverified or INVALID/ALREADY_FIXED finding produced a ticket, source_reports resolve exactly
+PASS: subsaipen write boundary continuous: no sub artifact targets a main-project canonical file (red control 7)
+PASS: hunt skip marks resolve to real commits on the remote (24 checked)
+PASS: history: 125 sealed LOG entr(y/ies) predate the mandatory DATE (earliest .saipen/logs/LOG-001.md:3); immutable by append-only, and the active log is FAILed for it
+PASS: saiui charter integrity verified (references UI.md, no second palette, write ban enforced, fixer contract present, UI- prefix documented, bootstrap includes charters)
+PASS: 6 shipped sai*.md charter(s) declare the full metadata block (8 keys, closed enums)
+PASS: freshness hardening command/cleanup/worker contracts intact
+PASS: T-549 hard barrier blocks the T-551..T-561 improve wave
+PASS: convergence contract intact (13 stages in order, closure bar and post-K ordering rule present)
+PASS: SAIUI SAISENT mission labels findings as hypotheses to verify
+PASS: KNOWLEDGE/ clean
+PASS: KNOWLEDGE/ structured surface valid (28 card(s), 28 active, index fresh)
+PASS: FUTURE GATE deferred-authority surface valid (54 document(s); 38 DEFERRED, 2 INELIGIBLE, 13 NEEDS_REVIEW, 1 PROMOTED)
+PASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 54 document(s) non-normative, 45 reviewed record(s) canonical)
+PASS: .saipen/USERPERSON.md is a well-formed optional USERPERSON profile
+PASS: README.md badge matches VERSION
+PASS: conformance corpus schema + IDs valid (257 rows, exactly 1..257)
+PASS: CONFORMANCE.md matches the generated corpus index
+PASS: no stray control characters in shipped text (749 files swept)
+PASS: core docs text lint clean (no U+FFFD/split keywords/fence drift)
+PASS: phase enum <-> phases/ docs in sync (16 phases)
+PASS: INDEX.md phase list matches enum + files (16 phases)
+PASS: CORE / IMPROVE / CLI Improve action sets match exactly
+FAIL: runtime manifest names a file git does not track: tools/_t2040_experiment.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/saipen_engine/discovery_providers.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/saipen_engine/gc.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/saipen_engine/outcome_truth.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/saipen_engine/persistent_goal.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/saipen_engine/source_reindex.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_converge_entry_authority.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_gc.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_nested_git_boundaries.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2023_goal_management_and_maintenance_binding.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2040_bounded_discovery_resume.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2040_continuation_truth.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2040_discovery_owners.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2040_exhaustion_evidence.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2040_finish_plan_guards.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2040_maintenance_authority.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2040_publication_truth.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2040_replenishment_recovery.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2040_review_proof_binding.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2040_terminal_consumer_guards.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2040_terminal_consumer_supplementary.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2050_pruned_row_restore.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2051_source_reindex.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2052_pruned_slice_closure.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2055_nested_directory_fingerprint.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2057_carrier_restore.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2059_regression.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2071_gate_pinned_row.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2076_installed_generation_binding.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t2077_unblock_gate.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_writer_route_projection.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+PASS: adapter cross-references valid (checking saipen/ paths in all 11 adapters)
+PASS: no adapter or injector treats RFC.md as normative (14 checked, RFC stub is redirect-only)
+PASS: 32 locale README badge(s) match VERSION (8.1.1)
+PASS: shortcut callouts aligned across 32 locale sources, 3 mirrors, 33 locale guides, and both root entry docs
+PASS: append targets end on a line boundary (42 checked)
+PASS: lint parity [T-628] -- harness.md and validate.yml agree on `python -m ruff check tools/ tests/` with ruff==0.16.0
+PASS: doc coverage accounted for (489 shipped documents, 29 checked patterns, 38 exempt)
+PASS: warn slug ownership verified for 4 tracked slug(s)
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists
+WARN [log-soft-cap]: .saipen/LOG.md is 482 lines / 172 KB, past the 300 line / 64 KB cap -- `saipen transition CLEAN` seals it into the next .saipen/logs/LOG-<NNN>.md (phases/clean.md step 4)
+WARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-051] carries source_head '025bf596c683464788ab698248e8a3c5eb44dfec' but current source_head is 'dc39709c0c17a3272126c01a626ffcaa4176140b' -- package is stale and MUST NOT be collected -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-051] carries source_tree_fingerprint 'git-delta-v1:f6e0d3683fdd49081fb91414517c6da180255dc0af9c762a9570fd6ca474418f' but the current tree computes 'git-delta-v1:0f69fe84ecb98bfc84e2c33be0bb35ef7310de8bbd75c223f7d6b77232be14d2' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [manifest-untracked-orphan]: untracked manifest file tools/_t2040_experiment.py imports runtime that HEAD does not carry: saipen_engine.focused_unit, saipen_engine.subs -- do NOT commit it alone; it will fail in every clone. Ship the runtime it depends on first
+WARN [manifest-untracked-orphan]: untracked manifest file tools/saipen_engine/discovery_providers.py imports runtime that HEAD does not carry: module .persistent_goal -- do NOT commit it alone; it will fail in every clone. Ship the runtime it depends on first
+WARN [manifest-untracked-orphan]: ... and 19 more like the above
+WARN [subsaipen-uncollected]: 1 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)
+WARN [cross-doc-drift]: cross-doc drift [borrowed-invariants] -- BOOT.md must say `next_action` is the previous session's pre-computed pick and is confirmed against BOARD.md where the validator cannot re-derive it -- the portable floor does not, since a grep cannot walk a needs: graph
+WARN [cross-doc-drift]: cross-doc drift [command-outranks-pick] -- BOOT.md step 7 must say the user's own message outranks `next_action` and defer to § 1.11's OBEY priority. Read as unconditional it is the half a cold agent reaches first, which is exactly how the command the user typed gets dropped
+WARN [cross-doc-drift]: ... and 6 more like the above
+WARN [changelog-unarchived]: CHANGELOG.md carries 13 version entries while it states it keeps the most recent ~10 -- the overflow belongs in CHANGELOG_ARCHIVE.md, moved verbatim the way LOG segments are sealed, so the top of the file stays the part anyone actually reads
+WARN [translation-stale]: 29 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, el, es, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this
+WARN [release-ledger]: 2 release(s) have a CHANGELOG entry but no git tag: v8.0.2, v8.1.1
+WARN [xpatch-survival]: XP-000001 applied bytes never reached a commit: tools/saipen_engine/intake.py
+WARN [xpatch-survival]: XP-000002 applied bytes never reached a commit: tools/saipen.py, tools/saipen_engine/operations.py
+Validation FAILED: 31 problem(s), 39 warning(s)

@@ -1,0 +1,20 @@
+[
+  {
+    "subject": "pre",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1695-invalid-stops\\verify.py",
+      "run"
+    ],
+    "exit_code": 1,
+    "verifier_sha256": "778aa77d7117475164911f75e0b7e3286db971e132a7e724d5c38cce65efb0a1",
+    "subject_sha256": "1d4f6f1963716db562b22841804d309bd187ee8e67456d78190fa198284afde2",
+    "subject_paths": [
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1695-invalid-stops\\pre-automation.py",
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1695-invalid-stops\\pre-response_surface.py"
+    ],
+    "output": "baseline-pre.out.txt",
+    "output_sha256": "96dc5928e0a145b6e2f981be977d4a57fdce72daca9a55a4bbdf0cc24f709840"
+  }
+]

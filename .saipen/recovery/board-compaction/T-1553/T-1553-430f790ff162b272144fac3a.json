@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-10626",
+    "operation_id": "ticket-f44a017351ed4d869b7b8fdb78be9cef",
+    "reason": "new BOARD record exceeds the live cap; canonical writer externalized detail"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-1553/T-1553-430f790ff162b272144fac3a.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 2437,
+  "original_record_path": ".saipen/recovery/board-compaction/T-1553/T-1553-430f790ff162b272144fac3a.BOARD.md",
+  "original_record_sha256": "430f790ff162b272144fac3a02f9e3d37af720db3cbb6da5bc9761828abfa0e8",
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": "",
+  "ticket_id": "T-1553"
+}

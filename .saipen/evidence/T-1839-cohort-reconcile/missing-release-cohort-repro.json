@@ -1,0 +1,5 @@
+{
+  "positive_matching_release_resolves": true,
+  "missing_release_cohort_resolves": true,
+  "detail": "T-7 published through cohort C-002 (release release-fixture, version 1.2.3)"
+}

@@ -1,0 +1,5 @@
+{
+  "command": "python -m unittest tools.test_opencode_bound_launch_smoke -v",
+  "exit_code": 0,
+  "timestamp_utc": "2026-10-10T12:04:27.5075906Z"
+}

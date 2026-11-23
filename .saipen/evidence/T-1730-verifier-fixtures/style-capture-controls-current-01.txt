@@ -1,0 +1,10 @@
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 9.545s
+
+OK
+PASS: hr-missing-style_contract -- failed on 'style_contract', as declared
+PASS: hr-wrong-style_contract -- failed on 'style_contract', as declared
+PASS: userperson-valid -- expected pass, got pass
+PASS: hr-missing-style_contract -- failed on 'style_contract', as declared
+PASS: hr-wrong-style_contract -- failed on 'style_contract', as declared

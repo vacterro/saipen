@@ -1,0 +1,6 @@
+{
+  "owned_path": "tools/saipen_engine/router.py",
+  "sha256_before": "6a537af67bc6282c8033b386629363ae34af01af744938d762425f57e10ca042",
+  "before": "projection-envelope-20261108T103334517580Z/router.py.before",
+  "producer_contract": "audit_inbox.projection returns invalid/residue as layer LISTS and *_only as booleans"
+}

@@ -1,0 +1,14 @@
+{
+  "oracle_sha256": "ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822",
+  "deliberate_mutation": true,
+  "ran": 9,
+  "failures": [
+    "test_operator_required_wait_dominates_two_candidates_and_eight_blocked (test_t1739_wait_boundary.WaitBoundary.test_operator_required_wait_dominates_two_candidates_and_eight_blocked)",
+    "test_safety_gates_and_existing_schema_remain_intact (test_t1739_wait_boundary.WaitBoundary.test_safety_gates_and_existing_schema_remain_intact) (category='manual-verify')",
+    "test_safety_gates_and_existing_schema_remain_intact (test_t1739_wait_boundary.WaitBoundary.test_safety_gates_and_existing_schema_remain_intact) (category='destructive-op')",
+    "test_safety_gates_and_existing_schema_remain_intact (test_t1739_wait_boundary.WaitBoundary.test_safety_gates_and_existing_schema_remain_intact) (category='user brake')",
+    "test_safety_gates_and_existing_schema_remain_intact (test_t1739_wait_boundary.WaitBoundary.test_safety_gates_and_existing_schema_remain_intact) (category='safety valve')"
+  ],
+  "errors": [],
+  "passed": false
+}

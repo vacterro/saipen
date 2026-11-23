@@ -1,0 +1,200 @@
+[
+  {
+    "name": "ancestry.result",
+    "record": ".saipen/evidence/regression/regression-execution-8523f6d7d07546bdb706826f9112a820.json",
+    "contract": ".saipen/evidence/T-2040/native-manifests-20261109/ancestry.json",
+    "command": [
+      "{python}",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "--color=no",
+      "-p",
+      "no:cacheprovider",
+      "tools/test_release_reconciliation.py",
+      "-k",
+      "r003 and not live"
+    ],
+    "context_matches": false,
+    "verifier_matches": false,
+    "subject_matches": true,
+    "contract_matches": true
+  },
+  {
+    "name": "exhaustion.result",
+    "record": ".saipen/evidence/regression/regression-execution-354b0a93145f43a69dc5b3b5f681cd2e.json",
+    "contract": ".saipen/evidence/T-2040/native-manifests-20261109/exhaustion.json",
+    "command": [
+      "{python}",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "--color=no",
+      "-p",
+      "no:cacheprovider",
+      "tools/test_t2040_exhaustion_evidence.py",
+      "tools/test_t2040_discovery_owners.py"
+    ],
+    "context_matches": false,
+    "verifier_matches": false,
+    "subject_matches": true,
+    "contract_matches": true
+  },
+  {
+    "name": "iteration.result",
+    "record": ".saipen/evidence/regression/regression-execution-aacd2e657ad94b7894b3570d2a099f6a.json",
+    "contract": ".saipen/evidence/T-2040/native-manifests-20261109/iteration.json",
+    "command": [
+      "{python}",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "--color=no",
+      "-p",
+      "no:cacheprovider",
+      "tools/test_t2040_iteration_truth.py"
+    ],
+    "context_matches": false,
+    "verifier_matches": false,
+    "subject_matches": true,
+    "contract_matches": true
+  },
+  {
+    "name": "lifecycle.result",
+    "record": ".saipen/evidence/regression/regression-execution-f26fcfca6ba34685b926620f357a9559.json",
+    "contract": ".saipen/evidence/T-2040/lifecycle-receipt-truth-20261109T200642579628Z/source-manifest.json",
+    "command": [
+      "{python}",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "--color=no",
+      "-p",
+      "no:cacheprovider",
+      "tools/test_recovery_reachability.py::StrandedClaimTests",
+      "tools/test_lost_active_ticket_recovery.py",
+      "tools/test_t1851_debt_authority.py::NativeDecisionTests::test_committed_operation_does_not_report_a_missing_target_repaired"
+    ],
+    "context_matches": false,
+    "verifier_matches": false,
+    "subject_matches": true,
+    "contract_matches": true
+  },
+  {
+    "name": "maintenance.result",
+    "record": ".saipen/evidence/regression/regression-execution-2a6aad66c9824c7f8af03fc46c74d016.json",
+    "contract": ".saipen/evidence/T-2040/native-manifests-20261109/maintenance.json",
+    "command": [
+      "{python}",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "--color=no",
+      "-p",
+      "no:cacheprovider",
+      "tools/test_t2040_maintenance_authority.py",
+      "tools/test_t2040_replenishment_recovery.py"
+    ],
+    "context_matches": false,
+    "verifier_matches": false,
+    "subject_matches": true,
+    "contract_matches": true
+  },
+  {
+    "name": "publication.result",
+    "record": ".saipen/evidence/regression/regression-execution-de2b828bd4fc4fd88ad8e96328b3e3c5.json",
+    "contract": ".saipen/evidence/T-2040/native-manifests-20261109/publication.json",
+    "command": [
+      "{python}",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "--color=no",
+      "-p",
+      "no:cacheprovider",
+      "tools/test_t2040_publication_truth.py"
+    ],
+    "context_matches": false,
+    "verifier_matches": false,
+    "subject_matches": true,
+    "contract_matches": true
+  },
+  {
+    "name": "release-completion.result",
+    "record": ".saipen/evidence/regression/regression-execution-448035965ebd4455b102090538b8604b.json",
+    "contract": ".saipen/evidence/T-2040/native-manifests-20261109/release-completion.json",
+    "command": [
+      "{python}",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "--color=no",
+      "-p",
+      "no:cacheprovider",
+      "tools/test_release_completion.py"
+    ],
+    "context_matches": false,
+    "verifier_matches": false,
+    "subject_matches": true,
+    "contract_matches": true
+  },
+  {
+    "name": "review-authority.result",
+    "record": ".saipen/evidence/regression/regression-execution-dc321bfa69a64e9db02a23eed6a46b02.json",
+    "contract": ".saipen/evidence/T-2040/native-manifests-20261109/review-authority.json",
+    "command": [
+      "{python}",
+      "-B",
+      "tools/test_t2040_review_authority_hypotheses.py"
+    ],
+    "context_matches": false,
+    "verifier_matches": false,
+    "subject_matches": true,
+    "contract_matches": true
+  },
+  {
+    "name": "review-boundaries.result",
+    "record": ".saipen/evidence/regression/regression-execution-7730f6b59eb44908b99dbdd0aba5b71a.json",
+    "contract": ".saipen/evidence/T-2040/native-manifests-20261109/review-boundaries.json",
+    "command": [
+      "{python}",
+      "-B",
+      "tools/test_t2040_review_input_boundaries.py",
+      "ReviewInputBoundaryTests"
+    ],
+    "context_matches": false,
+    "verifier_matches": false,
+    "subject_matches": true,
+    "contract_matches": true
+  },
+  {
+    "name": "external-terminal",
+    "contract": ".saipen/evidence/T-2040/external-terminal-20261110T172128Z/source-manifest.json",
+    "command": [
+      "{python}",
+      "-B",
+      "-m",
+      "pytest",
+      "-v",
+      "--tb=short",
+      "--color=no",
+      "-p",
+      "no:cacheprovider",
+      "tools/test_t2040_external_terminal_proof.py"
+    ]
+  }
+]

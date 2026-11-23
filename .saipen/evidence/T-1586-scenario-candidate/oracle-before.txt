@@ -1,0 +1,52 @@
+test_actual_copy_callbacks_skip_held_locks_but_preserve_durable_and_foreign_names (t1586_fixed_oracle.ScenarioInputTests.test_actual_copy_callbacks_skip_held_locks_but_preserve_durable_and_foreign_names) ... FAIL
+test_actual_goal_fixture_admits_claim_and_build_with_current_style (t1586_fixed_oracle.ScenarioInputTests.test_actual_goal_fixture_admits_claim_and_build_with_current_style) ... FAIL
+test_generic_known_bad_revision_still_fails_a_stuck_current_instrument (t1586_fixed_oracle.ScenarioInputTests.test_generic_known_bad_revision_still_fails_a_stuck_current_instrument) ... ok
+test_generic_probe_uses_its_actual_freshness_authority (t1586_fixed_oracle.ScenarioInputTests.test_generic_probe_uses_its_actual_freshness_authority) ... FAIL
+test_missing_style_control_still_refuses_the_same_canonical_writer (t1586_fixed_oracle.ScenarioInputTests.test_missing_style_control_still_refuses_the_same_canonical_writer) ... ok
+test_purity_snapshot_excludes_runtime_but_retains_durable_nested_names (t1586_fixed_oracle.ScenarioInputTests.test_purity_snapshot_excludes_runtime_but_retains_durable_nested_names) ... FAIL
+test_purity_snapshot_still_refuses_unreadable_durable_evidence (t1586_fixed_oracle.ScenarioInputTests.test_purity_snapshot_still_refuses_unreadable_durable_evidence) ... ok
+
+======================================================================
+FAIL: test_actual_copy_callbacks_skip_held_locks_but_preserve_durable_and_foreign_names (t1586_fixed_oracle.ScenarioInputTests.test_actual_copy_callbacks_skip_held_locks_but_preserve_durable_and_foreign_names)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1586-scenario-candidate\test_t1586_scenario_inputs.py", line 105, in test_actual_copy_callbacks_skip_held_locks_but_preserve_durable_and_foreign_names
+    self.assertIsNone(error, error)
+AssertionError: "[('V:\\\\_TEMP_\\\\saipen-scenario-inputs-335gwhrc\\\\source\\\\.saipen\\\\locks\\\\core.lock', 'V:\\\\_TEMP_\\\\saipen-scenario-inputs-335gwhrc\\\\copy-0\\\\.saipen\\\\locks\\\\core.lock', '[Errno 13] Permission denied')]" is not None : [('V:\\_TEMP_\\saipen-scenario-inputs-335gwhrc\\source\\.saipen\\locks\\core.lock', 'V:\\_TEMP_\\saipen-scenario-inputs-335gwhrc\\copy-0\\.saipen\\locks\\core.lock', '[Errno 13] Permission denied')]
+
+======================================================================
+FAIL: test_actual_goal_fixture_admits_claim_and_build_with_current_style (t1586_fixed_oracle.ScenarioInputTests.test_actual_goal_fixture_admits_claim_and_build_with_current_style)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1586-scenario-candidate\test_t1586_scenario_inputs.py", line 60, in test_actual_goal_fixture_admits_claim_and_build_with_current_style
+    self.assertTrue(claim.ok, claim.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'state-malformed: schema_version 3 requires style_contract: ded-71fc58de (RFC § 1.2)'}
+
+======================================================================
+FAIL: test_generic_probe_uses_its_actual_freshness_authority (t1586_fixed_oracle.ScenarioInputTests.test_generic_probe_uses_its_actual_freshness_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1586-scenario-candidate\test_t1586_scenario_inputs.py", line 199, in test_generic_probe_uses_its_actual_freshness_authority
+    self.assertEqual(self.generic_controls(), [])
+AssertionError: Lists differ: [('generic role contract change makes package stale', '')] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+('generic role contract change makes package stale', '')
+
+- [('generic role contract change makes package stale', '')]
++ []
+
+======================================================================
+FAIL: test_purity_snapshot_excludes_runtime_but_retains_durable_nested_names (t1586_fixed_oracle.ScenarioInputTests.test_purity_snapshot_excludes_runtime_but_retains_durable_nested_names)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1586-scenario-candidate\test_t1586_scenario_inputs.py", line 138, in test_purity_snapshot_excludes_runtime_but_retains_durable_nested_names
+    self.assertEqual(set(result), {"evidence/proof.txt", "nested/locks/durable.txt"})
+AssertionError: Items in the first set but not the second:
+'locks/core.lock'
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.799s
+
+FAILED (failures=4)

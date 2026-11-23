@@ -1,0 +1,52 @@
+test_declared_nested_repository_keeps_its_own_saipen_boundary (test_t1900_git_listing_boundary.TestGitListingAsksForItsBoundary.test_declared_nested_repository_keeps_its_own_saipen_boundary)
+AC-05: the pathspec also reaches the nested binding, on purpose. ... FAIL
+test_surviving_listing_is_identical_to_an_unpathspeced_listing (test_t1900_git_listing_boundary.TestGitListingAsksForItsBoundary.test_surviving_listing_is_identical_to_an_unpathspeced_listing)
+AC-02: the exclusion is a cost change, never a semantic one. ... ok
+test_the_exclusion_draws_exactly_the_saipen_boundary (test_t1900_git_listing_boundary.TestGitListingAsksForItsBoundary.test_the_exclusion_draws_exactly_the_saipen_boundary)
+AC-01: `.saipen/` is excluded; lookalike names are ordinary source. ... FAIL
+test_the_exclusion_neither_narrows_nor_widens_scope (test_t1900_git_listing_boundary.TestGitListingAsksForItsBoundary.test_the_exclusion_neither_narrows_nor_widens_scope)
+AC-03: exclusion-only keeps Git's default selection, exactly. ... ok
+test_the_fingerprint_is_unchanged_by_the_pathspec (test_t1900_git_listing_boundary.TestGitListingAsksForItsBoundary.test_the_fingerprint_is_unchanged_by_the_pathspec)
+AC-04: an .saipen-only change never moves the identity, before or after. ... ok
+
+======================================================================
+FAIL: test_declared_nested_repository_keeps_its_own_saipen_boundary (test_t1900_git_listing_boundary.TestGitListingAsksForItsBoundary.test_declared_nested_repository_keeps_its_own_saipen_boundary)
+AC-05: the pathspec also reaches the nested binding, on purpose.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1900-prefix\tools\test_t1900_git_listing_boundary.py", line 262, in test_declared_nested_repository_keeps_its_own_saipen_boundary
+    self.assertEqual(
+AssertionError: 'git-delta-v1:7b3812e01bf3678667e637ed986b759876aba28fcf142a68b3182e0cd02bce12' != 'git-delta-v1:771442253cf7ee415708ccd54807150ba024955f86330a71aa8ba6d5168e12db'
+- git-delta-v1:7b3812e01bf3678667e637ed986b759876aba28fcf142a68b3182e0cd02bce12
++ git-delta-v1:771442253cf7ee415708ccd54807150ba024955f86330a71aa8ba6d5168e12db
+ : a nested repository's own .saipen is its runtime, not the outer source
+
+======================================================================
+FAIL: test_the_exclusion_draws_exactly_the_saipen_boundary (test_t1900_git_listing_boundary.TestGitListingAsksForItsBoundary.test_the_exclusion_draws_exactly_the_saipen_boundary)
+AC-01: `.saipen/` is excluded; lookalike names are ordinary source.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1900-prefix\tools\test_t1900_git_listing_boundary.py", line 108, in test_the_exclusion_draws_exactly_the_saipen_boundary
+    self.assertEqual(
+AssertionError: Lists differ: ['.sa[22 chars]aipen/STATE.md', '.saipen/deep/nested/BOARD.md[47 chars]txt'] != ['.sa[22 chars]aipenicious.py', '.saipenx/y.py', 'plain.txt']
+
+First differing element 1:
+'.saipen/STATE.md'
+'.saipenicious.py'
+
+First list contains 2 additional elements.
+First extra element 4:
+'.saipenx/y.py'
+
++ ['.saipen-src/keep.py', '.saipenicious.py', '.saipenx/y.py', 'plain.txt']
+- ['.saipen-src/keep.py',
+-  '.saipen/STATE.md',
+-  '.saipen/deep/nested/BOARD.md',
+-  '.saipenicious.py',
+-  '.saipenx/y.py',
+-  'plain.txt']
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.311s
+
+FAILED (failures=2)

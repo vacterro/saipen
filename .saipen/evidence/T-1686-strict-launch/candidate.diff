@@ -1,0 +1,68 @@
+--- pre/tools/saipen_engine/host_launch.py
++++ tools/saipen_engine/host_launch.py
+@@ -55,11 +55,17 @@
+ def launch_degrades(host_id: str) -> bool:
+     """May this host start when its installed runtime could not be proven?
+ 
+-    Read from the registry (`degraded_mode`): a host whose integration degrades
++    Operator STRICT policy refuses every runtime gap. Otherwise the registry
++    (`degraded_mode`) decides whether a host whose integration degrades
+     truthfully on the prompt path is started with a warning, because refusing
+     the launch would deny the operator a host that works. A host whose tool
+     gate fails closed keeps the refusal it was designed with.
+     """
++    from .host_authority_client import authority_mode
++    from .host_taxonomy import MODE_STRICT
++
++    if authority_mode() == MODE_STRICT:
++        return False
+     for item in _registry_adapters():
+         if str(item.get("id")) == host_id:
+             return item.get("degraded_mode") == "DEGRADED_ALLOWED_DEFAULT"
+@@ -101,6 +107,10 @@
+ class HostLaunchRefusal(ValueError):
+     """The requested launch cannot establish an explicit bounded envelope."""
+ 
++    def __init__(self, message: str, *, operator_action: str | None = None):
++        super().__init__(message)
++        self.operator_action = operator_action
++
+ 
+ def build_launch_environment(
+     project_root: Path | str,
+@@ -200,12 +210,17 @@
+         )
+ 
+     env = build_launch_environment(project_root, seat, base_env=base_env)
+-    if prelaunch:
++    may_degrade = launch_degrades(host_id)
++    if prelaunch or not may_degrade:
+         try:
+             prelaunch_runtime(host_id)
+         except HostLaunchRefusal as exc:
+-            if not launch_degrades(host_id):
+-                raise
++            if not may_degrade:
++                from .host_taxonomy import REPAIR
++
++                raise HostLaunchRefusal(
++                    f"{exc}; recover with: {REPAIR}", operator_action=REPAIR
++                ) from exc
+             # The host itself still works and its own hook degrades truthfully:
+             # say what could not be proven and start it anyway.
+             print(
+--- pre/tools/saipen.py
++++ tools/saipen.py
+@@ -11817,7 +11817,11 @@
+         try:
+             return launch_host(host, project_root, _AGENT_OVERRIDE, host_args)
+         except HostLaunchRefusal as exc:
+-            _emit({"ok": False, "code": "HOST_LAUNCH_REFUSED", "detail": str(exc)}, as_json)
++            _emit(
++                {"ok": False, "code": "HOST_LAUNCH_REFUSED", "detail": str(exc),
++                 **({"operator_action": exc.operator_action} if exc.operator_action else {})},
++                as_json,
++            )
+             return 1
+ 
+     # CORE § 1.10 (Cyrillic-twin incident): whole-message shortcut resolution

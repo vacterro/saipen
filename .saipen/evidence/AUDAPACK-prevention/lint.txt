@@ -1,0 +1,12 @@
+E501 Line too long (103 > 100)
+   --> tools\saipen_engine\guard_events.py:293:101
+    |
+291 | )
+292 | _PS_WRITE_VERBS = _SHELL_WRITE_VERBS - {"tee"}
+293 | _PS_WRITE_PARAMETERS = (*_PS_VALUE_PARAMETERS, "filepath", "value", "encoding", "width", "inputobject")
+    |                                                                                                     ^^^
+294 | _PS_ONLY_VERBS = (
+295 |     frozenset({"remove-item", "ri", "move-item", "mi", "rename-item", "rni"}) | _PS_WRITE_VERBS
+    |
+
+Found 1 error.

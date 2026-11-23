@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-066:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-222 closed with verification evidence in LOG: verify -> PASS conf: high -- saipen audit status: pending [] closed_pending_delete [] residue_count 0 clean true, no workable layer 10; saipen source status SRC-044: CLOSED location archive coverage 15/15 VERIFIED. T-218 verify clause satisfied (record terminal settled + layer gone + not IN_WORK + clean true). T-221 filed for the root class on the SAIPEN owner; T-219 BLOCKED_EXTERNAL to SAIPEN gua",
+      "text": "Close T-218: verify the stranded audit/10 SRC-044 layer is now terminal and the inbox clean; T-218 closure per T-220 evidence; T-221 externalize to SAIPEN owner",
+      "verification": "the Work this request created reached its own verification gate; see the T-222 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-222"
+    }
+  },
+  "schema_version": 1
+}

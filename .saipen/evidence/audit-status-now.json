@@ -1,0 +1,712 @@
+{
+  "ok": true,
+  "code": "AUDIT_INBOX_STATUS",
+  "rule_id": "SOURCE-AUDIT-INBOX-01",
+  "directory": "audit",
+  "pending": [
+    {
+      "layer": 29,
+      "path": "audit/29.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-351",
+      "work": "T-1970",
+      "sha256": "d72a8d2cdebdcf545d6b5e920038178625e70fd1d0a18c0426ff88f20491afa9"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIPEN_20261012_0656.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-236",
+      "work": "T-1738",
+      "sha256": "8c3bd0e65bd6d904e0979644903443e3bd99339df8b91827d5d102b3d040ffef"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIHANDOFF_ZAICODE_20261013_LEDGER_AND_CONFORMANCE.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-245",
+      "work": "T-1764",
+      "sha256": "11872776d2bfeb0face6820e405d04f3319d5d7b3ce36b2d698db68bf79a3535"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIPEN_20261013_1647.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-246",
+      "work": "T-1766",
+      "sha256": "48d399faed85f0a8e4cfb2926e870120c4d19c8fa4f9b79eb516a2aacd4eb4e2"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIPEN_20261013_1933.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-247",
+      "work": "T-1768",
+      "sha256": "dcb0df86fc458502eca0497c106d85a08e838332ad0a0e32384b6c1b44d802fb"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIPEN_20261013_2132.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-248",
+      "work": "T-1769",
+      "sha256": "673bd4a3078e7d56c56edc39ec493df5d14525888671ee07fb06f96bafca7c5f"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIPEN_20261014_0010.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-253",
+      "work": "T-1791",
+      "sha256": "b2f054144a5ef75c56105ec53c6d4d01d29841324030c5a06e1b56ddccc17da2"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIHANDOFF — SAIRELAY_20261014_1350.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-259",
+      "work": "T-1800",
+      "sha256": "816e76661a1057da97692cd770253087a285d65fc59ad2ab6b04f21c6ab39d30"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIHANDOFF_AGENT_DRIFT_20261023_1019.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-295",
+      "work": "T-1863",
+      "sha256": "42db83f27b766861d6b2b463b14731b33ffd2a5dc89ebf2575ea308e01fd5d1c"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIHANDOFF_AGENT_DRIFT_2026-10-24.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-305",
+      "work": "T-1880",
+      "sha256": "eef1f9fc0f2c76738528cddc85110a6bd38514cd1c33cf6ffdcd0abf87833f6d"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIHANDOFF_SAIPEN_PROTOCOL_MAINTAINER_20261027_121545_28acc068.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-342",
+      "work": "T-1943",
+      "sha256": "28acc06800d938620eb6ae4a70f78e856abfb9d4a0f444fe8e846e48801c4382"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIHANDOFF_BZ_REA_AGENT_DRIFT_RECOVERY.md",
+      "state": "CLOSED_PENDING_DELETE",
+      "receipt": "SRC-386",
+      "work": "T-2016",
+      "sha256": "ac1d9a4db94073d6fad06a2a4af6ed9360bf573e08463801ff495cc813fc8943"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIHANDOFF_P0_ZAICODE_GOAL_COMMAND_COLLISION_AND_MAINTENANCE_GRANT_BINDING_20261104_132028_172870b3.md",
+      "state": "CLOSED_PENDING_DELETE",
+      "receipt": "SRC-394",
+      "work": "T-2024",
+      "sha256": "609bbc4c2df4af5ffe1494b8140234812ed6a1a60eaef5974325c89d65b148f8"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIHANDOFF_AGENT_DRIFT (7).md",
+      "state": "ACTIVE",
+      "receipt": "SRC-379",
+      "work": "T-2005",
+      "sha256": "719801393ad2216548def9d4bc7f58d187e2c64dd8b7ab9f118dd8cfdcba6a72"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIHANDOFF_AUDAPACK_AGENT_DRIFT_PROTOCOL_RECONCILIATION_20261103_035536_80b87b15.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-384",
+      "work": "T-2014",
+      "sha256": "80b87b158ac223459bbaf1bac9ab40b512181d52ccf090d14984fe608d8e2373"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIHANDOFF_FREEBUFF_WRONG_ROUTE_BZ_REA_20261029.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-351",
+      "work": "T-1970",
+      "sha256": "d72a8d2cdebdcf545d6b5e920038178625e70fd1d0a18c0426ff88f20491afa9"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIHANDOFF_SAIPEN_HOME_AUDIT_BZDECOMP_20261113.md",
+      "state": "NEW",
+      "receipt": null,
+      "work": null,
+      "sha256": "98f6c4ea3faeabc7e64db60b2a895f3883fb91a435dcff339f3056c3f3bf302c"
+    },
+    {
+      "layer": null,
+      "path": "audit/SAIHANDOFF_SAIPEN_HOME_AUDIT_BZDECOMP_20261113_INPUT_IDENTITY.md",
+      "state": "NEW",
+      "receipt": null,
+      "work": null,
+      "sha256": "4cafc55858347687e5ecd5a69424da687ccaaea801b7ea8ab218466bc09e6920"
+    },
+    {
+      "layer": 23,
+      "path": "audit/23.md",
+      "state": "CLOSED_PENDING_DELETE",
+      "receipt": "SRC-167",
+      "work": "T-1606",
+      "sha256": "e65de1f0c46a5857799fecdccfdd4f18961961805462d7b9cc053489c8e5f01c"
+    }
+  ],
+  "closed_pending_delete": [
+    "audit/SAIHANDOFF_BZ_REA_AGENT_DRIFT_RECOVERY.md",
+    "audit/SAIHANDOFF_P0_ZAICODE_GOAL_COMMAND_COLLISION_AND_MAINTENANCE_GRANT_BINDING_20261104_132028_172870b3.md",
+    23
+  ],
+  "invalid": [],
+  "orphans": [
+    {
+      "rel": "audit/1.md",
+      "layer": 1,
+      "receipt_id": "SRC-012",
+      "linked_work": "T-1222",
+      "sha256": "22ecac8c887ecc46ec574d31459e742aa2ad704fdf8126bf1b9db0b3b0baaccb",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/10.md",
+      "layer": 10,
+      "receipt_id": "SRC-023",
+      "linked_work": "T-1296",
+      "sha256": "a9b3965ee0679f92d5eea164ee89a27ac3d46bdbef298d6ffcd38c2c07102a45",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/11.md",
+      "layer": 11,
+      "receipt_id": "SRC-024",
+      "linked_work": "T-1297",
+      "sha256": "29382825df1167091bc5ca10c1983b5b3a4da608f6ddf28bdb247cf752b6be8c",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/12.md",
+      "layer": 12,
+      "receipt_id": "SRC-025",
+      "linked_work": "T-1298",
+      "sha256": "27efc70fdac11489d24b336758fe1adef00de6bb6144517276f127e17ced68ef",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/16.md",
+      "layer": 16,
+      "receipt_id": "SRC-026",
+      "linked_work": "T-1304",
+      "sha256": "a3e683b3247f15098436bd9cc3431223308a6c0ae7088ea73dc1113b02ab0cca",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/17.md",
+      "layer": 17,
+      "receipt_id": "SRC-123",
+      "linked_work": "T-1537",
+      "sha256": "6d1ee46d9e8557da38b4ae294fb2cb296864014f01b732f4efb9585c83d015f1",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/18.md",
+      "layer": 18,
+      "receipt_id": "SRC-126",
+      "linked_work": "T-1542",
+      "sha256": "1b24b8f049528928d6f7275bc024e1e23fc1dee9e24840d1b0387e3bd4023e46",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/19.md",
+      "layer": 19,
+      "receipt_id": "SRC-127",
+      "linked_work": "T-1543",
+      "sha256": "3dab14dd575b38f6d2afb7d21f10600b78bd43d30f9844a9bb6e3f3cc021ff53",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/2.md",
+      "layer": 2,
+      "receipt_id": "SRC-013",
+      "linked_work": "T-1223",
+      "sha256": "4264b5489fbbe4f40338cdb868f915b97ed4eac483bf4a16b68084f060a1eeb2",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/20.md",
+      "layer": 20,
+      "receipt_id": "SRC-128",
+      "linked_work": "T-1544",
+      "sha256": "a567d89ad4b12a9de07b8abaf4a7241e2271e8e64d36f03af792a73072570cd1",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/21.md",
+      "layer": 21,
+      "receipt_id": "SRC-129",
+      "linked_work": "T-1545",
+      "sha256": "cc23e599db5a531fbace40a24319125b481b8b3d013c4e4f3befa6705758975d",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/22.md",
+      "layer": 22,
+      "receipt_id": "SRC-129",
+      "linked_work": "T-1545",
+      "sha256": "cc23e599db5a531fbace40a24319125b481b8b3d013c4e4f3befa6705758975d",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/24.md",
+      "layer": 24,
+      "receipt_id": "SRC-177",
+      "linked_work": "T-1615",
+      "sha256": "02465cc1bfbd3422c152a5bb1b911364a365aa1bae26cea5a08f9d8d880f3ebf",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/25.md",
+      "layer": 25,
+      "receipt_id": "SRC-327",
+      "linked_work": "T-1918",
+      "sha256": "7a896a531945443de3bcdd9f5ccbcf4d87af6d431e0eead86b3aa1201f3da72a",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/26.md",
+      "layer": 26,
+      "receipt_id": "SRC-337",
+      "linked_work": "T-1931",
+      "sha256": "8055db4b943a03fa2760c6e4f9b6d333b24c9a2e4c94cba60e25f1e2a4f5d7ab",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/27.md",
+      "layer": 27,
+      "receipt_id": "SRC-343",
+      "linked_work": "T-1944",
+      "sha256": "1d66a2ad2c03f92a6180e149df42d3760e965de8623436ef22f6aad77abd47d4",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/28.md",
+      "layer": 28,
+      "receipt_id": "SRC-344",
+      "linked_work": "T-1945",
+      "sha256": "ec9397a199f250daa4adf5a5258efe7aa04079ece508dacf0f83fb1ca911aeec",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/3.md",
+      "layer": 3,
+      "receipt_id": "SRC-014",
+      "linked_work": "T-1224",
+      "sha256": "28e6b5d038cc19e3c854b3f3b0f1b35d6183ac4a959cd2f3df524365f85ce5d5",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/5.md",
+      "layer": 5,
+      "receipt_id": "SRC-018",
+      "linked_work": "T-1280",
+      "sha256": "2b22e539570b9c3aa9993d9dc215f9983b5dc5e8459e3ff234df8b3f99760cb7",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/6.md",
+      "layer": 6,
+      "receipt_id": "SRC-019",
+      "linked_work": "T-1288",
+      "sha256": "8b6783f72c34f7254a81d398c1afcc308a77cd07f60e7626df5cc0281c9e15d8",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/7.md",
+      "layer": 7,
+      "receipt_id": "SRC-020",
+      "linked_work": "T-1291",
+      "sha256": "c2bcebc0f31642d20985021d7f6076dc46a31a110b61fff54f0632fed6a00121",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/8.md",
+      "layer": 8,
+      "receipt_id": "SRC-021",
+      "linked_work": "T-1294",
+      "sha256": "9d0193bc5f3758ee6410a0d04a4d2266a8b8937bb4ffb8ee1c6f6909ec5927ce",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/9.md",
+      "layer": 9,
+      "receipt_id": "SRC-022",
+      "linked_work": "T-1295",
+      "sha256": "2fafdcbcbf7e5b653028d39f67856b81b25dc5313357402918a89219a4d30a9e",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/BZDECOMP-T293-20261025-protocol-entry.md",
+      "layer": null,
+      "receipt_id": "SRC-319",
+      "linked_work": "T-1901",
+      "sha256": "23524e865ca15c4eb5303e4b298c6fb28ddb282e43b341e66db2f61a907df7a9",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/HANDOFF-20260919.md",
+      "layer": null,
+      "receipt_id": "SRC-203",
+      "linked_work": "T-1700",
+      "sha256": "d9728ba4347d453f8eac37de866ef7bb17da4368e0aecb1dcb33bb6f64febf11",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/PROJECT_ SAIPEN_20261016_1932.md",
+      "layer": null,
+      "receipt_id": "SRC-264",
+      "linked_work": "T-1805",
+      "sha256": "f90b1b7be1d91a0a28dec8a30afdd8ed21d15e034ffaa5d529c3e13a400a2455",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF — SAIPEN_20261014_1341.md",
+      "layer": null,
+      "receipt_id": "SRC-255",
+      "linked_work": "T-1795",
+      "sha256": "18675cf9d163db99764bf71c95bf4592a458c4698569e9f0f786de286c73a112",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF — SAIPEN_20261014_1440.md",
+      "layer": null,
+      "receipt_id": "SRC-256",
+      "linked_work": "T-1796",
+      "sha256": "98d40fd8fed4732716e173a4248c132fb66c5d67c6f81ad3f35ce3f633d419e5",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF — SAIPEN_20261014_2009.md",
+      "layer": null,
+      "receipt_id": "SRC-257",
+      "linked_work": "T-1797",
+      "sha256": "6723490bfd359e969735462376396b34f350d71484787615cc076b683d370ce4",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF — SAIPEN_20261014_2224.md",
+      "layer": null,
+      "receipt_id": "SRC-258",
+      "linked_work": "T-1798",
+      "sha256": "f6b2335725fef75ff9805ed3e53d50bf7eb13db3c3bc2f97745e50b5e18c7f0c",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF — SAIPEN_20261017_0024.md",
+      "layer": null,
+      "receipt_id": "SRC-265",
+      "linked_work": "T-1806",
+      "sha256": "9aafb214f8de6868410665d531efb3b214255dee83a7eb09443f779621ea0a31",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_20261020_WRITER_LOCK.md",
+      "layer": null,
+      "receipt_id": "SRC-282",
+      "linked_work": "T-1827",
+      "sha256": "f294a69669328aacd3f72997f9f8ccd0a204a36a481715630253b43a124221ed",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_AGENT_DRIFT_2026-10-25.md",
+      "layer": null,
+      "receipt_id": "SRC-328",
+      "linked_work": "T-1919",
+      "sha256": "432c56eaa8fdb05d4e9e424119762d37eb66213f5fc5812ef29da429af6bdb41",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_AGENT_DRIFT_20261024_0648.md",
+      "layer": null,
+      "receipt_id": "SRC-301",
+      "linked_work": "T-1872",
+      "sha256": "05163ded8addc9fb0b6a5280aad63122c58f4762efbde43a61c890d32b2e41b4",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_AGENT_DRIFT_ProTrail_ZAICODE_2026-10-24.md",
+      "layer": null,
+      "receipt_id": "SRC-302",
+      "linked_work": "T-1873",
+      "sha256": "8dc2a459397843110b0070ad95dfc32f07735ebb0872f73f02667a85685a2d01",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_AGENT_DRIFT_SMART_VAC_MEDIA_COMPRESSOR_2026-10-24.md",
+      "layer": null,
+      "receipt_id": "SRC-306",
+      "linked_work": "T-1881",
+      "sha256": "3e6056ba571e23858783da238ea7b102024f8feecb81896c25a9bd963f8a12c3",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_AGENT_DRIFT_Wintage_2026-10-24.md",
+      "layer": null,
+      "receipt_id": "SRC-303",
+      "linked_work": "T-1874",
+      "sha256": "07c7ff589448028dab74504a91f935d8fc0c13a99e4e1791b6d488cd3b75a4ea",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_AGENT_DRIFT_ZAICODE_2026-10-25.md",
+      "layer": null,
+      "receipt_id": "SRC-329",
+      "linked_work": "T-1920",
+      "sha256": "1e5ee157618ada174c4de85ad75651d0eb290b6324bc82927b821f3aca6a13f1",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_AGENT_PROTOCOL_DRIFT_AUDIT.md",
+      "layer": null,
+      "receipt_id": "SRC-197",
+      "linked_work": "T-1691",
+      "sha256": "df983dc9ba85b05cba06672a3ae516f4d553aad0874a79bbd99fb6525f35cfa9",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_EVIDENCE_DRIVEN_HANDOFF_RECONCILIATION_20261025.md",
+      "layer": null,
+      "receipt_id": "SRC-323",
+      "linked_work": "T-1908",
+      "sha256": "abf632fde39d5233c3dd5479650db517408a07aed4a06b70d60dc35bdc08f9e1",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_FASTPROMPTER_AUTHORITY_BLOCKED.md",
+      "layer": null,
+      "receipt_id": "SRC-298",
+      "linked_work": "T-1869",
+      "sha256": "2410aeaa46d23a842b881d6ef155a27fa00c2a2a1e68f74c05dfa1cea048bc08",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_FASTPROMPTER_PERSONAL_AUDIO_RESTORATION.md",
+      "layer": null,
+      "receipt_id": "SRC-330",
+      "linked_work": "T-1921",
+      "sha256": "eee73aad905e76b0adef553fcef4938029393f7614606acb35b06e504d8ea41e",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_FREEBUFF_PROVENANCE.md",
+      "layer": null,
+      "receipt_id": "SRC-331",
+      "linked_work": "T-1922",
+      "sha256": "9f8f35055b400e901ab274b352c2c6bbb7452282eeb8f169f36da807820d9256",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_FREEBUFF_STARTUP_AND_PROTOCOL_DESYNC.md",
+      "layer": null,
+      "receipt_id": "SRC-332",
+      "linked_work": "T-1923",
+      "sha256": "2544f52d0628d17290805809647223bde4e832af7736a87141440971b469f249",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIHANDOFF_ZAICODE_20261026_1424_VALVE_AND_INGRESS_BLOCKER.md",
+      "layer": null,
+      "receipt_id": "SRC-339",
+      "linked_work": "T-1933",
+      "sha256": "2b8979aaaeb1a65cc63d2528c3b382c65adf469f7af295c282b667bd6b102d42",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261010_0255.md",
+      "layer": null,
+      "receipt_id": "SRC-204",
+      "linked_work": "T-1701",
+      "sha256": "f03cbc8c86212164405f51a57cf67254ab701aceec389dadeb36d8ff504455b6",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261010_1123.md",
+      "layer": null,
+      "receipt_id": "SRC-212",
+      "linked_work": "T-1711",
+      "sha256": "4a93ed6345e47792e93d86087a641933a8e91ca176d4672d42eff6f8cd609d20",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261010_1136.md",
+      "layer": null,
+      "receipt_id": "SRC-215",
+      "linked_work": "T-1716",
+      "sha256": "8d54708e5daccb690cc464918d4c81d7f1d2d4ed0f036a62a6e0c2f5ab0c2ce6",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261010_1156.md",
+      "layer": null,
+      "receipt_id": "SRC-216",
+      "linked_work": "T-1717",
+      "sha256": "e272b73351028793fd0882ab77973bf3a22493956f4aa8cd0edd36560df60d15",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261010_1202.md",
+      "layer": null,
+      "receipt_id": "SRC-225",
+      "linked_work": "T-1726",
+      "sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261010_1412.md",
+      "layer": null,
+      "receipt_id": "SRC-229",
+      "linked_work": "T-1731",
+      "sha256": "fdacbb8bce13646bebc911d723cf01456c58fb7eeb72c971fdc07e8370e977df",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261010_1415.md",
+      "layer": null,
+      "receipt_id": "SRC-230",
+      "linked_work": "T-1732",
+      "sha256": "bed49b8d192aa074e52e11be151b0ed0f7a0c5d3291ed723d734df4655091eeb",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261011_1832.md",
+      "layer": null,
+      "receipt_id": "SRC-232",
+      "linked_work": "T-1735",
+      "sha256": "ef6e7af8f075af6baf728c83abe4be998d13cd4b681a5ff3c7cce25c2a2bcc2a",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261011_1841.md",
+      "layer": null,
+      "receipt_id": "SRC-234",
+      "linked_work": "T-1736",
+      "sha256": "3affe34eae1dfc5f550a758883fda0f3c5dc787b4940aaa8ba31de9cb101548a",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261011_1901.md",
+      "layer": null,
+      "receipt_id": "SRC-235",
+      "linked_work": "T-1737",
+      "sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261012_1221.md",
+      "layer": null,
+      "receipt_id": "SRC-237",
+      "linked_work": "T-1739",
+      "sha256": "5aac1699cf8f8919489dd7a1ff05d4800c67b789e56102efa076d5b88a8ac1ae",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261013_1409.md",
+      "layer": null,
+      "receipt_id": "SRC-240",
+      "linked_work": "T-1746",
+      "sha256": "7a7afbcab27e635b152af9903766c752c5ebdab28a9ad75978e195c7c60bb230",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_20261013_1451_SMARTVAC_RECONCILE_HANDOFF.md",
+      "layer": null,
+      "receipt_id": "SRC-242",
+      "linked_work": "T-1751",
+      "sha256": "07427de3671195e5f84d27dc675869f2b9537265402ce4d306edadcf24d77336",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_BOOT_OMISSION_20261024.md",
+      "layer": null,
+      "receipt_id": "SRC-299",
+      "linked_work": "T-1870",
+      "sha256": "2c0d3105f66989b09a71ea4451840b2d3f9c14f7352986be286b72cc4e33b887",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/SAIPEN_ENFORCEMENT_ROADMAP_20261009.md",
+      "layer": null,
+      "receipt_id": "SRC-205",
+      "linked_work": "T-1702",
+      "sha256": "f43fe6b191c8e7449266b3d6ab1eb8c26b6247bfc8b8d5b02ab6cf1eef212f97",
+      "state": "MISSING_AFTER_CAPTURE"
+    },
+    {
+      "rel": "audit/SAIPEN_fastprompter1.md",
+      "layer": null,
+      "receipt_id": "SRC-231",
+      "linked_work": "T-1733",
+      "sha256": "0f8e236b2d182ed5ec6567776b02af3fba674b266d2aa1355d92324932746add",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/writing-block.md",
+      "layer": null,
+      "receipt_id": "SRC-333",
+      "linked_work": "T-1925",
+      "sha256": "2aca86c2a18c1ba42ad18db535b5a1bfb1186df0c2a6fed1126042b5c0e56b39",
+      "state": "DELETED"
+    }
+  ],
+  "residue": [
+    {
+      "name": "desktop.ini",
+      "rel": "audit/desktop.ini",
+      "kind": "file"
+    }
+  ],
+  "residue_count": 1,
+  "clean": false,
+  "next": {
+    "rule_id": "SOURCE-AUDIT-INBOX-01",
+    "pending": [
+      29,
+      "audit/SAIPEN_20261012_0656.md",
+      "audit/SAIHANDOFF_ZAICODE_20261013_LEDGER_AND_CONFORMANCE.md",
+      "audit/SAIPEN_20261013_1647.md",
+      "audit/SAIPEN_20261013_1933.md",
+      "audit/SAIPEN_20261013_2132.md",
+      "audit/SAIPEN_20261014_0010.md",
+      "audit/SAIHANDOFF — SAIRELAY_20261014_1350.md",
+      "audit/SAIHANDOFF_AGENT_DRIFT_20261023_1019.md",
+      "audit/SAIHANDOFF_AGENT_DRIFT_2026-10-24.md",
+      "audit/SAIHANDOFF_SAIPEN_PROTOCOL_MAINTAINER_20261027_121545_28acc068.md",
+      "audit/SAIHANDOFF_AGENT_DRIFT (7).md",
+      "audit/SAIHANDOFF_AUDAPACK_AGENT_DRIFT_PROTOCOL_RECONCILIATION_20261103_035536_80b87b15.md",
+      "audit/SAIHANDOFF_FREEBUFF_WRONG_ROUTE_BZ_REA_20261029.md",
+      "audit/SAIHANDOFF_SAIPEN_HOME_AUDIT_BZDECOMP_20261113.md",
+      "audit/SAIHANDOFF_SAIPEN_HOME_AUDIT_BZDECOMP_20261113_INPUT_IDENTITY.md"
+    ],
+    "closed_pending_delete": [
+      "audit/SAIHANDOFF_BZ_REA_AGENT_DRIFT_RECOVERY.md",
+      "audit/SAIHANDOFF_P0_ZAICODE_GOAL_COMMAND_COLLISION_AND_MAINTENANCE_GRANT_BINDING_20261104_132028_172870b3.md",
+      23
+    ],
+    "invalid": [],
+    "residue": [
+      "audit/desktop.ini"
+    ],
+    "residue_count": 1,
+    "unresolved_audit_count": 16,
+    "action": "saipen audit ingest",
+    "layer": null,
+    "path": "audit/SAIHANDOFF_BZ_REA_AGENT_DRIFT_RECOVERY.md",
+    "receipt": "SRC-386",
+    "work": "T-2016",
+    "detail": "audit/SAIHANDOFF_BZ_REA_AGENT_DRIFT_RECOVERY.md source SRC-386 is CLOSED and unchanged; settle the journaled cleanup"
+  },
+  "last_allocated_id": 28
+}

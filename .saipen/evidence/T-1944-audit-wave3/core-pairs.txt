@@ -1,0 +1,22 @@
+CORE-001 [Core001ForgedQualificationProof]
+  current  = PASS  (6 passed, 28 deselected, 4 subtests passed in 0.31s)
+  reverted = FAIL  (5 failed, 4 passed, 28 deselected, 1 subtests passed in 0.48s)
+  -> PROVEN
+CORE-002 [Core002CampaignStateDigestIsMandatory]
+  current  = PASS  (8 passed, 26 deselected, 11 subtests passed in 0.30s)
+  reverted = FAIL  (12 failed, 4 passed, 26 deselected, 3 subtests passed in 0.65s)
+  -> PROVEN
+CORE-003 [Core003MaintenanceScopeAgreesAcrossWriterAndReader]
+  current  = PASS  (6 passed, 28 deselected in 0.26s)
+  reverted = FAIL  (3 failed, 3 passed, 28 deselected in 0.35s)
+  -> PROVEN
+CORE-004 [Core004VerifiedDispositionNeedsExactBinding]
+  current  = PASS  (7 passed, 27 deselected, 3 subtests passed in 0.28s)
+  reverted = FAIL  (1 failed, 6 passed, 27 deselected, 3 subtests passed in 0.39s)
+  -> PROVEN
+CORE-005 [Core005CampaignStatusDistinguishesCorruption]
+  current  = PASS  (7 passed, 27 deselected in 2.26s)
+  reverted = FAIL  (6 failed, 1 passed, 27 deselected in 2.42s)
+  -> PROVEN
+
+5/5 red-before-green pairs measured

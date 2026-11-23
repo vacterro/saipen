@@ -1,0 +1,38 @@
+== R001 environment at T-1943 BUILD (SRC-342 clause 1) ==
+2026-10-27T10:56:57Z
+HEAD: 025bf596c683464788ab698248e8a3c5eb44dfec
+HEAD-subject: chore(t1601): record T-1601 DONE
+dirty-paths: 43746
+canonical adapter : sha256 7864a6d8209809b91345da5ebfb6f3f17910779ca953cea94e261458f886b408 (31593 bytes)
+staged  index     : 100644 b9de7f23ec67bf2f2400cc7ec745d5773cabef7d 0	extensions/adapters/zaicode/saipen-guard.py
+installed hook    : sha256 4317be7fc0175157d1248b34f7717ab8316566a787301e8c82d94984d4359315 (26630 bytes)
+
+== registry declaration (extensions/adapters/registry.json) ==
+  hook_artifact: extensions/adapters/zaicode/saipen-guard.py
+  hook_install_surface: ~/.zcode/hooks/saipen-guard.py
+  hook_installer: tools/install_host_guard.py
+  hook_config_surface: ~/.zcode/cli/config.json
+  declared_strength: ADVISORY
+  freshness_surfaces: ['skill', 'instruction', 'hook']
+
+== host doctor: zaicode ==
+zaicode           BROKEN                 absent   stale          ADVISORY              saipen host repair
+    the hook is installed but the runtime it needs is missing
+zcode-production  STALE_RUNTIME          stale    not-applicable ADVISORY              saipen host repair
+
+== scoped repair dry run (R008) ==
+    the hook is installed but the runtime it needs is missing
+
+next: saipen host repair
+DRY RUN: no install, no authority restart, no machine runtime write
+
+== broker / grant predicate on the LIVE state ==
+  continuation_authority             operator_required
+  authority_source                   E-17423
+  authority_until                    budget
+  safety_valve_mode                  hard_wait
+  persistent(state) SHAPE            False
+  continuous_maintenance SHAPE       False
+  continuous_maintenance PROVEN      False
+  protocol_home                      True
+  trip_checkpoint                    None

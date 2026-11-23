@@ -1,0 +1,4 @@
+STATUS: PLAN -- materialized
+RESULT: Kontroll tehtud.
+NEXT EXACT ACTION: NONE
+VALIDATION: NOT_RUN -- focused carrier green

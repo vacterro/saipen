@@ -1,0 +1,37 @@
+{
+ "agent": "saipen-cli",
+ "created_at": "2026-11-09T02:00:25Z",
+ "defect_contract_digest": "sha256:42c689ce30578ae41fb47661903ba370e1596ddaa1042896bd8dd1094fd6aa96",
+ "defect_contract_text": "SAI Accounts reports SAIPEN-runtime readiness separately from provider and project readiness, and a managed account is not READY while saipen host machine status is not MACHINE_RUNTIME_READY; closed through ticket resolve-external naming the SAI Accounts implementation",
+ "external_authority": "lineage-ded945ae8243480ab1bfee73baeb29c6",
+ "external_implementation": "T-289@d93b212f2c27763a62b00fc2641755a43a6f4004",
+ "installed_identity": {
+  "engine_digest": "sha256:c6819eff239d8b9c85b43b7b4940dbeee2a2a19b589746778b8188117c5ab526",
+  "files": 180,
+  "kind": "saipen-engine",
+  "version": "8.2.0"
+ },
+ "integrity_digest": "sha256:8c656b411a38a2a5d234517448375fcec49349b401964c08664468a32d66c6ef",
+ "journal_op_id": "resolve-external-a71b6e9d10e4471f81aa9da4c3dbbed2",
+ "prior_blocker_sha256": "",
+ "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+ "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+ "receipt_id": "EX-000050",
+ "resolution_reason": "DEPENDENCY_UPGRADE_VERIFIED",
+ "schema_version": 1,
+ "verdict": "PASS",
+ "verification": [
+  {
+   "command": "python -B tools/verify_accounts_readiness.py --engine C:/ProgramData/SAI/Accounts/bin/sai-accounts.exe --account AG3 --project V:/___VAC/__K/__CODE/_PY/_SMART_VAC_CLEANER --private-home C:/Users/vac34/.codex --report .saipen/evidence/T-1653-reresolution/live-reresolution.json",
+   "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+   "duration_ms": 12883,
+   "executed": true,
+   "exit_code": 0,
+   "output_bytes": 579,
+   "output_digest": "31680a52a672c923",
+   "result": "PASS"
+  }
+ ],
+ "verification_contract_digest": "252d59d98482fe1a",
+ "work": "T-1653"
+}

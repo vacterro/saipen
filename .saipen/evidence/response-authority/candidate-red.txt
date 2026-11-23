@@ -1,0 +1,11 @@
+Command: python -X utf8 -m unittest test_response_delivery.RepeatedStateDigest.test_delivery_candidate_itself_is_validated_and_fails_compactly test_response_delivery.RepeatedStateDigest.test_trusted_continue_does_not_authorize_a_caller_chosen_stop_reason
+Subject: live production before delivery candidate validation/reason binding repair
+
+FAIL: test_delivery_candidate_itself_is_validated_and_fails_compactly
+AssertionError: None != 'COMPACT_FAILURE'
+
+FAIL: test_trusted_continue_does_not_authorize_a_caller_chosen_stop_reason
+AssertionError: 'STATUS: BUILD T-1510\nRESULT: Peatatud operaatori soovil\nNEXT EXACT ACTION: PHASE BUILD T-1510\nVALIDATION: CURRENT_PASS' != ''
+
+Ran 2 tests in 0.003s
+FAILED (failures=2)

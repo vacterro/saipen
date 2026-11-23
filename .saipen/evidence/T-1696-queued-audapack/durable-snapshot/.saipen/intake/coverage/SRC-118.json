@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-118:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-273 closed with verification evidence in LOG: verify -> PASS [target: T-273] conf: high -- python -m pytest -q tests/test_nested_git_components.py: 28 passed (8 new fixtures; required red fixture red on pre-fix subject, green after, only implementation changed); python -m pytest -q tests/test_source_inventory.py tests/test_packing.py: 105 passed, 1 skipped; python -m pytest -q: 2535 passed, 16 skipped; python -m ruff check audapack tests: all",
+      "text": "T-268 residual TARGET D: same-origin nested git child must package even when outer .gitignore hides it; add red fixture, decouple component ingestion from outer untracked enumeration, real _ZAICODE pack acceptance",
+      "verification": "the Work this request created reached its own verification gate; see the T-273 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-273"
+    }
+  },
+  "schema_version": 1
+}

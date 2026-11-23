@@ -1,0 +1,154 @@
+{
+  "elapsed_seconds": 0.1,
+  "quality": {
+    "tickets_by_section": {},
+    "duplicate_work_count": 0,
+    "source_receipts": [],
+    "acceptance": {
+      "T-1_docstring": false,
+      "T-2_tests_pass": false,
+      "T-3_readme_one_sentence": false
+    },
+    "validator": "Cannot continue without STATE.md.",
+    "validator_exit": 1
+  },
+  "efficiency": {
+    "generations": 0,
+    "progress_generations": 0,
+    "slow_bounded_generations": 0,
+    "asked_user_heuristic_count": 0
+  },
+  "source_integrity": "DRIFTED"
+}
+{
+  "elapsed_seconds": 0.0,
+  "quality": {
+    "tickets_by_section": {},
+    "duplicate_work_count": 0,
+    "source_receipts": [],
+    "acceptance": {
+      "T-1_docstring": false,
+      "T-2_tests_pass": false,
+      "T-3_readme_one_sentence": false
+    },
+    "validator": "Cannot continue without STATE.md.",
+    "validator_exit": 1
+  },
+  "efficiency": {
+    "generations": 0,
+    "progress_generations": 0,
+    "slow_bounded_generations": 0,
+    "asked_user_heuristic_count": 0
+  },
+  "source_integrity": "DRIFTED"
+}
+{
+  "elapsed_seconds": 0.0,
+  "quality": {
+    "tickets_by_section": {},
+    "duplicate_work_count": 0,
+    "source_receipts": [],
+    "acceptance": {
+      "T-1_docstring": false,
+      "T-2_tests_pass": false,
+      "T-3_readme_one_sentence": false
+    },
+    "validator": "Cannot continue without STATE.md.",
+    "validator_exit": 1
+  },
+  "efficiency": {
+    "generations": 0,
+    "progress_generations": 0,
+    "slow_bounded_generations": 0,
+    "asked_user_heuristic_count": 0
+  },
+  "source_integrity": "STABLE"
+}
+{
+  "elapsed_seconds": 0.0,
+  "quality": {
+    "tickets_by_section": {},
+    "duplicate_work_count": 0,
+    "source_receipts": [],
+    "acceptance": {
+      "T-1_docstring": false,
+      "T-2_tests_pass": false,
+      "T-3_readme_one_sentence": false
+    },
+    "validator": "Cannot continue without STATE.md.",
+    "validator_exit": 1
+  },
+  "efficiency": {
+    "generations": 0,
+    "progress_generations": 0,
+    "slow_bounded_generations": 0,
+    "asked_user_heuristic_count": 0
+  },
+  "source_integrity": "DRIFTED"
+}
+{
+  "elapsed_seconds": 0.6,
+  "quality": {
+    "tickets_by_section": {},
+    "duplicate_work_count": 0,
+    "source_receipts": [],
+    "acceptance": {
+      "T-1_docstring": false,
+      "T-2_tests_pass": false,
+      "T-3_readme_one_sentence": false
+    },
+    "validator": "Cannot continue without STATE.md.",
+    "validator_exit": 1
+  },
+  "efficiency": {
+    "generations": 0,
+    "progress_generations": 0,
+    "slow_bounded_generations": 0,
+    "asked_user_heuristic_count": 0
+  },
+  "source_integrity": "DRIFTED"
+}
+{
+  "elapsed_seconds": 0.0,
+  "quality": {
+    "tickets_by_section": {},
+    "duplicate_work_count": 0,
+    "source_receipts": [],
+    "acceptance": {
+      "T-1_docstring": false,
+      "T-2_tests_pass": false,
+      "T-3_readme_one_sentence": false
+    },
+    "validator": "Cannot continue without STATE.md.",
+    "validator_exit": 1
+  },
+  "efficiency": {
+    "generations": 0,
+    "progress_generations": 0,
+    "slow_bounded_generations": 0,
+    "asked_user_heuristic_count": 0
+  },
+  "source_integrity": "UNMEASURED"
+}
+{
+  "elapsed_seconds": 0.0,
+  "quality": {
+    "tickets_by_section": {},
+    "duplicate_work_count": 0,
+    "source_receipts": [],
+    "acceptance": {
+      "T-1_docstring": false,
+      "T-2_tests_pass": false,
+      "T-3_readme_one_sentence": false
+    },
+    "validator": "Cannot continue without STATE.md.",
+    "validator_exit": 1
+  },
+  "efficiency": {
+    "generations": 0,
+    "progress_generations": 0,
+    "slow_bounded_generations": 0,
+    "asked_user_heuristic_count": 0
+  },
+  "source_integrity": "STABLE"
+}

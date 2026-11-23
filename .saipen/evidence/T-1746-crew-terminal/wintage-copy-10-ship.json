@@ -1,0 +1,31 @@
+{
+  "planned": true,
+  "op_id": "release-3470a48652b1488cbd5596589c0d1ae0",
+  "mode": "no-publish",
+  "version": "",
+  "tag": "",
+  "ticket_id": "",
+  "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8",
+  "scope_paths": [
+    ".gitignore",
+    "FINAL_REPORT-T-938.md",
+    "tests/Run-Tests.ps1",
+    "tools/bench-idle-cpu.js",
+    "tools/test-shadow-registry-lifecycle.js",
+    "tools/test-stylesheet-census.js",
+    "wintage.user.js"
+  ],
+  "result": {
+    "ok": true,
+    "code": "NO_PUBLISH_MODE",
+    "stage": "COMMITTED",
+    "stages_reached": [
+      "NO_PUBLISH_MODE"
+    ],
+    "op_id": "release-3470a48652b1488cbd5596589c0d1ae0",
+    "tag": "",
+    "terminal_outcome": "LOCAL_NO_PUBLISH",
+    "publication": "NOT_PERFORMED",
+    "detail": "no-publish: local validation passed, skipped-publish event recorded, ticket closed; zero git writes"
+  }
+}

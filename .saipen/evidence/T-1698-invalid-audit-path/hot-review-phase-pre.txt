@@ -1,0 +1,41 @@
+test_diagnostics_preserve_every_fixture_byte (__main__.InvalidPathTests.test_diagnostics_preserve_every_fixture_byte) ... ok
+test_numbered_summary_shape_is_unchanged (__main__.InvalidPathTests.test_numbered_summary_shape_is_unchanged) ... ok
+test_projection_identifies_each_named_failure (__main__.InvalidPathTests.test_projection_identifies_each_named_failure) ... FAIL
+test_status_identifies_each_named_failure (__main__.InvalidPathTests.test_status_identifies_each_named_failure) ... FAIL
+
+======================================================================
+FAIL: test_projection_identifies_each_named_failure (__main__.InvalidPathTests.test_projection_identifies_each_named_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1698-invalid-audit-path\regression.py", line 35, in test_projection_identifies_each_named_failure
+    self.assertEqual(audit_inbox.projection(self.root)["invalid"], [
+AssertionError: Lists differ: [{'layer': None, 'reason': 'empty'}, {'layer': None, 'reason': 'not-utf8'}] != [{'layer': None, 'path': 'audit/a-empty.md', 'reason': 'emp[71 chars]f8'}]
+
+First differing element 0:
+{'layer': None, 'reason': 'empty'}
+{'layer': None, 'path': 'audit/a-empty.md', 'reason': 'empty'}
+
+- [{'layer': None, 'reason': 'empty'}, {'layer': None, 'reason': 'not-utf8'}]
++ [{'layer': None, 'path': 'audit/a-empty.md', 'reason': 'empty'},
++  {'layer': None, 'path': 'audit/b-encoding.txt', 'reason': 'not-utf8'}]
+
+======================================================================
+FAIL: test_status_identifies_each_named_failure (__main__.InvalidPathTests.test_status_identifies_each_named_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1698-invalid-audit-path\regression.py", line 28, in test_status_identifies_each_named_failure
+    self.assertEqual(audit_inbox.status(self.root)["invalid"], [
+AssertionError: Lists differ: [{'layer': None, 'reason': 'empty'}, {'layer': None, 'reason': 'not-utf8'}] != [{'layer': None, 'path': 'audit/a-empty.md', 'reason': 'emp[71 chars]f8'}]
+
+First differing element 0:
+{'layer': None, 'reason': 'empty'}
+{'layer': None, 'path': 'audit/a-empty.md', 'reason': 'empty'}
+
+- [{'layer': None, 'reason': 'empty'}, {'layer': None, 'reason': 'not-utf8'}]
++ [{'layer': None, 'path': 'audit/a-empty.md', 'reason': 'empty'},
++  {'layer': None, 'path': 'audit/b-encoding.txt', 'reason': 'not-utf8'}]
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.026s
+
+FAILED (failures=2)

@@ -1,0 +1,64 @@
+{
+  "work": "T-1717",
+  "source": {
+    "ok": true,
+    "receipt": "SRC-216",
+    "status": "CLOSED",
+    "location": "archive",
+    "source_kind": "external_audit",
+    "source_sha256": "e272b73351028793fd0882ab77973bf3a22493956f4aa8cd0edd36560df60d15",
+    "linked_work": "T-1717",
+    "linked_works": [
+      "T-1717",
+      "T-1721"
+    ],
+    "amends": null,
+    "closure_event": null,
+    "coverage": {
+      "receipt": "SRC-216",
+      "requirements": 10,
+      "actionable": 10,
+      "terminal": 10,
+      "dispositions": {
+        "VERIFIED": 10
+      },
+      "unresolved": []
+    },
+    "distribution": {
+      "state": "DISTRIBUTABLE",
+      "receipt_id": "SRC-216",
+      "source_sha256": "e272b73351028793fd0882ab77973bf3a22493956f4aa8cd0edd36560df60d15"
+    }
+  },
+  "original_source_digest_retained": true,
+  "consume": {
+    "ok": true,
+    "code": "AUDIT_CONSUMED",
+    "layer": null,
+    "path": "audit/SAIPEN_20261010_1156.md",
+    "receipt": "SRC-216",
+    "work": "T-1717",
+    "sha256": "e272b73351028793fd0882ab77973bf3a22493956f4aa8cd0edd36560df60d15",
+    "event_id": "E-14640",
+    "op_id": "audit-consume-051bd3a7b47e5bdf",
+    "already_absent": false
+  },
+  "consumed_only": "audit/SAIPEN_20261010_1156.md",
+  "other_generations": {
+    ".gitignore": "45549a9ffd9963f855d72829e978a31c05b82894b14b1d8fbdd43083b20c2d86",
+    "SAIPEN_20261010_1202.md": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9",
+    "SAIPEN_20261010_1412.md": "fdacbb8bce13646bebc911d723cf01456c58fb7eeb72c971fdc07e8370e977df",
+    "SAIPEN_20261010_1415.md": "bed49b8d192aa074e52e11be151b0ed0f7a0c5d3291ed723d734df4655091eeb",
+    "SAIPEN_20261011_1832.md": "ef6e7af8f075af6baf728c83abe4be998d13cd4b681a5ff3c7cce25c2a2bcc2a",
+    "SAIPEN_20261011_1841.md": "3affe34eae1dfc5f550a758883fda0f3c5dc787b4940aaa8ba31de9cb101548a",
+    "SAIPEN_20261011_1901.md": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+    "SAIPEN_20261012_0656.md": "8c3bd0e65bd6d904e0979644903443e3bd99339df8b91827d5d102b3d040ffef",
+    "SAIPEN_20261012_1221.md": "5aac1699cf8f8919489dd7a1ff05d4800c67b789e56102efa076d5b88a8ac1ae",
+    "SAIPEN_fastprompter1.md": "0f8e236b2d182ed5ec6567776b02af3fba674b266d2aa1355d92324932746add"
+  },
+  "other_generations_unchanged": true,
+  "pending": [],
+  "conflicts": [],
+  "product_live_acceptance_claimed": false,
+  "publication": false
+}

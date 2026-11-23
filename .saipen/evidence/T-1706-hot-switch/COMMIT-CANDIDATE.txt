@@ -1,0 +1,6 @@
+fix(oracle): reject stale regression evidence
+
+A newer FAIL invalidates an earlier regression PASS in the current
+VERIFY cycle. Reject stale evidence before REVIEW or final closure.
+
+Refs T-1707

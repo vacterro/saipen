@@ -1,0 +1,16 @@
+test_assessment_reports_invalid_evidence_override_without_throwing (__main__.ContinuationTruthTests.test_assessment_reports_invalid_evidence_override_without_throwing) ... ok
+test_automation_uses_certificate_when_terminal_label_is_missing_or_false (__main__.ContinuationTruthTests.test_automation_uses_certificate_when_terminal_label_is_missing_or_false) ... ok
+test_campaign_external_wait_does_not_require_operator (__main__.ContinuationTruthTests.test_campaign_external_wait_does_not_require_operator) ... ok
+test_campaign_preserves_assessments_exact_discovery_action (__main__.ContinuationTruthTests.test_campaign_preserves_assessments_exact_discovery_action) ... ok
+test_campaign_restart_rechecks_evidence_without_operator_or_spin (__main__.ContinuationTruthTests.test_campaign_restart_rechecks_evidence_without_operator_or_spin) ... ok
+test_fallback_preserves_diagnostics_and_exact_stop_reason (__main__.ContinuationTruthTests.test_fallback_preserves_diagnostics_and_exact_stop_reason) ... ok
+test_router_accepts_recovery_owner_ids_and_rejects_malformed_envelopes (__main__.ContinuationTruthTests.test_router_accepts_recovery_owner_ids_and_rejects_malformed_envelopes) ... ok
+test_router_idle_classification_never_loads_goal_files (__main__.ContinuationTruthTests.test_router_idle_classification_never_loads_goal_files) ... ok
+test_unchanged_source_and_valid_grant_do_not_prove_quiescence (__main__.ContinuationTruthTests.test_unchanged_source_and_valid_grant_do_not_prove_quiescence) ... ok
+test_unreadable_goal_inventory_is_not_unchanged_success (__main__.ContinuationTruthTests.test_unreadable_goal_inventory_is_not_unchanged_success) ... ok
+test_worker_evidence_gap_has_no_operator_action_or_generation (__main__.ContinuationTruthTests.test_worker_evidence_gap_has_no_operator_action_or_generation) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.147s
+
+OK

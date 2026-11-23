@@ -13295,6 +13295,16 @@ def run_nitro_probes() -> tuple[list[str], int]:
             "nul",
         )),
     )
+    from saipen_engine.state import patch_state as _patch_state
+
+    home_state = home / ".saipen" / "STATE.md"
+    home_state.write_text(
+        _patch_state(
+            home_state.read_text(encoding="utf-8-sig"),
+            {"saipen_home": home.resolve().as_posix()},
+        ),
+        encoding="utf-8",
+    )
     env = {
         **os.environ,
         "GIT_AUTHOR_NAME": "probe",
@@ -13692,6 +13702,9 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
             "---\n",
             encoding="utf-8",
         )
+        from saipen_engine.journal import ensure_project_lineage
+
+        ensure_project_lineage(r)
         return r
 
     root = Path(tempfile.mkdtemp(prefix="saipen-m3-"))
@@ -13953,7 +13966,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         ge_state_before.get("task") == "T-1" and ge_state_before.get("phase") == "BUILD",
         repr(ge_state_before),
     )
-    with witnessed_operator("T-1100 goal entry test"):
+    with witnessed_operator("T-1100 goal entry test", ge_root):
         ge_result = goal_entry(ge_root, "probe", "T-1100 goal entry test")
     ge_state_after = parse_state(codec.read_doc(ge_saipen / "STATE.md"))
     ge_board = parse_board(codec.read_doc(ge_saipen / "BOARD.md"))
@@ -14026,7 +14039,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         ge_empty_state.get("task") == "none",
         repr(ge_empty_state),
     )
-    with witnessed_operator("empty board goal"):
+    with witnessed_operator("empty board goal", ge_empty):
         ge_empty_result = goal_entry(ge_empty, "probe", "empty board goal")
     ge_empty_after = parse_state(codec.read_doc(ge_empty_saipen / "STATE.md"))
     expect(
@@ -14040,7 +14053,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
     # ---- T-1100: goal_entry credential redaction ----
     ge_cred = make_project()
     cred_objective = "fix the ghp_abcdefghijklmnopqrstuvwxyz0123456789ab token leak"
-    with witnessed_operator(cred_objective):
+    with witnessed_operator(cred_objective, ge_cred):
         cred_result = goal_entry(ge_cred, "probe", cred_objective)
     ge_cred_log = codec.read_doc(ge_cred / ".saipen" / "LOG.md")
     expect(

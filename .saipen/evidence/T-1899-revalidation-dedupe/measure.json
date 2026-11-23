@@ -1,0 +1,32 @@
+{
+  "subject": "tools/saipen_engine/external.py revalidate_external_dependencies (T-1899)",
+  "workload": "revalidate_external_dependencies('.', 'saipen-cli', dry_run=True) on the live project",
+  "workload_identity": {
+    "external_receipt_files": 22,
+    "cited_receipts": 1,
+    "distinct_resolution_answers_over_all_22_files": 1,
+    "distinct_external_implementations_across_history": 2
+  },
+  "timings_seconds": {
+    "prefix_median_of_3": 4.1313,
+    "prefix_min_of_3": 3.9901,
+    "postfix_median_of_3": 0.2051,
+    "postfix_min_of_3": 0.1986,
+    "delta_median": -3.9262,
+    "ratio": 20.1
+  },
+  "outcome_identical": {
+    "inspected": 0,
+    "revalidated": 0,
+    "resolved": [],
+    "predicted_eligible": [],
+    "still_blocked": [],
+    "inaccessible": []
+  },
+  "end_to_end": {
+    "continue_json_median_of_3": {"before": 6.92, "after": 2.868},
+    "status_json_median_of_3": {"before": 11.5, "after": 12.433},
+    "status_note": "status does not call the revalidator on this path, so its spread is machine noise, not a regression; not claimed as an improvement"
+  },
+  "verdict": "one resolution per Work; superseded receipts are no longer re-resolved"
+}

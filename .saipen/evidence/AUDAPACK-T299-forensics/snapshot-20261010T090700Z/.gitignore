@@ -1,0 +1,35 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.tmp
+*.bak
+*.part
+*.zip
+_to_delete/
+fix please.md
+.saipen/kitchen/
+.saipen/saitranslate/
+.saipen/extensions/
+.saipen/locks/
+.saipen/recovery/
+.saipen/KNOWLEDGE/
+.saipen/intake/
+ruff_out.txt
+status.json
+runtime.json
+crew.json
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.freebuff/
+
+# Audit mirror written by the Bridge into the audited project.
+audit/

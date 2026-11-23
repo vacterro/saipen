@@ -1,0 +1,43 @@
+{
+  "six_controls": [
+    {
+      "case": "1-duplicate",
+      "exit_code": 1,
+      "code": "VALIDATION_FAILED",
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "2-unadmitted-done",
+      "exit_code": 1,
+      "code": "CONFORMANCE_UNHEALTHY",
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "3-unnumbered-actual",
+      "exit_code": 1,
+      "code": "VALIDATION_FAILED",
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "4-heading",
+      "exit_code": 1,
+      "code": "VALIDATION_FAILED",
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "5-evidence-no-event",
+      "exit_code": 1,
+      "code": "CONFORMANCE_UNHEALTHY",
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "6-unrelated-overwrite",
+      "exit_code": 1,
+      "code": "STALE_DUPLICATE_ID_DECISION",
+      "canonical_docs_unchanged": true
+    }
+  ],
+  "original_carrier_sha256": "3e286871204c99c02256c884a43b16b3e8959fcae7b7bdac8a7cbcd4d58b1110",
+  "hostile_payload_presence_asserted": true,
+  "target_writes": 0
+}

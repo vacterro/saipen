@@ -1,0 +1,20 @@
+[
+  {
+    "test": "test_release_completion.py",
+    "returncode": 1,
+    "duration_s": 1.891,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\publication-resume-20261108\\baseline-test_release_completion.py.log"
+  },
+  {
+    "test": "test_t1866_publication_state.py",
+    "returncode": 0,
+    "duration_s": 0.672,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\publication-resume-20261108\\baseline-test_t1866_publication_state.py.log"
+  },
+  {
+    "test": "test_t1238_release_commit_publication.py",
+    "returncode": 0,
+    "duration_s": 0.14,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\publication-resume-20261108\\baseline-test_t1238_release_commit_publication.py.log"
+  }
+]

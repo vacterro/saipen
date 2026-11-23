@@ -1,0 +1,24 @@
+{
+  "planned": true,
+  "op_id": "release-b88121ea649140659850ffca2e7bb382",
+  "mode": "no-publish",
+  "version": "",
+  "tag": "",
+  "ticket_id": "",
+  "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8",
+  "scope_paths": [
+    ".gitignore",
+    "FINAL_REPORT-T-938.md",
+    "tests/Run-Tests.ps1",
+    "tools/bench-idle-cpu.js",
+    "tools/test-shadow-registry-lifecycle.js",
+    "tools/test-stylesheet-census.js",
+    "wintage.user.js"
+  ],
+  "result": {
+    "ok": false,
+    "code": "RELEASE_FAILED",
+    "stage": "NO_PUBLISH",
+    "detail": "no-publish local validation failed: C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe: can't open file 'V:\\\\_TEMP_\\\\claude\\\\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\\\\42de2430-5060-4205-bf2e-4dcc056193f4\\\\scratchpad\\\\wintage-copy\\\\tools\\\\validate.py': [Errno 2] No such file or directory"
+  }
+}

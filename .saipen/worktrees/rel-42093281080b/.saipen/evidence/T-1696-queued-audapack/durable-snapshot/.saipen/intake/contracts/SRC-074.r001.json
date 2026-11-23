@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-074:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Auto-Send fires after canonical ZIP attaches on real ChatGPT despite React composer remount: DOM node identity must not be treated as human intent; semantic composer fence only fences on real content change"
+    }
+  },
+  "derived_at": "2026-09-26T02:32:26Z",
+  "derived_from": "SRC-074",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "9987af48ce43548604cc6cc3fe16c2796b09c2af34c0d690ffdba7201df2ccd6"
+}

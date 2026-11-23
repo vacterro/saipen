@@ -1,0 +1,168 @@
+test_102_blocked_and_three_todo_never_mean_all_complete (test_t1857_shared_blockers.SharedBlockerTests.test_102_blocked_and_three_todo_never_mean_all_complete) ... ok
+test_audit_uses_project_wide_shared_blocker_owner (test_t1857_shared_blockers.SharedBlockerTests.test_audit_uses_project_wide_shared_blocker_owner) ... FAIL
+test_dependency_cycle_is_not_recoverable_or_complete (test_t1857_shared_blockers.SharedBlockerTests.test_dependency_cycle_is_not_recoverable_or_complete) ... FAIL
+test_done_phase_alone_cannot_claim_campaign_completion (test_t1857_shared_blockers.SharedBlockerTests.test_done_phase_alone_cannot_claim_campaign_completion) ... FAIL
+test_each_blocked_item_has_one_complete_diagnostic (test_t1857_shared_blockers.SharedBlockerTests.test_each_blocked_item_has_one_complete_diagnostic) ... FAIL
+test_human_status_cannot_look_complete_while_automation_is_blocked (test_t1857_shared_blockers.SharedBlockerTests.test_human_status_cannot_look_complete_while_automation_is_blocked) ... FAIL
+test_incidental_words_do_not_grant_staging_recovery_authority (test_t1857_shared_blockers.SharedBlockerTests.test_incidental_words_do_not_grant_staging_recovery_authority) ... FAIL
+test_independent_work_still_runs_before_blocker_diagnostics (test_t1857_shared_blockers.SharedBlockerTests.test_independent_work_still_runs_before_blocker_diagnostics) ... ok
+test_multiple_dependency_roots_are_retained (test_t1857_shared_blockers.SharedBlockerTests.test_multiple_dependency_roots_are_retained) ... FAIL
+test_projection_groups_roots_and_transitive_todo_without_mutation (test_t1857_shared_blockers.SharedBlockerTests.test_projection_groups_roots_and_transitive_todo_without_mutation) ... FAIL
+test_publication_aliases_use_existing_operator_class (test_t1857_shared_blockers.SharedBlockerTests.test_publication_aliases_use_existing_operator_class) ... 
+  test_publication_aliases_use_existing_operator_class (test_t1857_shared_blockers.SharedBlockerTests.test_publication_aliases_use_existing_operator_class) (ticket='T-1815') ... FAIL
+  test_publication_aliases_use_existing_operator_class (test_t1857_shared_blockers.SharedBlockerTests.test_publication_aliases_use_existing_operator_class) (ticket='T-1816') ... FAIL
+  test_publication_aliases_use_existing_operator_class (test_t1857_shared_blockers.SharedBlockerTests.test_publication_aliases_use_existing_operator_class) (ticket='T-1817') ... FAIL
+  test_publication_aliases_use_existing_operator_class (test_t1857_shared_blockers.SharedBlockerTests.test_publication_aliases_use_existing_operator_class) (ticket='T-1856') ... FAIL
+test_router_carries_the_actionable_blocker_with_no_synthetic_progress (test_t1857_shared_blockers.SharedBlockerTests.test_router_carries_the_actionable_blocker_with_no_synthetic_progress) ... ERROR
+test_shared_release_obstruction_is_prioritized_over_older_external_work (test_t1857_shared_blockers.SharedBlockerTests.test_shared_release_obstruction_is_prioritized_over_older_external_work) ... FAIL
+
+======================================================================
+ERROR: test_router_carries_the_actionable_blocker_with_no_synthetic_progress (test_t1857_shared_blockers.SharedBlockerTests.test_router_carries_the_actionable_blocker_with_no_synthetic_progress)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 146, in test_router_carries_the_actionable_blocker_with_no_synthetic_progress
+    self.assertEqual(result["primary_blocker"]["cause"], "publication-staging")
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^
+KeyError: 'primary_blocker'
+
+======================================================================
+FAIL: test_audit_uses_project_wide_shared_blocker_owner (test_t1857_shared_blockers.SharedBlockerTests.test_audit_uses_project_wide_shared_blocker_owner)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 139, in test_audit_uses_project_wide_shared_blocker_owner
+    self.assertEqual(result["idle_classification"], "IDLE_OPERATOR_REQUIRED")
+AssertionError: 'IDLE_BLOCKED_EXTERNAL' != 'IDLE_OPERATOR_REQUIRED'
+- IDLE_BLOCKED_EXTERNAL
++ IDLE_OPERATOR_REQUIRED
+
+
+======================================================================
+FAIL: test_dependency_cycle_is_not_recoverable_or_complete (test_t1857_shared_blockers.SharedBlockerTests.test_dependency_cycle_is_not_recoverable_or_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 109, in test_dependency_cycle_is_not_recoverable_or_complete
+    result = self.projection(items)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 64, in projection
+    self.assertIsNotNone(project, "BOARD has no canonical shared-blocker projection")
+AssertionError: unexpectedly None : BOARD has no canonical shared-blocker projection
+
+======================================================================
+FAIL: test_done_phase_alone_cannot_claim_campaign_completion (test_t1857_shared_blockers.SharedBlockerTests.test_done_phase_alone_cannot_claim_campaign_completion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 169, in test_done_phase_alone_cannot_claim_campaign_completion
+    self.assertNotIn("RESULT: Complete", text)
+AssertionError: 'RESULT: Complete' unexpectedly found in 'STATUS: DONE  \nRESULT: Complete  \nNEXT EXACT ACTION: NONE  \nVALIDATION: UNKNOWN'
+
+======================================================================
+FAIL: test_each_blocked_item_has_one_complete_diagnostic (test_t1857_shared_blockers.SharedBlockerTests.test_each_blocked_item_has_one_complete_diagnostic)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 91, in test_each_blocked_item_has_one_complete_diagnostic
+    projection = self.projection(items)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 64, in projection
+    self.assertIsNotNone(project, "BOARD has no canonical shared-blocker projection")
+AssertionError: unexpectedly None : BOARD has no canonical shared-blocker projection
+
+======================================================================
+FAIL: test_human_status_cannot_look_complete_while_automation_is_blocked (test_t1857_shared_blockers.SharedBlockerTests.test_human_status_cannot_look_complete_while_automation_is_blocked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 163, in test_human_status_cannot_look_complete_while_automation_is_blocked
+    self.assertIn("STATUS: BLOCKED", text)
+AssertionError: 'STATUS: BLOCKED' not found in 'STATUS: DONE  \nRESULT: Work preserved; 1 blockers (BLOCKED_EXTERNAL 1)  \nNEXT EXACT ACTION: NONE  \nVALIDATION: CURRENT_FAIL'
+
+======================================================================
+FAIL: test_incidental_words_do_not_grant_staging_recovery_authority (test_t1857_shared_blockers.SharedBlockerTests.test_incidental_words_do_not_grant_staging_recovery_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 116, in test_incidental_words_do_not_grant_staging_recovery_authority
+    result = self.projection(items)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 64, in projection
+    self.assertIsNotNone(project, "BOARD has no canonical shared-blocker projection")
+AssertionError: unexpectedly None : BOARD has no canonical shared-blocker projection
+
+======================================================================
+FAIL: test_multiple_dependency_roots_are_retained (test_t1857_shared_blockers.SharedBlockerTests.test_multiple_dependency_roots_are_retained)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 103, in test_multiple_dependency_roots_are_retained
+    result = self.projection(items)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 64, in projection
+    self.assertIsNotNone(project, "BOARD has no canonical shared-blocker projection")
+AssertionError: unexpectedly None : BOARD has no canonical shared-blocker projection
+
+======================================================================
+FAIL: test_projection_groups_roots_and_transitive_todo_without_mutation (test_t1857_shared_blockers.SharedBlockerTests.test_projection_groups_roots_and_transitive_todo_without_mutation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 76, in test_projection_groups_roots_and_transitive_todo_without_mutation
+    projected = self.projection(items)
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 64, in projection
+    self.assertIsNotNone(project, "BOARD has no canonical shared-blocker projection")
+AssertionError: unexpectedly None : BOARD has no canonical shared-blocker projection
+
+======================================================================
+FAIL: test_publication_aliases_use_existing_operator_class (test_t1857_shared_blockers.SharedBlockerTests.test_publication_aliases_use_existing_operator_class) (ticket='T-1815')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 71, in test_publication_aliases_use_existing_operator_class
+    self.assertEqual(board.resolve_root_blocker(tid, items)[1], "WAIT_USER_DECISION")
+AssertionError: 'publication' != 'WAIT_USER_DECISION'
+- publication
++ WAIT_USER_DECISION
+
+
+======================================================================
+FAIL: test_publication_aliases_use_existing_operator_class (test_t1857_shared_blockers.SharedBlockerTests.test_publication_aliases_use_existing_operator_class) (ticket='T-1816')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 71, in test_publication_aliases_use_existing_operator_class
+    self.assertEqual(board.resolve_root_blocker(tid, items)[1], "WAIT_USER_DECISION")
+AssertionError: 'PUBLICATION_STAGING_BLOCKED' != 'WAIT_USER_DECISION'
+- PUBLICATION_STAGING_BLOCKED
++ WAIT_USER_DECISION
+
+
+======================================================================
+FAIL: test_publication_aliases_use_existing_operator_class (test_t1857_shared_blockers.SharedBlockerTests.test_publication_aliases_use_existing_operator_class) (ticket='T-1817')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 71, in test_publication_aliases_use_existing_operator_class
+    self.assertEqual(board.resolve_root_blocker(tid, items)[1], "WAIT_USER_DECISION")
+AssertionError: 'PUBLICATION_STAGING_BLOCKED' != 'WAIT_USER_DECISION'
+- PUBLICATION_STAGING_BLOCKED
++ WAIT_USER_DECISION
+
+
+======================================================================
+FAIL: test_publication_aliases_use_existing_operator_class (test_t1857_shared_blockers.SharedBlockerTests.test_publication_aliases_use_existing_operator_class) (ticket='T-1856')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 71, in test_publication_aliases_use_existing_operator_class
+    self.assertEqual(board.resolve_root_blocker(tid, items)[1], "WAIT_USER_DECISION")
+AssertionError: 'publication' != 'WAIT_USER_DECISION'
+- publication
++ WAIT_USER_DECISION
+
+
+======================================================================
+FAIL: test_shared_release_obstruction_is_prioritized_over_older_external_work (test_t1857_shared_blockers.SharedBlockerTests.test_shared_release_obstruction_is_prioritized_over_older_external_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 122, in test_shared_release_obstruction_is_prioritized_over_older_external_work
+    self.assertEqual(result["disposition"], "IDLE_OPERATOR_REQUIRED")
+AssertionError: 'IDLE_BLOCKED_EXTERNAL' != 'IDLE_OPERATOR_REQUIRED'
+- IDLE_BLOCKED_EXTERNAL
++ IDLE_OPERATOR_REQUIRED
+
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.010s
+
+FAILED (failures=13, errors=1)

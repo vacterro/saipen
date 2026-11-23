@@ -1,0 +1,54 @@
+generator saipen-audit-manifest/3 generated_at 2026-11-07T13:56:16Z protocol_version 8.2.0
+required type list 4
+[
+ "STATE.md",
+ "BOARD.md",
+ "LOG.md",
+ "IDENTITY.md"
+]
+references type dict 5
+{
+ "carriers": [
+  {
+   "kind": "file",
+   "path": "STATE.md"
+  },
+  {
+   "kind": "file",
+   "path": "BOARD.md"
+  },
+  {
+   "kind": "file",
+   "path": "LOG.md"
+  },
+  {
+   "kind": "dir",
+   "max_files": 4000,
+   "path": "logs",
+   "recursive": true,
+   "suffix": ".md"
+  },
+  {
+   "kind": "dir",
+   "max_files": 8000,
+   "path": "intake/coverage",
+   "recursive": false,
+   "suffix": ".json"
+  },
+  {
+   "kind": "dir",
+   "max_files": 8000,
+   "path": "archive/source",
+   "recursive": false,
+   "suffix": ".coverage.json"
+  }
+ ],
+ "max_carrier_bytes": 8388608,
+ "max_references": 20000,
+ "max_total_bytes": 67108864,
+ "surfaces": [
+  "evidence",
+  "recovery/log-detail",
+  "recovery/board-compaction"
+ ]
+}

@@ -1,0 +1,1716 @@
+{
+  "scope": "Complete syntactic read of the named owner documents and all phase deltas; registered rule references only",
+  "semantic_limit": "Reference occurrence classification is not proof of equivalence of all independent unnumbered prose. Selected changed obligations are manually mapped in W4-OWNERSHIP.md.",
+  "documents": {
+    "saipen/CORE.md": {
+      "lf_bytes": 32117,
+      "sha256": "baaf89ede66058eb3f2c0ecb739da5808c408abbc67dc87f143e0916be421847"
+    },
+    "saipen/COMMANDS.md": {
+      "lf_bytes": 6094,
+      "sha256": "9b59da51f1148b692e063af3664c526324b5341c6eff97190ab12ba68342d531"
+    },
+    "saipen/COMMANDS_REFERENCE.md": {
+      "lf_bytes": 18386,
+      "sha256": "ecacf6e0a3bd4046f7222976ee848e61ff2bfb1148c10f4363128ff8d578150d"
+    },
+    "saipen/EXECUTION.md": {
+      "lf_bytes": 7780,
+      "sha256": "a43ec161ca13171871f2f5e39bcd81169a7df09ea9a3449adc8d6b3e30679d16"
+    },
+    "saipen/OPS.md": {
+      "lf_bytes": 49935,
+      "sha256": "c5dd7d2e1ab8bd5284c3ea8eeeb99d7eacdfbf2ffa41d457eed81d8b26b06532"
+    },
+    "saipen/SOURCES.md": {
+      "lf_bytes": 25845,
+      "sha256": "5954921fd4ef702232f2ac228459281d9ad94a27a8f47765c9ebb42029cf7e78"
+    },
+    "saipen/MAINTENANCE.md": {
+      "lf_bytes": 15111,
+      "sha256": "e0fb72da18ad4b63d0bf8bc20aca0b60ce185e340eb330494023a77f77e466ba"
+    },
+    "saipen/IMPROVE.md": {
+      "lf_bytes": 39789,
+      "sha256": "f9b1af28dfb0e459e7c3952ffb889e75cd62009d17840351ce6b0a1637c94369"
+    },
+    "saipen/BOOT.md": {
+      "lf_bytes": 3397,
+      "sha256": "6d984fdd1124c0e7241593c3ec154cdee692c1346c8caf187353b1f1f5249729"
+    },
+    "saipen/INDEX.md": {
+      "lf_bytes": 2238,
+      "sha256": "c1d37ac30798014b51fa1503b04b9906fbb93deee25daab5d6c5ffa0fb77abed"
+    },
+    "saipen/phases/add.md": {
+      "lf_bytes": 3136,
+      "sha256": "4811904a1cb78733227fec515d5608c3dbae8f4aed8f7b70fc68d4f452a147c3"
+    },
+    "saipen/phases/blocked.md": {
+      "lf_bytes": 684,
+      "sha256": "026cdd5f06e2b39360a1676ed5b6b3bc6645fcb832fc5490365301e645d5fb7d"
+    },
+    "saipen/phases/build.md": {
+      "lf_bytes": 1414,
+      "sha256": "1cce5dfffe376eebe0b7d6655075fd6327e7a779588f20de185be4115c7aafd1"
+    },
+    "saipen/phases/clean.md": {
+      "lf_bytes": 4719,
+      "sha256": "7b0dd8534f16496159be374123af7bb7f2ae5c7013d1090c301a9881f98f0c74"
+    },
+    "saipen/phases/done.md": {
+      "lf_bytes": 2453,
+      "sha256": "4eaa944883c9ca5bf9e83364c742472856bfca343a83efe59c0e07600119faa9"
+    },
+    "saipen/phases/hunt.md": {
+      "lf_bytes": 4069,
+      "sha256": "02a71f04c713f5d52d1aaf57130ec8e258aa8abc7b91d802b0b0560163bdcb9a"
+    },
+    "saipen/phases/init.md": {
+      "lf_bytes": 1677,
+      "sha256": "dd3cc3eba61576a18e58f41a0ccc90c65380ebf60dafdd9062d61c815270d639"
+    },
+    "saipen/phases/markhunt.md": {
+      "lf_bytes": 3212,
+      "sha256": "f52c892a842112ac2c5ad616d678e2197fbdbcc7558732086c26746b911061ce"
+    },
+    "saipen/phases/plan.md": {
+      "lf_bytes": 1827,
+      "sha256": "143fd7dff1d059048961c05d9c340445f96ee80c255ad58ec8a970b00791499e"
+    },
+    "saipen/phases/prepare.md": {
+      "lf_bytes": 2991,
+      "sha256": "7b32d9c64b5137332eef2e8e6d589ebf3c96098b5242b60fb5fd7a70cedb5866"
+    },
+    "saipen/phases/review.md": {
+      "lf_bytes": 5325,
+      "sha256": "5930d03f960e7878c74db151d71569e6b9305cabef285b6cc486ca596dfbd692"
+    },
+    "saipen/phases/scout.md": {
+      "lf_bytes": 1028,
+      "sha256": "d488c5cff46941944a73302576e160fa2cfcbd7fb825f9383a5b203347744ae0"
+    },
+    "saipen/phases/ship.md": {
+      "lf_bytes": 5690,
+      "sha256": "65fbf0e6333a959c93aabf196bdaffad152a1024642513dc859478dec15deabb"
+    },
+    "saipen/phases/translate.md": {
+      "lf_bytes": 4679,
+      "sha256": "964a35ced909a65a100d953933a5e089b243379c9fcb32865abff49282d9a305"
+    },
+    "saipen/phases/validate.md": {
+      "lf_bytes": 1731,
+      "sha256": "6c21e71dad2800cb8f6614d4534ef375b0efde16cf37d0875573c8357f77053e"
+    },
+    "saipen/phases/verify.md": {
+      "lf_bytes": 8826,
+      "sha256": "3ea0e70188c1debb79a8499492be46f7300660a8cc46fb706ff4c2d76fd876f3"
+    }
+  },
+  "canonical_rule_owners": {
+    "VERIFY-ORACLE-01": {
+      "owner": "saipen/phases/verify.md",
+      "test": "tools/test_verify_oracle.py",
+      "subject": "regression evidence binds to the verifier that produced it"
+    },
+    "STATE-SHAPE-01": {
+      "owner": "saipen/CORE.md",
+      "test": "tools/test_protocol_registry.py",
+      "subject": "STATE fields, enums and conditional shape"
+    },
+    "STATE-DFA-01": {
+      "owner": "saipen/CORE.md",
+      "test": "tools/test_protocol_registry.py",
+      "subject": "phase enum, transition graph and ticket-bearing phases"
+    },
+    "STATE-NEXT-01": {
+      "owner": "saipen/CORE.md",
+      "test": "tools/test_protocol_registry.py",
+      "subject": "next_action forms and WAIT categories"
+    },
+    "CHECKPOINT-01": {
+      "owner": "saipen/CORE.md",
+      "test": "tests/scenarios/checkpoint-self-confirmation",
+      "subject": "LOG then BOARD then STATE checkpoint order"
+    },
+    "RECOVERY-01": {
+      "owner": "saipen/CORE.md",
+      "test": "tools/test_audit_2026_08_30_all3_impl.py",
+      "subject": "recovery and routing precedence"
+    },
+    "PICK-01": {
+      "owner": "saipen/CORE.md",
+      "test": "tools/test_command_routing.py",
+      "subject": "topmost workable ticket selection"
+    },
+    "CMD-ROUTING-01": {
+      "owner": "saipen/COMMANDS.md",
+      "test": "tools/test_command_routing.py",
+      "subject": "canonical commands, shortcuts and Unicode normalization"
+    },
+    "CMD-COMPOUND-01": {
+      "owner": "saipen/COMMANDS.md",
+      "test": "tools/test_command_routing.py",
+      "subject": "compound parsing and chain disposition"
+    },
+    "CMD-CONTINUE-01": {
+      "owner": "saipen/COMMANDS.md",
+      "test": "tools/test_continue_improve_fallthrough.py",
+      "subject": "bounded continue to improve fallthrough"
+    },
+    "SOURCE-AUTHORITY-01": {
+      "owner": "saipen/SOURCES.md",
+      "test": "tools/test_source_receipts.py",
+      "subject": "exact receipt authority and coverage"
+    },
+    "INGRESS-AUTHORITY-01": {
+      "owner": "saipen/SOURCES.md",
+      "test": "tools/test_pending_ingress.py",
+      "subject": "a refused ingress owes its bytes"
+    },
+    "REQUEST-CLAUSE-01": {
+      "owner": "saipen/SOURCES.md",
+      "test": "tools/test_request_clause_closure.py",
+      "subject": "a request is one requirement"
+    },
+    "REQUEST-PROVENANCE-01": {
+      "owner": "saipen/SOURCES.md",
+      "test": "tools/test_operator_task_witness.py",
+      "subject": "a receipt records its witness"
+    },
+    "OPS-EFFECT-01": {
+      "owner": "saipen/OPS.md",
+      "test": "tools/test_intent_audit_fixes.py",
+      "subject": "effect-based authorization"
+    },
+    "GOAL-01": {
+      "owner": "saipen/MAINTENANCE.md",
+      "test": "tools/test_t1494_continuation_authority.py",
+      "subject": "goal execution and safety valve"
+    },
+    "OPERATOR-QUESTION-01": {
+      "owner": "saipen/EXECUTION.md",
+      "test": "tools/test_t1627_operator_question.py",
+      "subject": "native questions require canonical operator authority"
+    },
+    "EXEC-HUSH-01": {
+      "owner": "saipen/EXECUTION.md",
+      "test": "tools/test_continue_improve_fallthrough.py",
+      "subject": "HUSH precedence, silence and mandatory output"
+    },
+    "EXEC-RESPONSE-01": {
+      "owner": "saipen/EXECUTION.md",
+      "test": "tools/test_response_surface_contract.py",
+      "subject": "default response surface: control block first, DETAILS last"
+    },
+    "PHASE-DELTA-01": {
+      "owner": "saipen/CORE.md",
+      "test": "tools/test_protocol_registry.py",
+      "subject": "16 lazy phase documents and delta-only phase contracts"
+    },
+    "CONFORMANCE-CORPUS-01": {
+      "owner": "tests/conformance_cases.jsonl",
+      "test": "tools/test_conformance_corpus.py",
+      "subject": "machine corpus completeness and generated human view"
+    },
+    "CONTEXT-BUDGET-01": {
+      "owner": "saipen/CORE.md",
+      "test": "tools/protocol_budget.py",
+      "subject": "routine protocol load budgets"
+    },
+    "SOURCE-AUDIT-INBOX-01": {
+      "owner": "saipen/SOURCES.md",
+      "test": "tools/test_audit_inbox.py",
+      "subject": "audit inbox transport identity, routing position and delete gate"
+    },
+    "SOURCE-AUDIT-ENQUEUE-01": {
+      "owner": "saipen/SOURCES.md",
+      "test": "tools/test_audit_enqueue.py",
+      "subject": "shared producer enqueue: monotonic never-reused ids, atomic placement, idempotent retry, optional untrusted envelope"
+    },
+    "EVIDENCE-RETENTION-01": {
+      "owner": "saipen/CORE.md",
+      "test": "tools/test_evidence_hygiene.py",
+      "subject": "bounded durable proof, run-owned ephemeral cleanup, conservative historical classification and retention manifests"
+    },
+    "QUALITY-TIME-01": {
+      "owner": "saipen/CORE.md",
+      "test": "tools/test_t1446_supervise.py",
+      "subject": "model-independent acceptance; durable progress, not elapsed time, decides liveness"
+    },
+    "SOURCE-APPEND-01": {
+      "owner": "saipen/SOURCES.md",
+      "test": "tools/test_t1461_source_append.py",
+      "subject": "operational handoff appends are durable mission state: verbatim amending receipt, ordered ledger, deterministic clause derivation, supersession without deletion, minimum truthful rewind, unprojected append routed before continuation"
+    },
+    "SOURCE-DISTRIBUTION-01": {
+      "owner": "saipen/SOURCES.md",
+      "test": "tools/test_source_receipts.py",
+      "subject": "local authority and publication permission are separate states: DISTRIBUTABLE default, monotonic QUARANTINED, protected body never exported"
+    },
+    "STORE-SAFETY-01": {
+      "owner": "saipen/STORAGE.md",
+      "test": "tools/test_storage_artifacts.py",
+      "subject": "explicit durable trust, disposable scratch, verified atomic artifact promotion and honest state-loss recovery"
+    },
+    "FUTURE-GATE-01": {
+      "owner": "saipen/FUTURE.md",
+      "test": "tools/test_t1614_future_gate.py",
+      "subject": "deferred authority is a lifecycle, not a document pile: a freshness witness over the corpus, an ambiguous document is never executable by guess, and routing refreshes and refines it itself so no dropped file waits on a manual command"
+    }
+  },
+  "owner_markers": {
+    "CONTEXT-BUDGET-01": [
+      {
+        "file": "saipen/CORE.md",
+        "line": 5
+      }
+    ],
+    "QUALITY-TIME-01": [
+      {
+        "file": "saipen/CORE.md",
+        "line": 37
+      }
+    ],
+    "STATE-SHAPE-01": [
+      {
+        "file": "saipen/CORE.md",
+        "line": 66
+      }
+    ],
+    "STATE-NEXT-01": [
+      {
+        "file": "saipen/CORE.md",
+        "line": 67
+      }
+    ],
+    "EVIDENCE-RETENTION-01": [
+      {
+        "file": "saipen/CORE.md",
+        "line": 191
+      }
+    ],
+    "CHECKPOINT-01": [
+      {
+        "file": "saipen/CORE.md",
+        "line": 291
+      }
+    ],
+    "RECOVERY-01": [
+      {
+        "file": "saipen/CORE.md",
+        "line": 292
+      }
+    ],
+    "STATE-DFA-01": [
+      {
+        "file": "saipen/CORE.md",
+        "line": 336
+      }
+    ],
+    "PHASE-DELTA-01": [
+      {
+        "file": "saipen/CORE.md",
+        "line": 337
+      }
+    ],
+    "PICK-01": [
+      {
+        "file": "saipen/CORE.md",
+        "line": 464
+      }
+    ],
+    "CMD-ROUTING-01": [
+      {
+        "file": "saipen/COMMANDS.md",
+        "line": 9
+      }
+    ],
+    "CMD-COMPOUND-01": [
+      {
+        "file": "saipen/COMMANDS.md",
+        "line": 44
+      }
+    ],
+    "CMD-CONTINUE-01": [
+      {
+        "file": "saipen/COMMANDS.md",
+        "line": 66
+      }
+    ],
+    "EXEC-RESPONSE-01": [
+      {
+        "file": "saipen/EXECUTION.md",
+        "line": 5
+      }
+    ],
+    "OPERATOR-QUESTION-01": [
+      {
+        "file": "saipen/EXECUTION.md",
+        "line": 69
+      }
+    ],
+    "EXEC-HUSH-01": [
+      {
+        "file": "saipen/EXECUTION.md",
+        "line": 118
+      }
+    ],
+    "OPS-EFFECT-01": [
+      {
+        "file": "saipen/OPS.md",
+        "line": 597
+      }
+    ],
+    "SOURCE-AUTHORITY-01": [
+      {
+        "file": "saipen/SOURCES.md",
+        "line": 9
+      }
+    ],
+    "SOURCE-DISTRIBUTION-01": [
+      {
+        "file": "saipen/SOURCES.md",
+        "line": 41
+      }
+    ],
+    "INGRESS-AUTHORITY-01": [
+      {
+        "file": "saipen/SOURCES.md",
+        "line": 95
+      }
+    ],
+    "REQUEST-PROVENANCE-01": [
+      {
+        "file": "saipen/SOURCES.md",
+        "line": 156
+      }
+    ],
+    "REQUEST-CLAUSE-01": [
+      {
+        "file": "saipen/SOURCES.md",
+        "line": 208
+      }
+    ],
+    "SOURCE-APPEND-01": [
+      {
+        "file": "saipen/SOURCES.md",
+        "line": 231
+      }
+    ],
+    "SOURCE-AUDIT-INBOX-01": [
+      {
+        "file": "saipen/SOURCES.md",
+        "line": 329
+      }
+    ],
+    "SOURCE-AUDIT-ENQUEUE-01": [
+      {
+        "file": "saipen/SOURCES.md",
+        "line": 411
+      }
+    ],
+    "GOAL-01": [
+      {
+        "file": "saipen/MAINTENANCE.md",
+        "line": 79
+      }
+    ],
+    "VERIFY-ORACLE-01": [
+      {
+        "file": "saipen/phases/verify.md",
+        "line": 65
+      }
+    ]
+  },
+  "occurrences": [
+    {
+      "rule": "CONTEXT-BUDGET-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 5,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: CONTEXT-BUDGET-01 -->"
+    },
+    {
+      "rule": "QUALITY-TIME-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 37,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: QUALITY-TIME-01 -->"
+    },
+    {
+      "rule": "STORE-SAFETY-01",
+      "owner": "saipen/STORAGE.md",
+      "file": "saipen/CORE.md",
+      "line": 50,
+      "classification": "Helpful explanation",
+      "text": "canonical artifact references obey `STORAGE.md` (`STORE-SAFETY-01`)."
+    },
+    {
+      "rule": "OPS-EFFECT-01",
+      "owner": "saipen/OPS.md",
+      "file": "saipen/CORE.md",
+      "line": 60,
+      "classification": "Helpful explanation",
+      "text": "- An operation is authorized by effect, not tool name. See `OPS-EFFECT-01`."
+    },
+    {
+      "rule": "STATE-SHAPE-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 66,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: STATE-SHAPE-01 -->"
+    },
+    {
+      "rule": "STATE-NEXT-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 67,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: STATE-NEXT-01 -->"
+    },
+    {
+      "rule": "PICK-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 135,
+      "classification": "Helpful explanation",
+      "text": "satisfy. Leaving them TODO poisons PICK-01 with apparently workable Work"
+    },
+    {
+      "rule": "EVIDENCE-RETENTION-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 191,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: EVIDENCE-RETENTION-01 -->"
+    },
+    {
+      "rule": "SOURCE-AUTHORITY-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/CORE.md",
+      "line": 218,
+      "classification": "Helpful explanation",
+      "text": "- `.saipen/intake/` obeys `SOURCE-AUTHORITY-01`; source bodies, contracts, and"
+    },
+    {
+      "rule": "OPS-EFFECT-01",
+      "owner": "saipen/OPS.md",
+      "file": "saipen/CORE.md",
+      "line": 261,
+      "classification": "Helpful explanation",
+      "text": "computed paths. OPS-EFFECT-01 owns vocabulary and resolution bounds; a host"
+    },
+    {
+      "rule": "CHECKPOINT-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 291,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: CHECKPOINT-01 -->"
+    },
+    {
+      "rule": "RECOVERY-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 292,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: RECOVERY-01 -->"
+    },
+    {
+      "rule": "STATE-DFA-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 336,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: STATE-DFA-01 -->"
+    },
+    {
+      "rule": "PHASE-DELTA-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 337,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: PHASE-DELTA-01 -->"
+    },
+    {
+      "rule": "PICK-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 350,
+      "classification": "Helpful explanation",
+      "text": "`PICK-01` selects the topmost workable line in BOARD priority order."
+    },
+    {
+      "rule": "CMD-CONTINUE-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/CORE.md",
+      "line": 421,
+      "classification": "Helpful explanation",
+      "text": "- Continue-to-improve fallthrough obeys `CMD-CONTINUE-01`: only after recovery,"
+    },
+    {
+      "rule": "EXEC-HUSH-01",
+      "owner": "saipen/EXECUTION.md",
+      "file": "saipen/CORE.md",
+      "line": 429,
+      "classification": "Helpful explanation",
+      "text": "- `hush <task>` changes narration through `EXEC-HUSH-01`; it changes no safety,"
+    },
+    {
+      "rule": "REQUEST-PROVENANCE-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/CORE.md",
+      "line": 435,
+      "classification": "Helpful explanation",
+      "text": "grants `user_explicit` (REQUEST-PROVENANCE-01). Unwitnessed ingress remains"
+    },
+    {
+      "rule": "PICK-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 464,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: PICK-01 -->"
+    },
+    {
+      "rule": "PICK-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/CORE.md",
+      "line": 482,
+      "classification": "Helpful explanation",
+      "text": "5. **START** the topmost workable TODO ticket (`PICK-01`)."
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS.md",
+      "line": 9,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: CMD-ROUTING-01 -->"
+    },
+    {
+      "rule": "CMD-COMPOUND-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS.md",
+      "line": 44,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: CMD-COMPOUND-01 -->"
+    },
+    {
+      "rule": "EXEC-HUSH-01",
+      "owner": "saipen/EXECUTION.md",
+      "file": "saipen/COMMANDS.md",
+      "line": 53,
+      "classification": "Helpful explanation",
+      "text": "- `hush <task>` applies execution policy `EXEC-HUSH-01`; `hush` is syntax,"
+    },
+    {
+      "rule": "CMD-CONTINUE-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS.md",
+      "line": 66,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: CMD-CONTINUE-01 -->"
+    },
+    {
+      "rule": "OPERATOR-QUESTION-01",
+      "owner": "saipen/EXECUTION.md",
+      "file": "saipen/COMMANDS.md",
+      "line": 70,
+      "classification": "Helpful explanation",
+      "text": "means or offer phase menus. Questions: EXECUTION OPERATOR-QUESTION-01."
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 12,
+      "classification": "Derived projection",
+      "text": "| `gg` | `saipen goal` | CMD-ROUTING-01 | NEW GOAL ONLY; `gg <objective>` names it, and it is never a continuation alias -- `cc` resumes |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 13,
+      "classification": "Derived projection",
+      "text": "| `hh` | `saipen hunt` | CMD-ROUTING-01 | Autonomous defect/improvement scan |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 14,
+      "classification": "Derived projection",
+      "text": "| `ff` | `saipen focus` | CMD-ROUTING-01 | Read-only closer inspection |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 15,
+      "classification": "Derived projection",
+      "text": "| `xx` | `saipen cut` | CMD-ROUTING-01 | `xx confirm <CUT-ID>` authorizes the planned mutation |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 16,
+      "classification": "Derived projection",
+      "text": "| `vv` | `saipen build` | CMD-ROUTING-01 | Bounded foreground Work |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 17,
+      "classification": "Derived projection",
+      "text": "| `zz` | `saipen undo` | CMD-ROUTING-01 | Restore the last safe milestone |"
+    },
+    {
+      "rule": "CMD-CONTINUE-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 18,
+      "classification": "Derived projection",
+      "text": "| `cc` | `saipen continue` | CMD-CONTINUE-01 | It enters convergence from `normal` and resumes `execution_intent: goal`, and it never asks for an objective; `cc <args>` is not a goal |"
+    },
+    {
+      "rule": "CMD-CONTINUE-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 19,
+      "classification": "Derived projection",
+      "text": "| `ccc` | `saipen continue` | CMD-CONTINUE-01 | Converge target `ship`, then refresh stages J-M |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 20,
+      "classification": "Derived projection",
+      "text": "| `st` | `saipen stop` | CMD-ROUTING-01 | Checkpoint and return control; `ss` retired |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 21,
+      "classification": "Derived projection",
+      "text": "| `sss` | `saipen status` | CMD-ROUTING-01 | Read-only status |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 22,
+      "classification": "Derived projection",
+      "text": "| `dd` | `saipen plan` | CMD-ROUTING-01 | Plan; payload supplies user items |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 23,
+      "classification": "Derived projection",
+      "text": "| `aa` | `saipen markhunt` | CMD-ROUTING-01 | Dry audit; records, never fixes |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 24,
+      "classification": "Derived projection",
+      "text": "| `qq` | `saipen prepare saiwiki` | CMD-ROUTING-01 | Force-fresh wiki package |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 25,
+      "classification": "Derived projection",
+      "text": "| `qqq` | `saipen collect saiwiki` | CMD-ROUTING-01 | Integrate ready wiki package, then ship |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 26,
+      "classification": "Derived projection",
+      "text": "| `ee` | `saipen prepare saitranslate` | CMD-ROUTING-01 | Force-fresh translation package |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 27,
+      "classification": "Derived projection",
+      "text": "| `eee` | `saipen collect saitranslate` | CMD-ROUTING-01 | Integrate ready translation package, then ship |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 28,
+      "classification": "Derived projection",
+      "text": "| `pp` | `saipen sub spawn saipython` | CMD-ROUTING-01 | Python tooling role |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 29,
+      "classification": "Derived projection",
+      "text": "| `tt` | `saipen test` | CMD-ROUTING-01 | Run the declared suite, read-only |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 30,
+      "classification": "Derived projection",
+      "text": "| `sc` | `saipen crew` | CMD-ROUTING-01 | Serial full-platoon convergence circuit |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 36,
+      "classification": "Derived projection",
+      "text": "| `saipen set` | INIT | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 37,
+      "classification": "Derived projection",
+      "text": "| `saipen init` | INIT | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-CONTINUE-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 38,
+      "classification": "Derived projection",
+      "text": "| `saipen continue` | router | CMD-CONTINUE-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 39,
+      "classification": "Derived projection",
+      "text": "| `saipen goal <text>` | PLAN | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 40,
+      "classification": "Derived projection",
+      "text": "| `saipen clean` | Enter CLEAN; completion waits for the phase's exit obligations | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 41,
+      "classification": "Derived projection",
+      "text": "| `saipen translate` | TRANSLATE | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 42,
+      "classification": "Derived projection",
+      "text": "| `saipen validate` | Core conformance | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 43,
+      "classification": "Derived projection",
+      "text": "| `saipen prepare <producer>` | PREPARE | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 44,
+      "classification": "Derived projection",
+      "text": "| `saipen collect <producer>` | router | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 45,
+      "classification": "Derived projection",
+      "text": "| `saipen ship` | SHIP | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 46,
+      "classification": "Derived projection",
+      "text": "| `saipen push` | SHIP | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-CONTINUE-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 47,
+      "classification": "Derived projection",
+      "text": "| `saipen improve [action]` | meta | CMD-CONTINUE-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 48,
+      "classification": "Derived projection",
+      "text": "| `saipen improve [status\\|sweep-queue\\|verify] <cycle>` | DIAGNOSTIC: read-only derived lifecycle status, the exact unswept composite finding queue in deterministic order, and the bounded DELTA audit; status refuses to round malformed evidence up to a normal lifecycle state (IMPROVE.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 49,
+      "classification": "Derived projection",
+      "text": "| `saipen improve reconcile <cycle>` | BUILD/RECOVERY: strict-cycle finite exit; classify every seat, execute lossless transitions, refuse while actionable work remains, terminalize COMPLETE/SUPERSEDED/BLOCKED_EXTERNAL; idempotent | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 50,
+      "classification": "Derived projection",
+      "text": "| `saipen status` | read-only | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "STORE-SAFETY-01",
+      "owner": "saipen/STORAGE.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 51,
+      "classification": "Derived projection",
+      "text": "| `saipen storage [status\\|classify\\|durable\\|ephemeral\\|scratch\\|store\\|verify\\|promote\\|migrate]` | Durable/scratch policy, stores and promotion; `status`/`classify`/`verify` and every `show` action are DIAGNOSTIC, the set/remove/declare/promote actions are EXECUTION and `migrate` is RECOVERY; STORAGE.md lists the exact forms | STORE-SAFETY-01 |"
+    },
+    {
+      "rule": "EXEC-RESPONSE-01",
+      "owner": "saipen/EXECUTION.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 52,
+      "classification": "Derived projection",
+      "text": "| `saipen response render\\|check --stdin`, `saipen response style [--json]` | response gate; `style` prints the chat contract generated from STYLE.md | EXEC-RESPONSE-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 55,
+      "classification": "Derived projection",
+      "text": "| `saipen autonomy` | read-only: the supervisor's ONE verdict (RUN_WORK, ADOPT_WORKER, REPLACE_WORKER, AWAIT_WORKER, OPERATOR_ACTION_DUE, NO_PROGRESS_LOOP, AMBIGUOUS_AUTHORITY, IDLE) plus the observation that produced it -- lease generation and heartbeat age, executable Work, due/deferred operator gates, no-progress verdict. Writes nothing; ambiguous lease authority fails closed for mutation | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 56,
+      "classification": "Derived projection",
+      "text": "| `saipen autonomy recall` | read-only AUTO_RECALL + turn-entry decision for a replaced/cold agent (RUNTIME.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 57,
+      "classification": "Derived projection",
+      "text": "| `saipen gpu [status\\|on\\|off\\|index\\|recall <text>\\|triage]` | DIAGNOSTIC: idle-GPU lane, default OFF (`SAIPEN_GPU=off` wins); a local embedding model indexes Work/decisions/knowledge, a local chat model annotates red declared-family runs (mechanical groups, one hypothesis each), both while the card is idle and beside `supervise`; ADVISORY only, writes only `.saipen/cache/` (gpu.py) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 58,
+      "classification": "Derived projection",
+      "text": "| `saipen lock [status]` | DIAGNOSTIC: read-only holder of the project writer lock (PID, command, since) or free; never acquires, creates or deletes it (lock.py) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CONTEXT-BUDGET-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 59,
+      "classification": "Derived projection",
+      "text": "| `saipen context orient [--handoff JSON]` | bounded current-truth orientation | CONTEXT-BUDGET-01 |"
+    },
+    {
+      "rule": "CONTEXT-BUDGET-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 60,
+      "classification": "Derived projection",
+      "text": "| `saipen brief` | generated handoff with identity/lineage/event provenance | CONTEXT-BUDGET-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 61,
+      "classification": "Derived projection",
+      "text": "| `saipen mail [init [--workspace PATH]]` | per-user SAIMAIL mailbox binding (SRC-136), DIAGNOSTIC status; `init` provisions the internal default idempotently via `saimail-local saipen init`; internal letters only | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 62,
+      "classification": "Derived projection",
+      "text": "| `saipen acceptance <T-###>` | read-only | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 63,
+      "classification": "Derived projection",
+      "text": "| `saipen test suite [declare -- <command>\\|run [T-###]\\|withdraw]` | a project's ONE declared suite, engine-run into a typed record (actions: EXECUTION); digest suite totals: only its current-tree record, never LOG prose | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 64,
+      "classification": "Derived projection",
+      "text": "| `saipen runtime` | read-only | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 65,
+      "classification": "Derived projection",
+      "text": "| `saipen host bootstrap [--host ID] [--project-root PATH]` | read-only host/runtime binding diagnostic; `HOST_UNSUPPORTED` for unregistered hosts | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 66,
+      "classification": "Derived projection",
+      "text": "| `saipen host activation --project-root PATH` | read-only; does the managed project's resolved runtime carry the activation contract | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 67,
+      "classification": "Derived projection",
+      "text": "| `saipen host entry [--host ID] [--project-root PATH] [-- <command>...]` | transport only: proven transport or `PROJECT_UNBOUND`/`RUNTIME_UNAVAILABLE`/`HOST_UNSUPPORTED`; with a command, rebinds a dead home, then runs it as argv, never via a shell; unregistered hosts: DIAGNOSTIC only | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 68,
+      "classification": "Derived projection",
+      "text": "| `saipen rebind-home --auto` | RECOVERY: converge a dead persisted home onto an already-proven runtime (`HOST_BINDING_CONVERGED`; refuses `HOME_REQUIRED` when nothing proves) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 69,
+      "classification": "Derived projection",
+      "text": "| `saipen rebind-home <candidate-home-path>` | RECOVERY: explicit re-point of `STATE.saipen_home` onto a proven install | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 70,
+      "classification": "Derived projection",
+      "text": "| `saipen search <pattern>` | read-only bounded search | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 72,
+      "classification": "Derived projection",
+      "text": "| `saipen host instructions [status\\|repair]` | SAIPEN block in a project's `AGENTS.md`: verdict / RECOVERY marker-to-marker rewrite; creates none | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 73,
+      "classification": "Derived projection",
+      "text": "| `saipen --agent <seat> launch <host> -- [args]` | optional explicit-actor host process (registry `launch_executable`) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 74,
+      "classification": "Derived projection",
+      "text": "| `saipen knowledge [status\\|index\\|retrieve]` | project knowledge | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "FUTURE-GATE-01",
+      "owner": "saipen/FUTURE.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 75,
+      "classification": "Derived projection",
+      "text": "| `saipen future [status\\|list\\|next]` | DIAGNOSTIC: deferred authority candidates (FUTURE.md) -- lifecycle counts, per-gate verdicts, and the ONE deterministic next candidate; writes nothing | FUTURE-GATE-01 |"
+    },
+    {
+      "rule": "FUTURE-GATE-01",
+      "owner": "saipen/FUTURE.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 76,
+      "classification": "Derived projection",
+      "text": "| `saipen future refresh` | EXECUTION: rebuild `.saipen/future/index.json` from the `future_gate/` corpus by identity (id > digest > title), never by filename alone, then recompute each gate's readiness. Routing runs this itself whenever the projection is not CURRENT, so a NEW document in `future_gate/` needs no import command | FUTURE-GATE-01 |"
+    },
+    {
+      "rule": "FUTURE-GATE-01",
+      "owner": "saipen/FUTURE.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 77,
+      "classification": "Derived projection",
+      "text": "| `saipen future refine FG-#### [--slice TEXT --evidence PATH[,PATH]]` | EXECUTION: ONE ambiguous document/verdict: classify its own recorded status into the closed vocabulary; write the bound .saipen/future/records/FG-####.json. Never rewrite source or grant implementation. --slice/--evidence bind undeclared prose facts. Router runs once/chain when no ELIGIBLE gate and ambiguity exists (FUTURE.md) | FUTURE-GATE-01 |"
+    },
+    {
+      "rule": "FUTURE-GATE-01",
+      "owner": "saipen/FUTURE.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 78,
+      "classification": "Derived projection",
+      "text": "| `saipen future promote FG-####` | INGRESS: ONE ELIGIBLE bounded slice via ordinary start receipt/dedupe/seat/goal valve. Ineligible/already-owned refuses; residual stays deferred; gate closes only after all slices resolve (FUTURE.md) | FUTURE-GATE-01 |"
+    },
+    {
+      "rule": "FUTURE-GATE-01",
+      "owner": "saipen/FUTURE.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 79,
+      "classification": "Derived projection",
+      "text": "| `saipen future add <title> [--body TEXT] [--priority P0-P3] [--evidence PATH[,PATH]]` | INGRESS: deferred authority candidate, default DEFERRED; never Work, rule source or implementation authority alone (FUTURE.md) | FUTURE-GATE-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 80,
+      "classification": "Derived projection",
+      "text": "| `saipen start '<task>' [--file PATH] [--hex HEX] [--receipt SRC-###]` | THE entry command for a new actionable task: capture, recover, seat, claim | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 81,
+      "classification": "Derived projection",
+      "text": "| `saipen handoff <T-###> --to <agent> [--authority SRC-###]` | Owner or operator-authorized live claim transfer; same Work and phase | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 82,
+      "classification": "Derived projection",
+      "text": "| `saipen user-request <text>` | USER_INTERRUPT ingress | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 83,
+      "classification": "Derived projection",
+      "text": "| `saipen ticket compact <T-###>` | RECOVERY: compact one historical BOARD record to its minimum truthful form (OPS.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 84,
+      "classification": "Derived projection",
+      "text": "| `saipen ticket retire <T-###> --reason <CODE> --evidence <E-###\\|.saipen/evidence/PATH> --authority <SRC-###> [--discovery-event E-###] [--note TEXT]` | canonical retirement of misrouted/invalid Work -- NOT done, NOT close; the authority must GRANT it (OPS.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 85,
+      "classification": "Derived projection",
+      "text": "| `saipen work reverify T-### [--contract FILE]` | RECOVERY: RV; OPS.md | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 86,
+      "classification": "Derived projection",
+      "text": "| `saipen work contracts [T-###] [--limit N] [--offset N]` | DIAGNOSTIC: closed dependencies; OPS.md | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "VERIFY-ORACLE-01",
+      "owner": "saipen/phases/verify.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 87,
+      "classification": "Derived projection",
+      "text": "| `saipen work regression <T-###> --file <contract.json>` | EXECUTION: owned VERIFY pair (phases/verify.md) | VERIFY-ORACLE-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 88,
+      "classification": "Derived projection",
+      "text": "| `saipen ticket resolve-external <T-###> --authority <lineage-32hex> --implementation <T-###@commit> --reason <CLASS> --run <command>...` | EXECUTION: close BLOCKED Work implemented by an external authority with an immutable `EX-NNNNNN` receipt bound to the installed engine generation (OPS.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 89,
+      "classification": "Derived projection",
+      "text": "| `saipen ticket renew-external <T-###> --implementation <T-###@commit> --verification-contract <path> --paths <p1,p2> [--external-root <path>] [--runtime-inputs <absolute-paths>]` | EXECUTION: renew DONE external proof with authenticated current checks and an immutable predecessor binding (OPS.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 90,
+      "classification": "Derived projection",
+      "text": "| `saipen ticket repair-metadata <T-###> --field source_receipts (--to <SRC-###> \\| --legacy-unbound [--authority <SRC-###\\|lineage-32hex>])` | RECOVERY: DONE-only malformed legacy source_receipts migration. --to needs exact linked receipt; --legacy-unbound removes unprovable token, preserves bytes in immutable MR-NNNNNN. Non-DONE or conflicting second migration: zero-write refusal (T-1435) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 91,
+      "classification": "Derived projection",
+      "text": "| `saipen ticket reasoning <T-###> --recurrence <text> --weak-model <text>` | EXECUTION: canonical writer for the strict-sweep reasoning gates; refuses unless a strict CONFIRMED PROTOCOL_VIOLATION disposition names the ticket | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 92,
+      "classification": "Derived projection",
+      "text": "| `saipen ticket requires <T-###> <CAP[@PHASE[+PHASE]],...\\|read_only\\|none>` / `saipen ticket regression <T-###> required [--evidence executed]` | EXECUTION: Work capabilities (RUNTIME.md) or strengthen non-DONE regression metadata; executed profile in phases/verify.md | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 93,
+      "classification": "Derived projection",
+      "text": "| `saipen cohort [status\\|ship] <C-###>` | batch publication authority | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 94,
+      "classification": "Derived projection",
+      "text": "| `saipen cohort reconcile <C-FINAL> --from <C-OLD[,C-OLD]> --review-work <T-###>` | RECOVERY: preserve pending member history while a current reviewed cumulative batch adopts its publication obligation; OPS.md owns the bounds | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 95,
+      "classification": "Derived projection",
+      "text": "| `saipen ticket bind-cohort <T-###> --cohort <C-###> --paths <p1,p2>` | RECOVERY: verified, unpublished own_patch DONE into pending cohort; preserve original row/finish/history and active Work. Exact retry byte-noop; published/legacy/foreign/conflicting bindings refuse (OPS.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 96,
+      "classification": "Derived projection",
+      "text": "| `saipen source` | intake | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 97,
+      "classification": "Derived projection",
+      "text": "| `saipen source capture (--file <UTF8_FILE>\\|--hex <UTF8_HEX>\\|-- <TEXT>)` | INGRESS: the ingress half of the audit-inbox contract -- persists ONE verbatim source body and a receipt; an audit layer that reached `ingest` without it has no receipt to close (SOURCES.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 98,
+      "classification": "Derived projection",
+      "text": "| `saipen source req <SRC-###> <RID> <CLASS> <TEXT...> [--when-environment <HOST>]` | EXECUTION: add one requirement clause to a live receipt (SOURCES.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 99,
+      "classification": "Derived projection",
+      "text": "| `saipen source disp <SRC-###> <RID> <DISPOSITION> [--work T-###] [--evidence E-###]` | EXECUTION: adjudicate one clause to a disposition and bind its Work and evidence (SOURCES.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 100,
+      "classification": "Derived projection",
+      "text": "| `saipen source close <SRC-###>` | EXECUTION: prove a receipt's evidence and mint the tombstone; this is the ONLY verb that writes one, so it is the precondition of every later consume/archive (SOURCES.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 101,
+      "classification": "Derived projection",
+      "text": "| `saipen source archive <SRC-###>` | EXECUTION: move an already-CLOSED receipt's artifacts into the archive; refuses while the receipt is still active (SOURCES.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 102,
+      "classification": "Derived projection",
+      "text": "| `saipen source purge <SRC-###> --confirm` | EXECUTION: destroy an ARCHIVED receipt's cold bytes; the explicit `--confirm` is mandatory and its absence is CONFIRMATION_REQUIRED, not a preview (SOURCES.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 103,
+      "classification": "Derived projection",
+      "text": "| `saipen source retire <SRC-###> --reason <CLASS> [--successor SRC-###] [--note TEXT]` | EXECUTION: receipt-only retirement; preserve cold original bytes; unresolved clauses or live Work refuse (OPS.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 104,
+      "classification": "Derived projection",
+      "text": "| `saipen source link <SRC-###> --work T-###` | EXECUTION: one durable Work membership, primary preserved; idempotent. Unknown receipt/Work or integrity failure: zero writes (T-1437) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 105,
+      "classification": "Derived projection",
+      "text": "| `saipen source append [--to <SRC-###>] [--class APPEND\\|SUPERSEDE\\|CLARIFICATION\\|CONFLICT] [--delta implementation\\|evidence\\|review\\|packaging\\|context] [--supersedes <ID,...>] [--label TEXT] (--file <PATH> \\| --hex <HEX> \\| -- <TEXT>)` | INGRESS: ONE verbatim immutable mission append (T-1461): amends, exact-digest dedupe, ordered per-source ledger; original source unchanged (SOURCES.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 106,
+      "classification": "Derived projection",
+      "text": "| `saipen source apply-append <SRC-###>` | EXECUTION: project the oldest RECEIVED append into requirements, Work and the minimum truthful rewind; idempotent and crash-resumable; what it supersedes becomes SUPERSEDED, never deleted (SOURCES.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 107,
+      "classification": "Derived projection",
+      "text": "| `saipen source appends` | DIAGNOSTIC: read-only per-mission append view status shares -- latest append, active and superseded clause counts, unprojected appends, affected Work | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 108,
+      "classification": "Derived projection",
+      "text": "| `saipen source recover` | DIAGNOSTIC: read-only orphan/crash diagnostic; never deletes or invents source intent | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 109,
+      "classification": "Derived projection",
+      "text": "| `saipen source reconcile <SRC-###> [--confirm]` | RECOVERY: read-only contradiction report; `--confirm` converges tombstone-authoritatively only on strong proof, else zero writes | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 110,
+      "classification": "Derived projection",
+      "text": "| `saipen source normalize [--dry-run]` | RECOVERY: journal BOARD ranges as explicit receipt IDs; malformed ranges refuse; preview writes zero | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 111,
+      "classification": "Derived projection",
+      "text": "| `saipen source quarantine <SRC-###> [--reason CODE]` | EXECUTION: preserve the exact active or archived body locally and exclude it from release/export; `--dry-run` previews without writing; does not close Work or waive coverage (SOURCES.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 112,
+      "classification": "Derived projection",
+      "text": "| `saipen authority capture --file <UTF8_FILE>\\|--hex <UTF8_HEX>` | persist ONE operator-authority Source from exact bytes, including scoped gate decisions (OPS.md); never projects Work | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-CONTINUE-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 113,
+      "classification": "Derived projection",
+      "text": "| `saipen audit [status\\|inspect\\|trace\\|ingest\\|enqueue\\|manifest]` | DIAGNOSTIC except EXECUTION `ingest`/`enqueue`/`manifest --write [--force]`; `inspect`/`trace`: N/filename (SOURCES.md) | CMD-CONTINUE-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 114,
+      "classification": "Derived projection",
+      "text": "| `saipen userperson [show\\|add\\|remove\\|reset]` | meta; direction is DEFAULT not ORDER (CORE.md), `reset` deletes the profile and needs `--confirm`, and `show --effective` is read-only (CORE.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 115,
+      "classification": "Derived projection",
+      "text": "| `saipen sub [spawn\\|adopt\\|sync\\|pause\\|resume\\|clean\\|collect\\|dispose\\|reconcile] <name>` | sub; `sync`/`spawn`/`adopt`/`pause`/`resume`/`clean`/`collect`/`dispose` are EXECUTION and `reconcile` is RECOVERY (CONVERGE.md, COMMANDS.md below) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 116,
+      "classification": "Derived projection",
+      "text": "| `saipen undo confirm` | EXECUTION: the confirmation leg of the `zz` milestone restore; without it the restore is a preview (CONTROLS.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 117,
+      "classification": "Derived projection",
+      "text": "| `saipen cut confirm <CUT-ID> -- <mutation>` | EXECUTION: authorize ONE already-previewed planned mutation; the preview alone writes nothing (CONTROLS.md) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 118,
+      "classification": "Derived projection",
+      "text": "| `saipen recover [inspect]` | DIAGNOSTIC: read-only recovery inspection; `resolve-blocker <SRC-###>` / `resolve-next-action <SRC-###>` consume scoped witnessed authority (OPS.md); `ab`/`aa`/`qq`: CONTROLS.md | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 119,
+      "classification": "Derived projection",
+      "text": "| `saipen fleet [preflight\\|scan\\|prepare]` | install-scoped Fleet binding; `preflight` and `scan` are read-only, `prepare` is RECOVERY and the only mutating leg -- it refuses `--root` and is never a dry-run, and `scan` inspects ONLY the explicit roots it is given and never enumerates children | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/COMMANDS_REFERENCE.md",
+      "line": 120,
+      "classification": "Derived projection",
+      "text": "| `saipen sub reconcile <role> --authority <SRC-###>` | RECOVERY: producer terminal reconciliation (T-1435). A: DONE producer/BOARD proves all Work terminal; clear stale task/residue. B: truthful SCOUT/PLAN/BLOCKED projection, real open Work unchanged. Malformed STATE/BOARD or foreign owner: zero writes (CONVERGE.md, sub_lifecycle) | CMD-ROUTING-01 |"
+    },
+    {
+      "rule": "EXEC-RESPONSE-01",
+      "owner": "saipen/EXECUTION.md",
+      "file": "saipen/EXECUTION.md",
+      "line": 5,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: EXEC-RESPONSE-01 -->"
+    },
+    {
+      "rule": "EXEC-RESPONSE-01",
+      "owner": "saipen/EXECUTION.md",
+      "file": "saipen/EXECUTION.md",
+      "line": 7,
+      "classification": "Helpful explanation",
+      "text": "## Default response surface \u2014 EXEC-RESPONSE-01"
+    },
+    {
+      "rule": "OPERATOR-QUESTION-01",
+      "owner": "saipen/EXECUTION.md",
+      "file": "saipen/EXECUTION.md",
+      "line": 69,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: OPERATOR-QUESTION-01 -->"
+    },
+    {
+      "rule": "EXEC-HUSH-01",
+      "owner": "saipen/EXECUTION.md",
+      "file": "saipen/EXECUTION.md",
+      "line": 118,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: EXEC-HUSH-01 -->"
+    },
+    {
+      "rule": "OPS-EFFECT-01",
+      "owner": "saipen/OPS.md",
+      "file": "saipen/OPS.md",
+      "line": 597,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: OPS-EFFECT-01 -->"
+    },
+    {
+      "rule": "OPS-EFFECT-01",
+      "owner": "saipen/OPS.md",
+      "file": "saipen/OPS.md",
+      "line": 600,
+      "classification": "Helpful explanation",
+      "text": "(`OPS-EFFECT-01`); this section owns the deterministic vocabulary and mechanics."
+    },
+    {
+      "rule": "SOURCE-AUTHORITY-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/SOURCES.md",
+      "line": 9,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: SOURCE-AUTHORITY-01 -->"
+    },
+    {
+      "rule": "SOURCE-DISTRIBUTION-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/SOURCES.md",
+      "line": 41,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: SOURCE-DISTRIBUTION-01 -->"
+    },
+    {
+      "rule": "INGRESS-AUTHORITY-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/SOURCES.md",
+      "line": 95,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: INGRESS-AUTHORITY-01 -->"
+    },
+    {
+      "rule": "REQUEST-PROVENANCE-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/SOURCES.md",
+      "line": 156,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: REQUEST-PROVENANCE-01 -->"
+    },
+    {
+      "rule": "INGRESS-AUTHORITY-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/SOURCES.md",
+      "line": 162,
+      "classification": "Helpful explanation",
+      "text": "being read as a statement about WORDS. INGRESS-AUTHORITY-01 only arms when a"
+    },
+    {
+      "rule": "INGRESS-AUTHORITY-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/SOURCES.md",
+      "line": 184,
+      "classification": "Helpful explanation",
+      "text": "whitespace exactly as INGRESS-AUTHORITY-01 does, so a launcher's file and a"
+    },
+    {
+      "rule": "REQUEST-CLAUSE-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/SOURCES.md",
+      "line": 208,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: REQUEST-CLAUSE-01 -->"
+    },
+    {
+      "rule": "SOURCE-APPEND-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/SOURCES.md",
+      "line": 231,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: SOURCE-APPEND-01 -->"
+    },
+    {
+      "rule": "REQUEST-PROVENANCE-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/SOURCES.md",
+      "line": 235,
+      "classification": "Helpful explanation",
+      "text": "REQUEST-PROVENANCE-01 applies: only an original operator carrier may modify"
+    },
+    {
+      "rule": "SOURCE-AUDIT-INBOX-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/SOURCES.md",
+      "line": 329,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: SOURCE-AUDIT-INBOX-01 -->"
+    },
+    {
+      "rule": "SOURCE-AUDIT-ENQUEUE-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/SOURCES.md",
+      "line": 411,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: SOURCE-AUDIT-ENQUEUE-01 -->"
+    },
+    {
+      "rule": "GOAL-01",
+      "owner": "saipen/MAINTENANCE.md",
+      "file": "saipen/MAINTENANCE.md",
+      "line": 79,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: GOAL-01 -->"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/IMPROVE.md",
+      "line": 15,
+      "classification": "Helpful explanation",
+      "text": "## 1. Command surface (routing lives in COMMANDS.md, CMD-ROUTING-01)"
+    },
+    {
+      "rule": "EXEC-RESPONSE-01",
+      "owner": "saipen/EXECUTION.md",
+      "file": "saipen/BOOT.md",
+      "line": 35,
+      "classification": "Derived projection",
+      "text": "Language/voice and EXEC-RESPONSE-01 bind; bad/missing authority fails bootstrap."
+    },
+    {
+      "rule": "CONTEXT-BUDGET-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/BOOT.md",
+      "line": 37,
+      "classification": "Derived projection",
+      "text": "`saipen context orient --json` suffices first (CONTEXT-BUDGET-01)."
+    },
+    {
+      "rule": "RECOVERY-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/BOOT.md",
+      "line": 38,
+      "classification": "Derived projection",
+      "text": "Corruption/pending operations: OPS.md (RECOVERY-01) before Work."
+    },
+    {
+      "rule": "SOURCE-AUTHORITY-01",
+      "owner": "saipen/SOURCES.md",
+      "file": "saipen/BOOT.md",
+      "line": 41,
+      "classification": "Derived projection",
+      "text": "(SOURCE-AUTHORITY-01); injected SPEC + smallest matching skill;"
+    },
+    {
+      "rule": "CMD-ROUTING-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/BOOT.md",
+      "line": 45,
+      "classification": "Derived projection",
+      "text": "mechanically before segments (CMD-ROUTING-01, CMD-COMPOUND-01; COMMANDS.md)."
+    },
+    {
+      "rule": "CMD-COMPOUND-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/BOOT.md",
+      "line": 45,
+      "classification": "Derived projection",
+      "text": "mechanically before segments (CMD-ROUTING-01, CMD-COMPOUND-01; COMMANDS.md)."
+    },
+    {
+      "rule": "CMD-CONTINUE-01",
+      "owner": "saipen/COMMANDS.md",
+      "file": "saipen/BOOT.md",
+      "line": 46,
+      "classification": "Derived projection",
+      "text": "cc executes, never asks for an objective (CMD-CONTINUE-01). Missing reads"
+    },
+    {
+      "rule": "GOAL-01",
+      "owner": "saipen/MAINTENANCE.md",
+      "file": "saipen/BOOT.md",
+      "line": 47,
+      "classification": "Derived projection",
+      "text": "are work; real refusals/WAIT bind. Goals: MAINTENANCE.md (GOAL-01);"
+    },
+    {
+      "rule": "PICK-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/BOOT.md",
+      "line": 51,
+      "classification": "Derived projection",
+      "text": "owns validator/corpus work. Unavailable-runtime analysis: CORE/PICK-01,"
+    },
+    {
+      "rule": "CHECKPOINT-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/BOOT.md",
+      "line": 53,
+      "classification": "Derived projection",
+      "text": "6. CLI checkpoint only: LOG -> BOARD -> STATE (CHECKPOINT-01). Reread all three;"
+    },
+    {
+      "rule": "VERIFY-ORACLE-01",
+      "owner": "saipen/phases/verify.md",
+      "file": "saipen/phases/review.md",
+      "line": 21,
+      "classification": "Helpful explanation",
+      "text": "verifier now passing (`VERIFY-ORACLE-01`, phases/verify.md); and can this"
+    },
+    {
+      "rule": "OPS-EFFECT-01",
+      "owner": "saipen/OPS.md",
+      "file": "saipen/phases/verify.md",
+      "line": 24,
+      "classification": "Helpful explanation",
+      "text": "OPS-EFFECT-01; BOARD grants no authority. Manual-verify gives the human that"
+    },
+    {
+      "rule": "VERIFY-ORACLE-01",
+      "owner": "saipen/phases/verify.md",
+      "file": "saipen/phases/verify.md",
+      "line": 29,
+      "classification": "Helpful explanation",
+      "text": "pre-fix red, post-fix green; only implementation changes (VERIFY-ORACLE-01)."
+    },
+    {
+      "rule": "VERIFY-ORACLE-01",
+      "owner": "saipen/phases/verify.md",
+      "file": "saipen/phases/verify.md",
+      "line": 65,
+      "classification": "Normative source",
+      "text": "<!-- RULE-OWNER: VERIFY-ORACLE-01 -->"
+    },
+    {
+      "rule": "PHASE-DELTA-01",
+      "owner": "saipen/CORE.md",
+      "file": "saipen/phases/verify.md",
+      "line": 140,
+      "classification": "Helpful explanation",
+      "text": "hypothesis/test and fix the cause. CORE PHASE-DELTA-01 forbids retry without"
+    }
+  ],
+  "explicit_marker_conflicts": [],
+  "conditional_command_reference": [
+    "COMMANDS_REFERENCE.md",
+    "CONTROLS.md",
+    "EXECUTION.md",
+    "IMPROVE.md"
+  ],
+  "graph_mcp": "Unavailable; no graph generation or coverage claim"
+}

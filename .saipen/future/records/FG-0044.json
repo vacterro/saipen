@@ -1,0 +1,13 @@
+{
+  "declared_status": null,
+  "digest": "27417ab512ef64409d20e554130326d3cce8643db4fc4d18126bc1738a6227ea",
+  "facts": {},
+  "gate": "FG-0044",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/SAIPEN_FUTURE_IDEA1.md",
+  "reason": "no explicit historical status found; review before any promotion",
+  "reviewed": true,
+  "schema": 2,
+  "title": "future_gate/SAIPEN_FUTURE_IDEA1.md",
+  "verdict": "NEEDS_REVIEW"
+}

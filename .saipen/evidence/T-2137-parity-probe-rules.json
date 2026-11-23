@@ -1,0 +1,68 @@
+{
+ "schema": 1,
+ "work": "T-2137",
+ "probe": "amended-pruned state rule dump",
+ "seconds": 38.1,
+ "problems": [
+  {
+   "category": null,
+   "credential": false,
+   "detail": "source receipts -- retired ticket record T-1368 evidence artifact .saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md is missing or unsafe: [WinError 3] The system cannot find the path s",
+   "detail_hash": "4bb9d0e3fc751282",
+   "finding_key": "76b48f23558dce11",
+   "rule_id": "unclassified",
+   "severity": "problem",
+   "subject_id": null,
+   "subject_kind": "global",
+   "subject_ref": null
+  },
+  {
+   "category": null,
+   "credential": false,
+   "detail": "source receipts -- retired ticket record T-1369 evidence artifact .saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md is missing or unsafe: [WinError 3] The system cannot find the path s",
+   "detail_hash": "de03360a77e8d868",
+   "finding_key": "76b48f23558dce11",
+   "rule_id": "unclassified",
+   "severity": "problem",
+   "subject_id": null,
+   "subject_kind": "global",
+   "subject_ref": null
+  },
+  {
+   "category": null,
+   "credential": false,
+   "detail": "source receipts -- retired ticket record T-1580 evidence artifact .saipen/evidence/T-1580-project-binding-20261001.md is missing or unsafe: [WinError 3] The system cannot find the path specified: 'V:\\",
+   "detail_hash": "da8e2cca1800eaa3",
+   "finding_key": "76b48f23558dce11",
+   "rule_id": "unclassified",
+   "severity": "problem",
+   "subject_id": null,
+   "subject_kind": "global",
+   "subject_ref": null
+  },
+  {
+   "category": null,
+   "credential": false,
+   "detail": "source receipts -- retired ticket record T-1599 evidence artifact .saipen/evidence/response-authority/authority-red.txt is missing or unsafe: [WinError 3] The system cannot find the path specified: 'V",
+   "detail_hash": "b0e25f09a9506b4a",
+   "finding_key": "76b48f23558dce11",
+   "rule_id": "unclassified",
+   "severity": "problem",
+   "subject_id": null,
+   "subject_kind": "global",
+   "subject_ref": null
+  },
+  {
+   "category": null,
+   "credential": false,
+   "detail": "T-1510,T-1565,T-1600,T-1609,T-1842",
+   "detail_hash": "9ac0aef2c43ade84",
+   "finding_key": "be275ce1326ee37b",
+   "rule_id": "closure_provenance_drift",
+   "severity": "problem",
+   "subject_id": null,
+   "subject_kind": "global",
+   "subject_ref": null
+  }
+ ]
+}

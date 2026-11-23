@@ -1,0 +1,10 @@
+{
+  "verifier": "4c1f8f8b3cb00afc",
+  "pre_subject": "f8e7066bd3a493f3",
+  "post_subject": "398ff79307450170",
+  "pre_rc": 1,
+  "post_rc": 0,
+  "control_rc": 0,
+  "held": true,
+  "command": "python -B -m unittest test_t1688_stale_plugin_guard"
+}

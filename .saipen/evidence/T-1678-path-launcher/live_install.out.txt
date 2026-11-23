@@ -1,0 +1,82 @@
+utc: 2026-10-08T06:02:01Z
+--- before: hand copies
+22f1b36ac80fbc0366e3067a09cb40c4916759ccfb6a8eff48b03975baae9909 */c/Users/vac34/bin/saipen
+f57fd06de34a9ed277a600bd053bcbbda4bc2044524814ded47e271ddeefdb43 */c/Users/vac34/bin/saipen.cmd
+--- saipen host launcher status
+{
+  "ok": false,
+  "code": "PATH_LAUNCHER_STALE",
+  "directory": "C:\\Users\\vac34\\bin",
+  "declared": [
+    "C:\\Users\\vac34\\bin",
+    "C:\\Users\\vac34\\.local\\bin"
+  ],
+  "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+  "files": {
+    "saipen.cmd": "unowned-proving",
+    "saipen": "unowned-proving"
+  },
+  "reasons": [
+    "C:\\Users\\vac34\\bin\\saipen.cmd proves the engine but no installer owns it",
+    "C:\\Users\\vac34\\bin\\saipen proves the engine but no installer owns it"
+  ],
+  "action": "saipen host launcher install",
+  "detail": "C:\\Users\\vac34\\bin\\saipen.cmd proves the engine but no installer owns it; C:\\Users\\vac34\\bin\\saipen proves the engine but no installer owns it"
+}
+--- saipen host launcher install
+{
+  "ok": true,
+  "code": "PATH_LAUNCHER_INSTALLED",
+  "directory": "C:\\Users\\vac34\\bin",
+  "declared": [
+    "C:\\Users\\vac34\\bin",
+    "C:\\Users\\vac34\\.local\\bin"
+  ],
+  "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+  "files": {
+    "saipen.cmd": "owned",
+    "saipen": "owned"
+  },
+  "reasons": [],
+  "action": null,
+  "status": "PATH_LAUNCHER_READY",
+  "previous": "PATH_LAUNCHER_STALE"
+}
+--- after
+22f1b36ac80fbc0366e3067a09cb40c4916759ccfb6a8eff48b03975baae9909 */c/Users/vac34/bin/saipen
+f57fd06de34a9ed277a600bd053bcbbda4bc2044524814ded47e271ddeefdb43 */c/Users/vac34/bin/saipen.cmd
+{
+  "files": {
+    "C:\\Users\\vac34\\bin\\saipen": "22f1b36ac80fbc0366e3067a09cb40c4916759ccfb6a8eff48b03975baae9909",
+    "C:\\Users\\vac34\\bin\\saipen.cmd": "f57fd06de34a9ed277a600bd053bcbbda4bc2044524814ded47e271ddeefdb43"
+  },
+  "kind": "saipen-path-launcher",
+  "schema": 1
+}
+--- saipen host launcher status (again)
+{
+  "ok": true,
+  "code": "PATH_LAUNCHER_READY",
+  "directory": "C:\\Users\\vac34\\bin",
+  "declared": [
+    "C:\\Users\\vac34\\bin",
+    "C:\\Users\\vac34\\.local\\bin"
+  ],
+  "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+  "files": {
+    "saipen.cmd": "owned",
+    "saipen": "owned"
+  },
+  "reasons": [],
+  "action": null
+}
+--- saipen host doctor (path launcher line)
+machine        STALE  saipen host machine install
+path launcher  READY  C:\Users\vac34\bin
+--- where saipen
+C:\Users\vac34\bin\saipen
+C:\Users\vac34\bin\saipen.cmd
+--- saipen host entry --json, typed in cmd.exe in V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+{'ok': True, 'code': 'PATH_LAUNCHER', 'transport': 'PATH_LAUNCHER', 'degraded': [], 'command_form': '"C:/Users/vac34/bin/saipen"'}
+--- saipen host entry --json, typed in cmd.exe in V:\___VAC\__K\__CODE\_PY\_AUDAPACK
+{'ok': True, 'code': 'PATH_LAUNCHER', 'transport': 'PATH_LAUNCHER', 'degraded': [], 'command_form': '"C:/Users/vac34/bin/saipen"'}

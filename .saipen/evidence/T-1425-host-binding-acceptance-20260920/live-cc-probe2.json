@@ -1,0 +1,13 @@
+{
+  "probe": "freebuff-live-cc-staged",
+  "project": "V:\\_TEMP_\\t1425-cc-fixture-2mynjxx8",
+  "stdin_sequence": [
+    "\\r",
+    "cc\\r"
+  ],
+  "timeout_seconds": 200,
+  "elapsed_seconds": 208.1,
+  "returncode": "TIMEOUT",
+  "stdout_bytes": 3447,
+  "screen_tail": "                                                    Freebuff                                                ⚠ Session limit reached                                 You've used 105 of 105 sessions today. Try again in 4h 34m. Press Ctrl+C to exit.                                                                                   9m  └─┘    ┌─┐  Some models aren't available in Estonia yet 8;2;175;253;126ming…                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────"
+}

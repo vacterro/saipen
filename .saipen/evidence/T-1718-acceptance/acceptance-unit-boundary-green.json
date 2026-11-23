@@ -1,0 +1,22 @@
+{
+  "label": "acceptance-unit-boundary-green",
+  "phase": "BUILD",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "test_t1718_acceptance_contract.NativeEscapeRegressionTests.test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass",
+    "-v"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+  "exit_code": 0,
+  "duration_s": 0.579,
+  "fingerprint": "41d439165c03c69745f115561255282f16fee7c0c6665c5254272bf250bfdfc2",
+  "stdout": "",
+  "stderr": "test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass (test_t1718_acceptance_contract.NativeEscapeRegressionTests.test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 1 test in 0.308s\r\n\r\nOK\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "a95ac6db7af7094674e240eb306e3d2f197dd3ce4e40ef0bbf8620579fd7d996",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

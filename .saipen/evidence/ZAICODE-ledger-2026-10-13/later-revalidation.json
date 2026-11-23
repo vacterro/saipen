@@ -1,0 +1,54 @@
+{
+  "observed_utc": "2026-10-13T10:01:34.6341811Z",
+  "target_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE",
+  "files": [
+    {
+      "path": ".saipen/logs/LOG-001.md",
+      "matches_capture": true,
+      "current_sha256": "9d77443ef6269f798f4e3ddceac0bfd9e249a73f2e3ca0ce2df0b44713003b36"
+    },
+    {
+      "path": ".saipen/logs/LOG-002.md",
+      "matches_capture": true,
+      "current_sha256": "de23495e9525a2979258363cd2de0513fd038fa9bf8d36b0127604f2ab21569e"
+    },
+    {
+      "path": ".saipen/logs/LOG-003.md",
+      "matches_capture": true,
+      "current_sha256": "d1f1dde8a9f6331de4bfe1c470b0104a131dc01124ece5f7e0f3c4f36b803839"
+    },
+    {
+      "path": ".saipen/logs/LOG-004.md",
+      "matches_capture": true,
+      "current_sha256": "b5371837efc745ed8101d9c99d4fbcb112eb93abf017f66fc7b155c7bc9843ca"
+    },
+    {
+      "path": ".saipen/LOG.md",
+      "matches_capture": false,
+      "current_sha256": "a41ec6ada5eab3e3f72651a14721e977f98e359dc259c5fde8ce67dea7d0eda3"
+    },
+    {
+      "path": ".saipen/STATE.md",
+      "matches_capture": false,
+      "current_sha256": "272dbc9c3421b62a312f16d2efece11e9e7cbb4d273a9b1ef2338c862cfb8e41"
+    },
+    {
+      "path": ".saipen/IDENTITY.md",
+      "matches_capture": true,
+      "current_sha256": "917348f1d49a8d9f3f3aa4bbb7b5843c7bd6e73ea1ffba292b7ea7d5be79a779"
+    },
+    {
+      "path": ".saipen/MANIFEST.json",
+      "matches_capture": true,
+      "current_sha256": "17f37f77c5ee3c719712e5e88af3b4e902a1a5d47d2eb6c481c6d0da3e81d3f2"
+    },
+    {
+      "path": ".saipen/BOARD.md",
+      "matches_capture": false,
+      "current_sha256": "be2f73c0fb38c184d1f2cd04e0c526f5c2c27c924e02722d3b703a9166c7d99f"
+    }
+  ],
+  "changed_count": 3,
+  "nested_zcode_protocol_state_exists": false,
+  "scope": "read-only exact files; original failing launcher carrier remains unknown"
+}

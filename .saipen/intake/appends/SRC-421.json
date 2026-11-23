@@ -1,0 +1,34 @@
+{
+  "appends": [
+    {
+      "class": "APPEND",
+      "created_work": "T-2088",
+      "delta": "context",
+      "derived_clauses": [
+        "SRC-422:R001",
+        "SRC-422:R002"
+      ],
+      "label": "",
+      "projected_at": "2026-11-17T23:06:19Z",
+      "receipt": "SRC-422",
+      "received_at": "2026-11-17T23:06:15Z",
+      "request_witness": "model_supplied",
+      "rewind": null,
+      "seq": 1,
+      "source_sha256": "0600cee65ae041b603e0f67940d207cd13b7829cfbfd607362c51a3240eb9ce0",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-2088"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source": "SRC-421"
+}

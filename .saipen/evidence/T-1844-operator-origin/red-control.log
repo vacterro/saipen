@@ -1,0 +1,108 @@
+test_fidelity_mismatch_still_refuses_instead_of_relabelling (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_fidelity_mismatch_still_refuses_instead_of_relabelling) ... ok
+test_forged_cached_proof_cannot_escape_its_project (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_forged_cached_proof_cannot_escape_its_project) ... FAIL
+test_matching_fields_and_declared_by_are_not_host_authentication (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_matching_fields_and_declared_by_are_not_host_authentication) ... 
+  test_matching_fields_and_declared_by_are_not_host_authentication (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_matching_fields_and_declared_by_are_not_host_authentication) (declared_by='SAIPEN_TASK_SHA256') ... FAIL
+  test_matching_fields_and_declared_by_are_not_host_authentication (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_matching_fields_and_declared_by_are_not_host_authentication) (declared_by='SAIPEN_TASK_FILE') ... FAIL
+  test_matching_fields_and_declared_by_are_not_host_authentication (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_matching_fields_and_declared_by_are_not_host_authentication) (declared_by='host_ingress') ... FAIL
+test_model_chosen_proof_fields_and_unkeyed_seal_are_not_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_chosen_proof_fields_and_unkeyed_seal_are_not_authority) ... FAIL
+test_model_computed_real_digest_variable_grants_no_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_computed_real_digest_variable_grants_no_authority) ... 
+  test_model_computed_real_digest_variable_grants_no_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_computed_real_digest_variable_grants_no_authority) (markers={}) ... FAIL
+  test_model_computed_real_digest_variable_grants_no_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_computed_real_digest_variable_grants_no_authority) (markers={'FREEBUFF_SESSION': 'model-chosen-session'}) ... FAIL
+test_model_written_matching_cache_envelope_grants_no_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_written_matching_cache_envelope_grants_no_authority) ... FAIL
+test_model_written_real_task_file_grants_no_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_written_real_task_file_grants_no_authority) ... FAIL
+test_no_carrier_stays_usable_as_local_model_work (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_no_carrier_stays_usable_as_local_model_work) ... ok
+
+======================================================================
+FAIL: test_forged_cached_proof_cannot_escape_its_project (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_forged_cached_proof_cannot_escape_its_project)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 94, in test_forged_cached_proof_cannot_escape_its_project
+    self.check_untrusted(OT.witness(TEXT, env={OT.ENV_HOST_SESSION: "model-session"}, root=self.root))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 43, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'host_ingress', 'ingress_id': 'forged', 'message_id': None, 'session_id': 'model-session'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_matching_fields_and_declared_by_are_not_host_authentication (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_matching_fields_and_declared_by_are_not_host_authentication) (declared_by='SAIPEN_TASK_SHA256')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 66, in test_matching_fields_and_declared_by_are_not_host_authentication
+    self.check_untrusted({"witness": OT.WITNESS_CARRIER,
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 43, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'SAIPEN_TASK_SHA256'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_matching_fields_and_declared_by_are_not_host_authentication (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_matching_fields_and_declared_by_are_not_host_authentication) (declared_by='SAIPEN_TASK_FILE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 66, in test_matching_fields_and_declared_by_are_not_host_authentication
+    self.check_untrusted({"witness": OT.WITNESS_CARRIER,
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 43, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'SAIPEN_TASK_FILE'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_matching_fields_and_declared_by_are_not_host_authentication (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_matching_fields_and_declared_by_are_not_host_authentication) (declared_by='host_ingress')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 66, in test_matching_fields_and_declared_by_are_not_host_authentication
+    self.check_untrusted({"witness": OT.WITNESS_CARRIER,
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 43, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'host_ingress'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_model_chosen_proof_fields_and_unkeyed_seal_are_not_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_chosen_proof_fields_and_unkeyed_seal_are_not_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 70, in test_model_chosen_proof_fields_and_unkeyed_seal_are_not_authority
+    self.check_untrusted({
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 43, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'host_ingress', 'operator_origin': {'kind': 'operator-origin', 'project': 'V:\\_TEMP_\\t1844-forgery-ys74lhjy', 'request_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'authenticated': True, 'seal': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'provenance': {'alg': 'sha256', 'mac': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57'}}}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_model_computed_real_digest_variable_grants_no_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_computed_real_digest_variable_grants_no_authority) (markers={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 48, in test_model_computed_real_digest_variable_grants_no_authority
+    self.check_untrusted(OT.witness(TEXT, env={**markers, OT.ENV_TASK_SHA256: self.digest}, root=self.root))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 43, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'SAIPEN_TASK_SHA256'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_model_computed_real_digest_variable_grants_no_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_computed_real_digest_variable_grants_no_authority) (markers={'FREEBUFF_SESSION': 'model-chosen-session'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 48, in test_model_computed_real_digest_variable_grants_no_authority
+    self.check_untrusted(OT.witness(TEXT, env={**markers, OT.ENV_TASK_SHA256: self.digest}, root=self.root))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 43, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'SAIPEN_TASK_SHA256'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_model_written_matching_cache_envelope_grants_no_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_written_matching_cache_envelope_grants_no_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 61, in test_model_written_matching_cache_envelope_grants_no_authority
+    self.check_untrusted(OT.witness(TEXT, env={OT.ENV_HOST_SESSION: "model-session"}, root=self.root))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 43, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'host_ingress', 'ingress_id': 'ing-228fd0dcc24ded66', 'message_id': 'model-message', 'session_id': 'model-session'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_model_written_real_task_file_grants_no_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_written_real_task_file_grants_no_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 53, in test_model_written_real_task_file_grants_no_authority
+    self.check_untrusted(OT.witness(TEXT, env={OT.ENV_TASK_FILE: str(target)}, root=self.root))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_operator_origin.py", line 43, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'SAIPEN_TASK_FILE'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.042s
+
+FAILED (failures=9)

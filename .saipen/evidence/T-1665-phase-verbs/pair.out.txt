@@ -1,0 +1,7 @@
+CONTROL unmutated copy: exit 0, Ran 4 tests
+command: python -B -m unittest test_t1665_guard_verbs (cwd tools/)
+verifier:8c66908cd078e845  (tools/test_t1665_guard_verbs.py, byte-identical in both trees)
+FAIL subject:192eede69b17cd4b  exit 1  red 3: test_a_verb_a_shell_does_not_run_names_what_is_true, test_no_verb_the_cli_dispatches_is_ever_called_not_a_verb, test_the_phase_verbs_are_admitted_as_their_transition_is
+PASS subject:e9b248cdf2adc31d  exit 0  Ran 4 tests
+held: True
+rc=0

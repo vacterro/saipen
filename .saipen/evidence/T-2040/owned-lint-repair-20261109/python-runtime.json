@@ -1,0 +1,8 @@
+{
+  "executable": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "packages": {
+    "ruff": "0.16.0",
+    "pytest": "9.1.1"
+  }
+}

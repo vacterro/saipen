@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-057:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-204 closed with verification evidence in LOG: verify -> PASS [target: T-204] conf: high -- python -m pytest -q tests/test_browser_bridge_widget_integration.py -> 1 passed; node --test tests/widget/w6-006-manual-archive-picker.test.js tests/widget/perf-011-manual-zip-latency.test.js -> 74 passed; full widget suite 48 files per-file bounded runner -> 565 passed; python -m pytest -q -> 1875 passed 5 skipped; python -m ruff check . -> All checks ",
+      "text": "T-198 contract correction: align acceptance doc and browser integration test with current Widget 0.0.61 auto-send ZIP semantics",
+      "verification": "the Work this request created reached its own verification gate; see the T-204 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-204"
+    }
+  },
+  "schema_version": 1
+}

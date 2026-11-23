@@ -1,0 +1,52 @@
+{
+  "observedUtc": "2026-10-14T23:50:06.952Z",
+  "runtime": {
+    "executable": "C:\\Users\\vac34\\AppData\\Local\\Programs\\@codebufffreebuff-desktop\\resources\\bun\\bun.exe",
+    "version": "v26.3.0",
+    "bun": "1.4.2"
+  },
+  "bundle": {
+    "path": "C:/Users/vac34/AppData/Local/Programs/@codebufffreebuff-desktop/resources/orchestrator/orchestrator.js",
+    "sha256": "0a4cc44933681c9bcb87804c435d96bff331f72dfae0d7c2db4d539abf64b66d"
+  },
+  "sourceMessage": {
+    "seq": 82,
+    "thread": "96ba4e8c-ef79-47c2-9e91-d2aad7c7096d",
+    "inputCwd": "/v/___VAC/__K/__CODE/_PLUG_SCRIPT/_FREEBUFF_SAI",
+    "root": "V:\\___VAC\\__K\\__CODE\\_PLUG_SCRIPT\\_FREEBUFF_SAI"
+  },
+  "bash": {
+    "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+    "exists": true,
+    "sha256": "c79fa1cd106bd3e2321f87e580930142ba9309d17b968fa5e3e71dedbbdc36aa"
+  },
+  "native": {
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_PLUG_SCRIPT\\_FREEBUFF_SAI",
+    "cwdExists": true,
+    "status": 0,
+    "stdout": "/v/___VAC/__K/__CODE/_PLUG_SCRIPT/_FREEBUFF_SAI\n",
+    "stderr": "",
+    "error": null
+  },
+  "incident": {
+    "cwd": "V:\\v\\___VAC\\__K\\__CODE\\_PLUG_SCRIPT\\_FREEBUFF_SAI",
+    "cwdExists": false,
+    "stdout": null,
+    "stderr": null,
+    "error": {
+      "code": "ENOENT",
+      "syscall": "spawnSync C:\\Program Files\\Git\\bin\\bash.exe",
+      "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+      "message": "ENOENT: no such file or directory, uv_spawn 'C:\\Program Files\\Git\\bin\\bash.exe'"
+    }
+  },
+  "supportedTranslation": {
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_PLUG_SCRIPT\\_FREEBUFF_SAI",
+    "cwdExists": true,
+    "status": 0,
+    "stdout": "/v/___VAC/__K/__CODE/_PLUG_SCRIPT/_FREEBUFF_SAI\n",
+    "stderr": "",
+    "error": null
+  },
+  "pass": true
+}

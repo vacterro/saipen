@@ -1,0 +1,93 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.exe
+PySide6 6.11.1 -- Qt runtime 6.11.1 -- Qt compiled 6.11.1
+rootdir: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+plugins: anyio-4.15.1, langsmith-0.14.12, asyncio-1.4.0, cov-7.1.0, docker-3.2.5, mock-3.15.1, qt-4.5.0, timeout-2.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 74 items
+
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_bad_or_unproven_hint_cannot_schedule 
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_bad_or_unproven_hint_cannot_schedule PASSED [  1%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_checked_terminal_control_retains_completion PASSED [  2%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_foreign_external_ticket_cannot_hide_authorized_discovery PASSED [  4%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_hint_never_overrides_real_authority_or_operator_boundary 
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_hint_never_overrides_real_authority_or_operator_boundary PASSED [  5%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_native_no_blocker_spellings_keep_bounded_discovery_available 
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_native_no_blocker_spellings_keep_bounded_discovery_available PASSED [  6%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_native_operator_stop_never_gets_a_discovery_hint PASSED [  8%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_pure_unproven_terminal_is_runtime_pause_not_operator_wait PASSED [  9%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_supervisor_queued_identity_does_not_lose_remediation_command 
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_supervisor_queued_identity_does_not_lose_remediation_command PASSED [ 10%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_unchecked_native_inventory_never_requests_a_human PASSED [ 12%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_valid_bounded_hint_remains_incomplete_but_resumes PASSED [ 13%]
+tools/test_supervisor.py::SupervisorTests::test_a_deferred_gate_is_not_a_human_stop PASSED [ 14%]
+tools/test_supervisor.py::SupervisorTests::test_a_due_human_stop_outranks_the_loop_stop PASSED [ 16%]
+tools/test_supervisor.py::SupervisorTests::test_a_due_operator_gate_with_no_work_stops_for_the_human PASSED [ 17%]
+tools/test_supervisor.py::SupervisorTests::test_a_future_heartbeat_reads_healthy_not_expired PASSED [ 18%]
+tools/test_supervisor.py::SupervisorTests::test_a_healthy_lease_is_never_stolen PASSED [ 20%]
+tools/test_supervisor.py::SupervisorTests::test_a_host_in_another_timezone_computes_the_same_age PASSED [ 21%]
+tools/test_supervisor.py::SupervisorTests::test_a_naive_timestamp_is_read_as_utc PASSED [ 22%]
+tools/test_supervisor.py::SupervisorTests::test_a_parked_hold_with_a_due_field_is_never_a_human_stop PASSED [ 24%]
+tools/test_supervisor.py::SupervisorTests::test_a_returning_old_worker_cannot_mutate PASSED [ 25%]
+tools/test_supervisor.py::SupervisorTests::test_a_role_owned_wait_is_never_a_human_stop PASSED [ 27%]
+tools/test_supervisor.py::SupervisorTests::test_a_stop_names_its_reason_and_a_run_does_not PASSED [ 28%]
+tools/test_supervisor.py::SupervisorTests::test_a_suspect_lease_is_still_not_replaceable PASSED [ 29%]
+tools/test_supervisor.py::SupervisorTests::test_boundary_just_before_at_and_after_expiry 
+tools/test_supervisor.py::SupervisorTests::test_boundary_just_before_at_and_after_expiry PASSED [ 31%]
+tools/test_supervisor.py::SupervisorTests::test_elapsed_progress_comes_from_the_history_not_the_readers_clock PASSED [ 32%]
+tools/test_supervisor.py::SupervisorTests::test_every_verdict_declares_whether_it_may_mutate 
+tools/test_supervisor.py::SupervisorTests::test_every_verdict_declares_whether_it_may_mutate PASSED [ 33%]
+tools/test_supervisor.py::SupervisorTests::test_every_verdict_names_a_canonical_command 
+tools/test_supervisor.py::SupervisorTests::test_every_verdict_names_a_canonical_command PASSED [ 35%]
+tools/test_supervisor.py::SupervisorTests::test_executable_work_outranks_a_due_operator_gate PASSED [ 36%]
+tools/test_supervisor.py::SupervisorTests::test_no_lease_and_work_available_runs_the_work PASSED [ 37%]
+tools/test_supervisor.py::SupervisorTests::test_observe_writes_nothing PASSED [ 39%]
+tools/test_supervisor.py::SupervisorTests::test_repeated_identical_cycles_stop_the_loop PASSED [ 40%]
+tools/test_supervisor.py::SupervisorTests::test_replacement_fences_the_old_generation_and_advances PASSED [ 41%]
+tools/test_supervisor.py::SupervisorTests::test_replacement_refuses_a_live_lease PASSED [ 43%]
+tools/test_supervisor.py::SupervisorTests::test_replacement_refuses_ambiguous_authority PASSED [ 44%]
+tools/test_supervisor.py::SupervisorTests::test_the_cli_projection_answers_verdict_and_observation_together PASSED [ 45%]
+tools/test_supervisor.py::SupervisorTests::test_the_cli_projection_writes_nothing PASSED [ 47%]
+tools/test_supervisor.py::SupervisorTests::test_the_holding_worker_adopts_its_own_generation PASSED [ 48%]
+tools/test_supervisor.py::SupervisorTests::test_the_picture_carries_the_last_durable_checkpoint PASSED [ 50%]
+tools/test_supervisor.py::SupervisorTests::test_the_read_only_picture_names_what_a_restart_needs 
+tools/test_supervisor.py::SupervisorTests::test_the_read_only_picture_names_what_a_restart_needs PASSED [ 51%]
+tools/test_supervisor.py::SupervisorTests::test_the_verb_is_registered_where_the_surface_is_declared PASSED [ 52%]
+tools/test_supervisor.py::SupervisorTests::test_three_generations_of_cold_turnover 
+tools/test_supervisor.py::SupervisorTests::test_three_generations_of_cold_turnover PASSED [ 54%]
+tools/test_supervisor.py::SupervisorTests::test_unknown_lease_with_a_present_record_never_permits_takeover PASSED [ 55%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c01_empty_board_with_proven_maintenance_continues PASSED [ 56%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c02_empty_board_no_maintenance_authority_remains_idle PASSED [ 58%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c03_doing_work_resumes_before_discovery PASSED [ 59%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c04_independent_work_proceeds_beside_blocked_work PASSED [ 60%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds PASSED [ 62%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c13_forged_persistent_grant_refused PASSED [ 63%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c14_due_operator_gate_enforced PASSED [ 64%]
+tools/test_t1619_iteration_boundary.py::E2E01PrematureHandback::test_auto_kick_and_no_completion_ui PASSED [ 66%]
+tools/test_t1619_iteration_boundary.py::E2E02TrueTerminal::test_terminal_once_then_stop PASSED [ 67%]
+tools/test_t1619_iteration_boundary.py::E2E03NoShellCandidate::test_incompatible_rejected_compatible_selected PASSED [ 68%]
+tools/test_t1619_iteration_boundary.py::E2E04ModelSwitchCapabilityLoss::test_each_switch_admitted_independently PASSED [ 70%]
+tools/test_t1619_iteration_boundary.py::E2E05BadRouteLoop::test_negative_epoch_does_not_reset_between_candidates PASSED [ 71%]
+tools/test_t1619_iteration_boundary.py::E2E06AllRoutesIncompatible::test_pause_preserves_work PASSED [ 72%]
+tools/test_t1619_iteration_boundary.py::E2E07SafetyValve::test_valve_tripped_is_operator_wait PASSED [ 74%]
+tools/test_t1619_iteration_boundary.py::E2E08RealOperatorAction::test_binding_brake_stops PASSED [ 75%]
+tools/test_t1619_iteration_boundary.py::E2E09PublicDecisionCommand::test_cli_decision_matches_library PASSED [ 77%]
+tools/test_t1619_iteration_boundary.py::E2E09PublicDecisionCommand::test_cli_guard_safe_caps PASSED [ 78%]
+tools/test_t1619_iteration_boundary.py::E2E10UnknownDecisionVersion::test_unknown_verdict_pauses PASSED [ 79%]
+tools/test_t1880_wait_survives_phase_shortcut.py::PhaseShortcutKeepsAnEarnedWaitTests::test_a_plain_continue_is_not_treated_as_a_brake PASSED [ 81%]
+tools/test_t1880_wait_survives_phase_shortcut.py::PhaseShortcutKeepsAnEarnedWaitTests::test_an_ordinary_transition_still_writes_the_destination_route PASSED [ 82%]
+tools/test_t1880_wait_survives_phase_shortcut.py::PhaseShortcutKeepsAnEarnedWaitTests::test_the_tripped_valve_wait_survives_the_phase_shortcut PASSED [ 83%]
+tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac01_build_unfinished_yields_auto_kick PASSED [ 85%]
+tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac02_next_exact_action_in_text_does_not_handback PASSED [ 86%]
+tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac03_ticket_completes_build_continues_lifecycle PASSED [ 87%]
+tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac04_ticket_terminal_other_work_remains_selects_next PASSED [ 89%]
+tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac05_genuine_full_goal_terminal_verdict PASSED [ 90%]
+tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac06_operator_wait_no_bypass PASSED [ 91%]
+tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac07_ac08_candidate_lacks_tools_reroutes PASSED [ 93%]
+tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac09_all_compatible_executors_unavailable_runtime_paused PASSED [ 94%]
+tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac10_ac11_duplicate_turn_callbacks_emitted_consistently PASSED [ 95%]
+tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac12_repeated_unchanged_report_diagnoses_stall PASSED [ 97%]
+tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac15_live_project_still_in_build_no_goal_complete_ui PASSED [ 98%]
+tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac17_cross_project_boundary_zaicode_advisory PASSED [100%]
+
+=================== 74 passed, 44 subtests passed in 4.37s ====================

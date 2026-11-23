@@ -1,0 +1,35 @@
+generation: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+hosts the installer accepts: ['kiro', 'gemini', 'codex', 'claude', 'zaicode']
+hosts declaring a hook surface: ['claude', 'codex', 'gemini', 'kiro', 'zaicode']
+
+== claude
+   shipped=2a5955eb10ecd679 extensions/adapters/claude/saipen-guard.py
+   surface=2a5955eb10ecd679 C:\Users\vac34\.claude\hooks\saipen-guard.py
+   byte-identical=True
+   --check rc=0 current=True problems=[] effective=UNKNOWN
+== codex
+   shipped=b69c2a413d2c1122 extensions/adapters/codex/saipen-guard.py
+   surface=b69c2a413d2c1122 C:\Users\vac34\.codex\hooks\saipen-guard.py
+   byte-identical=True
+   --check rc=0 current=True problems=[] effective=UNKNOWN
+== gemini
+   shipped=dbba552643a3657b tools/host_guard.py
+   surface=dbba552643a3657b C:\Users\vac34\.gemini\hooks\saipen-guard.py
+   byte-identical=True
+   --check rc=0 current=True problems=[] effective=UNKNOWN
+== kiro
+   shipped=dbba552643a3657b tools/host_guard.py
+   surface=ABSENT C:\Users\vac34\.kiro\hooks\saipen-guard.py
+   --check rc=0 current=False problems=['artifact-missing'] effective=ENFORCEMENT_GAP
+== zaicode
+   shipped=4317be7fc0175157 extensions/adapters/zaicode/saipen-guard.py
+   surface=4317be7fc0175157 C:\Users\vac34\.zcode\hooks\saipen-guard.py
+   byte-identical=True
+   --check rc=0 current=True problems=[] effective=UNKNOWN
+== opencode
+   shipped=8cd916664244d868 extensions/adapters/opencode/saipen-guard.js
+   surface=8cd916664244d868 C:\Users\vac34\.config\opencode\plugins\saipen-guard.js
+   byte-identical=True
+   --check N/A: not an install_host_guard adapter (its artifact is deployed by the injector; see fleet report)
+
+RESULT: PASS -- every deployed installer-managed hook is byte-current

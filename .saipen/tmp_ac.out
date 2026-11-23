@@ -1,0 +1,47 @@
+663     def _artifact_current(self, host: str):
+664         """A check that an installed hook file carries the shipped bytes."""
+665 
+666         def current(script: str) -> bool:
+667             try:
+668                 from . import protocol_admission as pa
+669                 from .runtime_surface import normalize_content
+670 
+671                 entry = (
+672                     pa._adapters(pa.Context(project_root=None, session_id="", host=host)).get(host)
+673                     or {}
+674                 )
+675                 artifact = entry.get("hook_artifact")
+676                 if not artifact or self.saipen_root is None:
+677                     return False
+678                 shipped = (Path(self.saipen_root) / str(artifact)).read_bytes()
+679                 installed = Path(script).read_bytes()
+680             except Exception:
+681                 return False
+682             return normalize_content(installed) == normalize_content(shipped)
+683 
+684         return current
+685 
+686     def identify(
+687         self, peer, host: str = "claude", home: object = None
+688     ) -> tuple[bool, str | None, dict]:
+689         """Authenticate the client from the OS, never from the request.
+690 
+691         The answer is a proof or a reason: `detail["reason"]` names exactly
+692         which part of the hook invocation could not be shown, and that reason
+693         is what the operator's diagnostic repeats.
+694         """
+695         if self._authenticator is not None:
+696             return self._authenticator(peer, host, home)
+697         # Per-host policy (T-417): a host that declares its own image/signer/
+698         # shell shape overrides the global policy for this identify() call.
+699         host_cfg = dict(self.config)
+700         hosts = host_cfg.get("hosts")
+701         if isinstance(hosts, dict) and isinstance(hosts.get(host), dict):
+702             host_cfg.update(hosts.get(host) or {})
+703         limit = int(host_cfg.get("ancestry_limit") or DEFAULT_ANCESTRY_LIMIT)
+704         if peer is None or getattr(peer, "pid", None) is None or not proc.platform_supported():
+705             return (
+706                 False,
+707                 CODE_IDENTITY_UNAVAILABLE,
+708                 {
+=====

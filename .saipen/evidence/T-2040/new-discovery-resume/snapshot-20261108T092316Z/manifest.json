@@ -1,0 +1,54 @@
+{
+  "status": "PRE_EDIT_SNAPSHOT",
+  "utc": "20261108T092316Z",
+  "files": [
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\work_exhaustion.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\snapshot-20261108T092316Z\\tools\\saipen_engine\\work_exhaustion.py",
+      "sha256": "e0f08535c7fc7e05e8084e66a0edec52a51ac2de73da82766984ae1d590f10ee",
+      "bytes": 27156
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\continue_fallback.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\snapshot-20261108T092316Z\\tools\\saipen_engine\\continue_fallback.py",
+      "sha256": "89462a7516166dc1d1500bcbdec5b1906435db9a2e6d46aaf5027828fdd88ca1",
+      "bytes": 18768
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\discovery_providers.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\snapshot-20261108T092316Z\\tools\\saipen_engine\\discovery_providers.py",
+      "sha256": "5a2dd94922602e091586617866758dd93374eb50619f9264c644cb4dd5f7e574",
+      "bytes": 58792
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\improve.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\snapshot-20261108T092316Z\\tools\\improve.py",
+      "sha256": "bc8f957001e2e5b04f5f1bfd73e352e400565a69daf73d3874479d06a3b55faa",
+      "bytes": 229427
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\snapshot-20261108T092316Z\\tools\\saipen.py",
+      "sha256": "ba58917e11e544c244035eb32f8887989276c94e48a2fd80322326e7eb124541",
+      "bytes": 687698
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_exhaustion_evidence.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\snapshot-20261108T092316Z\\tools\\test_t2040_exhaustion_evidence.py",
+      "sha256": "7f8a9aaedb16d5cf18f3cd3cee61c99597b98b01ab85cc85a830853f41c9415f",
+      "bytes": 10164
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_discovery_owners.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\snapshot-20261108T092316Z\\tools\\test_t2040_discovery_owners.py",
+      "sha256": "6142525d3581f07da0a049084aa8120150589b7355208cb2ffed98f988a613e1",
+      "bytes": 8673
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_continuation_truth.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\snapshot-20261108T092316Z\\tools\\test_t2040_continuation_truth.py",
+      "sha256": "94b7dd9ae3e870bb8e7d9d78b249aee1a1c4de8a2ab1642f70b8f8f40f89ba28",
+      "bytes": 12211
+    }
+  ]
+}

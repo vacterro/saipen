@@ -1,0 +1,30 @@
+{
+  "trees": 12,
+  "files_per_tree": 1500,
+  "runs": [
+    {
+      "trial": 0,
+      "mode": "serial",
+      "seconds": 1.25,
+      "leaked": []
+    },
+    {
+      "trial": 0,
+      "mode": "concurrent",
+      "seconds": 0.5,
+      "leaked": []
+    },
+    {
+      "trial": 1,
+      "mode": "serial",
+      "seconds": 1.28,
+      "leaked": []
+    },
+    {
+      "trial": 1,
+      "mode": "concurrent",
+      "seconds": 0.48,
+      "leaked": []
+    }
+  ]
+}

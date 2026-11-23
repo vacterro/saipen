@@ -1,0 +1,10 @@
+test_a_disabled_host_bound_turns_the_subject_check_red (test_t1748_worker_clock.WorkerClockControls.test_a_disabled_host_bound_turns_the_subject_check_red) ... ok
+test_a_too_early_host_bound_turns_the_subject_check_red (test_t1748_worker_clock.WorkerClockControls.test_a_too_early_host_bound_turns_the_subject_check_red) ... ok
+test_interruption_inside_state_write_preserves_the_successor (test_t1748_worker_clock.WorkerClockControls.test_interruption_inside_state_write_preserves_the_successor) ... ok
+test_normal_real_process_control (test_t1748_worker_clock.WorkerClockControls.test_normal_real_process_control) ... ok
+test_worker_without_cpu_beyond_old_idle_budget_stays_green (test_t1748_worker_clock.WorkerClockControls.test_worker_without_cpu_beyond_old_idle_budget_stays_green) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 6.753s
+
+OK

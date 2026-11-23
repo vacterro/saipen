@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "verdict": "PASS",
+  "ran": 4472,
+  "red": 0,
+  "new_red": [],
+  "fixed": [],
+  "problems": [],
+  "record": ".saipen/evidence/core-unit/8c90204d70561cf2-20261001T001542Z.json",
+  "reused": false,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

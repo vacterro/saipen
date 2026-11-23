@@ -1,0 +1,271 @@
+FE.FEEFE.FF.EF.EEEFFFFFFE
+======================================================================
+ERROR: test_conflicting_duplicate_disposition_never_overwrites (__main__.ArchivedImproveTests.test_conflicting_duplicate_disposition_never_overwrites)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 170, in test_conflicting_duplicate_disposition_never_overwrites
+    improve.write_sweep_entry(cycle, self._entry(seat))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1021, in write_sweep_entry
+    _require_cycle_active(cycle_dir, "write_sweep_entry")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1247, in _require_cycle_active
+    snapshot = load_valid_manifest(cycle_dir, mutator, ("active",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1222, in load_valid_manifest
+    raise ImproveError(
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+======================================================================
+ERROR: test_exact_disposition_retry_is_idempotent (__main__.ArchivedImproveTests.test_exact_disposition_retry_is_idempotent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 162, in test_exact_disposition_retry_is_idempotent
+    improve.write_sweep_entry(cycle, self._entry(seat))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1021, in write_sweep_entry
+    _require_cycle_active(cycle_dir, "write_sweep_entry")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1247, in _require_cycle_active
+    snapshot = load_valid_manifest(cycle_dir, mutator, ("active",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1222, in load_valid_manifest
+    raise ImproveError(
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+======================================================================
+ERROR: test_first_historical_disposition_preserves_original_missing_sweep (__main__.ArchivedImproveTests.test_first_historical_disposition_preserves_original_missing_sweep)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 135, in test_first_historical_disposition_preserves_original_missing_sweep
+    result = improve.write_sweep_entry(cycle, self._entry(seat))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1021, in write_sweep_entry
+    _require_cycle_active(cycle_dir, "write_sweep_entry")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1247, in _require_cycle_active
+    snapshot = load_valid_manifest(cycle_dir, mutator, ("active",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1222, in load_valid_manifest
+    raise ImproveError(
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+======================================================================
+ERROR: test_fresh_process_sees_persisted_reconciliation (__main__.ArchivedImproveTests.test_fresh_process_sees_persisted_reconciliation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 244, in test_fresh_process_sees_persisted_reconciliation
+    self._all_dispositions(cycle, seat)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 105, in _all_dispositions
+    result = improve.write_sweep_entry(cycle, self._entry(seat, number))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1021, in write_sweep_entry
+    _require_cycle_active(cycle_dir, "write_sweep_entry")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1247, in _require_cycle_active
+    snapshot = load_valid_manifest(cycle_dir, mutator, ("active",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1222, in load_valid_manifest
+    raise ImproveError(
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+======================================================================
+ERROR: test_needs_external_evidence_stays_visible_without_endless_actionable_retry (__main__.ArchivedImproveTests.test_needs_external_evidence_stays_visible_without_endless_actionable_retry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 217, in test_needs_external_evidence_stays_visible_without_endless_actionable_retry
+    result = improve.write_sweep_entry(cycle, self._entry(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1021, in write_sweep_entry
+    _require_cycle_active(cycle_dir, "write_sweep_entry")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1247, in _require_cycle_active
+    snapshot = load_valid_manifest(cycle_dir, mutator, ("active",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1222, in load_valid_manifest
+    raise ImproveError(
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+======================================================================
+ERROR: test_original_history_change_invalidates_successor_binding (__main__.ArchivedImproveTests.test_original_history_change_invalidates_successor_binding)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 197, in test_original_history_change_invalidates_successor_binding
+    improve.write_sweep_entry(cycle, self._entry(seat))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1021, in write_sweep_entry
+    _require_cycle_active(cycle_dir, "write_sweep_entry")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1247, in _require_cycle_active
+    snapshot = load_valid_manifest(cycle_dir, mutator, ("active",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1222, in load_valid_manifest
+    raise ImproveError(
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+======================================================================
+ERROR: test_partial_sweep_is_preserved_and_combined_with_successor (__main__.ArchivedImproveTests.test_partial_sweep_is_preserved_and_combined_with_successor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 154, in test_partial_sweep_is_preserved_and_combined_with_successor
+    result = improve.write_sweep_entry(cycle, self._entry(seat, 2))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1021, in write_sweep_entry
+    _require_cycle_active(cycle_dir, "write_sweep_entry")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1247, in _require_cycle_active
+    snapshot = load_valid_manifest(cycle_dir, mutator, ("active",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1222, in load_valid_manifest
+    raise ImproveError(
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+======================================================================
+ERROR: test_reconciled_archive_stops_repeated_advertisement (__main__.ArchivedImproveTests.test_reconciled_archive_stops_repeated_advertisement)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 230, in test_reconciled_archive_stops_repeated_advertisement
+    self._all_dispositions(cycle, seat)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 105, in _all_dispositions
+    result = improve.write_sweep_entry(cycle, self._entry(seat, number))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1021, in write_sweep_entry
+    _require_cycle_active(cycle_dir, "write_sweep_entry")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1247, in _require_cycle_active
+    snapshot = load_valid_manifest(cycle_dir, mutator, ("active",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1222, in load_valid_manifest
+    raise ImproveError(
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+======================================================================
+ERROR: test_wrong_lineage_cannot_reuse_successor (__main__.ArchivedImproveTests.test_wrong_lineage_cannot_reuse_successor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 207, in test_wrong_lineage_cannot_reuse_successor
+    improve.write_sweep_entry(cycle, self._entry(seat))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1021, in write_sweep_entry
+    _require_cycle_active(cycle_dir, "write_sweep_entry")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1247, in _require_cycle_active
+    snapshot = load_valid_manifest(cycle_dir, mutator, ("active",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1222, in load_valid_manifest
+    raise ImproveError(
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+======================================================================
+FAIL: test_concurrent_dispositions_preserve_both_findings_after_bounded_retry (__main__.ArchivedImproveTests.test_concurrent_dispositions_preserve_both_findings_after_bounded_retry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 188, in test_concurrent_dispositions_preserve_both_findings_after_bounded_retry
+    self.assertTrue(any(result.get("ok") for result in results), results)
+AssertionError: False is not true : [{'ok': False, 'detail': 'write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active'}, {'ok': False, 'detail': 'write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active'}]
+
+======================================================================
+FAIL: test_empty_archive_is_not_advertised_as_pending (__main__.ArchivedImproveTests.test_empty_archive_is_not_advertised_as_pending)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 112, in test_empty_archive_is_not_advertised_as_pending
+    self.assertFalse(live["stale"], live)
+AssertionError: True is not false : {'cycle_id': 'imp-t1803-20261016-1', 'status': 'archived', 'seat_id': 'probe-01', 'report_status': 'draft', 'has_report': True, 'runs': 0, 'draft': True, 'no_run': True, 'created_at': '2026-09-20T00:00:00Z', 'age_days': 26, 'stale': True, 'submit_route': 'saipen improve submit imp-t1803-20261016-1 probe-01 probe-project probe-01/saipen_improve_PROBE.md'}
+
+======================================================================
+FAIL: test_foreign_actor_cannot_mutate_claimed_project_history (__main__.ArchivedImproveTests.test_foreign_actor_cannot_mutate_claimed_project_history)
+----------------------------------------------------------------------
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 292, in test_foreign_actor_cannot_mutate_claimed_project_history
+    with self.assertRaisesRegex(improve.ImproveError, "OWNERSHIP|owner|actor"):
+AssertionError: "OWNERSHIP|owner|actor" does not match "write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active"
+
+======================================================================
+FAIL: test_interrupted_append_recovers_without_mutating_original_cycle (__main__.ArchivedImproveTests.test_interrupted_append_recovers_without_mutating_original_cycle)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 308, in test_interrupted_append_recovers_without_mutating_original_cycle
+    self.assertTrue(self._successor(cycle).is_file(), recovered)
+AssertionError: False is not true : {'ok': True, 'code': 'CLEAN', 'recovered': []}
+
+======================================================================
+FAIL: test_missing_active_work_is_not_retrospective_admission (__main__.ArchivedImproveTests.test_missing_active_work_is_not_retrospective_admission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 355, in test_missing_active_work_is_not_retrospective_admission
+    self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "TICKET_NOT_FOUND",
+  "op_id": null,
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "T-001 not on the board",
+  "ticket": "T-001",
+  "detail": "T-001 not on the board"
+}
+
+
+======================================================================
+FAIL: test_no_go_binding_brake_refuses_retrospective_mutation (__main__.ArchivedImproveTests.test_no_go_binding_brake_refuses_retrospective_mutation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 285, in test_no_go_binding_brake_refuses_retrospective_mutation
+    self.assertIn("NO_GO", state.read_text(encoding="utf-8"))
+AssertionError: 'NO_GO' not found in '---\nphase: SCOUT\ntask: T-1\nnext_action: "PHASE SCOUT T-1"\nblocker: ""\ntransition_from: DONE\nsaipen_version: 8\nschema_version: 3\nlast_event: 902\nstyle_contract: ded-069a4c52\nagent: probe\nmode: full\nupdated: "2026-10-16T16:43:22Z"\n---\n'
+
+======================================================================
+FAIL: test_recovery_refuses_changed_original_dependency (__main__.ArchivedImproveTests.test_recovery_refuses_changed_original_dependency)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 323, in test_recovery_refuses_changed_original_dependency
+    self.assertFalse(recovered.get("ok"), recovered)
+AssertionError: True is not false : {'ok': True, 'code': 'CLEAN', 'recovered': []}
+
+======================================================================
+FAIL: test_resolved_disposition_requires_owned_verification_evidence (__main__.ArchivedImproveTests.test_resolved_disposition_requires_owned_verification_evidence) (verification='-')
+----------------------------------------------------------------------
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 145, in test_resolved_disposition_requires_owned_verification_evidence
+    with self.assertRaisesRegex(improve.ImproveError, "evidence|verification|owned"):
+AssertionError: "evidence|verification|owned" does not match "write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active"
+
+======================================================================
+FAIL: test_resolved_disposition_requires_owned_verification_evidence (__main__.ArchivedImproveTests.test_resolved_disposition_requires_owned_verification_evidence) (verification='missing-proof.txt')
+----------------------------------------------------------------------
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 145, in test_resolved_disposition_requires_owned_verification_evidence
+    with self.assertRaisesRegex(improve.ImproveError, "evidence|verification|owned"):
+AssertionError: "evidence|verification|owned" does not match "write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active"
+
+======================================================================
+FAIL: test_resolved_disposition_requires_owned_verification_evidence (__main__.ArchivedImproveTests.test_resolved_disposition_requires_owned_verification_evidence) (verification='../outside-proof.txt')
+----------------------------------------------------------------------
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 145, in test_resolved_disposition_requires_owned_verification_evidence
+    with self.assertRaisesRegex(improve.ImproveError, "evidence|verification|owned"):
+AssertionError: "evidence|verification|owned" does not match "write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active"
+
+======================================================================
+FAIL: test_secondary_seat_findings_are_visible (__main__.ArchivedImproveTests.test_secondary_seat_findings_are_visible)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 119, in test_secondary_seat_findings_are_visible
+    self.assertEqual(len(live.get("pending_findings", [])), 2, live)
+AssertionError: 0 != 2 : {'cycle_id': 'imp-t1803-20261016-1', 'status': 'archived', 'seat_id': 'probe-01', 'report_status': 'draft', 'has_report': True, 'runs': 0, 'draft': True, 'no_run': True, 'created_at': '2026-09-20T00:00:00Z', 'age_days': 26, 'stale': True, 'submit_route': 'saipen improve submit imp-t1803-20261016-1 probe-01 probe-project probe-01/saipen_improve_PROBE.md'}
+
+======================================================================
+FAIL: test_terminal_status_does_not_hide_unfinished_findings (__main__.ArchivedImproveTests.test_terminal_status_does_not_hide_unfinished_findings)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 128, in test_terminal_status_does_not_hide_unfinished_findings
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'code': 'ALREADY_TERMINAL', 'outcome': 'ABORTED', 'cycle_id': 'imp-t1803-20261016-1', 'seats': [{'seat_id': 'probe-01', 'role': 'core', 'report_path': 'saipen_improve_PROBE.md', 'availability': 'expected', 'report_status': 'draft', 'class': 'STILL_ACTIONABLE', 'terminal': False, 'retire_reason': '', 'detail': "report_status 'draft' with committed audit content", 'routes': ['saipen improve submit imp-t1803-20261016-1 probe-01 <project> <findings.json>', 'saipen improve complete imp-t1803-20261016-1 probe-01 <project>']}, {'seat_id': 'probe-02', 'role': 'core', 'report_path': 'saipen_improve_PROBE.md', 'availability': 'expected', 'report_status': 'draft', 'class': 'EMPTY_DRAFT', 'terminal': False, 'retire_reason': '', 'detail': 'zero committed RUNs; the assignment produced no evidence', 'routes': ['saipen improve retire imp-t1803-20261016-1 probe-02 --reason EMPTY_DRAFT']}], 'seat_classes': {'probe-01': 'STILL_ACTIONABLE', 'probe-02': 'EMPTY_DRAFT'}, 'retired': [], 'superseded': [], 'bookkeeping': {'status': 'PENDING', 'persisted': False, 'changed': [], 'untracked_history': ['.saipen/BOARD.md', '.saipen/LOG.md', '.saipen/STATE.md', '.saipen/improve/imp-t1803-20261016-1/MANIFEST.md', '.saipen/improve/imp-t1803-20261016-1/probe-01/saipen_improve_PROBE.md', '.saipen/improve/imp-t1803-20261016-1/probe-02/saipen_improve_PROBE.md'], 'next_action': 'Review listed protocol files; explicitly stage approved paths (including ignored history when appropriate), then git commit --only -- <those exact paths>. Keep unrelated staged changes outside that commit; ship is a release operation.', 'review_command': 'git status --short --untracked-files=all -- .saipen', 'automatic_commit': False}}
+
+----------------------------------------------------------------------
+Ran 23 tests in 23.681s
+
+FAILED (failures=12, errors=9)

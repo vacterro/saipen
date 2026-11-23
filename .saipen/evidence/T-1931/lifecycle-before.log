@@ -1,0 +1,540 @@
+======================================================================
+ERROR: test_active_campaign_cancel_is_durable_and_once_only (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_active_campaign_cancel_is_durable_and_once_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 115, in test_active_campaign_cancel_is_durable_and_once_only
+    self.assertEqual(result["state"]["cancellation_epoch"], 1)
+                     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'cancellation_epoch'
+
+======================================================================
+ERROR: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget=[1])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 163, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(self.admit(resource_budget=budget)["ok"])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 36, in admit
+    return self.ctrl.admit_campaign(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 573, in admit_campaign
+    for k, v in resource_budget.items():
+                ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'items'
+
+======================================================================
+ERROR: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget='bad')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 163, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(self.admit(resource_budget=budget)["ok"])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 36, in admit
+    return self.ctrl.admit_campaign(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 573, in admit_campaign
+    for k, v in resource_budget.items():
+                ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'items'
+
+======================================================================
+ERROR: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 163, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(self.admit(resource_budget=budget)["ok"])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 36, in admit
+    return self.ctrl.admit_campaign(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 573, in admit_campaign
+    for k, v in resource_budget.items():
+                ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'items'
+
+======================================================================
+ERROR: test_durable_intent_precedes_worker_execution (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_durable_intent_precedes_worker_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 193, in test_durable_intent_precedes_worker_execution
+    result = self.ctrl.step(worker_func=worker)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 936, in step
+    w_res = worker_func(self.root, generation=w_gen)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 185, in worker
+    attempt = state["worker_attempt"]
+              ~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'worker_attempt'
+
+======================================================================
+ERROR: test_internal_typeerror_does_not_invoke_worker_three_times (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_internal_typeerror_does_not_invoke_worker_three_times)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 936, in step
+    w_res = worker_func(self.root, generation=w_gen)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 218, in worker
+    raise TypeError("error after side effect")
+TypeError: error after side effect
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 939, in step
+    w_res = worker_func(self.root, w_gen)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 218, in worker
+    raise TypeError("error after side effect")
+TypeError: error after side effect
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 220, in test_internal_typeerror_does_not_invoke_worker_three_times
+    result = self.ctrl.step(worker_func=worker)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 941, in step
+    w_res = worker_func(self.root)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 218, in worker
+    raise TypeError("error after side effect")
+TypeError: error after side effect
+
+======================================================================
+ERROR: test_interrupted_generation_preserves_identity_across_restart (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_interrupted_generation_preserves_identity_across_restart)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 233, in test_interrupted_generation_preserves_identity_across_restart
+    before = campaign.load_campaign_state(self.root)["worker_attempt"]
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'worker_attempt'
+
+======================================================================
+ERROR: test_invalid_horizon_never_throws (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_horizon_never_throws) (horizon=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 168, in test_invalid_horizon_never_throws
+    self.assertEqual(self.admit(horizon=horizon)["code"], "INVALID_HORIZON")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 36, in admit
+    return self.ctrl.admit_campaign(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 563, in admit_campaign
+    if horizon not in HORIZONS:
+       ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'list'
+
+======================================================================
+ERROR: test_terminal_replacement_retains_exact_original_bytes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_terminal_replacement_retains_exact_original_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 138, in test_terminal_replacement_retains_exact_original_bytes
+    self.assertEqual((self.root / result["state"]["predecessor_reference"]).read_bytes(), before)
+                                  ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'predecessor_reference'
+
+======================================================================
+ERROR: test_worker_exception_is_unknown_outcome_and_never_blindly_retried (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_worker_exception_is_unknown_outcome_and_never_blindly_retried)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 200, in test_worker_exception_is_unknown_outcome_and_never_blindly_retried
+    result = self.ctrl.step(worker_func=worker)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 936, in step
+    w_res = worker_func(self.root, generation=w_gen)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1183, in _execute_mock_call
+    raise effect
+RuntimeError: side effect may already exist
+
+======================================================================
+FAIL: test_cancel_and_parallel_step_while_worker_is_running (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_cancel_and_parallel_step_while_worker_is_running)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 257, in test_cancel_and_parallel_step_while_worker_is_running
+    self.assertEqual(result["code"], "ATTEMPT_RECOVERY_REQUIRED")
+AssertionError: 'CAMPAIGN_LOCKED' != 'ATTEMPT_RECOVERY_REQUIRED'
+- CAMPAIGN_LOCKED
++ ATTEMPT_RECOVERY_REQUIRED
+
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_cycles': -1})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': True, 'state': {'schema_version': 1, 'campaign_id': 'CAMP-LIFECYCLE', 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'authority_grant': {'reference': 'unit-grant'}, 'campaign_state': 'ADMITTED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': -1, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:00Z', 'updated_at': '2026-10-26T06:18:00Z', 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb'}, 'status': 'ADMITTED'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_cycles': 0})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_cycles': True})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_cycles': nan})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_cycles': inf})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_cycles': '2'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_cycles': None})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_generations': -1})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 160, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(campaign.campaign_state_path(self.root).exists())
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_generations': 0})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 160, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(campaign.campaign_state_path(self.root).exists())
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_generations': True})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_generations': nan})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_generations': inf})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_generations': '2'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_generations': None})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 160, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(campaign.campaign_state_path(self.root).exists())
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_wall_seconds': -1})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 160, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(campaign.campaign_state_path(self.root).exists())
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_wall_seconds': 0})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 160, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(campaign.campaign_state_path(self.root).exists())
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_wall_seconds': True})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_wall_seconds': nan})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_wall_seconds': inf})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_wall_seconds': '2'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_wall_seconds': None})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 160, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(campaign.campaign_state_path(self.root).exists())
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_cycles': 1.5})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'max_generations': 1.5})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget={'unknown': 1})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 158, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'authority_grant': {'reference': 'unit-grant'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'campaign_id': 'CAMP-LIFECYCLE', 'campaign_state': 'ADMITTED', 'created_at': '2026-10-26T06:18:00Z', 'current_work': None, 'goal_binding': {'fingerprint': 'lineage-lineage-', 'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-fhzvq5dv\\.saipen\\STATE.md'}, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_saipal_generation': 0, 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'no_progress_count': 0, 'project_lineage': 'lineage-local-fe868d7e397bffeb', 'resource_budget': {'max_cycles': -1, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'b9e06703f9ad015909cf6a517df1fd1ca9286e1f5af881baf81b0e0d5e02a0eb', 'updated_at': '2026-10-26T06:18:00Z', 'wake_condition': None, 'worker_generation': 0}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) (budget=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 163, in test_closed_positive_finite_budget_dimensions
+    self.assertFalse(self.admit(resource_budget=budget)["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_completed_and_cancelled_states_are_immutable_under_cancel (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_completed_and_cancelled_states_are_immutable_under_cancel) (terminal='COMPLETE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 107, in test_completed_and_cancelled_states_are_immutable_under_cancel
+    self.assertEqual(result["status"], terminal)
+AssertionError: 'CANCELLED' != 'COMPLETE'
+- CANCELLED
++ COMPLETE
+
+
+======================================================================
+FAIL: test_directory_at_state_path_is_not_absence (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_directory_at_state_path_is_not_absence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 70, in test_directory_at_state_path_is_not_absence
+    self.assertEqual(campaign.inspect_campaign_state(self.root)["status"], campaign.STATE_CORRUPT)
+AssertionError: 'STATE_ABSENT' != 'STATE_CORRUPT'
+- STATE_ABSENT
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_force_new_never_replaces_nonterminal_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_force_new_never_replaces_nonterminal_campaign) (phase='SAFETY_STOP')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 129, in test_force_new_never_replaces_nonterminal_campaign
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'schema_version': 1, 'campaign_id': 'NEW', 'project_lineage': 'lineage-local-02c7fe49642f490a', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-waoi9yxh\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': None, 'authority_scope': 'none', 'authority_grant': None, 'campaign_state': 'PROPOSED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_verified_result': None, 'next_action': 'operator_grant_required', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:00Z', 'updated_at': '2026-10-26T06:18:00Z', 'state_digest': '41c7fd89d65d1dad375b0a83b0dd4f57748980acfcc4577880740012a999ece9'}, 'status': 'PROPOSED'}
+
+======================================================================
+FAIL: test_force_new_never_replaces_nonterminal_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_force_new_never_replaces_nonterminal_campaign) (phase='FORENSIC_ANALYSIS')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 129, in test_force_new_never_replaces_nonterminal_campaign
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'schema_version': 1, 'campaign_id': 'NEW', 'project_lineage': 'lineage-local-02c7fe49642f490a', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-waoi9yxh\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': None, 'authority_scope': 'none', 'authority_grant': None, 'campaign_state': 'PROPOSED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_verified_result': None, 'next_action': 'operator_grant_required', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:00Z', 'updated_at': '2026-10-26T06:18:00Z', 'state_digest': '41c7fd89d65d1dad375b0a83b0dd4f57748980acfcc4577880740012a999ece9'}, 'status': 'PROPOSED'}
+
+======================================================================
+FAIL: test_force_new_never_replaces_nonterminal_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_force_new_never_replaces_nonterminal_campaign) (phase='QUIESCENT_WAIT')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 129, in test_force_new_never_replaces_nonterminal_campaign
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'schema_version': 1, 'campaign_id': 'NEW', 'project_lineage': 'lineage-local-02c7fe49642f490a', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-waoi9yxh\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': None, 'authority_scope': 'none', 'authority_grant': None, 'campaign_state': 'PROPOSED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_verified_result': None, 'next_action': 'operator_grant_required', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:00Z', 'updated_at': '2026-10-26T06:18:00Z', 'state_digest': '41c7fd89d65d1dad375b0a83b0dd4f57748980acfcc4577880740012a999ece9'}, 'status': 'PROPOSED'}
+
+======================================================================
+FAIL: test_force_new_never_replaces_nonterminal_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_force_new_never_replaces_nonterminal_campaign) (phase='PROPOSED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 129, in test_force_new_never_replaces_nonterminal_campaign
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'schema_version': 1, 'campaign_id': 'NEW', 'project_lineage': 'lineage-local-02c7fe49642f490a', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-waoi9yxh\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': None, 'authority_scope': 'none', 'authority_grant': None, 'campaign_state': 'PROPOSED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_verified_result': None, 'next_action': 'operator_grant_required', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:00Z', 'updated_at': '2026-10-26T06:18:00Z', 'state_digest': '41c7fd89d65d1dad375b0a83b0dd4f57748980acfcc4577880740012a999ece9'}, 'status': 'PROPOSED'}
+
+======================================================================
+FAIL: test_force_new_never_replaces_nonterminal_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_force_new_never_replaces_nonterminal_campaign) (phase='OPERATOR_BLOCKED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 129, in test_force_new_never_replaces_nonterminal_campaign
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'schema_version': 1, 'campaign_id': 'NEW', 'project_lineage': 'lineage-local-02c7fe49642f490a', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-waoi9yxh\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': None, 'authority_scope': 'none', 'authority_grant': None, 'campaign_state': 'PROPOSED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_verified_result': None, 'next_action': 'operator_grant_required', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:00Z', 'updated_at': '2026-10-26T06:18:00Z', 'state_digest': '41c7fd89d65d1dad375b0a83b0dd4f57748980acfcc4577880740012a999ece9'}, 'status': 'PROPOSED'}
+
+======================================================================
+FAIL: test_force_new_never_replaces_nonterminal_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_force_new_never_replaces_nonterminal_campaign) (phase='ADMITTED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 129, in test_force_new_never_replaces_nonterminal_campaign
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'schema_version': 1, 'campaign_id': 'NEW', 'project_lineage': 'lineage-local-02c7fe49642f490a', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-waoi9yxh\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': None, 'authority_scope': 'none', 'authority_grant': None, 'campaign_state': 'PROPOSED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_verified_result': None, 'next_action': 'operator_grant_required', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:00Z', 'updated_at': '2026-10-26T06:18:00Z', 'state_digest': '41c7fd89d65d1dad375b0a83b0dd4f57748980acfcc4577880740012a999ece9'}, 'status': 'PROPOSED'}
+
+======================================================================
+FAIL: test_force_new_never_replaces_nonterminal_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_force_new_never_replaces_nonterminal_campaign) (phase='RETRY_WAIT')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 129, in test_force_new_never_replaces_nonterminal_campaign
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'schema_version': 1, 'campaign_id': 'NEW', 'project_lineage': 'lineage-local-02c7fe49642f490a', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-waoi9yxh\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': None, 'authority_scope': 'none', 'authority_grant': None, 'campaign_state': 'PROPOSED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_verified_result': None, 'next_action': 'operator_grant_required', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:00Z', 'updated_at': '2026-10-26T06:18:00Z', 'state_digest': '41c7fd89d65d1dad375b0a83b0dd4f57748980acfcc4577880740012a999ece9'}, 'status': 'PROPOSED'}
+
+======================================================================
+FAIL: test_force_new_never_replaces_nonterminal_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_force_new_never_replaces_nonterminal_campaign) (phase='AUTHORITY_BLOCKED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 129, in test_force_new_never_replaces_nonterminal_campaign
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'schema_version': 1, 'campaign_id': 'NEW', 'project_lineage': 'lineage-local-02c7fe49642f490a', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-waoi9yxh\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': None, 'authority_scope': 'none', 'authority_grant': None, 'campaign_state': 'PROPOSED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_verified_result': None, 'next_action': 'operator_grant_required', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:00Z', 'updated_at': '2026-10-26T06:18:00Z', 'state_digest': '41c7fd89d65d1dad375b0a83b0dd4f57748980acfcc4577880740012a999ece9'}, 'status': 'PROPOSED'}
+
+======================================================================
+FAIL: test_force_new_never_replaces_nonterminal_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_force_new_never_replaces_nonterminal_campaign) (phase='CHECKPOINTING')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 129, in test_force_new_never_replaces_nonterminal_campaign
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'schema_version': 1, 'campaign_id': 'NEW', 'project_lineage': 'lineage-local-02c7fe49642f490a', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-waoi9yxh\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': None, 'authority_scope': 'none', 'authority_grant': None, 'campaign_state': 'PROPOSED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_verified_result': None, 'next_action': 'operator_grant_required', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:00Z', 'updated_at': '2026-10-26T06:18:00Z', 'state_digest': '41c7fd89d65d1dad375b0a83b0dd4f57748980acfcc4577880740012a999ece9'}, 'status': 'PROPOSED'}
+
+======================================================================
+FAIL: test_force_new_never_replaces_nonterminal_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_force_new_never_replaces_nonterminal_campaign) (phase='EXTERNAL_BLOCKED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 129, in test_force_new_never_replaces_nonterminal_campaign
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'schema_version': 1, 'campaign_id': 'NEW', 'project_lineage': 'lineage-local-02c7fe49642f490a', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-waoi9yxh\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': None, 'authority_scope': 'none', 'authority_grant': None, 'campaign_state': 'PROPOSED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:00Z', 'last_verified_result': None, 'next_action': 'operator_grant_required', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:00Z', 'updated_at': '2026-10-26T06:18:00Z', 'state_digest': '41c7fd89d65d1dad375b0a83b0dd4f57748980acfcc4577880740012a999ece9'}, 'status': 'PROPOSED'}
+
+======================================================================
+FAIL: test_incompatible_schemas_never_overwritten (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_incompatible_schemas_never_overwritten) (version=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 53, in test_incompatible_schemas_never_overwritten
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': True, 'state': {'schema_version': 1, 'campaign_id': 'CAMP-LIFECYCLE', 'project_lineage': 'lineage-local-fdb7a1ad6bfb5afb', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-r6qzqgys\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'authority_grant': {'reference': 'unit-grant'}, 'campaign_state': 'ADMITTED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:01Z', 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:01Z', 'updated_at': '2026-10-26T06:18:01Z', 'state_digest': '8ca66bff9a5b65c580dd2a989720e6d369c747bdc8dc0a8f4bb1887bf88d4ba3'}, 'status': 'ADMITTED'}
+
+======================================================================
+FAIL: test_incompatible_schemas_never_overwritten (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_incompatible_schemas_never_overwritten) (version=2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 53, in test_incompatible_schemas_never_overwritten
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': True, 'state': {'schema_version': 1, 'campaign_id': 'CAMP-LIFECYCLE', 'project_lineage': 'lineage-local-fdb7a1ad6bfb5afb', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-r6qzqgys\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'authority_grant': {'reference': 'unit-grant'}, 'campaign_state': 'ADMITTED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:01Z', 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:01Z', 'updated_at': '2026-10-26T06:18:01Z', 'state_digest': '8ca66bff9a5b65c580dd2a989720e6d369c747bdc8dc0a8f4bb1887bf88d4ba3'}, 'status': 'ADMITTED'}
+
+======================================================================
+FAIL: test_incompatible_schemas_never_overwritten (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_incompatible_schemas_never_overwritten) (version=999)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 53, in test_incompatible_schemas_never_overwritten
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': True, 'state': {'schema_version': 1, 'campaign_id': 'CAMP-LIFECYCLE', 'project_lineage': 'lineage-local-fdb7a1ad6bfb5afb', 'goal_binding': {'path': 'V:\\_TEMP_\\saipen-campaign-lifecycle-r6qzqgys\\.saipen\\STATE.md', 'fingerprint': 'lineage-lineage-'}, 'authority_proof_reference': 'unit-grant', 'authority_scope': 'CAMPAIGN_EXECUTION', 'authority_grant': {'reference': 'unit-grant'}, 'campaign_state': 'ADMITTED', 'current_work': None, 'worker_generation': 0, 'last_journal_event': 'none', 'last_source_generation': 0, 'last_audit_generation': 0, 'last_saipal_generation': 0, 'last_productive_progress': '2026-10-26T06:18:01Z', 'last_verified_result': None, 'next_action': 'start_campaign_worker', 'wake_condition': None, 'retry_count': 0, 'no_progress_count': 0, 'resource_budget': {'max_wall_seconds': 3600.0, 'max_cycles': 10, 'max_generations': 5}, 'created_at': '2026-10-26T06:18:01Z', 'updated_at': '2026-10-26T06:18:01Z', 'state_digest': '8ca66bff9a5b65c580dd2a989720e6d369c747bdc8dc0a8f4bb1887bf88d4ba3'}, 'status': 'ADMITTED'}
+
+======================================================================
+FAIL: test_incompatible_schemas_never_overwritten (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_incompatible_schemas_never_overwritten) (version=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 53, in test_incompatible_schemas_never_overwritten
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'admitted': False, 'state': {'schema_version': True, 'campaign_id': 'old', 'campaign_state': 'ADMITTED'}, 'status': 'RESUMED_EXISTING'}
+
+======================================================================
+FAIL: test_invalid_replacement_grant_changes_nothing (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_replacement_grant_changes_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 147, in test_invalid_replacement_grant_changes_nothing
+    self.assertEqual(self.raw(), before)
+AssertionError: b'{\n[203 chars]e": "CANCELLED",\n  "created_at": "2026-10-26T[915 chars]n}\n' != b'{\n[203 chars]e": "ADMITTED",\n  "created_at": "2026-10-26T0[872 chars]n}\n'
+
+======================================================================
+FAIL: test_late_worker_cannot_overwrite_new_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_late_worker_cannot_overwrite_new_campaign)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 278, in test_late_worker_cannot_overwrite_new_campaign
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_max_cycles_survives_restart_and_is_not_completion (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_max_cycles_survives_restart_and_is_not_completion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 175, in test_max_cycles_survives_restart_and_is_not_completion
+    self.assertEqual(result["event"], "BUDGET_EXHAUSTED")
+AssertionError: 'WORKER_GENERATION_EXECUTED' != 'BUDGET_EXHAUSTED'
+- WORKER_GENERATION_EXECUTED
++ BUDGET_EXHAUSTED
+
+
+======================================================================
+FAIL: test_unknown_lifecycle_state_is_corrupt (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_unknown_lifecycle_state_is_corrupt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 79, in test_unknown_lifecycle_state_is_corrupt
+    self.assertFalse(self.admit()["ok"])
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.731s
+
+FAILED (failures=46, errors=10)

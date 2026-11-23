@@ -1,0 +1,16 @@
+test_boundary_matrix_preserves_bounded_goal_semantics (test_t1857_budget_owner.BudgetOwnerTests.test_boundary_matrix_preserves_bounded_goal_semantics) ... ok
+test_public_operations_caps_are_preserved (test_t1857_budget_owner.BudgetOwnerTests.test_public_operations_caps_are_preserved) ... ok
+test_read_only_boundary_proof_does_not_import_mutation_engine (test_t1857_budget_owner.BudgetOwnerTests.test_read_only_boundary_proof_does_not_import_mutation_engine) ... FAIL
+
+======================================================================
+FAIL: test_read_only_boundary_proof_does_not_import_mutation_engine (test_t1857_budget_owner.BudgetOwnerTests.test_read_only_boundary_proof_does_not_import_mutation_engine)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_budget_owner.py", line 53, in test_read_only_boundary_proof_does_not_import_mutation_engine
+    self.assertFalse(result["writer_engine_loaded"], result)
+AssertionError: True is not false : {'proof': True, 'writer_engine_loaded': True, 'module_count': 20, 'represented_source_bytes': 1318131, 'elapsed_seconds': 0.045315500028664246, 'modules': ['saipen_engine.board', 'saipen_engine.board_compaction', 'saipen_engine.board_scrub', 'saipen_engine.codec', 'saipen_engine.errors', 'saipen_engine.fast_check', 'saipen_engine.journal', 'saipen_engine.lock', 'saipen_engine.log', 'saipen_engine.manifest', 'saipen_engine.operations', 'saipen_engine.ownership', 'saipen_engine.paths', 'saipen_engine.phases', 'saipen_engine.plan', 'saipen_engine.registry', 'saipen_engine.result', 'saipen_engine.runtime_surface', 'saipen_engine.snapshot', 'saipen_engine.state']}
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.128s
+
+FAILED (failures=1)

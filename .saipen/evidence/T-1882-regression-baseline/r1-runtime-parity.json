@@ -1,0 +1,70 @@
+{
+ "schema": 1,
+ "claim": "the six red modules whose dependency is absent from SOURCE pass unchanged against the installed runtime tools tree",
+ "runtime": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\76a5995cbf99aacc",
+ "repo_project_scaffolding": true,
+ "results": [
+  {
+   "module": "test_t1746_crew_terminal_outcome",
+   "exit": 0,
+   "verdict": "PASS",
+   "tail": [
+    "Ran 45 tests in 5.878s",
+    "OK"
+   ],
+   "duration_s": 6.3
+  },
+  {
+   "module": "test_t1750_release_boundary",
+   "exit": 0,
+   "verdict": "PASS",
+   "tail": [
+    "Ran 11 tests in 1.414s",
+    "OK"
+   ],
+   "duration_s": 1.64
+  },
+  {
+   "module": "test_t1681_release_closure_op",
+   "exit": 0,
+   "verdict": "PASS",
+   "tail": [
+    "Ran 5 tests in 5.752s",
+    "OK"
+   ],
+   "duration_s": 5.97
+  },
+  {
+   "module": "test_t1827_writer_lock_contract",
+   "exit": 0,
+   "verdict": "PASS",
+   "tail": [
+    "Ran 19 tests in 14.182s",
+    "OK"
+   ],
+   "duration_s": 14.38
+  },
+  {
+   "module": "test_t1828_verification_policy",
+   "exit": 0,
+   "verdict": "PASS",
+   "tail": [
+    "Ran 14 tests in 3.528s",
+    "OK"
+   ],
+   "duration_s": 3.73
+  },
+  {
+   "module": "test_source_contract_derivation",
+   "exit": 0,
+   "verdict": "PASS",
+   "tail": [
+    "Ran 13 tests in 3.496s",
+    "OK"
+   ],
+   "duration_s": 3.64
+  }
+ ],
+ "red": [],
+ "wall_s": 35.7
+}

@@ -1,0 +1,93 @@
+{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": []
+  },
+  "adopted": [],
+  "lifecycle": [],
+  "repair_id": "e2cf02b7100dc49f8a50db940afa5639777c7e26df018d7c87ff6491943bd79f",
+  "targets": [
+    ".saipen/LOG.md",
+    ".saipen/STATE.md"
+  ],
+  "event": "E-13",
+  "agent": "test-agent",
+  "strict_state_error": null,
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-legacycompat-ue_pkn3l/.saipen/MANIFEST.json",
+    "contract_version": 3,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-continue-dgu7aba_\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "recover --attest-legacy-done ids must be T-### (digits), comma-separated when several",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-continue-dgu7aba_\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": []
+  },
+  "adopted": [],
+  "lifecycle": [],
+  "repair_id": "98d5dca80fd7018b75748cc6db154dcff556832aa9173bdf0c719ad01d9908ed",
+  "targets": [
+    ".saipen/LOG.md",
+    ".saipen/STATE.md"
+  ],
+  "event": "E-3",
+  "agent": "test-agent",
+  "strict_state_error": null,
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-legacycompat-fggh6kew/.saipen/MANIFEST.json",
+    "contract_version": 3,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-continue-dgu7aba_\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

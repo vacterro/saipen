@@ -1,0 +1,173 @@
+--- preimage/tools/test_evidence_gap_ledger_lineage.py
++++ current/tools/test_evidence_gap_ledger_lineage.py
+@@ -260,7 +260,8 @@
+         fp1 = cands["G-LIN-FUN_1"]
+         (self.saipen_dir / "BOARD.md").write_text(
+             "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n"
+-            f"- [x] T-11 Investigate semantics of FUN_1 | goal: G-LIN | candidate: G-LIN-FUN_1 | evidence_fp: {fp1}\n"
++            f"- [x] T-11 [P2] Investigate semantics of FUN_1 \\| goal: G-LIN \\| candidate: G-LIN-FUN_1 \\| evidence_fp: {fp1}"
++            f" | verify: fixture FUN_1 semantics verified at {fp1}\n"
+             "\n## BLOCKED\n",
+             encoding="utf-8",
+         )
+@@ -280,7 +281,8 @@
+         fp1 = cands["G-LIN-FUN_1"]
+         (self.saipen_dir / "BOARD.md").write_text(
+             "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n"
+-            f"- [x] T-11 Investigate semantics of FUN_1 | candidate: G-LIN-FUN_1 | evidence_fp: {fp1}\n"
++            f"- [x] T-11 [P2] Investigate semantics of FUN_1 \\| goal: G-LIN \\| candidate: G-LIN-FUN_1 \\| evidence_fp: {fp1}"
++            f" | verify: fixture FUN_1 semantics verified at {fp1}\n"
+             "\n## BLOCKED\n",
+             encoding="utf-8",
+         )
+--- preimage/tools/test_persistent_goal_engine.py
++++ current/tools/test_persistent_goal_engine.py
+@@ -35,6 +35,7 @@
+ 
+ from __future__ import annotations
+ 
++import hashlib
+ import json
+ import shutil
+ import sys
+@@ -178,9 +179,11 @@
+ 
+     def test_case04_repeat_same_command_no_duplicate(self) -> None:
+         """CASE 04: Running replenishment when candidate is already on BOARD -> no duplicate ticket."""
++        # Discovery identity belongs to the escaped description, not BOARD fields.
+         board_content = (
+             "# Board\n\n## DOING\n\n"
+-            "- [ ] T-100 Investigate semantics of ProcessPacket [g-dup] | goal: g-dup | candidate: g-dup-proc_101\n\n"
++            "- [/] T-100 [P2] Investigate semantics of ProcessPacket [g-dup] \\| goal: g-dup \\| candidate: g-dup-proc_101"
++            " | verify: ProcessPacket semantics documented\n\n"
+             "## TODO\n\n## DONE\n\n## BLOCKED\n"
+         )
+         self.board_file.write_text(board_content, encoding="utf-8")
+@@ -224,7 +227,8 @@
+         """CASE 06: Previous ticket in DONE, new independent gap admitted as successor."""
+         self.board_file.write_text(
+             "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n"
+-            "- [x] T-100 ProcessPacket [g-seq] candidate: g-seq-proc_101\n\n## BLOCKED\n",
++            "- [x] T-100 [P2] ProcessPacket [g-seq] \\| goal: g-seq \\| candidate: g-seq-proc_101"
++            " | verify: fixture ProcessPacket semantics verified\n\n## BLOCKED\n",
+             encoding="utf-8",
+         )
+         ledger_path = self.saipen_dir / "evidence" / "coverage.json"
+@@ -327,7 +331,8 @@
+         """CASE 11: All candidates blocked on BOARD -> honest ALL_CANDIDATES_BLOCKED."""
+         self.board_file.write_text(
+             "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+-            "- [ ] T-110 Candidate proc_101 blocked | candidate: g-blk-proc_101\n",
++            "- [ ] T-110 [P2] Candidate proc_101 blocked \\| goal: g-blk \\| candidate: g-blk-proc_101"
++            " | blocker: BLOCKED_EXTERNAL -- awaiting capture | verify: proc_101 semantics documented\n",
+             encoding="utf-8",
+         )
+         ledger_path = self.saipen_dir / "evidence" / "coverage.json"
+@@ -415,7 +420,8 @@
+         """CASE 16: Ticket already committed on BOARD -> restart does not create duplicate."""
+         self.board_file.write_text(
+             "# Board\n\n## DOING\n\n## TODO\n"
+-            "- [ ] T-200 Candidate proc_101 | candidate: g-crash2-proc_101\n\n## DONE\n\n## BLOCKED\n",
++            "- [ ] T-200 [P2] Candidate proc_101 \\| goal: g-crash2 \\| candidate: g-crash2-proc_101"
++            " | verify: proc_101 semantics documented\n\n## DONE\n\n## BLOCKED\n",
+             encoding="utf-8",
+         )
+         ledger_path = self.saipen_dir / "evidence" / "coverage.json"
+@@ -440,7 +446,8 @@
+         """CASE 17: Ticket closed in DONE -> evaluates remaining goal and selects next gap."""
+         self.board_file.write_text(
+             "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n"
+-            "- [x] T-200 Candidate proc_101 | candidate: g-next-proc_101\n\n## BLOCKED\n",
++            "- [x] T-200 [P2] Candidate proc_101 \\| goal: g-next \\| candidate: g-next-proc_101"
++            " | verify: fixture proc_101 semantics verified\n\n## BLOCKED\n",
+             encoding="utf-8",
+         )
+         ledger_path = self.saipen_dir / "evidence" / "coverage.json"
+@@ -529,18 +536,71 @@
+         self.assertEqual(read_g.resume_metadata["consecutive_no_progress"], 3)
+ 
+     def test_case21_completed_ticket_invalid_no_silent_reopening(self) -> None:
+-        """CASE 21: An already completed ticket in DONE is never silently reopened; remains DONE."""
+-        self.board_file.write_text(
+-            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n- [x] T-50 Proc A [g-inv]\n\n## BLOCKED\n",
+-            encoding="utf-8",
+-        )
++        """CASE 21: New evidence permits review; the exact completed generation stays DONE."""
++        evidence_path = self.saipen_dir / "evidence" / "proc-a.bin"
++        evidence_path.write_bytes(b"original proc-a evidence")
++        fingerprint = "sha256:" + hashlib.sha256(evidence_path.read_bytes()).hexdigest()[:16]
++        self.board_file.write_text(
++            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n"
++            "- [x] T-50 [P2] Proc A [g-inv] \\| goal: g-inv \\| candidate: g-inv-proca"
++            f" \\| evidence_fp: {fingerprint} | verify: .saipen/evidence/proc-a.bin\n\n## BLOCKED\n",
++            encoding="utf-8",
++        )
++        before = self.board_file.read_bytes()
+         board = _parse_board_tickets(self.tmp)
+         self.assertEqual(len(board["done"]), 1)
+         self.assertEqual(board["done"][0]["id"], "T-50")
+-        cand = CandidateTask(candidate_id="g-inv-proca", goal_id="g-inv", title="Proc A")
++        self.assertEqual(board["done"][0]["state"], "x")
++        cand = CandidateTask(
++            candidate_id="g-inv-proca", goal_id="g-inv", title="Proc A",
++            evidence_fingerprint=fingerprint,
++        )
+         is_dup, reason = _is_candidate_duplicate(cand, board)
+         self.assertTrue(is_dup)
+         self.assertEqual(reason, "ALREADY_DONE:T-50")
++
++        evidence_path.write_bytes(b"corrected proc-a evidence")
++        cand.evidence_fingerprint = "sha256:" + hashlib.sha256(evidence_path.read_bytes()).hexdigest()[:16]
++        self.assertNotEqual(cand.evidence_fingerprint, fingerprint)
++        self.assertEqual(_is_candidate_duplicate(cand, board), (False, None))
++        self.assertEqual(self.board_file.read_bytes(), before)
++        self.assertEqual(_parse_board_tickets(self.tmp)["done"], board["done"])
++
++    def test_candidate_identity_rejects_false_matches(self) -> None:
++        """Titles, candidate prefixes, foreign goals and prose markers are not identity."""
++        cand = CandidateTask(candidate_id="g-inv-proca", goal_id="g-inv", title="Proc A")
++        for description in (
++            "Proc A [g-inv]",
++            "Proc A [g-inv] \\| candidate: g-inv-proca-extra",
++            "Proc A [g-inv] \\| candidate: g-inv-proc",
++            "Proc A [g-other] \\| goal: g-other \\| candidate: g-inv-proca",
++            "Proc A [g-inv] candidate: g-inv-proca",
++        ):
++            with self.subTest(description=description):
++                self.board_file.write_text(
++                    "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n"
++                    f"- [x] T-50 [P2] {description} | verify: fixture prior evidence\n\n## BLOCKED\n",
++                    encoding="utf-8",
++                )
++                board = _parse_board_tickets(self.tmp)
++                self.assertEqual(_is_candidate_duplicate(cand, board), (False, None))
++
++    def test_unescaped_discovery_identity_is_not_a_board_field(self) -> None:
++        """Stale unescaped identity fixtures must remain invalid, never become work."""
++        for marker in ("goal: g-inv", "candidate: g-inv-proca", "evidence_fp: sha256:1234"):
++            with self.subTest(marker=marker):
++                self.board_file.write_text(
++                    "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n"
++                    f"- [x] T-50 [P2] Proc A | {marker} | verify: fixture prior evidence\n\n## BLOCKED\n",
++                    encoding="utf-8",
++                )
++                before = self.board_file.read_bytes()
++                res = replenish_from_goals(self.tmp, "test-agent", dry_run=True)
++                self.assertFalse(res["ok"])
++                self.assertFalse(res["replenished"])
++                self.assertEqual(res["status"], "BOARD_INVALID")
++                self.assertIn("unrecognized field", res["detail"])
++                self.assertEqual(self.board_file.read_bytes(), before)
+ 
+     def test_case22_goal_paused_no_automatic_successor(self) -> None:
+         """CASE 22: Paused goal produces no automatic successor tickets."""
+@@ -579,7 +639,8 @@
+         """CASE 24: One candidate task blocked, independent candidate admitted."""
+         self.board_file.write_text(
+             "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+-            "- [ ] T-300 Candidate proc_101 blocked | candidate: g-ind-proc_101\n",
++            "- [ ] T-300 [P2] Candidate proc_101 blocked \\| goal: g-ind \\| candidate: g-ind-proc_101"
++            " | blocker: BLOCKED_EXTERNAL -- awaiting capture | verify: proc_101 semantics documented\n",
+             encoding="utf-8",
+         )
+         ledger_path = self.saipen_dir / "evidence" / "coverage.json"

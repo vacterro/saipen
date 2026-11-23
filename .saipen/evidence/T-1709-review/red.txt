@@ -1,0 +1,74 @@
+...FFF.F.FF....
+======================================================================
+FAIL: test_corrupt_chronology_is_refused_without_rewriting_evidence (__main__.AuditStarvationOracleTests.test_corrupt_chronology_is_refused_without_rewriting_evidence) (bad={'not': 'a list'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1709-review\subject-red\tools\test_t1709_audit_starvation.py", line 205, in test_corrupt_chronology_is_refused_without_rewriting_evidence
+    self.assertFalse(audit_inbox.classify(self.root)["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_corrupt_chronology_is_refused_without_rewriting_evidence (__main__.AuditStarvationOracleTests.test_corrupt_chronology_is_refused_without_rewriting_evidence) (bad=[{'rel': '../escape.md'}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1709-review\subject-red\tools\test_t1709_audit_starvation.py", line 205, in test_corrupt_chronology_is_refused_without_rewriting_evidence
+    self.assertFalse(audit_inbox.classify(self.root)["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_corrupt_chronology_is_refused_without_rewriting_evidence (__main__.AuditStarvationOracleTests.test_corrupt_chronology_is_refused_without_rewriting_evidence) (bad=[None])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1709-review\subject-red\tools\test_t1709_audit_starvation.py", line 205, in test_corrupt_chronology_is_refused_without_rewriting_evidence
+    self.assertFalse(audit_inbox.classify(self.root)["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_invalid_named_entry_keeps_observation_when_repaired (__main__.AuditStarvationOracleTests.test_invalid_named_entry_keeps_observation_when_repaired)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1709-review\subject-red\tools\test_t1709_audit_starvation.py", line 191, in test_invalid_named_entry_keeps_observation_when_repaired
+    self.assertEqual(
+AssertionError: Lists differ: ['alpha.md', 'beta.md'] != ['beta.md', 'alpha.md']
+
+First differing element 0:
+'alpha.md'
+'beta.md'
+
+- ['alpha.md', 'beta.md']
++ ['beta.md', 'alpha.md']
+
+======================================================================
+FAIL: test_named_observation_uses_project_writer_lock (__main__.AuditStarvationOracleTests.test_named_observation_uses_project_writer_lock)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1709-review\subject-red\tools\test_t1709_audit_starvation.py", line 223, in test_named_observation_uses_project_writer_lock
+    self.assertEqual(entered, [self.root])
+AssertionError: Lists differ: [] != [WindowsPath('V:/_TEMP_/saipen-audit-inbox-iy26gvaf/project')]
+
+Second list contains 1 additional elements.
+First extra element 0:
+WindowsPath('V:/_TEMP_/saipen-audit-inbox-iy26gvaf/project')
+
+- []
++ [WindowsPath('V:/_TEMP_/saipen-audit-inbox-iy26gvaf/project')]
+
+======================================================================
+FAIL: test_new_bytes_at_old_path_join_after_older_pending_generation (__main__.AuditStarvationOracleTests.test_new_bytes_at_old_path_join_after_older_pending_generation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1709-review\subject-red\tools\test_t1709_audit_starvation.py", line 164, in test_new_bytes_at_old_path_join_after_older_pending_generation
+    self.assertEqual(
+AssertionError: Lists differ: ['beta.md', 'alpha.md'] != ['alpha.md', 'beta.md']
+
+First differing element 0:
+'beta.md'
+'alpha.md'
+
+- ['beta.md', 'alpha.md']
++ ['alpha.md', 'beta.md']
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.161s
+
+FAILED (failures=6)

@@ -1,0 +1,24 @@
+{
+ "schema": 1,
+ "command": [
+  "{python}",
+  "tools/regression_t2089/t2089_oracle.py"
+ ],
+ "format": "unittest",
+ "context": [
+  "tools",
+  "saipen",
+  "VERSION",
+  "tools/regression_t2089"
+ ],
+ "oracle_files": [
+  "tools/regression_t2089/t2089_oracle.py"
+ ],
+ "subject_files": [
+  "tools/saipen.py"
+ ],
+ "before": {
+  "tools/saipen.py": "tools/regression_t2089/t2089_prefix_saipen.py"
+ },
+ "timeout": 300
+}

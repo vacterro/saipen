@@ -217,17 +217,6 @@ _original_digest = _digest
 def _path_from_git(root: Path, raw_path: bytes) -> Path:
     if not raw_path or raw_path.startswith(b"/") or b"\0" in raw_path:
         raise FreshnessError(f"Git returned an invalid path: {raw_path!r}")
-    # T-1953: an untracked DIRECTORY is listed with exactly one trailing
-    # slash. That is git's own spelling of a real entry, not a malformed one:
-    # `-o` reports `contributions/.tooling/upstream-parser/` for a directory it
-    # does not enter. Rejecting it made the WHOLE source identity raise, which
-    # is how one nested untracked directory disabled every caller that needs an
-    # identity -- including the PERF-001 single-identity threading in `status`,
-    # where the exception degraded to None and four consumers each repeated
-    # the same failing walk. The slash is stripped before the canonicality test
-    # below, which still rejects `.` and `..` anywhere in the path.
-    if raw_path.endswith(b"/"):
-        raw_path = raw_path.rstrip(b"/")
     if any(part in (b"", b".", b"..") for part in raw_path.split(b"/")):
         raise FreshnessError(f"Git returned a non-canonical path: {raw_path!r}")
     rel = os.fsdecode(raw_path)
@@ -237,6 +226,232 @@ def _path_from_git(root: Path, raw_path: bytes) -> Path:
     except ValueError as exc:
         raise FreshnessError(f"Git path escapes project root: {rel!r}") from exc
     return candidate
+
+
+def _nested_key(raw_path: bytes) -> bytes:
+    """Comparison key for a nested-repository path.
+
+    Windows paths are case-insensitive and separator-insensitive, so a project
+    that declares ``Contributions/.Tooling/Upstream-Parser`` owns the same
+    directory Git reports as ``contributions/.tooling/upstream-parser``. Both
+    sides go through the SAME normalisation, so the match is exact on the
+    platform's own rules and unchanged (identity) elsewhere -- never a fuzzy
+    match that could bind a directory the project did not name.
+    """
+    return os.fsencode(os.path.normcase(os.fsdecode(raw_path)))
+
+
+def _declared_nested_repo_paths(root: Path) -> frozenset[bytes]:
+    """The DECLARED nested repositories in the byte form Git reports them.
+
+    Same declaration document ``_nested_binding`` reads, projected onto the
+    listing path space: forward slashes, no leading/trailing separator, no
+    ``./`` prefix, filesystem encoding. A malformed declaration raises here too,
+    so an unreadable ownership contract can never be mistaken for "no contract"
+    by the classifier below.
+    """
+    declared = _read_nested_declarations(root)
+    canonical: set[bytes] = set()
+    for rel in declared:
+        normalised = rel.replace("\\", "/").strip("/")
+        while normalised.startswith("./"):
+            normalised = normalised[2:]
+        if normalised:
+            canonical.add(_nested_key(normalised.encode("utf-8")))
+    return frozenset(canonical)
+
+
+def _run_git_optional(root: Path, *args: str) -> bytes | None:
+    """Like ``_run_git`` but reports a non-zero exit as ``None``.
+
+    Only for probing an optional property -- a nested work tree with no commit
+    yet (unborn HEAD) is ordinary state, not a discovery failure, and it must be
+    fingerprinted rather than aborting the capture.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "-C", os.fspath(root), *args],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise FreshnessError(f"Git discovery failed: {exc}") from exc
+    if result.returncode != 0:
+        return None
+    return result.stdout
+
+
+_NESTED_TREE_MAGIC = b"saipen-nested-tree-v1\x00"
+_NESTED_GIT_MAGIC = b"saipen-nested-git-v1\x00"
+
+
+def _tree_content_digest(directory: Path) -> bytes:
+    """Deterministic content digest of one directory tree.
+
+    Same traversal and exclusions as the no-Git model (``_iter_no_git``), the
+    same race-safe reader, and no link is ever followed: symlinks contribute
+    their target text and a reparse point is recorded as a link. Paths stay
+    relative to ``directory``, so the digest is identical wherever the tree
+    lives -- it never carries an absolute path. Used for a nested repository
+    whose own history cannot describe it yet (unborn HEAD) and for an embedded
+    directory found inside one.
+    """
+    h = hashlib.sha256()
+    h.update(_NESTED_TREE_MAGIC)
+    for ev in sorted(_iter_no_git(directory, full=False), key=lambda item: item.path):
+        h.update(_frame(_Record(ev.kind, ev.path, ev.mode, ev.content)))
+    return h.digest()
+
+
+def _nested_untracked_digest(nested: Path, untracked: bytes) -> bytes:
+    """Content digests of a nested repository's untracked entries.
+
+    A listing names an untracked file without saying anything about its bytes,
+    so folding only the listing into the identity would let an edit inside the
+    user's repository leave the outer fingerprint untouched. Every untracked
+    entry is read here through the race-safe reader instead.
+    """
+    h = hashlib.sha256()
+    for raw in sorted(part for part in untracked.split(b"\0") if part):
+        if raw.endswith(b"/"):
+            inner = raw.rstrip(b"/")
+            path = _path_from_git(nested, inner)
+            if _is_reparse_point(path):
+                raise FreshnessError(
+                    f"nested untracked directory {os.fsdecode(inner)!r} is a symlink "
+                    "or reparse point; source identity never follows a linked tree"
+                )
+            if not path.is_dir():
+                raise FreshnessError(
+                    "Git reported a nested untracked directory that is not a "
+                    f"directory: {os.fsdecode(inner)!r}"
+                )
+            h.update(b"D\x00" + inner + b"\x00" + _tree_content_digest(path))
+            continue
+        path = _path_from_git(nested, raw)
+        try:
+            info = path.lstat()
+        except OSError as exc:
+            raise FreshnessError(
+                f"cannot stat nested untracked input {path}: {exc}"
+            ) from exc
+        if stat.S_ISLNK(info.st_mode):
+            h.update(b"L\x00" + raw + b"\x00" + hashlib.sha256(_read_symlink(path)).digest())
+        elif stat.S_ISREG(info.st_mode):
+            content, _ = _read_regular_info(path)
+            h.update(b"F\x00" + raw + b"\x00" + hashlib.sha256(content).digest())
+        else:
+            raise FreshnessError(
+                f"unsupported nested untracked input type at {path}; only regular "
+                "files, symlinks and directories are supported"
+            )
+    return h.digest()
+
+
+def _nested_repository_content(nested: Path) -> bytes:
+    """Canonical CONTENT identity of one embedded repository.
+
+    The committed tree is named by ``HEAD^{tree}``, not by ``HEAD``: a tree
+    object is content-addressed, while a commit id also folds in its timestamp,
+    author and message -- which would make two checkouts of the same source in
+    two directories produce two identities. Measured here as a flaky
+    determinism assertion that passed inside one second and failed across a
+    second boundary. The raw delta carries the blob ids of every tracked
+    working-tree change and deletion, and the untracked entries carry their own
+    byte digests. The value is therefore a content fingerprint on every machine
+    holding the same tree. A repository with no commit yet cannot be described
+    by its own history, so its tree is hashed directly, exactly as the no-Git
+    model does.
+    """
+    tree = _run_git_optional(nested, "rev-parse", "--verify", "HEAD^{tree}")
+    if tree is None:
+        return _NESTED_TREE_MAGIC + _tree_content_digest(nested)
+    raw_delta, untracked = _git_delta_listing(nested)
+    return (
+        _NESTED_GIT_MAGIC
+        + tree.decode("ascii").strip().encode("ascii")
+        + b"\x00"
+        + hashlib.sha256(raw_delta).digest()
+        + b"\x00"
+        + _nested_untracked_digest(nested, untracked)
+    )
+
+
+def _nested_boundary_from_git(
+    root: Path, raw_path: bytes, declared: frozenset[bytes]
+) -> _Record | None:
+    """Classify a Git listing entry that ends in ``/`` -- an embedded repository.
+
+    Git never descends into an embedded repository. For one that the outer
+    project does not track it emits the DIRECTORY ITSELF with a trailing slash
+    (``contributions/.tooling/upstream-parser/``), and that entry is not a path
+    to a file: parsing it as one either rejects a legitimate boundary as
+    "non-canonical" (the trailing empty component) or, with the slash stripped,
+    fails as an unsupported file type. Both outcomes abort the whole capture, so
+    a single untracked linked worktree made source identity unavailable and every
+    conformance run reported STALE_FAIL.
+
+    A valid boundary therefore becomes a RECORD, never silence:
+
+    * declared in ``.saipen/source-nested-repos.json`` -- the project has said
+      this repository counts, ``_nested_binding`` binds its own HEAD and delta,
+      so the outer delta must NOT also cover it. Returning ``None`` means "skip
+      this entry, it is already covered";
+    * a Git work-tree root, declared or not -- return an ``N`` record whose
+      content is ``_nested_repository_content``. The user's checkout inside the
+      project is source: it is fingerprinted deterministically, never deleted,
+      moved, ignored or staged, and an edit inside it moves the outer identity;
+    * anything else Git claims is a directory boundary (a reparse point, a
+      directory that is not a work-tree root, a path that escapes the project)
+      stays fatal, unchanged: a boundary with no content identity behind it can
+      never become a fabricated file record.
+    """
+    stripped = raw_path.rstrip(b"/")
+    if not stripped or stripped.startswith(b"/") or b"\0" in stripped:
+        raise FreshnessError(f"Git returned an invalid directory boundary: {raw_path!r}")
+    if any(part in (b"", b".", b"..") for part in stripped.split(b"/")):
+        raise FreshnessError(f"Git returned a non-canonical path: {raw_path!r}")
+    rel = os.fsdecode(stripped)
+    candidate = root.joinpath(*rel.split("/"))
+    try:
+        candidate.relative_to(root)
+    except ValueError as exc:
+        raise FreshnessError(f"Git path escapes project root: {rel!r}") from exc
+    if _is_reparse_point(candidate):
+        raise FreshnessError(
+            f"untracked directory boundary {rel!r} is a symlink or reparse point; "
+            "source identity never follows a linked tree"
+        )
+    if not candidate.is_dir():
+        raise FreshnessError(
+            f"Git reported a directory boundary that is not a directory: {rel!r}"
+        )
+    if _nested_key(stripped) in declared:
+        # Covered by _nested_binding: its HEAD and delta are bound there.
+        return None
+    probe = subprocess.run(
+        ["git", "-C", os.fspath(candidate), "rev-parse", "--show-toplevel"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    is_work_tree = False
+    if probe.returncode == 0:
+        try:
+            is_work_tree = Path(os.fsdecode(probe.stdout.strip())).resolve() == candidate.resolve()
+        except (OSError, ValueError):
+            is_work_tree = False
+    if is_work_tree:
+        return _Record(
+            b"N", stripped, 0o160000, _nested_repository_content(candidate)
+        )
+    raise FreshnessError(
+        f"Git returned an untracked directory entry {rel!r} that is not a repository "
+        f"root; only a Git work tree carries a content identity, and "
+        f"{NESTED_REPOS_CONFIG_REL.as_posix()} can declare a repository, not a "
+        "plain directory"
+    )
 
 
 def _read_regular_info(path: Path) -> tuple[bytes, tuple]:
@@ -333,17 +548,10 @@ def _record_current(
             mode = declared_mode
         kind = b"F"
         content, _ = _read_regular_info(path)
-    elif stat.S_ISDIR(info.st_mode) and declared_mode is None:
-        # T-1953: see the parallel branch in `_record_current`. An untracked
-        # directory git did not enter is a presence, framed like any other
-        # record but with no bytes of its own.
-        mode = 0o040000
-        kind = b"D"
-        content = b""
     else:
         raise FreshnessError(
-            f"unsupported fingerprint input type at {path}; only regular files, "
-            "symlinks and untracked directories are supported"
+            f"unsupported fingerprint input type at {path}; only regular files "
+            "and symlinks are supported"
         )
 
     if declared_mode is not None and declared_mode not in (mode, 0):
@@ -411,21 +619,10 @@ def _record_evidence(
             mode = declared_mode
         kind = b"F"
         content, _ = _read_regular_info(path)
-    elif stat.S_ISDIR(info.st_mode) and declared_mode is None:
-        # T-1953: an untracked directory git did not enter -- it reports the
-        # directory itself, with a trailing slash, when that directory is a
-        # nested repository or otherwise opaque. Its PRESENCE is the fact this
-        # identity can vouch for; its contents belong to its own tree, and
-        # descending would hash a repository this one does not own. Same rule
-        # `suite_record._git_subject` already applies. Empty content keeps the
-        # ordinary framing, so the digest stays a function of the record set.
-        mode = 0o040000
-        kind = b"D"
-        content = b""
     else:
         raise FreshnessError(
-            f"unsupported fingerprint input type at {path}; only regular files, "
-            "symlinks and untracked directories are supported"
+            f"unsupported fingerprint input type at {path}; only regular files "
+            "and symlinks are supported"
         )
     if declared_mode is not None and declared_mode not in (mode, 0):
         raise FreshnessError(f"Git mode {declared_mode:o} disagrees with filesystem type at {path}")
@@ -445,6 +642,8 @@ def _parse_git_delta_evidence(
 ) -> list[_Evidence]:
     """Evidence variant of ``_parse_git_delta`` (PERF-002)."""
     records: dict[bytes, tuple[bytes, int, int]] = {}
+    nested: dict[bytes, _Record] = {}
+    declared = _declared_nested_repo_paths(root)
     fields = raw.split(b"\0")
     index = 0
     while index < len(fields) and fields[index]:
@@ -477,10 +676,34 @@ def _parse_git_delta_evidence(
             records[raw_path] = (b"D", old_mode, new_mode)
             continue
         if new_mode == 0o160000:
-            raise FreshnessError(f"changed Git submodule is unsupported: {os.fsdecode(raw_path)}")
+            if _nested_key(raw_path.rstrip(b"/")) in declared:
+                # The project owns this repository: _nested_binding binds its
+                # own HEAD and delta, so the outer gitlink pointer is not the
+                # only thing that covers it.
+                continue
+            raise FreshnessError(
+                f"changed Git submodule is unsupported: {os.fsdecode(raw_path)}"
+                f" -- declare it in {NESTED_REPOS_CONFIG_REL.as_posix()} nested_repos "
+                "to bind its own HEAD and working-tree delta"
+            )
         records[raw_path] = (b"F", old_mode, new_mode)
     for raw_path in untracked.split(b"\0"):
         if not raw_path or _is_saipen_path(raw_path):
+            continue
+        if raw_path.endswith(b"/"):
+            # An embedded repository boundary. Declared ones are bound by
+            # _nested_binding and skipped; a valid work tree becomes an N
+            # record carrying its own content identity, so this loop can never
+            # turn a directory entry into a fabricated file record and can
+            # never silently drop the content behind it either.
+            nested_record = _nested_boundary_from_git(root, raw_path, declared)
+            if nested_record is not None:
+                nested[nested_record.path] = nested_record
+                records[nested_record.path] = (
+                    b"N",
+                    nested_record.mode,
+                    nested_record.mode,
+                )
             continue
         records[raw_path] = (b"F", 0, 0)
     # The output order is `sorted(records)`' order and is load-bearing: the
@@ -499,7 +722,20 @@ def _parse_git_delta_evidence(
         evidence: list[_Evidence] = []
         for raw_path in ordered_paths:
             kind, old_mode, new_mode = records[raw_path]
-            if kind == b"D":
+            if kind == b"N":
+                record = nested[raw_path]
+                if record_observer is not None:
+                    record_observer(record)
+                evidence.append(
+                    _Evidence(
+                        b"N",
+                        record.path,
+                        record.mode,
+                        record.content,
+                        len(record.content),
+                    )
+                )
+            elif kind == b"D":
                 if record_observer is not None:
                     # Deletions have no live file to read, but they are still
                     # source identity evidence.  Omitting this frame made a
@@ -525,6 +761,11 @@ def _parse_git_delta_evidence(
         kind, old_mode, new_mode = records[raw_path]
         if kind == b"D":
             slots.append(_Evidence(b"D", raw_path, old_mode, b"", 0))
+        elif kind == b"N":
+            record = nested[raw_path]
+            slots.append(
+                _Evidence(b"N", record.path, record.mode, record.content, len(record.content))
+            )
         else:
             read_slots.append(len(slots))
             slots.append(_PLACEHOLDER)
@@ -816,6 +1057,7 @@ def _filtered_git_listing(
 
 def _parse_git_delta(root: Path, raw: bytes, untracked: bytes) -> list[_Record]:
     records: dict[bytes, _Record] = {}
+    declared = _declared_nested_repo_paths(root)
     fields = raw.split(b"\0")
     index = 0
     while index < len(fields) and fields[index]:
@@ -848,11 +1090,25 @@ def _parse_git_delta(root: Path, raw: bytes, untracked: bytes) -> list[_Record]:
             records[raw_path] = _Record(b"D", raw_path, old_mode, b"")
             continue
         if new_mode == 0o160000:
-            raise FreshnessError(f"changed Git submodule is unsupported: {os.fsdecode(raw_path)}")
+            if _nested_key(raw_path.rstrip(b"/")) in declared:
+                # Owned by the project: _nested_binding covers the repository's
+                # own HEAD and delta, so the outer pointer is not its only
+                # evidence and the capture must not fail on it.
+                continue
+            raise FreshnessError(
+                f"changed Git submodule is unsupported: {os.fsdecode(raw_path)}"
+                f" -- declare it in {NESTED_REPOS_CONFIG_REL.as_posix()} nested_repos "
+                "to bind its own HEAD and working-tree delta"
+            )
         records[raw_path] = _record_current(root, raw_path, new_mode)
 
     for raw_path in untracked.split(b"\0"):
         if not raw_path or _is_saipen_path(raw_path):
+            continue
+        if raw_path.endswith(b"/"):
+            nested_record = _nested_boundary_from_git(root, raw_path, declared)
+            if nested_record is not None:
+                records[nested_record.path] = nested_record
             continue
         records[raw_path] = _record_current(root, raw_path, None)
     return list(records.values())
@@ -947,6 +1203,40 @@ def _git_identity(root: Path) -> SourceIdentity:
 NESTED_REPOS_CONFIG_REL = Path(".saipen") / "source-nested-repos.json"
 
 
+def _read_nested_config(root: Path) -> tuple[object, tuple[str, ...]]:
+    """``(schema_version, declared paths)`` from the ownership contract.
+
+    One read serves both the binding bytes and the boundary classifier, so the
+    two can never disagree about which repositories the project owns. Returns
+    ``(1, ())`` when the document is absent or names none. A document that
+    exists but cannot be understood raises: an unreadable ownership contract is
+    not the same thing as no contract, and treating it as "no contract" would
+    let a typo silently drop coverage of a whole nested repository.
+    """
+    config = root / NESTED_REPOS_CONFIG_REL
+    try:
+        raw = config.read_bytes()
+    except OSError:
+        return (1, ())
+    try:
+        data = json.loads(raw.decode("utf-8-sig"))
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise FreshnessError(f"nested-repo binding is unreadable: {exc}") from exc
+    if not isinstance(data, dict):
+        raise FreshnessError("nested-repo binding must be a JSON object")
+    declared = data.get("nested_repos")
+    if declared is None:
+        return (data.get("schema_version", 1), ())
+    if not isinstance(declared, list) or not all(isinstance(x, str) for x in declared):
+        raise FreshnessError("nested-repo binding 'nested_repos' must be a list of paths")
+    return (data.get("schema_version", 1), tuple(declared))
+
+
+def _read_nested_declarations(root: Path) -> tuple[str, ...]:
+    """The declared nested repositories, in declaration order."""
+    return _read_nested_config(root)[1]
+
+
 def _nested_binding(root: Path) -> bytes:
     """Canonical bytes binding every DECLARED nested repository's identity.
 
@@ -956,35 +1246,37 @@ def _nested_binding(root: Path) -> bytes:
     capture rather than dropping out of it: a freshness guarantee that quietly
     stops covering its source is worse than no guarantee, because it is believed.
     """
-    config = root / NESTED_REPOS_CONFIG_REL
-    try:
-        raw = config.read_bytes()
-    except OSError:
-        return b""
-    try:
-        data = json.loads(raw.decode("utf-8-sig"))
-    except (UnicodeDecodeError, ValueError) as exc:
-        raise FreshnessError(f"nested-repo binding is unreadable: {exc}") from exc
-    if not isinstance(data, dict):
-        raise FreshnessError("nested-repo binding must be a JSON object")
-    declared = data.get("nested_repos")
-    if declared is None:
-        return b""
-    if not isinstance(declared, list) or not all(isinstance(x, str) for x in declared):
-        raise FreshnessError("nested-repo binding 'nested_repos' must be a list of paths")
+    schema_version, declared = _read_nested_config(root)
     if not declared:
         return b""
     # Canonical, not raw: the binding names WHICH repositories count, so
     # reordering the list or repeating an entry is not a change in what is
     # bound and must not move the identity. Only adding or removing one does.
     canon = json.dumps(
-        {"schema_version": data.get("schema_version", 1), "nested_repos": sorted(set(declared))},
+        {"schema_version": schema_version, "nested_repos": sorted(set(declared))},
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
     parts: list[bytes] = [b"git-delta-v1-nested\x00", canon]
     for rel in sorted(set(declared)):
-        nested = (root / rel).resolve()
+        # Containment is decided LEXICALLY first, then on the target, because the
+        # three refusals mean different things to the operator: a declaration
+        # that climbs out, a declaration whose tree is gone, and a declaration
+        # that is a junction/symlink are not the same defect (T-572). Resolving
+        # first would collapse all three into "escapes".
+        rel_parts = Path(rel).parts
+        if Path(rel).is_absolute() or ".." in rel_parts:
+            raise FreshnessError(
+                f"declared nested repository escapes the project root: {rel!r}"
+            )
+        target = root / rel
+        if not target.exists():
+            raise FreshnessError(f"declared nested repository is missing: {rel!r}")
+        if _is_reparse_point(target):
+            raise FreshnessError(
+                f"declared nested repository is a reparse point: {rel!r}"
+            )
+        nested = target.resolve()
         try:
             nested.relative_to(root.resolve())
         except ValueError as exc:
@@ -993,10 +1285,6 @@ def _nested_binding(root: Path) -> bytes:
             ) from exc
         if not nested.is_dir():
             raise FreshnessError(f"declared nested repository is missing: {rel!r}")
-        if _is_reparse_point(root / rel):
-            raise FreshnessError(
-                f"declared nested repository is a reparse point: {rel!r}"
-            )
         # `--is-inside-work-tree` is the wrong test here: a plain directory
         # inside the outer repository answers true and would then be bound to
         # the OUTER head and delta, silently covering the wrong bytes. The

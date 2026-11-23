@@ -1,0 +1,1 @@
+{"registered_hosts": 15, "profile_rows": 16, "doctor_exit_code": 1, "broken": ["zaicode"], "machine_runtime": "MACHINE_RUNTIME_STALE", "live_writes": 0, "actual_boundary_probes": "NOT_PROBED"}

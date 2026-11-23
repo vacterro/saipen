@@ -1,0 +1,612 @@
+conformance	Set up job	﻿2026-10-04T04:21:10.2623066Z Current runner version: '2.337.0'
+conformance	Set up job	2026-10-04T04:21:10.2644368Z ##[group]Runner Image Provisioner
+conformance	Set up job	2026-10-04T04:21:10.2645070Z Hosted Compute Agent
+conformance	Set up job	2026-10-04T04:21:10.2645424Z Version: 20260901.588
+conformance	Set up job	2026-10-04T04:21:10.2645799Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+conformance	Set up job	2026-10-04T04:21:10.2646554Z Build Date: 2026-09-01T19:56:44Z
+conformance	Set up job	2026-10-04T04:21:10.2646995Z Worker ID: {b6b84a05-c8da-4ae0-add1-b51f1171a90a}
+conformance	Set up job	2026-10-04T04:21:10.2647451Z Azure Region: westus3
+conformance	Set up job	2026-10-04T04:21:10.2647799Z ##[endgroup]
+conformance	Set up job	2026-10-04T04:21:10.2648706Z ##[group]Operating System
+conformance	Set up job	2026-10-04T04:21:10.2649316Z Ubuntu
+conformance	Set up job	2026-10-04T04:21:10.2649781Z 24.04.5
+conformance	Set up job	2026-10-04T04:21:10.2650142Z LTS
+conformance	Set up job	2026-10-04T04:21:10.2650471Z ##[endgroup]
+conformance	Set up job	2026-10-04T04:21:10.2650808Z ##[group]Runner Image
+conformance	Set up job	2026-10-04T04:21:10.2651248Z Image: ubuntu-24.04
+conformance	Set up job	2026-10-04T04:21:10.2651623Z Version: 20260927.320.1
+conformance	Set up job	2026-10-04T04:21:10.2652264Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+conformance	Set up job	2026-10-04T04:21:10.2653312Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+conformance	Set up job	2026-10-04T04:21:10.2653966Z ##[endgroup]
+conformance	Set up job	2026-10-04T04:21:10.2654684Z ##[group]GITHUB_TOKEN Permissions
+conformance	Set up job	2026-10-04T04:21:10.2656083Z Contents: read
+conformance	Set up job	2026-10-04T04:21:10.2656561Z Metadata: read
+conformance	Set up job	2026-10-04T04:21:10.2656947Z Packages: read
+conformance	Set up job	2026-10-04T04:21:10.2657326Z ##[endgroup]
+conformance	Set up job	2026-10-04T04:21:10.2658846Z Secret source: Actions
+conformance	Set up job	2026-10-04T04:21:10.2659462Z Cache mode: write
+conformance	Set up job	2026-10-04T04:21:10.2659897Z Prepare workflow directory
+conformance	Set up job	2026-10-04T04:21:10.2890316Z Prepare all required actions
+conformance	Set up job	2026-10-04T04:21:10.2923501Z Getting action download info
+conformance	Set up job	2026-10-04T04:21:10.5887793Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+conformance	Set up job	2026-10-04T04:21:10.7019739Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+conformance	Set up job	2026-10-04T04:21:10.8602446Z Complete job name: conformance
+conformance	Run actions/checkout@v4	﻿2026-10-04T04:21:10.9134248Z ##[group]Run actions/checkout@v4
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9134704Z with:
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9134925Z   fetch-depth: 0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9135202Z   repository: vacterro/saipen
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9137238Z   token: ***
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9137459Z   ssh-strict: true
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9137686Z   ssh-user: git
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9137920Z   persist-credentials: true
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9138172Z   clean: true
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9138409Z   sparse-checkout-cone-mode: true
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9138685Z   fetch-tags: false
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9138917Z   show-progress: true
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9139152Z   lfs: false
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9139370Z   submodules: false
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9139608Z   set-safe-directory: true
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9139873Z   allow-unsafe-pr-checkout: false
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9140217Z ##[endgroup]
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9894445Z Syncing repository: vacterro/saipen
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9896070Z ##[group]Getting Git version info
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9896869Z Working directory is '/home/runner/work/saipen/saipen'
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9897766Z [command]/usr/bin/git version
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9965382Z git version 2.55.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9979194Z ##[endgroup]
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9990035Z Temporarily overriding HOME='/home/runner/work/_temp/14ff3903-0baa-4aa9-8939-bc12d3311e7e' before making global git config changes
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9991380Z Adding repository directory to the temporary git global config as a safe directory
+conformance	Run actions/checkout@v4	2026-10-04T04:21:10.9993586Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/saipen/saipen
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0042610Z Deleting the contents of '/home/runner/work/saipen/saipen'
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0046649Z ##[group]Initializing the repository
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0050390Z [command]/usr/bin/git init /home/runner/work/saipen/saipen
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0162715Z hint: Using 'master' as the name for the initial branch. This default branch name
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0163904Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0165053Z hint: to use in all of your new repositories, which will suppress this warning,
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0166677Z hint: call:
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0167021Z hint:
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0167448Z hint: 	git config --global init.defaultBranch <name>
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0167977Z hint:
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0168465Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0169303Z hint: 'development'. The just-created branch can be renamed via this command:
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0169928Z hint:
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0170255Z hint: 	git branch -m <name>
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0170659Z hint:
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0171195Z hint: Disable this message with "git config set advice.defaultBranchName false"
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0172053Z Initialized empty Git repository in /home/runner/work/saipen/saipen/.git/
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0174533Z [command]/usr/bin/git remote add origin https://github.com/vacterro/saipen
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0297391Z ##[endgroup]
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0298056Z ##[group]Disabling automatic garbage collection
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0298510Z [command]/usr/bin/git config --local gc.auto 0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0327416Z ##[endgroup]
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0328104Z ##[group]Setting up auth
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0334560Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0369072Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0693343Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0723311Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0905549Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.0936099Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.1122425Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.1164210Z ##[endgroup]
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.1164823Z ##[group]Fetching the repository
+conformance	Run actions/checkout@v4	2026-10-04T04:21:11.1171509Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1593786Z From https://github.com/vacterro/saipen
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1595342Z  * [new branch]        accepted-debt-rebind -> origin/accepted-debt-rebind
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1596100Z  * [new branch]        main                 -> origin/main
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1596870Z  * [new tag]           v1.0.0               -> v1.0.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1597522Z  * [new tag]           v1.0.1               -> v1.0.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1598223Z  * [new tag]           v1.1.0               -> v1.1.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1598805Z  * [new tag]           v1.1.0a              -> v1.1.0a
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1599185Z  * [new tag]           v1.1.1               -> v1.1.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1599606Z  * [new tag]           v1.1.2               -> v1.1.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1599978Z  * [new tag]           v1.1.3               -> v1.1.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1600357Z  * [new tag]           v1.1.4               -> v1.1.4
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1600917Z  * [new tag]           v1.1.4a              -> v1.1.4a
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1601364Z  * [new tag]           v1.1.5               -> v1.1.5
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1601730Z  * [new tag]           v1.2.0               -> v1.2.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1602138Z  * [new tag]           v1.2.1               -> v1.2.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1602673Z  * [new tag]           v1.2.2               -> v1.2.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1603041Z  * [new tag]           v2.0.0               -> v2.0.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1603410Z  * [new tag]           v2.1.0               -> v2.1.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1604062Z  * [new tag]           v2.1.0a              -> v2.1.0a
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1604427Z  * [new tag]           v3.0.0               -> v3.0.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1604791Z  * [new tag]           v3.1.0               -> v3.1.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1605155Z  * [new tag]           v3.1.0a              -> v3.1.0a
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1605521Z  * [new tag]           v3.1.1               -> v3.1.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1668417Z  * [new tag]           v3.1.1a              -> v3.1.1a
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1669420Z  * [new tag]           v3.1.2               -> v3.1.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1669997Z  * [new tag]           v4.0.0               -> v4.0.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1670558Z  * [new tag]           v4.1.0               -> v4.1.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1671124Z  * [new tag]           v5.0.0               -> v5.0.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1671565Z  * [new tag]           v5.0.1               -> v5.0.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1672044Z  * [new tag]           v5.1.0               -> v5.1.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1672607Z  * [new tag]           v5.2.0               -> v5.2.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1672966Z  * [new tag]           v5.3.0               -> v5.3.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1673317Z  * [new tag]           v6.0.0               -> v6.0.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1673665Z  * [new tag]           v6.1.0               -> v6.1.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1674135Z  * [new tag]           v6.2.0               -> v6.2.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1674489Z  * [new tag]           v6.3.0               -> v6.3.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1674894Z  * [new tag]           v7.0.0               -> v7.0.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1675383Z  * [new tag]           v7.1.0               -> v7.1.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1675792Z  * [new tag]           v7.1.1               -> v7.1.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1676455Z  * [new tag]           v7.1.2               -> v7.1.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1677204Z  * [new tag]           v7.10.0              -> v7.10.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1677954Z  * [new tag]           v7.101.0             -> v7.101.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1679009Z  * [new tag]           v7.102.0             -> v7.102.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1679556Z  * [new tag]           v7.103.0             -> v7.103.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1680112Z  * [new tag]           v7.104.0             -> v7.104.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1680638Z  * [new tag]           v7.105.0             -> v7.105.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1681197Z  * [new tag]           v7.106.0             -> v7.106.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1681764Z  * [new tag]           v7.107.0             -> v7.107.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1682320Z  * [new tag]           v7.108.0             -> v7.108.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1682900Z  * [new tag]           v7.109.0             -> v7.109.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1683475Z  * [new tag]           v7.11.0              -> v7.11.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1684093Z  * [new tag]           v7.11.1              -> v7.11.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1684673Z  * [new tag]           v7.11.2              -> v7.11.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1685272Z  * [new tag]           v7.110.0             -> v7.110.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1685888Z  * [new tag]           v7.111.0             -> v7.111.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1686625Z  * [new tag]           v7.112.0             -> v7.112.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1687209Z  * [new tag]           v7.113.0             -> v7.113.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1687792Z  * [new tag]           v7.114.0             -> v7.114.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1688381Z  * [new tag]           v7.115.0             -> v7.115.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1688945Z  * [new tag]           v7.116.0             -> v7.116.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1689527Z  * [new tag]           v7.117.0             -> v7.117.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1690107Z  * [new tag]           v7.118.0             -> v7.118.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1690768Z  * [new tag]           v7.119.0             -> v7.119.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1691359Z  * [new tag]           v7.12.0              -> v7.12.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1691842Z  * [new tag]           v7.120.0             -> v7.120.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1692356Z  * [new tag]           v7.121.0             -> v7.121.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1692717Z  * [new tag]           v7.122.0             -> v7.122.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1693260Z  * [new tag]           v7.123.0             -> v7.123.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1693611Z  * [new tag]           v7.124.0             -> v7.124.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1694073Z  * [new tag]           v7.125.0             -> v7.125.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1694426Z  * [new tag]           v7.126.0             -> v7.126.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1694777Z  * [new tag]           v7.127.0             -> v7.127.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1695129Z  * [new tag]           v7.128.0             -> v7.128.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1695475Z  * [new tag]           v7.129.0             -> v7.129.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1695828Z  * [new tag]           v7.13.0              -> v7.13.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1696691Z  * [new tag]           v7.13.1              -> v7.13.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1697255Z  * [new tag]           v7.130.0             -> v7.130.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1697808Z  * [new tag]           v7.131.0             -> v7.131.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1698376Z  * [new tag]           v7.132.0             -> v7.132.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1698941Z  * [new tag]           v7.133.0             -> v7.133.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1699504Z  * [new tag]           v7.134.0             -> v7.134.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1700056Z  * [new tag]           v7.135.0             -> v7.135.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1700600Z  * [new tag]           v7.136.0             -> v7.136.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1701143Z  * [new tag]           v7.137.0             -> v7.137.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1701493Z  * [new tag]           v7.138.0             -> v7.138.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1701842Z  * [new tag]           v7.139.0             -> v7.139.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1702265Z  * [new tag]           v7.14.0              -> v7.14.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1702824Z  * [new tag]           v7.140.0             -> v7.140.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1703334Z  * [new tag]           v7.141.0             -> v7.141.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1703681Z  * [new tag]           v7.142.0             -> v7.142.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1704031Z  * [new tag]           v7.143.0             -> v7.143.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1704565Z  * [new tag]           v7.144.0             -> v7.144.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1704914Z  * [new tag]           v7.145.0             -> v7.145.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1705267Z  * [new tag]           v7.146.0             -> v7.146.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1705617Z  * [new tag]           v7.147.0             -> v7.147.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1705968Z  * [new tag]           v7.148.0             -> v7.148.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1706439Z  * [new tag]           v7.149.0             -> v7.149.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1706794Z  * [new tag]           v7.15.0              -> v7.15.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1707143Z  * [new tag]           v7.150.0             -> v7.150.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1707491Z  * [new tag]           v7.151.0             -> v7.151.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1707843Z  * [new tag]           v7.152.0             -> v7.152.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1708192Z  * [new tag]           v7.153.0             -> v7.153.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1708540Z  * [new tag]           v7.154.0             -> v7.154.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1708896Z  * [new tag]           v7.155.0             -> v7.155.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1709241Z  * [new tag]           v7.156.0             -> v7.156.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1709590Z  * [new tag]           v7.157.0             -> v7.157.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1709940Z  * [new tag]           v7.158.0             -> v7.158.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1710287Z  * [new tag]           v7.159.0             -> v7.159.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1710635Z  * [new tag]           v7.16.0              -> v7.16.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1710982Z  * [new tag]           v7.16.1              -> v7.16.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1711331Z  * [new tag]           v7.160.0             -> v7.160.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1711678Z  * [new tag]           v7.161.0             -> v7.161.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1712026Z  * [new tag]           v7.162.0             -> v7.162.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1712371Z  * [new tag]           v7.163.0             -> v7.163.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1712719Z  * [new tag]           v7.164.0             -> v7.164.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1713170Z  * [new tag]           v7.165.0             -> v7.165.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1713518Z  * [new tag]           v7.166.0             -> v7.166.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1713863Z  * [new tag]           v7.166.1             -> v7.166.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1714226Z  * [new tag]           v7.166.2             -> v7.166.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1714577Z  * [new tag]           v7.167.0             -> v7.167.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1714928Z  * [new tag]           v7.168.0             -> v7.168.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1715279Z  * [new tag]           v7.169.0             -> v7.169.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1715632Z  * [new tag]           v7.17.0              -> v7.17.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1715982Z  * [new tag]           v7.170.0             -> v7.170.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1716516Z  * [new tag]           v7.171.0             -> v7.171.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1716915Z  * [new tag]           v7.172.0             -> v7.172.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1717265Z  * [new tag]           v7.173.0             -> v7.173.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1717623Z  * [new tag]           v7.174.0             -> v7.174.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1717972Z  * [new tag]           v7.175.0             -> v7.175.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1718319Z  * [new tag]           v7.176.0             -> v7.176.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1718667Z  * [new tag]           v7.177.0             -> v7.177.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1719015Z  * [new tag]           v7.178.0             -> v7.178.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1719365Z  * [new tag]           v7.179.0             -> v7.179.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1719715Z  * [new tag]           v7.18.0              -> v7.18.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1720062Z  * [new tag]           v7.18.1              -> v7.18.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1720410Z  * [new tag]           v7.180.0             -> v7.180.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1720759Z  * [new tag]           v7.181.0             -> v7.181.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1721111Z  * [new tag]           v7.182.0             -> v7.182.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1721461Z  * [new tag]           v7.183.0             -> v7.183.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1721913Z  * [new tag]           v7.184.0             -> v7.184.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1722262Z  * [new tag]           v7.185.0             -> v7.185.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1722613Z  * [new tag]           v7.186.0             -> v7.186.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1722995Z  * [new tag]           v7.187.0             -> v7.187.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1723448Z  * [new tag]           v7.188.0             -> v7.188.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1723809Z  * [new tag]           v7.189.0             -> v7.189.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1724159Z  * [new tag]           v7.19.0              -> v7.19.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1724509Z  * [new tag]           v7.19.1              -> v7.19.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1724858Z  * [new tag]           v7.190.0             -> v7.190.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1725206Z  * [new tag]           v7.191.0             -> v7.191.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1725557Z  * [new tag]           v7.192.0             -> v7.192.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1725910Z  * [new tag]           v7.193.0             -> v7.193.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1726421Z  * [new tag]           v7.194.0             -> v7.194.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1726770Z  * [new tag]           v7.195.0             -> v7.195.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1727145Z  * [new tag]           v7.196.0             -> v7.196.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1727491Z  * [new tag]           v7.197.0             -> v7.197.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1727840Z  * [new tag]           v7.198.0             -> v7.198.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1728189Z  * [new tag]           v7.199.0             -> v7.199.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1728539Z  * [new tag]           v7.2.0               -> v7.2.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1728887Z  * [new tag]           v7.2.1               -> v7.2.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1729239Z  * [new tag]           v7.20.0              -> v7.20.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1729587Z  * [new tag]           v7.200.0             -> v7.200.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1729935Z  * [new tag]           v7.201.0             -> v7.201.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1730282Z  * [new tag]           v7.202.0             -> v7.202.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1730729Z  * [new tag]           v7.203.0             -> v7.203.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1731080Z  * [new tag]           v7.204.0             -> v7.204.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1731430Z  * [new tag]           v7.204.1             -> v7.204.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1731776Z  * [new tag]           v7.205.0             -> v7.205.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1732293Z  * [new tag]           v7.205.1             -> v7.205.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1732829Z  * [new tag]           v7.205.2             -> v7.205.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1733370Z  * [new tag]           v7.206.0             -> v7.206.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1733933Z  * [new tag]           v7.206.1             -> v7.206.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1734376Z  * [new tag]           v7.206.2             -> v7.206.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1734729Z  * [new tag]           v7.206.3             -> v7.206.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1735082Z  * [new tag]           v7.206.4             -> v7.206.4
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1735437Z  * [new tag]           v7.206.5             -> v7.206.5
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1735799Z  * [new tag]           v7.206.6             -> v7.206.6
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1736154Z  * [new tag]           v7.206.7             -> v7.206.7
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1736633Z  * [new tag]           v7.206.8             -> v7.206.8
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1736991Z  * [new tag]           v7.206.9             -> v7.206.9
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1737345Z  * [new tag]           v7.207.0             -> v7.207.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1737699Z  * [new tag]           v7.208.0             -> v7.208.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1738053Z  * [new tag]           v7.209.0             -> v7.209.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1738406Z  * [new tag]           v7.21.0              -> v7.21.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1738760Z  * [new tag]           v7.210.0             -> v7.210.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1739114Z  * [new tag]           v7.211.0             -> v7.211.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1739471Z  * [new tag]           v7.212.0             -> v7.212.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1739822Z  * [new tag]           v7.213.0             -> v7.213.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1740287Z  * [new tag]           v7.214.0             -> v7.214.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1740638Z  * [new tag]           v7.215.0             -> v7.215.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1741090Z  * [new tag]           v7.216.0             -> v7.216.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1741577Z  * [new tag]           v7.217.0             -> v7.217.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1742148Z  * [new tag]           v7.218.0             -> v7.218.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1742718Z  * [new tag]           v7.219.0             -> v7.219.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1743315Z  * [new tag]           v7.22.0              -> v7.22.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1743895Z  * [new tag]           v7.22.1              -> v7.22.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1744499Z  * [new tag]           v7.22.2              -> v7.22.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1745082Z  * [new tag]           v7.22.3              -> v7.22.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1745665Z  * [new tag]           v7.220.0             -> v7.220.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1746346Z  * [new tag]           v7.221.0             -> v7.221.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1746944Z  * [new tag]           v7.222.0             -> v7.222.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1747523Z  * [new tag]           v7.223.0             -> v7.223.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1748113Z  * [new tag]           v7.223.1             -> v7.223.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1748698Z  * [new tag]           v7.223.10            -> v7.223.10
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1749170Z  * [new tag]           v7.223.11            -> v7.223.11
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1749595Z  * [new tag]           v7.223.12            -> v7.223.12
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1750177Z  * [new tag]           v7.223.13            -> v7.223.13
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1750591Z  * [new tag]           v7.223.14            -> v7.223.14
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1750951Z  * [new tag]           v7.223.15            -> v7.223.15
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1751313Z  * [new tag]           v7.223.16            -> v7.223.16
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1751672Z  * [new tag]           v7.223.2             -> v7.223.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1752028Z  * [new tag]           v7.223.3             -> v7.223.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1752491Z  * [new tag]           v7.223.4             -> v7.223.4
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1752846Z  * [new tag]           v7.223.5             -> v7.223.5
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1753207Z  * [new tag]           v7.223.6             -> v7.223.6
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1753576Z  * [new tag]           v7.223.7             -> v7.223.7
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1753933Z  * [new tag]           v7.223.8             -> v7.223.8
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1754291Z  * [new tag]           v7.223.9             -> v7.223.9
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1754645Z  * [new tag]           v7.224.0             -> v7.224.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1755037Z  * [new tag]           v7.224.1             -> v7.224.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1755495Z  * [new tag]           v7.224.2             -> v7.224.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1755851Z  * [new tag]           v7.224.3             -> v7.224.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1756322Z  * [new tag]           v7.224.4             -> v7.224.4
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1756677Z  * [new tag]           v7.225.0             -> v7.225.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1757047Z  * [new tag]           v7.226.0             -> v7.226.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1757408Z  * [new tag]           v7.226.1             -> v7.226.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1757785Z  * [new tag]           v7.226.2             -> v7.226.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1758141Z  * [new tag]           v7.226.3             -> v7.226.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1758496Z  * [new tag]           v7.227.0             -> v7.227.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1758852Z  * [new tag]           v7.227.1             -> v7.227.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1759208Z  * [new tag]           v7.227.2             -> v7.227.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1759563Z  * [new tag]           v7.228.0             -> v7.228.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1759917Z  * [new tag]           v7.229.0             -> v7.229.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1760274Z  * [new tag]           v7.23.0              -> v7.23.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1760632Z  * [new tag]           v7.230.0             -> v7.230.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1760987Z  * [new tag]           v7.231.0             -> v7.231.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1761438Z  * [new tag]           v7.231.1             -> v7.231.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1761812Z  * [new tag]           v7.231.10            -> v7.231.10
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1762178Z  * [new tag]           v7.231.11            -> v7.231.11
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1762538Z  * [new tag]           v7.231.2             -> v7.231.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1762896Z  * [new tag]           v7.231.3             -> v7.231.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1763255Z  * [new tag]           v7.231.4             -> v7.231.4
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1763612Z  * [new tag]           v7.231.5             -> v7.231.5
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1763971Z  * [new tag]           v7.231.6             -> v7.231.6
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1764327Z  * [new tag]           v7.231.7             -> v7.231.7
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1764684Z  * [new tag]           v7.231.8             -> v7.231.8
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1765041Z  * [new tag]           v7.231.9             -> v7.231.9
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1765397Z  * [new tag]           v7.232.0             -> v7.232.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1765761Z  * [new tag]           v7.233.0             -> v7.233.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1766121Z  * [new tag]           v7.233.1             -> v7.233.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1766613Z  * [new tag]           v7.233.2             -> v7.233.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1766970Z  * [new tag]           v7.233.3             -> v7.233.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1767328Z  * [new tag]           v7.233.4             -> v7.233.4
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1767685Z  * [new tag]           v7.234.0             -> v7.234.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1768042Z  * [new tag]           v7.234.1             -> v7.234.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1768407Z  * [new tag]           v7.234.2             -> v7.234.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1768766Z  * [new tag]           v7.234.3             -> v7.234.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1769123Z  * [new tag]           v7.235.0             -> v7.235.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1769481Z  * [new tag]           v7.235.1             -> v7.235.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1769840Z  * [new tag]           v7.236.0             -> v7.236.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1770210Z  * [new tag]           v7.237.0             -> v7.237.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1770664Z  * [new tag]           v7.238.0             -> v7.238.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1771021Z  * [new tag]           v7.238.1             -> v7.238.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1771380Z  * [new tag]           v7.238.2             -> v7.238.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1771739Z  * [new tag]           v7.238.3             -> v7.238.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1772100Z  * [new tag]           v7.239.0             -> v7.239.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1772458Z  * [new tag]           v7.239.1             -> v7.239.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1772933Z  * [new tag]           v7.239.2             -> v7.239.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1773320Z  * [new tag]           v7.239.3             -> v7.239.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1773681Z  * [new tag]           v7.24.0              -> v7.24.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1774038Z  * [new tag]           v7.240.0             -> v7.240.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1774395Z  * [new tag]           v7.240.1             -> v7.240.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1774756Z  * [new tag]           v7.240.2             -> v7.240.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1775121Z  * [new tag]           v7.241.0             -> v7.241.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1775480Z  * [new tag]           v7.241.1             -> v7.241.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1775840Z  * [new tag]           v7.242.0             -> v7.242.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1776334Z  * [new tag]           v7.243.0             -> v7.243.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1776696Z  * [new tag]           v7.244.0             -> v7.244.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1777058Z  * [new tag]           v7.245.0             -> v7.245.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1777418Z  * [new tag]           v7.246.0             -> v7.246.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1777776Z  * [new tag]           v7.246.1             -> v7.246.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1778134Z  * [new tag]           v7.247.0             -> v7.247.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1778493Z  * [new tag]           v7.248.0             -> v7.248.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1778855Z  * [new tag]           v7.249.0             -> v7.249.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1779218Z  * [new tag]           v7.25.0              -> v7.25.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1779675Z  * [new tag]           v7.250.0             -> v7.250.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1780033Z  * [new tag]           v7.251.0             -> v7.251.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1780392Z  * [new tag]           v7.252.0             -> v7.252.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1780748Z  * [new tag]           v7.253.0             -> v7.253.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1781108Z  * [new tag]           v7.254.0             -> v7.254.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1781465Z  * [new tag]           v7.255.0             -> v7.255.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1781835Z  * [new tag]           v7.256.0             -> v7.256.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1782193Z  * [new tag]           v7.256.1             -> v7.256.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1782551Z  * [new tag]           v7.257.0             -> v7.257.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1782909Z  * [new tag]           v7.26.0              -> v7.26.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1783266Z  * [new tag]           v7.27.0              -> v7.27.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1783630Z  * [new tag]           v7.28.0              -> v7.28.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1783996Z  * [new tag]           v7.28.1              -> v7.28.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1784354Z  * [new tag]           v7.29.0              -> v7.29.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1784714Z  * [new tag]           v7.3.0               -> v7.3.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1785071Z  * [new tag]           v7.3.1               -> v7.3.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1785428Z  * [new tag]           v7.3.2               -> v7.3.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1785784Z  * [new tag]           v7.3.3               -> v7.3.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1786140Z  * [new tag]           v7.30.0              -> v7.30.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1786567Z  * [new tag]           v7.30.1              -> v7.30.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1786926Z  * [new tag]           v7.31.0              -> v7.31.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1787282Z  * [new tag]           v7.31.1              -> v7.31.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1787639Z  * [new tag]           v7.31.2              -> v7.31.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1787995Z  * [new tag]           v7.32.0              -> v7.32.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1788448Z  * [new tag]           v7.32.1              -> v7.32.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1788803Z  * [new tag]           v7.33.0              -> v7.33.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1789159Z  * [new tag]           v7.33.1              -> v7.33.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1789517Z  * [new tag]           v7.33.2              -> v7.33.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1789872Z  * [new tag]           v7.33.3              -> v7.33.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1790230Z  * [new tag]           v7.33.4              -> v7.33.4
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1790599Z  * [new tag]           v7.34.0              -> v7.34.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1791175Z  * [new tag]           v7.34.1              -> v7.34.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1791748Z  * [new tag]           v7.35.0              -> v7.35.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1792307Z  * [new tag]           v7.35.1              -> v7.35.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1792906Z  * [new tag]           v7.36.0              -> v7.36.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1793467Z  * [new tag]           v7.37.0              -> v7.37.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1794046Z  * [new tag]           v7.38.0              -> v7.38.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1794608Z  * [new tag]           v7.39.0              -> v7.39.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1795152Z  * [new tag]           v7.4.0               -> v7.4.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1795715Z  * [new tag]           v7.4.1               -> v7.4.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1796423Z  * [new tag]           v7.4.2               -> v7.4.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1797023Z  * [new tag]           v7.4.3               -> v7.4.3
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1797603Z  * [new tag]           v7.4.4               -> v7.4.4
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1798204Z  * [new tag]           v7.4.5               -> v7.4.5
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1798783Z  * [new tag]           v7.4.6               -> v7.4.6
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1799359Z  * [new tag]           v7.40.0              -> v7.40.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1799953Z  * [new tag]           v7.41.0              -> v7.41.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1800536Z  * [new tag]           v7.42.0              -> v7.42.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1801306Z  * [new tag]           v7.43.0              -> v7.43.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1801910Z  * [new tag]           v7.44.0              -> v7.44.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1802487Z  * [new tag]           v7.45.0              -> v7.45.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1803058Z  * [new tag]           v7.46.0              -> v7.46.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1803631Z  * [new tag]           v7.47.0              -> v7.47.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1804210Z  * [new tag]           v7.48.0              -> v7.48.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1804815Z  * [new tag]           v7.49.0              -> v7.49.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1805407Z  * [new tag]           v7.5.0               -> v7.5.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1805999Z  * [new tag]           v7.5.1               -> v7.5.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1806743Z  * [new tag]           v7.5.2               -> v7.5.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1807333Z  * [new tag]           v7.50.0              -> v7.50.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1807919Z  * [new tag]           v7.51.0              -> v7.51.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1808685Z  * [new tag]           v7.52.0              -> v7.52.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1809171Z  * [new tag]           v7.53.0              -> v7.53.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1809559Z  * [new tag]           v7.54.0              -> v7.54.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1809919Z  * [new tag]           v7.55.0              -> v7.55.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1810281Z  * [new tag]           v7.56.0              -> v7.56.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1810640Z  * [new tag]           v7.57.0              -> v7.57.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1811001Z  * [new tag]           v7.58.0              -> v7.58.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1811364Z  * [new tag]           v7.59.0              -> v7.59.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1811721Z  * [new tag]           v7.6.0               -> v7.6.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1812081Z  * [new tag]           v7.6.1               -> v7.6.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1812459Z  * [new tag]           v7.60.0              -> v7.60.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1812819Z  * [new tag]           v7.61.0              -> v7.61.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1813185Z  * [new tag]           v7.62.0              -> v7.62.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1813706Z  * [new tag]           v7.63.0              -> v7.63.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1814062Z  * [new tag]           v7.64.0              -> v7.64.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1814425Z  * [new tag]           v7.65.0              -> v7.65.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1814788Z  * [new tag]           v7.66.0              -> v7.66.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1815146Z  * [new tag]           v7.67.0              -> v7.67.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1815505Z  * [new tag]           v7.68.0              -> v7.68.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1815863Z  * [new tag]           v7.69.0              -> v7.69.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1816537Z  * [new tag]           v7.7.0               -> v7.7.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1817102Z  * [new tag]           v7.7.1               -> v7.7.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1817665Z  * [new tag]           v7.7.2               -> v7.7.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1818257Z  * [new tag]           v7.70.0              -> v7.70.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1818718Z  * [new tag]           v7.71.0              -> v7.71.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1819096Z  * [new tag]           v7.71.1              -> v7.71.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1819452Z  * [new tag]           v7.72.0              -> v7.72.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1819810Z  * [new tag]           v7.72.1              -> v7.72.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1820166Z  * [new tag]           v7.73.0              -> v7.73.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1820525Z  * [new tag]           v7.74.0              -> v7.74.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1820881Z  * [new tag]           v7.75.0              -> v7.75.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1821241Z  * [new tag]           v7.76.0              -> v7.76.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1821598Z  * [new tag]           v7.77.0              -> v7.77.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1821958Z  * [new tag]           v7.78.0              -> v7.78.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1822312Z  * [new tag]           v7.79.0              -> v7.79.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1822669Z  * [new tag]           v7.8.0               -> v7.8.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1823029Z  * [new tag]           v7.8.1               -> v7.8.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1823510Z  * [new tag]           v7.8.2               -> v7.8.2
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1823871Z  * [new tag]           v7.80.0              -> v7.80.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1824238Z  * [new tag]           v7.81.0              -> v7.81.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1824595Z  * [new tag]           v7.82.0              -> v7.82.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1824952Z  * [new tag]           v7.83.0              -> v7.83.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1825312Z  * [new tag]           v7.9.0               -> v7.9.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1825674Z  * [new tag]           v7.92.0              -> v7.92.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1826038Z  * [new tag]           v7.93.0              -> v7.93.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1826550Z  * [new tag]           v7.94.0              -> v7.94.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1826962Z  * [new tag]           v7.95.0              -> v7.95.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1827324Z  * [new tag]           v7.96.0              -> v7.96.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1827683Z  * [new tag]           v7.97.0              -> v7.97.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1828048Z  * [new tag]           v7.98.0              -> v7.98.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1828411Z  * [new tag]           v7.99.0              -> v7.99.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1828929Z  * [new tag]           v8.0.0               -> v8.0.0
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1829518Z  * [new tag]           v8.0.1               -> v8.0.1
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1831098Z [command]/usr/bin/git branch --list --remote origin/main
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1831664Z   origin/main
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1832811Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1833453Z e7bac206994959c18c5c02c2293aedb30a9f212b
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1834754Z ##[endgroup]
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1835429Z ##[group]Determining the checkout info
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1836332Z ##[endgroup]
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1836782Z [command]/usr/bin/git sparse-checkout disable
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1838080Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1839528Z ##[group]Checking out the ref
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.1840258Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.5432351Z Switched to a new branch 'main'
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.5434148Z branch 'main' set up to track 'origin/main'.
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.5458167Z ##[endgroup]
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.5498435Z [command]/usr/bin/git log -1 --format=%H
+conformance	Run actions/checkout@v4	2026-10-04T04:21:14.5520927Z e7bac206994959c18c5c02c2293aedb30a9f212b
+conformance	Run actions/setup-python@v5	﻿2026-10-04T04:21:14.5780738Z ##[group]Run actions/setup-python@v5
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.5781523Z with:
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.5782088Z   python-version: 3.x
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.5782725Z   check-latest: false
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.5788288Z   token: ***
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.5788878Z   update-environment: true
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.5789555Z   allow-prereleases: false
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.5790237Z   freethreaded: false
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.5790853Z ##[endgroup]
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.6673384Z ##[group]Installed versions
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.6729064Z (node:2089) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.6731512Z (Use `node --trace-deprecation ...` to show where the warning was created)
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.6732992Z Successfully set up CPython (3.14.7)
+conformance	Run actions/setup-python@v5	2026-10-04T04:21:14.6734570Z ##[endgroup]
+conformance	Fast unit gate (import + unittest discover)	﻿2026-10-04T04:21:14.6975847Z ##[group]Run python -c "import py_compile, pathlib, sys; [py_compile.compile(str(p), doraise=True) for p in pathlib.Path('tools').rglob('*.py')]; print('py_compile PASS')"
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:21:14.6978784Z ^[[36;1mpython -c "import py_compile, pathlib, sys; [py_compile.compile(str(p), doraise=True) for p in pathlib.Path('tools').rglob('*.py')]; print('py_compile PASS')"^[[0m
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:21:14.6980972Z ^[[36;1mpython -B tools/test_runner.py --family unit^[[0m
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:21:14.7224042Z shell: /usr/bin/bash -e {0}
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:21:14.7224781Z env:
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:21:14.7225438Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.7/x64
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:21:14.7226630Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.7/x64/lib/pkgconfig
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:21:14.7227672Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.7/x64
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:21:14.7228670Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.7/x64
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:21:14.7229632Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.7/x64
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:21:14.7230689Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.7/x64/lib
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:21:14.7231545Z ##[endgroup]
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:21:17.0881822Z py_compile PASS
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4069635Z unit: FAIL
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4070066Z ce.py", line 321, in require_runtime_generation_identity
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4070321Z     return _digest_items(runtime_surface_items(root))
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4070515Z                          ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4080000Z   File "/tmp/saipen-test-s22f2klh/project/tools/saipen_engine/runtime_surface.py", line 197, in runtime_surface_items
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4080497Z     raise RuntimeSurfaceError(f"runtime root is not a directory: {base}")
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4080914Z saipen_engine.runtime_surface.RuntimeSurfaceError: runtime root is not a directory: /tmp/tmp6289necm/home\.agents\skills\saipen
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4081230Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4081236Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4081312Z ======================================================================
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4081713Z FAIL: test_a_sharded_run_leaves_no_sandbox (test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_a_sharded_run_leaves_no_sandbox)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4082117Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4082339Z Traceback (most recent call last):
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4082720Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_t1505_core_unit_sandbox_reclaim.py", line 259, in test_a_sharded_run_leaves_no_sandbox
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4083884Z     self.assert_run_leaves_no_sandbox(2)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4084069Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4084415Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_t1505_core_unit_sandbox_reclaim.py", line 251, in assert_run_leaves_no_sandbox
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4085725Z     self.assertEqual(run["status"], "PASS", run)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4085922Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4086111Z AssertionError: 'FAIL' != 'PASS'
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4086520Z - FAIL
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4086863Z + PASS
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4089347Z  : {'status': 'FAIL', 'exit_code': 5, 'ran': 3, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': None, 'sections': {}, 'discovered': 3, 'partition_error': None, 'shards': [{'status': 'PASS', 'exit_code': 0, 'ran': 3, 'selected': 3, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': 0, 'duration_s': 0.2}, {'status': 'FAIL', 'exit_code': 5, 'ran': 0, 'selected': 0, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': None, 'duration_s': 0.1}], 'module_durations_s': {'test_hermetic_env': 0.0}, 'sandboxes_swept': [], 'sandboxes_leaked': [], 'fingerprint': 'c917226255ebf922efb37530adcd38f41735698dc0f18aaeb9907029a550f388', 'jobs': 2, 'duration_s': 1.1, 'timeout_s': 600, 'command': ['python', '-B', '-m', 'unittest', 'discover', '-s', 'tools', '-p', 'test_hermetic_env.py', '-v']}
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4091453Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4091566Z ======================================================================
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4092353Z FAIL: test_crlf_bytes_committed_under_text_auto_are_not_reported (test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_crlf_bytes_committed_under_text_auto_are_not_reported)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4092806Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4093751Z Traceback (most recent call last):
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4094275Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_t1506_xpatch_survival.py", line 133, in test_crlf_bytes_committed_under_text_auto_are_not_reported
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4095328Z     self.assertEqual(xpatch.commit_survival(self.root)["uncommitted"], [])
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4096477Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4097471Z AssertionError: Lists differ: [{'patch_id': 'XP-000001', 'paths': ['src/session.py']}] != []
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4097879Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4097948Z First list contains 1 additional elements.
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098111Z First extra element 0:
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098276Z {'patch_id': 'XP-000001', 'paths': ['src/session.py']}
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098406Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098489Z - [{'patch_id': 'XP-000001', 'paths': ['src/session.py']}]
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098668Z + []
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098728Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098802Z ======================================================================
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4099890Z FAIL: test_capability_reason_reaches_skip_and_unproven_runner (test_t1582_sweep_skip_reason.ActualSweepCapabilityTests.test_capability_reason_reaches_skip_and_unproven_runner)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4100673Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4100872Z Traceback (most recent call last):
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4101528Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_t1582_sweep_skip_reason.py", line 179, in test_capability_reason_reaches_skip_and_unproven_runner
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4102906Z     self.assertIn("1314", text)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4103132Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4104958Z AssertionError: '1314' not found in 'UNPROVEN: sweep -- portable project identity: this host cannot create a symlink, so the case was never constructed (a host capability, not a missing file): [Errno 1] symlink privilege unavailable\nSKIP: portable project identity -- this host cannot create a symlink, so the case was never constructed (a host capability, not a missing file): [Errno 1] symlink privilege unavailable\nPROVEN: 0 of 1 mutation controls; host capability unproven: 1; broken: 0'
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4107302Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4107386Z ======================================================================
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4108371Z FAIL: test_non_locale_root_stray_is_reported_not_a_crash (test_validator_layout_parity.RootStrayLocaleTests.test_non_locale_root_stray_is_reported_not_a_crash)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4109430Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4109657Z Traceback (most recent call last):
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4110713Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_validator_layout_parity.py", line 383, in test_non_locale_root_stray_is_reported_not_a_crash
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4111762Z     self.assertIn(NON_LOCALE_STRAY, completed.stdout)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4112199Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4122769Z AssertionError: '╨╛╨┤╨╕╨╜' not found in "saipen conformance validation starting (tools/validate.py)...\nProject root: /tmp/saipen-stray-home-nbeq9xe7/project (explicit)\nProject lineage: lineage-527fdc75b2c646baa7cdcce5eae701d9\nPASS: state.schema.json and the engine STATE contract constants agree\nPASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-527fdc75b2c646baa7cdcce5eae701d9)\nFAIL: STATE.md next_action 'PHASE SCOUT' enters ticket-bearing phase SCOUT with no T-### -- RFC § 1.2 REQUIRES the ref for BUILD/REVIEW/SCOUT/SHIP/VERIFY, and a cold agent cannot act on a phase with no subject\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: append targets end on a line boundary (3 checked)\nFAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['\\udce2\\udc95\\udca8\\udce2\\udc95\\udc9b\\udce2\\udc95\\udca8\\udce2\\udc94\\udca4\\udce2\\udc95\\udca8\\udce2\\udc95\\udc95\\udce2\\udc95\\udca8\\udce2\\udc95\\udc9c']. Both orphans removed alongside this check arrived that way, on a `git add -A` in a commit about something else, and neither was referenced by any document or tool -- so no other check here could ever see them. A deliberate new root file is a one-line addition to ROOT_ALLOWED in tools/validate.py; a scratch file belongs in .gitignore, which this check honours\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [taskless-active-phase]: STATE.md phase SCOUT has task: none -- active ticket phases SHOULD name a T-### unless next_action explains a ticket-less maintenance exception (RFC § 1.2)\nWARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up\nWARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- RFC § 1.10 must state that answering a row from recall is the same failure as inventing a command, not a lesser one\nWARN [cross-doc-drift]: ... and 10 more like the above\nValidation FAILED: 2 problem(s), 14 warning(s)\n"
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132073Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132169Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132371Z Ran 4899 tests in 1195.466s
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132464Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132534Z FAILED (failures=21, errors=3, skipped=72)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132648Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4303487Z ##[error]Process completed with exit code 1.
+conformance	Post Run actions/checkout@v4	﻿2026-10-04T04:41:18.4483588Z Post job cleanup.
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.5383296Z [command]/usr/bin/git version
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.5425259Z git version 2.55.0
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.5452070Z Temporarily overriding HOME='/home/runner/work/_temp/7703c986-57e1-4f18-8bee-f591b9275740' before making global git config changes
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.5452947Z Adding repository directory to the temporary git global config as a safe directory
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.5455934Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/saipen/saipen
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.5501496Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.5537094Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.5810903Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.5839382Z http.https://github.com/.extraheader
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.5850269Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.5888988Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.6167040Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+conformance	Post Run actions/checkout@v4	2026-10-04T04:41:18.6211498Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+conformance	Complete job	﻿2026-10-04T04:41:18.6630822Z Cleaning up orphan processes
+conformance	Complete job	2026-10-04T04:41:18.6884017Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

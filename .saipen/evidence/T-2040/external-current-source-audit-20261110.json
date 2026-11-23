@@ -1,0 +1,17 @@
+{
+  "external_root": "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+  "path": "Scripts/accounts/SaiAccounts.cs",
+  "head": "555911ff03a7cca969f0b143c3370e12ba043abf",
+  "status": " M Scripts/accounts/SaiAccounts.cs\n",
+  "current_sha256": "0bae50f9359deff6a189d1b666957114e3d71f3a7e07ac8b643e1e92b65a257f",
+  "d93b212f2c27763a62b00fc2641755a43a6f4004": {
+    "exit_code": 0,
+    "sha256": "d771f95c48ece2c06ae25f660520680ad6bd2f2678b8443b26b266ccbb80ef08",
+    "matches_text": false
+  },
+  "HEAD": {
+    "exit_code": 0,
+    "sha256": "d771f95c48ece2c06ae25f660520680ad6bd2f2678b8443b26b266ccbb80ef08",
+    "matches_text": false
+  }
+}

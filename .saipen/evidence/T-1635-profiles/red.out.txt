@@ -1,0 +1,150 @@
+EEEEFFFFEEFFFFE
+======================================================================
+ERROR: test_other_profile_hook_is_refused_even_with_current_bytes (test_t1635_claude_profiles.HookProfileProof.test_other_profile_hook_is_refused_even_with_current_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 212, in test_other_profile_hook_is_refused_even_with_current_bytes
+    proof = self.proof(hook, selected)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 195, in proof
+    policy = identity.IdentityPolicy(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: IdentityPolicy.__init__() got an unexpected keyword argument 'profile_hook'
+
+======================================================================
+ERROR: test_real_process_environment_observes_only_requested_value (test_t1635_claude_profiles.HookProfileProof.test_real_process_environment_observes_only_requested_value)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 231, in test_real_process_environment_observes_only_requested_value
+    self.assertEqual(processes.environment_value(child.pid, "CLAUDE_CONFIG_DIR"),
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.host_authority_process' has no attribute 'environment_value'
+
+======================================================================
+ERROR: test_selected_profile_hook_is_accepted (test_t1635_claude_profiles.HookProfileProof.test_selected_profile_hook_is_accepted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 207, in test_selected_profile_hook_is_accepted
+    self.assertTrue(self.proof(hook, hook).ok)
+                    ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 195, in proof
+    policy = identity.IdentityPolicy(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: IdentityPolicy.__init__() got an unexpected keyword argument 'profile_hook'
+
+======================================================================
+ERROR: test_unobservable_profile_is_not_treated_as_default (test_t1635_claude_profiles.HookProfileProof.test_unobservable_profile_is_not_treated_as_default)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 217, in test_unobservable_profile_is_not_treated_as_default
+    proof = self.proof("/user/.claude/hooks/saipen-guard.py", None)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 195, in proof
+    policy = identity.IdentityPolicy(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: IdentityPolicy.__init__() got an unexpected keyword argument 'profile_hook'
+
+======================================================================
+ERROR: test_explicit_repair_installs_only_the_requested_profile (test_t1635_claude_profiles.Profiles.test_explicit_repair_installs_only_the_requested_profile)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 85, in test_explicit_repair_installs_only_the_requested_profile
+    integration.repair(home=self.home, only="claude", profile=self.second)
+TypeError: repair() got an unexpected keyword argument 'profile'
+
+======================================================================
+ERROR: test_health_records_do_not_overwrite_another_profiles_verification (test_t1635_claude_profiles.Profiles.test_health_records_do_not_overwrite_another_profiles_verification)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 102, in test_health_records_do_not_overwrite_another_profiles_verification
+    from saipen_engine.claude_profiles import health_file
+ModuleNotFoundError: No module named 'saipen_engine.claude_profiles'
+
+======================================================================
+ERROR: test_real_hooks_in_two_profiles_share_one_service_without_profile_confusion (test_t1635_claude_profiles.SharedAuthority.test_real_hooks_in_two_profiles_share_one_service_without_profile_confusion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 268, in test_real_hooks_in_two_profiles_share_one_service_without_profile_confusion
+    self.assertNotIn("decision", admitted, admitted)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\case.py", line 1144, in assertNotIn
+    if member in container:
+       ^^^^^^^^^^^^^^^^^^^
+TypeError: argument of type 'NoneType' is not iterable
+
+======================================================================
+FAIL: test_bash_injector_expands_selected_profile_and_keeps_other_hosts (test_t1635_claude_profiles.Profiles.test_bash_injector_expands_selected_profile_and_keeps_other_hosts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 183, in test_bash_injector_expands_selected_profile_and_keeps_other_hosts
+    self.assertEqual(result.stdout.splitlines(), [
+AssertionError: Lists differ: ['/default/home/.claude/skills/saipen', '/de[24 chars]ode'] != ['/selected/profile with spaces/skills/saipe[32 chars]ode']
+
+First differing element 0:
+'/default/home/.claude/skills/saipen'
+'/selected/profile with spaces/skills/saipen'
+
+- ['/default/home/.claude/skills/saipen', '/default/home/.config/opencode']
++ ['/selected/profile with spaces/skills/saipen',
++  '/default/home/.config/opencode']
+
+======================================================================
+FAIL: test_canonical_injector_installs_runtime_into_only_the_selected_profile (test_t1635_claude_profiles.Profiles.test_canonical_injector_installs_runtime_into_only_the_selected_profile)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 155, in test_canonical_injector_installs_runtime_into_only_the_selected_profile
+    self.assertTrue((runtime / "tools" / "saipen.py").is_file())
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_doctor_lists_each_profile_without_reading_credentials (test_t1635_claude_profiles.Profiles.test_doctor_lists_each_profile_without_reading_credentials)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 53, in test_doctor_lists_each_profile_without_reading_credentials
+    self.assertEqual(set(rows), {self.first, self.second})
+AssertionError: Items in the second set but not the first:
+WindowsPath('V:/_TEMP_/tmphkezpf65/.claude-account2')
+
+======================================================================
+FAIL: test_environment_profile_outside_home_is_observed_beside_default (test_t1635_claude_profiles.Profiles.test_environment_profile_outside_home_is_observed_beside_default)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 62, in test_environment_profile_outside_home_is_observed_beside_default
+    self.assertIn(Path(directory), homes)
+AssertionError: WindowsPath('V:/_TEMP_/tmpqesidrjk') not found in {WindowsPath('V:/_TEMP_/tmp35y9ajr7/.claude')}
+
+======================================================================
+FAIL: test_named_profile_cli_is_reachable_and_requires_claude (test_t1635_claude_profiles.Profiles.test_named_profile_cli_is_reachable_and_requires_claude)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 131, in test_named_profile_cli_is_reachable_and_requires_claude
+    self.assertEqual(result.returncode, 0, result.stderr)
+AssertionError: 2 != 0 : b''
+
+======================================================================
+FAIL: test_native_install_selects_one_profile_and_keeps_unrelated_settings (test_t1635_claude_profiles.Profiles.test_native_install_selects_one_profile_and_keeps_unrelated_settings)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 72, in test_native_install_selects_one_profile_and_keeps_unrelated_settings
+    self.assertEqual(Path(result["artifact"]), self.second / "hooks" / "saipen-guard.py")
+AssertionError: WindowsPath('V:/_TEMP_/tmp64b6stbp/.claude/hooks/saipen-guard.py') != WindowsPath('V:/_TEMP_/tmp64b6stbp/.claude-account2/hooks/saipen-guard.py')
+
+======================================================================
+FAIL: test_registered_launcher_profile_is_discovered_without_scanning_its_parent (test_t1635_claude_profiles.Profiles.test_registered_launcher_profile_is_discovered_without_scanning_its_parent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 99, in test_registered_launcher_profile_is_discovered_without_scanning_its_parent
+    self.assertIn(launcher_profile, homes)
+AssertionError: WindowsPath('V:/_TEMP_/tmpkktff7qm/launcher-home/account') not found in {WindowsPath('V:/_TEMP_/tmpkktff7qm/.claude')}
+
+======================================================================
+FAIL: test_selected_profile_uninstall_preserves_the_other_profile_and_credentials (test_t1635_claude_profiles.Profiles.test_selected_profile_uninstall_preserves_the_other_profile_and_credentials)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1635-pair-38r1lwhr\project\tools\test_t1635_claude_profiles.py", line 121, in test_selected_profile_uninstall_preserves_the_other_profile_and_credentials
+    self.assertTrue((self.first / "hooks" / "saipen-guard.py").is_file())
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 15 tests in 6.190s
+
+FAILED (failures=8, errors=7)

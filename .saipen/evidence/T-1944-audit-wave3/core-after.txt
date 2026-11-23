@@ -1,0 +1,10 @@
+core_001: ok=False status=NOT_QUALIFIED layers=0
+core_002: valid=STATE_VALID digestless=STATE_CORRUPT step_ok=False step_status=None
+core_003: EXCEPTION TypeError: grant_fields() got an unexpected keyword argument 'valve'
+core_004: T20_ok=False T20=DISPOSITION_UNVERIFIED fakeauth_ok=False fakeauth=DISPOSITION_UNVERIFIED
+core_005: rc=1 out={
+  "ok": false,
+  "campaign": null,
+  "state_status": "STATE_CORRUPT",
+  "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)",
+  "detail": "A campaign state exists b

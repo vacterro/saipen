@@ -1,0 +1,12 @@
+# SRC-054 live Problip pack through the live pipeline (scratch output)
+command: python .saipen/evidence/T-1373-evidence-surface-20260916/live_problip_pack.py --out <scratch>
+--- output ---
+pack success=True error=''
+archive=_PROBLIP_16.09.26-T23-29-24.zip bytes=585525
+contract conditional=logs,intake,archive/source,KNOWLEDGE,audit,evidence references_declared=True
+proof_in_zip=True source_sha256=7856719211E999FA47B0C8D21B3F6615BE12AFE0E73D4E4DDDD97D5242C14C9C archive_sha256=7856719211E999FA47B0C8D21B3F6615BE12AFE0E73D4E4DDDD97D5242C14C9C
+status=COMPLETE authoritative=True collected/in_archive=143/143 required_evidence_omitted=False
+evidence_citations={"rules_source": "contract", "surfaces": ["evidence"], "carriers_scanned": 8, "carrier_bytes_scanned": 72883, "cited_files": [".saipen/evidence/PERF-001_WINDOWS_EVIDENCE.md"], "cited_dirs": [], "cited_missing_on_disk": [], "cited_required": 1, "cited_in_archive": 1, "cited_by": {".saipen/evidence/PERF-001_WINDOWS_EVIDENCE.md": [".saipen/LOG.md", ".saipen/archive/source/SRC-002.coverage.json"]}, "truncated": false, "unreadable_carriers": []}
+problip .saipen files changed by the pack: ['MANIFEST.json']
+RESULT PASS
+exit=0

@@ -1,0 +1,3 @@
+# the real Claude hook artifact, the real engine and a real authority service on a throwaway profile; one UserPromptSubmit for a bound fixture project. pre = a home copy carrying the pre-fix files; _SAIPEN = this tree after the fix.
+{"home": "pre", "health": {"event": "UserPromptSubmit", "state": "DEGRADED", "code": "AUTHORITY_CLIENT_UNPROVEN", "step": null}, "notice_names_step": false, "service_log_lines": 0}
+{"home": "_SAIPEN", "health": {"event": "UserPromptSubmit", "state": "DEGRADED", "code": "AUTHORITY_CLIENT_UNPROVEN", "step": "NOT_HOST_DESCENDANT"}, "notice_names_step": true, "service_log_lines": 1, "service_log_steps": ["NOT_HOST_DESCENDANT"]}

@@ -1,0 +1,98 @@
+======================================================================
+FAIL: test_declaration_preserves_contract_sources_seat_phase_and_goal (test_t1708_regression_declaration.DeclarationTests.test_declaration_preserves_contract_sources_seat_phase_and_goal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1708-controls-a0jvkq8o\subject\tools\test_t1708_regression_declaration.py", line 96, in test_declaration_preserves_contract_sources_seat_phase_and_goal
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'HOME_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': "home-dead: STATE.saipen_home 'V:\\\\_TEMP_\\\\saipen-t1708-controls-a0jvkq8o\\\\subject' is missing extensions/subs/PROTOCOL.md -- not a usable SAIPEN install -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)", 'next_action': 'saipen rebind-home --auto'}
+
+======================================================================
+FAIL: test_done_history_is_refused_without_writes (test_t1708_regression_declaration.DeclarationTests.test_done_history_is_refused_without_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1708-controls-a0jvkq8o\subject\tools\test_t1708_regression_declaration.py", line 141, in test_done_history_is_refused_without_writes
+    self.assertEqual(result.code, "TICKET_NOT_WORKABLE")
+AssertionError: 'HOME_REQUIRED' != 'TICKET_NOT_WORKABLE'
+- HOME_REQUIRED
++ TICKET_NOT_WORKABLE
+
+
+======================================================================
+FAIL: test_dry_run_writes_no_canonical_bytes (test_t1708_regression_declaration.DeclarationTests.test_dry_run_writes_no_canonical_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1708-controls-a0jvkq8o\subject\tools\test_t1708_regression_declaration.py", line 114, in test_dry_run_writes_no_canonical_bytes
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'HOME_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': "home-dead: STATE.saipen_home 'V:\\\\_TEMP_\\\\saipen-t1708-controls-a0jvkq8o\\\\subject' is missing extensions/subs/PROTOCOL.md -- not a usable SAIPEN install -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)", 'next_action': 'saipen rebind-home --auto'}
+
+======================================================================
+FAIL: test_existing_verify_updater_keeps_the_preimage_and_declared_gate (test_t1708_regression_declaration.DeclarationTests.test_existing_verify_updater_keeps_the_preimage_and_declared_gate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1708-controls-a0jvkq8o\subject\tools\test_t1708_regression_declaration.py", line 155, in test_existing_verify_updater_keeps_the_preimage_and_declared_gate
+    self.assertTrue(_declare(self, self.root).ok)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_invalid_values_cannot_remove_or_relax_the_gate (test_t1708_regression_declaration.DeclarationTests.test_invalid_values_cannot_remove_or_relax_the_gate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1708-controls-a0jvkq8o\subject\tools\test_t1708_regression_declaration.py", line 120, in test_invalid_values_cannot_remove_or_relax_the_gate
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'HOME_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': "home-dead: STATE.saipen_home 'V:\\\\_TEMP_\\\\saipen-t1708-controls-a0jvkq8o\\\\subject' is missing extensions/subs/PROTOCOL.md -- not a usable SAIPEN install -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)", 'next_action': 'saipen rebind-home --auto'}
+
+======================================================================
+FAIL: test_missing_ticket_is_refused_without_writes (test_t1708_regression_declaration.DeclarationTests.test_missing_ticket_is_refused_without_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1708-controls-a0jvkq8o\subject\tools\test_t1708_regression_declaration.py", line 151, in test_missing_ticket_is_refused_without_writes
+    self.assertEqual(result.code, "TICKET_NOT_FOUND")
+AssertionError: 'HOME_REQUIRED' != 'TICKET_NOT_FOUND'
+- HOME_REQUIRED
++ TICKET_NOT_FOUND
+
+
+======================================================================
+FAIL: test_native_cli_dry_run_is_write_free (test_t1708_regression_declaration.DeclarationTests.test_native_cli_dry_run_is_write_free)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1708-controls-a0jvkq8o\subject\tools\test_t1708_regression_declaration.py", line 184, in test_native_cli_dry_run_is_write_free
+    self.assertTrue(result.get("ok"), result)
+AssertionError: False is not true : {'ok': False, 'code': 'HOME_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': "home-dead: STATE.saipen_home 'V:\\\\_TEMP_\\\\saipen-t1708-controls-a0jvkq8o\\\\subject' is missing extensions/subs/PROTOCOL.md -- not a usable SAIPEN install -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)", 'next_action': 'saipen rebind-home --auto', 'detail': "home-dead: STATE.saipen_home 'V:\\\\_TEMP_\\\\saipen-t1708-controls-a0jvkq8o\\\\subject' is missing extensions/subs/PROTOCOL.md -- not a usable SAIPEN install -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)"}
+
+======================================================================
+FAIL: test_native_cli_updates_only_the_declared_field (test_t1708_regression_declaration.DeclarationTests.test_native_cli_updates_only_the_declared_field)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1708-controls-a0jvkq8o\subject\tools\test_t1708_regression_declaration.py", line 176, in test_native_cli_updates_only_the_declared_field
+    self.assertTrue(result.get("ok"), result)
+AssertionError: False is not true : {'ok': False, 'code': 'HOME_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': "home-dead: STATE.saipen_home 'V:\\\\_TEMP_\\\\saipen-t1708-controls-a0jvkq8o\\\\subject' is missing extensions/subs/PROTOCOL.md -- not a usable SAIPEN install -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)", 'next_action': 'saipen rebind-home --auto', 'detail': "home-dead: STATE.saipen_home 'V:\\\\_TEMP_\\\\saipen-t1708-controls-a0jvkq8o\\\\subject' is missing extensions/subs/PROTOCOL.md -- not a usable SAIPEN install -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)"}
+
+======================================================================
+FAIL: test_oversized_original_contract_is_preserved_losslessly (test_t1708_regression_declaration.DeclarationTests.test_oversized_original_contract_is_preserved_losslessly)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1708-controls-a0jvkq8o\subject\tools\test_t1708_regression_declaration.py", line 165, in test_oversized_original_contract_is_preserved_losslessly
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'HOME_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': "home-dead: STATE.saipen_home 'V:\\\\_TEMP_\\\\saipen-t1708-controls-a0jvkq8o\\\\subject' is missing extensions/subs/PROTOCOL.md -- not a usable SAIPEN install -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)", 'next_action': 'saipen rebind-home --auto'}
+
+======================================================================
+FAIL: test_declaring_required_activates_the_current_cycle_gate (test_t1708_regression_declaration.DeclaredGateTests.test_declaring_required_activates_the_current_cycle_gate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1708-controls-a0jvkq8o\subject\tools\test_regression_gate.py", line 161, in setUp
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_without_declaration_the_existing_unrequired_gate_is_unchanged (test_t1708_regression_declaration.DeclaredGateTests.test_without_declaration_the_existing_unrequired_gate_is_unchanged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1708-controls-a0jvkq8o\subject\tools\test_regression_gate.py", line 161, in setUp
+    self.assertTrue(
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 13 tests in 2.194s
+
+FAILED (failures=11)

@@ -1,0 +1,86 @@
+{
+  "source_fingerprint": "27a1ef9552210b868101e3b0f846a2eab3005f4f741f4addb2605df3dc42f6b1",
+  "actual_project": {
+    "samples_ms": [
+      921.8662999919616,
+      930.6710000091698,
+      905.7174000190571,
+      889.1675000195391,
+      858.8596000045072
+    ],
+    "median_ms": 905.7174000190571,
+    "ok": true,
+    "total": 208,
+    "counts": {
+      "UNVERIFIED": 146,
+      "REGRESSION_SUSPECT": 52,
+      "UNCHANGED_SCOPE": 10
+    },
+    "paths_read": 799,
+    "bytes_read": 18590051,
+    "errors": [],
+    "blocks_unrelated_work": false
+  },
+  "synthetic": [
+    {
+      "unrelated_files": 0,
+      "samples_ms": [
+        5.007600004319102,
+        4.620499996235594,
+        5.43310001376085,
+        5.03749999916181,
+        4.892600001767278
+      ],
+      "median_ms": 5.007600004319102,
+      "ok": true,
+      "total": 1,
+      "counts": {
+        "CURRENT_PASS": 1
+      },
+      "paths_read": 3,
+      "bytes_read": 404,
+      "errors": [],
+      "blocks_unrelated_work": false
+    },
+    {
+      "unrelated_files": 1000,
+      "samples_ms": [
+        7.734999991953373,
+        7.267800014233217,
+        7.208800001535565,
+        7.2296000143978745,
+        7.153399987146258
+      ],
+      "median_ms": 7.2296000143978745,
+      "ok": true,
+      "total": 1,
+      "counts": {
+        "CURRENT_PASS": 1
+      },
+      "paths_read": 3,
+      "bytes_read": 404,
+      "errors": [],
+      "blocks_unrelated_work": false
+    },
+    {
+      "unrelated_files": 10000,
+      "samples_ms": [
+        5.663700023433194,
+        6.365600012941286,
+        7.7179999789223075,
+        6.3445999985560775,
+        6.658800004515797
+      ],
+      "median_ms": 6.365600012941286,
+      "ok": true,
+      "total": 1,
+      "counts": {
+        "CURRENT_PASS": 1
+      },
+      "paths_read": 3,
+      "bytes_read": 404,
+      "errors": [],
+      "blocks_unrelated_work": false
+    }
+  ]
+}

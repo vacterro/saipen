@@ -1,0 +1,16 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tools/test_t1544_audit20.py::OneSourceIdentityPerStatusProjectionTests",
+    "-q",
+    "--tb=short"
+  ],
+  "returncode": 0,
+  "files": {
+    "tools/saipen.py": "b5efc51fd68f6bda70030a1606ca3c193529d9cf74ad7380d0b7f0d35d5dea2d",
+    "tools/test_t1544_audit20.py": "52a252d80a787b2cfa1b3477679fd7944813a46c59a7877d82adc3e76f1e18fa"
+  }
+}

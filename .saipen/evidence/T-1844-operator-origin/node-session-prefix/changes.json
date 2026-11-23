@@ -1,0 +1,22 @@
+{
+  "extensions/adapters/opencode/saipen-guard.js": {
+    "before": "5ceb358c3af9a4ac6c9d9e7ef6a59add1c9caa275fba008eecb59abad3ebba89",
+    "after": "8a0c6e6ac8c7ed9bc938037a4d391b460bdfda20ac02aaddaba0f9f793ff0831"
+  },
+  "tools/test_operator_origin_support.py": {
+    "before": "969bdad7ef0d4e0c46a3b1972f9c663e2652b3ffaf7c9a594f65b0a52b86d91f",
+    "after": "8172d9110824b742191b4555ea3beff31b9aecf002064fb215ebd218809a7f46"
+  },
+  "tools/test_response_delivery.py": {
+    "before": "824c7c7dcbae15e8ccfe92eddbb62f5a6e9f64d71db74ca3aa55b5073ab2a9bd",
+    "after": "a12ea991519b24d21e7c47f1603aa5c416ad46ab0e7be21db69a801723457bf2"
+  },
+  "tools/test_t1657_refused_reply_preserved.py": {
+    "before": "ed32eb8e7202b745376e0a5603d5ab5263b5f7259219621712d2790a719b16d4",
+    "after": "165750f0d9354ba7f1a7dc6f60bc0f88bbf964a0a72d5199deb7b1ed6ab6bd04"
+  },
+  "tools/test_response_surface_contract.py": {
+    "before": "e4058305d5188ae0b37e1b10833f9d0f5dab56b8235b7b5d8f120fb0648a84d3",
+    "after": "a70421543b231b674da9958c4341c02b829d9c77b5947e375865656cac1db22b"
+  }
+}

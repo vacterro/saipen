@@ -1,0 +1,54 @@
+{
+  "clauses": {
+    "SRC-117:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-001: the SAIPEN memory root must be contract-AUTHORITATIVE, not merely contract-denylisted. After collect_for_inventory(), build the exact allowed-path set from that collection (which already incorporates mandatory, conditional, optional, cited-required, caps, transient exclusions and contract-version semantics) and exclude every inventory entry beneath contract.memory_root unless it is in it, symmetrically for tracked, untracked and filesystem-origin entries, with a dedicated machine reason saipen_undeclared_memory distinct from saipen_non_exportable. Measured on the audited archive: 278 undeclared .saipen/scratch_* files, 4,547,574 bytes, were published as payload while the contract collector correctly excluded them."
+    },
+    "SRC-117:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-002: a failed persistence transaction must be side-effect-free with respect to its input. ProjectRegistry._mutate_latest must never use self.config as its own transactional staging object (first write aliases staging to live caller state at projects.py:81-87), and save_config() must not leave normalize_paths()/initialized=True applied to its input when the durable replacement fails (config.py:1838-1844). Caller-visible state must be synchronized only AFTER durable commit succeeds. Reproduction: a mocked save failure raises RegistrySaveError yet the caller's cfg.projects still contains ['ghost'] with no config file on disk."
+    },
+    "SRC-117:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-003: Settings autosave must not roll back launcher state written after the dialog opened. settings_dialog.py:1160 replaces the whole launcher list with the dialog-construction snapshot, erasing the runtime-owned resolution fields (resolved_command, resolved_probe, resolved_profile, resolved_stage, resolved_is_cli) that ui_qt/main_window.py:3391-3405 persisted via scoped_config_write(). If the launcher tab was untouched, launchers must not be written at all; when it was edited, merge by launcher id into the freshly loaded list and preserve runtime-owned resolution unless an operator action semantically invalidates the command."
+    },
+    "SRC-117:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-001: PreparedWorker.stop() must be a truthful ownership barrier. Once shutdown begins: reject new prepared submissions, wake and stop the scheduler loop, cancel work that has not begun, prevent every post-stop _pool.submit/_probe_pool.submit, and wait for already-running side-effectful work to reach a defined safe terminal/recovery boundary before declaring quiescence. Measured: DELIVERY_FINISHED_EVENT True while stop() had already returned. run_bridge_server() must not remove PID/server ownership before prepared quiescence, and stop() must report success/failure explicitly rather than always claiming quiescence."
+    },
+    "SRC-117:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-002: TaskRunner needs an explicit terminal lifecycle (OPEN -> CLOSING -> CLOSED). New submissions must be refused after CLOSING, and a queued job must not execute after terminal shutdown. Once _pump_audit_start_queue() has moved a batch from _audit_start_pending into _audit_start_inflight and submitted _prepare, MainWindow.closeEvent() can no longer revoke it, so start_batch() may still pack, provision browser capacity and dispatch an audit after the operator closed the UI - violating the invariant closeEvent() itself documents. A cooperative close token must be checked at every irreversible boundary (worker provisioning, durable dispatch submission), and a race past that boundary must be settled/adopted truthfully rather than reported as cancelled."
+    },
+    "SRC-117:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-003: prepared execution history needs a terminal lifecycle. PreparedStore.prepared_executions grows monotonically for recurring EVERY_RESET jobs (measured 40 terminal rows for 40 completed events, job ARMED, nothing active or recoverable), and AuditStartIntentStore._trim_intents() explicitly retains every source-keyed record forever even at terminal status (measured 40 terminally FAILED prepared sources with history_bound=6). Compact provably-terminal, reconciled executions into bounded durable identity tombstones that still reject or adopt a replay, while keeping full rows for active, retryable, RECOVERY_REQUIRED/ambiguous and recent diagnostic history."
+    },
+    "SRC-117:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-001: the browser-audit critical path reads the complete archive FOUR times around one dispatch - client-side SHA in BridgeService.submit_browser_audit(), server-side rehash in _validate_browser_submission(), pre-fetch changed-archive hash in BrowserDispatcher.resolve_artifact(), then the artifact stream. The Bridge must become the single owner of the queue-time digest: the GUI must contribute ZERO archive hashes, queue-time validation exactly ONE, and the worker must still receive the same archive_sha256. The later resolve_artifact() verification stays because it proves bytes did not change between enqueue and fetch."
+    },
+    "SRC-117:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-002: browserWorkerSnapshot() performs TWO full conversation scans because it calls latestChatGPTUserTurn?.() with no argument, whose default re-runs getChatGPTTurns() over turns it already has. Worse, browserWorkerPollOnce() builds up to THREE snapshots per cycle for one returned unclaimable job. Measured on 1000 turns: 1003 selector scans for one direct getChatGPTTurns() versus 2043 for one browserWorkerSnapshot() (2.04x). Inside a snapshot it must pass the collected turns; after /v1/browser/poll returns, exactly ONE fresh post-response snapshot must drive both browserWorkerCanClaim() and browserWorkerClaimBlockReason()."
+    },
+    "SRC-117:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-003: waitForExactProjectAttachment() already has a condition-driven MutationObserver on the live composer subtree, yet keeps setInterval(() => { watch(); check(); }, 60) beside it - a near-frame-rate poll whose only job is noticing a React composer remount. Measured: 40 extra selector scans per 600 ms with nothing changing, i.e. ~666 fallback wakeups during one uninterrupted 40 s wait (budget 40,000 ms), each managed worker window paying it independently. waitForManualArchiveInjectedTile() duplicates the same pattern. The fallback must become deliberately coarse (250-500 ms corridor) or condition-driven, and the remount/reanchor primitive must be shared rather than copied."
+    }
+  },
+  "derived_at": "2026-10-04T19:16:06Z",
+  "derived_from": "SRC-117",
+  "interpretation_revision": 9,
+  "schema_version": 1,
+  "source_sha256": "9d7cdf7bd1a1e8f3771078fa04130a2aa86521811d11591044f7b69f664ac5ea"
+}

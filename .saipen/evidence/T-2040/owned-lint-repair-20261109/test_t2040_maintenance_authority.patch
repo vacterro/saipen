@@ -1,0 +1,43 @@
+--- pre/tools/test_t2040_maintenance_authority.py
++++ tools/test_t2040_maintenance_authority.py
+@@ -15,19 +15,19 @@
+ 
+ TOOLS = Path(__file__).resolve().parent
+ sys.path.insert(0, str(TOOLS))
+-from test_hermetic_env import isolate_host_session
+-from test_operator_origin_support import use_case_owner
+-from test_request_clause_closure import TASK, drive
+-from test_t1363_zero_manual_entry import cli, healthy, receipts_of
+-from test_t2023_goal_management_and_maintenance_binding import (
++from test_hermetic_env import isolate_host_session  # noqa: E402
++from test_operator_origin_support import use_case_owner  # noqa: E402
++from test_request_clause_closure import TASK, drive  # noqa: E402
++from test_t1363_zero_manual_entry import cli, healthy, receipts_of  # noqa: E402
++from test_t2023_goal_management_and_maintenance_binding import (  # noqa: E402
+     MAINTENANCE_OBJECTIVE, _project, _read_history, _register_maintenance,
+     _witnessed_apply,
+ )
+-from saipen_engine import codec, goal_authority, intake, operations, replenishment, state
+-from saipen_engine.board import parse_board
+-from saipen_engine.discovery_providers import CandidateTask, get_provider
+-from saipen_engine.journal import Journal
+-from saipen_engine.persistent_goal import save_goal
++from saipen_engine import codec, goal_authority, intake, operations, replenishment, state  # noqa: E402
++from saipen_engine.board import parse_board  # noqa: E402
++from saipen_engine.discovery_providers import CandidateTask, get_provider  # noqa: E402
++from saipen_engine.journal import Journal  # noqa: E402
++from saipen_engine.persistent_goal import save_goal  # noqa: E402
+ 
+ 
+ def setUpModule():
+@@ -271,7 +271,9 @@
+             "gaps": [{"id": "repair-1", "name": "Local parser",
+                       "verify": "The exact local regression oracle passes"}]}), encoding="utf-8")
+         block(self, root, "T-1", "BLOCKED_EXTERNAL -- publication owned elsewhere")
+-        candidate = get_provider(goal.evidence_provider).evaluate(root, goal).actionable_candidates[0]
++        candidate = (
++            get_provider(goal.evidence_provider).evaluate(root, goal).actionable_candidates[0]
++        )
+         description = ("Bounded local repair " + "detail " * 220 if long else candidate.title)
+         description += (f" | goal: {goal.goal_id} | candidate: {candidate.candidate_id}"
+                         f" | evidence_fp: {candidate.evidence_fingerprint}")

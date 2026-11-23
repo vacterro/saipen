@@ -1,0 +1,17 @@
+== BEFORE (engine as it was): journal.py b7ca75c0953a911d, settled_projection.py b7cf3c4f7e6e6198, settled receipts 10818
+   monolithic index: 37548015 bytes
+   five checkpoints, seconds: 10.45 7.56 8.28 9.81 8.01 | median 8.28
+   status               10.15 s ok=True
+   continue --dry-run   2.54 s ok=True
+   monolithic index after: 37554828
+== AFTER (engine as it is): journal.py 85ec7861c2110b15, settled_projection.py 42b9e9f9a243680a, settled receipts 10840
+   monolithic index: 37650110 bytes
+   five checkpoints, seconds: 10.86 1.10 1.04 1.04 1.10 | median 1.10
+   status               6.57 s ok=True
+   continue --dry-run   2.42 s ok=True
+   monolithic index after: absent
+== the new copy, checked in-process
+projection state: CURRENT | deep validation: (True, [])
+whole-history snapshot: memo 2.15 s, strict 8.42 s, 10845 records; identical records: True; identical digest: True; errors 0/0
+operation queries: 56 operations, mismatches [], slowest checkpoint (3861) 2.88 s, zero-match 3.1 ms -> []
+RESULT: bounded settlement and reads agree with the strict answers

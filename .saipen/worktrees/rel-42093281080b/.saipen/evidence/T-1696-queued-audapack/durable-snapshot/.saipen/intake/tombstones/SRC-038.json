@@ -1,0 +1,18 @@
+{
+  "actionable": 16,
+  "archive_ref": ".saipen/archive/source/SRC-038.md",
+  "closed_at": "2026-09-06T18:00:00Z",
+  "closure_event": "acb-mto9cetk-8776967d9bc24cb7a4c6 (quick3, 3 waves)",
+  "linked_work": "T-160",
+  "receipt_id": "SRC-038",
+  "recovery": {
+    "method": "TOMBSTONE_AUTHORITATIVE",
+    "record": ".saipen/archive/source/SRC-038.recovery.json",
+    "recovered_at": "2026-09-07T14:32:00Z"
+  },
+  "requirements": 16,
+  "schema_version": 1,
+  "source_sha256": "9a32a6e55a39add61c197f026d3eca932b950608d1d5627283299c589c3224cb",
+  "status": "CLOSED",
+  "unresolved": 0
+}

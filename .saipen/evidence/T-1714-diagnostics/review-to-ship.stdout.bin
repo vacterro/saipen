@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "code": "TRANSITIONED",
+  "op_id": "transition-46f616b073f144c2a4e05f51574048b0",
+  "changed_files": [
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md"
+  ],
+  "recovery_required": false,
+  "phase": "SHIP",
+  "next_action": "PHASE SHIP T-1714",
+  "event_id": "E-14477",
+  "ticket": "T-1714"
+}

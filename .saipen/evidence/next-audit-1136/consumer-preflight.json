@@ -1,0 +1,347 @@
+{
+  "checked_utc": "2026-10-11T11:48:53.657855+00:00",
+  "consumers": {
+    "SAI_WEBSITE": {
+      "root": "V:\\___VAC\\__K\\__CODE\\_HTML\\_SAI_WEBSITE",
+      "state_frontmatter": {
+        "phase": "VERIFY",
+        "task": "T-31",
+        "next_action": "PHASE VERIFY T-31",
+        "blocker": "none",
+        "agent": "saipen",
+        "saipen_version": 8,
+        "schema_version": 3,
+        "style_contract": "ded-069a4c52",
+        "saipen_home": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+        "mode": "full",
+        "transition_from": "BUILD",
+        "updated": "2026-10-10T23:58:19Z",
+        "last_event": 356,
+        "execution_intent": "converge",
+        "converge_target": "done"
+      },
+      "canonical_sha256": {
+        "STATE.md": "b3a716d43d39dd88771f8654fc2951ac7814cbb1b659be5fd50a205240b74e37",
+        "BOARD.md": "a3f06b495ac028eac6e486f0f1f6c402a6cec1fdd821535808ef7ca84e3d6bcc",
+        "LOG.md": "695b0d16ff062bc8bea0e717e2a055e2d2216da7dde7471a805ef4d82685d039",
+        "IDENTITY.md": "38e1497fea50bbed7615c7f13e6140e8e4181bb345b32283b591fe94f721fa08"
+      },
+      "history_hash": "52f94f7a43f4e2c3",
+      "history_tail": 356,
+      "illegal_lines": [],
+      "board_errors": [],
+      "T31_board": {
+        "id": "T-31",
+        "section": "## DOING",
+        "line_no": 30,
+        "checkbox": "/",
+        "needs": [],
+        "fields": {
+          "regression": "required",
+          "verify": "node --test scripts/tests/release-checklist.test.mjs",
+          "owner": "saipen",
+          "claim_time": "2026-10-09T10:23:25Z"
+        },
+        "raw": "- [/] T-31 [P1] Wave 1: accessible clipboard, scenario player, search interaction | regression: required | verify: node --test scripts/tests/release-checklist.test.mjs | owner: saipen | claim_time: 2026-10-09T10:23:25Z",
+        "description": "[P1] Wave 1: accessible clipboard, scenario player, search interaction"
+      },
+      "reported_window_events": [
+        {
+          "date": "09.10.26 08:16",
+          "event": 336,
+          "parent": 335,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-f18a8a0fcddd438faa5e0a70e9d729c5",
+          "taxonomy": "RUN",
+          "text": "verify PASS [target: T-31] conf: high -- regression pair: denied and missing clipboard tests FAIL on pre-fix build, all support 10 pass plus content-features 29 pass on fixed build"
+        },
+        {
+          "date": "09.10.26 08:16",
+          "event": 337,
+          "parent": 336,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-3bfb9b00fcd64b0b80c560a460113795",
+          "taxonomy": "RUN",
+          "text": "regression pair [target: T-31] -- verifier clipboard-failure-tests: FAIL on pre-fix build, PASS on post-fix build -- support 10 pass, content-features 29 pass"
+        },
+        {
+          "date": "09.10.26 08:16",
+          "event": 338,
+          "parent": 337,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "transition-4d43eb24be1a4777af712db6f709837d",
+          "taxonomy": "RUN",
+          "text": "transition to BUILD -- red-half demonstration"
+        },
+        {
+          "date": "09.10.26 08:17",
+          "event": 339,
+          "parent": 338,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-d6a2c58d4730494ca0acc8f86bce54ab",
+          "taxonomy": "RUN",
+          "text": "verify FAIL [target: T-31] -- clipboard-failure-tests: 2 failed on pre-fix build, no status announcement"
+        },
+        {
+          "date": "09.10.26 08:17",
+          "event": 340,
+          "parent": 339,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "transition-7da6805b86c7419886f586675d9577b0",
+          "taxonomy": "RUN",
+          "text": "transition to VERIFY -- post-fix verification boundary"
+        },
+        {
+          "date": "09.10.26 08:17",
+          "event": 341,
+          "parent": 340,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-e39954b376644fd8864308103df058ed",
+          "taxonomy": "RUN",
+          "text": "verify PASS [target: T-31] conf: high -- clipboard-failure-tests: 2 failed pre-fix, all support 10 pass post-fix"
+        },
+        {
+          "date": "09.10.26 08:18",
+          "event": 342,
+          "parent": 341,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-514b23d7855e44d39d8481484ffbb9c7",
+          "taxonomy": "RUN",
+          "text": "--hex 766572696679202d3e2050415353205b7461726765743a20542d33315d20636f6e663a2068696768202d2d20737570706f7274203130207061737320706f73742d6669782c2032206661696c6564207072652d666978"
+        },
+        {
+          "date": "09.10.26 08:19",
+          "event": 343,
+          "parent": 342,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-b3ebcf4d4e88429ab17b21115a1e603d",
+          "taxonomy": "RUN",
+          "text": "verify FAIL [target: T-31] conf: high -- support-clipboard: 2 failed pre-fix"
+        },
+        {
+          "date": "09.10.26 08:19",
+          "event": 344,
+          "parent": 343,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-e95ee81be6854e2ab11f66a6a57ecff3",
+          "taxonomy": "RUN",
+          "text": "verify PASS [target: T-31] conf: high -- support-clipboard: 10 passed post-fix"
+        },
+        {
+          "date": "09.10.26 08:20",
+          "event": 345,
+          "parent": 344,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-0ebf246ae54041bf8c985b6398a8c9bf",
+          "taxonomy": "RUN",
+          "text": "lifecycle blocker: regression gate wants machine-recorded FAIL-PASS pair, but run and declare are unimplemented and work reverify run refuses active tickets; same-verifier FAIL plus PASS checkpoints recorded from genuine red and green runs in-cycle, REVIEW still refused; fix and evidence preserved, no fabrication"
+        },
+        {
+          "date": "09.10.26 08:25",
+          "event": 346,
+          "parent": 345,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-a1b12460f36045dfa4af7a5e7065474e",
+          "taxonomy": "RUN",
+          "text": "lifecycle blocker rechecked: run and declare verbs unknown in runtime 8.1.0, work reverify run refuses active tickets; no supported machine-recording path for the regression pair; proceeding with authorized independent website work, no SAIPEN admission claimed"
+        },
+        {
+          "date": "09.10.26 09:04",
+          "event": 347,
+          "parent": 346,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-2422360f12d64e91b3948ead7c2fa1c2",
+          "taxonomy": "RUN",
+          "text": "wave2-4 convergence: engine 354/354, browser suites green, site:doctor HEALTHY after refresh; test-maintenance fixes (provenance/controls/engine live-sync decoupling); visual green post-rebuild; release:verify 26 PASS 5 environmental-BLOCKED"
+        },
+        {
+          "date": "09.10.26 09:46",
+          "event": 348,
+          "parent": 347,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "attempt-open-82d102e2d41f405f8d421111716c8065",
+          "taxonomy": "DEC",
+          "text": "attempt A-006 open; supersedes A-005; provenance eyJiZW5jaG1hcmtfZXZpZGVuY2UiOiJpbmNvbXBsZXRlIiwiZXhlY3V0b3JfaWRlbnRpdHkiOiJzYWlwZW4iLCJtaXNzaW5nX2ZpZWxkcyI6WyJydW50aW1lX3Byb3ZpZGVyIiwicnVudGltZV9tb2RlbCIsInJ1bnRpbWVfZWZmb3J0Il0sInByb3ZlbmFuY2Vfc291cmNlIjoidW5hdmFpbGFibGUiLCJwcm92ZW5hbmNlX3N0YXR1cyI6InVuYXZhaWxhYmxlIiwicmVhc29uX2NvZGUiOiJob3N0X2NvbnRleHRfbWlzc2luZyIsInJ1bnRpbWVfZWZmb3J0IjpudWxsLCJydW50aW1lX21vZGVsIjpudWxsLCJydW50aW1lX3Byb3ZpZGVyIjpudWxsLCJzY2hlbWFfdmVyc2lvbiI6MX0.a2d09f43012a809a7ddffc4e3e42fb7fc0bd9608c86f73e803f42bba5440aac1"
+        },
+        {
+          "date": "09.10.26 09:46",
+          "event": 349,
+          "parent": 348,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "attempt-close-6a3b4a093b134d988770014de4cb62d3",
+          "taxonomy": "DEC",
+          "text": "attempt A-006 close result candidate stop completed_execution"
+        },
+        {
+          "date": "09.10.26 09:47",
+          "event": 350,
+          "parent": 349,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-e9f90b0b64cf48168570db6f5d82762c",
+          "taxonomy": "RUN",
+          "text": "verify PASS target T-31 conf high -- node --test release-checklist suite: 41 pass 0 fail; playwright support plus content-features suites: all pass on current tree; attempt A-006 closed candidate"
+        },
+        {
+          "date": "09.10.26 09:47",
+          "event": 351,
+          "parent": 350,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-f6ac327f012c4065bba3976a0cf45d28",
+          "taxonomy": "RUN",
+          "text": "--hex 766572696679202d3e2050415353205b7461726765743a20542d33315d20636f6e663a2068696768202d2d206e6f6465202d2d7465737420736372697074732f74657374732f72656c656173652d636865636b6c6973742e746573742e6d6a733a20343120706173732030206661696c3b20706c617977726967687420737570706f727420313020706173733b20636f6e74656e742d666561747572657320323920706173733b20617474656d707420412d30303620636c6f7365642063616e646964617465"
+        },
+        {
+          "date": "09.10.26 09:47",
+          "event": 352,
+          "parent": 351,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-e1d8ab72f2c748eebdc2cdcf0c1e4218",
+          "taxonomy": "RUN",
+          "text": "stage F upstream defect report: reverify refuses active tickets; run and declare unknown in runtime 8.1.0; review gate reads stale evidence slot and ignores newer checkpoints; hex carrier logged undecoded; no verifier amend verb; attempt A-006 opened and closed cleanly; T-31 stays VERIFY through supported paths only"
+        },
+        {
+          "date": "09.10.26 09:55",
+          "event": 353,
+          "parent": 352,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-d14ef6c8519c448588a3abf5c253e4c1",
+          "taxonomy": "RUN",
+          "text": "mission convergence: engine 369 pass; browser matrix 690 pass 80 approved skips chromium plus webkit; visual 33 pass; doctor HEALTHY; release verify 26 pass 5 environmental blocked; gate contract 3 registered; T-31 VERIFY unchanged"
+        },
+        {
+          "date": "09.10.26 10:23",
+          "event": 354,
+          "parent": 353,
+          "ticket": "T-31",
+          "agent": "saipen",
+          "op_id": "checkpoint-a88351677d824d2fa0aea4a74c55e0ec",
+          "taxonomy": "RUN",
+          "text": "isolation mission convergence: engine 384 pass; matrix 690 pass 80 approved skips chromium plus webkit; visual 33 pass with immutability guard; doctor HEALTHY; release verify 26 pass; baselines 27 approved paths unchanged; T-31 VERIFY unchanged"
+        },
+        {
+          "date": "10.10.26 10:09",
+          "event": 355,
+          "parent": 354,
+          "ticket": "T-32",
+          "agent": "saipen",
+          "op_id": "userreq-d5fa90b259a346e98217145751a74c98",
+          "taxonomy": "DEC",
+          "text": "user request SRC-015 projected as T-32 (local candidate; witness model_supplied)"
+        },
+        {
+          "date": "10.10.26 23:58",
+          "event": 356,
+          "parent": 355,
+          "ticket": "T-33",
+          "agent": "saipen",
+          "op_id": "userreq-20554a02d93140388875100d9b591d13",
+          "taxonomy": "DEC",
+          "text": "user request SRC-016 projected as T-33 (local candidate; witness model_supplied)"
+        }
+      ],
+      "current_regression_gate": [
+        false,
+        "NO_REGRESSION_EVIDENCE: no FAIL half of a regression pair was recorded in this VERIFY cycle. A ticket declaring `regression: required` owes both: the SAME verifier red against the pre-fix subject and green against the post-fix one"
+      ],
+      "native_readonly_status": {
+        "command": [
+          "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+          "--project-root",
+          "V:\\___VAC\\__K\\__CODE\\_HTML\\_SAI_WEBSITE",
+          "status",
+          "--json"
+        ],
+        "exit_code": 0,
+        "stdout": "{\r\n  \"ok\": true,\r\n  \"project_identity\": \"v:\\\\___vac\\\\__k\\\\__code\\\\_html\\\\_sai_website\",\r\n  \"protocol_version\": \"8.1.0\",\r\n  \"phase\": \"VERIFY\",\r\n  \"task\": \"T-31\",\r\n  \"next_action\": \"PHASE VERIFY T-31\",\r\n  \"computed_next_action\": \"saipen status\",\r\n  \"computed_reason\": \"read-only-mode\",\r\n  \"blocker\": \"none\",\r\n  \"execution_intent\": \"converge\",\r\n  \"claimed_ticket\": \"T-31\",\r\n  \"top_workable_ticket\": \"T-33\",\r\n  \"log_tail_event\": 356,\r\n  \"head\": \"92946d5\",\r\n  \"board_errors\": [],\r\n  \"recovery_pending\": false,\r\n  \"recovery_conflict\": false,\r\n  \"pending_ops\": [],\r\n  \"conflict_ops\": [],\r\n  \"goal_authority\": {\r\n    \"state\": \"inactive\",\r\n    \"detail\": \"No persistent grant\",\r\n    \"original_event\": null,\r\n    \"checkpoint_due\": false\r\n  },\r\n  \"milestone\": {\r\n    \"current\": null,\r\n    \"label\": null,\r\n    \"parent\": null,\r\n    \"undo_available\": false,\r\n    \"valid\": true\r\n  },\r\n  \"cold_route\": {\r\n    \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_HTML\\\\_SAI_WEBSITE\",\r\n    \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n    \"protocol_dir\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\",\r\n    \"phase\": \"VERIFY\",\r\n    \"phase_module\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\phases\\\\verify.md\",\r\n    \"boot\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\BOOT.md\",\r\n    \"style\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\STYLE.md\",\r\n    \"documents\": {\r\n      \"STYLE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\STYLE.md\",\r\n      \"BOOT.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\BOOT.md\",\r\n      \"INDEX.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\INDEX.md\",\r\n      \"COMMANDS.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\COMMANDS.md\",\r\n      \"OPS.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\OPS.md\",\r\n      \"SOURCES.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\SOURCES.md\",\r\n      \"EXECUTION.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\EXECUTION.md\",\r\n      \"MAINTENANCE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\MAINTENANCE.md\",\r\n      \"CORE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\CORE.md\",\r\n      \"RUNTIME.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\RUNTIME.md\"\r\n    },\r\n    \"project_memory\": {\r\n      \"STATE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_HTML\\\\_SAI_WEBSITE\\\\.saipen\\\\STATE.md\",\r\n      \"BOARD.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_HTML\\\\_SAI_WEBSITE\\\\.saipen\\\\BOARD.md\",\r\n      \"LOG.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_HTML\\\\_SAI_WEBSITE\\\\.saipen\\\\LOG.md\"\r\n    },\r\n    \"search_required\": false\r\n  },\r\n  \"distribution\": {\r\n    \"installed\": 7,\r\n    \"stale\": 7,\r\n    \"unknown\": 2,\r\n    \"fresh\": false,\r\n    \"source_head\": \"025bf596c683464788ab698248e8a3c5eb44dfec\",\r\n    \"newest_installed_head\": \"025bf596c683464788ab698248e8a3c5eb44dfec\",\r\n    \"last_run\": {\r\n      \"status\": \"skipped\",\r\n      \"skip\": \"DIRTY_SOURCE\",\r\n      \"rc\": 2,\r\n      \"dirty\": [\r\n        \"M bootstrap/inject.ps1\",\r\n        \"M bootstrap/inject.sh\",\r\n        \"M bootstrap/install_ownership.py\",\r\n        \"M bootstrap/uninstall.ps1\",\r\n        \"M bootstrap/uninstall.sh\"\r\n      ],\r\n      \"at\": \"2026-10-11 14:46:00\",\r\n      \"head\": null,\r\n      \"in_flight\": false\r\n    },\r\n    \"blocker\": {\r\n      \"condition\": \"DIRTY_SOURCE\",\r\n      \"blocked\": true,\r\n      \"detail\": \"215 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation\",\r\n      \"paths\": [\r\n        \"bootstrap/inject.ps1\",\r\n        \"bootstrap/inject.sh\",\r\n        \"bootstrap/install_ownership.py\",\r\n        \"bootstrap/uninstall.ps1\",\r\n        \"bootstrap/uninstall.sh\",\r\n        \"extensions/adapters/claude.md\",\r\n        \"extensions/adapters/claude/saipen-guard.py\",\r\n        \"extensions/adapters/codex.md\"\r\n      ],\r\n      \"path_count\": 215,\r\n      \"canonical_next_command\": \"git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit\"\r\n    },\r\n    \"published_head\": null,\r\n    \"publication\": null,\r\n    \"consumer_convergence\": \"CURRENT\",\r\n    \"pending_consumers\": [],\r\n    \"consumers_converged\": false,\r\n    \"requires_human\": false,\r\n    \"summary\": \"distribution: 7 of 7 home(s) stale -- newest installed head 025bf596c683 -- source head 025bf596c683 -- 2 home(s) carry no head -- last scheduled injection: skipped DIRTY_SOURCE at 2026-10-11 14:46:00 -- BLOCKED DIRTY_SOURCE: 215 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation -- clears with: git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit\"\r\n  },\r\n  \"parked_work\": [\r\n    \"T-14 blocked: ET/RU MACHINE_DRAFT pilot prepared; genuine independent review and production publication approval are required before public i18n:enable.\",\r\n    \"T-15 blocked: operator decision: which 10 locales for the M50 stress test and which 33 for M51\"\r\n  ],\r\n  \"claimed_but_unproven\": [\r\n    \"T-19\",\r\n    \"T-18\",\r\n    \"T-10\",\r\n    \"T-9\",\r\n    \"T-8\"\r\n  ],\r\n  \"conformance_history\": \"PASS (08.10.26 22:33)\",\r\n  \"staleness\": \"11h ago\",\r\n  \"conformance_status\": {\r\n    \"status\": \"STALE_FAIL\",\r\n    \"gate\": \"core\",\r\n    \"reason\": \"conformance receipt is bound to a different source identity than the current checkpoint\",\r\n    \"receipt\": {\r\n      \"blocking_findings\": {\r\n        \"problem_count\": 5,\r\n        \"problems\": [\r\n          {\r\n            \"category\": null,\r\n            \"credential\": false,\r\n            \"detail\": \"no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt\",\r\n            \"detail_hash\": \"186e51123c0cc004\",\r\n            \"finding_key\": \"08886c31d44d83da\",\r\n            \"rule_id\": \"work_closure_evidence\",\r\n            \"severity\": \"problem\",\r\n            \"subject_id\": \"T-10\",\r\n            \"subject_kind\": \"work\",\r\n            \"subject_ref\": null\r\n          },\r\n          {\r\n            \"category\": null,\r\n            \"credential\": false,\r\n            \"detail\": \"no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt\",\r\n            \"detail_hash\": \"186e51123c0cc004\",\r\n            \"finding_key\": \"2a3a4a862046dc48\",\r\n            \"rule_id\": \"work_closure_evidence\",\r\n            \"severity\": \"problem\",\r\n            \"subject_id\": \"T-18\",\r\n            \"subject_kind\": \"work\",\r\n            \"subject_ref\": null\r\n          },\r\n          {\r\n            \"category\": null,\r\n            \"credential\": false,\r\n            \"detail\": \"no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt\",\r\n            \"detail_hash\": \"186e51123c0cc004\",\r\n            \"finding_key\": \"2d01562228f73296\",\r\n            \"rule_id\": \"work_closure_evidence\",\r\n            \"severity\": \"problem\",\r\n            \"subject_id\": \"T-19\",\r\n            \"subject_kind\": \"work\",\r\n            \"subject_ref\": null\r\n          },\r\n          {\r\n            \"category\": null,\r\n            \"credential\": false,\r\n            \"detail\": \"no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt\",\r\n            \"detail_hash\": \"186e51123c0cc004\",\r\n            \"finding_key\": \"8ef07216a69f7c43\",\r\n            \"rule_id\": \"work_closure_evidence\",\r\n            \"severity\": \"problem\",\r\n            \"subject_id\": \"T-8\",\r\n            \"subject_kind\": \"work\",\r\n            \"subject_ref\": null\r\n          },\r\n          {\r\n            \"category\": null,\r\n            \"credential\": false,\r\n            \"detail\": \"no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt\",\r\n            \"detail_hash\": \"186e51123c0cc004\",\r\n            \"finding_key\": \"ac8fe87afc1d71b8\",\r\n            \"rule_id\": \"work_closure_evidence\",\r\n            \"severity\": \"problem\",\r\n            \"subject_id\": \"T-9\",\r\n            \"subject_kind\": \"work\",\r\n            \"subject_ref\": null\r\n          }\r\n        ],\r\n        \"ruleset_fingerprint\": \"82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1\",\r\n        \"ruleset_version\": 1,\r\n        \"status\": \"complete\",\r\n        \"warning_count\": 2\r\n      },\r\n      \"board_hash\": \"8f3ac7f93232233e\",\r\n      \"canonical_next_command\": \"saipen work reverify T-10\",\r\n      \"content_hash\": \"ab5a6f7b2c603450\",\r\n      \"exit_code\": 1,\r\n      \"external_actions\": [],\r\n      \"gate\": \"core\",\r\n      \"install_fingerprint\": \"install-v1:1904ba1200a591675a04a599dd955bfe7e194157a7bb06527ee74d6d4868fa9e\",\r\n      \"install_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n      \"kind\": \"conformance_receipt\",\r\n      \"log_hash\": \"4486b8419c66dfd7\",\r\n      \"project_identity\": \"v:\\\\___vac\\\\__k\\\\__code\\\\_html\\\\_sai_website\",\r\n      \"receipt_id\": \"receipt-2f9f6bc51ac1\",\r\n      \"remediation_commands\": [\r\n        \"saipen work reverify T-10\",\r\n        \"saipen work reverify T-18\",\r\n        \"saipen work reverify T-19\",\r\n        \"saipen work reverify T-8\",\r\n        \"saipen work reverify T-9\"\r\n      ],\r\n      \"schema_version\": 2,\r\n      \"source_head\": \"9f5c020adf816610dd58b10b75099a17552a14e6\",\r\n      \"source_tree_fingerprint\": \"git-delta-v1:7f6433bb8dd2862ba99449b05862879ebb2aa16b2f9b79189ddb32abc3c4b165\",\r\n      \"state_hash\": \"567d035eb47a2e0b\",\r\n      \"timestamp_utc\": \"2026-10-09T08:14:54.658999Z\",\r\n      \"validator_protocol_version\": \"1\",\r\n      \"verdict\": \"FAIL\"\r\n    },\r\n    \"validator\": {\r\n      \"validator_path\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\validate.py\",\r\n      \"validator_protocol_version\": \"1\",\r\n      \"project_protocol_version\": \"8\",\r\n      \"gate\": \"core\",\r\n      \"source_head\": \"92946d5b58e521a8a47512c85659ee5d2173283b\",\r\n      \"source_tree_fingerprint\": \"git-delta-v1:f3f4e80a997d6f1317366cd9be25c0553f3c13512dd75511151e3f43019dc594\"\r\n    },\r\n    \"disposition\": \"UNPROVEN\",\r\n    \"remediation_command\": \"saipen validate\",\r\n    \"repair_status\": \"REFRESH_REQUIRED\",\r\n    \"diagnostic\": null\r\n  },\r\n  \"automation\": {\r\n    \"schema_version\": 1,\r\n    \"disposition\": \"BLOCKED\",\r\n    \"next_command\": null,\r\n    \"operator_action_due\": false,\r\n    \"reason_code\": \"read-only-mode\",\r\n    \"reason\": \"current session capability is read-only; no mutating next action may be routed -- inspect only\",\r\n    \"audit_quiescent\": true,\r\n    \"audit_epoch\": \"audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40\",\r\n    \"convergence_current\": false,\r\n    \"closure_complete\": false,\r\n    \"source_fingerprint\": \"92946d5b58e521a8a47512c85659ee5d2173283b+git-delta-v1:f3f4e80a997d6f1317366cd9be25c0553f3c13512dd75511151e3f43019dc594\",\r\n    \"completed_at\": null\r\n  },\r\n  \"conditional_efficiency_kpi\": {\r\n    \"scope\": \"ticket\",\r\n    \"ticket\": \"T-31\",\r\n    \"percent\": 100,\r\n    \"approximate\": true,\r\n    \"confidence\": \"LOW\",\r\n    \"formula_version\": 1,\r\n    \"components\": {\r\n      \"progress\": 100,\r\n      \"rework\": null,\r\n      \"autonomy\": 100,\r\n      \"human\": null\r\n    },\r\n    \"notes\": {\r\n      \"human\": \"no machine signal separates avoidable operator cost from a legitimate authorization boundary\",\r\n      \"autonomy\": \"coarse: LOG agent ids are CLI identities shared across sessions\"\r\n    },\r\n    \"preliminary\": true,\r\n    \"withheld\": null\r\n  },\r\n  \"telegrams\": {\r\n    \"state\": \"OK\",\r\n    \"unread\": 0,\r\n    \"on_current_work\": 0,\r\n    \"complete\": true,\r\n    \"read_command\": \"saimail-local saipen brief --project-root V:\\\\___VAC\\\\__K\\\\__CODE\\\\_HTML\\\\_SAI_WEBSITE --workspace C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\saipen\\\\saimail --seat saipen\",\r\n    \"detail\": \"counts only; nothing was opened and nothing here is an instruction\"\r\n  }\r\n}\r\n",
+        "stderr": ""
+      },
+      "canonical_and_history_unchanged": true
+    },
+    "Wintage": {
+      "root": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_WIN95THEME\\Wintage",
+      "state_frontmatter": {
+        "phase": "DONE",
+        "task": "none",
+        "next_action": "saipen crew",
+        "blocker": "none",
+        "agent": "saipen-cli",
+        "saipen_version": 7,
+        "schema_version": 3,
+        "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+        "mode": "full",
+        "last_event": 3603,
+        "style_contract": "ded-069a4c52",
+        "updated": "2026-10-11T10:30:05Z",
+        "transition_from": "SHIP",
+        "execution_intent": "converge",
+        "converge_target": "crew"
+      },
+      "canonical_sha256": {
+        "STATE.md": "d928382a7b26ff2a56d9b2a453e06ada94f1fba72860a7ae55e30a04f77c2563",
+        "BOARD.md": "04fc5aae4cac27f82d0b32671df4ef3c4ce58ab011d40c38289fbb4bf029d01a",
+        "LOG.md": "7d928bad267dbd3ba599c67f16da76feecde12b5ddfcc04910096a97d669ce8f",
+        "IDENTITY.md": "9ea0b33301aba583182c6c232f5e6da69407b7259a45ce8135a579d1969864c0"
+      },
+      "history_hash": "18aeb79647595cbe",
+      "history_tail": 3603,
+      "illegal_lines": [],
+      "board_errors": [],
+      "T359_board": null,
+      "T916_board": null,
+      "cited_sidecar": {
+        "path": ".saipen/recovery/log-detail/E-3286-f56793e5c6d3f9370cd1be66.json",
+        "status": "ABSENT_CONFIRMED_BY_LSTAT"
+      },
+      "E3286_parsed_events": [
+        {
+          "date": "05.10.26 20:56",
+          "event": 3286,
+          "parent": 3285,
+          "ticket": "T-415",
+          "agent": "saipen-cli",
+          "op_id": "checkpoint-d898f0b0e66644ea92a33f4c18909e6d",
+          "taxonomy": "RUN",
+          "text": "detail_ref: .saipen/recovery/log-detail/E-3286-f56793e5c6d3f9370cd1be66.json",
+          "detail_ref": ".saipen/recovery/log-detail/E-3286-f56793e5c6d3f9370cd1be66.json",
+          "detail_integrity": "invalid"
+        }
+      ],
+      "native_readonly_status": {
+        "command": [
+          "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+          "--project-root",
+          "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_WIN95THEME\\Wintage",
+          "status",
+          "--json"
+        ],
+        "exit_code": 0,
+        "stdout": "{\r\n  \"ok\": true,\r\n  \"project_identity\": \"v:\\\\___vac\\\\__k\\\\__code\\\\_tampermonkey\\\\_win95theme\\\\wintage\",\r\n  \"protocol_version\": \"8.1.0\",\r\n  \"phase\": \"DONE\",\r\n  \"task\": \"none\",\r\n  \"next_action\": \"saipen crew\",\r\n  \"computed_next_action\": \"saipen status\",\r\n  \"computed_reason\": \"read-only-mode\",\r\n  \"blocker\": \"none\",\r\n  \"execution_intent\": \"converge\",\r\n  \"claimed_ticket\": null,\r\n  \"top_workable_ticket\": null,\r\n  \"log_tail_event\": 3603,\r\n  \"head\": \"a576c3f\",\r\n  \"board_errors\": [],\r\n  \"recovery_pending\": false,\r\n  \"recovery_conflict\": false,\r\n  \"pending_ops\": [],\r\n  \"conflict_ops\": [],\r\n  \"goal_authority\": {\r\n    \"state\": \"inactive\",\r\n    \"detail\": \"No persistent grant\",\r\n    \"original_event\": null,\r\n    \"checkpoint_due\": false\r\n  },\r\n  \"milestone\": {\r\n    \"current\": null,\r\n    \"label\": null,\r\n    \"parent\": null,\r\n    \"undo_available\": false,\r\n    \"valid\": true\r\n  },\r\n  \"cold_route\": {\r\n    \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_TAMPERMONKEY\\\\_WIN95THEME\\\\Wintage\",\r\n    \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n    \"protocol_dir\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\",\r\n    \"phase\": \"DONE\",\r\n    \"phase_module\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\phases\\\\done.md\",\r\n    \"boot\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\BOOT.md\",\r\n    \"style\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\STYLE.md\",\r\n    \"documents\": {\r\n      \"STYLE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\STYLE.md\",\r\n      \"BOOT.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\BOOT.md\",\r\n      \"INDEX.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\INDEX.md\",\r\n      \"COMMANDS.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\COMMANDS.md\",\r\n      \"OPS.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\OPS.md\",\r\n      \"SOURCES.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\SOURCES.md\",\r\n      \"EXECUTION.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\EXECUTION.md\",\r\n      \"MAINTENANCE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\MAINTENANCE.md\",\r\n      \"CORE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\CORE.md\",\r\n      \"RUNTIME.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\RUNTIME.md\"\r\n    },\r\n    \"project_memory\": {\r\n      \"STATE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_TAMPERMONKEY\\\\_WIN95THEME\\\\Wintage\\\\.saipen\\\\STATE.md\",\r\n      \"BOARD.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_TAMPERMONKEY\\\\_WIN95THEME\\\\Wintage\\\\.saipen\\\\BOARD.md\",\r\n      \"LOG.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_TAMPERMONKEY\\\\_WIN95THEME\\\\Wintage\\\\.saipen\\\\LOG.md\"\r\n    },\r\n    \"search_required\": false\r\n  },\r\n  \"audit_inbox\": {\r\n    \"pending\": 0,\r\n    \"active_layer\": null,\r\n    \"bound_receipt\": null,\r\n    \"bound_work\": null,\r\n    \"closed_pending_delete\": 0,\r\n    \"invalid\": 0,\r\n    \"residue\": 0,\r\n    \"clean\": true,\r\n    \"last_allocated_id\": 9,\r\n    \"inbox_state\": null,\r\n    \"error_state\": null\r\n  },\r\n  \"distribution\": {\r\n    \"installed\": 7,\r\n    \"stale\": 7,\r\n    \"unknown\": 2,\r\n    \"fresh\": false,\r\n    \"source_head\": \"025bf596c683464788ab698248e8a3c5eb44dfec\",\r\n    \"newest_installed_head\": \"025bf596c683464788ab698248e8a3c5eb44dfec\",\r\n    \"last_run\": {\r\n      \"status\": \"skipped\",\r\n      \"skip\": \"DIRTY_SOURCE\",\r\n      \"rc\": 2,\r\n      \"dirty\": [\r\n        \"M bootstrap/inject.ps1\",\r\n        \"M bootstrap/inject.sh\",\r\n        \"M bootstrap/install_ownership.py\",\r\n        \"M bootstrap/uninstall.ps1\",\r\n        \"M bootstrap/uninstall.sh\"\r\n      ],\r\n      \"at\": \"2026-10-11 14:46:00\",\r\n      \"head\": null,\r\n      \"in_flight\": false\r\n    },\r\n    \"blocker\": {\r\n      \"condition\": \"DIRTY_SOURCE\",\r\n      \"blocked\": true,\r\n      \"detail\": \"215 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation\",\r\n      \"paths\": [\r\n        \"bootstrap/inject.ps1\",\r\n        \"bootstrap/inject.sh\",\r\n        \"bootstrap/install_ownership.py\",\r\n        \"bootstrap/uninstall.ps1\",\r\n        \"bootstrap/uninstall.sh\",\r\n        \"extensions/adapters/claude.md\",\r\n        \"extensions/adapters/claude/saipen-guard.py\",\r\n        \"extensions/adapters/codex.md\"\r\n      ],\r\n      \"path_count\": 215,\r\n      \"canonical_next_command\": \"git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit\"\r\n    },\r\n    \"published_head\": null,\r\n    \"publication\": null,\r\n    \"consumer_convergence\": \"CURRENT\",\r\n    \"pending_consumers\": [],\r\n    \"consumers_converged\": false,\r\n    \"requires_human\": false,\r\n    \"summary\": \"distribution: 7 of 7 home(s) stale -- newest installed head 025bf596c683 -- source head 025bf596c683 -- 2 home(s) carry no head -- last scheduled injection: skipped DIRTY_SOURCE at 2026-10-11 14:46:00 -- BLOCKED DIRTY_SOURCE: 215 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation -- clears with: git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit\"\r\n  },\r\n  \"parked_work\": [\r\n    \"T-925 blocked: WAIT_USER_DECISION -- engine (SAIPEN_HOME) defect recorded with its interim project-side repair applied: the four review rows T-919..T-922 were restored byte-identical from...\",\r\n    \"T-924 blocked: WAIT_USER_DECISION -- engine (SAIPEN_HOME) observation owned outside this mission's non-goal 'no unrelated protocol-engine changes': an agent writing engine source in SAIPEN_HOME while another...\",\r\n    \"T-923 blocked: WAIT_USER_DECISION -- engine (SAIPEN_HOME) defect owned outside this mission's non-goal 'no unrelated protocol-engine changes': crew.py:1165 must coerce health['board']['errors'] and health['outbox']['errors'] to list before concatenating so a role board snapshot reporting errors as a tuple does not crash the crew fixed-point; the project-side fix is a SAIPEN_HOME patch the operator reviews, so the finding stays recorded and the crash path is not reachable from this repo's healthy roles\",\r\n    \"T-376 blocked: WAIT_USER_CONFIRMATION -- LIVE BetterDiscord acceptance deferred to the operator: two sub-clauses need an operator-owned signed-in Discord + BetterDiscord session and outward-facing actions (loading the four plugins from desktop/targets/betterdiscord/plugins, toggling Hide rich link preview cards / blurred preview / session settings); the CDP endpoint issue from the previous blocker is resolved. Per the deferred-operator vocabulary (T-1429) this blocker carries an operator due instant and does not block Core convergence.\"\r\n  ],\r\n  \"waiting_on_you\": [\r\n    \"T-925: WAIT_USER_DECISION -- engine (SAIPEN_HOME) defect recorded with its interim project-side repair applied: the four review rows T-919..T-922 were restored byte-identical from...\",\r\n    \"T-924: WAIT_USER_DECISION -- engine (SAIPEN_HOME) observation owned outside this mission's non-goal 'no unrelated protocol-engine changes': an agent writing engine source in SAIPEN_HOME while another...\",\r\n    \"T-923: WAIT_USER_DECISION -- engine (SAIPEN_HOME) defect owned outside this mission's non-goal 'no unrelated protocol-engine changes': crew.py:1165 must coerce health['board']['errors'] and health['outbox']['errors'] to list before concatenating so a role board snapshot reporting errors as a tuple does not crash the crew fixed-point; the project-side fix is a SAIPEN_HOME patch the operator reviews, so the finding stays recorded and the crash path is not reachable from this repo's healthy roles\",\r\n    \"T-376: WAIT_USER_CONFIRMATION -- LIVE BetterDiscord acceptance deferred to the operator: two sub-clauses need an operator-owned signed-in Discord + BetterDiscord session and outward-facing actions (loading the four plugins from desktop/targets/betterdiscord/plugins, toggling Hide rich link preview cards / blurred preview / session settings); the CDP endpoint issue from the previous blocker is resolved. Per the deferred-operator vocabulary (T-1429) this blocker carries an operator due instant and does not block Core convergence.\"\r\n  ],\r\n  \"claimed_but_unproven\": [\r\n    \"T-357\",\r\n    \"T-245\",\r\n    \"T-244\",\r\n    \"T-243\"\r\n  ],\r\n  \"conformance_history\": \"PASS (10.10.26 00:51)\",\r\n  \"staleness\": \"1h ago\",\r\n  \"conformance_status\": {\r\n    \"status\": \"CURRENT_FAIL\",\r\n    \"gate\": \"core\",\r\n    \"reason\": \"canonical validator reports FAIL for the current checkpoint\",\r\n    \"receipt\": {\r\n      \"blocking_findings\": {\r\n        \"problem_count\": 4,\r\n        \"problems\": [\r\n          {\r\n            \"category\": null,\r\n            \"credential\": false,\r\n            \"detail\": \"no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt\",\r\n            \"detail_hash\": \"186e51123c0cc004\",\r\n            \"finding_key\": \"175fc51f8ba3b9bc\",\r\n            \"rule_id\": \"work_closure_evidence\",\r\n            \"severity\": \"problem\",\r\n            \"subject_id\": \"T-243\",\r\n            \"subject_kind\": \"work\",\r\n            \"subject_ref\": null\r\n          },\r\n          {\r\n            \"category\": null,\r\n            \"credential\": false,\r\n            \"detail\": \"no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt\",\r\n            \"detail_hash\": \"186e51123c0cc004\",\r\n            \"finding_key\": \"efc5b437c6b73818\",\r\n            \"rule_id\": \"work_closure_evidence\",\r\n            \"severity\": \"problem\",\r\n            \"subject_id\": \"T-244\",\r\n            \"subject_kind\": \"work\",\r\n            \"subject_ref\": null\r\n          },\r\n          {\r\n            \"category\": null,\r\n            \"credential\": false,\r\n            \"detail\": \"no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt\",\r\n            \"detail_hash\": \"186e51123c0cc004\",\r\n            \"finding_key\": \"2d2e3fe4b0417555\",\r\n            \"rule_id\": \"work_closure_evidence\",\r\n            \"severity\": \"problem\",\r\n            \"subject_id\": \"T-245\",\r\n            \"subject_kind\": \"work\",\r\n            \"subject_ref\": null\r\n          },\r\n          {\r\n            \"category\": null,\r\n            \"credential\": false,\r\n            \"detail\": \"no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt\",\r\n            \"detail_hash\": \"186e51123c0cc004\",\r\n            \"finding_key\": \"b2cfe2168de9c1e3\",\r\n            \"rule_id\": \"work_closure_evidence\",\r\n            \"severity\": \"problem\",\r\n            \"subject_id\": \"T-357\",\r\n            \"subject_kind\": \"work\",\r\n            \"subject_ref\": null\r\n          }\r\n        ],\r\n        \"ruleset_fingerprint\": \"82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1\",\r\n        \"ruleset_version\": 1,\r\n        \"status\": \"complete\",\r\n        \"warning_count\": 55\r\n      },\r\n      \"board_hash\": \"04fc5aae4cac27f8\",\r\n      \"canonical_next_command\": \"saipen work reverify T-243\",\r\n      \"content_hash\": \"d95c678047979394\",\r\n      \"exit_code\": 1,\r\n      \"external_actions\": [],\r\n      \"gate\": \"core\",\r\n      \"install_fingerprint\": \"install-v1:4551d7b4f3997f04cf4d4eccb0357988124edc99c89be126b0406770bb30535c\",\r\n      \"install_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n      \"kind\": \"conformance_receipt\",\r\n      \"log_hash\": \"18aeb79647595cbe\",\r\n      \"project_identity\": \"v:\\\\___vac\\\\__k\\\\__code\\\\_tampermonkey\\\\_win95theme\\\\wintage\",\r\n      \"receipt_id\": \"receipt-637b29b804af\",\r\n      \"remediation_commands\": [\r\n        \"saipen work reverify T-243\",\r\n        \"saipen work reverify T-244\",\r\n        \"saipen work reverify T-245\",\r\n        \"saipen work reverify T-357\"\r\n      ],\r\n      \"schema_version\": 2,\r\n      \"source_head\": \"a576c3fe76d2d728ade7a7bbf4a682ced9d7e617\",\r\n      \"source_tree_fingerprint\": \"git-delta-v1:2fbf59be2eaca71de82068a5d649a9e43050d4c011785af4ce5d960f838f36b3\",\r\n      \"state_hash\": \"d928382a7b26ff2a\",\r\n      \"timestamp_utc\": \"2026-10-11T11:39:07.451159Z\",\r\n      \"validator_protocol_version\": \"1\",\r\n      \"verdict\": \"FAIL\"\r\n    },\r\n    \"validator\": {\r\n      \"validator_path\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\validate.py\",\r\n      \"validator_protocol_version\": \"1\",\r\n      \"project_protocol_version\": \"7\",\r\n      \"gate\": \"core\",\r\n      \"source_head\": \"a576c3fe76d2d728ade7a7bbf4a682ced9d7e617\",\r\n      \"source_tree_fingerprint\": \"git-delta-v1:2fbf59be2eaca71de82068a5d649a9e43050d4c011785af4ce5d960f838f36b3\"\r\n    },\r\n    \"disposition\": \"REMEDIATION_REQUIRED\",\r\n    \"remediation_command\": \"saipen work reverify T-243\",\r\n    \"repair_status\": \"REPAIR_AVAILABLE\",\r\n    \"diagnostic\": null\r\n  },\r\n  \"automation\": {\r\n    \"schema_version\": 1,\r\n    \"disposition\": \"BLOCKED\",\r\n    \"next_command\": null,\r\n    \"operator_action_due\": false,\r\n    \"reason_code\": \"read-only-mode\",\r\n    \"reason\": \"current session capability is read-only; no mutating next action may be routed -- inspect only\",\r\n    \"audit_quiescent\": true,\r\n    \"audit_epoch\": \"audit-epoch-v1:5033411ef5831e163e8be859c75fb59b3aa372ea4ff14c94f904163b512ce6cf\",\r\n    \"convergence_current\": false,\r\n    \"closure_complete\": false,\r\n    \"source_fingerprint\": \"a576c3fe76d2d728ade7a7bbf4a682ced9d7e617+git-delta-v1:2fbf59be2eaca71de82068a5d649a9e43050d4c011785af4ce5d960f838f36b3\",\r\n    \"completed_at\": null\r\n  },\r\n  \"conditional_efficiency_kpi\": {\r\n    \"scope\": \"ticket\",\r\n    \"ticket\": \"T-926\",\r\n    \"percent\": 100,\r\n    \"approximate\": true,\r\n    \"confidence\": \"LOW\",\r\n    \"formula_version\": 1,\r\n    \"components\": {\r\n      \"progress\": 100,\r\n      \"rework\": 100,\r\n      \"autonomy\": 100,\r\n      \"human\": null\r\n    },\r\n    \"notes\": {\r\n      \"human\": \"no machine signal separates avoidable operator cost from a legitimate authorization boundary\",\r\n      \"autonomy\": \"coarse: LOG agent ids are CLI identities shared across sessions\"\r\n    },\r\n    \"preliminary\": true,\r\n    \"withheld\": null\r\n  },\r\n  \"telegrams\": {\r\n    \"state\": \"OK\",\r\n    \"unread\": 0,\r\n    \"on_current_work\": 0,\r\n    \"complete\": true,\r\n    \"read_command\": \"saimail-local saipen brief --project-root V:\\\\___VAC\\\\__K\\\\__CODE\\\\_TAMPERMONKEY\\\\_WIN95THEME\\\\Wintage --workspace C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\saipen\\\\saimail --seat saipen-cli\",\r\n    \"detail\": \"counts only; nothing was opened and nothing here is an instruction\"\r\n  }\r\n}\r\n",
+        "stderr": ""
+      },
+      "canonical_and_history_unchanged": true
+    }
+  },
+  "scope": "Read-only preparation while T-1714 owns VERIFY; no audit intake, consumer claim, repair, closure, browser access, credentials, installation or publication."
+}

@@ -1,0 +1,31 @@
+{
+  "name": "corrected",
+  "exit_code": 0,
+  "collected": 35,
+  "verifier": "54dc2e106871b3c9e25fc5a9898596de5c2189420fdc17af06b8b4afd00ec252",
+  "subject": "0844adfd4892eae01d4cd93139f8163bb8a079160b4f7a123e37f1621749f803",
+  "verifier_identity": {
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "tools.test_tool_module_identity",
+      "tools.test_module_duplication_guard",
+      "tools.test_engine_module_identity",
+      "-q"
+    ],
+    "timeout": 300,
+    "files": {
+      "tools/test_tool_module_identity.py": "28f2e696f7042f6f6351a75a8409f56f9669af064f54f1c605c9db4a202801a5",
+      "tools/test_module_duplication_guard.py": "1f3bc559fdaebafcdf22179567b35fc7a0dff07882bd38fc80f80862d5bceeca",
+      "tools/test_engine_module_identity.py": "7bfed77f301a8af0b8aa1d41f1ea62c704884dc140ecdd3a732b2ec90b02f4d2",
+      "tools/test_hermetic_env.py": "f5b562bf643af06f7e5f7deb7f82adcde6d98f9861896083d7df0581c5ef5156"
+    }
+  },
+  "subject_identity": {
+    "tools/__init__.py": "3e652fdf2d80d073138cd1b1b8d37caaf772f5652dfa9ac21db104e6494ceb88",
+    "tools/_module_identity.py": "add6a51a6ea3a271adeecb2ebd4486ecccbb36ed4441c1bf34d2b2f946cb815b"
+  },
+  "output_sha256": "d9ab6871bf3651f46f8f7104829db3c84c32fb258edc882be07ad9291ff36737"
+}

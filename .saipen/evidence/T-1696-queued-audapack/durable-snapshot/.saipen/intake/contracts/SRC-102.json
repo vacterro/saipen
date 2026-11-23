@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-102:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-249 close: agent-resolved acceptance"
+    }
+  },
+  "derived_at": "2026-09-29T09:36:06Z",
+  "derived_from": "SRC-102",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "2eb4ad38ca183350fad6876b4d7a2f22499c5ea9e213d5181a1f97cc66b7fb30"
+}

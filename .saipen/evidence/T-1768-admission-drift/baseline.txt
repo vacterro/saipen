@@ -1,0 +1,9 @@
+== two launchers reach one engine through two interpreters (observed this session)
+PATH launcher:
+exec "C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.EXE" "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen.py" "$@"
+repository launcher:
+exec "C:\ProgramData\SAI\SAIPEN\python\3.11.9-64\python.exe" "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen.py" "$@"
+== host entry
+{'code': 'PATH_LAUNCHER', 'transport': 'PATH_LAUNCHER', 'command_form': '"C:/Users/vac34/bin/saipen"'}
+exec_prefix: ['C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE', 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py']
+== this session: first continue ran through the PATH launcher, every later command through ./bin/saipen

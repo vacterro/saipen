@@ -1,0 +1,13 @@
+{
+  "oracle": "test_public_recovery_same_damage_preserves_bytes_and_resumes",
+  "red": true,
+  "collection_succeeded": true,
+  "subject_sha256": {
+    "tools/test_log_tail_quarantine.py": "71110b92d5c4c9332c4b185eeedd13b122b5c63c7f6428b1f2de8b8b8e0e46b8",
+    "tools/saipen_engine/operations.py": "ced60dc0f2b9d83d0fce76dcaa976dcfe24225ad060c3b7f13578ac7058f6732",
+    "tools/saipen_engine/log.py": "d4fe06190c3e9065792569c5d81ddf72e9fcc849f357ca9dbd4d6a017410a1fa",
+    "tools/saipen_engine/reconcile.py": "a16d5f5b62dbbb582ebd53ecd85e5cadba8e494a1da6e443a8a768e5709a74ac",
+    "tools/saipen.py": "3d0e16b1ac781d58a5fc4065bf56532d046ff91246032d1c58ba15e65a49fd90"
+  },
+  "log_sha256": "c1808fdefa04ab3d97d5bb67034e6ef5caa624a4aa06e4a377d699bc2280948b"
+}

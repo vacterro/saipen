@@ -1,0 +1,5 @@
+{
+  "tools/test_premature_victory_prevention.py": "18fa8fbcac05bb4f523fc85b49d8033751884cc12bfd99d2943fbe733b7594b8",
+  "tools/test_sub_dispose_after_collect.py": "2beb950d5f5e16b66027235b9c8cdbceeda978f3d9e5d6b4cb96dca0578f012f",
+  "tools/saipen_engine/subs.py": "ec5906e3fedc0ca0ea7ba1f9cc8691c941b3dedbcceefece9fd39efd5e50aa98"
+}

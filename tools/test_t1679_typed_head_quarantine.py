@@ -189,7 +189,13 @@ class JournalBoundCutTests(unittest.TestCase):
         cut, reason = foreign_tail_cut(self.snapshot, self.active, 8, journal_floor=floor)
         self.assertIsNone(reason)
         self.assertEqual((cut.journal_floor, cut.claimed_ids), (5, (6, 8)))
-        self.assertTrue(cut.kept_text.rstrip().endswith("scout done"))
+        # T-2133: the BUILD boundary now ends with the machine-minted
+        # tree-identity token (appended after any reason), so the kept
+        # region's last typed line is "<reason> tree-identity:<16hex>" --
+        # the cut floor is the test's subject, not the reason tail text.
+        self.assertRegex(
+            cut.kept_text.rstrip(), r"scout done\s+tree-identity:[0-9a-f]{16}$"
+        )
         self.assertEqual(cut.snapshot.tail, 5)
 
     def test_a_floor_at_or_above_the_marker_changes_nothing(self):

@@ -1,0 +1,34 @@
+## Fixture
+project      : V:\_TEMP_\t1363-mfab1ah0
+STATE.agent  : ['agent: codex']
+STATE.task   : ['task: T-9200']
+STATE.phase  : ['phase: BUILD']
+BOARD.DOING  : ['- [/] T-9200 [P1] work owned elsewhere | verify: it holds | owner: codex | claim_time: 2026-09-17T12:56:46Z']
+target bytes : 6
+
+## Guard verdicts for an UNSEATED arrival
+edit   ok=True  code='ADMITTED' actor=None
+       detail='protocol state sound'
+write  ok=True  code='ADMITTED' actor=None
+       detail='protocol state sound'
+bash   ok=True  code='ADMITTED' actor=None
+       detail='protocol state sound'
+
+## Verdict
+RED: guard ADMITS unseated product mutation via edit,write,bash
+expected: OWNERSHIP_CONFLICT on all three -- a live foreign owner
+          must block product bytes, not only the canonical ledger
+
+## Discriminator -- the same edit, three actor declarations
+
+actor=None       ok=True  code='ADMITTED'          detail='protocol state sound'
+actor='claude'   ok=False code='OWNERSHIP_CONFLICT' detail="live Work T-9200 owned by 'codex' (claim FOREIGN_LIVE); actor does not own the active Work"
+actor='codex'    ok=True  code='ADMITTED'          detail='protocol state sound'
+
+The FOREIGN_LIVE branch works -- it is simply unreachable without a declared
+actor. admission.py:772-774 makes the absent actor inherit STATE.agent, so the
+arriving agent IS the incumbent for every ownership test that follows.
+
+An agent that declares itself honestly is refused. An agent that says nothing
+mutates product bytes. The guard rewards silence, which is the opposite of
+what ownership isolation is for.

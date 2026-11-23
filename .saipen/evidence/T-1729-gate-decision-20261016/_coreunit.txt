@@ -1,0 +1,30 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 6754,
+  "red": 13,
+  "new_red": [
+    "test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry",
+    "test_response_surface_contract.BudgetTests.test_context_budget_remains_green_with_execution_in_cold",
+    "test_t1363_zero_manual_entry.LiveTranscriptConvergenceTests.test_a_refusal_is_never_reproduced_by_the_command_it_names",
+    "test_t1363_zero_manual_entry.LiveTranscriptConvergenceTests.test_one_operator_decision_costs_exactly_one_question",
+    "test_t1363_zero_manual_entry.StartEntryTests.test_the_decision_is_asked_once_and_the_retry_starts",
+    "test_t1465_budget_line_ends.LineEndTests.test_every_budget_holds",
+    "test_t1670_route_budgets.RouteBudgetTests.test_one_enormous_document_fails_even_where_no_route_loads_it",
+    "test_t1670_route_budgets.RouteBudgetTests.test_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate",
+    "test_t1670_route_budgets.RouteBudgetTests.test_the_command_line_summary_exits_by_the_route_verdict",
+    "test_t1670_route_budgets.RouteBudgetTests.test_the_summary_is_one_line_per_route_and_names_the_total_informational",
+    "test_t1670_route_budgets.RouteBudgetTests.test_unrelated_growth_raises_the_total_and_moves_no_route",
+    "test_t1676_lifecycle_code.RegisteredCodeTests.test_every_route_budget_still_passes",
+    "test_t1759_single_lifecycle_observer.LifecycleObserverContractTests.test_only_repairing_readers_name_the_lifecycle_class"
+  ],
+  "fixed": [],
+  "problems": [
+    "13 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/a145cafd936f563e-20261016T065539Z.json",
+  "reused": false,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

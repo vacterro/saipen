@@ -1,0 +1,1305 @@
+--- pre/tools/saipen_engine/board.py
++++ tools/saipen_engine/board.py
+@@ -2030,9 +2030,9 @@
+         item["dependent_tickets"] = list(groups[item["shared_blocker_id"]]["dependent_tickets"])
+     return {"schema_version": 1, "groups": list(groups.values()), "items": items}
+ 
+ 
+-def classify_idle_work(
++def _classify_idle_work(
+     tickets: dict,
+     audit_inbox: dict | None = None,
+     future_gate: dict | None = None,
+     state: dict | None = None,
+@@ -2054,11 +2054,13 @@
+     unresolved_audit_count = 0
+     has_residue = False
+     has_invalid_audit = False
+     if isinstance(audit_inbox, dict):
+-        unresolved_audit_count = int(
+-            audit_inbox.get("unresolved_audit_count", len(audit_inbox.get("pending", [])))
+-        )
++        pending = audit_inbox.get("unresolved_audit_count", audit_inbox.get("pending"))
++        if isinstance(pending, (list, tuple)):
++            unresolved_audit_count = len(pending)
++        elif type(pending) is int and pending >= 0:
++            unresolved_audit_count = pending
+         has_residue = bool(audit_inbox.get("residue") or audit_inbox.get("residue_only"))
+         has_invalid_audit = bool(audit_inbox.get("invalid") or audit_inbox.get("invalid_only"))
+ 
+     active_goals = [
+@@ -2071,48 +2073,34 @@
+     # Queue blockers describe those tickets, not independent goal discovery.
+     # Discovery is read-only here; the filesystem/admission owners prove the
+     # selected goal's authority before any task is created.
+     if not doing and not workable_tickets(tickets, agent=(state or {}).get("agent"), now=now):
++        statuses = [
++            g.get("current_status") if isinstance(g, dict) else g.current_status
++            for g in active_goals
++        ]
++        runnable = {"ACTIVE", "ACTIONABLE_GAPS", "DISCOVERY_REQUIRED", "VERIFICATION_REQUIRED"}
+         if active_goals:
+-            waiting_auth = all(
+-                (g.get("current_status") if isinstance(g, dict) else g.current_status)
+-                == "WAITING_AUTHORITY"
+-                for g in active_goals
++            actionable = any(s in runnable for s in statuses)
++            disposition = (
++                "GOAL_GAPS_ACTIONABLE" if actionable
++                else "GOAL_WAITING_AUTHORITY" if "WAITING_AUTHORITY" in statuses
++                else IDLE_BLOCKED_EXTERNAL if "WAITING_DEPENDENCY" in statuses
++                else "INCOMPLETE_DISCOVERY" if "BLOCKED_BY_EVIDENCE" in statuses
++                else NO_ADMISSIBLE_WORK
+             )
+-            if waiting_auth:
+-                return {
+-                    "disposition": "GOAL_WAITING_AUTHORITY",
+-                    "stop_reason": "WAITING_AUTHORITY",
+-                    "no_admissible_work": True,
+-                    "all_requirements_complete": False,
+-                    "unresolved_audit_count": unresolved_audit_count,
+-                    "next_exact_action": "saipen status",
+-                    "externally_blocked": [],
+-                    "operator_required": [],
+-                    "future_gated": [],
+-                    "active_goals": [
+-                        g.to_dict() if hasattr(g, "to_dict") else g for g in active_goals
+-                    ],
+-                    "detail": (
+-                        f"no runnable Board work; {len(active_goals)} active goal(s) "
+-                        "require authority"
+-                    ),
+-                }
+             return {
+-                "disposition": "GOAL_GAPS_ACTIONABLE",
+-                "stop_reason": "NO_ADMISSIBLE_WORK",
++                "disposition": disposition,
++                "stop_reason": "WAITING_AUTHORITY" if disposition == "GOAL_WAITING_AUTHORITY" else NO_ADMISSIBLE_WORK,
+                 "no_admissible_work": True,
+                 "all_requirements_complete": False,
+                 "unresolved_audit_count": unresolved_audit_count,
+-                "next_exact_action": "saipen continue",
++                "next_exact_action": "saipen continue" if actionable else "saipen status",
+                 "externally_blocked": [],
+                 "operator_required": [],
+                 "future_gated": [],
+                 "active_goals": [g.to_dict() if hasattr(g, "to_dict") else g for g in active_goals],
+-                "detail": (
+-                    f"no runnable Board work; {len(active_goals)} active goals "
+-                    "need evidence discovery"
+-                ),
++                "detail": f"no runnable BOARD work; {len(active_goals)} unsatisfied goal(s): {disposition}",
+             }
+ 
+     if (
+         not doing and not todo and not blocked and unresolved_audit_count == 0
+@@ -2255,48 +2243,128 @@
+     }
+     if decision_req:
+         res["decision_request"] = decision_req
+ 
++    return res
++
++
++def classify_idle_work(
++    tickets: dict,
++    audit_inbox: dict | None = None,
++    future_gate: dict | None = None,
++    state: dict | None = None,
++    now: datetime.datetime | None = None,
++    persistent_goals: list | dict | None = None,
++    source_evidence: dict | None = None,
++    continuous_maintenance_authorized: bool = False,
++    current_agent: str | None = None,
++    source_generation: str | None = None,
++    discovery_dispatch: dict | None = None,
++    publication_evidence=None,
++) -> dict:
++    """Attach complete discovery diagnostics to every pure BOARD idle verdict."""
++    from .persistent_goal import goal_inventory
++    from .work_exhaustion import (
++        INCOMPLETE_DISCOVERY, _ticket_inventory_valid, certificate_diagnostics,
++        certify_work_exhaustion, verified_quiescence,
++    )
++
++    # Typed envelope gate: the pure classifier must never consume a malformed
++    # owner envelope; fail closed to an INCOMPLETE verdict, never an
++    # empty-queue quiescence derived from invalid input.
++    problem = None
++    if not _ticket_inventory_valid(tickets):
++        problem = "tickets: inventory must be an object of valid ticket objects"
++    elif state is not None and not isinstance(state, dict):
++        problem = "state: envelope must be an object"
++    elif audit_inbox is not None and not isinstance(audit_inbox, dict):
++        problem = "audit_inbox: envelope must be an object"
++    elif future_gate is not None and not isinstance(future_gate, dict):
++        problem = "future_gate: envelope must be an object"
++    elif source_evidence is not None and not isinstance(source_evidence, dict):
++        problem = "source_evidence: envelope must be an object"
++
++    goals = goal_inventory(persistent_goals)
++    actor_state = {**(state or {}), "agent": current_agent} if current_agent is not None else state
++    if problem:
++        certificate = {
++            "schema_version": 2, "status": INCOMPLETE_DISCOVERY,
++            "source_generation": source_generation, "sources": [], "exhausted": False,
++            "verified_exhausted": False, "all_checked": False,
++            "blocked_sources": [], "blocked_obligations": [],
++            "certificate_errors": [problem],
++        }
++        return {
++            "disposition": NO_ADMISSIBLE_WORK, "stop_reason": INCOMPLETE_DISCOVERY,
++            "no_admissible_work": True, "all_requirements_complete": False,
++            "unresolved_audit_count": 0, "next_exact_action": "saipen status",
++            "externally_blocked": [], "operator_required": [], "future_gated": [],
++            "active_goals": [], "detail": problem,
++            "work_exhaustion": certificate, "work_exhaustion_error": problem,
++            "blocked_obligations": [], "outcome_truth_error": problem,
++        }
++
++    res = _classify_idle_work(tickets, audit_inbox, future_gate, actor_state, now, goals["goals"])
++    try:
++        certificate = certify_work_exhaustion(
++            None, tickets=tickets, state=state, audit_inbox=audit_inbox,
++            future_gate=future_gate, persistent_goals=persistent_goals,
++            source_evidence=source_evidence, now=now, current_agent=current_agent,
++            continuous_maintenance_authorized=continuous_maintenance_authorized,
++            source_generation=source_generation, discovery_dispatch=discovery_dispatch,
++            publication_evidence=publication_evidence,
++        )
++    except Exception as exc:
++        detail = f"certificate construction raised {type(exc).__name__}: {exc}"
++        res["work_exhaustion_error"] = detail
++        certificate = {
++            "schema_version": 2, "status": INCOMPLETE_DISCOVERY,
++            "source_generation": source_generation, "sources": [], "exhausted": False,
++            "verified_exhausted": False, "all_checked": False,
++            "blocked_sources": [], "blocked_obligations": [],
++            "certificate_errors": [detail],
++        }
++    # A malformed owner certificate (not a dict, or one failing the shared
++    # schema-2 bar) is replaced fail-closed: it must never be consumed via
++    # unguarded .get/iteration or treated as verified quiescence.
++    _cert_errors = certificate_diagnostics(certificate)
++    if _cert_errors:
++        detail = "certificate owner returned invalid evidence: " + "; ".join(_cert_errors[:3])
++        res["work_exhaustion_error"] = detail
++        certificate = {
++            "schema_version": 2, "status": INCOMPLETE_DISCOVERY,
++            "source_generation": source_generation, "sources": [], "exhausted": False,
++            "verified_exhausted": False, "all_checked": False,
++            "blocked_sources": [], "blocked_obligations": [],
++            "certificate_errors": _cert_errors,
++        }
++    res["work_exhaustion"] = certificate
++    res["blocked_obligations"] = certificate.get("blocked_obligations", [])
++    goals_satisfied = goals["complete"] and all(
++        (goal.get("current_status") if isinstance(goal, dict) else goal.current_status) == "SATISFIED"
++        for goal in goals["goals"]
++    )
++    if res.get("all_requirements_complete") and not (
++        verified_quiescence(certificate) and goals_satisfied
++    ):
++        res.update(
++            disposition=certificate["status"], stop_reason=certificate["status"],
++            all_requirements_complete=False, no_admissible_work=True,
++            detail="executable queue is empty; complete discovery and goal verification are not proven",
++        )
+     try:
+         from .outcome_truth import compute_outcome_truth
+-        from .work_exhaustion import certify_work_exhaustion
+ 
+         outcome = compute_outcome_truth(
+-            None,
+-            tickets=tickets,
+-            state=state,
+-            audit_inbox=audit_inbox,
+-            future_gate=future_gate,
++            None, tickets=tickets, state=state, audit_inbox=audit_inbox,
++            future_gate=future_gate, work_exhaustion=certificate,
++            has_continuous_maintenance=continuous_maintenance_authorized,
+             is_budget_exhausted=(state or {}).get("authority_until") == "budget",
++            publication_evidence=publication_evidence,
+         )
+         res["outcome_truth"] = outcome
+-        res["queue_status"] = outcome["queue_status"]
+-        res["campaign_status"] = outcome["campaign_status"]
+-        res["objective_status"] = outcome["objective_status"]
+-        # The caller's already-validated goal list is the goal evidence this
+-        # path owns; root is not in scope here, and passing None made the
+-        # certificate read PERSISTENT_GOALS as absent (SRC-400 P0-A).
+-        res["work_exhaustion"] = certify_work_exhaustion(
+-            None,
+-            tickets=tickets,
+-            state=state,
+-            audit_inbox=audit_inbox,
+-            future_gate=future_gate,
+-            persistent_goals=persistent_goals,
+-        )
+-    except Exception as exc:  # noqa: BLE001 -- a suppressed certificate is a false claim
+-        # A certificate that cannot be built is INCOMPLETE_DISCOVERY, never an
+-        # absent key that a reader mistakes for a clean sweep (SRC-401 R019).
+-        detail = f"certificate construction raised {type(exc).__name__}: {exc}"
+-        res["work_exhaustion_error"] = detail
+-        res["work_exhaustion"] = {
+-            "status": "INCOMPLETE_DISCOVERY",
+-            "source_generation": None,
+-            "sources": [],
+-            "exhausted": False,
+-            "verified_exhausted": False,
+-            "all_checked": False,
+-            "blocked_sources": [],
+-            "certificate_errors": [detail],
+-        }
+-
++        for key in ("queue_status", "campaign_status", "objective_status"):
++            res[key] = outcome[key]
++    except Exception as exc:
++        res["outcome_truth_error"] = f"{type(exc).__name__}: {exc}"
++        res["all_requirements_complete"] = False
+     return res
+--- pre/tools/saipen_engine/router.py
++++ tools/saipen_engine/router.py
+@@ -43,8 +43,67 @@
+     recomputation and the validator all consume. This wrapper keeps existing
+     callers working while the decision has exactly one home.
+     """
+     return pick_next_work(board["tickets"], agent=agent, now=now)[0]
++
++
++def _projection_envelope_problem(
++    *, queued_source=None, pending_append=None, audit_inbox=None, future_gate=None,
++) -> str | None:
++    """A truthy but malformed projection is invalid input, never evidence.
++
++    The router consumes these read-only projections from outside owners; a
++    wrong type must fail the route instead of being iterated or indexed.
++    """
++    def _action_problem(name: str, projection) -> str | None:
++        if projection is None:
++            return None
++        if not isinstance(projection, dict):
++            return f"{name}: projection must be an object"
++        if "action" in projection and not (
++            isinstance(projection["action"], str) and projection["action"].strip()
++        ):
++            return f"{name}: action must be a nonempty string"
++        return None
++
++    for name, projection in (("queued_source", queued_source), ("pending_append", pending_append)):
++        problem = _action_problem(name, projection)
++        if problem:
++            return problem
++    if audit_inbox is not None:
++        if not isinstance(audit_inbox, dict):
++            return "audit_inbox: projection must be an object"
++        # `audit_inbox.projection` emits the layer collections as LISTS
++        # (`pending`/`closed_pending_delete` of layer keys, `invalid` of
++        # identifier summaries, `residue` of relative paths) and only the
++        # `*_only`/`binding_corrupt` verdicts as booleans. Typing the lists as
++        # booleans rejects the honest live projection ("invalid must be a
++        # boolean") and bricks `saipen continue`.
++        for name in ("pending", "closed_pending_delete", "invalid", "residue"):
++            value = audit_inbox.get(name)
++            if value is not None and not isinstance(value, (list, tuple)):
++                return f"audit_inbox: {name} must be a list"
++        for name in ("unresolved_audit_count", "residue_count"):
++            count = audit_inbox.get(name)
++            if count is not None and not (type(count) is int and count >= 0):
++                return f"audit_inbox: {name} must be a nonnegative integer"
++        for flag in ("unworkable_active_only", "binding_corrupt",
++                     "invalid_only", "residue_only"):
++            if flag in audit_inbox and type(audit_inbox[flag]) is not bool:
++                return f"audit_inbox: {flag} must be a boolean"
++    if future_gate is not None:
++        if not isinstance(future_gate, dict):
++            return "future_gate: projection must be an object"
++        for key in ("eligible", "refinable"):
++            value = future_gate.get(key)
++            if value is not None and (
++                not isinstance(value, (list, tuple))
++                or any(not isinstance(item, str) or not item for item in value)
++            ):
++                return f"future_gate: {key} must be a list of ticket ids"
++        if "refresh_required" in future_gate and type(future_gate["refresh_required"]) is not bool:
++            return "future_gate: refresh_required must be a boolean"
++    return None
+ 
+ 
+ def route_next(
+     state_text: str,
+@@ -65,8 +124,14 @@
+     _state: dict | None = None,
+     _board: dict | None = None,
+     _state_error: str | None = None,
+     project_root: str | Path | None = None,
++    persistent_goals: list | dict | None = None,
++    source_evidence: dict | None = None,
++    continuous_maintenance_authorized: bool = False,
++    publication_evidence=None,
++    source_generation: str | None = None,
++    discovery_dispatch: dict | None = None,
+ ) -> dict:
+     """Compute the exact next executable action.
+ 
+     Returns a dict with `action` (an executable mechanical action), `reason`
+@@ -105,10 +170,8 @@
+     audit-idle branch, below the Improve gate and below the BOARD Pick Rule, so
+     a gate is consumed only on an honest AUTONOMOUS WORK EXHAUSTED verdict --
+     never ahead of active Work, an actionable audit, or a live operator hold.
+     """
+-    pending = list(pending_ops or [])
+-    conflicts = list(conflict_ops or [])
+     # PERF-004: parse STATE/BOARD ONCE and reuse the result for both the
+     # checkpoint-surface validation and the routing logic below. When the
+     # caller provides pre-parsed objects, skip parsing entirely.
+     from .state import parse_state_or_error
+@@ -116,12 +179,47 @@
+     if _state is not None and _board is not None:
+         # PERF-004: the pre-parsed seam. `_state_error` may be None -- the
+         # NORMAL "no parse error" case -- so it is NOT part of the guard; a
+         # clean pre-parsed call must not silently fall through to re-parsing.
++        # A caller-supplied envelope is still untrusted input: validate its
++        # types before ANY .get/iteration below.
++        from .work_exhaustion import _ticket_inventory_valid
++
++        if not isinstance(_state, dict):
++            return {
++                "ok": False, "action": "saipen recover", "reason": "state-malformed",
++                "detail": "pre-parsed STATE envelope must be an object",
++            }
++        if not isinstance(_state.get("next_action"), str):
++            return {
++                "ok": False, "action": "saipen recover", "reason": "state-malformed",
++                "detail": "pre-parsed STATE next_action must be a string",
++            }
++        if (
++            not isinstance(_board, dict)
++            or not _ticket_inventory_valid(_board.get("tickets"))
++            or not isinstance(_board.get("errors"), list)
++        ):
++            return {
++                "ok": False, "action": "saipen status", "reason": "board-malformed",
++                "detail": "pre-parsed BOARD envelope is malformed",
++            }
+         state, state_error, board = _state, _state_error, _board
+     else:
+         state, state_error = parse_state_or_error(state_text)
+         board = parse_board(board_text)
++
++    # Typed projection gate: a truthy but malformed projection must fail the
++    # route instead of being consumed as if it were evidence.
++    _projection_problem = _projection_envelope_problem(
++        queued_source=queued_source, pending_append=pending_append,
++        audit_inbox=audit_inbox, future_gate=future_gate,
++    )
++    if _projection_problem:
++        return {
++            "ok": False, "action": "saipen status", "reason": "board-malformed",
++            "detail": _projection_problem,
++        }
+     if snap is not None:
+         from .fast_check import validate_checkpoint_surface
+ 
+         errors = validate_checkpoint_surface(
+@@ -213,8 +311,18 @@
+         }
+ 
+     # RECOVER outranks everything (after the read-only brake): an unresolved
+     # op or conflict must be resolved before any canonical work.
++    from .work_exhaustion import recovery_identities
++
++    try:
++        pending = recovery_identities(pending_ops) if pending_ops is not None else []
++        conflicts = recovery_identities(conflict_ops) if conflict_ops is not None else []
++    except ValueError as exc:
++        return {
++            "ok": False, "action": "saipen recover", "reason": "recovery-invalid",
++            "detail": f"recovery inventory unreadable: {exc}",
++        }
+     if conflicts:
+         return {
+             "ok": False,
+             "action": "saipen recover",
+@@ -818,15 +926,52 @@
+             "detail": "active HUNT phase owns continuation",
+         }
+ 
+     from .board import classify_idle_work
+-    from .persistent_goal import list_goals
+-
+-    goals = list_goals(project_root) if project_root else []
++    goals = persistent_goals
++    evidence = dict(source_evidence) if isinstance(source_evidence, dict) else source_evidence
++    generation = str(source_generation or state.get("last_event") or "gen-current")
++    if pending_ops is not None and conflict_ops is not None and evidence is None:
++        evidence = {}
++    if pending_ops is not None and conflict_ops is not None and isinstance(evidence, dict):
++        evidence.setdefault("canonical_recovery", {
++            "source_generation": generation, "last_checked_generation": generation,
++            "eligibility_result": "CLEAN_VERIFIED",
++        })
+     idle = classify_idle_work(
+         board["tickets"], audit_inbox=audit_inbox, future_gate=future_gate,
+-        state=state, now=now, persistent_goals=goals,
++        state=state, now=now, persistent_goals=goals, source_evidence=evidence,
++        current_agent=session_agent,
++        continuous_maintenance_authorized=continuous_maintenance_authorized,
++        source_generation=source_generation, discovery_dispatch=discovery_dispatch,
++        publication_evidence=publication_evidence,
+     )
++    diagnostics = {key: idle[key] for key in (
++        "work_exhaustion", "work_exhaustion_error", "outcome_truth",
++        "outcome_truth_error", "queue_status", "campaign_status", "objective_status",
++    ) if key in idle}
++
++    # FAIL-CLOSED TERMINAL EVIDENCE: an owner certificate/outcome error means
++    # an empty queue is NOT proof of completion. Never project
++    # ALL_REQUIREMENTS_COMPLETE from a discovery/outcome owner failure; carry
++    # the structured error instead (the transport reads this as a stop).
++    _idle_problem = idle.get("outcome_truth_error") or idle.get("work_exhaustion_error")
++    if _idle_problem and not idle["no_admissible_work"]:
++        return {
++            "ok": True,
++            "action": "saipen status",
++            "reason": "maintain",
++            **diagnostics,
++            "stop_reason": "INCOMPLETE_DISCOVERY",
++            "terminal_classification": "INCOMPLETE_DISCOVERY",
++            "idle_classification": "INCOMPLETE_DISCOVERY",
++            "unresolved_audit_count": idle.get("unresolved_audit_count", 0),
++            "next_exact_action": "saipen status",
++            "externally_blocked": idle.get("externally_blocked", []),
++            "operator_required": idle.get("operator_required", []),
++            "future_gated": idle.get("future_gated", []),
++            "detail": f"terminal discovery/outcome evidence is incomplete: {_idle_problem}",
++        }
+ 
+     # UNWORKABLE AUDIT INBOX: An ACTIVE inbox layer whose linked Work is unworkable
+     # (BLOCKED_EXTERNAL / operator decision required). It sits below eligible FUTURE GATES
+     # and active HUNT continuation so external blockers do not starve independent work.
+@@ -861,17 +1006,22 @@
+         )
+         if _reconciled is not None:
+             res["primary_blocker"] = _reconciled
+             res["publication_staging_reconciled"] = True
+-        return res
++        return {**res, **diagnostics}
+     # MAINTAIN: fall through to the persisted next_action only when it is a
+     # legal non-ticket action (saipen continue / saipen <verb>), never a stale
+     # PHASE echo and never a WAIT -- a WAIT reaching here already failed the
+     # hard-stop gate above (the narrow DONE+empty-TODO exception), so it is a
+     # stale WAIT to route past, not a brake to restate.
+     res_action = na if (na.startswith("saipen ") or na.startswith("RUN:")) else "saipen continue"
+-    if idle.get("active_goals"):
++    if idle.get("active_goals") and (
++        idle.get("next_exact_action") == "saipen continue"
++        or idle.get("disposition") == "GOAL_WAITING_AUTHORITY"
++    ):
+         res_action = "saipen continue"
++    elif idle["no_admissible_work"]:
++        res_action = idle["next_exact_action"]
+     if idle["no_admissible_work"]:
+         res = {
+             "ok": True,
+             "action": res_action,
+@@ -897,13 +1047,14 @@
+         )
+         if _reconciled is not None:
+             res["primary_blocker"] = _reconciled
+             res["publication_staging_reconciled"] = True
+-        return res
++        return {**res, **diagnostics}
+     return {
+         "ok": True,
+         "action": res_action,
+         "reason": "maintain",
++        **diagnostics,
+         "stop_reason": "ALL_REQUIREMENTS_COMPLETE",
+         "terminal_classification": "ALL_WORK_COMPLETE",
+         "idle_classification": "ALL_WORK_COMPLETE",
+         "unresolved_audit_count": 0,
+@@ -918,8 +1069,9 @@
+     # Recovery conflicts/pending are recovery work: the project holds an
+     # unresolved journal.
+     "recovery-conflict": "RECOVERY_CONFLICT",
+     "recovery-pending": "RECOVERY_REQUIRED",
++    "recovery-invalid": "CORRUPT_JOURNAL",
+     # Everything else is a malformed/binding failure: there is NO journal to
+     # recover, so recovery_pending must be false and the refusal must be a
+     # validation failure -- telling the agent to recover a non-existent op
+     # would send it chasing ghosts (T-1003 hostile findings).
+--- pre/tools/saipen_engine/outcome_truth.py
++++ tools/saipen_engine/outcome_truth.py
+@@ -9,10 +9,13 @@
+ """
+ 
+ from __future__ import annotations
+ 
++from dataclasses import dataclass, fields
++import hashlib
++import json
+ from pathlib import Path
+-from typing import Any
++from weakref import WeakKeyDictionary
+ 
+ # Queue Statuses
+ QUEUE_DRAINED = "QUEUE_DRAINED"
+ QUEUE_HAS_WORK = "QUEUE_HAS_WORK"
+@@ -23,8 +26,9 @@
+ CAMPAIGN_QUIESCENT = "CAMPAIGN_QUIESCENT"
+ CAMPAIGN_WAIT_AUTHORITY = "CAMPAIGN_WAIT_AUTHORITY"
+ CAMPAIGN_WAIT_EXTERNAL = "CAMPAIGN_WAIT_EXTERNAL"
+ CAMPAIGN_COMPLETE = "CAMPAIGN_COMPLETE"
++CAMPAIGN_INCOMPLETE_DISCOVERY = "CAMPAIGN_INCOMPLETE_DISCOVERY"
+ 
+ # Objective Statuses
+ OBJECTIVE_UNVERIFIED = "OBJECTIVE_UNVERIFIED"
+ OBJECTIVE_PARTIALLY_VERIFIED = "OBJECTIVE_PARTIALLY_VERIFIED"
+@@ -33,8 +37,11 @@
+ 
+ # Publication Statuses
+ LOCAL_IMPLEMENTED = "LOCAL_IMPLEMENTED"
+ LOCAL_VERIFIED = "LOCAL_VERIFIED"
++LOCAL_NO_PUBLISH = "LOCAL_NO_PUBLISH"
++RELEASE_PENDING = "RELEASE_PENDING"
++RELEASE_UNKNOWN = "RELEASE_UNKNOWN"
+ RELEASE_READY = "RELEASE_READY"
+ RELEASE_BLOCKED = "RELEASE_BLOCKED"
+ RELEASE_PUBLISHED = "RELEASE_PUBLISHED"
+ INSTALLED_VERIFIED = "INSTALLED_VERIFIED"
+@@ -56,14 +63,353 @@
+ 
+ PUBLICATION_LANE_PENDING = "PENDING"
+ PUBLICATION_LANE_BLOCKED = "BLOCKED"
+ PUBLICATION_LANE_READY = "READY"
++PUBLICATION_LANE_PUBLISHED = "PUBLISHED"
++PUBLICATION_LANE_LOCAL_NO_PUBLISH = "LOCAL_NO_PUBLISH"
++PUBLICATION_LANE_UNKNOWN = "UNKNOWN"
+ 
+ CAMPAIGN_LANE_RUNNING = "RUNNING"
+ CAMPAIGN_LANE_QUIESCENT = "QUIESCENT"
+ CAMPAIGN_LANE_WAIT_AUTHORITY = "WAIT_AUTHORITY"
+ CAMPAIGN_LANE_WAIT_EXTERNAL = "WAIT_EXTERNAL"
+ CAMPAIGN_LANE_COMPLETE = "COMPLETE"
++
++
++@dataclass(frozen=True, eq=False)
++class PublicationEvidence:
++    """Command-scoped owner observation, not operator authentication."""
++
++    project_root: str
++    project_lineage: str
++    project_identity: str
++    ticket_snapshot: str
++    receipt_digest: str
++    tickets: tuple[tuple[str, str, tuple[str, ...], str], ...]
++    diagnostics: tuple[str, ...] = ()
++
++
++# ponytail: same-process provenance only; recapture at the outer observation owner.
++_issued_publication_evidence = WeakKeyDictionary()
++
++
++def _carrier_fields(evidence):
++    return tuple(getattr(evidence, field.name) for field in fields(PublicationEvidence))
++
++
++def _done_tickets(tickets):
++    return {tid: ticket for tid, ticket in tickets.items() if ticket.get("section") == "## DONE"}
++
++
++def _ticket_snapshot(tickets):
++    raw = json.dumps(tickets, sort_keys=True, separators=(",", ":"), allow_nan=False)
++    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
++
++
++def _local_no_publish_closure(root: Path, snapshot, ticket_id: str, *, ticket=None, history=None):
++    """Prove a COMMITTED local closure that shipped nothing, or refuse.
++
++    T-2040: a DONE ticket with no release receipt is not automatically
++    "pending" -- a verified zero-delta finish is a LOCAL_NO_PUBLISH closure,
++    and its own receipts are the only authority. The proof is the finish
++    operation (bound to this Work and to the live project, with its LOG event
++    and its artifact bytes unchanged) plus ONE producer integration whose
++    ignored payload was already implemented byte-for-byte. A tracked source
++    path with identical bytes is not an adopted implementation, a changed
++    payload is not current, and prose is never evidence.
++    """
++    from .journal import hash_bytes
++    from .paths import project_identity, project_lineage_identity
++    from .plan import semantic_payload_hash
++
++    lineage = project_lineage_identity(root) or ""
++    identity = project_identity(root)
++
++    def bound(record) -> bool:
++        record_lineage = record.get("project_lineage")
++        record_identity = record.get("project_identity")
++        if record_lineage is not None and str(record_lineage) != str(lineage):
++            return False
++        if record_identity is not None and str(record_identity) != str(identity):
++            return False
++        return bool(record_lineage or record_identity)
++
++    # A finish operation names its Work through the payload hash, not a ticket
++    # field: the hash IS the binding the closure operation signed.
++    expected_payload = semantic_payload_hash({"operation": "finish", "ticket": ticket_id})
++    finishes = [
++        record for record in snapshot.records
++        if record.get("operation") == "finish"
++        and record.get("status") == "COMMITTED"
++        and record.get("semantic_payload_hash") == expected_payload
++        and str(record.get("ticket_id") or ticket_id) == ticket_id
++    ]
++    if not finishes:
++        return "pending", (), "no canonical ticket-bound release or local closure receipt"
++    if len(finishes) > 1:
++        return "unknown", (), "competing local closure receipts for this Work"
++    finish = finishes[0]
++    finish_id = str(finish.get("op_id") or "")
++    ids = (finish_id,) if finish_id else ()
++    if not bound(finish):
++        return "unknown", ids, "local closure receipt lacks the live project binding"
++    owner = str(((ticket or {}).get("fields") or {}).get("owner") or "")
++    if owner and str(finish.get("agent") or "") != owner:
++        return "unknown", ids, "local closure receipt was not written by the claimed owner"
++    if history is not None:
++        events = getattr(history, "events", history if isinstance(history, (list, tuple)) else ())
++    else:
++        try:
++            from .log import read_history_snapshot
++
++            events = read_history_snapshot(root).events
++        except Exception:
++            events = ()
++    if finish_id and not any(
++        (isinstance(event, dict) and event.get("op_id") == finish_id)
++        or finish_id in str((event or {}).get("text", "") if isinstance(event, dict) else "")
++        for event in events
++    ):
++        return "unknown", ids, "local closure receipt has no journaled LOG event"
++    # Resolve the producer BEFORE artifact-byte checks: a missing producer is a
++    # pending closure, not unknown evidence, and never a local-only verdict.
++    producers = [
++        record for record in snapshot.records
++        if record.get("operation") == "producer_integration"
++        and record.get("status") == "COMMITTED"
++        and str((record.get("receipt_metadata") or {}).get("ticket_id") or "") == ticket_id
++    ]
++    if len(producers) != 1:
++        return "pending", ids, "no single canonical producer integration for this Work"
++    producer = producers[0]
++    producer_id = str(producer.get("op_id") or "")
++    ids = (*ids, producer_id) if producer_id else ids
++    if not bound(producer):
++        return "unknown", ids, "producer integration lacks the live project binding"
++    metadata = producer.get("receipt_metadata") or {}
++    if (
++        not metadata.get("input_source")
++        or metadata.get("input_source") != metadata.get("resulting_source")
++        or metadata.get("input_source_fingerprint") != metadata.get("resulting_source_fingerprint")
++    ):
++        return "pending", ids, "producer integration changed the source"
++    zero_delta = 0
++    for target in producer.get("targets") or []:
++        if not isinstance(target, dict):
++            return "unknown", ids, "producer integration has a malformed target"
++        path = str(target.get("path") or "")
++        before = str(target.get("before_hash") or "")
++        after = str(target.get("after_hash") or "")
++        if not path or not after:
++            return "unknown", ids, "producer integration bound no payload bytes"
++        if not path.startswith(".saipen/"):
++            # Identical bytes in the tracked source are not an adopted delta.
++            continue
++        if before != after:
++            return "pending", ids, "producer integration applied a source delta"
++        try:
++            current = hash_bytes((root / path).read_bytes())
++        except OSError:
++            return "unknown", ids, f"producer payload {path} is unreadable"
++        if current != after:
++            return "unknown", ids, f"producer payload {path} changed after the receipt"
++        zero_delta += 1
++    if not zero_delta:
++        return "pending", ids, "no ignored zero-delta payload proves an adopted implementation"
++    targets = finish.get("targets")
++    if not isinstance(targets, list) or not targets:
++        return "unknown", ids, "local closure receipt bound no artifacts"
++    for target in targets:
++        if not isinstance(target, dict):
++            return "unknown", ids, "local closure receipt has a malformed artifact binding"
++        path = str(target.get("path") or "")
++        after = str(target.get("after_hash") or "")
++        if not path.startswith(".saipen/") or not after:
++            return "unknown", ids, "local closure receipt binds a non-runtime artifact"
++        try:
++            current = hash_bytes((root / path).read_bytes())
++        except OSError:
++            return "unknown", ids, f"local closure artifact {path} is unreadable"
++        if current != after:
++            return "unknown", ids, f"local closure artifact {path} changed after the receipt"
++    return "no-publish", ids, "canonical local closure; publication not performed"
++
++
++def read_publication_evidence(
++    root: Path | str, *, tickets: dict, ticket_id: str | None = None, history=None,
++) -> PublicationEvidence:
++    """Read canonical ticket/project receipts through the existing release owner.
++
++    No grants, lifecycle or Git writes. A terminal receipt's own flags prove
++    nothing: release_verdict independently checks its project and Git result.
++    A selected ticket_id requires the same selected DONE subset at consumption.
++    """
++    from .journal import SemanticReceiptSnapshot, semantic_receipt_snapshot
++    from .paths import project_identity, project_lineage_identity
++    from . import release
++
++    root = Path(root).resolve()
++    selected = _done_tickets(tickets)
++    if ticket_id is not None:
++        selected = {ticket_id: selected[ticket_id]} if ticket_id in selected else {}
++    diagnostics = []
++    results = []
++    lineage = identity = digest = ""
++    try:
++        if ticket_id is not None and not selected:
++            raise ValueError("selected publication ticket is not DONE")
++        ticket_hash = _ticket_snapshot(selected)
++        lineage = project_lineage_identity(root) or ""
++        identity = project_identity(root)
++        snapshot = semantic_receipt_snapshot(root)
++        digest = snapshot.digest
++        diagnostics.extend(snapshot.errors)
++        for tid in sorted(selected):
++            records = tuple(record for record in snapshot.records
++                            if record.get("operation") == "release"
++                            and record.get("ticket_id") == tid
++                            and record.get("status") != "ABORTED")
++            op_ids = tuple(str(record.get("op_id") or "") for record in records)
++            if snapshot.errors:
++                status, reason = "unknown", "; ".join(snapshot.errors[:3])
++            elif len({str(record.get("op_id") or "") for record in records}) > 1:
++                # Competing terminal operations for one Work are ambiguity, and
++                # ambiguity never publishes (T-2040).
++                status, reason = "unknown", "competing canonical release receipts for this Work"
++            elif not records:
++                # No release receipt: a verified zero-delta finish is the only
++                # other canonical answer, and it is LOCAL_NO_PUBLISH.
++                status, op_ids, reason = _local_no_publish_closure(
++                    root, snapshot, tid, ticket=selected[tid], history=history
++                )
++            elif any(not (record.get("project_lineage") or record.get("project_identity"))
++                     for record in records):
++                status, reason = "unknown", "release receipt lacks project binding"
++            else:
++                scoped = SemanticReceiptSnapshot(records, (), snapshot.corrupt_op_ids, digest)
++                verdict = release.release_verdict(root, receipt_snapshot=scoped)
++                evidence = verdict.get("evidence") or {}
++                bound = (verdict.get("status") == "ok" and evidence.get("ticket_id") == tid
++                         and evidence.get("op_id") in op_ids)
++                if (bound and evidence.get("terminal_outcome") == release.TERMINAL_PUBLISHED
++                        and evidence.get("publication") == release.PUBLICATION_PERFORMED
++                        and evidence.get("mode") == "full"):
++                    status, reason = "published", "canonical release independently verified"
++                elif (bound and evidence.get("terminal_outcome") == release.TERMINAL_LOCAL_NO_PUBLISH
++                      and evidence.get("publication") == release.PUBLICATION_NOT_PERFORMED
++                      and evidence.get("mode") == "no-publish"):
++                    status, reason = "no-publish", "canonical local closure; publication not performed"
++                else:
++                    status = "unknown"
++                    reason = str(verdict.get("reason") or "release owner returned no bound terminal proof")
++            results.append((tid, status, op_ids, reason))
++        if project_lineage_identity(root) != (lineage or None):
++            raise ValueError("project lineage changed during publication observation")
++    except Exception as exc:
++        diagnostics.append(f"publication evidence unavailable: {type(exc).__name__}: {exc}")
++        ticket_hash = _ticket_snapshot(selected)
++        results = [(tid, "unknown", (), diagnostics[-1]) for tid in sorted(selected)]
++    carrier = PublicationEvidence(str(root), lineage, identity, ticket_hash, digest,
++                                  tuple(results), tuple(diagnostics))
++    _issued_publication_evidence[carrier] = _carrier_fields(carrier)
++    return carrier
++
++
++def _publication_hint(value):
++    if not isinstance(value, str):
++        return "unknown"
++    value = value.strip().lower()
++    if value in ("no-publish", "local-no-publish", "local_no_publish", "local-only"):
++        return "no-publish"
++    return value if value in ("pending", "blocked", "ready") else "unknown"
++
++
++def _aggregate_publication(statuses):
++    for status in ("unknown", "blocked", "pending", "ready", "no-publish", "published"):
++        if status in statuses:
++            return status
++    return "pending"
++
++
++def aggregate_publication_evidence(*, tickets, publication_evidence=None) -> dict:
++    """Pure SAME-carrier inventory; intent fields cannot discharge release debt."""
++    selected = _done_tickets(tickets)
++    evidence = publication_evidence
++    valid = (type(evidence) is PublicationEvidence
++             and _issued_publication_evidence.get(evidence) == _carrier_fields(evidence)
++             and evidence.ticket_snapshot == _ticket_snapshot(selected))
++    if not valid:
++        return {"status": "unknown", "checked": False, "tickets": [],
++                "diagnostics": ["publication evidence is not owner-issued or bound to this selection"]}
++    rows = [{"ticket_id": tid, "status": status, "receipt_ids": list(op_ids), "reason": reason}
++            for tid, status, op_ids, reason in evidence.tickets]
++    return {"status": "unknown" if evidence.diagnostics else _aggregate_publication(
++                [row["status"] for row in rows]),
++            "checked": not evidence.diagnostics, "tickets": rows,
++            "diagnostics": list(evidence.diagnostics), "project_root": evidence.project_root,
++            "project_lineage": evidence.project_lineage, "receipt_digest": evidence.receipt_digest}
++
++
++def _publication_projection(root, tickets, state, publication_state, evidence):
++    selected = _done_tickets(tickets)
++    hint = publication_state if publication_state is not None else state.get("publication_state")
++    details = {"tickets": [], "diagnostics": []}
++    if evidence is None and root is not None:
++        evidence = read_publication_evidence(root, tickets=tickets)
++    if evidence is not None:
++        valid = (type(evidence) is PublicationEvidence
++                 and _issued_publication_evidence.get(evidence) == _carrier_fields(evidence))
++        if valid:
++            valid = evidence.ticket_snapshot == _ticket_snapshot(selected)
++        if valid and root is not None:
++            valid = str(Path(root).resolve()) == evidence.project_root
++            if valid:
++                current = read_publication_evidence(root, tickets=tickets)
++                valid = _carrier_fields(current) == _carrier_fields(evidence)
++        if not valid:
++            details["diagnostics"] = ["publication evidence is not owner-issued, current, or bound to this selection"]
++            return "unknown", details
++        details.update(project_root=evidence.project_root, project_lineage=evidence.project_lineage,
++                       receipt_digest=evidence.receipt_digest, diagnostics=list(evidence.diagnostics))
++        for tid, status, op_ids, reason in evidence.tickets:
++            if status == "pending":
++                value = hint if hint is not None else (selected[tid].get("fields") or {}).get("publication_state", "pending")
++                status = _publication_hint(value)
++            details["tickets"].append({"ticket_id": tid, "status": status,
++                                       "receipt_ids": list(op_ids), "reason": reason})
++        if evidence.diagnostics:
++            return "unknown", details
++    else:
++        for tid, ticket in selected.items():
++            value = hint if hint is not None else (ticket.get("fields") or {}).get("publication_state", "pending")
++            details["tickets"].append({"ticket_id": tid, "status": _publication_hint(value),
++                                       "receipt_ids": [], "reason": "intent only; no owner publication proof"})
++    statuses = [item["status"] for item in details["tickets"]]
++    if not statuses:
++        statuses = [_publication_hint(hint if hint is not None else "pending")]
++    return _aggregate_publication(statuses), details
++
++
++def _workable_ids(tickets, state):
++    from .board import workable_tickets
++
++    return set(workable_tickets(tickets, agent=state.get("agent")))
++
++
++def _campaign_status(doing, workable, blocked, authority, budget, certificate, *, external=False):
++    from .work_exhaustion import verified_quiescence
++
++    if doing or workable:
++        return CAMPAIGN_RUNNING
++    if budget:
++        return CAMPAIGN_WAIT_AUTHORITY
++    if external or any("EXTERNAL" in str((t.get("fields") or {}).get("blocker", "")) for t in blocked):
++        return CAMPAIGN_WAIT_EXTERNAL
++    if blocked or not authority:
++        return CAMPAIGN_WAIT_AUTHORITY
++    if verified_quiescence(certificate):
++        return CAMPAIGN_QUIESCENT
++    return CAMPAIGN_INCOMPLETE_DISCOVERY
+ 
+ 
+ def compute_lane_statuses(
+     root: Path | str | None = None,
+@@ -76,34 +422,34 @@
+     foreign_staged: bool = False,
+     publication_state: str | None = None,
+     is_budget_exhausted: bool = False,
+     primary_blocker: dict | None = None,
++    work_exhaustion: dict | None = None,
++    publication_evidence: PublicationEvidence | None = None,
+ ) -> dict[str, str]:
+-    """Produce the five distinct operational lane statuses (P0-01).
+-
+-    Separates blocked release from blocked engineering and autonomous discovery:
+-    1. RELEASE_LANE: BLOCKED_FOREIGN_INDEX | BLOCKED | READY | CLEAR
+-    2. IMPLEMENTATION_LANE: ELIGIBLE | NO_WORK | AUTHORITY_REQUIRED
+-    3. DISCOVERY_LANE: ELIGIBLE | NOT_DUE | AUTHORITY_REQUIRED
+-    4. PUBLICATION_LANE: PENDING | BLOCKED | READY
+-    5. CAMPAIGN: RUNNING | QUIESCENT | WAIT_AUTHORITY | WAIT_EXTERNAL | COMPLETE
+-    """
++    """Separate operational lanes; root=None consumes owner evidence without IO."""
+     tickets = tickets or {}
+     state = state or {}
+-
++    pub, _details = _publication_projection(root, tickets, state, publication_state, publication_evidence)
++    return _lane_statuses(tickets, state, pub, has_continuous_maintenance, foreign_staged,
++                          is_budget_exhausted, primary_blocker, work_exhaustion)
++
++
++def _lane_statuses(tickets, state, pub, authority, foreign_staged, budget, primary_blocker, certificate):
+     doing = [t for t in tickets.values() if t.get("section") == "## DOING"]
+     todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+     blocked = [t for t in tickets.values() if t.get("section") == "## BLOCKED"]
+-    workable = [t for t in todo if not t.get("blocked")]
++    workable_ids = _workable_ids(tickets, state)
++    workable = [t for t in todo if t["id"] in workable_ids]
+ 
+     # 1. RELEASE_LANE
+     if foreign_staged:
+         release_lane = RELEASE_LANE_BLOCKED_FOREIGN_INDEX
+     elif primary_blocker and primary_blocker.get("cause") == "publication-staging":
+         release_lane = RELEASE_LANE_BLOCKED_FOREIGN_INDEX
+-    elif publication_state == "blocked" or state.get("publication_state") == "blocked":
++    elif pub == "blocked":
+         release_lane = RELEASE_LANE_BLOCKED
+-    elif publication_state == "ready" or state.get("publication_state") == "ready":
++    elif pub == "ready":
+         release_lane = RELEASE_LANE_READY
+     elif any(
+         "PUBLICATION_STAGING_BLOCKED" in str((t.get("fields") or {}).get("blocker", ""))
+         for t in blocked
+@@ -120,39 +466,30 @@
+     else:
+         implementation_lane = IMPLEMENTATION_LANE_NO_WORK
+ 
+     # 3. DISCOVERY_LANE
+-    if not has_continuous_maintenance:
++    if not authority:
+         discovery_lane = DISCOVERY_LANE_AUTHORITY_REQUIRED
+     else:
+         discovery_lane = DISCOVERY_LANE_NOT_DUE
+ 
+-    # 4. PUBLICATION_LANE
+-    pub = (publication_state or state.get("publication_state") or "pending").lower()
+-    if release_lane == RELEASE_LANE_BLOCKED_FOREIGN_INDEX or pub == "blocked":
++    # Completed publication/local-only truth survives a later release hold.
++    publication_lane = {
++        "pending": PUBLICATION_LANE_PENDING, "blocked": PUBLICATION_LANE_BLOCKED,
++        "ready": PUBLICATION_LANE_READY, "published": PUBLICATION_LANE_PUBLISHED,
++        "no-publish": PUBLICATION_LANE_LOCAL_NO_PUBLISH, "unknown": PUBLICATION_LANE_UNKNOWN,
++    }[pub]
++    if release_lane == RELEASE_LANE_BLOCKED_FOREIGN_INDEX and pub in ("pending", "ready", "blocked"):
+         publication_lane = PUBLICATION_LANE_BLOCKED
+-    elif pub == "ready":
+-        publication_lane = PUBLICATION_LANE_READY
+-    else:
+-        publication_lane = PUBLICATION_LANE_PENDING
+ 
+     # 5. CAMPAIGN
+-    if doing or workable:
+-        campaign = CAMPAIGN_LANE_RUNNING
+-    elif (
+-        any("EXTERNAL" in str((t.get("fields") or {}).get("blocker", "")) for t in blocked)
+-        or (primary_blocker and "EXTERNAL" in str(primary_blocker.get("blocker_class", "")))
+-        or release_lane == RELEASE_LANE_BLOCKED_FOREIGN_INDEX
+-    ):
+-        campaign = CAMPAIGN_LANE_WAIT_EXTERNAL
+-    elif is_budget_exhausted or not has_continuous_maintenance:
+-        campaign = CAMPAIGN_LANE_WAIT_AUTHORITY
+-    elif has_continuous_maintenance:
+-        campaign = CAMPAIGN_LANE_QUIESCENT
+-    elif not blocked and not todo and not doing:
+-        campaign = CAMPAIGN_LANE_COMPLETE
+-    else:
+-        campaign = CAMPAIGN_LANE_WAIT_AUTHORITY
++    campaign = _campaign_status(
++        doing, workable, blocked, authority, budget,
++        certificate, external=(
++            release_lane == RELEASE_LANE_BLOCKED_FOREIGN_INDEX
++            or bool(primary_blocker and "EXTERNAL" in str(primary_blocker.get("blocker_class", "")))
++        ),
++    ).removeprefix("CAMPAIGN_")
+ 
+     return {
+         "RELEASE_LANE": release_lane,
+         "IMPLEMENTATION_LANE": implementation_lane,
+@@ -172,8 +509,13 @@
+     objective_evidence: dict | None = None,
+     publication_state: str | None = None,
+     has_continuous_maintenance: bool = False,
+     is_budget_exhausted: bool = False,
++    work_exhaustion: dict | None = None,
++    verification_evidence: dict | None = None,
++    publication_evidence: PublicationEvidence | None = None,
++    foreign_staged: bool = False,
++    primary_blocker: dict | None = None,
+ ) -> dict:
+     """Project the multi-plane outcome truth from canonical facts.
+ 
+     Never infers objective success from an empty executable ticket queue.
+@@ -183,36 +525,27 @@
+ 
+     doing = [t for t in tickets.values() if t.get("section") == "## DOING"]
+     todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+     blocked = [t for t in tickets.values() if t.get("section") == "## BLOCKED"]
+-    workable = [t for t in todo if not t.get("blocked")]
+-
+-    # 1. QUEUE_STATUS
++    workable_ids = _workable_ids(tickets, state)
++    workable = [t for t in todo if t["id"] in workable_ids]
++
++    # 1. QUEUE_STATUS (legacy meaning preserved: "nothing workable remains";
++    # blocked Work is named below by CAMPAIGN_STATUS and the certificate).
+     if workable or doing:
+         queue_status = QUEUE_HAS_WORK
+-    elif blocked:
+-        # Executable queue is drained, but blocked items remain
++    else:
+         queue_status = QUEUE_DRAINED
+-    else:
+-        queue_status = QUEUE_DRAINED
+-
+-    # 2. CAMPAIGN_STATUS
+-    if is_budget_exhausted and not has_continuous_maintenance:
+-        campaign_status = CAMPAIGN_WAIT_AUTHORITY
+-    elif doing:
+-        campaign_status = CAMPAIGN_RUNNING
+-    elif any("EXTERNAL" in str((t.get("fields") or {}).get("blocker", "")) for t in blocked):
+-        if not workable:
+-            campaign_status = CAMPAIGN_WAIT_EXTERNAL
+-        else:
+-            campaign_status = CAMPAIGN_RUNNING
+-    elif not workable and not doing:
+-        if has_continuous_maintenance:
+-            campaign_status = CAMPAIGN_QUIESCENT
+-        else:
+-            campaign_status = CAMPAIGN_WAIT_AUTHORITY
+-    else:
+-        campaign_status = CAMPAIGN_RUNNING
++
++    # 2. CAMPAIGN_STATUS and publication lanes share one owner observation.
++    pub, publication_details = _publication_projection(
++        root, tickets, state, publication_state, publication_evidence,
++    )
++    lanes = _lane_statuses(
++        tickets, state, pub, has_continuous_maintenance, foreign_staged,
++        is_budget_exhausted, primary_blocker, work_exhaustion,
++    )
++    campaign_status = "CAMPAIGN_" + lanes["CAMPAIGN"]
+ 
+     # 3. OBJECTIVE_STATUS
+     if objective_evidence:
+         verdict = objective_evidence.get("verdict")
+@@ -229,19 +562,16 @@
+         # it is UNVERIFIED, even if all local unit tests passed.
+         objective_status = OBJECTIVE_UNVERIFIED
+ 
+     # 4. PUBLICATION_STATUS
+-    pub = (publication_state or state.get("publication_state") or "pending").lower()
+-    if pub == "published":
+-        publication_status = RELEASE_PUBLISHED
+-    elif pub == "ready":
+-        publication_status = RELEASE_READY
+-    elif pub == "blocked":
+-        publication_status = RELEASE_BLOCKED
+-    elif pub == "pending":
+-        publication_status = RELEASE_BLOCKED
+-    else:
+-        publication_status = LOCAL_VERIFIED
++    publication_status = {
++        PUBLICATION_LANE_PENDING: RELEASE_PENDING,
++        PUBLICATION_LANE_BLOCKED: RELEASE_BLOCKED,
++        PUBLICATION_LANE_READY: RELEASE_READY,
++        PUBLICATION_LANE_PUBLISHED: RELEASE_PUBLISHED,
++        PUBLICATION_LANE_LOCAL_NO_PUBLISH: LOCAL_NO_PUBLISH,
++        PUBLICATION_LANE_UNKNOWN: RELEASE_UNKNOWN,
++    }[lanes["PUBLICATION_LANE"]]
+ 
+     # 5. NEXT WAKE CONDITION & NEXT ACTION
+     if queue_status == QUEUE_HAS_WORK:
+         next_wake = "ticket execution starts"
+@@ -254,29 +584,25 @@
+         next_action = "saipen status"
+     elif campaign_status == CAMPAIGN_QUIESCENT:
+         next_wake = "new source bytes, evidence, or external audit findings arrive"
+         next_action = "saipen status"
++    elif campaign_status == CAMPAIGN_INCOMPLETE_DISCOVERY:
++        next_wake = "current discovery provider evidence becomes available"
++        next_action = "saipen status"
+     else:
+         next_wake = "operator instruction"
+         next_action = "saipen status"
+ 
+-    lanes = compute_lane_statuses(
+-        root,
+-        tickets=tickets,
+-        state=state,
+-        audit_inbox=audit_inbox,
+-        future_gate=future_gate,
+-        has_continuous_maintenance=has_continuous_maintenance,
+-        publication_state=publication_state,
+-        is_budget_exhausted=is_budget_exhausted,
+-    )
+-
++    verification_status = "NOT_CHECKED"
++    if verification_evidence and verification_evidence.get("scope") and verification_evidence.get("verdict") in ("PASS", "FAIL"):
++        verification_status = f"{verification_evidence['scope']}: {verification_evidence['verdict']}"
+     return {
+         "queue_status": queue_status,
+         "campaign_status": campaign_status,
+         "objective_status": objective_status,
+         "publication_status": publication_status,
+-        "verification_status": "QUEUE_VALIDATION: PASS",
++        "publication_details": publication_details,
++        "verification_status": verification_status,
+         "next_eligible_action": next_action,
+         "next_wake_condition": next_wake,
+         "lanes": lanes,
+         "release_lane": lanes["RELEASE_LANE"],
+--- pre/tools/saipen_engine/persistent_goal.py
++++ tools/saipen_engine/persistent_goal.py
+@@ -134,33 +134,108 @@
+     return goals
+ 
+ 
+ def list_goals_report(root: Path | str | None) -> dict[str, Any]:
+-    """Goal inventory that reports its residue instead of dropping it.
+-
+-    `list_goals` keeps the historical silent-skip shape for callers that only
+-    need the readable set. A work-exhaustion certificate may not certify a
+-    clean goal sweep over files it could not read, so it needs the residue:
+-    returns ``{"goals": [...], "unreadable": [path, ...]}``.
++    """Read local goal identities without hiding unavailable inventory evidence.
++
++    A missing optional goals directory is empty only under a readable project.
++    Discovery of a goal is not authentication of its maintenance grant.
+     """
+-    report: dict[str, Any] = {"goals": [], "unreadable": []}
+-    if not root:
++    from .paths import prove_owned_dir_chain, prove_owned_regular, read_bound_regular_bytes
++
++    report: dict[str, Any] = {
++        "goals": [], "unreadable": [], "errors": [],
++        "root_available": False, "complete": False,
++    }
++    try:
++        if root is None:
++            raise ValueError("project root not supplied")
++        project = Path(root)
++        if not project.is_dir():
++            raise OSError(f"project root is not a directory: {project}")
++        # Enumeration proves availability; is_dir alone hides access errors.
++        next(project.iterdir(), None)
++        report["root_available"] = True
++        gdir = goals_dir(project)
++        prove_owned_dir_chain(gdir, ownership_root=project, kind="goal inventory")
++        try:
++            paths = sorted(gdir.iterdir())
++        except FileNotFoundError:
++            report["complete"] = True
++            return report
++    except (OSError, ValueError) as exc:
++        report["errors"].append(f"goal inventory: {type(exc).__name__}: {exc}")
+         return report
+-    gdir = goals_dir(root)
+-    if not gdir.is_dir():
+-        return report
+-    for path in sorted(gdir.glob("*.json")):
+-        if path.name.startswith("."):
++    for path in paths:
++        if path.name.startswith(".") or path.suffix != ".json":
+             continue
+         try:
+-            raw = json.loads(path.read_text(encoding="utf-8"))
+-            if isinstance(raw, dict) and "goal_id" in raw:
+-                report["goals"].append(PersistentGoal.from_dict(raw))
++            info = prove_owned_regular(path, kind="goal")
++            raw = json.loads(read_bound_regular_bytes(path, info, max_bytes=1024 * 1024))
++            if not isinstance(raw, dict):
++                raise ValueError("goal must be an object")
++            identity = validate_safe_id(raw.get("goal_id"), kind="goal_id")
++            if identity != path.stem or raw.get("goal_id") != identity:
++                raise ValueError("goal identity does not match its filename")
++            if raw.get("current_status", STATUS_ACTIVE) not in GOAL_STATUSES:
++                raise ValueError("unrecognized goal status")
++            if not isinstance(raw.get("paused", False), bool):
++                raise ValueError("paused must be a boolean")
++            report["goals"].append(PersistentGoal.from_dict(raw))
++        except (OSError, ValueError, TypeError) as exc:
++            report["unreadable"].append(str(path))
++            report["errors"].append(f"{path}: {type(exc).__name__}: {exc}")
++    report["complete"] = not report["errors"]
++    return report
++
++
++def goal_inventory(evidence: Any) -> dict[str, Any]:
++    """Normalize explicit goal evidence; absence is not a checked empty set."""
++    result: dict[str, Any] = {
++        "goals": [], "unreadable": [], "errors": [],
++        "supplied": evidence is not None, "complete": False,
++    }
++    if evidence is None:
++        return result
++    if isinstance(evidence, dict) and "goals" in evidence:
++        if not isinstance(evidence["goals"], (list, tuple)):
++            result["errors"].append("goal inventory must contain a goal list")
++            return result
++        result["goals"] = list(evidence["goals"])
++        for key in ("unreadable", "errors"):
++            entries = evidence.get(key, [])
++            if not isinstance(entries, (list, tuple)):
++                result["errors"].append(f"goal inventory {key} must be a list")
+             else:
+-                report["unreadable"].append(str(path))
+-        except (OSError, ValueError, TypeError):
+-            report["unreadable"].append(str(path))
+-    return report
++                result[key].extend(str(entry) for entry in entries)
++        result["complete"] = evidence.get("complete") is True
++        if evidence.get("root_available") is False:
++            result["complete"] = False
++    elif isinstance(evidence, (list, tuple)):
++        result["goals"] = list(evidence)
++        result["complete"] = True
++    elif isinstance(evidence, PersistentGoal) or isinstance(evidence, dict) and "goal_id" in evidence:
++        result["goals"] = [evidence]
++        result["complete"] = True
++    else:
++        result["errors"].append(f"unsupported goal evidence {type(evidence).__name__}")
++    valid = []
++    for goal in result["goals"]:
++        if not isinstance(goal, (dict, PersistentGoal)):
++            result["errors"].append("invalid goal inventory member")
++            continue
++        status = goal.get("current_status", STATUS_ACTIVE) if isinstance(goal, dict) else goal.current_status
++        if status not in GOAL_STATUSES:
++            result["errors"].append(f"unrecognized goal status: {status!r}")
++            continue
++        paused = goal.get("paused", False) if isinstance(goal, dict) else goal.paused
++        if type(paused) is not bool:
++            result["errors"].append("goal paused must be a boolean")
++            continue
++        valid.append(goal)
++    result["goals"] = valid
++    result["complete"] = result["complete"] and not result["unreadable"] and not result["errors"]
++    return result
+ 
+ 
+ def get_goal(root: Path | str, goal_id: str) -> PersistentGoal | None:
+     try:
+@@ -176,11 +251,11 @@
+     if not path.is_file():
+         return None
+     try:
+         raw = json.loads(path.read_text(encoding="utf-8"))
+-        if isinstance(raw, dict) and "goal_id" in raw:
++        if isinstance(raw, dict) and raw.get("goal_id") == goal_id:
+             return PersistentGoal.from_dict(raw)
+-    except (OSError, ValueError):
++    except (OSError, ValueError, TypeError):
+         return None
+     return None
+ 
+ 

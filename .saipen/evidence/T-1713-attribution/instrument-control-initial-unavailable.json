@@ -1,0 +1,14 @@
+{
+  "outcome": "INSTRUMENT_UNAVAILABLE",
+  "command": ["python", "-B", ".saipen/evidence/T-1713-attribution/instrument-controls.py", "verify"],
+  "exit_code": 1,
+  "observed_exception": "RuntimeError: historical subject identity moved: manifest-8f91d779.py",
+  "failed_control": "false_sealed_hash",
+  "cause": "The control constructor used the preceding verifier.PREPARED override instead of the original operand source. The third input unintentionally inherited the second input's deliberately changed historical subject.",
+  "known_good": {"accepted": true, "parsed_events": 14428, "historical_reproductions": 2},
+  "success_artifact_produced": false,
+  "canonical_failure_event": "E-14430",
+  "build_entry_event": "E-14431",
+  "preserved_constructor": "instrument-controls-initial.py",
+  "limits": "This records an observed control-harness failure, not a production or historical subject failure. Raw stdout/trace were returned by exec_command. No invented raw stream or successful verdict is substituted."
+}

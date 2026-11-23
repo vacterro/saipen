@@ -1,0 +1,12 @@
+STATUS
+WAIT -- init complete; project bound, phase PLAN
+RESULT
+canonical control surface returned after the mid-session init
+BLOCKER
+NONE
+OPERATOR ACTION
+provide the first project goal or raw backlog
+NEXT EXACT ACTION
+NONE
+VALIDATION
+NOT_RUN -- focused carrier green

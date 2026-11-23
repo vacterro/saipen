@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+    "-m",
+    "ruff",
+    "check",
+    "tools/saipen_engine/state.py",
+    "tools/saipen_engine/audit_route.py",
+    "tools/saipen_engine/router.py",
+    "tools/saipen_engine/operations.py",
+    "tools/validate.py",
+    "tools/test_t1704_goal_checkpoint_priority.py"
+  ],
+  "cwd": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+  "exit_code": 0,
+  "stdout": "All checks passed!\n",
+  "stderr": ""
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-027:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement and verify the safe one-click run diagnostics bundle in T13, excluding tokens, cookies, private conversations, and unrelated audit bodies."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:13Z",
+  "derived_from": "SRC-027",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "f33d6999943aa10f62633f80b57b36ea86b69c49de754d2f80005a6855069460"
+}

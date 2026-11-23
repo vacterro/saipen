@@ -1,0 +1,110 @@
+Claude Code instructions     block added
+Claude Code guard hook       guard hook and configuration installed; health unproven
+Claude Code legacy hook      clean
+Codex CLI skill              copied (re-run after updates)
+Codex CLI provenance         verified
+Codex CLI instructions       block added
+Codex CLI guard hook         guard hook and configuration installed; health unproven
+Codex CLI legacy hook        clean
+ZAICODE                      not installed - skip
+ZCode (production ~/.zcode home) not installed - skip
+Gemini CLI / Antigravity skill copied (re-run after updates)
+Gemini CLI / Antigravity provenance verified
+Gemini CLI / Antigravity instructions block added
+Gemini CLI / Antigravity guard hook guard hook and configuration installed; health unproven
+Gemini CLI / Antigravity legacy hook clean
+CodeBuddy Code               not installed - skip
+~/.agents skills             copied (re-run after updates)
+~/.agents provenance         FAILED: provenance write/validate: runtime identity unprovable for /tmp/saipen-public-install-kcf3hqta/user home\.agents\skills\saipen (exit 1)
+FreeBuff ~/.knowledge.md     block added
+FreeBuff ~/.AGENTS.md        block added
+Aider                        not installed - skip
+Kiro                         not installed - skip
+------------------------------------------------------------
+FAILED. Fix reported errors and re-run.
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json,sys;sys.path.insert(0,sys.argv[1]);from saipen_engine.runtime_bootstrap import GENERATION;from saipen_engine.runtime_surface import require_runtime_generation_identity as identity;print(json.dumps({'installer_generation':GENERATION,'runtime_fingerprint':identity(sys.argv[2])}))
+                                                                                                                                                                                                                                                                              ~~~~~~~~^^^^^^^^^^^^^
+  File "/tmp/saipen-test-9m_mpcff/project/tools/saipen_engine/runtime_surface.py", line 321, in require_runtime_generation_identity
+    return _digest_items(runtime_surface_items(root))
+                         ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/tmp/saipen-test-9m_mpcff/project/tools/saipen_engine/runtime_surface.py", line 197, in runtime_surface_items
+    raise RuntimeSurfaceError(f"runtime root is not a directory: {base}")
+saipen_engine.runtime_surface.RuntimeSurfaceError: runtime root is not a directory: /tmp/saipen-public-install-kcf3hqta/user home\.agents\skills\saipen
+
+
+======================================================================
+FAIL: test_D_ps1_injector_marks_the_agents_skill_surface (test_t1389_foreign_delta_adoption.AgentsSurfaceTests.test_D_ps1_injector_marks_the_agents_skill_surface)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/saipen-test-9m_mpcff/project/tools/test_t1389_foreign_delta_adoption.py", line 199, in test_D_ps1_injector_marks_the_agents_skill_surface
+    self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : 
+saipen injector report (source: /tmp/saipen-test-9m_mpcff/project/saipen)
+------------------------------------------------------------
+~/.agents skills             copied (re-run after updates)
+~/.agents provenance         FAILED: provenance write/validate: runtime identity unprovable for /tmp/tmpxz8xz533/home\.agents\skills\saipen (exit 1)
+FreeBuff ~/.knowledge.md     file created
+FreeBuff ~/.AGENTS.md        file created
+------------------------------------------------------------
+FAILED. Fix reported errors and re-run.
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json,sys;sys.path.insert(0,sys.argv[1]);from saipen_engine.runtime_bootstrap import GENERATION;from saipen_engine.runtime_surface import require_runtime_generation_identity as identity;print(json.dumps({'installer_generation':GENERATION,'runtime_fingerprint':identity(sys.argv[2])}))
+                                                                                                                                                                                                                                                                              ~~~~~~~~^^^^^^^^^^^^^
+  File "/tmp/saipen-test-9m_mpcff/project/tools/saipen_engine/runtime_surface.py", line 321, in require_runtime_generation_identity
+    return _digest_items(runtime_surface_items(root))
+                         ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/tmp/saipen-test-9m_mpcff/project/tools/saipen_engine/runtime_surface.py", line 197, in runtime_surface_items
+    raise RuntimeSurfaceError(f"runtime root is not a directory: {base}")
+saipen_engine.runtime_surface.RuntimeSurfaceError: runtime root is not a directory: /tmp/tmpxz8xz533/home\.agents\skills\saipen
+
+
+======================================================================
+FAIL: test_a_sharded_run_leaves_no_sandbox (test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_a_sharded_run_leaves_no_sandbox)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/saipen-test-9m_mpcff/project/tools/test_t1505_core_unit_sandbox_reclaim.py", line 259, in test_a_sharded_run_leaves_no_sandbox
+    self.assert_run_leaves_no_sandbox(2)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/tmp/saipen-test-9m_mpcff/project/tools/test_t1505_core_unit_sandbox_reclaim.py", line 251, in assert_run_leaves_no_sandbox
+    self.assertEqual(run["status"], "PASS", run)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'FAIL' != 'PASS'
+- FAIL
++ PASS
+ : {'status': 'FAIL', 'exit_code': 5, 'ran': 3, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': None, 'sections': {}, 'discovered': 3, 'partition_error': None, 'shards': [{'status': 'PASS', 'exit_code': 0, 'ran': 3, 'selected': 3, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': 0, 'duration_s': 0.2}, {'status': 'FAIL', 'exit_code': 5, 'ran': 0, 'selected': 0, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': None, 'duration_s': 0.2}], 'module_durations_s': {'test_hermetic_env': 0.0}, 'sandboxes_swept': [], 'sandboxes_leaked': [], 'fingerprint': 'cfa4ae899fc1b5bbd9866068e0edb5dfb522a9654df19a2b7b99f0f102b67864', 'jobs': 2, 'duration_s': 0.9, 'timeout_s': 600, 'command': ['python', '-B', '-m', 'unittest', 'discover', '-s', 'tools', '-p', 'test_hermetic_env.py', '-v']}
+
+======================================================================
+FAIL: test_capability_reason_reaches_skip_and_unproven_runner (test_t1582_sweep_skip_reason.ActualSweepCapabilityTests.test_capability_reason_reaches_skip_and_unproven_runner)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/saipen-test-9m_mpcff/project/tools/test_t1582_sweep_skip_reason.py", line 179, in test_capability_reason_reaches_skip_and_unproven_runner
+    self.assertIn("1314", text)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^
+AssertionError: '1314' not found in 'UNPROVEN: sweep -- portable project identity: this host cannot create a symlink, so the case was never constructed (a host capability, not a missing file): [Errno 1] symlink privilege unavailable\nSKIP: portable project identity -- this host cannot create a symlink, so the case was never constructed (a host capability, not a missing file): [Errno 1] symlink privilege unavailable\nPROVEN: 0 of 1 mutation controls; host capability unproven: 1; broken: 0'
+
+----------------------------------------------------------------------
+Ran 4900 tests in 1696.981s
+
+FAILED (failures=18, errors=3, skipped=72)
+
+##[error]Process completed with exit code 1.
+Post job cleanup.
+[command]/usr/bin/git version
+git version 2.55.0
+Temporarily overriding HOME='/home/runner/work/_temp/51ef2682-905f-4795-901b-768c072c9cc0' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]/usr/bin/git config --global --add safe.directory /home/runner/work/saipen/saipen
+[command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+[command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+[command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+[command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Cleaning up orphan processes
+##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

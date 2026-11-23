@@ -1,0 +1,51 @@
+{
+  "name": "audapack_recovery",
+  "root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+  "started_utc": "2026-10-15T22:05:19.689656+00:00",
+  "finished_utc": "2026-10-15T22:05:42.079574+00:00",
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "--project-root",
+    "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+    "status",
+    "--json"
+  ],
+  "exit_code": 0,
+  "head": "6c6d841df24e5c5d91870def931af99f0af4c81f",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "saipen audit status",
+  "code": null,
+  "detail": null,
+  "automation": {
+    "schema_version": 1,
+    "disposition": "WAIT_USER",
+    "next_command": null,
+    "operator_action_due": true,
+    "reason_code": "audit-inbox-residue",
+    "reason": "audit/ is settled but not clean: 2 non-layer entries SAIPEN never captured (audit/sai_accounts_live_acceptance.py, audit/t277_live_reconciliation.py); nothing is deleted for you",
+    "audit_quiescent": false,
+    "audit_epoch": "audit-epoch-v1:92e7ae4f43a946e8df6d37efcb914f63a9be86a2414d914b79849d7eff053e61",
+    "convergence_current": false,
+    "closure_complete": false,
+    "source_fingerprint": "6c6d841df24e5c5d91870def931af99f0af4c81f+git-delta-v1:159fd7bed3286535a35ff4a9340e1fea42b03cf7bc0b107495d0e0392ec80d88",
+    "completed_at": null
+  },
+  "conformance": null,
+  "before_hashes": {
+    ".saipen/STATE.md": "ce2ddf330ab93b2602124fd6969b48269a18e5659573b0c44e9eab0c7d53f86b",
+    ".saipen/BOARD.md": "b2201eb3aaff431ab6f32579b71c8f5bbf70717e6a8eec5b9d176efd984edf39",
+    ".saipen/LOG.md": "dae327536aae041eb1c8ad30c401bdf084a55efbd0fd9f1446760f748dee12ce",
+    ".saipen/IDENTITY.md": "91a7fea18d8779f7d866d504fb673276986871a927e333985e7dec418eb39d42",
+    ".git/index": "6268e52fce51b2d716ac175aed2d022ff64f3f7e86d74a42ec45274a12c98595"
+  },
+  "after_hashes": {
+    ".saipen/STATE.md": "ce2ddf330ab93b2602124fd6969b48269a18e5659573b0c44e9eab0c7d53f86b",
+    ".saipen/BOARD.md": "b2201eb3aaff431ab6f32579b71c8f5bbf70717e6a8eec5b9d176efd984edf39",
+    ".saipen/LOG.md": "dae327536aae041eb1c8ad30c401bdf084a55efbd0fd9f1446760f748dee12ce",
+    ".saipen/IDENTITY.md": "91a7fea18d8779f7d866d504fb673276986871a927e333985e7dec418eb39d42",
+    ".git/index": "6268e52fce51b2d716ac175aed2d022ff64f3f7e86d74a42ec45274a12c98595"
+  },
+  "observed_inputs_unchanged": true,
+  "limit": "This collector writes only its own SAIPEN evidence; concurrent target edits are not excluded."
+}

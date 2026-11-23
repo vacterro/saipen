@@ -1,0 +1,91 @@
+{
+  "capture_verdict": "INSTRUMENT_ERROR",
+  "exception": "UnicodeDecodeError",
+  "native_results_only": true,
+  "fingerprint": "32267b416e4798f72b933ba871be7358c79cb85c470d747713ad1598a67c4045",
+  "shards": [
+    {
+      "sandbox": "saipen-core-unit-0q95a1pt",
+      "stderr_sha256": "790d027e1b0caaf37369fdfcafd8d9e203fbe7ec69a84d814a417b5e8eb2ee72",
+      "process_exit_code": "NOT_RETAINED",
+      "ran": 777,
+      "passed": 776,
+      "skipped": 1,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-1vx2bu1q",
+      "stderr_sha256": "a503c5c32005ecffb69d1e883483bc356b34753b449a31d0cefb2b716a0eedc4",
+      "process_exit_code": "NOT_RETAINED",
+      "ran": 731,
+      "passed": 729,
+      "skipped": 2,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-7kvs4d95",
+      "stderr_sha256": "684ff5eabd717ee2a30ae54b3c9bd289bb569a2dcb7bc57b329461feb51d7351",
+      "process_exit_code": "NOT_RETAINED",
+      "ran": 1257,
+      "passed": 1223,
+      "skipped": 34,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-e9mtlgom",
+      "stderr_sha256": "0e9776967b1b93a874c9279bc418fff41aaac73467f056268d90c3772ea8eb06",
+      "process_exit_code": "NOT_RETAINED",
+      "ran": 831,
+      "passed": 814,
+      "skipped": 17,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-wndtnkci",
+      "stderr_sha256": "79997eb6e323a2ffd05b273b492039c2799346c4ab42edcb25345cf39a02ea36",
+      "process_exit_code": "NOT_RETAINED",
+      "ran": 632,
+      "passed": 630,
+      "skipped": 2,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-wvqphcba",
+      "stderr_sha256": "cf041f98e04db208df15175bbcd8f1c582f2e123491b4282bd8e7181cc353f36",
+      "process_exit_code": "NOT_RETAINED",
+      "ran": 668,
+      "passed": 667,
+      "skipped": 1,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    }
+  ],
+  "ran": 4896,
+  "passed": 4839,
+  "skipped": 57,
+  "failures": 0,
+  "errors": 0
+}

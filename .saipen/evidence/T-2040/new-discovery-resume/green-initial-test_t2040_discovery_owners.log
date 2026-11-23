@@ -1,0 +1,20 @@
+test_authority_blocker_uses_canonical_fields (__main__.DiscoveryOwnerTests.test_authority_blocker_uses_canonical_fields) ... ok
+test_automation_cannot_override_incomplete_discovery_with_convergence (__main__.DiscoveryOwnerTests.test_automation_cannot_override_incomplete_discovery_with_convergence) ... ok
+test_corrupt_recovery_cannot_be_checked_clean (__main__.DiscoveryOwnerTests.test_corrupt_recovery_cannot_be_checked_clean) ... ok
+test_forged_queue_shape_is_not_checked_absence (__main__.DiscoveryOwnerTests.test_forged_queue_shape_is_not_checked_absence) ... ok
+test_invalid_goal_loader_envelope_is_structured (__main__.DiscoveryOwnerTests.test_invalid_goal_loader_envelope_is_structured) ... ok
+test_malformed_recovery_inventory_is_not_verified_empty (__main__.DiscoveryOwnerTests.test_malformed_recovery_inventory_is_not_verified_empty) ... ok
+test_missing_linked_work_is_incomplete_not_executable (__main__.DiscoveryOwnerTests.test_missing_linked_work_is_incomplete_not_executable) ... ok
+test_missing_root_never_calls_discovery_owners (__main__.DiscoveryOwnerTests.test_missing_root_never_calls_discovery_owners) ... ok
+test_no_analysis_receipt_stays_not_checked (__main__.DiscoveryOwnerTests.test_no_analysis_receipt_stays_not_checked) ... ok
+test_pure_router_does_not_load_goal_files (__main__.DiscoveryOwnerTests.test_pure_router_does_not_load_goal_files) ... ok
+test_recovery_ids_from_context_are_work_not_loader_failure (__main__.DiscoveryOwnerTests.test_recovery_ids_from_context_are_work_not_loader_failure) ... ok
+test_source_accounts_for_all_durable_work_members (__main__.DiscoveryOwnerTests.test_source_accounts_for_all_durable_work_members) ... ok
+test_supplied_empty_mapping_is_not_an_action_list (__main__.DiscoveryOwnerTests.test_supplied_empty_mapping_is_not_an_action_list) ... ok
+test_unreadable_append_ledger_is_not_clean_source (__main__.DiscoveryOwnerTests.test_unreadable_append_ledger_is_not_clean_source) ... ok
+test_unworkable_linked_todo_is_not_source_work (__main__.DiscoveryOwnerTests.test_unworkable_linked_todo_is_not_source_work) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.709s
+
+OK

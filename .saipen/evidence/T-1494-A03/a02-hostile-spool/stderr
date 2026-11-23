@@ -1,0 +1,16 @@
+test_injectors_contain_all_19_shortcuts (test_hostile_wave_regressions.Wave1InjectorTests.test_injectors_contain_all_19_shortcuts) ... ok
+test_new_shortcuts_ff_xx_vv_zz_present (test_hostile_wave_regressions.Wave1InjectorTests.test_new_shortcuts_ff_xx_vv_zz_present) ... ok
+test_aa_over_wait_executes_markhunt (test_hostile_wave_regressions.Wave2ObeyTests.test_aa_over_wait_executes_markhunt) ... ok
+test_cc_over_user_brake_wait (test_hostile_wave_regressions.Wave2ObeyTests.test_cc_over_user_brake_wait) ... ok
+test_cc_over_wait_is_obey_converge (test_hostile_wave_regressions.Wave2ObeyTests.test_cc_over_wait_is_obey_converge) ... ok
+test_next_stays_wait_no_command (test_hostile_wave_regressions.Wave2ObeyTests.test_next_stays_wait_no_command) ... ok
+test_safety_valve_cc_reauthorizes (test_hostile_wave_regressions.Wave2ObeyTests.test_safety_valve_cc_reauthorizes) ... ok
+test_sss_over_wait_executes_status_not_unknown (test_hostile_wave_regressions.Wave2ObeyTests.test_sss_over_wait_executes_status_not_unknown) ... ok
+test_crew_intent_persists_and_cc_resumes (test_hostile_wave_regressions.Wave3CrewTests.test_crew_intent_persists_and_cc_resumes) ... ok
+test_malformed_manifest_blocks (test_hostile_wave_regressions.Wave3CrewTests.test_malformed_manifest_blocks) ... ok
+test_missing_manifest_yields_sync_not_malformed (test_hostile_wave_regressions.Wave3CrewTests.test_missing_manifest_yields_sync_not_malformed) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 5.334s
+
+OK

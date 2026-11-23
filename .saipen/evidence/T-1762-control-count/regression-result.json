@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "code": "CHECKPOINTED",
+  "op_id": "regression-execution-f8da537a32dc4a3894c59d700d64d479",
+  "changed_files": [
+    ".saipen/evidence/regression/regression-execution-f8da537a32dc4a3894c59d700d64d479.json",
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md"
+  ],
+  "recovery_required": false,
+  "record": ".saipen/evidence/regression/regression-execution-f8da537a32dc4a3894c59d700d64d479.json",
+  "evidence_class": "executed",
+  "event_id": "E-15272"
+}

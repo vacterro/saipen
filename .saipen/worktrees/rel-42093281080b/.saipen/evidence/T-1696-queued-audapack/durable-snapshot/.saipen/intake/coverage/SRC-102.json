@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-102:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-256 closed with verification evidence in LOG: verify -> PASS [target: T-256] conf: high -- binds the SRC-102 request to the closed T-249: the machine-verifiable half was executed and red-controlled in real Chromium (tests/test_browser_generation_truth_integration.py, 3/3 RED with the T-249 generation gate disabled, 3/3 GREEN restored) on real widget 0.0.84 SHA a0fa7f25. No human-operated session is claimed; the real-ChatGPT-DOM half remains d",
+      "text": "T-249 close: agent-resolved acceptance",
+      "verification": "the Work this request created reached its own verification gate; see the T-256 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-256"
+    }
+  },
+  "schema_version": 1
+}

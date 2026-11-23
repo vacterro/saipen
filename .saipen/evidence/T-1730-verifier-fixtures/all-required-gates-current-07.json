@@ -1,0 +1,11 @@
+{
+  "job_pid": 14564,
+  "status": "stopped",
+  "completed": [
+    "T1695-current-07"
+  ],
+  "started_utc": "2026-10-12T22:25:04.374088+00:00",
+  "current_gate": "T1695-currentness-06",
+  "reason": "RuntimeError: required verification T1695-currentness-06 returned 1",
+  "finished_utc": "2026-10-12T22:25:37.014202+00:00"
+}

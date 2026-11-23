@@ -1,0 +1,51 @@
+{
+  "scope": "Git primitive feasibility in generated disposable repositories ONLY",
+  "canonical_release_implemented": false,
+  "live_repository_writes": false,
+  "controls": [
+    {
+      "case": "naive shared-index control",
+      "oracle": "REJECT",
+      "violations": [
+        "head-changed",
+        "refs-changed",
+        "index-changed",
+        "entries-changed",
+        "unreviewed-or-missing-path",
+        "foreign-staged-content-committed"
+      ]
+    },
+    {
+      "case": "two concurrent detached-worktree candidates",
+      "oracle": "PASS",
+      "commits": [
+        "c7a9072fcd83c86576fccfce37a09cd583d07a83",
+        "5ffc654cae669b760f498663ea9bab8a51198fba"
+      ],
+      "parent": "192b228d2c780d883f80918c7ac863d331188e54",
+      "live_index_sha256": "539664839c035f8c188d9e64d8f3d4d78a271886f0578a7b84ca7e8f36e242bb",
+      "original_refs_unchanged": true,
+      "original_worktree_unchanged": true,
+      "foreign_staging_unchanged": true,
+      "exact_scope_only": true
+    },
+    {
+      "case": "interruption after candidate commit before acceptance",
+      "oracle": "PASS",
+      "candidate_recoverable": true,
+      "production_journal_acceptance": false,
+      "live_index_sha256": "8405abd046c85be3310e1c2b3884ca763fa343c328958bc19c11db759f126ad1"
+    },
+    {
+      "case": "changed reviewed-source identity",
+      "oracle": "REFUSE",
+      "source_and_index_preserved": true
+    }
+  ],
+  "unproved": [
+    "canonical current-generation full-family evidence for an isolated final tree",
+    "native source/authority and closure receipt binding through the existing journal",
+    "production hooks, signing, deployment policy and release recovery integration",
+    "safe application to the live incomplete-history and 206-staged-path generation"
+  ]
+}

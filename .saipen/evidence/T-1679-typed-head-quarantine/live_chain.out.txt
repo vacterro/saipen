@@ -1,0 +1,29 @@
+utc: 2026-10-08T02:41:43Z
+command: python -B .saipen/evidence/T-1679-typed-head-quarantine/live_chain.py . <scratch> _PY/_AUDAPACK
+=== _AUDAPACK: STATE as found
+    phase: DONE
+    task: T-281
+    next_action: "ALL TARGET TICKETS COMPLETED"
+    transition_from: REPAIR
+    last_event: 3135
+1 status         : {"ok": false, "code": "VALIDATION_FAILED", "reason": "state-malformed", "action": "saipen recover"}
+2 recover        : {"ok": false, "code": "HISTORY_LEDGER_CORRUPT", "canonical_next_command": "saipen recover quarantine-log-tail"}
+     history-void: complete LOG history fails the immutable-ledger contract -- E-3134 parent E-3133 does not exist in the ledger
+3 quarantine     : {"ok": true, "code": "LOG_TAIL_QUARANTINED", "journal_floor": 3131, "quarantined_lines": 5, "claimed_ids": ["E-3132", "E-3134", "E-3135", "E-3136"]}
+    original LOG kept in the evidence copy: True
+     - 08.10.26 02:42 [E-3132] [parent: E-3131] [agent: saipen-cli] [op: quarantine-log-tail-514d7e89e9f04143b12f16d3a5a0aac6] DEC: actor saipen-cli (seat buffy); typed head quarantined above E-3131: 5 line(s) carried no operation record and no operation ever bound them; rows they closed: T-278, T-281, T-292, T-293. Claimed ids E-3132, E-3134, E-3135, E-3136; 0 non-event line(s). Original LOG preserved at .saipen/recovery
+4 status         : {"ok": false, "code": "VALIDATION_FAILED", "reason": "state-malformed", "action": "saipen recover"}
+5 recover        : {"ok": false, "code": "RECONCILE_REAUTH_REQUIRED", "canonical_next_command": "saipen recover --apply-approved-repair 4a185961777167aeb0133160f866f1930fe13459b95391d871a1edc0df079600"}
+     board  T-282: ## DONE -> ## TODO  [typed-closure-mode]
+     board  T-278: ## DONE -> ## TODO  [unauthorized-lifecycle-write]
+     board  T-281: ## DONE -> ## TODO  [unauthorized-lifecycle-write]
+     board  T-292: ## DONE -> ## TODO  [unauthorized-lifecycle-write]
+     board  T-293: ## DONE -> ## TODO  [unauthorized-lifecycle-write]
+     state  transition_from: 'REPAIR' -> 'DONE'
+     state  task: 'T-281' -> 'none'
+     state  next_action: 'ALL TARGET TICKETS COMPLETED' -> 'saipen continue'
+6 approved plan  : {"ok": true, "code": "REPAIRED", "event": "E-3135"}
+7 status         : {"ok": true, "phase": "DONE", "task": "none", "top_workable_ticket": "T-278"}
+8 recover        : {"ok": true, "code": "CLEAN"}
+live project untouched by this run: True
+--- exit: 0 ---

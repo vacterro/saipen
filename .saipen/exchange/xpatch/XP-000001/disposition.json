@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "patch_id": "XP-000001",
+  "verdict": "SUPERSEDED",
+  "recorded_at": "2026-09-07T21:20:00Z",
+  "paths": {
+    "tools/saipen_engine/intake.py": "1f98d19f2dadb70ae9be7fd9271e04b0c07703febe04cb18e7dc26e5a87e4da1",
+    "tools/saipen.py": "788e277b8e8cd63871ed3f882f5b4aa799067c1d01ba685c9e38f756a9eacd0e",
+    "tools/test_source_receipts.py": "d9b27ab622153ccb329562d6ce5f50496de2cbc90ff8efe030fc714614a9d756"
+  },
+  "note": "saipen.py bytes superseded by XP-000002 (debt snapshot|delta command family added on top of the XP-000001 surface); intake.py and test_source_receipts.py bytes unchanged and still verified live."
+}

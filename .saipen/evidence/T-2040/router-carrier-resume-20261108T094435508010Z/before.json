@@ -1,0 +1,14 @@
+{
+  "tools/saipen_engine/router.py": {
+    "sha256": "feeb90bb4ad4b9ca2f0dfa7854e20ae4ec7cad042fb136f57de44c8c3a889e95",
+    "before": ".saipen/evidence/T-2040/router-carrier-resume-20261108T094435508010Z/router.py.before"
+  },
+  "tools/saipen_engine/board.py": {
+    "sha256": "74cf0a77e64a91edadc8c6c65800aa7366ec7b3fc2f47b8612dbd66fafb80a2b",
+    "before": ".saipen/evidence/T-2040/router-carrier-resume-20261108T094435508010Z/board.py.before"
+  },
+  "tools/test_t2040_discovery_owners.py": {
+    "sha256": "6142525d3581f07da0a049084aa8120150589b7355208cb2ffed98f988a613e1",
+    "before": ".saipen/evidence/T-2040/router-carrier-resume-20261108T094435508010Z/test_t2040_discovery_owners.py.before"
+  }
+}

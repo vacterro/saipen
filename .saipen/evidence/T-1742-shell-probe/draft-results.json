@@ -1,0 +1,44 @@
+[
+  {
+    "subject": "before",
+    "profile": "missing",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ".\r\n----------------------------------------------------------------------\r\nRan 1 test in 0.064s\r\n\r\nOK\r\n"
+  },
+  {
+    "subject": "before",
+    "profile": "unusable",
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "F\r\n======================================================================\r\nFAIL: test_pipelined_validator_exit_status_preservation (test_t1736_tool_safety_and_evidence.ToolSafetyAndEvidenceTests.test_pipelined_validator_exit_status_preservation)\r\nA pipe masks failure without pipefail; the runner preserves the exit status.\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1742-shell-probe\\before\\test_t1736_tool_safety_and_evidence.py\", line 200, in test_pipelined_validator_exit_status_preservation\r\n    self.assertEqual(p_piped.returncode, 0)\r\nAssertionError: 75 != 0\r\n\r\n----------------------------------------------------------------------\r\nRan 1 test in 0.028s\r\n\r\nFAILED (failures=1)\r\n"
+  },
+  {
+    "subject": "before",
+    "profile": "native",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ".\r\n----------------------------------------------------------------------\r\nRan 1 test in 0.081s\r\n\r\nOK\r\n"
+  },
+  {
+    "subject": "after",
+    "profile": "missing",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ".\r\n----------------------------------------------------------------------\r\nRan 1 test in 0.062s\r\n\r\nOK\r\n"
+  },
+  {
+    "subject": "after",
+    "profile": "unusable",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ".\r\n----------------------------------------------------------------------\r\nRan 1 test in 0.070s\r\n\r\nOK\r\n"
+  },
+  {
+    "subject": "after",
+    "profile": "native",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ".\r\n----------------------------------------------------------------------\r\nRan 1 test in 0.108s\r\n\r\nOK\r\n"
+  }
+]

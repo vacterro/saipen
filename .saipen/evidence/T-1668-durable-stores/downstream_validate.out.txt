@@ -1,0 +1,40 @@
+utc: 2026-10-08T06:18:51Z
+same ___GIT_HUB__Gemini-CLI-UI: 29 FAIL
+same __MAIN_____SAICODE: 1 FAIL
+same __MAIN____ProTrail: 12 FAIL
+same _AI_STUFF_AGENTIC____SAIMAIL__: 2 FAIL
+same _AI_STUFF_AGENTIC____TERMISAI: 19 FAIL
+same _AI_STUFF_AGENTIC___SAICONT: 5 FAIL
+same _AI_STUFF_AGENTIC___SAIPAL: 27 FAIL
+same _AI_STUFF_AGENTIC___SAIPET: 28 FAIL
+same _AI_STUFF_AGENTIC___SAIRELAY: 2 FAIL
+same _AI_STUFF_AGENTIC___SAITALK: 7 FAIL
+same _AI_STUFF_AGENTIC___SAIWORK2: 53 FAIL
+same _AI_STUFF_AGENTIC___ZAICODE: 1 FAIL
+same _ANDROID__ProBlipAndroid: 5 FAIL
+same _HTML___SAI_WEBSITE: 5 FAIL
+same _MISC__SubtitleEditContextMenu: 44 FAIL
+same _PLUG_SCRIPT___PR Video Random Cut: 30 FAIL
+same _PLUG_SCRIPT___yt_cm: 56 FAIL
+same _PY___9router_extra: 1 FAIL
+same _PY___AUDAPACK: 13 FAIL
+same _PY___AUDAPACK-pub: 108 FAIL
+same _PY___FastPrompter: 18 FAIL
+DIFF _PY___LIMISAW: +1 -1
+   + FAIL: closure provenance does not resolve: EX-# was verified against installed engine generation sha#:#a#a#dd#b#eba#b#... but the running engine is sha#:#d#ac#ec... -- the dependency moved (rollback or upgrade): re-resol
+   - FAIL: closure provenance does not resolve: EX-# was verified against installed engine generation sha#:#a#a#dd#b#eba#b#... but the running engine is sha#:f#f#b#ef#e#b#... -- the dependency moved (rollback or upgrade): re-
+same _PY___PROBLIP: 1 FAIL
+same _PY___SAIMASTER: 9 FAIL
+DIFF _PY___SAIPENVIEW: +1 -1
+   + FAIL: closure provenance does not resolve: EX-# was verified against installed engine generation sha#:ccec#d#c#b#a... but the running engine is sha#:#d#ac#ec... -- the dependency moved (rollback or upgrade): re-resolve t
+   - FAIL: closure provenance does not resolve: EX-# was verified against installed engine generation sha#:ccec#d#c#b#a... but the running engine is sha#:f#f#b#ef#e#b#... -- the dependency moved (rollback or upgrade): re-reso
+same _PY___SAIPLAN: 11 FAIL
+same _PY___SAISENT: 99 FAIL
+same _PY___SMART_VAC_CLEANER: 6 FAIL
+same _PY___SMART_VAC_DUPLICATE_REMOVER: 19 FAIL
+same _PY___SMART_VAC_MEDIA_COMPRESSOR: 24 FAIL
+same _PY___VacWPlayer: 2 FAIL
+same _PY___VACZEN_CALENDAR: 5 FAIL
+same _TAMPERMONKEY___AICHATBUTTONS: 42 FAIL
+same _TAMPERMONKEY___SUNO_DOWNLOADER: 2 FAIL
+projects: 34, differing: 2

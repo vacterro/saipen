@@ -1,0 +1,15 @@
+# T-2016 clause-evidence scout (executed 2026-11-21)
+
+SRC-386 body (== audit/SAIHANDOFF_BZ_REA_AGENT_DRIFT_RECOVERY.md, sha ac1d9a4db94073d6fad06a2a4af6ed9360bf573e08463801ff495cc813fc8943, retired-immutable) == restored duty SRC-439 (ACTIVE):
+- R001 (P0-1..5 authority/provenance): local-half evidence base in-repo:
+  * admission/supersession fail-closed corpus: decision_request.validate_authority_escalation rejects bare cc/cc-all override of operator pauses; 84 'cc all' control points across tests (measured via grep this session).
+  * out-of-root write protection: test_external_authentication_contract.py, test_admission_auto_doctor.py, test_freebuff_operator_provenance.py, test_operator_ingress_matrix.py, test_operator_task_witness.py.
+  * recorded-decision binding: WAIT_USER_DECISION parks survived this entire session (topmost-workable refused stepping without --explicit; no supersession).
+  * foreign-source handoff-not-edit rule: SRC-386's own rule honored (session did zero foreign writes; authority broker read-only).
+- R002 (P1-6..11 honest phases/tests/delivery): measured live this session: canonical phase chain (claim->BUILD->VERIFY->REVIEW->SHIP->DONE) with in-phase evidence gates; test dedupe/reuse (focused runner reused:true twice); exit codes preserved (parse_summary FAIL/exit1 + PASS/exit0 measured pair); "verify alone proves nothing" enforced (NO_REGRESSION_EVIDENCE, STALE_* refusals); status separation (publication_state pending vs DONE across the board); response contract advisory (saipen response check).
+- R003 (P1-12..16): local half evidenced: measured perf baselines (T-2101 stdin 3.881s median, T-2105 3.419s, T-2108 repo 10.53 vs installed 11.78 p50; fresh session medians 6.02-6.41s recorded in T-2123 wave G); incremental/focused family (proportional focused runs + impact); tiered checks (focused vs family gate separation). FOREIGN HALF (REA BZCC 1.8.5 pilot batches 8-32 procedures): owned by the _BZ_REA project -- not executable here; handoff artifacts delivered audit-side (SAIHANDOFF series).
+- R004 (foreign-owner handoff): the copy-ready handoff IS the audit layer file itself + audit/SAIHANDOFF_* handoff series; no cross-project writes performed (enforced).
+
+Consumption route (row's 4th clause): audit_inbox.delete_gate requires (1) canonical layer binding [present], (2) bound receipt CLOSED with tombstone [SRC-386 tombstone E-19341 present, ALREADY_RECONCILED], (3) linked Work terminal [T-2016 DONE pending this ticket], (4) current bytes == captured digest [9669 B ac1d9a4... measured equal]. After T-2016 reaches DONE, the repo-CLI (8.1.1-dev) `saipen audit ingest` runs consume_layer (journaled audit_inbox.consume op) -> layer DELETED, closed_at set.
+
+Next assembly step: per-clause terminal ledger for R001-R003 local halves (map each numbered sub-obligation to its DONE-evidence events/tickets), the foreign-half disposition statement (R004 evidence = delivered handoffs + foreign-owner state), then the T-2016 chain with source closure via the restored SRC-439.

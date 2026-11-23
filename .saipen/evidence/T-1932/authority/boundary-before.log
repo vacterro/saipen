@@ -1,0 +1,15 @@
+======================================================================
+FAIL: test_revocation_during_assessment_prevents_the_protected_worker_start (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_revocation_during_assessment_prevents_the_protected_worker_start)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 316, in test_revocation_during_assessment_prevents_the_protected_worker_start
+    worker.assert_not_called()
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 900, in assert_not_called
+    raise AssertionError(msg)
+AssertionError: Expected 'mock' to not have been called. Called 1 times.
+Calls: [call(WindowsPath('V:/_TEMP_/saipen-campaign-authority-xtnzstox/project'), generation=1)].
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.286s
+
+FAILED (failures=1)

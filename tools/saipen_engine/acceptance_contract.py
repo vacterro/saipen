@@ -68,7 +68,7 @@ def _read(root: Path, relative: str, bindings: dict, *, evidence=False) -> bytes
 def specs(text: str) -> dict:
     """Keep the projection grammar, but refuse ambiguous declarations at admission."""
     seen = set()
-    for segment in ac.split_criterion_segments(text):
+    for segment in (text or "").split(";"):
         part = segment.strip()
         if not part.startswith("AC-"):
             continue
@@ -84,7 +84,7 @@ def specs(text: str) -> dict:
 
 def protected(old: str, new: str) -> bool:
     return any(part.strip().startswith("AC-") for text in (old, new)
-               for part in ac.split_criterion_segments(text))
+               for part in (text or "").split(";"))
 
 
 def _expand(contract: str, aliases: dict[str, str]) -> str:

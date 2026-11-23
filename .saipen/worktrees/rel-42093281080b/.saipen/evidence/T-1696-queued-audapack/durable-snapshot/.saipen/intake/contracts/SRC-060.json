@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-060:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "next"
+    }
+  },
+  "derived_at": "2026-09-19T23:01:34Z",
+  "derived_from": "SRC-060",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "f05adf082b5988294136e78a11455c4973867bc19a3e2b22572bb84d14ba1a44"
+}

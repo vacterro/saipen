@@ -1,0 +1,14 @@
+{
+  "gate": "audit_parity",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "tools/audit_parity.py"
+  ],
+  "started_at": "2026-11-10T17:46:54.419949+00:00",
+  "pid": 10224,
+  "exit_code": 1,
+  "status": "FAIL",
+  "duration_s": 81.875,
+  "finished_at": "2026-11-10T17:48:16.287426+00:00"
+}

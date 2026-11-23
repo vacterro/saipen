@@ -1,0 +1,27 @@
+--- pre/tools/test_t2040_terminal_consumer_supplementary.py
++++ tools/test_t2040_terminal_consumer_supplementary.py
+@@ -12,10 +12,9 @@
+ 
+ TOOLS = Path(__file__).resolve().parent
+ sys.path.insert(0, str(TOOLS))
+-from saipen_engine import board, continuation_assessment as CA, goal_authority, outcome_truth
+-from test_campaign_continuation_assessment import _format_state
+-from test_fixture_support import checked_discovery_evidence
+-from test_hermetic_env import isolate_host_session
++from saipen_engine import board, goal_authority, outcome_truth  # noqa: E402
++from test_fixture_support import checked_discovery_evidence  # noqa: E402
++from test_hermetic_env import isolate_host_session  # noqa: E402
+ 
+ BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+ 
+@@ -33,7 +32,9 @@
+             evidence = checked_discovery_evidence("100")
+             hint = {"source_name": "improve_candidates", "source_generation": "100",
+                     "action": "saipen improve", "bounded": True}
+-            with mock.patch.object(board, "classify_idle_work", return_value={"sentinel": True}) as classify:
++            with mock.patch.object(
++                board, "classify_idle_work", return_value={"sentinel": True}
++            ) as classify:
+                 result = goal_authority.goal_completion_verdict(
+                     {}, {}, persistent_goals=[], source_evidence=evidence,
+                     publication_evidence=carrier, source_generation="100",

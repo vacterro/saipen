@@ -1,0 +1,29 @@
+{
+  "checked_at": "2026-11-10T17:34:35.078699+00:00",
+  "contract": ".saipen/evidence/T-1840-external-refresh/sai-accounts-readiness-contract.json",
+  "executed": false,
+  "loader": "ADMITTED",
+  "detail": null,
+  "argv": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "tools/verify_accounts_readiness.py",
+    "--engine",
+    "C:\\ProgramData\\SAI\\Accounts\\bin\\sai-accounts.exe",
+    "--account",
+    "AG3",
+    "--project",
+    "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER",
+    "--private-home",
+    "C:\\Users\\vac34\\.codex",
+    "--report",
+    ".saipen/evidence/T-1840-external-refresh/live-current.json"
+  ],
+  "runtime": {
+    "path": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+  },
+  "context_files": 190,
+  "external_source": "REFUSED",
+  "external_source_detail": "external implementation differs from its carrying commit: Scripts/accounts/SaiAccounts.cs"
+}

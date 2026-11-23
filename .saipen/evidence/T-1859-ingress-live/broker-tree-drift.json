@@ -1,0 +1,18 @@
+{
+ "finding": "the authority service was serving a DIFFERENT saipen tree than the deployed hook",
+ "measured_at": "2026-10-24T01:20:02Z",
+ "broker_pid": 15692,
+ "broker_saipen_root": "C:\\Users\\vac34\\.claude\\skills\\saipen",
+ "broker_started": 1792804722.2611666,
+ "hook_path": "C:\\Users\\vac34\\.zcode\\hooks\\saipen-guard.py",
+ "hook_bytes": 12084,
+ "hook_sha256": "24eb2c04cfd69d02dfa9debcca67dd021a283d53e390d5b90d9303033d26a90e",
+ "broker_side_artifact": "C:\\Users\\vac34\\.claude\\skills\\saipen\\extensions\\adapters\\zaicode\\saipen-guard.py",
+ "broker_side_bytes": 12084,
+ "broker_side_sha256": "24eb2c04cfd69d02dfa9debcca67dd021a283d53e390d5b90d9303033d26a90e",
+ "artifact_current_after_repair": true,
+ "pre_repair_artifact_bytes": 5306,
+ "pre_repair_artifact_current": false,
+ "why_it_blocks": "host_authority_identity.prove_hook_invocation step 4 refuses with REASON_HOOK_ARTIFACT_MISMATCH when artifact_current(script) is False. The check compares the INSTALLED hook against the SHIPPED artifact under the BROKER's own saipen_root, so a broker running from a stale tree refuses every genuine host hook no matter how correct the deployed hook is.",
+ "repair": "saipen host repair --json (HOST_REPAIRED) rewrote the broker-side artifact; artifact_current is now True"
+}

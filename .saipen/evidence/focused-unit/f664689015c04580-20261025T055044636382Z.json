@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "f664689015c0458026ea5956529e1f744286454e13033c824c46325aa9a830e5",
+  "verdict": "PASS",
+  "patterns": [
+    "test_t1544_audit20_perf.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_t1544_audit20_perf.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1544_audit20_perf.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "duration_s": 2.219,
+      "process_create_s": 0.063,
+      "ran": 21,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_corrupt_binding_is_still_reported_by_both_entry_points (test_t1544_audit20_perf.AuditInboxClassificationCountTests.test_a_corrupt_binding_is_still_reported_by_both_entry_points)\r\nThe corrupt-binding branch is the one `status` refactors around. ... ok\r\ntest_one_classification_reads_the_intake_index_once (test_t1544_audit20_perf.AuditInboxClassificationCountTests.test_one_classification_reads_the_intake_index_once)\r\nThe O(layers x receipts) per-digest term, counted on a 4-layer inbox. ... ok\r\ntest_perform_audit_ingest_settled_classifies_exactly_once (test_t1544_audit20_perf.AuditInboxClassificationCountTests.test_perform_audit_ingest_settled_classifies_exactly_once)\r\nSRC-322: _perform_audit_ingest classifies once when settled and no new layers. ... ok\r\ntest_reconcile_bootstrap_with_precomputed_state_avoids_reclassifying (test_t1544_audit20_perf.AuditInboxClassificationCountTests.test_reconcile_bootstrap_with_precomputed_state_avoids_reclassifying)\r\nSRC-322: reconcile_bootstrap accepts precomputed state to avoid re-classifying. ... ok\r\ntest_record_named_first_seen_with_entries_avoids_rescan (test_t1544_audit20_perf.AuditInboxClassificationCountTests.test_record_named_first_seen_with_entries_avoids_rescan)\r\nSRC-322: record_named_first_seen avoids scan_layers and re-snapping when entries supplied. ... ok\r\ntest_scan_layers_include_snapshots_avoids_redundant_layer_reads (test_t1544_audit20_perf.AuditInboxClassificationCountTests.test_scan_layers_include_snapshots_avoids_redundant_layer_reads)\r\nSRC-322: classify uses include_snapshots so snapshot_layer is called once per layer. ... ok\r\ntest_status_and_projection_agree_on_one_shared_classification (test_t1544_audit20_perf.AuditInboxClassificationCountTests.test_status_and_projection_agree_on_one_shared_classification)\r\nThe new entry points are the same functions, minus the re-read. ... ok\r\ntest_status_classifies_the_inbox_exactly_once (test_t1544_audit20_perf.AuditInboxClassificationCountTests.test_status_classifies_the_inbox_exactly_once) ... ok\r\ntest_the_digest_table_answers_exactly_what_the_per_digest_read_answered (test_t1544_audit20_perf.AuditInboxClassificationCountTests.test_the_digest_table_answers_exactly_what_the_per_digest_read_answered)\r\nOne table, same answers: ACTIVE wins over tombstone, lowest id first. ... ok\r\ntest_a_clean_history_reports_no_ordering_evidence (test_t1544_audit20_perf.HistoryRoutingSummaryTests.test_a_clean_history_reports_no_ordering_evidence) ... ok\r\ntest_a_sealed_segment_is_framed_into_the_same_hash (test_t1544_audit20_perf.HistoryRoutingSummaryTests.test_a_sealed_segment_is_framed_into_the_same_hash) ... ok\r\ntest_duplicate_and_parent_ordering_evidence_is_derived (test_t1544_audit20_perf.HistoryRoutingSummaryTests.test_duplicate_and_parent_ordering_evidence_is_derived) ... ok\r\ntest_history_hash_no_longer_builds_the_per_event_dict_graph (test_t1544_audit20_perf.HistoryRoutingSummaryTests.test_history_hash_no_longer_builds_the_per_event_dict_graph)\r\n`history_hash` is one 16-character question about a whole lifetime. ... ok\r\ntest_retained_memory_does_not_grow_with_lifetime_event_count (test_t1544_audit20_perf.HistoryRoutingSummaryTests.test_retained_memory_does_not_grow_with_lifetime_event_count)\r\nTHE measurement, as an assertion: 10x the history, same retention. ... ok\r\ntest_the_summary_agrees_with_the_full_snapshot_on_every_shared_fact (test_t1544_audit20_perf.HistoryRoutingSummaryTests.test_the_summary_agrees_with_the_full_snapshot_on_every_shared_fact) ... ok\r\ntest_the_summary_keeps_only_a_bounded_window_of_events (test_t1544_audit20_perf.HistoryRoutingSummaryTests.test_the_summary_keeps_only_a_bounded_window_of_events) ... ok\r\ntest_the_tail_rises_past_a_damaged_line_that_still_claims_an_id (test_t1544_audit20_perf.HistoryRoutingSummaryTests.test_the_tail_rises_past_a_damaged_line_that_still_claims_an_id)\r\nThe _SAITULS 17.09.26 rule: a claimed id is spent. ... ok\r\ntest_a_refused_resolution_is_not_memoized (test_t1544_audit20_perf.ResolveCacheTests.test_a_refused_resolution_is_not_memoized)\r\nA negative answer expires the moment the project exists. ... ok\r\ntest_a_successful_resolution_is_still_memoized (test_t1544_audit20_perf.ResolveCacheTests.test_a_successful_resolution_is_still_memoized)\r\nThe memo keeps its whole purpose: the git probes are paid once. ... ok\r\ntest_admission_follows_a_project_into_existence (test_t1544_audit20_perf.ResolveCacheTests.test_admission_follows_a_project_into_existence)\r\nThe end-to-end shape: NOT_SAIPEN_PROJECT -> an answered admission. ... ok\r\ntest_the_binding_carriers_are_part_of_the_key (test_t1544_audit20_perf.ResolveCacheTests.test_the_binding_carriers_are_part_of_the_key)\r\nA rebound session must not be answered from the previous project. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 21 tests in 1.787s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 21,
+  "duration_s": 88.938,
+  "timings_s": {
+    "execution_wall_s": 2.219,
+    "environment_identity_wall_s": 0.047,
+    "copy_wall_s": 69.781,
+    "hash_wall_s": 0.156,
+    "cleanup_wall_s": 16.719
+  },
+  "copy_metrics": {
+    "subject_copy_s": 15.797,
+    "canonical_copy_s": 53.812,
+    "canonical_copy_attempts": 1,
+    "trees": null
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_t1544_audit20_perf.py"
+    ],
+    "manifest_sha256": "5e88effb752d63adc28040bda583ba8c56a4be1f9046f0d0af3fa75d9300413d"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_t1544_audit20_perf.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "d6c4acaf9e208d5abd46d4154bf121e4be2c9c45a2070dd999477be7022e11a2",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "dc803ffe929ce7ea68687e5d63bf4c444ac457ba5b2e50978b632cc1558d1dec"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "8ad51abb7ea05b8d85dc3563aa849cd4524d740ba803edee5de4343c4956908d"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "86d04f8a8d42dd8b365b33a29ca7b3cc1eacae9ddcfc2ae1b9bdbf3ee1e5e32f"
+      },
+      "core_unit_shard.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "b31bafde4ad2f78069e8f5ef839e26c59a4cbb38c9bcc4a19ad3e7acee7b6be0"
+      },
+      "test_runner.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "07a8109e808f10bb5268ac12f0da981db4b1fad2ec97a58da84f13b0509a1e81"
+      },
+      "verification_cache.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "8e7d43527554403147454d440d3b86d460ad166a21226fdfda2fd1a6384f5c5b"
+      },
+      "process_tree.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "e5f07f80d2a6802d95c3ccbebe4ca5f66cdbbcbb25b13450123baa896d8e8356"
+      },
+      "verification_bootstrap.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "df9bdce3388bf2511ce13a5a4329219810096ac58be0323675afd78b48cb605e"
+      },
+      "verification_impact.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "cf5c146ee2931cc1baa2765fa00e8bb9129d3370cb8bb8a2b7eb020dd8bba455"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "81516ef194be0dcb17a85f38a290d9f166d7b2ebd4f55dd41e484a690b501244"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

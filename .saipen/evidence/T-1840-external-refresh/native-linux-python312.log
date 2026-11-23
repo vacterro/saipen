@@ -1,0 +1,22 @@
+test_active_work_is_preserved (test_t1840_external_renewal.ExternalRenewalTests.test_active_work_is_preserved) ... ok
+test_changed_environment_requires_new_execution (test_t1840_external_renewal.ExternalRenewalTests.test_changed_environment_requires_new_execution) ... ok
+test_current_proof_preserves_original_receipt_and_defect_contract (test_t1840_external_renewal.ExternalRenewalTests.test_current_proof_preserves_original_receipt_and_defect_contract) ... ok
+test_dry_run_does_not_execute_or_write (test_t1840_external_renewal.ExternalRenewalTests.test_dry_run_does_not_execute_or_write) ... ok
+test_exact_repeat_reuses_the_current_immutable_receipt (test_t1840_external_renewal.ExternalRenewalTests.test_exact_repeat_reuses_the_current_immutable_receipt) ... ok
+test_external_and_native_bytes_cannot_move_under_current_proof (test_t1840_external_renewal.ExternalRenewalTests.test_external_and_native_bytes_cannot_move_under_current_proof) ... ok
+test_failed_receipt_commit_refusal_wins (test_t1840_external_renewal.ExternalRenewalTests.test_failed_receipt_commit_refusal_wins) ... ok
+test_foreign_owner_work_authority_or_changed_contract_refuses (test_t1840_external_renewal.ExternalRenewalTests.test_foreign_owner_work_authority_or_changed_contract_refuses) ... ok
+test_missing_unowned_or_uncommitted_predecessor_refuses (test_t1840_external_renewal.ExternalRenewalTests.test_missing_unowned_or_uncommitted_predecessor_refuses) ... ok
+test_public_cli_uses_sealed_contract (test_t1840_external_renewal.ExternalRenewalTests.test_public_cli_uses_sealed_contract) ... ok
+test_readonly_cli_refuses_before_execution (test_t1840_external_renewal.ExternalRenewalTests.test_readonly_cli_refuses_before_execution) ... ok
+test_receipt_and_repeat_accept_same_executable_with_different_case (test_t1840_external_renewal.ExternalRenewalTests.test_receipt_and_repeat_accept_same_executable_with_different_case) ... skipped 'Windows executable path spelling'
+test_runtime_bytes_arguments_and_separate_copy_remain_bound (test_t1840_external_renewal.ExternalRenewalTests.test_runtime_bytes_arguments_and_separate_copy_remain_bound) ... ok
+test_source_and_operator_gates_still_refuse (test_t1840_external_renewal.ExternalRenewalTests.test_source_and_operator_gates_still_refuse) ... ok
+test_tampered_current_contract_cannot_be_replayed (test_t1840_external_renewal.ExternalRenewalTests.test_tampered_current_contract_cannot_be_replayed) ... ok
+test_unrelated_or_missing_external_generation_refuses (test_t1840_external_renewal.ExternalRenewalTests.test_unrelated_or_missing_external_generation_refuses) ... ok
+test_zero_skipped_and_failed_checks_never_renew_done_proof (test_t1840_external_renewal.ExternalRenewalTests.test_zero_skipped_and_failed_checks_never_renew_done_proof) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 11.634s
+
+OK (skipped=1)

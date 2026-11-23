@@ -1,0 +1,27 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-388.md",
+  "linked_work": "T-2018",
+  "measured_sha256": "5857fcd2f56b8be8eefe423aac8737087f85275d0ba60c94dc34f0e8e4adcaa6",
+  "receipt_id": "SRC-388",
+  "retired_at": "2026-11-12T13:28:50Z",
+  "retired_by": "saipen-cli",
+  "retirement": {
+    "digest_mismatch": false,
+    "measured_sha256": "5857fcd2f56b8be8eefe423aac8737087f85275d0ba60c94dc34f0e8e4adcaa6",
+    "note": "",
+    "reason": "ORPHANED_RECEIPT",
+    "receipt_only": true,
+    "recorded_sha256": "5857fcd2f56b8be8eefe423aac8737087f85275d0ba60c94dc34f0e8e4adcaa6",
+    "retired_at": "2026-11-12T13:28:50Z",
+    "retired_by": "saipen-cli",
+    "retirement_event": "E-19342",
+    "schema_version": 2,
+    "source_reason": "ORPHANED_RECEIPT",
+    "successor": ""
+  },
+  "retirement_event": "E-19342",
+  "schema_version": 2,
+  "source_reason": "ORPHANED_RECEIPT",
+  "source_sha256": "5857fcd2f56b8be8eefe423aac8737087f85275d0ba60c94dc34f0e8e4adcaa6",
+  "status": "INVALID"
+}

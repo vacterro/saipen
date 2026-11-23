@@ -1,0 +1,62 @@
+{
+  "name": "SAIPEN_NEXT_ROADMAP_CURRENT_103342",
+  "version": "1.0",
+  "basis": "SAIPEN_31.08.26-T10-33-42.zip",
+  "verified_current": {
+    "version": "7.231.11",
+    "state_phase": "SCOUT",
+    "state_task": "T-1226",
+    "audit_1": "DELETED via native inbox",
+    "audit_2": "ACTIVE SRC-013 T-1223",
+    "audit_3": "DELETED via native inbox",
+    "audit_inbox_tests": 57,
+    "continue_improve_tests": 11,
+    "registry_tests": 11,
+    "phase_total_bytes": 100304,
+    "human_markdown_total_bytes": 272428,
+    "cold_load_bytes": 15912,
+    "core_validator_failures": 3,
+    "hush_status": "planned",
+    "shared_audit_enqueue": false
+  },
+  "critical_findings": [
+    "tracked sealed LOG-001..LOG-015 deleted in working tree",
+    "SRC-013 contains premature generic VERIFIED dispositions",
+    "T-1226 global <=70KB verify is impossible from its four-file local scope",
+    "Audit Inbox first-ACTIVE projection can starve later workable audit",
+    "shared audit producer allocator absent"
+  ],
+  "wave_order": [
+    "Wave 0 — Emergency History / Validator Truth Repair",
+    "Wave 1 — SRC-013 Coverage Truth Repair",
+    "Wave 2 — Phase Compression A",
+    "Wave 3 — Phase Compression B / audit2 closure",
+    "Wave 4 — Audit Inbox Hardening",
+    "Wave 5 — Audit Directory Hygiene",
+    "Wave 6 — Shared Producer API + Envelope",
+    "Wave 7 — Maintainer Closed Loop",
+    "Wave 8 — Real HUSH Runtime",
+    "Wave 9 — SAIPAL Bridge",
+    "Wave 10 — Release / Backlog Cleanup"
+  ],
+  "files": [
+    "00_README.md",
+    "01_VERIFIED_CURRENT_FINDINGS.md",
+    "02_WAVE_0_HISTORY_VALIDATOR_REPAIR.md",
+    "03_WAVE_1_SRC013_COVERAGE_TRUTH.md",
+    "04_WAVE_2_PHASE_COMPRESSION_A.md",
+    "05_WAVE_3_PHASE_COMPRESSION_B.md",
+    "06_WAVE_4_AUDIT_INBOX_HARDENING.md",
+    "07_WAVE_5_AUDIT_DIRECTORY_HYGIENE.md",
+    "08_WAVE_6_SHARED_PRODUCER_API.md",
+    "09_WAVE_7_MAINTAINER_CLOSED_LOOP.md",
+    "10_WAVE_8_REAL_HUSH.md",
+    "11_WAVE_9_SAIPAL_BRIDGE.md",
+    "12_WAVE_10_RELEASE_BACKLOG_CLEANUP.md",
+    "13_MASTER_TEST_MATRIX.md",
+    "14_RISK_REGISTER.md",
+    "15_AGENT_MASTER_PROMPT.md",
+    "16_DONE_CRITERIA.md",
+    "manifest.json"
+  ]
+}

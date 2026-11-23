@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "pytest",
+    "-v",
+    "--tb=short",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_t2045_operator_gateway.py"
+  ],
+  "format": "pytest",
+  "context": [
+    "tools",
+    "saipen",
+    "extensions",
+    "VERSION",
+    "ruff.toml"
+  ],
+  "oracle_files": [
+    "tools/test_t2045_operator_gateway.py"
+  ],
+  "subject_files": [
+    "tools/saipen_operator_gateway.py",
+    "extensions/adapters/FREEBUFF_INGRESS_CONTRACT.md"
+  ],
+  "before": {
+    "tools/saipen_operator_gateway.py": ".saipen/evidence/T-2045/gateway-boundary-20261110/pre/tools/saipen_operator_gateway.py",
+    "extensions/adapters/FREEBUFF_INGRESS_CONTRACT.md": ".saipen/evidence/T-2045/gateway-boundary-20261110/pre/extensions/adapters/FREEBUFF_INGRESS_CONTRACT.md"
+  },
+  "timeout": 120
+}

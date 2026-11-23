@@ -1,0 +1,4 @@
+- 08.08.26 00:00 [E-001] [T-none] DEC: fixture bootstrap
+- 08.08.26 00:01 [E-002] [agent: probe] [op: claim-0123456789abcdef0123456789abcdef] DEC: claimed via SAIOPS -- owner probe
+- 08.08.26 00:02 [E-003] DEC: goal pivot -- synthetic sealed missing provenance A
+- 08.08.26 00:03 [E-004] RUN: transition to BUILD -- synthetic sealed missing provenance B

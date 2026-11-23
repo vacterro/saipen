@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "_comment": [
+    "T-1889. Which heavy trees each focused test module reads from its sandbox.",
+    "Absent module => the run copies EVERYTHING, exactly as before this file.",
+    "An entry of [] means the module reads only the source tree.",
+    "Only '.git' or '.saipen/<child>' may be named: anything narrower would",
+    "drop part of the tested subject, so the resolver refuses it.",
+    "NEVER add an entry from import analysis or an audit hook over another",
+    "module. Declare a module only after running it in a narrowed sandbox and",
+    "seeing its own assertions pass there; that run is the evidence."
+  ],
+  "modules": {
+    "test_t1885_tag_peel.py": [],
+    "test_t1886_gate_lock_window.py": [],
+    "test_t1889_sandbox_scope.py": [],
+    "test_t1892_one_decoder.py": [],
+    "test_t1893_probe_wrappers.py": [],
+    "test_t1891_freshness_parser.py": [],
+    "test_subprocess_utf8.py": [],
+    "test_refusal_registry.py": [],
+    "test_t1844_operator_origin.py": [],
+    "test_t1833_verification_owner.py": [],
+    "test_t1850_freebuff_diagnostics.py": [],
+    "test_t1834_tool_call_identity.py": [],
+    "test_t1670_route_budgets.py": [],
+    "test_t1465_budget_line_ends.py": [],
+    "test_verify_oracle.py": [],
+    "test_verification_grammar.py": [],
+    "test_t1472_core_unit_shards.py": [],
+    "test_t1857_budget_owner.py": [],
+    "test_t1857_shared_blockers.py": [],
+    "test_t1867_completion_grammar.py": [],
+    "test_t1876_parallel_cleanup.py": [],
+    "test_response_digest.py": [],
+    "test_t1687_identity_diagnostics.py": [],
+    "test_t1676_lifecycle_code.py": []
+  }
+}

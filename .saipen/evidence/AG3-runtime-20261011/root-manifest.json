@@ -1,0 +1,17 @@
+{
+  "root": ".",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_audit_manifest.py"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "........................................\n----------------------------------------------------------------------\nRan 40 tests in 5.740s\n\nOK\n"
+}

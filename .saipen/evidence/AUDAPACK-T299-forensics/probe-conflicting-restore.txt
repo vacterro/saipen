@@ -1,0 +1,23 @@
+FAIL: source receipts -- source receipt BOARD projection unreadable: BOARD parse error: BOARD.md:5 ticket T-001 has unrecognized field 'notes: conflicting restoration snapshot'; BOARD.md:5 duplicate ticket ID T-001
+saipen conformance validation starting (tools/validate.py)...
+Project root: V:\_TEMP_\audapack-integrity-probes-_jwkda5b\conflicting-restore (explicit)
+Project lineage: lineage-54dcf07e58984d85b0c424a8a3c92e51
+PASS: state.schema.json and the engine STATE contract constants agree
+PASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)
+PASS: STATE.md schema valid (checked against state.schema.json)
+PASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-54dcf07e58984d85b0c424a8a3c92e51)
+FAIL: BOARD.md:5 ticket T-001 has unrecognized field 'notes: conflicting restoration snapshot'
+FAIL: BOARD.md:5 duplicate ticket ID T-001
+PASS: BOARD.md has all required section headings
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md Work supersession relations are terminal, existing and acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+PASS: BOARD.md at most one ## DOING ticket (1 claimed)
+PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))
+PASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)
+PASS: append targets end on a line boundary (3 checked)
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists
+WARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this
+Validation FAILED: 3 problem(s), 2 warning(s)

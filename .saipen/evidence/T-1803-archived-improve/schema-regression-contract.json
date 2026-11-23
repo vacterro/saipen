@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "tools/test_t1803_archived_improve.py"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "extensions",
+    "tests",
+    "bootstrap",
+    "bin",
+    ".github",
+    ".gitattributes",
+    ".gitignore",
+    "BROCHURE_DED.md",
+    "BROCHURE_EN.md",
+    "BROCHURE_ET.md",
+    "BROCHURE_JA.md",
+    "BROCHURE_RU.md",
+    "CHANGELOG_ARCHIVE.md",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "GUIDE.md",
+    "LICENSE",
+    "README.ded.md",
+    "README.ee.md",
+    "README.ja.md",
+    "README.md",
+    "ruff.toml",
+    "SECURITY.md",
+    "SPEC.md",
+    "THIRD_PARTY_NOTICES.md",
+    "VERSION"
+  ],
+  "oracle_files": [
+    "tools/test_t1803_archived_improve.py"
+  ],
+  "subject_files": [
+    "tools/improve.py",
+    "tools/saipen.py",
+    "tools/saipen_engine/improve_retrospective.py",
+    "tools/saipen_engine/continue_fallback.py",
+    "tools/saipen_engine/journal.py",
+    "tools/saipen_engine/admission.py",
+    "tools/saipen_engine/capability.py",
+    "saipen/IMPROVE.md"
+  ],
+  "before": {
+    "tools/improve.py": ".saipen/evidence/T-1803-archived-improve/schema-before/tools/improve.py",
+    "tools/saipen.py": ".saipen/evidence/T-1803-archived-improve/schema-before/tools/saipen.py",
+    "tools/saipen_engine/improve_retrospective.py": ".saipen/evidence/T-1803-archived-improve/schema-before/tools/saipen_engine/improve_retrospective.py",
+    "tools/saipen_engine/continue_fallback.py": ".saipen/evidence/T-1803-archived-improve/schema-before/tools/saipen_engine/continue_fallback.py",
+    "tools/saipen_engine/journal.py": ".saipen/evidence/T-1803-archived-improve/schema-before/tools/saipen_engine/journal.py",
+    "tools/saipen_engine/admission.py": ".saipen/evidence/T-1803-archived-improve/schema-before/tools/saipen_engine/admission.py",
+    "tools/saipen_engine/capability.py": ".saipen/evidence/T-1803-archived-improve/schema-before/tools/saipen_engine/capability.py",
+    "saipen/IMPROVE.md": ".saipen/evidence/T-1803-archived-improve/schema-before/saipen/IMPROVE.md"
+  },
+  "timeout": 300
+}

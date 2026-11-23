@@ -1,0 +1,27 @@
+--- before/extensions/adapters/FREEBUFF_INGRESS_CONTRACT.md
++++ after/extensions/adapters/FREEBUFF_INGRESS_CONTRACT.md
+@@ -1,6 +1,19 @@
+ # Freebuff Native Operator Ingress Contract
+ 
+ Status: NOT_INSTALLED / BLOCKED for T-1822 until a real host-side event source exists.
++
++Cold-entry routing follows `saipen/BOOT.md`; this contract is not a launcher or
++an alternative authority path.
++
++## Read-only operator gateway
++
++`python -B tools/saipen_operator_gateway.py --project-root <project> --json`
++reports the current task, phase, declared goal and recorded ticket/wave counters.
++Missing counters are unknown, not zero. The gateway does not approve, mint,
++renew or consume authority, start a broker, or write project files. Malformed,
++unreadable, linked or reparse STATE nodes refuse with a typed JSON error.
++Actual approval still requires a trusted native hook authenticated by the
++separated broker; running this CLI from a shell is not operator-origin proof.
+ 
+ ## Required upstream event
+ 
+@@ -59,4 +72,3 @@
+ 
+ This must remain unchanged until Freebuff Desktop implements and passes the
+ contract above.
+-" 

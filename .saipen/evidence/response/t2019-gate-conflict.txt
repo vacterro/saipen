@@ -1,0 +1,1 @@
+Kontrollvärav on vastuolus: nõuab DONE/STALE_FAIL lõppvastust, kuid klassifikaator lubab praegu ainult tühja masindigesti. Struktureeritud parandus renderdus, kuid kontroll keeldus sellest.

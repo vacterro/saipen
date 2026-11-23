@@ -1,0 +1,10 @@
+{
+  "verifier": "3b7f159c40afd076",
+  "pre_subject": "2c5b189428d12a6c",
+  "post_subject": "bbc7f28fd0de49c9",
+  "pre_rc": 1,
+  "post_rc": 0,
+  "control_rc": 0,
+  "held": true,
+  "command": "python -B -m unittest test_t1683_launcher_profile"
+}

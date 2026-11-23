@@ -1,0 +1,30 @@
+{
+  "board_hash": "d090626743259313",
+  "canonical_next_command": "saipen work reverify T-100",
+  "content_hash": "df0bedaf421ada4f",
+  "exit_code": 1,
+  "gate": "core",
+  "kind": "conformance_receipt",
+  "log_hash": "aa15c0f9e772d32c",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "receipt_id": "receipt-284597954ba6",
+  "remediation_commands": [
+    "saipen work reverify T-100",
+    "saipen work reverify T-101",
+    "saipen work reverify T-102",
+    "saipen work reverify T-103",
+    "saipen work reverify T-104",
+    "saipen work reverify T-105",
+    "saipen work reverify T-106",
+    "saipen work reverify T-107",
+    "saipen work reverify T-108",
+    "saipen work reverify T-109"
+  ],
+  "schema_version": 2,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:7dc55089ceccfb14c17e814bdd09dc64ab544751430279d1dc0a4880746582e5",
+  "state_hash": "93a629968709adfb",
+  "timestamp_utc": "2026-09-20T21:32:25.798566Z",
+  "validator_protocol_version": "1",
+  "verdict": "FAIL"
+}

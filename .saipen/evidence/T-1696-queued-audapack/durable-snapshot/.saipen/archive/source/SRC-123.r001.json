@@ -1,0 +1,54 @@
+{
+  "clauses": {
+    "SRC-123:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-001: LIST snapshot authority validation in audapack/sai_accounts.py read_registry() and launch_federation.py. Establish one authoritative LIST envelope validator (schema == 'sai.accounts/list/1', status == 'ok') before snapshot is usable. Validate every relevant wanted-provider row: canonical provider in account_id must match provider_id, and canonical account_id must be unique across accepted rows. Any malformed relevant record, contradiction, or duplicate makes entire snapshot non-authoritative (ok=False) and preserves last-known-good reconciliation behavior."
+    },
+    "SRC-123:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-002: Usage response account identity validation in audapack/sai_accounts.py probe(). Before accepting windows or typed per-account state, prove exact canonical account identity from the authoritative account_id field (payload['account_id'] == requested account_id). Missing, non-string, or mismatching account_id produces non-authoritative/unavailable behavior and discards windows, preventing foreign quota attribution."
+    },
+    "SRC-123:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-003: Startup federation single authority read in audapack/ui_qt/app.py _sync_launcher_inventory() and launch_federation.py. Separate acquiring authority snapshot from applying/reconciling it. Acquire exactly one SharedListing per logical refresh, and apply that same immutable authority snapshot to both runtime service.config and scoped persisted config without re-querying the control plane inside _persist."
+    },
+    "SRC-123:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-001: Stage-resumable specialized Prepared recovery in audapack/prepared_worker.py (_reconcile_audit, _reconcile_sync, _reconcile_prime). Derive resumable stage from both prepared execution state and specialized durable side-effect state. Replay only when durable record proves irreversible boundary was not crossed: AUDIT CLAIMED/PREPARING + ABSENT resumes idempotent start; SYNC PREPARING + PENDING/WAITING resumes preflight directly; PRIME PREPARING/LAUNCHING + PENDING resumes execution. SUBMITTING and ambiguous stages fail-closed into recovery-required."
+    },
+    "SRC-123:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-002: PreparedWorker restart lifecycle in audapack/prepared_worker.py. On CLOSED -> OPEN transition under _admission after prior generation is quiescent, recreate both ThreadPoolExecutor instances (_pool and _probe_pool), clear old generation _inflight and reconcile completed/cancelled probe futures before reopening lifecycle and starting scheduler thread. Refuse start during CLOSING."
+    },
+    "SRC-123:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-003: Handoff materialization transaction and byte contract in audapack/handoff_drop.py materialize(). Provide one folder-scoped cross-process transaction covering index reread, same-content reuse check, collision-free path allocation, reservation/publication without overwrite, writing exact UTF-8 bytes matching the content digest (preserving newline contract), byte verification, and index update."
+    },
+    "SRC-123:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-001: Bound Prepared SYNC member count with MAX_SYNC_MEMBERS product invariant in audapack/prepared.py and audapack/prepared_sync.py. Enforce conservative finite bound at every ingress (save_sync_members, SyncStore.create) and revalidate immediately before claim_release/release. Oversized groups fail closed before any member becomes RELEASING, launch zero members, and report deterministic unsupported size reason without deadlocking Barrier."
+    },
+    "SRC-123:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-002: Bounded hot audit intent journal with indexed durable replay identity index in audapack/services/audit_run_service.py AuditStartIntentStore. Separate hot operator journal (active intents, ambiguous recovery records, bounded recent terminal history) from durable replay identity index (indexed SQLite store keyed by source_execution_id for cold tombstones). begin() checks absence in both stores atomically; find_for_source() resolves cold identities via indexed lookup; refresh_runs/list does not enumerate cold tombstones; fail-safe migration order (write tombstone before pruning JSON)."
+    },
+    "SRC-123:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-003: Resident lightweight /health endpoint in audapack/bridge/server.py. Remove full load_config(), auto_heal_project_path(), and filesystem probes from /health. Keep health cheap, resident, and decoupled from project registry size while preserving required service/protocol/process identity and resident registry_revision."
+    }
+  },
+  "derived_at": "2026-10-07T07:00:28Z",
+  "derived_from": "SRC-123",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0b92a4c306ccff22e733f65925eac23200f07b63be718cceb781e963588b6f8e"
+}

@@ -1,0 +1,69 @@
+test_cli_plan_is_read_only_and_real_impact_producer_cites_scoped_record (test_t1836_verification_impact.ImpactExecution.test_cli_plan_is_read_only_and_real_impact_producer_cites_scoped_record) ... FAIL
+test_explicit_cli_scope_still_includes_git_added_tests (test_t1836_verification_impact.ImpactExecution.test_explicit_cli_scope_still_includes_git_added_tests) ... ERROR
+test_forged_full_label_and_scope_configuration_are_rejected (test_t1836_verification_impact.ImpactExecution.test_forged_full_label_and_scope_configuration_are_rejected) ... ok
+test_full_or_static_plan_does_not_execute_or_create_citation (test_t1836_verification_impact.ImpactExecution.test_full_or_static_plan_does_not_execute_or_create_citation) ... ok
+test_imported_testcase_occurrences_and_fixture_order_are_preserved (test_t1836_verification_impact.ImpactExecution.test_imported_testcase_occurrences_and_fixture_order_are_preserved) ... ok
+test_nested_canonical_modules_use_the_same_discovery_root (test_t1836_verification_impact.ImpactExecution.test_nested_canonical_modules_use_the_same_discovery_root) ... ok
+test_real_selected_run_keeps_family_scope_and_does_not_run_unrelated_red (test_t1836_verification_impact.ImpactExecution.test_real_selected_run_keeps_family_scope_and_does_not_run_unrelated_red) ... ok
+test_relabelled_unit_record_cannot_keep_an_impact_configuration (test_t1836_verification_impact.ImpactExecution.test_relabelled_unit_record_cannot_keep_an_impact_configuration) ... ok
+test_runtime_preload_cannot_replace_an_analyzed_module (test_t1836_verification_impact.ImpactExecution.test_runtime_preload_cannot_replace_an_analyzed_module) ... ok
+test_unrelated_import_error_cannot_disappear_in_a_filtered_run (test_t1836_verification_impact.ImpactExecution.test_unrelated_import_error_cannot_disappear_in_a_filtered_run) ... ok
+test_alias_escape_callback_and_builtin_shadowing_are_unknown (test_t1836_verification_impact.ImpactPlans.test_alias_escape_callback_and_builtin_shadowing_are_unknown) ... ok
+test_deletion_and_unknown_nonpython_path_do_not_look_unaffected (test_t1836_verification_impact.ImpactPlans.test_deletion_and_unknown_nonpython_path_do_not_look_unaffected) ... ok
+test_known_static_subset_has_source_inventory_and_reasons (test_t1836_verification_impact.ImpactPlans.test_known_static_subset_has_source_inventory_and_reasons) ... ok
+test_new_unrelated_test_is_selected_when_in_change_inventory (test_t1836_verification_impact.ImpactPlans.test_new_unrelated_test_is_selected_when_in_change_inventory) ... ok
+test_no_changes_is_a_nonexecuted_static_plan_and_paths_are_confined (test_t1836_verification_impact.ImpactPlans.test_no_changes_is_a_nonexecuted_static_plan_and_paths_are_confined) ... ok
+test_protocol_markdown_fixture_adapter_and_validator_require_full (test_t1836_verification_impact.ImpactPlans.test_protocol_markdown_fixture_adapter_and_validator_require_full) ... ok
+test_real_git_inventory_includes_added_tests_and_preserves_spaces (test_t1836_verification_impact.ImpactPlans.test_real_git_inventory_includes_added_tests_and_preserves_spaces) ... ERROR
+test_relative_import_and_package_initializer_are_dependencies (test_t1836_verification_impact.ImpactPlans.test_relative_import_and_package_initializer_are_dependencies) ... ok
+test_shared_fixture_hooks_are_not_treated_as_a_leaf (test_t1836_verification_impact.ImpactPlans.test_shared_fixture_hooks_are_not_treated_as_a_leaf) ... ok
+test_stale_or_modified_plan_is_rejected (test_t1836_verification_impact.ImpactPlans.test_stale_or_modified_plan_is_rejected) ... ok
+test_standard_library_shadowing_does_not_hide_local_dependencies (test_t1836_verification_impact.ImpactPlans.test_standard_library_shadowing_does_not_hide_local_dependencies) ... ok
+test_syntax_error_load_tests_and_no_consumer_escalate (test_t1836_verification_impact.ImpactPlans.test_syntax_error_load_tests_and_no_consumer_escalate) ... ok
+test_transitive_consumers_are_required_integrations (test_t1836_verification_impact.ImpactPlans.test_transitive_consumers_are_required_integrations) ... ok
+test_unresolved_dynamic_file_and_reflection_dependencies_escalate (test_t1836_verification_impact.ImpactPlans.test_unresolved_dynamic_file_and_reflection_dependencies_escalate) ... ok
+
+======================================================================
+ERROR: test_explicit_cli_scope_still_includes_git_added_tests (test_t1836_verification_impact.ImpactExecution.test_explicit_cli_scope_still_includes_git_added_tests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/test_t1836_verification_impact.py", line 300, in test_explicit_cli_scope_still_includes_git_added_tests
+    result = subprocess.run(["git", "-C", str(self.project), *args],
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'git'
+
+======================================================================
+ERROR: test_real_git_inventory_includes_added_tests_and_preserves_spaces (test_t1836_verification_impact.ImpactPlans.test_real_git_inventory_includes_added_tests_and_preserves_spaces)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/test_t1836_verification_impact.py", line 166, in test_real_git_inventory_includes_added_tests_and_preserves_spaces
+    result = subprocess.run(["git", "-C", str(self.root), *args],
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'git'
+
+======================================================================
+FAIL: test_cli_plan_is_read_only_and_real_impact_producer_cites_scoped_record (test_t1836_verification_impact.ImpactExecution.test_cli_plan_is_read_only_and_real_impact_producer_cites_scoped_record)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/test_t1836_verification_impact.py", line 279, in test_cli_plan_is_read_only_and_real_impact_producer_cites_scoped_record
+    self.assertEqual(core_unit.main([*base, "--plan"]), 0)
+AssertionError: 1 != 0
+
+----------------------------------------------------------------------
+Ran 24 tests in 3.092s
+
+FAILED (failures=1, errors=2)

@@ -1,0 +1,23 @@
+{
+  "UNTR": {
+    "old_len": 162793,
+    "new_len": 122871,
+    "equal": false,
+    "old_sha256": "63a20f37b7e93fcb2b75c299c6a8a382d4fa8e123f22ab5728504598d4453d0f",
+    "new_sha256": "c7135d71eee8a1840572592644db1ab309f2fec2382d8293e7f0c4ebf4a47a4e"
+  },
+  "FSMN": {
+    "old_len": 193,
+    "new_len": 193,
+    "equal": false,
+    "old_sha256": "3e324da898f7266ae8b90a2be7befabf5527946df46a08fa262596e7d99383bf",
+    "new_sha256": "1ce67fda7e86e12552a66b8e3210ddf32de5fcdab504d4ea00160fedabf01b9c"
+  },
+  "TREE": {
+    "old_len": 35182,
+    "new_len": 35182,
+    "equal": true,
+    "old_sha256": "d856e14844c58af6f28bcaa501a6f4429d7a0e55276e76d3ec9ae9a973edd4fd",
+    "new_sha256": "d856e14844c58af6f28bcaa501a6f4429d7a0e55276e76d3ec9ae9a973edd4fd"
+  }
+}

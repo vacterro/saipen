@@ -1,0 +1,22 @@
+{
+  "ok": false,
+  "code": "WAIT_OPERATOR",
+  "detail": "the request is durable as SRC-423; one operator decision is open in this project and must be answered before new Work is projected",
+  "decision": {
+    "field": "next_action",
+    "surface": "state",
+    "ticket": null,
+    "command": "saipen continue",
+    "reason": "next_action 'saipen continue'->\"WAIT: safety valve reached (0 waves / 31 tickets) -- run 'cc' to continue\" (safety valve tripped (goal_tickets=31) but next_action does not state the pause -- MAINTENANCE section 2.4 requires the section 1.2 WAIT form, and `cc` is the only re-authorization; reconciliation must not certify CLEAN over it)"
+  },
+  "canonical_next_command": "saipen continue",
+  "operator_decision_available": true,
+  "receipt": "SRC-423",
+  "ticket": null,
+  "resume_command": "saipen start --receipt SRC-423",
+  "refusal": null,
+  "valve_reauthorized": false,
+  "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE",
+  "actor": "saipen-cli",
+  "actor_source": "default"
+}

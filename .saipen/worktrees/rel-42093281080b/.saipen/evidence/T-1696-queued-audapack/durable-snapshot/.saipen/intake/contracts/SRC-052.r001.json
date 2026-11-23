@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-052:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUDAPACK P0/P1 closure defect: Widget production bytes changed without userscript @version bump (0.0.59 == 0.0.59), so installed Tampermonkey may run old bytes; add version/SHA release manifest + drift regression, audit Bridge GET /widget.user.js bytes, add bounded update/install probe and real-ChatGPT acceptance record, rename synthetic integration test, correct T-194 lifecycle, verify OpenCode launch, then resume T-188"
+    }
+  },
+  "derived_at": "2026-09-17T19:43:04Z",
+  "derived_from": "SRC-052",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "95f86f13e231b1199d680ca3d26392de934742bc3dbd61664d841e4e3938d37e"
+}

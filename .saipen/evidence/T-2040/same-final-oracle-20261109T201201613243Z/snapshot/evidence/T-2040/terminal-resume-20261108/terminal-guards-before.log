@@ -1,0 +1,806 @@
+test_assessment_forwards_same_issued_publication_carrier (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_forwards_same_issued_publication_carrier) ... ERROR
+test_assessment_refuses_malformed_board_or_discovery_envelope (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope) ... 
+  test_assessment_refuses_malformed_board_or_discovery_envelope (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope) (board=42) ... ERROR
+  test_assessment_refuses_malformed_board_or_discovery_envelope (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope) (board={'tickets': {}, 'errors': 42}) ... ERROR
+  test_assessment_refuses_malformed_board_or_discovery_envelope (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope) (evidence=42) ... ERROR
+  test_assessment_refuses_malformed_board_or_discovery_envelope (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope) (evidence={'source_evidence': 42}) ... ERROR
+  test_assessment_refuses_malformed_board_or_discovery_envelope (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope) (evidence={'source_evidence': []}) ... ERROR
+test_assessment_refuses_malformed_effective_route (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_effective_route) ... 
+  test_assessment_refuses_malformed_effective_route (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_effective_route) (route=42) ... ERROR
+  test_assessment_refuses_malformed_effective_route (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_effective_route) (route=['truthy']) ... ERROR
+  test_assessment_refuses_malformed_effective_route (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_effective_route) (route={'ok': True, 'reason': 'maintain', 'primary_blocker': 42}) ... ERROR
+test_authoritative_external_stop_outranks_stale_workable_board (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_authoritative_external_stop_outranks_stale_workable_board) ... FAIL
+test_automation_certificate_cannot_complete_unsatisfied_objectives (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_certificate_cannot_complete_unsatisfied_objectives) ... FAIL
+test_automation_helpers_fail_closed_on_malformed_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_helpers_fail_closed_on_malformed_envelopes) ... 
+  test_automation_helpers_fail_closed_on_malformed_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_helpers_fail_closed_on_malformed_envelopes) (status=42) ... ERROR
+  test_automation_helpers_fail_closed_on_malformed_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_helpers_fail_closed_on_malformed_envelopes) (status={'ok': True, 'clean': True, 'orphans': [42]}) ... ERROR
+  test_automation_helpers_fail_closed_on_malformed_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_helpers_fail_closed_on_malformed_envelopes) (envelope={'board': 42}) ... ERROR
+  test_automation_helpers_fail_closed_on_malformed_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_helpers_fail_closed_on_malformed_envelopes) (envelope={'convergence': 42}) ... ERROR
+  test_automation_helpers_fail_closed_on_malformed_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_helpers_fail_closed_on_malformed_envelopes) (envelope={'history_events': 42}) ... ERROR
+test_automation_unknown_route_or_missing_certificate_cannot_continue (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_unknown_route_or_missing_certificate_cannot_continue) ... 
+  test_automation_unknown_route_or_missing_certificate_cannot_continue (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_unknown_route_or_missing_certificate_cannot_continue) (route={'ok': True, 'reason': 'unknown-success', 'action': 'saipen status'}) ... FAIL
+  test_automation_unknown_route_or_missing_certificate_cannot_continue (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_unknown_route_or_missing_certificate_cannot_continue) (route={'ok': True, 'reason': 'maintain', 'action': 'saipen continue'}) ... FAIL
+  test_automation_unknown_route_or_missing_certificate_cannot_continue (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_unknown_route_or_missing_certificate_cannot_continue) (route={'ok': True, 'reason': 'maintain', 'action': 'saipen continue', 'work_exhaustion': 42}) ... FAIL
+test_board_rejects_malformed_certificate_owner_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_rejects_malformed_certificate_owner_envelopes) ... 
+  test_board_rejects_malformed_certificate_owner_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_rejects_malformed_certificate_owner_envelopes) (certificate=42) ... ERROR
+  test_board_rejects_malformed_certificate_owner_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_rejects_malformed_certificate_owner_envelopes) (certificate=['truthy']) ... ERROR
+  test_board_rejects_malformed_certificate_owner_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_rejects_malformed_certificate_owner_envelopes) (certificate={'status': 'VERIFIED_QUIESCENT', 'sources': 42}) ... FAIL
+test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) ... 
+  test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) (payload={'tickets': 42}) ... ERROR
+  test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) (payload={'tickets': {'T-1': 42}}) ... ERROR
+  test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) (payload={'tickets': {'T-1': {'section': '## TODO', 'fields': 42}}}) ... ERROR
+  test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) (payload={'tickets': {'T-1': {'section': '## TODO', 'needs': 42}}}) ... ERROR
+  test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) (payload={'state': 42}) ... ERROR
+  test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) (payload={'state': ['truthy']}) ... ERROR
+test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence) ... 
+  test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence) (status='NO_NEW_EVIDENCE') ... FAIL
+  test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence) (status='UNKNOWN_SUCCESS') ... FAIL
+test_campaign_refuses_malformed_assessment_and_delivery_without_throwing (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_campaign_refuses_malformed_assessment_and_delivery_without_throwing) ... ERROR
+test_campaign_valid_hint_reuses_one_bounded_worker_attempt (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_campaign_valid_hint_reuses_one_bounded_worker_attempt) ... FAIL
+test_completion_requires_verified_quiescence_and_all_goals_satisfied (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_completion_requires_verified_quiescence_and_all_goals_satisfied) ... ok
+test_external_wait_supervisor_never_becomes_idle (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_external_wait_supervisor_never_becomes_idle) ... 
+  test_external_wait_supervisor_never_becomes_idle (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_external_wait_supervisor_never_becomes_idle) (lease=None) ... FAIL
+  test_external_wait_supervisor_never_becomes_idle (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_external_wait_supervisor_never_becomes_idle) (lease='EXPIRED') ... FAIL
+  test_external_wait_supervisor_never_becomes_idle (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_external_wait_supervisor_never_becomes_idle) (lease='TERMINAL') ... FAIL
+test_external_wait_worker_never_reports_success_or_takes_authority (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_external_wait_worker_never_reports_success_or_takes_authority) ... FAIL
+test_iteration_refuses_malformed_goal_inventory_without_throwing (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_iteration_refuses_malformed_goal_inventory_without_throwing) ... 
+  test_iteration_refuses_malformed_goal_inventory_without_throwing (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_iteration_refuses_malformed_goal_inventory_without_throwing) (inventory=42) ... ERROR
+  test_iteration_refuses_malformed_goal_inventory_without_throwing (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_iteration_refuses_malformed_goal_inventory_without_throwing) (inventory={'goals': [42], 'complete': True}) ... ERROR
+  test_iteration_refuses_malformed_goal_inventory_without_throwing (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_iteration_refuses_malformed_goal_inventory_without_throwing) (inventory={'goals': 42}) ... ERROR
+test_live_or_ambiguous_lease_is_never_stolen_during_external_wait (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_live_or_ambiguous_lease_is_never_stolen_during_external_wait) ... ok
+test_native_grant_and_valid_hint_enable_bounded_incomplete_assessment (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_native_grant_and_valid_hint_enable_bounded_incomplete_assessment) ... ERROR
+test_native_grant_valid_hint_automation_continues_without_promotion (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_native_grant_valid_hint_automation_continues_without_promotion) ... FAIL
+test_native_grant_valid_hint_supervisor_uses_existing_execution_seam (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_native_grant_valid_hint_supervisor_uses_existing_execution_seam) ... FAIL
+test_outcome_failure_cannot_leak_router_completion (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_outcome_failure_cannot_leak_router_completion) ... FAIL
+test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) ... 
+  test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'queued_source': 42}) ... ERROR
+  test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'pending_append': 42}) ... ERROR
+  test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'audit_inbox': 42}) ... ERROR
+  test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'future_gate': 42}) ... ERROR
+  test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'future_gate': {'eligible': 42}}) ... ERROR
+  test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'audit_inbox': {'pending': 42}}) ... FAIL
+  test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'queued_source': {'action': 42}}) ... FAIL
+  test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'pending_append': {'action': 42}}) ... FAIL
+test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) ... 
+  test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) (state=42, board={'tickets': {}, 'headings': ['## DOING', '## TODO', '## DONE', '## BLOCKED'], 'errors': []}) ... ERROR
+  test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) (state={'phase': 'DONE', 'task': 'none', 'next_action': 'saipen continue', 'blocker': 'none', 'transition_from': 'SHIP', 'saipen_version': 8, 'schema_version': 3, 'last_event': 100, 'style_contract': 'ded-069a4c52', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'agent': 'tester', 'mode': 'full', 'updated': '2026-10-25T12:00:00Z', 'execution_intent': 'goal', 'goal_tickets': 5, 'goal_waves': 0, 'continuation_authority': 'operator_required', 'authority_source': 'E-100', 'authority_until': 'budget', 'safety_valve_mode': 'hard_wait'}, board=42) ... ERROR
+  test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) (state={'phase': 'DONE', 'task': 'none', 'next_action': 42, 'blocker': 'none', 'transition_from': 'SHIP', 'saipen_version': 8, 'schema_version': 3, 'last_event': 100, 'style_contract': 'ded-069a4c52', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'agent': 'tester', 'mode': 'full', 'updated': '2026-10-25T12:00:00Z', 'execution_intent': 'goal', 'goal_tickets': 5, 'goal_waves': 0, 'continuation_authority': 'operator_required', 'authority_source': 'E-100', 'authority_until': 'budget', 'safety_valve_mode': 'hard_wait'}, board={'tickets': {}, 'headings': ['## DOING', '## TODO', '## DONE', '## BLOCKED'], 'errors': []}) ... ERROR
+  test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) (state={'phase': 'DONE', 'task': 'none', 'next_action': 'saipen continue', 'blocker': 'none', 'transition_from': 'SHIP', 'saipen_version': 8, 'schema_version': 3, 'last_event': 100, 'style_contract': 'ded-069a4c52', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'agent': 'tester', 'mode': 'full', 'updated': '2026-10-25T12:00:00Z', 'execution_intent': 'goal', 'goal_tickets': 5, 'goal_waves': 0, 'continuation_authority': 'operator_required', 'authority_source': 'E-100', 'authority_until': 'budget', 'safety_valve_mode': 'hard_wait'}, board={'tickets': 42, 'errors': []}) ... ERROR
+  test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) (state={'phase': 'DONE', 'task': 'none', 'next_action': 'saipen continue', 'blocker': 'none', 'transition_from': 'SHIP', 'saipen_version': 8, 'schema_version': 3, 'last_event': 100, 'style_contract': 'ded-069a4c52', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'agent': 'tester', 'mode': 'full', 'updated': '2026-10-25T12:00:00Z', 'execution_intent': 'goal', 'goal_tickets': 5, 'goal_waves': 0, 'continuation_authority': 'operator_required', 'authority_source': 'E-100', 'authority_until': 'budget', 'safety_valve_mode': 'hard_wait'}, board={'tickets': {'T-1': 42}, 'errors': []}) ... ERROR
+  test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) (state={'phase': 'DONE', 'task': 'none', 'next_action': 'saipen continue', 'blocker': 'none', 'transition_from': 'SHIP', 'saipen_version': 8, 'schema_version': 3, 'last_event': 100, 'style_contract': 'ded-069a4c52', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'agent': 'tester', 'mode': 'full', 'updated': '2026-10-25T12:00:00Z', 'execution_intent': 'goal', 'goal_tickets': 5, 'goal_waves': 0, 'continuation_authority': 'operator_required', 'authority_source': 'E-100', 'authority_until': 'budget', 'safety_valve_mode': 'hard_wait'}, board={'tickets': {}, 'errors': 42}) ... ERROR
+test_same_issued_publication_carrier_reaches_pure_board_and_router (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_same_issued_publication_carrier_reaches_pure_board_and_router) ... 
+  test_same_issued_publication_carrier_reaches_pure_board_and_router (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_same_issued_publication_carrier_reaches_pure_board_and_router) (consumer='board') ... ERROR
+  test_same_issued_publication_carrier_reaches_pure_board_and_router (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_same_issued_publication_carrier_reaches_pure_board_and_router) (consumer='router') ... ERROR
+test_stored_actionable_goals_cannot_override_current_blocked_assessment (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_stored_actionable_goals_cannot_override_current_blocked_assessment) ... 
+  test_stored_actionable_goals_cannot_override_current_blocked_assessment (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_stored_actionable_goals_cannot_override_current_blocked_assessment) (classification='WAIT_EXTERNAL') ... FAIL
+  test_stored_actionable_goals_cannot_override_current_blocked_assessment (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_stored_actionable_goals_cannot_override_current_blocked_assessment) (classification='WAIT_OPERATOR') ... FAIL
+test_unproven_or_stale_hint_never_creates_authority (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_unproven_or_stale_hint_never_creates_authority) ... ok
+
+======================================================================
+ERROR: test_assessment_forwards_same_issued_publication_carrier (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_forwards_same_issued_publication_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 396, in test_assessment_forwards_same_issued_publication_carrier
+    result = CA.assess_continuation(self.root, publication_evidence=carrier)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: assess_continuation() got an unexpected keyword argument 'publication_evidence'
+
+======================================================================
+ERROR: test_assessment_refuses_malformed_board_or_discovery_envelope (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope) (board=42)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 298, in test_assessment_refuses_malformed_board_or_discovery_envelope
+    result = CA.assess_continuation(self.root, parsed_board=parsed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continuation_assessment.py", line 173, in assess_continuation
+    if board.get("errors"):
+       ^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_assessment_refuses_malformed_board_or_discovery_envelope (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope) (board={'tickets': {}, 'errors': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 298, in test_assessment_refuses_malformed_board_or_discovery_envelope
+    result = CA.assess_continuation(self.root, parsed_board=parsed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continuation_assessment.py", line 178, in assess_continuation
+    detail="BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+                                                ~~~~~~~~~~~~~~~^^^^
+TypeError: 'int' object is not subscriptable
+
+======================================================================
+ERROR: test_assessment_refuses_malformed_board_or_discovery_envelope (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope) (evidence=42)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 305, in test_assessment_refuses_malformed_board_or_discovery_envelope
+    result = CA.assess_continuation(self.root, source_evidence={"hunt_findings": {}})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continuation_assessment.py", line 195, in assess_continuation
+    evidence["source_evidence"].update(source_evidence)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^
+TypeError: 'int' object is not subscriptable
+
+======================================================================
+ERROR: test_assessment_refuses_malformed_board_or_discovery_envelope (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope) (evidence={'source_evidence': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 305, in test_assessment_refuses_malformed_board_or_discovery_envelope
+    result = CA.assess_continuation(self.root, source_evidence={"hunt_findings": {}})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continuation_assessment.py", line 195, in assess_continuation
+    evidence["source_evidence"].update(source_evidence)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'update'
+
+======================================================================
+ERROR: test_assessment_refuses_malformed_board_or_discovery_envelope (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope) (evidence={'source_evidence': []})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 305, in test_assessment_refuses_malformed_board_or_discovery_envelope
+    result = CA.assess_continuation(self.root, source_evidence={"hunt_findings": {}})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continuation_assessment.py", line 195, in assess_continuation
+    evidence["source_evidence"].update(source_evidence)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'update'
+
+======================================================================
+ERROR: test_assessment_refuses_malformed_effective_route (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_effective_route) (route=42)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 312, in test_assessment_refuses_malformed_effective_route
+    result = CA._classify_effective_route(self.root, routed, {}, self.state, board.parse_board(BOARD))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continuation_assessment.py", line 316, in _classify_effective_route
+    reason = str(routed.get("reason") or "")
+                 ^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_assessment_refuses_malformed_effective_route (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_effective_route) (route=['truthy'])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 312, in test_assessment_refuses_malformed_effective_route
+    result = CA._classify_effective_route(self.root, routed, {}, self.state, board.parse_board(BOARD))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continuation_assessment.py", line 316, in _classify_effective_route
+    reason = str(routed.get("reason") or "")
+                 ^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'get'
+
+======================================================================
+ERROR: test_assessment_refuses_malformed_effective_route (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_assessment_refuses_malformed_effective_route) (route={'ok': True, 'reason': 'maintain', 'primary_blocker': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 312, in test_assessment_refuses_malformed_effective_route
+    result = CA._classify_effective_route(self.root, routed, {}, self.state, board.parse_board(BOARD))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continuation_assessment.py", line 675, in _classify_effective_route
+    blocker_class = str(primary.get("blocker_class") or "")
+                        ^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_automation_helpers_fail_closed_on_malformed_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_helpers_fail_closed_on_malformed_envelopes) (status=42)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 344, in test_automation_helpers_fail_closed_on_malformed_envelopes
+    self.assertFalse(automation.audit_quiescent(status))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\automation.py", line 153, in audit_quiescent
+    if not status_out or not status_out.get("ok"):
+                             ^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_automation_helpers_fail_closed_on_malformed_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_helpers_fail_closed_on_malformed_envelopes) (status={'ok': True, 'clean': True, 'orphans': [42]})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 344, in test_automation_helpers_fail_closed_on_malformed_envelopes
+    self.assertFalse(automation.audit_quiescent(status))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\automation.py", line 162, in audit_quiescent
+    if orphan.get("state") == "MISSING_AFTER_CAPTURE":
+       ^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_automation_helpers_fail_closed_on_malformed_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_helpers_fail_closed_on_malformed_envelopes) (envelope={'board': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 350, in test_automation_helpers_fail_closed_on_malformed_envelopes
+    result = automation.closure_gate(**args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\automation.py", line 375, in closure_gate
+    board_problems = convergence_closure_problems(board or {}, agent=agent)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 1639, in convergence_closure_problems
+    errors = list(board.get("errors", []))
+                  ^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_automation_helpers_fail_closed_on_malformed_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_helpers_fail_closed_on_malformed_envelopes) (envelope={'convergence': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 350, in test_automation_helpers_fail_closed_on_malformed_envelopes
+    result = automation.closure_gate(**args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\automation.py", line 376, in closure_gate
+    convergence_ok = bool((convergence or {}).get("ok"))
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_automation_helpers_fail_closed_on_malformed_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_helpers_fail_closed_on_malformed_envelopes) (envelope={'history_events': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 350, in test_automation_helpers_fail_closed_on_malformed_envelopes
+    result = automation.closure_gate(**args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\automation.py", line 379, in closure_gate
+    consume_instants = _audit_consume_instants(history_events)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\automation.py", line 325, in _audit_consume_instants
+    for ev in history_events or ():
+TypeError: 'int' object is not iterable
+
+======================================================================
+ERROR: test_board_rejects_malformed_certificate_owner_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_rejects_malformed_certificate_owner_envelopes) (certificate=42)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 264, in test_board_rejects_malformed_certificate_owner_envelopes
+    result = board.classify_idle_work({}, state=self.state, persistent_goals=[])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2285, in classify_idle_work
+    res["blocked_obligations"] = certificate.get("blocked_obligations", [])
+                                 ^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_board_rejects_malformed_certificate_owner_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_rejects_malformed_certificate_owner_envelopes) (certificate=['truthy'])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 264, in test_board_rejects_malformed_certificate_owner_envelopes
+    result = board.classify_idle_work({}, state=self.state, persistent_goals=[])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2285, in classify_idle_work
+    res["blocked_obligations"] = certificate.get("blocked_obligations", [])
+                                 ^^^^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'get'
+
+======================================================================
+ERROR: test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) (payload={'tickets': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 254, in test_board_validates_typed_envelopes_before_consuming_them
+    result = board.classify_idle_work(**args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2267, in classify_idle_work
+    res = _classify_idle_work(tickets, audit_inbox, future_gate, actor_state, now, goals["goals"])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2050, in _classify_idle_work
+    doing = [t for t in tickets.values() if t.get("section") == "## DOING"]
+                        ^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'values'
+
+======================================================================
+ERROR: test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) (payload={'tickets': {'T-1': 42}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 254, in test_board_validates_typed_envelopes_before_consuming_them
+    result = board.classify_idle_work(**args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2267, in classify_idle_work
+    res = _classify_idle_work(tickets, audit_inbox, future_gate, actor_state, now, goals["goals"])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2050, in _classify_idle_work
+    doing = [t for t in tickets.values() if t.get("section") == "## DOING"]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2050, in <listcomp>
+    doing = [t for t in tickets.values() if t.get("section") == "## DOING"]
+                                            ^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) (payload={'tickets': {'T-1': {'section': '## TODO', 'fields': 42}}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 254, in test_board_validates_typed_envelopes_before_consuming_them
+    result = board.classify_idle_work(**args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2267, in classify_idle_work
+    res = _classify_idle_work(tickets, audit_inbox, future_gate, actor_state, now, goals["goals"])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2076, in _classify_idle_work
+    if not doing and not workable_tickets(tickets, agent=(state or {}).get("agent"), now=now):
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 1485, in workable_tickets
+    return [
+           ^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 1488, in <listcomp>
+    if ticket_is_workable(ticket, tickets, agent=agent, now=now)
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 1247, in ticket_is_workable
+    _cs = claim_status(ticket, agent, now)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 1189, in claim_status
+    owner = (fields.get("owner") or "").strip()
+             ^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) (payload={'tickets': {'T-1': {'section': '## TODO', 'needs': 42}}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 254, in test_board_validates_typed_envelopes_before_consuming_them
+    result = board.classify_idle_work(**args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2267, in classify_idle_work
+    res = _classify_idle_work(tickets, audit_inbox, future_gate, actor_state, now, goals["goals"])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2135, in _classify_idle_work
+    projection = project_blockers(tickets)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 1943, in project_blockers
+    roots = _root_blockers(tid, tickets)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 1906, in _root_blockers
+    list(ticket.get("needs") or ()) if ticket.get("section") == "## TODO" else []
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'int' object is not iterable
+
+======================================================================
+ERROR: test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) (payload={'state': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 254, in test_board_validates_typed_envelopes_before_consuming_them
+    result = board.classify_idle_work(**args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2267, in classify_idle_work
+    res = _classify_idle_work(tickets, audit_inbox, future_gate, actor_state, now, goals["goals"])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2076, in _classify_idle_work
+    if not doing and not workable_tickets(tickets, agent=(state or {}).get("agent"), now=now):
+                                                         ^^^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_board_validates_typed_envelopes_before_consuming_them (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_validates_typed_envelopes_before_consuming_them) (payload={'state': ['truthy']})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 254, in test_board_validates_typed_envelopes_before_consuming_them
+    result = board.classify_idle_work(**args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2267, in classify_idle_work
+    res = _classify_idle_work(tickets, audit_inbox, future_gate, actor_state, now, goals["goals"])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board.py", line 2076, in _classify_idle_work
+    if not doing and not workable_tickets(tickets, agent=(state or {}).get("agent"), now=now):
+                                                         ^^^^^^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'get'
+
+======================================================================
+ERROR: test_campaign_refuses_malformed_assessment_and_delivery_without_throwing (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_campaign_refuses_malformed_assessment_and_delivery_without_throwing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 489, in test_campaign_refuses_malformed_assessment_and_delivery_without_throwing
+    result = controller.step()
+             ^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 931, in step
+    classification = assessment["classification"]
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+TypeError: 'int' object is not subscriptable
+
+======================================================================
+ERROR: test_iteration_refuses_malformed_goal_inventory_without_throwing (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_iteration_refuses_malformed_goal_inventory_without_throwing) (inventory=42)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 239, in test_iteration_refuses_malformed_goal_inventory_without_throwing
+    result = IV.project_iteration_verdict(self.root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\iteration_verdict.py", line 542, in project_iteration_verdict
+    pgoals = inventory["goals"]
+             ~~~~~~~~~^^^^^^^^^
+TypeError: 'int' object is not subscriptable
+
+======================================================================
+ERROR: test_iteration_refuses_malformed_goal_inventory_without_throwing (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_iteration_refuses_malformed_goal_inventory_without_throwing) (inventory={'goals': [42], 'complete': True})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 239, in test_iteration_refuses_malformed_goal_inventory_without_throwing
+    result = IV.project_iteration_verdict(self.root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\iteration_verdict.py", line 546, in project_iteration_verdict
+    all_goals_satisfied = all(g.current_status == STATUS_SATISFIED for g in pgoals)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\iteration_verdict.py", line 546, in <genexpr>
+    all_goals_satisfied = all(g.current_status == STATUS_SATISFIED for g in pgoals)
+                              ^^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'current_status'
+
+======================================================================
+ERROR: test_iteration_refuses_malformed_goal_inventory_without_throwing (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_iteration_refuses_malformed_goal_inventory_without_throwing) (inventory={'goals': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 239, in test_iteration_refuses_malformed_goal_inventory_without_throwing
+    result = IV.project_iteration_verdict(self.root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\iteration_verdict.py", line 543, in project_iteration_verdict
+    if not inventory["complete"]:
+           ~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'complete'
+
+======================================================================
+ERROR: test_native_grant_and_valid_hint_enable_bounded_incomplete_assessment (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_native_grant_and_valid_hint_enable_bounded_incomplete_assessment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 409, in test_native_grant_and_valid_hint_enable_bounded_incomplete_assessment
+    self.assertIs(result["discovery_dispatch"], cert["discovery_dispatch"])
+                  ~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'discovery_dispatch'
+
+======================================================================
+ERROR: test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'queued_source': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 290, in test_router_rejects_malformed_truthy_projection_envelopes
+    result = self.route(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 99, in route
+    return router.route_next(
+           ^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\router.py", line 504, in route_next
+    if queued_source.get("invalid"):
+       ^^^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'pending_append': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 290, in test_router_rejects_malformed_truthy_projection_envelopes
+    result = self.route(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 99, in route
+    return router.route_next(
+           ^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\router.py", line 320, in route_next
+    if pending_append and not pending_append.get("invalid"):
+                              ^^^^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'audit_inbox': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 290, in test_router_rejects_malformed_truthy_projection_envelopes
+    result = self.route(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 99, in route
+    return router.route_next(
+           ^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\router.py", line 694, in route_next
+    if audit_inbox and audit_inbox.get("invalid_only"):
+                       ^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'future_gate': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 290, in test_router_rejects_malformed_truthy_projection_envelopes
+    result = self.route(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 99, in route
+    return router.route_next(
+           ^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\router.py", line 766, in route_next
+    if future_gate and future_gate.get("refresh_required"):
+                       ^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'future_gate': {'eligible': 42}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 290, in test_router_rejects_malformed_truthy_projection_envelopes
+    result = self.route(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 99, in route
+    return router.route_next(
+           ^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\router.py", line 806, in route_next
+    _gate_id = str(future_gate["eligible"][0])
+                   ~~~~~~~~~~~~~~~~~~~~~~~^^^
+TypeError: 'int' object is not subscriptable
+
+======================================================================
+ERROR: test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) (state=42, board={'tickets': {}, 'headings': ['## DOING', '## TODO', '## DONE', '## BLOCKED'], 'errors': []})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 278, in test_router_validates_preparsed_state_and_board_envelopes
+    result = router.route_next(_format_state(), BOARD, _state=state, _board=parsed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\router.py", line 176, in route_next
+    phase = state.get("phase")
+            ^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) (state={'phase': 'DONE', 'task': 'none', 'next_action': 'saipen continue', 'blocker': 'none', 'transition_from': 'SHIP', 'saipen_version': 8, 'schema_version': 3, 'last_event': 100, 'style_contract': 'ded-069a4c52', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'agent': 'tester', 'mode': 'full', 'updated': '2026-10-25T12:00:00Z', 'execution_intent': 'goal', 'goal_tickets': 5, 'goal_waves': 0, 'continuation_authority': 'operator_required', 'authority_source': 'E-100', 'authority_until': 'budget', 'safety_valve_mode': 'hard_wait'}, board=42)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 278, in test_router_validates_preparsed_state_and_board_envelopes
+    result = router.route_next(_format_state(), BOARD, _state=state, _board=parsed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\router.py", line 250, in route_next
+    if board["errors"]:
+       ~~~~~^^^^^^^^^^
+TypeError: 'int' object is not subscriptable
+
+======================================================================
+ERROR: test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) (state={'phase': 'DONE', 'task': 'none', 'next_action': 42, 'blocker': 'none', 'transition_from': 'SHIP', 'saipen_version': 8, 'schema_version': 3, 'last_event': 100, 'style_contract': 'ded-069a4c52', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'agent': 'tester', 'mode': 'full', 'updated': '2026-10-25T12:00:00Z', 'execution_intent': 'goal', 'goal_tickets': 5, 'goal_waves': 0, 'continuation_authority': 'operator_required', 'authority_source': 'E-100', 'authority_until': 'budget', 'safety_valve_mode': 'hard_wait'}, board={'tickets': {}, 'headings': ['## DOING', '## TODO', '## DONE', '## BLOCKED'], 'errors': []})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 278, in test_router_validates_preparsed_state_and_board_envelopes
+    result = router.route_next(_format_state(), BOARD, _state=state, _board=parsed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\router.py", line 895, in route_next
+    res_action = na if (na.startswith("saipen ") or na.startswith("RUN:")) else "saipen continue"
+                        ^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'startswith'
+
+======================================================================
+ERROR: test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) (state={'phase': 'DONE', 'task': 'none', 'next_action': 'saipen continue', 'blocker': 'none', 'transition_from': 'SHIP', 'saipen_version': 8, 'schema_version': 3, 'last_event': 100, 'style_contract': 'ded-069a4c52', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'agent': 'tester', 'mode': 'full', 'updated': '2026-10-25T12:00:00Z', 'execution_intent': 'goal', 'goal_tickets': 5, 'goal_waves': 0, 'continuation_authority': 'operator_required', 'authority_source': 'E-100', 'authority_until': 'budget', 'safety_valve_mode': 'hard_wait'}, board={'tickets': 42, 'errors': []})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 278, in test_router_validates_preparsed_state_and_board_envelopes
+    result = router.route_next(_format_state(), BOARD, _state=state, _board=parsed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\router.py", line 258, in route_next
+    doing = [t for t in board["tickets"].values() if t["section"] == "## DOING"]
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'values'
+
+======================================================================
+ERROR: test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) (state={'phase': 'DONE', 'task': 'none', 'next_action': 'saipen continue', 'blocker': 'none', 'transition_from': 'SHIP', 'saipen_version': 8, 'schema_version': 3, 'last_event': 100, 'style_contract': 'ded-069a4c52', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'agent': 'tester', 'mode': 'full', 'updated': '2026-10-25T12:00:00Z', 'execution_intent': 'goal', 'goal_tickets': 5, 'goal_waves': 0, 'continuation_authority': 'operator_required', 'authority_source': 'E-100', 'authority_until': 'budget', 'safety_valve_mode': 'hard_wait'}, board={'tickets': {'T-1': 42}, 'errors': []})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 278, in test_router_validates_preparsed_state_and_board_envelopes
+    result = router.route_next(_format_state(), BOARD, _state=state, _board=parsed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\router.py", line 258, in route_next
+    doing = [t for t in board["tickets"].values() if t["section"] == "## DOING"]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\router.py", line 258, in <listcomp>
+    doing = [t for t in board["tickets"].values() if t["section"] == "## DOING"]
+                                                     ~^^^^^^^^^^^
+TypeError: 'int' object is not subscriptable
+
+======================================================================
+ERROR: test_router_validates_preparsed_state_and_board_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_validates_preparsed_state_and_board_envelopes) (state={'phase': 'DONE', 'task': 'none', 'next_action': 'saipen continue', 'blocker': 'none', 'transition_from': 'SHIP', 'saipen_version': 8, 'schema_version': 3, 'last_event': 100, 'style_contract': 'ded-069a4c52', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'agent': 'tester', 'mode': 'full', 'updated': '2026-10-25T12:00:00Z', 'execution_intent': 'goal', 'goal_tickets': 5, 'goal_waves': 0, 'continuation_authority': 'operator_required', 'authority_source': 'E-100', 'authority_until': 'budget', 'safety_valve_mode': 'hard_wait'}, board={'tickets': {}, 'errors': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 278, in test_router_validates_preparsed_state_and_board_envelopes
+    result = router.route_next(_format_state(), BOARD, _state=state, _board=parsed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\router.py", line 255, in route_next
+    "detail": "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+                                                   ~~~~~~~~~~~~~~~^^^^
+TypeError: 'int' object is not subscriptable
+
+======================================================================
+ERROR: test_same_issued_publication_carrier_reaches_pure_board_and_router (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_same_issued_publication_carrier_reaches_pure_board_and_router) (consumer='board')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 383, in test_same_issued_publication_carrier_reaches_pure_board_and_router
+    board.classify_idle_work({}, state=self.state, persistent_goals=[], publication_evidence=carrier)
+TypeError: classify_idle_work() got an unexpected keyword argument 'publication_evidence'
+
+======================================================================
+ERROR: test_same_issued_publication_carrier_reaches_pure_board_and_router (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_same_issued_publication_carrier_reaches_pure_board_and_router) (consumer='router')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 385, in test_same_issued_publication_carrier_reaches_pure_board_and_router
+    self.route(persistent_goals=[], publication_evidence=carrier)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 99, in route
+    return router.route_next(
+           ^^^^^^^^^^^^^^^^^^
+TypeError: route_next() got an unexpected keyword argument 'publication_evidence'
+
+======================================================================
+FAIL: test_authoritative_external_stop_outranks_stale_workable_board (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_authoritative_external_stop_outranks_stale_workable_board)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 212, in test_authoritative_external_stop_outranks_stale_workable_board
+    self.assertIsNone(picture["executable_work"], picture)
+AssertionError: 'T-1' is not None : {'autonomy_run_id': '', 'observed_at': '2026-10-25T12:00:00Z', 'phase': 'DONE', 'active_work': None, 'next_action': 'saipen continue', 'last_event': '100', 'state_blocker': 'BLOCKED_EXTERNAL -- current external boundary', 'worker_id': None, 'worker_generation': None, 'lease_generation': None, 'lease_state': 'UNKNOWN', 'lease_reason': 'missing_or_corrupt_runtime_state', 'heartbeat_at': None, 'heartbeat_age_seconds': None, 'workable_work': ['T-1'], 'executable_work': 'T-1', 'continuation_classification': 'WAIT_EXTERNAL', 'continuation_actionable': False, 'continuation_reason': 'unblock', 'continuation_detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'continuation_assessment': {'classification': 'WAIT_EXTERNAL', 'actionable': False, 'executable_work': None, 'action': 'saipen status', 'reason': 'unblock', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'raw_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'continuous_maintenance_proven': False, 'continuous_maintenance_claimed': False, 'operator_work': []}, 'operator_work': [], 'operator_gates': [], 'due_operator_actions': [], 'deferred_operator_gates': [], 'board_errors': [], 'no_progress_count': 0, 'progress_verdict': 'RUNNING', 'durable_checkpoint': None, 'last_progress_at': ''}
+
+======================================================================
+FAIL: test_automation_certificate_cannot_complete_unsatisfied_objectives (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_certificate_cannot_complete_unsatisfied_objectives)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 372, in test_automation_certificate_cannot_complete_unsatisfied_objectives
+    self.assertNotEqual(result["disposition"], automation.COMPLETE, result)
+AssertionError: 'COMPLETE' == 'COMPLETE' : {'schema_version': 1, 'disposition': 'COMPLETE', 'next_command': None, 'operator_action_due': False, 'reason_code': 'closure-complete', 'reason': 'all eight closure conditions mechanically true; convergence bound to source head+tree and audit epoch audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'audit_quiescent': True, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': True, 'closure_complete': True, 'source_fingerprint': 'head+tree', 'completed_at': None}
+
+======================================================================
+FAIL: test_automation_unknown_route_or_missing_certificate_cannot_continue (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_unknown_route_or_missing_certificate_cannot_continue) (route={'ok': True, 'reason': 'unknown-success', 'action': 'saipen status'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 362, in test_automation_unknown_route_or_missing_certificate_cannot_continue
+    self.assertNotIn(result["disposition"], (automation.CONTINUE, automation.COMPLETE), result)
+AssertionError: 'CONTINUE' unexpectedly found in ('CONTINUE', 'COMPLETE') : {'schema_version': 1, 'disposition': 'CONTINUE', 'next_command': 'cc', 'operator_action_due': False, 'reason_code': 'unknown-success', 'reason': 'route reason: unknown-success', 'audit_quiescent': True, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': False, 'closure_complete': False, 'source_fingerprint': 'head+tree', 'completed_at': None}
+
+======================================================================
+FAIL: test_automation_unknown_route_or_missing_certificate_cannot_continue (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_unknown_route_or_missing_certificate_cannot_continue) (route={'ok': True, 'reason': 'maintain', 'action': 'saipen continue'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 362, in test_automation_unknown_route_or_missing_certificate_cannot_continue
+    self.assertNotIn(result["disposition"], (automation.CONTINUE, automation.COMPLETE), result)
+AssertionError: 'CONTINUE' unexpectedly found in ('CONTINUE', 'COMPLETE') : {'schema_version': 1, 'disposition': 'CONTINUE', 'next_command': 'cc', 'operator_action_due': False, 'reason_code': 'closure-conditions-C3-C4-C6', 'reason': 'route reason: maintain', 'audit_quiescent': True, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': False, 'closure_complete': False, 'source_fingerprint': 'head+tree', 'completed_at': None}
+
+======================================================================
+FAIL: test_automation_unknown_route_or_missing_certificate_cannot_continue (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_automation_unknown_route_or_missing_certificate_cannot_continue) (route={'ok': True, 'reason': 'maintain', 'action': 'saipen continue', 'work_exhaustion': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 362, in test_automation_unknown_route_or_missing_certificate_cannot_continue
+    self.assertNotIn(result["disposition"], (automation.CONTINUE, automation.COMPLETE), result)
+AssertionError: 'CONTINUE' unexpectedly found in ('CONTINUE', 'COMPLETE') : {'schema_version': 1, 'disposition': 'CONTINUE', 'next_command': 'cc', 'operator_action_due': False, 'reason_code': 'closure-conditions-C3-C4-C6', 'reason': 'route reason: maintain', 'audit_quiescent': True, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': False, 'closure_complete': False, 'source_fingerprint': 'head+tree', 'completed_at': None}
+
+======================================================================
+FAIL: test_board_rejects_malformed_certificate_owner_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_board_rejects_malformed_certificate_owner_envelopes) (certificate={'status': 'VERIFIED_QUIESCENT', 'sources': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 267, in test_board_rejects_malformed_certificate_owner_envelopes
+    self.assertEqual(result["work_exhaustion"]["status"], W.INCOMPLETE_DISCOVERY)
+AssertionError: 'VERIFIED_QUIESCENT' != 'INCOMPLETE_DISCOVERY'
+- VERIFIED_QUIESCENT
++ INCOMPLETE_DISCOVERY
+
+
+======================================================================
+FAIL: test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence) (status='NO_NEW_EVIDENCE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 481, in test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence
+    self.assertNotEqual(result["state"]["campaign_state"], campaign.QUIESCENT_WAIT, result)
+AssertionError: 'QUIESCENT_WAIT' == 'QUIESCENT_WAIT' : {'ok': True, 'event': 'DISCOVERY_NO_NEW_FINDINGS', 'discovery': {'ok': True, 'status': 'NO_NEW_EVIDENCE'}, 'state': {'authority_grant': {'authorization': {'authorized_scopes': ['AUDIT_STAGING', 'CAMPAIGN_EXECUTION', 'EXTERNAL_AUDIT_PUBLICATION', 'FORENSIC_ANALYSIS', 'PROTOCOL_REPAIR', 'SAIPEN_AUDIT_INGESTION', 'continuous_maintenance'], 'campaign_limit': 1, 'expires_at': 1794328559.596045, 'goal_binding': {'authority_source': 'E-100', 'goal_ingress': ''}, 'host': 'claude', 'kind': 'saipen-campaign-authorization', 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'resource_budget': {'max_cycles': 1000, 'max_generations': 1000, 'max_wall_seconds': 200000}, 'schema_version': 1, 'session': 'contract-session', 'target_project': 'V:\\_TEMP_\\saipen-terminal-guards-yg0c69rz'}, 'operator_origin': {'kind': 'operator-origin', 'nonce': '9e344714b67940a5bfc307854c7f2e07', 'request_digest': 'ea47f7bae353436491e7eb4abf17c8c3303331f427a8d4747af6533107d95638'}}, 'authority_grant_digest': 'ef7a5365d145ec0a18a3bcf3cdbc14dceed6154eabd473b4a7737b88253f84f8', 'authority_proof_reference': '.saipen/authority/grant.json', 'authority_scope': 'continuous_maintenance', 'campaign_id': 'CAMP-T2040-TERMINAL', 'campaign_state': 'QUIESCENT_WAIT', 'cancellation_epoch': 0, 'created_at': '2026-11-08T09:02:39Z', 'current_work': None, 'cycle_count': 1, 'goal_binding': {'authority_source': 'E-100', 'goal_ingress': ''}, 'last_analysis_generation': 0, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-11-08T09:02:39Z', 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'saipen continue', 'no_progress_count': 0, 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'resource_budget': {'max_cycles': 10, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': '2fcee6f4749f225fa026e7cac0f90cd5b8a924298e44287f4ebfa3befebff088', 'updated_at': '2026-11-08T09:02:39Z', 'wake_condition': None, 'worker_generation': 0}}
+
+======================================================================
+FAIL: test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence) (status='UNKNOWN_SUCCESS')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 481, in test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence
+    self.assertNotEqual(result["state"]["campaign_state"], campaign.QUIESCENT_WAIT, result)
+AssertionError: 'QUIESCENT_WAIT' == 'QUIESCENT_WAIT' : {'ok': True, 'event': 'DISCOVERY_NO_NEW_FINDINGS', 'discovery': {'ok': True, 'status': 'UNKNOWN_SUCCESS'}, 'state': {'authority_grant': {'authorization': {'authorized_scopes': ['AUDIT_STAGING', 'CAMPAIGN_EXECUTION', 'EXTERNAL_AUDIT_PUBLICATION', 'FORENSIC_ANALYSIS', 'PROTOCOL_REPAIR', 'SAIPEN_AUDIT_INGESTION', 'continuous_maintenance'], 'campaign_limit': 1, 'expires_at': 1794328559.596045, 'goal_binding': {'authority_source': 'E-100', 'goal_ingress': ''}, 'host': 'claude', 'kind': 'saipen-campaign-authorization', 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'resource_budget': {'max_cycles': 1000, 'max_generations': 1000, 'max_wall_seconds': 200000}, 'schema_version': 1, 'session': 'contract-session', 'target_project': 'V:\\_TEMP_\\saipen-terminal-guards-yg0c69rz'}, 'operator_origin': {'kind': 'operator-origin', 'nonce': '9e344714b67940a5bfc307854c7f2e07', 'request_digest': 'ea47f7bae353436491e7eb4abf17c8c3303331f427a8d4747af6533107d95638'}}, 'authority_grant_digest': 'ef7a5365d145ec0a18a3bcf3cdbc14dceed6154eabd473b4a7737b88253f84f8', 'authority_proof_reference': '.saipen/authority/grant.json', 'authority_scope': 'continuous_maintenance', 'campaign_id': 'CAMP-T2040-TERMINAL', 'campaign_state': 'QUIESCENT_WAIT', 'cancellation_epoch': 0, 'created_at': '2026-11-08T09:02:39Z', 'current_work': None, 'cycle_count': 2, 'goal_binding': {'authority_source': 'E-100', 'goal_ingress': ''}, 'last_analysis_generation': 0, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-11-08T09:02:39Z', 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'saipen continue', 'no_progress_count': 0, 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'resource_budget': {'max_cycles': 10, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'df23bd5d7753548a7d0739e8c6274a9fd00144c53d7b6478e35ee766341e3985', 'updated_at': '2026-11-08T09:02:39Z', 'wake_condition': None, 'worker_generation': 0}}
+
+======================================================================
+FAIL: test_campaign_valid_hint_reuses_one_bounded_worker_attempt (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_campaign_valid_hint_reuses_one_bounded_worker_attempt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 463, in test_campaign_valid_hint_reuses_one_bounded_worker_attempt
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'INCOMPLETE_DISCOVERY', 'event': 'INCOMPLETE_DISCOVERY', 'classification': 'INCOMPLETE_DISCOVERY', 'detail': 'current terminal evidence', 'state': {'authority_grant': {'authorization': {'authorized_scopes': ['AUDIT_STAGING', 'CAMPAIGN_EXECUTION', 'EXTERNAL_AUDIT_PUBLICATION', 'FORENSIC_ANALYSIS', 'PROTOCOL_REPAIR', 'SAIPEN_AUDIT_INGESTION', 'continuous_maintenance'], 'campaign_limit': 1, 'expires_at': 1794328559.8932645, 'goal_binding': {'authority_source': 'E-3', 'goal_ingress': 'goal-e09647e06f5f2a24'}, 'host': 'claude', 'kind': 'saipen-campaign-authorization', 'project_lineage': 'lineage-66c8e9475780402cafc6e706b302bedd', 'resource_budget': {'max_cycles': 1000, 'max_generations': 1000, 'max_wall_seconds': 200000}, 'schema_version': 1, 'session': 'contract-session', 'target_project': 'V:\\_TEMP_\\t2023-e8hl_5nl'}, 'operator_origin': {'kind': 'operator-origin', 'nonce': 'c96ec1c063c14a0d870e0d556c5bcf51', 'request_digest': '039cc14f8c0c946830f305d17bca58d9402dbff8ded54a333741d51225b18bc0'}}, 'authority_grant_digest': '06f0720ad0aab8e3c084b67e041f92118f8fd78d9d1ef5ad937508327425a53b', 'authority_proof_reference': '.saipen/authority/grant.json', 'authority_scope': 'continuous_maintenance', 'campaign_id': 'CAMP-T2040-TERMINAL', 'campaign_state': 'EXTERNAL_BLOCKED', 'cancellation_epoch': 0, 'created_at': '2026-11-08T09:02:39Z', 'current_work': None, 'cycle_count': 1, 'goal_binding': {'authority_source': 'E-3', 'goal_ingress': 'goal-e09647e06f5f2a24'}, 'last_analysis_generation': 0, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-11-08T09:02:39Z', 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'saipen improve', 'no_progress_count': 0, 'project_lineage': 'lineage-66c8e9475780402cafc6e706b302bedd', 'resource_budget': {'max_cycles': 10, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'd8de5d5bab2e0fe8bf96c8fcc6bbac959eaabeab4f25faf6271591ab789599f5', 'updated_at': '2026-11-08T09:02:39Z', 'wake_condition': {'event': 'current_discovery_evidence'}, 'worker_generation': 0}}
+
+======================================================================
+FAIL: test_external_wait_supervisor_never_becomes_idle (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_external_wait_supervisor_never_becomes_idle) (lease=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 176, in test_external_wait_supervisor_never_becomes_idle
+    self.assertEqual(result["verdict"], CA.WAIT_EXTERNAL, result)
+AssertionError: 'IDLE' != 'WAIT_EXTERNAL'
+- IDLE
++ WAIT_EXTERNAL
+ : {'verdict': 'IDLE', 'reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'may_mutate': False, 'requires_human': False, 'next_command': 'saipen status --json', 'stop_reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'observation': {'autonomy_run_id': '', 'observed_at': '2026-10-25T12:03:20Z', 'phase': 'DONE', 'active_work': None, 'next_action': 'saipen continue', 'last_event': '100', 'state_blocker': 'BLOCKED_EXTERNAL -- current external boundary', 'worker_id': None, 'worker_generation': None, 'lease_generation': None, 'lease_state': 'UNKNOWN', 'lease_reason': 'missing_or_corrupt_runtime_state', 'heartbeat_at': None, 'heartbeat_age_seconds': None, 'workable_work': [], 'executable_work': None, 'continuation_classification': 'WAIT_EXTERNAL', 'continuation_actionable': False, 'continuation_reason': 'unblock', 'continuation_detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'continuation_assessment': {'classification': 'WAIT_EXTERNAL', 'actionable': False, 'executable_work': None, 'action': 'saipen status', 'reason': 'unblock', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'raw_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'continuous_maintenance_proven': False, 'continuous_maintenance_claimed': False, 'operator_work': []}, 'operator_work': [], 'operator_gates': [], 'due_operator_actions': [], 'deferred_operator_gates': [], 'board_errors': [], 'no_progress_count': 0, 'progress_verdict': 'RUNNING', 'durable_checkpoint': None, 'last_progress_at': ''}}
+
+======================================================================
+FAIL: test_external_wait_supervisor_never_becomes_idle (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_external_wait_supervisor_never_becomes_idle) (lease='EXPIRED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 176, in test_external_wait_supervisor_never_becomes_idle
+    self.assertEqual(result["verdict"], CA.WAIT_EXTERNAL, result)
+AssertionError: 'IDLE' != 'WAIT_EXTERNAL'
+- IDLE
++ WAIT_EXTERNAL
+ : {'verdict': 'IDLE', 'reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'may_mutate': False, 'requires_human': False, 'next_command': 'saipen status --json', 'stop_reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'observation': {'autonomy_run_id': '', 'observed_at': '2026-10-25T12:03:20Z', 'phase': 'DONE', 'active_work': None, 'next_action': 'saipen continue', 'last_event': '100', 'state_blocker': 'BLOCKED_EXTERNAL -- current external boundary', 'worker_id': 'previous', 'worker_generation': 1, 'lease_generation': 1, 'lease_state': 'EXPIRED', 'lease_reason': 'heartbeat_timeout', 'heartbeat_at': '2026-10-25T12:00:00Z', 'heartbeat_age_seconds': 200.0, 'workable_work': [], 'executable_work': None, 'continuation_classification': 'WAIT_EXTERNAL', 'continuation_actionable': False, 'continuation_reason': 'unblock', 'continuation_detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'continuation_assessment': {'classification': 'WAIT_EXTERNAL', 'actionable': False, 'executable_work': None, 'action': 'saipen status', 'reason': 'unblock', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'raw_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'continuous_maintenance_proven': False, 'continuous_maintenance_claimed': False, 'operator_work': []}, 'operator_work': [], 'operator_gates': [], 'due_operator_actions': [], 'deferred_operator_gates': [], 'board_errors': [], 'no_progress_count': 0, 'progress_verdict': 'RUNNING', 'durable_checkpoint': None, 'last_progress_at': ''}}
+
+======================================================================
+FAIL: test_external_wait_supervisor_never_becomes_idle (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_external_wait_supervisor_never_becomes_idle) (lease='TERMINAL')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 176, in test_external_wait_supervisor_never_becomes_idle
+    self.assertEqual(result["verdict"], CA.WAIT_EXTERNAL, result)
+AssertionError: 'IDLE' != 'WAIT_EXTERNAL'
+- IDLE
++ WAIT_EXTERNAL
+ : {'verdict': 'IDLE', 'reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'may_mutate': False, 'requires_human': False, 'next_command': 'saipen status --json', 'stop_reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'observation': {'autonomy_run_id': '', 'observed_at': '2026-10-25T12:03:20Z', 'phase': 'DONE', 'active_work': None, 'next_action': 'saipen continue', 'last_event': '100', 'state_blocker': 'BLOCKED_EXTERNAL -- current external boundary', 'worker_id': 'previous', 'worker_generation': 1, 'lease_generation': 1, 'lease_state': 'EXPIRED', 'lease_reason': 'fenced', 'heartbeat_at': '2026-10-25T12:00:00Z', 'heartbeat_age_seconds': 200.0, 'workable_work': [], 'executable_work': None, 'continuation_classification': 'WAIT_EXTERNAL', 'continuation_actionable': False, 'continuation_reason': 'unblock', 'continuation_detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'continuation_assessment': {'classification': 'WAIT_EXTERNAL', 'actionable': False, 'executable_work': None, 'action': 'saipen status', 'reason': 'unblock', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'raw_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'continuous_maintenance_proven': False, 'continuous_maintenance_claimed': False, 'operator_work': []}, 'operator_work': [], 'operator_gates': [], 'due_operator_actions': [], 'deferred_operator_gates': [], 'board_errors': [], 'no_progress_count': 0, 'progress_verdict': 'RUNNING', 'durable_checkpoint': None, 'last_progress_at': ''}}
+
+======================================================================
+FAIL: test_external_wait_worker_never_reports_success_or_takes_authority (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_external_wait_worker_never_reports_success_or_takes_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 186, in test_external_wait_worker_never_reports_success_or_takes_authority
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'gpu_lane': None, 'ok': True, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-5500d9d29c72', 'stop': 'IDLE', 'reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'operator_action': None, 'counters': {'cycles': 1, 'worker_generation_count': 0, 'crash_recovery_count': 0, 'model_replacement_recovery_count': 0, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 0, 'slow_progress_slices': 0, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {}}, 'maximum_recovery_latency_seconds': 0.0, 'model': None, 'history': []}
+
+======================================================================
+FAIL: test_native_grant_valid_hint_automation_continues_without_promotion (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_native_grant_valid_hint_automation_continues_without_promotion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 417, in test_native_grant_valid_hint_automation_continues_without_promotion
+    self.assertEqual(result["disposition"], automation.CONTINUE, result)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+ : {'schema_version': 1, 'disposition': 'BLOCKED', 'next_command': None, 'operator_action_due': False, 'reason_code': 'incomplete-discovery', 'reason': 'current terminal evidence', 'audit_quiescent': True, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': False, 'closure_complete': False, 'source_fingerprint': 'head+tree', 'completed_at': None}
+
+======================================================================
+FAIL: test_native_grant_valid_hint_supervisor_uses_existing_execution_seam (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_native_grant_valid_hint_supervisor_uses_existing_execution_seam)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 429, in test_native_grant_valid_hint_supervisor_uses_existing_execution_seam
+    self.assertEqual(result["verdict"], supervisor.RUN_WORK, result)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'RUN_WORK'
+- INCOMPLETE_DISCOVERY
++ RUN_WORK
+ : {'verdict': 'INCOMPLETE_DISCOVERY', 'reason': 'current terminal evidence', 'may_mutate': False, 'requires_human': False, 'next_command': 'saipen status --json', 'stop_reason': 'current terminal evidence', 'observation': {'autonomy_run_id': '', 'observed_at': '2026-11-08T09:02:40Z', 'phase': 'DONE', 'active_work': None, 'next_action': 'saipen ticket resolve-external T-1', 'last_event': '5', 'state_blocker': 'none', 'worker_id': None, 'worker_generation': None, 'lease_generation': None, 'lease_state': 'UNKNOWN', 'lease_reason': 'missing_or_corrupt_runtime_state', 'heartbeat_at': None, 'heartbeat_age_seconds': None, 'workable_work': [], 'executable_work': None, 'continuation_classification': 'INCOMPLETE_DISCOVERY', 'continuation_actionable': False, 'continuation_reason': 'maintain', 'continuation_detail': 'current terminal evidence', 'continuation_assessment': {'classification': 'INCOMPLETE_DISCOVERY', 'actionable': False, 'executable_work': None, 'action': 'saipen improve', 'reason': 'maintain', 'detail': 'current terminal evidence', 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {'ok': True, 'reason': 'maintain', 'action': 'saipen status', 'terminal_classification': 'INCOMPLETE_DISCOVERY', 'stop_reason': 'INCOMPLETE_DISCOVERY', 'work_exhaustion': {'schema_version': 2, 'status': 'INCOMPLETE_DISCOVERY', 'source_generation': '5', 'sources': [{'source_name': 'active_work', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'canonical_recovery', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'actionable_todo', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'unresolved_source', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'unconsumed_audit_inbox', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'release_obligations', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'future_gates', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'hunt_findings', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'improve_candidates', 'source_generation': '5', 'last_checked_generation': None, 'checked': False, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': ['saipen improve']}, {'source_name': 'external_forensics', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'conformance_debt', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'persistent_goals', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}], 'all_checked': False, 'exhausted': False, 'certificate_errors': [], 'blocked_obligations': [], 'discovery_dispatch': {'source_name': 'improve_candidates', 'source_generation': '5', 'action': 'saipen improve', 'bounded': True}}, 'detail': 'current terminal evidence', 'all_requirements_complete': False, 'discovery_dispatch': {'source_name': 'improve_candidates', 'source_generation': '5', 'action': 'saipen improve', 'bounded': True}}, 'raw_route': {'ok': True, 'reason': 'maintain', 'action': 'saipen status', 'terminal_classification': 'INCOMPLETE_DISCOVERY', 'stop_reason': 'INCOMPLETE_DISCOVERY', 'work_exhaustion': {'schema_version': 2, 'status': 'INCOMPLETE_DISCOVERY', 'source_generation': '5', 'sources': [{'source_name': 'active_work', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'canonical_recovery', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'actionable_todo', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'unresolved_source', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'unconsumed_audit_inbox', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'release_obligations', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'future_gates', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'hunt_findings', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'improve_candidates', 'source_generation': '5', 'last_checked_generation': None, 'checked': False, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': ['saipen improve']}, {'source_name': 'external_forensics', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'conformance_debt', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'persistent_goals', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}], 'all_checked': False, 'exhausted': False, 'certificate_errors': [], 'blocked_obligations': [], 'discovery_dispatch': {'source_name': 'improve_candidates', 'source_generation': '5', 'action': 'saipen improve', 'bounded': True}}, 'detail': 'current terminal evidence', 'all_requirements_complete': False, 'discovery_dispatch': {'source_name': 'improve_candidates', 'source_generation': '5', 'action': 'saipen improve', 'bounded': True}}, 'continuous_maintenance_proven': True, 'continuous_maintenance_claimed': False, 'operator_work': [], 'discovery_dispatch': {'source_name': 'improve_candidates', 'source_generation': '5', 'action': 'saipen improve', 'bounded': True}}, 'operator_work': [], 'operator_gates': [], 'due_operator_actions': [], 'deferred_operator_gates': [], 'board_errors': [], 'no_progress_count': 0, 'progress_verdict': 'RUNNING', 'durable_checkpoint': None, 'last_progress_at': ''}}
+
+======================================================================
+FAIL: test_outcome_failure_cannot_leak_router_completion (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_outcome_failure_cannot_leak_router_completion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 338, in test_outcome_failure_cannot_leak_router_completion
+    self.assertNotEqual(result.get("stop_reason"), "ALL_REQUIREMENTS_COMPLETE", result)
+AssertionError: 'ALL_REQUIREMENTS_COMPLETE' == 'ALL_REQUIREMENTS_COMPLETE' : {'ok': True, 'action': 'saipen continue', 'reason': 'maintain', 'work_exhaustion': {'schema_version': 2, 'status': 'VERIFIED_QUIESCENT', 'source_generation': '100', 'sources': [{'source_name': 'active_work', 'source_generation': '100', 'last_checked_generation': '100', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'canonical_recovery', 'source_generation': '100', 'last_checked_generation': '100', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'actionable_todo', 'source_generation': '100', 'last_checked_generation': '100', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'unresolved_source', 'source_generation': '100', 'last_checked_generation': '100', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'unconsumed_audit_inbox', 'source_generation': '100', 'last_checked_generation': '100', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'release_obligations', 'source_generation': '100', 'last_checked_generation': '100', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'future_gates', 'source_generation': '100', 'last_checked_generation': '100', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'hunt_findings', 'source_generation': '100', 'last_checked_generation': '100', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'improve_candidates', 'source_generation': '100', 'last_checked_generation': '100', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'external_forensics', 'source_generation': '100', 'last_checked_generation': '100', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'conformance_debt', 'source_generation': '100', 'last_checked_generation': '100', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'persistent_goals', 'source_generation': '100', 'last_checked_generation': '100', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}], 'all_checked': True, 'exhausted': True, 'certificate_errors': [], 'blocked_obligations': []}, 'outcome_truth_error': 'ValueError: owner proof unreadable', 'stop_reason': 'ALL_REQUIREMENTS_COMPLETE', 'terminal_classification': 'ALL_WORK_COMPLETE', 'idle_classification': 'ALL_WORK_COMPLETE', 'unresolved_audit_count': 0, 'next_exact_action': 'saipen status', 'detail': 'no pending recovery, no active ticket, no workable TODO; continue ordinary maintenance'}
+
+======================================================================
+FAIL: test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'audit_inbox': {'pending': 42}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 291, in test_router_rejects_malformed_truthy_projection_envelopes
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'action': 'saipen status', 'reason': 'maintain', 'stop_reason': 'NO_ADMISSIBLE_WORK', 'terminal_classification': 'NO_ADMISSIBLE_WORK', 'idle_classification': 'NO_ADMISSIBLE_WORK', 'primary_blocker': None, 'unresolved_audit_count': 42, 'next_exact_action': 'saipen status', 'externally_blocked': [], 'operator_required': [], 'future_gated': [], 'detail': 'no runnable work remains; backlog is unworkable or blocked', 'work_exhaustion': {'schema_version': 2, 'status': 'WORK_ELIGIBLE', 'legacy_status': 'WORK_ELIGIBLE', 'source_generation': '100', 'sources': [{'source_name': 'active_work', 'source_generation': '100', 'last_checked_generation': '100', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'canonical_recovery', 'source_generation': '100', 'last_checked_generation': '100', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'actionable_todo', 'source_generation': '100', 'last_checked_generation': '100', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'unresolved_source', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'provider result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'unconsumed_audit_inbox', 'source_generation': '100', 'last_checked_generation': '100', 'eligibility_result': 'WORK_AVAILABLE', 'authorized_actions': ['saipen audit ingest'], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'release_obligations', 'source_generation': '100', 'last_checked_generation': '100', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'future_gates', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'provider result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'hunt_findings', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'provider result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'improve_candidates', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'BLOCKED_AUTHORITY', 'authorized_actions': [], 'exact_blocker': 'current continuous maintenance grant is not proven', 'next_recheck_condition': 'authenticated grant restored within its scope', 'checked': False}, {'source_name': 'external_forensics', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'provider result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'conformance_debt', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'provider result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'persistent_goals', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'goal inventory or evaluation is incomplete', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}], 'exhausted': False, 'verified_exhausted': False, 'no_work_available': False, 'all_checked': False, 'blocked_sources': ['improve_candidates'], 'blocked_obligations': [], 'certificate_errors': []}, 'outcome_truth': {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_PENDING', 'publication_details': {'tickets': [], 'diagnostics': []}, 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PENDING'}, 'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED'}
+
+======================================================================
+FAIL: test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'queued_source': {'action': 42}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 291, in test_router_rejects_malformed_truthy_projection_envelopes
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'action': 42, 'reason': 'queued-source', 'receipt': None, 'detail': 'queued explicit user Source owns continuation'}
+
+======================================================================
+FAIL: test_router_rejects_malformed_truthy_projection_envelopes (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes) (projection={'pending_append': {'action': 42}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 291, in test_router_rejects_malformed_truthy_projection_envelopes
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'action': 42, 'reason': 'unprojected-source-append', 'receipt': None, 'source_receipt': None, 'ticket': None, 'detail': None}
+
+======================================================================
+FAIL: test_stored_actionable_goals_cannot_override_current_blocked_assessment (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_stored_actionable_goals_cannot_override_current_blocked_assessment) (classification='WAIT_EXTERNAL')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 231, in test_stored_actionable_goals_cannot_override_current_blocked_assessment
+    self.assertFalse(result["executable_action_remains"], result)
+AssertionError: True is not false : {'schema_version': 1, 'decision': 'OPERATOR_WAIT', 'goal_complete': False, 'executable_action_remains': True, 'operator_due': True, 'valve_tripped': False, 'requires_human': True, 'canonical_task': 'none', 'phase': 'DONE', 'next_action': 'saipen continue', 'execution_intent': 'goal', 'executor_assessed': False, 'executor_compatible': True, 'executor_id': None, 'missing_capabilities': [], 'required_capabilities': ['patch_application', 'process_execution', 'saipen_control'], 'executor_capabilities': None, 'admission': {'result': 'UNASSESSED', 'missing': [], 'next': 'NONE'}, 'route_reason': 'unblock', 'route_action': 'saipen status', 'state_readable': True, 'recall_decision': None, 'continuation_classification': 'WAIT_EXTERNAL', 'work_exhaustion': None, 'goal_inventory': {'complete': True, 'errors': [], 'unreadable': []}}
+
+======================================================================
+FAIL: test_stored_actionable_goals_cannot_override_current_blocked_assessment (test_t2040_terminal_consumer_guards.TerminalConsumerGuards.test_stored_actionable_goals_cannot_override_current_blocked_assessment) (classification='WAIT_OPERATOR')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 227, in test_stored_actionable_goals_cannot_override_current_blocked_assessment
+    self.write_state(**kwargs)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_guards.py", line 95, in write_state
+    self.assertIsNone(error, error)
+AssertionError: "next_action is a malformed WAIT (a WAIT with no category token, no ' -- ' delimiter or more than one sentence is never legal) -- CORE § 1.2 requires 'WAIT: <category> -- <one sentence>' where category is one of manual-verify/destructive-op/first-publish/user brake/blocked/safety valve/init (or the exact safety-valve pause); it has no ' -- ' delimiter: a bare category names the KIND of stop and asks nothing, which CORE § 1.2 forbids (got 'user brake operator stopped work')" is not None : next_action is a malformed WAIT (a WAIT with no category token, no ' -- ' delimiter or more than one sentence is never legal) -- CORE § 1.2 requires 'WAIT: <category> -- <one sentence>' where category is one of manual-verify/destructive-op/first-publish/user brake/blocked/safety valve/init (or the exact safety-valve pause); it has no ' -- ' delimiter: a bare category names the KIND of stop and asks nothing, which CORE § 1.2 forbids (got 'user brake operator stopped work')
+
+----------------------------------------------------------------------
+Ran 26 tests in 1.546s
+
+FAILED (failures=21, errors=40)
+
+{"errors": 40, "failures": 21, "oracle_sha256": "40d465cee2271b3048ff155853cef59c6ae628de95b9c4f65d750db60a112adb", "seconds": 1.641, "skipped": 0, "tests": 26}

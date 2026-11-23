@@ -1,0 +1,34 @@
+machine runtime : C:\ProgramData\SAI\SAIPEN
+recorded home   : V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+fixture project : V:\_TEMP_\saipen-t1614-_zv116zb\project  (ticket T-1)
+principal holds : Everyone, BUILTIN\Users, NT AUTHORITY\INTERACTIVE, CONSOLE LOGON, NT AUTHORITY\Authenticated Users, NT AUTHORITY\This Organization, NT AUTHORITY\Local account, LOCAL, NT AUTHORITY\NTLM Authentication
+deny-only       : operator SID, NT AUTHORITY\Local account and member of Administrators group, DESKTOP-TTH0L52\docker-users, BUILTIN\Administrators
+
+PASS  operator profile file is closed
+      rc=1 Access is denied.
+PASS  operator SAIPEN home is closed
+      rc=1 Access is denied.
+PASS  operator interpreter is closed
+      rc=1 Access is denied.
+PASS  saipen is not on PATH
+      rc=1 INFO: Could not find files for the given pattern(s).
+PASS  it proves the machine runtime itself
+      {'code': 'MACHINE_RUNTIME_READY', 'saipen_runtime_ready': True, 'root': 'C:\\ProgramData\\SAI\\SAIPEN'}
+PASS  the binding is the machine runtime, the pointer is kept
+      {'code': 'HOST_BOOTSTRAP_BOUND', 'runtime_source': 'MACHINE_RUNTIME', 'legacy_saipen_home': 'INACCESSIBLE_BUT_REPLACED', 'python': 'C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe'}
+PASS  continue resumes the exact current work
+      {'ok': True, 'action': 'PHASE SCOUT T-1', 'load_path': 'C:\\ProgramData\\SAI\\SAIPEN\\runtime\\fa7c8439cc62f269\\phases\\scout.md'}
+PASS  a checkpoint lands in the granted project
+      {'ok': True, 'code': 'CHECKPOINTED', 'event_id': 'E-3'}
+PASS  the recorded home is never rebound
+      {'code': 'HOME_ALREADY_BOUND', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN'}
+PASS  the runtime it runs is closed to its writes
+      rc=1 Access is denied.
+PASS  after all of it the operator profile is still closed
+      rc=1 Access is denied.
+PASS  the machine runtime is unchanged: no other writer, no other owner
+      {'code': 'MACHINE_RUNTIME_READY', 'acl': {'checked': True, 'writable_by': [], 'foreign_owners': [], 'installed_by': 'S-1-5-21-6247072-3065140091-1424061869-1002'}}
+
+expectations: 12, held: 12
+VERDICT: PASS
+exit=0

@@ -1,0 +1,454 @@
+E501 Line too long (104 > 100)
+     --> tools\saipen.py:14113:101
+      |
+14111 |                 "mechanical_boundary": False,
+14112 |                 "note": (
+14113 |                     "Host tool-call cancellation and mechanical interception are host-owned (ZAICODE). "
+      |                                                                                                     ^^^^
+14114 |                     "SAIPEN enforces protocol-side handback only."
+14115 |                 ),
+      |
+
+E501 Line too long (111 > 100)
+  --> tools\test_t1732_protocol_hardening.py:8:101
+   |
+ 6 |    - Active ticket ownership is preserved; execution seat is not silently transferred.
+ 7 |    - STARTED returns work_claimed=True both on new claim and resumption.
+ 8 |    - CLI start returns explicit execution_instruction warning against source mutation on USER_REQUEST_RECORDED.
+   |                                                                                                     ^^^^^^^^^^^
+ 9 | 2. STOP lifecycle and safety boundaries:
+10 |    - STOP transitions to handback-only semantics with mutation_authorized=False.
+   |
+
+F401 [*] `os` imported but unused
+  --> tools\test_t1732_protocol_hardening.py:22:8
+   |
+21 | import json
+22 | import os
+   |        ^^
+23 | import shutil
+24 | import subprocess
+   |
+help: Remove unused import: `os`
+   |
+21 | import json
+   - import os
+22 | import shutil
+   |
+
+E402 Module level import not at top of file
+  --> tools\test_t1732_protocol_hardening.py:37:1
+   |
+35 |     sys.path.insert(0, str(TOOLS))
+36 |
+37 | from saipen_engine import entry, operations, ownership
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+38 | from test_hermetic_env import isolate_host_session
+   |
+help: Move module level imports to top of file
+
+F401 [*] `saipen_engine.ownership` imported but unused
+  --> tools\test_t1732_protocol_hardening.py:37:46
+   |
+35 |     sys.path.insert(0, str(TOOLS))
+36 |
+37 | from saipen_engine import entry, operations, ownership
+   |                                              ^^^^^^^^^
+38 | from test_hermetic_env import isolate_host_session
+   |
+help: Remove unused import: `saipen_engine.ownership`
+   |
+36 |
+   - from saipen_engine import entry, operations, ownership
+37 + from saipen_engine import entry, operations
+38 | from test_hermetic_env import isolate_host_session
+   |
+
+E402 Module level import not at top of file
+  --> tools\test_t1732_protocol_hardening.py:38:1
+   |
+37 | from saipen_engine import entry, operations, ownership
+38 | from test_hermetic_env import isolate_host_session
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+help: Move module level imports to top of file
+
+E501 Line too long (103 > 100)
+   --> tools\test_t1732_protocol_hardening.py:125:101
+    |
+124 |     def test_cli_start_instruction_on_user_request_recorded(self):
+125 |         """CLI start prints explicit execution instruction when request is recorded but not claimed."""
+    |                                                                                                     ^^^
+126 |         # Claim primary work
+127 |         entry.start_work(
+    |
+
+E501 Line too long (126 > 100)
+   --> tools\test_t1732_protocol_hardening.py:137:101
+    |
+135 |         saipen_py = REPO / "tools" / "saipen.py"
+136 |         proc = subprocess.run(
+137 |             [sys.executable, str(saipen_py), "start", "Secondary queued request", "--json", "--project-root", str(self.root)],
+    |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+138 |             capture_output=True,
+139 |             text=True,
+    |
+
+E501 Line too long (109 > 100)
+   --> tools\test_t1732_protocol_hardening.py:210:101
+    |
+208 |         }
+209 |         self.assertFalse(
+210 |             recorded_payload["code"] == "USER_REQUEST_RECORDED" and recorded_payload["work_claimed"] is True,
+    |                                                                                                     ^^^^^^^^^
+211 |             "Negative control passed: USER_REQUEST_RECORDED cannot claim work_claimed=True",
+212 |         )
+    |
+
+E501 Line too long (111 > 100)
+   --> tools\test_t1732_protocol_hardening.py:230:101
+    |
+228 |         }
+229 |         self.assertFalse(
+230 |             host_enforce["host_cancellation"] == "UNAVAILABLE" and host_enforce["mechanical_boundary"] is True,
+    |                                                                                                     ^^^^^^^^^^^
+231 |             "Negative control passed: UNAVAILABLE host cancellation cannot claim mechanical_boundary=True",
+232 |         )
+    |
+
+E501 Line too long (107 > 100)
+   --> tools\test_t1732_protocol_hardening.py:231:101
+    |
+229 |         self.assertFalse(
+230 |             host_enforce["host_cancellation"] == "UNAVAILABLE" and host_enforce["mechanical_boundary"] is True,
+231 |             "Negative control passed: UNAVAILABLE host cancellation cannot claim mechanical_boundary=True",
+    |                                                                                                     ^^^^^^^
+232 |         )
+    |
+
+E501 Line too long (110 > 100)
+  --> tools\test_t1734_source_drift.py:86:101
+   |
+84 |         self.assertEqual(block["drifted"], ["T-100"])
+85 |         self.assertEqual(block["works"][0]["recorded_fingerprint"], "0" * 16)
+86 |         self.assertEqual(block["works"][0]["current_fingerprint"], core_unit.tree_fingerprint(self.root)[:16])
+   |                                                                                                     ^^^^^^^^^^
+87 |
+88 |     def test_unbound_when_no_family_run_is_cited(self) -> None:
+   |
+
+F401 [*] `json` imported but unused
+  --> tools\test_t1735_tool_failure_boundaries.py:25:8
+   |
+23 | from __future__ import annotations
+24 |
+25 | import json
+   |        ^^^^
+26 | import sys
+27 | import tempfile
+   |
+help: Remove unused import: `json`
+   |
+24 |
+   - import json
+25 | import sys
+   |
+
+E501 Line too long (101 > 100)
+  --> tools\test_t1735_tool_failure_boundaries.py:76:101
+   |
+74 |             "</system-reminder>"
+75 |         )
+76 |         # Ordinary intake check without explicit flag classifies synthetic reminder as ordinary-input
+   |                                                                                                     ^
+77 |         cw = intake.capture_worthy(synthetic_todo, source_kind="user_instruction", explicit=False)
+78 |         self.assertFalse(cw["capture_required"])
+   |
+
+E501 Line too long (107 > 100)
+  --> tools\test_t1735_tool_failure_boundaries.py:90:101
+   |
+88 |             "2. Never classify synthetic reminders as human instructions.\n"
+89 |         )
+90 |         cw_genuine = intake.capture_worthy(genuine_request, source_kind="user_instruction", explicit=False)
+   |                                                                                                     ^^^^^^^
+91 |         self.assertTrue(cw_genuine["capture_required"])
+   |
+
+E501 Line too long (106 > 100)
+  --> tools\test_t1735_tool_failure_boundaries.py:96:101
+   |
+94 |         """A corrected retry must not be classified as an unchanged repeated error."""
+95 |         history = [
+96 |             {"target": "read", "path": "wrong/path/file.py", "success": False, "error": "file not found"},
+   |                                                                                                     ^^^^^^
+97 |             {"target": "read", "path": "correct/path/file.py", "success": True, "error": None},
+98 |         ]
+   |
+
+E501 Line too long (118 > 100)
+   --> tools\test_t1735_tool_failure_boundaries.py:102:101
+    |
+100 |         first_call = history[0]
+101 |         second_call = history[1]
+102 |         is_identical = (first_call["path"] == second_call["path"]) and (first_call["target"] == second_call["target"])
+    |                                                                                                     ^^^^^^^^^^^^^^^^^^
+103 |         self.assertFalse(is_identical)
+104 |         self.assertTrue(second_call["success"])
+    |
+
+E501 Line too long (110 > 100)
+   --> tools\test_t1735_tool_failure_boundaries.py:152:101
+    |
+150 |     def test_negative_controls(self):
+151 |         """Negative controls: prevent illegal classification and boundary violations."""
+152 |         # Negative Control 1: Synthetic reminder cannot have source_kind="user_instruction" with explicit=True
+    |                                                                                                     ^^^^^^^^^^
+153 |         with tempfile.TemporaryDirectory() as tmp:
+154 |             root = Path(tmp)
+    |
+
+E501 Line too long (114 > 100)
+   --> tools\test_t1735_tool_failure_boundaries.py:156:101
+    |
+154 |             root = Path(tmp)
+155 |             (root / ".saipen" / "intake").mkdir(parents=True)
+156 |             res = intake.capture_worthy("<system-reminder>test</system-reminder>", source_kind="user_instruction")
+    |                                                                                                     ^^^^^^^^^^^^^^
+157 |             self.assertFalse(res["capture_required"], "Negative control: synthetic reminder was not rejected")
+    |
+
+E501 Line too long (110 > 100)
+   --> tools\test_t1735_tool_failure_boundaries.py:157:101
+    |
+155 |             (root / ".saipen" / "intake").mkdir(parents=True)
+156 |             res = intake.capture_worthy("<system-reminder>test</system-reminder>", source_kind="user_instruction")
+157 |             self.assertFalse(res["capture_required"], "Negative control: synthetic reminder was not rejected")
+    |                                                                                                     ^^^^^^^^^^
+158 |
+159 |         # Negative Control 2: Universal retry prohibition is NOT present
+    |
+
+E501 Line too long (101 > 100)
+  --> tools\test_t1736_tool_safety_and_evidence.py:8:101
+   |
+ 6 | 1. Schema Correction and Bounded Retry:
+ 7 |    - One invalid schema call followed by a corrected call succeeds.
+ 8 |    - Two equivalent schema failures with no parameter/state change stop without a blind third repeat.
+   |                                                                                                     ^
+ 9 | 2. File Safety Protections:
+10 |    - Read-before-write: unread file modification is rejected; read-then-edit succeeds.
+   |
+
+E501 Line too long (101 > 100)
+  --> tools\test_t1736_tool_safety_and_evidence.py:11:101
+   |
+ 9 | 2. File Safety Protections:
+10 |    - Read-before-write: unread file modification is rejected; read-then-edit succeeds.
+11 |    - Optimistic concurrency: stale write against modified file is rejected; reread allows valid edit.
+   |                                                                                                     ^
+12 | 3. Task Lifecycle Idempotence:
+13 |    - Completed task stop distinguishes idempotent terminal state from real failure; does not manufacture false blockers.
+   |
+
+E501 Line too long (120 > 100)
+  --> tools\test_t1736_tool_safety_and_evidence.py:13:101
+   |
+11 |    - Optimistic concurrency: stale write against modified file is rejected; reread allows valid edit.
+12 | 3. Task Lifecycle Idempotence:
+13 |    - Completed task stop distinguishes idempotent terminal state from real failure; does not manufacture false blockers.
+   |                                                                                                     ^^^^^^^^^^^^^^^^^^^^
+14 | 4. Validation Evidence and Exit Status Preservation:
+15 |    - Piping a failing validator to a pipeline (e.g. tail) masks non-zero exit codes under standard shell;
+   |
+
+E501 Line too long (105 > 100)
+  --> tools\test_t1736_tool_safety_and_evidence.py:15:101
+   |
+13 |    - Completed task stop distinguishes idempotent terminal state from real failure; does not manufacture false blockers.
+14 | 4. Validation Evidence and Exit Status Preservation:
+15 |    - Piping a failing validator to a pipeline (e.g. tail) masks non-zero exit codes under standard shell;
+   |                                                                                                     ^^^^^
+16 |      protocol runners must preserve actual process exit codes and unclipped output.
+17 | 5. Installation Identity:
+   |
+
+E501 Line too long (116 > 100)
+  --> tools\test_t1736_tool_safety_and_evidence.py:18:101
+   |
+16 |      protocol runners must preserve actual process exit codes and unclipped output.
+17 | 5. Installation Identity:
+18 |    - Version-string equality alone does not prove installation identity; resolved root path and digest are required.
+   |                                                                                                     ^^^^^^^^^^^^^^^^
+19 | 6. Authority Boundary:
+20 |    - Confirms that tool schemas and file-edit guards are owned by the ZAICODE host; SAIPEN owns protocol evidence and recovery contrac…
+   |
+
+E501 Line too long (137 > 100)
+  --> tools\test_t1736_tool_safety_and_evidence.py:20:101
+   |
+18 | …stallation identity; resolved root path and digest are required.
+19 | …
+20 | … are owned by the ZAICODE host; SAIPEN owns protocol evidence and recovery contracts.
+   |                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+21 | …
+   |
+
+F401 [*] `json` imported but unused
+  --> tools\test_t1736_tool_safety_and_evidence.py:25:8
+   |
+23 | from __future__ import annotations
+24 |
+25 | import json
+   |        ^^^^
+26 | import os
+27 | import subprocess
+   |
+help: Remove unused import: `json`
+   |
+24 |
+   - import json
+25 | import os
+   |
+
+F401 [*] `os` imported but unused
+  --> tools\test_t1736_tool_safety_and_evidence.py:26:8
+   |
+25 | import json
+26 | import os
+   |        ^^
+27 | import subprocess
+28 | import sys
+   |
+help: Remove unused import: `os`
+   |
+25 | import json
+   - import os
+26 | import subprocess
+   |
+
+F401 [*] `tempfile` imported but unused
+  --> tools\test_t1736_tool_safety_and_evidence.py:29:8
+   |
+27 | import subprocess
+28 | import sys
+29 | import tempfile
+   |        ^^^^^^^^
+30 | import unittest
+31 | from pathlib import Path
+   |
+help: Remove unused import: `tempfile`
+   |
+28 | import sys
+   - import tempfile
+29 | import unittest
+   |
+
+E501 Line too long (106 > 100)
+  --> tools\test_t1736_tool_safety_and_evidence.py:72:101
+   |
+71 |     def test_schema_blind_repeats_bounded(self):
+72 |         """Two equivalent schema failures without parameter change stop at cap and do not blindly loop."""
+   |                                                                                                     ^^^^^^
+73 |         max_repeats = 2
+74 |         failures = 0
+   |
+
+RUF059 Unpacked variable `msg` is never used
+   --> tools\test_t1736_tool_safety_and_evidence.py:126:13
+    |
+124 |         content = editor.read("/test/file.txt")
+125 |         self.assertIn("initial line", content)
+126 |         ok, msg = editor.edit("/test/file.txt", "initial", "updated")
+    |             ^^^
+127 |         self.assertTrue(ok)
+128 |         self.assertEqual(editor.contents["/test/file.txt"], "updated line\n")
+    |
+help: Prefix it with an underscore or any other dummy variable pattern
+
+E501 Line too long (108 > 100)
+   --> tools\test_t1736_tool_safety_and_evidence.py:131:101
+    |
+130 |     def test_stale_write_reconcile_contract(self):
+131 |         """Edit against stale content is rejected; reread allows valid edit under optimistic concurrency."""
+    |                                                                                                     ^^^^^^^^
+132 |         class ConcurrencyEditor:
+133 |             def __init__(self):
+    |
+
+RUF059 Unpacked variable `msg` is never used
+   --> tools\test_t1736_tool_safety_and_evidence.py:165:13
+    |
+164 |         # Reapplied edit against fresh version succeeds
+165 |         ok, msg = ce.edit("foo.txt", "version 2 (modified by background job)", "version 3")
+    |             ^^^
+166 |         self.assertTrue(ok)
+167 |         self.assertEqual(ce.file_state, "version 3")
+    |
+help: Prefix it with an underscore or any other dummy variable pattern
+
+E501 Line too long (111 > 100)
+   --> tools\test_t1736_tool_safety_and_evidence.py:170:101
+    |
+169 |     def test_idempotent_task_stop_terminal_state(self):
+170 |         """Stopping an already-completed task produces an idempotent terminal response, not a false blocker."""
+    |                                                                                                     ^^^^^^^^^^^
+171 |         class TaskManager:
+172 |             def __init__(self):
+    |
+
+E501 Line too long (110 > 100)
+   --> tools\test_t1736_tool_safety_and_evidence.py:178:101
+    |
+176 |                 status = self.tasks.get(task_id)
+177 |                 if status == "COMPLETED" or status == "STOPPED":
+178 |                     return {"ok": True, "status": status, "message": "task is not running (already terminal)"}
+    |                                                                                                     ^^^^^^^^^^
+179 |                 if status == "RUNNING":
+180 |                     self.tasks[task_id] = "STOPPED"
+    |
+
+E501 Line too long (112 > 100)
+   --> tools\test_t1736_tool_safety_and_evidence.py:191:101
+    |
+190 |     def test_pipelined_validator_exit_status_preservation(self):
+191 |         """Shell pipe without pipefail masks failure exit codes; protocol runner preserves exact exit status."""
+    |                                                                                                     ^^^^^^^^^^^^
+192 |         import shutil
+193 |         bash_bin = shutil.which("bash")
+    |
+
+E501 Line too long (108 > 100)
+   --> tools\test_t1736_tool_safety_and_evidence.py:206:101
+    |
+204 |         else:
+205 |             # Fallback assertion if no bash is available
+206 |             p1 = subprocess.Popen([sys.executable, "-c", "import sys; sys.exit(2)"], stdout=subprocess.PIPE)
+    |                                                                                                     ^^^^^^^^
+207 |             p2 = subprocess.Popen([sys.executable, "-c", "import sys; sys.stdin.read(); sys.exit(0)"], stdin=p1.stdout)
+208 |             p1.stdout.close()
+    |
+
+E501 Line too long (119 > 100)
+   --> tools\test_t1736_tool_safety_and_evidence.py:207:101
+    |
+205 |             # Fallback assertion if no bash is available
+206 |             p1 = subprocess.Popen([sys.executable, "-c", "import sys; sys.exit(2)"], stdout=subprocess.PIPE)
+207 |             p2 = subprocess.Popen([sys.executable, "-c", "import sys; sys.stdin.read(); sys.exit(0)"], stdin=p1.stdout)
+    |                                                                                                     ^^^^^^^^^^^^^^^^^^^
+208 |             p1.stdout.close()
+209 |             p2.communicate()
+    |
+
+E501 Line too long (105 > 100)
+   --> tools\test_t1736_tool_safety_and_evidence.py:216:101
+    |
+215 |     def test_installation_identity_beyond_version_string(self):
+216 |         """Version string equality does not prove installation identity; path and digest are required."""
+    |                                                                                                     ^^^^^
+217 |         inst_a = {
+218 |             "version": "8.1.0",
+    |
+
+Found 39 errors.
+[*] 6 fixable with the `--fix` option (2 hidden fixes can be enabled with the `--unsafe-fixes` option).

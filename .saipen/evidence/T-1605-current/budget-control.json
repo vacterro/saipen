@@ -1,0 +1,8 @@
+{
+  "limit": 310272,
+  "current": 309346,
+  "good": "PASS",
+  "overflow": 310273,
+  "bad": "FAIL",
+  "smallest_whole_kib": 303
+}

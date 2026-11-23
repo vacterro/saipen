@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-008:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Use a clean Chromium profile dedicated exclusively to AUDAPACK instead of requiring Brave."
+    }
+  },
+  "derived_at": "2026-08-31T03:07:35Z",
+  "derived_from": "SRC-008",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7897132a2b877f757281e9396a619b7e298bef890f74374c55ec5dc180ce954e"
+}

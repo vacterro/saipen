@@ -1,0 +1,11 @@
+{
+  "extensions/adapters/opencode/saipen-guard.js": "126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d",
+  "extensions/adapters/opencode.md": "2ba9b7e542c863d17beb05aee9852dbc5026f90bf11c6326b0bbac3a997042d7",
+  "extensions/adapters/registry.json": "5aea82292d5cb8ade7eb0571a1d771578f1992f2c980fd3bfff4a07513467b30",
+  "tools/saipen_engine/native_host_policy.py": null,
+  "tools/test_t1628_opencode_policy.py": null,
+  "tools/test_opencode_adapter.py": "518383e5ecdc110e0e2acd50bd69614bc3de4a85288cb0bbaa2434f59b5620f7",
+  "tools/test_continue_entry.py": "b3011917374317eb324c5b02a71b06b39e5a5a57cde60e6b0ba29d7bd7603d8d",
+  "tools/test_t1624_host_integration.py": "01411adf6f620e4e36f34a087021abb92172da895890287836dad3865eb7f95f",
+  "tools/test_t1327_zero_manual_recovery.py": "a37f19f37f024059a6d095f28eeceb488887be42a84ad70fa56234ec8bc944af"
+}

@@ -1,0 +1,16 @@
+utc: 2026-10-08T01:21:34Z
+command: python -B .saipen/evidence/T-1671-lifecycle-authority/review_launcher.py .
+=== bin/saipen.cmd via cmd.exe
+  status      : {"ok": false, "code": "PROTOCOL_STATE_INVALID", "reason": "UNAUTHORIZED_LIFECYCLE_WRITE", "action": "saipen recover"}
+  ticket done : {"ok": false, "code": "PROTOCOL_STATE_INVALID"} | canonical bytes unchanged: True
+  recover     : {"ok": false, "code": "RECONCILE_REAUTH_REQUIRED", "canonical_next_command": "saipen recover --apply-approved-repair 3fe5915ff64cfc0cebc39be634266003a529df44fb8aba2dfe08ad8762806ea7"}
+  approved    : {"ok": true, "code": "REPAIRED", "event": "E-9"}
+  status after: {"ok": true, "top_workable_ticket": "T-001"}
+=== bin/saipen via sh
+  status      : {"ok": false, "code": "PROTOCOL_STATE_INVALID", "reason": "UNAUTHORIZED_LIFECYCLE_WRITE", "action": "saipen recover"}
+  ticket done : {"ok": false, "code": "PROTOCOL_STATE_INVALID"} | canonical bytes unchanged: True
+  recover     : {"ok": false, "code": "RECONCILE_REAUTH_REQUIRED", "canonical_next_command": "saipen recover --apply-approved-repair d548a8c8c6515fa67bd125de443ec1986c5f8413ba38d9c81bba5fcb94b7a9df"}
+  approved    : {"ok": true, "code": "REPAIRED", "event": "E-9"}
+  status after: {"ok": true, "top_workable_ticket": "T-001"}
+launcher paths that did not hold: 0
+--- exit: 0 ---

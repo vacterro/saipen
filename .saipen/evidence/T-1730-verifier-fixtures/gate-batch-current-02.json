@@ -1,0 +1,15 @@
+{
+  "job_pid": 16960,
+  "status": "stopped",
+  "runner_pid": 15700,
+  "started_utc": "2026-10-12T19:44:26.024982+00:00",
+  "completed": [
+    "floor-current-02",
+    "order-current-02",
+    "tags-current-02"
+  ],
+  "core_record": ".saipen/evidence/core-unit/4227ce21b1e99182-20261012T200757Z.json",
+  "current_gate": "audit-current-02",
+  "reason": "RuntimeError: mandatory gate audit-current-02 returned 1",
+  "finished_utc": "2026-10-12T20:18:44.986409+00:00"
+}

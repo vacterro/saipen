@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1762_control_count_scope.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap"
+  ],
+  "oracle_files": [
+    "tools/test_t1762_control_count_scope.py",
+    "tools/test_verification_grammar.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/log.py"
+  ],
+  "before": {
+    "tools/saipen_engine/log.py": ".saipen/evidence/T-1762-control-count/before/log.py"
+  },
+  "timeout": 600
+}

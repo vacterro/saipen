@@ -1,0 +1,29 @@
+E.......
+======================================================================
+ERROR: test_fidelity_mismatch_still_refuses_instead_of_relabelling (tools.test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_fidelity_mismatch_still_refuses_instead_of_relabelling)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-carrier-pair-9nvf9jfg\after\tools\test_t1844_operator_origin.py", line 117, in test_fidelity_mismatch_still_refuses_instead_of_relabelling
+    result = OT.witness(TEXT, env={OT.ENV_TASK_SHA256: "0" * 64}, root=self.root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t1844-carrier-pair-9nvf9jfg\after\tools\saipen_engine\operator_task.py", line 484, in witness
+    route = _reachable_route(env)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t1844-carrier-pair-9nvf9jfg\after\tools\saipen_engine\operator_task.py", line 256, in _reachable_route
+    return file_route(env.get(ENV_TASK_FILE))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t1844-carrier-pair-9nvf9jfg\after\tools\saipen_engine\operator_task.py", line 236, in file_route
+    from .guard_events import ingress_payload_literal
+  File "V:\_TEMP_\t1844-carrier-pair-9nvf9jfg\after\tools\saipen_engine\guard_events.py", line 47, in <module>
+    from .admission import normalize_action
+  File "V:\_TEMP_\t1844-carrier-pair-9nvf9jfg\after\tools\saipen_engine\admission.py", line 152, in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t1844-carrier-pair-9nvf9jfg\after\tools\saipen_engine\admission.py", line 137, in _load_registry
+    raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1844-carrier-pair-9nvf9jfg\after\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1844-carrier-pair-9nvf9jfg\\after\\extensions\\adapters\\registry.json'
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.049s
+
+FAILED (errors=1)

@@ -1,0 +1,26 @@
+test_a_historical_fail_is_not_safety_authority (__main__.DeterministicBudgetRefusalTests.test_a_historical_fail_is_not_safety_authority) ... ok
+test_a_measured_over_budget_copy_is_never_a_refusal (__main__.DeterministicBudgetRefusalTests.test_a_measured_over_budget_copy_is_never_a_refusal) ... ok
+test_a_non_positive_timeout_is_a_deterministic_refusal (__main__.DeterministicBudgetRefusalTests.test_a_non_positive_timeout_is_a_deterministic_refusal) ... ok
+test_a_supported_timeout_is_not_refused_by_history (__main__.DeterministicBudgetRefusalTests.test_a_supported_timeout_is_not_refused_by_history) ... ok
+test_a_timeout_above_the_focused_cap_names_the_reachable_route (__main__.DeterministicBudgetRefusalTests.test_a_timeout_above_the_focused_cap_names_the_reachable_route) ... ok
+test_a_changed_source_tree_does_not_inherit_the_old_timing (__main__.HistoricalTimingAdvisoryTests.test_a_changed_source_tree_does_not_inherit_the_old_timing) ... ok
+test_a_declared_scope_gets_a_reachable_recommendation (__main__.HistoricalTimingAdvisoryTests.test_a_declared_scope_gets_a_reachable_recommendation) ... ok
+test_a_full_scope_recommendation_names_a_reachable_route (__main__.HistoricalTimingAdvisoryTests.test_a_full_scope_recommendation_names_a_reachable_route) ... ok
+test_a_measured_copy_within_budget_is_not_an_advisory (__main__.HistoricalTimingAdvisoryTests.test_a_measured_copy_within_budget_is_not_an_advisory) ... ok
+test_a_small_current_corpus_is_not_blocked_by_a_large_old_one (__main__.HistoricalTimingAdvisoryTests.test_a_small_current_corpus_is_not_blocked_by_a_large_old_one) ... ok
+test_another_pattern_set_is_not_this_selection (__main__.HistoricalTimingAdvisoryTests.test_another_pattern_set_is_not_this_selection) ... ok
+test_missing_record_directory_is_not_an_advisory (__main__.HistoricalTimingAdvisoryTests.test_missing_record_directory_is_not_an_advisory) ... ok
+test_the_60_second_floor_keeps_noise_out_of_the_advisory (__main__.HistoricalTimingAdvisoryTests.test_the_60_second_floor_keeps_noise_out_of_the_advisory) ... ok
+test_the_worst_record_wins_whatever_the_filename_order (__main__.HistoricalTimingAdvisoryTests.test_the_worst_record_wins_whatever_the_filename_order) ... ok
+test_unreadable_or_corrupt_records_never_advise (__main__.HistoricalTimingAdvisoryTests.test_unreadable_or_corrupt_records_never_advise) ... ok
+test_without_a_tree_identity_the_advisory_still_never_refuses (__main__.HistoricalTimingAdvisoryTests.test_without_a_tree_identity_the_advisory_still_never_refuses) ... ok
+test_a_dead_pattern_is_refused_before_the_copy (__main__.SelectionRefusalTests.test_a_dead_pattern_is_refused_before_the_copy) ... ok
+test_a_live_pattern_proceeds (__main__.SelectionRefusalTests.test_a_live_pattern_proceeds) ... ok
+test_a_missing_tools_dir_is_not_a_selection_refusal (__main__.SelectionRefusalTests.test_a_missing_tools_dir_is_not_a_selection_refusal) ... ok
+test_one_live_one_dead_refuses_only_the_dead_one (__main__.SelectionRefusalTests.test_one_live_one_dead_refuses_only_the_dead_one) ... ok
+test_selection_agrees_with_the_shared_scope_selector (__main__.SelectionRefusalTests.test_selection_agrees_with_the_shared_scope_selector) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.062s
+
+OK

@@ -1,0 +1,210 @@
+test_exact_legacy_candidate_is_scoped_not_foreign_or_prefix (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_exact_legacy_candidate_is_scoped_not_foreign_or_prefix) ... FAIL
+test_goal_policy_is_pinned_for_apply_and_recovery (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_goal_policy_is_pinned_for_apply_and_recovery) ... 
+  test_goal_policy_is_pinned_for_apply_and_recovery (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_goal_policy_is_pinned_for_apply_and_recovery) (recovering=False) ... FAIL
+  test_goal_policy_is_pinned_for_apply_and_recovery (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_goal_policy_is_pinned_for_apply_and_recovery) (recovering=True) ... FAIL
+test_legacy_blocked_identity_deduplicates_but_never_restores (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_legacy_blocked_identity_deduplicates_but_never_restores) ... FAIL
+test_malformed_board_and_noncanonical_encoding_fail_closed (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_malformed_board_and_noncanonical_encoding_fail_closed) ... ok
+test_missing_board_is_invalid_not_an_empty_queue (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_missing_board_is_invalid_not_an_empty_queue) ... 
+  test_missing_board_is_invalid_not_an_empty_queue (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_missing_board_is_invalid_not_an_empty_queue) (reader=True) ... FAIL
+  test_missing_board_is_invalid_not_an_empty_queue (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_missing_board_is_invalid_not_an_empty_queue) (entrypoint=True) ... ERROR
+test_native_restore_preserves_sources_origin_foreign_work_and_replay (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_native_restore_preserves_sources_origin_foreign_work_and_replay) ... FAIL
+test_native_revocation_after_plan_refuses_before_work_write (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_native_revocation_after_plan_refuses_before_work_write) ... ok
+test_prose_does_not_acquire_candidate_identity (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_prose_does_not_acquire_candidate_identity) ... 
+  test_prose_does_not_acquire_candidate_identity (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_prose_does_not_acquire_candidate_identity) (text='Memo about Parser repair | goal: maintenance') ... FAIL
+  test_prose_does_not_acquire_candidate_identity (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_prose_does_not_acquire_candidate_identity) (text='Discuss candidate: parser-gap-1 | goal: maintenance') ... FAIL
+  test_prose_does_not_acquire_candidate_identity (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_prose_does_not_acquire_candidate_identity) (text='Mention parser-gap-1 | goal: maintenance') ... FAIL
+test_recovery_rechecks_revoked_native_grant_before_unblock (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_recovery_rechecks_revoked_native_grant_before_unblock) ... FAIL
+test_revoked_native_grant_never_restores_or_allocates (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_revoked_native_grant_never_restores_or_allocates) ... FAIL
+test_same_native_fixture_without_maintenance_grant_never_allocates (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_same_native_fixture_without_maintenance_grant_never_allocates) ... ok
+test_source_drift_between_plan_apply_and_recovery_never_unblocks (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_source_drift_between_plan_apply_and_recovery_never_unblocks) ... 
+  test_source_drift_between_plan_apply_and_recovery_never_unblocks (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_source_drift_between_plan_apply_and_recovery_never_unblocks) (recovering=False) ... FAIL
+  test_source_drift_between_plan_apply_and_recovery_never_unblocks (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_source_drift_between_plan_apply_and_recovery_never_unblocks) (recovering=True) ... FAIL
+test_source_metadata_and_index_must_name_same_exact_receipt (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_source_metadata_and_index_must_name_same_exact_receipt) ... 
+  test_source_metadata_and_index_must_name_same_exact_receipt (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_source_metadata_and_index_must_name_same_exact_receipt) (change='receipt_id') ... FAIL
+  test_source_metadata_and_index_must_name_same_exact_receipt (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_source_metadata_and_index_must_name_same_exact_receipt) (change='status') ... FAIL
+  test_source_metadata_and_index_must_name_same_exact_receipt (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_source_metadata_and_index_must_name_same_exact_receipt) (change='index_digest') ... FAIL
+test_unchanged_interrupted_native_restore_recovers_once (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_unchanged_interrupted_native_restore_recovers_once) ... FAIL
+
+======================================================================
+ERROR: test_missing_board_is_invalid_not_an_empty_queue (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_missing_board_is_invalid_not_an_empty_queue) (entrypoint=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 87, in test_missing_board_is_invalid_not_an_empty_queue
+    result = replenishment.replenish_from_goals(root, "fix", dry_run=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\replenishment.py", line 637, in replenish_from_goals
+    parsed = parse_board((root / ".saipen/BOARD.md").read_text(encoding="utf-8"))["tickets"]
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 1058, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 1044, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t2040-missing-board-z94ivirg\\.saipen\\BOARD.md'
+
+======================================================================
+FAIL: test_exact_legacy_candidate_is_scoped_not_foreign_or_prefix (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_exact_legacy_candidate_is_scoped_not_foreign_or_prefix)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 106, in test_exact_legacy_candidate_is_scoped_not_foreign_or_prefix
+    self.assertTrue(replenishment._matches_candidate(candidate,
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_goal_policy_is_pinned_for_apply_and_recovery (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_goal_policy_is_pinned_for_apply_and_recovery) (recovering=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 197, in test_goal_policy_is_pinned_for_apply_and_recovery
+    plan = self.plan(root)
+           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 62, in plan
+    self.assertEqual(len(captured), 1, result)
+AssertionError: 0 != 1 : {'ok': True, 'replenished': False, 'status': 'DOING_ACTIVE', 'active_ticket': 'T-3', 'detail': 'active ticket T-3 currently in DOING'}
+
+======================================================================
+FAIL: test_goal_policy_is_pinned_for_apply_and_recovery (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_goal_policy_is_pinned_for_apply_and_recovery) (recovering=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 197, in test_goal_policy_is_pinned_for_apply_and_recovery
+    plan = self.plan(root)
+           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 62, in plan
+    self.assertEqual(len(captured), 1, result)
+AssertionError: 0 != 1 : {'ok': True, 'replenished': False, 'status': 'DOING_ACTIVE', 'active_ticket': 'T-3', 'detail': 'active ticket T-3 currently in DOING'}
+
+======================================================================
+FAIL: test_legacy_blocked_identity_deduplicates_but_never_restores (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_legacy_blocked_identity_deduplicates_but_never_restores)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 133, in test_legacy_blocked_identity_deduplicates_but_never_restores
+    self.assertFalse(result.get("replenished"), result)
+AssertionError: True is not false : {'ok': True, 'replenished': True, 'status': 'TASK_REPLENISHED', 'dry_run': True, 'reused_work': True, 'admitted_ticket': 'T-2', 'goal_id': 'self-maintenance-core', 'candidate': {'candidate_id': 'self-maintenance-core-repair-1', 'goal_id': 'self-maintenance-core', 'title': 'Investigate semantics of Local parser [self-maintenance-core]', 'priority': 'P2', 'description': 'Investigate and document semantics for unresolved item repair-1', 'scope': 'item:repair-1', 'target_locator': 'repair-1', 'evidence_source': '.saipen/evidence/coverage_gap.json', 'verification': 'The exact local regression oracle passes', 'needs': [], 'risk': 'low', 'metadata': {'item_id': 'repair-1', 'goal_id': 'self-maintenance-core', 'rva': '', 'va': '', 'bytes': None, 'module': None, 'capture_sha256': '', 'capture_path': ''}, 'evidence_fingerprint': 'sha256:b27a450d349698e5'}, 'action': 'PHASE SCOUT T-2', 'next_action': 'PHASE SCOUT T-2', 'detail': 'would restore existing Work T-2'}
+
+======================================================================
+FAIL: test_missing_board_is_invalid_not_an_empty_queue (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_missing_board_is_invalid_not_an_empty_queue) (reader=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 84, in test_missing_board_is_invalid_not_an_empty_queue
+    with self.subTest(reader=True), self.assertRaises(ValueError):
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_native_restore_preserves_sources_origin_foreign_work_and_replay (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_native_restore_preserves_sources_origin_foreign_work_and_replay)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 140, in test_native_restore_preserves_sources_origin_foreign_work_and_replay
+    plan = self.plan(root)
+           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 62, in plan
+    self.assertEqual(len(captured), 1, result)
+AssertionError: 0 != 1 : {'ok': True, 'replenished': False, 'status': 'DOING_ACTIVE', 'active_ticket': 'T-3', 'detail': 'active ticket T-3 currently in DOING'}
+
+======================================================================
+FAIL: test_prose_does_not_acquire_candidate_identity (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_prose_does_not_acquire_candidate_identity) (text='Memo about Parser repair | goal: maintenance')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 120, in test_prose_does_not_acquire_candidate_identity
+    self.assertFalse(replenishment._matches_candidate(candidate, text))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_prose_does_not_acquire_candidate_identity (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_prose_does_not_acquire_candidate_identity) (text='Discuss candidate: parser-gap-1 | goal: maintenance')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 120, in test_prose_does_not_acquire_candidate_identity
+    self.assertFalse(replenishment._matches_candidate(candidate, text))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_prose_does_not_acquire_candidate_identity (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_prose_does_not_acquire_candidate_identity) (text='Mention parser-gap-1 | goal: maintenance')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 120, in test_prose_does_not_acquire_candidate_identity
+    self.assertFalse(replenishment._matches_candidate(candidate, text))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_recovery_rechecks_revoked_native_grant_before_unblock (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_recovery_rechecks_revoked_native_grant_before_unblock)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 248, in test_recovery_rechecks_revoked_native_grant_before_unblock
+    plan = self.plan(root)
+           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 62, in plan
+    self.assertEqual(len(captured), 1, result)
+AssertionError: 0 != 1 : {'ok': True, 'replenished': False, 'status': 'DOING_ACTIVE', 'active_ticket': 'T-3', 'detail': 'active ticket T-3 currently in DOING'}
+
+======================================================================
+FAIL: test_revoked_native_grant_never_restores_or_allocates (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_revoked_native_grant_never_restores_or_allocates)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 223, in test_revoked_native_grant_never_restores_or_allocates
+    self.revoke(root, self.plan(root))
+                      ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 62, in plan
+    self.assertEqual(len(captured), 1, result)
+AssertionError: 0 != 1 : {'ok': True, 'replenished': False, 'status': 'DOING_ACTIVE', 'active_ticket': 'T-3', 'detail': 'active ticket T-3 currently in DOING'}
+
+======================================================================
+FAIL: test_source_drift_between_plan_apply_and_recovery_never_unblocks (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_source_drift_between_plan_apply_and_recovery_never_unblocks) (recovering=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 184, in test_source_drift_between_plan_apply_and_recovery_never_unblocks
+    plan = self.plan(root)
+           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 62, in plan
+    self.assertEqual(len(captured), 1, result)
+AssertionError: 0 != 1 : {'ok': True, 'replenished': False, 'status': 'DOING_ACTIVE', 'active_ticket': 'T-3', 'detail': 'active ticket T-3 currently in DOING'}
+
+======================================================================
+FAIL: test_source_drift_between_plan_apply_and_recovery_never_unblocks (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_source_drift_between_plan_apply_and_recovery_never_unblocks) (recovering=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 184, in test_source_drift_between_plan_apply_and_recovery_never_unblocks
+    plan = self.plan(root)
+           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 62, in plan
+    self.assertEqual(len(captured), 1, result)
+AssertionError: 0 != 1 : {'ok': True, 'replenished': False, 'status': 'DOING_ACTIVE', 'active_ticket': 'T-3', 'detail': 'active ticket T-3 currently in DOING'}
+
+======================================================================
+FAIL: test_source_metadata_and_index_must_name_same_exact_receipt (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_source_metadata_and_index_must_name_same_exact_receipt) (change='receipt_id')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 177, in test_source_metadata_and_index_must_name_same_exact_receipt
+    self.assertFalse(result.get("replenished"), result)
+AssertionError: True is not false : {'ok': True, 'replenished': True, 'status': 'TASK_REPLENISHED', 'dry_run': True, 'reused_work': True, 'admitted_ticket': 'T-2', 'goal_id': 'self-maintenance-core', 'candidate': {'candidate_id': 'self-maintenance-core-repair-1', 'goal_id': 'self-maintenance-core', 'title': 'Investigate semantics of Local parser [self-maintenance-core]', 'priority': 'P2', 'description': 'Investigate and document semantics for unresolved item repair-1', 'scope': 'item:repair-1', 'target_locator': 'repair-1', 'evidence_source': '.saipen/evidence/coverage_gap.json', 'verification': 'The exact local regression oracle passes', 'needs': [], 'risk': 'low', 'metadata': {'item_id': 'repair-1', 'goal_id': 'self-maintenance-core', 'rva': '', 'va': '', 'bytes': None, 'module': None, 'capture_sha256': '', 'capture_path': ''}, 'evidence_fingerprint': 'sha256:5df85cdff27467e4'}, 'action': 'PHASE SCOUT T-2', 'next_action': 'PHASE SCOUT T-2', 'detail': 'would restore existing Work T-2'}
+
+======================================================================
+FAIL: test_source_metadata_and_index_must_name_same_exact_receipt (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_source_metadata_and_index_must_name_same_exact_receipt) (change='status')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 177, in test_source_metadata_and_index_must_name_same_exact_receipt
+    self.assertFalse(result.get("replenished"), result)
+AssertionError: True is not false : {'ok': True, 'replenished': True, 'status': 'TASK_REPLENISHED', 'dry_run': True, 'reused_work': True, 'admitted_ticket': 'T-2', 'goal_id': 'self-maintenance-core', 'candidate': {'candidate_id': 'self-maintenance-core-repair-1', 'goal_id': 'self-maintenance-core', 'title': 'Investigate semantics of Local parser [self-maintenance-core]', 'priority': 'P2', 'description': 'Investigate and document semantics for unresolved item repair-1', 'scope': 'item:repair-1', 'target_locator': 'repair-1', 'evidence_source': '.saipen/evidence/coverage_gap.json', 'verification': 'The exact local regression oracle passes', 'needs': [], 'risk': 'low', 'metadata': {'item_id': 'repair-1', 'goal_id': 'self-maintenance-core', 'rva': '', 'va': '', 'bytes': None, 'module': None, 'capture_sha256': '', 'capture_path': ''}, 'evidence_fingerprint': 'sha256:b0876ef2df77f652'}, 'action': 'PHASE SCOUT T-2', 'next_action': 'PHASE SCOUT T-2', 'detail': 'would restore existing Work T-2'}
+
+======================================================================
+FAIL: test_source_metadata_and_index_must_name_same_exact_receipt (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_source_metadata_and_index_must_name_same_exact_receipt) (change='index_digest')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 177, in test_source_metadata_and_index_must_name_same_exact_receipt
+    self.assertFalse(result.get("replenished"), result)
+AssertionError: True is not false : {'ok': True, 'replenished': True, 'status': 'TASK_REPLENISHED', 'dry_run': True, 'reused_work': True, 'admitted_ticket': 'T-2', 'goal_id': 'self-maintenance-core', 'candidate': {'candidate_id': 'self-maintenance-core-repair-1', 'goal_id': 'self-maintenance-core', 'title': 'Investigate semantics of Local parser [self-maintenance-core]', 'priority': 'P2', 'description': 'Investigate and document semantics for unresolved item repair-1', 'scope': 'item:repair-1', 'target_locator': 'repair-1', 'evidence_source': '.saipen/evidence/coverage_gap.json', 'verification': 'The exact local regression oracle passes', 'needs': [], 'risk': 'low', 'metadata': {'item_id': 'repair-1', 'goal_id': 'self-maintenance-core', 'rva': '', 'va': '', 'bytes': None, 'module': None, 'capture_sha256': '', 'capture_path': ''}, 'evidence_fingerprint': 'sha256:fdf0bcf3715e8052'}, 'action': 'PHASE SCOUT T-2', 'next_action': 'PHASE SCOUT T-2', 'detail': 'would restore existing Work T-2'}
+
+======================================================================
+FAIL: test_unchanged_interrupted_native_restore_recovers_once (test_t2040_replenishment_recovery.ReplenishmentRecovery.test_unchanged_interrupted_native_restore_recovers_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 259, in test_unchanged_interrupted_native_restore_recovers_once
+    plan = self.plan(root)
+           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_replenishment_recovery.py", line 62, in plan
+    self.assertEqual(len(captured), 1, result)
+AssertionError: 0 != 1 : {'ok': True, 'replenished': False, 'status': 'DOING_ACTIVE', 'active_ticket': 'T-3', 'detail': 'active ticket T-3 currently in DOING'}
+
+----------------------------------------------------------------------
+Ran 14 tests in 7.089s
+
+FAILED (failures=17, errors=1)
+COUNTS ran=14 failed=17 errors=1 skipped=0 passed=-4

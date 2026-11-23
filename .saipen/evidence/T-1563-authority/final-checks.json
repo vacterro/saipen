@@ -1,0 +1,40 @@
+{
+  "security_tests": {
+    "ran": 11,
+    "red": 0,
+    "log": "security-final.log"
+  },
+  "guard_tests": {
+    "ran": 17,
+    "red": 0
+  },
+  "budget_tests": {
+    "ran": 3,
+    "passed": true,
+    "cold": 26441,
+    "human_markdown_total": 307105,
+    "log": "budget-final.log"
+  },
+  "ruff": "PASS for four changed Python files",
+  "last_full_core": {
+    "record": ".saipen/evidence/core-unit/39cb84441cec8e61-20260929T210208Z.json",
+    "ran": 4343,
+    "new_red": 76,
+    "note": "before lint and budget compression; no current full-family PASS is claimed",
+    "checkpoint": "HISTORY_LEDGER_CORRUPT"
+  },
+  "canonical_validation_now": "UNAVAILABLE: HISTORY_LEDGER_CORRUPT",
+  "host_admission": "UNAVAILABLE",
+  "verify_entered": false,
+  "tickets_closed": [],
+  "source_files_sha256": {
+    "tools/saipen_engine/protocol_admission.py": "2f8b312f888e267376d572e5238421f22262fee3c92e8c39dd4efcf2f9297d0e",
+    "tools/t1563_transport_carrier.py": "bfd935061c5cfb6bb0522e151c0b457c44a3f43b32c5bf3c61fd487b6b7ee573",
+    "tools/test_t1563_authority_minting.py": "f181614c0d2b260ae3de57ce868d383ba9e5c6032b87496109b9fa0541c562c5",
+    "extensions/adapters/claude/saipen-guard.py": "a9d1880bbedbe4b31ca8c384b7fb8ca0c7cbb432d1dc2b3f808e1d37ad240450",
+    "extensions/adapters/registry.json": "e4695e076ea1927c3421e113284b3273c47324310ac2836685ba2c64d42aef6c",
+    "saipen/EXECUTION.md": "f674186c5796b8195de515138d58c2b000499f55002a91091d6eee5017760676",
+    "saipen/REGISTRY.json": "892335917e5bcf087030f290db617d6d01d17c0673a13bcff51393df544438ad",
+    "extensions/adapters/claude.md": "a96fc9cd2e20b543f4a7d59e45f260de0f4b33e9972deda6c0d258bd8ba5fee9"
+  }
+}

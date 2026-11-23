@@ -1,0 +1,6 @@
+active LOG carries a UTF-8 BOM: RAISED AttributeError: 'NoneType' object has no attribute 'illegal_lines'
+     errors: list[str] = list(snapshot.illegal_lines[:4])
+    through the journal's boundary: ["semantic verifier core_fast raised AttributeError: 'NoneType' object has no attribute 'illegal_lines'"]
+logs container is a regular file: RAISED AttributeError: 'NoneType' object has no attribute 'illegal_lines'
+     errors: list[str] = list(snapshot.illegal_lines[:4])
+    through the journal's boundary: ["semantic verifier core_fast raised AttributeError: 'NoneType' object has no attribute 'illegal_lines'"]

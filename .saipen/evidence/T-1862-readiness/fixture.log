@@ -1,0 +1,20 @@
+fixture: V:\_TEMP_\t1862-saituls-r3npcrwv
+exit_code: 0
+execution_phase: DONE
+execution_task: none
+top_workable_ticket: T-9001
+derived_status: AUDIT_OUTSTANDING
+accepted: False
+ready: False
+reasons: ['1 audit layer(s) not consumed']
+dimensions:
+  work: {"counts": {"doing": 0, "todo": 2, "done": 1, "blocked": 7}, "open": 9, "runnable": 2, "claimed": 0, "work_available": true, "top_workable": "T-9001", "blocked": 7, "blocked_external": 7}
+  audit: {"known": true, "pending": 1, "invalid": 0, "closed_pending_delete": 0, "residue": 0, "clean": false, "error_state": null, "inbox_state": null}
+  source: {"active_receipts": 1, "requirements": 162, "outstanding": 162, "terminal": 0, "archived": {"receipts": 0, "unresolved_at_closure": 0}, "receipts_known": true}
+  integrity: {"known": true, "orphans": 0, "items": []}
+  authority: {"continuation_authority": "operator_required", "authority_source": "E-1", "authority_until": "budget", "safety_valve_mode": "hard_wait", "execution_intent": "goal", "waiting": false, "next_action": "PHASE DONE", "goal_authority": {"state": "bounded", "detail": "No persistent grant", "original_event": "E-1", "checkpoint_due": false}}
+continuation_authority: operator_required
+safety_valve_mode: hard_wait
+grants_authority: False
+memory_unchanged: True
+FIXTURE HOLDS

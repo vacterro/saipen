@@ -1,0 +1,9 @@
+{
+  "verdict": "PASS",
+  "checked_source_paths": 413,
+  "tree": "6d14d59a7f44e47cf6167d96831d3795259f4972",
+  "main_head_and_staged_entries_preserved": true,
+  "original_index_bytes_unchanged": false,
+  "source_fingerprint": "b6dc79950e87084614b6a070eeeca1f167410f736c65f40256a94762ca9a0c3c",
+  "push_pending": true
+}

@@ -1,0 +1,8 @@
+phase 1 PREFIX test_subprocess_utf8.py: mode=FULL trees=[] undeclared=['test_subprocess_utf8.py']
+phase 2 NOW    test_subprocess_utf8.py: mode=DECLARED trees=[] undeclared=[]
+phase 3 LEGIT  test_closure_provenance.py: mode=FULL undeclared=['test_closure_provenance.py']
+
+pre-fix tree  narrowed False  (want False: copies everything)
+current tree  narrowed True   (want True: source tree only)
+legit module  stays FULL True   (want True: history-reader keeps everything)
+CONTROL OK

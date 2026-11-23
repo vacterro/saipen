@@ -1,0 +1,6 @@
+{
+  "exit_code": 0,
+  "stdout": "{\"rc\": 0, \"code\": \"VALID\", \"findings\": {\"problem_count\": 0, \"problems\": [], \"ruleset_fingerprint\": \"82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1\", \"ruleset_version\": 1, \"status\": \"complete\", \"warning_count\": 1}}\n",
+  "stderr": "",
+  "layout": "unchanged native regression root spool placement"
+}

@@ -1,0 +1,8 @@
+utc: 2026-10-08T01:16:13Z
+command: python -B -m unittest test_host_bootstrap test_t1645_zero_hunt test_t1647_machine_runtime test_t1651_executor_admission (cwd tools/)
+....................................................................................................................................
+----------------------------------------------------------------------
+Ran 132 tests in 114.250s
+
+OK
+--- exit: 0 ---

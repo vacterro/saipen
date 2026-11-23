@@ -1,0 +1,7 @@
+fix(admission): disable forgeable local authority
+
+Same-user imports could mint the key and transport MAC. Refuse local
+admission pending a separated host authority; preserve the exact attack
+and frozen vulnerable subject. Host-positive acceptance remains open.
+
+Refs T-1563

@@ -1,0 +1,45 @@
+CONTROL unmutated copy: exit 0, Ran 57 tests
+M1 seal keeps the tree binding it writes into: exit 1 failures=6
+      red: test_a_seal_interrupted_at_any_point_converges
+      red: test_an_older_segment_changed_under_the_plan_refuses_the_seal
+      red: test_the_plan_binds_each_sealed_file_and_not_the_tree_it_writes_into
+M2 seal shortens the LOG before the copy lands: exit 1 failures=2
+      red: test_the_interrupted_shape_holds_both_copies_never_neither
+      red: test_the_plan_binds_each_sealed_file_and_not_the_tree_it_writes_into
+M3 seal does not put the write gate to the standing ledger: exit 1 failures=1
+      red: test_a_ledger_the_write_gate_refuses_is_not_sealed_into_history
+M4 seal runs outside CLEAN: exit 1 failures=1
+      red: test_a_seal_outside_clean_is_refused_and_names_the_way_in
+M5 seal ignores the cap: exit 1 failures=2, errors=1
+      red: test_entering_clean_says_nothing_about_a_log_under_its_cap
+      red: test_not_due_is_answered_before_the_gates_that_only_matter_when_due
+      red: test_nothing_is_sealed_under_the_cap
+M6 scrub closure is one hop: exit 1 failures=2
+      red: test_a_source_named_as_implementation_source_keeps_the_work_it_produced
+      red: test_the_closure_is_transitive_through_kept_records
+M7 scrub forgets what ACTIVE receipts name: exit 1 failures=3
+      red: test_a_clause_bound_under_the_plan_refuses_the_scrub
+      red: test_a_row_naming_an_active_receipt_is_kept_even_if_the_receipt_forgot_it
+      red: test_the_work_an_active_receipt_names_is_kept
+M8 scrub prunes a row the LOG never closed: exit 1 failures=2, skipped=1
+      red: test_a_record_the_log_never_closed_is_kept
+      red: test_the_log_names_the_copy_and_its_digest
+M9 scrub does not bind the receipts it read: exit 1 failures=1
+      red: test_a_clause_bound_under_the_plan_refuses_the_scrub
+M10 scrub drops the rows instead of keeping them: exit 1 failures=10, skipped=1
+      red: test_a_dry_run_names_the_plan_and_writes_nothing
+      red: test_a_scrub_interrupted_at_any_point_converges
+      red: test_a_second_scrub_finds_nothing_due
+      red: test_the_board_loses_exactly_the_pruned_lines
+M11 only the clean verb runs the entry steps: exit 1 failures=1, errors=5
+      red: test_entering_clean_scrubs_a_board_past_its_cap
+      red: test_entering_clean_seals_a_log_past_its_cap
+      red: test_the_finding_names_the_route_and_the_route_clears_it
+      red: test_the_plain_answer_names_what_ran
+      red: test_the_scrub_runs_before_the_seal_and_both_report
+M12 the validator measures the whole BOARD again: exit 1 failures=1
+      red: test_closed_text_a_scrub_cannot_clear_is_not_reported
+M13 the validator names the verb the guard refuses: exit 1 failures=2
+      red: test_the_finding_names_the_route_and_the_route_clears_it
+      red: test_the_named_route_is_one_a_guarded_shell_admits
+restored; mutations 13

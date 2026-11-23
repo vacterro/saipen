@@ -1,0 +1,66 @@
+test_a_real_freebuff_tool_process_delivered_the_operator_carrier (test_freebuff_operator_provenance.FreebuffLiveHostAcceptance.test_a_real_freebuff_tool_process_delivered_the_operator_carrier) ... skipped 'no live FreeBuff host in this environment: category 4 acceptance requires a real FreeBuff-launched tool process carrying SAIPEN_TASK_FILE/SAIPEN_TASK_SHA256 (or a host ingress envelope)'
+test_clause_a_user_directly_approves_task_in_freebuff (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_a_user_directly_approves_task_in_freebuff)
+Clause A: User directly approves task in FREEBUFF -> SAIPEN receives valid trusted provenance. ... FAIL
+test_clause_b_luna_generates_authorization_itself (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_b_luna_generates_authorization_itself)
+Clause B: Luna generates authorization text itself -> SAIPEN rejects trusted authority. ... ok
+test_clause_c_luna_copies_old_authorization (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_c_luna_copies_old_authorization)
+Clause C: Luna copies an old authorization -> rejected as mismatch or replay. ... ok
+test_clause_d_freebuff_starts_saipen_task (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_d_freebuff_starts_saipen_task)
+Clause D: FREEBUFF starts a SAIPEN task -> provenance reaches admission. ... ok
+test_clause_e_freebuff_resumes_admitted_task (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_e_freebuff_resumes_admitted_task)
+Clause E: FREEBUFF resumes an admitted task -> valid authority lineage preserved. ... ok
+test_clause_f_nested_tool_invocation_preserves_provenance (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_f_nested_tool_invocation_preserves_provenance)
+Clause F: Nested tool/process invocation -> carrier is preserved in subprocess env. ... FAIL
+test_clause_g_freebuff_restarts (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_g_freebuff_restarts)
+Clause G: FREEBUFF restarts -> durable authorization recovered only where valid. ... ok
+test_clause_h_wrong_repository_or_task_identity (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_h_wrong_repository_or_task_identity)
+Clause H: Wrong repository or task identity -> admission rejected. ... ok
+test_clause_i_negative_prose_alone_grants_no_revalidation (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_i_negative_prose_alone_grants_no_revalidation)
+T-1823: the same sentence with no typed recoverable condition and the ... ok
+test_clause_i_stale_validation_with_valid_authority (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_i_stale_validation_with_valid_authority)
+Clause I: Stale validation with valid authority -> safe recovery occurs. ... ok
+test_clause_j_stale_validation_without_authority (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_j_stale_validation_without_authority)
+Clause J: Stale validation without authority -> no privilege invented. ... ok
+test_clause_k_rapid_repeated_continue_requests (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_k_rapid_repeated_continue_requests)
+Clause K: Rapid repeated continue requests -> idempotent, no duplicate tickets. ... ok
+test_clause_l_t1479_already_exists_in_scout (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_l_t1479_already_exists_in_scout)
+Clause L: T-1479 already exists in SCOUT -> original ticket resumed, not recreated. ... ok
+test_clause_m_model_supplied_environment_variables (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_m_model_supplied_environment_variables)
+Clause M: Model-supplied environment variables -> insufficient to forge human identity. ... ok
+test_clause_n_expired_or_revoked_authorization (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_n_expired_or_revoked_authorization)
+Clause N: Expired or revoked authorization -> execution refused. ... ok
+test_clause_o_freebuff_user_approval_through_simulated_ingress (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_o_freebuff_user_approval_through_simulated_ingress)
+Clause O (SIMULATED): an operator-origin ingress envelope is admitted. ... ok
+test_clause_p_freebuff_user_approval_followed_by_continuation (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_p_freebuff_user_approval_followed_by_continuation)
+Clause P: FREEBUFF user approval followed by Luna continuation -> no second approval needed. ... ok
+test_clause_q_tool_errors_and_missing_host_capabilities (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_q_tool_errors_and_missing_host_capabilities)
+Clause Q: Tool errors and missing host capabilities -> clear actionable diagnostic. ... ok
+
+======================================================================
+FAIL: test_clause_a_user_directly_approves_task_in_freebuff (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_a_user_directly_approves_task_in_freebuff)
+Clause A: User directly approves task in FREEBUFF -> SAIPEN receives valid trusted provenance.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_freebuff_operator_provenance.py", line 118, in test_clause_a_user_directly_approves_task_in_freebuff
+    self.assertEqual(witness_rec["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+======================================================================
+FAIL: test_clause_f_nested_tool_invocation_preserves_provenance (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_f_nested_tool_invocation_preserves_provenance)
+Clause F: Nested tool/process invocation -> carrier is preserved in subprocess env.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_freebuff_operator_provenance.py", line 186, in test_clause_f_nested_tool_invocation_preserves_provenance
+    self.assertEqual(witness_rec["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.138s
+
+FAILED (failures=2, skipped=1)

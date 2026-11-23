@@ -1,0 +1,331 @@
+T-1385 RED -- python -m unittest tools.test_canonical_write_route -v
+test file sha256: efe3c505853b94deffa62787a9df344c15721ba919b85d1c466d0d960dd4de8f (identical in both subjects)
+pre-fix subject: detached worktree at 8cd798cc + T-1385 slice-1 admission.py (placeholder checkpoint route, per-site placement); adapter as committed
+date: 2026-09-17T16:14:47Z
+
+test_a_directory_that_holds_another_project (tools.test_canonical_write_route.EveryRefusalSiteCarriesTheRouteTests.test_a_directory_that_holds_another_project) ... FAIL
+test_a_hard_link_to_canonical_state (tools.test_canonical_write_route.EveryRefusalSiteCarriesTheRouteTests.test_a_hard_link_to_canonical_state) ... FAIL
+test_another_projects_canonical_state (tools.test_canonical_write_route.EveryRefusalSiteCarriesTheRouteTests.test_another_projects_canonical_state) ... FAIL
+test_containment_of_the_memory_directory (tools.test_canonical_write_route.EveryRefusalSiteCarriesTheRouteTests.test_containment_of_the_memory_directory) ... FAIL
+test_the_refusal_says_what_it_refused (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_the_refusal_says_what_it_refused) ... FAIL
+test_the_route_reaches_the_model_on_every_surface (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_the_route_reaches_the_model_on_every_surface) ... 
+  test_the_route_reaches_the_model_on_every_surface (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_the_route_reaches_the_model_on_every_surface) (case='run') ... FAIL
+  test_the_route_reaches_the_model_on_every_surface (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_the_route_reaches_the_model_on_every_surface) (case='delete') ... FAIL
+  test_the_route_reaches_the_model_on_every_surface (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_the_route_reaches_the_model_on_every_surface) (case='write') ... FAIL
+test_two_different_effects_are_two_refusals_and_one_effect_twice_is_a_repeat (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_two_different_effects_are_two_refusals_and_one_effect_twice_is_a_repeat)
+The polygon reads the host error text; PARALLEL/SEQUENTIAL provenance ... FAIL
+test_every_surface_that_is_refused_carries_the_same_route (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_every_surface_that_is_refused_carries_the_same_route) ... 
+  test_every_surface_that_is_refused_carries_the_same_route (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_every_surface_that_is_refused_carries_the_same_route) (surface='bash') ... FAIL
+  test_every_surface_that_is_refused_carries_the_same_route (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_every_surface_that_is_refused_carries_the_same_route) (surface='edit') ... FAIL
+  test_every_surface_that_is_refused_carries_the_same_route (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_every_surface_that_is_refused_carries_the_same_route) (surface='write') ... FAIL
+test_the_route_carries_no_placeholder (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_the_route_carries_no_placeholder)
+A placeholder is authority the guard does not have. ... 
+  test_the_route_carries_no_placeholder (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_the_route_carries_no_placeholder) (state='build')
+A placeholder is authority the guard does not have. ... FAIL
+test_the_route_classifies_canonical_and_needs_no_preparation (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_the_route_classifies_canonical_and_needs_no_preparation)
+Not an ordinary shell line admitted by luck: the canonical grammar's own verb. ... ok
+test_active_build_work_records_no_fabricated_checkpoint (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_active_build_work_records_no_fabricated_checkpoint)
+The RED this replaces: `saipen checkpoint RUN T-1 '<what happened>'` ... 
+  test_active_build_work_records_no_fabricated_checkpoint (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_active_build_work_records_no_fabricated_checkpoint) (surface='bash')
+The RED this replaces: `saipen checkpoint RUN T-1 '<what happened>'` ... FAIL
+  test_active_build_work_records_no_fabricated_checkpoint (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_active_build_work_records_no_fabricated_checkpoint) (surface='edit')
+The RED this replaces: `saipen checkpoint RUN T-1 '<what happened>'` ... FAIL
+  test_active_build_work_records_no_fabricated_checkpoint (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_active_build_work_records_no_fabricated_checkpoint) (surface='write')
+The RED this replaces: `saipen checkpoint RUN T-1 '<what happened>'` ... FAIL
+test_no_active_work (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_no_active_work) ... FAIL
+test_unreadable_state_is_diagnosed_and_nothing_is_written (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_unreadable_state_is_diagnosed_and_nothing_is_written)
+Never send a session to checkpoint over state nobody could parse. ... ok
+
+======================================================================
+FAIL: test_a_directory_that_holds_another_project (tools.test_canonical_write_route.EveryRefusalSiteCarriesTheRouteTests.test_a_directory_that_holds_another_project)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 281, in test_a_directory_that_holds_another_project
+    self.assertRouted(
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 256, in assertRouted
+    self.assertEqual(verdict.get("canonical_next_command"), ROUTE, verdict)
+AssertionError: 'saipen status --json' != 'saipen next --json'
+- saipen status --json
+?        ^ ----
++ saipen next --json
+?        ^^^
+ : {'ok': False, 'code': 'PROTECTED_CANONICAL_NAMESPACE', 'canonical_next_command': 'saipen status --json', 'admitted': False, 'project_root': 'V:\\_TEMP_\\t1363-xjjaivsw', 'target': 'V:/_TEMP_/t1385-holder-jx7fom9d', 'targets': ['V:/_TEMP_/t1385-holder-jx7fom9d'], 'action': 'delete', 'effect': 'mutating', 'protected': True, 'outside_root': True, 'provenance': 'ancestor', 'detail': "delete of 'V:/_TEMP_/t1385-holder-jx7fom9d' refused: the target contains the SAIPEN project at 'V:/_TEMP_/t1385-holder-jx7fom9d/inner'; a directory that holds a SAIPEN project is that project's lifecycle", 'duration_ms': 7.612}
+
+======================================================================
+FAIL: test_a_hard_link_to_canonical_state (tools.test_canonical_write_route.EveryRefusalSiteCarriesTheRouteTests.test_a_hard_link_to_canonical_state)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 292, in test_a_hard_link_to_canonical_state
+    self.assertRouted(
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 256, in assertRouted
+    self.assertEqual(verdict.get("canonical_next_command"), ROUTE, verdict)
+AssertionError: None != 'saipen next --json' : {'ok': False, 'code': 'PROTECTED_CANONICAL_NAMESPACE', 'admitted': False, 'project_root': 'V:\\_TEMP_\\t1363-g6hh1y5k', 'target': 'src/state-alias.md', 'targets': ['src/state-alias.md'], 'action': 'write', 'effect': 'mutating', 'protected': True, 'provenance': 'ancestor', 'detail': "'V:\\_TEMP_\\t1363-g6hh1y5k\\src\\state-alias.md' is a hard link to the protected canonical document .saipen/STATE.md", 'duration_ms': 0.919}
+
+======================================================================
+FAIL: test_another_projects_canonical_state (tools.test_canonical_write_route.EveryRefusalSiteCarriesTheRouteTests.test_another_projects_canonical_state)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 269, in test_another_projects_canonical_state
+    self.assertRouted(
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 256, in assertRouted
+    self.assertEqual(verdict.get("canonical_next_command"), ROUTE, verdict)
+AssertionError: 'saipen status --json' != 'saipen next --json'
+- saipen status --json
+?        ^ ----
++ saipen next --json
+?        ^^^
+ : {'ok': False, 'code': 'PROTECTED_CANONICAL_NAMESPACE', 'canonical_next_command': 'saipen status --json', 'admitted': False, 'project_root': 'V:\\_TEMP_\\t1363-cb3_3w8z', 'target': 'V:/_TEMP_/t1363-q_pvn5i0/.saipen/STATE.md', 'targets': ['V:/_TEMP_/t1363-q_pvn5i0/.saipen/STATE.md'], 'action': 'write', 'effect': 'mutating', 'protected': True, 'outside_root': True, 'foreign_project': True, 'foreign_target': '.saipen/STATE.md', 'provenance': 'ancestor', 'detail': "target is another SAIPEN project's protected canonical state ('.saipen/STATE.md'); that project's lifecycle is admitted by its own root, never by this session's jurisdiction", 'duration_ms': 2.396}
+
+======================================================================
+FAIL: test_containment_of_the_memory_directory (tools.test_canonical_write_route.EveryRefusalSiteCarriesTheRouteTests.test_containment_of_the_memory_directory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 260, in test_containment_of_the_memory_directory
+    self.assertRouted(
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 256, in assertRouted
+    self.assertEqual(verdict.get("canonical_next_command"), ROUTE, verdict)
+AssertionError: 'saipen status --json' != 'saipen next --json'
+- saipen status --json
+?        ^ ----
++ saipen next --json
+?        ^^^
+ : {'ok': False, 'code': 'PROTECTED_CANONICAL_NAMESPACE', 'canonical_next_command': 'saipen status --json', 'admitted': False, 'project_root': 'V:\\_TEMP_\\t1363-d7umory3', 'target': '.saipen', 'targets': ['.saipen'], 'action': 'delete', 'effect': 'mutating', 'protected': True, 'provenance': 'ancestor', 'detail': "'.saipen' contains the protected canonical namespace; a delete of it would mutate protected state without naming it", 'duration_ms': 1.81}
+
+======================================================================
+FAIL: test_the_refusal_says_what_it_refused (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_the_refusal_says_what_it_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 363, in test_the_refusal_says_what_it_refused
+    self.assertIn(f" attempted: {self.RUN}", self.blocked("run"))
+AssertionError: ' attempted: python .saipen/kitchen/review_check.py' not found in 'SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute'
+
+======================================================================
+FAIL: test_the_route_reaches_the_model_on_every_surface (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_the_route_reaches_the_model_on_every_surface) (case='run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 360, in test_the_route_reaches_the_model_on_every_surface
+    self.assertIn(f" next: {ROUTE}", self.blocked(case_id))
+AssertionError: ' next: saipen next --json' not found in 'SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute'
+
+======================================================================
+FAIL: test_the_route_reaches_the_model_on_every_surface (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_the_route_reaches_the_model_on_every_surface) (case='delete')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 360, in test_the_route_reaches_the_model_on_every_surface
+    self.assertIn(f" next: {ROUTE}", self.blocked(case_id))
+AssertionError: ' next: saipen next --json' not found in 'SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute'
+
+======================================================================
+FAIL: test_the_route_reaches_the_model_on_every_surface (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_the_route_reaches_the_model_on_every_surface) (case='write')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 360, in test_the_route_reaches_the_model_on_every_surface
+    self.assertIn(f" next: {ROUTE}", self.blocked(case_id))
+AssertionError: ' next: saipen next --json' not found in 'SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute'
+
+======================================================================
+FAIL: test_two_different_effects_are_two_refusals_and_one_effect_twice_is_a_repeat (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_two_different_effects_are_two_refusals_and_one_effect_twice_is_a_repeat)
+The polygon reads the host error text; PARALLEL/SEQUENTIAL provenance
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 384, in test_two_different_effects_are_two_refusals_and_one_effect_twice_is_a_repeat
+    self.assertEqual(seen["repeated_refusal"], [])
+AssertionError: Lists differ: ['PROTECTED_CANONICAL_NAMESPACE'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'PROTECTED_CANONICAL_NAMESPACE'
+
+- ['PROTECTED_CANONICAL_NAMESPACE']
++ []
+
+======================================================================
+FAIL: test_every_surface_that_is_refused_carries_the_same_route (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_every_surface_that_is_refused_carries_the_same_route) (surface='bash')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 179, in test_every_surface_that_is_refused_carries_the_same_route
+    self.assertEqual(verdict.get("canonical_next_command"), ROUTE, verdict)
+AssertionError: 'saipen status --json' != 'saipen next --json'
+- saipen status --json
+?        ^ ----
++ saipen next --json
+?        ^^^
+ : {'ok': False, 'code': 'PROTECTED_CANONICAL_NAMESPACE', 'canonical_next_command': 'saipen status --json', 'admitted': False, 'project_root': 'V:\\_TEMP_\\t1363-8kgzxn29', 'target': '.saipen', 'targets': [], 'action': 'shell', 'effect': 'mutating', 'protected': True, 'provenance': 'ancestor', 'detail': 'ordinary shell command explicitly references the .saipen namespace; preflight refuses the whole command before host execution', 'duration_ms': 1.773, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'V:\\_TEMP_\\t1363-8kgzxn29', 'tool_name': 'bash', 'action': 'shell', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': None, 'target_paths': [], 'targets_unresolved': False, 'shell_protected_namespace': True, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': None, 'saipen_verb': None, 'detail': 'shell command explicitly references the protected .saipen namespace', 'session_id': 'ses_route_probe'}, 'strength': {'host': 'opencode', 'effective': 'ENFORCEMENT_GAP', 'reason': 'installed hook digest does not match the shipped adapter artifact'}}
+
+======================================================================
+FAIL: test_every_surface_that_is_refused_carries_the_same_route (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_every_surface_that_is_refused_carries_the_same_route) (surface='edit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 179, in test_every_surface_that_is_refused_carries_the_same_route
+    self.assertEqual(verdict.get("canonical_next_command"), ROUTE, verdict)
+AssertionError: 'saipen status --json' != 'saipen next --json'
+- saipen status --json
+?        ^ ----
++ saipen next --json
+?        ^^^
+ : {'ok': False, 'code': 'PROTECTED_CANONICAL_NAMESPACE', 'canonical_next_command': 'saipen status --json', 'admitted': False, 'project_root': 'V:\\_TEMP_\\t1363-8kgzxn29', 'target': '.saipen/STATE.md', 'targets': ['.saipen/STATE.md'], 'action': 'write', 'effect': 'mutating', 'protected': True, 'provenance': 'ancestor', 'detail': "direct mutation of protected canonical path '.saipen/STATE.md' is forbidden; mutations must go through canonical saipen commands", 'duration_ms': 1.303, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'V:\\_TEMP_\\t1363-8kgzxn29', 'tool_name': 'edit', 'action': 'write', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': 'V:\\_TEMP_\\t1363-8kgzxn29\\.saipen\\STATE.md', 'target_paths': ['V:\\_TEMP_\\t1363-8kgzxn29\\.saipen\\STATE.md'], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': None, 'saipen_verb': None, 'detail': '', 'session_id': 'ses_route_probe'}, 'strength': {'host': 'opencode', 'effective': 'ENFORCEMENT_GAP', 'reason': 'installed hook digest does not match the shipped adapter artifact'}}
+
+======================================================================
+FAIL: test_every_surface_that_is_refused_carries_the_same_route (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_every_surface_that_is_refused_carries_the_same_route) (surface='write')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 179, in test_every_surface_that_is_refused_carries_the_same_route
+    self.assertEqual(verdict.get("canonical_next_command"), ROUTE, verdict)
+AssertionError: 'saipen status --json' != 'saipen next --json'
+- saipen status --json
+?        ^ ----
++ saipen next --json
+?        ^^^
+ : {'ok': False, 'code': 'PROTECTED_CANONICAL_NAMESPACE', 'canonical_next_command': 'saipen status --json', 'admitted': False, 'project_root': 'V:\\_TEMP_\\t1363-8kgzxn29', 'target': '.saipen/STATE.md', 'targets': ['.saipen/STATE.md'], 'action': 'write', 'effect': 'mutating', 'protected': True, 'provenance': 'ancestor', 'detail': "direct mutation of protected canonical path '.saipen/STATE.md' is forbidden; mutations must go through canonical saipen commands", 'duration_ms': 1.397, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'V:\\_TEMP_\\t1363-8kgzxn29', 'tool_name': 'write', 'action': 'write', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': 'V:\\_TEMP_\\t1363-8kgzxn29\\.saipen\\STATE.md', 'target_paths': ['V:\\_TEMP_\\t1363-8kgzxn29\\.saipen\\STATE.md'], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': None, 'saipen_verb': None, 'detail': '', 'session_id': 'ses_route_probe'}, 'strength': {'host': 'opencode', 'effective': 'ENFORCEMENT_GAP', 'reason': 'installed hook digest does not match the shipped adapter artifact'}}
+
+======================================================================
+FAIL: test_the_route_carries_no_placeholder (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_the_route_carries_no_placeholder) (state='build')
+A placeholder is authority the guard does not have.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 189, in test_the_route_carries_no_placeholder
+    self.assertEqual(PLACEHOLDER.findall(route), [], route)
+AssertionError: Lists differ: ['<what happened>'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'<what happened>'
+
+- ['<what happened>']
++ [] : saipen checkpoint RUN T-1 '<what happened>'
+
+======================================================================
+FAIL: test_active_build_work_records_no_fabricated_checkpoint (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_active_build_work_records_no_fabricated_checkpoint) (surface='bash')
+The RED this replaces: `saipen checkpoint RUN T-1 '<what happened>'`
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 226, in test_active_build_work_records_no_fabricated_checkpoint
+    self.assertNotIn("<what happened>", log_after, "a placeholder became evidence")
+AssertionError: '<what happened>' unexpectedly found in '# Log\n- 14.09.26 00:00 [E-0001] [agent: test-agent] [op: transition-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] RUN: transition to SCOUT\n- 17.09.26 16:14 [E-2] [parent: E-1] [T-1] [agent: test-agent] [op: userreq-9152aa62429749f19c12394ff470e7f3] DEC: user request SRC-001 projected as T-1 (user_explicit)\n- 17.09.26 16:14 [E-3] [parent: E-2] [T-1] [agent: test-agent] [op: claim-3f76fa482cc8453e806268d25127f167] DEC: claimed via SAIOPS -- owner test-agent\n- 17.09.26 16:14 [E-4] [parent: E-3] [T-1] [agent: test-agent] [op: transition-64fa7edb68fc4b72808bfe930d2f5f8e] RUN: transition to BUILD -- scout done\n- 17.09.26 16:14 [E-5] [parent: E-4] [T-1] [agent: test-agent] [op: checkpoint-a541fc4a372d4c1e825e9e163171d8f8] RUN: <what happened>\n' : a placeholder became evidence
+
+======================================================================
+FAIL: test_active_build_work_records_no_fabricated_checkpoint (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_active_build_work_records_no_fabricated_checkpoint) (surface='edit')
+The RED this replaces: `saipen checkpoint RUN T-1 '<what happened>'`
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 226, in test_active_build_work_records_no_fabricated_checkpoint
+    self.assertNotIn("<what happened>", log_after, "a placeholder became evidence")
+AssertionError: '<what happened>' unexpectedly found in '# Log\n- 14.09.26 00:00 [E-0001] [agent: test-agent] [op: transition-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] RUN: transition to SCOUT\n- 17.09.26 16:14 [E-2] [parent: E-1] [T-1] [agent: test-agent] [op: userreq-9152aa62429749f19c12394ff470e7f3] DEC: user request SRC-001 projected as T-1 (user_explicit)\n- 17.09.26 16:14 [E-3] [parent: E-2] [T-1] [agent: test-agent] [op: claim-3f76fa482cc8453e806268d25127f167] DEC: claimed via SAIOPS -- owner test-agent\n- 17.09.26 16:14 [E-4] [parent: E-3] [T-1] [agent: test-agent] [op: transition-64fa7edb68fc4b72808bfe930d2f5f8e] RUN: transition to BUILD -- scout done\n- 17.09.26 16:14 [E-5] [parent: E-4] [T-1] [agent: test-agent] [op: checkpoint-a541fc4a372d4c1e825e9e163171d8f8] RUN: <what happened>\n- 17.09.26 16:14 [E-6] [parent: E-5] [T-1] [agent: test-agent] [op: checkpoint-3c70d8fe7b7646a58acd4ac8d46d90b2] RUN: <what happened>\n' : a placeholder became evidence
+
+======================================================================
+FAIL: test_active_build_work_records_no_fabricated_checkpoint (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_active_build_work_records_no_fabricated_checkpoint) (surface='write')
+The RED this replaces: `saipen checkpoint RUN T-1 '<what happened>'`
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 226, in test_active_build_work_records_no_fabricated_checkpoint
+    self.assertNotIn("<what happened>", log_after, "a placeholder became evidence")
+AssertionError: '<what happened>' unexpectedly found in '# Log\n- 14.09.26 00:00 [E-0001] [agent: test-agent] [op: transition-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] RUN: transition to SCOUT\n- 17.09.26 16:14 [E-2] [parent: E-1] [T-1] [agent: test-agent] [op: userreq-9152aa62429749f19c12394ff470e7f3] DEC: user request SRC-001 projected as T-1 (user_explicit)\n- 17.09.26 16:14 [E-3] [parent: E-2] [T-1] [agent: test-agent] [op: claim-3f76fa482cc8453e806268d25127f167] DEC: claimed via SAIOPS -- owner test-agent\n- 17.09.26 16:14 [E-4] [parent: E-3] [T-1] [agent: test-agent] [op: transition-64fa7edb68fc4b72808bfe930d2f5f8e] RUN: transition to BUILD -- scout done\n- 17.09.26 16:14 [E-5] [parent: E-4] [T-1] [agent: test-agent] [op: checkpoint-a541fc4a372d4c1e825e9e163171d8f8] RUN: <what happened>\n- 17.09.26 16:14 [E-6] [parent: E-5] [T-1] [agent: test-agent] [op: checkpoint-3c70d8fe7b7646a58acd4ac8d46d90b2] RUN: <what happened>\n- 17.09.26 16:14 [E-7] [parent: E-6] [T-1] [agent: test-agent] [op: checkpoint-ef7f83fc02364739baba20949082ab30] RUN: <what happened>\n' : a placeholder became evidence
+
+======================================================================
+FAIL: test_no_active_work (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_no_active_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1385-red-subject\tools\test_canonical_write_route.py", line 213, in test_no_active_work
+    self.assertTrue(str((payload or {}).get("action") or "").strip(), text)
+AssertionError: '' is not true : {
+  "ok": true,
+  "project_identity": "v:\\_temp_\\t1363-an929w5b",
+  "protocol_version": "8.0.1",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "saipen continue",
+  "computed_next_action": "saipen continue",
+  "computed_reason": "maintain",
+  "blocker": "",
+  "execution_intent": "normal",
+  "claimed_ticket": null,
+  "top_workable_ticket": null,
+  "log_tail_event": 1,
+  "head": "",
+  "board_errors": [],
+  "recovery_pending": false,
+  "recovery_conflict": false,
+  "pending_ops": [],
+  "conflict_ops": [],
+  "milestone": {
+    "current": null,
+    "label": null,
+    "parent": null,
+    "undo_available": false,
+    "valid": true
+  },
+  "cold_route": {
+    "project_root": "V:\\_TEMP_\\t1363-an929w5b",
+    "saipen_home": "V:\\_TEMP_\\t1385-red-subject",
+    "protocol_dir": "V:\\_TEMP_\\t1385-red-subject\\saipen",
+    "phase": "DONE",
+    "phase_module": "V:\\_TEMP_\\t1385-red-subject\\saipen\\phases\\done.md",
+    "boot": "V:\\_TEMP_\\t1385-red-subject\\saipen\\BOOT.md",
+    "style": "V:\\_TEMP_\\t1385-red-subject\\saipen\\STYLE.md",
+    "documents": {
+      "STYLE.md": "V:\\_TEMP_\\t1385-red-subject\\saipen\\STYLE.md",
+      "BOOT.md": "V:\\_TEMP_\\t1385-red-subject\\saipen\\BOOT.md",
+      "INDEX.md": "V:\\_TEMP_\\t1385-red-subject\\saipen\\INDEX.md",
+      "COMMANDS.md": "V:\\_TEMP_\\t1385-red-subject\\saipen\\COMMANDS.md",
+      "OPS.md": "V:\\_TEMP_\\t1385-red-subject\\saipen\\OPS.md",
+      "SOURCES.md": "V:\\_TEMP_\\t1385-red-subject\\saipen\\SOURCES.md",
+      "EXECUTION.md": "V:\\_TEMP_\\t1385-red-subject\\saipen\\EXECUTION.md",
+      "MAINTENANCE.md": "V:\\_TEMP_\\t1385-red-subject\\saipen\\MAINTENANCE.md",
+      "CORE.md": "V:\\_TEMP_\\t1385-red-subject\\saipen\\CORE.md",
+      "RUNTIME.md": "V:\\_TEMP_\\t1385-red-subject\\saipen\\RUNTIME.md"
+    },
+    "project_memory": {
+      "STATE.md": "V:\\_TEMP_\\t1363-an929w5b\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\_TEMP_\\t1363-an929w5b\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\_TEMP_\\t1363-an929w5b\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  },
+  "distribution": {
+    "installed": 6,
+    "stale": 6,
+    "unknown": 0,
+    "fresh": false,
+    "source_head": "8cd798cc5ffa2ea87470fea069bb4da68cdb0e91",
+    "newest_installed_head": "8cd798cc5ffa2ea87470fea069bb4da68cdb0e91",
+    "blocked": "DIRTY_SOURCE",
+    "blocking_paths": [
+      "M tools/saipen_engine/admission.py",
+      "M tools/saipen_engine/entry.py",
+      "AM tools/test_canonical_write_route.py"
+    ],
+    "summary": "distribution: 6 of 6 home(s) stale -- newest installed head 8cd798cc5ffa -- source head 8cd798cc5ffa -- injection blocked: DIRTY_SOURCE (M tools/saipen_engine/admission.py, M tools/saipen_engine/entry.py, AM tools/test_canonical_write_route.py)"
+  },
+  "conformance_status": {
+    "status": "NOT_RUN",
+    "gate": "core",
+    "reason": "no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS",
+    "validator": {
+      "validator_path": "V:\\_TEMP_\\t1385-red-subject\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:fb16cabc6962fa48e2b2e3293e17bab860126925020c8914ce158c4da7146709"
+    }
+  },
+  "automation": {
+    "schema_version": 1,
+    "disposition": "CONTINUE",
+    "next_command": "cc",
+    "reason_code": "closure-conditions-C3-C4-C6",
+    "reason": "route reason: maintain",
+    "audit_quiescent": true,
+    "audit_epoch": "audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40",
+    "convergence_current": false,
+    "closure_complete": false,
+    "source_fingerprint": "no-git+no-git-tree-v1:fb16cabc6962fa48e2b2e3293e17bab860126925020c8914ce158c4da7146709",
+    "completed_at": null
+  }
+}
+
+
+----------------------------------------------------------------------
+Ran 13 tests in 5.910s
+
+FAILED (failures=17)

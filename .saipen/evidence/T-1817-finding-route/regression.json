@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "format": "unittest",
+  "timeout": 600,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools",
+              "-p", "test_t1817_finding_route.py", "-v"],
+  "context": ["tools", "saipen", "bootstrap", "extensions", "tests/scenarios",
+              "tests/fixtures", "VERSION"],
+  "oracle_files": ["tools/test_t1817_finding_route.py"],
+  "subject_files": ["tools/saipen_engine/finding_route.py"],
+  "before": {
+    "tools/saipen_engine/finding_route.py": ".saipen/evidence/T-1817-finding-route/before/finding_route.py"
+  }
+}

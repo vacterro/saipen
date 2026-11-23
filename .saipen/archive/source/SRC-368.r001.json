@@ -1,0 +1,69 @@
+{
+  "clauses": {
+    "SRC-368:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reconcile actual current Work and authorization."
+    },
+    "SRC-368:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Add failing independent negative controls for each reproduced defect."
+    },
+    "SRC-368:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repair path confinement, false coverage satisfaction and dry-run mutation."
+    },
+    "SRC-368:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repair the shared cause of full-suite regressions."
+    },
+    "SRC-368:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify real registered goal and authenticated task admission."
+    },
+    "SRC-368:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify isolated release and exact remote commit equality."
+    },
+    "SRC-368:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Connect actual native model-turn continuation and independent maintenance."
+    },
+    "SRC-368:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Run focused and affected regression tests."
+    },
+    "SRC-368:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Run the mandatory final verification gate on the frozen release tree."
+    },
+    "SRC-368:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Publish only with valid scope-bound broker permission."
+    },
+    "SRC-368:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Continue independent authorized engineering if publication remains blocked."
+    },
+    "SRC-368:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Report the exact remaining legal or external blocker, not a fake victory. REQUIRED ACCEPTANCE No outside-root file mutation. No false goal satisfaction. No dry-run write. No self-issued goal authorization. No silent candidate loss or duplicate Work. No stale full-suite PASS reused for changed source. No unsafe or destructive shared Git staging operation. No GitHub sync claim unless expected and observed release SHAs match. No release without required broker and verification. No global engineering WAIT solely because publication is blocked. No fake multi-turn autonomy from model-output or hook-presence claims. No synthetic benchmarks promoted to real performance evidence. REPORT STATUS: CURRENT_WORK: GOAL_REGISTRY: AUTHORITY: FULL_SUITE_EVIDENCE: REGRESSION_ROOT_CAUSE: PATH_ESCAPE_CONTROLS: DRY_RUN_INTEGRITY: COVERAGE_COMPLETENESS: ISOLATED_RELEASE_INTEGRITY: EXPECTED_RELEASE_SHA: OBSERVED_REMOTE_SHA: BROKER_RELEASE_STATUS: INDEPENDENT_ENGINEERING: REAL_NATIVE_TURNS: SAIPAL_DISCOVERY: TEST_RESULTS: PUBLICATION_STATUS: NEXT_LAWFUL_ACTION: NEXT_WAKE_CONDITION: Implement and independently verify real improvements. Continue the authorized objective across bounded worker generations. Never close the project simply because the current ticket queue is empty, and never invent work or credentials to simulate autonomy. END SAIHANDOFF"
+    }
+  },
+  "derived_at": "2026-11-01T20:38:15Z",
+  "derived_from": "SRC-368",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "2585064f0adfcc18304904652c6e7c28bf8312a287918071a0a97f958c267612"
+}

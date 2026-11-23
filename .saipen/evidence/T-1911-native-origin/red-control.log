@@ -1,0 +1,15 @@
+pre-fix grammar control (typed host command disabled):
+  is_continuation_command('cc') = True
+  is_continuation_command('cc all') = True
+  is_continuation_command('saipen continue') = True
+  is_continuation_command('/goal cc all') = False
+Traceback (most recent call last):
+  File "<stdin>", line 10, in <module>
+  File "<frozen importlib._bootstrap_external>", line 936, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1073, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1130, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: 'V:\\tmp/t1911-red/guard_head.py'
+guard control: the shipped hook (pre-edit bytes, untracked in Git) had no
+seal_diagnostic and printed {"ok": ..., "sealed": sealed} only -- the incident's
+own observed output ok:true/sealed:false with no stage, code or category. The
+new test imports GUARD.seal_diagnostic, so it cannot pass against that shape.

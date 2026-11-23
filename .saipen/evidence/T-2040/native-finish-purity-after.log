@@ -1,0 +1,17 @@
+F.....                                                                   [100%]
+================================== FAILURES ===================================
+_ FinishPlanPurity.test_applied_finish_owns_request_targets_in_its_single_journal _
+
+self = <test_t2040_maintenance_authority.FinishPlanPurity testMethod=test_applied_finish_owns_request_targets_in_its_single_journal>
+
+    def test_applied_finish_owns_request_targets_in_its_single_journal(self):
+        root = self.fixture()
+        receipt = receipts_of(root)[0]
+        result = operations.finish_ticket(root, "T-1", "test-agent")
+>       self.assertTrue(result.ok, result.to_dict())
+E       AssertionError: False is not true : {'ok': False, 'code': 'STALE_STATE', 'op_id': 'finish-ee267bfed67a4ee0b4d0ed0c57aea3fe', 'changed_files': [], 'recovery_required': False, 'message': "precondition .saipen/intake/contracts/SRC-001.r001.json changed (live '', expected 'file-missing-v1')"}
+
+tools\test_t2040_maintenance_authority.py:123: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_maintenance_authority.py::FinishPlanPurity::test_applied_finish_owns_request_targets_in_its_single_journal
+1 failed, 5 passed in 45.42s

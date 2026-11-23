@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-386:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Authority and source provenance (P0-1..5): synthetic Goal-Verifier reminders and agent_runtime continuations cannot authorize any effectful write, especially to foreign projects; an out-of-root write requires an authority check bound to the canonical target and owning project (aliases, symlinks, traversal, case, redirection); a recorded operator-required decision stays binding until the operator changes it; foreign host/protocol source is handed off, never edited; cross-project edits reconciled non-destructively"
+    },
+    "SRC-386:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Honest phases, tests and delivery (P1-6..11): recover real REA ticket status without backfilling an imaginary suite PASS; a deduplicated validation runner keyed by command+environment+subject hash that awaits an identical in-flight run instead of re-executing; preserve real nonzero exit codes through output filtering; save command/timestamps/subject hash/exit code/stdout; replace sleep polling with bounded event-driven wait; separate LOCAL_CHANGED/VERIFIED/REVIEWED/COMMITTED/PUBLISHED/INSTALLED; report an advisory-only reply contract as ADVISORY not as mechanically enforced"
+    }
+  },
+  "derived_at": "2026-11-03T07:17:41Z",
+  "derived_from": "SRC-386",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "ac1d9a4db94073d6fad06a2a4af6ed9360bf573e08463801ff495cc813fc8943"
+}

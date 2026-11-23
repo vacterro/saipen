@@ -1,6 +1,6 @@
 {
   "archive_ref": ".saipen/archive/source/SRC-098.md",
-  "closed_at": "2026-10-30T02:41:59Z",
+  "closed_at": "2026-11-14T22:52:19Z",
   "closure_event": null,
   "linked_work": "T-1441",
   "receipt_id": "SRC-098",
@@ -15,7 +15,7 @@
     "compared_digest": "3663057fd3b0299a3d2cdcaa7cb4f79f1abb34bbcdca89f23692154d01144e14",
     "witness": "transport_obligation"
   },
-  "reread_at": "2026-10-30T02:41:59Z",
+  "reread_at": "2026-11-14T22:52:19Z",
   "schema_version": 1,
   "sensitive": false,
   "source_authority": {

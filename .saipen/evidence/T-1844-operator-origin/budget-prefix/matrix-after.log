@@ -1,0 +1,43 @@
+test_clause_a_new_handoff_with_cc_routes_to_start (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_a_new_handoff_with_cc_routes_to_start)
+A. New handoff containing 'cc' routes to START. ... ok
+test_clause_b_standalone_cc_routes_to_continue (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_b_standalone_cc_routes_to_continue)
+B. Standalone operator cc routes to CONTINUE. ... ok
+test_clause_c_host_prompt_reaches_canonical_admission (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_c_host_prompt_reaches_canonical_admission)
+C. Host prompt reaches canonical operator admission. ... ok
+test_clause_d_agent_authored_text_cannot_impersonate (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_d_agent_authored_text_cannot_impersonate)
+D. Agent-authored text cannot impersonate the prompt. ... ok
+test_clause_e_model_created_task_files_cannot_forge_authority (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_e_model_created_task_files_cannot_forge_authority)
+E. Model-created task files cannot forge authority. ... ok
+test_clause_f_user_message_identity_survives_model_switching (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_f_user_message_identity_survives_model_switching)
+F. User-message identity survives model switching. ... ok
+test_clause_g_multiple_queued_prompts_retain_separate_provenance (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_g_multiple_queued_prompts_retain_separate_provenance)
+G. Multiple queued prompts retain separate provenance. ... ok
+test_clause_h_delayed_callbacks_cannot_reuse_another_prompt (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_h_delayed_callbacks_cannot_reuse_another_prompt)
+H. Delayed callbacks cannot reuse another prompt. ... ok
+test_clause_i_renderer_reload_does_not_grant_new_authority (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_i_renderer_reload_does_not_grant_new_authority)
+I. Renderer reload does not grant new authority. ... ok
+test_clause_j_existing_model_supplied_src_remains_unchanged (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_j_existing_model_supplied_src_remains_unchanged)
+J. Existing model_supplied SRC remains unchanged. ... ok
+test_clause_k_fresh_verified_ingress_authorizes_new_work (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_k_fresh_verified_ingress_authorizes_new_work)
+K. Fresh verified ingress can authorize new Work. ... ok
+test_clause_l_tripped_bounded_valve_remains_effective (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_l_tripped_bounded_valve_remains_effective)
+L. Tripped bounded valve remains effective without fresh operator carrier. ... ok
+test_clause_m_new_authorized_task_passes_valve_legally (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_m_new_authorized_task_passes_valve_legally)
+M. New authorized task can pass the valve legally. ... ok
+test_clause_n_existing_ship_evidence_is_preserved (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_n_existing_ship_evidence_is_preserved)
+N. Existing T-91 SHIP evidence is preserved. ... ok
+test_clause_o_tag_conflict_not_silently_overwritten (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_o_tag_conflict_not_silently_overwritten)
+O. TAG_CONFLICT is not silently overwritten. ... ok
+test_clause_p_opencode_native_integration_end_to_end (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_p_opencode_native_integration_end_to_end)
+P. OpenCode native integration passes end-to-end. ... ok
+test_clause_q_no_operator_terminal_commands_needed (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_q_no_operator_terminal_commands_needed)
+Q. No operator terminal commands needed in normal use. ... ok
+test_clause_r_host_adapter_and_installed_plugin_match (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_r_host_adapter_and_installed_plugin_match)
+R. Host adapter and installed plugin generation match. ... ok
+test_live_acceptance_disposable_project (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_live_acceptance_disposable_project)
+Simulated acceptance on a disposable 9router-like project; no live UI: ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.833s
+
+OK

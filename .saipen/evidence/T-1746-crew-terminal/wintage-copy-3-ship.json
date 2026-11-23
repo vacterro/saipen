@@ -1,0 +1,48 @@
+{
+  "planned": true,
+  "op_id": "release-ffeec748859e4a1583095be5185aceac",
+  "mode": "no-publish",
+  "version": "",
+  "tag": "",
+  "ticket_id": "",
+  "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8",
+  "scope_paths": [
+    ".gitignore",
+    "FINAL_REPORT-T-938.md",
+    "tests/Run-Tests.ps1",
+    "tools/bench-idle-cpu.js",
+    "tools/test-shadow-registry-lifecycle.js",
+    "tools/test-stylesheet-census.js",
+    "wintage.user.js"
+  ],
+  "result": {
+    "ok": false,
+    "code": "RELEASE_FAILED",
+    "stage": "SOURCE_COVERAGE",
+    "detail": "source receipt blocks ship: {'ok': False, 'code': 'SOURCE_UNRESOLVED', 'receipt': 'SRC-002', 'detail': 'an authoritative receipt no BOARD Work projects: the repository answers for its coverage, so link it to the Work that owns it or resolve its clauses', 'work': None, 'source_status': 'ACTIVE', 'linked_work': None, 'linked_works': [], 'contract_derived': False, 'coverage': {'receipt': 'SRC-002', 'requirements': 0, 'actionable': 0, 'terminal': 0, 'dispositions': {}, 'unresolved': []}, 'unresolved_clauses': [], 'in_release_scope': False, 'canonical_next_command': \"saipen source req SRC-002 R001 requirement '<what the receipt asks for>'\", 'binding_fault': False}",
+    "source_gate": {
+      "ok": false,
+      "code": "SOURCE_UNRESOLVED",
+      "receipt": "SRC-002",
+      "detail": "an authoritative receipt no BOARD Work projects: the repository answers for its coverage, so link it to the Work that owns it or resolve its clauses",
+      "work": null,
+      "source_status": "ACTIVE",
+      "linked_work": null,
+      "linked_works": [],
+      "contract_derived": false,
+      "coverage": {
+        "receipt": "SRC-002",
+        "requirements": 0,
+        "actionable": 0,
+        "terminal": 0,
+        "dispositions": {},
+        "unresolved": []
+      },
+      "unresolved_clauses": [],
+      "in_release_scope": false,
+      "canonical_next_command": "saipen source req SRC-002 R001 requirement '<what the receipt asks for>'",
+      "binding_fault": false
+    },
+    "canonical_next_command": "saipen source req SRC-002 R001 requirement '<what the receipt asks for>'"
+  }
+}

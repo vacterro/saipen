@@ -1,0 +1,12 @@
+{
+ "renewal_event": "- 28.10.26 17:44 [E-4436] [parent: E-4435] [agent: saipen-cli] [op: valve-400ece91a1fe4459ac136ecc433bdd79] DEC: goal reauthorized -- goal_waves 0->0, goal_tickets 20->0; authority_source operator_carrier",
+ "resume_after": [
+  "- 28.10.26 17:44 [E-4437] [parent: E-4436] [T-1435] [agent: saipen-cli] [op: userreq-cb1e4cfbb44f496186c617d321c7eef3] DEC: user request SRC-133 projected as T-1435 (local candidate; witness model_supplied)",
+  "- 28.10.26 17:47 [E-4439] [parent: E-4438] [T-1435] [agent: saipen-cli] [op: checkpoint-0e0b68430f454630ae66360c437979a2] RUN: SCOUT: mapped all 20 domains (03-22) from the SRC-129 inventory to their production modules and to test files BY IMPORT, not filename; every domain has module+importing test, none unrepresented. Thin-coverage domains (D04/D07/D08/D10/D11/D13/D19) executed individually, all green. Prior audit suites T-1427/T-1432/T-1436/T-1437 green. Carried finding resolved: test_audit_export_cancel_t1432.py no longer errors (_EXPORT_TARGETS gone, module exposes _EXPORT_THREADS); 19 passed/1 skipped where the 2026-10-20 baseline had 16 errors. Evidence: .saipen/evidence/T-1435-domains-03-22/REPORT.md. Not claimed: clause-by-clause SRC-129 satisfaction, packaged-Windows/Nuitka.",
+  "- 28.10.26 18:35 [E-4441] [parent: E-4440] [T-1435] [agent: saipen-cli] [op: checkpoint-cbbd673be8254beaa0bbb7ef7c5dffbd] RUN: RUN: build -> audit evidence T-1435-domains-03-22/REPORT.md finalised: 20/20 domains 03-22 have production module + importing tests; 12 thin-domain suites + 10 prior-audit suites executed green; T-1432 _EXPORT_TARGETS regression resolved (19 passed, 1 skipped); full suite 7628 passed/35 skipped/3 failed, all three triaged as pre-existing unrelated rebrand, full-run isolation pollution, and missing uv on PATH",
+  "- 28.10.26 19:31 [E-4447] [parent: E-4446] [agent: saipen-cli] [op: transition-114b926fba0c4e47a91b6c1f64bc0021] DEC: goal_tickets 0->1",
+  "- 30.10.26 07:01 [E-4620] [parent: E-4619] [T-1443] [agent: saipen-cli] [op: finish-5b730c6da7ca46569e35ab1d77701e8b] DEC: ticket finished via SAIOPS -- completion (from SHIP); publication_state pending; release route: saipen cohort ship <C-###> (a released batch names this ticket, flipping the state to published)",
+  "- 30.10.26 07:14 [E-4626] [parent: E-4625] [agent: saipen-cli] [op: checkpoint-e600fac2461a43fd8cb1155e49859fb5] RUN: detail_ref: .saipen/recovery/log-detail/E-4626-cc10f615a2d57539ca416a6a.json"
+ ],
+ "log_sha256": "dc3678033529b78be9f250f073a7187ddd6aa40d4ba21c2589e45e8e2a2237f3"
+}

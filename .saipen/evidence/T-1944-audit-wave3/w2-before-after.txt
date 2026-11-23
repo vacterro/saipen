@@ -1,0 +1,10 @@
+repository: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+
+W2-001  current=1 passed, 25 deselected in 0.26s  reverted=1 failed, 25 deselected in 0.22s  PROVEN
+W2-002  current=1 passed, 25 deselected in 0.21s  reverted=1 failed, 25 deselected in 0.23s  PROVEN
+W2-003  current=1 passed, 25 deselected in 1.04s  reverted=1 failed, 25 deselected in 0.22s  PROVEN
+W2-004  current=1 passed, 25 deselected in 0.22s  reverted=1 failed, 25 deselected in 0.23s  PROVEN
+W2-005  current=1 passed, 25 deselected in 0.23s  reverted=1 failed, 25 deselected in 0.21s  PROVEN
+W2-006  current=1 passed, 25 deselected in 0.27s  reverted=1 failed, 25 deselected in 0.20s  PROVEN
+
+6/6 red-before-green pairs measured

@@ -1,0 +1,12 @@
+======================================================================
+FAIL: test_unsafe_history_node_is_refused_even_when_target_looks_absent (test_t1931_saipal_boundary.SaipalBoundaryTests.test_unsafe_history_node_is_refused_even_when_target_looks_absent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 258, in test_unsafe_history_node_is_refused_even_when_target_looks_absent
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 1 test in 0.005s
+
+FAILED (failures=1)

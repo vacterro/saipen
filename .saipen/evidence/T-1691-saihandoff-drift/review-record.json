@@ -1,0 +1,18 @@
+{
+  "independent_review": "PASS",
+  "audit_sha256": "df983dc9ba85b05cba06672a3ae516f4d553aad0874a79bbd99fb6525f35cfa9",
+  "exact_source_and_original": true,
+  "request_clause_equals_original": true,
+  "consumer_checkpoint_unchanged": {
+    "STATE.md": true,
+    "BOARD.md": true
+  },
+  "proposed_rules": {
+    "R005": "REJECTED",
+    "R006": "REJECTED",
+    "R007": "REJECTED",
+    "R008": "NOT_APPLICABLE"
+  },
+  "memory_promotion": "NO: existing downstream-shape and old-instruction lessons cover this incident",
+  "scope": "read and record only; product/runtime/ACL/host acceptance excluded"
+}

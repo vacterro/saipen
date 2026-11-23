@@ -1,0 +1,25 @@
+{
+  "label": "postreview-family-20261012",
+  "phase": "VERIFY",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    "tools/core_unit.py",
+    "evidence",
+    "T-1718",
+    "--jobs",
+    "6",
+    "--timeout",
+    "5400"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 1558.734,
+  "fingerprint": "f07ab6d183ddcf28ac4990b50dd4ec0cde675bf3a66e716c07d941d1e0d5e9f1",
+  "stdout": "{\r\n  \"ok\": true,\r\n  \"verdict\": \"PASS\",\r\n  \"ran\": 6254,\r\n  \"red\": 0,\r\n  \"new_red\": [],\r\n  \"fixed\": [],\r\n  \"problems\": [],\r\n  \"record\": \".saipen/evidence/core-unit/f07ab6d183ddcf28-20261012T042439Z.json\",\r\n  \"reused\": false,\r\n  \"checkpoint\": \"CHECKPOINTED\",\r\n  \"checkpoint_detail\": null,\r\n  \"sandboxes_leaked\": []\r\n}\r\n",
+  "stderr": "",
+  "stdout_sha256": "5febc1a024472cd4dfb9ec898961b5c375d7874f9593f7ef7ef7353e81084ba7",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

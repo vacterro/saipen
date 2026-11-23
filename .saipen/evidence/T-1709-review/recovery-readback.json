@@ -1,0 +1,53 @@
+{
+  "checked_utc": "2026-10-11T04:31:43.935044+00:00",
+  "checks": {
+    "prior_acceptance_pass": true,
+    "original_baseline_preserved": false,
+    "original_lineage_preserved": true,
+    "new_lineage_preserved": true,
+    "copy_mapping_preserved": true,
+    "original_reads_zero_mutation": true,
+    "recovery_reads_zero_mutation": true,
+    "independent_regular_storage": false,
+    "git_refs_and_history_preserved": true,
+    "original_remains_unauthorized": true,
+    "no_original_pending_or_conflicts": true,
+    "recovery_native_pass": true,
+    "original_native_refuses": true
+  },
+  "original_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "recovery_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+  "original_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "new_lineage": "lineage-0ee6b060c73040d2be567d123691d079",
+  "original_file_count": 19810,
+  "recovery_file_count": 28531,
+  "verified_copy_mappings": 28517,
+  "copy_mismatches": [],
+  "original_authority": "UNAUTHORIZED",
+  "recovery_authority": "AUTHORIZED",
+  "recovery_ledger_errors": [],
+  "recovery_receipt_errors": [],
+  "recovery_pending": [],
+  "recovery_conflicts": [],
+  "native": [
+    {
+      "root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+      "exit_code": 1,
+      "output": ".saipen\\evidence\\T-1709-review\\recovery-readback-original-native.txt",
+      "sha256": "4da8ceb13d5bebce4bb20491c3803bba91ed55ba458ca0374d6694c7d2c662fd"
+    },
+    {
+      "root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+      "exit_code": 0,
+      "output": ".saipen\\evidence\\T-1709-review\\recovery-readback-recovery-native.txt",
+      "sha256": "5cf0958957fd588ddeffc539bafd667c7056c77d79e526ac373f80d6962cd07d"
+    }
+  ],
+  "acceptance_pass": false,
+  "original_verdict": "NO_GO",
+  "recovery_verdict": "GO_CANONICAL_OPERATIONS_ONLY",
+  "mutations": [],
+  "cutover": false,
+  "publication": false,
+  "scope": "Fresh readback of already completed SRC-211 recovery; no new recovery operation."
+}

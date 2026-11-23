@@ -119,7 +119,9 @@ class RouteCommandTests(unittest.TestCase):
     def test_a_routed_finding_names_claim_and_never_start(self):
         result = {"code": "ROUTED_TO_OWNER", "owner": "T-9"}
         command = R.route_command(result)
-        self.assertEqual(command, "saipen ticket claim T-9")
+        # T-2056: the real verb is `saipen claim`; `saipen ticket claim` is not
+        # an action the CLI has, so the resolver used to hand back a dead line.
+        self.assertEqual(command, "saipen claim T-9")
         self.assertNotIn("saipen start", command)
 
     def test_every_other_outcome_invents_no_command(self):
@@ -139,7 +141,7 @@ class RouteCommandTests(unittest.TestCase):
             tickets(**{"T-57": ("## DOING", blocked)}),
         )
         self.assertEqual(result["code"], "ROUTED_TO_OWNER")
-        self.assertEqual(R.route_command(result), "saipen ticket claim T-57")
+        self.assertEqual(R.route_command(result), "saipen claim T-57")
 
 
 if __name__ == "__main__":

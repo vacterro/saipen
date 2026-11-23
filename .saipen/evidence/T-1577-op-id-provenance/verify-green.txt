@@ -1,0 +1,26 @@
+test_a_canonical_anchor_still_closes (test_t1577_op_id_provenance.ClosureEvidence.test_a_canonical_anchor_still_closes) ... ok
+test_a_hand_authored_anchor_is_not_closure_evidence (test_t1577_op_id_provenance.ClosureEvidence.test_a_hand_authored_anchor_is_not_closure_evidence) ... ok
+test_a_missing_tag_is_absent_not_hand_authored (test_t1577_op_id_provenance.GrammarOwner.test_a_missing_tag_is_absent_not_hand_authored)
+An untagged event is a different question (T-110), not this one. ... ok
+test_other_typos_stay_hand_authored (test_t1577_op_id_provenance.GrammarOwner.test_other_typos_stay_hand_authored) ... ok
+test_real_writer_shapes_stay_canonical (test_t1577_op_id_provenance.GrammarOwner.test_real_writer_shapes_stay_canonical) ... ok
+test_the_carrier_ids_really_carry_thirty_one_hex (test_t1577_op_id_provenance.GrammarOwner.test_the_carrier_ids_really_carry_thirty_one_hex) ... ok
+test_the_three_hand_written_ids_are_hand_authored (test_t1577_op_id_provenance.GrammarOwner.test_the_three_hand_written_ids_are_hand_authored) ... ok
+test_a_hand_authored_boundary_opens_no_cycle (test_t1577_op_id_provenance.PhaseEvidence.test_a_hand_authored_boundary_opens_no_cycle)
+The boundary is itself evidence of the transition (CORE-001). ... ok
+test_a_hand_authored_fail_is_not_a_veto_either (test_t1577_op_id_provenance.PhaseEvidence.test_a_hand_authored_fail_is_not_a_veto_either)
+Filtered means IGNORED, not merely distrusted. ... ok
+test_a_hand_authored_pass_is_not_phase_evidence (test_t1577_op_id_provenance.PhaseEvidence.test_a_hand_authored_pass_is_not_phase_evidence) ... ok
+test_canonical_evidence_still_verifies (test_t1577_op_id_provenance.PhaseEvidence.test_canonical_evidence_still_verifies) ... ok
+test_the_bulk_classifier_agrees_byte_for_byte (test_t1577_op_id_provenance.PhaseEvidence.test_the_bulk_classifier_agrees_byte_for_byte) ... ok
+test_a_hand_authored_id_above_the_floor_is_named_and_fails (test_t1577_op_id_provenance.ValidatorGate.test_a_hand_authored_id_above_the_floor_is_named_and_fails) ... ok
+test_a_hand_authored_id_below_the_floor_only_warns (test_t1577_op_id_provenance.ValidatorGate.test_a_hand_authored_id_below_the_floor_only_warns)
+History stays readable: the record that follows sets the floor. ... ok
+test_a_hand_authored_id_that_resolves_is_not_claimed (test_t1577_op_id_provenance.ValidatorGate.test_a_hand_authored_id_that_resolves_is_not_claimed)
+A real operation record outranks the shape: no false accusation. ... ok
+test_no_ledger_means_unavailable_not_red (test_t1577_op_id_provenance.ValidatorGate.test_no_ledger_means_unavailable_not_red) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 2.804s
+
+OK

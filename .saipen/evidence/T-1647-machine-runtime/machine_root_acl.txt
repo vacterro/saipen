@@ -1,0 +1,6 @@
+C:\ProgramData\SAI\SAIPEN BUILTIN\Users:(OI)(CI)(RX)
+                          DESKTOP-TTH0L52\vac34:(OI)(CI)(F)
+                          BUILTIN\Administrators:(OI)(CI)(F)
+                          NT AUTHORITY\SYSTEM:(OI)(CI)(F)
+
+Successfully processed 1 files; Failed processing 0 files

@@ -1,0 +1,8 @@
+{
+  "oracle_sha256": "ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822",
+  "deliberate_mutation": false,
+  "ran": 9,
+  "failures": [],
+  "errors": [],
+  "passed": true
+}

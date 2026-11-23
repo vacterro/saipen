@@ -1,0 +1,97 @@
+.........................................................................................................................................................................................................................................................................................................................................................................s.................ss................F...........................................................................................s.....................................................................................................................................................................................................................................................................................................................................................................s........................FFFFF................................................................
+======================================================================
+FAIL: test_context_budget_remains_green_with_execution_in_cold (test_response_surface_contract.BudgetTests.test_context_budget_remains_green_with_execution_in_cold)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_surface_contract.py", line 612, in test_context_budget_remains_green_with_execution_in_cold
+    self.assertEqual(errors, [], errors)
+AssertionError: Lists differ: ['cold 27699 > 27648'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'cold 27699 > 27648'
+
+- ['cold 27699 > 27648']
++ [] : ['cold 27699 > 27648']
+
+======================================================================
+FAIL: test_one_enormous_document_fails_even_where_no_route_loads_it (test_t1670_route_budgets.RouteBudgetTests.test_one_enormous_document_fails_even_where_no_route_loads_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1670_route_budgets.py", line 155, in test_one_enormous_document_fails_even_where_no_route_loads_it
+    self.assertEqual(errors, [f"file {rel} {limit + 1} > single_doc {limit}"])
+AssertionError: Lists differ: ['cold 27699 > 27648', 'file UI.md 51201 > single_doc 51200'] != ['file UI.md 51201 > single_doc 51200']
+
+First differing element 0:
+'cold 27699 > 27648'
+'file UI.md 51201 > single_doc 51200'
+
+First list contains 1 additional elements.
+First extra element 1:
+'file UI.md 51201 > single_doc 51200'
+
+- ['cold 27699 > 27648', 'file UI.md 51201 > single_doc 51200']
+?  ----------------------
+
++ ['file UI.md 51201 > single_doc 51200']
+
+======================================================================
+FAIL: test_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate (test_t1670_route_budgets.RouteBudgetTests.test_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1670_route_budgets.py", line 87, in test_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate
+    self.assertEqual(protocol_budget.check(self.protocol), [])
+AssertionError: Lists differ: ['cold 27699 > 27648'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'cold 27699 > 27648'
+
+- ['cold 27699 > 27648']
++ []
+
+======================================================================
+FAIL: test_the_command_line_summary_exits_by_the_route_verdict (test_t1670_route_budgets.RouteBudgetTests.test_the_command_line_summary_exits_by_the_route_verdict)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1670_route_budgets.py", line 173, in test_the_command_line_summary_exits_by_the_route_verdict
+    self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+AssertionError: 1 != 0 : cold                  27699 / 27648  FAIL
+ordinary_continue     34412 / 35840  PASS
+command_resolution    55284 / 55296  PASS
+ordinary_phase        40801 / 40960  PASS
+ship_improve          55926 / 56320  PASS
+single_doc            47253 / 51200  PASS
+largest document      47253  OPS.md
+human markdown total 350842  informational
+
+
+======================================================================
+FAIL: test_the_summary_is_one_line_per_route_and_names_the_total_informational (test_t1670_route_budgets.RouteBudgetTests.test_the_summary_is_one_line_per_route_and_names_the_total_informational)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1670_route_budgets.py", line 162, in test_the_summary_is_one_line_per_route_and_names_the_total_informational
+    self.assertTrue(line.startswith(name) and line.endswith("PASS"), line)
+AssertionError: False is not true : cold                  27699 / 27648  FAIL
+
+======================================================================
+FAIL: test_unrelated_growth_raises_the_total_and_moves_no_route (test_t1670_route_budgets.RouteBudgetTests.test_unrelated_growth_raises_the_total_and_moves_no_route)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1670_route_budgets.py", line 96, in test_unrelated_growth_raises_the_total_and_moves_no_route
+    self.assertEqual(protocol_budget.check(self.protocol), [])
+AssertionError: Lists differ: ['cold 27699 > 27648'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'cold 27699 > 27648'
+
+- ['cold 27699 > 27648']
++ []
+
+----------------------------------------------------------------------
+Ran 941 tests in 899.541s
+
+FAILED (failures=6, skipped=5)
+PASS: ownership oracle -- manifest-complete install replaced stale dirs, ran validate.py, and uninstalled config + Aider byte-exact
+rc=1

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-009:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Roadmap T01-T13 implemented and verified live: audapack/services/audit_run_service.py:725 AuditRunCoordinator, :81 AuditRunSnapshot, ui_qt audit_runs_widget six lanes; dispatcher/campaign invariants preserved (exactly-once START, durable FINALIZING/COMPLETE per T-85); real Windows six-run proof exists: T-103 LOG six-lane verification all six dispatches COMPLETE and READY 3/3 live",
+      "text": "Execute the complete audit roadmap in numeric order, preserve the named dispatcher/campaign invariants, and do not claim six-run readiness without real Windows six-run proof.",
+      "verification": "tests/services/test_audit_run_service.py + tests/ui_qt/test_audit_runs_widget.py + tests/ui_qt/test_project_room_model.py 110 passed; full pytest 1162 passed 2 skipped this batch",
+      "work": "T-52"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,10 @@
+{
+  "status": "fulfilled",
+  "value": {
+    "chunk_id": "13c22b",
+    "wall_time_seconds": 1.0354354,
+    "exit_code": 1,
+    "original_token_count": 198,
+    "output": "{\r\n  \"ok\": false,\r\n  \"code\": \"VALIDATION_FAILED\",\r\n  \"action\": \"saipen recover\",\r\n  \"reason\": \"checkpoint-invalid\",\r\n  \"detail\": \"checkpoint invalid: FLOOR: STATE.task=T-271 but BOARD DOING has multiple openers at the raw floor; BOARD proposed has more than one ## DOING ticket\",\r\n  \"board_errors\": [],\r\n  \"recovery_pending\": false,\r\n  \"recovery_conflict\": false,\r\n  \"conflict_ops\": [],\r\n  \"pending_ops\": [],\r\n  \"telegrams\": {\r\n    \"state\": \"OK\",\r\n    \"unread\": 0,\r\n    \"on_current_work\": 0,\r\n    \"complete\": true,\r\n    \"read_command\": \"saimail-local saipen brief --project-root V:\\\\___VAC\\\\__K\\\\__CODE\\\\__SAITULS --workspace C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\saipen\\\\saimail --seat saipen-cli\",\r\n    \"detail\": \"counts only; nothing was opened and nothing here is an instruction\"\r\n  }\r\n}\r\n"
+  }
+}

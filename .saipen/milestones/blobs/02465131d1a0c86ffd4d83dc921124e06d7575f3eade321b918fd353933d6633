@@ -1,0 +1,52 @@
+<p align="center">
+  <img src="assets/SAIPEN_design1.png" alt="SAIPEN Guide Title" width="800"/>
+</p>
+
+# SAIPEN Anleitung (Deutsch)
+
+Hör zu, Neuling. Das Problem ist einfach: Deine AI-Agenten haben das Gedächtnis eines Goldfisches.
+
+**SAIPEN** ist einfach ein Notizbuch im Ordner `.saipen/` direkt in deinem Projekt.
+
+**Schnellzugriff:** `cc` führt den Projektkontext bis zur Konvergenz fort (setzt ein laufendes Ziel fort, falls eines gesetzt ist), `sss` meldet Status ohne Code anzufassen und `ss` speichert einen Checkpoint und stoppt. [Siehe die komplette 15-Tasten-Karte](../saipen/RFC.md#110-command-surface). Kyrillische Zwillinge funktionieren auch: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+
+## Schnellstart
+
+1. **Einmal pro Maschine installieren:**
+```bash
+git clone https://github.com/vacterro/saipen
+cd saipen
+powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
+bash bootstrap/inject.sh                                            # macOS / Linux
+```
+
+2. **Im Projekt starten:**
+> `saipen set`
+
+3. **Arbeiten:**
+> `saipen`
+
+## Befehle
+
+| Befehl | Aktion |
+|---|---|
+| `saipen set` | Speicherordner `.saipen/` initialisieren |
+| `saipen continue` | Arbeit anhand von Notizen fortsetzen |
+| `saipen stop` | Fortschritt speichern & anhalten |
+| `saipen status` | Board & Status lesen |
+| `saipen goal <text>` | Zu neuem Ziel wechseln |
+| `saipen clean` | Tiefe Repository-Bereinigung |
+| `saipen translate` | Isolierter 32-Sprachen-Übersetzungs-Build |
+| `saipen markhunt` | Tiefer, unbegrenzter Audit -- zeichnet nur Befunde auf |
+| `saipen prepare` | Verpackt die Arbeit zur Übergabe an den nächsten Agenten |
+| `saipen ship` | Release-Flow auslösen |
+
+## Gut zu wissen
+- Nicht committete Änderungen, wenn du zurückkommst? Normal -- SAIPEN committet erst bei `ship`, nicht bei jedem Schritt. Der Agent prüft erst, wessen Änderungen das sind, bevor er etwas anfasst.
+- Soll er sich eine echte Architekturentscheidung merken? Leg sie in `.saipen/KNOWLEDGE/` ab, entweder als `decisions.md` oder als nummerierte `ADR-001.md`-Dateien.
+- Kein Git oder keine Shell auf dieser Maschine? Der Agent sagt es offen (`mode`, `WAIT: <category> -- <Frage>`), statt zu raten (die Kategorie ist eine von sieben: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; sie sagt dir, welche Art von Antwort dich entblockt)
+- Willst du ein Sicherheitsnetz? `python <saipen-Klon>/tools/install_hook.py` installiert eine Pre-Commit-Prüfung.
+
+---
+
+**Full command list / complete command reference:** [RFC § 1.10](../saipen/RFC.md#110-command-surface) — the authoritative list of every `saipen` command.

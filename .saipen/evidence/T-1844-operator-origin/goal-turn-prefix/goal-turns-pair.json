@@ -1,0 +1,22 @@
+{
+  "before": {
+    "exit_code": 1,
+    "oracle_sha256": "f2deb80bbb0be961be86f65fee02eed2a048ba99e890881d2d927861b6fc1c60",
+    "subject_sha256": "998554e76e37da96051074529e810ab7d5616e8be2cb11376691ea117a7023ab",
+    "tail": [
+      "Ran 10 tests in 1.994s",
+      "",
+      "FAILED (failures=5)"
+    ]
+  },
+  "after": {
+    "exit_code": 0,
+    "oracle_sha256": "f2deb80bbb0be961be86f65fee02eed2a048ba99e890881d2d927861b6fc1c60",
+    "subject_sha256": "dce8b7d513959edcddec1c39b7257282a0b7b86e398c973b83ce6b47951dc945",
+    "tail": [
+      "Ran 10 tests in 2.166s",
+      "",
+      "OK"
+    ]
+  }
+}

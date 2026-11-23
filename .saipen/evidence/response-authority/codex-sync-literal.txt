@@ -1,0 +1,10 @@
+
+saipen injector report (source: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\saipen)
+------------------------------------------------------------
+Codex CLI skill              copied (re-run after updates)
+Codex CLI provenance         verified
+Codex CLI instructions       already
+Codex CLI guard hook         guard hook and configuration installed; health unproven
+Codex CLI legacy hook        clean
+------------------------------------------------------------
+Done. Test: open any project in any agent, say: saipen set

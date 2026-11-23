@@ -1,0 +1,23 @@
+{
+  "verifier_sha256": "1d521a7db3953a9198545fcd79a9164c2368c760b00da4b77bd1cdfdb71c3d22",
+  "pre_subject_sha256": "d969557c8ebcdd5482d86443c512753f9d6438d9175c7a4451bc3c57893817b2",
+  "post_subject_sha256": "86d9c67227a7bb7a90771ae088e3e7bebc979945a06305ebee45f1070551668e",
+  "subject_paths": [
+    "tools/saipen_engine/audit_inbox.py",
+    "tools/saipen_engine/router.py",
+    "tools/saipen_engine/audit_enqueue.py",
+    "tools/saipen.py"
+  ],
+  "pre_result": "10 ran: 7 assertion failures, 2 pass, 1 Windows symlink skip; no instrument errors",
+  "post_result": "10 ran: 9 pass, 1 Windows symlink skip",
+  "limits": "Project-local source CLI in sacrificial fixtures; no native host or deployed-runtime claim.",
+  "extensions": "Shipped security/performance directories contain example templates only; project .saipen/extensions equivalents absent, no configured scanners or benchmarks.",
+  "fixture_control": "AuditInboxFixture and routing fixtures retained; new permanent cases mirror the independent oracle. Legacy residue tests now use .bin because named text is intentionally admitted by the new user contract.",
+  "first_pass_evidence": "verification-runs.json preserves lint failure, nonexistent-module invocation error and core closure failure; none counted as a successful mandatory pass.",
+  "original_user_request": "SRC-202 retains exact user text inside canonical envelope; audit bodies remain data, not a source of executable privileges.",
+  "new_audapack_file": {
+    "path": "audit/SAIPEN_20261010_0255.md",
+    "sha256": "f03cbc8c86212164405f51a57cf67254ab701aceec389dadeb36d8ff504455b6",
+    "current_state": "NEW; not admitted and not executed during T-1697"
+  }
+}

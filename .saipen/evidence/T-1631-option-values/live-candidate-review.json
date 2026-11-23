@@ -1,0 +1,12 @@
+{
+  "tests": 14,
+  "failures": 2,
+  "errors": 1,
+  "failed_ids": [
+    "independent_t1631_oracle.RealCLIValues.test_model_spelling_compound_separator_is_a_value",
+    "independent_t1631_oracle.StructuralValues.test_help_value_does_not_change_execution_effect",
+    "independent_t1631_oracle.StructuralValues.test_compound_separator_and_boundary_operands_stay_literal"
+  ],
+  "subject": "live CLI candidate; no source mutation",
+  "oracle": "V:\\_TEMP_\\saipen-t1631-draft-kkrri_3g\\project\\tools\\test_t1631_option_values.py"
+}

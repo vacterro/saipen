@@ -1,0 +1,1458 @@
+{
+  "scope": "actual managed broker, project admission and isolated negative controls",
+  "engine": "C:\\ProgramData\\SAI\\Accounts\\bin\\sai-accounts.exe",
+  "engine_sha256": "ec856f62e4fd687c44dd49c86dea10d930b532e3544abc0a879dc7eda5e938d4",
+  "account": "AG3",
+  "probes": [
+    {
+      "argv": [
+        "saipen-readiness",
+        "AG3",
+        "--workdir",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER"
+      ],
+      "exit_code": 0,
+      "result": {
+        "schema": "sai.accounts/saipen-readiness/1",
+        "account_id": "antigravity:windows-user:86e40a6e56585c5f",
+        "compact_label": "AG3",
+        "workdir": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER",
+        "facts": {
+          "account": {
+            "state": "ENABLED",
+            "backend": "managed_windows_user"
+          },
+          "broker": {
+            "state": "ONLINE",
+            "sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+            "identity_verified": true
+          },
+          "credentials": {
+            "present": true
+          },
+          "project_access": {
+            "status": "ok",
+            "reason": null,
+            "error": null
+          },
+          "saipen_runtime_detail": {
+            "code": "MACHINE_RUNTIME_READY",
+            "generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+            "current": true,
+            "capture": "captured",
+            "exit_code": 0
+          },
+          "saipen_runtime": {
+            "state": "READY"
+          },
+          "host_launch": {
+            "vendor_binary_present": true,
+            "effective_sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+            "token_matches_account": true,
+            "effective_user": "DESKTOP-TTH0L52\\SAIAG_9fabb0d5",
+            "elevated": false
+          },
+          "project_admission": {
+            "state": "ADMITTED",
+            "bootstrap": "HOST_BOOTSTRAP_BOUND",
+            "bootstrap_boundary": null,
+            "runtime_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+            "legacy_home_inaccessible": false,
+            "phase": "DONE",
+            "task": "none",
+            "next_action": "saipen continue",
+            "write_admission": "ADMITTED",
+            "write_detail": null,
+            "error": null
+          }
+        },
+        "execution": "broker",
+        "probe": {
+          "context": "86e40a6e56585c5f",
+          "status": "ok",
+          "schema": "sai.accounts/saipen-readiness-probe/1",
+          "effective_user": "DESKTOP-TTH0L52\\SAIAG_9fabb0d5",
+          "effective_sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+          "elevated": false,
+          "workdir": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER",
+          "launcher": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+          "launcher_present": true,
+          "machine": {
+            "argv": "saipen host machine status --json",
+            "capture_status": "captured",
+            "exit_code": 0,
+            "json": {
+              "ok": true,
+              "code": "MACHINE_RUNTIME_READY",
+              "root": "C:\\ProgramData\\SAI\\SAIPEN",
+              "saipen_runtime_ready": true,
+              "reasons": [],
+              "action": null,
+              "registration": {
+                "generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+                "installed_at": "2026-10-19T04:46:10Z",
+                "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002",
+                "kind": "saipen-machine-runtime",
+                "launcher": {
+                  "posix": "bin/saipen",
+                  "windows": "bin/saipen.cmd"
+                },
+                "previous": {
+                  "generation": "gen-sha256:06b7c9ab48edff45432b900f13e7b1d77fe006cb8b62bfc1935d1c19fac50784",
+                  "runtime": "runtime/06b7c9ab48edff45",
+                  "saipen_version": "8.1.0"
+                },
+                "projected_homes": [
+                  "C:\\Users\\vac34\\.agents\\skills\\saipen",
+                  "C:\\Users\\vac34\\.claude\\skills\\saipen",
+                  "C:\\Users\\vac34\\.codebuddy\\skills\\saipen",
+                  "C:\\Users\\vac34\\.codex\\skills\\saipen",
+                  "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+                  "C:\\Users\\vac34\\.gemini\\skills\\saipen",
+                  "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode\\skills\\saipen"
+                ],
+                "python": "python/3.11.9-64/python.exe",
+                "python_bundled": true,
+                "runtime": "runtime/b465d0bc64c60308",
+                "saipen_version": "8.1.0",
+                "schema": 1,
+                "source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+                "state_schema": 3
+              },
+              "home": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+              "generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+              "generation_proven": true,
+              "saipen_version": "8.1.0",
+              "state_schema": 3,
+              "launcher": {
+                "windows": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+                "posix": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen",
+                "ok": true,
+                "problems": []
+              },
+              "python": {
+                "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+                "bundled": true,
+                "ok": true
+              },
+              "acl": {
+                "checked": true,
+                "writable_by": [],
+                "foreign_owners": [],
+                "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002"
+              },
+              "source": "MACHINE_RUNTIME",
+              "canonical_generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+              "current": true
+            }
+          },
+          "bootstrap": {
+            "argv": "saipen host bootstrap --json",
+            "capture_status": "captured",
+            "exit_code": 0,
+            "json": {
+              "ok": true,
+              "code": "HOST_BOOTSTRAP_BOUND",
+              "host": null,
+              "host_record": {
+                "host": null,
+                "known": false,
+                "strength": "UNKNOWN"
+              },
+              "host_supported": false,
+              "project_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER",
+              "project_lineage": "lineage-05afdade62f34ea2ab30cb3740a7ad17",
+              "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+              "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+              "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+              "launcher": {
+                "ok": true,
+                "discovered": true,
+                "executable": true,
+                "dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin",
+                "posix": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen",
+                "windows": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+                "transport": "direct_launcher",
+                "why": ""
+              },
+              "bridge": {
+                "required": false,
+                "transport": "direct_launcher",
+                "cross_boundary": false,
+                "why": ""
+              },
+              "binding": {
+                "persisted_home": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+                "persisted_home_dead": false,
+                "persisted_home_inaccessible": false,
+                "reason": null
+              },
+              "runtime_discovered": true,
+              "python": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+              "attempted": [
+                {
+                  "source": "state-saipen-home",
+                  "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+                  "ok": true,
+                  "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+                  "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py"
+                },
+                {
+                  "source": "executing-engine",
+                  "home": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+                  "ok": true,
+                  "protocol_dir": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+                  "engine": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\tools\\saipen.py"
+                }
+              ],
+              "boundary": null,
+              "remediation": "canonical SAIPEN runtime reachable",
+              "fingerprint": "15fc819836fb433a967a24187baccd4924c7a4a126fff0e99a220784f39e6884",
+              "instructions": {
+                "code": "PROJECT_BLOCK_ABSENT",
+                "action": null,
+                "detail": null,
+                "files": []
+              },
+              "bridge_required": false
+            }
+          },
+          "project": {
+            "argv": "saipen status --json",
+            "capture_status": "captured",
+            "exit_code": 0,
+            "json": {
+              "ok": true,
+              "project_identity": "v:\\___vac\\__k\\__code\\_py\\_smart_vac_cleaner",
+              "protocol_version": "8.1.0",
+              "phase": "DONE",
+              "task": "none",
+              "next_action": "saipen continue",
+              "computed_next_action": "saipen continue",
+              "computed_reason": "maintain",
+              "blocker": "",
+              "execution_intent": "converge",
+              "claimed_ticket": null,
+              "top_workable_ticket": null,
+              "log_tail_event": 702,
+              "head": "",
+              "board_errors": [],
+              "recovery_pending": false,
+              "recovery_conflict": false,
+              "pending_ops": [],
+              "conflict_ops": [],
+              "goal_authority": {
+                "state": "inactive",
+                "detail": "No persistent grant",
+                "original_event": null,
+                "checkpoint_due": false
+              },
+              "milestone": {
+                "current": null,
+                "label": null,
+                "parent": null,
+                "undo_available": false,
+                "valid": true
+              },
+              "cold_route": {
+                "project_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER",
+                "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+                "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+                "phase": "DONE",
+                "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\done.md",
+                "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+                "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+                "documents": {
+                  "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+                  "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+                  "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+                  "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+                  "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+                  "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+                  "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+                  "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+                  "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+                  "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+                },
+                "project_memory": {
+                  "STATE.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER\\.saipen\\STATE.md",
+                  "BOARD.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER\\.saipen\\BOARD.md",
+                  "LOG.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER\\.saipen\\LOG.md"
+                },
+                "search_required": false
+              },
+              "audit_inbox": {
+                "pending": 0,
+                "active_layer": null,
+                "bound_receipt": null,
+                "bound_work": null,
+                "closed_pending_delete": 0,
+                "invalid": 0,
+                "residue": 0,
+                "clean": true,
+                "last_allocated_id": 1,
+                "inbox_state": null,
+                "error_state": null
+              },
+              "distribution": {
+                "installed": 3,
+                "stale": 3,
+                "unknown": 3,
+                "fresh": false,
+                "source_head": null,
+                "newest_installed_head": null,
+                "last_run": null,
+                "blocker": {
+                  "condition": "NONE",
+                  "blocked": false,
+                  "detail": "no injected surface declared by saipen/MANIFEST.json",
+                  "paths": [],
+                  "path_count": 0,
+                  "canonical_next_command": ""
+                },
+                "published_head": null,
+                "publication": null,
+                "consumer_convergence": "CURRENT",
+                "pending_consumers": [],
+                "consumers_converged": false,
+                "requires_human": false,
+                "summary": "distribution: 3 of 3 home(s) stale -- newest installed head unknown -- source head unknown -- 3 home(s) carry no head"
+              },
+              "claimed_but_unproven": [
+                "T-150",
+                "T-151",
+                "T-152",
+                "T-153",
+                "T-155",
+                "T-156",
+                "T-157",
+                "T-158",
+                "T-159",
+                "T-160",
+                "T-161",
+                "T-165",
+                "T-182",
+                "T-162",
+                "T-163",
+                "T-168",
+                "T-169",
+                "T-170",
+                "T-172",
+                "T-173",
+                "T-174",
+                "T-175",
+                "T-176",
+                "T-177",
+                "T-178",
+                "T-179",
+                "T-180",
+                "T-181",
+                "T-183",
+                "T-184",
+                "T-185",
+                "T-186",
+                "T-187",
+                "T-188",
+                "T-189",
+                "T-164",
+                "T-166",
+                "T-167",
+                "T-171"
+              ],
+              "conformance_history": "PASS (20.10.26 21:09)",
+              "conformance_status": {
+                "status": "STALE_FAIL",
+                "gate": "core",
+                "reason": "current source identity is unavailable (empty source_head/source_tree_fingerprint) -- the receipt cannot be proven bound to the current tree",
+                "receipt": {
+                  "blocking_findings": {
+                    "problem_count": 1,
+                    "problems": [
+                      {
+                        "category": null,
+                        "credential": false,
+                        "detail": "no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt",
+                        "detail_hash": "186e51123c0cc004",
+                        "finding_key": "622f11dd8173a7b5",
+                        "rule_id": "work_closure_evidence",
+                        "severity": "problem",
+                        "subject_id": "T-189",
+                        "subject_kind": "work",
+                        "subject_ref": null
+                      }
+                    ],
+                    "ruleset_fingerprint": "d682e4a0e542976ddfe3e5518a2b4f8bc81d7eea1e4bbdcd8642a8d5c7fefc5c",
+                    "ruleset_version": 2,
+                    "status": "complete",
+                    "warning_count": 35
+                  },
+                  "board_hash": "44c5f7dcf3ce2546",
+                  "canonical_next_command": "saipen work reverify T-189",
+                  "content_hash": "ad6122766bd88f5a",
+                  "exit_code": 1,
+                  "external_actions": [],
+                  "gate": "core",
+                  "install_fingerprint": "install-v1:213e8893e4fdadd3769e68c3630e4baac17b4ef2f21609ac199cc4edb5296f5d",
+                  "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+                  "kind": "conformance_receipt",
+                  "log_hash": "7121d339079fc518",
+                  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_smart_vac_cleaner",
+                  "receipt_id": "receipt-a99e95d57d10",
+                  "remediation_commands": [
+                    "saipen work reverify T-189"
+                  ],
+                  "schema_version": 2,
+                  "source_head": "dff12ced23f59b5dce3e259696b132b500bdb3c1",
+                  "source_tree_fingerprint": "git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195",
+                  "state_hash": "cad1aadd1cfb4999",
+                  "timestamp_utc": "2026-10-20T21:21:06.713074Z",
+                  "validator_protocol_version": "1",
+                  "verdict": "FAIL"
+                },
+                "validator": {
+                  "validator_path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\tools\\validate.py",
+                  "validator_protocol_version": "1",
+                  "project_protocol_version": "8",
+                  "gate": "core",
+                  "source_head": "",
+                  "source_tree_fingerprint": ""
+                },
+                "disposition": "UNPROVEN",
+                "remediation_command": "saipen validate",
+                "repair_status": "REFRESH_REQUIRED",
+                "diagnostic": null
+              },
+              "closed_contracts": {
+                "ok": true,
+                "status": "OBSERVED",
+                "advisory": true,
+                "blocks_unrelated_work": false,
+                "total": 65,
+                "counts": {
+                  "UNVERIFIED": 52,
+                  "REGRESSION_SUSPECT": 10,
+                  "UNCHANGED_SCOPE": 3
+                },
+                "rows": [
+                  {
+                    "work": "T-150",
+                    "status": "UNVERIFIED",
+                    "reason": "DEPENDENCY_BINDING_MISSING"
+                  },
+                  {
+                    "work": "T-151",
+                    "status": "UNVERIFIED",
+                    "reason": "DEPENDENCY_BINDING_MISSING"
+                  },
+                  {
+                    "work": "T-152",
+                    "status": "UNVERIFIED",
+                    "reason": "DEPENDENCY_BINDING_MISSING"
+                  },
+                  {
+                    "work": "T-153",
+                    "status": "UNVERIFIED",
+                    "reason": "DEPENDENCY_BINDING_MISSING"
+                  },
+                  {
+                    "work": "T-155",
+                    "status": "UNVERIFIED",
+                    "reason": "DEPENDENCY_BINDING_MISSING"
+                  }
+                ],
+                "has_more": true,
+                "offset": 0,
+                "limit": 5,
+                "errors": [],
+                "paths_read": 47,
+                "bytes_read": 874309
+              },
+              "automation": {
+                "schema_version": 1,
+                "disposition": "CONTINUE",
+                "next_command": "cc",
+                "operator_action_due": false,
+                "reason_code": "closure-conditions-C3-C4-C5-C6",
+                "reason": "no pending recovery, no active ticket, no workable TODO; continue ordinary maintenance",
+                "audit_quiescent": true,
+                "audit_epoch": "audit-epoch-v1:a7fd3c69ad0ecf048c784d94a9c1ec3885f0b97bbb616d8542e83a888f0ddb1d",
+                "convergence_current": false,
+                "closure_complete": false,
+                "source_fingerprint": null,
+                "completed_at": null
+              },
+              "conditional_efficiency_kpi": {
+                "scope": "ticket",
+                "ticket": "T-215",
+                "percent": 100,
+                "approximate": true,
+                "confidence": "LOW",
+                "formula_version": 1,
+                "components": {
+                  "progress": 100,
+                  "rework": 100,
+                  "autonomy": 100,
+                  "human": null
+                },
+                "notes": {
+                  "human": "no machine signal separates avoidable operator cost from a legitimate authorization boundary",
+                  "autonomy": "coarse: LOG agent ids are CLI identities shared across sessions"
+                },
+                "preliminary": true,
+                "withheld": null
+              },
+              "telegrams": {
+                "state": "NOT_CONFIGURED",
+                "detail": "run `saipen mail init` (or set SAIMAIL_WORKSPACE) to bind a mailbox and see unread telegrams at turn entry"
+              }
+            }
+          },
+          "write_admission": {
+            "argv": "saipen checkpoint DEC sai-accounts-readiness-probe --dry-run --json",
+            "capture_status": "captured",
+            "exit_code": 0,
+            "json": {
+              "ok": true,
+              "code": "CHECKPOINTED",
+              "op_id": "checkpoint-0a501fd300944f859d5cb6d768c27d82",
+              "changed_files": [
+                ".saipen/LOG.md",
+                ".saipen/STATE.md"
+              ],
+              "recovery_required": false,
+              "event_id": "E-703",
+              "dry_run": true
+            }
+          },
+          "sid": "S-1-5-21-6247072-3065140091-1424061869-1019"
+        },
+        "verdict": "READY",
+        "status": "ok"
+      }
+    },
+    {
+      "argv": [
+        "grant-workdir",
+        "AG3",
+        "--workdir",
+        "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project"
+      ],
+      "exit_code": 0,
+      "result": {
+        "schema": "sai.accounts/grant-workdir/1",
+        "account_id": "antigravity:windows-user:86e40a6e56585c5f",
+        "workdir": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project",
+        "op": "managed_workdir_ensure_access",
+        "target_sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+        "path_kind": "directory",
+        "status": "granted"
+      }
+    },
+    {
+      "argv": [
+        "saipen-readiness",
+        "AG3",
+        "--workdir",
+        "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project"
+      ],
+      "exit_code": 0,
+      "result": {
+        "schema": "sai.accounts/saipen-readiness/1",
+        "account_id": "antigravity:windows-user:86e40a6e56585c5f",
+        "compact_label": "AG3",
+        "workdir": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project",
+        "facts": {
+          "account": {
+            "state": "ENABLED",
+            "backend": "managed_windows_user"
+          },
+          "broker": {
+            "state": "ONLINE",
+            "sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+            "identity_verified": true
+          },
+          "credentials": {
+            "present": true
+          },
+          "project_access": {
+            "status": "ok",
+            "reason": null,
+            "error": null
+          },
+          "saipen_runtime_detail": {
+            "code": "MACHINE_RUNTIME_READY",
+            "generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+            "current": true,
+            "capture": "captured",
+            "exit_code": 0
+          },
+          "saipen_runtime": {
+            "state": "READY"
+          },
+          "host_launch": {
+            "vendor_binary_present": true,
+            "effective_sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+            "token_matches_account": true,
+            "effective_user": "DESKTOP-TTH0L52\\SAIAG_9fabb0d5",
+            "elevated": false
+          },
+          "project_admission": {
+            "state": "ADMITTED",
+            "bootstrap": "HOST_BOOTSTRAP_BOUND",
+            "bootstrap_boundary": null,
+            "runtime_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+            "legacy_home_inaccessible": false,
+            "phase": "PLAN",
+            "task": "none",
+            "next_action": "WAIT: init -- provide the first project goal or raw backlog",
+            "write_admission": "ADMITTED",
+            "write_detail": null,
+            "error": null
+          }
+        },
+        "execution": "broker",
+        "probe": {
+          "context": "86e40a6e56585c5f",
+          "status": "ok",
+          "schema": "sai.accounts/saipen-readiness-probe/1",
+          "effective_user": "DESKTOP-TTH0L52\\SAIAG_9fabb0d5",
+          "effective_sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+          "elevated": false,
+          "workdir": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project",
+          "launcher": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+          "launcher_present": true,
+          "machine": {
+            "argv": "saipen host machine status --json",
+            "capture_status": "captured",
+            "exit_code": 0,
+            "json": {
+              "ok": true,
+              "code": "MACHINE_RUNTIME_READY",
+              "root": "C:\\ProgramData\\SAI\\SAIPEN",
+              "saipen_runtime_ready": true,
+              "reasons": [],
+              "action": null,
+              "registration": {
+                "generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+                "installed_at": "2026-10-19T04:46:10Z",
+                "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002",
+                "kind": "saipen-machine-runtime",
+                "launcher": {
+                  "posix": "bin/saipen",
+                  "windows": "bin/saipen.cmd"
+                },
+                "previous": {
+                  "generation": "gen-sha256:06b7c9ab48edff45432b900f13e7b1d77fe006cb8b62bfc1935d1c19fac50784",
+                  "runtime": "runtime/06b7c9ab48edff45",
+                  "saipen_version": "8.1.0"
+                },
+                "projected_homes": [
+                  "C:\\Users\\vac34\\.agents\\skills\\saipen",
+                  "C:\\Users\\vac34\\.claude\\skills\\saipen",
+                  "C:\\Users\\vac34\\.codebuddy\\skills\\saipen",
+                  "C:\\Users\\vac34\\.codex\\skills\\saipen",
+                  "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+                  "C:\\Users\\vac34\\.gemini\\skills\\saipen",
+                  "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode\\skills\\saipen"
+                ],
+                "python": "python/3.11.9-64/python.exe",
+                "python_bundled": true,
+                "runtime": "runtime/b465d0bc64c60308",
+                "saipen_version": "8.1.0",
+                "schema": 1,
+                "source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+                "state_schema": 3
+              },
+              "home": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+              "generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+              "generation_proven": true,
+              "saipen_version": "8.1.0",
+              "state_schema": 3,
+              "launcher": {
+                "windows": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+                "posix": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen",
+                "ok": true,
+                "problems": []
+              },
+              "python": {
+                "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+                "bundled": true,
+                "ok": true
+              },
+              "acl": {
+                "checked": true,
+                "writable_by": [],
+                "foreign_owners": [],
+                "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002"
+              },
+              "source": "MACHINE_RUNTIME",
+              "canonical_generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+              "current": true
+            }
+          },
+          "bootstrap": {
+            "argv": "saipen host bootstrap --json",
+            "capture_status": "captured",
+            "exit_code": 0,
+            "json": {
+              "ok": true,
+              "code": "HOST_BOOTSTRAP_BOUND",
+              "host": null,
+              "host_record": {
+                "host": null,
+                "known": false,
+                "strength": "UNKNOWN"
+              },
+              "host_supported": false,
+              "project_root": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project",
+              "project_lineage": "lineage-c56d7f2ff12c4a2b9f3e1919ef6388af",
+              "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+              "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+              "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+              "launcher": {
+                "ok": true,
+                "discovered": true,
+                "executable": true,
+                "dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin",
+                "posix": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen",
+                "windows": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+                "transport": "direct_launcher",
+                "why": ""
+              },
+              "bridge": {
+                "required": false,
+                "transport": "direct_launcher",
+                "cross_boundary": false,
+                "why": ""
+              },
+              "binding": {
+                "persisted_home": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+                "persisted_home_dead": false,
+                "persisted_home_inaccessible": false,
+                "reason": null
+              },
+              "runtime_discovered": true,
+              "python": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+              "attempted": [
+                {
+                  "source": "state-saipen-home",
+                  "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+                  "ok": true,
+                  "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+                  "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py"
+                },
+                {
+                  "source": "executing-engine",
+                  "home": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+                  "ok": true,
+                  "protocol_dir": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+                  "engine": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\tools\\saipen.py"
+                }
+              ],
+              "boundary": null,
+              "remediation": "canonical SAIPEN runtime reachable",
+              "fingerprint": "54eb0fb3e2c4903e2bde576d28ad1d83089e9ad03ef1b8e5f72e7f0c449a995c",
+              "instructions": {
+                "code": "PROJECT_BLOCK_ABSENT",
+                "action": null,
+                "detail": null,
+                "files": []
+              },
+              "bridge_required": false
+            }
+          },
+          "project": {
+            "argv": "saipen status --json",
+            "capture_status": "captured",
+            "exit_code": 0,
+            "json": {
+              "ok": true,
+              "project_identity": "v:\\_temp_\\saipen-accounts-acceptance-u9xfwj4p\\project",
+              "protocol_version": "8.1.0",
+              "phase": "PLAN",
+              "task": "none",
+              "next_action": "WAIT: init -- provide the first project goal or raw backlog",
+              "computed_next_action": "WAIT: init -- provide the first project goal or raw backlog",
+              "computed_reason": "wait",
+              "blocker": "none",
+              "execution_intent": "normal",
+              "claimed_ticket": null,
+              "top_workable_ticket": null,
+              "log_tail_event": null,
+              "head": "",
+              "board_errors": [],
+              "recovery_pending": false,
+              "recovery_conflict": false,
+              "pending_ops": [],
+              "conflict_ops": [],
+              "goal_authority": {
+                "state": "inactive",
+                "detail": "No persistent grant",
+                "original_event": null,
+                "checkpoint_due": false
+              },
+              "milestone": {
+                "current": null,
+                "label": null,
+                "parent": null,
+                "undo_available": false,
+                "valid": true
+              },
+              "cold_route": {
+                "project_root": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project",
+                "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+                "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+                "phase": "PLAN",
+                "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\plan.md",
+                "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+                "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+                "documents": {
+                  "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+                  "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+                  "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+                  "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+                  "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+                  "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+                  "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+                  "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+                  "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+                  "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+                },
+                "project_memory": {
+                  "STATE.md": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project\\.saipen\\STATE.md",
+                  "BOARD.md": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project\\.saipen\\BOARD.md",
+                  "LOG.md": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project\\.saipen\\LOG.md"
+                },
+                "search_required": false
+              },
+              "distribution": {
+                "installed": 3,
+                "stale": 3,
+                "unknown": 3,
+                "fresh": false,
+                "source_head": null,
+                "newest_installed_head": null,
+                "last_run": null,
+                "blocker": {
+                  "condition": "NONE",
+                  "blocked": false,
+                  "detail": "no injected surface declared by saipen/MANIFEST.json",
+                  "paths": [],
+                  "path_count": 0,
+                  "canonical_next_command": ""
+                },
+                "published_head": null,
+                "publication": null,
+                "consumer_convergence": "CURRENT",
+                "pending_consumers": [],
+                "consumers_converged": false,
+                "requires_human": false,
+                "summary": "distribution: 3 of 3 home(s) stale -- newest installed head unknown -- source head unknown -- 3 home(s) carry no head"
+              },
+              "waiting_on_you": [
+                "WAIT: init -- provide the first project goal or raw backlog"
+              ],
+              "conformance_status": {
+                "status": "NOT_RUN",
+                "gate": "core",
+                "reason": "no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS",
+                "validator": {
+                  "validator_path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\tools\\validate.py",
+                  "validator_protocol_version": "1",
+                  "project_protocol_version": "8",
+                  "gate": "core",
+                  "source_head": "no-git",
+                  "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4"
+                },
+                "disposition": "UNPROVEN",
+                "remediation_command": "saipen validate",
+                "repair_status": "REFRESH_REQUIRED",
+                "diagnostic": null
+              },
+              "closed_contracts": {
+                "ok": true,
+                "status": "OBSERVED",
+                "advisory": true,
+                "blocks_unrelated_work": false,
+                "total": 0,
+                "counts": {},
+                "rows": [],
+                "has_more": false,
+                "offset": 0,
+                "limit": 5,
+                "errors": [],
+                "paths_read": 0,
+                "bytes_read": 0
+              },
+              "automation": {
+                "schema_version": 1,
+                "disposition": "CONTINUE",
+                "next_command": "cc",
+                "operator_action_due": true,
+                "reason_code": "wait-init",
+                "reason": "persisted WAIT is a hard stop; do not route past it",
+                "audit_quiescent": true,
+                "audit_epoch": "audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40",
+                "convergence_current": false,
+                "closure_complete": false,
+                "source_fingerprint": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+                "completed_at": null
+              },
+              "conditional_efficiency_kpi": {
+                "scope": "session",
+                "ticket": null,
+                "percent": null,
+                "approximate": true,
+                "confidence": "UNKNOWN",
+                "formula_version": 1,
+                "components": {
+                  "progress": null,
+                  "rework": null,
+                  "autonomy": null,
+                  "human": null
+                },
+                "preliminary": true,
+                "withheld": "no ticket attribution; no session KPI is derived in formula v1"
+              },
+              "telegrams": {
+                "state": "NOT_CONFIGURED",
+                "detail": "run `saipen mail init` (or set SAIMAIL_WORKSPACE) to bind a mailbox and see unread telegrams at turn entry"
+              }
+            }
+          },
+          "write_admission": {
+            "argv": "saipen checkpoint DEC sai-accounts-readiness-probe --dry-run --json",
+            "capture_status": "captured",
+            "exit_code": 0,
+            "json": {
+              "ok": true,
+              "code": "CHECKPOINTED",
+              "op_id": "checkpoint-12ad2a703aa84fd8bf2bbd12a6183fee",
+              "changed_files": [
+                ".saipen/LOG.md",
+                ".saipen/STATE.md"
+              ],
+              "recovery_required": false,
+              "event_id": "E-1",
+              "dry_run": true,
+              "operator_boundary": {
+                "command": "saipen response digest --project-root \"V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project\" --reason final --json",
+                "instruction": "The project now waits for the operator. To end the turn, reply with the `text` of that command verbatim and nothing else: the detail is already in LOG, and a DETAILS line, when there is one, names where."
+              }
+            }
+          },
+          "sid": "S-1-5-21-6247072-3065140091-1424061869-1019"
+        },
+        "verdict": "READY",
+        "status": "ok"
+      }
+    },
+    {
+      "argv": [
+        "saipen-readiness",
+        "AG3",
+        "--workdir",
+        "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project"
+      ],
+      "exit_code": 1,
+      "result": {
+        "schema": "sai.accounts/saipen-readiness/1",
+        "account_id": "antigravity:windows-user:86e40a6e56585c5f",
+        "compact_label": "AG3",
+        "workdir": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project",
+        "facts": {
+          "account": {
+            "state": "ENABLED",
+            "backend": "managed_windows_user"
+          },
+          "broker": {
+            "state": "ONLINE",
+            "sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+            "identity_verified": true
+          },
+          "credentials": {
+            "present": true
+          },
+          "project_access": {
+            "status": "ok",
+            "reason": null,
+            "error": null
+          },
+          "saipen_runtime_detail": {
+            "code": "MACHINE_RUNTIME_READY",
+            "generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+            "current": true,
+            "capture": "captured",
+            "exit_code": 0
+          },
+          "saipen_runtime": {
+            "state": "READY"
+          },
+          "host_launch": {
+            "vendor_binary_present": true,
+            "effective_sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+            "token_matches_account": true,
+            "effective_user": "DESKTOP-TTH0L52\\SAIAG_9fabb0d5",
+            "elevated": false
+          },
+          "project_admission": {
+            "state": "DENIED",
+            "bootstrap": "HOST_BOOTSTRAP_BOUND",
+            "bootstrap_boundary": null,
+            "runtime_home": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+            "legacy_home_inaccessible": true,
+            "phase": "PLAN",
+            "task": "none",
+            "next_action": null,
+            "write_admission": "CROSS_USER_RUNTIME_UNAVAILABLE",
+            "write_detail": "home-inaccessible: STATE.saipen_home 'C:/Users/vac34/.codex' cannot be read by this account (CROSS_USER_RUNTIME_UNAVAILABLE): the install belongs to another user. It is not a dead pointer and is never rebound; the machine runtime running this command projects 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', not that home. This needs the operator: install the machine runtime from that home, or rebind this project from an account that can read it",
+            "error": null
+          }
+        },
+        "execution": "broker",
+        "probe": {
+          "context": "86e40a6e56585c5f",
+          "status": "ok",
+          "schema": "sai.accounts/saipen-readiness-probe/1",
+          "effective_user": "DESKTOP-TTH0L52\\SAIAG_9fabb0d5",
+          "effective_sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+          "elevated": false,
+          "workdir": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project",
+          "launcher": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+          "launcher_present": true,
+          "machine": {
+            "argv": "saipen host machine status --json",
+            "capture_status": "captured",
+            "exit_code": 0,
+            "json": {
+              "ok": true,
+              "code": "MACHINE_RUNTIME_READY",
+              "root": "C:\\ProgramData\\SAI\\SAIPEN",
+              "saipen_runtime_ready": true,
+              "reasons": [],
+              "action": null,
+              "registration": {
+                "generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+                "installed_at": "2026-10-19T04:46:10Z",
+                "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002",
+                "kind": "saipen-machine-runtime",
+                "launcher": {
+                  "posix": "bin/saipen",
+                  "windows": "bin/saipen.cmd"
+                },
+                "previous": {
+                  "generation": "gen-sha256:06b7c9ab48edff45432b900f13e7b1d77fe006cb8b62bfc1935d1c19fac50784",
+                  "runtime": "runtime/06b7c9ab48edff45",
+                  "saipen_version": "8.1.0"
+                },
+                "projected_homes": [
+                  "C:\\Users\\vac34\\.agents\\skills\\saipen",
+                  "C:\\Users\\vac34\\.claude\\skills\\saipen",
+                  "C:\\Users\\vac34\\.codebuddy\\skills\\saipen",
+                  "C:\\Users\\vac34\\.codex\\skills\\saipen",
+                  "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+                  "C:\\Users\\vac34\\.gemini\\skills\\saipen",
+                  "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode\\skills\\saipen"
+                ],
+                "python": "python/3.11.9-64/python.exe",
+                "python_bundled": true,
+                "runtime": "runtime/b465d0bc64c60308",
+                "saipen_version": "8.1.0",
+                "schema": 1,
+                "source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+                "state_schema": 3
+              },
+              "home": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+              "generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+              "generation_proven": true,
+              "saipen_version": "8.1.0",
+              "state_schema": 3,
+              "launcher": {
+                "windows": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+                "posix": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen",
+                "ok": true,
+                "problems": []
+              },
+              "python": {
+                "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+                "bundled": true,
+                "ok": true
+              },
+              "acl": {
+                "checked": true,
+                "writable_by": [],
+                "foreign_owners": [],
+                "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002"
+              },
+              "source": "MACHINE_RUNTIME",
+              "canonical_generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+              "current": true
+            }
+          },
+          "bootstrap": {
+            "argv": "saipen host bootstrap --json",
+            "capture_status": "captured",
+            "exit_code": 0,
+            "json": {
+              "ok": true,
+              "code": "HOST_BOOTSTRAP_BOUND",
+              "host": null,
+              "host_record": {
+                "host": null,
+                "known": false,
+                "strength": "UNKNOWN"
+              },
+              "host_supported": false,
+              "project_root": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project",
+              "project_lineage": "lineage-c56d7f2ff12c4a2b9f3e1919ef6388af",
+              "saipen_home": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+              "protocol_dir": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+              "engine": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\tools\\saipen.py",
+              "launcher": {
+                "ok": true,
+                "discovered": true,
+                "executable": true,
+                "dir": "C:\\ProgramData\\SAI\\SAIPEN\\bin",
+                "posix": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen",
+                "windows": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+                "transport": "direct_launcher",
+                "why": ""
+              },
+              "bridge": {
+                "required": false,
+                "transport": "direct_launcher",
+                "cross_boundary": false,
+                "why": ""
+              },
+              "binding": {
+                "persisted_home": "C:/Users/vac34/.codex",
+                "persisted_home_dead": false,
+                "persisted_home_inaccessible": true,
+                "reason": "STATE.saipen_home 'C:/Users/vac34/.codex' cannot be read by this account (CROSS_USER_RUNTIME_UNAVAILABLE): the install belongs to another user. It is not a dead pointer and is never rebound; the machine runtime running this command projects 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', not that home. This needs the operator: install the machine runtime from that home, or rebind this project from an account that can read it",
+                "legacy_saipen_home": "INACCESSIBLE_NOT_THIS_RUNTIME"
+              },
+              "runtime_discovered": true,
+              "python": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+              "attempted": [
+                {
+                  "source": "state-saipen-home",
+                  "home": "C:\\Users\\vac34\\.codex",
+                  "ok": false,
+                  "inaccessible": true,
+                  "why": "this account cannot read the path (access denied)"
+                },
+                {
+                  "source": "executing-engine",
+                  "home": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+                  "ok": true,
+                  "protocol_dir": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+                  "engine": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\tools\\saipen.py"
+                }
+              ],
+              "boundary": null,
+              "remediation": "canonical SAIPEN runtime reachable",
+              "fingerprint": "f5c88fcdbee0ed5399238a25c6c594ee263fe567afc34278f7fbf973ae8030e5",
+              "instructions": {
+                "code": "PROJECT_BLOCK_ABSENT",
+                "action": null,
+                "detail": null,
+                "files": []
+              },
+              "bridge_required": false,
+              "runtime_source": "MACHINE_RUNTIME",
+              "machine_runtime": {
+                "root": "C:\\ProgramData\\SAI\\SAIPEN",
+                "generation": "gen-sha256:b465d0bc64c60308280a62553f7ef0b359800419fb4c00af89b444dbbe68e8b5",
+                "saipen_version": "8.1.0"
+              }
+            }
+          },
+          "project": {
+            "argv": "saipen status --json",
+            "capture_status": "captured",
+            "exit_code": 0,
+            "json": {
+              "ok": true,
+              "project_identity": "v:\\_temp_\\saipen-accounts-acceptance-u9xfwj4p\\project",
+              "protocol_version": "8.1.0",
+              "phase": "PLAN",
+              "task": "none",
+              "next_action": "WAIT: init -- provide the first project goal or raw backlog",
+              "computed_next_action": null,
+              "computed_reason": "reconcile-refused",
+              "blocker": "none",
+              "execution_intent": "normal",
+              "claimed_ticket": null,
+              "top_workable_ticket": null,
+              "log_tail_event": null,
+              "head": "",
+              "board_errors": [],
+              "recovery_pending": false,
+              "recovery_conflict": false,
+              "pending_ops": [],
+              "conflict_ops": [],
+              "goal_authority": {
+                "state": "inactive",
+                "detail": "No persistent grant",
+                "original_event": null,
+                "checkpoint_due": false
+              },
+              "milestone": {
+                "current": null,
+                "label": null,
+                "parent": null,
+                "undo_available": false,
+                "valid": true
+              },
+              "cold_route": {
+                "project_root": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project",
+                "saipen_home": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+                "protocol_dir": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308",
+                "phase": "PLAN",
+                "phase_module": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\phases\\plan.md",
+                "boot": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\BOOT.md",
+                "style": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\STYLE.md",
+                "documents": {
+                  "STYLE.md": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\STYLE.md",
+                  "BOOT.md": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\BOOT.md",
+                  "INDEX.md": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\INDEX.md",
+                  "COMMANDS.md": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\COMMANDS.md",
+                  "OPS.md": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\OPS.md",
+                  "SOURCES.md": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\SOURCES.md",
+                  "EXECUTION.md": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\EXECUTION.md",
+                  "MAINTENANCE.md": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\MAINTENANCE.md",
+                  "CORE.md": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\CORE.md",
+                  "RUNTIME.md": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\RUNTIME.md"
+                },
+                "project_memory": {
+                  "STATE.md": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project\\.saipen\\STATE.md",
+                  "BOARD.md": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project\\.saipen\\BOARD.md",
+                  "LOG.md": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project\\.saipen\\LOG.md"
+                },
+                "search_required": false,
+                "runtime_source": "MACHINE_RUNTIME",
+                "recorded_saipen_home": "C:/Users/vac34/.codex"
+              },
+              "distribution": {
+                "installed": 3,
+                "stale": 3,
+                "unknown": 3,
+                "fresh": false,
+                "source_head": null,
+                "newest_installed_head": null,
+                "last_run": null,
+                "blocker": {
+                  "condition": "NONE",
+                  "blocked": false,
+                  "detail": "no injected surface declared by saipen/MANIFEST.json",
+                  "paths": [],
+                  "path_count": 0,
+                  "canonical_next_command": ""
+                },
+                "published_head": null,
+                "publication": null,
+                "consumer_convergence": "CURRENT",
+                "pending_consumers": [],
+                "consumers_converged": false,
+                "requires_human": false,
+                "summary": "distribution: 3 of 3 home(s) stale -- newest installed head unknown -- source head unknown -- 3 home(s) carry no head"
+              },
+              "waiting_on_you": [
+                "WAIT: init -- provide the first project goal or raw backlog"
+              ],
+              "conformance_status": {
+                "status": "NOT_RUN",
+                "gate": "core",
+                "reason": "no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS",
+                "validator": {
+                  "validator_path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\b465d0bc64c60308\\tools\\validate.py",
+                  "validator_protocol_version": "1",
+                  "project_protocol_version": "8",
+                  "gate": "core",
+                  "source_head": "no-git",
+                  "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4"
+                },
+                "disposition": "UNPROVEN",
+                "remediation_command": "saipen validate",
+                "repair_status": "REFRESH_REQUIRED",
+                "diagnostic": null
+              },
+              "closed_contracts": {
+                "ok": true,
+                "status": "OBSERVED",
+                "advisory": true,
+                "blocks_unrelated_work": false,
+                "total": 0,
+                "counts": {},
+                "rows": [],
+                "has_more": false,
+                "offset": 0,
+                "limit": 5,
+                "errors": [],
+                "paths_read": 0,
+                "bytes_read": 0
+              },
+              "automation": {
+                "schema_version": 1,
+                "disposition": "BLOCKED",
+                "next_command": null,
+                "operator_action_due": false,
+                "reason_code": "reconcile-refused",
+                "reason": "home-inaccessible: STATE.saipen_home 'C:/Users/vac34/.codex' cannot be read by this account (CROSS_USER_RUNTIME_UNAVAILABLE): the install belongs to another user. It is not a dead pointer and is never rebound; the machine runtime running this command projects 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', not that home. This needs the operator: install the machine runtime from that home, or rebind this project from an account that can read it",
+                "audit_quiescent": true,
+                "audit_epoch": "audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40",
+                "convergence_current": false,
+                "closure_complete": false,
+                "source_fingerprint": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+                "completed_at": null,
+                "reconcile_code": "VALIDATION_FAILED",
+                "operator_action": null,
+                "remediation_command": null
+              },
+              "conditional_efficiency_kpi": {
+                "scope": "session",
+                "ticket": null,
+                "percent": null,
+                "approximate": true,
+                "confidence": "UNKNOWN",
+                "formula_version": 1,
+                "components": {
+                  "progress": null,
+                  "rework": null,
+                  "autonomy": null,
+                  "human": null
+                },
+                "preliminary": true,
+                "withheld": "no ticket attribution; no session KPI is derived in formula v1"
+              },
+              "telegrams": {
+                "state": "NOT_CONFIGURED",
+                "detail": "run `saipen mail init` (or set SAIMAIL_WORKSPACE) to bind a mailbox and see unread telegrams at turn entry"
+              }
+            }
+          },
+          "write_admission": {
+            "argv": "saipen checkpoint DEC sai-accounts-readiness-probe --dry-run --json",
+            "capture_status": "probe_failed",
+            "exit_code": 1,
+            "json": {
+              "ok": false,
+              "code": "CROSS_USER_RUNTIME_UNAVAILABLE",
+              "op_id": null,
+              "changed_files": [],
+              "recovery_required": false,
+              "message": "home-inaccessible: STATE.saipen_home 'C:/Users/vac34/.codex' cannot be read by this account (CROSS_USER_RUNTIME_UNAVAILABLE): the install belongs to another user. It is not a dead pointer and is never rebound; the machine runtime running this command projects 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', not that home. This needs the operator: install the machine runtime from that home, or rebind this project from an account that can read it",
+              "detail": "home-inaccessible: STATE.saipen_home 'C:/Users/vac34/.codex' cannot be read by this account (CROSS_USER_RUNTIME_UNAVAILABLE): the install belongs to another user. It is not a dead pointer and is never rebound; the machine runtime running this command projects 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', not that home. This needs the operator: install the machine runtime from that home, or rebind this project from an account that can read it"
+            }
+          },
+          "sid": "S-1-5-21-6247072-3065140091-1424061869-1019"
+        },
+        "verdict": "PROJECT_LIFECYCLE_DENIED",
+        "status": "PROJECT_LIFECYCLE_DENIED"
+      }
+    },
+    {
+      "argv": [
+        "revoke-workdir",
+        "AG3",
+        "--workdir",
+        "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project"
+      ],
+      "exit_code": 0,
+      "result": {
+        "schema": "sai.accounts/revoke-workdir/1",
+        "account_id": "antigravity:windows-user:86e40a6e56585c5f",
+        "workdir": "V:\\_TEMP_\\saipen-accounts-acceptance-u9xfwj4p\\project",
+        "op": "managed_workdir_revoke_path_access",
+        "target_sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+        "status": "revoked",
+        "revoked_rules": 1,
+        "preserved_rules": 0,
+        "failed_rules": 0,
+        "ownership_unproven_rules": 0,
+        "unverified_ownership_rules": 0
+      }
+    },
+    {
+      "argv": [
+        "saipen-readiness",
+        "AG3",
+        "--workdir",
+        "C:\\Users\\vac34\\.codex"
+      ],
+      "exit_code": 1,
+      "result": {
+        "schema": "sai.accounts/saipen-readiness/1",
+        "account_id": "antigravity:windows-user:86e40a6e56585c5f",
+        "compact_label": "AG3",
+        "workdir": "C:\\Users\\vac34\\.codex",
+        "facts": {
+          "account": {
+            "state": "ENABLED",
+            "backend": "managed_windows_user"
+          },
+          "broker": {
+            "state": "ONLINE",
+            "sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+            "identity_verified": true
+          },
+          "credentials": {
+            "present": true
+          },
+          "project_access": {
+            "status": "WORKDIR_UNAVAILABLE",
+            "reason": "ACCESS_DENIED",
+            "error": null
+          },
+          "saipen_runtime_detail": {
+            "code": null,
+            "generation": null,
+            "current": null,
+            "capture": null,
+            "exit_code": null
+          },
+          "saipen_runtime": {
+            "state": "UNAVAILABLE"
+          },
+          "host_launch": {
+            "vendor_binary_present": true,
+            "effective_sid": null,
+            "token_matches_account": false,
+            "effective_user": null,
+            "elevated": null
+          },
+          "project_admission": {
+            "state": "DENIED",
+            "bootstrap": null,
+            "bootstrap_boundary": null,
+            "runtime_home": null,
+            "legacy_home_inaccessible": null,
+            "phase": null,
+            "task": null,
+            "next_action": null,
+            "write_admission": "UNKNOWN",
+            "write_detail": null,
+            "error": null
+          }
+        },
+        "execution": "broker",
+        "probe": {
+          "context": "86e40a6e56585c5f",
+          "status": "WORKDIR_UNAVAILABLE",
+          "workdir": "C:\\Users\\vac34\\.codex",
+          "reason": "ACCESS_DENIED",
+          "sid": "S-1-5-21-6247072-3065140091-1424061869-1019"
+        },
+        "verdict": "PROJECT_ACCESS_DENIED",
+        "status": "PROJECT_ACCESS_DENIED"
+      }
+    }
+  ],
+  "fixture_removed": true,
+  "actual_project_canonical_unchanged": true,
+  "unlisted_home_negative_control": true,
+  "tests_ran": 3,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0
+}

@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "PROJECT_BINDING_INVALID",
+  "detail": "explicit --project-root has no .saipen/ directory: V:\\_TEMP_\\saipen-freebuff-luna-cold-s5e38tid"
+}

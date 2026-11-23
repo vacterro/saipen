@@ -1,0 +1,11 @@
+{
+  "observed_at": "2026-11-09T00:55:08.144948+00:00",
+  "subject_observation": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\cc-20261109\\review-subject.json",
+  "head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+  "observed_head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+  "file_count": 906,
+  "changed": [],
+  "index_sha256": "e708797f31c5aafe4e83799d97c94b5a415b80a02253267e273ca0f10477060c",
+  "previous_index_sha256": "e708797f31c5aafe4e83799d97c94b5a415b80a02253267e273ca0f10477060c",
+  "note": "Post-run comparison. Baseline was captured after runner start; this does not bind earlier tests to their exact start bytes or establish author attribution."
+}

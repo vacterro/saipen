@@ -1,0 +1,6 @@
+test_only_proved_empty_worker_is_neutral_and_raw_result_stays_visible (test_t1837_ci_family_parity.EmptyPartitionTests.test_only_proved_empty_worker_is_neutral_and_raw_result_stays_visible) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK

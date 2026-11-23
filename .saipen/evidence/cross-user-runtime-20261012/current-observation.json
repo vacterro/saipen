@@ -1,0 +1,218 @@
+{
+  "captured_utc": "2026-10-12T11:03:12.947304+00:00",
+  "observer_identity": "current operator token; NOT the AG3 token",
+  "consumer_projects": [
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER",
+      "reported_snapshot": {
+        "phase": "BUILD",
+        "task": "T-195",
+        "next_action": "PHASE BUILD T-195",
+        "blocker": "",
+        "last_event": 208,
+        "agent": "workbuddy",
+        "saipen_home": "C:\\Users\\vac34\\.agents\\skills\\saipen"
+      },
+      "board_errors": [
+        "BOARD.md:8 ticket T-199 has unrecognized field 'source: saihunt HUNT-001'"
+      ],
+      "history_errors": [],
+      "current_authority": {
+        "status": "UNAUTHORIZED",
+        "floor": 207,
+        "head": [
+          208
+        ],
+        "findings": [
+          {
+            "rule": "state-ahead-of-journal",
+            "last_event": 208,
+            "floor": 207,
+            "detail": "STATE.last_event is E-208, above E-207, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand"
+          }
+        ],
+        "detail": "STATE.last_event is E-208, above E-207, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand"
+      },
+      "work": {
+        "T-195": {
+          "section": "## DOING",
+          "description": "[P1] Implement and verify the 19 AUDIT_ALL_3 findings (RUN_ID acb-mtk1nqt0): CORE-001..008, W2-001..006, PERF-001..005 into the live v2.6.9 project",
+          "fields": {
+            "verify": "Implement and verify the 19 AUDIT_ALL_3 findings (RUN_ID acb-mtk1nqt0): CORE-001..008, W2-001..006, PERF-001..005 into the live v2.6.9 project is complete and the repository-declared verification harness passes;... [detail_ref: .saipen/recovery/board-compaction/T-195/T-195-36147efc9b05ad5b42526448.json]",
+            "owner": "workbuddy",
+            "claim_time": "2026-09-02T17:54:19Z",
+            "detail_ref": ".saipen/recovery/board-compaction/T-195/T-195-36147efc9b05ad5b42526448.json"
+          }
+        },
+        "T-199": {
+          "section": "## TODO",
+          "description": "[P1] Remediate saihunt HUNT-001 defects: WINDIR env poisoning in resolve_system_roots() (Signal 1), 5 silent except pass (Signal 4), schedule uninstall asymmetry (Signal 5)",
+          "fields": {
+            "verify": "test_windir_is_os_authoritative_not_env PASS, silent catches replaced with logging, task uninstall route available"
+          }
+        }
+      },
+      "canonical_hashes": {
+        "STATE.md": "3430cf0c9e49b8dfbd5ae181a912b0dcf20562b98b4ec033e066e6b3afc562d2",
+        "BOARD.md": "ab63abf32103de952db83f99b42fc8d2b759a3da4081f60a6bfd697eb7808a6e",
+        "LOG.md": "6bff61d59c4cfc9831806f715279d296d164ee76591f86b7b0e7e539b7282f73",
+        "IDENTITY.md": "d69712a396f0bf8481f5f4ba885cf7f6cc8652e90d5937d8e29b2de80f060bef",
+        "MANIFEST.json": "d92db5b76b33463f63044d7a5b3b15837148ce82ce5189f1c2292d8950171050"
+      },
+      "canonical_unchanged": true
+    },
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER",
+      "reported_snapshot": {
+        "phase": "DONE",
+        "task": "none",
+        "next_action": "saipen continue",
+        "blocker": "none",
+        "last_event": 24,
+        "agent": "saipen",
+        "saipen_home": "C:/ProgramData/SAI/SAIPEN/runtime/2bd10cc421aacf6a"
+      },
+      "board_errors": [],
+      "history_errors": [
+        "duplicate E-ID(s) in complete history: E-19",
+        "E-19 is not greater than preceding E-23 (out of order)"
+      ],
+      "current_authority": {
+        "status": "UNAUTHORIZED",
+        "floor": 23,
+        "head": [],
+        "findings": [
+          {
+            "rule": "state-ahead-of-journal",
+            "last_event": 24,
+            "floor": 23,
+            "detail": "STATE.last_event is E-24, above E-23, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand"
+          },
+          {
+            "rule": "terminal-without-operation",
+            "ticket": "T-2",
+            "events": [],
+            "floor": 23,
+            "origin": "board-only",
+            "detail": "T-2 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it -- the completion was typed, not run"
+          },
+          {
+            "rule": "terminal-without-operation",
+            "ticket": "T-3",
+            "events": [],
+            "floor": 23,
+            "origin": "board-only",
+            "detail": "T-3 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it -- the completion was typed, not run"
+          },
+          {
+            "rule": "terminal-without-operation",
+            "ticket": "T-4",
+            "events": [],
+            "floor": 23,
+            "origin": "board-only",
+            "detail": "T-4 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it -- the completion was typed, not run"
+          },
+          {
+            "rule": "terminal-without-operation",
+            "ticket": "T-5",
+            "events": [],
+            "floor": 23,
+            "origin": "board-only",
+            "detail": "T-5 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it -- the completion was typed, not run"
+          },
+          {
+            "rule": "terminal-without-operation",
+            "ticket": "T-6",
+            "events": [],
+            "floor": 23,
+            "origin": "board-only",
+            "detail": "T-6 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it -- the completion was typed, not run"
+          }
+        ],
+        "detail": "STATE.last_event is E-24, above E-23, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand; T-2 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it -- the completion was typed, not run; T-3 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      "work": {
+        "T-195": null,
+        "T-199": null
+      },
+      "canonical_hashes": {
+        "STATE.md": "776ece0c3b302cfcd7332843c0500d338698a4eaa3a6d6d2cc57ee6f4d293c6c",
+        "BOARD.md": "ef1f28cb4367ede8b2b8e0cbd7648677c979f1bcdc837cd93eb2d50121397167",
+        "LOG.md": "1a89d1e18828c151e49f982e129bb4a3386fe451e5e08d97c0aea8bf9da18578",
+        "IDENTITY.md": "523125b90af60622302bf93324566888353a6df6e2079efacaa831a0f31f7b02",
+        "MANIFEST.json": "b1628f6afb5f8f63870f4dc99ad9f2627a6fdf902732cb11c01dfa8bb1cb53f7"
+      },
+      "canonical_unchanged": true
+    }
+  ],
+  "machine_status": {
+    "ok": false,
+    "code": "MACHINE_RUNTIME_STALE",
+    "root": "C:\\ProgramData\\SAI\\SAIPEN",
+    "saipen_runtime_ready": false,
+    "reasons": [
+      "the machine runtime is not the generation of the canonical source"
+    ],
+    "action": "saipen host machine install",
+    "registration": {
+      "generation": "gen-sha256:2bd10cc421aacf6a65253322d366939d9328f65080bce0bc6bd029d2a8223b9f",
+      "installed_at": "2026-10-07T22:27:56Z",
+      "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002",
+      "kind": "saipen-machine-runtime",
+      "launcher": {
+        "posix": "bin/saipen",
+        "windows": "bin/saipen.cmd"
+      },
+      "previous": {
+        "generation": "gen-sha256:01283009c4902f4b53abc0a28c9ecf9a530c3b99e1f6c3fae60886ddf8d16f20",
+        "runtime": "runtime/01283009c4902f4b",
+        "saipen_version": "8.1.0"
+      },
+      "python": "python/3.11.9-64/python.exe",
+      "python_bundled": true,
+      "runtime": "runtime/2bd10cc421aacf6a",
+      "saipen_version": "8.1.0",
+      "schema": 1,
+      "source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "state_schema": 3
+    },
+    "home": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\2bd10cc421aacf6a",
+    "generation": "gen-sha256:2bd10cc421aacf6a65253322d366939d9328f65080bce0bc6bd029d2a8223b9f",
+    "generation_proven": true,
+    "saipen_version": "8.1.0",
+    "state_schema": 3,
+    "launcher": {
+      "windows": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+      "posix": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen",
+      "ok": true,
+      "problems": []
+    },
+    "python": {
+      "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+      "bundled": true,
+      "ok": true
+    },
+    "acl": {
+      "checked": true,
+      "writable_by": [],
+      "foreign_owners": [],
+      "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002"
+    },
+    "source": "MACHINE_RUNTIME",
+    "canonical_generation": "gen-sha256:39d7ba6975eb235f2096b398e1bb282e36131f6172464c10ded44fbf2a99f2f9",
+    "current": false,
+    "detail": "the machine runtime is not the generation of the canonical source"
+  },
+  "machine_status_exit": 1,
+  "scope": "read-only declared project records/current protocol interpretation and shared runtime metadata",
+  "project_writes": 0,
+  "acl_mutations": 0,
+  "impersonation": false,
+  "real_ag3_continuation_verified": false,
+  "common_actual_root_cause": "NOT_PROVEN; no current authenticated AG3 operation/token evidence",
+  "new_work_created": false,
+  "existing_work": [
+    "T-1647",
+    "T-1652"
+  ]
+}

@@ -1,0 +1,18 @@
+T-289 Full Test Suite Run Receipt
+Run Command: python -m pytest -q
+Total tests: 2783
+Passed: 2767
+Skipped: 16
+Failed: 0
+Duration: ~730s
+Git hygiene verified: audapack/ui_qt/metrics_strip.py added to index.
+Targeted checks:
+- tests/test_metrics_strip.py: 16 passed
+- tests/test_idle_resource_hygiene.py: 5 passed
+- tests/test_repository_hygiene.py: 5 passed
+- tests/test_hidden_subprocess.py: 18 passed, 1 skipped
+- tests/test_freshness.py: 18 passed
+- tests/live_metrics_acceptance.py: live visual acceptance PASS
+- tests/soak_leak_audit.py: PASS across 3 rounds (zero orphans, monotonic RSS/handles stable)
+Lint: python -m ruff check (clean)
+Bytecode compilation: python -m compileall -q audapack tests (clean)

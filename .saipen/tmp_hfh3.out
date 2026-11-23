@@ -1,0 +1,49 @@
+723:             max_shells=_policy_int(host_cfg, "max_shells", 4),
+724:             max_bridges=_policy_int(host_cfg, "max_bridges", 2),
+725:             profile_hook="hooks/saipen-guard.py" if host == "claude" else None,
+726:         )
+727:         from .claude_profiles import hook_for_process
+728: 
+729:         proof = identity_proof.prove_hook_invocation(
+730:             proc.ancestry(int(peer.pid), limit),
+731:             policy,
+732:             signer_of=proc.image_signer,
+733:             artifact_current=self._artifact_current(str(host or "")),
+734:             hook_for_host=lambda pid: hook_for_process(pid, Path(str(home)) if home else None),
+735:             report_limit=MAX_CHAIN_REPORTED,
+736:         )
+737:         view = {
+738:             "transport": getattr(peer, "kind", "unknown"),
+739:             "pid": int(peer.pid),
+740:             "host_image": (proof.host_image or "").rsplit("/", 1)[-1] or None,
+741:             "host_pid": proof.host_pid,
+742:             "host_signer": proof.host_signer,
+743:             "hook_pid": proof.hook_pid,
+744:             "profile": proof.profile,
+745:             "chain": [
+746:                 {key: item.get(key) for key in ("pid", "ppid", "image", "name")}
+747:                 for item in proof.chain
+748:             ],
+749:         }
+750:         if proof.ok:
+751:             return True, None, view
+752:         view.update(
+753:             {
+754:                 "reason": proof.reason,
+755:                 "detail": proof.detail,
+756:                 "host_images": list(policy.host_images),
+757:                 "host_signers": list(policy.host_signers),
+758:                 "identity": {"supported": True, "chain": view["chain"], "detail": proof.detail},
+759:             }
+760:         )
+761:         code = (
+762:             CODE_IDENTITY_UNAVAILABLE
+763:             if proof.reason == identity_proof.REASON_IDENTITY_UNAVAILABLE
+764:             else CODE_NOT_AUTHENTICATED
+765:         )
+766:         return False, code, view
+767: 
+768:     def _components(self, ctx, policy: dict) -> dict:
+769:         """`protocol_admission.components` against this service's identity memo.
+770: 
+=====

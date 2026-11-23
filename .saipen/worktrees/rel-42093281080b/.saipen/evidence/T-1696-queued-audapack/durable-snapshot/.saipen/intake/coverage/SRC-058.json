@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-058:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-205 closed with verification evidence in LOG: verify -> PASS [target: T-205] conf: high -- python -m pytest -q tests/test_title_guardian.py tests/ui_qt/test_launcher_focus_reuse.py tests/ui_qt/test_opencode_startup_liveness.py tests/test_opencode_launch_policy.py -> 91 passed; python -m pytest -q -> 1897 passed 5 skipped; python -m ruff check . -> All checks passed; python -m compileall -q audapack -> exit 0; saipen validate -> VALID; widget ",
+      "text": "T-198 machine-side addition: managed OpenCode window title ownership must survive the full instance lifetime -- event-driven WinEvent title guardian, HWND/PID/correlation ownership, no 250ms polling, drift restore, reuse/focus unaffected, cleanup on exit",
+      "verification": "the Work this request created reached its own verification gate; see the T-205 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-205"
+    }
+  },
+  "schema_version": 1
+}

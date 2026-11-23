@@ -1,0 +1,33 @@
+commit 6c6d841df24e5c5d91870def931af99f0af4c81f
+Author:     VAC34 <vac34@example.com>
+AuthorDate: Fri Oct 9 13:08:02 2026 +0300
+Commit:     VAC34 <vac34@example.com>
+CommitDate: Fri Oct 9 13:08:02 2026 +0300
+
+    fix(widget): P1-A/P1-B trust-boundary hardening in 0.1.07
+    
+    P1-A: Remove setVerifiedProjectArchive from manualArchiveRecordSent.
+    A Send receipt proves transmission only; it must not overwrite
+    Bridge-confirmed canonical archive metadata. The receipt now calls
+    recordSendObservation (SEND timestamp only) and schedules a bounded
+    background refreshProjectArchiveMetadata that can adopt canonical
+    metadata only via Bridge confirmation. Zero canonical-store writes
+    from the receipt itself.
+    
+    P1-B: Attach tile-removal detection for attachment-only Send intents.
+    A rejected attachment-only Send + manual attachment removal + delayed
+    history must not fabricate an accepted Send timestamp. Added
+    noteComposerAttachmentRemoved with capture-phase click/keydown
+    listeners on document detecting operator interaction with Remove
+    controls inside the composer root. Extended
+    retireStaleManualSendIntent to check tile count changes for
+    attachment-only intents (empty composerText), covering React remount
+    where no click/keydown event fires.
+    
+    Tests: 21 new RED tests in w7-016 (C1-C10 P1-A, D1-D11 P1-B),
+    all proven RED pre-fix and GREEN post-fix. Full widget suite 772/772
+    PASS. Targeted regression gates pass: w6-006 85/85, w6-001 50/50,
+    w3-002 14/14, w7-011 7/7, test_bridge_project_archive.py 30/30.
+    
+    Release 0.1.07, sha 5efa3a49fee7bdef83f63ecfa3324e2746eb12b874baad4e1bba03edd03a09fa.
+    Evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md

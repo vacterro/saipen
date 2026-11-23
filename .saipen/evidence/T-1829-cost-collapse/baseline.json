@@ -1,0 +1,3501 @@
+{
+  "schema": 1,
+  "advisory": true,
+  "observed_utc": "2026-10-20T14:40:58.761612+00:00",
+  "classification": "historical records plus direct filesystem inventory; no benchmark executed",
+  "core_unit": {
+    "execution_records": 554,
+    "durations_present": 554,
+    "aggregate_recorded_run_wall_s": 646317.6,
+    "median_recorded_run_wall_s": 1085.0500000000002,
+    "p95_recorded_run_wall_s": 1806.2,
+    "distinct_source_fingerprints": 453,
+    "additional_same_fingerprint_records": 101,
+    "additional_same_fingerprint_pass_records": 42,
+    "additional_same_fingerprint_pass_run_s": 42909.4,
+    "by_status": {
+      "FAIL": 319,
+      "PASS": 233,
+      "TIMEOUT": 2
+    },
+    "by_jobs": {
+      "1": {
+        "records": 37,
+        "median_run_wall_s": 1743.0
+      },
+      "4": {
+        "records": 10,
+        "median_run_wall_s": 1240.3
+      },
+      "6": {
+        "records": 489,
+        "median_run_wall_s": 985.5
+      },
+      "8": {
+        "records": 16,
+        "median_run_wall_s": 1320.35
+      },
+      "10": {
+        "records": 1,
+        "median_run_wall_s": 1691.0
+      },
+      "18": {
+        "records": 1,
+        "median_run_wall_s": 1037.9
+      }
+    },
+    "runs_with_stage_timings": 0,
+    "runs_with_environment_identity": 0,
+    "runs_with_module_timings": 515,
+    "module_process_time": [
+      {
+        "module": "test_t1505_core_unit_sandbox_reclaim",
+        "samples": 484,
+        "sum_process_s": 81881.1,
+        "median_process_s": 141.8,
+        "max_process_s": 745.1
+      },
+      {
+        "module": "test_t1613_publication_convergence",
+        "samples": 257,
+        "sum_process_s": 61173.7,
+        "median_process_s": 233.5,
+        "max_process_s": 409.8
+      },
+      {
+        "module": "test_t1326_board_compaction",
+        "samples": 515,
+        "sum_process_s": 59368.3,
+        "median_process_s": 113.8,
+        "max_process_s": 275.5
+      },
+      {
+        "module": "test_t1363_zero_manual_entry",
+        "samples": 515,
+        "sum_process_s": 59008.0,
+        "median_process_s": 112.5,
+        "max_process_s": 254.1
+      },
+      {
+        "module": "test_conformance_lineage",
+        "samples": 515,
+        "sum_process_s": 56117.0,
+        "median_process_s": 108.7,
+        "max_process_s": 686.2
+      },
+      {
+        "module": "test_t1553_mid_session_activation",
+        "samples": 402,
+        "sum_process_s": 53187.8,
+        "median_process_s": 140.8,
+        "max_process_s": 259.0
+      },
+      {
+        "module": "test_t1411_stale_complete_resolution",
+        "samples": 515,
+        "sum_process_s": 50453.6,
+        "median_process_s": 94.3,
+        "max_process_s": 295.8
+      },
+      {
+        "module": "test_source_receipts",
+        "samples": 515,
+        "sum_process_s": 47928.7,
+        "median_process_s": 85.2,
+        "max_process_s": 262.7
+      },
+      {
+        "module": "test_t1461_source_append",
+        "samples": 515,
+        "sum_process_s": 47744.2,
+        "median_process_s": 92.1,
+        "max_process_s": 228.0
+      },
+      {
+        "module": "test_t1474_start_goal_entry",
+        "samples": 515,
+        "sum_process_s": 46493.4,
+        "median_process_s": 107.9,
+        "max_process_s": 249.5
+      },
+      {
+        "module": "test_opencode_host_smoke",
+        "samples": 515,
+        "sum_process_s": 45210.3,
+        "median_process_s": 82.6,
+        "max_process_s": 391.6
+      },
+      {
+        "module": "test_t1412_conformance_truth",
+        "samples": 515,
+        "sum_process_s": 44767.9,
+        "median_process_s": 83.7,
+        "max_process_s": 223.2
+      },
+      {
+        "module": "test_entry_point_parity",
+        "samples": 515,
+        "sum_process_s": 43765.9,
+        "median_process_s": 82.5,
+        "max_process_s": 191.3
+      },
+      {
+        "module": "test_t1501_entry_resolver",
+        "samples": 494,
+        "sum_process_s": 41724.7,
+        "median_process_s": 82.95,
+        "max_process_s": 156.0
+      },
+      {
+        "module": "test_recovery_reachability",
+        "samples": 515,
+        "sum_process_s": 40465.0,
+        "median_process_s": 76.7,
+        "max_process_s": 165.7
+      },
+      {
+        "module": "test_validator_layout_parity",
+        "samples": 515,
+        "sum_process_s": 39750.5,
+        "median_process_s": 59.9,
+        "max_process_s": 322.7
+      },
+      {
+        "module": "test_opencode_bound_launch_smoke",
+        "samples": 515,
+        "sum_process_s": 38983.7,
+        "median_process_s": 72.9,
+        "max_process_s": 355.0
+      },
+      {
+        "module": "test_command_routing",
+        "samples": 515,
+        "sum_process_s": 38073.1,
+        "median_process_s": 71.9,
+        "max_process_s": 192.5
+      },
+      {
+        "module": "test_refusal_routes",
+        "samples": 515,
+        "sum_process_s": 33471.8,
+        "median_process_s": 64.0,
+        "max_process_s": 142.4
+      },
+      {
+        "module": "test_t1612_accidental_success_reproduction",
+        "samples": 257,
+        "sum_process_s": 32501.8,
+        "median_process_s": 121.2,
+        "max_process_s": 207.5
+      },
+      {
+        "module": "test_protocol_admission",
+        "samples": 359,
+        "sum_process_s": 31190.1,
+        "median_process_s": 84.6,
+        "max_process_s": 207.2
+      },
+      {
+        "module": "test_ticket_retirement",
+        "samples": 515,
+        "sum_process_s": 30966.2,
+        "median_process_s": 61.7,
+        "max_process_s": 167.4
+      },
+      {
+        "module": "test_opencode_adapter",
+        "samples": 515,
+        "sum_process_s": 30553.7,
+        "median_process_s": 57.7,
+        "max_process_s": 143.3
+      },
+      {
+        "module": "test_public_install_lifecycle",
+        "samples": 258,
+        "sum_process_s": 30488.2,
+        "median_process_s": 112.9,
+        "max_process_s": 287.4
+      },
+      {
+        "module": "test_t1647_machine_runtime",
+        "samples": 212,
+        "sum_process_s": 29241.4,
+        "median_process_s": 135.8,
+        "max_process_s": 231.8
+      },
+      {
+        "module": "test_ticket_supersession",
+        "samples": 515,
+        "sum_process_s": 28605.8,
+        "median_process_s": 55.2,
+        "max_process_s": 131.8
+      },
+      {
+        "module": "test_settled_projection",
+        "samples": 515,
+        "sum_process_s": 26514.5,
+        "median_process_s": 47.8,
+        "max_process_s": 316.2
+      },
+      {
+        "module": "test_intent_audit_fixes",
+        "samples": 515,
+        "sum_process_s": 23071.5,
+        "median_process_s": 36.2,
+        "max_process_s": 271.9
+      },
+      {
+        "module": "test_improve_reconcile",
+        "samples": 515,
+        "sum_process_s": 22941.7,
+        "median_process_s": 42.4,
+        "max_process_s": 145.5
+      },
+      {
+        "module": "test_crew_applicability",
+        "samples": 515,
+        "sum_process_s": 22882.3,
+        "median_process_s": 44.2,
+        "max_process_s": 143.5
+      },
+      {
+        "module": "test_continue_chain",
+        "samples": 515,
+        "sum_process_s": 21619.7,
+        "median_process_s": 40.8,
+        "max_process_s": 104.6
+      },
+      {
+        "module": "test_router_closure_readiness",
+        "samples": 515,
+        "sum_process_s": 21079.8,
+        "median_process_s": 40.1,
+        "max_process_s": 104.9
+      },
+      {
+        "module": "test_adapter_parity",
+        "samples": 515,
+        "sum_process_s": 21036.4,
+        "median_process_s": 38.5,
+        "max_process_s": 195.1
+      },
+      {
+        "module": "test_control_primitives",
+        "samples": 515,
+        "sum_process_s": 20411.7,
+        "median_process_s": 38.4,
+        "max_process_s": 123.4
+      },
+      {
+        "module": "test_public_closure_cli",
+        "samples": 515,
+        "sum_process_s": 20268.3,
+        "median_process_s": 40.7,
+        "max_process_s": 92.9
+      },
+      {
+        "module": "test_t1557_autonomy_sentinels",
+        "samples": 388,
+        "sum_process_s": 19700.9,
+        "median_process_s": 49.2,
+        "max_process_s": 105.7
+      },
+      {
+        "module": "test_t1327_zero_manual_recovery",
+        "samples": 515,
+        "sum_process_s": 18697.6,
+        "median_process_s": 35.6,
+        "max_process_s": 77.5
+      },
+      {
+        "module": "test_t1614_future_gate",
+        "samples": 257,
+        "sum_process_s": 18050.5,
+        "median_process_s": 68.8,
+        "max_process_s": 147.0
+      },
+      {
+        "module": "test_codex_stop_hook",
+        "samples": 408,
+        "sum_process_s": 17953.1,
+        "median_process_s": 43.75,
+        "max_process_s": 81.2
+      },
+      {
+        "module": "test_producer_terminal_consistency",
+        "samples": 515,
+        "sum_process_s": 17933.2,
+        "median_process_s": 33.3,
+        "max_process_s": 116.4
+      },
+      {
+        "module": "test_conformance_repair_boundary",
+        "samples": 515,
+        "sum_process_s": 17692.8,
+        "median_process_s": 32.3,
+        "max_process_s": 101.0
+      },
+      {
+        "module": "test_request_clause_closure",
+        "samples": 515,
+        "sum_process_s": 17557.7,
+        "median_process_s": 33.6,
+        "max_process_s": 68.5
+      },
+      {
+        "module": "test_claude_stop_hook",
+        "samples": 359,
+        "sum_process_s": 15835.2,
+        "median_process_s": 43.4,
+        "max_process_s": 120.4
+      },
+      {
+        "module": "test_debt_gate",
+        "samples": 515,
+        "sum_process_s": 15012.0,
+        "median_process_s": 28.4,
+        "max_process_s": 144.1
+      },
+      {
+        "module": "test_no_publish_source_scope",
+        "samples": 340,
+        "sum_process_s": 14821.7,
+        "median_process_s": 43.75,
+        "max_process_s": 153.5
+      },
+      {
+        "module": "test_t1572_ticket_scoped_recovery",
+        "samples": 351,
+        "sum_process_s": 14628.5,
+        "median_process_s": 39.7,
+        "max_process_s": 78.4
+      },
+      {
+        "module": "test_guard_hostile_matrix",
+        "samples": 515,
+        "sum_process_s": 14570.3,
+        "median_process_s": 27.5,
+        "max_process_s": 51.1
+      },
+      {
+        "module": "test_t1476_retired_source_livelock",
+        "samples": 515,
+        "sum_process_s": 14448.6,
+        "median_process_s": 27.8,
+        "max_process_s": 62.8
+      },
+      {
+        "module": "test_audit_2026_08_28_all3",
+        "samples": 515,
+        "sum_process_s": 14156.1,
+        "median_process_s": 26.8,
+        "max_process_s": 79.3
+      },
+      {
+        "module": "test_closure_provenance",
+        "samples": 515,
+        "sum_process_s": 13631.0,
+        "median_process_s": 22.2,
+        "max_process_s": 89.5
+      },
+      {
+        "module": "test_t1671_lifecycle_authority",
+        "samples": 193,
+        "sum_process_s": 13586.8,
+        "median_process_s": 68.7,
+        "max_process_s": 115.4
+      },
+      {
+        "module": "test_metrics_acceptance",
+        "samples": 515,
+        "sum_process_s": 13282.2,
+        "median_process_s": 21.4,
+        "max_process_s": 338.7
+      },
+      {
+        "module": "test_t1624_host_integration",
+        "samples": 232,
+        "sum_process_s": 13265.0,
+        "median_process_s": 56.6,
+        "max_process_s": 86.9
+      },
+      {
+        "module": "test_work_reverify_cli",
+        "samples": 515,
+        "sum_process_s": 12500.3,
+        "median_process_s": 23.1,
+        "max_process_s": 74.1
+      },
+      {
+        "module": "test_saipen_metrics",
+        "samples": 515,
+        "sum_process_s": 12406.2,
+        "median_process_s": 23.5,
+        "max_process_s": 102.9
+      },
+      {
+        "module": "test_guard_execution_reachability",
+        "samples": 515,
+        "sum_process_s": 12134.8,
+        "median_process_s": 23.2,
+        "max_process_s": 47.3
+      },
+      {
+        "module": "test_response_delivery",
+        "samples": 279,
+        "sum_process_s": 12115.9,
+        "median_process_s": 43.5,
+        "max_process_s": 162.4
+      },
+      {
+        "module": "test_t1704_legacy_goal_authority",
+        "samples": 146,
+        "sum_process_s": 11485.1,
+        "median_process_s": 76.5,
+        "max_process_s": 126.5
+      },
+      {
+        "module": "test_cli_compound_entry",
+        "samples": 413,
+        "sum_process_s": 11311.8,
+        "median_process_s": 26.5,
+        "max_process_s": 71.9
+      },
+      {
+        "module": "test_t1721_acceptance_compaction",
+        "samples": 121,
+        "sum_process_s": 10669.2,
+        "median_process_s": 88.0,
+        "max_process_s": 137.9
+      },
+      {
+        "module": "test_src085_conformance_disposition",
+        "samples": 515,
+        "sum_process_s": 10567.6,
+        "median_process_s": 18.9,
+        "max_process_s": 49.8
+      },
+      {
+        "module": "test_response_fact_binding",
+        "samples": 353,
+        "sum_process_s": 10429.4,
+        "median_process_s": 28.1,
+        "max_process_s": 70.2
+      },
+      {
+        "module": "test_t1389_foreign_delta_adoption",
+        "samples": 515,
+        "sum_process_s": 10205.0,
+        "median_process_s": 18.6,
+        "max_process_s": 55.8
+      },
+      {
+        "module": "test_boot_locator",
+        "samples": 515,
+        "sum_process_s": 10201.9,
+        "median_process_s": 19.0,
+        "max_process_s": 67.4
+      },
+      {
+        "module": "test_t1679_typed_head_quarantine",
+        "samples": 191,
+        "sum_process_s": 10122.8,
+        "median_process_s": 51.6,
+        "max_process_s": 88.4
+      },
+      {
+        "module": "test_t1446_supervise",
+        "samples": 515,
+        "sum_process_s": 9928.2,
+        "median_process_s": 18.1,
+        "max_process_s": 37.4
+      },
+      {
+        "module": "test_t1304_r004_dry_run_purity",
+        "samples": 515,
+        "sum_process_s": 9366.8,
+        "median_process_s": 17.5,
+        "max_process_s": 43.6
+      },
+      {
+        "module": "test_subprocess_utf8",
+        "samples": 329,
+        "sum_process_s": 9362.6,
+        "median_process_s": 26.2,
+        "max_process_s": 67.3
+      },
+      {
+        "module": "test_t1718_acceptance_contract",
+        "samples": 125,
+        "sum_process_s": 9339.3,
+        "median_process_s": 75.0,
+        "max_process_s": 116.8
+      },
+      {
+        "module": "test_t1587_stale_closure_recovery",
+        "samples": 326,
+        "sum_process_s": 9321.3,
+        "median_process_s": 27.7,
+        "max_process_s": 115.7
+      },
+      {
+        "module": "test_t1304_r004_transition",
+        "samples": 515,
+        "sum_process_s": 9134.9,
+        "median_process_s": 18.8,
+        "max_process_s": 66.1
+      },
+      {
+        "module": "test_runtime_bootstrap",
+        "samples": 515,
+        "sum_process_s": 9098.8,
+        "median_process_s": 16.4,
+        "max_process_s": 51.6
+      },
+      {
+        "module": "test_t1286_crew_probe",
+        "samples": 473,
+        "sum_process_s": 9091.5,
+        "median_process_s": 17.2,
+        "max_process_s": 315.1
+      },
+      {
+        "module": "test_operator_task_witness",
+        "samples": 515,
+        "sum_process_s": 9085.8,
+        "median_process_s": 17.1,
+        "max_process_s": 51.5
+      },
+      {
+        "module": "test_metadata_repair",
+        "samples": 515,
+        "sum_process_s": 9004.8,
+        "median_process_s": 16.8,
+        "max_process_s": 39.7
+      },
+      {
+        "module": "test_t1494_continuation_authority",
+        "samples": 155,
+        "sum_process_s": 8806.4,
+        "median_process_s": 57.2,
+        "max_process_s": 88.2
+      },
+      {
+        "module": "test_orchestration_repair",
+        "samples": 515,
+        "sum_process_s": 8688.4,
+        "median_process_s": 17.0,
+        "max_process_s": 47.1
+      },
+      {
+        "module": "test_t1574_followups",
+        "samples": 351,
+        "sum_process_s": 8664.5,
+        "median_process_s": 23.7,
+        "max_process_s": 62.7
+      },
+      {
+        "module": "test_t1657_refused_reply_preserved",
+        "samples": 203,
+        "sum_process_s": 8586.6,
+        "median_process_s": 42.7,
+        "max_process_s": 70.4
+      },
+      {
+        "module": "test_t1609_unproven_done_recovery",
+        "samples": 258,
+        "sum_process_s": 8554.3,
+        "median_process_s": 31.25,
+        "max_process_s": 94.9
+      },
+      {
+        "module": "test_dependency_resume_liveness",
+        "samples": 515,
+        "sum_process_s": 8544.8,
+        "median_process_s": 16.4,
+        "max_process_s": 54.6
+      },
+      {
+        "module": "test_core_unit_gate",
+        "samples": 515,
+        "sum_process_s": 8533.6,
+        "median_process_s": 16.6,
+        "max_process_s": 82.2
+      },
+      {
+        "module": "test_response_surface_contract",
+        "samples": 515,
+        "sum_process_s": 8309.2,
+        "median_process_s": 18.7,
+        "max_process_s": 46.1
+      },
+      {
+        "module": "test_canonical_write_route",
+        "samples": 515,
+        "sum_process_s": 8155.5,
+        "median_process_s": 15.4,
+        "max_process_s": 48.5
+      },
+      {
+        "module": "test_entry_answer_agrees",
+        "samples": 515,
+        "sum_process_s": 8003.7,
+        "median_process_s": 15.0,
+        "max_process_s": 36.8
+      },
+      {
+        "module": "test_accepted_debt",
+        "samples": 498,
+        "sum_process_s": 7906.5,
+        "median_process_s": 15.1,
+        "max_process_s": 63.4
+      },
+      {
+        "module": "test_t1429_deferred_due",
+        "samples": 515,
+        "sum_process_s": 7700.7,
+        "median_process_s": 15.4,
+        "max_process_s": 38.5
+      },
+      {
+        "module": "test_nested_source_binding",
+        "samples": 429,
+        "sum_process_s": 7623.5,
+        "median_process_s": 15.9,
+        "max_process_s": 150.3
+      },
+      {
+        "module": "test_t1446_auto_recall",
+        "samples": 515,
+        "sum_process_s": 7551.9,
+        "median_process_s": 14.3,
+        "max_process_s": 38.1
+      },
+      {
+        "module": "test_host_authority_broker",
+        "samples": 233,
+        "sum_process_s": 7434.6,
+        "median_process_s": 31.7,
+        "max_process_s": 72.4
+      },
+      {
+        "module": "test_t1533_terminal_handback",
+        "samples": 429,
+        "sum_process_s": 7170.5,
+        "median_process_s": 16.6,
+        "max_process_s": 44.3
+      },
+      {
+        "module": "test_session_binding",
+        "samples": 515,
+        "sum_process_s": 7162.9,
+        "median_process_s": 13.3,
+        "max_process_s": 64.9
+      },
+      {
+        "module": "test_t1500_claim_continuity",
+        "samples": 496,
+        "sum_process_s": 6988.0,
+        "median_process_s": 14.5,
+        "max_process_s": 42.1
+      },
+      {
+        "module": "test_t1658_suite_record",
+        "samples": 208,
+        "sum_process_s": 6544.3,
+        "median_process_s": 30.85,
+        "max_process_s": 59.2
+      },
+      {
+        "module": "test_t1581_phase_rename_knowledge",
+        "samples": 330,
+        "sum_process_s": 6503.0,
+        "median_process_s": 0.6,
+        "max_process_s": 100.6
+      },
+      {
+        "module": "test_t1316_recovery_already_applied",
+        "samples": 515,
+        "sum_process_s": 6482.7,
+        "median_process_s": 12.9,
+        "max_process_s": 33.8
+      },
+      {
+        "module": "test_t1711_regression_execution",
+        "samples": 129,
+        "sum_process_s": 6328.8,
+        "median_process_s": 49.1,
+        "max_process_s": 75.6
+      },
+      {
+        "module": "test_t1586_scenario_inputs",
+        "samples": 327,
+        "sum_process_s": 6272.2,
+        "median_process_s": 3.7,
+        "max_process_s": 146.9
+      },
+      {
+        "module": "test_field_fixture_isolation",
+        "samples": 515,
+        "sum_process_s": 6250.8,
+        "median_process_s": 11.8,
+        "max_process_s": 46.8
+      },
+      {
+        "module": "test_ingress_authority",
+        "samples": 279,
+        "sum_process_s": 6233.2,
+        "median_process_s": 22.5,
+        "max_process_s": 46.1
+      },
+      {
+        "module": "test_conformance_remediation_evidence",
+        "samples": 419,
+        "sum_process_s": 6224.0,
+        "median_process_s": 13.4,
+        "max_process_s": 109.7
+      },
+      {
+        "module": "test_t1430_crew_run_receipt",
+        "samples": 504,
+        "sum_process_s": 6090.7,
+        "median_process_s": 11.7,
+        "max_process_s": 35.5
+      },
+      {
+        "module": "test_source_retirement",
+        "samples": 515,
+        "sum_process_s": 6055.1,
+        "median_process_s": 11.2,
+        "max_process_s": 45.5
+      },
+      {
+        "module": "test_t1473_handback",
+        "samples": 515,
+        "sum_process_s": 5848.9,
+        "median_process_s": 11.1,
+        "max_process_s": 28.5
+      },
+      {
+        "module": "test_core_ownership_routing",
+        "samples": 515,
+        "sum_process_s": 5747.4,
+        "median_process_s": 11.1,
+        "max_process_s": 37.4
+      },
+      {
+        "module": "test_external_resolution",
+        "samples": 515,
+        "sum_process_s": 5746.7,
+        "median_process_s": 10.6,
+        "max_process_s": 30.3
+      },
+      {
+        "module": "test_t1511_soak_source_identity",
+        "samples": 486,
+        "sum_process_s": 5711.6,
+        "median_process_s": 11.1,
+        "max_process_s": 62.3
+      },
+      {
+        "module": "test_host_bootstrap",
+        "samples": 515,
+        "sum_process_s": 5655.0,
+        "median_process_s": 10.3,
+        "max_process_s": 49.8
+      },
+      {
+        "module": "test_t1673_board_only_terminal",
+        "samples": 186,
+        "sum_process_s": 5632.0,
+        "median_process_s": 29.2,
+        "max_process_s": 81.2
+      },
+      {
+        "module": "test_t1484_soak_report_survives",
+        "samples": 515,
+        "sum_process_s": 5528.3,
+        "median_process_s": 6.5,
+        "max_process_s": 85.5
+      },
+      {
+        "module": "test_t1665_guard_verbs",
+        "samples": 179,
+        "sum_process_s": 5526.6,
+        "median_process_s": 30.5,
+        "max_process_s": 46.7
+      },
+      {
+        "module": "test_t1685_profile_carrier",
+        "samples": 168,
+        "sum_process_s": 5520.0,
+        "median_process_s": 32.2,
+        "max_process_s": 59.3
+      },
+      {
+        "module": "test_pending_ingress",
+        "samples": 515,
+        "sum_process_s": 5389.3,
+        "median_process_s": 10.0,
+        "max_process_s": 27.9
+      },
+      {
+        "module": "test_t1497_turn_entry_telegrams",
+        "samples": 501,
+        "sum_process_s": 5254.9,
+        "median_process_s": 10.3,
+        "max_process_s": 28.6
+      },
+      {
+        "module": "test_t149_reverify_run_records_its_directory",
+        "samples": 257,
+        "sum_process_s": 5189.3,
+        "median_process_s": 20.3,
+        "max_process_s": 22.7
+      },
+      {
+        "module": "test_audit_manifest",
+        "samples": 515,
+        "sum_process_s": 5185.5,
+        "median_process_s": 9.5,
+        "max_process_s": 35.0
+      },
+      {
+        "module": "test_audit_inbox",
+        "samples": 515,
+        "sum_process_s": 5178.2,
+        "median_process_s": 9.4,
+        "max_process_s": 28.1
+      },
+      {
+        "module": "test_t1504_zaicode_adapter",
+        "samples": 489,
+        "sum_process_s": 5175.5,
+        "median_process_s": 9.4,
+        "max_process_s": 92.5
+      },
+      {
+        "module": "test_t1407_structural_log_compaction",
+        "samples": 515,
+        "sum_process_s": 5124.0,
+        "median_process_s": 10.5,
+        "max_process_s": 35.4
+      },
+      {
+        "module": "test_t1661_suite_projection",
+        "samples": 206,
+        "sum_process_s": 5116.8,
+        "median_process_s": 24.9,
+        "max_process_s": 40.2
+      },
+      {
+        "module": "test_hostile_wave_regressions",
+        "samples": 515,
+        "sum_process_s": 4946.8,
+        "median_process_s": 9.3,
+        "max_process_s": 24.4
+      },
+      {
+        "module": "test_t1577_op_id_provenance",
+        "samples": 346,
+        "sum_process_s": 4917.4,
+        "median_process_s": 13.5,
+        "max_process_s": 31.8
+      },
+      {
+        "module": "test_source_quarantine_route",
+        "samples": 515,
+        "sum_process_s": 4827.2,
+        "median_process_s": 8.9,
+        "max_process_s": 33.8
+      },
+      {
+        "module": "test_check_inventory",
+        "samples": 515,
+        "sum_process_s": 4816.4,
+        "median_process_s": 8.4,
+        "max_process_s": 45.1
+      },
+      {
+        "module": "test_explicit_claim",
+        "samples": 515,
+        "sum_process_s": 4751.9,
+        "median_process_s": 9.5,
+        "max_process_s": 30.2
+      },
+      {
+        "module": "test_user_wait_release",
+        "samples": 515,
+        "sum_process_s": 4625.0,
+        "median_process_s": 8.7,
+        "max_process_s": 19.4
+      },
+      {
+        "module": "test_t1514_portable_history_evidence",
+        "samples": 475,
+        "sum_process_s": 4606.3,
+        "median_process_s": 9.3,
+        "max_process_s": 35.4
+      },
+      {
+        "module": "test_t1487_claim_handoff",
+        "samples": 476,
+        "sum_process_s": 4539.0,
+        "median_process_s": 9.1,
+        "max_process_s": 27.4
+      },
+      {
+        "module": "test_src085_improve_run_body",
+        "samples": 515,
+        "sum_process_s": 4488.0,
+        "median_process_s": 8.3,
+        "max_process_s": 33.7
+      },
+      {
+        "module": "test_handoff_archive_cross_repo",
+        "samples": 515,
+        "sum_process_s": 4438.6,
+        "median_process_s": 8.3,
+        "max_process_s": 29.3
+      },
+      {
+        "module": "test_canonical_command_reachability",
+        "samples": 515,
+        "sum_process_s": 4363.8,
+        "median_process_s": 8.1,
+        "max_process_s": 43.0
+      },
+      {
+        "module": "test_authority_capture",
+        "samples": 515,
+        "sum_process_s": 4266.5,
+        "median_process_s": 8.3,
+        "max_process_s": 37.9
+      },
+      {
+        "module": "test_regression_gate",
+        "samples": 515,
+        "sum_process_s": 4260.6,
+        "median_process_s": 8.3,
+        "max_process_s": 30.1
+      },
+      {
+        "module": "test_detail_authorization",
+        "samples": 356,
+        "sum_process_s": 4231.5,
+        "median_process_s": 11.2,
+        "max_process_s": 45.4
+      },
+      {
+        "module": "test_remediation_self_consistency",
+        "samples": 515,
+        "sum_process_s": 4206.0,
+        "median_process_s": 7.7,
+        "max_process_s": 37.4
+      },
+      {
+        "module": "test_t1277_source_dry_run_parity",
+        "samples": 464,
+        "sum_process_s": 4148.3,
+        "median_process_s": 8.5,
+        "max_process_s": 19.8
+      },
+      {
+        "module": "test_chat_style",
+        "samples": 359,
+        "sum_process_s": 4142.5,
+        "median_process_s": 11.0,
+        "max_process_s": 37.9
+      },
+      {
+        "module": "test_actor_binding_lifecycle",
+        "samples": 515,
+        "sum_process_s": 4139.4,
+        "median_process_s": 7.6,
+        "max_process_s": 32.7
+      },
+      {
+        "module": "test_native_host_guard",
+        "samples": 515,
+        "sum_process_s": 4127.3,
+        "median_process_s": 7.8,
+        "max_process_s": 27.1
+      },
+      {
+        "module": "test_t1578_restore_owner",
+        "samples": 347,
+        "sum_process_s": 4122.5,
+        "median_process_s": 11.6,
+        "max_process_s": 23.7
+      },
+      {
+        "module": "test_t1516_portable_receipts",
+        "samples": 473,
+        "sum_process_s": 4069.4,
+        "median_process_s": 8.3,
+        "max_process_s": 18.6
+      },
+      {
+        "module": "test_journal_nested_targets",
+        "samples": 515,
+        "sum_process_s": 3849.2,
+        "median_process_s": 7.4,
+        "max_process_s": 41.9
+      },
+      {
+        "module": "test_t1803_archived_improve",
+        "samples": 32,
+        "sum_process_s": 3827.3,
+        "median_process_s": 121.5,
+        "max_process_s": 171.5
+      },
+      {
+        "module": "test_improve_gate",
+        "samples": 515,
+        "sum_process_s": 3815.2,
+        "median_process_s": 7.2,
+        "max_process_s": 15.9
+      },
+      {
+        "module": "test_style_contract_chokepoint",
+        "samples": 373,
+        "sum_process_s": 3803.4,
+        "median_process_s": 9.2,
+        "max_process_s": 50.8
+      },
+      {
+        "module": "test_t1304_review_p0_repair",
+        "samples": 515,
+        "sum_process_s": 3794.4,
+        "median_process_s": 7.7,
+        "max_process_s": 21.6
+      },
+      {
+        "module": "test_t1304_r009_settled_wiring",
+        "samples": 196,
+        "sum_process_s": 3755.2,
+        "median_process_s": 21.1,
+        "max_process_s": 36.8
+      },
+      {
+        "module": "test_t1666_receipt_close",
+        "samples": 180,
+        "sum_process_s": 3700.5,
+        "median_process_s": 21.05,
+        "max_process_s": 35.6
+      },
+      {
+        "module": "test_t1446_duplicate_ingress",
+        "samples": 515,
+        "sum_process_s": 3581.1,
+        "median_process_s": 6.8,
+        "max_process_s": 22.9
+      },
+      {
+        "module": "test_unknown_tool_fail_closed",
+        "samples": 515,
+        "sum_process_s": 3567.4,
+        "median_process_s": 6.5,
+        "max_process_s": 23.9
+      },
+      {
+        "module": "test_log_normalize",
+        "samples": 515,
+        "sum_process_s": 3526.2,
+        "median_process_s": 6.6,
+        "max_process_s": 17.8
+      },
+      {
+        "module": "test_t1663_ticket_requires",
+        "samples": 184,
+        "sum_process_s": 3483.4,
+        "median_process_s": 18.5,
+        "max_process_s": 28.3
+      },
+      {
+        "module": "test_v7_producer_parallelism",
+        "samples": 515,
+        "sum_process_s": 3454.3,
+        "median_process_s": 6.4,
+        "max_process_s": 26.9
+      },
+      {
+        "module": "test_log_tail_quarantine",
+        "samples": 358,
+        "sum_process_s": 3450.4,
+        "median_process_s": 9.2,
+        "max_process_s": 26.4
+      },
+      {
+        "module": "test_adaptive_runtime",
+        "samples": 515,
+        "sum_process_s": 3375.1,
+        "median_process_s": 6.3,
+        "max_process_s": 26.1
+      },
+      {
+        "module": "test_reconcile_history_ledger_blocked",
+        "samples": 515,
+        "sum_process_s": 3287.0,
+        "median_process_s": 0.0,
+        "max_process_s": 51.0
+      },
+      {
+        "module": "test_t1761_recovery_reaches_a_typed_duplicate",
+        "samples": 83,
+        "sum_process_s": 3279.7,
+        "median_process_s": 39.4,
+        "max_process_s": 59.2
+      },
+      {
+        "module": "test_t1282_op_id_resolution",
+        "samples": 466,
+        "sum_process_s": 3265.3,
+        "median_process_s": 6.6,
+        "max_process_s": 22.2
+      },
+      {
+        "module": "test_effect_authorization",
+        "samples": 515,
+        "sum_process_s": 3226.0,
+        "median_process_s": 5.3,
+        "max_process_s": 133.1
+      },
+      {
+        "module": "test_t1654_project_block",
+        "samples": 211,
+        "sum_process_s": 3193.8,
+        "median_process_s": 14.9,
+        "max_process_s": 48.8
+      },
+      {
+        "module": "test_userperson_global",
+        "samples": 515,
+        "sum_process_s": 3171.3,
+        "median_process_s": 5.8,
+        "max_process_s": 15.6
+      },
+      {
+        "module": "test_t1743_cross_user_dead_ends",
+        "samples": 99,
+        "sum_process_s": 3164.8,
+        "median_process_s": 30.8,
+        "max_process_s": 81.5
+      },
+      {
+        "module": "test_release_provenance",
+        "samples": 365,
+        "sum_process_s": 3135.3,
+        "median_process_s": 8.2,
+        "max_process_s": 39.4
+      },
+      {
+        "module": "test_reconcile_valve",
+        "samples": 515,
+        "sum_process_s": 3122.3,
+        "median_process_s": 5.9,
+        "max_process_s": 13.7
+      },
+      {
+        "module": "test_t1704_goal_checkpoint_priority",
+        "samples": 146,
+        "sum_process_s": 3106.7,
+        "median_process_s": 21.25,
+        "max_process_s": 29.9
+      },
+      {
+        "module": "test_runtime_generation_identity",
+        "samples": 515,
+        "sum_process_s": 3081.9,
+        "median_process_s": 5.6,
+        "max_process_s": 16.0
+      },
+      {
+        "module": "test_foreign_observation_authority",
+        "samples": 515,
+        "sum_process_s": 3068.3,
+        "median_process_s": 5.4,
+        "max_process_s": 18.9
+      },
+      {
+        "module": "test_project_root_session_binding",
+        "samples": 515,
+        "sum_process_s": 3031.8,
+        "median_process_s": 5.4,
+        "max_process_s": 35.3
+      },
+      {
+        "module": "test_t1681_release_closure_op",
+        "samples": 188,
+        "sum_process_s": 2970.3,
+        "median_process_s": 16.1,
+        "max_process_s": 29.3
+      },
+      {
+        "module": "test_next_action_deadlock",
+        "samples": 515,
+        "sum_process_s": 2901.0,
+        "median_process_s": 5.2,
+        "max_process_s": 59.1
+      },
+      {
+        "module": "test_t1398_ingress_shell_operator",
+        "samples": 515,
+        "sum_process_s": 2851.3,
+        "median_process_s": 5.1,
+        "max_process_s": 18.4
+      },
+      {
+        "module": "test_concurrency_independence",
+        "samples": 515,
+        "sum_process_s": 2838.2,
+        "median_process_s": 5.1,
+        "max_process_s": 27.2
+      },
+      {
+        "module": "test_capability_boundary",
+        "samples": 515,
+        "sum_process_s": 2820.7,
+        "median_process_s": 5.1,
+        "max_process_s": 17.9
+      },
+      {
+        "module": "test_t1627_operator_question",
+        "samples": 157,
+        "sum_process_s": 2780.8,
+        "median_process_s": 18.1,
+        "max_process_s": 35.7
+      },
+      {
+        "module": "test_t1771_measure_then_finish",
+        "samples": 80,
+        "sum_process_s": 2645.6,
+        "median_process_s": 32.8,
+        "max_process_s": 44.1
+      },
+      {
+        "module": "test_continue_improve_fallthrough",
+        "samples": 515,
+        "sum_process_s": 2626.6,
+        "median_process_s": 5.0,
+        "max_process_s": 23.9
+      },
+      {
+        "module": "test_t1608_collect_verb_route",
+        "samples": 252,
+        "sum_process_s": 2612.1,
+        "median_process_s": 7.4,
+        "max_process_s": 72.4
+      },
+      {
+        "module": "test_t1576_efficiency_kpi",
+        "samples": 344,
+        "sum_process_s": 2567.1,
+        "median_process_s": 7.2,
+        "max_process_s": 14.1
+      },
+      {
+        "module": "test_t1453_ingress_clause",
+        "samples": 515,
+        "sum_process_s": 2527.4,
+        "median_process_s": 4.9,
+        "max_process_s": 18.3
+      },
+      {
+        "module": "test_t1656_operator_readability",
+        "samples": 210,
+        "sum_process_s": 2526.7,
+        "median_process_s": 11.9,
+        "max_process_s": 43.6
+      },
+      {
+        "module": "test_t1287_build_directive_grammar",
+        "samples": 418,
+        "sum_process_s": 2516.8,
+        "median_process_s": 5.6,
+        "max_process_s": 21.3
+      },
+      {
+        "module": "test_crew_liveness_drift",
+        "samples": 515,
+        "sum_process_s": 2501.1,
+        "median_process_s": 4.9,
+        "max_process_s": 28.0
+      },
+      {
+        "module": "test_t1508_byte_bound_attributes",
+        "samples": 439,
+        "sum_process_s": 2449.7,
+        "median_process_s": 4.9,
+        "max_process_s": 46.7
+      },
+      {
+        "module": "test_runtime_namespace",
+        "samples": 515,
+        "sum_process_s": 2434.0,
+        "median_process_s": 4.2,
+        "max_process_s": 63.4
+      },
+      {
+        "module": "test_t1726_closed_contracts",
+        "samples": 118,
+        "sum_process_s": 2433.3,
+        "median_process_s": 20.7,
+        "max_process_s": 32.4
+      },
+      {
+        "module": "test_t1640_log_seal",
+        "samples": 198,
+        "sum_process_s": 2376.2,
+        "median_process_s": 12.0,
+        "max_process_s": 23.0
+      },
+      {
+        "module": "test_audit_2026_08_27_core",
+        "samples": 515,
+        "sum_process_s": 2363.6,
+        "median_process_s": 4.4,
+        "max_process_s": 34.7
+      },
+      {
+        "module": "test_t1568_opencode_chat_style",
+        "samples": 303,
+        "sum_process_s": 2360.1,
+        "median_process_s": 8.0,
+        "max_process_s": 15.3
+      },
+      {
+        "module": "test_t1792_auto_doctor",
+        "samples": 60,
+        "sum_process_s": 2355.4,
+        "median_process_s": 38.95,
+        "max_process_s": 53.2
+      },
+      {
+        "module": "test_t1457_ingress_obligation",
+        "samples": 515,
+        "sum_process_s": 2330.3,
+        "median_process_s": 4.2,
+        "max_process_s": 10.7
+      },
+      {
+        "module": "test_t1784_dry_run_verdict",
+        "samples": 69,
+        "sum_process_s": 2326.4,
+        "median_process_s": 33.3,
+        "max_process_s": 58.7
+      },
+      {
+        "module": "test_source_refusal_routing",
+        "samples": 515,
+        "sum_process_s": 2262.2,
+        "median_process_s": 4.3,
+        "max_process_s": 14.6
+      },
+      {
+        "module": "test_t1640_board_scrub",
+        "samples": 198,
+        "sum_process_s": 2261.1,
+        "median_process_s": 11.3,
+        "max_process_s": 34.7
+      },
+      {
+        "module": "test_t1631_argv_values",
+        "samples": 173,
+        "sum_process_s": 2250.5,
+        "median_process_s": 12.6,
+        "max_process_s": 21.3
+      },
+      {
+        "module": "test_search_transport",
+        "samples": 515,
+        "sum_process_s": 2240.2,
+        "median_process_s": 4.1,
+        "max_process_s": 16.0
+      },
+      {
+        "module": "test_t1519_settled_index",
+        "samples": 487,
+        "sum_process_s": 2229.4,
+        "median_process_s": 4.4,
+        "max_process_s": 15.3
+      },
+      {
+        "module": "test_t1598_stale_claim_next_action",
+        "samples": 283,
+        "sum_process_s": 2222.2,
+        "median_process_s": 7.5,
+        "max_process_s": 15.5
+      },
+      {
+        "module": "test_inject_digest",
+        "samples": 515,
+        "sum_process_s": 2211.3,
+        "median_process_s": 3.9,
+        "max_process_s": 38.5
+      },
+      {
+        "module": "test_t1563_authority_minting",
+        "samples": 359,
+        "sum_process_s": 2197.9,
+        "median_process_s": 5.4,
+        "max_process_s": 16.1
+      },
+      {
+        "module": "test_module_duplication_guard",
+        "samples": 515,
+        "sum_process_s": 2156.2,
+        "median_process_s": 4.1,
+        "max_process_s": 17.3
+      },
+      {
+        "module": "test_t1557_sub_style_contract",
+        "samples": 388,
+        "sum_process_s": 2140.9,
+        "median_process_s": 5.4,
+        "max_process_s": 21.9
+      },
+      {
+        "module": "test_t1383_ticket_add_route",
+        "samples": 515,
+        "sum_process_s": 2124.6,
+        "median_process_s": 4.0,
+        "max_process_s": 13.7
+      },
+      {
+        "module": "test_install_drift",
+        "samples": 515,
+        "sum_process_s": 2102.6,
+        "median_process_s": 3.7,
+        "max_process_s": 39.0
+      },
+      {
+        "module": "test_t1662_repository_interlock",
+        "samples": 205,
+        "sum_process_s": 2100.0,
+        "median_process_s": 10.2,
+        "max_process_s": 16.5
+      },
+      {
+        "module": "test_t1506_xpatch_survival",
+        "samples": 483,
+        "sum_process_s": 2078.9,
+        "median_process_s": 4.0,
+        "max_process_s": 53.1
+      },
+      {
+        "module": "test_automation_block",
+        "samples": 515,
+        "sum_process_s": 2041.5,
+        "median_process_s": 3.7,
+        "max_process_s": 21.9
+      },
+      {
+        "module": "test_t1684_operand_grammar",
+        "samples": 171,
+        "sum_process_s": 2005.7,
+        "median_process_s": 11.6,
+        "max_process_s": 20.3
+      },
+      {
+        "module": "test_t1628_opencode_policy",
+        "samples": 165,
+        "sum_process_s": 1976.9,
+        "median_process_s": 12.9,
+        "max_process_s": 20.5
+      },
+      {
+        "module": "test_refusal_registry",
+        "samples": 515,
+        "sum_process_s": 1966.7,
+        "median_process_s": 3.5,
+        "max_process_s": 13.6
+      },
+      {
+        "module": "test_t1557_mail_binding",
+        "samples": 388,
+        "sum_process_s": 1962.6,
+        "median_process_s": 4.6,
+        "max_process_s": 21.6
+      },
+      {
+        "module": "test_reverify_timeout_and_route",
+        "samples": 419,
+        "sum_process_s": 1947.7,
+        "median_process_s": 4.3,
+        "max_process_s": 11.0
+      },
+      {
+        "module": "test_t1635_claude_profiles",
+        "samples": 177,
+        "sum_process_s": 1933.6,
+        "median_process_s": 10.5,
+        "max_process_s": 34.4
+      },
+      {
+        "module": "test_cold_recovery",
+        "samples": 515,
+        "sum_process_s": 1883.1,
+        "median_process_s": 3.4,
+        "max_process_s": 10.6
+      },
+      {
+        "module": "test_foreign_owner_terminal_route",
+        "samples": 515,
+        "sum_process_s": 1857.8,
+        "median_process_s": 3.3,
+        "max_process_s": 19.5
+      },
+      {
+        "module": "test_t1678_path_launcher",
+        "samples": 188,
+        "sum_process_s": 1823.8,
+        "median_process_s": 9.5,
+        "max_process_s": 18.8
+      },
+      {
+        "module": "test_t1790_dependency_route_budget",
+        "samples": 47,
+        "sum_process_s": 1815.3,
+        "median_process_s": 38.5,
+        "max_process_s": 61.7
+      },
+      {
+        "module": "test_t1688_stale_plugin_guard",
+        "samples": 163,
+        "sum_process_s": 1810.3,
+        "median_process_s": 12.0,
+        "max_process_s": 25.1
+      },
+      {
+        "module": "test_t1544_audit20",
+        "samples": 297,
+        "sum_process_s": 1800.7,
+        "median_process_s": 5.9,
+        "max_process_s": 14.0
+      },
+      {
+        "module": "test_source_multiwork",
+        "samples": 515,
+        "sum_process_s": 1756.9,
+        "median_process_s": 3.3,
+        "max_process_s": 26.7
+      },
+      {
+        "module": "test_t1387_scratch_one_answer",
+        "samples": 508,
+        "sum_process_s": 1748.8,
+        "median_process_s": 3.3,
+        "max_process_s": 9.3
+      },
+      {
+        "module": "test_t1801_missing_audit_settlement",
+        "samples": 45,
+        "sum_process_s": 1747.4,
+        "median_process_s": 39.6,
+        "max_process_s": 54.1
+      },
+      {
+        "module": "test_t1746_crew_terminal_outcome",
+        "samples": 97,
+        "sum_process_s": 1693.2,
+        "median_process_s": 17.0,
+        "max_process_s": 38.7
+      },
+      {
+        "module": "test_t1386_canonical_payload",
+        "samples": 515,
+        "sum_process_s": 1690.0,
+        "median_process_s": 3.1,
+        "max_process_s": 9.1
+      },
+      {
+        "module": "test_t1752_audit_auto_close",
+        "samples": 46,
+        "sum_process_s": 1680.0,
+        "median_process_s": 36.55,
+        "max_process_s": 49.5
+      },
+      {
+        "module": "test_t1304_r006_boundary_refusals",
+        "samples": 196,
+        "sum_process_s": 1646.3,
+        "median_process_s": 8.8,
+        "max_process_s": 17.4
+      },
+      {
+        "module": "test_portable_floor_fields",
+        "samples": 271,
+        "sum_process_s": 1520.8,
+        "median_process_s": 5.0,
+        "max_process_s": 36.6
+      },
+      {
+        "module": "test_audit_ingest_resume",
+        "samples": 515,
+        "sum_process_s": 1491.6,
+        "median_process_s": 2.7,
+        "max_process_s": 18.3
+      },
+      {
+        "module": "test_engine_module_identity",
+        "samples": 515,
+        "sum_process_s": 1473.1,
+        "median_process_s": 2.7,
+        "max_process_s": 8.3
+      },
+      {
+        "module": "test_storage_artifacts",
+        "samples": 340,
+        "sum_process_s": 1458.9,
+        "median_process_s": 4.1,
+        "max_process_s": 10.9
+      },
+      {
+        "module": "test_t1575_parallel_lane",
+        "samples": 348,
+        "sum_process_s": 1456.6,
+        "median_process_s": 4.0,
+        "max_process_s": 9.6
+      },
+      {
+        "module": "test_t1760_no_git_ccc_marker",
+        "samples": 85,
+        "sum_process_s": 1435.2,
+        "median_process_s": 16.3,
+        "max_process_s": 25.0
+      },
+      {
+        "module": "test_audit_2026_08_29_all3_impl",
+        "samples": 515,
+        "sum_process_s": 1426.2,
+        "median_process_s": 2.7,
+        "max_process_s": 10.2
+      },
+      {
+        "module": "test_audit_dogfood",
+        "samples": 515,
+        "sum_process_s": 1408.6,
+        "median_process_s": 2.5,
+        "max_process_s": 20.3
+      },
+      {
+        "module": "test_t1789_child_closure_route",
+        "samples": 62,
+        "sum_process_s": 1402.2,
+        "median_process_s": 22.0,
+        "max_process_s": 32.8
+      },
+      {
+        "module": "test_worker_turnover",
+        "samples": 515,
+        "sum_process_s": 1401.6,
+        "median_process_s": 2.4,
+        "max_process_s": 15.7
+      },
+      {
+        "module": "test_t1458_queue_reservation",
+        "samples": 515,
+        "sum_process_s": 1379.4,
+        "median_process_s": 2.7,
+        "max_process_s": 13.9
+      },
+      {
+        "module": "test_t1667_clean_compaction",
+        "samples": 181,
+        "sum_process_s": 1376.3,
+        "median_process_s": 7.6,
+        "max_process_s": 12.9
+      },
+      {
+        "module": "test_t1454_distribution_blocker",
+        "samples": 515,
+        "sum_process_s": 1348.1,
+        "median_process_s": 2.2,
+        "max_process_s": 29.3
+      },
+      {
+        "module": "test_t1674_typed_closure_mode",
+        "samples": 192,
+        "sum_process_s": 1339.6,
+        "median_process_s": 6.7,
+        "max_process_s": 26.7
+      },
+      {
+        "module": "test_t1517_reverify_integrity",
+        "samples": 473,
+        "sum_process_s": 1336.1,
+        "median_process_s": 2.7,
+        "max_process_s": 16.3
+      },
+      {
+        "module": "test_t1705_lifecycle_write_preflight",
+        "samples": 144,
+        "sum_process_s": 1331.1,
+        "median_process_s": 9.05,
+        "max_process_s": 44.8
+      },
+      {
+        "module": "test_guard_admission",
+        "samples": 515,
+        "sum_process_s": 1306.9,
+        "median_process_s": 2.3,
+        "max_process_s": 11.0
+      },
+      {
+        "module": "test_t1676_lifecycle_code",
+        "samples": 182,
+        "sum_process_s": 1297.7,
+        "median_process_s": 6.9,
+        "max_process_s": 14.6
+      },
+      {
+        "module": "test_t1173_empty_intent_normalization",
+        "samples": 416,
+        "sum_process_s": 1295.7,
+        "median_process_s": 2.9,
+        "max_process_s": 15.7
+      },
+      {
+        "module": "test_telemetry",
+        "samples": 293,
+        "sum_process_s": 1272.8,
+        "median_process_s": 4.2,
+        "max_process_s": 13.5
+      },
+      {
+        "module": "test_audit_enqueue",
+        "samples": 515,
+        "sum_process_s": 1271.4,
+        "median_process_s": 2.4,
+        "max_process_s": 8.9
+      },
+      {
+        "module": "test_validator_findings",
+        "samples": 515,
+        "sum_process_s": 1266.5,
+        "median_process_s": 2.2,
+        "max_process_s": 12.3
+      },
+      {
+        "module": "test_continue_entry",
+        "samples": 515,
+        "sum_process_s": 1216.6,
+        "median_process_s": 2.2,
+        "max_process_s": 42.3
+      },
+      {
+        "module": "test_t1527_runtime_provenance",
+        "samples": 471,
+        "sum_process_s": 1189.2,
+        "median_process_s": 2.5,
+        "max_process_s": 9.7
+      },
+      {
+        "module": "test_improve_error_boundary",
+        "samples": 326,
+        "sum_process_s": 1138.9,
+        "median_process_s": 3.4,
+        "max_process_s": 9.2
+      },
+      {
+        "module": "test_t1278_closure_contradiction",
+        "samples": 438,
+        "sum_process_s": 1133.2,
+        "median_process_s": 2.25,
+        "max_process_s": 11.4
+      },
+      {
+        "module": "test_t1668_durable_stores_ship",
+        "samples": 187,
+        "sum_process_s": 1103.8,
+        "median_process_s": 5.5,
+        "max_process_s": 49.0
+      },
+      {
+        "module": "test_xpatch",
+        "samples": 515,
+        "sum_process_s": 1102.1,
+        "median_process_s": 1.9,
+        "max_process_s": 13.9
+      },
+      {
+        "module": "test_t1708_regression_declaration",
+        "samples": 143,
+        "sum_process_s": 1083.4,
+        "median_process_s": 7.5,
+        "max_process_s": 15.4
+      },
+      {
+        "module": "test_t1642_history_notes",
+        "samples": 221,
+        "sum_process_s": 1038.3,
+        "median_process_s": 4.5,
+        "max_process_s": 9.5
+      },
+      {
+        "module": "test_reverify",
+        "samples": 515,
+        "sum_process_s": 1018.4,
+        "median_process_s": 1.9,
+        "max_process_s": 6.6
+      },
+      {
+        "module": "test_t1759_single_lifecycle_observer",
+        "samples": 84,
+        "sum_process_s": 994.3,
+        "median_process_s": 11.6,
+        "max_process_s": 17.1
+      },
+      {
+        "module": "test_distribution_report",
+        "samples": 515,
+        "sum_process_s": 988.3,
+        "median_process_s": 1.5,
+        "max_process_s": 47.8
+      },
+      {
+        "module": "test_accepted_debt_rebind",
+        "samples": 423,
+        "sum_process_s": 956.6,
+        "median_process_s": 2.3,
+        "max_process_s": 5.9
+      },
+      {
+        "module": "test_t1751_reconcile_surfaces",
+        "samples": 90,
+        "sum_process_s": 947.7,
+        "median_process_s": 10.9,
+        "max_process_s": 15.4
+      },
+      {
+        "module": "test_tool_module_identity",
+        "samples": 266,
+        "sum_process_s": 930.0,
+        "median_process_s": 3.3,
+        "max_process_s": 13.4
+      },
+      {
+        "module": "test_t1472_core_unit_shards",
+        "samples": 515,
+        "sum_process_s": 923.5,
+        "median_process_s": 1.1,
+        "max_process_s": 167.1
+      },
+      {
+        "module": "test_evidence_hygiene",
+        "samples": 515,
+        "sum_process_s": 921.5,
+        "median_process_s": 1.1,
+        "max_process_s": 292.4
+      },
+      {
+        "module": "test_t1460_consumed_ingress",
+        "samples": 515,
+        "sum_process_s": 889.2,
+        "median_process_s": 1.7,
+        "max_process_s": 8.3
+      },
+      {
+        "module": "test_t1669_clean_done_projection",
+        "samples": 194,
+        "sum_process_s": 861.3,
+        "median_process_s": 4.3,
+        "max_process_s": 13.9
+      },
+      {
+        "module": "test_t1633_process_tree",
+        "samples": 176,
+        "sum_process_s": 854.2,
+        "median_process_s": 4.8,
+        "max_process_s": 7.3
+      },
+      {
+        "module": "test_t1772_empty_draft_exit",
+        "samples": 74,
+        "sum_process_s": 809.3,
+        "median_process_s": 10.8,
+        "max_process_s": 17.2
+      },
+      {
+        "module": "test_recovery_noop_targets",
+        "samples": 515,
+        "sum_process_s": 780.9,
+        "median_process_s": 1.5,
+        "max_process_s": 5.8
+      },
+      {
+        "module": "test_gpu_lane",
+        "samples": 515,
+        "sum_process_s": 773.6,
+        "median_process_s": 1.4,
+        "max_process_s": 12.1
+      },
+      {
+        "module": "test_t1732_protocol_hardening",
+        "samples": 109,
+        "sum_process_s": 769.5,
+        "median_process_s": 6.9,
+        "max_process_s": 11.4
+      },
+      {
+        "module": "test_legacy_lifecycle_compat",
+        "samples": 515,
+        "sum_process_s": 763.3,
+        "median_process_s": 1.4,
+        "max_process_s": 10.3
+      },
+      {
+        "module": "test_t1618_future_maturation",
+        "samples": 235,
+        "sum_process_s": 757.8,
+        "median_process_s": 3.3,
+        "max_process_s": 7.6
+      },
+      {
+        "module": "test_audit_2026_08_30_all3_impl",
+        "samples": 515,
+        "sum_process_s": 737.9,
+        "median_process_s": 1.2,
+        "max_process_s": 17.4
+      },
+      {
+        "module": "test_t1715_block_for_parent_guard",
+        "samples": 101,
+        "sum_process_s": 733.2,
+        "median_process_s": 7.2,
+        "max_process_s": 12.3
+      },
+      {
+        "module": "test_finding_invalidated_closure",
+        "samples": 249,
+        "sum_process_s": 726.2,
+        "median_process_s": 2.8,
+        "max_process_s": 9.1
+      },
+      {
+        "module": "test_t1636_invalid_carrier",
+        "samples": 178,
+        "sum_process_s": 712.0,
+        "median_process_s": 3.9,
+        "max_process_s": 9.0
+      },
+      {
+        "module": "test_t1775_continue_never_admits_a_seat",
+        "samples": 71,
+        "sum_process_s": 695.7,
+        "median_process_s": 10.4,
+        "max_process_s": 14.6
+      },
+      {
+        "module": "test_t1641_gate_ownership",
+        "samples": 216,
+        "sum_process_s": 686.4,
+        "median_process_s": 3.4,
+        "max_process_s": 6.3
+      },
+      {
+        "module": "test_t1726_contract_oracle",
+        "samples": 118,
+        "sum_process_s": 681.2,
+        "median_process_s": 5.6,
+        "max_process_s": 8.1
+      },
+      {
+        "module": "test_t1778_continue_closes_source",
+        "samples": 65,
+        "sum_process_s": 633.8,
+        "median_process_s": 9.8,
+        "max_process_s": 14.4
+      },
+      {
+        "module": "test_supervisor",
+        "samples": 515,
+        "sum_process_s": 633.5,
+        "median_process_s": 1.1,
+        "max_process_s": 4.5
+      },
+      {
+        "module": "test_t1645_zero_hunt",
+        "samples": 218,
+        "sum_process_s": 623.2,
+        "median_process_s": 2.8,
+        "max_process_s": 6.5
+      },
+      {
+        "module": "test_recovered_attribution",
+        "samples": 515,
+        "sum_process_s": 616.0,
+        "median_process_s": 1.0,
+        "max_process_s": 8.5
+      },
+      {
+        "module": "test_t1707_regression_chronology",
+        "samples": 144,
+        "sum_process_s": 611.3,
+        "median_process_s": 4.2,
+        "max_process_s": 8.8
+      },
+      {
+        "module": "test_generation_migration",
+        "samples": 515,
+        "sum_process_s": 607.1,
+        "median_process_s": 1.1,
+        "max_process_s": 6.4
+      },
+      {
+        "module": "test_t1544_audit20_perf",
+        "samples": 297,
+        "sum_process_s": 594.4,
+        "median_process_s": 1.8,
+        "max_process_s": 8.3
+      },
+      {
+        "module": "test_t1544_audit20_intake",
+        "samples": 297,
+        "sum_process_s": 583.9,
+        "median_process_s": 2.0,
+        "max_process_s": 10.8
+      },
+      {
+        "module": "test_ticket_add_regression",
+        "samples": 421,
+        "sum_process_s": 550.3,
+        "median_process_s": 1.3,
+        "max_process_s": 5.7
+      },
+      {
+        "module": "test_t1712_manifest_runtime",
+        "samples": 132,
+        "sum_process_s": 540.0,
+        "median_process_s": 4.0,
+        "max_process_s": 7.8
+      },
+      {
+        "module": "test_knowledge",
+        "samples": 515,
+        "sum_process_s": 531.2,
+        "median_process_s": 0.9,
+        "max_process_s": 11.2
+      },
+      {
+        "module": "test_t1584_production_zcode_boundary",
+        "samples": 332,
+        "sum_process_s": 523.4,
+        "median_process_s": 1.4,
+        "max_process_s": 8.3
+      },
+      {
+        "module": "test_t1757_claim_follows_route",
+        "samples": 89,
+        "sum_process_s": 521.6,
+        "median_process_s": 5.9,
+        "max_process_s": 10.0
+      },
+      {
+        "module": "test_external_revalidation",
+        "samples": 26,
+        "sum_process_s": 480.1,
+        "median_process_s": 18.95,
+        "max_process_s": 31.2
+      },
+      {
+        "module": "test_t1617_release_surface_ignores_gitignore",
+        "samples": 251,
+        "sum_process_s": 461.3,
+        "median_process_s": 1.6,
+        "max_process_s": 16.3
+      },
+      {
+        "module": "test_opencode_launch_binding",
+        "samples": 515,
+        "sum_process_s": 433.0,
+        "median_process_s": 0.8,
+        "max_process_s": 2.8
+      },
+      {
+        "module": "test_t1729_operator_gate",
+        "samples": 34,
+        "sum_process_s": 431.4,
+        "median_process_s": 12.85,
+        "max_process_s": 19.6
+      },
+      {
+        "module": "test_cold_agent_truth",
+        "samples": 515,
+        "sum_process_s": 415.6,
+        "median_process_s": 0.7,
+        "max_process_s": 8.5
+      },
+      {
+        "module": "test_t1749_project_root_subject",
+        "samples": 58,
+        "sum_process_s": 380.4,
+        "median_process_s": 6.25,
+        "max_process_s": 11.3
+      },
+      {
+        "module": "test_install_identity_doctor",
+        "samples": 51,
+        "sum_process_s": 367.7,
+        "median_process_s": 7.0,
+        "max_process_s": 12.4
+      },
+      {
+        "module": "test_t1293_valve_resume_audit_route",
+        "samples": 443,
+        "sum_process_s": 347.7,
+        "median_process_s": 0.8,
+        "max_process_s": 2.7
+      },
+      {
+        "module": "test_t148_sweep_historical_bar",
+        "samples": 257,
+        "sum_process_s": 339.0,
+        "median_process_s": 1.2,
+        "max_process_s": 19.2
+      },
+      {
+        "module": "test_t1374_detail_ref_export",
+        "samples": 503,
+        "sum_process_s": 334.6,
+        "median_process_s": 0.6,
+        "max_process_s": 13.0
+      },
+      {
+        "module": "test_t119_stale_complete_exit",
+        "samples": 26,
+        "sum_process_s": 329.3,
+        "median_process_s": 11.95,
+        "max_process_s": 19.3
+      },
+      {
+        "module": "test_recover_approved_repair",
+        "samples": 515,
+        "sum_process_s": 322.9,
+        "median_process_s": 0.6,
+        "max_process_s": 7.5
+      },
+      {
+        "module": "test_verify_oracle",
+        "samples": 515,
+        "sum_process_s": 313.4,
+        "median_process_s": 0.5,
+        "max_process_s": 5.8
+      },
+      {
+        "module": "test_t1683_launcher_profile",
+        "samples": 175,
+        "sum_process_s": 313.0,
+        "median_process_s": 1.7,
+        "max_process_s": 3.3
+      },
+      {
+        "module": "test_audit_transport_loop",
+        "samples": 515,
+        "sum_process_s": 309.3,
+        "median_process_s": 0.5,
+        "max_process_s": 10.7
+      },
+      {
+        "module": "test_t1479_core_unit_consistent_copy",
+        "samples": 515,
+        "sum_process_s": 305.0,
+        "median_process_s": 0.3,
+        "max_process_s": 70.6
+      },
+      {
+        "module": "test_t1513_argv_unconsumed_quotes",
+        "samples": 485,
+        "sum_process_s": 298.4,
+        "median_process_s": 0.7,
+        "max_process_s": 3.8
+      },
+      {
+        "module": "test_reconcile_legacy_output_field",
+        "samples": 515,
+        "sum_process_s": 296.3,
+        "median_process_s": 0.6,
+        "max_process_s": 2.3
+      },
+      {
+        "module": "test_t1748_worker_clock",
+        "samples": 39,
+        "sum_process_s": 296.1,
+        "median_process_s": 7.6,
+        "max_process_s": 9.1
+      },
+      {
+        "module": "test_t1638_future_ingress",
+        "samples": 224,
+        "sum_process_s": 293.9,
+        "median_process_s": 1.3,
+        "max_process_s": 3.9
+      },
+      {
+        "module": "test_t1690_profile_isolation",
+        "samples": 162,
+        "sum_process_s": 286.8,
+        "median_process_s": 1.7,
+        "max_process_s": 4.7
+      },
+      {
+        "module": "test_t1659_run_window",
+        "samples": 209,
+        "sum_process_s": 275.3,
+        "median_process_s": 1.3,
+        "max_process_s": 3.2
+      },
+      {
+        "module": "test_scenario_runner_isolation",
+        "samples": 515,
+        "sum_process_s": 274.8,
+        "median_process_s": 0.5,
+        "max_process_s": 1.8
+      },
+      {
+        "module": "test_acceptance",
+        "samples": 515,
+        "sum_process_s": 259.0,
+        "median_process_s": 0.4,
+        "max_process_s": 5.5
+      },
+      {
+        "module": "test_t1283_lineage_legacy_ingest",
+        "samples": 290,
+        "sum_process_s": 249.1,
+        "median_process_s": 0.8,
+        "max_process_s": 5.6
+      },
+      {
+        "module": "test_audit_2026_08_27_w2",
+        "samples": 515,
+        "sum_process_s": 234.7,
+        "median_process_s": 0.4,
+        "max_process_s": 2.9
+      },
+      {
+        "module": "test_defect_delta_controls",
+        "samples": 515,
+        "sum_process_s": 231.4,
+        "median_process_s": 0.4,
+        "max_process_s": 3.7
+      },
+      {
+        "module": "test_ticket_verify_preimage",
+        "samples": 252,
+        "sum_process_s": 224.9,
+        "median_process_s": 0.9,
+        "max_process_s": 2.7
+      },
+      {
+        "module": "test_t1619_iteration_boundary",
+        "samples": 238,
+        "sum_process_s": 219.2,
+        "median_process_s": 0.9,
+        "max_process_s": 2.4
+      },
+      {
+        "module": "test_t1515_posix_shell_entry",
+        "samples": 288,
+        "sum_process_s": 210.0,
+        "median_process_s": 0.6,
+        "max_process_s": 3.5
+      },
+      {
+        "module": "test_t1787_parked_brief",
+        "samples": 63,
+        "sum_process_s": 206.7,
+        "median_process_s": 3.3,
+        "max_process_s": 5.7
+      },
+      {
+        "module": "test_self_resolving_gates",
+        "samples": 515,
+        "sum_process_s": 205.2,
+        "median_process_s": 0.4,
+        "max_process_s": 3.8
+      },
+      {
+        "module": "test_external_authentication_contract",
+        "samples": 26,
+        "sum_process_s": 201.4,
+        "median_process_s": 6.7,
+        "max_process_s": 28.2
+      },
+      {
+        "module": "test_t1729_gate_decision_lifecycle",
+        "samples": 34,
+        "sum_process_s": 198.1,
+        "median_process_s": 3.95,
+        "max_process_s": 14.4
+      },
+      {
+        "module": "test_t1750_release_boundary",
+        "samples": 40,
+        "sum_process_s": 196.0,
+        "median_process_s": 4.3,
+        "max_process_s": 32.5
+      },
+      {
+        "module": "test_autonomy_audit_fixes",
+        "samples": 515,
+        "sum_process_s": 174.9,
+        "median_process_s": 0.2,
+        "max_process_s": 5.2
+      },
+      {
+        "module": "test_t1687_identity_diagnostics",
+        "samples": 160,
+        "sum_process_s": 174.7,
+        "median_process_s": 1.0,
+        "max_process_s": 5.3
+      },
+      {
+        "module": "test_guard_root_parity",
+        "samples": 515,
+        "sum_process_s": 153.5,
+        "median_process_s": 0.3,
+        "max_process_s": 3.1
+      },
+      {
+        "module": "test_t1670_route_budgets",
+        "samples": 187,
+        "sum_process_s": 145.5,
+        "median_process_s": 0.8,
+        "max_process_s": 1.3
+      },
+      {
+        "module": "test_audit_enqueue_boundary",
+        "samples": 515,
+        "sum_process_s": 141.0,
+        "median_process_s": 0.2,
+        "max_process_s": 4.9
+      },
+      {
+        "module": "test_source_contract_derivation",
+        "samples": 18,
+        "sum_process_s": 140.6,
+        "median_process_s": 9.5,
+        "max_process_s": 13.0
+      },
+      {
+        "module": "test_t1651_executor_admission",
+        "samples": 199,
+        "sum_process_s": 136.1,
+        "median_process_s": 0.7,
+        "max_process_s": 1.5
+      },
+      {
+        "module": "test_t1571_lint_surface",
+        "samples": 342,
+        "sum_process_s": 135.2,
+        "median_process_s": 0.3,
+        "max_process_s": 2.6
+      },
+      {
+        "module": "test_t1739_wait_boundary",
+        "samples": 35,
+        "sum_process_s": 132.2,
+        "median_process_s": 3.7,
+        "max_process_s": 5.7
+      },
+      {
+        "module": "test_instruction_loader_contracts",
+        "samples": 515,
+        "sum_process_s": 131.1,
+        "median_process_s": 0.2,
+        "max_process_s": 3.7
+      },
+      {
+        "module": "test_t1774_sweep_queue_human",
+        "samples": 70,
+        "sum_process_s": 126.4,
+        "median_process_s": 1.8,
+        "max_process_s": 3.5
+      },
+      {
+        "module": "test_t1747_degraded_profile",
+        "samples": 95,
+        "sum_process_s": 126.2,
+        "median_process_s": 1.9,
+        "max_process_s": 3.2
+      },
+      {
+        "module": "test_t1785_dry_run_human",
+        "samples": 67,
+        "sum_process_s": 121.5,
+        "median_process_s": 1.8,
+        "max_process_s": 2.7
+      },
+      {
+        "module": "test_audit_provenance",
+        "samples": 515,
+        "sum_process_s": 117.1,
+        "median_process_s": 0.2,
+        "max_process_s": 2.4
+      },
+      {
+        "module": "test_t147_generation_exit_behind_style_drift",
+        "samples": 257,
+        "sum_process_s": 116.2,
+        "median_process_s": 0.4,
+        "max_process_s": 2.2
+      },
+      {
+        "module": "test_t1442_family_env",
+        "samples": 512,
+        "sum_process_s": 108.9,
+        "median_process_s": 0.1,
+        "max_process_s": 4.0
+      },
+      {
+        "module": "test_t1776_protocol_home_valve",
+        "samples": 78,
+        "sum_process_s": 108.9,
+        "median_process_s": 1.4,
+        "max_process_s": 3.1
+      },
+      {
+        "module": "test_t1767_usage_line",
+        "samples": 61,
+        "sum_process_s": 108.4,
+        "median_process_s": 1.8,
+        "max_process_s": 2.6
+      },
+      {
+        "module": "test_xpatch_controls",
+        "samples": 515,
+        "sum_process_s": 105.5,
+        "median_process_s": 0.2,
+        "max_process_s": 1.0
+      },
+      {
+        "module": "test_adoption_section_parity",
+        "samples": 515,
+        "sum_process_s": 98.4,
+        "median_process_s": 0.2,
+        "max_process_s": 1.3
+      },
+      {
+        "module": "test_t1304_r005_verifier_boundary",
+        "samples": 196,
+        "sum_process_s": 96.4,
+        "median_process_s": 0.5,
+        "max_process_s": 4.1
+      },
+      {
+        "module": "test_t1518_crew_banner",
+        "samples": 448,
+        "sum_process_s": 91.9,
+        "median_process_s": 0.1,
+        "max_process_s": 3.0
+      },
+      {
+        "module": "test_t1709_audit_starvation",
+        "samples": 134,
+        "sum_process_s": 91.8,
+        "median_process_s": 0.6,
+        "max_process_s": 4.0
+      },
+      {
+        "module": "test_t1742_pipeline_shell_probe",
+        "samples": 99,
+        "sum_process_s": 86.5,
+        "median_process_s": 0.7,
+        "max_process_s": 11.8
+      },
+      {
+        "module": "test_t1649_refusal_step",
+        "samples": 214,
+        "sum_process_s": 79.6,
+        "median_process_s": 0.4,
+        "max_process_s": 0.8
+      },
+      {
+        "module": "test_protocol_registry",
+        "samples": 515,
+        "sum_process_s": 78.4,
+        "median_process_s": 0.1,
+        "max_process_s": 1.6
+      },
+      {
+        "module": "test_instruction_home_parity",
+        "samples": 515,
+        "sum_process_s": 72.9,
+        "median_process_s": 0.1,
+        "max_process_s": 3.2
+      },
+      {
+        "module": "test_t1475_host_hook_payload",
+        "samples": 437,
+        "sum_process_s": 71.2,
+        "median_process_s": 0.1,
+        "max_process_s": 2.4
+      },
+      {
+        "module": "test_producer_gate_policy",
+        "samples": 446,
+        "sum_process_s": 63.2,
+        "median_process_s": 0.1,
+        "max_process_s": 0.4
+      },
+      {
+        "module": "test_vacterro_t37_no_delta_closure",
+        "samples": 73,
+        "sum_process_s": 61.1,
+        "median_process_s": 0.8,
+        "max_process_s": 2.3
+      },
+      {
+        "module": "test_log_detail_evidence",
+        "samples": 515,
+        "sum_process_s": 57.4,
+        "median_process_s": 0.1,
+        "max_process_s": 1.3
+      },
+      {
+        "module": "test_hermetic_env",
+        "samples": 515,
+        "sum_process_s": 53.3,
+        "median_process_s": 0.1,
+        "max_process_s": 1.4
+      },
+      {
+        "module": "test_guard_events",
+        "samples": 515,
+        "sum_process_s": 53.1,
+        "median_process_s": 0.1,
+        "max_process_s": 0.4
+      },
+      {
+        "module": "test_watchdog",
+        "samples": 515,
+        "sum_process_s": 53.0,
+        "median_process_s": 0.1,
+        "max_process_s": 1.0
+      },
+      {
+        "module": "test_t1765_finding_subtypes",
+        "samples": 44,
+        "sum_process_s": 52.7,
+        "median_process_s": 1.2,
+        "max_process_s": 1.7
+      },
+      {
+        "module": "test_t1452_manifest_authority",
+        "samples": 515,
+        "sum_process_s": 52.4,
+        "median_process_s": 0.1,
+        "max_process_s": 0.4
+      },
+      {
+        "module": "test_vacterro_t36_checkpoint_usage_taxonomy",
+        "samples": 73,
+        "sum_process_s": 51.6,
+        "median_process_s": 0.7,
+        "max_process_s": 1.1
+      },
+      {
+        "module": "test_t1478_fixture_clock",
+        "samples": 512,
+        "sum_process_s": 49.6,
+        "median_process_s": 0.1,
+        "max_process_s": 0.4
+      },
+      {
+        "module": "test_narrative_authority",
+        "samples": 515,
+        "sum_process_s": 49.3,
+        "median_process_s": 0.1,
+        "max_process_s": 1.3
+      },
+      {
+        "module": "test_t1401_saipen_grammar_answer",
+        "samples": 512,
+        "sum_process_s": 44.7,
+        "median_process_s": 0.1,
+        "max_process_s": 0.9
+      },
+      {
+        "module": "test_t1827_writer_lock_contract",
+        "samples": 3,
+        "sum_process_s": 44.4,
+        "median_process_s": 14.6,
+        "max_process_s": 15.7
+      },
+      {
+        "module": "test_storage_policy",
+        "samples": 340,
+        "sum_process_s": 40.6,
+        "median_process_s": 0.1,
+        "max_process_s": 0.7
+      },
+      {
+        "module": "test_audit_envelope",
+        "samples": 515,
+        "sum_process_s": 40.2,
+        "median_process_s": 0.1,
+        "max_process_s": 2.0
+      },
+      {
+        "module": "test_t1434_cross_shape_index",
+        "samples": 515,
+        "sum_process_s": 39.5,
+        "median_process_s": 0.1,
+        "max_process_s": 0.8
+      },
+      {
+        "module": "test_guard_surface_parity",
+        "samples": 515,
+        "sum_process_s": 39.3,
+        "median_process_s": 0.1,
+        "max_process_s": 0.8
+      },
+      {
+        "module": "test_storage_lost_registry",
+        "samples": 328,
+        "sum_process_s": 38.4,
+        "median_process_s": 0.1,
+        "max_process_s": 0.5
+      },
+      {
+        "module": "test_sailearn_consumer",
+        "samples": 55,
+        "sum_process_s": 37.3,
+        "median_process_s": 0.8,
+        "max_process_s": 1.7
+      },
+      {
+        "module": "test_operator_ingress_matrix",
+        "samples": 23,
+        "sum_process_s": 37.0,
+        "median_process_s": 1.7,
+        "max_process_s": 2.5
+      },
+      {
+        "module": "test_t1781_t37_latest_build",
+        "samples": 68,
+        "sum_process_s": 34.4,
+        "median_process_s": 0.5,
+        "max_process_s": 1.3
+      },
+      {
+        "module": "test_t1745_sub_collect_foreign_field",
+        "samples": 38,
+        "sum_process_s": 33.7,
+        "median_process_s": 0.85,
+        "max_process_s": 2.7
+      },
+      {
+        "module": "test_host_launch_net",
+        "samples": 515,
+        "sum_process_s": 29.3,
+        "median_process_s": 0.0,
+        "max_process_s": 2.3
+      },
+      {
+        "module": "test_t1786_cli_first_activation",
+        "samples": 64,
+        "sum_process_s": 24.7,
+        "median_process_s": 0.4,
+        "max_process_s": 0.6
+      },
+      {
+        "module": "test_t1648_transient_replace_lock",
+        "samples": 217,
+        "sum_process_s": 24.6,
+        "median_process_s": 0.1,
+        "max_process_s": 0.4
+      },
+      {
+        "module": "test_t1753_activation_launcher",
+        "samples": 41,
+        "sum_process_s": 21.1,
+        "median_process_s": 0.5,
+        "max_process_s": 0.9
+      },
+      {
+        "module": "test_retired_source_coverage",
+        "samples": 367,
+        "sum_process_s": 14.4,
+        "median_process_s": 0.0,
+        "max_process_s": 0.3
+      },
+      {
+        "module": "test_t1582_sweep_skip_reason",
+        "samples": 334,
+        "sum_process_s": 12.2,
+        "median_process_s": 0.0,
+        "max_process_s": 0.8
+      },
+      {
+        "module": "test_next_action_grammar",
+        "samples": 1,
+        "sum_process_s": 11.6,
+        "median_process_s": 11.6,
+        "max_process_s": 11.6
+      },
+      {
+        "module": "test_t1736_tool_safety_and_evidence",
+        "samples": 102,
+        "sum_process_s": 11.6,
+        "median_process_s": 0.1,
+        "max_process_s": 1.1
+      },
+      {
+        "module": "test_t1686_launch_policy",
+        "samples": 158,
+        "sum_process_s": 11.1,
+        "median_process_s": 0.1,
+        "max_process_s": 0.2
+      },
+      {
+        "module": "test_sub_dispose_after_collect",
+        "samples": 300,
+        "sum_process_s": 9.8,
+        "median_process_s": 0.0,
+        "max_process_s": 1.1
+      },
+      {
+        "module": "test_core_audit_containment",
+        "samples": 515,
+        "sum_process_s": 8.8,
+        "median_process_s": 0.0,
+        "max_process_s": 1.2
+      },
+      {
+        "module": "test_t1655_file_mode",
+        "samples": 200,
+        "sum_process_s": 8.2,
+        "median_process_s": 0.0,
+        "max_process_s": 0.3
+      },
+      {
+        "module": "test_event_taxonomy_owner",
+        "samples": 515,
+        "sum_process_s": 7.7,
+        "median_process_s": 0.0,
+        "max_process_s": 1.2
+      },
+      {
+        "module": "test_t1631_option_values",
+        "samples": 1,
+        "sum_process_s": 7.5,
+        "median_process_s": 7.5,
+        "max_process_s": 7.5
+      },
+      {
+        "module": "test_opencode_live_evaluator",
+        "samples": 515,
+        "sum_process_s": 5.7,
+        "median_process_s": 0.0,
+        "max_process_s": 0.7
+      },
+      {
+        "module": "test_conformance_projection",
+        "samples": 515,
+        "sum_process_s": 5.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.3
+      },
+      {
+        "module": "test_sandbox_work_surface",
+        "samples": 515,
+        "sum_process_s": 3.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.2
+      },
+      {
+        "module": "test_t1402_readonly_reporters",
+        "samples": 512,
+        "sum_process_s": 3.0,
+        "median_process_s": 0.0,
+        "max_process_s": 1.5
+      },
+      {
+        "module": "test_continue_fallback_source_gate",
+        "samples": 429,
+        "sum_process_s": 2.7,
+        "median_process_s": 0.0,
+        "max_process_s": 1.7
+      },
+      {
+        "module": "test_t1650_retired_host_image",
+        "samples": 213,
+        "sum_process_s": 2.0,
+        "median_process_s": 0.0,
+        "max_process_s": 1.3
+      },
+      {
+        "module": "test_t38_improve_cycle_liveness",
+        "samples": 73,
+        "sum_process_s": 1.8,
+        "median_process_s": 0.0,
+        "max_process_s": 0.1
+      },
+      {
+        "module": "test_t1561_probe_fixture",
+        "samples": 336,
+        "sum_process_s": 1.7,
+        "median_process_s": 0.0,
+        "max_process_s": 0.4
+      },
+      {
+        "module": "test_t1585_amnesty_control",
+        "samples": 327,
+        "sum_process_s": 1.6,
+        "median_process_s": 0.0,
+        "max_process_s": 0.2
+      },
+      {
+        "module": "test_state_scalar_quoting",
+        "samples": 515,
+        "sum_process_s": 1.5,
+        "median_process_s": 0.0,
+        "max_process_s": 0.1
+      },
+      {
+        "module": "test_opencode_live_session",
+        "samples": 515,
+        "sum_process_s": 1.1,
+        "median_process_s": 0.0,
+        "max_process_s": 0.6
+      },
+      {
+        "module": "test_t1287_audit_empty_scope",
+        "samples": 444,
+        "sum_process_s": 1.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.3
+      },
+      {
+        "module": "test_t151_foreign_receipt_cannot_erase_a_sibling_verdict",
+        "samples": 257,
+        "sum_process_s": 0.9,
+        "median_process_s": 0.0,
+        "max_process_s": 0.2
+      },
+      {
+        "module": "test_t1779_family_ignores_inbox",
+        "samples": 66,
+        "sum_process_s": 0.9,
+        "median_process_s": 0.0,
+        "max_process_s": 0.4
+      },
+      {
+        "module": "test_t1592_manifest_orphan_advice",
+        "samples": 316,
+        "sum_process_s": 0.6,
+        "median_process_s": 0.0,
+        "max_process_s": 0.2
+      },
+      {
+        "module": "test_conformance_corpus",
+        "samples": 515,
+        "sum_process_s": 0.5,
+        "median_process_s": 0.0,
+        "max_process_s": 0.2
+      },
+      {
+        "module": "test_log_stamp_guard",
+        "samples": 515,
+        "sum_process_s": 0.5,
+        "median_process_s": 0.0,
+        "max_process_s": 0.2
+      },
+      {
+        "module": "test_t1465_budget_line_ends",
+        "samples": 512,
+        "sum_process_s": 0.5,
+        "median_process_s": 0.0,
+        "max_process_s": 0.2
+      },
+      {
+        "module": "test_t925_sub_terminal_durability",
+        "samples": 122,
+        "sum_process_s": 0.5,
+        "median_process_s": 0.0,
+        "max_process_s": 0.4
+      },
+      {
+        "module": "test_improve_resolve_report_path",
+        "samples": 298,
+        "sum_process_s": 0.4,
+        "median_process_s": 0.0,
+        "max_process_s": 0.2
+      },
+      {
+        "module": "test_fixture_style_authority",
+        "samples": 419,
+        "sum_process_s": 0.3,
+        "median_process_s": 0.0,
+        "max_process_s": 0.1
+      },
+      {
+        "module": "test_hush_runtime",
+        "samples": 515,
+        "sum_process_s": 0.2,
+        "median_process_s": 0.0,
+        "max_process_s": 0.1
+      },
+      {
+        "module": "test_saitranslate_charter_namespace",
+        "samples": 515,
+        "sum_process_s": 0.2,
+        "median_process_s": 0.0,
+        "max_process_s": 0.1
+      },
+      {
+        "module": "test_vocabulary_parity",
+        "samples": 515,
+        "sum_process_s": 0.2,
+        "median_process_s": 0.0,
+        "max_process_s": 0.1
+      },
+      {
+        "module": "test_outbox_write_time_bar",
+        "samples": 374,
+        "sum_process_s": 0.2,
+        "median_process_s": 0.0,
+        "max_process_s": 0.2
+      },
+      {
+        "module": "test_t1734_source_drift",
+        "samples": 105,
+        "sum_process_s": 0.2,
+        "median_process_s": 0.0,
+        "max_process_s": 0.1
+      },
+      {
+        "module": "test_admission_auto_doctor",
+        "samples": 53,
+        "sum_process_s": 0.2,
+        "median_process_s": 0.0,
+        "max_process_s": 0.1
+      },
+      {
+        "module": "test_audit_scope",
+        "samples": 515,
+        "sum_process_s": 0.1,
+        "median_process_s": 0.0,
+        "max_process_s": 0.1
+      },
+      {
+        "module": "test_t1238_release_commit_publication",
+        "samples": 416,
+        "sum_process_s": 0.1,
+        "median_process_s": 0.0,
+        "max_process_s": 0.1
+      },
+      {
+        "module": "test_runner_failure_roster",
+        "samples": 258,
+        "sum_process_s": 0.1,
+        "median_process_s": 0.0,
+        "max_process_s": 0.1
+      },
+      {
+        "module": "test_audit_route",
+        "samples": 515,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_board_pseudo_link",
+        "samples": 515,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_ccc_ff_control",
+        "samples": 515,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_ledger_gap",
+        "samples": 515,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_log_ticket_slot",
+        "samples": 515,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_repeated_cc",
+        "samples": 515,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1327_live_acceptance",
+        "samples": 515,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1445_failure_field_scope",
+        "samples": 515,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_verification_grammar",
+        "samples": 515,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_verify_scope_isolation",
+        "samples": 515,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_warn_ownership_probe",
+        "samples": 515,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1502_ui_aa_contract",
+        "samples": 490,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_response_digest",
+        "samples": 279,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_first_publish_confirm_evidence",
+        "samples": 277,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t150_legacy_generation_evidence_boundary",
+        "samples": 257,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t152_t154_a_red_gate_names_the_repair_that_resolves_it",
+        "samples": 257,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1464_matrix_acceptance",
+        "samples": 244,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1619_goal_terminality",
+        "samples": 241,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1620_historical_counts",
+        "samples": 234,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1632_identifier_is_not_a_count",
+        "samples": 215,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1304_r011_empty_selection",
+        "samples": 196,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t923_crew_invalid_role_errors",
+        "samples": 122,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1735_tool_failure_boundaries",
+        "samples": 104,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1762_control_count_scope",
+        "samples": 82,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1770_pair_stage_scope",
+        "samples": 81,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1782_capped_builder_identifier",
+        "samples": 72,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1744_fleet_foreign_field_skew",
+        "samples": 36,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1758_closure_cycle",
+        "samples": 27,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_t1807_audit_liveness_regression",
+        "samples": 26,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      },
+      {
+        "module": "test_freebuff_operator_provenance",
+        "samples": 9,
+        "sum_process_s": 0.0,
+        "median_process_s": 0.0,
+        "max_process_s": 0.0
+      }
+    ],
+    "recent": [
+      {
+        "path": ".saipen/evidence/core-unit/7d2903f22c05f08b-20261019T132812Z.json",
+        "fingerprint": "7d2903f22c05f08b8f89f8b2f298a7090050c4638f403c36fedd98a1db06a3e5",
+        "finished_utc": "2026-10-19T13:28:12Z",
+        "ran": 6925,
+        "jobs": 6,
+        "status": "PASS",
+        "verdict": "PASS",
+        "duration_s": 1582.7
+      },
+      {
+        "path": ".saipen/evidence/core-unit/4938af3e6ed9afc4-20261019T140547Z.json",
+        "fingerprint": "4938af3e6ed9afc468e1268f430ce7e74485de5ea1406715c434ce997f17bba6",
+        "finished_utc": "2026-10-19T14:05:47Z",
+        "ran": 6925,
+        "jobs": 6,
+        "status": "PASS",
+        "verdict": "PASS",
+        "duration_s": 1468.6
+      },
+      {
+        "path": ".saipen/evidence/core-unit/4938af3e6ed9afc4-20261019T205726Z.json",
+        "fingerprint": "4938af3e6ed9afc468e1268f430ce7e74485de5ea1406715c434ce997f17bba6",
+        "finished_utc": "2026-10-19T20:57:26Z",
+        "ran": null,
+        "jobs": 1,
+        "status": "TIMEOUT",
+        "verdict": "FAIL",
+        "duration_s": 5607.8
+      },
+      {
+        "path": ".saipen/evidence/core-unit/4938af3e6ed9afc4-20261019T225802Z.json",
+        "fingerprint": "4938af3e6ed9afc468e1268f430ce7e74485de5ea1406715c434ce997f17bba6",
+        "finished_utc": "2026-10-19T22:58:02Z",
+        "ran": 6925,
+        "jobs": 1,
+        "status": "PASS",
+        "verdict": "PASS",
+        "duration_s": 6879.7
+      },
+      {
+        "path": ".saipen/evidence/core-unit/73e01d794f842e8c-20261020T010550Z.json",
+        "fingerprint": "73e01d794f842e8cc115f2c1404388d8a0d18b7627231676902d34b7e2fadfbd",
+        "finished_utc": "2026-10-20T01:05:50Z",
+        "ran": 6925,
+        "jobs": 1,
+        "status": "FAIL",
+        "verdict": "FAIL",
+        "duration_s": 7458.0
+      },
+      {
+        "path": ".saipen/evidence/core-unit/aa0b79d379c253a4-20261020T053350Z.json",
+        "fingerprint": "aa0b79d379c253a425fced17006199a0da444352e61684ec961b4dfbf0df1d3a",
+        "finished_utc": "2026-10-20T05:33:50Z",
+        "ran": 6922,
+        "jobs": 6,
+        "status": "FAIL",
+        "verdict": "FAIL",
+        "duration_s": 1451.5
+      },
+      {
+        "path": ".saipen/evidence/core-unit/0f22caf9dd72b542-20261020T061509Z.json",
+        "fingerprint": "0f22caf9dd72b542cdd6736e70ff026472bf00313065c4995b34c2904e90afea",
+        "finished_utc": "2026-10-20T06:15:09Z",
+        "ran": 6942,
+        "jobs": 6,
+        "status": "FAIL",
+        "verdict": "FAIL",
+        "duration_s": 1621.5
+      },
+      {
+        "path": ".saipen/evidence/core-unit/cc0dfc3832da7093-20261020T065104Z.json",
+        "fingerprint": "cc0dfc3832da7093955b394d0d903d59fdb7536f292a784fc75745bf9a0a3b53",
+        "finished_utc": "2026-10-20T06:51:04Z",
+        "ran": 6944,
+        "jobs": 6,
+        "status": "PASS",
+        "verdict": "PASS",
+        "duration_s": 1447.9
+      },
+      {
+        "path": ".saipen/evidence/core-unit/2e52f7cd26e1ad34-20261020T082020Z.json",
+        "fingerprint": "2e52f7cd26e1ad347647022c270cc5ad291c740b7463eb2f2b3e6bd429d124ec",
+        "finished_utc": "2026-10-20T08:20:20Z",
+        "ran": 6950,
+        "jobs": 1,
+        "status": "FAIL",
+        "verdict": "FAIL",
+        "duration_s": 4334.9
+      },
+      {
+        "path": ".saipen/evidence/core-unit/2e52f7cd26e1ad34-20261020T093930Z.json",
+        "fingerprint": "2e52f7cd26e1ad347647022c270cc5ad291c740b7463eb2f2b3e6bd429d124ec",
+        "finished_utc": "2026-10-20T09:39:30Z",
+        "ran": 6950,
+        "jobs": 1,
+        "status": "PASS",
+        "verdict": "PASS",
+        "duration_s": 4669.8
+      },
+      {
+        "path": ".saipen/evidence/core-unit/d7569f11b8c865c9-20261020T112749Z.json",
+        "fingerprint": "d7569f11b8c865c9d96538b2f8d5a4da0234dbf65e34d853eaa26938c9fbcc21",
+        "finished_utc": "2026-10-20T11:27:49Z",
+        "ran": 6958,
+        "jobs": 1,
+        "status": "PASS",
+        "verdict": "PASS",
+        "duration_s": 4682.5
+      },
+      {
+        "path": ".saipen/evidence/core-unit/c0780e34235467f5-20261020T134621Z.json",
+        "fingerprint": "c0780e34235467f5b96c76d1c97819a11a90e2b2dff462be6f63ac7279f2f8a4",
+        "finished_utc": "2026-10-20T13:46:21Z",
+        "ran": 6965,
+        "jobs": 1,
+        "status": "PASS",
+        "verdict": "PASS",
+        "duration_s": 4943.2
+      }
+    ],
+    "interpretation": "Repeated fingerprints are candidates, not proven redundant compatible runs. Summed run durations and summed module process durations are NOT operator elapsed time."
+  },
+  "focused_unit": {
+    "execution_records": 2,
+    "durations_present": 2,
+    "aggregate_recorded_run_wall_s": 334.265,
+    "median_recorded_run_wall_s": 167.1325,
+    "p95_recorded_run_wall_s": 215.484,
+    "distinct_source_fingerprints": 2,
+    "additional_same_fingerprint_records": 0,
+    "additional_same_fingerprint_pass_records": 0,
+    "additional_same_fingerprint_pass_run_s": 0,
+    "by_status": {
+      "UNKNOWN": 1,
+      "PASS": 1
+    },
+    "by_jobs": {
+      "1": {
+        "records": 2,
+        "median_run_wall_s": 167.1325
+      }
+    },
+    "runs_with_stage_timings": 0,
+    "runs_with_environment_identity": 0,
+    "runs_with_module_timings": 0,
+    "module_process_time": [],
+    "recent": [
+      {
+        "path": ".saipen/evidence/focused-unit/079e8f042fdb1857-20261020T142449374288Z.json",
+        "fingerprint": "079e8f042fdb1857060ea8098f65e44d358f4a6bb8240e6d706db8694386bbc2",
+        "finished_utc": null,
+        "ran": 146,
+        "jobs": null,
+        "status": null,
+        "verdict": "PASS",
+        "duration_s": 118.781
+      },
+      {
+        "path": ".saipen/evidence/focused-unit/7ca3b9b4e7be6717-20261020T143234244847Z.json",
+        "fingerprint": "7ca3b9b4e7be67174e3fb298ccc5bdb1231b5ea9b0bcbfeab9cba2a159f0c70d",
+        "finished_utc": null,
+        "ran": 212,
+        "jobs": null,
+        "status": "PASS",
+        "verdict": "PASS",
+        "duration_s": 215.484
+      }
+    ],
+    "interpretation": "Repeated fingerprints are candidates, not proven redundant compatible runs. Summed run durations and summed module process durations are NOT operator elapsed time."
+  },
+  "saipen_tree": {
+    "files": 85509,
+    "bytes": 1420344978,
+    "stat_errors": 0,
+    "by_top_level": {
+      "evidence": {
+        "files": 51387,
+        "bytes": 1043240095
+      },
+      "recovery": {
+        "files": 20955,
+        "bytes": 158252208
+      },
+      "kitchen": {
+        "files": 5206,
+        "bytes": 114712586
+      },
+      "extensions": {
+        "files": 1794,
+        "bytes": 37927418
+      },
+      "saitranslate": {
+        "files": 2190,
+        "bytes": 20170725
+      },
+      "cache": {
+        "files": 546,
+        "bytes": 15868494
+      },
+      "intake": {
+        "files": 1896,
+        "bytes": 8965899
+      },
+      "milestones": {
+        "files": 171,
+        "bytes": 6049252
+      },
+      "archive": {
+        "files": 1153,
+        "bytes": 4459952
+      },
+      "logs": {
+        "files": 18,
+        "bytes": 4293373
+      },
+      "exchange": {
+        "files": 8,
+        "bytes": 3893088
+      },
+      "LOG.md": {
+        "files": 1,
+        "bytes": 1156752
+      },
+      "tmp": {
+        "files": 16,
+        "bytes": 700656
+      },
+      "KNOWLEDGE": {
+        "files": 69,
+        "bytes": 292135
+      },
+      "BOARD.md": {
+        "files": 1,
+        "bytes": 261237
+      },
+      "future": {
+        "files": 47,
+        "bytes": 53142
+      },
+      "improve": {
+        "files": 41,
+        "bytes": 37915
+      },
+      "quarantine": {
+        "files": 1,
+        "bytes": 5664
+      },
+      "MANIFEST.json": {
+        "files": 1,
+        "bytes": 3666
+      },
+      "STATE.md": {
+        "files": 1,
+        "bytes": 559
+      },
+      "USERPERSON.md": {
+        "files": 1,
+        "bytes": 93
+      },
+      "IDENTITY.md": {
+        "files": 1,
+        "bytes": 69
+      },
+      "locks": {
+        "files": 5,
+        "bytes": 0
+      }
+    }
+  },
+  "top_level_test_modules": 456,
+  "read_errors": [],
+  "missing_measurements": {
+    "copy_wall_s": null,
+    "hash_wall_s": null,
+    "discovery_wall_s": null,
+    "python_startup_s": null,
+    "canonical_validation_s": null,
+    "lifecycle_gate_elapsed_s": null,
+    "forced_fresh_reasons": null,
+    "actual_implementation_s": null,
+    "operator_wait_wall_s": null,
+    "verification_share": null,
+    "flake_attribution": null,
+    "cache_hit_rate": null,
+    "escaped_regressions_by_tier": null
+  },
+  "operator_observation": {
+    "verification_share_percent": 98,
+    "independently_verified": false
+  }
+}

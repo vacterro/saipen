@@ -1,0 +1,35 @@
+{
+  "scope": "frozen tools-only static-planning corpus, no tests executed",
+  "scope_identical": true,
+  "source_fingerprint": "3f2c8a287bd8a2c0886941e64bf09ba452114d7bfbc31b2e61d9ce398fd80dee",
+  "source_inventory_sha256": "5f467a42bceb9b686136f2c89ff9bc459e28d87e382a90807ea40b1e7ed8a13c",
+  "runtime": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "before_implementation_sha256": "441f5779d1920200991de157b7b57391a4dfd13cc24d0dbedbac1664bb8cde60",
+  "after_implementation_sha256": "cb217fa94dd03732772e761636e972e44fc76eb5ce970d64fdba6e06920841be",
+  "measurements": [
+    {
+      "implementation": "before",
+      "wall_s": 13.741090800000165,
+      "inventory": 464,
+      "tier": "FULL"
+    },
+    {
+      "implementation": "after",
+      "wall_s": 0.2607865000009042,
+      "inventory": 464,
+      "tier": "FULL"
+    },
+    {
+      "implementation": "after",
+      "wall_s": 0.30429560000084166,
+      "inventory": 464,
+      "tier": "FULL"
+    },
+    {
+      "implementation": "before",
+      "wall_s": 13.989003899998352,
+      "inventory": 464,
+      "tier": "FULL"
+    }
+  ]
+}

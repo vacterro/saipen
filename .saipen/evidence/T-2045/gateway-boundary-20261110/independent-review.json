@@ -1,0 +1,22 @@
+{
+  "checked_at": "2026-11-10T18:15:52.706902+00:00",
+  "reviewer": "independent local agent",
+  "scope": [
+    "tools/saipen_operator_gateway.py",
+    "extensions/adapters/FREEBUFF_INGRESS_CONTRACT.md",
+    "tools/test_t2045_operator_gateway.py"
+  ],
+  "observed": "15 passed, 5 subtests passed in 0.90s",
+  "findings": [],
+  "limitations": [
+    "permission/symlink cases mocked; no real NTFS reparse/race control",
+    "shared helper internals outside independent scope",
+    "fixture snapshots do not prove global side effects",
+    "supplied native carrier not independently authenticated by reviewer"
+  ],
+  "revision": {
+    "tools/saipen_operator_gateway.py": "f7fdd935fe97bf5ebdcf82e139b27a1c4c8050508bc3d4fcb7401fa0e8f49a91",
+    "tools/test_t2045_operator_gateway.py": "34b6973d0cf92bc7612cfb362fd8b1ab395bc8ec88dbbb9d253a5ce3013baac4",
+    "extensions/adapters/FREEBUFF_INGRESS_CONTRACT.md": "246bf85d0991e5d292bb2631ba0d4fd52654c978c5851a41b3dafcd2c45e2837"
+  }
+}

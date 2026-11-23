@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "kind": "saipen-campaign-authorization",
+  "campaign_limit": 1,
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "target_project": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "host": "gemini",
+  "session": "7cc82127-72ed-467c-8096-d5ffdbc7d24a",
+  "goal_binding": {
+    "goal_ingress": "OPERATOR_DIRECTIVE_20261101_0406",
+    "authority_source": "V:/_TEMP_/fastprompter_drag/OPERATOR DIRECTIVE \u2014_20261101_0406.md"
+  },
+  "authorized_scopes": [
+    "CAMPAIGN_EXECUTION",
+    "continuous_maintenance",
+    "FORENSIC_ANALYSIS",
+    "AUDIT_STAGING",
+    "PROTOCOL_REPAIR"
+  ],
+  "resource_budget": {
+    "max_generations": 40,
+    "max_cycles": 100,
+    "max_wall_seconds": 28800
+  },
+  "expires_at": 1793527658
+}

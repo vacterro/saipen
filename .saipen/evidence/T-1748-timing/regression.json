@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t1748_worker_clock.py", "-v"],
+  "format": "unittest",
+  "context": ["tools", "saipen", "tests", "extensions", "VERSION", "bootstrap", "bin"],
+  "oracle_files": ["tools/test_t1748_worker_clock.py", "tools/test_fixture_support.py"],
+  "subject_files": ["tools/test_t1446_supervise.py"],
+  "before": {"tools/test_t1446_supervise.py": ".saipen/evidence/T-1748-timing/before/test_t1446_supervise.py"},
+  "timeout": 300
+}

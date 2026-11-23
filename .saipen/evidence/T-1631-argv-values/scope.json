@@ -1,0 +1,30 @@
+{
+  "tools/saipen.py": {
+    "before_sha256": "43dc09847fe30cabd77ead291c84925ea74426a6c68ec102e863845a3e5c7833",
+    "after_sha256": "4ad469c22dcced5faea43337ac61b9e8cda7ac2559f31675e7ef70e71ccdd081"
+  },
+  "tools/test_t1631_argv_values.py": {
+    "before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "after_sha256": "bc612a368dadc5e2d69d70f9bfb71264a928393d9bc92f7f45fa8bbc0309a62e"
+  },
+  "tools/test_adaptive_runtime.py": {
+    "before_sha256": "9430f08f58951c5ec247748d4b00eed780de16b0376273ead1d2afc0baf5152e",
+    "after_sha256": "335e86f7adcb4b4bf37d16001ed98e18ce79513f3294ab65f1058d841fae8b4e"
+  },
+  "tools/test_intent_audit_fixes.py": {
+    "before_sha256": "918ffbdebf069ba07f159159c919d4e453bddfb392eca49a39e8607346562c99",
+    "after_sha256": "d233b1bf75b6433cabff3d81a38d28f4f515a9efb8fd5a892a71f2b019bbf356"
+  },
+  "tools/test_t1327_zero_manual_recovery.py": {
+    "before_sha256": "617c4a6099e4bb55ef9708877d311f69cd792665e219792de01f1d9974597aed",
+    "after_sha256": "a37f19f37f024059a6d095f28eeceb488887be42a84ad70fa56234ec8bc944af"
+  },
+  "tools/test_t1557_mail_binding.py": {
+    "before_sha256": "f9a11f027d0e54138eae42b736da2206f72d525c2083d74144b86e29bb3ce3d0",
+    "after_sha256": "ed8254d1cabba458eff09a7fb91efa8ef5255e68ef68ae5f47fdb233298fed74"
+  },
+  "tools/test_t1363_zero_manual_entry.py": {
+    "before_sha256": "3f1fda2d3e84f87a91072477a31ca68e97db7f63914f94f963921516c66fe9f7",
+    "after_sha256": "9e5280da0258a0f85e5358ee8f19780696a7359ede60ec3ccd6ef42bdaef3108"
+  }
+}

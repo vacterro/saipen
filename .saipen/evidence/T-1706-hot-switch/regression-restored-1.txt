@@ -1,0 +1,21 @@
+======================================================================
+ERROR: setUpClass (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1706-oracle-x_3tsn3o\project\tools\test_t1705_lifecycle_write_preflight.py", line 33, in setUpClass
+    cls.root = _project()
+               ^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1706-oracle-x_3tsn3o\project\tools\test_t1671_lifecycle_authority.py", line 45, in _project
+    root = probes.fresh_project("t1671")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1706-oracle-x_3tsn3o\project\tools\continuity_probes.py", line 46, in fresh_project
+    shutil.copytree(FIXTURE, root / ".saipen")
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 571, in copytree
+    with os.scandir(src) as itr:
+         ^^^^^^^^^^^^^^^
+FileNotFoundError: [WinError 3] The system cannot find the path specified: 'V:\\_TEMP_\\saipen-t1706-oracle-x_3tsn3o\\project\\tests\\scenarios\\cold-handoff-continuity\\.saipen'
+
+----------------------------------------------------------------------
+Ran 0 tests in 0.048s
+
+FAILED (errors=1)

@@ -1,0 +1,10 @@
+== signal2: newest commit vs LOG
+66ef622a4 fix(t1950): resolve EX-000022 by correcting the oracle and carrying the external bytes
+1
+== signal3 TODO/FIXME/HACK (tools/, tracked+untracked)
+862
+== signal4 silent candidates
+3
+== signal5 untracked in tools/
+12
+== signal6 zero-ref defs (ast census)

@@ -1,0 +1,88 @@
+T-1959 / SRC-348 R003 + R004 mechanism measurement
+HEAD 66ef622a43ab59512735ac78ce10d1250e26f9df
+Measured 2026-10-29 after clause derivation (contract revision 9).
+
+R003  read-only under a blocked gate; no state-changing bypass; CLI replay
+      of operator ingress must fail; operator-carrier ingress must be verified.
+
+  (a) read-only under block
+      fleet.classify answers read_only: True with needs_local_mutation: False
+      while the session is braked (fleet.py:310). The board's own blocker
+      projection emits read_only_work_may_proceed: True for every recorded
+      blocker (observed live in `saipen status --json` for work:T-1943 and
+      work:T-1644).
+  (b) no state-changing bypass
+      gate_decision returns RECONCILE_REAUTH_REQUIRED for a missing or invalid
+      authority Source, another project identity, or another gate version.
+      Covered by tools/test_automation_block.py (38 tests OK) and
+      tools/test_capability_boundary.py (10 tests OK).
+  (c) CLI replay must fail
+      goal_authority.bounded_resume_requirement() returns
+        required_ingress: "operator_carrier"
+        canonical_next_command: None
+        operator_action: "Send fresh cc through authenticated native host
+          ingress; an agent CLI replay cannot renew this budget."
+      tools/test_t1858_valve_guidance.py 9 tests OK asserts
+      refusal["required_ingress"] == "operator_carrier" and
+      block["required_ingress"] == "operator_carrier".
+      tools/test_t1494_continuation_authority.py 19 tests OK includes
+      test_a_different_operator_carrier_is_not_a_fresh_cc, so a replayed or
+      transplanted carrier is not a fresh cc.
+  (d) operator-carrier ingress verified
+      host_authority_broker.py:440-459 accepts only a capability THIS process
+      minted and refuses a written-down string with BROKER_CAPABILITY_REPLAY
+      ("capability is not one this broker issued").
+      tools/test_host_authority_broker.py 38 OK, tools/test_t1844_origin_broker.py
+      48 OK, tools/test_operator_ingress_matrix.py 19 OK
+      (asserts res["source"] == "operator_carrier").
+      host_taxonomy.py:175-179 registers CAPABILITY_REPLAYED as SEVERITY_BLOCKING.
+
+R004  audit ledgers not declarable VERIFIED from aggregate counts: test-node
+      identities unique, bound to a source revision, checked per mechanism.
+
+  (a) identities unique, every occurrence proven exactly once
+      core_unit.merge_shards() (~676-730) requires the ordered inventory
+      digest to be identical across shards and the selected position lists to
+      cover range(discovered) with no duplicate, omission or substitution;
+      a violation sets partition_error "shards duplicate, omit or misidentify
+      required test occurrences". tools/test_t1472_core_unit_shards.py
+      14 tests OK includes test_a_record_of_a_sharded_run_keeps_the_partition_proof
+      and test_shards_that_kept_fewer_tests_than_discovered_refuse.
+      tools/test_t1837_ci_family_parity.py 15 tests OK includes
+      test_missing_mismatched_duplicate_and_error_members_still_refuse.
+  (b) bound to a source revision
+      focused_unit.run_focused records fingerprint = tree_fingerprint of the
+      immutable snapshot plus verification_identity; verification_cache
+      _load_written refuses a record whose fingerprint, verification_identity
+      or family differ (verification_cache.py:327-343). A record is therefore
+      bound to the exact bytes it measured, not to a floating tree.
+  (c) per mechanism, not one aggregate
+      intake derives each clause individually (intake.py:3041) and
+      is_generic_core_pass (intake.py:2403) refuses "core-unit", "core_unit",
+      "unittest discover", "core suite", "discover -s tools", "aggregate pass"
+      as proof of a live-acceptance clause.
+      tools/test_source_contract_derivation.py 13 tests OK and
+      tools/test_cold_agent_truth.py 21 tests OK.
+
+R009  non-goal: do not reopen a remediated ticket without evidence the defect
+      survives on HEAD; no push without destination-specific authority; do not
+      forge, replay or bypass operator credentials; nonintrusive tests only.
+
+  Honoured in this ticket, measured from the artifacts rather than asserted:
+  (a) no ticket was reopened. T-1943 had been parked with a recorded blocker
+      and was unblocked only on freshly measured evidence (E-19271) before it
+      was claimed again; nothing was reopened on the strength of a historical
+      report. Every finding in this audit was re-measured on HEAD 66ef622a
+      before it was called a live defect, and the two findings the audit marks
+      UNPROVEN were left unproven.
+  (b) no push. Nothing was committed or pushed during T-1959; the audit's own
+      STOP CONDITION and this repository's WAIT_USER_DECISION on publication
+      policy (work:T-1644) both forbid it without destination-specific
+      authority.
+  (c) no credential forging, replay or bypass. The R003 measurements are the
+      refusal paths themselves: the broker refuses a replayed capability, and
+      no state file was edited to simulate an operator act.
+  (d) nonintrusive only. Every command in this ticket is a read-only probe, a
+      unittest discovery run under the isolated focused-unit sandbox, or a
+      SAIPEN CLI write. No desktop focus capture, no mouse or keyboard
+      injection and no window switching occurred.

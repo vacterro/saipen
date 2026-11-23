@@ -1,0 +1,14 @@
+seed 1654: 400 cases, 328 repaired, 72 malformed and left alone, 0 broken
+probe seed 1654 rc=0
+seed 7: 400 cases, 332 repaired, 68 malformed and left alone, 0 broken
+probe seed 7 rc=0
+seed 20261007: 400 cases, 336 repaired, 64 malformed and left alone, 0 broken
+probe seed 20261007 rc=0
+....................s....................
+----------------------------------------------------------------------
+Ran 41 tests in 6.224s
+
+OK (skipped=1)
+module rc=0
+audapack PROJECT_BLOCK_STALE saipen host instructions repair
+this project continue --dry-run: PHASE REVIEW T-1654 | instructions hint present: False | boot: True

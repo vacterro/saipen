@@ -1,0 +1,913 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
+PySide6 6.11.1 -- Qt runtime 6.11.1 -- Qt compiled 6.11.1
+rootdir: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+plugins: anyio-4.15.1, langsmith-0.14.12, asyncio-1.4.0, cov-7.1.0, docker-3.2.5, mock-3.15.1, qt-4.5.0, timeout-2.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 27 items
+
+tools\test_t2040_terminal_consumer_guards.py ...FF.....FF..F. [ 59%]
+..FF.......                                                            [100%]
+
+================================== FAILURES ===================================
+_ TerminalConsumerGuards.test_authoritative_external_stop_outranks_stale_workable_board _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_authoritative_external_stop_outranks_stale_workable_board>
+
+    def test_authoritative_external_stop_outranks_stale_workable_board(self):
+        self.write_state(blocker="BLOCKED_EXTERNAL -- current external boundary")
+        (self.root / ".saipen/BOARD.md").write_text(
+            "## DOING\n## TODO\n- [ ] T-1 [P1] stale work | verify: local test\n## DONE\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        picture = supervisor.observe(self.root, now=T0)
+        self.assertEqual(picture["continuation_classification"], CA.WAIT_EXTERNAL)
+>       self.assertIsNone(picture["executable_work"], picture)
+E       AssertionError: 'T-1' is not None : {'autonomy_run_id': '', 'observed_at': '2026-10-25T12:00:00Z', 'phase': 'DONE', 'active_work': None, 'next_action': 'saipen continue', 'last_event': '100', 'state_blocker': 'BLOCKED_EXTERNAL -- current external boundary', 'worker_id': None, 'worker_generation': None, 'lease_generation': None, 'lease_state': 'UNKNOWN', 'lease_reason': 'missing_or_corrupt_runtime_state', 'heartbeat_at': None, 'heartbeat_age_seconds': None, 'workable_work': ['T-1'], 'executable_work': 'T-1', 'continuation_classification': 'WAIT_EXTERNAL', 'continuation_actionable': False, 'continuation_reason': 'unblock', 'continuation_detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'continuation_assessment': {'classification': 'WAIT_EXTERNAL', 'actionable': False, 'executable_work': None, 'action': 'saipen status', 'reason': 'unblock', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'raw_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'continuous_maintenance_proven': False, 'continuous_maintenance_claimed': False, 'operator_work': []}, 'operator_work': [], 'operator_gates': [], 'due_operator_actions': [], 'deferred_operator_gates': [], 'board_errors': [], 'no_progress_count': 0, 'progress_verdict': 'RUNNING', 'durable_checkpoint': None, 'last_progress_at': ''}
+
+tools\test_t2040_terminal_consumer_guards.py:212: AssertionError
+_ TerminalConsumerGuards.test_automation_certificate_cannot_complete_unsatisfied_objectives _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_automation_certificate_cannot_complete_unsatisfied_objectives>
+
+    def test_automation_certificate_cannot_complete_unsatisfied_objectives(self):
+        routed = idle_route(certificate())
+        routed["terminal_classification"] = "ALL_WORK_COMPLETE"
+        with mock.patch.object(automation, "closure_gate", return_value={
+            "complete": True, "convergence_current": True, "conditions": {},
+        }):
+            result = self.automation(routed)
+>       self.assertNotEqual(result["disposition"], automation.COMPLETE, result)
+E       AssertionError: 'COMPLETE' == 'COMPLETE' : {'schema_version': 1, 'disposition': 'COMPLETE', 'next_command': None, 'operator_action_due': False, 'reason_code': 'closure-complete', 'reason': 'all eight closure conditions mechanically true; convergence bound to source head+tree and audit epoch audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'audit_quiescent': True, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': True, 'closure_complete': True, 'source_fingerprint': 'head+tree', 'completed_at': None}
+
+tools\test_t2040_terminal_consumer_guards.py:397: AssertionError
+_ TerminalConsumerGuards.test_automation_unknown_route_or_missing_certificate_cannot_continue (route={'ok': True, 'reason': 'unknown-success', 'action': 'saipen status'}) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_automation_unknown_route_or_missing_certificate_cannot_continue>
+
+    def test_automation_unknown_route_or_missing_certificate_cannot_continue(self):
+        for routed in (
+            {"ok": True, "reason": "unknown-success", "action": "saipen status"},
+            {"ok": True, "reason": "maintain", "action": "saipen continue"},
+            {"ok": True, "reason": "maintain", "action": "saipen continue", "work_exhaustion": 42},
+        ):
+            with self.subTest(route=routed):
+                result = self.automation(routed)
+>               self.assertNotIn(result["disposition"], (automation.CONTINUE, automation.COMPLETE), result)
+E               AssertionError: 'CONTINUE' unexpectedly found in ('CONTINUE', 'COMPLETE') : {'schema_version': 1, 'disposition': 'CONTINUE', 'next_command': 'cc', 'operator_action_due': False, 'reason_code': 'unknown-success', 'reason': 'route reason: unknown-success', 'audit_quiescent': True, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': False, 'closure_complete': False, 'source_fingerprint': 'head+tree', 'completed_at': None}
+
+tools\test_t2040_terminal_consumer_guards.py:387: AssertionError
+_ TerminalConsumerGuards.test_automation_unknown_route_or_missing_certificate_cannot_continue (route={'ok': True, 'reason': 'maintain', 'action': 'saipen continue'}) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_automation_unknown_route_or_missing_certificate_cannot_continue>
+
+    def test_automation_unknown_route_or_missing_certificate_cannot_continue(self):
+        for routed in (
+            {"ok": True, "reason": "unknown-success", "action": "saipen status"},
+            {"ok": True, "reason": "maintain", "action": "saipen continue"},
+            {"ok": True, "reason": "maintain", "action": "saipen continue", "work_exhaustion": 42},
+        ):
+            with self.subTest(route=routed):
+                result = self.automation(routed)
+>               self.assertNotIn(result["disposition"], (automation.CONTINUE, automation.COMPLETE), result)
+E               AssertionError: 'CONTINUE' unexpectedly found in ('CONTINUE', 'COMPLETE') : {'schema_version': 1, 'disposition': 'CONTINUE', 'next_command': 'cc', 'operator_action_due': False, 'reason_code': 'closure-conditions-C3-C4-C6', 'reason': 'route reason: maintain', 'audit_quiescent': True, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': False, 'closure_complete': False, 'source_fingerprint': 'head+tree', 'completed_at': None}
+
+tools\test_t2040_terminal_consumer_guards.py:387: AssertionError
+_ TerminalConsumerGuards.test_automation_unknown_route_or_missing_certificate_cannot_continue (route={'ok': True, 'reason': 'maintain', 'action': 'saipen continue', 'work_exhaustion': 42}) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_automation_unknown_route_or_missing_certificate_cannot_continue>
+
+    def test_automation_unknown_route_or_missing_certificate_cannot_continue(self):
+        for routed in (
+            {"ok": True, "reason": "unknown-success", "action": "saipen status"},
+            {"ok": True, "reason": "maintain", "action": "saipen continue"},
+            {"ok": True, "reason": "maintain", "action": "saipen continue", "work_exhaustion": 42},
+        ):
+            with self.subTest(route=routed):
+                result = self.automation(routed)
+>               self.assertNotIn(result["disposition"], (automation.CONTINUE, automation.COMPLETE), result)
+E               AssertionError: 'CONTINUE' unexpectedly found in ('CONTINUE', 'COMPLETE') : {'schema_version': 1, 'disposition': 'CONTINUE', 'next_command': 'cc', 'operator_action_due': False, 'reason_code': 'closure-conditions-C3-C4-C6', 'reason': 'route reason: maintain', 'audit_quiescent': True, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': False, 'closure_complete': False, 'source_fingerprint': 'head+tree', 'completed_at': None}
+
+tools\test_t2040_terminal_consumer_guards.py:387: AssertionError
+_ TerminalConsumerGuards.test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence (status='NO_NEW_EVIDENCE') _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence>
+
+    def test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence(self):
+        backend = mock.Mock()
+        controller = self.admit(backend=backend)
+        assessment = CA._make_assessment(CA.MAINTENANCE_AVAILABLE, action="saipen continue",
+                                         reason="maintain", detail="bounded forensic source")
+        for status in (backend_protocol.NO_NEW_EVIDENCE, "UNKNOWN_SUCCESS"):
+            with self.subTest(status=status), mock.patch.object(CA, "assess_continuation", return_value=assessment):
+                backend.discover.return_value = {"ok": True, "status": status}
+                result = controller.step()
+>               self.assertNotEqual(result["state"]["campaign_state"], campaign.QUIESCENT_WAIT, result)
+E               AssertionError: 'QUIESCENT_WAIT' == 'QUIESCENT_WAIT' : {'ok': True, 'event': 'DISCOVERY_NO_NEW_FINDINGS', 'discovery': {'ok': True, 'status': 'NO_NEW_EVIDENCE'}, 'state': {'authority_grant': {'authorization': {'authorized_scopes': ['AUDIT_STAGING', 'CAMPAIGN_EXECUTION', 'EXTERNAL_AUDIT_PUBLICATION', 'FORENSIC_ANALYSIS', 'PROTOCOL_REPAIR', 'SAIPEN_AUDIT_INGESTION', 'continuous_maintenance'], 'campaign_limit': 1, 'expires_at': 1794338198.4213848, 'goal_binding': {'authority_source': 'E-100', 'goal_ingress': ''}, 'host': 'claude', 'kind': 'saipen-campaign-authorization', 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'resource_budget': {'max_cycles': 1000, 'max_generations': 1000, 'max_wall_seconds': 200000}, 'schema_version': 1, 'session': 'contract-session', 'target_project': 'V:\\_TEMP_\\saipen-terminal-guards-lulu7aty'}, 'operator_origin': {'kind': 'operator-origin', 'nonce': '85f7ee3c05a74a5abb3dbed31efaf967', 'request_digest': '9a81d124b398fff396e63c0b431aac58a96519d8acaf2396338e28130a44df6f'}}, 'authority_grant_digest': '4e5e52906b9a80cc76200805cdebc8dace228471886790bc1ee05b0b08122429', 'authority_proof_reference': '.saipen/authority/grant.json', 'authority_scope': 'continuous_maintenance', 'campaign_id': 'CAMP-T2040-TERMINAL', 'campaign_state': 'QUIESCENT_WAIT', 'cancellation_epoch': 0, 'created_at': '2026-11-08T11:43:18Z', 'current_work': None, 'cycle_count': 1, 'goal_binding': {'authority_source': 'E-100', 'goal_ingress': ''}, 'last_analysis_generation': 0, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-11-08T11:43:18Z', 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'saipen continue', 'no_progress_count': 0, 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'resource_budget': {'max_cycles': 10, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': '636c55793b0b6484935241106d5bcd75c6a3cb5939d5cd712867e3026fceca47', 'updated_at': '2026-11-08T11:43:18Z', 'wake_condition': None, 'worker_generation': 0}}
+
+tools\test_t2040_terminal_consumer_guards.py:506: AssertionError
+_ TerminalConsumerGuards.test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence (status='UNKNOWN_SUCCESS') _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence>
+
+    def test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence(self):
+        backend = mock.Mock()
+        controller = self.admit(backend=backend)
+        assessment = CA._make_assessment(CA.MAINTENANCE_AVAILABLE, action="saipen continue",
+                                         reason="maintain", detail="bounded forensic source")
+        for status in (backend_protocol.NO_NEW_EVIDENCE, "UNKNOWN_SUCCESS"):
+            with self.subTest(status=status), mock.patch.object(CA, "assess_continuation", return_value=assessment):
+                backend.discover.return_value = {"ok": True, "status": status}
+                result = controller.step()
+>               self.assertNotEqual(result["state"]["campaign_state"], campaign.QUIESCENT_WAIT, result)
+E               AssertionError: 'QUIESCENT_WAIT' == 'QUIESCENT_WAIT' : {'ok': True, 'event': 'DISCOVERY_NO_NEW_FINDINGS', 'discovery': {'ok': True, 'status': 'UNKNOWN_SUCCESS'}, 'state': {'authority_grant': {'authorization': {'authorized_scopes': ['AUDIT_STAGING', 'CAMPAIGN_EXECUTION', 'EXTERNAL_AUDIT_PUBLICATION', 'FORENSIC_ANALYSIS', 'PROTOCOL_REPAIR', 'SAIPEN_AUDIT_INGESTION', 'continuous_maintenance'], 'campaign_limit': 1, 'expires_at': 1794338198.4213848, 'goal_binding': {'authority_source': 'E-100', 'goal_ingress': ''}, 'host': 'claude', 'kind': 'saipen-campaign-authorization', 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'resource_budget': {'max_cycles': 1000, 'max_generations': 1000, 'max_wall_seconds': 200000}, 'schema_version': 1, 'session': 'contract-session', 'target_project': 'V:\\_TEMP_\\saipen-terminal-guards-lulu7aty'}, 'operator_origin': {'kind': 'operator-origin', 'nonce': '85f7ee3c05a74a5abb3dbed31efaf967', 'request_digest': '9a81d124b398fff396e63c0b431aac58a96519d8acaf2396338e28130a44df6f'}}, 'authority_grant_digest': '4e5e52906b9a80cc76200805cdebc8dace228471886790bc1ee05b0b08122429', 'authority_proof_reference': '.saipen/authority/grant.json', 'authority_scope': 'continuous_maintenance', 'campaign_id': 'CAMP-T2040-TERMINAL', 'campaign_state': 'QUIESCENT_WAIT', 'cancellation_epoch': 0, 'created_at': '2026-11-08T11:43:18Z', 'current_work': None, 'cycle_count': 2, 'goal_binding': {'authority_source': 'E-100', 'goal_ingress': ''}, 'last_analysis_generation': 0, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-11-08T11:43:18Z', 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'saipen continue', 'no_progress_count': 0, 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'resource_budget': {'max_cycles': 10, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': '6512196465d581828d02925434a898386e16f6bba1d4852c798cb5b15bee7ad9', 'updated_at': '2026-11-08T11:43:18Z', 'wake_condition': None, 'worker_generation': 0}}
+
+tools\test_t2040_terminal_consumer_guards.py:506: AssertionError
+_ TerminalConsumerGuards.test_campaign_refuses_malformed_assessment_and_delivery_without_throwing _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_campaign_refuses_malformed_assessment_and_delivery_without_throwing>
+
+    def test_campaign_refuses_malformed_assessment_and_delivery_without_throwing(self):
+        backend = mock.Mock()
+        controller = self.admit(backend=backend)
+        with mock.patch.object(CA, "assess_continuation", return_value=42):
+>           result = controller.step()
+                     ^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_terminal_consumer_guards.py:514: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <saipen_engine.campaign.CampaignController object at 0x00000171C77254D0>
+worker_func = None
+
+    def step(self, *, worker_func: callable | None = None) -> dict:
+        """Claim a durable attempt, execute without the lifecycle lock, then reconcile."""
+        try:
+            lk = self._acquire_lock()
+        except lock.FileLockBusy:
+            return {
+                "ok": False,
+                "code": "CAMPAIGN_LOCKED",
+                "detail": "Another controller owns the campaign lock",
+            }
+    
+        try:
+            inspect = inspect_campaign_state(self.root)
+            if inspect["status"] != STATE_VALID:
+                return {
+                    "ok": False,
+                    "code": inspect["status"],
+                    "detail": inspect.get("error", "Campaign state is not valid"),
+                }
+    
+            state = inspect["state"]
+            cur_state = state.get("campaign_state")
+            if cur_state in (CANCELLED, COMPLETE):
+                return {"ok": True, "stopped": True, "state": state, "status": cur_state}
+    
+            if cur_state == PROPOSED:
+                return {
+                    "ok": False,
+                    "code": "CAMPAIGN_NOT_ADMITTED",
+                    "detail": (
+                        "Campaign in proposal state; valid operator grant required for execution"
+                    ),
+                    "state": state,
+                }
+    
+            attempt = state.get("worker_attempt")
+            if isinstance(attempt, dict) and attempt.get("status") in (
+                "EXECUTOR_STARTED",
+                "UNKNOWN_OUTCOME",
+            ):
+                if attempt.get("status") == "EXECUTOR_STARTED" and attempt.get("result_reference"):
+                    result = self._commit_worker_outcome(state, attempt)
+                    if result.get("ok"):
+                        result["event"] = "WORKER_ATTEMPT_RECONCILED"
+                    return result
+                return {
+                    "ok": False,
+                    "code": "ATTEMPT_RECOVERY_REQUIRED",
+                    "state": state,
+                    "detail": (
+                        "Reconcile the original worker attempt before another generation; "
+                        "elapsed time grants no retry"
+                    ),
+                }
+    
+            # Authority re-verification before protected side effects
+            proof_ref = state.get("authority_proof_reference")
+            if not proof_ref:
+                state["campaign_state"] = AUTHORITY_BLOCKED
+                state["next_action"] = "operator_grant_required"
+                save_campaign_state(self.root, state)
+                return {
+                    "ok": True,
+                    "event": "AUTHORITY_BLOCKED",
+                    "code": "AUTHORITY_PROOF_MISSING",
+                    "detail": "Admitted campaign missing authority proof reference",
+                    "state": state,
+                }
+    
+            grant_chk = _verify_state_grant(self.root, state)
+            if not grant_chk["valid"]:
+                state["campaign_state"] = AUTHORITY_BLOCKED
+                state["next_action"] = "operator_grant_required"
+                save_campaign_state(self.root, state)
+                return {
+                    "ok": True,
+                    "event": "AUTHORITY_BLOCKED",
+                    "code": "GRANT_INVALIDATED",
+                    "status": grant_chk.get("status", "GRANT_INVALIDATED"),
+                    "detail": grant_chk.get("error"),
+                    "state": state,
+                }
+    
+            # Enforce resource budgets
+            budget = state.get("resource_budget", {})
+            if not _valid_budget(budget):
+                return {"ok": False, "code": "INVALID_RESOURCE_BUDGET", "state": state}
+            if int(state.get("cycle_count", 0)) >= budget.get(
+                "max_cycles", HORIZONS["SHORT"]["max_cycles"]
+            ):
+                state["campaign_state"] = CHECKPOINTING
+                state["next_action"] = "budget_exhausted: max_cycles reached"
+                save_campaign_state(self.root, state)
+                return {
+                    "ok": True,
+                    "event": "BUDGET_EXHAUSTED",
+                    "reason": "max_cycles",
+                    "state": state,
+                }
+            max_gen = int(budget.get("max_generations", 999999))
+            if int(state.get("worker_generation", 0)) >= max_gen:
+                state["campaign_state"] = CHECKPOINTING
+                state["next_action"] = "budget_exhausted: max_generations reached"
+                save_campaign_state(self.root, state)
+                return {
+                    "ok": True,
+                    "event": "BUDGET_EXHAUSTED",
+                    "reason": "max_generations",
+                    "state": state,
+                }
+    
+            max_wall = float(budget.get("max_wall_seconds", 999999999.0))
+            created_str = state.get("created_at")
+            if created_str:
+                try:
+                    c_dt = _dt.datetime.fromisoformat(created_str.replace("Z", "+00:00"))
+                    elapsed = (_dt.datetime.now(_dt.timezone.utc) - c_dt).total_seconds()
+                    if elapsed >= max_wall:
+                        state["campaign_state"] = CHECKPOINTING
+                        state["next_action"] = "budget_exhausted: max_wall_seconds reached"
+                        save_campaign_state(self.root, state)
+                        return {
+                            "ok": True,
+                            "event": "BUDGET_EXHAUSTED",
+                            "reason": "max_wall_seconds",
+                            "state": state,
+                        }
+                except Exception:
+                    pass
+    
+            # Continuation Assessment
+            assessment = ca.assess_continuation(self.root)
+            state["cycle_count"] = int(state.get("cycle_count", 0)) + 1
+>           classification = assessment["classification"]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: 'int' object is not subscriptable
+
+tools\saipen_engine\campaign.py:931: TypeError
+_ TerminalConsumerGuards.test_campaign_valid_hint_reuses_one_bounded_worker_attempt _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_campaign_valid_hint_reuses_one_bounded_worker_attempt>
+
+    def test_campaign_valid_hint_reuses_one_bounded_worker_attempt(self):
+        root, current = self.native_grant()
+        controller = self.admit(root)
+        cert = certificate(generation=str(current["last_event"]), source=W.IMPROVE_CANDIDATES)
+        with mock.patch.object(CA, "assess_continuation", return_value=self.assessment(cert, proven=True)), mock.patch.object(
+            controller, "_execute_canonical_worker", return_value={"ok": True, "route_only": True},
+        ) as execute:
+            result = controller.step()
+>       self.assertTrue(result["ok"], result)
+E       AssertionError: False is not true : {'ok': False, 'code': 'INCOMPLETE_DISCOVERY', 'event': 'INCOMPLETE_DISCOVERY', 'classification': 'INCOMPLETE_DISCOVERY', 'detail': 'current terminal evidence', 'state': {'authority_grant': {'authorization': {'authorized_scopes': ['AUDIT_STAGING', 'CAMPAIGN_EXECUTION', 'EXTERNAL_AUDIT_PUBLICATION', 'FORENSIC_ANALYSIS', 'PROTOCOL_REPAIR', 'SAIPEN_AUDIT_INGESTION', 'continuous_maintenance'], 'campaign_limit': 1, 'expires_at': 1794338198.8257651, 'goal_binding': {'authority_source': 'E-3', 'goal_ingress': 'goal-d72c7e3ff10f70ce'}, 'host': 'claude', 'kind': 'saipen-campaign-authorization', 'project_lineage': 'lineage-818eb8a4b55d40d2b7f4e0add0e2fd4f', 'resource_budget': {'max_cycles': 1000, 'max_generations': 1000, 'max_wall_seconds': 200000}, 'schema_version': 1, 'session': 'contract-session', 'target_project': 'V:\\_TEMP_\\t2023-1_p8y93x'}, 'operator_origin': {'kind': 'operator-origin', 'nonce': '542641a5d2784af9ae1f4aba6555d80c', 'request_digest': '7784ffd5ca8b36a191db7895d33b7bef36fd4493d01445b28ee3e7f259ab38e4'}}, 'authority_grant_digest': '9f9de5a350fa7c693cb32498b737fcf1a15d5b4b7f49dcd66093ab3b1de8d7b6', 'authority_proof_reference': '.saipen/authority/grant.json', 'authority_scope': 'continuous_maintenance', 'campaign_id': 'CAMP-T2040-TERMINAL', 'campaign_state': 'EXTERNAL_BLOCKED', 'cancellation_epoch': 0, 'created_at': '2026-11-08T11:43:18Z', 'current_work': None, 'cycle_count': 1, 'goal_binding': {'authority_source': 'E-3', 'goal_ingress': 'goal-d72c7e3ff10f70ce'}, 'last_analysis_generation': 0, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-11-08T11:43:18Z', 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'saipen improve', 'no_progress_count': 0, 'project_lineage': 'lineage-818eb8a4b55d40d2b7f4e0add0e2fd4f', 'resource_budget': {'max_cycles': 10, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': 'ee53dcbdf50b9d14494f055696d57ea7902603fc8ca6e9364456985526fe508b', 'updated_at': '2026-11-08T11:43:18Z', 'wake_condition': {'event': 'current_discovery_evidence'}, 'worker_generation': 0}}
+
+tools\test_t2040_terminal_consumer_guards.py:488: AssertionError
+_ TerminalConsumerGuards.test_external_wait_supervisor_never_becomes_idle (lease=None) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_external_wait_supervisor_never_becomes_idle>
+
+    def test_external_wait_supervisor_never_becomes_idle(self):
+        self.write_state(blocker="BLOCKED_EXTERNAL -- current external boundary")
+        for lease in (None, watchdog.EXPIRED, watchdog.TERMINAL):
+            with self.subTest(lease=lease):
+                path = self.root / watchdog.CACHE_REL
+                path.unlink(missing_ok=True)
+                if lease is not None:
+                    watchdog.acquire_lease(self.root, "previous", now=T0)
+                    if lease == watchdog.TERMINAL:
+                        watchdog.fence(self.root, "previous", 1, now=T0)
+                result = supervisor.decide(self.root, now=T0 + dt.timedelta(seconds=200))
+>               self.assertEqual(result["verdict"], CA.WAIT_EXTERNAL, result)
+E               AssertionError: 'IDLE' != 'WAIT_EXTERNAL'
+E               - IDLE
+E               + WAIT_EXTERNAL
+E                : {'verdict': 'IDLE', 'reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'may_mutate': False, 'requires_human': False, 'next_command': 'saipen status --json', 'stop_reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'observation': {'autonomy_run_id': '', 'observed_at': '2026-10-25T12:03:20Z', 'phase': 'DONE', 'active_work': None, 'next_action': 'saipen continue', 'last_event': '100', 'state_blocker': 'BLOCKED_EXTERNAL -- current external boundary', 'worker_id': None, 'worker_generation': None, 'lease_generation': None, 'lease_state': 'UNKNOWN', 'lease_reason': 'missing_or_corrupt_runtime_state', 'heartbeat_at': None, 'heartbeat_age_seconds': None, 'workable_work': [], 'executable_work': None, 'continuation_classification': 'WAIT_EXTERNAL', 'continuation_actionable': False, 'continuation_reason': 'unblock', 'continuation_detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'continuation_assessment': {'classification': 'WAIT_EXTERNAL', 'actionable': False, 'executable_work': None, 'action': 'saipen status', 'reason': 'unblock', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'raw_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'continuous_maintenance_proven': False, 'continuous_maintenance_claimed': False, 'operator_work': []}, 'operator_work': [], 'operator_gates': [], 'due_operator_actions': [], 'deferred_operator_gates': [], 'board_errors': [], 'no_progress_count': 0, 'progress_verdict': 'RUNNING', 'durable_checkpoint': None, 'last_progress_at': ''}}
+
+tools\test_t2040_terminal_consumer_guards.py:176: AssertionError
+_ TerminalConsumerGuards.test_external_wait_supervisor_never_becomes_idle (lease='EXPIRED') _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_external_wait_supervisor_never_becomes_idle>
+
+    def test_external_wait_supervisor_never_becomes_idle(self):
+        self.write_state(blocker="BLOCKED_EXTERNAL -- current external boundary")
+        for lease in (None, watchdog.EXPIRED, watchdog.TERMINAL):
+            with self.subTest(lease=lease):
+                path = self.root / watchdog.CACHE_REL
+                path.unlink(missing_ok=True)
+                if lease is not None:
+                    watchdog.acquire_lease(self.root, "previous", now=T0)
+                    if lease == watchdog.TERMINAL:
+                        watchdog.fence(self.root, "previous", 1, now=T0)
+                result = supervisor.decide(self.root, now=T0 + dt.timedelta(seconds=200))
+>               self.assertEqual(result["verdict"], CA.WAIT_EXTERNAL, result)
+E               AssertionError: 'IDLE' != 'WAIT_EXTERNAL'
+E               - IDLE
+E               + WAIT_EXTERNAL
+E                : {'verdict': 'IDLE', 'reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'may_mutate': False, 'requires_human': False, 'next_command': 'saipen status --json', 'stop_reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'observation': {'autonomy_run_id': '', 'observed_at': '2026-10-25T12:03:20Z', 'phase': 'DONE', 'active_work': None, 'next_action': 'saipen continue', 'last_event': '100', 'state_blocker': 'BLOCKED_EXTERNAL -- current external boundary', 'worker_id': 'previous', 'worker_generation': 1, 'lease_generation': 1, 'lease_state': 'EXPIRED', 'lease_reason': 'heartbeat_timeout', 'heartbeat_at': '2026-10-25T12:00:00Z', 'heartbeat_age_seconds': 200.0, 'workable_work': [], 'executable_work': None, 'continuation_classification': 'WAIT_EXTERNAL', 'continuation_actionable': False, 'continuation_reason': 'unblock', 'continuation_detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'continuation_assessment': {'classification': 'WAIT_EXTERNAL', 'actionable': False, 'executable_work': None, 'action': 'saipen status', 'reason': 'unblock', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'raw_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'continuous_maintenance_proven': False, 'continuous_maintenance_claimed': False, 'operator_work': []}, 'operator_work': [], 'operator_gates': [], 'due_operator_actions': [], 'deferred_operator_gates': [], 'board_errors': [], 'no_progress_count': 0, 'progress_verdict': 'RUNNING', 'durable_checkpoint': None, 'last_progress_at': ''}}
+
+tools\test_t2040_terminal_consumer_guards.py:176: AssertionError
+_ TerminalConsumerGuards.test_external_wait_supervisor_never_becomes_idle (lease='TERMINAL') _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_external_wait_supervisor_never_becomes_idle>
+
+    def test_external_wait_supervisor_never_becomes_idle(self):
+        self.write_state(blocker="BLOCKED_EXTERNAL -- current external boundary")
+        for lease in (None, watchdog.EXPIRED, watchdog.TERMINAL):
+            with self.subTest(lease=lease):
+                path = self.root / watchdog.CACHE_REL
+                path.unlink(missing_ok=True)
+                if lease is not None:
+                    watchdog.acquire_lease(self.root, "previous", now=T0)
+                    if lease == watchdog.TERMINAL:
+                        watchdog.fence(self.root, "previous", 1, now=T0)
+                result = supervisor.decide(self.root, now=T0 + dt.timedelta(seconds=200))
+>               self.assertEqual(result["verdict"], CA.WAIT_EXTERNAL, result)
+E               AssertionError: 'IDLE' != 'WAIT_EXTERNAL'
+E               - IDLE
+E               + WAIT_EXTERNAL
+E                : {'verdict': 'IDLE', 'reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'may_mutate': False, 'requires_human': False, 'next_command': 'saipen status --json', 'stop_reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'observation': {'autonomy_run_id': '', 'observed_at': '2026-10-25T12:03:20Z', 'phase': 'DONE', 'active_work': None, 'next_action': 'saipen continue', 'last_event': '100', 'state_blocker': 'BLOCKED_EXTERNAL -- current external boundary', 'worker_id': 'previous', 'worker_generation': 1, 'lease_generation': 1, 'lease_state': 'EXPIRED', 'lease_reason': 'fenced', 'heartbeat_at': '2026-10-25T12:00:00Z', 'heartbeat_age_seconds': 200.0, 'workable_work': [], 'executable_work': None, 'continuation_classification': 'WAIT_EXTERNAL', 'continuation_actionable': False, 'continuation_reason': 'unblock', 'continuation_detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'continuation_assessment': {'classification': 'WAIT_EXTERNAL', 'actionable': False, 'executable_work': None, 'action': 'saipen status', 'reason': 'unblock', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'raw_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'continuous_maintenance_proven': False, 'continuous_maintenance_claimed': False, 'operator_work': []}, 'operator_work': [], 'operator_gates': [], 'due_operator_actions': [], 'deferred_operator_gates': [], 'board_errors': [], 'no_progress_count': 0, 'progress_verdict': 'RUNNING', 'durable_checkpoint': None, 'last_progress_at': ''}}
+
+tools\test_t2040_terminal_consumer_guards.py:176: AssertionError
+_ TerminalConsumerGuards.test_external_wait_worker_never_reports_success_or_takes_authority _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_external_wait_worker_never_reports_success_or_takes_authority>
+
+    def test_external_wait_worker_never_reports_success_or_takes_authority(self):
+        self.write_state(blocker="BLOCKED_EXTERNAL -- current external boundary")
+        with mock.patch.object(worker, "take_authority") as take, mock.patch.object(
+            worker, "_run_generation",
+        ) as execute:
+            result = worker._supervise(self.root, ["fixture-agent"], max_cycles=3)
+>       self.assertFalse(result["ok"], result)
+E       AssertionError: True is not false : {'gpu_lane': None, 'ok': True, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-98c9c9142f5b', 'stop': 'IDLE', 'reason': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'operator_action': None, 'counters': {'cycles': 1, 'worker_generation_count': 0, 'crash_recovery_count': 0, 'model_replacement_recovery_count': 0, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 0, 'slow_progress_slices': 0, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {}}, 'maximum_recovery_latency_seconds': 0.0, 'model': None, 'history': []}
+
+tools\test_t2040_terminal_consumer_guards.py:186: AssertionError
+_ TerminalConsumerGuards.test_iteration_refuses_malformed_goal_inventory_without_throwing (inventory=42) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_iteration_refuses_malformed_goal_inventory_without_throwing>
+
+    def test_iteration_refuses_malformed_goal_inventory_without_throwing(self):
+        for inventory in (42, {"goals": [42], "complete": True}, {"goals": 42}):
+            with self.subTest(inventory=inventory), mock.patch.object(
+                persistent_goal, "list_goals_report", return_value=inventory,
+            ), mock.patch.object(IV, "_recall_decision", return_value=None):
+>               result = IV.project_iteration_verdict(self.root)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_terminal_consumer_guards.py:239: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('V:/_TEMP_/saipen-terminal-guards-oa4eqkfe')
+executor_caps = None, runtime_info_path = None, executor_id = None
+all_candidates_exhausted = False
+
+    def project_iteration_verdict(
+        root: Path | str,
+        *,
+        executor_caps: Mapping[str, object] | None = None,
+        runtime_info_path: Path | str | None = None,
+        executor_id: str | None = None,
+        all_candidates_exhausted: bool = False,
+    ) -> dict:
+        """Derive the closed iteration verdict from canonical SAIPEN state.
+    
+        Read-only: opens STATE.md/BOARD.md (and LOG.md through recall) and
+        writes nothing. ``executor_caps`` is the CURRENT candidate's advertised
+        tool map; when omitted the executor is unassessed (never a mismatch).
+        ``runtime_info_path`` is a ``saipen runtime`` JSON document whose
+        ``capabilities`` object is used when no explicit caps are given.
+        """
+        base = Path(root)
+        try:
+            state_text = (base / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+            board_text = (base / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+        except OSError as exc:
+            return _unreadable(f"canonical checkpoint not readable: {exc}")
+        state, state_error = parse_state_or_error(state_text)
+        if state_error or not state:
+            return _unreadable(f"STATE not parseable whole: {state_error or 'empty'}")
+        try:
+            board = parse_board(board_text)
+            tickets = board["tickets"]
+        except (ValueError, KeyError, AttributeError, TypeError) as exc:
+            return _unreadable(f"BOARD not parseable whole: {exc}")
+        if board.get("errors"):
+            verdict = _unreadable("BOARD carries parse errors: " + "; ".join(board["errors"][:3]))
+            verdict["decision"] = iteration.OPERATOR_WAIT
+            verdict["requires_human"] = True
+            verdict["route_reason"] = "board-malformed"
+            verdict["phase"] = str(state.get("phase") or "UNKNOWN")
+            verdict["canonical_task"] = str(state.get("task") or "none")
+            verdict["next_action"] = str(state.get("next_action") or "NONE")
+            return verdict
+    
+        from .operations import GOAL_TICKET_CAP, GOAL_WAVE_CAP
+        from . import goal_authority
+    
+        grant_errors = goal_authority.prove(base, state)
+        if grant_errors:
+            return _unreadable("continuation grant invalid: " + "; ".join(grant_errors))
+        home_checkpoint = goal_authority.protocol_home_checkpoint(base, state)
+        checkpoint = goal_authority.persistent(state) or home_checkpoint
+    
+        phase = str(state.get("phase") or "UNKNOWN")
+        task = state.get("task")
+        canonical_task = str(task) if task not in (None, "") else "none"
+        next_action = str(state.get("next_action") or "NONE")
+        intent = state.get("execution_intent")
+    
+        valve_tripped = bool(
+            intent == "goal" and not checkpoint
+            and (
+                int(state.get("goal_waves") or 0) >= GOAL_WAVE_CAP
+                or int(state.get("goal_tickets") or 0) >= GOAL_TICKET_CAP
+            )
+        )
+    
+        empty_todo = not any(t.get("section") == "## TODO" for t in tickets.values())
+        brake = binding_brake(state, empty_todo=empty_todo)
+        from .state import parse_wait
+    
+        operator_due = brake is not None and not (
+            checkpoint and brake[0] == "wait" and parse_wait(next_action) == "safety valve"
+        )
+    
+        recall = _recall_decision(base)
+        if recall in ("OPERATOR_WAIT", "USER_INPUT"):
+            operator_due = True
+    
+        from .continuation_assessment import assess_continuation
+        from .persistent_goal import list_goals_report
+    
+        inventory = list_goals_report(base)
+        assessment = assess_continuation(
+            base,
+            state_text=state_text,
+            board_text=board_text,
+            persistent_goals=inventory,
+        )
+        routed = assessment.get("effective_route") or {}
+        route_reason = str(assessment.get("reason") or "unknown")
+        route_action = str(assessment.get("action") or "NONE")
+        executable_action_remains = bool(assessment.get("actionable"))
+    
+        if assessment.get("classification") in (
+            "WAIT_OPERATOR",
+            "WAIT_AUTHORITY",
+            "SAFETY_STOP",
+            "CONFORMANCE_STOP",
+        ) and not executable_action_remains:
+            operator_due = True
+    
+        doing = [t for t in tickets.values() if t.get("section") == "## DOING"]
+        blocked = [t for t in tickets.values() if t.get("section") == "## BLOCKED"]
+        todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+        goal_complete = bool(
+            phase == "DONE"
+            and canonical_task == "none"
+            and not doing
+            and not blocked
+            and not todo
+            and not executable_action_remains
+            and assessment.get("classification") == "QUIESCENT"
+        )
+    
+        # Reconcile authenticated persistent goals: an empty board or completed ticket
+        # must NEVER imply research completion when measured goals remain unsatisfied.
+        from .persistent_goal import STATUS_SATISFIED, STATUS_ACTIONABLE_GAPS
+    
+>       pgoals = inventory["goals"]
+                 ^^^^^^^^^^^^^^^^^^
+E       TypeError: 'int' object is not subscriptable
+
+tools\saipen_engine\iteration_verdict.py:542: TypeError
+_ TerminalConsumerGuards.test_iteration_refuses_malformed_goal_inventory_without_throwing (inventory={'goals': [42], 'complete': True}) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_iteration_refuses_malformed_goal_inventory_without_throwing>
+
+    def test_iteration_refuses_malformed_goal_inventory_without_throwing(self):
+        for inventory in (42, {"goals": [42], "complete": True}, {"goals": 42}):
+            with self.subTest(inventory=inventory), mock.patch.object(
+                persistent_goal, "list_goals_report", return_value=inventory,
+            ), mock.patch.object(IV, "_recall_decision", return_value=None):
+>               result = IV.project_iteration_verdict(self.root)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_terminal_consumer_guards.py:239: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('V:/_TEMP_/saipen-terminal-guards-oa4eqkfe')
+executor_caps = None, runtime_info_path = None, executor_id = None
+all_candidates_exhausted = False
+
+    def project_iteration_verdict(
+        root: Path | str,
+        *,
+        executor_caps: Mapping[str, object] | None = None,
+        runtime_info_path: Path | str | None = None,
+        executor_id: str | None = None,
+        all_candidates_exhausted: bool = False,
+    ) -> dict:
+        """Derive the closed iteration verdict from canonical SAIPEN state.
+    
+        Read-only: opens STATE.md/BOARD.md (and LOG.md through recall) and
+        writes nothing. ``executor_caps`` is the CURRENT candidate's advertised
+        tool map; when omitted the executor is unassessed (never a mismatch).
+        ``runtime_info_path`` is a ``saipen runtime`` JSON document whose
+        ``capabilities`` object is used when no explicit caps are given.
+        """
+        base = Path(root)
+        try:
+            state_text = (base / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+            board_text = (base / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+        except OSError as exc:
+            return _unreadable(f"canonical checkpoint not readable: {exc}")
+        state, state_error = parse_state_or_error(state_text)
+        if state_error or not state:
+            return _unreadable(f"STATE not parseable whole: {state_error or 'empty'}")
+        try:
+            board = parse_board(board_text)
+            tickets = board["tickets"]
+        except (ValueError, KeyError, AttributeError, TypeError) as exc:
+            return _unreadable(f"BOARD not parseable whole: {exc}")
+        if board.get("errors"):
+            verdict = _unreadable("BOARD carries parse errors: " + "; ".join(board["errors"][:3]))
+            verdict["decision"] = iteration.OPERATOR_WAIT
+            verdict["requires_human"] = True
+            verdict["route_reason"] = "board-malformed"
+            verdict["phase"] = str(state.get("phase") or "UNKNOWN")
+            verdict["canonical_task"] = str(state.get("task") or "none")
+            verdict["next_action"] = str(state.get("next_action") or "NONE")
+            return verdict
+    
+        from .operations import GOAL_TICKET_CAP, GOAL_WAVE_CAP
+        from . import goal_authority
+    
+        grant_errors = goal_authority.prove(base, state)
+        if grant_errors:
+            return _unreadable("continuation grant invalid: " + "; ".join(grant_errors))
+        home_checkpoint = goal_authority.protocol_home_checkpoint(base, state)
+        checkpoint = goal_authority.persistent(state) or home_checkpoint
+    
+        phase = str(state.get("phase") or "UNKNOWN")
+        task = state.get("task")
+        canonical_task = str(task) if task not in (None, "") else "none"
+        next_action = str(state.get("next_action") or "NONE")
+        intent = state.get("execution_intent")
+    
+        valve_tripped = bool(
+            intent == "goal" and not checkpoint
+            and (
+                int(state.get("goal_waves") or 0) >= GOAL_WAVE_CAP
+                or int(state.get("goal_tickets") or 0) >= GOAL_TICKET_CAP
+            )
+        )
+    
+        empty_todo = not any(t.get("section") == "## TODO" for t in tickets.values())
+        brake = binding_brake(state, empty_todo=empty_todo)
+        from .state import parse_wait
+    
+        operator_due = brake is not None and not (
+            checkpoint and brake[0] == "wait" and parse_wait(next_action) == "safety valve"
+        )
+    
+        recall = _recall_decision(base)
+        if recall in ("OPERATOR_WAIT", "USER_INPUT"):
+            operator_due = True
+    
+        from .continuation_assessment import assess_continuation
+        from .persistent_goal import list_goals_report
+    
+        inventory = list_goals_report(base)
+        assessment = assess_continuation(
+            base,
+            state_text=state_text,
+            board_text=board_text,
+            persistent_goals=inventory,
+        )
+        routed = assessment.get("effective_route") or {}
+        route_reason = str(assessment.get("reason") or "unknown")
+        route_action = str(assessment.get("action") or "NONE")
+        executable_action_remains = bool(assessment.get("actionable"))
+    
+        if assessment.get("classification") in (
+            "WAIT_OPERATOR",
+            "WAIT_AUTHORITY",
+            "SAFETY_STOP",
+            "CONFORMANCE_STOP",
+        ) and not executable_action_remains:
+            operator_due = True
+    
+        doing = [t for t in tickets.values() if t.get("section") == "## DOING"]
+        blocked = [t for t in tickets.values() if t.get("section") == "## BLOCKED"]
+        todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+        goal_complete = bool(
+            phase == "DONE"
+            and canonical_task == "none"
+            and not doing
+            and not blocked
+            and not todo
+            and not executable_action_remains
+            and assessment.get("classification") == "QUIESCENT"
+        )
+    
+        # Reconcile authenticated persistent goals: an empty board or completed ticket
+        # must NEVER imply research completion when measured goals remain unsatisfied.
+        from .persistent_goal import STATUS_SATISFIED, STATUS_ACTIONABLE_GAPS
+    
+        pgoals = inventory["goals"]
+        if not inventory["complete"]:
+            goal_complete = False
+        if pgoals:
+>           all_goals_satisfied = all(g.current_status == STATUS_SATISFIED for g in pgoals)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\saipen_engine\iteration_verdict.py:546: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+.0 = <list_iterator object at 0x00000171C7847610>
+
+>   all_goals_satisfied = all(g.current_status == STATUS_SATISFIED for g in pgoals)
+                              ^^^^^^^^^^^^^^^^
+E   AttributeError: 'int' object has no attribute 'current_status'
+
+tools\saipen_engine\iteration_verdict.py:546: AttributeError
+_ TerminalConsumerGuards.test_iteration_refuses_malformed_goal_inventory_without_throwing (inventory={'goals': 42}) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_iteration_refuses_malformed_goal_inventory_without_throwing>
+
+    def test_iteration_refuses_malformed_goal_inventory_without_throwing(self):
+        for inventory in (42, {"goals": [42], "complete": True}, {"goals": 42}):
+            with self.subTest(inventory=inventory), mock.patch.object(
+                persistent_goal, "list_goals_report", return_value=inventory,
+            ), mock.patch.object(IV, "_recall_decision", return_value=None):
+>               result = IV.project_iteration_verdict(self.root)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_terminal_consumer_guards.py:239: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('V:/_TEMP_/saipen-terminal-guards-oa4eqkfe')
+executor_caps = None, runtime_info_path = None, executor_id = None
+all_candidates_exhausted = False
+
+    def project_iteration_verdict(
+        root: Path | str,
+        *,
+        executor_caps: Mapping[str, object] | None = None,
+        runtime_info_path: Path | str | None = None,
+        executor_id: str | None = None,
+        all_candidates_exhausted: bool = False,
+    ) -> dict:
+        """Derive the closed iteration verdict from canonical SAIPEN state.
+    
+        Read-only: opens STATE.md/BOARD.md (and LOG.md through recall) and
+        writes nothing. ``executor_caps`` is the CURRENT candidate's advertised
+        tool map; when omitted the executor is unassessed (never a mismatch).
+        ``runtime_info_path`` is a ``saipen runtime`` JSON document whose
+        ``capabilities`` object is used when no explicit caps are given.
+        """
+        base = Path(root)
+        try:
+            state_text = (base / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+            board_text = (base / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+        except OSError as exc:
+            return _unreadable(f"canonical checkpoint not readable: {exc}")
+        state, state_error = parse_state_or_error(state_text)
+        if state_error or not state:
+            return _unreadable(f"STATE not parseable whole: {state_error or 'empty'}")
+        try:
+            board = parse_board(board_text)
+            tickets = board["tickets"]
+        except (ValueError, KeyError, AttributeError, TypeError) as exc:
+            return _unreadable(f"BOARD not parseable whole: {exc}")
+        if board.get("errors"):
+            verdict = _unreadable("BOARD carries parse errors: " + "; ".join(board["errors"][:3]))
+            verdict["decision"] = iteration.OPERATOR_WAIT
+            verdict["requires_human"] = True
+            verdict["route_reason"] = "board-malformed"
+            verdict["phase"] = str(state.get("phase") or "UNKNOWN")
+            verdict["canonical_task"] = str(state.get("task") or "none")
+            verdict["next_action"] = str(state.get("next_action") or "NONE")
+            return verdict
+    
+        from .operations import GOAL_TICKET_CAP, GOAL_WAVE_CAP
+        from . import goal_authority
+    
+        grant_errors = goal_authority.prove(base, state)
+        if grant_errors:
+            return _unreadable("continuation grant invalid: " + "; ".join(grant_errors))
+        home_checkpoint = goal_authority.protocol_home_checkpoint(base, state)
+        checkpoint = goal_authority.persistent(state) or home_checkpoint
+    
+        phase = str(state.get("phase") or "UNKNOWN")
+        task = state.get("task")
+        canonical_task = str(task) if task not in (None, "") else "none"
+        next_action = str(state.get("next_action") or "NONE")
+        intent = state.get("execution_intent")
+    
+        valve_tripped = bool(
+            intent == "goal" and not checkpoint
+            and (
+                int(state.get("goal_waves") or 0) >= GOAL_WAVE_CAP
+                or int(state.get("goal_tickets") or 0) >= GOAL_TICKET_CAP
+            )
+        )
+    
+        empty_todo = not any(t.get("section") == "## TODO" for t in tickets.values())
+        brake = binding_brake(state, empty_todo=empty_todo)
+        from .state import parse_wait
+    
+        operator_due = brake is not None and not (
+            checkpoint and brake[0] == "wait" and parse_wait(next_action) == "safety valve"
+        )
+    
+        recall = _recall_decision(base)
+        if recall in ("OPERATOR_WAIT", "USER_INPUT"):
+            operator_due = True
+    
+        from .continuation_assessment import assess_continuation
+        from .persistent_goal import list_goals_report
+    
+        inventory = list_goals_report(base)
+        assessment = assess_continuation(
+            base,
+            state_text=state_text,
+            board_text=board_text,
+            persistent_goals=inventory,
+        )
+        routed = assessment.get("effective_route") or {}
+        route_reason = str(assessment.get("reason") or "unknown")
+        route_action = str(assessment.get("action") or "NONE")
+        executable_action_remains = bool(assessment.get("actionable"))
+    
+        if assessment.get("classification") in (
+            "WAIT_OPERATOR",
+            "WAIT_AUTHORITY",
+            "SAFETY_STOP",
+            "CONFORMANCE_STOP",
+        ) and not executable_action_remains:
+            operator_due = True
+    
+        doing = [t for t in tickets.values() if t.get("section") == "## DOING"]
+        blocked = [t for t in tickets.values() if t.get("section") == "## BLOCKED"]
+        todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+        goal_complete = bool(
+            phase == "DONE"
+            and canonical_task == "none"
+            and not doing
+            and not blocked
+            and not todo
+            and not executable_action_remains
+            and assessment.get("classification") == "QUIESCENT"
+        )
+    
+        # Reconcile authenticated persistent goals: an empty board or completed ticket
+        # must NEVER imply research completion when measured goals remain unsatisfied.
+        from .persistent_goal import STATUS_SATISFIED, STATUS_ACTIONABLE_GAPS
+    
+        pgoals = inventory["goals"]
+>       if not inventory["complete"]:
+               ^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'complete'
+
+tools\saipen_engine\iteration_verdict.py:543: KeyError
+_ TerminalConsumerGuards.test_native_grant_valid_hint_automation_continues_without_promotion _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_native_grant_valid_hint_automation_continues_without_promotion>
+
+    def test_native_grant_valid_hint_automation_continues_without_promotion(self):
+        root, current = self.native_grant()
+        cert = certificate(generation=str(current["last_event"]), source=W.IMPROVE_CANDIDATES)
+        result = self.automation(idle_route(cert), root=root, state=current)
+>       self.assertEqual(result["disposition"], automation.CONTINUE, result)
+E       AssertionError: 'BLOCKED' != 'CONTINUE'
+E       - BLOCKED
+E       + CONTINUE
+E        : {'schema_version': 1, 'disposition': 'BLOCKED', 'next_command': None, 'operator_action_due': False, 'reason_code': 'incomplete-discovery', 'reason': 'current terminal evidence', 'audit_quiescent': True, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': False, 'closure_complete': False, 'source_fingerprint': 'head+tree', 'completed_at': None}
+
+tools\test_t2040_terminal_consumer_guards.py:442: AssertionError
+_ TerminalConsumerGuards.test_native_grant_valid_hint_supervisor_uses_existing_execution_seam _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_native_grant_valid_hint_supervisor_uses_existing_execution_seam>
+
+    def test_native_grant_valid_hint_supervisor_uses_existing_execution_seam(self):
+        root, current = self.native_grant()
+        cert = certificate(generation=str(current["last_event"]), source=W.IMPROVE_CANDIDATES)
+        with mock.patch.object(supervisor, "assess_continuation", return_value=self.assessment(cert, proven=True)):
+            result = supervisor.decide(root)
+>       self.assertEqual(result["verdict"], supervisor.RUN_WORK, result)
+E       AssertionError: 'INCOMPLETE_DISCOVERY' != 'RUN_WORK'
+E       - INCOMPLETE_DISCOVERY
+E       + RUN_WORK
+E        : {'verdict': 'INCOMPLETE_DISCOVERY', 'reason': 'current terminal evidence', 'may_mutate': False, 'requires_human': False, 'next_command': 'saipen status --json', 'stop_reason': 'current terminal evidence', 'observation': {'autonomy_run_id': '', 'observed_at': '2026-11-08T11:43:20Z', 'phase': 'DONE', 'active_work': None, 'next_action': 'saipen ticket resolve-external T-1', 'last_event': '5', 'state_blocker': 'none', 'worker_id': None, 'worker_generation': None, 'lease_generation': None, 'lease_state': 'UNKNOWN', 'lease_reason': 'missing_or_corrupt_runtime_state', 'heartbeat_at': None, 'heartbeat_age_seconds': None, 'workable_work': [], 'executable_work': None, 'continuation_classification': 'INCOMPLETE_DISCOVERY', 'continuation_actionable': False, 'continuation_reason': 'maintain', 'continuation_detail': 'current terminal evidence', 'continuation_assessment': {'classification': 'INCOMPLETE_DISCOVERY', 'actionable': False, 'executable_work': None, 'action': 'saipen improve', 'reason': 'maintain', 'detail': 'current terminal evidence', 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {'ok': True, 'reason': 'maintain', 'action': 'saipen status', 'terminal_classification': 'INCOMPLETE_DISCOVERY', 'stop_reason': 'INCOMPLETE_DISCOVERY', 'work_exhaustion': {'schema_version': 2, 'status': 'INCOMPLETE_DISCOVERY', 'source_generation': '5', 'sources': [{'source_name': 'active_work', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'canonical_recovery', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'actionable_todo', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'unresolved_source', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'unconsumed_audit_inbox', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'release_obligations', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'future_gates', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'hunt_findings', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'improve_candidates', 'source_generation': '5', 'last_checked_generation': None, 'checked': False, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': ['saipen improve']}, {'source_name': 'external_forensics', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'conformance_debt', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'persistent_goals', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}], 'all_checked': False, 'exhausted': False, 'certificate_errors': [], 'blocked_obligations': [], 'discovery_dispatch': {'source_name': 'improve_candidates', 'source_generation': '5', 'action': 'saipen improve', 'bounded': True}}, 'detail': 'current terminal evidence', 'all_requirements_complete': False, 'discovery_dispatch': {'source_name': 'improve_candidates', 'source_generation': '5', 'action': 'saipen improve', 'bounded': True}}, 'raw_route': {'ok': True, 'reason': 'maintain', 'action': 'saipen status', 'terminal_classification': 'INCOMPLETE_DISCOVERY', 'stop_reason': 'INCOMPLETE_DISCOVERY', 'work_exhaustion': {'schema_version': 2, 'status': 'INCOMPLETE_DISCOVERY', 'source_generation': '5', 'sources': [{'source_name': 'active_work', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'canonical_recovery', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'actionable_todo', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'unresolved_source', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'unconsumed_audit_inbox', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'release_obligations', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'future_gates', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'hunt_findings', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'improve_candidates', 'source_generation': '5', 'last_checked_generation': None, 'checked': False, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': ['saipen improve']}, {'source_name': 'external_forensics', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'conformance_debt', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}, {'source_name': 'persistent_goals', 'source_generation': '5', 'last_checked_generation': '5', 'checked': True, 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': []}], 'all_checked': False, 'exhausted': False, 'certificate_errors': [], 'blocked_obligations': [], 'discovery_dispatch': {'source_name': 'improve_candidates', 'source_generation': '5', 'action': 'saipen improve', 'bounded': True}}, 'detail': 'current terminal evidence', 'all_requirements_complete': False, 'discovery_dispatch': {'source_name': 'improve_candidates', 'source_generation': '5', 'action': 'saipen improve', 'bounded': True}}, 'continuous_maintenance_proven': True, 'continuous_maintenance_claimed': False, 'operator_work': [], 'discovery_dispatch': {'source_name': 'improve_candidates', 'source_generation': '5', 'action': 'saipen improve', 'bounded': True}}, 'operator_work': [], 'operator_gates': [], 'due_operator_actions': [], 'deferred_operator_gates': [], 'board_errors': [], 'no_progress_count': 0, 'progress_verdict': 'RUNNING', 'durable_checkpoint': None, 'last_progress_at': ''}}
+
+tools\test_t2040_terminal_consumer_guards.py:454: AssertionError
+_ TerminalConsumerGuards.test_stored_actionable_goals_cannot_override_current_blocked_assessment (classification='WAIT_EXTERNAL') _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_stored_actionable_goals_cannot_override_current_blocked_assessment>
+
+    def test_stored_actionable_goals_cannot_override_current_blocked_assessment(self):
+        goal = persistent_goal.PersistentGoal(
+            goal_id="stale-goal", project_id=self.root.name, title="Stale observation",
+            objective="Current proof required", current_status=persistent_goal.STATUS_ACTIONABLE_GAPS,
+        )
+        persistent_goal.save_goal(self.root, goal)
+        for kwargs, classification in (
+            ({"blocker": "BLOCKED_EXTERNAL -- current boundary"}, CA.WAIT_EXTERNAL),
+            ({"next_action": '"WAIT: user brake operator stopped work"'}, CA.WAIT_OPERATOR),
+        ):
+            with self.subTest(classification=classification):
+                self.write_state(**kwargs)
+                with mock.patch.object(IV, "_recall_decision", return_value=None):
+                    result = IV.project_iteration_verdict(self.root)
+                self.assertEqual(result["continuation_classification"], classification, result)
+>               self.assertFalse(result["executable_action_remains"], result)
+E               AssertionError: True is not false : {'schema_version': 1, 'decision': 'OPERATOR_WAIT', 'goal_complete': False, 'executable_action_remains': True, 'operator_due': True, 'valve_tripped': False, 'requires_human': True, 'canonical_task': 'none', 'phase': 'DONE', 'next_action': 'saipen continue', 'execution_intent': 'goal', 'executor_assessed': False, 'executor_compatible': True, 'executor_id': None, 'missing_capabilities': [], 'required_capabilities': ['patch_application', 'process_execution', 'saipen_control'], 'executor_capabilities': None, 'admission': {'result': 'UNASSESSED', 'missing': [], 'next': 'NONE'}, 'route_reason': 'unblock', 'route_action': 'saipen status', 'state_readable': True, 'recall_decision': None, 'continuation_classification': 'WAIT_EXTERNAL', 'work_exhaustion': None, 'goal_inventory': {'complete': True, 'errors': [], 'unreadable': []}}
+
+tools\test_t2040_terminal_consumer_guards.py:231: AssertionError
+_ TerminalConsumerGuards.test_stored_actionable_goals_cannot_override_current_blocked_assessment (classification='WAIT_OPERATOR') _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_stored_actionable_goals_cannot_override_current_blocked_assessment>
+
+    def test_stored_actionable_goals_cannot_override_current_blocked_assessment(self):
+        goal = persistent_goal.PersistentGoal(
+            goal_id="stale-goal", project_id=self.root.name, title="Stale observation",
+            objective="Current proof required", current_status=persistent_goal.STATUS_ACTIONABLE_GAPS,
+        )
+        persistent_goal.save_goal(self.root, goal)
+        for kwargs, classification in (
+            ({"blocker": "BLOCKED_EXTERNAL -- current boundary"}, CA.WAIT_EXTERNAL),
+            ({"next_action": '"WAIT: user brake operator stopped work"'}, CA.WAIT_OPERATOR),
+        ):
+            with self.subTest(classification=classification):
+>               self.write_state(**kwargs)
+
+tools\test_t2040_terminal_consumer_guards.py:227: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_stored_actionable_goals_cannot_override_current_blocked_assessment>
+kwargs = {'next_action': '"WAIT: user brake operator stopped work"'}
+
+    def write_state(self, **kwargs):
+        text = _format_state(**kwargs)
+        (self.root / ".saipen/STATE.md").write_text(text, encoding="utf-8")
+        self.state, error = state_owner.parse_state_or_error(text)
+>       self.assertIsNone(error, error)
+E       AssertionError: "next_action is a malformed WAIT (a WAIT with no category token, no ' -- ' delimiter or more than one sentence is never legal) -- CORE § 1.2 requires 'WAIT: <category> -- <one sentence>' where category is one of manual-verify/destructive-op/first-publish/user brake/blocked/safety valve/init (or the exact safety-valve pause); it has no ' -- ' delimiter: a bare category names the KIND of stop and asks nothing, which CORE § 1.2 forbids (got 'user brake operator stopped work')" is not None : next_action is a malformed WAIT (a WAIT with no category token, no ' -- ' delimiter or more than one sentence is never legal) -- CORE § 1.2 requires 'WAIT: <category> -- <one sentence>' where category is one of manual-verify/destructive-op/first-publish/user brake/blocked/safety valve/init (or the exact safety-valve pause); it has no ' -- ' delimiter: a bare category names the KIND of stop and asks nothing, which CORE § 1.2 forbids (got 'user brake operator stopped work')
+
+tools\test_t2040_terminal_consumer_guards.py:95: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_authoritative_external_stop_outranks_stale_workable_board
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_automation_certificate_cannot_complete_unsatisfied_objectives
+SUBFAILED(route={'ok': True, 'reason': 'unknown-success', 'action': 'saipen status'}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_automation_unknown_route_or_missing_certificate_cannot_continue
+SUBFAILED(route={'ok': True, 'reason': 'maintain', 'action': 'saipen continue'}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_automation_unknown_route_or_missing_certificate_cannot_continue
+SUBFAILED(route={'ok': True, 'reason': 'maintain', 'action': 'saipen continue', 'work_exhaustion': 42}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_automation_unknown_route_or_missing_certificate_cannot_continue
+SUBFAILED(status='NO_NEW_EVIDENCE') tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence
+SUBFAILED(status='UNKNOWN_SUCCESS') tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_campaign_refuses_malformed_assessment_and_delivery_without_throwing
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_campaign_valid_hint_reuses_one_bounded_worker_attempt
+SUBFAILED(lease=None) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_external_wait_supervisor_never_becomes_idle
+SUBFAILED(lease='EXPIRED') tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_external_wait_supervisor_never_becomes_idle
+SUBFAILED(lease='TERMINAL') tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_external_wait_supervisor_never_becomes_idle
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_external_wait_worker_never_reports_success_or_takes_authority
+SUBFAILED(inventory=42) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_iteration_refuses_malformed_goal_inventory_without_throwing
+SUBFAILED(inventory={'goals': [42], 'complete': True}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_iteration_refuses_malformed_goal_inventory_without_throwing
+SUBFAILED(inventory={'goals': 42}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_iteration_refuses_malformed_goal_inventory_without_throwing
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_native_grant_valid_hint_automation_continues_without_promotion
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_native_grant_valid_hint_supervisor_uses_existing_execution_seam
+SUBFAILED(classification='WAIT_EXTERNAL') tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_stored_actionable_goals_cannot_override_current_blocked_assessment
+SUBFAILED(classification='WAIT_OPERATOR') tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_stored_actionable_goals_cannot_override_current_blocked_assessment
+======================== 20 failed, 20 passed in 2.28s ========================

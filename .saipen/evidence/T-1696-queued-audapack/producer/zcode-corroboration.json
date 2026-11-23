@@ -1,0 +1,38 @@
+[
+  {
+    "part_id": "part_mv0sqjy0_58b119df-a1f4-4c61-955b-5ebd908bbfe3",
+    "ts": 1791540130680,
+    "path": "zcode-part_mv0sqjy0_58b119df-a1f4-4c61-955b-5ebd908bbfe3.json",
+    "sha256": "897d1efe34de79a8ecf1169938848c8cb45a5744969a42050f8d0e402d9d781d",
+    "tool": "Read",
+    "status": "completed",
+    "input": {
+      "file_path": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK\\.saipen/BOARD.md"
+    }
+  },
+  {
+    "part_id": "part_mv0swfwf_70419286-70a9-43d9-b9ad-0699acbdfa31",
+    "ts": 1791540405375,
+    "path": "zcode-part_mv0swfwf_70419286-70a9-43d9-b9ad-0699acbdfa31.json",
+    "sha256": "553e2f21131bc7414c0e05f3afaf8065bc1db5754d3863fda524227eb02a2087",
+    "tool": "Read",
+    "status": "completed",
+    "input": {
+      "file_path": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK\\.saipen/BOARD.md",
+      "limit": 20,
+      "offset": 1
+    }
+  },
+  {
+    "part_id": "part_mv0sy3b6_9bf0d46c-ea5b-4a75-835c-4fd546b4c960",
+    "ts": 1791540482370,
+    "path": "zcode-part_mv0sy3b6_9bf0d46c-ea5b-4a75-835c-4fd546b4c960.json",
+    "sha256": "a675fec8b6fbed2b3d36fdedd957e4f7f89524e1bba25ccbe35922795a269375",
+    "tool": "Bash",
+    "status": "completed",
+    "input": {
+      "command": "git -C . add -A && git -C . commit -m \"$(cat <<'EOF'\nfix(widget): P1-A/P1-B trust-boundary hardening in 0.1.07\n\nP1-A: Remove setVerifiedProjectArchive from manualArchiveRecordSent.\nA Send receipt proves transmission only; it must not overwrite\nBridge-confirmed canonical archive metadata. The receipt now calls\nrecordSendObservation (SEND timestamp only) and schedules a bounded\nbackground refreshProjectArchiveMetadata that can adopt canonical\nmetadata only via Bridge confirmation. Zero canonical-store writes\nfrom the receipt itself.\n\nP1-B: Attach tile-removal detection for attachment-only Send intents.\nA rejected attachment-only Send + manual attachment removal + delayed\nhistory must not fabricate an accepted Send timestamp. Added\nnoteComposerAttachmentRemoved with capture-phase click/keydown\nlisteners on document detecting operator interaction with Remove\ncontrols inside the composer root. Extended\nretireStaleManualSendIntent to check tile count changes for\nattachment-only intents (empty composerText), covering React remount\nwhere no click/keydown event fires.\n\nTests: 21 new RED tests in w7-016 (C1-C10 P1-A, D1-D11 P1-B),\nall proven RED pre-fix and GREEN post-fix. Full widget suite 772/772\nPASS. Targeted regression gates pass: w6-006 85/85, w6-001 50/50,\nw3-002 14/14, w7-011 7/7, test_bridge_project_archive.py 30/30.\n\nRelease 0.1.07, sha 5efa3a49fee7bdef83f63ecfa3324e2746eb12b874baad4e1bba03edd03a09fa.\nEvidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md\nEOF\n)\"",
+      "description": "Commit all P1-A/P1-B changes"
+    }
+  }
+]

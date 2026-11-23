@@ -1,0 +1,46 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-10-04T15:22:55Z",
+  "evidence_class": "executed",
+  "findings_digest": "7a5633c5efe8d61b0f8ba75051f846250f2af8e9d9c1ba05b6f761cc942ef99e",
+  "gate": "core",
+  "integrity_digest": "5b699888cb46839c",
+  "journal_op_id": "reverify.92ee621ed7c9",
+  "original_closure": {
+    "claim_time": "2026-09-06T17:00:00Z",
+    "owner": "opencode",
+    "source_receipts": "SRC-038"
+  },
+  "own_problem_keys": [
+    "dc5bc6e71eaba820"
+  ],
+  "problem_count": 89,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000325",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:3e3b6932e9ec6783ed42ae9fc5878fc93de55142a003c0f805784405990bb976",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "strict_gate:core",
+      "default_contract": true,
+      "executed": true,
+      "result": "PASS_WITH_CARRIED_DEBT"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "strict_gate:core"
+    ],
+    "findings_digest": "7a5633c5efe8d61b0f8ba75051f846250f2af8e9d9c1ba05b6f761cc942ef99e",
+    "gate": "core"
+  },
+  "verification_contract_digest": "c8fe5ad87ab553f3",
+  "verifier": "buffy",
+  "warning_count": 95,
+  "work": "T-160"
+}

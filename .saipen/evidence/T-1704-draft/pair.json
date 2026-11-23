@@ -1,0 +1,10 @@
+{
+  "red_exit": 1,
+  "green_exit": 0,
+  "oracle_sha256": {
+    "tools/test_t1704_goal_checkpoint_priority.py": "1cb20991be3a2ab32a4c59dadce10977cf81e3d2af9a4112d7b4463e7aa5b2f4",
+    "tests/fixtures/t1703-valve-audit.json": "6a4982752267dfc62d3d372b64c2cd9b640060a42e7e6f515f80751367c9147d"
+  },
+  "live_code_applied": false,
+  "live_authority_granted": false
+}

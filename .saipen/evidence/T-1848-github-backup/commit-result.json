@@ -1,0 +1,9 @@
+{
+  "exit_code": 0,
+  "commit": "ee215e0a0bbd5154806673b9baa23533e1eb7402",
+  "branch": "backup/cc-all-20261021T222419Z",
+  "mandatory_failure_lines": [],
+  "canonical_pass": true,
+  "portable_floor_pass": true,
+  "pushed": false
+}

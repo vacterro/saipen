@@ -1,0 +1,221 @@
+{
+  "requirements": {
+    "SRC-370:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Hash-prefixed filenames in reverse order.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Older PASS and newer FAIL.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Newer focused PASS and earlier full-family FAIL.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "PASS for an unrelated source fingerprint.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Source modified after an otherwise valid PASS.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Complete PASS with valid current verification identity.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Failed evidence containing red but no legacy failures field.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Baseline FAIL with no new-red items.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Invalid or corrupted evidence record.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Missing matching evidence.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Current registered goal missing from a partial export.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Duplicate registered goal.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Goal registered but not authenticated.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Legacy capsule supplied to campaign admission.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Campaign capsule supplied to legacy goal authorization.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Wrong project or target-host binding.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Expired, revoked or forged campaign receipt.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R018": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Correctly authenticated campaign admission.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Zero eligible new defects with unchanged generation.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R020": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Newly arrived evidence after quiescence.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Full-suite PASS but other independent maintenance gaps.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Real native successor model-turn execution.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R023": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "Release blocked while independent engineering continues.",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    },
+    "SRC-370:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-20099",
+      "text": "No false project completion from one clean test family. All destructive tests must use isolated fixtures. Routine Windows tests must not capture the real desktop focus, mouse or keyboard. REQUIRED EXECUTION ORDER A. Finish or correctly checkpoint existing canonical Work. B. Reproduce stale evidence selection using current evidence formats and independent fixtures. C. Repair the provider's exact canonical evidence selection. D. Run focused negative and positive tests. E. Verify the real persistent-goal registry. F. Validate the actual authorization capsule type and grant. G. Connect the goal to all legitimate maintenance eligibility sources without duplicating architecture. H. Execute a genuine eligible candidate when authorized. I. Verify actual native continuation and durable progress. J. Preserve isolated release and broker gates independently. K. Run required affected conformance tests. L. Record real verified status and continue authorized Work. Do not rerun a large suite merely because a checkpoint changed. Do not close the campaign because all focused tests passed. Do not create fictional tasks to keep the model active. Do not return generic status polling as progress. FINAL ACCEPTANCE - Current test evidence is selected correctly. - An old PASS cannot mask a newer current failure. - A focused PASS cannot substitute for full-family acceptance. - The actual registered goal and scope are verified. - The correct authority mechanism is selected by capsule kind. - The operator grant is genuinely authenticated. - Independent maintenance discovery remains available. - Real executable Work advances when authorized. - Genuine quiescence does not masquerade as objective completion. - Release authority remains independent and protected. - The final report distinguishes all verification levels. FINAL REPORT GOAL_REGISTRY: GOAL_EVIDENCE_PROVIDER: CURRENT_EVIDENCE_IDENTITY: TEST_FAMILY: SOURCE_FINGERPRINT: EVIDENCE_FRESHNESS: ACTUAL_TEST_VERDICT: GOAL_SATISFACTION: AUTHORIZATION_CAPSULE_KIND: BROKER_GRANT_STATUS: HOST_BINDING: MAINTENANCE_DISCOVERY: CANONICAL_WORK: ACTUAL_IMPLEMENTATION: REGRESSION_RESULTS: REAL_SUCCESSOR_TURNS: RELEASE_STATUS: NEXT_AUTHORIZED_ACTION: NEXT_WAKE_CONDITION: EXACT_UNRESOLVED_OPERATOR_ACTION: Do not report DONE from stale evidence or an empty queue. Implement, independently verify, and continue the genuine authorized engineering objective. END SAIHANDOFF",
+      "verification": "python -m unittest tools.test_persistent_autonomy_false_satisfaction tools.test_persistent_autonomy_recovery -> PASS",
+      "work": "T-1996"
+    }
+  },
+  "schema_version": 1
+}

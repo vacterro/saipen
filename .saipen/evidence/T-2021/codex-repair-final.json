@@ -1,0 +1,152 @@
+{
+  "ok": true,
+  "code": "HOST_REPAIRED",
+  "source": {
+    "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "kind": "source-checkout",
+    "adapter": null,
+    "canonical": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "generation": "gen-sha256:aa73f4eeae461b33c09c5e3d32dd70d3d65de09df9be67cca97216e0c82d1d3b",
+    "proven": true,
+    "detail": null,
+    "version": "8.2.0"
+  },
+  "policy": {
+    "mode": "degraded",
+    "label": "DEGRADED_ALLOWED",
+    "source": "operator",
+    "path": "C:\\Users\\vac34\\.saipen\\authority.json"
+  },
+  "authority": {
+    "running": true,
+    "pid": 5264,
+    "instance": "broker-5cebdbd2db29bf3e5f095b63",
+    "generation": "svc-285ee3e47ebd8f1a89f247cb",
+    "expected_generation": "svc-285ee3e47ebd8f1a89f247cb",
+    "saipen_root": "C:\\Users\\vac34\\.claude\\skills\\saipen",
+    "endpoint": "\\\\.\\pipe\\saipen-authority-336850628174a20c242c9247",
+    "log": "C:\\Users\\vac34\\.saipen\\authority\\broker.log",
+    "identity_supported": true,
+    "mode": "degraded",
+    "mode_label": "DEGRADED_ALLOWED",
+    "mode_source": "operator",
+    "mode_path": "C:\\Users\\vac34\\.saipen\\authority.json",
+    "generation_current": true
+  },
+  "machine_runtime": {
+    "code": "MACHINE_RUNTIME_STALE",
+    "root": "C:\\ProgramData\\SAI\\SAIPEN",
+    "saipen_runtime_ready": false,
+    "generation": "gen-sha256:14edc039841d85c52e8a401964cc61df1b99b62a902fab37e4c429e2f8821bf5",
+    "current": false,
+    "saipen_version": "8.1.0",
+    "state_schema": 3,
+    "launcher": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+    "python_bundled": true,
+    "source": "MACHINE_RUNTIME",
+    "reasons": [
+      "the machine runtime is not the generation of the canonical source"
+    ],
+    "action": "saipen host machine install"
+  },
+  "path_launcher": {
+    "code": "PATH_LAUNCHER_READY",
+    "directory": "C:\\Users\\vac34\\bin",
+    "files": {
+      "saipen.cmd": "owned",
+      "saipen": "owned"
+    },
+    "reasons": []
+  },
+  "hosts": [
+    {
+      "id": "codex",
+      "profile": null,
+      "name": "Codex CLI",
+      "state": "INSTALLED_UNVERIFIED",
+      "reasons": [
+        "installed and current; this host exposes no channel through which SAIPEN could verify a session, so nothing more can be claimed"
+      ],
+      "action": null,
+      "installed": true,
+      "host_present": true,
+      "runtime": "current",
+      "hook": "current",
+      "instruction": "current",
+      "admission": "UNAVAILABLE",
+      "response_enforcement": "MECHANICAL",
+      "last_health": null,
+      "recoverable": false,
+      "contract": {
+        "id": "codex",
+        "name": "Codex CLI",
+        "install_surfaces": {
+          "home": "~/.codex",
+          "skill": "~/.codex/skills/saipen",
+          "instruction": "~/.codex/AGENTS.md",
+          "hook": "~/.codex/hooks/saipen-guard.py"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "MECHANICAL",
+        "response_enforcement": "MECHANICAL",
+        "admission_enforcement": "UNAVAILABLE",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native Codex CLI launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.codex\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:aa73f4eeae461b33c09c5e3d32dd70d3d65de09df9be67cca97216e0c82d1d3b",
+          "expected_generation": "gen-sha256:aa73f4eeae461b33c09c5e3d32dd70d3d65de09df9be67cca97216e0c82d1d3b",
+          "current": true,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.codex\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.codex\\hooks\\saipen-guard.py",
+          "installed": true,
+          "status": "current",
+          "delegated_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "delegated_current": true,
+          "problems": [],
+          "installed_at": 1793200314.4254105
+        },
+        "host_home": "C:\\Users\\vac34\\.codex"
+      }
+    }
+  ],
+  "broken": [],
+  "needs_action": [],
+  "problems": [],
+  "next_action": null,
+  "steps": [
+    {
+      "step": "install:codex",
+      "ok": true,
+      "code": "INSTALLED",
+      "installer_rc": 0,
+      "detail": "Codex CLI provenance         verified\nCodex CLI instructions       already\nCodex CLI guard hook         guard hook and configuration installed; health unproven\nCodex CLI legacy hook        clean\n------------------------------------------------------------\nDone. Test: open any project in any agent, say: saipen set"
+    }
+  ],
+  "remaining": [],
+  "mechanical_hosts": []
+}

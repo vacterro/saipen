@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-433:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "\"V:\\_TEMP_\\fastprompter_drag\\SAIHANDOFF  SAIPEN_20261120_1533.md\""
+    }
+  },
+  "derived_at": "2026-11-22T01:34:58Z",
+  "derived_from": "SRC-433",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "ce69c2fa2014595a8a9a65d3c11422f5fa3545d13df4d09f1f715c622f9e8a0a"
+}

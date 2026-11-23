@@ -1,0 +1,1 @@
+- 06.08.26 23:40 [ST-001] spawn by Core (sc stage 2): created from TEMPLATE

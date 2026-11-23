@@ -1,0 +1,16 @@
+{
+  "actionable": 6,
+  "archive_ref": ".saipen/archive/source/SRC-371.md",
+  "closed_at": "2026-11-01T22:50:45Z",
+  "closure_event": null,
+  "linked_work": "T-1997",
+  "linked_works": [
+    "T-1997"
+  ],
+  "receipt_id": "SRC-371",
+  "requirements": 6,
+  "schema_version": 1,
+  "source_sha256": "7ecefe84c478530f957331d50a676c780e9a235c80f0401941f9625d5bb0d024",
+  "status": "CLOSED",
+  "unresolved": 0
+}

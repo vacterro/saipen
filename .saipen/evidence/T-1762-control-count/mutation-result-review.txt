@@ -1,0 +1,6 @@
+control: ran 8, red 0 -- as expected
+the engine before this Work: ran 8, red 3 -- as expected
+the proposal as its author spelled it: ran 8, red 2 -- as expected
+the scope is defined and never applied: ran 8, red 3 -- as expected
+the fixed subject's own count joins the vocabulary: ran 8, red 1 -- as expected
+mutations: 4, repetitions each: 3, problems: 0

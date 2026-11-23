@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-095:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-248 closed with verification evidence in LOG: verify -> PASS [target: T-248] conf: high -- new tests/test_browser_upload_topology_integration.py 4 PASS against the REAL widget bytes in headless Chromium on the 2026-09 composer: no #prompt-textarea, aria-label 'Ask ChatGPT', no data-type on the form (hashed Composer* classes only), three media-only file inputs plus one general, and the tile filename on the Remove button. RED CONTROL disabling ",
+      "text": "Fix live A3 pre-start regression: 6 runs BLOCKED PRE-START, no ZIP attachment, no START sent",
+      "verification": "the Work this request created reached its own verification gate; see the T-248 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-248"
+    }
+  },
+  "schema_version": 1
+}

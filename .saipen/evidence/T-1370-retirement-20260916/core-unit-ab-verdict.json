@@ -1,0 +1,57 @@
+{
+  "current": {
+    "ran": 2598,
+    "summary": "FAILED (failures=36, errors=1, skipped=17)",
+    "reds": 37
+  },
+  "baseline": {
+    "ran": 2539,
+    "summary": "FAILED (failures=37, errors=1, skipped=17)",
+    "reds": 38
+  },
+  "PATCH_OWNED": [],
+  "UNKNOWN": [],
+  "PRE_EXISTING": [
+    "test_audit_2026_08_28_all3.CoreArchiveSettlementTamperTests.test_untampered_interrupted_close_settles_idempotently",
+    "test_concurrency_independence.NoAbsoluteLatencyBudgets.test_no_test_module_races_a_concurrent_gate_on_a_constant_timeout",
+    "test_explicit_claim.CliSurfaceTests.test_the_flag_reaches_the_engine_through_the_cli",
+    "test_explicit_claim.OverrideBypassesOnlyOrderingTests.test_a_live_doing_ticket_still_refuses_with_the_flag",
+    "test_explicit_claim.OverrideWorksTests.test_a_redundant_flag_writes_no_stepped_over_claim",
+    "test_explicit_claim.OverrideWorksTests.test_explicit_claims_a_ticket_the_pick_rule_would_refuse",
+    "test_explicit_claim.RefusalNamesTheRemedyTests.test_without_the_flag_the_pick_rule_is_unchanged",
+    "test_inject_digest.SurfaceDigest.test_the_two_transports_agree",
+    "test_install_drift.DriftReportTests.test_line_endings_alone_are_not_drift",
+    "test_intent_audit_fixes.IntentAuditTests.test_audit_core003_converge_target_controls_resume_without_writes(target='crew')",
+    "test_intent_audit_fixes.IntentAuditTests.test_audit_core003_converge_target_controls_resume_without_writes(target='ship')",
+    "test_intent_audit_fixes.IntentAuditTests.test_audit_core003_goal_cc_and_continue_route_identically_without_writes",
+    "test_intent_audit_fixes.IntentAuditTests.test_audit_core003_normal_cc_enters_done_convergence",
+    "test_opencode_host_smoke.OpenCodeHostSmoke.test_3_the_installed_artifact_carries_the_whole_chain",
+    "test_recovered_attribution.AttributionNegativeTests.test_coverage_count_mismatch_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_coverage_work_disagrees_with_tombstone_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_linked_work_not_done_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_missing_recovery_record_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_missing_verification_on_implemented_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_newer_generation_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_non_requirement_requirement_id_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_one_unknown_actionable_requirement_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_requirement_without_linked_work_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_source_still_active_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_split_linked_work_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_tombstone_closure_counts_change_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_tombstone_linked_work_change_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_tombstone_not_closed_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_tombstone_source_sha_change_refuses",
+    "test_recovered_attribution.AttributionNegativeTests.test_undocumented_tombstone_field_refuses",
+    "test_recovered_attribution.AttributionPositiveTests.test_current_tombstone_is_not_byte_identical_to_original",
+    "test_recovered_attribution.AttributionPositiveTests.test_positive_fixture_attributes_to_linked_work",
+    "test_recovered_attribution.AttributionPositiveTests.test_release_stays_blocked_with_carried_residue",
+    "test_recovered_attribution.AttributionPositiveTests.test_strict_finding_identity_is_unchanged_by_attribution",
+    "test_recovered_attribution.AttributionPositiveTests.test_work_delta_carries_residue_through_t160",
+    "test_t1363_zero_manual_entry.HumanRefusalTests.test_a_foreign_owner_refusal_says_who_owns_the_seat",
+    "test_t1363_zero_manual_entry.StartEntryTests.test_start_never_steals_a_live_foreign_seat"
+  ],
+  "FIXED_BY_PATCH": [
+    "test_guard_admission.TestAdmissionAuthority.test_performance_budget"
+  ],
+  "new_modules_in_current": []
+}

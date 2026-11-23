@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-421:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIHANDOFF 2026-11-18 SAIPEN x ZAICODE AGENT_DRIFT_REPAIR (attachment _PIC/_Clipboard_stuff/SAIHANDOFF_SAIPEN_\u00d7_ZAICODE_AGENT_DRIFT_REPAIR_20261118_010249_0600cee6.md): reproduce and repair confirmed drift at the SAIPEN<->ZAICODE seam per E1-E7, evidence-driven, DRIFT_MATRIX + regression pairs, no fabricated PASS, operator gates kept honest"
+    }
+  },
+  "derived_at": "2026-11-17T23:11:02Z",
+  "derived_from": "SRC-421",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "d5e917977c904080b4be087d7feb4e204cc80b4361c1135919735d66ee7929e7"
+}

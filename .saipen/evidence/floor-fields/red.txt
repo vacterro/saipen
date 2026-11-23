@@ -1,0 +1,109 @@
+test_native_floor_failure_names_the_runner_that_failed (test_portable_floor_fields.NativeParityTransport.test_native_floor_failure_names_the_runner_that_failed) ... ERROR
+test_posix_runtime_keeps_the_bash_floor (test_portable_floor_fields.NativeParityTransport.test_posix_runtime_keeps_the_bash_floor) ... ERROR
+test_win32_runtime_uses_powershell_without_changing_the_timeout (test_portable_floor_fields.NativeParityTransport.test_win32_runtime_uses_powershell_without_changing_the_timeout) ... ERROR
+test_description_and_blocker_prose_do_not_create_dependencies (test_portable_floor_fields.PortableNeedsFields.test_description_and_blocker_prose_do_not_create_dependencies) ... 
+  test_description_and_blocker_prose_do_not_create_dependencies (test_portable_floor_fields.PortableNeedsFields.test_description_and_blocker_prose_do_not_create_dependencies) (floor='sh') ... FAIL
+  test_description_and_blocker_prose_do_not_create_dependencies (test_portable_floor_fields.PortableNeedsFields.test_description_and_blocker_prose_do_not_create_dependencies) (floor='ps1') ... FAIL
+test_narrative_self_reference_does_not_create_a_cycle (test_portable_floor_fields.PortableNeedsFields.test_narrative_self_reference_does_not_create_a_cycle) ... 
+  test_narrative_self_reference_does_not_create_a_cycle (test_portable_floor_fields.PortableNeedsFields.test_narrative_self_reference_does_not_create_a_cycle) (floor='sh') ... FAIL
+  test_narrative_self_reference_does_not_create_a_cycle (test_portable_floor_fields.PortableNeedsFields.test_narrative_self_reference_does_not_create_a_cycle) (floor='ps1') ... FAIL
+test_real_cycle_still_fails (test_portable_floor_fields.PortableNeedsFields.test_real_cycle_still_fails) ... ok
+test_real_dangling_field_still_fails (test_portable_floor_fields.PortableNeedsFields.test_real_dangling_field_still_fails) ... ok
+
+======================================================================
+ERROR: test_native_floor_failure_names_the_runner_that_failed (test_portable_floor_fields.NativeParityTransport.test_native_floor_failure_names_the_runner_that_failed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_portable_floor_fields.py", line 131, in test_native_floor_failure_names_the_runner_that_failed
+    _calls, output = self.probe("nt", "win32", validator_return=0, floor_return=1)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_portable_floor_fields.py", line 111, in probe
+    self.assertEqual(audit_parity.main(), 1, "known-bad preflight passed")
+                     ^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\audit_parity.py", line 98, in main
+    sys.modules["audit_checks"] = ac
+    ^^^^^^^^^^^
+AttributeError: 'types.SimpleNamespace' object has no attribute 'modules'
+
+======================================================================
+ERROR: test_posix_runtime_keeps_the_bash_floor (test_portable_floor_fields.NativeParityTransport.test_posix_runtime_keeps_the_bash_floor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_portable_floor_fields.py", line 127, in test_posix_runtime_keeps_the_bash_floor
+    calls, _output = self.probe("posix", "linux", validator_return=1, floor_return=0)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_portable_floor_fields.py", line 111, in probe
+    self.assertEqual(audit_parity.main(), 1, "known-bad preflight passed")
+                     ^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\audit_parity.py", line 98, in main
+    sys.modules["audit_checks"] = ac
+    ^^^^^^^^^^^
+AttributeError: 'types.SimpleNamespace' object has no attribute 'modules'
+
+======================================================================
+ERROR: test_win32_runtime_uses_powershell_without_changing_the_timeout (test_portable_floor_fields.NativeParityTransport.test_win32_runtime_uses_powershell_without_changing_the_timeout)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_portable_floor_fields.py", line 120, in test_win32_runtime_uses_powershell_without_changing_the_timeout
+    calls, _output = self.probe("nt", "win32", validator_return=1, floor_return=0)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_portable_floor_fields.py", line 111, in probe
+    self.assertEqual(audit_parity.main(), 1, "known-bad preflight passed")
+                     ^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\audit_parity.py", line 98, in main
+    sys.modules["audit_checks"] = ac
+    ^^^^^^^^^^^
+AttributeError: 'types.SimpleNamespace' object has no attribute 'modules'
+
+======================================================================
+FAIL: test_description_and_blocker_prose_do_not_create_dependencies (test_portable_floor_fields.PortableNeedsFields.test_description_and_blocker_prose_do_not_create_dependencies) (floor='sh')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_portable_floor_fields.py", line 53, in run_floors
+    self.assertEqual(result.returncode, 0, output)
+AssertionError: 1 != 0 : [0;36msaipen conformance validation starting...[0m
+[0;32mPASS: STATE.md schema valid[0m
+[0;32mPASS: BOARD.md acyclic[0m
+[0;32mPASS: BOARD.md no duplicate tickets[0m
+[0;31mFAIL: BOARD.md has dangling needs: reference(s): T-999 -- referenced ticket doesn't exist anywhere on the board[0m
+
+
+======================================================================
+FAIL: test_description_and_blocker_prose_do_not_create_dependencies (test_portable_floor_fields.PortableNeedsFields.test_description_and_blocker_prose_do_not_create_dependencies) (floor='ps1')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_portable_floor_fields.py", line 53, in run_floors
+    self.assertEqual(result.returncode, 0, output)
+AssertionError: 1 != 0 : saipen conformance validation starting...
+PASS: STATE.md schema valid
+PASS: BOARD.md acyclic
+PASS: BOARD.md no duplicate tickets
+FAIL: BOARD.md has dangling needs: reference(s): T-003->external service, T-001->T-999 -- referenced ticket doesn't exist anywhere on the board
+
+
+======================================================================
+FAIL: test_narrative_self_reference_does_not_create_a_cycle (test_portable_floor_fields.PortableNeedsFields.test_narrative_self_reference_does_not_create_a_cycle) (floor='sh')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_portable_floor_fields.py", line 53, in run_floors
+    self.assertEqual(result.returncode, 0, output)
+AssertionError: 1 != 0 : [0;36msaipen conformance validation starting...[0m
+[0;32mPASS: STATE.md schema valid[0m
+[0;31mFAIL: BOARD.md contains cyclic needs: dependencies involving: T-001[0m
+
+
+======================================================================
+FAIL: test_narrative_self_reference_does_not_create_a_cycle (test_portable_floor_fields.PortableNeedsFields.test_narrative_self_reference_does_not_create_a_cycle) (floor='ps1')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_portable_floor_fields.py", line 53, in run_floors
+    self.assertEqual(result.returncode, 0, output)
+AssertionError: 1 != 0 : saipen conformance validation starting...
+PASS: STATE.md schema valid
+FAIL: BOARD.md contains cyclic needs: dependencies involving: T-001
+
+
+----------------------------------------------------------------------
+Ran 7 tests in 5.100s
+
+FAILED (failures=4, errors=3)

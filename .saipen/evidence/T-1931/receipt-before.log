@@ -1,0 +1,22 @@
+======================================================================
+ERROR: test_completed_worker_result_recovers_after_commit_lock_contention (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_completed_worker_result_recovers_after_commit_lock_contention)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 309, in test_completed_worker_result_recovers_after_commit_lock_contention
+    self.assertEqual(result["event"], "WORKER_ATTEMPT_RECONCILED")
+                     ~~~~~~^^^^^^^^^
+KeyError: 'event'
+
+======================================================================
+ERROR: test_altered_attempt_receipt_never_becomes_a_success (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_altered_attempt_receipt_never_becomes_a_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 330, in test_altered_attempt_receipt_never_becomes_a_success
+    outcome = self.root / state["worker_attempt"]["result_reference"]
+                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'result_reference'
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.051s
+
+FAILED (errors=2)

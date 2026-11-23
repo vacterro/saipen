@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t2021_false_idle_maintenance.py"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "bin",
+    "VERSION",
+    "README.md",
+    "extensions"
+  ],
+  "oracle_files": [
+    "tools/test_t2021_false_idle_maintenance.py"
+  ],
+  "subject_files": [
+    "tools/saipen.py",
+    "tools/saipen_engine/board.py",
+    "tools/saipen_engine/router.py",
+    "tools/saipen_engine/replenishment.py",
+    "tools/saipen_engine/automation.py",
+    "tools/saipen_engine/effects.py",
+    "tools/autoinject.py"
+  ],
+  "before": {
+    "tools/saipen.py": ".saipen/evidence/T-2021/before/tools/saipen.py",
+    "tools/saipen_engine/board.py": ".saipen/evidence/T-2021/before/tools/saipen_engine/board.py",
+    "tools/saipen_engine/router.py": ".saipen/evidence/T-2021/before/tools/saipen_engine/router.py",
+    "tools/saipen_engine/replenishment.py": ".saipen/evidence/T-2021/before/tools/saipen_engine/replenishment.py",
+    "tools/saipen_engine/automation.py": ".saipen/evidence/T-2021/before/tools/saipen_engine/automation.py",
+    "tools/saipen_engine/effects.py": ".saipen/evidence/T-2021/before/tools/saipen_engine/effects.py",
+    "tools/autoinject.py": ".saipen/evidence/T-2021/before/tools/autoinject.py"
+  },
+  "timeout": 120
+}

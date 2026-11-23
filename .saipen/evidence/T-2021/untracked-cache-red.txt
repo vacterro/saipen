@@ -1,0 +1,13 @@
+...........F.......
+======================================================================
+FAIL: test_read_only_discovery_preserves_the_untracked_cache_bytes (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_read_only_discovery_preserves_the_untracked_cache_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2021_false_idle_maintenance.py", line 340, in test_read_only_discovery_preserves_the_untracked_cache_bytes
+    self.assertEqual(index.read_bytes(), before, "discovery must preserve UNTR cache too")
+AssertionError: b'DIR[281 chars]0\x01\x86ALocation V:/_TEMP_/saipen-t1614-59lp[1122 chars]xa1L' != b'DIR[281 chars]0\x01vALocation V:/_TEMP_/saipen-t1614-59lpm9f[1099 chars]\x03' : discovery must preserve UNTR cache too
+
+----------------------------------------------------------------------
+Ran 19 tests in 2.215s
+
+FAILED (failures=1)

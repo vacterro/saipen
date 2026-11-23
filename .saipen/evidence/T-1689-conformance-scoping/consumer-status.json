@@ -1,0 +1,248 @@
+{
+  "ok": true,
+  "project_identity": "v:\\___vac\\__k\\__code\\_tampermonkey\\_win95theme\\wintage",
+  "protocol_version": "8.1.0",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "saipen crew",
+  "computed_next_action": null,
+  "computed_reason": "conformance-unhealthy",
+  "blocker": "none",
+  "execution_intent": "converge",
+  "claimed_ticket": null,
+  "top_workable_ticket": null,
+  "log_tail_event": 3403,
+  "head": "60496e7",
+  "board_errors": [],
+  "recovery_pending": false,
+  "recovery_conflict": false,
+  "pending_ops": [],
+  "conflict_ops": [],
+  "milestone": {
+    "current": null,
+    "label": null,
+    "parent": null,
+    "undo_available": false,
+    "valid": true
+  },
+  "cold_route": {
+    "project_root": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_WIN95THEME\\Wintage",
+    "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+    "phase": "DONE",
+    "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\done.md",
+    "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+    "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+    "documents": {
+      "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+      "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+      "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+      "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+      "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+      "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+      "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+      "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+      "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+      "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+    },
+    "project_memory": {
+      "STATE.md": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_WIN95THEME\\Wintage\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_WIN95THEME\\Wintage\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_WIN95THEME\\Wintage\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  },
+  "audit_inbox": {
+    "pending": 0,
+    "active_layer": null,
+    "bound_receipt": null,
+    "bound_work": null,
+    "closed_pending_delete": 0,
+    "invalid": 0,
+    "residue": 0,
+    "clean": true,
+    "last_allocated_id": 9,
+    "inbox_state": null,
+    "error_state": null
+  },
+  "distribution": {
+    "installed": 7,
+    "stale": 7,
+    "unknown": 2,
+    "fresh": false,
+    "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+    "newest_installed_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+    "last_run": {
+      "status": "skipped",
+      "skip": "DIRTY_SOURCE",
+      "rc": 2,
+      "dirty": [
+        "M bootstrap/inject.ps1",
+        "M bootstrap/inject.sh",
+        "M bootstrap/install_ownership.py",
+        "M bootstrap/uninstall.ps1",
+        "M bootstrap/uninstall.sh"
+      ],
+      "at": "2026-10-09 01:16:01",
+      "head": null,
+      "in_flight": false
+    },
+    "blocker": {
+      "condition": "DIRTY_SOURCE",
+      "blocked": true,
+      "detail": "177 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation",
+      "paths": [
+        "bootstrap/inject.ps1",
+        "bootstrap/inject.sh",
+        "bootstrap/install_ownership.py",
+        "bootstrap/uninstall.ps1",
+        "bootstrap/uninstall.sh",
+        "extensions/adapters/claude.md",
+        "extensions/adapters/claude/saipen-guard.py",
+        "extensions/adapters/codex.md"
+      ],
+      "path_count": 177,
+      "canonical_next_command": "git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit"
+    },
+    "published_head": null,
+    "publication": null,
+    "consumer_convergence": "CURRENT",
+    "pending_consumers": [],
+    "consumers_converged": false,
+    "requires_human": false,
+    "summary": "distribution: 7 of 7 home(s) stale -- newest installed head 025bf596c683 -- source head 025bf596c683 -- 2 home(s) carry no head -- last scheduled injection: skipped DIRTY_SOURCE at 2026-10-09 01:16:01 -- BLOCKED DIRTY_SOURCE: 177 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation -- clears with: git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit"
+  },
+  "parked_work": [
+    "T-911 blocked: WAIT_USER_DECISION (engine owner T-607, not this tree's authority): relax the sub-write-boundary detector to the rule's stated intent -- an actionable TARGET (payload/instructions), not a mere...",
+    "T-907 blocked: WAIT_USER_DECISION: three items, all outside the working tree's authority. (a) the launcher shim: ~/bin/saipen and ~/bin/saipen.cmd exec V:\\_TEMP_\\saipen-core-unit-gzehwnwk\\project\\tools\\saipen.py,...",
+    "T-903 blocked: WAIT_USER_DECISION: the ledger repair is an operator choice -- re-derive the 115 lost events from .saipen/recovery/**/operation.json, or declare the active ledger sealed and restart above E-3368...",
+    "T-902 blocked: source closure not ready (SOURCE_RECEIPT_MISSING)",
+    "T-376 blocked: T-376 BLOCKED, NARROWED to two sub-clauses that need the operator, both because producing the input is an outward-facing action. RESOLVED since the last blocker: the CDP endpoint the previous...",
+    "T-359 blocked: T-359 BLOCKED -- NOT accepted, and the gap is a product fact, not unfinished work. What is proven on the live page right now, with the product's own CHATGPT_FAST_CSS injected (goldendefault 1.36.6,..."
+  ],
+  "claimed_but_unproven": [
+    "T-415",
+    "T-357",
+    "T-245",
+    "T-244",
+    "T-243"
+  ],
+  "conformance_history": "PASS (05.10.26 02:03)",
+  "staleness": "12h ago",
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 1,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "subsaipen [sub-write-boundary] -- saihunt OUTBOX references a main-project canonical path; a SubSaipen writes only inside its own home -- a package may not target .saipen/BOARD.md|STATE.md|LOG.md (red",
+            "detail_hash": "b3df18e5abf0c452",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 56
+      },
+      "board_hash": "7ce58df64217c30d",
+      "canonical_next_command": null,
+      "content_hash": "f48e0f002a568625",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:a9f9054e311856f330dd22c7bba8282067bdb92dc4d275d3da4b75bf0479d226",
+      "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "kind": "conformance_receipt",
+      "log_hash": "470973cbcf494f39",
+      "project_identity": "v:\\___vac\\__k\\__code\\_tampermonkey\\_win95theme\\wintage",
+      "receipt_id": "receipt-417946d3e1da",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "60496e734109208135cd3adc20a5c4eeafba87b8",
+      "source_tree_fingerprint": "git-delta-v1:e68bd7028e20c3814d50e92c2d0e1bfb68f4274e655f17e3f00a9fab0ffa4324",
+      "state_hash": "28e14e574a1bf306",
+      "timestamp_utc": "2026-10-08T08:57:17.106718Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "7",
+      "gate": "core",
+      "source_head": "60496e734109208135cd3adc20a5c4eeafba87b8",
+      "source_tree_fingerprint": "git-delta-v1:e68bd7028e20c3814d50e92c2d0e1bfb68f4274e655f17e3f00a9fab0ffa4324"
+    },
+    "disposition": "REMEDIATION_REQUIRED",
+    "remediation_command": null,
+    "repair_status": "ENGINEERING_REQUIRED",
+    "diagnostic": {
+      "kind": "ENGINEERING_REQUIRED",
+      "owner": "SAIPEN conformance/remediation",
+      "receipt_id": "receipt-417946d3e1da",
+      "findings_status": "complete",
+      "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+    }
+  },
+  "automation": {
+    "schema_version": 1,
+    "disposition": "BLOCKED",
+    "next_command": null,
+    "operator_action_due": false,
+    "reason_code": "conformance-remediation",
+    "reason": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair.",
+    "audit_quiescent": true,
+    "audit_epoch": "audit-epoch-v1:5033411ef5831e163e8be859c75fb59b3aa372ea4ff14c94f904163b512ce6cf",
+    "convergence_current": false,
+    "closure_complete": false,
+    "source_fingerprint": "60496e734109208135cd3adc20a5c4eeafba87b8+git-delta-v1:e68bd7028e20c3814d50e92c2d0e1bfb68f4274e655f17e3f00a9fab0ffa4324",
+    "completed_at": null,
+    "remediation_command": null,
+    "diagnostic": {
+      "kind": "ENGINEERING_REQUIRED",
+      "owner": "SAIPEN conformance/remediation",
+      "receipt_id": "receipt-417946d3e1da",
+      "findings_status": "complete",
+      "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+    }
+  },
+  "conditional_efficiency_kpi": {
+    "scope": "ticket",
+    "ticket": "T-910",
+    "percent": 100,
+    "approximate": true,
+    "confidence": "LOW",
+    "formula_version": 1,
+    "components": {
+      "progress": 100,
+      "rework": 100,
+      "autonomy": 100,
+      "human": null
+    },
+    "notes": {
+      "human": "no machine signal separates avoidable operator cost from a legitimate authorization boundary",
+      "autonomy": "coarse: LOG agent ids are CLI identities shared across sessions"
+    },
+    "preliminary": true,
+    "withheld": null
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_WIN95THEME\\Wintage --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat saipen-cli",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

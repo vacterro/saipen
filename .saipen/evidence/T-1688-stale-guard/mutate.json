@@ -1,0 +1,75 @@
+{
+  "mutations": [
+    {
+      "name": "round_trip_skipped_again",
+      "rc": [
+        1,
+        1
+      ],
+      "red": [
+        "test_a_replaced_plugin_still_refuses_a_protected_canonical_path",
+        "test_every_target_or_actor_refusal_survives_the_gap_with_its_own_code",
+        "test_padding_the_payload_does_not_buy_the_allowance"
+      ],
+      "stable": true
+    },
+    {
+      "name": "other_answers_block",
+      "rc": [
+        1,
+        1
+      ],
+      "red": [
+        "test_a_replaced_plugin_with_nothing_left_to_ask_degrades_as_before",
+        "test_any_other_answer_of_the_previous_generation_degrades"
+      ],
+      "stable": true
+    },
+    {
+      "name": "strict_falls_through",
+      "rc": [
+        1,
+        1
+      ],
+      "red": [
+        "test_bad_policy_uses_strict_and_names_its_policy_repair",
+        "test_policy_change_is_seen_by_the_same_live_factory",
+        "test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action",
+        "test_strict_refuses_the_replaced_plugin_before_any_round_trip"
+      ],
+      "stable": true
+    },
+    {
+      "name": "guardless_gaps_enter_the_round_trip",
+      "rc": [
+        1,
+        1
+      ],
+      "red": [
+        "test_a_gap_with_nothing_to_ask_builds_no_event"
+      ],
+      "stable": true
+    },
+    {
+      "name": "target_refusal_dropped_in_the_gap",
+      "rc": [
+        1,
+        1
+      ],
+      "red": [
+        "test_a_replaced_plugin_still_refuses_a_protected_canonical_path",
+        "test_every_target_or_actor_refusal_survives_the_gap_with_its_own_code"
+      ],
+      "stable": true
+    }
+  ],
+  "control_before": [
+    0,
+    []
+  ],
+  "control_after": [
+    0,
+    []
+  ],
+  "undetected": []
+}

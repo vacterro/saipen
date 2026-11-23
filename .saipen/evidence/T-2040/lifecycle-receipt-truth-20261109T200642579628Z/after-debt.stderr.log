@@ -1,0 +1,6 @@
+test_committed_operation_does_not_report_a_missing_target_repaired (test_t1851_debt_authority.NativeDecisionTests.test_committed_operation_does_not_report_a_missing_target_repaired) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.287s
+
+OK

@@ -1,0 +1,9 @@
+utc: 2026-10-08T00:18:03Z
+subject: tools/test_conformance_lineage.py after the lint rewrite of the M20 control test (ExitStack instead of a chained with), copy of tools/ only
+Ran 1 test in 0.092s
+
+OK
+CONTROL unmutated exit: 0
+M20 run 1/3 exit: 1 FAIL: test_production_consumer_reads_the_bounded_lineage_not_the_legacy_scan (test_conformance_lineage.Conform
+M20 run 2/3 exit: 1 FAIL: test_production_consumer_reads_the_bounded_lineage_not_the_legacy_scan (test_conformance_lineage.Conform
+M20 run 3/3 exit: 1 FAIL: test_production_consumer_reads_the_bounded_lineage_not_the_legacy_scan (test_conformance_lineage.Conform

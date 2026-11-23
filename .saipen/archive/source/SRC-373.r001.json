@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-373:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Preserve the original shared Git index and all existing staged changes. Do not reset, stash, clean or force-push."
+    },
+    "SRC-373:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reconcile the local integration branch with the actual current GitHub main. Preserve remote ancestry and all independently authored changes."
+    },
+    "SRC-373:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Finish the exact reviewed release candidate. Exclude unreviewed source files and operational archives unless separately approved."
+    },
+    "SRC-373:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify the required publication test gate against the final candidate. Focused tests alone are insufficient if the release contract requires broader conformance. Investigate outstanding failures and repair genuine regressions."
+    },
+    "SRC-373:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inspect the prepared approval packet. Verify its exact source revision, cohort, destination, branch, operation, expiration and authorization scope."
+    },
+    "SRC-373:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Use an existing supported trusted host, such as the installed ZAICODE native integration if applicable, to present the actual operator approval transaction and capture a genuine broker-backed receipt."
+    },
+    "SRC-373:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Do not fabricate a signed capsule, reinterpret this handoff as a cryptographic signature, or bypass the broker. If the host cannot perform native approval, identify the exact missing mechanism rather than repeatedly requesting free-form consent."
+    },
+    "SRC-373:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "After verified authorization, publish by the established non-force release mechanism."
+    },
+    "SRC-373:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Independently fetch GitHub main and verify the exact intended release commit or the formally accepted merge result."
+    },
+    "SRC-373:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Separately verify the standing continuous-maintenance grant. Continue genuinely authorized self-maintenance through Antigravity. A pending release permission must not suppress unrelated authorized Work. SUCCESS: - Actual reviewed code published. - GitHub remote verified. - Original staging preserved. - Required release test gate passed. - Real broker receipt recorded. - Persistent maintenance authorized and operational. - No unnecessary operator interruptions. FINAL: RELEASE_CANDIDATE_SHA: FULL_RELEASE_GATE: APPROVAL_PACKET_VALID: BROKER_RECEIPT: GITHUB_REMOTE_SHA: PUBLICATION_RESULT: SHARED_INDEX_PRESERVED: CONTINUOUS_MAINTENANCE_AUTHORITY: NEXT_AUTOMATIC_ACTION: ONE_REQUIRED_NATIVE_OPERATOR_ACTION_IF_ANY: If an operator confirmation is required, present precisely that action through the actual trusted host. Do not restart completed investigations or return generic WAIT without explaining the exact outstanding gate."
+    }
+  },
+  "derived_at": "2026-11-01T23:16:16Z",
+  "derived_from": "SRC-373",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "152d0f92a73c00fd38f5bc9269fac494391eb5177c3c965c192167791deb7039"
+}

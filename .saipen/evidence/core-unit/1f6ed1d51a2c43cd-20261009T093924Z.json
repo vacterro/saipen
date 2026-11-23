@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "family": "unit",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "fingerprint": "1f6ed1d51a2c43cde02b8d5763fcb8e5e6c725ac04c025cab1c63792790b30be",
+  "fingerprint_excludes": [
+    ".git",
+    ".saipen"
+  ],
+  "baseline_sha256": "81516ef194be0dcb17a85f38a290d9f166d7b2ebd4f55dd41e484a690b501244",
+  "head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "finished_utc": "2026-10-09T09:39:24Z",
+  "status": "PASS",
+  "exit_code": 0,
+  "ran": 5981,
+  "duration_s": 4075.1,
+  "timeout_s": 5400,
+  "headers": 0,
+  "unparsed": 0,
+  "tallied": 0,
+  "red": [],
+  "red_sections": {},
+  "processes_leaked": [
+    4948
+  ],
+  "jobs": 1,
+  "verdict": "PASS",
+  "new_red": [],
+  "fixed": [],
+  "problems": []
+}

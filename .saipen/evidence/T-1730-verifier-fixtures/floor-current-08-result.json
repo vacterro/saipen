@@ -1,0 +1,14 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "tools/audit_floor.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "started_utc": "2026-10-12T22:55:22.839227+00:00",
+  "runner_pid": 28100,
+  "child_pid": 23576,
+  "exit_code": 0,
+  "elapsed_s": 13.719,
+  "finished_utc": "2026-10-12T22:55:36.548708+00:00"
+}

@@ -1,0 +1,25 @@
+test_active_goal_idle_result_also_carries_certificate (__main__.ExhaustionEvidenceTests.test_active_goal_idle_result_also_carries_certificate) ... ok
+test_authority_blocker_is_not_verified_quiescence (__main__.ExhaustionEvidenceTests.test_authority_blocker_is_not_verified_quiescence) ... ok
+test_blocked_tickets_are_not_verified_absence (__main__.ExhaustionEvidenceTests.test_blocked_tickets_are_not_verified_absence) ... ok
+test_checked_absence_is_quiescent (__main__.ExhaustionEvidenceTests.test_checked_absence_is_quiescent) ... ok
+test_continuation_unknown_discovery_is_not_quiescent (__main__.ExhaustionEvidenceTests.test_continuation_unknown_discovery_is_not_quiescent) ... ok
+test_current_hunt_with_open_findings_is_not_unchanged (__main__.ExhaustionEvidenceTests.test_current_hunt_with_open_findings_is_not_unchanged) ... ok
+test_dependency_blocked_todo_is_not_an_available_claim (__main__.ExhaustionEvidenceTests.test_dependency_blocked_todo_is_not_an_available_claim) ... ok
+test_legacy_exhausted_flag_does_not_prove_quiescence (__main__.ExhaustionEvidenceTests.test_legacy_exhausted_flag_does_not_prove_quiescence) ... ok
+test_malformed_audit_count_remains_structured_unknown (__main__.ExhaustionEvidenceTests.test_malformed_audit_count_remains_structured_unknown) ... ok
+test_missing_root_is_not_a_readable_empty_inventory (__main__.ExhaustionEvidenceTests.test_missing_root_is_not_a_readable_empty_inventory) ... ok
+test_not_checked_cannot_certify_exhaustion (__main__.ExhaustionEvidenceTests.test_not_checked_cannot_certify_exhaustion) ... ok
+test_paused_goal_does_not_prove_objective_satisfaction (__main__.ExhaustionEvidenceTests.test_paused_goal_does_not_prove_objective_satisfaction) ... ok
+test_pending_publication_is_not_a_clean_release_inventory (__main__.ExhaustionEvidenceTests.test_pending_publication_is_not_a_clean_release_inventory) ... ok
+test_report_needs_explicit_complete_observation (__main__.ExhaustionEvidenceTests.test_report_needs_explicit_complete_observation) ... ok
+test_router_never_reports_complete_over_unreadable_goal (__main__.ExhaustionEvidenceTests.test_router_never_reports_complete_over_unreadable_goal) ... ok
+test_standalone_lane_cannot_certify_omitted_discovery (__main__.ExhaustionEvidenceTests.test_standalone_lane_cannot_certify_omitted_discovery) ... ok
+test_unworkable_audit_is_not_available_ingest (__main__.ExhaustionEvidenceTests.test_unworkable_audit_is_not_available_ingest) ... ok
+test_valid_goal_does_not_hide_failed_inventory_accounting (__main__.ExhaustionEvidenceTests.test_valid_goal_does_not_hide_failed_inventory_accounting) ... ok
+test_waiting_dependency_goal_is_not_runnable_discovery (__main__.ExhaustionEvidenceTests.test_waiting_dependency_goal_is_not_runnable_discovery) ... ok
+test_waiting_goal_cannot_mask_independent_discovery (__main__.ExhaustionEvidenceTests.test_waiting_goal_cannot_mask_independent_discovery) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.043s
+
+OK

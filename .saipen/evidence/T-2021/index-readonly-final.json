@@ -1,0 +1,8 @@
+{
+  "status_exit_code": 0,
+  "tree_snapshot_status": "KNOWN",
+  "index_before_sha256": "dcb1637b2114fe07b413565018aad079a1fcefbbffe3fff6220d22556f1a9adf",
+  "index_after_sha256": "dcb1637b2114fe07b413565018aad079a1fcefbbffe3fff6220d22556f1a9adf",
+  "read_only_checks_preserved_index": true,
+  "original_index_preserved": true
+}

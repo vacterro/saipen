@@ -1,0 +1,113 @@
+EEEEEE
+======================================================================
+ERROR: test_malformed_successor_returns_blocked_without_writes (__main__.ArchivedImproveTests.test_malformed_successor_returns_blocked_without_writes) (shape='array')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 169, in test_malformed_successor_returns_blocked_without_writes
+    live = cf.cycle_liveness(root, cycle.name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continue_fallback.py", line 171, in cycle_liveness
+    result.update(inspect_archive(cycle_dir))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\improve_retrospective.py", line 419, in inspect_archive
+    return _view(snapshot, _read(snapshot))
+                           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\improve_retrospective.py", line 253, in _read
+    body = {key: value for key, value in event.items() if key != "sha256"}
+                                         ^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'items'
+
+======================================================================
+ERROR: test_malformed_successor_returns_blocked_without_writes (__main__.ArchivedImproveTests.test_malformed_successor_returns_blocked_without_writes) (shape='null')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 169, in test_malformed_successor_returns_blocked_without_writes
+    live = cf.cycle_liveness(root, cycle.name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continue_fallback.py", line 171, in cycle_liveness
+    result.update(inspect_archive(cycle_dir))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\improve_retrospective.py", line 419, in inspect_archive
+    return _view(snapshot, _read(snapshot))
+                           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\improve_retrospective.py", line 253, in _read
+    body = {key: value for key, value in event.items() if key != "sha256"}
+                                         ^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'items'
+
+======================================================================
+ERROR: test_malformed_successor_returns_blocked_without_writes (__main__.ArchivedImproveTests.test_malformed_successor_returns_blocked_without_writes) (shape='boolean')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 169, in test_malformed_successor_returns_blocked_without_writes
+    live = cf.cycle_liveness(root, cycle.name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continue_fallback.py", line 171, in cycle_liveness
+    result.update(inspect_archive(cycle_dir))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\improve_retrospective.py", line 419, in inspect_archive
+    return _view(snapshot, _read(snapshot))
+                           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\improve_retrospective.py", line 253, in _read
+    body = {key: value for key, value in event.items() if key != "sha256"}
+                                         ^^^^^^^^^^^
+AttributeError: 'bool' object has no attribute 'items'
+
+======================================================================
+ERROR: test_malformed_successor_returns_blocked_without_writes (__main__.ArchivedImproveTests.test_malformed_successor_returns_blocked_without_writes) (shape='number')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 169, in test_malformed_successor_returns_blocked_without_writes
+    live = cf.cycle_liveness(root, cycle.name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continue_fallback.py", line 171, in cycle_liveness
+    result.update(inspect_archive(cycle_dir))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\improve_retrospective.py", line 419, in inspect_archive
+    return _view(snapshot, _read(snapshot))
+                           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\improve_retrospective.py", line 253, in _read
+    body = {key: value for key, value in event.items() if key != "sha256"}
+                                         ^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'items'
+
+======================================================================
+ERROR: test_malformed_successor_returns_blocked_without_writes (__main__.ArchivedImproveTests.test_malformed_successor_returns_blocked_without_writes) (shape='string')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 169, in test_malformed_successor_returns_blocked_without_writes
+    live = cf.cycle_liveness(root, cycle.name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continue_fallback.py", line 171, in cycle_liveness
+    result.update(inspect_archive(cycle_dir))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\improve_retrospective.py", line 419, in inspect_archive
+    return _view(snapshot, _read(snapshot))
+                           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\improve_retrospective.py", line 253, in _read
+    body = {key: value for key, value in event.items() if key != "sha256"}
+                                         ^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'items'
+
+======================================================================
+ERROR: test_malformed_successor_returns_blocked_without_writes (__main__.ArchivedImproveTests.test_malformed_successor_returns_blocked_without_writes) (shape='evidence-array')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 169, in test_malformed_successor_returns_blocked_without_writes
+    live = cf.cycle_liveness(root, cycle.name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\continue_fallback.py", line 171, in cycle_liveness
+    result.update(inspect_archive(cycle_dir))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\improve_retrospective.py", line 419, in inspect_archive
+    return _view(snapshot, _read(snapshot))
+                           ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\improve_retrospective.py", line 305, in _read
+    for name, digest in evidence.items():
+                        ^^^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'items'
+
+----------------------------------------------------------------------
+Ran 1 test in 1.237s
+
+FAILED (errors=6)

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-036:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Audit 13 opening: preserve SAIPEN deletion policy; closure and unchanged bytes authorize journaled consume, never model confidence."
+    }
+  },
+  "derived_at": "2026-09-05T00:30:57Z",
+  "derived_from": "SRC-036",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "747e8098e8384fc26c81daf9ab42c296fe76fa9b59da8da9186ddda5bf644625"
+}

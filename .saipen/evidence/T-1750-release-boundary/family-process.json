@@ -1,0 +1,22 @@
+{
+  "ticket": "T-1750",
+  "status": "FINISHED",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "tools/core_unit.py",
+    "evidence",
+    "T-1750",
+    "--jobs",
+    "6",
+    "--timeout",
+    "5400"
+  ],
+  "supervisor_pid": 29780,
+  "supervisor_created": 1792101837.8882542,
+  "child_pid": 39096,
+  "child_created": 1792101837.9808216,
+  "started_utc": "2026-10-15T22:03:57.982044+00:00",
+  "exit_code": 0,
+  "finished_utc": "2026-10-15T22:33:30.085074+00:00"
+}

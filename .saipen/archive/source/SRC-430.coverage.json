@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-430:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2107 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:61 record:.saipen/evidence/focused-unit/3a821f81232fc6be-20261119T051047323863Z.json sha256:b1d37ee2b7bbf78f25c0ade2854b36e2836918eabe67ff7334c3c15c1d2b3965",
+      "text": "Repair conformance/publication deadlock: live stop matrix SAIPEN+ZAICODE, correct conformance scope, runtime generation convergence, goal reauthorization",
+      "verification": "the Work this request created reached its own verification gate; see the T-2107 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2107"
+    }
+  },
+  "schema_version": 1
+}

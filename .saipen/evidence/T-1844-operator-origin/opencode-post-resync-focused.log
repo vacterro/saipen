@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "verdict": "PASS",
+  "ran": 29,
+  "duration_s": 124.609,
+  "record": ".saipen/evidence/focused-unit/b6dc79950e870846-20261021T142051125376Z.json",
+  "reused": false,
+  "shared": false,
+  "request_wall_s": 134.016,
+  "problem": null,
+  "checkpoint": "CHECKPOINTED"
+}

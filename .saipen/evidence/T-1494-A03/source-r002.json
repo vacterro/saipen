@@ -1,0 +1,26 @@
+{
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "source",
+    "disp",
+    "SRC-112",
+    "R002",
+    "VERIFIED",
+    "--work",
+    "T-1494",
+    "--evidence",
+    "E-13961",
+    "--verification",
+    "python -B -m unittest test_t1494_continuation_authority -v -> 18 PASS; python -B tools/validate.py --gate core -> PASS; schema and committed grant controls: a01-mutations.json, safety-controls.json, verify-oracle-pair.json.",
+    "--json"
+  ],
+  "exit_code": 0,
+  "session_capability": "no-publish",
+  "result": {
+    "ok": true,
+    "code": "COVERAGE_UPDATED",
+    "receipt": "SRC-112",
+    "rid": "SRC-112:R002",
+    "disposition": "VERIFIED"
+  }
+}

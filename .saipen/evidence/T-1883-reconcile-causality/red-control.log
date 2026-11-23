@@ -1,0 +1,23 @@
+red copy: V:\_TEMP_\t1883-red-wzm3qhgy\reconcile_red.py
+defect present: presence veto
+--- test_t1883_reconcile_causality: ran 17 failures 7 errors 0
+--- test_recovery_reachability: ran 85 failures 1 errors 0
+
+failed under the defect:
+  BlockerClassificationTests.test_an_unrelated_board_block_does_not_refuse
+  AmbiguityFailsClosedTests.test_ac06_a_blocked_set_with_no_relation_is_reported_not_trusted
+  EndToEndVerdictTests.test_ac01_the_incident_project_repairs_through_the_real_pipeline
+  EndToEndVerdictTests.test_ac02_the_same_project_without_blocks_gives_the_same_repair
+  UnrelatedBlocksCannotVetoTests.test_ac01_incident_shape_repairs_the_proven_stale_blocker
+  UnrelatedBlocksCannotVetoTests.test_ac02_no_blocked_tickets_gives_the_same_verdict
+  UnrelatedBlocksCannotVetoTests.test_ac03_one_unrelated_block_changes_nothing
+  UnrelatedBlocksCannotVetoTests.test_ac04_one_hundred_unrelated_blocks_change_nothing
+
+expected-red hit 8/8
+security coverage PASS: RelatedGatesStillRefuseTests.test_a_recognised_class_token_still_refuses_with_unrelated_blocks
+security coverage PASS: RelatedGatesStillRefuseTests.test_ac05_a_blocked_ticket_that_needs_the_active_work_refuses
+security coverage PASS: RelatedGatesStillRefuseTests.test_ac05_a_blocker_naming_the_blocked_ticket_refuses
+security coverage PASS: RelatedGatesStillRefuseTests.test_ac05_active_work_depending_on_a_blocked_ticket_refuses
+security coverage PASS: BlockerClassificationTests.test_a_related_live_board_block_refuses
+
+RED CONTROL OK: the defect is caught only by the unrelated-veto tests; related gates keep refusing.

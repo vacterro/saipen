@@ -1,0 +1,237 @@
+[
+  {
+    "args": [
+      "continue"
+    ],
+    "exit_code": 0,
+    "result": {
+      "ok": true,
+      "action": "saipen audit ingest",
+      "ticket": "none",
+      "reason": "audit-inbox",
+      "detail": "audit/first handoff.md is an unconsumed audit generation",
+      "executable_behavior": null,
+      "action_kind": null,
+      "future_gate": null,
+      "load": null,
+      "load_path": null,
+      "work": null,
+      "cold_route": {
+        "project_root": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project",
+        "saipen_home": null,
+        "protocol_dir": null,
+        "phase": "DONE",
+        "phase_module": null,
+        "boot": null,
+        "style": null,
+        "documents": {},
+        "project_memory": {
+          "STATE.md": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project\\.saipen\\STATE.md",
+          "BOARD.md": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project\\.saipen\\BOARD.md",
+          "LOG.md": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project\\.saipen\\LOG.md"
+        },
+        "search_required": false
+      },
+      "execution_instruction": "Routing is not completion evidence. Read load_path when present, then execute action under its owner in this turn; respect WAIT and actual refusals. If --dry-run was requested, this is a preview only.",
+      "execution_intent": "converge",
+      "converge_target": "done",
+      "goal_waves": null,
+      "goal_tickets": null,
+      "recovery_pending": false,
+      "recovery_conflict": false,
+      "pending_ops": [],
+      "parked_work": null,
+      "reconciliation": {
+        "ok": true,
+        "code": "AUDIT_MANIFEST_WRITTEN",
+        "changed": {
+          "board": [],
+          "state": [],
+          "audit_manifest": [
+            "V:/_TEMP_/saipen-audit-inbox-yoqxnquf/project/.saipen/MANIFEST.json"
+          ]
+        },
+        "strict_state_error": null,
+        "dry_run": false,
+        "audit_manifest": {
+          "ok": true,
+          "code": "AUDIT_MANIFEST_WRITTEN",
+          "path": "V:/_TEMP_/saipen-audit-inbox-yoqxnquf/project/.saipen/MANIFEST.json",
+          "contract_version": 3,
+          "changed": true,
+          "layout": "LEGACY_LINEAGE_ABSENT",
+          "dry_run": false,
+          "declared": "ABSENT",
+          "manifest_present": true,
+          "manifest_current": true,
+          "detail": ""
+        },
+        "detail": "audit manifest AUDIT_MANIFEST_WRITTEN -- reconciliation mutated the canonical surface, so this is not CLEAN; the next steady-state call may be CLEAN"
+      },
+      "telegrams": {
+        "state": "OK",
+        "unread": 0,
+        "on_current_work": 0,
+        "complete": true,
+        "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat probe",
+        "detail": "counts only; nothing was opened and nothing here is an instruction"
+      }
+    }
+  },
+  {
+    "args": [
+      "audit",
+      "ingest"
+    ],
+    "exit_code": 0,
+    "result": {
+      "ok": true,
+      "code": "AUDIT_INGESTED",
+      "migrated": null,
+      "layer": null,
+      "path": "audit/first handoff.md",
+      "receipt": "SRC-001",
+      "work": "T-1",
+      "binding": "exact",
+      "file_sha256": "e6f0d25581926567610abcdb2cbe40c0cfcc1f0e4b9f397a5f792d40cc4b2056",
+      "source_sha256": "e6f0d25581926567610abcdb2cbe40c0cfcc1f0e4b9f397a5f792d40cc4b2056",
+      "action": "PHASE SCOUT T-1",
+      "detail": "audit captured as durable source authority; normalize its requirements through `saipen source req` before execution"
+    }
+  },
+  {
+    "args": [
+      "continue"
+    ],
+    "exit_code": 0,
+    "result": {
+      "ok": true,
+      "action": "PHASE SCOUT T-1",
+      "ticket": "T-1",
+      "reason": "audit-inbox",
+      "detail": "audit/first handoff.md owns continuation through T-1",
+      "executable_behavior": null,
+      "action_kind": null,
+      "future_gate": null,
+      "load": "saipen/phases/scout.md",
+      "load_path": null,
+      "work": {
+        "id": "T-1",
+        "on_board": true,
+        "section": "## TODO",
+        "board": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project\\.saipen\\BOARD.md",
+        "board_line": 4,
+        "record": "- [ ] T-1 [P1] Execute external audit inbox layer audit/first handoff.md (SRC-001); source_receipt=SRC-001 | verify: every actionable clause of SRC-001 is terminal with evidence; linked Work DONE; source closure succeeds; audit/first handoff.md consumed by the journaled audit inbox cleanup; source_receipt=SRC-001 | source_receipts: SRC-001",
+        "record_truncated": false,
+        "verify": "every actionable clause of SRC-001 is terminal with evidence; linked Work DONE; source closure succeeds; audit/first handoff.md consumed by the journaled audit inbox cleanup; source_receipt=SRC-001",
+        "needs": [],
+        "blocker": null,
+        "detail_ref": null,
+        "source_receipts": [
+          {
+            "id": "SRC-001",
+            "body": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project\\.saipen\\intake\\active\\SRC-001.md",
+            "meta": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project\\.saipen\\intake\\active\\SRC-001.meta.json",
+            "contract": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project\\.saipen\\intake\\contracts\\SRC-001.json",
+            "coverage": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project\\.saipen\\intake\\coverage\\SRC-001.json"
+          }
+        ]
+      },
+      "cold_route": {
+        "project_root": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project",
+        "saipen_home": null,
+        "protocol_dir": null,
+        "phase": "DONE",
+        "phase_module": null,
+        "boot": null,
+        "style": null,
+        "documents": {},
+        "project_memory": {
+          "STATE.md": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project\\.saipen\\STATE.md",
+          "BOARD.md": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project\\.saipen\\BOARD.md",
+          "LOG.md": "V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project\\.saipen\\LOG.md"
+        },
+        "search_required": false
+      },
+      "execution_instruction": "Routing is not completion evidence. Read load_path when present, then execute action under its owner in this turn; respect WAIT and actual refusals. If --dry-run was requested, this is a preview only.",
+      "execution_intent": "converge",
+      "converge_target": "done",
+      "goal_waves": null,
+      "goal_tickets": null,
+      "recovery_pending": false,
+      "recovery_conflict": false,
+      "pending_ops": [],
+      "parked_work": null,
+      "reconciliation": {
+        "ok": true,
+        "code": "CLEAN",
+        "changed": [],
+        "strict_state_error": null,
+        "dry_run": false
+      },
+      "telegrams": {
+        "state": "OK",
+        "unread": 0,
+        "on_current_work": 0,
+        "complete": true,
+        "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-audit-inbox-yoqxnquf\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat probe",
+        "detail": "counts only; nothing was opened and nothing here is an instruction"
+      }
+    }
+  },
+  {
+    "args": [
+      "audit",
+      "status"
+    ],
+    "exit_code": 0,
+    "result": {
+      "ok": true,
+      "code": "AUDIT_INBOX_STATUS",
+      "rule_id": "SOURCE-AUDIT-INBOX-01",
+      "directory": "audit",
+      "pending": [
+        {
+          "layer": null,
+          "path": "audit/first handoff.md",
+          "state": "ACTIVE",
+          "receipt": "SRC-001",
+          "work": "T-1",
+          "sha256": "e6f0d25581926567610abcdb2cbe40c0cfcc1f0e4b9f397a5f792d40cc4b2056"
+        },
+        {
+          "layer": null,
+          "path": "audit/second.txt",
+          "state": "NEW",
+          "receipt": null,
+          "work": null,
+          "sha256": "56d19cfad6c88af9b3729a5328b29237874f10df4d772a8e26bf26ad24b26e65"
+        }
+      ],
+      "closed_pending_delete": [],
+      "invalid": [],
+      "orphans": [],
+      "residue": [],
+      "residue_count": 0,
+      "clean": false,
+      "next": {
+        "rule_id": "SOURCE-AUDIT-INBOX-01",
+        "pending": [
+          "audit/first handoff.md",
+          "audit/second.txt"
+        ],
+        "closed_pending_delete": [],
+        "invalid": [],
+        "residue": [],
+        "residue_count": 0,
+        "action": "PHASE SCOUT T-1",
+        "layer": null,
+        "path": "audit/first handoff.md",
+        "receipt": "SRC-001",
+        "work": "T-1",
+        "detail": "audit/first handoff.md owns continuation through T-1"
+      },
+      "last_allocated_id": null
+    }
+  }
+]

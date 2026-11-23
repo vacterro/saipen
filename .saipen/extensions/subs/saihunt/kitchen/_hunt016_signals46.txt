@@ -1,0 +1,17 @@
+== signal4: swallowed-exception candidates (tools/, tracked+untracked)
+0
+-- broken out by directory
+== signal6: zero-reference defs
+defs 14047 zero-ref defs 8512
+  tools/saipen_engine/result.py:66 __bool__
+  tools/test_t1829_publication_boundary.py:34 __call__
+  tools/saipen_engine/result.py:63 __contains__
+  tools/run_scenarios.py:4336 __exit__
+  tools/saipen_engine/result.py:60 __getitem__
+  tools/saipen_engine/producer.py:518 __post_init__
+  tools/saipen_engine/errors.py:36 __str__
+  tools/test_t1304_r004_dry_run_purity.py:73 _all_files
+  tools/saipen_engine/convergence.py:401 _attribution_claims
+  tools/test_opencode_live_session.py:750 _bash_after
+  tools/saipen_engine/liveness.py:65 _cache_path
+  tools/saipen_engine/board.py:1210 _claim_is_live

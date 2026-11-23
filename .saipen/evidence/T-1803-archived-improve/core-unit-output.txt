@@ -1,0 +1,19 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 6791,
+  "red": 2,
+  "new_red": [
+    "test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_every_literal_writer_class_is_registered",
+    "test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_every_named_writer_class_is_registered"
+  ],
+  "fixed": [],
+  "problems": [
+    "2 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/de39bbd33e86d519-20261016T184906Z.json",
+  "reused": false,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

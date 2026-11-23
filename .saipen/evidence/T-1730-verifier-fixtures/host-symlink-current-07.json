@@ -1,0 +1,8 @@
+{
+  "available": false,
+  "error": "OSError",
+  "winerror": 1314,
+  "detail": "[WinError 1314] A required privilege is not held by the client: 'V:\\\\_TEMP_\\\\saipen-symlink-capability-hkuf8zxx\\\\external.md' -> 'V:\\\\_TEMP_\\\\saipen-symlink-capability-hkuf8zxx\\\\project\\\\IDENTITY.md'",
+  "privilege_query_exit": 0,
+  "symbolic_link_privilege_listed": false
+}

@@ -1,0 +1,16 @@
+{
+  "ticket": "T-1790",
+  "phase": "DONE",
+  "command": "python tools/core_unit.py evidence T-1790",
+  "tool_session_id": 71912,
+  "pid": 15824,
+  "started_utc": "2026-10-15T15:13:12Z",
+  "marker": ".saipen/cache/inflight/core-unit.json",
+  "regression_record": ".saipen/evidence/regression/regression-execution-86b4a9cf6bcf4a3699070510498b2201.json",
+  "terminal": true,
+  "exit_code": 0,
+  "family_record": ".saipen/evidence/core-unit/afba273e0b7ef3ca-20261015T153829Z.json",
+  "observation": "Original tool session completed PASS: 6661 ran, zero red, zero new red, no partition error and no leaked sandboxes. The six recorded descendant PIDs were absent on the subsequent process check.",
+  "ticket_completion_event": "E-15903",
+  "resume": "T-1790 is canonically DONE after independent REVIEW and final CURRENT_PASS validation. Do not restart its completed family or replay its finish. Continue the active cc all goal through the canonical router."
+}

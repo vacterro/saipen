@@ -1,0 +1,24 @@
+{
+  "ticket": "T-1581",
+  "verifier_sha256": "8b14abf00bf826b7734d402fa085d4288142a338ca4e99c4d7a613456816e162",
+  "subject_before_sha256": "60e278f2681127a7ee3e1bd03368a0e7d54fc5bc34c7dd5446cbf9ef69241aa5",
+  "subject_after_sha256": "c7b317a9e11bb0b0b7687573e88f6c25048045ac9ae9f7d6e8e4644fa34319b0",
+  "results": [
+    {
+      "expected": "FAIL",
+      "passed": false,
+      "ran": 5,
+      "failures": 1,
+      "errors": 0,
+      "output": "test_a_wrong_digest_still_fails_the_same_validator (test_t1581_phase_rename_knowledge.PhaseRenameKnowledgeTests.test_a_wrong_digest_still_fails_the_same_validator) ... ok\ntest_absent_knowledge_remains_absent (test_t1581_phase_rename_knowledge.PhaseRenameKnowledgeTests.test_absent_knowledge_remains_absent) ... ok\ntest_existing_wrong_digest_is_not_restamped (test_t1581_phase_rename_knowledge.PhaseRenameKnowledgeTests.test_existing_wrong_digest_is_not_restamped) ... ok\ntest_invalid_card_is_not_repaired_into_valid_evidence (test_t1581_phase_rename_knowledge.PhaseRenameKnowledgeTests.test_invalid_card_is_not_repaired_into_valid_evidence) ... ok\ntest_renamed_card_body_gets_a_fresh_index (test_t1581_phase_rename_knowledge.PhaseRenameKnowledgeTests.test_renamed_card_body_gets_a_fresh_index) ... FAIL\n\n======================================================================\nFAIL: test_renamed_card_body_gets_a_fresh_index (test_t1581_phase_rename_knowledge.PhaseRenameKnowledgeTests.test_renamed_card_body_gets_a_fresh_index)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1581_phase_rename_knowledge.py\", line 78, in test_renamed_card_body_gets_a_fresh_index\n    self.assertIsNone(self.run_probe())\nAssertionError: 'consistent SCOUT->SCOUTX rename was rejected: FAIL: KNOWLEDGE/ structured card/index: INDEX.md is stale; run `saipen knowledge index`' is not None\n\n----------------------------------------------------------------------\nRan 5 tests in 0.134s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "expected": "PASS",
+      "passed": true,
+      "ran": 5,
+      "failures": 0,
+      "errors": 0,
+      "output": "test_a_wrong_digest_still_fails_the_same_validator (test_t1581_phase_rename_knowledge.PhaseRenameKnowledgeTests.test_a_wrong_digest_still_fails_the_same_validator) ... ok\ntest_absent_knowledge_remains_absent (test_t1581_phase_rename_knowledge.PhaseRenameKnowledgeTests.test_absent_knowledge_remains_absent) ... ok\ntest_existing_wrong_digest_is_not_restamped (test_t1581_phase_rename_knowledge.PhaseRenameKnowledgeTests.test_existing_wrong_digest_is_not_restamped) ... ok\ntest_invalid_card_is_not_repaired_into_valid_evidence (test_t1581_phase_rename_knowledge.PhaseRenameKnowledgeTests.test_invalid_card_is_not_repaired_into_valid_evidence) ... ok\ntest_renamed_card_body_gets_a_fresh_index (test_t1581_phase_rename_knowledge.PhaseRenameKnowledgeTests.test_renamed_card_body_gets_a_fresh_index) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.227s\n\nOK\n"
+    }
+  ]
+}

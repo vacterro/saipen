@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_automation_block.py"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests/scenarios/userperson-valid",
+    "VERSION"
+  ],
+  "oracle_files": [
+    "tools/test_automation_block.py",
+    "tools/test_fixture_support.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/automation.py",
+    "tools/saipen_engine/response_surface.py"
+  ],
+  "timeout": 180
+}

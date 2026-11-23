@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-400:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIHANDOFF P0 work-exhaustion truth, review terminality, autonomous maintenance authority and publication truth; reconcile live state, reproduce defects, repair and verify within authenticated authority"
+    }
+  },
+  "derived_at": "2026-11-09T12:11:06Z",
+  "derived_from": "SRC-400",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "9ec75263cdf68840636f8810930565d5fa457bdad67f37e14677101e85b57ed3"
+}

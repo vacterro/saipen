@@ -1,0 +1,19 @@
+{
+  "owned_intent_to_add": [
+    "tools/_module_identity.py",
+    "tools/test_tool_module_identity.py"
+  ],
+  "source_unchanged": true,
+  "fingerprint": "73a0535196e5c013219b88b35cf4e275d74e5f1a911edbf4bb22e4b5a55ff13c",
+  "actual_flags": [
+    "0x20104000",
+    "0x20104000"
+  ],
+  "required_intent_bit": "0x20000000",
+  "staged_blobs_empty": true,
+  "native_family_record": ".saipen\\evidence\\core-unit\\73a0535196e5c013-20261003T164017Z.json",
+  "native_family_record_sha256": "7c00355242378e7c871807521e794a653c184801f6286861b11e7e892836b823",
+  "initial_wrapper_error": "Exact 20104000 mask rejected valid 20004000 flags",
+  "foreign_index_preservation": "Initial track_owned.py passed foreign-entry and staged-blob comparisons before line 46 failed; no mutation repeated",
+  "published": false
+}

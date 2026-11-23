@@ -1,0 +1,8 @@
+control: ran 5, red 0 -- as expected
+the engine before this Work: ran 5, red 4 -- as expected
+the check never fires: ran 5, red 4 -- as expected
+the plan skips the check: ran 5, red 1 -- as expected
+the check fires beside evidence: ran 5, red 1 -- as expected
+a retired seat counts as a survivor: ran 5, red 1 -- as expected
+the route names reconcile again: ran 5, red 4 -- as expected
+mutations: 6, repetitions each: 3, problems: 0

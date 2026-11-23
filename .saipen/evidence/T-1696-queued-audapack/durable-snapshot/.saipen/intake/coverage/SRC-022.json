@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-022:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "T08 batch start: whole batch queued as independent runs, one pack failure isolated, beyond-six demand queued not dropped, active project reused without duplicate",
+      "text": "Implement and verify every required change and test in T08 BATCH START UP TO 6.",
+      "verification": "tests/services/test_audit_run_service.py:202 batch queued pack failure isolated, :427 eight projects all join queue, :436 never more than six windows, :488 batch reuses active project",
+      "work": "T-52"
+    }
+  },
+  "schema_version": 1
+}

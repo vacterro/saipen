@@ -1,0 +1,36 @@
+PY-27 sweep captures at the 3373fe9f4 epoch
+
+--- compileall tools/saipen_engine (3.11.9 family interpreter) rc=0
+--- py_compile tools/test_t2062_gc_serial.py tools/test_validator_layout_parity.py rc=0
+--- ruff 0.16.0 check tools/ --statistics rc=1
+  420	E501   	[ ] line-too-long
+   52	F401   	[*] unused-import
+   38	E402   	[ ] module-import-not-at-top-of-file
+   29	F821   	[ ] undefined-name
+   16	SIM117 	[-] multiple-with-statements
+   15	RUF100 	[*] unused-noqa
+   14	PLW0108	[ ] unnecessary-lambda
+   14	RUF059 	[ ] unused-unpacked-variable
+   11	F841   	[ ] unused-variable
+    6	RUF005 	[ ] collection-literal-concatenation
+    6	SIM105 	[ ] suppressible-exception
+    4	E731   	[ ] lambda-assignment
+    4	PLW2901	[ ] redefined-loop-name
+    3	SIM114 	[*] if-with-same-arms
+  (full statistics in this section)
+--- ruff findings attributed to the serialized-GC oracle file: 2	RUF100	[*] unused-noqa | 1	F401  	[*] unused-import | Found 3 errors. | [*] 3 fixable with the `--fix` option.
+--- kitchen/pen artifact census (13 entries, closed-cycle artifacts only)
+  .saipen
+  PY-16.patch
+  REGISTRY.json
+  T-2062
+  T-2062-r2
+  T-2062-r3
+  T-2062-r4
+  _gitkeep
+  _py16_verify.txt
+  _verify_duplicate_guard.py
+  crew.py
+  test_t1430_crew_run_receipt.py
+  test_t2122_red_owner_fail_closed.py
+--- attribution: no new source delta this epoch: the head 3373fe9f4 adds .saipen records only (parent 975477b04 published the source bytes), so the backlog is the standing PY-26 census with the serialized-GC oracle findings still attributed

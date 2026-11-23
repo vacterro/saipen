@@ -1,0 +1,18 @@
+helper sentences: 1 ['For Claude Code, a local helper starts on the first prompt and exits when idle with no host running.']
+helper before Quick start: True
+helper absent inside Quick start section: True
+README.md daemon claims: []
+README.ee.md daemon claims: []
+README.ded.md daemon claims: []
+README.ja.md daemon claims: []
+.saipen/saitranslate/kitchen/et/README_ET.md daemon claims: []
+.saipen/saitranslate/kitchen/ru/README_RU.md daemon claims: []
+.saipen/saitranslate/kitchen/ded/README_DED.md daemon claims: []
+.saipen/saitranslate/kitchen/ja/README_JA.md daemon claims: []
+README.ee.md marker 877128c30331e950
+README.ded.md marker 877128c30331e950
+README.ja.md marker 877128c30331e950
+.saipen/saitranslate/kitchen/et/README_ET.md marker 877128c30331e950
+.saipen/saitranslate/kitchen/ru/README_RU.md marker 877128c30331e950
+.saipen/saitranslate/kitchen/ded/README_DED.md marker 877128c30331e950
+.saipen/saitranslate/kitchen/ja/README_JA.md marker 877128c30331e950

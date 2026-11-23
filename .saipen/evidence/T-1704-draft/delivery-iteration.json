@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "schema_version": 1,
+  "decision": "OPERATOR_WAIT",
+  "goal_complete": false,
+  "executable_action_remains": false,
+  "operator_due": true,
+  "valve_tripped": true,
+  "requires_human": true,
+  "canonical_task": "T-1703",
+  "phase": "REVIEW",
+  "next_action": "WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
+  "execution_intent": "goal",
+  "executor_assessed": false,
+  "executor_compatible": true,
+  "executor_id": null,
+  "missing_capabilities": [],
+  "required_capabilities": [
+    "filesystem_read",
+    "git",
+    "process_execution",
+    "python",
+    "saipen_control"
+  ],
+  "executor_capabilities": null,
+  "admission": {
+    "result": "UNASSESSED",
+    "missing": [],
+    "next": "NONE"
+  },
+  "route_reason": "wait",
+  "route_action": "WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
+  "state_readable": true,
+  "recall_decision": "OPERATOR_WAIT"
+}

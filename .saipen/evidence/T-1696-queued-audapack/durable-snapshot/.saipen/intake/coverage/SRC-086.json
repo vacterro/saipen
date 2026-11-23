@@ -1,0 +1,1832 @@
+{
+  "requirements": {
+    "SRC-086:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "E-1926",
+      "text": "Do not rewrite or merge historical source receipts.",
+      "verification": null,
+      "work": "T-238"
+    },
+    "SRC-086:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not invent a dependency on T-236 merely because this feature can reuse code implemented during T-236.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not make the operator complete T-236 browser acceptance before beginning this feature.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "The operator must not need to:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/limits.py; audapack/limit_adapters.py",
+      "text": "Do not hard-code a universal assumption that every provider has exactly one 5-hour limit.",
+      "verification": "pytest tests/test_account_limits.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Routine limit observation must not waste model quota.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Never accidentally consume quota merely to check whether quota exists.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "A trigger must never turn into two agents, two prompts, or two audits because the UI restarted or two processes observed the same due time.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not fabricate availability.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "But a stale optional limit source must not brick unrelated launchers or unrelated prepared jobs.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "The operator must always be able to see:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not treat launcher ids as the final account model.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Account identity must remain stable across application restarts.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not use display name alone as identity.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/account_registry.py",
+      "text": "Do not include credentials in account ids.",
+      "verification": "pytest tests/test_account_limits.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R016": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/account_registry.py; audapack/prepared.py",
+      "text": "Do not persist tokens.",
+      "verification": "pytest tests/test_account_limits.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not hash secrets merely to use the hash as identity.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do NOT recursively scan the whole user profile or disks.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R019": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not parse credential values.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not display tokens.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R021": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not store full auth files.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Discovery must be idempotent.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R023": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not silently guess between multiple plausible launchers.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R024": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not scatter provider-specific quota parsing through Qt widgets or launch code.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Never invent percentages from incomplete information.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R026": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Availability must consider all relevant hard windows.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R027": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Detailed tooltip must display all known windows.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R028": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/limit_adapters.py; live Codex/Claude/Antigravity status probes 2026-09-23",
+      "text": "Do not use model prompts as normal polling.",
+      "verification": "pytest tests/test_account_limits.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not modify the other applications state.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R030": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not create a hard dependency.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R031": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not scrape screenshots or UI pixels.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R032": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "tests/test_prepared_worker.py::test_thirty_second_worker_wake_does_not_probe_every_wake",
+      "text": "do not probe more frequently merely because a timer exists.",
+      "verification": "python -m pytest -q tests/test_prepared_worker.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R033": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not run a minute-by-minute network poll for hours.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R034": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not permanently switch the account to one-minute polling.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R035": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tests/test_account_limits.py::test_probe_errors_back_off_and_success_restores_normal_cadence",
+      "text": "Repeated probe errors must back off.",
+      "verification": "python -m pytest -q tests/test_account_limits.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R036": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "One provider failure must not stop other account probes.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R037": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not copy UI code blindly.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R038": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not make project rows dramatically taller.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R039": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not turn ten launcher buttons into unreadable Christmas lights.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R040": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "ERROR must not look identical to exhausted quota.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R041": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not expose tokens or credential paths unnecessarily.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R042": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not overload Settings with all runtime scheduling state.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R043": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "A prepared launch must be a real persistent scheduled entity.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R044": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared.py; audapack/bridge/server.py",
+      "text": "Do not store runtime state only in Qt widgets.",
+      "verification": "pytest tests/test_prepared.py tests/test_prepared_worker.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R045": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not simply choose the newest .md in the folder.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R046": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Project identity must match.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R047": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not mutate the captured original.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R048": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not log the entire command in general diagnostic logs.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R049": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not create a second audit dispatch implementation.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R050": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not blindly pass Claude flags to Codex or Codex flags to ZCode.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R051": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not depend forever on parsing --help on every launch.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R052": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/limit_adapters.py Codex model/list metadata; audapack/prepared_delivery.py version-keyed capability cache",
+      "text": "Do not hard-code a supposedly permanent model catalog.",
+      "verification": "live Codex 2 model/list 7 models 2026-09-23; pytest tests/test_prepared_delivery.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R053": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not guess arguments from internet memory.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R054": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Prepared scheduling must not duplicate launcher implementation.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R055": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "must go through the same authoritative launcher logic for:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R056": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not create:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R057": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "After launch, prepared content must enter the agent reliably.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R058": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do NOT default to fragile keyboard simulation or SendKeys.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R059": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not pretend a launched empty terminal executed the prepared work.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R060": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "A reset event must have a stable identity.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R061": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "A recurring ON RESET job must execute at most once for one reset event.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R062": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "A process restart at reset+30s must not create a second execution.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R063": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not keep firing against the obsolete time.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R064": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not store only a locale-formatted string.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R065": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not silently forget it.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R066": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "DO NOT ASSUME RESET SEMANTICS",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R067": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/provider_capabilities.py; audapack/prepared_sync.py",
+      "text": "The scheduler must know whether synchronization by first use is meaningful.",
+      "verification": "python -m pytest -q tests/test_provider_capabilities.py tests/test_prepared_sync.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R068": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/provider_capabilities.py; audapack/prepared_sync.py",
+      "text": "Do not tell the user two accounts were synchronized when the provider uses a fixed independent schedule.",
+      "verification": "python -m pytest -q tests/test_prepared_sync.py::test_sync_preflight_requires_first_consuming_use_and_reports_fixed_window:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R069": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not promise zero milliseconds.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R070": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_sync.py; audapack/prepared_worker.py",
+      "text": "do not lie about successful synchronization.",
+      "verification": "python -m pytest -q tests/test_prepared_sync.py::test_sync_unsupported_provider_fails_preflight:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R071": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "must avoid consuming model quota.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R072": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Never mix them.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R073": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not assume using a \"cheap model\" starts the same 5h timer as the expensive model.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R074": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not burn usage experimentally without explicit operator action.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R075": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "The prime action must:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R076": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not invent exact command flags.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R077": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not optimize cost by starting the wrong timer.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R078": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "It must never repeat merely because AUDAPACK restarted.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R079": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "State transitions must be explicit.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R080": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not infer scheduling state only from timestamps.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R081": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "A stale worker must not:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R082": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not depend on a Qt widget timer as the sole authority.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R083": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not create two independent schedulers in GUI and Bridge.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R084": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not write runtime state into repository source files.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R085": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not place provider auth tokens into scheduler JSON.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R086": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not allow endless growth.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R087": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not present inferred time with the same confidence as provider-supplied time.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R088": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not build one giant form containing every option simultaneously.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R089": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "DRY RUN must prove:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R090": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "It must create a normal execution receipt.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R091": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not bypass exactly-once bookkeeping.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R092": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Prepared scheduling must build a project-aware handoff index.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R093": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_payloads.py",
+      "text": "Never select a handoff only because its filename happens to sort last.",
+      "verification": "pytest tests/test_prepared_payloads.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R094": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_delivery.py",
+      "text": "must be treated as exact operator payload.",
+      "verification": "pytest tests/test_prepared_delivery.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R095": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not expand or reinterpret it inside AUDAPACK.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R096": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not create an archive hours in advance unless deliberately requested.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R097": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not randomly pick.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R098": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared.py; audapack/auto_account.py",
+      "text": "Avoid two due jobs simultaneously selecting the same sole available account.",
+      "verification": "python -m pytest -q tests/test_auto_account.py::test_auto_account_reservations_prevent_dual_selection_and_recover:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R099": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared.py LEASE_SECONDS short-lived reservation",
+      "text": "Do not create hard quota reservations hours in advance unless configured.",
+      "verification": "python -m pytest -q tests/test_auto_account.py::test_auto_account_reservations_prevent_dual_selection_and_recover:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R100": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "It must never be presented as provider-enforced quota.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R101": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not overbuild calendar recurrence if not required.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R102": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not continue claiming \"synced\" forever.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R103": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not use huge blocking popups.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R104": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not encode meaning solely by color.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R105": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not wait 15 minutes just because the periodic interval has not elapsed.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R106": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not launch a second Claude 1 accidentally because scheduler did not know Project Room already launched one.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R107": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "tests/test_prepared_worker.py::test_model_with_two_quota_pools_waits_for_mapping_then_uses_mapped_pool",
+      "text": "Do not assume all models share the same quota.",
+      "verification": "python -m pytest -q tests/test_prepared_worker.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R108": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "the prepared model must map to the correct availability window.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R109": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not execute PRIME specifically to align a quota bucket that is not proven.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R110": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "tests/test_prepared.py::test_timezone_offset_sleep_and_backward_clock_keep_one_event",
+      "text": "Do not fire twice because the clock moved backward.",
+      "verification": "python -m pytest -q tests/test_prepared.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R111": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not silently launch a job six hours late unless policy permits it.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R112": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_prime.py; audapack/prepared.py",
+      "text": "Do not repeat a successful prime because final logging failed.",
+      "verification": "python -m pytest -q tests/test_prepared_worker.py::test_worker_prime_successful_delivery:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R113": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not resend a prompt merely because the GUI did not receive the success notification.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R114": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not kill an already-running provider process unless the operator explicitly requests it.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R115": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Editing an armed job must invalidate/recompute:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R116": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not mutate an execution already CLAIMED.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R117": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Never persist:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R118": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not place them in:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R119": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not log their body.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R120": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "It must not:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R121": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Project Room paint must remain memory-only.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R122": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not run provider probes or disk scans during:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R123": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not reset the whole project model because Claude 1 remaining percentage changed.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R124": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not bolt scheduler data blindly into LauncherConfig.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R125": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not store high-churn runtime limit history inside the main config.json.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R126": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not invent provider quota support when none can be obtained.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R127": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "reset 30 minutes away: job waits.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R128": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "reset arrives: no execution before safety delay.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R129": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "reset +60 seconds: one availability verification.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R130": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "available: exactly one execution.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R131": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "provider still unavailable: bounded wait/recheck.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R132": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared.py; audapack/prepared_worker.py",
+      "text": "app restarts 10 seconds before due: job still fires once.",
+      "verification": "python -m pytest -q tests/test_prepared_clock.py::test_bridge_restart_before_and_during_due:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R133": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared.py; audapack/prepared_worker.py",
+      "text": "app restarts 10 seconds after due: catch-up policy determines result.",
+      "verification": "python -m pytest -q tests/test_prepared_clock.py::test_sleep_within_catchup_window_claims_and_launches:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R134": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "reset_at moves: timer follows latest authoritative observation.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R135": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "same reset event observed twice: no duplicate run.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R136": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "recurring Every Reset: next event arms only after current event receives a terminal receipt.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R137": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "future time",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R138": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared.py; audapack/prepared_worker.py",
+      "text": "exact due",
+      "verification": "python -m pytest -q tests/test_prepared_clock.py::test_timezone_offset_equivalence:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R139": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared.py; audapack/prepared_worker.py",
+      "text": "unavailable at due",
+      "verification": "python -m pytest -q tests/test_prepared_clock.py::test_availability_wait_catches_up_when_limit_clears:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R140": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "wait-until-available",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R141": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared.py; audapack/prepared_worker.py",
+      "text": "strict-time missed",
+      "verification": "python -m pytest -q tests/test_prepared_clock.py::test_strict_time_policy_misses_immediately_when_exhausted:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R142": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "tests/test_prepared.py::test_timezone_offset_sleep_and_backward_clock_keep_one_event",
+      "text": "sleep through due",
+      "verification": "python -m pytest -q tests/test_prepared.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R143": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared.py; audapack/prepared_worker.py",
+      "text": "restart through due",
+      "verification": "python -m pytest -q tests/test_prepared_clock.py::test_bridge_restart_before_and_during_due:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R144": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "tests/test_prepared.py::test_timezone_offset_sleep_and_backward_clock_keep_one_event",
+      "text": "timezone-safe serialization",
+      "verification": "python -m pytest -q tests/test_prepared.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R145": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "tests/ui_qt/test_limits_prepared_widget.py::test_edit_preserves_time_policy_and_reset_window_and_recomputes_due",
+      "text": "editing time recomputes due timer",
+      "verification": "python -m pytest -q tests/ui_qt/test_limits_prepared_widget.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R146": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "duplicate scheduler process cannot double execute.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R147": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_sync.py",
+      "text": "two ready accounts: both pass preflight.",
+      "verification": "python -m pytest -q tests/test_prepared_sync.py::test_sync_coordinator_prepare_marks_ready:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R148": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_sync.py",
+      "text": "release barrier: both launch once.",
+      "verification": "python -m pytest -q tests/test_prepared_sync.py::test_sync_coordinator_release_launches_all_members_once:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R149": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_sync.py",
+      "text": "measured start skew recorded.",
+      "verification": "python -m pytest -q tests/test_prepared_sync.py::test_sync_release_skew_calculation:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R150": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_worker.py",
+      "text": "one account unavailable: neither account starts before policy permits.",
+      "verification": "python -m pytest -q tests/test_prepared_worker.py::test_worker_sync_wait_reason_when_under_two_accounts:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R151": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_worker.py",
+      "text": "one account fails preflight: no other account starts.",
+      "verification": "python -m pytest -q tests/test_prepared_worker.py::test_worker_sync_preflight_failure_launches_zero:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R152": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_worker.py",
+      "text": "one fails after barrier: PARTIAL result recorded honestly.",
+      "verification": "python -m pytest -q tests/test_prepared_worker.py::test_worker_sync_two_phase_release_and_skew:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R153": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "provider window semantics FIXED: alignment action disabled/not claimed useful.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R154": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "FIRST_CONSUMING_USE: alignment supported.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R155": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "after start: observed window start/reset is captured.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R156": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "future drift displayed.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R157": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_prime.py",
+      "text": "unsupported provider - no prime",
+      "verification": "python -m pytest -q tests/test_prepared_prime.py::test_unsupported_or_unknown_semantics_never_call_consuming_adapter:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R158": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_prime.py",
+      "text": "unknown quota mapping - no prime",
+      "verification": "python -m pytest -q tests/test_prepared_prime.py::test_unknown_or_mismatched_quota_mapping_refuses_prime:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R159": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_prime.py",
+      "text": "fixed window - no prime alignment claim",
+      "verification": "python -m pytest -q tests/test_prepared_prime.py::test_fixed_window_semantics_refuse_prime:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R160": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_prime.py",
+      "text": "first-use-started supported window - one minimal action",
+      "verification": "python -m pytest -q tests/test_prepared_prime.py::test_supported_first_consuming_use_records_claimed_and_submits:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R161": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_prime.py minimal neutral command",
+      "text": "no project mutation",
+      "verification": "python -m pytest -q tests/test_prepared_prime.py::test_supported_first_consuming_use_records_claimed_and_submits:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R162": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_worker.py",
+      "text": "one execution only",
+      "verification": "python -m pytest -q tests/test_prepared_worker.py::test_worker_prime_successful_delivery:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R163": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_worker.py",
+      "text": "restart does not repeat",
+      "verification": "python -m pytest -q tests/test_prepared_worker.py::test_worker_prime_reconcile_interrupted_submission:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R164": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_prime.py",
+      "text": "model maps to target quota bucket",
+      "verification": "python -m pytest -q tests/test_prepared_prime.py::test_supported_first_consuming_use_records_claimed_and_submits:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R165": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_prime.py",
+      "text": "cheap model from another bucket is rejected",
+      "verification": "python -m pytest -q tests/test_prepared_prime.py::test_unknown_or_mismatched_quota_mapping_refuses_prime:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R166": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_worker.py",
+      "text": "prime result updates limit state.",
+      "verification": "python -m pytest -q tests/test_prepared_worker.py::test_worker_prime_unverified_transitions_to_verifying_and_reconciles_done:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R167": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "newest handoff for correct project selected",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R168": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "newer handoff from different project rejected",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R169": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "duplicate content does not create ambiguity",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R170": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "latest mode changes when new capture arrives",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R171": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "pinned mode does not change",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R172": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "missing temp original does not break durable pinned copy",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R173": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "content hash mismatch blocks pinned execution",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R174": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "handoff body is not written to general logs.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R175": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Recovery must converge.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R176": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "AUDAPACK status must answer:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R177": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not require opening logs to understand the system.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R178": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not throw modal dialogs for ordinary scheduler state changes.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R179": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Manual RUN NOW must still use the normal execution service and receipts.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R180": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/auto_account.py deterministic scoring",
+      "text": "Do not hard-code which account is \"best\".",
+      "verification": "python -m pytest -q tests/test_auto_account.py::test_rank_auto_accounts_operator_priority_and_tie_breaks:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R181": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not duplicate account identity logic.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R182": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not build this only for Claude/Codex.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R183": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "This subsystem must remain cheap.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R184": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not store full prompts.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R185": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Tests must simulate:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R186": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack test suite simulated clock fixtures",
+      "text": "Do not use real sleep(60) in test suites.",
+      "verification": "python -m pytest -q tests/test_prepared_clock.py:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R187": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared.py claim generation fence",
+      "text": "remove fencing - duplicate execution test must fail",
+      "verification": "python -m pytest -q tests/test_prepared_recovery.py::test_stale_claim_takeover_and_owner_fence:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R188": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared.py safety_delay_seconds",
+      "text": "remove +60s guard - reset safety test must fail",
+      "verification": "python -m pytest -q tests/test_prepared.py::test_reset_waits_full_safety_delay_then_requires_fresh_verification:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R189": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "remove account matching - wrong-account test must fail",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R190": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "remove handoff project identity - cross-project handoff test must fail",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R191": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/prepared_prime.py one target receipt per event",
+      "text": "remove prime receipt - duplicate prime test must fail",
+      "verification": "python -m pytest -q tests/test_prepared_prime.py::test_supported_first_consuming_use_records_claimed_and_submits:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R192": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not perform a quota-consuming PRIME during validation unless explicitly safe and useful.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R193": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not falsely absorb unrelated inherited blockers.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R194": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not claim inherited failures as new regressions.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R195": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not worsen them.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R196": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "If a touched inherited defect must be fixed to implement this feature safely:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R197": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not accumulate hours of implementation without durable checkpoints.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R198": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "It must include:",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R199": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "A /new Opus session must be able to continue from repository state and this checkpoint without requiring the previous conversation.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R200": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not hide flaky/time-dependent scheduler tests.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R201": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not stop after implementing a scheduler form.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R202": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not stop after displaying limits.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    },
+    "SRC-086:R203": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-1925",
+      "text": "Do not stop after creating timers.",
+      "verification": "pytest focused prepared 181 PASS + full pytest 1826 passed 5 skipped + ruff clean + compileall rc=0:PASS",
+      "work": "T-238"
+    }
+  },
+  "schema_version": 1
+}

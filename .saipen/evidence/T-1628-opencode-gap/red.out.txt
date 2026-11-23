@@ -1,0 +1,144 @@
+.FFFFFFFFFFFFFFFFF
+======================================================================
+FAIL: test_a_loaded_generation_gap_never_softens_a_binding_conflict (test_t1628_opencode_gap.NativeGapPolicy.test_a_loaded_generation_gap_never_softens_a_binding_conflict) (carrier={'SAIPEN_PROJECT_ROOT': 'V:\\_TEMP_\\tmpvekg87av', 'SAIPEN_PROJECT_LINEAGE': 'lineage-e389be8ec8314955ab8d78cfb489892a'}, mode='degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 162, in test_a_loaded_generation_gap_never_softens_a_binding_conflict
+    self.assertRegex(
+AssertionError: Regex didn't match: 'PROJECT_BINDING_INVALID|PROJECT_LINEAGE_MISMATCH|PROJECT_BINDING_AMBIGUOUS' not found in 'SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=T-1327-zero-manual-recovery-20260914.1 sha256=126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d; installed sha256=52d983d766d4d4dc81ecf8310353c96d57f901ef34a53d2c2e66cd9f2e126f1d; restart OpenCode; the host tool did not execute'
+
+======================================================================
+FAIL: test_a_loaded_generation_gap_never_softens_a_binding_conflict (test_t1628_opencode_gap.NativeGapPolicy.test_a_loaded_generation_gap_never_softens_a_binding_conflict) (carrier={'SAIPEN_PROJECT_ROOT': 'V:\\_TEMP_\\tmpvekg87av', 'SAIPEN_PROJECT_LINEAGE': 'lineage-e389be8ec8314955ab8d78cfb489892a'}, mode='strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 162, in test_a_loaded_generation_gap_never_softens_a_binding_conflict
+    self.assertRegex(
+AssertionError: Regex didn't match: 'PROJECT_BINDING_INVALID|PROJECT_LINEAGE_MISMATCH|PROJECT_BINDING_AMBIGUOUS' not found in 'SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=T-1327-zero-manual-recovery-20260914.1 sha256=126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d; installed sha256=52d983d766d4d4dc81ecf8310353c96d57f901ef34a53d2c2e66cd9f2e126f1d; restart OpenCode; the host tool did not execute'
+
+======================================================================
+FAIL: test_a_loaded_generation_gap_never_softens_a_binding_conflict (test_t1628_opencode_gap.NativeGapPolicy.test_a_loaded_generation_gap_never_softens_a_binding_conflict) (carrier={'SAIPEN_PROJECT_ROOT': 'V:\\_TEMP_\\tmpcjmg9rzi', 'SAIPEN_PROJECT_LINEAGE': 'lineage-forged'}, mode='degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 162, in test_a_loaded_generation_gap_never_softens_a_binding_conflict
+    self.assertRegex(
+AssertionError: Regex didn't match: 'PROJECT_BINDING_INVALID|PROJECT_LINEAGE_MISMATCH|PROJECT_BINDING_AMBIGUOUS' not found in 'SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=T-1327-zero-manual-recovery-20260914.1 sha256=126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d; installed sha256=52d983d766d4d4dc81ecf8310353c96d57f901ef34a53d2c2e66cd9f2e126f1d; restart OpenCode; the host tool did not execute'
+
+======================================================================
+FAIL: test_a_loaded_generation_gap_never_softens_a_binding_conflict (test_t1628_opencode_gap.NativeGapPolicy.test_a_loaded_generation_gap_never_softens_a_binding_conflict) (carrier={'SAIPEN_PROJECT_ROOT': 'V:\\_TEMP_\\tmpcjmg9rzi', 'SAIPEN_PROJECT_LINEAGE': 'lineage-forged'}, mode='strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 162, in test_a_loaded_generation_gap_never_softens_a_binding_conflict
+    self.assertRegex(
+AssertionError: Regex didn't match: 'PROJECT_BINDING_INVALID|PROJECT_LINEAGE_MISMATCH|PROJECT_BINDING_AMBIGUOUS' not found in 'SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=T-1327-zero-manual-recovery-20260914.1 sha256=126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d; installed sha256=52d983d766d4d4dc81ecf8310353c96d57f901ef34a53d2c2e66cd9f2e126f1d; restart OpenCode; the host tool did not execute'
+
+======================================================================
+FAIL: test_a_loaded_generation_gap_never_softens_a_forbidden_effect (test_t1628_opencode_gap.NativeGapPolicy.test_a_loaded_generation_gap_never_softens_a_forbidden_effect) (mode='degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 176, in test_a_loaded_generation_gap_never_softens_a_forbidden_effect
+    self.assertIn("PROTECTED_CANONICAL_NAMESPACE", record["message"])
+AssertionError: 'PROTECTED_CANONICAL_NAMESPACE' not found in 'SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=T-1327-zero-manual-recovery-20260914.1 sha256=126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d; installed sha256=52d983d766d4d4dc81ecf8310353c96d57f901ef34a53d2c2e66cd9f2e126f1d; restart OpenCode; the host tool did not execute'
+
+======================================================================
+FAIL: test_a_loaded_generation_gap_never_softens_a_forbidden_effect (test_t1628_opencode_gap.NativeGapPolicy.test_a_loaded_generation_gap_never_softens_a_forbidden_effect) (mode='strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 176, in test_a_loaded_generation_gap_never_softens_a_forbidden_effect
+    self.assertIn("PROTECTED_CANONICAL_NAMESPACE", record["message"])
+AssertionError: 'PROTECTED_CANONICAL_NAMESPACE' not found in 'SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=T-1327-zero-manual-recovery-20260914.1 sha256=126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d; installed sha256=52d983d766d4d4dc81ecf8310353c96d57f901ef34a53d2c2e66cd9f2e126f1d; restart OpenCode; the host tool did not execute'
+
+======================================================================
+FAIL: test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects (test_t1628_opencode_gap.NativeGapPolicy.test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects) (gap='missing-engine', mode='degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 114, in test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects
+    self.assertEqual(record["allowed"], mode == "degraded", record)
+AssertionError: False != True : {'allowed': False, 'message': "SAIPEN_GUARD_UNINSTALLED: no saipen guard at 'V:\\_TEMP_\\t1628-gap-n_p_wdpk\\absent-engine\\tools\\saipen.py'; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)", 'notices': [], 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']}
+
+======================================================================
+FAIL: test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects (test_t1628_opencode_gap.NativeGapPolicy.test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects) (gap='missing-engine', mode='strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 124, in test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects
+    self.assertIn("policy STRICT", record["message"])
+AssertionError: 'policy STRICT' not found in "SAIPEN_GUARD_UNINSTALLED: no saipen guard at 'V:\\_TEMP_\\t1628-gap-n_p_wdpk\\absent-engine\\tools\\saipen.py'; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)"
+
+======================================================================
+FAIL: test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects (test_t1628_opencode_gap.NativeGapPolicy.test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects) (gap='missing-python', mode='degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 114, in test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects
+    self.assertEqual(record["allowed"], mode == "degraded", record)
+AssertionError: False != True : {'allowed': False, 'message': "SAIPEN_GUARD_UNREACHABLE: no Python runtime found; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)", 'notices': [], 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']}
+
+======================================================================
+FAIL: test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects (test_t1628_opencode_gap.NativeGapPolicy.test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects) (gap='missing-python', mode='strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 124, in test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects
+    self.assertIn("policy STRICT", record["message"])
+AssertionError: 'policy STRICT' not found in "SAIPEN_GUARD_UNREACHABLE: no Python runtime found; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)"
+
+======================================================================
+FAIL: test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects (test_t1628_opencode_gap.NativeGapPolicy.test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects) (gap='stale', mode='degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 114, in test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects
+    self.assertEqual(record["allowed"], mode == "degraded", record)
+AssertionError: False != True : {'allowed': False, 'message': 'SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=T-1327-zero-manual-recovery-20260914.1 sha256=126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d; installed sha256=52d983d766d4d4dc81ecf8310353c96d57f901ef34a53d2c2e66cd9f2e126f1d; restart OpenCode; the host tool did not execute', 'notices': [], 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpenzvtrzi","project_lineage":"lineage-dd341c4ffee64993acaa4101638933a0","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-9001", "agent_incarnation": "inc-81562c1b4b9dc534", "decision": "AUTO_KICK", "execution_epoch": "ep-6e59801552ccc7f0", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-9001", "phase": "BUILD", "replacement_detected": true, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-9001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.']}
+
+======================================================================
+FAIL: test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects (test_t1628_opencode_gap.NativeGapPolicy.test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects) (gap='stale', mode='strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 124, in test_all_three_gaps_follow_the_operator_policy_and_mark_real_effects
+    self.assertIn("policy STRICT", record["message"])
+AssertionError: 'policy STRICT' not found in 'SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=T-1327-zero-manual-recovery-20260914.1 sha256=126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d; installed sha256=52d983d766d4d4dc81ecf8310353c96d57f901ef34a53d2c2e66cd9f2e126f1d; restart OpenCode; the host tool did not execute'
+
+======================================================================
+FAIL: test_registry_describes_the_tool_boundary_without_claiming_prompt_admission (test_t1628_opencode_gap.NativeGapPolicy.test_registry_describes_the_tool_boundary_without_claiming_prompt_admission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 183, in test_registry_describes_the_tool_boundary_without_claiming_prompt_admission
+    self.assertEqual(adapter["degraded_mode"], "DEGRADED_ALLOWED_TOOL_GATE")
+AssertionError: 'FAIL_CLOSED_TOOL_GATE' != 'DEGRADED_ALLOWED_TOOL_GATE'
+- FAIL_CLOSED_TOOL_GATE
++ DEGRADED_ALLOWED_TOOL_GATE
+
+
+======================================================================
+FAIL: test_the_standalone_reader_agrees_with_the_canonical_policy_and_taxonomy (test_t1628_opencode_gap.NativeGapPolicy.test_the_standalone_reader_agrees_with_the_canonical_policy_and_taxonomy) (policy=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 141, in test_the_standalone_reader_agrees_with_the_canonical_policy_and_taxonomy
+    self.assertEqual(record["allowed"], expected == HT.DECISION_ALLOW_DEGRADED)
+AssertionError: False != True
+
+======================================================================
+FAIL: test_the_standalone_reader_agrees_with_the_canonical_policy_and_taxonomy (test_t1628_opencode_gap.NativeGapPolicy.test_the_standalone_reader_agrees_with_the_canonical_policy_and_taxonomy) (policy=b'{"mode":"degraded"}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 141, in test_the_standalone_reader_agrees_with_the_canonical_policy_and_taxonomy
+    self.assertEqual(record["allowed"], expected == HT.DECISION_ALLOW_DEGRADED)
+AssertionError: False != True
+
+======================================================================
+FAIL: test_the_standalone_reader_agrees_with_the_canonical_policy_and_taxonomy (test_t1628_opencode_gap.NativeGapPolicy.test_the_standalone_reader_agrees_with_the_canonical_policy_and_taxonomy) (policy=b'{"mode":"degraded_allowed"}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 141, in test_the_standalone_reader_agrees_with_the_canonical_policy_and_taxonomy
+    self.assertEqual(record["allowed"], expected == HT.DECISION_ALLOW_DEGRADED)
+AssertionError: False != True
+
+======================================================================
+FAIL: test_the_standalone_reader_agrees_with_the_canonical_policy_and_taxonomy (test_t1628_opencode_gap.NativeGapPolicy.test_the_standalone_reader_agrees_with_the_canonical_policy_and_taxonomy) (policy=b'\xef\xbb\xbf{"mode":" Degraded Allowed "}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-draft-fbl_fit3\project\tools\test_t1628_opencode_gap.py", line 141, in test_the_standalone_reader_agrees_with_the_canonical_policy_and_taxonomy
+    self.assertEqual(record["allowed"], expected == HT.DECISION_ALLOW_DEGRADED)
+AssertionError: False != True
+
+----------------------------------------------------------------------
+Ran 6 tests in 11.781s
+
+FAILED (failures=17)

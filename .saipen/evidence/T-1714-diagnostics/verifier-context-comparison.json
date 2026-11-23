@@ -1,0 +1,26 @@
+{
+  "native": {
+    "verifier": "ed90c68d2382ba5c11f81703abaf0e49429cb9c7f567e26045a25c9d1a3a2425",
+    "runtime": {
+      "path": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+    },
+    "context_matches": true,
+    "before_matches": true,
+    "after_matches": true
+  },
+  "launcher": {
+    "verifier": "571b991d7860660a7ff0e3cb7054484112118a78151dec9a36fdebe5ad4b1880",
+    "runtime": {
+      "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+      "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+    },
+    "context_matches": true,
+    "before_matches": true,
+    "after_matches": true
+  },
+  "different_environment_keys": [
+    "PROMPT"
+  ],
+  "limits": "Only environment value hashes were compared in memory; no secret values saved or printed."
+}

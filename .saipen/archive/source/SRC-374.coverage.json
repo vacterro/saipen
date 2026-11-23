@@ -1,0 +1,68 @@
+{
+  "requirements": {
+    "SRC-374:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_release_authority_gap.py",
+      "text": "Check the separated authority broker; if inactive, repair it using the canonical supported mechanism without treating broker startup as an authorization grant.",
+      "verification": ".saipen/evidence/focused-unit/ae4080a187fd66f2-20261101T235539347504Z.json",
+      "work": "T-2000"
+    },
+    "SRC-374:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_release_authority_gap.py",
+      "text": "Inspect the exact prepared approval packet and its capsule schema to determine whether it is an executable operator authorization capsule or only a decision proposal.",
+      "verification": ".saipen/evidence/focused-unit/ae4080a187fd66f2-20261101T235539347504Z.json",
+      "work": "T-2000"
+    },
+    "SRC-374:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_release_authority_gap.py",
+      "text": "Inspect existing Antigravity native hook support to determine whether it can provide authenticated operator approval independently of model-generated shell commands.",
+      "verification": ".saipen/evidence/focused-unit/ae4080a187fd66f2-20261101T235539347504Z.json",
+      "work": "T-2000"
+    },
+    "SRC-374:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_release_authority_gap.py",
+      "text": "If Antigravity native hook cannot provide authenticated operator approval, identify and implement a supported standalone operator-controlled approval surface within the existing trusted broker model without fabricating keys, signatures, provenance, or broker receipts.",
+      "verification": ".saipen/evidence/focused-unit/ae4080a187fd66f2-20261101T235539347504Z.json",
+      "work": "T-2000"
+    },
+    "SRC-374:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_release_authority_gap.py",
+      "text": "Verify the exact release candidate SHA and mandatory publication verification, ensuring focused tests are not mislabeled as a full gate.",
+      "verification": ".saipen/evidence/focused-unit/ae4080a187fd66f2-20261101T235539347504Z.json",
+      "work": "T-2000"
+    },
+    "SRC-374:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_release_authority_gap.py",
+      "text": "Publish through the isolated non-force mechanism and verify the remote commit only when valid approval and all gates pass, otherwise surface the exact blocker and single operator action.",
+      "verification": ".saipen/evidence/focused-unit/ae4080a187fd66f2-20261101T235539347504Z.json",
+      "work": "T-2000"
+    },
+    "SRC-374:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_release_authority_gap.py",
+      "text": "Preserve the shared Git index, persistent maintenance authority, and independent engineering work.",
+      "verification": ".saipen/evidence/focused-unit/ae4080a187fd66f2-20261101T235539347504Z.json",
+      "work": "T-2000"
+    }
+  },
+  "schema_version": 1
+}

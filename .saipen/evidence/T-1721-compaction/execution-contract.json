@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "tools/test_t1721_acceptance_compaction.py"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "extensions",
+    "bootstrap",
+    "tests"
+  ],
+  "oracle_files": [
+    "tools/test_t1721_acceptance_compaction.py",
+    "tools/test_t1718_acceptance_contract.py",
+    "tools/test_regression_gate.py",
+    "tools/test_fixture_support.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/acceptance_contract.py",
+    "tools/saipen_engine/operations.py",
+    "tools/saipen.py"
+  ],
+  "before": {
+    "tools/saipen_engine/acceptance_contract.py": ".saipen/evidence/T-1721-compaction/pre/tools/saipen_engine/acceptance_contract.py",
+    "tools/saipen_engine/operations.py": ".saipen/evidence/T-1721-compaction/pre/tools/saipen_engine/operations.py",
+    "tools/saipen.py": ".saipen/evidence/T-1721-compaction/pre/tools/saipen.py"
+  },
+  "timeout": 300
+}

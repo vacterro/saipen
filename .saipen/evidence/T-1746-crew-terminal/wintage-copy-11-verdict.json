@@ -1,0 +1,13 @@
+{
+  "state_mode": "full",
+  "epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8",
+  "epoch_ticket": null,
+  "verdict": {
+    "status": "unknown",
+    "reason": "release receipt lineage is not clean: release-b88121ea649140659850ffca2e7bb382; release-9f18e1f77e7049979a6cc1afc110d9bd -- resolve or remove the conflicting evidence"
+  },
+  "release_current": [
+    false,
+    "crew release truth UNKNOWN: release receipt lineage is not clean: release-b88121ea649140659850ffca2e7bb382; release-9f18e1f77e7049979a6cc1afc110d9bd -- resolve or remove the conflicting evidence"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "preserved": {
+    "task": "T-1703",
+    "phase": "REVIEW",
+    "transition_from": "VERIFY",
+    "next_action": "WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
+    "blocker": "none",
+    "agent": "saipen-cli",
+    "execution_intent": "goal",
+    "goal_waves": 0,
+    "goal_tickets": 20
+  },
+  "before_event": 14220,
+  "after_event": 14221,
+  "checkpoint_exit": 0,
+  "native_exit": 1,
+  "live_source_fingerprint": "3ac66c50a9bbb4d8191b6db2f85483bfafbe099792909af32f4dfc947e8315f4",
+  "live_canonical_sha256": {
+    ".saipen/STATE.md": "d29e00d3b92fc77ea378b8d10a8a49810d3ccabceb91f3da1201d59f5090c641",
+    ".saipen/BOARD.md": "f4faa017ea691b9f991711f558fec9ddf040c08a236791211f308546a06760b5",
+    ".saipen/LOG.md": "42f0293879b656ed9791542dd59a2c99b019a96c77775799b7eb480ab18246db"
+  },
+  "authority_tuple_present": false,
+  "code_applied_to_live_root": false
+}

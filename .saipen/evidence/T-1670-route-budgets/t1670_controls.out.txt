@@ -1,0 +1,9 @@
+PRE-FIX  old engine, UI.md grown, total 334903: exit 1, red ['test_every_declared_load_budget_is_measured_from_registry'], cause ['334903 not less than or equal to 334848']
+POST-FIX new engine, same clause, total 334903: exit 0, Ran 26 tests
+CONTROL unmutated x3: [0, 0, 0]
+M1 the aggregate is a gate again: DETECTED 3 of 3 by ['test_one_enormous_document_fails_even_where_no_route_loads_it', 'test_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate', 'test_the_command_line_summary_exits_by_the_route_verdict', 'test_unrelated_growth_raises_the_total_and_moves_no_route']
+M2 a declared dependency is not followed: DETECTED 3 of 3 by ['test_a_declared_dependency_chain_is_counted_whole', 'test_a_dependency_cycle_is_a_declaration_error']
+M3 a conditional reference counts as mandatory: DETECTED 3 of 3 by ['test_a_declared_dependency_chain_is_counted_whole', 'test_an_optional_reference_does_not_inflate_the_mandatory_load', 'test_one_enormous_document_fails_even_where_no_route_loads_it', 'test_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate', 'test_the_command_line_summary_exits_by_the_route_verdict', 'test_the_summary_is_one_line_per_route_and_names_the_total_informational', 'test_unrelated_growth_raises_the_total_and_moves_no_route']
+M4 no per-document guard: DETECTED 3 of 3 by ['test_one_enormous_document_fails_even_where_no_route_loads_it']
+M5 a cycle is not refused: DETECTED 3 of 3 by ['test_a_dependency_cycle_is_a_declaration_error']
+held: True

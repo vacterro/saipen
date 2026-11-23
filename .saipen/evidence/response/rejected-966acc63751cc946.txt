@@ -1,0 +1,7 @@
+STATUS: Kohalik parandus valmis; Workshopis veel avaldamata.
+
+RESULT: Kõik 404 faili olid terviklikud. Parandatud MPI üksusetunnused ja `svar8` eellaadimisloend. VSR-i Morph/Unmorph kasutab mootori käske 47/48; võrdlus aitas laadimisvea leida.
+
+VALIDATION: Barren ja Dunes Interneti MPI-s kumbki **18/18 PASS**, laadimishoiatusi **0**. Kahe kliendiga kontrollimata.
+
+DETAILS: [Paranduspakk](V:/___VAC/__K/__CODE/_MISC/_BZDECOMP/vrv/dist/VRV-0.3.1-Workshop.zip) · [VSR-i võrdlus](V:/___VAC/__K/__CODE/_MISC/_BZDECOMP/vrv/docs/WORKSHOP_REFERENCE_FINDINGS.md)

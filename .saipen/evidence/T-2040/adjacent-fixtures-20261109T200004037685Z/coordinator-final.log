@@ -1,0 +1,11 @@
+.......F....................................                             [100%]
+================================== FAILURES ===================================
+_ BlockerFingerprint.test_fingerprint_is_deterministic_and_bundles_required_inputs _
+tools\test_t2022_protocol_home_maintenance_distinction.py:153: in test_fingerprint_is_deterministic_and_bundles_required_inputs
+    self.assertEqual(fp["digest"], again["digest"])
+E   AssertionError: 'c03e5fcfbbfe12a6c570c61e8e003ebb' != '06b7f600a4d842aec1f3a760ffc04a56'
+E   - c03e5fcfbbfe12a6c570c61e8e003ebb
+E   + 06b7f600a4d842aec1f3a760ffc04a56
+=========================== short test summary info ===========================
+FAILED tools/test_t2022_protocol_home_maintenance_distinction.py::BlockerFingerprint::test_fingerprint_is_deterministic_and_bundles_required_inputs
+1 failed, 43 passed in 34.01s

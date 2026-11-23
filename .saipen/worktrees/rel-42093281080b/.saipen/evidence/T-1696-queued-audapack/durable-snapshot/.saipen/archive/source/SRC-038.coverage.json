@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "requirements": {
+    "SRC-038:R001": {
+      "class": "requirement",
+      "text": "CORE-001 P1: The old generic exclusion policy still owns files that the new fidelity profiles claim to own. FULL can therefore advertise full_snapshot while dropping media, and COMPACT/STANDARD/DEEP cannot sample or inventory those default-excluded formats. Existing installations retaining the historical default list inherit the same contradiction.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause CORE-001; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R002": {
+      "class": "requirement",
+      "text": "CORE-002 P1: FULL is allowed to perform profile-driven lossy trimming while still declaring itself a full snapshot. The manifest therefore makes a stronger completeness claim than the bytes support.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause CORE-002; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R003": {
+      "class": "requirement",
+      "text": "CORE-003 P1: Freshness proves only source-time freshness, not archive-policy freshness. A change in excludes, fidelity profile, sampling, size budget or overrides can make the existing archive semantically stale while all source mtimes remain older than the ZIP. The service then positively reports the wrong artifact as current.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause CORE-003; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R004": {
+      "class": "requirement",
+      "text": "CORE-004 P1: The manifest's numeric source accounting is not accounting for the whole source tree whenever directory pruning occurs. A repository can omit a massive dependency/generated subtree while reporting files_excluded=0 for that subtree and source_bytes that exclude its contents. The directory is named, but the global-looking counters remain materially misleading.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause CORE-004; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R005": {
+      "class": "requirement",
+      "text": "CORE-005 P1: The new transaction lock prevents simultaneous writes but does not protect the read-modify-write transaction used by campaign auto-repair. A stale resolver can legally acquire the lock after a newer writer and erase the newer campaign index state. This is a classic lost update and can regress UI progress/next-action state after a successful wave commit.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause CORE-005; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R006": {
+      "class": "requirement",
+      "text": "CORE-006 P2: Reference identity is normalized inconsistently. A valid Windows reference whose text casing differs from the stored filename can resolve successfully but still be ranked as unreferenced. Under a tight sample cap, a runtime/build-referenced media asset can therefore be omitted while an arbitrary unreferenced asset is retained.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause CORE-006; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R007": {
+      "class": "requirement",
+      "text": "CORE-007 P2: The configured sample count is not a cap; it is one of two alternative admission paths. STANDARD can retain more than its advertised representative-file count whenever the byte budget has room, making profile size behavior and the UI/settings meaning of \"media samples\" inconsistent.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause CORE-007; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R008": {
+      "class": "requirement",
+      "text": "W2-001 P1: The request is canonically resolved once, but downstream lifecycle operations revert to the untrusted/raw optional request identity. A legal v2 name-only completion can therefore close an unrelated live project when one project's display name equals another project's canonical ID. That can free the wrong worker/lane, suppress its legitimate audit, and permit duplicate dispatch. The same identity loss silently prevents canonical project mirroring for name-only submissions.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause W2-001; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R009": {
+      "class": "requirement",
+      "text": "W2-002 P1: Lifecycle recovery treats a coarse wall-clock display timestamp as transaction ordering authority. Equal timestamps are common, not pathological. A crash during archive or restore can consequently roll a completed transition backward and delete the intended destination copy, violating the documented destination-first recovery invariant.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause W2-002; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R010": {
+      "class": "requirement",
+      "text": "W2-003 P1: The recently hardened exclusive-copy fallback and the transaction recovery protocol disagree about what constitutes successful publication. Recovery understands only hard-link identity. A crash in the fallback's final window converts a valid durable canonical layer into an orphan and causes duplicate audit delivery on retry.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause W2-003; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R011": {
+      "class": "requirement",
+      "text": "W2-004 P2: Dispatcher restart is not behaviorally repeatable. A deliberately throttled RETRYABLE job becomes ordinary immediately claimable QUEUED work, so restarting the bridge/service accelerates retries and defeats the anti-pinball policy precisely during repeated startup failures.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause W2-004; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R012": {
+      "class": "requirement",
+      "text": "W2-005 P2: The copy-then-remove rename is neither failure-atomic nor recoverable. A transient Windows sharing violation after destination publication converts one audit into two canonical layers, while the API reports failure and its normal retry path cannot finish the original operation. Both copies may then be independently dispatched or implemented.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause W2-005; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R013": {
+      "class": "requirement",
+      "text": "PERF-001 P1: Freshness checking still executes packing-grade source analysis. The common unchanged path walks the project twice and may parse megabytes of source text; the nested-change path can do that planning work and then repeat it for the actual pack. Cancellation cannot interrupt the preflight. Cost therefore scales directly with project size even when the only requested answer is \"reuse this ZIP?\", and a cancel can appear ignored while the planner finishes.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause PERF-001; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R014": {
+      "class": "requirement",
+      "text": "PERF-002 P1: Large precompressed assets spend CPU in Deflate for essentially zero benefit. As STANDARD/DEEP/FULL now retain more images/audio/video/fonts, this can dominate packing latency and CPU load. The compressor can literally work harder to create a larger artifact, an impressive little triumph of machinery over common sense.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause PERF-002; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R015": {
+      "class": "requirement",
+      "text": "PERF-003 P2: The planner maintains and serializes multiple linear-size diagnostic structures unrelated to actual ZIP bytes. Media-heavy or very large repositories therefore spend avoidable memory, allocation time and manifest space on exhaustive diagnostics, while ordinary packing also carries an mtime dictionary that has no consumer. The top-10 omitted report additionally pays O(n log n) sorting for a fixed ten-element output.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause PERF-003; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    },
+    "SRC-038:R016": {
+      "class": "requirement",
+      "text": "PERF-004 P2: Backend polling converts \"nothing changed\" into hundreds of Qt model signals plus table item destruction/reallocation every four seconds. Work scales with total project count rather than changed projects and occurs for the entire duration of a long audit, precisely when the UI should be boring and cheap.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "work": "T-160",
+      "evidence": ".saipen/kitchen/T-160-build.md clause PERF-004; live file:line + named regression",
+      "verification": "python -m pytest -q (1116 PASS, 2 skip); ruff check audapack tests clean; compileall clean"
+    }
+  }
+}

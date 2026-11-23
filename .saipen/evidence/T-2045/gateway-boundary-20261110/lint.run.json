@@ -1,0 +1,17 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "ruff",
+    "check",
+    "--no-cache",
+    "--output-format",
+    "json",
+    "tools/saipen_operator_gateway.py",
+    "tools/test_t2045_operator_gateway.py"
+  ],
+  "exit_code": 1,
+  "duration_s": 0.047,
+  "finished_at": "2026-11-10T18:07:55.443122+00:00"
+}

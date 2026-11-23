@@ -1,0 +1,222 @@
+{
+  "ok": true,
+  "code": "CREW_PLAN",
+  "crew_complete": false,
+  "action_required": true,
+  "dry_run": true,
+  "stages": [
+    {
+      "stage": "SC-0",
+      "name": "recover-sync",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-1",
+      "name": "instances",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-2",
+      "name": "saihunt",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-3",
+      "name": "saitest",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-4",
+      "name": "saipython",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-5",
+      "name": "saiui",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "NOT_APPLICABLE -- no visual implementation file in 64522 scanned project files (extensions .css .htm .html .jsx .less .qml .sass .scss .storyboard .svelte .tsx .ui .vue .xaml .xib; no desktop UI toolkit import)",
+      "action": null
+    },
+    {
+      "stage": "SC-6",
+      "name": "core-collect",
+      "state": "UNSATISFIED",
+      "satisfied": false,
+      "reason": "ready package(s): saitest, saipython",
+      "action": {
+        "stage": "SC-6",
+        "role": "saitest",
+        "action": "COLLECT_ROLE",
+        "source_identity": {
+          "source_head": "dc39709c0c17a3272126c01a626ffcaa4176140b",
+          "source_tree_fingerprint": "git-delta-v1:cf7cd4a7512b88c0b0f2e57a05d17aef9e41b432f907486635c87aa3ab53aa42"
+        },
+        "required_contract": "core-review package durably ingested once (INTAKE != REVIEW)",
+        "inputs": [
+          ".saipen/extensions/subs/saitest/kitchen/OUTBOX.md"
+        ],
+        "expected_evidence": "ordinary Core review unit + durable collect receipt binding package identity to the ticket",
+        "completion_condition": "saitest health REVIEW_PENDING with a linked review ticket",
+        "on_success": "REPLAN",
+        "on_failure": "BLOCK",
+        "execute_in_current_agent": true,
+        "role_paths": [
+          ".saipen/extensions/subs/saitest.md",
+          ".saipen/extensions/subs/saitest/STATE.md",
+          ".saipen/extensions/subs/saitest/BOARD.md",
+          ".saipen/extensions/subs/saitest/LOG.md",
+          ".saipen/extensions/subs/saitest/kitchen/OUTBOX.md"
+        ],
+        "write_boundary": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\extensions\\subs",
+        "then_action": "REPLAN_CREW",
+        "terminal": false,
+        "requires_human": false,
+        "next_action": "COLLECT_ROLE",
+        "resume_after": "REPLAN_CREW",
+        "userperson_projection": {
+          "role": "saitest",
+          "projection_policy": [],
+          "source_fingerprint": "2f3ac492d9e934ec",
+          "preferences": []
+        }
+      }
+    },
+    {
+      "stage": "SC-7",
+      "name": "core-converge",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "SC-8",
+      "name": "saitranslate",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "SC-9",
+      "name": "saiwiki",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "WAIT-ROLE",
+      "name": "wait-role",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "SC-10",
+      "name": "final-fixed-point",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "SC-11",
+      "name": "ship",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "SC-12",
+      "name": "post-ship",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "SC-13",
+      "name": "finalize",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    }
+  ],
+  "first_unsatisfied": "SC-6",
+  "action": {
+    "stage": "SC-6",
+    "role": "saitest",
+    "action": "COLLECT_ROLE",
+    "source_identity": {
+      "source_head": "dc39709c0c17a3272126c01a626ffcaa4176140b",
+      "source_tree_fingerprint": "git-delta-v1:cf7cd4a7512b88c0b0f2e57a05d17aef9e41b432f907486635c87aa3ab53aa42"
+    },
+    "required_contract": "core-review package durably ingested once (INTAKE != REVIEW)",
+    "inputs": [
+      ".saipen/extensions/subs/saitest/kitchen/OUTBOX.md"
+    ],
+    "expected_evidence": "ordinary Core review unit + durable collect receipt binding package identity to the ticket",
+    "completion_condition": "saitest health REVIEW_PENDING with a linked review ticket",
+    "on_success": "REPLAN",
+    "on_failure": "BLOCK",
+    "execute_in_current_agent": true,
+    "role_paths": [
+      ".saipen/extensions/subs/saitest.md",
+      ".saipen/extensions/subs/saitest/STATE.md",
+      ".saipen/extensions/subs/saitest/BOARD.md",
+      ".saipen/extensions/subs/saitest/LOG.md",
+      ".saipen/extensions/subs/saitest/kitchen/OUTBOX.md"
+    ],
+    "write_boundary": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\extensions\\subs",
+    "then_action": "REPLAN_CREW",
+    "terminal": false,
+    "requires_human": false,
+    "next_action": "COLLECT_ROLE",
+    "resume_after": "REPLAN_CREW",
+    "userperson_projection": {
+      "role": "saitest",
+      "projection_policy": [],
+      "source_fingerprint": "2f3ac492d9e934ec",
+      "preferences": []
+    }
+  },
+  "roles": {
+    "saihunt": "REVIEW_PENDING",
+    "saitest": "READY_FOR_REVIEW",
+    "saipython": "READY_FOR_REVIEW",
+    "saiui": "STALE",
+    "saitranslate": "NOT_RUN",
+    "saiwiki": "NOT_RUN"
+  },
+  "source": {
+    "source_head": "dc39709c0c17a3272126c01a626ffcaa4176140b",
+    "source_tree_fingerprint": "git-delta-v1:cf7cd4a7512b88c0b0f2e57a05d17aef9e41b432f907486635c87aa3ab53aa42"
+  },
+  "snapshot": {
+    "state": "8e100e144474ee08",
+    "board": "0aea9a111aac2bdf",
+    "log_tail": 21501,
+    "stable": true
+  },
+  "finalized": false
+}

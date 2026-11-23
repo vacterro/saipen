@@ -1,0 +1,47 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-10-03T04:51:29Z",
+  "evidence_class": "executed",
+  "findings_digest": "94ba896dd6ddc4dd0b33e133d85793823596ab6d4b6df43a1f9d2de15d578748",
+  "gate": "core",
+  "integrity_digest": "38f34fb055f63f75",
+  "journal_op_id": "reverify.1759dfeafbab",
+  "original_closure": {
+    "owner": "claude"
+  },
+  "own_problem_keys": [
+    "681c39f5e3854068"
+  ],
+  "problem_count": 46,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000275",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:3d240e983a6652dfde8e972181a3b2503a499c642e88858546e1e7f58b9169cd",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "python -m pytest -q tests/test_browser_dispatch.py",
+      "duration_ms": 6684,
+      "executed": true,
+      "exit_code": 0,
+      "output_bytes": 260,
+      "output_digest": "6122e8a2e2d9d8b8",
+      "result": "PASS"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "python -m pytest -q tests/test_browser_dispatch.py"
+    ],
+    "findings_digest": "94ba896dd6ddc4dd0b33e133d85793823596ab6d4b6df43a1f9d2de15d578748",
+    "gate": "core"
+  },
+  "verification_contract_digest": "e38f3248eab6d496",
+  "verifier": "buffy",
+  "warning_count": 94,
+  "work": "T-72"
+}

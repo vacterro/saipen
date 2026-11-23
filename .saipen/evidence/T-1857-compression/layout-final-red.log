@@ -1,0 +1,21 @@
+test_layouts_agree_on_the_live_repository (test_validator_layout_parity.InstalledValidatorLayoutParityTests.test_layouts_agree_on_the_live_repository)
+The same parity against a real, fully populated project. ... FAIL
+
+======================================================================
+FAIL: test_layouts_agree_on_the_live_repository (test_validator_layout_parity.InstalledValidatorLayoutParityTests.test_layouts_agree_on_the_live_repository)
+The same parity against a real, fully populated project.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_validator_layout_parity.py", line 278, in test_layouts_agree_on_the_live_repository
+    self._assert_parity(tmp, frozen, "live")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_validator_layout_parity.py", line 241, in _assert_parity
+    self.assertEqual(
+AssertionError: Items in the second set but not the first:
+('problem', '06e7be6ec88ceb06') : live: the two layouts classified the project's problems differently.
+source-only: ['closure provenance does not resolve: EX-000022 was verified against installed engine generation sha256:fbbb910716437391... but the running engine is sha256:0b32d0ac2c919fa7... -- the dependency moved ']
+flat-only: ['closure provenance does not resolve: EX-000022 was verified against installed engine generation sha256:fbbb910716437391... but the running engine is sha256:0b32d0ac2c919fa7... -- the dependency moved ', 'coverage gap -- 1 shipped document(s) are read by no check and declared exempt by none: saipen/COMMANDS_REFERENCE.md. Put each under a check or add it to EXEMPT with a reason']
+
+----------------------------------------------------------------------
+Ran 1 test in 98.040s
+
+FAILED (failures=1)

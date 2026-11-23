@@ -1,0 +1,151 @@
+{
+  "ok": true,
+  "code": "HOST_REPAIRED",
+  "source": {
+    "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "kind": "source-checkout",
+    "adapter": null,
+    "canonical": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "generation": "gen-sha256:1bae7cb3b53e0eb77c10a955aaf5f16af7ed8d8bde046b1954aa4739c6a6d696",
+    "proven": true,
+    "detail": null,
+    "version": "8.1.0"
+  },
+  "policy": {
+    "mode": "degraded",
+    "label": "DEGRADED_ALLOWED",
+    "source": "operator",
+    "path": "C:\\Users\\vac34\\.saipen\\authority.json"
+  },
+  "authority": {
+    "running": true,
+    "pid": 26588,
+    "instance": "broker-bda5ac731376eee6b2229273",
+    "generation": "svc-d6a2c0140f90b08d8cd79a84",
+    "expected_generation": "svc-d6a2c0140f90b08d8cd79a84",
+    "saipen_root": "C:\\Users\\vac34\\.claude\\skills\\saipen",
+    "endpoint": "\\\\.\\pipe\\saipen-authority-336850628174a20c242c9247",
+    "log": "C:\\Users\\vac34\\.saipen\\authority\\broker.log",
+    "identity_supported": true,
+    "mode": "degraded",
+    "mode_label": "DEGRADED_ALLOWED",
+    "mode_source": "operator",
+    "mode_path": "C:\\Users\\vac34\\.saipen\\authority.json",
+    "generation_current": true
+  },
+  "machine_runtime": {
+    "code": "MACHINE_RUNTIME_STALE",
+    "root": "C:\\ProgramData\\SAI\\SAIPEN",
+    "saipen_runtime_ready": false,
+    "generation": "gen-sha256:06b7c9ab48edff45432b900f13e7b1d77fe006cb8b62bfc1935d1c19fac50784",
+    "current": false,
+    "saipen_version": "8.1.0",
+    "state_schema": 3,
+    "launcher": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+    "python_bundled": true,
+    "source": "MACHINE_RUNTIME",
+    "reasons": [
+      "the machine runtime is not the generation of the canonical source"
+    ],
+    "action": "saipen host machine install"
+  },
+  "path_launcher": {
+    "code": "PATH_LAUNCHER_READY",
+    "directory": "C:\\Users\\vac34\\bin",
+    "files": {
+      "saipen.cmd": "owned",
+      "saipen": "owned"
+    },
+    "reasons": []
+  },
+  "hosts": [
+    {
+      "id": "freebuff",
+      "profile": null,
+      "name": "FreeBuff / generic ~/.agents skills",
+      "state": "INSTALLED_UNVERIFIED",
+      "reasons": [
+        "installed and current; this host exposes no channel through which SAIPEN could verify a session, so nothing more can be claimed"
+      ],
+      "action": null,
+      "installed": true,
+      "host_present": true,
+      "runtime": "current",
+      "hook": "not-applicable",
+      "instruction": "not-applicable",
+      "admission": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "last_health": null,
+      "recoverable": false,
+      "contract": {
+        "id": "freebuff",
+        "name": "FreeBuff / generic ~/.agents skills",
+        "install_surfaces": {
+          "home": "~/.agents",
+          "skill": "~/.agents/skills/saipen",
+          "bespoke": "freebuff-backstop"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "ADVISORY",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native FreeBuff / generic ~/.agents skills launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:1bae7cb3b53e0eb77c10a955aaf5f16af7ed8d8bde046b1954aa4739c6a6d696",
+          "expected_generation": "gen-sha256:1bae7cb3b53e0eb77c10a955aaf5f16af7ed8d8bde046b1954aa4739c6a6d696",
+          "current": true,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.agents\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "status": "not-applicable",
+          "delegated_root": null,
+          "delegated_current": null,
+          "problems": [],
+          "installed_at": null
+        },
+        "host_home": "C:\\Users\\vac34\\.agents"
+      }
+    }
+  ],
+  "broken": [],
+  "needs_action": [],
+  "problems": [],
+  "next_action": null,
+  "steps": [
+    {
+      "step": "install:freebuff",
+      "ok": true,
+      "code": "INSTALLED",
+      "installer_rc": 0,
+      "detail": "~/.agents skills             copied (re-run after updates)\n~/.agents provenance         verified\nFreeBuff ~/.knowledge.md     already\nFreeBuff ~/.AGENTS.md        already\n------------------------------------------------------------\nDone. Test: open any project in any agent, say: saipen set"
+    }
+  ],
+  "remaining": [],
+  "mechanical_hosts": []
+}

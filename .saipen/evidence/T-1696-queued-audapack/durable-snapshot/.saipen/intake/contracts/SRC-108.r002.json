@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-108:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Split send acceptance from Core user-turn adoption: a send the Core accepts is not proof the user turn registered"
+    },
+    "SRC-108:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Enter Bridge AUDITING only after the local runtime has adopted the Core user turn"
+    }
+  },
+  "derived_at": "2026-10-04T14:53:06Z",
+  "derived_from": "SRC-108",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "3270d128e89a56ec8641cbac4d267a9e6eb88bed75134a15f970f08f2ad35037"
+}

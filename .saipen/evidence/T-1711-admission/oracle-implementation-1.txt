@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 15, in <module>
+    from saipen_engine import operations
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\operations.py", line 61, in <module>
+    from .board_compaction import (
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board_compaction.py", line 176, in <module>
+    validate_compaction_disposition()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\board_compaction.py", line 164, in validate_compaction_disposition
+    raise ValueError(f"compaction disposition is missing BOARD fields: {missing}")
+ValueError: compaction disposition is missing BOARD fields: ['regression_evidence']

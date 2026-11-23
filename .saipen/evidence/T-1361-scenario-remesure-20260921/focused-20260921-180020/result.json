@@ -1,0 +1,39 @@
+{
+  "command": ".saipen/evidence/T-1361-scenario-remesure-20260921/focused.py run_project_root_probes run_last_event_probes run_hostile_state_probes run_continuity_probes",
+  "head": "d97abdc097db432bafe2316b1e3577e44cd9cc4c",
+  "harness_sha256": "f15edd84483f38b0ae43e751b0f3b66c370a3adb28e75b6cf5f02f60e6771c9c",
+  "results": [
+    {
+      "function": "run_project_root_probes",
+      "elapsed": 3.922000000020489,
+      "checked": 7,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "function": "run_last_event_probes",
+      "elapsed": 2.577999999979511,
+      "checked": 7,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "function": "run_hostile_state_probes",
+      "elapsed": 0.0,
+      "checked": 17,
+      "skipped": 0,
+      "failures": [
+        "plain-UTF-8 project passes post-write verification: BOARD: BOARD.md:9 unexpected physical BOARD record under ## DOING ('- none') -- a detached continuation or record fragment never becomes authority; the board grammar is closed and the bytes are ambiguous or corrupt, refuse them; BOARD: BOARD.md:13 unexpected physical BOARD record under ## TODO ('- none') -- a detached continuation or record fragment never becomes authority; the board grammar is closed and the bytes are ambiguous or corrupt, refuse them; BOARD: BOARD.md:17 unexpected physical BOARD record under ## BLOCKED ('- none') -- a detached continuation or record fragment never becomes authority; the board grammar is closed and the bytes are ambiguous or corrupt, refuse them; BOARD: BOARD.md:21 unexpected physical BOARD record under ## DONE ('- none') -- a detached continuation or record fragment never becomes authority; the board grammar is closed and the bytes are ambiguous or corrupt, refuse them"
+      ]
+    },
+    {
+      "function": "run_continuity_probes",
+      "elapsed": 26.25,
+      "checked": 1,
+      "skipped": 0,
+      "failures": [
+        "continuity probes exited 1: recovery_required\": false, \"message\": \"attempt A-001 is still open on this Work -- close it (result interrupted, stop un\nFAILED: H26a: foreign-stale seat may close the dangling episode: {\"ok\": false, \"code\": \"VALIDATION_FAILED\", \"op_id\": null, \"changed_files\": [], \"recovery_required\": false, \"message\": \"proposed state fails fast validation: STA\nFAILED: H26b: second open while an episode is live refuses deterministically: {\"ok\": true, \"code\": \"ATTEMPT_ACTIVE\", \"idempotent\": true, \"attempt\": \"A-001\", \"ticket\": \"T-001\", \"detail\": \"attempt A-001 already open for T-001; no second episode created\"}\n"
+      ]
+    }
+  ]
+}

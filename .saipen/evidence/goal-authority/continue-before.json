@@ -1,0 +1,21 @@
+{
+  "kind": "unclaimed-next-work-red-control",
+  "command": "continue",
+  "original_operator_carrier": false,
+  "returncode": 1,
+  "stdout": "{\r\n  \"ok\": false,\r\n  \"code\": \"INCOMPLETE_TICKET\",\r\n  \"op_id\": null,\r\n  \"changed_files\": [],\r\n  \"recovery_required\": false,\r\n  \"message\": \"finish requires explicit verification evidence for ticket T-001 (got: no current-cycle VERIFY boundary)\",\r\n  \"ticket\": \"T-001\",\r\n  \"canonical_next_command\": \"saipen checkpoint RUN T-001 \\\"verify -> PASS [target: T-001] conf: high -- <the command that ran and what it reported>\\\"\",\r\n  \"recovery_pending\": false,\r\n  \"parked_work\": null,\r\n  \"continue_trace\": [\r\n    {\r\n      \"iteration\": 1,\r\n      \"action\": \"PHASE SHIP T-001\",\r\n      \"kind\": \"finish-at-ship\",\r\n      \"operation\": \"ticket_done\",\r\n      \"ticket\": \"T-001\",\r\n      \"result\": \"INCOMPLETE_TICKET\",\r\n      \"ok\": false,\r\n      \"before_last_event\": 22,\r\n      \"after_last_event\": null\r\n    }\r\n  ],\r\n  \"iterations\": 0,\r\n  \"stop_reason\": \"refusal\",\r\n  \"detail\": \"finish requires explicit verification evidence for ticket T-001 (got: no current-cycle VERIFY boundary)\",\r\n  \"telegrams\": {\r\n    \"state\": \"OK\",\r\n    \"unread\": 0,\r\n    \"on_current_work\": 0,\r\n    \"complete\": true,\r\n    \"read_command\": \"saimail-local saipen brief --project-root V:\\\\_TEMP_\\\\t1181-valve-q0xj0i7s --workspace C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\saipen\\\\saimail --seat tester\",\r\n    \"detail\": \"counts only; nothing was opened and nothing here is an instruction\"\r\n  }\r\n}\r\n",
+  "stderr": "",
+  "before": {
+    "STATE.md": "4476553d407918a48e4129dd64d67c0ae7b1e3d0f116aae3d794884f954bb57a",
+    "BOARD.md": "6cef6aee241b915b0e87a1f0c480e81630f9b3cbb3ae164ca960c75d1f9b460a",
+    "LOG.md": "72b57291f36dcd129d508891b939b8156c1251617dde92cd1baab8905db50940"
+  },
+  "after": {
+    "STATE.md": "b79b4dc5e5271e7e34441e5b2193627f1df8a854c80155a36234f9cceb945418",
+    "BOARD.md": "6cef6aee241b915b0e87a1f0c480e81630f9b3cbb3ae164ca960c75d1f9b460a",
+    "LOG.md": "86d0126554c2d0a4da12eead5e2f288d3c2fc8a9ed40cfaa45324f44e1cd1bfb"
+  },
+  "after_tickets": 0,
+  "after_next_action": "PHASE SHIP T-001",
+  "fixture_root": "V:\\_TEMP_\\t1181-valve-q0xj0i7s"
+}

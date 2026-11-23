@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "code": "MACHINE_RUNTIME_ABSENT",
+  "root": ".saipen\\evidence\\freebuff-luna-runtime-recovery\\absent-machine",
+  "saipen_runtime_ready": false,
+  "reasons": [
+    "no machine runtime is installed"
+  ],
+  "action": "saipen host machine install",
+  "detail": "no machine runtime is installed"
+}

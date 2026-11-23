@@ -1,0 +1,6 @@
+STATUS: BLOCKED (eesmärk)
+RESULT: T-1729 parandus kontrollitud; 20/21 nõuet tõendatud.
+BLOCKER: 95 piletit blokeeritud; käivitatavat tööd pole.
+OPERATOR ACTION: R019 vajab sõltumatut operaatoritõendit. [Vastuvõtusammud](V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1729.md)
+NEXT EXACT ACTION: NONE
+VALIDATION: CURRENT_PASS | 6756 testi | 0 viga

@@ -1,0 +1,3 @@
+seed 1654: 400 cases, 328 repaired, 72 malformed and left alone, 0 broken
+seed 7: 400 cases, 332 repaired, 68 malformed and left alone, 0 broken
+seed 20261007: 400 cases, 336 repaired, 64 malformed and left alone, 0 broken

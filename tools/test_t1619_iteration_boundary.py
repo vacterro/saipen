@@ -49,6 +49,15 @@ def _seat(text, **fields):
         else:
             close = text.index("\n---", 3)
             text = text[:close] + "\n" + line + text[close:]
+    # Execution-intent families are exclusive (state.state_contract_errors):
+    # seating one intent over a live canonical STATE that still carries the
+    # other family's field makes the strict reader refuse the whole fixture,
+    # so drop the family this intent forbids before the fixture is parsed.
+    seated_intent = str(fields.get("execution_intent") or "").strip()
+    if seated_intent == "goal":
+        text = re.sub(r"(?m)^converge_target:.*\r?\n?", "", text)
+    elif seated_intent == "converge":
+        text = re.sub(r"(?m)^(goal_waves|goal_tickets):.*\r?\n?", "", text)
     return text
 
 

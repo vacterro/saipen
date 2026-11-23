@@ -1,0 +1,49 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-10-04T23:57:06Z",
+  "evidence_class": "executed",
+  "findings_digest": "bdb284f641024c975ca176dfcec0915512d8900352da44e1f7adf5dbdb39a822",
+  "gate": "core",
+  "integrity_digest": "f49c75027873bb36",
+  "journal_op_id": "reverify.42488f27aacd",
+  "original_closure": {
+    "claim_time": "2026-08-31T12:30:00Z",
+    "owner": "opencode"
+  },
+  "own_problem_keys": [
+    "883b2d9007966e02"
+  ],
+  "problem_count": 65,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000476",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:0c125360ae483b4e7f1a84912ec4202fab48973a7d3607ce53407bd10e5901bb",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "python -m pytest -q tests/ui_qt",
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+      "duration_ms": 107201,
+      "executed": true,
+      "exit_code": 0,
+      "output_bytes": 511,
+      "output_digest": "2f7168138621711a",
+      "result": "PASS"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "python -m pytest -q tests/ui_qt"
+    ],
+    "findings_digest": "bdb284f641024c975ca176dfcec0915512d8900352da44e1f7adf5dbdb39a822",
+    "gate": "core"
+  },
+  "verification_contract_digest": "c1e75e84bda20577",
+  "verifier": "buffy",
+  "warning_count": 96,
+  "work": "T-44"
+}

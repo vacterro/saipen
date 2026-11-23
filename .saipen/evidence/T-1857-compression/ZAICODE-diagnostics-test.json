@@ -1,0 +1,175 @@
+{
+  "scope": "Scratch VM executes original and candidate pure classifiers and actual existing shared/UI projections",
+  "native_issuer_installed": false,
+  "foreign_source_applied": false,
+  "typecheck_and_lint_of_foreign_repo": "not executed for an unapplied patch",
+  "node_version": "v24.22.1",
+  "typescript_version": "6.0.2",
+  "sources": {
+    "apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/commands/continue-diagnostics.ts": "250f0c3e0ed00b464330a6c757530bf09e4eccd7128399f6870730622c7d542a",
+    "packages/shared/src/zaicode-operator-ingress.ts": "09a88497646211d3549622af2aeb0d36d9c22d9fd8c80999e17a84dbddcd0b66",
+    "packages/ui/src/v4/queueActionOutcome.ts": "d471151e498dee47cf3d3290acef6331552cb474ead64a18264a31beaa741230"
+  },
+  "red_failures": 6,
+  "green_cases": 10,
+  "red": [
+    {
+      "state": "trusted-ingress-unavailable",
+      "boundary": {
+        "operatorActionDue": true
+      },
+      "expected": "guard.recognizedContinueTrustedIngressUnavailable",
+      "actual": "guard.recognizedContinueSaipenOperator",
+      "pass": false
+    },
+    {
+      "state": "trusted-ingress-unavailable",
+      "boundary": {
+        "safetyValveTripped": true
+      },
+      "expected": "guard.recognizedContinueTrustedIngressUnavailable",
+      "actual": "guard.recognizedContinueSaipenValve",
+      "pass": false
+    },
+    {
+      "state": "broker-unhealthy",
+      "boundary": {
+        "operatorActionDue": true
+      },
+      "expected": "guard.recognizedContinueBrokerUnhealthy",
+      "actual": "guard.recognizedContinueSaipenOperator",
+      "pass": false
+    },
+    {
+      "state": "broker-unhealthy",
+      "boundary": {
+        "safetyValveTripped": true
+      },
+      "expected": "guard.recognizedContinueBrokerUnhealthy",
+      "actual": "guard.recognizedContinueSaipenValve",
+      "pass": false
+    },
+    {
+      "state": "runtime-stale",
+      "boundary": {
+        "operatorActionDue": true
+      },
+      "expected": "guard.recognizedContinueRuntimeStale",
+      "actual": "guard.recognizedContinueSaipenOperator",
+      "pass": false
+    },
+    {
+      "state": "runtime-stale",
+      "boundary": {
+        "safetyValveTripped": true
+      },
+      "expected": "guard.recognizedContinueRuntimeStale",
+      "actual": "guard.recognizedContinueSaipenValve",
+      "pass": false
+    },
+    {
+      "case": "existing refusal preserved",
+      "expected": "guard.recognizedContinueSaipenOperator",
+      "actual": "guard.recognizedContinueSaipenOperator",
+      "pass": true
+    },
+    {
+      "case": "existing refusal preserved",
+      "expected": "guard.recognizedContinueSaipenValve",
+      "actual": "guard.recognizedContinueSaipenValve",
+      "pass": true
+    },
+    {
+      "case": "existing refusal preserved",
+      "expected": "guard.recognizedContinueSaipenOperator",
+      "actual": "guard.recognizedContinueSaipenOperator",
+      "pass": true
+    },
+    {
+      "case": "existing refusal preserved",
+      "expected": "guard.recognizedContinueSaipenRefused",
+      "actual": "guard.recognizedContinueSaipenRefused",
+      "pass": true
+    }
+  ],
+  "green": [
+    {
+      "state": "trusted-ingress-unavailable",
+      "boundary": {
+        "operatorActionDue": true
+      },
+      "expected": "guard.recognizedContinueTrustedIngressUnavailable",
+      "actual": "guard.recognizedContinueTrustedIngressUnavailable",
+      "pass": true
+    },
+    {
+      "state": "trusted-ingress-unavailable",
+      "boundary": {
+        "safetyValveTripped": true
+      },
+      "expected": "guard.recognizedContinueTrustedIngressUnavailable",
+      "actual": "guard.recognizedContinueTrustedIngressUnavailable",
+      "pass": true
+    },
+    {
+      "state": "broker-unhealthy",
+      "boundary": {
+        "operatorActionDue": true
+      },
+      "expected": "guard.recognizedContinueBrokerUnhealthy",
+      "actual": "guard.recognizedContinueBrokerUnhealthy",
+      "pass": true
+    },
+    {
+      "state": "broker-unhealthy",
+      "boundary": {
+        "safetyValveTripped": true
+      },
+      "expected": "guard.recognizedContinueBrokerUnhealthy",
+      "actual": "guard.recognizedContinueBrokerUnhealthy",
+      "pass": true
+    },
+    {
+      "state": "runtime-stale",
+      "boundary": {
+        "operatorActionDue": true
+      },
+      "expected": "guard.recognizedContinueRuntimeStale",
+      "actual": "guard.recognizedContinueRuntimeStale",
+      "pass": true
+    },
+    {
+      "state": "runtime-stale",
+      "boundary": {
+        "safetyValveTripped": true
+      },
+      "expected": "guard.recognizedContinueRuntimeStale",
+      "actual": "guard.recognizedContinueRuntimeStale",
+      "pass": true
+    },
+    {
+      "case": "existing refusal preserved",
+      "expected": "guard.recognizedContinueSaipenOperator",
+      "actual": "guard.recognizedContinueSaipenOperator",
+      "pass": true
+    },
+    {
+      "case": "existing refusal preserved",
+      "expected": "guard.recognizedContinueSaipenValve",
+      "actual": "guard.recognizedContinueSaipenValve",
+      "pass": true
+    },
+    {
+      "case": "existing refusal preserved",
+      "expected": "guard.recognizedContinueSaipenOperator",
+      "actual": "guard.recognizedContinueSaipenOperator",
+      "pass": true
+    },
+    {
+      "case": "existing refusal preserved",
+      "expected": "guard.recognizedContinueSaipenRefused",
+      "actual": "guard.recognizedContinueSaipenRefused",
+      "pass": true
+    }
+  ]
+}

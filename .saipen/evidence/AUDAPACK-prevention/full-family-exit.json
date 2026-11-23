@@ -1,0 +1,5 @@
+{
+  "command": "python tools/core_unit.py evidence T-1705 --fresh --jobs 6",
+  "exit_code": 1,
+  "finished_utc": "2026-10-10T11:58:42.0489788Z"
+}

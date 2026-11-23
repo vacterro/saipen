@@ -1,0 +1,12 @@
+{
+  "exit_code": 0,
+  "commit": "1aae6b974cf988a855f0707ff32df0e191cad4ce",
+  "branch": "backup/cc-all-20261021T222419Z",
+  "mandatory_failure_lines": [
+    "FAIL: closure provenance does not resolve: EXTERNAL_COMMIT_MISSING: commit 041f00ed1bc0b4b4841ca3edbb5912dd39461349 not found in external repository history -- a DONE line may record HOW it closed, never that something was published when it was not (CORE-003)",
+    "Validation FAILED: 1 problem(s), 16 warning(s)"
+  ],
+  "canonical_pass": false,
+  "portable_floor_pass": true,
+  "pushed": false
+}

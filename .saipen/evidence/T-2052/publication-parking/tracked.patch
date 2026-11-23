@@ -1,0 +1,1451 @@
+diff --git a/saipen/COMMANDS_REFERENCE.md b/saipen/COMMANDS_REFERENCE.md
+index 0f7bb8b5e..5f7079c49 100644
+--- a/saipen/COMMANDS_REFERENCE.md
++++ b/saipen/COMMANDS_REFERENCE.md
+@@ -108,6 +108,7 @@ independent rule owner or an authorization grant.
+ | `saipen source appends` | DIAGNOSTIC: read-only per-mission append view status shares -- latest append, active and superseded clause counts, unprojected appends, affected Work | CMD-ROUTING-01 |
+ | `saipen source delta <SRC-###>` | DIAGNOSTIC: read-only classification of the UNADMITTED worktree delta against the receipt's clauses -- exact changed-file identity and observed stamps, NOT_EXECUTED verification, publication authority CLOSED; admits, settles and writes nothing (SRC-325 §10) | CMD-ROUTING-01 |
+ | `saipen source recover` | DIAGNOSTIC: read-only orphan/crash diagnostic; never deletes or invents source intent | CMD-ROUTING-01 |
++| `saipen source recover --confirm` | EXECUTION: ONE journaled restore of the closed BOARD records an earlier scrub moved while an ACTIVE receipt still names them -- re-inserted verbatim from the scrub evidence, no receipt retired, no field reconstructed; the plain form stays the read-only survey and a dry-run degrades to it | CMD-ROUTING-01 |
+ | `saipen source reconcile <SRC-###> [--confirm]` | RECOVERY: read-only contradiction report; `--confirm` converges tombstone-authoritatively only on strong proof, else zero writes | CMD-ROUTING-01 |
+ | `saipen source normalize [--dry-run]` | RECOVERY: journal BOARD ranges as explicit receipt IDs; malformed ranges refuse; preview writes zero | CMD-ROUTING-01 |
+ | `saipen source quarantine <SRC-###> [--reason CODE]` | EXECUTION: preserve the exact active or archived body locally and exclude it from release/export; `--dry-run` previews without writing; does not close Work or waive coverage (SOURCES.md) | CMD-ROUTING-01 |
+diff --git a/saipen/REGISTRY.json b/saipen/REGISTRY.json
+index 89bd14a48..ad2f171c7 100644
+--- a/saipen/REGISTRY.json
++++ b/saipen/REGISTRY.json
+@@ -963,6 +963,7 @@
+   "ACTIVE_CLAIM_FOREIGN",
+   "ALREADY_CLAIMED",
+   "CONTINUATION_RESERVED",
++  "CORRUPT_GC_STATE",
+   "ILLEGAL_TRANSITION",
+   "ILLEGAL_PHASE",
+   "WRITER_BUSY",
+@@ -1091,10 +1092,14 @@
+   "FINDINGS_CAPTURE_FAILED",
+   "FINDINGS_CAPTURE_MALFORMED",
+   "FLEET_INTERNAL_ERROR",
++  "GC_MAINTENANCE_FAILED",
++  "GC_STATE_REPAIR_UNVERIFIED",
++  "GIT_GUARD_FAILED",
+   "GUARD_EVENT_INVALID",
+   "HOST_UNIDENTIFIED",
+   "INCOMPLETE",
+   "INVALID",
++  "INVALID_POLICY_KEY",
+   "INVALID_READY",
+   "INVALID_ROLE",
+   "INVALID_SOURCE",
+@@ -1264,8 +1269,10 @@
+   "PATH_LAUNCHER_NO_DIRECTORY",
+   "PROJECT_BLOCK_REPAIR_FAILED",
+   "RECEIPT_NOT_FOUND",
++  "ROWS_UNRECOVERABLE",
+   "RUNTIME_UNAVAILABLE",
+   "SAIPEN_HOST_RUNTIME_UNAVAILABLE",
++  "SOURCE_INDEX_UNRECOVERABLE",
+   "STALE_WORK_CONTEXT",
+   "UNHANDLED_CLASSIFICATION",
+   "WAIT_FOREIGN_OWNER",
+diff --git a/tools/core_unit_baseline.json b/tools/core_unit_baseline.json
+index 11b24461e..9bf3d810f 100644
+--- a/tools/core_unit_baseline.json
++++ b/tools/core_unit_baseline.json
+@@ -13,15 +13,8 @@
+     "test_*.py",
+     "-v"
+   ],
+-  "recorded_at": "d4c56c4d1b1782a68e4381467fb9be958a604d93",
+-  "ran": 5038,
+-  "grown_because": "6 inherited reds, not caused by this work: measured in a detached worktree at the pre-T-1614 base d99cfb15, where tools.test_legacy_lifecycle_compat fails the SAME 6 tests and the other implicated suites are green. They read the live .saipen/BOARD.md, whose T-113 and T-114 ## DONE rows predate this project's closure contract (frontier T-190) and carry no execution evidence in either grammar; the engine classifies that as OPERATOR_DECISION (remediation: 'saipen recover --attest-legacy-done T-113,T-114') and forbids automatic repair, so the debt cannot be cleared by the agent and belongs in the baseline. T-1614 repaired the other 22 (down from 22 new reds to these 6).",
+-  "red": [
+-    "test_legacy_lifecycle_compat.AttestLegacyDoneTests.test_attestation_clears_the_ambiguity_without_rewriting_history",
+-    "test_legacy_lifecycle_compat.AttestLegacyDoneTests.test_cli_attest_round_trip_and_id_grammar",
+-    "test_legacy_lifecycle_compat.PlanIdentityTests.test_attestation_plus_approval_commits_both_in_one_pass",
+-    "test_legacy_lifecycle_compat.TargetCLegacyDoneTests.test_1_pre_closure_mode_done_with_build_evidence_remains_done",
+-    "test_legacy_lifecycle_compat.TargetCLegacyDoneTests.test_2_pre_closure_mode_done_with_ship_evidence_remains_legacy_valid",
+-    "test_legacy_lifecycle_compat.TargetDLegacyAttributionTests.test_4_legacy_attribution_survives_a_full_reconciliation"
+-  ]
++  "recorded_at": "bf70d2eb9b73df5e9a74333cb817446b1f91ed1a",
++  "ran": 4365,
++  "grown_because": null,
++  "red": []
+ }
+diff --git a/tools/freshness.py b/tools/freshness.py
+index d98fbc545..411e5ed76 100644
+--- a/tools/freshness.py
++++ b/tools/freshness.py
+@@ -228,6 +228,116 @@ def _path_from_git(root: Path, raw_path: bytes) -> Path:
+     return candidate
+ 
+ 
++def _nested_key(raw_path: bytes) -> bytes:
++    """Comparison key for a nested-repository path.
++
++    Windows paths are case-insensitive and separator-insensitive, so a project
++    that declares ``Contributions/.Tooling/Upstream-Parser`` owns the same
++    directory Git reports as ``contributions/.tooling/upstream-parser``. Both
++    sides go through the SAME normalisation, so the match is exact on the
++    platform's own rules and unchanged (identity) elsewhere -- never a fuzzy
++    match that could bind a directory the project did not name.
++    """
++    return os.fsencode(os.path.normcase(os.fsdecode(raw_path)))
++
++
++def _declared_nested_repo_paths(root: Path) -> frozenset[bytes]:
++    """The DECLARED nested repositories in the byte form Git reports them.
++
++    Same declaration document ``_nested_binding`` reads, projected onto the
++    listing path space: forward slashes, no leading/trailing separator, no
++    ``./`` prefix, filesystem encoding. A malformed declaration raises here too,
++    so an unreadable ownership contract can never be mistaken for "no contract"
++    by the classifier below.
++    """
++    declared = _read_nested_declarations(root)
++    canonical: set[bytes] = set()
++    for rel in declared:
++        normalised = rel.replace("\\", "/").strip("/")
++        while normalised.startswith("./"):
++            normalised = normalised[2:]
++        if normalised:
++            canonical.add(_nested_key(normalised.encode("utf-8")))
++    return frozenset(canonical)
++
++
++def _nested_boundary_from_git(
++    root: Path, raw_path: bytes, declared: frozenset[bytes]
++) -> None:
++    """Classify a Git listing entry that ends in ``/`` -- an embedded repository.
++
++    Git never descends into an embedded repository. For one that the outer
++    project does not track it emits the DIRECTORY ITSELF with a trailing slash
++    (``contributions/.tooling/upstream-parser/``), and that entry is not a path
++    to a file: parsing it as one either rejects a legitimate boundary as
++    "non-canonical" (the trailing empty component) or, with the slash stripped,
++    fails as an unsupported file type. Both outcomes abort the whole capture, so
++    a single untracked linked worktree made source identity unavailable and every
++    conformance run reported STALE_FAIL.
++
++    The decision is provenance, not path shape:
++
++    * declared in ``.saipen/source-nested-repos.json`` -- the project has said
++      this repository counts, ``_nested_binding`` binds its own HEAD and delta,
++      so the outer delta must NOT also cover it. Returning normally means "skip
++      this entry, it is already covered";
++    * undeclared -- refuse, naming the exact contract that is missing. A nested
++      repository is never silently included, excluded or modified: it needs an
++      ownership decision, and this message is the actionable path to it;
++    * anything else Git claims is a directory boundary (a reparse point, a
++      directory that is not a Git work tree root, a path that escapes the
++      project) stays fatal, unchanged.
++    """
++    stripped = raw_path.rstrip(b"/")
++    if not stripped or stripped.startswith(b"/") or b"\0" in stripped:
++        raise FreshnessError(f"Git returned an invalid directory boundary: {raw_path!r}")
++    if any(part in (b"", b".", b"..") for part in stripped.split(b"/")):
++        raise FreshnessError(f"Git returned a non-canonical path: {raw_path!r}")
++    rel = os.fsdecode(stripped)
++    candidate = root.joinpath(*rel.split("/"))
++    try:
++        candidate.relative_to(root)
++    except ValueError as exc:
++        raise FreshnessError(f"Git path escapes project root: {rel!r}") from exc
++    if _is_reparse_point(candidate):
++        raise FreshnessError(
++            f"untracked directory boundary {rel!r} is a symlink or reparse point; "
++            "source identity never follows a linked tree"
++        )
++    if not candidate.is_dir():
++        raise FreshnessError(
++            f"Git reported a directory boundary that is not a directory: {rel!r}"
++        )
++    if _nested_key(stripped) in declared:
++        # Covered by _nested_binding: its HEAD and delta are bound there.
++        return
++    probe = subprocess.run(
++        ["git", "-C", os.fspath(candidate), "rev-parse", "--show-toplevel"],
++        stdout=subprocess.PIPE,
++        stderr=subprocess.PIPE,
++        check=False,
++    )
++    is_work_tree = False
++    if probe.returncode == 0:
++        try:
++            is_work_tree = Path(os.fsdecode(probe.stdout.strip())).resolve() == candidate.resolve()
++        except (OSError, ValueError):
++            is_work_tree = False
++    contract = NESTED_REPOS_CONFIG_REL.as_posix()
++    if is_work_tree:
++        raise FreshnessError(
++            f"untracked nested Git repository {rel!r} has no ownership contract; "
++            f"add it to the `nested_repos` list in {contract} to bind its own HEAD "
++            "and working-tree delta, or exclude the checkout from Git discovery -- "
++            "source identity will not silently include or ignore it"
++        )
++    raise FreshnessError(
++        f"Git returned an untracked directory entry {rel!r} that is not a repository "
++        f"root; if it belongs to the project declare it in {contract}, otherwise "
++        "it cannot be classified"
++    )
++
++
+ def _read_regular_info(path: Path) -> tuple[bytes, tuple]:
+     """Race-safe read returning (content, post-read stat fingerprint).
+ 
+@@ -416,6 +526,7 @@ def _parse_git_delta_evidence(
+ ) -> list[_Evidence]:
+     """Evidence variant of ``_parse_git_delta`` (PERF-002)."""
+     records: dict[bytes, tuple[bytes, int, int]] = {}
++    declared = _declared_nested_repo_paths(root)
+     fields = raw.split(b"\0")
+     index = 0
+     while index < len(fields) and fields[index]:
+@@ -448,11 +559,26 @@ def _parse_git_delta_evidence(
+             records[raw_path] = (b"D", old_mode, new_mode)
+             continue
+         if new_mode == 0o160000:
+-            raise FreshnessError(f"changed Git submodule is unsupported: {os.fsdecode(raw_path)}")
++            if _nested_key(raw_path.rstrip(b"/")) in declared:
++                # The project owns this repository: _nested_binding binds its
++                # own HEAD and delta, so the outer gitlink pointer is not the
++                # only thing that covers it.
++                continue
++            raise FreshnessError(
++                f"changed Git submodule is unsupported: {os.fsdecode(raw_path)}"
++                f" -- declare it in {NESTED_REPOS_CONFIG_REL.as_posix()} nested_repos "
++                "to bind its own HEAD and working-tree delta"
++            )
+         records[raw_path] = (b"F", old_mode, new_mode)
+     for raw_path in untracked.split(b"\0"):
+         if not raw_path or _is_saipen_path(raw_path):
+             continue
++        if raw_path.endswith(b"/"):
++            # An embedded repository boundary. Declared ones are bound by
++            # _nested_binding and skipped; undeclared ones raise, so this loop
++            # can never turn one into a fabricated file record.
++            _nested_boundary_from_git(root, raw_path, declared)
++            continue
+         records[raw_path] = (b"F", 0, 0)
+     # The output order is `sorted(records)`' order and is load-bearing: the
+     # confirming pass frames these records into the canonical digest in exactly
+@@ -787,6 +913,7 @@ def _filtered_git_listing(
+ 
+ def _parse_git_delta(root: Path, raw: bytes, untracked: bytes) -> list[_Record]:
+     records: dict[bytes, _Record] = {}
++    declared = _declared_nested_repo_paths(root)
+     fields = raw.split(b"\0")
+     index = 0
+     while index < len(fields) and fields[index]:
+@@ -819,12 +946,24 @@ def _parse_git_delta(root: Path, raw: bytes, untracked: bytes) -> list[_Record]:
+             records[raw_path] = _Record(b"D", raw_path, old_mode, b"")
+             continue
+         if new_mode == 0o160000:
+-            raise FreshnessError(f"changed Git submodule is unsupported: {os.fsdecode(raw_path)}")
++            if _nested_key(raw_path.rstrip(b"/")) in declared:
++                # Owned by the project: _nested_binding covers the repository's
++                # own HEAD and delta, so the outer pointer is not its only
++                # evidence and the capture must not fail on it.
++                continue
++            raise FreshnessError(
++                f"changed Git submodule is unsupported: {os.fsdecode(raw_path)}"
++                f" -- declare it in {NESTED_REPOS_CONFIG_REL.as_posix()} nested_repos "
++                "to bind its own HEAD and working-tree delta"
++            )
+         records[raw_path] = _record_current(root, raw_path, new_mode)
+ 
+     for raw_path in untracked.split(b"\0"):
+         if not raw_path or _is_saipen_path(raw_path):
+             continue
++        if raw_path.endswith(b"/"):
++            _nested_boundary_from_git(root, raw_path, declared)
++            continue
+         records[raw_path] = _record_current(root, raw_path, None)
+     return list(records.values())
+ 
+@@ -918,20 +1057,21 @@ def _git_identity(root: Path) -> SourceIdentity:
+ NESTED_REPOS_CONFIG_REL = Path(".saipen") / "source-nested-repos.json"
+ 
+ 
+-def _nested_binding(root: Path) -> bytes:
+-    """Canonical bytes binding every DECLARED nested repository's identity.
++def _read_nested_config(root: Path) -> tuple[object, tuple[str, ...]]:
++    """``(schema_version, declared paths)`` from the ownership contract.
+ 
+-    Empty when the project declares none, which keeps every existing project's
+-    identity byte-identical to what it was before this rule existed. A declared
+-    repository that is missing, unreadable or not a Git work tree FAILS the
+-    capture rather than dropping out of it: a freshness guarantee that quietly
+-    stops covering its source is worse than no guarantee, because it is believed.
++    One read serves both the binding bytes and the boundary classifier, so the
++    two can never disagree about which repositories the project owns. Returns
++    ``(1, ())`` when the document is absent or names none. A document that
++    exists but cannot be understood raises: an unreadable ownership contract is
++    not the same thing as no contract, and treating it as "no contract" would
++    let a typo silently drop coverage of a whole nested repository.
+     """
+     config = root / NESTED_REPOS_CONFIG_REL
+     try:
+         raw = config.read_bytes()
+     except OSError:
+-        return b""
++        return (1, ())
+     try:
+         data = json.loads(raw.decode("utf-8-sig"))
+     except (UnicodeDecodeError, ValueError) as exc:
+@@ -940,22 +1080,57 @@ def _nested_binding(root: Path) -> bytes:
+         raise FreshnessError("nested-repo binding must be a JSON object")
+     declared = data.get("nested_repos")
+     if declared is None:
+-        return b""
++        return (data.get("schema_version", 1), ())
+     if not isinstance(declared, list) or not all(isinstance(x, str) for x in declared):
+         raise FreshnessError("nested-repo binding 'nested_repos' must be a list of paths")
++    return (data.get("schema_version", 1), tuple(declared))
++
++
++def _read_nested_declarations(root: Path) -> tuple[str, ...]:
++    """The declared nested repositories, in declaration order."""
++    return _read_nested_config(root)[1]
++
++
++def _nested_binding(root: Path) -> bytes:
++    """Canonical bytes binding every DECLARED nested repository's identity.
++
++    Empty when the project declares none, which keeps every existing project's
++    identity byte-identical to what it was before this rule existed. A declared
++    repository that is missing, unreadable or not a Git work tree FAILS the
++    capture rather than dropping out of it: a freshness guarantee that quietly
++    stops covering its source is worse than no guarantee, because it is believed.
++    """
++    schema_version, declared = _read_nested_config(root)
+     if not declared:
+         return b""
+     # Canonical, not raw: the binding names WHICH repositories count, so
+     # reordering the list or repeating an entry is not a change in what is
+     # bound and must not move the identity. Only adding or removing one does.
+     canon = json.dumps(
+-        {"schema_version": data.get("schema_version", 1), "nested_repos": sorted(set(declared))},
++        {"schema_version": schema_version, "nested_repos": sorted(set(declared))},
+         sort_keys=True,
+         separators=(",", ":"),
+     ).encode("utf-8")
+     parts: list[bytes] = [b"git-delta-v1-nested\x00", canon]
+     for rel in sorted(set(declared)):
+-        nested = (root / rel).resolve()
++        # Containment is decided LEXICALLY first, then on the target, because the
++        # three refusals mean different things to the operator: a declaration
++        # that climbs out, a declaration whose tree is gone, and a declaration
++        # that is a junction/symlink are not the same defect (T-572). Resolving
++        # first would collapse all three into "escapes".
++        rel_parts = Path(rel).parts
++        if Path(rel).is_absolute() or ".." in rel_parts:
++            raise FreshnessError(
++                f"declared nested repository escapes the project root: {rel!r}"
++            )
++        target = root / rel
++        if not target.exists():
++            raise FreshnessError(f"declared nested repository is missing: {rel!r}")
++        if _is_reparse_point(target):
++            raise FreshnessError(
++                f"declared nested repository is a reparse point: {rel!r}"
++            )
++        nested = target.resolve()
+         try:
+             nested.relative_to(root.resolve())
+         except ValueError as exc:
+@@ -964,10 +1139,6 @@ def _nested_binding(root: Path) -> bytes:
+             ) from exc
+         if not nested.is_dir():
+             raise FreshnessError(f"declared nested repository is missing: {rel!r}")
+-        if _is_reparse_point(root / rel):
+-            raise FreshnessError(
+-                f"declared nested repository is a reparse point: {rel!r}"
+-            )
+         # `--is-inside-work-tree` is the wrong test here: a plain directory
+         # inside the outer repository answers true and would then be bound to
+         # the OUTER head and delta, silently covering the wrong bytes. The
+diff --git a/tools/saipen.py b/tools/saipen.py
+index 372116373..bdb3f55ba 100644
+--- a/tools/saipen.py
++++ b/tools/saipen.py
+@@ -47,6 +47,8 @@ from saipen_engine.operations import (
+     plan_claim,
+     repair_metadata,
+     resolve_external_ticket,
++    reconcile_source_index,
++    restore_board_rows,
+     scrub_board,
+     seal_log,
+     supersede_ticket,
+@@ -6744,18 +6746,63 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
+         return 0 if result.get("ok") else 1
+ 
+     if action == "recover":
++        # T-2050: the survey alone was a dead end for a row an earlier scrub
++        # moved while an ACTIVE receipt still names it. `--confirm` performs the
++        # one journaled restore of exactly those rows; the plain form stays the
++        # read-only report, and a dry-run always degrades to it.
++        confirm = "--confirm" in rest
++        rest = [token for token in rest if token != "--confirm"]
+         if rest:
+             _emit(
+                 {
+                     "ok": False,
+                     "code": "VALIDATION_FAILED",
+-                    "detail": "source recover accepts no arguments",
++                    "detail": "source recover accepts only [--confirm]",
+                 },
+                 as_json,
+             )
+             return 2
+-        _emit(intake.recover_orphans(project_root), as_json)
+-        return 0
++        if not confirm or dry_run:
++            _emit(intake.recover_orphans(project_root), as_json)
++            return 0
++        if _negotiate_capability(project_root) == "read-only":
++            return _capability_refusal(as_json)
++        outcome = restore_board_rows(project_root, _agent_for(project_root)).to_dict()
++        _emit(outcome, as_json)
++        return 0 if outcome.get("ok") else 1
++
++    if action == "reconcile-index":
++        # T-2051: the index lost the entries for receipts whose byte-exact
++        # bundles never left `.saipen/archive/source/`, so the validator's
++        # `BOARD Work T-x references missing source receipt SRC-y` named a
++        # break no verb could close. The plan is read-only and names, per id,
++        # whether a proven bundle backs it or which carrier is missing;
++        # `--confirm` re-registers only the proven ones, transactionally.
++        confirm = "--confirm" in rest
++        rest = [token for token in rest if token != "--confirm"]
++        if any(not re.fullmatch(r"SRC-\d{3,}", token) for token in rest):
++            _emit(
++                {
++                    "ok": False,
++                    "code": "VALIDATION_FAILED",
++                    "detail": "source reconcile-index takes [SRC-### ...] [--confirm]",
++                },
++                as_json,
++            )
++            return 2
++        from saipen_engine import source_reindex
++
++        if not confirm or dry_run:
++            report = source_reindex.plan(project_root)
++            _emit(report, as_json)
++            return 0 if report.get("ok") else 1
++        if _negotiate_capability(project_root) == "read-only":
++            return _capability_refusal(as_json)
++        outcome = reconcile_source_index(
++            project_root, _agent_for(project_root), rest or None
++        ).to_dict()
++        _emit(outcome, as_json)
++        return 0 if outcome.get("ok") else 1
+ 
+     if action == "show":
+         if len(rest) != 1:
+@@ -9374,7 +9421,21 @@ def _emit(payload: dict, as_json: bool) -> None:
+             _reason = str(_conformance.get("reason") or "").strip()
+             if _reason:
+                 print(f"Reason: {_reason}")
+-            print("Remediation: saipen validate")
++            if _conformance.get("retry_blocked"):
++                # An unrecoverable staleness: `saipen validate` re-reads the
++                # same broken input and returns the identical STALE_FAIL, so
++                # recommending it again is the loop itself. Name the repair the
++                # evidence carries and the condition's fingerprint instead.
++                _detail = str(_conformance.get("blocker_detail") or "").strip()
++                if _detail:
++                    print(f"Blocked: {_detail}")
++                _fp = str(_conformance.get("retry_fingerprint") or "").strip()
++                print(
++                    "Remediation: none -- re-running 'saipen validate' cannot change this"
++                    + (f" (blocker {_fp})" if _fp else "")
++                )
++            else:
++                print("Remediation: saipen validate")
+     elif payload.get("conformance_history"):
+         print("Conformance: UNKNOWN (authoritative receipt status unavailable)")
+     if payload.get("conformance_history"):
+diff --git a/tools/saipen_engine/board_scrub.py b/tools/saipen_engine/board_scrub.py
+index 6fb59fca1..51e223e7e 100644
+--- a/tools/saipen_engine/board_scrub.py
++++ b/tools/saipen_engine/board_scrub.py
+@@ -38,6 +38,7 @@ from __future__ import annotations
+ 
+ import re
+ from dataclasses import dataclass
++from pathlib import Path
+ 
+ #: Where a scrub keeps the rows it pruned, one directory per operation.
+ SCRUB_EVIDENCE_ROOT = ".saipen/recovery/board-scrub"
+@@ -149,3 +150,55 @@ def select(tickets: dict, events, active_receipts: set[str], receipt_works: set[
+     )
+     size = sum(len(str(tickets[tid].get("raw") or "").encode("utf-8")) + 1 for tid in pruned)
+     return Selection(tuple(pruned), size, kept)
++
++
++#: One BOARD record line and the ticket id it opens with.
++_ROW_RE = re.compile(r"^\s*[-*]\s*\[[ x/]\]\s*(T-\d+)\b")
++
++
++def pruned_rows(root: Path, ticket_ids) -> dict[str, tuple[str, str]]:
++    """The verbatim rows earlier scrubs moved for these ids (T-2050).
++
++    Returns ``{ticket: (row_text, evidence_path)}``. A scrub removes whole
++    physical lines, so the row a restore puts back is the same bytes the BOARD
++    held -- nothing is re-rendered and no field is reconstructed. Newest scrub
++    wins when a row was pruned twice.
++    """
++    wanted = {str(tid) for tid in ticket_ids if re.fullmatch(r"T-\d+", str(tid))}
++    found: dict[str, tuple[str, str]] = {}
++    if not wanted:
++        return found
++    base = Path(root) / SCRUB_EVIDENCE_ROOT
++    if not base.is_dir():
++        return found
++    for evidence in sorted(base.glob("*/BOARD.md")):
++        try:
++            text = evidence.read_text(encoding="utf-8-sig")
++        except (OSError, UnicodeDecodeError):
++            continue
++        for line in text.splitlines():
++            match = _ROW_RE.match(line)
++            if match and match.group(1) in wanted:
++                found[match.group(1)] = (line, evidence.relative_to(root).as_posix())
++    return found
++
++
++def restored_board_text(text: str, rows) -> str:
++    """Insert verbatim closed records at the head of ``## DONE``.
++
++    Every other byte of the document is preserved: the rows are already
++    complete lines in this document's own shape, and only their position
++    changes. Raises ``ValueError`` when there is no closed section to restore
++    into, so a caller never guesses where a closed record belongs.
++    """
++    eol = "\r\n" if "\r\n" in text else "\n"
++    lines = text.split(eol)
++    heading = next(
++        (index for index, line in enumerate(lines) if line.strip() == "## DONE"), None
++    )
++    if heading is None:
++        raise ValueError("the BOARD has no ## DONE section to restore into")
++    body = list(rows)
++    if not body:
++        return text
++    return eol.join(lines[: heading + 1] + body + lines[heading + 1 :])
+diff --git a/tools/saipen_engine/conformance.py b/tools/saipen_engine/conformance.py
+index 5b25c7ec8..0dd623360 100644
+--- a/tools/saipen_engine/conformance.py
++++ b/tools/saipen_engine/conformance.py
+@@ -211,6 +211,59 @@ STALE_REASONS_RECOVERABLE = frozenset(
+ )
+ 
+ 
++#: The reasons NO validator re-run can settle, because the input the evidence
++#: needs was never computable in the first place. `saipen validate` reads the
++#: same broken input every time, so recommending it again is a loop that cannot
++#: terminate: the agent re-runs, gets the identical STALE_FAIL, and is told the
++#: same thing. These statuses carry a stable `retry_fingerprint`, so a consumer
++#: can recognise "nothing changed" and name the real repair instead.
++UNRECOVERABLE_STALE_REASONS = frozenset({STALE_REASON_SOURCE_IDENTITY_UNAVAILABLE})
++
++
++def blocking_fingerprint(receipt: dict | None, stale_reason: str | None) -> str:
++    """Stable 16-hex identity of the condition holding conformance red.
++
++    Derived only from evidence the receipt already carries -- the sorted
++    ``finding_key``/``detail_hash`` pairs of its blocking findings plus the
++    typed stale reason -- so two runs blocked by the same inputs agree and a
++    changed input does not. A receipt with no readable findings degrades to the
++    reason alone rather than inventing a match it cannot support.
++    """
++    items: list[list[str]] = []
++    findings = (receipt or {}).get("blocking_findings")
++    if isinstance(findings, dict):
++        for finding in findings.get("problems") or ():
++            if isinstance(finding, dict):
++                items.append(
++                    [str(finding.get("finding_key") or ""), str(finding.get("detail_hash") or "")]
++                )
++    items.sort()
++    payload = json.dumps(
++        {"reason": stale_reason or "", "blockers": items},
++        sort_keys=True,
++        separators=(",", ":"),
++    )
++    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
++
++
++def blocker_detail(receipt: dict | None) -> str:
++    """The first blocking finding's own words, or "".
++
++    The detail is the actionable half of a blockage (``add it to the
++    nested_repos list in ...``); the status carries it so the human surface can
++    print the repair instead of a command that cannot perform it.
++    """
++    findings = (receipt or {}).get("blocking_findings")
++    if not isinstance(findings, dict):
++        return ""
++    for finding in findings.get("problems") or ():
++        if isinstance(finding, dict):
++            detail = str(finding.get("detail") or "").strip()
++            if detail:
++                return detail
++    return ""
++
++
+ def stale_recoverable(status: dict | None) -> bool:
+     """Whether THIS conformance status is a staleness the validator re-run cures.
+ 
+@@ -1518,6 +1571,10 @@ def conformance_status(
+     # matching identity. Empty==empty must NOT bind as current -- the receipt
+     # cannot be proven bound to THIS project/tree when neither side has a value.
+     if not current_head or not current_fp:
++        # Retry-proof: the validator would read the same uncomputable input
++        # again. The fingerprint names the condition, the detail names the
++        # repair, and `retry_blocked` tells every consumer not to recommend the
++        # identical run a second time.
+         return {
+             "status": STATUS_STALE_FAIL,
+             "gate": gate,
+@@ -1527,6 +1584,11 @@ def conformance_status(
+                 "source_tree_fingerprint) -- the receipt cannot be proven bound "
+                 "to the current tree"
+             ),
++            "retry_blocked": True,
++            "retry_fingerprint": blocking_fingerprint(
++                receipt, STALE_REASON_SOURCE_IDENTITY_UNAVAILABLE
++            ),
++            "blocker_detail": blocker_detail(receipt),
+             "receipt": receipt,
+             "validator": info.as_dict(),
+         }
+@@ -1611,6 +1673,11 @@ def conformance_status(
+         # CURRENT_*/NOT_RUN/INVALID verdict, which is not a staleness at all.
+         "stale_reason": stale_reason,
+         "reason": reason,
++        # Always present, so a consumer never has to infer "is a retry useful?"
++        # from prose: only an unrecoverable staleness blocks the retry, and only
++        # it carries a fingerprint.
++        "retry_blocked": False,
++        "retry_fingerprint": None,
+         "receipt": receipt,
+         "validator": info.as_dict(),
+     }
+@@ -1717,8 +1784,30 @@ def conformance_decision(
+     bounded = (_bounded_remediation_commands(receipt.get("remediation_commands"))
+                if kind == STATUS_CURRENT_FAIL else [])
+     diagnostic = None
++    retry_blocked = bool(status.get("retry_blocked"))
+     if healthy:
+         primary, repair_status = None, "HEALTHY"
++    elif retry_blocked:
++        # The evidence input itself is uncomputable, so the canonical validator
++        # would return the identical verdict on every retry. The command stays
++        # advertised (it is the one run that re-reads evidence once the input is
++        # repaired) but the repair status names what is actually required, and
++        # the fingerprinted condition travels so a consumer can tell an unchanged
++        # blockage from a new one instead of looping.
++        primary, repair_status = CONFORMANCE_REMEDIATION_COMMAND, "INPUT_REQUIRED"
++        diagnostic = {
++            "kind": "INPUT_REQUIRED",
++            "owner": "SAIPEN source identity",
++            "stale_reason": status.get("stale_reason"),
++            "retry_fingerprint": status.get("retry_fingerprint"),
++            "detail": str(
++                status.get("blocker_detail") or status.get("reason") or ""
++            ).strip(),
++            "note": (
++                "re-running the canonical validator cannot change this condition; "
++                "repair the named input, then validate once"
++            ),
++        }
+     elif kind != STATUS_CURRENT_FAIL:
+         primary, repair_status = CONFORMANCE_REMEDIATION_COMMAND, "REFRESH_REQUIRED"
+     elif bounded:
+@@ -1775,6 +1864,12 @@ def conformance_decision(
+         "remediation_command": primary,
+         "remediation_commands": bounded,
+         "repair_status": repair_status,
++        # The retry-proof condition, when there is one: `retry_blocked` false and
++        # both detail fields empty for every recoverable status, so a consumer
++        # that ignores them keeps the previous behaviour exactly.
++        "retry_blocked": retry_blocked,
++        "retry_fingerprint": status.get("retry_fingerprint"),
++        "blocker_detail": str(status.get("blocker_detail") or ""),
+         "diagnostic": diagnostic,
+         "status_block": status,
+     }
+diff --git a/tools/saipen_engine/intake.py b/tools/saipen_engine/intake.py
+index ad768675d..b7fee5da5 100644
+--- a/tools/saipen_engine/intake.py
++++ b/tools/saipen_engine/intake.py
+@@ -5360,7 +5360,73 @@ def recover_orphans(root: Path | str) -> dict:
+                         "source_sha256": digest,
+                     }
+                 )
+-    return {"ok": True, "code": "ORPHAN_RECEIPTS", "orphans": orphans}
++    report = {"ok": True, "code": "ORPHAN_RECEIPTS", "orphans": orphans}
++    pruned = pruned_work_rows(root)
++    if pruned:
++        report["pruned_work_rows"] = pruned
++        report["recovery_command"] = "saipen source recover --confirm"
++    return report
++
++
++def dangling_linked_work(root: Path | str) -> dict[str, str]:
++    """ACTIVE receipts whose `linked_work` is not on the BOARD (T-2050).
++
++    The same edge `validate_project` refuses. Read-only: `{receipt: work}` for
++    every active receipt that names a Work the BOARD no longer holds, so both
++    the report and the restore act on exactly the link the validator reports.
++    """
++    root = Path(root)
++    index = _read_index(root)
++    active = index.get("active") or {}
++    if not isinstance(active, dict):
++        return {}
++    from .board import parse_board
++
++    raw = _read_owned_file(
++        root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX
++    )
++    tickets = parse_board(raw.decode("utf-8-sig")).get("tickets", {})
++    dangling: dict[str, str] = {}
++    for receipt_id in sorted(active):
++        if not _valid_receipt_id(receipt_id):
++            continue
++        linked = str((_read_meta(root, receipt_id) or {}).get("linked_work") or "").strip()
++        if linked and linked not in tickets:
++            dangling[receipt_id] = linked
++    return dangling
++
++
++def pruned_work_rows(root: Path | str) -> list[dict]:
++    """Active receipts whose Work row an earlier scrub moved (T-2050).
++
++    Read-only. A row an ACTIVE receipt still names is a broken link, not a
++    deleted record: the scrub moved the line verbatim into
++    `SCRUB_EVIDENCE_ROOT`, so the report names both the Work and the evidence
++    that still holds it, and `state` says whether the bytes are there at all.
++    """
++    root = Path(root)
++    try:
++        dangling = dangling_linked_work(root)
++    except (OSError, ValueError):
++        return []
++    missing = sorted(set(dangling.values()))
++    if not missing:
++        return []
++    receipts_by_work: dict[str, list[str]] = {}
++    for receipt_id, work in dangling.items():
++        receipts_by_work.setdefault(work, []).append(receipt_id)
++    from . import board_scrub
++
++    found = board_scrub.pruned_rows(root, missing)
++    return [
++        {
++            "work": tid,
++            "state": "PRUNED_ROW" if tid in found else "ROW_LOST",
++            "evidence": found.get(tid, ("", ""))[1] or None,
++            "receipts": receipts_by_work[tid],
++        }
++        for tid in missing
++    ]
+ 
+ 
+ def recover_reports(root: Path | str, receipt_id: object) -> bool:
+@@ -5372,10 +5438,14 @@ def recover_reports(root: Path | str, receipt_id: object) -> bool:
+     state never changes, and every agent generation re-runs the same route.
+     """
+     try:
+-        orphans = recover_orphans(root).get("orphans") or []
++        report = recover_orphans(root)
+     except (OSError, ValueError):
+         return False
+-    return any(item.get("receipt") == receipt_id for item in orphans)
++    if any(item.get("receipt") == receipt_id for item in report.get("orphans") or []):
++        return True
++    # T-2050: a row an earlier scrub moved is now a route, so the receipt that
++    # names it is no longer a dead end for this command.
++    return bool(report.get("pruned_work_rows"))
+ 
+ 
+ def validate_project(root: Path | str) -> list[str]:
+@@ -5500,7 +5570,14 @@ def validate_project(root: Path | str) -> list[str]:
+         if linked:
+             ticket = board_tickets.get(linked)
+             if ticket is None:
+-                errors.append(f"active receipt {receipt_id} references missing Work {linked}")
++                # T-2050: the row may have been moved by a scrub rather than
++                # never exist, and that case has an executable repair. The
++                # message carries it so the conformance receipt advertises an
++                # action instead of ENGINEERING_REQUIRED.
++                errors.append(
++                    f"active receipt {receipt_id} references missing Work {linked}"
++                    " -- saipen source recover --confirm re-inserts the row an earlier scrub moved"
++                )
+             else:
+                 projected = {
+                     value.strip()
+diff --git a/tools/saipen_engine/journal.py b/tools/saipen_engine/journal.py
+index e5e29191f..c479b10c2 100644
+--- a/tools/saipen_engine/journal.py
++++ b/tools/saipen_engine/journal.py
+@@ -468,6 +468,7 @@ OP_CLASSES: dict[str, frozenset[int]] = {
+             "attempt-open-",
+             "bind-cohort-",
+             "board-compact-",
++            "board-restore-",
+             "board-scrub-",
+             "ccc-entry-",
+             "clear-wait-role-",
+@@ -499,6 +500,7 @@ OP_CLASSES: dict[str, frozenset[int]] = {
+             "duplicate-id-",
+             "release-",
+             "source.requirement_add-",
++            "source-reindex-",
+             # improve.py (`_journaled_write` kinds, admit, rebind), userperson.py
+             "cycle-",
+             "improve-admit-",
+diff --git a/tools/saipen_engine/operations.py b/tools/saipen_engine/operations.py
+index 80a7b8587..250e8fae5 100644
+--- a/tools/saipen_engine/operations.py
++++ b/tools/saipen_engine/operations.py
+@@ -26948,3 +26948,439 @@ def _render_plan(plan: OperationPlan) -> Result:
+         changed_files=plan.changed_files,
+ 
+     )
++
++@_state_guard
++def restore_board_rows(project_root: Path | str, agent: str, dry_run: bool = False) -> Result:
++    """Put back the pruned closed records an ACTIVE receipt still names (T-2050).
++
++    The validator FAILed `active receipt SRC-x references missing Work T-y` on
++    rows an earlier scrub moved, and nothing could act on it: the row was gone
++    from the BOARD, `source recover` reported the receipts as clean, and no verb
++    could re-add a record. A scrub moves whole physical lines into
++    `SCRUB_EVIDENCE_ROOT`, so the row an ACTIVE receipt still pins is recoverable
++    by identity -- this re-inserts exactly those lines and nothing else.
++
++    Eligibility is not a judgement call: a row comes back only when a receipt
++    that is ACTIVE right now names its ticket. A row nothing pins stays pruned,
++    which keeps this a repair of a broken link rather than a reversal of the
++    scrub. No receipt is retired, no body is edited and no field is
++    reconstructed: the bytes are the ones the BOARD held.
++    """
++    from .intake import dangling_linked_work
++    from .journal import hash_tree_dependency
++
++    root = Path(project_root)
++    now, utc = _now(), _utc_iso()
++    intake_binding = hash_tree_dependency(root / ".saipen" / "intake")
++    docs, state, board, log_tail = _read(root)
++    if board["errors"]:
++        return _refuse(
++            "VALIDATION_FAILED",
++            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
++        )
++    try:
++        dangling = dangling_linked_work(root)
++    except (OSError, ValueError) as exc:
++        return _refuse(
++            "VALIDATION_FAILED",
++            f"the source receipts cannot be read, so what they pin is unknown: {exc}",
++        )
++    missing = sorted(set(dangling.values()))
++    if not missing:
++        return Result(
++            ok=True,
++            code="NOTHING_TO_RESTORE",
++            data={
++                "ok": True,
++                "code": "NOTHING_TO_RESTORE",
++                "detail": "every record an ACTIVE source receipt names is on the BOARD",
++                "restored": [],
++            },
++        )
++    try:
++        recoverable = board_scrub.pruned_rows(root, missing)
++    except (OSError, ValueError) as exc:
++        return _refuse("VALIDATION_FAILED", f"the scrub evidence cannot be read: {exc}")
++    unrecoverable = [tid for tid in missing if tid not in recoverable]
++    missing = [tid for tid in missing if tid in recoverable]
++    if not missing:
++        return _refuse(
++            "ROWS_UNRECOVERABLE",
++            f"none of the {len(unrecoverable)} pinned record(s) has a pruned copy to restore: "
++            + ", ".join(unrecoverable[:8])
++            + (" ..." if len(unrecoverable) > 8 else ""),
++            missing=unrecoverable,
++        )
++    board_doc = docs["board"]
++    if hash_bytes(board_doc.bom + board_doc.text.encode(board_doc.encoding)) != board_doc.raw_hash:
++        return _refuse(
++            "VALIDATION_FAILED",
++            "the BOARD does not re-encode to the bytes that were read; a restore inserts whole "
++            "physical lines and refuses to rewrite anything else",
++        )
++    try:
++        new_board_text = board_scrub.restored_board_text(
++            board_doc.text, [recoverable[tid][0] for tid in missing]
++        )
++    except ValueError as exc:
++        return _refuse("VALIDATION_FAILED", str(exc))
++    # A restored record keeps its own edges: the BOARD validator resolves
++    # `needs:` and the scalar reference fields on the rows that stay, so every
++    # record a restored row still names has to come back with it or the restore
++    # would re-create the orphan it exists to fix. The closure is the same one
++    # the retention rule follows, read off the parsed rows that will exist.
++    from .board import parse_board
++
++    selected = list(missing)
++    settled = False
++    for _ in range(12):
++        parsed = parse_board(
++            board_scrub.restored_board_text(
++                board_doc.text, [recoverable[tid][0] for tid in selected]
++            )
++        )
++        named = {
++            ref
++            for ticket in (parsed.get("tickets") or {}).values()
++            for ref in board_scrub._references(ticket, {})
++            if ref not in (parsed.get("tickets") or {})
++        }
++        fresh = sorted(ref for ref in named if ref not in selected)
++        if not fresh:
++            settled = True
++            break
++        recoverable.update(board_scrub.pruned_rows(root, fresh))
++        added = [ref for ref in fresh if ref in recoverable]
++        unrecoverable.extend(
++            ref for ref in fresh if ref not in recoverable and ref not in unrecoverable
++        )
++        if not added:
++            settled = True
++            break
++        selected.extend(added)
++    if not settled:
++        return _refuse(
++            "VALIDATION_FAILED",
++            "the reference closure of the restored records did not settle; nothing is restored",
++        )
++    missing = sorted(selected)
++    rows = [recoverable[tid][0] for tid in missing]
++    evidence_paths = sorted({recoverable[tid][1] for tid in missing})
++    new_board_text = board_scrub.restored_board_text(board_doc.text, rows)
++    new_board_bytes = board_doc.bom + new_board_text.encode(board_doc.encoding)
++    new_board_norm = new_board_text.replace("\r\n", "\n").replace("\r", "\n")
++    restored_bytes = len(new_board_bytes) - len(
++        board_doc.bom + board_doc.text.encode(board_doc.encoding)
++    )
++    op_id = "board-restore-" + uuid4_hex()
++    event, line = _event_line(
++        docs,
++        log_tail,
++        "DEC",
++        None,
++        agent,
++        _actor_provenance(
++            state,
++            agent,
++            f"BOARD rows restored -- {len(missing)} pruned closed record(s) still named by "
++            f"ACTIVE source receipts re-inserted verbatim ({restored_bytes} bytes) from "
++            + ", ".join(evidence_paths[:3])
++            + (" ..." if len(evidence_paths) > 3 else ""),
++        ),
++        now,
++        op_id,
++    )
++    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
++    new_state = patch_state(
++        docs["state"].text_norm,
++        {
++            "last_event": event,
++            "updated": utc,
++            "agent": _seat_agent(state, board_doc.text_norm, agent),
++        },
++    )
++    errors = validate_texts(
++        new_state,
++        new_board_norm,
++        new_log,
++        current_agent=agent,
++        sealed_events=docs["_history"],
++    )
++    if errors:
++        return _refuse(
++            "VALIDATION_FAILED",
++            "proposed BOARD restore fails fast validation: " + "; ".join(errors[:5]),
++        )
++    preconditions = _docs_preconditions(docs, "state", "board", "log")
++    preconditions[".saipen/intake"] = intake_binding
++    for path in evidence_paths:
++        preconditions[path] = hash_bytes((root / path).read_bytes())
++    plan = build_plan(
++        "restore_board_rows",
++        agent,
++        _identity(root),
++        {"operation": "restore_board_rows", "agent": agent},
++        preconditions,
++        [
++            *_log_targets(docs, new_log),
++            TargetPlan(
++                ".saipen/BOARD.md",
++                "board",
++                new_board_bytes,
++                board_doc.raw_hash,
++                hash_bytes(new_board_bytes),
++            ),
++            _target(docs["state"], ".saipen/STATE.md", "state", new_state),
++        ],
++        {
++            "ok": True,
++            "code": "BOARD_ROWS_RESTORED",
++            "event_id": f"E-{event}",
++            "restored": list(missing),
++            "restored_records": len(missing),
++            "unrecoverable": unrecoverable,
++            "restored_bytes": restored_bytes,
++            "evidence_paths": evidence_paths,
++            "board_bytes_before": len(new_board_bytes) - restored_bytes,
++            "board_bytes_after": len(new_board_bytes),
++        },
++        op_id=op_id,
++    )
++    if dry_run:
++        return _render_plan(plan)
++    return apply_plan(root, plan)
++def reconcile_source_index(project_root: Path | str, agent: str, receipt_ids=None, dry_run: bool = False) -> Result:
++    """Re-register intake-index authority from archived bundles on disk (T-2051).
++
++    The validator FAILed `BOARD Work T-x references missing source receipt
++    SRC-y` for receipts whose complete bundle still sat in
++    `.saipen/archive/source/`. The index had lost the entry; the evidence had
++    not. `source recover` cannot help (no row moved), a retirement cannot help
++    (the receipt is not retired, it is archived and closed), and the finding
++    therefore sat at ENGINEERING_REQUIRED forever.
++
++    Eligibility is proof, not judgement: an id is re-registered only when the
++    canonical reader can verify the whole bundle and derive the tombstone from
++    it. Ids without a proven bundle stay unresolved and are reported with the
++    exact missing carrier, which is the terminal blocker the evidence deserves.
++    """
++    import json as _json
++
++    from . import source_reindex
++    from .journal import hash_tree_dependency
++
++    root = Path(project_root)
++    now, utc = _now(), _utc_iso()
++    intake_binding = hash_tree_dependency(root / ".saipen" / "intake")
++    docs, state, board, log_tail = _read(root)
++    if board["errors"]:
++        return _refuse(
++            "VALIDATION_FAILED",
++            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
++        )
++    report = source_reindex.plan(root)
++    if not report.get("ok"):
++        return _refuse("VALIDATION_FAILED", report.get("detail") or "the plan is unreadable")
++    recoverable = {
++        entry["receipt_id"]: entry
++        for entry in report.get("entries") or ()
++        if entry.get("state") in source_reindex.RECOVERABLE_STATES
++    }
++    no_evidence = {
++        entry["receipt_id"]: entry
++        for entry in report.get("entries") or ()
++        if entry.get("state") not in source_reindex.RECOVERABLE_STATES
++    }
++    if receipt_ids:
++        requested_ids = sorted({str(item) for item in receipt_ids})
++        rejected = [item for item in requested_ids if item not in recoverable]
++        if rejected:
++            return _refuse(
++                "SOURCE_INDEX_UNRECOVERABLE",
++                "no proven archived bundle for "
++                + ", ".join(rejected[:6])
++                + (" ..." if len(rejected) > 6 else "")
++                + ": "
++                + "; ".join(
++                    f"{item}: {no_evidence[item]['missing_proof']}"
++                    for item in rejected[:3]
++                    if item in no_evidence
++                ),
++                unrecoverable=rejected,
++            )
++    else:
++        requested_ids = sorted(recoverable)
++    if not requested_ids:
++        return Result(
++            ok=True,
++            code="NOTHING_TO_RECONCILE",
++            data={
++                "ok": True,
++                "code": "NOTHING_TO_RECONCILE",
++                "detail": "every BOARD-named receipt is already resolvable from the index",
++                "reconciled": [],
++                "no_evidence": {
++                    item: entry["missing_proof"] for item, entry in no_evidence.items()
++                },
++            },
++        )
++    index_rel = ".saipen/intake/index.json"
++    try:
++        current = (root / index_rel).read_bytes()
++        index = _json.loads(current.decode("utf-8-sig"))
++    except (OSError, ValueError) as exc:
++        return _refuse("VALIDATION_FAILED", f"the intake index cannot be read: {exc}")
++    canonical = (
++        _json.dumps(index, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
++    ).encode("utf-8")
++    if canonical != current:
++        return _refuse(
++            "VALIDATION_FAILED",
++            "the intake index does not round-trip to the bytes on disk, so adding a record "
++            "would rewrite unrelated ones; nothing is written",
++        )
++    tombstones = index.get("tombstones")
++    if not isinstance(tombstones, dict):
++        return _refuse("VALIDATION_FAILED", "the intake index has no tombstone surface")
++    active = index.get("active") or {}
++    resumed: list[str] = []
++    for receipt_id in requested_ids:
++        if receipt_id in active:
++            return _refuse(
++                "VALIDATION_FAILED",
++                f"{receipt_id} is ACTIVE, not an index gap; nothing is written",
++            )
++        if receipt_id in tombstones:
++            # Resumable: a previous run registered the projection but not its
++            # carrier, so the same bundle finishes the pair instead of the run
++            # refusing a state it produced itself. Drift is the other half-state:
++            # the carrier survived close-time and the projection did not, and the
++            # planner only marks that when the carrier itself was verified.
++            if tombstones[receipt_id] != recoverable[receipt_id]["tombstone"]:
++                if not recoverable[receipt_id].get("carrier_present"):
++                    return _refuse(
++                        "VALIDATION_FAILED",
++                        f"{receipt_id} is already registered and disagrees with its archived "
++                        "bundle; nothing is written",
++                    )
++                resumed.append(receipt_id)
++                tombstones[receipt_id] = recoverable[receipt_id]["tombstone"]
++                continue
++            resumed.append(receipt_id)
++            continue
++        tombstones[receipt_id] = recoverable[receipt_id]["tombstone"]
++    new_bytes = (
++        _json.dumps(index, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
++    ).encode("utf-8")
++    op_id = "source-reindex-" + uuid4_hex()
++    event, line = _event_line(
++        docs,
++        log_tail,
++        "DEC",
++        None,
++        agent,
++        _actor_provenance(
++            state,
++            agent,
++            f"source index reconciled -- {len(requested_ids)} archived bundle(s) re-registered "
++            f"as closed tombstones from bytes on disk ({', '.join(requested_ids[:6])}"
++            + (" ..." if len(requested_ids) > 6 else "")
++            + ") after the index lost them",
++        ),
++        now,
++        op_id,
++    )
++    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
++    new_state = patch_state(
++        docs["state"].text_norm,
++        {
++            "last_event": event,
++            "updated": utc,
++            "agent": _seat_agent(state, docs["board"].text_norm, agent),
++        },
++    )
++    errors = validate_texts(
++        new_state,
++        docs["board"].text_norm,
++        new_log,
++        current_agent=agent,
++        sealed_events=docs["_history"],
++    )
++    if errors:
++        return _refuse(
++            "VALIDATION_FAILED",
++            "proposed index reconciliation fails fast validation: " + "; ".join(errors[:5]),
++        )
++    preconditions = _docs_preconditions(docs, "state", "board", "log")
++    preconditions[index_rel] = hash_bytes(current)
++    preconditions[".saipen/intake"] = intake_binding
++    # The index projection is not the record: each tombstone also has a carrier
++    # file, and the validator refuses a projection whose carrier disagrees with
++    # it. Both are written in the same plan so a crash cannot leave the pair
++    # half-registered.
++    tombstone_targets: list[TargetPlan] = []
++    for receipt_id in requested_ids:
++        preconditions[f".saipen/archive/source/{receipt_id}.meta.json"] = hash_bytes(
++            (root / ".saipen/archive/source" / f"{receipt_id}.meta.json").read_bytes()
++        )
++        tomb_rel = f".saipen/intake/tombstones/{receipt_id}.json"
++        tomb_bytes = (
++            _json.dumps(
++                recoverable[receipt_id]["tombstone"], indent=2, sort_keys=True, ensure_ascii=False
++            )
++            + "\n"
++        ).encode("utf-8")
++        if (root / tomb_rel).exists():
++            if (root / tomb_rel).read_bytes() != tomb_bytes:
++                return _refuse(
++                    "VALIDATION_FAILED",
++                    f"{tomb_rel} already exists and differs from the derived record; nothing is written",
++                )
++            continue
++        preconditions[tomb_rel] = MISSING_FILE_DEPENDENCY
++        tombstone_targets.append(
++            TargetPlan(tomb_rel, "generic", tomb_bytes, "", hash_bytes(tomb_bytes))
++        )
++    plan = build_plan(
++        "reconcile_source_index",
++        agent,
++        _identity(root),
++        {"operation": "reconcile_source_index", "agent": agent, "receipts": list(requested_ids)},
++        preconditions,
++        [
++            *_log_targets(docs, new_log),
++            *(
++                [
++                    TargetPlan(
++                        index_rel,
++                        "generic",
++                        new_bytes,
++                        hash_bytes(current),
++                        hash_bytes(new_bytes),
++                    )
++                ]
++                if new_bytes != current
++                else []
++            ),
++            *tombstone_targets,
++            _target(docs["state"], ".saipen/STATE.md", "state", new_state),
++        ],
++        {
++            "ok": True,
++            "code": "SOURCE_INDEX_RECONCILED",
++            "event_id": f"E-{event}",
++            "reconciled": list(requested_ids),
++            "reconciled_count": len(requested_ids),
++            "resumed": resumed,
++            "carriers_written": [target.path for target in tombstone_targets],
++            "no_evidence": {
++                item: entry["missing_proof"] for item, entry in no_evidence.items()
++            },
++            "index_bytes_before": len(current),
++            "index_bytes_after": len(new_bytes),
++        },
++        op_id=op_id,
++    )
++    if dry_run:
++        return _render_plan(plan)
++    return apply_plan(root, plan)
+diff --git a/tools/saipen_engine/remediation.py b/tools/saipen_engine/remediation.py
+index d72018f5e..bcd5585f5 100644
+--- a/tools/saipen_engine/remediation.py
++++ b/tools/saipen_engine/remediation.py
+@@ -252,9 +252,20 @@ REMEDIATIONS = (
+         "retire",
+         "tools/saipen_engine/operations.py",
+     ),
++    _cmd(
++        # T-2050: a closed row an ACTIVE receipt still names was moveable but not
++        # restorable, so the finding degraded to ENGINEERING_REQUIRED. The
++        # restoring form is its own registered shape.
++        "source coverage:pruned-work-row",
++        r"saipen source recover --confirm",
++        "saipen source recover --confirm",
++        "source",
++        "recover",
++        "tools/saipen_engine/intake.py",
++    ),
+     _cmd(
+         "source coverage",
+-        r"saipen source recover",
++        r"saipen source recover(?! --confirm)",
+         "saipen source recover",
+         "source",
+         "recover",
+diff --git a/tools/saipen_engine/router.py b/tools/saipen_engine/router.py
+index e10133c48..43d00f078 100644
+--- a/tools/saipen_engine/router.py
++++ b/tools/saipen_engine/router.py
+@@ -1127,6 +1127,12 @@ def conformance_crew_gate(project_root, routed: dict) -> dict | None:
+             # T-1823: the typed staleness code travels with the refusal, so a
+             # repair consumer never infers safety from the prose in `detail`.
+             "stale_reason": decision.get("stale_reason"),
++            # Retry-proof conditions: the fingerprint and the named input travel
++            # with the refusal, so a consumer can see that re-running the same
++            # command cannot change the answer.
++            "retry_blocked": decision.get("retry_blocked", False),
++            "retry_fingerprint": decision.get("retry_fingerprint"),
++            "blocker_detail": decision.get("blocker_detail", ""),
+             "canonical_next_command": command,
+             "diagnostic": decision["diagnostic"],
+             "repair_status": decision["repair_status"],
+@@ -1207,6 +1213,9 @@ def conformance_idle_gate(project_root, routed: dict) -> dict | None:
+             "conformance_status": decision["status"],
+             "conformance_disposition": decision["disposition"],
+             "stale_reason": decision.get("stale_reason"),
++            "retry_blocked": decision.get("retry_blocked", False),
++            "retry_fingerprint": decision.get("retry_fingerprint"),
++            "blocker_detail": decision.get("blocker_detail", ""),
+             "canonical_next_command": command,
+             "diagnostic": decision["diagnostic"],
+             "repair_status": decision["repair_status"],
+diff --git a/tools/test_campaign_matrix.py b/tools/test_campaign_matrix.py
+index a3af8e449..244c86d19 100644
+--- a/tools/test_campaign_matrix.py
++++ b/tools/test_campaign_matrix.py
+@@ -51,6 +51,15 @@ def _seat_state(text: str, **fields) -> str:
+         else:
+             close = text.index("\n---", 3)
+             text = text[:close] + "\n" + line + text[close:]
++    # Execution-intent families are exclusive (state.state_contract_errors):
++    # seating one intent over a live canonical STATE that still carries the
++    # other family's field makes the strict reader refuse the whole fixture,
++    # so drop the family this intent forbids before the fixture is parsed.
++    seated_intent = str(fields.get("execution_intent") or "").strip()
++    if seated_intent == "goal":
++        text = re.sub(r"(?m)^converge_target:.*\r?\n?", "", text)
++    elif seated_intent == "converge":
++        text = re.sub(r"(?m)^(goal_waves|goal_tickets):.*\r?\n?", "", text)
+     return text
+ 
+ 
+diff --git a/tools/test_campaign_production_gates.py b/tools/test_campaign_production_gates.py
+index d7684c8dd..899f8add3 100644
+--- a/tools/test_campaign_production_gates.py
++++ b/tools/test_campaign_production_gates.py
+@@ -64,6 +64,15 @@ def _seat_state(text: str, **fields) -> str:
+         else:
+             close = text.index("\n---", 3)
+             text = text[:close] + "\n" + line + text[close:]
++    # Execution-intent families are exclusive (state.state_contract_errors):
++    # seating one intent over a live canonical STATE that still carries the
++    # other family's field makes the strict reader refuse the whole fixture,
++    # so drop the family this intent forbids before the fixture is parsed.
++    seated_intent = str(fields.get("execution_intent") or "").strip()
++    if seated_intent == "goal":
++        text = re.sub(r"(?m)^converge_target:.*\r?\n?", "", text)
++    elif seated_intent == "converge":
++        text = re.sub(r"(?m)^(goal_waves|goal_tickets):.*\r?\n?", "", text)
+     return text
+ 
+ 
+diff --git a/tools/test_remediation_self_consistency.py b/tools/test_remediation_self_consistency.py
+index b52434d8c..bda0c7717 100644
+--- a/tools/test_remediation_self_consistency.py
++++ b/tools/test_remediation_self_consistency.py
+@@ -327,6 +327,11 @@ class EmittedLiteralScanTests(unittest.TestCase):
+             "improve report": "repair: saipen improve reconcile imp-x-1 --json",
+             "source receipts": "retire with saipen source retire SRC-007 --reason",
+             "source coverage": "route: saipen source recover",
++            # T-2050: the closed-row restore is its own registered shape, so it
++            # needs its own exercised sample beside the unconfirmed form.
++            "source coverage:pruned-work-row": (
++                "restore the pruned rows with saipen source recover --confirm"
++            ),
+         }
+         for spec in remediation.REMEDIATIONS:
+             if spec.kind != "command" or not spec.extract:
+diff --git a/tools/test_t1619_iteration_boundary.py b/tools/test_t1619_iteration_boundary.py
+index 1ef9d5168..516ecb5dc 100644
+--- a/tools/test_t1619_iteration_boundary.py
++++ b/tools/test_t1619_iteration_boundary.py
+@@ -49,6 +49,15 @@ def _seat(text, **fields):
+         else:
+             close = text.index("\n---", 3)
+             text = text[:close] + "\n" + line + text[close:]
++    # Execution-intent families are exclusive (state.state_contract_errors):
++    # seating one intent over a live canonical STATE that still carries the
++    # other family's field makes the strict reader refuse the whole fixture,
++    # so drop the family this intent forbids before the fixture is parsed.
++    seated_intent = str(fields.get("execution_intent") or "").strip()
++    if seated_intent == "goal":
++        text = re.sub(r"(?m)^converge_target:.*\r?\n?", "", text)
++    elif seated_intent == "converge":
++        text = re.sub(r"(?m)^(goal_waves|goal_tickets):.*\r?\n?", "", text)
+     return text
+ 
+ 
+diff --git a/tools/test_t1880_wait_survives_phase_shortcut.py b/tools/test_t1880_wait_survives_phase_shortcut.py
+index 095953f97..793c97844 100644
+--- a/tools/test_t1880_wait_survives_phase_shortcut.py
++++ b/tools/test_t1880_wait_survives_phase_shortcut.py
+@@ -48,6 +48,15 @@ def _seat(text, **fields):
+         else:
+             close = text.index("\n---", 3)
+             text = text[:close] + "\n" + line + text[close:]
++    # Execution-intent families are exclusive (state.state_contract_errors):
++    # seating one intent over a live canonical STATE that still carries the
++    # other family's field makes the strict reader refuse the whole fixture,
++    # so drop the family this intent forbids before the fixture is parsed.
++    seated_intent = str(fields.get("execution_intent") or "").strip()
++    if seated_intent == "goal":
++        text = re.sub(r"(?m)^converge_target:.*\r?\n?", "", text)
++    elif seated_intent == "converge":
++        text = re.sub(r"(?m)^(goal_waves|goal_tickets):.*\r?\n?", "", text)
+     return text
+ 
+ 
+diff --git a/tools/test_t1949_hook_validator_status.py b/tools/test_t1949_hook_validator_status.py
+index 17027e8f2..edcfd4776 100644
+--- a/tools/test_t1949_hook_validator_status.py
++++ b/tools/test_t1949_hook_validator_status.py
+@@ -22,7 +22,6 @@ LAST validator instead of the worst one would still be caught.
+ from __future__ import annotations
+ 
+ import os
+-import shutil
+ import subprocess
+ import sys
+ import tempfile
+@@ -38,18 +37,17 @@ PASSING_SH = "#!/bin/sh\necho FLOOR-OK\nexit 0\n"
+ FAILING_SH = "#!/bin/sh\necho FLOOR-RED\nexit 1\n"
+ 
+ 
+-def _sh():
+-    """The interpreter git itself would use to run a `#!/bin/sh` hook."""
+-    return shutil.which("bash") or shutil.which("sh")
++# Invoke the hook the way a real commit does: through git itself. Picking
++# `bash` off PATH picks WSL's bash.exe on Windows (System32 precedes Git in
++# PATH), and the WSL launcher dies on mounts before the hook ever runs, so the
++# test measured the environment instead of the hook. `git hook run` hands the
++# hook to the same sh git uses for its own hooks.
+ 
+ 
+ class HookValidatorStatusTests(unittest.TestCase):
+     """Install the real hook into a sandbox and observe its exit status."""
+ 
+     def _install_and_run(self, py_body: str, sh_body: str):
+-        shell = _sh()
+-        if shell is None:
+-            self.skipTest("no POSIX shell to run a /bin/sh hook")
+         with tempfile.TemporaryDirectory(prefix="t1949-hook-") as raw:
+             root = Path(raw)
+             home = root / "saipen-home"
+@@ -75,7 +73,7 @@ class HookValidatorStatusTests(unittest.TestCase):
+             self.assertTrue(hook.is_file(), "installer wrote no hook")
+ 
+             run = subprocess.run(
+-                [shell, str(hook)],
++                ["git", "hook", "run", "pre-commit"],
+                 cwd=project,
+                 capture_output=True,
+                 text=True,

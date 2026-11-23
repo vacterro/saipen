@@ -1,0 +1,9 @@
+{
+  "original_path": ".saipen/evidence/T-1730-verifier-fixtures/candidate-before-native-release.py",
+  "current_path": ".saipen/evidence/T-1730-verifier-fixtures/run_scenarios.before.py",
+  "sha256": "564c482e72d5e372283b6a2b923d065e621465a27eb2236021af35b5fd435623",
+  "bytes_preserved": true,
+  "reason": "Raw run_scenarios candidate capture now uses existing subject.before.py classification; unchanged style oracle remains armed",
+  "before_oracle_log": "capture-name-before-01.txt",
+  "producer_preimage": "before-capture-producer/prepare-release-candidate.py"
+}

@@ -1,0 +1,292 @@
+======================================================================
+ERROR: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='worker_generation', value='bad')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 120, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    result = self.ctrl.step(worker_func=worker)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 999, in step
+    if int(state.get("worker_generation", 0)) >= max_gen:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: 'bad'
+
+======================================================================
+ERROR: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='worker_generation', value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 120, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    result = self.ctrl.step(worker_func=worker)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 999, in step
+    if int(state.get("worker_generation", 0)) >= max_gen:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'list'
+
+======================================================================
+ERROR: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='cycle_count', value='bad')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 120, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    result = self.ctrl.step(worker_func=worker)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 986, in step
+    if int(state.get("cycle_count", 0)) >= budget.get(
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: 'bad'
+
+======================================================================
+ERROR: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='cycle_count', value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 120, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    result = self.ctrl.step(worker_func=worker)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 986, in step
+    if int(state.get("cycle_count", 0)) >= budget.get(
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'list'
+
+======================================================================
+ERROR: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='retry_count', value='bad')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 120, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    result = self.ctrl.step(worker_func=worker)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 1286, in step
+    return self._commit_worker_outcome(current, attempt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 1364, in _commit_worker_outcome
+    state["retry_count"] = int(state.get("retry_count", 0)) + 1
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: 'bad'
+
+======================================================================
+ERROR: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='retry_count', value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 120, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    result = self.ctrl.step(worker_func=worker)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 1286, in step
+    return self._commit_worker_outcome(current, attempt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 1364, in _commit_worker_outcome
+    state["retry_count"] = int(state.get("retry_count", 0)) + 1
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'list'
+
+======================================================================
+ERROR: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='no_progress_count', value='bad')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 120, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    result = self.ctrl.step(worker_func=worker)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 1286, in step
+    return self._commit_worker_outcome(current, attempt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 1365, in _commit_worker_outcome
+    state["no_progress_count"] = int(state.get("no_progress_count", 0)) + 1
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: 'bad'
+
+======================================================================
+ERROR: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='no_progress_count', value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 120, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    result = self.ctrl.step(worker_func=worker)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 1286, in step
+    return self._commit_worker_outcome(current, attempt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 1365, in _commit_worker_outcome
+    state["no_progress_count"] = int(state.get("no_progress_count", 0)) + 1
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'list'
+
+======================================================================
+ERROR: test_incomplete_outcome_envelope_is_a_typed_refusal (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_incomplete_outcome_envelope_is_a_typed_refusal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 382, in test_incomplete_outcome_envelope_is_a_typed_refusal
+    result = self.ctrl.step(worker_func=mock.Mock())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 940, in step
+    result = self._commit_worker_outcome(state, attempt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 1357, in _commit_worker_outcome
+    attempt["finished_at"] = outcome["observed_at"]
+                             ~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 'observed_at'
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='worker_generation', value=-1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='worker_generation', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='cycle_count', value=-1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='cycle_count', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='cancellation_epoch', value=-1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='cancellation_epoch', value='bad')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='cancellation_epoch', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='cancellation_epoch', value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='retry_count', value=-1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='retry_count', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='no_progress_count', value=-1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='no_progress_count', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='resource_budget', value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'INVALID_RESOURCE_BUDGET' != 'STATE_CORRUPT'
+- INVALID_RESOURCE_BUDGET
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='worker_attempt', value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+======================================================================
+FAIL: test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) (key='worker_attempt', value='bad')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 122, in test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes
+    self.assertEqual(result["code"], campaign.STATE_CORRUPT)
+AssertionError: 'WORKER_GENERATION_FAILED' != 'STATE_CORRUPT'
+- WORKER_GENERATION_FAILED
++ STATE_CORRUPT
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.244s
+
+FAILED (failures=15, errors=9)

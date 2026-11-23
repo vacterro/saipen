@@ -1,0 +1,4 @@
+warning: in the working copy of 'tools/test_bz_rea_acceptance_fixture.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tools/test_persistent_autonomy_recovery.py', LF will be replaced by CRLF the next time Git touches it
+
+returncode=0

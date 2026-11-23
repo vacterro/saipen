@@ -1,0 +1,18 @@
+{
+ "schema": 1,
+ "command": ["{python}", "-B", "-m", "unittest", "tools.test_t2062_gc_serial"],
+ "format": "unittest",
+ "context": [
+  "tools/saipen_engine",
+  "tools/test_t2062_gc_serial.py",
+  "saipen/BOOT.md",
+  "saipen/REGISTRY.json"
+ ],
+ "oracle_files": ["tools/test_t2062_gc_serial.py"],
+ "subject_files": ["tools/saipen_engine/gc.py", "tools/saipen_engine/lock.py"],
+ "before": {
+  "tools/saipen_engine/gc.py": ".saipen/evidence/pre/T-2062-gc.py",
+  "tools/saipen_engine/lock.py": ".saipen/evidence/pre/T-2062-lock.py"
+ },
+ "timeout": 300
+}

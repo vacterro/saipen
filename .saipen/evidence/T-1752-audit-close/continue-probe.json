@@ -1,0 +1,67 @@
+{
+  "finish_ok": true,
+  "finish_code": "IMPROVE_AUDIT_ASSIGNMENT",
+  "continue_trace": [
+    {
+      "iteration": 1,
+      "action": "PHASE SHIP T-1",
+      "kind": "finish-at-ship",
+      "operation": "ticket_done",
+      "ticket": "T-1",
+      "result": "FINISHED",
+      "ok": true,
+      "before_last_event": 9,
+      "after_last_event": 10,
+      "source_closed": {
+        "ok": true,
+        "closed": [
+          "SRC-001"
+        ],
+        "refused": {}
+      }
+    },
+    {
+      "iteration": 2,
+      "action": "saipen audit ingest",
+      "kind": "apply-audit-ingest",
+      "operation": "audit_ingest",
+      "ticket": null,
+      "result": "AUDIT_CONSUMED",
+      "ok": true,
+      "before_last_event": 10,
+      "after_last_event": 11
+    }
+  ],
+  "source_status": {
+    "ok": true,
+    "receipt": "SRC-001",
+    "status": "CLOSED",
+    "location": "archive",
+    "source_kind": "external_audit",
+    "source_sha256": "9247203f7d110d1cf1f2f88a64a770586a00ec6cbce679b1b3bcd0adf9278061",
+    "linked_work": "T-1",
+    "linked_works": [
+      "T-1"
+    ],
+    "amends": null,
+    "closure_event": null,
+    "coverage": {
+      "receipt": "SRC-001",
+      "requirements": 1,
+      "actionable": 1,
+      "terminal": 1,
+      "dispositions": {
+        "VERIFIED": 1
+      },
+      "unresolved": []
+    },
+    "distribution": {
+      "state": "DISTRIBUTABLE",
+      "receipt_id": "SRC-001",
+      "source_sha256": "9247203f7d110d1cf1f2f88a64a770586a00ec6cbce679b1b3bcd0adf9278061"
+    }
+  },
+  "layer_states": [],
+  "binding_state": "DELETED",
+  "layer_preserved": false
+}

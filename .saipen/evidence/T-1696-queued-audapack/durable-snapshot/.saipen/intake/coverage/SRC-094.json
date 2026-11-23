@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-094:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-246 closed with verification evidence in LOG: verify -> PASS conf: high -- ticket verify 'real _ZAICODE PACK succeeds' met: live PackingService.pack_project('zaicode') PACKED 529 files 4.7MB -> 1.2MB, previously TRACKED_RESERVED_ARCHIVE_NAME_CONFLICT on the same repo (proved by build_git_inventory without the supersession set); archive carries exactly one _AUDAPACK_MANIFEST.json and publishes superseded_control=['_AUDAPACK_MANIFEST.json']; wo",
+      "text": "Safe supersession of tracked AUDAPACK-generated archive control artifacts",
+      "verification": "the Work this request created reached its own verification gate; see the T-246 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-246"
+    }
+  },
+  "schema_version": 1
+}

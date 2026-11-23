@@ -1,0 +1,12 @@
+{
+  "scope": "Observed HTML before assertions; not a PASS certificate",
+  "fields": 5,
+  "before": {
+    "html": "<div class=\"space-y-4 whitespace-normal [&amp;&gt;*:first-child]:mt-0 [&amp;&gt;*:last-child]:mb-0\"><p>STATUS: BLOCKED\nRESULT: Controlled rendering probe fixture\nBLOCKER: PROBE_FIXTURE -- rendering only\nNEXT EXACT ACTION: NONE\nVALIDATION: NOT_RUN</p></div>",
+    "hardBreaks": 0
+  },
+  "after": {
+    "html": "<div class=\"space-y-4 whitespace-normal [&amp;&gt;*:first-child]:mt-0 [&amp;&gt;*:last-child]:mb-0\"><p>STATUS: BLOCKED<br/>\nRESULT: Controlled rendering probe fixture<br/>\nBLOCKER: PROBE_FIXTURE -- rendering only<br/>\nNEXT EXACT ACTION: NONE<br/>\nVALIDATION: NOT_RUN</p></div>",
+    "hardBreaks": 4
+  }
+}

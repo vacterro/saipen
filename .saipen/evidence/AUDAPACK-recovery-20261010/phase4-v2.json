@@ -1,0 +1,44 @@
+{
+  "checked_utc": "2026-10-10T16:10:20.596686+00:00",
+  "original_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "recovery_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+  "original_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "new_lineage": "lineage-0ee6b060c73040d2be567d123691d079",
+  "gates": {
+    "new_identity_and_binding": true,
+    "initial_complete_ledger_and_ownership": true
+  },
+  "commands": [
+    {
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "exit_code": 1,
+      "output": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\phase4-initial-native.txt",
+      "output_sha256": "6c9ff25a8a438ca38b2e3f31dbc5af35d8d6bf26498c26b0f6188dab5c10edc7",
+      "summary": [
+        "Validation FAILED: 1 problem(s), 2 warning(s)"
+      ],
+      "failed_lines": [
+        "FAIL: source freshness computation BLOCKED -- Git returned a non-canonical path: b'.recovery-legacy/recovery-execution/fixtures-v2/A-fresh/'; no package may become ready or be collected with unknown input"
+      ]
+    }
+  ],
+  "final_protocol": null,
+  "failure": "Traceback (most recent call last):\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\acceptance.py\", line 108, in main\n    initial_native = native(\"initial\")\n                     ^^^^^^^^^^^^^^^^^\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\acceptance.py\", line 65, in native\n    assert run.returncode == 0 and not record[\"failed_lines\"], record\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'argv': ['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', '-B', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\validate.py', '--project-root', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK_RECOVERY_20261010', '--gate', 'core', '--no-receipt'], 'exit_code': 1, 'output': 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\phase4-initial-native.txt', 'output_sha256': '6c9ff25a8a438ca38b2e3f31dbc5af35d8d6bf26498c26b0f6188dab5c10edc7', 'summary': ['Validation FAILED: 1 problem(s), 2 warning(s)'], 'failed_lines': [\"FAIL: source freshness computation BLOCKED -- Git returned a non-canonical path: b'.recovery-legacy/recovery-execution/fixtures-v2/A-fresh/'; no package may become ready or be collected with unknown input\"]}\n",
+  "acceptance_pass": false,
+  "original_verdict": "NO_GO",
+  "recovery_verdict": "NO_GO",
+  "cutover": false,
+  "publication": false,
+  "consumer_agents_enabled": false,
+  "legacy_terminal_claims": "Unverified; preserved exclusively outside active authority",
+  "host_hook_limit": "CLI authority and native guard refusal are proved; no live-host blocking capability or OS sandbox is inferred."
+}

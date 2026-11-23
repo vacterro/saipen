@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "family": "unit",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "fingerprint": "c9a98f598cc8821ccda95e6b783d906e73e13c71f1e0b7961cc51a5ae1cace6b",
+  "fingerprint_excludes": [
+    ".git",
+    ".saipen"
+  ],
+  "baseline_sha256": "733711a816e113edb8a635c6ac0548361ad4d4a3b39a662819c57cd779a33c6d",
+  "head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "finished_utc": "2026-10-06T10:23:33Z",
+  "status": "TIMEOUT",
+  "exit_code": null,
+  "ran": null,
+  "duration_s": 5544.3,
+  "timeout_s": 5400,
+  "headers": 0,
+  "unparsed": 0,
+  "tallied": null,
+  "red": [],
+  "jobs": 6,
+  "discovered": 5260,
+  "shards": [
+    {
+      "status": "TIMEOUT",
+      "exit_code": null,
+      "ran": null,
+      "selected": 1037,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 5400.2
+    },
+    {
+      "status": "TIMEOUT",
+      "exit_code": null,
+      "ran": null,
+      "selected": 944,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 5400.2
+    },
+    {
+      "status": "TIMEOUT",
+      "exit_code": null,
+      "ran": null,
+      "selected": 832,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 5400.2
+    },
+    {
+      "status": "TIMEOUT",
+      "exit_code": null,
+      "ran": null,
+      "selected": 751,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 5400.2
+    },
+    {
+      "status": "TIMEOUT",
+      "exit_code": null,
+      "ran": null,
+      "selected": 948,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 5400.2
+    },
+    {
+      "status": "TIMEOUT",
+      "exit_code": null,
+      "ran": null,
+      "selected": 748,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 5400.2
+    }
+  ],
+  "module_durations_s": {},
+  "verdict": "FAIL",
+  "new_red": [],
+  "fixed": [
+    "test_legacy_lifecycle_compat.AttestLegacyDoneTests.test_attestation_clears_the_ambiguity_without_rewriting_history",
+    "test_legacy_lifecycle_compat.AttestLegacyDoneTests.test_cli_attest_round_trip_and_id_grammar",
+    "test_legacy_lifecycle_compat.PlanIdentityTests.test_attestation_plus_approval_commits_both_in_one_pass",
+    "test_legacy_lifecycle_compat.TargetCLegacyDoneTests.test_1_pre_closure_mode_done_with_build_evidence_remains_done",
+    "test_legacy_lifecycle_compat.TargetCLegacyDoneTests.test_2_pre_closure_mode_done_with_ship_evidence_remains_legacy_valid",
+    "test_legacy_lifecycle_compat.TargetDLegacyAttributionTests.test_4_legacy_attribution_survives_a_full_reconciliation"
+  ],
+  "problems": [
+    "the family did not finish inside 5400 s",
+    "no 'Ran N tests' line: the family did not run to its summary",
+    "shard 0: the family did not finish inside 5400 s",
+    "shard 0: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 1: the family did not finish inside 5400 s",
+    "shard 1: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 2: the family did not finish inside 5400 s",
+    "shard 2: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 3: the family did not finish inside 5400 s",
+    "shard 3: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 4: the family did not finish inside 5400 s",
+    "shard 4: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 5: the family did not finish inside 5400 s",
+    "shard 5: no 'Ran N tests' line: the family did not run to its summary"
+  ]
+}

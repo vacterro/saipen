@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-008:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Use a clean Chromium profile dedicated exclusively to AUDAPACK instead of requiring Brave."
+    },
+    "SRC-008:R0002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The AUDAPACK Chromium worker continues running when minimized, occluded by other apps, unfocused, or while displays are off, provided Windows remains awake."
+    }
+  },
+  "derived_at": "2026-08-31T03:07:35Z",
+  "derived_from": "SRC-008",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "7897132a2b877f757281e9396a619b7e298bef890f74374c55ec5dc180ce954e"
+}

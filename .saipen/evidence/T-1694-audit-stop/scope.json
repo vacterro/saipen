@@ -1,0 +1,23 @@
+{
+  "ticket": "T-1694",
+  "pre_subject_capture": "Copied from the shared tree after claim E-14002, before T-1694 production edits; pre-automation.py and pre-response_surface.py",
+  "scope": [
+    {
+      "path": "tools/saipen_engine/automation.py",
+      "sha256": "83982bf9e33a7bdf3e3791d0490885a83d90cb37ffa45c144274545ef9e17c86"
+    },
+    {
+      "path": "tools/saipen_engine/response_surface.py",
+      "sha256": "5d6bd6dcbe09232116b686b4ecf6addace30322bb43451600fd66b298d320544"
+    },
+    {
+      "path": "tools/test_automation_block.py",
+      "sha256": "502ab93eb3b8bd5bd8d6c1f87d79f292ba450cbb294e3c4532130e10508bb2b4"
+    },
+    {
+      "path": "tools/test_response_surface_contract.py",
+      "sha256": "889f9a201584902bfda0ee0e97953ddcc29851309ebd94e969c8971a76203fca"
+    }
+  ],
+  "limit": "Other inherited hunks are preserved; no staging, commit, tag, push or runtime injection."
+}

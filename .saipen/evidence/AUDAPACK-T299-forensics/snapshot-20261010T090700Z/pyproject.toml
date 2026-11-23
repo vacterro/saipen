@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "audapack"
+version = "0.3.1"
+description = "Windows desktop cockpit for verified ZIP packaging, multi-wave AI audit handoff, and a local browser bridge"
+readme = "README.md"
+authors = [
+    { name = "AUDAPACK Contributors", email = "audapack@local" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = []
+
+[project.optional-dependencies]
+qt = [
+    "PySide6>=6.5.0",
+]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-mock>=3.12.0",
+    "ruff>=0.4.0",
+]
+
+[project.scripts]
+audapack = "audapack.__main__:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# A standalone script has to put the repository on sys.path before it can
+# import the package it is benchmarking, so its imports cannot be at the top.
+"scripts/*.py" = ["E402"]
+"tools/*.py" = ["E402"]
+# Operator-run live-acceptance scripts drive a real browser and are not
+# collected by pytest; they put the repo on sys.path before importing.
+"tests/test_target_g_live.py" = ["E402"]

@@ -1,0 +1,6 @@
+{
+  "ok": false,
+  "code": "SOURCE_SCOPE_MISSING",
+  "detail": "no release scope recorded for T-1717 -- record the exact reviewed files (`saipen scope T-1717 <path...>`) before shipping",
+  "canonical_next_command": null
+}

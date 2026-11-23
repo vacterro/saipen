@@ -1,0 +1,127 @@
+{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": []
+  },
+  "adopted": [],
+  "lifecycle": [],
+  "repair_id": "e2cf02b7100dc49f8a50db940afa5639777c7e26df018d7c87ff6491943bd79f",
+  "targets": [
+    ".saipen/LOG.md",
+    ".saipen/STATE.md"
+  ],
+  "event": "E-13",
+  "agent": "test-agent",
+  "strict_state_error": null,
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-legacycompat-sbb9rk4z/.saipen/MANIFEST.json",
+    "contract_version": 3,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-cont-improve-3_eg5z_u\\followup --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "recover --attest-legacy-done ids must be T-### (digits), comma-separated when several",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-cont-improve-3_eg5z_u\\followup --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": []
+  },
+  "adopted": [],
+  "lifecycle": [],
+  "repair_id": "98d5dca80fd7018b75748cc6db154dcff556832aa9173bdf0c719ad01d9908ed",
+  "targets": [
+    ".saipen/LOG.md",
+    ".saipen/STATE.md"
+  ],
+  "event": "E-3",
+  "agent": "test-agent",
+  "strict_state_error": null,
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-legacycompat-qdci1gs8/.saipen/MANIFEST.json",
+    "contract_version": 3,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-cont-improve-3_eg5z_u\\followup --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+{
+  "ok": true,
+  "code": "CONVERGE_SET",
+  "op_id": "converge_intent-eb746b3457ff4a3597099b8b3043389b",
+  "changed_files": [
+    ".saipen/LOG.md",
+    ".saipen/STATE.md"
+  ],
+  "recovery_required": false,
+  "execution_intent": "converge",
+  "converge_target": "done",
+  "event_id": "E-4",
+  "dry_run": true,
+  "reconciliation": {
+    "ok": true,
+    "code": "CLEAN",
+    "changed": [],
+    "strict_state_error": null,
+    "dry_run": true
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-legacycompat-qdci1gs8 --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+PASS: hr-missing-style_contract -- failed on 'style_contract', as declared
+PASS: hr-wrong-style_contract -- failed on 'style_contract', as declared
+PASS: userperson-valid -- expected pass, got pass
+PASS: hr-missing-style_contract -- failed on 'style_contract', as declared
+PASS: hr-wrong-style_contract -- failed on 'style_contract', as declared

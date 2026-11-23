@@ -1,0 +1,81 @@
+"""SCOUT (T-1634): does `saipen host repair` converge for a hook that names its source?
+
+A sandbox profile with one host directory, the REAL canonical installer run
+through `host repair`, then the doctor -- each as its own process through the
+repository launcher, the way the operator runs them.
+
+Usage: python repair_sandbox.py <repo root> <scratch dir> <host>
+"""
+
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(sys.argv[1]).resolve()
+BASE = Path(sys.argv[2]).resolve()
+HOST = sys.argv[3]
+home = BASE / "user home"
+home.mkdir(parents=True, exist_ok=True)
+registry = json.loads((ROOT / "extensions/adapters/registry.json").read_text(encoding="utf-8-sig"))
+adapter = next(item for item in registry["adapters"] if item["id"] == HOST)
+(home / adapter["install"]["home"].removeprefix("~/")).mkdir(parents=True, exist_ok=True)
+
+env = {k: v for k, v in os.environ.items() if not k.startswith("SAIPEN_")}
+env.update(
+    HOME=str(home), USERPROFILE=str(home), HOMEDRIVE="", HOMEPATH="",
+    LOCALAPPDATA=str(home / "AppData/Local"), XDG_CONFIG_HOME=str(home / ".config"),
+    SAIPEN_USER_CONFIG_HOME=str(home / ".saipen-user"), SAIPEN_UNINSTALL_SKIP_TASK="1",
+    PYTHONUTF8="1", PYTHONDONTWRITEBYTECODE="1",
+)
+env.pop("ZAICODE_HOME", None)
+env.pop("SAIMAIL_WORKSPACE", None)
+launcher = [str(ROOT / "bin" / ("saipen.cmd" if os.name == "nt" else "saipen"))]
+
+
+def run(*arguments: str) -> tuple[int, dict | str]:
+    proc = subprocess.run(
+        [*launcher, *arguments], capture_output=True, env=env, cwd=str(BASE),
+        stdin=subprocess.DEVNULL, timeout=900,
+    )
+    out = proc.stdout.decode("utf-8", errors="replace")
+    try:
+        return proc.returncode, json.loads(out)
+    except ValueError:
+        return proc.returncode, (out + proc.stderr.decode("utf-8", errors="replace"))[-900:]
+
+
+def show(label: str, code: int, report) -> None:
+    if not isinstance(report, dict):
+        print(label, "rc", code, "UNPARSED", report)
+        return
+    for item in report.get("hosts", []):
+        if item["id"] == HOST:
+            print(label, "rc", code, item["state"], "runtime", item["runtime"], "hook", item["hook"],
+                  "| reasons:", item["reasons"], "| hook problems:",
+                  item["facts"]["hook"].get("problems"), "| delegated:",
+                  item["facts"]["hook"].get("delegated_root"))
+    for step in report.get("steps", []):
+        print("   step", step.get("step"), step.get("ok"), step.get("code"),
+              str(step.get("detail") or "")[-160:].replace("\n", " | "))
+    if "remaining" in report:
+        print("   remaining", [(r["id"], r["state"]) for r in report["remaining"]], "code",
+              report.get("code"))
+
+
+if "--install-first" in sys.argv:
+    # The canonical installer, host-scoped, exactly as `repair` would run it.
+    sys.path.insert(0, str(ROOT / "tools"))
+    from saipen_engine import runtime_bootstrap
+
+    os.environ.clear()
+    os.environ.update(env)
+    proc = runtime_bootstrap._invoke_installer(ROOT, HOST)
+    print("installer rc", proc.returncode if proc else None,
+          " | ".join((proc.stdout or "").splitlines()[-4:])[:300] if proc else "")
+
+show("doctor-before", *run("host", "doctor", "--host", HOST, "--json"))
+show("repair       ", *run("host", "repair", "--host", HOST, "--json"))
+show("doctor-after ", *run("host", "doctor", "--host", HOST, "--json"))
+show("repair-again ", *run("host", "repair", "--host", HOST, "--json"))

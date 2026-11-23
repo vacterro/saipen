@@ -1,0 +1,15 @@
+test_explicit_artifact_is_bounded_even_when_the_request_is_witnessed (test_response_digest.DetailIntentTests.test_explicit_artifact_is_bounded_even_when_the_request_is_witnessed) ... ok
+test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) ... ok
+test_model_cannot_authorize_detail_by_claiming_an_exception (test_response_digest.DetailIntentTests.test_model_cannot_authorize_detail_by_claiming_an_exception) ... ok
+test_negations_and_quotes_do_not_authorize_depth (test_response_digest.DetailIntentTests.test_negations_and_quotes_do_not_authorize_depth) ... ok
+test_summary_brief_and_normal_final_report_remain_compact (test_response_digest.DetailIntentTests.test_summary_brief_and_normal_final_report_remain_compact) ... ok
+test_typed_artifact_carrier_requires_a_whole_human_request (test_response_digest.DetailIntentTests.test_typed_artifact_carrier_requires_a_whole_human_request) ... ok
+test_a_model_supplied_detail_mode_does_not_authorize_host_output (test_response_digest.SurfacePressureTests.test_a_model_supplied_detail_mode_does_not_authorize_host_output) ... ok
+test_actual_rendered_default_fits_six_visible_lines (test_response_digest.SurfacePressureTests.test_actual_rendered_default_fits_six_visible_lines) ... ok
+test_real_blocker_inventory_is_not_a_default_result (test_response_digest.SurfacePressureTests.test_real_blocker_inventory_is_not_a_default_result) ... ok
+test_stop_report_uses_machine_facts_not_the_model_retrospective (test_response_digest.SurfacePressureTests.test_stop_report_uses_machine_facts_not_the_model_retrospective) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.158s
+
+OK

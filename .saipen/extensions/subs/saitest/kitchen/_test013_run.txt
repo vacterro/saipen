@@ -1,0 +1,10 @@
+S1: NOT_REPRODUCED -- hostile OUTBOX is refused, not accepted: 2 grammar errors: ["OUTBOX:19 status 'bogus' outside closed enum", 'OUTBOX:19 package missing coverage, instructions, payload, producer, role_revision, source_head, source_tree_fingerprint, verified']
+S7: NOT_REPRODUCED -- adversarial content (embedded status field, path climbing refs, bad severity) is rejected by the parse instead of being honoured
+S2: NOT_REPRODUCED -- boundary boards are refused, not accepted: empty errors=['required heading ## DOING appears 0 time(s)', 'required heading ## TODO appears 0 time(s)'] counts={'DOING': 0, 'TODO': 0, 'DONE': 0, 'BLOCKED': 0}; single counts={'DOING': 0, 'TODO': 1, 'DONE': 0, 'BLOCKED': 0} errors=['required heading ## DOING appears 0 time(s)', 'required heading ## DONE appears 0 time(s)']; duplicate-id errors=['duplicate ticket ID TEST-1', 'required heading ## DOING appears 0 time(s)']
+S3: NOT_REPRODUCED -- replayed `sub status saihunt --json` twice: identical output True, exit 0
+S4: NOT_REPRODUCED -- run from foreign cwd _test013_cwd exits 0 with "code": "SUB_STATUS", and no traceback
+S5: NOT_REPRODUCED -- 200 KB single line parsed in 0.001s, errors=1
+S6: NOT_REPRODUCED -- front-matter cut reports error=True and yields state None=True; half-file cut has an intact front matter so it parses (error=False, state None=False); truncated JSON record raises a clean ValueError 'Unterminated string starting at: line 582 column 27 (char 27' -- no damaged input is silently accepted
+TEST13_RUN_COMPLETE
+S8: REPRODUCED -- replayed `crew record-run saihunt` exits 0 with {
+exit=0

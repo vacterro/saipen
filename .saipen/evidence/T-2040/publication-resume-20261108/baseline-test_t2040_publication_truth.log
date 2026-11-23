@@ -1,0 +1,32 @@
+test_bound_no_publish_receipt_is_local_only (__main__.PublicationTruthTests.test_bound_no_publish_receipt_is_local_only) ... ok
+test_claimed_published_without_owner_proof_is_unknown (__main__.PublicationTruthTests.test_claimed_published_without_owner_proof_is_unknown) ... ok
+test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof (__main__.PublicationTruthTests.test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof) ... ok
+test_corrupt_or_duplicate_receipts_remain_unknown (__main__.PublicationTruthTests.test_corrupt_or_duplicate_receipts_remain_unknown) ... ok
+test_done_published_field_is_not_proof (__main__.PublicationTruthTests.test_done_published_field_is_not_proof) ... ok
+test_exact_canonical_receipt_and_local_remote_prove_publication (__main__.PublicationTruthTests.test_exact_canonical_receipt_and_local_remote_prove_publication) ... ok
+test_explicit_blocker_remains_blocked (__main__.PublicationTruthTests.test_explicit_blocker_remains_blocked) ... ok
+test_explicit_unknown_remains_unknown (__main__.PublicationTruthTests.test_explicit_unknown_remains_unknown) ... ok
+test_external_hold_does_not_suppress_executable_work_or_budget_veto (__main__.PublicationTruthTests.test_external_hold_does_not_suppress_executable_work_or_budget_veto) ... ok
+test_fabricated_verified_release_id_never_publishes (__main__.PublicationTruthTests.test_fabricated_verified_release_id_never_publishes) ... ok
+test_foreign_root_replay_is_unknown (__main__.PublicationTruthTests.test_foreign_root_replay_is_unknown) ... ok
+test_foreign_staging_context_survives_outcome_projection (__main__.PublicationTruthTests.test_foreign_staging_context_survives_outcome_projection) ... ok
+test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown (__main__.PublicationTruthTests.test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown) ... ok
+test_missing_or_foreign_project_binding_never_publishes (__main__.PublicationTruthTests.test_missing_or_foreign_project_binding_never_publishes) ... ok
+test_missing_remote_git_proof_is_unknown (__main__.PublicationTruthTests.test_missing_remote_git_proof_is_unknown) ... ok
+test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication (__main__.PublicationTruthTests.test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication) ... ok
+test_no_publish_intent_is_local_not_pending_or_published (__main__.PublicationTruthTests.test_no_publish_intent_is_local_not_pending_or_published) ... ok
+test_other_ticket_receipt_cannot_publish_this_ticket (__main__.PublicationTruthTests.test_other_ticket_receipt_cannot_publish_this_ticket) ... ok
+test_owner_reads_absence_as_pending (__main__.PublicationTruthTests.test_owner_reads_absence_as_pending) ... ok
+test_partial_or_competing_matching_receipts_remain_unknown (__main__.PublicationTruthTests.test_partial_or_competing_matching_receipts_remain_unknown) ... ok
+test_pending_without_hold_is_not_blocked (__main__.PublicationTruthTests.test_pending_without_hold_is_not_blocked) ... ok
+test_primary_blocker_context_survives_outcome_projection (__main__.PublicationTruthTests.test_primary_blocker_context_survives_outcome_projection) ... ok
+test_pv15_exact_old_pending_oracle_has_no_blocker (__main__.PublicationTruthTests.test_pv15_exact_old_pending_oracle_has_no_blocker) ... ok
+test_pv21_executable_budgeted_work_does_not_invent_release_hold (__main__.PublicationTruthTests.test_pv21_executable_budgeted_work_does_not_invent_release_hold) ... ok
+test_root_none_consumes_owner_carrier_without_io (__main__.PublicationTruthTests.test_root_none_consumes_owner_carrier_without_io) ... ok
+test_stale_git_proof_is_rejected_at_explicit_root_boundary (__main__.PublicationTruthTests.test_stale_git_proof_is_rejected_at_explicit_root_boundary) ... ok
+test_stale_local_no_publish_source_is_unknown (__main__.PublicationTruthTests.test_stale_local_no_publish_source_is_unknown) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 2.596s
+
+OK

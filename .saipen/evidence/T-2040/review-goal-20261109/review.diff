@@ -1,0 +1,552 @@
+--- pre/tools/saipen_engine/subs.py
++++ tools/saipen_engine/subs.py
+@@ -3996,10 +3996,9 @@
+     Free prose is never mechanical evidence: a package_identity SHA mentioned
+     inside an arbitrary BOARD description or LOG message is NOT proof an
+     intake happened. The ONLY witness is a COMMITTED `sub_collect` operation
+     receipt whose structured receipt_metadata carries the exact
+-    `package_identity`, or matching meaningful hypothesis triple, or an existing
+-    ticket on the Core board tracking the hypothesis.
++    `package_identity` or matching producer, package, source and role revision.
+ 
+     The MANIFEST `last_collect` marker is an INDEX, never authority: it is a
+     journal target of the very collect op that also writes it, so a collect
+     that CONFLICTs during post-write verification leaves the marker on disk
+@@ -4012,31 +4011,32 @@
+     for record in _iter_operation_records(root, records):
+         if not _durable_collect_receipt(record):
+             continue
+         meta = record.get("receipt_metadata") or {}
+-        if identity and identity in (meta.get("package_identities") or ()):
++        identities = meta.get("package_identities")
++        if identity and isinstance(identities, list) and identity in identities:
+             return True
+-        if package is not None:
+-            for h in meta.get("hypotheses") or ():
+-                prod = package.fields.get("producer") or getattr(package, "producer", "")
+-                if (
+-                    h.get("producer") == prod
+-                    and h.get("package_id") == package.package_id
+-                    and h.get("source_head") == package.fields.get("source_head")
+-                    and h.get("source_tree_fingerprint") == package.fields.get("source_tree_fingerprint")
+-                    and h.get("role_revision") == package.fields.get("role_revision")
+-                ):
+-                    return True
+-
+-    if package is not None and board_text:
++        if package is None:
++            continue
++        # An explicit identity list is the exact digest; a hypothesis may not
++        # substitute for it. Hypotheses answer only the receipts that carry no
++        # identity list at all.
++        if identities is not None:
++            continue
++        hypotheses = meta.get("hypotheses")
++        if not isinstance(hypotheses, list) or len(hypotheses) != 1:
++            continue
++        h = hypotheses[0]
+         prod = package.fields.get("producer") or getattr(package, "producer", "")
+-        pkg_id = package.package_id
+-        s_head = package.fields.get("source_head")
+-        s_tree = package.fields.get("source_tree_fingerprint")
+-        if prod and pkg_id and s_head and s_tree:
+-            needle = f"producer={prod}; package={pkg_id}; source_head={s_head}; source_tree_fingerprint={s_tree}"
+-            if needle in board_text:
+-                return True
++        if (
++            isinstance(h, dict)
++            and h.get("producer") == prod
++            and h.get("package_id") == package.package_id
++            and h.get("source_head") == package.fields.get("source_head")
++            and h.get("source_tree_fingerprint") == package.fields.get("source_tree_fingerprint")
++            and h.get("role_revision") == package.fields.get("role_revision")
++        ):
++            return True
+ 
+     return False
+ 
+ 
+@@ -4072,32 +4072,260 @@
+         )
+     )
+ 
+ 
++def _collect_links(root: Path, records: tuple[dict, ...] | None = None):
++    """Exact positional intake links; ambiguous generations retain no authority."""
++    collected: set[str] = set()
++    links: dict[str, tuple[str, str]] = {}
++    ticket_links: dict[str, tuple[str, str]] = {}
++    invalid: set[str] = set()
++    from .journal import op_id_provenance
++
++    for record in _iter_operation_records(root, records):
++        if not _durable_collect_receipt(record):
++            continue
++        meta = record.get("receipt_metadata") or {}
++        identities = meta.get("package_identities")
++        tickets = meta.get("tickets")
++        if not isinstance(identities, list):
++            continue
++        known = {value for value in identities if isinstance(value, str)
++                 and ROLE_REVISION_RE.fullmatch(value)}
++        collected.update(known)
++        op = record.get("op_id")
++        owned = {target.get("path") for target in record.get("targets", ())
++                 if target.get("applied") is True}
++        if (not {".saipen/LOG.md", ".saipen/BOARD.md", ".saipen/STATE.md"}.issubset(owned)
++                or not known or len(known) != len(identities)
++                or not isinstance(tickets, list) or len(tickets) != len(identities)
++                or any(not isinstance(tid, str) or not re.fullmatch(r"T-\d+", tid) for tid in tickets)
++                or len(set(tickets)) != len(tickets) or op_id_provenance(op) != "canonical"):
++            invalid.update(known)
++            continue
++        for identity, ticket in zip(identities, tickets):
++            binding = (ticket, op)
++            if identity in links and links[identity] != binding:
++                invalid.add(identity)
++            prior = ticket_links.get(ticket)
++            if prior is not None and prior != (identity, op):
++                invalid.update((identity, prior[0]))
++            ticket_links[ticket] = (identity, op)
++            links[identity] = binding
++    return collected, {identity: binding for identity, binding in links.items()
++                       if identity not in invalid}
++
++
+ def _collect_linkage(
+     root: Path, records: tuple[dict, ...] | None = None
+ ) -> tuple[set[str], dict[str, str]]:
+-    """Durable intake linkage (items 4/13/16): every package identity with a
+-    COMMITTED sub_collect receipt, and its exact linked Core review ticket.
+-
+-    The receipt's structured receipt_metadata binds package_identities to
+-    tickets positionally -- that binding is the INTAKE != REVIEW relation.
+-    The MANIFEST last_collect marker is a dedup witness; the ticket link is
+-    the disposition relation.
++    collected, links = _collect_links(root, records)
++    return collected, {identity: binding[0] for identity, binding in links.items()}
++
++
++_REVIEW_BINDING_KEYS = ("package_identity", "producer", "package", "source_head",
++                        "source_tree_fingerprint", "role_revision", "collect_op")
++_REVIEW_BINDINGS = re.compile(
++    r"(?:^|;\s*)(" + "|".join(_REVIEW_BINDING_KEYS) + r")=([^;\s]+)(?=;|$)"
++)
++_REVIEW_RECORD = re.compile(r"record:(\S+) sha256:([0-9a-f]{64})(?=;|\s|$)")
++
++
++def _collect_hypotheses_problem(metadata: dict, package: OutboxPackage) -> str:
++    """Validate an explicit collect hypothesis block against one package.
++
++    An ABSENT block is legacy and allowed. A PRESENT block must be a non-empty
++    array of well-formed, distinct hypotheses, exactly one of which binds this
++    package's producer, package id, source head, tree fingerprint and role
++    revision. A contradictory, duplicated or empty block is not exact evidence
++    (T-2040), and the identity list may not launder it.
+     """
+-    collected: set[str] = set()
+-    links: dict[str, str] = {}
+-    for record in _iter_operation_records(root, records):
+-        meta = record.get("receipt_metadata") or {}
+-        if not _durable_collect_receipt(record):
+-            continue
+-        identities = meta.get("package_identities") or []
+-        tickets = meta.get("tickets") or []
+-        for index, identity in enumerate(identities):
+-            collected.add(identity)
+-            if index < len(tickets):
+-                links[identity] = tickets[index]
+-    return collected, links
++    if "hypotheses" not in metadata:
++        return ""
++    hypotheses = metadata.get("hypotheses")
++    if not isinstance(hypotheses, list) or not hypotheses:
++        return "collect hypothesis block is not a non-empty array"
++    if any(not isinstance(item, dict) for item in hypotheses):
++        return "collect hypothesis block contains a non-object entry"
++    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
++    if len(unique) != len(hypotheses):
++        return "collect hypothesis block repeats one generation"
++    producer = package.fields.get("producer") or getattr(package, "producer", "")
++    expected = {
++        "producer": producer,
++        "package_id": package.package_id,
++        "source_head": package.fields.get("source_head"),
++        "source_tree_fingerprint": package.fields.get("source_tree_fingerprint"),
++        "role_revision": package.fields.get("role_revision"),
++    }
++    matches = [item for item in hypotheses if all(item.get(key) == value for key, value in expected.items())]
++    if len(matches) != 1:
++        return "collect hypotheses do not bind this exact package generation"
++    return ""
++
++
++def _package_review_bindings(package: OutboxPackage, collect_op: str) -> dict[str, str]:
++    return {"package_identity": package_identity(package), "package": package.package_id,
++            **{key: package.fields.get(key, "") for key in
++               ("producer", "source_head", "source_tree_fingerprint", "role_revision")},
++            "collect_op": collect_op}
++
++
++def _checkpoint_proves(event: dict, records: tuple[dict, ...]) -> bool:
++    """The committed owner must bind this exact ticket/text, not merely an op tag."""
++    from .journal import op_id_provenance
++    from .plan import semantic_payload_hash
++
++    op = event.get("op_id")
++    matches = [record for record in records if record.get("op_id") == op]
++    if op_id_provenance(op) != "canonical" or len(matches) != 1:
++        return False
++    record = matches[0]
++    return (record.get("operation") == "checkpoint" and record.get("status") == "COMMITTED"
++            and record.get("agent") == event.get("agent")
++            and {".saipen/LOG.md", ".saipen/STATE.md"}.issubset(
++                target.get("path") for target in record.get("targets", ())
++                if target.get("applied") is True)
++            and record.get("semantic_payload_hash") == semantic_payload_hash({
++                "operation": "checkpoint", "taxonomy": event.get("taxonomy"),
++                "ticket": event.get("ticket"), "description": event.get("text")}))
++
++
++def _verify_boundary_proves(event: dict, records: tuple[dict, ...]) -> bool:
++    from .journal import op_id_provenance
++    from .plan import semantic_payload_hash
++
++    if _checkpoint_proves(event, records):
++        return True
++    matches = [record for record in records if record.get("op_id") == event.get("op_id")]
++    if op_id_provenance(event.get("op_id")) != "canonical" or len(matches) != 1:
++        return False
++    record = matches[0]
++    return (record.get("operation") == "transition" and record.get("status") == "COMMITTED"
++            and record.get("agent") == event.get("agent")
++            and {".saipen/LOG.md", ".saipen/STATE.md"}.issubset(
++                target.get("path") for target in record.get("targets", ())
++                if target.get("applied") is True)
++            and any(record.get("semantic_payload_hash") == semantic_payload_hash({
++                "operation": "transition", "destination": "VERIFY", "from_phase": phase,
++                "ticket": event.get("ticket"), "agent": event.get("agent")})
++                    for phase in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")))
++
++
++def _independent_core_review(
++    root: Path, package: OutboxPackage, ticket: str, collect_op: str,
++    records: tuple[dict, ...], history=None,
++) -> tuple[dict | None, str]:
++    """Ticket-local review of an exact generation backed by native executed evidence.
++
++    ponytail: focused-unit evidence only; add another native validator when a
++    collected review requires a different executed family. No prose fallback.
++    """
++    from .focused_unit import MARKER, RECORD_DIR_REL, record_problem
++    from .log import (_claims_failure, _is_regression_evidence, _is_verify_boundary,
++                      read_history_snapshot, snapshot_contract_errors)
++    from .paths import prove_owned_dir_chain, prove_owned_regular, read_bound_regular_bytes
++
++    if history is None:
++        history = read_history_snapshot(root)
++    if problems := snapshot_contract_errors(history):
++        return None, "invalid review history: " + "; ".join(problems[:3])
++    # The collect authority is exactly ONE COMMITTED `sub_collect` receipt.
++    # A RESOLVED/accept_live record still deduplicates intake, but it is not
++    # committed review authority; a duplicated op id is ambiguous authority
++    # (T-2040).
++    collect_records = [record for record in records if record.get("op_id") == collect_op]
++    if len(collect_records) != 1:
++        return None, "missing or duplicate collect receipt"
++    collect_record = collect_records[0]
++    if (collect_record.get("operation") != "sub_collect"
++            or collect_record.get("status") != "COMMITTED"):
++        return None, "collect receipt is not a COMMITTED sub_collect operation"
++    # A collect receipt that names hypotheses must prove THIS generation in
++    # every one of them: a contradictory or duplicate block is not exact
++    # evidence, and the identity list alone may not launder it (T-2040).
++    problem = _collect_hypotheses_problem(
++        (collect_record.get("receipt_metadata") or {}), package
++    )
++    if problem:
++        return None, problem
++    _collected, links = _collect_links(root, records)
++    expected = _package_review_bindings(package, collect_op)
++    if links.get(expected["package_identity"]) != (ticket, collect_op):
++        return None, "missing or ambiguous exact collect linkage"
++    own = [event for event in history.events
++           if event.get("ticket") == ticket and event.get("taxonomy") == "RUN"]
++    intake = [event for event in own if event.get("op_id") == collect_op]
++    if len(intake) != 1:
++        return None, "missing unique ticket-local collect event"
++    intake_bindings = _REVIEW_BINDINGS.findall(intake[0].get("text", ""))
++    if (len(intake_bindings) != 6
++            or dict(intake_bindings) != {key: value for key, value in expected.items() if key != "collect_op"}):
++        return None, "collect event does not bind the full package generation"
++    later = [event for event in own if event["event"] > intake[0]["event"]]
++    boundaries = [event for event in later if _is_verify_boundary(event)]
++    if not boundaries or not _verify_boundary_proves(boundaries[-1], records):
++        return None, "no committed ticket-local VERIFY boundary"
++    cycle = [event for event in later if event["event"] > boundaries[-1]["event"]]
++    reviews = [event for event in cycle if event.get("text", "").startswith("review ->")]
++    if not reviews:
++        return None, "no ticket-local independent Core review"
++    review = reviews[-1]
++    if review.get("agent") == expected["producer"]:
++        return None, "package producer cannot author its own independent Core review"
++    text = review.get("text", "")
++    pairs = _REVIEW_BINDINGS.findall(text)
++    citations = _REVIEW_RECORD.findall(text)
++    if (not text.startswith("review -> PASS conf: high -- ")
++            or len(pairs) != len(expected) or dict(pairs) != expected
++            or len(citations) != 1 or not _checkpoint_proves(review, records)):
++        return None, "latest independent Core review lacks exact committed passing proof"
++    citation = citations[0]
++    if any(event["event"] > review["event"] and _checkpoint_proves(event, records)
++           and not _is_regression_evidence(event.get("text", ""))
++           and _claims_failure(event.get("text", "")) for event in cycle):
++        return None, "later ticket-local verification failed"
++    executed = [event for event in cycle if event.get("text", "").startswith(MARKER + " ")]
++    if (not executed or executed[-1]["event"] >= review["event"]
++            or not executed[-1].get("text", "").startswith(MARKER + " PASS conf: high ")
++            or _REVIEW_RECORD.findall(executed[-1]["text"]) != [citation]
++            or not _checkpoint_proves(executed[-1], records)):
++        return None, "no exact committed executed-evidence citation for this review"
++    if executed[-1].get("agent") == expected["producer"]:
++        return None, "package producer cannot supply its own executed evidence"
++    relative, digest = citation
++    if not relative.startswith(RECORD_DIR_REL + "/") or "\\" in relative or ":" in relative \
++            or any(part in ("", ".", "..") for part in relative.split("/")):
++        return None, "review record is outside owned focused evidence"
++    path = root / relative
++    try:
++        prove_owned_dir_chain(path.parent, kind="Core review evidence", ownership_root=root)
++        info = prove_owned_regular(path, kind="Core review evidence")
++        raw = read_bound_regular_bytes(path, info, max_bytes=8 * 1024 * 1024)
++        if hashlib.sha256(raw).hexdigest() != digest:
++            return None, "review record digest mismatch"
++        record = json.loads(raw)
++        problem = record_problem(root, record)
++        if problem:
++            return None, problem
++        from .verification_cache import replay_supported
++
++        if not replay_supported(record["verification_identity"]):
++            return None, "executed review has unresolved runtime dependencies"
++        configuration = record["verification_identity"]["configuration"]
++        if configuration.get("family") != "focused-unit" \
++                or configuration.get("patterns") != record["patterns"]:
++            return None, "executed review selection differs from its bound configuration"
++        if history.hash != read_history_snapshot(root).hash:
++            return None, "review history changed during evidence validation"
++    except (OSError, ValueError, KeyError, TypeError) as exc:
++        return None, f"independent Core review evidence unavailable: {exc}"
++    # The proof IS the receipt binding: every package field that the review
++    # text had to name, plus the exact executed record and its digest. Callers
++    # persist this whole object so a later verifier never reconstructs a
++    # weaker subset (T-2040).
++    return {**expected, "ticket_id": ticket, "review_event": f"E-{review['event']}",
++            "record": relative, "record_sha256": digest}, ""
+ 
+ 
+ def _terminal_tickets(root: Path, extra_ids: tuple[str, ...] = ()) -> dict[str, bool]:
+     """Terminal state of every Core ticket: DONE or BLOCKED is a terminal
+@@ -4145,18 +4373,14 @@
+ ) -> dict:
+     """The INTAKE/REVIEW relation for one role's current packages (item 16).
+ 
+     Returns structured flags the health derivation consumes:
+-    - reviewed_without_disposition: a current package claims 'reviewed' but
+-      has no durable collect receipt with a terminal linked Core ticket --
+-      REVIEWED TEXT IS NOT A REVIEW DISPOSITION, this is INVALID.
+-    - ready_collected_open: current READY package durably collected, linked
+-      Core review ticket not terminal -- REVIEW_PENDING (Core owns it now).
+-    - ready_collected_terminal: collected and the linked ticket IS terminal,
+-      but the disposition mark has not been applied -- REVIEW_PENDING with
+-      disposition_pending True (a mechanical DISPOSE action remains).
+-    - ready_uncollected: current READY package with no collect receipt --
+-      READY_FOR_REVIEW (intake is the missing action).
++    - reviewed_without_disposition: current reviewed claim without exact
++      durable collect linkage, independent executed Core review, terminal ticket.
++    - ready_collected_open: intake exists but review or terminality is missing.
++    - ready_collected_terminal: review proof and terminality both qualify;
++      disposition_pending True schedules only the remaining mechanical mark.
++    - ready_uncollected: intake is the missing action.
+     """
+     out = {
+         "reviewed_without_disposition": False,
+         "ready_collected_open": False,
+@@ -4169,10 +4393,17 @@
+         return out
+     current_role = current_local_role_revision(root, name, saipen_home)
+     if current_role is None:
+         return out
+-    collected, links = _collect_linkage(root, records)
+-    terminal = _terminal_tickets(root, tuple(links.values()))
++    records = tuple(_iter_operation_records(root, records))
++    collected, links = _collect_links(root, records)
++    terminal = _terminal_tickets(root, tuple(binding[0] for binding in links.values()))
++    from .log import read_history_snapshot
++
++    try:
++        history = read_history_snapshot(root)
++    except Exception:
++        history = None
+     for package in model.packages:
+         if package.legacy:
+             continue
+         status = package.fields.get("status")
+@@ -4184,10 +4415,14 @@
+             continue
+         if package.fields.get("role_revision") != current_role:
+             continue
+         identity = package_identity(package)
+-        ticket = links.get(identity)
+-        disposed = bool(ticket and terminal.get(ticket) is True)
++        binding = links.get(identity)
++        ticket = binding[0] if binding else None
++        disposed = False
++        if ticket and terminal.get(ticket) is True and history is not None:
++            proof, _problem = _independent_core_review(root, package, ticket, binding[1], records, history)
++            disposed = proof is not None
+         if status == "reviewed":
+             if not (identity in collected and disposed):
+                 out["reviewed_without_disposition"] = True
+                 out["review_ticket"] = ticket
+@@ -4704,15 +4939,16 @@
+     agent: str | None = None,
+     dry_run: bool = False,
+ ) -> Result:
+     """CORE DISPOSITION: mark a collected core-review package `reviewed` ONLY
+-    after its linked Core review ticket is terminal (items 4/13/16).
++    after its linked ticket has independent review proof and is terminal.
+ 
+     INTAKE != REVIEW: sub_collect only queues the hypothesis; this operation
+     writes the reviewed claim, and only when:
+       - the package carries the CURRENT role revision,
+       - a durable collect receipt links its immutable identity to a Core
+         review ticket,
++      - that ticket has exact ticket-local independently executed Core review,
+       - that ticket is terminal (DONE or BLOCKED) on the Core board.
+     The source triple is deliberately NOT part of that selection: collect
+     writes a receipt into the very tree whose fingerprint the package recorded,
+     so a collected package is stale by construction and no dispose could ever
+@@ -4798,9 +5034,11 @@
+         )
+     package = candidates[0]
+     identity = package_identity(package)
+     try:
+-        collected, links = _collect_linkage(root)
++        records = tuple(_iter_operation_records(root))
++        collected, links = _collect_links(root, records)
++        review_board_hash = _captured_hash(_read_bytes_maybe(root / ".saipen/BOARD.md"))
+     except Exception as exc:
+         from .journal import SemanticReceiptCorruptionError
+ 
+         if isinstance(exc, SemanticReceiptCorruptionError):
+@@ -4812,9 +5050,10 @@
+                 name=name,
+                 package=package.package_id,
+             )
+         raise
+-    ticket = links.get(identity)
++    binding = links.get(identity)
++    ticket = binding[0] if binding else None
+     if identity not in collected or not ticket:
+         return _refuse(
+             "VALIDATION_FAILED",
+             f"{name}/{package.package_id}: no durable collect receipt links "
+@@ -4830,8 +5069,20 @@
+             "is not terminal -- a reviewed claim requires an independent "
+             "Core disposition (DONE or BLOCKED) first",
+             name=name,
+             ticket=ticket,
++        )
++
++    try:
++        review_history = read_history_snapshot(root)
++        proof, problem = _independent_core_review(root, package, ticket, binding[1], records, review_history)
++    except Exception as exc:
++        proof, problem = None, f"review authority unavailable: {exc}"
++    if proof is None:
++        return _refuse(
++            "VALIDATION_FAILED",
++            f"{name}/{package.package_id}: independent Core review required for {ticket}: {problem}",
++            name=name, ticket=ticket,
+         )
+ 
+     try:
+         reviewed_text = _mark_package_reviewed(outbox_doc.text_norm, package.package_id)
+@@ -4852,9 +5103,11 @@
+         root,
+         tail,
+         "DEC",
+         f"disposition {name}/{package.package_id} reviewed after Core "
+-        f"review {ticket} terminal; package_identity={identity}",
++        f"review {ticket} terminal; package_identity={identity}; "
++        f"role_revision={package.fields['role_revision']}; collect_op={proof['collect_op']}; "
++        f"review_event={proof['review_event']}",
+         ticket=None,
+         agent=agent or "saipen-cli",
+         now=now_log,
+         op_id=op_id,
+@@ -4877,8 +5130,10 @@
+         return _refuse(
+             "VALIDATION_FAILED",
+             f"cannot capture history for CORE-005 validation: {type(exc).__name__}: {exc}",
+         )
++    if _history.hash != review_history.hash or board_doc.raw_hash != review_board_hash:
++        return _refuse("STALE_STATE", "review history or ticket changed during disposition planning; zero writes")
+     errors = validate_texts(
+         new_state, board_doc.text_norm, new_log, current_agent=agent or "saipen-cli",
+         sealed_events=_history,
+     )
+@@ -4901,9 +5156,13 @@
+     }
+     read_preconditions = {
+         ".": source_dependency,
+         ".saipen/BOARD.md": board_doc.raw_hash,
++        proof["record"]: proof["record_sha256"][:16],
+         **sealed_dependencies,
++        **{rel: _captured_hash(_read_bytes_maybe(root / rel))
++           for event in review_history.events
++           for rel in re.findall(r"(?:^|\s)original_event: (\S+)", event.get("text", ""))},
+     }
+     changed = [target["path"] for target in targets]
+     if dry_run:
+         return Result(
+@@ -4913,14 +5172,20 @@
+                 "name": name,
+                 "package": package.package_id,
+                 "package_identity": identity,
+                 "ticket": ticket,
++                "collect_op": proof["collect_op"],
++                "review_event": proof["review_event"],
+                 "dry_run": True,
+                 "would_result": "SUB_DISPOSITIONED",
+                 "would_write": changed,
+             },
+         )
+     with project_writer_lock(root):
++        live_records = tuple(_iter_operation_records(root))
++        live_proof, problem = _independent_core_review(root, package, ticket, binding[1], live_records)
++        if live_proof != proof or not _terminal_tickets(root, (ticket,)).get(ticket):
++            return _refuse("STALE_STATE", "independent Core review changed before APPLY: " + problem)
+         commit = run_mutation(
+             root,
+             op_id,
+             "sub_disposition",
+@@ -4931,16 +5196,12 @@
+             preconditions=preconditions,
+             read_preconditions=read_preconditions,
+             verification_policy="sub_disposition",
+             receipt_metadata={
++                **proof,
+                 "operation": "sub_disposition",
+                 "status": "COMMITTED",
+-                "package_identity": identity,
+                 "producer": name,
+-                "package": package.package_id,
+-                "ticket_id": ticket,
+-                "source_head": package.fields.get("source_head"),
+-                "source_tree_fingerprint": package.fields.get("source_tree_fingerprint"),
+             },
+         )
+     if not commit.get("ok"):
+         return _refuse(

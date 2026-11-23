@@ -1,0 +1,535 @@
+--- a/tools/saipen_engine/state.py
++++ b/tools/saipen_engine/state.py
+@@ -383,6 +383,32 @@
+     if category == "user brake":
+         return "user brake"
+     return None
++
++
++def goal_valve_wait_is_proven(state: dict, goal_counters: dict | None) -> bool:
++    """A budget WAIT needs exact counts reconstructed from canonical history.
++
++    The caller owns that history snapshot. STATE or WAIT wording alone cannot
++    prove a cap, and a counter jump in prose cannot replace counted events.
++    This proves the budget boundary only; it grants no continuation authority.
++    """
++    if state.get("execution_intent") != "goal" or not isinstance(goal_counters, dict):
++        return False
++    counts = []
++    for key in ("goal_waves", "goal_tickets"):
++        value = state.get(key)
++        evidence = goal_counters.get(key)
++        if type(value) is not int or type(evidence) is not int or value < 0 or value != evidence:
++            return False
++        counts.append(value)
++    from .operations import GOAL_TICKET_CAP, GOAL_WAVE_CAP
++
++    waves, tickets = counts
++    if waves < GOAL_WAVE_CAP and tickets < GOAL_TICKET_CAP:
++        return False
++    expected = (f"WAIT: safety valve reached ({waves} waves / {tickets} tickets) "
++                "-- run 'cc' to continue")
++    return state.get("next_action") == expected
+ 
+ 
+ def binding_brake(state: dict, *, empty_todo: bool = False) -> tuple[str, str] | None:
+--- a/tools/saipen_engine/audit_route.py
++++ b/tools/saipen_engine/audit_route.py
+@@ -109,6 +109,9 @@
+     tickets: dict | None = None,
+     agent: str | None = None,
+     now: datetime.datetime | None = None,
++    *,
++    state: dict | None = None,
++    goal_counters: dict | None = None,
+ ) -> str | None:
+     """Why the audit route was not followed, or None when it was.
+ 
+@@ -120,6 +123,22 @@
+     assert isinstance(projection, dict)  # narrowed by audit_route_owns
+     routed = str(projection["action"])
+     current = (next_action or "").strip()
++    if state is not None and state.get("next_action") == current:
++        from .state import binding_brake, goal_valve_wait_is_proven, parse_wait
++
++        empty_todo = tickets is not None and not any(
++            ticket.get("section") == "## TODO" for ticket in tickets.values()
++        )
++        brake = binding_brake(state, empty_todo=empty_todo)
++        if brake is not None and (
++            brake[0] != "wait"
++            or parse_wait(current) != "safety valve"
++            or goal_valve_wait_is_proven(state, goal_counters)
++        ):
++            # Same priority owner as route_next and mutation admission. A
++            # safety-valve exception additionally needs canonical counter
++            # evidence; neither a WAIT string nor invented STATE counts earn it.
++            return None
+     if current == routed or live_continuation(current, doing_ids):
+         return None
+     why = (
+--- a/tools/saipen_engine/router.py
++++ b/tools/saipen_engine/router.py
+@@ -1180,11 +1180,16 @@
+     if routed.get("reason") != "goal-checkpoint":
+         return None
+     from . import codec, goal_authority
+-    from .state import parse_state
++    from .log import read_history_snapshot
++    from .reconcile import _derived_goal_counters
++    from .state import goal_valve_wait_is_proven, parse_state
+ 
+     try:
+         current = parse_state(codec.read_doc(Path(project_root) / ".saipen/STATE.md"))
+-        errors = goal_authority.prove(project_root, current)
++        history = read_history_snapshot(Path(project_root), lean=True)
++        errors = goal_authority.prove(project_root, current, history_events=history.events)
++        if not goal_valve_wait_is_proven(current, _derived_goal_counters(history.events)):
++            errors.append("checkpoint budget WAIT is not proved by canonical counter history")
+         if (not goal_authority.persistent(current)
+                 or current.get("authority_source") != routed.get("authority_source")):
+             errors.append("checkpoint grant no longer owns the current goal")
+--- a/tools/saipen_engine/operations.py
++++ b/tools/saipen_engine/operations.py
+@@ -10453,6 +10453,30 @@
+             next_action=wait, operator_action_due=True,
+         )
+ 
++    checkpoint_review = None
++    if authority["mode"] == "checkpoint":
++        from .reconcile import _derived_goal_counters
++        from .state import goal_valve_wait_is_proven
++
++        counts = _derived_goal_counters(_docs["_history"].events)
++        if not goal_valve_wait_is_proven(state, counts):
++            return _refuse(
++                "VALIDATION_FAILED",
++                "checkpoint budget WAIT is not proved by canonical counter history",
++            )
++        guard = _active_claim_refusal(state, _docs["board"].text_norm, agent)
++        if guard is not None:
++            return guard
++        checkpoint_review = {
++            "authority_source": authority["source"],
++            "based_on_event": state["last_event"],
++            "task": state.get("task"), "phase": state.get("phase"),
++            "old_counters": counts,
++            "new_counters": {"goal_waves": 0, "goal_tickets": 0},
++            "binding_brakes": "passed", "ownership": "passed",
++            "counter_history": "verified", "authority": "verified",
++        }
++
+     def mutate(text: str, event: int) -> str:
+         # The persisted safety-valve WAIT describes the pre-reset
+         # authorization state. Keeping it after reauthorization would make
+@@ -10510,6 +10534,7 @@
+         utc,
+         {"goal_waves", "goal_tickets", "next_action"},
+         read_once=(_docs, state, _board, _log_tail),
++        receipt_metadata=({"goal_checkpoint": checkpoint_review} if checkpoint_review else None),
+     )
+     if isinstance(plan, Result):
+         return plan
+--- a/tools/validate.py
++++ b/tools/validate.py
+@@ -3198,6 +3198,8 @@
+     )
+ 
+ if _audit_route_projection is not None:
++    from saipen_engine.reconcile import _derived_goal_counters as _audit_goal_counters
++
+     _audit_route_why = _audit_route_violation(
+         _audit_route_projection,
+         state.get("next_action") if isinstance(state.get("next_action"), str) else "",
+@@ -3205,6 +3207,11 @@
+         WAIT_CATEGORIES,
+         tickets=tickets,
+         agent=self_agent,
++        state=state,
++        goal_counters=(
++            _audit_goal_counters(_canonical_history_snapshot.events)
++            if _canonical_history_snapshot is not None else None
++        ),
+     )
+     if _audit_route_why:
+         fail(f"STATE.md audit route not followed -- {_audit_route_why} (SOURCE-AUDIT-INBOX-01)")
+--- /dev/null
++++ b/tools/test_t1704_goal_checkpoint_priority.py
+@@ -0,0 +1,270 @@
++"""T-1704: canonical budget brakes outrank audit ingestion, with counter proof.
++
++Carrier doubles below belong only to disposable projects. The live captured
++T-1703 snapshot is immutable input; no test can authorize or mutate that Work.
++"""
++
++from __future__ import annotations
++
++import copy
++import inspect
++import json
++import sys
++import unittest
++from pathlib import Path
++
++TOOLS = Path(__file__).resolve().parent
++sys.path.insert(0, str(TOOLS))
++
++from saipen_engine import codec  # noqa: E402
++from saipen_engine.audit_route import route_violation  # noqa: E402
++from saipen_engine.log import read_history_snapshot  # noqa: E402
++from saipen_engine.reconcile import _derived_goal_counters  # noqa: E402
++from saipen_engine.router import goal_checkpoint_gate, route_next  # noqa: E402
++from test_hermetic_env import isolate_host_session  # noqa: E402
++from test_t1363_zero_manual_entry import _allocation_log, _stamp, cli, project  # noqa: E402
++import test_t1494_continuation_authority as authority_fixtures  # noqa: E402
++
++FIXTURE = json.loads(
++    (TOOLS.parent / "tests/fixtures/t1703-valve-audit.json").read_text(encoding="utf-8")
++)
++
++
++def setUpModule():
++    isolate_host_session()
++
++
++def violation(current, *, counters=None, action=None):
++    """Keep the same oracle executable on both pre-fix and corrected subjects."""
++    kwargs = {}
++    if "state" in inspect.signature(route_violation).parameters:
++        kwargs.update(state=current, goal_counters=counters)
++    return route_violation(
++        FIXTURE["audit_projection"],
++        current["next_action"] if action is None else action,
++        ("T-1703",),
++        **kwargs,
++    )
++
++
++class BrakePriorityTests(unittest.TestCase):
++    def setUp(self):
++        self.current = copy.deepcopy(FIXTURE["checkpoint"])
++        self.counts = copy.deepcopy(FIXTURE["derived_counters"])
++
++    def test_captured_t1703_review_valve_is_a_legal_audit_diversion(self):
++        self.assertEqual((self.current["task"], self.current["phase"]), ("T-1703", "REVIEW"))
++        self.assertIsNone(violation(self.current, counters=self.counts))
++
++    def test_three_wave_valve_is_a_legal_audit_diversion(self):
++        self.current.update(
++            goal_waves=3,
++            goal_tickets=0,
++            next_action="WAIT: safety valve reached (3 waves / 0 tickets) -- run 'cc' to continue",
++        )
++        self.assertIsNone(violation(self.current, counters={"goal_waves": 3, "goal_tickets": 0}))
++
++    def test_counter_overrun_is_preserved_and_still_requires_a_checkpoint(self):
++        self.current.update(
++            goal_tickets=21,
++            next_action="WAIT: safety valve reached (0 waves / 21 tickets) -- run 'cc' to continue",
++        )
++        self.assertIsNone(violation(self.current, counters={"goal_waves": 0, "goal_tickets": 21}))
++
++    def test_unproved_cap_does_not_suppress_audit(self):
++        self.assertIsNotNone(violation(self.current))
++
++    def test_fabricated_state_cap_does_not_suppress_audit(self):
++        self.assertIsNotNone(
++            violation(self.current, counters={"goal_waves": 0, "goal_tickets": 19})
++        )
++
++    def test_fabricated_wait_counts_do_not_suppress_audit(self):
++        self.current["next_action"] = (
++            "WAIT: safety valve reached (0 waves / 999 tickets) -- run 'cc' to continue"
++        )
++        self.assertIsNotNone(violation(self.current, counters=self.counts))
++
++    def test_under_cap_counters_do_not_suppress_audit(self):
++        self.current.update(
++            goal_tickets=19,
++            next_action="WAIT: safety valve reached (0 waves / 19 tickets) -- run 'cc' to continue",
++        )
++        self.assertIsNotNone(
++            violation(self.current, counters={"goal_waves": 0, "goal_tickets": 19})
++        )
++
++    def test_wrong_intent_does_not_suppress_audit(self):
++        self.current["execution_intent"] = "normal"
++        self.assertIsNotNone(violation(self.current, counters=self.counts))
++
++    def test_mismatched_state_action_does_not_suppress_audit(self):
++        self.assertIsNotNone(violation(self.current, counters=self.counts, action="saipen improve"))
++
++    def test_boolean_or_string_counter_evidence_cannot_fabricate_a_cap(self):
++        for counter in (True, "20", -20):
++            self.assertIsNotNone(
++                violation(self.current, counters={"goal_waves": 0, "goal_tickets": counter})
++            )
++
++    def test_scope_selection_wait_remains_illegal(self):
++        self.current["next_action"] = "WAIT: scope selection -- choose an audit"
++        self.assertIsNotNone(violation(self.current, counters=self.counts))
++
++    def test_user_brake_outranks_pending_ingestion(self):
++        self.current["next_action"] = "WAIT: user brake -- stop here"
++        self.assertIsNone(violation(self.current))
++
++    def test_destructive_operation_gate_outranks_pending_ingestion(self):
++        self.current["next_action"] = "WAIT: destructive-op -- delete the database"
++        self.assertIsNone(violation(self.current))
++
++    def test_external_state_blocker_outranks_pending_ingestion(self):
++        self.current.update(
++            blocker="BLOCKED_EXTERNAL: credentials unavailable", next_action="saipen status"
++        )
++        self.assertIsNone(violation(self.current))
++
++    def test_blocked_phase_outranks_pending_ingestion(self):
++        self.current.update(phase="BLOCKED", blocker="failed safely", next_action="saipen status")
++        self.assertIsNone(violation(self.current))
++
++    def test_a_different_wait_does_not_borrow_a_state_brake(self):
++        self.current["next_action"] = "WAIT: user brake -- stop here"
++        self.assertIsNotNone(
++            violation(self.current, action="WAIT: scope selection -- choose an audit")
++        )
++
++    def test_live_ticket_priority_and_pending_audit_order_are_unchanged(self):
++        self.assertIsNone(violation(self.current, action="PHASE REVIEW T-1703"))
++        before = copy.deepcopy(FIXTURE["audit_projection"])
++        violation(self.current, counters=self.counts)
++        self.assertEqual(before, FIXTURE["audit_projection"])
++
++
++class NativeCheckpointTests(unittest.TestCase):
++    # Reuse fixture construction, never a separately maintained authority oracle.
++    bounded = authority_fixtures.ContinuationAuthorityTests.bounded
++    persistent = authority_fixtures.ContinuationAuthorityTests.persistent
++    read_state = authority_fixtures.ContinuationAuthorityTests.read_state
++    patch_state = authority_fixtures.ContinuationAuthorityTests.patch_state
++    spend = authority_fixtures.ContinuationAuthorityTests.spend
++    snapshot = authority_fixtures.ContinuationAuthorityTests.snapshot
++
++    def audit(self, root):
++        audit = root / "audit/1.md"
++        audit.parent.mkdir(exist_ok=True)
++        audit.write_text("# Independent audit\n\nFix the audit defect.\n", encoding="utf-8")
++
++    def test_bounded_native_validator_accepts_proved_cap_with_pending_audit(self):
++        root = self.bounded()
++        self.audit(root)
++        code, _payload, text = cli(root, "validate", "--json")
++        self.assertEqual(code, 0, text)
++
++    def test_bounded_continue_still_refuses_without_operator(self):
++        root = self.bounded()
++        self.audit(root)
++        before = self.snapshot(root)
++        code, payload, text = cli(root, "continue", "--json")
++        self.assertEqual(code, 1, text)
++        self.assertEqual(payload["code"], "RECONCILE_REAUTH_REQUIRED", text)
++        self.assertEqual(before, self.snapshot(root))
++
++    def test_persistent_twenty_ticket_checkpoint_continues_and_native_agrees(self):
++        root = self.persistent()
++        self.spend(root)
++        self.audit(root)
++        code, _payload, text = cli(root, "validate", "--json")
++        self.assertEqual(code, 0, text)
++        phase = self.read_state(root)["phase"]
++        code, _payload, text = cli(root, "continue", "--json")
++        self.assertEqual(code, 0, text)
++        self.assertEqual(self.read_state(root)["phase"], phase)
++        self.assertEqual(self.read_state(root)["goal_tickets"], 0)
++        self.assertTrue((root / "audit/1.md").is_file())
++
++    def test_persistent_three_wave_checkpoint_has_the_same_priority(self):
++        root = self.persistent()
++        self.spend(root, tickets=0, waves=3)
++        self.audit(root)
++        code, _payload, text = cli(root, "validate", "--json")
++        self.assertEqual(code, 0, text)
++        code, _payload, text = cli(root, "continue", "--json")
++        self.assertEqual(code, 0, text)
++        self.assertEqual(self.read_state(root)["goal_waves"], 0)
++
++    def test_persistent_checkpoint_rejects_unearned_state_counters(self):
++        root = self.persistent()
++        self.patch_state(
++            root,
++            {
++                "goal_waves": 0,
++                "goal_tickets": 20,
++                "next_action": FIXTURE["checkpoint"]["next_action"],
++            },
++        )
++        routed = route_next(
++            codec.read_doc(root / ".saipen/STATE.md"),
++            codec.read_doc(root / ".saipen/BOARD.md"),
++            current_agent="test-agent",
++        )
++        self.assertIsNotNone(goal_checkpoint_gate(root, routed))
++
++    def test_counter_reconstruction_and_idempotent_checkpoint_replay(self):
++        root = self.persistent()
++        self.spend(root)
++        code, _payload, text = cli(root, "continue", "--json")
++        self.assertEqual(code, 0, text)
++        code, _payload, text = cli(root, "continue", "--json")
++        self.assertEqual(code, 0, text)
++        log = (root / ".saipen/LOG.md").read_text(encoding="utf-8")
++        self.assertEqual(log.count("DEC: goal checkpoint --"), 1)
++        self.assertEqual(
++            _derived_goal_counters(read_history_snapshot(root).events),
++            {"goal_waves": 0, "goal_tickets": 0},
++        )
++
++    def test_review_ticket_and_phase_survive_the_bounded_native_check(self):
++        lines = _allocation_log("T-1703").rstrip().splitlines()
++        event = 3
++        lines.append(
++            f"- 10.10.26 00:00 [E-{event}] [parent: E-{event - 1}] "
++            "[agent: test-agent] [op: goal-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] "
++            "DEC: goal pivot -- maintainer fixture"
++        )
++        for value in range(20):
++            event += 1
++            lines.append(
++                f"- 10.10.26 00:00 [E-{event}] [parent: E-{event - 1}] "
++                f"[agent: test-agent] DEC: goal_tickets {value}->{value + 1}"
++            )
++        board = (
++            "## DOING\n- [/] T-1703 [P2] review host report | verify: report controls "
++            f"| owner: test-agent | claim_time: {_stamp()}\n## TODO\n## DONE\n## BLOCKED\n"
++        )
++        root = project(
++            self,
++            board=board,
++            log="\n".join(lines) + "\n",
++            phase="REVIEW",
++            transition_from="VERIFY",
++            task="T-1703",
++            execution_intent="goal",
++            goal_waves=0,
++            goal_tickets=20,
++            next_action=FIXTURE["checkpoint"]["next_action"],
++        )
++        self.patch_state(root, {"saipen_home": str(TOOLS.parent)})
++        self.audit(root)
++        before = self.snapshot(root)
++        code, _payload, text = cli(root, "validate", "--json")
++        self.assertEqual(code, 0, text)
++        self.assertEqual(before, self.snapshot(root))
++        self.assertEqual(
++            (self.read_state(root)["task"], self.read_state(root)["phase"]), ("T-1703", "REVIEW")
++        )
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- /dev/null
++++ b/tests/fixtures/t1703-valve-audit.json
+@@ -0,0 +1,104 @@
++{
++  "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
++  "git_status_command": "git -c core.safecrlf=false status --porcelain=v1 --branch",
++  "git_status_exit_code": 0,
++  "checkpoint": {
++    "phase": "REVIEW",
++    "task": "T-1703",
++    "next_action": "WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
++    "blocker": "none",
++    "transition_from": "VERIFY",
++    "saipen_version": 8,
++    "schema_version": 3,
++    "last_event": 14219,
++    "style_contract": "ded-069a4c52",
++    "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
++    "agent": "saipen-cli",
++    "mode": "full",
++    "updated": "2026-10-10T08:00:50Z",
++    "requires": [
++      "filesystem",
++      "git",
++      "python"
++    ],
++    "execution_intent": "goal",
++    "goal_waves": 0,
++    "goal_tickets": 20
++  },
++  "derived_counters": {
++    "goal_waves": 0,
++    "goal_tickets": 20
++  },
++  "pending_operations": [],
++  "conflicts": [],
++  "ingress_authority": {
++    "witness": "model_supplied",
++    "capture": true,
++    "local_work": true,
++    "user_explicit": false,
++    "preempt_active_work": false,
++    "goal_pivot": false,
++    "reset_bounded_authority": false,
++    "detailed_response": false,
++    "external_action": false
++  },
++  "declared_operator_carrier": null,
++  "persistent_authority": false,
++  "binding_brake": [
++    "wait",
++    "persisted WAIT binds in this context: \"WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc\""
++  ],
++  "audit_projection": {
++    "rule_id": "SOURCE-AUDIT-INBOX-01",
++    "pending": [
++      "audit/SAIPEN_ENFORCEMENT_ROADMAP_20261009.md",
++      "audit/SAIPEN_fastprompter1.md",
++      "audit/SAIPEN_WEAK_MODEL_SLICE_PROTOCOL_20261009.md"
++    ],
++    "closed_pending_delete": [],
++    "invalid": [],
++    "residue": [],
++    "residue_count": 0,
++    "unworkable_active": [
++      {
++        "layer": null,
++        "work": "T-1702",
++        "reason": "linked Work is not currently workable"
++      }
++    ],
++    "idle_only": true,
++    "action": "saipen audit ingest",
++    "layer": null,
++    "path": "audit/SAIPEN_fastprompter1.md",
++    "detail": "audit/SAIPEN_fastprompter1.md is an unconsumed audit generation"
++  },
++  "router": {
++    "ok": true,
++    "action": "WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
++    "reason": "wait",
++    "executable_behavior": "RESTATE_AND_STOP",
++    "detail": "persisted WAIT is a hard stop; do not route past it"
++  },
++  "audit_validator_violation": "the audit inbox routes 'saipen audit ingest' (layer None, audit/SAIPEN_fastprompter1.md) but next_action is \"WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue\", which is neither that action nor a live-ticket continuation",
++  "controls": {
++    "active_review_continuation_accepted": true,
++    "scope_wait_refused": true,
++    "pending_ingestion_accepted": true
++  },
++  "protected_sha256": {
++    ".saipen/STATE.md": "5e9ee6054ba80491c9709d3b3c18220e89549258c96a9cdcad559befc3217952",
++    ".saipen/BOARD.md": "43b5d7f31bedbc66ef4044b5b9256fc945da0092d79f0694a9126159818f8e55",
++    ".saipen/LOG.md": "8f002f4b3b736edc073b7c11c0d828c49d23c1600b90544a8f9b0cfdf17cb682",
++    ".saipen/evidence/T-1703-host-truth/REPORT.md": "493525506a4f8098f6a89ebf1f5ea0c91f8af34fa32509884daf10c22318921d",
++    ".saipen/evidence/T-1703-host-truth/cap-audit-conflict.json": "4dcc913bdcd8ea088d5174147ab38c21018600cf758a1338c97551d4aa1d9fa3",
++    "tools/saipen_engine/goal_authority.py": "297b69017222fb2d8f7814bcbd6d1d3cde55f1f0e47b10516a208f875c3281e9",
++    "tools/saipen_engine/operations.py": "5263e9fdf2f2ab13efd4031943227f0ce6036c6e3e47a4ddd60a671674bba1ef",
++    "tools/saipen_engine/router.py": "b2076c1ada9083998e4833e30536e431a7dad6ef4ba98e297487314b8ffb6ed5",
++    "tools/saipen_engine/audit_route.py": "13c3b7cb8be06742d36a7a37c54b2e7eb73e29df70a4e6a306fb8eba03303f42",
++    "tools/saipen_engine/state.py": "45a4bd66b5738168362f887bfd7aea5c88dfedf3082e940ea0eec1c53182d2fa",
++    "tools/validate.py": "64355ea00c7953faed7911fe771de2c66da23ef7fec84cba15e19ddf77d0196e"
++  },
++  "protected_bytes_unchanged": true,
++  "regression_green": false,
++  "disposition": "Diagnostic only; canonical bounded WAIT remains binding."
++}

@@ -1,0 +1,24 @@
+..............F.....                                                     [100%]
+================================== FAILURES ===================================
+_ ExhaustionEvidenceTests.test_router_never_reports_complete_over_unreadable_goal _
+
+self = <test_t2040_exhaustion_evidence.ExhaustionEvidenceTests testMethod=test_router_never_reports_complete_over_unreadable_goal>
+
+    def test_router_never_reports_complete_over_unreadable_goal(self):
+        (self.root / ".saipen/goals").mkdir()
+        (self.root / ".saipen/goals/broken.json").write_text("{", encoding="utf-8")
+        state = _valid_state_text()
+        text = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+        with mock.patch.object(router, "queued_source_projection", return_value=None), mock.patch.object(
+            router, "pending_append_projection", return_value=None
+        ):
+            result = router.route_next(state, text, project_root=self.root)
+        self.assertNotEqual(result.get("terminal_classification"), "ALL_WORK_COMPLETE", result)
+        self.assertIn("work_exhaustion", result)
+>       self.assertTrue(result["work_exhaustion"]["certificate_errors"])
+E       AssertionError: [] is not true
+
+tools\test_t2040_exhaustion_evidence.py:148: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_exhaustion_evidence.py::ExhaustionEvidenceTests::test_router_never_reports_complete_over_unreadable_goal
+1 failed, 19 passed in 0.91s

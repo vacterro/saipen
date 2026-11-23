@@ -1,0 +1,50 @@
+....E..EEE.E
+======================================================================
+ERROR: test_duplicate_event_routes_are_terminal_and_write_nothing (__main__.PublicLedgerDiagnosticTests.test_duplicate_event_routes_are_terminal_and_write_nothing) (command=('explain-next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 223, in assert_terminal_parity
+    self.assertIsNone(value["canonical_next_command"], value)
+                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'canonical_next_command'
+
+======================================================================
+ERROR: test_missing_parent_routes_are_terminal_and_write_nothing (__main__.PublicLedgerDiagnosticTests.test_missing_parent_routes_are_terminal_and_write_nothing) (command=('explain-next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 223, in assert_terminal_parity
+    self.assertIsNone(value["canonical_next_command"], value)
+                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'canonical_next_command'
+
+======================================================================
+ERROR: test_out_of_order_history_routes_are_terminal_and_write_nothing (__main__.PublicLedgerDiagnosticTests.test_out_of_order_history_routes_are_terminal_and_write_nothing) (command=('explain-next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 223, in assert_terminal_parity
+    self.assertIsNone(value["canonical_next_command"], value)
+                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'canonical_next_command'
+
+======================================================================
+ERROR: test_proven_foreign_tail_keeps_the_same_executable_quarantine_route (__main__.PublicLedgerDiagnosticTests.test_proven_foreign_tail_keeps_the_same_executable_quarantine_route) (command=('explain-next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 299, in test_proven_foreign_tail_keeps_the_same_executable_quarantine_route
+    self.assertIsNone(value["terminal_disposition"], value)
+                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'terminal_disposition'
+
+======================================================================
+ERROR: test_unbacked_head_does_not_hide_the_precise_ledger_owner (__main__.PublicLedgerDiagnosticTests.test_unbacked_head_does_not_hide_the_precise_ledger_owner) (command=('explain-next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 223, in assert_terminal_parity
+    self.assertIsNone(value["canonical_next_command"], value)
+                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'canonical_next_command'
+
+----------------------------------------------------------------------
+Ran 12 tests in 15.451s
+
+FAILED (errors=5)

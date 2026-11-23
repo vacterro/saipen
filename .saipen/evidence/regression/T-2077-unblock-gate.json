@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "tools.test_t2077_unblock_gate"],
+  "format": "unittest",
+  "context": [
+    "tools/saipen_engine",
+    "tools/test_t2077_unblock_gate.py",
+    "tools/test_t1363_zero_manual_entry.py",
+    "tools/test_fixture_support.py",
+    "tools/test_hermetic_env.py",
+    "saipen",
+    "extensions/subs",
+    "VERSION"
+  ],
+  "oracle_files": ["tools/test_t2077_unblock_gate.py"],
+  "subject_files": ["tools/saipen_engine/operations.py"],
+  "before": {
+    "tools/saipen_engine/operations.py": ".saipen/evidence/pre/T-2077-operations.py"
+  },
+  "timeout": 300
+}

@@ -1,0 +1,10 @@
+rounds: 20
+test_t1304_r009_settled_wiring: tests run 380, rounds not green 0
+test_t1519_settled_index: tests run 140, rounds not green 0
+test_t1304_r005_verifier_boundary: tests run 120, rounds not green 0
+test_t1304_r006_boundary_refusals: tests run 180, rounds not green 0
+test_t1304_r011_empty_selection: tests run 40, rounds not green 0
+test_t1640_log_seal: tests run 540, rounds not green 0
+test_t1640_board_scrub: tests run 600, rounds not green 0
+test ids not green in every round: 0
+exit=0

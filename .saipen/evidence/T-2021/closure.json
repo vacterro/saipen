@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "code": "FINISHED",
+  "op_id": "finish-3b701bb4d5434607b11724c1aeee4d1c",
+  "changed_files": [
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md"
+  ],
+  "recovery_required": false,
+  "ticket": "T-2021",
+  "event_id": "E-20529",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "saipen continue",
+  "transition_from": "SHIP",
+  "source_closed": {
+    "ok": true,
+    "closed": [
+      "SRC-391"
+    ],
+    "refused": {}
+  }
+}

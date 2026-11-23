@@ -1,0 +1,24 @@
+test_diagnostic_carrier_changes_neither_environment_nor_real_child (test_t1834_tool_call_identity.ToolCallIdentity.test_diagnostic_carrier_changes_neither_environment_nor_real_child) ... FAIL
+test_new_tool_call_reuses_evidence_but_semantic_changes_invalidate_it (test_t1834_tool_call_identity.ToolCallIdentity.test_new_tool_call_reuses_evidence_but_semantic_changes_invalidate_it) ... FAIL
+
+======================================================================
+FAIL: test_diagnostic_carrier_changes_neither_environment_nor_real_child (test_t1834_tool_call_identity.ToolCallIdentity.test_diagnostic_carrier_changes_neither_environment_nor_real_child)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1834_tool_call_identity.py", line 24, in test_diagnostic_carrier_changes_neither_environment_nor_real_child
+    self.assertEqual(first, family_environment(family))
+AssertionError: {'$OC[850 chars]D': 'first', 'CODEX_VERSION': '0.163.0', 'COLO[7190 chars] '1'} != {'$OC[850 chars]D': 'second', 'CODEX_VERSION': '0.163.0', 'COL[7191 chars] '1'}
+Diff is 8978 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_new_tool_call_reuses_evidence_but_semantic_changes_invalidate_it (test_t1834_tool_call_identity.ToolCallIdentity.test_new_tool_call_reuses_evidence_but_semantic_changes_invalidate_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1834_tool_call_identity.py", line 36, in test_new_tool_call_reuses_evidence_but_semantic_changes_invalidate_it
+    self.assertTrue(cache.compatible(self.project, written["record"]["verification_identity"]))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.139s
+
+FAILED (failures=2)

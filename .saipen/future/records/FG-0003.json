@@ -1,0 +1,13 @@
+{
+  "declared_status": "RECORDED FOLLOW-UP WORK / NOT AUTHORIZED FOR IMPLEMENTATION",
+  "digest": "21701512d8c3f3e1022d4d28d3d8cde76178f0a287f3b9231d745a0c1e1f872a",
+  "facts": {},
+  "gate": "FG-0003",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/FUTURE GATE — AUDIT CONTRACT OPTIONAL ROOTS EXPORT RUNTIME STATE_20260916.md",
+  "reason": "recorded, explicitly not authorized for implementation",
+  "reviewed": true,
+  "schema": 2,
+  "title": "FUTURE GATE — AUDIT CONTRACT `optional` ROOTS EXPORT RUNTIME STATE; PROJECT-LOCAL SCOPING IS ERASED BY REGENERATION",
+  "verdict": "DEFERRED"
+}

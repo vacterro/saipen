@@ -1,0 +1,235 @@
+{
+  "recorded_utc": "2026-10-10T10:54:51.591459+00:00",
+  "checks": [
+    {
+      "command": "python -m unittest tools.test_t1704_legacy_goal_authority -q",
+      "exit_code": 1,
+      "output": ".saipen\\evidence\\T-1704-draft\\legacy-red.txt",
+      "output_sha256": "a7b3c5cbb497ae346c7cff5a660886d08e1214bcd0320b17c53cafd342944adf",
+      "ran": 13,
+      "duration_s": 5.391,
+      "summary": "FAILED (errors=13)",
+      "file_mtime_utc": "2026-10-10T09:48:12.286412+00:00"
+    },
+    {
+      "command": "python -m unittest tools.test_t1704_legacy_goal_authority tools.test_t1494_continuation_authority tools.test_t1704_goal_checkpoint_priority tools.test_t1293_valve_resume_audit_route tools.test_audit_route tools.test_reconcile_valve tools.test_command_routing tools.test_t1619_iteration_boundary -q",
+      "exit_code": 0,
+      "output": ".saipen\\evidence\\T-1704-draft\\focused-current.txt",
+      "output_sha256": "fbd61cdb02857ab1762db207b756ac943d5ad88a0eb8ed523def7d808c041275",
+      "ran": 207,
+      "duration_s": 101.304,
+      "summary": "OK",
+      "file_mtime_utc": "2026-10-10T09:57:12.509372+00:00"
+    },
+    {
+      "command": "python -m unittest tools.test_t1704_legacy_goal_authority tools.test_t1494_continuation_authority tools.test_t1704_goal_checkpoint_priority tools.test_t1577_op_id_provenance -q",
+      "exit_code": 0,
+      "output": ".saipen\\evidence\\T-1704-draft\\authority-focused-green.txt",
+      "output_sha256": "6418c3b141b99734359f428651553df2075f77f8e5e7074aadaabea225f5202e",
+      "ran": 93,
+      "duration_s": 68.085,
+      "summary": "OK",
+      "file_mtime_utc": "2026-10-10T10:00:46.007993+00:00"
+    },
+    {
+      "command": "python -m unittest tools.test_t1704_legacy_goal_authority tools.test_t1494_continuation_authority tools.test_t1704_goal_checkpoint_priority tools.test_t1577_op_id_provenance -q",
+      "exit_code": 0,
+      "output": ".saipen\\evidence\\T-1704-draft\\authority-ingress-green.txt",
+      "output_sha256": "268eaad23bc7417594a866e4a5e7b092003279a42916bc6a9a77f561febfc793",
+      "ran": 94,
+      "duration_s": 144.817,
+      "summary": "OK",
+      "file_mtime_utc": "2026-10-10T10:11:30.351422+00:00"
+    },
+    {
+      "command": "python -m unittest tools.test_t1704_legacy_goal_authority -q",
+      "exit_code": 0,
+      "output": ".saipen\\evidence\\T-1704-draft\\legacy-final-green.txt",
+      "output_sha256": "7a1fc4b4fd6546140d7e8ae49860c20d9ac587569f68e173665fb38c6f567e2e",
+      "ran": 28,
+      "duration_s": 61.189,
+      "summary": "OK",
+      "file_mtime_utc": "2026-10-10T10:13:46.682647+00:00"
+    }
+  ],
+  "subject_sha256": {
+    "tools/saipen_engine/state.py": "40bd0450ffbc4428fa9a7af01842258fe04eda3f5ca1c6565b04ddbb2efe60c9",
+    "tools/saipen_engine/audit_route.py": "1758f5a7e5facd9470ad895ee75acbda09c389e4d9a9fdf24ecea8188293b5ba",
+    "tools/saipen_engine/router.py": "5481e8faf73e757a4b4ca433316e370d3c8925365e70d399c06ac18ee8bf69da",
+    "tools/saipen_engine/operations.py": "126189fa0b3a84eea4e430cda8bded676cf578387a86abee700b49f1e6f98256",
+    "tools/saipen_engine/goal_authority.py": "0a0b32e8712a2bdeca5d581373fc7a64f38e5ff0a3cbd08f46bf7cf28ed735fc",
+    "tools/saipen_engine/journal.py": "3375ddd84f33f5d73d5c41e5bd92cf424cb1af737b20677f9cc5afa599fef625",
+    "tools/saipen.py": "15fdfd5c7d4077fd397ea26ea4cafc417de41cf5c445ed47b97bc1b72be0f849",
+    "tools/validate.py": "1423937c3439df3ed45400d86a4d3e09868bdd82dbf78e82ee0d284c27fa8394",
+    "tools/test_t1704_goal_checkpoint_priority.py": "7ad1658b13fc529bcf7ac38665baeadc170f530f1c492f6fa48ce8fad53593ab",
+    "tools/test_t1704_legacy_goal_authority.py": "acd22a3374567644c060a46b2ac91fdc53b21595326a03d3954aee589b9bbb2a",
+    "tests/fixtures/t1703-valve-audit.json": "6a4982752267dfc62d3d372b64c2cd9b640060a42e7e6f515f80751367c9147d",
+    "saipen/MAINTENANCE.md": "56740dad22642f4a4e7a2d7a177de5796740caac0f02d6c02da65f519166589e",
+    "saipen/OPS.md": "c3cdc235cf44ff83318095f896f9deb18a41e3b1417443c510d04d570a6271d0"
+  },
+  "current_state": {
+    "phase": "REVIEW",
+    "task": "T-1703",
+    "next_action": "WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
+    "blocker": "none",
+    "transition_from": "VERIFY",
+    "saipen_version": 8,
+    "schema_version": 3,
+    "last_event": 14226,
+    "style_contract": "ded-069a4c52",
+    "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "agent": "saipen-cli",
+    "mode": "full",
+    "updated": "2026-10-10T10:47:56Z",
+    "requires": [
+      "filesystem",
+      "git",
+      "python"
+    ],
+    "execution_intent": "goal",
+    "goal_waves": 0,
+    "goal_tickets": 20
+  },
+  "original_goal_pivot": {
+    "date": "02.10.26 21:17",
+    "event": 11872,
+    "parent": 11871,
+    "ticket": null,
+    "agent": "saipen-cli",
+    "op_id": "goal-b14d64dda57b46b6bd33833a2b93b776",
+    "taxonomy": "DEC",
+    "text": "goal pivot -- T-1599 (SRC-164): test1"
+  },
+  "live_operator_carrier_declared": false,
+  "live_persistent_grant_applied": false,
+  "full_family": {
+    "command": "python tools/core_unit.py evidence T-1704 --fresh --jobs 6",
+    "exit_code": 0,
+    "status": "PASS",
+    "verdict": "PASS",
+    "ran": 6079,
+    "red": [],
+    "new_red": [],
+    "fingerprint": "474c47ea7d6123b7ab279fad6ce2c29be85b390215b69d363eb4b25e63872dcb",
+    "duration_s": 1878.6,
+    "record": ".saipen\\evidence\\core-unit\\474c47ea7d6123b7-20261010T104605Z.json",
+    "record_sha256": "a01c4f7dd0474398fa89ed852e5fb99544eeec0563844e3cf95c3878ae3773e2",
+    "reused_for_T1703": true,
+    "fresh_run": true,
+    "frozen_source_unchanged": true
+  },
+  "interrupted_full_attempt": {
+    "exit_code": -1,
+    "reason": "Proved stale goal ingress reuse; source required correction",
+    "verdict": "NO_RESULT"
+  },
+  "canonical_operations": {
+    "core_family_evidence": "E-14223",
+    "active_review_family_reuse": "E-14224",
+    "independent_review_evidence": "E-14225",
+    "correction_evidence": "E-14226",
+    "review_op": "checkpoint-59f2b70a76b44f2a9a0934e823746ff5",
+    "correction_op": "checkpoint-6958523dfa484e1c8a67b0c2ae319541",
+    "T1695_reverification": [
+      "RV-000010",
+      "RV-000011",
+      "RV-000012"
+    ]
+  },
+  "native_validation": {
+    "command": "bin/saipen.cmd validate --json",
+    "exit_code": 0,
+    "status": "CURRENT_PASS",
+    "receipt_id": "receipt-77901f731131",
+    "problem_count": 0,
+    "warning_count": 9,
+    "source_tree_fingerprint": "git-delta-v1:b9665d7c5180c218ecd8ce0b4fc9f8bcb5bcd6394fda212084960bf6633214a1",
+    "timestamp_utc": "2026-10-10T10:48:23.594590Z",
+    "output_sha256": "fb02212c29135ed9fcdeaf379284f67cb87d9adccb684aff1ce87686c56e2bc7",
+    "event_head": 14226
+  },
+  "delivery_probes": [
+    {
+      "command": "bin/saipen.cmd status --json",
+      "exit_code": 0,
+      "output": "delivery-status.json",
+      "output_sha256": "a83acbdcfe270d41b643004efd51a3601bbd3f74c54b8d7bbea5fd5bff1ca5b3"
+    },
+    {
+      "command": "bin/saipen.cmd explain next --json",
+      "exit_code": 2,
+      "output": "delivery-explain.json",
+      "output_sha256": "b4ce9f75705473d812fe23f24c9c9325295f63ce302dd0b1d635643630e96f66"
+    },
+    {
+      "command": "bin/saipen.cmd explain-next --json",
+      "exit_code": 0,
+      "output": "delivery-explain-next.json",
+      "output_sha256": "39756629ba2d7b4ae9207e9209ee9506ad905a4f7263ebf69ce50b689b1d7677"
+    },
+    {
+      "command": "bin/saipen.cmd iteration --json",
+      "exit_code": 0,
+      "output": "delivery-iteration.json",
+      "output_sha256": "c8b0ea5033d22853a0f6f233c742650c9a524a061669fd3c0ff57b89c334b827"
+    },
+    {
+      "command": "bin/saipen.cmd continue --json",
+      "exit_code": 1,
+      "output": "delivery-continue.json",
+      "output_sha256": "87af3e677b6216a71c9564e061aa6d6c6bc08c8383d29ce5a5ea72759bfdddab"
+    }
+  ],
+  "audapack_readonly_recheck": {
+    "before": {
+      "STATE.md": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50",
+      "BOARD.md": "8bb2a5e68d474ee2ab22b834e6a94440d5389ea352d2969f5ad945cd04ca9952",
+      "LOG.md": "e414d4b54a3e99d9fa515945bf9d8be208581292889b3744edcb11466b0f7c7a",
+      "MANIFEST.json": "6bbb6ca8bed1502f04176d848f24ad12fdd58759e1946f0b2b27a5f023e0e050"
+    },
+    "after": {
+      "STATE.md": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50",
+      "BOARD.md": "8bb2a5e68d474ee2ab22b834e6a94440d5389ea352d2969f5ad945cd04ca9952",
+      "LOG.md": "e414d4b54a3e99d9fa515945bf9d8be208581292889b3744edcb11466b0f7c7a",
+      "MANIFEST.json": "6bbb6ca8bed1502f04176d848f24ad12fdd58759e1946f0b2b27a5f023e0e050"
+    },
+    "core_unchanged": true,
+    "commands": [
+      {
+        "name": "native-current",
+        "argv": [
+          "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+          "--project-root",
+          "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+          "--gate",
+          "core",
+          "--no-receipt"
+        ],
+        "started_utc": "2026-10-10T10:51:45.526289+00:00",
+        "exit_code": 1,
+        "output": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1704-draft\\AUDAPACK-native-current.txt",
+        "output_sha256": "0b29472dbb07431069d5444a73e6db0f3bb4c8c954627dd56c333ef0808e2b71",
+        "tail": "OT be collected -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else\r\nWARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-001] carries source_tree_fingerprint 'git-delta-v1:a3fd43351486de05d92256b7508c1b05ffb3ec3cc0d4e9fb1d6a72d59c6813d2' but the current tree computes 'git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else\r\nWARN [subsaipen-uncollected]: 1 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)\r\nWARN [sub-role-revision-legacy]: subSaipen STATE(s) predate role-revision recording: saipython, saitranslate -- re-record `role_revision` from the current charter at their next adopt (PROTOCOL.md § 6, T-542)\r\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\r\nValidation FAILED: 19 problem(s), 79 warning(s)\r\n"
+      },
+      {
+        "name": "recovery-current",
+        "argv": [
+          "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+          "recover",
+          "--project-root",
+          "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+          "--dry-run",
+          "--json"
+        ],
+        "started_utc": "2026-10-10T10:51:45.526289+00:00",
+        "exit_code": 1,
+        "output": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1704-draft\\AUDAPACK-recovery-current.txt",
+        "output_sha256": "9c844e719d0b6624191f0b46f8f64c9bca619f658179ff1c24cc9de490cc5451",
+        "tail": "{\r\n  \"ok\": false,\r\n  \"code\": \"HISTORY_LEDGER_CORRUPT\",\r\n  \"detail\": \"history-void: complete LOG history fails the immutable-ledger contract -- E-3134 parent E-3133 does not exist in the ledger; E-3137 parent E-3136 does not exist in the ledger; E-3146 parent E-3145 does not exist in the ledger\",\r\n  \"needs_local_mutation\": false,\r\n  \"safe_auto_repair_available\": false,\r\n  \"operator_decision_available\": false,\r\n  \"canonical_next_command\": null,\r\n  \"read_only\": true,\r\n  \"terminal_disposition\": \"FORENSICALLY_UNRECOVERABLE\",\r\n  \"blocking_surface\": \"log\",\r\n  \"blocking_field\": null,\r\n  \"evidence_reference\": \".saipen/LOG.md\",\r\n  \"diagnosis\": \"READ_ONLY_DIAGNOSIS_ONLY\",\r\n  \"read_only_diagnosis_only\": true,\r\n  \"instruction\": \"READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth\",\r\n  \"forbidden_probes\": [\r\n    \"saipen stop\",\r\n    \"saipen transition\",\r\n    \"saipen goal\",\r\n    \"saipen ticket\",\r\n    \"Bash\",\r\n    \"Edit\",\r\n    \"Write\"\r\n  ],\r\n  \"reason_code\": \"HISTORY_LEDGER_CORRUPT\"\r\n}\r\n"
+      }
+    ],
+    "admission": "NO_GO",
+    "live_mutations": 0
+  }
+}

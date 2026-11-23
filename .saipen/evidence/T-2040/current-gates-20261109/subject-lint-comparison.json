@@ -1,0 +1,195 @@
+[
+  {
+    "path": "tools/saipen_engine/isolated_release.py",
+    "preimage": ".saipen/evidence/T-2040/release-completion-fixture-20261108/isolated_release.py.before",
+    "before_count": 34,
+    "current_count": 32,
+    "before_codes": {
+      "F401": 7,
+      "SIM108": 1,
+      "E501": 23,
+      "RUF100": 1,
+      "RUF059": 1,
+      "SIM105": 1
+    }
+  },
+  {
+    "path": "tools/saipen_engine/board.py",
+    "preimage": ".saipen/evidence/T-2040/review-input-boundaries-20261109/tools/saipen_engine/board.py",
+    "before_count": 6,
+    "current_count": 6,
+    "before_codes": {
+      "E501": 6
+    }
+  },
+  {
+    "path": "tools/saipen_engine/work_exhaustion.py",
+    "preimage": ".saipen/evidence/T-2040/review-input-boundaries-20261109/tools/saipen_engine/work_exhaustion.py",
+    "before_count": 35,
+    "current_count": 35,
+    "before_codes": {
+      "E501": 32,
+      "RUF021": 2,
+      "SIM105": 1
+    }
+  },
+  {
+    "path": "tools/saipen_engine/outcome_truth.py",
+    "preimage": ".saipen/evidence/T-2040/new-publication-resume/snapshot-20261108T092153831678Z/tools/saipen_engine/outcome_truth.py",
+    "before_count": 19,
+    "current_count": 20,
+    "before_codes": {
+      "E501": 14,
+      "PLW2901": 1,
+      "SIM114": 1,
+      "SIM108": 2,
+      "F841": 1
+    }
+  },
+  {
+    "path": "tools/saipen_engine/persistent_goal.py",
+    "preimage": ".saipen/evidence/T-2040/review-input-boundaries-20261109/tools/saipen_engine/persistent_goal.py",
+    "before_count": 3,
+    "current_count": 3,
+    "before_codes": {
+      "RUF021": 1,
+      "E501": 2
+    }
+  },
+  {
+    "path": "tools/saipen_engine/router.py",
+    "preimage": ".saipen/evidence/T-2040/pre/tools/saipen_engine/router.py",
+    "before_count": 1,
+    "current_count": 1,
+    "before_codes": {
+      "E501": 1
+    }
+  },
+  {
+    "path": "tools/saipen_engine/continuation_assessment.py",
+    "preimage": ".saipen/evidence/T-2040/iteration-boundary-20261109T192547886828Z/tools__saipen_engine__continuation_assessment.py",
+    "before_count": 8,
+    "current_count": 8,
+    "before_codes": {
+      "F401": 2,
+      "E501": 6
+    }
+  },
+  {
+    "path": "tools/saipen_engine/continue_fallback.py",
+    "preimage": ".saipen/evidence/T-2040/new-discovery-resume/snapshot-20261108T092316Z/tools/saipen_engine/continue_fallback.py",
+    "before_count": 0,
+    "current_count": 7,
+    "before_codes": {}
+  },
+  {
+    "path": "tools/saipen_engine/discovery_providers.py",
+    "preimage": ".saipen/evidence/T-2040/new-discovery-resume/snapshot-20261108T092316Z/tools/saipen_engine/discovery_providers.py",
+    "before_count": 62,
+    "current_count": 64,
+    "before_codes": {
+      "F401": 2,
+      "E501": 57,
+      "E713": 1,
+      "RUF059": 1,
+      "F541": 1
+    }
+  },
+  {
+    "path": "tools/improve.py",
+    "preimage": ".saipen/evidence/T-2040/new-discovery-resume/snapshot-20261108T092316Z/tools/improve.py",
+    "before_count": 0,
+    "current_count": 2,
+    "before_codes": {}
+  },
+  {
+    "path": "tools/saipen.py",
+    "preimage": ".saipen/evidence/T-2040/new-discovery-resume/snapshot-20261108T092316Z/tools/saipen.py",
+    "before_count": 40,
+    "current_count": 40,
+    "before_codes": {
+      "E501": 35,
+      "RUF010": 1,
+      "F401": 1,
+      "SIM105": 2,
+      "FURB110": 1
+    }
+  },
+  {
+    "path": "tools/saipen_engine/iteration.py",
+    "preimage": ".saipen/evidence/T-2040/iteration-boundary-20261109T192547886828Z/tools__saipen_engine__iteration.py",
+    "before_count": 0,
+    "current_count": 0,
+    "before_codes": {}
+  },
+  {
+    "path": "tools/saipen_engine/iteration_verdict.py",
+    "preimage": ".saipen/evidence/T-2040/iteration-boundary-20261109T192547886828Z/tools__saipen_engine__iteration_verdict.py",
+    "before_count": 4,
+    "current_count": 5,
+    "before_codes": {
+      "F401": 1,
+      "E501": 3
+    }
+  },
+  {
+    "path": "tools/saipen_engine/supervisor.py",
+    "preimage": ".saipen/evidence/T-2040/iteration-boundary-20261109T192547886828Z/tools__saipen_engine__supervisor.py",
+    "before_count": 16,
+    "current_count": 16,
+    "before_codes": {
+      "F401": 6,
+      "E501": 10
+    }
+  },
+  {
+    "path": "tools/saipen_engine/operations.py",
+    "preimage": ".saipen/evidence/T-2040/review-request-inventory-20261109/tools/saipen_engine/operations.py",
+    "before_count": 11,
+    "current_count": 11,
+    "before_codes": {
+      "RUF059": 1,
+      "E501": 10
+    }
+  },
+  {
+    "path": "tools/saipen_engine/goal_authority.py",
+    "preimage": ".saipen/evidence/T-2040/review-authority-hypotheses-20261109/tools/saipen_engine/goal_authority.py",
+    "before_count": 0,
+    "current_count": 0,
+    "before_codes": {}
+  },
+  {
+    "path": "tools/saipen_engine/replenishment.py",
+    "preimage": ".saipen/evidence/T-2040/replenishment-resume-20261108/replenishment.py.before",
+    "before_count": 15,
+    "current_count": 15,
+    "before_codes": {
+      "F401": 5,
+      "E501": 10
+    }
+  },
+  {
+    "path": "tools/saipen_engine/closure.py",
+    "preimage": ".saipen/evidence/T-2040/new-publication-resume/snapshot-20261108T092153831678Z/tools/saipen_engine/closure.py",
+    "before_count": 0,
+    "current_count": 0,
+    "before_codes": {}
+  },
+  {
+    "path": "tools/saipen_engine/context.py",
+    "preimage": ".saipen/evidence/T-2040/new-publication-resume/snapshot-20261108T092153831678Z/tools/saipen_engine/context.py",
+    "before_count": 0,
+    "current_count": 0,
+    "before_codes": {}
+  },
+  {
+    "path": "tools/saipen_engine/subs.py",
+    "preimage": ".saipen/evidence/T-2040/review-authority-hypotheses-20261109/tools/saipen_engine/subs.py",
+    "before_count": 12,
+    "current_count": 11,
+    "before_codes": {
+      "E501": 12
+    }
+  }
+]

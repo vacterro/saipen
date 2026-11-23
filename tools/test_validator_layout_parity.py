@@ -37,6 +37,26 @@ their different semantics, and the oracle reads neither.
 The project under validation is then varied deliberately: a NEUTRAL fixture
 project the test constructs (nothing at its root but `.saipen/`), and the live
 repository. The full finding set must agree across layouts for both.
+
+T-2137 REFUTED THE FROZEN-INPUT TREE PRUNE, AND ITS PROOF DUTY. The
+optimization ticket proposed pruning the stat-only memory trees (.saipen/
+evidence 59,253 files, .saipen/worktrees 8,260, .saipen/archive 2,362 -- 2.0
+GB of a 106,082-file copy) from the frozen input, legal "if and only if
+findings-equivalence is proven identical". The recorded proofs REFUTED every
+read-trace-sound scope: deleting archive together with the others adds 304
+`source_receipt_closed_archive_invalid` problems (every closed source receipt
+cross-checks the archive tree); deleting evidence+worktrees while keeping
+archive adds 4 "source receipts -- retired ticket record ... evidence
+artifact missing" problems (retired-ticket records cite concrete files under
+.saipen/evidence). Stat-only is NOT read-only: absence is itself a finding.
+Both proof runs, the tree-isolation diagnostic and the rule dump are recorded
+in .saipen/evidence/ as T-2137-parity-pruned-proof-all3-refuted.json,
+T-2137-parity-pruned-proof.json and T-2137-parity-probe-rules.json plus
+T-2137-parity-pruned-diag.json. The full frozen copy is therefore REQUIRED
+input, not overhead: any future prune idea (including a smaller tree set)
+must first re-run that equivalence proof against the unpruned build and hold
+identical problem_keys and ruleset_fingerprint in both layouts before the
+ignore set here changes at all.
 """
 
 from __future__ import annotations
@@ -141,7 +161,14 @@ def _ignore_runtime_state(source_root: Path):
     Match the path RELATIVE to the copy root instead.
     """
     root = source_root.resolve()
-    runtime = {".saipen/cache", ".saipen/locks", ".saipen/kitchen"}
+    # Runtime state only. T-2137 recorded refutations for pruning any of the
+    # memory trees (see module docstring): absorption here must keep the
+    # frozen copy a faithful project surface -- stat-only is NOT read-only.
+    runtime = {
+        ".saipen/cache",
+        ".saipen/locks",
+        ".saipen/kitchen",
+    }
     transient = {".git", "__pycache__", "node_modules"}
 
     def ignore(directory: str, names: list[str]) -> set[str]:
@@ -296,6 +323,8 @@ class InstalledValidatorLayoutParityTests(unittest.TestCase):
             tmp = Path(raw)
             frozen = tmp / "live-project"
             shutil.copytree(HOME, frozen, ignore=_ignore_runtime_state(HOME))
+            # T-2137: prune attempts for the memory trees are refuted;
+            # the frozen copy keeps them (see module docstring).
             self._assert_parity(tmp, frozen, "live")
 
     def test_packaging_metadata_at_the_home_root_cannot_reach_the_oracle(self):

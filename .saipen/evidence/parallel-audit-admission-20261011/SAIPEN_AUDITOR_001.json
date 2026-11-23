@@ -1,0 +1,33 @@
+{
+  "worker_id": "SAIPEN_AUDITOR_001",
+  "assignment_id": "eb073c44d16d4c359723952f1160d5c93aee230864b61b18ec338a5cb0da580c",
+  "command": [
+    "C:/nodejs/codex.cmd",
+    "exec",
+    "--ignore-user-config",
+    "--ignore-rules",
+    "--ephemeral",
+    "--sandbox",
+    "read-only",
+    "-c",
+    "windows.sandbox=unelevated",
+    "-c",
+    "approval_policy=never",
+    "--skip-git-repo-check",
+    "--json",
+    "--output-schema",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\parallel-audit-admission-20261011\\worker-output-schema.json",
+    "--cd",
+    "V:\\_TEMP_\\saipen-readonly-audit-pilot-20261011T1628Z\\SAIPEN_AUDITOR_001",
+    "-"
+  ],
+  "pid": 17932,
+  "started_utc": "2026-10-11T16:34:53.600483+00:00",
+  "finished_utc": "2026-10-11T16:36:22.124041+00:00",
+  "duration_s": 88.516,
+  "exit_code": 0,
+  "timed_out": false,
+  "stdout_sha256": "18a5c761d04c2a1d9536e06b644d73cc1bb6fe960bafb74c0a934edf547473d1",
+  "stderr_sha256": "55788864a87aa7cab69128edcfe9acf950e03cb53d2fd21c75916245cbf70319",
+  "cleanup": "existing ProcessTree job closes owned descendants; no worktree removal"
+}

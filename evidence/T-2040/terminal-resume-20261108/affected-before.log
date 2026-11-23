@@ -1,0 +1,416 @@
+Affected baseline: ['test_t2040_continuation_truth', 'test_premature_victory_prevention', 'test_t2021_false_idle_maintenance', 'test_automation_block', 'test_campaign_continuation_assessment', 'test_campaign_production_gates', 'test_campaign_matrix']
+test_assessment_reports_invalid_evidence_override_without_throwing (test_t2040_continuation_truth.ContinuationTruthTests.test_assessment_reports_invalid_evidence_override_without_throwing) ... ok
+test_automation_uses_certificate_when_terminal_label_is_missing_or_false (test_t2040_continuation_truth.ContinuationTruthTests.test_automation_uses_certificate_when_terminal_label_is_missing_or_false) ... ok
+test_campaign_external_wait_does_not_require_operator (test_t2040_continuation_truth.ContinuationTruthTests.test_campaign_external_wait_does_not_require_operator) ... ok
+test_campaign_preserves_assessments_exact_discovery_action (test_t2040_continuation_truth.ContinuationTruthTests.test_campaign_preserves_assessments_exact_discovery_action) ... ok
+test_campaign_restart_rechecks_evidence_without_operator_or_spin (test_t2040_continuation_truth.ContinuationTruthTests.test_campaign_restart_rechecks_evidence_without_operator_or_spin) ... ok
+test_fallback_preserves_diagnostics_and_exact_stop_reason (test_t2040_continuation_truth.ContinuationTruthTests.test_fallback_preserves_diagnostics_and_exact_stop_reason) ... ok
+test_router_accepts_recovery_owner_ids_and_rejects_malformed_envelopes (test_t2040_continuation_truth.ContinuationTruthTests.test_router_accepts_recovery_owner_ids_and_rejects_malformed_envelopes) ... ok
+test_router_idle_classification_never_loads_goal_files (test_t2040_continuation_truth.ContinuationTruthTests.test_router_idle_classification_never_loads_goal_files) ... ok
+test_unchanged_source_and_valid_grant_do_not_prove_quiescence (test_t2040_continuation_truth.ContinuationTruthTests.test_unchanged_source_and_valid_grant_do_not_prove_quiescence) ... ok
+test_unreadable_goal_inventory_is_not_unchanged_success (test_t2040_continuation_truth.ContinuationTruthTests.test_unreadable_goal_inventory_is_not_unchanged_success) ... ok
+test_worker_evidence_gap_has_no_operator_action_or_generation (test_t2040_continuation_truth.ContinuationTruthTests.test_worker_evidence_gap_has_no_operator_action_or_generation) ... ok
+test_pv01_no_admissible_work_not_all_work_complete (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv01_no_admissible_work_not_all_work_complete) ... ok
+test_pv02_empty_runnable_queue_unmeasured_user_outcome (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv02_empty_runnable_queue_unmeasured_user_outcome) ... ok
+test_pv03_synthetic_benchmark_dictionary_rejected (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv03_synthetic_benchmark_dictionary_rejected) ... ok
+test_pv04_shared_unit_receipt_insufficient_for_non_unit_requirements (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv04_shared_unit_receipt_insufficient_for_non_unit_requirements) ... ok
+test_pv05_shared_unit_receipt_accepted_for_matching_unit_requirements (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv05_shared_unit_receipt_accepted_for_matching_unit_requirements) ... ok
+test_pv06_unauthorized_continuous_maintenance_refuses_auto_writes (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv06_unauthorized_continuous_maintenance_refuses_auto_writes) ... ok
+test_pv07_authentic_continuous_maintenance_allows_discovery_at_idle (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv07_authentic_continuous_maintenance_allows_discovery_at_idle) ... ok
+test_pv08_external_release_blocker_does_not_suppress_independent_work (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv08_external_release_blocker_does_not_suppress_independent_work) ... ok
+test_pv09_stale_repeated_status_no_hot_polling (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv09_stale_repeated_status_no_hot_polling) ... ok
+test_pv10_hunt_not_checked_source_generation_no_clean_claim (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv10_hunt_not_checked_source_generation_no_clean_claim) ... ok
+test_pv11_hunt_unchanged_generation_quiescent_not_busywork (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv11_hunt_unchanged_generation_quiescent_not_busywork) ... ok
+test_pv12_new_evidence_wakes_quiescent_campaign (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv12_new_evidence_wakes_quiescent_campaign) ... ok
+test_pv13_saipal_unfinished_slices_schedulable (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv13_saipal_unfinished_slices_schedulable) ... ok
+test_pv14_local_tests_pass_without_installed_host_acceptance (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv14_local_tests_pass_without_installed_host_acceptance) ... ok
+test_pv15_local_done_pending_publication_not_published (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv15_local_done_pending_publication_not_published) ... FAIL
+test_pv16_single_external_blocked_prevents_blanket_product_complete (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv16_single_external_blocked_prevents_blanket_product_complete) ... ok
+test_pv17_model_turn_end_does_not_close_authorized_campaign (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv17_model_turn_end_does_not_close_authorized_campaign) ... ok
+test_pv18_expired_campaign_reports_wait_authority (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv18_expired_campaign_reports_wait_authority) ... ok
+test_pv19_intentionally_held_architecture_gate_preserved (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv19_intentionally_held_architecture_gate_preserved) ... ok
+test_pv20_false_done_corrected_without_rewriting_history (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv20_false_done_corrected_without_rewriting_history) ... ok
+test_pv21_operator_bounded_grant_executes_within_scope (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv21_operator_bounded_grant_executes_within_scope) ... FAIL
+test_pv22_all_sources_exhausted_event_driven_quiescent_wait (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv22_all_sources_exhausted_event_driven_quiescent_wait) ... ok
+test_pv23_real_user_workflow_improvement_verified (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv23_real_user_workflow_improvement_verified) ... ok
+test_pv24_user_workflow_slower_fails_optimization_objective (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv24_user_workflow_slower_fails_optimization_objective) ... ok
+test_pv25_incidental_prose_does_not_raise_required_class (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv25_incidental_prose_does_not_raise_required_class) ... ok
+test_pv26_declared_evidence_class_closes_tagged_clause (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv26_declared_evidence_class_closes_tagged_clause) ... ok
+test_pv26_lane_statuses_distinct_under_foreign_staged_blocker (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv26_lane_statuses_distinct_under_foreign_staged_blocker)
+P0-01: Distinct lane statuses prevent release conflict from masquerading as global completion. ... ok
+test_pv27_response_surface_preserves_independent_action_under_shared_staging_blocker (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv27_response_surface_preserves_independent_action_under_shared_staging_blocker)
+P0-01: response_surface does not force NEXT EXACT ACTION to NONE when independent action exists. ... ok
+test_pv28_stale_plan_recovery_command_attached (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv28_stale_plan_recovery_command_attached) ... ok
+test_pv29_isolated_release_decision_request (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv29_isolated_release_decision_request)
+P0-03: create_isolated_release_decision_request satisfies Section 4 requirements. ... ok
+test_pv30_goal_loader_exception_is_not_clean_verified (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv30_goal_loader_exception_is_not_clean_verified) ... ok
+test_pv31_absent_root_reports_not_checked_goals (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv31_absent_root_reports_not_checked_goals) ... ok
+test_pv32_unreadable_goal_file_is_not_clean_verified (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv32_unreadable_goal_file_is_not_clean_verified) ... ok
+test_pv33_idle_classification_connects_caller_goal_evidence (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv33_idle_classification_connects_caller_goal_evidence) ... ok
+test_pv34_certificate_failure_is_observable (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv34_certificate_failure_is_observable) ... ok
+test_pv35_actionable_goal_outranks_but_residue_reported (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv35_actionable_goal_outranks_but_residue_reported) ... ok
+test_a_waiting_todo_dependency_cannot_mask_independent_work (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_a_waiting_todo_dependency_cannot_mask_independent_work) ... ok
+test_active_goal_is_not_hidden_by_100_blocked_rows (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_active_goal_is_not_hidden_by_100_blocked_rows) ... ok
+test_an_unavailable_provider_is_an_explicit_evidence_limit (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_an_unavailable_provider_is_an_explicit_evidence_limit) ... ok
+test_blocked_audit_does_not_hide_goal_discovery (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_blocked_audit_does_not_hide_goal_discovery) ... ok
+test_dependent_candidate_cannot_starve_independent_candidate (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_dependent_candidate_cannot_starve_independent_candidate) ... ok
+test_goal_waiting_authority_has_a_waiting_status_gate (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_goal_waiting_authority_has_a_waiting_status_gate) ... ok
+test_live_ambiguous_ownership_is_not_historical_foreign_staging (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_live_ambiguous_ownership_is_not_historical_foreign_staging) ... ok
+test_maintenance_without_grant_cannot_admit_or_mutate (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_maintenance_without_grant_cannot_admit_or_mutate) ... ok
+test_paused_goals_do_not_supply_continuation_authority (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_paused_goals_do_not_supply_continuation_authority) ... ok
+test_persisted_status_does_not_stall_a_goal_with_new_valid_authority (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_persisted_status_does_not_stall_a_goal_with_new_valid_authority) ... ok
+test_proven_maintenance_grant_admits_independent_work_through_saioops (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_proven_maintenance_grant_admits_independent_work_through_saioops) ... ok
+test_read_only_discovery_preserves_the_untracked_cache_bytes (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_read_only_discovery_preserves_the_untracked_cache_bytes) ... ok
+test_read_only_live_inventory_preserves_the_index (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_read_only_live_inventory_preserves_the_index) ... ok
+test_release_candidate_cannot_starve_authorized_local_maintenance (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_release_candidate_cannot_starve_authorized_local_maintenance) ... ok
+test_status_distribution_probe_preserves_index_stat_cache (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_status_distribution_probe_preserves_index_stat_cache) ... ok
+test_status_gate_names_maintenance_approval_instead_of_release_approval (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_status_gate_names_maintenance_approval_instead_of_release_approval) ... ok
+test_status_gate_permits_a_proven_standing_maintenance_grant (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_status_gate_permits_a_proven_standing_maintenance_grant) ... ok
+test_unknown_provider_is_an_evidence_gap_not_a_satisfied_goal (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_unknown_provider_is_an_evidence_gap_not_a_satisfied_goal) ... ok
+test_unverified_scope_label_cannot_admit_work (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_unverified_scope_label_cannot_admit_work) ... ok
+test_waiting_goal_cannot_mask_an_independent_actionable_goal (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_waiting_goal_cannot_mask_an_independent_actionable_goal) ... ok
+test_full_run_to_closure_sequence (test_automation_block.AcceptanceFixture.test_full_run_to_closure_sequence) ... FAIL
+test_epoch_deterministic_and_drifts_with_transport (test_automation_block.AuditEpoch.test_epoch_deterministic_and_drifts_with_transport) ... ok
+test_diverted_unknown_disposition_cannot_be_emitted (test_automation_block.ClosedVocabulary.test_diverted_unknown_disposition_cannot_be_emitted) ... ok
+test_live_project_continues_with_cc (test_automation_block.ClosedVocabulary.test_live_project_continues_with_cc) ... FAIL
+test_recovery_pending_is_agent_work_not_a_stop (test_automation_block.ClosedVocabulary.test_recovery_pending_is_agent_work_not_a_stop) ... ok
+test_route_refusal_fails_closed (test_automation_block.ClosedVocabulary.test_route_refusal_fails_closed) ... ok
+test_audit_quiescence_is_required (test_automation_block.ClosureGate.test_audit_quiescence_is_required) ... FAIL
+test_binding_wait_vetoes_closure (test_automation_block.ClosureGate.test_binding_wait_vetoes_closure) ... FAIL
+test_bounded_wait_preserves_route_outside_rtc (test_automation_block.ClosureGate.test_bounded_wait_preserves_route_outside_rtc) ... ok
+test_corrupted_route_evidence_is_invalid_fail_closed (test_automation_block.ClosureGate.test_corrupted_route_evidence_is_invalid_fail_closed) ... ok
+test_done_phase_and_empty_board_alone_are_insufficient (test_automation_block.ClosureGate.test_done_phase_and_empty_board_alone_are_insufficient) ... FAIL
+test_empty_physical_folder_with_unsettled_intake_is_not_complete (test_automation_block.ClosureGate.test_empty_physical_folder_with_unsettled_intake_is_not_complete) ... FAIL
+test_full_closure_gate_yields_complete (test_automation_block.ClosureGate.test_full_closure_gate_yields_complete) ... FAIL
+test_no_convergence_evidence_vetoes_closure (test_automation_block.ClosureGate.test_no_convergence_evidence_vetoes_closure) ... FAIL
+test_race_rule_consume_after_convergence_vetoes_closure (test_automation_block.ClosureGate.test_race_rule_consume_after_convergence_vetoes_closure) ... FAIL
+test_race_rule_consume_before_convergence_allows_closure (test_automation_block.ClosureGate.test_race_rule_consume_before_convergence_allows_closure) ... FAIL
+test_residue_vetoes_closure_although_dir_is_empty_of_layers (test_automation_block.ClosureGate.test_residue_vetoes_closure_although_dir_is_empty_of_layers) ... FAIL
+test_same_epoch_and_source_give_stable_machine_output (test_automation_block.ClosureGate.test_same_epoch_and_source_give_stable_machine_output) ... ok
+test_status_json_writes_zero_project_bytes (test_automation_block.ClosureGate.test_status_json_writes_zero_project_bytes) ... ok
+test_workable_board_work_vetoes_closure (test_automation_block.ClosureGate.test_workable_board_work_vetoes_closure) ... FAIL
+test_active_work_outranks_invalid_data (test_automation_block.InvalidDataStops.test_active_work_outranks_invalid_data) ... ok
+test_independent_workable_ticket_outranks_invalid_audit (test_automation_block.InvalidDataStops.test_independent_workable_ticket_outranks_invalid_audit) ... ok
+test_invalid_audit_has_a_visible_diagnostic_without_cc (test_automation_block.InvalidDataStops.test_invalid_audit_has_a_visible_diagnostic_without_cc) ... ok
+test_invalid_audit_is_not_a_continuation (test_automation_block.InvalidDataStops.test_invalid_audit_is_not_a_continuation) ... ok
+test_invalid_queue_cannot_be_completed_by_clean_closure_evidence (test_automation_block.InvalidDataStops.test_invalid_queue_cannot_be_completed_by_clean_closure_evidence) ... ok
+test_invalid_queue_has_a_visible_diagnostic_without_cc (test_automation_block.InvalidDataStops.test_invalid_queue_has_a_visible_diagnostic_without_cc) ... ok
+test_block_never_emits_cc_for_non_continue (test_automation_block.NextCommandLaw.test_block_never_emits_cc_for_non_continue) ... ok
+test_only_continue_gets_cc (test_automation_block.NextCommandLaw.test_only_continue_gets_cc) ... ok
+test_audit_residue_waits_for_the_operator (test_automation_block.WaitOwnership.test_audit_residue_waits_for_the_operator) ... ok
+test_blocked_wait_is_a_stop (test_automation_block.WaitOwnership.test_blocked_wait_is_a_stop) ... ok
+test_bounded_safety_valve_requires_operator_cc (test_automation_block.WaitOwnership.test_bounded_safety_valve_requires_operator_cc) ... ok
+test_foreign_live_is_external (test_automation_block.WaitOwnership.test_foreign_live_is_external) ... ok
+test_manual_verify_is_a_human_stop (test_automation_block.WaitOwnership.test_manual_verify_is_a_human_stop) ... ok
+test_read_only_session_blocks (test_automation_block.WaitOwnership.test_read_only_session_blocks) ... ok
+test_unworkable_audit_has_truthful_final_facts (test_automation_block.WaitOwnership.test_unworkable_audit_has_truthful_final_facts) ... ok
+test_unworkable_audit_stops_without_inventing_operator_authority (test_automation_block.WaitOwnership.test_unworkable_audit_stops_without_inventing_operator_authority) ... ok
+test_user_brake_is_a_human_stop (test_automation_block.WaitOwnership.test_user_brake_is_a_human_stop) ... ok
+test_workable_ticket_outranks_unworkable_audit (test_automation_block.WaitOwnership.test_workable_ticket_outranks_unworkable_audit) ... ok
+test_c01_empty_board_with_proven_maintenance_continues (test_campaign_continuation_assessment.ContinuationAssessmentSuite.test_c01_empty_board_with_proven_maintenance_continues) ... FAIL
+test_c02_empty_board_no_maintenance_authority_remains_idle (test_campaign_continuation_assessment.ContinuationAssessmentSuite.test_c02_empty_board_no_maintenance_authority_remains_idle) ... FAIL
+test_c03_doing_work_resumes_before_discovery (test_campaign_continuation_assessment.ContinuationAssessmentSuite.test_c03_doing_work_resumes_before_discovery) ... ok
+test_c04_independent_work_proceeds_beside_blocked_work (test_campaign_continuation_assessment.ContinuationAssessmentSuite.test_c04_independent_work_proceeds_beside_blocked_work) ... ok
+test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds (test_campaign_continuation_assessment.ContinuationAssessmentSuite.test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds) ... FAIL
+test_c13_forged_persistent_grant_refused (test_campaign_continuation_assessment.ContinuationAssessmentSuite.test_c13_forged_persistent_grant_refused) ... ok
+test_c14_due_operator_gate_enforced (test_campaign_continuation_assessment.ContinuationAssessmentSuite.test_c14_due_operator_gate_enforced) ... ok
+test_neg_camp_001_unauthenticated_grant_file_rejected (test_campaign_production_gates.TestCampaignNegativeControls.test_neg_camp_001_unauthenticated_grant_file_rejected)
+CAMP-1930-001: Unauthenticated local JSON grant fails closed. ... ok
+test_neg_camp_002_journal_event_without_operator_authority_rejected (test_campaign_production_gates.TestCampaignNegativeControls.test_neg_camp_002_journal_event_without_operator_authority_rejected)
+CAMP-1930-002: Journal event without operator grant proof fails. ... ok
+test_neg_camp_003_dispatch_lock_busy_fails_closed (test_campaign_production_gates.TestCampaignNegativeControls.test_neg_camp_003_dispatch_lock_busy_fails_closed)
+CAMP-1930-003: Dispatch lock failure fails closed without proceeding. ... ok
+test_neg_camp_004_unrelated_dict_or_none_acceptance_unverified (test_campaign_production_gates.TestCampaignNegativeControls.test_neg_camp_004_unrelated_dict_or_none_acceptance_unverified)
+CAMP-1930-004: Host hook returning None or unrelated dict fails ACCEPTANCE_UNVERIFIED. ... ok
+test_neg_camp_005_and_009_executor_missing_and_supersession (test_campaign_production_gates.TestCampaignNegativeControls.test_neg_camp_005_and_009_executor_missing_and_supersession)
+CAMP-1930-005 & CAMP-1930-009: Missing executor fails; live campaign supersession blocked. ... ok
+test_neg_camp_007_missing_artifact_digest_fails_publication (test_campaign_production_gates.TestCampaignNegativeControls.test_neg_camp_007_missing_artifact_digest_fails_publication)
+CAMP-1930-007: Finding without digest or qualification proof fails publication. ... ok
+test_neg_camp_008_unverified_maintainer_disposition_rejected (test_campaign_production_gates.TestCampaignNegativeControls.test_neg_camp_008_unverified_maintainer_disposition_rejected)
+CAMP-1930-008: VERIFIED disposition without board DONE status or evidence rejected. ... ok
+test_extended_soak_multi_generation_simulation (test_campaign_production_gates.TestExtendedSoakCampaign.test_extended_soak_multi_generation_simulation)
+Wave 15: Sustained multi-generation soak verifying required safety metrics. ... ok
+test_gate_a_authority_enforcement (test_campaign_production_gates.TestProductionAcceptanceGates.test_gate_a_authority_enforcement)
+GATE A: Valid grant permits scoped execution; invalid grant forbids protected actions. ... ok
+test_gate_b_actual_work_execution (test_campaign_production_gates.TestProductionAcceptanceGates.test_gate_b_actual_work_execution)
+GATE B: Campaign step executes real worker, changes Work state or records progress. ... ok
+test_gate_c_host_auto_kick (test_campaign_production_gates.TestProductionAcceptanceGates.test_gate_c_host_auto_kick)
+GATE C: Turn completion starts real native scheduler dispatch with bound grant. ... ok
+test_gate_d_crash_recovery_no_duplicate_owner (test_campaign_production_gates.TestProductionAcceptanceGates.test_gate_d_crash_recovery_no_duplicate_owner)
+GATE D: Survived crash; no duplicate owner executes across generations. ... ok
+test_gate_e_gate_f_saipal_forensics_and_publication (test_campaign_production_gates.TestProductionAcceptanceGates.test_gate_e_gate_f_saipal_forensics_and_publication)
+GATE E & F: Qualified finding passes authorization and preserves immutable receipt. ... ok
+test_gate_g_gate_h_repair_and_disposition (test_campaign_production_gates.TestProductionAcceptanceGates.test_gate_g_gate_h_repair_and_disposition)
+GATE G & H: Canonical repair closed-loop links finding, Work, and verification. ... ok
+test_gate_i_quiescence_and_wake (test_campaign_production_gates.TestProductionAcceptanceGates.test_gate_i_quiescence_and_wake)
+GATE I: Work exhaustion enters quiescence; new work wakes controller. ... FAIL
+test_gate_j_long_run_stability_and_budget_limits (test_campaign_production_gates.TestProductionAcceptanceGates.test_gate_j_long_run_stability_and_budget_limits)
+GATE J: Multi-generation execution enforces budgets truthfully. ... ok
+test_gate_k_explicit_cancellation (test_campaign_production_gates.TestProductionAcceptanceGates.test_gate_k_explicit_cancellation)
+GATE K: Cancellation fences future generation dispatches. ... ok
+test_gate_l_installed_parity (test_campaign_production_gates.TestProductionAcceptanceGates.test_gate_l_installed_parity)
+GATE L: Installed runtime lineage and schema parity verified. ... ok
+test_c05_model_final_response_dispatches_next_turn (test_campaign_matrix.TestCampaignMatrix.test_c05_model_final_response_dispatches_next_turn) ... ok
+test_c06_final_response_callback_delivered_twice_is_idempotent (test_campaign_matrix.TestCampaignMatrix.test_c06_final_response_callback_delivered_twice_is_idempotent) ... 
+[SAIPEN_HOST_DISPATCH_ADVISORY]
+action: kick_next_iteration
+campaign_id: CAMPAIGN-00000000-0000-0000-0000-000000000000
+iteration_id: 1
+worker_generation: 1
+idempotency_key: 54e82e970e6c71f1f031831a2d0cf4f0d6cbe6988255c700a7e0b7f0d57967ea
+inbox_path: V:\_TEMP_\saipen-camp-mat-c9bpb8d4\.saipen\campaign\dispatch_inbox.jsonl
+advisory: Native host iteration dispatch not registered; pump turn via host harness or external watcher.
+[/SAIPEN_HOST_DISPATCH_ADVISORY]
+ok
+test_c07_c08_host_dispatch_concurrency_and_idempotency_key (test_campaign_matrix.TestCampaignMatrix.test_c07_c08_host_dispatch_concurrency_and_idempotency_key) ... ok
+test_c09_c10_worker_cycles_slice_boundary_advances_generation (test_campaign_matrix.TestCampaignMatrix.test_c09_c10_worker_cycles_slice_boundary_advances_generation) ... ok
+test_c11_worker_generation_lease_fencing (test_campaign_matrix.TestCampaignMatrix.test_c11_worker_generation_lease_fencing) ... ok
+test_c15_saipal_runtime_unavailable (test_campaign_matrix.TestCampaignMatrix.test_c15_saipal_runtime_unavailable) ... ok
+test_c16_c18_c19_c22_audit_enqueue_and_publication_authorization (test_campaign_matrix.TestCampaignMatrix.test_c16_c18_c19_c22_audit_enqueue_and_publication_authorization) ... ok
+test_c17_saipal_no_new_evidence_no_invented_findings (test_campaign_matrix.TestCampaignMatrix.test_c17_saipal_no_new_evidence_no_invented_findings) ... ok
+test_c20_interrupted_audit_enqueue_crash_safe (test_campaign_matrix.TestCampaignMatrix.test_c20_interrupted_audit_enqueue_crash_safe) ... ok
+test_c21_duplicate_causal_findings_no_duplicate_repair_ticket (test_campaign_matrix.TestCampaignMatrix.test_c21_duplicate_causal_findings_no_duplicate_repair_ticket) ... ok
+test_c23_maintainer_disposition_recorded (test_campaign_matrix.TestCampaignMatrix.test_c23_maintainer_disposition_recorded) ... ok
+test_c24_repair_verified_closure_linked_to_finding (test_campaign_matrix.TestCampaignMatrix.test_c24_repair_verified_closure_linked_to_finding) ... ok
+test_c25_repair_fails_regression_remains_open (test_campaign_matrix.TestCampaignMatrix.test_c25_repair_fails_regression_remains_open) ... ok
+test_c26_recurrence_after_repair_links_evidence (test_campaign_matrix.TestCampaignMatrix.test_c26_recurrence_after_repair_links_evidence) ... ok
+test_c27_c34_no_hot_polling_eligibility (test_campaign_matrix.TestCampaignMatrix.test_c27_c34_no_hot_polling_eligibility) ... ok
+test_c28_provider_rate_limit_failure_classification (test_campaign_matrix.TestCampaignMatrix.test_c28_provider_rate_limit_failure_classification) ... ok
+test_c29_capability_mismatch_failure_classification (test_campaign_matrix.TestCampaignMatrix.test_c29_capability_mismatch_failure_classification) ... ok
+test_c30_campaign_controller_restarted_reconstructs_objective (test_campaign_matrix.TestCampaignMatrix.test_c30_campaign_controller_restarted_reconstructs_objective) ... ok
+test_c31_simultaneous_controllers_one_owner (test_campaign_matrix.TestCampaignMatrix.test_c31_simultaneous_controllers_one_owner) ... ok
+test_c32_user_cancellation (test_campaign_matrix.TestCampaignMatrix.test_c32_user_cancellation) ... ok
+test_c33_new_source_arrives_during_quiescence_wakes (test_campaign_matrix.TestCampaignMatrix.test_c33_new_source_arrives_during_quiescence_wakes) ... ok
+test_c35_c36_all_work_complete_legitimately_quiescent (test_campaign_matrix.TestCampaignMatrix.test_c35_c36_all_work_complete_legitimately_quiescent) ... FAIL
+test_c37_host_lacks_native_post_turn_scheduling (test_campaign_matrix.TestCampaignMatrix.test_c37_host_lacks_native_post_turn_scheduling) ... ok
+test_c38_cross_project_authority_missing (test_campaign_matrix.TestCampaignMatrix.test_c38_cross_project_authority_missing) ... ok
+test_c39_protocol_binding_unavailable_classifies_blocker (test_campaign_matrix.TestCampaignMatrix.test_c39_protocol_binding_unavailable_classifies_blocker) ... ok
+test_c40_native_runtime_parity_check (test_campaign_matrix.TestCampaignMatrix.test_c40_native_runtime_parity_check) ... ok
+test_neg01_admission_without_grant_witness_cannot_execute (test_campaign_matrix.TestCampaignMatrix.test_neg01_admission_without_grant_witness_cannot_execute)
+Negative control 1: Admission without grant witness creates PROPOSED state, step refuses execution. ... ok
+test_neg02_unverified_finding_cannot_publish (test_campaign_matrix.TestCampaignMatrix.test_neg02_unverified_finding_cannot_publish)
+Negative control 2: PENDING/unconfirmed finding cannot publish even with P0/P1 severity. ... ok
+test_neg03_active_work_executes_worker_and_records_progress (test_campaign_matrix.TestCampaignMatrix.test_neg03_active_work_executes_worker_and_records_progress)
+Negative control 3: Step on ACTIVE_WORK launches worker generation and checks progress evidence. ... ok
+test_neg04_source_available_handled_explicitly (test_campaign_matrix.TestCampaignMatrix.test_neg04_source_available_handled_explicitly)
+Negative control 4: SOURCE_AVAILABLE is handled cleanly, never UNHANDLED_CLASSIFICATION. ... ok
+test_neg05_invalid_runtime_returns_explicit_failure (test_campaign_matrix.TestCampaignMatrix.test_neg05_invalid_runtime_returns_explicit_failure)
+Negative control 5: INVALID_RUNTIME returns ok=False, never ok=true UNHANDLED_CLASSIFICATION. ... ok
+test_neg06_two_parallel_host_dispatches_execute_callback_once (test_campaign_matrix.TestCampaignMatrix.test_neg06_two_parallel_host_dispatches_execute_callback_once)
+Negative control 6: Concurrent dispatch requests execute host hook exactly once. ... ok
+test_neg07_rejected_host_hook_reported_as_dispatch_refused (test_campaign_matrix.TestCampaignMatrix.test_neg07_rejected_host_hook_reported_as_dispatch_refused)
+Negative control 7: Structured rejection from host_hook is DISPATCH_REFUSED, not success. ... ok
+test_neg08_failed_dispatch_is_retryable_on_same_controller (test_campaign_matrix.TestCampaignMatrix.test_neg08_failed_dispatch_is_retryable_on_same_controller)
+Negative control 8: A failed dispatch does not block a subsequent retry. ... ok
+test_neg09_corrupted_campaign_state_overwritten_rejected (test_campaign_matrix.TestCampaignMatrix.test_neg09_corrupted_campaign_state_overwritten_rejected)
+Negative control 9: Corrupted state.json is NOT silently overwritten by admission. ... ok
+
+======================================================================
+FAIL: test_pv15_local_done_pending_publication_not_published (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv15_local_done_pending_publication_not_published)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_premature_victory_prevention.py", line 333, in test_pv15_local_done_pending_publication_not_published
+    self.assertEqual(truth["publication_status"], outcome_truth.RELEASE_BLOCKED)
+AssertionError: 'RELEASE_PENDING' != 'RELEASE_BLOCKED'
+- RELEASE_PENDING
++ RELEASE_BLOCKED
+
+
+======================================================================
+FAIL: test_pv21_operator_bounded_grant_executes_within_scope (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv21_operator_bounded_grant_executes_within_scope)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_premature_victory_prevention.py", line 403, in test_pv21_operator_bounded_grant_executes_within_scope
+    self.assertEqual(truth["publication_status"], outcome_truth.RELEASE_BLOCKED)
+AssertionError: 'RELEASE_PENDING' != 'RELEASE_BLOCKED'
+- RELEASE_PENDING
++ RELEASE_BLOCKED
+
+
+======================================================================
+FAIL: test_full_run_to_closure_sequence (test_automation_block.AcceptanceFixture.test_full_run_to_closure_sequence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 764, in test_full_run_to_closure_sequence
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_live_project_continues_with_cc (test_automation_block.ClosedVocabulary.test_live_project_continues_with_cc)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 201, in test_live_project_continues_with_cc
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_audit_quiescence_is_required (test_automation_block.ClosureGate.test_audit_quiescence_is_required)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 475, in test_audit_quiescence_is_required
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_binding_wait_vetoes_closure (test_automation_block.ClosureGate.test_binding_wait_vetoes_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 516, in test_binding_wait_vetoes_closure
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_done_phase_and_empty_board_alone_are_insufficient (test_automation_block.ClosureGate.test_done_phase_and_empty_board_alone_are_insufficient)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 577, in test_done_phase_and_empty_board_alone_are_insufficient
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_empty_physical_folder_with_unsettled_intake_is_not_complete (test_automation_block.ClosureGate.test_empty_physical_folder_with_unsettled_intake_is_not_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 604, in test_empty_physical_folder_with_unsettled_intake_is_not_complete
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_full_closure_gate_yields_complete (test_automation_block.ClosureGate.test_full_closure_gate_yields_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 465, in test_full_closure_gate_yields_complete
+    self.assertEqual(block["disposition"], automation.COMPLETE)
+AssertionError: 'BLOCKED' != 'COMPLETE'
+- BLOCKED
++ COMPLETE
+
+
+======================================================================
+FAIL: test_no_convergence_evidence_vetoes_closure (test_automation_block.ClosureGate.test_no_convergence_evidence_vetoes_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 493, in test_no_convergence_evidence_vetoes_closure
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_race_rule_consume_after_convergence_vetoes_closure (test_automation_block.ClosureGate.test_race_rule_consume_after_convergence_vetoes_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 532, in test_race_rule_consume_after_convergence_vetoes_closure
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_race_rule_consume_before_convergence_allows_closure (test_automation_block.ClosureGate.test_race_rule_consume_before_convergence_allows_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 565, in test_race_rule_consume_before_convergence_allows_closure
+    self.assertEqual(block["disposition"], automation.COMPLETE)
+AssertionError: 'BLOCKED' != 'COMPLETE'
+- BLOCKED
++ COMPLETE
+
+
+======================================================================
+FAIL: test_residue_vetoes_closure_although_dir_is_empty_of_layers (test_automation_block.ClosureGate.test_residue_vetoes_closure_although_dir_is_empty_of_layers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 484, in test_residue_vetoes_closure_although_dir_is_empty_of_layers
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_workable_board_work_vetoes_closure (test_automation_block.ClosureGate.test_workable_board_work_vetoes_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 506, in test_workable_board_work_vetoes_closure
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_c01_empty_board_with_proven_maintenance_continues (test_campaign_continuation_assessment.ContinuationAssessmentSuite.test_c01_empty_board_with_proven_maintenance_continues)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_campaign_continuation_assessment.py", line 125, in test_c01_empty_board_with_proven_maintenance_continues
+    self.assertEqual(assessment["classification"], CA.MAINTENANCE_AVAILABLE)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'MAINTENANCE_AVAILABLE'
+- INCOMPLETE_DISCOVERY
++ MAINTENANCE_AVAILABLE
+
+
+======================================================================
+FAIL: test_c02_empty_board_no_maintenance_authority_remains_idle (test_campaign_continuation_assessment.ContinuationAssessmentSuite.test_c02_empty_board_no_maintenance_authority_remains_idle)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_campaign_continuation_assessment.py", line 155, in test_c02_empty_board_no_maintenance_authority_remains_idle
+    self.assertEqual(assessment["classification"], CA.QUIESCENT)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'QUIESCENT'
+- INCOMPLETE_DISCOVERY
++ QUIESCENT
+
+
+======================================================================
+FAIL: test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds (test_campaign_continuation_assessment.ContinuationAssessmentSuite.test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_campaign_continuation_assessment.py", line 232, in test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds
+    self.assertEqual(assessment["classification"], CA.MAINTENANCE_AVAILABLE)
+AssertionError: 'WAIT_EXTERNAL' != 'MAINTENANCE_AVAILABLE'
+- WAIT_EXTERNAL
++ MAINTENANCE_AVAILABLE
+
+
+======================================================================
+FAIL: test_gate_i_quiescence_and_wake (test_campaign_production_gates.TestProductionAcceptanceGates.test_gate_i_quiescence_and_wake)
+GATE I: Work exhaustion enters quiescence; new work wakes controller.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_campaign_production_gates.py", line 322, in test_gate_i_quiescence_and_wake
+    self.assertTrue(step_res["ok"])
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_c35_c36_all_work_complete_legitimately_quiescent (test_campaign_matrix.TestCampaignMatrix.test_c35_c36_all_work_complete_legitimately_quiescent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_campaign_matrix.py", line 420, in test_c35_c36_all_work_complete_legitimately_quiescent
+    self.assertTrue(step_res["ok"])
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 165 tests in 7.470s
+
+FAILED (failures=19)
+COUNTS tests=165 failures=19 errors=0 skipped=0 seconds=7.578

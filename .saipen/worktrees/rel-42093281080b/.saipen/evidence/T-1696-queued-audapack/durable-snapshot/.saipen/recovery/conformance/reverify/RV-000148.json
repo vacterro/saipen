@@ -1,0 +1,44 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-09-29T09:48:30Z",
+  "evidence_class": "attested",
+  "findings_digest": "915f499b303f114337f8f7372f0545182633ac4cd7d23eb1f8c1d405f098efbd",
+  "gate": "core",
+  "integrity_digest": "dd8418880783c626",
+  "journal_op_id": "reverify.f0ea5e99ed00",
+  "original_closure": {
+    "owner": "claude"
+  },
+  "own_problem_keys": [
+    "101fb58264819ca3"
+  ],
+  "problem_count": 92,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000148",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:9bcef1910f9399cb37eaa650a0b27ae5fefc792613ec01c88a7b40285641ae09",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "python -m pytest -q 2299 passed/16 skipped/exit 0|node --test tests/widget/*.test.js 721 pass/0 fail/0 cancelled/exit 0|python -m ruff check audapack tests All checks passed|python -m compileall -q audapack exit 0|update_widget_release.py --check OK 0.0.84 a0fa7f25",
+      "executed": false,
+      "kind": "attested",
+      "result": "PASS"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "python -m pytest -q 2299 passed/16 skipped/exit 0|node --test tests/widget/*.test.js 721 pass/0 fail/0 cancelled/exit 0|python -m ruff check audapack tests All checks passed|python -m compileall -q audapack exit 0|update_widget_release.py --check OK 0.0.84 a0fa7f25"
+    ],
+    "findings_digest": "915f499b303f114337f8f7372f0545182633ac4cd7d23eb1f8c1d405f098efbd",
+    "gate": "core"
+  },
+  "verification_contract_digest": "372c0823a3b75bc5",
+  "verifier": "buffy",
+  "warning_count": 96,
+  "work": "T-109"
+}

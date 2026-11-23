@@ -1,0 +1,46 @@
+{
+  "ok": true,
+  "receipt": "SRC-225",
+  "location": "active",
+  "body": "SAIPEN\n\nMISSION: CLOSED-CONTRACT REGRESSION DETECTION\nPRIORITY: P1\nMODE: PROTOCOL ENGINEERING\n\nROLE\nYou are the SAIPEN protocol agent.\nOwn protocol semantics, verification integrity, and regression detection.\nDo not implement FastPrompter application fixes.\n\nINCIDENT\nA FastPrompter snapshot dated 2026-10-10 contains:\n\n- SRC-101 closed with eight VERIFIED requirements.\n- Historical verification attributed to T-1442.\n- Later production code contradicts several verified contracts.\n- Tests representing those contracts remain present.\n- T-1451 was admitted to repair orphan tests and collection failures.\n\nConcrete examples:\n- Blocking IPC socket reads returned.\n- Unbounded audio kernel allocation returned.\n- Persistent custom fonts reverted to runtime IDs.\n- Dependency manifests diverged.\n- Experimental audio renderer defaults to ON again.\n- Transcript inventory reverted to full-tree enumeration.\n\nThis is a verified current-state contradiction, not proof that the\noriginal T-1442 verification was fraudulent.\n\nOBJECTIVE\nDetermine whether the protocol lacks effective protection against\npost-closure semantic regression, whether an existing guard failed,\nor whether an operational reconciliation path was skipped.\n\nPHASE 1 — ROOT CAUSE\n\nInspect the live SAIPEN implementation and existing contracts for:\n- Work closure evidence.\n- Source receipt closure.\n- Code changes after verification.\n- Regression invalidation.\n- Knowledge and evidence dependencies.\n- Verification fingerprinting.\n- Active task ownership and admission.\n- Current-state reconciliation.\n\nDo not invent source paths before locating the real implementation.\n\nDistinguish:\nA. Historical evidence was valid but later became stale.\nB. Closure happened without valid evidence.\nC. Evidence remained valid but its meaning was overclaimed.\nD. Existing regression detection failed.\nE. An operator or agent bypassed the supported protocol.\n\nRequire evidence before selecting a classification.\n\nPHASE 2 — DESIGN AN ENFORCEABLE GUARD\n\nA previously VERIFIED requirement must not automatically imply that\nthe current code still satisfies it.\n\nIntroduce or repair targeted regression-suspect detection.\n\nDesired behavior:\n1. Associate verified requirements with meaningful implementation\n   dependencies and reproducible verification evidence.\n2. Detect changes that may invalidate those assumptions.\n3. Recheck affected requirements with focused tests or behavioral\n   invariants where possible.\n4. Mark contradictions as CURRENT_REGRESSION or an existing equivalent\n   supported state.\n5. Preserve original historical evidence unchanged.\n6. Attribute newly discovered defects to new legal Work ownership.\n7. Prevent duplicate tickets for already active recovery work.\n8. Avoid re-running every historic test for every unrelated edit.\n9. Keep performance bounded for large repositories.\n10. Provide exact reasons for any inability to verify.\n\nUse the existing protocol vocabulary and schemas where possible.\nAvoid creating parallel, incompatible state machinery.\n\nPHASE 3 — NEGATIVE CONTROLS\n\nTest at least:\n\n- A verified function is later replaced with an incorrect implementation.\n- A required dependency is removed.\n- A test is deleted or weakened.\n- A harmless formatting change touches the same file.\n- A refactor preserves the behavioral contract.\n- A closed source has an active successor repair ticket.\n- Two agents attempt reconciliation simultaneously.\n- A historical receipt is immutable but its current validation is stale.\n\nThe guard must detect real contradictions without treating every changed\nbyte as proof of failure.\n\nPHASE 4 — ADMISSION AND RECOVERY\n\nPrefer fail-open degraded engineering operation when safe.\n\nA suspected historical regression should not freeze unrelated Work,\nordinary diagnostics, or all application development.\n\nHard-block only an operation that cannot be performed safely or whose\nrequired integrity guarantee is actually violated.\n\nNever silently close a confirmed regression as already VERIFIED.\n\nDo not rewrite source history to make the current snapshot look clean.\n\nPHASE 5 — VERIFICATION\n\nRun focused protocol tests, relevant lifecycle tests, regression controls,\nand the supported full verification gates.\n\nMeasure the detection overhead.\n\nDocument:\n- The actual root cause.\n- The guard or workflow correction.\n- False-positive controls.\n- False-negative controls.\n- Remaining limitations.\n- Migration impact on existing project states.\n\nNON_GOALS\n- No modifications to FastPrompter production code.\n- No mass reopening of historical tickets.\n- No global byte-change hard stop.\n- No automatic deletion of existing evidence.\n- No fabricated Work IDs.\n- No commit, tag, push, release, or deployment.\n\nFINAL ACCEPTANCE\nA verified historical requirement can become suspect when its current\nimplementation demonstrably regresses, without destroying its historical\nclosure evidence or blocking unrelated safe engineering.\n\nFINAL REPORT\nSTATUS:\nROOT CAUSE:\nFILES CHANGED:\nPROTOCOL RULE:\nRED CONTROLS:\nGREEN CONTROLS:\nFALSE POSITIVE RATE:\nPERFORMANCE COST:\nREMAINING RISKS:\nNEXT EXACT ACTION:",
+  "meta": {
+    "linked_work": "T-1726",
+    "receipt_id": "SRC-225",
+    "received_at": "2026-10-12T10:41:47Z",
+    "redaction": {
+      "applied": false,
+      "authoritative": false,
+      "original_sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9",
+      "sanitized_sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9"
+    },
+    "request_provenance": {
+      "witness": "model_supplied"
+    },
+    "schema_version": 1,
+    "sensitive": false,
+    "source_authority": {
+      "body_sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9",
+      "mode": "exact",
+      "original_available": true
+    },
+    "source_kind": "external_audit",
+    "source_sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9",
+    "status": "ACTIVE",
+    "transport": {
+      "newline_normalization": "none",
+      "source_encoding": "utf-8",
+      "transport_transform": "none"
+    }
+  },
+  "source_authority": {
+    "mode": "exact",
+    "original_available": true,
+    "body_sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9",
+    "original_sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9"
+  },
+  "distribution": {
+    "state": "DISTRIBUTABLE",
+    "receipt_id": "SRC-225",
+    "source_sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9"
+  }
+}

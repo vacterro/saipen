@@ -1,0 +1,31 @@
+{
+  "created_at": "2026-11-09T20:06:34.769483+00:00",
+  "assigned_postimage_sha256": {
+    "tools/test_bz_rea_acceptance_fixture.py": "1dd41e2a27c1a90000963f87c38cf4288ca95b2032275ffdd26e362796c03f6d",
+    "tools/test_bzcc_overnight_autonomy.py": "567e683327e01ee55b1df98dd9deb19f339c0802d41623dc8ec68a669b9c63f2",
+    "tools/test_persistent_autonomy_recovery.py": "9042fe5848d257b1d7ed595b06470a6d212001b70e1cf43f5a82e17dbc089b10"
+  },
+  "changed_protected_files": {
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\STATE.md": {
+      "before": "6e07b5247e7d0d7ab91079c7986ca08655230d9ec9b05e68df38a4ca9b23792e",
+      "after": "8aac4e8653643f67b0009f3ec8a6fcfe06bcfcfa0e35f0bc369eed57c9f1e34e"
+    },
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\BOARD.md": {
+      "before": "36740c536dee4a974f682c7fde2caa2c5ea3122f5538585fe50b6a51b153195e",
+      "after": "e8edada584c2b94671a6550a46c678f392d475f39e232e785f28816e2d814ffd"
+    },
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\LOG.md": {
+      "before": "57c26374fd9b69efed485e2f656e7f2dbc43e28d39fafc51e31941fe275556c7",
+      "after": "ff893678e1bb252db90d4c524a6c8e1303a3d2e4132c935ccca6b9f5e132d667"
+    },
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\operations.py": {
+      "before": "4dce94adbe631b65eb809f22beb69d61d8b537149664edd10fb82977536f17e4",
+      "after": "d20897d27dffe29cc141e83c770424d0d231c80d899cdc8d1755c9716e93bd95"
+    },
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.git\\index": {
+      "before": "07e5066ccbbb2c9cf3028265460e5565221ce9761b2ae86964a619f45fae0436",
+      "after": "c0a064a5a45819d6428ef58b2c3171477abac65216dcb2a6f4cd4a4561d683f8"
+    }
+  },
+  "index_unchanged": false
+}

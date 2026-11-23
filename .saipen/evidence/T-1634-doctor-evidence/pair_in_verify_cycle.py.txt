@@ -1,0 +1,132 @@
+"""T-1634: re-establish the regression pair INSIDE the VERIFY cycle.
+
+The pre-fix subject is rebuilt by reversing the three product edits, and it is
+accepted only when its digest equals the subject of the FAIL half recorded in
+BUILD (E-12542). The repaired files are restored byte-exactly in `finally`.
+
+Usage: python repair_pair_in_cycle.py <repo root>
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(sys.argv[1]).resolve()
+sys.path.insert(0, str(ROOT / "tools"))
+
+from saipen_engine import oracle  # noqa: E402
+
+GUARD = ROOT / "tools" / "install_host_guard.py"
+DOCTOR = ROOT / "tools" / "saipen_engine" / "host_integration.py"
+SUBJECT = ("tools/saipen_engine/host_integration.py", "tools/install_host_guard.py")
+ORACLE = ("tools/test_t1624_host_integration.py",)
+PRE_FIX = "0f879f146cb2eb63"
+POST_FIX = "460cf696a6ee56e0"
+MODULE = "test_t1624_host_integration."
+CASES = (
+    MODULE + "StateModelTests."
+    "test_a_health_record_of_another_hook_file_is_not_evidence_about_this_host",
+    MODULE + "DoctorTests."
+    "test_the_doctor_judges_a_hook_with_its_own_installer_not_the_inspected_copy",
+    MODULE + "InstallerTests.test_the_interpreter_is_a_variable_in_the_cmd_spelling_too",
+)
+COMMAND = "python -B -m unittest " + " ".join(CASES)
+
+GUARD_OLD = '''def interpreter_of(invocation: str) -> str | None:
+    """The interpreter a hook command starts, or None when it names none."""
+    for argv in _argv_of(invocation):
+        return argv[0]
+    return None
+
+
+def interpreter_missing(invocation: str) -> bool:
+    """Does this hook command name an interpreter that is not on this machine?
+
+    A hook whose interpreter was uninstalled or upgraded away cannot start at
+    all, which the host reports as a hook error on every event. That is a
+    broken hook, not a stale one, and it has its own name in the result.
+    """
+    interpreter = interpreter_of(invocation)
+    if not interpreter:
+        return False
+    if any(sep in interpreter for sep in ("/", "\\\\")):
+        return not Path(interpreter).is_file()
+    import shutil
+
+    return shutil.which(interpreter) is None
+'''
+GUARD_START = "def _interpreters_of(invocation: str) -> list[str]:\n"
+GUARD_END = "    return bool(found) and not any(_interpreter_exists(item) for item in found)\n"
+
+DOCTOR_IMPORT_NEW_START = "            # The installer module of the runtime that is RUNNING, asked about\n"
+DOCTOR_IMPORT_NEW_END = '            tools = str(source_root() / "tools")\n'
+DOCTOR_IMPORT_OLD = '            tools = str(checker / "tools")\n'
+
+DOCTOR_HEALTH_NEW_START = "def _same_file(left: object, right: object) -> bool:\n"
+DOCTOR_HEALTH_NEW_END = (
+    '    installed_at = facts["hook"].get("installed_at")\n'
+    "    return installed_at is None or at >= installed_at - 1\n"
+)
+DOCTOR_HEALTH_OLD = '''def _health_is_current(facts: dict) -> bool:
+    """Is the recorded outcome evidence about THIS installation?"""
+    health = facts.get("health") or {}
+    at = health.get("at")
+    if not isinstance(at, (int, float)):
+        return False
+    if time.time() - at > HEALTH_FRESH_SECONDS:
+        return False
+    installed_at = facts["hook"].get("installed_at")
+    return installed_at is None or at >= installed_at - 1
+'''
+
+
+def cut(text: str, start: str, end: str, replacement: str) -> str:
+    assert text.count(start) == 1, f"anchor not unique: {start!r}"
+    head, rest = text.split(start, 1)
+    assert end in rest, f"end anchor missing: {end!r}"
+    _body, tail = rest.split(end, 1)
+    return head + replacement + tail
+
+
+def digest() -> str:
+    return oracle.oracle_digest(ROOT, SUBJECT)[:16]
+
+
+def run() -> str:
+    proc = subprocess.run(
+        [sys.executable, "-B", "-m", "unittest", *CASES], cwd=str(ROOT / "tools"),
+        capture_output=True, stdin=subprocess.DEVNULL, timeout=900,
+    )
+    tail = proc.stderr.decode("utf-8", errors="replace").strip().splitlines()
+    return f"exit {proc.returncode} | " + " | ".join(
+        line for line in tail if line.startswith(("Ran ", "OK", "FAILED"))
+    )
+
+
+fixed_guard, fixed_doctor = GUARD.read_bytes(), DOCTOR.read_bytes()
+assert digest() == POST_FIX, f"the repaired subject moved: {digest()}"
+print("verifier", oracle.verifier_identity(COMMAND, ORACLE, ROOT)[:16])
+try:
+    # Each file keeps ONE line ending throughout: edit as LF, write back as found.
+    def ending(data: bytes) -> str:
+        crlf, lf = data.count(b"\r\n"), data.count(b"\n")
+        assert crlf in (0, lf), "mixed line endings"
+        return "\r\n" if crlf else "\n"
+
+    guard_end, doctor_end = ending(fixed_guard), ending(fixed_doctor)
+    guard_text = fixed_guard.decode("utf-8").replace("\r\n", "\n")
+    doctor_text = fixed_doctor.decode("utf-8").replace("\r\n", "\n")
+    older_guard = cut(guard_text, GUARD_START, GUARD_END, GUARD_OLD)
+    older = cut(doctor_text, DOCTOR_IMPORT_NEW_START, DOCTOR_IMPORT_NEW_END, DOCTOR_IMPORT_OLD)
+    older = cut(older, DOCTOR_HEALTH_NEW_START, DOCTOR_HEALTH_NEW_END, DOCTOR_HEALTH_OLD)
+    GUARD.write_bytes(older_guard.replace("\n", guard_end).encode("utf-8"))
+    DOCTOR.write_bytes(older.replace("\n", doctor_end).encode("utf-8"))
+    rebuilt = digest()
+    print("pre-fix subject", rebuilt, "matches E-12542:", rebuilt == PRE_FIX)
+    if rebuilt == PRE_FIX:
+        print("pre-fix run :", run())
+finally:
+    GUARD.write_bytes(fixed_guard)
+    DOCTOR.write_bytes(fixed_doctor)
+print("post-fix subject", digest(), "restored:", digest() == POST_FIX)
+print("post-fix run:", run())

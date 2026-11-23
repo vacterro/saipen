@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-077:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-232 closed with verification evidence in LOG: PASS -- SRC-077 demonstrated against the live tree: BOARD shows T-230 and T-231 under ## DONE with closure_mode own_patch; the operator's acceptance is durable at E-1805 (schema 4->5, FreeBuff Unlimited, A/A-shift/B/B-shift concurrent, Instance Manager independent listing, focus/reuse + Shift-less creation, no limit-1 refusal). Nothing in SRC-077 remains outstanding. conf: high",
+      "text": "T-230 operator LIVE ACCEPTANCE PASS on real Windows (21.09.2026). Existing real config migrated: schema 4 -> 5, FreeBuff max_instances 1 -> 0 / Unlimited. Project A normal launch PASS. Project A Shift+click second instance PASS. Project B normal launch PASS. Project B Shift+click second instance PASS. All FreeBuff instances alive concurrently PASS. Instance Manager lists all instances independently PASS. Normal click focuses existing instance PASS. Shift+click creates another instance PASS. No default \"limit 1\" refusal PASS. Record this acceptance as the VERIFY evidence for T-230 and close T-230 canonically through the phase chain.",
+      "verification": "the Work this request created reached its own verification gate; see the T-232 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-232"
+    }
+  },
+  "schema_version": 1
+}

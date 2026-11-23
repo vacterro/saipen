@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "verdict": "INSUFFICIENT_EVIDENCE",
+  "unit_digest": "e9621daba26ae48e70d122e7888a6d998f940abfe42755aa25746b9ef2fc2148",
+  "session_id": "ses_ed06693f2ffe47q1nxCBJRQEeD",
+  "episode_index": 0,
+  "slice_index": 0,
+  "disposition_class": "INSUFFICIENT_EVIDENCE",
+  "event_refs": [1, 15, 18, 21, 24],
+  "reasoning": "Prosecutor: completion after a refused state write and invalid-tool call could conceal failed acceptance. Defender: the operator asked for a deterministic native binding smoke, the project is temporary and model smoke produced the sequence; refusals may be the intended controls, and no application repair is claimed. This carrier uses OpenCode 1.18.32, is HOT/PROVISIONAL, has no mechanical signals, and provides UNKNOWN historical protocol binding. There is no evidence establishing the required smoke sequence or the applicable historical version of the rule. Neither a protocol violation nor fully clean acceptance is established. Retain the uncertainty without an audit."
+}

@@ -1,0 +1,42 @@
+# R4 CONTROL — the `init` WAIT exemption in tools/saipen.py (T-1882)
+# One verifier (tools/test_t1881_authority_brake.py, unmodified bytes) over a
+# throwaway copy of tools/ + saipen/ + extensions/; only the exemption's guard
+# differs between the halves. The suite's own fixture gap (a missing
+# extensions/adapters/registry.json) was hit first and is NOT the subject here:
+# with extensions/ present both halves reach the brake.
+
+## GREEN — exemption present
+# exit 0  FAIL/ERROR lines 0
+
+n_decision) ... ok
+test_diagnosis_and_preview_stay_available_under_a_brake (test_t1881_authority_brake.TheWorkAlreadyHeldStillMovesTests.test_diagnosis_and_preview_stay_available_under_a_brake) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 7.477s
+
+OK
+
+
+## RED — exemption removed
+# exit 1  FAIL/ERROR lines 1
+# FAIL: test_ticket_add_answers_the_init_pause (test_t1881_authority_brake.InitPauseIsAnswerableTests.test_ticket_add_answers_the_init_pause)
+s_state_binding_brake) ... ok
+test_transition_and_ingress_are_deliberately_absent (test_t1881_authority_brake.TheGateReadsTheOneBrakeTests.test_transition_and_ingress_are_deliberately_absent) ... ok
+test_a_transition_still_moves_under_a_tripped_valve (test_t1881_authority_brake.TheWorkAlreadyHeldStillMovesTests.test_a_transition_still_moves_under_a_tripped_valve)
+T-1880's repair: the phase moves, the WAIT survives verbatim. ... ok
+test_a_transition_still_moves_under_an_open_decision (test_t1881_authority_brake.TheWorkAlreadyHeldStillMovesTests.test_a_transition_still_moves_under_an_open_decision) ... ok
+test_diagnosis_and_preview_stay_available_under_a_brake (test_t1881_authority_brake.TheWorkAlreadyHeldStillMovesTests.test_diagnosis_and_preview_stay_available_under_a_brake) ... ok
+
+======================================================================
+FAIL: test_ticket_add_answers_the_init_pause (test_t1881_authority_brake.InitPauseIsAnswerableTests.test_ticket_add_answers_the_init_pause)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1882-r4b-l07trwx0\tools\test_t1881_authority_brake.py", line 252, in test_ticket_add_answers_the_init_pause
+    self.assertEqual(rc, 0, payload)
+AssertionError: 1 != 0 : {'ok': False, 'code': 'WAIT_BLOCKED', 'detail': "ticket add would grant authority while a hard stop binds: persisted WAIT binds in this context: 'WAIT: init -- provide the first project goal or raw backlog' -- answer the stop first; read-only diagnosis stays available", 'brake': 'wait', 'canonical_next_command': 'saipen continue --json', 'resume_command': 'saipen continue --json'}
+
+----------------------------------------------------------------------
+Ran 15 tests in 7.500s
+
+FAILED (failures=1)
+

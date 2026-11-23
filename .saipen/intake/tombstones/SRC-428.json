@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-428.md",
+  "closed_at": "2026-11-18T15:56:14Z",
+  "closure_event": null,
+  "linked_work": "T-2094",
+  "linked_works": [
+    "T-2094"
+  ],
+  "receipt_id": "SRC-428",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "f2620fd1d10ed42869557b066fd362ac8c6ff92a0a9a8af98b827d1f6e6fd830",
+  "status": "CLOSED",
+  "unresolved": 0
+}

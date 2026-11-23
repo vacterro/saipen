@@ -1,0 +1,74 @@
+HEAD: dc39709c0c17a3272126c01a626ffcaa4176140b
+LOG bytes: 121964 BOARD bytes: 209108
+git_status_lines: 4205
+staged: 7
+untracked: 3507
+
+SIGNAL 2: commits_checked 25 cited 1 uncited 24
+  uncited: 7857dbf21567
+  uncited: 00f290d9004a
+  uncited: 66ef622a43ab
+  uncited: b152e6de2b30
+  uncited: 88dab8ae46fc
+  uncited: 983470bd32b2
+  uncited: bc752edfa518
+  uncited: 326fcdddb9ed
+  uncited: 08e84d13758e
+  uncited: d5eca177aac9
+  uncited: 7373fcb9bf44
+  uncited: 95a06bdd0877
+  uncited: a5663db4aa9b
+  uncited: d017b652f5c4
+  uncited: 768bf3e38306
+  uncited: ac2da75d8ecf
+  uncited: 414969cc69df
+  uncited: 4fde560e4e06
+  uncited: e9cc875c5497
+  uncited: c26ab59fdeaa
+  uncited: adb68ea9e8c4
+  uncited: e4483dda641f
+  uncited: 37da914135b7
+  uncited: 6037ba46037b
+done_rows_on_board: 130
+
+SIGNAL 3: files_scanned 175 marker_lines 199
+markers_naming_done_tickets: 1
+   ('tools/saipen_engine\\reconcile.py', 1915, 'T-1609', 'phase, `restart: TODO` distinguishes CURRENT_DONE_UNPROVEN (T-1609):')
+
+SIGNAL 4: ast_files 175 parse_errors 0 bare_except_handlers 0 pass_only_handlers 48
+
+SIGNAL 5: record_crew_run defs=['tools/saipen_engine\\operations.py:26301'] call_sites=['tools/saipen_engine\\crew.py:1587']
+
+SIGNAL 5: record_producer_integration defs=['tools/saipen_engine\\operations.py:26557'] call_sites=[]
+
+SIGNAL 6: untracked_tools_paths 29
+   tools/_t2040_experiment.py
+   tools/saipen_engine/discovery_providers.py
+   tools/saipen_engine/gc.py
+   tools/saipen_engine/outcome_truth.py
+   tools/saipen_engine/persistent_goal.py
+   tools/saipen_engine/source_reindex.py
+   tools/test_gc.py
+   tools/test_nested_git_boundaries.py
+   tools/test_t2023_goal_management_and_maintenance_binding.py
+   tools/test_t2040_bounded_discovery_resume.py
+   tools/test_t2040_continuation_truth.py
+   tools/test_t2040_discovery_owners.py
+   tools/test_t2040_exhaustion_evidence.py
+   tools/test_t2040_finish_plan_guards.py
+   tools/test_t2040_maintenance_authority.py
+   tools/test_t2040_publication_truth.py
+   tools/test_t2040_replenishment_recovery.py
+   tools/test_t2040_review_proof_binding.py
+   tools/test_t2040_terminal_consumer_guards.py
+   tools/test_t2040_terminal_consumer_supplementary.py
+   tools/test_t2050_pruned_row_restore.py
+   tools/test_t2051_source_reindex.py
+   tools/test_t2052_pruned_slice_closure.py
+   tools/test_t2055_nested_directory_fingerprint.py
+   tools/test_t2057_carrier_restore.py
+   tools/test_t2059_regression.py
+   tools/test_t2071_gate_pinned_row.py
+   tools/test_t2076_installed_generation_binding.py
+   tools/test_t2077_unblock_gate.py
+SIGNAL 6: no zero-reference claim beyond this bounded listing

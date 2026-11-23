@@ -1,0 +1,67 @@
+[
+  {
+    "path": "tools/saipen_engine/regression_execution.py",
+    "before_sha256": null,
+    "after_sha256": "c83509b46e0f403edbbc58775ce5060ac7afe7888d8947e2909591539e1f45fe"
+  },
+  {
+    "path": "tools/saipen_engine/oracle.py",
+    "before_sha256": "61d4b36335f775862ffc3a82b83601387fc6c08a7705b580c8fb5b9b83fc8e9a",
+    "after_sha256": "3d192c1e66033f94f5f932b502dc8917b3a64a71ee44323ef3832ca856e2f4eb"
+  },
+  {
+    "path": "tools/saipen_engine/log.py",
+    "before_sha256": "1298621aeef31e5d166e565ff11425ab67e5fbad587de756f3e099908d61bca8",
+    "after_sha256": "a6287bbfd40d19bb4958008dc7a0602f191796ba3fa64ffc94c676c9af2951e0"
+  },
+  {
+    "path": "tools/saipen_engine/operations.py",
+    "before_sha256": "9a44a8061261716261759ff80b83ce1858192cfec9c6b07dfbf7f776f037af06",
+    "after_sha256": "fd56609e5a1806fde7a6a06dd6630841835b2419dc9720332c4223bd21b1f2af"
+  },
+  {
+    "path": "tools/saipen_engine/board.py",
+    "before_sha256": "20d34dbb19d15612135ebbda7c9383984ea5c702b5386a65158b5bc9177e1ce3",
+    "after_sha256": "9a29e6eec3579e9ab196aab2f533b8eab857ca81008ec0f2f01a94ba39fa0489"
+  },
+  {
+    "path": "tools/saipen_engine/journal.py",
+    "before_sha256": "3375ddd84f33f5d73d5c41e5bd92cf424cb1af737b20677f9cc5afa599fef625",
+    "after_sha256": "be64a585f6af2621da49d5b2053fb55ec5010336ab6590ec19d0bf6548765b9d"
+  },
+  {
+    "path": "tools/saipen.py",
+    "before_sha256": "da6d0d610333114236822c4fec6142fc704753940012420df33b6aebeef9a930",
+    "after_sha256": "467988d4404860c83e5fd25f059106049b1b00cc706b92269146fce61cddb935"
+  },
+  {
+    "path": "saipen/REGISTRY.json",
+    "before_sha256": "6078e409098510e29bc97b3360487b1f55ca8003e59f1c3ec98a202684c8a918",
+    "after_sha256": "a684e07b05d99561f44ca8a4b4568e62b424e416b6472c116a6f9f29160174d1"
+  },
+  {
+    "path": "saipen/COMMANDS.md",
+    "before_sha256": "259454d5aa26a292a051c5d63d22aa5ec75f3b9a395c92117d6eeafb5876edde",
+    "after_sha256": "1da84ca7650a6258826a0cfcf08908ee3e719daa76c7e97c5fc5eb3bd6f34fb0"
+  },
+  {
+    "path": "saipen/phases/verify.md",
+    "before_sha256": "3f558bb105f8b978514ff08c74a6242d83e77b5993087f85f64993f38e2b4bf7",
+    "after_sha256": "148060b89571a73899ab90119370050fd95a1d30abdb4439c7fbd9295ede5d7c"
+  },
+  {
+    "path": "tools/test_t1711_regression_execution.py",
+    "before_sha256": null,
+    "after_sha256": "bcdfa50d84f80f16f16fd1cf2f85a7366a1679064de4d299c5e599a024c940da"
+  },
+  {
+    "path": "tools/saipen_engine/board_compaction.py",
+    "before_sha256": "d3e129d9bd5591ffdc3ad5c456c01b120981c25b4f311438a2babe3e6263834c",
+    "after_sha256": "428c211c20e21aad27072bb3e9819fdc4f582925b1d37f4998dde0e08554d89b"
+  },
+  {
+    "path": "extensions/schemas/board.schema.json",
+    "before_sha256": "4d54ff13df3a3ddfa98839546a37a9437fe15221bbc23b16b088dd1f56baa18a",
+    "after_sha256": "7b20b9ca97fd917f81ee6de516efc2d7f540d00308060643e79d5c7f499b0f61"
+  }
+]

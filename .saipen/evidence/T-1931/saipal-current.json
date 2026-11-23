@@ -1,0 +1,12 @@
+{
+  "subject": "tools\\saipen_engine\\saipal_adapter.py",
+  "subject_sha256": "9037500442d257dfd4f487a4ebb446717bfc70043fd50b478dcd728d89738aa9",
+  "subject_unchanged": true,
+  "oracle_sha256": "dfcdcbfe4ac163f6a598bab0786b02c4fba3e0cada41904bb2d8dc7a27461a11",
+  "oracle_unchanged": true,
+  "tests_run": 22,
+  "successful": true,
+  "failures": [],
+  "errors": [],
+  "scope": "local boundary contracts with real isolated CLI processes; no production SAIPAL acceptance"
+}

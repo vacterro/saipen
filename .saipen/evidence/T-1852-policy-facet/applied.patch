@@ -1,0 +1,16 @@
+--- before/plugin
++++ after/plugin
+@@ -175,6 +175,13 @@
+         "degraded": "ALLOW_DEGRADED"
+       },
+       "operator_action": "saipen host doctor"
++    },
++    "FREEBUFF_OPERATOR_PROVENANCE_MISSING": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "complete FreeBuff native input and worker integration with the SAIPEN authority broker"
+     },
+     "PROTOCOL_ADMISSION_REQUIRED": {
+       "decisions": {

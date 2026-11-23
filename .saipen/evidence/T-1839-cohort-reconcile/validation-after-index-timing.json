@@ -1,0 +1,20 @@
+{
+  "wall_s": 28.4922946,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "exit_code": 1,
+  "command": "saipen validate --json",
+  "problems": [
+    {
+      "category": null,
+      "credential": false,
+      "detail": "closure provenance does not resolve: EX-000010 was verified against installed engine generation sha256:e10a20a075aa310b... but the running engine is sha256:2a84f5a5da648420... -- the dependency moved ",
+      "detail_hash": "de39eb94092e7b48",
+      "finding_key": "76b48f23558dce11",
+      "rule_id": "unclassified",
+      "severity": "problem",
+      "subject_id": null,
+      "subject_kind": "global",
+      "subject_ref": null
+    }
+  ]
+}

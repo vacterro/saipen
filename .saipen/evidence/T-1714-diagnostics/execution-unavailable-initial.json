@@ -1,0 +1,17 @@
+{
+  "outcome": "INSTRUMENT_UNAVAILABLE",
+  "command": ["bin/saipen.cmd", "work", "regression", "T-1714", "--file", ".saipen/evidence/T-1714-diagnostics/regression-contract.json", "--json"],
+  "exit_code": 1,
+  "code": "INCOMPLETE_TICKET",
+  "detail": "REGRESSION_PAIR_FAILED: measured runs do not prove FAIL then PASS",
+  "observed_runs": [
+    {"stage": "before", "exit_code": 1, "ran": 13, "failed": 12},
+    {"stage": "current", "exit_code": 1, "ran": 13, "failed": 12}
+  ],
+  "underlying_diagnostic": "home-dead: isolated STATE.saipen_home is missing extensions/subs/PROTOCOL.md -- not a usable SAIPEN install",
+  "initial_context_entries": 196,
+  "preserved_contract": "regression-contract-initial.json",
+  "canonical_changed_files": [],
+  "receipt_admitted": false,
+  "limits": "Observed public native refusal; this bounded summary does not pretend to be a retained raw stream. No successful regression or production failure is substituted for the unavailable good control."
+}

@@ -1,0 +1,24 @@
+T-1943 R005: why the LIVE half cannot be produced from this seat
+
+live STATE
+  execution_intent         'goal'
+  continuation_authority   'operator_required'
+  authority_source         'E-18977'
+  authority_until          'budget'
+  safety_valve_mode        'hard_wait'
+  goal_ingress             None
+  goal_tickets             16
+
+is_continuous_maintenance : False
+continuous_maintenance_proven: False
+persistent (shape-valid)  : False
+
+a CORRECTLY-SHAPED persistent claim is still refused without a committed grant:
+  prove -> ['persistent authority does not name the current goal pivot']
+
+committed goal_entry receipts: 23 | journal problems: ()
+receipts carrying goal_authority metadata: 0
+goal pivot DEC events in LOG: 0
+
+=> the grant does not exist. It can only be created by an intentional native
+   user action in the running host, which SRC-342 R005/R007 forbids simulating.

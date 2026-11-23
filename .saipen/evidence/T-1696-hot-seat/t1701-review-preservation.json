@@ -1,0 +1,104 @@
+{
+  "observed_at": "2026-10-10T03:16:45.088728+00:00",
+  "target": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "before_originals": 8048,
+  "after_originals": 8048,
+  "copies_and_live_sha256_equal": true,
+  "registry_unchanged": true,
+  "producer_originals_verified": [
+    "message-196-parts.json",
+    "message-198-parts.json",
+    "zcode-part_mv0qjjfw_83519ef5-4ff7-4c9a-8983-698bec643e6e.json",
+    "zcode-part_mv0sw36f_853504c2-4fdb-471d-954d-f039baf6667f.json",
+    "zcode-part_mv0sw36i_859ef69a-f26a-4e72-a1a7-7051851bd6d0.json",
+    "zcode-part_mv0swc66_db3f560a-e71d-48a4-aaa5-da6ca8441c20.json",
+    "zcode-part_mv0swm7x_68117fba-8530-4461-9a2f-32c6139e6a61.json"
+  ],
+  "git": [
+    {
+      "kind": "head",
+      "sha256": "c56b4cfa1368c502bda88f185d5c5e482123e64b61a71a8245c1143bb602c994",
+      "unchanged": true
+    },
+    {
+      "kind": "dirty",
+      "sha256": "f1582a451085690e24a8f895658d3ce8f2bf0882da61940df32835c44f45e279",
+      "unchanged": true
+    },
+    {
+      "kind": "unstaged",
+      "sha256": "f0cd0e4b1a69c3627e2074a688e8a85c8368d7ffad14a6d8eff8d897b18cfffe",
+      "unchanged": true
+    },
+    {
+      "kind": "staged",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unchanged": true
+    }
+  ],
+  "canonical_reader_passes": [
+    {
+      "tail": 3146,
+      "history_hash": "d73f80c7815e698e",
+      "ledger_errors": [
+        "LOG.md:2: not a legal LOG event: '- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no '",
+        "E-3134 parent E-3133 does not exist in the ledger",
+        "E-3137 parent E-3136 does not exist in the ledger",
+        "E-3146 parent E-3145 does not exist in the ledger"
+      ],
+      "fast_errors": [
+        "FLOOR: STATE.task=T-299 but BOARD has no DOING section at the raw floor",
+        "STATE proposed next_action 'idle' does not start with WAIT:/saipen /PHASE /RUN:/RESUME:",
+        "BOARD: BOARD.md:5 ticket T-299 has unrecognized field 'evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md'",
+        "BOARD: BOARD.md:6 duplicate ticket ID T-299",
+        "BOARD: BOARD.md:7 ticket T-298 has unrecognized field 'evidence: .saipen/evidence/T-298-widget-trust-boundary.md'",
+        "BOARD: BOARD.md:8 ticket T-297 has unrecognized field 'evidence: .saipen/evidence/T-297-widget-clock-recorrective.md'",
+        "BOARD: BOARD.md required heading ## DOING appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+        "BOARD: BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+        "BOARD proposed T-282 declares closure_mode 'duplicate_reconciled', outside own_patch|inherited_verified|cohort|superseded_verified|external_implementation|finding_invalidated",
+        "STATE proposed invalid phase transition: VERIFY -> DONE (RFC \u00a7 1.6). The block-parked shape requires the latest phase-changing event through STATE.last_event to be the canonical active-block DEC for the exact ticket still in BOARD.BLOCKED",
+        "LOG: LOG.md:2 not a legal event line",
+        "LOG: LOG.md:720 E-3134 is not consecutive after E-3132; an unexplained gap means events were lost or removed from an append-only ledger. A documented historical gap is exempted by a DEC line at or after E-3134 whose text BEGINS `LEDGER-GAP AMNESTY E-3132 -> E-3134`",
+        "LOG: LOG.md:722 E-3137 is not consecutive after E-3135; an unexplained gap means events were lost or removed from an append-only ledger. A documented historical gap is exempted by a DEC line at or after E-3137 whose text BEGINS `LEDGER-GAP AMNESTY E-3135 -> E-3137`",
+        "LOG: LOG.md:731 E-3146 is not consecutive after E-3144; an unexplained gap means events were lost or removed from an append-only ledger. A documented historical gap is exempted by a DEC line at or after E-3146 whose text BEGINS `LEDGER-GAP AMNESTY E-3144 -> E-3146`",
+        "STATE proposed phase DONE is not ticket-bearing but task is 'T-299'; task must be none outside a ticket-bearing phase"
+      ],
+      "semantic_receipts": 4170,
+      "receipt_errors": [],
+      "receipt_digest": "ops-receipt-sha256:44b2c1593576c0a8c14385d30235e2b75360a415d3461591b1dbfcc272d3107e"
+    },
+    {
+      "tail": 3146,
+      "history_hash": "d73f80c7815e698e",
+      "ledger_errors": [
+        "LOG.md:2: not a legal LOG event: '- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no '",
+        "E-3134 parent E-3133 does not exist in the ledger",
+        "E-3137 parent E-3136 does not exist in the ledger",
+        "E-3146 parent E-3145 does not exist in the ledger"
+      ],
+      "fast_errors": [
+        "FLOOR: STATE.task=T-299 but BOARD has no DOING section at the raw floor",
+        "STATE proposed next_action 'idle' does not start with WAIT:/saipen /PHASE /RUN:/RESUME:",
+        "BOARD: BOARD.md:5 ticket T-299 has unrecognized field 'evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md'",
+        "BOARD: BOARD.md:6 duplicate ticket ID T-299",
+        "BOARD: BOARD.md:7 ticket T-298 has unrecognized field 'evidence: .saipen/evidence/T-298-widget-trust-boundary.md'",
+        "BOARD: BOARD.md:8 ticket T-297 has unrecognized field 'evidence: .saipen/evidence/T-297-widget-clock-recorrective.md'",
+        "BOARD: BOARD.md required heading ## DOING appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+        "BOARD: BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+        "BOARD proposed T-282 declares closure_mode 'duplicate_reconciled', outside own_patch|inherited_verified|cohort|superseded_verified|external_implementation|finding_invalidated",
+        "STATE proposed invalid phase transition: VERIFY -> DONE (RFC \u00a7 1.6). The block-parked shape requires the latest phase-changing event through STATE.last_event to be the canonical active-block DEC for the exact ticket still in BOARD.BLOCKED",
+        "LOG: LOG.md:2 not a legal event line",
+        "LOG: LOG.md:720 E-3134 is not consecutive after E-3132; an unexplained gap means events were lost or removed from an append-only ledger. A documented historical gap is exempted by a DEC line at or after E-3134 whose text BEGINS `LEDGER-GAP AMNESTY E-3132 -> E-3134`",
+        "LOG: LOG.md:722 E-3137 is not consecutive after E-3135; an unexplained gap means events were lost or removed from an append-only ledger. A documented historical gap is exempted by a DEC line at or after E-3137 whose text BEGINS `LEDGER-GAP AMNESTY E-3135 -> E-3137`",
+        "LOG: LOG.md:731 E-3146 is not consecutive after E-3144; an unexplained gap means events were lost or removed from an append-only ledger. A documented historical gap is exempted by a DEC line at or after E-3146 whose text BEGINS `LEDGER-GAP AMNESTY E-3144 -> E-3146`",
+        "STATE proposed phase DONE is not ticket-bearing but task is 'T-299'; task must be none outside a ticket-bearing phase"
+      ],
+      "semantic_receipts": 4170,
+      "receipt_errors": [],
+      "receipt_digest": "ops-receipt-sha256:44b2c1593576c0a8c14385d30235e2b75360a415d3461591b1dbfcc272d3107e"
+    }
+  ],
+  "idempotent": true,
+  "target_writes": 0,
+  "disposition": "HISTORY_LEDGER_CORRUPT / INTEGRITY_BLOCKED"
+}

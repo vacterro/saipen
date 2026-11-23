@@ -1,0 +1,525 @@
+.........................................................................................warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+..............................F............warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................s....F...........................................................................warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+....warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/milestones/CP-001/manifest.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/milestones/current.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/milestone-ad87ddb80248b286/operation.json', LF will be replaced by CRLF the next time Git touches it
+...warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.........................................................................................................................................................................................................................V:\_TEMP_\t1363-ab\baseline\tools\run_scenarios.py:1765: DeprecationWarning: invalid escape sequence '\e'
+  "</Arguments>", " //E:vbscript C:\evil.vbs</Arguments>", 1
+................................F.F..F.F...F............................................................................................................................................................................................................................................................FFFF.......................................................................................................{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": []
+  },
+  "adopted": [],
+  "lifecycle": [],
+  "repair_id": "847dea4b853bb871b48f9895728343092fcd766026873ed7d9d9f18693daeaaa",
+  "targets": [
+    ".saipen/LOG.md",
+    ".saipen/STATE.md"
+  ],
+  "event": "E-13",
+  "agent": "test-agent",
+  "strict_state_error": null,
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-legacycompat-rk8m7hpq/.saipen/MANIFEST.json",
+    "contract_version": 1,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  }
+}
+......................................................................................................................................................................sssssssss............................................................................................................{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "recover --attest-legacy-done ids must be T-### (digits), comma-separated when several"
+}
+.....FF..F.FFFFF....F.FF...FFFF.F...F...FFE.F.....................................................................................................................................................................................................................<unknown>:1765: DeprecationWarning: invalid escape sequence '\e'
+.<unknown>:1765: DeprecationWarning: invalid escape sequence '\e'
+...................................................................................................................................................................................................................................................................................................sssssss..............................................................................................................................................................................................................................
+======================================================================
+ERROR: test_strict_finding_identity_is_unchanged_by_attribution (test_recovered_attribution.AttributionPositiveTests.test_strict_finding_identity_is_unchanged_by_attribution)
+Phase I: ownership metadata never mints a new finding key.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 407, in test_strict_finding_identity_is_unchanged_by_attribution
+    self.assertEqual(report["carried"][0]["finding_key"], before)
+                     ~~~~~~~~~~~~~~~~~^^^
+IndexError: list index out of range
+
+======================================================================
+FAIL: test_untampered_interrupted_close_settles_idempotently (test_audit_2026_08_28_all3.CoreArchiveSettlementTamperTests.test_untampered_interrupted_close_settles_idempotently)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_audit_2026_08_28_all3.py", line 1927, in test_untampered_interrupted_close_settles_idempotently
+    self.assertEqual(second.get("code"), "TICKET_NOT_FOUND", second)
+AssertionError: 'SOURCE_CLOSED' != 'TICKET_NOT_FOUND'
+- SOURCE_CLOSED
++ TICKET_NOT_FOUND
+ : {'ok': True, 'code': 'SOURCE_CLOSED', 'receipt': 'SRC-001', 'status': 'CLOSED', 'archive_ref': '.saipen/archive/source/SRC-001.md', 'recovered': True, 'residue_removed': False}
+
+======================================================================
+FAIL: test_no_test_module_races_a_concurrent_gate_on_a_constant_timeout (test_concurrency_independence.NoAbsoluteLatencyBudgets.test_no_test_module_races_a_concurrent_gate_on_a_constant_timeout)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_concurrency_independence.py", line 88, in test_no_test_module_races_a_concurrent_gate_on_a_constant_timeout
+    self.assertEqual(
+AssertionError: {'test_opencode_bound_launch_smoke.py': [(144, 5.0)]} != {}
+- {'test_opencode_bound_launch_smoke.py': [(144, 5.0)]}
++ {} : a numeric subprocess timeout under 10s outside a suppress block makes the verdict depend on host load: derive the budget from a measured per-subprocess cost (see PerformanceAuditTests._subprocess_cost) or raise it to a hang guard
+
+======================================================================
+FAIL: test_the_flag_reaches_the_engine_through_the_cli (test_explicit_claim.CliSurfaceTests.test_the_flag_reaches_the_engine_through_the_cli)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_explicit_claim.py", line 169, in test_the_flag_reaches_the_engine_through_the_cli
+    self.assertIn('"CLAIMED"', done.stdout, done.stdout + done.stderr)
+AssertionError: '"CLAIMED"' not found in '{\n  "ok": false,\n  "code": "CONFLICT",\n  "op_id": "claim-d2647fde09dc416c9291738a34ae638b",\n  "changed_files": [],\n  "recovery_required": true,\n  "message": "post-write semantic verification (policy core_fast) failed: BOARD: T-1 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)",\n  "detail": "post-write semantic verification (policy core_fast) failed: BOARD: T-1 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)"\n}\n' : {
+  "ok": false,
+  "code": "CONFLICT",
+  "op_id": "claim-d2647fde09dc416c9291738a34ae638b",
+  "changed_files": [],
+  "recovery_required": true,
+  "message": "post-write semantic verification (policy core_fast) failed: BOARD: T-1 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)",
+  "detail": "post-write semantic verification (policy core_fast) failed: BOARD: T-1 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)"
+}
+
+
+======================================================================
+FAIL: test_a_live_doing_ticket_still_refuses_with_the_flag (test_explicit_claim.OverrideBypassesOnlyOrderingTests.test_a_live_doing_ticket_still_refuses_with_the_flag)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_explicit_claim.py", line 148, in test_a_live_doing_ticket_still_refuses_with_the_flag
+    self.assertTrue(apply_claim(self.root, "T-1", "probe").get("ok"))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_a_redundant_flag_writes_no_stepped_over_claim (test_explicit_claim.OverrideWorksTests.test_a_redundant_flag_writes_no_stepped_over_claim)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_explicit_claim.py", line 107, in test_a_redundant_flag_writes_no_stepped_over_claim
+    self.assertTrue(out.get("ok"), out)
+AssertionError: False is not true : Result(ok=False, code='CONFLICT', data={'op_id': 'claim-d35e09e9fdfa467eb8f8bc3ad6149e3f', 'recovery_required': True}, message='post-write semantic verification (policy core_fast) failed: BOARD: T-2 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)', changed_files=[], op_id='claim-d35e09e9fdfa467eb8f8bc3ad6149e3f', recovery_required=True)
+
+======================================================================
+FAIL: test_explicit_claims_a_ticket_the_pick_rule_would_refuse (test_explicit_claim.OverrideWorksTests.test_explicit_claims_a_ticket_the_pick_rule_would_refuse)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_explicit_claim.py", line 93, in test_explicit_claims_a_ticket_the_pick_rule_would_refuse
+    self.assertTrue(out.get("ok"), out)
+AssertionError: False is not true : Result(ok=False, code='CONFLICT', data={'op_id': 'claim-0428d615297f402884538c7cb6220349', 'recovery_required': True}, message='post-write semantic verification (policy core_fast) failed: BOARD: T-1 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)', changed_files=[], op_id='claim-0428d615297f402884538c7cb6220349', recovery_required=True)
+
+======================================================================
+FAIL: test_without_the_flag_the_pick_rule_is_unchanged (test_explicit_claim.RefusalNamesTheRemedyTests.test_without_the_flag_the_pick_rule_is_unchanged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_explicit_claim.py", line 86, in test_without_the_flag_the_pick_rule_is_unchanged
+    self.assertTrue(top.get("ok"), top)
+AssertionError: False is not true : Result(ok=False, code='CONFLICT', data={'op_id': 'claim-261d477437dc441d99ec298cb85b85cc', 'recovery_required': True}, message='post-write semantic verification (policy core_fast) failed: BOARD: T-2 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)', changed_files=[], op_id='claim-261d477437dc441d99ec298cb85b85cc', recovery_required=True)
+
+======================================================================
+FAIL: test_audit_core003_converge_target_controls_resume_without_writes (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_converge_target_controls_resume_without_writes) (target='ship')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_intent_audit_fixes.py", line 436, in test_audit_core003_converge_target_controls_resume_without_writes
+    self.assertEqual(rc, 0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_audit_core003_converge_target_controls_resume_without_writes (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_converge_target_controls_resume_without_writes) (target='crew')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_intent_audit_fixes.py", line 436, in test_audit_core003_converge_target_controls_resume_without_writes
+    self.assertEqual(rc, 0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_audit_core003_goal_cc_and_continue_route_identically_without_writes (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_goal_cc_and_continue_route_identically_without_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_intent_audit_fixes.py", line 418, in test_audit_core003_goal_cc_and_continue_route_identically_without_writes
+    self.assertEqual((cc_rc, continue_rc), (0, 0))
+AssertionError: Tuples differ: (1, 1) != (0, 0)
+
+First differing element 0:
+1
+0
+
+- (1, 1)
++ (0, 0)
+
+======================================================================
+FAIL: test_audit_core003_normal_cc_enters_done_convergence (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_normal_cc_enters_done_convergence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_intent_audit_fixes.py", line 447, in test_audit_core003_normal_cc_enters_done_convergence
+    self.assertEqual(rc, 0, result)
+AssertionError: 1 != 0 : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'valve has not tripped; no fresh budget is owed', 'goal_waves': 0, 'goal_tickets': 0, 'detail': 'valve has not tripped; no fresh budget is owed', 'route': 'cc'}
+
+======================================================================
+FAIL: test_coverage_count_mismatch_refuses (test_recovered_attribution.AttributionNegativeTests.test_coverage_count_mismatch_refuses)
+15 requirements against a tombstone claiming 16 never attributes.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 602, in test_coverage_count_mismatch_refuses
+    self._refuse(self.proof(), "COVERAGE_COUNT_MISMATCH")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_COUNT_MISMATCH'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_COUNT_MISMATCH
+
+
+======================================================================
+FAIL: test_coverage_work_disagrees_with_tombstone_refuses (test_recovered_attribution.AttributionNegativeTests.test_coverage_work_disagrees_with_tombstone_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 628, in test_coverage_work_disagrees_with_tombstone_refuses
+    self._refuse(self.proof(), "COVERAGE_SPLIT_WORK")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_SPLIT_WORK'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_SPLIT_WORK
+
+
+======================================================================
+FAIL: test_linked_work_not_done_refuses (test_recovered_attribution.AttributionNegativeTests.test_linked_work_not_done_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 652, in test_linked_work_not_done_refuses
+    self._refuse(self.proof(), "LINKED_WORK_NOT_DONE")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'LINKED_WORK_NOT_DONE'
+- PRESERVED_ORIGINAL_REPLACED
++ LINKED_WORK_NOT_DONE
+
+
+======================================================================
+FAIL: test_missing_recovery_record_refuses (test_recovered_attribution.AttributionNegativeTests.test_missing_recovery_record_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 474, in test_missing_recovery_record_refuses
+    self._refuse(self.proof(), "RECOVERY_RECORD_MISSING")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'RECOVERY_RECORD_MISSING'
+- PRESERVED_ORIGINAL_REPLACED
++ RECOVERY_RECORD_MISSING
+
+
+======================================================================
+FAIL: test_missing_verification_on_implemented_refuses (test_recovered_attribution.AttributionNegativeTests.test_missing_verification_on_implemented_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 616, in test_missing_verification_on_implemented_refuses
+    self._refuse(self.proof(), "COVERAGE_TERMINAL_MISMATCH")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_TERMINAL_MISMATCH'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_TERMINAL_MISMATCH
+
+
+======================================================================
+FAIL: test_newer_generation_refuses (test_recovered_attribution.AttributionNegativeTests.test_newer_generation_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 684, in test_newer_generation_refuses
+    self._refuse(self.proof(), "NEWER_GENERATION_EXISTS")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'INDEX_UNREADABLE' != 'NEWER_GENERATION_EXISTS'
+- INDEX_UNREADABLE
++ NEWER_GENERATION_EXISTS
+
+
+======================================================================
+FAIL: test_non_requirement_requirement_id_refuses (test_recovered_attribution.AttributionNegativeTests.test_non_requirement_requirement_id_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 635, in test_non_requirement_requirement_id_refuses
+    self._refuse(self.proof(), "COVERAGE_UNINTERPRETABLE")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_UNINTERPRETABLE'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_UNINTERPRETABLE
+
+
+======================================================================
+FAIL: test_one_unknown_actionable_requirement_refuses (test_recovered_attribution.AttributionNegativeTests.test_one_unknown_actionable_requirement_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 609, in test_one_unknown_actionable_requirement_refuses
+    self._refuse(self.proof(), "COVERAGE_TERMINAL_MISMATCH")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_TERMINAL_MISMATCH'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_TERMINAL_MISMATCH
+
+
+======================================================================
+FAIL: test_requirement_without_linked_work_refuses (test_recovered_attribution.AttributionNegativeTests.test_requirement_without_linked_work_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 642, in test_requirement_without_linked_work_refuses
+    self._refuse(self.proof(), "COVERAGE_UNINTERPRETABLE")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_UNINTERPRETABLE'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_UNINTERPRETABLE
+
+
+======================================================================
+FAIL: test_source_still_active_refuses (test_recovered_attribution.AttributionNegativeTests.test_source_still_active_refuses)
+An active projection for a tombstoned receipt corrupts the index;
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 665, in test_source_still_active_refuses
+    self._blocked_global()
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 463, in _blocked_global
+    self.assertEqual(report["code"], "WORK_DELTA_BLOCKED")
+AssertionError: 'VALIDATION_FAILED' != 'WORK_DELTA_BLOCKED'
+- VALIDATION_FAILED
++ WORK_DELTA_BLOCKED
+
+
+======================================================================
+FAIL: test_split_linked_work_refuses (test_recovered_attribution.AttributionNegativeTests.test_split_linked_work_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 623, in test_split_linked_work_refuses
+    self._refuse(self.proof(), "COVERAGE_SPLIT_WORK")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_SPLIT_WORK'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_SPLIT_WORK
+
+
+======================================================================
+FAIL: test_tombstone_closure_counts_change_refuses (test_recovered_attribution.AttributionNegativeTests.test_tombstone_closure_counts_change_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 580, in test_tombstone_closure_counts_change_refuses
+    self._refuse(self.proof(), "COVERAGE_COUNT_MISMATCH")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'TOMBSTONE_CLOSURE_IDENTITY_CHANGED' != 'COVERAGE_COUNT_MISMATCH'
+- TOMBSTONE_CLOSURE_IDENTITY_CHANGED
++ COVERAGE_COUNT_MISMATCH
+
+
+======================================================================
+FAIL: test_tombstone_linked_work_change_refuses (test_recovered_attribution.AttributionNegativeTests.test_tombstone_linked_work_change_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 565, in test_tombstone_linked_work_change_refuses
+    self._refuse(self.proof(), "TOMBSTONE_CLOSURE_IDENTITY_CHANGED")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'ARCHIVE_WORK_MISMATCH' != 'TOMBSTONE_CLOSURE_IDENTITY_CHANGED'
+- ARCHIVE_WORK_MISMATCH
++ TOMBSTONE_CLOSURE_IDENTITY_CHANGED
+
+
+======================================================================
+FAIL: test_tombstone_not_closed_refuses (test_recovered_attribution.AttributionNegativeTests.test_tombstone_not_closed_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 510, in test_tombstone_not_closed_refuses
+    self._refuse(self.proof(), "TOMBSTONE_NOT_CLOSED")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'INDEX_UNREADABLE' != 'TOMBSTONE_NOT_CLOSED'
+- INDEX_UNREADABLE
++ TOMBSTONE_NOT_CLOSED
+
+
+======================================================================
+FAIL: test_tombstone_source_sha_change_refuses (test_recovered_attribution.AttributionNegativeTests.test_tombstone_source_sha_change_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 572, in test_tombstone_source_sha_change_refuses
+    self._refuse(self.proof(), "TOMBSTONE_CLOSURE_IDENTITY_CHANGED")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'ARCHIVE_SHA_MISMATCH' != 'TOMBSTONE_CLOSURE_IDENTITY_CHANGED'
+- ARCHIVE_SHA_MISMATCH
++ TOMBSTONE_CLOSURE_IDENTITY_CHANGED
+
+
+======================================================================
+FAIL: test_undocumented_tombstone_field_refuses (test_recovered_attribution.AttributionNegativeTests.test_undocumented_tombstone_field_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 594, in test_undocumented_tombstone_field_refuses
+    self._refuse(self.proof(), "TOMBSTONE_CLOSURE_IDENTITY_CHANGED")
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'TOMBSTONE_CLOSURE_IDENTITY_CHANGED'
+- PRESERVED_ORIGINAL_REPLACED
++ TOMBSTONE_CLOSURE_IDENTITY_CHANGED
+
+
+======================================================================
+FAIL: test_current_tombstone_is_not_byte_identical_to_original (test_recovered_attribution.AttributionPositiveTests.test_current_tombstone_is_not_byte_identical_to_original)
+C3: the additive recovery block is expected, never corruption.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 383, in test_current_tombstone_is_not_byte_identical_to_original
+    self.assertTrue(self.proof()["attributable"])
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_positive_fixture_attributes_to_linked_work (test_recovered_attribution.AttributionPositiveTests.test_positive_fixture_attributes_to_linked_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 369, in test_positive_fixture_attributes_to_linked_work
+    self.assertTrue(result["attributable"], result)
+AssertionError: False is not true : {'attributable': False, 'reason': 'PRESERVED_ORIGINAL_REPLACED', 'receipt_id': 'SRC-038', 'detail': 'contract'}
+
+======================================================================
+FAIL: test_release_stays_blocked_with_carried_residue (test_recovered_attribution.AttributionPositiveTests.test_release_stays_blocked_with_carried_residue)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 413, in test_release_stays_blocked_with_carried_residue
+    self.assertEqual(report["code"], "WORK_DELTA_PASS")
+AssertionError: 'WORK_DELTA_BLOCKED' != 'WORK_DELTA_PASS'
+- WORK_DELTA_BLOCKED
++ WORK_DELTA_PASS
+
+
+======================================================================
+FAIL: test_work_delta_carries_residue_through_t160 (test_recovered_attribution.AttributionPositiveTests.test_work_delta_carries_residue_through_t160)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1363-ab\baseline\tools\test_recovered_attribution.py", line 394, in test_work_delta_carries_residue_through_t160
+    self.assertEqual(report["code"], "WORK_DELTA_PASS")
+AssertionError: 'WORK_DELTA_BLOCKED' != 'WORK_DELTA_PASS'
+- WORK_DELTA_BLOCKED
++ WORK_DELTA_PASS
+
+
+----------------------------------------------------------------------
+Ran 2466 tests in 833.320s
+
+FAILED (failures=31, errors=1, skipped=17)
+{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": [
+      {
+        "field": "phase",
+        "from": "BUILD",
+        "to": "SCOUT",
+        "surface": "state",
+        "reason": "phase 'BUILD' disagrees with the newest provable phase-changing event E-100, which names SCOUT (T-1318)"
+      }
+    ]
+  },
+  "adopted": [],
+  "lifecycle": [
+    {
+      "field": "board",
+      "kind": "claim-clear",
+      "ticket": "T-9001",
+      "surface": "board",
+      "section": "## DOING",
+      "fields": [
+        "owner",
+        "claim_time"
+      ],
+      "reason": "T-9001 carries a half claim pair (owner='test-agent', claim_time='') on claimable Work; CORE's both-or-neither rule makes the LEASE INVALID, so the deterministic repair removes BOTH halves and fabricates no owner or time (SRC-043)"
+    },
+    {
+      "field": "board",
+      "kind": "section-move",
+      "ticket": "T-9001",
+      "surface": "board",
+      "from_section": "## DOING",
+      "to_section": "## TODO",
+      "reason": "T-9001 sits under ## DOING with no owner/claim_time pair; an unclaimed DOING Work was never started, so it returns to ## TODO (SRC-043)"
+    },
+    {
+      "field": "board",
+      "kind": "section-move",
+      "ticket": "T-9002",
+      "surface": "board",
+      "from_section": "## DOING",
+      "to_section": "## TODO",
+      "reason": "T-9002 sits under ## DOING with no owner/claim_time pair; an unclaimed DOING Work was never started, so it returns to ## TODO (SRC-043)"
+    },
+    {
+      "field": "board",
+      "kind": "section-move",
+      "ticket": "T-9003",
+      "surface": "board",
+      "from_section": "## DONE",
+      "to_section": "## TODO",
+      "requires_approval": true,
+      "generation": "current",
+      "reason": "T-9003 sits under ## DONE with no closure_mode, no owner, no claim_time and no verification evidence in history, and was allocated AFTER this project's closure contract became observable; the completion was never established by a canonical operation, so reopening it into ## TODO requires ONE operator approval of the repair plan (SRC-043)"
+    }
+  ],
+  "repair_id": "2209210f5f9a53764d8d871b5ec9f624ca2997ec4c71916e24fbb3d909a5459f",
+  "targets": [
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md",
+    ".saipen/recovery/state-phase/reconcile-20260916123432757693.STATE.md"
+  ],
+  "event": "E-101",
+  "agent": "test-agent",
+  "strict_state_error": "invalid phase transition: DONE -> BUILD (RFC § 1.6). Allowed from DONE: SCOUT, PLAN, HUNT, BLOCKED",
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-sdefect-69u6ys81/.saipen/MANIFEST.json",
+    "contract_version": 1,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  }
+}

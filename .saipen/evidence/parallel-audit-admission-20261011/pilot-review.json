@@ -1,0 +1,94 @@
+{
+  "stage_a": "DEMONSTRATED",
+  "reviewed_evaluations": 3,
+  "independent_threads": 3,
+  "simultaneous_overlap_seconds": 88.523,
+  "pilot_wall_seconds": 118.563,
+  "observed_burst_evaluations_per_hour": 91.09,
+  "sustained_throughput_improvement_proved": false,
+  "serial_baseline_measured": false,
+  "duplicate_assignments": 0,
+  "duplicate_negative_control_refused": true,
+  "protected_file_count_before": 19821,
+  "protected_file_count_after": 19821,
+  "protected_canonical_audit_index_and_source_hashes_identical": true,
+  "workers": [
+    {
+      "worker_id": "SAIPEN_AUDITOR_001",
+      "assignment_id": "eb073c44d16d4c359723952f1160d5c93aee230864b61b18ec338a5cb0da580c",
+      "audit_path": "audit/SAIPEN_20261010_1202.md",
+      "audit_sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9",
+      "thread_ids": [
+        "01a12bd1-376d-7003-a9fd-cae49b0300fe"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "actual_boundary_proof": true,
+      "protected_targets_denied": 14,
+      "child_inheritance": true,
+      "command_count": 7,
+      "unexpected_completed_item_types": [],
+      "events_digest_matches": true,
+      "report_sha256": "e31513de350365d94fc823ca355c5c4a0bec1ec4967045e2433f27e0b142aff4",
+      "all_required_fields_returned": true,
+      "findings_independently_accepted_as_fixes": false,
+      "limit": "Evaluation receipt only; no historical incident closure or engineering acceptance."
+    },
+    {
+      "worker_id": "SAIPEN_AUDITOR_002",
+      "assignment_id": "3fd7711067b7f8116e12dbf5ae4e1d6a5a42d77778bc3af72538777b5892c9b7",
+      "audit_path": "audit/SAIPEN_20261011_1832.md",
+      "audit_sha256": "ef6e7af8f075af6baf728c83abe4be998d13cd4b681a5ff3c7cce25c2a2bcc2a",
+      "thread_ids": [
+        "01a12bd1-376d-7ad2-91e4-4c2153b4ddfe"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "actual_boundary_proof": true,
+      "protected_targets_denied": 14,
+      "child_inheritance": true,
+      "command_count": 9,
+      "unexpected_completed_item_types": [],
+      "events_digest_matches": true,
+      "report_sha256": "7541140656b91045fa58300b85907bf51b51f481580e2760550b011505a4738c",
+      "all_required_fields_returned": true,
+      "findings_independently_accepted_as_fixes": false,
+      "limit": "Evaluation receipt only; no historical incident closure or engineering acceptance."
+    },
+    {
+      "worker_id": "SAIPEN_AUDITOR_003",
+      "assignment_id": "0a7850f735d1325c11dc8c96f45161c162e86002f48e305dc0ac1c1906836e59",
+      "audit_path": "audit/SAIPEN_20261011_1901.md",
+      "audit_sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+      "thread_ids": [
+        "01a12bd1-376d-72b0-9ea7-dff42e6a8080"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "actual_boundary_proof": true,
+      "protected_targets_denied": 14,
+      "child_inheritance": true,
+      "command_count": 7,
+      "unexpected_completed_item_types": [],
+      "events_digest_matches": true,
+      "report_sha256": "193d58f2e578972b795798d71a2a1e649a28f6e2268f2e071726ef6be9ec6211",
+      "all_required_fields_returned": true,
+      "findings_independently_accepted_as_fixes": false,
+      "limit": "Evaluation receipt only; no historical incident closure or engineering acceptance."
+    }
+  ],
+  "manifest_resolution": "manifest-digest-resolution.json",
+  "stage_b": "DEFERRED_T442_HELD",
+  "stage_c": "DEFERRED_T442_HELD",
+  "stage_d": "NOT_MEASURED",
+  "verified_fixes_integrated": 0,
+  "source_receipts_created_by_workers": 0,
+  "work_tickets_created_by_workers": 0,
+  "remaining_limits": [
+    "No CPU/RAM peak, provider contention or sustained latency baseline measured.",
+    "Original foreign sessions and projects were absent; suggested controls are not executed results.",
+    "The input subset omitted adapter assets; no complete host capability claim.",
+    "One-coordinator static duplicate refusal does not prove T-445 simultaneous atomic claims.",
+    "OS command sandbox proof does not prove SAIPEN host admission, hooks or provider isolation."
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-10-03T04:38:36Z",
+  "evidence_class": "executed",
+  "findings_digest": "55690a7a25e3dc4607850c2df57e81e82a2f2f01e60739d26f2ce0f2a312bc95",
+  "gate": "core",
+  "integrity_digest": "2d400aca4e126e69",
+  "journal_op_id": "reverify.5d33a3b908c5",
+  "original_closure": {
+    "owner": "claude"
+  },
+  "own_problem_keys": [
+    "0db0eaa79f6d743f"
+  ],
+  "problem_count": 59,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000260",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:3d240e983a6652dfde8e972181a3b2503a499c642e88858546e1e7f58b9169cd",
+  "verdict": "FAIL",
+  "verification": [
+    {
+      "command": "python -m pytest -q tests/test_browser_dispatch.py tests/widget/w7-002-pre-start-block-once.test.js",
+      "duration_ms": 852,
+      "executed": true,
+      "exit_code": 4,
+      "output_bytes": 162,
+      "output_digest": "60b52b8bcac9b5f5",
+      "result": "FAIL"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "python -m pytest -q tests/test_browser_dispatch.py tests/widget/w7-002-pre-start-block-once.test.js"
+    ],
+    "findings_digest": "55690a7a25e3dc4607850c2df57e81e82a2f2f01e60739d26f2ce0f2a312bc95",
+    "gate": "core"
+  },
+  "verification_contract_digest": "9c23e9d6d162632b",
+  "verifier": "buffy",
+  "warning_count": 94,
+  "work": "T-57"
+}

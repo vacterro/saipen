@@ -1,0 +1,1 @@
+Testijooks käib veel (~634/941). Monitor äratab mind lõpus; siis: BOOT-i 51-baidine trim, BOOT-testid uuesti, regressioonipaar `work regression`, VERIFY → REVIEW.

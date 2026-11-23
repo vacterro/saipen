@@ -1,0 +1,144 @@
+{
+  "clauses": {
+    "SRC-401:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not assume these facts still describe the live repository."
+    },
+    "SRC-401:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Their causal relationship to the observed final STATE must still be established through reproduction."
+    },
+    "SRC-401:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never convert an exception, omitted provider result or absent root into CLEAN_VERIFIED without an explicit contract proving that absence is valid."
+    },
+    "SRC-401:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Determine the protocol-correct closure mode using actual review evidence."
+    },
+    "SRC-401:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Permit automatic terminal completion where existing operator authority already permits it."
+    },
+    "SRC-401:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not demand a manual confirmation solely to acknowledge that a completed automated verification found no defects, unless a genuine protected decision is involved."
+    },
+    "SRC-401:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Preserve a distinct outcome for unresolved findings or required human decisions."
+    },
+    "SRC-401:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Reconcile superseded review generations without deleting the older provenance."
+    },
+    "SRC-401:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Keep package identity, role revision, immutable collect linkage and durable receipts intact."
+    },
+    "SRC-401:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never mark a package genuinely reviewed before its required independent Core review has happened."
+    },
+    "SRC-401:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never fabricate a patch or publication receipt merely to close a no-change review ticket."
+    },
+    "SRC-401:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not manufacture grants, approve protected actions, bypass broker verification or reinterpret denied authority as consent."
+    },
+    "SRC-401:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Avoid repeatedly filing identical protected-goal tickets."
+    },
+    "SRC-401:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not automatically publish or amend foreign-owned changes."
+    },
+    "SRC-401:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not infer publication merely from a successful test or DONE ticket."
+    },
+    "SRC-401:R016": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Goal loader raises an exception: must not report CLEAN_VERIFIED."
+    },
+    "SRC-401:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Active Persistent Goal with empty BOARD: must not report ALL_WORK_COMPLETE."
+    },
+    "SRC-401:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Authority-blocked maintenance: must not claim successful goal completion."
+    },
+    "SRC-401:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Certificate failure must remain observable in structured status."
+    },
+    "SRC-401:R020": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Restart/recovery must preserve disposition and authorization provenance."
+    },
+    "SRC-401:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "All ordinary tests must be non-invasive to the active Windows desktop."
+    },
+    "SRC-401:R022": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not capture keyboard, mouse, focus or foreground windows."
+    },
+    "SRC-401:R023": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not claim success solely because the CLI reports DONE or the validator reports zero problems."
+    },
+    "SRC-401:R024": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Avoid duplicate tickets if the same fixes are already implemented."
+    },
+    "SRC-401:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not halt unrelated permitted work."
+    },
+    "SRC-401:R026": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never bypass safety gates to simulate autonomous progress."
+    },
+    "SRC-401:R027": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Final response must include:"
+    }
+  },
+  "derived_at": "2026-11-07T16:59:19Z",
+  "derived_from": "SRC-401",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "db19390c4bd638e1472abfed1d74704d9d3692853c7631373e026482694197d3"
+}

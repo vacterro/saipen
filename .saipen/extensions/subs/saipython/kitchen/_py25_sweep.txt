@@ -1,0 +1,62 @@
+PY-25 sweep captures, identity 5706afe0d / tree c66baf69
+
+--- compileall tools/saipen_engine (Python 3.11.9 family interpreter)
+rc=0 0s
+
+
+--- py_compile tools/test_validator_layout_parity.py (the only tools/ file touched by 5706afe0d)
+rc=0
+
+--- ruff 0.16.0 check tools/ --statistics
+rc=1
+420	E501   	[ ] line-too-long
+ 51	F401   	[*] unused-import
+ 38	E402   	[ ] module-import-not-at-top-of-file
+ 29	F821   	[ ] undefined-name
+ 16	SIM117 	[-] multiple-with-statements
+ 14	PLW0108	[ ] unnecessary-lambda
+ 14	RUF059 	[ ] unused-unpacked-variable
+ 13	RUF100 	[*] unused-noqa
+ 11	F841   	[ ] unused-variable
+  6	RUF005 	[ ] collection-literal-concatenation
+  6	SIM105 	[ ] suppressible-exception
+  4	E731   	[ ] lambda-assignment
+  4	PLW2901	[ ] redefined-loop-name
+  3	SIM114 	[*] if-with-same-arms
+  2	       	[ ] invalid-syntax
+  2	E401   	[*] multiple-imports-on-one-line
+  2	SIM103 	[ ] needless-bool
+  1	E713   	[*] not-in-test
+  1	E741   	[ ] ambiguous-variable-name
+  1	F541   	[*] f-string-missing-placeholders
+  1	F811   	[ ] redefined-while-unused
+  1	FURB110	[*] if-exp-instead-of-or-operator
+  1	FURB171	[ ] single-item-membership-test
+  1	RUF010 	[*] explicit-f-string-type-conversion
+  1	SIM108 	[ ] if-else-block-instead-of-if-exp
+  1	SIM113 	[ ] enumerate-for-loop
+Found 644 errors.
+[*] 75 fixable with the `--fix` option (59 hidden fixes can be enabled with the `--unsafe-fixes` option).
+
+--- kitchen/pen artifact census (13 entries, closed-cycle artifacts only)
+  .saipen
+  PY-16.patch
+  REGISTRY.json
+  T-2062
+  T-2062-r2
+  T-2062-r3
+  T-2062-r4
+  _gitkeep
+  _py16_verify.txt
+  _verify_duplicate_guard.py
+  crew.py
+  test_t1430_crew_run_receipt.py
+  test_t2122_red_owner_fail_closed.py
+--- E501 delta attribution (measured this sweep)
+PY-24 (tree 28904dfc12dd4d11) measured 418 E501 / 642 total; this tree measures 420 E501 / 644 total.
+git show 42e49954d --unified=0 -- tools/ added exactly 2 lines longer than 100 chars
+(f"{receipt_id} already names {work} as its primary Work; refusing a no-op rebind" at 105 chars and
+the sha256 digest construction line at 104 chars -- the T-2139 source-rebind landing, commit 42e49954d).
+git show 5706afe0d --unified=0 -- tools/ added 0 lines longer than 100 chars (comment-only parity delta).
+The +2 E501 are therefore owned by the T-2139 rebind commit between the two measured trees, not by
+this crew epoch's closure commit; F401 51 / E402 38 / F821 29 are unchanged.

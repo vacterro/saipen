@@ -1,0 +1,21 @@
+{
+  "command": [
+    "C:\\Windows\\system32\\cmd.exe",
+    "/d",
+    "/c",
+    "bin\\saipen.cmd",
+    "work",
+    "reverify",
+    "T-1695",
+    "--contract",
+    ".saipen\\evidence\\T-1726-closed-contracts\\T1695-focused-contract.json",
+    "--json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "started_utc": "2026-10-12T22:25:05.029663+00:00",
+  "runner_pid": 34496,
+  "child_pid": 32800,
+  "exit_code": 0,
+  "elapsed_s": 31.625,
+  "finished_utc": "2026-10-12T22:25:36.642795+00:00"
+}

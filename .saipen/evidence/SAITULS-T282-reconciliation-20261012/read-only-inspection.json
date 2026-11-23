@@ -1,0 +1,277 @@
+{
+  "observed_utc": "2026-10-12T04:13:43.420439+00:00",
+  "project_root": "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+  "head": "5f0dc0c6abe1f9a0a34487d87f56fb129410cb7f",
+  "git_status_counts": {
+    "M ": 1,
+    " M": 87,
+    " A": 1,
+    " D": 9,
+    "??": 397
+  },
+  "index_entries_sha256": "0e32c5437a0c05e179d7a66f21abc50348a3e1018a256329d11ab01624657d8f",
+  "protected_before": {
+    ".saipen/STATE.md": "66a30ae0fda1e66d839ab0395ee2335a96a0c8ed122539b82e46efc44bcaece2",
+    ".saipen/BOARD.md": "fc343854e6ecceb7ea76970445909dc66b20891ac6c6055dc47fff189adbf56d",
+    ".saipen/LOG.md": "6468d7f98033e819b95a29e86e9bfcd44bc11d11874541895843b94a99d390c2",
+    ".saipen/intake/active/SRC-099.md": "f4d0258f00b80eadcac0042290762466b09ee1a12a484e547b3703e188891442",
+    ".saipen/intake/active/SRC-099.meta.json": "405f39b7d0865a59a0b74bce847d05216341eefca696fc1d0147cb0eabdcf39d",
+    ".saipen/intake/contracts/SRC-099.json": "f62f0c6219f3859833f2ed79c508a507c153c095f67412d7ce2e4ab74d37254c",
+    ".saipen/intake/coverage/SRC-099.json": "05f91c8e61028a816986361fd0003937049a8319bcfe998f3397abd76f1b652c",
+    ".saipen/evidence/T-282-w2-002-ownership-generation.md": "aa3ad5a847acc2dcd39c2788741526aed04120b60cd9c1d8349a832ae9653ded",
+    "Scripts/accounts/SaiAccountsHelper.cs": "d835c3d8969c43cfb81ef9d3f1d53d6faccae01364faa005c22507de829ebbf2",
+    "tests/test_accounts_ownership_generation.py": "3c3f52b2bc525db2a1881fd4aad6e85e7b43dc504def499c48c4c1fd9da31533"
+  },
+  "protected_after": {
+    ".saipen/STATE.md": "66a30ae0fda1e66d839ab0395ee2335a96a0c8ed122539b82e46efc44bcaece2",
+    ".saipen/BOARD.md": "fc343854e6ecceb7ea76970445909dc66b20891ac6c6055dc47fff189adbf56d",
+    ".saipen/LOG.md": "6468d7f98033e819b95a29e86e9bfcd44bc11d11874541895843b94a99d390c2",
+    ".saipen/intake/active/SRC-099.md": "f4d0258f00b80eadcac0042290762466b09ee1a12a484e547b3703e188891442",
+    ".saipen/intake/active/SRC-099.meta.json": "405f39b7d0865a59a0b74bce847d05216341eefca696fc1d0147cb0eabdcf39d",
+    ".saipen/intake/contracts/SRC-099.json": "f62f0c6219f3859833f2ed79c508a507c153c095f67412d7ce2e4ab74d37254c",
+    ".saipen/intake/coverage/SRC-099.json": "05f91c8e61028a816986361fd0003937049a8319bcfe998f3397abd76f1b652c",
+    ".saipen/evidence/T-282-w2-002-ownership-generation.md": "aa3ad5a847acc2dcd39c2788741526aed04120b60cd9c1d8349a832ae9653ded",
+    "Scripts/accounts/SaiAccountsHelper.cs": "d835c3d8969c43cfb81ef9d3f1d53d6faccae01364faa005c22507de829ebbf2",
+    "tests/test_accounts_ownership_generation.py": "3c3f52b2bc525db2a1881fd4aad6e85e7b43dc504def499c48c4c1fd9da31533"
+  },
+  "protected_unchanged": true,
+  "git_unchanged": true,
+  "state": "---\nphase: PAUSED\ntask: T-260\nnext_action: \"NONE -- T-260 paused awaiting operator authority; T-282 evidence at .saipen/evidence/T-282-w2-002-ownership-generation.md\"\nblocker: T-260 continuation requires operator authority (continuation_authority: operator_required)\nagent: saipen-cli\nsaipen_version: 7\nschema_version: 3\nstyle_contract: ded-069a4c52\nsaipen_home: \"V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN\"\nmode: no-publish\ntransition_from: SCOPED_RUN\nlast_event: 3002\nupdated: \"2026-10-11T05:58:00Z\"\nexecution_intent: goal\ngoal_waves: 0\ngoal_tickets: 13\ncontinuation_authority: operator_required\nauthority_source: E-2853\nauthority_until: budget\nsafety_valve_mode: hard_wait\n---\n\n# T-282 / W2-002 residual ownership generation -- completed, evidence recorded\n\nBounded under T-260 / SRC-078 ownership; no scope expansion admitted.\n\nDelivered in Scripts/accounts/SaiAccountsHelper.cs:\n- post-write ACL witness (`post_write_acl_fp`) journaled immediately after\n  `SetAccessControl`, before verification, so a mid-flight journal proves the\n  ACE on disk was written by this helper.\n- generation-checked rollback in `HandleGrantFailure`: a foreign ACL generation\n  refuses rollback (no ACE deleted, evidence stamped and retained); rollback\n  results are verified against the pre-mutation generation.\n- evidence is stamped onto the existing journal (`MarkTxnIntentState`), never\n  rewritten, so transaction identity and witnesses survive a failure.\n- reconciler adopts `mutation_written` journals and refuses adoption when the\n  recorded write witness disagrees with the live ACL.\n- ensure fails closed with INCONSISTENT_GRANT_STATE when the witness cannot be\n  journaled.\n\nTests: 38/38 (new suite), 105 + 69 + 240 + 264 regression all green.\nPower-loss durability classified BLOCKED, not claimed PASS.\nPublication disabled. No push, no deploy, no account changes.\n\nT-261, T-262, T-263 remain paused. T-260 left PAUSED: other SRC-078 audit\nclauses stay actionable.\n\n\n# T-273 SAISPIN watchdog repair -- work completed (board-blocked, not finished)\n\nAll P0 and P1 acceptance criteria implemented and verified:\n\n### P0-1: Producer authentication (FIXED)\n- `validate_lease_producer_authority()` now requires `producer_token` matching\n  a `producers.json` registry entry; hand-written leases with no matching\n  token are refused.\n- `build_managed_lease()` accepts and embeds `producer_token`.\n- `register_managed_worker()` generates UUID4 token, records it in registry.\n- PowerShell `Get-RecoveryLeaseVerdict()` validates token against registry.\n- `evaluate_recovery_lease()` reordered: identity check before producer check.\n\n### P0-2: Process-owner verification (FIXED)\n- Python engine: `validate_lease_producer_authority()` rejects empty `windows_user`.\n- PowerShell: `Get-RecoveryLeaseVerdict()` and `Invoke-ProvenKill()` require\n  non-empty `windows_user`; `Get-ProcessOwnerName()` uses CIM instance-method\n  (Get-CimInstance + Invoke-CimMethod) instead of class-level call.\n\n### P0-3: Thread-safe lease writes (FIXED)\n- `write_lease_atomic()` temp filename now includes thread ID + random nonce.\n- Generation-checked optimistic concurrency via `expect_generation` param.\n\n### P1-3: Production managed-worker caller (INTEGRATED)\n- New `Scripts/saispin_managed.py`: production caller for SAITULS worker scripts.\n- `register_self()`, `authorize_self()`, `heartbeat()`, `revoke_self()`,\n  `unregister_self()` wrappers around the engine's lease API.\n- Added `now_iso()` to engine for timestamp generation.\n\n### P1-4: Controlled kill acceptance (EVIDENCED)\n- Positive: stale authorized lease with stale heartbeat KILLs.\n- Negative 1: forged lease (foreign producer_token) REFUSES.\n- Negative 2: empty windows_user REFUSES.\n- Negative 3: active work (fresh progress) REFUSES.\n- Negative 4: revoked ownership REFUSES.\n\n### Test results: ALL PASS (0 failures)\n- `python -B tests/test_saispin.py` -- 0 failures\n- `--self-test` P1-4 cases added to PowerShell self-test suite.\n\n### Remaining (board-blocked, cannot mutate)\n- P1-6 SAIPEN reconciliation: BOARD conflict blocks all mutations.\n  Directive P1-6 fallback applied: source work + evidence retained,\n  refusal recorded, transition left BLOCKED.\n---\n",
+  "required_headings": [
+    "## DOING",
+    "## TODO",
+    "## DONE",
+    "## BLOCKED"
+  ],
+  "actual_headings": [
+    "## DOING",
+    "## TODO",
+    "## PARTIAL",
+    "## DONE",
+    "## BLOCKED"
+  ],
+  "board_errors": [
+    "BOARD.md:28 ticket T-282 sits under ## PARTIAL -- not one of the four RFC sections, so no operation may mutate a board built around it"
+  ],
+  "t282_physical_records": [
+    {
+      "id": "T-282",
+      "digest": "48d54149bb68805f807a7bf7815016cc28ec07d5d6defeb4bd155c049f632f69",
+      "line_no": 26,
+      "section": "## TODO",
+      "checkbox": " ",
+      "description": "[P2] Finish residual W2-002 Accounts Helper ownership and crash-recovery safety boundaries under T-260/SRC-078",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "request_witness": "model_supplied",
+        "source_receipts": "SRC-099"
+      },
+      "raw": "- [ ] T-282 [P2] Finish residual W2-002 Accounts Helper ownership and crash-recovery safety boundaries under T-260/SRC-078 | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-099"
+    },
+    {
+      "id": "T-282",
+      "digest": "573914a32ab04ef910ab59e96cb247d00e7476f174d844cce88d18918d4d36fb",
+      "line_no": 28,
+      "section": "## PARTIAL",
+      "checkbox": "/",
+      "description": "[P2] W2-002 residual ownership generation delivered: Scripts/accounts/SaiAccountsHelper.cs gains a post-write ACL witness (post_write_acl_fp) journaled immediately after SetAccessControl, generation-checked rollback (CheckRollbackOwnershipAt, HasExactHelperRuleVerified), evidence-stamping instead of journal rewriting on failure, and mutation_written adoption in the reconciler; per-generation ownership (gen + acl_fp + retraction) rejects ownership of a foreign ACL generation",
+      "fields": {
+        "verify": "tests/test_accounts_ownership_generation.py 38/38 PASS covering CASE A orphaned-helper-grant, CASE B foreign-replacement preservation, restart and generation-mismatch, revoke-transaction path justification for unowned and unexpected paths, repeated reconciliation; 105 + 69 + 240 + 264 regression suites unchanged; power-loss durability classified BLOCKED (Flush(true) is not a volume barrier) and NOT claimed PASS",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-11T05:00:00Z",
+        "closure_mode": "evidence_recorded"
+      },
+      "raw": "- [/] T-282 [P2] W2-002 residual ownership generation delivered: Scripts/accounts/SaiAccountsHelper.cs gains a post-write ACL witness (post_write_acl_fp) journaled immediately after SetAccessControl, generation-checked rollback (CheckRollbackOwnershipAt, HasExactHelperRuleVerified), evidence-stamping instead of journal rewriting on failure, and mutation_written adoption in the reconciler; per-generation ownership (gen + acl_fp + retraction) rejects ownership of a foreign ACL generation | verify: tests/test_accounts_ownership_generation.py 38/38 PASS covering CASE A orphaned-helper-grant, CASE B foreign-replacement preservation, restart and generation-mismatch, revoke-transaction path justification for unowned and unexpected paths, repeated reconciliation; 105 + 69 + 240 + 264 regression suites unchanged; power-loss durability classified BLOCKED (Flush(true) is not a volume barrier) and NOT claimed PASS | evidence: .saipen/evidence/T-282-w2-002-ownership-generation.md | owner: saipen-cli | claim_time: 2026-10-11T05:00:00Z | closure_mode: evidence_recorded"
+    }
+  ],
+  "t282_parser_record": {
+    "id": "T-282",
+    "section": "## TODO",
+    "line_no": 26,
+    "checkbox": " ",
+    "needs": [],
+    "fields": {
+      "verify": "the requested change is present and demonstrated against the user own description of it",
+      "request_witness": "model_supplied",
+      "source_receipts": "SRC-099"
+    },
+    "raw": "- [ ] T-282 [P2] Finish residual W2-002 Accounts Helper ownership and crash-recovery safety boundaries under T-260/SRC-078 | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-099",
+    "description": "[P2] Finish residual W2-002 Accounts Helper ownership and crash-recovery safety boundaries under T-260/SRC-078"
+  },
+  "source_meta": {
+    "linked_work": "T-282",
+    "receipt_id": "SRC-099",
+    "received_at": "2026-10-11T05:22:01Z",
+    "redaction": {
+      "applied": false,
+      "authoritative": false,
+      "original_sha256": "f4d0258f00b80eadcac0042290762466b09ee1a12a484e547b3703e188891442",
+      "sanitized_sha256": "f4d0258f00b80eadcac0042290762466b09ee1a12a484e547b3703e188891442"
+    },
+    "request_provenance": {
+      "compared_digest": "9208ce77fb157cc702b2e12d77ba0df306bb6d9e83c4945c75156d75b22f1d49",
+      "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+      "witness": "model_supplied"
+    },
+    "schema_version": 1,
+    "sensitive": false,
+    "source_authority": {
+      "body_sha256": "f4d0258f00b80eadcac0042290762466b09ee1a12a484e547b3703e188891442",
+      "mode": "exact",
+      "original_available": true
+    },
+    "source_kind": "user_instruction",
+    "source_sha256": "f4d0258f00b80eadcac0042290762466b09ee1a12a484e547b3703e188891442",
+    "status": "ACTIVE",
+    "transport": {
+      "newline_normalization": "none",
+      "source_encoding": "utf-8",
+      "transport_transform": "none"
+    }
+  },
+  "source_body_digest_matches": true,
+  "source_contract": {
+    "clauses": {},
+    "derived_at": null,
+    "derived_from": "SRC-099",
+    "interpretation_revision": 0,
+    "schema_version": 1,
+    "source_sha256": "f4d0258f00b80eadcac0042290762466b09ee1a12a484e547b3703e188891442"
+  },
+  "source_coverage": {
+    "requirements": {},
+    "schema_version": 1
+  },
+  "event_chain_tail": [
+    "- 11.10.26 02:44 [E-2995] [parent: E-2994] [T-260] [agent: saipen-cli] [op: ticket-331bbbb84dc74126b56713f6efc9fb30] DEC: ticket unblock via SAIOPS -- bounded operator authorization SAITULS_20261011_0542 for W2-002 transaction security correction",
+    "- 11.10.26 03:04 [E-2996] [parent: E-2995] [T-260] [agent: saipen-cli] [op: ticket-cd7ab0cef6db4dfb90bdf891152ad15c] DEC: ticket block via SAIOPS -- W2-002 accounts transaction security correction completed across all 7 boundaries, 100% tests passing, returned to operator pause",
+    "- 11.10.26 04:40 [E-2997] [parent: E-2996] [T-260] [agent: saipen-cli] [op: ticket-58f05b1b893b44d1989eb31a511526f2] DEC: ticket unblock via SAIOPS -- bounded operator authorization (mission SAITULS residual W2-002): ownership-generation ledger correctness, recovery ownership validation, rollback evidence, txn durability contract under existing T-260 / SRC-078 ownership",
+    "- 11.10.26 04:40 [E-2998] [parent: E-2997] [T-260] [agent: saipen-cli] [op: claim-3c1c632e7be94036bd641a3b0708ccaf] DEC: claimed via SAIOPS -- owner saipen-cli",
+    "- 11.10.26 04:42 [E-2999] [parent: E-2998] [T-260] [agent: saipen-cli] [op: checkpoint-2533169e52d248089d48cf7d9de939db] RUN: SCOUT residual W2-002: reread SRC-078 + r001 contract; scope = stale ledger ownership CASES A/B, recovery ownership validation in ReconcileInterruptedTxn, rollback evidence on grant failure branches, durable txn contract; baseline 105/105 fault-injection green",
+    "- 11.10.26 04:53 [E-3000] [parent: E-2999] [T-260] [agent: saipen-cli] [op: checkpoint-0a1b3f454b734540b2902b749f9e81fb] RUN: BUILD gate CONTRACT_DRIFT on SRC-078: active contract is rev-0 seeded residue, orphan r001.json present, coverage requirements=0 (re-seeded 01:41Z); close/reconcile/promote all refused or out of scope; previous corrective session E-2995->E-2996 proceeded without BUILD transition; same precedent followed; residual protocol-state drift recorded as evidence",
+    "- 11.10.26 05:22 [E-3001] [parent: E-3000] [T-282] [agent: saipen-cli] [op: userreq-4fd1ad12db894d5bb82d07379cc969fd] DEC: user request SRC-099 projected as T-282 (local candidate; witness model_supplied)",
+    "- 11.10.26 05:58 [E-3002] [parent: E-3001] [T-282] [agent: saipen-cli] [op: run-w2-002-residual] RUN: residual W2-002 ownership generation. SaiAccountsHelper.cs: post_write_acl_fp witness journaled immediately after SetAccessControl; CheckRollbackOwnershipAt + HasExactHelperRuleVerified gate HandleGrantFailure rollback against the generation the helper itself wrote (foreign ACL generation -> refusal, no ACE deleted, evidence retained); MarkTxnIntentState stamps existing journal instead of rewriting it; mutation_written adoption in reconciler with write-witness agreement; ensure fails closed when the witness cannot be journaled. Built: Scripts\\accounts\\build.ps1 (not deployed). Tests: ownership_generation 38/38, fault_injection 105/105, native_contract 69/69, sai_accounts 240/240, accounts_runtime 264 passed. Evidence: .saipen/evidence/T-282-w2-002-ownership-generation.md. Power-loss durability classified BLOCKED (Flush(true) is not a volume barrier); no controlled process-termination test executed; byte-identical single-explicit-ACE replacement accepted as content-witness ceiling."
+  ],
+  "operation_records": [
+    {
+      "path": ".saipen\\recovery\\settled\\userreq-4fd1ad12db894d5bb82d07379cc969fd\\operation.json",
+      "record": {
+        "op_id": "userreq-4fd1ad12db894d5bb82d07379cc969fd",
+        "operation": "user_request",
+        "created_at": "2026-10-11T05:22:03Z",
+        "agent": "saipen-cli",
+        "project_identity": "v:\\___vac\\__k\\__code\\__saituls",
+        "project_lineage": "lineage-ded945ae8243480ab1bfee73baeb29c6",
+        "semantic_payload_hash": "d86a3e2dd773a1f5",
+        "preconditions": {
+          ".saipen/STATE.md": "096b8cead1786988",
+          ".saipen/BOARD.md": "8a3b8a3aa58debc1",
+          ".saipen/LOG.md": "99f09b5f87a9b37a"
+        },
+        "read_preconditions": {
+          ".saipen/logs": "tree-missing-v1"
+        },
+        "verification_policy": "core_fast",
+        "status": "COMMITTED",
+        "progress_index": 3,
+        "targets": [
+          {
+            "path": ".saipen/LOG.md",
+            "role": "log",
+            "action": "write",
+            "before_hash": "99f09b5f87a9b37a",
+            "after_hash": "53f73a714e524227",
+            "applied": true
+          },
+          {
+            "path": ".saipen/BOARD.md",
+            "role": "board",
+            "action": "write",
+            "before_hash": "8a3b8a3aa58debc1",
+            "after_hash": "d3a356f78c635c7a",
+            "applied": true
+          },
+          {
+            "path": ".saipen/STATE.md",
+            "role": "state",
+            "action": "write",
+            "before_hash": "096b8cead1786988",
+            "after_hash": "bfbfa577f958dbbb",
+            "applied": true
+          }
+        ]
+      }
+    }
+  ],
+  "commands": [
+    {
+      "command": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "status",
+        "--json"
+      ],
+      "exit_code": 1,
+      "stdout": "status.stdout.bin",
+      "stderr": "status.stderr.bin"
+    },
+    {
+      "command": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "recover",
+        "--dry-run",
+        "--json"
+      ],
+      "exit_code": 1,
+      "stdout": "recover-dry-run.stdout.bin",
+      "stderr": "recover-dry-run.stderr.bin"
+    },
+    {
+      "command": [
+        "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+        "-B",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+        "--gate",
+        "core",
+        "--no-receipt",
+        "--findings-json",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\SAITULS-T282-reconciliation-20261012\\core-findings.json"
+      ],
+      "exit_code": 1,
+      "stdout": "core-read-only.stdout.bin",
+      "stderr": "core-read-only.stderr.bin"
+    }
+  ],
+  "current_code_markers": {
+    "CheckRollbackOwnershipAt": [
+      3325,
+      3366
+    ],
+    "MarkTxnIntentState": [
+      3281,
+      3296,
+      3303,
+      3374,
+      3430,
+      3613
+    ],
+    "HasExactHelperRuleVerified": [
+      3395,
+      3446,
+      3456
+    ],
+    "post_write_acl_fp": [
+      2102,
+      2440,
+      3356
+    ],
+    "mutation_written": [
+      2426,
+      2436,
+      3607
+    ]
+  },
+  "test_execution": "Not repeated; existing narrative and E-3002 claims retained without new PASS attribution.",
+  "conclusion": "AUTHORITY_REQUIRED; no canonical mutation applied. PAUSED cannot be preserved by the proposed SCOUT recovery."
+}

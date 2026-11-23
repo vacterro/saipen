@@ -1,0 +1,65 @@
+ M VERSION
+ M saipen/COMMANDS_REFERENCE.md
+ M saipen/COMMAND_EFFECTS.json
+ M saipen/REGISTRY.json
+ M tools/core_unit_baseline.json
+ M tools/freshness.py
+ M tools/release_ledger_baseline.json
+ M tools/saipen.py
+ M tools/saipen_engine/audit_route.py
+ M tools/saipen_engine/board_scrub.py
+MM tools/saipen_engine/conformance.py
+ M tools/saipen_engine/crew.py
+M  tools/saipen_engine/finding_route.py
+ M tools/saipen_engine/future_gate.py
+ M tools/saipen_engine/host_authority_broker.py
+ M tools/saipen_engine/host_authority_client.py
+ M tools/saipen_engine/intake.py
+ M tools/saipen_engine/journal.py
+ M tools/saipen_engine/operations.py
+ M tools/saipen_engine/operator_origin.py
+ M tools/saipen_engine/regression_execution.py
+ M tools/saipen_engine/release.py
+ M tools/saipen_engine/remediation.py
+ M tools/saipen_engine/router.py
+ M tools/test_audit_route.py
+ M tools/test_campaign_matrix.py
+ M tools/test_campaign_production_gates.py
+M  tools/test_conformance_repair_boundary.py
+ M tools/test_fixture_support.py
+ M tools/test_remediation_self_consistency.py
+ M tools/test_t1430_crew_run_receipt.py
+ M tools/test_t1619_iteration_boundary.py
+M  tools/test_t1817_acceptance_bar.py
+M  tools/test_t1817_finding_route.py
+ M tools/test_t1880_wait_survives_phase_shortcut.py
+ M tools/test_t1949_hook_validator_status.py
+AM tools/test_t2056_obstacle_actions.py
+A  tools/test_t2066_zaicode_host_policy.py
+?? tools/_t2040_experiment.py
+?? tools/saipen_engine/discovery_providers.py
+?? tools/saipen_engine/gc.py
+?? tools/saipen_engine/outcome_truth.py
+?? tools/saipen_engine/persistent_goal.py
+?? tools/saipen_engine/source_reindex.py
+?? tools/test_gc.py
+?? tools/test_nested_git_boundaries.py
+?? tools/test_t2023_goal_management_and_maintenance_binding.py
+?? tools/test_t2040_bounded_discovery_resume.py
+?? tools/test_t2040_continuation_truth.py
+?? tools/test_t2040_discovery_owners.py
+?? tools/test_t2040_exhaustion_evidence.py
+?? tools/test_t2040_finish_plan_guards.py
+?? tools/test_t2040_maintenance_authority.py
+?? tools/test_t2040_publication_truth.py
+?? tools/test_t2040_replenishment_recovery.py
+?? tools/test_t2040_review_proof_binding.py
+?? tools/test_t2040_terminal_consumer_guards.py
+?? tools/test_t2040_terminal_consumer_supplementary.py
+?? tools/test_t2050_pruned_row_restore.py
+?? tools/test_t2051_source_reindex.py
+?? tools/test_t2052_pruned_slice_closure.py
+?? tools/test_t2055_nested_directory_fingerprint.py
+?? tools/test_t2057_carrier_restore.py
+?? tools/test_t2059_regression.py
+?? tools/test_t2071_gate_pinned_row.py

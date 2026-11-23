@@ -1,0 +1,63 @@
+{
+  "agent": "saipen-cli",
+  "created_at": "2026-10-09T18:00:26Z",
+  "evidence_class": "executed",
+  "findings_digest": "f4ad929db526f185866da5bc9e7fd9cbb710b4c57e3a5143d7b88f302c32a758",
+  "gate": "core",
+  "integrity_digest": "2109263f5ce590ea",
+  "journal_op_id": "reverify.27143147c56e",
+  "original_closure": {
+    "claim_time": "2026-10-09T17:55:35Z",
+    "closure_mode": "own_patch",
+    "last_ticket_event": "E-14046",
+    "owner": "saipen-cli",
+    "source_receipts": "SRC-200"
+  },
+  "own_problem_keys": [
+    "6c74e7473d745ef5"
+  ],
+  "problem_count": 1,
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "receipt_id": "RV-000003",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "source_tree_fingerprint": "git-delta-v1:e661405c20540ddc2b802340714f13ff232c8ef8528a275b3f1ca531fa20cbea",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "python -B .saipen/evidence/T-1695-invalid-stops/verify.py pair reverify",
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "duration_ms": 439,
+      "executed": true,
+      "exit_code": 0,
+      "output_bytes": 1546,
+      "output_digest": "50e1b69f6c129990",
+      "result": "PASS"
+    },
+    {
+      "command": "python -B .saipen/evidence/T-1695-invalid-stops/public-smoke.py reverify",
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "duration_ms": 12116,
+      "executed": true,
+      "exit_code": 0,
+      "output_bytes": 119,
+      "output_digest": "4639580333e42f06",
+      "result": "PASS"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "python -B .saipen/evidence/T-1695-invalid-stops/verify.py pair reverify",
+      "python -B .saipen/evidence/T-1695-invalid-stops/public-smoke.py reverify"
+    ],
+    "findings_digest": "f4ad929db526f185866da5bc9e7fd9cbb710b4c57e3a5143d7b88f302c32a758",
+    "gate": "core"
+  },
+  "verification_contract_digest": "4b7a26ae7827dc41",
+  "verifier": "saipen-cli",
+  "warning_count": 9,
+  "work": "T-1695"
+}

@@ -1,0 +1,458 @@
+{
+  "ok": true,
+  "models": [
+    {
+      "id": "m-00032eaeec",
+      "key": "m-00032eaeec",
+      "compiledId": "mimo/mimo-v2.5",
+      "displayName": "MiMo 2.6 Flash",
+      "tagline": "Balanced",
+      "badges": [],
+      "availability": "always",
+      "multimodal": true,
+      "premium": false,
+      "dataUse": "service",
+      "access": "open",
+      "placement": {
+        "section": "optimized",
+        "order": 10
+      },
+      "peakPills": "peak",
+      "slotBound": false
+    },
+    {
+      "id": "m-7e20df6765",
+      "key": "m-7e20df6765",
+      "compiledId": "z-ai/glm-5.3-flash",
+      "displayName": "GLM 5.3 Flash",
+      "tagline": "Deep reasoning",
+      "badges": [],
+      "availability": "always",
+      "multimodal": true,
+      "premium": false,
+      "dataUse": "service",
+      "access": "open",
+      "placement": {
+        "section": "optimized",
+        "order": 20
+      },
+      "peakPills": "peak",
+      "reasoningEffort": "high",
+      "efforts": [
+        "low",
+        "high"
+      ],
+      "defaultEffort": "high",
+      "earned": true,
+      "slotBound": false
+    },
+    {
+      "id": "m-096e75164d",
+      "key": "m-096e75164d",
+      "compiledId": "deepseek/deepseek-v4-flash",
+      "displayName": "DeepSeek V4.1 Flash",
+      "tagline": "Smart & Fast",
+      "warning": "May use data for AI training",
+      "badges": [],
+      "availability": "always",
+      "multimodal": true,
+      "premium": false,
+      "dataUse": "training",
+      "access": "open",
+      "placement": {
+        "section": "optimized",
+        "order": 5,
+        "recommended": true
+      },
+      "peakPills": "peak",
+      "reasoningEffort": "high",
+      "efforts": [
+        "low",
+        "high",
+        "max"
+      ],
+      "defaultEffort": "high",
+      "slotBound": false
+    },
+    {
+      "id": "m-127314bb39",
+      "key": "m-127314bb39",
+      "compiledId": "deepseek/deepseek-v4-flash-fast",
+      "displayName": "DeepSeek V4.1 Flash Fast",
+      "tagline": "Parallel agents",
+      "taglineTooltip": "Gathers context with parallel subagents. Runs on DeepSeek’s own API.",
+      "warning": "May use data for AI training",
+      "badges": [],
+      "availability": "always",
+      "multimodal": true,
+      "premium": true,
+      "dataUse": "training",
+      "access": "open",
+      "placement": {
+        "section": "powerful",
+        "order": 20
+      },
+      "peakPills": "peak",
+      "reasoningEffort": "high",
+      "efforts": [
+        "low",
+        "high",
+        "max"
+      ],
+      "defaultEffort": "high",
+      "slotBound": true
+    },
+    {
+      "id": "m-5a5d0e255e",
+      "key": "m-5a5d0e255e",
+      "compiledId": "openai/gpt-6-luna",
+      "displayName": "GPT-6 Luna",
+      "tagline": "Strong all-around",
+      "taglineTooltip": "On OpenAI flex capacity, with a standard-tier backup when it’s busy.",
+      "badges": [],
+      "availability": "always",
+      "multimodal": true,
+      "premium": true,
+      "dataUse": "service",
+      "access": "open",
+      "placement": {
+        "section": "optimized",
+        "order": 50
+      },
+      "peakPills": "peak",
+      "reasoningEffort": "high",
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "defaultEffort": "high",
+      "slotBound": true
+    },
+    {
+      "id": "m-cb71f819fe",
+      "key": "m-cb71f819fe",
+      "compiledId": "mimo/mimo-v2.6-pro",
+      "displayName": "MiMo 2.6 Pro",
+      "tagline": "Strong reasoning",
+      "badges": [],
+      "availability": "always",
+      "multimodal": true,
+      "premium": true,
+      "dataUse": "service",
+      "access": "open",
+      "placement": {
+        "section": "powerful",
+        "order": 10
+      },
+      "peakPills": "peak",
+      "slotBound": true
+    },
+    {
+      "id": "m-69307952f8",
+      "key": "m-69307952f8",
+      "compiledId": "upstage/solar-mini4",
+      "displayName": "Solar Mini 4",
+      "tagline": "Fast and light",
+      "warning": "May use data for AI training",
+      "badges": [
+        {
+          "kind": "promotional",
+          "label": "Promotional",
+          "tooltip": "Temporary price. It goes up when the promotion ends."
+        }
+      ],
+      "availability": "always",
+      "multimodal": false,
+      "premium": false,
+      "dataUse": "training",
+      "access": "open",
+      "placement": {
+        "section": "unlimited",
+        "order": 20
+      },
+      "peakPills": "peak",
+      "slotBound": false
+    },
+    {
+      "id": "m-9a7e098cc1",
+      "key": "m-9a7e098cc1",
+      "compiledId": "upstage/solar-pro4",
+      "displayName": "Solar Pro 4",
+      "tagline": "Upstage flagship",
+      "warning": "May use data for AI training",
+      "badges": [
+        {
+          "kind": "promotional",
+          "label": "Promotional",
+          "tooltip": "Temporary price. It goes up when the promotion ends."
+        }
+      ],
+      "availability": "always",
+      "multimodal": false,
+      "premium": false,
+      "dataUse": "training",
+      "access": "open",
+      "placement": {
+        "section": "unlimited",
+        "order": 15
+      },
+      "peakPills": "peak",
+      "slotBound": false
+    },
+    {
+      "id": "m-5dafce7f08",
+      "key": "m-5dafce7f08",
+      "compiledId": "google/gemini-3.8-flash",
+      "displayName": "Gemini 3.8 Flash",
+      "tagline": "1M context",
+      "badges": [],
+      "availability": "always",
+      "multimodal": true,
+      "premium": true,
+      "dataUse": "service",
+      "access": "open",
+      "placement": {
+        "section": "powerful",
+        "order": 40,
+        "more": true
+      },
+      "peakPills": "peak",
+      "reasoningEffort": "high",
+      "efforts": [
+        "high"
+      ],
+      "defaultEffort": "high",
+      "slotBound": true
+    },
+    {
+      "id": "m-ffcbc2bcf3",
+      "key": "m-ffcbc2bcf3",
+      "compiledId": "meta/muse-spark-1.3-contributor",
+      "displayName": "Muse Spark 1.3",
+      "tagline": "Falls back when busy",
+      "taglineTooltip": "When it's busy, DeepSeek V4.1 Flash answers instead.",
+      "warning": "May use data for AI training",
+      "badges": [],
+      "availability": "always",
+      "multimodal": false,
+      "premium": false,
+      "dataUse": "training",
+      "access": "open",
+      "placement": {
+        "section": "optimized",
+        "order": 40
+      },
+      "peakPills": "peak",
+      "reasoningEffort": "high",
+      "efforts": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "defaultEffort": "high",
+      "slotBound": false
+    },
+    {
+      "id": "m-94d83cc7e6",
+      "key": "m-94d83cc7e6",
+      "compiledId": "google/gemini-4-argon",
+      "displayName": "Gemini 4 Argon",
+      "tagline": "Google flagship",
+      "taglineTooltip": "On Google flex capacity, with a standard-tier backup when it’s busy.",
+      "badges": [
+        {
+          "kind": "promotional",
+          "label": "Promotional · 1 session a day",
+          "tooltip": "New and experimental: it may be unreliable or change without notice. Free in the US, a paid plan elsewhere, until the promotion ends. One session a day on every plan."
+        }
+      ],
+      "availability": "always",
+      "multimodal": true,
+      "premium": true,
+      "dataUse": "service",
+      "access": "open",
+      "placement": {
+        "section": "powerful",
+        "order": 1
+      },
+      "peakPills": "peak",
+      "reasoningEffort": "medium",
+      "efforts": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "defaultEffort": "medium",
+      "slotBound": true
+    },
+    {
+      "id": "m-6adcd6d671",
+      "key": "m-6adcd6d671",
+      "compiledId": "openai/gpt-6.1-sol",
+      "displayName": "GPT-6.1 Sol",
+      "tagline": "OpenAI flagship",
+      "taglineTooltip": "On OpenAI flex capacity, with a standard-tier backup when it’s busy.",
+      "badges": [
+        {
+          "kind": "promotional",
+          "label": "Promotional · 1 session a day",
+          "tooltip": "Free in the US, a paid plan elsewhere, until the promotion ends. One session a day on every plan."
+        }
+      ],
+      "availability": "always",
+      "multimodal": true,
+      "premium": true,
+      "dataUse": "service",
+      "access": "open",
+      "placement": {
+        "section": "powerful",
+        "order": 50,
+        "more": true
+      },
+      "peakPills": "peak",
+      "reasoningEffort": "medium",
+      "efforts": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "defaultEffort": "medium",
+      "slotBound": true
+    },
+    {
+      "id": "m-02244092cb",
+      "key": "m-02244092cb",
+      "displayName": "Glyph Cluster",
+      "tagline": "Stealth preview",
+      "warning": "Preview model: prompts and outputs may be retained for training",
+      "badges": [
+        {
+          "kind": "promotional",
+          "label": "Promotional",
+          "tooltip": "Free while in preview. The price may change when the preview ends."
+        }
+      ],
+      "availability": "always",
+      "multimodal": false,
+      "premium": false,
+      "dataUse": "training",
+      "access": "open",
+      "placement": {
+        "section": "unlimited",
+        "order": 5
+      },
+      "peakPills": "peak",
+      "reasoningEffort": "high",
+      "slotBound": false
+    },
+    {
+      "id": "m-ddc687c50f",
+      "key": "m-ddc687c50f",
+      "displayName": "Nemotron 3.5 Lightning",
+      "tagline": "Fast & free",
+      "warning": "May use data for AI training",
+      "badges": [
+        {
+          "kind": "new",
+          "label": "New",
+          "tooltip": "NVIDIA's Nemotron 3.5 Lightning, new on Freebuff.",
+          "besideName": true
+        }
+      ],
+      "availability": "always",
+      "multimodal": false,
+      "premium": false,
+      "dataUse": "training",
+      "access": "open",
+      "placement": {
+        "section": "unlimited",
+        "order": 1
+      },
+      "peakPills": "peak",
+      "reasoningEffort": "high",
+      "slotBound": false
+    },
+    {
+      "id": "m-5b6a604eb6",
+      "key": "m-5b6a604eb6",
+      "displayName": "Claude Haiku 5.5 · 100k context",
+      "tagline": "Anthropic · fast",
+      "taglineTooltip": "Every request stays under 100k tokens: past ~88k, older messages and tool output are condensed into a summary, so a long task keeps less detail. It costs less an hour than Claude Haiku 5.5 with full context, which condenses past ~320k.",
+      "badges": [
+        {
+          "kind": "new",
+          "label": "New",
+          "tooltip": "Anthropic's Claude Haiku 5.5, new on Freebuff.",
+          "besideName": true
+        }
+      ],
+      "availability": "always",
+      "multimodal": true,
+      "premium": true,
+      "dataUse": "service",
+      "access": "open",
+      "placement": {
+        "section": "powerful",
+        "order": 2
+      },
+      "peakPills": "peak",
+      "efforts": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "defaultEffort": "medium",
+      "slotBound": false
+    },
+    {
+      "id": "m-79293c5b7d",
+      "key": "m-79293c5b7d",
+      "displayName": "Claude Haiku 5.5",
+      "tagline": "Anthropic · full context",
+      "taglineTooltip": "Condenses older context only past ~320k tokens, so a long task keeps its detail. Claude Haiku 5.5 · 100k context is the same model at a lower hourly price; it condenses past ~88k.",
+      "badges": [
+        {
+          "kind": "new",
+          "label": "New",
+          "tooltip": "Anthropic's Claude Haiku 5.5, new on Freebuff.",
+          "besideName": true
+        }
+      ],
+      "availability": "always",
+      "multimodal": true,
+      "premium": true,
+      "dataUse": "service",
+      "access": "open",
+      "placement": {
+        "section": "powerful",
+        "order": 30
+      },
+      "peakPills": "peak",
+      "efforts": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "defaultEffort": "medium",
+      "slotBound": false
+    }
+  ],
+  "accessTier": "limited",
+  "slots": {
+    "slotBound": {
+      "limit": 3,
+      "used": 1,
+      "holders": [
+        "46ce6206-f92e-466e-b508-fe1059f46093"
+      ]
+    },
+    "multiTab": {
+      "limit": 8,
+      "used": 1,
+      "holders": []
+    }
+  },
+  "appVersion": "0.0.173"
+}

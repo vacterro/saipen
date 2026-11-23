@@ -1,0 +1,89 @@
+{
+  "family_record": ".saipen/evidence/core-unit/897f117d9995d092-20261003T213728Z.json",
+  "fingerprint": "897f117d9995d092f3932b00bfa43a581686d8b2b53cacc857cbfd644dffd0a8",
+  "runner": "canonical core_unit.run_family",
+  "jobs": 6,
+  "timeout": 5400,
+  "verdict": "PASS",
+  "shards": [
+    {
+      "sandbox": "saipen-core-unit-b8ol0r__",
+      "stderr_sha256": "f6173a9d6135446dc474d45ef1975597914c16616372a3fdaf67fb948e374853",
+      "ran": 668,
+      "passed": 667,
+      "skipped": 1,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-z2st_6j6",
+      "stderr_sha256": "e499f4556e47327ea6a08706f80645034607668bfe716dfb74a797176c8c2840",
+      "ran": 1257,
+      "passed": 1223,
+      "skipped": 34,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-8q_39na6",
+      "stderr_sha256": "beff15279422913ab598c42a56a03c74bf3b3b39523e955ec925999d1f147d3f",
+      "ran": 632,
+      "passed": 630,
+      "skipped": 2,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-8wc677rs",
+      "stderr_sha256": "b455681bef06ee782f30b09b2d6abebad6664fe7bca78f3633b2bd55a41d6147",
+      "ran": 831,
+      "passed": 814,
+      "skipped": 17,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-ebf283a2",
+      "stderr_sha256": "9b0c19e84cd34809d9eae36951829e03a65218dd80281165784b80b1423b92a3",
+      "ran": 778,
+      "passed": 777,
+      "skipped": 1,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-rf684t6o",
+      "stderr_sha256": "50ec0afb36107667f7fd2b65bd1bf178c044bcefa76af9eb879414a595443657",
+      "ran": 731,
+      "passed": 728,
+      "skipped": 3,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    }
+  ],
+  "ran": 4897,
+  "skipped": 58,
+  "expected_failures": 0,
+  "failures": 0,
+  "errors": 0,
+  "unexpected_successes": 0,
+  "passed": 4839
+}

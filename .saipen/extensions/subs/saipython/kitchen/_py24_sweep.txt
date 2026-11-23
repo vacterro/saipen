@@ -1,0 +1,14 @@
+PY-24 sweep at 13f2e7579 / tree 28904dfc12dd4d11
+--- module compileall (repo's own engine sources)
+exit=0
+--- ruff
+ruff 0.16.0
+
+Found 642 errors.
+[*] 75 fixable with the `--fix` option (59 hidden fixes can be enabled with the `--unsafe-fixes` option).
+exit=0
+--- pen pristine:
+PY-16.patch
+REGISTRY.json
+T-2062
+(empty = pristine)

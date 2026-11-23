@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1776_protocol_home_valve.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap"
+  ],
+  "oracle_files": [
+    "tools/test_t1776_protocol_home_valve.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/goal_authority.py",
+    "tools/saipen_engine/automation.py",
+    "tools/saipen_engine/iteration_verdict.py",
+    "tools/saipen_engine/cold_recovery.py"
+  ],
+  "before": {
+    "tools/saipen_engine/goal_authority.py": ".saipen/evidence/T-1776-protocol-home-valve/before/goal_authority.py",
+    "tools/saipen_engine/automation.py": ".saipen/evidence/T-1776-protocol-home-valve/before/automation.py",
+    "tools/saipen_engine/iteration_verdict.py": ".saipen/evidence/T-1776-protocol-home-valve/before/iteration_verdict.py",
+    "tools/saipen_engine/cold_recovery.py": ".saipen/evidence/T-1776-protocol-home-valve/before/cold_recovery.py"
+  },
+  "timeout": 900
+}

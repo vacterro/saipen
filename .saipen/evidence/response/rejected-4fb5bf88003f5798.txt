@@ -1,0 +1,3 @@
+86 sihttesti ja üldvalidaator läbivad. Paigalduste lahknevuse kontroll parandatud.
+
+Täistest veel töötab; `cc all` jääb aktiivseks.

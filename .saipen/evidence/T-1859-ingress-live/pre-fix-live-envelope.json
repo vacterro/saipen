@@ -1,0 +1,15 @@
+{
+ "ingress_id": "ing-da4df1aa5446268b",
+ "message_id": "turn_70dddf8f-3c1b-474c-bdb3-39c836058fdb",
+ "request_digest": "7ec3947b0d158937b43ac6d67c8331be12575bc990a324cfdc0e2431eba5fbbe",
+ "session_id": "sess_03e89c14-0423-455c-ab04-54a007ac543c",
+ "destination_op": "start",
+ "consumed": true,
+ "created_at": "2026-10-24T00:30:39Z",
+ "witness": "model_supplied",
+ "declared_by": "host_ingress",
+ "project_lineage": "lineage-6c27dab147d645d19f103379d2be4d76",
+ "request_text": "Посмотри снова пожалуйста и реши проблему где опять Workbuddy выдаёт это при использовании в 9router_extra но клиент у м",
+ "_source_path": "V:\\___VAC\\__K\\__CODE\\_PY\\_9router_extra\\.saipen\\cache\\ingress\\ing-da4df1aa5446268b.json",
+ "_sha256": "4c0aadb04d120b510d03f2c81cca5ce67e1fbe198ff3a1ba8e184913ab6dd048"
+}

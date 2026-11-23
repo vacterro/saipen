@@ -1,0 +1,43 @@
+{
+ "status": {
+  "exit": 0,
+  "automation": {
+   "schema_version": 1,
+   "disposition": "WAIT_USER",
+   "next_command": null,
+   "operator_action_due": true,
+   "reason_code": "reconcile-decision",
+   "reason": "T-9003 sits under ## DONE with no closure_mode, no owner, no claim_time and no verification evidence in history, and was allocated AFTER this project's closure contract became observable; the completion was never established by a canonical operation, so reopening it into ## TODO requires ONE operator approval of the repair plan (SRC-043)",
+   "audit_quiescent": true,
+   "audit_epoch": "audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40",
+   "convergence_current": false,
+   "closure_complete": false,
+   "source_fingerprint": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+   "completed_at": null,
+   "reconcile_code": "RECONCILE_REAUTH_REQUIRED",
+   "operator_action": "Approve recovery plan aa5cc669ebb2 (T-9003)",
+   "remediation_command": "saipen recover --apply-approved-repair aa5cc669ebb284dcc659680f779753b161b0de5462733fc0c42a796fc23bfe8e"
+  },
+  "computed_next_action": "saipen recover --apply-approved-repair aa5cc669ebb284dcc659680f779753b161b0de5462733fc0c42a796fc23bfe8e"
+ },
+ "continue": {
+  "exit": 1,
+  "action": null,
+  "reason": null,
+  "code": "RECONCILE_REAUTH_REQUIRED"
+ },
+ "recover": {
+  "exit": 1,
+  "code": "RECONCILE_REAUTH_REQUIRED",
+  "operator_decision_available": true,
+  "canonical_next_command": "saipen recover --apply-approved-repair aa5cc669ebb284dcc659680f779753b161b0de5462733fc0c42a796fc23bfe8e"
+ },
+ "start_dry_run": {
+  "exit": 0,
+  "code": "PLAN",
+  "next": null,
+  "detail": null
+ },
+ "digest": "STATUS: BUILD T-9000\r\nRESULT: Vajab operaatori otsust\r\nBLOCKER: RECONCILE_REAUTH_REQUIRED -- recovery refuses the continuation; saipen recover --json\r\nOPERATOR ACTION: Approve recovery plan aa5cc669ebb2 (T-9003)\r\nNEXT EXACT ACTION: NONE\r\nVALIDATION: NOT_RUN\r\n",
+ "canonical_bytes_unchanged": true
+}

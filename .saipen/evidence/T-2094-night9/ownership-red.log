@@ -1,0 +1,50 @@
+..F.........FF......
+======================================================================
+FAIL: test_absent_stamp_legacy_sandbox_is_kept_under_a_project_filter (__main__.OwnerStampGrammarTests.test_absent_stamp_legacy_sandbox_is_kept_under_a_project_filter)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_owner_stamp_grammar.py", line 203, in test_absent_stamp_legacy_sandbox_is_kept_under_a_project_filter
+    self.assertEqual(self.sweep(), [])
+AssertionError: Lists differ: ['saipen-core-unit-unstamped'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'saipen-core-unit-unstamped'
+
+- ['saipen-core-unit-unstamped']
++ []
+
+======================================================================
+FAIL: test_json_null_stamp_is_kept_under_a_project_filter (__main__.OwnerStampGrammarTests.test_json_null_stamp_is_kept_under_a_project_filter)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_owner_stamp_grammar.py", line 212, in test_json_null_stamp_is_kept_under_a_project_filter
+    self.assertEqual(self.sweep(), [])
+AssertionError: Lists differ: ['saipen-core-unit-null'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'saipen-core-unit-null'
+
+- ['saipen-core-unit-null']
++ []
+
+======================================================================
+FAIL: test_json_null_stamp_is_kept_without_a_project_filter (__main__.OwnerStampGrammarTests.test_json_null_stamp_is_kept_without_a_project_filter)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_owner_stamp_grammar.py", line 220, in test_json_null_stamp_is_kept_without_a_project_filter
+    self.assertEqual(sweep_stale_sandboxes(temp_root=self.temp), [])
+AssertionError: Lists differ: ['saipen-core-unit-null-global'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'saipen-core-unit-null-global'
+
+- ['saipen-core-unit-null-global']
++ []
+
+----------------------------------------------------------------------
+Ran 20 tests in 11.275s
+
+FAILED (failures=3)

@@ -1,0 +1,36 @@
+{
+  "reported_account": "SAIAG_9fabb0d5",
+  "confirmed_account_sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+  "project_root": "V:/___VAC/__K/__CODE/_TAMPERMONKEY/_SUNO_DOWNLOADER",
+  "reported_offending_path": "V:/___VAC/__K",
+  "reported_windows_error": 5,
+  "operation": "post_INIT_manifest_validation",
+  "code": "SAIPEN_HOST_RUNTIME_UNAVAILABLE",
+  "fingerprint": "a5364665aa08cebed686e96a9682293cdf5f108a57453f64b9c18d4268e52de7",
+  "state": "BLOCKED",
+  "scope": "external_validation_operation",
+  "repair_work": "T-1712",
+  "historical_work": "T-1713",
+  "canonical_external_readback": {
+    "phase": "PLAN",
+    "task": "none",
+    "agent": "saipen"
+  },
+  "external_claim_changed": false,
+  "same_token_diagnostics_available": false,
+  "resume_position": "Existing bound project: canonical continue and validation after prerequisite repair",
+  "required_changed_prerequisites": [
+    "Isolation-policy-authorized metadata access or supported authorized binding/broker",
+    "Approved runtime carrying the verified repair, accessible to the actual isolated token"
+  ],
+  "identical_runtime_retry_permitted": false,
+  "source_repair_is_deployment": false,
+  "main_goal_blocked": false,
+  "evidence": [
+    "operator-runtime-request.txt",
+    "read-only-diagnostics.json",
+    "preflight.json",
+    "history.json",
+    "REPORT.md"
+  ]
+}

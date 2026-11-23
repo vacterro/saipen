@@ -1,0 +1,31 @@
+{
+ "schema": 1,
+ "command": [
+  "{python}",
+  "-B",
+  "-m",
+  "unittest",
+  "discover",
+  "-s",
+  "tools",
+  "-p",
+  "test_t2011_host_acceptance_stages.py",
+  "-v"
+ ],
+ "format": "unittest",
+ "context": [
+  "tools",
+  "saipen",
+  "extensions"
+ ],
+ "oracle_files": [
+  "tools/test_t2011_host_acceptance_stages.py"
+ ],
+ "subject_files": [
+  "tools/installed_host_acceptance.py"
+ ],
+ "before": {
+  "tools/installed_host_acceptance.py": ".saipen/evidence/T-2017-regression/pre/installed_host_acceptance.py"
+ },
+ "timeout": 300
+}

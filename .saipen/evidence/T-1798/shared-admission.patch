@@ -1,0 +1,266 @@
+--- a/tools/saipen.py
++++ b/tools/saipen.py
+@@ -1098,7 +1098,9 @@
+     # Reported on its own field rather than folded into `detail`, so it stays
+     # visible when some OTHER gate is already failing -- an ambiguous install
+     # must never hide behind an unrelated verdict.
+-    from saipen_engine.install_identity import diagnose_install_mismatch
++    from saipen_engine.install_identity import (
++        STATUS_PERSISTED_HOME_UNREADABLE, diagnose_install_mismatch,
++    )
+ 
+     _state_fields, _state_err = parse_state_or_error(codec.read_doc(_state_path(project_root)))
+     _identity = diagnose_install_mismatch(
+@@ -1115,7 +1117,12 @@
+     }
+     if _home_problem:
+         healthy = False
+-        code = "INSTALL_IDENTITY_MISMATCH"
++        code = (
++            "CROSS_USER_RUNTIME_UNAVAILABLE"
++            if _identity["status"] == STATUS_PERSISTED_HOME_UNREADABLE
++            and _identity.get("remediation_command") is None
++            else "INSTALL_IDENTITY_MISMATCH"
++        )
+         detail = _home_problem
+     if run.error:
+         code = CONFORMANCE_UNAVAILABLE
+@@ -1152,6 +1159,11 @@
+         payload["detail"] = detail
+         if code == CONFORMANCE_UNAVAILABLE:
+             payload["canonical_next_command"] = CONFORMANCE_REMEDIATION_COMMAND
++        elif code == "CROSS_USER_RUNTIME_UNAVAILABLE":
++            payload["canonical_next_command"] = None
++            payload["repair_status"] = "ENGINEERING_REQUIRED"
++            payload["diagnostic"] = code
++            payload["terminal"] = False
+         elif code == "INSTALL_IDENTITY_MISMATCH":
+             payload["canonical_next_command"] = "saipen rebind-home --auto"
+             payload["repair_status"] = "REBIND_REQUIRED"
+@@ -4697,9 +4709,18 @@
+     fields, error = parse_state_or_error(codec.read_doc(path))
+     if error or not isinstance(fields, dict):
+         return None
+-    from saipen_engine.state import binding_brake, persisted_home_error
+-
+-    if persisted_home_error(fields.get("saipen_home")) is None:
++    from saipen_engine.state import (
++        CODE_HOME_INACCESSIBLE, HOME_USABLE, binding_brake, home_refusal, persisted_home_access,
++    )
++
++    refused = home_refusal(fields.get("saipen_home"))
++    if refused is None:
++        return None
++    if refused[0] == CODE_HOME_INACCESSIBLE:
++        _emit({"ok": False, "code": CODE_HOME_INACCESSIBLE, "detail": refused[1]}, as_json)
++        return 1
++    home_access, _home_reason = persisted_home_access(fields.get("saipen_home"))
++    if home_access == HOME_USABLE:
+         if (
+             not allow_divergent
+             or fields.get("execution_intent") not in ("goal", "converge")
+@@ -4707,12 +4728,9 @@
+         ):
+             return None
+         from saipen_engine.board import operator_gates
+-        from saipen_engine.install_identity import diagnose_install_mismatch
+ 
+         board = parse_board(codec.read_doc(project_root / ".saipen" / "BOARD.md"))
+         if any(gate["state"] == "DUE_OPERATOR_ACTION" for gate in operator_gates(board["tickets"])):
+-            return None
+-        if not diagnose_install_mismatch(fields.get("saipen_home"))["is_blocking"]:
+             return None
+     if _negotiate_capability(project_root) == "read-only":
+         return None
+--- a/tools/saipen_engine/state.py
++++ b/tools/saipen_engine/state.py
+@@ -992,6 +992,18 @@
+         return CODE_HOME_DEAD, str(reason), HOME_REBIND_ROUTE
+     if status == HOME_INACCESSIBLE and not machine_runtime_covers(home):
+         return CODE_HOME_INACCESSIBLE, str(reason), None
++    if status == HOME_USABLE and Path(str(home)).resolve() != running_home():
++        from .install_identity import STATUS_PERSISTED_HOME_UNREADABLE, diagnose_install_mismatch
++
++        diagnosis = diagnose_install_mismatch(home)
++        if diagnosis["status"] == STATUS_PERSISTED_HOME_UNREADABLE:
++            return CODE_HOME_INACCESSIBLE, str(diagnosis["detail"]), None
++        if diagnosis["is_blocking"]:
++            return (
++                CODE_HOME_DEAD,
++                f"home-divergent: {diagnosis['detail']}",
++                HOME_REBIND_ROUTE,
++            )
+     return None
+ 
+ 
+--- a/tools/saipen_engine/operations.py
++++ b/tools/saipen_engine/operations.py
+@@ -365,16 +365,6 @@
+             raise HomeDeadError(
+                 f"home-dead: {home_problem} -- the bootloader cannot load the "
+                 f"protocol this checkpoint names, so ordinary mutation is "
+-                f"refused; converge it with `saipen rebind-home --auto` "
+-                f"(or name the replacement explicitly with `saipen "
+-                f"rebind-home <candidate-home-path>`)"
+-            )
+-        from .install_identity import diagnose_install_mismatch
+-
+-        diag = diagnose_install_mismatch(state.get("saipen_home"))
+-        if diag["is_blocking"]:
+-            raise HomeDeadError(
+-                f"home-divergent: {diag['detail']} -- ordinary mutation is "
+                 f"refused; converge it with `saipen rebind-home --auto` "
+                 f"(or name the replacement explicitly with `saipen "
+                 f"rebind-home <candidate-home-path>`)"
+@@ -10453,9 +10443,7 @@
+     from . import host_bootstrap
+     from .state import (
+         CODE_HOME_INACCESSIBLE,
+-        HOME_INACCESSIBLE,
+-        persisted_home_access,
+-        persisted_home_error,
++        home_refusal,
+     )
+ 
+     root = Path(project_root)
+@@ -10463,13 +10451,13 @@
+     _docs, state, _board, _tail = read_once
+ 
+     current_home = str(state.get("saipen_home") or "").strip()
+-    access, access_reason = persisted_home_access(state.get("saipen_home"))
+-    current_problem = persisted_home_error(state.get("saipen_home"))
+-    if access == HOME_INACCESSIBLE and current_problem is not None:
++    refused = home_refusal(state.get("saipen_home"))
++    current_problem = refused[1] if refused else None
++    if refused is not None and refused[0] == CODE_HOME_INACCESSIBLE:
+         # Unreadable is not dead: adopting the engine that happens to be
+         # running would move the project onto whatever copy this account
+         # holds, for every account (T-1647).
+-        return _refuse(CODE_HOME_INACCESSIBLE, str(access_reason))
++        return _refuse(CODE_HOME_INACCESSIBLE, current_problem)
+     try:
+         current_posix = Path(current_home).expanduser().resolve().as_posix()
+     except Exception:
+--- a/tools/test_install_identity_doctor.py
++++ b/tools/test_install_identity_doctor.py
+@@ -17,12 +17,17 @@
+ from pathlib import Path
+ from unittest import mock
+ 
+-from saipen_engine import continue_loop, install_identity, operations, state
++from saipen_engine import admission, continue_loop, install_identity, operations, state
+ from saipen_engine.paths import identity_file_content, new_project_lineage
+ from saipen_engine.state import running_style_token
++from test_hermetic_env import isolate_host_session
+ 
+ TOOLS = Path(__file__).resolve().parent
+ REPO = TOOLS.parent
++
++
++def setUpModule():
++    isolate_host_session()
+ 
+ 
+ class InstallIdentityDoctorTests(unittest.TestCase):
+@@ -221,7 +226,7 @@
+         # Running engine is REPO
+         running = state.running_home().resolve().as_posix()
+         self.assertNotEqual(other_home.resolve().as_posix(), running)
+-        self.assertIsNone(state.persisted_home_error(other_home))
++        self.assertEqual(state.persisted_home_access(other_home)[0], state.HOME_USABLE)
+ 
+         result = operations.rebind_home_auto(project, "test-agent")
+         self.assertTrue(result.ok, result.to_dict())
+@@ -235,6 +240,59 @@
+         second = operations.rebind_home_auto(project, "test-agent")
+         self.assertTrue(second.ok, second.to_dict())
+         self.assertEqual(second.code, "HOME_ALREADY_BOUND")
++
++    def test_shared_home_gate_refuses_the_divergent_engine(self):
++        home = self._full_home("shared-home-gate")
++        refusal = state.home_refusal(home)
++        self.assertIsNotNone(refusal)
++        self.assertEqual(refusal[0], "HOME_REQUIRED")
++        self.assertIn("home-divergent", refusal[1])
++        self.assertEqual(refusal[2], "saipen rebind-home --auto")
++
++    def test_tool_admission_refuses_the_same_divergent_engine(self):
++        home = self._full_home("tool-admission")
++        project = self._make_project(home.as_posix())
++        snapshot = admission.protocol_snapshot(project, actor="test-agent")
++        self.assertEqual(snapshot["block"], "HOME_REQUIRED", snapshot)
++        self.assertEqual(snapshot.get("route"), "saipen rebind-home --auto")
++
++    def test_a_partially_unreadable_home_is_not_a_proven_divergence(self):
++        home = self._full_home("partially-unreadable")
++        unreadable = home / "tools" / "saipen_engine" / "operations.py"
++        read_bytes = Path.read_bytes
++
++        def read(path):
++            if path == unreadable:
++                raise PermissionError("denied")
++            return read_bytes(path)
++
++        with mock.patch.object(Path, "read_bytes", read):
++            refusal = state.home_refusal(home)
++        self.assertEqual(refusal[0], state.CODE_HOME_INACCESSIBLE, refusal)
++        self.assertIsNone(refusal[2])
++
++    def test_auto_rebind_preserves_a_partially_unreadable_home(self):
++        home = self._full_home("unreadable-rebind")
++        project = self._make_project(home.as_posix())
++        before = {
++            name: (project / ".saipen" / name).read_bytes()
++            for name in ("STATE.md", "BOARD.md", "LOG.md")
++        }
++        unreadable = home / "tools" / "saipen_engine" / "operations.py"
++        read_bytes = Path.read_bytes
++
++        def read(path):
++            if path == unreadable:
++                raise PermissionError("denied")
++            return read_bytes(path)
++
++        with mock.patch.object(Path, "read_bytes", read):
++            result = operations.rebind_home_auto(project, "test-agent")
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(result.code, state.CODE_HOME_INACCESSIBLE)
++        self.assertEqual(
++            before, {name: (project / ".saipen" / name).read_bytes() for name in before}
++        )
+ 
+     def test_a_literal_naming_the_running_engine_cannot_hide_divergence(self):
+         home = self._full_home("independent")
+--- a/tools/saipen_engine/install_identity.py
++++ b/tools/saipen_engine/install_identity.py
+@@ -165,7 +165,7 @@
+             "persisted_fingerprint": "missing-v1",
+             "is_blocking": True,
+             "detail": f"STATE.saipen_home path {raw_text!r} cannot be resolved",
+-            "remediation_command": "saipen rebind-home --auto",
++            "remediation_command": None,
+         }
+ 
+     if named == running:
+@@ -200,6 +200,9 @@
+     named_fp = _fingerprint_frames(named_frames)
+ 
+     if named_fp == "missing-v1":
++        from .state import HOME_DEAD, persisted_home_access
++
++        access, access_reason = persisted_home_access(named)
+         return {
+             "status": STATUS_PERSISTED_HOME_UNREADABLE,
+             "running_home": str(running),
+@@ -207,8 +210,9 @@
+             "running_fingerprint": running_fp,
+             "persisted_fingerprint": named_fp,
+             "is_blocking": True,
+-            "detail": f"STATE.saipen_home {named} has no readable protocol files",
+-            "remediation_command": "saipen rebind-home --auto",
++            "detail": access_reason
++            or f"STATE.saipen_home {named} has no complete readable identity",
++            "remediation_command": "saipen rebind-home --auto" if access == HOME_DEAD else None,
+         }
+ 
+     if running_fp == named_fp:

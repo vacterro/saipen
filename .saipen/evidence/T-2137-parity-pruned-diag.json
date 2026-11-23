@@ -1,0 +1,26 @@
+{
+ "schema": 1,
+ "work": "T-2137",
+ "diag": "tree isolation",
+ "seconds": 101.7,
+ "all3_absent": {
+  "problems": 305,
+  "new_vs_full_absence": 304,
+  "missing_vs_full": 0
+ },
+ "worktrees_archive_absent": {
+  "problems": 305,
+  "new_vs_full_absence": 304,
+  "missing_vs_full": 0
+ },
+ "archive_absent": {
+  "problems": 305,
+  "new_vs_full_absence": 304,
+  "missing_vs_full": 0
+ },
+ "none_absent_full": {
+  "problems": 1,
+  "new_vs_full_absence": 0,
+  "missing_vs_full": 0
+ }
+}

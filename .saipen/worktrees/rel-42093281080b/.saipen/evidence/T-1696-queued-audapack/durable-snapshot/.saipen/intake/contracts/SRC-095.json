@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-095:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Fix live A3 pre-start regression: 6 runs BLOCKED PRE-START, no ZIP attachment, no START sent"
+    }
+  },
+  "derived_at": "2026-09-29T10:36:04Z",
+  "derived_from": "SRC-095",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "e1bc454a41b0a2e72279dd5ced31eadfe5db93927d9295fc6e290d22cc9169da"
+}

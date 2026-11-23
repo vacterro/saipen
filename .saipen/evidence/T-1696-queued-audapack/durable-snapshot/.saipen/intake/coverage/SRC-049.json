@@ -1,0 +1,59 @@
+{
+  "requirements": {
+    "SRC-049:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "resources/AUDAPACK_WIDGET.user.js manual ZIP titlebar markup and control logic: manualArchiveControlLabel, renderManualArchiveControl, renderManualArchiveMenu, openManualArchivePicker, manualArchiveZipAction",
+      "text": "Manual project ZIP control decoupled from Auto Audit: compact titlebar control available in ordinary ChatGPT chats, project popover fed by GET /v1/projects (select, change, clear binding, refresh list), explicit state labels (CHECK/PACK/GET/ATTACH/ZIP check/ZIP bang), no Auto enabled or campaign or START required (SRC-049 TARGET A, C, P).",
+      "verification": "tests/widget/w6-006-manual-archive-picker.test.js 29 PASS: control renders, unbound click loads registry picker, selecting a project binds and attaches, compact state labels; full widget suite 522 PASS",
+      "work": "T-193"
+    },
+    "SRC-049:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "resources/AUDAPACK_WIDGET.user.js manualArchiveBindingsStore, setManualArchiveBinding, clearManualArchiveBinding, migrateManualArchiveBinding and the bindAutoRuntimeToCurrentConversation draft-to-stable migration hook",
+      "text": "Conversation-to-project binding persisted per ChatGPT conversation key with explicit user selection authoritative, change and clear supported without touching project files, temporary draft identity migrated only through the existing canonical conversation identity transition, and no binding leaking between conversations (SRC-049 TARGET B, N).",
+      "verification": "w6-006 tests: two chats keep independent bindings, SPA navigation restores label, new chat unbinds and migrates to the stable key, stale binding never leaks, clear returns UNBOUND; all PASS",
+      "work": "T-193"
+    },
+    "SRC-049:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "resources/AUDAPACK_WIDGET.user.js runCanonicalArchiveAttach and canonicalAttachedArchiveMatch tile-bound canonical proof using project_id plus SHA-256 plus size, ensure metadata reuse, ALREADY_ATTACHED no-op path",
+      "text": "Idempotent duplicate protection: canonical identity is project_id plus archive SHA-256 plus byte size, filename alone is never equality proof; ensureProjectArchive is reused without repack or archive churn when unchanged; an already proven attached canonical archive returns ALREADY_ATTACHED with zero GET, File construction, injection or DOM replacement (SRC-049 TARGET D, E, F, G, J).",
+      "verification": "w6-006 tests: unchanged repeat ALREADY_ATTACHED with zero GET File injection DOM, unproven same filename refreshed, changed SHA replaced, identical SHA different filename not re-uploaded; all PASS",
+      "work": "T-193"
+    },
+    "SRC-049:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "resources/AUDAPACK_WIDGET.user.js attachCanonicalProjectArchive flight map keyed by conversation plus project, race re-check before injection, AUTO ZIP wrapper delegating to the shared engine",
+      "text": "Single-flight and race safety: all archive operations for one conversation plus project coalesce onto one chain, a concurrent or repeated click joins the live operation, a second check before injection turns a raced duplicate into ALREADY_ATTACHED, and manual plus Auto Audit share one canonical attachment engine and proof state (SRC-049 TARGET H, K, L).",
+      "verification": "w6-006 tests: ten rapid clicks one ensure one GET one injection with nine DUPLICATE_COALESCED, manual plus auto coalesce onto one chain; all PASS",
+      "work": "T-193"
+    },
+    "SRC-049:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "resources/AUDAPACK_WIDGET.user.js failure codes HASH_MISMATCH SIZE_MISMATCH ATTACH_TIMEOUT BRIDGE_OFFLINE FAILED, conversation-change guard, removal only after new tile proven, no send or campaign transition in the manual path",
+      "text": "Failure semantics and non-goals: a failed download, SHA or size mismatch, attachment timeout, bridge offline or replacement failure preserves the previous archive and unrelated attachments and composer text; bounded observable result codes; no Send, no campaign transition, no A3 or A10 or START side effects, no file chooser fallback, no second packer or second injection implementation (SRC-049 TARGET I, M, O and NON-GOALS).",
+      "verification": "w6-006 tests: failed download, SHA mismatch, size mismatch, timeout, bridge offline, navigating away, unrelated attachments survive; all PASS; Auto Audit remains disabled",
+      "work": "T-193"
+    },
+    "SRC-049:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "tests/widget/w6-006-manual-archive-picker.test.js 29 focused regressions; deliberate red control against the pre-T-193 subject",
+      "text": "Focused widget regression coverage for the manual picker flow plus the repository gates: selection and immediate attach, one-click repeat, ALREADY_ATTACHED no-op without GET or injection, binding isolation and migration, failure preservation, code observability, single-flight; full widget suite green; new coverage proven red against the pre-fix subject (SRC-049 REGRESSION TESTS and ACCEPTANCE).",
+      "verification": "focused suite 29 PASS 0 FAIL; pre-fix subject 0 PASS 29 FAIL; full widget suite node --test tests/widget/*.test.js 522 PASS 0 FAIL; compileall clean",
+      "work": "T-193"
+    }
+  },
+  "schema_version": 1
+}

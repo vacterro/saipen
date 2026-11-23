@@ -1,0 +1,85 @@
+{
+  "artifact": {
+    "after_hashes": {},
+    "after_index_modes": {},
+    "after_modes": {},
+    "artifact_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\evidence\\parallel\\pilot-20261011T192430\\claude-replacement\\artifact.json",
+    "artifact_sha256": "d16a640744cd9e5c335f217a8a28a04890d1f55c1656b0dd2e35828e6618a684",
+    "base_commit": "0269896e66c034a4b4f67bc12176b1f66f17be04",
+    "base_tree": "d420a43ebf8ec144926c6037d85436852f7230c7",
+    "before_hashes": {},
+    "before_index_modes": {},
+    "before_modes": {},
+    "changed_paths": [],
+    "code": "PARALLEL_ARTIFACT_SEALED",
+    "created_at": "2026-10-11T19:28:10.958910Z",
+    "evidence": [],
+    "job_id": "claude-replacement",
+    "kind": "saipen-parallel-artifact",
+    "objective": "Read-only audit of arithmetic.py",
+    "ok": true,
+    "packet_sha256": "787e0ef8778334d42af7ca74bfdc49cb0191bdf8f1b51c3050aea7366a010ce9",
+    "patch_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\evidence\\parallel\\pilot-20261011T192430\\claude-replacement\\changes.patch",
+    "patch_rel": ".saipen/evidence/parallel/pilot-20261011T192430/claude-replacement/changes.patch",
+    "patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "project_lineage": "lineage-94ea5bd7e0204216aef2b49f1944167d",
+    "read_all": true,
+    "read_hashes": {
+      "arithmetic.py": "d582c4f30488436f42ab3cfd58b4d4892dcba9bb24c4fd7a36cbf6afc3fc8701"
+    },
+    "read_index_modes": {
+      "arithmetic.py": "100644"
+    },
+    "read_modes": {
+      "arithmetic.py": "100644"
+    },
+    "read_paths": [
+      "arithmetic.py"
+    ],
+    "result_tree": "d420a43ebf8ec144926c6037d85436852f7230c7",
+    "role": "audit",
+    "root_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen\\.saipen\\cache\\parallel-pilot\\pilot-20261011t192430\\project",
+    "run_id": "pilot-20261011T192430",
+    "schema_version": 1,
+    "worker_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\claude-replacement",
+    "write_paths": []
+  },
+  "finished": "2026-10-11T19:28:10.649913+00:00",
+  "job_id": "claude-replacement",
+  "outcome": {
+    "elapsed_seconds": 56.297,
+    "failure": null,
+    "parsed_response": null,
+    "result_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\claude-replacement\\result.txt",
+    "returncode": 0,
+    "status": "completed",
+    "stderr_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\claude-replacement\\result.txt.stderr.txt",
+    "stdout_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\claude-replacement\\result.txt.stdout.jsonl"
+  },
+  "profile": {
+    "account_key": "claude:93bea5e6cbddcb458c78d2c8821dd8bea57b08f6d56d20ec8edf22e289d437f7",
+    "authenticated": true,
+    "capabilities": {
+      "headless": true,
+      "json_events": true,
+      "no_permission_prompts": true,
+      "permission_mode": true,
+      "schema": true,
+      "tools": true,
+      "worker_flags": true
+    },
+    "id": "claude:.claude",
+    "launchable": true,
+    "model": "opus",
+    "plan": "pro",
+    "profile_dir": "C:\\Users\\vac34\\.claude",
+    "provider": "claude",
+    "quota": "unknown",
+    "reason": null,
+    "subscription_auth": true,
+    "version": "2.1.295"
+  },
+  "provider": "claude",
+  "started": "2026-10-11T19:27:14.351211+00:00",
+  "worker_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\claude-replacement"
+}

@@ -1,0 +1,28 @@
+{
+  "launcher": {
+    "chunk_id": "b91ff3",
+    "wall_time_seconds": 0.2973488,
+    "exit_code": 0,
+    "original_token_count": 588,
+    "output": "{\r\n  \"ok\": true,\r\n  \"code\": \"PATH_LAUNCHER\",\r\n  \"transport\": \"PATH_LAUNCHER\",\r\n  \"argv_prefix\": [\r\n    \"C:\\\\Users\\\\vac34\\\\bin\\\\saipen.CMD\"\r\n  ],\r\n  \"exec_prefix\": [\r\n    \"C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.EXE\",\r\n    \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\saipen.py\"\r\n  ],\r\n  \"command_form\": \"saipen\",\r\n  \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n  \"project_lineage\": \"lineage-b512942bac884a8691f6c98afcd6ddb9\",\r\n  \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n  \"runtime_identity\": {\r\n    \"home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n    \"engine\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\saipen.py\",\r\n    \"protocol_dir\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\",\r\n    \"proven_by\": \"state-saipen-home\",\r\n    \"proof\": \"activation contract and engine present in the home's own bytes\",\r\n    \"version\": \"8.1.0\",\r\n    \"installer_provenance\": null\r\n  },\r\n  \"host_admission\": {\r\n    \"host\": null,\r\n    \"known\": false,\r\n    \"mutation_admitted\": true\r\n  },\r\n  \"requested_command\": null,\r\n  \"command_effect\": null,\r\n  \"command_allowed\": true,\r\n  \"binding\": {\r\n    \"persisted_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n    \"persisted_home_dead\": false,\r\n    \"persisted_home_inaccessible\": false,\r\n    \"reason\": null\r\n  },\r\n  \"degraded\": [],\r\n  \"diagnostics\": [],\r\n  \"attempted\": [\r\n    {\r\n      \"source\": \"path\",\r\n      \"path\": \"C:\\\\Users\\\\vac34\\\\bin\\\\saipen.CMD\",\r\n      \"ok\": true\r\n    },\r\n    {\r\n      \"source\": \"state-saipen-home\",\r\n      \"home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n      \"ok\": true,\r\n      \"protocol_dir\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\",\r\n      \"engine\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\saipen.py\"\r\n    },\r\n    {\r\n      \"source\": \"executing-engine\",\r\n      \"home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n      \"ok\": true,\r\n      \"protocol_dir\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\",\r\n      \"engine\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\saipen.py\"\r\n    }\r\n  ],\r\n  \"next_action\": null,\r\n  \"bootstrap_code\": \"HOST_BOOTSTRAP_BOUND\",\r\n  \"module_invocation\": \"unsupported\",\r\n  \"host_shell\": \"windows\"\r\n}\r\n"
+  },
+  "preview": {
+    "chunk_id": "762dcc",
+    "wall_time_seconds": 1.6163509999999999,
+    "exit_code": 0,
+    "original_token_count": 206,
+    "output": "{\r\n  \"ok\": true,\r\n  \"code\": \"REPAIR_REQUIRED\",\r\n  \"dry_run\": true,\r\n  \"capsule\": {\r\n    \"kind\": \"saipen-gate-decision\",\r\n    \"schema\": 1,\r\n    \"project_lineage\": \"lineage-b512942bac884a8691f6c98afcd6ddb9\",\r\n    \"gate_id\": \"97cdcd106e3a1a886eb8c6f4abb8428989d1ab26ce6ae7265dcee6208ef067a2\",\r\n    \"gate\": {\r\n      \"phase\": \"VERIFY\",\r\n      \"task\": \"T-1729\",\r\n      \"last_event\": 16152,\r\n      \"blocker\": \"none\",\r\n      \"next_action\": \"PHASE VERIFY T-1729\"\r\n    },\r\n    \"resolve\": [],\r\n    \"decision\": \"ACCEPT_LIMITATION\",\r\n    \"statement\": \"\",\r\n    \"expires_at\": \"\"\r\n  },\r\n  \"detail\": \"Complete the capsule and capture its original operator witness; a preview grants no authority.\",\r\n  \"canonical_next_command\": \"saipen authority capture --file <UTF8_FILE>\",\r\n  \"apply_command\": \"saipen recover resolve-blocker <SRC-###>\"\r\n}\r\n"
+  },
+  "target_observation_and_carrier_presence": {
+    "chunk_id": "4bf0c4",
+    "wall_time_seconds": 5.9841114,
+    "exit_code": 0,
+    "original_token_count": 92,
+    "output": "{\r\n  \"ok\": true,\r\n  \"phase\": \"DONE\",\r\n  \"task\": \"none\",\r\n  \"next_action\": \"saipen continue\",\r\n  \"blocker\": \"none\",\r\n  \"execution_intent\": \"goal\",\r\n  \"safety_valve_mode\": \"hard_wait\",\r\n  \"log_tail_event\": 3243,\r\n  \"head\": \"5f0dc0c\",\r\n  \"board_errors\": [],\r\n  \"recovery_pending\": false\r\n}\r\n{\r\n  \"operator_digest_present\": false,\r\n  \"operator_file_present\": false\r\n}\r\n"
+  },
+  "limitations": [
+    "Read-only observation: SAITULS currently reports DONE, none, saipen continue at E-3243. Its earlier WAIT is no longer active; this session did not establish the origin of that external change.",
+    "No SAIPEN_TASK_SHA256 or SAIPEN_TASK_FILE is present. Test harness witnesses do not establish genuine operator acceptance.",
+    "Current PATH launcher resolves the modified source engine. Consumer installations were not deployed or published."
+  ]
+}

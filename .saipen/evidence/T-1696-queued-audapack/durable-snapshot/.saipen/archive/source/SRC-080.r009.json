@@ -1,0 +1,54 @@
+{
+  "clauses": {
+    "SRC-080:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: existing-but-corrupt durable audit generation state must fail closed, never infer generation 0, and never publish a generation <= prior durable N; Bridge, browser-dispatch and INAUDIT channels share one coherent semantics; missing file may bootstrap at 1; pending INAUDIT notification stays owed on publish failure; consumers adopt an explicit recovery/reset baseline lower than last observed generation."
+    },
+    "SRC-080:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002: one explicit cross-process ProjectRegistry refresh primitive acquires the canonical registry lock, loads latest config, synchronizes the existing AppConfig/project collection IN PLACE (preserving object identity) and rebuilds ID indexes; invoked at external Bridge generation consumption and explicit Refresh All so a Bridge-created project is resolvable by AuditService and visible in ProjectRoomModel without restart; no disk I/O on paint/data lookup paths."
+    },
+    "SRC-080:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003: v3 campaign artifacts require non-empty CAMPAIGN_PROFILE, CAMPAIGN_PROFILE_VERSION and CAMPAIGN_MANIFEST_SHA256; profile id and version must match the selected profile; manifest hash must be exact unless an explicit proven compatibility ledger maps it; manifest_hash_is_compatible rejects missing/arbitrary mismatches by default; parser, resolver and Bridge server agree and never launder an absent/untrusted identity into the current canonical identity after acceptance."
+    },
+    "SRC-080:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001: AuditStartIntentStore owns an atomic pre-dispatch fencing claim (opaque claim token / monotonic fencing generation); exactly one caller may advance PREPARING/PACKING/SUBMITTING for one intent; stale/interrupted owners take over through a fenced claim; every mutation validates the expected claim; a loser never packs again, submits again, mutates state, or attaches FAILED after winner progress; one pack, one submit, one intent, one stable dispatch identity under a deterministic concurrent release."
+    },
+    "SRC-080:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-002: the Win32 kernel named mutex is authoritative for single-instance admission; an existing launcher probes with real owned-mutex semantics (WaitForSingleObject) and stands down on WAIT_TIMEOUT even before owner.json/window exists; missing/unreadable owner.json and lack of a visible window never authorize a second GUI; abandoned/dead ownership recovers safely with namespace continuity and third-launcher exclusion; clean shutdown releases ownership; owner.json is diagnostic only."
+    },
+    "SRC-080:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-003: browser-dispatch and audit generation streams use one coherent recovery identity; corrupt/unreadable durable generation files are not collapsed to zero; the producer never publishes a generation lower than durable history; consumers perform one authoritative resync and adopt a recovered/reset baseline even when lower than last observed, then advance normally; malformed generation files never break authoritative run/job persistence."
+    },
+    "SRC-080:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-001: AuditRunCoordinator.refresh_runs separates all non-terminal ACTIVE dispatches from bounded TERMINAL history; every non-terminal dispatch remains represented to Project Room, queue operations, cancel/reset/reorder, lane state and poll-cadence selection; terminal history is bounded independently; records excluded from terminal presentation avoid full enrichment; pre-campaign QUEUED/RETRYABLE records trigger no pointless AuditIndexer scan; regression dataset 200 non-terminal + 100 terminal."
+    },
+    "SRC-080:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-002: physical artifact digest verification is not recomputed from raw bytes on every passive refresh; the intra-snapshot duplicate hash is removed; a bounded physical-digest proof cache keyed by artifact identity plus trustworthy change signature is reused across unchanged passive refreshes; same-path mutation, deletion, missing/unreadable files, and cross-run canonical-path overwrite remain detected; cache evicts with dispatch history pruning."
+    },
+    "SRC-080:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-003: ProjectRoomModel maintains an authoritative project_id->location index rebuilt with _projects and updated atomically on reload/create/delete/move/swap/reconcile/dynamic groups; project_by_id and index_for_project_id are O(1); scale fixtures create the requested real cardinality (24/60/120/300 unique coordinates) and assert model-visible unique project IDs equal project_count; 300 targets scale ~O(N); targeted Qt signals preserved with no unnecessary model reset."
+    }
+  },
+  "derived_at": "2026-09-22T10:42:31Z",
+  "derived_from": "SRC-080",
+  "interpretation_revision": 9,
+  "schema_version": 1,
+  "source_sha256": "1a65c43e12ee4453d6036de7216e131b95a6fb83d3d596b77ece69bdb35ef3da"
+}

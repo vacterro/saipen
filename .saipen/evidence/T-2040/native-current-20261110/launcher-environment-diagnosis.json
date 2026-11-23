@@ -1,0 +1,19 @@
+{
+  "checked_at": "2026-11-10T18:11:09.234480+00:00",
+  "record": "regression-execution-f26fcfca6ba34685b926620f357a9559",
+  "direct_runtime": {
+    "path": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+  },
+  "proven_launcher": "C:/Users/vac34/bin/saipen",
+  "direct_shell_public_path": "C:\\Program Files\\Git\\bin\\bash.exe",
+  "matching_single_change": [
+    {
+      "name": "SHELL",
+      "public_path": "C:\\Program Files\\Git\\usr\\bin\\bash.exe",
+      "value_sha256": "b501f83b30dfdcc822eda40272ca3670f7710cf595147e70ca908fab17d54906"
+    }
+  ],
+  "contract_unchanged": true,
+  "limitation": "Current context moved after gateway repair; stored pair is historical until refreshed. Only one invocation difference is diagnosed, no digest transplanted."
+}

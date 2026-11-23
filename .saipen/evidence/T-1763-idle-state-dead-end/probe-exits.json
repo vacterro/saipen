@@ -1,0 +1,122 @@
+{
+ "saipen status": {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "checkpoint invalid: STATE proposed phase DONE is not ticket-bearing but BOARD has a ## DOING ticket; a DOING ticket requires a ticket-bearing phase (a",
+  "names": "saipen recover",
+  "moved": [],
+  "state_after": {
+   "phase": "DONE",
+   "transition_from": "SHIP",
+   "task": "none",
+   "next_action": "\"saipen continue\"",
+   "last_event": "5"
+  },
+  "row_section": "## DOING"
+ },
+ "saipen recover": {
+  "ok": false,
+  "code": "RESIDUAL_DEFECTS",
+  "detail": "reconciliation has no repair left to make and the project is still invalid: STATE proposed phase DONE is not ticket-bearing but BOARD has a ## DOING t",
+  "names": null,
+  "moved": [],
+  "state_after": {
+   "phase": "DONE",
+   "transition_from": "SHIP",
+   "task": "none",
+   "next_action": "\"saipen continue\"",
+   "last_event": "5"
+  },
+  "row_section": "## DOING"
+ },
+ "saipen recover --dry-run": {
+  "ok": false,
+  "code": "RESIDUAL_DEFECTS",
+  "detail": "reconciliation has no repair left to make and the project is still invalid: STATE proposed phase DONE is not ticket-bearing but BOARD has a ## DOING t",
+  "names": null,
+  "moved": [],
+  "state_after": {
+   "phase": "DONE",
+   "transition_from": "SHIP",
+   "task": "none",
+   "next_action": "\"saipen continue\"",
+   "last_event": "5"
+  },
+  "row_section": "## DOING"
+ },
+ "saipen continue": {
+  "ok": false,
+  "code": "RESIDUAL_DEFECTS",
+  "detail": "reconciliation has no repair left to make and the project is still invalid: STATE proposed phase DONE is not ticket-bearing but BOARD has a ## DOING t",
+  "names": null,
+  "moved": [],
+  "state_after": {
+   "phase": "DONE",
+   "transition_from": "SHIP",
+   "task": "none",
+   "next_action": "\"saipen continue\"",
+   "last_event": "5"
+  },
+  "row_section": "## DOING"
+ },
+ "saipen claim T-001": {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "proposed state fails fast validation: STATE proposed phase DONE is not ticket-bearing but BOARD has a ## DOING ticket; a DOING ticket requires a ticke",
+  "names": null,
+  "moved": [],
+  "state_after": {
+   "phase": "DONE",
+   "transition_from": "SHIP",
+   "task": "none",
+   "next_action": "\"saipen continue\"",
+   "last_event": "5"
+  },
+  "row_section": "## DOING"
+ },
+ "saipen claim T-001 --explicit": {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "proposed state fails fast validation: STATE proposed phase DONE is not ticket-bearing but BOARD has a ## DOING ticket; a DOING ticket requires a ticke",
+  "names": null,
+  "moved": [],
+  "state_after": {
+   "phase": "DONE",
+   "transition_from": "SHIP",
+   "task": "none",
+   "next_action": "\"saipen continue\"",
+   "last_event": "5"
+  },
+  "row_section": "## DOING"
+ },
+ "saipen transition BUILD T-001 resume": {
+  "ok": false,
+  "code": "ILLEGAL_TRANSITION",
+  "detail": "DONE -> BUILD is not a legal edge; from DONE the legal edges are SCOUT, PLAN, HUNT, BLOCKED",
+  "names": "saipen transition SCOUT T-001 '<why>'",
+  "moved": [],
+  "state_after": {
+   "phase": "DONE",
+   "transition_from": "SHIP",
+   "task": "none",
+   "next_action": "\"saipen continue\"",
+   "last_event": "5"
+  },
+  "row_section": "## DOING"
+ },
+ "saipen validate": {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "STATE proposed phase DONE is not ticket-bearing but BOARD has a ## DOING ticket; a DOING ticket requires a ticket-bearing phase (a completed ticket's ",
+  "names": null,
+  "moved": [],
+  "state_after": {
+   "phase": "DONE",
+   "transition_from": "SHIP",
+   "task": "none",
+   "next_action": "\"saipen continue\"",
+   "last_event": "5"
+  },
+  "row_section": "## DOING"
+ }
+}

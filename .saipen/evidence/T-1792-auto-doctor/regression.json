@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t1792_auto_doctor.py", "-v"],
+  "format": "unittest",
+  "context": [
+    "tools", "saipen", "tests", "extensions", "VERSION", "bootstrap", "bin",
+    "assets", "docs", "guides", "KNOWLEDGE", "src", ".github",
+    ".gitignore", ".gitattributes", "ruff.toml", "README.md", "README.ded.md",
+    "README.ee.md", "README.ja.md", "SPEC.md", "LICENSE", "GUIDE.md",
+    "CHANGELOG.md", "CHANGELOG_ARCHIVE.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md",
+    "SECURITY.md", "THIRD_PARTY_NOTICES.md", "BROCHURE_DED.md", "BROCHURE_EN.md",
+    "BROCHURE_ET.md", "BROCHURE_JA.md", "BROCHURE_RU.md"
+  ],
+  "oracle_files": [
+    "tools/test_t1792_auto_doctor.py", "tools/test_t1412_conformance_truth.py",
+    "tools/test_continue_chain.py", "tools/test_hermetic_env.py", "tools/test_fixture_support.py"
+  ],
+  "subject_files": ["tools/saipen.py"],
+  "before": {"tools/saipen.py": ".saipen/evidence/T-1792-auto-doctor/pre/saipen.py"},
+  "timeout": 900
+}

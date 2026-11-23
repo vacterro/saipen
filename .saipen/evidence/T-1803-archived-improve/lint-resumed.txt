@@ -1,0 +1,7 @@
+Observed 2026-10-16T21:13:44Z, exec chunk 17550a.
+python -m ruff --version
+ruff 0.16.0
+python -m ruff check tools/ tests/
+All checks passed!
+git diff --check -- tools/improve.py tools/saipen.py tools/saipen_engine/continue_fallback.py tools/saipen_engine/journal.py tools/saipen_engine/admission.py tools/saipen_engine/capability.py tools/test_t38_improve_cycle_liveness.py saipen/IMPROVE.md
+No whitespace diagnostics; exit 0.

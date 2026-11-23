@@ -1,0 +1,17 @@
+........................warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+....................................s.........................................................................................................................................................................................................................................................................................................s.........................................................s...................................................
+----------------------------------------------------------------------
+Ran 469 tests in 343.539s
+
+OK (skipped=3)

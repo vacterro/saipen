@@ -1,0 +1,12 @@
+{
+  "status": "NOT_GREEN",
+  "full_family_verified": false,
+  "outer_exit_code": 1,
+  "exact_output": "FAIL: canonical mutation suite is not green; portable-floor parity cannot assume the Python side catches every case\n",
+  "parent_process_started_utc": "2026-10-21T00:43:51Z",
+  "nested_canonical_process_started_utc": "2026-10-21T00:44:43Z",
+  "outer_log_written_utc": "2026-10-21T01:00:01.095355+00:00",
+  "nested_result": "The wrapper did not expose its child exit code or full captured output; do not infer a completed mutation verdict. Timing is consistent with its 900-second bound, not direct proof of the inner status.",
+  "live_observation": "Outer tool session 99203 returned terminal exit 1; later PID traversal found no remaining known descendants.",
+  "next_scope": "Use the existing audit_checks.py --changed mode for the 13 actual controls targeting the three owned documents. This is not the full sweep, not full audit_checks/parity evidence, and must not populate the full-audit cache."
+}

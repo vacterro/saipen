@@ -1,0 +1,184 @@
+test_a_historical_fail_is_not_safety_authority (__main__.DeterministicBudgetRefusalTests.test_a_historical_fail_is_not_safety_authority) ... FAIL
+test_a_measured_over_budget_copy_is_never_a_refusal (__main__.DeterministicBudgetRefusalTests.test_a_measured_over_budget_copy_is_never_a_refusal) ... FAIL
+test_a_non_positive_timeout_is_a_deterministic_refusal (__main__.DeterministicBudgetRefusalTests.test_a_non_positive_timeout_is_a_deterministic_refusal) ... 
+  test_a_non_positive_timeout_is_a_deterministic_refusal (__main__.DeterministicBudgetRefusalTests.test_a_non_positive_timeout_is_a_deterministic_refusal) (timeout=0) ... FAIL
+  test_a_non_positive_timeout_is_a_deterministic_refusal (__main__.DeterministicBudgetRefusalTests.test_a_non_positive_timeout_is_a_deterministic_refusal) (timeout=-1) ... FAIL
+test_a_supported_timeout_is_not_refused_by_history (__main__.DeterministicBudgetRefusalTests.test_a_supported_timeout_is_not_refused_by_history) ... FAIL
+test_a_timeout_above_the_focused_cap_names_the_reachable_route (__main__.DeterministicBudgetRefusalTests.test_a_timeout_above_the_focused_cap_names_the_reachable_route) ... FAIL
+test_a_changed_source_tree_does_not_inherit_the_old_timing (__main__.HistoricalTimingAdvisoryTests.test_a_changed_source_tree_does_not_inherit_the_old_timing) ... ERROR
+test_a_declared_scope_gets_a_reachable_recommendation (__main__.HistoricalTimingAdvisoryTests.test_a_declared_scope_gets_a_reachable_recommendation) ... ERROR
+test_a_full_scope_recommendation_names_a_reachable_route (__main__.HistoricalTimingAdvisoryTests.test_a_full_scope_recommendation_names_a_reachable_route) ... ERROR
+test_a_measured_copy_within_budget_is_not_an_advisory (__main__.HistoricalTimingAdvisoryTests.test_a_measured_copy_within_budget_is_not_an_advisory) ... ERROR
+test_a_small_current_corpus_is_not_blocked_by_a_large_old_one (__main__.HistoricalTimingAdvisoryTests.test_a_small_current_corpus_is_not_blocked_by_a_large_old_one) ... FAIL
+test_another_pattern_set_is_not_this_selection (__main__.HistoricalTimingAdvisoryTests.test_another_pattern_set_is_not_this_selection) ... ERROR
+test_missing_record_directory_is_not_an_advisory (__main__.HistoricalTimingAdvisoryTests.test_missing_record_directory_is_not_an_advisory) ... ERROR
+test_the_60_second_floor_keeps_noise_out_of_the_advisory (__main__.HistoricalTimingAdvisoryTests.test_the_60_second_floor_keeps_noise_out_of_the_advisory) ... ERROR
+test_the_worst_record_wins_whatever_the_filename_order (__main__.HistoricalTimingAdvisoryTests.test_the_worst_record_wins_whatever_the_filename_order) ... 
+  test_the_worst_record_wins_whatever_the_filename_order (__main__.HistoricalTimingAdvisoryTests.test_the_worst_record_wins_whatever_the_filename_order) (first='a.json') ... ERROR
+  test_the_worst_record_wins_whatever_the_filename_order (__main__.HistoricalTimingAdvisoryTests.test_the_worst_record_wins_whatever_the_filename_order) (first='z.json') ... ERROR
+test_unreadable_or_corrupt_records_never_advise (__main__.HistoricalTimingAdvisoryTests.test_unreadable_or_corrupt_records_never_advise) ... ERROR
+test_without_a_tree_identity_the_advisory_still_never_refuses (__main__.HistoricalTimingAdvisoryTests.test_without_a_tree_identity_the_advisory_still_never_refuses) ... FAIL
+test_a_dead_pattern_is_refused_before_the_copy (__main__.SelectionRefusalTests.test_a_dead_pattern_is_refused_before_the_copy) ... ok
+test_a_live_pattern_proceeds (__main__.SelectionRefusalTests.test_a_live_pattern_proceeds) ... ok
+test_a_missing_tools_dir_is_not_a_selection_refusal (__main__.SelectionRefusalTests.test_a_missing_tools_dir_is_not_a_selection_refusal) ... ok
+test_one_live_one_dead_refuses_only_the_dead_one (__main__.SelectionRefusalTests.test_one_live_one_dead_refuses_only_the_dead_one) ... ok
+test_selection_agrees_with_the_shared_scope_selector (__main__.SelectionRefusalTests.test_selection_agrees_with_the_shared_scope_selector) ... ok
+
+======================================================================
+ERROR: test_a_changed_source_tree_does_not_inherit_the_old_timing (__main__.HistoricalTimingAdvisoryTests.test_a_changed_source_tree_does_not_inherit_the_old_timing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 150, in test_a_changed_source_tree_does_not_inherit_the_old_timing
+    self.assertIsNone(preflight.timing_advisory(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.preflight' has no attribute 'timing_advisory'
+
+======================================================================
+ERROR: test_a_declared_scope_gets_a_reachable_recommendation (__main__.HistoricalTimingAdvisoryTests.test_a_declared_scope_gets_a_reachable_recommendation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 215, in test_a_declared_scope_gets_a_reachable_recommendation
+    advisory = preflight.timing_advisory(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.preflight' has no attribute 'timing_advisory'
+
+======================================================================
+ERROR: test_a_full_scope_recommendation_names_a_reachable_route (__main__.HistoricalTimingAdvisoryTests.test_a_full_scope_recommendation_names_a_reachable_route)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 232, in test_a_full_scope_recommendation_names_a_reachable_route
+    advisory = preflight.timing_advisory(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.preflight' has no attribute 'timing_advisory'
+
+======================================================================
+ERROR: test_a_measured_copy_within_budget_is_not_an_advisory (__main__.HistoricalTimingAdvisoryTests.test_a_measured_copy_within_budget_is_not_an_advisory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 189, in test_a_measured_copy_within_budget_is_not_an_advisory
+    self.assertIsNone(preflight.timing_advisory(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.preflight' has no attribute 'timing_advisory'
+
+======================================================================
+ERROR: test_another_pattern_set_is_not_this_selection (__main__.HistoricalTimingAdvisoryTests.test_another_pattern_set_is_not_this_selection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 141, in test_another_pattern_set_is_not_this_selection
+    self.assertIsNone(preflight.timing_advisory(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.preflight' has no attribute 'timing_advisory'
+
+======================================================================
+ERROR: test_missing_record_directory_is_not_an_advisory (__main__.HistoricalTimingAdvisoryTests.test_missing_record_directory_is_not_an_advisory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 207, in test_missing_record_directory_is_not_an_advisory
+    self.assertIsNone(preflight.timing_advisory(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.preflight' has no attribute 'timing_advisory'
+
+======================================================================
+ERROR: test_the_60_second_floor_keeps_noise_out_of_the_advisory (__main__.HistoricalTimingAdvisoryTests.test_the_60_second_floor_keeps_noise_out_of_the_advisory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 195, in test_the_60_second_floor_keeps_noise_out_of_the_advisory
+    self.assertIsNone(preflight.timing_advisory(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.preflight' has no attribute 'timing_advisory'
+
+======================================================================
+ERROR: test_the_worst_record_wins_whatever_the_filename_order (__main__.HistoricalTimingAdvisoryTests.test_the_worst_record_wins_whatever_the_filename_order) (first='a.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 177, in test_the_worst_record_wins_whatever_the_filename_order
+    advisory = preflight.timing_advisory(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.preflight' has no attribute 'timing_advisory'
+
+======================================================================
+ERROR: test_the_worst_record_wins_whatever_the_filename_order (__main__.HistoricalTimingAdvisoryTests.test_the_worst_record_wins_whatever_the_filename_order) (first='z.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 177, in test_the_worst_record_wins_whatever_the_filename_order
+    advisory = preflight.timing_advisory(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.preflight' has no attribute 'timing_advisory'
+
+======================================================================
+ERROR: test_unreadable_or_corrupt_records_never_advise (__main__.HistoricalTimingAdvisoryTests.test_unreadable_or_corrupt_records_never_advise)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 202, in test_unreadable_or_corrupt_records_never_advise
+    self.assertIsNone(preflight.timing_advisory(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.preflight' has no attribute 'timing_advisory'
+
+======================================================================
+FAIL: test_a_historical_fail_is_not_safety_authority (__main__.DeterministicBudgetRefusalTests.test_a_historical_fail_is_not_safety_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 124, in test_a_historical_fail_is_not_safety_authority
+    self.assertIsNone(
+AssertionError: {'code': 'INSUFFICIENT_VERIFICATION_BUDGET', 'detail': 'a prior record of this exact scope measured copy_wall_s=676.6 alone, above the whole 300s budget; use a declared narrow scope or a larger budget instead of paying the copy again', 'scope': {'mode': 'FULL', 'trees': []}, 'witness': {'path': 'a.json', 'copy_wall_s': 676.58, 'verdict': 'FAIL', 'ran': 0}} is not None
+
+======================================================================
+FAIL: test_a_measured_over_budget_copy_is_never_a_refusal (__main__.DeterministicBudgetRefusalTests.test_a_measured_over_budget_copy_is_never_a_refusal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 109, in test_a_measured_over_budget_copy_is_never_a_refusal
+    self.assertIsNone(
+AssertionError: {'code': 'INSUFFICIENT_VERIFICATION_BUDGET', 'detail': 'a prior record of this exact scope measured copy_wall_s=676.6 alone, above the whole 300s budget; use a declared narrow scope or a larger budget instead of paying the copy again', 'scope': {'mode': 'FULL', 'trees': []}, 'witness': {'path': 'a.json', 'copy_wall_s': 676.58, 'verdict': 'FAIL', 'ran': 0}} is not None
+
+======================================================================
+FAIL: test_a_non_positive_timeout_is_a_deterministic_refusal (__main__.DeterministicBudgetRefusalTests.test_a_non_positive_timeout_is_a_deterministic_refusal) (timeout=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 87, in test_a_non_positive_timeout_is_a_deterministic_refusal
+    self.assertIsNotNone(problem)
+AssertionError: unexpectedly None
+
+======================================================================
+FAIL: test_a_non_positive_timeout_is_a_deterministic_refusal (__main__.DeterministicBudgetRefusalTests.test_a_non_positive_timeout_is_a_deterministic_refusal) (timeout=-1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 87, in test_a_non_positive_timeout_is_a_deterministic_refusal
+    self.assertIsNotNone(problem)
+AssertionError: unexpectedly None
+
+======================================================================
+FAIL: test_a_supported_timeout_is_not_refused_by_history (__main__.DeterministicBudgetRefusalTests.test_a_supported_timeout_is_not_refused_by_history)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 103, in test_a_supported_timeout_is_not_refused_by_history
+    self.assertIsNone(
+AssertionError: {'code': 'INSUFFICIENT_VERIFICATION_BUDGET', 'detail': 'a prior record of this exact scope measured copy_wall_s=676.6 alone, above the whole 300s budget; use a declared narrow scope or a larger budget instead of paying the copy again', 'scope': {'mode': 'FULL', 'trees': []}, 'witness': {'path': 'a.json', 'copy_wall_s': 676.58, 'verdict': 'FAIL', 'ran': 0}} is not None
+
+======================================================================
+FAIL: test_a_timeout_above_the_focused_cap_names_the_reachable_route (__main__.DeterministicBudgetRefusalTests.test_a_timeout_above_the_focused_cap_names_the_reachable_route)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 92, in test_a_timeout_above_the_focused_cap_names_the_reachable_route
+    self.assertIsNotNone(problem)
+AssertionError: unexpectedly None
+
+======================================================================
+FAIL: test_a_small_current_corpus_is_not_blocked_by_a_large_old_one (__main__.HistoricalTimingAdvisoryTests.test_a_small_current_corpus_is_not_blocked_by_a_large_old_one)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 161, in test_a_small_current_corpus_is_not_blocked_by_a_large_old_one
+    self.assertIsNone(preflight.budget_problem(
+AssertionError: {'code': 'INSUFFICIENT_VERIFICATION_BUDGET', 'detail': 'a prior record of this exact scope measured copy_wall_s=676.6 alone, above the whole 300s budget; use a declared narrow scope or a larger budget instead of paying the copy again', 'scope': {'mode': 'FULL', 'trees': []}, 'witness': {'path': 'a.json', 'copy_wall_s': 676.58, 'verdict': 'FAIL', 'ran': 0}} is not None
+
+======================================================================
+FAIL: test_without_a_tree_identity_the_advisory_still_never_refuses (__main__.HistoricalTimingAdvisoryTests.test_without_a_tree_identity_the_advisory_still_never_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2093_preflight.py", line 242, in test_without_a_tree_identity_the_advisory_still_never_refuses
+    self.assertIsNone(
+AssertionError: {'code': 'INSUFFICIENT_VERIFICATION_BUDGET', 'detail': 'a prior record of this exact scope measured copy_wall_s=676.6 alone, above the whole 300s budget; use a declared narrow scope or a larger budget instead of paying the copy again', 'scope': {'mode': 'FULL', 'trees': []}, 'witness': {'path': 'a.json', 'copy_wall_s': 676.58, 'verdict': 'FAIL', 'ran': 0}} is not None
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.029s
+
+FAILED (failures=8, errors=10)

@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1759_single_lifecycle_observer.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap"
+  ],
+  "oracle_files": [
+    "tools/test_t1759_single_lifecycle_observer.py",
+    "tools/test_t1671_lifecycle_authority.py",
+    "tools/continuity_probes.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/reconcile.py"
+  ],
+  "before": {
+    "tools/saipen_engine/reconcile.py": ".saipen/evidence/foreign-edit-20261014-reconcile/reconcile.with-foreign-hunk.py"
+  },
+  "timeout": 900
+}

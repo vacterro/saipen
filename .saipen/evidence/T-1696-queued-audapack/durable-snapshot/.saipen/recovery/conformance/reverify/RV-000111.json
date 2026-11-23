@@ -1,0 +1,48 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-09-25T15:17:34Z",
+  "evidence_class": "executed",
+  "findings_digest": "6dd93d546e498a33a64bb4a6b9037b1ff9916c04e21b7323a08a398f2790d9dd",
+  "gate": "core",
+  "integrity_digest": "135cfecf6c8565de",
+  "journal_op_id": "reverify.06f3b9c06ad0",
+  "original_closure": {
+    "claim_time": "2026-08-31T08:21:49Z",
+    "owner": "opencode",
+    "source_receipts": "SRC-009, SRC-010, SRC-011, SRC-012, SRC-013, SRC-014, SRC-015, SRC-016, SRC-017, SRC-018, SRC-019, SRC-020, SRC-021, SRC-022, SRC-023, SRC-024, SRC-025, SRC-026, SRC-027, SRC-028, SRC-029"
+  },
+  "own_problem_keys": [
+    "5c37a274e978dcd4",
+    "5c37a274e978dcd4",
+    "5c37a274e978dcd4"
+  ],
+  "problem_count": 10,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000111",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:69a5fe4257f1fe56b335194a5521bca6f9fd222f5e9ababbe84e733a93bab22c",
+  "verdict": "FAIL",
+  "verification": [
+    {
+      "command": "strict_gate:core",
+      "default_contract": true,
+      "executed": true,
+      "result": "FAIL"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "strict_gate:core"
+    ],
+    "findings_digest": "6dd93d546e498a33a64bb4a6b9037b1ff9916c04e21b7323a08a398f2790d9dd",
+    "gate": "core"
+  },
+  "verification_contract_digest": "c8fe5ad87ab553f3",
+  "verifier": "buffy",
+  "warning_count": 93,
+  "work": "T-52"
+}

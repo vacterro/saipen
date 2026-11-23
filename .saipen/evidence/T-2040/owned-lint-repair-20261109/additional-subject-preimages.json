@@ -1,0 +1,12 @@
+[
+  {
+    "path": "tools/saipen_engine/discovery_providers.py",
+    "sha256": "b82412d9491b8743a55bee4d9f2f91329593f69b26c8ee2dabb82aacc7276a1f",
+    "ast_sha256": "c27960e1ffc060eec032355a439975e84679564b28a1d116fda996e41f96df08"
+  },
+  {
+    "path": "tools/saipen_engine/outcome_truth.py",
+    "sha256": "1a00028b276570f088923ec27ae3beb584ff8b3874e79ab57971df74e7447ec5",
+    "ast_sha256": "f0c9ab55a80cc47ea23b66b40ebbd66ea34bcb3f8ebbd88ec65f401320fb68ee"
+  }
+]

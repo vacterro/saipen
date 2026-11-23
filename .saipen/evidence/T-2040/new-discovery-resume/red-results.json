@@ -1,0 +1,7 @@
+{
+  "status": "RED_CONTROLS",
+  "exit_code": 1,
+  "test": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_bounded_discovery_resume.py",
+  "test_sha256": "137c69ec12702ca3c0da5608968944477090419f13a70a02b1243b7c5949c13b",
+  "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\red-test_t2040_bounded_discovery_resume.log"
+}

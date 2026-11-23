@@ -1,0 +1,38 @@
+{
+ "saipen transition SCOUT T-001": {
+  "ok": false,
+  "code": "ACTIVE_TICKET_MISMATCH",
+  "detail": "STATE.task=none but BOARD.DOING=T-001",
+  "names": null,
+  "moved": [],
+  "state": {
+   "phase": "DONE",
+   "task": "none"
+  },
+  "row": "## DOING"
+ },
+ "saipen recover": {
+  "ok": false,
+  "code": "RESIDUAL_DEFECTS",
+  "detail": "reconciliation has no repair left to make and the project is still invalid: STATE proposed phase DONE is not ticket-bearing but BOARD has a ## DOING ticket; a DOING ticke",
+  "names": null,
+  "moved": [],
+  "state": {
+   "phase": "DONE",
+   "task": "none"
+  },
+  "row": "## DOING"
+ },
+ "saipen status": {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "checkpoint invalid: STATE proposed phase DONE is not ticket-bearing but BOARD has a ## DOING ticket; a DOING ticket requires a ticket-bearing phase (a completed ticket's ",
+  "names": "saipen recover",
+  "moved": [],
+  "state": {
+   "phase": "DONE",
+   "task": "none"
+  },
+  "row": "## DOING"
+ }
+}

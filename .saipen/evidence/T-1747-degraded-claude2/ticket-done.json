@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "code": "FINISHED",
+  "op_id": "finish-476db50769a64a2889d7c90c3358bbb1",
+  "changed_files": [
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md"
+  ],
+  "recovery_required": false,
+  "ticket": "T-1747",
+  "event_id": "E-15125",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "PHASE SCOUT T-1756",
+  "transition_from": "SHIP",
+  "source_closed": {
+    "ok": true,
+    "closed": [
+      "SRC-241"
+    ],
+    "refused": {}
+  }
+}

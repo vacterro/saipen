@@ -1,0 +1,18 @@
+[
+  {
+    "test": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_publication_truth.py",
+    "exit_code": 0,
+    "seconds": 2.706,
+    "test_sha256": "0d7ab5ceee6d3e390be3df901f76e2f83672056fd3d7f52882ebd1d666288c82",
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\publication-resume-20261108\\baseline-test_t2040_publication_truth.log",
+    "log_sha256": "916fba4e18f67b6c2188dd49b332bf82eed7241554df7b445d9699b4ff331d71"
+  },
+  {
+    "test": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_release_completion.py",
+    "exit_code": 1,
+    "seconds": 1.804,
+    "test_sha256": "7d68bf3d1d6e59c4ff9cdafbfa577f4aa45d63e38e1e78e63fce81614e2b9a58",
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\publication-resume-20261108\\baseline-test_release_completion.log",
+    "log_sha256": "3d888889723a339a5fd28f6b0b0fd1a92dfe98020d9a71c868c113ccddc27d09"
+  }
+]

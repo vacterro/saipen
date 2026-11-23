@@ -1,0 +1,84 @@
+......s...sss.ss.....................................s.................ss..............................................................FF..FF.F.......................................................................................................................................s.........................................................................................................................s.....
+======================================================================
+FAIL: test_regeneration_keeps_an_adjudicated_verdict (test_check_inventory.InventoryGateTests.test_regeneration_keeps_an_adjudicated_verdict)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_check_inventory.py", line 310, in test_regeneration_keeps_an_adjudicated_verdict
+    self.assertEqual(I.inventory_errors(root), [])
+AssertionError: Lists differ: ["fail site 95800e9ef7d07dee in <module> ([256 chars]ead"] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+"fail site 95800e9ef7d07dee in <module> ('cross-doc drift [root-file-set] -- file(s) at the repository root that') is still UNADJUDICATED -- give it a CASE in tools/audit_checks.py and record COVERED, or record INTENTIONALLY_NO_MUTATION_CASE with a reason that names what proves the invariant instead"
+
++ []
+- ["fail site 95800e9ef7d07dee in <module> ('cross-doc drift [root-file-set] -- "
+-  "file(s) at the repository root that') is still UNADJUDICATED -- give it a "
+-  'CASE in tools/audit_checks.py and record COVERED, or record '
+-  'INTENTIONALLY_NO_MUTATION_CASE with a reason that names what proves the '
+-  'invariant instead']
+
+======================================================================
+FAIL: test_regeneration_never_mints_a_baseline (test_check_inventory.InventoryGateTests.test_regeneration_never_mints_a_baseline)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_check_inventory.py", line 298, in test_regeneration_never_mints_a_baseline
+    self.assertEqual(len(fresh), 1, "a new site was silently adjudicated")
+AssertionError: 2 != 1 : a new site was silently adjudicated
+
+======================================================================
+FAIL: test_the_live_repository_agrees_with_its_ledger (test_check_inventory.InventoryGateTests.test_the_live_repository_agrees_with_its_ledger)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_check_inventory.py", line 253, in test_the_live_repository_agrees_with_its_ledger
+    self.assertEqual(I.inventory_errors(ROOT), [])
+AssertionError: Lists differ: ["ADDED fail site 95800e9ef7d07dee at tool[522 chars]nge"] != []
+
+First list contains 2 additional elements.
+First extra element 0:
+"ADDED fail site 95800e9ef7d07dee at tools/validate.py:7989 in <module> ('cross-doc drift [root-file-set] -- file(s) at the repository root that') -- a new check needs a CASE in tools/audit_checks.py, or a recorded reason it has none. Regenerate tools/validator_fail_sites.json in the same change"
+
++ []
+- ['ADDED fail site 95800e9ef7d07dee at tools/validate.py:7989 in <module> '
+-  "('cross-doc drift [root-file-set] -- file(s) at the repository root that') "
+-  '-- a new check needs a CASE in tools/audit_checks.py, or a recorded reason '
+-  'it has none. Regenerate tools/validator_fail_sites.json in the same change',
+-  "REMOVED fail site 9233fc0f93466bb8 last seen in <module> ('cross-doc drift "
+-  "[root-file-set] -- file(s) at the repository root that') -- a deleted check "
+-  'leaves its control testing nothing. Drop the CASE and regenerate '
+-  'tools/validator_fail_sites.json in the same change']
+
+======================================================================
+FAIL: test_the_probe_passes_on_the_real_repository (test_check_inventory.InventoryGateTests.test_the_probe_passes_on_the_real_repository)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_check_inventory.py", line 256, in test_the_probe_passes_on_the_real_repository
+    self.assertIsNone(A.check_inventory_probe(ROOT, self.workdir))
+AssertionError: "ADDED fail site 95800e9ef7d07dee at tools/validate.py:7989 in <module> ('cross-doc drift [root-file-set] -- file(s) at the repository root that') -- a new check needs a CASE in tools/audit_checks.py, or a recorded reason it has none. Regenerate tools/validator_fail_sites.json in the same change; REMOVED fail site 9233fc0f93466bb8 last seen in <module> ('cross-doc drift [root-file-set] -- file(s) at the repository root that') -- a deleted check leaves its control testing nothing. Drop the CASE and regenerate tools/validator_fail_sites.json in the same change" is not None
+
+======================================================================
+FAIL: test_unrelated_line_insertion_is_accepted (test_check_inventory.InventoryGateTests.test_unrelated_line_insertion_is_accepted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_check_inventory.py", line 278, in test_unrelated_line_insertion_is_accepted
+    self.assertEqual(I.inventory_errors(padded), [])
+AssertionError: Lists differ: ["ADDED fail site 95800e9ef7d07dee at tool[522 chars]nge"] != []
+
+First list contains 2 additional elements.
+First extra element 0:
+"ADDED fail site 95800e9ef7d07dee at tools/validate.py:7991 in <module> ('cross-doc drift [root-file-set] -- file(s) at the repository root that') -- a new check needs a CASE in tools/audit_checks.py, or a recorded reason it has none. Regenerate tools/validator_fail_sites.json in the same change"
+
++ []
+- ['ADDED fail site 95800e9ef7d07dee at tools/validate.py:7991 in <module> '
+-  "('cross-doc drift [root-file-set] -- file(s) at the repository root that') "
+-  '-- a new check needs a CASE in tools/audit_checks.py, or a recorded reason '
+-  'it has none. Regenerate tools/validator_fail_sites.json in the same change',
+-  "REMOVED fail site 9233fc0f93466bb8 last seen in <module> ('cross-doc drift "
+-  "[root-file-set] -- file(s) at the repository root that') -- a deleted check "
+-  'leaves its control testing nothing. Drop the CASE and regenerate '
+-  'tools/validator_fail_sites.json in the same change']
+
+----------------------------------------------------------------------
+Ran 406 tests in 641.801s
+
+FAILED (failures=5, skipped=11)

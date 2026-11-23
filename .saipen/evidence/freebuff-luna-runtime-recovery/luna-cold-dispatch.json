@@ -1,0 +1,88 @@
+{
+  "observedUtc": "2026-10-14T23:54:38.043Z",
+  "project": "V:\\_TEMP_\\saipen-freebuff-luna-cold-s5e38tid",
+  "model": {
+    "id": "m-5a5d0e255e",
+    "key": "m-5a5d0e255e",
+    "compiledId": "openai/gpt-6-luna",
+    "displayName": "GPT-6 Luna",
+    "tagline": "Strong all-around",
+    "taglineTooltip": "On OpenAI flex capacity, with a standard-tier backup when it’s busy.",
+    "badges": [],
+    "availability": "always",
+    "multimodal": true,
+    "premium": true,
+    "dataUse": "service",
+    "access": "open",
+    "placement": {
+      "section": "optimized",
+      "order": 50
+    },
+    "peakPills": "peak",
+    "reasoningEffort": "high",
+    "efforts": [
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+    ],
+    "defaultEffort": "high",
+    "slotBound": true
+  },
+  "thread": "587918ed-22b5-46c3-82e3-9c926ea84f3c",
+  "input": "cc",
+  "created": {
+    "status": 200,
+    "data": {
+      "id": "587918ed-22b5-46c3-82e3-9c926ea84f3c",
+      "draft": true,
+      "projectId": "V:\\_TEMP_\\saipen-freebuff-luna-cold-s5e38tid",
+      "projectPath": "V:\\_TEMP_\\saipen-freebuff-luna-cold-s5e38tid",
+      "title": "SAIPEN T-1794 read-only Luna cold acceptance",
+      "harnessId": "codebuff",
+      "model": "m-5a5d0e255e",
+      "byok": null,
+      "reasoningEffort": null,
+      "agentMode": "build",
+      "executionTarget": "local",
+      "executionMode": "local",
+      "sourceBranch": null,
+      "status": "open",
+      "branch": null,
+      "worktreePath": null,
+      "baseRef": null,
+      "lastSeenHead": null,
+      "deliveries": [],
+      "turnState": "idle",
+      "queuePaused": false,
+      "briefs": [],
+      "lastPromptAt": null,
+      "lastTurnFinishedAt": null,
+      "lastTurnOutcome": null,
+      "attentionRevision": 0,
+      "attentionAcknowledgedRevision": 0,
+      "attentionReason": null,
+      "attentionAt": null,
+      "missionOn": false,
+      "missionEffort": 3,
+      "missionPrompt": "Complete the user's request fully. When the work is correct, lean, and verified, commit it, open a pull request, drive its checks to green, and merge it.",
+      "missionStatus": null,
+      "willContinue": false,
+      "createdAt": 1792022078016,
+      "updatedAt": 1792022078016,
+      "compacting": false,
+      "autoCompacting": false,
+      "sourceEditable": true,
+      "canSwitchToFreebuff": false,
+      "pendingWorkCount": 0,
+      "stopping": false
+    }
+  },
+  "sent": {
+    "status": 200,
+    "data": {
+      "ok": true,
+      "queued": false
+    }
+  }
+}

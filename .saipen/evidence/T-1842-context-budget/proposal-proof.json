@@ -1,0 +1,20 @@
+{
+  "scope": "Diagnostic proposal: actual validator branch and budget checker; not full conformance/publication",
+  "validator_sha256": "23b39ab429ef6f9e5b1f2533579bd7120dd75c2fd98399431895967a1308f786",
+  "guard_outcomes": {
+    "known_good": [],
+    "known_bad": [
+      "cross-doc drift [no-publish-split] -- phases/ship.md must say `no-publish` is a permission and not an absence of git, must record the real reason in the skipped-publish line rather than a hardcoded `no git`, and must keep the release step split into a LOCAL half and a GIT half. Fused, the block ordered a step that commits and pushes while calling it local, and told a mode that forbids committing to skip only the push"
+    ],
+    "proposal": []
+  },
+  "budget_errors": [],
+  "proposal_ship_bytes": 6352,
+  "subject_sha256": {
+    "saipen/COMMANDS.md": "11936f29f40ae8387228bc1ead89e5babf58efdbbe3a3391c76d09780c97251d",
+    "saipen/phases/verify.md": "a97a3520200409903a05daec79ee66a4aaf2c9db4bec71302cb077f3c043a48a",
+    "saipen/phases/ship.md": "96bce56b6564790ec07db403645a8577ab85a1a50cbd69548b0a475a492fae3d"
+  },
+  "live_source_unchanged": true,
+  "semantic_delta": "Restore original no-publish permission and GIT boundary markers; retain all constraints. The illustrative main.py overlap remains in saved source/semantic trace. DOING-at-entry remains enforced by procedure step 0; remove only its repeated exit wording."
+}

@@ -1,0 +1,19 @@
+{
+  "label": "scout-controls",
+  "phase": "SCOUT",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    ".saipen/evidence/T-1716-resilience/controls.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 1,
+  "duration_s": 1.235,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\r\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1716-resilience\\controls.py\", line 114, in <module>\r\n    \"mode_contract\": mode_control()}\r\n                     ^^^^^^^^^^^^^^\r\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1716-resilience\\controls.py\", line 97, in mode_control\r\n    return {\"live_no_publish_may_mutate\": may_mutate(), \"normal\": normal,\r\n                                          ^^^^^^^^^^^^\r\nTypeError: may_mutate() missing 1 required positional argument: 'capability'\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "c26e8a631726901e88fb95ffed25bde43fa241086e774763a9fe727195191048",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

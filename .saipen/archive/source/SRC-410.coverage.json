@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-410:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-21005; saihunt/HUNT-019 current-epoch package sha256:3d861dc3615459f99aa86a2e930dc7e2a92106e74ed141f03d3e0cdb67d881ac; .saipen/extensions/subs/saihunt/kitchen/HUNT-019.md sha256:fca3b7bdd0212b86f606c2b18fc11c3467d84da87d0f2596ceca36a4825851b7",
+      "text": "run saihunt at current epoch",
+      "verification": "source_head 66ef622a43ab59512735ac78ce10d1250e26f9df; source_tree_fingerprint git-delta-v1:e4fe1f84c67c2ebd8af3e8d7461569cfd826aaa140e1f7d364d5505e29dfc07f; outbox check saihunt OUTBOX_VALID; validator exit 1 23 problems/33 warnings; refusal registry 6/6 PASS; crew receipt 3/3 PASS",
+      "work": "T-1964"
+    }
+  },
+  "schema_version": 1
+}

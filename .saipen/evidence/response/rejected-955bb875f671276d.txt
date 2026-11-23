@@ -1,0 +1,15 @@
+STATUS: DONE / task:none; auditite koondseis BLOCKED.  
+RESULT: 0 lubatud käivitatavat tööd. Kontrollitud kõik 9 ACTIVE seost: 7 faili alles, 2 puuduvad. Seis püsib 263 DONE / 95 BLOCKED / 0 TODO / 0 DOING.  
+BLOCKER: AUDIT_INBOX_UNWORKABLE — aegunud osaväited ei kõrvalda ühegi auditi kõiki väravaid.  
+OPERATOR ACTION: T-1729:R019 ehtne operaatoritõend; T-1766/T-1768 dokumenteeritud missiooniluba; SAIRELAY kirjutamiskeelu tühistamine ja algne A–F ulatus; T-1702 kaitstud taastamise otsus.  
+NEXT EXACT ACTION: NONE. Kanoniline `saipen audit status` täidetud; tulemus `RESTATE_AND_STOP`.  
+VALIDATION: SAIPEN CURRENT_PASS. Värsked validatorid: ZAICODE PASS; SAITULS FAIL — 29 probleemi; SAIRELAY FAIL — 1 probleem.  
+DETAILS: Aegunud põhjused ja säilivad blokeeringud:
+
+- **T-1738 / SRC-236:** T-260 ja T-282 on DONE; T-282→SRC-099 seos olemas. Vana PAUSED/seosepuuduse kirjeldus aegunud. Eraldi jätkamisloa päritolu jääb tõendamata; R012 nõutud conformance endiselt FAIL.
+- **T-1764 / SRC-245:** vana root-file-set-keeld aegunud; värske validator PASS, elava ledgeri vanemseosed korras. Algse keeldumise käsu, käitusaja ja laadija identiteet ning artefaktide kirjutaja jäävad tuvastamata.
+- **T-1769 / SRC-248; T-1800 / SRC-259:** SAIRELAY T-10 hõivatud omaniku väide aegunud. T-1783 jääb blokeerituks: viis aegunud, sweep’imata leidu; native reconcile keeldub. Kirjutamiskeeld ja A–F algallika puudumine püsivad.
+- **T-1791 / SRC-253:** T-1794 sõltuvus kehtib. Freebuffi muutunud bundle sisaldab endiselt vigast CWD-lahendust; uuritud ehtne Luna külmkäivitustõend on FAIL. Tarbija T-52 DONE ei tõenda hosti vastuvõttu.
+- **T-1766 / SRC-246; T-1768 / SRC-247:** SAI_WEBSITE T-35 omaniku konflikt aegunud. Admission on DEGRADED, `permitted:true`, `verified:false`; dokumenteeritud missiooniväravat pole tühistatud. `unblock --dry-run` ei tõenda puuduvat otsust.
+- **T-1606 / SRC-167; T-1702 / SRC-205:** vastavalt säilivad kahe katse retry cap ja 24 mitteterminaalset roadmap’i nõuet. Puuduvad auditifailid ei sulge jäädvustatud allikaid. T-1729 [operaatorivastuvõtt](V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1729-gate-decision-20261016/OPERATOR-ACCEPTANCE.md) jääb PREPARED, UNAPPROVED.
+- **Miks DONE:** E-16184 parkis viimase aktiivse T-1729; STATE jäi ilma aktiivse piletita. Scheduler teatab siiski `BLOCKED`, `audit_quiescent:false`, `closure_complete:false`. Worki ega kaitseklappi ei muudetud; värskendati diagnostikakviitungeid.

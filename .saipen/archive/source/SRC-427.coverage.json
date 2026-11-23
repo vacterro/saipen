@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-427:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2093 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:37 record:.saipen/evidence/focused-unit/557739ffd46bca22-20261118T145211929895Z.json sha256:58bc37319ba28ccca6b91b70825fbfd4f1622fcc3dba5270155c450a9abe1000",
+      "text": "Night Shift 8: fix false PASS reference for T-2090, fail-closed sandbox ownership grammar, real concurrency tests, verification preflight and throughput",
+      "verification": "the Work this request created reached its own verification gate; see the T-2093 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2093"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,13 @@
+test_fidelity_mismatch_still_refuses_instead_of_relabelling (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_fidelity_mismatch_still_refuses_instead_of_relabelling) ... ok
+test_forged_cached_proof_cannot_escape_its_project (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_forged_cached_proof_cannot_escape_its_project) ... ok
+test_matching_fields_and_declared_by_are_not_host_authentication (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_matching_fields_and_declared_by_are_not_host_authentication) ... ok
+test_model_chosen_proof_fields_and_unkeyed_seal_are_not_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_chosen_proof_fields_and_unkeyed_seal_are_not_authority) ... ok
+test_model_computed_real_digest_variable_grants_no_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_computed_real_digest_variable_grants_no_authority) ... ok
+test_model_written_matching_cache_envelope_grants_no_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_written_matching_cache_envelope_grants_no_authority) ... ok
+test_model_written_real_task_file_grants_no_authority (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_written_real_task_file_grants_no_authority) ... ok
+test_no_carrier_stays_usable_as_local_model_work (test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_no_carrier_stays_usable_as_local_model_work) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.084s
+
+OK

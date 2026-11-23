@@ -1,0 +1,22 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.exe
+PySide6 6.11.1 -- Qt runtime 6.11.1 -- Qt compiled 6.11.1
+rootdir: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+plugins: anyio-4.15.1, langsmith-0.14.12, asyncio-1.4.0, cov-7.1.0, docker-3.2.5, mock-3.15.1, qt-4.5.0, timeout-2.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 18 items / 9 deselected / 9 selected
+
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip 
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip PASSED [ 11%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero 
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero PASSED [ 22%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_known_graphs_report_measured_counts 
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_known_graphs_report_measured_counts PASSED [ 33%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_live_remotes_ancestry_topology PASSED [ 44%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_measures_push_destination_not_fetch_remote PASSED [ 55%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_missing_local_commit_is_unmeasured PASSED [ 66%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_reconcile_remote_ancestry_detects_merge_base_and_divergence PASSED [ 77%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_refuses_non_fast_forward_push PASSED [ 88%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_remote_object_absent_locally_is_unknown_not_zero PASSED [100%]
+
+============= 9 passed, 9 deselected, 15 subtests passed in 4.61s =============

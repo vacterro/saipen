@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-034:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: the single-file pack branch enforces the mandatory secret exclusions"
+    },
+    "SRC-034:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002: rejected ingest leaves no registry or filesystem side effect"
+    },
+    "SRC-034:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003: canonical archive resolution honors ordered alias precedence without a synthetic Archive"
+    },
+    "SRC-034:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-004: diagnostics redact every free-text field before persistence"
+    },
+    "SRC-034:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-005: widget update metadata derives from one authoritative port contract"
+    },
+    "SRC-034:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-006: managed-profile liveness is answered from dedicated-profile identity, not aggregate workers"
+    },
+    "SRC-034:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001: browser dispatch holds one durable terminal-completion authority with the canonical campaign status"
+    },
+    "SRC-034:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-002: worker launch intent is durable before any browser spawn and corrupt launch state fails closed"
+    },
+    "SRC-034:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-003: Win32 recovery transfers canonical single-instance ownership across the stale owner's exit"
+    },
+    "SRC-034:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-004: Bridge PID publication/deletion is atomic and bound to the exact daemon being stopped"
+    }
+  },
+  "derived_at": "2026-09-04T20:09:33Z",
+  "derived_from": "SRC-034",
+  "interpretation_revision": 10,
+  "schema_version": 1,
+  "source_sha256": "c730420cd0a13195725dfcafe4cdb137764796b74c14f9d9da5bbfef12e21328"
+}

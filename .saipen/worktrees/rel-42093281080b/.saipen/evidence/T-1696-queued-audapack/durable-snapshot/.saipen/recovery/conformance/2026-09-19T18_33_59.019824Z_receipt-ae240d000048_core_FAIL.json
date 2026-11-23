@@ -1,0 +1,17 @@
+{
+  "board_hash": "436514328a959e07",
+  "content_hash": "215bc0ee1b969b8d",
+  "exit_code": 1,
+  "gate": "core",
+  "kind": "conformance_receipt",
+  "log_hash": "6fb4c1780bec5228",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "receipt_id": "receipt-ae240d000048",
+  "schema_version": 2,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:1d8e12396597fd9c6843c4d589993f57833d33c05553329b8a319ecd28ad7df5",
+  "state_hash": "6a5a2b9bb37cae97",
+  "timestamp_utc": "2026-09-19T18:33:59.019824Z",
+  "validator_protocol_version": "1",
+  "verdict": "FAIL"
+}

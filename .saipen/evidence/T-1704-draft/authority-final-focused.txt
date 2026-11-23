@@ -1,0 +1,196 @@
+======================================================================
+FAIL: test_committed_proof_pins_both_journals_project_and_source (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_committed_proof_pins_both_journals_project_and_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 376, in test_committed_proof_pins_both_journals_project_and_source
+    self.assertEqual(goal_authority.prove(root, self.current(root), dependencies=dependencies), [])
+AssertionError: Lists differ: ['continuation grant journal is corrupt: .[123 chars] it'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'continuation grant journal is corrupt: .saipen/recovery/settled-index/head.json: projection stale (settled namespace token mismatch); canonical settlement rebuilds it'
+
++ []
+- ['continuation grant journal is corrupt: '
+-  '.saipen/recovery/settled-index/head.json: projection stale (settled '
+-  'namespace token mismatch); canonical settlement rebuilds it']
+
+======================================================================
+FAIL: test_crashed_transition_recovers_exact_prepared_bytes_without_a_new_grant (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_crashed_transition_recovers_exact_prepared_bytes_without_a_new_grant)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 285, in test_crashed_transition_recovers_exact_prepared_bytes_without_a_new_grant
+    self.assertEqual(code, 0, (boundary, text))
+AssertionError: 1 != 0 : ('PREPARE', '{\n  "ok": false,\n  "code": "CORRUPT_JOURNAL",\n  "op_ids": [\n    "goal-authorize-07b0adc1702d4d6cb12728f5bd5268e3"\n  ],\n  "recovery_required": true,\n  "corrupt": [\n    {\n      "op_id": "goal-authorize-07b0adc1702d4d6cb12728f5bd5268e3",\n      "status": "CORRUPT_JOURNAL",\n      "detail": "operation record field \'receipt_metadata.goal_authority_transition\' must be a string"\n    }\n  ],\n  "detail": "corrupt recovery evidence goal-authorize-07b0adc1702d4d6cb12728f5bd5268e3 (operation record field \'receipt_metadata.goal_authority_transition\' must be a string) -- resolve it explicitly before any further canonical write"\n}\n')
+
+======================================================================
+FAIL: test_fresh_grant_preserves_review_work_counters_board_and_original_journal (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_fresh_grant_preserves_review_work_counters_board_and_original_journal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 101, in test_fresh_grant_preserves_review_work_counters_board_and_original_journal
+    self.assertEqual(goal_authority.prove(root, after), [])
+AssertionError: Lists differ: ['continuation grant journal is corrupt: .[123 chars] it'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'continuation grant journal is corrupt: .saipen/recovery/settled-index/head.json: projection stale (settled namespace token mismatch); canonical settlement rebuilds it'
+
++ []
+- ['continuation grant journal is corrupt: '
+-  '.saipen/recovery/settled-index/head.json: projection stale (settled '
+-  'namespace token mismatch); canonical settlement rebuilds it']
+
+======================================================================
+FAIL: test_goal_replacement_does_not_inherit_a_previous_grant (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_goal_replacement_does_not_inherit_a_previous_grant)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 244, in test_goal_replacement_does_not_inherit_a_previous_grant
+    self.assertTrue(replaced.ok, replaced.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'goal-authority: continuation grant journal is corrupt: .saipen/recovery/settled-index/head.json: projection stale (settled namespace token mismatch); canonical settlement rebuilds it'}
+
+======================================================================
+FAIL: test_identical_replay_reuses_grant_and_event_without_carrier (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_identical_replay_reuses_grant_and_event_without_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 173, in test_identical_replay_reuses_grant_and_event_without_carrier
+    self.assertTrue(second.ok, second.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'goal-authority: continuation grant journal is corrupt: .saipen/recovery/settled-index/head.json: projection stale (settled namespace token mismatch); canonical settlement rebuilds it'}
+
+======================================================================
+FAIL: test_native_router_iteration_and_reconstructed_counts_agree (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_native_router_iteration_and_reconstructed_counts_agree)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 311, in test_native_router_iteration_and_reconstructed_counts_agree
+    self.assertEqual(code, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": " types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-e77fde38953e424694f52c5e2d554e05)\nFAIL: goal-authority: continuation grant journal is corrupt: .saipen/recovery/settled-index/head.json: projection stale (settled namespace token mismatch); canonical settlement rebuilds it\nPASS: goal execution_intent counters present\nPASS: safety-valve pause names the cc resume key\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (1 claimed)\nPASS: the audit inbox's routed action owns continuation\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [no-conformance-record]: no LOG line records a conformance run in � 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so � 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nValidation FAILED: 1 problem(s), 2 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 1,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "goal-authority: continuation grant journal is corrupt: .saipen/recovery/settled-index/head.json: projection stale (settled namespace token mismatch); canonical settlement rebuilds it",
+            "detail_hash": "87c418e824f40675",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 2
+      },
+      "board_hash": "689750c0135e9257",
+      "canonical_next_command": null,
+      "content_hash": "15b7b454095c058e",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:8d3eb71d39a986225f784c818b2b606592cce3195f3b780fa1bb2fe80156b8fb",
+      "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "kind": "conformance_receipt",
+      "log_hash": "d298dd58214883b4",
+      "project_identity": "v:\\_temp_\\t1363-6cv3qqy1",
+      "receipt_id": "receipt-0fec8afb6968",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:b69df805a154014a8c1b1037fb8c148bd24b7668e8570e8161b0d1ffb861eed2",
+      "state_hash": "15c76f9dd861ed70",
+      "timestamp_utc": "2026-10-10T09:58:08.885709Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:b69df805a154014a8c1b1037fb8c148bd24b7668e8570e8161b0d1ffb861eed2"
+    }
+  },
+  "install_identity": {
+    "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "install_fingerprint": "install-v1:8d3eb71d39a986225f784c818b2b606592cce3195f3b780fa1bb2fe80156b8fb",
+    "mismatch": null
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-0fec8afb6968",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+  },
+  "terminal": true
+}
+
+
+======================================================================
+FAIL: test_ticket_checkpoint_resumes_exact_active_review_after_restart (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_ticket_checkpoint_resumes_exact_active_review_after_restart)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 108, in test_ticket_checkpoint_resumes_exact_active_review_after_restart
+    self.assertEqual(code, 0, output)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "goal-authority: continuation grant journal is corrupt: .saipen/recovery/settled-index/head.json: projection stale (settled namespace token mismatch); canonical settlement rebuilds it",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\t1363-fyc5_iuu --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+
+
+======================================================================
+FAIL: test_wave_checkpoint_uses_the_same_grant (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_wave_checkpoint_uses_the_same_grant)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 118, in test_wave_checkpoint_uses_the_same_grant
+    self.assertEqual(code, 0, output)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "goal-authority: continuation grant journal is corrupt: .saipen/recovery/settled-index/head.json: projection stale (settled namespace token mismatch); canonical settlement rebuilds it",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\t1363-zlh5qo1f --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+
+
+----------------------------------------------------------------------
+Ran 93 tests in 55.678s
+
+FAILED (failures=8)

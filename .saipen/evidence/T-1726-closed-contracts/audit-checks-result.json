@@ -1,0 +1,1 @@
+{"command":"python -B tools/audit_checks.py","exit_code":1,"duration_s":314.1202084,"log":".saipen/evidence/T-1726-closed-contracts/audit-checks.txt"}

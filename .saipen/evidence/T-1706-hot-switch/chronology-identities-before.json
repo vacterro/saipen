@@ -1,0 +1,22 @@
+{
+  "recorded_utc": "2026-10-10T12:39:04.120886+00:00",
+  "subject_before_sha256": "83ed9ca24cb93f2ac5ef9822f89f2cbea1be7f1bd9ed79c1c47c8810dbaa02ba",
+  "verifier_sha256": "68aaf62bf06ceef23f48b5bfe4d2bb95c66fdca6caab5d9922ce224808bdf143",
+  "verifier_tests": 8,
+  "cancelled_family": {
+    "command": [
+      "python",
+      "-B",
+      "tools/core_unit.py",
+      "evidence",
+      "T-1705",
+      "--fresh",
+      "--jobs",
+      "6"
+    ],
+    "status": "CANCELLED_NO_VERDICT",
+    "reason": "Confirmed a new gate bug before completion; freeze must be released to correct the subject before final full-family verification.",
+    "session_id": 13030,
+    "observed_exit_code": 1
+  }
+}

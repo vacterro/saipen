@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "tools/test_t2056_obstacle_actions.py"],
+  "format": "unittest",
+  "context": [
+    "tools/test_t2056_obstacle_actions.py",
+    "tools/saipen_engine/finding_route.py",
+    "tools/saipen_engine/finding_ownership.py",
+    "tools/saipen_engine/conformance.py",
+    "tools/test_conformance_repair_boundary.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "oracle_files": ["tools/test_t2056_obstacle_actions.py"],
+  "subject_files": ["tools/saipen_engine/finding_route.py"],
+  "before": {"tools/saipen_engine/finding_route.py": null},
+  "timeout": 300
+}

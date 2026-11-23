@@ -1,0 +1,50 @@
+"""SCOUT (T-1634): the doctor's own hook check, step by step.
+
+Usage: <python> diag_codex2.py <repo root> <sandbox home> <host>
+"""
+
+import json
+import os
+import sys
+from pathlib import Path
+
+ROOT = Path(sys.argv[1]).resolve()
+HOME = Path(sys.argv[2]).resolve()
+HOST = sys.argv[3]
+os.environ.update(HOME=str(HOME), USERPROFILE=str(HOME), HOMEDRIVE="", HOMEPATH="")
+sys.path.insert(0, str(ROOT / "tools"))
+
+from saipen_engine import host_integration as HG  # noqa: E402
+
+print("sys.executable:", sys.executable)
+registry = HG.load_registry(ROOT)
+adapter = next(item for item in registry["adapters"] if item["id"] == HOST)
+runtime_root = HG._expand(adapter["install"]["skill"])
+facts = HG._hook_facts(adapter, runtime_root, HOME)
+print("doctor facts  :", facts["status"], facts["problems"], facts["delegated_root"])
+import install_host_guard as guard  # noqa: E402
+
+print("guard module  :", guard.__file__)
+print("guard.ROOT    :", guard.ROOT)
+entry = adapter
+artifact = HOME / entry["hook_install_surface"].removeprefix("~/")
+config = HOME / entry["hook_config_surface"].removeprefix("~/")
+data = json.loads(config.read_text(encoding="utf-8"))
+owned = data["hooks"]["Stop"][0]["hooks"][0]
+posix, windows = guard.command_pair(HOST, artifact, guard.delegated_root(entry, HOME, runtime_root))
+for key, expected in (("command", posix), ("commandWindows", windows)):
+    configured = owned[key]
+    root = guard.saipen_root_of(configured)
+    marker = "--saipen-root"
+    head_c = configured[: configured.rfind(marker)]
+    head_e = expected[: expected.rfind(marker)]
+    print(f"[{key}] named root:", root, "| resolves:", guard.root_resolves(root),
+          "| heads equal:", head_c == head_e,
+          "| interpreter missing:", guard.interpreter_missing(configured),
+          "| modulo interpreter:", guard._same_modulo_interpreter(head_c, head_e),
+          "| same invocation:", guard._same_invocation(configured, expected))
+    if head_c != head_e:
+        print("    configured head:", head_c[:140], "...", head_c[-150:])
+        print("    expected head  :", head_e[:140], "...", head_e[-150:])
+        print("    argv configured:", [a[:2] + ["..."] + a[-4:] for a in guard._argv_of(head_c)])
+        print("    argv expected  :", [a[:2] + ["..."] + a[-4:] for a in guard._argv_of(head_e)])

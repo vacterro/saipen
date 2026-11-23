@@ -1,0 +1,13 @@
+BOARD after == BOARD before minus exactly the evidence lines: True
+every evidence line was a physical BOARD line: True
+evidence is in BOARD order: True
+bytes: 240995 -> 149439 evidence 91556
+segment starts with the LOG saved before the entry: True
+lines the entry itself added before the seal: 2
+    - 07.10.26 15:21 [E-13153] [parent: E-13152] [agent: saipen-cli] [op: transition-61d8c7cd3c844a038d7eff5330bf7652] RUN: transition to CLEAN
+    - 07.10.26 15:21 [E-13154] [parent: E-13153] [agent: saipen-cli] [op: board-scrub-d74272f1b0c644bc99713d79b377b6c2] DEC: board scrubbed -- 128 closed record(s) nothing pi
+fresh tail lines: 2
+    # Log
+    - 07.10.26 15:21 [E-13155] [parent: E-13154] [agent: saipen-cli] [op: seal-log-525de98cc8c2418da3e2d2a19a019b3a] DEC: log sealed -- E-7039..E-13154 (6116 events, 6118 lines, 2072684 bytes) moved verbatim into .saipen/logs/LOG-018.md sha256:4b8817bc1758bfe3; the active tail continues here
+ledger contract errors: [] events 13154 tail 13155
+write gate on the result: []

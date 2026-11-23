@@ -1,0 +1,34 @@
+worker 0: 10/124 floor cases
+worker 1: 10/123 floor cases
+worker 0: 20/124 floor cases
+worker 1: 20/123 floor cases
+worker 0: 30/124 floor cases
+worker 1: 30/123 floor cases
+worker 0: 40/124 floor cases
+worker 1: 40/123 floor cases
+worker 0: 50/124 floor cases
+worker 1: 50/123 floor cases
+worker 0: 60/124 floor cases
+worker 1: 60/123 floor cases
+worker 0: 70/124 floor cases
+worker 1: 70/123 floor cases
+worker 0: 80/124 floor cases
+worker 1: 80/123 floor cases
+worker 0: 90/124 floor cases
+worker 1: 90/123 floor cases
+worker 0: 100/124 floor cases
+worker 1: 100/123 floor cases
+worker 0: 110/124 floor cases
+worker 1: 110/123 floor cases
+worker 0: 120/124 floor cases
+worker 1: 120/123 floor cases
+[124/247] portable-floor cases complete
+[247/247] portable-floor cases complete
+
+cases applied: 246 of 247
+  caught by both:                 14
+  caught only by tools/validate:  232
+  caught by neither (WARN-only):  0
+FAIL: skipped canonical mutation: portable project identity becomes an external symlink
+
+FAIL: parity denominator changed because a canonical mutation could not be set up

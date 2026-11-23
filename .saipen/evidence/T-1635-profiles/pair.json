@@ -1,0 +1,10 @@
+{
+  "verifier": "e34ed9b5225c4271",
+  "pre_subject": "045a4d366a56803b",
+  "post_subject": "25b02c5940e41b4b",
+  "pre_rc": 1,
+  "post_rc": 0,
+  "control_rc": 0,
+  "held": true,
+  "command": "python -B -m unittest test_t1635_claude_profiles"
+}

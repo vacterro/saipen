@@ -1,0 +1,6 @@
+{
+  "path": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_WIN95THEME\\Wintage\\.saipen\\archive\\source\\SRC-054.md",
+  "sha256": "06f9a61c055b344f863b8a44bbad172983097bced73d7cb15fe2122803bdc823",
+  "text": "# User request\n\npriority: P1\nverify: an operator-owned signed-in chatgpt.com tab is reachable over CDP (brave --remote-debugging-port=9222); node tools/inspect-web.js watch chatgpt.com 900 --attribute completes a bounded pass whose final report distinguishes observedEver, mismatchedEver, unprovenEver, requiredCoverageNotObserved and optionalNotObserved; every surface named in ACCEPTANCE_SURFACES was actually opened by the operator (conversation, expanded and collapsed navigation, user message, assistant message, composer, a code block, a menu or popover, a Project, full-page Settings, Settings navigation, Customize/apps/integrations); no surface remains UNPROVEN, and only a live-proven mismatch may be patched\n\n## Request\n\nLIVE ChatGPT acceptance for T-357/T-358: run the bounded watch on an operator-owned signed-in chatgpt.com tab and record which requested surfaces were observed and proven, observed and mismatched, observed but still unproven, and never observed\n",
+  "mutations_to_external_root": []
+}

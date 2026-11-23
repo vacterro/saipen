@@ -1,0 +1,20 @@
+{
+  "proposal_only": true,
+  "product_file_unchanged": true,
+  "version_before": 1,
+  "version_proposed": 2,
+  "fingerprint_before": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "fingerprint_proposed": "d682e4a0e542976ddfe3e5518a2b4f8bc81d7eea1e4bbdcd8642a8d5c7fefc5c",
+  "old_details": [
+    "T-1446",
+    "T-1446"
+  ],
+  "proposed_details": [
+    "cross-doc drift [root-file-set] -- unexpected root files: ['T-1446', 'tuple[bool']",
+    "cross-doc drift [release-version] -- mismatch in T-1446"
+  ],
+  "finding_keys_preserved": true,
+  "stored_snapshots_rewritten": 0,
+  "candidate_sha256": "972e818011a27bd533264040188c9db9ab6a7c6d18628337661eca650fb1ce9f",
+  "pending": "T-1765's acceptance requires the operator's compatibility choice. This proposal changes no canonical product, baseline, Work or source coverage."
+}

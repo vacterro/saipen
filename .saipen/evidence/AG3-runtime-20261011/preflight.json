@@ -1,0 +1,134 @@
+{
+  "scope": "injected permission failure, current subject; not an AG3-token execution",
+  "subject": {
+    "tools/saipen_engine/audit_manifest.py": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b",
+    "tools/saipen_engine/paths.py": "055fcc3f9c94eca57f3494e636b8ee31a830b67969958d3d62ca2bbf3a0f93fc",
+    "tools/saipen_engine/reconcile.py": "fa7555a02d98ef3b6330a6a81ff954e56a556f49ea45a9fae647b7e223521b85"
+  },
+  "cases": [
+    {
+      "case": "accessible",
+      "injected": false,
+      "blocked_path": "V:\\_TEMP_\\saipen-ag3-boundary-5oicqen0\\granted-project\\.saipen\\MANIFEST.json",
+      "result": {
+        "ok": true,
+        "code": "AUDIT_MANIFEST_WRITTEN",
+        "path": "V:/_TEMP_/saipen-ag3-boundary-5oicqen0/granted-project/.saipen/MANIFEST.json",
+        "contract_version": 3,
+        "changed": true,
+        "layout": "CURRENT",
+        "dry_run": false,
+        "declared": "ABSENT",
+        "manifest_present": true,
+        "manifest_current": true,
+        "detail": ""
+      },
+      "bytes_unchanged": false,
+      "added_paths": [
+        "granted-project/.saipen/MANIFEST.json"
+      ]
+    },
+    {
+      "case": "missing",
+      "injected": false,
+      "blocked_path": "V:\\_TEMP_\\saipen-ag3-boundary-wlvquku8\\granted-project\\.saipen\\MANIFEST.json",
+      "result": {
+        "ok": false,
+        "code": "AUDIT_MANIFEST_REFUSED",
+        "path": "V:/_TEMP_/saipen-ag3-boundary-wlvquku8/granted-project/.saipen/MANIFEST.json",
+        "contract_version": 3,
+        "changed": false,
+        "layout": "ABSENT",
+        "dry_run": false,
+        "reason_code": "PROTOCOL_MEMORY_ABSENT",
+        "detail": "no real .saipen/ directory at V:\\_TEMP_\\saipen-ag3-boundary-wlvquku8\\granted-project"
+      },
+      "bytes_unchanged": true,
+      "added_paths": []
+    },
+    {
+      "case": "ancestor-denied",
+      "injected": true,
+      "blocked_path": "V:\\_TEMP_\\saipen-ag3-boundary-3n7xqss6",
+      "escaped": {
+        "type": "ValueError",
+        "message": "audit manifest ancestor V:\\_TEMP_\\saipen-ag3-boundary-3n7xqss6 unreadable: [WinError 5] Access is denied: 'V:\\\\_TEMP_\\\\saipen-ag3-boundary-3n7xqss6'",
+        "context_type": "PermissionError",
+        "context_errno": 13,
+        "context_winerror": 5,
+        "context_filename": "V:\\_TEMP_\\saipen-ag3-boundary-3n7xqss6",
+        "frames": [
+          {
+            "name": "probe",
+            "line": 49,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\preflight.py"
+          },
+          {
+            "name": "ensure",
+            "line": 700,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\audit_manifest.py"
+          },
+          {
+            "name": "write",
+            "line": 795,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\audit_manifest.py"
+          },
+          {
+            "name": "safe_atomic_write_bytes",
+            "line": 401,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\paths.py"
+          },
+          {
+            "name": "prove_owned_dir_chain",
+            "line": 244,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\paths.py"
+          }
+        ]
+      },
+      "bytes_unchanged": true,
+      "added_paths": []
+    },
+    {
+      "case": "manifest-inspection-denied",
+      "injected": true,
+      "blocked_path": "V:\\_TEMP_\\saipen-ag3-boundary-t7p8v1xr\\granted-project\\.saipen\\MANIFEST.json",
+      "escaped": {
+        "type": "ValueError",
+        "message": "audit manifest V:\\_TEMP_\\saipen-ag3-boundary-t7p8v1xr\\granted-project\\.saipen\\MANIFEST.json is unreadable: [WinError 5] Access is denied: 'V:\\\\_TEMP_\\\\saipen-ag3-boundary-t7p8v1xr\\\\granted-project\\\\.saipen\\\\MANIFEST.json'",
+        "context_type": "PermissionError",
+        "context_errno": 13,
+        "context_winerror": 5,
+        "context_filename": "V:\\_TEMP_\\saipen-ag3-boundary-t7p8v1xr\\granted-project\\.saipen\\MANIFEST.json",
+        "frames": [
+          {
+            "name": "probe",
+            "line": 49,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\preflight.py"
+          },
+          {
+            "name": "ensure",
+            "line": 700,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\audit_manifest.py"
+          },
+          {
+            "name": "write",
+            "line": 795,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\audit_manifest.py"
+          },
+          {
+            "name": "safe_atomic_write_bytes",
+            "line": 406,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\paths.py"
+          },
+          {
+            "name": "prove_owned_regular",
+            "line": 209,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\paths.py"
+          }
+        ]
+      },
+      "bytes_unchanged": true,
+      "added_paths": []
+    }
+  ]
+}

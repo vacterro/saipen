@@ -1,0 +1,43 @@
+{
+ "installed_runtime": true,
+ "runtime_probe": "{\n  \"ok\": true,\n  \"code\": \"RUNTIME\",\n  \"agent\": \"claude\",\n  \"runtime_info_source\": \"unknown\",\n  \"runtime_info_present\": false,\n  \"schema_version\": 1,\n  \"harness\": null,\n  \"provider\": null,\n  \"model\": null,\n  \"variant\": null,\n  \"capabilities\": {\n    \"shell\": null,\n    \"filesystem\": null,\n    \"patch\": null,\n    \"browser\": null,\n    \"web\": null,\n    \"subagents\": null,\n    \"parallel_subagents\": null,\n    \"skills\": null,\n    \"mcp\": null,\n    \"structured_output\": null,\n    \"persistent_session\": null,\n    \"context_compaction\": null,\n    \"reasoning_effort\": null,\n    \"tool_search\": null,\n    \"programmatic_tool_calling\": null\n  },\n  \"strategy\": {\n    \"task_class\": \"IMPLEMENT\",\n    \"strategy\": \"LONG_BUILD\",\n    \"why\": \"ordinary implementation is LONG_BUILD: one primary worker, no reflexive subagents; no helper justification was supplied, so helpers are 0\",\n    \"helper_justification\": null,\n    \"helper_ceiling\": 0,\n    \"max_subagent_depth\": 1,\n    \"recursive_helpers\": \"DENIED_BY_POLICY\",\n    \"depth_enforcement\": \"UNKNOWN\",\n    \"context_budget_class\": \"ORDINARY\",\n    \"context_budget_bytes\": 40960,\n    \"child_packet_ceiling_bytes\": 16384,\n    \"capabilities\": {\n      \"subagents\": null,\n      \"parallel_subagents\": null,\n      \"skills\": null,\n      \"structured_output\": null,\n      \"context_compaction\": null,\n      \"persistent_session\": null\n    },\n    \"unknown_capabilities\": [\n      \"subagents\",\n      \"parallel_subagents\",\n      \"skills\",\n      \"structured_output\",\n      \"context_compaction\",\n      \"persistent_session\"\n    ]\n  }\n}\n",
+ "sessions": [
+  {
+   "model": "sairoute/SAIFREN",
+   "returncode": 0,
+   "elapsed_s": 32.5,
+   "text": "`src/app.py:1` updated.",
+   "stderr_tail": "",
+   "tools": 9,
+   "first_saipen_command": "saipen start 'add a one-line docstring to the top of src/app.py'",
+   "protocol_commands": [
+    "saipen start 'add a one-line docstring to the top of src/app.py'"
+   ],
+   "protocol_commands_before_productive": 0,
+   "productive_action": "edit",
+   "refusal_sequence": [
+    "NO_ACTIVE_WORK"
+   ],
+   "repeated_refusal": [],
+   "tool_names": [
+    "read",
+    "read",
+    "read",
+    "read",
+    "read",
+    "edit",
+    "bash",
+    "read",
+    "edit"
+   ],
+   "condition": "healthy",
+   "task": "add a one-line docstring to the top of src/app.py",
+   "project": "V:\\_TEMP_\\t1363-tcv6e6r8",
+   "canonical_changed": [
+    "BOARD.md",
+    "LOG.md",
+    "STATE.md"
+   ]
+  }
+ ]
+}

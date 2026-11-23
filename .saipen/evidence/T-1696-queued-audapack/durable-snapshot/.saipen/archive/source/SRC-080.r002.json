@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-080:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: existing-but-corrupt durable audit generation state must fail closed, never infer generation 0, and never publish a generation <= prior durable N; Bridge, browser-dispatch and INAUDIT channels share one coherent semantics; missing file may bootstrap at 1; pending INAUDIT notification stays owed on publish failure; consumers adopt an explicit recovery/reset baseline lower than last observed generation."
+    },
+    "SRC-080:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002: one explicit cross-process ProjectRegistry refresh primitive acquires the canonical registry lock, loads latest config, synchronizes the existing AppConfig/project collection IN PLACE (preserving object identity) and rebuilds ID indexes; invoked at external Bridge generation consumption and explicit Refresh All so a Bridge-created project is resolvable by AuditService and visible in ProjectRoomModel without restart; no disk I/O on paint/data lookup paths."
+    }
+  },
+  "derived_at": "2026-09-22T10:41:22Z",
+  "derived_from": "SRC-080",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "1a65c43e12ee4453d6036de7216e131b95a6fb83d3d596b77ece69bdb35ef3da"
+}

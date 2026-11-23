@@ -1,0 +1,6 @@
+{
+  "original_hook": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.git\\hooks\\pre-commit",
+  "original_sha256": "ba9f8cfbe73af3e7592c30290ffdc17779c5c4047f7b9ac03a1b9bf1edfd7c84",
+  "private_transport": "V:\\_SAIPEN_VERIFY_\\github-backups\\saipen-20261021T222419Z.git\\scoped-hooks\\pre-commit",
+  "effect": "clear caller repository selectors; execute original hook unchanged"
+}

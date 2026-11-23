@@ -1,0 +1,58 @@
+{
+  "original_goal": "cc all",
+  "goal_complete": false,
+  "current_work": "T-1798",
+  "current_phase": "VERIFY",
+  "source": "SRC-258",
+  "source_contract_revision": 2,
+  "source_open_clauses": [
+    "R005 BLOCKED pending verification",
+    "R011 UNKNOWN pending live C/V reconciliation"
+  ],
+  "completed_helper": "T-1799",
+  "completed_helper_mode": "no-publish",
+  "helper_full_family": ".saipen/evidence/core-unit/8c54a7bb42d63833-20261015T074038Z.json",
+  "helper_full_family_counts": {
+    "ran": 6654,
+    "red": 0
+  },
+  "helper_review_counts": {
+    "ran": 174,
+    "failed": 0
+  },
+  "helper_publisher_result": ".saipen/evidence/T-1799/ship.json",
+  "current_family_exec_session": 61757,
+  "current_family_command": "python tools/core_unit.py evidence T-1798 --jobs 6 --timeout 5400",
+  "current_family_observation": "write_stdin most recently confirmed still running; re-poll native handle, do not restart from this artifact",
+  "executed_pair_so_far": ".saipen/evidence/regression/regression-execution-c7bef7f1070d403c9bb0a40e58e0e770.json",
+  "pair_observed_counts": {
+    "before_ran": 17,
+    "before_failed": 9,
+    "after_ran": 17,
+    "after_failed": 0
+  },
+  "pending_pair_contract": ".saipen/evidence/T-1798/regression.json",
+  "pending_pair_reason": ".saipen/evidence/T-1798/oracle-scope.json",
+  "primary_code_applied_from_verified_candidate": ".saipen/evidence/T-1798/candidate-baseline.json",
+  "pre_fix_subjects": ".saipen/evidence/T-1798/pre/",
+  "live_C_install_owner_evidence": ".saipen/evidence/T-1798/live-install-ownership.json",
+  "live_C_install": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+  "canonical_source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "live_C_owner": {
+    "adapter": "freebuff",
+    "recorded_files_checked": 729,
+    "locally_modified_recorded_files": 0,
+    "missing_recorded_files": 0
+  },
+  "canonical_scoped_install_command": "saipen host repair --host freebuff --json",
+  "live_install_change_executed": false,
+  "published": false,
+  "git_commits_created": false,
+  "earlier_staged_required_runtime_files": 144,
+  "next_queue_repro": ".saipen/evidence/T-1790/diagnosis.json",
+  "next_queue_repro_counts": {
+    "foreign_clauses": 34,
+    "route_chars": 514
+  },
+  "eligible_work_must_continue": true
+}

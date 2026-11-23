@@ -1,0 +1,16 @@
+test_a_marked_noop_does_not_turn_an_untouched_refusal_into_recovery (test_t1750_release_boundary.RefusedLocalReleaseTests.test_a_marked_noop_does_not_turn_an_untouched_refusal_into_recovery) ... ok
+test_closure_planning_refusal_aborts_without_changing_canonical_bytes (test_t1750_release_boundary.RefusedLocalReleaseTests.test_closure_planning_refusal_aborts_without_changing_canonical_bytes) ... ok
+test_failed_gate_aborts_and_two_retries_need_no_recovery (test_t1750_release_boundary.RefusedLocalReleaseTests.test_failed_gate_aborts_and_two_retries_need_no_recovery) ... ok
+test_foreign_bytes_preserve_the_operation_and_refuse_recovery (test_t1750_release_boundary.RefusedLocalReleaseTests.test_foreign_bytes_preserve_the_operation_and_refuse_recovery) ... ok
+test_landed_bytes_without_a_progress_marker_keep_recovery (test_t1750_release_boundary.RefusedLocalReleaseTests.test_landed_bytes_without_a_progress_marker_keep_recovery) ... ok
+test_process_death_before_body_still_requires_canonical_recovery (test_t1750_release_boundary.RefusedLocalReleaseTests.test_process_death_before_body_still_requires_canonical_recovery) ... ok
+test_refusal_after_a_marked_target_keeps_recovery_and_replays (test_t1750_release_boundary.RefusedLocalReleaseTests.test_refusal_after_a_marked_target_keeps_recovery_and_replays) ... ok
+test_registered_but_untouched_targets_abort (test_t1750_release_boundary.RefusedLocalReleaseTests.test_registered_but_untouched_targets_abort) ... ok
+test_downstream_validator_cannot_replace_the_runtime_gate (test_t1750_release_boundary.RuntimeValidatorTests.test_downstream_validator_cannot_replace_the_runtime_gate) ... ok
+test_missing_runtime_validator_cannot_fall_back_to_downstream_code (test_t1750_release_boundary.RuntimeValidatorTests.test_missing_runtime_validator_cannot_fall_back_to_downstream_code) ... ok
+test_running_home_keeps_self_validation (test_t1750_release_boundary.RuntimeValidatorTests.test_running_home_keeps_self_validation) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 1.813s
+
+OK

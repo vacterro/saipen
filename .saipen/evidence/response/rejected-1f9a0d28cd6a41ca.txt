@@ -1,0 +1,4 @@
+STATUS: VERIFY T-1730
+RESULT: Tõendikaart ja ülevaatus täiendatud. cc all jätkub, eesmärk lõpetamata.
+NEXT EXACT ACTION: Oodata olemasoleva kontrollikäituse lõpptulemust.
+VALIDATION: 6318 testi, 0 viga; täisaudit töötab taustal.

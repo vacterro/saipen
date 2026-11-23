@@ -1,0 +1,10 @@
+{
+  "kind": "lag",
+  "version": "current",
+  "subject": "2afaef42922d0316ee84c052da824988297ea5ac9638bd34087ab4da9841e340",
+  "verifier": "d3057db789cfab01dec53ccdd05d32cb66914e0f01b5c3dabebb11970ee44f37",
+  "exit_code": 0,
+  "verdict": "PASS",
+  "stdout": "sweep_observations=3\n",
+  "stderr": "test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone (test_t1505_core_unit_sandbox_reclaim.HeldSandboxTests.test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 3.955s\n\nOK\n"
+}

@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-108:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Split send acceptance from Core user-turn adoption: a send the Core accepts is not proof the user turn registered"
+    },
+    "SRC-108:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Enter Bridge AUDITING only after the local runtime has adopted the Core user turn"
+    },
+    "SRC-108:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A runtime that owns no current audit wave never writes AUDITING, so the bridge never sees a split-brain claim"
+    },
+    "SRC-108:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "the change is demonstrated against the operator own description of the split"
+    }
+  },
+  "derived_at": "2026-10-04T14:53:07Z",
+  "derived_from": "SRC-108",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "3270d128e89a56ec8641cbac4d267a9e6eb88bed75134a15f970f08f2ad35037"
+}

@@ -1,0 +1,34 @@
+{
+  "status": "PROPOSED; pending explicit operator retention decision",
+  "policy_path": "C:/Users/vac34/AppData/Roaming/SAIPEN/STORAGE_POLICY.json",
+  "canonical_operation": "saipen storage durable add V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen",
+  "before": {
+    "schema_version": 1,
+    "durable_roots": [
+      "V:\\___VAC\\__K\\__STATE\\SAILEARN_HOME"
+    ],
+    "ephemeral_roots": [
+      "V:\\_TEMP_"
+    ],
+    "scratch_root": null
+  },
+  "after": {
+    "schema_version": 1,
+    "durable_roots": [
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen",
+      "V:\\___VAC\\__K\\__STATE\\SAILEARN_HOME"
+    ],
+    "ephemeral_roots": [
+      "V:\\_TEMP_"
+    ],
+    "scratch_root": null
+  },
+  "basis": "STORAGE.md requires the operator to decide which non-temporary roots are trusted; storage classify returned UNKNOWN_REQUIRES_EXPLICIT_DECISION.",
+  "observed_volume": {
+    "drive": "V",
+    "type": "Fixed",
+    "filesystem": "NTFS",
+    "health": "Healthy"
+  },
+  "caveat": "Volume metadata does not establish the operator's retention/cleanup policy. No configuration has been applied."
+}

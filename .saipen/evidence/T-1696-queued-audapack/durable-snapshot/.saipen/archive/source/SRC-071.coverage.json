@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-071:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-227 closed with verification evidence in LOG: verify -> PASS [target: T-227] conf: high -- requested supersession is ALREADY_SATISFIED without synthetic link: T-218 DONE after T-220; audit/10 journal DELETED, files absent, residue_count 0; SRC-044 CLOSED 15/15 VERIFIED",
+      "text": "Supersede duplicate strand T-218 with T-220 which implemented its correction",
+      "verification": "the Work this request created reached its own verification gate; see the T-227 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-227"
+    }
+  },
+  "schema_version": 1
+}

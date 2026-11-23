@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-034:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: the single-file pack branch enforces the mandatory secret exclusions"
+    },
+    "SRC-034:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002: rejected ingest leaves no registry or filesystem side effect"
+    }
+  },
+  "derived_at": "2026-09-04T20:09:25Z",
+  "derived_from": "SRC-034",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "c730420cd0a13195725dfcafe4cdb137764796b74c14f9d9da5bbfef12e21328"
+}

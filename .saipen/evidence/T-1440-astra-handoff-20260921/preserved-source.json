@@ -1,0 +1,54 @@
+[
+  {
+    "path": "saipen/COMMAND_EFFECTS.json",
+    "preserved": true
+  },
+  {
+    "path": "saipen/REGISTRY.json",
+    "preserved": true
+  },
+  {
+    "path": "saipen/SOURCES.md",
+    "preserved": true
+  },
+  {
+    "path": "tools/saipen_engine/debt.py",
+    "preserved": true
+  },
+  {
+    "path": "tools/saipen_engine/intake.py",
+    "preserved": true
+  },
+  {
+    "path": "tools/saipen_engine/operations.py",
+    "preserved": true
+  },
+  {
+    "path": "tools/saipen_engine/release.py",
+    "preserved": true
+  },
+  {
+    "path": "tools/saipen_engine/remediation.py",
+    "preserved": true
+  },
+  {
+    "path": "tools/saipen_engine/result.py",
+    "preserved": true
+  },
+  {
+    "path": "tools/test_remediation_self_consistency.py",
+    "preserved": true
+  },
+  {
+    "path": "tools/test_refusal_registry.py",
+    "preserved": true
+  },
+  {
+    "path": "tools/test_source_multiwork.py",
+    "preserved": true
+  },
+  {
+    "path": "tools/test_source_quarantine_route.py",
+    "preserved": true
+  }
+]

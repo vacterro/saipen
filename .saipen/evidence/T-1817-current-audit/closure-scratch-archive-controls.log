@@ -1,0 +1,16 @@
+test_archived_coverage_and_contract_must_agree_when_both_carriers_exist (test_audit_2026_08_28_all3.CoreArchiveStrictBundleTests.test_archived_coverage_and_contract_must_agree_when_both_carriers_exist) ... ok
+test_archived_metadata_must_carry_received_at_utc (test_audit_2026_08_28_all3.CoreArchiveStrictBundleTests.test_archived_metadata_must_carry_received_at_utc) ... ok
+test_archived_redaction_digest_must_equal_archived_body (test_audit_2026_08_28_all3.CoreArchiveStrictBundleTests.test_archived_redaction_digest_must_equal_archived_body) ... ok
+test_a_settled_retry_is_not_a_rubber_stamp (test_audit_2026_08_28_all3.CoreArchiveSettlementTamperTests.test_a_settled_retry_is_not_a_rubber_stamp) ... ok
+test_archived_coverage_adding_unknown_requirement_refuses (test_audit_2026_08_28_all3.CoreArchiveSettlementTamperTests.test_archived_coverage_adding_unknown_requirement_refuses) ... ok
+test_archived_coverage_changing_class_actionable_and_text_refuses (test_audit_2026_08_28_all3.CoreArchiveSettlementTamperTests.test_archived_coverage_changing_class_actionable_and_text_refuses) ... ok
+test_archived_coverage_downgrading_terminal_disposition_refuses (test_audit_2026_08_28_all3.CoreArchiveSettlementTamperTests.test_archived_coverage_downgrading_terminal_disposition_refuses) ... ok
+test_archived_coverage_dropping_contract_requirement_refuses (test_audit_2026_08_28_all3.CoreArchiveSettlementTamperTests.test_archived_coverage_dropping_contract_requirement_refuses) ... ok
+test_archived_coverage_removing_evidence_refuses (test_audit_2026_08_28_all3.CoreArchiveSettlementTamperTests.test_archived_coverage_removing_evidence_refuses) ... ok
+test_archived_coverage_removing_verification_refuses (test_audit_2026_08_28_all3.CoreArchiveSettlementTamperTests.test_archived_coverage_removing_verification_refuses) ... ok
+test_untampered_interrupted_close_settles_idempotently (test_audit_2026_08_28_all3.CoreArchiveSettlementTamperTests.test_untampered_interrupted_close_settles_idempotently) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 8.116s
+
+OK

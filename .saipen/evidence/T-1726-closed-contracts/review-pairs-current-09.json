@@ -1,0 +1,75 @@
+{
+  "status": "PASS",
+  "fingerprint": "27a1ef9552210b868101e3b0f846a2eab3005f4f741f4addb2605df3dc42f6b1",
+  "comparisons": [
+    {
+      "contract": "regression-contract.json",
+      "contract_sha256": "48352726c7a76c5dad86c3898cc6abb30d0453bff48637c6fc0e7fc71521ef60",
+      "verifier": "2c6aa8c27b8fc9020df38603adec91d23dd009e791cd112533aa795611855b44",
+      "runs": [
+        {
+          "stage": "before",
+          "ran": 2,
+          "failed": 2,
+          "skipped": 0,
+          "exit_code": 1,
+          "output_sha256": "e83a8395015a2cf230c5037d7b33b58fa35d24c61d928bba0fefe3f58e077905"
+        },
+        {
+          "stage": "after",
+          "ran": 2,
+          "failed": 0,
+          "skipped": 0,
+          "exit_code": 0,
+          "output_sha256": "82e0fbbc6136dc2f44973be03b5cd905ebf787cf788495f572e0893414f8e00b"
+        }
+      ]
+    },
+    {
+      "contract": "diagnostic-regression-contract.json",
+      "contract_sha256": "8c17cbcce7c6ae0f058ff77775d996a3aa7ff253979f1ec54a274255b137af21",
+      "verifier": "2e31cfde48e7fd958d118ca6f1a37c0b5e556697acddfba90767c79d20eb2360",
+      "runs": [
+        {
+          "stage": "before",
+          "ran": 33,
+          "failed": 7,
+          "skipped": 0,
+          "exit_code": 1,
+          "output_sha256": "f7c025155d77aa8688bdd62a2e564005f9eb5e4613fb4cd186737436dc000f34"
+        },
+        {
+          "stage": "after",
+          "ran": 33,
+          "failed": 0,
+          "skipped": 0,
+          "exit_code": 0,
+          "output_sha256": "71272e3aaa7c120fd90a19fb9980a3d9d8faa04cae132ac7665e87f06a503ba6"
+        }
+      ]
+    },
+    {
+      "contract": "cache-regression-matched-current-08.json",
+      "contract_sha256": "cdc0a6d92d4ca64afb306d221ca22b576d8c4a6dc693d743ff55934a4fdd74ba",
+      "verifier": "123b6628836b1b2aaa082f6d4667f849982e52c530ed4169a1ffe521ef08d78d",
+      "runs": [
+        {
+          "stage": "before",
+          "ran": 1,
+          "failed": 1,
+          "skipped": 0,
+          "exit_code": 1,
+          "output_sha256": "f1ef49e80b8e0eb38e275ebd6b29a32b48793f7aca92fa5c4cb9db0383341278"
+        },
+        {
+          "stage": "after",
+          "ran": 1,
+          "failed": 0,
+          "skipped": 0,
+          "exit_code": 0,
+          "output_sha256": "1e5a9de7737e78aad29c906801fe8c8c07eb39f2f73fc2d7369d39855127d8c1"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-068:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-224 closed with verification evidence in LOG: verify -> PASS conf: high -- audit status pending [] closed_pending_delete [] residue_count 0 clean true; SRC-044 CLOSED archive 15/15 VERIFIED; audit/10.md absent",
+      "text": "Finish T-218 itself: audit/10 SRC-044 layer terminal and inbox clean per T-222/T-223 evidence; close the stranded T-218 ticket",
+      "verification": "the Work this request created reached its own verification gate; see the T-224 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-224"
+    }
+  },
+  "schema_version": 1
+}

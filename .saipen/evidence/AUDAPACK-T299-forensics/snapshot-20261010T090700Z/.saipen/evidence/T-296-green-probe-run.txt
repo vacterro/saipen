@@ -1,0 +1,11 @@
+✔ T-296 RED A1: stable UUID chat, empty DOM, delayed old history fabricates nothing (519.6847ms)
+✔ T-296 RED A2: persisted authoritative Send survives a different old turn (430.4846ms)
+✔ T-296 RED B: idle visible widget validates ZIP metadata within TTL (531.9741ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1550.4514

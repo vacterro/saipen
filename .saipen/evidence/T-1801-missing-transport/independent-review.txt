@@ -1,0 +1,13 @@
+test_a_changed_surviving_generation_and_uncaptured_residue_are_preserved (test_t1801_missing_audit_settlement.MissingAuditSettlementTests.test_a_changed_surviving_generation_and_uncaptured_residue_are_preserved) ... ok
+test_a_missing_audit_directory_still_settles_its_closed_capture (test_t1801_missing_audit_settlement.MissingAuditSettlementTests.test_a_missing_audit_directory_still_settles_its_closed_capture) ... ok
+test_absent_closed_capture_is_settled_before_a_new_drop_is_captured (test_t1801_missing_audit_settlement.MissingAuditSettlementTests.test_absent_closed_capture_is_settled_before_a_new_drop_is_captured) ... ok
+test_an_active_source_with_a_missing_transport_is_not_settled (test_t1801_missing_audit_settlement.MissingAuditSettlementTests.test_an_active_source_with_a_missing_transport_is_not_settled) ... ok
+test_ingest_settles_the_absent_capture_and_releases_its_work (test_t1801_missing_audit_settlement.MissingAuditSettlementTests.test_ingest_settles_the_absent_capture_and_releases_its_work) ... ok
+test_read_only_projection_names_cleanup_without_rewriting_the_binding (test_t1801_missing_audit_settlement.MissingAuditSettlementTests.test_read_only_projection_names_cleanup_without_rewriting_the_binding) ... ok
+test_reappearance_after_the_absence_proof_refuses_metadata_commit (test_t1801_missing_audit_settlement.MissingAuditSettlementTests.test_reappearance_after_the_absence_proof_refuses_metadata_commit) ... ok
+test_repeated_ingest_after_settlement_is_a_canonical_byte_noop (test_t1801_missing_audit_settlement.MissingAuditSettlementTests.test_repeated_ingest_after_settlement_is_a_canonical_byte_noop) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 21.255s
+
+OK

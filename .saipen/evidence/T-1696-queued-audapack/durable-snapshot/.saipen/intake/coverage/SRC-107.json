@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-107:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-260 closed with verification evidence in LOG: verify -> PASS [target: T-260] conf: high -- widget 0.0.90: 761/761 node widget tests PASS (w7-011 adds 7), 2316 pytest PASS + 16 skipped, ruff clean, compileall clean, update_widget_release.py --check OK 0.0.90 8d81ceb06e40253f87d87ef332db544ab482e7cb11ddc8deb0fb726bc67b9e36, and GET http://127.0.0.1:17843/widget.user.js serves exactly those bytes. Operator-confirmed in production: after 0.0.88 t",
+      "text": "Widget still shows READY during a live A3 audit: veto READY on a rejected in-composer stop control, close voice-hole, expose build+generation in the widget UI",
+      "verification": "the Work this request created reached its own verification gate; see the T-260 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-260"
+    }
+  },
+  "schema_version": 1
+}

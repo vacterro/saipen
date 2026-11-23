@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-390:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Establish current CLI/protocol state and direct evidence; use SAIPEN's canonical workflow; never alter BZDECOMP's .saipen state from the SAIPEN side. BZDECOMP reference is read-only and its T-651 owns suite speed."
+    },
+    "SRC-390:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "VERIFY owns SUITE-PREFLIGHT-01 with conformance tests: last declared-command duration over 5 min requires changed-path/untracked, basename, added/removed qualified-symbol and grown-table count-fixture checks, and a green affected subset before the full suite."
+    },
+    "SRC-390:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "After a red suite run rerun only the failing script until green; inspect sibling fixtures that stub/cut the same production file, then one full run; never restart a full suite blind."
+    },
+    "SRC-390:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "saipen test suite run [T-###] --fail-fast stops at the first matching FAIL verdict (or first failing sub-test), records partial FAIL and preserves evidence semantics. Replay the BZDECOMP stub-mismatch case in a fixture repository, never BZDECOMP itself, and stop in under 2 min."
+    },
+    "SRC-390:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Record per-sub-script durations when the runner prints them and separate SAIPEN pre/post hashing/parsing overhead; status or response digest exposes last suite duration and first failure line."
+    },
+    "SRC-390:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "saipen test suite affected [T-###] prints candidate scripts/fixtures referencing the changed paths for the agent to run before the gate; documented alternatives remain admissible under the handoff acceptance."
+    },
+    "SRC-390:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "For declared PASS suites consistently over 10 min, suggest a project-owned speed ticket (parallel independent scripts, one compiler environment load, source-hash compile cache), without blocking closure or taking over BZDECOMP T-651."
+    }
+  },
+  "derived_at": "2026-11-04T04:01:22Z",
+  "derived_from": "SRC-390",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "a50ab374d409e1a33c8a4f2164018fa10dd09c264991df343f7dcb199dbfe029"
+}

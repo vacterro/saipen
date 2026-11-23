@@ -1,0 +1,28 @@
+{
+  "checked_utc": "2026-10-10T10:24:16.990405+00:00",
+  "casefiles_catalog_sha256": "220630f5f8e5c65ecdc107c2b6a78074c4d819d09ed027855db0949d7245659c",
+  "casefiles_checked": 8171,
+  "changed_casefiles": [],
+  "original_core_unchanged": true,
+  "original_core": {
+    "STATE.md": {
+      "sha256": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50",
+      "expected": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50"
+    },
+    "BOARD.md": {
+      "sha256": "8bb2a5e68d474ee2ab22b834e6a94440d5389ea352d2969f5ad945cd04ca9952",
+      "expected": "8bb2a5e68d474ee2ab22b834e6a94440d5389ea352d2969f5ad945cd04ca9952"
+    },
+    "LOG.md": {
+      "sha256": "e414d4b54a3e99d9fa515945bf9d8be208581292889b3744edcb11466b0f7c7a",
+      "expected": "e414d4b54a3e99d9fa515945bf9d8be208581292889b3744edcb11466b0f7c7a"
+    },
+    "MANIFEST.json": {
+      "sha256": "6bbb6ca8bed1502f04176d848f24ad12fdd58759e1946f0b2b27a5f023e0e050",
+      "expected": "6bbb6ca8bed1502f04176d848f24ad12fdd58759e1946f0b2b27a5f023e0e050"
+    }
+  },
+  "head": "6c6d841df24e5c5d91870def931af99f0af4c81f",
+  "admission": "NO_GO",
+  "live_mutations": 0
+}

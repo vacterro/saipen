@@ -1,0 +1,22 @@
+test_no_engine_module_calls_the_capped_builder_directly (test_t1326_board_compaction.CanonicalLogProducerTests.test_no_engine_module_calls_the_capped_builder_directly) ... ok
+test_crlf_and_lf_copies_measure_the_same (test_t1465_budget_line_ends.LineEndTests.test_crlf_and_lf_copies_measure_the_same) ... ok
+test_every_budget_holds (test_t1465_budget_line_ends.LineEndTests.test_every_budget_holds) ... ok
+test_the_registry_is_one_space_indented_and_unchanged_in_meaning (test_t1465_budget_line_ends.RegistryTests.test_the_registry_is_one_space_indented_and_unchanged_in_meaning) ... ok
+test_a_declared_dependency_chain_is_counted_whole (test_t1670_route_budgets.RouteBudgetTests.test_a_declared_dependency_chain_is_counted_whole) ... ok
+test_a_dependency_cycle_is_a_declaration_error (test_t1670_route_budgets.RouteBudgetTests.test_a_dependency_cycle_is_a_declaration_error) ... ok
+test_an_optional_reference_does_not_inflate_the_mandatory_load (test_t1670_route_budgets.RouteBudgetTests.test_an_optional_reference_does_not_inflate_the_mandatory_load) ... ok
+test_mandatory_growth_past_a_route_budget_fails (test_t1670_route_budgets.RouteBudgetTests.test_mandatory_growth_past_a_route_budget_fails) ... ok
+test_one_enormous_document_fails_even_where_no_route_loads_it (test_t1670_route_budgets.RouteBudgetTests.test_one_enormous_document_fails_even_where_no_route_loads_it) ... ok
+test_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate (test_t1670_route_budgets.RouteBudgetTests.test_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate) ... ok
+test_the_command_line_summary_exits_by_the_route_verdict (test_t1670_route_budgets.RouteBudgetTests.test_the_command_line_summary_exits_by_the_route_verdict) ... ok
+test_the_summary_is_one_line_per_route_and_names_the_total_informational (test_t1670_route_budgets.RouteBudgetTests.test_the_summary_is_one_line_per_route_and_names_the_total_informational) ... ok
+test_unrelated_growth_raises_the_total_and_moves_no_route (test_t1670_route_budgets.RouteBudgetTests.test_unrelated_growth_raises_the_total_and_moves_no_route) ... ok
+test_verify_or_future_growth_leaves_the_cold_load_byte_identical (test_t1670_route_budgets.RouteBudgetTests.test_verify_or_future_growth_leaves_the_cold_load_byte_identical) ... ok
+test_context_budget_remains_green_with_execution_in_cold (test_response_surface_contract.BudgetTests.test_context_budget_remains_green_with_execution_in_cold) ... ok
+test_every_route_budget_still_passes (test_t1676_lifecycle_code.RegisteredCodeTests.test_every_route_budget_still_passes) ... ok
+test_every_declared_load_budget_is_measured_from_registry (test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.692s
+
+OK

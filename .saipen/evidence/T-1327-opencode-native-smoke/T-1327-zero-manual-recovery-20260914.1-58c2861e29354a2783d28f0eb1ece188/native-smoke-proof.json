@@ -1,0 +1,28 @@
+{
+ "passed_methods": [
+  2
+ ],
+ "install_rc": 0,
+ "generation": {
+  "build_id": "T-1327-zero-manual-recovery-20260914.1",
+  "source_artifact_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\extensions\\adapters\\opencode\\saipen-guard.js",
+  "source_sha256": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+  "installed_artifact_path": "C:\\temp\\saipen-evidence-opencode-native-smoke-v2qs7i5p\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+  "installed_sha256": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+  "loaded_module_path": "C:\\temp\\saipen-evidence-opencode-native-smoke-v2qs7i5p\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+  "loaded_module_sha256": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+  "sha_triplet_equal": true,
+  "factory_count": 1,
+  "opencode_pid": 29560,
+  "factory_started_ms": 1791685249151,
+  "install_completed_ms": 1791685237230,
+  "context_directory": "C:\\temp\\tmpvzeqq4_g",
+  "context_worktree": "/",
+  "resolved_project_root": "C:\\temp\\tmpvzeqq4_g",
+  "resolved_project_lineage": "lineage-1cdc0f1408a4446fb077fd44105e9d04",
+  "resolution_provenance": "ancestor",
+  "binding_code": "ADMITTED",
+  "fresh_process_after_install": true
+ },
+ "case_outcomes": []
+}

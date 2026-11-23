@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "tools/test_t1942_regression_pair.py"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "extensions",
+    "bootstrap",
+    "tests"
+  ],
+  "oracle_files": [
+    "tools/test_t1942_regression_pair.py"
+  ],
+  "subject_files": [
+    "saipen/OPS.md",
+    "tools/test_response_surface_contract.py"
+  ],
+  "before": {
+    "saipen/OPS.md": ".saipen/evidence/T-1942-regression/pre/OPS.prefix.md",
+    "tools/test_response_surface_contract.py": ".saipen/evidence/T-1942-regression/pre/test_response_surface_contract.prefix.py"
+  },
+  "timeout": 900
+}

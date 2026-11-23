@@ -1,0 +1,18 @@
+[
+  {
+    "stage": "subject-red-lock",
+    "exit_code": 1,
+    "verifier": "b5a955c8b5ec7f91e5758986236e387277b5086cb1a295e01ec639a6cdecf3d6",
+    "subject": "a36ad45b4c17b6fe62d51bd9dedb486dc5af674781aa6580af541850dc15e858",
+    "stdout": "",
+    "stderr": ".F............\n======================================================================\nFAIL: test_binding_cannot_clobber_concurrent_named_observations (__main__.AuditStarvationOracleTests.test_binding_cannot_clobber_concurrent_named_observations)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\_TEMP_\\saipen-t1709-bundle-g_7lauw7\\subject-red-lock-run\\tools\\test_t1709_audit_starvation.py\", line 256, in test_binding_cannot_clobber_concurrent_named_observations\n    self.assertEqual(refused, [True], \"binding must serialize with chronology writes\")\nAssertionError: Lists differ: [] != [True]\n\nSecond list contains 1 additional elements.\nFirst extra element 0:\nTrue\n\n- []\n+ [True] : binding must serialize with chronology writes\n\n----------------------------------------------------------------------\nRan 14 tests in 0.312s\n\nFAILED (failures=1)\n"
+  },
+  {
+    "stage": "subject-green-final",
+    "exit_code": 0,
+    "verifier": "b5a955c8b5ec7f91e5758986236e387277b5086cb1a295e01ec639a6cdecf3d6",
+    "subject": "fa730006eb727ad0bea94ce5b53a68489840a31705247c19fbb9f0df2c94b6cf",
+    "stdout": "",
+    "stderr": "..............\n----------------------------------------------------------------------\nRan 14 tests in 0.317s\n\nOK\n"
+  }
+]

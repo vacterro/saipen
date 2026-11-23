@@ -1,0 +1,55 @@
+
+[SAIPEN_HOST_DISPATCH_ADVISORY]
+action: kick_next_iteration
+campaign_id: CAMPAIGN-00000000-0000-0000-0000-000000000000
+iteration_id: 1
+worker_generation: 1
+idempotency_key: bbf1f985ccf1e07c46cece5e6a4bda235b354a1d0cb73a1eebe5506bc9e79839
+inbox_path: V:\_TEMP_\tmpjaml9bpf\CORE-012\p\.saipen\campaign\dispatch_inbox.jsonl
+advisory: Native host iteration dispatch not registered; pump turn via host harness or external watcher.
+[/SAIPEN_HOST_DISPATCH_ADVISORY]
+{
+  "CORE-012": {
+    "action": "kick_next_iteration",
+    "disposition": "REQUEST_PERSISTED",
+    "telemetry": [
+      "turn_dispatch_pending"
+    ]
+  },
+  "PERF-003": {
+    "journal_bytes_per_dispatch_early": [
+      852,
+      852,
+      852
+    ],
+    "journal_bytes_per_dispatch_late": [
+      856,
+      856,
+      856
+    ],
+    "record_sized_not_history_sized": true
+  },
+  "PERF-005": {
+    "parse_board_calls": 1
+  },
+  "PERF-007": {
+    "bounded": true,
+    "dropped": 4936,
+    "history_len": 64,
+    "iterations": 5000,
+    "last_action": "a",
+    "observation_count": 5000,
+    "retention": 64
+  },
+  "W2-004": {
+    "after_host_available": "ACCEPTANCE_UNVERIFIED",
+    "first": "HOST_DISPATCH_UNAVAILABLE",
+    "second_dispatched": false
+  },
+  "W2-007": {
+    "first": "DELIVERED_PUBLICATION",
+    "receipt_rows": 1,
+    "second": "DELIVERED_PUBLICATION",
+    "second_idempotent_replay": true
+  }
+}

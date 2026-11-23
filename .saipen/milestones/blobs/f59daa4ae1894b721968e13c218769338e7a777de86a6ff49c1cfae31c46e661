@@ -1,0 +1,52 @@
+<p align="center">
+  <img src="assets/SAIPEN_design1.png" alt="SAIPEN Guide Title" width="800"/>
+</p>
+
+# SAIPEN Vodič (Hrvatski)
+
+Slušaj, početniče. Problem je jednostavan: tvoji AI agenti imaju pamćenje zlatne ribice.
+
+**SAIPEN** je bilježnica u mapi `.saipen/` u vašem projektu.
+
+**Brzi prečaci:** `cc` nastavlja kontekst projekta do konvergencije (nastavlja aktivni cilj ako je postavljen), `sss` prikazuje status bez diranja koda, a `ss` sprema kontrolnu točku i zaustavlja se. [Pogledaj punu kartu od 15 tipki](../saipen/RFC.md#110-command-surface). Ćirilični blizanci također rade: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+
+## Brzi početak
+
+1. **Instalirajte jednom po stroju:**
+```bash
+git clone https://github.com/vacterro/saipen
+cd saipen
+powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
+bash bootstrap/inject.sh                                            # macOS / Linux
+```
+
+2. **Pokreni projekt:**
+> `saipen set`
+
+3. **Rad:**
+> `saipen`
+
+## Naredbe
+
+| Naredba | Akcija |
+|---|---|
+| `saipen set` | Inicijalizirajte mapu memorije |
+| `saipen continue` | Nastavi rad iz bilješki |
+| `saipen stop` | Spremi napredak i zaustavi |
+| `saipen status` | Pročitaj ploču |
+| `saipen goal <text>` | Prebaci na novi cilj |
+| `saipen clean` | Očisti repozitorij |
+| `saipen translate` | Izolirana izrada prijevoda na 32 jezika |
+| `saipen markhunt` | Duboka, neograničena revizija -- samo bilježi nalaze |
+| `saipen prepare` | Pakira rad za predaju sljedećem agentu |
+| `saipen ship` | Pokreni tok izdanja |
+
+## Dobro je znati
+- Necommitane promjene kad se vratiš na projekt? Normalno -- SAIPEN commita samo kod `ship`, ne kod svakog koraka. Agent prvo provjerava čije su te promjene prije nego što išta dotakne.
+- Želiš da pamti pravu arhitektonsku odluku? Stavi je u `.saipen/KNOWLEDGE/`, kao jednu datoteku `decisions.md` ili numerirane datoteke `ADR-001.md`.
+- Nema gita ni shella na ovom stroju? Agent to jasno kaže (`mode`, `WAIT: <category> -- <pitanje>`) umjesto da nagađa (kategorija je jedna od sedam: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`; govori kakav odgovor otključava situaciju)
+- Želiš sigurnosnu mrežu? `python <saipen-klon>/tools/install_hook.py` instalira provjeru prije svakog commita.
+
+---
+
+**Full command list / complete command reference:** [RFC § 1.10](../saipen/RFC.md#110-command-surface) — the authoritative list of every `saipen` command.

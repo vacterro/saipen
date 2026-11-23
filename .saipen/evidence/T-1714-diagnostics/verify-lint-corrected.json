@@ -1,0 +1,22 @@
+{
+  "label": "verify-lint-corrected",
+  "phase": "VERIFY",
+  "command": [
+    "python",
+    "-m",
+    "ruff",
+    "check",
+    "tools/",
+    "tests/"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 0.203,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "All checks passed!\n",
+  "stderr": "",
+  "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

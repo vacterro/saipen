@@ -1,0 +1,36 @@
+{
+  "subject_sha256": "b928417bf1092f6ddbf5baf07532fb7dec00af873c3bf9cf19ed2580d7153ab0",
+  "verifier_sha256": "ede023edfb5ebcfc8f736f39d58879b39fae413c565375e47694964c54e6e587",
+  "os_name": "nt",
+  "checks": [
+    {
+      "control": "registered-tree",
+      "ok": false,
+      "exception": "PermissionError",
+      "detail": "[WinError 5] Access is denied: 'V:\\\\_TEMP_\\\\saipen-evidence-readonly-oracle-o79fc04e\\\\home\\\\.git\\\\objects\\\\aa\\\\object'",
+      "owned_root_remains": true,
+      "proof_preserved": true
+    },
+    {
+      "control": "registered-file",
+      "ok": false,
+      "exception": "PermissionError",
+      "detail": "[WinError 5] Access is denied: 'V:\\\\_TEMP_\\\\saipen-evidence-readonly-oracle-38z15le3\\\\object'",
+      "owned_root_remains": true,
+      "proof_preserved": true
+    },
+    {
+      "control": "owned-root",
+      "ok": false,
+      "exception": "PermissionError",
+      "detail": "[WinError 5] Access is denied: 'V:\\\\_TEMP_\\\\saipen-evidence-readonly-oracle-k0d86wb8\\\\object'",
+      "owned_root_remains": true,
+      "proof_preserved": true
+    },
+    {
+      "control": "foreign-readonly",
+      "ok": true
+    }
+  ],
+  "failures": 3
+}

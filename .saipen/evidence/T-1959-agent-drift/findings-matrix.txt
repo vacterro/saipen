@@ -1,0 +1,63 @@
+T-1959 / SRC-348 finding-by-finding measurement, HEAD 66ef622a43ab59512735ac78ce10d1250e26f9df 2026-10-29T22:45:08Z
+
+F-01 incorrect initial route -> IMPLEMENTED+REGRESSED (not a live defect)
+   BOOT.md lines 11-14: NEW ACTIONABLE USER INPUT -> saipen start '<verbatim task>'; START FIRST,
+   no status/continue/source/recover first. tests test_entry_answer_agrees +
+   test_t1363_zero_manual_entry: 84 tests OK (2 skipped), including
+   test_continue_names_it_too_instead_of_an_improvement_audit and
+   test_a_task_file_carrier_names_the_file_transport.
+
+F-02 direct self-certified coverage -> IMPLEMENTED+REGRESSED
+   disp now refuses: terminal actionable disposition without evidence;
+   IMPLEMENTED/VERIFIED without verification; EVIDENCE_NOT_FOUND for a
+   referenced test file absent from disk; EVIDENCE_UNRELATED when test topic
+   and clause domain are disjoint; EVIDENCE_SCOPE_TOO_WEAK when a live
+   acceptance clause is cited with a unit/core-suite PASS;
+   PARTIAL_FULFILLMENT_REFUSED for subset-only proof.
+   Measured live this session: 'implemented/verified disposition requires
+   verification' and 'referenced test file ... does not exist on disk'.
+
+F-03 workflow bypass after safety valve -> IMPLEMENTED+REGRESSED
+   fleet.classify answers read_only:True with needs_local_mutation False when
+   the state is braked, so investigation is permitted and mutation is not;
+   gate_decision returns RECONCILE_REAUTH_REQUIRED for a missing/invalid
+   authority Source, another project, or another gate version.
+   tests test_automation_block + test_capability_boundary: 48 tests OK.
+
+F-04 false domain completeness -> IMPLEMENTED+REGRESSED
+   intake.py:2403 treats 'core-unit', 'core_unit', 'unittest discover',
+   'core suite', 'aggregate pass' as generic proofs that cannot satisfy a
+   live-acceptance clause; :3041 derives each clause individually 'so that
+   aggregate test runs cannot improperly blanket-verify unrelated functional
+   outcomes'. tests test_cold_agent_truth + test_source_contract_derivation:
+   34 tests OK.
+
+F-05 ambiguous derived requirement provenance -> IMPLEMENTED
+   SOURCES.md REQUEST-PROVENANCE-01 records a witness per user_instruction
+   receipt: operator_carrier / transport_obligation / model_supplied.
+   operator_task.authority_for_receipt derives capabilities from original
+   integrity-checked provenance, never BOARD labels; only operator_carrier
+   may project user_explicit:true or preempt active Work.
+
+F-06 response contract not enforced -> IMPLEMENTED+REGRESSED
+   saipen response style/render/check exist; saipen/STYLE.md is the single
+   authority; tests test_response_surface_contract, test_response_delivery,
+   test_response_digest, test_response_fact_binding: 85 tests OK.
+
+F-07 authenticated bridge unavailable -> HOST LIMITATION, fail-closed
+   test_host_bootstrap: 25 tests OK, including test_04_no_proven_candidate_is
+   _unavailable and test_06_unregistered_explicit_host_is_never_green.
+   Refusal stays fail-closed when identity or generation is unavailable.
+
+F-08 runtime projection ambiguity -> OUT OF THIS REPOSITORY
+   grep for turnCount|contextUsed|stateRevision|contextUsage across
+   tools/saipen_engine returns NOTHING: these are ZAICODE host snapshot
+   fields. SRC-348 itself marks F-08 MEDIUM UNPROVEN and instructs 'Do not
+   classify different counters as a defect without establishing their
+   semantics'. Not actionable in SAIPEN, and not proven.
+
+F-09 Qt teardown warning -> OUT OF THIS REPOSITORY
+   SAIPEN has no Qt dependency: the only PyQt/PySide mentions are toolkit
+   DETECTION strings in applicability.py:89-93 and its test. QThreadStorage
+   teardown belongs to the FastPrompter/ZAICODE GUI. SRC-348 marks F-09
+   LOW/MEDIUM UNPROVEN.

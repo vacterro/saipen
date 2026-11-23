@@ -1,0 +1,9 @@
+{
+  "tool": "audit_parity.py",
+  "condition_delta": "Focused execution is terminal and its OS verification locks are released; no source change",
+  "exit_code": 1,
+  "tail": [
+    "FAIL: tools/validate.py rejects an UNMODIFIED copy (exit 1) -- every number below would be measuring that instead of the floor's coverage. What it said:",
+    "    FAIL: cross-doc drift [no-publish-split] -- phases/ship.md must say `no-publish` is a permission and not an absence of git, must record the real reason in the s"
+  ]
+}

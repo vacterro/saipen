@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-062:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "P0 escaped regression: AUDAPACK Project Room GUI freezes / Not Responding after managed launch because the Qt GUI thread performs blocking native discovery (EnumWindows, process metadata, Fleet preflight); move all native work off the GUI thread. Full spec V:\\_TEMP_\\fastprompter_drag\\AUDAPACK_20260920_1620.md"
+    }
+  },
+  "derived_at": "2026-09-20T16:55:45Z",
+  "derived_from": "SRC-062",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "1f64efa94f3b14f661e6f10f8ba766bf97432d986971fda8617d41fd8696013d"
+}

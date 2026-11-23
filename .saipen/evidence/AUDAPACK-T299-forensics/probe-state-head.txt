@@ -1,0 +1,23 @@
+saipen conformance validation starting (tools/validate.py)...
+Project root: V:\_TEMP_\audapack-integrity-probes-_jwkda5b\state-head (explicit)
+Project lineage: lineage-54dcf07e58984d85b0c424a8a3c92e51
+PASS: state.schema.json and the engine STATE contract constants agree
+PASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)
+PASS: STATE.md schema valid (checked against state.schema.json)
+PASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-54dcf07e58984d85b0c424a8a3c92e51)
+PASS: BOARD.md has all required section headings
+PASS: BOARD.md no duplicate tickets
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md Work supersession relations are terminal, existing and acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+PASS: BOARD.md at most one ## DOING ticket (1 claimed)
+PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))
+FAIL: lifecycle authority [saio] -- canonical lifecycle state stands on no operation: STATE.last_event is E-12, above E-5, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand -- run `saipen recover`; it names the journaled repair (T-1671)
+PASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)
+PASS: append targets end on a line boundary (3 checked)
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [repairable-protocol-drift]: STATE.md last_event is E-12 but the LOG tail is E-5 -- higher than the log means corrupt, or a STATE carried over from an incompatible branch. Recovery rebuilds from the log and would chase an event that was never written (RFC § 1.2)
+WARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists
+WARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this
+Validation FAILED: 1 problem(s), 3 warning(s)

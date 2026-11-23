@@ -1,0 +1,118 @@
+test_e2e_bz_rea_candidate_discovery_and_deduplication (test_bz_rea_acceptance_fixture.BzReaAcceptanceFixtureTests.test_e2e_bz_rea_candidate_discovery_and_deduplication)
+Step 3, 4, 5: Discovers specific research candidate, deduplicates, admits highest priority. ... ok
+test_e2e_bz_rea_sequential_lifecycle_and_distinct_successor (test_bz_rea_acceptance_fixture.BzReaAcceptanceFixtureTests.test_e2e_bz_rea_sequential_lifecycle_and_distinct_successor)
+Step 6..10: Admitted task lifecycle -> checkpoint -> evaluates remaining goal -> distinct next candidate. ... FAIL
+test_e2e_bz_rea_unsatisfied_goal_discovery (test_bz_rea_acceptance_fixture.BzReaAcceptanceFixtureTests.test_e2e_bz_rea_unsatisfied_goal_discovery)
+Step 1 & 2: Identifies unsatisfied goal and does not claim mission complete. ... ok
+test_e2e_bz_rea_work_exhaustion_not_exhausted (test_bz_rea_acceptance_fixture.BzReaAcceptanceFixtureTests.test_e2e_bz_rea_work_exhaustion_not_exhausted)
+Work exhaustion certificate must certify WORK_AVAILABLE, not EXHAUSTED. ... ok
+test_01_exact_cc_all_is_continuation_not_new_ticket (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_01_exact_cc_all_is_continuation_not_new_ticket) ... ok
+test_02_explicit_new_goal_remains_separate (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_02_explicit_new_goal_remains_separate) ... ok
+test_03_empty_board_with_unresolved_gaps_cannot_satisfy_goal (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_03_empty_board_with_unresolved_gaps_cannot_satisfy_goal) ... ok
+test_04_missing_authenticated_goal_cannot_create_false_completion (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_04_missing_authenticated_goal_cannot_create_false_completion) ... ok
+test_05_native_nested_coverage_schema_produces_genuine_candidates (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_05_native_nested_coverage_schema_produces_genuine_candidates) ... ok
+test_06_schema_mismatch_does_not_silently_become_zero_gaps (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_06_schema_mismatch_does_not_silently_become_zero_gaps) ... ok
+test_07_green_doc_checks_do_not_imply_100pct_re (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_07_green_doc_checks_do_not_imply_100pct_re) ... ok
+test_08_generated_citations_do_not_count_as_verified_semantics (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_08_generated_citations_do_not_count_as_verified_semantics) ... ok
+test_09_patch_specific_evidence_cannot_be_borrowed (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_09_patch_specific_evidence_cannot_be_borrowed) ... ok
+test_10_candidate_deduplication_preserves_new_evidence_generations (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_10_candidate_deduplication_preserves_new_evidence_generations) ... FAIL
+test_11_one_verified_gap_closes_different_gap_automatically_selected (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_11_one_verified_gap_closes_different_gap_automatically_selected) ... FAIL
+test_12_bzdecomp_active_work_is_preserved (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_12_bzdecomp_active_work_is_preserved) ... ok
+test_13_cross_project_ownership_respected (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_13_cross_project_ownership_respected) ... ok
+test_14_cli_one_step_completion_does_not_imply_multi_turn_autonomy (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_14_cli_one_step_completion_does_not_imply_multi_turn_autonomy) ... ok
+test_15_persisted_dispatch_without_host_acceptance_is_not_turn_started (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_15_persisted_dispatch_without_host_acceptance_is_not_turn_started) ... ok
+test_16_several_genuine_successor_native_turns_execute_without_user_cc (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_16_several_genuine_successor_native_turns_execute_without_user_cc) ... ok
+test_17_interrupted_campaigns_resume_without_duplicate_side_effects (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_17_interrupted_campaigns_resume_without_duplicate_side_effects) ... ok
+test_18_expired_revoked_wrong_scope_grants_refuse_mutation (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_18_expired_revoked_wrong_scope_grants_refuse_mutation) ... ok
+test_19_host_offline_produces_runtime_paused (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_19_host_offline_produces_runtime_paused) ... ok
+test_20_genuine_exhausted_work_produces_quiet_waiting (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_20_genuine_exhausted_work_produces_quiet_waiting) ... FAIL
+test_21_failed_saipen_command_piped_through_head_remains_failed (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_21_failed_saipen_command_piped_through_head_remains_failed) ... ok
+test_22_work_progress_not_inferred_solely_from_journal_counters (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_22_work_progress_not_inferred_solely_from_journal_counters) ... ok
+test_23_routine_windows_tests_do_not_capture_mouse_focus_keyboard (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_23_routine_windows_tests_do_not_capture_mouse_focus_keyboard) ... ok
+test_24_mock_only_passing_tests_never_prove_installed_host_acceptance (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_24_mock_only_passing_tests_never_prove_installed_host_acceptance) ... ok
+test_arbitrary_substring_does_not_deduplicate (test_persistent_autonomy_recovery.CandidateDeduplicationAndIndependentSelectionTests.test_arbitrary_substring_does_not_deduplicate)
+A ticket containing a common word in its title does not deduplicate an unrelated candidate. ... ok
+test_blocked_first_candidate_selects_second_candidate (test_persistent_autonomy_recovery.CandidateDeduplicationAndIndependentSelectionTests.test_blocked_first_candidate_selects_second_candidate)
+If candidate 1 is blocked on the board, replenishment selects candidate 2 from the pool. ... FAIL
+test_evaluate_all_goals_pure_by_default (test_persistent_autonomy_recovery.DryRunIntegrityTests.test_evaluate_all_goals_pure_by_default)
+evaluate_all_goals(commit=False) must NOT change the goal file on disk. ... ok
+test_replenish_from_goals_dry_run_writes_zero_bytes (test_persistent_autonomy_recovery.DryRunIntegrityTests.test_replenish_from_goals_dry_run_writes_zero_bytes)
+replenish_from_goals(dry_run=True) must NOT change goal or board files. ... ok
+test_backlog_empty_never_satisfied (test_persistent_autonomy_recovery.FalseGoalSatisfactionControlsTests.test_backlog_empty_never_satisfied)
+BacklogProvider with 0 items must NOT be classified as SATISFIED. ... ok
+test_empty_denominator_never_satisfied (test_persistent_autonomy_recovery.FalseGoalSatisfactionControlsTests.test_empty_denominator_never_satisfied)
+A ledger with total=0, resolved=0, gaps=[] must NOT be classified as SATISFIED. ... ok
+test_failed_test_ran_zero_never_satisfied (test_persistent_autonomy_recovery.FalseGoalSatisfactionControlsTests.test_failed_test_ran_zero_never_satisfied)
+FailedTestProvider with ran=0 must NOT be classified as SATISFIED. ... ok
+test_genuinely_complete_inventory_satisfied (test_persistent_autonomy_recovery.FalseGoalSatisfactionControlsTests.test_genuinely_complete_inventory_satisfied)
+Genuinely complete inventory (total=10, resolved=10, gaps=[]) is SATISFIED. ... ok
+test_inconsistent_metrics_rejected (test_persistent_autonomy_recovery.FalseGoalSatisfactionControlsTests.test_inconsistent_metrics_rejected)
+Resolved > total must be rejected as inconsistent, not SATISFIED. ... ok
+test_traversing_evidence_source_blocked (test_persistent_autonomy_recovery.FalseGoalSatisfactionControlsTests.test_traversing_evidence_source_blocked)
+An evidence source attempting parent traversal must be rejected with BLOCKED_BY_EVIDENCE. ... ok
+test_truncated_inventory_never_satisfied (test_persistent_autonomy_recovery.FalseGoalSatisfactionControlsTests.test_truncated_inventory_never_satisfied)
+A truncated inventory must NOT be classified as SATISFIED even if gaps is empty. ... ok
+test_delete_goal_rejects_traversal (test_persistent_autonomy_recovery.PathEscapeControlsTests.test_delete_goal_rejects_traversal)
+delete_goal with traversal ID returns False without file escape. ... ok
+test_get_goal_rejects_traversal (test_persistent_autonomy_recovery.PathEscapeControlsTests.test_get_goal_rejects_traversal)
+get_goal with traversal ID returns None without file escape. ... ok
+test_save_goal_rejects_absolute_path (test_persistent_autonomy_recovery.PathEscapeControlsTests.test_save_goal_rejects_absolute_path)
+An absolute goal_id must raise InvalidIdError. ... ok
+test_save_goal_rejects_parent_traversal (test_persistent_autonomy_recovery.PathEscapeControlsTests.test_save_goal_rejects_parent_traversal)
+A traversing goal_id (e.g. '../../evil') must raise InvalidIdError and never write outside. ... ok
+test_transfer_reviewed_scope_rejects_traversing_path (test_persistent_autonomy_recovery.PathEscapeControlsTests.test_transfer_reviewed_scope_rejects_traversing_path)
+transfer_reviewed_scope must reject paths that contain '..' or are absolute. ... ok
+
+======================================================================
+FAIL: test_e2e_bz_rea_sequential_lifecycle_and_distinct_successor (test_bz_rea_acceptance_fixture.BzReaAcceptanceFixtureTests.test_e2e_bz_rea_sequential_lifecycle_and_distinct_successor)
+Step 6..10: Admitted task lifecycle -> checkpoint -> evaluates remaining goal -> distinct next candidate.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_bz_rea_acceptance_fixture.py", line 183, in test_e2e_bz_rea_sequential_lifecycle_and_distinct_successor
+    self.assertTrue(res2["replenished"])
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_10_candidate_deduplication_preserves_new_evidence_generations (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_10_candidate_deduplication_preserves_new_evidence_generations)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_bzcc_overnight_autonomy.py", line 372, in test_10_candidate_deduplication_preserves_new_evidence_generations
+    self.assertTrue(is_dup)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_11_one_verified_gap_closes_different_gap_automatically_selected (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_11_one_verified_gap_closes_different_gap_automatically_selected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_bzcc_overnight_autonomy.py", line 425, in test_11_one_verified_gap_closes_different_gap_automatically_selected
+    self.assertEqual(rep["candidate"]["candidate_id"], "BZ-G-FUN_10")
+AssertionError: 'BZ-G-FUN_0' != 'BZ-G-FUN_10'
+- BZ-G-FUN_0
++ BZ-G-FUN_10
+?          +
+
+
+======================================================================
+FAIL: test_20_genuine_exhausted_work_produces_quiet_waiting (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_20_genuine_exhausted_work_produces_quiet_waiting)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_bzcc_overnight_autonomy.py", line 596, in test_20_genuine_exhausted_work_produces_quiet_waiting
+    self.assertEqual(assessment["classification"], ca.QUIESCENT)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'QUIESCENT'
+- INCOMPLETE_DISCOVERY
++ QUIESCENT
+
+
+======================================================================
+FAIL: test_blocked_first_candidate_selects_second_candidate (test_persistent_autonomy_recovery.CandidateDeduplicationAndIndependentSelectionTests.test_blocked_first_candidate_selects_second_candidate)
+If candidate 1 is blocked on the board, replenishment selects candidate 2 from the pool.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_persistent_autonomy_recovery.py", line 394, in test_blocked_first_candidate_selects_second_candidate
+    self.assertTrue(res.get("ok"))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 44 tests in 0.469s
+
+FAILED (failures=5)

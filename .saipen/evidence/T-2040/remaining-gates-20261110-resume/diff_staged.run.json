@@ -1,0 +1,15 @@
+{
+  "gate": "diff_staged",
+  "command": [
+    "git",
+    "diff",
+    "--cached",
+    "--check"
+  ],
+  "started_at": "2026-11-10T17:48:18.266020+00:00",
+  "pid": 39328,
+  "exit_code": 2,
+  "status": "FAIL",
+  "duration_s": 0.187,
+  "finished_at": "2026-11-10T17:48:18.444358+00:00"
+}

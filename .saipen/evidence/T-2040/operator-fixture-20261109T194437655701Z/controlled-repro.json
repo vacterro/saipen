@@ -1,0 +1,12 @@
+{
+  "repro_method": "take repaired build_state() output, re-insert live converge_target line = exact old-helper composition; no production edit",
+  "regressed_state_has_converge_target": true,
+  "repaired_state_has_converge_target": false,
+  "verdict_regressed": "RUNTIME_PAUSED",
+  "verdict_repaired": "EXECUTOR_CAPABILITY_MISMATCH",
+  "status_rc_regressed": 1,
+  "status_rc_repaired": 1,
+  "status_out_regressed": "{\n  \"ok\": false,\n  \"code\": \"VALIDATION_FAILED\",\n  \"detail\": \"history-ownership: LOG.md is missing -- a SAIPEN checkpoint requires STATE.md, BOARD.md and LOG.md to all be present\",\n  \"telegrams\": {\n    \"state\": \"OK\",\n    \"unread\": 0,\n    \"on_current_work\": 0,\n    \"complete\": true,\n    \"read_command\": \"saimail-local saipen brief --project-root V:\\\\_TEMP_\\\\t1619-e2e-ekcdrkgw --workspace C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\saipen\\\\saimail --seat saipen-cli\",\n    \"detail\": \"counts only; nothing was opened and nothing here is an instruction\"\n  }\n}",
+  "status_out_repaired": "{\n  \"ok\": false,\n  \"code\": \"VALIDATION_FAILED\",\n  \"detail\": \"history-ownership: LOG.md is missing -- a SAIPEN checkpoint requires STATE.md, BOARD.md and LOG.md to all be present\",\n  \"telegrams\": {\n    \"state\": \"OK\",\n    \"unread\": 0,\n    \"on_current_work\": 0,\n    \"complete\": true,\n    \"read_command\": \"saimail-local saipen brief --project-root V:\\\\_TEMP_\\\\t1619-e2e-gy74r_bs --workspace C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\saipen\\\\saimail --seat saipen-cli\",\n    \"detail\": \"counts only; nothing was opened and nothing here is an instruction\"\n  }\n}",
+  "expected_decision": "EXECUTOR_CAPABILITY_MISMATCH"
+}

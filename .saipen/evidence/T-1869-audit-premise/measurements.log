@@ -1,0 +1,51 @@
+== M1: does a ZAICODE adapter exist? ==
+repo adapter : True 7772 bf9e9a900c86502c
+installed    : True 7772 bf9e9a900c86502c
+byte-identical: True
+config hooks.enabled: True
+UserPromptSubmit entries: 1
+  cmd: C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.exe args[1]==bootstrap: True
+  script: C:\Users\vac34\.zcode\hooks\saipen-guard.py
+
+== M2: does the hook bind the EVENT's project or the pinned --saipen-root? ==
+rc: 0
+stdout: {"ok": true, "ingress_id": "ing-896e59f957df5fb2", "destination_op": "continue", "consumed": true, "sealed": false}
+stderr: 
+
+== M3: where did the envelope land? ==
+FastPrompter cache records: 1
+   ing-896e59f957df5fb2 'cc' destination_op= continue sealed= False
+records landed in the pinned protocol home: 0 (0 = project-cwd binding)
+
+== M4: can a shell mint a seal? (expected: no -- a shell is not the hook) ==
+code: BROKER_CLIENT_NOT_AUTHENTICATED
+detail: the connecting process is under the host application but is not the installed host hook or the engine it started (a shell tool call is not a hook)
+host_images declared: ['ZAICODE.exe']
+ancestry root image: zaicode.exe.old pid 22508
+renamed-host note: the connecting process is under the host application but is not the installed host hook or the engine it started (a shell tool call is not a hook)
+
+== M5: FastPrompter's valve, after the probe envelope was retired ==
+active ingress remaining: 0
+witness for unrelated text: model_supplied None
+FastPrompter STATE counters:
+   phase: DONE
+   task: none
+   next_action: "saipen continue"
+   execution_intent: goal
+   goal_waves: 3
+   goal_tickets: 39
+   continuation_authority: operator_required
+   safety_valve_mode: hard_wait
+
+== M6: the live refusal, verbatim ==
+Traceback (most recent call last):
+  File "<stdin>", line 75, in <module>
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\subprocess.py", line 1538, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] The system cannot find the file specified

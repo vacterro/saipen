@@ -1,0 +1,9 @@
+CONTROL unmutated copy: exit 0, Ran 8 tests
+only lifecycle_authority pre-fix: exit 1, red ['test_a_board_edit_that_moves_no_ticket_is_not_refused', 'test_a_board_only_move_is_refused_by_every_entry_and_writes_nothing', 'test_a_row_a_closure_operation_closed_is_never_a_board_only_move', 'test_an_unchanged_board_is_not_judged_whatever_the_baseline_says', 'test_an_unreadable_baseline_is_no_finding', 'test_recovery_reopens_the_row_and_status_is_valid_again', 'test_the_baseline_follows_every_committed_board_write']
+only plan pre-fix: exit 1, red ['test_a_board_only_move_is_refused_by_every_entry_and_writes_nothing', 'test_recovery_reopens_the_row_and_status_is_valid_again', 'test_the_baseline_follows_every_committed_board_write']
+command: python -B -m unittest test_t1673_board_only_terminal (cwd tools/)
+verifier:910f8dba1fdfee64  (tools/test_t1673_board_only_terminal.py, byte-identical in both trees)
+FAIL subject:231934fdd6ed6764  exit 1  red: test_a_board_only_move_is_refused_by_every_entry_and_writes_nothing, test_a_row_a_closure_operation_closed_is_never_a_board_only_move, test_an_unchanged_board_is_not_judged_whatever_the_baseline_says, test_an_unreadable_baseline_is_no_finding, test_recovery_reopens_the_row_and_status_is_valid_again, test_the_baseline_follows_every_committed_board_write
+PASS subject:143522896dbc2467  exit 0  Ran 8 tests
+held: True
+rc=0

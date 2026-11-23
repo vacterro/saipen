@@ -1,0 +1,983 @@
+{
+  "captured_utc": "2026-10-10T09:19:33.167552+00:00",
+  "root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "git": [
+    {
+      "file": "commit-metadata.txt",
+      "sha256": "6fcb7e7a8e90d4e46a9c61cadf1b7e000f31d01717fdc253d4912b6c59f970e4",
+      "bytes": 1755,
+      "argv": [
+        "git",
+        "-C",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+        "show",
+        "-s",
+        "--format=fuller",
+        "HEAD"
+      ],
+      "exit_code": 0
+    },
+    {
+      "file": "lifecycle-diff.txt",
+      "sha256": "07f9146bcead429a2ec90c16c2b91191e3da05700382ff704544e2b4a50c3225",
+      "bytes": 48400,
+      "argv": [
+        "git",
+        "-C",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+        "diff",
+        "HEAD^",
+        "HEAD",
+        "--",
+        ".saipen/STATE.md",
+        ".saipen/BOARD.md",
+        ".saipen/LOG.md",
+        ".saipen/MANIFEST.json"
+      ],
+      "exit_code": 0
+    },
+    {
+      "file": "canonical-blame.txt",
+      "sha256": "91763ca1f0411180457ca744f289dbc424108b8dc139588e87e1defdf033f36b",
+      "bytes": 6287,
+      "argv": [
+        "git",
+        "-C",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+        "blame",
+        "--line-porcelain",
+        "-L",
+        "1,8",
+        "HEAD",
+        "--",
+        ".saipen/BOARD.md"
+      ],
+      "exit_code": 0
+    },
+    {
+      "file": "canonical-log-blame.txt",
+      "sha256": "7b8ccc953be6ccaaf3b48d056e4ead1698b86718a654acd6c48015a7e23da68c",
+      "bytes": 2759,
+      "argv": [
+        "git",
+        "-C",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+        "blame",
+        "--line-porcelain",
+        "-L",
+        "1,4",
+        "HEAD",
+        "--",
+        ".saipen/LOG.md"
+      ],
+      "exit_code": 0
+    },
+    {
+      "file": "evidence-and-engineering-files.txt",
+      "sha256": "4315d095b4fd4add1167c8be12b3df9eceaaf0f5ba1de1a33b2b91ab811703ca",
+      "bytes": 21011,
+      "argv": [
+        "git",
+        "-C",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+        "show",
+        "--format=",
+        "--name-only",
+        "HEAD"
+      ],
+      "exit_code": 0
+    },
+    {
+      "revision": "HEAD",
+      "file": "HEAD-STATE.md",
+      "sha256": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50",
+      "bytes": 341
+    },
+    {
+      "revision": "HEAD",
+      "file": "HEAD-BOARD.md",
+      "sha256": "d39ce3a61681f46ed075918ffe1f965276eea3dc6b31914ebd25b76a90cf4667",
+      "bytes": 145628
+    },
+    {
+      "revision": "HEAD",
+      "file": "HEAD-LOG.md",
+      "sha256": "a777d5ad3498d60686177cddd37125e488acc4ea642bfc7456e0a53acaa32e1d",
+      "bytes": 230632
+    },
+    {
+      "revision": "HEAD",
+      "file": "HEAD-MANIFEST.json",
+      "sha256": "6bbb6ca8bed1502f04176d848f24ad12fdd58759e1946f0b2b27a5f023e0e050",
+      "bytes": 3666
+    },
+    {
+      "revision": "HEAD^",
+      "file": "HEAD-parent-STATE.md",
+      "sha256": "2c03fd871babeaf56977b5e82aa5b66031304708907140287ce8db0aa4283160",
+      "bytes": 352
+    },
+    {
+      "revision": "HEAD^",
+      "file": "HEAD-parent-BOARD.md",
+      "sha256": "0f4ea67de9dfa1dbcae8aaf25da6493790490c1e9eaf165900da7117b4070033",
+      "bytes": 139111
+    },
+    {
+      "revision": "HEAD^",
+      "file": "HEAD-parent-LOG.md",
+      "sha256": "3aede2a5617201699a09f3f8027100ff5d5fd5b6a4d5ccab5e59d01272751ad9",
+      "bytes": 204294
+    }
+  ],
+  "gap_search": {
+    "events": [
+      3133,
+      3136,
+      3145,
+      3147
+    ],
+    "scope": "captured .md/.txt/.json files <=8MB, no binaries or host databases",
+    "matches": [],
+    "recovery_heads": [
+      {
+        "path": ".saipen/BOARD.md",
+        "tail": 0,
+        "t299_record_count": 2
+      },
+      {
+        "path": ".saipen/LOG.md",
+        "tail": 3146,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/20260826-2321-STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/20260828T065851Z-STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/20260831T045035-STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/20260831T213917Z-STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-012/T-012-ef1bdae41d2772246140acdd.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-132/T-132-0104540a801467fc0852df12.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-133/T-133-d8f008a6ee8a2ac0c7c2a8e2.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-158/T-158-2a0a5ac158d777239d6cde0d.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-160/T-160-2d8ae617e92d6854758131cc.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-173/T-173-7bba31210df4db64374122a9.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-174/T-174-02a2beb59c5f9179bde07efc.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-175/T-175-436e857672a1e685c5ab2293.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-176/T-176-a3f2216235c1c08401ae0441.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-180/T-180-b55543955c2ebd318ad273c5.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-181/T-181-14a9b572200ca86a4e14fd5d.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-183/T-183-9ce6bd2d4340ad3465328da1.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-183/T-183-d48ea27114f032b8346e2ac1.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-185/T-185-f20549bb4c8f7af40a888f7a.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-198/T-198-f59ea428028896f980f7aaa0.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-202/T-202-2729a7fd860449e2f9746828.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-210/T-210-151c8e042f9f9ad70687c416.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-211/T-211-feaf78fbf98dcac4b31dc7ec.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-212/T-212-1698cf476501f3dbe991c6fc.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-213/T-213-3d7eff10c96c1aecbfe400b8.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-214/T-214-9740b2dcb1f43a0e412abdd9.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-219/T-219-a7d8dcf060329d257e4a7fb2.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-219/T-219-b59ede0e0446358260d41d2d.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-221/T-221-0b0df6ddf4f1127260f847be.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-248/T-248-097aa6350f1e9644d311dfac.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-261/T-261-0bb91a8dbc19fc22244d3d75.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-264/T-264-6df1132d551fde7f5f108687.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-279/T-279-fa3758af8c75a563967c8afe.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/board-compaction/T-87/T-87-eeef36608ee292fe0aa623b6.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1391-3e40930ccab55512093a821d.LOG.md",
+        "tail": 1391,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1414-214a45f9efc68a179c3715fd.LOG.md",
+        "tail": 1414,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1419-f5faa74471763641b4081114.LOG.md",
+        "tail": 1419,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1429-b54e339c4bb11739e3ab562a.LOG.md",
+        "tail": 1429,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1431-ddb08e36b4cb07ae0e9b0675.LOG.md",
+        "tail": 1431,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1437-adccd8f5bbc905f62525b362.LOG.md",
+        "tail": 1437,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1473-5407522be9a9f9796fa82a4e.LOG.md",
+        "tail": 1473,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1500-9d69a3a300837a6142a4108b.LOG.md",
+        "tail": 1500,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1502-2e23e79f989b2d371fb22f84.LOG.md",
+        "tail": 1502,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1510-d83091400440405ce35d9dba.LOG.md",
+        "tail": 1510,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1512-4413c346399892357857bc84.LOG.md",
+        "tail": 1512,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1526-ce164a67a97aa2e4adc60994.LOG.md",
+        "tail": 1526,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1528-207d79993c6f7e851e8d8c79.LOG.md",
+        "tail": 1528,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1537-66ec85a830f4fb44609d0667.LOG.md",
+        "tail": 1537,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1541-608122a3a15b8b17c51b2596.LOG.md",
+        "tail": 1541,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1626-470d8a151fef8cd23fd03ec7.LOG.md",
+        "tail": 1626,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1628-2a9215153c9b212c4ba472f7.LOG.md",
+        "tail": 1628,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1630-66bc5fbb8c227b237a463b22.LOG.md",
+        "tail": 1630,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1640-d15762253f042de12df52ab6.LOG.md",
+        "tail": 1640,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1645-a4ea92005281e7bd50a20ab7.LOG.md",
+        "tail": 1645,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1660-d4c87285fe822a4a0aba244c.LOG.md",
+        "tail": 1660,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1662-1605d1e3585792ad5add8489.LOG.md",
+        "tail": 1662,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1666-e6c5bbf2fc5dfb42db0837d1.LOG.md",
+        "tail": 1666,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1695-ef726e3040b11aa341e62465.LOG.md",
+        "tail": 1695,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1697-48e08c1256e0c8908c4bc680.LOG.md",
+        "tail": 1697,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1843-f91fa6ff01d7fba537c99a3c.LOG.md",
+        "tail": 1843,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1904-c53e2f35e45e4884ba47b94d.LOG.md",
+        "tail": 1904,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1914-2b0034f726de8d152c960d73.LOG.md",
+        "tail": 1914,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1915-883f4ad04d6ed2610654e3ae.LOG.md",
+        "tail": 1915,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1916-7c2b6ab384af917179429589.LOG.md",
+        "tail": 1916,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1917-c3ab844f942f5f3cfc172a95.LOG.md",
+        "tail": 1917,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1931-3ff8185df513cc4cfde4bf20.LOG.md",
+        "tail": 1931,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-1942-9df5c484ea1943bac522eaed.LOG.md",
+        "tail": 1942,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2230-bf2c890f4ecaff1397d36391.LOG.md",
+        "tail": 2230,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2242-27d426393dbe1507214d1a17.LOG.md",
+        "tail": 2242,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2282-e5fb5794f37e31ad133e0c2b.LOG.md",
+        "tail": 2282,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2336-12c50eeed3014967890d6b5f.LOG.md",
+        "tail": 2336,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2345-256046618d9672b4a62a7c1a.LOG.md",
+        "tail": 2345,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2354-34f61b3fa34bbda5386f1fda.LOG.md",
+        "tail": 2354,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2363-d92b9b75615451f30a64ac47.LOG.md",
+        "tail": 2363,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2372-9c7dd52657a163a1c7eab860.LOG.md",
+        "tail": 2372,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2381-c5f5645c0c106203475fb9ab.LOG.md",
+        "tail": 2381,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2390-b4e7ad3f6e96922c0a7e00c5.LOG.md",
+        "tail": 2390,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2408-289c155ca641eb45697cc7ce.LOG.md",
+        "tail": 2408,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2424-dfccbd0d79c81ddcae5b42bf.LOG.md",
+        "tail": 2424,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2550-f0d99d3b680188e18756f9ac.LOG.md",
+        "tail": 2550,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2551-78dde1b167b21d77413045d5.LOG.md",
+        "tail": 2551,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2552-ac1f71b8d3458c5b25109fe2.LOG.md",
+        "tail": 2552,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2554-e836c90ee040c258355a7eb4.LOG.md",
+        "tail": 2554,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2555-35909df54123c26731a0e1c2.LOG.md",
+        "tail": 2555,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2562-0689ba9fa99201f475a30204.LOG.md",
+        "tail": 2562,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2563-82d985931549b8092125d967.LOG.md",
+        "tail": 2563,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2565-26c48bed271fca93cdc16450.LOG.md",
+        "tail": 2565,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2566-b91ae7daca8350bc74767c91.LOG.md",
+        "tail": 2566,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2567-b656b74ecbc70faaa11abeff.LOG.md",
+        "tail": 2567,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2568-6cf5a70f4774b896fed9a871.LOG.md",
+        "tail": 2568,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2586-81a8c990088fb042164bb6fd.LOG.md",
+        "tail": 2586,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2614-bb1b11fbc87a70c461063da5.LOG.md",
+        "tail": 2614,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2615-2bb81a5912b89828fc02ab2e.LOG.md",
+        "tail": 2615,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2618-48665377258763131d36bd45.LOG.md",
+        "tail": 2618,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2619-7a1503bca18c10ee3f0b811b.LOG.md",
+        "tail": 2619,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2622-5430829e2b7678332cd1aed2.LOG.md",
+        "tail": 2622,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2625-d05115c4cf85c051fd9c011e.LOG.md",
+        "tail": 2625,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2628-4f972d771611b8cbcf8788e3.LOG.md",
+        "tail": 2628,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2632-2e7276321aef546e89e2023f.LOG.md",
+        "tail": 2632,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2637-66b83dc7d02f636737f5d242.LOG.md",
+        "tail": 2637,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2638-3e667a93a8fac8a1e2849f67.LOG.md",
+        "tail": 2638,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2639-28787f9e71417b25704b7a20.LOG.md",
+        "tail": 2639,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2642-74d80cd340eb45593cc9d81d.LOG.md",
+        "tail": 2642,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2645-a76c4f1f0ecca2925a23dda2.LOG.md",
+        "tail": 2645,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2646-cca93557b517a9ab838a1c2d.LOG.md",
+        "tail": 2646,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2647-ab6bc8415f349df0048976d6.LOG.md",
+        "tail": 2647,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2694-29b9db888048cac1e0e48251.LOG.md",
+        "tail": 2694,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2703-3da304c5835a5a4d1a1e6f99.LOG.md",
+        "tail": 2703,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2705-fe7e22e9b3d17ebbd76d04d8.LOG.md",
+        "tail": 2705,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2720-4ffa53eadfa0cfaf2ea0fb67.LOG.md",
+        "tail": 2720,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2721-f716f4888e54f8d497f8146c.LOG.md",
+        "tail": 2721,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2725-beba181a05655b39ffc71353.LOG.md",
+        "tail": 2725,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2736-386a773cfb76c95e93295891.LOG.md",
+        "tail": 2736,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2745-887252686659c444c5c5f789.LOG.md",
+        "tail": 2745,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2746-55bc5efdabd32ee4fc2293fb.LOG.md",
+        "tail": 2746,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2747-e47d2a4fd468da7a2384594e.LOG.md",
+        "tail": 2747,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2748-64a6fb612abdb7e96f74632b.LOG.md",
+        "tail": 2748,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2749-f51a020eb239b9e610e484a8.LOG.md",
+        "tail": 2749,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2750-415d1ee50b67ca60adbffa37.LOG.md",
+        "tail": 2750,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2751-0c59e5cd55270cd91411e583.LOG.md",
+        "tail": 2751,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2752-f2fbbf0d67a357f575c4ef1a.LOG.md",
+        "tail": 2752,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2869-2548dfc8d6df007112bb6e3b.LOG.md",
+        "tail": 2869,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2887-8810e8aa0f220258ef852073.LOG.md",
+        "tail": 2887,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2910-0643bb46fe84a497d6d90897.LOG.md",
+        "tail": 2910,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2914-29a412eb68a05a810daced07.LOG.md",
+        "tail": 2914,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2918-365aff76dd482a6d0f3c13bb.LOG.md",
+        "tail": 2918,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2941-ec4d54a1a7b942525a15d947.LOG.md",
+        "tail": 2941,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2953-5d9a9b38c1f1e78f962ee7a6.LOG.md",
+        "tail": 2953,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2954-8a174169b1419c0e7b1f01bf.LOG.md",
+        "tail": 2954,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2960-08361526d2540cbf1b60926e.LOG.md",
+        "tail": 2960,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2975-c3e97511b93ad5d045139b56.LOG.md",
+        "tail": 2975,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2979-e9b6826962c51e1e39892e84.LOG.md",
+        "tail": 2979,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2980-cc93aa23b6342470f956d965.LOG.md",
+        "tail": 2980,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2981-0d0cbeb2196ee65788e5acb0.LOG.md",
+        "tail": 2981,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-2985-7d20e94b417f88ec299efabc.LOG.md",
+        "tail": 2985,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-3011-28d0a89fba9255b5df6007b2.LOG.md",
+        "tail": 3011,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-3013-88fe04963191e23ac132de6a.LOG.md",
+        "tail": 3013,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-3016-a2762327ae910c90837463a2.LOG.md",
+        "tail": 3016,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-3021-b876ec7948a7a5d49b17f43b.LOG.md",
+        "tail": 3021,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-3049-14381ad012f55b658b6df5e3.LOG.md",
+        "tail": 3049,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-3077-b6d5887866b7f34bca4447cc.LOG.md",
+        "tail": 3077,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-3079-b45bd7d188a16dda0f92b533.LOG.md",
+        "tail": 3079,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-3081-eade7d56cbf7e8e9b003524a.LOG.md",
+        "tail": 3081,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-3082-fbca67d903a8ea29dd171948.LOG.md",
+        "tail": 3082,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-3103-0e26aa96074d1b25f0aaceb5.LOG.md",
+        "tail": 3103,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/log-detail/E-3105-fd18afc8a2c128dfe0739bc3.LOG.md",
+        "tail": 3105,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/state-legacy-output/reconcile-20260914072119806144.STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/state-legacy-output/reconcile-20260921214346648966.STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/state-legacy-output/reconcile-20260921225042115365.STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/state-legacy-output/reconcile-20261003212641712065.STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/state-legacy-output/reconcile-20261004133234815776.STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/state-legacy-output/reconcile-20261005191017510074.STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/state-legacy-output/reconcile-20261007011915434095.STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/state-phase/reconcile-20260919121841373898.STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/state-phase/reconcile-20261003010227005614.STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/state-phase/reconcile-20261007032404134996.STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/t290-prerepair-backup/BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/t290-prerepair-backup/LOG.md",
+        "tail": 3101,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/t290-prerepair-backup/STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/terminal-gap/reconcile-20261003010227005614.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/terminal-gap/reconcile-20261003010227005614.LOG.md",
+        "tail": 2608,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/terminal-gap/reconcile-20261003010227005614.STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/terminal-gap/reconcile-20261007032404134996.BOARD.md",
+        "tail": 0,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/terminal-gap/reconcile-20261007032404134996.LOG.md",
+        "tail": 3101,
+        "t299_record_count": 0
+      },
+      {
+        "path": ".saipen/recovery/terminal-gap/reconcile-20261007032404134996.STATE.md",
+        "tail": 0,
+        "t299_record_count": 0
+      }
+    ]
+  },
+  "host_sessions": [],
+  "host_incident_parts": [],
+  "host_scope": "Read-only SQLite transaction; AUDAPACK directory sessions, 2026-10-07 through 2026-10-09 UTC, three exact incident terms"
+}

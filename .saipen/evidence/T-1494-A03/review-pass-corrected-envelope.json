@@ -1,0 +1,44 @@
+{
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "checkpoint",
+    "RUN",
+    "T-1494",
+    "review -> PASS [target: T-1494] conf: high -- current accepted subject: own authority verifier 18/18, A02 controls 3/3, original automation controls 2/2; exit 0, skipped 0. Authentic restored-bug comparison ADMISSIBLE, separately typed as REGRESSION-EVIDENCE; same command, verifier and fixtures. Core validation exit 0, nine baseline warnings. Full declared family 5981, new_red:0, 59 declared skips, source fingerprint 1f6ed1d51a2c43cd. P0/P1 findings: none; review_passes:1, source correction cycles:0. Current implementation unchanged. Evidence .saipen/evidence/T-1494-A03/review.json and review-oracle-pair.json. Local own_patch closure, no-publish policy.",
+    "--json"
+  ],
+  "exit_code": 0,
+  "session_capability": "no-publish",
+  "result": {
+    "ok": true,
+    "code": "CHECKPOINTED",
+    "op_id": "checkpoint-ea0d9234279b417f8d0ad86c6d6103a9",
+    "changed_files": [
+      ".saipen/LOG.md",
+      ".saipen/BOARD.md",
+      ".saipen/STATE.md"
+    ],
+    "recovery_required": false,
+    "event_id": "E-13973"
+  },
+  "committed_operation": {
+    "path": ".saipen\\recovery\\settled\\checkpoint-ea0d9234279b417f8d0ad86c6d6103a9\\operation.json",
+    "status": "COMMITTED",
+    "operation": "checkpoint",
+    "progress_index": 3,
+    "targets": [
+      {
+        "path": ".saipen/LOG.md",
+        "applied": true
+      },
+      {
+        "path": ".saipen/BOARD.md",
+        "applied": true
+      },
+      {
+        "path": ".saipen/STATE.md",
+        "applied": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,226 @@
+[
+  {
+    "path": "saipen/BOOT.md",
+    "sha256": "9d3888b181f843a04636f863d52174df6f1543dcab86d2ae152d533cd0cba19c",
+    "accepted_by": [
+      {
+        "ticket": "T-1607",
+        "review": "inspected HEAD delta; cold-start acceptance SRC-168:R004"
+      }
+    ]
+  },
+  {
+    "path": "saipen/COMMANDS.md",
+    "sha256": "e23fc8282cb7e995ee7323406c584a5919306bfeae2c8be8c30ddfc6cb98ee18",
+    "accepted_by": [
+      {
+        "cohort": "C-004",
+        "ticket": "T-1605"
+      }
+    ]
+  },
+  {
+    "path": "saipen/COMMAND_EFFECTS.json",
+    "sha256": "3d2bd6d1c4f1fe6e4d01754fc6f535a7198dc9ba1a8d5a1c0b8ca1e06d755a99",
+    "accepted_by": [
+      {
+        "cohort": "C-004",
+        "ticket": "T-1605"
+      }
+    ]
+  },
+  {
+    "path": "saipen/CORE.md",
+    "sha256": "6e501d7a043e7a8d629360332f39a4b9487385aa8fd34965e340daf355b9e761",
+    "accepted_by": [
+      {
+        "cohort": "C-002",
+        "ticket": "T-1510"
+      },
+      {
+        "cohort": "C-002",
+        "ticket": "T-1600"
+      }
+    ]
+  },
+  {
+    "path": "saipen/OPS.md",
+    "sha256": "17017ff8e98e7e1f297869a901d7b0675ae200c46844c39285bba5460a592a66",
+    "accepted_by": [
+      {
+        "cohort": "C-004",
+        "ticket": "T-1605"
+      }
+    ]
+  },
+  {
+    "path": "tools/__init__.py",
+    "sha256": "3e652fdf2d80d073138cd1b1b8d37caaf772f5652dfa9ac21db104e6494ceb88",
+    "accepted_by": [
+      {
+        "cohort": "C-004",
+        "ticket": "T-1341"
+      },
+      {
+        "cohort": "C-004",
+        "ticket": "T-1348"
+      }
+    ]
+  },
+  {
+    "path": "tools/_module_identity.py",
+    "sha256": "add6a51a6ea3a271adeecb2ebd4486ecccbb36ed4441c1bf34d2b2f946cb815b",
+    "accepted_by": [
+      {
+        "cohort": "C-004",
+        "ticket": "T-1348"
+      }
+    ]
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "sha256": "786e69f7d96cf857ad0383dcae62484a0a3906104491c72ab9d6d56ec07b638b",
+    "accepted_by": [
+      {
+        "cohort": "C-003",
+        "ticket": "T-1408"
+      },
+      {
+        "cohort": "C-003",
+        "ticket": "T-1603"
+      }
+    ]
+  },
+  {
+    "path": "tools/saipen.py",
+    "sha256": "4c8515118219cf9fd293f55b62f9af45f8b1ad51a92798c96e2e9311faceefaf",
+    "accepted_by": [
+      {
+        "cohort": "C-001",
+        "ticket": "T-1320"
+      },
+      {
+        "cohort": "C-002",
+        "ticket": "T-1510"
+      },
+      {
+        "cohort": "C-002",
+        "ticket": "T-1600"
+      },
+      {
+        "cohort": "C-004",
+        "ticket": "T-1306"
+      },
+      {
+        "cohort": "C-004",
+        "ticket": "T-1605"
+      }
+    ]
+  },
+  {
+    "path": "tools/saipen_engine/evidence.py",
+    "sha256": "1778719abd6df1663841f58aa78499bf0c186cf63e3b4a8b717f45640a165e1a",
+    "accepted_by": [
+      {
+        "cohort": "C-003",
+        "ticket": "T-1604"
+      }
+    ]
+  },
+  {
+    "path": "tools/saipen_engine/journal.py",
+    "sha256": "6cc6fea91e1afbca07413fba6e8280ae0c7faa21839b04963fd4a6bdbb18a6f8",
+    "accepted_by": [
+      {
+        "cohort": "C-004",
+        "ticket": "T-1316"
+      },
+      {
+        "cohort": "C-004",
+        "ticket": "T-1605"
+      }
+    ]
+  },
+  {
+    "path": "tools/saipen_engine/operations.py",
+    "sha256": "a02c7f83d78a3d949708ee8a764cd8c4f0b785c7485b23e3ae30ff3cc47814fa",
+    "accepted_by": [
+      {
+        "cohort": "C-002",
+        "ticket": "T-1510"
+      },
+      {
+        "cohort": "C-002",
+        "ticket": "T-1565"
+      },
+      {
+        "cohort": "C-002",
+        "ticket": "T-1600"
+      },
+      {
+        "cohort": "C-004",
+        "ticket": "T-1605"
+      }
+    ]
+  },
+  {
+    "path": "tools/test_closure_provenance.py",
+    "sha256": "fa51758010a248992fbd1b559943ed14e57315f91b7758c2d4c63725e1c524c7",
+    "accepted_by": [
+      {
+        "cohort": "C-004",
+        "ticket": "T-1605"
+      }
+    ]
+  },
+  {
+    "path": "tools/test_evidence_hygiene.py",
+    "sha256": "bb77bdc62dfcad42ba2aef2c70f013c85d2a4ca5454515bbbfe5914b57e0cc33",
+    "accepted_by": [
+      {
+        "cohort": "C-003",
+        "ticket": "T-1604"
+      }
+    ]
+  },
+  {
+    "path": "tools/test_module_duplication_guard.py",
+    "sha256": "1f3bc559fdaebafcdf22179567b35fc7a0dff07882bd38fc80f80862d5bceeca",
+    "accepted_by": [
+      {
+        "cohort": "C-004",
+        "ticket": "T-1348"
+      }
+    ]
+  },
+  {
+    "path": "tools/test_protocol_registry.py",
+    "sha256": "261f6192fcca07a04fa3e500443e56956880fd174fc213af22e011b561622672",
+    "accepted_by": [
+      {
+        "cohort": "C-004",
+        "ticket": "T-1605"
+      }
+    ]
+  },
+  {
+    "path": "tools/test_t1515_posix_shell_entry.py",
+    "sha256": "f56fe202feabb34c4b62885e64f10438017393fc443b90d1c72acc409a98cf9e",
+    "accepted_by": [
+      {
+        "cohort": "C-004",
+        "ticket": "T-1515"
+      }
+    ]
+  },
+  {
+    "path": "tools/test_tool_module_identity.py",
+    "sha256": "28f2e696f7042f6f6351a75a8409f56f9669af064f54f1c605c9db4a202801a5",
+    "accepted_by": [
+      {
+        "cohort": "C-004",
+        "ticket": "T-1348"
+      }
+    ]
+  }
+]

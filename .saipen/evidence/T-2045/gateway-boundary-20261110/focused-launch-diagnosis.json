@@ -1,0 +1,21 @@
+{
+  "scope": "T-2045 focused compatibility diagnosis",
+  "record": ".saipen/evidence/focused-unit/25fba1c7192bc359-20261110T181329782031Z.json",
+  "component_matches": {
+    "baseline": true,
+    "configuration": true,
+    "configuration_files": true,
+    "identity_rule": true,
+    "platform": true,
+    "python": true,
+    "schema": true,
+    "toolchain": true,
+    "verifiers": true,
+    "environment_sha256": false
+  },
+  "direct_environment_sha256": "b94fe85a9be80f7782db6d8e96d25a988f1861be6ee7540f363feefccc7cc6b9",
+  "stored_environment_sha256": "c9d864581612afc472b82245518541e15e1feac4ea0fc56272445bda7da9bc14",
+  "matching_single_public_variable": {"name": "SHLVL", "direct": "1", "stored_match": "0"},
+  "meaning": "The exact otherwise unchanged canonical child environment matches the stored digest when the shell exec launch decrements SHLVL to zero. A standalone canonical focused command reused the intact 64-test PASS while an ordinary non-exec saipen transition refused it. This diagnosis does not alter the record or admission rule.",
+  "controls": "No raw secret environment values printed or saved. No digest transplanted. No verification code or policy changed. Fresh focused execution under explicit exec launcher is running; its real result is still required. SHELL is excluded by focused identity_environment, unlike native regression_execution."
+}

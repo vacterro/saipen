@@ -1,0 +1,15 @@
+{
+  "active": {
+    "SRC-001": {
+      "linked_work": "T-198",
+      "source_sha256": "df25548ce4ce3997cc326a2c3c621cd3049b009a6658a4ffd20c549339fc57a9"
+    },
+    "SRC-002": {
+      "linked_work": null,
+      "source_sha256": "2c83d080bb9739f3a8f93571d31e57bfa297acfcf3f07def8dd8a061a9bcc9f1"
+    }
+  },
+  "next_id": 3,
+  "schema_version": 1,
+  "tombstones": {}
+}

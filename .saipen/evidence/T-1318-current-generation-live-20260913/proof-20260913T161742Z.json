@@ -1,0 +1,100 @@
+{
+  "ticket": "T-1318",
+  "acceptance": "AC-05",
+  "requested_model": "sairoute/SAIOPP",
+  "process_returncode": 0,
+  "elapsed_seconds": 116.19,
+  "timed_out": false,
+  "session_ids": [
+    "ses_f647090a9ffe70DI33Wy02xs8L"
+  ],
+  "process_ids": [
+    13824
+  ],
+  "startup": [
+    {
+      "build_id": "T-1319-opencode-continue-entry-20260913.7",
+      "module_sha256": "080f823b9b685a49995c080e134232852b977ce27c94cf856142667467459062",
+      "module_path": "C:\\Users\\vac34\\.config\\opencode\\plugins\\saipen-guard.js",
+      "skill_root": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+      "guard_runtime_path": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen\\tools\\saipen.py",
+      "cli_bin": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen\\bin",
+      "cli_launcher_status": "ok",
+      "cli_launcher_detail": "",
+      "pid": 13824,
+      "factory_started_ms": 1789316263607,
+      "cwd": "V:\\_TEMP_\\tmpvssddcnr",
+      "context_directory": "V:\\_TEMP_\\tmpvssddcnr",
+      "context_worktree": "V:\\_TEMP_\\tmpvssddcnr",
+      "binding_code": "ADMITTED",
+      "project_root": "V:\\_TEMP_\\tmpvssddcnr",
+      "project_lineage": "lineage-d7f1c71056014743bbf912723e3f4f80",
+      "root_resolution_provenance": "git-worktree",
+      "host_candidates": [
+        "V:\\_TEMP_\\tmpvssddcnr"
+      ],
+      "resolved_from": "V:\\_TEMP_\\tmpvssddcnr",
+      "binding_detail": "read-only diagnostic access",
+      "actor": null
+    }
+  ],
+  "tools": [
+    {
+      "tool": "bash",
+      "status": "error",
+      "input": {
+        "command": "pwd"
+      },
+      "output": "",
+      "error": "SAIPEN_GUARD_REFUSAL: PROTOCOL_STATE_INVALID: the saipen guard refused tool 'bash'; the host tool did not execute",
+      "start_ms": 1789316308357
+    },
+    {
+      "tool": "bash",
+      "status": "completed",
+      "input": {
+        "command": "saipen recover"
+      },
+      "output": "code: REPAIRED\r\n",
+      "error": "",
+      "start_ms": 1789316330158
+    },
+    {
+      "tool": "bash",
+      "status": "completed",
+      "input": {
+        "command": "echo POST_RECOVERY_ORDINARY_OK"
+      },
+      "output": "POST_RECOVERY_ORDINARY_OK\r\n",
+      "error": "",
+      "start_ms": 1789316346368
+    },
+    {
+      "tool": "bash",
+      "status": "error",
+      "input": {
+        "command": "rm -f .saipen/STATE.md"
+      },
+      "output": "",
+      "error": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool 'bash'; the host tool did not execute",
+      "start_ms": 1789316367696
+    }
+  ],
+  "checks": {
+    "one_process": true,
+    "current_guard_loaded": true,
+    "invalid_ordinary_refused": true,
+    "canonical_repair_executed": true,
+    "ordinary_work_resumed": true,
+    "protected_mutation_refused": true,
+    "state_repaired": true,
+    "original_state_preserved": true
+  },
+  "state_before_sha256": "3a6b3d0ddb7e755a953fd3806e58f4137923fed8da5e2ee41516add5d2fc1719",
+  "state_after_sha256": "6753545e2dd26ebd182a38138e6ae3393888d293f3db05421a567c0574137d26",
+  "recovery_artifacts": [
+    "V:\\_TEMP_\\tmpvssddcnr\\.saipen\\recovery\\state-phase\\reconcile-20260913161850618929.STATE.md"
+  ],
+  "stderr_tail": "",
+  "final_disposition": "PASS"
+}

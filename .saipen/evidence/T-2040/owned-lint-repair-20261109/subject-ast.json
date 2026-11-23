@@ -1,0 +1,26 @@
+[
+  {
+    "path": "tools/saipen_engine/continue_fallback.py",
+    "preimage_sha256": "d1c6219b139f5de084b4c89cc74cc169b8ed91759ac7d49ed4118017299fde41",
+    "current_sha256": "4854fda4a01193bb2f8669b45fa01ef4b6d7819c5d1d198153c09723ac42d79e",
+    "ast_nonimport_equal": true
+  },
+  {
+    "path": "tools/saipen_engine/iteration_verdict.py",
+    "preimage_sha256": "060703ac55a8c51ad6f317f4cc1ae3072bfb187ff0a266dca1228fa9d3cd9637",
+    "current_sha256": "ab33aa26ace5d05ab83c3c351bc3b3c4f14be7090144aca19f017f1504bcddf0",
+    "ast_nonimport_equal": true
+  },
+  {
+    "path": "tools/improve.py",
+    "preimage_sha256": "165a59af2e18dc8b85b693c741d641238049f7d62f13fdc3857bca17c4e24195",
+    "current_sha256": "c9d917e1e6e38e49c80c3c651e106c8c3384f04473327e670d073c331dc2dad0",
+    "ast_nonimport_equal": true
+  },
+  {
+    "path": "tools/campaign_test_support.py",
+    "preimage_sha256": "2851165fedd3fe2848fd6ef685ef97e0968cb66f88b50c5a2e5c69cbef9b0caa",
+    "current_sha256": "3d4a0980fe774c463dfbd4c462e8cb670a8a59d547a9686c2cbe63d36ac6baa7",
+    "ast_nonimport_equal": true
+  }
+]

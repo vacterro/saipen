@@ -1,0 +1,448 @@
+{
+  "observed_utc": "2026-10-23T05:08:14.321446+00:00",
+  "scope": "Campaign deltas against captured working before-images; no HEAD ownership claim",
+  "branch_definition": "If, IfExp, For, While, ExceptHandler, Match AST nodes; not cyclomatic complexity",
+  "owned_source_drift": [],
+  "totals": {
+    "product": {
+      "files": 16,
+      "before": {
+        "lf_bytes": 1891934,
+        "lines": 45272,
+        "functions": 678,
+        "branch_sites": 4903
+      },
+      "after": {
+        "lf_bytes": 1900912,
+        "lines": 45454,
+        "functions": 685,
+        "branch_sites": 4935
+      }
+    },
+    "test": {
+      "files": 7,
+      "before": {
+        "lf_bytes": 33192,
+        "lines": 791,
+        "functions": 57,
+        "branch_sites": 15
+      },
+      "after": {
+        "lf_bytes": 52905,
+        "lines": 1194,
+        "functions": 90,
+        "branch_sites": 39
+      }
+    }
+  },
+  "files": [
+    {
+      "path": "tools/saipen_engine/board.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 88127,
+        "lines": 2006,
+        "functions": 59,
+        "branch_sites": 229
+      },
+      "after": {
+        "lf_bytes": 92711,
+        "lines": 2097,
+        "functions": 62,
+        "branch_sites": 244
+      }
+    },
+    {
+      "path": "tools/saipen_engine/router.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 69699,
+        "lines": 1509,
+        "functions": 18,
+        "branch_sites": 114
+      },
+      "after": {
+        "lf_bytes": 69250,
+        "lines": 1499,
+        "functions": 18,
+        "branch_sites": 113
+      }
+    },
+    {
+      "path": "tools/saipen_engine/audit_inbox.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 63660,
+        "lines": 1610,
+        "functions": 39,
+        "branch_sites": 169
+      },
+      "after": {
+        "lf_bytes": 63180,
+        "lines": 1598,
+        "functions": 39,
+        "branch_sites": 168
+      }
+    },
+    {
+      "path": "tools/saipen_engine/automation.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 26080,
+        "lines": 608,
+        "functions": 10,
+        "branch_sites": 62
+      },
+      "after": {
+        "lf_bytes": 26671,
+        "lines": 620,
+        "functions": 10,
+        "branch_sites": 66
+      }
+    },
+    {
+      "path": "tools/saipen_engine/response_surface.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 86400,
+        "lines": 1988,
+        "functions": 37,
+        "branch_sites": 253
+      },
+      "after": {
+        "lf_bytes": 87561,
+        "lines": 2012,
+        "functions": 37,
+        "branch_sites": 258
+      }
+    },
+    {
+      "path": "tools/saipen_engine/goal_authority.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 18467,
+        "lines": 427,
+        "functions": 16,
+        "branch_sites": 61
+      },
+      "after": {
+        "lf_bytes": 19492,
+        "lines": 446,
+        "functions": 18,
+        "branch_sites": 62
+      }
+    },
+    {
+      "path": "tools/saipen_engine/operations.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 529942,
+        "lines": 13018,
+        "functions": 177,
+        "branch_sites": 1143
+      },
+      "after": {
+        "lf_bytes": 529969,
+        "lines": 13017,
+        "functions": 177,
+        "branch_sites": 1143
+      }
+    },
+    {
+      "path": "tools/saipen_engine/state.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 56079,
+        "lines": 1279,
+        "functions": 38,
+        "branch_sites": 167
+      },
+      "after": {
+        "lf_bytes": 56045,
+        "lines": 1279,
+        "functions": 38,
+        "branch_sites": 167
+      }
+    },
+    {
+      "path": "tools/saipen_engine/entry.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 40290,
+        "lines": 944,
+        "functions": 17,
+        "branch_sites": 100
+      },
+      "after": {
+        "lf_bytes": 40232,
+        "lines": 945,
+        "functions": 17,
+        "branch_sites": 100
+      }
+    },
+    {
+      "path": "tools/saipen_engine/reconcile.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 169512,
+        "lines": 3761,
+        "functions": 45,
+        "branch_sites": 306
+      },
+      "after": {
+        "lf_bytes": 169581,
+        "lines": 3763,
+        "functions": 45,
+        "branch_sites": 306
+      }
+    },
+    {
+      "path": "tools/saipen_engine/commands.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 18229,
+        "lines": 453,
+        "functions": 11,
+        "branch_sites": 54
+      },
+      "after": {
+        "lf_bytes": 19272,
+        "lines": 477,
+        "functions": 12,
+        "branch_sites": 57
+      }
+    },
+    {
+      "path": "tools/saipen_engine/cold_truth.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 16186,
+        "lines": 428,
+        "functions": 18,
+        "branch_sites": 41
+      },
+      "after": {
+        "lf_bytes": 17489,
+        "lines": 454,
+        "functions": 19,
+        "branch_sites": 46
+      }
+    },
+    {
+      "path": "tools/saipen.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 609312,
+        "lines": 14814,
+        "functions": 129,
+        "branch_sites": 1940
+      },
+      "after": {
+        "lf_bytes": 609539,
+        "lines": 14820,
+        "functions": 129,
+        "branch_sites": 1941
+      }
+    },
+    {
+      "path": "tools/test_cold_agent_truth.py",
+      "kind": "test",
+      "before": {
+        "lf_bytes": 12447,
+        "lines": 317,
+        "functions": 26,
+        "branch_sites": 5
+      },
+      "after": {
+        "lf_bytes": 14574,
+        "lines": 358,
+        "functions": 30,
+        "branch_sites": 5
+      }
+    },
+    {
+      "path": "tools/saipen_engine/conformance.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 78353,
+        "lines": 1847,
+        "functions": 47,
+        "branch_sites": 215
+      },
+      "after": {
+        "lf_bytes": 78338,
+        "lines": 1847,
+        "functions": 47,
+        "branch_sites": 215
+      }
+    },
+    {
+      "path": "tools/saipen_engine/finding_route.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 7428,
+        "lines": 176,
+        "functions": 7,
+        "branch_sites": 22
+      },
+      "after": {
+        "lf_bytes": 7413,
+        "lines": 176,
+        "functions": 7,
+        "branch_sites": 22
+      }
+    },
+    {
+      "path": "tools/saipen_engine/findings.py",
+      "kind": "product",
+      "before": {
+        "lf_bytes": 14170,
+        "lines": 404,
+        "functions": 10,
+        "branch_sites": 27
+      },
+      "after": {
+        "lf_bytes": 14169,
+        "lines": 404,
+        "functions": 10,
+        "branch_sites": 27
+      }
+    },
+    {
+      "path": "tools/test_t1817_acceptance_bar.py",
+      "kind": "test",
+      "before": {
+        "lf_bytes": 7211,
+        "lines": 162,
+        "functions": 8,
+        "branch_sites": 4
+      },
+      "after": {
+        "lf_bytes": 7212,
+        "lines": 162,
+        "functions": 8,
+        "branch_sites": 4
+      }
+    },
+    {
+      "path": "tools/test_t1817_diagnostic_ownership.py",
+      "kind": "test",
+      "before": {
+        "lf_bytes": 7707,
+        "lines": 168,
+        "functions": 11,
+        "branch_sites": 2
+      },
+      "after": {
+        "lf_bytes": 7697,
+        "lines": 167,
+        "functions": 11,
+        "branch_sites": 2
+      }
+    },
+    {
+      "path": "tools/test_t1817_finding_route.py",
+      "kind": "test",
+      "before": {
+        "lf_bytes": 5827,
+        "lines": 144,
+        "functions": 12,
+        "branch_sites": 4
+      },
+      "after": {
+        "lf_bytes": 5849,
+        "lines": 146,
+        "functions": 12,
+        "branch_sites": 4
+      }
+    },
+    {
+      "path": "tools/test_t1857_shared_blockers.py",
+      "kind": "test",
+      "before": {
+        "lf_bytes": 0,
+        "lines": 0,
+        "functions": 0,
+        "branch_sites": 0
+      },
+      "after": {
+        "lf_bytes": 8530,
+        "lines": 177,
+        "functions": 18,
+        "branch_sites": 12
+      }
+    },
+    {
+      "path": "tools/test_t1857_budget_owner.py",
+      "kind": "test",
+      "before": {
+        "lf_bytes": 0,
+        "lines": 0,
+        "functions": 0,
+        "branch_sites": 0
+      },
+      "after": {
+        "lf_bytes": 2752,
+        "lines": 57,
+        "functions": 3,
+        "branch_sites": 5
+      }
+    },
+    {
+      "path": "tools/test_t1858_valve_guidance.py",
+      "kind": "test",
+      "before": {
+        "lf_bytes": 0,
+        "lines": 0,
+        "functions": 0,
+        "branch_sites": 0
+      },
+      "after": {
+        "lf_bytes": 6291,
+        "lines": 127,
+        "functions": 8,
+        "branch_sites": 7
+      }
+    }
+  ],
+  "context_profiles_lf_bytes": {
+    "cold": {
+      "before": 27643,
+      "after": 20694,
+      "reduction_percent": 25.1384
+    },
+    "command_resolution": {
+      "before": 56160,
+      "after": 39309,
+      "reduction_percent": 30.0053
+    },
+    "ordinary_continue": {
+      "before": 34570,
+      "after": 34570,
+      "reduction_percent": 0.0
+    },
+    "ordinary_phase": {
+      "before": 40943,
+      "after": 40943,
+      "reduction_percent": 0.0
+    },
+    "ship_improve": {
+      "before": 55625,
+      "after": 55625,
+      "reduction_percent": 0.0
+    }
+  },
+  "budgets": {
+    "cold": 27648,
+    "ordinary_continue": 35840,
+    "command_resolution": 56320,
+    "ordinary_phase": 40960,
+    "ship_improve": 56320,
+    "single_doc": 51200
+  },
+  "limitations": [
+    "New diagnostic behavior adds code; no net Python-size or global speed reduction is claimed.",
+    "A conditional command-table move reduces loaded context, not historical storage.",
+    "Evidence completion, native trust, Source acceptance and publication remain independent gates."
+  ]
+}

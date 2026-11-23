@@ -1,0 +1,157 @@
+======================================================================
+ERROR: test_capsule_must_name_exact_goal_objective_event_and_project (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_capsule_must_name_exact_goal_objective_event_and_project)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 140, in test_capsule_must_name_exact_goal_objective_event_and_project
+    result = self.upgrade(root, self.capsule(root, **changes))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 83, in upgrade
+    return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+======================================================================
+ERROR: test_concurrent_writer_cannot_create_a_grant (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_concurrent_writer_cannot_create_a_grant)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 202, in test_concurrent_writer_cannot_create_a_grant
+    result = self.upgrade(root)
+             ^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 83, in upgrade
+    return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+======================================================================
+ERROR: test_existing_model_source_cannot_be_promoted_by_later_carrier (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_existing_model_source_cannot_be_promoted_by_later_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 150, in test_existing_model_source_cannot_be_promoted_by_later_carrier
+    result = self.upgrade(root, body)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 83, in upgrade
+    return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+======================================================================
+ERROR: test_fresh_grant_preserves_review_work_counters_board_and_original_journal (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_fresh_grant_preserves_review_work_counters_board_and_original_journal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 91, in test_fresh_grant_preserves_review_work_counters_board_and_original_journal
+    result = self.upgrade(root)
+             ^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 83, in upgrade
+    return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+======================================================================
+ERROR: test_identical_replay_reuses_grant_and_event_without_carrier (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_identical_replay_reuses_grant_and_event_without_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 166, in test_identical_replay_reuses_grant_and_event_without_carrier
+    first = self.upgrade(root, body)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 83, in upgrade
+    return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+======================================================================
+ERROR: test_missing_grant_journal_cannot_reset_checkpoint (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_missing_grant_journal_cannot_reset_checkpoint)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 188, in test_missing_grant_journal_cannot_reset_checkpoint
+    result = self.upgrade(root)
+             ^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 83, in upgrade
+    return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+======================================================================
+ERROR: test_missing_original_goal_journal_refuses (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_missing_original_goal_journal_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 183, in test_missing_original_goal_journal_refuses
+    self.assertFalse(self.upgrade(root, body).ok)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 83, in upgrade
+    return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+======================================================================
+ERROR: test_model_origin_is_refused_before_capture (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_model_origin_is_refused_before_capture)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 121, in test_model_origin_is_refused_before_capture
+    result = self.upgrade(root, witnessed=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 83, in upgrade
+    return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+======================================================================
+ERROR: test_preview_writes_no_source_or_lifecycle_bytes (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_preview_writes_no_source_or_lifecycle_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 158, in test_preview_writes_no_source_or_lifecycle_bytes
+    result = self.upgrade(root, dry_run=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 83, in upgrade
+    return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+======================================================================
+ERROR: test_ticket_checkpoint_resumes_exact_active_review_after_restart (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_ticket_checkpoint_resumes_exact_active_review_after_restart)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 103, in test_ticket_checkpoint_resumes_exact_active_review_after_restart
+    self.assertTrue(self.upgrade(root).ok)
+                    ^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 83, in upgrade
+    return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+======================================================================
+ERROR: test_user_brake_survives_grant_and_continuation (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_user_brake_survives_grant_and_continuation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 209, in test_user_brake_survives_grant_and_continuation
+    self.assertTrue(self.upgrade(root).ok)
+                    ^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 83, in upgrade
+    return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+======================================================================
+ERROR: test_wave_checkpoint_uses_the_same_grant (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_wave_checkpoint_uses_the_same_grant)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 113, in test_wave_checkpoint_uses_the_same_grant
+    self.assertTrue(self.upgrade(root).ok)
+                    ^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 83, in upgrade
+    return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+======================================================================
+ERROR: test_wrong_carrier_digest_is_refused (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_wrong_carrier_digest_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 130, in test_wrong_carrier_digest_is_refused
+    result = operations.authorize_goal_continuation(root, "test-agent", self.capsule(root))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.operations' has no attribute 'authorize_goal_continuation'
+
+----------------------------------------------------------------------
+Ran 13 tests in 5.391s
+
+FAILED (errors=13)

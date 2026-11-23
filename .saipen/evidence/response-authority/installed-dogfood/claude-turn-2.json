@@ -1,0 +1,6 @@
+{
+  "turn": 2,
+  "returncode": 0,
+  "stdout": "{\"decision\": \"block\", \"reason\": \"SAIPEN PROTOCOL ADMISSION REFUSED -- host claude declares admission_enforcement=UNAVAILABLE: no evidence channel to prove it -- No reply is permitted until admission is current. The runtime re-delivers authority on the next prompt; a REFUSED state needs the operator action named above.\"}\r\n",
+  "stderr": ""
+}

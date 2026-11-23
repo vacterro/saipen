@@ -1,0 +1,128 @@
+.                                                                   [100%]
+================================== FAILURES ===================================
+_ FinishProposalGuards.test_planned_request_evidence_preserves_native_refusals (code='VALIDATION_FAILED', evidence='', verification='T-1 VERIFY cycle in LOG') _
+
+self = <test_t2040_finish_plan_guards.FinishProposalGuards testMethod=test_planned_request_evidence_preserves_native_refusals>
+
+    def test_planned_request_evidence_preserves_native_refusals(self):
+        root = self.fixture()
+        cases = (
+            ("", "T-1 VERIFY cycle in LOG", "VALIDATION_FAILED"),
+            ("T-1 code verification", "PASS", "VALIDATION_FAILED"),
+            ("SRC-999 code verification", "T-1 VERIFY cycle in LOG", "EVIDENCE_IDENTITY_MISMATCH"),
+            ("partial fulfillment only", "T-1 VERIFY cycle in LOG", "PARTIAL_FULFILLMENT_REFUSED"),
+            ("T-1 code verification", "pytest test_missing_oracle.py", "EVIDENCE_NOT_FOUND"),
+        )
+        before = snapshot(root)
+        for evidence, verification, code in cases:
+            with self.subTest(code=code, evidence=evidence, verification=verification):
+                proposed = intake.plan_request_clause_closure(
+                    root, "T-1", evidence=evidence, verification=verification
+                )
+                self.assertFalse(proposed["ok"], proposed)
+>               self.assertEqual(proposed["code"], code, proposed)
+E               AssertionError: 'SOURCE_CORRUPTION' != 'VALIDATION_FAILED'
+E               - SOURCE_CORRUPTION
+E               + VALIDATION_FAILED
+E                : {'ok': False, 'code': 'SOURCE_CORRUPTION', 'detail': 'source SRC-001 requirement SRC-001:R001 has invalid evidence', 'work': 'T-1'}
+
+tools\test_t2040_finish_plan_guards.py:106: AssertionError
+_ FinishProposalGuards.test_planned_request_evidence_preserves_native_refusals (code='VALIDATION_FAILED', evidence='T-1 code verification', verification='PASS') _
+
+self = <test_t2040_finish_plan_guards.FinishProposalGuards testMethod=test_planned_request_evidence_preserves_native_refusals>
+
+    def test_planned_request_evidence_preserves_native_refusals(self):
+        root = self.fixture()
+        cases = (
+            ("", "T-1 VERIFY cycle in LOG", "VALIDATION_FAILED"),
+            ("T-1 code verification", "PASS", "VALIDATION_FAILED"),
+            ("SRC-999 code verification", "T-1 VERIFY cycle in LOG", "EVIDENCE_IDENTITY_MISMATCH"),
+            ("partial fulfillment only", "T-1 VERIFY cycle in LOG", "PARTIAL_FULFILLMENT_REFUSED"),
+            ("T-1 code verification", "pytest test_missing_oracle.py", "EVIDENCE_NOT_FOUND"),
+        )
+        before = snapshot(root)
+        for evidence, verification, code in cases:
+            with self.subTest(code=code, evidence=evidence, verification=verification):
+                proposed = intake.plan_request_clause_closure(
+                    root, "T-1", evidence=evidence, verification=verification
+                )
+>               self.assertFalse(proposed["ok"], proposed)
+E               AssertionError: True is not false : {'ok': True, 'gate': {'ok': True, 'code': 'SOURCE_COVERAGE_COMPLETE', 'work': 'T-1', 'receipts': ['SRC-001']}, 'targets': [TargetPlan(path='.saipen/intake/contracts/SRC-001.json', role='contract', content=b'{\n  "clauses": {\n    "SRC-001:R001": {\n      "actionable": true,\n      "class": "requirement",\n      "text": "add a one-line docstring to the top of src/app.py"\n    }\n  },\n  "derived_at": "2026-11-08T09:10:13Z",\n  "derived_from": "SRC-001",\n  "interpretation_revision": 1,\n  "schema_version": 1,\n  "source_sha256": "c643705ceac2bb2477784c07e4d6c9df04159d844a63c3c85931d2b8b1cdce94"\n}\n', before_hash='40e00c5ad455dada', after_hash='da0b24066c75408e', action='write'), TargetPlan(path='.saipen/intake/contracts/SRC-001.r001.json', role='contract_revision', content=b'{\n  "clauses": {\n    "SRC-001:R001": {\n      "actionable": true,\n      "class": "requirement",\n      "text": "add a one-line docstring to the top of src/app.py"\n    }\n  },\n  "derived_at": "2026-11-08T09:10:13Z",\n  "derived_from": "SRC-001",\n  "interpretation_revision": 1,\n  "schema_version": 1,\n  "source_sha256": "c643705ceac2bb2477784c07e4d6c9df04159d844a63c3c85931d2b8b1cdce94"\n}\n', before_hash='', after_hash='da0b24066c75408e', action='write'), TargetPlan(path='.saipen/intake/coverage/SRC-001.json', role='coverage', content=b'{\n  "requirements": {\n    "SRC-001:R001": {\n      "actionable": true,\n      "class": "requirement",\n      "disposition": "VERIFIED",\n      "evidence": "T-1 code verification",\n      "text": "add a one-line docstring to the top of src/app.py",\n      "verification": "PASS",\n      "work": "T-1"\n    }\n  },\n  "schema_version": 1\n}\n', before_hash='05f91c8e61028a81', after_hash='39bb2e2b83987287', action='write')], 'preconditions': {'.saipen/intake/index.json': '78aa92483b4885a9', '.saipen/intake/active/SRC-001.meta.json': 'f947875375dffc0a', '.saipen/intake/distribution/SRC-001.json': 'file-missing-v1', '.saipen/quarantine/source/SRC-001.md': 'file-missing-v1', '.saipen/intake/active/SRC-001.md': 'c643705ceac2bb24', '.saipen/intake/contracts/SRC-001.json': '40e00c5ad455dada', '.saipen/intake/coverage/SRC-001.json': '05f91c8e61028a81', '.saipen/intake/contracts/SRC-001.r001.json': ''}, 'settled': ['SRC-001:R001']}
+
+tools\test_t2040_finish_plan_guards.py:105: AssertionError
+_ FinishProposalGuards.test_planned_request_evidence_preserves_native_refusals (code='EVIDENCE_IDENTITY_MISMATCH', evidence='SRC-999 code verification', verification='T-1 VERIFY cycle in LOG') _
+
+self = <test_t2040_finish_plan_guards.FinishProposalGuards testMethod=test_planned_request_evidence_preserves_native_refusals>
+
+    def test_planned_request_evidence_preserves_native_refusals(self):
+        root = self.fixture()
+        cases = (
+            ("", "T-1 VERIFY cycle in LOG", "VALIDATION_FAILED"),
+            ("T-1 code verification", "PASS", "VALIDATION_FAILED"),
+            ("SRC-999 code verification", "T-1 VERIFY cycle in LOG", "EVIDENCE_IDENTITY_MISMATCH"),
+            ("partial fulfillment only", "T-1 VERIFY cycle in LOG", "PARTIAL_FULFILLMENT_REFUSED"),
+            ("T-1 code verification", "pytest test_missing_oracle.py", "EVIDENCE_NOT_FOUND"),
+        )
+        before = snapshot(root)
+        for evidence, verification, code in cases:
+            with self.subTest(code=code, evidence=evidence, verification=verification):
+                proposed = intake.plan_request_clause_closure(
+                    root, "T-1", evidence=evidence, verification=verification
+                )
+>               self.assertFalse(proposed["ok"], proposed)
+E               AssertionError: True is not false : {'ok': True, 'gate': {'ok': True, 'code': 'SOURCE_COVERAGE_COMPLETE', 'work': 'T-1', 'receipts': ['SRC-001']}, 'targets': [TargetPlan(path='.saipen/intake/contracts/SRC-001.json', role='contract', content=b'{\n  "clauses": {\n    "SRC-001:R001": {\n      "actionable": true,\n      "class": "requirement",\n      "text": "add a one-line docstring to the top of src/app.py"\n    }\n  },\n  "derived_at": "2026-11-08T09:10:13Z",\n  "derived_from": "SRC-001",\n  "interpretation_revision": 1,\n  "schema_version": 1,\n  "source_sha256": "c643705ceac2bb2477784c07e4d6c9df04159d844a63c3c85931d2b8b1cdce94"\n}\n', before_hash='40e00c5ad455dada', after_hash='da0b24066c75408e', action='write'), TargetPlan(path='.saipen/intake/contracts/SRC-001.r001.json', role='contract_revision', content=b'{\n  "clauses": {\n    "SRC-001:R001": {\n      "actionable": true,\n      "class": "requirement",\n      "text": "add a one-line docstring to the top of src/app.py"\n    }\n  },\n  "derived_at": "2026-11-08T09:10:13Z",\n  "derived_from": "SRC-001",\n  "interpretation_revision": 1,\n  "schema_version": 1,\n  "source_sha256": "c643705ceac2bb2477784c07e4d6c9df04159d844a63c3c85931d2b8b1cdce94"\n}\n', before_hash='', after_hash='da0b24066c75408e', action='write'), TargetPlan(path='.saipen/intake/coverage/SRC-001.json', role='coverage', content=b'{\n  "requirements": {\n    "SRC-001:R001": {\n      "actionable": true,\n      "class": "requirement",\n      "disposition": "VERIFIED",\n      "evidence": "SRC-999 code verification",\n      "text": "add a one-line docstring to the top of src/app.py",\n      "verification": "T-1 VERIFY cycle in LOG",\n      "work": "T-1"\n    }\n  },\n  "schema_version": 1\n}\n', before_hash='05f91c8e61028a81', after_hash='b5946a83514aabac', action='write')], 'preconditions': {'.saipen/intake/index.json': '78aa92483b4885a9', '.saipen/intake/active/SRC-001.meta.json': 'f947875375dffc0a', '.saipen/intake/distribution/SRC-001.json': 'file-missing-v1', '.saipen/quarantine/source/SRC-001.md': 'file-missing-v1', '.saipen/intake/active/SRC-001.md': 'c643705ceac2bb24', '.saipen/intake/contracts/SRC-001.json': '40e00c5ad455dada', '.saipen/intake/coverage/SRC-001.json': '05f91c8e61028a81', '.saipen/intake/contracts/SRC-001.r001.json': ''}, 'settled': ['SRC-001:R001']}
+
+tools\test_t2040_finish_plan_guards.py:105: AssertionError
+_ FinishProposalGuards.test_planned_request_evidence_preserves_native_refusals (code='PARTIAL_FULFILLMENT_REFUSED', evidence='partial fulfillment only', verification='T-1 VERIFY cycle in LOG') _
+
+self = <test_t2040_finish_plan_guards.FinishProposalGuards testMethod=test_planned_request_evidence_preserves_native_refusals>
+
+    def test_planned_request_evidence_preserves_native_refusals(self):
+        root = self.fixture()
+        cases = (
+            ("", "T-1 VERIFY cycle in LOG", "VALIDATION_FAILED"),
+            ("T-1 code verification", "PASS", "VALIDATION_FAILED"),
+            ("SRC-999 code verification", "T-1 VERIFY cycle in LOG", "EVIDENCE_IDENTITY_MISMATCH"),
+            ("partial fulfillment only", "T-1 VERIFY cycle in LOG", "PARTIAL_FULFILLMENT_REFUSED"),
+            ("T-1 code verification", "pytest test_missing_oracle.py", "EVIDENCE_NOT_FOUND"),
+        )
+        before = snapshot(root)
+        for evidence, verification, code in cases:
+            with self.subTest(code=code, evidence=evidence, verification=verification):
+                proposed = intake.plan_request_clause_closure(
+                    root, "T-1", evidence=evidence, verification=verification
+                )
+>               self.assertFalse(proposed["ok"], proposed)
+E               AssertionError: True is not false : {'ok': True, 'gate': {'ok': True, 'code': 'SOURCE_COVERAGE_COMPLETE', 'work': 'T-1', 'receipts': ['SRC-001']}, 'targets': [TargetPlan(path='.saipen/intake/contracts/SRC-001.json', role='contract', content=b'{\n  "clauses": {\n    "SRC-001:R001": {\n      "actionable": true,\n      "class": "requirement",\n      "text": "add a one-line docstring to the top of src/app.py"\n    }\n  },\n  "derived_at": "2026-11-08T09:10:13Z",\n  "derived_from": "SRC-001",\n  "interpretation_revision": 1,\n  "schema_version": 1,\n  "source_sha256": "c643705ceac2bb2477784c07e4d6c9df04159d844a63c3c85931d2b8b1cdce94"\n}\n', before_hash='40e00c5ad455dada', after_hash='da0b24066c75408e', action='write'), TargetPlan(path='.saipen/intake/contracts/SRC-001.r001.json', role='contract_revision', content=b'{\n  "clauses": {\n    "SRC-001:R001": {\n      "actionable": true,\n      "class": "requirement",\n      "text": "add a one-line docstring to the top of src/app.py"\n    }\n  },\n  "derived_at": "2026-11-08T09:10:13Z",\n  "derived_from": "SRC-001",\n  "interpretation_revision": 1,\n  "schema_version": 1,\n  "source_sha256": "c643705ceac2bb2477784c07e4d6c9df04159d844a63c3c85931d2b8b1cdce94"\n}\n', before_hash='', after_hash='da0b24066c75408e', action='write'), TargetPlan(path='.saipen/intake/coverage/SRC-001.json', role='coverage', content=b'{\n  "requirements": {\n    "SRC-001:R001": {\n      "actionable": true,\n      "class": "requirement",\n      "disposition": "VERIFIED",\n      "evidence": "partial fulfillment only",\n      "text": "add a one-line docstring to the top of src/app.py",\n      "verification": "T-1 VERIFY cycle in LOG",\n      "work": "T-1"\n    }\n  },\n  "schema_version": 1\n}\n', before_hash='05f91c8e61028a81', after_hash='3d13271318f1ff1a', action='write')], 'preconditions': {'.saipen/intake/index.json': '78aa92483b4885a9', '.saipen/intake/active/SRC-001.meta.json': 'f947875375dffc0a', '.saipen/intake/distribution/SRC-001.json': 'file-missing-v1', '.saipen/quarantine/source/SRC-001.md': 'file-missing-v1', '.saipen/intake/active/SRC-001.md': 'c643705ceac2bb24', '.saipen/intake/contracts/SRC-001.json': '40e00c5ad455dada', '.saipen/intake/coverage/SRC-001.json': '05f91c8e61028a81', '.saipen/intake/contracts/SRC-001.r001.json': ''}, 'settled': ['SRC-001:R001']}
+
+tools\test_t2040_finish_plan_guards.py:105: AssertionError
+_ FinishProposalGuards.test_planned_request_evidence_preserves_native_refusals (code='EVIDENCE_NOT_FOUND', evidence='T-1 code verification', verification='pytest test_missing_oracle.py') _
+
+self = <test_t2040_finish_plan_guards.FinishProposalGuards testMethod=test_planned_request_evidence_preserves_native_refusals>
+
+    def test_planned_request_evidence_preserves_native_refusals(self):
+        root = self.fixture()
+        cases = (
+            ("", "T-1 VERIFY cycle in LOG", "VALIDATION_FAILED"),
+            ("T-1 code verification", "PASS", "VALIDATION_FAILED"),
+            ("SRC-999 code verification", "T-1 VERIFY cycle in LOG", "EVIDENCE_IDENTITY_MISMATCH"),
+            ("partial fulfillment only", "T-1 VERIFY cycle in LOG", "PARTIAL_FULFILLMENT_REFUSED"),
+            ("T-1 code verification", "pytest test_missing_oracle.py", "EVIDENCE_NOT_FOUND"),
+        )
+        before = snapshot(root)
+        for evidence, verification, code in cases:
+            with self.subTest(code=code, evidence=evidence, verification=verification):
+                proposed = intake.plan_request_clause_closure(
+                    root, "T-1", evidence=evidence, verification=verification
+                )
+>               self.assertFalse(proposed["ok"], proposed)
+E               AssertionError: True is not false : {'ok': True, 'gate': {'ok': True, 'code': 'SOURCE_COVERAGE_COMPLETE', 'work': 'T-1', 'receipts': ['SRC-001']}, 'targets': [TargetPlan(path='.saipen/intake/contracts/SRC-001.json', role='contract', content=b'{\n  "clauses": {\n    "SRC-001:R001": {\n      "actionable": true,\n      "class": "requirement",\n      "text": "add a one-line docstring to the top of src/app.py"\n    }\n  },\n  "derived_at": "2026-11-08T09:10:13Z",\n  "derived_from": "SRC-001",\n  "interpretation_revision": 1,\n  "schema_version": 1,\n  "source_sha256": "c643705ceac2bb2477784c07e4d6c9df04159d844a63c3c85931d2b8b1cdce94"\n}\n', before_hash='40e00c5ad455dada', after_hash='da0b24066c75408e', action='write'), TargetPlan(path='.saipen/intake/contracts/SRC-001.r001.json', role='contract_revision', content=b'{\n  "clauses": {\n    "SRC-001:R001": {\n      "actionable": true,\n      "class": "requirement",\n      "text": "add a one-line docstring to the top of src/app.py"\n    }\n  },\n  "derived_at": "2026-11-08T09:10:13Z",\n  "derived_from": "SRC-001",\n  "interpretation_revision": 1,\n  "schema_version": 1,\n  "source_sha256": "c643705ceac2bb2477784c07e4d6c9df04159d844a63c3c85931d2b8b1cdce94"\n}\n', before_hash='', after_hash='da0b24066c75408e', action='write'), TargetPlan(path='.saipen/intake/coverage/SRC-001.json', role='coverage', content=b'{\n  "requirements": {\n    "SRC-001:R001": {\n      "actionable": true,\n      "class": "requirement",\n      "disposition": "VERIFIED",\n      "evidence": "T-1 code verification",\n      "text": "add a one-line docstring to the top of src/app.py",\n      "verification": "pytest test_missing_oracle.py",\n      "work": "T-1"\n    }\n  },\n  "schema_version": 1\n}\n', before_hash='05f91c8e61028a81', after_hash='68766cc69def7310', action='write')], 'preconditions': {'.saipen/intake/index.json': '78aa92483b4885a9', '.saipen/intake/active/SRC-001.meta.json': 'f947875375dffc0a', '.saipen/intake/distribution/SRC-001.json': 'file-missing-v1', '.saipen/quarantine/source/SRC-001.md': 'file-missing-v1', '.saipen/intake/active/SRC-001.md': 'c643705ceac2bb24', '.saipen/intake/contracts/SRC-001.json': '40e00c5ad455dada', '.saipen/intake/coverage/SRC-001.json': '05f91c8e61028a81', '.saipen/intake/contracts/SRC-001.r001.json': ''}, 'settled': ['SRC-001:R001']}
+
+tools\test_t2040_finish_plan_guards.py:105: AssertionError
+=========================== short test summary info ===========================
+SUBFAILED(code='VALIDATION_FAILED', evidence='', verification='T-1 VERIFY cycle in LOG') tools/test_t2040_finish_plan_guards.py::FinishProposalGuards::test_planned_request_evidence_preserves_native_refusals
+SUBFAILED(code='VALIDATION_FAILED', evidence='T-1 code verification', verification='PASS') tools/test_t2040_finish_plan_guards.py::FinishProposalGuards::test_planned_request_evidence_preserves_native_refusals
+SUBFAILED(code='EVIDENCE_IDENTITY_MISMATCH', evidence='SRC-999 code verification', verification='T-1 VERIFY cycle in LOG') tools/test_t2040_finish_plan_guards.py::FinishProposalGuards::test_planned_request_evidence_preserves_native_refusals
+SUBFAILED(code='PARTIAL_FULFILLMENT_REFUSED', evidence='partial fulfillment only', verification='T-1 VERIFY cycle in LOG') tools/test_t2040_finish_plan_guards.py::FinishProposalGuards::test_planned_request_evidence_preserves_native_refusals
+SUBFAILED(code='EVIDENCE_NOT_FOUND', evidence='T-1 code verification', verification='pytest test_missing_oracle.py') tools/test_t2040_finish_plan_guards.py::FinishProposalGuards::test_planned_request_evidence_preserves_native_refusals
+5 failed, 1 passed in 3.28s

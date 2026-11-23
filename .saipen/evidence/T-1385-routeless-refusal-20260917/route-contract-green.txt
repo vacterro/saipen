@@ -1,0 +1,28 @@
+T-1385 GREEN -- python -m unittest tools.test_canonical_write_route -v
+test file sha256: efe3c505853b94deffa62787a9df344c15721ba919b85d1c466d0d960dd4de8f (identical in both subjects)
+post-fix subject: this working tree -- admission CANONICAL_NAMESPACE_ROUTE attached in result(); adapter guardRefusal() shared by both branches
+date: 2026-09-17T16:14:47Z
+
+test_a_directory_that_holds_another_project (tools.test_canonical_write_route.EveryRefusalSiteCarriesTheRouteTests.test_a_directory_that_holds_another_project) ... ok
+test_a_hard_link_to_canonical_state (tools.test_canonical_write_route.EveryRefusalSiteCarriesTheRouteTests.test_a_hard_link_to_canonical_state) ... ok
+test_another_projects_canonical_state (tools.test_canonical_write_route.EveryRefusalSiteCarriesTheRouteTests.test_another_projects_canonical_state) ... ok
+test_containment_of_the_memory_directory (tools.test_canonical_write_route.EveryRefusalSiteCarriesTheRouteTests.test_containment_of_the_memory_directory) ... ok
+test_the_refusal_says_what_it_refused (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_the_refusal_says_what_it_refused) ... ok
+test_the_route_reaches_the_model_on_every_surface (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_the_route_reaches_the_model_on_every_surface) ... ok
+test_two_different_effects_are_two_refusals_and_one_effect_twice_is_a_repeat (tools.test_canonical_write_route.TheHostDeliversTheRouteTests.test_two_different_effects_are_two_refusals_and_one_effect_twice_is_a_repeat)
+The polygon reads the host error text; PARALLEL/SEQUENTIAL provenance ... ok
+test_every_surface_that_is_refused_carries_the_same_route (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_every_surface_that_is_refused_carries_the_same_route) ... ok
+test_the_route_carries_no_placeholder (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_the_route_carries_no_placeholder)
+A placeholder is authority the guard does not have. ... ok
+test_the_route_classifies_canonical_and_needs_no_preparation (tools.test_canonical_write_route.TheRouteIsOneHonestCommandTests.test_the_route_classifies_canonical_and_needs_no_preparation)
+Not an ordinary shell line admitted by luck: the canonical grammar's own verb. ... ok
+test_active_build_work_records_no_fabricated_checkpoint (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_active_build_work_records_no_fabricated_checkpoint)
+The RED this replaces: `saipen checkpoint RUN T-1 '<what happened>'` ... ok
+test_no_active_work (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_no_active_work) ... ok
+test_unreadable_state_is_diagnosed_and_nothing_is_written (tools.test_canonical_write_route.TheRouteRunsVerbatimFromTheStateThatPrintedItTests.test_unreadable_state_is_diagnosed_and_nothing_is_written)
+Never send a session to checkpoint over state nobody could parse. ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 4.272s
+
+OK

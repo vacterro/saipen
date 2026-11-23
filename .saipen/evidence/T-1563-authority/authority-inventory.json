@@ -1,0 +1,394 @@
+{
+  "scope": "complete admission owner and Claude adapter; graph tools subtree excluded, source read directly",
+  "entries": [
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_sha",
+      "line": 152,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_norm",
+      "line": 158,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "load_policy",
+      "line": 162,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_adapters",
+      "line": 173,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "host_claims",
+      "line": 187,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "consulted",
+      "line": 200,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_authority_root",
+      "line": 212,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "read_authority",
+      "line": 223,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_expand",
+      "line": 235,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_front_matter_name",
+      "line": 242,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "resolve_skill",
+      "line": 250,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_agents_component",
+      "line": 283,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_host_component",
+      "line": 319,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_project_component",
+      "line": 345,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_runtime_component",
+      "line": 361,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "provider_fingerprint",
+      "line": 373,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "components",
+      "line": 380,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "generation",
+      "line": 458,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_ledger_path",
+      "line": 465,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "verify_transport",
+      "line": 469,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_seal",
+      "line": 481,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_verify_record_provenance",
+      "line": 486,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_read_record",
+      "line": 495,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_write_record",
+      "line": 510,
+      "classification": "UNAVAILABLE",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "invalidate",
+      "line": 519,
+      "classification": "UNAVAILABLE",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_verdict",
+      "line": 548,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "diagnostic",
+      "line": 559,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "evaluate",
+      "line": 577,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "_delivery",
+      "line": 639,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "establish",
+      "line": 657,
+      "classification": "UNAVAILABLE",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "tools/saipen_engine/protocol_admission.py",
+      "symbol": "capability_matrix",
+      "line": 727,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "project_root",
+      "line": 93,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "_run_engine",
+      "line": 118,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "_read_transcript",
+      "line": 146,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "last_human_request",
+      "line": 164,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "last_model",
+      "line": 202,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "admission_args",
+      "line": 221,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "canonical_verdict",
+      "line": 242,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "correction_reason",
+      "line": 279,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "record",
+      "line": 322,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "_admission",
+      "line": 327,
+      "classification": "UNAVAILABLE",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "_inject",
+      "line": 346,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "handle_session_start",
+      "line": 357,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "handle_prompt",
+      "line": 374,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "handle_post_tool",
+      "line": 394,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "handle_stop",
+      "line": 419,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    },
+    {
+      "path": "extensions/adapters/claude/saipen-guard.py",
+      "symbol": "main",
+      "line": 456,
+      "classification": "SAFE_READ_ONLY",
+      "scope": "admission authority only; adapter may emit host responses or invoke engine",
+      "evidence": "complete direct-source AST inventory; minting APIs removed; write boundary refuses"
+    }
+  ],
+  "removed": [
+    "bootstrap_transport_key",
+    "_read_transport_key",
+    "_transport_key_path",
+    "_transport_mac",
+    "_provenance",
+    "claude.transport_capability"
+  ],
+  "host_only_mechanical": [],
+  "source_sha256": {
+    "tools/saipen_engine/protocol_admission.py": "2f8b312f888e267376d572e5238421f22262fee3c92e8c39dd4efcf2f9297d0e",
+    "extensions/adapters/claude/saipen-guard.py": "a9d1880bbedbe4b31ca8c384b7fb8ca0c7cbb432d1dc2b3f808e1d37ad240450"
+  }
+}

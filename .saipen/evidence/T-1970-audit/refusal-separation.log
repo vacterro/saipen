@@ -1,0 +1,21 @@
+=== measured 2026-10-31T01:51:04Z
+--- foreign (owned) token:
+{
+  "ok": false,
+  "code": "FOREIGN_PROTOCOL_COMMAND",
+  "protocol": "saipal",
+  "requested_command": "saipal continue",
+  "foreign_protocol": {
+--- alias:
+{
+  "ok": false,
+  "code": "FOREIGN_PROTOCOL_COMMAND",
+  "protocol": "saipal",
+  "requested_command": "pal",
+  "foreign_protocol": {
+--- typo (no owner):
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "unknown command: bogusxyz"
+}

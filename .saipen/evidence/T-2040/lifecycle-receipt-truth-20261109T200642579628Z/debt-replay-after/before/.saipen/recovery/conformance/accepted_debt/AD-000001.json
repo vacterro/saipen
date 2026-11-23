@@ -1,0 +1,82 @@
+{
+  "accepted_missing_events": [
+    "E-3",
+    "E-4"
+  ],
+  "agent": "probe",
+  "authority": "SRC-001",
+  "authorization": {
+    "binding": {
+      "check_id": "log_provenance_marker",
+      "check_version": 1,
+      "decision": "ACCEPT_LEGACY_DEBT",
+      "event_hashes": {
+        "E-3": "2facac9afa91ba1a5865c92689ce9fdda18a56c43c5f606a397818fb6825e414",
+        "E-4": "0f96608764d5516a9b0c20b1e41a5c6578ef2f3053077eb63ea704f42ec7591e"
+      },
+      "events": [
+        "E-3",
+        "E-4"
+      ],
+      "expires_at": "2099-01-01T00:00:00Z",
+      "kind": "saipen-accepted-debt-decision",
+      "project_lineage": "lineage-13484440f8fc4b4ba70239008748bfde",
+      "schema": 1,
+      "statement": "sealed historical debt: retroactive marker would forge provenance (Decision B)"
+    },
+    "operator_origin": {
+      "action": "resolve-gate",
+      "budget": "",
+      "event_id": "6b04dbf775c2433782894b8d0187838e",
+      "expires": 160.0,
+      "goal": "",
+      "host": "claude",
+      "host_birth": 1,
+      "host_pid": 10,
+      "issued": 100.0,
+      "kind": "operator-origin",
+      "lineage": "lineage-13484440f8fc4b4ba70239008748bfde",
+      "model": "",
+      "nonce": "d162a09d1ed53e5d49896b4226537037",
+      "project": "v:\\_temp_\\saipen-accepted-debt-q15lgqcx\\project",
+      "provenance": {
+        "alg": "hmac-sha256",
+        "kid": "broker-081a85fa901b29c784b7ade0",
+        "mac": "f8849dcad94aee6a5478a797a6dc8ba2209b834744ca42d4b65e5e25a308e82d"
+      },
+      "provider": "",
+      "request_digest": "9f0c437ec49ec5000982ca1067feb9f9beea87a4f117d5b0710ac15e64307d4b",
+      "schema": 1,
+      "session": "simulated-native-c1a53632984c4e8dae9a7d4731ec640f",
+      "task": "none"
+    },
+    "receipt": "SRC-001",
+    "source_sha256": "9f0c437ec49ec5000982ca1067feb9f9beea87a4f117d5b0710ac15e64307d4b"
+  },
+  "check_id": "log_provenance_marker",
+  "check_version": 1,
+  "created_at": "2026-11-09T20:29:09Z",
+  "evidence": [
+    {
+      "event": "E-3",
+      "file": ".saipen/LOG.md",
+      "line_number": 3,
+      "line_sha256": "2facac9afa91ba1a5865c92689ce9fdda18a56c43c5f606a397818fb6825e414"
+    },
+    {
+      "event": "E-4",
+      "file": ".saipen/LOG.md",
+      "line_number": 4,
+      "line_sha256": "0f96608764d5516a9b0c20b1e41a5c6578ef2f3053077eb63ea704f42ec7591e"
+    }
+  ],
+  "integrity_digest": "8333d46a5d65976c5bc7700eff43a43837e970b51aecd146cc8fc9c86bed0f68",
+  "journal_op_id": "accepted_debt.register-aa6d173eda0c",
+  "kind": "accepted_legacy_debt",
+  "project_identity": "v:\\_temp_\\saipen-accepted-debt-q15lgqcx\\project",
+  "project_lineage": "lineage-13484440f8fc4b4ba70239008748bfde",
+  "reason": "sealed historical debt: retroactive marker would forge provenance (Decision B)",
+  "record_id": "AD-000001",
+  "registration_op_id": "accepted_debt.register-aa6d173eda0c",
+  "schema_version": 1
+}

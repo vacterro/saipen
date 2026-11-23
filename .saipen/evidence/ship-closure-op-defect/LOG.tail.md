@@ -1,0 +1,8 @@
+- 08.10.26 05:25 [E-13294] [parent: E-13293] [T-1679] [agent: saipen-cli] [op: transition-cdc43d0789e942e68b41e0cb7c491d7a] RUN: transition to REVIEW -- VERIFY PASS
+- 08.10.26 05:25 [E-13295] [parent: E-13294] [agent: saipen-cli] [op: transition-cdc43d0789e942e68b41e0cb7c491d7a] DEC: goal_tickets 13->14
+- 08.10.26 05:25 [E-13296] [parent: E-13295] [T-1679] [agent: saipen-cli] [op: checkpoint-500d0554b6244d29baa61a03c9192986] RUN: detail_ref: .saipen/recovery/log-detail/E-13296-7e565b3fdca3d801e1a7c9df.json
+- 08.10.26 05:26 [E-13297] [parent: E-13296] [T-1679] [agent: saipen-cli] [op: checkpoint-e9504ecf5fa14982ac45813be79b94fb] DEC: SHIP -- no P0 or P1 in the delta; local own_patch closure, no-publish pending T-1644; scope tools/saipen_engine/log.py, tools/saipen_engine/operations.py, tools/saipen_engine/lifecycle_authority.py, tools/saipen_engine/reconcile.py, tools/test_t1679_typed_head_quarantine.py
+- 08.10.26 05:26 [E-13298] [parent: E-13297] [T-1679] [agent: saipen-cli] [op: transition-b854ee3bb9ff42a498d95f98327715e7] RUN: transition to SHIP -- core-unit PASS d485d60b0332a03a
+- 08.10.26 05:26 [E-13299] [parent: E-13298] [T-1679] [agent: saipen-cli] [op: scope-5d2d5bfc6c08453a94e45e6469a9b77e] DEC: release scope recorded -- 5 path(s) bound to 025bf596c683
+- 08.10.26 05:27 [E-13300] [parent: E-13299] [T-1679] [agent: saipen-cli] [op: finish-83f7c0c2964b46b7a961a6f1cc5142b1] RUN: ship v8.1.0 -> skipped publish (no-publish: policy)
+- 08.10.26 05:27 [E-13301] [parent: E-13300] [T-1679] [agent: saipen-cli] [op: finish-83f7c0c2964b46b7a961a6f1cc5142b1] DEC: ticket finished via SAIOPS -- completion (from SHIP)

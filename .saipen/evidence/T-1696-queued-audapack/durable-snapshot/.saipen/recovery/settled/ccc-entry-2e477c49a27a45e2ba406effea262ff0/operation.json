@@ -1,0 +1,57 @@
+{
+  "op_id": "ccc-entry-2e477c49a27a45e2ba406effea262ff0",
+  "operation": "ccc_entry",
+  "created_at": "2026-08-29T01:39:48Z",
+  "agent": "opencode",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "8bf5275c523b7143",
+  "preconditions": {
+    ".saipen/STATE.md": "3e27b90d08f043b1",
+    ".saipen/BOARD.md": "5d00100dddee5f85",
+    ".saipen/LOG.md": "314ebf0529a13fc9"
+  },
+  "read_preconditions": {
+    ".saipen/logs": "delete-tree-sha256:ccffe3625544839b1a2f22c985260a3a13612d7b0a0b80fe6cd23b76cdbe5841",
+    ".": "source-identity-v1:29ac384fb932148117c97d84c1c84073eecf8a85427c5376b71d358158628ab6"
+  },
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 3,
+  "targets": [
+    {
+      "path": ".saipen/LOG.md",
+      "role": "log",
+      "action": "write",
+      "before_hash": "314ebf0529a13fc9",
+      "after_hash": "e6b9a73bdd570e58",
+      "applied": true
+    },
+    {
+      "path": ".saipen/BOARD.md",
+      "role": "board",
+      "action": "write",
+      "before_hash": "5d00100dddee5f85",
+      "after_hash": "db5b94c0684cdf97",
+      "applied": true
+    },
+    {
+      "path": ".saipen/STATE.md",
+      "role": "state",
+      "action": "write",
+      "before_hash": "3e27b90d08f043b1",
+      "after_hash": "c34d2b709c273571",
+      "applied": true
+    }
+  ],
+  "receipt_metadata": {
+    "operation": "ccc_entry",
+    "target": "ship",
+    "status": "COMMITTED",
+    "source_head": "3a141ac2700028c3e24156ecc7d091695841e71f",
+    "source_tree_fingerprint": "git-delta-v1:c2ab3706639e9dec0d7ebe54092bd66ff63edea6f78587dc92f52f3ecd387686",
+    "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+    "event_id": "E-347",
+    "ticket_id": "T-38"
+  }
+}

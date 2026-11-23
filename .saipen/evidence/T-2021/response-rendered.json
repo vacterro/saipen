@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "EXEC_RESPONSE_INVALID",
+  "detail": "VALIDATION must start with current CURRENT_FAIL"
+}

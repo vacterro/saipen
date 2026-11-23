@@ -1,0 +1,21 @@
+=== ZC matrix (9 tests) ===
+test_the_saimail_source_is_readable_so_zc01_is_not_purely_external (test_t1926_zc_owners_matrix.ExternalReachabilityTests.test_the_saimail_source_is_readable_so_zc01_is_not_purely_external) ... ok
+test_the_zaicode_host_has_no_readable_source_tree_here (test_t1926_zc_owners_matrix.ExternalReachabilityTests.test_the_zaicode_host_has_no_readable_source_tree_here) ... ok
+test_any_value_under_a_private_key_field_is_removed (test_t1926_zc_owners_matrix.ZC01SecretContainmentTests.test_any_value_under_a_private_key_field_is_removed) ... ok
+test_every_storage_spelling_is_covered (test_t1926_zc_owners_matrix.ZC01SecretContainmentTests.test_every_storage_spelling_is_covered) ... ok
+test_saimail_identity_private_keys_are_redacted (test_t1926_zc_owners_matrix.ZC01SecretContainmentTests.test_saimail_identity_private_keys_are_redacted) ... ok
+test_the_field_name_is_what_makes_it_certain (test_t1926_zc_owners_matrix.ZC01SecretContainmentTests.test_the_field_name_is_what_makes_it_certain) ... ok
+test_uppercase_hex_is_covered_too (test_t1926_zc_owners_matrix.ZC01SecretContainmentTests.test_uppercase_hex_is_covered_too) ... ok
+test_argv_is_passed_without_a_shell_rewriting_it (test_t1926_zc_owners_matrix.ZC03TransportTests.test_argv_is_passed_without_a_shell_rewriting_it) ... ok
+test_nonzero_exit_code_reaches_the_observation (test_t1926_zc_owners_matrix.ZC03TransportTests.test_nonzero_exit_code_reaches_the_observation) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.864s
+
+OK
+
+=== redaction contract (190 tests) ===
+----------------------------------------------------------------------
+Ran 190 tests in 66.395s
+
+OK

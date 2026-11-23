@@ -1,0 +1,133 @@
+{
+  "advisory": true,
+  "compatible_repeat_candidates": 0,
+  "diagnostics": [],
+  "escape_unknown": "records do not prove per-regression earlier-tier coverage",
+  "focused": {
+    "duration_samples": 13,
+    "median_record_wall_s": 83.047,
+    "module_process_samples": 0,
+    "p95_record_wall_s": 215.484,
+    "recorded_red_ids": [],
+    "recorded_verdicts": {
+      "PASS": 13
+    },
+    "records": 13,
+    "stage_samples": {
+      "cleanup_wall_s": 11,
+      "copy_wall_s": 11,
+      "environment_identity_wall_s": 8,
+      "execution_wall_s": 11,
+      "hash_wall_s": 11
+    },
+    "stage_totals_s": {
+      "cleanup_wall_s": 162.046,
+      "copy_wall_s": 637.876,
+      "environment_identity_wall_s": 17.923,
+      "execution_wall_s": 222.922,
+      "hash_wall_s": 1.516
+    },
+    "summed_module_process_s": null,
+    "summed_record_wall_s": 1376.689
+  },
+  "full": {
+    "duration_samples": 8,
+    "median_record_wall_s": 4502.35,
+    "module_process_samples": 3,
+    "p95_record_wall_s": 7458.0,
+    "recorded_red_ids": [
+      "test_closure_provenance.ClosedCohortBindingTests.test_finish_authority_change_after_plan_refuses",
+      "test_closure_provenance.ClosedCohortBindingTests.test_registry_change_after_plan_refuses",
+      "test_opencode_host_smoke.OpenCodeRealInstalledGeneration.test_fresh_process_loads_the_installed_generation_from_one_origin",
+      "test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_r_host_adapter_and_installed_plugin_match",
+      "test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry",
+      "test_response_surface_contract.BudgetTests.test_context_budget_remains_green_with_execution_in_cold",
+      "test_t1465_budget_line_ends.LineEndTests.test_every_budget_holds",
+      "test_t1553_mid_session_activation.RealLauncherInit.test_the_installed_launcher_init_gates_its_own_turn",
+      "test_t1553_mid_session_activation.RealLauncherInit.test_the_launcher_carrier_rejects_prose_before_status_too",
+      "test_t1663_ticket_requires.EscalationTests.test_scout_escalates_build_and_nothing_else_moves",
+      "test_t1670_route_budgets.RouteBudgetTests.test_one_enormous_document_fails_even_where_no_route_loads_it",
+      "test_t1670_route_budgets.RouteBudgetTests.test_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate",
+      "test_t1670_route_budgets.RouteBudgetTests.test_the_command_line_summary_exits_by_the_route_verdict",
+      "test_t1670_route_budgets.RouteBudgetTests.test_the_summary_is_one_line_per_route_and_names_the_total_informational",
+      "test_t1670_route_budgets.RouteBudgetTests.test_unrelated_growth_raises_the_total_and_moves_no_route",
+      "test_t1671_lifecycle_authority.TypedLifecycleTests.test_a_checkout_without_a_ledger_is_unavailable_not_accused",
+      "test_t1671_lifecycle_authority.TypedLifecycleTests.test_a_marker_moved_by_hand_alone_is_reconciled_by_one_journaled_event",
+      "test_t1671_lifecycle_authority.TypedLifecycleTests.test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing",
+      "test_t1671_lifecycle_authority.TypedLifecycleTests.test_a_typed_note_that_moves_nothing_is_still_only_a_note",
+      "test_t1671_lifecycle_authority.TypedLifecycleTests.test_ordinary_project_files_stay_writable",
+      "test_t1671_lifecycle_authority.TypedLifecycleTests.test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte",
+      "test_t1673_board_only_terminal.BoardOnlyMoveTests.test_a_board_edit_that_moves_no_ticket_is_not_refused",
+      "test_t1673_board_only_terminal.BoardOnlyMoveTests.test_a_board_only_move_is_refused_by_every_entry_and_writes_nothing",
+      "test_t1673_board_only_terminal.BoardOnlyMoveTests.test_recovery_reopens_the_row_and_status_is_valid_again",
+      "test_t1673_board_only_terminal.BoardOnlyMoveTests.test_the_baseline_follows_every_committed_board_write",
+      "test_t1676_lifecycle_code.RefusalTests.test_status_and_every_refused_verb_return_the_class_as_the_code",
+      "test_t1676_lifecycle_code.RegisteredCodeTests.test_every_route_budget_still_passes",
+      "test_t1679_typed_head_quarantine.BrokenTypedHeadTests.test_a_typed_head_the_contract_accepts_is_not_cut",
+      "test_t1679_typed_head_quarantine.BrokenTypedHeadTests.test_between_the_two_commands_the_quarantined_rows_still_refuse",
+      "test_t1679_typed_head_quarantine.BrokenTypedHeadTests.test_recover_names_the_quarantine_and_the_two_commands_restore_the_project",
+      "test_t1679_typed_head_quarantine.JournalBoundCutTests.test_a_floor_at_or_above_the_marker_changes_nothing",
+      "test_t1679_typed_head_quarantine.JournalBoundCutTests.test_a_tail_above_a_real_checkpoint_with_no_ledger_is_still_possibly_genuine",
+      "test_t1679_typed_head_quarantine.JournalBoundCutTests.test_the_floor_below_the_marker_is_the_boundary",
+      "test_t1679_typed_head_quarantine.JournalBoundCutTests.test_without_a_floor_the_typed_marker_makes_the_damage_unprovable",
+      "test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.setUpClass",
+      "test_t1759_single_lifecycle_observer.DuplicateDecisionOnATypedHeadTests.test_the_decision_executes_on_a_head_operations_wrote",
+      "test_t1759_single_lifecycle_observer.DuplicateDecisionOnATypedHeadTests.test_the_decision_over_a_typed_head_buries_nothing",
+      "test_t1761_recovery_reaches_a_typed_duplicate.CarryBoundaryTests.test_a_typed_carry_clause_judges_nothing_an_operation_holds",
+      "test_t1761_recovery_reaches_a_typed_duplicate.CarryBoundaryTests.test_only_an_unauthorized_verdict_has_rows_to_carry",
+      "test_t1761_recovery_reaches_a_typed_duplicate.TypedHeadBesideADuplicateTests.test_a_decision_on_a_head_operations_wrote_carries_nothing",
+      "test_t1761_recovery_reaches_a_typed_duplicate.TypedHeadBesideADuplicateTests.test_the_printed_decision_runs_and_the_typed_closure_is_not_buried",
+      "test_t1761_recovery_reaches_a_typed_duplicate.TypedRecordBehindALiveIdTests.test_a_second_record_with_no_other_trace_is_judged_too",
+      "test_t1761_recovery_reaches_a_typed_duplicate.TypedRecordBehindALiveIdTests.test_typed_lines_and_a_second_record_are_followed_through_the_rename"
+    ],
+    "recorded_verdicts": {
+      "FAIL": 4,
+      "PASS": 4
+    },
+    "records": 8,
+    "stage_samples": {},
+    "stage_totals_s": {},
+    "summed_module_process_s": 20701.5,
+    "summed_record_wall_s": 30609.3
+  },
+  "full_records_by_utc_day": {
+    "2026-10-20": 8
+  },
+  "full_suite_fraction": 0.38095238095238093,
+  "impact": {
+    "measured_wall_s": null,
+    "reason": "no typed impact execution producer yet"
+  },
+  "implementation_unknown": "actual active implementation time was not instrumented",
+  "implementation_wall_s": null,
+  "meaning": "stored observations, not current acceptance or operator elapsed time",
+  "operator_elapsed_wall_s": null,
+  "per_ticket": {},
+  "records_with_compatibility": 8,
+  "recovery_wall_s": null,
+  "redundant_verification_rate": null,
+  "regressions_escaping_earlier_tiers": null,
+  "repeat_unknown": "a repeated compatible run may have been explicitly required fresh",
+  "requests": {
+    "by_status": {
+      "COMPLETE": 13
+    },
+    "cache_hit_rate": 0.38461538461538464,
+    "completed": 13,
+    "coordination_samples": 0,
+    "feedback_samples": 13,
+    "median_feedback_wall_s": 81.969,
+    "observed": 13,
+    "p95_feedback_wall_s": 185.859,
+    "reuse_known": 13,
+    "reused": 5,
+    "summed_coordination_wall_s": null,
+    "summed_request_wall_s": 908.406,
+    "unattributed_requests": 13
+  },
+  "same_fingerprint_repeat_candidates": 3,
+  "schema": 1,
+  "since_utc": "2026-10-20",
+  "source_generations": 18,
+  "verification_share": null
+}

@@ -1,0 +1,152 @@
+{
+  "ok": false,
+  "code": "UNAUTHORIZED_LIFECYCLE_WRITE",
+  "action": "saipen recover",
+  "reason": "UNAUTHORIZED_LIFECYCLE_WRITE",
+  "detail": "lifecycle-authority: UNAUTHORIZED_LIFECYCLE_WRITE -- STATE.last_event is E-3146, above E-3131, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand; T-278 sits under ## DONE on the word of E-3135, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run; T-292 sits under ## DONE on the word of E-3132, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run -- canonical lifecycle state exists only through an operation; `saipen recover` names the journaled repair that reopens what no operation closed",
+  "lifecycle_authority": {
+    "floor": 3131,
+    "head": [
+      3132,
+      3134,
+      3135,
+      3137,
+      3138,
+      3139,
+      3140,
+      3141,
+      3142,
+      3143,
+      3144,
+      3146
+    ],
+    "findings": [
+      {
+        "rule": "state-ahead-of-journal",
+        "last_event": 3146,
+        "floor": 3131
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-278",
+        "events": [
+          3135
+        ],
+        "floor": 3131
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-292",
+        "events": [
+          3132
+        ],
+        "floor": 3131
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-293",
+        "events": [
+          3134
+        ],
+        "floor": 3131
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-294",
+        "events": [
+          3137
+        ],
+        "floor": 3131
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-295",
+        "events": [
+          3138
+        ],
+        "floor": 3131
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-296",
+        "events": [
+          3139,
+          3140
+        ],
+        "floor": 3131
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-297",
+        "events": [
+          3141,
+          3142
+        ],
+        "floor": 3131
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-298",
+        "events": [
+          3143,
+          3144
+        ],
+        "floor": 3131
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-299",
+        "events": [
+          3146
+        ],
+        "floor": 3131
+      }
+    ]
+  },
+  "cold_route": {
+    "project_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+    "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+    "phase": "DONE",
+    "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\done.md",
+    "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+    "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+    "documents": {
+      "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+      "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+      "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+      "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+      "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+      "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+      "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+      "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+      "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+      "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+    },
+    "project_memory": {
+      "STATE.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK\\.saipen\\LOG.md"
+    },
+    "search_required": false,
+    "instructions": {
+      "code": "PROJECT_BLOCK_STALE",
+      "action": "saipen host instructions repair",
+      "detail": "AGENTS.md carries a SAIPEN block of another generation: tells the agent to clone a repository; names an absolute path (C:\\Users\\vac34\\.agents\\skills\\saipen\\BOOT.md)",
+      "files": [
+        {
+          "file": "AGENTS.md",
+          "status": "STALE"
+        }
+      ]
+    }
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat buffy",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

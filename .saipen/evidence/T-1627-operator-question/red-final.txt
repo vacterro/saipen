@@ -1,0 +1,232 @@
+test_a_true_wait_allows_the_exact_canonical_operator_question (test_t1627_operator_question.QuestionAuthorityTests.test_a_true_wait_allows_the_exact_canonical_operator_question) ... ok
+test_a_true_wait_cannot_smuggle_in_a_different_question_or_extra_choices (test_t1627_operator_question.QuestionAuthorityTests.test_a_true_wait_cannot_smuggle_in_a_different_question_or_extra_choices) ... FAIL
+test_claude_question_uses_the_same_canonical_semantics (test_t1627_operator_question.QuestionAuthorityTests.test_claude_question_uses_the_same_canonical_semantics) ... ERROR
+test_cold_real_project_route_wins_over_an_absent_provider_session (test_t1627_operator_question.QuestionAuthorityTests.test_cold_real_project_route_wins_over_an_absent_provider_session) ... FAIL
+test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu (test_t1627_operator_question.QuestionAuthorityTests.test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu) ... 
+  test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu (test_t1627_operator_question.QuestionAuthorityTests.test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu) (disposition='COMPLETE') ... FAIL
+  test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu (test_t1627_operator_question.QuestionAuthorityTests.test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu) (disposition='WAIT_EXTERNAL') ... FAIL
+  test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu (test_t1627_operator_question.QuestionAuthorityTests.test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu) (disposition='BLOCKED') ... FAIL
+  test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu (test_t1627_operator_question.QuestionAuthorityTests.test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu) (disposition='INVALID') ... FAIL
+test_continue_refuses_the_exact_incident_menu_and_preserves_build (test_t1627_operator_question.QuestionAuthorityTests.test_continue_refuses_the_exact_incident_menu_and_preserves_build) ... FAIL
+test_due_flag_must_be_machine_boolean_not_model_text (test_t1627_operator_question.QuestionAuthorityTests.test_due_flag_must_be_machine_boolean_not_model_text) ... FAIL
+test_incompatible_executor_uses_existing_failover_and_keeps_work (test_t1627_operator_question.QuestionAuthorityTests.test_incompatible_executor_uses_existing_failover_and_keeps_work) ... FAIL
+test_keeper_completion_and_session_cache_never_grant_question_authority (test_t1627_operator_question.QuestionAuthorityTests.test_keeper_completion_and_session_cache_never_grant_question_authority) ... 
+  test_keeper_completion_and_session_cache_never_grant_question_authority (test_t1627_operator_question.QuestionAuthorityTests.test_keeper_completion_and_session_cache_never_grant_question_authority) (observation='keeper complete') ... FAIL
+  test_keeper_completion_and_session_cache_never_grant_question_authority (test_t1627_operator_question.QuestionAuthorityTests.test_keeper_completion_and_session_cache_never_grant_question_authority) (observation='cache unreadable') ... FAIL
+  test_keeper_completion_and_session_cache_never_grant_question_authority (test_t1627_operator_question.QuestionAuthorityTests.test_keeper_completion_and_session_cache_never_grant_question_authority) (observation='handoff absent') ... FAIL
+  test_keeper_completion_and_session_cache_never_grant_question_authority (test_t1627_operator_question.QuestionAuthorityTests.test_keeper_completion_and_session_cache_never_grant_question_authority) (observation='model switched') ... FAIL
+test_real_claude_pretool_question_is_refused_before_ui_delivery (test_t1627_operator_question.QuestionAuthorityTests.test_real_claude_pretool_question_is_refused_before_ui_delivery) ... FAIL
+test_real_opencode_question_hook_is_refused_before_ui_delivery (test_t1627_operator_question.QuestionAuthorityTests.test_real_opencode_question_hook_is_refused_before_ui_delivery) ... FAIL
+test_real_wait_projection_admits_only_its_owned_operator_action (test_t1627_operator_question.QuestionAuthorityTests.test_real_wait_projection_admits_only_its_owned_operator_action) ... ERROR
+test_registry_records_advisory_freebuff_without_a_blocking_claim (test_t1627_operator_question.QuestionAuthorityTests.test_registry_records_advisory_freebuff_without_a_blocking_claim) ... FAIL
+test_unbound_product_question_remains_non_interfering (test_t1627_operator_question.QuestionAuthorityTests.test_unbound_product_question_remains_non_interfering) ... ok
+test_unknown_or_missing_projection_is_a_diagnostic_not_a_question (test_t1627_operator_question.QuestionAuthorityTests.test_unknown_or_missing_projection_is_a_diagnostic_not_a_question) ... 
+  test_unknown_or_missing_projection_is_a_diagnostic_not_a_question (test_t1627_operator_question.QuestionAuthorityTests.test_unknown_or_missing_projection_is_a_diagnostic_not_a_question) (automation={}) ... FAIL
+  test_unknown_or_missing_projection_is_a_diagnostic_not_a_question (test_t1627_operator_question.QuestionAuthorityTests.test_unknown_or_missing_projection_is_a_diagnostic_not_a_question) (automation={'schema_version': 99, 'disposition': 'WAIT_USER'}) ... FAIL
+  test_unknown_or_missing_projection_is_a_diagnostic_not_a_question (test_t1627_operator_question.QuestionAuthorityTests.test_unknown_or_missing_projection_is_a_diagnostic_not_a_question) (automation={'schema_version': 1, 'disposition': 'IMPROVISED', 'operator_action_due': True}) ... FAIL
+test_unregistered_question_name_never_gains_read_trust (test_t1627_operator_question.QuestionAuthorityTests.test_unregistered_question_name_never_gains_read_trust) ... 
+  test_unregistered_question_name_never_gains_read_trust (test_t1627_operator_question.QuestionAuthorityTests.test_unregistered_question_name_never_gains_read_trust) (host='zaicode') ... FAIL
+  test_unregistered_question_name_never_gains_read_trust (test_t1627_operator_question.QuestionAuthorityTests.test_unregistered_question_name_never_gains_read_trust) (host='gemini') ... FAIL
+  test_unregistered_question_name_never_gains_read_trust (test_t1627_operator_question.QuestionAuthorityTests.test_unregistered_question_name_never_gains_read_trust) (host='generic') ... FAIL
+
+======================================================================
+ERROR: test_claude_question_uses_the_same_canonical_semantics (test_t1627_operator_question.QuestionAuthorityTests.test_claude_question_uses_the_same_canonical_semantics)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 188, in test_claude_question_uses_the_same_canonical_semantics
+    self.assertEqual(verdict["operator_question"]["class"], "AUTONOMOUS_HANDBACK")
+                     ~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'operator_question'
+
+======================================================================
+ERROR: test_real_wait_projection_admits_only_its_owned_operator_action (test_t1627_operator_question.QuestionAuthorityTests.test_real_wait_projection_admits_only_its_owned_operator_action)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 262, in test_real_wait_projection_admits_only_its_owned_operator_action
+    self.assertIn(CANONICAL_ACTION, verdict["operator_question"]["canonical_surface"])
+                                    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'operator_question'
+
+======================================================================
+FAIL: test_a_true_wait_cannot_smuggle_in_a_different_question_or_extra_choices (test_t1627_operator_question.QuestionAuthorityTests.test_a_true_wait_cannot_smuggle_in_a_different_question_or_extra_choices)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 165, in test_a_true_wait_cannot_smuggle_in_a_different_question_or_extra_choices
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_cold_real_project_route_wins_over_an_absent_provider_session (test_t1627_operator_question.QuestionAuthorityTests.test_cold_real_project_route_wins_over_an_absent_provider_session)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 247, in test_cold_real_project_route_wins_over_an_absent_provider_session
+    self.assertNotEqual(rc, 0, verdict)
+AssertionError: 0 == 0 : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\saipen-t1627-ysv80d4t\\project', 'target': None, 'targets': [], 'action': 'read', 'effect': 'read', 'provenance': 'explicit', 'project_lineage': 'lineage-46e9ebe294924b3f94415baf85560dce', 'detail': 'read-only diagnostic access', 'duration_ms': 0.693, 'event': {'event': 'before_tool', 'host': 'freebuff', 'cwd': 'V:\\_TEMP_\\saipen-t1627-ysv80d4t\\project', 'tool_name': 'question', 'action': 'read', 'command_class': 'DIAGNOSTIC', 'fleet_preflight': False, 'target_path': None, 'target_paths': [], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': None, 'saipen_verb': None, 'detail': '', 'session_id': 'missing-transcript-session'}, 'strength': {'host': 'freebuff', 'effective': 'ADVISORY', 'reason': 'host has no verified before-tool blocking surface'}}
+
+======================================================================
+FAIL: test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu (test_t1627_operator_question.QuestionAuthorityTests.test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu) (disposition='COMPLETE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 133, in test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu (test_t1627_operator_question.QuestionAuthorityTests.test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu) (disposition='WAIT_EXTERNAL')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 133, in test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu (test_t1627_operator_question.QuestionAuthorityTests.test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu) (disposition='BLOCKED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 133, in test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu (test_t1627_operator_question.QuestionAuthorityTests.test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu) (disposition='INVALID')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 133, in test_complete_external_blocked_and_invalid_never_allow_a_lifecycle_menu
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_continue_refuses_the_exact_incident_menu_and_preserves_build (test_t1627_operator_question.QuestionAuthorityTests.test_continue_refuses_the_exact_incident_menu_and_preserves_build)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 114, in test_continue_refuses_the_exact_incident_menu_and_preserves_build
+    self.assertFalse(verdict["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_due_flag_must_be_machine_boolean_not_model_text (test_t1627_operator_question.QuestionAuthorityTests.test_due_flag_must_be_machine_boolean_not_model_text)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 173, in test_due_flag_must_be_machine_boolean_not_model_text
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_incompatible_executor_uses_existing_failover_and_keeps_work (test_t1627_operator_question.QuestionAuthorityTests.test_incompatible_executor_uses_existing_failover_and_keeps_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 183, in test_incompatible_executor_uses_existing_failover_and_keeps_work
+    self.assertFalse(self._guard()["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_keeper_completion_and_session_cache_never_grant_question_authority (test_t1627_operator_question.QuestionAuthorityTests.test_keeper_completion_and_session_cache_never_grant_question_authority) (observation='keeper complete')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 126, in test_keeper_completion_and_session_cache_never_grant_question_authority
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_keeper_completion_and_session_cache_never_grant_question_authority (test_t1627_operator_question.QuestionAuthorityTests.test_keeper_completion_and_session_cache_never_grant_question_authority) (observation='cache unreadable')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 126, in test_keeper_completion_and_session_cache_never_grant_question_authority
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_keeper_completion_and_session_cache_never_grant_question_authority (test_t1627_operator_question.QuestionAuthorityTests.test_keeper_completion_and_session_cache_never_grant_question_authority) (observation='handoff absent')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 126, in test_keeper_completion_and_session_cache_never_grant_question_authority
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_keeper_completion_and_session_cache_never_grant_question_authority (test_t1627_operator_question.QuestionAuthorityTests.test_keeper_completion_and_session_cache_never_grant_question_authority) (observation='model switched')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 126, in test_keeper_completion_and_session_cache_never_grant_question_authority
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_real_claude_pretool_question_is_refused_before_ui_delivery (test_t1627_operator_question.QuestionAuthorityTests.test_real_claude_pretool_question_is_refused_before_ui_delivery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 202, in test_real_claude_pretool_question_is_refused_before_ui_delivery
+    self.assertEqual(answer.get("hookSpecificOutput", {}).get("permissionDecision"), "deny")
+AssertionError: None != 'deny'
+
+======================================================================
+FAIL: test_real_opencode_question_hook_is_refused_before_ui_delivery (test_t1627_operator_question.QuestionAuthorityTests.test_real_opencode_question_hook_is_refused_before_ui_delivery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 219, in test_real_opencode_question_hook_is_refused_before_ui_delivery
+    self.assertEqual(result["outcome"], "blocked", result)
+AssertionError: 'allowed' != 'blocked'
+- allowed
++ blocked
+ : {'id': 'question', 'outcome': 'allowed', 'message': '', 'hooks': ['experimental.chat.system.transform', 'chat.message', 'experimental.text.complete', 'tool.execute.before'], 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\saipen-t1627-l0jnocjf\\\\project","project_lineage":null,"provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or ��, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-1624", "agent_incarnation": "inc-acf657354838cbf4", "decision": "AUTO_KICK", "execution_epoch": "ep-37e91a204156b892", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-1624", "phase": "BUILD", "replacement_detected": true, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-1624 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.'], 'exports': ['default']}
+
+======================================================================
+FAIL: test_registry_records_advisory_freebuff_without_a_blocking_claim (test_t1627_operator_question.QuestionAuthorityTests.test_registry_records_advisory_freebuff_without_a_blocking_claim)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 267, in test_registry_records_advisory_freebuff_without_a_blocking_claim
+    self.assertEqual(hosts["freebuff"].get("question_enforcement"), "ADVISORY")
+AssertionError: None != 'ADVISORY'
+
+======================================================================
+FAIL: test_unknown_or_missing_projection_is_a_diagnostic_not_a_question (test_t1627_operator_question.QuestionAuthorityTests.test_unknown_or_missing_projection_is_a_diagnostic_not_a_question) (automation={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 143, in test_unknown_or_missing_projection_is_a_diagnostic_not_a_question
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_unknown_or_missing_projection_is_a_diagnostic_not_a_question (test_t1627_operator_question.QuestionAuthorityTests.test_unknown_or_missing_projection_is_a_diagnostic_not_a_question) (automation={'schema_version': 99, 'disposition': 'WAIT_USER'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 143, in test_unknown_or_missing_projection_is_a_diagnostic_not_a_question
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_unknown_or_missing_projection_is_a_diagnostic_not_a_question (test_t1627_operator_question.QuestionAuthorityTests.test_unknown_or_missing_projection_is_a_diagnostic_not_a_question) (automation={'schema_version': 1, 'disposition': 'IMPROVISED', 'operator_action_due': True})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 143, in test_unknown_or_missing_projection_is_a_diagnostic_not_a_question
+    self.assertFalse(self._guard(status=status)["admitted"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_unregistered_question_name_never_gains_read_trust (test_t1627_operator_question.QuestionAuthorityTests.test_unregistered_question_name_never_gains_read_trust) (host='zaicode')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 233, in test_unregistered_question_name_never_gains_read_trust
+    self.assertNotEqual(guard_events.map_event(event)["action"], "read")
+AssertionError: 'read' == 'read'
+
+======================================================================
+FAIL: test_unregistered_question_name_never_gains_read_trust (test_t1627_operator_question.QuestionAuthorityTests.test_unregistered_question_name_never_gains_read_trust) (host='gemini')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 233, in test_unregistered_question_name_never_gains_read_trust
+    self.assertNotEqual(guard_events.map_event(event)["action"], "read")
+AssertionError: 'read' == 'read'
+
+======================================================================
+FAIL: test_unregistered_question_name_never_gains_read_trust (test_t1627_operator_question.QuestionAuthorityTests.test_unregistered_question_name_never_gains_read_trust) (host='generic')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1627_operator_question.py", line 233, in test_unregistered_question_name_never_gains_read_trust
+    self.assertNotEqual(guard_events.map_event(event)["action"], "read")
+AssertionError: 'read' == 'read'
+
+----------------------------------------------------------------------
+Ran 16 tests in 4.450s
+
+FAILED (failures=22, errors=2)

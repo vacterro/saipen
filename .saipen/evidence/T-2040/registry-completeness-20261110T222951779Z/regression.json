@@ -1,0 +1,24 @@
+{
+ "schema": 1,
+ "command": [
+  "{python}",
+  "-B",
+  "tools/test_refusal_registry.py"
+ ],
+ "format": "unittest",
+ "context": [
+  "tools",
+  "saipen",
+  "VERSION"
+ ],
+ "oracle_files": [
+  "tools/test_refusal_registry.py"
+ ],
+ "subject_files": [
+  "saipen/REGISTRY.json"
+ ],
+ "before": {
+  "saipen/REGISTRY.json": ".saipen/evidence/T-2040/registry-completeness-20261110T222951779Z/saipen/REGISTRY.json"
+ },
+ "timeout": 300
+}

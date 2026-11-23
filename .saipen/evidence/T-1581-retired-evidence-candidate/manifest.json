@@ -1,0 +1,22 @@
+{
+  "subject": "tools/audit_checks.py",
+  "oracle": "tools/test_t1581_phase_rename_knowledge.py",
+  "before_sha256": "581cf41f8960dc233783c53c1b235c079eb8bf0c6117849cba40fa460ae4de71",
+  "after_sha256": "5f53d98cc67dca1bb81f40a688b06c60639dfd739edbd551db4dd43df5ac244d",
+  "oracle_before_sha256": "8b14abf00bf826b7734d402fa085d4288142a338ca4e99c4d7a613456816e162",
+  "oracle_sha256": "196b9f6790d75fc5ac2c6977e2b084678624c0e2cf3d532d4923c422ff094e7c",
+  "runs": {
+    "before": {
+      "ran": 13,
+      "failures": 4,
+      "errors": 0,
+      "ok": false
+    },
+    "candidate": {
+      "ran": 13,
+      "failures": 0,
+      "errors": 0,
+      "ok": true
+    }
+  }
+}

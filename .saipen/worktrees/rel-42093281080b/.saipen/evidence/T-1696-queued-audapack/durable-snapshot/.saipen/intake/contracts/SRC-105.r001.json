@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-105:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Fix Wintage PACK duplicate .audapack/manifest.json: build_git_inventory UNTRACKED loop has no reserved-control supersession, so an untracked non-ignored generated control enters included_entries and is written twice"
+    }
+  },
+  "derived_at": "2026-09-29T13:55:38Z",
+  "derived_from": "SRC-105",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "edbe09aa50decd2efe072a3ded4913d4f28a84819db513b0c374b8e9764af8ba"
+}

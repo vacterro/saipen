@@ -1,0 +1,56 @@
+# SAIPEN INDEX
+
+BOOT loads one owner and active phase. `REGISTRY.json` owns machine facts and
+Rule-ID ownership.
+
+## Runtime route
+
+- `BOOT.md` -- cold execution router; no protocol semantics.
+- `STYLE.md` -- reply language, voice and artifact style; loaded first.
+- `REGISTRY.json` -- executable closed sets, routing facts and load profiles.
+- `COMMANDS.md` -- command, shortcut and compound-command semantics.
+- `EXECUTION.md` -- execution/output policy and HUSH.
+- `CORE.md` -- global state, checkpoint, priority and transition invariants.
+- `MAINTENANCE.md` -- goal-driven and autonomous maintenance semantics.
+- `FUTURE.md` -- deferred authority candidates: intake, readiness, promotion.
+- `OPS.md` -- journaled operations, recovery, reconciliation and rebind mechanics.
+- `STORAGE.md` -- storage policy, stores and promotion.
+- `SOURCES.md` -- receipt authority, Work Contract and coverage lifecycle.
+- `RUNTIME.md` -- runtime identity, capabilities and adaptive strategy.
+- `CONTROLS.md` -- focus/build/cut/undo controls and restore milestones.
+- `IMPROVE.md` -- Improve admission, seats, findings and lifecycle.
+- `CONVERGE.md` -- converge stage order and closure bar.
+- `SAICRITIC.md`: ordered self-critique proof vocabulary.
+- `RFC.md` -- compatibility redirect only; never a rule destination.
+
+## Phase route
+
+Load only `phases/<STATE.phase>.md`; replace it on transition.
+
+- `init.md`: bootstrap.
+- `plan.md`: planning.
+- `scout.md`: discovery.
+- `build.md`: implementation.
+- `verify.md`: evidence.
+- `review.md`: review.
+- `ship.md`: release.
+- `done.md`: closure.
+- `blocked.md`: blocker.
+- `hunt.md`: defect sweep.
+- `markhunt.md`: report-only sweep.
+- `add.md`: next work.
+- `clean.md`: hygiene.
+- `validate.md`: repair.
+- `translate.md`: translation.
+- `prepare.md`: handoff.
+
+## Conditional surfaces
+
+- `UI.md` -- only UI/frontend work.
+- `HABITS.md` -- known model failure patterns.
+- `CONFORMANCE.md` -- human conformance index; routine agents never load it.
+- `.saipen/KNOWLEDGE/*.md` -- project truths for the current ticket.
+- `CHANGELOG.md` -- release history, never cold context.
+- `SKILL.md` -- platform loader entry, not runtime protocol.
+
+Use the owner named by the route. Do not read the full protocol tree.

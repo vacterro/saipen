@@ -1,0 +1,18 @@
+PASS: nitro-m2 -- crash before LOG leaves canonical state unchanged
+PASS: nitro-m2 -- PREPARED recovery aborts safely
+PASS: nitro-m2 -- crash after LOG leaves the LOG event and nothing else
+PASS: nitro-m2 -- recovery rolls BOARD+STATE forward after LOG
+PASS: nitro-m2 -- repeated recovery is idempotent (ALREADY_APPLIED)
+PASS: nitro-m2 -- the LOG event was not duplicated by recovery
+PASS: nitro-m2 -- crash after BOARD leaves STATE unbuilt
+PASS: nitro-m2 -- recovery rolls STATE forward after BOARD
+PASS: nitro-m2 -- crash after STATE leaves the full mutation written
+PASS: nitro-m2 -- recovery after STATE validates and commits
+PASS: nitro-m2 -- the crash-after-STATE op was not double-written by recovery
+PASS: nitro-m2 -- a committed op's retry returns ALREADY_APPLIED
+PASS: nitro-m2 -- no duplicate LOG event from a retried committed op
+PASS: nitro-m2 -- recovery CONFLICTs on externally modified pending target
+PASS: nitro-m2 -- conflict preserves the journal for evidence
+PASS: nitro-m2 -- a second live writer is refused (WRITER_BUSY)
+PASS: nitro-m2 -- the lock releases and re-acquires cleanly
+{"group": "run_nitro_m2_probes", "checked": 17, "problems": []}

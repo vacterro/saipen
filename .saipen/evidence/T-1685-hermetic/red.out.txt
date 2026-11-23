@@ -1,0 +1,38 @@
+FFF
+======================================================================
+FAIL: test_a_family_child_inherits_no_profile_carrier (test_t1685_profile_carrier.ProfileCarrierTests.test_a_family_child_inherits_no_profile_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1685-pair-g1vxcpvw\project\tools\test_t1685_profile_carrier.py", line 71, in test_a_family_child_inherits_no_profile_carrier
+    self.assertEqual((spool / "stdout").read_text(encoding="utf-8").strip(), "None")
+AssertionError: "'V:\\\\_TEMP_\\\\saipen-t1685-family-ulkcgi6h\\\\operator-profile'" != 'None'
+- 'V:\\_TEMP_\\saipen-t1685-family-ulkcgi6h\\operator-profile'
++ None
+
+
+======================================================================
+FAIL: test_host_fixtures_never_reach_the_operators_profile (test_t1685_profile_carrier.ProfileCarrierTests.test_host_fixtures_never_reach_the_operators_profile)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1685-pair-g1vxcpvw\project\tools\test_t1685_profile_carrier.py", line 83, in test_host_fixtures_never_reach_the_operators_profile
+    self.assertEqual(_contents(operator), [])
+AssertionError: Lists differ: ['CLAUDE.md', 'hooks', 'hooks\\saipen-guar[35735 chars].py'] != []
+
+First list contains 682 additional elements.
+First extra element 0:
+'CLAUDE.md'
+
+Diff is 37833 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_the_harness_strips_the_profile_carrier (test_t1685_profile_carrier.ProfileCarrierTests.test_the_harness_strips_the_profile_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1685-pair-g1vxcpvw\project\tools\test_t1685_profile_carrier.py", line 56, in test_the_harness_strips_the_profile_carrier
+    self.assertIn(ENVIRONMENT, HOST_SESSION_VARIABLES)
+AssertionError: 'CLAUDE_CONFIG_DIR' not found in ('SAIPEN_AUTONOMY_RUN_ID', 'SAIPEN_AUTONOMY_WORKER', 'SAIPEN_LEASE_GENERATION', 'SAIPEN_PROJECT_ROOT', 'SAIPEN_PROJECT_LINEAGE', 'SAIPEN_AGENT', 'SAIPEN_CAPABILITY', 'SAIPEN_HOST_ENFORCEMENT', 'SAIPEN_RUNTIME_INFO', 'SAIPEN_SKILL_ROOT', 'SAIPEN_GUARD_STARTUP_PROBE', 'SAIPEN_HOST_SESSION', 'SAIPEN_GPU', 'SAIMAIL_WORKSPACE', 'ZAICODE_HOME')
+
+----------------------------------------------------------------------
+Ran 3 tests in 6.326s
+
+FAILED (failures=3)

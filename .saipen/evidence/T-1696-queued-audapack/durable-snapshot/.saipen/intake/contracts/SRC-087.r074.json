@@ -1,0 +1,379 @@
+{
+  "clauses": {
+    "SRC-087:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT create another scheduler ticket."
+    },
+    "SRC-087:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT restart SCOUT."
+    },
+    "SRC-087:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT replay already-completed account/limit/prepared implementation."
+    },
+    "SRC-087:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT discard valid E-1881..E-1888 evidence."
+    },
+    "SRC-087:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT mark unfinished workflow placeholders complete merely because their enums or UI fields exist."
+    },
+    "SRC-087:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not ask for ordinary continuation between milestones."
+    },
+    "SRC-087:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT interpret UNKNOWN as \"not implemented\"."
+    },
+    "SRC-087:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Therefore real PRIME/SYNC claims must remain conservative."
+    },
+    "SRC-087:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not treat this external validation as a replacement for the real Windows and Qt gates."
+    },
+    "SRC-087:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create a parallel scheduler."
+    },
+    "SRC-087:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not remove the gate before the corresponding implementation is safe."
+    },
+    "SRC-087:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT start with visual polish."
+    },
+    "SRC-087:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT consume real provider quota merely to make PRIME tests green."
+    },
+    "SRC-087:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Every mutation of an active execution must prove:"
+    },
+    "SRC-087:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A stale worker must not update a receipt after takeover."
+    },
+    "SRC-087:R016": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rely solely on mutable owner_id text."
+    },
+    "SRC-087:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not generate unrelated duplicate work."
+    },
+    "SRC-087:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "never automatically launch another provider process merely because lease expired."
+    },
+    "SRC-087:R019": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not weaken exactly-once semantics."
+    },
+    "SRC-087:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never runs again."
+    },
+    "SRC-087:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Manual Project Room launcher and Prepared Scheduler must share one authoritative launch layer."
+    },
+    "SRC-087:R022": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not let this become a permanent second launcher stack."
+    },
+    "SRC-087:R023": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT force their argv to be literally identical."
+    },
+    "SRC-087:R024": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never bypass a user custom command silently."
+    },
+    "SRC-087:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not guess shell semantics."
+    },
+    "SRC-087:R026": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Avoid permanent provider if/elif logic scattered through:"
+    },
+    "SRC-087:R027": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never infer FIRST_CONSUMING_USE solely from observing a countdown."
+    },
+    "SRC-087:R028": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not query the internet during normal operation."
+    },
+    "SRC-087:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not consume model quota to discover a flag."
+    },
+    "SRC-087:R030": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Model must map to the correct quota bucket where providers expose separate pools."
+    },
+    "SRC-087:R031": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PRIME must refuse UNKNOWN bucket mapping."
+    },
+    "SRC-087:R032": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "SYNC must not claim quota alignment when window mapping is unknown."
+    },
+    "SRC-087:R033": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT pipe an audit through Claude/Codex stdin as a substitute."
+    },
+    "SRC-087:R034": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create the final archive hours in advance by default."
+    },
+    "SRC-087:R035": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT enqueue a second audit."
+    },
+    "SRC-087:R036": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not implement it as sequential normal launches."
+    },
+    "SRC-087:R037": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not store comma-separated account IDs inside the current single account_id field."
+    },
+    "SRC-087:R038": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Each member must prove:"
+    },
+    "SRC-087:R039": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not confuse them."
+    },
+    "SRC-087:R040": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not retry already-started members automatically."
+    },
+    "SRC-087:R041": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not claim synchronization success."
+    },
+    "SRC-087:R042": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Normal probes must remain non-consuming."
+    },
+    "SRC-087:R043": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not guess."
+    },
+    "SRC-087:R044": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not run an autonomous coding command merely to start a timer."
+    },
+    "SRC-087:R045": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "never auto-prime again after uncertainty."
+    },
+    "SRC-087:R046": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not consume real user quota."
+    },
+    "SRC-087:R047": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not silently choose arbitrary account."
+    },
+    "SRC-087:R048": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reservations must expire."
+    },
+    "SRC-087:R049": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not reserve accounts hours ahead by default."
+    },
+    "SRC-087:R050": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "An enabled prepared job must never disappear into silent waiting."
+    },
+    "SRC-087:R051": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Running Test Now today must NOT consume tomorrows ONE_SHOT scheduled event."
+    },
+    "SRC-087:R052": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not bypass launcher/delivery safeguards."
+    },
+    "SRC-087:R053": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make the operator accidentally delete the future job by testing it."
+    },
+    "SRC-087:R054": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "ON TIME must prove:"
+    },
+    "SRC-087:R055": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "ON RESET must prove:"
+    },
+    "SRC-087:R056": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "NEXT_USABLE must consider ALL hard bottlenecks."
+    },
+    "SRC-087:R057": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not launch."
+    },
+    "SRC-087:R058": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not use zero meter for UNKNOWN."
+    },
+    "SRC-087:R059": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prepared jobs must consult current process state."
+    },
+    "SRC-087:R060": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not keyboard-paste into an arbitrary terminal."
+    },
+    "SRC-087:R061": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not fake support."
+    },
+    "SRC-087:R062": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not scan the whole machine."
+    },
+    "SRC-087:R063": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not modify their state."
+    },
+    "SRC-087:R064": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not import credentials."
+    },
+    "SRC-087:R065": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "This must not block T-238."
+    },
+    "SRC-087:R066": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not waste quota repeating it without purpose."
+    },
+    "SRC-087:R067": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT automatically consume live quota during development."
+    },
+    "SRC-087:R068": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not revert these."
+    },
+    "SRC-087:R069": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not blanket mark all 203 VERIFIED."
+    },
+    "SRC-087:R070": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not bump Widget version merely because scheduler code changed."
+    },
+    "SRC-087:R071": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never hold SQLite transaction while:"
+    },
+    "SRC-087:R072": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Must not persist:"
+    },
+    "SRC-087:R073": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not put provider secrets into:"
+    },
+    "SRC-087:R074": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A new /new Opus 5 Max session must resume from this checkpoint and repository machine truth without previous chat context."
+    }
+  },
+  "derived_at": "2026-09-23T12:30:07Z",
+  "derived_from": "SRC-087",
+  "interpretation_revision": 74,
+  "schema_version": 1,
+  "source_sha256": "a71ce00bc107837c605bc56060020ea49607c508c8bc05c650a4b5988da36c38"
+}

@@ -1,0 +1,610 @@
+F.F.......                         [100%]
+================================== FAILURES ===================================
+_ TerminalConsumerGuards.test_assessment_forwards_same_issued_publication_carrier _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_assessment_forwards_same_issued_publication_carrier>
+
+    def test_assessment_forwards_same_issued_publication_carrier(self):
+        carrier = outcome_truth.read_publication_evidence(self.root, tickets={})
+        self.owners()
+        with mock.patch.object(W, "discovery_evidence", return_value={
+            "persistent_goals": [], "source_evidence": checked_discovery_evidence("100"),
+            "continuous_maintenance_authorized": False,
+        }), mock.patch.object(CA, "route_next", wraps=CA.route_next) as route:
+>           result = CA.assess_continuation(self.root, publication_evidence=carrier)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: assess_continuation() got an unexpected keyword argument 'publication_evidence'
+
+tools\test_t2040_terminal_consumer_guards.py:396: TypeError
+_ TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope (board=42) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_assessment_refuses_malformed_board_or_discovery_envelope>
+
+    def test_assessment_refuses_malformed_board_or_discovery_envelope(self):
+        self.owners()
+        for parsed in (42, {"tickets": 42, "errors": []}, {"tickets": {}, "errors": 42}):
+            with self.subTest(board=parsed):
+>               result = CA.assess_continuation(self.root, parsed_board=parsed)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_terminal_consumer_guards.py:298: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('V:/_TEMP_/saipen-terminal-guards-p64t7r4y'), now = None
+current_agent = None, current_capability = None
+state_text = '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\nblocker: none\ntransition_from: SHIP\nsaipen_version: 8...on_authority: operator_required\nauthority_source: E-100\nauthority_until: budget\nsafety_valve_mode: hard_wait\n---\n'
+board_text = '## DOING\n## TODO\n## DONE\n## BLOCKED\n', pending_ops = None
+conflict_ops = None, snap = None, reconciled = None, parsed_board = 42
+persistent_goals = None, source_evidence = None
+
+    def assess_continuation(
+        root: Path | str,
+        *,
+        now: _dt.datetime | None = None,
+        current_agent: str | None = None,
+        current_capability: str | None = None,
+        state_text: str | None = None,
+        board_text: str | None = None,
+        pending_ops: list | None = None,
+        conflict_ops: list | None = None,
+        snap: Any = None,
+        reconciled: dict | None = None,
+        parsed_board: dict | None = None,
+        persistent_goals: list | dict | None = None,
+        source_evidence: dict | None = None,
+    ) -> dict:
+        """Compute the authoritative read-only continuation assessment.
+    
+        Pure of mutations: reads canonical state and projections, applies the
+        ordered router and gate chain, and maps the verdict onto the closed
+        classification vocabulary.
+        """
+        root_path = Path(root).resolve()
+    
+        if state_text is None:
+            try:
+                state_text = (root_path / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+            except OSError as exc:
+                return _unreadable(f"STATE.md unreadable: {exc}")
+    
+        if board_text is None:
+            try:
+                board_text = (root_path / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+            except OSError as exc:
+                return _unreadable(f"BOARD.md unreadable: {exc}")
+    
+        state, state_error = parse_state_or_error(state_text)
+        if state_error and "missing required field updated" in state_error:
+            # Compatibility with fixtures omitting updated field
+            if "\n---" in state_text:
+                fixed_text = state_text.replace("\n---", "\nupdated: '2026-01-01T00:00:00Z'\n---", 1)
+                fixed_state, fixed_err = parse_state_or_error(fixed_text)
+                if not fixed_err and fixed_state:
+                    state, state_error, state_text = fixed_state, None, fixed_text
+    
+        if state_error or not state:
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action=None,
+                reason="state-malformed",
+                detail=f"STATE parse error: {state_error or 'empty'}",
+            )
+    
+        try:
+            # PERF-005: the caller may already hold the parsed BOARD. Re-parsing it
+            # here was the first of the redundant parses in one observation.
+            board = parsed_board if parsed_board is not None else parse_board(board_text)
+        except Exception as exc:
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action=None,
+                reason="board-malformed",
+                detail=f"BOARD parse error: {exc}",
+            )
+    
+>       if board.get("errors"):
+           ^^^^^^^^^
+E       AttributeError: 'int' object has no attribute 'get'
+
+tools\saipen_engine\continuation_assessment.py:173: AttributeError
+_ TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope (board={'tickets': {}, 'errors': 42}) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_assessment_refuses_malformed_board_or_discovery_envelope>
+
+    def test_assessment_refuses_malformed_board_or_discovery_envelope(self):
+        self.owners()
+        for parsed in (42, {"tickets": 42, "errors": []}, {"tickets": {}, "errors": 42}):
+            with self.subTest(board=parsed):
+>               result = CA.assess_continuation(self.root, parsed_board=parsed)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_terminal_consumer_guards.py:298: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('V:/_TEMP_/saipen-terminal-guards-p64t7r4y'), now = None
+current_agent = None, current_capability = None
+state_text = '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\nblocker: none\ntransition_from: SHIP\nsaipen_version: 8...on_authority: operator_required\nauthority_source: E-100\nauthority_until: budget\nsafety_valve_mode: hard_wait\n---\n'
+board_text = '## DOING\n## TODO\n## DONE\n## BLOCKED\n', pending_ops = None
+conflict_ops = None, snap = None, reconciled = None
+parsed_board = {'tickets': {}, 'errors': 42}, persistent_goals = None
+source_evidence = None
+
+    def assess_continuation(
+        root: Path | str,
+        *,
+        now: _dt.datetime | None = None,
+        current_agent: str | None = None,
+        current_capability: str | None = None,
+        state_text: str | None = None,
+        board_text: str | None = None,
+        pending_ops: list | None = None,
+        conflict_ops: list | None = None,
+        snap: Any = None,
+        reconciled: dict | None = None,
+        parsed_board: dict | None = None,
+        persistent_goals: list | dict | None = None,
+        source_evidence: dict | None = None,
+    ) -> dict:
+        """Compute the authoritative read-only continuation assessment.
+    
+        Pure of mutations: reads canonical state and projections, applies the
+        ordered router and gate chain, and maps the verdict onto the closed
+        classification vocabulary.
+        """
+        root_path = Path(root).resolve()
+    
+        if state_text is None:
+            try:
+                state_text = (root_path / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+            except OSError as exc:
+                return _unreadable(f"STATE.md unreadable: {exc}")
+    
+        if board_text is None:
+            try:
+                board_text = (root_path / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+            except OSError as exc:
+                return _unreadable(f"BOARD.md unreadable: {exc}")
+    
+        state, state_error = parse_state_or_error(state_text)
+        if state_error and "missing required field updated" in state_error:
+            # Compatibility with fixtures omitting updated field
+            if "\n---" in state_text:
+                fixed_text = state_text.replace("\n---", "\nupdated: '2026-01-01T00:00:00Z'\n---", 1)
+                fixed_state, fixed_err = parse_state_or_error(fixed_text)
+                if not fixed_err and fixed_state:
+                    state, state_error, state_text = fixed_state, None, fixed_text
+    
+        if state_error or not state:
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action=None,
+                reason="state-malformed",
+                detail=f"STATE parse error: {state_error or 'empty'}",
+            )
+    
+        try:
+            # PERF-005: the caller may already hold the parsed BOARD. Re-parsing it
+            # here was the first of the redundant parses in one observation.
+            board = parsed_board if parsed_board is not None else parse_board(board_text)
+        except Exception as exc:
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action=None,
+                reason="board-malformed",
+                detail=f"BOARD parse error: {exc}",
+            )
+    
+        if board.get("errors"):
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action="saipen status",
+                reason="board-malformed",
+>               detail="BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+                                                            ^^^^^^^^^^^^^^^^^^^
+            )
+E           TypeError: 'int' object is not subscriptable
+
+tools\saipen_engine\continuation_assessment.py:178: TypeError
+_ TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope (evidence=42) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_assessment_refuses_malformed_board_or_discovery_envelope>
+
+    def test_assessment_refuses_malformed_board_or_discovery_envelope(self):
+        self.owners()
+        for parsed in (42, {"tickets": 42, "errors": []}, {"tickets": {}, "errors": 42}):
+            with self.subTest(board=parsed):
+                result = CA.assess_continuation(self.root, parsed_board=parsed)
+                self.assertEqual(result["classification"], CA.INVALID_RUNTIME)
+                self.assertFalse(result["actionable"])
+        for evidence in (42, {"source_evidence": 42}, {"source_evidence": []}):
+            with self.subTest(evidence=evidence), mock.patch.object(
+                W, "discovery_evidence", return_value=evidence,
+            ):
+>               result = CA.assess_continuation(self.root, source_evidence={"hunt_findings": {}})
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_terminal_consumer_guards.py:305: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('V:/_TEMP_/saipen-terminal-guards-p64t7r4y'), now = None
+current_agent = None, current_capability = None
+state_text = '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\nblocker: none\ntransition_from: SHIP\nsaipen_version: 8...on_authority: operator_required\nauthority_source: E-100\nauthority_until: budget\nsafety_valve_mode: hard_wait\n---\n'
+board_text = '## DOING\n## TODO\n## DONE\n## BLOCKED\n', pending_ops = None
+conflict_ops = None, snap = None, reconciled = None, parsed_board = None
+persistent_goals = None, source_evidence = {'hunt_findings': {}}
+
+    def assess_continuation(
+        root: Path | str,
+        *,
+        now: _dt.datetime | None = None,
+        current_agent: str | None = None,
+        current_capability: str | None = None,
+        state_text: str | None = None,
+        board_text: str | None = None,
+        pending_ops: list | None = None,
+        conflict_ops: list | None = None,
+        snap: Any = None,
+        reconciled: dict | None = None,
+        parsed_board: dict | None = None,
+        persistent_goals: list | dict | None = None,
+        source_evidence: dict | None = None,
+    ) -> dict:
+        """Compute the authoritative read-only continuation assessment.
+    
+        Pure of mutations: reads canonical state and projections, applies the
+        ordered router and gate chain, and maps the verdict onto the closed
+        classification vocabulary.
+        """
+        root_path = Path(root).resolve()
+    
+        if state_text is None:
+            try:
+                state_text = (root_path / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+            except OSError as exc:
+                return _unreadable(f"STATE.md unreadable: {exc}")
+    
+        if board_text is None:
+            try:
+                board_text = (root_path / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+            except OSError as exc:
+                return _unreadable(f"BOARD.md unreadable: {exc}")
+    
+        state, state_error = parse_state_or_error(state_text)
+        if state_error and "missing required field updated" in state_error:
+            # Compatibility with fixtures omitting updated field
+            if "\n---" in state_text:
+                fixed_text = state_text.replace("\n---", "\nupdated: '2026-01-01T00:00:00Z'\n---", 1)
+                fixed_state, fixed_err = parse_state_or_error(fixed_text)
+                if not fixed_err and fixed_state:
+                    state, state_error, state_text = fixed_state, None, fixed_text
+    
+        if state_error or not state:
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action=None,
+                reason="state-malformed",
+                detail=f"STATE parse error: {state_error or 'empty'}",
+            )
+    
+        try:
+            # PERF-005: the caller may already hold the parsed BOARD. Re-parsing it
+            # here was the first of the redundant parses in one observation.
+            board = parsed_board if parsed_board is not None else parse_board(board_text)
+        except Exception as exc:
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action=None,
+                reason="board-malformed",
+                detail=f"BOARD parse error: {exc}",
+            )
+    
+        if board.get("errors"):
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action="saipen status",
+                reason="board-malformed",
+                detail="BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            )
+    
+        # Resolve agent
+        acting_agent = current_agent if current_agent is not None else state.get("agent")
+    
+        # Discovery owners run outside the pure router, with the same project root.
+        from .work_exhaustion import discovery_evidence
+    
+        evidence = discovery_evidence(
+            root_path, state=state, tickets=board.get("tickets") or {},
+            pending_ops=pending_ops, conflict_ops=conflict_ops, now=now,
+        )
+        if persistent_goals is not None:
+            evidence["persistent_goals"] = persistent_goals
+        if source_evidence is not None:
+            if isinstance(source_evidence, dict):
+>               evidence["source_evidence"].update(source_evidence)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               TypeError: 'int' object is not subscriptable
+
+tools\saipen_engine\continuation_assessment.py:195: TypeError
+_ TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope (evidence={'source_evidence': 42}) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_assessment_refuses_malformed_board_or_discovery_envelope>
+
+    def test_assessment_refuses_malformed_board_or_discovery_envelope(self):
+        self.owners()
+        for parsed in (42, {"tickets": 42, "errors": []}, {"tickets": {}, "errors": 42}):
+            with self.subTest(board=parsed):
+                result = CA.assess_continuation(self.root, parsed_board=parsed)
+                self.assertEqual(result["classification"], CA.INVALID_RUNTIME)
+                self.assertFalse(result["actionable"])
+        for evidence in (42, {"source_evidence": 42}, {"source_evidence": []}):
+            with self.subTest(evidence=evidence), mock.patch.object(
+                W, "discovery_evidence", return_value=evidence,
+            ):
+>               result = CA.assess_continuation(self.root, source_evidence={"hunt_findings": {}})
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_terminal_consumer_guards.py:305: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('V:/_TEMP_/saipen-terminal-guards-p64t7r4y'), now = None
+current_agent = None, current_capability = None
+state_text = '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\nblocker: none\ntransition_from: SHIP\nsaipen_version: 8...on_authority: operator_required\nauthority_source: E-100\nauthority_until: budget\nsafety_valve_mode: hard_wait\n---\n'
+board_text = '## DOING\n## TODO\n## DONE\n## BLOCKED\n', pending_ops = None
+conflict_ops = None, snap = None, reconciled = None, parsed_board = None
+persistent_goals = None, source_evidence = {'hunt_findings': {}}
+
+    def assess_continuation(
+        root: Path | str,
+        *,
+        now: _dt.datetime | None = None,
+        current_agent: str | None = None,
+        current_capability: str | None = None,
+        state_text: str | None = None,
+        board_text: str | None = None,
+        pending_ops: list | None = None,
+        conflict_ops: list | None = None,
+        snap: Any = None,
+        reconciled: dict | None = None,
+        parsed_board: dict | None = None,
+        persistent_goals: list | dict | None = None,
+        source_evidence: dict | None = None,
+    ) -> dict:
+        """Compute the authoritative read-only continuation assessment.
+    
+        Pure of mutations: reads canonical state and projections, applies the
+        ordered router and gate chain, and maps the verdict onto the closed
+        classification vocabulary.
+        """
+        root_path = Path(root).resolve()
+    
+        if state_text is None:
+            try:
+                state_text = (root_path / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+            except OSError as exc:
+                return _unreadable(f"STATE.md unreadable: {exc}")
+    
+        if board_text is None:
+            try:
+                board_text = (root_path / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+            except OSError as exc:
+                return _unreadable(f"BOARD.md unreadable: {exc}")
+    
+        state, state_error = parse_state_or_error(state_text)
+        if state_error and "missing required field updated" in state_error:
+            # Compatibility with fixtures omitting updated field
+            if "\n---" in state_text:
+                fixed_text = state_text.replace("\n---", "\nupdated: '2026-01-01T00:00:00Z'\n---", 1)
+                fixed_state, fixed_err = parse_state_or_error(fixed_text)
+                if not fixed_err and fixed_state:
+                    state, state_error, state_text = fixed_state, None, fixed_text
+    
+        if state_error or not state:
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action=None,
+                reason="state-malformed",
+                detail=f"STATE parse error: {state_error or 'empty'}",
+            )
+    
+        try:
+            # PERF-005: the caller may already hold the parsed BOARD. Re-parsing it
+            # here was the first of the redundant parses in one observation.
+            board = parsed_board if parsed_board is not None else parse_board(board_text)
+        except Exception as exc:
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action=None,
+                reason="board-malformed",
+                detail=f"BOARD parse error: {exc}",
+            )
+    
+        if board.get("errors"):
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action="saipen status",
+                reason="board-malformed",
+                detail="BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            )
+    
+        # Resolve agent
+        acting_agent = current_agent if current_agent is not None else state.get("agent")
+    
+        # Discovery owners run outside the pure router, with the same project root.
+        from .work_exhaustion import discovery_evidence
+    
+        evidence = discovery_evidence(
+            root_path, state=state, tickets=board.get("tickets") or {},
+            pending_ops=pending_ops, conflict_ops=conflict_ops, now=now,
+        )
+        if persistent_goals is not None:
+            evidence["persistent_goals"] = persistent_goals
+        if source_evidence is not None:
+            if isinstance(source_evidence, dict):
+>               evidence["source_evidence"].update(source_evidence)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: 'int' object has no attribute 'update'
+
+tools\saipen_engine\continuation_assessment.py:195: AttributeError
+_ TerminalConsumerGuards.test_assessment_refuses_malformed_board_or_discovery_envelope (evidence={'source_evidence': []}) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_assessment_refuses_malformed_board_or_discovery_envelope>
+
+    def test_assessment_refuses_malformed_board_or_discovery_envelope(self):
+        self.owners()
+        for parsed in (42, {"tickets": 42, "errors": []}, {"tickets": {}, "errors": 42}):
+            with self.subTest(board=parsed):
+                result = CA.assess_continuation(self.root, parsed_board=parsed)
+                self.assertEqual(result["classification"], CA.INVALID_RUNTIME)
+                self.assertFalse(result["actionable"])
+        for evidence in (42, {"source_evidence": 42}, {"source_evidence": []}):
+            with self.subTest(evidence=evidence), mock.patch.object(
+                W, "discovery_evidence", return_value=evidence,
+            ):
+>               result = CA.assess_continuation(self.root, source_evidence={"hunt_findings": {}})
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_terminal_consumer_guards.py:305: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('V:/_TEMP_/saipen-terminal-guards-p64t7r4y'), now = None
+current_agent = None, current_capability = None
+state_text = '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\nblocker: none\ntransition_from: SHIP\nsaipen_version: 8...on_authority: operator_required\nauthority_source: E-100\nauthority_until: budget\nsafety_valve_mode: hard_wait\n---\n'
+board_text = '## DOING\n## TODO\n## DONE\n## BLOCKED\n', pending_ops = None
+conflict_ops = None, snap = None, reconciled = None, parsed_board = None
+persistent_goals = None, source_evidence = {'hunt_findings': {}}
+
+    def assess_continuation(
+        root: Path | str,
+        *,
+        now: _dt.datetime | None = None,
+        current_agent: str | None = None,
+        current_capability: str | None = None,
+        state_text: str | None = None,
+        board_text: str | None = None,
+        pending_ops: list | None = None,
+        conflict_ops: list | None = None,
+        snap: Any = None,
+        reconciled: dict | None = None,
+        parsed_board: dict | None = None,
+        persistent_goals: list | dict | None = None,
+        source_evidence: dict | None = None,
+    ) -> dict:
+        """Compute the authoritative read-only continuation assessment.
+    
+        Pure of mutations: reads canonical state and projections, applies the
+        ordered router and gate chain, and maps the verdict onto the closed
+        classification vocabulary.
+        """
+        root_path = Path(root).resolve()
+    
+        if state_text is None:
+            try:
+                state_text = (root_path / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+            except OSError as exc:
+                return _unreadable(f"STATE.md unreadable: {exc}")
+    
+        if board_text is None:
+            try:
+                board_text = (root_path / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+            except OSError as exc:
+                return _unreadable(f"BOARD.md unreadable: {exc}")
+    
+        state, state_error = parse_state_or_error(state_text)
+        if state_error and "missing required field updated" in state_error:
+            # Compatibility with fixtures omitting updated field
+            if "\n---" in state_text:
+                fixed_text = state_text.replace("\n---", "\nupdated: '2026-01-01T00:00:00Z'\n---", 1)
+                fixed_state, fixed_err = parse_state_or_error(fixed_text)
+                if not fixed_err and fixed_state:
+                    state, state_error, state_text = fixed_state, None, fixed_text
+    
+        if state_error or not state:
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action=None,
+                reason="state-malformed",
+                detail=f"STATE parse error: {state_error or 'empty'}",
+            )
+    
+        try:
+            # PERF-005: the caller may already hold the parsed BOARD. Re-parsing it
+            # here was the first of the redundant parses in one observation.
+            board = parsed_board if parsed_board is not None else parse_board(board_text)
+        except Exception as exc:
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action=None,
+                reason="board-malformed",
+                detail=f"BOARD parse error: {exc}",
+            )
+    
+        if board.get("errors"):
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action="saipen status",
+                reason="board-malformed",
+                detail="BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            )
+    
+        # Resolve agent
+        acting_agent = current_agent if current_agent is not None else state.get("agent")
+    
+        # Discovery owners run outside the pure router, with the same project root.
+        from .work_exhaustion import discovery_evidence
+    
+        evidence = discovery_evidence(
+            root_path, state=state, tickets=board.get("tickets") or {},
+            pending_ops=pending_ops, conflict_ops=conflict_ops, now=now,
+        )
+        if persistent_goals is not None:
+            evidence["persistent_goals"] = persistent_goals
+        if source_evidence is not None:
+            if isinstance(source_evidence, dict):
+>               evidence["source_evidence"].update(source_evidence)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: 'list' object has no attribute 'update'
+
+tools\saipen_engine\continuation_assessment.py:195: AttributeError
+_ TerminalConsumerGuards.test_authoritative_external_stop_outranks_stale_workable_board _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_authoritative_external_stop_outranks_stale_workable_board>
+
+    def test_authoritative_external_stop_outranks_stale_workable_board(self):
+        self.write_state(blocker="BLOCKED_EXTERNAL -- current external boundary")
+        (self.root / ".saipen/BOARD.md").write_text(
+            "## DOING\n## TODO\n- [ ] T-1 [P1] stale work | verify: local test\n## DONE\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        picture = supervisor.observe(self.root, now=T0)
+        self.assertEqual(picture["continuation_classification"], CA.WAIT_EXTERNAL)
+>       self.assertIsNone(picture["executable_work"], picture)
+E       AssertionError: 'T-1' is not None : {'autonomy_run_id': '', 'observed_at': '2026-10-25T12:00:00Z', 'phase': 'DONE', 'active_work': None, 'next_action': 'saipen continue', 'last_event': '100', 'state_blocker': 'BLOCKED_EXTERNAL -- current external boundary', 'worker_id': None, 'worker_generation': None, 'lease_generation': None, 'lease_state': 'UNKNOWN', 'lease_reason': 'missing_or_corrupt_runtime_state', 'heartbeat_at': None, 'heartbeat_age_seconds': None, 'workable_work': ['T-1'], 'executable_work': 'T-1', 'continuation_classification': 'WAIT_EXTERNAL', 'continuation_actionable': False, 'continuation_reason': 'unblock', 'continuation_detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'continuation_assessment': {'classification': 'WAIT_EXTERNAL', 'actionable': False, 'executable_work': None, 'action': 'saipen status', 'reason': 'unblock', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'raw_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'continuous_maintenance_proven': False, 'continuous_maintenance_claimed': False, 'operator_work': []}, 'operator_work': [], 'operator_gates': [], 'due_operator_actions': [], 'deferred_operator_gates': [], 'board_errors': [], 'no_progress_count': 0, 'progress_verdict': 'RUNNING', 'durable_checkpoint': None, 'last_progress_at': ''}
+
+tools\test_t2040_terminal_consumer_guards.py:212: AssertionError
+_ TerminalConsumerGuards.test_router_rejects_malformed_truthy_projection_envelopes (projection={'audit_inbox': {'pending': 42}}) _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_router_rejects_malformed_truthy_projection_envelopes>
+
+    def test_router_rejects_malformed_truthy_projection_envelopes(self):
+        for kwargs in (
+            {"queued_source": 42}, {"pending_append": 42}, {"audit_inbox": 42},
+            {"future_gate": 42}, {"future_gate": {"eligible": 42}},
+            {"audit_inbox": {"pending": 42}}, {"queued_source": {"action": 42}},
+            {"pending_append": {"action": 42}},
+        ):
+            with self.subTest(projection=kwargs):
+                result = self.route(**kwargs)
+>               self.assertFalse(result["ok"], result)
+E               AssertionError: True is not false : {'ok': True, 'action': 'saipen status', 'reason': 'maintain', 'stop_reason': 'NO_ADMISSIBLE_WORK', 'terminal_classification': 'NO_ADMISSIBLE_WORK', 'idle_classification': 'NO_ADMISSIBLE_WORK', 'primary_blocker': None, 'unresolved_audit_count': 42, 'next_exact_action': 'saipen status', 'externally_blocked': [], 'operator_required': [], 'future_gated': [], 'detail': 'no runnable work remains; backlog is unworkable or blocked', 'work_exhaustion': {'schema_version': 2, 'status': 'WORK_ELIGIBLE', 'legacy_status': 'WORK_ELIGIBLE', 'source_generation': '100', 'sources': [{'source_name': 'active_work', 'source_generation': '100', 'last_checked_generation': '100', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'canonical_recovery', 'source_generation': '100', 'last_checked_generation': '100', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'actionable_todo', 'source_generation': '100', 'last_checked_generation': '100', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'unresolved_source', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'provider result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'unconsumed_audit_inbox', 'source_generation': '100', 'last_checked_generation': '100', 'eligibility_result': 'WORK_AVAILABLE', 'authorized_actions': ['saipen audit ingest'], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'release_obligations', 'source_generation': '100', 'last_checked_generation': '100', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'future_gates', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'provider result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'hunt_findings', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'provider result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'improve_candidates', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'BLOCKED_AUTHORITY', 'authorized_actions': [], 'exact_blocker': 'current continuous maintenance grant is not proven', 'next_recheck_condition': 'authenticated grant restored within its scope', 'checked': False}, {'source_name': 'external_forensics', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'provider result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'conformance_debt', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'provider result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'persistent_goals', 'source_generation': '100', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'goal inventory or evaluation is incomplete', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}], 'exhausted': False, 'verified_exhausted': False, 'no_work_available': False, 'all_checked': False, 'blocked_sources': ['improve_candidates'], 'blocked_obligations': [], 'certificate_errors': []}, 'outcome_truth': {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_PENDING', 'publication_details': {'tickets': [], 'diagnostics': []}, 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PENDING'}, 'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED'}
+
+tools\test_t2040_terminal_consumer_guards.py:291: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_assessment_forwards_same_issued_publication_carrier
+SUBFAILED(board=42) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_assessment_refuses_malformed_board_or_discovery_envelope
+SUBFAILED(board={'tickets': {}, 'errors': 42}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_assessment_refuses_malformed_board_or_discovery_envelope
+SUBFAILED(evidence=42) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_assessment_refuses_malformed_board_or_discovery_envelope
+SUBFAILED(evidence={'source_evidence': 42}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_assessment_refuses_malformed_board_or_discovery_envelope
+SUBFAILED(evidence={'source_evidence': []}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_assessment_refuses_malformed_board_or_discovery_envelope
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_authoritative_external_stop_outranks_stale_workable_board
+SUBFAILED(projection={'audit_inbox': {'pending': 42}}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_router_rejects_malformed_truthy_projection_envelopes
+8 failed, 8 passed, 16 deselected, 32 subtests passed in 1.52s

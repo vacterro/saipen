@@ -1,0 +1,21 @@
+T-1926 ZC-01 exposure scan — read-only, 2026-10-27T03:04:35Z
+Values never printed; only sha256 prefixes and file paths.
+
+sibling(__SAIMAIL__): schema=SAIMAIL_LOCAL_IDENTITY_1 version=1 fields=['created', 'recipient_private_key', 'schema', 'seat', 'sender_private_key', 'version']
+  sender_private_key: sha256[:12]=7779ce7a96e1 len=64
+  recipient_private_key: sha256[:12]=69ccc6fb610b len=64
+live(ZAICODE agent): schema=SAIMAIL_LOCAL_IDENTITY_1 version=1 fields=['created', 'recipient_private_key', 'schema', 'seat', 'sender_private_key', 'version']
+  sender_private_key: sha256[:12]=b4612097d969 len=64
+  recipient_private_key: sha256[:12]=033b8d2f32b9 len=64
+
+  IDENTITY-FILE(ignored): live(ZAICODE agent).sender_private_key -> C:\Users\vac34\AppData\Roaming\ZAICODE\saimail\agent\identity\identity.json
+  IDENTITY-FILE(ignored): live(ZAICODE agent).recipient_private_key -> C:\Users\vac34\AppData\Roaming\ZAICODE\saimail\agent\identity\identity.json
+  IDENTITY-FILE(ignored): sibling(__SAIMAIL__).sender_private_key -> ..\__SAIMAIL__\.saimail-workspace\identity\identity.json
+  IDENTITY-FILE(ignored): sibling(__SAIMAIL__).recipient_private_key -> ..\__SAIMAIL__\.saimail-workspace\identity\identity.json
+
+files scanned: 193711
+exposures outside an identity.json: 0
+verdict: NO EXPOSURE
+
+=== identity files are git-ignored, not tracked ===
+37:.saimail-workspace/

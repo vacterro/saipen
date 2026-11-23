@@ -1,0 +1,5 @@
+{
+  "command": "python -m unittest tools.test_session_binding.UnseatedMutationTests.test_the_owner_session_mutates_its_own_work -v",
+  "exit_code": 1,
+  "timestamp_utc": "2026-10-10T11:49:00.1044960Z"
+}

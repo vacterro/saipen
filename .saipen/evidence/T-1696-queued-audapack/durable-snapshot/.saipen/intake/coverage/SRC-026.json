@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-026:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "T12 run history/traceability: bounded recent-ready history in panel, canonical lineage project_id+campaign_run_id, no filename inference",
+      "text": "Implement and verify bounded run history and canonical project/campaign result traceability in T12.",
+      "verification": "tests/ui_qt/test_audit_runs_widget.py::test_panel_recent_history_is_bounded_to_twelve; tests/test_run_id_single_owner.py green",
+      "work": "T-52"
+    }
+  },
+  "schema_version": 1
+}

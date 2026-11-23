@@ -1,0 +1,21 @@
+FAMILY GATE for T-1968 (core-unit family, python -m unittest discover -s tools -p test_*.py)
+record: .saipen\evidence\core-unit\adb364d2c0d4fbd4-20261030T220916916164Z.json
+record sha256: 994bb726f1593fb9a14de74cd35b6b1d47a1ad85db435f6f2d67ffecfc50669b
+verdict: PASS
+ran: 8519
+head: 66ef622a43ab59512735ac78ce10d1250e26f9df
+baseline_sha256: 2d091fe11e7e6cf4002e34bc6c69f0104a53378e6980e906842eeeb973ffcade
+new_red: []
+fixed: []
+problems: []
+baseline red (pre-existing, NOT T-1968):
+  test_t1816_provenance_inventory.ProvenanceInventoryTests.test_committed_ledger_cites_the_missing_ids_as_parents
+  test_t1816_provenance_inventory.ProvenanceInventoryTests.test_committed_ledger_still_misses_exactly_the_cited_events
+  test_t1816_provenance_inventory.ProvenanceInventoryTests.test_working_tree_renumbers_committed_ids_instead_of_repairing
+
+PREVIOUS RUN (same family, before FOREIGN_PROTOCOL_COMMAND was registered in
+REGISTRY.json error_codes) was FAIL with exactly one new red:
+  test_refusal_registry.RegistryCompletenessTests.test_every_production_refusal_code_is_registered
+record: .saipen/evidence/core-unit/f9b996aaa43297b0-20261030T213648364077Z.json
+That red was caused by THIS ticket and is now green: the code was added to the
+canonical closed set, so the family gate proves the repair rather than a retreat.

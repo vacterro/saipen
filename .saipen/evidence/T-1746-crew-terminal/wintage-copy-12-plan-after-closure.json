@@ -1,0 +1,120 @@
+{
+  "ok": true,
+  "code": "CREW_PLAN",
+  "next_action": {
+    "stage": "SC-11",
+    "role": null,
+    "action": "SHIP",
+    "source_identity": {
+      "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+      "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4"
+    },
+    "required_contract": "canonical terminal release bound to the crew epoch",
+    "inputs": [],
+    "expected_evidence": "committed release receipt verified by the release engine",
+    "completion_condition": "release closure is current HEAD and remote-verified",
+    "on_success": "REPLAN",
+    "on_failure": "BLOCK",
+    "execute_in_current_agent": true,
+    "role_paths": [],
+    "write_boundary": "",
+    "then_action": "REPLAN_CREW",
+    "terminal": false,
+    "requires_human": false,
+    "next_action": "SHIP",
+    "resume_after": "REPLAN_CREW",
+    "userperson_projection": null
+  },
+  "stages": [
+    {
+      "stage": "SC-0",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-1",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-2",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-3",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-4",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-5",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-6",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-7",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-8",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-9",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "WAIT-ROLE",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-10",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-11",
+      "state": "UNSATISFIED",
+      "reason": "crew release truth UNKNOWN: release receipt lineage is not clean: release-b88121ea649140659850ffca2e7bb382; release-9f18e1f77e7049979a6cc1afc110d9bd -- resolve or remove the conflicting evidence"
+    },
+    {
+      "stage": "SC-12",
+      "state": "WAITING_ON_PREDECESSOR",
+      "reason": "waiting on predecessor SC-11"
+    },
+    {
+      "stage": "SC-13",
+      "state": "WAITING_ON_PREDECESSOR",
+      "reason": "waiting on predecessor SC-11"
+    }
+  ],
+  "release_context": {
+    "ok": true,
+    "detail": null,
+    "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8",
+    "ticket_id": "",
+    "scope_paths": [
+      ".gitignore",
+      "FINAL_REPORT-T-938.md",
+      "tests/Run-Tests.ps1",
+      "tools/bench-idle-cpu.js",
+      "tools/test-shadow-registry-lifecycle.js",
+      "tools/test-stylesheet-census.js",
+      "wintage.user.js"
+    ]
+  }
+}

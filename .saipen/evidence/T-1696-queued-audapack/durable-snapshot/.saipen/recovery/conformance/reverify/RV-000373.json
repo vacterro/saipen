@@ -1,0 +1,48 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-10-04T21:05:29Z",
+  "evidence_class": "executed",
+  "findings_digest": "823eb7970f459eadffda2e29689720c671e7ea894de852f989740f1a59e14b32",
+  "gate": "core",
+  "integrity_digest": "06db033aa6c24554",
+  "journal_op_id": "reverify.9b7a13ff7609",
+  "original_closure": {
+    "owner": "claude"
+  },
+  "own_problem_keys": [
+    "887eef30f849333c"
+  ],
+  "problem_count": 91,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000373",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:0c125360ae483b4e7f1a84912ec4202fab48973a7d3607ce53407bd10e5901bb",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "python -m pytest tests/test_browser_dispatch.py -q -k \"real_handoff_with_a_matching_digest or bridges_own_campaign_probe\"",
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+      "duration_ms": 1287,
+      "executed": true,
+      "exit_code": 0,
+      "output_bytes": 114,
+      "output_digest": "50fd7b924f2d9d7e",
+      "result": "PASS"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "python -m pytest tests/test_browser_dispatch.py -q -k \"real_handoff_with_a_matching_digest or bridges_own_campaign_probe\""
+    ],
+    "findings_digest": "823eb7970f459eadffda2e29689720c671e7ea894de852f989740f1a59e14b32",
+    "gate": "core"
+  },
+  "verification_contract_digest": "fdb918bf74f5eec2",
+  "verifier": "buffy",
+  "warning_count": 95,
+  "work": "T-102"
+}

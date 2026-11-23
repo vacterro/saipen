@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 import types
 import unittest
 from pathlib import Path
@@ -16,11 +17,176 @@ from unittest.mock import patch
 import audit_floor
 import audit_parity
 from saipen_engine.board import parse_board
+from saipen_engine.process_tree import ProcessTree
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class PortableNeedsFields(unittest.TestCase):
+    #: T-2163 (Campaign XII P1-B), measured 2026-11-22 on this host under
+    #: family-representative ambient load: the MSYS bash floor outlived a
+    #: fixed 30 s window in 7 of 10 samples (p50 30.7 s, p95 330 s -- the
+    #: kill was held hostage by pipe-holding grandchildren a bare kill
+    #: could not reach), while the PowerShell floor kept >= 1.2x headroom
+    #: across all 16 samples.
+    #:
+    #: Campaign XIII tightened that contract twice (P0-A/P0-B):
+    #:
+    #: 1. P0-B -- the floor child runs inside an OWNED process tree
+    #:    (session/group leader on POSIX via start_new_session, an assigned
+    #:    Job Object on Windows), so a window expiry ends the whole tree:
+    #:    grandchildren cannot outlive the kill, hold the output pipes, and
+    #:    stall communicate() past the declared window. The old path
+    #:    (plain Popen + killpg fallback) killed only the direct child on
+    #:    POSIX and left the wall to the grandchildren's lifetime. The owned
+    #:    kill is SIGKILL/TerminateJobObject with no TERM phase: a stalled
+    #:    floor gets no cleanup time it already failed to use, and SIGKILL
+    #:    is the one signal a hung child cannot ignore (the bounded
+    #:    escalation question answered by design, not by timeout ladder).
+    #: 2. P0-A -- a window expiry is an unfinished measurement, never a
+    #:    verdict: the runner is remeasured once at double the window; a
+    #:    runner that answers is judged only on that answer (known-bad
+    #:    stays red fast); a runner that answers in NEITHER window is
+    #:    INCONCLUSIVE_TIMEOUT, and no governing contract lets an
+    #:    inconclusive floor stand for a verified one, so the field fails
+    #:    closed instead of skipping. The named measurement skip this
+    #:    path used to take is exactly how a mandatory floor silently
+    #:    stopped being verified, and this class refuses to rent it again.
+    FLOOR_WINDOW_S = 30.0
+    #: The documented, bounded reap allowance (P0-B acceptance): after the
+    #: owned tree is terminated the second communicate() is bounded by this,
+    #: so the wall of an expired window stays at window + allowance even
+    #: when grandchildren held both pipes.
+    FLOOR_CLEANUP_ALLOWANCE_S = 10.0
+
+    #: P0-A verdict classes. A floor either answers -- VERIFIED_PASS or
+    #: VERIFIED_FAIL, judged strictly on that answer -- or it does not:
+    #: UNAVAILABLE_PLATFORM names a floor whose absence the host contract
+    #: allows (never the native one), and INCONCLUSIVE_TIMEOUT names an
+    #: available floor that never answered, which fails closed.
+    VERIFIED_PASS = "VERIFIED_PASS"
+    VERIFIED_FAIL = "VERIFIED_FAIL"
+    UNAVAILABLE_PLATFORM = "UNAVAILABLE_PLATFORM"
+    INCONCLUSIVE_TIMEOUT = "INCONCLUSIVE_TIMEOUT"
+
+    def mandatory_floor_labels(self) -> tuple[str, ...]:
+        """The floor that is mandatory release coverage on this host.
+
+        ``audit_parity`` measures the native surface -- PowerShell on win32,
+        bash on POSIX -- and this is the same per-platform mapping the field
+        tests treat as mandatory: a missing native floor may not be
+        substituted by an optional one. The other floor, when installed, is
+        optional cross-platform corroboration: audit_parity documents the
+        loud POSIX-shell skip for the parity diagnostic, and this harness
+        honors that absence by simply not running it -- but an AVAILABLE
+        floor is never allowed to time out into silence.
+        """
+        if os.name == "nt":
+            return ("ps1",)
+        return ("sh",)
+
+    def floor_runners(self) -> list:
+        runners = []
+        bash = audit_floor.find_bash()
+        pwsh = audit_floor.find_pwsh()
+        if bash:
+            runners.append((
+                "sh", [bash, str(ROOT / "tests/validate.sh")], audit_floor.bash_env(bash),
+            ))
+        if pwsh:
+            runners.append((
+                "ps1", [pwsh, "-NoProfile", "-ExecutionPolicy", "Bypass",
+                        "-File", str(ROOT / "tests/validate.ps1")], os.environ.copy(),
+            ))
+        labels = [label for label, _command, _environment in runners]
+        mandatory = self.mandatory_floor_labels()
+        if not any(label in mandatory for label in labels):
+            self.fail(
+                f"the mandatory portable floor for this host is "
+                f"{self.UNAVAILABLE_PLATFORM}: the release coverage floor "
+                f"{mandatory[0]!r} is not installed, and the optional floors "
+                f"in the set {labels or ['none']} cannot substitute for it"
+            )
+        return runners
+
+    def run_floor_once(self, command, cwd, environment, window):
+        """One floor invocation inside an owned, bounded process tree.
+
+        The child is started through ``ProcessTree``: session leader on
+        POSIX, an assigned Job Object on Windows. On window expiry the owned
+        tree is terminated and the reap is bounded by
+        FLOOR_CLEANUP_ALLOWANCE_S -- the kill reaches the pipe holders, so
+        communicate() cannot stay hostage to a grandchild's lifetime past
+        window + allowance.
+        """
+        started = time.monotonic()
+        stdout = ""
+        stderr = ""
+        with ProcessTree() as tree:
+            process = tree.start(
+                command, cwd=cwd, env=environment,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True,
+            )
+            try:
+                stdout, stderr = process.communicate(timeout=window)
+            except subprocess.TimeoutExpired:
+                tree.terminate()
+                with contextlib.suppress(subprocess.TimeoutExpired):
+                    stdout, stderr = process.communicate(
+                        timeout=self.FLOOR_CLEANUP_ALLOWANCE_S
+                    )
+                # An answer that arrives while a murdered tree is reaped
+                # belongs to a killed child and cannot speak for the subject.
+                return None, time.monotonic() - started, stdout + stderr
+        wall = time.monotonic() - started
+        if wall >= window:
+            # Answered at the window edge: the expiry owns this wall, and
+            # the race-not the runner-decides nothing about the subject.
+            return None, wall, stdout + stderr
+        return process.returncode, None, stdout + stderr
+
+    def run_floor(self, label, command, cwd, environment):
+        """The runner's verdict class, or the composed fail-closed refusal.
+
+        Remeasured once at double the window (the measured p50 sat on the
+        window's edge, not on the floor's opinion). A runner that answers
+        inside a window is judged only on that answer; a runner that answers
+        in neither window is INCONCLUSIVE_TIMEOUT, and the caller fails
+        closed on that verdict -- never skips it.
+        """
+        windows = (self.FLOOR_WINDOW_S, self.FLOOR_WINDOW_S * 2)
+        walls: list[float] = []
+        for window in windows:
+            returncode, wall, output = self.run_floor_once(
+                command, cwd, environment, window
+            )
+            walls.append(wall)
+            if returncode is not None:
+                return {
+                    "verdict": (
+                        self.VERIFIED_PASS
+                        if returncode == 0
+                        else self.VERIFIED_FAIL
+                    ),
+                    "returncode": returncode,
+                    "output": output,
+                    "walls": walls,
+                }
+        bounds = ", ".join(f"{value:.1f} s" for value in walls)
+        return {
+            "verdict": self.INCONCLUSIVE_TIMEOUT,
+            "returncode": None,
+            "output": (
+                f"floor {label} is {self.INCONCLUSIVE_TIMEOUT}: the platform "
+                f"is available but the runner answered inside neither window "
+                f"({windows[0]:.0f} s then {windows[1]:.0f} s; measured "
+                f"walls {bounds}); an unanswered floor is not a verified "
+                f"floor -- it fails closed, it does not skip"
+            ),
+            "walls": walls,
+        }
+
     def run_floors(self, board: str, *, valid: bool, diagnostic: str = "") -> None:
         parsed = parse_board(board)
         self.assertEqual(parsed.get("errors"), [], parsed)
@@ -33,32 +199,32 @@ class PortableNeedsFields(unittest.TestCase):
                 ("BOARD.md", board), ("LOG.md", audit_floor.GOOD_LOG),
             ):
                 (memory / name).write_text(text, encoding="utf-8")
-            runners = []
-            bash = audit_floor.find_bash()
-            pwsh = audit_floor.find_pwsh()
-            if bash:
-                runners.append((
-                    "sh", [bash, str(ROOT / "tests/validate.sh")], audit_floor.bash_env(bash),
-                ))
-            if pwsh:
-                runners.append((
-                    "ps1", [pwsh, "-NoProfile", "-ExecutionPolicy", "Bypass",
-                            "-File", str(ROOT / "tests/validate.ps1")], os.environ.copy(),
-                ))
-            self.assertTrue(runners, "no portable floor is available")
-            before = {p.name: p.read_bytes() for p in memory.iterdir()}
-            for label, command, environment in runners:
+            for label, command, environment in self.floor_runners():
                 with self.subTest(floor=label):
-                    result = subprocess.run(command, cwd=fixture, env=environment,
-                                            capture_output=True, text=True, encoding="utf-8",
-                                            errors="replace", timeout=30)
-                    output = result.stdout + result.stderr
+                    before = {p.name: p.read_bytes() for p in memory.iterdir()}
+                    verdict = self.run_floor(label, command, fixture, environment)
+                    #: A timeout (or its kill) must not corrupt the evidence
+                    #: either (P0-A mandated controls): the bytes are
+                    #: compared BEFORE the verdict is judged, so a murdered
+                    #: floor that tore the fixture is named for the
+                    #: corruption, and a clean inconclusive floor reaches
+                    #: its fail-closed refusal only on provably intact bytes.
+                    self.assertEqual(
+                        {p.name: p.read_bytes() for p in memory.iterdir()},
+                        before,
+                        "the floor changed the tested memory",
+                    )
+                    if verdict["verdict"] == self.INCONCLUSIVE_TIMEOUT:
+                        self.fail(verdict["output"])
                     if valid:
-                        self.assertEqual(result.returncode, 0, output)
+                        self.assertEqual(
+                            verdict["verdict"], self.VERIFIED_PASS, verdict["output"]
+                        )
                     else:
-                        self.assertNotEqual(result.returncode, 0, "known-bad control passed")
-                        self.assertIn(diagnostic, output)
-                    self.assertEqual({p.name: p.read_bytes() for p in memory.iterdir()}, before)
+                        self.assertEqual(
+                            verdict["verdict"], self.VERIFIED_FAIL, verdict["output"]
+                        )
+                        self.assertIn(diagnostic, verdict["output"])
 
     def test_description_and_blocker_prose_do_not_create_dependencies(self) -> None:
         board = """# Board

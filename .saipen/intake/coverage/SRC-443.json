@@ -1,0 +1,545 @@
+{
+  "requirements": {
+    "SRC-443:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0417\u0430\u043f\u0443\u0441\u043a\u0430\u0435\u0442 platform floor.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041e\u0433\u0440\u0430\u043d\u0438\u0447\u0438\u0432\u0430\u0435\u0442 \u043f\u043e\u043f\u044b\u0442\u043a\u0443 30 \u0441\u0435\u043a\u0443\u043d\u0434\u0430\u043c\u0438.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041f\u0440\u0438 timeout \u0437\u0430\u0432\u0435\u0440\u0448\u0430\u0435\u0442 \u043f\u0440\u043e\u0446\u0435\u0441\u0441\u043d\u043e\u0435 \u0434\u0435\u0440\u0435\u0432\u043e.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041f\u043e\u0432\u0442\u043e\u0440\u044f\u0435\u0442 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0443 \u0441 60-\u0441\u0435\u043a\u0443\u043d\u0434\u043d\u044b\u043c \u043e\u043a\u043d\u043e\u043c.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0415\u0441\u043b\u0438 \u043e\u0442\u0432\u0435\u0442\u0430 \u0441\u043d\u043e\u0432\u0430 \u043d\u0435\u0442, \u0432\u044b\u0437\u044b\u0432\u0430\u0435\u0442 `self.skipTest()`. \u0420\u0435\u0430\u043b\u044c\u043d\u044b\u0439 \u043a\u043e\u0434: ```python windows = (self.FLOOR_WINDOW_S, self.FLOOR_WINDOW_S * 2) for window in windows: returncode, _expired, output = self.run_floor_once( command, cwd, environment, window ) if returncode is not None: return returncode, output self.skipTest(...) ``` \u041f\u0440\u043e\u0431\u043b\u0435\u043c\u0430 \u0437\u0430\u043a\u043b\u044e\u0447\u0430\u0435\u0442\u0441\u044f \u043d\u0435 \u0432 \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u043e\u043c \u0438\u0437\u043c\u0435\u0440\u0435\u043d\u0438\u0438, \u0430 \u0432 \u0442\u043e\u043c, \u043a\u0430\u043a \u0438\u043d\u0442\u0435\u0440\u043f\u0440\u0435\u0442\u0438\u0440\u0443\u0435\u0442\u0441\u044f \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u043e\u0442\u0432\u0435\u0442\u0430. **Timeout \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u0435\u043d\u043d\u043e\u0433\u043e validator \u043d\u0435 \u0440\u0430\u0432\u0435\u043d \u0443\u0441\u043f\u0435\u0448\u043d\u043e\u0439 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0435 \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u0435\u043d\u043d\u043e\u0433\u043e validator.** \u0415\u0441\u043b\u0438 \u0442\u0430\u043a\u0430\u044f \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f mandatory release coverage, \u043f\u0440\u0435\u0432\u0440\u0430\u0449\u0430\u0442\u044c \u0435\u0451 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u0432 \u0434\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u044b\u0439 PASS \u043d\u0435\u043b\u044c\u0437\u044f. ## Required investigation \u041e\u043f\u0440\u0435\u0434\u0435\u043b\u0438\u0442\u044c \u043d\u043e\u0440\u043c\u0430\u0442\u0438\u0432\u043d\u0443\u044e \u0440\u043e\u043b\u044c \u043a\u0430\u0436\u0434\u043e\u0433\u043e floor: - MSYS bash; - PowerShell; - native Windows; - optional cross-platform diagnostic. \u0414\u043b\u044f \u043a\u0430\u0436\u0434\u043e\u0433\u043e \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c:",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u042f\u0432\u043b\u044f\u0435\u0442\u0441\u044f \u043b\u0438 floor \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u043c \u0434\u043b\u044f \u0442\u0435\u043a\u0443\u0449\u0435\u0433\u043e release.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0414\u043e\u043f\u0443\u0441\u043a\u0430\u0435\u0442\u0441\u044f \u043b\u0438 skip \u043f\u043e \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u0439 \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e\u0441\u0442\u0438 \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u044b.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0414\u043e\u043f\u0443\u0441\u043a\u0430\u0435\u0442\u0441\u044f \u043b\u0438 skip \u0438\u0437-\u0437\u0430 timeout \u043f\u0440\u0438 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e\u0439 \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u0435.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041a\u0430\u043a full-family gate \u0443\u0447\u0438\u0442\u044b\u0432\u0430\u0435\u0442 skips.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041c\u043e\u0436\u0435\u0442 \u043b\u0438 PASS \u0441 \u043f\u0440\u043e\u043f\u0443\u0449\u0435\u043d\u043d\u044b\u043c mandatory floor \u043f\u0440\u0438\u0432\u0435\u0441\u0442\u0438 \u043a SHIP. ## Required implementation \u0420\u0430\u0437\u0434\u0435\u043b\u0438\u0442\u044c: **VERIFIED_PASS:** runner \u043e\u0442\u0432\u0435\u0442\u0438\u043b \u0438 \u043f\u0440\u043e\u0448\u0451\u043b. **VERIFIED_FAIL:** runner \u043e\u0442\u0432\u0435\u0442\u0438\u043b \u0438 \u043e\u0431\u043d\u0430\u0440\u0443\u0436\u0438\u043b \u0434\u0435\u0444\u0435\u043a\u0442. **UNAVAILABLE_PLATFORM:** \u0434\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u043e\u0435 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u044b, \u0435\u0441\u043b\u0438 \u044d\u0442\u043e \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043d\u043e \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u043e\u043c. **INCONCLUSIVE_TIMEOUT:** \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u0430 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u0430, \u043d\u043e \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u043d\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u043b\u0430\u0441\u044c. \u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0435\u0435 \u043d\u0435 \u0434\u043e\u043b\u0436\u043d\u043e \u043c\u043e\u043b\u0447\u0430 \u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c\u0441\u044f \u043f\u0440\u043e\u0432\u0435\u0440\u0435\u043d\u043d\u044b\u043c \u0443\u0441\u043f\u0435\u0445\u043e\u043c. \u0414\u043b\u044f mandatory floor \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c \u043f\u0440\u0435\u0434\u0443\u0441\u043c\u043e\u0442\u0440\u0435\u043d\u043d\u0443\u044e fail-closed \u0438\u043b\u0438 blocked-verification \u0441\u0435\u043c\u0430\u043d\u0442\u0438\u043a\u0443. \u0414\u043b\u044f optional floor \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u0442\u043e\u043b\u044c\u043a\u043e \u0442\u0435 skips, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043b\u044c\u043d\u043e \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043d\u044b governing contract. \u041d\u0435 \u043c\u0435\u043d\u044f\u0442\u044c baseline \u0442\u0430\u043a, \u0447\u0442\u043e\u0431\u044b \u043d\u043e\u0432\u044b\u0435 skips \u0441\u0447\u0438\u0442\u0430\u043b\u0438\u0441\u044c \u0434\u043e\u043a\u0430\u0437\u0430\u043d\u043d\u044b\u043c PASS. ## Mandatory tests - Fast valid floor \u2192 PASS. - Fast known-bad floor \u2192 FAIL. - First timeout, second valid \u2192 PASS. - First timeout, second known-bad \u2192 FAIL. - Two timeouts on mandatory floor \u2192 no verified PASS. - Unsupported optional platform \u2192 policy-compliant SKIP. - Timeout does not modify tested BOARD. - Timeout does not corrupt evidence. - No hidden mandatory coverage loss. \u041e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u043e \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u0440\u0430\u0437\u043b\u0438\u0447\u0438\u0435 \u043c\u0435\u0436\u0434\u0443 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435\u043c \u043e\u0442\u0432\u0435\u0442\u0430 \u0438 \u043e\u0442\u0440\u0438\u0446\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u043c \u043e\u0442\u0432\u0435\u0442\u043e\u043c. --- # 5. P0-B \u2014 PROCESS-TREE WATCHDOG NOT FULLY BOUNDED ## Confirmed source issue \u0412 `run_floor_once()` \u0441\u043e\u0437\u0434\u0430\u0451\u0442\u0441\u044f \u043e\u0431\u044b\u0447\u043d\u044b\u0439 `subprocess.Popen()` \u0431\u0435\u0437 \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e\u0439 process group/session. \u0417\u0430\u0442\u0435\u043c \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0435\u0442\u0441\u044f: ```python watchdog = threading.Timer( window, _terminate_process_tree, [process], ) ``` \u0418: ```python stdout, stderr = process.communicate() ``` \u0412 POSIX-\u0432\u0435\u0442\u043a\u0435 `_terminate_process_tree()` \u043f\u044b\u0442\u0430\u0435\u0442\u0441\u044f \u0432\u044b\u0437\u0432\u0430\u0442\u044c `os.killpg(process.pid, ...)`. \u0415\u0441\u043b\u0438 \u043f\u0440\u043e\u0446\u0435\u0441\u0441 \u043d\u0435 \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f \u043b\u0438\u0434\u0435\u0440\u043e\u043c \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e\u0439 \u0433\u0440\u0443\u043f\u043f\u044b, group kill \u043c\u043e\u0436\u0435\u0442 \u043d\u0435 \u0441\u0440\u0430\u0431\u043e\u0442\u0430\u0442\u044c. Fallback \u0437\u0430\u0432\u0435\u0440\u0448\u0430\u0435\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u043d\u0435\u043f\u043e\u0441\u0440\u0435\u0434\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0439 \u043f\u0440\u043e\u0446\u0435\u0441\u0441. Grandchildren \u043c\u043e\u0433\u0443\u0442 \u043f\u0440\u043e\u0434\u043e\u043b\u0436\u0430\u0442\u044c \u0443\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0442\u044c pipe descriptors. \u042d\u0442\u043e \u043e\u0441\u0442\u0430\u0432\u043b\u044f\u0435\u0442 `communicate()` \u0432 \u043e\u0436\u0438\u0434\u0430\u043d\u0438\u0438 \u043f\u043e\u0441\u043b\u0435 \u0438\u0441\u0442\u0435\u0447\u0435\u043d\u0438\u044f \u043e\u0431\u044a\u044f\u0432\u043b\u0435\u043d\u043d\u043e\u0433\u043e deadline. ## Independent reproduction \u041d\u0430 \u0438\u0437\u0432\u043b\u0435\u0447\u0451\u043d\u043d\u043e\u043c source code \u0441\u043e\u0437\u0434\u0430\u043d \u043a\u043e\u043d\u0442\u0440\u043e\u043b\u0438\u0440\u0443\u0435\u043c\u044b\u0439 test: - Window: 1.0 s. - Parent Python process. - Grandchild, \u0443\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u044e\u0449\u0438\u0439 stdout/stderr. - Grandchild \u0437\u0430\u0432\u0435\u0440\u0448\u0430\u0435\u0442 \u0440\u0430\u0431\u043e\u0442\u0443 \u0441\u0430\u043c\u043e\u0441\u0442\u043e\u044f\u0442\u0435\u043b\u044c\u043d\u043e. Observed: ```text configured_window: 1.0 s actual_wall: 5.691 s result: TIMEOUT ``` \u0421\u043b\u0435\u0434\u043e\u0432\u0430\u0442\u0435\u043b\u044c\u043d\u043e, \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u0435 bounded execution \u043d\u0435 \u0433\u0430\u0440\u0430\u043d\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u043e \u043d\u0430 \u043f\u0440\u043e\u0432\u0435\u0440\u0435\u043d\u043d\u043e\u0439 POSIX-\u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u0435. \u042d\u0442\u043e \u043d\u0435 \u0434\u043e\u043a\u0430\u0437\u0430\u0442\u0435\u043b\u044c\u0441\u0442\u0432\u043e \u0442\u043e\u0433\u043e \u0436\u0435 \u0434\u0435\u0444\u0435\u043a\u0442\u0430 \u0432 Windows Job Object path. Windows \u043d\u0443\u0436\u043d\u043e \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e. ## Required repair \u0418\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c platform-correct process ownership. \u0414\u043b\u044f POSIX \u0438\u0441\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u0442\u044c: - \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u0435 \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e\u0439 process session/group; - group termination; - bounded escalation TERM \u2192 KILL; - \u0433\u0430\u0440\u0430\u043d\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u043e\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u0435 pipe readers; - \u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u043e\u0435 \u0437\u0430\u043a\u0440\u044b\u0442\u0438\u0435 streams; - handling of already-exited children; - race between process exit and watchdog. \u0414\u043b\u044f Windows: - exact owned process tree; - Job Object semantics \u0438\u043b\u0438 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043c\u044b\u0439 `taskkill /T`; - bounded termination; - inherited handles; - process creation identity. \u041d\u0435\u043b\u044c\u0437\u044f \u0437\u0430\u0432\u0435\u0440\u0448\u0430\u0442\u044c \u0447\u0443\u0436\u0438\u0435 \u043f\u0440\u043e\u0446\u0435\u0441\u0441\u044b \u043f\u043e \u043e\u0434\u043d\u043e\u043c\u0443 PID. ## Required negative controls",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Normal immediate completion.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Timeout before child spawn.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Parent with grandchild holding stdout.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Multiple descendants.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Child ignores graceful termination.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Parent exits but grandchild stays alive.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Process exits during watchdog activation.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R018": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "PID reuse.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Cancellation.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R020": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Unrelated process remains untouched. ## Acceptance \u041d\u0430\u0441\u0442\u043e\u044f\u0449\u0435\u0435 wall time \u0434\u043e\u043b\u0436\u043d\u043e \u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u043e\u0432\u0430\u0442\u044c declared timeout + \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u043e\u043c\u0443 \u043d\u0435\u0431\u043e\u043b\u044c\u0448\u043e\u043c\u0443 cleanup allowance. \u0418\u0437\u043c\u0435\u0440\u0438\u0442\u044c p50, p95, max \u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 persistent owned orphans. \u041d\u0435 \u0437\u0430\u044f\u0432\u043b\u044f\u0442\u044c bounded execution \u0431\u0435\u0437 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438 \u043f\u0440\u043e\u0446\u0435\u0441\u0441\u0430 \u0441 grandchildren. --- # 6. P0-C \u2014 REGRESSION RED MUST PROVE THE RIGHT DEFECT ## Source ```text tools/test_t2163_floor_timeout_remeasure.py ``` Canonical regression evidence: ```text .saipen/evidence/regression/ regression-execution-2e9f04f1daf042ce9580698bf0bb7571.json ``` \u0417\u0430\u043f\u0438\u0441\u044c \u0441\u043e\u0434\u0435\u0440\u0436\u0438\u0442: - BEFORE: FAIL. - AFTER: PASS. - Same verifier identity. - Four tests. - AFTER: one skipped test. \u041e\u0434\u043d\u0430\u043a\u043e **BEFORE failures \u043d\u0435 \u044f\u0432\u043b\u044f\u044e\u0442\u0441\u044f \u0432\u043e\u0441\u043f\u0440\u043e\u0438\u0437\u0432\u0435\u0434\u0435\u043d\u0438\u0435\u043c \u0438\u0441\u0445\u043e\u0434\u043d\u043e\u0433\u043e 30-\u0441\u0435\u043a\u0443\u043d\u0434\u043d\u043e\u0433\u043e timeout**. \u0412 recorded stderr \u0432\u0441\u0435 \u0447\u0435\u0442\u044b\u0440\u0435 \u0442\u0435\u0441\u0442\u0430 \u043f\u0430\u0434\u0430\u044e\u0442 \u043f\u043e\u0442\u043e\u043c\u0443, \u0447\u0442\u043e \u0441\u0442\u0430\u0440\u0430\u044f \u0440\u0435\u0430\u043b\u0438\u0437\u0430\u0446\u0438\u044f \u043f\u044b\u0442\u0430\u0435\u0442\u0441\u044f \u0432\u044b\u0437\u0432\u0430\u0442\u044c: ```text /usr/bin/bash: V:\\_TEMP_\\saipen-regression-...\\tests\\validate.sh: No such file or directory ``` \u041f\u0440\u0438\u0447\u0438\u043d\u0430: \u0441\u0442\u0430\u0440\u0430\u044f \u0440\u0435\u0430\u043b\u0438\u0437\u0430\u0446\u0438\u044f \u043d\u0435 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0435\u0442 \u043d\u043e\u0432\u044b\u0439 injectable `floor_runners()` \u0438 \u0437\u0430\u043f\u0443\u0441\u043a\u0430\u0435\u0442 \u0440\u0435\u0430\u043b\u044c\u043d\u044b\u0439 platform shell \u0441 \u043d\u0435\u0441\u043e\u0432\u043c\u0435\u0441\u0442\u0438\u043c\u044b\u043c fixture path. \u0422\u0430\u043a\u0438\u043c \u043e\u0431\u0440\u0430\u0437\u043e\u043c, RED \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043b\u044c\u043d\u043e \u043f\u043e\u043b\u0443\u0447\u0435\u043d, \u043d\u043e \u043e\u043d \u043d\u0435 \u0434\u043e\u043a\u0430\u0437\u044b\u0432\u0430\u0435\u0442 \u0437\u0430\u044f\u0432\u043b\u0435\u043d\u043d\u0443\u044e causal pathology. ## Required corrective work \u041d\u0435 \u043f\u0435\u0440\u0435\u043f\u0438\u0441\u044b\u0432\u0430\u0442\u044c historical evidence. \u0421\u043e\u0437\u0434\u0430\u0442\u044c \u043d\u043e\u0432\u044b\u0439 \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 regression pair, \u0433\u0434\u0435: - \u0441\u0442\u0430\u0440\u0430\u044f \u0438 \u043d\u043e\u0432\u0430\u044f \u0440\u0435\u0430\u043b\u0438\u0437\u0430\u0446\u0438\u0438 \u043f\u043e\u043b\u0443\u0447\u0430\u044e\u0442 \u043e\u0434\u0438\u043d\u0430\u043a\u043e\u0432\u044b\u0439 \u043a\u043e\u043d\u0442\u0440\u043e\u043b\u0438\u0440\u0443\u0435\u043c\u044b\u0439 runner; - \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0435\u0442\u0441\u044f \u0434\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u044b\u0439 test environment; - BEFORE \u043f\u0430\u0434\u0430\u0435\u0442 \u0438\u043c\u0435\u043d\u043d\u043e \u043f\u043e timeout; - AFTER \u043f\u043e\u043b\u0443\u0447\u0430\u0435\u0442 \u0440\u0435\u0430\u043b\u044c\u043d\u044b\u0439 verdict; - \u043d\u0435 \u043c\u0435\u043d\u044f\u044e\u0442\u0441\u044f unrelated fixture assumptions; - \u043f\u0440\u043e\u0432\u0435\u0440\u044f\u0435\u0442\u0441\u044f known-bad refusal; - \u0438\u0437\u043c\u0435\u0440\u044f\u0435\u0442\u0441\u044f actual wall bound. \u041f\u0440\u0438 \u043d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u043e\u0441\u0442\u0438 \u0441\u043e\u0437\u0434\u0430\u0442\u044c \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u044b\u0439 \u043d\u0435\u0431\u043e\u043b\u044c\u0448\u043e\u0439 host-agnostic runner oracle. \u041d\u0435 \u043f\u0440\u0435\u0432\u0440\u0430\u0449\u0430\u0442\u044c test patch \u0432 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0435 \u0441\u0430\u043c\u043e\u0433\u043e \u043f\u0440\u043e\u0432\u0435\u0440\u044f\u0435\u043c\u043e\u0433\u043e \u043f\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u044f. \u0415\u0441\u043b\u0438 canonical regression pairing \u043d\u0435 \u043f\u043e\u0437\u0432\u043e\u043b\u044f\u0435\u0442 \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u043e \u043f\u043e\u0441\u0442\u0440\u043e\u0438\u0442\u044c \u0442\u0430\u043a\u043e\u0439 oracle, \u0437\u0430\u0444\u0438\u043a\u0441\u0438\u0440\u043e\u0432\u0430\u0442\u044c limitation \u0438 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c \u043f\u0440\u0435\u0434\u0443\u0441\u043c\u043e\u0442\u0440\u0435\u043d\u043d\u0443\u044e \u0430\u043b\u044c\u0442\u0435\u0440\u043d\u0430\u0442\u0438\u0432\u043d\u0443\u044e \u043d\u0435\u0437\u0430\u0432\u0438\u0441\u0438\u043c\u0443\u044e \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0443. ## Acceptance Evidence \u0434\u043e\u043b\u0436\u0435\u043d \u0434\u043e\u043a\u0430\u0437\u044b\u0432\u0430\u0442\u044c: `BEFORE: genuine timeout defect` `AFTER: corrected timeout behavior` \u0430 \u043d\u0435: `BEFORE: missing file` `AFTER: different test harness` \u0414\u043e \u044d\u0442\u043e\u0433\u043e \u0441\u0447\u0438\u0442\u0430\u0442\u044c \u0442\u0435\u043a\u0443\u0449\u0438\u0439 regression proof \u043d\u0435\u043f\u043e\u043b\u043d\u044b\u043c. --- # 7. P1 \u2014 1,029 SECONDS FOR ZERO TESTS ## Exact evidence ```text .saipen/evidence/focused-unit/ 5f6a19d06e6cb029-20261122T133104115616Z.json ``` Result: ```text status: FAIL ran: 0 duration: 1029.031 s ``` Measured cost: | Component | Seconds | |---|---:| | Environment identity | 22.328 | | Copy | 824.172 | | Cleanup | 178.953 | | Execution | 0 | | Total | 1029.031 | Copy breakdown: - Subject copy: 179.25 s. - Canonical copy: 644.234 s. Selected modules: ```text test_sandbox_work_surface.py test_t1505_core_unit_sandbox_reclaim.py test_t1889_sandbox_scope.py ``` Sandbox mode: `FULL` Undeclared: ```text test_sandbox_work_surface.py test_t1505_core_unit_sandbox_reclaim.py ``` Runner \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u043b\u0441\u044f \u0434\u043e \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u0433\u043e test execution. ## Immediate objective **An infrastructure preparation failure must not consume 17 minutes before reporting zero executed tests.** \u041d\u043e \u043d\u0435 \u0438\u0437\u043c\u0435\u043d\u044f\u0442\u044c sandbox scopes \u043c\u0435\u0445\u0430\u043d\u0438\u0447\u0435\u0441\u043a\u0438. \u042d\u0442\u0438 \u043c\u043e\u0434\u0443\u043b\u0438 \u043f\u0440\u043e\u0432\u0435\u0440\u044f\u044e\u0442 \u0441\u0430\u043c \u043c\u0435\u0445\u0430\u043d\u0438\u0437\u043c \u0437\u0430\u0449\u0438\u0442\u044b sandbox \u0438 \u043c\u043e\u0433\u0443\u0442 \u0442\u0440\u0435\u0431\u043e\u0432\u0430\u0442\u044c FULL representation. ## Required investigation \u0418\u0437\u043c\u0435\u0440\u0438\u0442\u044c: - \u0447\u0438\u0441\u043b\u043e copied files; - \u0447\u0438\u0441\u043b\u043e copied bytes; - directory traversal; - antivirus/disk contention; - destination filesystem performance; - hardlinks/reparse points; - repeated canonical copy; - stale sandbox sweep; - cancellation during copying; - cleanup after incomplete preparation. \u0421\u0440\u0430\u0432\u043d\u0438\u0442\u044c \u0441 \u043f\u0440\u0435\u0434\u044b\u0434\u0443\u0449\u0438\u043c FULL machinery run, \u0433\u0434\u0435 \u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 \u0437\u0430\u043d\u0438\u043c\u0430\u043b\u043e \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e \u043c\u0435\u043d\u044c\u0448\u0435 \u0432\u0440\u0435\u043c\u0435\u043d\u0438. \u041e\u043f\u0440\u0435\u0434\u0435\u043b\u0438\u0442\u044c, \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f \u043b\u0438 824-\u0441\u0435\u043a\u0443\u043d\u0434\u043d\u0430\u044f \u0441\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c \u0443\u0441\u0442\u043e\u0439\u0447\u0438\u0432\u044b\u043c bottleneck \u0438\u043b\u0438 \u0441\u043b\u0435\u0434\u0441\u0442\u0432\u0438\u0435\u043c \u0432\u0440\u0435\u043c\u0435\u043d\u043d\u043e\u0439 host contention. ## Engineering candidates - bounded pre-copy health check; - safe cancellation; - progress accounting; - avoiding duplicate immutable copies; - existing-snapshot reuse where protocol permits; - reducing redundant filesystem enumeration; - fast failure before expensive copy when prerequisites unavailable; - safe cleanup of partially constructed owned sandboxes. \u041d\u0435 \u043f\u0440\u043e\u043f\u0443\u0441\u043a\u0430\u0442\u044c \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u0435 test trees. \u041d\u0435 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c unsafe hardlinks \u0432 mutable source fixtures. \u041d\u0435 \u0443\u0434\u0430\u043b\u044f\u0442\u044c \u0447\u0443\u0436\u0438\u0435 sandboxes. ## Acceptance \u0415\u0441\u043b\u0438 \u043f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043a\u0430 \u0437\u0430\u0432\u0435\u0440\u0448\u0430\u0435\u0442\u0441\u044f \u0431\u0435\u0437 \u0442\u0435\u0441\u0442\u043e\u0432, runner \u0434\u043e\u043b\u0436\u0435\u043d \u0432\u043e\u0437\u0432\u0440\u0430\u0449\u0430\u0442\u044c \u0442\u043e\u0447\u043d\u0443\u044e \u0438\u043d\u0444\u0440\u0430\u0441\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u043d\u0443\u044e \u043f\u0440\u0438\u0447\u0438\u043d\u0443, \u0430 \u043d\u0435 ambiguous test failure. \u041f\u043e\u0442\u0440\u0430\u0447\u0435\u043d\u043d\u044b\u0435 \u0440\u0435\u0441\u0443\u0440\u0441\u044b \u0434\u043e\u043b\u0436\u043d\u044b \u0431\u044b\u0442\u044c \u0438\u0437\u043c\u0435\u0440\u0435\u043d\u044b. \u041f\u043e\u0432\u0442\u043e\u0440 \u0442\u0430\u043a\u043e\u0433\u043e failure \u0431\u0435\u0437 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0443\u0441\u043b\u043e\u0432\u0438\u0439 \u043d\u0435 \u0434\u043e\u043b\u0436\u0435\u043d \u0437\u0430\u043f\u0443\u0441\u043a\u0430\u0442\u044c\u0441\u044f \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438. --- # 8. P1 \u2014 PUBLICATION CONVERGENCE FIXTURE CONSOLIDATION Current source change: ```text tools/test_t1613_publication_convergence.py ``` \u0420\u0435\u0430\u043b\u0438\u0437\u043e\u0432\u0430\u043d\u043e: - `setUpClass()` prepares one immutable source fixture. - `_Publisher` accepts `prepared_source`. - Each test receives its own copied instance. - Repeated Git initialization/commit setup is reduced. \u0421\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u043e \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u0435 publication execution. \u042d\u0442\u043e \u0440\u0430\u0437\u0443\u043c\u043d\u043e\u0435 \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u043e\u0435 optimization direction. ## Current limitation E-23072 \u0441\u043e\u043e\u0431\u0449\u0430\u0435\u0442: **Standalone module duration: 2882.9 s under heavy ambient load.** \u0418\u0441\u0442\u043e\u0440\u0438\u0447\u0435\u0441\u043a\u0438\u0435 family module measurements \u0441\u043e\u0441\u0442\u0430\u0432\u043b\u044f\u043b\u0438 \u043e\u043a\u043e\u043b\u043e 250\u2013300 \u0441\u0435\u043a\u0443\u043d\u0434. \u042d\u0442\u043e \u043d\u0435 \u0434\u043e\u043a\u0430\u0437\u044b\u0432\u0430\u0435\u0442 \u0443\u043b\u0443\u0447\u0448\u0435\u043d\u0438\u044f wall time. \u0418\u0437-\u0437\u0430 \u0441\u0438\u043b\u044c\u043d\u043e\u0433\u043e contention \u043d\u0435\u043b\u044c\u0437\u044f \u043e\u0431\u044a\u044f\u0432\u043b\u044f\u0442\u044c \u0434\u0430\u043d\u043d\u0443\u044e \u043e\u043f\u0442\u0438\u043c\u0438\u0437\u0430\u0446\u0438\u044e \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442\u0438\u0432\u043d\u043e\u0439 \u0442\u043e\u043b\u044c\u043a\u043e \u043f\u043e \u0447\u0438\u0441\u043b\u0443 \u0438\u0441\u043a\u043b\u044e\u0447\u0451\u043d\u043d\u044b\u0445 Git commands. ## Required work \u041f\u0440\u043e\u0432\u0435\u0441\u0442\u0438 controlled A/B: - original fixture strategy; - new shared fixture strategy; - same source bytes; - same runtime; - same test membership; - quiet-window workload; - comparable disk load. Measure: - fixture setup; - Git startup; - copy; - actual installer; - lock wait; - cleanup; - module wall p50/p95. \u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c: - \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 contamination \u043c\u0435\u0436\u0434\u0443 tests; - independent mutable state; - identical publication results; - Windows sharing conflict behavior; - correct fixture cleanup. \u0415\u0441\u043b\u0438 measured improvement \u0435\u0441\u0442\u044c, \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c patch. \u0415\u0441\u043b\u0438 improvement \u0438\u0441\u0447\u0435\u0437\u0430\u0435\u0442 \u043d\u0430 representative load, \u043f\u0435\u0440\u0435\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0441\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043d\u043e\u0439 \u0441\u043b\u043e\u0436\u043d\u043e\u0441\u0442\u0438. \u041d\u0435 \u0437\u0430\u043c\u0435\u043d\u044f\u0442\u044c native publication integration mocks. --- # 9. P1 \u2014 VERIFICATION PREFLIGHT ACCEPTANCE \u041d\u043e\u0432\u044b\u0439 `preflight()` \u0434\u043e\u043b\u0436\u0435\u043d \u043f\u043e\u043c\u043e\u0447\u044c \u0438\u0437\u0431\u0435\u0436\u0430\u0442\u044c \u043f\u043e\u0432\u0442\u043e\u0440\u0435\u043d\u0438\u044f \u0438\u0441\u0442\u043e\u0440\u0438\u0438 \u0441 \u0447\u0435\u0442\u044b\u0440\u044c\u043c\u044f full-family runs. ## Required scenarios ### A. Exact reusable evidence Return: `REUSABLE_EXACT_RECORD` and reference the correct compatible record. ### B. Same source, wrong evaluator route Return: `EVALUATOR_ENVIRONMENT_MISMATCH` with exact verifier-path difference. \u041d\u0435 \u043c\u0435\u043d\u044f\u0442\u044c record identity. ### C. New source fingerprint Return: `NEW_SOURCE_VERIFICATION_REQUIRED`. ### D. Updated baseline Return: `NEW_BASELINE_VERIFICATION_REQUIRED`. ### E. Newest run failed Return: `PREVIOUS_FAILURE_REQUIRES_TRIAGE`. Do not reuse an older PASS to hide a newer conflicting failure. ### F. Corrupt record Return: `INVALID_OR_CORRUPT_RECORD`. ### G. Mandatory freshness \u041d\u0435 \u0441\u043e\u0432\u0435\u0442\u043e\u0432\u0430\u0442\u044c reuse, \u0435\u0441\u043b\u0438 current protocol \u0442\u0440\u0435\u0431\u0443\u0435\u0442 fresh execution. ## Live Windows acceptance \u041f\u0440\u043e\u0442\u0435\u0441\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0440\u0435\u0430\u043b\u044c\u043d\u044b\u0435 \u0441\u043b\u0443\u0447\u0430\u0438: - source launcher; - installed launcher; - alternate Python; - different shell; - valid existing record; - stale environment; - changed baseline. **Primary practical target:** never rerun a 35-minute family merely because diagnostic advice failed to identify the evaluator route. \u042d\u0442\u043e \u0434\u0438\u0430\u0433\u043d\u043e\u0441\u0442\u0438\u0447\u0435\u0441\u043a\u043e\u0435 \u0443\u043b\u0443\u0447\u0448\u0435\u043d\u0438\u0435, \u043d\u0435 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0435 release authorization. --- # 10. P1 \u2014 FULL-FAMILY PERFORMANCE \u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u044b\u0439 full-family baseline \u0438\u0437 \u043f\u0440\u0435\u0434\u044b\u0434\u0443\u0449\u0435\u0439 \u0441\u043c\u0435\u043d\u044b: - 8 911 tests. - 2 141.4 s. - 104 inherited red. - 0 new red. - Baseline-relative PASS. \u0412 \u043d\u043e\u0432\u043e\u043c snapshot \u043d\u0435\u0442 \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u043e\u0433\u043e full-family record \u0434\u043b\u044f \u0432\u0441\u0435\u0439 \u0442\u0435\u043a\u0443\u0449\u0435\u0439 \u0441\u043e\u0432\u043e\u043a\u0443\u043f\u043d\u043e\u0441\u0442\u0438 T-2163 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439. \u0421\u043b\u0435\u0434\u043e\u0432\u0430\u0442\u0435\u043b\u044c\u043d\u043e: **CURRENT TREE FULL-FAMILY STATUS: UNVERIFIED in the provided archive.** \u0414\u043e \u043d\u043e\u0432\u043e\u0433\u043e \u043f\u043e\u043b\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0433\u043e\u043d\u0430:",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0417\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u044c source changes.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0418\u0441\u043f\u0440\u0430\u0432\u0438\u0442\u044c P0 verification issues.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R023": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0412\u044b\u043f\u043e\u043b\u043d\u0438\u0442\u044c focused and adjacent tests.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0421\u0442\u0430\u0431\u0438\u043b\u0438\u0437\u0438\u0440\u043e\u0432\u0430\u0442\u044c subject fingerprint.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R025": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0417\u0430\u043f\u0443\u0441\u0442\u0438\u0442\u044c read-only preflight.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R026": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c correct evaluator environment.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R027": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0417\u0430\u043f\u0443\u0441\u0442\u0438\u0442\u044c \u0440\u043e\u0432\u043d\u043e \u0442\u0440\u0435\u0431\u0443\u0435\u043c\u0443\u044e \u043f\u043e\u043b\u043d\u0443\u044e \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0443.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R028": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c executed evidence.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R029": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041d\u0435 \u043f\u043e\u0432\u0442\u043e\u0440\u044f\u0442\u044c \u0435\u0451 \u0431\u0435\u0437 \u043d\u043e\u0432\u043e\u0433\u043e \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043c\u043e\u0433\u043e \u043e\u0441\u043d\u043e\u0432\u0430\u043d\u0438\u044f. ## Remaining hotspots \u041f\u043e\u0441\u043b\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u044f T-2163: - `test_t1613_publication_convergence`; - `test_validator_layout_parity`; - `test_t1553_mid_session_activation`; - `test_t1474_start_goal_entry`; - `test_t1647_machine_runtime`. T-2137 \u0443\u0436\u0435 \u043e\u043f\u0440\u043e\u0432\u0435\u0440\u0433 unsafe evidence/archive pruning. \u041d\u0435 \u043f\u043e\u0432\u0442\u043e\u0440\u044f\u0442\u044c \u044d\u0442\u0443 \u0433\u0438\u043f\u043e\u0442\u0435\u0437\u0443. \u0414\u043b\u044f \u043a\u0430\u0436\u0434\u043e\u0433\u043e \u043d\u043e\u0432\u043e\u0433\u043e \u0443\u0447\u0430\u0441\u0442\u043a\u0430: `PER-TEST PROFILE \u2192 ROOT CAUSE \u2192 PATCH \u2192 PARITY \u2192 BENCHMARK` --- # 11. P2 \u2014 WHOLE-SYSTEM PERFORMANCE \u041f\u043e\u0441\u043b\u0435 \u0443\u0441\u0442\u0440\u0430\u043d\u0435\u043d\u0438\u044f verification correctness debt \u043f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u0435 \u0443\u0441\u043a\u043e\u0440\u0435\u043d\u0438\u0435 SAIPEN. ## Measure full autonomous cycle ```text NATIVE INGRESS \u2192 ROUTING \u2192 WORK CLAIM \u2192 IMPLEMENTATION \u2192 FOCUSED VERIFICATION \u2192 FULL VERIFICATION WHEN REQUIRED \u2192 REVIEW \u2192 SHIP \u2192 DURABLE CONTINUATION ``` Metrics: - total wall; - useful engineering work time; - unnecessary verification time; - total CPU; - peak memory; - filesystem operations; - process launches; - duplicate status calls; - context tokens; - verified completions per hour. ## Candidate improvements **CLI startup:** repeated import and interpreter cost. **Journal:** request-local consistent snapshot reuse. **Filesystem:** duplicate reads and hashes. **Verification:** exact evidence reuse with strict freshness. **Context:** avoid unnecessary full BOARD/LOG loading. **Orchestration:** eliminate repeated checks against unchanged inputs. **Test infrastructure:** bounded sandbox preparation, cleanup and process ownership. No global caching rewrite unless profiling supports it. No speculative resident daemon before the relevant v8/v9 gates. --- # 12. PERFORMANCE SCOREBOARD For each accepted patch: ```text WORK: SOURCE HEAD: MEASURED ROOT CAUSE: BEFORE: wall p50: wall p95: CPU: memory: copy: execution: cleanup: process count: tests ran: skipped: new red: AFTER: same fields CORRECTNESS: focused: adjacent: adversarial: family: platform coverage: EVIDENCE: subject identity: environment identity: verifier identity: authorized reuse: PUBLICATION: source: committed: installed: native verified: NEXT: highest measured bottleneck ``` \u041d\u0435 \u0441\u043c\u0435\u0448\u0438\u0432\u0430\u0442\u044c measured speedup \u0441 avoided hypothetical runtime. \u0415\u0441\u043b\u0438 suite \u043d\u0435 \u0432\u044b\u043f\u043e\u043b\u043d\u044f\u043b\u0441\u044f, \u0435\u0433\u043e \u0434\u043b\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c \u043d\u0435\u043b\u044c\u0437\u044f \u043e\u0431\u044a\u044f\u0432\u043b\u044f\u0442\u044c \u0443\u043b\u0443\u0447\u0448\u0435\u043d\u043d\u043e\u0439. --- # 13. EXECUTION ORDER ## Wave A \u2014 Current T-2163 Refresh actual native STATE and source identity. \u041d\u0435 \u0441\u043e\u0437\u0434\u0430\u0432\u0430\u0442\u044c duplicate Work. ## Wave B \u2014 Floor timeout semantics \u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c mandatory coverage \u0438 \u0443\u0441\u0442\u0440\u0430\u043d\u0438\u0442\u044c \u043f\u0440\u0435\u0432\u0440\u0430\u0449\u0435\u043d\u0438\u0435 unresolved floor \u0432 \u043b\u043e\u0436\u043d\u0443\u044e \u0443\u0441\u043f\u0435\u0448\u043d\u0443\u044e \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0443. ## Wave C \u2014 Process-tree boundedness \u0418\u0441\u043f\u0440\u0430\u0432\u0438\u0442\u044c POSIX process group behavior \u0438 \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c Windows ownership semantics. ## Wave D \u2014 Regression integrity \u041f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u043d\u043e\u0432\u044b\u0439 causal RED/GREEN \u0434\u043b\u044f timeout-repair. ## Wave E \u2014 Expensive zero-test sandbox \u041f\u0440\u043e\u0444\u0438\u043b\u0438\u0440\u043e\u0432\u0430\u0442\u044c 1 029-\u0441\u0435\u043a\u0443\u043d\u0434\u043d\u0443\u044e \u043f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043a\u0443 \u0438 \u0443\u0441\u0442\u0440\u0430\u043d\u0438\u0442\u044c \u0434\u043e\u043a\u0430\u0437\u0430\u043d\u043d\u0443\u044e \u0438\u0437\u0431\u044b\u0442\u043e\u0447\u043d\u0443\u044e \u0440\u0430\u0431\u043e\u0442\u0443. ## Wave F \u2014 Publication fixture economics \u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0440\u0435\u0430\u043b\u044c\u043d\u0443\u044e \u0432\u044b\u0433\u043e\u0434\u0443 \u043a\u043e\u043d\u0441\u043e\u043b\u0438\u0434\u0430\u0446\u0438\u0438 fixtures. ## Wave G \u2014 Verification preflight \u0417\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u044c native compatibility acceptance. ## Wave H \u2014 Canonical full-family \u041f\u043e\u0441\u043b\u0435 source freeze \u0432\u044b\u043f\u043e\u043b\u043d\u0438\u0442\u044c \u0442\u0440\u0435\u0431\u0443\u0435\u043c\u0443\u044e fresh verification \u0441 \u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u044b\u043c environment. ## Wave I \u2014 Lifecycle completion \u0417\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u044c T-2163 \u0447\u0435\u0440\u0435\u0437 \u0434\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u044b\u0435 VERIFY/REVIEW/SHIP transitions. ## Wave J \u2014 Next performance work \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c \u043f\u043e \u043e\u0441\u0442\u0430\u0432\u0448\u0438\u043c\u0441\u044f \u0441\u0430\u043c\u044b\u043c \u0434\u043e\u0440\u043e\u0433\u0438\u043c integration modules \u0438 autonomous-cycle costs. \u041d\u0435 \u043e\u0441\u0442\u0430\u043d\u0430\u0432\u043b\u0438\u0432\u0430\u0442\u044c\u0441\u044f \u043f\u043e\u0441\u043b\u0435 \u043e\u0434\u043d\u043e\u0433\u043e \u0438\u0441\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f, \u0435\u0441\u043b\u0438 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u0430 \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0430\u044f \u0437\u043d\u0430\u0447\u0438\u043c\u0430\u044f \u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u0430\u044f \u0440\u0430\u0431\u043e\u0442\u0430. --- # 14. SAFETY AND AUTHORITY \u0420\u0435\u0436\u0438\u043c 2 \u043d\u0435 \u0434\u0430\u0451\u0442 \u043f\u0440\u0430\u0432\u0430 \u043f\u043e\u0434\u0434\u0435\u043b\u044b\u0432\u0430\u0442\u044c \u043e\u043f\u0435\u0440\u0430\u0442\u043e\u0440\u0441\u043a\u0438\u0435 \u043f\u043e\u043b\u043d\u043e\u043c\u043e\u0447\u0438\u044f. \u042d\u0442\u043e\u0442 handoff \u043d\u0435 \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f \u043d\u043e\u0432\u044b\u043c authenticated operator grant. \u0417\u0430\u043f\u0440\u0435\u0449\u0435\u043d\u043e: - \u0441\u043a\u0440\u044b\u0432\u0430\u0442\u044c mandatory test failures \u0447\u0435\u0440\u0435\u0437 SKIP; - \u043f\u043e\u0434\u0434\u0435\u043b\u044b\u0432\u0430\u0442\u044c regression causality; - \u0438\u0437\u043c\u0435\u043d\u044f\u0442\u044c historical evidence; - \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c incompatible verification records; - \u043f\u0435\u0440\u0435\u043f\u0438\u0441\u044b\u0432\u0430\u0442\u044c baseline \u0440\u0430\u0434\u0438 PASS; - \u0437\u0430\u043f\u0443\u0441\u043a\u0430\u0442\u044c destructive cleanup \u0431\u0435\u0437 ownership; - \u0443\u0431\u0438\u0432\u0430\u0442\u044c \u0447\u0443\u0436\u0438\u0435 \u043f\u0440\u043e\u0446\u0435\u0441\u0441\u044b; - \u0434\u0435\u043b\u0430\u0442\u044c blanket Git commits; - \u0443\u0434\u0430\u043b\u044f\u0442\u044c \u0447\u0443\u0436\u043e\u0439 WIP; - \u043e\u0431\u0445\u043e\u0434\u0438\u0442\u044c clean-source install gate; - \u0432\u044b\u043f\u043e\u043b\u043d\u044f\u0442\u044c \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u044b\u0439 full-family \u0431\u0435\u0437 \u043e\u0431\u043e\u0441\u043d\u043e\u0432\u0430\u043d\u043d\u043e\u0433\u043e preflight. \u0415\u0441\u043b\u0438 \u043e\u0434\u043d\u0430 \u043e\u043f\u0435\u0440\u0430\u0446\u0438\u044f \u0437\u0430\u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u0430\u043d\u0430 authority, \u043f\u0440\u043e\u0434\u043e\u043b\u0436\u0430\u0442\u044c \u043d\u0435\u0437\u0430\u0432\u0438\u0441\u0438\u043c\u044b\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0451\u043d\u043d\u044b\u0435 tasks. \u0415\u0441\u043b\u0438 performance hypothesis \u043e\u043f\u0440\u043e\u0432\u0435\u0440\u0433\u043d\u0443\u0442\u0430, \u0437\u0430\u043f\u0438\u0441\u0430\u0442\u044c \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442 \u0438 \u043f\u0435\u0440\u0435\u0439\u0442\u0438 \u0434\u0430\u043b\u044c\u0448\u0435. \u041d\u0435 \u0437\u0430\u043f\u0443\u0441\u043a\u0430\u0442\u044c \u0431\u0435\u0441\u043a\u043e\u043d\u0435\u0447\u043d\u044b\u0435 retries \u043f\u0440\u043e\u0442\u0438\u0432 \u043e\u0434\u043d\u043e\u0433\u043e \u0438 \u0442\u043e\u0433\u043e \u0436\u0435 \u043d\u0435\u0438\u0437\u043c\u0435\u043d\u043d\u043e\u0433\u043e blocker. --- # 15. ACCEPTANCE CRITERIA Campaign XIII \u043f\u0440\u0438\u043d\u043e\u0441\u0438\u0442 \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442, \u0435\u0441\u043b\u0438:",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R030": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "T-2163 \u0441\u043e\u0445\u0440\u0430\u043d\u044f\u0435\u0442 \u0433\u043e\u0442\u043e\u0432\u044b\u0435 preflight improvements.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R031": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Mandatory floor timeout \u043d\u0435 \u0441\u043a\u0440\u044b\u0432\u0430\u0435\u0442\u0441\u044f \u0437\u0430 \u0443\u0441\u043f\u0435\u0448\u043d\u044b\u043c verification verdict.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R032": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Process-tree execution \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043b\u044c\u043d\u043e bounded \u043d\u0430 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043c\u044b\u0445 \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u0430\u0445.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R033": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Regression RED \u0434\u043e\u043a\u0430\u0437\u044b\u0432\u0430\u0435\u0442 \u0438\u0441\u0445\u043e\u0434\u043d\u044b\u0439 timeout defect.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R034": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Focused test setup \u043d\u0435 \u043f\u043e\u0442\u0440\u0435\u0431\u043b\u044f\u0435\u0442 17 \u043c\u0438\u043d\u0443\u0442 \u0431\u0435\u0437 \u0434\u0438\u0430\u0433\u043d\u043e\u0441\u0442\u0438\u0440\u0443\u0435\u043c\u043e\u0439 \u043f\u0440\u0438\u0447\u0438\u043d\u044b.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R035": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Publication fixture optimization \u0438\u043c\u0435\u0435\u0442 \u0447\u0435\u0441\u0442\u043d\u044b\u0439 \u0438\u0437\u043c\u0435\u0440\u0435\u043d\u043d\u044b\u0439 \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R036": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Preflight \u043f\u0440\u0435\u0434\u0443\u043f\u0440\u0435\u0436\u0434\u0430\u0435\u0442 \u043d\u0435\u043d\u0443\u0436\u043d\u044b\u0435 family reruns.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R037": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041d\u0435\u0442 \u043d\u043e\u0432\u044b\u0445 \u0441\u043a\u0440\u044b\u0442\u044b\u0445 skips.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R038": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Test membership \u0438 coverage \u0441\u043e\u0445\u0440\u0430\u043d\u044f\u044e\u0442\u0441\u044f.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R039": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Current source family evidence \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u043e \u0438\u043b\u0438 \u0447\u0435\u0441\u0442\u043d\u043e \u043f\u043e\u043c\u0435\u0447\u0435\u043d\u043e blocked.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R040": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Raw FAIL \u043d\u0435 \u0432\u044b\u0434\u0430\u0451\u0442\u0441\u044f \u0437\u0430 zero-failure PASS.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R041": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Source \u0438 installed identities \u043d\u0435 \u0441\u043c\u0435\u0448\u0438\u0432\u0430\u044e\u0442\u0441\u044f.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R042": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041d\u0438 \u043e\u0434\u0438\u043d \u0447\u0443\u0436\u043e\u0439 WIP \u043d\u0435 \u0443\u043d\u0438\u0447\u0442\u043e\u0436\u0435\u043d.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R043": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Performance improvements \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u044b comparable benchmarks.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R044": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0414\u0430\u043b\u044c\u043d\u0435\u0439\u0448\u0430\u044f \u0430\u0432\u0442\u043e\u043d\u043e\u043c\u043d\u0430\u044f \u0440\u0430\u0431\u043e\u0442\u0430 \u0438\u043c\u0435\u0435\u0442 \u043a\u043e\u043d\u043a\u0440\u0435\u0442\u043d\u044b\u0439 measured target. --- # 16. FIRST EXACT ACTION NOW",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R045": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041f\u0440\u043e\u0447\u0438\u0442\u0430\u0442\u044c native STATE \u0438 \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c live T-2163 VERIFY.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R046": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0442\u0435\u043a\u0443\u0449\u0438\u0435 dirty paths \u0438 exact source identity.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R047": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044c \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 preflight \u043d\u0430 \u0442\u0435\u043a\u0443\u0449\u0435\u043c runtime.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R048": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0421\u043e\u0437\u0434\u0430\u0442\u044c RED \u043d\u0430 mandatory floor, \u043a\u043e\u0442\u043e\u0440\u044b\u0439 \u0434\u0432\u0430\u0436\u0434\u044b \u043f\u0440\u0435\u0432\u044b\u0448\u0430\u0435\u0442 timeout.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R049": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0421\u043e\u0437\u0434\u0430\u0442\u044c POSIX grandchild-pipe negative test.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R050": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0418\u0441\u043f\u0440\u0430\u0432\u0438\u0442\u044c process-tree termination \u0438 bounded communication.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R051": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0418\u0441\u043f\u0440\u0430\u0432\u0438\u0442\u044c policy \u043e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0438 inconclusive mandatory floors.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R052": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041f\u0435\u0440\u0435\u0441\u043e\u0431\u0440\u0430\u0442\u044c \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u043e\u0435 causal RED/GREEN evidence.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R053": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0418\u0441\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u0442\u044c record \u0441 1 029 \u0441\u0435\u043a\u0443\u043d\u0434\u0430\u043c\u0438 \u0438 0 \u0442\u0435\u0441\u0442\u043e\u0432.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R054": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c publication fixture consolidation under controlled load.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R055": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0412\u044b\u043f\u043e\u043b\u043d\u0438\u0442\u044c focused/adjacent verification.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R056": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0417\u0430\u0444\u0438\u043a\u0441\u0438\u0440\u043e\u0432\u0430\u0442\u044c source identity.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R057": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0412\u044b\u043f\u043e\u043b\u043d\u0438\u0442\u044c canonical preflight.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R058": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0417\u0430\u043f\u0443\u0441\u0442\u0438\u0442\u044c \u0442\u043e\u043b\u044c\u043a\u043e \u043d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u044b\u0439 full-family run.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R059": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u0417\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u044c T-2163 \u0447\u0435\u0440\u0435\u0437 \u0440\u0430\u0437\u0440\u0435\u0448\u0451\u043d\u043d\u044b\u0439 lifecycle.",
+      "verification": null,
+      "work": "T-2163"
+    },
+    "SRC-443:R060": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c \u0441 `test_t1553_mid_session_activation`, `test_validator_layout_parity` \u0438 \u043e\u0431\u0449\u0438\u043c\u0438 \u0437\u0430\u0442\u0440\u0430\u0442\u0430\u043c\u0438 autonomous cycle. ## GOVERNING DIRECTIVE **A faster test runner that silently skips required checks is not faster verification. It is less verification.** **A correct preflight that prevents unnecessary 40-minute reruns is a major performance improvement. Preserve it.** **A 1,029-second setup that executes zero tests is an infrastructure defect worth investigating before another global optimization framework.** \u0421\u043e\u0445\u0440\u0430\u043d\u044f\u0442\u044c \u0441\u0442\u0440\u043e\u0433\u0438\u0439 kontroll (\u043a\u043e\u043d\u0442\u0440\u043e\u043b\u044c), \u0434\u043e\u043a\u0430\u0437\u0443\u0435\u043c\u0443\u044e \u691c\u8a3c (\u3051\u3093\u3057\u3087\u3046, \u043a\u044d\u043d\u0441\u0451:, \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0443) \u0438 \u043c\u0430\u043a\u0441\u0438\u043c\u0430\u043b\u044c\u043d\u043e \u0432\u044b\u0441\u043e\u043a\u0438\u0439 useful throughput. **MODE 2 ACTIVE.** **CAMPAIGN XIII: REPAIR THE VERIFICATION CONTRACT \u2192 FIX BOUNDED EXECUTION \u2192 REMOVE SETUP WASTE \u2192 MEASURE \u2192 CONTINUE.**",
+      "verification": null,
+      "work": "T-2163"
+    }
+  },
+  "schema_version": 1
+}

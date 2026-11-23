@@ -1,0 +1,35 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 8822,
+  "red": 109,
+  "new_red": [
+    "test_gc.GcCommandAdmissionTests.test_bare_gc_is_a_known_recovery_probe",
+    "test_gc.GcCommandAdmissionTests.test_gc_is_a_known_verb",
+    "test_gc.GcCommandAdmissionTests.test_read_only_routes_are_recovery_class",
+    "test_refusal_registry.RegistryCompletenessTests.test_every_production_refusal_code_is_registered",
+    "test_sailearn_consumer.TestSailearnConsumer.test_soft_fallback_on_missing_index",
+    "test_t1363_zero_manual_entry.ReauthProducerMatrixTests.test_every_producer_names_an_exact_next_command",
+    "test_t1614_future_gate.FutureGateMatrixTests.test_I_the_goal_valve_defers_instead_of_bypassing",
+    "test_t1647_machine_runtime.AnotherPrincipalTests.test_a_project_it_was_not_granted_is_not_worked",
+    "test_t1647_machine_runtime.ProjectAccessTests.test_a_project_this_account_may_not_read_is_named_as_that",
+    "test_t1647_machine_runtime.ProjectAccessTests.test_the_session_carrier_is_answered_the_same_way",
+    "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_scope_selection_wait_remains_illegal",
+    "test_t2087_drift_matrix_anchors.E2AdmissionLatency.test_user_messages_admitted_only_as_late_paraphrase"
+  ],
+  "fixed": [
+    "test_host_bootstrap.ActivationDeliveryTests.test_32_installed_desktop_loader_reads_the_injected_block",
+    "test_t1767_usage_line.UnknownCommandRouteTests.test_a_nested_action_names_its_real_route"
+  ],
+  "problems": [
+    "12 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/c7759036aa409a0c-20261120T071957574781Z.json",
+  "reused": false,
+  "shared": false,
+  "request_wall_s": 2744.018973,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}
+EXIT:1

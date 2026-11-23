@@ -1,0 +1,24 @@
+{
+  "event_id": "E-2619",
+  "externalization_event": {
+    "operation_id": "ticket-2c8bf0dde18c48d68d389965a0de02cf",
+    "reason": "new LOG event exceeds the live cap; canonical detail externalization"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/log-detail/E-2619-7a1503bca18c10ee3f0b811b.json",
+  "operation": "log_event_externalization",
+  "original_event_bytes": 1087,
+  "original_event_path": ".saipen/recovery/log-detail/E-2619-7a1503bca18c10ee3f0b811b.LOG.md",
+  "original_event_sha256": "7a1503bca18c10ee3f0b811bea11e4d88bb7481dafc2f7d169ce690924404f09",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "schema_version": 1,
+  "source": ".saipen/LOG.md",
+  "status": "COMMITTED",
+  "structural_event": {
+    "active": true,
+    "dependency_ticket": null,
+    "kind": "ticket_block"
+  },
+  "ticket_id": "T-261"
+}

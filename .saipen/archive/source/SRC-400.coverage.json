@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-400:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2040 closed with verification evidence in LOG: verify -> PASS [target: T-2040] conf: high -- commands run: python -B tools/core_unit.py evidence T-2040 -> verdict PASS ran 9384 new_red 0 record .saipen/evidence/core-unit/f9f4efc6b0c72583-20261110T220006355138Z.json; python -B tools/test_refusal_registry.py -> OK 6 tests; focused command routing and protocol registry -> PASS 95 tests; python -B tools/saipen.py work regression T-2040 --file .sai",
+      "text": "SAIHANDOFF P0 work-exhaustion truth, review terminality, autonomous maintenance authority and publication truth; reconcile live state, reproduce defects, repair and verify within authenticated authority",
+      "verification": "the Work this request created reached its own verification gate; see the T-2040 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2040"
+    }
+  },
+  "schema_version": 1
+}

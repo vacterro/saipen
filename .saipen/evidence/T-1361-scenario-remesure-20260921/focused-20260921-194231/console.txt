@@ -1,0 +1,7 @@
+PASS: release freshness -- post-metadata binding gate rejects stale locale badges
+PASS: release freshness -- failed post-metadata gate creates no commit or tag
+PASS: release freshness -- rollback removes only staging introduced by this ship
+PASS: release freshness -- duplicate locale badge fails the ship gate
+PASS: release freshness -- missing locale badge fails the ship gate
+PASS: release freshness -- final binding scope and cached diff are exact
+PASS: release freshness -- version-only mirror update leaves source digests unchanged

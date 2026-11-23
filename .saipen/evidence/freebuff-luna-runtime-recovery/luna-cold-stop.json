@@ -1,0 +1,9 @@
+{
+  "thread": "587918ed-22b5-46c3-82e3-9c926ea84f3c",
+  "reason": "Acceptance F already failed: real Luna loaded account SAIPAL skill owning cc and read foreign SAIPAL protocol. Stop only owned test before further work.",
+  "observedUtc": "2026-10-14T23:55:59.135Z",
+  "status": 200,
+  "data": {
+    "ok": true
+  }
+}

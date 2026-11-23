@@ -1,0 +1,148 @@
+{
+  "recorded_utc": "2026-10-01T09:53:03.509714+00:00",
+  "objective_complete": false,
+  "no_closure_or_publication_claimed": true,
+  "state": {
+    "phase": "BUILD",
+    "task": "T-1561",
+    "next_action": "PHASE BUILD T-1561",
+    "last_event": 11100
+  },
+  "storage_owned_paths": {
+    "saipen/REGISTRY.json": "4379bb47281c138f63e6bd25c6ecd55ec5bf5b8ad1185a9272721c53036cb3ff",
+    "saipen/INDEX.md": "23fe63a199527df93b82271cc678694c7b8de5bd897569e8c7d3fc970bb3424c",
+    "saipen/COMMANDS.md": "fc44ef8449f3b9dd9d651dd070604493765ccebfaa147d93a3d12120e4ef93a9",
+    "saipen/STORAGE.md": "a6360a07378de3c997a6404ba2f503b49c8a32d80a46586341711410e2e63f31",
+    "tools/saipen_engine/storage.py": "5801295c9a319e31fec2f0cd30be938c393b3e41a850f4e02ffead42a3e68824",
+    "tools/saipen_engine/storage_artifacts.py": "74b843a372a7fa0ae6d8e81fa2d8ee5a0d339dd9d17c90c0112461a52d5c5175",
+    "tools/test_storage_policy.py": "137447ea2e637cd1b2c1d42416bfe625ee53abd0abb691b2fe241db909e83064",
+    "tools/test_storage_artifacts.py": "68bd5985da8b1cc71af37a45df339198a6e870cc0d85811a54ccf57074700513"
+  },
+  "current_tree_fingerprint": "a14ca1c8b42bc1d22339a2084350302832cee1008221e5eb53c3bb1a9154ffea",
+  "family_records": [
+    {
+      "path": ".saipen/evidence/core-unit/7621521d20d8a7c5-20261001T083313Z.json",
+      "sha256": "9be64901ff46881c1599d24ff2e6458cfdddc9e805b9bc01f54445cc99ff415a",
+      "finished_utc": "2026-10-01T08:33:13Z",
+      "status": "FAIL",
+      "ran": 4509,
+      "red": [
+        "test_source_quarantine_route.QuarantineRouteTests.test_other_source_refusals_are_preserved_without_guessing_quarantine",
+        "test_source_quarantine_route.QuarantineRouteTests.test_release_preflight_preserves_source_refusal_route_and_identity",
+        "test_storage_artifacts.StorageArtifactsTests.test_adapter_directory_promotes_as_verified_tree",
+        "test_storage_artifacts.StorageArtifactsTests.test_legacy_ephemeral_registry_reference_is_detected_and_migrated",
+        "test_storage_artifacts.StorageArtifactsTests.test_live_checker_and_finish_gate_refuse_lost_canonical_artifact",
+        "test_storage_artifacts.StorageArtifactsTests.test_missing_durable_artifact_reports_recovery_class",
+        "test_storage_artifacts.StorageArtifactsTests.test_missing_registry_is_not_treated_as_fresh_installation",
+        "test_storage_artifacts.StorageArtifactsTests.test_modified_promoted_adapter_tree_is_detected",
+        "test_storage_artifacts.StorageArtifactsTests.test_policy_change_during_copy_prevents_canonical_publication",
+        "test_storage_artifacts.StorageArtifactsTests.test_public_cli_blocks_temp_home_and_preserves_promoted_adapter_after_loss",
+        "test_storage_artifacts.StorageArtifactsTests.test_reconstructable_record_requires_and_reports_rebuild_command",
+        "test_storage_artifacts.StorageArtifactsTests.test_registry_publication_failure_preserves_previous_pointer",
+        "test_storage_artifacts.StorageArtifactsTests.test_source_disappears_mid_copy_without_registry_commit",
+        "test_storage_artifacts.StorageArtifactsTests.test_transient_checkpoint_promotes_before_registry_pointer",
+        "test_storage_policy.StoragePolicyTests.test_operator_durable_root_allows_store_without_touching_user_file",
+        "test_storage_policy.StoragePolicyTests.test_registered_cleanup_root_cannot_be_a_trusted_durable_root",
+        "test_storage_policy.StoragePolicyTests.test_scratch_and_cache_are_disposable_but_unknown_durable_is_not",
+        "test_storage_policy.StoragePolicyTests.test_stale_writer_cannot_erase_a_new_ephemeral_root"
+      ],
+      "fingerprint": "7621521d20d8a7c57f437058f63de6382c1f557f19078051fbaa15c8e08e1268",
+      "duration_s": 869.3,
+      "matches_current_tree": false
+    },
+    {
+      "path": ".saipen/evidence/core-unit/0b86bdb31c8f8159-20261001T090336Z.json",
+      "sha256": "b6c25ef945850aa76df2fc416833638a1b41370d0ca4dcc7e37333f63f07bc64",
+      "finished_utc": "2026-10-01T09:03:36Z",
+      "status": "FAIL",
+      "ran": 4509,
+      "red": [
+        "test_style_contract_chokepoint.StaticChokepointTests.test_evidence_scripts_hardcode_no_marker"
+      ],
+      "fingerprint": "0b86bdb31c8f8159bec9321490402e6f2d99d12d6db417344b7f3420c7dc06b5",
+      "duration_s": 1204.1,
+      "matches_current_tree": false
+    },
+    {
+      "path": ".saipen/evidence/core-unit/5e4ad55db429a23f-20261001T092334Z.json",
+      "sha256": "9795effcf11915ecb1197151db1fa140025e3eec4be24538dee6b6798b2d24f1",
+      "finished_utc": "2026-10-01T09:23:34Z",
+      "status": "PASS",
+      "ran": 4509,
+      "red": [],
+      "fingerprint": "5e4ad55db429a23fbe6ab97a145959e4650f73674b766318d0c8a4500b8fd513",
+      "duration_s": 910.1,
+      "matches_current_tree": false
+    },
+    {
+      "path": ".saipen/evidence/core-unit/bfbf8d13d8926e96-20261001T094510Z.json",
+      "sha256": "6c31cb76526d38b198f29499c311a448e386a2626d5cf44e4b9436e117b832e2",
+      "finished_utc": "2026-10-01T09:45:10Z",
+      "status": "PASS",
+      "ran": 4509,
+      "red": [],
+      "fingerprint": "bfbf8d13d8926e9699b1eab908b080cec55060a93dfa96d55785633e165558d0",
+      "duration_s": 1295.5,
+      "matches_current_tree": false
+    },
+    {
+      "path": ".saipen/evidence/core-unit/a14ca1c8b42bc1d2-20261001T094842Z.json",
+      "sha256": "2938b0c427ba71e19b480aba3e4b8817ad96a83f291c5336c62b432640bf2274",
+      "finished_utc": "2026-10-01T09:48:42Z",
+      "status": "PASS",
+      "ran": 4523,
+      "red": [],
+      "fingerprint": "a14ca1c8b42bc1d22339a2084350302832cee1008221e5eb53c3bb1a9154ffea",
+      "duration_s": 1010.9,
+      "matches_current_tree": true
+    }
+  ],
+  "inflight": null,
+  "focused_storage_registry_and_static": {
+    "tests": 51,
+    "status": "PASS",
+    "skips": 1
+  },
+  "incoming_T1561_focused": {
+    "tests": 64,
+    "status": "PASS",
+    "command": "python -B -m unittest tools.test_t1561_probe_fixture tools.test_warn_ownership_probe tools.test_check_inventory"
+  },
+  "shared_writer": {
+    "identity": "UNKNOWN",
+    "team_tree": "root only; no child agents spawned",
+    "events_not_written_by_this_thread": [
+      "E-11098",
+      "E-11099"
+    ],
+    "file": "tools/audit_checks.py",
+    "observed_mtime_utc": "2026-10-01T09:23:43Z",
+    "before_sha256": "1b52cbc58da619cb259086bc28448347e17d0a4afb2887aabe1feaab8f4ffe39",
+    "observed_after_sha256": "c6799752e2f73119973317eef776324bda914b8c027e4aa3d2458e12c54907f1",
+    "policy": "preserve incoming edits; no draft overwrite of the shared implementation"
+  },
+  "prepared_backlog": {
+    "T-1560": {
+      "path": ".saipen/evidence/T-1560-utf8-candidate/",
+      "sites": 224,
+      "files": 29,
+      "permanent_oracle": "same source red on implicit encoding, green in isolated candidate"
+    },
+    "T-1559": {
+      "path": ".saipen/evidence/T-1559-style-candidate/",
+      "same_oracle": "STYLE/SKILL target warnings: old 2, candidate 0, voice-red 1, language-red 1",
+      "byte_delta": -15,
+      "measurable_style_contract_changed": false
+    }
+  },
+  "authority_boundary": {
+    "ticket": "T-1580",
+    "code": "RETIREMENT_AUTHORITY_REQUIRED",
+    "proof": ".saipen/evidence/T-1580-retire-refused-20261001.md",
+    "parent": "T-1579",
+    "parent_resume": "BUILD",
+    "question": "pending operator capsule; no authorization inferred from elapsed time"
+  },
+  "recovery": "SAILEARN durable HOME selected; source evidence absent; no fabricated reconstruction; SAIBUD-8 untouched",
+  "saipal_report": ".saipen/evidence/T-1579-storage-safety/saipal-report.json"
+}

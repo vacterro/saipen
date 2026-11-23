@@ -1,0 +1,30 @@
+======================================================================
+FAIL: test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='printf x >&LOG.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 116, in test_shell_redirection_spellings_and_wrappers_are_refused
+    self.assert_protected(self.event(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 50, in assert_protected
+    self.assertFalse(answer["admitted"], answer)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\t1671-hbtyk8z8', 'target': None, 'targets': [], 'action': 'shell', 'effect': 'mutating', 'provenance': 'git-worktree', 'detail': 'protocol state sound', 'duration_ms': 4.048, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'V:\\_TEMP_\\t1671-hbtyk8z8\\.saipen', 'tool_name': 'bash', 'action': 'shell', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': None, 'target_paths': [], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [{'action': 'write', 'verb': 'redirection', 'targets': ['V:\\_TEMP_\\t1671-hbtyk8z8\\.saipen\\&LOG.md']}], 'shell_effects_unresolved': None, 'actor': 'buffy', 'saipen_verb': None, 'detail': 'shell command carries destructive filesystem effects; each is judged as the file effect it is'}, 'strength': {'host': 'opencode', 'capability': True, 'installed': True, 'current': True, 'health': None, 'effective': 'UNKNOWN', 'reason': 'current hook exists but guard reachability or host health is unobserved'}}
+
+======================================================================
+FAIL: test_unreadable_named_writer_is_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_unreadable_named_writer_is_refused) (command='Set-Content \\"LOG.md\\" x')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 126, in test_unreadable_named_writer_is_refused
+    self.assertFalse(answer["admitted"], answer)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\t1671-hbtyk8z8', 'target': None, 'targets': [], 'action': 'shell', 'effect': 'mutating', 'provenance': 'git-worktree', 'detail': 'protocol state sound', 'duration_ms': 2.077, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'V:\\_TEMP_\\t1671-hbtyk8z8\\.saipen', 'tool_name': 'bash', 'action': 'shell', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': None, 'target_paths': [], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [{'action': 'write', 'verb': 'set-content', 'targets': ['\\LOG.md']}], 'shell_effects_unresolved': None, 'actor': 'buffy', 'saipen_verb': None, 'detail': 'shell command carries destructive filesystem effects; each is judged as the file effect it is'}, 'strength': {'host': 'opencode', 'capability': True, 'installed': True, 'current': True, 'health': None, 'effective': 'UNKNOWN', 'reason': 'current hook exists but guard reachability or host health is unobserved'}}
+
+======================================================================
+FAIL: test_unreadable_named_writer_is_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_unreadable_named_writer_is_refused) (command='timeout 5 tee LOG.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 126, in test_unreadable_named_writer_is_refused
+    self.assertFalse(answer["admitted"], answer)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\t1671-hbtyk8z8', 'target': None, 'targets': [], 'action': 'shell', 'effect': 'mutating', 'provenance': 'git-worktree', 'detail': 'protocol state sound', 'duration_ms': 1.631, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'V:\\_TEMP_\\t1671-hbtyk8z8\\.saipen', 'tool_name': 'bash', 'action': 'shell', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': None, 'target_paths': [], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': 'buffy', 'saipen_verb': None, 'detail': ''}, 'strength': {'host': 'opencode', 'capability': True, 'installed': True, 'current': True, 'health': None, 'effective': 'UNKNOWN', 'reason': 'current hook exists but guard reachability or host health is unobserved'}}
+
+----------------------------------------------------------------------
+Ran 15 tests in 2.303s
+
+FAILED (failures=3)

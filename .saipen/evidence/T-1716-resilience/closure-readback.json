@@ -1,0 +1,19 @@
+{
+  "ticket": "T-1716",
+  "board_done_read_back": true,
+  "finish_event": "E-14500",
+  "finish_op": "finish-4847deb76ea84e84960d46a5a9250caa",
+  "source": "SRC-215",
+  "source_status_read_back": "CLOSED",
+  "source_storage_read_back": "ARCHIVED",
+  "source_archive": ".saipen/archive/source/SRC-215.md",
+  "archive_sha256_verified": "8d54708e5daccb690cc464918d4c81d7f1d2d4ed0f036a62a6e0c2f5ab0c2ce6",
+  "verified_clauses_read_back": 16,
+  "audit_consume_event": "E-14501",
+  "audit_consume_op": "audit-consume-6a3779414f2ebcc5",
+  "audit_path": "audit/SAIPEN_20261010_1136.md",
+  "audit_absent_read_back": true,
+  "published": false,
+  "remaining_goal_work": true,
+  "authority": "canonical receipts and source metadata; this is a readback observation"
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-015:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement and verify every required change and test in T01 ONE CLICK START CONTRACT."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:10Z",
+  "derived_from": "SRC-015",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7dec1e287624d6f1570491ebbedf16de1f828c349114b5761215230f39cf8611"
+}

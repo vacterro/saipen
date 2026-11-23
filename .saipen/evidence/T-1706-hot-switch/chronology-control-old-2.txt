@@ -1,0 +1,36 @@
+======================================================================
+FAIL: test_active_verify_refuses_a_pass_older_than_the_latest_failure (test_t1707_regression_chronology.CurrentGateChronologyTests.test_active_verify_refuses_a_pass_older_than_the_latest_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1707-control-5x1cftsj\project\tools\test_t1707_regression_chronology.py", line 58, in test_active_verify_refuses_a_pass_older_than_the_latest_failure
+    self.assertFalse(answer.ok, answer.to_dict())
+AssertionError: True is not false : {'ok': True, 'code': 'TRANSITIONED', 'op_id': 'transition-ad9ebcaacbbe4ebf9611ae358800c45b', 'changed_files': ['.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'], 'recovery_required': False, 'phase': 'REVIEW', 'next_action': 'PHASE REVIEW T-7', 'event_id': 'E-7', 'ticket': 'T-7'}
+
+======================================================================
+FAIL: test_finish_refuses_the_pair_invalidated_by_a_new_failure (test_t1707_regression_chronology.FinishChronologyTests.test_finish_refuses_the_pair_invalidated_by_a_new_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1707-control-5x1cftsj\project\tools\test_t1707_regression_chronology.py", line 90, in test_finish_refuses_the_pair_invalidated_by_a_new_failure
+    self.assertFalse(answer.ok, answer.to_dict())
+AssertionError: True is not false : {'ok': True, 'code': 'FINISHED', 'op_id': 'finish-9289a72286ef4569b0da23e27a95286b', 'changed_files': ['.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'], 'recovery_required': False, 'ticket': 'T-7', 'event_id': 'E-8', 'phase': 'DONE', 'task': 'none', 'next_action': 'saipen continue', 'transition_from': 'SHIP'}
+
+======================================================================
+FAIL: test_new_failure_invalidates_the_earlier_completed_pair (test_t1707_regression_chronology.RegressionChronologyTests.test_new_failure_invalidates_the_earlier_completed_pair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1707-control-5x1cftsj\project\tools\test_t1707_regression_chronology.py", line 39, in test_new_failure_invalidates_the_earlier_completed_pair
+    self.assertFalse(answer["admissible"], answer)
+AssertionError: True is not false : {'code': 'ADMISSIBLE', 'admissible': True, 'reason': 'the same verifier failed against the pre-fix subject and passed against the post-fix subject, so the implementation is what changed', 'rule_id': 'VERIFY-ORACLE-01'}
+
+======================================================================
+FAIL: test_pass_before_fail_is_not_a_fix_comparison (test_t1707_regression_chronology.RegressionChronologyTests.test_pass_before_fail_is_not_a_fix_comparison)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1707-control-5x1cftsj\project\tools\test_t1707_regression_chronology.py", line 35, in test_pass_before_fail_is_not_a_fix_comparison
+    self.assertFalse(answer["admissible"], answer)
+AssertionError: True is not false : {'code': 'ADMISSIBLE', 'admissible': True, 'reason': 'the same verifier failed against the pre-fix subject and passed against the post-fix subject, so the implementation is what changed', 'rule_id': 'VERIFY-ORACLE-01'}
+
+----------------------------------------------------------------------
+Ran 8 tests in 2.941s
+
+FAILED (failures=4)

@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "reconcile refuses: genuine actionable work remains: seat saipen-cli-01 (complete but stale COMPLETE with unswept finding(s): RUN-1/IMP-001, RUN-1/IMP-002, RUN-1/IMP-003); seat saipen-cli-02 (complete but stale COMPLETE with unswept finding(s): RUN-1/IMP-002); seat saipen-cli-03 (complete but stale COMPLETE with unswept finding(s): RUN-1/IMP-001) -- resolve each named route first"
+}

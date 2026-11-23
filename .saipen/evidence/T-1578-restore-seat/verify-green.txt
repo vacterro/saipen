@@ -1,0 +1,11 @@
+test_matrix_A_the_gap_restores_the_row_owner_and_converges (test_t1578_restore_owner.RestoreTheExistingOwner.test_matrix_A_the_gap_restores_the_row_owner_and_converges) ... ok
+test_matrix_B_an_already_coherent_seat_is_untouched (test_t1578_restore_owner.RestoreTheExistingOwner.test_matrix_B_an_already_coherent_seat_is_untouched) ... ok
+test_matrix_C_a_live_foreign_doing_is_never_displaced (test_t1578_restore_owner.RestoreTheExistingOwner.test_matrix_C_a_live_foreign_doing_is_never_displaced) ... ok
+test_matrix_D_the_journal_keeps_the_real_actor (test_t1578_restore_owner.RestoreTheExistingOwner.test_matrix_D_the_journal_keeps_the_real_actor) ... ok
+test_matrix_E_replay_is_refused_and_writes_nothing (test_t1578_restore_owner.RestoreTheExistingOwner.test_matrix_E_replay_is_refused_and_writes_nothing) ... ok
+test_matrix_f_the_original_bytes_are_preserved (test_t1578_restore_owner.RestoreTheExistingOwner.test_matrix_f_the_original_bytes_are_preserved) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 8.743s
+
+OK

@@ -1,0 +1,50 @@
+{
+  "finish": {
+    "ok": true,
+    "code": "FINISHED",
+    "op_id": "finish-2a45da775da54162bfbf0915e72bb006",
+    "changed_files": [
+      ".saipen/LOG.md",
+      ".saipen/BOARD.md",
+      ".saipen/STATE.md"
+    ],
+    "recovery_required": false,
+    "ticket": "T-1",
+    "event_id": "E-9",
+    "phase": "DONE",
+    "task": "none",
+    "next_action": "saipen continue",
+    "transition_from": "SHIP"
+  },
+  "source_status": {
+    "ok": true,
+    "receipt": "SRC-001",
+    "status": "ACTIVE",
+    "location": "active",
+    "source_kind": "external_audit",
+    "source_sha256": "9247203f7d110d1cf1f2f88a64a770586a00ec6cbce679b1b3bcd0adf9278061",
+    "linked_work": "T-1",
+    "linked_works": [
+      "T-1"
+    ],
+    "amends": null,
+    "closure_event": null,
+    "coverage": {
+      "receipt": "SRC-001",
+      "requirements": 1,
+      "actionable": 1,
+      "terminal": 1,
+      "dispositions": {
+        "VERIFIED": 1
+      },
+      "unresolved": []
+    },
+    "distribution": {
+      "state": "DISTRIBUTABLE",
+      "receipt_id": "SRC-001",
+      "source_sha256": "9247203f7d110d1cf1f2f88a64a770586a00ec6cbce679b1b3bcd0adf9278061"
+    }
+  },
+  "layer_state": "ACTIVE",
+  "layer_preserved": true
+}

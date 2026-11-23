@@ -1,0 +1,95 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.exe
+PySide6 6.11.1 -- Qt runtime 6.11.1 -- Qt compiled 6.11.1
+rootdir: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+plugins: anyio-4.15.1, langsmith-0.14.12, asyncio-1.4.0, cov-7.1.0, docker-3.2.5, mock-3.15.1, qt-4.5.0, timeout-2.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 74 items
+
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r001_corrupt_or_mismatched_staged_entry_detected PASSED [  1%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r001_live_repository_staged_manifest_matches_100_percent PASSED [  2%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r001_raw_index_stat_cache_mutation_vs_stage_invariance PASSED [  4%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r002_path_traversal_refused_during_transfer PASSED [  5%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r002_separate_reviewed_implementation_from_archive_and_metadata PASSED [  6%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip 
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip PASSED [  8%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero 
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero PASSED [  9%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_known_graphs_report_measured_counts 
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_known_graphs_report_measured_counts PASSED [ 10%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_live_remotes_ancestry_topology PASSED [ 12%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_measures_push_destination_not_fetch_remote PASSED [ 13%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_missing_local_commit_is_unmeasured PASSED [ 14%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_reconcile_remote_ancestry_detects_merge_base_and_divergence PASSED [ 16%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_refuses_non_fast_forward_push PASSED [ 17%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_remote_object_absent_locally_is_unknown_not_zero PASSED [ 18%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r004_approval_packet_contains_all_decision_request_fields PASSED [ 20%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r004_live_durable_approval_packet PASSED [ 21%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r005_verify_remote_head_must_match_expected_sha PASSED [ 22%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r006_independent_work_unblocked_during_release_hold PASSED [ 24%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r001_concurrent_index_is_never_restored_over PASSED [ 25%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r001_shared_index_and_staged_manifest_are_exact PASSED [ 27%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r002_diverged_ancestry_is_reconciled_only_in_isolated_tree PASSED [ 28%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r003_only_exact_reviewed_bytes_and_deletions_transfer PASSED [ 29%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r004_baseline_does_not_hide_new_red_or_incomplete_execution 
+tools/test_release_completion.py::ReleaseCompletionTests::test_r004_baseline_does_not_hide_new_red_or_incomplete_execution PASSED [ 31%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r004_focused_evidence_cannot_authorize_publication PASSED [ 32%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r005_approval_packet_is_current_proposal_not_a_grant PASSED [ 33%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r005_unavailable_inventory_cannot_claim_protected_staging PASSED [ 35%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r006_host_contract_does_not_prove_broker_availability PASSED [ 36%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r007_confirm_tty_and_forged_carrier_never_authorize 
+tools/test_release_completion.py::ReleaseCompletionTests::test_r007_confirm_tty_and_forged_carrier_never_authorize PASSED [ 37%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r008_unapproved_release_is_held_and_dry_run_is_not_publication PASSED [ 39%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r009_local_closure_and_caller_prose_are_not_published PASSED [ 40%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r009_owner_requires_ticket_project_and_actual_remote_git 
+tools/test_release_completion.py::ReleaseCompletionTests::test_r009_owner_requires_ticket_project_and_actual_remote_git PASSED [ 41%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r010_exact_fixture_grant_survives_only_its_bound_policy_and_origin 
+tools/test_release_completion.py::ReleaseCompletionTests::test_r010_exact_fixture_grant_survives_only_its_bound_policy_and_origin PASSED [ 43%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r010_independent_work_is_claimed_despite_external_publication_hold PASSED [ 44%]
+tools/test_release_completion.py::ReleaseCompletionTests::test_r010_state_prose_is_not_a_standing_maintenance_grant PASSED [ 45%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_bound_no_publish_receipt_is_local_only PASSED [ 47%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_claimed_published_without_owner_proof_is_unknown PASSED [ 48%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof 
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof PASSED [ 50%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_corrupt_or_duplicate_receipts_remain_unknown PASSED [ 51%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_done_published_field_is_not_proof PASSED [ 52%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_exact_canonical_receipt_and_local_remote_prove_publication PASSED [ 54%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_explicit_blocker_remains_blocked PASSED [ 55%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_explicit_unknown_remains_unknown PASSED [ 56%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_external_hold_does_not_suppress_executable_work_or_budget_veto PASSED [ 58%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_fabricated_verified_release_id_never_publishes PASSED [ 59%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_foreign_root_replay_is_unknown PASSED [ 60%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_foreign_staging_context_survives_outcome_projection PASSED [ 62%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown PASSED [ 63%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_missing_or_foreign_project_binding_never_publishes PASSED [ 64%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_missing_remote_git_proof_is_unknown PASSED [ 66%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication PASSED [ 67%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_no_publish_intent_is_local_not_pending_or_published PASSED [ 68%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_other_ticket_receipt_cannot_publish_this_ticket PASSED [ 70%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_owner_reads_absence_as_pending PASSED [ 71%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_partial_or_competing_matching_receipts_remain_unknown PASSED [ 72%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_pending_without_hold_is_not_blocked PASSED [ 74%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_primary_blocker_context_survives_outcome_projection PASSED [ 75%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_pv15_exact_old_pending_oracle_has_no_blocker PASSED [ 77%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_pv21_executable_budgeted_work_does_not_invent_release_hold PASSED [ 78%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_root_none_consumes_owner_carrier_without_io PASSED [ 79%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_stale_git_proof_is_rejected_at_explicit_root_boundary PASSED [ 81%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_stale_local_no_publish_source_is_unknown PASSED [ 82%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_canonical_full_closure_has_explicit_publication_flag PASSED [ 83%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_context_captures_publication_and_source_identity_once PASSED [ 85%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result 
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result PASSED [ 86%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_corrupt_receipt_cannot_borrow_kitchen_publication PASSED [ 87%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_duplicate_terminal_operations_cannot_publish PASSED [ 89%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_finish_and_owner_receipt_binding_cannot_be_borrowed 
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_finish_and_owner_receipt_binding_cannot_be_borrowed PASSED [ 90%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_identical_tracked_producer_bytes_do_not_discharge_adopted_delta PASSED [ 91%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication 
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication PASSED [ 93%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_local_finish_stale_payload_rejected_at_explicit_root PASSED [ 94%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_no_new_code_prose_is_not_zero_delta_authority PASSED [ 95%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_no_publish_closure_is_compatible_but_not_publication PASSED [ 97%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_pure_aggregation_rejects_hints_and_carrier_reconstruction PASSED [ 98%]
+tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_verified_ignored_zero_delta_finish_is_local_only PASSED [100%]
+
+=================== 74 passed, 41 subtests passed in 19.64s ===================

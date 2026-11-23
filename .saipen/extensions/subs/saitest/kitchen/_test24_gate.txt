@@ -1,0 +1,18 @@
+S4 probe (corrected classification): _PREMISE_DISPROOF_RE search() behavior
+regex source: tools/saipen_engine/operations.py:9185-9203, compiled with re.IGNORECASE
+designed-accept forms (expect MATCH):
+  'premise is invalidated by E-22451'           match=True
+  'the premise was therefore disproved'         match=True
+  'premise-disproof recorded'                   match=True
+  'premise disproof filed'                      match=True
+  'the finding is invalidated'                  match=True
+  'the premise refuted by its own instrument'   match=True
+  'premise invalid'                             match=True
+  'PREMISE IS INVALIDATED'                      match=True
+adversarial near-misses (expect NO MATCH / fail-closed):
+  'premise is invalidáted'                      match=False
+  'premises are refuted'                        match=False
+  'premise is dis proved'                       match=False
+  'premise statement is wrong'                  match=False
+  'the assumption is invalidated'               match=False
+S4 summary: designed-accept mismatches: 0 | adversarial leaks: 0

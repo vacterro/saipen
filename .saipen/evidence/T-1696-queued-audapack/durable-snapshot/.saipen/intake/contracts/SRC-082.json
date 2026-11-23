@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-082:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Process compact evidence from fastprompter_drag/AUDAPACK_20260923_0302.md: CLI launcher fixes (PATH split, profile distinctness, admit fallback), widget release progression"
+    }
+  },
+  "derived_at": "2026-09-25T16:30:09Z",
+  "derived_from": "SRC-082",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "5f3876ddd041dfed408249b7159bc29a749d985790795994d8a94ac5d18903b4"
+}

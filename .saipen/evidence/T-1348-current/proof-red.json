@@ -1,0 +1,40 @@
+{
+  "checker_sha256": "2e37cff77182f0b25e2b7b75b6f96143ae77271afcdce51c195d7bae7e90c6f4",
+  "green_receipt": ".saipen\\evidence\\T-1348-current\\review-pair\\original.json",
+  "checks": [
+    {
+      "check": "nonempty native runs and opposite results",
+      "okay": false
+    },
+    {
+      "check": "one fixed verifier digest",
+      "okay": true
+    },
+    {
+      "check": "current oracle bytes",
+      "okay": true
+    },
+    {
+      "check": "current implementation bytes",
+      "okay": false
+    },
+    {
+      "check": "retained actual output binding",
+      "okay": true
+    },
+    {
+      "check": "earlier candidate still fails reload execution",
+      "okay": true
+    },
+    {
+      "check": "known bad duplicate guard remains independent",
+      "okay": true
+    },
+    {
+      "check": "unchanged live binding and owned allocation removed",
+      "okay": true
+    }
+  ],
+  "passed": 6,
+  "failed": 2
+}

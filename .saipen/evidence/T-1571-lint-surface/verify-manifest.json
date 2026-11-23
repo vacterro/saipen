@@ -1,0 +1,25 @@
+{
+  "verifier": "19b93aaba6c59b1b",
+  "command": "python -B -m unittest -v test_t1571_lint_surface",
+  "oracle": [
+    "tools/test_t1571_lint_surface.py"
+  ],
+  "runs": [
+    {
+      "label": "red",
+      "subject": "decd17756eaa0f69",
+      "returncode": 1,
+      "verdict": "FAILED (failures=4)",
+      "errors": 0,
+      "failures": 4
+    },
+    {
+      "label": "green",
+      "subject": "8ff04419c4417b97",
+      "returncode": 0,
+      "verdict": "OK",
+      "errors": 0,
+      "failures": 0
+    }
+  ]
+}

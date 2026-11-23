@@ -1,0 +1,6 @@
+control: ran 4, red [] -- as expected
+the foreign hunk: ran 4, red ['test_only_repairing_readers_name_the_lifecycle_class', 'test_the_decision_does_not_build_on_a_typed_head'] -- as expected
+a log normalizer names the class: ran 4, red ['test_only_repairing_readers_name_the_lifecycle_class'] -- as expected
+a migration names the class through a computed value: ran 4, red ['test_only_repairing_readers_name_the_lifecycle_class'] -- as expected
+mutations: 3, repetitions each: 3, problems: 0
+exit=0

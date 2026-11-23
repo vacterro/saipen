@@ -1,0 +1,27 @@
+{"command": ["C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe", "V:\\_TEMP_\\saipen-evidence-t1603-full-scenarios-jo3mhdg_\\home\\tools\\run_scenarios.py"], "source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN", "snapshot": "V:\\_TEMP_\\saipen-evidence-t1603-full-scenarios-jo3mhdg_\\home", "fingerprint": "54ad859af386ae71ba05cd6bd0368cad8fa11b18c546eee41f958f1b56ccb7a9", "baseline_sha256": "0e98ff25a686832646b69a657695281114034764d348a02cd6644ca87f203224", "scenario_sha256": "786e69f7d96cf857ad0383dcae62484a0a3906104491c72ab9d6d56ec07b638b", "snapshot_state_sha256": "4f82dd91d03d6442d47836fca913d310b1459c2d35b884a5d7d9c62bc38655ff", "snapshot_board_sha256": "6d83c22b4ad8be655675ed9f5a8059c1ee9390638a4d84b0e6f09b25eef80cbc", "snapshot_log_sha256": "851f8dcda294c3f539d7454f15d22ede77bf25c1c30cd0aedf73622bb01e870a", "mode": "complete native scenario gate; no selector or new timeout", "wrapper_sha256": "b294a582729cf0118f1356441537ab515e7c9c0a404c5ebd2032f84f393a4f9b"}
+{"verdict": "PASS", "exit_code": 0, "completed_groups": 44, "declared_groups": 44, "checks": 1354, "fingerprint": "54ad859af386ae71ba05cd6bd0368cad8fa11b18c546eee41f958f1b56ccb7a9", "snapshot_unchanged": true, "live_source_unchanged": true, "output_sha256": "85b695fddcdf9b87ceef4ed3d5453b8793ef853f09f08e229c8e9fa954fb3a31", "seconds": 1999.906}
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\scenario-oracles\run_frozen_full.py", line 74, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\scenario-oracles\run_frozen_full.py", line 69, in main
+    evidence.finalize(verdict=report["verdict"], extra={"scenario_gate": report})
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\evidence.py", line 404, in finalize
+    removed = self.cleanup()
+              ^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\evidence.py", line 306, in cleanup
+    shutil.rmtree(path)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 787, in rmtree
+    return _rmtree_unsafe(path, onerror)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 629, in _rmtree_unsafe
+    _rmtree_unsafe(fullname, onerror)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 629, in _rmtree_unsafe
+    _rmtree_unsafe(fullname, onerror)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 629, in _rmtree_unsafe
+    _rmtree_unsafe(fullname, onerror)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 634, in _rmtree_unsafe
+    onerror(os.unlink, fullname, sys.exc_info())
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 632, in _rmtree_unsafe
+    os.unlink(fullname)
+PermissionError: [WinError 5] Access is denied: 'V:\\_TEMP_\\saipen-evidence-t1603-full-scenarios-jo3mhdg_\\home\\.git\\objects\\00\\029bfe1bca912ddce854d9d52eb428e5a5c537'

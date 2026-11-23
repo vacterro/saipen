@@ -1,0 +1,16 @@
+.................................................................................................................................................................s...............................................................................................................F...............................................................................
+======================================================================
+FAIL: test_fresh_process_loads_the_installed_generation_from_one_origin (test_opencode_host_smoke.OpenCodeRealInstalledGeneration.test_fresh_process_loads_the_installed_generation_from_one_origin)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_opencode_host_smoke.py", line 694, in test_fresh_process_loads_the_installed_generation_from_one_origin
+    self.assertEqual(hashlib.sha256(installed.read_bytes()).hexdigest(), digest)
+AssertionError: '126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d' != '3d498ac4913e793e28f68eb89a76e4b8aa42bd0f5e8fcb1611ca25e8519a35db'
+- 126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d
++ 3d498ac4913e793e28f68eb89a76e4b8aa42bd0f5e8fcb1611ca25e8519a35db
+
+
+----------------------------------------------------------------------
+Ran 353 tests in 264.851s
+
+FAILED (failures=1, skipped=1)

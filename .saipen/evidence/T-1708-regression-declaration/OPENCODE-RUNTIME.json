@@ -1,0 +1,40 @@
+{
+  "checked_utc": "2026-10-10T14:45:37.215470+00:00",
+  "files": [
+    {
+      "path": "C:\\nodejs\\node_modules\\opencode-ai\\bin\\opencode.exe",
+      "size": 479,
+      "sha256": "21c366f53283d5b5e1cdbbec2aafc98286b4c1075a4c3d5afd5ce1f5c9bf46dd",
+      "mtime_utc": "2026-10-10T14:24:29.196506+00:00"
+    },
+    {
+      "path": "C:\\nodejs\\node_modules\\opencode-ai\\node_modules\\opencode-windows-x64\\bin\\opencode.exe",
+      "size": 180656008,
+      "sha256": "83567c13cc5e361ded7e48351cb024cd4503285960d82c30fc585194da46d757",
+      "mtime_utc": "2026-10-10T14:24:37.176596+00:00"
+    },
+    {
+      "path": "C:\\Users\\vac34\\.config\\opencode\\plugins\\saipen-guard.js",
+      "size": 76768,
+      "sha256": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+      "mtime_utc": "2026-10-10T12:02:24.163123+00:00"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\extensions\\adapters\\opencode\\saipen-guard.js",
+      "size": 76768,
+      "sha256": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+      "mtime_utc": "2026-10-10T12:02:24.163123+00:00"
+    }
+  ],
+  "stub": "echo \"Error: opencode-ai's postinstall script was not run.\" >&2\necho \"\" >&2\necho \"This occurs when using --ignore-scripts during installation, or when using a\" >&2\necho \"package manager like pnpm that does not run postinstall scripts by default.\" >&2\necho \"\" >&2\necho \"To fix this, run the postinstall script manually:\" >&2\necho \"  cd node_modules/opencode-ai && node postinstall.mjs\" >&2\necho \"\" >&2\necho \"Or reinstall opencode-ai without the --ignore-scripts flag.\" >&2\nexit 1\n",
+  "native_payload_version": "1.18.35 from executed --version",
+  "active_external_process": {
+    "pid": 22296,
+    "launcher_pid": 7784,
+    "bound_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE",
+    "touched": false
+  },
+  "instrument_change": "prepend existing x64 payload directory to PATH only in the verification child process",
+  "live_install_writes": 0,
+  "full_failed_record": ".saipen/evidence/core-unit/ca37381939e67b4e-20261010T144201Z.json"
+}

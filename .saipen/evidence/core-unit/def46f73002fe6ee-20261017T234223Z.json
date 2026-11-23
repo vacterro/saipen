@@ -1,0 +1,423 @@
+{
+  "schema": 1,
+  "family": "unit",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "fingerprint": "def46f73002fe6ee97c41dfce631e4c87621be0e57a33a9c59d29d3a1fd84a2e",
+  "fingerprint_excludes": [
+    ".git",
+    ".saipen",
+    "audit"
+  ],
+  "baseline_sha256": "81516ef194be0dcb17a85f38a290d9f166d7b2ebd4f55dd41e484a690b501244",
+  "head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "finished_utc": "2026-10-17T23:42:23Z",
+  "status": "FAIL",
+  "exit_code": 4294967295,
+  "ran": null,
+  "duration_s": 1037.9,
+  "timeout_s": 5400,
+  "headers": 0,
+  "unparsed": 0,
+  "tallied": null,
+  "red": [],
+  "red_sections": {},
+  "processes_leaked": [
+    8932,
+    9244,
+    9452,
+    9832,
+    12432,
+    12620,
+    12668,
+    13108,
+    13404,
+    13716,
+    14752,
+    15632,
+    16196,
+    16492,
+    19096,
+    20180,
+    21124,
+    21252,
+    22028,
+    22812,
+    22924,
+    24812,
+    25492,
+    25548,
+    26092,
+    26584,
+    26664,
+    26720,
+    27464,
+    28760,
+    29288,
+    29320,
+    31272,
+    31508,
+    32384,
+    33268,
+    33576,
+    33664,
+    34224,
+    35300,
+    35356,
+    35428,
+    35448,
+    35556,
+    35736,
+    35968,
+    38264,
+    38512,
+    38856,
+    39512,
+    39628,
+    41972
+  ],
+  "jobs": 18,
+  "discovered": 6884,
+  "shards": [
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 192,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        8932,
+        15632,
+        22812
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 295,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        13404
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 346,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        13716,
+        19096,
+        12668,
+        35556
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 464,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        38512
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 263,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        35300
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 345,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        16196,
+        12432,
+        35428,
+        26720
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 248,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        33664,
+        39628,
+        31272,
+        21124
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 290,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        34224,
+        31508,
+        9244,
+        26584
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 321,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        26092,
+        38856,
+        32384,
+        26664
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 445,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        16492,
+        27464,
+        35968,
+        22028
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 267,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 47.0,
+      "processes_leaked": [
+        9452
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 382,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        38264,
+        9832,
+        39512,
+        35736,
+        14752
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 425,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        28760,
+        35356,
+        21252
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 407,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 47.0,
+      "processes_leaked": [
+        33268
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 419,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        24812,
+        25548
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 463,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        41972,
+        35448,
+        13108,
+        29320,
+        12620
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 898,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        29288,
+        20180,
+        25492,
+        22924
+      ]
+    },
+    {
+      "status": "FAIL",
+      "exit_code": 4294967295,
+      "ran": null,
+      "selected": 414,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "duration_s": 46.9,
+      "processes_leaked": [
+        33576
+      ]
+    }
+  ],
+  "module_durations_s": {},
+  "verdict": "FAIL",
+  "new_red": [],
+  "fixed": [],
+  "problems": [
+    "no 'Ran N tests' line: the family did not run to its summary",
+    "exit code 4294967295 with no parsed red test",
+    "shard 0: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 0: exit code 4294967295 with no parsed red test",
+    "shard 1: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 1: exit code 4294967295 with no parsed red test",
+    "shard 2: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 2: exit code 4294967295 with no parsed red test",
+    "shard 3: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 3: exit code 4294967295 with no parsed red test",
+    "shard 4: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 4: exit code 4294967295 with no parsed red test",
+    "shard 5: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 5: exit code 4294967295 with no parsed red test",
+    "shard 6: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 6: exit code 4294967295 with no parsed red test",
+    "shard 7: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 7: exit code 4294967295 with no parsed red test",
+    "shard 8: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 8: exit code 4294967295 with no parsed red test",
+    "shard 9: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 9: exit code 4294967295 with no parsed red test",
+    "shard 10: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 10: exit code 4294967295 with no parsed red test",
+    "shard 11: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 11: exit code 4294967295 with no parsed red test",
+    "shard 12: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 12: exit code 4294967295 with no parsed red test",
+    "shard 13: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 13: exit code 4294967295 with no parsed red test",
+    "shard 14: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 14: exit code 4294967295 with no parsed red test",
+    "shard 15: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 15: exit code 4294967295 with no parsed red test",
+    "shard 16: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 16: exit code 4294967295 with no parsed red test",
+    "shard 17: no 'Ran N tests' line: the family did not run to its summary",
+    "shard 17: exit code 4294967295 with no parsed red test"
+  ]
+}

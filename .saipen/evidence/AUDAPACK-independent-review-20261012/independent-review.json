@@ -1,0 +1,83 @@
+{
+  "work": "T-2",
+  "phase": "REVIEW",
+  "owner": "audapack-recovery-engineer",
+  "current_input_count": 344,
+  "full_gate_sha256": {
+    "recovery-full-pytest-current.json": "5efb46e64f27c44ce04f960fc687927be77955f26ae83c6d5bc3053e89d6d549",
+    "recovery-full-node-current.json": "95dc95e54966fc1a70b0df3b0d698fbd41207ab7221bc2e1b2b3644da123c39e"
+  },
+  "full_python": "2911 passed/17 inherited platform or environment skips",
+  "full_node": "936 passed/0 skipped/0 cancelled",
+  "native_pair_sha256": "1e9573a9f9ad313e7d8233fb3dd5fa7c6b0c29fe08d1a5593aa1fdef7dee98bf",
+  "native_pair": "48/21 before; 48/0 after; zero skips; same oracle",
+  "frozen_15_oracle_sha256": "a929d13a6a2ad2ee4f8d2871fa985355383f74a34ce12eb5e47a593789d67b22",
+  "independent_same_oracle": {
+    "ran": 48,
+    "failed": 0,
+    "skipped": 0
+  },
+  "independent_service_canary": {
+    "verdict": "PASS",
+    "staging": {
+      "files": 3,
+      "source_unchanged": true,
+      "staging_byte_identical": true,
+      "manifest_sha256": "58fe9772124dce9f298b7f8dae56687a134e6eacb9815651c7c6df2c151941fd"
+    },
+    "source_runtime_unchanged": true,
+    "source_project_unchanged": true,
+    "settings_owner_preserved": true,
+    "sqlite_row_preserved": true,
+    "live_archive_bytes_verified": true,
+    "two_replica_generations_excluded": true,
+    "scope": "isolated representative runtime; no original/default runtime switch, real account launch, publication or installation"
+  },
+  "protected_original_files": 8260,
+  "original_unchanged": true,
+  "negative_controls_unchanged": true,
+  "instrument_controls_sha256": "a009e32df0ae0963ff655587acaff46648967822fbfb33681a5460ce56c8830b",
+  "instrument_controls": [
+    {
+      "label": "plane-exact-workdir",
+      "good_exit": 0,
+      "bad_exit": 1
+    },
+    {
+      "label": "worker-recreation",
+      "good_exit": 0,
+      "bad_exit": 1
+    },
+    {
+      "label": "worker-held-probe",
+      "good_exit": 0,
+      "bad_exit": 1
+    },
+    {
+      "label": "data-io-call",
+      "good_exit": 0,
+      "bad_exit": 1
+    },
+    {
+      "label": "new-descendant",
+      "good_exit": 0,
+      "bad_exit": 1
+    },
+    {
+      "label": "gui-error",
+      "good_exit": 0,
+      "bad_exit": 1
+    }
+  ],
+  "source_inspection": [
+    "service-bound settings directory; first-save registry preservation",
+    "launcher refill keeps signals blocked through final selection",
+    "absent plane clears shared provenance; installed outage preserves last known good",
+    "exact launch argv and worker held-probe/closed-pool controls",
+    "new child detection uses PID and creation time; GUI API errors stay unavailable",
+    "data-I/O gate uses AST call/import inspection; this is not runtime I/O instrumentation"
+  ],
+  "verdict": "PASS",
+  "implementation_change_by_reviewer": false,
+  "limits": "Windows controlled/offscreen application and native CLI proof; no original runtime cutover, real AG3, live IDE guard, user desktop/model acceptance or publication."
+}

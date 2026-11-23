@@ -1,0 +1,37 @@
+{
+  "exit_code": 1,
+  "verifier": "097bd33e18218aae",
+  "subject": "c21d5388ac2e77b0",
+  "verifier_identity": {
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "tools.test_source_receipts.ReceiptRangeNormalizationTests",
+      "-q"
+    ],
+    "files": {
+      "tools/test_source_receipts.py": "db047a9452d9bcc2b41d94e7d5c8852b4d5c3832c523011ba5a4db38ae9720ab",
+      "tests/scenarios/stale-state-reconciliation/.saipen/BOARD.md": "97abf259a2f72cb2a4e9703035f25c60bcc7253f62d494ab0da69f98dada9f32",
+      "tests/scenarios/stale-state-reconciliation/.saipen/LOG.md": "95d6188e6e2c6eb9bd3281a857f607b7d60bb844915a19ef16e0404e36f0b3ee",
+      "tests/scenarios/stale-state-reconciliation/.saipen/STATE.md": "e7e2f3a799c823185379e405ddbc5e81a575c36c8c911abbaab443065dc8bfac",
+      "tests/scenarios/stale-state-reconciliation/.saipen/recovery/conformance/2026-08-29T23_13_05.382476Z_receipt-8ef75218ad85_core_PASS.json": "d7730e606db1a52efe08b6a053a03b04c7806cdd7294373d99738dc97d1cace3",
+      "tests/scenarios/stale-state-reconciliation/.saipen/recovery/conformance/2026-09-08T03_30_11.820793Z_receipt-1c3f8c7b3f0f_core_FAIL.json": "c57b673ac14ec5906ce2a2c280b641996030c27a6156e897874ae513768e715a",
+      "tests/scenarios/stale-state-reconciliation/.saipen/recovery/conformance/index/.lineage.json": "e4aaf0b78767213b6d1628ca69b1b73c20628bf8a5cca92595502072e2d0c994",
+      "tests/scenarios/stale-state-reconciliation/.saipen/recovery/conformance/index/active-gen.json": "425b3e03bc378388dafdcf5e90b612b5695e1f8e73e85cae8c7207f634241c6e",
+      "tests/scenarios/stale-state-reconciliation/.saipen/recovery/conformance/index/core.json": "d61f51d29d712c1868eee611f0719b8bdf63857a12948fc80332747e116a0bfb",
+      "tests/scenarios/stale-state-reconciliation/.saipen/recovery/conformance/index/lineage-head.json": "5ddb24774db9e5db2ba2f7d60ab64e48c3a4f70a6b718117732045bf2820b64a"
+    },
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]"
+  },
+  "subject_identity": {
+    "tools/saipen.py": "f6c6fe648a0376d17b53de9f83c41381f0b43fe740c1d31d2ec3258a0a14dbf0",
+    "tools/saipen_engine/intake.py": "efd88a9935cfddda25839a5c1a2d1a4d3e8ded3607f98f7ffcb7bd1757800a14",
+    "tools/saipen_engine/board.py": "c2112d100b3cb43afe32ba6f3f44b5f88f027bdc2e5caca1c361f290a86ae238",
+    "tools/saipen_engine/codec.py": "4c368ac40f3ff82a1d3ca6a84fa4bd3df5a84675daf9c3c8c3485e514748b919",
+    "tools/saipen_engine/journal.py": "4724c8c8e1a078dd93240aa37301f63a1078258837137ff418e34420d8bb3796",
+    "tools/saipen_engine/lock.py": "fb93cc8c6c3573bd2bb4e9852523092a1d843d0e5f208f8a18a40367f0939a1c"
+  },
+  "output_sha256": "0900516bc361c000cac9475f9fe8e8c86c8020a56d84b7a2ba9fab113a2a0b2b"
+}

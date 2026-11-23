@@ -1,0 +1,20 @@
+{
+  "label": "acceptance-unit-boundary-red-final",
+  "phase": "BUILD",
+  "command": [
+    "python",
+    "-B",
+    ".saipen/evidence/T-1718-acceptance/acceptance-unit-boundary-replay.py",
+    "before"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 1,
+  "duration_s": 0.656,
+  "fingerprint": "148afe823921b9bb0b249dbd1d47341aa6593220565820882d34dda34248cbd8",
+  "stdout": "oracle_sha256 7df4959c2cb2e92c9dedeec34b7e5deb311e09d5e86d4ca8a9a887405b0aaf19\r\nsubject_sha256 761c339b0b1a975554003e24ad1fbfa9c5e2ade546d9b519ec57c828e50444a6\r\n",
+  "stderr": "test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass (test_t1718_acceptance_contract.NativeEscapeRegressionTests.test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass) ... FAIL\r\n\r\n======================================================================\r\nFAIL: test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass (test_t1718_acceptance_contract.NativeEscapeRegressionTests.test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass)\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1718_acceptance_contract.py\", line 132, in test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass\r\n    self.assertFalse(result.ok, result.to_dict())\r\nAssertionError: True is not false : {'ok': True, 'code': 'TICKET_VERIFIED', 'op_id': 'ticket-verify-09cb3ef8e6b8469f8eb2c4e0da99b6da', 'changed_files': ['.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'], 'recovery_required': False, 'ticket': 'T-7', 'event_id': 'E-6'}\r\n\r\n----------------------------------------------------------------------\r\nRan 1 test in 0.366s\r\n\r\nFAILED (failures=1)\r\n",
+  "stdout_sha256": "4571e74dfd2f23c5a3523876b61504bae131c480312079a2997eda77f9f88f98",
+  "stderr_sha256": "105bcbd855ffaecb9151eefc1e9a51b8b2e4e064afa57071714243e5c10f0783",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

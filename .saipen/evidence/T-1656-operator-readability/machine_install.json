@@ -1,0 +1,56 @@
+{
+  "ok": true,
+  "code": "MACHINE_RUNTIME_INSTALLED",
+  "root": "C:\\ProgramData\\SAI\\SAIPEN",
+  "saipen_runtime_ready": true,
+  "reasons": [],
+  "action": null,
+  "registration": {
+    "generation": "gen-sha256:e100ca69eb938100f0c7d4ce9ef4c2cc726ba7086b15132a12f606790e75ff17",
+    "installed_at": "2026-10-07T05:40:46Z",
+    "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002",
+    "kind": "saipen-machine-runtime",
+    "launcher": {
+      "posix": "bin/saipen",
+      "windows": "bin/saipen.cmd"
+    },
+    "previous": {
+      "generation": "gen-sha256:fb5b53a07e5b0db5b8a1852c7ea0f65b244d7e342dcb9fafb6400ce78b8e79f5",
+      "runtime": "runtime/fb5b53a07e5b0db5",
+      "saipen_version": "8.1.0"
+    },
+    "python": "python/3.11.9-64/python.exe",
+    "python_bundled": true,
+    "runtime": "runtime/e100ca69eb938100",
+    "saipen_version": "8.1.0",
+    "schema": 1,
+    "source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "state_schema": 3
+  },
+  "home": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\e100ca69eb938100",
+  "generation": "gen-sha256:e100ca69eb938100f0c7d4ce9ef4c2cc726ba7086b15132a12f606790e75ff17",
+  "generation_proven": true,
+  "saipen_version": "8.1.0",
+  "state_schema": 3,
+  "launcher": {
+    "windows": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+    "posix": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen",
+    "ok": true,
+    "problems": []
+  },
+  "python": {
+    "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "bundled": true,
+    "ok": true
+  },
+  "acl": {
+    "checked": true,
+    "writable_by": [],
+    "foreign_owners": [],
+    "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002"
+  },
+  "source": "MACHINE_RUNTIME",
+  "canonical_generation": "gen-sha256:e100ca69eb938100f0c7d4ce9ef4c2cc726ba7086b15132a12f606790e75ff17",
+  "current": true,
+  "changed": true
+}

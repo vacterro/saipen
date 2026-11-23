@@ -1,0 +1,220 @@
+{
+  "ok": true,
+  "stage": "verify",
+  "work": "T-1713",
+  "tree_fingerprint": "55f06a7fce4aa11ff0de0126e1e44a6118807f51927a80787cb5a0b99fbb2ec4",
+  "history_tail": 14427,
+  "history_hash": "7fd0d3e3eaaabdf5",
+  "parsed_events": 14426,
+  "attempts": 5,
+  "model_bound_attempts": 0,
+  "assets": {
+    "history.json": "e92f3fcf3d2329bca3e5bc75f6edf031360b3920808f48125366a170b935d106",
+    "history-supplement.json": "4c78ba2da25c939ad790f8a328c5a22bd6c69427140bfd08acd99b5a0983c5c8",
+    "attribution-provenance.json": "d0f3efe08e27fbaf337ade281aa8c7f99afcccab5cbea94b5f5fe8ca9adc4f93",
+    "scoped-predecessor-delta-normalized.json": "eb1800ceae4307af2b13bc1eb6ae52b6924dece837896b380850f938e535a78b",
+    "scoped-predecessor-delta-normalized.patch": "904c217839e5434b5fa7d0ea829d179ede07f5fc1f37745c821f0c9bfd58c414",
+    "OPERATOR-ATTRIBUTION-CLARIFICATION.md": "b9b5b67b4e799ae4f5e691d8c7f4cf4c653a7584f1d042a0a5f29f8ebf8b0fa0",
+    "CLOSURE.md": "0f2b2b07ab26999c7d953e196f5d2e87af1b4a22eabfc9ff14a524854d58c21d"
+  },
+  "commits": {
+    "dbbfad94688515d604b54e2c97dc92aa5fa7eab1": {
+      "author_time": "2026-08-27T23:33:14+03:00",
+      "git_author": "VAC34",
+      "subject": "ship v7.231.9"
+    },
+    "8f91d779cc4d65f6e1db952eee58db7fb3b14a78": {
+      "author_time": "2026-09-15T13:36:08+03:00",
+      "git_author": "VAC34",
+      "subject": "chore(audit-manifest): track cross-repo snapshot contract under T-1328"
+    },
+    "b2343541e3ebe939bc583408a173c54aeb57939b": {
+      "author_time": "2026-09-15T15:25:20+03:00",
+      "git_author": "VAC34",
+      "subject": "fix(recovery): legacy lifecycle compatibility + reachable allocation-identity stop"
+    },
+    "c138bfd8aa89ec82728587dd7c9ae43e9a69b7c3": {
+      "author_time": "2026-09-28T23:34:31+03:00",
+      "git_author": "VAC34",
+      "subject": "chore(runtime): track the 34 declared runtime files git was not carrying"
+    },
+    "c7e25f9281934de8f38da26d2dd599f358c77f79": {
+      "author_time": "2026-09-23T22:33:01+03:00",
+      "git_author": "VAC34",
+      "subject": "fix(audit): exported snapshots carry the LOG detail their detail_ref cites (T-1374)"
+    }
+  },
+  "subjects": {
+    "paths-dbbfad946.py": {
+      "commit": "dbbfad94688515d604b54e2c97dc92aa5fa7eab1",
+      "git_path": "tools/saipen_engine/paths.py",
+      "sha256": "0954686d644fca3ee9db43dc12602eeb7bc660b639d3456c4c3d3da9ab582662"
+    },
+    "manifest-8f91d779.py": {
+      "commit": "8f91d779cc4d65f6e1db952eee58db7fb3b14a78",
+      "git_path": "tools/saipen_engine/audit_manifest.py",
+      "sha256": "66ee10bdd75118966951ed52cfbd321907394862798d6e5b30e3b9b86dbeb33c"
+    },
+    "manifest-c7e25f92.py": {
+      "commit": "c7e25f9281934de8f38da26d2dd599f358c77f79",
+      "git_path": "tools/saipen_engine/audit_manifest.py",
+      "sha256": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b"
+    },
+    "reconcile-b2343541.py": {
+      "commit": "b2343541e3ebe939bc583408a173c54aeb57939b",
+      "git_path": "tools/saipen_engine/reconcile.py",
+      "sha256": "57f4e0ed985d9b7fa43803ca66449f2c051473ff92b6dfd4d9e660457854a474"
+    }
+  },
+  "historical_reproductions": [
+    {
+      "subject": "manifest-8f91d779.py",
+      "exception_type": "ValueError",
+      "message": "audit manifest ancestor V:\\_TEMP_\\saipen-t1713-history-l7k2xobk unreadable: [WinError 5] Access is denied: 'V:\\\\_TEMP_\\\\saipen-t1713-history-l7k2xobk'",
+      "cause_winerror": 5,
+      "frames": [
+        {
+          "function": "replay",
+          "line": 69,
+          "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1713-attribution\\verify-attribution.py"
+        },
+        {
+          "function": "ensure",
+          "line": 488,
+          "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\manifest-8f91d779.py"
+        },
+        {
+          "function": "write",
+          "line": 562,
+          "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\manifest-8f91d779.py"
+        },
+        {
+          "function": "safe_atomic_write_bytes",
+          "line": 242,
+          "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\paths-dbbfad946.py"
+        },
+        {
+          "function": "prove_owned_dir_chain",
+          "line": 149,
+          "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\paths-dbbfad946.py"
+        }
+      ],
+      "canonical_fixture_unchanged": true
+    },
+    {
+      "subject": "manifest-c7e25f92.py",
+      "exception_type": "ValueError",
+      "message": "audit manifest ancestor V:\\_TEMP_\\saipen-t1713-history-l7p9cq54 unreadable: [WinError 5] Access is denied: 'V:\\\\_TEMP_\\\\saipen-t1713-history-l7p9cq54'",
+      "cause_winerror": 5,
+      "frames": [
+        {
+          "function": "replay",
+          "line": 69,
+          "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1713-attribution\\verify-attribution.py"
+        },
+        {
+          "function": "ensure",
+          "line": 700,
+          "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\manifest-c7e25f92.py"
+        },
+        {
+          "function": "write",
+          "line": 795,
+          "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\manifest-c7e25f92.py"
+        },
+        {
+          "function": "safe_atomic_write_bytes",
+          "line": 242,
+          "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\paths-dbbfad946.py"
+        },
+        {
+          "function": "prove_owned_dir_chain",
+          "line": 149,
+          "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\paths-dbbfad946.py"
+        }
+      ],
+      "canonical_fixture_unchanged": true
+    }
+  ],
+  "last_manifest_file_commit": "c7e25f9281934de8f38da26d2dd599f358c77f79",
+  "bounded_predecessors": {
+    "tools/saipen_engine/audit_manifest.py": {
+      "tracked_sha256": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b",
+      "pre_repair_sha256": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b",
+      "tracked_operand_available": true,
+      "equal_bytes": true
+    },
+    "tools/saipen_engine/paths.py": {
+      "tracked_sha256": "6a513043eb294217dc4bc21826a7c67348d89e7a9ef8ebee300d4f16e31d74b5",
+      "pre_repair_sha256": "055fcc3f9c94eca57f3494e636b8ee31a830b67969958d3d62ca2bbf3a0f93fc",
+      "tracked_operand_available": true,
+      "equal_bytes": false
+    },
+    "tools/saipen_engine/host_bootstrap.py": {
+      "tracked_sha256": "faf80853a339c03391a9422513e33c801ac884cfda5fcc98d6d16c9341f8dd27",
+      "pre_repair_sha256": "785a93b2dd44f76f883c0bf97cce9346c60a2a68c4ac1d927fb5e0d67d4ef27a",
+      "tracked_operand_available": true,
+      "equal_bytes": false
+    },
+    "tools/saipen_engine/machine_runtime.py": {
+      "tracked_sha256": null,
+      "pre_repair_sha256": "951d26ad7189d8042bece89c96ad92f293f0560c0e432b9dc0bca6af9d2041ed",
+      "tracked_operand_available": false,
+      "equal_bytes": false
+    },
+    "tools/saipen_engine/protocol_admission.py": {
+      "tracked_sha256": "6e9e6f54a218e36c900a754c4d130832c29f69e4ff16e62d2c0b1a49bfcb8bef",
+      "pre_repair_sha256": "63f75f13d608d7aca1ffb84c1ffc8dbb91760bf3619a7f35ae4b58d72ec80ca6",
+      "tracked_operand_available": true,
+      "equal_bytes": false
+    },
+    "tools/saipen_engine/admission.py": {
+      "tracked_sha256": "eff1c06f73b1337b6a3f5d980be8c3286643adfcc8314e582f477ab70a331372",
+      "pre_repair_sha256": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+      "tracked_operand_available": true,
+      "equal_bytes": false
+    },
+    "tools/saipen_engine/reconcile.py": {
+      "tracked_sha256": "4f3a80e0a1db157e6a0bdef9f452c81dc983597efc988d784a487d0c7ea7c836",
+      "pre_repair_sha256": "fa7555a02d98ef3b6330a6a81ff954e56a556f49ea45a9fae647b7e223521b85",
+      "tracked_operand_available": true,
+      "equal_bytes": false
+    },
+    "tools/saipen_engine/init_project.py": {
+      "tracked_sha256": "7a5246452c9f074b7deb1b993c446f7c0cfd8c6450d3f682fa0bb4b21eb74573",
+      "pre_repair_sha256": "7a5246452c9f074b7deb1b993c446f7c0cfd8c6450d3f682fa0bb4b21eb74573",
+      "tracked_operand_available": true,
+      "equal_bytes": true
+    }
+  },
+  "matrix_sha256": "82ea1a42b37a79ed20675a6837a8b3fab52ef6bb939ad266603185ca08439846",
+  "sealed_log_hashes": {
+    ".saipen\\logs\\LOG-001.md": "e86fc37508e79fa6f215dd280ca31386c0aa3bd636db613c515ce608f95c892c",
+    ".saipen\\logs\\LOG-002.md": "e50def4a7d73dcd3afc4010c6b075f55a81331094360b17a208ffaa2e2ca1915",
+    ".saipen\\logs\\LOG-003.md": "f588e05df2f6bf1caffcb21fb41c16cacf235724f21cac36d21f1133539d3b40",
+    ".saipen\\logs\\LOG-004.md": "ee4a099e7a86a098b0d708b2d2fad43d70e6fb7857c3318130fb3b12a40762d9",
+    ".saipen\\logs\\LOG-005.md": "cf21df0a6c8466c5045a2e8a308baa0231d769dacdfa24cf7134937ec19aec38",
+    ".saipen\\logs\\LOG-006.md": "9bbc60b3876195a0ab99f96e9ca3b3a9881ee794bcebbba1d238f9ea8f8648e4",
+    ".saipen\\logs\\LOG-007.md": "c5707e64c08c341354373dc88452d7d81536650cfb7000f2c6352d7e0cc01b9f",
+    ".saipen\\logs\\LOG-008.md": "904bac7c3d360bb53b99b57e6e45681c54b14c500c22d3d1099d4c0277645aa6",
+    ".saipen\\logs\\LOG-009.md": "7f12087dc2e7d7695a84daf2644920377bd13d833f29363285b98136450f0949",
+    ".saipen\\logs\\LOG-010.md": "dda04504759ff929d2366fe6740741f51e195bf437b87592cdc1d137d15f12e5",
+    ".saipen\\logs\\LOG-011.md": "d361b95c56dd1a7fdfcee8db6cb741dec5fc9d4d54e86af854c5a58abeffc115",
+    ".saipen\\logs\\LOG-012.md": "54e652cf571225de82f4a0ba462020f6b59d8f3d4c95abfa2b3e9b4931871390",
+    ".saipen\\logs\\LOG-013.md": "866836a8c89d508f49500e581dd319b4f985ed55cae1e7481e662c6d6398fec4",
+    ".saipen\\logs\\LOG-014.md": "e981819ba8a4ce26cc3d45694e739132459af7f5993dc375492531f57094b22a",
+    ".saipen\\logs\\LOG-015.md": "67d3b654da64b5dcc6a9a9f5f41fc3f8b88c4bd521773f762825b862e0fb5e02",
+    ".saipen\\logs\\LOG-016.md": "7657dce0a96a5ccc53e299bd6621f60619d3706a69b2fbeb4fa49449e157b9a0",
+    ".saipen\\logs\\LOG-017.md": "6c64a8b072e9cea9d088b27011b1c3c526f61637808f52d3b09459fdd284e00d",
+    ".saipen\\logs\\LOG-018.md": "c4b0f972689d0168c71cf5dc091e970b9acc99979397f245a04c1a5ad819b101"
+  },
+  "T1171_committed_board": [
+    "- [/] T-1171 [P1] Implement SAIPEN__00_AUDIT_ALL_3.md to end - complete all 32 tickets | verify: Implement SAIPEN__00_AUDIT_ALL_3.md to end - complete all 32 tickets is complete and the repository-declared verification harness passes | owner: codex | claim_time: 2026-08-27T18:02:50Z | source_receipts: SRC-003"
+  ],
+  "canonical_readback_hashes": {
+    "STATE.md": "a73791b8fca25add3d85ae8ce408babf0e3ebf91ad2a629aea8dde8cd5c619b1",
+    "BOARD.md": "7916e54c7b7cf7d10bc2b1871749977b176a25f7008e3537f6f4cb8308ccaf4f",
+    "LOG.md": "f59f8bb19ca7fb1138d9bd4bb8c4004224c2a361a3de7783a81b0985c40e5623"
+  },
+  "limits": "Only exact manifest/helper subjects were executed, with current stdlib and explicit current protocol_dir. Git author and canonical seats are not model authentication. HEAD is a tracked reference, not an authenticated previous Gemini verified predecessor. machine_runtime.py has no tracked HEAD operand. The operator explicitly confirms the missing model window/predecessor remains unknown. No production, foreign consumer, ACL, Git index or sealed-history mutation."
+}

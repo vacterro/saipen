@@ -1,0 +1,71 @@
+{
+  "model": "opus",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe -c 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)' C:/Users/vac34/.claude/hooks/saipen-guard.py --host claude --saipen-root C:/Users/vac34/.claude/skills/saipen",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe -c 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)' C:/Users/vac34/.claude/hooks/saipen-guard.py --host claude --saipen-root C:/Users/vac34/.claude/skills/saipen",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe -c 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)' C:/Users/vac34/.claude/hooks/saipen-guard.py --host claude --saipen-root C:/Users/vac34/.claude/skills/saipen",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostModelSwitch": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe -c 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)' C:/Users/vac34/.claude/hooks/saipen-guard.py --host claude --saipen-root C:/Users/vac34/.claude/skills/saipen",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe -c 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)' C:/Users/vac34/.claude/hooks/saipen-guard.py --host claude --saipen-root C:/Users/vac34/.claude/skills/saipen",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  },
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "xhigh"
+    },
+    "claude-haiku-4-5": {
+      "effortLevel": "low"
+    }
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "auto"
+}

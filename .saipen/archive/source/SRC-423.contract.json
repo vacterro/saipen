@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-423:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Hyperlean refactor night shift 2: live re-measure, W1 source_binding one-pass O(DONE+LOG) fix with parity tests, W2 compact agent status view, W3 lean startup imports; before/after benchmarks, no authority weakened"
+    }
+  },
+  "derived_at": "2026-11-18T00:26:46Z",
+  "derived_from": "SRC-423",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "9976da9788b9b123ea41cf9307c980ca6b2c6d1d651fda5fde1f9e32e6381d26"
+}

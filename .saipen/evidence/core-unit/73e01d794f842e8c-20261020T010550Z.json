@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "family": "unit",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "fingerprint": "73e01d794f842e8cc115f2c1404388d8a0d18b7627231676902d34b7e2fadfbd",
+  "fingerprint_excludes": [
+    ".git",
+    ".saipen",
+    "audit"
+  ],
+  "baseline_sha256": "81516ef194be0dcb17a85f38a290d9f166d7b2ebd4f55dd41e484a690b501244",
+  "head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "finished_utc": "2026-10-20T01:05:50Z",
+  "status": "FAIL",
+  "exit_code": 1,
+  "ran": 6925,
+  "duration_s": 7458.0,
+  "timeout_s": 9000,
+  "headers": 2,
+  "unparsed": 0,
+  "tallied": 2,
+  "red": [
+    "test_t1553_mid_session_activation.RealLauncherInit.test_the_installed_launcher_init_gates_its_own_turn",
+    "test_t1553_mid_session_activation.RealLauncherInit.test_the_launcher_carrier_rejects_prose_before_status_too"
+  ],
+  "red_sections": {
+    "test_t1553_mid_session_activation.RealLauncherInit.test_the_installed_launcher_init_gates_its_own_turn": "FAIL: test_the_installed_launcher_init_gates_its_own_turn (test_t1553_mid_session_activation.RealLauncherInit.test_the_installed_launcher_init_gates_its_own_turn)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\_TEMP_\\saipen-core-unit-88qtm2ax\\project\\tools\\test_t1553_mid_session_activation.py\", line 496, in test_the_installed_launcher_init_gates_its_own_turn\n    self.assert_machine_delivery(first)\n  File \"V:\\_TEMP_\\saipen-core-unit-88qtm2ax\\project\\tools\\test_t1553_mid_session_activation.py\", line 374, in assert_machine_delivery\n    self.assertEqual(step[\"outcome\"], \"allowed\", step)\nAssertionError: 'blocked' != 'allowed'\n- blocked\n+ allowed\n : {'kind': 'text', 'outcome': 'blocked', 'message': 'EXEC_RESPONSE_INVALID: ETIMEDOUT', 'original': 'SAIMASTER init complete. Wave 1 built everything the operator asked for.\\n\\nWhat was done:\\n- created .saipen/STATE.md, BOARD.md and LOG.md from the canonical templates\\n- bound the project identity and recorded the seat\\n- confirmed the guard is reachable from the host shell\\n\\nTests:\\n- 42 focused tests pass\\n- ruff clean\\n\\nBacklog:\\n- wire the response gate into the remaining hosts\\n- re-check the distribution stamp\\n', 'delivered': 'SAIMASTER init complete. Wave 1 built everything the operator asked for.\\n\\nWhat was done:\\n- created .saipen/STATE.md, BOARD.md and LOG.md from the canonical templates\\n- bound the project identity and recorded the seat\\n- confirmed the guard is reachable from the host shell\\n\\nTests:\\n- 42 focused tests pass\\n- ruff clean\\n\\nBacklog:\\n- wire the response gate into the remaining hosts\\n- re-check the distribution stamp\\n', 'digest_status': 0, 'canonical': 'STATUS: PLAN\\nRESULT: Vajab operaatori otsust\\nOPERATOR ACTION: init -- provide the first project goal or raw backlog\\nNEXT EXACT ACTION: NONE\\nVALIDATION: NOT_RUN'}",
+    "test_t1553_mid_session_activation.RealLauncherInit.test_the_launcher_carrier_rejects_prose_before_status_too": "FAIL: test_the_launcher_carrier_rejects_prose_before_status_too (test_t1553_mid_session_activation.RealLauncherInit.test_the_launcher_carrier_rejects_prose_before_status_too)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\_TEMP_\\saipen-core-unit-88qtm2ax\\project\\tools\\test_t1553_mid_session_activation.py\", line 506, in test_the_launcher_carrier_rejects_prose_before_status_too\n    self.assert_machine_delivery(first)\n  File \"V:\\_TEMP_\\saipen-core-unit-88qtm2ax\\project\\tools\\test_t1553_mid_session_activation.py\", line 374, in assert_machine_delivery\n    self.assertEqual(step[\"outcome\"], \"allowed\", step)\nAssertionError: 'blocked' != 'allowed'\n- blocked\n+ allowed\n : {'kind': 'text', 'outcome': 'blocked', 'message': 'EXEC_RESPONSE_INVALID: ETIMEDOUT', 'original': 'STATUS: done\\n\\nSAIMASTER init complete. Wave 1 built everything the operator asked for.\\n\\nWhat was done:\\n- created .saipen/STATE.md, BOARD.md and LOG.md from the canonical templates\\n- bound the project identity and recorded the seat\\n- confirmed the guard is reachable from the host shell\\n\\nTests:\\n- 42 focused tests pass\\n- ruff clean\\n\\nBacklog:\\n- wire the response gate into the remaining hosts\\n- re-check the distribution stamp\\n', 'delivered': 'STATUS: done\\n\\nSAIMASTER init complete. Wave 1 built everything the operator asked for.\\n\\nWhat was done:\\n- created .saipen/STATE.md, BOARD.md and LOG.md from the canonical templates\\n- bound the project identity and recorded the seat\\n- confirmed the guard is reachable from the host shell\\n\\nTests:\\n- 42 focused tests pass\\n- ruff clean\\n\\nBacklog:\\n- wire the response gate into the remaining hosts\\n- re-check the distribution stamp\\n', 'digest_status': 0, 'canonical': 'STATUS: PLAN\\nRESULT: Vajab operaatori otsust\\nOPERATOR ACTION: init -- provide the first project goal or raw backlog\\nNEXT EXACT ACTION: NONE\\nVALIDATION: NOT_RUN'}"
+  },
+  "processes_leaked": [
+    22092
+  ],
+  "jobs": 1,
+  "verdict": "FAIL",
+  "new_red": [
+    "test_t1553_mid_session_activation.RealLauncherInit.test_the_installed_launcher_init_gates_its_own_turn",
+    "test_t1553_mid_session_activation.RealLauncherInit.test_the_launcher_carrier_rejects_prose_before_status_too"
+  ],
+  "fixed": [],
+  "problems": [
+    "2 new red outside the baseline"
+  ]
+}

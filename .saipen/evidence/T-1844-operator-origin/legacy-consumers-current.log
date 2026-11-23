@@ -1,0 +1,568 @@
+.F..F.F...FFFF....F......F............FF..F...FFFEF.FF.FFF...FFFF..F..FFFFFFFF.sF....F............
+======================================================================
+ERROR: test_under_cap_continue_never_grants_a_fresh_budget (test_t1494_continuation_authority.ContinuationAuthorityTests.test_under_cap_continue_never_grants_a_fresh_budget)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1494_continuation_authority.py", line 193, in test_under_cap_continue_never_grants_a_fresh_budget
+    self.assertEqual((current["goal_waves"], current["goal_tickets"]), (1, 0))
+                      ~~~~~~~^^^^^^^^^^^^^^
+KeyError: 'goal_waves'
+
+======================================================================
+FAIL: test_a_file_carrier_mismatch_names_that_exact_file_and_it_works (test_operator_task_witness.AnOperatorCarrierIsComparedTests.test_a_file_carrier_mismatch_names_that_exact_file_and_it_works)
+With the bytes on disk the refusal is answerable, and answered.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_operator_task_witness.py", line 209, in test_a_file_carrier_mismatch_names_that_exact_file_and_it_works
+    self.assertEqual(provenance_of(root)["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+======================================================================
+FAIL: test_a_task_file_carries_it_when_a_digest_cannot (test_operator_task_witness.AnOperatorCarrierIsComparedTests.test_a_task_file_carries_it_when_a_digest_cannot)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_operator_task_witness.py", line 152, in test_a_task_file_carries_it_when_a_digest_cannot
+    self.assertEqual(witness["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+======================================================================
+FAIL: test_matching_text_records_the_carrier (test_operator_task_witness.AnOperatorCarrierIsComparedTests.test_matching_text_records_the_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_operator_task_witness.py", line 140, in test_matching_text_records_the_carrier
+    self.assertEqual(witness["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+======================================================================
+FAIL: test_every_available_shell_types_it_to_started (test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) (shell='bash')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_operator_task_witness.py", line 414, in test_every_available_shell_types_it_to_started
+    self.assertEqual(provenance_of(root)["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+======================================================================
+FAIL: test_every_available_shell_types_it_to_started (test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) (shell='powershell')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_operator_task_witness.py", line 414, in test_every_available_shell_types_it_to_started
+    self.assertEqual(provenance_of(root)["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+======================================================================
+FAIL: test_every_available_shell_types_it_to_started (test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) (shell='pwsh')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_operator_task_witness.py", line 414, in test_every_available_shell_types_it_to_started
+    self.assertEqual(provenance_of(root)["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+======================================================================
+FAIL: test_every_available_shell_types_it_to_started (test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) (shell='cmd')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_operator_task_witness.py", line 414, in test_every_available_shell_types_it_to_started
+    self.assertEqual(provenance_of(root)["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+======================================================================
+FAIL: test_line_endings_do_not_change_the_answer (test_operator_task_witness.WitnessIsDecidedFromBytesTests.test_line_endings_do_not_change_the_answer)
+A launcher's file and a shell payload are the same request.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_operator_task_witness.py", line 302, in test_line_endings_do_not_change_the_answer
+    self.assertEqual(outcome["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+======================================================================
+FAIL: test_identical_trusted_bytes_have_different_authority (test_ingress_authority.IngressAuthorityTests.test_identical_trusted_bytes_have_different_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 93, in test_identical_trusted_bytes_have_different_authority
+    self.assertEqual(state(root)["task"], second)
+AssertionError: 'T-1' != 'T-2'
+- T-1
+?   ^
++ T-2
+?   ^
+
+
+======================================================================
+FAIL: test_explicit_fresh_operator_cc_can_reset_the_bounded_cap (test_t1494_continuation_authority.ContinuationAuthorityTests.test_explicit_fresh_operator_cc_can_reset_the_bounded_cap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1494_continuation_authority.py", line 160, in test_explicit_fresh_operator_cc_can_reset_the_bounded_cap
+    self.assertEqual(code, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "RECONCILE_REAUTH_REQUIRED",
+  "op_id": null,
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "bounded run requires a fresh operator cc; WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
+  "next_action": "WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
+  "operator_action_due": true,
+  "dry_run": false,
+  "reconciliation": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "changed": {
+      "board": [],
+      "state": [],
+      "audit_manifest": [
+        "V:/_TEMP_/t1363-hv7hkuqt/.saipen/MANIFEST.json"
+      ]
+    },
+    "strict_state_error": null,
+    "dry_run": false,
+    "audit_manifest": {
+      "ok": true,
+      "code": "AUDIT_MANIFEST_WRITTEN",
+      "path": "V:/_TEMP_/t1363-hv7hkuqt/.saipen/MANIFEST.json",
+      "contract_version": 3,
+      "changed": true,
+      "layout": "CURRENT",
+      "dry_run": false,
+      "declared": "ABSENT",
+      "manifest_present": true,
+      "manifest_current": true,
+      "detail": ""
+    },
+    "detail": "audit manifest AUDIT_MANIFEST_WRITTEN -- reconciliation mutated the canonical surface, so this is not CLEAN; the next steady-state call may be CLEAN"
+  },
+  "detail": "bounded run requires a fresh operator cc; WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\t1363-hv7hkuqt --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+
+
+======================================================================
+FAIL: test_explicit_operator_goal_records_persistent_authority_and_source (test_t1494_continuation_authority.ContinuationAuthorityTests.test_explicit_operator_goal_records_persistent_authority_and_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1494_continuation_authority.py", line 99, in test_explicit_operator_goal_records_persistent_authority_and_source
+    self.assertEqual(current.get("continuation_authority"), "operator_persistent")
+AssertionError: None != 'operator_persistent'
+
+======================================================================
+FAIL: test_iteration_does_not_call_a_persistent_checkpoint_a_human_wait (test_t1494_continuation_authority.ContinuationAuthorityTests.test_iteration_does_not_call_a_persistent_checkpoint_a_human_wait)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1494_continuation_authority.py", line 230, in test_iteration_does_not_call_a_persistent_checkpoint_a_human_wait
+    self.assertEqual(verdict["decision"], "AUTO_KICK", verdict)
+AssertionError: 'RUNTIME_PAUSED' != 'AUTO_KICK'
+- RUNTIME_PAUSED
++ AUTO_KICK
+ : {'schema_version': 1, 'decision': 'RUNTIME_PAUSED', 'goal_complete': False, 'executable_action_remains': False, 'operator_due': False, 'valve_tripped': False, 'requires_human': False, 'canonical_task': 'none', 'phase': 'UNKNOWN', 'next_action': 'NONE', 'execution_intent': 'UNKNOWN', 'executor_assessed': False, 'executor_compatible': False, 'executor_id': None, 'missing_capabilities': [], 'required_capabilities': [], 'executor_capabilities': None, 'admission': {'result': 'UNASSESSED', 'missing': [], 'next': 'NONE'}, 'route_reason': 'state-unreadable', 'route_action': 'NONE', 'state_readable': False, 'state_detail': 'STATE not parseable whole: non-goal execution_intent with goal_tickets', 'recall_decision': None}
+
+======================================================================
+FAIL: test_persistent_cap_status_is_a_checkpoint_without_operator_action (test_t1494_continuation_authority.ContinuationAuthorityTests.test_persistent_cap_status_is_a_checkpoint_without_operator_action)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1494_continuation_authority.py", line 134, in test_persistent_cap_status_is_a_checkpoint_without_operator_action
+    self.assertEqual(code, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "action": "saipen recover",
+  "reason": "state-malformed",
+  "detail": "state-malformed: non-goal execution_intent with goal_tickets",
+  "cold_route": {
+    "project_root": "V:\\_TEMP_\\t1363-mx67nu_1",
+    "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+    "phase": "SCOUT",
+    "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\scout.md",
+    "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+    "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+    "documents": {
+      "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+      "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+      "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+      "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+      "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+      "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+      "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+      "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+      "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+      "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+    },
+    "project_memory": {
+      "STATE.md": "V:\\_TEMP_\\t1363-mx67nu_1\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\_TEMP_\\t1363-mx67nu_1\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\_TEMP_\\t1363-mx67nu_1\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\t1363-mx67nu_1 --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+
+
+======================================================================
+FAIL: test_persistent_checkpoint_then_core_validator_is_green (test_t1494_continuation_authority.ContinuationAuthorityTests.test_persistent_checkpoint_then_core_validator_is_green)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1494_continuation_authority.py", line 259, in test_persistent_checkpoint_then_core_validator_is_green
+    self.assertEqual(code, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "state-malformed: non-goal execution_intent with goal_tickets",
+  "changed": {
+    "board": [],
+    "state": []
+  },
+  "strict_state_error": "non-goal execution_intent with goal_tickets",
+  "dry_run": false,
+  "needs_local_mutation": false,
+  "safe_auto_repair_available": false,
+  "operator_decision_available": false,
+  "canonical_next_command": null,
+  "read_only": true,
+  "terminal_disposition": "RECOVERY_BLOCKED",
+  "blocking_surface": "state",
+  "blocking_field": null,
+  "evidence_reference": ".saipen/STATE.md",
+  "diagnosis": "READ_ONLY_DIAGNOSIS_ONLY",
+  "read_only_diagnosis_only": true,
+  "instruction": "READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth",
+  "forbidden_probes": [
+    "saipen stop",
+    "saipen transition",
+    "saipen goal",
+    "saipen ticket",
+    "Bash",
+    "Edit",
+    "Write"
+  ],
+  "reason_code": "PROTOCOL_STATE_INVALID",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\t1363-f7aax0im --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+
+
+======================================================================
+FAIL: test_persistent_cold_continue_checkpoints_then_resumes_same_work (test_t1494_continuation_authority.ContinuationAuthorityTests.test_persistent_cold_continue_checkpoints_then_resumes_same_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1494_continuation_authority.py", line 145, in test_persistent_cold_continue_checkpoints_then_resumes_same_work
+    self.assertEqual(code, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "state-malformed: non-goal execution_intent with goal_tickets",
+  "changed": {
+    "board": [],
+    "state": []
+  },
+  "strict_state_error": "non-goal execution_intent with goal_tickets",
+  "dry_run": false,
+  "needs_local_mutation": false,
+  "safe_auto_repair_available": false,
+  "operator_decision_available": false,
+  "canonical_next_command": null,
+  "read_only": true,
+  "terminal_disposition": "RECOVERY_BLOCKED",
+  "blocking_surface": "state",
+  "blocking_field": null,
+  "evidence_reference": ".saipen/STATE.md",
+  "diagnosis": "READ_ONLY_DIAGNOSIS_ONLY",
+  "read_only_diagnosis_only": true,
+  "instruction": "READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth",
+  "forbidden_probes": [
+    "saipen stop",
+    "saipen transition",
+    "saipen goal",
+    "saipen ticket",
+    "Bash",
+    "Edit",
+    "Write"
+  ],
+  "reason_code": "PROTOCOL_STATE_INVALID",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\t1363-lfkdilag --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+
+
+======================================================================
+FAIL: test_wave_cap_uses_the_same_persistent_checkpoint_policy (test_t1494_continuation_authority.ContinuationAuthorityTests.test_wave_cap_uses_the_same_persistent_checkpoint_policy)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1494_continuation_authority.py", line 200, in test_wave_cap_uses_the_same_persistent_checkpoint_policy
+    self.assertEqual(code, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "state-malformed: non-goal execution_intent with goal_waves; non-goal execution_intent with goal_tickets",
+  "changed": {
+    "board": [],
+    "state": []
+  },
+  "strict_state_error": "non-goal execution_intent with goal_waves; non-goal execution_intent with goal_tickets",
+  "dry_run": false,
+  "needs_local_mutation": false,
+  "safe_auto_repair_available": false,
+  "operator_decision_available": false,
+  "canonical_next_command": null,
+  "read_only": true,
+  "terminal_disposition": "RECOVERY_BLOCKED",
+  "blocking_surface": "state",
+  "blocking_field": null,
+  "evidence_reference": ".saipen/STATE.md",
+  "diagnosis": "READ_ONLY_DIAGNOSIS_ONLY",
+  "read_only_diagnosis_only": true,
+  "instruction": "READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth",
+  "forbidden_probes": [
+    "saipen stop",
+    "saipen transition",
+    "saipen goal",
+    "saipen ticket",
+    "Bash",
+    "Edit",
+    "Write"
+  ],
+  "reason_code": "PROTOCOL_STATE_INVALID",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\t1363-mk7ozaj1 --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+
+
+======================================================================
+FAIL: test_cli_consumes_exact_capsule_and_does_not_replan (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_cli_consumes_exact_capsule_and_does_not_replan)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 429, in test_cli_consumes_exact_capsule_and_does_not_replan
+    self.assertEqual(code, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "op_id": null,
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "a fresh externally witnessed operator authorization is required",
+  "detail": "a fresh externally witnessed operator authorization is required"
+}
+
+
+======================================================================
+FAIL: test_committed_proof_pins_both_journals_project_and_source (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_committed_proof_pins_both_journals_project_and_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 453, in test_committed_proof_pins_both_journals_project_and_source
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'a fresh externally witnessed operator authorization is required'}
+
+======================================================================
+FAIL: test_corrupt_transition_manifest_refuses_continuation (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_corrupt_transition_manifest_refuses_continuation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 340, in test_corrupt_transition_manifest_refuses_continuation
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'a fresh externally witnessed operator authorization is required'}
+
+======================================================================
+FAIL: test_corrupted_or_revoked_source_refuses_continuation (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_corrupted_or_revoked_source_refuses_continuation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 326, in test_corrupted_or_revoked_source_refuses_continuation
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'a fresh externally witnessed operator authorization is required'}
+
+======================================================================
+FAIL: test_crashed_transition_recovers_exact_prepared_bytes_without_a_new_grant (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_crashed_transition_recovers_exact_prepared_bytes_without_a_new_grant)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 352, in test_crashed_transition_recovers_exact_prepared_bytes_without_a_new_grant
+    with patch.dict(os.environ, crash_env), self.assertRaises(SystemExit) as crash:
+AssertionError: SystemExit not raised
+
+======================================================================
+FAIL: test_fresh_grant_preserves_review_work_counters_board_and_original_journal (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_fresh_grant_preserves_review_work_counters_board_and_original_journal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 127, in test_fresh_grant_preserves_review_work_counters_board_and_original_journal
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'a fresh externally witnessed operator authorization is required'}
+
+======================================================================
+FAIL: test_genuine_external_blocker_prevents_automatic_checkpoint (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_genuine_external_blocker_prevents_automatic_checkpoint)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 415, in test_genuine_external_blocker_prevents_automatic_checkpoint
+    self.assertTrue(self.upgrade(root).ok)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_goal_replacement_does_not_inherit_a_previous_grant (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_goal_replacement_does_not_inherit_a_previous_grant)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 300, in test_goal_replacement_does_not_inherit_a_previous_grant
+    self.assertTrue(self.upgrade(root, old).ok)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_identical_replay_reuses_grant_and_event_without_carrier (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_identical_replay_reuses_grant_and_event_without_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 222, in test_identical_replay_reuses_grant_and_event_without_carrier
+    self.assertTrue(first.ok, first.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'a fresh externally witnessed operator authorization is required'}
+
+======================================================================
+FAIL: test_missing_grant_journal_cannot_reset_checkpoint (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_missing_grant_journal_cannot_reset_checkpoint)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 244, in test_missing_grant_journal_cannot_reset_checkpoint
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'a fresh externally witnessed operator authorization is required'}
+
+======================================================================
+FAIL: test_native_router_iteration_and_reconstructed_counts_agree (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_native_router_iteration_and_reconstructed_counts_agree)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 382, in test_native_router_iteration_and_reconstructed_counts_agree
+    self.assertTrue(self.upgrade(root).ok)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_preview_writes_no_source_or_lifecycle_bytes (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_preview_writes_no_source_or_lifecycle_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 214, in test_preview_writes_no_source_or_lifecycle_bytes
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'a fresh externally witnessed operator authorization is required'}
+
+======================================================================
+FAIL: test_replacement_cannot_reuse_an_ingress_from_a_different_goal (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_replacement_cannot_reuse_an_ingress_from_a_different_goal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 310, in test_replacement_cannot_reuse_an_ingress_from_a_different_goal
+    self.assertTrue(self.upgrade(root).ok)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_replayed_capsule_cannot_authorize_another_project (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_replayed_capsule_cannot_authorize_another_project)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 290, in test_replayed_capsule_cannot_authorize_another_project
+    self.assertTrue(self.upgrade(first, body).ok)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_source_change_after_proof_is_rejected_by_apply_cas (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_source_change_after_proof_is_rejected_by_apply_cas)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 447, in test_source_change_after_proof_is_rejected_by_apply_cas
+    self.assertEqual(result.code, "STALE_STATE", result.to_dict())
+AssertionError: 'VALIDATION_FAILED' != 'STALE_STATE'
+- VALIDATION_FAILED
++ STALE_STATE
+ : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'a fresh externally witnessed operator authorization is required'}
+
+======================================================================
+FAIL: test_ticket_checkpoint_resumes_exact_active_review_after_restart (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_ticket_checkpoint_resumes_exact_active_review_after_restart)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 146, in test_ticket_checkpoint_resumes_exact_active_review_after_restart
+    self.assertTrue(self.upgrade(root).ok)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_user_brake_survives_grant_and_continuation (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_user_brake_survives_grant_and_continuation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 264, in test_user_brake_survives_grant_and_continuation
+    self.assertTrue(self.upgrade(root).ok)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_wave_checkpoint_uses_the_same_grant (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_wave_checkpoint_uses_the_same_grant)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 158, in test_wave_checkpoint_uses_the_same_grant
+    self.assertTrue(self.upgrade(root).ok)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_clause_a_user_directly_approves_task_in_freebuff (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_a_user_directly_approves_task_in_freebuff)
+Clause A: User directly approves task in FREEBUFF -> SAIPEN receives valid trusted provenance.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_freebuff_operator_provenance.py", line 118, in test_clause_a_user_directly_approves_task_in_freebuff
+    self.assertEqual(witness_rec["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+======================================================================
+FAIL: test_clause_f_nested_tool_invocation_preserves_provenance (test_freebuff_operator_provenance.TestFreebuffOperatorProvenance.test_clause_f_nested_tool_invocation_preserves_provenance)
+Clause F: Nested tool/process invocation -> carrier is preserved in subprocess env.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_freebuff_operator_provenance.py", line 186, in test_clause_f_nested_tool_invocation_preserves_provenance
+    self.assertEqual(witness_rec["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+----------------------------------------------------------------------
+Ran 95 tests in 44.840s
+
+FAILED (failures=36, errors=1, skipped=1)

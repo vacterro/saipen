@@ -1,0 +1,21 @@
+{
+  "kind": "prepared snapshot, not committed or pushed",
+  "auxiliary_git_dir": "V:\\_SAIPEN_VERIFY_\\github-backups\\saipen-20261021T222419Z.git",
+  "base": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "original_branch": "main",
+  "original_index_sha256": "2155041c6b051f488c1273462e896a789e6be2c6d844d18cb8fe64253f101539",
+  "branch": "backup/cc-all-20261021T222419Z",
+  "remote": "https://github.com/vacterro/saipen.git",
+  "tree": "6d14d59a7f44e47cf6167d96831d3795259f4972",
+  "manifest": ".saipen/evidence/T-1848-github-backup/snapshot-manifest.json",
+  "selected_paths": 414,
+  "source_fingerprint": "b6dc79950e87084614b6a070eeeca1f167410f736c65f40256a94762ca9a0c3c",
+  "secret_findings": [],
+  "reviewed_fixture_matches": [
+    {
+      "path": "tools/run_scenarios.py",
+      "kind": "github_token",
+      "reason": "existing T-1100 synthetic redaction fixture, unchanged in HEAD"
+    }
+  ]
+}

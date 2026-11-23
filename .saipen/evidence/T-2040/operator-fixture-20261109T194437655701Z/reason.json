@@ -1,0 +1,49 @@
+{
+  "task": "T-2040",
+  "scope": "tools/test_t1627_operator_question.py",
+  "source_changed": false,
+  "reason": "The operator test imports _seat and build_state from test_t1619_iteration_boundary. That shared helper already contains the two-line execution_intent=goal normalization removing converge_target before overrides. Duplicating it in the operator fixture would add no repair. All original assertions remain unchanged.",
+  "cause": "The old shared fixture copied live execution_intent=converge/converge_target=crew, changed execution_intent to goal, and retained converge_target. The production state validator correctly rejects this incompatible combination with execution_intent goal with converge_target.",
+  "historical_record": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/core-unit/f48bded68d33a538-20261109T183729854817Z.json",
+  "historical_sections": "historical-red-sections.json",
+  "preimage": "test_t1627_operator_question.py.preimage",
+  "baseline": {
+    "output": "before.log",
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "note": "Untouched operator source; shared repair already present. This is not a historical failing baseline."
+  },
+  "faithful_reproduction": {
+    "script": "reproduce_old_helper.py",
+    "output": "old-helper.log",
+    "result": "old-helper-result.json",
+    "method": "Remove only the two normalization lines from the imported shared helper in memory. Patch only the shared helper and the operator module's imported helper alias. Run all 16 original operator tests, including real Claude and OpenCode transports, without production doubles beyond the original tests.",
+    "tests": 16,
+    "failures": 6,
+    "errors": 0,
+    "skipped": 0,
+    "matches_exact_historical_failure_ids": true,
+    "exit_code": 1,
+    "expected_failure": true
+  },
+  "after": {
+    "output": "after.log",
+    "metadata": "after-results.json",
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "source_byte_identical_to_preimage": true
+  },
+  "remaining_production_errors": "None observed in this 16-test module. No full-family PASS claim; full family not rerun.",
+  "preserved": "All refusal, executor failover, canonical operator authority and real transport assertions; no production edits or tracked source changes.",
+  "superseded_exploratory_probes": [
+    {
+      "path": "controlled-repro.json",
+      "reason": "Exploratory status comparison omitted LOG.md, so both CLI status calls failed history ownership first. Not a verification result and not a PASS claim. regressed-status-full.json confirms the intended malformed-state diagnostic; old-helper.log and after.log are authoritative module outputs."
+    }
+  ]
+}

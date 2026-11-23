@@ -1,0 +1,12 @@
+tools/installed_host_acceptance.py
+tools/saipen_engine/release_authority.py
+tools/test_bzcc_overnight_autonomy.py
+tools/test_evidence_gap_ledger_lineage.py
+tools/test_installed_host_acceptance.py
+tools/test_persistent_autonomy_false_satisfaction.py
+tools/test_persistent_autonomy_recovery.py
+tools/test_release_approval_contract.py
+tools/test_release_authority_gap.py
+tools/test_release_completion.py
+tools/test_release_reconciliation.py
+tools/test_shared_index_forensics.py

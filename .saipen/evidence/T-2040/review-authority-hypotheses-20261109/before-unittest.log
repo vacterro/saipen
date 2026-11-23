@@ -1,0 +1,456 @@
+test_duplicate_and_contradictory_generations_fail_closed (__main__.CollectHypothesisTests.test_duplicate_and_contradictory_generations_fail_closed) ... 
+  test_duplicate_and_contradictory_generations_fail_closed (__main__.CollectHypothesisTests.test_duplicate_and_contradictory_generations_fail_closed) (hypotheses=[{'producer': 'saiui', 'package_id': 'UI-001', 'source_head': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'source_tree_fingerprint': 'git-delta-v1:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc', 'role_revision': 'sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8'}, {'producer': 'saiui', 'package_id': 'UI-001', 'source_head': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'source_tree_fingerprint': 'git-delta-v1:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc', 'role_revision': 'sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8', 'note': []}]) ... ERROR
+test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) ... 
+  test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='producer', value=[]) ... ERROR
+  test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='producer', value={}) ... ERROR
+  test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='package_id', value=[]) ... ERROR
+  test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='package_id', value={}) ... ERROR
+  test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='source_head', value=[]) ... ERROR
+  test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='source_head', value={}) ... ERROR
+  test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='source_tree_fingerprint', value=[]) ... ERROR
+  test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='source_tree_fingerprint', value={}) ... ERROR
+  test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='role_revision', value=[]) ... ERROR
+  test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='role_revision', value={}) ... ERROR
+test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) ... ERROR
+test_valid_and_absent_legacy_hypotheses_still_bind (__main__.CollectHypothesisTests.test_valid_and_absent_legacy_hypotheses_still_bind) ... ok
+test_malformed_goal_inventory_never_binds_authority (__main__.MaintenanceObservationTests.test_malformed_goal_inventory_never_binds_authority) ... 
+  test_malformed_goal_inventory_never_binds_authority (__main__.MaintenanceObservationTests.test_malformed_goal_inventory_never_binds_authority) (status='unknown') ... FAIL
+  test_malformed_goal_inventory_never_binds_authority (__main__.MaintenanceObservationTests.test_malformed_goal_inventory_never_binds_authority) (status=None) ... FAIL
+  test_malformed_goal_inventory_never_binds_authority (__main__.MaintenanceObservationTests.test_malformed_goal_inventory_never_binds_authority) (status=1) ... FAIL
+test_native_admission_preserves_grant_identity_and_restart (__main__.MaintenanceObservationTests.test_native_admission_preserves_grant_identity_and_restart) ... FAIL
+test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) ... 
+  test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='ACTIONABLE_GAPS') ... FAIL
+  test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='BLOCKED_BY_EVIDENCE') ... FAIL
+  test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='DISCOVERY_REQUIRED') ... FAIL
+  test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='NO_ADMISSIBLE_WORK') ... FAIL
+  test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='SATISFIED') ... FAIL
+  test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='VERIFICATION_REQUIRED') ... FAIL
+  test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='WAITING_AUTHORITY') ... FAIL
+  test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='WAITING_DEPENDENCY') ... FAIL
+test_policy_change_and_pause_still_refuse (__main__.MaintenanceObservationTests.test_policy_change_and_pause_still_refuse) ... ok
+test_ungranted_or_revoked_observation_never_admits (__main__.MaintenanceObservationTests.test_ungranted_or_revoked_observation_never_admits) ... ok
+
+======================================================================
+ERROR: test_duplicate_and_contradictory_generations_fail_closed (__main__.CollectHypothesisTests.test_duplicate_and_contradictory_generations_fail_closed) (hypotheses=[{'producer': 'saiui', 'package_id': 'UI-001', 'source_head': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'source_tree_fingerprint': 'git-delta-v1:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc', 'role_revision': 'sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8'}, {'producer': 'saiui', 'package_id': 'UI-001', 'source_head': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'source_tree_fingerprint': 'git-delta-v1:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc', 'role_revision': 'sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8', 'note': []}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 163, in test_duplicate_and_contradictory_generations_fail_closed
+    proof, problem = self.proof(hypotheses)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 134, in proof
+    return subs._independent_core_review(f.root, f.package, f.ticket, f.collect_op,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4246, in _independent_core_review
+    problem = _collect_hypotheses_problem(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in _collect_hypotheses_problem
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in <setcomp>
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'list'
+
+======================================================================
+ERROR: test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='producer', value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 148, in test_nested_null_numeric_and_missing_values_are_invalid
+    proof, problem = self.proof([{**self.hypothesis, key: value}])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 134, in proof
+    return subs._independent_core_review(f.root, f.package, f.ticket, f.collect_op,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4246, in _independent_core_review
+    problem = _collect_hypotheses_problem(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in _collect_hypotheses_problem
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in <setcomp>
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'list'
+
+======================================================================
+ERROR: test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='producer', value={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 148, in test_nested_null_numeric_and_missing_values_are_invalid
+    proof, problem = self.proof([{**self.hypothesis, key: value}])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 134, in proof
+    return subs._independent_core_review(f.root, f.package, f.ticket, f.collect_op,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4246, in _independent_core_review
+    problem = _collect_hypotheses_problem(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in _collect_hypotheses_problem
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in <setcomp>
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'dict'
+
+======================================================================
+ERROR: test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='package_id', value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 148, in test_nested_null_numeric_and_missing_values_are_invalid
+    proof, problem = self.proof([{**self.hypothesis, key: value}])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 134, in proof
+    return subs._independent_core_review(f.root, f.package, f.ticket, f.collect_op,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4246, in _independent_core_review
+    problem = _collect_hypotheses_problem(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in _collect_hypotheses_problem
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in <setcomp>
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'list'
+
+======================================================================
+ERROR: test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='package_id', value={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 148, in test_nested_null_numeric_and_missing_values_are_invalid
+    proof, problem = self.proof([{**self.hypothesis, key: value}])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 134, in proof
+    return subs._independent_core_review(f.root, f.package, f.ticket, f.collect_op,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4246, in _independent_core_review
+    problem = _collect_hypotheses_problem(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in _collect_hypotheses_problem
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in <setcomp>
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'dict'
+
+======================================================================
+ERROR: test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='source_head', value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 148, in test_nested_null_numeric_and_missing_values_are_invalid
+    proof, problem = self.proof([{**self.hypothesis, key: value}])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 134, in proof
+    return subs._independent_core_review(f.root, f.package, f.ticket, f.collect_op,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4246, in _independent_core_review
+    problem = _collect_hypotheses_problem(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in _collect_hypotheses_problem
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in <setcomp>
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'list'
+
+======================================================================
+ERROR: test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='source_head', value={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 148, in test_nested_null_numeric_and_missing_values_are_invalid
+    proof, problem = self.proof([{**self.hypothesis, key: value}])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 134, in proof
+    return subs._independent_core_review(f.root, f.package, f.ticket, f.collect_op,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4246, in _independent_core_review
+    problem = _collect_hypotheses_problem(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in _collect_hypotheses_problem
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in <setcomp>
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'dict'
+
+======================================================================
+ERROR: test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='source_tree_fingerprint', value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 148, in test_nested_null_numeric_and_missing_values_are_invalid
+    proof, problem = self.proof([{**self.hypothesis, key: value}])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 134, in proof
+    return subs._independent_core_review(f.root, f.package, f.ticket, f.collect_op,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4246, in _independent_core_review
+    problem = _collect_hypotheses_problem(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in _collect_hypotheses_problem
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in <setcomp>
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'list'
+
+======================================================================
+ERROR: test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='source_tree_fingerprint', value={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 148, in test_nested_null_numeric_and_missing_values_are_invalid
+    proof, problem = self.proof([{**self.hypothesis, key: value}])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 134, in proof
+    return subs._independent_core_review(f.root, f.package, f.ticket, f.collect_op,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4246, in _independent_core_review
+    problem = _collect_hypotheses_problem(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in _collect_hypotheses_problem
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in <setcomp>
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'dict'
+
+======================================================================
+ERROR: test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='role_revision', value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 148, in test_nested_null_numeric_and_missing_values_are_invalid
+    proof, problem = self.proof([{**self.hypothesis, key: value}])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 134, in proof
+    return subs._independent_core_review(f.root, f.package, f.ticket, f.collect_op,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4246, in _independent_core_review
+    problem = _collect_hypotheses_problem(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in _collect_hypotheses_problem
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in <setcomp>
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'list'
+
+======================================================================
+ERROR: test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) (key='role_revision', value={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 148, in test_nested_null_numeric_and_missing_values_are_invalid
+    proof, problem = self.proof([{**self.hypothesis, key: value}])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 134, in proof
+    return subs._independent_core_review(f.root, f.package, f.ticket, f.collect_op,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4246, in _independent_core_review
+    problem = _collect_hypotheses_problem(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in _collect_hypotheses_problem
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in <setcomp>
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'dict'
+
+======================================================================
+ERROR: test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 154, in test_nested_null_numeric_and_missing_values_are_invalid
+    proof, problem = self.proof([self.hypothesis, {"producer": []}])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 134, in proof
+    return subs._independent_core_review(f.root, f.package, f.ticket, f.collect_op,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4246, in _independent_core_review
+    problem = _collect_hypotheses_problem(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in _collect_hypotheses_problem
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\subs.py", line 4149, in <setcomp>
+    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unhashable type: 'list'
+
+======================================================================
+FAIL: test_malformed_goal_inventory_never_binds_authority (__main__.MaintenanceObservationTests.test_malformed_goal_inventory_never_binds_authority) (status='unknown')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 113, in test_malformed_goal_inventory_never_binds_authority
+    self.assertTrue(goal_authority.prove(root, maintenance_fixture.current(root)))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_malformed_goal_inventory_never_binds_authority (__main__.MaintenanceObservationTests.test_malformed_goal_inventory_never_binds_authority) (status=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 113, in test_malformed_goal_inventory_never_binds_authority
+    self.assertTrue(goal_authority.prove(root, maintenance_fixture.current(root)))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_malformed_goal_inventory_never_binds_authority (__main__.MaintenanceObservationTests.test_malformed_goal_inventory_never_binds_authority) (status=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 113, in test_malformed_goal_inventory_never_binds_authority
+    self.assertTrue(goal_authority.prove(root, maintenance_fixture.current(root)))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_native_admission_preserves_grant_identity_and_restart (__main__.MaintenanceObservationTests.test_native_admission_preserves_grant_identity_and_restart)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 59, in test_native_admission_preserves_grant_identity_and_restart
+    self.assertEqual(goal_authority.prove(root, after), [])
+AssertionError: Lists differ: ['continuation authority transition is inv[59 chars]ect'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'continuation authority transition is invalid: no ACTIVE maintenance goal is registered in this project'
+
++ []
+- ['continuation authority transition is invalid: no ACTIVE maintenance goal is '
+-  'registered in this project']
+
+======================================================================
+FAIL: test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='ACTIONABLE_GAPS')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 73, in test_observation_statuses_do_not_revoke_an_unchanged_grant
+    self.assertEqual(goal_authority.prove(root, maintenance_fixture.current(root)), [])
+AssertionError: Lists differ: ['continuation authority transition is inv[59 chars]ect'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'continuation authority transition is invalid: no ACTIVE maintenance goal is registered in this project'
+
++ []
+- ['continuation authority transition is invalid: no ACTIVE maintenance goal is '
+-  'registered in this project']
+
+======================================================================
+FAIL: test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='BLOCKED_BY_EVIDENCE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 73, in test_observation_statuses_do_not_revoke_an_unchanged_grant
+    self.assertEqual(goal_authority.prove(root, maintenance_fixture.current(root)), [])
+AssertionError: Lists differ: ['continuation authority transition is inv[59 chars]ect'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'continuation authority transition is invalid: no ACTIVE maintenance goal is registered in this project'
+
++ []
+- ['continuation authority transition is invalid: no ACTIVE maintenance goal is '
+-  'registered in this project']
+
+======================================================================
+FAIL: test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='DISCOVERY_REQUIRED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 73, in test_observation_statuses_do_not_revoke_an_unchanged_grant
+    self.assertEqual(goal_authority.prove(root, maintenance_fixture.current(root)), [])
+AssertionError: Lists differ: ['continuation authority transition is inv[59 chars]ect'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'continuation authority transition is invalid: no ACTIVE maintenance goal is registered in this project'
+
++ []
+- ['continuation authority transition is invalid: no ACTIVE maintenance goal is '
+-  'registered in this project']
+
+======================================================================
+FAIL: test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='NO_ADMISSIBLE_WORK')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 73, in test_observation_statuses_do_not_revoke_an_unchanged_grant
+    self.assertEqual(goal_authority.prove(root, maintenance_fixture.current(root)), [])
+AssertionError: Lists differ: ['continuation authority transition is inv[59 chars]ect'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'continuation authority transition is invalid: no ACTIVE maintenance goal is registered in this project'
+
++ []
+- ['continuation authority transition is invalid: no ACTIVE maintenance goal is '
+-  'registered in this project']
+
+======================================================================
+FAIL: test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='SATISFIED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 73, in test_observation_statuses_do_not_revoke_an_unchanged_grant
+    self.assertEqual(goal_authority.prove(root, maintenance_fixture.current(root)), [])
+AssertionError: Lists differ: ['continuation authority transition is inv[59 chars]ect'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'continuation authority transition is invalid: no ACTIVE maintenance goal is registered in this project'
+
++ []
+- ['continuation authority transition is invalid: no ACTIVE maintenance goal is '
+-  'registered in this project']
+
+======================================================================
+FAIL: test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='VERIFICATION_REQUIRED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 73, in test_observation_statuses_do_not_revoke_an_unchanged_grant
+    self.assertEqual(goal_authority.prove(root, maintenance_fixture.current(root)), [])
+AssertionError: Lists differ: ['continuation authority transition is inv[59 chars]ect'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'continuation authority transition is invalid: no ACTIVE maintenance goal is registered in this project'
+
++ []
+- ['continuation authority transition is invalid: no ACTIVE maintenance goal is '
+-  'registered in this project']
+
+======================================================================
+FAIL: test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='WAITING_AUTHORITY')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 73, in test_observation_statuses_do_not_revoke_an_unchanged_grant
+    self.assertEqual(goal_authority.prove(root, maintenance_fixture.current(root)), [])
+AssertionError: Lists differ: ['continuation authority transition is inv[59 chars]ect'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'continuation authority transition is invalid: no ACTIVE maintenance goal is registered in this project'
+
++ []
+- ['continuation authority transition is invalid: no ACTIVE maintenance goal is '
+-  'registered in this project']
+
+======================================================================
+FAIL: test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) (status='WAITING_DEPENDENCY')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 73, in test_observation_statuses_do_not_revoke_an_unchanged_grant
+    self.assertEqual(goal_authority.prove(root, maintenance_fixture.current(root)), [])
+AssertionError: Lists differ: ['continuation authority transition is inv[59 chars]ect'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'continuation authority transition is invalid: no ACTIVE maintenance goal is registered in this project'
+
++ []
+- ['continuation authority transition is invalid: no ACTIVE maintenance goal is '
+-  'registered in this project']
+
+----------------------------------------------------------------------
+Ran 8 tests in 21.479s
+
+FAILED (failures=12, errors=12)

@@ -87,6 +87,9 @@ class SandboxScopeTests(CoreUnitFixture):
     # -- clause 1: a declared module copies only the source tree --------------
 
     def test_a_declared_module_copies_no_history(self):
+        # T-2094: the resolver expands patterns through the same selector the
+        # runner uses, so the module must exist for this to be a declared run.
+        (self.project / "tools/test_plain.py").write_text("", encoding="utf-8")
         _write_manifest(self.project, {"test_plain.py": []})
         scope = sandbox_scope.resolve(self.project, ["test_plain.py"])
         self.assertEqual(scope["mode"], sandbox_scope.DECLARED)
@@ -107,6 +110,7 @@ class SandboxScopeTests(CoreUnitFixture):
     # -- clause 2: a module that reads .saipen/evidence still sees it ----------
 
     def test_a_declared_history_reader_still_sees_evidence(self):
+        (self.project / "tools/test_reader.py").write_text("", encoding="utf-8")
         _write_manifest(self.project, {"test_reader.py": [".saipen/evidence"]})
         scope = sandbox_scope.resolve(self.project, ["test_reader.py"])
         sandbox = _copy(self.project, scope)
@@ -255,6 +259,7 @@ class SandboxScopeTests(CoreUnitFixture):
             sandbox_scope.resolve(self.project, ["test_plain.py"])
 
     def test_the_identity_ignores_unrelated_manifest_edits(self):
+        (self.project / "tools/test_a.py").write_text("", encoding="utf-8")
         _write_manifest(self.project, {"test_a.py": []})
         first = sandbox_scope.resolve(self.project, ["test_a.py"])
         _write_manifest(self.project, {"test_a.py": [], "test_b.py": [".git"]})

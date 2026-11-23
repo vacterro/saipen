@@ -1,0 +1,15 @@
+utc: 2026-10-08T01:58:22Z
+command: python -B .saipen/evidence/T-1671-lifecycle-authority/live_copies.py . <scratch> _PY/_AUDAPACK
+=== _AUDAPACK
+  status before  : {"ok": false, "code": "VALIDATION_FAILED", "reason": "state-malformed", "action": "saipen recover"}
+  validator      : no lifecycle-authority FAIL
+  recover        : {"ok": false, "code": "HISTORY_LEDGER_CORRUPT"}
+  LOG append-only: bytes True | lines (line ends folded) True
+      + 
+  original bytes kept under recovery/terminal-gap: False
+  status after   : {"ok": false, "code": "VALIDATION_FAILED", "reason": "state-malformed", "action": "saipen recover"}
+      detail: state-malformed: transition_from 'REPAIR' not one of INIT|PLAN|SCOUT|BUILD|VERIFY|REVIEW|SHIP|DONE|BLOCKED|VALIDATE|HUNT|MARKHUNT|ADD|CLEAN|TRANSLATE|PREPARE; transition_from 'REPAIR' not one of the 16 phase enum values (RFC § 1.6)
+  validator after: no lifecycle-authority FAIL
+  live project untouched by this run: True
+copies still unauthorized after recovery: 0
+--- exit: 0 ---

@@ -21,6 +21,9 @@ it. A closed record is KEPT while any of these holds:
              the receipt's later verbs look it up. An unconsumed captured audit
              binding also holds its Work row after Source closure, because
              journaled consumption still checks that the Work is DONE;
+  gate       a PROMOTED future gate still names it as a slice ticket: the gate
+             is resolved on the BOARD by every core gate run, and the row is
+             the implementation record that resolution reads;
   unproven   the complete LOG history holds no closing event for it, so the
              BOARD row is the only record that it closed at all.
 
@@ -36,8 +39,10 @@ restated against what a scrub can actually clear: the prunable text.
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
+from pathlib import Path
 
 #: Where a scrub keeps the rows it pruned, one directory per operation.
 SCRUB_EVIDENCE_ROOT = ".saipen/recovery/board-scrub"
@@ -115,7 +120,145 @@ def _references(ticket: dict, by_receipt: dict[str, set[str]]) -> set[str]:
     return named
 
 
-def select(tickets: dict, events, active_receipts: set[str], receipt_works: set[str]) -> Selection:
+#: The promoted-gate ledger. A slice ticket named there is still read by
+#: `future_gate.validate_future_gate` on every core gate run.
+FUTURE_INDEX = ".saipen/future/index.json"
+
+
+def gated_tickets(root: Path | str) -> set[str]:
+    """Slice tickets a PROMOTED future gate still pins, for DIAGNOSTICS (T-2071).
+
+    A gate record outlives the BOARD row it names: after promotion the slice
+    ticket is the evidence that the gate's implementation exists, and
+    `future_gate` resolves it on the BOARD every run. The scrub retention rule
+    did not read the ledger, so it pruned T-1936 -- a DONE row FG-0046 pinned --
+    and the gate then reported a broken link over a slice the LOG proves
+    complete. Reading the ledger here keeps that row while the gate is in
+    force; an unreadable ledger pins nothing, because a broken file must not
+    silently freeze the whole DONE section.
+
+    That fail-open reading is sound only where nothing is destroyed. A caller
+    that PRUNES must use `collect_inputs`, which raises when the ledger cannot
+    prove the gate set (T-2096) instead of reading "unreadable" as "no gates".
+    """
+    path = Path(root) / FUTURE_INDEX
+    try:
+        index = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError):
+        return set()
+    gated: set[str] = set()
+    for gate in index.get("gates") or ():
+        if not isinstance(gate, dict) or str(gate.get("state") or "") != "PROMOTED":
+            continue
+        for record in gate.get("slices") or ():
+            if not isinstance(record, dict):
+                continue
+            ticket = str(record.get("ticket") or "")
+            if re.fullmatch(r"T-\d+", ticket):
+                gated.add(ticket)
+    return gated
+
+
+class ScrubInputsUnknown(ValueError):
+    """A mandatory retention input cannot be read, so nothing is called prunable."""
+
+
+@dataclass(frozen=True)
+class RetentionInputs:
+    """Every read-only input `select` needs besides the BOARD and its history."""
+
+    active_receipts: frozenset[str]
+    receipt_works: frozenset[str]
+    gated: frozenset[str]
+
+
+def _gate_pins(root: Path) -> tuple[set[str], str | None]:
+    """`(PROMOTED slice tickets, unknown reason)` from the canonical ledger.
+
+    The owner module decides what the ledger is: absence, corruption, schema
+    drift and a malformed record are each named, never collapsed into "no
+    gates". `None` is returned only when absence is provable -- no index and
+    no corpus to index.
+    """
+    from . import future_gate
+
+    root = Path(root)
+    index = future_gate.load_index(root)
+    if index is None:
+        try:
+            documents = future_gate.read_documents(root)
+        except (OSError, ValueError) as exc:
+            return set(), f"the future-gate corpus cannot be read: {exc}"
+        if documents:
+            return set(), (
+                f"{len(documents)} future-gate document(s) are not indexed, so the "
+                "slice tickets they pin are unknown -- run `saipen future refresh`"
+            )
+        return set(), None
+    if index.get("corrupt"):
+        return set(), (
+            f"the future-gate index is unreadable ({index['corrupt']}), so the "
+            "slice tickets it pins are unknown -- run `saipen future refresh`"
+        )
+    try:
+        schema_ok = int(index.get("schema") or 0) == future_gate.SCHEMA_VERSION
+    except (TypeError, ValueError):
+        schema_ok = False
+    if not schema_ok:
+        return set(), (
+            f"the future-gate index carries schema {index.get('schema')!r}, expected "
+            f"{future_gate.SCHEMA_VERSION}, so the slice tickets it pins are unknown"
+        )
+    gates = index.get("gates")
+    if gates is None:
+        gates = []
+    if not isinstance(gates, list):
+        return set(), "the future-gate index holds a malformed gates member"
+    gated: set[str] = set()
+    for gate in gates:
+        if not isinstance(gate, dict):
+            return set(), "the future-gate index holds a malformed gate record"
+        if str(gate.get("state") or "") != future_gate.PROMOTED:
+            continue
+        slices = gate.get("slices")
+        if slices is None:
+            slices = []
+        if not isinstance(slices, list):
+            return set(), f"promoted gate {gate.get('id')!r} carries malformed slices"
+        for record in slices:
+            if not isinstance(record, dict):
+                return set(), f"promoted gate {gate.get('id')!r} carries a malformed slice"
+            ticket = str(record.get("ticket") or "")
+            if re.fullmatch(r"T-\d+", ticket):
+                gated.add(ticket)
+    return gated, None
+
+
+def collect_inputs(root: Path | str) -> RetentionInputs:
+    """Read every retention input ONCE, refusing on data that cannot be proved.
+
+    The validator finding and the canonical operation both call this and then
+    `select`, so the row a CLEAN plan removes and the row the warning counts
+    are the same decision over the same bytes (T-2096). Receipts raise from
+    their owner; the gate ledger raises here. `gated_tickets` keeps the
+    fail-open diagnostic reading, which is never used to destroy anything.
+    """
+    from .intake import active_receipt_works
+
+    active, works = active_receipt_works(root)
+    gated, unknown = _gate_pins(Path(root))
+    if unknown is not None:
+        raise ScrubInputsUnknown(unknown)
+    return RetentionInputs(frozenset(active), frozenset(works), frozenset(gated))
+
+
+def select(
+    tickets: dict,
+    events,
+    active_receipts: set[str],
+    receipt_works: set[str],
+    gated: set[str] | frozenset[str] = frozenset(),
+) -> Selection:
     """Apply the retention rule to one parsed BOARD.
 
     Pure: `tickets` is `parse_board(...)["tickets"]`, `events` the complete
@@ -134,6 +277,8 @@ def select(tickets: dict, events, active_receipts: set[str], receipt_works: set[
     for tid in done:
         if tid in receipt_works or _receipts_named(tickets[tid]) & active_receipts:
             kept[tid] = "receipt"
+        elif tid in gated:
+            kept[tid] = "gate"
         elif tid not in proven:
             kept[tid] = "unproven"
     frontier.extend(kept)
@@ -149,3 +294,55 @@ def select(tickets: dict, events, active_receipts: set[str], receipt_works: set[
     )
     size = sum(len(str(tickets[tid].get("raw") or "").encode("utf-8")) + 1 for tid in pruned)
     return Selection(tuple(pruned), size, kept)
+
+
+#: One BOARD record line and the ticket id it opens with.
+_ROW_RE = re.compile(r"^\s*[-*]\s*\[[ x/]\]\s*(T-\d+)\b")
+
+
+def pruned_rows(root: Path, ticket_ids) -> dict[str, tuple[str, str]]:
+    """The verbatim rows earlier scrubs moved for these ids (T-2050).
+
+    Returns ``{ticket: (row_text, evidence_path)}``. A scrub removes whole
+    physical lines, so the row a restore puts back is the same bytes the BOARD
+    held -- nothing is re-rendered and no field is reconstructed. Newest scrub
+    wins when a row was pruned twice.
+    """
+    wanted = {str(tid) for tid in ticket_ids if re.fullmatch(r"T-\d+", str(tid))}
+    found: dict[str, tuple[str, str]] = {}
+    if not wanted:
+        return found
+    base = Path(root) / SCRUB_EVIDENCE_ROOT
+    if not base.is_dir():
+        return found
+    for evidence in sorted(base.glob("*/BOARD.md")):
+        try:
+            text = evidence.read_text(encoding="utf-8-sig")
+        except (OSError, UnicodeDecodeError):
+            continue
+        for line in text.splitlines():
+            match = _ROW_RE.match(line)
+            if match and match.group(1) in wanted:
+                found[match.group(1)] = (line, evidence.relative_to(root).as_posix())
+    return found
+
+
+def restored_board_text(text: str, rows) -> str:
+    """Insert verbatim closed records at the head of ``## DONE``.
+
+    Every other byte of the document is preserved: the rows are already
+    complete lines in this document's own shape, and only their position
+    changes. Raises ``ValueError`` when there is no closed section to restore
+    into, so a caller never guesses where a closed record belongs.
+    """
+    eol = "\r\n" if "\r\n" in text else "\n"
+    lines = text.split(eol)
+    heading = next(
+        (index for index, line in enumerate(lines) if line.strip() == "## DONE"), None
+    )
+    if heading is None:
+        raise ValueError("the BOARD has no ## DONE section to restore into")
+    body = list(rows)
+    if not body:
+        return text
+    return eol.join(lines[: heading + 1] + body + lines[heading + 1 :])

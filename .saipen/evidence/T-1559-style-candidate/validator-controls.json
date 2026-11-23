@@ -1,0 +1,33 @@
+[
+  {
+    "label": "original",
+    "target_findings": [
+      "cross-doc drift [reply-language] -- STYLE.md no longer carries the exact EE/EN/RU precedence: explicit prose first, Russian repository only as a bare/ambiguous tie-breaker, then Estonian",
+      "cross-doc drift [chat-voice] -- STYLE.md no longer carries the persistent caveman-\u0434\u0435\u0434 duty and its two explicit off switches"
+    ],
+    "overall_exit": 1,
+    "scope": "STYLE/SKILL reply-language and chat-voice findings only"
+  },
+  {
+    "label": "candidate",
+    "target_findings": [],
+    "overall_exit": 1,
+    "scope": "STYLE/SKILL reply-language and chat-voice findings only"
+  },
+  {
+    "label": "voice-red",
+    "target_findings": [
+      "cross-doc drift [chat-voice] -- STYLE.md no longer carries the persistent caveman-\u0434\u0435\u0434 duty and its two explicit off switches"
+    ],
+    "overall_exit": 1,
+    "scope": "STYLE/SKILL reply-language and chat-voice findings only"
+  },
+  {
+    "label": "language-red",
+    "target_findings": [
+      "cross-doc drift [reply-language] -- SKILL.md no longer carries the exact EE/EN/RU precedence: explicit prose first, Russian repository only as a bare/ambiguous tie-breaker, then Estonian"
+    ],
+    "overall_exit": 1,
+    "scope": "STYLE/SKILL reply-language and chat-voice findings only"
+  }
+]

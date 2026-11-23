@@ -1,0 +1,15 @@
+{
+  "checks": {
+    "native_control_passes": true,
+    "native_subject_is_live": true,
+    "exact_old_allocations_absent": true,
+    "six_original_durable_proofs_unchanged": true,
+    "failed_empty_allocation_absent": true,
+    "complete_family_is_current": true
+  },
+  "failures": 0,
+  "verifier_sha256": "1f2ff84fb8af10f27f1b3c2df45f95961e8aaf55ebb4d278d5eb10e58141eda6",
+  "unit_record_sha256": "84e0f76e45a4225bc538201ab849b48771df692ec6558971cb3711ffe032849c",
+  "fingerprint": "5e8c632d2983e78cdf26defbb8a1a9f3c886477efc13eaafcc8cc91eee62b323",
+  "native_receipt": "review-green.json"
+}

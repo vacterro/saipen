@@ -1,0 +1,60 @@
+{
+  "ok": true,
+  "code": "RUNTIME",
+  "agent": "saipen-cli",
+  "runtime_info_source": "unknown",
+  "runtime_info_present": false,
+  "schema_version": 1,
+  "harness": null,
+  "provider": null,
+  "model": null,
+  "variant": null,
+  "effort": null,
+  "capabilities": {
+    "shell": null,
+    "filesystem": null,
+    "patch": null,
+    "browser": null,
+    "web": null,
+    "subagents": null,
+    "parallel_subagents": null,
+    "skills": null,
+    "mcp": null,
+    "structured_output": null,
+    "persistent_session": null,
+    "context_compaction": null,
+    "reasoning_effort": null,
+    "tool_search": null,
+    "programmatic_tool_calling": null
+  },
+  "actor_source": "default",
+  "strategy": {
+    "task_class": "IMPLEMENT",
+    "strategy": "LONG_BUILD",
+    "why": "ordinary implementation is LONG_BUILD: one primary worker, no reflexive subagents; no helper justification was supplied, so helpers are 0",
+    "helper_justification": null,
+    "helper_ceiling": 0,
+    "max_subagent_depth": 1,
+    "recursive_helpers": "DENIED_BY_POLICY",
+    "depth_enforcement": "UNKNOWN",
+    "context_budget_class": "ORDINARY",
+    "context_budget_bytes": 40960,
+    "child_packet_ceiling_bytes": 16384,
+    "capabilities": {
+      "subagents": null,
+      "parallel_subagents": null,
+      "skills": null,
+      "structured_output": null,
+      "context_compaction": null,
+      "persistent_session": null
+    },
+    "unknown_capabilities": [
+      "subagents",
+      "parallel_subagents",
+      "skills",
+      "structured_output",
+      "context_compaction",
+      "persistent_session"
+    ]
+  }
+}

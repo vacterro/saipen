@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-049:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Manual project ZIP control decoupled from Auto Audit: compact titlebar control available in ordinary ChatGPT chats, project popover fed by GET /v1/projects (select, change, clear binding, refresh list), explicit state labels (CHECK/PACK/GET/ATTACH/ZIP check/ZIP bang), no Auto enabled or campaign or START required (SRC-049 TARGET A, C, P)."
+    }
+  },
+  "derived_at": "2026-09-16T17:01:12Z",
+  "derived_from": "SRC-049",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "80dee69f3744af8e037255b5e22fede832243bc4f4b6353d5735030e3b1dc967"
+}

@@ -1,0 +1,311 @@
+{
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": " (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else\nWARN [manifest-untracked-orphan]: untracked manifest file tools/test_t1776_protocol_home_valve.py imports runtime that HEAD does not carry: module saipen_engine.iteration_verdict, saipen_engine.automation, saipen_engine.codec, saipen_engine.goal_authority, saipen_engine.state -- do NOT commit it alone; it will fail in every clone. Ship the runtime it depends on first\nWARN [manifest-untracked-orphan]: untracked manifest file tools/test_t1778_continue_closes_source.py imports runtime that HEAD does not carry: module test_t1666_receipt_close, saipen_engine.intake -- do NOT commit it alone; it will fail in every clone. Ship the runtime it depends on first\nWARN [manifest-untracked-orphan]: ... and 6 more like the above\nWARN [subsaipen-uncollected]: 2 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nWARN [release-ledger]: 2 release(s) have a CHANGELOG entry but no git tag: v8.0.2, v8.1.0\nWARN [xpatch-survival]: XP-000001 applied bytes never reached a commit: tools/saipen_engine/intake.py\nWARN [xpatch-survival]: XP-000002 applied bytes never reached a commit: saipen/COMMANDS.md, tools/saipen.py, tools/saipen_engine/debt.py, tools/saipen_engine/operations.py, tools/test_debt_gate.py, tools/validate.py\nValidation FAILED: 20 problem(s), 17 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 20,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "Continuation boundary after E-14044/E-14045 local finish: continue returned audit-inbox-unworkable RESTATE_AND_STOP; its audit status action executed. audit/23 remains ACTIVE SRC-167/T-1606 at VERIFY_RETRY_CAP. Canonical pick has no workable Work. All 62 parked ticket bytes, 15 failed candidates and inherited Git index unchanged. SRC-200 CLOSED, original body hash retained. Full family 6013/0/0; global goal incomplete, counters 0 waves/12 tickets. Evidence: .saipen/evidence/T-1695-invalid-stops/completion-evidence.json.; reverify: no current-tree PASS re-verification receipt",
+            "detail_hash": "e1c43b2354b01b43",
+            "finding_key": "6c74e7473d745ef5",
+            "rule_id": "work_closure_evidence",
+            "severity": "problem",
+            "subject_id": "T-1695",
+            "subject_kind": "work",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1749_project_root_subject.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the ",
+            "detail_hash": "16b6069c2bb9e0ec",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1767_usage_line.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or dr",
+            "detail_hash": "1c5887e47be2757d",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1772_empty_draft_exit.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file",
+            "detail_hash": "48c6fcfddefb1f27",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1774_sweep_queue_human.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the fil",
+            "detail_hash": "c4c9207dcad301cb",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1775_continue_never_admits_a_seat.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Com",
+            "detail_hash": "9b9506fd1659c570",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1776_protocol_home_valve.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the f",
+            "detail_hash": "05c585ee8aa906d5",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1778_continue_closes_source.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit th",
+            "detail_hash": "3b8ac5c31eeb555c",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1779_family_ignores_inbox.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the ",
+            "detail_hash": "98570c8ee8b0b6f0",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1781_t37_latest_build.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file",
+            "detail_hash": "574ec38a38f2777a",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1782_capped_builder_identifier.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit",
+            "detail_hash": "303f90acd1b78354",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1784_dry_run_verdict.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file ",
+            "detail_hash": "3522066cbb4f3a19",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1785_dry_run_human.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or",
+            "detail_hash": "faf255871a161354",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1786_cli_first_activation.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the ",
+            "detail_hash": "33324e83759f888a",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1787_parked_brief.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or ",
+            "detail_hash": "d28f9a3c4f2ac4f3",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1789_child_closure_route.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the f",
+            "detail_hash": "8ef19238e6c2e86d",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1792_auto_doctor.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or d",
+            "detail_hash": "bb1a48b76c50182a",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t38_improve_cycle_liveness.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the ",
+            "detail_hash": "c4f3fb606f9806ee",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_vacterro_t36_checkpoint_usage_taxonomy.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not.",
+            "detail_hash": "9e746eb19348bf85",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_vacterro_t37_no_delta_closure.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit t",
+            "detail_hash": "362b262a57528e05",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 17
+      },
+      "board_hash": "2fdfb66b39cc0cde",
+      "canonical_next_command": "saipen work reverify T-1695",
+      "content_hash": "5be914706ef31ce6",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:26b4abac8c9be434cd27835a0cdf90d5605b401a77931a66543ec4039cf38ad7",
+      "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "kind": "conformance_receipt",
+      "log_hash": "2e0925a1789105c3",
+      "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+      "receipt_id": "receipt-56db9c5b6552",
+      "remediation_commands": [
+        "saipen work reverify T-1695"
+      ],
+      "schema_version": 2,
+      "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+      "source_tree_fingerprint": "git-delta-v1:a9a6b7f85395095aeb878a9c6b2d8cec4746c165c51dfccec03260141777a961",
+      "state_hash": "0af392ea6e5dc7a0",
+      "timestamp_utc": "2026-10-14T23:44:33.699024Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+      "source_tree_fingerprint": "git-delta-v1:a9a6b7f85395095aeb878a9c6b2d8cec4746c165c51dfccec03260141777a961"
+    }
+  },
+  "install_identity": {
+    "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "install_fingerprint": "install-v1:26b4abac8c9be434cd27835a0cdf90d5605b401a77931a66543ec4039cf38ad7",
+    "mismatch": null
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": "saipen work reverify T-1695",
+  "repair_status": "REPAIR_AVAILABLE",
+  "diagnostic": null,
+  "terminal": false,
+  "remediation_commands": [
+    "saipen work reverify T-1695"
+  ]
+}

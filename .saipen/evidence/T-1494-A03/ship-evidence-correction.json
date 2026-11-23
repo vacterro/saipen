@@ -1,0 +1,21 @@
+{
+  "initial_refusal": "no-publish-ship-apply.json",
+  "cause": "ordinary REVIEW RUN included authenticated pre-fix failure tallies; decisive verification grammar classified those as current-subject negative evidence",
+  "source_or_oracle_change": false,
+  "failed_operation": "release-2caf93f3f6c54211b8ab9311674122e0",
+  "recovery": "ABORTED; zero targets; canonical recover",
+  "correction_event": "E-13968",
+  "typed_review_regression_events": [
+    "E-13969",
+    "E-13970",
+    "E-13971",
+    "E-13972"
+  ],
+  "corrected_current_review_event": "E-13973",
+  "canonical_verification_evidence": {
+    "accepted": true,
+    "reason": "review -> PASS [target: T-1494] conf: high -- current accepted subject: own authority verifier 18/18, A02 controls 3/3, original automation controls 2/2; exit 0, skipped 0. Authentic restored-bug comparison ADMISSIBLE, separately typed as REGRESSION-EVIDENCE; same command, verifier and fixtures. Core validation exit 0, nine baseline warnings. Full declared family 5981, new_red:0, 59 declared skips, source fingerprint 1f6ed1d51a2c43cd. P0/P1 findings: none; review_passes:1, source correction cycles:0. Current implementation unchanged. Evidence .saipen/evidence/T-1494-A03/review.json and review-oracle-pair.json. Local own_patch closure, no-publish policy."
+  },
+  "retry_delta": "correct canonical evidence envelope, with original erroneous RUN preserved",
+  "mandatory_current_subject_red": []
+}

@@ -1,0 +1,25 @@
+# HUNT-029 signal census (read-only, at 5706afe0d identity)
+# captured: 2026-11-22T00:20:27Z by saihunt role
+
+## S2: last-25 commit whole-hash citations in .saipen/LOG.md
+# command: for h in $(git log -25 --format=%H); do grep -c -w $h .saipen/LOG.md; done
+25 hashes checked; cited=0 for 24; 13f2e7579b29a2892a7130796558ecf5e441bba0 cited=3
+(LOG.md cites only 13f2e757 -- the CORE-TASK governance commit; HEAD 5706afe0d not yet cited, normal for fresh commits)
+
+## S3: TODO/FIXME/HACK census over tools/saipen_engine/*.py + tools/*.py
+# command: grep -rn 'TODO|FIXME|HACK' tools/saipen_engine/*.py tools/*.py
+raw total TODO: 893 (incl. tests); non-test lines: 373; FIXME: 0; HACK: 0
+ticket-named markers: all historical/docstring references (T-1609, T-1762, T-576, T-803..808 board fixtures, T-1637, T-999/T-998 synthetic tickets in audit_checks/audit_floor tests). No live work-marker TODO outside test fixtures/message strings.
+
+## S4: exception-census
+# command: grep -rn 'except:' tools/saipen_engine/*.py tools/*.py ; grep -A1 'except...$' | grep -c pass
+bare 'except:' sites: 0; except-then-pass sites: 32 (existing tolerated pattern, no change since HUNT-028)
+
+## S5: record_crew_run / record_producer integration call-site census
+# command: grep -rn 'record_crew_run|record_producer_integration' tools/
+record_crew_run: single production call site tools/saipen_engine/crew.py:1587 (crew record-run verb); test coverage tools/test_t1430_crew_run_receipt.py
+record_producer_integration: no production call site (verb not yet exercised; stale-signature risk unchanged)
+
+## S6: untracked tools/ paths
+# command: git status --porcelain -- tools/
+0 untracked paths under tools/ -- working tree clean for tools/

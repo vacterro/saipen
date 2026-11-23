@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1787_parked_brief.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap",
+    "bin"
+  ],
+  "oracle_files": [
+    "tools/test_t1787_parked_brief.py",
+    "tools/test_t1614_future_gate.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "subject_files": [
+    "tools/saipen.py"
+  ],
+  "before": {
+    "tools/saipen.py": ".saipen/evidence/T-1787-parked-brief/pre/saipen.py"
+  },
+  "timeout": 900
+}

@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "purpose": "A05 preparation while T-1713 owns VERIFY",
+  "project": "V:\\_TEMP_\\saipen-a05-candidate-do218qeg\\project",
+  "live_fingerprint": "55f06a7fce4aa11ff0de0126e1e44a6118807f51927a80787cb5a0b99fbb2ec4",
+  "preimages": {
+    "tools/saipen_engine/reconcile.py": {
+      "sha256": "4611839620eb199b747d0aac8eaea848760c2fd8dfd71ad3b672a3107d0feefb",
+      "path": "V:\\_TEMP_\\saipen-a05-candidate-do218qeg\\before\\tools\\saipen_engine\\reconcile.py"
+    },
+    "tools/saipen.py": {
+      "sha256": "467988d4404860c83e5fd25f059106049b1b00cc706b92269146fce61cddb935",
+      "path": "V:\\_TEMP_\\saipen-a05-candidate-do218qeg\\before\\tools\\saipen.py"
+    },
+    "tools/test_reconcile_history_ledger_blocked.py": {
+      "sha256": "bcd479c03426d25122025798fd8827dc95915ef0cd375f53260b56319c222a96",
+      "path": "V:\\_TEMP_\\saipen-a05-candidate-do218qeg\\before\\tools\\test_reconcile_history_ledger_blocked.py"
+    }
+  },
+  "live_source_mutated": false,
+  "limitations": "Root Git and protocol memory were deliberately excluded. This is not a copied AUDAPACK ledger or a canonical T-1714 phase proof."
+}

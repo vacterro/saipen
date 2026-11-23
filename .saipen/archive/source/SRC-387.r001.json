@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-387:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIPEN native turn lifecycle forensic repair: fix installed_host_acceptance.py lifecycle pairing, wrapper/receipt status binding, ledger starvation, historical-vs-current readiness separation"
+    }
+  },
+  "derived_at": "2026-11-04T01:49:46Z",
+  "derived_from": "SRC-387",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "b5fdba327e1fb7dd9f4d7c90fefdb2ba4186c5bb4f3fe7dfadbd64a93b5363d1"
+}

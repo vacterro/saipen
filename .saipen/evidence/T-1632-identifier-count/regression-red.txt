@@ -1,0 +1,46 @@
+...FFFFF
+======================================================================
+FAIL: test_no_constant_answer_satisfies_this_class (test_t1632_identifier_is_not_a_count.ABareCountStillClaims.test_no_constant_answer_satisfies_this_class)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1632_identifier_is_not_a_count.py", line 97, in test_no_constant_answer_satisfies_this_class
+    self.assertFalse(cited)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_identity_tokens_and_file_lines_never_claim (test_t1632_identifier_is_not_a_count.AnIdentifierIsNotACount.test_identity_tokens_and_file_lines_never_claim)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1632_identifier_is_not_a_count.py", line 68, in test_identity_tokens_and_file_lines_never_claim
+    self.assertFalse(_claims_failure(text), text)
+AssertionError: True is not false : PASS conf: high -- subject:12345678 FAIL before, subject:87654321 after
+
+======================================================================
+FAIL: test_ids_in_front_of_the_token_never_claim (test_t1632_identifier_is_not_a_count.AnIdentifierIsNotACount.test_ids_in_front_of_the_token_never_claim)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1632_identifier_is_not_a_count.py", line 60, in test_ids_in_front_of_the_token_never_claim
+    self.assertFalse(_claims_failure(text), text)
+AssertionError: True is not false : PASS conf: high -- regression pair E-12503 FAIL / E-12504 PASS
+
+======================================================================
+FAIL: test_the_exact_text_is_not_a_failure_claim (test_t1632_identifier_is_not_a_count.TheRefusedCheckpoint.test_the_exact_text_is_not_a_failure_claim)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1632_identifier_is_not_a_count.py", line 43, in test_the_exact_text_is_not_a_failure_claim
+    self.assertFalse(_claims_failure(E_12510))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_the_green_cycle_it_closed_is_accepted (test_t1632_identifier_is_not_a_count.TheRefusedCheckpoint.test_the_green_cycle_it_closed_is_accepted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1632_identifier_is_not_a_count.py", line 47, in test_the_green_cycle_it_closed_is_accepted
+    self.assertTrue(ok, reason)
+AssertionError: False is not true : verify -> PASS [target: T-1624] conf: high -- regression pair E-12503 FAIL / E-12504 PASS same verifier 7e7eb72e7be1564f ADMISSIBLE; incident controls A-F and concurrency 9 OK; adversarial authority and broker and launch 57 OK; public install lifecycle 2 OK; adapter parity and runtime bootstrap 40 OK; host modules 101 OK; ruff clean; hostile-event probe 25 of 25 without a block; real Claude Code 2.1.291 on the final generation after host repair: tool call, new session and authority restart each ADMITTED under 300 ms, doctor HEALTHY_VERIFIED MECHANICAL (ACCEPTANCE.md section 5)
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.015s
+
+FAILED (failures=5)
+exit=1

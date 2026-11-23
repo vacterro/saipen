@@ -1,0 +1,20 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 8548,
+  "red": 4,
+  "new_red": [
+    "test_t1966_broker_liveness.TheZaicodSurface.test_a_killed_service_is_replaced_by_the_next_prompt_which_seals"
+  ],
+  "fixed": [],
+  "problems": [
+    "1 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/2788077a4ad27cc1-20261031T092649219759Z.json",
+  "reused": true,
+  "shared": false,
+  "request_wall_s": 5.36,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

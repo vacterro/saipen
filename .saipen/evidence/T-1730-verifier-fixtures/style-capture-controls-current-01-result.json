@@ -1,0 +1,20 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_style_contract_chokepoint.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "started_utc": "2026-10-12T19:32:39.546802+00:00",
+  "runner_pid": 16828,
+  "child_pid": 23312,
+  "exit_code": 0,
+  "elapsed_s": 9.719,
+  "finished_utc": "2026-10-12T19:32:49.280606+00:00"
+}

@@ -1,0 +1,163 @@
+{
+  "autoUpdatesChannel": "latest",
+  "hooks": {
+    "PostModelSwitch": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe -c 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)' C:/Users/vac34/.claude/hooks/saipen-guard.py --host claude --saipen-root V:/_TEMP_/claude/V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN/04138852-6d47-401e-8fcb-d59fcd4a919c/scratchpad/copy",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-code-discovery-gate.cmd\"\"'",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "Read"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe -c 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)' C:/Users/vac34/.claude/hooks/saipen-guard.py --host claude --saipen-root V:/_TEMP_/claude/V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN/04138852-6d47-401e-8fcb-d59fcd4a919c/scratchpad/copy",
+            "timeout": 30
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-code-discovery-gate.cmd\"\"'",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "Grep|Glob"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-session-reminder.cmd\"\"'",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "startup"
+      },
+      {
+        "hooks": [
+          {
+            "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-session-reminder.cmd\"\"'",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "resume"
+      },
+      {
+        "hooks": [
+          {
+            "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-session-reminder.cmd\"\"'",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "clear"
+      },
+      {
+        "hooks": [
+          {
+            "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-session-reminder.cmd\"\"'",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "compact"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe -c 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)' C:/Users/vac34/.claude/hooks/saipen-guard.py --host claude --saipen-root V:/_TEMP_/claude/V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN/04138852-6d47-401e-8fcb-d59fcd4a919c/scratchpad/copy",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe -c 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)' C:/Users/vac34/.claude/hooks/saipen-guard.py --host claude --saipen-root V:/_TEMP_/claude/V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN/04138852-6d47-401e-8fcb-d59fcd4a919c/scratchpad/copy",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-subagent-reminder.cmd\"\"'",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "*"
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"STYLE CHECK: caveman-ded is ON (saipen STYLE.md). Blunt, compressed, fragments fine, short profanity where it lands. NO corporate prose, no I-will-now-proceed, no decorative tables/emoji. Report <=8 lines. Facts stay exact and unstyled: commands, PASS/FAIL, file:line, error strings, code. Answer in the user own language. If this reply is turning into smooth polished paragraphs, that IS the drift STYLE.md calls the default failure - cut it before sending.\"},\"suppressOutput\":true}'",
+            "timeout": 5,
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe -c 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)' C:/Users/vac34/.claude/hooks/saipen-guard.py --host claude --saipen-root V:/_TEMP_/claude/V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN/04138852-6d47-401e-8fcb-d59fcd4a919c/scratchpad/copy",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
+  "model": "opus",
+  "modelSettings": {
+    "claude-haiku-4-5": {
+      "effortLevel": "low"
+    },
+    "claude-opus-5": {
+      "effortLevel": "high"
+    },
+    "claude-opus-5-5": {
+      "effortLevel": "xhigh"
+    }
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "statusLine": {
+    "command": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe V:\\___VAC\\__K\\__CODE\\_PY\\_FastPrompter\\FastPrompter.pyw --claude-statusline-bridge",
+    "type": "command"
+  },
+  "switchModelsOnFlag": false,
+  "theme": "auto"
+}

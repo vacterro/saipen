@@ -1,0 +1,15 @@
+{
+  "checker_sha256": "2fa8065f544588a757e105a557ca6d3f4ec35d0fd824a2eb63d71c55db1da42c",
+  "receipt": ".saipen\\evidence\\T-1341-current\\review\\original.json",
+  "checks": {
+    "current native forms pass": false,
+    "help byte parity": false,
+    "same fixed verifier": true,
+    "actual old foreign execution": true,
+    "retained current output binding": false,
+    "current init binding": false,
+    "live source preserved and owned root reclaimed": true
+  },
+  "passed": 3,
+  "failed": 4
+}

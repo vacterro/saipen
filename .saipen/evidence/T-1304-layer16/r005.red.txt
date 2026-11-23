@@ -1,0 +1,60 @@
+..F.FFEE
+======================================================================
+ERROR: test_the_verifier_reports_the_cause_and_dereferences_nothing (test_t1304_r005_verifier_boundary.UnreadableHistoryTests.test_the_verifier_reports_the_cause_and_dereferences_nothing) [the active LOG carries a BOM]
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1304_r005_verifier_boundary.py", line 67, in test_the_verifier_reports_the_cause_and_dereferences_nothing
+    errors = validate_project(root)  # must return, never raise
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\fast_check.py", line 967, in validate_project
+    errors.extend(f"LOG: {e}" for e in snapshot_contract_errors(_history))
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\log.py", line 840, in snapshot_contract_errors
+    errors: list[str] = list(snapshot.illegal_lines[:4])
+                             ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'illegal_lines'
+
+======================================================================
+ERROR: test_the_verifier_reports_the_cause_and_dereferences_nothing (test_t1304_r005_verifier_boundary.UnreadableHistoryTests.test_the_verifier_reports_the_cause_and_dereferences_nothing) [the sealed-log container is a file]
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1304_r005_verifier_boundary.py", line 67, in test_the_verifier_reports_the_cause_and_dereferences_nothing
+    errors = validate_project(root)  # must return, never raise
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\fast_check.py", line 967, in validate_project
+    errors.extend(f"LOG: {e}" for e in snapshot_contract_errors(_history))
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\log.py", line 840, in snapshot_contract_errors
+    errors: list[str] = list(snapshot.illegal_lines[:4])
+                             ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'illegal_lines'
+
+======================================================================
+FAIL: test_the_operation_settles_on_a_structured_conflict_that_names_the_cause (test_t1304_r005_verifier_boundary.AfterApplyTests.test_the_operation_settles_on_a_structured_conflict_that_names_the_cause)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1304_r005_verifier_boundary.py", line 118, in test_the_operation_settles_on_a_structured_conflict_that_names_the_cause
+    self.assertIn("complete history unreadable", result.message)
+AssertionError: 'complete history unreadable' not found in "post-write semantic verification (policy core_fast) failed: semantic verifier core_fast raised AttributeError: 'NoneType' object has no attribute 'illegal_lines'"
+
+======================================================================
+FAIL: test_the_journal_boundary_carries_the_cause (test_t1304_r005_verifier_boundary.UnreadableHistoryTests.test_the_journal_boundary_carries_the_cause) [the active LOG carries a BOM]
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1304_r005_verifier_boundary.py", line 80, in test_the_journal_boundary_carries_the_cause
+    self.assertTrue(any("complete history unreadable" in e for e in errors), errors)
+AssertionError: False is not true : ["semantic verifier core_fast raised AttributeError: 'NoneType' object has no attribute 'illegal_lines'"]
+
+======================================================================
+FAIL: test_the_journal_boundary_carries_the_cause (test_t1304_r005_verifier_boundary.UnreadableHistoryTests.test_the_journal_boundary_carries_the_cause) [the sealed-log container is a file]
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1304_r005_verifier_boundary.py", line 80, in test_the_journal_boundary_carries_the_cause
+    self.assertTrue(any("complete history unreadable" in e for e in errors), errors)
+AssertionError: False is not true : ["semantic verifier core_fast raised AttributeError: 'NoneType' object has no attribute 'illegal_lines'"]
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.187s
+
+FAILED (failures=3, errors=2)
+exit 1

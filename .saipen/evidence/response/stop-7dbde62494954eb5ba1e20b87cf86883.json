@@ -1,0 +1,298 @@
+{
+  "schema": 1,
+  "reason": "STOP_HANDBACK",
+  "facts": {
+    "phase": "BUILD",
+    "task": "T-1690",
+    "next_action": "PHASE BUILD T-1690",
+    "blocker": "none",
+    "transition_from": "SCOUT",
+    "saipen_version": 8,
+    "schema_version": 3,
+    "last_event": 13787,
+    "style_contract": "ded-069a4c52",
+    "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "agent": "saipen-cli",
+    "mode": "full",
+    "updated": "2026-10-08T21:36:35Z",
+    "requires": [
+      "filesystem",
+      "git",
+      "python"
+    ],
+    "execution_intent": "goal",
+    "goal_waves": 0,
+    "goal_tickets": 1,
+    "validation": "STALE_PASS",
+    "completed": [
+      "T-1688"
+    ],
+    "automation": {},
+    "operator_due": false,
+    "blockers": [
+      {
+        "ticket": "T-1607",
+        "blocker": "ACTIVE_DEPENDENCY:T-1644 -- SRC-168 accepts only on the published version (fresh clone, install, set, continue, validate, uninstall, reinstall, GitHub main and CI, a release tag), and nothing built since 2026-10-05 is committed while the operator's publication policy (T-1644) is open; this ticket also forbids a push without a fresh operator instruction (E-13181). Resume at SCOUT once T-1644 is decided"
+      },
+      {
+        "ticket": "T-1663",
+        "blocker": "BLOCKED_EXTERNAL -- the ticket requires delta is built, verified, reviewed and gated (regression pair on verifier e571ea0713fb70be, core-unit d1fdfeb92c691189: 5813 ran, 0 red; SRC-189 R002, R004,..."
+      },
+      {
+        "ticket": "T-1671",
+        "blocker": "ACTIVE_DEPENDENCY:T-1672 -- the operator's request is carried by T-1672 (SRC-193, appended to this source): the engine half is built and gated there and the PATH launcher is installed on this machine (E-13246); this ticket owns no independent implementation and closes with T-1672 once its four open clauses are terminal, or earlier on the operator's own report that a FreeBuff session reached saipen"
+      },
+      {
+        "ticket": "T-1675",
+        "blocker": "WAIT_USER_DECISION -- the operator decides whether managed projects get a git hook by default: (a) the installer puts a pre-commit and pre-push hook into every managed project; (b) hooks stay opt-in through tools/install_hook.py; (c) no hook, publication outside saipen stays ungated. Repository evidence cannot supply it: six managed projects carry no hook today and none asked for one"
+      },
+      {
+        "ticket": "T-1672",
+        "blocker": "BLOCKED_EXTERNAL -- the engine delta is built, verified, reviewed and gated (regression pair E-13233/E-13234, core-unit 58c3c1da1506d690: 5732 ran, none red; 12 actionable clauses of SRC-193 VERIFIED on E-13235); the ticket cannot finish while SRC-193 keeps four clauses open: R050 waits on T-1644 (operator: publication policy; until it is decided the injector refuses DIRTY_SOURCE and every installed host keeps the old activation block), R051 on T-1677 (FastPrompter, SAIRoute and SAIOPP, other repositories), R052 on T-1673 and R053 on T-1675 (in this repository). Finish with ticket done once coverage is terminal"
+      },
+      {
+        "ticket": "T-1677",
+        "blocker": "BLOCKED_EXTERNAL -- the launchers that hand a project to FreeBuff live in other repositories (FastPrompter, SAIRoute, SAIOPP); the SAIPEN half of the contract (saipen host bootstrap, the activation block's launcher line, the machine runtime) is delivered here and described in .saipen/evidence/T-1671-lifecycle-authority/"
+      },
+      {
+        "ticket": "T-1664",
+        "blocker": "BLOCKED_EXTERNAL -- the native iteration controllers live in ZAICODE and SAIRoute, which are other repositories; the SAIPEN half of the contract (saipen iteration --json with required_capabilities,..."
+      },
+      {
+        "ticket": "T-1651",
+        "blocker": "ACTIVE_DEPENDENCY:T-1663 -- the slice of SRC-189 this ticket builds is verified, reviewed and gated (regression pair E-13131/E-13132, core-unit a36534b2b35ace49: 5616 ran, 0 red, 19 clauses VERIFIED or IMPLEMENTED on E-13135); the ticket cannot finish while SRC-189 keeps seven clauses open: R002, R004, R016, R017 and R018 wait on T-1663 (in this repository, next in the queue), R010 on T-1664 (ZAICODE and SAIRoute, other repositories), R021 on the future gate FG-0046. Finish with ticket done once coverage is terminal"
+      },
+      {
+        "ticket": "T-1655",
+        "blocker": "WAIT_USER_CONFIRMATION -- the repair is built and gated on this Windows host (regression pair E-13120/E-13121 on the decision and wiring cases; core-unit bec5a943bb90b071: 5594 ran, 0 red), and..."
+      },
+      {
+        "ticket": "T-1647",
+        "blocker": "BLOCKED_EXTERNAL -- the engine delta is built, verified, reviewed and gated (core-unit c63302aec1cd2ea6, machine runtime installed and READY on this machine); the ticket cannot finish while SRC-188 keeps seven clauses open: R006, R013 and R016 wait on T-1654 (in this repository, next in the queue), R009 and R010 on T-1653 (SAI Accounts, another repository), R020 and R025 on T-1652 (the operator's run as antigravity_b). Finish with ticket done once coverage is terminal"
+      },
+      {
+        "ticket": "T-1653",
+        "blocker": "BLOCKED_EXTERNAL -- the SAI Accounts source is outside this repository; the SAIPEN half of the contract (saipen host machine status and install, saipen_runtime_ready) is delivered by T-1647 and described in .saipen/evidence/T-1647-machine-runtime/ACCEPTANCE.md"
+      },
+      {
+        "ticket": "T-1652",
+        "blocker": "WAIT_USER_CONFIRMATION -- the operator runs the three commands of this ticket as antigravity_b and reports pass or fail; this seat holds no logon for a managed account and does not use the SAI Accounts vault"
+      },
+      {
+        "ticket": "T-1644",
+        "blocker": "WAIT_USER_DECISION -- the operator chooses this repository's publication policy: (a) full: SHIP commits, tags and pushes; (b) local commits only, no push or tag (the practice recorded in this..."
+      },
+      {
+        "ticket": "T-1610",
+        "blocker": "CONTEXT_MISSING -- the reserved seat child cannot be specified truthfully from this seat (measured 2026-10-05): SRC-172 asks that an agent never ask about the artifact fast_Scheduler_Continuinity bundle, and quotes the operator's 'your 12 requirements', which this seat does not carry; the archive is absent from the workspace and from the standard download locations (find over the repo to depth 3 and the user profile to depth 4, measured). Not permanent and not a refusal of the request: resume T-1610 when the artifact or the 12 requirements are supplied; the seat is released for the operator's explicit T-1614 finishing handoff (SRC-176)"
+      },
+      {
+        "ticket": "T-1611",
+        "blocker": "ACTIVE_DEPENDENCY:T-1610 -- Duplicate append projection of SRC-173; operator explicitly requires reuse of T-1610. T-1611 owns no independent implementation; supersede by T-1610 with E-12264/SRC-173 once successor is verified DONE."
+      },
+      {
+        "ticket": "T-1606",
+        "blocker": "VERIFY_RETRY_CAP: two failed correction cycles; complete family 4908 ran with seven new regressions. Candidate and exact failures are preserved under .saipen/kitchen/failed/T-1606; lift only after changed evidence resolves the seven neighbors and the Unicode line-separator writer mismatch. SRC-167 and audit/23 remain open."
+      },
+      {
+        "ticket": "T-1602",
+        "blocker": "BLOCKED_EXTERNAL -- unchanged portable parity cannot construct external-identity symlink (WinError 1314): 246/247 cases, 14 caught, baseline 11 unchanged. Full unit 4855/red 0 and fixed oracle pass; no denominator waiver. Pending owned patch and exact refusal: .saipen/evidence/floor-fields/VERIFY-notes.md. Resume VERIFY after real host symlink capability is available."
+      },
+      {
+        "ticket": "T-1507",
+        "blocker": "ACTIVE_DEPENDENCY:T-1602 -- Mandatory portable parity oracle: structured needs parsing reads prose; Windows native runner is unreachable because sys.platform is compared with nt. Preserve restored normalization and family PASS; fix the oracle and floors before parent closure."
+      },
+      {
+        "ticket": "T-1449",
+        "blocker": "QUEUE_NOT_TERMINAL -- cc all acceptance still needs completion or truthful disposition of admitted runnable Work. The current queue snapshot is .saipen/evidence/response-authority/parent-final-queue.json; its counts are observed evidence, not a permanent readiness rule. T-1510 remains active and T-1507 owns its continuation reservation. Eight MARKHUNT findings retain their explicit-human-triage gate; other real external and strategic boundaries remain. Current complete unit oracle is green but does not complete the queue. Shared cohort evidence closure and publication are separate; release publication remains excluded."
+      },
+      {
+        "ticket": "T-1450",
+        "blocker": "QUEUE_NOT_TERMINAL -- cc all acceptance still needs completion or truthful disposition of admitted runnable Work. The current queue snapshot is .saipen/evidence/response-authority/parent-final-queue.json; its counts are observed evidence, not a permanent readiness rule. T-1510 remains active and T-1507 owns its continuation reservation. Eight MARKHUNT findings retain their explicit-human-triage gate; other real external and strategic boundaries remain. Current complete unit oracle is green but does not complete the queue. Shared cohort evidence closure and publication are separate; release publication remains excluded."
+      },
+      {
+        "ticket": "T-1314",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it..."
+      },
+      {
+        "ticket": "T-1313",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it..."
+      },
+      {
+        "ticket": "T-1312",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it..."
+      },
+      {
+        "ticket": "T-1311",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it..."
+      },
+      {
+        "ticket": "T-1310",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it..."
+      },
+      {
+        "ticket": "T-1309",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it..."
+      },
+      {
+        "ticket": "T-1308",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it..."
+      },
+      {
+        "ticket": "T-1307",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it..."
+      },
+      {
+        "ticket": "T-1099",
+        "blocker": "FUTURE/STRATEGIC HOLD -- CLEAN-phase remediation, restated 02.10.26 under T-1596. NOT permanent: measured today, BOARD.md is 188.7 KB against the ~16 KB soft cap (validate.py:2766-2780 warns 'board-soft-cap'), of which 143.4 KB is 225 closed-ticket lines. The declared mechanism is the CLEAN board scrub (phases/clean.md step 1), which may prune a DONE entry only when permanent LOG evidence exists AND no live ticket names it in needs: AND no ACTIVE source receipt references it -- a scrub that ignores those gates produced ten 'active receipt references missing Work' failures in a previous pass (IMP-002). Removing DONE text alone still leaves ~45 KB, so this is a real hygiene project, not a one-line prune. Class: FUTURE/STRATEGIC HOLD, not a stale blocker."
+      },
+      {
+        "ticket": "T-1564",
+        "blocker": "SUPERSEDED WORK (restated 02.10.26 under T-1596): T-1563 owns this repair, SRC-142 appends SRC-140, SRC-141 is preserved as historical START input. The canonical route 'saipen ticket supersede T-1564 --by T-1563' is closed on three gates: this Work carries Source receipts (SRC-141) so the route refuses source migration, successor T-1563 is BLOCKED rather than DONE, and no ACTIVE operator receipt grants T-1564 - T-1563. Manufacturing that grant is not authorized. Class: SUPERSEDED/RETIRED WORK plus ACTIVE_DEPENDENCY:T-1563."
+      },
+      {
+        "ticket": "T-1321",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596. Not Work: 'saipen goal --help' was parsed as goal text; superseded by the production-hardening objective. No canonical route retires a Work row (done/supersede only), and supersede would need an ACTIVE operator receipt granting the exact pair against a DONE successor that is still on the board. Class: INVALID_OR_AMBIGUOUS."
+      },
+      {
+        "ticket": "T-1195",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596. Not Work: the row text is the tail of a goal command parsed as its own ticket, created in the same BOARD write as T-1194 at b23019f4 (ship v7.231.11); T-1194 is compacted off the board. No canonical route retires a Work row, and supersede would need an ACTIVE operator receipt granting the exact pair. Class: INVALID_OR_AMBIGUOUS."
+      },
+      {
+        "ticket": "T-1172",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596. Not Work: 'saipen goal --help' was parsed as goal text; superseded by T-1173, which is compacted off the board. No canonical route retires a Work row: supersede refuses a compacted successor (operations.py:4219-4231) and demands an ACTIVE operator receipt granting the exact pair, which does not exist and must not be manufactured. Class: INVALID_OR_AMBIGUOUS."
+      },
+      {
+        "ticket": "T-1155",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, unchanged in truth and restated 02.10.26 under T-1596. This row is not Work: an accidental 'saipen goal --help' usage probe was parsed as goal text and became a ticket, superseded by the real FF/XX/VV/ZZ mission. No canonical route retires a Work row -- 'saipen ticket' offers done and supersede only; supersede needs an ACTIVE operator receipt granting T-1155 - <successor>, a successor that is DONE and still on the board, and an OLD Work with no Source receipts (operations.py:4219-4260). None of those exists and none may be manufactured. Class: INVALID_OR_AMBIGUOUS, not a real blocker of any repair."
+      },
+      {
+        "ticket": "T-1566",
+        "blocker": "SUPERSEDED WORK, not settleable locally (restated 02.10.26 under T-1596). SRC-144 corrects the T-1563/T-1565 stabilization chain; graph reconciliation and containment are preserved in E-10859..E-10862. The canonical retirement route is 'saipen ticket supersede T-1566 --by T-1563', and every gate it names is closed here: this Work carries Source receipts (SRC-144) so the route refuses source migration; successor T-1563 is BLOCKED, not DONE; and no ACTIVE operator receipt grants T-1566 - T-1563. Manufacturing that grant is not authorized. Remaining class: EXTERNAL HUMAN AUTHORITY plus ACTIVE_DEPENDENCY:T-1563."
+      },
+      {
+        "ticket": "T-1446",
+        "blocker": "STALE SEAT CLAIM REMOVED, live measurement still outstanding (02.10.26 under T-1596). FALSE, proved today: 'the soak rerun is a long-running live 24H measurement ... PID 24736' -- tasklist reports..."
+      },
+      {
+        "ticket": "T-1563",
+        "blocker": "BLOCKED_EXTERNAL -- CAPABILITY_UNAVAILABLE: no separated production host authority; containment and negative controls preserved; SRC-140 R007/R008/R009/R012 positive acceptance unresolved; tests use explicit downstream-only doubles, ten real positives unavailable; no fake HARD or DONE"
+      },
+      {
+        "ticket": "T-1562",
+        "blocker": "ACTIVE_DEPENDENCY:T-1563 -- PAUSED by user request SRC-140: explicit new task T-1563 takes the seat; resumes at SCOUT when T-1563 closes"
+      },
+      {
+        "ticket": "T-1558",
+        "blocker": "ACTIVE_DEPENDENCY:T-1562 -- PAUSED by user request SRC-139: explicit new task T-1562 takes the seat; resumes at BUILD when T-1562 closes"
+      },
+      {
+        "ticket": "T-1551",
+        "blocker": "HOST_EXECUTION_UNAVAILABLE -- live Codex negative probe failed helper_sandbox_lock_failed / SetNamedSecurityInfoW 5, so REFUSED_EFFECT_PROVED is absent. Deterministic preflight found DUAL_HOOK_REPRESENTATION (hooks.json plus config.toml) and HOOK_TRUST_UNPROVEN; direct canonical checker reachable, host checker execution unproven. Keep user hooks intact. Resume VERIFY only after genuine host trust and successful real negative/positive controls; current-tree full core new_red=0 also owed."
+      },
+      {
+        "ticket": "T-1548",
+        "blocker": "ACTIVE_DEPENDENCY:T-1551 -- EXEC_RESPONSE_HOST_GAP -- Codex has a documented Stop hook but SAIPEN has no installed final-response guard for that supported executor; T-1551 owns the runtime binding and proof"
+      },
+      {
+        "ticket": "T-1541",
+        "blocker": "ORACLE_CHANGED -- hidden-runner stdout assertion was invalid for OpenCode; refusal reaches the provider transcript, and current tree only changes that verifier. No same-verifier pre/post implementation pair; preserve until canonical regression authority is resolved."
+      },
+      {
+        "ticket": "T-1532",
+        "blocker": "CONTRACT_CONFLICT -- the requested behavior is forbidden by a declared contract this implementation cannot change unilaterally. SRC-121 asks for '/goal cc all'. The delivered shape (route a gg..."
+      },
+      {
+        "ticket": "T-1509",
+        "blocker": "SEQUENCED_AFTER:T-1507 -- T-1506 DONE 34c32202 (XPATCH survival now reports XP-000001 intake.py + test_source_receipts.py). Next child is T-1507 (restore receipt-range normalization from XP-000001), paused under T-1510 which resumes after the T-1521 post-soak batch. No human action."
+      },
+      {
+        "ticket": "T-1327",
+        "blocker": "ACTIVE_DEPENDENCY:T-1446 -- acceptance resyncs the installed OpenCode runtime the live 24H soak worker executes, and needs live OpenCode runs on the same model pool. Resume SCOUT after T-1446 DONE; no human action."
+      },
+      {
+        "ticket": "T-1429",
+        "blocker": "ACTIVE_DEPENDENCY:T-1426 -- clauses 1-2 implemented (E-8114); clause 3 needs T-1426 live use of retry_not_before, and T-1426 resumes only after T-1428 -> T-1446. Resume VERIFY then; no human action."
+      },
+      {
+        "ticket": "T-1375",
+        "blocker": "WAIT_USER_DECISION -- the quoted foreign path is lexically identical to a local claim (.saipen/evidence/PERF-001_WINDOWS_EVIDENCE.md) and the COMPLETE verdict is made by AUDAPACK's consumer in..."
+      },
+      {
+        "ticket": "T-1431",
+        "blocker": "ACTIVE_DEPENDENCY:T-1375 -- SRC-084 phase F: T-1375 next; T-1431 resumes at SCOUT after it"
+      },
+      {
+        "ticket": "T-1493",
+        "blocker": "SUPERSEDED_PENDING:T-1494 -- operator note SRC-112 (captured 2026-09-23): the current verify clause (an agent-run continue must leave the WAIT) would degrade the autonomy an explicit /goal grants; the defect is the missing machine distinction between persistent /goal authority and fresh cc authority, owned by T-1494. Formal ticket supersede T-1493 --by T-1494 --authority SRC-112 once T-1494 is DONE"
+      },
+      {
+        "ticket": "T-1428",
+        "blocker": "ACTIVE_DEPENDENCY:T-1446 -- PAUSED by user request SRC-100: explicit new task T-1446 takes the seat; resumes at BUILD when T-1446 closes"
+      },
+      {
+        "ticket": "T-1425",
+        "blocker": "ACTIVE_DEPENDENCY:T-1426 -- T-1425 is the superseded umbrella of the T-1424 mission (SRC-079/SRC-080); its technical repairs 1-5 and 7 are implemented and preserved under T-1426; T-1426 owns the unresolved live FreeBuff Desktop cc first-turn acceptance (SRC-081); this umbrella stays truthfully blocked on that manual result -- never reopened, never duplicated, and never falsely closed by deterministic green"
+      },
+      {
+        "ticket": "T-1426",
+        "blocker": "ACTIVE_DEPENDENCY:T-1428 -- PAUSED by user request SRC-083: explicit new task T-1428 takes the seat; resumes at VERIFY when T-1428 closes"
+      },
+      {
+        "ticket": "T-1323",
+        "blocker": "PAUSED by operator interrupt SRC-039 -- public ship/polish is explicitly paused; the P0 recovery-reachability wave takes the seat"
+      },
+      {
+        "ticket": "T-1317",
+        "blocker": "BLOCKED_EXTERNAL -- SRC-028:R010 is an unconditional Kiro blocking-adapter requirement; current read-only registry probe found no kiro command and no declared ~/.kiro home, and no real host refused-effect proof exists. Source coverage is BLOCKED, not waived; do not install Kiro to manufacture closure."
+      },
+      {
+        "ticket": "T-1257",
+        "blocker": "HELD -- unmet dependency T-473; not schedulable until the concurrent whole-file clobber guard exists"
+      },
+      {
+        "ticket": "T-1119",
+        "blocker": "PERMANENT_WARNING_OWNER -- the condition can never be met and immutable history is why. LOG.md carries 125 pre-date sealed entries; new entries are FAILed, so the warning emits forever and no work closes it"
+      },
+      {
+        "ticket": "T-473",
+        "blocker": "HELD -- unmet dependency; not schedulable until concurrent-mode gate completes"
+      },
+      {
+        "ticket": "T-407",
+        "blocker": "PERMANENT_WARNING_OWNER -- the condition can never be met and immutable history is why. E-1659 logged a `DEC: goal reauthorized` under the caps, `LOG.md` is append-only, so the warning emits forever and no work closes it. Same trap as T-406: in `## TODO` the Pick Rule was obliged to select a ticket whose own `verify:` says closing it FAILs"
+      },
+      {
+        "ticket": "T-406",
+        "blocker": "PERMANENT_WARNING_OWNER -- the condition can never be met and immutable history is why. `MANIFEST.md` advertises saipython live until its board opens, so the warning emits every validation; this ticket exists to own it, and its own `verify:` says closing it while the warning emits FAILs the ownership check. Sitting in `## TODO` it was a ticket the Pick Rule MUST take and no agent can finish. It leaves `## BLOCKED` when saipython actually runs or is de-advertised -- a real event, not work anyone can pick"
+      },
+      {
+        "ticket": "T-442",
+        "blocker": "HELD -- sequential stability gate; unblocks when the v8 prerequisites are proven"
+      },
+      {
+        "ticket": "T-575",
+        "blocker": "HELD -- until actual v8 Concurrent Mode exists and is stable"
+      }
+    ],
+    "evidence": [
+      ".saipen/evidence/core-unit/86049574f139a8d4-20261008T212507Z.json"
+    ],
+    "suite_groups": [],
+    "detail_refs": [
+      "E-13775",
+      "E-13782"
+    ],
+    "test_groups": [
+      {
+        "ran": 5919,
+        "red": 0,
+        "new_red": 0
+      }
+    ],
+    "response_reason": "stop",
+    "operator_action": "NONE"
+  },
+  "delivery": "STATUS: BUILD T-1690\nRESULT: Peatatud operaatori soovil; T-1688 lõpetatud; 61 blokeeritud (BLOCKED_EXTERNAL 9, MARKHUNT_TRIAGE_REQUIRED 8, HELD 4)\nNEXT EXACT ACTION: PHASE BUILD T-1690\nVALIDATION: STALE_PASS | full core 5919 | red 0 | new_red 0 | tõendid säilitatud\nDETAILS: E-13775, E-13782",
+  "event": 13787
+}

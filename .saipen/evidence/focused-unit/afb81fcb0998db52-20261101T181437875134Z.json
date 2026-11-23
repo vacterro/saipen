@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "afb81fcb0998db5224caa1c32e2888f30b5f143cff443d76d3ab53fa6606bfce",
+  "verdict": "PASS",
+  "patterns": [
+    "test_binding_snapshot_integrity.py",
+    "test_isolated_release.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_binding_snapshot_integrity.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_binding_snapshot_integrity.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        24232
+      ],
+      "duration_s": 27.907,
+      "process_create_s": 0.032,
+      "ran": 4,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_previously_absent_binding_is_removed_on_rollback (test_binding_snapshot_integrity.BindingSnapshotIntegrityTests.test_a_previously_absent_binding_is_removed_on_rollback) ... ok\r\ntest_an_unreadable_original_refuses_instead_of_becoming_absent (test_binding_snapshot_integrity.BindingSnapshotIntegrityTests.test_an_unreadable_original_refuses_instead_of_becoming_absent) ... ok\r\ntest_distinct_launcher_directories_keep_their_own_bytes (test_binding_snapshot_integrity.BindingSnapshotIntegrityTests.test_distinct_launcher_directories_keep_their_own_bytes) ... ok\r\ntest_locked_binding_refuses_before_the_source_or_consumers_change (test_binding_snapshot_integrity.PublisherSnapshotRefusalTests.test_locked_binding_refuses_before_the_source_or_consumers_change) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 4 tests in 27.742s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_isolated_release.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_isolated_release.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        8284
+      ],
+      "duration_s": 4.093,
+      "process_create_s": 0.031,
+      "ran": 6,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_concurrent_writer_cannot_be_overwritten (test_isolated_release.TestIsolatedRelease.test_concurrent_writer_cannot_be_overwritten)\r\nRegression 2: Concurrent writer detection refuses to overwrite or roll back. ... ok\r\ntest_non_fast_forward_refuses_force_push (test_isolated_release.TestIsolatedRelease.test_non_fast_forward_refuses_force_push)\r\nRegression 7: Non-fast-forward push is rejected and never force-pushes. ... ok\r\ntest_original_foreign_index_byte_exact_after_isolated_release (test_isolated_release.TestIsolatedRelease.test_original_foreign_index_byte_exact_after_isolated_release)\r\nRegression 1: Foreign staging must be preserved 100% byte-exact. ... ok\r\ntest_release_includes_only_reviewed_owned_paths (test_isolated_release.TestIsolatedRelease.test_release_includes_only_reviewed_owned_paths)\r\nRegression 4: Only reviewed paths enter the isolated worktree. ... ok\r\ntest_staged_renames_deletions_preserved (test_isolated_release.TestIsolatedRelease.test_staged_renames_deletions_preserved)\r\nRegression 3: Staged renames and deletions survive isolated operations. ... ok\r\ntest_wrong_or_unknown_remote_is_not_published (test_isolated_release.TestIsolatedRelease.test_wrong_or_unknown_remote_is_not_published)\r\nRegression 6: Publishing to an unknown remote is refused. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 6 tests in 3.773s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 10,
+  "duration_s": 121.734,
+  "timings_s": {
+    "execution_wall_s": 32.0,
+    "environment_identity_wall_s": 0.031,
+    "copy_wall_s": 73.234,
+    "hash_wall_s": 0.125,
+    "cleanup_wall_s": 16.328
+  },
+  "copy_metrics": {
+    "subject_copy_s": 22.531,
+    "canonical_copy_s": 50.531,
+    "canonical_copy_attempts": 1,
+    "trees": null,
+    "pointers": {
+      "rewritten": [
+        "bin/saipen.cmd",
+        "bin/saipen",
+        ".saipen/STATE.md"
+      ],
+      "home": "C:/temp/saipen-core-unit-1k84skuy/project"
+    }
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_binding_snapshot_integrity.py",
+      "test_isolated_release.py"
+    ],
+    "manifest_sha256": "3074253aa569fc7009f08347adf22f8bb6ea529b6d775987fc1d90b7b8dd76a4"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_binding_snapshot_integrity.py",
+        "test_isolated_release.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "8dc6ece956078ab451490c30335df48f8bb56bfbdf2b3ac27bdfaa091c495abc",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "2271ca5434892f15f981f28ed5ded00314be23f853d23c8db56c527f302b0463"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "a47f93dee387b41f3ac6e6755a3bd8083826824b65f31590a35ebc3d061ae5a7"
+      },
+      "core_unit_shard.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "b31bafde4ad2f78069e8f5ef839e26c59a4cbb38c9bcc4a19ad3e7acee7b6be0"
+      },
+      "test_runner.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "07a8109e808f10bb5268ac12f0da981db4b1fad2ec97a58da84f13b0509a1e81"
+      },
+      "verification_cache.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "e3ef0d9f3d48c1d6afa7af2bb383ce2ae57149f0c76bd5bc9efee06443566af7"
+      },
+      "process_tree.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "e5f07f80d2a6802d95c3ccbebe4ca5f66cdbbcbb25b13450123baa896d8e8356"
+      },
+      "verification_bootstrap.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "df9bdce3388bf2511ce13a5a4329219810096ac58be0323675afd78b48cb605e"
+      },
+      "verification_impact.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "cf5c146ee2931cc1baa2765fa00e8bb9129d3370cb8bb8a2b7eb020dd8bba455"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "2d091fe11e7e6cf4002e34bc6c69f0104a53378e6980e906842eeeb973ffcade"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

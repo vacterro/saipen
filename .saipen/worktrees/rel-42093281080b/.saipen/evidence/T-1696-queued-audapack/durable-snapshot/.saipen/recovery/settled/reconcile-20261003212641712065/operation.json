@@ -1,0 +1,51 @@
+{
+  "op_id": "reconcile-20261003212641712065",
+  "operation": "reconcile",
+  "created_at": "2026-10-03T21:26:41Z",
+  "agent": "buffy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "4423cc25421556fc",
+  "preconditions": {
+    ".saipen/STATE.md": "46fbb811cd111b4d",
+    ".saipen/LOG.md": "0f9bea44b1276dad"
+  },
+  "read_preconditions": {
+    ".saipen/BOARD.md": "78fc39e2b157070e",
+    ".saipen/logs": "delete-tree-sha256:937337c45728d38258704cc0ec14fd144d30502172e4407ac6357b501f37a2f3"
+  },
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 3,
+  "targets": [
+    {
+      "path": ".saipen/LOG.md",
+      "role": "log",
+      "action": "write",
+      "before_hash": "0f9bea44b1276dad",
+      "after_hash": "287af000a9d0afb2",
+      "applied": true
+    },
+    {
+      "path": ".saipen/STATE.md",
+      "role": "state",
+      "action": "write",
+      "before_hash": "46fbb811cd111b4d",
+      "after_hash": "e409065bd8fc873f",
+      "applied": true
+    },
+    {
+      "path": ".saipen/recovery/state-legacy-output/reconcile-20261003212641712065.STATE.md",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "46fbb811cd111b4d",
+      "applied": true
+    }
+  ],
+  "receipt_metadata": {
+    "inherited_findings": [
+      "STATE proposed next_action 'OPERATOR RUNS: python scripts/probe_launcher_recovery.py --case all (real-desktop acceptance A-D), then T-25 closes; after that T-261 FastPrompter live A3 lineage debug' does not start with WAIT:/saipen /PHASE /RUN:/RESUME:"
+    ]
+  }
+}

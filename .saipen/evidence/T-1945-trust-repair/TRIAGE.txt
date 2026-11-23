@@ -1,0 +1,10 @@
+=== AUT-001 host acceptance ===
+H01 invented host    -> (True, 'HOST_ACCEPTED', '')
+H02 no trusted issuer-> (True, 'HOST_ACCEPTED', '')
+H03 request persisted-> (True, 'DISPATCH_REQUEST_PERSISTED', '')
+H04 bad iteration -> RAISED ValueError invalid literal for int() with base 10: 'not-an-int'
+H05 bad worker gen -> RAISED ValueError invalid literal for int() with base 10: 'x'
+
+=== AUT-004 corpus content identity (T-1944 W2-006 territory) ===
+F01 same id, changed body -> digest unchanged? False
+F02 changed qualification -> digest unchanged? False

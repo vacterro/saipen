@@ -1,0 +1,29 @@
+...F.F.F
+======================================================================
+FAIL: test_refused_replay_leaves_the_owner_envelope_unconsumed (test_t1822_carrier_binding.CarrierBindingTests.test_refused_replay_leaves_the_owner_envelope_unconsumed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1822red\tools\test_t1822_carrier_binding.py", line 85, in test_refused_replay_leaves_the_owner_envelope_unconsumed
+    self.assertFalse(self._envelopes()[0].get("consumed"))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_same_text_from_two_sessions_keeps_both_envelopes (test_t1822_carrier_binding.CarrierBindingTests.test_same_text_from_two_sessions_keeps_both_envelopes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1822red\tools\test_t1822_carrier_binding.py", line 98, in test_same_text_from_two_sessions_keeps_both_envelopes
+    self.assertNotEqual(first["ingress_id"], second["ingress_id"])
+AssertionError: 'ing-109fbabc507160e9' == 'ing-109fbabc507160e9'
+
+======================================================================
+FAIL: test_wrong_session_envelope_is_refused_not_promoted (test_t1822_carrier_binding.CarrierBindingTests.test_wrong_session_envelope_is_refused_not_promoted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1822red\tools\test_t1822_carrier_binding.py", line 76, in test_wrong_session_envelope_is_refused_not_promoted
+    self.assertEqual(witness.get("code"), operator_task.CODE_HOST_PROVENANCE_UNAVAILABLE, witness)
+AssertionError: None != 'HOST_PROVENANCE_UNAVAILABLE' : {'witness': 'operator_carrier', 'compared_digest': '109fbabc507160e9e62fc99be653aab992d02907ce785d6ab0b20a353dcf0689', 'declared_by': 'host_ingress', 'ingress_id': 'ing-109fbabc507160e9', 'message_id': 'm-A', 'session_id': 'session-A'}
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.040s
+
+FAILED (failures=3)

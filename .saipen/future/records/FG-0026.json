@@ -1,0 +1,13 @@
+{
+  "declared_status": "ARCHITECTURE SEED",
+  "digest": "3acfff95a7c0bad5d6da6641e085050b8e82eb860de1df7b6042c1cc058ca756",
+  "facts": {},
+  "gate": "FG-0026",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/01_GLOBAL_PROJECT_DISPATCHER.md",
+  "reason": "broad architecture record; kept gated until one bounded slice is named",
+  "reviewed": true,
+  "schema": 2,
+  "title": "GLOBAL PROJECT DISPATCHER",
+  "verdict": "DEFERRED"
+}

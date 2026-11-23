@@ -1,0 +1,38 @@
+{
+  "argv": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+    "-B",
+    "-m",
+    "unittest",
+    "tools.test_t1704_goal_checkpoint_priority"
+  ],
+  "cwd": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+  "exit_code": 1,
+  "elapsed_seconds": 7.923551321029663,
+  "fingerprint_before": "d806fee31079f7fede78a7c2e3aced3c605ced3a5295aef17a5f9d3aeb9f4f9d",
+  "fingerprint_after": "d806fee31079f7fede78a7c2e3aced3c605ced3a5295aef17a5f9d3aeb9f4f9d",
+  "counts": {
+    "ran": 24,
+    "red": [
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_blocked_phase_outranks_pending_ingestion",
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_captured_t1703_review_valve_is_a_legal_audit_diversion",
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_counter_overrun_is_preserved_and_still_requires_a_checkpoint",
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_destructive_operation_gate_outranks_pending_ingestion",
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_external_state_blocker_outranks_pending_ingestion",
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_three_wave_valve_is_a_legal_audit_diversion",
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_user_brake_outranks_pending_ingestion",
+      "test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_bounded_native_validator_accepts_proved_cap_with_pending_audit",
+      "test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_persistent_checkpoint_rejects_unearned_state_counters",
+      "test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_persistent_three_wave_checkpoint_has_the_same_priority",
+      "test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_persistent_twenty_ticket_checkpoint_continues_and_native_agrees",
+      "test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_review_ticket_and_phase_survive_the_bounded_native_check"
+    ],
+    "headers": 12,
+    "unparsed": 0,
+    "tallied": 12
+  },
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "7b5816b339c484333a5475f91d2d25399c472d28483943b53464a82377d0155d",
+  "live_root_modified": false,
+  "live_persistent_grant": false
+}

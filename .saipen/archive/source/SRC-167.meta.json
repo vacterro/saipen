@@ -1,6 +1,6 @@
 {
   "archive_ref": ".saipen/archive/source/SRC-167.md",
-  "closed_at": "2026-10-28T22:32:56Z",
+  "closed_at": "2026-11-16T03:36:17Z",
   "closure_event": null,
   "linked_work": "T-1606",
   "receipt_id": "SRC-167",
@@ -14,7 +14,7 @@
   "request_provenance": {
     "witness": "model_supplied"
   },
-  "reread_at": "2026-10-28T22:32:56Z",
+  "reread_at": "2026-11-16T03:36:17Z",
   "schema_version": 1,
   "sensitive": false,
   "source_authority": {

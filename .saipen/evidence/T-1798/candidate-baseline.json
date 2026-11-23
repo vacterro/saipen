@@ -1,0 +1,66 @@
+{
+  "source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "candidate": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1798\\candidate",
+  "main_subject_sha256": {
+    "tools/saipen.py": "df386db4d63da2990d0e2a26551920a6be3afa498ea7ec3ac3b6b236d150485e",
+    "tools/saipen_engine/state.py": "5b12b2b3373b7156916ab11e05623d3dda631b89581a03eb1cebaeb8d2e41306",
+    "tools/saipen_engine/operations.py": "4f1dac73883e0160a9061992227dc3cc20f0054c0535f6660ac810e3827a633a",
+    "tools/test_install_identity_doctor.py": "69db974db6a381dde62ddac83de65984a3c35fa328603225c2e0f891babf892a",
+    "tools/saipen_engine/install_identity.py": "10f254424fe94b84c54884b7cf34287c1d57a55aed32811791af6d9a2172caec"
+  },
+  "prepared_changes": [
+    {
+      "path": "tools/saipen.py",
+      "sha256": "7c59fd1a1644678218712938632ad4c9170aa5ab92c8fb9a7fb3b3486f0ea01a"
+    },
+    {
+      "path": "tools/saipen_engine/state.py",
+      "sha256": "7e8b0e879837fcf8289bc155f0e13c8863c837d2b0ca26c0be5f97d0bbc11d87"
+    },
+    {
+      "path": "tools/saipen_engine/operations.py",
+      "sha256": "e0f307ef288742b338c01127fed46de00937c77218129a8812d287da416144a7"
+    },
+    {
+      "path": "tools/test_install_identity_doctor.py",
+      "sha256": "9363d209a6ecb835bd95be40df0c076539c74ebde981ed6f41eeb1b33e629122"
+    },
+    {
+      "path": "tools/saipen_engine/install_identity.py",
+      "sha256": "d84b54254995dc0bac1ccd37b88e111ca3ca47e273af6854b52ab8634c876ac1"
+    }
+  ],
+  "primary_baseline_unchanged": true,
+  "known_bad_candidate_tests": {
+    "ran": 15,
+    "failures": 2
+  },
+  "corrected_candidate_tests_and_source_contracts": {
+    "ran": 36,
+    "failures": 0
+  },
+  "candidate_ruff": "PASS 0.16.0",
+  "candidate_controls": {
+    "ran": 38,
+    "failures": 0,
+    "separate_neighbors_before_partial_access_extension": 128
+  },
+  "partial_access_red_control": {
+    "ran": 17,
+    "failures": 2
+  },
+  "applied_files": [
+    "tools\\saipen.py",
+    "tools\\saipen_engine\\state.py",
+    "tools\\saipen_engine\\operations.py",
+    "tools\\test_install_identity_doctor.py",
+    "tools\\saipen_engine\\install_identity.py"
+  ],
+  "applied_candidate_hashes": {
+    "tools\\saipen.py": "7c59fd1a1644678218712938632ad4c9170aa5ab92c8fb9a7fb3b3486f0ea01a",
+    "tools\\saipen_engine\\state.py": "7e8b0e879837fcf8289bc155f0e13c8863c837d2b0ca26c0be5f97d0bbc11d87",
+    "tools\\saipen_engine\\operations.py": "e0f307ef288742b338c01127fed46de00937c77218129a8812d287da416144a7",
+    "tools\\test_install_identity_doctor.py": "9363d209a6ecb835bd95be40df0c076539c74ebde981ed6f41eeb1b33e629122",
+    "tools\\saipen_engine\\install_identity.py": "d84b54254995dc0bac1ccd37b88e111ca3ca47e273af6854b52ab8634c876ac1"
+  }
+}

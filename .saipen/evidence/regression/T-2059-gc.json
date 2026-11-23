@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "tools.test_t2059_regression"],
+  "format": "unittest",
+  "context": [
+    "tools/saipen_engine",
+    "tools/test_t2059_regression.py",
+    "saipen/BOOT.md",
+    "saipen/REGISTRY.json"
+  ],
+  "oracle_files": ["tools/test_t2059_regression.py"],
+  "subject_files": ["tools/saipen_engine/gc.py", "tools/saipen_engine/operations.py"],
+  "before": {
+    "tools/saipen_engine/gc.py": null,
+    "tools/saipen_engine/operations.py": ".saipen/evidence/pre/T-2059-operations.py"
+  },
+  "timeout": 120
+}

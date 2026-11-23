@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-037:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 P0: settings_dialog.py uses PROFILES and normalize_fidelity_profile; they must be imported from audapack.fidelity and a regression must actually construct SettingsWidget/MainWindow so unresolved globals are caught"
+    },
+    "SRC-037:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002 P1: DEFAULT_EXCLUDES still hides fidelity-owned media/font patterns from the fidelity planner; remove them, migrate persisted legacy defaults provenance-safely, keep config.py and config.example.json derived from one canonical default set"
+    },
+    "SRC-037:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003 P1: enforce discovered == included + excluded + failed at the traversal boundary in build_fidelity_plan, represent pruned subtrees as counts/bytes, classify links and stat failures once, assert the invariant before manifest emission"
+    },
+    "SRC-037:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-004 P1: FULL must be structurally unbounded for profile size/media controls, and full_snapshot semantics must never be emitted when any fidelity-policy omission occurred"
+    },
+    "SRC-037:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-005 P1: media sampling must be a joint count-and-byte cap with referenced assets protected, DEEP given an explicit bounded policy, unreferenced media reachable by the global soft budget, and deterministic ordering"
+    },
+    "SRC-037:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-006 P1: persist a canonical packing-policy fingerprint in the manifest and make ensure_fresh_archive validate manifest, schema, source identity and policy before mtime reuse, reconstructing PackResult policy fields from the validated manifest"
+    },
+    "SRC-037:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001 P0: campaign ingest has no project-scoped cross-process transaction lock, so one writer rollback deletes another writer committed waves and campaign.json; add one lock covering revalidation, writes, publication and rollback with documented ordering against the registry lock"
+    }
+  },
+  "derived_at": "2026-09-05T01:24:19Z",
+  "derived_from": "SRC-037",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "6c949baaeb49a413ffa0bfb85f6a856f49d1040f2ae06ad27421ef5f8f4ed7a5"
+}

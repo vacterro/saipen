@@ -1,0 +1,433 @@
+{
+  "checked_utc": "2026-10-10T16:20:28.900977+00:00",
+  "original_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "recovery_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+  "original_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "new_lineage": "lineage-0ee6b060c73040d2be567d123691d079",
+  "gates": {
+    "new_identity_and_binding": true,
+    "initial_complete_ledger_and_ownership": true,
+    "initial_native_core": true,
+    "source_legacy_and_supporting_bytes": true,
+    "independent_git_integrity": true,
+    "unauthorized_and_foreign_refused_zero_bytes": {
+      "foreign": "PROJECT_LINEAGE_MISMATCH",
+      "guard": {
+        "ok": false,
+        "code": "PROTECTED_CANONICAL_NAMESPACE",
+        "admitted": false,
+        "project_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+        "target": ".saipen/LOG.md",
+        "targets": [
+          ".saipen/LOG.md"
+        ],
+        "action": "write",
+        "effect": "mutating",
+        "protected": true,
+        "provenance": "git-worktree",
+        "detail": "direct mutation of protected canonical path '.saipen/LOG.md' is forbidden; mutations must go through canonical saipen commands",
+        "canonical_next_command": "saipen next --json",
+        "duration_ms": 35.405,
+        "event": {
+          "event": "before_tool",
+          "host": "opencode",
+          "cwd": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+          "tool_name": "write",
+          "action": "write",
+          "command_class": "EXECUTION",
+          "fleet_preflight": true,
+          "target_path": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010\\.saipen\\LOG.md",
+          "target_paths": [
+            "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010\\.saipen\\LOG.md"
+          ],
+          "targets_unresolved": false,
+          "shell_protected_namespace": false,
+          "shell_effects": [],
+          "shell_effects_unresolved": null,
+          "actor": "saipen-cli",
+          "saipen_verb": null,
+          "detail": ""
+        },
+        "strength": {
+          "host": "opencode",
+          "capability": true,
+          "installed": true,
+          "current": true,
+          "health": null,
+          "effective": "UNKNOWN",
+          "reason": "current hook exists but guard reachability or host health is unobserved"
+        }
+      }
+    },
+    "authorized_canonical_verification_operation": {
+      "ok": true,
+      "code": "CHECKPOINTED",
+      "op_id": "checkpoint-74ac6de1fd664bf78df7e66490c83f4e",
+      "changed_files": [
+        ".saipen/LOG.md",
+        ".saipen/STATE.md"
+      ],
+      "recovery_required": false,
+      "event_id": "E-1",
+      "operator_boundary": {
+        "command": "saipen response digest --project-root \"V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010\" --reason final --json",
+        "instruction": "The project now waits for the operator. To end the turn, reply with the `text` of that command verbatim and nothing else: the detail is already in LOG, and a DETAILS line, when there is one, names where."
+      }
+    },
+    "final_native_core": true,
+    "final_operation_backed_ledger": true,
+    "normal_status_admission": true,
+    "original_and_refs_preserved": true,
+    "external_mailbox_unmodified": true
+  },
+  "commands": [
+    {
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "exit_code": 0,
+      "output": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\phase4-v3-initial-native.txt",
+      "output_sha256": "5cf0958957fd588ddeffc539bafd667c7056c77d79e526ac373f80d6962cd07d",
+      "summary": [
+        "Validation complete. Agent is conformant. (2 warning(s))"
+      ],
+      "failed_lines": []
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+        "--agent",
+        "saipen-cli",
+        "checkpoint",
+        "RUN",
+        "Foreign-lineage refusal control",
+        "--json"
+      ],
+      "exit_code": 3,
+      "payload": {
+        "ok": false,
+        "code": "PROJECT_LINEAGE_MISMATCH",
+        "detail": "explicit project lineage 'lineage-0ee6b060c73040d2be567d123691d079' does not match expected 'lineage-79944d6c0334416ebe1001e97de6c1cc': V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010"
+      },
+      "stdout": "{\r\n  \"ok\": false,\r\n  \"code\": \"PROJECT_LINEAGE_MISMATCH\",\r\n  \"detail\": \"explicit project lineage 'lineage-0ee6b060c73040d2be567d123691d079' does not match expected 'lineage-79944d6c0334416ebe1001e97de6c1cc': V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK_RECOVERY_20261010\"\r\n}\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+        "--agent",
+        "saipen-cli",
+        "checkpoint",
+        "RUN",
+        "RECOVERY VERIFICATION -- native core PASS; captured source, legacy namespace, Git refs/objects/index and independent storage verified; controls A-G PASS; original remains NO_GO; no historical Work imported. Operator authorization: SRC-211@lineage-b512942bac884a8691f6c98afcd6ddb9. No publication or cutover.",
+        "--json"
+      ],
+      "exit_code": 0,
+      "payload": {
+        "ok": true,
+        "code": "CHECKPOINTED",
+        "op_id": "checkpoint-74ac6de1fd664bf78df7e66490c83f4e",
+        "changed_files": [
+          ".saipen/LOG.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "event_id": "E-1",
+        "operator_boundary": {
+          "command": "saipen response digest --project-root \"V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010\" --reason final --json",
+          "instruction": "The project now waits for the operator. To end the turn, reply with the `text` of that command verbatim and nothing else: the detail is already in LOG, and a DETAILS line, when there is one, names where."
+        }
+      },
+      "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"CHECKPOINTED\",\r\n  \"op_id\": \"checkpoint-74ac6de1fd664bf78df7e66490c83f4e\",\r\n  \"changed_files\": [\r\n    \".saipen/LOG.md\",\r\n    \".saipen/STATE.md\"\r\n  ],\r\n  \"recovery_required\": false,\r\n  \"event_id\": \"E-1\",\r\n  \"operator_boundary\": {\r\n    \"command\": \"saipen response digest --project-root \\\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK_RECOVERY_20261010\\\" --reason final --json\",\r\n    \"instruction\": \"The project now waits for the operator. To end the turn, reply with the `text` of that command verbatim and nothing else: the detail is already in LOG, and a DETAILS line, when there is one, names where.\"\r\n  }\r\n}\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "exit_code": 0,
+      "output": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\phase4-v3-final-native.txt",
+      "output_sha256": "5cf0958957fd588ddeffc539bafd667c7056c77d79e526ac373f80d6962cd07d",
+      "summary": [
+        "Validation complete. Agent is conformant. (2 warning(s))"
+      ],
+      "failed_lines": []
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+        "--agent",
+        "saipen-cli",
+        "status",
+        "--json"
+      ],
+      "exit_code": 0,
+      "payload": {
+        "ok": true,
+        "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack_recovery_20261010",
+        "protocol_version": "8.1.0",
+        "phase": "PLAN",
+        "task": "none",
+        "next_action": "WAIT: init -- provide the first project goal or raw backlog",
+        "computed_next_action": "WAIT: init -- provide the first project goal or raw backlog",
+        "computed_reason": "wait",
+        "blocker": "none",
+        "execution_intent": "normal",
+        "claimed_ticket": null,
+        "top_workable_ticket": null,
+        "log_tail_event": 1,
+        "head": "6c6d841",
+        "board_errors": [],
+        "recovery_pending": false,
+        "recovery_conflict": false,
+        "pending_ops": [],
+        "conflict_ops": [],
+        "goal_authority": {
+          "state": "inactive",
+          "detail": "No persistent grant",
+          "original_event": null,
+          "checkpoint_due": false
+        },
+        "milestone": {
+          "current": null,
+          "label": null,
+          "parent": null,
+          "undo_available": false,
+          "valid": true
+        },
+        "cold_route": {
+          "project_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+          "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+          "phase": "PLAN",
+          "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\plan.md",
+          "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+          "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+          "documents": {
+            "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+            "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+            "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+            "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+            "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+            "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+            "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+            "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+            "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+            "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+          },
+          "project_memory": {
+            "STATE.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010\\.saipen\\STATE.md",
+            "BOARD.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010\\.saipen\\BOARD.md",
+            "LOG.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010\\.saipen\\LOG.md"
+          },
+          "search_required": false,
+          "instructions": {
+            "code": "PROJECT_BLOCK_STALE",
+            "action": "saipen host instructions repair",
+            "detail": "AGENTS.md carries a SAIPEN block of another generation: tells the agent to clone a repository; names an absolute path (C:\\Users\\vac34\\.agents\\skills\\saipen\\BOOT.md)",
+            "files": [
+              {
+                "file": "AGENTS.md",
+                "status": "STALE"
+              }
+            ]
+          }
+        },
+        "audit_inbox": {
+          "pending": 1,
+          "active_layer": null,
+          "bound_receipt": null,
+          "bound_work": null,
+          "closed_pending_delete": 0,
+          "invalid": 0,
+          "residue": 2,
+          "clean": false,
+          "last_allocated_id": null,
+          "inbox_state": null,
+          "error_state": null
+        },
+        "distribution": {
+          "installed": 7,
+          "stale": 6,
+          "unknown": 2,
+          "fresh": false,
+          "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+          "newest_installed_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+          "last_run": {
+            "status": "skipped",
+            "skip": "DIRTY_SOURCE",
+            "rc": 2,
+            "dirty": [
+              "M bootstrap/inject.ps1",
+              "M bootstrap/inject.sh",
+              "M bootstrap/install_ownership.py",
+              "M bootstrap/uninstall.ps1",
+              "M bootstrap/uninstall.sh"
+            ],
+            "at": "2026-10-10 19:16:00",
+            "head": null,
+            "in_flight": false
+          },
+          "blocker": {
+            "condition": "DIRTY_SOURCE",
+            "blocked": true,
+            "detail": "207 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation",
+            "paths": [
+              "bootstrap/inject.ps1",
+              "bootstrap/inject.sh",
+              "bootstrap/install_ownership.py",
+              "bootstrap/uninstall.ps1",
+              "bootstrap/uninstall.sh",
+              "extensions/adapters/claude.md",
+              "extensions/adapters/claude/saipen-guard.py",
+              "extensions/adapters/codex.md"
+            ],
+            "path_count": 207,
+            "canonical_next_command": "git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit"
+          },
+          "published_head": null,
+          "publication": null,
+          "consumer_convergence": "CURRENT",
+          "pending_consumers": [],
+          "consumers_converged": false,
+          "requires_human": false,
+          "summary": "distribution: 6 of 7 home(s) stale -- newest installed head 025bf596c683 -- source head 025bf596c683 -- 2 home(s) carry no head -- last scheduled injection: skipped DIRTY_SOURCE at 2026-10-10 19:16:00 -- BLOCKED DIRTY_SOURCE: 207 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation -- clears with: git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit"
+        },
+        "waiting_on_you": [
+          "WAIT: init -- provide the first project goal or raw backlog"
+        ],
+        "conformance_status": {
+          "status": "NOT_RUN",
+          "gate": "core",
+          "reason": "no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS",
+          "validator": {
+            "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+            "validator_protocol_version": "1",
+            "project_protocol_version": "8",
+            "gate": "core",
+            "source_head": "6c6d841df24e5c5d91870def931af99f0af4c81f",
+            "source_tree_fingerprint": "git-delta-v1:ca950e4f7ebad1003908cb5378f280192a0a78529e7624ac137ad1bbb08697c5"
+          },
+          "disposition": "UNPROVEN",
+          "remediation_command": "saipen validate",
+          "repair_status": "REFRESH_REQUIRED",
+          "diagnostic": null
+        },
+        "automation": {
+          "schema_version": 1,
+          "disposition": "CONTINUE",
+          "next_command": "cc",
+          "operator_action_due": true,
+          "reason_code": "wait-init",
+          "reason": "persisted WAIT is a hard stop; do not route past it",
+          "audit_quiescent": false,
+          "audit_epoch": "audit-epoch-v1:d80796001f1d769336c20aea4400ba62c2d8c132f3f8e36d29beac6ab802b403",
+          "convergence_current": false,
+          "closure_complete": false,
+          "source_fingerprint": "6c6d841df24e5c5d91870def931af99f0af4c81f+git-delta-v1:ca950e4f7ebad1003908cb5378f280192a0a78529e7624ac137ad1bbb08697c5",
+          "completed_at": null
+        },
+        "conditional_efficiency_kpi": {
+          "scope": "session",
+          "ticket": null,
+          "percent": null,
+          "approximate": true,
+          "confidence": "UNKNOWN",
+          "formula_version": 1,
+          "components": {
+            "progress": null,
+            "rework": null,
+            "autonomy": null,
+            "human": null
+          },
+          "preliminary": true,
+          "withheld": "no ticket attribution; no session KPI is derived in formula v1"
+        },
+        "telegrams": {
+          "state": "OK",
+          "unread": 0,
+          "on_current_work": 0,
+          "complete": true,
+          "read_command": "saimail-local saipen brief --project-root V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010 --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat saipen-cli",
+          "detail": "counts only; nothing was opened and nothing here is an instruction"
+        }
+      },
+      "stdout": "{\r\n  \"ok\": true,\r\n  \"project_identity\": \"v:\\\\___vac\\\\__k\\\\__code\\\\_py\\\\_audapack_recovery_20261010\",\r\n  \"protocol_version\": \"8.1.0\",\r\n  \"phase\": \"PLAN\",\r\n  \"task\": \"none\",\r\n  \"next_action\": \"WAIT: init -- provide the first project goal or raw backlog\",\r\n  \"computed_next_action\": \"WAIT: init -- provide the first project goal or raw backlog\",\r\n  \"computed_reason\": \"wait\",\r\n  \"blocker\": \"none\",\r\n  \"execution_intent\": \"normal\",\r\n  \"claimed_ticket\": null,\r\n  \"top_workable_ticket\": null,\r\n  \"log_tail_event\": 1,\r\n  \"head\": \"6c6d841\",\r\n  \"board_errors\": [],\r\n  \"recovery_pending\": false,\r\n  \"recovery_conflict\": false,\r\n  \"pending_ops\": [],\r\n  \"conflict_ops\": [],\r\n  \"goal_authority\": {\r\n    \"state\": \"inactive\",\r\n    \"detail\": \"No persistent grant\",\r\n    \"original_event\": null,\r\n    \"checkpoint_due\": false\r\n  },\r\n  \"milestone\": {\r\n    \"current\": null,\r\n    \"label\": null,\r\n    \"parent\": null,\r\n    \"undo_available\": false,\r\n    \"valid\": true\r\n  },\r\n  \"cold_route\": {\r\n    \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK_RECOVERY_20261010\",\r\n    \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n    \"protocol_dir\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\",\r\n    \"phase\": \"PLAN\",\r\n    \"phase_module\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\phases\\\\plan.md\",\r\n    \"boot\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\BOOT.md\",\r\n    \"style\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\STYLE.md\",\r\n    \"documents\": {\r\n      \"STYLE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\STYLE.md\",\r\n      \"BOOT.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\BOOT.md\",\r\n      \"INDEX.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\INDEX.md\",\r\n      \"COMMANDS.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\COMMANDS.md\",\r\n      \"OPS.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\OPS.md\",\r\n      \"SOURCES.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\SOURCES.md\",\r\n      \"EXECUTION.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\EXECUTION.md\",\r\n      \"MAINTENANCE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\MAINTENANCE.md\",\r\n      \"CORE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\CORE.md\",\r\n      \"RUNTIME.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\RUNTIME.md\"\r\n    },\r\n    \"project_memory\": {\r\n      \"STATE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK_RECOVERY_20261010\\\\.saipen\\\\STATE.md\",\r\n      \"BOARD.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK_RECOVERY_20261010\\\\.saipen\\\\BOARD.md\",\r\n      \"LOG.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK_RECOVERY_20261010\\\\.saipen\\\\LOG.md\"\r\n    },\r\n    \"search_required\": false,\r\n    \"instructions\": {\r\n      \"code\": \"PROJECT_BLOCK_STALE\",\r\n      \"action\": \"saipen host instructions repair\",\r\n      \"detail\": \"AGENTS.md carries a SAIPEN block of another generation: tells the agent to clone a repository; names an absolute path (C:\\\\Users\\\\vac34\\\\.agents\\\\skills\\\\saipen\\\\BOOT.md)\",\r\n      \"files\": [\r\n        {\r\n          \"file\": \"AGENTS.md\",\r\n          \"status\": \"STALE\"\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"audit_inbox\": {\r\n    \"pending\": 1,\r\n    \"active_layer\": null,\r\n    \"bound_receipt\": null,\r\n    \"bound_work\": null,\r\n    \"closed_pending_delete\": 0,\r\n    \"invalid\": 0,\r\n    \"residue\": 2,\r\n    \"clean\": false,\r\n    \"last_allocated_id\": null,\r\n    \"inbox_state\": null,\r\n    \"error_state\": null\r\n  },\r\n  \"distribution\": {\r\n    \"installed\": 7,\r\n    \"stale\": 6,\r\n    \"unknown\": 2,\r\n    \"fresh\": false,\r\n    \"source_head\": \"025bf596c683464788ab698248e8a3c5eb44dfec\",\r\n    \"newest_installed_head\": \"025bf596c683464788ab698248e8a3c5eb44dfec\",\r\n    \"last_run\": {\r\n      \"status\": \"skipped\",\r\n      \"skip\": \"DIRTY_SOURCE\",\r\n      \"rc\": 2,\r\n      \"dirty\": [\r\n        \"M bootstrap/inject.ps1\",\r\n        \"M bootstrap/inject.sh\",\r\n        \"M bootstrap/install_ownership.py\",\r\n        \"M bootstrap/uninstall.ps1\",\r\n        \"M bootstrap/uninstall.sh\"\r\n      ],\r\n      \"at\": \"2026-10-10 19:16:00\",\r\n      \"head\": null,\r\n      \"in_flight\": false\r\n    },\r\n    \"blocker\": {\r\n      \"condition\": \"DIRTY_SOURCE\",\r\n      \"blocked\": true,\r\n      \"detail\": \"207 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation\",\r\n      \"paths\": [\r\n        \"bootstrap/inject.ps1\",\r\n        \"bootstrap/inject.sh\",\r\n        \"bootstrap/install_ownership.py\",\r\n        \"bootstrap/uninstall.ps1\",\r\n        \"bootstrap/uninstall.sh\",\r\n        \"extensions/adapters/claude.md\",\r\n        \"extensions/adapters/claude/saipen-guard.py\",\r\n        \"extensions/adapters/codex.md\"\r\n      ],\r\n      \"path_count\": 207,\r\n      \"canonical_next_command\": \"git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit\"\r\n    },\r\n    \"published_head\": null,\r\n    \"publication\": null,\r\n    \"consumer_convergence\": \"CURRENT\",\r\n    \"pending_consumers\": [],\r\n    \"consumers_converged\": false,\r\n    \"requires_human\": false,\r\n    \"summary\": \"distribution: 6 of 7 home(s) stale -- newest installed head 025bf596c683 -- source head 025bf596c683 -- 2 home(s) carry no head -- last scheduled injection: skipped DIRTY_SOURCE at 2026-10-10 19:16:00 -- BLOCKED DIRTY_SOURCE: 207 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation -- clears with: git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit\"\r\n  },\r\n  \"waiting_on_you\": [\r\n    \"WAIT: init -- provide the first project goal or raw backlog\"\r\n  ],\r\n  \"conformance_status\": {\r\n    \"status\": \"NOT_RUN\",\r\n    \"gate\": \"core\",\r\n    \"reason\": \"no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS\",\r\n    \"validator\": {\r\n      \"validator_path\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\validate.py\",\r\n      \"validator_protocol_version\": \"1\",\r\n      \"project_protocol_version\": \"8\",\r\n      \"gate\": \"core\",\r\n      \"source_head\": \"6c6d841df24e5c5d91870def931af99f0af4c81f\",\r\n      \"source_tree_fingerprint\": \"git-delta-v1:ca950e4f7ebad1003908cb5378f280192a0a78529e7624ac137ad1bbb08697c5\"\r\n    },\r\n    \"disposition\": \"UNPROVEN\",\r\n    \"remediation_command\": \"saipen validate\",\r\n    \"repair_status\": \"REFRESH_REQUIRED\",\r\n    \"diagnostic\": null\r\n  },\r\n  \"automation\": {\r\n    \"schema_version\": 1,\r\n    \"disposition\": \"CONTINUE\",\r\n    \"next_command\": \"cc\",\r\n    \"operator_action_due\": true,\r\n    \"reason_code\": \"wait-init\",\r\n    \"reason\": \"persisted WAIT is a hard stop; do not route past it\",\r\n    \"audit_quiescent\": false,\r\n    \"audit_epoch\": \"audit-epoch-v1:d80796001f1d769336c20aea4400ba62c2d8c132f3f8e36d29beac6ab802b403\",\r\n    \"convergence_current\": false,\r\n    \"closure_complete\": false,\r\n    \"source_fingerprint\": \"6c6d841df24e5c5d91870def931af99f0af4c81f+git-delta-v1:ca950e4f7ebad1003908cb5378f280192a0a78529e7624ac137ad1bbb08697c5\",\r\n    \"completed_at\": null\r\n  },\r\n  \"conditional_efficiency_kpi\": {\r\n    \"scope\": \"session\",\r\n    \"ticket\": null,\r\n    \"percent\": null,\r\n    \"approximate\": true,\r\n    \"confidence\": \"UNKNOWN\",\r\n    \"formula_version\": 1,\r\n    \"components\": {\r\n      \"progress\": null,\r\n      \"rework\": null,\r\n      \"autonomy\": null,\r\n      \"human\": null\r\n    },\r\n    \"preliminary\": true,\r\n    \"withheld\": \"no ticket attribution; no session KPI is derived in formula v1\"\r\n  },\r\n  \"telegrams\": {\r\n    \"state\": \"OK\",\r\n    \"unread\": 0,\r\n    \"on_current_work\": 0,\r\n    \"complete\": true,\r\n    \"read_command\": \"saimail-local saipen brief --project-root V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK_RECOVERY_20261010 --workspace C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\saipen\\\\saimail --seat saipen-cli\",\r\n    \"detail\": \"counts only; nothing was opened and nothing here is an instruction\"\r\n  }\r\n}\r\n",
+      "stderr": ""
+    }
+  ],
+  "final_protocol": {
+    "state": {
+      "phase": "PLAN",
+      "task": "none",
+      "next_action": "WAIT: init -- provide the first project goal or raw backlog",
+      "blocker": "none",
+      "agent": "saipen-cli",
+      "saipen_version": 8,
+      "schema_version": 3,
+      "style_contract": "ded-069a4c52",
+      "saipen_home": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+      "mode": "full",
+      "execution_intent": "normal",
+      "transition_from": "INIT",
+      "updated": "2026-10-10T16:19:33Z",
+      "last_event": 1
+    },
+    "board_errors": [],
+    "ledger_errors": [],
+    "ledger_segments": 1,
+    "events": [
+      {
+        "date": "10.10.26 16:19",
+        "event": 1,
+        "parent": null,
+        "ticket": null,
+        "agent": "saipen-cli",
+        "op_id": "checkpoint-74ac6de1fd664bf78df7e66490c83f4e",
+        "taxonomy": "RUN",
+        "text": "RECOVERY VERIFICATION -- native core PASS; captured source, legacy namespace, Git refs/objects/index and independent storage verified; controls A-G PASS; original remains NO_GO; no historical Work imported. Operator authorization: SRC-211@lineage-b512942bac884a8691f6c98afcd6ddb9. No publication or cutover."
+      }
+    ],
+    "lifecycle_authority": {
+      "status": "AUTHORIZED",
+      "floor": 1,
+      "head": [],
+      "findings": [],
+      "detail": ""
+    },
+    "pending": [],
+    "conflicts": [],
+    "receipt_count": 1,
+    "receipt_errors": [],
+    "ticket_count": 0
+  },
+  "failure": null,
+  "acceptance_pass": true,
+  "original_verdict": "NO_GO",
+  "recovery_verdict": "GO_CANONICAL_OPERATIONS_ONLY",
+  "cutover": false,
+  "publication": false,
+  "consumer_agents_enabled": false,
+  "legacy_terminal_claims": "Unverified; preserved exclusively outside active authority",
+  "host_hook_limit": "CLI authority and native guard refusal are proved; no live-host blocking capability or OS sandbox is inferred."
+}

@@ -1,0 +1,8 @@
+test_large_route_executes_and_preserves_every_unresolved_clause (test_t1790_dependency_route_budget.DependencyRouteBudgetTests.test_large_route_executes_and_preserves_every_unresolved_clause) ... ok
+test_many_foreign_owners_do_not_expand_the_route_again (test_t1790_dependency_route_budget.DependencyRouteBudgetTests.test_many_foreign_owners_do_not_expand_the_route_again) ... ok
+test_single_clause_is_counted_without_hiding_its_identity (test_t1790_dependency_route_budget.DependencyRouteBudgetTests.test_single_clause_is_counted_without_hiding_its_identity) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 18.187s
+
+OK

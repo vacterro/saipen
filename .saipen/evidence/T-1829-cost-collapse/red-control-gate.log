@@ -1,0 +1,5 @@
+RED   publication gate not consulted -> release refuses before the external validator
+RED   gate consults the project copy -> a downstream validator cannot replace the runtime gate
+RED   project root not forwarded -> the managed project is named to the runtime validator
+restored byte-identically: True
+PASS: all 3 mutations were caught; implementation restored

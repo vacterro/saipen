@@ -1,0 +1,21 @@
+test_a_changed_manifest_declaration_refuses_the_recorded_scope (__main__.PatternScopeTests.test_a_changed_manifest_declaration_refuses_the_recorded_scope) ... ok
+test_a_deleted_test_leaves_the_selection (__main__.PatternScopeTests.test_a_deleted_test_leaves_the_selection) ... ok
+test_a_new_matching_module_moves_the_selection_and_the_fingerprint (__main__.PatternScopeTests.test_a_new_matching_module_moves_the_selection_and_the_fingerprint) ... ok
+test_a_wildcard_over_four_declared_modules_is_declared (__main__.PatternScopeTests.test_a_wildcard_over_four_declared_modules_is_declared) ... ok
+test_a_wildcard_with_one_undeclared_module_is_full (__main__.PatternScopeTests.test_a_wildcard_with_one_undeclared_module_is_full) ... ok
+test_a_wildcard_without_matches_is_full_and_says_so (__main__.PatternScopeTests.test_a_wildcard_without_matches_is_full_and_says_so) ... ok
+test_an_exact_declared_name_without_a_file_is_full (__main__.PatternScopeTests.test_an_exact_declared_name_without_a_file_is_full) ... ok
+test_four_exact_modules_union_their_trees (__main__.PatternScopeTests.test_four_exact_modules_union_their_trees) ... ok
+test_identity_ignores_unrelated_manifest_entries (__main__.PatternScopeTests.test_identity_ignores_unrelated_manifest_entries) ... ok
+test_matching_is_bare_filename_only (__main__.PatternScopeTests.test_matching_is_bare_filename_only) ... ok
+test_matching_is_case_sensitive_on_every_platform (__main__.PatternScopeTests.test_matching_is_case_sensitive_on_every_platform) ... ok
+test_one_exact_module_is_declared (__main__.PatternScopeTests.test_one_exact_module_is_declared) ... ok
+test_overlapping_patterns_are_deduplicated (__main__.PatternScopeTests.test_overlapping_patterns_are_deduplicated) ... ok
+test_replay_after_a_wildcard_gains_a_declaration_is_refused (__main__.PatternScopeTests.test_replay_after_a_wildcard_gains_a_declaration_is_refused) ... ok
+test_selection_and_runner_share_one_selector (__main__.PatternScopeTests.test_selection_and_runner_share_one_selector) ... ok
+test_the_decision_records_the_selected_modules (__main__.PatternScopeTests.test_the_decision_records_the_selected_modules) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.026s
+
+OK

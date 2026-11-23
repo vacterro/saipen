@@ -1,0 +1,21 @@
+{
+  "ok": true,
+  "code": "NON_OPERATIONAL",
+  "class": "ORDINARY_CHAT",
+  "layer": "NONE",
+  "layers": {
+    "admission": "NOT_CONSULTED",
+    "exec_response": "NOT_APPLICABLE",
+    "chat_style": "PASS"
+  },
+  "diagnosis_verification": "STRUCTURE_AND_CITATIONS_ONLY",
+  "semantic_review": "REQUIRED",
+  "errors": [],
+  "detail_mode": "EXPLICIT_REPORT",
+  "turn_decision": "OPERATOR_WAIT",
+  "detail": null,
+  "diagnostic": null,
+  "delivery": null,
+  "overflow": null,
+  "contract": null
+}

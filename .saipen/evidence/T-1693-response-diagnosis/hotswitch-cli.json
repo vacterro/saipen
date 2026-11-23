@@ -1,0 +1,104 @@
+{
+  "records": [
+    {
+      "label": "inventory",
+      "command": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\_TEMP_\\saipen-t1693-t013og4l\\project",
+        "response",
+        "check",
+        "--stdin",
+        "--classify",
+        "--request",
+        "Explain why the agent deviated from SAIPEN.",
+        "--json"
+      ],
+      "exit_code": 1,
+      "verdict": {
+        "ok": false,
+        "code": "EXEC_RESPONSE_INVALID",
+        "class": "INVALID_OPERATIONAL_PROSE",
+        "layer": "EXEC_RESPONSE",
+        "layers": {
+          "admission": "NOT_CONSULTED",
+          "exec_response": "FAIL",
+          "chat_style": "NOT_REACHED"
+        },
+        "diagnosis_verification": "STRUCTURE_AND_CITATIONS_ONLY",
+        "semantic_review": "REQUIRED",
+        "errors": [
+          "protocol diagnosis requires an evidence-bound record; an inventory is not a diagnosis"
+        ],
+        "detail_mode": "EXPLICIT_REPORT",
+        "turn_decision": "OPERATOR_WAIT",
+        "detail": "protocol diagnosis requires an evidence-bound record; an inventory is not a diagnosis",
+        "diagnostic": null,
+        "delivery": null,
+        "overflow": {
+          "code": "OPERATOR_OUTPUT_OVERFLOW",
+          "response_class": "EXPLICIT_DETAILED_REPORT",
+          "fields": [
+            {
+              "field": "RESPONSE",
+              "chars": 2245,
+              "lines": 21,
+              "char_budget": 3600,
+              "line_budget": 16
+            }
+          ],
+          "total": {
+            "chars": 2245,
+            "lines": 21,
+            "char_budget": 3600,
+            "line_budget": 16
+          },
+          "detail_ref": ".saipen/evidence/response/rejected-1378f149861acd5a.txt",
+          "compaction": "NOT_ATTEMPTED",
+          "preserved": false
+        },
+        "contract": "SAIPEN chat contract, generated from STYLE.md (ded-069a4c52). Reply language is pinned to Estonian (et) by STYLE.md: answer in it on every reply, whatever language the user wrote in. Voice: caveman-ded, blunt and compressed. Higher-priority host instructions retain precedence. Chat prose is at most 8 lines (target 5) and 900 characters unless witnessed human ingress explicitly requests depth or a typed artifact. Summary, brief and ordinary final report stay compact. Fences never escape the total budget. Never open with: Sure, Certainly, Okay, Here is, I will, Let me, Based on my analysis, I'd be happy to. Never close with: Hope this helps, Let me know if you need anything else, Feel free to ask. Never apologize with: Sorry, My apologies, I made a mistake. Commands, PASS/FAIL, file:line, error strings and code stay exact. An operational boundary is the EXEC-RESPONSE-01 control surface generated from machine facts (`saipen response digest --project-root ROOT --reason final|stop|status`), never a model retrospective. The low-level diagnostic renderer is `saipen response render --stdin`. Completed-part gates replace default operational output. Post-render Stop gates request one correction; they cannot retract visible text. Runnable work continues silently. Evidence remains durable, not narrated."
+      }
+    },
+    {
+      "label": "diagnosis",
+      "command": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\_TEMP_\\saipen-t1693-t013og4l\\project",
+        "response",
+        "check",
+        "--stdin",
+        "--classify",
+        "--request",
+        "Explain why the agent deviated from SAIPEN.",
+        "--json"
+      ],
+      "exit_code": 0,
+      "verdict": {
+        "ok": true,
+        "code": "NON_OPERATIONAL",
+        "class": "ORDINARY_CHAT",
+        "layer": "NONE",
+        "layers": {
+          "admission": "NOT_CONSULTED",
+          "exec_response": "NOT_APPLICABLE",
+          "chat_style": "PASS"
+        },
+        "diagnosis_verification": "STRUCTURE_AND_CITATIONS_ONLY",
+        "semantic_review": "REQUIRED",
+        "errors": [],
+        "detail_mode": "EXPLICIT_REPORT",
+        "turn_decision": "OPERATOR_WAIT",
+        "detail": null,
+        "diagnostic": null,
+        "delivery": null,
+        "overflow": null,
+        "contract": null
+      }
+    }
+  ],
+  "checkpoint_unchanged": true,
+  "subject_sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8",
+  "limits": "Disposable project and synthetic witness; public source CLI only; no native FreeBuff interception or real human provenance is proved."
+}

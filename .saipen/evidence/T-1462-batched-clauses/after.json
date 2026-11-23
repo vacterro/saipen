@@ -1,0 +1,12 @@
+{
+ "label": "after",
+ "ok": true,
+ "code": "APPEND_PROJECTED",
+ "clauses": 156,
+ "seconds": 0.22,
+ "calls": {
+  "add_requirement": 0,
+  "add_requirements": 1
+ },
+ "interpretation_revision": 1
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-427:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Night Shift 8: fix false PASS reference for T-2090, fail-closed sandbox ownership grammar, real concurrency tests, verification preflight and throughput"
+    }
+  },
+  "derived_at": "2026-11-18T15:04:20Z",
+  "derived_from": "SRC-427",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "d7f5b1acfd9e200eb27451c21ae5253d17ce1e32278185f8d1079b3731b7aeff"
+}

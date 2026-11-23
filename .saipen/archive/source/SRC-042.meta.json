@@ -1,6 +1,6 @@
 {
   "archive_ref": ".saipen/archive/source/SRC-042.md",
-  "closed_at": "2026-10-30T02:41:56Z",
+  "closed_at": "2026-11-14T22:52:17Z",
   "closure_event": null,
   "linked_work": "T-1326",
   "receipt_id": "SRC-042",
@@ -11,7 +11,7 @@
     "original_sha256": "5fc82e2bf36e37038c6e5bcd109866cd2c0569fda5df3fb5c34c5b0915c6282c",
     "sanitized_sha256": "5fc82e2bf36e37038c6e5bcd109866cd2c0569fda5df3fb5c34c5b0915c6282c"
   },
-  "reread_at": "2026-10-30T02:41:56Z",
+  "reread_at": "2026-11-14T22:52:17Z",
   "schema_version": 1,
   "sensitive": false,
   "source_authority": {

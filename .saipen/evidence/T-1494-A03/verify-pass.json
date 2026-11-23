@@ -1,0 +1,44 @@
+{
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "checkpoint",
+    "RUN",
+    "T-1494",
+    "verify -> PASS [target: T-1494] conf: high -- A03 inventory 358, 46 inventory tests, 69 routing, 11 hostile, 18 authority, 83 neighbors (3 declared skips), four supplemental effect controls and 20 invariants covered. Two A01 exact validator red/green controls and fixed-fixture authentic pre/post pairs ADMISSIBLE. Ruff 0.16.0 and core PASS; declared core-unit 5981 ran, red 0, new_red 0, 59 declared skips; fingerprint 1f6ed1d51a2c43cd, baseline unchanged. PID 4948 detected then reaped, no active leaks. .saipen/evidence/T-1494-A03/core-unit-acceptance.json",
+    "--json"
+  ],
+  "exit_code": 0,
+  "session_capability": "no-publish",
+  "result": {
+    "ok": true,
+    "code": "CHECKPOINTED",
+    "op_id": "checkpoint-5886337b50ce4ac6829fa51e35a9c6e4",
+    "changed_files": [
+      ".saipen/LOG.md",
+      ".saipen/BOARD.md",
+      ".saipen/STATE.md"
+    ],
+    "recovery_required": false,
+    "event_id": "E-13961"
+  },
+  "committed_operation": {
+    "path": ".saipen\\recovery\\settled\\checkpoint-5886337b50ce4ac6829fa51e35a9c6e4\\operation.json",
+    "status": "COMMITTED",
+    "operation": "checkpoint",
+    "progress_index": 3,
+    "targets": [
+      {
+        "path": ".saipen/LOG.md",
+        "applied": true
+      },
+      {
+        "path": ".saipen/BOARD.md",
+        "applied": true
+      },
+      {
+        "path": ".saipen/STATE.md",
+        "applied": true
+      }
+    ]
+  }
+}

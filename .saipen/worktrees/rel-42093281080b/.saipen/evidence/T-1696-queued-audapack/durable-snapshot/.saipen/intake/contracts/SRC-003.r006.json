@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-003:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Provide one-click SEND AUDIT for the selected project, asynchronously reuse only a provably fresh ZIP or coalesce/reuse the canonical PackingService operation, then enqueue automatically."
+    },
+    "SRC-003:R0002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Use the authenticated localhost Bridge as a pull-based broker; do not use SendKeys, clipboard, mouse/focus/HWND automation, Selenium, Playwright, DevTools remote debugging, external WebSockets, or native window titles as transport."
+    },
+    "SRC-003:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Maintain an ephemeral authoritative Widget worker registry with heartbeat TTL and accept at most six active browser workers; never create or dispatch to a seventh worker."
+    },
+    "SRC-003:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Combine heartbeat and atomic claim in bounded 15-25 second long polling with immediate wakeup for work, bounded exponential failure backoff, and best-effort offline release."
+    },
+    "SRC-003:R0005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A Widget may report FREE only when ChatGPT is usable and authenticated with no generation, manual draft, attachments, active audit/start/action, unresolved START receipt, or other dispatch lease."
+    },
+    "SRC-003:R0006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Keep dispatch_id strictly separate from the canonical campaign run_id; the existing audit engine remains the single campaign run-id owner and reports it after establishment."
+    }
+  },
+  "derived_at": "2026-08-30T13:09:22Z",
+  "derived_from": "SRC-003",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "9f5237353cce66a3cf10f0025310b11182a15f8bb750ccaf0a5287deb7c650a9"
+}

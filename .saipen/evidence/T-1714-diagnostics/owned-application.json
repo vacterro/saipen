@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "work": "T-1714",
+  "candidate": "V:\\_TEMP_\\saipen-a05-candidate-do218qeg\\project",
+  "paths": {
+    "tools/saipen_engine/reconcile.py": {
+      "before_sha256": "4611839620eb199b747d0aac8eaea848760c2fd8dfd71ad3b672a3107d0feefb",
+      "after_sha256": "3874c43ecfb5d9f8649607f183e4b6f7c598221286852c00aa98af5a994d598e",
+      "preserved_before": ".saipen/evidence/T-1714-diagnostics/before/tools/saipen_engine/reconcile.py"
+    },
+    "tools/saipen.py": {
+      "before_sha256": "467988d4404860c83e5fd25f059106049b1b00cc706b92269146fce61cddb935",
+      "after_sha256": "d0040f5ee0c53c328894de8006194dcdf83134af1ccf3ce3f46c22cb101d57ae",
+      "preserved_before": ".saipen/evidence/T-1714-diagnostics/before/tools/saipen.py"
+    },
+    "tools/test_reconcile_history_ledger_blocked.py": {
+      "before_sha256": "bcd479c03426d25122025798fd8827dc95915ef0cd375f53260b56319c222a96",
+      "after_sha256": "3e91b0d059ca95a8aa5e76077b165ea9b42854c20ff23fa2d1c4987cb6aec239",
+      "preserved_before": ".saipen/evidence/T-1714-diagnostics/before/tools/test_reconcile_history_ledger_blocked.py"
+    }
+  },
+  "patch_sha256": "442a58c637a36c7b06370c5105bbd9d14d142db4743c09e13e02413b32ca54b4",
+  "limits": "Three attributable paths only; original EOL form preserved. No Git, canonical history, foreign consumer or ACL mutation."
+}

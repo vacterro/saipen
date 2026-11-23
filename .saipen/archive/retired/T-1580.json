@@ -1,0 +1,28 @@
+{
+  "authority_grant": "T-1580 / SRC-157,SRC-158",
+  "authority_receipt": "SRC-160",
+  "authority_sha256": "342829b269423a226dbfd23e5c6dcdf65c18ec10df475bc9997a752b218e5751",
+  "board_record": "- [ ] T-1580 [P1] \u0423\u0431\u0440\u0430\u0442\u044c \u043f\u0435\u0440\u0435\u043a\u043b\u044e\u0447\u0430\u0442\u0435\u043b\u044c thought \u0442\u0430\u043c, \u0433\u0434\u0435 \u043e\u043d \u043d\u0435 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442\u0441\u044f; \u043e\u0441\u0442\u0430\u0432\u0438\u0442\u044c \u0443\u043c\u043d\u0443\u044e \u043c\u043e\u0434\u0435\u043b\u044c \u0432\u0441\u0435\u0433\u0434\u0430 \u0432\u043a\u043b\u044e\u0447\u0451\u043d\u043d\u043e\u0439. \u0414\u043b\u044f Antigravity \u0438 ZCode \u0441\u0434\u0435\u043b\u0430\u0442\u044c \u043f\u044f\u0442\u0447\u0430\u0441\u043e\u0432\u043e\u0435 \u043e\u043a\u043d\u043e \u043f\u043e\u0441\u0442\u043e\u044f\u043d\u043d... | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-157,SRC-158 | owner: saipen-cli | claim_time: 2026-10-01T09:03:36Z | blocker: WAIT_USER_DECISION -- misrouted foreign work (ZAICODE T-143 owns it; binding proof .saipen/evidence/T-1580-project-binding-20261001.md); canonical retirement machine-refused live RETIREMENT_AUTHORITY_REQUIRED (proof .saipen/evidence/T-1580-retire-refused-20261001.md). Human action: operator sends the authority capsule as plain unfenced text: This message supplies operator authority for: T-1580 / SRC-157,SRC-158 only. | blocker_scope: ticket",
+  "board_record_sha256": "ef5325d7f49b778a1a234356653aab0cfcecbe0a21179afa4e193e1d3cece675",
+  "discovery_event": null,
+  "evidence": {
+    "kind": "artifact",
+    "ref": ".saipen/evidence/T-1580-project-binding-20261001.md",
+    "sha256": "7475459e4b9b07ef8e257946aa312a70b646eb9d87bc61d4163fedee2d8eda25"
+  },
+  "evidence_bound_event": "E-11175",
+  "evidence_note": null,
+  "reason": "MISROUTED_PROJECT_BINDING",
+  "restored_parent": "T-1579",
+  "restored_parent_owner": "saipen-cli",
+  "retired_at": "2026-10-01T14:12:00Z",
+  "retired_by": "saipen-cli",
+  "retirement_event": "E-11175",
+  "schema_version": 2,
+  "section": "## BLOCKED",
+  "source_receipts": [
+    "SRC-157",
+    "SRC-158"
+  ],
+  "ticket": "T-1580"
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-389:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Rakenda suite preflight: enne t\u00e4issuite muudatusest m\u00f5jutatud testid, punase j\u00e4rel ainult kukkunud skript, CLI --fail-fast ja skripti kestus rekordis; sisend V:\\_TEMP_\\claude\\b314202c553fb9a8\\7f261c8f-a0c8-4d8f-b395-c7c97a4e4b03\\scratchpad\\SAIPEN-append-suite-preflight.md"
+    }
+  },
+  "derived_at": "2026-11-04T03:31:11Z",
+  "derived_from": "SRC-389",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "227eb6b3709eadc1f1f32456a124f405a1f63b6279129ec5950fe9f87c34b217"
+}

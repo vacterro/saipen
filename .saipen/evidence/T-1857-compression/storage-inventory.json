@@ -1,0 +1,392 @@
+{
+  "scope": "metadata inventory plus size-filtered SHA256 duplicates within a fixed read budget",
+  "logical_bytes_by_top_level": {
+    "BOARD.md": 288064,
+    "IDENTITY.md": 69,
+    "LOG.md": 1438154,
+    "MANIFEST.json": 3666,
+    "STATE.md": 563,
+    "USERPERSON.md": 597,
+    "archive": 4463559,
+    "cache": 33427809,
+    "evidence": 1112989376,
+    "exchange": 3893088,
+    "extensions": 37927418,
+    "future": 53142,
+    "improve": 37915,
+    "intake": 9326091,
+    "kitchen": 114812524,
+    "KNOWLEDGE": 293534,
+    "locks": 0,
+    "logs": 4293373,
+    "milestones": 6049252,
+    "quarantine": 5664,
+    "recovery": 164773120,
+    "saitranslate": 20170725,
+    "tmp": 700656
+  },
+  "logical_total_bytes": 1514948359,
+  "duplicate_read_budget": 134217728,
+  "duplicate_bytes_hashed": 134217721,
+  "duplicate_groups": [
+    {
+      "sha256": "40e510711b7658c33c6014d1ed8a0c5e4cecf547e917258b1bd263c45152cdcf",
+      "size": 3012881,
+      "paths": [
+        ".saipen/evidence/parallel-audit-admission-20261011/pilot-protected-after.json",
+        ".saipen/evidence/parallel-audit-admission-20261011/pilot-protected-before.json"
+      ],
+      "logical_duplicate_bytes": 3012881
+    },
+    {
+      "sha256": "4a624fa067da387d9b427834f0e4e093f06db3e4ea6dd988a349b3755ea16c44",
+      "size": 1907201,
+      "paths": [
+        ".saipen/evidence/AUDAPACK-T299-forensics/snapshot-20261010T090700Z/.saipen/recovery/settled-index/rec/seg-0011.json",
+        ".saipen/evidence/T-1696-queued-audapack/durable-snapshot/.saipen/recovery/settled-index/rec/seg-0011.json"
+      ],
+      "logical_duplicate_bytes": 1907201
+    },
+    {
+      "sha256": "439067b85e3932835ba14354ef8e828c073490c6dbfdd67cc55269a7b5c17b7a",
+      "size": 1593536,
+      "paths": [
+        ".saipen/evidence/AUDAPACK-T299-forensics/snapshot-20261010T090700Z/.saipen/recovery/settled-index/rec/seg-0012.json",
+        ".saipen/evidence/T-1696-queued-audapack/durable-snapshot/.saipen/recovery/settled-index/rec/seg-0012.json"
+      ],
+      "logical_duplicate_bytes": 1593536
+    },
+    {
+      "sha256": "5efa3a49fee7bdef83f63ecfa3324e2746eb12b874baad4e1bba03edd03a09fa",
+      "size": 1327850,
+      "paths": [
+        ".saipen/evidence/AUDAPACK-T299-forensics/provenance-capture/engineering/resources/AUDAPACK_WIDGET.user.js",
+        ".saipen/evidence/T-1696-queued-audapack/additional-originals/resources/AUDAPACK_WIDGET.user.js"
+      ],
+      "logical_duplicate_bytes": 1327850
+    },
+    {
+      "sha256": "c675c9a982d62be3387b30d680f0d0c2ea588a77065e75b6b0fd02c05307fecd",
+      "size": 1177117,
+      "paths": [
+        ".saipen/evidence/T-1754-principles/saituls-LOG.md",
+        ".saipen/evidence/T-1754-principles/observations-final/saituls-LOG.md"
+      ],
+      "logical_duplicate_bytes": 1177117
+    },
+    {
+      "sha256": "962c1237574237fddba36760d4e570153f8c05bbafc865d65b8598c382282242",
+      "size": 1099947,
+      "paths": [
+        ".saipen/evidence/T-1829-cost-collapse/head-connectivity-after-candidates.txt",
+        ".saipen/evidence/T-1829-cost-collapse/head-connectivity-after-directories.txt",
+        ".saipen/evidence/T-1829-cost-collapse/head-connectivity-final-recovery.txt",
+        ".saipen/evidence/T-1829-cost-collapse/auxiliary-recovery-1792539704822365500/connectivity.txt"
+      ],
+      "logical_duplicate_bytes": 3299841
+    },
+    {
+      "sha256": "038c3526ce4c6124016228f65255fb452394cc87013ddc18980ef851c106e34b",
+      "size": 1089855,
+      "paths": [
+        ".saipen/evidence/T-1829-cost-collapse/head-connectivity-after-blobs.txt",
+        ".saipen/evidence/T-1829-cost-collapse/head-connectivity-current.txt"
+      ],
+      "logical_duplicate_bytes": 1089855
+    },
+    {
+      "sha256": "edbe44b9827c8a7cbc19ee842d911641f08a6977d05b312b5756d13a676bfa2a",
+      "size": 1045174,
+      "paths": [
+        ".saipen/evidence/T-1692-saispin-forensics/snapshot/.saipen/LOG.md",
+        ".saipen/evidence/T-1692-saispin-forensics/snapshot-002/.saipen/LOG.md"
+      ],
+      "logical_duplicate_bytes": 1045174
+    },
+    {
+      "sha256": "ff932061a888dfed34bcd95186fe17509fbfa20d3919f5576de86aa4bda57a6b",
+      "size": 850971,
+      "paths": [
+        ".saipen/evidence/AUDAPACK-recovery-20261010/T1705-oracle-subject/tools/run_scenarios.py",
+        ".saipen/evidence/T-1685-hermetic/quarantine/skills/saipen/tools/run_scenarios.py",
+        ".saipen/evidence/T-1686-strict-launch/subjects-prep/candidate/tools/run_scenarios.py",
+        ".saipen/evidence/T-1686-strict-launch/subjects-prep/pre-fix/tools/run_scenarios.py",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-1gnefq4o/candidate/tools/run_scenarios.py",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-1gnefq4o/pre-fix/tools/run_scenarios.py",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-v1/control/tools/run_scenarios.py",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-v1/pre-fix/tools/run_scenarios.py",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v2/control/tools/run_scenarios.py",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v2/pre-fix/tools/run_scenarios.py",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v3/control/tools/run_scenarios.py",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v3/pre-fix/tools/run_scenarios.py",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v4/control/tools/run_scenarios.py",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v4/pre-fix/tools/run_scenarios.py",
+        ".saipen/evidence/T-1726-closed-contracts/candidate/tools/run_scenarios.py",
+        ".saipen/evidence/T-1730-verifier-fixtures/before/run_scenarios.py"
+      ],
+      "logical_duplicate_bytes": 12764565
+    },
+    {
+      "sha256": "786e69f7d96cf857ad0383dcae62484a0a3906104491c72ab9d6d56ec07b638b",
+      "size": 849577,
+      "paths": [
+        ".saipen/evidence/public-release/continuation/before/tools/run_scenarios.py",
+        ".saipen/evidence/public-release/debug-native-home/.agents/skills/saipen/tools/run_scenarios.py",
+        ".saipen/evidence/public-release/debug-native-home/.claude/skills/saipen/tools/run_scenarios.py",
+        ".saipen/evidence/public-release/debug-native-home/.codex/skills/saipen/tools/run_scenarios.py",
+        ".saipen/evidence/public-release/debug-native-home/.config/opencode/skills/saipen/tools/run_scenarios.py",
+        ".saipen/evidence/public-release/debug-native-home/.gemini/skills/saipen/tools/run_scenarios.py"
+      ],
+      "logical_duplicate_bytes": 4247885
+    },
+    {
+      "sha256": "177ad8d60ed7cca77dc5ee38e5b7c50bc40e536dcdd0ce4c95919def630c0eb5",
+      "size": 847943,
+      "paths": [
+        ".saipen/evidence/T-1726-closed-contracts/cache-candidate/tools/run_scenarios.py",
+        ".saipen/evidence/T-1758-closure-cycle/downstream_run/engine-after/tools/run_scenarios.py",
+        ".saipen/evidence/T-1758-closure-cycle/downstream_run/engine-before/tools/run_scenarios.py",
+        ".saipen/evidence/T-1798/candidate/tools/run_scenarios.py"
+      ],
+      "logical_duplicate_bytes": 2543829
+    },
+    {
+      "sha256": "c3771799a05d88a387d66a59ffbd348ec8656e9b77b3617d3f32114ca439a42e",
+      "size": 846775,
+      "paths": [
+        ".saipen/evidence/floor-fields/original-subject/tools/run_scenarios.py",
+        ".saipen/evidence/public-release/candidate-before/tools/run_scenarios.py",
+        ".saipen/evidence/scenario-oracles/run_scenarios.before.py",
+        ".saipen/evidence/tool-module-identity/current-pair/candidate/tools/run_scenarios.py",
+        ".saipen/evidence/tool-module-identity/current-pair/original/tools/run_scenarios.py",
+        ".saipen/evidence/tool-module-identity/original-subject/tools/run_scenarios.py",
+        ".saipen/evidence/tool-module-identity/subject/tools/run_scenarios.py"
+      ],
+      "logical_duplicate_bytes": 5080650
+    },
+    {
+      "sha256": "c6c6d14e3c8aef198edc8e9f9659f3d2b89d656057c3f6d425fde967a11c53b3",
+      "size": 842223,
+      "paths": [
+        ".saipen/evidence/T-1560-utf8-candidate/before/tools/run_scenarios.py.original",
+        ".saipen/kitchen/t1565-goalresume-prefix-20260930/tools/run_scenarios.py",
+        ".saipen/kitchen/t1567-response-candidate-20260930/tools/run_scenarios.py",
+        ".saipen/kitchen/t1568-opencode-style-20260930/tools/run_scenarios.py",
+        ".saipen/kitchen/t1569-response-facts-20260930/tools/run_scenarios.py",
+        ".saipen/kitchen/t1570-no-publish-scope-20260930/tools/run_scenarios.py"
+      ],
+      "logical_duplicate_bytes": 4211115
+    },
+    {
+      "sha256": "8850b6dc97e17166d61510b0074868a29ca4785966b52affd48b2d30f8f1d89f",
+      "size": 780027,
+      "paths": [
+        ".saipen/extensions/subs/saipython/kitchen/pen/patch-stage-current/a/tools/run_scenarios.py",
+        ".saipen/extensions/subs/saipython/kitchen/pen/patch-stage-current-2/a/tools/run_scenarios.py"
+      ],
+      "logical_duplicate_bytes": 780027
+    },
+    {
+      "sha256": "e935264e29f092b9b43ec697c685a85ef2304385259046a5a3a0f9d0ac559f3d",
+      "size": 779721,
+      "paths": [
+        ".saipen/extensions/subs/saipython/kitchen/pen/apply-check-current/tools/run_scenarios.py",
+        ".saipen/extensions/subs/saipython/kitchen/pen/apply-check-current-2/tools/run_scenarios.py",
+        ".saipen/extensions/subs/saipython/kitchen/pen/patch-stage-current/b/tools/run_scenarios.py",
+        ".saipen/extensions/subs/saipython/kitchen/pen/patch-stage-current-2/b/tools/run_scenarios.py",
+        ".saipen/extensions/subs/saipython/kitchen/pen/ruff-current/tools/run_scenarios.py",
+        ".saipen/extensions/subs/saipython/kitchen/pen/ruff-current-2/tools/run_scenarios.py",
+        ".saipen/extensions/subs/saipython/kitchen/pen/verify-current/tools/run_scenarios.py",
+        ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/tools/run_scenarios.py"
+      ],
+      "logical_duplicate_bytes": 5458047
+    },
+    {
+      "sha256": "e275197db0ed1c495a6e50cd4a2b2a94130623e9af2a2b2a1e9e548f28ff42a9",
+      "size": 675735,
+      "paths": [
+        ".saipen/evidence/floor-fields/original-subject/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1686-strict-launch/subjects-prep/candidate/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1686-strict-launch/subjects-prep/pre-fix/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-1gnefq4o/candidate/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-1gnefq4o/pre-fix/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-v1/control/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-v1/pre-fix/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v2/control/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v2/pre-fix/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v3/control/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v3/pre-fix/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v4/control/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v4/pre-fix/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/T-1726-closed-contracts/cache-candidate/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/tool-module-identity/current-pair/candidate/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/tool-module-identity/current-pair/original/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/tool-module-identity/original-subject/assets/__SAIPEN_Alpha.png",
+        ".saipen/evidence/tool-module-identity/subject/assets/__SAIPEN_Alpha.png",
+        ".saipen/extensions/subs/saipython/kitchen/pen/verify-current/assets/__SAIPEN_Alpha.png",
+        ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/assets/__SAIPEN_Alpha.png",
+        ".saipen/kitchen/t1565-goalresume-prefix-20260930/assets/__SAIPEN_Alpha.png",
+        ".saipen/kitchen/t1567-response-candidate-20260930/assets/__SAIPEN_Alpha.png"
+      ],
+      "logical_duplicate_bytes": 14190435
+    },
+    {
+      "sha256": "56336debf1b0a26e108391ae44c3b95e45cf130eedd0826705f613d6e9fa71ba",
+      "size": 657598,
+      "paths": [
+        ".saipen/evidence/floor-fields/original-subject/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1686-strict-launch/subjects-prep/candidate/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1686-strict-launch/subjects-prep/pre-fix/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-1gnefq4o/candidate/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-1gnefq4o/pre-fix/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-v1/control/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-v1/pre-fix/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v2/control/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v2/pre-fix/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v3/control/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v3/pre-fix/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v4/control/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v4/pre-fix/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/T-1726-closed-contracts/cache-candidate/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/tool-module-identity/current-pair/candidate/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/tool-module-identity/current-pair/original/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/tool-module-identity/original-subject/assets/SAIPEN_design2_alpha.png",
+        ".saipen/evidence/tool-module-identity/subject/assets/SAIPEN_design2_alpha.png",
+        ".saipen/extensions/subs/saipython/kitchen/pen/verify-current/assets/SAIPEN_design2_alpha.png",
+        ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/assets/SAIPEN_design2_alpha.png",
+        ".saipen/kitchen/t1565-goalresume-prefix-20260930/assets/SAIPEN_design2_alpha.png",
+        ".saipen/kitchen/t1567-response-candidate-20260930/assets/SAIPEN_design2_alpha.png"
+      ],
+      "logical_duplicate_bytes": 13809558
+    },
+    {
+      "sha256": "17b1fa5b6cf836325cced39af03de1e18d31a6edceaf043d8b932396264c99a6",
+      "size": 640082,
+      "paths": [
+        ".saipen/evidence/T-1686-strict-launch/subjects-prep/candidate/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1686-strict-launch/subjects-prep/pre-fix/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-1gnefq4o/candidate/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-1gnefq4o/pre-fix/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-v1/control/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1687-identity-diagnostics/subjects-v1/pre-fix/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v2/control/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v2/pre-fix/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v3/control/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v3/pre-fix/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v4/control/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1690-profile-isolation/subjects-v4/pre-fix/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1726-closed-contracts/cache-candidate/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1758-closure-cycle/downstream_run/engine-after/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/T-1758-closure-cycle/downstream_run/engine-before/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/tool-module-identity/current-pair/candidate/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/tool-module-identity/current-pair/original/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/tool-module-identity/original-subject/CHANGELOG_ARCHIVE.md",
+        ".saipen/evidence/tool-module-identity/subject/CHANGELOG_ARCHIVE.md",
+        ".saipen/kitchen/t1565-goalresume-prefix-20260930/CHANGELOG_ARCHIVE.md",
+        ".saipen/kitchen/t1567-response-candidate-20260930/CHANGELOG_ARCHIVE.md",
+        ".saipen/kitchen/t1568-opencode-style-20260930/CHANGELOG_ARCHIVE.md",
+        ".saipen/kitchen/t1569-response-facts-20260930/CHANGELOG_ARCHIVE.md"
+      ],
+      "logical_duplicate_bytes": 14081804
+    },
+    {
+      "sha256": "1565f0a9698fce1cd81bf29f5144ed8206baae2b0fd0180bf0564c8e4310941d",
+      "size": 618096,
+      "paths": [
+        ".saipen/evidence/T-1687-identity-diagnostics/index-before-entries.txt",
+        ".saipen/evidence/T-1690-profile-isolation/index-entries-after.txt"
+      ],
+      "logical_duplicate_bytes": 618096
+    },
+    {
+      "sha256": "e1a978ca0b4f3c10c1cc491b2607a019ad3bdb6d31eb4e71042df938c0570c8c",
+      "size": 613595,
+      "paths": [
+        ".saipen/evidence/T-1758-closure-cycle/downstream_run/engine-after/tools/validate.py",
+        ".saipen/evidence/T-1758-closure-cycle/downstream_run/engine-before/tools/validate.py",
+        ".saipen/evidence/T-1798/candidate/tools/validate.py"
+      ],
+      "logical_duplicate_bytes": 1227190
+    },
+    {
+      "sha256": "c42371fdf6ea2e1bca9c8d1f7f83f30ecba73000e58ae62d671d790fbcdc9613",
+      "size": 612591,
+      "paths": [
+        ".saipen/evidence/T-1494-A03/after-index.z",
+        ".saipen/evidence/T-1494-A03/before-index.z"
+      ],
+      "logical_duplicate_bytes": 612591
+    },
+    {
+      "sha256": "ac570838581cf80a6c713899939d9a5ccc9cbf45605d565cfe94d070e7d28164",
+      "size": 612041,
+      "paths": [
+        ".saipen/evidence/foreign-edit-20261014-reconcile/freeze-kept/20261013T223456Z/tools/validate.py",
+        ".saipen/evidence/foreign-edit-20261014-reconcile/validate/validate.with-foreign-edit.py"
+      ],
+      "logical_duplicate_bytes": 612041
+    },
+    {
+      "sha256": "eae6d8c63aa405369490be2f4e705a350c306a3056fca6e590a97ed09c733234",
+      "size": 612034,
+      "paths": [
+        ".saipen/evidence/foreign-edit-20261014-reconcile/validate/validate.before.py",
+        ".saipen/evidence/T-1753-launcher-line/before/validate.py",
+        ".saipen/evidence/T-1760-no-git-marker/before/validate.py"
+      ],
+      "logical_duplicate_bytes": 1224068
+    },
+    {
+      "sha256": "a865caa0d60464464d6e749c3cf0787166f8a06f5f91789a40013e6b4a41d886",
+      "size": 558189,
+      "paths": [
+        ".saipen/evidence/AUDAPACK-T299-forensics/snapshot-20261010T090700Z/.saipen/logs/LOG-002.md",
+        ".saipen/evidence/T-1696-queued-audapack/durable-snapshot/.saipen/logs/LOG-002.md"
+      ],
+      "logical_duplicate_bytes": 558189
+    },
+    {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size": 2,
+      "paths": [
+        ".saipen/evidence/T-1361-scenario-remesure-20260921/focused-20260921-181628/subprocess.json",
+        ".saipen/evidence/T-1696-queued-audapack/producer/earlier-gap-carriers.json",
+        ".saipen/evidence/T-1841-ruff/lint-final.json",
+        ".saipen/kitchen/t1298-recovery/git-candidates.json"
+      ],
+      "logical_duplicate_bytes": 6
+    }
+  ],
+  "potential_identical_bytes": 96473551,
+  "skipped_link_or_special_paths": [],
+  "actual_saving_bytes": 0,
+  "migration_or_deletion_performed": false,
+  "roles": [
+    {
+      "role": "ACTIVE STATE",
+      "basis": "CORE File Model exact STATE/BOARD/LOG paths",
+      "physical_retention": "UNKNOWN pending operator storage-root decision"
+    },
+    {
+      "role": "IMMUTABLE EVIDENCE",
+      "basis": "CORE EVIDENCE-RETENTION-01 and Source lifecycle, not directory-name heuristics",
+      "physical_retention": "UNKNOWN pending decision; retain all proof"
+    },
+    {
+      "role": "DERIVED INDEX",
+      "basis": "KNOWLEDGE INDEX generated/deletable contract; runtime rebuilds it from active cards",
+      "caveat": "does not make original cards or source receipts disposable"
+    },
+    {
+      "role": "DISPOSABLE CACHE",
+      "basis": "only producer-confirmed reconstructable entries or run-owned ephemera",
+      "caveat": "live inflight markers and unresolved records cannot be bulk-deleted as cache"
+    },
+    {
+      "role": "HISTORICAL ARCHIVE",
+      "basis": "SOURCES archive/tombstone hash/reference lifecycle and sealed LOG authority",
+      "caveat": "preserve hashes, ownership, original attribution and lookup references"
+    }
+  ],
+  "decision": "No dedup migration: exact byte equality alone does not prove compatible readers, immutable aliases, rollback or crash-safe reference updates. Unknown ownership/retention remains protected."
+}

@@ -1,0 +1,24 @@
+subject: copy of _SAIPEN at HEAD 025bf596 with its uncommitted tree and project memory
+validator before: exit 0, findings ['WARN board-soft-cap', 'WARN log-soft-cap', 'WARN producer-package-stale', 'WARN release-ledger', 'WARN subsaipen-uncollected', 'WARN translation-surface-absent', 'WARN wiki-mirror-stale']
+    WARN board-soft-cap: BOARD.md is 238 KB, of which 89 KB is 128 closed record(s) nothing pins (soft cap 16 KB of such text) -- `saipen transition CLEAN` scrubs them into .saipen/recovery/board-scrub/ (phases/clean.md step 1)
+    WARN log-soft-cap: .saipen/LOG.md is 6128 lines / 2026 KB, past the 300 line / 64 KB cap -- `saipen transition CLEAN` seals it into the next .saipen/logs/LOG-<NNN>.md (phases/clean.md step 4)
+parked T-1640: BLOCK
+transition CLEAN: TRANSITIONED phase CLEAN
+board_scrub: {"ok": true, "code": "BOARD_SCRUBBED", "op_id": "board-scrub-b9f690b4128c498ea626b17d764b27ff", "recovery_required": false, "event_id": "E-13167", "pruned_records": 128, "pruned_bytes": 91556, "kept_closed": 151, "kept_by": {"receipt": 80, "reference": 71}, "board_bytes_before": 243681, "board_bytes_after": 152125, "evidence_path": ".saipen/recovery/board-scrub/board-scrub-b9f690b4128c498ea626b17d764b27ff/BOARD.md", "evidence_sha256": "5645954634a7d24fdbc083cfb70deb4f2f55717b6f832fa535dfa40fa28e5300"}
+log_seal: {"ok": true, "code": "LOG_SEALED", "op_id": "seal-log-ca0e801f463c4761babd0fc685deb62f", "recovery_required": false, "segment": ".saipen/logs/LOG-018.md", "sealed_from": "E-7039", "sealed_to": "E-13167", "sealed_events": 6129, "sealed_lines": 6131, "sealed_bytes": 2075335, "sealed_sha256": "ba852c2289ff9f1de293259ea26510e4e1dc2bb7ece00ffcad0b64f72bfacabb", "event_id": "E-13168"}
+    PASS  evidence digest is the recorded one
+    PASS  evidence holds one physical BOARD line per pruned record
+    PASS  every evidence line was a BOARD line, in BOARD order
+    PASS  BOARD after == BOARD before minus exactly those lines
+    PASS  segment digest is the recorded one
+    PASS  segment begins with the whole LOG saved before the entry
+    PASS  the entry added only its own events before the seal
+    PASS  fresh tail is the heading and the seal's own event
+    PASS  complete ledger passes the immutable-ledger contract
+    PASS  write gate passes on the result
+bytes: BOARD 243681 -> 152125, active LOG 2074825 -> 297, events in ledger 13167
+validator after: exit 0, findings ['WARN no-conformance-record', 'WARN producer-package-stale', 'WARN release-ledger', 'WARN subsaipen-uncollected', 'WARN translation-surface-absent', 'WARN wiki-mirror-stale']
+gone: ['WARN board-soft-cap', 'WARN log-soft-cap']
+new: ['WARN no-conformance-record']
+    WARN no-conformance-record: no LOG line records a conformance run in ? 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so ? 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists
+RESULT: the named route clears both findings and breaks nothing

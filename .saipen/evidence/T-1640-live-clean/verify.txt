@@ -1,0 +1,13 @@
+PASS  evidence digest is the recorded one
+PASS  evidence holds one physical BOARD line per pruned record
+PASS  every evidence line was a BOARD line, in BOARD order
+PASS  BOARD after == BOARD before minus exactly those lines
+PASS  segment digest is the recorded one
+PASS  segment begins with the whole LOG saved before the entry
+PASS  the entry added only its own events before the seal
+PASS  fresh tail is the heading and the seal's own event
+PASS  complete ledger passes the immutable-ledger contract
+PASS  write gate passes on the result
+BOARD 244210 -> 151827 bytes; active LOG 2078315 -> 297 bytes; ledger events 13179, tail E-13180
+pruned ids: T-1640, T-1657, T-1660, T-1662, T-1661, T-1658 ... T-1398, T-1394, T-1382
+RESULT: all ten hold

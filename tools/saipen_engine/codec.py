@@ -308,26 +308,31 @@ _CRED_PATTERNS = [
     # sha256 digest that evidence citations depend on -- so the rule keys on
     # the name and then removes the whole value, whatever its encoding or
     # width. Partial redaction would leave a truncated key behind.
-    # T-1965: the prefix must be anchored to the START of an identifier. Without
-    # that anchor `[a-z0-9_]*private_key` restarts its scan at every character of
-    # a long word run and backtracks the whole remainder at each one, which is
-    # quadratic: a 100KB entry of plain letters cost ~2 minutes of CPU inside
-    # context_cold and hung the declared core-unit family. The lookbehind
-    # rejects interior positions in O(1), leaving one linear scan per identifier.
+    # T-2134 (Campaign IX): `(?<![a-z0-9_])` guards where a match may START.
+    # Unguarded, the engine probed EVERY offset: at each one `[a-z0-9_]*`
+    # swallowed the whole identifier run and unwound it char-by-char hunting
+    # the literal, which measured Θ(n²) -- 0.33 s at 5 000 chars growing to
+    # 99.98 s at 100 000 (family interpreter, this host), so one 100 KB
+    # USERPERSON preference paid ~250-320 s per context parse and
+    # test_userperson_global's chronic 780-1200 s family cost was 871.3 s of
+    # one test in an 874.4 s instrumented run. With the guard, a probe offset
+    # inside a run is rejected in O(1) and only run starts / non-identifier
+    # positions reach the backtracking, whose cost is bounded by ONE run.
+    # EMITTED BYTES ARE UNCHANGED: every char before the `private_key` literal
+    # is either captured in group 1 (re-emitted by the `\1***` replacement) or
+    # left untouched before the span -- a match the unguarded engine found by
+    # probing inside a run is found at the run's own start -- and the value
+    # alternatives are untouched by the guard. Byte-for-byte equivalence
+    # against the unguarded pattern is pinned by
+    # test_t1926_zc_owners_matrix.RedactionScanCostRegressionTests.
     (
         _re.compile(
-            r"(?i)(?<![a-z0-9_])"
-            r"([\"']?[a-z0-9_]*private_key[\"']?\s*[:=]\s*)"
+            r"(?i)(?<![a-z0-9_])([\"']?[a-z0-9_]*private_key[\"']?\s*[:=]\s*)"
             r"(\"[^\"]{8,}\"|'[^']{8,}'|[0-9a-f]{16,})"
         ),
         r"\1***",
-        "private_key",
     ),
 ]
-
-#: Third field of a `_CRED_PATTERNS` row: a literal that must be present for the
-#: pattern to match at all. Only worth the branch where the subject can be large
-#: and the pattern has to scan for it anyway (T-1965); absent means "always run".
 
 
 def redact_credentials(text: str) -> str:
@@ -339,10 +344,6 @@ def redact_credentials(text: str) -> str:
     STATE, BOARD, LOG, recovery, or sealed segments (CORE § 1.1, T-1015,
     T-1101, T-1926).
     """
-    for row in _CRED_PATTERNS:
-        pattern, repl = row[0], row[1]
-        needle = row[2] if len(row) > 2 else None
-        if needle is not None and needle not in text.lower():
-            continue
+    for pattern, repl in _CRED_PATTERNS:
         text = pattern.sub(repl, text)
     return text

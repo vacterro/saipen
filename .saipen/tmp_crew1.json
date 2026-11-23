@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "code": "SUB_ADOPTED",
+  "op_id": "sub-adopt-927e901b",
+  "changed_files": [
+    ".saipen/extensions/subs/saipython/STATE.md"
+  ],
+  "recovery_required": false,
+  "name": "saipython",
+  "role_revision": "sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff",
+  "userperson_projection": {
+    "role": "saipython",
+    "projection_policy": [],
+    "source_fingerprint": "2f3ac492d9e934ec",
+    "preferences": [],
+    "active": true
+  }
+}

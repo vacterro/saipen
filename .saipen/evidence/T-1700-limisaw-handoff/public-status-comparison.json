@@ -1,0 +1,10 @@
+{
+  "authoritative_status": "STALE_PASS",
+  "human_and_json_agree": true,
+  "history_is_labeled_as_history": true,
+  "source_named_inbox_pending": 5,
+  "source_binding_error": null,
+  "json_output_sha256": "1e4ef137b930de2e2d45ce495a857af46cc39fc12f9c0cc82b8639b43d10648e",
+  "human_output_sha256": "a3d0150cae8fb987ab60eee8339842f269aa8199e0bc5041f526d71ea5e377e6",
+  "scope": "source transport observation; no installed rollout claim"
+}

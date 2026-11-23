@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-093:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Safe supersession of tracked AUDAPACK-generated archive control artifacts"
+    }
+  },
+  "derived_at": "2026-09-27T02:33:30Z",
+  "derived_from": "SRC-093",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "8508420c7415d7760d1b05c6dc0d4ed0d903f9b7cb05d33e4d39b96b3ccc2b94"
+}

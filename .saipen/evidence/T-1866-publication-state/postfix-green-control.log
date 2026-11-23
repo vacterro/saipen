@@ -1,0 +1,16 @@
+$ C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.exe -B tools/core_unit.py focused T-1866 --pattern test_t1866_publication_state.py --timeout 120
+# after the T-1866 hunks (subject.diff 'b/' side)
+# exit=0
+
+{
+  "ok": true,
+  "verdict": "PASS",
+  "ran": 6,
+  "duration_s": 62.75,
+  "record": ".saipen/evidence/focused-unit/dcfbfb5f55f3717b-20261023T181956869919Z.json",
+  "reused": true,
+  "shared": false,
+  "request_wall_s": 5.547,
+  "problem": null,
+  "checkpoint": "CHECKPOINTED"
+}

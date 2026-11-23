@@ -1,0 +1,127 @@
+{"source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN", "materialized_root": "V:\\_TEMP_\\saipen-t1439-verified-68da8e21", "command": ["C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe", "-B", "-m", "unittest", "-v", "tools.test_conformance_repair_boundary", "tools.test_t1412_conformance_truth", "tools.test_src085_conformance_disposition", "tools.test_validator_findings", "tools.test_remediation_self_consistency", "tools.test_continue_chain", "tools.test_source_quarantine_route", "tools.test_source_multiwork", "tools.test_debt_gate", "tools.test_protocol_registry"], "materialization": "current runtime manifest plus repository test resources; git fixture; no source substitutions", "removed_environment_names": []}
+test_classifier_failure_is_unavailable_not_an_empty_complete_set (tools.test_conformance_repair_boundary.RealValidatorBoundaryTests.test_classifier_failure_is_unavailable_not_an_empty_complete_set) ... ok
+test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop (tools.test_conformance_repair_boundary.RealValidatorBoundaryTests.test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop) ... ok
+test_classified_credentials_are_redacted_in_receipt (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_classified_credentials_are_redacted_in_receipt) ... ok
+test_current_fail_without_registered_repair_has_terminal_diagnosis (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_current_fail_without_registered_repair_has_terminal_diagnosis) ... ok
+test_every_blocking_record_survives_duplicate_family_keys (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_every_blocking_record_survives_duplicate_family_keys) ... ok
+test_failure_after_completed_chain_keeps_its_refusal_and_diagnostic (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_failure_after_completed_chain_keeps_its_refusal_and_diagnostic) ... ok
+test_registered_repair_remains_executable_but_validate_is_not_a_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_registered_repair_remains_executable_but_validate_is_not_a_repair) ... ok
+test_stale_fail_refreshes_instead_of_executing_its_old_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_stale_fail_refreshes_instead_of_executing_its_old_repair) ... ok
+test_tampered_blocking_findings_cannot_be_current_evidence (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_tampered_blocking_findings_cannot_be_current_evidence) ... ok
+test_continue_crew_route_is_refused_and_the_named_remediation_clears_it (tools.test_t1412_conformance_truth.RouterConformanceGateTests.test_continue_crew_route_is_refused_and_the_named_remediation_clears_it)
+The PRODUCTION continuation path, not just the Result wrapper. ... ok
+test_named_remediation_is_executable_and_clears_the_refusal (tools.test_t1412_conformance_truth.RouterConformanceGateTests.test_named_remediation_is_executable_and_clears_the_refusal) ... ok
+test_router_admits_only_current_pass (tools.test_t1412_conformance_truth.RouterConformanceGateTests.test_router_admits_only_current_pass) ... ok
+test_human_status_prints_receipt_truth_not_the_legacy_pass (tools.test_t1412_conformance_truth.StatusSurfaceTests.test_human_status_prints_receipt_truth_not_the_legacy_pass) ... ok
+test_status_matrix_json_and_human_agree_with_authority (tools.test_t1412_conformance_truth.StatusSurfaceTests.test_status_matrix_json_and_human_agree_with_authority) ... ok
+test_moved_source_pass_never_certifies_the_new_source (tools.test_t1412_conformance_truth.ValidateSurfaceTests.test_moved_source_pass_never_certifies_the_new_source) ... ok
+test_receipt_write_failure_cannot_return_valid (tools.test_t1412_conformance_truth.ValidateSurfaceTests.test_receipt_write_failure_cannot_return_valid) ... ok
+test_structural_failure_refuses_before_the_validator_runs (tools.test_t1412_conformance_truth.ValidateSurfaceTests.test_structural_failure_refuses_before_the_validator_runs) ... ok
+test_validate_current_fail_is_non_green (tools.test_t1412_conformance_truth.ValidateSurfaceTests.test_validate_current_fail_is_non_green) ... ok
+test_validate_refreshes_stale_fail_to_current_pass (tools.test_t1412_conformance_truth.ValidateSurfaceTests.test_validate_refreshes_stale_fail_to_current_pass) ... ok
+test_the_closed_mapping (tools.test_src085_conformance_disposition.DispositionMappingTests.test_the_closed_mapping) ... ok
+test_active_work_route_is_not_owned_by_the_idle_gate (tools.test_src085_conformance_disposition.IdleGateTests.test_active_work_route_is_not_owned_by_the_idle_gate) ... ok
+test_clean_conformance_keeps_ordinary_continuation (tools.test_src085_conformance_disposition.IdleGateTests.test_clean_conformance_keeps_ordinary_continuation) ... ok
+test_crew_route_still_uses_the_crew_gate (tools.test_src085_conformance_disposition.IdleGateTests.test_crew_route_still_uses_the_crew_gate) ... ok
+test_current_fail_owns_the_idle_continuation (tools.test_src085_conformance_disposition.IdleGateTests.test_current_fail_owns_the_idle_continuation) ... ok
+test_current_failure_does_not_recommend_another_idle_validation (tools.test_src085_conformance_disposition.IdleGateTests.test_current_failure_does_not_recommend_another_idle_validation) ... ok
+test_unproven_is_not_a_stop (tools.test_src085_conformance_disposition.IdleGateTests.test_unproven_is_not_a_stop) ... ok
+test_clean_conformance_keeps_continue_in_the_automation_block (tools.test_src085_conformance_disposition.StatusSurfaceTests.test_clean_conformance_keeps_continue_in_the_automation_block) ... ok
+test_explain_next_agrees_with_status_and_next_on_a_red_gate (tools.test_src085_conformance_disposition.StatusSurfaceTests.test_explain_next_agrees_with_status_and_next_on_a_red_gate) ... ok
+test_explain_next_keeps_a_healthy_route_executable (tools.test_src085_conformance_disposition.StatusSurfaceTests.test_explain_next_keeps_a_healthy_route_executable) ... ok
+test_status_exposes_the_disposition_and_stops_advertising_continue (tools.test_src085_conformance_disposition.StatusSurfaceTests.test_status_exposes_the_disposition_and_stops_advertising_continue) ... ok
+test_classifier_failure_never_publishes_partial_findings (tools.test_validator_findings.ValidatorFindingsTests.test_classifier_failure_never_publishes_partial_findings) ... ok
+test_findings_json_side_artifact_matches_standard_counts (tools.test_validator_findings.ValidatorFindingsTests.test_findings_json_side_artifact_matches_standard_counts) ... ok
+test_every_table_pattern_is_exercised (tools.test_remediation_self_consistency.EmittedLiteralScanTests.test_every_table_pattern_is_exercised) ... ok
+test_validate_py_delegates_to_the_closed_table (tools.test_remediation_self_consistency.EmittedLiteralScanTests.test_validate_py_delegates_to_the_closed_table) ... ok
+test_01_table_is_closed_and_typed (tools.test_remediation_self_consistency.RemediationTableTests.test_01_table_is_closed_and_typed) ... ok
+test_02_command_specs_resolve_in_registry_and_effects (tools.test_remediation_self_consistency.RemediationTableTests.test_02_command_specs_resolve_in_registry_and_effects) ... ok
+test_03_no_internal_python_or_pseudocommands (tools.test_remediation_self_consistency.RemediationTableTests.test_03_no_internal_python_or_pseudocommands) ... ok
+test_04_no_generic_validate_when_a_specific_repair_exists (tools.test_remediation_self_consistency.RemediationTableTests.test_04_no_generic_validate_when_a_specific_repair_exists) ... ok
+test_05_external_records_are_not_commands (tools.test_remediation_self_consistency.RemediationTableTests.test_05_external_records_are_not_commands) ... ok
+test_06_extraction_admits_only_table_shapes (tools.test_remediation_self_consistency.RemediationTableTests.test_06_extraction_admits_only_table_shapes) ... ok
+test_07_unregistered_commands_are_refused (tools.test_remediation_self_consistency.RemediationTableTests.test_07_unregistered_commands_are_refused) ... ok
+test_08_cli_dispatches_every_registered_command (tools.test_remediation_self_consistency.RemediationTableTests.test_08_cli_dispatches_every_registered_command)
+Parser + registry + dispatch owner are mechanically proven. ... ok
+test_09_closure_evidence_remediation_round_trip (tools.test_remediation_self_consistency.RemediationTableTests.test_09_closure_evidence_remediation_round_trip)
+Emit -> parse -> registry -> effects -> dispatch -> execute -> green. ... ok
+test_10_help_and_docs_name_every_remediation_command (tools.test_remediation_self_consistency.RemediationTableTests.test_10_help_and_docs_name_every_remediation_command)
+M5 audit surface: help syntax and documentation agree. ... ok
+test_budget_exhaustion_is_classified_not_silent (tools.test_continue_chain.ContinueChainTests.test_budget_exhaustion_is_classified_not_silent) ... ok
+test_dry_run_projects_the_chain_and_writes_nothing (tools.test_continue_chain.ContinueChainTests.test_dry_run_projects_the_chain_and_writes_nothing) ... ok
+test_fixed_point_stops_bounded (tools.test_continue_chain.ContinueChainTests.test_fixed_point_stops_bounded) ... ok
+test_next_stays_a_pure_projection (tools.test_continue_chain.ContinueChainTests.test_next_stays_a_pure_projection) ... ok
+test_one_cc_drives_the_deterministic_chain_to_the_boundary (tools.test_continue_chain.ContinueChainTests.test_one_cc_drives_the_deterministic_chain_to_the_boundary) ... ok
+test_trace_is_machine_readable_and_bounded (tools.test_continue_chain.ContinueChainTests.test_trace_is_machine_readable_and_bounded) ... ok
+test_active_and_archived_refusals_emit_executable_lossless_repair (tools.test_source_quarantine_route.QuarantineRouteTests.test_active_and_archived_refusals_emit_executable_lossless_repair) ... ok
+test_missing_distribution_record_never_accepts_historical_reference (tools.test_source_quarantine_route.QuarantineRouteTests.test_missing_distribution_record_never_accepts_historical_reference) ... ok
+test_other_source_refusals_are_preserved_without_guessing_quarantine (tools.test_source_quarantine_route.QuarantineRouteTests.test_other_source_refusals_are_preserved_without_guessing_quarantine) ... ok
+test_quarantine_does_not_clear_unfinished_coverage (tools.test_source_quarantine_route.QuarantineRouteTests.test_quarantine_does_not_clear_unfinished_coverage) ... ok
+test_quarantine_overlay_never_accepts_arbitrary_archive_reference (tools.test_source_quarantine_route.QuarantineRouteTests.test_quarantine_overlay_never_accepts_arbitrary_archive_reference) ... ok
+test_real_validator_receipt_carries_repair_and_turns_green_after_execution (tools.test_source_quarantine_route.QuarantineRouteTests.test_real_validator_receipt_carries_repair_and_turns_green_after_execution) ... ok
+test_release_preflight_preserves_source_refusal_route_and_identity (tools.test_source_quarantine_route.QuarantineRouteTests.test_release_preflight_preserves_source_refusal_route_and_identity) ... ok
+test_tampered_body_is_not_offered_quarantine_as_integrity_repair (tools.test_source_quarantine_route.QuarantineRouteTests.test_tampered_body_is_not_offered_quarantine_as_integrity_repair) ... ok
+test_close_requires_every_live_member_done (tools.test_source_multiwork.MultiWorkLinkageTests.test_close_requires_every_live_member_done) ... ok
+test_declared_nonmember_still_drifts_structurally (tools.test_source_multiwork.MultiWorkLinkageTests.test_declared_nonmember_still_drifts_structurally) ... ok
+test_multi_work_membership_preserves_primary_and_gate (tools.test_source_multiwork.MultiWorkLinkageTests.test_multi_work_membership_preserves_primary_and_gate) ... ok
+test_repeated_link_is_idempotent (tools.test_source_multiwork.MultiWorkLinkageTests.test_repeated_link_is_idempotent) ... ok
+test_single_work_receipt_is_unchanged (tools.test_source_multiwork.MultiWorkLinkageTests.test_single_work_receipt_is_unchanged) ... ok
+test_corrupted_snapshot_fails_closed (tools.test_debt_gate.DebtGateFixtureTests.test_corrupted_snapshot_fails_closed) ... ok
+test_deleted_snapshot_cannot_create_pass (tools.test_debt_gate.DebtGateFixtureTests.test_deleted_snapshot_cannot_create_pass) ... ok
+test_delta_requires_verification_evidence (tools.test_debt_gate.DebtGateFixtureTests.test_delta_requires_verification_evidence) ... ok
+test_delta_resolves_and_reports_release_blocked (tools.test_debt_gate.DebtGateFixtureTests.test_delta_resolves_and_reports_release_blocked) ... ok
+test_delta_without_any_baseline_refuses (tools.test_debt_gate.DebtGateFixtureTests.test_delta_without_any_baseline_refuses) ... ok
+test_ruleset_change_refuses_comparison (tools.test_debt_gate.DebtGateFixtureTests.test_ruleset_change_refuses_comparison) ... ok
+test_snapshot_from_another_project_refuses (tools.test_debt_gate.DebtGateFixtureTests.test_snapshot_from_another_project_refuses) ... ok
+test_snapshot_is_immutable_project_bound_and_reused (tools.test_debt_gate.DebtGateFixtureTests.test_snapshot_is_immutable_project_bound_and_reused) ... ok
+test_credential_finding_never_carries_message_content (tools.test_debt_gate.FindingsIdentityTests.test_credential_finding_never_carries_message_content) ... ok
+test_identity_is_deterministic_and_order_free (tools.test_debt_gate.FindingsIdentityTests.test_identity_is_deterministic_and_order_free) ... ok
+test_ruleset_fingerprint_covers_the_rule_table (tools.test_debt_gate.FindingsIdentityTests.test_ruleset_fingerprint_covers_the_rule_table) ... ok
+test_semantic_change_changes_detail_but_not_key_shape (tools.test_debt_gate.FindingsIdentityTests.test_semantic_change_changes_detail_but_not_key_shape) ... ok
+test_subject_extraction_prefers_semantic_ids_over_line_numbers (tools.test_debt_gate.FindingsIdentityTests.test_subject_extraction_prefers_semantic_ids_over_line_numbers) ... ok
+test_unknown_message_is_global_and_never_carried (tools.test_debt_gate.FindingsIdentityTests.test_unknown_message_is_global_and_never_carried) ... ok
+test_claim_boundary_must_exist (tools.test_debt_gate.LegacyBootstrapTests.test_claim_boundary_must_exist) ... ok
+test_global_problem_refuses (tools.test_debt_gate.LegacyBootstrapTests.test_global_problem_refuses) ... ok
+test_post_claim_subject_refuses (tools.test_debt_gate.LegacyBootstrapTests.test_post_claim_subject_refuses) ... ok
+test_pre_claim_unrelated_subject_is_carried (tools.test_debt_gate.LegacyBootstrapTests.test_pre_claim_unrelated_subject_is_carried) ... ok
+test_target_source_receipt_refuses (tools.test_debt_gate.LegacyBootstrapTests.test_target_source_receipt_refuses) ... ok
+test_target_work_subject_refuses (tools.test_debt_gate.LegacyBootstrapTests.test_target_work_subject_refuses) ... ok
+test_debt_feature_adds_no_ignore_path (tools.test_debt_gate.StrictGateInvariantTests.test_debt_feature_adds_no_ignore_path) ... ok
+test_findings_json_side_artifact_matches_standard_counts (tools.test_debt_gate.StrictGateInvariantTests.test_findings_json_side_artifact_matches_standard_counts) ... ok
+test_strict_core_stays_red_with_carried_debt (tools.test_debt_gate.StrictGateInvariantTests.test_strict_core_stays_red_with_carried_debt) ... ok
+test_carried_unrelated_problem_passes_but_keeps_release_blocked (tools.test_debt_gate.WorkDeltaClassificationTests.test_carried_unrelated_problem_passes_but_keeps_release_blocked) ... ok
+test_changed_unsafe_problem_blocks (tools.test_debt_gate.WorkDeltaClassificationTests.test_changed_unsafe_problem_blocks) ... ok
+test_new_problem_blocks (tools.test_debt_gate.WorkDeltaClassificationTests.test_new_problem_blocks) ... ok
+test_resolved_problem_is_reported (tools.test_debt_gate.WorkDeltaClassificationTests.test_resolved_problem_is_reported) ... ok
+test_unattributed_global_problem_blocks_even_when_carried (tools.test_debt_gate.WorkDeltaClassificationTests.test_unattributed_global_problem_blocks_even_when_carried) ... ok
+test_work_attribution_blocks (tools.test_debt_gate.WorkDeltaClassificationTests.test_work_attribution_blocks) ... ok
+test_worsened_problem_blocks (tools.test_debt_gate.WorkDeltaClassificationTests.test_worsened_problem_blocks) ... ok
+test_all_16_phase_documents_exist (tools.test_protocol_registry.ProtocolRegistryTests.test_all_16_phase_documents_exist) ... ok
+test_every_declared_load_budget_is_measured_from_registry (tools.test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry) ... FAIL
+test_golden_command_and_chain_snapshots (tools.test_protocol_registry.ProtocolRegistryTests.test_golden_command_and_chain_snapshots) ... ok
+test_missing_registry_phase_fails_instead_of_disappearing (tools.test_protocol_registry.ProtocolRegistryTests.test_missing_registry_phase_fails_instead_of_disappearing) ... ok
+test_one_rule_one_owner (tools.test_protocol_registry.ProtocolRegistryTests.test_one_rule_one_owner) ... ok
+test_phase_max_median_and_tie_break_are_deterministic (tools.test_protocol_registry.ProtocolRegistryTests.test_phase_max_median_and_tie_break_are_deterministic) ... ok
+test_phase_metrics_do_not_change_load_profile_measurement (tools.test_protocol_registry.ProtocolRegistryTests.test_phase_metrics_do_not_change_load_profile_measurement) ... ok
+test_phase_metrics_measure_all_registry_phases_and_actual_bytes (tools.test_protocol_registry.ProtocolRegistryTests.test_phase_metrics_measure_all_registry_phases_and_actual_bytes) ... ok
+test_phase_preferences_are_registry_owned_and_not_hard_failures (tools.test_protocol_registry.ProtocolRegistryTests.test_phase_preferences_are_registry_owned_and_not_hard_failures) ... ok
+test_prose_rewrite_cannot_change_shortcut_behavior (tools.test_protocol_registry.ProtocolRegistryTests.test_prose_rewrite_cannot_change_shortcut_behavior) ... ok
+test_registry_absent_fails_closed (tools.test_protocol_registry.ProtocolRegistryTests.test_registry_absent_fails_closed) ... ok
+test_registry_confusable_fixture_drives_normalizer (tools.test_protocol_registry.ProtocolRegistryTests.test_registry_confusable_fixture_drives_normalizer) ... ok
+test_registry_fixture_drives_resolver (tools.test_protocol_registry.ProtocolRegistryTests.test_registry_fixture_drives_resolver) ... ok
+test_registry_malformed_fails_closed (tools.test_protocol_registry.ProtocolRegistryTests.test_registry_malformed_fails_closed) ... ok
+test_runtime_closed_sets_derive_from_registry (tools.test_protocol_registry.ProtocolRegistryTests.test_runtime_closed_sets_derive_from_registry) ... ok
+test_semantic_facts_name_owner_and_test (tools.test_protocol_registry.ProtocolRegistryTests.test_semantic_facts_name_owner_and_test) ... ok
+
+======================================================================
+FAIL: test_every_declared_load_budget_is_measured_from_registry (tools.test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1439-verified-68da8e21\tools\test_protocol_registry.py", line 192, in test_every_declared_load_budget_is_measured_from_registry
+    self.assertLessEqual(measured[name], limit, name)
+AssertionError: 41690 not less than or equal to 40960 : command_resolution
+
+----------------------------------------------------------------------
+Ran 109 tests in 94.752s
+
+FAILED (failures=1)

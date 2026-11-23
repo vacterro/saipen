@@ -1,0 +1,72 @@
+Production module under test: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-2040\resume-repair-20261107b\tools\saipen_engine\replenishment.py
+Original 9 RestoredMaintenanceCandidate methods; disposable hermetic fixtures only
+test_apply_reuses_work_preserving_source_origin_and_external_blocker (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_apply_reuses_work_preserving_source_origin_and_external_blocker) ... FAIL
+test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal) ... FAIL
+test_candidate_text_in_verify_is_not_description_identity (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_candidate_text_in_verify_is_not_description_identity) ... FAIL
+test_compacted_identity_is_read_from_validated_detail (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_compacted_identity_is_read_from_validated_detail) ... FAIL
+test_corrupt_linked_source_never_restores_work (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_corrupt_linked_source_never_restores_work) ... ok
+test_dry_run_reuses_work_without_any_source_or_canonical_write (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_dry_run_reuses_work_without_any_source_or_canonical_write) ... FAIL
+test_mixed_external_blocker_stays_blocked_with_valid_grant (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_mixed_external_blocker_stays_blocked_with_valid_grant) ... ok
+test_provider_does_not_suppress_verified_authority_only_work (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_provider_does_not_suppress_verified_authority_only_work) ... FAIL
+test_unverified_or_revoked_grant_cannot_restore_or_allocate (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_unverified_or_revoked_grant_cannot_restore_or_allocate) ... ok
+
+======================================================================
+FAIL: test_apply_reuses_work_preserving_source_origin_and_external_blocker (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_apply_reuses_work_preserving_source_origin_and_external_blocker)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_maintenance_authority.py", line 315, in test_apply_reuses_work_preserving_source_origin_and_external_blocker
+    self.assertTrue(result.get("replenished"), result)
+AssertionError: False is not true : {'ok': True, 'replenished': False, 'status': 'NO_ADMISSIBLE_WORK', 'detail': 'persistent goals remain incomplete but no new admissible task could be selected (blockers: none)', 'blockers': [], 'goals': [{'goal_id': 'self-maintenance-core', 'project_id': 't2023-w23sylgm', 'title': 'Continuous Self-Maintenance', 'objective': 'Autonomously discover, evaluate, and repair verified regressions, test failures, and maintenance backlog to preserve a healthy repository', 'authorization_scope': 'MAINTENANCE', 'success_criteria': {}, 'evidence_provider': 'evidence_gap_ledger', 'current_progress': {'total': 1, 'resolved': 0, 'anchored': 0, 'gap_count': 1, 'current_coverage_percent': 0.0, 'target_coverage_percent': 100.0, 'inventoried': 1, 'semantically_described': 0, 'cited': 0, 'interface_only': 0, 'unresolved': 1, 'enumerated': 1, 'independently_verified': 0, 'independent_shortfall': 1, 'capture_sha256': '', 'capture_provenance': 'UNREQUIRED', 'target_patch': ''}, 'target_progress': {}, 'research_or_work_backlog_source': '.saipen/evidence/coverage_gap.json', 'admission_policy': {}, 'current_status': 'NO_ADMISSIBLE_WORK', 'last_evaluation': '2026-11-07T20:32:45Z', 'last_successful_work': None, 'last_discovery': None, 'blockers': [], 'completion_evidence': None, 'resume_metadata': {'cursor_index': 0, 'source_digest': '1a9d9081a03c71d1'}, 'paused': False}]}
+
+======================================================================
+FAIL: test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_maintenance_authority.py", line 360, in test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal
+    self.assertFalse(replenishment._matches_candidate(candidate,
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_candidate_text_in_verify_is_not_description_identity (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_candidate_text_in_verify_is_not_description_identity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_maintenance_authority.py", line 375, in test_candidate_text_in_verify_is_not_description_identity
+    self.assertFalse(duplicate)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_compacted_identity_is_read_from_validated_detail (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_compacted_identity_is_read_from_validated_detail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_maintenance_authority.py", line 329, in test_compacted_identity_is_read_from_validated_detail
+    self.assertIn(f"candidate: {candidate.candidate_id}", row["text"])
+AssertionError: 'candidate: self-maintenance-core-repair-1' not found in '[P1] Bounded local repair detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail... | needs:  | verify: The exact local regression oracle passes [detail_ref: .saipen/recovery/board-compaction/T-2/T-2-be8acce88554834e877f61ac.json] | detail_ref: .saipen/recovery/board-compaction/T-2/T-2-be8acce88554834e877f61ac.json | source_receipts: SRC-001 | blocker: CONTINUATION_AUTHORITY_UNPROVEN -- standing maintenance grant missing | blocker_scope: ticket'
+
+======================================================================
+FAIL: test_dry_run_reuses_work_without_any_source_or_canonical_write (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_dry_run_reuses_work_without_any_source_or_canonical_write)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_maintenance_authority.py", line 305, in test_dry_run_reuses_work_without_any_source_or_canonical_write
+    self.assertTrue(result.get("replenished"), result)
+AssertionError: False is not true : {'ok': True, 'replenished': False, 'status': 'NO_ADMISSIBLE_WORK', 'detail': 'persistent goals remain incomplete but no new admissible task could be selected (blockers: none)', 'blockers': [], 'goals': [{'goal_id': 'self-maintenance-core', 'project_id': 't2023-z5kmcnrn', 'title': 'Continuous Self-Maintenance', 'objective': 'Autonomously discover, evaluate, and repair verified regressions, test failures, and maintenance backlog to preserve a healthy repository', 'authorization_scope': 'MAINTENANCE', 'success_criteria': {}, 'evidence_provider': 'evidence_gap_ledger', 'current_progress': {'total': 1, 'resolved': 0, 'anchored': 0, 'gap_count': 1, 'current_coverage_percent': 0.0, 'target_coverage_percent': 100.0, 'inventoried': 1, 'semantically_described': 0, 'cited': 0, 'interface_only': 0, 'unresolved': 1, 'enumerated': 1, 'independently_verified': 0, 'independent_shortfall': 1, 'capture_sha256': '', 'capture_provenance': 'UNREQUIRED', 'target_patch': ''}, 'target_progress': {}, 'research_or_work_backlog_source': '.saipen/evidence/coverage_gap.json', 'admission_policy': {}, 'current_status': 'NO_ADMISSIBLE_WORK', 'last_evaluation': '2026-11-07T20:32:49Z', 'last_successful_work': None, 'last_discovery': None, 'blockers': [], 'completion_evidence': None, 'resume_metadata': {'cursor_index': 0, 'source_digest': '1a9d9081a03c71d1'}, 'paused': False}]}
+
+======================================================================
+FAIL: test_provider_does_not_suppress_verified_authority_only_work (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_provider_does_not_suppress_verified_authority_only_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_maintenance_authority.py", line 298, in test_provider_does_not_suppress_verified_authority_only_work
+    self.assertEqual(evaluation.candidate_ids, [candidate.candidate_id])
+AssertionError: Lists differ: [] != ['self-maintenance-core-repair-1']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'self-maintenance-core-repair-1'
+
+- []
++ ['self-maintenance-core-repair-1']
+
+----------------------------------------------------------------------
+Ran 9 tests in 9.438s
+
+FAILED (failures=6)
+COUNTS ran=9 failed=6 errors=0 passed=3

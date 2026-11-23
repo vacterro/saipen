@@ -1,0 +1,22 @@
+[
+  {
+    "path": "tools/saipen_engine/continue_fallback.py",
+    "sha256": "d1c6219b139f5de084b4c89cc74cc169b8ed91759ac7d49ed4118017299fde41",
+    "ast_sha256": "daf10e3b240fd5c1086237684b54af0aa703c327eb36f71629398215275c70fe"
+  },
+  {
+    "path": "tools/saipen_engine/iteration_verdict.py",
+    "sha256": "060703ac55a8c51ad6f317f4cc1ae3072bfb187ff0a266dca1228fa9d3cd9637",
+    "ast_sha256": "e2034ed942268fb2630e54196636f2adfe12a66115bbd73a4987f7240feaa7f5"
+  },
+  {
+    "path": "tools/improve.py",
+    "sha256": "165a59af2e18dc8b85b693c741d641238049f7d62f13fdc3857bca17c4e24195",
+    "ast_sha256": "38b3dfd7ccbbc14aa3ca03a707f4929342136ee5cbcc89d20f846c74c974d65b"
+  },
+  {
+    "path": "tools/campaign_test_support.py",
+    "sha256": "2851165fedd3fe2848fd6ef685ef97e0968cb66f88b50c5a2e5c69cbef9b0caa",
+    "ast_sha256": "f0a482820ea6b18c7773e0236187965cdd396f8265051e4dca4f8c5a79145275"
+  }
+]

@@ -1,0 +1,64 @@
+{
+  "oracle": "actual strict range preview; all directory names and file hashes unchanged",
+  "result": {
+    "ok": true,
+    "code": "RECEIPT_RANGE_PLAN",
+    "expanded": {
+      "T-099": [
+        "SRC-009",
+        "SRC-010",
+        "SRC-011",
+        "SRC-012",
+        "SRC-013",
+        "SRC-014",
+        "SRC-015",
+        "SRC-016",
+        "SRC-017",
+        "SRC-018",
+        "SRC-019",
+        "SRC-020",
+        "SRC-021",
+        "SRC-022",
+        "SRC-023",
+        "SRC-024",
+        "SRC-025",
+        "SRC-026",
+        "SRC-027",
+        "SRC-028",
+        "SRC-029"
+      ]
+    },
+    "rewrites": 1
+  },
+  "before": {
+    ".saipen": "directory",
+    ".saipen/BOARD.md": "719d8b9926ab2d7fa3bb03e9a57b9c21d680a16b8a7ff9640bfc72d49ed3e3a2",
+    ".saipen/LOG.md": "95d6188e6e2c6eb9bd3281a857f607b7d60bb844915a19ef16e0404e36f0b3ee",
+    ".saipen/recovery": "directory",
+    ".saipen/STATE.md": "e7e2f3a799c823185379e405ddbc5e81a575c36c8c911abbaab443065dc8bfac",
+    ".saipen/recovery/conformance": "directory",
+    ".saipen/recovery/conformance/2026-08-29T23_13_05.382476Z_receipt-8ef75218ad85_core_PASS.json": "d7730e606db1a52efe08b6a053a03b04c7806cdd7294373d99738dc97d1cace3",
+    ".saipen/recovery/conformance/2026-09-08T03_30_11.820793Z_receipt-1c3f8c7b3f0f_core_FAIL.json": "c57b673ac14ec5906ce2a2c280b641996030c27a6156e897874ae513768e715a",
+    ".saipen/recovery/conformance/index": "directory",
+    ".saipen/recovery/conformance/index/.lineage.json": "e4aaf0b78767213b6d1628ca69b1b73c20628bf8a5cca92595502072e2d0c994",
+    ".saipen/recovery/conformance/index/active-gen.json": "425b3e03bc378388dafdcf5e90b612b5695e1f8e73e85cae8c7207f634241c6e",
+    ".saipen/recovery/conformance/index/core.json": "d61f51d29d712c1868eee611f0719b8bdf63857a12948fc80332747e116a0bfb",
+    ".saipen/recovery/conformance/index/lineage-head.json": "5ddb24774db9e5db2ba2f7d60ab64e48c3a4f70a6b718117732045bf2820b64a"
+  },
+  "after": {
+    ".saipen": "directory",
+    ".saipen/BOARD.md": "719d8b9926ab2d7fa3bb03e9a57b9c21d680a16b8a7ff9640bfc72d49ed3e3a2",
+    ".saipen/LOG.md": "95d6188e6e2c6eb9bd3281a857f607b7d60bb844915a19ef16e0404e36f0b3ee",
+    ".saipen/recovery": "directory",
+    ".saipen/STATE.md": "e7e2f3a799c823185379e405ddbc5e81a575c36c8c911abbaab443065dc8bfac",
+    ".saipen/recovery/conformance": "directory",
+    ".saipen/recovery/conformance/2026-08-29T23_13_05.382476Z_receipt-8ef75218ad85_core_PASS.json": "d7730e606db1a52efe08b6a053a03b04c7806cdd7294373d99738dc97d1cace3",
+    ".saipen/recovery/conformance/2026-09-08T03_30_11.820793Z_receipt-1c3f8c7b3f0f_core_FAIL.json": "c57b673ac14ec5906ce2a2c280b641996030c27a6156e897874ae513768e715a",
+    ".saipen/recovery/conformance/index": "directory",
+    ".saipen/recovery/conformance/index/.lineage.json": "e4aaf0b78767213b6d1628ca69b1b73c20628bf8a5cca92595502072e2d0c994",
+    ".saipen/recovery/conformance/index/active-gen.json": "425b3e03bc378388dafdcf5e90b612b5695e1f8e73e85cae8c7207f634241c6e",
+    ".saipen/recovery/conformance/index/core.json": "d61f51d29d712c1868eee611f0719b8bdf63857a12948fc80332747e116a0bfb",
+    ".saipen/recovery/conformance/index/lineage-head.json": "5ddb24774db9e5db2ba2f7d60ab64e48c3a4f70a6b718117732045bf2820b64a"
+  },
+  "root": "V:\\_TEMP_\\saipen-source-receipts-14ob6l6s\\project"
+}

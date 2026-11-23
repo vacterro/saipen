@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-056:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-203 closed with verification evidence in LOG: verify -> PASS [target: T-203] conf: high -- python -m pytest -q tests/test_hot_freshness.py -> 38 passed; tests/test_archive_receipt.py -> 13 passed; tests/test_saipen_evidence.py + tests/test_saipen_contract_compat.py -> 72 passed 1 skipped (cross-repo leg skip reasoned: host lineage binding, T-202 scope); tests/test_saipen_manifest_gate.py -> 15 passed; wave requested change (v2 manifest accept",
+      "text": "CLOSURE WAVE - FINISH T-201, THEN CLAIM/VERIFY T-202 (full spec at V:\\_TEMP_\\fastprompter_drag\\AUDAPACK_20260919_1630.md)",
+      "verification": "the Work this request created reached its own verification gate; see the T-203 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-203"
+    }
+  },
+  "schema_version": 1
+}

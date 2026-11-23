@@ -1,0 +1,68 @@
+{
+  "requirements": {
+    "SRC-390:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-2020/coverage.md",
+      "text": "Establish current CLI/protocol state and direct evidence; use SAIPEN's canonical workflow; never alter BZDECOMP's .saipen state from the SAIPEN side. BZDECOMP reference is read-only and its T-651 owns suite speed.",
+      "verification": "record:.saipen/evidence/focused-unit/67ef25d5a3ddabff-20261104T033002415179Z.json test_t2019_suite_preflight.py PASS12; Current source audit and canonical E-20488..E-20492 lifecycle; disposable fixture only and read-only candidate path.",
+      "work": "T-2020"
+    },
+    "SRC-390:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "saipen/phases/verify.md; saipen/REGISTRY.json",
+      "text": "VERIFY owns SUITE-PREFLIGHT-01 with conformance tests: last declared-command duration over 5 min requires changed-path/untracked, basename, added/removed qualified-symbol and grown-table count-fixture checks, and a green affected subset before the full suite.",
+      "verification": "record:.saipen/evidence/focused-unit/67ef25d5a3ddabff-20261104T033002415179Z.json test_t2019_suite_preflight.py PASS12; Rule-owner conformance and staged/unstaged/untracked symbol/count fixture selection.",
+      "work": "T-2020"
+    },
+    "SRC-390:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "saipen/phases/verify.md; .saipen/evidence/T-2020/coverage.md",
+      "text": "After a red suite run rerun only the failing script until green; inspect sibling fixtures that stub/cut the same production file, then one full run; never restart a full suite blind.",
+      "verification": "record:.saipen/evidence/focused-unit/67ef25d5a3ddabff-20261104T033002415179Z.json test_t2019_suite_preflight.py PASS12; Only-failed-script and sibling-fixture conformance assertions; no blind full rerun.",
+      "work": "T-2020"
+    },
+    "SRC-390:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-2020/status_probe.json",
+      "text": "saipen test suite run [T-###] --fail-fast stops at the first matching FAIL verdict (or first failing sub-test), records partial FAIL and preserves evidence semantics. Replay the BZDECOMP stub-mismatch case in a fixture repository, never BZDECOMP itself, and stop in under 2 min.",
+      "verification": "record:.saipen/evidence/focused-unit/67ef25d5a3ddabff-20261104T033002415179Z.json test_t2019_suite_preflight.py PASS12; FAIL/exit-zero, PowerShell, timeout, descendant cleanup; supplemental measured stub replay 1.266s <120s.",
+      "work": "T-2020"
+    },
+    "SRC-390:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-2020/status_probe.json",
+      "text": "Record per-sub-script durations when the runner prints them and separate SAIPEN pre/post hashing/parsing overhead; status or response digest exposes last suite duration and first failure line.",
+      "verification": "record:.saipen/evidence/focused-unit/67ef25d5a3ddabff-20261104T033002415179Z.json test_t2019_suite_preflight.py PASS12; Explicit timing retention and overhead; supplemental current status assertion covers duration and first failure.",
+      "work": "T-2020"
+    },
+    "SRC-390:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/suite_preflight.py; .saipen/evidence/T-2020/coverage.md",
+      "text": "saipen test suite affected [T-###] prints candidate scripts/fixtures referencing the changed paths for the agent to run before the gate; documented alternatives remain admissible under the handoff acceptance.",
+      "verification": "record:.saipen/evidence/focused-unit/67ef25d5a3ddabff-20261104T033002415179Z.json test_t2019_suite_preflight.py PASS12; Read-only affected fixture selection, nested Git, entrypoint/generator exclusion.",
+      "work": "T-2020"
+    },
+    "SRC-390:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "saipen/phases/verify.md; .saipen/evidence/T-2020/coverage.md",
+      "text": "For declared PASS suites consistently over 10 min, suggest a project-owned speed ticket (parallel independent scripts, one compiler environment load, source-hash compile cache), without blocking closure or taking over BZDECOMP T-651.",
+      "verification": "record:.saipen/evidence/focused-unit/67ef25d5a3ddabff-20261104T033002415179Z.json test_t2019_suite_preflight.py PASS12; Current normative section advises nonblocking project speed ticket for consistently >600-second PASS.",
+      "work": "T-2020"
+    }
+  },
+  "schema_version": 1
+}

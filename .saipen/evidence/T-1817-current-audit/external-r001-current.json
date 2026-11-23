@@ -1,0 +1,93 @@
+{
+  "observed_utc": "2026-10-22T12:19:05.932104+00:00",
+  "external_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_MEDIA_COMPRESSOR",
+  "read_only": true,
+  "tombstone": {
+    "actionable": 4,
+    "archive_ref": ".saipen/archive/source/SRC-003.md",
+    "closed_at": "2026-09-10T04:47:00Z",
+    "closure_event": "E-357",
+    "linked_work": "T-47",
+    "receipt_id": "SRC-003",
+    "requirements": 4,
+    "schema_version": 1,
+    "source_sha256": "7b142fbac1b37134345a4048a368f36fbdd71751c8275adc513f676db3d9e1c1",
+    "status": "CLOSED",
+    "unresolved": 0
+  },
+  "archive_bundle": {
+    "proved": true,
+    "meta_status": "CLOSED",
+    "meta_storage_status": "ARCHIVED",
+    "meta_source_sha256": "7b142fbac1b37134345a4048a368f36fbdd71751c8275adc513f676db3d9e1c1",
+    "tombstone_source_sha256": "7b142fbac1b37134345a4048a368f36fbdd71751c8275adc513f676db3d9e1c1",
+    "meta_digest_matches_tombstone": true,
+    "contract_clauses": 4,
+    "coverage_dispositions": {
+      "SRC-003:R001": "VERIFIED",
+      "SRC-003:R002": "VERIFIED",
+      "SRC-003:R003": "VERIFIED",
+      "SRC-003:R004": "VERIFIED"
+    },
+    "summary_requirements": 4,
+    "summary_actionable": 4,
+    "summary_unresolved": 0
+  },
+  "archive_sidecars_present": [
+    "SRC-003.contract.json",
+    "SRC-003.coverage.json",
+    "SRC-003.md",
+    "SRC-003.meta.json",
+    "SRC-003.r001.json"
+  ],
+  "intake_status": {
+    "ok": true,
+    "receipt": "SRC-003",
+    "status": "CLOSED",
+    "location": "archive",
+    "source_kind": "external_audit",
+    "source_sha256": "7b142fbac1b37134345a4048a368f36fbdd71751c8275adc513f676db3d9e1c1",
+    "linked_work": "T-47",
+    "linked_works": [
+      "T-47"
+    ],
+    "amends": null,
+    "closure_event": "E-357",
+    "coverage": {
+      "receipt": "SRC-003",
+      "requirements": 4,
+      "actionable": 4,
+      "terminal": 4,
+      "dispositions": {
+        "VERIFIED": 4
+      },
+      "unresolved": []
+    },
+    "distribution": {
+      "state": "DISTRIBUTABLE",
+      "receipt_id": "SRC-003",
+      "source_sha256": "7b142fbac1b37134345a4048a368f36fbdd71751c8275adc513f676db3d9e1c1"
+    }
+  },
+  "board_tickets": {
+    "T-57": "## DONE",
+    "T-62": "## DONE"
+  },
+  "latest_core_conformance": {
+    "file": "2026-10-20T19_55_02.618277Z_receipt-7de67076a41f_core_PASS.json",
+    "status": null,
+    "recorded_at": null
+  },
+  "before_hashes": {
+    ".saipen/archive/source/SRC-003.contract.json": "b4d6564d17b6a6d554d1206b56e3d4af5310445e22968f0a6bf93252a8b813c9",
+    ".saipen/archive/source/SRC-003.coverage.json": "d2dfe559e30344dace208eac2a725d775ab99d9370b6ab8715cfaa501cea4dc5",
+    ".saipen/archive/source/SRC-003.md": "7b142fbac1b37134345a4048a368f36fbdd71751c8275adc513f676db3d9e1c1",
+    ".saipen/archive/source/SRC-003.meta.json": "1d716e7a045e5c28a5c54b3cdbac91e7664d856c7938ef16975595d8b8a904c3",
+    ".saipen/archive/source/SRC-003.r001.json": "b4d6564d17b6a6d554d1206b56e3d4af5310445e22968f0a6bf93252a8b813c9",
+    ".saipen/STATE.md": "27594ee295a89e6e90552c32ad8bf02f23aa42f0b534e2990607d6f9656b5953",
+    ".saipen/BOARD.md": "5c653789d98e1cb486eeb9cec8c70ccc8f57f37d9a4e5c8734743f82a1bbcc15",
+    ".saipen/intake/index.json": "497a14bb10201932077472348f0180969522ecbca49b743e1f456b16888d4e42"
+  },
+  "observed_files_unchanged": true,
+  "limitation": "No validator execution, no foreign mutation, no historical writer attribution and no claim that the missing sidecars ever existed. Present-day consistency is proved; historical origin stays UNKNOWN."
+}

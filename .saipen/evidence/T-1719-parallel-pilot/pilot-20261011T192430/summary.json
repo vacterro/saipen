@@ -1,0 +1,228 @@
+{
+  "attempts": [
+    {
+      "artifact": {
+        "after_hashes": {},
+        "after_index_modes": {},
+        "after_modes": {},
+        "artifact_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\evidence\\parallel\\pilot-20261011T192430\\claude-audit\\artifact.json",
+        "artifact_sha256": "14efe5b19bc38fe0c21ce433387f4f2df576a3c5c7785ee1ba3dcdcec153ec42",
+        "base_commit": "0269896e66c034a4b4f67bc12176b1f66f17be04",
+        "base_tree": "d420a43ebf8ec144926c6037d85436852f7230c7",
+        "before_hashes": {},
+        "before_index_modes": {},
+        "before_modes": {},
+        "changed_paths": [],
+        "code": "PARALLEL_ARTIFACT_SEALED",
+        "created_at": "2026-10-11T19:24:40.147362Z",
+        "evidence": [],
+        "job_id": "claude-audit",
+        "kind": "saipen-parallel-artifact",
+        "objective": "Read-only audit of arithmetic.py",
+        "ok": true,
+        "packet_sha256": "99d45b63e597e9e6f6af4411911467e3fdaa0c4df0410a6f8232b966013df7eb",
+        "patch_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\evidence\\parallel\\pilot-20261011T192430\\claude-audit\\changes.patch",
+        "patch_rel": ".saipen/evidence/parallel/pilot-20261011T192430/claude-audit/changes.patch",
+        "patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "project_lineage": "lineage-94ea5bd7e0204216aef2b49f1944167d",
+        "read_all": true,
+        "read_hashes": {
+          "arithmetic.py": "d582c4f30488436f42ab3cfd58b4d4892dcba9bb24c4fd7a36cbf6afc3fc8701"
+        },
+        "read_index_modes": {
+          "arithmetic.py": "100644"
+        },
+        "read_modes": {
+          "arithmetic.py": "100644"
+        },
+        "read_paths": [
+          "arithmetic.py"
+        ],
+        "result_tree": "d420a43ebf8ec144926c6037d85436852f7230c7",
+        "role": "audit",
+        "root_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen\\.saipen\\cache\\parallel-pilot\\pilot-20261011t192430\\project",
+        "run_id": "pilot-20261011T192430",
+        "schema_version": 1,
+        "worker_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\claude-audit",
+        "write_paths": []
+      },
+      "finished": "2026-10-11T19:24:39.829363+00:00",
+      "job_id": "claude-audit",
+      "outcome": {
+        "elapsed_seconds": 4.406,
+        "failure": "UNKNOWN",
+        "parsed_response": null,
+        "result_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\claude-audit\\result.txt",
+        "returncode": 1,
+        "status": "failed",
+        "stderr_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\claude-audit\\result.txt.stderr.txt",
+        "stdout_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\claude-audit\\result.txt.stdout.jsonl"
+      },
+      "profile": {
+        "account_key": "claude:14b257518acdeb9b53c60ee84b168fb0b9bda0d0399193d295cc3b1f98090cb1",
+        "authenticated": true,
+        "capabilities": {
+          "headless": true,
+          "json_events": true,
+          "no_permission_prompts": true,
+          "permission_mode": true,
+          "schema": true,
+          "tools": true,
+          "worker_flags": true
+        },
+        "id": "claude:.claude-account2",
+        "launchable": true,
+        "model": "opus",
+        "plan": "pro",
+        "profile_dir": "C:\\Users\\vac34\\.claude-account2",
+        "provider": "claude",
+        "quota": "unknown",
+        "reason": null,
+        "subscription_auth": true,
+        "version": "2.1.295"
+      },
+      "provider": "claude",
+      "started": "2026-10-11T19:24:35.427926+00:00",
+      "worker_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\claude-audit"
+    },
+    {
+      "artifact": {
+        "after_hashes": {},
+        "after_index_modes": {},
+        "after_modes": {},
+        "artifact_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\evidence\\parallel\\pilot-20261011T192430\\codex-audit\\artifact.json",
+        "artifact_sha256": "dcabc20c917101158c8fa4367bca2f5f1f45a8f78851f2bf1af7da6ae34dd7ab",
+        "base_commit": "0269896e66c034a4b4f67bc12176b1f66f17be04",
+        "base_tree": "d420a43ebf8ec144926c6037d85436852f7230c7",
+        "before_hashes": {},
+        "before_index_modes": {},
+        "before_modes": {},
+        "changed_paths": [],
+        "code": "PARALLEL_ARTIFACT_SEALED",
+        "created_at": "2026-10-11T19:25:21.061139Z",
+        "evidence": [],
+        "job_id": "codex-audit",
+        "kind": "saipen-parallel-artifact",
+        "objective": "Read-only audit of arithmetic.py",
+        "ok": true,
+        "packet_sha256": "6c017ec19ab99e3c8222f9bc6d483b1b6328a228815bfe869cf2abc93e9bdbac",
+        "patch_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\evidence\\parallel\\pilot-20261011T192430\\codex-audit\\changes.patch",
+        "patch_rel": ".saipen/evidence/parallel/pilot-20261011T192430/codex-audit/changes.patch",
+        "patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "project_lineage": "lineage-94ea5bd7e0204216aef2b49f1944167d",
+        "read_all": true,
+        "read_hashes": {
+          "arithmetic.py": "d582c4f30488436f42ab3cfd58b4d4892dcba9bb24c4fd7a36cbf6afc3fc8701"
+        },
+        "read_index_modes": {
+          "arithmetic.py": "100644"
+        },
+        "read_modes": {
+          "arithmetic.py": "100644"
+        },
+        "read_paths": [
+          "arithmetic.py"
+        ],
+        "result_tree": "d420a43ebf8ec144926c6037d85436852f7230c7",
+        "role": "audit",
+        "root_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen\\.saipen\\cache\\parallel-pilot\\pilot-20261011t192430\\project",
+        "run_id": "pilot-20261011T192430",
+        "schema_version": 1,
+        "worker_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\codex-audit",
+        "write_paths": []
+      },
+      "finished": "2026-10-11T19:25:20.580617+00:00",
+      "job_id": "codex-audit",
+      "outcome": {
+        "elapsed_seconds": 45.156,
+        "failure": null,
+        "parsed_response": {
+          "checks": "static inspection",
+          "findings": [
+            {
+              "actual": -1,
+              "correction": "Replace return left - right with return left + right.",
+              "expected": 5,
+              "location": "arithmetic.py:4",
+              "trigger": "add(2, 3)"
+            },
+            {
+              "actual": 2,
+              "correction": "Replace return sum(values) / (len(values) + 1) with return sum(values) / len(values).",
+              "expected": 3,
+              "location": "arithmetic.py:7",
+              "trigger": "mean([2, 4])"
+            }
+          ],
+          "source_modified": false
+        },
+        "result_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\codex-audit\\result.txt",
+        "returncode": 0,
+        "status": "completed",
+        "stderr_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\codex-audit\\result.txt.stderr.txt",
+        "stdout_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\codex-audit\\result.txt.stdout.jsonl"
+      },
+      "profile": {
+        "account_key": null,
+        "authenticated": true,
+        "capabilities": {
+          "headless": true,
+          "json_events": true,
+          "last_message_file": true,
+          "permission_mode": true,
+          "schema": true,
+          "worker_flags": true
+        },
+        "id": "codex:.codex-account2",
+        "launchable": true,
+        "model": "gpt-6.1-sol",
+        "plan": "unknown",
+        "profile_dir": "C:\\Users\\vac34\\.codex-account2",
+        "provider": "codex",
+        "quota": "unknown",
+        "reason": null,
+        "subscription_auth": true,
+        "version": "0.162.1"
+      },
+      "provider": "codex",
+      "started": "2026-10-11T19:24:35.432927+00:00",
+      "worker_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\codex-audit"
+    }
+  ],
+  "evidence": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430",
+  "integrity": {
+    "canonical_changed": [],
+    "head_unchanged": true,
+    "index_unchanged": true,
+    "source_changed": [],
+    "source_index_modes_unchanged": true,
+    "source_modes_unchanged": true
+  },
+  "overlaps": [
+    {
+      "jobs": [
+        "claude-audit",
+        "codex-audit"
+      ],
+      "overlap_seconds": 4.218
+    }
+  ],
+  "process_intervals": {
+    "claude-audit": {
+      "end_monotonic": 127966.343,
+      "finished": "2026-10-11T19:24:39.764362+00:00",
+      "pid": 26680,
+      "start_monotonic": 127962.125,
+      "started": "2026-10-11T19:24:35.538924+00:00"
+    },
+    "codex-audit": {
+      "end_monotonic": 128007.125,
+      "finished": "2026-10-11T19:25:20.532577+00:00",
+      "pid": 19760,
+      "start_monotonic": 127962.125,
+      "started": "2026-10-11T19:24:35.544924+00:00"
+    }
+  },
+  "run_id": "pilot-20261011T192430",
+  "scratch_project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project"
+}

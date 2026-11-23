@@ -1,0 +1,18 @@
+{
+  "scratch_root": "V:\\_TEMP_\\saipen-t1711-prior-fix-hrch07hy",
+  "project": "V:\\_TEMP_\\saipen-t1711-prior-fix-hrch07hy\\project",
+  "owned_paths": {
+    "tools/saipen_engine/regression_execution.py": {
+      "live_before_sha256": "c83509b46e0f403edbbc58775ce5060ac7afe7888d8947e2909591539e1f45fe",
+      "scratch_sha256": "e08177cb2e61d37347015e93cbd20ec2cb8415262b4f24de6d674046b80e29d4"
+    },
+    "tools/test_t1711_regression_execution.py": {
+      "live_before_sha256": "bcdfa50d84f80f16f16fd1cf2f85a7366a1679064de4d299c5e599a024c940da",
+      "scratch_sha256": "5641369e5e2a8a4be73fe401091a43d35dddfae86ec811afdb18309c8aabd6ef"
+    }
+  },
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "..........................................\n----------------------------------------------------------------------\nRan 42 tests in 47.206s\n\nOK\n",
+  "scope": "scratch only; live production is still frozen and unchanged"
+}

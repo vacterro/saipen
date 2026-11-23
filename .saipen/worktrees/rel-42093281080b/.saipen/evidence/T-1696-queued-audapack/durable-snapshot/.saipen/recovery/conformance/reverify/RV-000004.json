@@ -1,0 +1,29 @@
+{
+  "agent": "opencode",
+  "created_at": "2026-09-08T08:14:04Z",
+  "findings_digest": "b04c69b37c79d1cbf1dadbf292b50968d8962c51a18ef6ed7385ea0d62825259",
+  "gate": "core",
+  "integrity_digest": "a465a27d881e1107",
+  "journal_op_id": "reverify.eabbe69db236",
+  "own_problem_keys": [
+    "dc5bc6e71eaba820"
+  ],
+  "problem_count": 86,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000004",
+  "ruleset_fingerprint": "35251f00fa567709f75dae23144f35571c8a9854b5c167344995a27657e87713",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": null,
+  "source_tree_fingerprint": null,
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "python -m pytest -q tests/test_bridge.py::TestNameOnlyCompletionIdentity tests/test_run_id_single_owner.py",
+      "result": "PASS"
+    }
+  ],
+  "warning_count": 120,
+  "work": "T-160"
+}

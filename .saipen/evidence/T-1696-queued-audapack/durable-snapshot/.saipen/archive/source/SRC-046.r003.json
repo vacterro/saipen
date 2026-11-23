@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-046:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Git inventory = tracked_existing UNION untracked_nonignored; tracked project truth overrides ordinary noise exclusions; hard-safety conflicts fail closed"
+    },
+    "SRC-046:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Tracked deletions are explicit (tracked_deleted); no per-file Git subprocesses; no recursive traversal of ignored recovery/cache trees"
+    },
+    "SRC-046:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Source inventory is frozen before writing; source disappearance/read failure fails closed; source mutation earns at most one complete retry"
+    }
+  },
+  "derived_at": "2026-09-12T07:37:27Z",
+  "derived_from": "SRC-046",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "36385619b971128e3e0436df531fb6f702c3ca38b9007ac1e81eacce4f3ce587"
+}

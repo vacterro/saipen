@@ -1,0 +1,20 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 4477,
+  "red": 3,
+  "new_red": [
+    "test_t1571_lint_surface.CanonicalSurface.test_discovery_is_every_python_file_under_tools_and_tests",
+    "test_t1571_lint_surface.InjectedViolations.test_an_engine_file_and_a_test_file_are_both_linted",
+    "test_t1571_lint_surface.InjectedViolations.test_syntax_newer_than_the_floor_is_reported"
+  ],
+  "fixed": [],
+  "problems": [
+    "3 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/994d78de6c7a1537-20261001T004548Z.json",
+  "reused": false,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

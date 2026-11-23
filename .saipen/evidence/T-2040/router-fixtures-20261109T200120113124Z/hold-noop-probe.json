@@ -1,0 +1,7 @@
+{
+  "ticket": "T-1",
+  "block_code": "BLOCK",
+  "next_action": "saipen status",
+  "improve_gate": null,
+  "expected_gate": "T-1"
+}

@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "tools/test_t2056_obstacle_actions.py"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools/test_t2056_obstacle_actions.py",
+    "tools",
+    "saipen",
+    "extensions"
+  ],
+  "oracle_files": [
+    "tools/test_t2056_obstacle_actions.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/conformance.py"
+  ],
+  "before": {
+    "tools/saipen_engine/conformance.py": ".saipen/evidence/T-2056-cycle5/conformance.before.py"
+  },
+  "timeout": 300
+}

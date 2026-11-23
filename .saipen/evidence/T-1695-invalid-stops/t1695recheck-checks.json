@@ -1,0 +1,52 @@
+[
+  {
+    "check": "focused",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "test_automation_block",
+      "test_response_surface_contract",
+      "test_response_digest",
+      "test_response_fact_binding",
+      "test_audit_inbox",
+      "test_refusal_registry",
+      "test_canonical_command_reachability",
+      "test_subprocess_utf8"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+    "exit_code": 0,
+    "output": "t1695recheck-focused.out.txt",
+    "output_sha256": "b328d2d12cedcc7a3306a2e3fb9cfef08c80fe4780b82d063da1124194cda187"
+  },
+  {
+    "check": "ruff",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "ruff",
+      "check",
+      "tools/",
+      "tests/"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit_code": 1,
+    "output": "t1695recheck-ruff.out.txt",
+    "output_sha256": "e515c4860a3c03e5eea2b6731f64dcae0e219ae72b7e0225652863c7c80d846e"
+  },
+  {
+    "check": "whitespace",
+    "command": [
+      "git",
+      "-c",
+      "core.safecrlf=false",
+      "diff",
+      "--check"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit_code": 0,
+    "output": "t1695recheck-whitespace.out.txt",
+    "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

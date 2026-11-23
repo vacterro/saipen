@@ -1,0 +1,38 @@
+{
+  "tools/saipen.py": {
+    "before_count": 40,
+    "after_count": 40,
+    "new": []
+  },
+  "tools/saipen_engine/board.py": {
+    "before_count": 7,
+    "after_count": 4,
+    "new": [
+      {
+        "code": "E501",
+        "message": "Line too long (103 > 100)",
+        "source": "f\"no runnable Board work; {len(active_goals)} active goal(s) require authority\""
+      },
+      {
+        "code": "E501",
+        "message": "Line too long (103 > 100)",
+        "source": "f\"no runnable Board work; {len(active_goals)} active goals need evidence discovery\""
+      }
+    ]
+  },
+  "tools/saipen_engine/router.py": {
+    "before_count": 1,
+    "after_count": 1,
+    "new": []
+  },
+  "tools/saipen_engine/replenishment.py": {
+    "before_count": 12,
+    "after_count": 10,
+    "new": []
+  },
+  "tools/saipen_engine/automation.py": {
+    "before_count": 0,
+    "after_count": 0,
+    "new": []
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-093:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-247 closed with verification evidence in LOG: verify -> PASS conf: high -- SRC-093 asks for the same change already delivered under T-246 (SRC-094, identical request text). The requested change is present and demonstrated: the real _ZAICODE pack succeeds, the pre-fix subject on that same repo raised TRACKED_RESERVED_ARCHIVE_NAME_CONFLICT, the archive carries exactly one generated _AUDAPACK_MANIFEST.json and names the superseded path, and the ",
+      "text": "Safe supersession of tracked AUDAPACK-generated archive control artifacts",
+      "verification": "the Work this request created reached its own verification gate; see the T-247 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-247"
+    }
+  },
+  "schema_version": 1
+}

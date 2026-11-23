@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "platform": "WSL Linux",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "source": "/tmp/saipen-campaign-linux-a1f9iv6c/source",
+  "scope": "test_t1832_single_flight.py",
+  "exit_code": 0,
+  "elapsed_wall_s": 5.157064,
+  "transport": "private source copy; canonical state/history omitted, test fixtures create their own memory",
+  "native_path": "/usr/local/bin:/usr/bin:/bin"
+}

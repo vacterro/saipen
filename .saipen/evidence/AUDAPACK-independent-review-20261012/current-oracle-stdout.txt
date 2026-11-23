@@ -1,0 +1,60 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.exe
+cachedir: .pytest_cache
+PySide6 6.11.1 -- Qt runtime 6.11.1 -- Qt compiled 6.11.1
+rootdir: V:\___VAC\__K\__CODE\_PY\_AUDAPACK_RECOVERY_20261010
+configfile: pytest.ini
+plugins: anyio-4.12.1, langsmith-0.8.17, asyncio-1.4.0, cov-7.1.0, docker-3.2.5, mock-3.15.1, qt-4.5.0, timeout-2.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 48 items
+
+tests/test_packing_disposable_trees.py::TestDisposableCheckoutTreeIsNotPacked::test_live_source_and_fixtures_stay PASSED [  2%]
+tests/test_packing_disposable_trees.py::TestDisposableCheckoutTreeIsNotPacked::test_no_entry_sits_under_the_disposable_tree PASSED [  4%]
+tests/test_packing_disposable_trees.py::TestManifestNamesTheExcludedTree::test_archive_manifest_declares_the_exclusion_reason PASSED [  6%]
+tests/test_packing_disposable_trees.py::TestManifestNamesTheExcludedTree::test_plan_records_the_tree_as_generated_output PASSED [  8%]
+tests/test_packing_disposable_trees.py::TestNegativeControls::test_near_miss_names_survive PASSED [ 10%]
+tests/test_packing_disposable_trees.py::TestNegativeControls::test_temp_named_directory_with_real_source_survives PASSED [ 12%]
+tests/test_packing_disposable_trees.py::TestJunctionToOutsideTreeIsNotFollowed::test_junction_inside_source_is_not_packed PASSED [ 14%]
+tests/test_packing_disposable_trees.py::TestNormalArchivePath::test_existing_exact_release_opt_in_preserves_artifact_bytes PASSED [ 16%]
+tests/test_packing_disposable_trees.py::TestNormalArchivePath::test_freshness_members_match_archive_policy PASSED [ 18%]
+tests/test_packing_disposable_trees.py::TestNormalArchivePath::test_git_inventory_and_normal_zip_exclude_untracked_scratch PASSED [ 20%]
+tests/test_packing_disposable_trees.py::TestNormalArchivePath::test_normal_filesystem_pack_including_without_fidelity_reconciles_and_never_deletes PASSED [ 22%]
+tests/test_packing_disposable_trees.py::TestNormalArchivePath::test_policy_fingerprint_changes_when_disposable_rule_changes PASSED [ 25%]
+tests/test_packing_disposable_trees.py::TestNormalArchivePath::test_profiles_account_for_all_excluded_bytes_and_preserve_control_plane PASSED [ 27%]
+tests/test_packing_disposable_trees.py::TestNormalArchivePath::test_tracked_marker_lookalike_remains_authoritative_source PASSED [ 29%]
+tests/test_packing_disposable_trees.py::TestNormalArchivePath::test_two_replica_generations_cannot_inflate_the_source_budget PASSED [ 31%]
+tests/test_settings_project_ownership.py::test_first_settings_save_keeps_the_service_root_and_projects PASSED [ 33%]
+tests/test_settings_project_ownership.py::test_launcher_refill_is_not_an_operator_settings_edit PASSED [ 35%]
+tests/test_plane_launch_async.py::test_c_a_success_registers_exactly_once_under_the_canonical_id PASSED [ 37%]
+tests/test_sai_accounts_federation.py::TestCentralFailure::test_plane_removed_mid_life_leaves_local_accounts_working PASSED [ 39%]
+tests/test_sai_accounts_federation.py::TestCentralFailure::test_absent_snapshot_clears_shared_authority_but_outage_keeps_it PASSED [ 41%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_the_module_only_ever_reads PASSED [ 43%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_data_io_oracle_rejects_real_forbidden_operations[open('secret', 'w')] PASSED [ 45%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_data_io_oracle_rejects_real_forbidden_operations[path.write_text('secret')] PASSED [ 47%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_data_io_oracle_rejects_real_forbidden_operations[path.write_bytes(b'secret')] PASSED [ 50%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_data_io_oracle_rejects_real_forbidden_operations[path.mkdir()] PASSED [ 52%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_data_io_oracle_rejects_real_forbidden_operations[path.unlink()] PASSED [ 54%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_data_io_oracle_rejects_real_forbidden_operations[shutil.rmtree(path)] PASSED [ 56%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_data_io_oracle_rejects_real_forbidden_operations[urlopen(url)] PASSED [ 58%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_data_io_oracle_rejects_real_forbidden_operations[import sqlite3] PASSED [ 60%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_data_io_oracle_rejects_real_forbidden_operations[from urllib import request] PASSED [ 62%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_data_io_oracle_allows_explicit_manager_spawn PASSED [ 64%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_discovery_stays_credential_free PASSED [ 66%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_identity_locator_never_leaks_a_machine_path_for_antigravity PASSED [ 68%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_an_override_that_does_not_exist_falls_through PASSED [ 70%]
+tests/test_sai_accounts_federation.py::TestReadOnly::test_an_override_that_exists_is_used PASSED [ 72%]
+tests/test_audit13_wave2.py::TestW2002WorkerRestartLifecycle::test_worker_stop_start_recreates_executors_and_allows_submit PASSED [ 75%]
+tests/test_audit13_wave2.py::TestW2002WorkerRestartLifecycle::test_restart_pools_are_distinct_instances PASSED [ 77%]
+tests/test_audit13_wave2.py::TestW2002WorkerRestartLifecycle::test_repeated_stop_start_cycles_stay_bounded PASSED [ 79%]
+tests/test_audit13_wave2.py::TestW2002WorkerRestartLifecycle::test_start_while_closing_refuses PASSED [ 81%]
+tests/test_audit13_wave2.py::TestW2002WorkerRestartLifecycle::test_stale_old_generation_futures_not_owned_by_new_generation PASSED [ 83%]
+tests/test_audit13_wave2.py::TestW2002WorkerRestartLifecycle::test_a_running_probe_keeps_ownership_until_it_settles PASSED [ 85%]
+tests/test_soak_instruments.py::test_preexisting_descendant_is_preserved_and_not_a_new_leak PASSED [ 87%]
+tests/test_soak_instruments.py::test_new_surviving_descendant_is_a_real_red_control[after0] PASSED [ 89%]
+tests/test_soak_instruments.py::test_new_surviving_descendant_is_a_real_red_control[after1] PASSED [ 91%]
+tests/test_soak_instruments.py::test_gui_counter_error_is_not_a_valid_zero PASSED [ 93%]
+tests/test_soak_instruments.py::test_gui_counter_accepts_zero_only_when_the_api_reports_no_error PASSED [ 95%]
+tests/test_idle_resource_hygiene.py::test_soak_leak_audit_acceptance PASSED [ 97%]
+tests/test_docs_consistency.py::test_the_changelog_leads_with_the_current_version PASSED [100%]
+
+============================= 48 passed in 31.06s =============================

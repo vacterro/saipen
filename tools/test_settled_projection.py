@@ -527,5 +527,156 @@ class SettledProjectionTests(unittest.TestCase):
             shutil.rmtree(root, ignore_errors=True)
 
 
+def _write_convergence_fixture(root: Path) -> object:
+    from freshness import compute_source_identity
+
+    src = root / "src"
+    src.mkdir(parents=True, exist_ok=True)
+    app_bytes = b"print('ok')\n"
+    (src / "app.py").write_bytes(app_bytes)
+    (root / ".saipen").mkdir(parents=True, exist_ok=True)
+    (root / ".saipen" / "IDENTITY.md").write_text(
+        "---\nproject_lineage: lineage-" + "1" * 32 + "\n---\n",
+        encoding="utf-8",
+    )
+    source_id = compute_source_identity(root)
+    for index in range(SP.SEG_BOUND + 5):
+        _write_receipt(root, f"op-{index:04d}", "alpha")
+    stages = [
+        ("E", "PASS", "2026-09-07T00:00:01Z", "E-001"),
+        ("F", "CLEAN", "2026-09-07T00:00:02Z", "E-002"),
+        ("G", "COMPLETED", "2026-09-07T00:00:03Z", "E-003"),
+        ("H", "PASS", "2026-09-07T00:00:04Z", "E-004"),
+        ("I", "CLEAN", "2026-09-07T00:00:05Z", "E-005"),
+    ]
+    for stage, verdict, ts, eid in stages:
+        meta = {
+            "operation": "convergence_stage",
+            "status": "COMMITTED",
+            "stage": stage,
+            "verdict": verdict,
+            "event_id": eid,
+            "source_head": source_id.source_head,
+            "source_tree_fingerprint": source_id.source_tree_fingerprint,
+        }
+        if stage == "G":
+            meta["input_source_head"] = source_id.source_head
+            meta["input_source_tree_fingerprint"] = source_id.source_tree_fingerprint
+            meta["resulting_source_head"] = source_id.source_head
+            meta["resulting_source_tree_fingerprint"] = source_id.source_tree_fingerprint
+        rec = _write_receipt(root, f"conv-{stage}", "convergence_stage")
+        rec["created_at"] = ts
+        rec["receipt_metadata"] = meta
+        (root / SETTLED_DIR / f"conv-{stage}" / "operation.json").write_text(
+            json.dumps(rec), encoding="utf-8"
+        )
+    defer_rec = _write_receipt(root, "defer-0001", "crew_defer")
+    defer_rec["created_at"] = "2026-09-07T00:00:06Z"
+    defer_rec["receipt_metadata"] = {
+        "operation": "crew_defer",
+        "status": "COMMITTED",
+        "project_identity": runtime_lock_identity(root),
+        "project_lineage": "lineage-" + "1" * 32,
+        "ticket_id": "T-1",
+        "paths": {"src/app.py": journal.hash_bytes(app_bytes)},
+    }
+    (root / SETTLED_DIR / "defer-0001" / "operation.json").write_text(
+        json.dumps(defer_rec), encoding="utf-8"
+    )
+    SP.rebuild_projection(root)
+    return source_id
+
+
+class ConvergenceBoundedProjectionTests(unittest.TestCase):
+    def test_convergence_verdict_uses_bounded_projection_without_snapshot_scan(self) -> None:
+        from saipen_engine import convergence
+
+        root = Path(tempfile.mkdtemp(prefix="r010_conv_"))
+        try:
+            for index in range(SP.SEG_BOUND + 5):
+                _write_receipt(root, f"op-{index:04d}", "alpha")
+            SP.rebuild_projection(root)
+            calls = 0
+            original_snapshot = journal.semantic_receipt_snapshot
+
+            def counting_snapshot(*args, **kwargs):
+                nonlocal calls
+                calls += 1
+                return original_snapshot(*args, **kwargs)
+
+            with mock.patch.object(
+                journal, "semantic_receipt_snapshot", side_effect=counting_snapshot
+            ):
+                bounded = convergence.convergence_verdict(root)
+            self.assertEqual(
+                calls,
+                0,
+                "convergence_verdict(receipt_snapshot=None) scanned lifetime receipts "
+                "when projection was CURRENT",
+            )
+            full_snapshot = journal.semantic_receipt_snapshot(root)
+            full = convergence.convergence_verdict(root, receipt_snapshot=full_snapshot)
+            self.assertEqual(bounded.as_dict(), full.as_dict())
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_convergence_verdict_full_chain_and_crew_defer_parity(self) -> None:
+        from saipen_engine import convergence
+
+        root = Path(tempfile.mkdtemp(prefix="r010_conv_full_"))
+        try:
+            source_id = _write_convergence_fixture(root)
+            calls = 0
+            original_snapshot = journal.semantic_receipt_snapshot
+
+            def counting_snapshot(*args, **kwargs):
+                nonlocal calls
+                calls += 1
+                return original_snapshot(*args, **kwargs)
+
+            with mock.patch.object(
+                journal, "semantic_receipt_snapshot", side_effect=counting_snapshot
+            ):
+                bounded = convergence.convergence_verdict(root, source_id=source_id)
+            self.assertEqual(calls, 0)
+            self.assertTrue(bounded.ok, bounded.reasons)
+            self.assertEqual(len(bounded.stages), 5)
+            self.assertEqual(bounded.attribution_problems, ())
+            full_snapshot = journal.semantic_receipt_snapshot(root)
+            full = convergence.convergence_verdict(
+                root, source_id=source_id, receipt_snapshot=full_snapshot
+            )
+            self.assertEqual(bounded.as_dict(), full.as_dict())
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_convergence_verdict_fails_closed_when_projection_corrupt(self) -> None:
+        from saipen_engine import convergence
+
+        root = Path(tempfile.mkdtemp(prefix="r010_conv_bad_"))
+        try:
+            _write_receipt(root, "op-0000", "alpha")
+            SP.rebuild_projection(root)
+            (root / SP.INDEX_DIR_REL / "head.json").write_text("{broken", encoding="utf-8")
+            verdict = convergence.convergence_verdict(root)
+            self.assertFalse(verdict.ok)
+            self.assertTrue(any("corruption" in r for r in verdict.reasons), verdict.reasons)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_convergence_verdict_fails_closed_when_crew_defer_locator_corrupt(self) -> None:
+        from saipen_engine import convergence
+
+        root = Path(tempfile.mkdtemp(prefix="r010_conv_defer_bad_"))
+        try:
+            source_id = _write_convergence_fixture(root)
+            SP._locator_path(root, "crew_defer").write_text("{broken", encoding="utf-8")
+            verdict = convergence.convergence_verdict(root, source_id=source_id)
+            self.assertFalse(verdict.ok)
+            self.assertTrue(any("corruption" in r for r in verdict.reasons), verdict.reasons)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+
 if __name__ == "__main__":
     unittest.main()

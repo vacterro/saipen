@@ -1,0 +1,19 @@
+# T-1859 VERIFY after the renewal-parser fix -- 2026-10-24 04:04:39
+
+## hook seal suite
+----------------------------------------------------------------------
+Ran 8 tests in 0.702s
+
+OK
+
+## authority + ingress families (129)
+----------------------------------------------------------------------
+Ran 129 tests in 52.096s
+
+OK
+
+## guard + ingress lifecycle families (165)
+----------------------------------------------------------------------
+Ran 165 tests in 32.767s
+
+OK (skipped=1)

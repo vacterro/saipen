@@ -1,0 +1,16 @@
+# T-1630 RED evidence — pre-fix artifact, original argparse path
+artifact_sha256=d747325e7564b44ad6ea84cfbd67cdc304f5d53ac4373458cc83a24bc43cd74e
+subject: extensions/adapters/codex/saipen-guard.py (bytes = live tree, T-1657 changes included, argparse defect intact)
+payload: controlled Stop event, cwd = bound SAIPEN project (this copy)
+case1 [unknown argument] argv: --host codex --saipen-root . --unexpected x
+  exit_code=2
+  stdout=[]
+  stderr_last=[saipen-guard.py: error: unrecognized arguments: --unexpected x]
+case2 [missing --saipen-root value] argv: --host codex --saipen-root
+  exit_code=2
+  stdout=[]
+  stderr_last=[saipen-guard.py: error: argument --saipen-root: expected one argument]
+case3 [foreign --host] argv: --host claude --saipen-root .
+  exit_code=2
+  stdout=[]
+  stderr_last=[saipen-guard.py: error: argument --host: invalid choice: 'claude' (choose from 'codex')]

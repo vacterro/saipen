@@ -1,0 +1,41 @@
+{
+  "base_commit": "0269896e66c034a4b4f67bc12176b1f66f17be04",
+  "base_tree": "d420a43ebf8ec144926c6037d85436852f7230c7",
+  "baseline_hashes": {
+    "arithmetic.py": "d582c4f30488436f42ab3cfd58b4d4892dcba9bb24c4fd7a36cbf6afc3fc8701"
+  },
+  "baseline_modes": {
+    "arithmetic.py": "100644"
+  },
+  "baseline_source_index_modes": {
+    "arithmetic.py": "100644"
+  },
+  "job_id": "codex-audit",
+  "ok": true,
+  "packet_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\codex-audit\\.saipen\\evidence\\parallel-packet.json",
+  "packet_sha256": "6c017ec19ab99e3c8222f9bc6d483b1b6328a228815bfe869cf2abc93e9bdbac",
+  "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\codex-audit",
+  "project_lineage": "lineage-68b7c35d9dbf4974aaea1fc83568f8b1",
+  "run_id": "pilot-20261011T192430",
+  "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "snapshot": {
+    "commit": "0269896e66c034a4b4f67bc12176b1f66f17be04",
+    "created_at": "2026-10-11T19:24:35.238925Z",
+    "fingerprint": "f5697b67aad477956f2020669f36df7d20dfefd0538f3f6ed7493725507b541a",
+    "head": "d3f55092665222f22d993f15ca7e44b407351ebb",
+    "ok": true,
+    "project_lineage": "lineage-94ea5bd7e0204216aef2b49f1944167d",
+    "root_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen\\.saipen\\cache\\parallel-pilot\\pilot-20261011t192430\\project",
+    "source_hashes": {
+      "arithmetic.py": "d582c4f30488436f42ab3cfd58b4d4892dcba9bb24c4fd7a36cbf6afc3fc8701"
+    },
+    "source_index_modes": {
+      "arithmetic.py": "100644"
+    },
+    "source_modes": {
+      "arithmetic.py": "100644"
+    },
+    "tree": "d420a43ebf8ec144926c6037d85436852f7230c7"
+  },
+  "worker_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\codex-audit"
+}

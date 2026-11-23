@@ -1,0 +1,99 @@
+{
+  "clauses": {
+    "SRC-086:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rewrite or merge historical source receipts."
+    },
+    "SRC-086:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent a dependency on T-236 merely because this feature can reuse code implemented during T-236."
+    },
+    "SRC-086:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make the operator complete T-236 browser acceptance before beginning this feature."
+    },
+    "SRC-086:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "The operator must not need to:"
+    },
+    "SRC-086:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not hard-code a universal assumption that every provider has exactly one 5-hour limit."
+    },
+    "SRC-086:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Routine limit observation must not waste model quota."
+    },
+    "SRC-086:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never accidentally consume quota merely to check whether quota exists."
+    },
+    "SRC-086:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A trigger must never turn into two agents, two prompts, or two audits because the UI restarted or two processes observed the same due time."
+    },
+    "SRC-086:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not fabricate availability."
+    },
+    "SRC-086:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "But a stale optional limit source must not brick unrelated launchers or unrelated prepared jobs."
+    },
+    "SRC-086:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The operator must always be able to see:"
+    },
+    "SRC-086:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not treat launcher ids as the final account model."
+    },
+    "SRC-086:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Account identity must remain stable across application restarts."
+    },
+    "SRC-086:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not use display name alone as identity."
+    },
+    "SRC-086:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not include credentials in account ids."
+    },
+    "SRC-086:R016": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not persist tokens."
+    },
+    "SRC-086:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not hash secrets merely to use the hash as identity."
+    },
+    "SRC-086:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT recursively scan the whole user profile or disks."
+    }
+  },
+  "derived_at": "2026-09-23T03:58:52Z",
+  "derived_from": "SRC-086",
+  "interpretation_revision": 18,
+  "schema_version": 1,
+  "source_sha256": "002b591c238663c159091f82fcad252951bcbae8c3c1398b23d0aed8dfdee3db"
+}

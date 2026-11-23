@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-096:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Fix widget live audit shown READY while ChatGPT generating (state-truth defect, 0.0.80)"
+    }
+  },
+  "derived_at": "2026-09-29T08:55:44Z",
+  "derived_from": "SRC-096",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "cd7e1401e58387a8a3b96a4063659d9b40e41abbdd4300bc6fa4868612669525"
+}

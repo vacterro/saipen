@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1753_activation_launcher.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap",
+    "bin"
+  ],
+  "oracle_files": [
+    "tools/test_t1753_activation_launcher.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "subject_files": [
+    "saipen/ACTIVATION_BLOCK.md"
+  ],
+  "before": {
+    "saipen/ACTIVATION_BLOCK.md": ".saipen/evidence/T-1786-mimo-freebuff-audit/pre/ACTIVATION_BLOCK.md"
+  },
+  "timeout": 900
+}

@@ -1,0 +1,20 @@
+{
+  "scope": "the two owned STYLE/SKILL mutation controls only",
+  "controls": [
+    {
+      "variant": "original",
+      "baseline": "PASS",
+      "ran": 2,
+      "verdict": "FAIL",
+      "error": "2 of 2 mutation control(s) no longer prove anything"
+    },
+    {
+      "variant": "candidate",
+      "baseline": "PASS",
+      "ran": 2,
+      "verdict": "PASS",
+      "error": null
+    }
+  ],
+  "oracle_sha256": "2572f2125203533ab3e0d8e5d979009d7a6a44c790c24420f2ad0cedee073c02"
+}

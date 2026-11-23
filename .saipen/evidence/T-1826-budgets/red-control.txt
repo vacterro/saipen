@@ -1,0 +1,48 @@
+test_the_launcher_harness_outlasts_the_adapter_bound (test_t1826_declared_budgets.AdapterCheckBudgetTests.test_the_launcher_harness_outlasts_the_adapter_bound)
+A harness bound under the adapter's would cut the adapter off first. ... ok
+test_the_open_guard_bound_clears_the_measured_check_cost (test_t1826_declared_budgets.AdapterCheckBudgetTests.test_the_open_guard_bound_clears_the_measured_check_cost) ... FAIL
+test_the_open_guard_bound_is_not_below_its_sibling_transports (test_t1826_declared_budgets.AdapterCheckBudgetTests.test_the_open_guard_bound_is_not_below_its_sibling_transports)
+Claude's hook already answers 45 s; only OpenCode invented a third. ... FAIL
+test_core_unit_consumes_the_declared_family_and_nothing_else (test_t1826_declared_budgets.FamilyBudgetTests.test_core_unit_consumes_the_declared_family_and_nothing_else) ... ok
+test_the_family_budget_is_not_below_a_run_that_already_timed_out (test_t1826_declared_budgets.FamilyBudgetTests.test_the_family_budget_is_not_below_a_run_that_already_timed_out)
+5400 s is the value this ticket measured as a false TIMEOUT. ... FAIL
+test_the_unit_family_budget_clears_every_measured_run (test_t1826_declared_budgets.FamilyBudgetTests.test_the_unit_family_budget_clears_every_measured_run) ... FAIL
+
+======================================================================
+FAIL: test_the_open_guard_bound_clears_the_measured_check_cost (test_t1826_declared_budgets.AdapterCheckBudgetTests.test_the_open_guard_bound_clears_the_measured_check_cost)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1826-red-q395wnz6\project\tools\test_t1826_declared_budgets.py", line 108, in test_the_open_guard_bound_clears_the_measured_check_cost
+    self.assertGreaterEqual(
+AssertionError: 15000 not greater than or equal to 24228 : the adapter kills its child after 15000 ms while a healthy check measured 20190 ms; that bound reports EXEC_RESPONSE_INVALID: ETIMEDOUT for a slower host, not a defect
+
+======================================================================
+FAIL: test_the_open_guard_bound_is_not_below_its_sibling_transports (test_t1826_declared_budgets.AdapterCheckBudgetTests.test_the_open_guard_bound_is_not_below_its_sibling_transports)
+Claude's hook already answers 45 s; only OpenCode invented a third.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1826-red-q395wnz6\project\tools\test_t1826_declared_budgets.py", line 124, in test_the_open_guard_bound_is_not_below_its_sibling_transports
+    self.assertGreaterEqual(
+AssertionError: 15000 not greater than or equal to 45000 : OpenCode waits 15000 ms for the same engine call Claude allows 45000 ms
+
+======================================================================
+FAIL: test_the_family_budget_is_not_below_a_run_that_already_timed_out (test_t1826_declared_budgets.FamilyBudgetTests.test_the_family_budget_is_not_below_a_run_that_already_timed_out)
+5400 s is the value this ticket measured as a false TIMEOUT.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1826-red-q395wnz6\project\tools\test_t1826_declared_budgets.py", line 88, in test_the_family_budget_is_not_below_a_run_that_already_timed_out
+    self.assertGreater(
+AssertionError: 5400 not greater than 7458.0 : a budget of 5400 s is still below the recorded 7458.0 s run, so canonical evidence will time out a green suite
+
+======================================================================
+FAIL: test_the_unit_family_budget_clears_every_measured_run (test_t1826_declared_budgets.FamilyBudgetTests.test_the_unit_family_budget_clears_every_measured_run)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1826-red-q395wnz6\project\tools\test_t1826_declared_budgets.py", line 77, in test_the_unit_family_budget_clears_every_measured_run
+    self.assertGreaterEqual(
+AssertionError: 5400 not greater than or equal to 8949.6 : the declared unit family budget 5400 s does not clear the measured worst case 7458.0 s with 1.2x headroom
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.015s
+
+FAILED (failures=4)

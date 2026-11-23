@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1775_continue_never_admits_a_seat.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap"
+  ],
+  "oracle_files": [
+    "tools/test_t1775_continue_never_admits_a_seat.py",
+    "tools/test_continue_improve_fallthrough.py",
+    "tools/test_fixture_support.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/continue_fallback.py",
+    "tools/saipen.py"
+  ],
+  "before": {
+    "tools/saipen_engine/continue_fallback.py": ".saipen/evidence/T-1775-improve-resume/before/continue_fallback.py",
+    "tools/saipen.py": ".saipen/evidence/T-1775-improve-resume/before/saipen.py"
+  },
+  "timeout": 900
+}

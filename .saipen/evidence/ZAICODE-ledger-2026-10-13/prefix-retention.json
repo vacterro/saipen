@@ -1,0 +1,34 @@
+{
+  "observed_utc": "2026-10-13T10:09:25.203027+00:00",
+  "initial_events": 5050,
+  "later_events": 5066,
+  "later_tail": 5067,
+  "original_events_exact_semantic_prefix": true,
+  "original_active_bytes_exact_prefix": true,
+  "sealed_bytes_unchanged": {
+    "LOG-001.md": true,
+    "LOG-002.md": true,
+    "LOG-003.md": true,
+    "LOG-004.md": true
+  },
+  "new_event_ids": [
+    5052,
+    5053,
+    5054,
+    5055,
+    5056,
+    5057,
+    5058,
+    5059,
+    5060,
+    5061,
+    5062,
+    5063,
+    5064,
+    5065,
+    5066,
+    5067
+  ],
+  "actor_attribution": "new durable T-321 records observed; their initiating host/authorization was not identified by this inspector",
+  "target_mutations_by_inspection": 0
+}

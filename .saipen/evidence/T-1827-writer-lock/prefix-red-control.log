@@ -1,0 +1,146 @@
+test_a_capture_overtaken_by_a_mutation_is_retried_outside_the_lock (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_capture_overtaken_by_a_mutation_is_retried_outside_the_lock)
+R009: the remedy is a fresh capture outside the mutex, never a retry ... FAIL
+test_a_long_external_capture_does_not_block_a_short_mutation (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_long_external_capture_does_not_block_a_short_mutation)
+R001/R003/R006: the measured 240 s hold was the capture, and the ... FAIL
+test_a_long_external_capture_does_not_block_a_short_mutation (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_long_external_capture_does_not_block_a_short_mutation)
+R001/R003/R006: the measured 240 s hold was the capture, and the ... ERROR
+test_a_short_hold_is_waited_out_and_acquired (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_short_hold_is_waited_out_and_acquired) ... ERROR
+test_an_unbounded_holder_is_refused_within_the_declared_budget (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_an_unbounded_holder_is_refused_within_the_declared_budget) ... Exception in thread Thread-6:
+Traceback (most recent call last):
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\threading.py", line 1401, in run
+    self.function(*self.args, **self.kwargs)
+  File "V:\_TEMP_\t1827-prefix\tools\test_t1827_writer_lock_contract.py", line 83, in _send
+    process.stdin.write(line)
+ValueError: I/O operation on closed file.
+FAIL
+test_acquire_docstring_states_the_bounded_wait (test_t1827_writer_lock_contract.ContractAgreementTests.test_acquire_docstring_states_the_bounded_wait) ... ok
+test_core_contract_states_the_budget_override_and_refusal (test_t1827_writer_lock_contract.ContractAgreementTests.test_core_contract_states_the_budget_override_and_refusal) ... ok
+test_the_remediation_names_the_orphan_procedure_not_file_deletion (test_t1827_writer_lock_contract.ContractAgreementTests.test_the_remediation_names_the_orphan_procedure_not_file_deletion) ... ok
+test_a_saipen_holder_is_named_by_pid_and_command (test_t1827_writer_lock_contract.HolderIdentityTests.test_a_saipen_holder_is_named_by_pid_and_command) ... ERROR
+test_an_unreadable_holder_record_says_the_holder_is_unknown (test_t1827_writer_lock_contract.HolderIdentityTests.test_an_unreadable_holder_record_says_the_holder_is_unknown) ... ERROR
+test_the_status_projection_names_the_live_holder (test_t1827_writer_lock_contract.HolderIdentityTests.test_the_status_projection_names_the_live_holder) ... ERROR
+test_a_stale_holder_record_never_blocks_acquisition (test_t1827_writer_lock_contract.ProcessDeathAndRecordTests.test_a_stale_holder_record_never_blocks_acquisition) ... ok
+test_process_death_releases_the_lock (test_t1827_writer_lock_contract.ProcessDeathAndRecordTests.test_process_death_releases_the_lock) ... ok
+test_the_lock_file_stays_a_permanent_zero_byte_carrier (test_t1827_writer_lock_contract.ProcessDeathAndRecordTests.test_the_lock_file_stays_a_permanent_zero_byte_carrier)
+R008: never delete the lock file to cure a hold. ... ok
+test_the_ship_gate_runs_outside_the_writer_lock (test_t1827_writer_lock_contract.ReleaseGateWindowTests.test_the_ship_gate_runs_outside_the_writer_lock) ... ok
+test_a_yielded_lock_is_retaken_and_a_lost_race_refuses (test_t1827_writer_lock_contract.StatusAndYieldTests.test_a_yielded_lock_is_retaken_and_a_lost_race_refuses) ... ok
+test_lock_status_never_acquires_the_lock (test_t1827_writer_lock_contract.StatusAndYieldTests.test_lock_status_never_acquires_the_lock) ... ok
+test_saipen_status_answers_while_another_writer_holds_the_lock (test_t1827_writer_lock_contract.StatusAndYieldTests.test_saipen_status_answers_while_another_writer_holds_the_lock) ... ok
+
+======================================================================
+ERROR: test_a_long_external_capture_does_not_block_a_short_mutation (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_long_external_capture_does_not_block_a_short_mutation)
+R001/R003/R006: the measured 240 s hold was the capture, and the
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 632, in _rmtree_unsafe
+    os.unlink(fullname)
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'V:\\_TEMP_\\saipen-t1827-3s7ikqb7\\project\\.saipen\\locks\\core.lock'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1827-prefix\tools\test_t1827_writer_lock_contract.py", line 118, in tearDown
+    self.tmp.cleanup()
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\tempfile.py", line 947, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\tempfile.py", line 929, in _rmtree
+    _shutil.rmtree(name, onerror=onerror)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 787, in rmtree
+    return _rmtree_unsafe(path, onerror)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 629, in _rmtree_unsafe
+    _rmtree_unsafe(fullname, onerror)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 629, in _rmtree_unsafe
+    _rmtree_unsafe(fullname, onerror)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 629, in _rmtree_unsafe
+    _rmtree_unsafe(fullname, onerror)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 634, in _rmtree_unsafe
+    onerror(os.unlink, fullname, sys.exc_info())
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\tempfile.py", line 893, in onerror
+    _os.unlink(path)
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'V:\\_TEMP_\\saipen-t1827-3s7ikqb7\\project\\.saipen\\locks\\core.lock'
+
+======================================================================
+ERROR: test_a_short_hold_is_waited_out_and_acquired (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_short_hold_is_waited_out_and_acquired)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1827-prefix\tools\saipen_engine\lock.py", line 654, in _os_lock_bounded
+    _os_lock(self._handle)
+  File "V:\_TEMP_\t1827-prefix\tools\saipen_engine\lock.py", line 506, in _os_lock
+    _MSVCRT.locking(handle.fileno(), mode, 1)
+PermissionError: [Errno 13] Permission denied
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1827-prefix\tools\test_t1827_writer_lock_contract.py", line 158, in test_a_short_hold_is_waited_out_and_acquired
+    self.assertTrue(acquired.acquire(), "a short legitimate hold must be waited for")
+                    ^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t1827-prefix\tools\saipen_engine\lock.py", line 695, in acquire
+    self._os_lock_bounded()
+  File "V:\_TEMP_\t1827-prefix\tools\saipen_engine\lock.py", line 657, in _os_lock_bounded
+    raise WriterBusy(_holder_detail(None)) from exc
+saipen_engine.lock.WriterBusy: WRITER_BUSY
+
+======================================================================
+ERROR: test_a_saipen_holder_is_named_by_pid_and_command (test_t1827_writer_lock_contract.HolderIdentityTests.test_a_saipen_holder_is_named_by_pid_and_command)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1827-prefix\tools\test_t1827_writer_lock_contract.py", line 252, in test_a_saipen_holder_is_named_by_pid_and_command
+    self.assertEqual(payload["holder"]["pid"], process.pid, payload)
+                     ~~~~~~~^^^^^^^^^^
+KeyError: 'holder'
+
+======================================================================
+ERROR: test_an_unreadable_holder_record_says_the_holder_is_unknown (test_t1827_writer_lock_contract.HolderIdentityTests.test_an_unreadable_holder_record_says_the_holder_is_unknown)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1827-prefix\tools\test_t1827_writer_lock_contract.py", line 261, in test_an_unreadable_holder_record_says_the_holder_is_unknown
+    (self.root / ".saipen/locks/core.lock.holder").unlink()
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 1147, in unlink
+    os.unlink(self)
+FileNotFoundError: [WinError 2] The system cannot find the file specified: 'V:\\_TEMP_\\saipen-t1827-cxcegx1f\\project\\.saipen\\locks\\core.lock.holder'
+
+======================================================================
+ERROR: test_the_status_projection_names_the_live_holder (test_t1827_writer_lock_contract.HolderIdentityTests.test_the_status_projection_names_the_live_holder)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1827-prefix\tools\test_t1827_writer_lock_contract.py", line 279, in test_the_status_projection_names_the_live_holder
+    self.assertEqual(payload["holder"]["pid"], process.pid)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+======================================================================
+FAIL: test_a_capture_overtaken_by_a_mutation_is_retried_outside_the_lock (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_capture_overtaken_by_a_mutation_is_retried_outside_the_lock)
+R009: the remedy is a fresh capture outside the mutex, never a retry
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1827-prefix\tools\test_t1827_writer_lock_contract.py", line 229, in test_a_capture_overtaken_by_a_mutation_is_retried_outside_the_lock
+    self.assertGreaterEqual(len(attempts), 2, "the stale capture was not retried")
+AssertionError: 1 not greater than or equal to 2 : the stale capture was not retried
+
+======================================================================
+FAIL: test_a_long_external_capture_does_not_block_a_short_mutation (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_long_external_capture_does_not_block_a_short_mutation)
+R001/R003/R006: the measured 240 s hold was the capture, and the
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1827-prefix\tools\test_t1827_writer_lock_contract.py", line 202, in test_a_long_external_capture_does_not_block_a_short_mutation
+    self.assertFalse(lock_status(self.root)["held"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_an_unbounded_holder_is_refused_within_the_declared_budget (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_an_unbounded_holder_is_refused_within_the_declared_budget)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1827-prefix\tools\test_t1827_writer_lock_contract.py", line 173, in test_an_unbounded_holder_is_refused_within_the_declared_budget
+    self.assertGreaterEqual(elapsed, 0.2, elapsed)
+AssertionError: 0.0 not greater than or equal to 0.2 : 0.0
+
+----------------------------------------------------------------------
+Ran 17 tests in 41.272s
+
+FAILED (failures=3, errors=5)
+EXIT:1

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-438:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "OPERATOR DECISIONS for CAMPAIGN IV delivered explicitly via interactive request (real user, not model): (1) RELEASE 8.1.1 authorized: commit the 52-file runtime manifest blob (RELEASE-COMMIT-THE-BLOB-LIST.txt) AND install candidate iv v2 (V:/_TEMP_/saipen-candidate-iv, 8388 files, tree 689803a4dfd2..., rollback scheduled-source-previous); (2) BASELINE POLICY: populate red_owners with undecided owner dispositions for open WIP and record the shrink of the 4 healed foreign reds (test_sailearn_consumer.soft_fallback, test_t1647_machine_runtime x3) measured by family record 6904e2d2...-2004Z; (3) SRC-386/T-2016: RESTORE disposition chosen (original bytes proven intact at .saipen/archive/retired/SRC-386.*)."
+    }
+  },
+  "derived_at": "2026-11-20T22:14:53Z",
+  "derived_from": "SRC-438",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7eb543fa32a972f687bb9a8b8aa9d81e564b5ac484f3d5f5e92f921d1f7068ac"
+}

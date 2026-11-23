@@ -1,0 +1,14 @@
+{
+  "purpose": "Lossless naming correction for an owned captured subject; no evidence deleted",
+  "moves": [
+    {
+      "old": "before/tools__audit_checks.py",
+      "new": "before/audit_checks.before.py",
+      "raw_sha256": "60f77eef0475e7f5d80c387cdbed69d564b8b894c33cea27d4ce5a25d73fccc9",
+      "reason": "Use the existing captured-subject naming contract in test_style_contract_chokepoint; inherit only markers present in the shipped audit_checks.py subject",
+      "rollback": "Move the same owned file back to its old name, verify this digest, and restore the export locator; this deliberately reproduces the original style-guard failure",
+      "first_full_export_affected": false,
+      "current_export_locator_updated": true
+    }
+  ]
+}

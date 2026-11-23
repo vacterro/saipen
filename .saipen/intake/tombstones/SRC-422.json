@@ -1,0 +1,16 @@
+{
+  "actionable": 2,
+  "archive_ref": ".saipen/quarantine/source/SRC-422.md",
+  "closed_at": "2026-11-22T01:48:38Z",
+  "closure_event": null,
+  "linked_work": "T-2088",
+  "linked_works": [
+    "T-2088"
+  ],
+  "receipt_id": "SRC-422",
+  "requirements": 2,
+  "schema_version": 1,
+  "source_sha256": "0600cee65ae041b603e0f67940d207cd13b7829cfbfd607362c51a3240eb9ce0",
+  "status": "CLOSED",
+  "unresolved": 0
+}

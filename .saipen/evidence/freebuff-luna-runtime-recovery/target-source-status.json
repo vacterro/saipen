@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "receipt": "SRC-020",
+  "status": "ACTIVE",
+  "location": "active",
+  "source_kind": "user_instruction",
+  "source_sha256": "2b4aa7a7752be916763a004e0b3af8e4cbccd55c79adbf69aec46c9dff4fc85e",
+  "linked_work": "T-52",
+  "linked_works": [
+    "T-52"
+  ],
+  "amends": null,
+  "closure_event": null,
+  "coverage": {
+    "receipt": "SRC-020",
+    "requirements": 0,
+    "actionable": 0,
+    "terminal": 0,
+    "dispositions": {},
+    "unresolved": []
+  },
+  "distribution": {
+    "state": "DISTRIBUTABLE",
+    "receipt_id": "SRC-020",
+    "source_sha256": "2b4aa7a7752be916763a004e0b3af8e4cbccd55c79adbf69aec46c9dff4fc85e"
+  }
+}

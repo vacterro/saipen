@@ -1,0 +1,17 @@
+test_a_wait_value_with_its_separator_is_suppliable (test_next_action_deadlock.NextActionDeadlockTests.test_a_wait_value_with_its_separator_is_suppliable)
+`WAIT: <category> -- <text>` is the canonical WAIT grammar. ... ok
+test_an_empty_decision_refuses (test_next_action_deadlock.NextActionDeadlockTests.test_an_empty_decision_refuses) ... ok
+test_the_decision_is_recorded_against_its_own_field (test_next_action_deadlock.NextActionDeadlockTests.test_the_decision_is_recorded_against_its_own_field)
+The DEC used to say `STATE.blocker clear` whatever was authorized. ... ok
+test_the_fixture_really_is_the_deadlock (test_next_action_deadlock.NextActionDeadlockTests.test_the_fixture_really_is_the_deadlock)
+Guard: the router must genuinely be unable to project this. ... ok
+test_the_named_route_runs_from_the_state_that_names_it (test_next_action_deadlock.NextActionDeadlockTests.test_the_named_route_runs_from_the_state_that_names_it) ... ok
+test_the_operator_decides_the_value_not_the_grammar (test_next_action_deadlock.NextActionDeadlockTests.test_the_operator_decides_the_value_not_the_grammar) ... ok
+test_the_refusal_names_a_route (test_next_action_deadlock.NextActionDeadlockTests.test_the_refusal_names_a_route) ... ok
+test_the_route_is_reachable_through_the_guard (test_next_action_deadlock.NextActionDeadlockTests.test_the_route_is_reachable_through_the_guard)
+A printed command the guard refuses is not a route (T-1357). ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 2.747s
+
+OK

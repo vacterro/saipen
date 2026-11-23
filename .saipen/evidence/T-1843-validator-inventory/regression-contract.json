@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_check_inventory.py", "-k", "test_the_live_repository_agrees_with_its_ledger", "-v"],
+  "format": "unittest",
+  "context": ["tools", "saipen"],
+  "oracle_files": ["tools/test_check_inventory.py", "tools/fail_site_inventory.py", "tools/audit_checks.py"],
+  "subject_files": ["tools/validator_fail_sites.json"],
+  "before": {"tools/validator_fail_sites.json": ".saipen/evidence/T-1843-validator-inventory/prefix-ledger.json"},
+  "timeout": 60
+}

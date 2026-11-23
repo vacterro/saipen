@@ -1,0 +1,23 @@
+{
+  "source": "SRC-202",
+  "work": "T-1697",
+  "routing": "Fresh named drops wait behind active work and workable BOARD; before idle maintenance. Numbered legacy layers and existing-source continuation retain precedence.",
+  "extensions": [
+    ".md",
+    ".markdown",
+    ".txt"
+  ],
+  "ordering": "Legacy numeric ascending, then casefolded filename with exact-name tie break; mtime is not authority.",
+  "identity": "relative path + SHA-256 exact bytes; named layer number is null, not synthesized.",
+  "seriality": "One canonical Source/umbrella Work selected per ingest; existing Source dedupe and closure contracts retained.",
+  "deletion": "Only journaled consume after Source CLOSED and matching current captured bytes; arbitrary file deletion not authorized.",
+  "project_boundary": "Only currently bound project root. No registry crawl or daemon; other projects use their own audit directory and ordinary continue loop.",
+  "delivery_scope": "Source home CLI changed; no installed-runtime refresh, Git commit, tag or publish.",
+  "preservation": "Nine pre-subject owner files and independent pre-tree preserved; 62 prior blocked rows byte-identical. Staged diff identical after capture EOL normalization; raw index hash changed, writer UNKNOWN.",
+  "unknown_external_change": "tools/validate.py changed before this ticket implementation; bytes preserved, outside ownership; not reverted or attributed.",
+  "verification_first_pass": "FAIL: five Ruff E501s; extra nonexistent module invocation was invalid instrumentation; stale T-1695 current-tree closure receipt blocked core. Original output preserved; no PASS for this pass.",
+  "verification_current_pass": "Five formatting fixes, corrected module list; Ruff PASS; 209 focused tests PASS (2 skips); oracle 9 pass /1 symlink skip vs pre 7 failures /2 pass /1 skip; core PASS (9 inherited warnings); canonical executed reverify RV-000004 for T-1695. Whole family running.",
+  "boundary_probe_corrections": "verify-boundaries.json and verify-boundaries-correction.json used wrong ticket token and then omitted original CRLF. verified-boundaries.json uses raw rows with original terminators and proves all 62 hashes. No project failure inferred from bad instrumentation.",
+  "audit_snapshot": "Read-only audit status now recognizes 5 named files and legacy audit23; SRC-197 exact closed generation eligible for journaled cleanup. No audit intake or deletion while T-1697 active.",
+  "memory_promotion": "Pending independent review; no card warranted by feature mechanics."
+}

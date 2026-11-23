@@ -1,0 +1,16 @@
+{
+  "actionable": 7,
+  "archive_ref": ".saipen/archive/source/SRC-390.md",
+  "closed_at": "2026-11-04T04:05:49Z",
+  "closure_event": null,
+  "linked_work": "T-2020",
+  "linked_works": [
+    "T-2020"
+  ],
+  "receipt_id": "SRC-390",
+  "requirements": 7,
+  "schema_version": 1,
+  "source_sha256": "a50ab374d409e1a33c8a4f2164018fa10dd09c264991df343f7dcb199dbfe029",
+  "status": "CLOSED",
+  "unresolved": 0
+}

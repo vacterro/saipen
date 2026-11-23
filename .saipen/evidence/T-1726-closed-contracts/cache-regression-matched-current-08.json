@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1726_closed_contracts.py",
+    "-k",
+    "implicit_cache_changes"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "extensions",
+    "bootstrap",
+    "bin",
+    "tests/scenarios/stale-state-reconciliation",
+    "VERSION",
+    "README.md",
+    "ruff.toml"
+  ],
+  "oracle_files": [
+    "tools/test_t1726_closed_contracts.py",
+    "tools/test_work_reverify_cli.py",
+    "tests/scenarios/stale-state-reconciliation/.saipen/STATE.md",
+    "tests/scenarios/stale-state-reconciliation/.saipen/BOARD.md",
+    "tests/scenarios/stale-state-reconciliation/.saipen/LOG.md"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/regression_execution.py",
+    "tools/saipen_engine/closed_contracts.py"
+  ],
+  "before": {
+    "tools/saipen_engine/regression_execution.py": ".saipen/evidence/T-1726-closed-contracts/before-cache/regression_execution.py",
+    "tools/saipen_engine/closed_contracts.py": ".saipen/evidence/T-1726-closed-contracts/before-membership-current-08/tools/saipen_engine/closed_contracts.py"
+  },
+  "timeout": 180
+}

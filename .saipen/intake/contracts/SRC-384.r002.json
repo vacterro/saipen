@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-384:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Finding A current-state: criteria above satisfied"
+    },
+    "SRC-384:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Finding B source provenance fidelity: a model interpretation cannot become operator-authoritative by being stored under user_instruction; authenticated witness required for authority"
+    }
+  },
+  "derived_at": "2026-11-03T05:18:30Z",
+  "derived_from": "SRC-384",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "80b87b158ac223459bbaf1bac9ab40b512181d52ccf090d14984fe608d8e2373"
+}

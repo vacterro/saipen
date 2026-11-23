@@ -1,0 +1,19 @@
+{
+  "oracle_sha256": "8732220cbe13c4a8000201039e652c24fd462f8a67d142fc2410822969ed352d",
+  "runs": [
+    {
+      "subject": "tools\\saipen_engine\\audit_inbox.py",
+      "exit_code": 1,
+      "subject_sha256": "7421355627f2b55b109e0df4644a5b49580f2f21173e6bf33d3544dc37968e06",
+      "output_sha256": "fdeabfe050b01c9967da19ef6c294c53125b70b6fae1d21fedc58aa06a597a32"
+    },
+    {
+      "subject": ".saipen\\kitchen\\failed\\T-1698\\audit_inbox.py",
+      "exit_code": 0,
+      "subject_sha256": "8be9ffadd25fc8d8c750ee7694f82e41fdbe2faa2ff593a44a59f3306477c53d",
+      "output_sha256": "d4f6d3999106391582e2471ac0d3726bdc8a82239503dfdd5e33c83c9335ffc0"
+    }
+  ],
+  "frozen_owner_paths_unchanged": true,
+  "limits": "candidate verification only; T-1698 remains BLOCKED, no source restoration or lifecycle claim"
+}

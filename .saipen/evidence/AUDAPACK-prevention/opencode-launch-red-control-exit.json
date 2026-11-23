@@ -1,0 +1,5 @@
+{
+  "command": "python -m unittest tools.test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_optional_explicit_launch_is_checked_and_does_not_leak -v",
+  "exit_code": 1,
+  "timestamp_utc": "2026-10-10T11:50:23.9485258Z"
+}

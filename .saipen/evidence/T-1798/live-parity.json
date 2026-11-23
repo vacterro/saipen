@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "install_fingerprint": "install-v1:d008ed5f12049737a26b1769aa7aa27cc19724a7ccc61eb4bd11cbd2d9f18cc8",
+  "request_clause_engine_bytes": "IDENTICAL",
+  "source_route": {
+    "ok": true,
+    "code": "CONVERGE_SET",
+    "action": null,
+    "ticket": null,
+    "reason": null
+  },
+  "installed_route": {
+    "ok": true,
+    "code": "CONVERGE_SET",
+    "action": null,
+    "ticket": null,
+    "reason": null
+  },
+  "dry_run_checkpoint_unchanged": true,
+  "published": false
+}

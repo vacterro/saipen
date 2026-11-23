@@ -1,0 +1,376 @@
+ M .gitattributes
+ M .github/workflows/release.yml
+ M .saipen/BOARD.md
+ M .saipen/LOG.md
+ M .saipen/MANIFEST.json
+ M .saipen/STATE.md
+ M .saipen/evidence/response-authority/REVIEW.md
+ M .saipen/evidence/response-authority/paired/live.json
+ M .saipen/evidence/response-authority/paired/live.txt
+ M .saipen/intake/audit_allocator.json
+ M .saipen/intake/audit_inbox.json
+ M .saipen/intake/contracts/SRC-118.json
+ M .saipen/intake/contracts/SRC-143.json
+ M .saipen/intake/coverage/SRC-027.json
+ M .saipen/intake/coverage/SRC-118.json
+ M .saipen/intake/coverage/SRC-143.json
+ M .saipen/intake/coverage/SRC-165.json
+ M .saipen/intake/coverage/SRC-166.json
+ M .saipen/intake/index.json
+ M .saipen/kitchen/cohort_registry.json
+ M .saipen/kitchen/digest.md
+ M .saipen/saitranslate/kitchen/.ded_source_digest
+ M .saipen/saitranslate/kitchen/OUTBOX.md
+ M .saipen/saitranslate/kitchen/_publish_package.py
+ M .saipen/saitranslate/kitchen/_refresh_readmes.py
+ M .saipen/saitranslate/kitchen/_translate_all_locales.py
+ M .saipen/saitranslate/kitchen/_translate_all_v2.py
+ M .saipen/saitranslate/kitchen/_translate_remaining.py
+ M .saipen/saitranslate/kitchen/_translate_spec_api.py
+ M .saipen/saitranslate/kitchen/_translate_spec_sections.py
+ M .saipen/saitranslate/kitchen/_translate_spec_v2.py
+ M .saipen/saitranslate/kitchen/ar/CODE_OF_CONDUCT_AR.md
+ M .saipen/saitranslate/kitchen/ar/CONTRIBUTING_AR.md
+ M .saipen/saitranslate/kitchen/ar/GUIDE_AR.md
+ M .saipen/saitranslate/kitchen/ar/README_AR.md
+ M .saipen/saitranslate/kitchen/ar/SECURITY_AR.md
+ M .saipen/saitranslate/kitchen/ar/SPEC_AR.md
+ M .saipen/saitranslate/kitchen/bg/CODE_OF_CONDUCT_BG.md
+ M .saipen/saitranslate/kitchen/bg/CONTRIBUTING_BG.md
+ M .saipen/saitranslate/kitchen/bg/GUIDE_BG.md
+ M .saipen/saitranslate/kitchen/bg/README_BG.md
+ M .saipen/saitranslate/kitchen/bg/SECURITY_BG.md
+ M .saipen/saitranslate/kitchen/bg/SPEC_BG.md
+ M .saipen/saitranslate/kitchen/cs/CODE_OF_CONDUCT_CS.md
+ M .saipen/saitranslate/kitchen/cs/CONTRIBUTING_CS.md
+ M .saipen/saitranslate/kitchen/cs/GUIDE_CS.md
+ M .saipen/saitranslate/kitchen/cs/README_CS.md
+ M .saipen/saitranslate/kitchen/cs/SECURITY_CS.md
+ M .saipen/saitranslate/kitchen/cs/SPEC_CS.md
+ M .saipen/saitranslate/kitchen/da/CODE_OF_CONDUCT_DA.md
+ M .saipen/saitranslate/kitchen/da/CONTRIBUTING_DA.md
+ M .saipen/saitranslate/kitchen/da/GUIDE_DA.md
+ M .saipen/saitranslate/kitchen/da/README_DA.md
+ M .saipen/saitranslate/kitchen/da/SECURITY_DA.md
+ M .saipen/saitranslate/kitchen/da/SPEC_DA.md
+ M .saipen/saitranslate/kitchen/de/CODE_OF_CONDUCT_DE.md
+ M .saipen/saitranslate/kitchen/de/CONTRIBUTING_DE.md
+ M .saipen/saitranslate/kitchen/de/GUIDE_DE.md
+ M .saipen/saitranslate/kitchen/de/README_DE.md
+ M .saipen/saitranslate/kitchen/de/SECURITY_DE.md
+ M .saipen/saitranslate/kitchen/de/SPEC_DE.md
+ M .saipen/saitranslate/kitchen/ded/CODE_OF_CONDUCT_DED.md
+ M .saipen/saitranslate/kitchen/ded/CONTRIBUTING_DED.md
+ M .saipen/saitranslate/kitchen/ded/README_DED.md
+ M .saipen/saitranslate/kitchen/ded/SECURITY_DED.md
+ M .saipen/saitranslate/kitchen/ded/SPEC_DED.md
+ M .saipen/saitranslate/kitchen/el/CODE_OF_CONDUCT_EL.md
+ M .saipen/saitranslate/kitchen/el/CONTRIBUTING_EL.md
+ M .saipen/saitranslate/kitchen/el/GUIDE_EL.md
+ M .saipen/saitranslate/kitchen/el/README_EL.md
+ M .saipen/saitranslate/kitchen/el/SECURITY_EL.md
+ M .saipen/saitranslate/kitchen/el/SPEC_EL.md
+ M .saipen/saitranslate/kitchen/es/CODE_OF_CONDUCT_ES.md
+ M .saipen/saitranslate/kitchen/es/CONTRIBUTING_ES.md
+ M .saipen/saitranslate/kitchen/es/GUIDE_ES.md
+ M .saipen/saitranslate/kitchen/es/README_ES.md
+ M .saipen/saitranslate/kitchen/es/SECURITY_ES.md
+ M .saipen/saitranslate/kitchen/es/SPEC_ES.md
+ M .saipen/saitranslate/kitchen/et/CODE_OF_CONDUCT_ET.md
+ M .saipen/saitranslate/kitchen/et/CONTRIBUTING_ET.md
+ M .saipen/saitranslate/kitchen/et/README_ET.md
+ M .saipen/saitranslate/kitchen/et/SECURITY_ET.md
+ M .saipen/saitranslate/kitchen/et/SPEC_ET.md
+ M .saipen/saitranslate/kitchen/fi/CODE_OF_CONDUCT_FI.md
+ M .saipen/saitranslate/kitchen/fi/CONTRIBUTING_FI.md
+ M .saipen/saitranslate/kitchen/fi/GUIDE_FI.md
+ M .saipen/saitranslate/kitchen/fi/README_FI.md
+ M .saipen/saitranslate/kitchen/fi/SECURITY_FI.md
+ M .saipen/saitranslate/kitchen/fi/SPEC_FI.md
+ M .saipen/saitranslate/kitchen/fr/CODE_OF_CONDUCT_FR.md
+ M .saipen/saitranslate/kitchen/fr/CONTRIBUTING_FR.md
+ M .saipen/saitranslate/kitchen/fr/GUIDE_FR.md
+ M .saipen/saitranslate/kitchen/fr/README_FR.md
+ M .saipen/saitranslate/kitchen/fr/SECURITY_FR.md
+ M .saipen/saitranslate/kitchen/fr/SPEC_FR.md
+ M .saipen/saitranslate/kitchen/he/CODE_OF_CONDUCT_HE.md
+ M .saipen/saitranslate/kitchen/he/CONTRIBUTING_HE.md
+ M .saipen/saitranslate/kitchen/he/GUIDE_HE.md
+ M .saipen/saitranslate/kitchen/he/README_HE.md
+ M .saipen/saitranslate/kitchen/he/SECURITY_HE.md
+ M .saipen/saitranslate/kitchen/he/SPEC_HE.md
+ M .saipen/saitranslate/kitchen/hi/CODE_OF_CONDUCT_HI.md
+ M .saipen/saitranslate/kitchen/hi/CONTRIBUTING_HI.md
+ M .saipen/saitranslate/kitchen/hi/GUIDE_HI.md
+ M .saipen/saitranslate/kitchen/hi/README_HI.md
+ M .saipen/saitranslate/kitchen/hi/SECURITY_HI.md
+ M .saipen/saitranslate/kitchen/hi/SPEC_HI.md
+ M .saipen/saitranslate/kitchen/hr/CODE_OF_CONDUCT_HR.md
+ M .saipen/saitranslate/kitchen/hr/CONTRIBUTING_HR.md
+ M .saipen/saitranslate/kitchen/hr/GUIDE_HR.md
+ M .saipen/saitranslate/kitchen/hr/README_HR.md
+ M .saipen/saitranslate/kitchen/hr/SECURITY_HR.md
+ M .saipen/saitranslate/kitchen/hr/SPEC_HR.md
+ M .saipen/saitranslate/kitchen/hu/CODE_OF_CONDUCT_HU.md
+ M .saipen/saitranslate/kitchen/hu/CONTRIBUTING_HU.md
+ M .saipen/saitranslate/kitchen/hu/GUIDE_HU.md
+ M .saipen/saitranslate/kitchen/hu/README_HU.md
+ M .saipen/saitranslate/kitchen/hu/SECURITY_HU.md
+ M .saipen/saitranslate/kitchen/hu/SPEC_HU.md
+ M .saipen/saitranslate/kitchen/id/CODE_OF_CONDUCT_ID.md
+ M .saipen/saitranslate/kitchen/id/CONTRIBUTING_ID.md
+ M .saipen/saitranslate/kitchen/id/GUIDE_ID.md
+ M .saipen/saitranslate/kitchen/id/README_ID.md
+ M .saipen/saitranslate/kitchen/id/SECURITY_ID.md
+ M .saipen/saitranslate/kitchen/id/SPEC_ID.md
+ M .saipen/saitranslate/kitchen/it/CODE_OF_CONDUCT_IT.md
+ M .saipen/saitranslate/kitchen/it/CONTRIBUTING_IT.md
+ M .saipen/saitranslate/kitchen/it/GUIDE_IT.md
+ M .saipen/saitranslate/kitchen/it/README_IT.md
+ M .saipen/saitranslate/kitchen/it/SECURITY_IT.md
+ M .saipen/saitranslate/kitchen/it/SPEC_IT.md
+ M .saipen/saitranslate/kitchen/ja/CODE_OF_CONDUCT_JA.md
+ M .saipen/saitranslate/kitchen/ja/CONTRIBUTING_JA.md
+ M .saipen/saitranslate/kitchen/ja/GUIDE_JA.md
+ M .saipen/saitranslate/kitchen/ja/README_JA.md
+ M .saipen/saitranslate/kitchen/ja/SECURITY_JA.md
+ M .saipen/saitranslate/kitchen/ja/SPEC_JA.md
+ M .saipen/saitranslate/kitchen/ko/CODE_OF_CONDUCT_KO.md
+ M .saipen/saitranslate/kitchen/ko/CONTRIBUTING_KO.md
+ M .saipen/saitranslate/kitchen/ko/GUIDE_KO.md
+ M .saipen/saitranslate/kitchen/ko/README_KO.md
+ M .saipen/saitranslate/kitchen/ko/SECURITY_KO.md
+ M .saipen/saitranslate/kitchen/ko/SPEC_KO.md
+ M .saipen/saitranslate/kitchen/nl/CODE_OF_CONDUCT_NL.md
+ M .saipen/saitranslate/kitchen/nl/CONTRIBUTING_NL.md
+ M .saipen/saitranslate/kitchen/nl/GUIDE_NL.md
+ M .saipen/saitranslate/kitchen/nl/README_NL.md
+ M .saipen/saitranslate/kitchen/nl/SECURITY_NL.md
+ M .saipen/saitranslate/kitchen/nl/SPEC_NL.md
+ M .saipen/saitranslate/kitchen/no/CODE_OF_CONDUCT_NO.md
+ M .saipen/saitranslate/kitchen/no/CONTRIBUTING_NO.md
+ M .saipen/saitranslate/kitchen/no/GUIDE_NO.md
+ M .saipen/saitranslate/kitchen/no/README_NO.md
+ M .saipen/saitranslate/kitchen/no/SECURITY_NO.md
+ M .saipen/saitranslate/kitchen/no/SPEC_NO.md
+ M .saipen/saitranslate/kitchen/pl/CODE_OF_CONDUCT_PL.md
+ M .saipen/saitranslate/kitchen/pl/CONTRIBUTING_PL.md
+ M .saipen/saitranslate/kitchen/pl/GUIDE_PL.md
+ M .saipen/saitranslate/kitchen/pl/README_PL.md
+ M .saipen/saitranslate/kitchen/pl/SECURITY_PL.md
+ M .saipen/saitranslate/kitchen/pl/SPEC_PL.md
+ M .saipen/saitranslate/kitchen/pt/CODE_OF_CONDUCT_PT.md
+ M .saipen/saitranslate/kitchen/pt/CONTRIBUTING_PT.md
+ M .saipen/saitranslate/kitchen/pt/GUIDE_PT.md
+ M .saipen/saitranslate/kitchen/pt/README_PT.md
+ M .saipen/saitranslate/kitchen/pt/SECURITY_PT.md
+ M .saipen/saitranslate/kitchen/pt/SPEC_PT.md
+ M .saipen/saitranslate/kitchen/ro/CODE_OF_CONDUCT_RO.md
+ M .saipen/saitranslate/kitchen/ro/CONTRIBUTING_RO.md
+ M .saipen/saitranslate/kitchen/ro/GUIDE_RO.md
+ M .saipen/saitranslate/kitchen/ro/README_RO.md
+ M .saipen/saitranslate/kitchen/ro/SECURITY_RO.md
+ M .saipen/saitranslate/kitchen/ro/SPEC_RO.md
+ M .saipen/saitranslate/kitchen/ru/CODE_OF_CONDUCT_RU.md
+ M .saipen/saitranslate/kitchen/ru/CONTRIBUTING_RU.md
+ M .saipen/saitranslate/kitchen/ru/README_RU.md
+ M .saipen/saitranslate/kitchen/ru/SECURITY_RU.md
+ M .saipen/saitranslate/kitchen/ru/SPEC_RU.md
+ M .saipen/saitranslate/kitchen/sk/CODE_OF_CONDUCT_SK.md
+ M .saipen/saitranslate/kitchen/sk/CONTRIBUTING_SK.md
+ M .saipen/saitranslate/kitchen/sk/GUIDE_SK.md
+ M .saipen/saitranslate/kitchen/sk/README_SK.md
+ M .saipen/saitranslate/kitchen/sk/SECURITY_SK.md
+ M .saipen/saitranslate/kitchen/sk/SPEC_SK.md
+ M .saipen/saitranslate/kitchen/sv/CODE_OF_CONDUCT_SV.md
+ M .saipen/saitranslate/kitchen/sv/CONTRIBUTING_SV.md
+ M .saipen/saitranslate/kitchen/sv/GUIDE_SV.md
+ M .saipen/saitranslate/kitchen/sv/README_SV.md
+ M .saipen/saitranslate/kitchen/sv/SECURITY_SV.md
+ M .saipen/saitranslate/kitchen/sv/SPEC_SV.md
+ M .saipen/saitranslate/kitchen/th/CODE_OF_CONDUCT_TH.md
+ M .saipen/saitranslate/kitchen/th/CONTRIBUTING_TH.md
+ M .saipen/saitranslate/kitchen/th/GUIDE_TH.md
+ M .saipen/saitranslate/kitchen/th/README_TH.md
+ M .saipen/saitranslate/kitchen/th/SECURITY_TH.md
+ M .saipen/saitranslate/kitchen/th/SPEC_TH.md
+ M .saipen/saitranslate/kitchen/tr/CODE_OF_CONDUCT_TR.md
+ M .saipen/saitranslate/kitchen/tr/CONTRIBUTING_TR.md
+ M .saipen/saitranslate/kitchen/tr/GUIDE_TR.md
+ M .saipen/saitranslate/kitchen/tr/README_TR.md
+ M .saipen/saitranslate/kitchen/tr/SECURITY_TR.md
+ M .saipen/saitranslate/kitchen/tr/SPEC_TR.md
+ M .saipen/saitranslate/kitchen/uk/CODE_OF_CONDUCT_UK.md
+ M .saipen/saitranslate/kitchen/uk/CONTRIBUTING_UK.md
+ M .saipen/saitranslate/kitchen/uk/GUIDE_UK.md
+ M .saipen/saitranslate/kitchen/uk/README_UK.md
+ M .saipen/saitranslate/kitchen/uk/SECURITY_UK.md
+ M .saipen/saitranslate/kitchen/uk/SPEC_UK.md
+ M .saipen/saitranslate/kitchen/vi/CODE_OF_CONDUCT_VI.md
+ M .saipen/saitranslate/kitchen/vi/CONTRIBUTING_VI.md
+ M .saipen/saitranslate/kitchen/vi/GUIDE_VI.md
+ M .saipen/saitranslate/kitchen/vi/README_VI.md
+ M .saipen/saitranslate/kitchen/vi/SECURITY_VI.md
+ M .saipen/saitranslate/kitchen/vi/SPEC_VI.md
+ M .saipen/saitranslate/kitchen/zh/CODE_OF_CONDUCT_ZH.md
+ M .saipen/saitranslate/kitchen/zh/CONTRIBUTING_ZH.md
+ M .saipen/saitranslate/kitchen/zh/GUIDE_ZH.md
+ M .saipen/saitranslate/kitchen/zh/README_ZH.md
+ M .saipen/saitranslate/kitchen/zh/SECURITY_ZH.md
+ M .saipen/saitranslate/kitchen/zh/SPEC_ZH.md
+ M CHANGELOG.md
+ M README.ded.md
+ M README.ee.md
+ M README.ja.md
+ M README.md
+ M VERSION
+ M bootstrap/inject.ps1
+ M bootstrap/inject.sh
+A  bootstrap/install_ownership.py
+ M bootstrap/uninstall.ps1
+ M bootstrap/uninstall.sh
+ M saipen/BOOT.md
+ M saipen/COMMANDS.md
+ M saipen/COMMAND_EFFECTS.json
+ M saipen/CORE.md
+ M saipen/OPS.md
+ M tests/validate.ps1
+ M tests/validate.sh
+ M tools/__init__.py
+ A tools/_module_identity.py
+ M tools/audit_parity.py
+ M tools/install_host_guard.py
+ M tools/run_scenarios.py
+ M tools/saipen.py
+ M tools/saipen_engine/evidence.py
+ M tools/saipen_engine/intake.py
+ M tools/saipen_engine/journal.py
+ M tools/saipen_engine/operations.py
+ M tools/saipen_engine/router.py
+ M tools/test_closure_provenance.py
+ M tools/test_evidence_hygiene.py
+ M tools/test_module_duplication_guard.py
+ A tools/test_portable_floor_fields.py
+ M tools/test_protocol_registry.py
+A  tools/test_public_install_lifecycle.py
+ M tools/test_source_receipts.py
+ M tools/test_t1515_posix_shell_entry.py
+ A tools/test_tool_module_identity.py
+?? .saipen/evidence/T-1283-current/
+?? .saipen/evidence/T-1306-current/
+?? .saipen/evidence/T-1316-current/
+?? .saipen/evidence/T-1341-current/
+?? .saipen/evidence/T-1348-current/
+?? .saipen/evidence/T-1408-current/
+?? .saipen/evidence/T-1515-current/
+?? .saipen/evidence/T-1565-current/
+?? .saipen/evidence/T-1604-current/
+?? .saipen/evidence/T-1605-current/
+?? .saipen/evidence/cc-all-owned/
+?? .saipen/evidence/core-unit/1d9268ada530735b-20261003T040639Z.json
+?? .saipen/evidence/core-unit/32267b416e4798f7-20261003T191632Z.json
+?? .saipen/evidence/core-unit/32267b416e4798f7-20261003T201330Z.json
+?? .saipen/evidence/core-unit/54ad859af386ae71-20261003T112208Z.json
+?? .saipen/evidence/core-unit/54ad859af386ae71-20261003T114625Z.json
+?? .saipen/evidence/core-unit/54ad859af386ae71-20261003T135812Z.json
+?? .saipen/evidence/core-unit/5e8c632d2983e78c-20261003T153839Z.json
+?? .saipen/evidence/core-unit/6d7780e2d0dd1257-20261003T033811Z.json
+?? .saipen/evidence/core-unit/73a0535196e5c013-20261003T164017Z.json
+?? .saipen/evidence/core-unit/786656ef48db7083-20261004T012105Z.json
+?? .saipen/evidence/core-unit/897f117d9995d092-20261003T213728Z.json
+?? .saipen/evidence/core-unit/8ceffa6b28850c67-20261003T030014Z.json
+?? .saipen/evidence/core-unit/a48df88d233ae1e6-20261003T185925Z.json
+?? .saipen/evidence/core-unit/b244951a4ff548b4-20261003T090442Z.json
+?? .saipen/evidence/core-unit/be685174ecb2b4dd-20261003T023428Z.json
+?? .saipen/evidence/core-unit/bfdadc11eaa0d3af-20261003T102125Z.json
+?? .saipen/evidence/core-unit/db342ee8fd388dd5-20261003T120021Z.json
+?? .saipen/evidence/core-unit/e0bea87e9445b496-20261003T060300Z.json
+?? .saipen/evidence/core-unit/e7acc6aa3b764cce-20261003T235746Z.json
+?? .saipen/evidence/floor-fields/
+?? .saipen/evidence/goal-authority/
+?? .saipen/evidence/markhunt-triage/
+?? .saipen/evidence/model-matrix/
+?? .saipen/evidence/operator-wait/
+?? .saipen/evidence/posix-entry-criterion/
+?? .saipen/evidence/public-release/
+?? .saipen/evidence/queue-controls/
+?? .saipen/evidence/receipt-normalization/
+?? .saipen/evidence/response-authority/CORE-before-budget-fix.md
+?? .saipen/evidence/response-authority/FINAL.md
+?? .saipen/evidence/response-authority/PARENT-FINAL.md
+?? .saipen/evidence/response-authority/REVIEW-FINAL.md
+?? .saipen/evidence/response-authority/T-1155-retirement-refusal.json
+?? .saipen/evidence/response-authority/T-1172-retirement-refusal.json
+?? .saipen/evidence/response-authority/T-1195-retirement-refusal.json
+?? .saipen/evidence/response-authority/T-1321-retirement-refusal.json
+?? .saipen/evidence/response-authority/acceptance-map.json
+?? .saipen/evidence/response-authority/bind_verified.py
+?? .saipen/evidence/response-authority/blocked-current.json
+?? .saipen/evidence/response-authority/budget-final-tests.txt
+?? .saipen/evidence/response-authority/budget-tests.txt
+?? .saipen/evidence/response-authority/claude-sync-budget.txt
+?? .saipen/evidence/response-authority/claude-sync-literal.txt
+?? .saipen/evidence/response-authority/claude-sync-stable.txt
+?? .saipen/evidence/response-authority/codex-sync-budget.txt
+?? .saipen/evidence/response-authority/codex-sync-literal.txt
+?? .saipen/evidence/response-authority/codex-sync-stable.txt
+?? .saipen/evidence/response-authority/finalize_evidence.py
+?? .saipen/evidence/response-authority/host-sync-after-doc-update.txt
+?? .saipen/evidence/response-authority/host-sync.txt
+?? .saipen/evidence/response-authority/installed-current-literal.json
+?? .saipen/evidence/response-authority/installed-dogfood/
+?? .saipen/evidence/response-authority/installed_dogfood.py
+?? .saipen/evidence/response-authority/installed_prompt.py
+?? .saipen/evidence/response-authority/opencode-sync-budget.txt
+?? .saipen/evidence/response-authority/opencode-sync-literal.txt
+?? .saipen/evidence/response-authority/opencode-sync-stable.txt
+?? .saipen/evidence/response-authority/paired-review/
+?? .saipen/evidence/response-authority/parent-blockers-expanded.json
+?? .saipen/evidence/response-authority/parent-blockers-pass1.json
+?? .saipen/evidence/response-authority/parent-blockers-pass2.json
+?? .saipen/evidence/response-authority/parent-blockers-repaired-pass1.json
+?? .saipen/evidence/response-authority/parent-blockers-repaired-pass2.json
+?? .saipen/evidence/response-authority/parent-final-queue.json
+?? .saipen/evidence/response-authority/parent-reconcile-pass1.json
+?? .saipen/evidence/response-authority/parent-reconcile-pass2.json
+?? .saipen/evidence/response-authority/parent-reconcile-repaired-pass1.json
+?? .saipen/evidence/response-authority/parent-reconcile-repaired-pass2.json
+?? .saipen/evidence/response-authority/parent-review-tests.txt
+?? .saipen/evidence/response-authority/parent-validate-repaired.json
+?? .saipen/evidence/response-authority/parent-validate.json
+?? .saipen/evidence/response-authority/parent-verify-tests.txt
+?? .saipen/evidence/response-authority/parent_blocker_audit.py
+?? .saipen/evidence/response-authority/retention.json
+?? .saipen/evidence/response-authority/source-review.json
+?? .saipen/evidence/response-authority/validate-final-current.json
+?? .saipen/evidence/response-authority/validate-final.json
+?? .saipen/evidence/response-authority/validate-literal-fail.json
+?? .saipen/evidence/response-authority/validate-literal-pass.json
+?? .saipen/evidence/response-authority/validate-review.json
+?? .saipen/evidence/response-authority/zaicode-sync-budget.txt
+?? .saipen/evidence/response-authority/zaicode-sync-literal.txt
+?? .saipen/evidence/response-authority/zcode-production-sync-literal.txt
+?? .saipen/evidence/response-authority/zcode-sync-budget.txt
+?? .saipen/evidence/sandbox-wait-oracle/
+?? .saipen/evidence/scenario-oracles/
+?? .saipen/evidence/scenario-review/
+?? .saipen/evidence/tool-module-identity/
+?? .saipen/intake/active/SRC-167.md
+?? .saipen/intake/active/SRC-167.meta.json
+?? .saipen/intake/active/SRC-168.md
+?? .saipen/intake/active/SRC-168.meta.json
+?? .saipen/intake/active/SRC-169.md
+?? .saipen/intake/active/SRC-169.meta.json
+?? .saipen/intake/contracts/SRC-118.r001.json
+?? .saipen/intake/contracts/SRC-143.r001.json
+?? .saipen/intake/contracts/SRC-167.json
+?? .saipen/intake/contracts/SRC-167.r001.json
+?? .saipen/intake/contracts/SRC-168.json
+?? .saipen/intake/contracts/SRC-168.r001.json
+?? .saipen/intake/contracts/SRC-169.json
+?? .saipen/intake/coverage/SRC-167.json
+?? .saipen/intake/coverage/SRC-168.json
+?? .saipen/intake/coverage/SRC-169.json
+?? .saipen/kitchen/failed/T-1606.patch
+?? .saipen/kitchen/failed/T-1606/
+?? .saipen/kitchen/readonly-cleanup/

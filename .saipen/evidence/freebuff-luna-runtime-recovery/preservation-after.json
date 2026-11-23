@@ -1,0 +1,23 @@
+{
+  "observed": "post-test",
+  "target_root": "V:\\___VAC\\__K\\__CODE\\_PLUG_SCRIPT\\_FREEBUFF_SAI",
+  "sha256": {
+    ".saipen/STATE.md": "b88cc3f2f1335d182b662f05b4970d9c635541178a3d22b18a85e26f924db351",
+    ".saipen/BOARD.md": "2f74b14d5a981ddb9196207003446b8370e8c4b7d460e88bbfbf7be472faff74",
+    ".saipen/LOG.md": "1f59559a04a4f161cfb8175c9d2b4971133e4528d65192182e97c573e013d89e",
+    ".saipen/IDENTITY.md": "e3aeccc2a2b1bd5047a2640db3693b1b1a940186d0052747511949b436ac92a0",
+    ".saipen/intake/active/SRC-020.md": "2b4aa7a7752be916763a004e0b3af8e4cbccd55c79adbf69aec46c9dff4fc85e",
+    ".saipen/intake/active/SRC-020.meta.json": "92e8dd21f0d3ceb6c548777b8fef2a57ae8e165c3ef16d494865d9ad5452f1d6"
+  },
+  "state": "---\nphase: BUILD\ntask: T-52\nnext_action: \"PHASE BUILD T-52\"\nblocker: \"\"\nagent: saipen\nsaipen_version: 8\nschema_version: 3\nstyle_contract: ded-069a4c52\nsaipen_home: \"V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN\"\nmode: full\ntransition_from: SCOUT\nupdated: \"2026-10-14T17:42:11Z\"\nlast_event: 685\nexecution_intent: converge\nconverge_target: done\n---\n",
+  "fixture": {
+    "project_root": "V:\\_TEMP_\\saipen-freebuff-luna-cold-s5e38tid",
+    "no_lifecycle_created": true,
+    "unchanged_fixture_files": true,
+    "actual_files": [
+      ".AGENTS.md",
+      ".freebuff/project-id",
+      "README.md"
+    ]
+  }
+}

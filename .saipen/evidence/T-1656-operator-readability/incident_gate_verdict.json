@@ -1,0 +1,49 @@
+{
+  "ok": false,
+  "code": "EXEC_RESPONSE_INVALID",
+  "class": "AUTONOMOUS_HANDBACK",
+  "layer": "EXEC_RESPONSE",
+  "layers": {
+    "admission": "NOT_CONSULTED",
+    "exec_response": "FAIL",
+    "chat_style": "NOT_REACHED"
+  },
+  "errors": [
+    "RESULT must occur exactly once",
+    "NEXT EXACT ACTION must occur exactly once",
+    "VALIDATION must occur exactly once",
+    "STATUS exceeds 64 character(s) (3278) -- a line count is not a compactness contract",
+    "the whole response is 3287 characters -- the budget for this boundary is 1200",
+    "VALIDATION must start with current CURRENT_FAIL",
+    "STATUS must name current phase DONE",
+    "OPERATOR ACTION is required by the current route"
+  ],
+  "detail_mode": "NONE",
+  "turn_decision": "OPERATOR_WAIT",
+  "detail": "RESULT must occur exactly once; NEXT EXACT ACTION must occur exactly once; VALIDATION must occur exactly once; STATUS exceeds 64 character(s) (3278) -- a line count is not a compactness contract; the whole response is 3287 characters -- the budget for this boundary is 1200; VALIDATION must start with current CURRENT_FAIL; STATUS must name current phase DONE; OPERATOR ACTION is required by the current route",
+  "diagnostic": null,
+  "delivery": "STATUS: DONE\nRESULT: Vajab operaatori otsust; 133 lõpetatud; 1 blokeeritud\nOPERATOR ACTION: Anna puuduva otsuse volitus.\nNEXT EXACT ACTION: NONE\nVALIDATION: CURRENT_FAIL\nDETAILS: E-4515, E-4520",
+  "overflow": {
+    "code": "OPERATOR_OUTPUT_OVERFLOW",
+    "response_class": "HUMAN_ACTION_BLOCKER",
+    "fields": [
+      {
+        "field": "STATUS",
+        "chars": 3278,
+        "lines": 1,
+        "char_budget": 64,
+        "line_budget": 1
+      }
+    ],
+    "total": {
+      "chars": 3287,
+      "lines": 1,
+      "char_budget": 1200,
+      "line_budget": 8
+    },
+    "detail_ref": ".saipen/evidence/response/rejected-2a84a1b6a29a5d0e.txt",
+    "compaction": "SUCCEEDED",
+    "preserved": false
+  },
+  "contract": "SAIPEN chat contract, generated from STYLE.md (ded-069a4c52). Reply language is pinned to Estonian (et) by STYLE.md: answer in it on every reply, whatever language the user wrote in. Voice: caveman-ded, blunt and compressed. Higher-priority host instructions retain precedence. Chat prose is at most 8 lines (target 5) and 900 characters unless witnessed human ingress explicitly requests depth or a typed artifact. Summary, brief and ordinary final report stay compact. Fences never escape the total budget. Never open with: Sure, Certainly, Okay, Here is, I will, Let me, Based on my analysis, I'd be happy to. Never close with: Hope this helps, Let me know if you need anything else, Feel free to ask. Never apologize with: Sorry, My apologies, I made a mistake. Commands, PASS/FAIL, file:line, error strings and code stay exact. An operational boundary is the EXEC-RESPONSE-01 control surface generated from machine facts (`saipen response digest --project-root ROOT --reason final|stop|status`), never a model retrospective. The low-level diagnostic renderer is `saipen response render --stdin`. Completed-part gates replace default operational output. Post-render Stop gates request one correction; they cannot retract visible text. Runnable work continues silently. Evidence remains durable, not narrated."
+}

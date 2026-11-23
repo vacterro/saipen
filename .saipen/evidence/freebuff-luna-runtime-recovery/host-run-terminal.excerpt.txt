@@ -1,0 +1,291 @@
+var COMMAND_OUTPUT_LIMIT = 50000, TRUNCATION_MARKER = `
+[...TRUNCATED DUE TO LENGTH...]
+`, MAX_PENDING_COLOR_SEQUENCE_LENGTH = 32, INCOMPLETE_COLOR_SEQUENCE_REGEX = /\x1B\[[0-9;]*$/, KILL_ESCALATION_MS = 1500, PROCESS_EXIT_POLL_MS = 25;
+
+class BoundedOutputBuffer {
+  maxLength;
+  head = "";
+  tail = "";
+  truncated = !1;
+  pendingColorSequence = "";
+  headLimit;
+  tailLimit;
+  constructor(maxLength) {
+    this.maxLength = maxLength;
+    if (maxLength < TRUNCATION_MARKER.length)
+      throw Error("Output limit must fit the truncation marker");
+    let retainedLength = Math.max(0, maxLength - TRUNCATION_MARKER.length);
+    this.headLimit = Math.ceil(retainedLength / 2), this.tailLimit = Math.floor(retainedLength / 2);
+  }
+  append(value) {
+    if (!value)
+      return;
+    let normalized = this.pendingColorSequence + value;
+    this.pendingColorSequence = "";
+    let incompleteColorSequence = normalized.match(INCOMPLETE_COLOR_SEQUENCE_REGEX)?.[0];
+    if (incompleteColorSequence && incompleteColorSequence.length <= MAX_PENDING_COLOR_SEQUENCE_LENGTH)
+      this.pendingColorSequence = incompleteColorSequence, normalized = normalized.slice(0, -incompleteColorSequence.length);
+    if (normalized = stripColors(normalized), !normalized)
+      return;
+    if (!this.truncated) {
+      let combined = this.head + normalized;
+      if (combined.length <= this.maxLength) {
+        this.head = combined;
+        return;
+      }
+      this.truncated = !0, this.head = combined.slice(0, this.headLimit), this.tail = this.tailLimit === 0 ? "" : combined.slice(-this.tailLimit);
+      return;
+    }
+    this.tail = this.tailLimit === 0 ? "" : (this.tail + normalized).slice(-this.tailLimit);
+  }
+  get retainedLength() {
+    return this.head.length + this.tail.length;
+  }
+  format() {
+    if (!this.truncated)
+      return this.head;
+    return this.head + TRUNCATION_MARKER + this.tail;
+  }
+}
+function killProcessGroup(child, signal) {
+  if (os7.platform() === "win32" && child.pid) {
+    let result = spawnSync2("taskkill.exe", ["/pid", String(child.pid), "/t", "/f"], {
+      stdio: "ignore",
+      windowsHide: !0,
+      timeout: 5000
+    });
+    if (!result.error && result.status === 0)
+      return;
+  }
+  if (os7.platform() !== "win32" && child.pid)
+    try {
+      process.kill(-child.pid, signal);
+      return;
+    } catch {}
+  try {
+    child.kill(signal);
+  } catch {}
+}
+function isProcessGroupAlive(child) {
+  if (!child.pid)
+    return !1;
+  if (os7.platform() === "win32")
+    return child.exitCode === null && child.signalCode === null;
+  try {
+    return process.kill(-child.pid, 0), !0;
+  } catch {
+    return !1;
+  }
+}
+async function waitForProcessExit(isAlive, timeoutMs, { unref = !1 } = {}) {
+  let deadline = Date.now() + timeoutMs;
+  while (isAlive() && Date.now() < deadline)
+    await new Promise((resolve10) => {
+      let pollTimer = setTimeout(resolve10, PROCESS_EXIT_POLL_MS);
+      if (unref)
+        pollTimer.unref?.();
+    });
+  return !isAlive();
+}
+var liveChildren = /* @__PURE__ */ new Set, exitSweepInstalled = !1;
+function getActiveTerminalCommandProcesses() {
+  return Array.from(liveChildren).flatMap((child) => {
+    if (!child.pid)
+      return [];
+    return [
+      {
+        pid: child.pid,
+        ...os7.platform() === "win32" ? {} : { processGroupId: child.pid }
+      }
+    ];
+  });
+}
+function installExitSweep() {
+  if (exitSweepInstalled)
+    return;
+  exitSweepInstalled = !0, process.on("exit", () => {
+    for (let child of liveChildren)
+      try {
+        child.kill("SIGKILL");
+      } catch {}
+  });
+}
+function rewriteWindowsNulRedirects(command) {
+  return command.replace(/([<>]\s*)nul(?![\w.])/gi, "$1/dev/null");
+}
+function spawnDirectTerminalCommand(request) {
+  let child = spawn3(request.executable, request.args, {
+    cwd: request.cwd,
+    env: request.env,
+    stdio: "pipe",
+    detached: !0,
+    windowsHide: !0
+  }), completion = new Promise((resolve10, reject2) => {
+    child.once("error", reject2), child.once("close", resolve10);
+  }).then(async (exitCode) => {
+    if (os7.platform() === "win32" || !isProcessGroupAlive(child))
+      return exitCode;
+    if (killProcessGroup(child, "SIGTERM"), await waitForProcessExit(() => isProcessGroupAlive(child), KILL_ESCALATION_MS))
+      return exitCode;
+    return killProcessGroup(child, "SIGKILL"), await waitForProcessExit(() => isProcessGroupAlive(child), KILL_ESCALATION_MS), exitCode;
+  });
+  return {
+    pid: child.pid,
+    stdout: child.stdout,
+    stderr: child.stderr,
+    completion,
+    kill: (signal) => killProcessGroup(child, signal),
+    isAlive: () => isProcessGroupAlive(child)
+  };
+}
+function runTerminalCommand({
+  command,
+  process_type,
+  cwd,
+  timeout_seconds,
+  env: env2,
+  scrubEnvironmentKeys,
+  scrubEnvironmentValues,
+  signal,
+  terminalCommandBroker
+}) {
+  return new Promise((resolve10, reject2) => {
+    let isWindows = os7.platform() === "win32", processEnv2 = {
+      ...getSystemProcessEnv(),
+      ...env2 ?? {}
+    };
+    for (let key of scrubEnvironmentKeys ?? [])
+      delete processEnv2[key];
+    for (let [key, value] of Object.entries(processEnv2))
+      if (value !== void 0 && scrubEnvironmentValues?.some((secret) => value.trim() === secret.trim()))
+        delete processEnv2[key];
+    if (isWindows)
+      processEnv2.MSYS = [processEnv2.MSYS, "disable_pcon"].filter(Boolean).join(" ");
+    let resolveAbortedBeforeSpawn = () => {
+      resolve10([
+        {
+          type: "json",
+          value: {
+            command,
+            message: "Command cancelled: the run was aborted by the user."
+          }
+        }
+      ]);
+    };
+    if (signal?.aborted) {
+      resolveAbortedBeforeSpawn();
+      return;
+    }
+    let shell, shellArgs, brokerOwnsShell = terminalCommandBroker?.ownsShell === !0;
+    if (brokerOwnsShell)
+      shell = "", shellArgs = [];
+    else if (isWindows) {
+      command = rewriteWindowsNulRedirects(command);
+      let bashPath = findWindowsBash(processEnv2);
+      if (!bashPath) {
+        reject2(createWindowsBashNotFoundError());
+        return;
+      }
+      shell = bashPath, shellArgs = ["-c"];
+    } else
+      shell = "bash", shellArgs = ["-c"];
+    let resolvedCwd = path23.resolve(cwd), childProcess;
+    try {
+      let request = brokerOwnsShell ? {
+        executable: shell,
+        args: [],
+        cwd: resolvedCwd,
+        env: processEnv2,
+        command
+      } : {
+        executable: shell,
+        args: [...shellArgs, command],
+        cwd: resolvedCwd,
+        env: processEnv2
+      };
+      if (process_type === "BACKGROUND") {
+        startBackgroundCommand(request, command, signal, terminalCommandBroker).then(resolve10, reject2);
+        return;
+      }
+      childProcess = terminalCommandBroker ? terminalCommandBroker.start(request) : spawnDirectTerminalCommand(request);
+    } catch (error46) {
+      reject2(Error(`${terminalCommandBroker ? "Failed to start terminal command broker" : "Failed to spawn command"}: ${error46 instanceof Error ? error46.message : String(error46)}`));
+      return;
+    }
+    liveChildren.add(childProcess), installExitSweep();
+    let childLifecycleFinished = !1, finishTrackingChild = () => {
+      if (childLifecycleFinished)
+        return;
+      childLifecycleFinished = !0, liveChildren.delete(childProcess);
+    }, stdout = new BoundedOutputBuffer(COMMAND_OUTPUT_LIMIT), stderr = new BoundedOutputBuffer(COMMAND_OUTPUT_LIMIT), timer = null, sigkillTimer = null, processFinished = !1, killChildProcess = () => {
+      try {
+        childProcess.kill("SIGTERM");
+      } catch {}
+      sigkillTimer = setTimeout(async () => {
+        if (childProcess.isAlive())
+          try {
+            childProcess.kill("SIGKILL");
+          } catch {}
+        await waitForProcessExit(() => childProcess.isAlive(), KILL_ESCALATION_MS, { unref: !0 }), sigkillTimer = null, finishTrackingChild();
+      }, KILL_ESCALATION_MS), sigkillTimer.unref?.();
+    }, onAbort = () => {
+      if (processFinished)
+        return;
+      if (processFinished = !0, timer)
+        clearTimeout(timer);
+      killChildProcess(), resolve10([
+        {
+          type: "json",
+          value: {
+            command,
+            stdout: stdout.format(),
+            ...stderr.retainedLength > 0 ? { stderr: stderr.format() } : {},
+            message: "Command interrupted: the run was aborted by the user and the process was killed before it completed."
+          }
+        }
+      ]), childProcess.stdout.destroy(), childProcess.stderr.destroy();
+    };
+    if (signal?.addEventListener("abort", onAbort, { once: !0 }), signal?.aborted)
+      onAbort();
+    if (timeout_seconds >= 0 && !processFinished)
+      timer = setTimeout(() => {
+        if (!processFinished)
+          processFinished = !0, signal?.removeEventListener("abort", onAbort), killChildProcess(), reject2(Error(`Command timed out after ${timeout_seconds} seconds`));
+      }, timeout_seconds * 1000);
+    childProcess.stdout.on("data", (data) => {
+      stdout.append(data.toString());
+    }), childProcess.stderr.on("data", (data) => {
+      stderr.append(data.toString());
+    }), childProcess.completion.then((exitCode) => {
+      if (sigkillTimer) {
+        if (!childProcess.isAlive())
+          clearTimeout(sigkillTimer), sigkillTimer = null, finishTrackingChild();
+      } else
+        finishTrackingChild();
+      if (processFinished)
+        return;
+      if (processFinished = !0, timer)
+        clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
+      let truncatedStdout = stdout.format(), truncatedStderr = stderr.format(), combinedOutput = {
+        command,
+        stdout: truncatedStdout,
+        ...truncatedStderr ? { stderr: truncatedStderr } : {},
+        ...exitCode !== null ? { exitCode } : {}
+      };
+      resolve10([{ type: "json", value: combinedOutput }]);
+    }).catch((error46) => {
+      let wasFinished = processFinished;
+      if (processFinished = !0, timer)
+        clearTimeout(timer);
+      if (signal?.removeEventListener("abort", onAbort), childProcess.isAlive()) {
+        if (!sigkillTimer)
+          killChildProcess();
+      } else
+        finishTrackingChild();
+      if (wasFinished)
+        return;
+      reject2(Error(`${terminalCommandBroker ? "Terminal command broker failed" : childProcess.pid ? "Terminal command process failed" : "Failed to spawn command"}: ${error46 instanceof Error ? error46.message : String(error46)}`));
+    });
+  });
+}

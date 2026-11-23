@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-068:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Finish T-218 itself: audit/10 SRC-044 layer terminal and inbox clean per T-222/T-223 evidence; close the stranded T-218 ticket"
+    }
+  },
+  "derived_at": "2026-09-20T20:08:16Z",
+  "derived_from": "SRC-068",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "63cd713370b516884c468b56294f63328b22ed97e9f9111e27636736b621abd0"
+}

@@ -1,0 +1,25 @@
+--- pre/tools/test_t2040_finish_plan_guards.py
++++ tools/test_t2040_finish_plan_guards.py
+@@ -10,14 +10,14 @@
+ 
+ TOOLS = Path(__file__).resolve().parent
+ sys.path.insert(0, str(TOOLS))
+-from test_hermetic_env import isolate_host_session
+-from test_request_clause_closure import drive
+-from test_t1363_zero_manual_entry import healthy, receipts_of
+-from test_t2040_maintenance_authority import snapshot, source
+-from saipen_engine import closure_readiness, intake, operations
+-from saipen_engine.distribution import distribution_record_rel, quarantine_body_rel
+-from saipen_engine.journal import hash_file_dependency
+-from saipen_engine.plan import OperationPlan, apply_plan
++from test_hermetic_env import isolate_host_session  # noqa: E402
++from test_request_clause_closure import drive  # noqa: E402
++from test_t1363_zero_manual_entry import healthy, receipts_of  # noqa: E402
++from test_t2040_maintenance_authority import snapshot, source  # noqa: E402
++from saipen_engine import closure_readiness, intake, operations  # noqa: E402
++from saipen_engine.distribution import distribution_record_rel, quarantine_body_rel  # noqa: E402
++from saipen_engine.journal import hash_file_dependency  # noqa: E402
++from saipen_engine.plan import OperationPlan, apply_plan  # noqa: E402
+ 
+ 
+ def setUpModule():

@@ -1,0 +1,29 @@
+{
+  "agent": "opencode",
+  "created_at": "2026-09-08T07:42:21Z",
+  "findings_digest": "994cfac4e6c7f79cd5670fce3c87712e8729d84e754fd3a819a4afe00ca4e221",
+  "gate": "core",
+  "integrity_digest": "2d38050c4440faea",
+  "journal_op_id": "reverify.c57f6d9f6767",
+  "own_problem_keys": [
+    "ff368d8fe872fa17"
+  ],
+  "problem_count": 86,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000002",
+  "ruleset_fingerprint": "35251f00fa567709f75dae23144f35571c8a9854b5c167344995a27657e87713",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": null,
+  "source_tree_fingerprint": null,
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "python -m pytest -q tests/ui_qt/test_state_columns.py tests/ui_qt/test_project_row_density.py tests/ui_qt/test_project_room_model.py",
+      "result": "PASS"
+    }
+  ],
+  "warning_count": 120,
+  "work": "T-164"
+}

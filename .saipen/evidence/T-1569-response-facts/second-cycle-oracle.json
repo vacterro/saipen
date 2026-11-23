@@ -1,0 +1,26 @@
+{
+  "verifier": "cbe7efd99c85159c3c6438bfdcd2f085de7de33707a215c67fd62d3cdd83f4d1",
+  "command": "python -m unittest discover -s tools -p test_response_fact_binding.py -v",
+  "identical_oracle_and_helpers": {
+    "tools/test_response_fact_binding.py": true,
+    "tools/test_guard_hostile_matrix.py": true,
+    "tools/test_fixture_support.py": true,
+    "saipen/STYLE.md": true,
+    "tools/saipen.py": true,
+    "tools/saipen_engine/phases.py": true
+  },
+  "subjects": {
+    "pre": "b88b9d1aff2d39e205dc2089223f504ceab332018b5603dd067d2d536a302bbb",
+    "post": "0d8368c17f8f6726847374498c412afcdf6656d03ceffb87172b6a765d28ac06"
+  },
+  "source_hashes": {
+    "pre": {
+      "tools/saipen_engine/response_surface.py": "d78ce4c75b0a5b45aae42974d0e7d052d6936d9978944dc656bc318e5e6c8e71",
+      "tools/saipen_engine/automation.py": "93ddd7c0d9fb8b3407fbf8da655ea28e8eb687f65de71d5c54d2228f5f9df860"
+    },
+    "post": {
+      "tools/saipen_engine/response_surface.py": "002bcd62a0bfd3e17c3f46dd9efb0861959443e138bce77e7b3aefce468d1cdb",
+      "tools/saipen_engine/automation.py": "f9a3e8e9a136f2ac9c2a0d9c867c6a48102e710b6dbbe22326a59ff437bc61fc"
+    }
+  }
+}

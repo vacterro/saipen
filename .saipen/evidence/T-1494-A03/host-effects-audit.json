@@ -1,0 +1,16 @@
+{
+  "source_fingerprint": "1f6ed1d51a2c43cde02b8d5763fcb8e5e6c725ac04c025cab1c63792790b30be",
+  "examined_sha256": {
+    "tools/test_opencode_bound_launch_smoke.py": "81584c60116385d782aec7e81975a3907a8f0936105dafd682182c59a087e8eb",
+    "tools/test_hermetic_env.py": "b39d8c6e04e15368d7c1753147c596eb521a3af1659da15590928e4b38dfc717",
+    "tools/saipen_engine/test_runner.py": "532c8a7f8fa4e1e7847c3fbd477da816e64474e1128658219deb30554263d96e"
+  },
+  "native_runtime_launch": "explicitly declared fixture; real installed OpenCode with --model saipen-smoke/smoke",
+  "provider": "ThreadingHTTPServer on 127.0.0.1; deterministic scripted tool output; apiKey local-fixture",
+  "profile_isolation": "TemporaryDirectory saipen-bound-opencode-; HOME/USERPROFILE set to disposable profile, no inherited PWD/OLDPWD/SAIPEN_AGENT",
+  "ordinary_fixture_interlock": "isolate_host_session arms SAIPEN_FORBID_HOST_SPAWN; deliberate native smoke explicitly clears it in its child only",
+  "observed_live_child": "19364 -> 30884 -> 17828 -> 2748; inspected declared smoke at 2026-10-09T08:47:56Z",
+  "unexpected_external_ai_launch_observed": false,
+  "real_operator_profile_mutation_claimed": false,
+  "publication_actions": []
+}

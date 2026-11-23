@@ -1,0 +1,11 @@
+Vahekokkuvõte (täispere veel käib):
+
+- **AG3 töötab.** Mõõdetud AG3 enda Windowsi tokeniga, tema brokeri kaudu. SMART_VAC_CLEANER ja SUNO_DOWNLOADER: runtime tuleb `C:\ProgramData\SAI\SAIPEN`ist, sinu profiili vaja ei ole, lugemine ja kirjutus on lubatud (proovikirjutus `--dry-run`, mis midagi ei muuda). Sama tulemus AG2-ga. Võõrad profiilid ja projektid, millele AG2/AG3-l luba pole, jäävad suletuks (6/6 keelatud).
+- **Mis valesti oli:** SAIPENis oli 6 ummikteed. Kõige hullem: SMARTis lugemine töötas, aga iga kirjutus oleks keelatud „This needs the operator“ teatega. SUNO STATE viitas runtime'i versioonikaustale, mis kustutatakse iga uuendusega, nii et viga tuli pärast igat uuendust tagasi. Kõik 6 on parandatud, igaühel test, mis vana koodiga kukub ja uuega läbib.
+- **SAITULS:** T-287 ja T-289 on DONE. SAI Accounts mõõdab nüüd SAIPENi valmisolekut konto enda tokeniga (`sai-accounts saipen-readiness`), ja AG konsooli PATH-is on `saipen`.
+- **AUDAPACK:** taastekoopia täis-pytest 2911 läbis, 0 kukkus. Originaali ei puudutanud.
+- **Pooleli:** SAIPEN T-1743 ootab täispere (umbes 77 min) tulemust, siis SHIP ilma commit'ita (publish on keelatud, sest T-1644 on lahti).
+
+Kaks otsust jäävad sinu teha:
+1. Ise AG3-s kontrollida: `sai-accounts.exe launch AG3 --workdir "V:\___VAC\__K\__CODE\_TAMPERMONKEY\_SUNO_DOWNLOADER"` ja kirjuta konsooli `cc`. SMARTis praegu ära tee: seal töötab hetkel teine agent (`workbuddy`).
+2. AUDAPACKi ümberkolimine (T-3) on proovitud ja tagasivõetav, aga see vajab sinu sõnaselget „jah“.

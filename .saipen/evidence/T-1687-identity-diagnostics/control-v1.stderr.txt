@@ -1,0 +1,8 @@
+test_a_real_probe_outage_is_a_named_refusal_in_both_borrowed_cases (test_t1687_identity_diagnostics.IdentityDiagnostics.test_a_real_probe_outage_is_a_named_refusal_in_both_borrowed_cases) ... ok
+test_an_unnamed_refusal_still_fails_both_borrowed_checks (test_t1687_identity_diagnostics.IdentityDiagnostics.test_an_unnamed_refusal_still_fails_both_borrowed_checks) ... ok
+test_the_record_retains_the_decisive_real_unittest_failure_section (test_t1687_identity_diagnostics.IdentityDiagnostics.test_the_record_retains_the_decisive_real_unittest_failure_section) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.709s
+
+OK

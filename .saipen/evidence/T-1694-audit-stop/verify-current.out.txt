@@ -1,0 +1,9 @@
+test_unworkable_audit_stops_without_inventing_operator_authority (test_automation_block.WaitOwnership.test_unworkable_audit_stops_without_inventing_operator_authority) ... ok
+test_workable_ticket_outranks_unworkable_audit (test_automation_block.WaitOwnership.test_workable_ticket_outranks_unworkable_audit) ... ok
+test_unworkable_audit_has_truthful_final_facts (test_automation_block.WaitOwnership.test_unworkable_audit_has_truthful_final_facts) ... ok
+test_blocked_automation_is_a_handback_not_project_completion (test_response_surface_contract.AutonomyTests.test_blocked_automation_is_a_handback_not_project_completion) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.045s
+
+OK

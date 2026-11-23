@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-031:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: a failed pack must never remove or overwrite the previous good archive when backup establishment or later verification fails"
+    }
+  },
+  "derived_at": "2026-09-04T00:54:55Z",
+  "derived_from": "SRC-031",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "9299b24bdd09bbcbf056ea334b3d3842d563cf0d77c64ed29c8a01b044a32332"
+}

@@ -1,0 +1,20 @@
+======================================================================
+FAIL: test_cli_refuses_before_a_host_could_apply_the_edit (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_cli_refuses_before_a_host_could_apply_the_edit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 176, in test_cli_refuses_before_a_host_could_apply_the_edit
+    self.assertEqual(result.returncode, 2, result)
+AssertionError: 1 != 2 : CompletedProcess(args=['C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe', 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py', 'guard', '--event-json', '-', '--json'], returncode=1, stdout='{\n  "ok": false,\n  "code": "PROTECTED_CANONICAL_NAMESPACE",\n  "admitted": false,\n  "project_root": "V:\\\\_TEMP_\\\\t1671-6rw6jdgg",\n  "target": ".saipen/LOG.md",\n  "targets": [\n    ".saipen/LOG.md"\n  ],\n  "action": "write",\n  "effect": "mutating",\n  "protected": true,\n  "provenance": "git-worktree",\n  "detail": "direct mutation of protected canonical path \'.saipen/LOG.md\' is forbidden; mutations must go through canonical saipen commands",\n  "canonical_next_command": "saipen next --json",\n  "duration_ms": 34.852,\n  "event": {\n    "event": "before_tool",\n    "host": "opencode",\n    "cwd": "V:\\\\_TEMP_\\\\t1671-6rw6jdgg\\\\.saipen",\n    "tool_name": "str_replace",\n    "action": "write",\n    "command_class": "EXECUTION",\n    "fleet_preflight": true,\n    "target_path": "LOG.md",\n    "target_paths": [\n      "LOG.md"\n    ],\n    "targets_unresolved": false,\n    "shell_protected_namespace": false,\n    "shell_effects": [],\n    "shell_effects_unresolved": null,\n    "actor": "buffy",\n    "saipen_verb": null,\n    "detail": ""\n  },\n  "strength": {\n    "host": "opencode",\n    "capability": true,\n    "installed": true,\n    "current": true,\n    "health": null,\n    "effective": "UNKNOWN",\n    "reason": "current hook exists but guard reachability or host health is unobserved"\n  }\n}\n', stderr='')
+
+======================================================================
+FAIL: test_unknown_relative_host_cwd_does_not_grant_a_target_base (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_unknown_relative_host_cwd_does_not_grant_a_target_base)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 186, in test_unknown_relative_host_cwd_does_not_grant_a_target_base
+    self.assertFalse(answer["admitted"], answer)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED_EXTERNAL', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\t1671-6rw6jdgg', 'target': 'V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/relative-cwd/LOG.md', 'targets': ['V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/relative-cwd/LOG.md'], 'action': 'write', 'effect': 'mutating', 'outside_root': True, 'provenance': 'explicit', 'project_lineage': 'lineage-68485697e2a549b2bdc19dbd66f44788', 'detail': 'mutation outside the project root; protocol jurisdiction ends at the root', 'duration_ms': 1.49, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'relative-cwd', 'tool_name': 'write', 'action': 'write', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': 'LOG.md', 'target_paths': ['LOG.md'], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': 'buffy', 'saipen_verb': None, 'detail': ''}, 'strength': {'host': 'opencode', 'capability': True, 'installed': True, 'current': True, 'health': None, 'effective': 'UNKNOWN', 'reason': 'current hook exists but guard reachability or host health is unobserved'}}
+
+----------------------------------------------------------------------
+Ran 17 tests in 2.436s
+
+FAILED (failures=2)

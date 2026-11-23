@@ -1,0 +1,97 @@
+
+#################### test_crlf_bytes_committed_under_text_auto_are_not_reported
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4092353Z FAIL: test_crlf_bytes_committed_under_text_auto_are_not_reported (test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_crlf_bytes_committed_
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4092806Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4093751Z Traceback (most recent call last):
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4094275Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_t1506_xpatch_survival.py", line 133, in test_crlf_bytes_committed_under_text_auto_are_not_re
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4095328Z     self.assertEqual(xpatch.commit_survival(self.root)["uncommitted"], [])
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4096477Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4097471Z AssertionError: Lists differ: [{'patch_id': 'XP-000001', 'paths': ['src/session.py']}] != []
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4097879Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4097948Z First list contains 1 additional elements.
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098111Z First extra element 0:
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098276Z {'patch_id': 'XP-000001', 'paths': ['src/session.py']}
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098406Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098489Z - [{'patch_id': 'XP-000001', 'paths': ['src/session.py']}]
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098668Z + []
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098728Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098802Z ======================================================================
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4099890Z FAIL: test_capability_reason_reaches_skip_and_unproven_runner (test_t1582_sweep_skip_reason.ActualSweepCapabilityTests.test_capability_reason_rea
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4100673Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4100872Z Traceback (most recent call last):
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4101528Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_t1582_sweep_skip_reason.py", line 179, in test_capability_reason_reaches_skip_and_unproven_r
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4102906Z     self.assertIn("1314", text)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4103132Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4104958Z AssertionError: '1314' not found in 'UNPROVEN: sweep -- portable project identity: this host cannot create a symlink, so the case was never const
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4107302Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4107386Z ======================================================================
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4108371Z FAIL: test_non_locale_root_stray_is_reported_not_a_crash (test_validator_layout_parity.RootStrayLocaleTests.test_non_locale_root_stray_is_reporte
+
+#################### test_capability_reason_reaches_skip_and_unproven_runner
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4099890Z FAIL: test_capability_reason_reaches_skip_and_unproven_runner (test_t1582_sweep_skip_reason.ActualSweepCapabilityTests.test_capability_reason_rea
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4100673Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4100872Z Traceback (most recent call last):
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4101528Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_t1582_sweep_skip_reason.py", line 179, in test_capability_reason_reaches_skip_and_unproven_r
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4102906Z     self.assertIn("1314", text)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4103132Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4104958Z AssertionError: '1314' not found in 'UNPROVEN: sweep -- portable project identity: this host cannot create a symlink, so the case was never const
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4107302Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4107386Z ======================================================================
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4108371Z FAIL: test_non_locale_root_stray_is_reported_not_a_crash (test_validator_layout_parity.RootStrayLocaleTests.test_non_locale_root_stray_is_reporte
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4109430Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4109657Z Traceback (most recent call last):
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4110713Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_validator_layout_parity.py", line 383, in test_non_locale_root_stray_is_reported_not_a_crash
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4111762Z     self.assertIn(NON_LOCALE_STRAY, completed.stdout)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4112199Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4122769Z AssertionError: '╨╛╨┤╨╕╨╜' not found in "saipen conformance validation starting (tools/validate.py)...\nProject root: /tmp/saipen-stray-home-nbeq
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132073Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132169Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132371Z Ran 4899 tests in 1195.466s
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132464Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132534Z FAILED (failures=21, errors=3, skipped=72)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132648Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4303487Z ##[error]Process completed with exit code 1.
+
+#################### test_non_locale_root_stray_is_reported_not_a_crash
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4108371Z FAIL: test_non_locale_root_stray_is_reported_not_a_crash (test_validator_layout_parity.RootStrayLocaleTests.test_non_locale_root_stray_is_reporte
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4109430Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4109657Z Traceback (most recent call last):
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4110713Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_validator_layout_parity.py", line 383, in test_non_locale_root_stray_is_reported_not_a_crash
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4111762Z     self.assertIn(NON_LOCALE_STRAY, completed.stdout)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4112199Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4122769Z AssertionError: '╨╛╨┤╨╕╨╜' not found in "saipen conformance validation starting (tools/validate.py)...\nProject root: /tmp/saipen-stray-home-nbeq
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132073Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132169Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132371Z Ran 4899 tests in 1195.466s
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132464Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132534Z FAILED (failures=21, errors=3, skipped=72)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4132648Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4303487Z ##[error]Process completed with exit code 1.
+
+#################### test_a_sharded_run_leaves_no_sandbox
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4081713Z FAIL: test_a_sharded_run_leaves_no_sandbox (test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_a_sharded_run_leaves_no_sandbox
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4082117Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4082339Z Traceback (most recent call last):
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4082720Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_t1505_core_unit_sandbox_reclaim.py", line 259, in test_a_sharded_run_leaves_no_sandbox
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4083884Z     self.assert_run_leaves_no_sandbox(2)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4084069Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4084415Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_t1505_core_unit_sandbox_reclaim.py", line 251, in assert_run_leaves_no_sandbox
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4085725Z     self.assertEqual(run["status"], "PASS", run)
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4085922Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4086111Z AssertionError: 'FAIL' != 'PASS'
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4086520Z - FAIL
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4086863Z + PASS
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4089347Z  : {'status': 'FAIL', 'exit_code': 5, 'ran': 3, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': None, 'sections': {}, 'discovered': 3, 'partit
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4091453Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4091566Z ======================================================================
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4092353Z FAIL: test_crlf_bytes_committed_under_text_auto_are_not_reported (test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_crlf_bytes_committed_
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4092806Z ----------------------------------------------------------------------
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4093751Z Traceback (most recent call last):
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4094275Z   File "/tmp/saipen-test-s22f2klh/project/tools/test_t1506_xpatch_survival.py", line 133, in test_crlf_bytes_committed_under_text_auto_are_not_re
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4095328Z     self.assertEqual(xpatch.commit_survival(self.root)["uncommitted"], [])
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4096477Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4097471Z AssertionError: Lists differ: [{'patch_id': 'XP-000001', 'paths': ['src/session.py']}] != []
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4097879Z 
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4097948Z First list contains 1 additional elements.
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098111Z First extra element 0:
+conformance	Fast unit gate (import + unittest discover)	2026-10-04T04:41:18.4098276Z {'patch_id': 'XP-000001', 'paths': ['src/session.py']}

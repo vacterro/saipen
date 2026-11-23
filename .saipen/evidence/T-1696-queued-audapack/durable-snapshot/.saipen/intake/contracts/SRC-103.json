@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-103:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SRC-100 fix Wintage PACK FAILED_VERIFY duplicate .audapack/manifest.json archive member ownership"
+    }
+  },
+  "derived_at": "2026-09-29T09:31:25Z",
+  "derived_from": "SRC-103",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0b7673c3c7b17f143a02cf14553bb5d308a16ab026c14982265c77736b7accf6"
+}

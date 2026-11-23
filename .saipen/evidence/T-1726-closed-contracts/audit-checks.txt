@@ -1,0 +1,35 @@
+PASS: a real root `nul` entry is excluded from audit snapshots
+UNPROVEN: symlink-restore -- host cannot create a symlink, so the red control was never constructed: [WinError 1314] A required privilege is not held by the client: 'V:\\_TEMP_\\audit_checks_ofyqagf2\\probe-symlink-restore\\symlink-restore-probe\\external.md' -> 'V:\\_TEMP_\\audit_checks_ofyqagf2\\probe-symlink-restore\\symlink-restore-probe\\IDENTITY.md'
+PASS: audit-tags missing-Git skip plus enumeration, nonzero, malformed, truncated, and surplus fail-closed controls behave
+PASS: every producer-OUTBOX control runs at a gate where its finding is hard
+PASS: a known-good copy of this repository is built for the mutation controls
+FAIL: release-ledger -- git add -A failed (exit 128): stderr: warning: in the working copy of '.gitattributes', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/ISSUE_TEMPLATE/bug_report.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/ISSUE_TEMPLATE/config.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/ISSUE_TEMPLATE/feature_request.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/PULL_REQUEST_TEMPLATE.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/workflows/release.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+error: open(".saipen/evidence/AUDAPACK-recovery-20261010/T1705-oracle-subject/tests/scenarios/stale-state-reconciliation/.saipen/recovery/conformance/2026-08-29T23_13_05.382476Z_receipt-8ef75218ad85_core_PASS.json"): Filename too long
+error: unable to index file '.saipen/evidence/AUDAPACK-recovery-20261010/T1705-oracle-subject/tests/scenarios/stale-state-reconciliation/.saipen/recovery/conformance/2026-08-29T23_13_05.382476Z_receipt-8ef75218ad85_core_PASS.json'
+fatal: adding files failed
+PASS: tools/validate.py declares exactly the adjudicated fail sites, and added, removed and same-count SWAPPED sites are each named
+NOTE: 358 fail site(s) recorded by identity in tools/validator_fail_sites.json
+NOTE: known limitation -- identity binds WHICH fail sites tools/validate.py declares, so an added, removed or same-count swapped site is named -- but a BASELINE record is inherited surface that was never individually adjudicated, which is recorded per site and is NOT detected here as missing coverage
+FAIL: warn-slug-ownership -- git add -A failed (exit 128): stderr: warning: in the working copy of '.gitattributes', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/ISSUE_TEMPLATE/bug_report.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/ISSUE_TEMPLATE/config.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/ISSUE_TEMPLATE/feature_request.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/PULL_REQUEST_TEMPLATE.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/workflows/release.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+error: open(".saipen/evidence/AUDAPACK-recovery-20261010/T1705-oracle-subject/tests/scenarios/stale-state-reconciliation/.saipen/recovery/conformance/2026-08-29T23_13_05.382476Z_receipt-8ef75218ad85_core_PASS.json"): Filename too long
+error: unable to index file '.saipen/evidence/AUDAPACK-recovery-20261010/T1705-oracle-subject/tests/scenarios/stale-state-reconciliation/.saipen/recovery/conformance/2026-08-29T23_13_05.382476Z_receipt-8ef75218ad85_core_PASS.json'
+fatal: adding files failed
+FAIL: phase-rename -- PermissionError: [Errno 13] Permission denied: 'V:\\_TEMP_\\audit_checks_ofyqagf2\\probe-phase-rename\\phase-rename\\.saipen\\evidence\\AUDAPACK-T299-forensics\\provenance-capture\\freebuff-message-198.json'
+FAIL: release-ledger-runtime-query -- validator control exited 1 while tag queries were observed: FAIL: closure-evidence -- ticket T-1695 is ## DONE but carries no current-cycle verification evidenc
+FAIL: validator-baseline -- the validator rejects an unmodified copy -- fix the known-good control before trusting mutation results: FAIL: closure-evidence -- ticket T-1695 is ## DONE but carries no current-cycle verification evidence (classifier: Continuation boundary after E-14044/E-14045 local finish: continue returned audit-inbox-unworkable RESTATE_AND_STOP; its audit status action executed. audit/23 remains ACTIVE SRC-167/T-1606 at VERIFY_RETRY_CAP. Canonical pick has no workable Work. All 62 parked ticket bytes, 15 failed
+PASS: callable no-op mutations are rejected before validation
+FAIL: case-availability -- TypeError: argument of type 'NoneType' is not iterable
+SKIP: mutation-sweep because prerequisite validator-baseline failed
+AUDIT: 6 of 14 probes passed; failed: case-availability, phase-rename, release-ledger, release-ledger-runtime-query, validator-baseline, warn-slug-ownership; skipped: mutation-sweep; unproven (host capability): symlink-restore

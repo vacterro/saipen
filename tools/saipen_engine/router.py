@@ -263,9 +263,10 @@ def route_next(
         _kind, _detail = _brake
         if _kind == "wait":
             from . import goal_authority
-            from .state import parse_wait
+            from .state import parse_wait, safety_valve_wait_text
 
-            if parse_wait(na) == "safety valve" and goal_authority.persistent(state):
+            _wait_action = na if na.startswith("WAIT:") else safety_valve_wait_text(state)
+            if parse_wait(_wait_action) == "safety valve" and goal_authority.persistent(state):
                 return {
                     "ok": True,
                     "action": "saipen continue",
@@ -276,11 +277,11 @@ def route_next(
                 }
             # CORE-004: the safety valve is an AUTHORIZATION boundary, not a
             # resumable yield. Once the 3-wave / 20-ticket budget is exhausted,
-            # the persisted WAIT is a HARD STOP (RESTATE_AND_STOP) until the
+            # the persisted WAIT (or exhausted valve) is a HARD STOP until the
             # documented re-authorization operation durably resets the counters.
             return {
                 "ok": True,
-                "action": na,
+                "action": _wait_action,
                 "reason": "wait",
                 "executable_behavior": "RESTATE_AND_STOP",
                 "detail": "persisted WAIT is a hard stop; do not route past it",
@@ -571,6 +572,36 @@ def route_next(
     if not active:
         top, pick_reason = pick_next_work(board["tickets"], agent=session_agent, now=now)
         if top is not None:
+            # Campaign XVII (T-2170): queued Work is not an executable task
+            # while a non-work phase owns the session. CLEAN/HUNT/MARKHUNT/
+            # VALIDATE have mandatory obligations and the DFA deliberately
+            # forbids entering SCOUT from them. Advertising PHASE SCOUT here
+            # made `continue` print an action its own transition gate refused.
+            # Route to the legal forward edge of the CURRENT phase instead;
+            # the ticket stays queued and becomes eligible after that edge.
+            # The DFA itself is untouched: phases.transition_legal is the
+            # single authority.
+            _MAINTENANCE_PHASES = frozenset({"CLEAN", "MARKHUNT"})
+            if str(phase or "") in _MAINTENANCE_PHASES and not phases.transition_legal(str(phase or ""), "SCOUT"):
+                # The current phase owns the session. `PHASE <current>` is the
+                # canonical executable form: load_for_action resolves it to
+                # that phase's obligation document, and the phase's own exit
+                # gate (never this router) decides DONE vs BLOCKED. No ticket
+                # is claimed and no DFA edge is widened.
+                detail = (
+                    f"{top} is queued; the DFA forbids {phase or 'INIT'} -> SCOUT, "
+                    "so the current phase must complete before the ticket is claimed"
+                )
+                action = f"PHASE {phase}"
+                return {
+                    "ok": True,
+                    "action": action,
+                    "reason": "phase-owns-continuation",
+                    "ticket": top,
+                    "detail": detail,
+                    "queued_ticket": top,
+                    "load": load_for_action(action),
+                }
             return {
                 "ok": True,
                 "action": f"PHASE SCOUT {top}",
@@ -690,6 +721,30 @@ def route_next(
             ),
         }
 
+    if audit_inbox and audit_inbox.get("unworkable_active_only"):
+        idle_cls = audit_inbox.get("idle_classification") or "IDLE_BLOCKED_EXTERNAL"
+        next_act = audit_inbox.get("next_exact_action") or audit_inbox.get(
+            "action", "saipen audit status"
+        )
+        if "<decision>" in str(next_act):
+            next_act = "saipen status"
+        unresolved = audit_inbox.get("unresolved_audit_count", len(audit_inbox.get("pending", [])))
+        res = {
+            "ok": True,
+            "action": audit_inbox.get("action", "saipen audit status"),
+            "reason": "audit-inbox-unworkable",
+            "stop_reason": "NO_ADMISSIBLE_WORK",
+            "terminal_classification": idle_cls,
+            "idle_classification": idle_cls,
+            "primary_blocker": audit_inbox.get("primary_blocker"),
+            "unresolved_audit_count": unresolved,
+            "next_exact_action": next_act,
+            "executable_behavior": "RESTATE_AND_STOP",
+            "detail": audit_inbox.get("detail", "audit inbox has no currently workable layer"),
+        }
+        if audit_inbox.get("decision_request"):
+            res["decision_request"] = audit_inbox["decision_request"]
+        return res
     # Every layer settled, but `audit/` still holds bytes SAIPEN never
     # captured. The work is genuinely finished, so this is not a failure and
     # never a refusal -- it is the difference between "the audit is closed"
@@ -805,45 +860,6 @@ def route_next(
                 ),
                 "load": load_for_action("saipen future status"),
             }
-
-    # HUNT CONTINUATION (SOURCE-AUDIT-INBOX-01): when in HUNT phase without an active ticket,
-    # the HUNT cycle owns continuation over an unworkable/blocked audit inbox.
-    if phase == "HUNT" and (na.startswith("PHASE HUNT") or na == "PHASE HUNT" or na.startswith("saipen hunt")):
-        return {
-            "ok": True,
-            "action": "PHASE HUNT",
-            "reason": "hunt-continue",
-            "load": load_for_action("PHASE HUNT"),
-            "detail": "active HUNT phase owns continuation",
-        }
-
-    # UNWORKABLE AUDIT INBOX: An ACTIVE inbox layer whose linked Work is unworkable
-    # (BLOCKED_EXTERNAL / operator decision required). It sits below eligible FUTURE GATES
-    # and active HUNT continuation so external blockers do not starve independent work.
-    if audit_inbox and audit_inbox.get("unworkable_active_only"):
-        idle_cls = audit_inbox.get("idle_classification") or "IDLE_BLOCKED_EXTERNAL"
-        next_act = audit_inbox.get("next_exact_action") or audit_inbox.get(
-            "action", "saipen audit status"
-        )
-        if "<decision>" in str(next_act):
-            next_act = "saipen status"
-        unresolved = audit_inbox.get("unresolved_audit_count", len(audit_inbox.get("pending", [])))
-        res = {
-            "ok": True,
-            "action": audit_inbox.get("action", "saipen audit status"),
-            "reason": "audit-inbox-unworkable",
-            "stop_reason": "NO_ADMISSIBLE_WORK",
-            "terminal_classification": idle_cls,
-            "idle_classification": idle_cls,
-            "primary_blocker": audit_inbox.get("primary_blocker"),
-            "unresolved_audit_count": unresolved,
-            "next_exact_action": next_act,
-            "executable_behavior": "RESTATE_AND_STOP",
-            "detail": audit_inbox.get("detail", "audit inbox has no currently workable layer"),
-        }
-        if audit_inbox.get("decision_request"):
-            res["decision_request"] = audit_inbox["decision_request"]
-        return res
 
     # MAINTAIN: fall through to the persisted next_action only when it is a
     # legal non-ticket action (saipen continue / saipen <verb>), never a stale
@@ -1142,6 +1158,12 @@ def conformance_crew_gate(project_root, routed: dict) -> dict | None:
             # T-1823: the typed staleness code travels with the refusal, so a
             # repair consumer never infers safety from the prose in `detail`.
             "stale_reason": decision.get("stale_reason"),
+            # Retry-proof conditions: the fingerprint and the named input travel
+            # with the refusal, so a consumer can see that re-running the same
+            # command cannot change the answer.
+            "retry_blocked": decision.get("retry_blocked", False),
+            "retry_fingerprint": decision.get("retry_fingerprint"),
+            "blocker_detail": decision.get("blocker_detail", ""),
             "canonical_next_command": command,
             "diagnostic": decision["diagnostic"],
             "repair_status": decision["repair_status"],
@@ -1222,6 +1244,9 @@ def conformance_idle_gate(project_root, routed: dict) -> dict | None:
             "conformance_status": decision["status"],
             "conformance_disposition": decision["disposition"],
             "stale_reason": decision.get("stale_reason"),
+            "retry_blocked": decision.get("retry_blocked", False),
+            "retry_fingerprint": decision.get("retry_fingerprint"),
+            "blocker_detail": decision.get("blocker_detail", ""),
             "canonical_next_command": command,
             "diagnostic": decision["diagnostic"],
             "repair_status": decision["repair_status"],
@@ -1319,7 +1344,24 @@ def reconcile_gate(
     from .reconcile import SAFETY_VALVE_TRIPPED
 
     if reconciled.get("remediation") == SAFETY_VALVE_TRIPPED:
-        return None
+        if reconciled.get("canonical_next_command"):
+            return None
+        return {
+            "ok": False,
+            "code": str(reconciled.get("code") or "RECONCILE_REAUTH_REQUIRED"),
+            "reason": "reconcile-decision",
+            "action": None,
+            "canonical_next_command": None,
+            "requires_human": True,
+            "terminal": True,
+            "detail": " ".join(
+                str(reconciled.get("detail") or "RECONCILE_REAUTH_REQUIRED").split()
+            )[:600],
+            "repair_id": reconciled.get("repair_id"),
+            "operator_action": (
+                reconciled.get("operator_action") or _reconcile_operator_action(reconciled)
+            ),
+        }
     command = str(reconciled.get("canonical_next_command") or "")
     decision = bool(reconciled.get("operator_decision_available")) and bool(command)
     code = str(reconciled.get("code") or "RECONCILE_REFUSED")

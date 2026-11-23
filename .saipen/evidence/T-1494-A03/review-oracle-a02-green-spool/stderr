@@ -1,0 +1,9 @@
+test_bare_continue_cc_identical_on_tripped_goal_valve (test_command_routing.CommandSemanticsTests.test_bare_continue_cc_identical_on_tripped_goal_valve)
+Aliases share routing semantics; authority comes from the caller. ... ok
+test_tripped_goal_valve_cc_reauthorizes_keeps_objective (test_command_routing.CommandSemanticsTests.test_tripped_goal_valve_cc_reauthorizes_keeps_objective) ... ok
+test_safety_valve_cc_reauthorizes (test_hostile_wave_regressions.Wave2ObeyTests.test_safety_valve_cc_reauthorizes) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 6.616s
+
+OK

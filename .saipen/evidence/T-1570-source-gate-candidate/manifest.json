@@ -1,0 +1,30 @@
+{
+  "subject": {
+    "path": "tools/saipen_engine/intake.py",
+    "before_sha256": "2833ac57c311c32f6ca1c5e811bbfee7a878b4db1cd2a7533a261d29a7bee114",
+    "after_sha256": "626cfbb752ec8d731dcc5d24de12fd2adf569465f35433fe3e9d5b9a4d50ebd3"
+  },
+  "oracle": {
+    "path": "tools/test_no_publish_source_scope.py",
+    "before_sha256": "1759b809de0d5cbfccca8cecb7bfd4ade2bf561fd55600892b9657b672bb7ee9",
+    "after_sha256": "aaa1c5542a1385e3f700bcd8dbca836577129d3cab2b16332471666ffe7fa596"
+  },
+  "controls": [
+    {
+      "variant": "before",
+      "ran": 14,
+      "passed": false,
+      "failures": 2,
+      "errors": 0,
+      "oracle_sha256": "aaa1c5542a1385e3f700bcd8dbca836577129d3cab2b16332471666ffe7fa596"
+    },
+    {
+      "variant": "candidate",
+      "ran": 14,
+      "passed": true,
+      "failures": 0,
+      "errors": 0,
+      "oracle_sha256": "aaa1c5542a1385e3f700bcd8dbca836577129d3cab2b16332471666ffe7fa596"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+Ran 60 tests in 0.019s
+
+OK
+pre-T-1770 engine reads the verify line as a failure claim: True

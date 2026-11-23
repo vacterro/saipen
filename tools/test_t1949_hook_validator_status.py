@@ -22,7 +22,6 @@ LAST validator instead of the worst one would still be caught.
 from __future__ import annotations
 
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -38,41 +37,17 @@ PASSING_SH = "#!/bin/sh\necho FLOOR-OK\nexit 0\n"
 FAILING_SH = "#!/bin/sh\necho FLOOR-RED\nexit 1\n"
 
 
-def _sh():
-    """The interpreter git itself would use to run a `#!/bin/sh` hook."""
-    if os.name == "nt":
-        git = shutil.which("git")
-        if git:
-            for cand in [
-                Path(git).resolve().parent.parent / "bin" / "sh.exe",
-                Path(git).resolve().parent.parent / "bin" / "bash.exe",
-                Path(git).resolve().parent.parent / "usr" / "bin" / "sh.exe",
-            ]:
-                if cand.is_file():
-                    return str(cand)
-        for var in ("ProgramFiles", "ProgramFiles(x86)"):
-            base = os.environ.get(var)
-            if base:
-                for cand in [
-                    Path(base) / "Git" / "bin" / "sh.exe",
-                    Path(base) / "Git" / "bin" / "bash.exe",
-                ]:
-                    if cand.is_file():
-                        return str(cand)
-    for cand_name in ("bash", "sh"):
-        p = shutil.which(cand_name)
-        if p and "system32" not in p.lower():
-            return p
-    return shutil.which("bash") or shutil.which("sh")
+# Invoke the hook the way a real commit does: through git itself. Picking
+# `bash` off PATH picks WSL's bash.exe on Windows (System32 precedes Git in
+# PATH), and the WSL launcher dies on mounts before the hook ever runs, so the
+# test measured the environment instead of the hook. `git hook run` hands the
+# hook to the same sh git uses for its own hooks.
 
 
 class HookValidatorStatusTests(unittest.TestCase):
     """Install the real hook into a sandbox and observe its exit status."""
 
     def _install_and_run(self, py_body: str, sh_body: str):
-        shell = _sh()
-        if shell is None:
-            self.skipTest("no POSIX shell to run a /bin/sh hook")
         with tempfile.TemporaryDirectory(prefix="t1949-hook-") as raw:
             root = Path(raw)
             home = root / "saipen-home"
@@ -98,7 +73,7 @@ class HookValidatorStatusTests(unittest.TestCase):
             self.assertTrue(hook.is_file(), "installer wrote no hook")
 
             run = subprocess.run(
-                [shell, str(hook)],
+                ["git", "hook", "run", "pre-commit"],
                 cwd=project,
                 capture_output=True,
                 text=True,

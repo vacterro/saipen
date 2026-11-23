@@ -1,0 +1,530 @@
+[
+  {
+    "subject": "original in-place fixture",
+    "instrumented_agent_sha256": "79315ac93d4be07b605acdb1361b71dda6cf44d951f35655b155626c04f50e6d",
+    "write_window_reached": true,
+    "state_bytes": 0,
+    "state_text": "",
+    "result": {
+      "gpu_lane": null,
+      "ok": true,
+      "code": "SUPERVISE_STOPPED",
+      "run_id": "run-b390380706f2",
+      "stop": "IDLE",
+      "reason": "no executable Work and no claimed Work to recover",
+      "operator_action": null,
+      "counters": {
+        "cycles": 2,
+        "worker_generation_count": 1,
+        "crash_recovery_count": 0,
+        "model_replacement_recovery_count": 0,
+        "backoff_count": 0,
+        "await_count": 0,
+        "stolen_lease_count": 0,
+        "progress_slices": 1,
+        "slow_progress_slices": 1,
+        "manual_continue_count": 0,
+        "unknown_terminal_failure_count": 0,
+        "failures": {}
+      },
+      "maximum_recovery_latency_seconds": 0.0,
+      "model": null,
+      "history": [
+        {
+          "cycle": 1,
+          "verdict": "RUN_WORK",
+          "generation": 1,
+          "model": null,
+          "returncode": 1,
+          "failure": null,
+          "progressed": true,
+          "bounded": true,
+          "output_tail": null,
+          "failure_text_tail": null
+        }
+      ]
+    },
+    "trace": [
+      {
+        "index": 0,
+        "mode": "slow_forever",
+        "pid": 33284,
+        "model": "",
+        "generation": "1",
+        "worker": "run-b390380706f2-c1",
+        "start": 1792102638.1210756,
+        "end": null
+      }
+    ],
+    "limit": "The write interruption is deliberately widened; this proves a reachable fixture defect, not attribution of the historical failure."
+  },
+  {
+    "subject": "atomic fixture candidate",
+    "instrumented_agent_sha256": "abc4569d97b9b6bd11e465a3181f350689912a55fb5990732c778f8294fefc9d",
+    "write_window_reached": true,
+    "state_bytes": 214,
+    "state_text": "---\r\nphase: BUILD\r\ntask: T-1\r\nnext_action: \"PHASE BUILD T-1\"\r\nblocker: \"\"\r\ntransition_from: SCOUT\r\nsaipen_version: 7\r\nschema_version: 3\r\nlast_event: 8\r\nstyle_contract: ded-069a4c52\r\nagent: tester\r\nmode: full\r\n---\r\n",
+    "result": {
+      "gpu_lane": null,
+      "ok": true,
+      "code": "SUPERVISE_STOPPED",
+      "run_id": "run-96597e562636",
+      "stop": "MAX_CYCLES",
+      "reason": "bounded run of 20 cycle(s) finished",
+      "operator_action": null,
+      "counters": {
+        "cycles": 20,
+        "worker_generation_count": 20,
+        "crash_recovery_count": 1,
+        "model_replacement_recovery_count": 0,
+        "backoff_count": 0,
+        "await_count": 0,
+        "stolen_lease_count": 0,
+        "progress_slices": 1,
+        "slow_progress_slices": 1,
+        "manual_continue_count": 0,
+        "unknown_terminal_failure_count": 0,
+        "failures": {
+          "HOST_RUNTIME_FAILURE": 1
+        }
+      },
+      "maximum_recovery_latency_seconds": 0.031,
+      "model": null,
+      "history": [
+        {
+          "cycle": 1,
+          "verdict": "RUN_WORK",
+          "generation": 1,
+          "model": null,
+          "returncode": 1,
+          "failure": null,
+          "progressed": true,
+          "bounded": true,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 2,
+          "verdict": "REPLACE_WORKER",
+          "generation": 2,
+          "model": null,
+          "returncode": 1,
+          "failure": "HOST_RUNTIME_FAILURE",
+          "progressed": false,
+          "bounded": true,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 3,
+          "verdict": "REPLACE_WORKER",
+          "generation": 3,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 4,
+          "verdict": "REPLACE_WORKER",
+          "generation": 4,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 5,
+          "verdict": "REPLACE_WORKER",
+          "generation": 5,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 6,
+          "verdict": "REPLACE_WORKER",
+          "generation": 6,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 7,
+          "verdict": "REPLACE_WORKER",
+          "generation": 7,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 8,
+          "verdict": "REPLACE_WORKER",
+          "generation": 8,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 9,
+          "verdict": "REPLACE_WORKER",
+          "generation": 9,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 10,
+          "verdict": "REPLACE_WORKER",
+          "generation": 10,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 11,
+          "verdict": "REPLACE_WORKER",
+          "generation": 11,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 12,
+          "verdict": "REPLACE_WORKER",
+          "generation": 12,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 13,
+          "verdict": "REPLACE_WORKER",
+          "generation": 13,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 14,
+          "verdict": "REPLACE_WORKER",
+          "generation": 14,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 15,
+          "verdict": "REPLACE_WORKER",
+          "generation": 15,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 16,
+          "verdict": "REPLACE_WORKER",
+          "generation": 16,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 17,
+          "verdict": "REPLACE_WORKER",
+          "generation": 17,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 18,
+          "verdict": "REPLACE_WORKER",
+          "generation": 18,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 19,
+          "verdict": "REPLACE_WORKER",
+          "generation": 19,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 20,
+          "verdict": "REPLACE_WORKER",
+          "generation": 20,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": false,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        }
+      ]
+    },
+    "trace": [
+      {
+        "index": 0,
+        "mode": "slow_forever",
+        "pid": 29672,
+        "model": "",
+        "generation": "1",
+        "worker": "run-96597e562636-c1",
+        "start": 1792102638.830838,
+        "end": null
+      },
+      {
+        "index": 2,
+        "mode": "noop",
+        "pid": 2032,
+        "model": "",
+        "generation": "3",
+        "worker": "run-96597e562636-c3",
+        "start": 1792102640.2726634,
+        "end": 1792102640.2726634
+      },
+      {
+        "index": 3,
+        "mode": "noop",
+        "pid": 33760,
+        "model": "",
+        "generation": "4",
+        "worker": "run-96597e562636-c4",
+        "start": 1792102640.410818,
+        "end": 1792102640.410818
+      },
+      {
+        "index": 4,
+        "mode": "noop",
+        "pid": 5712,
+        "model": "",
+        "generation": "5",
+        "worker": "run-96597e562636-c5",
+        "start": 1792102640.572486,
+        "end": 1792102640.572486
+      },
+      {
+        "index": 5,
+        "mode": "noop",
+        "pid": 36740,
+        "model": "",
+        "generation": "6",
+        "worker": "run-96597e562636-c6",
+        "start": 1792102640.6800268,
+        "end": 1792102640.6800268
+      },
+      {
+        "index": 6,
+        "mode": "noop",
+        "pid": 19664,
+        "model": "",
+        "generation": "7",
+        "worker": "run-96597e562636-c7",
+        "start": 1792102640.7716708,
+        "end": 1792102640.7716708
+      },
+      {
+        "index": 7,
+        "mode": "noop",
+        "pid": 37544,
+        "model": "",
+        "generation": "8",
+        "worker": "run-96597e562636-c8",
+        "start": 1792102640.8623528,
+        "end": 1792102640.8623528
+      },
+      {
+        "index": 8,
+        "mode": "noop",
+        "pid": 12180,
+        "model": "",
+        "generation": "9",
+        "worker": "run-96597e562636-c9",
+        "start": 1792102640.9955864,
+        "end": 1792102640.9955864
+      },
+      {
+        "index": 9,
+        "mode": "noop",
+        "pid": 18032,
+        "model": "",
+        "generation": "10",
+        "worker": "run-96597e562636-c10",
+        "start": 1792102641.093478,
+        "end": 1792102641.093478
+      },
+      {
+        "index": 10,
+        "mode": "noop",
+        "pid": 40948,
+        "model": "",
+        "generation": "11",
+        "worker": "run-96597e562636-c11",
+        "start": 1792102641.211924,
+        "end": 1792102641.211924
+      },
+      {
+        "index": 11,
+        "mode": "noop",
+        "pid": 17124,
+        "model": "",
+        "generation": "12",
+        "worker": "run-96597e562636-c12",
+        "start": 1792102641.3641396,
+        "end": 1792102641.3641396
+      },
+      {
+        "index": 12,
+        "mode": "noop",
+        "pid": 34776,
+        "model": "",
+        "generation": "13",
+        "worker": "run-96597e562636-c13",
+        "start": 1792102641.4782326,
+        "end": 1792102641.4782326
+      },
+      {
+        "index": 13,
+        "mode": "noop",
+        "pid": 14164,
+        "model": "",
+        "generation": "14",
+        "worker": "run-96597e562636-c14",
+        "start": 1792102641.5879138,
+        "end": 1792102641.5879138
+      },
+      {
+        "index": 14,
+        "mode": "noop",
+        "pid": 16128,
+        "model": "",
+        "generation": "15",
+        "worker": "run-96597e562636-c15",
+        "start": 1792102641.7462995,
+        "end": 1792102641.7462995
+      },
+      {
+        "index": 15,
+        "mode": "noop",
+        "pid": 39176,
+        "model": "",
+        "generation": "16",
+        "worker": "run-96597e562636-c16",
+        "start": 1792102641.8605447,
+        "end": 1792102641.8605447
+      },
+      {
+        "index": 16,
+        "mode": "noop",
+        "pid": 18044,
+        "model": "",
+        "generation": "17",
+        "worker": "run-96597e562636-c17",
+        "start": 1792102641.9862194,
+        "end": 1792102641.9862194
+      },
+      {
+        "index": 17,
+        "mode": "noop",
+        "pid": 20616,
+        "model": "",
+        "generation": "18",
+        "worker": "run-96597e562636-c18",
+        "start": 1792102642.1264324,
+        "end": 1792102642.1264324
+      },
+      {
+        "index": 18,
+        "mode": "noop",
+        "pid": 28376,
+        "model": "",
+        "generation": "19",
+        "worker": "run-96597e562636-c19",
+        "start": 1792102642.2217133,
+        "end": 1792102642.2217133
+      },
+      {
+        "index": 19,
+        "mode": "noop",
+        "pid": 14464,
+        "model": "",
+        "generation": "20",
+        "worker": "run-96597e562636-c20",
+        "start": 1792102642.323424,
+        "end": 1792102642.323424
+      }
+    ],
+    "limit": "The write interruption is deliberately widened; this proves a reachable fixture defect, not attribution of the historical failure."
+  }
+]

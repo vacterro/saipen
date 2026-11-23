@@ -1,0 +1,14 @@
+
+[SAIPEN_HOST_DISPATCH_ADVISORY]
+action: kick_next_iteration
+campaign_id: CAMPAIGN-00000000-0000-0000-0000-000000000000
+iteration_id: 1
+worker_generation: 1
+idempotency_key: 54e82e970e6c71f1f031831a2d0cf4f0d6cbe6988255c700a7e0b7f0d57967ea
+inbox_path: V:\_TEMP_\saipen-camp-mat-69gm_9un\.saipen\campaign\dispatch_inbox.jsonl
+advisory: Native host iteration dispatch not registered; pump turn via host harness or external watcher.
+[/SAIPEN_HOST_DISPATCH_ADVISORY]
+----------------------------------------------------------------------
+Ran 109 tests in 5.251s
+
+OK

@@ -1,0 +1,60 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/public-release/debug-native-home/.claude/hooks/saipen-guard.py --host claude --saipen-root V:/_SAIPEN_RELEASE_/public-20261004",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/public-release/debug-native-home/.claude/hooks/saipen-guard.py --host claude --saipen-root V:/_SAIPEN_RELEASE_/public-20261004",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/public-release/debug-native-home/.claude/hooks/saipen-guard.py --host claude --saipen-root V:/_SAIPEN_RELEASE_/public-20261004",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PostModelSwitch": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/public-release/debug-native-home/.claude/hooks/saipen-guard.py --host claude --saipen-root V:/_SAIPEN_RELEASE_/public-20261004",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/public-release/debug-native-home/.claude/hooks/saipen-guard.py --host claude --saipen-root V:/_SAIPEN_RELEASE_/public-20261004",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

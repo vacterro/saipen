@@ -1,0 +1,20 @@
+live  cand  want  | case
+True  False False | verify -> PASS [target: T-8] conf: high -- python -m pytest -q from the repository root: 136 passed, 2 skip...
+True  False False | verify -> PASS conf: high -- before exit 1 (28 ran, 7 failed) / after exit 0 (28 passed)
+True  False False | PASS conf: high -- pair: before exit 1 (7 failed), after exit 0 (28 passed)
+True  False False | PASS conf: high -- before: exit 1 (28 ran, 7 failures); after: exit 0 (28 ran, 0 failed)
+True  False False | PASS conf: high -- before exit 1, 28 ran, 7 failed / after exit 0, 28 passed
+True  False False | PASS conf: high -- before exit 1 (7 failed, 21 passed) then after exit 0
+True  True  True  | PASS conf: high -- 3 failed before the retry, all green after
+True  True  True  | PASS conf: high -- before the fix 7 failed / after exit 0
+True  True  True  | PASS conf: high -- before exit 1 (28 ran, 7 failed)
+True  True  True  | PASS conf: high -- before exit 1 (28 ran, 7 failed); the family later
+True  True  True  | PASS conf: high -- before exit 1 (28 ran, 7 failed) / after exit 1 (28 ran, 2 failed)
+True  True  True  | PASS conf: high -- before exit 2 (7 failed) / after exit 0 (28 passed)
+True  True  True  | PASS conf: high -- 7 failed before exit 1 / after exit 0
+True  True  True  | PASS conf: high -- before exit 1 (7 failed) / after exit 0 (28 passed); family 2 failed
+True  True  True  | PASS conf: high -- before exit 1 (7 failed) / after exit 0 (28 ran, 3 failed)
+True  True  True  | PASS conf: high -- before exit 1 (7 failed) / after exit 0, and failures=1 in smoke
+True  True  True  | verify -> FAIL -- before exit 1 (7 failed) / after exit 0 (28 passed)
+True  True  True  | NOT PASS -- before exit 1 (7 failed) / after exit 0 (28 passed)
+cases: 18, mismatches: 0

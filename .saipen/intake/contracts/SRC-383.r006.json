@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-383:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "false LIVE_ACCEPTANCE gate: the installed-host probe must not upgrade any dispatched=True (or any host acceptance) to LIVE_ACCEPTANCE; LIVE_ACCEPTANCE requires broker-authenticated TURN_STARTED + TURN_COMPLETED evidence for ONE campaign, graded by tier"
+    },
+    "SRC-383:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "read-only probe mutation: probe(project_root) must leave the supplied tree byte-identical; the mutating dispatch test must run only in a disposable fixture root and refuse a supplied live project"
+    },
+    "SRC-383:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "native ZAICODE scheduler connection: a registered env transport (HOST_SCHEDULER_DISPATCH_CMD / HOST_DISPATCH_ENDPOINT) must actually be consulted by the campaign driver and the native Windows command path split without mangling"
+    },
+    "SRC-383:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "host-env test oracle: a test must not demand the optional external host exist; the host matrix is measured from the registry, not assumed"
+    },
+    "SRC-383:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "reconcile current Work: every installed-host acceptance clause of this source maps to current live evidence or to its exact owning ticket; no clause is left UNKNOWN"
+    },
+    "SRC-383:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "real BZ_REA overnight acceptance: no OVERNIGHT_PRODUCTION_ACCEPTANCE may be reported without sustained, broker-authenticated same-campaign host execution; the BZ_REA live half is external-owned"
+    }
+  },
+  "derived_at": "2026-11-03T08:21:22Z",
+  "derived_from": "SRC-383",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "2f44b47394f4a06e8c0bceab5247b0f010f70af23c6a8a5d4557d36aeae955ab"
+}

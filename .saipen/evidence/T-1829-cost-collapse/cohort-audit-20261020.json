@@ -1,0 +1,233 @@
+{
+  "scope": "C-007 through C-012, current source versus historical reviewed members",
+  "fingerprint": "d23c49152ef1f81d04ae62a34a7eaaac2fb36fc512618946f3dbae3cba5aa24d",
+  "registry_sha256": "ae6b924eeee2a962b18f709460e02c8e9c7bd8e67ae54f7ebfb94b51d4eafea0",
+  "registry_unchanged": true,
+  "cohorts": [
+    {
+      "cohort": "C-007",
+      "publication_status": "pending",
+      "members": [
+        "T-1828",
+        "T-1833",
+        "T-1834"
+      ],
+      "readiness": {
+        "ready": true,
+        "problems": []
+      },
+      "internal_scope_error": null,
+      "live_member_mismatches": [
+        {
+          "work": "T-1828",
+          "path": "saipen/phases/verify.md",
+          "recorded": "bff7defbec3cc058",
+          "live": "4d2be7f8accf1e91"
+        },
+        {
+          "work": "T-1828",
+          "path": "tools/saipen_engine/core_unit.py",
+          "recorded": "c315f8fadcefef78",
+          "live": "988c9b9cfb2c3b81"
+        },
+        {
+          "work": "T-1828",
+          "path": "tools/saipen_engine/focused_unit.py",
+          "recorded": "957ad5747862cd7a",
+          "live": "222a2398bb19f508"
+        },
+        {
+          "work": "T-1828",
+          "path": "tools/test_t1828_verification_policy.py",
+          "recorded": "517785ef6d96a6b4",
+          "live": "d501259c412de9ae"
+        },
+        {
+          "work": "T-1833",
+          "path": "tools/saipen_engine/test_runner.py",
+          "recorded": "ddc432151d26fad4",
+          "live": "4f2950036436bd97"
+        },
+        {
+          "work": "T-1833",
+          "path": "tools/saipen_engine/verification_bootstrap.py",
+          "recorded": "00dcaa6a3b542aa8",
+          "live": "df9bdce3388bf251"
+        },
+        {
+          "work": "T-1834",
+          "path": "tools/saipen_engine/test_runner.py",
+          "recorded": "ddc432151d26fad4",
+          "live": "4f2950036436bd97"
+        }
+      ]
+    },
+    {
+      "cohort": "C-008",
+      "publication_status": "pending",
+      "members": [
+        "T-1830",
+        "T-1831"
+      ],
+      "readiness": {
+        "ready": true,
+        "problems": []
+      },
+      "internal_scope_error": null,
+      "live_member_mismatches": [
+        {
+          "work": "T-1830",
+          "path": "tools/saipen_engine/core_unit.py",
+          "recorded": "d9b894465075a31a",
+          "live": "988c9b9cfb2c3b81"
+        },
+        {
+          "work": "T-1830",
+          "path": "tools/saipen_engine/core_unit_shard.py",
+          "recorded": "d6b2893bb0582c7e",
+          "live": "b31bafde4ad2f780"
+        },
+        {
+          "work": "T-1830",
+          "path": "tools/saipen_engine/focused_unit.py",
+          "recorded": "d71af38b7263e01a",
+          "live": "222a2398bb19f508"
+        },
+        {
+          "work": "T-1830",
+          "path": "tools/saipen_engine/test_runner.py",
+          "recorded": "154d2ad749d4271e",
+          "live": "4f2950036436bd97"
+        },
+        {
+          "work": "T-1830",
+          "path": "tools/test_t1830_verification_observations.py",
+          "recorded": "6bc1f3c4a717dacc",
+          "live": "ca8caeae0ce3328f"
+        },
+        {
+          "work": "T-1831",
+          "path": "tools/test_t1505_core_unit_sandbox_reclaim.py",
+          "recorded": "dfc1191ec3612298",
+          "live": "72f62f737699307e"
+        }
+      ]
+    },
+    {
+      "cohort": "C-009",
+      "publication_status": "pending",
+      "members": [
+        "T-1832"
+      ],
+      "readiness": {
+        "ready": true,
+        "problems": []
+      },
+      "internal_scope_error": null,
+      "live_member_mismatches": [
+        {
+          "work": "T-1832",
+          "path": "tools/saipen_engine/core_unit.py",
+          "recorded": "24aca431614c7a20",
+          "live": "988c9b9cfb2c3b81"
+        },
+        {
+          "work": "T-1832",
+          "path": "tools/saipen_engine/focused_unit.py",
+          "recorded": "0998f7005b8a1184",
+          "live": "222a2398bb19f508"
+        },
+        {
+          "work": "T-1832",
+          "path": "tools/saipen_engine/test_runner.py",
+          "recorded": "ddc432151d26fad4",
+          "live": "4f2950036436bd97"
+        },
+        {
+          "work": "T-1832",
+          "path": "tools/saipen_engine/verification_cache.py",
+          "recorded": "317b52e9620ea974",
+          "live": "5d724c800f1435f6"
+        },
+        {
+          "work": "T-1832",
+          "path": "tools/test_t1832_single_flight.py",
+          "recorded": "f0f5ffbe35a635f9",
+          "live": "7225595909b7c69c"
+        }
+      ]
+    },
+    {
+      "cohort": "C-010",
+      "publication_status": "pending",
+      "members": [
+        "T-1835"
+      ],
+      "readiness": {
+        "ready": true,
+        "problems": []
+      },
+      "internal_scope_error": null,
+      "live_member_mismatches": [
+        {
+          "work": "T-1835",
+          "path": "tools/saipen_engine/core_unit.py",
+          "recorded": "8e777d8cbf574618",
+          "live": "988c9b9cfb2c3b81"
+        },
+        {
+          "work": "T-1835",
+          "path": "tools/saipen_engine/focused_unit.py",
+          "recorded": "972f0e5f43086cc7",
+          "live": "222a2398bb19f508"
+        },
+        {
+          "work": "T-1835",
+          "path": "tools/saipen_engine/verification_cache.py",
+          "recorded": "27af1612947740b5",
+          "live": "5d724c800f1435f6"
+        },
+        {
+          "work": "T-1835",
+          "path": "tools/verification_metrics.py",
+          "recorded": "3efcdaa26e6486f7",
+          "live": "663ae557c5699ea8"
+        }
+      ]
+    },
+    {
+      "cohort": "C-011",
+      "publication_status": "pending",
+      "members": [
+        "T-1836"
+      ],
+      "readiness": {
+        "ready": true,
+        "problems": []
+      },
+      "internal_scope_error": null,
+      "live_member_mismatches": [
+        {
+          "work": "T-1836",
+          "path": "tools/saipen_engine/core_unit.py",
+          "recorded": "a0772dd9d2cfe2bd",
+          "live": "988c9b9cfb2c3b81"
+        }
+      ]
+    },
+    {
+      "cohort": "C-012",
+      "publication_status": "pending",
+      "members": [
+        "T-1837"
+      ],
+      "readiness": {
+        "ready": true,
+        "problems": []
+      },
+      "internal_scope_error": null,
+      "live_member_mismatches": []
+    }
+  ],
+  "note": "readiness proves local member closure; it is not a current-byte or publication verdict"
+}

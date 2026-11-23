@@ -1,0 +1,8 @@
+[
+  "tools/test_hermetic_env.py",
+  "tools/saipen_engine/test_runner.py",
+  "tools/test_t1649_refusal_step.py",
+  "tools/test_t1635_claude_profiles.py",
+  "tools/test_host_authority_broker.py",
+  "tools/test_t1685_profile_carrier.py"
+]

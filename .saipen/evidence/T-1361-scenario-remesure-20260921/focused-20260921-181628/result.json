@@ -1,0 +1,14 @@
+{
+  "command": ".saipen/evidence/T-1361-scenario-remesure-20260921/focused.py run_continuity_probes",
+  "head": "d97abdc097db432bafe2316b1e3577e44cd9cc4c",
+  "harness_sha256": "df733ec77df7c355e63a85b7851b0879fa39a1325ac9e547d5c5850d13175fd3",
+  "results": [
+    {
+      "function": "run_continuity_probes",
+      "elapsed": 29.21899999998277,
+      "checked": 1,
+      "skipped": 0,
+      "failures": []
+    }
+  ]
+}

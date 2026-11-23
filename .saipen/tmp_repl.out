@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "replenished": false,
+  "status": "DOING_ACTIVE",
+  "active_ticket": "T-2022",
+  "detail": "active ticket T-2022 currently in DOING"
+}

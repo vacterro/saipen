@@ -1,0 +1,219 @@
+{
+  "clauses": {
+    "SRC-394:R001": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not ask the operator to approve the current capsule until the two defects below are repaired and independently verified."
+    },
+    "SRC-394:R002": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not create a new orchestration framework, weaken native operator provenance or bypass the authority broker."
+    },
+    "SRC-394:R003": {
+      "actionable": false,
+      "class": "context",
+      "text": "A goal-management command is NEVER a goal-entry objective."
+    },
+    "SRC-394:R004": {
+      "actionable": false,
+      "class": "context",
+      "text": "The preview must not trigger:"
+    },
+    "SRC-394:R005": {
+      "actionable": false,
+      "class": "context",
+      "text": "goal pivot"
+    },
+    "SRC-394:R006": {
+      "actionable": false,
+      "class": "context",
+      "text": "bounded authority reset"
+    },
+    "SRC-394:R007": {
+      "actionable": false,
+      "class": "context",
+      "text": "Work admission"
+    },
+    "SRC-394:R008": {
+      "actionable": false,
+      "class": "context",
+      "text": "campaign dispatch"
+    },
+    "SRC-394:R009": {
+      "actionable": false,
+      "class": "context",
+      "text": "journal mutation"
+    },
+    "SRC-394:R010": {
+      "actionable": false,
+      "class": "context",
+      "text": "authorization"
+    },
+    "SRC-394:R011": {
+      "actionable": false,
+      "class": "context",
+      "text": "a synthetic operator event."
+    },
+    "SRC-394:R012": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not merely classify inspection as \"continue\" if that path has side effects."
+    },
+    "SRC-394:R013": {
+      "actionable": false,
+      "class": "context",
+      "text": "DO NOT TREAT THIS AS VERIFIED MAINTENANCE-GOAL AUTHORITY."
+    },
+    "SRC-394:R014": {
+      "actionable": false,
+      "class": "context",
+      "text": "If the canonical maintenance model must remain separate from goal continuation, implement the narrow supported authority bridge instead of quietly substituting the old test pivot."
+    },
+    "SRC-394:R015": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not rewrite historical pivot events or journal receipts."
+    },
+    "SRC-394:R016": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not use an old goal as the authority anchor for a different persistent goal without an explicit authenticated and verifiable delegation contract."
+    },
+    "SRC-394:R017": {
+      "actionable": false,
+      "class": "context",
+      "text": "An approval preview must show the actual maintenance objective, allowed operations, exact project, scope, budget, expiry policy, revocation path, and excluded actions."
+    },
+    "SRC-394:R018": {
+      "actionable": false,
+      "class": "context",
+      "text": "Wrong goal, stale source, altered objective, mismatched provider or mismatched project must fail closed."
+    },
+    "SRC-394:R019": {
+      "actionable": false,
+      "class": "context",
+      "text": "The approval event must originate in a real trusted human interaction."
+    },
+    "SRC-394:R020": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not treat an agent's shell or text as consent."
+    },
+    "SRC-394:R021": {
+      "actionable": false,
+      "class": "context",
+      "text": "The native broker must verify exact proposal identity and revocation/budget scope at commit time."
+    },
+    "SRC-394:R022": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not mark unattended autonomy production-ready merely because the operator approval process is repaired."
+    },
+    "SRC-394:R023": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not fabricate TURN_STARTED, TURN_COMPLETED or broker proof."
+    },
+    "SRC-394:R024": {
+      "actionable": false,
+      "class": "context",
+      "text": "User typing \"saipen goal propose\" never creates a goal."
+    },
+    "SRC-394:R025": {
+      "actionable": false,
+      "class": "context",
+      "text": "User typing \"saipen goal status/list/eval\" never creates a goal."
+    },
+    "SRC-394:R026": {
+      "actionable": false,
+      "class": "context",
+      "text": "Goal pause/resume/add/replenish cannot become pivot objectives."
+    },
+    "SRC-394:R027": {
+      "actionable": false,
+      "class": "context",
+      "text": "Explicit intended goal-entry syntax still works."
+    },
+    "SRC-394:R028": {
+      "actionable": false,
+      "class": "context",
+      "text": "Authorized goal grant syntax remains distinct."
+    },
+    "SRC-394:R029": {
+      "actionable": false,
+      "class": "context",
+      "text": "CLI and native hook resolve the same command semantics."
+    },
+    "SRC-394:R030": {
+      "actionable": false,
+      "class": "context",
+      "text": "Read-only preview creates zero project mutations."
+    },
+    "SRC-394:R031": {
+      "actionable": false,
+      "class": "context",
+      "text": "Model-authored capsule cannot authorize maintenance."
+    },
+    "SRC-394:R032": {
+      "actionable": false,
+      "class": "context",
+      "text": "Operator approval for a different goal is refused."
+    },
+    "SRC-394:R033": {
+      "actionable": false,
+      "class": "context",
+      "text": "Historic test pivot cannot silently authorize self-maintenance."
+    },
+    "SRC-394:R034": {
+      "actionable": false,
+      "class": "context",
+      "text": "A valid current maintenance grant is accepted once."
+    },
+    "SRC-394:R035": {
+      "actionable": false,
+      "class": "context",
+      "text": "Expiry, revocation, duplicate approval and wrong scope fail."
+    },
+    "SRC-394:R036": {
+      "actionable": false,
+      "class": "context",
+      "text": "Protocol-home checkpoint does not grant arbitrary mutations."
+    },
+    "SRC-394:R037": {
+      "actionable": false,
+      "class": "context",
+      "text": "Release approval remains a separate authority."
+    },
+    "SRC-394:R038": {
+      "actionable": false,
+      "class": "context",
+      "text": "Genuine installed-host continuation remains a separate gate."
+    },
+    "SRC-394:R039": {
+      "actionable": false,
+      "class": "context",
+      "text": "Routine Windows tests are noninvasive."
+    },
+    "SRC-394:R040": {
+      "actionable": false,
+      "class": "context",
+      "text": "Shared Git index and foreign owners remain protected."
+    },
+    "SRC-394:R041": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not prompt the operator to authorize the old \"test1\" capsule."
+    },
+    "SRC-394:R042": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SRC-394's core demand: repair and independently verify the two goal-authority defects (a goal-management command sealed as a goal-entry objective, and grant authority anchored to a historic test pivot) BEFORE asking the operator to approve any capsule; wrong goal, stale source, altered objective, mismatched provider/project, model-authored capsule and historic test pivot must fail closed; the read-only preview must create zero mutations and must never present a refusal as available authority."
+    }
+  },
+  "derived_at": "2026-11-05T02:12:30Z",
+  "derived_from": "SRC-394",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "609bbc4c2df4af5ffe1494b8140234812ed6a1a60eaef5974325c89d65b148f8"
+}

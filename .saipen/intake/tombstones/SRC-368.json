@@ -1,0 +1,16 @@
+{
+  "actionable": 12,
+  "archive_ref": ".saipen/archive/source/SRC-368.md",
+  "closed_at": "2026-11-01T20:55:01Z",
+  "closure_event": null,
+  "linked_work": "T-1994",
+  "linked_works": [
+    "T-1994"
+  ],
+  "receipt_id": "SRC-368",
+  "requirements": 12,
+  "schema_version": 1,
+  "source_sha256": "2585064f0adfcc18304904652c6e7c28bf8312a287918071a0a97f958c267612",
+  "status": "CLOSED",
+  "unresolved": 0
+}

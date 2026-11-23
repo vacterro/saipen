@@ -1,0 +1,19 @@
+# T-1867 red control: the pre-fix matcher against the event the writer ships
+# pre-fix pattern: ^ticket finished via SAIOPS -- completion(?: \(from SHIP\))?$
+# subject event  : ticket finished via SAIOPS -- completion (from SHIP); publication_state pending; release route: saipen cohort ship <C-###> (a released batch names this ticket, flipping the state to published)
+
+pre_fix_fullmatch  : False
+post_fix_fullmatch : True
+
+# The pre-fix matcher refuses the shipped event, which is the whole bug:
+# every supersession ordering proof lost its completion and reported
+# SUPERSESSION_EVIDENCE_INVALID. Reproduced by running the live suite
+# against a supersession module carrying only the pre-fix pattern.
+
+$ python -B -m unittest discover -s tools -p test_ticket_supersession.py
+# result: exit=1, FAILED (failures=7) -- the pre-fix matcher, live suite, real bytes
+# then the fixed matcher restored (bytes verified identical to the saved copy) and:
+# result: exit=0, Ran 19 tests, OK
+
+$ python -B -m unittest discover -s tools -p test_ticket_supersession.py
+# exit=0

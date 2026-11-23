@@ -1,0 +1,8 @@
+{
+  "STATUS": "DONE — T-2019 valmis, avaldamata",
+  "BLOCKER": "NONE",
+  "OPERATOR ACTION": "NONE",
+  "RESULT": "Lisatud eelkontrolli reegel, kukkunud skripti kordusjooks, --fail-fast, suite affected ning kestuste ja SAIPENi lisakulu väljad. Skriptiajad vajavad jooksutaja ajaridu (BZDECOMP T-651).",
+  "NEXT EXACT ACTION": "NONE",
+  "VALIDATION": "STALE_FAIL — üldised core/lint kontrollid punased; 76 seotud testi ja lõppmuudatuse 12 testi PASS, uusi lintvigu 0."
+}

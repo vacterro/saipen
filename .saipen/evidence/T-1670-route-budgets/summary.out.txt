@@ -1,0 +1,9 @@
+cold                  26110 / 27648  PASS
+ordinary_continue     33792 / 35840  PASS
+command_resolution    54265 / 54272  PASS
+ordinary_phase        40012 / 40960  PASS
+ship_improve          50000 / 56320  PASS
+single_doc            41327 / 51200  PASS
+largest document      41327  OPS.md
+human markdown total 334847  informational
+rc=0

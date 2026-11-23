@@ -1040,6 +1040,7 @@ def operation_receipts_bounded(root: Path, operation: str):
 
     records: list[dict] = []
     errors: list[str] = []
+    root_resolved = root.resolve()
 
     # Active tail: every settlement's most recent members.
     tail = _read_segment(root, ACTIVE_ID)
@@ -1068,7 +1069,16 @@ def operation_receipts_bounded(root: Path, operation: str):
             return [], (
                 f"{ACTIVE_ID}.json: locator advertises names the tail does not carry",
             ), True
-        records.extend(_load_members(root, SETTLED_DIR, tail_hits, errors, decode_operation_record))
+        records.extend(
+            _load_members(
+                root,
+                SETTLED_DIR,
+                tail_hits,
+                errors,
+                decode_operation_record,
+                resolved_root=root_resolved,
+            )
+        )
         referenced.pop(ACTIVE_ID)
 
     for segment_id, wanted in referenced.items():
@@ -1085,7 +1095,16 @@ def operation_receipts_bounded(root: Path, operation: str):
             return [], (
                 f"{segment_id}.json: locator advertises names the segment does not carry",
             ), True
-        records.extend(_load_members(root, SETTLED_DIR, hits, errors, decode_operation_record))
+        records.extend(
+            _load_members(
+                root,
+                SETTLED_DIR,
+                hits,
+                errors,
+                decode_operation_record,
+                resolved_root=root_resolved,
+            )
+        )
         if errors:
             return [], errors, True
 
@@ -1104,6 +1123,7 @@ def operation_receipts_bounded(root: Path, operation: str):
             raw=entry.manifest_raw,
             progress_raw=entry.progress_raw,
             progress_captured=True,
+            resolved_root=root_resolved,
         )
         if not decoded["ok"]:
             errors.append(
@@ -1149,7 +1169,15 @@ def operation_receipts_bounded(root: Path, operation: str):
     return kept, (), True
 
 
-def _load_members(root: Path, settled_rel: str, members, errors, decode_operation_record):
+def _load_members(
+    root: Path,
+    settled_rel: str,
+    members,
+    errors,
+    decode_operation_record,
+    *,
+    resolved_root: Path | None = None,
+):
     """Open, digest-verify, and strictly decode the matched members only."""
     records = []
     for member in members:
@@ -1182,12 +1210,23 @@ def _load_members(root: Path, settled_rel: str, members, errors, decode_operatio
                 f"{name}: settled progress content digest mismatch; refusing bounded trust"
             )
             return records
-        decoded = decode_operation_record(
-            root,
-            op_dir,
-            raw=manifest_raw,
-            progress_raw=progress_raw,
-            progress_captured=True,
+        decoded = (
+            decode_operation_record(
+                root,
+                op_dir,
+                raw=manifest_raw,
+                progress_raw=progress_raw,
+                progress_captured=True,
+                resolved_root=resolved_root,
+            )
+            if resolved_root is not None
+            else decode_operation_record(
+                root,
+                op_dir,
+                raw=manifest_raw,
+                progress_raw=progress_raw,
+                progress_captured=True,
+            )
         )
         if not decoded["ok"]:
             errors.append(

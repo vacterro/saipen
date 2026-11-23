@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "stage": "verify",
+  "verifier_sha256": "c853c66acfecfa6517bd6ec966dd2c04188f5c09eb9a76f083262158aaed800a",
+  "matrix_sha256": "82ea1a42b37a79ed20675a6837a8b3fab52ef6bb939ad266603185ca08439846",
+  "controls": [
+    {
+      "input": "good",
+      "accepted": true,
+      "historical_reproductions": 2
+    },
+    {
+      "input": "changed_historical_subject",
+      "accepted": false,
+      "exception": "RuntimeError",
+      "detail": "historical subject identity moved: manifest-8f91d779.py"
+    },
+    {
+      "input": "false_sealed_hash",
+      "accepted": false,
+      "exception": "RuntimeError",
+      "detail": "an inspected sealed segment changed: .saipen\\logs\\LOG-001.md"
+    }
+  ],
+  "tree_fingerprint": "55f06a7fce4aa11ff0de0126e1e44a6118807f51927a80787cb5a0b99fbb2ec4",
+  "canonical_unchanged": true,
+  "index_unchanged": true,
+  "limits": "Identical verifier code; only disposable copies of its forensic operands changed. No claim of a historical complete-installation boot or unavailable AG3 token."
+}

@@ -1,0 +1,23 @@
+{
+ "engine": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\tools\\saipen_engine\\convergence.py",
+ "conditions": {
+  "C1": true,
+  "C2": true,
+  "C3": true,
+  "C4": true,
+  "C5": true,
+  "C6": true,
+  "C7": false,
+  "C8": true
+ },
+ "complete": false,
+ "latest_i": "2026-11-13T11:45:14Z",
+ "stages": [
+  "E",
+  "F",
+  "G",
+  "H",
+  "I"
+ ],
+ "audit_consumes": []
+}

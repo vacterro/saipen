@@ -1,0 +1,43 @@
+CONTROL 1/3 unmutated copy: exit 0, Ran 14 tests
+CONTROL 2/3 unmutated copy: exit 0, Ran 14 tests
+CONTROL 3/3 unmutated copy: exit 0, Ran 14 tests
+M1 the loader no longer refuses an unauthorized head: DETECTED in 3 of 3
+      red: test_a_marker_moved_by_hand_alone_is_reconciled_by_one_journaled_event
+      red: test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing
+M2 status projects the typed state as healthy: DETECTED in 3 of 3
+      red: test_a_marker_moved_by_hand_alone_is_reconciled_by_one_journaled_event
+      red: test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing
+M3 the validator says nothing about it: DETECTED in 3 of 3
+      red: test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing
+M4 reconciliation plans no repair for it: DETECTED in 3 of 3
+      red: test_a_marker_moved_by_hand_alone_is_reconciled_by_one_journaled_event
+      red: test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte
+M5 the floor believes any tag, resolved or not: DETECTED in 3 of 3
+      red: test_an_id_in_the_registered_grammar_with_no_record_is_part_of_the_head
+M6 a closure before a fresh claim still backs the ticket: DETECTED in 3 of 3
+      red: test_a_closure_before_a_fresh_claim_does_not_back_a_typed_completion
+M7 a marker above the floor is no finding: DETECTED in 3 of 3
+      red: test_a_canonical_closure_with_a_later_typed_note_is_authorized
+      red: test_a_marker_moved_by_hand_alone_is_reconciled_by_one_journaled_event
+      red: test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing
+      red: test_an_id_in_the_registered_grammar_with_no_record_is_part_of_the_head
+M8 a typed completion is no finding: DETECTED in 3 of 3
+      red: test_a_closure_before_a_fresh_claim_does_not_back_a_typed_completion
+      red: test_a_ticket_named_only_as_a_target_is_still_named
+      red: test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing
+      red: test_an_id_in_the_registered_grammar_with_no_record_is_part_of_the_head
+      red: test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte
+M9 the recovery keeps no copy of the typed bytes: DETECTED in 3 of 3
+      red: test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte
+M10 a checkout with no resolvable event is accused: DETECTED in 3 of 3
+      red: test_no_ledger_and_no_resolvable_event_are_both_unavailable
+M11 a ticket named only as a target is not named: DETECTED in 3 of 3
+      red: test_a_ticket_named_only_as_a_target_is_still_named
+M12 finish_ticket loses its refusal guard: DETECTED in 3 of 3
+      red: test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing
+M13 OPS 8 licenses the manual protocol again: DETECTED in 3 of 3
+      red: test_ops_names_no_manual_fallback
+M14 the activation block orders the hand checkpoint again: DETECTED in 3 of 3
+      red: test_the_activation_block_forbids_the_hand_checkpoint_it_used_to_order
+restored; mutations 14, undetected 0, mutations with an unstable test 0, mutations with a red test not named for them 0
+exit 0

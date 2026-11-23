@@ -1,0 +1,216 @@
+{
+  "scope": "bounded native disposable counterexamples",
+  "cases": [
+    {
+      "case": "delete_required",
+      "original": "AC-01 [LIVE] signed-in product outcome",
+      "replacement": "offline fixture passes; required product predicate removed",
+      "original_sha256": "3111c322c338a83cfd99496a15ea574fdbcdfd08a1fa1a68b0d79be1e5af50c8",
+      "replacement_sha256": "b841f9391dd6fe8767d2de6cf87a34d62c7425a2b3081f7d719f651ceb739ef6",
+      "projection": {
+        "ticket": "T-7",
+        "criteria": [],
+        "undeclared_evidence": [
+          "AC-01"
+        ],
+        "undeclared_escaped_defects": [],
+        "build_boundary": 0,
+        "counts": {},
+        "declared": 0
+      },
+      "native_review_admission": {
+        "ok": true,
+        "code": "TRANSITIONED",
+        "op_id": "transition-67a39f3e7d3548f9af9484364a21c712",
+        "changed_files": [
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "phase": "REVIEW",
+        "next_action": "PHASE REVIEW T-7",
+        "event_id": "E-8",
+        "ticket": "T-7"
+      },
+      "unsafe_accepted": true
+    },
+    {
+      "case": "optionalize_witness",
+      "original": "AC-01 [LIVE] signed-in product outcome",
+      "replacement": "AC-01 [UNIT] signed-in product outcome",
+      "original_sha256": "3111c322c338a83cfd99496a15ea574fdbcdfd08a1fa1a68b0d79be1e5af50c8",
+      "replacement_sha256": "af75e8eec158990a961171949ba3e8cc0f960e65c5e1b54fcaef7b26eb0aaeb0",
+      "projection": {
+        "ticket": "T-7",
+        "criteria": [
+          {
+            "ac": "AC-01",
+            "text": "signed-in product outcome",
+            "minimum_witness": "UNIT",
+            "minimum_witness_explicit": true,
+            "state": "SATISFIED",
+            "evidence": [
+              {
+                "ac": "AC-01",
+                "result": "PASS",
+                "kind": "behavioral",
+                "witness": "UNIT",
+                "witness_explicit": true,
+                "observed_surface": "fixture",
+                "detail": "actual fixture-only scope",
+                "event": 6,
+                "stale": false,
+                "scope_sufficient": true
+              }
+            ],
+            "escaped_defects": [],
+            "previously_accepted": false
+          }
+        ],
+        "undeclared_evidence": [],
+        "undeclared_escaped_defects": [],
+        "build_boundary": 0,
+        "counts": {
+          "SATISFIED": 1
+        },
+        "declared": 1
+      },
+      "native_review_admission": {
+        "ok": true,
+        "code": "TRANSITIONED",
+        "op_id": "transition-1cf8437d61a8414c8c3730aaa8f4bc18",
+        "changed_files": [
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "phase": "REVIEW",
+        "next_action": "PHASE REVIEW T-7",
+        "event_id": "E-8",
+        "ticket": "T-7"
+      },
+      "unsafe_accepted": true
+    },
+    {
+      "case": "fixture_for_live",
+      "original": "AC-01 [LIVE] signed-in product outcome",
+      "replacement": "AC-01 [LIVE] signed-in product outcome",
+      "original_sha256": "3111c322c338a83cfd99496a15ea574fdbcdfd08a1fa1a68b0d79be1e5af50c8",
+      "replacement_sha256": "3111c322c338a83cfd99496a15ea574fdbcdfd08a1fa1a68b0d79be1e5af50c8",
+      "projection": {
+        "ticket": "T-7",
+        "criteria": [
+          {
+            "ac": "AC-01",
+            "text": "signed-in product outcome",
+            "minimum_witness": "LIVE",
+            "minimum_witness_explicit": true,
+            "state": "EVIDENCE_SCOPE_TOO_WEAK",
+            "evidence": [
+              {
+                "ac": "AC-01",
+                "result": "PASS",
+                "kind": "behavioral",
+                "witness": "UNIT",
+                "witness_explicit": true,
+                "observed_surface": "fixture",
+                "detail": "actual fixture-only scope",
+                "event": 5,
+                "stale": false,
+                "scope_sufficient": false
+              }
+            ],
+            "escaped_defects": [],
+            "previously_accepted": false
+          }
+        ],
+        "undeclared_evidence": [],
+        "undeclared_escaped_defects": [],
+        "build_boundary": 0,
+        "counts": {
+          "EVIDENCE_SCOPE_TOO_WEAK": 1
+        },
+        "declared": 1
+      },
+      "native_review_admission": {
+        "ok": true,
+        "code": "TRANSITIONED",
+        "op_id": "transition-273fc80d97be4e62ad6740ae871bbb6e",
+        "changed_files": [
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "phase": "REVIEW",
+        "next_action": "PHASE REVIEW T-7",
+        "event_id": "E-7",
+        "ticket": "T-7"
+      },
+      "unsafe_accepted": true
+    },
+    {
+      "case": "ordinary_unchanged",
+      "original": "AC-01 [UNIT] offline inspector outcome",
+      "replacement": "AC-01 [UNIT] offline inspector outcome",
+      "original_sha256": "1f8576c3dfe8367d9a5c72fc4b3c2ca856a19703c8b559faaf153ae51778489b",
+      "replacement_sha256": "1f8576c3dfe8367d9a5c72fc4b3c2ca856a19703c8b559faaf153ae51778489b",
+      "projection": {
+        "ticket": "T-7",
+        "criteria": [
+          {
+            "ac": "AC-01",
+            "text": "offline inspector outcome",
+            "minimum_witness": "UNIT",
+            "minimum_witness_explicit": true,
+            "state": "SATISFIED",
+            "evidence": [
+              {
+                "ac": "AC-01",
+                "result": "PASS",
+                "kind": "behavioral",
+                "witness": "UNIT",
+                "witness_explicit": true,
+                "observed_surface": "fixture",
+                "detail": "actual fixture-only scope",
+                "event": 5,
+                "stale": false,
+                "scope_sufficient": true
+              }
+            ],
+            "escaped_defects": [],
+            "previously_accepted": false
+          }
+        ],
+        "undeclared_evidence": [],
+        "undeclared_escaped_defects": [],
+        "build_boundary": 0,
+        "counts": {
+          "SATISFIED": 1
+        },
+        "declared": 1
+      },
+      "native_review_admission": {
+        "ok": true,
+        "code": "TRANSITIONED",
+        "op_id": "transition-18c1d5492bfc482eb7f71bab2a6617f4",
+        "changed_files": [
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "phase": "REVIEW",
+        "next_action": "PHASE REVIEW T-7",
+        "event_id": "E-7",
+        "ticket": "T-7"
+      },
+      "unsafe_accepted": false
+    }
+  ],
+  "unsafe_admitted": 3,
+  "legitimate_admitted": 1,
+  "production_changed": false
+}

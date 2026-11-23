@@ -1,0 +1,60 @@
+.........................................F......................... [ 78%]
+.F................                                                  [100%]
+================================== FAILURES ===================================
+________ TestProductionAcceptanceGates.test_gate_i_quiescence_and_wake ________
+C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:939: in assert_called_with
+    raise AssertionError(_error_message()) from cause
+E   AssertionError: expected call not found.
+E   Expected: mock(WindowsPath('V:/_TEMP_/saipen-gate-lxdh0lx8'), 1)
+E     Actual: mock(WindowsPath('V:/_TEMP_/saipen-gate-lxdh0lx8'), generation=1)
+
+During handling of the above exception, another exception occurred:
+C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:951: in assert_called_once_with
+    return self.assert_called_with(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: expected call not found.
+E   Expected: mock(WindowsPath('V:/_TEMP_/saipen-gate-lxdh0lx8'), 1)
+E     Actual: mock(WindowsPath('V:/_TEMP_/saipen-gate-lxdh0lx8'), generation=1)
+E   
+E   pytest introspection follows:
+E   
+E   Args:
+E   assert (WindowsPath(...e-lxdh0lx8'),) == (WindowsPath(...lxdh0lx8'), 1)
+E     
+E     Right contains one more item: 1
+E     Use -v to get more diff
+E   Kwargs:
+E   assert {'generation': 1} == {}
+E     
+E     Left contains 1 more item:
+E     {'generation': 1}
+E     Use -v to get more diff
+
+During handling of the above exception, another exception occurred:
+tools\test_campaign_production_gates.py:342: in test_gate_i_quiescence_and_wake
+    worker.assert_called_once_with(root, 1)
+E   AssertionError: expected call not found.
+E   Expected: mock(WindowsPath('V:/_TEMP_/saipen-gate-lxdh0lx8'), 1)
+E     Actual: mock(WindowsPath('V:/_TEMP_/saipen-gate-lxdh0lx8'), generation=1)
+E   
+E   pytest introspection follows:
+E   
+E   Args:
+E   assert (WindowsPath(...e-lxdh0lx8'),) == (WindowsPath(...lxdh0lx8'), 1)
+E     
+E     Right contains one more item: 1
+E     Use -v to get more diff
+E   Kwargs:
+E   assert {'generation': 1} == {}
+E     
+E     Left contains 1 more item:
+E     {'generation': 1}
+E     Use -v to get more diff
+_ DriverStopsOnBlockingStatesTest.test_external_block_does_not_veto_independent_work _
+tools\test_t1945_campaign_driver.py:187: in test_external_block_does_not_veto_independent_work
+    self.assertTrue(result["ok"], result)
+E   AssertionError: False is not true : {'ok': False, 'status': 'STOPPED', 'reason': 'step_failed', 'code': 'INVALID_RUNTIME', 'detail': 'BOARD parse error(s): BOARD.md required heading ## BLOCKED appears 2 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash', 'steps': [{'ok': False, 'code': 'INVALID_RUNTIME', 'event': 'INVALID_RUNTIME', 'classification': 'INVALID_RUNTIME', 'detail': 'BOARD parse error(s): BOARD.md required heading ## BLOCKED appears 2 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash', 'state': {'authority_grant': {'authorization': {'authorized_scopes': ['AUDIT_STAGING', 'CAMPAIGN_EXECUTION', 'EXTERNAL_AUDIT_PUBLICATION', 'FORENSIC_ANALYSIS', 'PROTOCOL_REPAIR', 'SAIPEN_AUDIT_INGESTION', 'continuous_maintenance'], 'campaign_limit': 1, 'expires_at': 1794455941.5783553, 'goal_binding': {'authority_source': '', 'goal_ingress': ''}, 'host': 'claude', 'kind': 'saipen-campaign-authorization', 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'resource_budget': {'max_cycles': 1000, 'max_generations': 1000, 'max_wall_seconds': 200000}, 'schema_version': 1, 'session': 'contract-session', 'target_project': 'V:\\_TEMP_\\saipen-camp-mat-8fw9v4gi'}, 'operator_origin': {'kind': 'operator-origin', 'nonce': '1e51349f58984cd4a8f44dfd9cb9e76e', 'request_digest': '4e239f48bbb12593e6a11ab7c0b1337548964ce148363b3940d8b46bc7af85f9'}}, 'authority_grant_digest': 'aaa37c9cf280b2e1b7f67a23da8971ce0c476ff9616460e2e0253c29d75fcca5', 'authority_proof_reference': '.saipen/authority/grant.json', 'authority_scope': 'continuous_maintenance', 'campaign_id': 'CAMP-AUT006', 'campaign_state': 'SAFETY_STOP', 'cancellation_epoch': 0, 'created_at': '2026-11-09T20:25:41Z', 'current_work': None, 'cycle_count': 1, 'goal_binding': {'authority_source': '', 'goal_ingress': ''}, 'last_analysis_generation': 0, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-11-09T20:25:41Z', 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'saipen status', 'no_progress_count': 0, 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'resource_budget': {'max_cycles': 10, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': '308730bf46dcdb9f1b9716531cd5afa2a7a7ea0b0dac4fe2e9fb3b421d718387', 'updated_at': '2026-11-09T20:25:41Z', 'wake_condition': None, 'worker_generation': 0}}]}
+=========================== short test summary info ===========================
+FAILED tools/test_campaign_production_gates.py::TestProductionAcceptanceGates::test_gate_i_quiescence_and_wake
+FAILED tools/test_t1945_campaign_driver.py::DriverStopsOnBlockingStatesTest::test_external_block_does_not_veto_independent_work
+2 failed, 83 passed, 10 subtests passed in 3.91s

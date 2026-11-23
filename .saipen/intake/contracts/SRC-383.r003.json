@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-383:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "false LIVE_ACCEPTANCE gate: the installed-host probe must not upgrade any dispatched=True (or any host acceptance) to LIVE_ACCEPTANCE; LIVE_ACCEPTANCE requires broker-authenticated TURN_STARTED + TURN_COMPLETED evidence for ONE campaign, graded by tier"
+    },
+    "SRC-383:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "read-only probe mutation: probe(project_root) must leave the supplied tree byte-identical; the mutating dispatch test must run only in a disposable fixture root and refuse a supplied live project"
+    },
+    "SRC-383:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "native ZAICODE scheduler connection: a registered env transport (HOST_SCHEDULER_DISPATCH_CMD / HOST_DISPATCH_ENDPOINT) must actually be consulted by the campaign driver and the native Windows command path split without mangling"
+    }
+  },
+  "derived_at": "2026-11-03T08:20:30Z",
+  "derived_from": "SRC-383",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "2f44b47394f4a06e8c0bceab5247b0f010f70af23c6a8a5d4557d36aeae955ab"
+}

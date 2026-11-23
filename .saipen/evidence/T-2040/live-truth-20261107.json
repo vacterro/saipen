@@ -1,0 +1,895 @@
+{
+  "position": {
+    "phase": "BUILD",
+    "task": "T-2040",
+    "next_action": "PHASE BUILD T-2040",
+    "last_event": 20749,
+    "execution_intent": "converge",
+    "continuation_authority": null,
+    "authority_source": null,
+    "authority_until": null
+  },
+  "board": {
+    "## DOING": 1,
+    "## TODO": 2,
+    "## DONE": 138,
+    "## BLOCKED": 126
+  },
+  "goals": [
+    {
+      "goal_id": "self-maintenance-core",
+      "project_id": "_SAIPEN",
+      "title": "Continuous SAIPEN Self-Maintenance and Defect Elimination",
+      "objective": "Autonomously discover, evaluate, and repair verified regressions, test failures, and maintenance backlog to preserve a healthy repository",
+      "authorization_scope": "MAINTENANCE",
+      "success_criteria": {},
+      "evidence_provider": "failed_tests",
+      "current_progress": {},
+      "target_progress": {},
+      "research_or_work_backlog_source": "",
+      "admission_policy": {},
+      "current_status": "ACTIVE",
+      "last_evaluation": "",
+      "last_successful_work": null,
+      "last_discovery": null,
+      "blockers": [],
+      "completion_evidence": null,
+      "resume_metadata": {},
+      "paused": false
+    }
+  ],
+  "authority_errors": [],
+  "proposal": {
+    "ok": false,
+    "code": "PROPOSAL_UNAVAILABLE",
+    "detail": "ValueError: an existing active goal is required",
+    "scope": "continuous_maintenance"
+  },
+  "publication_counts": {
+    "pending": 132,
+    "unknown": 6
+  },
+  "publication_diagnostics": [],
+  "publication_by_ticket": [
+    [
+      "T-1302",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1318",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1326",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1344",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1345",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1346",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1361",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1374",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1383",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1387",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1401",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1402",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1420",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1427",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1430",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1432",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1433",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1434",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1435",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1436",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1437",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1438",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1439",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1440",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1441",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1442",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1444",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1445",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1447",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1448",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1452",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1453",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1454",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1455",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1456",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1457",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1458",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1459",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1460",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1461",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1463",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1465",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1466",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1467",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1468",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1469",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1470",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1472",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1474",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1476",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1478",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1481",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1482",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1483",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1484",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1485",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1486",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1488",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1489",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1490",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1491",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1494",
+      "unknown",
+      [
+        "release-2398c14dcffa4bbca9ac32e4f3aff49c"
+      ],
+      "local closure truth absent: Core not at DONE / task none"
+    ],
+    [
+      "T-1495",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1496",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1500",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1501",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1502",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1504",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1506",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1510",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1511",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1512",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1520",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1549",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1565",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1598",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1600",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1609",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1639",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1653",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1654",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1673",
+      "unknown",
+      [
+        "release-64ef9fb1cac64bacaf60b3ee7d0ec4b8"
+      ],
+      "local closure truth absent: Core not at DONE / task none"
+    ],
+    [
+      "T-1693",
+      "unknown",
+      [
+        "release-ca5147d0f9954b8780d109d79f4e0a15"
+      ],
+      "local closure truth absent: Core not at DONE / task none"
+    ],
+    [
+      "T-1703",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1705",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1707",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1708",
+      "unknown",
+      [
+        "release-7b9ee0604806458aab1cc93aa0ec2d14"
+      ],
+      "local closure truth absent: Core not at DONE / task none"
+    ],
+    [
+      "T-1709",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1711",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1713",
+      "unknown",
+      [
+        "release-05102ed14cda4098b8c31af857e844e6"
+      ],
+      "local closure truth absent: Core not at DONE / task none"
+    ],
+    [
+      "T-1714",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1721",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1749",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1750",
+      "unknown",
+      [
+        "release-a1a49cb73de34e6b825889e10173d406"
+      ],
+      "local closure truth absent: Core not at DONE / task none"
+    ],
+    [
+      "T-1771",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1772",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1774",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1775",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1776",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1782",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1785",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1792",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1793",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1842",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1844",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1845",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1846",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1847",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1848",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1850",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1851",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1852",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1866",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1992",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1994",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1995",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1996",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1997",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1998",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-1999",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2000",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2001",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2003",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2004",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2007",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2009",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2013",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2015",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2017",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2019",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2020",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2021",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2023",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2025",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2027",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2030",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2031",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ],
+    [
+      "T-2032",
+      "pending",
+      [],
+      "no canonical ticket-bound release receipt"
+    ]
+  ]
+}

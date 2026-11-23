@@ -1,0 +1,31 @@
+{
+  "archive_ref": ".saipen/archive/source/SRC-036.md",
+  "closed_at": "2026-09-24T11:28:54Z",
+  "closure_event": null,
+  "linked_work": "T-158",
+  "receipt_id": "SRC-036",
+  "received_at": "2026-09-05T00:18:50Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "747e8098e8384fc26c81daf9ab42c296fe76fa9b59da8da9186ddda5bf644625",
+    "sanitized_sha256": "747e8098e8384fc26c81daf9ab42c296fe76fa9b59da8da9186ddda5bf644625"
+  },
+  "reread_at": "2026-09-24T11:28:54Z",
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "747e8098e8384fc26c81daf9ab42c296fe76fa9b59da8da9186ddda5bf644625",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "external_audit",
+  "source_sha256": "747e8098e8384fc26c81daf9ab42c296fe76fa9b59da8da9186ddda5bf644625",
+  "status": "CLOSED",
+  "storage_status": "ARCHIVED",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

@@ -1,0 +1,13 @@
+..............F.....
+======================================================================
+FAIL: test_status_distribution_probe_preserves_index_stat_cache (test_t2021_false_idle_maintenance.IndependentMaintenanceTests.test_status_distribution_probe_preserves_index_stat_cache)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2021_false_idle_maintenance.py", line 367, in test_status_distribution_probe_preserves_index_stat_cache
+    self.assertEqual(index.read_bytes(), before, "status must not refresh the index stat cache")
+AssertionError: b'DIR[60 chars]a\xc2p\x05\xbc;\xf8\x00\x00\x00\x00\x00\x00\x0[214 chars]97E:' != b'DIR[60 chars]a\xc2m\x05\xbc;\xf8\x00\x00\x00\x00\x00\x00\x0[216 chars]xe5j' : status must not refresh the index stat cache
+
+----------------------------------------------------------------------
+Ran 20 tests in 1.191s
+
+FAILED (failures=1)

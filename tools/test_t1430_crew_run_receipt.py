@@ -174,6 +174,42 @@ class CrewRunReceiptTests(unittest.TestCase):
         self.assertIn("[agent: test-agent]", line)
         self.assertIn("role saihunt", line)
 
+    def test_replaying_the_same_binding_is_idempotent_and_writes_nothing(self):
+        # TEST-13 S8: a retry after a lost reply used to append a SECOND
+        # COMMITTED receipt for the identical epoch+role+source+package binding,
+        # so receipt counts stopped measuring how often a role actually ran.
+        self.write_outbox(self.package("HUNT-900"))
+        self.enter_crew()
+        code, first, text = cli(self.root, "crew", "record-run", "saihunt", "--json")
+        self.assertEqual(code, 0, text)
+        self.assertEqual(first["code"], "CREW_RUN_RECORDED", first)
+        before = (self.root / ".saipen" / "LOG.md").read_bytes()
+
+        code, second, text = cli(self.root, "crew", "record-run", "saihunt", "--json")
+        self.assertEqual(code, 0, text)
+        self.assertEqual(second["code"], "ALREADY_BOUND", second)
+        self.assertTrue(second["idempotent"])
+        self.assertEqual(second["event_id"], first["event_id"])
+        self.assertEqual((self.root / ".saipen" / "LOG.md").read_bytes(), before)
+        log = (self.root / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+        self.assertEqual(log.count("crew run -- epoch"), 1)
+        self.assertTrue(self.sc2()["satisfied"])
+
+    def test_a_changed_package_set_is_a_new_binding(self):
+        # Idempotence is exact: binding an additional package is new evidence.
+        self.write_outbox(self.package("HUNT-900"))
+        self.enter_crew()
+        code, first, text = cli(self.root, "crew", "record-run", "saihunt", "--json")
+        self.assertEqual(code, 0, text)
+        self.assertEqual(first["code"], "CREW_RUN_RECORDED", first)
+        self.write_outbox(self.package("HUNT-900"), self.package("HUNT-901"))
+        code, second, text = cli(self.root, "crew", "record-run", "saihunt", "--json")
+        self.assertEqual(code, 0, text)
+        self.assertEqual(second["code"], "CREW_RUN_RECORDED", second)
+        self.assertNotEqual(second["event_id"], first["event_id"])
+        log = (self.root / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+        self.assertEqual(log.count("crew run -- epoch"), 2)
+
     def test_a_hand_written_receipt_is_not_accepted(self):
         self.write_outbox(self.package("HUNT-900"))
         epoch = self.enter_crew()

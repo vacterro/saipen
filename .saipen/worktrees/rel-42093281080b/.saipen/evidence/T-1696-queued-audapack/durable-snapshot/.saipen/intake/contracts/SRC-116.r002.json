@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-116:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TARGET A / P0-1: A selected live audit must be stoppable from the Audit Runs panel. Pre-START reads CANCEL, live post-START reads STOP, post-START BLOCKED keeps FORCE UNBLOCK, terminal runs have no stop action. STOP routes through AuditRunCoordinator.abandon(dispatch_id, 'operator stopped active audit from Audit Runs panel'), ends terminal FAILED/operator_abandoned, frees the lane, never re-leases the dispatch, starts no fresh audit and no further waves, and refreshes immediately with visible success. The race fix: abandon() honours the terminal state returned by the bridge and never rewrites an already-COMPLETE intent to FAILED. cancel_job() is not weakened. A post-STOP run is never labelled CANCELLED."
+    },
+    "SRC-116:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TARGET B / P0-2: INAUDIT Save must never be an enabled-but-silent no-op. With a project selected, no physical layer and non-empty editor text, Save means 'create the first canonical internal audit': the managed path adopts or creates the managed draft identity without destroying typed text (CaptureStore -> assign -> SAIPEN enqueue, preserving the T-175 stable capture UUID and retry); the unmanaged path allocates the next legal layer via the canonical allocator, binds the editor and commits the exact text with the existing durable commit primitive, then refreshes. Empty text with no layer mutates nothing and shows 'Nothing to save'. Every early refusal in _on_save() sets a visible status. On a layer-read failure there is no phantom bound layer, the error is surfaced, and Save can never overwrite an unknown target."
+    }
+  },
+  "derived_at": "2026-10-04T16:37:32Z",
+  "derived_from": "SRC-116",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "312c18ade7969b65b392a2c07627337cf235178fe6374eb96b48deaa58d68b83"
+}

@@ -1,0 +1,251 @@
+PASS: active-task-not-claimed -- failed on 'is not the claimed ## DOING ticket', as declared
+PASS: append-target-mid-line -- failed on 'end mid-line', as declared
+PASS: block-park-done-green -- expected pass, got pass
+PASS: block-park-done-red -- failed on 'invalid phase transition', as declared
+PASS: blocked-ticket -- expected pass, got pass
+PASS: checkpoint-missing-required-field -- failed on 'missing required field: blocker', as declared
+PASS: cold-handoff-continuity -- expected pass, got pass
+PASS: dangling-needs-reference -- failed on 'dangling needs: reference', as declared
+PASS: dependency-cycle -- failed on 'cyclic needs: dependencies', as declared
+PASS: done-wait-deadlock -- failed on 'auto-transition HUNT', as declared
+PASS: done-wait-deadlock-goal-mode -- failed on 'auto-transition HUNT', as declared
+PASS: goal-counter-recovery -- expected pass, got pass
+PASS: goal-counter-untraced -- passed and warned on 'goal-counter-untraced', as declared
+PASS: goal-reauthorization-trace -- expected pass, got pass
+PASS: goal-reauthorization-untraced -- passed and warned on 'repairable-protocol-drift', as declared
+PASS: hr-bad-updated -- failed on 'updated must be ISO-8601 UTC', as declared
+PASS: hr-claim-foreign-doing -- expected pass, got pass
+PASS: hr-claim-half-pair -- failed on 'INVALID claim', as declared
+PASS: hr-illegal-transition-pair -- failed on 'invalid phase transition', as declared
+PASS: hr-malformed-wait -- failed on 'WAIT with no category token', as declared
+PASS: hr-missing-style_contract -- failed on 'style_contract', as declared
+PASS: hr-missing-transition_from -- failed on 'missing transition_from', as declared
+PASS: hr-wait-grammar -- failed on 'malformed WAIT', as declared
+PASS: hr-wrong-style_contract -- failed on 'style_contract', as declared
+PASS: invalid-mode-phase-combination -- expected pass, got pass
+PASS: multi-agent-claim-conflict -- expected pass, got pass
+PASS: next-action-not-executable -- failed on 'STATE.md next_action does not start with', as declared
+PASS: proposal-mode-halt -- expected pass, got pass
+PASS: read-only-restriction -- failed on 'read-only MUST NOT enter BUILD', as declared
+PASS: resume-after-crash -- expected pass, got pass
+PASS: saiui-adoption -- expected pass, got pass
+PASS: ship-preflight-build-return -- expected pass, got pass
+PASS: stale-state-reconciliation -- expected pass, got pass
+PASS: state-behind-board-self-claim -- failed on 'STATE is behind BOARD', as declared
+PASS: tripped-valve-without-wait -- failed on 'tripped safety valve', as declared
+PASS: two-doing-tickets -- failed on 'tickets in ## DOING', as declared
+PASS: userperson-malformed -- failed on 'USERPERSON file must open with the exact heading', as declared
+PASS: userperson-valid -- expected pass, got pass
+PASS: bootstrap/inject.sh -- manifest-complete install replaced stale dirs, ran validate.py, and uninstalled config + Aider byte-exact
+PASS: bootstrap/inject.sh grep failure -- exits nonzero without completion text
+PASS: bootstrap/inject.sh grep failure -- exits nonzero without Done
+PASS: bootstrap/inject.sh write failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh transform failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh grep failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh grep failure -- exits nonzero without Done
+PASS: bootstrap/uninstall.sh regular-file skill -- removed
+PASS: bootstrap/inject.sh late missing source -- old install preserved, no staging debris
+PASS: bootstrap/inject.sh manifest traversal -- old install preserved, no staging debris
+PASS: bootstrap/inject.ps1 -- manifest-complete install replaced stale dirs, ran validate.py, and uninstalled config + Aider byte-exact
+PASS: bootstrap/inject.ps1 copy failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.ps1 read failure -- exits nonzero without completion text
+PASS: bootstrap/inject.ps1 late missing source -- old install preserved, no staging debris
+PASS: bootstrap/inject.ps1 manifest traversal -- old install preserved, no staging debris
+PASS: injector probe red-control -- deleted tests/ goes red
+PASS: injector probe red-control -- installed bytecode goes red
+PASS: scheduler -- one manager and no generated repository wrapper
+PASS: scheduler -- wrapper publication is atomic and outside the repository
+PASS: scheduler -- external-wrapper contract red control
+PASS: scheduler -- all removers own current task, legacy task, and runtime wrapper
+PASS: scheduler -- background runner never updates the development clone
+PASS: scheduler -- background Git disables optional index mutation
+PASS: scheduler -- status distinguishes NOT_INSTALLED
+PASS: scheduler -- unknown command is nonzero with concise usage
+PASS: scheduler -- install migrates legacy task and publishes external wrapper
+PASS: scheduler -- atomic install leaves no temporary wrapper
+PASS: scheduler -- wrapper preserves a Unicode runner path
+PASS: scheduler -- status distinguishes HEALTHY
+PASS: scheduler -- wrong scheduled action is DEGRADED
+PASS: scheduler -- quoted wrapper path is HEALTHY (host quoting is not a contract)
+PASS: scheduler -- an extra argument after the wrapper is DEGRADED
+PASS: scheduler -- wrong task principal is DEGRADED
+PASS: scheduler -- disabled scheduled task is DEGRADED
+PASS: scheduler -- wrong task trigger type is DEGRADED
+PASS: scheduler -- finite repetition duration is DEGRADED
+PASS: scheduler -- wrong task trigger or runtime policy is DEGRADED
+PASS: scheduler -- run-now triggers only a healthy installation
+PASS: scheduler -- wrapper with canonical path hidden in dead text is DEGRADED
+PASS: scheduler -- run-now refuses a noncanonical wrapper body
+PASS: scheduler -- generated wrapper waits and returns runner status
+PASS: scheduler -- duplicate current and legacy tasks are DEGRADED
+PASS: scheduler -- run-now refuses a DEGRADED duplicate installation
+PASS: scheduler -- missing VBS wrapper is DEGRADED
+PASS: scheduler -- run-now refuses a task with missing wrapper
+PASS: scheduler -- wrapper referencing a missing runner is DEGRADED
+PASS: scheduler -- remove cleans both task names and scheduler runtime
+PASS: scheduler -- remove sweeps killed-run temp files but keeps the canonical log
+PASS: scheduler -- install and remove leave repository status unchanged
+PASS: scheduler -- failed reinstall restores previous task and wrapper
+PASS: scheduler -- fresh settings failure removes new task and wrapper
+PASS: scheduler -- query failure is nonzero and preserves task and wrapper
+PASS: scheduler -- delete failure is nonzero and preserves runnable wrapper
+PASS: scheduler -- PowerShell global uninstall removes both tasks and wrapper
+PASS: scheduler -- PowerShell uninstall sweeps killed-run temp files but keeps the canonical log
+PASS: scheduler -- PowerShell global uninstall fails closed on query error
+PASS: scheduler -- PowerShell uninstall falls back when ScheduledTasks cmdlets are absent
+PASS: scheduler -- PowerShell fallback uninstall sweeps temp files, keeps canonical log
+PASS: scheduler -- PowerShell schtasks fallback fails closed on query error
+PASS: scheduler -- shell global uninstall removes both tasks and wrapper
+PASS: scheduler -- shell uninstall sweeps killed-run temp files but keeps the canonical log
+PASS: scheduler -- shell global uninstall fails closed on query error
+PASS: scheduler -- shell uninstall without schtasks still cleans runtime source
+PASS: scheduler -- shell uninstall without schtasks sweeps temp files, keeps canonical log
+PASS: scheduler -- clean committed source injects exact HEAD without network access
+PASS: scheduler -- successful injection keeps its advertised source path alive
+PASS: scheduler -- background run never changes HEAD or working-tree bytes
+PASS: scheduler -- a successful inject writes the freshness stamp through its one owner
+PASS: scheduler -- dirty tracked source skips and preserves installed snapshot
+PASS: scheduler -- untracked file outside the injected surface does not block the refresh
+PASS: scheduler -- untracked file inside the injected surface still skips
+PASS: scheduler -- a source with no manifest refuses instead of guessing its surface
+PASS: scheduler -- source operation failure never falls through into injection
+PASS: scheduler -- source change during preflight refuses mixed-source injection
+PASS: scheduler -- every refusal preserves previous installed snapshot and HEAD
+PASS: scheduler -- stale snapshot backup from a killed run is refused
+PASS: scheduler -- failed injector restores previous persistent source snapshot
+PASS: project root -- correct root
+PASS: project root -- nested cwd
+PASS: project root -- wrong cwd rejected
+PASS: project root -- explicit root overrides cwd
+PASS: project root -- non-Git nested cwd
+PASS: project root -- linked worktree uses main owner
+PASS: project root -- linked worktree with its own .saipen/ is validated as itself
+PASS: export.sh -- nested cwd
+PASS: export.sh -- foreign cwd rejected
+PASS: export.sh -- explicit root overrides cwd
+PASS: export.sh -- empty explicit root rejected
+PASS: export.sh -- linked worktree uses main owner
+PASS: export.sh -- external git-dir parent rejected
+PASS: export.ps1 -- nested cwd
+PASS: export.ps1 -- foreign cwd rejected
+PASS: export.ps1 -- explicit root overrides cwd
+PASS: export.ps1 -- empty explicit root rejected
+PASS: export.ps1 -- linked worktree uses main owner
+PASS: export.ps1 -- external git-dir parent rejected
+PASS: bootstrap/saipen_crew.sh broken launcher -- exits nonzero without Done
+PASS: bootstrap/saipen_crew.sh working launcher -- three accepted calls
+PASS: bootstrap/saipen_crew.bat failed start 1 -- exits nonzero without success
+PASS: bootstrap/saipen_crew.bat failed start 2 -- exits nonzero without success
+PASS: bootstrap/saipen_crew.bat failed start 3 -- exits nonzero without success
+PASS: bootstrap/saipen_crew.bat working start -- three accepted calls
+PASS: saicrew -- duplicate instance name FAILs
+PASS: saicrew -- duplicate canonical path FAILs
+PASS: saicrew -- malformed entry FAILs
+PASS: saicrew -- traversal path FAILs
+PASS: saicrew -- non-entry line FAILs (never skip+continue)
+PASS: saicrew -- exact header required
+PASS: saicrew -- valid canonical manifest passes
+PASS: saicrew -- identity-bound last_collect passes strict manifest
+PASS: saicrew -- legacy current path FAILs
+PASS: saicrew -- unknown metadata FAILs
+PASS: saicrew -- duplicate metadata FAILs
+PASS: saicrew -- absolute path FAILs
+PASS: saicrew -- sub list refuses INVALID_MANIFEST
+PASS: saicrew -- spawn succeeds in probe project
+PASS: saicrew -- pause/resume/spawn/sync --dry-run write nothing
+PASS: saicrew -- dry-run pause reports the same proposed outcome
+PASS: saicrew -- dry-run adopt reports proposed outcome without writes
+PASS: saicrew -- dry-run spawn does not create an instance
+PASS: saicrew -- sync-probe spawn ok
+PASS: saicrew -- partial bootstrap reported not current
+PASS: saicrew -- missing file named exactly
+PASS: saicrew -- sync --dry-run reports the exact diff
+PASS: saicrew -- sync --dry-run did not repair
+PASS: saicrew -- sync succeeds
+PASS: saicrew -- sync repaired the missing file
+PASS: saicrew -- live instance history untouched by sync
+PASS: saicrew -- shared inbox preserved byte-identically
+PASS: saicrew -- second sync -> no drift
+PASS: saicrew -- byte-current contract without receipt is not falsely terminal
+PASS: saicrew -- metadata-only sync establishes ownership receipt
+PASS: saicrew -- durable successor wins over inverted receipt mtime
+PASS: saicrew -- obsolete reconciliation follows the durable successor
+PASS: saicrew -- ambiguous receipt lineage fails closed
+PASS: saicrew -- broken-lineage fixture receipt
+PASS: saicrew -- broken receipt lineage fails closed
+PASS: saicrew -- broken lineage self-heals with a fresh valid receipt
+PASS: saicrew -- broken receipt never wins selection
+PASS: saicrew -- equally-close same-second lineages fail closed
+PASS: saicrew -- obsolete-sync fixture spawn ok
+PASS: saicrew -- sync admits new inherited nested file with receipt
+PASS: saicrew -- sync deletes receipt-owned obsolete file and empty directory
+PASS: saicrew -- sync refuses modified obsolete inherited file with zero writes
+PASS: saicrew -- obsolete sync crash resumes to receipt-bound current state
+PASS: saicrew -- role-probe spawn ok
+PASS: saicrew -- spawned built-in worker has a real role_revision
+PASS: saicrew -- local charter is the authority
+PASS: saicrew -- role freshness CURRENT with local charter
+PASS: saicrew -- local missing -> UNAVAILABLE, never home fallback
+PASS: saicrew -- generic spawn succeeds
+PASS: saicrew -- generic worker revision never blank
+PASS: saicrew -- generic revision derives from local PROTOCOL
+PASS: saicrew -- duplicate heading FAILs
+PASS: saicrew -- valid board passes
+PASS: saicrew -- checkbox/section mismatch FAILs
+PASS: saicrew -- two DOING FAILs
+PASS: saicrew -- Core T-### namespace FAILs on a sub board
+PASS: saicrew -- saihunt canonical HUNT- board prefix passes
+PASS: saicrew -- saitest canonical TEST- board prefix passes
+PASS: saicrew -- saipython canonical PY- board prefix passes
+PASS: saicrew -- saiui canonical UI- board prefix passes
+PASS: saicrew -- saiwiki canonical W- board prefix passes
+PASS: saicrew -- wrong role ticket prefix FAILs
+PASS: saicrew -- unknown board heading FAILs
+PASS: saicrew -- status-probe spawn ok
+PASS: saicrew -- DONE + unresolved BLOCKED board is INVALID, not DONE
+PASS: saicrew -- empty OUTBOX never implies CURRENT
+PASS: saicrew -- phase BLOCKED reports BLOCKED
+PASS: saicrew -- collect-probe spawn ok
+PASS: saicrew -- ready package without source triple refused
+PASS: saicrew -- malformed OUTBOX refused
+PASS: saicrew -- header-only OUTBOX template is a valid empty queue
+PASS: saicrew -- complete current READY OUTBOX -> READY_FOR_REVIEW
+PASS: saicrew -- collect dry-run computes ticket and writes zero bytes/journal
+PASS: saicrew -- complete current collection creates one Core TODO hypothesis
+PASS: saicrew -- collection marks MANIFEST last_collect and binds identity
+PASS: saicrew -- collect retry deduplicates without second Core ticket
+PASS: saicrew -- collected READY package with open review ticket -> REVIEW_PENDING
+PASS: saicrew -- disposition marks OUTBOX reviewed and binds immutable identity
+PASS: saicrew -- collection preserves Core LOG/STATE binding
+PASS: saicrew -- complete current reviewed OUTBOX -> CURRENT
+PASS: saicrew -- duplicate OUTBOX field FAILs
+PASS: saicrew -- unknown OUTBOX field FAILs
+PASS: saicrew -- wrong OUTBOX producer FAILs
+PASS: saicrew -- duplicate OUTBOX package ID FAILs
+PASS: saicrew -- invalid OUTBOX source_head FAILs
+PASS: saicrew -- invalid OUTBOX tree fingerprint FAILs
+PASS: saicrew -- invalid OUTBOX role revision FAILs
+PASS: saicrew -- two current READY packages refuse as ambiguous
+PASS: saicrew -- explicit-probe spawn core role
+PASS: saicrew -- explicit-probe spawn saiwiki
+PASS: saicrew -- explicit-probe spawn saitranslate
+PASS: saicrew -- targeted explicit producer refuses with EXPLICIT_POLICY
+PASS: saicrew -- aggregate skips explicit saiwiki/saitranslate
+PASS: saicrew -- CAS-probe spawn ok
+PASS: saicrew -- adopt stale STATE CAS refuses
+PASS: saicrew -- adopt stale charter CAS refuses
+PASS: saicrew -- pause stale LOG CAS refuses
+PASS: saicrew -- pause stale MANIFEST CAS refuses
+PASS: saicrew -- CAS-probe pause setup ok
+PASS: saicrew -- resume stale LOG CAS refuses
+PASS: saicrew -- CAS-probe resume setup ok
+PASS: saicrew -- spawn target-absence CAS refuses
+PASS: saicrew -- sync stale source CAS refuses
+PASS: saicrew -- collect-CAS spawn ok
+PASS: saicrew -- collect stale OUTBOX CAS refuses with zero Core writes
+PASS: saicrew -- clean fixture spawn succeeds
+PASS: saicrew -- clean sibling spawn succeeds
+PASS: saicrew -- safe terminal worker is archived, removed, and unregistered
+PASS: saicrew -- clean archive preserves every source file byte-exactly
+PASS: saicrew -- clean leaves sibling worker and shared files untouched
+PASS: saicrew -- clean retry after COMMITTED is idempotent ALREADY_CLEAN

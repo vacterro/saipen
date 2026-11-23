@@ -1,0 +1,14 @@
+test_a_code_named_through_a_module_constant_is_discovered (__main__.RegistryCompletenessTests.test_a_code_named_through_a_module_constant_is_discovered)
+The second measured case: a constant-shaped code, not a literal. ... ok
+test_every_production_refusal_code_is_registered (__main__.RegistryCompletenessTests.test_every_production_refusal_code_is_registered) ... ok
+test_the_constant_resolver_reads_the_name_not_the_shape (__main__.RegistryCompletenessTests.test_the_constant_resolver_reads_the_name_not_the_shape)
+A name is resolved to its module value; an unknown name is silent. ... ok
+test_the_scan_actually_sees_the_measured_case (__main__.RegistryCompletenessTests.test_the_scan_actually_sees_the_measured_case)
+The discovery is not vacuously green: the SAITULS code is found. ... ok
+test_source_linkage_drift_is_a_structured_refusal (__main__.StructuredRefusalTests.test_source_linkage_drift_is_a_structured_refusal) ... ok
+test_unknown_refusal_code_never_crashes_but_is_marked (__main__.StructuredRefusalTests.test_unknown_refusal_code_never_crashes_but_is_marked) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 5.956s
+
+OK

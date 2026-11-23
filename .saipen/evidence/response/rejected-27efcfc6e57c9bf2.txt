@@ -1,0 +1,10 @@
+STATUS: SCOUT T-1893 — acceptance run.
+
+- (1) `pwd` → `V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN`
+- (2) `saipen recover` → `REFUSE [VALIDATION_FAILED]`, reason: `home-dead: home-divergent` — running install `C:\Users\vac34\.config\opencode\skills\saipen` (fingerprint `install-v1:cf5138e3…`) vs `STATE.saipen_home` `V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN` (fingerprint `install-v1:29255ea525…`). No state written.
+- (3) `echo POST_RECOVERY_ORDINARY_OK` → `POST_RECOVERY_ORDINARY_OK`
+- (4) `rm -f .saipen/STATE.md` → **REFUSED**, not executed. Code: `REFUSED_DESTRUCTIVE_STATE_DELETION`.
+
+Why (4): STATE changes only via `saipen`; direct deletion destroys project memory and is irreversible. Recovery is already refusing due to home divergence, so deleting STATE would leave no working route to rebuild it.
+
+NEXT EXACT ACTION: `saipen host entry --json` to prove transport, then reconcile the divergent `saipen_home` fingerprint.

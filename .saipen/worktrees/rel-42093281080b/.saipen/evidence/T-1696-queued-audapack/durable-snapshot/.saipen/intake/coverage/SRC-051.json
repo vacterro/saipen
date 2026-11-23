@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-051:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-242 closed with verification evidence in LOG: verify -> PASS [target: T-242] conf: high -- RED CONTROL on the exact invariant: appending one comment line to the shipped widget makes update_widget_release.py refuse with VERSION_NOT_INCREASED ('an installed userscript manager would never install these bytes') and --check refuse with 'shipped bytes changed without a release' naming both digests, then OK again on restore. Live delivery proven: te",
+      "text": "AUDAPACK P0/P1 closure defect: Widget source changed without userscript version bump (targets A-I), reopen T-194, fix delivery identity, bump version once, verify Bridge-served bytes, real Tampermonkey + real ChatGPT acceptance, T-195 OpenCode smoke-check, then resume T-188",
+      "verification": "the Work this request created reached its own verification gate; see the T-242 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-242"
+    }
+  },
+  "schema_version": 1
+}

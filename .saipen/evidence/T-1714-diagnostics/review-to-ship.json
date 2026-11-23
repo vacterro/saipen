@@ -1,0 +1,22 @@
+{
+  "label": "review-to-ship",
+  "phase": "REVIEW",
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "transition",
+    "SHIP",
+    "T-1714",
+    "Complete reviewed A05 locally under no-publish policy, run final native core after local metadata, then atomic own_patch finish. No staged-set mutation or external write; preserve the active roadmap and next dependent guard repair.",
+    "--json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 1.313,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"TRANSITIONED\",\r\n  \"op_id\": \"transition-46f616b073f144c2a4e05f51574048b0\",\r\n  \"changed_files\": [\r\n    \".saipen/LOG.md\",\r\n    \".saipen/BOARD.md\",\r\n    \".saipen/STATE.md\"\r\n  ],\r\n  \"recovery_required\": false,\r\n  \"phase\": \"SHIP\",\r\n  \"next_action\": \"PHASE SHIP T-1714\",\r\n  \"event_id\": \"E-14477\",\r\n  \"ticket\": \"T-1714\"\r\n}\r\n",
+  "stderr": "",
+  "stdout_sha256": "b01bc90ca6986753be041398883e2c215bb53365a5cf9813215a82e6ea521c34",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

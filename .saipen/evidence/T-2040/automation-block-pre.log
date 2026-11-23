@@ -1,0 +1,88 @@
+............................F..F....F.                                 [100%]
+================================== FAILURES ===================================
+_____________ ClosureGate.test_full_closure_gate_yields_complete ______________
+
+self = <test_automation_block.ClosureGate testMethod=test_full_closure_gate_yields_complete>
+
+    def test_full_closure_gate_yields_complete(self) -> None:
+        block = self.block(
+            routed=self._idle_route(),
+            audit_status=self.audit(),
+            history_events=[],
+        )
+>       self.assertEqual(block["disposition"], automation.COMPLETE)
+E       AssertionError: 'CONTINUE' != 'COMPLETE'
+E       - CONTINUE
+E       + COMPLETE
+
+tools\test_automation_block.py:465: AssertionError
+____ ClosureGate.test_race_rule_consume_before_convergence_allows_closure _____
+
+self = <test_automation_block.ClosureGate testMethod=test_race_rule_consume_before_convergence_allows_closure>
+
+    def test_race_rule_consume_before_convergence_allows_closure(self) -> None:
+        block = self.block(
+            routed=self._idle_route(),
+            audit_status=self.audit(),
+            history_events=[
+                {
+                    "event": 9,
+                    "date": "06.09.26 10:30",
+                    "taxonomy": "RUN",
+                    "text": "AUDIT_INBOX_CLOSED audit/5.md sha256=x SRC-018 T-1280 coverage=10/10",
+                }
+            ],
+        )
+>       self.assertEqual(block["disposition"], automation.COMPLETE)
+E       AssertionError: 'CONTINUE' != 'COMPLETE'
+E       - CONTINUE
+E       + COMPLETE
+
+tools\test_automation_block.py:565: AssertionError
+_____________ AcceptanceFixture.test_full_run_to_closure_sequence _____________
+
+self = <test_automation_block.AcceptanceFixture testMethod=test_full_run_to_closure_sequence>
+
+    def test_full_run_to_closure_sequence(self) -> None:
+        idle = route_next(_state(), BOARD_EMPTY, audit_inbox=None)
+        self.assertEqual(idle["reason"], "maintain")
+    
+        # 1. While audit generations and their work remain -> CONTINUE.
+        work_rows = self._transport_rows([(1, "a\n"), (2, "b\n")])
+        block = self.block(
+            routed=idle, audit_status=work_rows, convergence=self._verdict_for(20)
+        )
+        self.assertEqual(block["disposition"], CONTINUE)
+        self.assertFalse(block["closure_complete"])
+    
+        # 2. The transport first drains (the third layer consumed before the
+        #    convergence pass): quiescent, but the convergence ran BEFORE the
+        #    last boundary -> still not COMPLETE.
+        drained_rows = self._transport_rows([(3, "c\n")], drained=True)
+        early = self.block(
+            routed=idle,
+            audit_status=drained_rows,
+            history_events=[self._consume_event("audit/3.md", 10)],
+            convergence=self._verdict_for(9),
+        )
+        self.assertEqual(early["disposition"], CONTINUE)
+        self.assertFalse(early["closure_complete"])
+    
+        # 3. A fresh convergence happens after that boundary -> COMPLETE.
+        closed = self.block(
+            routed=idle,
+            audit_status=drained_rows,
+            history_events=[self._consume_event("audit/3.md", 10)],
+            convergence=self._verdict_for(12),
+        )
+>       self.assertEqual(closed["disposition"], automation.COMPLETE)
+E       AssertionError: 'CONTINUE' != 'COMPLETE'
+E       - CONTINUE
+E       + COMPLETE
+
+tools\test_automation_block.py:787: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_automation_block.py::ClosureGate::test_full_closure_gate_yields_complete
+FAILED tools/test_automation_block.py::ClosureGate::test_race_rule_consume_before_convergence_allows_closure
+FAILED tools/test_automation_block.py::AcceptanceFixture::test_full_run_to_closure_sequence
+3 failed, 35 passed, 2 subtests passed in 2.64s

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-085:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement new P1 AUDAPACK resource-aware prepared launch scheduler from current user mission, preserving T-236 blocked and T-237 queued."
+    }
+  },
+  "derived_at": "2026-09-25T15:56:27Z",
+  "derived_from": "SRC-085",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "bb144220e8476d50c5b4d2842b676f27b1ae39add84caf29992eb9bcfdbdd24a"
+}

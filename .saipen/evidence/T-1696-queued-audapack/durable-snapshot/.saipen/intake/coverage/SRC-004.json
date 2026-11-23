@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-004:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "c930cc9 ship v0.2.0: SEND AUDIT -> fresh ZIP -> Bridge -> worker -> exactly-once START -> campaign -> durable waves -> canonical final",
+      "text": "One-click reliable browser audit orchestration: Project Room -> START AUDIT -> fresh project ZIP -> localhost Bridge -> responsive Widget worker -> attach ZIP -> exactly-once Audit Core START -> automatic campaign -> every wave durably saved -> canonical final audit synthesized and verified.",
+      "verification": "368 pytest + 23 widget suites green",
+      "work": "T-50"
+    }
+  },
+  "schema_version": 1
+}

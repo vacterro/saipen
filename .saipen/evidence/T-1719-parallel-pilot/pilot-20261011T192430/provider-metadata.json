@@ -1,0 +1,114 @@
+[
+  {
+    "account_key": null,
+    "authenticated": true,
+    "capabilities": {
+      "headless": true,
+      "json_events": true,
+      "last_message_file": true,
+      "permission_mode": true,
+      "schema": true,
+      "worker_flags": true
+    },
+    "id": "codex:.codex",
+    "launchable": true,
+    "model": "gpt-6.1-sol",
+    "plan": "unknown",
+    "profile_dir": "C:\\Users\\vac34\\.codex",
+    "provider": "codex",
+    "quota": "unknown",
+    "reason": null,
+    "subscription_auth": true,
+    "version": "0.162.1"
+  },
+  {
+    "account_key": null,
+    "authenticated": true,
+    "capabilities": {
+      "headless": true,
+      "json_events": true,
+      "last_message_file": true,
+      "permission_mode": true,
+      "schema": true,
+      "worker_flags": true
+    },
+    "id": "codex:.codex-account2",
+    "launchable": true,
+    "model": "gpt-6.1-sol",
+    "plan": "unknown",
+    "profile_dir": "C:\\Users\\vac34\\.codex-account2",
+    "provider": "codex",
+    "quota": "unknown",
+    "reason": null,
+    "subscription_auth": true,
+    "version": "0.162.1"
+  },
+  {
+    "account_key": null,
+    "authenticated": true,
+    "capabilities": {
+      "headless": true,
+      "json_events": true,
+      "last_message_file": true,
+      "permission_mode": true,
+      "schema": true,
+      "worker_flags": true
+    },
+    "id": "codex:.codex-account3free",
+    "launchable": true,
+    "model": "gpt-6-luna",
+    "plan": "unknown",
+    "profile_dir": "C:\\Users\\vac34\\.codex-account3free",
+    "provider": "codex",
+    "quota": "unknown",
+    "reason": null,
+    "subscription_auth": true,
+    "version": "0.162.1"
+  },
+  {
+    "account_key": "claude:93bea5e6cbddcb458c78d2c8821dd8bea57b08f6d56d20ec8edf22e289d437f7",
+    "authenticated": true,
+    "capabilities": {
+      "headless": true,
+      "json_events": true,
+      "no_permission_prompts": true,
+      "permission_mode": true,
+      "schema": true,
+      "tools": true,
+      "worker_flags": true
+    },
+    "id": "claude:.claude",
+    "launchable": true,
+    "model": "opus",
+    "plan": "pro",
+    "profile_dir": "C:\\Users\\vac34\\.claude",
+    "provider": "claude",
+    "quota": "unknown",
+    "reason": null,
+    "subscription_auth": true,
+    "version": "2.1.295"
+  },
+  {
+    "account_key": "claude:14b257518acdeb9b53c60ee84b168fb0b9bda0d0399193d295cc3b1f98090cb1",
+    "authenticated": true,
+    "capabilities": {
+      "headless": true,
+      "json_events": true,
+      "no_permission_prompts": true,
+      "permission_mode": true,
+      "schema": true,
+      "tools": true,
+      "worker_flags": true
+    },
+    "id": "claude:.claude-account2",
+    "launchable": true,
+    "model": "opus",
+    "plan": "pro",
+    "profile_dir": "C:\\Users\\vac34\\.claude-account2",
+    "provider": "claude",
+    "quota": "unknown",
+    "reason": null,
+    "subscription_auth": true,
+    "version": "2.1.295"
+  }
+]

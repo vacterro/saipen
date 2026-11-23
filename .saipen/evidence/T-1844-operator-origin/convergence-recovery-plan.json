@@ -1,0 +1,10 @@
+{
+  "source_adapter": "8a0c6e6ac8c7ed9bc938037a4d391b460bdfda20ac02aaddaba0f9f793ff0831",
+  "installed_adapter": "5ceb358c3af9a4ac6c9d9e7ef6a59add1c9caa275fba008eecb59abad3ebba89",
+  "canonical_readonly_verdict": "RUNTIME_STALE",
+  "actual_profile_parity_requirement": "preserved",
+  "next_after_terminal": "saipen runtime --prelaunch --adapter opencode --json",
+  "do_not_mutate_while_live": true,
+  "live_exec_session": 54521,
+  "live_pid": 28872
+}

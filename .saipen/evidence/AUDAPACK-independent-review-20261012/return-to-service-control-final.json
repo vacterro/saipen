@@ -1,0 +1,16 @@
+{
+  "verdict": "PASS",
+  "staging": {
+    "files": 3,
+    "source_unchanged": true,
+    "staging_byte_identical": true,
+    "manifest_sha256": "58fe9772124dce9f298b7f8dae56687a134e6eacb9815651c7c6df2c151941fd"
+  },
+  "source_runtime_unchanged": true,
+  "source_project_unchanged": true,
+  "settings_owner_preserved": true,
+  "sqlite_row_preserved": true,
+  "live_archive_bytes_verified": true,
+  "two_replica_generations_excluded": true,
+  "scope": "isolated representative runtime; no original/default runtime switch, real account launch, publication or installation"
+}

@@ -1,0 +1,143 @@
+{
+  "ok": true,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_problip",
+  "protocol_version": "8.0.1",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "saipen status",
+  "computed_next_action": "saipen status",
+  "computed_reason": "goal-blocked",
+  "blocker": "none",
+  "execution_intent": "converge",
+  "claimed_ticket": null,
+  "top_workable_ticket": null,
+  "log_tail_event": 195,
+  "head": "295492a",
+  "board_errors": [],
+  "recovery_pending": false,
+  "recovery_conflict": false,
+  "pending_ops": [],
+  "conflict_ops": [],
+  "milestone": {
+    "current": null,
+    "label": null,
+    "parent": null,
+    "undo_available": false,
+    "valid": true
+  },
+  "cold_route": {
+    "project_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_PROBLIP",
+    "saipen_home": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source",
+    "protocol_dir": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen",
+    "phase": "DONE",
+    "phase_module": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\phases\\done.md",
+    "boot": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\BOOT.md",
+    "style": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\STYLE.md",
+    "documents": {
+      "STYLE.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\STYLE.md",
+      "BOOT.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\BOOT.md",
+      "INDEX.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\INDEX.md",
+      "COMMANDS.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\COMMANDS.md",
+      "OPS.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\OPS.md",
+      "SOURCES.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\SOURCES.md",
+      "EXECUTION.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\EXECUTION.md",
+      "MAINTENANCE.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\MAINTENANCE.md",
+      "CORE.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\CORE.md",
+      "RUNTIME.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\RUNTIME.md"
+    },
+    "project_memory": {
+      "STATE.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_PROBLIP\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_PROBLIP\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_PROBLIP\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  },
+  "audit_inbox": {
+    "pending": 0,
+    "active_layer": null,
+    "bound_receipt": null,
+    "bound_work": null,
+    "closed_pending_delete": 0,
+    "invalid": 0,
+    "residue": 0,
+    "clean": true,
+    "last_allocated_id": 2,
+    "inbox_state": null,
+    "error_state": null
+  },
+  "distribution": {
+    "installed": 6,
+    "stale": 6,
+    "unknown": 2,
+    "fresh": false,
+    "source_head": "ec53042a9262bc5bd22f2d39f2d08bef103cca3e",
+    "newest_installed_head": "ec53042a9262bc5bd22f2d39f2d08bef103cca3e",
+    "last_run": {
+      "status": "skipped",
+      "skip": "DIRTY_SOURCE",
+      "rc": 2,
+      "dirty": [
+        "M bootstrap/inject.ps1",
+        "M bootstrap/inject.sh",
+        "M extensions/adapters/registry.json",
+        "M saipen/COMMANDS.md",
+        "M saipen/COMMAND_EFFECTS.json"
+      ],
+      "at": "2026-09-20 21:16:01",
+      "head": null,
+      "in_flight": false
+    },
+    "summary": "distribution: 6 of 6 home(s) stale -- newest installed head ec53042a9262 -- source head ec53042a9262 -- 2 home(s) carry no head -- last scheduled injection: skipped DIRTY_SOURCE at 2026-09-20 21:16:01"
+  },
+  "parked_work": [
+    "T-24 blocked: pre-existing protocol-tree defect: sweep-ticket-link requires T-22 (created from USER_REQUEST SRC-005) to carry recurrence and weak_model reasoning-gate fields, but no canonical SAIPEN verb writes arbitrary ticket fields and the board is a protected canonical namespace; the fix belongs to the external SAIPEN protocol tree, not this project (same class as T-22 BLOCKED_EXTERNAL)",
+    "T-22 blocked: BLOCKED_EXTERNAL"
+  ],
+  "conformance": "PASS (12.09.26 00:24)",
+  "staleness": "1d ago",
+  "conformance_status": {
+    "status": "STALE_FAIL",
+    "gate": "core",
+    "reason": "conformance receipt is 41h old (older than the 24h freshness window)",
+    "receipt": {
+      "board_hash": "c051546a2c0a1c6b",
+      "content_hash": "e6c4d58c185a453e",
+      "exit_code": 1,
+      "gate": "core",
+      "kind": "conformance_receipt",
+      "log_hash": "04129c9c43b620c3",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_problip",
+      "receipt_id": "receipt-ce9d78b0411b",
+      "schema_version": 2,
+      "source_head": "295492a608acb884f9024d4443592c1b76e497b9",
+      "source_tree_fingerprint": "git-delta-v1:0508370ecb80cffcfc91c818e1c182d0fc6d51f57317cf45cc92b58d6dfbe862",
+      "state_hash": "52f717552062fadb",
+      "timestamp_utc": "2026-09-19T00:38:38.837171Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "295492a608acb884f9024d4443592c1b76e497b9",
+      "source_tree_fingerprint": "git-delta-v1:0508370ecb80cffcfc91c818e1c182d0fc6d51f57317cf45cc92b58d6dfbe862"
+    },
+    "disposition": "UNPROVEN",
+    "remediation_command": "saipen validate"
+  },
+  "automation": {
+    "schema_version": 1,
+    "disposition": "CONTINUE",
+    "next_command": "cc",
+    "reason_code": "goal-blocked",
+    "reason": "no workable Work remains and T-24, T-22 declares a GOAL-scope blocker; this is a legitimate stop, not an idle project",
+    "audit_quiescent": true,
+    "audit_epoch": "audit-epoch-v1:abf4144f06e2f92b6fddab0f4b74c352784411f7628c7827a4f25b99c66bc7b4",
+    "convergence_current": false,
+    "closure_complete": false,
+    "source_fingerprint": "295492a608acb884f9024d4443592c1b76e497b9+git-delta-v1:0508370ecb80cffcfc91c818e1c182d0fc6d51f57317cf45cc92b58d6dfbe862",
+    "completed_at": null
+  }
+}

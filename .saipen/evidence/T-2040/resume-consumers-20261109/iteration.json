@@ -1,0 +1,37 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-v",
+    "--tb=short",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_t2040_iteration_truth.py",
+    "tools/test_supervisor.py",
+    "tools/test_campaign_continuation_assessment.py",
+    "tools/test_t1619_iteration_boundary.py",
+    "tools/test_t1880_wait_survives_phase_shortcut.py",
+    "tools/test_t1917_premature_handback.py"
+  ],
+  "exit_code": 0,
+  "started_at": "2026-11-09T20:51:56.660050+00:00",
+  "before": {
+    "tools/test_t2040_iteration_truth.py": "8341ee450118a1f8d62b779bfe5f4548bab02fa28b0f2ea274afaf67e00d1ea7",
+    "tools/test_supervisor.py": "751d20a8947677cddd1467becab2f7d2d82ba3ce43b2d729322fc17825c05bc4",
+    "tools/test_campaign_continuation_assessment.py": "36c69dfa2a13d05d7a4a006c9804cd59cd3814433e165d93b9b9c9df18993977",
+    "tools/test_t1619_iteration_boundary.py": "ad0e82b19f4b5fbef8f1c2b7ba9d76cd6b65e01ae64744fd6c20ac45af6cb08f",
+    "tools/test_t1880_wait_survives_phase_shortcut.py": "680cfde2e2f8c91826933c0c4aa25b96df48bc2e6adc041f279cc544b72e2fa6",
+    "tools/test_t1917_premature_handback.py": "71a6a3944bf4866a98f5cc488083206fe1cfabf0382c6ec7960d997a1a1f53b1"
+  },
+  "after": {
+    "tools/test_t2040_iteration_truth.py": "8341ee450118a1f8d62b779bfe5f4548bab02fa28b0f2ea274afaf67e00d1ea7",
+    "tools/test_supervisor.py": "751d20a8947677cddd1467becab2f7d2d82ba3ce43b2d729322fc17825c05bc4",
+    "tools/test_campaign_continuation_assessment.py": "36c69dfa2a13d05d7a4a006c9804cd59cd3814433e165d93b9b9c9df18993977",
+    "tools/test_t1619_iteration_boundary.py": "ad0e82b19f4b5fbef8f1c2b7ba9d76cd6b65e01ae64744fd6c20ac45af6cb08f",
+    "tools/test_t1880_wait_survives_phase_shortcut.py": "680cfde2e2f8c91826933c0c4aa25b96df48bc2e6adc041f279cc544b72e2fa6",
+    "tools/test_t1917_premature_handback.py": "71a6a3944bf4866a98f5cc488083206fe1cfabf0382c6ec7960d997a1a1f53b1"
+  }
+}

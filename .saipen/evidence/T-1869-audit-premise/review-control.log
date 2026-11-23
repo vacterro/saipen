@@ -1,0 +1,24 @@
+project home: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+subject     : V:\___VAC\__K\__CODE\_PY\_FastPrompter
+
+== A: at HEAD the repository held no ZAICODE adapter ==
+  git cat-file rc=128
+  stderr: fatal: path 'extensions/adapters/zaicode/saipen-guard.py' exists on disk, but not in 'HEAD'
+PASS the adapter is absent at HEAD
+  git status: ?? extensions/adapters/zaicode/
+PASS the adapter directory is untracked (created after HEAD)
+
+== B: the pre-fix live config dispatched nothing on a prompt ==
+  UserPromptSubmit entries in the LIVE config: 1
+PASS the live config now dispatches an adapter -- 1
+  reproduced pre-fix UserPromptSubmit entries: 0
+PASS the pre-fix config dispatched nothing
+PASS measure.py's dispatch check FAILS on the pre-fix config
+
+== C: the pre-fix READER against a real host event ==
+  rc=0 stdout={"ok": true, "ingress_id": null, "sealed": false}
+PASS the pre-fix hook dropped the operator's prompt -- {"ok": true, "ingress_id": null, "sealed": false}
+PASS it still answered ok -- the defect was silent -- {"ok": true, "ingress_id": null, "sealed": false}
+
+== CONTROL VERDICT ==
+CONTROL VALID: the pre-fix world lacked the adapter, the dispatch and the reader

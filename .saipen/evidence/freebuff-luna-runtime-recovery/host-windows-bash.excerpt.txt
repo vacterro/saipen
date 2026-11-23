@@ -1,0 +1,167 @@
+// ../sdk/src/tools/windows-bash.ts
+import { spawnSync } from "child_process";
+import * as fs11 from "fs";
+import * as path15 from "path";
+var EXCLUDED_PATH_PATTERNS = ["system32", "windowsapps"];
+function gitRoots(env2) {
+  let { LOCALAPPDATA: localAppData, USERPROFILE: userProfile } = env2, programData = env2.ProgramData ?? env2.PROGRAMDATA, systemDrive = env2.SystemDrive ?? env2.SYSTEMDRIVE;
+  return [
+    env2.ProgramFiles,
+    env2.ProgramW6432,
+    env2["ProgramFiles(x86)"]
+  ].filter((root) => !!root).map((root) => path15.join(root, "Git")).concat([
+    localAppData && path15.join(localAppData, "Programs", "Git"),
+    env2.SCOOP && path15.join(env2.SCOOP, "apps", "git", "current"),
+    userProfile && path15.join(userProfile, "scoop", "apps", "git", "current"),
+    env2.SCOOP_GLOBAL && path15.join(env2.SCOOP_GLOBAL, "apps", "git", "current"),
+    programData && path15.join(programData, "scoop", "apps", "git", "current"),
+    systemDrive && path15.join(systemDrive, "\\", "tools", "git"),
+    systemDrive && path15.join(systemDrive, "\\", "Git")
+  ].filter((root) => !!root));
+}
+function usablePathDirs(env2) {
+  return (env2.PATH || env2.Path || "").split(path15.delimiter).filter((dir) => dir && !EXCLUDED_PATH_PATTERNS.some((pattern) => dir.toLowerCase().includes(pattern)));
+}
+function windowsBashCandidates(env2) {
+  let pathDirs = usablePathDirs(env2), candidates = [
+    env2.CODEBUFF_GIT_BASH_PATH,
+    ...gitRoots(env2).map((root) => path15.join(root, "bin", "bash.exe")),
+    ...pathDirs.flatMap((dir) => ["bash.exe", "bash"].map((name31) => path15.join(dir, name31))),
+    ...pathDirs.filter((dir) => pathExists(path15.join(dir, "git.exe"))).flatMap((dir) => [
+      path15.join(path15.dirname(dir), "bin", "bash.exe"),
+      path15.join(path15.dirname(path15.dirname(dir)), "bin", "bash.exe")
+    ])
+  ].filter((candidate) => !!candidate);
+  return [...new Set(candidates)];
+}
+function pathExists(candidate) {
+  try {
+    return fs11.existsSync(candidate);
+  } catch {
+    return !1;
+  }
+}
+var GIT_REGISTRY_VALUES = [
+  ["HKLM\\SOFTWARE\\GitForWindows", "InstallPath"],
+  ["HKCU\\SOFTWARE\\GitForWindows", "InstallPath"],
+  ["HKLM\\SOFTWARE\\WOW6432Node\\GitForWindows", "InstallPath"],
+  ["HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1", "InstallLocation"],
+  ["HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git_is1", "InstallLocation"]
+];
+function parseRegistryPath(stdout, value) {
+  return new RegExp(`^\\s*${value}\\s+REG_[A-Z_]+\\s+(.+)$`, "im").exec(stdout)?.[1]?.trim().replace(/[\\/]+$/, "") || null;
+}
+var cachedGitRegistryRoot;
+function gitRootFromRegistry() {
+  if (cachedGitRegistryRoot !== void 0)
+    return cachedGitRegistryRoot;
+  if (cachedGitRegistryRoot = null, process.platform !== "win32")
+    return null;
+  for (let [key, value] of GIT_REGISTRY_VALUES)
+    try {
+      let probe = spawnSync("reg", ["query", key, "/v", value], {
+        encoding: "utf8",
+        windowsHide: !0,
+        timeout: 5000
+      }), root = probe.stdout ? parseRegistryPath(probe.stdout, value) : null;
+      if (root)
+        return cachedGitRegistryRoot = root, root;
+    } catch {}
+  return null;
+}
+function findWindowsBash(env2, registryRoot) {
+  let found = windowsBashCandidates(env2).find(pathExists);
+  if (found)
+    return found;
+  let root = (registryRoot ?? (env2 === getSystemProcessEnv() ? gitRootFromRegistry : () => null))(), candidate = root ? path15.join(root, "bin", "bash.exe") : null;
+  return candidate && pathExists(candidate) ? candidate : null;
+}
+function listDirectory(dir) {
+  try {
+    return fs11.readdirSync(dir);
+  } catch {
+    return [];
+  }
+}
+function compareAppVersionsDescending(a, b) {
+  let parts2 = (name31) => name31.slice(4).split(".").map((n) => Number(n) || 0), [left, right] = [parts2(a), parts2(b)];
+  for (let i2 = 0;i2 < Math.max(left.length, right.length); i2++) {
+    let diff = (right[i2] ?? 0) - (left[i2] ?? 0);
+    if (diff !== 0)
+      return diff;
+  }
+  return 0;
+}
+function windowsGitCandidates(env2, readDir = listDirectory) {
+  let githubDesktop = env2.LOCALAPPDATA ? path15.join(env2.LOCALAPPDATA, "GitHubDesktop") : null, bundled = githubDesktop ? readDir(githubDesktop).filter((name31) => /^app-\d/.test(name31)).sort(compareAppVersionsDescending).map((name31) => path15.join(githubDesktop, name31, "resources", "app", "git", "cmd", "git.exe")) : [];
+  return [
+    .../* @__PURE__ */ new Set([
+      ...gitRoots(env2).map((root) => path15.join(root, "cmd", "git.exe")),
+      ...bundled
+    ])
+  ];
+}
+function findWindowsGit(env2, registryRoot) {
+  let found = windowsGitCandidates(env2).find(pathExists);
+  if (found)
+    return found;
+  let root = (registryRoot ?? (env2 === getSystemProcessEnv() ? gitRootFromRegistry : () => null))(), candidate = root ? path15.join(root, "cmd", "git.exe") : null;
+  return candidate && pathExists(candidate) ? candidate : null;
+}
+function isGitBashAbsolutePath(filePath) {
+  return /^\/(?!\/)/.test(filePath);
+}
+function spawnCygpath(cygpath, filePath) {
+  return spawnSync(cygpath, ["-w", "--", filePath], {
+    encoding: "utf8",
+    windowsHide: !0,
+    timeout: 5000
+  });
+}
+function findCygpath(bash, exists) {
+  return [
+    path15.join(path15.dirname(path15.dirname(bash)), "usr", "bin", "cygpath.exe"),
+    path15.join(path15.dirname(bash), "cygpath.exe")
+  ].find(exists) ?? null;
+}
+function runCygpath(spawn2, cygpath, filePath) {
+  try {
+    let result = spawn2(cygpath, filePath);
+    if (result.status !== 0)
+      return null;
+    return result.stdout.trim().split(/\r?\n/).pop()?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+var MSYS_DRIVE_PATTERN = /^\/([a-z])\//i, translatedPathCache = /* @__PURE__ */ new Map;
+function translateGitBashPath(filePath, dependencies = {}) {
+  if ((dependencies.platform ?? process.platform) !== "win32" || !isGitBashAbsolutePath(filePath))
+    return filePath;
+  if (MSYS_DRIVE_PATTERN.test(filePath))
+    return `${filePath.charAt(1).toUpperCase()}:\\${filePath.slice(3).replace(/\//g, "\\")}`;
+  let cached2 = translatedPathCache.get(filePath);
+  if (cached2 !== void 0)
+    return cached2;
+  let env2 = dependencies.env ?? getSystemProcessEnv(), bash = (dependencies.findBash ?? findWindowsBash)(env2);
+  if (!bash)
+    return filePath;
+  let cygpath = findCygpath(bash, dependencies.pathExists ?? pathExists);
+  if (!cygpath)
+    return filePath;
+  let translated = runCygpath(dependencies.spawnCygpath ?? spawnCygpath, cygpath, filePath);
+  if (translated === null)
+    return filePath;
+  return translatedPathCache.set(filePath, translated), translated;
+}
+function createWindowsBashNotFoundError() {
+  return Error(`Bash is required but was not found on this Windows system.
+
+Install Git for Windows, which includes it: https://git-scm.com/download/win
+Or, from a terminal: winget install --id Git.Git --exact --source winget
+
+If you already have Git installed somewhere unusual and we did not find it, point
+us at it directly by setting CODEBUFF_GIT_BASH_PATH to its bash.exe. Example:
+   set CODEBUFF_GIT_BASH_PATH=C:\\path\\to\\Git\\bin\\bash.exe`);
+}
+

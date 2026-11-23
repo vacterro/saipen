@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-117:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-001: the SAIPEN memory root must be contract-AUTHORITATIVE, not merely contract-denylisted. After collect_for_inventory(), build the exact allowed-path set from that collection (which already incorporates mandatory, conditional, optional, cited-required, caps, transient exclusions and contract-version semantics) and exclude every inventory entry beneath contract.memory_root unless it is in it, symmetrically for tracked, untracked and filesystem-origin entries, with a dedicated machine reason saipen_undeclared_memory distinct from saipen_non_exportable. Measured on the audited archive: 278 undeclared .saipen/scratch_* files, 4,547,574 bytes, were published as payload while the contract collector correctly excluded them."
+    },
+    "SRC-117:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-002: a failed persistence transaction must be side-effect-free with respect to its input. ProjectRegistry._mutate_latest must never use self.config as its own transactional staging object (first write aliases staging to live caller state at projects.py:81-87), and save_config() must not leave normalize_paths()/initialized=True applied to its input when the durable replacement fails (config.py:1838-1844). Caller-visible state must be synchronized only AFTER durable commit succeeds. Reproduction: a mocked save failure raises RegistrySaveError yet the caller's cfg.projects still contains ['ghost'] with no config file on disk."
+    },
+    "SRC-117:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-003: Settings autosave must not roll back launcher state written after the dialog opened. settings_dialog.py:1160 replaces the whole launcher list with the dialog-construction snapshot, erasing the runtime-owned resolution fields (resolved_command, resolved_probe, resolved_profile, resolved_stage, resolved_is_cli) that ui_qt/main_window.py:3391-3405 persisted via scoped_config_write(). If the launcher tab was untouched, launchers must not be written at all; when it was edited, merge by launcher id into the freshly loaded list and preserve runtime-owned resolution unless an operator action semantically invalidates the command."
+    }
+  },
+  "derived_at": "2026-10-04T19:15:57Z",
+  "derived_from": "SRC-117",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "9d7cdf7bd1a1e8f3771078fa04130a2aa86521811d11591044f7b69f664ac5ea"
+}

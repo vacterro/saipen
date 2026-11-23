@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-101:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-249 close: agent-resolved acceptance, real-Chromium generation-truth contract proven red-then-green"
+    }
+  },
+  "derived_at": "2026-09-29T09:34:35Z",
+  "derived_from": "SRC-101",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7ea3f02c4c82a428434cc4ed83ee7f22fdae9ef3c605d39ea0fa68e4d5e0f281"
+}

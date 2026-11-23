@@ -1,0 +1,59 @@
+{
+  "requirements": {
+    "SRC-046:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "tests/test_source_inventory.py TestGitInventoryContract",
+      "text": "Git inventory = tracked_existing UNION untracked_nonignored; tracked project truth overrides ordinary noise exclusions; hard-safety conflicts fail closed",
+      "verification": "focused pytest green",
+      "work": "T-190"
+    },
+    "SRC-046:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "tests/test_source_inventory.py bounded-command + recovery-tree tests",
+      "text": "Tracked deletions are explicit (tracked_deleted); no per-file Git subprocesses; no recursive traversal of ignored recovery/cache trees",
+      "verification": "focused pytest green",
+      "work": "T-190"
+    },
+    "SRC-046:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "pack_single frozen inventory, _SOURCE_CHANGE_MAX_ATTEMPTS=2",
+      "text": "Source inventory is frozen before writing; source disappearance/read failure fails closed; source mutation earns at most one complete retry",
+      "verification": "focused pytest green",
+      "work": "T-190"
+    },
+    "SRC-046:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "tests/test_packing_git_inventory.py sha/manifest/rollback/part tests",
+      "text": "SHA-256 computed from exact bytes streamed into ZIP; .audapack/manifest.json versioned and correct; post-write verification checks expected->actual AND actual->expected; previous known-good archive survives failed replacement; unique .part artifacts cleaned",
+      "verification": "verify_inventory_archive both directions proven",
+      "work": "T-190"
+    },
+    "SRC-046:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "tests/test_source_inventory.py single-file tests; test_packing concurrency at staging boundary",
+      "text": "Single-file packing remains supported; same-target concurrent transaction safety remains supported",
+      "verification": "focused pytest green",
+      "work": "T-190"
+    },
+    "SRC-046:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "full gate re-runs",
+      "text": "Focused inventory tests present; full pytest, ruff, compileall, widget suite, regression_t158 green; STATE/BOARD/LOG converge",
+      "verification": "pytest 1595 pass 5 skip; ruff clean; compileall clean; widget 493 PASS 0 FAIL; regression_t158 4 PASS",
+      "work": "T-190"
+    }
+  },
+  "schema_version": 1
+}

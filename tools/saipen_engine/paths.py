@@ -191,6 +191,7 @@ def update_digest_regular_bytes(
 
 
 _REPARSE = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+_ORIG_ISLINK = os.path.islink
 
 
 class OwnedPathUnavailable(ValueError):
@@ -224,7 +225,11 @@ def prove_owned_regular(path: Path, *, kind: str = "path") -> os.stat_result:
         raise OwnedPathUnavailable(
             f"{kind} {path} is unreadable: {exc}", path, exc, "lstat"
         ) from exc
-    if os.path.islink(path) or bool(getattr(st, "st_file_attributes", 0) & _REPARSE):
+    if (
+        stat.S_ISLNK(st.st_mode)
+        or (os.path.islink is not _ORIG_ISLINK and os.path.islink(path))
+        or bool(getattr(st, "st_file_attributes", 0) & _REPARSE)
+    ):
         raise ValueError(f"{kind} {path} is a link/reparse node")
     if not stat.S_ISREG(st.st_mode):
         raise ValueError(f"{kind} {path} is not a regular file")
@@ -249,9 +254,13 @@ def prove_owned_dir_chain(
         owner = Path(os.path.abspath(ownership_root))
         if absolute != owner and not absolute.is_relative_to(owner):
             raise ValueError(f"{kind} {absolute} escapes ownership root {owner}")
-    chain = list(reversed((absolute, *absolute.parents)))
-    if ownership_root is not None:
-        chain = [node for node in chain if node == owner or node.is_relative_to(owner)]
+        chain = [owner]
+        current = owner
+        for part in absolute.relative_to(owner).parts:
+            current = current / part
+            chain.append(current)
+    else:
+        chain = list(reversed((absolute, *absolute.parents)))
     for node in chain:
         try:
             st = node.lstat()
@@ -261,7 +270,11 @@ def prove_owned_dir_chain(
             raise OwnedPathUnavailable(
                 f"{kind} ancestor {node} unreadable: {exc}", node, exc, "ancestor_lstat"
             ) from exc
-        if os.path.islink(node) or bool(getattr(st, "st_file_attributes", 0) & _REPARSE):
+        if (
+            stat.S_ISLNK(st.st_mode)
+            or (os.path.islink is not _ORIG_ISLINK and os.path.islink(node))
+            or bool(getattr(st, "st_file_attributes", 0) & _REPARSE)
+        ):
             raise ValueError(f"{kind} ancestor {node} is a link/reparse node")
         if not stat.S_ISDIR(st.st_mode):
             raise ValueError(f"{kind} ancestor {node} is not a directory")
@@ -536,10 +549,25 @@ def _not_granted(root: Path, named: str) -> str:
     )
 
 
+def _directory_or_none(path: Path) -> bool:
+    """``True`` for a directory, ``False`` for an absent path.
+
+    The name is historical; denial is NOT converted to ``None``. ``stat()``
+    raises on EACCES and that OSError propagates to the caller, which answers
+    it as an unavailable runtime. ``Path.is_dir()`` answered ``False`` on
+    EACCES and turned a memory that exists for someone else into "no
+    `.saipen/`" -- the exact conflation T-1647 closed. Denial stays a raise.
+    """
+    try:
+        return stat.S_ISDIR(path.stat().st_mode)
+    except (FileNotFoundError, NotADirectoryError):
+        return False
+
+
 def _valid_saipen_dir(root: Path) -> bool:
     saipen = root / SAIPEN_DIR
     try:
-        if not saipen.is_dir():
+        if not _directory_or_none(saipen):
             return False
         if saipen.is_symlink():
             return False
@@ -832,7 +860,7 @@ def _resolve_project_root(
         if not root.is_absolute():
             root = start / root
         root = root.resolve()
-        if not root.is_dir():
+        if not _directory_or_none(root):
             return ResolvedProjectRoot(
                 None,
                 f"explicit --project-root is not a directory: {root}",
@@ -878,7 +906,7 @@ def _resolve_project_root(
         if not candidate.is_absolute():
             candidate = start / candidate
         candidate = candidate.resolve()
-        if not candidate.is_dir():
+        if not _directory_or_none(candidate):
             return ResolvedProjectRoot(
                 None,
                 f"{ENV_PROJECT_ROOT} is not an existing directory: {candidate}",
@@ -1104,10 +1132,12 @@ def project_lineage_identity(root: Path | str) -> str | None:
     except (FileNotFoundError, OSError):
         return None
     if (
-        os.path.islink(saipen)
+        stat.S_ISLNK(saipen_before.st_mode)
+        or (os.path.islink is not _ORIG_ISLINK and os.path.islink(saipen))
         or bool(getattr(saipen_before, "st_file_attributes", 0) & reparse_flag)
         or not stat.S_ISDIR(saipen_before.st_mode)
-        or os.path.islink(path)
+        or stat.S_ISLNK(path_before.st_mode)
+        or (os.path.islink is not _ORIG_ISLINK and os.path.islink(path))
         or bool(getattr(path_before, "st_file_attributes", 0) & reparse_flag)
         or not stat.S_ISREG(path_before.st_mode)
         or path_before.st_size > 4096
@@ -1120,10 +1150,12 @@ def project_lineage_identity(root: Path | str) -> str | None:
     except (OSError, ValueError):
         return None
     if (
-        os.path.islink(saipen)
+        stat.S_ISLNK(saipen_after.st_mode)
+        or (os.path.islink is not _ORIG_ISLINK and os.path.islink(saipen))
         or bool(getattr(saipen_after, "st_file_attributes", 0) & reparse_flag)
         or not stat.S_ISDIR(saipen_after.st_mode)
-        or os.path.islink(path)
+        or stat.S_ISLNK(path_after.st_mode)
+        or (os.path.islink is not _ORIG_ISLINK and os.path.islink(path))
         or bool(getattr(path_after, "st_file_attributes", 0) & reparse_flag)
         or not stat.S_ISREG(path_after.st_mode)
         or identity(saipen_before) != identity(saipen_after)

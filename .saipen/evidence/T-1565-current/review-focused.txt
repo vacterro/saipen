@@ -1,0 +1,53 @@
+test_a_comment_only_suffix_is_not_a_tail (test_log_tail_quarantine.QuarantineLogTailTests.test_a_comment_only_suffix_is_not_a_tail) ... ok
+test_a_legal_log_refuses_rather_than_writing_a_no_op (test_log_tail_quarantine.QuarantineLogTailTests.test_a_legal_log_refuses_rather_than_writing_a_no_op) ... ok
+test_a_stale_last_event_is_not_a_cut_boundary (test_log_tail_quarantine.QuarantineLogTailTests.test_a_stale_last_event_is_not_a_cut_boundary)
+STATE behind a legal tail means the suffix holds a real event. ... ok
+test_a_suffix_id_above_the_tail_is_never_cut (test_log_tail_quarantine.QuarantineLogTailTests.test_a_suffix_id_above_the_tail_is_never_cut)
+It may be a genuine event whose checkpoint never landed. ... ok
+test_damage_before_the_tail_still_refuses (test_log_tail_quarantine.QuarantineLogTailTests.test_damage_before_the_tail_still_refuses) ... ok
+test_every_repair_evidence_root_is_durable_and_byte_bound (test_log_tail_quarantine.QuarantineLogTailTests.test_every_repair_evidence_root_is_durable_and_byte_bound)
+A preserved LOG whose digest the ledger records must keep its bytes. ... ok
+test_ordinary_work_resumes_and_validates (test_log_tail_quarantine.QuarantineLogTailTests.test_ordinary_work_resumes_and_validates) ... ok
+test_public_recovery_same_damage_preserves_bytes_and_resumes (test_log_tail_quarantine.QuarantineLogTailTests.test_public_recovery_same_damage_preserves_bytes_and_resumes)
+Same oracle reaches the old runtime, not an absent-API import. ... ok
+test_reconcile_never_plans_on_the_cut_ledger (test_log_tail_quarantine.QuarantineLogTailTests.test_reconcile_never_plans_on_the_cut_ledger)
+The observation is the cut; only the op that writes the cut may ask. ... ok
+test_recover_names_the_exit_instead_of_unrecoverable (test_log_tail_quarantine.QuarantineLogTailTests.test_recover_names_the_exit_instead_of_unrecoverable)
+The measured dead end: FORENSICALLY_UNRECOVERABLE, command null. ... ok
+test_recover_stays_unrecoverable_when_the_cut_is_not_provable (test_log_tail_quarantine.QuarantineLogTailTests.test_recover_stays_unrecoverable_when_the_cut_is_not_provable) ... ok
+test_the_canonical_command_reaches_it (test_log_tail_quarantine.QuarantineLogTailTests.test_the_canonical_command_reaches_it) ... ok
+test_the_command_takes_no_other_argument (test_log_tail_quarantine.QuarantineLogTailTests.test_the_command_takes_no_other_argument) ... ok
+test_the_cut_keeps_the_ledger_and_records_itself (test_log_tail_quarantine.QuarantineLogTailTests.test_the_cut_keeps_the_ledger_and_records_itself) ... ok
+test_the_fixture_really_is_the_deadlock (test_log_tail_quarantine.QuarantineLogTailTests.test_the_fixture_really_is_the_deadlock)
+Guard: the strict read refuses ordinary work exactly as measured. ... ok
+test_the_original_bytes_are_preserved (test_log_tail_quarantine.QuarantineLogTailTests.test_the_original_bytes_are_preserved) ... ok
+test_dec_at_or_after_the_inversion_covers_it (test_log_stamp_guard.AmnestyScopeTests.test_dec_at_or_after_the_inversion_covers_it) ... ok
+test_dec_does_not_cover_an_inversion_written_after_it (test_log_stamp_guard.AmnestyScopeTests.test_dec_does_not_cover_an_inversion_written_after_it) ... ok
+test_run_line_quoting_the_phrase_grants_no_amnesty (test_log_stamp_guard.AmnestyScopeTests.test_run_line_quoting_the_phrase_grants_no_amnesty) ... ok
+test_a_well_formed_next_line_is_still_refused (test_log_stamp_guard.RetiredAppenderTests.test_a_well_formed_next_line_is_still_refused) ... ok
+test_help_prints_the_notice_and_writes_nothing (test_log_stamp_guard.RetiredAppenderTests.test_help_prints_the_notice_and_writes_nothing)
+The measured first line: `--help` was appended to the ledger. ... ok
+test_no_code_path_opens_the_ledger_for_writing (test_log_stamp_guard.RetiredAppenderTests.test_no_code_path_opens_the_ledger_for_writing) ... ok
+test_the_measured_foreign_sequence_writes_nothing (test_log_stamp_guard.RetiredAppenderTests.test_the_measured_foreign_sequence_writes_nothing) ... ok
+test_mutation_against_foreign_project_is_refused (test_foreign_observation_authority.ForeignObservationCliTests.test_mutation_against_foreign_project_is_refused) ... ok
+test_mutation_succeeds_with_coherent_carriers (test_foreign_observation_authority.ForeignObservationCliTests.test_mutation_succeeds_with_coherent_carriers) ... ok
+test_mutation_succeeds_with_no_carriers (test_foreign_observation_authority.ForeignObservationCliTests.test_mutation_succeeds_with_no_carriers) ... ok
+test_status_observes_foreign_project_with_ambient_a_carriers (test_foreign_observation_authority.ForeignObservationCliTests.test_status_observes_foreign_project_with_ambient_a_carriers) ... ok
+test_validate_observes_foreign_project_with_ambient_a_carriers (test_foreign_observation_authority.ForeignObservationCliTests.test_validate_observes_foreign_project_with_ambient_a_carriers) ... ok
+test_external_authority_is_stable_identity_not_a_url (test_foreign_observation_authority.ProvenanceModelTests.test_external_authority_is_stable_identity_not_a_url) ... ok
+test_external_implementation_and_reason_families (test_foreign_observation_authority.ProvenanceModelTests.test_external_implementation_and_reason_families) ... ok
+test_local_implementation (test_foreign_observation_authority.ProvenanceModelTests.test_local_implementation) ... ok
+test_superseded_local_ticket (test_foreign_observation_authority.ProvenanceModelTests.test_superseded_local_ticket) ... ok
+test_mutation_allows_coherent_explicit_root (test_foreign_observation_authority.ResolveAuthorityTests.test_mutation_allows_coherent_explicit_root) ... ok
+test_mutation_refuses_foreign_explicit_root (test_foreign_observation_authority.ResolveAuthorityTests.test_mutation_refuses_foreign_explicit_root) ... ok
+test_observation_may_bind_foreign_explicit_root (test_foreign_observation_authority.ResolveAuthorityTests.test_observation_may_bind_foreign_explicit_root) ... ok
+test_unknown_authority_is_refused (test_foreign_observation_authority.ResolveAuthorityTests.test_unknown_authority_is_refused) ... ok
+test_plain_text_ingress_still_gets_the_receipt_route (test_foreign_owner_terminal_route.ForeignOwnerTerminalRouteTests.test_plain_text_ingress_still_gets_the_receipt_route) ... ok
+test_receipt_form_ingress_is_terminal_not_a_fixed_point (test_foreign_owner_terminal_route.ForeignOwnerTerminalRouteTests.test_receipt_form_ingress_is_terminal_not_a_fixed_point) ... ok
+test_the_owner_is_still_exactly_where_it_was (test_foreign_owner_terminal_route.ForeignOwnerTerminalRouteTests.test_the_owner_is_still_exactly_where_it_was) ... ok
+test_the_two_answers_are_not_identical (test_foreign_owner_terminal_route.ForeignOwnerTerminalRouteTests.test_the_two_answers_are_not_identical) ... ok
+
+----------------------------------------------------------------------
+Ran 40 tests in 6.974s
+
+OK

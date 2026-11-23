@@ -1,0 +1,202 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "079e8f042fdb1857060ea8098f65e44d358f4a6bb8240e6d706db8694386bbc2",
+  "verdict": "PASS",
+  "patterns": [
+    "test_closure_provenance.py",
+    "test_core_unit_gate.py",
+    "test_t1238_release_commit_publication.py",
+    "test_t1472_core_unit_shards.py",
+    "test_t1750_release_boundary.py",
+    "test_t1827_writer_lock_contract.py",
+    "test_t1828_verification_policy.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_closure_provenance.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_closure_provenance.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        20536
+      ],
+      "ran": 57,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_core_unit_gate.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_core_unit_gate.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        13888
+      ],
+      "ran": 28,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_t1238_release_commit_publication.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1238_release_commit_publication.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        6476
+      ],
+      "ran": 4,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_t1472_core_unit_shards.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1472_core_unit_shards.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "ran": 14,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_t1750_release_boundary.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1750_release_boundary.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        13652
+      ],
+      "ran": 11,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_t1827_writer_lock_contract.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1827_writer_lock_contract.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        17152,
+        21924
+      ],
+      "ran": 19,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_t1828_verification_policy.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1828_verification_policy.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        8248
+      ],
+      "ran": 13,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    }
+  ],
+  "ran": 146,
+  "duration_s": 118.781,
+  "sandboxes_leaked": [],
+  "problem": null
+}

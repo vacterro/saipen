@@ -1,0 +1,10 @@
+{
+  "verifier": "7f80ddeb84578b48",
+  "pre_subject": "b8e90d35089eeeab",
+  "post_subject": "db609fc190f06012",
+  "pre_rc": 1,
+  "post_rc": 0,
+  "control_rc": 0,
+  "held": true,
+  "command": "python -B -m unittest test_t1631_option_values"
+}

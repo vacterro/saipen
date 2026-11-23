@@ -1,0 +1,4 @@
+log._claims_failure on the engine carrying T-1762 (True = still read as a current failure)
+True  | the _sairelay T-8 line the report cites (E-112 shape)
+False | its accepted rewording (E-113 shape)
+False | the vacterro-saiwebsite T-33 line (IMP-004)

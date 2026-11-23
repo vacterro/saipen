@@ -1,0 +1,10 @@
+S5 probe: structured refusal re-measure at tree 5706afe0d / c66baf69
+  CORRUPT_GC_STATE             code_ok=True unregistered_code=False
+  GC_MAINTENANCE_FAILED        code_ok=True unregistered_code=False
+  GC_STATE_REPAIR_UNVERIFIED   code_ok=True unregistered_code=False
+  GIT_GUARD_FAILED             code_ok=True unregistered_code=False
+  INVALID_POLICY_KEY           code_ok=True unregistered_code=False
+  ROWS_UNRECOVERABLE           code_ok=True unregistered_code=False
+  SOURCE_INDEX_UNRECOVERABLE   code_ok=True unregistered_code=False
+  TEST24_UNKNOWN_CANARY        canary unregistered_code=True
+S5 summary: 0 of 7 codes marked unregistered | canary marked: True

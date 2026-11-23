@@ -1,0 +1,582 @@
+{
+  "cohorts": {
+    "C-001": {
+      "cohort_id": "C-001",
+      "commit": "",
+      "members": {
+        "T-1320": {
+          "closed_at": "2026-09-13T18:40:33Z",
+          "closed_by": "codex",
+          "paths": {
+            "extensions/adapters/opencode/saipen-guard.js": "941c650a9301f384",
+            "tools/saipen.py": "89e1c4899a221599",
+            "tools/saipen_engine/admission.py": "ea20a616c888008c",
+            "tools/saipen_engine/fleet.py": "0453d3e1ae50c7cb",
+            "tools/saipen_engine/paths.py": "1889eb788261bfbd",
+            "tools/t1320_fleet_native_smoke.py": "52e43d44fb807ecf",
+            "tools/test_guard_hostile_matrix.py": "1f1c69a07a8caba4",
+            "tools/test_opencode_adapter.py": "1a21ddbd038e8bf4",
+            "tools/test_opencode_host_smoke.py": "9e03d1b3563feb82",
+            "tools/test_project_root_session_binding.py": "34566355d7204941"
+          },
+          "ticket_id": "T-1320",
+          "verification": "AC-01..AC-12 proven by deterministic fixtures, representative fleet matrix, fresh OpenCode proof, no-rg proof, focused suite and broader gate; zero new PATCH_OWNED failures"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "extensions/adapters/opencode/saipen-guard.js",
+        "tools/saipen.py",
+        "tools/saipen_engine/admission.py",
+        "tools/saipen_engine/fleet.py",
+        "tools/saipen_engine/paths.py",
+        "tools/t1320_fleet_native_smoke.py",
+        "tools/test_guard_hostile_matrix.py",
+        "tools/test_opencode_adapter.py",
+        "tools/test_opencode_host_smoke.py",
+        "tools/test_project_root_session_binding.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-002": {
+      "cohort_id": "C-002",
+      "commit": "",
+      "members": {
+        "T-1510": {
+          "closed_at": "2026-10-03T05:27:52Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "extensions/adapters/claude/saipen-guard.py": "75a076d9acf96b02",
+            "extensions/adapters/codex/saipen-guard.py": "d015eeb6330bb3de",
+            "extensions/adapters/opencode/saipen-guard.js": "fae3eed77a4533f8",
+            "saipen/CORE.md": "6e501d7a043e7a8d",
+            "tests/fixtures/response-authority/incidents.json": "5ff04b5aac4dd275",
+            "tools/saipen.py": "2abac30c4b2a7345",
+            "tools/saipen_engine/board.py": "c2112d100b3cb43a",
+            "tools/saipen_engine/board_compaction.py": "4c9662440a85888c",
+            "tools/saipen_engine/chat_style.py": "4f467f45d332dad3",
+            "tools/saipen_engine/entry.py": "789b35a943484a0f",
+            "tools/saipen_engine/hush.py": "45c16edb4cf678f8",
+            "tools/saipen_engine/operations.py": "bb4d9c95fa10643d",
+            "tools/saipen_engine/operator_task.py": "3027b1341bea2caa",
+            "tools/saipen_engine/response_surface.py": "a3da071566beed3d",
+            "tools/saipen_engine/retirement.py": "9d500e5a04bfd1d7",
+            "tools/saipen_engine/source_append.py": "c271b4238fd41940",
+            "tools/t1446_field_soak.py": "6a523804de19b48f",
+            "tools/test_ingress_authority.py": "a99f509e4c41e143",
+            "tools/test_response_delivery.py": "824c7c7dcbae15e8",
+            "tools/test_response_digest.py": "fd9c07b786ea0e82",
+            "tools/test_t1511_soak_source_identity.py": "42c2e2e68d39501c",
+            "tools/test_t1598_stale_claim_next_action.py": "f94cbbfd97003271",
+            "tools/validate.py": "1212311880ec14b9"
+          },
+          "ticket_id": "T-1510",
+          "verification": "the requested change is present and demonstrated against the user own description of it"
+        },
+        "T-1565": {
+          "closed_at": "2026-10-03T15:15:05Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            ".gitattributes": "dfb240e7d7b4cd2c",
+            "tools/_log_append.py": "f0fa4117f6db742f",
+            "tools/saipen_engine/log.py": "173596942090002c",
+            "tools/saipen_engine/operations.py": "bb4d9c95fa10643d",
+            "tools/saipen_engine/reconcile.py": "1e7dddf50d11e4e1",
+            "tools/saipen_engine/runtime_namespace.py": "3ce5a28e36ab9ad4",
+            "tools/test_log_stamp_guard.py": "8e5c58f4d0fde401",
+            "tools/test_log_tail_quarantine.py": "71110b92d5c4c933"
+          },
+          "ticket_id": "T-1565",
+          "verification": "Foreign-tail quarantine repair preserved: retired zero-write raw appender, checkpointed last_event cut proof, no higher event cut, immutable prefix validation, original bytes and canonical repair event, public... [detail_ref: .saipen/recovery/board-compaction/T-1565/T-1565-79c37929db94a8d6fa403439.json]"
+        },
+        "T-1600": {
+          "closed_at": "2026-10-03T04:24:54Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "extensions/adapters/claude/saipen-guard.py": "75a076d9acf96b02",
+            "extensions/adapters/codex/saipen-guard.py": "d015eeb6330bb3de",
+            "extensions/adapters/opencode/saipen-guard.js": "fae3eed77a4533f8",
+            "saipen/CORE.md": "6e501d7a043e7a8d",
+            "tests/fixtures/response-authority/incidents.json": "5ff04b5aac4dd275",
+            "tools/saipen.py": "2abac30c4b2a7345",
+            "tools/saipen_engine/board.py": "c2112d100b3cb43a",
+            "tools/saipen_engine/board_compaction.py": "4c9662440a85888c",
+            "tools/saipen_engine/chat_style.py": "4f467f45d332dad3",
+            "tools/saipen_engine/entry.py": "789b35a943484a0f",
+            "tools/saipen_engine/hush.py": "45c16edb4cf678f8",
+            "tools/saipen_engine/operations.py": "bb4d9c95fa10643d",
+            "tools/saipen_engine/operator_task.py": "3027b1341bea2caa",
+            "tools/saipen_engine/response_surface.py": "a3da071566beed3d",
+            "tools/saipen_engine/retirement.py": "9d500e5a04bfd1d7",
+            "tools/saipen_engine/source_append.py": "c271b4238fd41940",
+            "tools/test_ingress_authority.py": "a99f509e4c41e143",
+            "tools/test_response_delivery.py": "824c7c7dcbae15e8",
+            "tools/test_response_digest.py": "fd9c07b786ea0e82"
+          },
+          "ticket_id": "T-1600",
+          "verification": "Same incident SRC-164 and SRC-146 RED to GREEN; unwitnessed ingress cannot preempt, goal pivot or reset bounded authority; T-1599 retired without DONE, SRC-164 retained, T-1510 restored; full core red 0 new_red 0"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        ".gitattributes",
+        "extensions/adapters/claude/saipen-guard.py",
+        "extensions/adapters/codex/saipen-guard.py",
+        "extensions/adapters/opencode/saipen-guard.js",
+        "saipen/CORE.md",
+        "tests/fixtures/response-authority/incidents.json",
+        "tools/_log_append.py",
+        "tools/saipen.py",
+        "tools/saipen_engine/board.py",
+        "tools/saipen_engine/board_compaction.py",
+        "tools/saipen_engine/chat_style.py",
+        "tools/saipen_engine/entry.py",
+        "tools/saipen_engine/hush.py",
+        "tools/saipen_engine/log.py",
+        "tools/saipen_engine/operations.py",
+        "tools/saipen_engine/operator_task.py",
+        "tools/saipen_engine/reconcile.py",
+        "tools/saipen_engine/response_surface.py",
+        "tools/saipen_engine/retirement.py",
+        "tools/saipen_engine/runtime_namespace.py",
+        "tools/saipen_engine/source_append.py",
+        "tools/t1446_field_soak.py",
+        "tools/test_ingress_authority.py",
+        "tools/test_log_stamp_guard.py",
+        "tools/test_log_tail_quarantine.py",
+        "tools/test_response_delivery.py",
+        "tools/test_response_digest.py",
+        "tools/test_t1511_soak_source_identity.py",
+        "tools/test_t1598_stale_claim_next_action.py",
+        "tools/validate.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-003": {
+      "cohort_id": "C-003",
+      "commit": "",
+      "members": {
+        "T-1408": {
+          "closed_at": "2026-10-03T14:57:14Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/run_scenarios.py": "786e69f7d96cf857"
+          },
+          "ticket_id": "T-1408",
+          "verification": "the requested change is present and demonstrated against the user own description of it"
+        },
+        "T-1603": {
+          "closed_at": "2026-10-03T14:35:20Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/run_scenarios.py": "786e69f7d96cf857"
+          },
+          "ticket_id": "T-1603",
+          "verification": "Same fixed external driver FAIL on original run_scenarios.py and PASS on repaired scenario subject; bad authority and omitted reconcile controls remain red; full scenario gate reaches every group with no failure; full unit red 0 new_red 0"
+        },
+        "T-1604": {
+          "closed_at": "2026-10-03T15:54:08Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/evidence.py": "1778719abd6df166",
+            "tools/test_evidence_hygiene.py": "bb77bdc62dfcad42"
+          },
+          "ticket_id": "T-1604",
+          "verification": "Fixed same oracle: EvidenceRun finalizes an owned read-only Git-shaped temporary tree without leaking it on Windows; foreign paths remain refused and durable proof is preserved; full core new_red 0"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "tools/run_scenarios.py",
+        "tools/saipen_engine/evidence.py",
+        "tools/test_evidence_hygiene.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-004": {
+      "cohort_id": "C-004",
+      "commit": "",
+      "members": {
+        "T-1283": {
+          "closed_at": "2026-10-03T21:11:09Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/conformance_lineage.py": "1f4e6b3859d434d6",
+            "tools/test_t1283_lineage_legacy_ingest.py": "8ae99f87ea330a2f"
+          },
+          "ticket_id": "T-1283",
+          "verification": "AC-01 a settlement leaves a settled index that validates on the next read, proven by a test that goes red against the current sequencing; AC-02 an operation-specific query consults the index or segment offsets and...... [detail_ref: .saipen/recovery/board-compaction/T-1283/T-1283-17804ebaaadf061cca2b25df.json]"
+        },
+        "T-1306": {
+          "closed_at": "2026-10-03T19:27:02Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen.py": "4c8515118219cf9f",
+            "tools/saipen_engine/acceptance.py": "e22e683291e87fee",
+            "tools/test_acceptance.py": "5773afa4597cf2d5"
+          },
+          "ticket_id": "T-1306",
+          "verification": "Evidence-backed acceptance reconciliation: a completion claim becomes traceable to structured evidence bound to the criterion that was promised, with narrative prose demoted to data is complete and the repository-declared verification harness passes"
+        },
+        "T-1316": {
+          "closed_at": "2026-10-03T20:16:59Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/journal.py": "6cc6fea91e1afbca",
+            "tools/test_t1316_recovery_already_applied.py": "f09edcab1a1a93ec"
+          },
+          "ticket_id": "T-1316",
+          "verification": "Three-way classifier centralized with unit matrix; ProTrail-shaped fixture converges with zero target rewrites, second recovery no-op, exact retry idempotent, conformance PASS after recovery and non-green before;... [detail_ref: .saipen/recovery/board-compaction/T-1316/T-1316-1546c8cc265ec44e3aeb7af0.json]"
+        },
+        "T-1341": {
+          "closed_at": "2026-10-03T17:14:56Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/__init__.py": "3e652fdf2d80d073"
+          },
+          "ticket_id": "T-1341",
+          "verification": "entry-point-parity-six-green-hostile-shadow-refused"
+        },
+        "T-1348": {
+          "closed_at": "2026-10-03T16:53:01Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/__init__.py": "3e652fdf2d80d073",
+            "tools/_module_identity.py": "add6a51a6ea3a271",
+            "tools/test_module_duplication_guard.py": "1f3bc559fdaebafc",
+            "tools/test_tool_module_identity.py": "28f2e696f7042f6f"
+          },
+          "ticket_id": "T-1348",
+          "verification": "a guard test proves no file under tools/ has two live module objects in the canonical discover run, red-controlled by importing one module both ways; either the flat spelling is removed from test imports without... [detail_ref: .saipen/recovery/board-compaction/T-1348/T-1348-e1ff6b2978caca2096f3fc56.json]"
+        },
+        "T-1515": {
+          "closed_at": "2026-10-04T00:01:45Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/entry_resolver.py": "9b500b2be67cdc63",
+            "tools/test_t1515_posix_shell_entry.py": "f56fe202feabb34c"
+          },
+          "ticket_id": "T-1515",
+          "verification": "MSYS/Cygwin shells on Windows receive the proven POSIX launcher in command_form; Win32 argv_prefix remains .cmd and exec_prefix remains the proven Python engine. cmd/PowerShell retain the Windows form. The same fixed original/current oracle uses actual Git Bash, observes original argument injection and current intact argument transport, and refuses failed shell execution. Focused entry neighbors, declared full family and core validation pass."
+        },
+        "T-1605": {
+          "closed_at": "2026-10-03T19:26:52Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "saipen/COMMANDS.md": "e23fc8282cb7e995",
+            "saipen/COMMAND_EFFECTS.json": "3d2bd6d1c4f1fe6e",
+            "saipen/OPS.md": "17017ff8e98e7e1f",
+            "tools/saipen.py": "4c8515118219cf9f",
+            "tools/saipen_engine/journal.py": "6cc6fea91e1afbca",
+            "tools/saipen_engine/operations.py": "a02c7f83d78a3d94",
+            "tools/test_closure_provenance.py": "fa51758010a24899",
+            "tools/test_protocol_registry.py": "261f6192fcca07a0"
+          },
+          "ticket_id": "T-1605",
+          "verification": "Same fixed native public-CLI oracle refuses before fix and atomically binds verified canonical own_patch DONE to pending cohort after fix; preserves original finish and active Work; conflicting hashes, published/legacy/foreign rows and missing proof refuse zero-write; exact retry and dry-run are byte-noops; fresh complete unit family plus core validation and Ruff pass"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "saipen/COMMANDS.md",
+        "saipen/COMMAND_EFFECTS.json",
+        "saipen/OPS.md",
+        "tools/__init__.py",
+        "tools/_module_identity.py",
+        "tools/saipen.py",
+        "tools/saipen_engine/acceptance.py",
+        "tools/saipen_engine/conformance_lineage.py",
+        "tools/saipen_engine/entry_resolver.py",
+        "tools/saipen_engine/journal.py",
+        "tools/saipen_engine/operations.py",
+        "tools/test_acceptance.py",
+        "tools/test_closure_provenance.py",
+        "tools/test_module_duplication_guard.py",
+        "tools/test_protocol_registry.py",
+        "tools/test_t1283_lineage_legacy_ingest.py",
+        "tools/test_t1316_recovery_already_applied.py",
+        "tools/test_t1515_posix_shell_entry.py",
+        "tools/test_tool_module_identity.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-005": {
+      "cohort_id": "C-005",
+      "commit": "",
+      "members": {
+        "T-1609": {
+          "closed_at": "2026-10-04T14:37:21Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "saipen/OPS.md": "d08cf764b6db6a7b",
+            "tools/saipen_engine/reconcile.py": "6a06fb1851199fb2",
+            "tools/test_t1609_unproven_done_recovery.py": "116683b0092e6180"
+          },
+          "ticket_id": "T-1609",
+          "verification": "the requested change is present and demonstrated against the user own description of it"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "saipen/OPS.md",
+        "tools/saipen_engine/reconcile.py",
+        "tools/test_t1609_unproven_done_recovery.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-006": {
+      "cohort_id": "C-006",
+      "commit": "",
+      "members": {
+        "T-1752": {
+          "closed_at": "2026-10-15T17:22:07Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/board_scrub.py": "61aa6adec8c8c053",
+            "tools/saipen_engine/intake.py": "19f2ee80b35824ca",
+            "tools/test_t1666_receipt_close.py": "f737b4b8eafb7716",
+            "tools/test_t1752_audit_auto_close.py": "e5984ce256d14a58"
+          },
+          "ticket_id": "T-1752",
+          "verification": "a Work that reaches DONE with its audit-bound receipt fully covered leaves that layer CLOSED_PENDING_DELETE without a hand-typed command, the next audit ingest consumes it before capturing a new generation, and the sentence in closable_receipts describes what the code does; regression pair on a fixture inbox"
+        },
+        "T-1755": {
+          "closed_at": "2026-10-15T17:21:38Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/board_scrub.py": "61aa6adec8c8c053",
+            "tools/saipen_engine/intake.py": "19f2ee80b35824ca",
+            "tools/test_t1666_receipt_close.py": "f737b4b8eafb7716",
+            "tools/test_t1752_audit_auto_close.py": "e5984ce256d14a58"
+          },
+          "ticket_id": "T-1755",
+          "verification": "the requested change is present and demonstrated against the user own description of it"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "tools/saipen_engine/board_scrub.py",
+        "tools/saipen_engine/intake.py",
+        "tools/test_t1666_receipt_close.py",
+        "tools/test_t1752_audit_auto_close.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-007": {
+      "cohort_id": "C-007",
+      "commit": "",
+      "members": {
+        "T-1828": {
+          "closed_at": "2026-10-20T14:33:30Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "saipen/phases/ship.md": "ec599340a1133698",
+            "saipen/phases/verify.md": "bff7defbec3cc058",
+            "tools/saipen_engine/core_unit.py": "c315f8fadcefef78",
+            "tools/saipen_engine/focused_unit.py": "957ad5747862cd7a",
+            "tools/saipen_engine/operations.py": "e74b7c5874c6e6af",
+            "tools/saipen_engine/release.py": "877ebd7642d87868",
+            "tools/test_t1828_verification_policy.py": "517785ef6d96a6b4",
+            "tools/validate.py": "23b39ab429ef6f9e",
+            "tools/verification_policy.json": "d68a072b6217c163"
+          },
+          "ticket_id": "T-1828",
+          "verification": "the requested change is present and demonstrated against the user own description of it"
+        },
+        "T-1833": {
+          "closed_at": "2026-10-20T16:40:44Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/process_tree.py": "e5f07f80d2a6802d",
+            "tools/saipen_engine/test_runner.py": "ddc432151d26fad4",
+            "tools/saipen_engine/verification_bootstrap.py": "00dcaa6a3b542aa8",
+            "tools/test_t1833_verification_owner.py": "d0b1753d64d3d284"
+          },
+          "ticket_id": "T-1833",
+          "verification": "A real POSIX verifier cannot start before its reader ownership is recorded; killing its owner reaps the owned process group and allows a bounded fresh execution; Windows job behavior and existing process-tree controls remain intact"
+        },
+        "T-1834": {
+          "closed_at": "2026-10-20T16:40:11Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/test_runner.py": "ddc432151d26fad4",
+            "tools/test_t1834_tool_call_identity.py": "d8fad98ef381fe2f"
+          },
+          "ticket_id": "T-1834",
+          "verification": "Different CODEX_TOOL_CALL_ID values produce the same actual canonical child environment and compatible verification identity; one unchanged generation reuses its real focused receipt across separate tool calls and reaches SHIP; real test-mode changes still invalidate evidence"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "saipen/phases/ship.md",
+        "saipen/phases/verify.md",
+        "tools/saipen_engine/core_unit.py",
+        "tools/saipen_engine/focused_unit.py",
+        "tools/saipen_engine/operations.py",
+        "tools/saipen_engine/process_tree.py",
+        "tools/saipen_engine/release.py",
+        "tools/saipen_engine/test_runner.py",
+        "tools/saipen_engine/verification_bootstrap.py",
+        "tools/test_t1828_verification_policy.py",
+        "tools/test_t1833_verification_owner.py",
+        "tools/test_t1834_tool_call_identity.py",
+        "tools/validate.py",
+        "tools/verification_policy.json"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-008": {
+      "cohort_id": "C-008",
+      "commit": "",
+      "members": {
+        "T-1830": {
+          "closed_at": "2026-10-20T14:56:42Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/core_unit.py": "d9b894465075a31a",
+            "tools/saipen_engine/core_unit_shard.py": "d6b2893bb0582c7e",
+            "tools/saipen_engine/focused_unit.py": "d71af38b7263e01a",
+            "tools/saipen_engine/test_runner.py": "154d2ad749d4271e",
+            "tools/test_t1830_verification_observations.py": "6bc1f3c4a717dacc"
+          },
+          "ticket_id": "T-1830",
+          "verification": "Lightweight timers report observed stage wall time and counts without changing verdicts; adversarial equal-count duplicate/omission partition refuses; existing copy, shard, cleanup and failure-roster controls pass"
+        },
+        "T-1831": {
+          "closed_at": "2026-10-20T15:02:30Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/test_t1505_core_unit_sandbox_reclaim.py": "dfc1191ec3612298",
+            "tools/test_t1831_cleanup_fixture_cost.py": "e15eadd46ffb57b8"
+          },
+          "ticket_id": "T-1831",
+          "verification": "Same 21 cleanup/ownership controls pass on the same host with a bounded isolated fixture; before/after wall and copy time reported; old whole-repository input rejected by an independent regression control"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "tools/saipen_engine/core_unit.py",
+        "tools/saipen_engine/core_unit_shard.py",
+        "tools/saipen_engine/focused_unit.py",
+        "tools/saipen_engine/test_runner.py",
+        "tools/test_t1505_core_unit_sandbox_reclaim.py",
+        "tools/test_t1830_verification_observations.py",
+        "tools/test_t1831_cleanup_fixture_cost.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-009": {
+      "cohort_id": "C-009",
+      "commit": "",
+      "members": {
+        "T-1832": {
+          "closed_at": "2026-10-20T16:50:23Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/core_unit.py": "24aca431614c7a20",
+            "tools/saipen_engine/focused_unit.py": "0998f7005b8a1184",
+            "tools/saipen_engine/test_runner.py": "ddc432151d26fad4",
+            "tools/saipen_engine/verification_bootstrap.py": "df9bdce3388bf251",
+            "tools/saipen_engine/verification_cache.py": "317b52e9620ea974",
+            "tools/test_core_unit_gate.py": "fb033b9d70b3ce8b",
+            "tools/test_t1828_verification_policy.py": "d501259c412de9ae",
+            "tools/test_t1832_single_flight.py": "f0f5ffbe35a635f9"
+          },
+          "ticket_id": "T-1832",
+          "verification": "Real concurrent callers of one compatible immutable verification share one execution; source/config/runtime/environment/baseline changes refuse stale evidence; failure, cancellation, interruption, timeout and tamper controls preserve exact verdict and ownership"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "tools/saipen_engine/core_unit.py",
+        "tools/saipen_engine/focused_unit.py",
+        "tools/saipen_engine/test_runner.py",
+        "tools/saipen_engine/verification_bootstrap.py",
+        "tools/saipen_engine/verification_cache.py",
+        "tools/test_core_unit_gate.py",
+        "tools/test_t1828_verification_policy.py",
+        "tools/test_t1832_single_flight.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-010": {
+      "cohort_id": "C-010",
+      "commit": "",
+      "members": {
+        "T-1835": {
+          "closed_at": "2026-10-20T17:20:19Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/core_unit.py": "8e777d8cbf574618",
+            "tools/saipen_engine/focused_unit.py": "972f0e5f43086cc7",
+            "tools/saipen_engine/verification_cache.py": "27af1612947740b5",
+            "tools/saipen_metrics.py": "028b215da92e81e8",
+            "tools/test_t1832_single_flight.py": "7225595909b7c69c",
+            "tools/test_t1835_verification_economics.py": "b11ce39d83b3c7e5",
+            "tools/verification_metrics.py": "3efcdaa26e6486f7"
+          },
+          "ticket_id": "T-1835",
+          "verification": "The existing metrics CLI reports execution frequency, stage/process versus request wall time, cache/repeat/feedback/generation/ticket measures and red visibility without double counting shared executions; absent implementation/impact/escape observations remain explicitly unknown; reports cannot mutate lifecycle or authorize work"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "tools/saipen_engine/core_unit.py",
+        "tools/saipen_engine/focused_unit.py",
+        "tools/saipen_engine/verification_cache.py",
+        "tools/saipen_metrics.py",
+        "tools/test_t1832_single_flight.py",
+        "tools/test_t1835_verification_economics.py",
+        "tools/verification_metrics.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-011": {
+      "cohort_id": "C-011",
+      "commit": "",
+      "members": {
+        "T-1836": {
+          "closed_at": "2026-10-20T18:23:21Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "saipen/phases/verify.md": "4d2be7f8accf1e91",
+            "tools/saipen_engine/core_unit.py": "a0772dd9d2cfe2bd",
+            "tools/saipen_engine/core_unit_shard.py": "b31bafde4ad2f780",
+            "tools/saipen_engine/focused_unit.py": "222a2398bb19f508",
+            "tools/saipen_engine/verification_cache.py": "5d724c800f1435f6",
+            "tools/saipen_engine/verification_impact.py": "cf5c146ee2931cc1",
+            "tools/test_t1836_verification_impact.py": "73835e794c4dad47",
+            "tools/verification_metrics.py": "663ae557c5699ea8"
+          },
+          "ticket_id": "T-1836",
+          "verification": "Plans bind changed paths, current source and test inventory with selection reasons; sta

@@ -1,0 +1,1 @@
+PASS: continuity probes (SC-CONTINUITY-001 + H1..H20, T-1148)

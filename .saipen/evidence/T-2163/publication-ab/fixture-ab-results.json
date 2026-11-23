@@ -1,0 +1,50 @@
+{
+  "samples": 12,
+  "per_arm": {
+    "A_original_build_source": {
+      "walls_s": [
+        1.765,
+        1.75,
+        1.735,
+        3.625,
+        4.578,
+        4.64,
+        4.172,
+        4.11,
+        4.14,
+        4.297,
+        6.656,
+        4.172
+      ],
+      "p50_s": 4.172,
+      "mean_s": 3.8033,
+      "git_processes_per_construction": 3.0
+    },
+    "B_shared_prep_then_copy": {
+      "one_time_prep_s": 4.125,
+      "copy_walls_s": [
+        0.781,
+        0.829,
+        0.765,
+        0.735,
+        0.89,
+        0.766,
+        0.812,
+        0.844,
+        0.891,
+        0.797,
+        0.796,
+        0.813
+      ],
+      "copy_p50_s": 0.812,
+      "copy_mean_s": 0.8099,
+      "git_processes_per_construction": 0.0
+    }
+  },
+  "delta_per_construction_s": 2.9934,
+  "git_processes_per_construction_A_B": [
+    3.0,
+    0.0
+  ],
+  "conclusion": "Wave F, measured at the only site the consolidation touched (fixture construction; 12 samples per arm): git process count 3.0 per construction -> 0.0 (3 total, paid once per class); construction p50 1.75 s -> 0.80 s; mean delta 0.92 s per test with a one-time 1.89 s prep over 7 tests. The XII consolidation is real and kept, but its magnitude is small: it does not explain the 2882.9 s E-23072 standalone wall, which the per-test installer/publish work and ambient load dominate. No contamination regression observed (battery green)."
+}

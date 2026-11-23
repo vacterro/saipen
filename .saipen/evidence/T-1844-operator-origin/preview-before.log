@@ -1,0 +1,46 @@
+test_fresh_native_preview_does_not_reuse_an_older_model_receipt (test_t1844_authority_preview.AuthorityPreviewEvents.test_fresh_native_preview_does_not_reuse_an_older_model_receipt) ... FAIL
+test_preview_preserves_the_real_capture_fidelity_refusal (test_t1844_authority_preview.AuthorityPreviewEvents.test_preview_preserves_the_real_capture_fidelity_refusal) ... FAIL
+test_preview_refuses_corruption_before_filtering_out_an_older_event (test_t1844_authority_preview.AuthorityPreviewEvents.test_preview_refuses_corruption_before_filtering_out_an_older_event) ... FAIL
+test_preview_selects_the_current_native_event_without_binding_it (test_t1844_authority_preview.AuthorityPreviewEvents.test_preview_selects_the_current_native_event_without_binding_it) ... FAIL
+
+======================================================================
+FAIL: test_fresh_native_preview_does_not_reuse_an_older_model_receipt (test_t1844_authority_preview.AuthorityPreviewEvents.test_fresh_native_preview_does_not_reuse_an_older_model_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_authority_preview.py", line 79, in test_fresh_native_preview_does_not_reuse_an_older_model_receipt
+    self.assertIsNone(self.preview().data["receipt"])
+AssertionError: 'SRC-001' is not None
+
+======================================================================
+FAIL: test_preview_preserves_the_real_capture_fidelity_refusal (test_t1844_authority_preview.AuthorityPreviewEvents.test_preview_preserves_the_real_capture_fidelity_refusal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_authority_preview.py", line 103, in test_preview_preserves_the_real_capture_fidelity_refusal
+    self.assertFalse(preview.ok, preview.to_dict())
+AssertionError: True is not false : {'ok': True, 'code': 'PLAN', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'operator-authority capsule would be captured as its own Source', 'operation': 'authority_capture', 'dry_run': True, 'receipt': None, 'source_sha256': '3d3703b4d0767c744be1d1a1304fb85eb7e80a41f610eeeabf8068ba280e08fa', 'operation_id': 'authority-capture-3d3703b4d0767c74', 'projection_policy': 'authority_only', 'targets': ['.saipen/intake/active (source receipt)']}
+
+======================================================================
+FAIL: test_preview_refuses_corruption_before_filtering_out_an_older_event (test_t1844_authority_preview.AuthorityPreviewEvents.test_preview_refuses_corruption_before_filtering_out_an_older_event)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_authority_preview.py", line 119, in test_preview_refuses_corruption_before_filtering_out_an_older_event
+    self.assertFalse(preview.ok, preview.to_dict())
+AssertionError: True is not false : {'ok': True, 'code': 'PLAN', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'operator-authority capsule would be captured as its own Source', 'operation': 'authority_capture', 'dry_run': True, 'receipt': 'SRC-001', 'source_sha256': '3d3703b4d0767c744be1d1a1304fb85eb7e80a41f610eeeabf8068ba280e08fa', 'operation_id': 'authority-capture-3d3703b4d0767c74', 'projection_policy': 'authority_only', 'targets': ['.saipen/intake/active (source receipt)']}
+
+======================================================================
+FAIL: test_preview_selects_the_current_native_event_without_binding_it (test_t1844_authority_preview.AuthorityPreviewEvents.test_preview_selects_the_current_native_event_without_binding_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_authority_preview.py", line 95, in test_preview_selects_the_current_native_event_without_binding_it
+    self.assertEqual(self.preview().data["receipt"], current)
+AssertionError: 'SRC-001' != 'SRC-002'
+- SRC-001
+?       ^
++ SRC-002
+?       ^
+
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.261s
+
+FAILED (failures=4)

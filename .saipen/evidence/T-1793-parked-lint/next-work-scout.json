@@ -1,0 +1,19 @@
+{
+  "ticket_to_repair": "T-1790",
+  "observed_work": "T-1767",
+  "ready": false,
+  "code": "SOURCE_UNRESOLVED",
+  "receipt": "SRC-246",
+  "open_clauses": 34,
+  "command_chars": 523,
+  "command_prefix": "saipen ticket block T-1767 \"ACTIVE_DEPENDENCY:T-1766 -- SRC-246 SRC-246:R001 SRC-246:R002 SRC-246:R0",
+  "first_three": [
+    "SRC-246:R001",
+    "SRC-246:R002",
+    "SRC-246:R003"
+  ],
+  "writes": 0,
+  "implementation_owner": "tools/saipen_engine/closure_readiness.py:106-113",
+  "existing_oracle": "tools/test_t1789_child_closure_route.py",
+  "next_change": "Bound the explanatory clause/owner preview; retain complete unresolved truth and the same canonical block route."
+}

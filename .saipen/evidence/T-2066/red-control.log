@@ -1,0 +1,133 @@
+.F...FF.FF..F.F                                                          [100%]
+================================== FAILURES ===================================
+_________ PolicyTests.test_the_named_host_answers_with_its_own_images _________
+
+self = <test_t2066_zaicode_host_policy.PolicyTests testMethod=test_the_named_host_answers_with_its_own_images>
+
+    def test_the_named_host_answers_with_its_own_images(self):
+        # The diagnostic surface must name the images the proof will use; the
+        # unnamed answer stays the global policy.
+        named = HC.identify_self(host="zaicode")["host_images"]
+>       self.assertIn("zaicode.exe", [str(item).lower() for item in named], named)
+E       AssertionError: 'zaicode.exe' not found in ['claude.exe', 'claude', 'claude-code', 'claude-code.exe'] : ['claude.exe', 'claude', 'claude-code', 'claude-code.exe']
+
+tools\test_t2066_zaicode_host_policy.py:162: AssertionError
+____ ZeroBoundTests.test_declared_zero_shells_and_bridges_reach_the_proof _____
+
+self = <test_t2066_zaicode_host_policy.ZeroBoundTests testMethod=test_declared_zero_shells_and_bridges_reach_the_proof>
+
+    def test_declared_zero_shells_and_bridges_reach_the_proof(self):
+        policy = self._policy_for(
+            "zaicode", {"max_shells": 0, "max_bridges": 0, "bridge_images": []}
+        )
+>       self.assertEqual(policy.max_shells, 0)
+E       AssertionError: 4 != 0
+
+tools\test_t2066_zaicode_host_policy.py:204: AssertionError
+___________ AncestryTests.test_a_broken_parent_link_is_not_crossed ____________
+
+self = <test_t2066_zaicode_host_policy.AncestryTests testMethod=test_a_broken_parent_link_is_not_crossed>
+
+    def test_a_broken_parent_link_is_not_crossed(self):
+        origins = self._origins(
+            HP.ProcessFact(100, 99, "hook.exe", "hook", (), created=5),
+            HP.ProcessFact(98, 97, "reused.exe", "reused.exe", (), created=4),
+        )
+>       self.assertEqual([fact.pid for fact in origins._chain(100)], [100])
+E       AssertionError: Lists differ: [] != [100]
+E       
+E       Second list contains 1 additional elements.
+E       First extra element 0:
+E       100
+E       
+E       - []
+E       + [100]
+
+tools\test_t2066_zaicode_host_policy.py:255: AssertionError
+_ AncestryTests.test_an_unmeasurable_protected_ancestor_keeps_the_verified_prefix _
+
+self = <test_t2066_zaicode_host_policy.AncestryTests testMethod=test_an_unmeasurable_protected_ancestor_keeps_the_verified_prefix>
+
+    def test_an_unmeasurable_protected_ancestor_keeps_the_verified_prefix(self):
+        origins = self._origins(
+            HP.ProcessFact(100, 99, "hook.exe", "hook", (), created=5),
+            HP.ProcessFact(99, 98, "zaicode.exe", "zaicode.exe", (), created=4),
+            HP.ProcessFact(98, 97, "services.exe", "services.exe", (), created=3),
+            HP.ProcessFact(97, 0, None, None, (), created=None),
+        )
+        chain = origins._chain(100)
+>       self.assertEqual([fact.pid for fact in chain], [100, 99, 98])
+E       AssertionError: Lists differ: [] != [100, 99, 98]
+E       
+E       Second list contains 3 additional elements.
+E       First extra element 0:
+E       100
+E       
+E       - []
+E       + [100, 99, 98]
+
+tools\test_t2066_zaicode_host_policy.py:241: AssertionError
+_____ ClientTests.test_the_client_applies_the_effective_per_host_settings _____
+
+self = <test_t2066_zaicode_host_policy.ClientTests testMethod=test_the_client_applies_the_effective_per_host_settings>
+
+    def test_the_client_applies_the_effective_per_host_settings(self):
+        report = self._shape(
+            "zaicode",
+            {
+                "host_images": ["zaicode.exe", "ZCode.exe"],
+                "host_signers": [],
+                "max_shells": 0,
+                "max_bridges": 0,
+                "bridge_images": ["zcode-cli.exe"],
+            },
+        )
+        self.assertTrue(report["report"]["ok"], report)
+        policy = report["policy"]
+        self.assertEqual(policy.host, "zaicode")
+        images = [str(item).lower() for item in policy.host_images]
+>       self.assertIn("zaicode.exe", images)
+E       AssertionError: 'zaicode.exe' not found in ['claude.exe', 'claude', 'claude-code', 'claude-code.exe']
+
+tools\test_t2066_zaicode_host_policy.py:318: AssertionError
+______ HostTests.test_a_shell_tool_call_gains_nothing_and_seals_nothing _______
+
+self = <test_t2066_zaicode_host_policy.HostTests testMethod=test_a_shell_tool_call_gains_nothing_and_seals_nothing>
+
+    def test_a_shell_tool_call_gains_nothing_and_seals_nothing(self):
+        # The ZAICODE policy bounds the chain at zero shells; a host hook run
+        # through a shell is refused and nothing is sealed. A policy that lost
+        # the explicit zero would admit this shape and seal it.
+        reply = self.prompt(via="shell")
+        self.assertFalse(reply.get("sealed"), reply)
+        self.assertFalse(reply.get("authenticated"), reply)
+        self.assertFalse(reply.get("seal", {}).get("ok"), reply)
+>       self.assertIn(
+            reply.get("seal", {}).get("code"),
+            # The broker answers with its own refusal; without a reachable
+            # service the same caller is refused by the client first.
+            ("BROKER_CLIENT_NOT_AUTHENTICATED", "AUTHORITY_CLIENT_UNPROVEN"),
+            reply,
+        )
+E       AssertionError: 'HOST_PROVENANCE_UNAVAILABLE' not found in ('BROKER_CLIENT_NOT_AUTHENTICATED', 'AUTHORITY_CLIENT_UNPROVEN') : {'ok': True, 'ingress_id': 'ing-96d5b79a36a52ac5', 'destination_op': 'start', 'sealed': False, 'authenticated': False, 'seal': {'ok': False, 'stage': 'issue-origin', 'code': 'HOST_PROVENANCE_UNAVAILABLE', 'category': 'refused', 'detail': 'native host process birth could not be observed', 'recovery': {'component': 'SAIPEN host-authority broker', 'attempted': ['connect'], 'started': False, 'state': 'answered', 'log': 'V:\\_TEMP_\\tmpwo7ixjvm\\userprofile\\.saipen\\authority\\broker.log', 'identity': None, 'detail': None}}}
+
+tools\test_t2066_zaicode_host_policy.py:471: AssertionError
+____ HostTests.test_the_host_own_hook_invocation_seals_the_operator_origin ____
+
+self = <test_t2066_zaicode_host_policy.HostTests testMethod=test_the_host_own_hook_invocation_seals_the_operator_origin>
+
+    def test_the_host_own_hook_invocation_seals_the_operator_origin(self):
+        reply = self.prompt(via="direct")
+>       self.assertTrue(reply.get("sealed"), reply)
+E       AssertionError: False is not true : {'ok': True, 'ingress_id': 'ing-ba97e00f269119fe', 'destination_op': 'start', 'sealed': False, 'authenticated': False, 'seal': {'ok': False, 'stage': 'issue-origin', 'code': 'HOST_PROVENANCE_UNAVAILABLE', 'category': 'refused', 'detail': 'native host process birth could not be observed', 'recovery': {'component': 'SAIPEN host-authority broker', 'attempted': ['connect'], 'started': False, 'state': 'answered', 'log': 'V:\\_TEMP_\\tmp8s2eq9pq\\userprofile\\.saipen\\authority\\broker.log', 'identity': None, 'detail': None}}}
+
+tools\test_t2066_zaicode_host_policy.py:458: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t2066_zaicode_host_policy.py::PolicyTests::test_the_named_host_answers_with_its_own_images
+FAILED tools/test_t2066_zaicode_host_policy.py::ZeroBoundTests::test_declared_zero_shells_and_bridges_reach_the_proof
+FAILED tools/test_t2066_zaicode_host_policy.py::AncestryTests::test_a_broken_parent_link_is_not_crossed
+FAILED tools/test_t2066_zaicode_host_policy.py::AncestryTests::test_an_unmeasurable_protected_ancestor_keeps_the_verified_prefix
+FAILED tools/test_t2066_zaicode_host_policy.py::ClientTests::test_the_client_applies_the_effective_per_host_settings
+FAILED tools/test_t2066_zaicode_host_policy.py::HostTests::test_a_shell_tool_call_gains_nothing_and_seals_nothing
+FAILED tools/test_t2066_zaicode_host_policy.py::HostTests::test_the_host_own_hook_invocation_seals_the_operator_origin
+7 failed, 8 passed in 2.62s

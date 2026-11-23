@@ -1,0 +1,14 @@
+[
+  {
+    "remote": "origin",
+    "exit_code": 0,
+    "stdout": "4f03d79f7ec8da4f3ad458128cc7da81e5ee5dce\trefs/heads/main\n",
+    "stderr": ""
+  },
+  {
+    "remote": "github-backup",
+    "exit_code": 128,
+    "stdout": "",
+    "stderr": "remote: Your account is suspended. Please visit https://support.github.com for more information.\nfatal: unable to access 'https://github.com/vacterro/saipen.git/': The requested URL returned error: 403\n"
+  }
+]

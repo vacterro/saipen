@@ -1,0 +1,15 @@
+test_compiled_facet_is_exactly_the_current_canonical_decision_table (test_t1628_opencode_policy.NativePolicyTests.test_compiled_facet_is_exactly_the_current_canonical_decision_table) ... FAIL
+
+======================================================================
+FAIL: test_compiled_facet_is_exactly_the_current_canonical_decision_table (test_t1628_opencode_policy.NativePolicyTests.test_compiled_facet_is_exactly_the_current_canonical_decision_table)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_t1628_opencode_policy.py", line 307, in test_compiled_facet_is_exactly_the_current_canonical_decision_table
+    self.assertEqual(text[first:last], fragment())
+AssertionError: '// B[3393 chars]    "PROTOCOL_ADMISSION_REQUIRED": {\n      "d[5872 chars]LICY' != '// B[3393 chars]    "FREEBUFF_OPERATOR_PROVENANCE_MISSING": {\[6140 chars]LICY'
+Diff is 9896 characters long. Set self.maxDiff to None to see it.
+
+----------------------------------------------------------------------
+Ran 1 test in 14.311s
+
+FAILED (failures=1)

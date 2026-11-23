@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "c:\\nodejs\\node.EXE",
+    "c:\\nodejs\\node_modules\\@openai\\codex\\bin\\codex.js",
+    "exec",
+    "--json",
+    "--color",
+    "never",
+    "--ephemeral",
+    "--sandbox",
+    "read-only",
+    "-c",
+    "approval_policy=\"never\"",
+    "--cd",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\codex-audit",
+    "--output-last-message",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\codex-audit\\result.txt",
+    "--model",
+    "gpt-6.1-sol",
+    "-"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\codex-audit",
+  "model": "gpt-6.1-sol",
+  "parent_interlock": null,
+  "profile_id": "codex:.codex-account2",
+  "provider": "codex",
+  "role": "audit",
+  "shell": false,
+  "timeout_seconds": 120
+}

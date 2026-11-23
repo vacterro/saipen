@@ -1,0 +1,117 @@
+{
+  "positive_control": "valid copy, original committed finish lineage and sealed digest match",
+  "original_operation": "finish-4e77c05c4d31478ebbb7e73e6df1d1ed",
+  "expected_sealed_dependency": "delete-tree-sha256:b01c21f438a0885d7b2df68eb6561f2a03ac77151e8f45c85479eaa2867d7f36",
+  "cases": [
+    {
+      "case": "missing-parent",
+      "rejected": true,
+      "ledger_errors": [
+        "E-3134 parent E-3133 does not exist in the ledger"
+      ],
+      "identity_verdict": {
+        "ok": true
+      },
+      "sealed_dependency_changed": true,
+      "level": "existing predicate; not an authorized restoration/effect-path proof"
+    },
+    {
+      "case": "duplicate-event",
+      "rejected": true,
+      "ledger_errors": [
+        "duplicate E-ID(s) in complete history: E-3133",
+        "E-3133 is not greater than preceding E-3133 (out of order)"
+      ],
+      "identity_verdict": {
+        "ok": true
+      },
+      "sealed_dependency_changed": true,
+      "level": "existing predicate; not an authorized restoration/effect-path proof"
+    },
+    {
+      "case": "reordered-events",
+      "rejected": true,
+      "ledger_errors": [
+        "E-3133 is not greater than preceding E-3134 (out of order)"
+      ],
+      "identity_verdict": {
+        "ok": true
+      },
+      "sealed_dependency_changed": true,
+      "level": "existing predicate; not an authorized restoration/effect-path proof"
+    },
+    {
+      "case": "forged-parent",
+      "rejected": true,
+      "ledger_errors": [
+        "E-3134 parent E-9999999 does not exist in the ledger"
+      ],
+      "identity_verdict": {
+        "ok": true
+      },
+      "sealed_dependency_changed": true,
+      "level": "existing predicate; not an authorized restoration/effect-path proof"
+    },
+    {
+      "case": "modified-sealed",
+      "rejected": true,
+      "ledger_errors": [],
+      "identity_verdict": {
+        "ok": true
+      },
+      "sealed_dependency_changed": true,
+      "level": "existing predicate; not an authorized restoration/effect-path proof"
+    },
+    {
+      "case": "cross-project-ledger",
+      "rejected": true,
+      "ledger_errors": [
+        "duplicate E-ID(s) in complete history: E-1, E-2, E-3, E-4, E-5, E-6, E-7, E-8, E-9, E-10",
+        "E-1 is not greater than preceding E-2466 (out of order)",
+        "E-4675 parent E-4674 does not exist in the ledger"
+      ],
+      "identity_verdict": {
+        "ok": true
+      },
+      "sealed_dependency_changed": true,
+      "level": "existing predicate; not an authorized restoration/effect-path proof"
+    },
+    {
+      "case": "incorrect-lineage",
+      "rejected": true,
+      "ledger_errors": [],
+      "identity_verdict": {
+        "ok": false,
+        "code": "PROJECT_MISMATCH",
+        "recovery_required": true,
+        "detail": "receipt lineage 'lineage-b0732ed2f98947b9a3c97bfe71427eca' does not match this project's lineage 'lineage-11111111111111111111111111111111'; refuse cross-project recovery with zero writes"
+      },
+      "sealed_dependency_changed": false,
+      "level": "existing predicate; not an authorized restoration/effect-path proof"
+    },
+    {
+      "case": "stale-history-snapshot",
+      "rejected": true,
+      "ledger_errors": [],
+      "identity_verdict": {
+        "ok": true
+      },
+      "sealed_dependency_changed": true,
+      "level": "existing predicate; not an authorized restoration/effect-path proof"
+    },
+    {
+      "case": "incomplete-restoration",
+      "rejected": true,
+      "ledger_errors": [
+        "E-1157 parent E-1156 does not exist in the ledger"
+      ],
+      "identity_verdict": {
+        "ok": true
+      },
+      "sealed_dependency_changed": true,
+      "level": "existing predicate; not an authorized restoration/effect-path proof"
+    }
+  ],
+  "captured_inputs_preserved": true,
+  "limitation": "No recovery transaction was approved or executed; structural syntax alone cannot authenticate a legal text rewrite."
+}

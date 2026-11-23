@@ -1,0 +1,56 @@
+test_idle_verdict_round_trips_through_the_authoritative_checker (test_t1857_shared_blockers.SharedBlockerTests.test_idle_verdict_round_trips_through_the_authoritative_checker) ... 
+  test_idle_verdict_round_trips_through_the_authoritative_checker (test_t1857_shared_blockers.SharedBlockerTests.test_idle_verdict_round_trips_through_the_authoritative_checker) (disposition='BLOCKED') ... ERROR
+  test_idle_verdict_round_trips_through_the_authoritative_checker (test_t1857_shared_blockers.SharedBlockerTests.test_idle_verdict_round_trips_through_the_authoritative_checker) (disposition='WAIT_USER') ... ERROR
+  test_idle_verdict_round_trips_through_the_authoritative_checker (test_t1857_shared_blockers.SharedBlockerTests.test_idle_verdict_round_trips_through_the_authoritative_checker) (disposition='WAIT_EXTERNAL') ... ERROR
+  test_idle_verdict_round_trips_through_the_authoritative_checker (test_t1857_shared_blockers.SharedBlockerTests.test_idle_verdict_round_trips_through_the_authoritative_checker) (disposition='INVALID') ... ERROR
+test_idle_projection_cannot_waive_an_active_phase_or_claim_done (test_t1857_shared_blockers.SharedBlockerTests.test_idle_projection_cannot_waive_an_active_phase_or_claim_done) ... ERROR
+
+======================================================================
+ERROR: test_idle_verdict_round_trips_through_the_authoritative_checker (test_t1857_shared_blockers.SharedBlockerTests.test_idle_verdict_round_trips_through_the_authoritative_checker) (disposition='BLOCKED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 186, in test_idle_verdict_round_trips_through_the_authoritative_checker
+    self.assertEqual(response_surface.response_errors(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: response_errors() got an unexpected keyword argument 'current_idle_disposition'
+
+======================================================================
+ERROR: test_idle_verdict_round_trips_through_the_authoritative_checker (test_t1857_shared_blockers.SharedBlockerTests.test_idle_verdict_round_trips_through_the_authoritative_checker) (disposition='WAIT_USER')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 186, in test_idle_verdict_round_trips_through_the_authoritative_checker
+    self.assertEqual(response_surface.response_errors(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: response_errors() got an unexpected keyword argument 'current_idle_disposition'
+
+======================================================================
+ERROR: test_idle_verdict_round_trips_through_the_authoritative_checker (test_t1857_shared_blockers.SharedBlockerTests.test_idle_verdict_round_trips_through_the_authoritative_checker) (disposition='WAIT_EXTERNAL')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 186, in test_idle_verdict_round_trips_through_the_authoritative_checker
+    self.assertEqual(response_surface.response_errors(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: response_errors() got an unexpected keyword argument 'current_idle_disposition'
+
+======================================================================
+ERROR: test_idle_verdict_round_trips_through_the_authoritative_checker (test_t1857_shared_blockers.SharedBlockerTests.test_idle_verdict_round_trips_through_the_authoritative_checker) (disposition='INVALID')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 186, in test_idle_verdict_round_trips_through_the_authoritative_checker
+    self.assertEqual(response_surface.response_errors(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: response_errors() got an unexpected keyword argument 'current_idle_disposition'
+
+======================================================================
+ERROR: test_idle_projection_cannot_waive_an_active_phase_or_claim_done (test_t1857_shared_blockers.SharedBlockerTests.test_idle_projection_cannot_waive_an_active_phase_or_claim_done)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1857_shared_blockers.py", line 202, in test_idle_projection_cannot_waive_an_active_phase_or_claim_done
+    self.assertTrue(response_surface.response_errors(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: response_errors() got an unexpected keyword argument 'current_idle_disposition'
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+FAILED (errors=5)

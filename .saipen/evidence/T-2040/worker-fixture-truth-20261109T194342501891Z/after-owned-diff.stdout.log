@@ -1,0 +1,172 @@
+diff --git a/tools/test_t1446_supervise.py b/tools/test_t1446_supervise.py
+index 1fae3bd2..18846263 100644
+--- a/tools/test_t1446_supervise.py
++++ b/tools/test_t1446_supervise.py
+@@ -240,6 +240,25 @@ class SuperviseFixture(unittest.TestCase):
+             if earlier.get("end") is not None:
+                 self.assertLessEqual(earlier["end"], later["start"] + 0.001, (earlier, later))
+ 
++    def assert_incomplete_discovery(self, result: dict) -> None:
++        """Scripted DONE is not a checked twelve-source exhaustion proof."""
++        self.assertEqual(result["stop"], supervisor.INCOMPLETE_DISCOVERY, result)
++        self.assertFalse(result["ok"], result)
++        self.assertIsNone(result["operator_action"], result)
++        verdict = supervisor.decide(self.project)
++        self.assertEqual(verdict["verdict"], supervisor.INCOMPLETE_DISCOVERY, verdict)
++        self.assertFalse(verdict["requires_human"], verdict)
++        assessment = verdict["observation"]["continuation_assessment"]
++        self.assertFalse(assessment["quiescent"], assessment)
++        route = assessment["effective_route"]
++        self.assertEqual(route["terminal_classification"], supervisor.INCOMPLETE_DISCOVERY, route)
++        certificate = route["work_exhaustion"]
++        self.assertEqual(certificate["schema_version"], 2, certificate)
++        self.assertEqual(len(certificate["sources"]), 12, certificate)
++        self.assertTrue(any(row["checked"] is False for row in certificate["sources"]), certificate)
++        self.assertFalse(certificate["all_checked"], certificate)
++        self.assertFalse(certificate["exhausted"], certificate)
++
+     def state_text(self) -> str:
+         return (self.project / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+ 
+@@ -250,8 +269,11 @@ class ChaosTests(SuperviseFixture):
+             ["work", "crash", "work", "hang", "ratelimit", "crash_after_work", "work", "finish"]
+         )
+         counters = result["counters"]
+-        self.assertEqual(result["stop"], supervisor.IDLE, result)
+-        self.assertTrue(result["ok"], result)
++        # T-2040 schema 2: the scripted children move Work to DONE and prove the
++        # process controls, but none produces checked discovery evidence, so the
++        # truthful stop is INCOMPLETE_DISCOVERY -- not IDLE, and ok stays False
++        # instead of claiming completion.
++        self.assert_incomplete_discovery(result)
+         self.assertEqual(counters["worker_generation_count"], 8, result)
+         # crash, hang and crash_after_work each cost one generation, never the mission.
+         self.assertEqual(counters["crash_recovery_count"], 3, result)
+@@ -285,7 +307,7 @@ class ChaosTests(SuperviseFixture):
+             env={"FAKE_AGENT_CONTROL": str(self.control)},
+             sleep=lambda _s: None,
+         )
+-        self.assertIn(second["stop"], (supervisor.IDLE,), second)
++        self.assert_incomplete_discovery(second)
+         self.assertNotEqual(first["run_id"], second["run_id"])
+         trace = self.trace()
+         self.assert_generations_never_overlap(trace)
+@@ -311,7 +333,7 @@ class QualityOverTimeTests(SuperviseFixture):
+     def test_a_slow_generation_that_keeps_progressing_is_not_killed(self):
+         # Runs ~3 s against a 1 s idle bound: every bump restarts the bound.
+         result = self.run_plan(["slow_work", "finish"], slice_timeout=1.0, max_slice_seconds=20.0)
+-        self.assertEqual(result["stop"], supervisor.IDLE, result)
++        self.assert_incomplete_discovery(result)
+         self.assertEqual(result["counters"]["failures"], {}, result)
+         self.assertEqual(result["counters"]["crash_recovery_count"], 0, result)
+ 
+@@ -334,7 +356,7 @@ class QualityOverTimeTests(SuperviseFixture):
+             max_slice_seconds=2.5,
+             clock=clock,
+         )
+-        self.assertEqual(result["stop"], supervisor.IDLE, result)
++        self.assert_incomplete_discovery(result)
+         self.assertEqual(result["counters"]["slow_progress_slices"], 1, result)
+         self.assertEqual(result["counters"]["failures"], {}, result)
+         self.assertEqual(result["counters"]["worker_generation_count"], 2, result)
+@@ -343,7 +365,7 @@ class QualityOverTimeTests(SuperviseFixture):
+     def test_an_idle_generation_is_still_bounded(self):
+         result = self.run_plan(["hang", "finish"], slice_timeout=1.0, max_slice_seconds=30.0)
+         self.assertEqual(result["counters"]["failures"].get("HOST_RUNTIME_FAILURE"), 1, result)
+-        self.assertEqual(result["stop"], supervisor.IDLE, result)
++        self.assert_incomplete_discovery(result)
+ 
+     def test_model_identity_never_enters_canonical_truth(self):
+         self.run_plan(
+@@ -424,13 +446,13 @@ class TruncatedTranscriptTests(SuperviseFixture):
+ 
+     def test_a_long_read_never_stops_the_run_on_a_clean_exit(self):
+         result = self.run_plan(["big_transcript", "finish"])
+-        self.assertEqual(result["stop"], supervisor.IDLE, result)
++        self.assert_incomplete_discovery(result)
+         self.assertIsNone(result["history"][0]["failure"], result["history"][0])
+         self.assertEqual(result["counters"]["failures"], {}, result)
+ 
+     def test_a_killed_generation_after_a_long_read_is_a_crash(self):
+         result = self.run_plan(["big_transcript_killed", "finish"])
+-        self.assertEqual(result["stop"], supervisor.IDLE, result)
++        self.assert_incomplete_discovery(result)
+         self.assertEqual(result["history"][0]["failure"], supervisor.WORKER_CRASH)
+ 
+     def test_a_genuine_error_line_after_a_long_read_still_classifies(self):
+@@ -443,7 +465,7 @@ class ProcessTreeTests(SuperviseFixture):
+         import time
+ 
+         result = self.run_plan(["hang_tree", "finish"], slice_timeout=1.0)
+-        self.assertEqual(result["stop"], supervisor.IDLE, result)
++        self.assert_incomplete_discovery(result)
+         beat = self.control / "grandchild.beat"
+         self.assertTrue(beat.exists(), "the grandchild never started")
+         time.sleep(0.6)
+@@ -459,7 +481,7 @@ class CapabilityTests(SuperviseFixture):
+         result = self.run_plan(
+             ["no_tools", "no_tools", "finish"], model="chat-only", fallback=("tool-model",)
+         )
+-        self.assertEqual(result["stop"], supervisor.IDLE, result)
++        self.assert_incomplete_discovery(result)
+         self.assertEqual(result["counters"]["failures"], {"CAPABILITY_UNAVAILABLE": 1}, result)
+         self.assertEqual(result["counters"]["model_replacement_recovery_count"], 1)
+ 
+@@ -498,7 +520,7 @@ class ProviderFailureTests(SuperviseFixture):
+             model="bad-model",
+             fallback=("good-model",),
+         )
+-        self.assertEqual(result["stop"], supervisor.IDLE, result)
++        self.assert_incomplete_discovery(result)
+         self.assertEqual(result["counters"]["model_replacement_recovery_count"], 1, result)
+         models = [item["model"] for item in self.trace()]
+         self.assertEqual(models, ["bad-model", "good-model", "good-model"], models)
+diff --git a/tools/test_t1748_worker_clock.py b/tools/test_t1748_worker_clock.py
+index 0f431c5c..edd5db92 100644
+--- a/tools/test_t1748_worker_clock.py
++++ b/tools/test_t1748_worker_clock.py
+@@ -15,7 +15,7 @@ def probe(scenario):
+     import test_t1446_supervise as subject
+ 
+     # Bound a broken old fixture without changing the configuration between
+-    # subjects. Three cycles still admit two generations plus the IDLE decision.
++    # subjects. Three cycles still admit two generations plus the discovery stop.
+     original = subject.worker.supervise
+ 
+     def supervise(*args, **kwargs):
+@@ -71,7 +71,8 @@ def probe(scenario):
+                 )
+                 assert (case.control / "write-window").is_file(), "write window not exercised"
+                 assert case.state_text(), "killed fixture left STATE empty"
+-                assert result["stop"] == subject.supervisor.IDLE, result
++                # The successor finishes Work, not schema-2 discovery.
++                case.assert_incomplete_discovery(result)
+                 assert result["counters"]["worker_generation_count"] == 2, result
+                 assert result["counters"]["failures"] == {}, result
+             else:
+diff --git a/tools/test_worker_turnover.py b/tools/test_worker_turnover.py
+index d014fe8c..364eaf02 100644
+--- a/tools/test_worker_turnover.py
++++ b/tools/test_worker_turnover.py
+@@ -282,7 +282,20 @@ class ColdTurnoverTests(unittest.TestCase):
+         result = self.spawn("worker-a", slices=1)
+         self.assertEqual(result.returncode, worker.EXIT_STOPPED, result.stdout)
+         payload = json.loads(result.stdout.strip().splitlines()[-1])
+-        self.assertEqual(payload["code"], supervisor.IDLE)
++        # HELD Work is not runnable, but an empty queue does not prove that
++        # all twelve discovery sources were checked or require a human.
++        self.assertEqual(payload["code"], supervisor.INCOMPLETE_DISCOVERY, payload)
++        self.assertFalse(payload["ok"], payload)
++        verdict = supervisor.decide(self.project)
++        self.assertEqual(verdict["verdict"], supervisor.INCOMPLETE_DISCOVERY, verdict)
++        self.assertFalse(verdict["requires_human"], verdict)
++        assessment = verdict["observation"]["continuation_assessment"]
++        self.assertFalse(assessment["quiescent"], assessment)
++        certificate = assessment["effective_route"]["work_exhaustion"]
++        self.assertEqual(certificate["schema_version"], 2, certificate)
++        self.assertEqual(len(certificate["sources"]), 12, certificate)
++        self.assertFalse(certificate["all_checked"], certificate)
++        self.assertFalse(certificate["exhausted"], certificate)
+         self.assertIsNone(worker.read_checkpoint(self.project))
+         self.counters["false_stops"] += 0
+         self.assertEqual(self.counters["false_stops"], 0)

@@ -1,0 +1,66 @@
+test_degraded_policy_preserves_registry_fail_closed_hosts (test_t1686_launch_policy.LaunchPolicyTests.test_degraded_policy_preserves_registry_fail_closed_hosts) ... ok
+test_explicit_degraded_policy_keeps_the_warning (test_t1686_launch_policy.LaunchPolicyTests.test_explicit_degraded_policy_keeps_the_warning) ... ok
+test_invalid_policy_refuses_instead_of_silently_degrading (test_t1686_launch_policy.LaunchPolicyTests.test_invalid_policy_refuses_instead_of_silently_degrading) ... 
+  test_invalid_policy_refuses_instead_of_silently_degrading (test_t1686_launch_policy.LaunchPolicyTests.test_invalid_policy_refuses_instead_of_silently_degrading) (host='opencode') ... FAIL
+  test_invalid_policy_refuses_instead_of_silently_degrading (test_t1686_launch_policy.LaunchPolicyTests.test_invalid_policy_refuses_instead_of_silently_degrading) (host='claude') ... FAIL
+test_missing_policy_keeps_the_default_degraded_launch (test_t1686_launch_policy.LaunchPolicyTests.test_missing_policy_keeps_the_default_degraded_launch) ... ok
+test_strict_policy_allows_a_proven_runtime (test_t1686_launch_policy.LaunchPolicyTests.test_strict_policy_allows_a_proven_runtime) ... ok
+test_strict_policy_refuses_every_degrading_host_before_spawn (test_t1686_launch_policy.LaunchPolicyTests.test_strict_policy_refuses_every_degrading_host_before_spawn) ... 
+  test_strict_policy_refuses_every_degrading_host_before_spawn (test_t1686_launch_policy.LaunchPolicyTests.test_strict_policy_refuses_every_degrading_host_before_spawn) (host='opencode') ... FAIL
+  test_strict_policy_refuses_every_degrading_host_before_spawn (test_t1686_launch_policy.LaunchPolicyTests.test_strict_policy_refuses_every_degrading_host_before_spawn) (host='claude') ... FAIL
+test_unreadable_policy_refuses_instead_of_silently_degrading (test_t1686_launch_policy.LaunchPolicyTests.test_unreadable_policy_refuses_instead_of_silently_degrading) ... 
+  test_unreadable_policy_refuses_instead_of_silently_degrading (test_t1686_launch_policy.LaunchPolicyTests.test_unreadable_policy_refuses_instead_of_silently_degrading) (host='opencode') ... FAIL
+  test_unreadable_policy_refuses_instead_of_silently_degrading (test_t1686_launch_policy.LaunchPolicyTests.test_unreadable_policy_refuses_instead_of_silently_degrading) (host='claude') ... FAIL
+
+======================================================================
+FAIL: test_invalid_policy_refuses_instead_of_silently_degrading (test_t1686_launch_policy.LaunchPolicyTests.test_invalid_policy_refuses_instead_of_silently_degrading) (host='opencode')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1686_launch_policy.py", line 74, in _assert_strict_refusal
+    self.assertNotIn(host_launch.ENV_FORBID_HOST_SPAWN, message)
+AssertionError: 'SAIPEN_FORBID_HOST_SPAWN' unexpectedly found in "SAIPEN_FORBID_HOST_SPAWN=1 forbids starting a real host process; this launch had selected V:\\_TEMP_\\saipen-t1686-lkbuwduv\\opencode for host 'opencode'. No process was created."
+
+======================================================================
+FAIL: test_invalid_policy_refuses_instead_of_silently_degrading (test_t1686_launch_policy.LaunchPolicyTests.test_invalid_policy_refuses_instead_of_silently_degrading) (host='claude')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1686_launch_policy.py", line 74, in _assert_strict_refusal
+    self.assertNotIn(host_launch.ENV_FORBID_HOST_SPAWN, message)
+AssertionError: 'SAIPEN_FORBID_HOST_SPAWN' unexpectedly found in "SAIPEN_FORBID_HOST_SPAWN=1 forbids starting a real host process; this launch had selected V:\\_TEMP_\\saipen-t1686-lkbuwduv\\claude for host 'claude'. No process was created."
+
+======================================================================
+FAIL: test_strict_policy_refuses_every_degrading_host_before_spawn (test_t1686_launch_policy.LaunchPolicyTests.test_strict_policy_refuses_every_degrading_host_before_spawn) (host='opencode')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1686_launch_policy.py", line 74, in _assert_strict_refusal
+    self.assertNotIn(host_launch.ENV_FORBID_HOST_SPAWN, message)
+AssertionError: 'SAIPEN_FORBID_HOST_SPAWN' unexpectedly found in "SAIPEN_FORBID_HOST_SPAWN=1 forbids starting a real host process; this launch had selected V:\\_TEMP_\\saipen-t1686-so17z0z7\\opencode for host 'opencode'. No process was created."
+
+======================================================================
+FAIL: test_strict_policy_refuses_every_degrading_host_before_spawn (test_t1686_launch_policy.LaunchPolicyTests.test_strict_policy_refuses_every_degrading_host_before_spawn) (host='claude')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1686_launch_policy.py", line 74, in _assert_strict_refusal
+    self.assertNotIn(host_launch.ENV_FORBID_HOST_SPAWN, message)
+AssertionError: 'SAIPEN_FORBID_HOST_SPAWN' unexpectedly found in "SAIPEN_FORBID_HOST_SPAWN=1 forbids starting a real host process; this launch had selected V:\\_TEMP_\\saipen-t1686-so17z0z7\\claude for host 'claude'. No process was created."
+
+======================================================================
+FAIL: test_unreadable_policy_refuses_instead_of_silently_degrading (test_t1686_launch_policy.LaunchPolicyTests.test_unreadable_policy_refuses_instead_of_silently_degrading) (host='opencode')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1686_launch_policy.py", line 74, in _assert_strict_refusal
+    self.assertNotIn(host_launch.ENV_FORBID_HOST_SPAWN, message)
+AssertionError: 'SAIPEN_FORBID_HOST_SPAWN' unexpectedly found in "SAIPEN_FORBID_HOST_SPAWN=1 forbids starting a real host process; this launch had selected V:\\_TEMP_\\saipen-t1686-jmh4c1sw\\opencode for host 'opencode'. No process was created."
+
+======================================================================
+FAIL: test_unreadable_policy_refuses_instead_of_silently_degrading (test_t1686_launch_policy.LaunchPolicyTests.test_unreadable_policy_refuses_instead_of_silently_degrading) (host='claude')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1686_launch_policy.py", line 74, in _assert_strict_refusal
+    self.assertNotIn(host_launch.ENV_FORBID_HOST_SPAWN, message)
+AssertionError: 'SAIPEN_FORBID_HOST_SPAWN' unexpectedly found in "SAIPEN_FORBID_HOST_SPAWN=1 forbids starting a real host process; this launch had selected V:\\_TEMP_\\saipen-t1686-jmh4c1sw\\claude for host 'claude'. No process was created."
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.047s
+
+FAILED (failures=6)

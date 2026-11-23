@@ -1,0 +1,10 @@
+{
+  "path": "saipen/STYLE.md",
+  "before_sha256": "c7328bd9f7fcf42d2f717154b9c8a4a77376891cca656360917ae829c226438f",
+  "after_sha256": "a6b374724acc93136a9f678335c3099cdd5ccecea0cbe81d7edfff623c7b7830",
+  "normalized_byte_delta": -15,
+  "style_marker_before": "ded-6b950e75",
+  "style_marker_candidate": "ded-71fc58de",
+  "measurable_contract_unchanged": true,
+  "required_before_integration": "same-oracle validator and mutation controls; canonical marker rederivation for owned live STATE"
+}

@@ -1,0 +1,8 @@
+test_a_contract_changed_after_measurement_still_refuses (test_t1771_measure_then_finish.MeasureThenFinish.test_a_contract_changed_after_measurement_still_refuses) ... ok
+test_the_first_finish_after_one_measurement_closes (test_t1771_measure_then_finish.MeasureThenFinish.test_the_first_finish_after_one_measurement_closes) ... ok
+test_the_fixture_measured_a_receipt_with_no_clause_yet_at_capture (test_t1771_measure_then_finish.MeasureThenFinish.test_the_fixture_measured_a_receipt_with_no_clause_yet_at_capture) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 12.875s
+
+OK

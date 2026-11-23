@@ -1,0 +1,43 @@
+{
+  "command": "python -B -m unittest test_t1656_operator_readability   (cwd tools/)",
+  "oracle": [
+    "tools/test_t1656_operator_readability.py",
+    "tests/fixtures/t1656-operator-wall/response.transcribed.txt",
+    "tools/test_orchestration_repair.py",
+    "tools/test_hermetic_env.py",
+    "tools/test_fixture_support.py"
+  ],
+  "subject": [
+    "tools/saipen_engine/response_surface.py",
+    "tools/saipen.py",
+    "saipen/EXECUTION.md"
+  ],
+  "red_files": 969,
+  "red_restored": [
+    "tools/saipen_engine/response_surface.py",
+    "tools/saipen.py",
+    "saipen/EXECUTION.md"
+  ],
+  "red_absent": [],
+  "green_files": 969,
+  "red": {
+    "rc": 1,
+    "verifier": "c4180be4af6174f6",
+    "subject": "b5fd87cff9c5e010",
+    "tail": [
+      "----------------------------------------------------------------------",
+      "Ran 29 tests in 3.324s",
+      "FAILED (failures=9, errors=15)"
+    ]
+  },
+  "green": {
+    "rc": 0,
+    "verifier": "c4180be4af6174f6",
+    "subject": "54f1e40e5aa80b48",
+    "tail": [
+      "----------------------------------------------------------------------",
+      "Ran 29 tests in 6.934s",
+      "OK"
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+  File "<stdin>", line 12
+    p=e['path'].replace('\','/')
+                              ^
+SyntaxError: unterminated string literal (detected at line 12)

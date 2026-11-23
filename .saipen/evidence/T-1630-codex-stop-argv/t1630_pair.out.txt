@@ -1,0 +1,10 @@
+utc: 2026-10-08T06:05:03Z
+CONTROL unmutated copy: exit 0, Ran 6 tests
+only the guard pre-fix: exit 1, red ['test_a_foreign_host_records_the_boundary', 'test_a_malformed_command_line_on_reentry_still_never_blocks', 'test_a_missing_saipen_root_records_the_boundary', 'test_an_unknown_argument_records_the_boundary']
+only the installer pre-fix: exit 1, red ['test_a_refused_installation_preserves_the_installed_bytes', 'test_installer_refuses_an_artifact_that_exits_two']
+command: python -B -m unittest test_codex_stop_hook.CommandLineFaultTests test_codex_stop_hook.BrokenArtifactInstallTests (cwd tools/)
+verifier:65a1015acb38732c  (tools/test_codex_stop_hook.py, byte-identical in both trees)
+FAIL subject:719c8072bd1280d1  exit 1  red: test_a_foreign_host_records_the_boundary, test_a_malformed_command_line_on_reentry_still_never_blocks, test_a_missing_saipen_root_records_the_boundary, test_a_refused_installation_preserves_the_installed_bytes, test_an_unknown_argument_records_the_boundary, test_installer_refuses_an_artifact_that_exits_two
+PASS subject:0c8c515a7ef72013  exit 0  Ran 6 tests
+held: True
+--- exit: 0 ---

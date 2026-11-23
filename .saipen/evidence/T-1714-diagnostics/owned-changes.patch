@@ -1,0 +1,318 @@
+--- before/tools/saipen_engine/reconcile.py
++++ after/tools/saipen_engine/reconcile.py
+@@ -2523,6 +2523,42 @@
+     return result
+ 
+ 
++def _history_ledger_refusal(project_root: Path, detail: str) -> dict:
++    """The same proven quarantine-or-terminal decision for every projection."""
++    quarantine = _foreign_tail_route(project_root)
++    return {
++        "ok": False,
++        "code": "HISTORY_LEDGER_CORRUPT",
++        "detail": detail,
++        **_blocked_recovery_fields(
++            command=quarantine,
++            terminal_disposition=None if quarantine else "FORENSICALLY_UNRECOVERABLE",
++            evidence_reference=".saipen/LOG.md",
++            reason_code="HISTORY_LEDGER_CORRUPT",
++        ),
++    }
++
++
++def checkpoint_ledger_diagnostic(project_root: Path | str, routed: dict) -> dict | None:
++    """Refine an already invalid checkpoint using recovery's existing typed read.
++
++    Healthy routing performs no additional history read or traversal. The
++    strict recovery reader retains binding, error precedence and quarantine
++    proof; projection code must not infer a terminal diagnosis from prose.
++    """
++    if routed.get("ok") is not False:
++        return None
++    from . import lifecycle_authority
++
++    if (routed.get("reason") != "checkpoint-invalid"
++            and routed.get("code") != lifecycle_authority.CODE):
++        return None
++    result = reconcile_protocol_state(project_root, "diagnostic", dry_run=True)
++    if result.get("code") == "HISTORY_LEDGER_CORRUPT":
++        return result
++    return None
++
++
+ def reconcile_protocol_state(
+     root: Path | str,
+     agent: str,
+@@ -2598,21 +2634,7 @@
+             "detail": str(exc),
+         }
+         if result["code"] == "HISTORY_LEDGER_CORRUPT":
+-            # Unrecoverable is a claim that no local mutation can reconstruct
+-            # the truth. A proven foreign tail reconstructs nothing -- it cuts
+-            # lines no checkpoint bound -- so that one shape names its exit
+-            # instead of stranding the project (29.09.26).
+-            quarantine = _foreign_tail_route(project_root)
+-            result.update(
+-                _blocked_recovery_fields(
+-                    command=quarantine,
+-                    terminal_disposition=(
+-                        None if quarantine else "FORENSICALLY_UNRECOVERABLE"
+-                    ),
+-                    evidence_reference=".saipen/LOG.md",
+-                    reason_code="HISTORY_LEDGER_CORRUPT",
+-                )
+-            )
++            return _history_ledger_refusal(project_root, str(exc))
+         return result
+ 
+     events = docs["_history"].events if docs.get("_history") is not None else ()
+--- before/tools/saipen.py
++++ after/tools/saipen.py
+@@ -1733,6 +1733,8 @@
+         )
+         return 1
+     board = parse_board(board_text)
++    from saipen_engine.reconcile import checkpoint_ledger_diagnostic
++
+     # T-1671: a lifecycle head no operation produced is not a status to
+     # project. Reporting phase DONE and an idle route over a hand-written
+     # completion is how the forgery became the project's truth; the refusal
+@@ -1741,6 +1743,12 @@
+ 
+     _lifecycle = _lifecycle_authority.assess(project_root, state, board, snap.history_events)
+     if _lifecycle["status"] == _lifecycle_authority.UNAUTHORIZED:
++        diagnostic = checkpoint_ledger_diagnostic(
++            project_root, {"ok": False, "code": _lifecycle_authority.CODE}
++        )
++        if diagnostic is not None:
++            _emit({**diagnostic, "cold_route": _cold_route(project_root, state, state_text)}, as_json)
++            return 1
+         _emit(
+             {
+                 "ok": False,
+@@ -1816,6 +1824,10 @@
+     _status_gated = gate_route(project_root, routed)
+     if _status_gated is not None:
+         routed = _status_gated
++    diagnostic = checkpoint_ledger_diagnostic(project_root, routed)
++    if diagnostic is not None:
++        _emit({**diagnostic, "cold_route": _cold_route(project_root, state, state_text)}, as_json)
++        return 1
+     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
+         # A malformed/binding failure must NOT project a healthy surface from
+         # corrupt input (T-1003): status fails closed with the router's
+@@ -2571,6 +2583,11 @@
+     _gated = gate_route(project_root, routed)
+     if _gated is not None:
+         routed = _gated
++    from saipen_engine.reconcile import checkpoint_ledger_diagnostic
++
++    diagnostic = checkpoint_ledger_diagnostic(project_root, routed)
++    if diagnostic is not None:
++        return {"emitted": diagnostic, "rc": 1}
+     route = {
+         "emitted": None,
+         "rc": 0,
+@@ -3205,9 +3222,15 @@
+     gated = gate_route(project_root, routed)
+     if gated is not None:
+         routed = gated
++    from saipen_engine.reconcile import checkpoint_ledger_diagnostic
++
++    diagnostic = checkpoint_ledger_diagnostic(project_root, routed)
++    if diagnostic is not None:
++        routed = diagnostic
+     if not routed.get("ok"):
+         carrier = {
+-            "code": routing_failure_code(routed),
++            **routed,
++            "code": routed.get("code") or routing_failure_code(routed),
+             "action": routed.get("action"),
+             "reason": routed.get("reason"),
+             "next_action": routed.get("action"),
+@@ -3242,7 +3265,8 @@
+             "execution_intent": state.get("execution_intent") or "normal",
+             "converge_target": state.get("converge_target"),
+         },
+-        "carrier": {k: v for k, v in carrier.items() if v is not None},
++        "carrier": carrier if diagnostic is not None else
++        {k: v for k, v in carrier.items() if v is not None},
+         "disposition": verdict["disposition"],
+         "owner": "user" if verdict["requires_human"] else "agent",
+         "human_required": verdict["requires_human"],
+--- before/tools/test_reconcile_history_ledger_blocked.py
++++ after/tools/test_reconcile_history_ledger_blocked.py
+@@ -25,16 +25,21 @@
+ from __future__ import annotations
+ 
+ import importlib
++import json
+ import shutil
++import subprocess
+ import sys
+ import tempfile
+ import unittest
+ from pathlib import Path
++from unittest import mock
+ 
+ TOOLS = Path(__file__).resolve().parent
+ if str(TOOLS) not in sys.path:
+     sys.path.insert(0, str(TOOLS))
+ from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
++from test_hermetic_env import hermetic_env  # noqa: E402
++from test_regression_gate import RegressionGateFixture  # noqa: E402
+ 
+ 
+ def _live(name: str):
+@@ -173,5 +178,151 @@
+         self.assertIsNone(result["canonical_next_command"], result)
+ 
+ 
++class PublicLedgerDiagnosticTests(RegressionGateFixture):
++    """A05: public routes must agree with the actual recovery owner."""
++
++    REGRESSION = ""
++    COMMANDS = (("status",), ("next",), ("continue",),
++                ("recover", "--dry-run"), ("explain-next",))
++
++    def native(self, root: Path, words: tuple[str, ...]) -> tuple[int, dict]:
++        completed = subprocess.run(
++            [sys.executable, "-B", str(TOOLS / "saipen.py"),
++             "--project-root", str(root), *words, "--json"],
++            cwd=root, env=hermetic_env(SAIPEN_CAPABILITY="no-publish"),
++            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=45,
++        )
++        self.assertIn(completed.returncode, (0, 1), completed.stderr)
++        value = json.loads(completed.stdout)
++        if words == ("explain-next",):
++            self.assertEqual(completed.returncode, 0, value)
++            self.assertEqual(value["code"], "EXPLAIN_NEXT", value)
++            return 1 if not value["carrier"].get("ok", True) else 0, value["carrier"]
++        return completed.returncode, value
++
++    def bytes(self, root: Path) -> dict[str, bytes]:
++        return {name: (root / ".saipen" / name).read_bytes()
++                for name in ("STATE.md", "BOARD.md", "LOG.md")}
++
++    def append_missing_parent(self) -> None:
++        path = self.project / ".saipen/LOG.md"
++        with path.open("a", encoding="utf-8") as stream:
++            stream.write("- 24.08.26 00:04 [E-004] [parent: E-3133] [T-7] "
++                         "[agent: tester] RUN: missing historical parent\n")
++
++    def assert_terminal_parity(self) -> None:
++        before = self.bytes(self.project)
++        for words in self.COMMANDS:
++            with self.subTest(command=words):
++                rc, value = self.native(self.project, words)
++                self.assertEqual(rc, 1, value)
++                self.assertFalse(value["ok"], value)
++                self.assertEqual(value["code"], "HISTORY_LEDGER_CORRUPT", value)
++                self.assertEqual(value["terminal_disposition"],
++                                 "FORENSICALLY_UNRECOVERABLE", value)
++                self.assertIsNone(value["canonical_next_command"], value)
++                self.assertFalse(value["needs_local_mutation"], value)
++                self.assertFalse(value["safe_auto_repair_available"], value)
++                self.assertFalse(value["operator_decision_available"], value)
++                self.assertTrue(value["read_only_diagnosis_only"], value)
++                self.assertEqual(value["evidence_reference"], ".saipen/LOG.md", value)
++                self.assertIsNone(value.get("action"), value)
++                self.assertIn("immutable-ledger", value["detail"], value)
++                self.assertEqual(self.bytes(self.project), before, words)
++
++    def test_missing_parent_routes_are_terminal_and_write_nothing(self) -> None:
++        self.append_missing_parent()
++        self.assert_terminal_parity()
++
++    def test_duplicate_event_routes_are_terminal_and_write_nothing(self) -> None:
++        path = self.project / ".saipen/LOG.md"
++        lines = path.read_text(encoding="utf-8").splitlines()
++        lines.insert(1, "- 24.08.26 00:01 [E-001] [T-7] "
++                     "[agent: tester] RUN: duplicate historical identity")
++        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
++        self.assert_terminal_parity()
++
++    def test_out_of_order_history_routes_are_terminal_and_write_nothing(self) -> None:
++        path = self.project / ".saipen/LOG.md"
++        lines = path.read_text(encoding="utf-8").splitlines()
++        lines[1], lines[2] = lines[2], lines[1]
++        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
++        self.assert_terminal_parity()
++
++    def test_unbacked_head_does_not_hide_the_precise_ledger_owner(self) -> None:
++        self.append_missing_parent()
++        path = self.project / ".saipen/STATE.md"
++        text = path.read_text(encoding="utf-8")
++        text = text.replace("phase: VERIFY", "phase: DONE")
++        text = text.replace("task: T-7", "task: none")
++        text = text.replace("PHASE VERIFY T-7", "SCOUT: next workable ticket")
++        path.write_text(text, encoding="utf-8")
++        self.assert_terminal_parity()
++
++    def test_healthy_status_next_and_recover_remain_healthy_without_writes(self) -> None:
++        before = self.bytes(self.project)
++        for words in (("status",), ("next",), ("recover", "--dry-run")):
++            rc, value = self.native(self.project, words)
++            self.assertEqual(rc, 0, value)
++            self.assertTrue(value["ok"], value)
++            self.assertNotEqual(value.get("terminal_disposition"),
++                                "FORENSICALLY_UNRECOVERABLE", value)
++            self.assertEqual(self.bytes(self.project), before, words)
++
++    def test_repairable_checkpoint_keeps_its_registered_recovery_route(self) -> None:
++        path = self.project / ".saipen/STATE.md"
++        path.write_text(path.read_text(encoding="utf-8").replace("last_event: 3", "last_event: 99"),
++                        encoding="utf-8")
++        before = self.bytes(self.project)
++        for words in (("status",), ("next",)):
++            rc, value = self.native(self.project, words)
++            self.assertEqual(rc, 1, value)
++            self.assertEqual(value["action"], "saipen recover", value)
++            self.assertNotEqual(value.get("code"), "HISTORY_LEDGER_CORRUPT", value)
++            self.assertEqual(self.bytes(self.project), before)
++        _rc, recovery = self.native(self.project, ("recover", "--dry-run"))
++        self.assertNotEqual(recovery.get("terminal_disposition"),
++                            "FORENSICALLY_UNRECOVERABLE", recovery)
++        self.assertEqual(self.bytes(self.project), before)
++
++    def test_proven_foreign_tail_keeps_the_same_executable_quarantine_route(self) -> None:
++        from test_log_tail_quarantine import project
++
++        with tempfile.TemporaryDirectory(prefix="a05-proven-quarantine-") as directory:
++            root = project(Path(directory))
++            before = self.bytes(root)
++            for words in self.COMMANDS:
++                with self.subTest(command=words):
++                    rc, value = self.native(root, words)
++                    self.assertEqual(rc, 1, value)
++                    self.assertEqual(value["code"], "HISTORY_LEDGER_CORRUPT", value)
++                    self.assertIsNone(value["terminal_disposition"], value)
++                    self.assertEqual(value["canonical_next_command"],
++                                     "saipen recover quarantine-log-tail", value)
++                    self.assertTrue(value["operator_decision_available"], value)
++                    self.assertEqual(self.bytes(root), before, words)
++
++    def test_healthy_route_requires_no_additional_strict_history_read(self) -> None:
++        reconcile = _live("saipen_engine.reconcile")
++        diagnostic = getattr(reconcile, "checkpoint_ledger_diagnostic", None)
++        self.assertIsNotNone(diagnostic, "shared recovery diagnostic is absent")
++        with mock.patch("saipen_engine.operations._read", side_effect=AssertionError("extra read")):
++            self.assertIsNone(diagnostic(self.project, {"ok": True, "action": "PHASE VERIFY T-7"}))
++
++    def test_manifest_runtime_preflight_keeps_recovery_error_precedence(self) -> None:
++        self.append_missing_parent()
++        reconcile = _live("saipen_engine.reconcile")
++        diagnostic = getattr(reconcile, "checkpoint_ledger_diagnostic", None)
++        self.assertIsNotNone(diagnostic, "shared recovery diagnostic is absent")
++        unavailable = {"ok": False, "code": "SAIPEN_HOST_RUNTIME_UNAVAILABLE",
++                       "detail": "controlled manifest access denial"}
++        before = self.bytes(self.project)
++        with mock.patch("saipen_engine.audit_manifest.ensure", return_value=unavailable):
++            self.assertEqual(reconcile.reconcile_protocol_state(self.project, "tester", dry_run=True),
++                             unavailable)
++            self.assertIsNone(diagnostic(self.project, {"ok": False, "reason": "checkpoint-invalid"}))
++        self.assertEqual(self.bytes(self.project), before)
++
++
+ if __name__ == "__main__":
+     unittest.main()

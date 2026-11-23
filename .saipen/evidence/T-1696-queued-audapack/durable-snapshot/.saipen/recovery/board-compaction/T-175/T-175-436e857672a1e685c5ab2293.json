@@ -1,0 +1,19 @@
+{
+  "externalization_event": {
+    "event_id": "E-1366",
+    "operation_id": "board-compact-b1b902d6fd8641ae97b709ca46566acf",
+    "reason": "explicit canonical legacy BOARD compaction"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-175/T-175-436e857672a1e685c5ab2293.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 1852,
+  "original_record_path": ".saipen/recovery/board-compaction/T-175/T-175-436e857672a1e685c5ab2293.BOARD.md",
+  "original_record_sha256": "436e857672a1e685c5ab2293aeb2ec27d402f95dd5c2d92eafceedfabb65238b",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "ticket_id": "T-175"
+}

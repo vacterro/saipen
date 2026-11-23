@@ -1,0 +1,34 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_release_completion.py",
+    "-v"
+  ],
+  "runtime": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "exit_code": 1,
+  "seconds": 7.391,
+  "before": {
+    "tools/test_release_completion.py": "5a74e041b9be86397c4a3a178618fba15032d3ef06897b04e651b66274b2a471",
+    "tools/saipen_engine/isolated_release.py": "bcfad9b99bcddca20b89d8274e986e19b90b3b9b60324c9b6b95ed319729613a",
+    "tools/saipen_engine/outcome_truth.py": "8ad47a8498aa591b635f48f4ee3a10aaba75d6b9e2113ef67c3246b7837085d1",
+    "tools/saipen_engine/goal_authority.py": "d28593c5d83034338e55b16c6c0bc0a8bcd4eda991ec5541155ffd319f9b2e8a",
+    "tools/saipen_engine/release_authority.py": "09d99267166ed916e8c80e6adac1b79d27b523b73d6e64d8fcc19b3a4f5dee37",
+    "tools/saipen_engine/operations.py": "f7b5d795eb3417fc358994a680340463c304a5dd1e204c0dff742431671c0aab"
+  },
+  "after": {
+    "tools/test_release_completion.py": "5a74e041b9be86397c4a3a178618fba15032d3ef06897b04e651b66274b2a471",
+    "tools/saipen_engine/isolated_release.py": "bcfad9b99bcddca20b89d8274e986e19b90b3b9b60324c9b6b95ed319729613a",
+    "tools/saipen_engine/outcome_truth.py": "8ad47a8498aa591b635f48f4ee3a10aaba75d6b9e2113ef67c3246b7837085d1",
+    "tools/saipen_engine/goal_authority.py": "d28593c5d83034338e55b16c6c0bc0a8bcd4eda991ec5541155ffd319f9b2e8a",
+    "tools/saipen_engine/release_authority.py": "09d99267166ed916e8c80e6adac1b79d27b523b73d6e64d8fcc19b3a4f5dee37",
+    "tools/saipen_engine/operations.py": "f7b5d795eb3417fc358994a680340463c304a5dd1e204c0dff742431671c0aab"
+  },
+  "unchanged": true
+}

@@ -1,0 +1,2 @@
+FAIL: tools/validate.py rejects an UNMODIFIED copy (exit 1) -- every number below would be measuring that instead of the floor's coverage. What it said:
+    FAIL: closure-evidence -- ticket T-1695 is ## DONE but carries no current-cycle verification evidence (classifier: Continuation boundary after E-14044/E-14045 l

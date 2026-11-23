@@ -1,0 +1,1203 @@
+[
+  {
+    "id": "B001",
+    "capture_line": 1235,
+    "identity": "block-park-done-green",
+    "raw_failure": "block-park-done-green: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B002",
+    "capture_line": 1236,
+    "identity": "blocked-ticket",
+    "raw_failure": "blocked-ticket: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B003",
+    "capture_line": 1237,
+    "identity": "cold-handoff-continuity",
+    "raw_failure": "cold-handoff-continuity: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B004",
+    "capture_line": 1238,
+    "identity": "goal-counter-recovery",
+    "raw_failure": "goal-counter-recovery: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B005",
+    "capture_line": 1239,
+    "identity": "goal-counter-untraced",
+    "raw_failure": "goal-counter-untraced: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B006",
+    "capture_line": 1240,
+    "identity": "goal-reauthorization-trace",
+    "raw_failure": "goal-reauthorization-trace: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B007",
+    "capture_line": 1241,
+    "identity": "goal-reauthorization-untraced",
+    "raw_failure": "goal-reauthorization-untraced: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B008",
+    "capture_line": 1242,
+    "identity": "hr-claim-foreign-doing",
+    "raw_failure": "hr-claim-foreign-doing: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B009",
+    "capture_line": 1243,
+    "identity": "invalid-mode-phase-combination",
+    "raw_failure": "invalid-mode-phase-combination: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B010",
+    "capture_line": 1244,
+    "identity": "multi-agent-claim-conflict",
+    "raw_failure": "multi-agent-claim-conflict: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B011",
+    "capture_line": 1245,
+    "identity": "proposal-mode-halt",
+    "raw_failure": "proposal-mode-halt: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B012",
+    "capture_line": 1246,
+    "identity": "resume-after-crash",
+    "raw_failure": "resume-after-crash: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B013",
+    "capture_line": 1247,
+    "identity": "saiui-adoption",
+    "raw_failure": "saiui-adoption: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B014",
+    "capture_line": 1248,
+    "identity": "ship-preflight-build-return",
+    "raw_failure": "ship-preflight-build-return: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B015",
+    "capture_line": 1249,
+    "identity": "stale-state-reconciliation",
+    "raw_failure": "stale-state-reconciliation: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B016",
+    "capture_line": 1250,
+    "identity": "userperson-valid",
+    "raw_failure": "userperson-valid: declared 'pass', got 'fail' (validator exit 1) | first FAIL: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN тАФ ",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Validator inspected HOME root handoff files; preserved relocation removed this first failure. Current 38-fixture run is green.",
+    "exit_code": 1,
+    "first_failing_invariant": "Closed repository root file set",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B017",
+    "capture_line": 1251,
+    "identity": "bootstrap/inject.sh",
+    "raw_failure": "bootstrap/inject.sh: install/uninstall changed surrounding user bytes | no failure line",
+    "root": "INJECT-SHELL-BYTES",
+    "first_causal_failure": "inject.sh template no longer starts with separator LF; uninstaller still removes one preceding byte, consuming user-owned newline (b2343541 template migration).",
+    "exit_code": 0,
+    "first_failing_invariant": "User bytes outside managed block remain identical",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "ENGINE_DEFECT"
+  },
+  {
+    "id": "B018",
+    "capture_line": 1252,
+    "identity": "bootstrap/inject.ps1",
+    "raw_failure": "bootstrap/inject.ps1: exited 1; injector did not add its managed BOOT+STYLE Aider block | no failure line",
+    "root": "INJECT-POWERSHELL",
+    "first_causal_failure": "inject.ps1:593 calls Buffer.BlockCopy with four arguments; required count argument is absent. Focused subprocess retains exact PowerShell exception.",
+    "exit_code": 1,
+    "first_failing_invariant": "Managed BOOT+STYLE Aider block installed",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "ENGINE_DEFECT"
+  },
+  {
+    "id": "B019",
+    "capture_line": 1253,
+    "identity": "scheduler shell uninstall without schtasks still cleans runtime source",
+    "raw_failure": "scheduler shell uninstall without schtasks still cleans runtime source: saipen uninstaller",
+    "root": "UNINSTALL-JSON-READER",
+    "first_causal_failure": "Fixture PATH=/usr/bin:/bin removes Python as well as schtasks on Windows. Registry-driven hook cleanup requires a JSON reader (b2343541); runtime source cleanup itself succeeds. Supply Python independently while preserving absent schtasks.",
+    "exit_code": 1,
+    "first_failing_invariant": "Scheduler cleanup succeeds without schtasks",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B020",
+    "capture_line": 1268,
+    "identity": "correct root",
+    "raw_failure": "correct root: exit 1, expected 0; missing output 'Project root: V:\\\\_TEMP_\\\\saipen-root-9g3ho_j0\\\\project (git-worktree)'",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical ambient HOME failure; exact existing project-root and last-event families now pass (7 each); output contract unchanged.",
+    "exit_code": 1,
+    "first_failing_invariant": "Validator must accept valid fixture while retaining root/marker negative controls",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B021",
+    "capture_line": 1269,
+    "identity": "nested cwd",
+    "raw_failure": "nested cwd: exit 1, expected 0; missing output 'Project root: V:\\\\_TEMP_\\\\saipen-root-9g3ho_j0\\\\project (git-worktree)'",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical ambient HOME failure; exact existing project-root and last-event families now pass (7 each); output contract unchanged.",
+    "exit_code": 1,
+    "first_failing_invariant": "Validator must accept valid fixture while retaining root/marker negative controls",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B022",
+    "capture_line": 1270,
+    "identity": "explicit root overrides cwd",
+    "raw_failure": "explicit root overrides cwd: exit 1, expected 0; missing output 'Project root: V:\\\\_TEMP_\\\\saipen-root-9g3ho_j0\\\\project (explicit)'",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical ambient HOME failure; exact existing project-root and last-event families now pass (7 each); output contract unchanged.",
+    "exit_code": 1,
+    "first_failing_invariant": "Validator must accept valid fixture while retaining root/marker negative controls",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B023",
+    "capture_line": 1271,
+    "identity": "non-Git nested cwd",
+    "raw_failure": "non-Git nested cwd: exit 1, expected 0; missing output 'Project root: V:\\\\_TEMP_\\\\saipen-root-9g3ho_j0\\\\plain-project (ancestor)'",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical ambient HOME failure; exact existing project-root and last-event families now pass (7 each); output contract unchanged.",
+    "exit_code": 1,
+    "first_failing_invariant": "Validator must accept valid fixture while retaining root/marker negative controls",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B024",
+    "capture_line": 1272,
+    "identity": "linked worktree uses main owner",
+    "raw_failure": "linked worktree uses main owner: exit 1, expected 0; missing output 'Project root: V:\\\\_TEMP_\\\\saipen-root-9g3ho_j0\\\\project (git-common)'",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical ambient HOME failure; exact existing project-root and last-event families now pass (7 each); output contract unchanged.",
+    "exit_code": 1,
+    "first_failing_invariant": "Validator must accept valid fixture while retaining root/marker negative controls",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B025",
+    "capture_line": 1273,
+    "identity": "legacy absence warns but remains readable",
+    "raw_failure": "legacy absence warns but remains readable: exit 1, expected 0",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical ambient HOME failure; exact existing project-root and last-event families now pass (7 each); output contract unchanged.",
+    "exit_code": 1,
+    "first_failing_invariant": "Validator must accept valid fixture while retaining root/marker negative controls",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B026",
+    "capture_line": 1274,
+    "identity": "exact recovered tail passes",
+    "raw_failure": "exact recovered tail passes: exit 1, expected 0; missing 'Validation complete. Agent is conformant.'",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical ambient HOME failure; exact existing project-root and last-event families now pass (7 each); output contract unchanged.",
+    "exit_code": 1,
+    "first_failing_invariant": "Validator must accept valid fixture while retaining root/marker negative controls",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B027",
+    "capture_line": 1275,
+    "identity": "advanced LOG makes old marker stale",
+    "raw_failure": "advanced LOG makes old marker stale: exit 1, expected 0",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical ambient HOME failure; exact existing project-root and last-event families now pass (7 each); output contract unchanged.",
+    "exit_code": 1,
+    "first_failing_invariant": "Validator must accept valid fixture while retaining root/marker negative controls",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B028",
+    "capture_line": 1276,
+    "identity": "recovered exact tail passes",
+    "raw_failure": "recovered exact tail passes: exit 1, expected 0; missing 'Validation complete. Agent is conformant.'",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical ambient HOME failure; exact existing project-root and last-event families now pass (7 each); output contract unchanged.",
+    "exit_code": 1,
+    "first_failing_invariant": "Validator must accept valid fixture while retaining root/marker negative controls",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B029",
+    "capture_line": 1277,
+    "identity": "marker above LOG is repairable drift",
+    "raw_failure": "marker above LOG is repairable drift: exit 1, expected 0",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical ambient HOME failure; exact existing project-root and last-event families now pass (7 each); output contract unchanged.",
+    "exit_code": 1,
+    "first_failing_invariant": "Validator must accept valid fixture while retaining root/marker negative controls",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B030",
+    "capture_line": 1278,
+    "identity": "release freshness pre-metadata core signal is green",
+    "raw_failure": "release freshness pre-metadata core signal is green: saipen conformance validation starting (tools/validate.py)...",
+    "root": "FRESHNESS-COPIED-BOARD",
+    "first_causal_failure": "Copied BOARD pruning removes needs edges but not blocked_on/resume reservations; baseline names dangling T-1361 and partial T-1426. Root handoffs also copied. Empty-index assertion has an independent diagnostic mismatch requiring focused inspection.",
+    "exit_code": 1,
+    "first_failing_invariant": "Fixture BOARD must retain coherent dependency reservations before testing staged metadata",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B031",
+    "capture_line": 1342,
+    "identity": "release freshness binding gate rejects an empty release index",
+    "raw_failure": "release freshness binding gate rejects an empty release index: saipen conformance validation starting (tools/validate.py)...",
+    "root": "FRESHNESS-COPIED-BOARD",
+    "first_causal_failure": "Copied BOARD pruning removes needs edges but not blocked_on/resume reservations; baseline names dangling T-1361 and partial T-1426. Root handoffs also copied. Empty-index assertion has an independent diagnostic mismatch requiring focused inspection.",
+    "exit_code": 1,
+    "first_failing_invariant": "Fixture BOARD must retain coherent dependency reservations before testing staged metadata",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B032",
+    "capture_line": 1408,
+    "identity": "release freshness all mechanically discovered locale mirrors pass",
+    "raw_failure": "release freshness all mechanically discovered locale mirrors pass: saipen conformance validation starting (tools/validate.py)...",
+    "root": "FRESHNESS-COPIED-BOARD",
+    "first_causal_failure": "Copied BOARD pruning removes needs edges but not blocked_on/resume reservations; baseline names dangling T-1361 and partial T-1426. Root handoffs also copied. Empty-index assertion has an independent diagnostic mismatch requiring focused inspection.",
+    "exit_code": 1,
+    "first_failing_invariant": "Fixture BOARD must retain coherent dependency reservations before testing staged metadata",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B033",
+    "capture_line": 1474,
+    "identity": "release freshness stale staged badge cannot hide behind clean working bytes",
+    "raw_failure": "release freshness stale staged badge cannot hide behind clean working bytes: saipen conformance validation starting (tools/validate.py)...",
+    "root": "FRESHNESS-COPIED-BOARD",
+    "first_causal_failure": "Copied BOARD pruning removes needs edges but not blocked_on/resume reservations; baseline names dangling T-1361 and partial T-1426. Root handoffs also copied. Empty-index assertion has an independent diagnostic mismatch requiring focused inspection.",
+    "exit_code": 1,
+    "first_failing_invariant": "Fixture BOARD must retain coherent dependency reservations before testing staged metadata",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B034",
+    "capture_line": 1540,
+    "identity": "release executor 3h. confirmed first publish proceeds to RELEASED",
+    "raw_failure": "release executor 3h. confirmed first publish proceeds to RELEASED: code=RELEASE_FAILED detail=source receipt blocks ship: {'ok': False, 'code': 'STALE_PLAN', 'detail': 'release scope tree identity for T-9000 differs from the live tree', 'work': 'T-9000', 'scope_status': 'STALE_SCOPE'}",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B035",
+    "capture_line": 1541,
+    "identity": "release executor 3i. tag published after confirmation",
+    "raw_failure": "release executor 3i. tag published after confirmation: tag= tip=",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B036",
+    "capture_line": 1542,
+    "identity": "release executor 4a. no-publish returns a truthful success",
+    "raw_failure": "release executor 4a. no-publish returns a truthful success: code=RELEASE_FAILED detail=source receipt blocks ship: {'ok': False, 'code': 'STALE_PLAN', 'detail': 'release scope tree identity for T-9000 differs from the live tree', 'work': 'T-9000', 'scope_status': 'STALE_SCOPE'}",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B037",
+    "capture_line": 1543,
+    "identity": "release executor 4f. canonical STATE becomes DONE",
+    "raw_failure": "release executor 4f. canonical STATE becomes DONE: ---",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B038",
+    "capture_line": 1553,
+    "identity": "release executor 4g. ticket becomes DONE",
+    "raw_failure": "release executor 4g. ticket becomes DONE: ",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B039",
+    "capture_line": 1554,
+    "identity": "release executor 4h. truthful skipped-publish LOG event",
+    "raw_failure": "release executor 4h. truthful skipped-publish LOG event: []",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B040",
+    "capture_line": 1555,
+    "identity": "release executor 4j. git-less no-publish succeeds",
+    "raw_failure": "release executor 4j. git-less no-publish succeeds: code=RELEASE_FAILED detail=source receipt blocks ship: {'ok': False, 'code': 'STALE_PLAN', 'detail': 'release scope tree identity for T-9000 differs from the live tree', 'work': 'T-9000', 'scope_status': 'STALE_SCOPE'}",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B041",
+    "capture_line": 1556,
+    "identity": "release executor 4k. git-less no-publish records the true reason",
+    "raw_failure": "release executor 4k. git-less no-publish records the true reason: []",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B042",
+    "capture_line": 1557,
+    "identity": "release executor 4l. git-less no-publish closes SHIP -> DONE",
+    "raw_failure": "release executor 4l. git-less no-publish closes SHIP -> DONE: ",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B043",
+    "capture_line": 1558,
+    "identity": "release executor 8a. full release returns RELEASED",
+    "raw_failure": "release executor 8a. full release returns RELEASED: ok=False code=RELEASE_FAILED detail=source receipt blocks ship: {'ok': False, 'code': 'STALE_PLAN', 'detail': 'release scope tree identity for T-9000 differs from the live tree', 'work': 'T-9000', 'scope_status': 'STALE_SCOPE'}",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B044",
+    "capture_line": 1559,
+    "identity": "release executor 8b. closure B is a separate non-empty commit after A",
+    "raw_failure": "release executor 8b. closure B is a separate non-empty commit after A: A= B=",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B045",
+    "capture_line": 1560,
+    "identity": "release executor 8c. remote branch tip == closure commit (non-empty)",
+    "raw_failure": "release executor 8c. remote branch tip == closure commit (non-empty): remote=a6f49f3d9784 closure=",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B046",
+    "capture_line": 1561,
+    "identity": "release executor 8d. remote tag^{commit} == closure commit (non-empty)",
+    "raw_failure": "release executor 8d. remote tag^{commit} == closure commit (non-empty): remote tag=(none)",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B047",
+    "capture_line": 1562,
+    "identity": "release executor 8e. local tag^{commit} == closure commit (non-empty)",
+    "raw_failure": "release executor 8e. local tag^{commit} == closure commit (non-empty): local tag=v8.0.2^{comm closure=",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B048",
+    "capture_line": 1563,
+    "identity": "release executor 8f. tag is created AFTER the closure is published",
+    "raw_failure": "release executor 8f. tag is created AFTER the closure is published: stages=[]",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B049",
+    "capture_line": 1564,
+    "identity": "release executor 8g. B.parent == A",
+    "raw_failure": "release executor 8g. B.parent == A: B^=^ A=",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B050",
+    "capture_line": 1565,
+    "identity": "release executor 8i. fresh clone carries the exact reviewed source change",
+    "raw_failure": "release executor 8i. fresh clone carries the exact reviewed source change: source change missing in fresh clone",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B051",
+    "capture_line": 1566,
+    "identity": "release executor 8j. fresh clone sees STATE DONE / task none",
+    "raw_failure": "release executor 8j. fresh clone sees STATE DONE / task none: ",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B052",
+    "capture_line": 1567,
+    "identity": "release executor 8k. fresh clone sees ticket DONE",
+    "raw_failure": "release executor 8k. fresh clone sees ticket DONE: ",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B053",
+    "capture_line": 1568,
+    "identity": "release executor 8l. fresh clone LOG carries truthful release evidence",
+    "raw_failure": "release executor 8l. fresh clone LOG carries truthful release evidence: release evidence missing in cloned LOG",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B054",
+    "capture_line": 1569,
+    "identity": "release executor 8m. scope record reaches the fresh clone",
+    "raw_failure": "release executor 8m. scope record reaches the fresh clone: scope record missing in clone",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B055",
+    "capture_line": 1570,
+    "identity": "release executor 8p. no owned work remains dirty (only the foreign untracked)",
+    "raw_failure": "release executor 8p. no owned work remains dirty (only the foreign untracked): status=' M .saipen/LOG.md\\n M .saipen/STATE.md\\n M .saipen/saitranslate/kitchen/ar/README_AR.md\\n M .saipen/saitranslate/kitchen/bg/README_BG.md\\n M .saipen/saitranslate/kitchen/cs/README_CS.md\\n M .saipen/saitranslate/kitchen/da/README_DA.md\\n M .saipen/saitranslate/kitchen/de/README_DE.md\\n M .saipen/saitranslate/kitchen/ded/README_DED.md\\n M .saipen/saitranslate/kitchen/el/README_EL.md\\n M .saipen/saitranslate/kitchen/es/README_ES.md\\n M .saipen/saitranslate/kitchen/et/README_ET.md\\n M .saipen/saitranslate/kitchen/fi/README_FI.md\\n M .saipen/saitranslate/kitchen/fr/README_FR.md\\n M .saipen/saitranslate/kitchen/he/README_HE.md\\n M .saipen/saitranslate/kitchen/hi/README_HI.md\\n M .saipen/saitranslate/kitchen/hr/README_HR.md\\n M .saipen/saitranslate/kitchen/hu/README_HU.md\\n M .saipen/saitranslate/kitchen/id/README_ID.md\\n M .saipen/saitranslate/kitchen/it/README_IT.md\\n M .saipen/saitranslate/kitchen/ja/README_JA.md\\n M .saipen/saitranslate/kitchen/ko/README_KO.md\\n M .saipen/saitranslate/kitchen/nl/README_NL.md\\n M .saipen/saitranslate/kitchen/no/README_NO.md\\n M .saipen/saitranslate/kitchen/pl/README_PL.md\\n M .saipen/saitranslate/kitchen/pt/README_PT.md\\n M .saipen/saitranslate/kitchen/ro/README_RO.md\\n M .saipen/saitranslate/kitchen/ru/README_RU.md\\n M .saipen/saitranslate/kitchen/sk/README_SK.md\\n M .saipen/saitranslate/kitchen/sv/README_SV.md\\n M .saipen/saitranslate/kitchen/th/README_TH.md\\n M .saipen/saitranslate/kitchen/tr/README_TR.md\\n M .saipen/saitranslate/kitchen/uk/README_UK.md\\n M .saipen/saitranslate/kitchen/vi/README_VI.md\\n M .saipen/saitranslate/kitchen/zh/README_ZH.md\\n M CHANGELOG.md\\n M README.ded.md\\n M README.ee.md\\n M README.ja.md\\n M README.md\\n M VERSION\\n M tools/saipen_engine/release_contract.py\\n?? .saipen/kitchen/release_scope/T-9000.json\\n?? tools/foreign_file.py\\n'",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B056",
+    "capture_line": 1571,
+    "identity": "release executor 8q. scope record is committed (no tracked dirt)",
+    "raw_failure": "release executor 8q. scope record is committed (no tracked dirt): scope record untracked",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B057",
+    "capture_line": 1572,
+    "identity": "release executor 8r. retry recognizes ALREADY_APPLIED from full evidence",
+    "raw_failure": "release executor 8r. retry recognizes ALREADY_APPLIED from full evidence: code=RELEASE_FAILED already_applied=None",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B058",
+    "capture_line": 1573,
+    "identity": "release executor 9. A after content push",
+    "raw_failure": "release executor 9. A after content push: crash injected at the edge: rc=1",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c). Injection edge was not reached; recovery conclusions remain unproven until first release operation succeeds.",
+    "exit_code": 1,
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B059",
+    "capture_line": 1574,
+    "identity": "release executor 9. A after content push",
+    "raw_failure": "release executor 9. A after content push: remote branch reaches closure: tip=cf9793455aaf tag=(none)",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c). Injection edge was not reached; recovery conclusions remain unproven until first release operation succeeds.",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B060",
+    "capture_line": 1575,
+    "identity": "release executor 9. B after closure push",
+    "raw_failure": "release executor 9. B after closure push: crash injected at the edge: rc=1",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c). Injection edge was not reached; recovery conclusions remain unproven until first release operation succeeds.",
+    "exit_code": 1,
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B061",
+    "capture_line": 1576,
+    "identity": "release executor 9. B after closure push",
+    "raw_failure": "release executor 9. B after closure push: remote branch reaches closure: tip=9a5717e8858e tag=(none)",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c). Injection edge was not reached; recovery conclusions remain unproven until first release operation succeeds.",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B062",
+    "capture_line": 1577,
+    "identity": "release executor 9. C after tag push",
+    "raw_failure": "release executor 9. C after tag push: crash injected at the edge: rc=1",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c). Injection edge was not reached; recovery conclusions remain unproven until first release operation succeeds.",
+    "exit_code": 1,
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B063",
+    "capture_line": 1578,
+    "identity": "release executor 9. C after tag push",
+    "raw_failure": "release executor 9. C after tag push: remote branch reaches closure: tip=81e1e5c9c0a0 tag=(none)",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c). Injection edge was not reached; recovery conclusions remain unproven until first release operation succeeds.",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B064",
+    "capture_line": 1579,
+    "identity": "release executor 9b. crash injected after closure publish",
+    "raw_failure": "release executor 9b. crash injected after closure publish: rc=1",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c). Injection edge was not reached; recovery conclusions remain unproven until first release operation succeeds.",
+    "exit_code": 1,
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B065",
+    "capture_line": 1580,
+    "identity": "release executor 9b. fresh-clone continuation publishes only the missing tag",
+    "raw_failure": "release executor 9b. fresh-clone continuation publishes only the missing tag: code=SOURCE_SCOPE_MISSING detail=no release scope recorded for T-9000 -- record the exact reviewed files (`saipen scope T-9000 <path...>`) before shipping",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c). Injection edge was not reached; recovery conclusions remain unproven until first release operation succeeds.",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B066",
+    "capture_line": 1581,
+    "identity": "release executor 9b. tag now matches the closure tip (non-empty)",
+    "raw_failure": "release executor 9b. tag now matches the closure tip (non-empty): tag=(none) tip=cc7b67e635ab",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c). Injection edge was not reached; recovery conclusions remain unproven until first release operation succeeds.",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B067",
+    "capture_line": 1582,
+    "identity": "release executor 11c. deletion-scope release succeeds",
+    "raw_failure": "release executor 11c. deletion-scope release succeeds: code=RELEASE_FAILED detail=FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN ╨▓╨ВтАЭ SAIHANDOFF ╨▓╨ВтАЭ conformance-validation-deadlock_20260920.md', 'SAIPEN ╨▓╨",
+    "root": "RELEASE-COPIED-ROOT",
+    "first_causal_failure": "Copied untracked HOME root handoffs fail the fixture validator.",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B068",
+    "capture_line": 1583,
+    "identity": "release executor 11c. fresh clone lacks the reviewed deletion",
+    "raw_failure": "release executor 11c. fresh clone lacks the reviewed deletion: clone rc=0 exists=True",
+    "root": "RELEASE-COPIED-ROOT",
+    "first_causal_failure": "Copied untracked HOME root handoffs fail the fixture validator.",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B069",
+    "capture_line": 1584,
+    "identity": "release executor 11c. fresh clone still carries the reviewed source change",
+    "raw_failure": "release executor 11c. fresh clone still carries the reviewed source change: source change missing",
+    "root": "RELEASE-COPIED-ROOT",
+    "first_causal_failure": "Copied untracked HOME root handoffs fail the fixture validator.",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B070",
+    "capture_line": 1585,
+    "identity": "release executor 14. untracked-only release returns RELEASED",
+    "raw_failure": "release executor 14. untracked-only release returns RELEASED: code=RELEASE_FAILED detail=FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN ╨▓╨ВтАЭ SAIHANDOFF ╨▓╨ВтАЭ conformance-validation-deadlock_20260920.md', 'SAIPEN ╨▓╨",
+    "root": "RELEASE-COPIED-ROOT",
+    "first_causal_failure": "Copied untracked HOME root handoffs fail the fixture validator.",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B071",
+    "capture_line": 1586,
+    "identity": "release executor 14. a content commit A was created (not skipped)",
+    "raw_failure": "release executor 14. a content commit A was created (not skipped): A= parent=b6d87792936b",
+    "root": "RELEASE-COPIED-ROOT",
+    "first_causal_failure": "Copied untracked HOME root handoffs fail the fixture validator.",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B072",
+    "capture_line": 1587,
+    "identity": "release executor 14. closure B is a child of the content commit",
+    "raw_failure": "release executor 14. closure B is a child of the content commit: B= A=",
+    "root": "RELEASE-COPIED-ROOT",
+    "first_causal_failure": "Copied untracked HOME root handoffs fail the fixture validator.",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B073",
+    "capture_line": 1588,
+    "identity": "release executor 14. fresh clone carries the untracked scope file",
+    "raw_failure": "release executor 14. fresh clone carries the untracked scope file: clone rc=0",
+    "root": "RELEASE-COPIED-ROOT",
+    "first_causal_failure": "Copied untracked HOME root handoffs fail the fixture validator.",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B074",
+    "capture_line": 1589,
+    "identity": "release executor 15. seal-with-release succeeds",
+    "raw_failure": "release executor 15. seal-with-release succeeds: code=RELEASE_FAILED detail=source receipt blocks ship: {'ok': False, 'code': 'STALE_PLAN', 'detail': 'release scope tree identity for T-9000 differs from the live tree', 'work': 'T-9000', 'scope_status': 'STALE_SCOPE'}",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B075",
+    "capture_line": 1590,
+    "identity": "release executor 15. fresh clone carries the sealed segment",
+    "raw_failure": "release executor 15. fresh clone carries the sealed segment: clone rc=0 seg=False",
+    "root": "RELEASE-SCOPE-ORDER",
+    "first_causal_failure": "build_fixture records scope before changing VERSION, CHANGELOG and locale bytes; tree binding correctly refuses STALE_PLAN (contract commit 6e47c37c).",
+    "exit_code": "RELEASE_FAILED / subprocess code not retained",
+    "first_failing_invariant": "Reviewed scope tree must equal the intended final source tree before release",
+    "downstream_symptoms": [
+      "No successful release predecessor; absence of commit/tag/scope/clone content is not independently diagnosed."
+    ],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B076",
+    "capture_line": 1591,
+    "identity": "sweep",
+    "raw_failure": "sweep: three reports' root cause deduplicates into ONE ticket (red control 11, validator green): 1",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical HOME root handoffs contaminated validator; style/memory prose is WARN diagnostic tail, not engine result pollution. Improve 192 and nitro-integrity 191 checks now green, including exact composite refs and closure controls; H30 now green in continuity subprocess. Recovery A/B remain to remeasure in full suite.",
+    "exit_code": 1,
+    "first_failing_invariant": "Valid synthetic project accepted by canonical validator",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B077",
+    "capture_line": 1592,
+    "identity": "sweep",
+    "raw_failure": "sweep: a PROTOCOL_VIOLATION ticket with both reasoning gates passes: 1",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical HOME root handoffs contaminated validator; style/memory prose is WARN diagnostic tail, not engine result pollution. Improve 192 and nitro-integrity 191 checks now green, including exact composite refs and closure controls; H30 now green in continuity subprocess. Recovery A/B remain to remeasure in full suite.",
+    "exit_code": 1,
+    "first_failing_invariant": "Valid synthetic project accepted by canonical validator",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B078",
+    "capture_line": 1593,
+    "identity": "sweep",
+    "raw_failure": "sweep: a report audited against the current head passes the reload check (no false positive): 1",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical HOME root handoffs contaminated validator; style/memory prose is WARN diagnostic tail, not engine result pollution. Improve 192 and nitro-integrity 191 checks now green, including exact composite refs and closure controls; H30 now green in continuity subprocess. Recovery A/B remain to remeasure in full suite.",
+    "exit_code": 1,
+    "first_failing_invariant": "Valid synthetic project accepted by canonical validator",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B079",
+    "capture_line": 1600,
+    "identity": "source_reports resolves an EXACT composite ref (validator green)",
+    "raw_failure": "source_reports resolves an EXACT composite ref (validator green): 1",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical HOME root handoffs contaminated validator; style/memory prose is WARN diagnostic tail, not engine result pollution. Improve 192 and nitro-integrity 191 checks now green, including exact composite refs and closure controls; H30 now green in continuity subprocess. Recovery A/B remain to remeasure in full suite.",
+    "exit_code": 1,
+    "first_failing_invariant": "Valid synthetic project accepted by canonical validator",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B080",
+    "capture_line": 1601,
+    "identity": "public closure",
+    "raw_failure": "public closure: the state stays validator-green after the refusal: s table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical HOME root handoffs contaminated validator; style/memory prose is WARN diagnostic tail, not engine result pollution. Improve 192 and nitro-integrity 191 checks now green, including exact composite refs and closure controls; H30 now green in continuity subprocess. Recovery A/B remain to remeasure in full suite.",
+    "exit_code": 1,
+    "first_failing_invariant": "Valid synthetic project accepted by canonical validator",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B081",
+    "capture_line": 1605,
+    "identity": "gate control D",
+    "raw_failure": "gate control D: full chain ends validator-green: s table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical HOME root handoffs contaminated validator; style/memory prose is WARN diagnostic tail, not engine result pollution. Improve 192 and nitro-integrity 191 checks now green, including exact composite refs and closure controls; H30 now green in continuity subprocess. Recovery A/B remain to remeasure in full suite.",
+    "exit_code": 1,
+    "first_failing_invariant": "Valid synthetic project accepted by canonical validator",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B082",
+    "capture_line": 1609,
+    "identity": "gate-closure red control",
+    "raw_failure": "gate-closure red control: pre-boundary history passes, post-boundary non-SHIP finish FAILs the validator: (1, 1)",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical HOME root handoffs contaminated validator; style/memory prose is WARN diagnostic tail, not engine result pollution. Improve 192 and nitro-integrity 191 checks now green, including exact composite refs and closure controls; H30 now green in continuity subprocess. Recovery A/B remain to remeasure in full suite.",
+    "exit_code": 1,
+    "first_failing_invariant": "Valid synthetic project accepted by canonical validator",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B083",
+    "capture_line": 1628,
+    "identity": "plain-UTF-8 project passes post-write verification",
+    "raw_failure": "plain-UTF-8 project passes post-write verification: BOARD: BOARD.md:9 unexpected physical BOARD record under ## DOING ('- none') -- a detached continuation or record fragment never becomes authority; the board grammar is closed and the bytes are ambiguous or corrupt, refuse them; BOARD: BOARD.md:13 unexpected physical BOARD record under ## TODO ('- none') -- a detached continuation or record fragment never becomes authority; the board grammar is closed and the bytes are ambiguous or corrupt, refuse them; BOARD: BOARD.md:17 unexpected physical BOARD record under ## BLOCKED ('- none') -- a detached continuation or record fragment never becomes authority; the board grammar is closed and the bytes are ambiguous or corrupt, refuse them; BOARD: BOARD.md:21 unexpected physical BOARD record under ## DONE ('- none') -- a detached continuation or record fragment never becomes authority; the board grammar is closed and the bytes are ambiguous or corrupt, refuse them",
+    "root": "BOARD-EMPTY-SECTION",
+    "first_causal_failure": "Fixture inserts physical '- none' records in canonical sections; closed BOARD grammar intentionally rejects them (b2343541). Current focused RED reproduced.",
+    "exit_code": "in-process validate_project returns BOARD errors",
+    "first_failing_invariant": "Canonical empty sections contain no physical records",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "FIXTURE_STALE"
+  },
+  {
+    "id": "B084",
+    "capture_line": 1629,
+    "identity": "Recovery of case A validates",
+    "raw_failure": "Recovery of case A validates: missing 'Agent is conformant'",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical HOME root handoffs contaminated validator; style/memory prose is WARN diagnostic tail, not engine result pollution. Improve 192 and nitro-integrity 191 checks now green, including exact composite refs and closure controls; H30 now green in continuity subprocess. Recovery A/B remain to remeasure in full suite.",
+    "exit_code": 1,
+    "first_failing_invariant": "Valid synthetic project accepted by canonical validator",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B085",
+    "capture_line": 1630,
+    "identity": "Recovery of case B validates",
+    "raw_failure": "Recovery of case B validates: missing 'Agent is conformant'",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical HOME root handoffs contaminated validator; style/memory prose is WARN diagnostic tail, not engine result pollution. Improve 192 and nitro-integrity 191 checks now green, including exact composite refs and closure controls; H30 now green in continuity subprocess. Recovery A/B remain to remeasure in full suite.",
+    "exit_code": 1,
+    "first_failing_invariant": "Valid synthetic project accepted by canonical validator",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  },
+  {
+    "id": "B086",
+    "capture_line": 1631,
+    "identity": "continuity probes exited 1",
+    "raw_failure": "continuity probes exited 1:  while an episode is live refuses deterministically: {\"ok\": true, \"code\": \"ATTEMPT_ACTIVE\", \"idempotent\": true, \"attempt\": \"A-001\", \"ticket\": \"T-001\", \"detail\": \"attempt A-001 already open for T-001; no second episode created\"}",
+    "root": "ATTEMPT-RECOVERY-VALIDATION-ORDER",
+    "first_causal_failure": "H26b is FOREIGN actor replay, not same-actor idempotence. H26a predecessor close fails validation before stale claim release is included. Failed adoption leaves a1's original attempt active, so its replay truthfully returns ATTEMPT_ACTIVE. Current full subprocess additionally exposes H12 future-version fixture stale and same recovery cascade SC C2/H18c/H18d.",
+    "exit_code": 1,
+    "first_failing_invariant": "Validate recovery's complete final BOARD and STATE together",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DOWNSTREAM_SYMPTOM"
+  },
+  {
+    "id": "B087",
+    "capture_line": 1632,
+    "identity": "H30",
+    "raw_failure": "H30: sealed-open + active-close reads as one coherent lineage: s table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file",
+    "root": "HOME-ROOT-FILE-SET",
+    "first_causal_failure": "Historical HOME root handoffs contaminated validator; style/memory prose is WARN diagnostic tail, not engine result pollution. Improve 192 and nitro-integrity 191 checks now green, including exact composite refs and closure controls; H30 now green in continuity subprocess. Recovery A/B remain to remeasure in full suite.",
+    "exit_code": 1,
+    "first_failing_invariant": "Valid synthetic project accepted by canonical validator",
+    "downstream_symptoms": [],
+    "likely_owner": "T-1361",
+    "classification": "DIRTY_SOURCE_DEPENDENT"
+  }
+]

@@ -1,0 +1,10 @@
+--- /v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/test_t2122_red_owner_fail_closed.py	2026-11-21 00:21:07.058742000 +0200
++++ pen/test_t2122_red_owner_fail_closed.py	2026-11-21 07:35:11.699518900 +0200
+@@ -10,7 +10,6 @@
+ from __future__ import annotations
+ 
+ import json
+-import re
+ import sys
+ import unittest
+ from pathlib import Path

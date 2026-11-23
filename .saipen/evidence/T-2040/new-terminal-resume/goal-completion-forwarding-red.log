@@ -1,0 +1,15 @@
+test_same_publication_carrier_and_discovery_kwargs_reach_board (__main__.GoalCompletionForwarding.test_same_publication_carrier_and_discovery_kwargs_reach_board) ... ERROR
+
+======================================================================
+ERROR: test_same_publication_carrier_and_discovery_kwargs_reach_board (__main__.GoalCompletionForwarding.test_same_publication_carrier_and_discovery_kwargs_reach_board)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_terminal_consumer_supplementary.py", line 37, in test_same_publication_carrier_and_discovery_kwargs_reach_board
+    result = goal_authority.goal_completion_verdict(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: goal_completion_verdict() got an unexpected keyword argument 'publication_evidence'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.047s
+
+FAILED (errors=1)

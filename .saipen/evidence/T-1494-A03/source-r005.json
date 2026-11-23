@@ -1,0 +1,26 @@
+{
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "source",
+    "disp",
+    "SRC-112",
+    "R005",
+    "VERIFIED",
+    "--work",
+    "T-1494",
+    "--evidence",
+    "E-13961",
+    "--verification",
+    "Continue reads stored authority and never invents a fresh grant; test_t1494_continuation_authority -> 18 PASS; safety-controls.json repeated-cc/dry-run and corrupt/missing grants; cold continuation and valve equivalence: safety-matrix.json.",
+    "--json"
+  ],
+  "exit_code": 0,
+  "session_capability": "no-publish",
+  "result": {
+    "ok": true,
+    "code": "COVERAGE_UPDATED",
+    "receipt": "SRC-112",
+    "rid": "SRC-112:R005",
+    "disposition": "VERIFIED"
+  }
+}

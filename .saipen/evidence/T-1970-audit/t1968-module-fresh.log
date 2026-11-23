@@ -1,0 +1,25 @@
+test_a_saipen_verb_is_never_foreign (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_a_saipen_verb_is_never_foreign) ... ok
+test_an_unknown_token_has_no_owner (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_an_unknown_token_has_no_owner) ... ok
+test_case_and_whitespace_do_not_evade_ownership (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_case_and_whitespace_do_not_evade_ownership) ... ok
+test_declared_alias_is_owned (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_declared_alias_is_owned)
+`pal` is SAIPAL's own advertised shortcut, so it must resolve too. ... ok
+test_declared_protocol_name_is_owned (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_declared_protocol_name_is_owned) ... ok
+test_a_damaged_registry_degrades_to_the_old_refusal (test_t1968_foreign_protocol_route.NegativeControlTests.test_a_damaged_registry_degrades_to_the_old_refusal)
+Fail toward the previous behaviour, never toward a guessed owner. ... ok
+test_a_real_typo_keeps_the_ordinary_refusal (test_t1968_foreign_protocol_route.NegativeControlTests.test_a_real_typo_keeps_the_ordinary_refusal) ... ok
+test_continue_is_still_a_saipen_command (test_t1968_foreign_protocol_route.NegativeControlTests.test_continue_is_still_a_saipen_command) ... ok
+test_declared_saipen_shortcuts_still_resolve (test_t1968_foreign_protocol_route.NegativeControlTests.test_declared_saipen_shortcuts_still_resolve)
+`cc` must stay SAIPEN's own; the repair may not shadow a real row. ... ok
+test_every_declared_alias_is_refused_the_same_way (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_every_declared_alias_is_refused_the_same_way) ... ok
+test_foreign_command_is_not_a_bare_unknown_command (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_foreign_command_is_not_a_bare_unknown_command) ... ok
+test_human_readable_refusal_is_also_typed (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_human_readable_refusal_is_also_typed)
+A non-JSON caller must not get only `unknown command` either. ... ok
+test_the_full_invocation_is_reported_not_just_the_first_token (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_the_full_invocation_is_reported_not_just_the_first_token) ... ok
+test_the_refusal_carries_the_no_home_rule (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_the_refusal_carries_the_no_home_rule)
+The exact error that made the agent move repositories. ... ok
+test_the_refusal_names_the_saipen_route_to_use_instead (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_the_refusal_names_the_saipen_route_to_use_instead) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 6.712s
+
+OK

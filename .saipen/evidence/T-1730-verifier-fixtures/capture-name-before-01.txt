@@ -1,0 +1,23 @@
+F
+======================================================================
+FAIL: test_evidence_scripts_hardcode_no_marker (test_style_contract_chokepoint.StaticChokepointTests.test_evidence_scripts_hardcode_no_marker)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_style_contract_chokepoint.py", line 152, in test_evidence_scripts_hardcode_no_marker
+    self.assertEqual(
+AssertionError: Lists differ: ['.saipen\\evidence\\T-1730-verifier-fixtu[147 chars]eef'] != []
+
+First list contains 2 additional elements.
+First extra element 0:
+'.saipen\\evidence\\T-1730-verifier-fixtures\\candidate-before-native-release.py: ded-00000000'
+
++ []
+- ['.saipen\\evidence\\T-1730-verifier-fixtures\\candidate-before-native-release.py: '
+-  'ded-00000000',
+-  '.saipen\\evidence\\T-1730-verifier-fixtures\\candidate-before-native-release.py: '
+-  'ded-deadbeef'] : hardcoded markers in evidence scripts: .saipen\evidence\T-1730-verifier-fixtures\candidate-before-native-release.py: ded-00000000; .saipen\evidence\T-1730-verifier-fixtures\candidate-before-native-release.py: ded-deadbeef
+
+----------------------------------------------------------------------
+Ran 1 test in 12.948s
+
+FAILED (failures=1)

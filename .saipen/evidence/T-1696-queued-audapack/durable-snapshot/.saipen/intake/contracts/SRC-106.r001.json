@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-106:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Fix false-negative generation detection: real live ChatGPT Stop control yields READY in widget"
+    }
+  },
+  "derived_at": "2026-09-29T16:57:03Z",
+  "derived_from": "SRC-106",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "8e59d195ae49b6d700f0f8563f3bc65b467992062ff0a7e3a3fe7162c90229a7"
+}

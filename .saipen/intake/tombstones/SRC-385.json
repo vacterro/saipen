@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-385.md",
+  "closed_at": "2026-11-03T08:14:16Z",
+  "closure_event": null,
+  "linked_work": "T-2015",
+  "linked_works": [
+    "T-2015"
+  ],
+  "receipt_id": "SRC-385",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "5a09388e5cbd026bf0b3fb78465c336b5d2e603179c64c4a7dde1aba0795f40b",
+  "status": "CLOSED",
+  "unresolved": 0
+}

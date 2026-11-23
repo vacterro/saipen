@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-378.md",
+  "closed_at": "2026-11-02T04:50:06Z",
+  "closure_event": null,
+  "linked_work": "T-2004",
+  "linked_works": [
+    "T-2004"
+  ],
+  "receipt_id": "SRC-378",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "bc6db0b10d2adc6f21118a6396ec72b2aa57bd467fd9f5708d23119c2188f73f",
+  "status": "CLOSED",
+  "unresolved": 0
+}

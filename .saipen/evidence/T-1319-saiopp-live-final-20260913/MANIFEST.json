@@ -1,0 +1,26 @@
+{
+  "ticket": "T-1319",
+  "kind": "SAIOPP_LIVE_ACCEPTANCE",
+  "files": [
+    {
+      "name": "i1-proof.json",
+      "bytes": 111982,
+      "sha256": "5f5a43d415d34d3d21d16e946eb3485027134eb8f5ce6691fb1ceca3951f12bf"
+    },
+    {
+      "name": "i2-proof.json",
+      "bytes": 114514,
+      "sha256": "38cd570fb0bdf465c03ad0e21eb7f4dbb25a411ee799c5473b2b13930e4f5b1c"
+    },
+    {
+      "name": "i3-proof.json",
+      "bytes": 90660,
+      "sha256": "0dc1a28e97d06d06199b898131aa4d5f92ebd5d329f04ccaa65c2590242469fa"
+    },
+    {
+      "name": "summary.json",
+      "bytes": 1873,
+      "sha256": "14ad4afef677b004050d50ae6a5082c441b2c3e78a2e98ffcf660f2ce7a6dc18"
+    }
+  ]
+}

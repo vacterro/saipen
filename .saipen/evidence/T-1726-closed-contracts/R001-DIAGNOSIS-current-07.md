@@ -1,0 +1,15 @@
+# SRC-225 R001: bounded current-state diagnosis
+
+The immutable mission source is SRC-225, SHA256 534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9. This finding addresses its diagnostic clause, not completion of the remaining implementation/gate clauses or cc all.
+
+Current source inspection covered operations._plan_transition and _plan_finish_ticket (lifecycle verification/source/acceptance boundaries), intake.close_receipt (terminal coverage and linked DONE Work), debt.reverify_work and current_tree_reverify (post-closure receipts/currentness), regression_execution._load/_binding/_measure (inputs, ownership, verifier and runtime/environment), closed_contracts.measure/inspect (scoped observations), and the existing work/status CLI projections. The preserved pre-feature owners are located exactly by regression-contract.json under before/tools/.
+
+The old current_tree_reverify requires project/lineage/ruleset and the current full source fingerprint, and rejects attested-only proof. Existing reverify --run already supports executing a caller-selected check on DONE Work. Thus the former engine did have a manual re-verification workflow; it is incorrect to claim that no behavioral check could ever be rerun. What the old path lacks is the new structured, reproducible focused dependency/oracle/runtime binding and read-only current behavioral observation that survives unrelated source edits.
+
+Source closure records its historical coverage and linked Work at closure. It does not continuously rerun arbitrary application behavior after later changes. A release scope describes bytes, and the generic strict protocol validator is not itself a test of an application's semantic contract. Knowledge/source/evidence references do not turn a historical VERIFIED clause into perpetual current behavioral proof. New current observations must preserve the original historical closure and remain distinct from it.
+
+For the reported FastPrompter snapshot, current contradictions and the already admitted T-1451 repair are operator-supplied incident evidence. This SAIPEN-only investigation has not reconstructed original T-1442 execution or established the original code/guard/reconciliation sequence. Classification A remains possible; B, C, D and E are not established. In particular, a manual supported path may have been skipped, but the supplied snapshot alone cannot prove that it was. No fraud or bypass is attributed and no FastPrompter production file is edited.
+
+The demonstrated correction is therefore targeted current observation beside the existing RV/manual recheck workflow, not retroactive condemnation of historical verification. The native feature controls, immutable-archive/successor controls and current source inspection support that bounded diagnosis. Other Source clauses still require their own current gates and acceptance evidence; this diagnosis does not settle them.
+
+Graph evidence is Tier2: project saipen, generation2026-09-01T13:16:39Z. tools/ is excluded by design and protocol metadata has changed; material findings use exact current/preserved source and native records, not an exhaustive graph claim.

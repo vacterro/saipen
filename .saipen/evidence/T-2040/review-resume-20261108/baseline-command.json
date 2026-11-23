@@ -1,0 +1,14 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "test_sub_dispose_after_collect",
+    "test_t925_sub_terminal_durability"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+  "oracle": "saved original test_sub_dispose_after_collect:19 + durability:5",
+  "snapshot_sha256": "1cc65bb1384297dbbce50ac38fc5cccb43b7476e9f5129cbd46c686249b09cb9"
+}

@@ -1,0 +1,89 @@
+{
+  "family_record": ".saipen/evidence/core-unit/32267b416e4798f7-20261003T201330Z.json",
+  "fingerprint": "32267b416e4798f72b933ba871be7358c79cb85c470d747713ad1598a67c4045",
+  "runner": "canonical core_unit.run_family",
+  "jobs": 6,
+  "timeout": 5400,
+  "verdict": "PASS",
+  "shards": [
+    {
+      "sandbox": "saipen-core-unit-vgbuhgqi",
+      "stderr_sha256": "04b569e36012ab94acc187bf0f5f9ed779eee38fbc9639174f3750e2bbadc4cc",
+      "ran": 668,
+      "passed": 667,
+      "skipped": 1,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-2m_ac5mz",
+      "stderr_sha256": "4bb06d33280793c18a65dc9a14f4ffb7939113611496e974f219c582472a71ca",
+      "ran": 1257,
+      "passed": 1223,
+      "skipped": 34,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-dqafbwuz",
+      "stderr_sha256": "7608082382e3fa12a29ffa0c2fb02552aafc022fda928ed6c2091ccbfa987780",
+      "ran": 632,
+      "passed": 630,
+      "skipped": 2,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-p3u94o6r",
+      "stderr_sha256": "25834fe51c90b6a78cfae02718445bbb6ab8740b503e9601beff122b82ece25e",
+      "ran": 831,
+      "passed": 814,
+      "skipped": 17,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-kw_hxosz",
+      "stderr_sha256": "f520c6276976cd9ce8be18754ed83ef72ea6a83a53838618535656288a840689",
+      "ran": 777,
+      "passed": 776,
+      "skipped": 1,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    },
+    {
+      "sandbox": "saipen-core-unit-w9njkh85",
+      "stderr_sha256": "e840f9dd293d8722e081ea32230e527f4bbe8bc62d6710b63f8b0b3830778ad3",
+      "ran": 731,
+      "passed": 729,
+      "skipped": 2,
+      "expected_failures": 0,
+      "failures": 0,
+      "errors": 0,
+      "unexpected_successes": 0,
+      "status": "OK"
+    }
+  ],
+  "ran": 4896,
+  "skipped": 57,
+  "expected_failures": 0,
+  "failures": 0,
+  "errors": 0,
+  "unexpected_successes": 0,
+  "passed": 4839
+}

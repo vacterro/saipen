@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-418:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-21252,E-21258,E-21259,E-21261",
+      "text": "Fix the installed engine's core conformance (the two blocking findings its validator reports) and deliver the fixes through the canonical release route, never by a hand install.",
+      "verification": "the requested change is present and demonstrated: E-21258 review run OK (148 checks), E-21259 58 focused checks PASS, scope bound to source_head dc39709c1 in E-21261; the installed surface is not rebuilt or delivered by this disposition -- E-21262 defers publication to the release circuit",
+      "work": "T-2072"
+    }
+  },
+  "schema_version": 1
+}

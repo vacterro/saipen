@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "code": "BOARD_COMPACTED",
+  "op_id": "board-compact-d83deaf67086498c8df836b50b2633c4",
+  "changed_files": [
+    ".saipen/recovery/board-compaction/T-199/T-199-45d18c671ef427272648749b.BOARD.md",
+    ".saipen/recovery/board-compaction/T-199/T-199-45d18c671ef427272648749b.json",
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md"
+  ],
+  "recovery_required": false,
+  "ticket": "T-199",
+  "event_id": "E-241",
+  "detail_ref": ".saipen/recovery/board-compaction/T-199/T-199-45d18c671ef427272648749b.json",
+  "carried_findings": [],
+  "carried_finding_count": 0
+}

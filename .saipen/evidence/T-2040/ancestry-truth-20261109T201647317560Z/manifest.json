@@ -1,0 +1,20 @@
+{
+  "created_at": "20261109T201647317560Z",
+  "workspace": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "preimages": {
+    "tools/saipen_engine/isolated_release.py": {
+      "sha256": "45d5ce0b6d45b7bc5836853221ce744c66ae385aa5cb5fdaf199aa3326b050b7",
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\ancestry-truth-20261109T201647317560Z\\preimages\\tools\\saipen_engine\\isolated_release.py"
+    },
+    "tools/test_release_reconciliation.py": {
+      "sha256": "b768706096ff1cda6480fec7dad5fc2ae41e61eb1c877e241bcb9c42ceffe063",
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\ancestry-truth-20261109T201647317560Z\\preimages\\tools\\test_release_reconciliation.py"
+    }
+  },
+  "protected": {
+    ".git/index": "a6cdc800f621d49970fbf8febc59813814da13ca5dae1e41738f7493da2516d0",
+    ".git/config": "038b722bd3dc1e8d824130b0a9fe77b180b64613e7c932becd56a10bd2ba3225",
+    "tools/saipen_engine/release.py": "dbdbbc01537ac21ca5863686c1a48253b0d1fb6bab33a210e605bc0a7a435833",
+    "tools/saipen_engine/release_authority.py": "09d99267166ed916e8c80e6adac1b79d27b523b73d6e64d8fcc19b3a4f5dee37"
+  }
+}

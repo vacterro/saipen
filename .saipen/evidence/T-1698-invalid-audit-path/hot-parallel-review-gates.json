@@ -1,0 +1,28 @@
+{
+  "verifier_sha256": "8732220cbe13c4a8000201039e652c24fd462f8a67d142fc2410822969ed352d",
+  "runs": [
+    {
+      "label": "pre",
+      "exit_code": 1,
+      "subject_sha256": "7421355627f2b55b109e0df4644a5b49580f2f21173e6bf33d3544dc37968e06",
+      "output_sha256": "2a3430a9a8939ad9ec338616836afbc85b145a22cde960cc544814ec89c10c4b"
+    },
+    {
+      "label": "post",
+      "exit_code": 0,
+      "subject_sha256": "8be9ffadd25fc8d8c750ee7694f82e41fdbe2faa2ff593a44a59f3306477c53d",
+      "output_sha256": "dfc0555880c3cdf9fcd5573cb6d9a157933274129646e587b2177de1eb3c808d"
+    }
+  ],
+  "prior_test_definitions_identical": 15,
+  "permanent_regression_ast_identical": true,
+  "subject_hashes": {
+    "tools\\saipen_engine\\audit_inbox.py": "8be9ffadd25fc8d8c750ee7694f82e41fdbe2faa2ff593a44a59f3306477c53d",
+    "tools\\test_audit_inbox.py": "e702c8403074fb1584048c582bc234efd342a7bd0dabca8b3e7aa54740bb3a2e",
+    "tools\\saipen_engine\\subs.py": "649687ffdf8bcbee7d56ef19aa66837047dde0d121c86f49fb575c37cbc0dde4",
+    "tools\\validate.py": "64355ea00c7953faed7911fe771de2c66da23ef7fec84cba15e19ddf77d0196e",
+    "tools\\saipen.py": "8e43b4749f0dca94853056e90b84e0730b2f678dd5e3082b96435165bddab148",
+    "tools\\improve.py": "c2b095e0b7a804a1c3fb5365c9a0d3cda9564394a43a7b0e2826374867332761"
+  },
+  "source_hashes_unchanged": true
+}

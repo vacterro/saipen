@@ -1,0 +1,16 @@
+[
+  {
+    "id": "proc_2026-08-17T2038_6468e9",
+    "workspaceId": "msxou8l7",
+    "title": "scenarios2",
+    "command": "python tools/run_scenarios.py > V:\\_TEMP_\\opencode\\sc-run2.txt 2>&1",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "status": "stopped",
+    "pid": 20408,
+    "startedAt": "2026-08-17T20:38:23.805Z",
+    "outputSizeBytes": 0,
+    "terminalReason": "user_stopped",
+    "exitCode": 1,
+    "stoppedAt": "2026-08-17T20:42:18.713Z"
+  }
+]

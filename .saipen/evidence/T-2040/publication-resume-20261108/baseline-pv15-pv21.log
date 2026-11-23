@@ -1,0 +1,7 @@
+test_pv15_local_done_pending_publication_not_published (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv15_local_done_pending_publication_not_published) ... ok
+test_pv21_operator_bounded_grant_executes_within_scope (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv21_operator_bounded_grant_executes_within_scope) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.032s
+
+OK

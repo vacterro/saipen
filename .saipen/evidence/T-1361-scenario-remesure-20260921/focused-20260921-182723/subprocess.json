@@ -1,0 +1,310 @@
+[
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-inject-sh-q2yipoe1\\\\.claude\\\\skills\\\\saipen\\\\tools\\\\validate.py', '--project-root', 'V:\\\\_TEMP_\\\\saipen-inject-sh-q2yipoe1\\\\validator-project']",
+    "cwd": "V:\\_TEMP_\\saipen-inject-sh-q2yipoe1",
+    "exit": 0,
+    "stdout": "saipen conformance validation starting (tools/validate.py)...\nProject root: V:\\_TEMP_\\saipen-inject-sh-q2yipoe1\\validator-project (explicit)\nPASS: state.schema.json and the engine STATE contract constants agree\nPASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md absent -- project not yet lineage-migrated (the first mutation mints it journaled)\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (1 claimed)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [schema-version]: STATE.md has no schema_version -- legacy pre-v1 format. At the next checkpoint set schema_version: 3, last_event to the current LOG tail (omit last_event only while LOG is empty), and style_contract to saipen/STYLE.md's boot marker.\nWARN [no-conformance-record]: no LOG line records a conformance run in \u0412\u00a7 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so \u0412\u00a7 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up\nWARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order \u0412\u00a7 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file\nWARN [cross-doc-drift]: ... and 13 more like the above\nValidation complete. Agent is conformant. (17 warning(s))\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\bash.exe', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bootstrap\\\\inject.sh']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "saipen injector (source: V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen)\n------------------------------------------------------------\nOpenCode                     not installed - skip\nClaude Code skill            copied (re-run after updates)\nClaude Code provenance       verified\nClaude Code instructions     block marker read FAILED (/tmp/saipen-inject-sh-grep-fail-1l7pei4p/.claude/CLAUDE.md)\nCodex CLI                    not installed - skip\nGemini CLI / Antigravity     not installed - skip\nCodeBuddy Code               not installed - skip\n~/.agents skills             copied (re-run after updates)\n~/.agents provenance         verified\nFreeBuff ~/.knowledge.md     block added\nFreeBuff ~/.AGENTS.md        block added\nAider conf                   read check FAILED (/tmp/saipen-inject-sh-grep-fail-1l7pei4p/.aider.conf.yml)\nKiro                         not installed - skip\nDeepSeek                     not installed - skip\nOpenAI                       not installed - skip\nQwen                         not installed - skip\nGeneric (no interception)    not installed - skip\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\bash.exe', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bootstrap\\\\inject.sh']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "saipen injector (source: V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen)\n------------------------------------------------------------\nOpenCode                     not installed - skip\nClaude Code skill            copied (re-run after updates)\nClaude Code provenance       verified\nClaude Code instructions     V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bootstrap\\inject.sh: line 258: /tmp/saipen-inject-sh-fail-iy7qnriq/.claude/CLAUDE.md: Is a directory\nblock write FAILED (/tmp/saipen-inject-sh-fail-iy7qnriq/.claude/CLAUDE.md)\nCodex CLI                    not installed - skip\nGemini CLI / Antigravity     not installed - skip\nCodeBuddy Code               not installed - skip\n~/.agents skills             copied (re-run after updates)\n~/.agents provenance         verified\nFreeBuff ~/.knowledge.md     block added\nFreeBuff ~/.AGENTS.md        block added\nAider conf                   created\nKiro                         not installed - skip\nDeepSeek                     not installed - skip\nOpenAI                       not installed - skip\nQwen                         not installed - skip\nGeneric (no interception)    not installed - skip\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\bash.exe', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bootstrap\\\\uninstall.sh']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "saipen uninstaller\n------------------------------------------------------------\nClaude Code skill            clean\nClaude Code CLAUDE.md        block remove FAILED (/tmp/saipen-uninstall-sh-fail-_hgoi0nf/.claude/CLAUDE.md)\nOpenCode skill               clean\nOpenCode AGENTS.md           clean\nguard hooks                  clean\nCodex skill                  clean\nCodex AGENTS.md              clean\nGemini GEMINI.md             clean\n~/.agents skills             clean\nAider conf                   clean\nscheduled inject task        clean\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\bash.exe', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bootstrap\\\\uninstall.sh']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "saipen uninstaller\n------------------------------------------------------------\nClaude Code skill            clean\nClaude Code CLAUDE.md        block marker read FAILED (/tmp/saipen-uninstall-sh-grep-fail-vxtrby9h/.claude/CLAUDE.md)\nOpenCode skill               clean\nOpenCode AGENTS.md           clean\nguard hooks                  clean\nCodex skill                  clean\nCodex AGENTS.md              clean\nGemini GEMINI.md             clean\n~/.agents skills             clean\nAider conf                   aider marker read FAILED (/tmp/saipen-uninstall-sh-grep-fail-vxtrby9h/.aider.conf.yml)\nscheduled inject task        clean\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\bash.exe', 'V:\\\\_TEMP_\\\\saipen-inject-sh-atomic-yyv689i9\\\\source\\\\bootstrap\\\\inject.sh']",
+    "cwd": "V:\\_TEMP_\\saipen-inject-sh-atomic-yyv689i9\\source",
+    "exit": 1,
+    "stdout": "saipen injector (source: V:\\_TEMP_\\saipen-inject-sh-atomic-yyv689i9\\source\\saipen)\n------------------------------------------------------------\nOpenCode                     not installed - skip\nClaude Code skill            runtime manifest file missing: missing-runtime-file\ncopy FAILED (/tmp/saipen-inject-sh-atomic-yyv689i9/home/.claude/skills/saipen) -- staged copy or verification failed\nClaude Code provenance       provenance FAILED: source runtime identity unprovable\nClaude Code instructions     block added\nCodex CLI                    not installed - skip\nGemini CLI / Antigravity     not installed - skip\nCodeBuddy Code               not installed - skip\n~/.agents skills             runtime manifest file missing: missing-runtime-file\ncopy FAILED (/tmp/saipen-inject-sh-atomic-yyv689i9/home/.agents/skills/saipen) -- staged copy or verification failed\n~/.agents provenance         provenance FAILED: skill dir missing\nFreeBuff ~/.knowledge.md     block added\nFreeBuff ~/.AGENTS.md        block added\nAider conf                   created\nKiro                         not installed - skip\nDeepSeek                     not installed - skip\nOpenAI                       not installed - skip\nQwen                         not installed - skip\nGeneric (no interception)    not installed - skip\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\bash.exe', 'V:\\\\_TEMP_\\\\saipen-inject-sh-atomic-yyv689i9\\\\source\\\\bootstrap\\\\inject.sh']",
+    "cwd": "V:\\_TEMP_\\saipen-inject-sh-atomic-yyv689i9\\source",
+    "exit": 1,
+    "stdout": "FATAL: saipen/MANIFEST.json is invalid\n",
+    "stderr": "Traceback (most recent call last):\n  File \"<stdin>\", line 25, in <module>\n  File \"<stdin>\", line 25, in <listcomp>\n  File \"<stdin>\", line 15, in safe\nValueError: unsafe runtime manifest path: '../outside'\n"
+  },
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-inject-ps1-m_qenyap\\\\.claude\\\\skills\\\\saipen\\\\tools\\\\validate.py', '--project-root', 'V:\\\\_TEMP_\\\\saipen-inject-ps1-m_qenyap\\\\validator-project']",
+    "cwd": "V:\\_TEMP_\\saipen-inject-ps1-m_qenyap",
+    "exit": 0,
+    "stdout": "saipen conformance validation starting (tools/validate.py)...\nProject root: V:\\_TEMP_\\saipen-inject-ps1-m_qenyap\\validator-project (explicit)\nPASS: state.schema.json and the engine STATE contract constants agree\nPASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md absent -- project not yet lineage-migrated (the first mutation mints it journaled)\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (1 claimed)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [schema-version]: STATE.md has no schema_version -- legacy pre-v1 format. At the next checkpoint set schema_version: 3, last_event to the current LOG tail (omit last_event only while LOG is empty), and style_contract to saipen/STYLE.md's boot marker.\nWARN [no-conformance-record]: no LOG line records a conformance run in \u0412\u00a7 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so \u0412\u00a7 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up\nWARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order \u0412\u00a7 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file\nWARN [cross-doc-drift]: ... and 13 more like the above\nValidation complete. Agent is conformant. (17 warning(s))\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bootstrap\\\\inject.ps1', '-SkillHome', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "\nsaipen injector report (source: V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen)\n------------------------------------------------------------\nOpenCode                     not installed - skip\nClaude Code skill            copy FAILED (V:\\_TEMP_\\saipen-inject-ps1-fail-hod1cyl4/.claude/skills/saipen): Cannot create 'V:\\_TEMP_\\saipen-inject-ps1-fail-hod1cyl4\\.claude\\skills' because a file or directory with the same name already exists.\nClaude Code instructions     file created\nCodex CLI                    not installed - skip\nGemini CLI / Antigravity     not installed - skip\nCodeBuddy Code               not installed - skip\n~/.agents skills             copied (re-run after updates)\n~/.agents provenance         verified\nFreeBuff ~/.knowledge.md     file created\nFreeBuff ~/.AGENTS.md        file created\nAider conf                   created\nKiro                         not installed - skip\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bootstrap\\\\uninstall.ps1']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "saipen uninstaller\n------------------------------------------------------------\nClaude Code skill            clean\n",
+    "stderr": "\u001b[31;1mException: \u001b[0mV:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bootstrap\\uninstall.ps1:14\u001b[0m\n\u001b[31;1m\u001b[0m\u001b[36;1mLine |\u001b[0m\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m  14 | \u001b[0m : h $file -PathType Leaf)) { \u001b[36;1mthrow \"config path is not a file: $file\"\u001b[0m }\u001b[0m\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m     | \u001b[31;1m                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\u001b[0m\n\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[31;1m\u001b[31;1m\u001b[36;1m     | \u001b[31;1mconfig path is not a file: V:\\_TEMP_\\saipen-uninstall-ps1-fail-ay9ptr6_\\.claude\\CLAUDE.md\u001b[0m\n"
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-inject-ps1-atomic-yl_kgj48\\\\source\\\\bootstrap\\\\inject.ps1', '-SkillHome', 'V:\\\\_TEMP_\\\\saipen-inject-ps1-atomic-yl_kgj48\\\\source\\\\saipen']",
+    "cwd": "V:\\_TEMP_\\saipen-inject-ps1-atomic-yl_kgj48\\source",
+    "exit": 1,
+    "stdout": "\nsaipen injector report (source: V:\\_TEMP_\\saipen-inject-ps1-atomic-yl_kgj48\\source\\saipen)\n------------------------------------------------------------\nOpenCode                     not installed - skip\nClaude Code skill            copy FAILED (V:\\_TEMP_\\saipen-inject-ps1-atomic-yl_kgj48\\home/.claude/skills/saipen): runtime manifest file missing: missing-runtime-file\nClaude Code instructions     file created\nCodex CLI                    not installed - skip\nGemini CLI / Antigravity     not installed - skip\nCodeBuddy Code               not installed - skip\n~/.agents skills             copy FAILED (V:\\_TEMP_\\saipen-inject-ps1-atomic-yl_kgj48\\home\\.agents\\skills\\saipen): runtime manifest file missing: missing-runtime-file\nFreeBuff ~/.knowledge.md     file created\nFreeBuff ~/.AGENTS.md        file created\nAider conf                   created\nKiro                         not installed - skip\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-inject-ps1-atomic-yl_kgj48\\\\source\\\\bootstrap\\\\inject.ps1', '-SkillHome', 'V:\\\\_TEMP_\\\\saipen-inject-ps1-atomic-yl_kgj48\\\\source\\\\saipen']",
+    "cwd": "V:\\_TEMP_\\saipen-inject-ps1-atomic-yl_kgj48\\source",
+    "exit": 1,
+    "stdout": "FATAL: runtime manifest invalid: unsafe runtime manifest source: ../outside\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "STATUS: NOT_INSTALLED\nInstall: powershell -ExecutionPolicy Bypass -File V:\\_TEMP_\\saipen-scheduler-kd3swy6c\\unicode-\u0407\u0433\u0432\u043c-?\\bootstrap\\schedule.ps1 install\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'typo-command']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "usage: schedule.ps1 [install|remove|status|run-now] (default: install)\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: task action does not execute the canonical VBS wrapper\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: task action does not execute the canonical VBS wrapper\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: task principal is not the current interactive user\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: canonical task is disabled: saipen-inject\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: task trigger is not the canonical 15-minute interval\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: task trigger is not the canonical 15-minute interval\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: task trigger is not the canonical 15-minute interval\nREASON: task settings differ from the canonical runtime policy\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: VBS wrapper differs from the canonical command body\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'run-now']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "REFUSED: scheduler status is DEGRADED\nREASON: VBS wrapper differs from the canonical command body\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Windows\\\\system32\\\\wscript.exe', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\local-app-data\\\\saipen\\\\schedule-run-hidden.vbs']",
+    "cwd": "",
+    "exit": 37,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: duplicate legacy task present: saipen-autoinject\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'run-now']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "REFUSED: scheduler status is DEGRADED\nREASON: duplicate legacy task present: saipen-autoinject\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: VBS wrapper missing: V:\\_TEMP_\\saipen-scheduler-kd3swy6c\\local-app-data\\saipen\\schedule-run-hidden.vbs\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'run-now']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "REFUSED: scheduler status is DEGRADED\nREASON: VBS wrapper missing: V:\\_TEMP_\\saipen-scheduler-kd3swy6c\\local-app-data\\saipen\\schedule-run-hidden.vbs\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: referenced runner missing: V:\\_TEMP_\\saipen-scheduler-kd3swy6c\\unicode-\u0407\u0433\u0432\u043c-?\\bootstrap\\schedule-run.ps1\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'install']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "FATAL: scheduler install rolled back: Exception calling \"Replace\" with \"3\" argument(s): \"The path is empty. (Parameter 'path')\"\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'install']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "created saipen-inject\ndeleted saipen-inject\nRemoved: saipen-inject\nFATAL: scheduler install rolled back: mock settings failure\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'remove']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "FATAL: could not query saipen-inject: mock query failure\nNot present: saipen-autoinject\nFATAL: scheduler cleanup incomplete; wrapper preserved for any remaining task\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'remove']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "access denied\nFATAL: could not remove saipen-inject (schtasks rc 5)\nNot present: saipen-autoinject\nFATAL: scheduler cleanup incomplete; wrapper preserved for any remaining task\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-harness.ps1', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bootstrap\\\\uninstall.ps1', '']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "saipen uninstaller\n------------------------------------------------------------\nClaude Code skill            clean\nClaude Code CLAUDE.md        clean\nOpenCode skill               clean\nOpenCode AGENTS.md           clean\nguard hooks                  clean\nCodex skill                  clean\nCodex AGENTS.md              clean\nGemini GEMINI.md             clean\n~/.agents skills             clean\nAider conf                   clean\nscheduled inject task        task remove FAILED (could not query saipen-inject: mock query failure); wrapper preserved\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduler-fallback-harness.ps1', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bootstrap\\\\uninstall.ps1']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "saipen uninstaller\n------------------------------------------------------------\nClaude Code skill            clean\nClaude Code CLAUDE.md        clean\nOpenCode skill               clean\nOpenCode AGENTS.md           clean\nguard hooks                  clean\nCodex skill                  clean\nCodex AGENTS.md              clean\nGemini GEMINI.md             clean\n~/.agents skills             clean\nAider conf                   clean\nscheduled inject task        task remove FAILED (could not query saipen-inject (schtasks rc 5; all-task query rc 5), could not query saipen-autoinject (schtasks rc 5; all-task query rc 5)); wrapper preserved\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\bash.exe', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bootstrap\\\\uninstall.sh']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "saipen uninstaller\n------------------------------------------------------------\nClaude Code skill            clean\nClaude Code CLAUDE.md        clean\nOpenCode skill               clean\nOpenCode AGENTS.md           clean\nguard hooks                  clean\nCodex skill                  clean\nCodex AGENTS.md              clean\nGemini GEMINI.md             clean\n~/.agents skills             clean\nAider conf                   clean\nscheduled inject task        saipen-inject query FAILED\nsaipen-autoinject query FAILED\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source\\\\bootstrap\\\\schedule-run.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-kd3swy6c\\scheduled-source",
+    "exit": 2,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source\\\\bootstrap\\\\schedule-run.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-kd3swy6c\\scheduled-source",
+    "exit": 2,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source\\\\bootstrap\\\\schedule-run.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-kd3swy6c\\scheduled-source",
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['git', 'commit', '-q', '-m', 'probe: restore manifest']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-kd3swy6c\\scheduled-source",
+    "exit": 1,
+    "stdout": "On branch master\nnothing to commit, working tree clean\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source\\\\bootstrap\\\\schedule-run.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-kd3swy6c\\scheduled-source",
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\schedule-run-race.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-kd3swy6c\\scheduled-source",
+    "exit": 2,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source\\\\bootstrap\\\\schedule-run.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-kd3swy6c\\scheduled-source",
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source\\\\bootstrap\\\\schedule-run.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-kd3swy6c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-kd3swy6c\\scheduled-source",
+    "exit": 9,
+    "stdout": "",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,93 @@
+test_cli_foreign_fixture_ingests_only_one_named_file_and_reuses_it (__main__.NamedDropOracle.test_cli_foreign_fixture_ingests_only_one_named_file_and_reuses_it) ... FAIL
+test_legacy_numbered_producer_works_beside_named_drop (__main__.NamedDropOracle.test_legacy_numbered_producer_works_beside_named_drop) ... ok
+test_named_close_consumes_exact_file_and_is_idempotent (__main__.NamedDropOracle.test_named_close_consumes_exact_file_and_is_idempotent) ... FAIL
+test_named_discovery_is_read_only_and_pending_has_a_path (__main__.NamedDropOracle.test_named_discovery_is_read_only_and_pending_has_a_path) ... FAIL
+test_named_drop_does_not_preempt_live_build (__main__.NamedDropOracle.test_named_drop_does_not_preempt_live_build) ... ok
+test_named_drop_waits_behind_existing_board_work (__main__.NamedDropOracle.test_named_drop_waits_behind_existing_board_work) ... FAIL
+test_named_symlink_traversal_and_binary_remain_refused (__main__.NamedDropOracle.test_named_symlink_traversal_and_binary_remain_refused) ... skipped 'symlink privilege unavailable'
+test_named_text_files_are_work_not_residue (__main__.NamedDropOracle.test_named_text_files_are_work_not_residue) ... FAIL
+test_numeric_order_then_names_without_mtime_authority (__main__.NamedDropOracle.test_numeric_order_then_names_without_mtime_authority) ... FAIL
+test_replacing_closed_named_file_preserves_the_new_generation (__main__.NamedDropOracle.test_replacing_closed_named_file_preserves_the_new_generation) ... FAIL
+
+======================================================================
+FAIL: test_cli_foreign_fixture_ingests_only_one_named_file_and_reuses_it (__main__.NamedDropOracle.test_cli_foreign_fixture_ingests_only_one_named_file_and_reuses_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1697-audit-drop-queue\regression.py", line 68, in test_cli_foreign_fixture_ingests_only_one_named_file_and_reuses_it
+    self.assertEqual(first["code"], "AUDIT_INGESTED")
+AssertionError: 'AUDIT_INBOX_STATUS' != 'AUDIT_INGESTED'
+- AUDIT_INBOX_STATUS
++ AUDIT_INGESTED
+
+
+======================================================================
+FAIL: test_named_close_consumes_exact_file_and_is_idempotent (__main__.NamedDropOracle.test_named_close_consumes_exact_file_and_is_idempotent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1697-audit-drop-queue\regression.py", line 84, in test_named_close_consumes_exact_file_and_is_idempotent
+    self.assertTrue(captured["ok"], captured)
+AssertionError: False is not true : {'ok': False, 'code': 'AUDIT_LAYER_INVALID', 'reason': 'noncanonical', 'detail': 'audit/handoff.txt is not a canonical audit layer'}
+
+======================================================================
+FAIL: test_named_discovery_is_read_only_and_pending_has_a_path (__main__.NamedDropOracle.test_named_discovery_is_read_only_and_pending_has_a_path)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1697-audit-drop-queue\regression.py", line 139, in test_named_discovery_is_read_only_and_pending_has_a_path
+    self.assertEqual(projection["pending"], ["audit/handoff.md"])
+AssertionError: Lists differ: [] != ['audit/handoff.md']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'audit/handoff.md'
+
+- []
++ ['audit/handoff.md']
+
+======================================================================
+FAIL: test_named_drop_waits_behind_existing_board_work (__main__.NamedDropOracle.test_named_drop_waits_behind_existing_board_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1697-audit-drop-queue\regression.py", line 52, in test_named_drop_waits_behind_existing_board_work
+    self.assertTrue(projection.get("idle_only"))
+AssertionError: None is not true
+
+======================================================================
+FAIL: test_named_text_files_are_work_not_residue (__main__.NamedDropOracle.test_named_text_files_are_work_not_residue)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1697-audit-drop-queue\regression.py", line 36, in test_named_text_files_are_work_not_residue
+    self.assertEqual({x["name"] for x in audit_inbox.scan_layers(self.root)}, set(names))
+AssertionError: Items in the second set but not the first:
+'next task.txt'
+'spec.markdown'
+'README.MD'
+'01.md'
+'handoff.md'
+
+======================================================================
+FAIL: test_numeric_order_then_names_without_mtime_authority (__main__.NamedDropOracle.test_numeric_order_then_names_without_mtime_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1697-audit-drop-queue\regression.py", line 43, in test_numeric_order_then_names_without_mtime_authority
+    self.assertEqual([x["name"] for x in audit_inbox.scan_layers(self.root)],
+AssertionError: Lists differ: ['2.md', '10.md'] != ['2.md', '10.md', 'A.txt', 'z.md']
+
+Second list contains 2 additional elements.
+First extra element 2:
+'A.txt'
+
+- ['2.md', '10.md']
++ ['2.md', '10.md', 'A.txt', 'z.md']
+
+======================================================================
+FAIL: test_replacing_closed_named_file_preserves_the_new_generation (__main__.NamedDropOracle.test_replacing_closed_named_file_preserves_the_new_generation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1697-audit-drop-queue\regression.py", line 99, in test_replacing_closed_named_file_preserves_the_new_generation
+    self.assertTrue(cap["ok"], cap)
+AssertionError: False is not true : {'ok': False, 'code': 'AUDIT_LAYER_INVALID', 'reason': 'noncanonical', 'detail': 'audit/handoff.md is not a canonical audit layer'}
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.323s
+
+FAILED (failures=7, skipped=1)

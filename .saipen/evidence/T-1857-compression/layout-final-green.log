@@ -1,0 +1,14 @@
+test_flattened_home_resolves_protocol_docs (test_validator_layout_parity.InstalledValidatorLayoutParityTests.test_flattened_home_resolves_protocol_docs)
+No protocol read may assume the source tree's `saipen/` prefix. ... ok
+test_layouts_agree_on_a_neutral_project (test_validator_layout_parity.InstalledValidatorLayoutParityTests.test_layouts_agree_on_a_neutral_project)
+Complete validator parity with no packaging-only file anywhere. ... ok
+test_layouts_agree_on_the_live_repository (test_validator_layout_parity.InstalledValidatorLayoutParityTests.test_layouts_agree_on_the_live_repository)
+The same parity against a real, fully populated project. ... ok
+test_packaging_metadata_at_the_home_root_cannot_reach_the_oracle (test_validator_layout_parity.InstalledValidatorLayoutParityTests.test_packaging_metadata_at_the_home_root_cannot_reach_the_oracle)
+The hermetic seal, proven rather than assumed. ... ok
+test_non_locale_root_stray_is_reported_not_a_crash (test_validator_layout_parity.RootStrayLocaleTests.test_non_locale_root_stray_is_reported_not_a_crash) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 88.583s
+
+OK

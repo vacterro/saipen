@@ -1,0 +1,798 @@
+{
+  "root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-T299-forensics\\snapshot-20261010T090700Z",
+  "analysis_subject": "immutable snapshot",
+  "state": {
+    "phase": "DONE",
+    "task": "T-299",
+    "next_action": "idle",
+    "blocker": "none",
+    "agent": "buffy",
+    "saipen_version": 7,
+    "schema_version": 3,
+    "saipen_home": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+    "mode": "full",
+    "transition_from": "VERIFY",
+    "last_event": 3146,
+    "updated": "2026-10-09T02:30:00Z",
+    "style_contract": "ded-069a4c52",
+    "execution_intent": "goal",
+    "goal_waves": 0,
+    "goal_tickets": 0
+  },
+  "board_errors": [
+    "BOARD.md:5 ticket T-299 has unrecognized field 'evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md'",
+    "BOARD.md:6 duplicate ticket ID T-299",
+    "BOARD.md:7 ticket T-298 has unrecognized field 'evidence: .saipen/evidence/T-298-widget-trust-boundary.md'",
+    "BOARD.md:8 ticket T-297 has unrecognized field 'evidence: .saipen/evidence/T-297-widget-clock-recorrective.md'",
+    "BOARD.md required heading ## DOING appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+    "BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash"
+  ],
+  "headings": [
+    "## TODO## DOING",
+    "## DONE",
+    "## BLOCKED"
+  ],
+  "board_unique_tasks": 279,
+  "board_task_records": 280,
+  "history_tail": 3146,
+  "history_events": 3143,
+  "history_errors": [
+    "LOG.md:2: not a legal LOG event: '- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no '",
+    "E-3134 parent E-3133 does not exist in the ledger",
+    "E-3137 parent E-3136 does not exist in the ledger",
+    "E-3146 parent E-3145 does not exist in the ledger"
+  ],
+  "illegal_history_lines": [
+    "LOG.md:2: not a legal LOG event: '- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no '"
+  ],
+  "related_events": [
+    {
+      "date": "09.10.26 02:00",
+      "event": 3143,
+      "parent": 3142,
+      "ticket": "T-298",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "CLAIM corrective Widget trust-boundary hardening post T-297 -- P1-A newer unverified attachment promotes into verified canonical store (timestamp-only authority), P1-B failed Send + cleared draft + delayed same-text history fabricates observed Send (text equality without transaction identity); baseline 0.1.05 9c7d40b9, w7-016 85/85 green pre-work"
+    },
+    {
+      "date": "09.10.26 02:30",
+      "event": 3144,
+      "parent": 3143,
+      "ticket": "T-298",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "REPAIR & VERIFY -- P1-A attached data never enters verified store (canonical clock precedence, Attached: tooltip, observed-only display + session-local detach memory), P1-B user-edit input listener breaks intent chain (corroboration refuses, sync retires); RED 4/4 pre-fix -> GREEN w7-016 89/89, full widget sweep 915/915, bridge archive 30/30, contracts 36/36; release 0.1.06 SHA 5136324da8a12c2f0647cb5ef5d7eceaa854f1cd487fa474068195d642e0d610; synthetic harness only, no live-browser acceptance; T-298 DONE"
+    },
+    {
+      "date": "09.10.26 03:15",
+      "event": 3146,
+      "parent": 3145,
+      "ticket": "T-299",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "REPAIR & VERIFY -- refuse npm cache segments (_cacache/content-v2/index-v5) as transient reproducible state under memory root, kitchen probe notes + sources + tests keep shipping; RED 2/3 pre-fix -> GREEN test_saipen_evidence.py 107+1skip, packing/projects/freshness 124+1skip, ruff/compileall clean; T-299 DONE"
+    }
+  ],
+  "recent_events": [
+    {
+      "date": "07.10.26 04:20",
+      "event": 3109,
+      "parent": 3108,
+      "ticket": null,
+      "agent": "buffy",
+      "op_id": "transition-1fab563034bf4df8b41f7c8cbd1838bf",
+      "taxonomy": "DEC",
+      "text": "goal_tickets 17->18"
+    },
+    {
+      "date": "07.10.26 04:20",
+      "event": 3110,
+      "parent": 3109,
+      "ticket": "T-290",
+      "agent": "buffy",
+      "op_id": "transition-cfbc5f0c0a154966b11912074b7a33e1",
+      "taxonomy": "RUN",
+      "text": "transition to SHIP -- append shipped"
+    },
+    {
+      "date": "07.10.26 04:20",
+      "event": 3111,
+      "parent": 3110,
+      "ticket": "T-290",
+      "agent": "buffy",
+      "op_id": "finish-a657a6d4429c41db93ce55f33208c3a7",
+      "taxonomy": "DEC",
+      "text": "ticket finished via SAIOPS -- completion (from SHIP)"
+    },
+    {
+      "date": "07.10.26 06:59",
+      "event": 3112,
+      "parent": 3111,
+      "ticket": "T-287",
+      "agent": "buffy",
+      "op_id": "claim-b3ff71f659f747328780b360389e2870",
+      "taxonomy": "DEC",
+      "text": "claimed via SAIOPS -- owner buffy"
+    },
+    {
+      "date": "07.10.26 07:00",
+      "event": 3113,
+      "parent": 3112,
+      "ticket": "T-287",
+      "agent": "buffy",
+      "op_id": "transition-7b2920f791b34503b9ff7344bba238a9",
+      "taxonomy": "RUN",
+      "text": "transition to BUILD -- SCOUT T-287: derived 9 clauses for SRC-123 from audit/13.md"
+    },
+    {
+      "date": "07.10.26 19:52",
+      "event": 3114,
+      "parent": 3113,
+      "ticket": "T-287",
+      "agent": "buffy",
+      "op_id": "rebind_home-c222ff0d2db04291b5f33f92cc342381",
+      "taxonomy": "DEC",
+      "text": "saipen_home rebound to C:/Users/antigravity_b/.gemini/antigravity-cli/brain/e0e21f66-0704-4785-96c8-caac1c89f20e/scratch/saipen7"
+    },
+    {
+      "date": "07.10.26 19:52",
+      "event": 3115,
+      "parent": 3114,
+      "ticket": "T-287",
+      "agent": "buffy",
+      "op_id": "transition-c4149f059ae44b6fb97a8d5595bb9ed0",
+      "taxonomy": "RUN",
+      "text": "transition to VERIFY -- verify 9 clauses"
+    },
+    {
+      "date": "07.10.26 19:53",
+      "event": 3116,
+      "parent": 3115,
+      "ticket": "T-287",
+      "agent": "buffy",
+      "op_id": "checkpoint-925655dab36c45d98077e8827cc6e6d9",
+      "taxonomy": "RUN",
+      "text": "verify -> PASS [target: T-287] conf: high -- pytest audit13 suites 38 passed in 3.4s; 241 passed in 29s across related test families; ruff 0 findings; compileall clean; evidence .saipen/evidence/T-287-SRC-123-closure.md"
+    },
+    {
+      "date": "07.10.26 19:53",
+      "event": 3117,
+      "parent": 3116,
+      "ticket": "T-287",
+      "agent": "buffy",
+      "op_id": "transition-9607720aa8d84241bd83f792320a9c53",
+      "taxonomy": "RUN",
+      "text": "transition to REVIEW -- review 9 clauses"
+    },
+    {
+      "date": "07.10.26 19:53",
+      "event": 3118,
+      "parent": 3117,
+      "ticket": null,
+      "agent": "buffy",
+      "op_id": "transition-9607720aa8d84241bd83f792320a9c53",
+      "taxonomy": "DEC",
+      "text": "goal_tickets 18->19"
+    },
+    {
+      "date": "07.10.26 19:53",
+      "event": 3119,
+      "parent": 3118,
+      "ticket": "T-287",
+      "agent": "buffy",
+      "op_id": "transition-6778873ca0e341778bb50e6d65993281",
+      "taxonomy": "RUN",
+      "text": "transition to SHIP -- ship 9 clauses"
+    },
+    {
+      "date": "07.10.26 19:53",
+      "event": 3120,
+      "parent": 3119,
+      "ticket": "T-287",
+      "agent": "buffy",
+      "op_id": "finish-55b83ea1e1214ec389b1cdc9a5c6a263",
+      "taxonomy": "DEC",
+      "text": "ticket finished via SAIOPS -- completion (from SHIP)"
+    },
+    {
+      "date": "07.10.26 19:54",
+      "event": 3121,
+      "parent": 3120,
+      "ticket": "T-287",
+      "agent": "buffy",
+      "op_id": "audit-consume-421d877b2e900c5d",
+      "taxonomy": "RUN",
+      "text": "AUDIT_INBOX_CLOSED audit/13.md sha256=0b92a4c306ccff22 SRC-123 T-287 coverage=9/9"
+    },
+    {
+      "date": "07.10.26 22:28",
+      "event": 3122,
+      "parent": 3121,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "userreq-42f00a1f9b2e450faca780a2f7bdf5c5",
+      "taxonomy": "DEC",
+      "text": "user request SRC-125 projected as T-291 (local candidate; witness model_supplied)"
+    },
+    {
+      "date": "07.10.26 22:29",
+      "event": 3123,
+      "parent": 3122,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "claim-7836f7b0e46a441c94a81bc0a2024895",
+      "taxonomy": "DEC",
+      "text": "claimed via SAIOPS -- owner buffy"
+    },
+    {
+      "date": "07.10.26 22:37",
+      "event": 3124,
+      "parent": 3123,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "transition-3db7e14d33f54ba2a69c54feb4e91f6d",
+      "taxonomy": "RUN",
+      "text": "transition to BUILD -- scout done"
+    },
+    {
+      "date": "07.10.26 22:38",
+      "event": 3125,
+      "parent": 3124,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "transition-5c4290ae988b4a60bb0de3489bfec8e6",
+      "taxonomy": "RUN",
+      "text": "transition to VERIFY -- build complete"
+    },
+    {
+      "date": "07.10.26 22:38",
+      "event": 3126,
+      "parent": 3125,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "checkpoint-9f1a4e925ee54974bf184f4a674f178b",
+      "taxonomy": "RUN",
+      "text": "verify -> PASS [target: T-291] conf: high -- node --test tests/widget/w6-006-manual-archive-picker.test.js: 76/76 PASS; pytest tests/test_bridge_widget_delivery.py: 6/6 PASS"
+    },
+    {
+      "date": "07.10.26 22:38",
+      "event": 3127,
+      "parent": 3126,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "transition-417a152d244c49a5a217122209ead321",
+      "taxonomy": "RUN",
+      "text": "transition to REVIEW -- all tests pass"
+    },
+    {
+      "date": "07.10.26 22:38",
+      "event": 3128,
+      "parent": 3127,
+      "ticket": null,
+      "agent": "buffy",
+      "op_id": "transition-417a152d244c49a5a217122209ead321",
+      "taxonomy": "DEC",
+      "text": "goal_tickets 19->20"
+    },
+    {
+      "date": "07.10.26 22:38",
+      "event": 3129,
+      "parent": 3128,
+      "ticket": null,
+      "agent": "buffy",
+      "op_id": "valve-e4e8fb7393b94c31a54c735342f74909",
+      "taxonomy": "DEC",
+      "text": "goal reauthorized -- goal_waves 0->0, goal_tickets 20->0"
+    },
+    {
+      "date": "07.10.26 22:47",
+      "event": 3130,
+      "parent": 3129,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "transition-9f7a45c285244a6eb42fc3d0be29cf45",
+      "taxonomy": "RUN",
+      "text": "transition to SHIP -- DEC: SHIP"
+    },
+    {
+      "date": "07.10.26 22:47",
+      "event": 3131,
+      "parent": 3130,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "finish-29deadc9792e498ca581916d8a22c785",
+      "taxonomy": "DEC",
+      "text": "ticket finished via SAIOPS -- completion (from SHIP)"
+    },
+    {
+      "date": "08.10.26 02:10",
+      "event": 3132,
+      "parent": 3131,
+      "ticket": "T-292",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "REPAIR -- fix manual ZIP picker registry cache stale overwrite & hard TTL enforcement; bump widget 0.1.00; +3 regression tests in w6-006 (79/79 PASS)"
+    },
+    {
+      "date": "08.10.26 02:35",
+      "event": 3134,
+      "parent": 3133,
+      "ticket": "T-293",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "REPAIR -- manual ZIP project picker hard-TTL UI lifecycle: decouple request generation from cache expiration timer, add w6-006 tests (85/85 PASS), node --check PASS; T-293 DONE"
+    },
+    {
+      "date": "08.10.26 04:30",
+      "event": 3135,
+      "parent": 3134,
+      "ticket": "T-278",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "BUILD & VERIFY -- Settings -> Launchers federated inventory split (LOCAL TOOLS vs SAI ACCOUNTS), read-only account rows with enabled check, canonical manager routing (SAITULS.exe), stale status display, single coalesced TaskRunner refresh owner in MainWindow; tests pass (103/103); T-278 DONE"
+    },
+    {
+      "date": "08.10.26 23:08",
+      "event": 3137,
+      "parent": 3136,
+      "ticket": "T-294",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "REPAIR & VERIFY -- Widget live Send elapsed clock (`SEND HH:MM:SS`, empty baseline hydration fix, draft-to-stable decoupled migration, 1s tick without DOM reflow/storage writes, background pause) & archive timestamp (`ZIP HH:MM:SS`, passive metadata endpoint, filename priority); bump widget 0.1.02; w7-016 (27/27 PASS), w6-006 (85/85 PASS), bridge pytest (107/108 PASS, 1 skip); T-294 DONE"
+    },
+    {
+      "date": "08.10.26 23:38",
+      "event": 3138,
+      "parent": 3137,
+      "ticket": "T-295",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "REPAIR & VERIFY -- Widget clock correctness and idle-performance repairs post T-294 (Defects A, B, C, D): distinguish history hydration from accepted new send, remove stale 3s metadata cache, add single-flight promise sharing in refreshProjectArchiveMetadata, decouple archive indicator from per-second timer, fix tooltip provenance label; bump widget 0.1.03 SHA bfcfa94d55ce5095030b7249ab04c52aa538f3329637a2cc73bbceb36ec91c25; tests/widget/w7-016 (45/45 PASS), w6-006 (85/85 PASS), w6-001 (50/50 PASS), bridge project archive (30/30 PASS); T-295 DONE"
+    },
+    {
+      "date": "09.10.26 00:00",
+      "event": 3139,
+      "parent": 3138,
+      "ticket": "T-296",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "CLAIM corrective Widget clock repair post T-295 -- Target A stop fabricated Sends on stable-route hydration (ID-substring heuristic), Target B autonomous ZIP metadata scheduler, Target C red-first regression quality with UUID fixtures"
+    },
+    {
+      "date": "09.10.26 01:30",
+      "event": 3140,
+      "parent": 3139,
+      "ticket": "T-296",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "REPAIR & VERIFY -- Widget clock trust contract (no ID-substring hydration, intent+turn+composer acceptance, no Date.now fallback), autonomous 20s ZIP metadata scheduler, harness capture/bubble Delegated path, w7-016 61/61; w3-002 stale format fixed 14/14; release 0.1.04 SHA 2cb1bf60c8eed566b1077b7567aa3223c7b756daa1a7718ef4dfa604052b27e4; T-296 DONE"
+    },
+    {
+      "date": "09.10.26 01:09",
+      "event": 3141,
+      "parent": 3140,
+      "ticket": "T-297",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "CLAIM corrective Widget repair post T-296 -- P1-A stale composer ZIP clobbers verified canonical archive (unconditional setVerifiedProjectArchive + per-render rewrite), P1-B failed Send + edited draft + late history fabricates observed Send (intent + turnId-change + composer-departed without payload correlation); baseline 0.1.04 2cb1bf60, clock suite 61/61, bridge 28+2"
+    },
+    {
+      "date": "09.10.26 01:09",
+      "event": 3142,
+      "parent": 3141,
+      "ticket": "T-297",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "REPAIR & VERIFY -- canonical/attached/runtime precedence with Attached: tooltip, change-driven archive writes, payload-to-turn correlation (userTurnTextCandidates + whitespace-collapsed), stale-intent retire/rekey/navigation-clear; RED 11/24 pre-fix -> GREEN w7-016 85/85, full widget sweep 911/911, bridge archive 30/30, M3 writes 10->0, M4/M5/M6 unchanged bounded; release 0.1.05 SHA 9c7d40b9595c605e98077d77f81e0ada8e0456ca2cbb689954f780b788e4aa25; synthetic harness only, no live-browser acceptance; T-297 DONE"
+    },
+    {
+      "date": "09.10.26 02:00",
+      "event": 3143,
+      "parent": 3142,
+      "ticket": "T-298",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "CLAIM corrective Widget trust-boundary hardening post T-297 -- P1-A newer unverified attachment promotes into verified canonical store (timestamp-only authority), P1-B failed Send + cleared draft + delayed same-text history fabricates observed Send (text equality without transaction identity); baseline 0.1.05 9c7d40b9, w7-016 85/85 green pre-work"
+    },
+    {
+      "date": "09.10.26 02:30",
+      "event": 3144,
+      "parent": 3143,
+      "ticket": "T-298",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "REPAIR & VERIFY -- P1-A attached data never enters verified store (canonical clock precedence, Attached: tooltip, observed-only display + session-local detach memory), P1-B user-edit input listener breaks intent chain (corroboration refuses, sync retires); RED 4/4 pre-fix -> GREEN w7-016 89/89, full widget sweep 915/915, bridge archive 30/30, contracts 36/36; release 0.1.06 SHA 5136324da8a12c2f0647cb5ef5d7eceaa854f1cd487fa474068195d642e0d610; synthetic harness only, no live-browser acceptance; T-298 DONE"
+    },
+    {
+      "date": "09.10.26 03:15",
+      "event": 3146,
+      "parent": 3145,
+      "ticket": "T-299",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "RUN",
+      "text": "REPAIR & VERIFY -- refuse npm cache segments (_cacache/content-v2/index-v5) as transient reproducible state under memory root, kitchen probe notes + sources + tests keep shipping; RED 2/3 pre-fix -> GREEN test_saipen_evidence.py 107+1skip, packing/projects/freshness 124+1skip, ruff/compileall clean; T-299 DONE"
+    }
+  ],
+  "receipts": 4170,
+  "receipt_errors": [],
+  "receipt_statuses": {
+    "COMMITTED": 4166,
+    "RESOLVED": 3,
+    "ABORTED": 1
+  },
+  "pending": [],
+  "conflicts": [],
+  "latest_receipted_events": [
+    {
+      "date": "07.10.26 19:53",
+      "event": 3120,
+      "parent": 3119,
+      "ticket": "T-287",
+      "agent": "buffy",
+      "op_id": "finish-55b83ea1e1214ec389b1cdc9a5c6a263",
+      "taxonomy": "DEC",
+      "text": "ticket finished via SAIOPS -- completion (from SHIP)"
+    },
+    {
+      "date": "07.10.26 19:54",
+      "event": 3121,
+      "parent": 3120,
+      "ticket": "T-287",
+      "agent": "buffy",
+      "op_id": "audit-consume-421d877b2e900c5d",
+      "taxonomy": "RUN",
+      "text": "AUDIT_INBOX_CLOSED audit/13.md sha256=0b92a4c306ccff22 SRC-123 T-287 coverage=9/9"
+    },
+    {
+      "date": "07.10.26 22:28",
+      "event": 3122,
+      "parent": 3121,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "userreq-42f00a1f9b2e450faca780a2f7bdf5c5",
+      "taxonomy": "DEC",
+      "text": "user request SRC-125 projected as T-291 (local candidate; witness model_supplied)"
+    },
+    {
+      "date": "07.10.26 22:29",
+      "event": 3123,
+      "parent": 3122,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "claim-7836f7b0e46a441c94a81bc0a2024895",
+      "taxonomy": "DEC",
+      "text": "claimed via SAIOPS -- owner buffy"
+    },
+    {
+      "date": "07.10.26 22:37",
+      "event": 3124,
+      "parent": 3123,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "transition-3db7e14d33f54ba2a69c54feb4e91f6d",
+      "taxonomy": "RUN",
+      "text": "transition to BUILD -- scout done"
+    },
+    {
+      "date": "07.10.26 22:38",
+      "event": 3125,
+      "parent": 3124,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "transition-5c4290ae988b4a60bb0de3489bfec8e6",
+      "taxonomy": "RUN",
+      "text": "transition to VERIFY -- build complete"
+    },
+    {
+      "date": "07.10.26 22:38",
+      "event": 3126,
+      "parent": 3125,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "checkpoint-9f1a4e925ee54974bf184f4a674f178b",
+      "taxonomy": "RUN",
+      "text": "verify -> PASS [target: T-291] conf: high -- node --test tests/widget/w6-006-manual-archive-picker.test.js: 76/76 PASS; pytest tests/test_bridge_widget_delivery.py: 6/6 PASS"
+    },
+    {
+      "date": "07.10.26 22:38",
+      "event": 3127,
+      "parent": 3126,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "transition-417a152d244c49a5a217122209ead321",
+      "taxonomy": "RUN",
+      "text": "transition to REVIEW -- all tests pass"
+    },
+    {
+      "date": "07.10.26 22:38",
+      "event": 3128,
+      "parent": 3127,
+      "ticket": null,
+      "agent": "buffy",
+      "op_id": "transition-417a152d244c49a5a217122209ead321",
+      "taxonomy": "DEC",
+      "text": "goal_tickets 19->20"
+    },
+    {
+      "date": "07.10.26 22:38",
+      "event": 3129,
+      "parent": 3128,
+      "ticket": null,
+      "agent": "buffy",
+      "op_id": "valve-e4e8fb7393b94c31a54c735342f74909",
+      "taxonomy": "DEC",
+      "text": "goal reauthorized -- goal_waves 0->0, goal_tickets 20->0"
+    },
+    {
+      "date": "07.10.26 22:47",
+      "event": 3130,
+      "parent": 3129,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "transition-9f7a45c285244a6eb42fc3d0be29cf45",
+      "taxonomy": "RUN",
+      "text": "transition to SHIP -- DEC: SHIP"
+    },
+    {
+      "date": "07.10.26 22:47",
+      "event": 3131,
+      "parent": 3130,
+      "ticket": "T-291",
+      "agent": "buffy",
+      "op_id": "finish-29deadc9792e498ca581916d8a22c785",
+      "taxonomy": "DEC",
+      "text": "ticket finished via SAIOPS -- completion (from SHIP)"
+    }
+  ],
+  "latest_receipts": [
+    {
+      "op_id": "userreq-42f00a1f9b2e450faca780a2f7bdf5c5",
+      "operation": "user_request",
+      "agent": "buffy",
+      "created_at": "2026-10-07T22:28:59Z",
+      "status": "COMMITTED",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+      "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+      "result": null
+    },
+    {
+      "op_id": "claim-7836f7b0e46a441c94a81bc0a2024895",
+      "operation": "claim",
+      "agent": "buffy",
+      "created_at": "2026-10-07T22:29:02Z",
+      "status": "COMMITTED",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+      "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+      "result": null
+    },
+    {
+      "op_id": "debt.snapshot-ee35907c14f7",
+      "operation": "debt.snapshot",
+      "agent": "buffy",
+      "created_at": "2026-10-07T22:38:25Z",
+      "status": "COMMITTED",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+      "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+      "result": null
+    },
+    {
+      "op_id": "transition-3db7e14d33f54ba2a69c54feb4e91f6d",
+      "operation": "transition",
+      "agent": "buffy",
+      "created_at": "2026-10-07T22:38:25Z",
+      "status": "COMMITTED",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+      "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+      "result": null
+    },
+    {
+      "op_id": "transition-5c4290ae988b4a60bb0de3489bfec8e6",
+      "operation": "transition",
+      "agent": "buffy",
+      "created_at": "2026-10-07T22:38:30Z",
+      "status": "COMMITTED",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+      "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+      "result": null
+    },
+    {
+      "op_id": "checkpoint-9f1a4e925ee54974bf184f4a674f178b",
+      "operation": "checkpoint",
+      "agent": "buffy",
+      "created_at": "2026-10-07T22:38:40Z",
+      "status": "COMMITTED",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+      "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+      "result": null
+    },
+    {
+      "op_id": "transition-417a152d244c49a5a217122209ead321",
+      "operation": "transition",
+      "agent": "buffy",
+      "created_at": "2026-10-07T22:38:42Z",
+      "status": "COMMITTED",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+      "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+      "result": null
+    },
+    {
+      "op_id": "valve-e4e8fb7393b94c31a54c735342f74909",
+      "operation": "valve",
+      "agent": "buffy",
+      "created_at": "2026-10-07T22:38:45Z",
+      "status": "COMMITTED",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+      "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+      "result": null
+    },
+    {
+      "op_id": "transition-9f7a45c285244a6eb42fc3d0be29cf45",
+      "operation": "transition",
+      "agent": "buffy",
+      "created_at": "2026-10-07T22:47:24Z",
+      "status": "COMMITTED",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+      "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+      "result": null
+    },
+    {
+      "op_id": "finish-29deadc9792e498ca581916d8a22c785",
+      "operation": "finish",
+      "agent": "buffy",
+      "created_at": "2026-10-07T22:47:28Z",
+      "status": "COMMITTED",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+      "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+      "result": null
+    },
+    {
+      "op_id": "source.requirement_add-05a6fa97ec684fab89fcda0207d96d5f",
+      "operation": "source.requirement_add",
+      "agent": "buffy",
+      "created_at": "2026-10-07T22:47:28Z",
+      "status": "COMMITTED",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+      "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+      "result": null
+    },
+    {
+      "op_id": "improve-rebind-b431fb0cacf0479daf67055c33ae053c",
+      "operation": "improve_rebind",
+      "agent": "buffy-01",
+      "created_at": "2026-10-09T22:43:19Z",
+      "status": "COMMITTED",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+      "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+      "result": null
+    }
+  ],
+  "authority": {
+    "status": "UNAUTHORIZED",
+    "floor": 3131,
+    "head": [
+      3132,
+      3134,
+      3135,
+      3137,
+      3138,
+      3139,
+      3140,
+      3141,
+      3142,
+      3143,
+      3144,
+      3146
+    ],
+    "findings": [
+      {
+        "rule": "state-ahead-of-journal",
+        "last_event": 3146,
+        "floor": 3131,
+        "detail": "STATE.last_event is E-3146, above E-3131, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-278",
+        "events": [
+          3135
+        ],
+        "floor": 3131,
+        "detail": "T-278 sits under ## DONE on the word of E-3135, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-292",
+        "events": [
+          3132
+        ],
+        "floor": 3131,
+        "detail": "T-292 sits under ## DONE on the word of E-3132, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-293",
+        "events": [
+          3134
+        ],
+        "floor": 3131,
+        "detail": "T-293 sits under ## DONE on the word of E-3134, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-294",
+        "events": [
+          3137
+        ],
+        "floor": 3131,
+        "detail": "T-294 sits under ## DONE on the word of E-3137, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-295",
+        "events": [
+          3138
+        ],
+        "floor": 3131,
+        "detail": "T-295 sits under ## DONE on the word of E-3138, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-296",
+        "events": [
+          3139,
+          3140
+        ],
+        "floor": 3131,
+        "detail": "T-296 sits under ## DONE on the word of E-3139, E-3140, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-297",
+        "events": [
+          3141,
+          3142
+        ],
+        "floor": 3131,
+        "detail": "T-297 sits under ## DONE on the word of E-3141, E-3142, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-298",
+        "events": [
+          3143,
+          3144
+        ],
+        "floor": 3131,
+        "detail": "T-298 sits under ## DONE on the word of E-3143, E-3144, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-299",
+        "events": [
+          3146
+        ],
+        "floor": 3131,
+        "detail": "T-299 sits under ## DONE on the word of E-3146, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      }
+    ],
+    "detail": "STATE.last_event is E-3146, above E-3131, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand; T-278 sits under ## DONE on the word of E-3135, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run; T-292 sits under ## DONE on the word of E-3132, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+  },
+  "related_receipt_count": 0
+}

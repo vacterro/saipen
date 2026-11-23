@@ -1,0 +1,1 @@
+- 26.07.17 00:00 [E-001] [T-001] DEC: Started working on T-001

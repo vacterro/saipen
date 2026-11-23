@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "tools.test_evidence_gap_ledger_lineage",
+    "tools.test_persistent_goal_engine"
+  ],
+  "command": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -B -m unittest -v tools.test_evidence_gap_ledger_lineage tools.test_persistent_goal_engine",
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONIOENCODING": "utf-8",
+    "PYTHONPATH": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+    "FORBID_SAIPEN_PROJECT_WRITE": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "SAIPEN_FORBID_HOST_SPAWN": "1",
+    "SAIPEN_MACHINE_ROOT": "V:\\_TEMP_\\saipen-no-machine-runtime-2984"
+  },
+  "host_session": "test_hermetic_env.hermetic_env strips host-session carriers",
+  "started_at": "2026-11-09T19:29:13.883249+00:00"
+}

@@ -1,0 +1,6 @@
+signal5: record_crew_run sites: 2 | record_producer_integration sites: 1
+signal6: untracked tools paths: 0
+signal3 ticket-naming marker lines:
+    closure_readiness.py:101 | # child returned to TODO and the router picked it again (T-1762,
+    operations.py:3341 | T-1384: a fresh TODO -> DOING claim is the OTHER place a seat is taken by
+    reconcile.py:1941 | phase, `restart: TODO` distinguishes CURRENT_DONE_UNPROVEN (T-1609):

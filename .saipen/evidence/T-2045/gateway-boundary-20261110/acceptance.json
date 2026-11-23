@@ -1,0 +1,39 @@
+{
+  "checked_at": "2026-11-10T18:14:30.340033+00:00",
+  "ticket": "T-2045",
+  "scope": "local read-only gateway and documented uninstalled Freebuff ingress; not installation or publication",
+  "requirements": [
+    {
+      "requirement": "gateway documented",
+      "artifact": "extensions/adapters/FREEBUFF_INGRESS_CONTRACT.md",
+      "proof": "CLI invocation and explicit read-only/non-approval limits present"
+    },
+    {
+      "requirement": "ingress contract documented",
+      "artifact": "extensions/adapters/FREEBUFF_INGRESS_CONTRACT.md",
+      "proof": "BOOT.md route, user_message_submitted, field/broker requirements, NOT_INSTALLED declaration"
+    },
+    {
+      "requirement": "adversarial tests pass",
+      "artifact": ".saipen/evidence/focused-unit/25fba1c7192bc359-20261110T181329782031Z.json",
+      "proof": "64 PASS, selected gateway, carrier binding, host authority broker; local current-tree record, not full family"
+    },
+    {
+      "requirement": "same oracle detects pre-fix defects",
+      "artifact": ".saipen/evidence/regression/regression-execution-360e6c15b6c5499fae003d89985576d1.json",
+      "proof": "native 15 methods; before 11 failures, after 0; no skipped; same verifier"
+    },
+    {
+      "requirement": "T-1822 remains blocked",
+      "observed_section": "## BLOCKED",
+      "observed_blocker": "SRC-280:R001 remains BLOCKED on the FreeBuff-side transport: a real FreeBuff-launched tool process must export SAIPEN_TASK_FILE/SAIPEN_TASK_SHA256 or write a .saipen/cache/ingress envelope before..."
+    }
+  ],
+  "publication": "not performed; shared staged work untouched",
+  "files": {
+    "tools/saipen_operator_gateway.py": "f7fdd935fe97bf5ebdcf82e139b27a1c4c8050508bc3d4fcb7401fa0e8f49a91",
+    "tools/test_t2045_operator_gateway.py": "34b6973d0cf92bc7612cfb362fd8b1ab395bc8ec88dbbb9d253a5ce3013baac4",
+    "extensions/adapters/FREEBUFF_INGRESS_CONTRACT.md": "246bf85d0991e5d292bb2631ba0d4fd52654c978c5851a41b3dafcd2c45e2837",
+    "extensions/adapters/registry.json": "c57b09312afb2beba8b0ed777d0cfe2042abb785ec99170916fc024e63ac0ba3"
+  }
+}

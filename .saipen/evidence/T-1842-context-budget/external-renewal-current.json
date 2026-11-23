@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "code": "EXTERNAL_RESOLVED",
+  "op_id": "resolve-external-d1914435e86a4c27a2870aa3c7e2c685",
+  "changed_files": [
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md",
+    ".saipen/recovery/conformance/external/EX-000016.json"
+  ],
+  "recovery_required": false,
+  "ticket": "T-1653",
+  "receipt_id": "EX-000016",
+  "verdict": "PASS",
+  "authority": "lineage-ded945ae8243480ab1bfee73baeb29c6",
+  "implementation": "T-289@041f00ed1bc0b4b4841ca3edbb5912dd39461349",
+  "event_id": "E-16920",
+  "resumed_parent": null
+}

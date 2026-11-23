@@ -1,0 +1,11 @@
+oracle  sha256 6f4b77666fb0fdf2 (identical copy: True)
+subject ba40776ff5f9a548 -> e87898b75a0f6135 (_refusal_texts reverted)
+Measured on the T-1380 re-run: `operator_decision` grepped this ... FAIL
+Measured: three sessions grepped this repository and the harness ... ok
+The host's own shape for a before-tool refusal: status error, the ... ok
+test_the_same_refusal_twice_is_a_repeat (tools.test_refusal_routes.RefusalIdentityIsNotACodeBucketTests.test_the_same_refusal_twice_is_a_repeat) ... ok
+test_two_different_validation_errors_are_not_a_repeat (tools.test_refusal_routes.RefusalIdentityIsNotACodeBucketTests.test_two_different_validation_errors_are_not_a_repeat) ... ok
+FAIL: test_a_guard_marker_in_what_a_tool_read_is_not_a_refusal (tools.test_refusal_routes.RefusalIdentityIsNotACodeBucketTests.test_a_guard_marker_in_what_a_tool_read_is_not_a_refusal)
+Ran 5 tests in 0.012s
+FAILED (failures=1)
+RED CONTROL OK: the reverted extractor scores what a grep read as a refusal

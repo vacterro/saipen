@@ -1,0 +1,68 @@
+..FF..FF.F.
+======================================================================
+FAIL: test_a_replaced_plugin_still_refuses_a_protected_canonical_path (test_t1688_stale_plugin_guard.StalePluginGuardTests.test_a_replaced_plugin_still_refuses_a_protected_canonical_path) (case='protected-default')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1688-pair-qq0hmzuw\project\tools\test_t1688_stale_plugin_guard.py", line 231, in test_a_replaced_plugin_still_refuses_a_protected_canonical_path
+    self.blocked(identifier, "PROTECTED_CANONICAL_NAMESPACE")
+  File "V:\_TEMP_\saipen-t1688-pair-qq0hmzuw\project\tools\test_t1688_stale_plugin_guard.py", line 212, in blocked
+    self.assertEqual(record["outcome"], "blocked", record)
+AssertionError: 'allowed' != 'blocked'
+- allowed
++ blocked
+ : {'id': 'protected-default', 'outcome': 'allowed', 'message': '', 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmptdj_e2k7","project_lineage":"lineage-e3ed8b3488fe4dd5867322dcfd0b0652","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_HOST_INTEGRATION {"status":"UNVERIFIED","adapter_code":"PLUGIN_RESTART_REQUIRED","binding_conflict":null,"failure_code":"PLUGIN_RESTART_REQUIRED","decision":"ALLOW_DEGRADED","policy":"DEGRADED_ALLOWED","policy_source":"default","operator_action":"restart the host application"}\nOrdinary work may proceed under the selected host policy. SAIPEN could not verify consequential tools; retain the UNVERIFIED status and claim no validation.', 'SAIPEN_AUTO_RECALL {"active_work": "T-9001", "agent_incarnation": "inc-a8c99fa78dd13ada", "decision": "AUTO_KICK", "execution_epoch": "ep-6e59801552ccc7f0", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-9001", "phase": "BUILD", "replacement_detected": true, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-9001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.']}
+
+======================================================================
+FAIL: test_a_replaced_plugin_still_refuses_a_protected_canonical_path (test_t1688_stale_plugin_guard.StalePluginGuardTests.test_a_replaced_plugin_still_refuses_a_protected_canonical_path) (case='protected-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1688-pair-qq0hmzuw\project\tools\test_t1688_stale_plugin_guard.py", line 231, in test_a_replaced_plugin_still_refuses_a_protected_canonical_path
+    self.blocked(identifier, "PROTECTED_CANONICAL_NAMESPACE")
+  File "V:\_TEMP_\saipen-t1688-pair-qq0hmzuw\project\tools\test_t1688_stale_plugin_guard.py", line 212, in blocked
+    self.assertEqual(record["outcome"], "blocked", record)
+AssertionError: 'allowed' != 'blocked'
+- allowed
++ blocked
+ : {'id': 'protected-degraded', 'outcome': 'allowed', 'message': '', 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmptdj_e2k7","project_lineage":"lineage-e3ed8b3488fe4dd5867322dcfd0b0652","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_HOST_INTEGRATION {"status":"UNVERIFIED","adapter_code":"PLUGIN_RESTART_REQUIRED","binding_conflict":null,"failure_code":"PLUGIN_RESTART_REQUIRED","decision":"ALLOW_DEGRADED","policy":"DEGRADED_ALLOWED","policy_source":"operator","operator_action":"restart the host application"}\nOrdinary work may proceed under the selected host policy. SAIPEN could not verify consequential tools; retain the UNVERIFIED status and claim no validation.', 'SAIPEN_AUTO_RECALL {"active_work": "T-9001", "agent_incarnation": "inc-2afa11bc2633bd72", "decision": "AUTO_KICK", "execution_epoch": "ep-6e59801552ccc7f0", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-9001", "phase": "BUILD", "replacement_detected": true, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-9001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.']}
+
+======================================================================
+FAIL: test_every_target_or_actor_refusal_survives_the_gap_with_its_own_code (test_t1688_stale_plugin_guard.StalePluginGuardTests.test_every_target_or_actor_refusal_survives_the_gap_with_its_own_code) (case='answer-terminal')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1688-pair-qq0hmzuw\project\tools\test_t1688_stale_plugin_guard.py", line 248, in test_every_target_or_actor_refusal_survives_the_gap_with_its_own_code
+    self.blocked(identifier, code)
+  File "V:\_TEMP_\saipen-t1688-pair-qq0hmzuw\project\tools\test_t1688_stale_plugin_guard.py", line 212, in blocked
+    self.assertEqual(record["outcome"], "blocked", record)
+AssertionError: 'allowed' != 'blocked'
+- allowed
++ blocked
+ : {'id': 'answer-terminal', 'outcome': 'allowed', 'message': '', 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"NOT_SAIPEN_PROJECT","project_root":null,"project_lineage":null,"provenance":null}\nNo SAIPEN project or asserted binding exists; the guard is non-interfering.', 'SAIPEN_HOST_INTEGRATION {"status":"UNVERIFIED","adapter_code":"PLUGIN_RESTART_REQUIRED","binding_conflict":null,"failure_code":"PLUGIN_RESTART_REQUIRED","decision":"ALLOW_DEGRADED","policy":"DEGRADED_ALLOWED","policy_source":"default","operator_action":"restart the host application"}\nOrdinary work may proceed under the selected host policy. SAIPEN could not verify consequential tools; retain the UNVERIFIED status and claim no validation.']}
+
+======================================================================
+FAIL: test_every_target_or_actor_refusal_survives_the_gap_with_its_own_code (test_t1688_stale_plugin_guard.StalePluginGuardTests.test_every_target_or_actor_refusal_survives_the_gap_with_its_own_code) (case='answer-ownership')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1688-pair-qq0hmzuw\project\tools\test_t1688_stale_plugin_guard.py", line 248, in test_every_target_or_actor_refusal_survives_the_gap_with_its_own_code
+    self.blocked(identifier, code)
+  File "V:\_TEMP_\saipen-t1688-pair-qq0hmzuw\project\tools\test_t1688_stale_plugin_guard.py", line 212, in blocked
+    self.assertEqual(record["outcome"], "blocked", record)
+AssertionError: 'allowed' != 'blocked'
+- allowed
++ blocked
+ : {'id': 'answer-ownership', 'outcome': 'allowed', 'message': '', 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"NOT_SAIPEN_PROJECT","project_root":null,"project_lineage":null,"provenance":null}\nNo SAIPEN project or asserted binding exists; the guard is non-interfering.', 'SAIPEN_HOST_INTEGRATION {"status":"UNVERIFIED","adapter_code":"PLUGIN_RESTART_REQUIRED","binding_conflict":null,"failure_code":"PLUGIN_RESTART_REQUIRED","decision":"ALLOW_DEGRADED","policy":"DEGRADED_ALLOWED","policy_source":"default","operator_action":"restart the host application"}\nOrdinary work may proceed under the selected host policy. SAIPEN could not verify consequential tools; retain the UNVERIFIED status and claim no validation.']}
+
+======================================================================
+FAIL: test_padding_the_payload_does_not_buy_the_allowance (test_t1688_stale_plugin_guard.StalePluginGuardTests.test_padding_the_payload_does_not_buy_the_allowance)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1688-pair-qq0hmzuw\project\tools\test_t1688_stale_plugin_guard.py", line 279, in test_padding_the_payload_does_not_buy_the_allowance
+    self.assertEqual(record["outcome"], "blocked", record["message"])
+AssertionError: 'allowed' != 'blocked'
+- allowed
++ blocked
+ : 
+
+----------------------------------------------------------------------
+Ran 9 tests in 9.099s
+
+FAILED (failures=5)

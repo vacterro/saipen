@@ -1,0 +1,11 @@
+{
+  "part_id": "part_mveqvmtd_a936c6d1-84fb-47ad-b884-54163551fe52",
+  "session_id": "sess_4b88db14-910a-4520-8986-18571294c816",
+  "message_id": "msg_mveqvjfw_0afa6f3f-3025-4fbc-9701-118ed4373cd3",
+  "directory": "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+  "title": "PHASE REVIEW T-301",
+  "text": "STATUS: BLOCKED (honest; no fabricated acceptance)\nAUTHORITY: bounded operator reauthorized E-3366; review recorded E-3368\nTICKET: T-301\nINPUT ABI VERDICT: PASS (x64 KeyInput 24, MouseInput 32, INPUT 40, union offset 8)\nDESKTOP PROBE VERDICT: BLOCKED_ENVIRONMENT (interactive desktop unavailable)\nCONSOLE WINDOW OWNERSHIP: hardened (session + conhost + exact title + nonce; ambiguous rejected)\nSENDINPUT DELIVERY: return counts + GetLastError wired; physical delivery blocked\nCOPY RESULT: not proven\nPASTE RESULT: not proven\nCTRL+C RESULT: not proven\nCTRL+A RESULT: mechanism fixed via GetAsyncKeyState low bit; physical proof blocked\nUNICODE RESULT: not proven\nNEGATIVE CONTROLS: controller-off detected; input-dependent ones honestly blocked\nWINDOWS LIVE ACCEPTANCE: BLOCKED_ENVIRONMENT (7 cases)\nSTAGED BINARY HASH: 04B063A10946F64A22B32E2461BA91E52406F6A5363961D32B3207F06AF238BD\nINSTALLED BINARY HASH: 5A45188E3E4A8ED3E0CA806EB09B6557C4474BF36347F73CD007F73DBA4DB6A5\nCANONICAL VERIFY: E-3367 recorded; REVIEW -> BLOCKED\nREMAINING BLOCKERS: no interactive desktop; installed binary stale; deployment authorization unverified\nNEXT EXACT ACTION: rerun on unlocked interactive Windows desktop; deploy staged binary only with verified authorization\nNEED USER: yes (interactive desktop and deployment authorization)",
+  "sha256": "266e2aeec04312c477e312e10d96e0730e31728c85d970bc7ff34d03b272b987",
+  "read_only_database": true,
+  "scope": "Actual stored report, not a separately captured pre-transport stream or desktop screenshot"
+}

@@ -1,0 +1,79 @@
+{
+  "clauses": {
+    "SRC-395:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Changing independent-verification requirements invalidates the existing maintenance grant."
+    },
+    "SRC-395:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Changing patch, capture, coverage target, provider-relevant admission rules or evidence source invalidates the grant."
+    },
+    "SRC-395:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Updating harmless progress preserves the grant."
+    },
+    "SRC-395:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Legacy grants cannot silently authorize expanded policies."
+    },
+    "SRC-395:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Concurrent policy changes cannot pass Work admission."
+    },
+    "SRC-395:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Model-supplied or forged approval remains refused."
+    },
+    "SRC-395:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Wrong project and historic test objective remain refused."
+    },
+    "SRC-395:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Read-only proposal never creates a new goal."
+    },
+    "SRC-395:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inner proposal refusal produces outer refusal."
+    },
+    "SRC-395:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A real matching goal can be approved through the trusted native operator surface."
+    },
+    "SRC-395:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Release, publication and foreign mutations remain separately gated."
+    },
+    "SRC-395:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Shared Git index and sibling ownership remain unchanged."
+    },
+    "SRC-395:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The final required full verification covers the actual tree."
+    },
+    "SRC-395:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Installed-host acceptance remains separate from mocks. FINAL REPORT CURRENT_WORK: GRANT_POLICY_IDENTITY: MATERIAL_POLICY_CHANGE_REFUSAL: HARMLESS_PROGRESS_NONREGRESSION: ADMISSION_TOCTOU_PROTECTION: LEGACY_GRANT_HANDLING: PROPOSAL_REFUSAL_PROPAGATION: PERSISTENT_GOAL_BINDING: REAL_OPERATOR_APPROVAL: BROKER_PROOF: FULL_GATE: ZAICODE_NATIVE_SCHEDULER: REAL_SUCCESSOR_TURNS: ORIGINAL_INDEX_PRESERVED: REMAINING_BLOCKER: ONE_GENUINE_OPERATOR_ACTION: NEXT_AUTOMATIC_ACTION: No premature DONE. No fabricated human approval. No secure-grant claim while material policy edits leave its authorization identity unchanged. END SAIHANDOFF"
+    }
+  },
+  "derived_at": "2026-11-04T22:46:11Z",
+  "derived_from": "SRC-395",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "1270a4730bb4e2fe964c7f32ee65b200396e624b5b440d31fc5e0cd886f27477"
+}

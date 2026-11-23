@@ -1,0 +1,38 @@
+PASS: active-task-not-claimed -- failed on 'is not the claimed ## DOING ticket', as declared
+PASS: append-target-mid-line -- failed on 'end mid-line', as declared
+PASS: block-park-done-green -- expected pass, got pass
+PASS: block-park-done-red -- failed on 'invalid phase transition', as declared
+PASS: blocked-ticket -- expected pass, got pass
+PASS: checkpoint-missing-required-field -- failed on 'missing required field: blocker', as declared
+PASS: cold-handoff-continuity -- expected pass, got pass
+PASS: dangling-needs-reference -- failed on 'dangling needs: reference', as declared
+PASS: dependency-cycle -- failed on 'cyclic needs: dependencies', as declared
+PASS: done-wait-deadlock -- failed on 'auto-transition HUNT', as declared
+PASS: done-wait-deadlock-goal-mode -- failed on 'auto-transition HUNT', as declared
+PASS: goal-counter-recovery -- expected pass, got pass
+PASS: goal-counter-untraced -- passed and warned on 'goal-counter-untraced', as declared
+PASS: goal-reauthorization-trace -- expected pass, got pass
+PASS: goal-reauthorization-untraced -- passed and warned on 'repairable-protocol-drift', as declared
+PASS: hr-bad-updated -- failed on 'updated must be ISO-8601 UTC', as declared
+PASS: hr-claim-foreign-doing -- expected pass, got pass
+PASS: hr-claim-half-pair -- failed on 'INVALID claim', as declared
+PASS: hr-illegal-transition-pair -- failed on 'invalid phase transition', as declared
+PASS: hr-malformed-wait -- failed on 'WAIT with no category token', as declared
+PASS: hr-missing-style_contract -- failed on 'style_contract', as declared
+PASS: hr-missing-transition_from -- failed on 'missing transition_from', as declared
+PASS: hr-wait-grammar -- failed on 'malformed WAIT', as declared
+PASS: hr-wrong-style_contract -- failed on 'style_contract', as declared
+PASS: invalid-mode-phase-combination -- expected pass, got pass
+PASS: multi-agent-claim-conflict -- expected pass, got pass
+PASS: next-action-not-executable -- failed on 'STATE.md next_action does not start with', as declared
+PASS: proposal-mode-halt -- expected pass, got pass
+PASS: read-only-restriction -- failed on 'read-only MUST NOT enter BUILD', as declared
+PASS: resume-after-crash -- expected pass, got pass
+PASS: saiui-adoption -- expected pass, got pass
+PASS: ship-preflight-build-return -- expected pass, got pass
+PASS: stale-state-reconciliation -- expected pass, got pass
+PASS: state-behind-board-self-claim -- failed on 'STATE is behind BOARD', as declared
+PASS: tripped-valve-without-wait -- failed on 'tripped safety valve', as declared
+PASS: two-doing-tickets -- failed on 'tickets in ## DOING', as declared
+PASS: userperson-malformed -- failed on 'USERPERSON file must open with the exact heading', as declared
+PASS: userperson-valid -- expected pass, got pass

@@ -1,0 +1,26 @@
+test_a_missing_hook_is_why_this_suite_installs_it (__main__.AdmissionTests.test_a_missing_hook_is_why_this_suite_installs_it)
+Guard against a fixture that silently has no gate at all. ... ok
+test_the_shipped_hook_accepts_the_same_file_once_its_content_is_staged (__main__.AdmissionTests.test_the_shipped_hook_accepts_the_same_file_once_its_content_is_staged) ... ok
+test_the_shipped_hook_refuses_a_commit_whose_only_runtime_file_is_intent_only (__main__.AdmissionTests.test_the_shipped_hook_refuses_a_commit_whose_only_runtime_file_is_intent_only) ... ok
+test_copy_tree_members_reads_the_disk_not_the_index (__main__.InjectionStillShipsTheDiskTests.test_copy_tree_members_reads_the_disk_not_the_index)
+The shared expansion must stay disk-based, or the FAIL loses meaning. ... ok
+test_the_powershell_injector_copies_the_whole_tree (__main__.InjectionStillShipsTheDiskTests.test_the_powershell_injector_copies_the_whole_tree) ... ok
+test_the_shell_injector_copies_the_whole_tree (__main__.InjectionStillShipsTheDiskTests.test_the_shell_injector_copies_the_whole_tree) ... ok
+test_the_red_control_anchor_still_exists (__main__.RedControlTests.test_the_red_control_anchor_still_exists) ... ok
+test_without_the_fix_the_intent_only_state_reads_green (__main__.RedControlTests.test_without_the_fix_the_intent_only_state_reads_green) ... ok
+test_a_file_the_index_never_met_is_not_called_intent_only (__main__.ThreeStateTests.test_a_file_the_index_never_met_is_not_called_intent_only)
+The three states must not collapse: only a staged name is intent-only. ... ok
+test_conformance_passes_on_a_tree_whose_only_defect_would_be_untracked (__main__.ThreeStateTests.test_conformance_passes_on_a_tree_whose_only_defect_would_be_untracked)
+The verify clause's third half, asserted on the whole gate. ... ok
+test_intent_only_content_fails_and_names_the_real_repair (__main__.ThreeStateTests.test_intent_only_content_fails_and_names_the_real_repair)
+THE DEFECT. Pre-fix this printed PASS (see RedControlTests). ... ok
+test_plain_untracked_still_fails_with_the_original_message (__main__.ThreeStateTests.test_plain_untracked_still_fails_with_the_original_message)
+T-1592's finding must not be reworded by this change. ... ok
+test_staged_content_passes (__main__.ThreeStateTests.test_staged_content_passes)
+The middle state is the ordinary case: one commit will carry it. ... ok
+test_the_baseline_is_green (__main__.ThreeStateTests.test_the_baseline_is_green) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 34.292s
+
+OK

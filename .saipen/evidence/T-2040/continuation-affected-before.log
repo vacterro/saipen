@@ -1,0 +1,400 @@
+...F..................FF..FFFFFFF..FF.FF..F...FF.F.F................                                                                     [100%]
+================================== FAILURES ===================================
+____________ ClosedVocabulary.test_live_project_continues_with_cc _____________
+
+self = <test_automation_block.ClosedVocabulary testMethod=test_live_project_continues_with_cc>
+
+    def test_live_project_continues_with_cc(self) -> None:
+        routed = route_next(
+            _state(),
+            BOARD_EMPTY,
+            pending_ops=[],
+            conflict_ops=[],
+            audit_inbox=None,
+        )
+        block = self.block(routed=routed, audit_status=self.audit(), convergence=None)
+>       self.assertEqual(block["disposition"], CONTINUE)
+E       AssertionError: 'BLOCKED' != 'CONTINUE'
+E       - BLOCKED
+E       + CONTINUE
+
+tools\test_automation_block.py:201: AssertionError
+________________ ClosureGate.test_audit_quiescence_is_required ________________
+
+self = <test_automation_block.ClosureGate testMethod=test_audit_quiescence_is_required>
+
+    def test_audit_quiescence_is_required(self) -> None:
+        block = self.block(
+            routed=self._idle_route(),
+            audit_status=self.audit(layer_counts=1),
+        )
+>       self.assertEqual(block["disposition"], CONTINUE)
+E       AssertionError: 'BLOCKED' != 'CONTINUE'
+E       - BLOCKED
+E       + CONTINUE
+
+tools\test_automation_block.py:475: AssertionError
+________________ ClosureGate.test_binding_wait_vetoes_closure _________________
+
+self = <test_automation_block.ClosureGate testMethod=test_binding_wait_vetoes_closure>
+
+    def test_binding_wait_vetoes_closure(self) -> None:
+        state, _ = _parsed(_state(next_action="WAIT: user brake -- wait for the human"))
+        block = self.block(
+            routed=self._idle_route(),
+            state=state,
+            audit_status=self.audit(),
+        )
+>       self.assertEqual(block["disposition"], CONTINUE)
+E       AssertionError: 'BLOCKED' != 'CONTINUE'
+E       - BLOCKED
+E       + CONTINUE
+
+tools\test_automation_block.py:516: AssertionError
+_____ ClosureGate.test_done_phase_and_empty_board_alone_are_insufficient ______
+
+self = <test_automation_block.ClosureGate testMethod=test_done_phase_and_empty_board_alone_are_insufficient>
+
+    def test_done_phase_and_empty_board_alone_are_insufficient(self) -> None:
+        # SRC-023 (audit/10.md) §9 #12/#13: neither DONE phase nor an empty
+        # board alone proves closure -- the convergence gate decides.
+        state, _ = _parsed(_state(phase="DONE"))
+        block = self.block(
+            routed=self._idle_route(),
+            state=state,
+            audit_status=self.audit(),
+            convergence=None,
+        )
+>       self.assertEqual(block["disposition"], CONTINUE)
+E       AssertionError: 'BLOCKED' != 'CONTINUE'
+E       - BLOCKED
+E       + CONTINUE
+
+tools\test_automation_block.py:577: AssertionError
+_ ClosureGate.test_empty_physical_folder_with_unsettled_intake_is_not_complete _
+
+self = <test_automation_block.ClosureGate testMethod=test_empty_physical_folder_with_unsettled_intake_is_not_complete>
+
+    def test_empty_physical_folder_with_unsettled_intake_is_not_complete(self) -> None:
+        # SRC-023 (audit/10.md) §9 #5: a physically empty audit/ plus an
+        # unsettled canonical intake (a live ACTIVE source receipt whose
+        # transport file vanished) is exactly a MISSING_AFTER_CAPTURE
+        # orphan -- quiescence stays false although the folder looks empty.
+        block = self.block(
+            routed=self._idle_route(),
+            audit_status={
+                "ok": True,
+                "clean": True,
+                "pending": [],
+                "closed_pending_delete": [],
+                "invalid": [],
+                "orphans": [
+                    {
+                        "rel": "audit/3.md",
+                        "state": "MISSING_AFTER_CAPTURE",
+                        "sha256": "a" * 64,
+                    }
+                ],
+                "residue": [],
+            },
+        )
+>       self.assertEqual(block["disposition"], CONTINUE)
+E       AssertionError: 'BLOCKED' != 'CONTINUE'
+E       - BLOCKED
+E       + CONTINUE
+
+tools\test_automation_block.py:604: AssertionError
+_____________ ClosureGate.test_full_closure_gate_yields_complete ______________
+
+self = <test_automation_block.ClosureGate testMethod=test_full_closure_gate_yields_complete>
+
+    def test_full_closure_gate_yields_complete(self) -> None:
+        block = self.block(
+            routed=self._idle_route(),
+            audit_status=self.audit(),
+            history_events=[],
+        )
+>       self.assertEqual(block["disposition"], automation.COMPLETE)
+E       AssertionError: 'BLOCKED' != 'COMPLETE'
+E       - BLOCKED
+E       + COMPLETE
+
+tools\test_automation_block.py:465: AssertionError
+___________ ClosureGate.test_no_convergence_evidence_vetoes_closure ___________
+
+self = <test_automation_block.ClosureGate testMethod=test_no_convergence_evidence_vetoes_closure>
+
+    def test_no_convergence_evidence_vetoes_closure(self) -> None:
+        block = self.block(
+            routed=self._idle_route(),
+            audit_status=self.audit(),
+            convergence=None,
+        )
+>       self.assertEqual(block["disposition"], CONTINUE)
+E       AssertionError: 'BLOCKED' != 'CONTINUE'
+E       - BLOCKED
+E       + CONTINUE
+
+tools\test_automation_block.py:493: AssertionError
+_____ ClosureGate.test_race_rule_consume_after_convergence_vetoes_closure _____
+
+self = <test_automation_block.ClosureGate testMethod=test_race_rule_consume_after_convergence_vetoes_closure>
+
+    def test_race_rule_consume_after_convergence_vetoes_closure(self) -> None:
+        block = self.block(
+            routed=self._idle_route(),
+            audit_status=self.audit(),
+            history_events=[
+                {
+                    "event": 9,
+                    "date": "06.09.26 12:05",
+                    "taxonomy": "RUN",
+                    "text": "AUDIT_INBOX_CLOSED audit/5.md sha256=x SRC-018 T-1280 coverage=10/10",
+                }
+            ],
+        )
+>       self.assertEqual(block["disposition"], CONTINUE)
+E       AssertionError: 'BLOCKED' != 'CONTINUE'
+E       - BLOCKED
+E       + CONTINUE
+
+tools\test_automation_block.py:532: AssertionError
+____ ClosureGate.test_race_rule_consume_before_convergence_allows_closure _____
+
+self = <test_automation_block.ClosureGate testMethod=test_race_rule_consume_before_convergence_allows_closure>
+
+    def test_race_rule_consume_before_convergence_allows_closure(self) -> None:
+        block = self.block(
+            routed=self._idle_route(),
+            audit_status=self.audit(),
+            history_events=[
+                {
+                    "event": 9,
+                    "date": "06.09.26 10:30",
+                    "taxonomy": "RUN",
+                    "text": "AUDIT_INBOX_CLOSED audit/5.md sha256=x SRC-018 T-1280 coverage=10/10",
+                }
+            ],
+        )
+>       self.assertEqual(block["disposition"], automation.COMPLETE)
+E       AssertionError: 'BLOCKED' != 'COMPLETE'
+E       - BLOCKED
+E       + COMPLETE
+
+tools\test_automation_block.py:565: AssertionError
+___ ClosureGate.test_residue_vetoes_closure_although_dir_is_empty_of_layers ___
+
+self = <test_automation_block.ClosureGate testMethod=test_residue_vetoes_closure_although_dir_is_empty_of_layers>
+
+    def test_residue_vetoes_closure_although_dir_is_empty_of_layers(self) -> None:
+        block = self.block(
+            routed=self._idle_route(),
+            audit_status=self.audit(residue=True),
+        )
+>       self.assertEqual(block["disposition"], CONTINUE)
+E       AssertionError: 'BLOCKED' != 'CONTINUE'
+E       - BLOCKED
+E       + CONTINUE
+
+tools\test_automation_block.py:484: AssertionError
+_____________ ClosureGate.test_workable_board_work_vetoes_closure _____________
+
+self = <test_automation_block.ClosureGate testMethod=test_workable_board_work_vetoes_closure>
+
+    def test_workable_board_work_vetoes_closure(self) -> None:
+        board = (
+            "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] stale | verify: proof\n"
+            "## DONE\n## BLOCKED\n"
+        )
+        block = self.block(
+            routed=self._idle_route(),
+            board=parse_board(board),
+            audit_status=self.audit(),
+        )
+>       self.assertEqual(block["disposition"], CONTINUE)
+E       AssertionError: 'BLOCKED' != 'CONTINUE'
+E       - BLOCKED
+E       + CONTINUE
+
+tools\test_automation_block.py:506: AssertionError
+_____________ AcceptanceFixture.test_full_run_to_closure_sequence _____________
+
+self = <test_automation_block.AcceptanceFixture testMethod=test_full_run_to_closure_sequence>
+
+    def test_full_run_to_closure_sequence(self) -> None:
+        idle = route_next(_state(), BOARD_EMPTY, audit_inbox=None)
+        self.assertEqual(idle["reason"], "maintain")
+    
+        # 1. While audit generations and their work remain -> CONTINUE.
+        work_rows = self._transport_rows([(1, "a\n"), (2, "b\n")])
+        block = self.block(
+            routed=idle, audit_status=work_rows, convergence=self._verdict_for(20)
+        )
+>       self.assertEqual(block["disposition"], CONTINUE)
+E       AssertionError: 'BLOCKED' != 'CONTINUE'
+E       - BLOCKED
+E       + CONTINUE
+
+tools\test_automation_block.py:764: AssertionError
+_ ContinuationAssessmentSuite.test_c01_empty_board_with_proven_maintenance_continues _
+
+self = <test_campaign_continuation_assessment.ContinuationAssessmentSuite testMethod=test_c01_empty_board_with_proven_maintenance_continues>
+
+    def test_c01_empty_board_with_proven_maintenance_continues(self):
+        self.write_board(doing=(), todo=(), blocked=())
+        self.write_state(
+            phase="DONE",
+            task="none",
+            continuation_authority="operator_persistent",
+            authority_until="continuous_maintenance",
+            authority_source="SRC-304",
+            goal_ingress="goal-0123456789abcdef",
+        )
+    
+        with patch.object(goal_authority, "prove", return_value=[]):
+            # Surface 1: Authoritative assessment
+            assessment = CA.assess_continuation(self.project, now=T0)
+>           self.assertEqual(assessment["classification"], CA.MAINTENANCE_AVAILABLE)
+E           AssertionError: 'INCOMPLETE_DISCOVERY' != 'MAINTENANCE_AVAILABLE'
+E           - INCOMPLETE_DISCOVERY
+E           + MAINTENANCE_AVAILABLE
+
+tools\test_campaign_continuation_assessment.py:125: AssertionError
+_ ContinuationAssessmentSuite.test_c02_empty_board_no_maintenance_authority_remains_idle _
+
+self = <test_campaign_continuation_assessment.ContinuationAssessmentSuite testMethod=test_c02_empty_board_no_maintenance_authority_remains_idle>
+
+    def test_c02_empty_board_no_maintenance_authority_remains_idle(self):
+        self.write_board(doing=(), todo=(), blocked=())
+        self.write_state(
+            phase="DONE",
+            task="none",
+            continuation_authority="operator_required",
+            authority_until="budget",
+        )
+    
+        # Surface 1: Assessment
+        assessment = CA.assess_continuation(self.project, now=T0)
+>       self.assertEqual(assessment["classification"], CA.QUIESCENT)
+E       AssertionError: 'INCOMPLETE_DISCOVERY' != 'QUIESCENT'
+E       - INCOMPLETE_DISCOVERY
+E       + QUIESCENT
+
+tools\test_campaign_continuation_assessment.py:155: AssertionError
+_ ContinuationAssessmentSuite.test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds _
+
+self = <test_campaign_continuation_assessment.ContinuationAssessmentSuite testMethod=test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds>
+
+    def test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds(self):
+        self.write_board(
+            todo=(),
+            blocked=("T-99 [P1] Foreign blocked ticket | blocker: BLOCKED_EXTERNAL",),
+        )
+        self.write_state(
+            phase="DONE",
+            task="none",
+            continuation_authority="operator_persistent",
+            authority_until="continuous_maintenance",
+            authority_source="SRC-304",
+            goal_ingress="goal-0123456789abcdef",
+        )
+    
+        with patch.object(goal_authority, "prove", return_value=[]):
+            # Surface 1: Assessment
+            assessment = CA.assess_continuation(self.project, now=T0)
+>           self.assertEqual(assessment["classification"], CA.MAINTENANCE_AVAILABLE)
+E           AssertionError: 'WAIT_EXTERNAL' != 'MAINTENANCE_AVAILABLE'
+E           - WAIT_EXTERNAL
+E           + MAINTENANCE_AVAILABLE
+
+tools\test_campaign_continuation_assessment.py:232: AssertionError
+_ ContinueImproveFallthroughTests.test_ambiguous_improve_is_refusal_not_idle __
+
+self = <test_continue_improve_fallthrough.ContinueImproveFallthroughTests testMethod=test_ambiguous_improve_is_refusal_not_idle>
+
+    def test_ambiguous_improve_is_refusal_not_idle(self):
+        # Two active Improve cycles force improve's ambiguous-admission
+        # refusal (a real non-recovery ImproveError).  W3B.11: that is a
+        # structured refusal that must propagate, never be mapped to
+        # CONTINUE_IDLE -- only a genuine NO_WORTHWHILE_IMPROVEMENT outcome
+        # may become idle.
+        root = self._make("idle", board=self._board())
+        imp = root / ".saipen" / "improve"
+        for i in ("a", "b"):
+            cycle = imp / f"imp-idle-{i}-1"
+            cycle.mkdir(parents=True)
+            (cycle / "MANIFEST.md").write_text(
+                "# IMPROVE CYCLE ROSTER\n"
+                "manifest_schema: strict\n"
+                f"cycle_id: {cycle.name}\n"
+                "created_at: 2026-08-30T00:00:00Z\n"
+                "project_identity: test\n"
+                "cycle_status: active\n",
+                encoding="utf-8",
+            )
+        rc, result = _invoke_cli(root, "cc")
+>       self.assertEqual(rc, 1, result)
+E       AssertionError: 0 != 1 : {'ok': True, 'action': 'saipen status', 'ticket': 'none', 'reason': 'maintain', 'detail': 'executable queue is empty; complete discovery and goal verification are not proven', 'executable_behavior': None, 'action_kind': None, 'future_gate': None, 'load': None, 'load_path': None, 'work': None, 'cold_route': {'project_root': 'V:\\_TEMP_\\saipen-cont-improve-otmgq244\\idle', 'saipen_home': None, 'protocol_dir': None, 'phase': 'DONE', 'phase_module': None, 'boot': None, 'style': None, 'documents': {}, 'project_memory': {'STATE.md': 'V:\\_TEMP_\\saipen-cont-improve-otmgq244\\idle\\.saipen\\STATE.md', 'BOARD.md': 'V:\\_TEMP_\\saipen-cont-improve-otmgq244\\idle\\.saipen\\BOARD.md', 'LOG.md': 'V:\\_TEMP_\\saipen-cont-improve-otmgq244\\idle\\.saipen\\LOG.md'}, 'search_required': False}, 'execution_instruction': 'Routing is not completion evidence. Read load_path when present, then execute action under its owner in this turn; respect WAIT and actual refusals. If --dry-run was requested, this is a preview only.', 'execution_intent': 'goal', 'converge_target': None, 'goal_waves': 0, 'goal_tickets': 0, 'recovery_pending': False, 'recovery_conflict': False, 'pending_ops': [], 'parked_work': None, 'parked_detail': None, 'reconciliation': {'ok': True, 'code': 'AUDIT_MANIFEST_WRITTEN', 'changed': {'board': [], 'state': [], 'audit_manifest': ['V:/_TEMP_/saipen-cont-improve-otmgq244/idle/.saipen/MANIFEST.json']}, 'strict_state_error': None, 'dry_run': False, 'audit_manifest': {'ok': True, 'code': 'AUDIT_MANIFEST_WRITTEN', 'path': 'V:/_TEMP_/saipen-cont-improve-otmgq244/idle/.saipen/MANIFEST.json', 'contract_version': 3, 'changed': True, 'layout': 'LEGACY_LINEAGE_ABSENT', 'dry_run': False, 'declared': 'ABSENT', 'manifest_present': True, 'manifest_current': True, 'detail': ''}, 'detail': 'audit manifest AUDIT_MANIFEST_WRITTEN -- reconciliation mutated the canonical surface, so this is not CLEAN; the next steady-state call may be CLEAN'}, 'stop_reason': 'INCOMPLETE_DISCOVERY', 'terminal_classification': 'INCOMPLETE_DISCOVERY', 'work_exhaustion': {'schema_version': 2, 'status': 'INCOMPLETE_DISCOVERY', 'legacy_status': 'INCOMPLETE_DISCOVERY', 'source_generation': '1', 'sources': [{'source_name': 'active_work', 'source_generation': '1', 'last_checked_generation': '1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'canonical_recovery', 'source_generation': '1', 'last_checked_generation': '1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'actionable_todo', 'source_generation': '1', 'last_checked_generation': '1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'unresolved_source', 'source_generation': '1', 'last_checked_generation': '1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'unconsumed_audit_inbox', 'source_generation': '1', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'provider result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'release_obligations', 'source_generation': '1', 'last_checked_generation': '1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'future_gates', 'source_generation': '1', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': ['saipen future refresh'], 'exact_blocker': 'future inventory missing, stale or unreadable', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'hunt_findings', 'source_generation': '1', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'current-generation analysis result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'improve_candidates', 'source_generation': '1', 'last_checked_generation': None, 'eligibility_result': 'BLOCKED_AUTHORITY', 'authorized_actions': [], 'exact_blocker': 'current continuous maintenance grant is not proven', 'next_recheck_condition': 'authenticated grant restored within its scope', 'checked': False}, {'source_name': 'external_forensics', 'source_generation': '1', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'current-generation analysis result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'conformance_debt', 'source_generation': '1', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'persistent_goals', 'source_generation': '1', 'last_checked_generation': '1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}], 'exhausted': False, 'verified_exhausted': False, 'no_work_available': True, 'all_checked': False, 'blocked_sources': ['improve_candidates'], 'blocked_obligations': [], 'certificate_errors': []}, 'outcome_truth': {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}, 'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'librarian_advisory': 'ADVISORY (local GPU librarian; semantic suggestion, not protocol authority)\nRetrieved 2 reference(s) (0 verified, 0 superseded):\n  1. [CHANGED] (score 4.53) .saipen/BOARD.md\n     "DY_FIXED against the WP-D fix | verify: librarian status reports the configured --enable gate rather than the persisted ..."\n  2. [CHANGED] (score 4.503) .saipen/BOARD.md\n     "de: own_patch\r - [x] T-15 [P3] Delete the dead _expected_is_abstention_removed stub from eval/metrics.py | verify: grep ..."', 'librarian_metrics': {'hits_count': 2, 'verified_count': 0, 'stale_count': 0, 'useful': True}, 'telegrams': {'state': 'OK', 'unread': 0, 'on_current_work': 0, 'complete': True, 'read_command': 'saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-cont-improve-otmgq244\\idle --workspace V:\\___VAC\\__K\\__STORE\\_PERSONAL\\_SAIMAILBOX_ --seat tester', 'detail': 'counts only; nothing was opened and nothing here is an instruction'}, 'route': 'cc'}
+
+tools\test_continue_improve_fallthrough.py:294: AssertionError
+_ ContinueImproveFallthroughTests.test_anti_loop_at_most_one_fallback_per_invocation _
+
+self = <test_continue_improve_fallthrough.ContinueImproveFallthroughTests testMethod=test_anti_loop_at_most_one_fallback_per_invocation>
+
+    def test_anti_loop_at_most_one_fallback_per_invocation(self):
+        root = self._make("antiloop", board=self._board())
+        # First cc falls through exactly once and prepares ONE cycle.
+        rc, first = _invoke_cli(root, "cc")
+        self.assertEqual(rc, 0)
+>       self.assertEqual(first["code"], "IMPROVE_AUDIT_ASSIGNMENT")
+                         ^^^^^^^^^^^^^
+E       KeyError: 'code'
+
+tools\test_continue_improve_fallthrough.py:304: KeyError
+_ ContinueImproveFallthroughTests.test_discovered_work_proceeds_through_normal_lifecycle _
+
+self = <test_continue_improve_fallthrough.ContinueImproveFallthroughTests testMethod=test_discovered_work_proceeds_through_normal_lifecycle>
+
+    def test_discovered_work_proceeds_through_normal_lifecycle(self):
+        root = self._make("lifecycle", board=self._board())
+        rc, first = _invoke_cli(root, "cc")
+        self.assertEqual(rc, 0)
+        cycle = first.get("cycle_id")
+>       self.assertTrue(cycle, first)
+E       AssertionError: None is not true : {'ok': True, 'action': 'saipen status', 'ticket': 'none', 'reason': 'maintain', 'detail': 'executable queue is empty; complete discovery and goal verification are not proven', 'executable_behavior': None, 'action_kind': None, 'future_gate': None, 'load': None, 'load_path': None, 'work': None, 'cold_route': {'project_root': 'V:\\_TEMP_\\saipen-cont-improve-isvr6xf1\\lifecycle', 'saipen_home': None, 'protocol_dir': None, 'phase': 'DONE', 'phase_module': None, 'boot': None, 'style': None, 'documents': {}, 'project_memory': {'STATE.md': 'V:\\_TEMP_\\saipen-cont-improve-isvr6xf1\\lifecycle\\.saipen\\STATE.md', 'BOARD.md': 'V:\\_TEMP_\\saipen-cont-improve-isvr6xf1\\lifecycle\\.saipen\\BOARD.md', 'LOG.md': 'V:\\_TEMP_\\saipen-cont-improve-isvr6xf1\\lifecycle\\.saipen\\LOG.md'}, 'search_required': False}, 'execution_instruction': 'Routing is not completion evidence. Read load_path when present, then execute action under its owner in this turn; respect WAIT and actual refusals. If --dry-run was requested, this is a preview only.', 'execution_intent': 'goal', 'converge_target': None, 'goal_waves': 0, 'goal_tickets': 0, 'recovery_pending': False, 'recovery_conflict': False, 'pending_ops': [], 'parked_work': None, 'parked_detail': None, 'reconciliation': {'ok': True, 'code': 'AUDIT_MANIFEST_WRITTEN', 'changed': {'board': [], 'state': [], 'audit_manifest': ['V:/_TEMP_/saipen-cont-improve-isvr6xf1/lifecycle/.saipen/MANIFEST.json']}, 'strict_state_error': None, 'dry_run': False, 'audit_manifest': {'ok': True, 'code': 'AUDIT_MANIFEST_WRITTEN', 'path': 'V:/_TEMP_/saipen-cont-improve-isvr6xf1/lifecycle/.saipen/MANIFEST.json', 'contract_version': 3, 'changed': True, 'layout': 'LEGACY_LINEAGE_ABSENT', 'dry_run': False, 'declared': 'ABSENT', 'manifest_present': True, 'manifest_current': True, 'detail': ''}, 'detail': 'audit manifest AUDIT_MANIFEST_WRITTEN -- reconciliation mutated the canonical surface, so this is not CLEAN; the next steady-state call may be CLEAN'}, 'stop_reason': 'INCOMPLETE_DISCOVERY', 'terminal_classification': 'INCOMPLETE_DISCOVERY', 'work_exhaustion': {'schema_version': 2, 'status': 'INCOMPLETE_DISCOVERY', 'legacy_status': 'INCOMPLETE_DISCOVERY', 'source_generation': '1', 'sources': [{'source_name': 'active_work', 'source_generation': '1', 'last_checked_generation': '1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'canonical_recovery', 'source_generation': '1', 'last_checked_generation': '1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'actionable_todo', 'source_generation': '1', 'last_checked_generation': '1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'unresolved_source', 'source_generation': '1', 'last_checked_generation': '1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'unconsumed_audit_inbox', 'source_generation': '1', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'provider result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'release_obligations', 'source_generation': '1', 'last_checked_generation': '1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}, {'source_name': 'future_gates', 'source_generation': '1', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': ['saipen future refresh'], 'exact_blocker': 'future inventory missing, stale or unreadable', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'hunt_findings', 'source_generation': '1', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'current-generation analysis result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'improve_candidates', 'source_generation': '1', 'last_checked_generation': None, 'eligibility_result': 'BLOCKED_AUTHORITY', 'authorized_actions': [], 'exact_blocker': 'current continuous maintenance grant is not proven', 'next_recheck_condition': 'authenticated grant restored within its scope', 'checked': False}, {'source_name': 'external_forensics', 'source_generation': '1', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'current-generation analysis result not supplied', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'conformance_debt', 'source_generation': '1', 'last_checked_generation': None, 'eligibility_result': 'NOT_CHECKED', 'authorized_actions': [], 'exact_blocker': 'no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS', 'next_recheck_condition': 'provider supplies current evidence', 'checked': False}, {'source_name': 'persistent_goals', 'source_generation': '1', 'last_checked_generation': '1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}], 'exhausted': False, 'verified_exhausted': False, 'no_work_available': True, 'all_checked': False, 'blocked_sources': ['improve_candidates'], 'blocked_obligations': [], 'certificate_errors': []}, 'outcome_truth': {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}, 'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'librarian_advisory': 'ADVISORY (local GPU librarian; semantic suggestion, not protocol authority)\nRetrieved 2 reference(s) (0 verified, 0 superseded):\n  1. [CHANGED] (score 4.53) .saipen/BOARD.md\n     "DY_FIXED against the WP-D fix | verify: librarian status reports the configured --enable gate rather than the persisted ..."\n  2. [CHANGED] (score 4.503) .saipen/BOARD.md\n     "de: own_patch\r - [x] T-15 [P3] Delete the dead _expected_is_abstention_removed stub from eval/metrics.py | verify: grep ..."', 'librarian_metrics': {'hits_count': 2, 'verified_count': 0, 'stale_count': 0, 'useful': True}, 'telegrams': {'state': 'OK', 'unread': 0, 'on_current_work': 0, 'complete': True, 'read_command': 'saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-cont-improve-isvr6xf1\\lifecycle --workspace V:\\___VAC\\__K\\__STORE\\_PERSONAL\\_SAIMAILBOX_ --seat tester', 'detail': 'counts only; nothing was opened and nothing here is an instruction'}, 'route': 'cc'}
+
+tools\test_continue_improve_fallthrough.py:264: AssertionError
+______ ContinueImproveFallthroughTests.test_empty_queue_triggers_improve ______
+
+self = <test_continue_improve_fallthrough.ContinueImproveFallthroughTests testMethod=test_empty_queue_triggers_improve>
+
+    def test_empty_queue_triggers_improve(self):
+        root = self._make("empty", board=self._board())
+        rc, result = _invoke_cli(root, "cc")
+        self.assertEqual(rc, 0, result)
+>       self.assertEqual(result["code"], "IMPROVE_AUDIT_ASSIGNMENT", result)
+                         ^^^^^^^^^^^^^^
+E       KeyError: 'code'
+
+tools\test_continue_improve_fallthrough.py:234: KeyError
+=========================== short test summary info ===========================
+FAILED tools/test_automation_block.py::ClosedVocabulary::test_live_project_continues_with_cc
+FAILED tools/test_automation_block.py::ClosureGate::test_audit_quiescence_is_required
+FAILED tools/test_automation_block.py::ClosureGate::test_binding_wait_vetoes_closure
+FAILED tools/test_automation_block.py::ClosureGate::test_done_phase_and_empty_board_alone_are_insufficient
+FAILED tools/test_automation_block.py::ClosureGate::test_empty_physical_folder_with_unsettled_intake_is_not_complete
+FAILED tools/test_automation_block.py::ClosureGate::test_full_closure_gate_yields_complete
+FAILED tools/test_automation_block.py::ClosureGate::test_no_convergence_evidence_vetoes_closure
+FAILED tools/test_automation_block.py::ClosureGate::test_race_rule_consume_after_convergence_vetoes_closure
+FAILED tools/test_automation_block.py::ClosureGate::test_race_rule_consume_before_convergence_allows_closure
+FAILED tools/test_automation_block.py::ClosureGate::test_residue_vetoes_closure_although_dir_is_empty_of_layers
+FAILED tools/test_automation_block.py::ClosureGate::test_workable_board_work_vetoes_closure
+FAILED tools/test_automation_block.py::AcceptanceFixture::test_full_run_to_closure_sequence
+FAILED tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c01_empty_board_with_proven_maintenance_continues
+FAILED tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c02_empty_board_no_maintenance_authority_remains_idle
+FAILED tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds
+FAILED tools/test_continue_improve_fallthrough.py::ContinueImproveFallthroughTests::test_ambiguous_improve_is_refusal_not_idle
+FAILED tools/test_continue_improve_fallthrough.py::ContinueImproveFallthroughTests::test_anti_loop_at_most_one_fallback_per_invocation
+FAILED tools/test_continue_improve_fallthrough.py::ContinueImproveFallthroughTests::test_discovered_work_proceeds_through_normal_lifecycle
+FAILED tools/test_continue_improve_fallthrough.py::ContinueImproveFallthroughTests::test_empty_queue_triggers_improve
+19 failed, 49 passed, 8 subtests passed in 26.92s

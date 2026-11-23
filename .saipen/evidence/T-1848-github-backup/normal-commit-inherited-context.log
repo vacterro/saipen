@@ -1,0 +1,303 @@
+[backup/cc-all-20261021T222419Z 1aae6b97] chore: snapshot cc-all work for GitHub backup
+ 414 files changed, 92976 insertions(+), 8634 deletions(-)
+ create mode 100644 .saipen/evidence/T-1848-github-backup/snapshot-manifest.json
+ delete mode 100644 .workbuddy-ai/SAIPENFUTURE_CONTEXT_GRAPH_20260909_1811.md
+ delete mode 100644 .workbuddy-ai/memory/2026-08-19.md
+ delete mode 100644 .workbuddy-ai/memory/2026-08-20.md
+ delete mode 100644 .workbuddy-ai/memory/2026-08-22.md
+ delete mode 100644 .workbuddy-ai/memory/2026-08-31.md
+ create mode 100644 KNOWLEDGE/ADR-0004-sink-mirror-for-diagnostics.md
+ create mode 100644 SAIHANDOFF_FREEBUFF_PROVENANCE.md
+ create mode 100644 future_gate/FG-0046_unified-provider-and-account-aware-saipen-launch-src-184.md
+ create mode 100644 future_gate/SAIPEN_20261011_1022_2.md
+ create mode 100644 future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/FUTURE_GATE_DURABLE_AUTONOMOUS_RUNS.md
+ create mode 100644 future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/MUTATION_VECTORS.md
+ create mode 100644 future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/README.md
+ create mode 100644 future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/REFERENCE_TRIGGERDEV_IDEAS.md
+ create mode 100644 tests/fixtures/protocol-diagnosis/README.md
+ create mode 100644 tests/fixtures/protocol-diagnosis/a.md
+ create mode 100644 tests/fixtures/protocol-diagnosis/b.md
+ create mode 100644 tests/fixtures/t1624-lockout/saipen-guard.py
+ create mode 100644 tests/fixtures/t1624-lockout/subject.json
+ create mode 100644 tests/fixtures/t1654-legacy-block/AGENTS.md.measured
+ create mode 100644 tests/fixtures/t1656-operator-wall/response.transcribed.txt
+ create mode 100644 tests/fixtures/t1703-valve-audit.json
+ create mode 100644 tools/authority_service.py
+ create mode 100644 tools/retired_host_hook.py
+ create mode 100644 tools/saipen_engine/acceptance_contract.py
+ create mode 100644 tools/saipen_engine/admission_doctor.py
+ create mode 100644 tools/saipen_engine/board_scrub.py
+ create mode 100644 tools/saipen_engine/claude_profiles.py
+ create mode 100644 tools/saipen_engine/cli_grammar.py
+ create mode 100644 tools/saipen_engine/closed_contracts.py
+ create mode 100644 tools/saipen_engine/cohort_reconcile.py
+ create mode 100644 tools/saipen_engine/decision_request.py
+ create mode 100644 tools/saipen_engine/external_renewal.py
+ create mode 100644 tools/saipen_engine/focused_unit.py
+ create mode 100644 tools/saipen_engine/gate_decision.py
+ create mode 100644 tools/saipen_engine/goal_authority.py
+ create mode 100644 tools/saipen_engine/host_authority_broker.py
+ create mode 100644 tools/saipen_engine/host_authority_client.py
+ create mode 100644 tools/saipen_engine/host_authority_identity.py
+ create mode 100644 tools/saipen_engine/host_authority_process.py
+ create mode 100644 tools/saipen_engine/host_authority_transport.py
+ create mode 100644 tools/saipen_engine/host_integration.py
+ create mode 100644 tools/saipen_engine/host_iteration.py
+ create mode 100644 tools/saipen_engine/host_taxonomy.py
+ create mode 100644 tools/saipen_engine/improve_retrospective.py
+ create mode 100644 tools/saipen_engine/install_identity.py
+ create mode 100644 tools/saipen_engine/iteration.py
+ create mode 100644 tools/saipen_engine/iteration_verdict.py
+ create mode 100644 tools/saipen_engine/lifecycle_authority.py
+ create mode 100644 tools/saipen_engine/machine_runtime.py
+ create mode 100644 tools/saipen_engine/native_host_policy.py
+ create mode 100644 tools/saipen_engine/operator_origin.py
+ create mode 100644 tools/saipen_engine/path_launcher.py
+ create mode 100644 tools/saipen_engine/process_tree.py
+ create mode 100644 tools/saipen_engine/project_block.py
+ create mode 100644 tools/saipen_engine/regression_execution.py
+ create mode 100644 tools/saipen_engine/sailearn_consumer.py
+ create mode 100644 tools/saipen_engine/source_binding.py
+ create mode 100644 tools/saipen_engine/suite_record.py
+ create mode 100644 tools/saipen_engine/verification_bootstrap.py
+ create mode 100644 tools/saipen_engine/verification_cache.py
+ create mode 100644 tools/saipen_engine/verification_impact.py
+ create mode 100644 tools/test_admission_auto_doctor.py
+ create mode 100644 tools/test_external_authentication_contract.py
+ create mode 100644 tools/test_external_revalidation.py
+ create mode 100644 tools/test_freebuff_operator_provenance.py
+ create mode 100644 tools/test_host_authority_broker.py
+ create mode 100644 tools/test_host_fixture.py
+ create mode 100644 tools/test_install_identity_doctor.py
+ create mode 100644 tools/test_operator_ingress_matrix.py
+ create mode 100644 tools/test_operator_origin_support.py
+ create mode 100644 tools/test_sailearn_consumer.py
+ create mode 100644 tools/test_source_contract_derivation.py
+ create mode 100644 tools/test_t119_stale_complete_exit.py
+ create mode 100644 tools/test_t1304_r005_verifier_boundary.py
+ create mode 100644 tools/test_t1304_r006_boundary_refusals.py
+ create mode 100644 tools/test_t1304_r009_settled_wiring.py
+ create mode 100644 tools/test_t1304_r011_empty_selection.py
+ create mode 100644 tools/test_t1464_matrix_acceptance.py
+ create mode 100644 tools/test_t1494_continuation_authority.py
+ create mode 100644 tools/test_t1618_future_maturation.py
+ create mode 100644 tools/test_t1619_goal_terminality.py
+ create mode 100644 tools/test_t1619_iteration_boundary.py
+ create mode 100644 tools/test_t1620_historical_counts.py
+ create mode 100644 tools/test_t1624_host_integration.py
+ create mode 100644 tools/test_t1627_operator_question.py
+ create mode 100644 tools/test_t1628_opencode_policy.py
+ create mode 100644 tools/test_t1631_argv_values.py
+ create mode 100644 tools/test_t1632_identifier_is_not_a_count.py
+ create mode 100644 tools/test_t1633_process_tree.py
+ create mode 100644 tools/test_t1635_claude_profiles.py
+ create mode 100644 tools/test_t1636_invalid_carrier.py
+ create mode 100644 tools/test_t1638_future_ingress.py
+ create mode 100644 tools/test_t1640_board_scrub.py
+ create mode 100644 tools/test_t1640_log_seal.py
+ create mode 100644 tools/test_t1641_gate_ownership.py
+ create mode 100644 tools/test_t1642_history_notes.py
+ create mode 100644 tools/test_t1645_zero_hunt.py
+ create mode 100644 tools/test_t1647_machine_runtime.py
+ create mode 100644 tools/test_t1648_transient_replace_lock.py
+ create mode 100644 tools/test_t1649_refusal_step.py
+ create mode 100644 tools/test_t1650_retired_host_image.py
+ create mode 100644 tools/test_t1651_executor_admission.py
+ create mode 100644 tools/test_t1654_project_block.py
+ create mode 100644 tools/test_t1655_file_mode.py
+ create mode 100644 tools/test_t1656_operator_readability.py
+ create mode 100644 tools/test_t1657_refused_reply_preserved.py
+ create mode 100644 tools/test_t1658_suite_record.py
+ create mode 100644 tools/test_t1659_run_window.py
+ create mode 100644 tools/test_t1661_suite_projection.py
+ create mode 100644 tools/test_t1662_repository_interlock.py
+ create mode 100644 tools/test_t1663_ticket_requires.py
+ create mode 100644 tools/test_t1665_guard_verbs.py
+ create mode 100644 tools/test_t1666_receipt_close.py
+ create mode 100644 tools/test_t1667_clean_compaction.py
+ create mode 100644 tools/test_t1668_durable_stores_ship.py
+ create mode 100644 tools/test_t1669_clean_done_projection.py
+ create mode 100644 tools/test_t1670_route_budgets.py
+ create mode 100644 tools/test_t1671_lifecycle_authority.py
+ create mode 100644 tools/test_t1673_board_only_terminal.py
+ create mode 100644 tools/test_t1674_typed_closure_mode.py
+ create mode 100644 tools/test_t1676_lifecycle_code.py
+ create mode 100644 tools/test_t1678_path_launcher.py
+ create mode 100644 tools/test_t1679_typed_head_quarantine.py
+ create mode 100644 tools/test_t1681_release_closure_op.py
+ create mode 100644 tools/test_t1683_launcher_profile.py
+ create mode 100644 tools/test_t1684_operand_grammar.py
+ create mode 100644 tools/test_t1685_profile_carrier.py
+ create mode 100644 tools/test_t1686_launch_policy.py
+ create mode 100644 tools/test_t1687_identity_diagnostics.py
+ create mode 100644 tools/test_t1688_stale_plugin_guard.py
+ create mode 100644 tools/test_t1690_profile_isolation.py
+ create mode 100644 tools/test_t1704_goal_checkpoint_priority.py
+ create mode 100644 tools/test_t1704_legacy_goal_authority.py
+ create mode 100644 tools/test_t1705_lifecycle_write_preflight.py
+ create mode 100644 tools/test_t1707_regression_chronology.py
+ create mode 100644 tools/test_t1708_regression_declaration.py
+ create mode 100644 tools/test_t1709_audit_starvation.py
+ create mode 100644 tools/test_t1711_regression_execution.py
+ create mode 100644 tools/test_t1712_manifest_runtime.py
+ create mode 100644 tools/test_t1715_block_for_parent_guard.py
+ create mode 100644 tools/test_t1718_acceptance_contract.py
+ create mode 100644 tools/test_t1721_acceptance_compaction.py
+ create mode 100644 tools/test_t1726_closed_contracts.py
+ create mode 100644 tools/test_t1726_contract_oracle.py
+ create mode 100644 tools/test_t1729_gate_decision_lifecycle.py
+ create mode 100644 tools/test_t1729_operator_gate.py
+ create mode 100644 tools/test_t1732_protocol_hardening.py
+ create mode 100644 tools/test_t1734_source_drift.py
+ create mode 100644 tools/test_t1735_tool_failure_boundaries.py
+ create mode 100644 tools/test_t1736_tool_safety_and_evidence.py
+ create mode 100644 tools/test_t1739_wait_boundary.py
+ create mode 100644 tools/test_t1742_pipeline_shell_probe.py
+ create mode 100644 tools/test_t1743_cross_user_dead_ends.py
+ create mode 100644 tools/test_t1744_fleet_foreign_field_skew.py
+ create mode 100644 tools/test_t1745_sub_collect_foreign_field.py
+ create mode 100644 tools/test_t1746_crew_terminal_outcome.py
+ create mode 100644 tools/test_t1747_degraded_profile.py
+ create mode 100644 tools/test_t1748_worker_clock.py
+ create mode 100644 tools/test_t1749_project_root_subject.py
+ create mode 100644 tools/test_t1750_release_boundary.py
+ create mode 100644 tools/test_t1751_reconcile_surfaces.py
+ create mode 100644 tools/test_t1752_audit_auto_close.py
+ create mode 100644 tools/test_t1753_activation_launcher.py
+ create mode 100644 tools/test_t1757_claim_follows_route.py
+ create mode 100644 tools/test_t1758_closure_cycle.py
+ create mode 100644 tools/test_t1759_single_lifecycle_observer.py
+ create mode 100644 tools/test_t1760_no_git_ccc_marker.py
+ create mode 100644 tools/test_t1761_recovery_reaches_a_typed_duplicate.py
+ create mode 100644 tools/test_t1762_control_count_scope.py
+ create mode 100644 tools/test_t1765_finding_subtypes.py
+ create mode 100644 tools/test_t1767_usage_line.py
+ create mode 100644 tools/test_t1770_pair_stage_scope.py
+ create mode 100644 tools/test_t1771_measure_then_finish.py
+ create mode 100644 tools/test_t1772_empty_draft_exit.py
+ create mode 100644 tools/test_t1774_sweep_queue_human.py
+ create mode 100644 tools/test_t1775_continue_never_admits_a_seat.py
+ create mode 100644 tools/test_t1776_protocol_home_valve.py
+ create mode 100644 tools/test_t1778_continue_closes_source.py
+ create mode 100644 tools/test_t1779_family_ignores_inbox.py
+ create mode 100644 tools/test_t1781_t37_latest_build.py
+ create mode 100644 tools/test_t1782_capped_builder_identifier.py
+ create mode 100644 tools/test_t1784_dry_run_verdict.py
+ create mode 100644 tools/test_t1785_dry_run_human.py
+ create mode 100644 tools/test_t1786_cli_first_activation.py
+ create mode 100644 tools/test_t1787_parked_brief.py
+ create mode 100644 tools/test_t1789_child_closure_route.py
+ create mode 100644 tools/test_t1790_dependency_route_budget.py
+ create mode 100644 tools/test_t1792_auto_doctor.py
+ create mode 100644 tools/test_t1801_missing_audit_settlement.py
+ create mode 100644 tools/test_t1803_archived_improve.py
+ create mode 100644 tools/test_t1807_audit_liveness_regression.py
+ create mode 100644 tools/test_t1821_markdown_surface.py
+ create mode 100644 tools/test_t1822_carrier_binding.py
+ create mode 100644 tools/test_t1826_declared_budgets.py
+ create mode 100644 tools/test_t1827_writer_lock_contract.py
+ create mode 100644 tools/test_t1828_verification_policy.py
+ create mode 100644 tools/test_t1830_verification_observations.py
+ create mode 100644 tools/test_t1831_cleanup_fixture_cost.py
+ create mode 100644 tools/test_t1832_single_flight.py
+ create mode 100644 tools/test_t1833_verification_owner.py
+ create mode 100644 tools/test_t1834_tool_call_identity.py
+ create mode 100644 tools/test_t1835_verification_economics.py
+ create mode 100644 tools/test_t1836_verification_impact.py
+ create mode 100644 tools/test_t1837_ci_family_parity.py
+ create mode 100644 tools/test_t1839_cohort_reconciliation.py
+ create mode 100644 tools/test_t1840_external_renewal.py
+ create mode 100644 tools/test_t1844_authority_preview.py
+ create mode 100644 tools/test_t1844_goal_turns.py
+ create mode 100644 tools/test_t1844_operator_origin.py
+ create mode 100644 tools/test_t1844_origin_broker.py
+ create mode 100644 tools/test_t1844_source_event.py
+ create mode 100644 tools/test_t1847_fixture_contract.py
+ create mode 100644 tools/test_t38_improve_cycle_liveness.py
+ create mode 100644 tools/test_t923_crew_invalid_role_errors.py
+ create mode 100644 tools/test_t925_sub_terminal_durability.py
+ create mode 100644 tools/test_vacterro_t36_checkpoint_usage_taxonomy.py
+ create mode 100644 tools/test_vacterro_t37_no_delta_closure.py
+ create mode 100644 tools/verification_metrics.py
+ create mode 100644 tools/verification_policy.json
+ create mode 100644 tools/verify_accounts_readiness.py
+saipen conformance validation starting (tools/validate.py)...
+Project root: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN (git-worktree)
+Project lineage: lineage-b512942bac884a8691f6c98afcd6ddb9
+PASS: state.schema.json and the engine STATE contract constants agree
+PASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)
+PASS: STATE.md schema valid (checked against state.schema.json)
+PASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-b512942bac884a8691f6c98afcd6ddb9)
+PASS: goal execution_intent counters present
+PASS: subSaipen STATE.md shape valid (7 checked, live + shipped library)
+PASS: .saipen/extensions/subs/MANIFEST.md parses strictly (5 entries)
+PASS: extensions/subs/MANIFEST.md parses strictly (4 entries)
+PASS: BOARD.md has all required section headings
+PASS: BOARD.md no duplicate tickets
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md Work supersession relations are terminal, existing and acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+PASS: BOARD.md at most one ## DOING ticket (1 claimed)
+FAIL: closure provenance does not resolve: EXTERNAL_COMMIT_MISSING: commit 041f00ed1bc0b4b4841ca3edbb5912dd39461349 not found in external repository history -- a DONE line may record HOW it closed, never that something was published when it was not (CORE-003)
+PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 19 segment(s))
+PASS: history: 89 event(s) carry an off-grammar `[op: ...]` id no writer emits, exempt as sealed, at or below the resolved floor, or backed by a real operation record (first .saipen/logs/LOG-012.md:125 E-2882; T-1577)
+PASS: improve seat report schema valid (20 report(s) scanned)
+PASS: core sweep linkage valid: every disposition resolves to a real finding/ticket, no unverified or INVALID/ALREADY_FIXED finding produced a ticket, source_reports resolve exactly
+PASS: subsaipen write boundary continuous: no sub artifact targets a main-project canonical file (red control 7)
+PASS: history: 24 sealed hunt mark(s) name commits this repository does not have or that never reached the remote (earliest .saipen/logs/LOG-001.md:114 @ab71e87); immutable by append-only, and new marks are FAILed (T-1642)
+PASS: hunt skip marks resolve to real commits on the remote (24 checked)
+PASS: history: 1 sealed `DEC: goal reauthorized` line(s) cleared counters under the caps (first in .saipen/logs/LOG-006.md); immutable by append-only, and a new one in the active log warns
+PASS: history: 125 sealed LOG entr(y/ies) predate the mandatory DATE (earliest .saipen/logs/LOG-001.md:3); immutable by append-only, and the active log is FAILed for it
+PASS: saiui charter integrity verified (references UI.md, no second palette, write ban enforced, fixer contract present, UI- prefix documented, bootstrap includes charters)
+PASS: 6 shipped sai*.md charter(s) declare the full metadata block (8 keys, closed enums)
+PASS: freshness hardening command/cleanup/worker contracts intact
+PASS: T-549 hard barrier blocks the T-551..T-561 improve wave
+PASS: convergence contract intact (13 stages in order, closure bar and post-K ordering rule present)
+PASS: SAIUI SAISENT mission labels findings as hypotheses to verify
+PASS: KNOWLEDGE/ clean
+PASS: KNOWLEDGE/ structured surface valid (25 card(s), 25 active, index fresh)
+PASS: FUTURE GATE deferred-authority surface valid (51 document(s); 37 DEFERRED, 1 ELIGIBLE, 2 INELIGIBLE, 11 NEEDS_REVIEW)
+PASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 51 document(s) non-normative, 46 reviewed record(s) canonical)
+PASS: .saipen/USERPERSON.md is a well-formed optional USERPERSON profile
+PASS: README.md badge matches VERSION
+PASS: conformance corpus schema + IDs valid (257 rows, exactly 1..257)
+PASS: CONFORMANCE.md matches the generated corpus index
+PASS: no stray control characters in shipped text (616 files swept)
+PASS: core docs text lint clean (no U+FFFD/split keywords/fence drift)
+PASS: phase enum <-> phases/ docs in sync (16 phases)
+PASS: INDEX.md phase list matches enum + files (16 phases)
+PASS: CORE / IMPROVE / CLI Improve action sets match exactly
+PASS: runtime manifest complete (814 files, all tracked)
+PASS: adapter cross-references valid (checking saipen/ paths in all 10 adapters)
+PASS: no adapter or injector treats RFC.md as normative (13 checked, RFC stub is redirect-only)
+PASS: 32 locale README badge(s) match VERSION (8.1.0)
+PASS: shortcut callouts aligned across 32 locale sources, 3 mirrors, 33 locale guides, and both root entry docs
+PASS: append targets end on a line boundary (40 checked)
+PASS: lint parity [T-628] -- harness.md and validate.yml agree on `python -m ruff check tools/ tests/` with ruff==0.16.0
+PASS: doc coverage accounted for (469 shipped documents, 27 checked patterns, 37 exempt)
+PASS: warn slug ownership verified for 4 tracked slug(s)
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [board-soft-cap]: BOARD.md is 272 KB, of which 68 KB is 109 closed record(s) nothing pins (soft cap 16 KB of such text) -- `saipen transition CLEAN` scrubs them into .saipen/recovery/board-scrub/ (phases/clean.md step 1)
+WARN [log-soft-cap]: .saipen/LOG.md is 3964 lines / 1334 KB, past the 300 line / 64 KB cap -- `saipen transition CLEAN` seals it into the next .saipen/logs/LOG-<NNN>.md (phases/clean.md step 4)
+WARN [producer-package-stale]: .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-015] carries source_tree_fingerprint 'git-delta-v1:177b9b9d5f524377258c331f5c11b006511a77f4271b29048d032cb46b3a9024' but the current tree computes 'git-delta-v1:a31c90be63928ac3376a338281720824c3e2897c028316f12ab67f39459d2946' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else
+WARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-051] carries source_tree_fingerprint 'git-delta-v1:f6e0d3683fdd49081fb91414517c6da180255dc0af9c762a9570fd6ca474418f' but the current tree computes 'git-delta-v1:a31c90be63928ac3376a338281720824c3e2897c028316f12ab67f39459d2946' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [subsaipen-uncollected]: 2 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)
+WARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this
+WARN [release-ledger]: git tag list unavailable or empty -- the release ledger has only its CHANGELOG half, so the phantom-version check is skipped rather than run against incomplete data
+WARN [xpatch-survival]: XP-000001 tools/saipen_engine/intake.py: Git history unreadable: fatal: unable to read tree (181b01607f6e96819439715edc648bec02c5195a)
+WARN [xpatch-survival]: XP-000001 tools/test_source_receipts.py: Git history unreadable: fatal: unable to read tree (181b01607f6e96819439715edc648bec02c5195a)
+WARN [xpatch-survival]: ... and 7 more like the above
+Validation FAILED: 1 problem(s), 16 warning(s)
+[0;36msaipen conformance validation starting...[0m
+[0;32mPASS: STATE.md schema valid[0m
+[0;32mPASS: goal intent counters present[0m
+[0;32mPASS: BOARD.md acyclic[0m
+[0;32mPASS: BOARD.md no duplicate tickets[0m
+[0;32mPASS: BOARD.md no dangling needs: references[0m
+[0;32mPASS: BOARD.md has all required section headings[0m
+[0;32mPASS: LOG.md format valid[0m
+[0;32mPASS: KNOWLEDGE/ clean[0m
+[0;32mPASS: README.md badge matches VERSION[0m
+[0;32mPortable floor complete: no structural break found.[0m
+[0;32mThis is a SUBSET of tools/validate.py -- run that wherever Python exists.[0m

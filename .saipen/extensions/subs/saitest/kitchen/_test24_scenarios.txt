@@ -1,0 +1,29 @@
+TEST-24 scenario captures (installed engine CLI), identity 5706afe0d / c66baf69
+
+--- S1 second crew record-run HUNT-029 (idempotence) (rc=0, 6.7s)
+$ saipen crew record-run saihunt --package HUNT-029
+code: ALREADY_BOUND
+
+
+--- S2 crew record-run saitest TEST-23 (stale-package refusal) (rc=1, 7.1s)
+$ saipen crew record-run saitest --package TEST-23
+REFUSE [STALE_PACKAGE]
+reason: TEST-23 is not a current saitest package: it must be ready or reviewed and carry the live source triple and the current role revision
+
+
+--- S3 ticket block-for T-2137 T-2140 (post-DONE lifecycle refusal) (rc=1, 0.6s)
+$ saipen ticket block-for T-2137 T-2140
+REFUSE [VALIDATION_FAILED]
+reason: block requires the facts/dead ends that justify the block
+
+
+--- S3b retry with reason arg (ticket block-for needs <parent> <blocker> <reason>)
+$ saipen ticket block-for T-2137 T-2140 TEST-24-probe-post-DONE-lifecycle-replay (rc=1)
+REFUSE [ILLEGAL_TICKET_LIFECYCLE]
+reason: block-for accepts DOING or TODO; T-2137 is under ## DONE
+S3 retry note: the first S3 attempt (no reason token) was refused by the earlier
+validation gate REFUSE [VALIDATION_FAILED] "block requires the facts/dead ends that
+justify the block" -- the reason token is part of the command surface
+(saipen.py:13659, operations.py:6728). The retry with a reason reaches the
+lifecycle gate and answers the lifecycle refusal; no board write happened in
+either attempt.

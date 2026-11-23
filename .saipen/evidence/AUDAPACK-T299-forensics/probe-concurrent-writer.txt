@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "code": "WRITER_BUSY",
+  "op_id": "ticket-5c078b0cbd484e2cb49fff8455e7b738",
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "another live writer holds the project lock",
+  "detail": "another live writer holds the project lock"
+}

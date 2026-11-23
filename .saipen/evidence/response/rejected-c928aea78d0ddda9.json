@@ -1,0 +1,27 @@
+{
+  "bytes": 1656,
+  "kind": "saipen-rejected-response",
+  "overflow": {
+    "code": "OPERATOR_OUTPUT_OVERFLOW",
+    "detail_ref": ".saipen/evidence/response/rejected-c928aea78d0ddda9.txt",
+    "fields": [
+      {
+        "char_budget": 900,
+        "chars": 1606,
+        "field": "RESPONSE",
+        "line_budget": 6,
+        "lines": 9
+      }
+    ],
+    "response_class": "COMPACT_FINAL",
+    "total": {
+      "char_budget": 900,
+      "chars": 1606,
+      "line_budget": 6,
+      "lines": 9
+    }
+  },
+  "ref": ".saipen/evidence/response/rejected-c928aea78d0ddda9.txt",
+  "schema": 1,
+  "sha256": "c928aea78d0ddda91729e635a0974b3e6f8b36d3f15f916f45d0c0ab29093523"
+}

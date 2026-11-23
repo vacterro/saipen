@@ -1,0 +1,91 @@
+{
+  "observed_utc": "2026-10-13T07:32:03.250211+00:00",
+  "target_root": "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+  "target_head": "5f0dc0c6abe1f9a0a34487d87f56fb129410cb7f",
+  "tracked_status_count": 98,
+  "state": {
+    "phase": "BUILD",
+    "task": "T-282",
+    "last_event": "3016",
+    "next_action": "\"PHASE BUILD T-282\"",
+    "continuation_authority": "operator_required"
+  },
+  "board_errors": [],
+  "board_headings": [
+    "## DOING",
+    "## TODO",
+    "## DONE",
+    "## BLOCKED"
+  ],
+  "t282_record_count": 1,
+  "t282": {
+    "id": "T-282",
+    "section": "## DOING",
+    "line_no": 24,
+    "checkbox": "/",
+    "needs": [],
+    "fields": {
+      "verify": "tests/test_accounts_ownership_generation.py 38/38 PASS covering CASE A orphaned-helper-grant, CASE B foreign-replacement preservation, restart and generation-mismatch, revoke-transaction path justification for... [detail_ref: .saipen/recovery/board-compaction/T-282/T-282-db88b246b839833f2e4f48eb.json]",
+      "owner": "saipen-cli",
+      "claim_time": "2026-10-13T07:30:39Z",
+      "detail_ref": ".saipen/recovery/board-compaction/T-282/T-282-db88b246b839833f2e4f48eb.json"
+    },
+    "raw": "- [/] T-282 [P2] W2-002 residual ownership generation delivered: Scripts/accounts/SaiAccountsHelper.cs gains a post-write ACL witness (post_write_acl_fp) journaled immediately after... | verify: tests/test_accounts_ownership_generation.py 38/38 PASS covering CASE A orphaned-helper-grant, CASE B foreign-replacement preservation, restart and generation-mismatch, revoke-transaction path justification for... [detail_ref: .saipen/recovery/board-compaction/T-282/T-282-db88b246b839833f2e4f48eb.json] | owner: saipen-cli | claim_time: 2026-10-13T07:30:39Z | detail_ref: .saipen/recovery/board-compaction/T-282/T-282-db88b246b839833f2e4f48eb.json",
+    "description": "[P2] W2-002 residual ownership generation delivered: Scripts/accounts/SaiAccountsHelper.cs gains a post-write ACL witness (post_write_acl_fp) journaled immediately after..."
+  },
+  "t282_source_meta_link": "T-282",
+  "t282_source_body_integrity": true,
+  "events": [
+    "- 11.10.26 05:22 [E-3001] [parent: E-3000] [T-282] [agent: saipen-cli] [op: userreq-4fd1ad12db894d5bb82d07379cc969fd] DEC: user request SRC-099 projected as T-282 (local candidate; witness model_supplied)",
+    "- 11.10.26 05:58 [E-3002] [parent: E-3001] [T-282] [agent: saipen-cli] [op: run-w2-002-residual] RUN: residual W2-002 ownership generation. SaiAccountsHelper.cs: post_write_acl_fp witness journaled immediately after SetAccessControl; CheckRollbackOwnershipAt + HasExactHelperRuleVerified gate HandleGrantFailure rollback against the generation the helper itself wrote (foreign ACL generation -> refusal, no ACE deleted, evidence retained); MarkTxnIntentState stamps existing journal instead of rewriting it; mutation_written adoption in reconciler with write-witness agreement; ensure fails closed when the witness cannot be journaled. Built: Scripts\\accounts\\build.ps1 (not deployed). Tests: ownership_generation 38/38, fault_injection 105/105, native_contract 69/69, sai_accounts 240/240, accounts_runtime 264 passed. Evidence: .saipen/evidence/T-282-w2-002-ownership-generation.md. Power-loss durability classified BLOCKED (Flush(true) is not a volume barrier); no controlled process-termination test executed; byte-identical single-explicit-ACE replacement accepted as content-witness ceiling.",
+    "- 12.10.26 05:30 [E-3003] [parent: E-3002] [agent: saipen-cli] [op: reconcile-20261012053047876446] DEC: reconcile protocol state -- phase 'PAUSED'->'SCOUT'; transition_from 'SCOPED_RUN'->'SCOUT'; next_action 'NONE -- T-260 paused awaiting operator authority; T-282 evidence at .saipen/evidence/T-282-w2-002-ownership-generation.md'->'WAIT: blocked -- T-260 residual W2-002 complete per E-3002 evidence; operator must accept-or-extend the Flush(true) power-loss durability ceiling before any further work'; last_event 3002->3001; lifecycle authority: E-3002 above E-3001 carry no operation record (written by hand); kept as history, nothing stands on their word; operator-authorized STATE.next_action: 'WAIT: blocked -- T-260 residual W2-002 complete per E-3002 evidence; operator must accept-or-extend the Flush(true) power-loss durability ceiling before any further work'",
+    "- 12.10.26 05:31 [E-3004] [parent: E-3003] [agent: saipen-cli] [op: reconcile-20261012053110126201] DEC: reconcile protocol state -- blocker 'T-260 continuation requires operator authority (continuation_authority: operator_required)'->'none'; operator-authorized STATE.blocker: 'T-260 stays paused: E-3002 returned residual W2-002 to operator pause and no newer operator authorization exists on record; BLOCKED tickets T-143/T-144/T-167/T-220/T-261/T-262/T-263 remain operator-gated and unclaimable'; follow-up: saipen ticket unblock T-143 \"<decision>\"",
+    "- 12.10.26 06:56 [E-3005] [parent: E-3004] [T-283] [agent: saipen-cli] [op: userreq-6cc17b8b024345c4ab013fd31aa48055] DEC: user request SRC-101 projected as T-283 (local candidate; witness model_supplied)",
+    "- 12.10.26 10:48 [E-3006] [parent: E-3005] [T-284] [agent: saipen-cli] [op: userreq-881c627c70d746a393227f1bda38bd1d] DEC: user request SRC-102 projected as T-284 (local candidate; witness model_supplied)",
+    "- 12.10.26 11:52 [E-3007] [parent: E-3006] [T-285] [agent: saipen-cli] [op: userreq-b636bda731134b8d9483774cd08a04d2] DEC: user request SRC-103 projected as T-285 (local candidate; witness model_supplied)",
+    "- 12.10.26 13:48 [E-3008] [parent: E-3007] [T-286] [agent: saipen-cli] [op: userreq-fc7f0de0841c444bad2ecd1422cc5686] DEC: user request SRC-104 projected as T-286 (local candidate; witness model_supplied)",
+    "- 12.10.26 14:19 [E-3009] [parent: E-3008] [T-282] [agent: saipen-cli] [op: ticket-d1f7111c174e4a2ab1645bd8fe86b350] DEC: ticket unblock via SAIOPS -- OPERATOR_ACCEPTED_LIMITATION 2026-10-12: operator ACCEPTS the documented physical power-loss durability ceiling (FileStream.Flush(true)/File.Replace/File.Move not a volume barrier); no POWER_LOSS_DURABILITY_PASS claim; bounded T-282 journal-integrity correction + disposable-windows fault-injection acceptance authorized; evidence .saipen/evidence/T-282-operator-decision-2026-10-12.md",
+    "- 12.10.26 14:25 [E-3010] [parent: E-3009] [T-285] [agent: saipen-cli] [op: checkpoint-16e643dd623f4cd984c5e39461eb1ee4] RUN: operator gate satisfied (E-3009): physical power-loss ceiling accepted; bounded persistence correction + fault-injection acceptance active",
+    "- 12.10.26 14:40 [E-3011] [parent: E-3010] [T-260] [agent: saipen-cli] [op: checkpoint-66d60d7c00594f13978aa54667d654cd] RUN: power-loss ceiling accepted (E-3009): operator gate satisfied; residual W2-002 complete (E-3002); T-260 operator-gated -- remaining SRC-078 clauses actionable on operator authorization"
+  ],
+  "before_sha256": {
+    ".saipen/STATE.md": "ee6d88f90e9a42be39b69613686a09f618ce36d2eae736b4f4fcd06b2d715aa7",
+    ".saipen/BOARD.md": "7022ed0b116155ae1f2466b6625ad9e03b53b3edb6b972896f0d7afa2ad33edd",
+    ".saipen/LOG.md": "5974489b9727984238ce3518f1c85eec9871cfecf79324c4d97624c23ef46b04",
+    ".saipen/intake/active/SRC-099.md": "f4d0258f00b80eadcac0042290762466b09ee1a12a484e547b3703e188891442",
+    ".saipen/intake/active/SRC-099.meta.json": "405f39b7d0865a59a0b74bce847d05216341eefca696fc1d0147cb0eabdcf39d",
+    ".saipen/evidence/T-282-w2-002-ownership-generation.md": "aa3ad5a847acc2dcd39c2788741526aed04120b60cd9c1d8349a832ae9653ded"
+  },
+  "after_sha256": {
+    ".saipen/STATE.md": "ee6d88f90e9a42be39b69613686a09f618ce36d2eae736b4f4fcd06b2d715aa7",
+    ".saipen/BOARD.md": "7022ed0b116155ae1f2466b6625ad9e03b53b3edb6b972896f0d7afa2ad33edd",
+    ".saipen/LOG.md": "5974489b9727984238ce3518f1c85eec9871cfecf79324c4d97624c23ef46b04",
+    ".saipen/intake/active/SRC-099.md": "f4d0258f00b80eadcac0042290762466b09ee1a12a484e547b3703e188891442",
+    ".saipen/intake/active/SRC-099.meta.json": "405f39b7d0865a59a0b74bce847d05216341eefca696fc1d0147cb0eabdcf39d",
+    ".saipen/evidence/T-282-w2-002-ownership-generation.md": "aa3ad5a847acc2dcd39c2788741526aed04120b60cd9c1d8349a832ae9653ded"
+  },
+  "collector_preserved_target_inputs": true,
+  "parser_controls": {
+    "good": [],
+    "duplicate": [
+      "BOARD.md:4 duplicate ticket ID T-1"
+    ],
+    "partial": [
+      "BOARD.md:3 ticket T-1 sits under ## PARTIAL -- not one of the four RFC sections, so no operation may mutate a board built around it",
+      "BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash"
+    ]
+  },
+  "target_conformance_receipt": {
+    "path": "V:\\___VAC\\__K\\__CODE\\__SAITULS\\.saipen\\recovery\\conformance\\2026-10-13T07_29_00.481477Z_receipt-66261157f63a_core_FAIL.json",
+    "sha256": "7230699c07d65e6fea4d67e517bed6e3ac54473269d55498330a0498b7deeddb",
+    "verdict": "FAIL",
+    "problems": 29,
+    "warnings": 41
+  },
+  "limits": [
+    "Canonical validate wrote its conformance receipt; no target Work mutation was requested.",
+    "No original duplicate-removal transaction was identified or authorized in this session.",
+    "Parser controls prove parser behavior, not target-wide conformance.",
+    "MCP excludes tools/ and target memory; conclusions use current direct-source evidence."
+  ]
+}

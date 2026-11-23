@@ -1,0 +1,395 @@
+{
+  "recorded_at": "2026-10-01T14:15:19.600803+00:00",
+  "scope": "Immediate project siblings with .saipen/STATE.md plus adapter-registry runtime homes; no recursive disk discovery.",
+  "limitations": "An unknown root has no durable trust. This inventory does not inspect arbitrary third-party model registries, remote hosts or undeclared projects.",
+  "effective_ephemeral_roots": [
+    "V:\\_TEMP_"
+  ],
+  "projects": [
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\__SAIMAIL__",
+      "state_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\__SAIMAIL__\\.saipen",
+      "paths": [
+        {
+          "purpose": "project canonical state",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\__SAIMAIL__\\.saipen",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\__SAIMAIL__\\.saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\__SAIMAIL__\\.saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        },
+        {
+          "purpose": "bound runtime home",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        }
+      ],
+      "storage_declared": false
+    },
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\__TERMISAI",
+      "state_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\__TERMISAI\\.saipen",
+      "paths": [
+        {
+          "purpose": "project canonical state",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\__TERMISAI\\.saipen",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\__TERMISAI\\.saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\__TERMISAI\\.saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        },
+        {
+          "purpose": "bound runtime home",
+          "requested": "C:/Users/vac34/.agents/skills/saipen",
+          "resolved": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "C:\\Users\\vac34\\.agents\\skills\\saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        }
+      ],
+      "storage_declared": false
+    },
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAICONT",
+      "state_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAICONT\\.saipen",
+      "paths": [
+        {
+          "purpose": "project canonical state",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAICONT\\.saipen",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAICONT\\.saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAICONT\\.saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        },
+        {
+          "purpose": "bound runtime home",
+          "requested": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        }
+      ],
+      "storage_declared": false
+    },
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPAL",
+      "state_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPAL\\.saipen",
+      "paths": [
+        {
+          "purpose": "project canonical state",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPAL\\.saipen",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPAL\\.saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPAL\\.saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        },
+        {
+          "purpose": "bound runtime home",
+          "requested": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+          "resolved": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        }
+      ],
+      "storage_declared": false
+    },
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "state_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen",
+      "paths": [
+        {
+          "purpose": "project canonical state",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        },
+        {
+          "purpose": "bound runtime home",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        }
+      ],
+      "storage_declared": false
+    },
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN_HEADCHECK",
+      "state_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN_HEADCHECK\\.saipen",
+      "paths": [
+        {
+          "purpose": "project canonical state",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN_HEADCHECK\\.saipen",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN_HEADCHECK\\.saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN_HEADCHECK\\.saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        },
+        {
+          "purpose": "bound runtime home",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        }
+      ],
+      "storage_declared": false
+    },
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPET",
+      "state_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPET\\.saipen",
+      "paths": [
+        {
+          "purpose": "project canonical state",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPET\\.saipen",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPET\\.saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPET\\.saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        },
+        {
+          "purpose": "bound runtime home",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        }
+      ],
+      "storage_declared": false
+    },
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIRELAY",
+      "state_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIRELAY\\.saipen",
+      "paths": [
+        {
+          "purpose": "project canonical state",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIRELAY\\.saipen",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIRELAY\\.saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIRELAY\\.saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        },
+        {
+          "purpose": "bound runtime home",
+          "requested": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        }
+      ],
+      "storage_declared": false
+    },
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAITALK",
+      "state_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAITALK\\.saipen",
+      "paths": [
+        {
+          "purpose": "project canonical state",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAITALK\\.saipen",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAITALK\\.saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAITALK\\.saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        },
+        {
+          "purpose": "bound runtime home",
+          "requested": "C:/Users/vac34/.config/opencode/skills/saipen",
+          "resolved": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        }
+      ],
+      "storage_declared": false
+    },
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIWORK2",
+      "state_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIWORK2\\.saipen",
+      "paths": [
+        {
+          "purpose": "project canonical state",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIWORK2\\.saipen",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIWORK2\\.saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIWORK2\\.saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        },
+        {
+          "purpose": "bound runtime home",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        }
+      ],
+      "storage_declared": false
+    },
+    {
+      "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE",
+      "state_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen",
+      "paths": [
+        {
+          "purpose": "project canonical state",
+          "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        },
+        {
+          "purpose": "bound runtime home",
+          "requested": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+          "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "required_class": "DURABLE",
+          "ok": false,
+          "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+          "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+        }
+      ],
+      "storage_declared": false
+    }
+  ],
+  "runtime_homes": [
+    {
+      "home": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+      "exists": true,
+      "requested": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+      "resolved": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+      "required_class": "DURABLE",
+      "ok": false,
+      "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+      "detail": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+    },
+    {
+      "home": "C:\\Users\\vac34\\.claude\\skills\\saipen",
+      "exists": true,
+      "requested": "C:\\Users\\vac34\\.claude\\skills\\saipen",
+      "resolved": "C:\\Users\\vac34\\.claude\\skills\\saipen",
+      "required_class": "DURABLE",
+      "ok": false,
+      "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+      "detail": "C:\\Users\\vac34\\.claude\\skills\\saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+    },
+    {
+      "home": "C:\\Users\\vac34\\.codex\\skills\\saipen",
+      "exists": true,
+      "requested": "C:\\Users\\vac34\\.codex\\skills\\saipen",
+      "resolved": "C:\\Users\\vac34\\.codex\\skills\\saipen",
+      "required_class": "DURABLE",
+      "ok": false,
+      "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+      "detail": "C:\\Users\\vac34\\.codex\\skills\\saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+    },
+    {
+      "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode\\skills\\saipen",
+      "exists": false,
+      "requested": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode\\skills\\saipen",
+      "resolved": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode\\skills\\saipen",
+      "required_class": "DURABLE",
+      "ok": false,
+      "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+      "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode\\skills\\saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+    },
+    {
+      "home": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+      "exists": true,
+      "requested": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+      "resolved": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+      "required_class": "DURABLE",
+      "ok": false,
+      "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+      "detail": "C:\\Users\\vac34\\.agents\\skills\\saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+    },
+    {
+      "home": "C:\\Users\\vac34\\.gemini\\skills\\saipen",
+      "exists": true,
+      "requested": "C:\\Users\\vac34\\.gemini\\skills\\saipen",
+      "resolved": "C:\\Users\\vac34\\.gemini\\skills\\saipen",
+      "required_class": "DURABLE",
+      "ok": false,
+      "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+      "detail": "C:\\Users\\vac34\\.gemini\\skills\\saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+    },
+    {
+      "home": "C:\\Users\\vac34\\.codebuddy\\skills\\saipen",
+      "exists": true,
+      "requested": "C:\\Users\\vac34\\.codebuddy\\skills\\saipen",
+      "resolved": "C:\\Users\\vac34\\.codebuddy\\skills\\saipen",
+      "required_class": "DURABLE",
+      "ok": false,
+      "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+      "detail": "C:\\Users\\vac34\\.codebuddy\\skills\\saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+    },
+    {
+      "home": "C:\\Users\\vac34\\.gemini\\config\\plugins\\*\\skills\\saipen",
+      "exists": false,
+      "requested": "C:\\Users\\vac34\\.gemini\\config\\plugins\\*\\skills\\saipen",
+      "resolved": "C:\\Users\\vac34\\.gemini\\config\\plugins\\*\\skills\\saipen",
+      "required_class": "DURABLE",
+      "ok": false,
+      "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+      "detail": "C:\\Users\\vac34\\.gemini\\config\\plugins\\*\\skills\\saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+    },
+    {
+      "home": "C:\\Users\\vac34\\.kiro\\skills\\saipen",
+      "exists": false,
+      "requested": "C:\\Users\\vac34\\.kiro\\skills\\saipen",
+      "resolved": "C:\\Users\\vac34\\.kiro\\skills\\saipen",
+      "required_class": "DURABLE",
+      "ok": false,
+      "code": "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
+      "detail": "C:\\Users\\vac34\\.kiro\\skills\\saipen is outside every explicitly trusted durable root. Use 'saipen storage durable add <root>' after confirming its retention policy."
+    }
+  ],
+  "violations": [],
+  "read_errors": [],
+  "sailearn": {
+    "home": "V:\\___VAC\\__K\\__STATE\\SAILEARN_HOME",
+    "verdict": {
+      "requested": "V:\\___VAC\\__K\\__STATE\\SAILEARN_HOME",
+      "resolved": "V:\\___VAC\\__K\\__STATE\\SAILEARN_HOME",
+      "required_class": "DURABLE",
+      "ok": true,
+      "code": "DURABLE_ALLOWED",
+      "matched_durable_root": "V:\\___VAC\\__K\\__STATE\\SAILEARN_HOME"
+    },
+    "source_repository_available": false,
+    "recovery_marker": "V:\\___VAC\\__K\\__STATE\\SAILEARN_HOME\\RECOVERY_PENDING.md",
+    "marker_sha256": "1acc3f6ad508d21f2c29076324c0a849f25dc5a985124d8d85d2ff0c31825c8a",
+    "migration_actions_this_turn": [],
+    "model_history_rebuilt": false
+  }
+}

@@ -1,0 +1,168 @@
+.FFFFF                                                                   [100%]
+================================== FAILURES ===================================
+_________________ test_the_worker_never_blocks_a_finished_row _________________
+
+tmp_path = WindowsPath('V:/_TEMP_/pytest-of-vac34/pytest-254/test_the_worker_never_blocks_a0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000025F41CD7650>
+
+    def test_the_worker_never_blocks_a_finished_row(tmp_path, monkeypatch):
+        """A finished row is not a candidate: no re-point, no re-label, no re-arm.
+    
+        A terminal row is what happened. The tick loop has nothing to decide about
+        it, so it may neither rewrite its binding nor downgrade its state to
+        WAITING_LIMIT ("account not discovered") when its account later leaves the
+        effective inventory.
+        """
+        from audapack.limits import LimitStore
+        from audapack.prepared_worker import PreparedWorker
+    
+        config = _federated_config(tmp_path,
+                                   LauncherConfig(target_id(CANON), "Claude 1", "C1"))
+        monkeypatch.setattr("audapack.prepared_worker.discover_accounts", lambda *a, **k: [])
+        store = _store(tmp_path, _job("done", "claude1", "claude1", state=JobState.DONE))
+        worker = PreparedWorker(config, clock=lambda: NOW,
+                                limit_store=LimitStore(tmp_path / "resources.sqlite3"),
+                                prepared_store=store)
+        worker.tick()
+        row = store.get("done")
+        assert row.launcher_id == "claude1" and row.account_id == "claude1"
+>       assert row.state == JobState.DONE
+E       AssertionError: assert <JobState.BLOCKED: 'BLOCKED'> == <JobState.DONE: 'DONE'>
+E         
+E         - DONE
+E         + BLOCKED
+
+tests\test_prepared_binding.py:380: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  audapack.prepared_worker:prepared_worker.py:235 prepared job done blocked: ACCOUNT_MAPPING_REQUIRED: no canonical account proves the identity claude1
+____________ test_the_worker_leaves_every_terminal_row_alone[DONE] ____________
+
+tmp_path = WindowsPath('V:/_TEMP_/pytest-of-vac34/pytest-254/test_the_worker_leaves_every_t0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000025F41CD7D90>
+state = <JobState.DONE: 'DONE'>
+
+    @pytest.mark.parametrize("state", [JobState.DONE, JobState.MISSED,
+                                       JobState.CANCELLED, JobState.FAILED_TERMINAL])
+    def test_the_worker_leaves_every_terminal_row_alone(tmp_path, monkeypatch, state):
+        """Every terminal state survives a tick whose account is not discovered."""
+        from audapack.limits import LimitStore
+        from audapack.prepared_worker import PreparedWorker
+    
+        config = _federated_config(tmp_path,
+                                   LauncherConfig(target_id(CANON), "Claude 1", "C1"))
+        monkeypatch.setattr("audapack.prepared_worker.discover_accounts", lambda *a, **k: [])
+        store = _store(tmp_path, _job("row", "claude1", "claude1", state=state))
+        worker = PreparedWorker(config, clock=lambda: NOW,
+                                limit_store=LimitStore(tmp_path / "resources.sqlite3"),
+                                prepared_store=store)
+        worker.tick()
+        row = store.get("row")
+>       assert row.state == state and row.waiting_reason == ""
+E       AssertionError: assert (<JobState.BLOCKED: 'BLOCKED'> == <JobState.DONE: 'DONE'>
+E         
+E         - DONE
+E         + BLOCKED)
+
+tests\test_prepared_binding.py:400: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  audapack.prepared_worker:prepared_worker.py:235 prepared job row blocked: ACCOUNT_MAPPING_REQUIRED: no canonical account proves the identity claude1
+___________ test_the_worker_leaves_every_terminal_row_alone[MISSED] ___________
+
+tmp_path = WindowsPath('V:/_TEMP_/pytest-of-vac34/pytest-254/test_the_worker_leaves_every_t1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000025F41C79A10>
+state = <JobState.MISSED: 'MISSED'>
+
+    @pytest.mark.parametrize("state", [JobState.DONE, JobState.MISSED,
+                                       JobState.CANCELLED, JobState.FAILED_TERMINAL])
+    def test_the_worker_leaves_every_terminal_row_alone(tmp_path, monkeypatch, state):
+        """Every terminal state survives a tick whose account is not discovered."""
+        from audapack.limits import LimitStore
+        from audapack.prepared_worker import PreparedWorker
+    
+        config = _federated_config(tmp_path,
+                                   LauncherConfig(target_id(CANON), "Claude 1", "C1"))
+        monkeypatch.setattr("audapack.prepared_worker.discover_accounts", lambda *a, **k: [])
+        store = _store(tmp_path, _job("row", "claude1", "claude1", state=state))
+        worker = PreparedWorker(config, clock=lambda: NOW,
+                                limit_store=LimitStore(tmp_path / "resources.sqlite3"),
+                                prepared_store=store)
+        worker.tick()
+        row = store.get("row")
+>       assert row.state == state and row.waiting_reason == ""
+E       AssertionError: assert (<JobState.BLOCKED: 'BLOCKED'> == <JobState.MISSED: 'MISSED'>
+E         
+E         - MISSED
+E         + BLOCKED)
+
+tests\test_prepared_binding.py:400: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  audapack.prepared_worker:prepared_worker.py:235 prepared job row blocked: ACCOUNT_MAPPING_REQUIRED: no canonical account proves the identity claude1
+_________ test_the_worker_leaves_every_terminal_row_alone[CANCELLED] __________
+
+tmp_path = WindowsPath('V:/_TEMP_/pytest-of-vac34/pytest-254/test_the_worker_leaves_every_t2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000025F41D36B50>
+state = <JobState.CANCELLED: 'CANCELLED'>
+
+    @pytest.mark.parametrize("state", [JobState.DONE, JobState.MISSED,
+                                       JobState.CANCELLED, JobState.FAILED_TERMINAL])
+    def test_the_worker_leaves_every_terminal_row_alone(tmp_path, monkeypatch, state):
+        """Every terminal state survives a tick whose account is not discovered."""
+        from audapack.limits import LimitStore
+        from audapack.prepared_worker import PreparedWorker
+    
+        config = _federated_config(tmp_path,
+                                   LauncherConfig(target_id(CANON), "Claude 1", "C1"))
+        monkeypatch.setattr("audapack.prepared_worker.discover_accounts", lambda *a, **k: [])
+        store = _store(tmp_path, _job("row", "claude1", "claude1", state=state))
+        worker = PreparedWorker(config, clock=lambda: NOW,
+                                limit_store=LimitStore(tmp_path / "resources.sqlite3"),
+                                prepared_store=store)
+        worker.tick()
+        row = store.get("row")
+>       assert row.state == state and row.waiting_reason == ""
+E       AssertionError: assert (<JobState.BLOCKED: 'BLOCKED'> == <JobState.CAN...: 'CANCELLED'>
+E         
+E         - CANCELLED
+E         + BLOCKED)
+
+tests\test_prepared_binding.py:400: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  audapack.prepared_worker:prepared_worker.py:235 prepared job row blocked: ACCOUNT_MAPPING_REQUIRED: no canonical account proves the identity claude1
+______ test_the_worker_leaves_every_terminal_row_alone[FAILED_TERMINAL] _______
+
+tmp_path = WindowsPath('V:/_TEMP_/pytest-of-vac34/pytest-254/test_the_worker_leaves_every_t3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000025F41E6A2D0>
+state = <JobState.FAILED_TERMINAL: 'FAILED_TERMINAL'>
+
+    @pytest.mark.parametrize("state", [JobState.DONE, JobState.MISSED,
+                                       JobState.CANCELLED, JobState.FAILED_TERMINAL])
+    def test_the_worker_leaves_every_terminal_row_alone(tmp_path, monkeypatch, state):
+        """Every terminal state survives a tick whose account is not discovered."""
+        from audapack.limits import LimitStore
+        from audapack.prepared_worker import PreparedWorker
+    
+        config = _federated_config(tmp_path,
+                                   LauncherConfig(target_id(CANON), "Claude 1", "C1"))
+        monkeypatch.setattr("audapack.prepared_worker.discover_accounts", lambda *a, **k: [])
+        store = _store(tmp_path, _job("row", "claude1", "claude1", state=state))
+        worker = PreparedWorker(config, clock=lambda: NOW,
+                                limit_store=LimitStore(tmp_path / "resources.sqlite3"),
+                                prepared_store=store)
+        worker.tick()
+        row = store.get("row")
+>       assert row.state == state and row.waiting_reason == ""
+E       AssertionError: assert (<JobState.BLOCKED: 'BLOCKED'> == <JobState.FAI...LED_TERMINAL'>
+E         
+E         - FAILED_TERMINAL
+E         + BLOCKED)
+
+tests\test_prepared_binding.py:400: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  audapack.prepared_worker:prepared_worker.py:235 prepared job row blocked: ACCOUNT_MAPPING_REQUIRED: no canonical account proves the identity claude1
+=========================== short test summary info ===========================
+FAILED tests/test_prepared_binding.py::test_the_worker_never_blocks_a_finished_row
+FAILED tests/test_prepared_binding.py::test_the_worker_leaves_every_terminal_row_alone[DONE]
+FAILED tests/test_prepared_binding.py::test_the_worker_leaves_every_terminal_row_alone[MISSED]
+FAILED tests/test_prepared_binding.py::test_the_worker_leaves_every_terminal_row_alone[CANCELLED]
+FAILED tests/test_prepared_binding.py::test_the_worker_leaves_every_terminal_row_alone[FAILED_TERMINAL]
+5 failed, 1 passed, 22 deselected in 0.38s

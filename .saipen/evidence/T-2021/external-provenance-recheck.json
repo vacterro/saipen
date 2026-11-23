@@ -1,0 +1,32 @@
+{
+  "external_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "HEAD": "a8a14ffe1cfbc22ad7186136b052ca2620d4d93c",
+  "historically_missing_ids": [
+    3133,
+    3136,
+    3145
+  ],
+  "currently_present_in_HEAD": [
+    3133,
+    3136,
+    3145
+  ],
+  "current_missing_event_ids": [],
+  "historically_colliding_ids": [
+    3132,
+    3134,
+    3135,
+    3137,
+    3138,
+    3139,
+    3140,
+    3141,
+    3142,
+    3143,
+    3144,
+    3146
+  ],
+  "currently_colliding_ids": [],
+  "protected_bytes_unchanged": true,
+  "interpretation": "The three current test failures are stale historical expectations, not evidence that events remain missing today. This probe grants no authorization to rewrite the external ledger, audit or prior closure."
+}

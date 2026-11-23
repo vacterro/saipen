@@ -1,0 +1,26 @@
+test_current_handoff_and_current_state (test_cold_agent_truth.ColdProject.test_current_handoff_and_current_state) ... ok
+test_foreign_lineage_handoff_never_executes (test_cold_agent_truth.ColdProject.test_foreign_lineage_handoff_never_executes) ... ok
+test_foreign_runtime_identity_is_conflict (test_cold_agent_truth.ColdProject.test_foreign_runtime_identity_is_conflict) ... ok
+test_fresh_process_cold_boot_report_uses_protocol_bytes_only (test_cold_agent_truth.ColdProject.test_fresh_process_cold_boot_report_uses_protocol_bytes_only) ... ok
+test_generated_handoff_has_complete_provenance (test_cold_agent_truth.ColdProject.test_generated_handoff_has_complete_provenance) ... ok
+test_large_body_cannot_hide_duplicate_authority_fields (test_cold_agent_truth.ColdProject.test_large_body_cannot_hide_duplicate_authority_fields) ... ok
+test_large_historical_state_body_does_not_hide_complete_frontmatter (test_cold_agent_truth.ColdProject.test_large_historical_state_body_does_not_hide_complete_frontmatter) ... ok
+test_orientation_ignores_mtimes (test_cold_agent_truth.ColdProject.test_orientation_ignores_mtimes) ... ok
+test_oversized_handoff_is_data_conflict_not_required_input (test_cold_agent_truth.ColdProject.test_oversized_handoff_is_data_conflict_not_required_input) ... ok
+test_partial_closing_fence_at_cap_cannot_validate_a_malformed_state (test_cold_agent_truth.ColdProject.test_partial_closing_fence_at_cap_cannot_validate_a_malformed_state) ... ok
+test_stale_handoff_cannot_override_current_next_action (test_cold_agent_truth.ColdProject.test_stale_handoff_cannot_override_current_next_action) ... ok
+test_valid_multibyte_body_can_be_cut_without_decoding_the_omitted_body (test_cold_agent_truth.ColdProject.test_valid_multibyte_body_can_be_cut_without_decoding_the_omitted_body) ... ok
+test_workspace_bytes_compare_checkpoint_without_mtime_guess (test_cold_agent_truth.ColdProject.test_workspace_bytes_compare_checkpoint_without_mtime_guess) ... ok
+test_zero_context_orientation_stays_under_measured_budget (test_cold_agent_truth.ColdProject.test_zero_context_orientation_stays_under_measured_budget) ... ok
+test_bounded_new_log_event_keeps_parent_and_identity (test_cold_agent_truth.CompactWriterTests.test_bounded_new_log_event_keeps_parent_and_identity) ... ok
+test_oversized_new_board_record_refuses_with_externalization_route (test_cold_agent_truth.CompactWriterTests.test_oversized_new_board_record_refuses_with_externalization_route) ... ok
+test_oversized_new_log_event_refuses_without_truncation (test_cold_agent_truth.CompactWriterTests.test_oversized_new_log_event_refuses_without_truncation) ... ok
+test_oversized_updated_board_record_also_refuses (test_cold_agent_truth.CompactWriterTests.test_oversized_updated_board_record_also_refuses) ... ok
+test_effect_path_witness_satisfies_broader_criterion (test_cold_agent_truth.EffectPathEvidenceTests.test_effect_path_witness_satisfies_broader_criterion) ... ok
+test_historical_pass_plus_later_escape_is_temporally_truthful (test_cold_agent_truth.EffectPathEvidenceTests.test_historical_pass_plus_later_escape_is_temporally_truthful) ... ok
+test_unit_witness_cannot_satisfy_real_effect_path (test_cold_agent_truth.EffectPathEvidenceTests.test_unit_witness_cannot_satisfy_real_effect_path) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.369s
+
+OK

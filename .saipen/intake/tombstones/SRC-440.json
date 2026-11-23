@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-440.md",
+  "closed_at": "2026-11-21T06:13:08Z",
+  "closure_event": null,
+  "linked_work": "T-2123",
+  "linked_works": [
+    "T-2123"
+  ],
+  "receipt_id": "SRC-440",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "bef9b735ef176f76f79d6630322621a05a23ed95b69d9d1dd56550e8acf53279",
+  "status": "CLOSED",
+  "unresolved": 0
+}

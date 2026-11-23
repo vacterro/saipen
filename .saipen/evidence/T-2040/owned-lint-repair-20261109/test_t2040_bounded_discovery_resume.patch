@@ -1,0 +1,198 @@
+--- pre/tools/test_t2040_bounded_discovery_resume.py
++++ tools/test_t2040_bounded_discovery_resume.py
+@@ -6,7 +6,6 @@
+ from __future__ import annotations
+ 
+ import copy
+-import json
+ import subprocess
+ import tempfile
+ import unittest
+@@ -155,8 +154,12 @@
+         from saipen_engine.log import read_history_snapshot
+         history = read_history_snapshot(self.root, lean=True)
+         before = self.log.read_bytes()
+-        with mock.patch.object(freshness, "compute_source_identity", side_effect=AssertionError("recapture")):
+-            observed = CF.hunt_observation(self.root, source_identity=self.identity, history=history)
++        with mock.patch.object(
++            freshness, "compute_source_identity", side_effect=AssertionError("recapture")
++        ):
++            observed = CF.hunt_observation(
++                self.root, source_identity=self.identity, history=history
++            )
+         self.assertEqual(observed["eligibility_result"], W.CLEAN_VERIFIED, observed)
+         self.assertEqual(self.log.read_bytes(), before)
+ 
+@@ -167,20 +170,28 @@
+             ("RUN", "hunt -> clean @deadbee"),
+         ):
+             self.clean_hunt(taxonomy=taxonomy, text=text)
+-            self.assertEqual(CF.hunt_observation(self.root, source_identity=self.identity)["eligibility_result"],
+-                             W.NOT_CHECKED)
++            self.assertEqual(
++                CF.hunt_observation(self.root, source_identity=self.identity)["eligibility_result"],
++                W.NOT_CHECKED,
++            )
+         self.clean_hunt()
+         (self.root / "source.py").write_text("value = 2\n", encoding="utf-8")
+-        self.assertEqual(CF.hunt_observation(self.root, source_identity=self.identity)["eligibility_result"],
+-                         W.NOT_CHECKED)
++        self.assertEqual(
++            CF.hunt_observation(self.root, source_identity=self.identity)["eligibility_result"],
++            W.NOT_CHECKED,
++        )
+         (self.root / "source.py").write_text("value = 1\n", encoding="utf-8")
+         self.log.unlink()
+-        self.assertEqual(CF.hunt_observation(self.root, source_identity=self.identity)["eligibility_result"],
+-                         W.NOT_CHECKED)
++        self.assertEqual(
++            CF.hunt_observation(self.root, source_identity=self.identity)["eligibility_result"],
++            W.NOT_CHECKED,
++        )
+         self.clean_hunt()
+         with mock.patch("subprocess.run", side_effect=OSError("unreadable Git")):
+-            self.assertEqual(CF.hunt_observation(self.root, source_identity=self.identity)["eligibility_result"],
+-                             W.NOT_CHECKED)
++            self.assertEqual(
++                CF.hunt_observation(self.root, source_identity=self.identity)["eligibility_result"],
++                W.NOT_CHECKED,
++            )
+ 
+     def improve_cycle(self):
+         cycle = self.root / ".saipen/improve/imp-fixture-1"
+@@ -207,8 +218,10 @@
+             "report_status": "complete",
+         }
+         report = "# REPORT\n" + "".join(f"{key}: {value}\n" for key, value in header.items())
+-        report += (f"\n## RUN 1\nrun_source_head: {self.identity.source_head}\n"
+-                   f"run_source_tree_fingerprint: {self.identity.source_tree_fingerprint}\n\nNO_FINDINGS\n")
++        report += (
++            f"\n## RUN 1\nrun_source_head: {self.identity.source_head}\n"
++            f"run_source_tree_fingerprint: {self.identity.source_tree_fingerprint}\n\nNO_FINDINGS\n"
++        )
+         path = cycle / seat / report_name
+         path.write_text(report, encoding="utf-8")
+         self.stack.enter_context(mock.patch.object(improve, "installed_protocol_fingerprint",
+@@ -218,9 +231,11 @@
+         return cycle, path, report
+ 
+     def test_current_complete_improve_uses_shared_bound_bar(self):
+-        cycle, path, report = self.improve_cycle()
++        _cycle, path, _report = self.improve_cycle()
+         before = path.read_bytes()
+-        with mock.patch.object(improve, "validate_bound_report", wraps=improve.validate_bound_report) as validate:
++        with mock.patch.object(
++            improve, "validate_bound_report", wraps=improve.validate_bound_report
++        ) as validate:
+             observed = CF.improve_observation(self.root, source_identity=self.identity)
+         self.assertEqual(observed["eligibility_result"], W.CLEAN_VERIFIED, observed)
+         self.assertTrue(validate.called)
+@@ -231,7 +246,7 @@
+         self.assertEqual(path.read_bytes(), before)
+ 
+     def test_complete_improve_cannot_restamp_any_identity_dimension(self):
+-        cycle, path, report = self.improve_cycle()
++        _cycle, path, report = self.improve_cycle()
+         for key, value in (
+             ("agent", "other-01"), ("project", "other-project"),
+             ("saipen_version", "old-version"), ("protocol_fingerprint", "sha256:" + "2" * 64),
+@@ -244,16 +259,28 @@
+             changed = re.sub(rf"(?m)^{key}:.*$", f"{key}: {value}", report)
+             path.write_text(changed, encoding="utf-8")
+             with self.subTest(key=key):
+-                self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+-                                 W.NOT_CHECKED)
+-        path.write_text(report.replace(f"run_source_head: {self.identity.source_head}\n", ""), encoding="utf-8")
+-        self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+-                         W.NOT_CHECKED)
++                self.assertEqual(
++                    CF.improve_observation(self.root, source_identity=self.identity)[
++                        "eligibility_result"
++                    ],
++                    W.NOT_CHECKED,
++                )
++        path.write_text(
++            report.replace(f"run_source_head: {self.identity.source_head}\n", ""), encoding="utf-8"
++        )
++        self.assertEqual(
++            CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
++            W.NOT_CHECKED,
++        )
+ 
+     def test_header_cannot_mix_head_and_tree_from_different_runs(self):
+-        text = ("source_head: first\nsource_tree_fingerprint: tree-second\n\n"
+-                "## RUN 1\nrun_source_head: first\nrun_source_tree_fingerprint: tree-first\n\nNO_FINDINGS\n"
+-                "## RUN 2\nrun_source_head: second\nrun_source_tree_fingerprint: tree-second\n\nNO_FINDINGS\n")
++        text = (
++            "source_head: first\nsource_tree_fingerprint: tree-second\n\n"
++            "## RUN 1\nrun_source_head: first\n"
++            "run_source_tree_fingerprint: tree-first\n\nNO_FINDINGS\n"
++            "## RUN 2\nrun_source_head: second\n"
++            "run_source_tree_fingerprint: tree-second\n\nNO_FINDINGS\n"
++        )
+         self.assertTrue(improve._header_repair_errors(text))
+ 
+     def test_source_change_marker_is_not_completed_analysis(self):
+@@ -289,8 +316,12 @@
+                          self.identity.source_head + "+" + self.identity.source_tree_fingerprint)
+         self.assertTrue(all(row["source_generation"] == evidence["source_generation"]
+                             for row in evidence["source_evidence"].values()))
+-        self.assertEqual(evidence["source_evidence"][W.HUNT_FINDINGS]["eligibility_result"], W.CLEAN_VERIFIED)
+-        self.assertEqual(evidence["source_evidence"][W.EXTERNAL_FORENSICS]["eligibility_result"], W.NOT_CHECKED)
++        self.assertEqual(
++            evidence["source_evidence"][W.HUNT_FINDINGS]["eligibility_result"], W.CLEAN_VERIFIED
++        )
++        self.assertEqual(
++            evidence["source_evidence"][W.EXTERNAL_FORENSICS]["eligibility_result"], W.NOT_CHECKED
++        )
+         self.assertEqual(evidence["discovery_dispatch"]["action"], "saipen improve")
+ 
+     def test_grant_recovery_and_owned_work_gate_one_analysis_hint(self):
+@@ -310,7 +341,9 @@
+             {"state": {"agent": "tester", "next_action": "WAIT: user brake"}},
+         ):
+             with self.subTest(extra=extra):
+-                self.assertIsNone(W.discovery_evidence(self.root, **{**args, **extra})["discovery_dispatch"])
++                self.assertIsNone(
++                    W.discovery_evidence(self.root, **{**args, **extra})["discovery_dispatch"]
++                )
+ 
+ 
+ class ContinuationAdmissionTests(unittest.TestCase):
+@@ -329,13 +362,19 @@
+             (CLI, "_agent_for", "tester"),
+         ):
+             self.stack.enter_context(mock.patch.object(owner, name, return_value=value))
+-        self.stack.enter_context(mock.patch.object(CF, "with_cycle_liveness", side_effect=lambda value, _: value))
++        self.stack.enter_context(
++            mock.patch.object(CF, "with_cycle_liveness", side_effect=lambda value, _: value)
++        )
+         self.improve = self.stack.enter_context(mock.patch.object(CLI, "_public_improve"))
+ 
+     def fallthrough(self, result):
+         emitted = []
+-        with mock.patch.object(replenishment, "replenish_from_goals", return_value=result), mock.patch.object(
+-            CLI, "_emit", side_effect=lambda payload, _: emitted.append(payload),
++        with mock.patch.object(
++            replenishment, "replenish_from_goals", return_value=result
++        ), mock.patch.object(
++            CLI,
++            "_emit",
++            side_effect=lambda payload, _: emitted.append(payload),
+         ):
+             rc = CLI._continue_improve_fallthrough(self.root, True, False, {}, [], [], None)
+         self.assertEqual(len(emitted), 1)
+@@ -353,7 +392,12 @@
+         self.improve.assert_not_called()
+ 
+     def test_structured_admission_failures_never_fall_through_improve(self):
+-        for status in ("BOARD_INVALID", "RECOVERY_BLOCKED", "ADMISSION_FAILED", "ADMISSION_POLICY_DRIFT"):
++        for status in (
++            "BOARD_INVALID",
++            "RECOVERY_BLOCKED",
++            "ADMISSION_FAILED",
++            "ADMISSION_POLICY_DRIFT",
++        ):
+             with self.subTest(status=status):
+                 rc, payload = self.fallthrough({"ok": False, "replenished": False,
+                                                "status": status, "detail": "current refusal"})

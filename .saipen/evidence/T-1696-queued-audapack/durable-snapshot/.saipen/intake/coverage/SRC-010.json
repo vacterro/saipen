@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-010:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Operator target delivered: one-click coordinator start, operator states in project_room_model.py (completed/total wave roles :612-615), AUDIT READY contract in audit_run_service.py _ready proof tests; six-lane panel dialogs/audit_runs_widget.py",
+      "text": "Deliver the documented operator target: one START AUDIT click, one understandable run, durable AUDIT READY, and up to six visible independent runs without exposing worker internals in normal UI.",
+      "verification": "tests/ui_qt/test_audit_runs_widget.py::test_panel_has_exactly_six_visible_lanes_and_ready_truth; services gate 110 passed",
+      "work": "T-52"
+    }
+  },
+  "schema_version": 1
+}

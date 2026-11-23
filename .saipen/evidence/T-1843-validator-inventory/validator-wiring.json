@@ -1,0 +1,22 @@
+[
+  {
+    "gate": "core",
+    "problem": "full run missing",
+    "calls": 0,
+    "errors": []
+  },
+  {
+    "gate": "ship",
+    "problem": "full run missing",
+    "calls": 1,
+    "errors": [
+      "core-unit publication -- full run missing"
+    ]
+  },
+  {
+    "gate": "ship",
+    "problem": null,
+    "calls": 1,
+    "errors": []
+  }
+]

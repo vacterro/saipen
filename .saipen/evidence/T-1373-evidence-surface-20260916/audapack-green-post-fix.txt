@@ -1,0 +1,12 @@
+# SRC-054 AUDAPACK green, FINAL oracle vs FINAL subject (same isolated copy; only the subject differs)
+command: python -m pytest tests/test_saipen_evidence.py -q -p no:cacheprovider
+verifier: 5f95780fc0cb76b6
+subject: 284b08b3ae11b893
+--- isolated copy ---
+E       AssertionError: False is not true : SAIPEN audit-manifest precondition failed (AUDIT_MANIFEST_STALE_REGENERATION_FAILED): manifest is stale (declared mandatory evidence no longer matches disk: declared=['.saipen/BOARD.md', '.saipen/IDENTITY.md', '.saipen/LOG.md', '.saipen/STATE.md'] on_disk=['.saipen/BOARD.md', '.saipen/IDENTITY.md', '.saipen/LOG.md']); regeneration failed: saipen.cmd: executable not found. Run `saipen audit manifest --write` in the project (or repair the owning SAIPEN protocol component) and repack; no archive was produced.
+FAILED tests/test_saipen_evidence.py::TestArchiveProvenance::test_incomplete_snapshot_does_not_claim_authority
+1 failed, 49 passed in 13.59s
+--- real AUDAPACK working tree ---
+E       AssertionError: False is not true : SAIPEN audit-manifest precondition failed (AUDIT_MANIFEST_STALE_REGENERATION_FAILED): manifest is stale (declared mandatory evidence no longer matches disk: declared=['.saipen/BOARD.md', '.saipen/IDENTITY.md', '.saipen/LOG.md', '.saipen/STATE.md'] on_disk=['.saipen/BOARD.md', '.saipen/IDENTITY.md', '.saipen/LOG.md']); regeneration failed: saipen.cmd: executable not found. Run `saipen audit manifest --write` in the project (or repair the owning SAIPEN protocol component) and repack; no archive was produced.
+FAILED tests/test_saipen_evidence.py::TestArchiveProvenance::test_incomplete_snapshot_does_not_claim_authority
+1 failed, 49 passed in 13.35s

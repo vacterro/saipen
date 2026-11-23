@@ -1,0 +1,14 @@
+test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass (test_t1718_acceptance_contract.NativeEscapeRegressionTests.test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass) ... FAIL
+
+======================================================================
+FAIL: test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass (test_t1718_acceptance_contract.NativeEscapeRegressionTests.test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1718_acceptance_contract.py", line 130, in test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass
+    self.assertFalse(result.ok, result.to_dict())
+AssertionError: True is not false : {'ok': True, 'code': 'TICKET_VERIFIED', 'op_id': 'ticket-verify-8faadd52df5640f787fbb1208275b532', 'changed_files': ['.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'], 'recovery_required': False, 'ticket': 'T-7', 'event_id': 'E-6'}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.368s
+
+FAILED (failures=1)

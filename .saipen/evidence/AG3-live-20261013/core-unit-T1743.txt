@@ -1,0 +1,19 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 6385,
+  "red": 1,
+  "new_red": [
+    "test_concurrency_independence.NoAbsoluteLatencyBudgets.test_no_test_module_races_a_concurrent_gate_on_a_constant_timeout"
+  ],
+  "fixed": [],
+  "problems": [
+    "1 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/6a7ae62411375cf1-20261013T124834Z.json",
+  "reused": false,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}
+rc=1

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-001:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 (P0): destructive root establishment must be a no-follow authorization boundary, not a plain Path.resolve(). Reject a destructive base root whose own path or any existing ancestor component is a symlink/junction/reparse point BEFORE canonicalization; capture the raw root no-follow identity; canonicalize; re-check raw path/reparse state and identity after canonicalization so a swap during establishment fails closed. Centralize in the guard/root-scope primitive so every cleaner gets the same invariant."
+    }
+  },
+  "derived_at": "2026-09-09T15:26:26Z",
+  "derived_from": "SRC-001",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "df25548ce4ce3997cc326a2c3c621cd3049b009a6658a4ffd20c549339fc57a9"
+}

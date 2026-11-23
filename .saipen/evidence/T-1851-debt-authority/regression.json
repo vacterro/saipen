@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "format": "unittest",
+  "timeout": 120,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t1851_debt_authority.py", "-k", "AuthorityNegativeTests", "-v"],
+  "context": ["tools", "saipen", "bootstrap", "extensions", "tests/scenarios", "tests/fixtures", "VERSION"],
+  "oracle_files": ["tools/test_t1851_debt_authority.py", "tools/test_accepted_debt.py"],
+  "subject_files": ["tools/saipen_engine/accepted_debt.py", "tools/accept_legacy_debt.py", "tools/saipen_engine/debt_authority.py"],
+  "before": {
+    "tools/saipen_engine/accepted_debt.py": ".saipen/evidence/T-1851-debt-authority/before/accepted_debt.py",
+    "tools/accept_legacy_debt.py": ".saipen/evidence/T-1851-debt-authority/before/accept_legacy_debt.py",
+    "tools/saipen_engine/debt_authority.py": null
+  }
+}

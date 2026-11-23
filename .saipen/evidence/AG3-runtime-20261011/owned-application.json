@@ -1,0 +1,42 @@
+[
+  {
+    "path": "tools/saipen_engine/audit_manifest.py",
+    "before_sha256": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b",
+    "after_sha256": "00306d1c133841f6ff96f24a3097375f04151b5bdd2262947dd4a1cb2a50b54a"
+  },
+  {
+    "path": "tools/saipen_engine/paths.py",
+    "before_sha256": "055fcc3f9c94eca57f3494e636b8ee31a830b67969958d3d62ca2bbf3a0f93fc",
+    "after_sha256": "ffe1aa85fb129db09085f4ad2273c23ef6e02140c06650dfd6f24d6c220f7a36"
+  },
+  {
+    "path": "tools/saipen_engine/host_bootstrap.py",
+    "before_sha256": "785a93b2dd44f76f883c0bf97cce9346c60a2a68c4ac1d927fb5e0d67d4ef27a",
+    "after_sha256": "bd2ec342d163e3993d5b760d141e6fa9a5cc58007cc17926032861ba79e1fd18"
+  },
+  {
+    "path": "tools/saipen_engine/reconcile.py",
+    "before_sha256": "fa7555a02d98ef3b6330a6a81ff954e56a556f49ea45a9fae647b7e223521b85",
+    "after_sha256": "4611839620eb199b747d0aac8eaea848760c2fd8dfd71ad3b672a3107d0feefb"
+  },
+  {
+    "path": "tools/saipen.py",
+    "before_sha256": "f550ebd4d320ce2c0f3f9fe7c5c487030ad3d5ad1b1fb4c2655faeadb5a4c3f3",
+    "after_sha256": "da6d0d610333114236822c4fec6142fc704753940012420df33b6aebeef9a930"
+  },
+  {
+    "path": "tools/saipen_engine/init_project.py",
+    "before_sha256": "7a5246452c9f074b7deb1b993c446f7c0cfd8c6450d3f682fa0bb4b21eb74573",
+    "after_sha256": "11a7119308890ab92e7da59ac98f2b5b96b0d08d742904ec07f2a7db55c0d652"
+  },
+  {
+    "path": "tools/test_t1647_machine_runtime.py",
+    "before_sha256": "53b1aab560fd75ee2ed06cf69d7005fca9921675618853e22b6ace5a2ae41d3d",
+    "after_sha256": "a0a44db537b47c916b2ea4b9ec63c79ed3c3d9692593f7fc639cb4779cc49870"
+  },
+  {
+    "path": "tools/test_t1712_manifest_runtime.py",
+    "before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "after_sha256": "1eea368ab4c57f16f63823d0bcbc26a6d07b72ba921cd56ccac3096f6f0bbf0b"
+  }
+]

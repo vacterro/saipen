@@ -1,0 +1,7 @@
+{
+  "ok": false,
+  "code": "SOURCE_UNRESOLVED",
+  "detail": "linked Work T-2016 is not DONE",
+  "receipt": "SRC-386",
+  "action": "saipen audit status"
+}

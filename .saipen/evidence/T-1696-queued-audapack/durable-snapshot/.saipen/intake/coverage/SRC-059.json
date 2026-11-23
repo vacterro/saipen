@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-059:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-208 closed with verification evidence in LOG: verify -> PASS [target: T-208] conf: high -- node --test tests/widget/w2-002-ownership.test.js on Node v24.15.0: 14 pass / 0 fail / 0 cancelled / exit 0 (pre-fix same command: 11 pass then no exit); node --test tests/widget/*.test.js: 568 pass / 0 fail / 0 cancelled / exit 0; pytest 1897 passed 5 skipped exit 0; ruff clean; compileall exit 0; saipen validate VALID",
+      "text": "Continue T-206 only: fix stale send-acceptance test in tests/widget/w2-002-ownership.test.js then reprove canonical Node widget gate; full spec at V:\\_TEMP_\\fastprompter_drag\\AUDAPACK_20260919_2156.md",
+      "verification": "the Work this request created reached its own verification gate; see the T-208 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-208"
+    }
+  },
+  "schema_version": 1
+}

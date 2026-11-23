@@ -1,0 +1,22 @@
+{
+  "scope": "Isolated actual helper negative control; no real project authorization or host acceptance",
+  "model_authored": true,
+  "provenance": {
+    "witness": "operator_carrier",
+    "compared_digest": "13d6d093327b9c07ff5d5d10e1c4a64f4575f062417675c29fc6459c355faecf",
+    "declared_by": "SAIPEN_TASK_SHA256"
+  },
+  "authority_effects": {
+    "witness": "operator_carrier",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": true,
+    "preempt_active_work": true,
+    "goal_pivot": true,
+    "reset_bounded_authority": true,
+    "detailed_response": true,
+    "external_action": false
+  },
+  "expected_privileged_authority": false,
+  "current_defect_proven": true
+}

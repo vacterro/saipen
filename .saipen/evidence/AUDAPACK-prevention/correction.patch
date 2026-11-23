@@ -1,0 +1,536 @@
+--- a/tools/saipen_engine/guard_events.py
++++ b/tools/saipen_engine/guard_events.py
+@@ -235,6 +235,7 @@
+ _SHELL_MOVE_VERBS = frozenset({"mv", "move", "move-item", "mi"})
+ _SHELL_RENAME_VERBS = frozenset({"ren", "rename", "rename-item", "rni"})
+ _SHELL_MIRROR_VERBS = frozenset({"robocopy", "rsync"})
++_SHELL_WRITE_VERBS = frozenset({"tee", "tee-object", "set-content", "add-content", "out-file"})
+ _POSIX_SHELL_VERBS = frozenset({"bash", "sh", "zsh", "dash", "ksh", "busybox"})
+ _POWERSHELL_VERBS = frozenset({"powershell", "pwsh"})
+ _EVAL_VERBS = frozenset({"eval", "iex", "invoke-expression"})
+@@ -288,12 +289,19 @@
+     "credential",
+     "stream",
+ )
+-_PS_ONLY_VERBS = frozenset({"remove-item", "ri", "move-item", "mi", "rename-item", "rni"})
++_PS_WRITE_VERBS = _SHELL_WRITE_VERBS - {"tee"}
++_PS_WRITE_PARAMETERS = (
++    *_PS_VALUE_PARAMETERS, "filepath", "value", "encoding", "width", "inputobject",
++)
++_PS_ONLY_VERBS = (
++    frozenset({"remove-item", "ri", "move-item", "mi", "rename-item", "rni"}) | _PS_WRITE_VERBS
++)
+ #: A destructive verb spelled anywhere in a segment the parser could not read.
+ #: Used to fail closed rather than report an unread segment as read.
+ _DESTRUCTIVE_TEXT = re.compile(
+     r"(?i)\b(rm|rmdir|rd|del|erase|remove-item|move-item|mv|move)\b"
+ )
++_FILE_WRITE_TEXT = re.compile(r"(?i)\b(tee|tee-object|set-content|add-content|out-file)\b")
+ #: A backslash-escaped quote. `_shell_words` runs `shlex` with escaping
+ #: disabled, so these tokenize into nonsense rather than raising.
+ _ESCAPED_QUOTE = re.compile(r"\\[\"']")
+@@ -447,9 +455,9 @@
+     return name
+ 
+ 
+-def _ps_parameter(name: str) -> str | None:
+-    matches = [full for full in _PS_VALUE_PARAMETERS if full.startswith(name)]
+-    return matches[0] if len(matches) == 1 or name in _PS_VALUE_PARAMETERS else None
++def _ps_parameter(name: str, parameters: tuple[str, ...] = _PS_VALUE_PARAMETERS) -> str | None:
++    matches = [full for full in parameters if full.startswith(name)]
++    return matches[0] if len(matches) == 1 or name in parameters else None
+ 
+ 
+ def _is_redirection(word: str) -> bool:
+@@ -464,6 +472,7 @@
+     named: dict[str, list[str]] = {}
+     switches: set[str] = set()
+     powershell = verb in _PS_ONLY_VERBS
++    parameters = _PS_WRITE_PARAMETERS if verb in _PS_WRITE_VERBS else _PS_VALUE_PARAMETERS
+     index = 0
+     options_done = False
+     while index < len(words):
+@@ -483,7 +492,8 @@
+             name, _sep, bound = word[1:].partition(":")
+             lowered = name.lower().lstrip("-")
+             parameter = (
+-                _ps_parameter(lowered) if (powershell or len(lowered) >= 3) and lowered else None
++                _ps_parameter(lowered, parameters)
++                if (powershell or len(lowered) >= 3) and lowered else None
+             )
+             if parameter:
+                 if bound:
+@@ -516,7 +526,7 @@
+     pure = PureWindowsPath(token) if windows else PurePosixPath(token)
+     if pure.is_absolute() or (windows and pure.root):
+         return str(Path(token))
+-    if cwd is None:
++    if cwd is None or not Path(cwd).is_absolute():
+         return None
+     return str(Path(cwd) / token)
+ 
+@@ -666,8 +676,69 @@
+     return _absolute(os.path.expanduser(destination), cwd)
+ 
+ 
++def _output_redirections(segment: str) -> tuple[list[str], str | None]:
++    """Literal output operands, preserving quote boundaries (T-1705).
++
++    Quoted text containing ``>>`` is data. An actual redirection is a write
++    even if the command never spells ``.saipen``. The existing operand owner
++    resolves its target; computed or unreadable operands stay unresolved.
++    """
++    if ">" not in segment:
++        return [], None
++    if _ESCAPED_QUOTE.search(segment):
++        return [], "output redirection has escaped quoting the guard cannot read"
++    targets: list[str] = []
++    quote: str | None = None
++    index = 0
++    while index < len(segment):
++        char = segment[index]
++        if quote is not None:
++            if char == quote:
++                quote = None
++            index += 1
++            continue
++        if char in "'\"":
++            quote = char
++            index += 1
++            continue
++        if char != ">":
++            index += 1
++            continue
++        index += 1
++        if segment[index:index + 1] == ">":
++            index += 1
++        while index < len(segment) and segment[index].isspace():
++            index += 1
++        start = index
++        while index < len(segment):
++            char = segment[index]
++            if quote is not None:
++                if char == quote:
++                    quote = None
++            elif char in "'\"":
++                quote = char
++            elif char.isspace() or char in "<>|;":
++                break
++            index += 1
++        if quote is not None or start == index:
++            return [], "output redirection has no readable literal target"
++        raw = segment[start:index]
++        if re.fullmatch(r"&(?:\d+|-)", raw):
++            continue  # descriptor duplication/closure writes no file
++        if raw.startswith("&"):
++            raw = raw[1:]  # POSIX >&file redirects both output descriptors
++        words = _shell_words(raw)
++        if not words or len(words) != 1:
++            return [], "output redirection target cannot be read as one operand"
++        targets.append(words[0])
++    return targets, None
++
++
+ def destructive_shell_effects(command: str, cwd: str | None, _depth: int = 0) -> dict:
+-    """Resolve the delete/move effects of one shell command line (T-1354).
++    """Resolve bounded filesystem effects of one shell command line.
++
++    The public name is retained for existing adapters. T-1705 adds literal
++    output redirection and named file writers to T-1354's delete/move effects.
+ 
+     Returns ``{"effects": [{"action", "verb", "targets"}...], "unresolved": str
+     | None}``. Targets are absolute. An effect is reported whenever a bounded
+@@ -685,12 +756,18 @@
+         effects.extend(inner["effects"])
+         unresolved = unresolved or inner["unresolved"]
+     for segment, piped in segments:
++        outputs, why = _output_redirections(segment)
++        effect, operand_error = _operand_effect("write", "redirection", outputs, cwd)
++        effects.extend([effect] if effect else [])
++        unresolved = unresolved or why or operand_error
+         words = _shell_words(segment)
+         if words is None:
+-            if _DESTRUCTIVE_TEXT.search(segment):
++            if _DESTRUCTIVE_TEXT.search(segment) or _FILE_WRITE_TEXT.search(segment):
+                 unresolved = unresolved or f"destructive command cannot be parsed: {segment[:80]}"
+             continue
+-        if _ESCAPED_QUOTE.search(segment) and _DESTRUCTIVE_TEXT.search(segment):
++        if _ESCAPED_QUOTE.search(segment) and (
++            _DESTRUCTIVE_TEXT.search(segment) or _FILE_WRITE_TEXT.search(segment)
++        ):
+             # Escaping is disabled in the lexer, so `\"` does not raise -- it
+             # tokenizes into nonsense, and the guard then reports a reading it
+             # never made. Measured: `rm -rf \".\"` resolved to the single path
+@@ -725,6 +802,20 @@
+             continue
+         if verb in _CD_VERBS or verb in _PUSHD_VERBS or verb in _POPD_VERBS:
+             cwd = _navigate(verb, args, cwd, cwd_stack)
++            continue
++        if verb in _SHELL_WRITE_VERBS:
++            operands, named, _switches = _parse_arguments(verb, args)
++            paths = named.get("path") or named.get("literalpath") or named.get("filepath")
++            if paths is None:
++                paths = operands if verb == "tee" else operands[:1]
++            if verb in _PS_WRITE_VERBS and any("," in token for token in paths):
++                unresolved = unresolved or f"{verb} uses a path array the guard cannot resolve"
++                continue
++            effect, why = _operand_effect("write", verb, paths, cwd)
++            effects.extend([effect] if effect else [])
++            unresolved = unresolved or why
++            if not paths and verb != "tee":
++                unresolved = unresolved or f"{verb} supplies no inspectable file target"
+             continue
+         if verb == "xargs":
+             if any(_shell_verb(word) in _SHELL_DELETE_VERBS | _SHELL_MOVE_VERBS for word in args):
+@@ -758,7 +849,7 @@
+         if verb not in (
+             _SHELL_DELETE_VERBS | _SHELL_MOVE_VERBS | _SHELL_RENAME_VERBS | _SHELL_MIRROR_VERBS
+         ):
+-            if launched and _DESTRUCTIVE_TEXT.search(segment):
++            if launched and (_DESTRUCTIVE_TEXT.search(segment) or _FILE_WRITE_TEXT.search(segment)):
+                 # A launcher ran something the guard could not reduce to a
+                 # verb it knows -- `timeout 5 rm -rf .`, `sudo -u root rm -rf .`
+                 # -- so the destructive word in the line is unaccounted for.
+@@ -1864,6 +1955,7 @@
+         shell_effects=mapped["shell_effects"],
+         shell_effects_unresolved=mapped["shell_effects_unresolved"],
+         session_id=mapped["session_id"],
++        target_base=event["cwd"],
+     )
+     if is_operator_question(event) and verdict.get("admitted") and verdict.get("applicable"):
+         from .response_surface import gate_operator_question
+--- a/tools/saipen_engine/admission.py
++++ b/tools/saipen_engine/admission.py
+@@ -530,8 +530,13 @@
+     )
+ 
+ 
+-def canonicalize_target(root: Path, target_path: str | Path) -> tuple[str, str, str]:
+-    """Resolve a proposed target against the project root before classification.
++def canonicalize_target(
++    root: Path, target_path: str | Path, *, target_base: Path | str | None = None,
++) -> tuple[str, str, str]:
++    """Resolve a proposed target before classification against the project root.
++
++    Native admission targets default to the project root. A host tool's
++    relative targets instead use its actual working directory (T-1705).
+ 
+     Returns ``(classification, canonical_relative_or_abs, detail)`` where
+     classification is one of:
+@@ -556,7 +561,8 @@
+     decide.
+     """
+     raw = Path(_win32_spelling(str(target_path)))
+-    absolute = raw if raw.is_absolute() else Path(root) / raw
++    base = Path(target_base if target_base is not None else root)
++    absolute = raw if raw.is_absolute() else base / raw
+     try:
+         canonical = absolute.resolve(strict=False)
+     except OSError:
+@@ -1115,12 +1121,16 @@
+     shell_effects: "list[dict] | None" = None,
+     shell_effects_unresolved: str | None = None,
+     session_id: str | None = None,
++    target_base: Path | str | None = None,
+ ) -> dict:
+     """Evaluate admission for a proposed tool call or file modification.
+ 
+     ``target_paths`` carries the FULL target set of one proposed effect (a
+     multi-file patch, both endpoints of a move). ``targets_unresolved`` marks
+     a consequential mutation whose target set could not be trusted.
++    ``target_base`` is the host's working directory for relative file targets;
++    native project-relative callers omit it. Relative escape detection retains
++    the original relative spelling, so rebasing never grants external scope.
+     ``shell_effects`` are the destructive filesystem effects a shell command
+     was resolved to (`guard_events.destructive_shell_effects`): each is judged
+     exactly as the file-tool effect it is, so one effect gets one answer
+@@ -1176,6 +1186,19 @@
+         )
+ 
+     root = Path(root_res.root).resolve()
++
++    if (
++        effect == "mutating"
++        and target_base is not None
++        and not Path(_win32_spelling(str(target_base))).is_absolute()
++        and any(not Path(_win32_spelling(candidate)).is_absolute() for candidate in targets)
++    ):
++        return result(
++            ok=False, code=CODE_TARGET_UNRESOLVED, admitted=False,
++            project_root=str(root), action=action_name, effect=effect,
++            target=None, targets=targets, provenance=root_res.provenance,
++            detail="relative host target has no proven absolute working directory",
++        )
+ 
+     if (
+         action_name == "shell"
+@@ -1265,7 +1288,9 @@
+     # them refuses the whole host tool before execution.
+     resolved: list[tuple[str, str]] = []
+     for candidate in targets:
+-        classification, canonical, _detail = canonicalize_target(root, candidate)
++        classification, canonical, _detail = canonicalize_target(
++            root, candidate, target_base=target_base,
++        )
+         resolved.append((classification, canonical))
+         if classification == "protected":
+             if effect == "read":
+--- /dev/null
++++ b/tools/test_t1705_lifecycle_write_preflight.py
+@@ -0,0 +1,198 @@
++"""T-1705: host-relative writes must preserve canonical namespace protection.
++
++These are pre-execution guard tests. They do not claim a hook exists in a host
++that declares only advisory enforcement, and never mutate a consumer project.
++"""
++
++from __future__ import annotations
++
++import json
++import shutil
++import subprocess
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++TOOLS = Path(__file__).resolve().parent
++if str(TOOLS) not in sys.path:
++    sys.path.insert(0, str(TOOLS))
++
++from saipen_engine import guard_events  # noqa: E402
++from test_hermetic_env import isolate_host_session  # noqa: E402
++from test_t1671_lifecycle_authority import AGENT, _project  # noqa: E402
++
++
++def setUpModule() -> None:
++    isolate_host_session()
++
++
++class LifecycleWritePreflightTests(unittest.TestCase):
++    @classmethod
++    def setUpClass(cls) -> None:
++        cls.root = _project()
++        cls.addClassCleanup(lambda: shutil.rmtree(cls.root, ignore_errors=True))
++        (cls.root / "src").mkdir(exist_ok=True)
++        (cls.root / ".saipen" / "evidence").mkdir(exist_ok=True)
++
++    def event(self, tool: str, args: dict, *, cwd: Path | None = None) -> dict:
++        return {
++            "event": "before_tool",
++            "host": "opencode",
++            "cwd": str(cwd or self.root),
++            "actor": AGENT,
++            "tool_name": tool,
++            "tool_input": args,
++        }
++
++    def assert_protected(self, event: dict) -> None:
++        paths = [self.root / ".saipen" / name for name in ("STATE.md", "BOARD.md", "LOG.md")]
++        before = {path: path.read_bytes() for path in paths}
++        answer = guard_events.evaluate_event(event)
++        self.assertFalse(answer["admitted"], answer)
++        self.assertEqual(answer["code"], "PROTECTED_CANONICAL_NAMESPACE", answer)
++        self.assertEqual({path: path.read_bytes() for path in paths}, before)
++
++    def test_relative_file_targets_from_canonical_cwd_are_refused(self) -> None:
++        for name in ("STATE.md", "BOARD.md", "LOG.md"):
++            with self.subTest(name=name):
++                self.assert_protected(self.event(
++                    "str_replace", {"path": name, "old_str": "x", "new_str": "y"},
++                    cwd=self.root / ".saipen",
++                ))
++
++    def test_relative_shell_redirection_from_canonical_cwd_is_refused(self) -> None:
++        self.assert_protected(self.event(
++            "bash", {"command": 'printf "fabricated closure" >> LOG.md'},
++            cwd=self.root / ".saipen",
++        ))
++
++    def test_relative_patch_batch_cannot_hide_a_canonical_target(self) -> None:
++        self.assert_protected(self.event("apply_patch", {"patchText": (
++            "*** Begin Patch\n*** Add File: scratch.txt\n+x\n"
++            "*** Update File: BOARD.md\n@@\n-x\n+y\n*** End Patch\n"
++        )}, cwd=self.root / ".saipen"))
++
++    def test_both_relative_move_endpoints_use_the_host_cwd(self) -> None:
++        for source, destination in (("LOG.md", "scratch.txt"), ("scratch.txt", "STATE.md")):
++            with self.subTest(source=source, destination=destination):
++                self.assert_protected(self.event("move", {
++                    "source_path": source, "destination_path": destination,
++                }, cwd=self.root / ".saipen"))
++
++    def test_relative_parent_path_resolves_from_a_source_subdirectory(self) -> None:
++        self.assert_protected(self.event(
++            "edit", {"file_path": "../.saipen/STATE.md"}, cwd=self.root / "src",
++        ))
++
++    def test_structured_relative_escape_still_fails_closed(self) -> None:
++        answer = guard_events.evaluate_event(self.event(
++            "write", {"path": "../../outside.txt"}, cwd=self.root / "src",
++        ))
++        self.assertFalse(answer["admitted"], answer)
++        self.assertEqual(answer["code"], "PATH_ESCAPES_PROJECT", answer)
++
++    def test_direct_canonical_paths_and_absolute_aliases_stay_refused(self) -> None:
++        for target in (".saipen/LOG.md", str(self.root / ".saipen" / "STATE.md")):
++            with self.subTest(target=target):
++                self.assert_protected(self.event("write", {"path": target}))
++
++    def test_canonical_read_and_ordinary_relative_edit_stay_available(self) -> None:
++        for event in (
++            self.event("read", {"path": "LOG.md"}, cwd=self.root / ".saipen"),
++            self.event("write", {"path": "notes.txt"}, cwd=self.root / ".saipen" / "evidence"),
++        ):
++            with self.subTest(event=event):
++                answer = guard_events.evaluate_event(event)
++                self.assertTrue(answer["admitted"], answer)
++
++    def test_shell_redirection_spellings_and_wrappers_are_refused(self) -> None:
++        for command in (
++            'printf x>LOG.md', 'printf x 2>>"LOG.md"',
++            'printf x >&LOG.md', 'printf x &>LOG.md', 'printf x >> L\'OG\'.md',
++            "bash -c 'printf x >> LOG.md'", 'cmd /c "echo x >> LOG.md"',
++            'powershell -Command "Write-Output x >> LOG.md"',
++            'pushd ..; popd; printf x >> LOG.md',
++        ):
++            with self.subTest(command=command):
++                self.assert_protected(self.event(
++                    "bash", {"command": command}, cwd=self.root / ".saipen",
++                ))
++
++    def test_unreadable_named_writer_is_refused(self) -> None:
++        for command in (r'Set-Content \"LOG.md\" x', 'timeout 5 tee LOG.md'):
++            with self.subTest(command=command):
++                answer = guard_events.evaluate_event(self.event(
++                    "bash", {"command": command}, cwd=self.root / ".saipen",
++                ))
++                self.assertFalse(answer["admitted"], answer)
++                self.assertEqual(answer["code"], "TARGET_UNRESOLVED", answer)
++
++    def test_named_shell_writers_are_refused(self) -> None:
++        for command in (
++            'printf x | tee -a LOG.md',
++            'Set-Content -Value x -LiteralPath LOG.md',
++            'Add-Content LOG.md x', 'Write-Output x | Out-File LOG.md',
++        ):
++            with self.subTest(command=command):
++                self.assert_protected(self.event(
++                    "bash", {"command": command}, cwd=self.root / ".saipen",
++                ))
++
++    def test_computed_output_target_is_not_assumed_safe(self) -> None:
++        answer = guard_events.evaluate_event(self.event(
++            "bash", {"command": "printf x >> $target"}, cwd=self.root / ".saipen",
++        ))
++        self.assertFalse(answer["admitted"], answer)
++        self.assertEqual(answer["code"], "TARGET_UNRESOLVED", answer)
++
++    def test_ordinary_output_and_quoted_redirection_text_are_allowed(self) -> None:
++        for command in (
++            'printf x >> notes.txt', 'printf "%s" ">> LOG.md"', 'printf x 2>&1',
++        ):
++            with self.subTest(command=command):
++                answer = guard_events.evaluate_event(self.event(
++                    "bash", {"command": command}, cwd=self.root / ".saipen" / "evidence",
++                ))
++                self.assertTrue(answer["admitted"], answer)
++
++    def test_guard_decision_does_not_fabricate_a_freebuff_blocking_hook(self) -> None:
++        event = self.event("str_replace", {"path": "LOG.md"}, cwd=self.root / ".saipen")
++        event["host"] = "freebuff"
++        answer = guard_events.evaluate_event(event)
++        self.assertFalse(answer["admitted"], answer)
++        self.assertEqual(answer["code"], "PROTECTED_CANONICAL_NAMESPACE", answer)
++        self.assertEqual(answer["strength"]["effective"], "ADVISORY", answer)
++
++    def test_cli_refuses_before_a_host_could_apply_the_edit(self) -> None:
++        event = self.event("str_replace", {"path": "LOG.md"}, cwd=self.root / ".saipen")
++        before = (self.root / ".saipen" / "LOG.md").read_bytes()
++        result = subprocess.run(
++            [sys.executable, str(TOOLS / "saipen.py"), "guard", "--event-json", "-", "--json"],
++            input=json.dumps(event), text=True, encoding="utf-8", capture_output=True,
++            cwd=self.root, check=False, timeout=30,
++        )
++        answer = json.loads(result.stdout)
++        self.assertEqual(result.returncode, 1, result)
++        self.assertFalse(answer["admitted"], answer)
++        self.assertEqual(answer["code"], "PROTECTED_CANONICAL_NAMESPACE", answer)
++        self.assertEqual((self.root / ".saipen" / "LOG.md").read_bytes(), before)
++
++    def test_unknown_relative_host_cwd_does_not_grant_a_target_base(self) -> None:
++        answer = guard_events.evaluate_event(
++            self.event("write", {"path": "LOG.md"}, cwd=Path("relative-cwd")),
++            project_root=str(self.root),
++        )
++        self.assertFalse(answer["admitted"], answer)
++        self.assertEqual(answer["code"], "TARGET_UNRESOLVED", answer)
++
++    def test_non_saipen_project_remains_non_interfering(self) -> None:
++        with tempfile.TemporaryDirectory(prefix="t1705-unbound-") as temporary:
++            event = self.event("write", {"path": "LOG.md"}, cwd=Path(temporary))
++            answer = guard_events.evaluate_event(event)
++            self.assertTrue(answer["admitted"], answer)
++            self.assertFalse(answer["applicable"], answer)
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/saipen/CORE.md
++++ b/saipen/CORE.md
+@@ -248,12 +248,16 @@
+   override foreign live owners or contradictory ownership. Host session ids,
+   slots, pids, titles and ports are never actors. Handover records both seats
+   before mutation; unknown runtime metadata stays UNKNOWN.
+-- Host-event preflight closes the protected-namespace shell bypass: shell text
+-  naming `.saipen` refuses before execution, except standalone canonical
+-  `saipen <verb>`. Ordinary source-development shell use remains available.
+-  Destructive EFFECTS receive file-tool rules; unproved operands/cwd refuse
+-  as unresolved. Explicit-text proof is no sandbox for obfuscated/computed
+-  paths. OPS-EFFECT-01 owns verb/wrapper vocabulary and resolution bounds.
++- Host-event preflight refuses direct shell mutation of protected canonical
++  state; standalone canonical `saipen <verb>` keeps its operation exemption.
++  Ordinary source-development and unprotected evidence files remain available.
++  Relative file-tool targets resolve from the host's actual working directory,
++  then receive the same project containment and ownership checks. Destructive
++  effects, literal output redirection and bounded named file writers receive
++  file-tool rules even when the command omits `.saipen`; unproved operands/cwd
++  refuse as unresolved. Explicit-text proof is no sandbox for obfuscated or
++  computed paths. OPS-EFFECT-01 owns vocabulary and resolution bounds; a host
++  without a blocking hook remains ADVISORY.
+ - The exact built-in OpenCode `task` call is consequential delegation, not an
+   unnamed mutation. It requires canonical state, actor and recovery admission;
+   child tool calls receive their own guards. Namespaced or unclassified
+--- a/saipen/OPS.md
++++ b/saipen/OPS.md
+@@ -574,10 +574,14 @@
+ 
+ **Shell preflight resolution bounds** (CORE § 1.4). Shell text visibly naming a
+ `.saipen` path -- quoted, Windows/POSIX separator, or simple-traversal
+-spellings -- is refused before execution; a standalone canonical `saipen
+-<verb>` keeps its operation exemption, and ordinary source-development shell
+-use remains available. Destructive EFFECTS are resolved from a bounded
+-delete/move/rename verb set with its documented flags, the explicit `bash -c` /
++spellings -- receives the structured tools' canonical namespace checks;
++unresolved namespace mentions refuse before execution. A standalone canonical
++`saipen <verb>` keeps its operation exemption, and ordinary source-development
++shell use remains available. File-tool relative targets use the host working
++directory, never an assumed project root; containment still belongs to the
++bound project. The shell resolver covers delete/move/rename, literal output
++redirection, `tee`, `tee-object`, `set-content`, `add-content` and `out-file`,
++with bounded flags, the explicit `bash -c` /
+ `powershell -Command` / `cmd /c` / `eval` wrappers, command substitution, and
+ the working directory as `cd`, `pushd` and `popd` move it; each resolved
+ effect is judged exactly as the file-tool effect it is. An effect whose
+@@ -585,7 +589,10 @@
+ encoded command, a directory stack deeper than the guard tracks -- is refused
+ as unresolved, never admitted as ordinary shell. This is an accidental-
+ mutation barrier over explicit command text, not a sandbox: obfuscated or
+-dynamically computed paths stay outside its proof.
++dynamically computed paths stay outside its proof. Quoted redirection text
++and descriptor duplication are not file writes. These decisions prevent host
++execution only where an installed blocking hook actually invokes the guard;
++an ADVISORY host does not acquire that capability from a green test.
+ 
+ **Coverage evaluation** (`evaluate_coverage`) answers one question
+ mechanically: WHAT AUTHORIZATION COVERS THIS OBSERVED EFFECT? DENY fails

@@ -1,0 +1,48 @@
+........................................................................ [ 49%]
+...................................................................F.... [ 99%]
+.                                                                        [100%]
+================================== FAILURES ===================================
+_ GapRecoveryRouteTests.test_matrix_J_resolve_next_action_cannot_mask_the_gap _
+
+self = <test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests testMethod=test_matrix_J_resolve_next_action_cannot_mask_the_gap>
+
+    def test_matrix_J_resolve_next_action_cannot_mask_the_gap(self):
+        """A legacy next_action must not become the advertised exit."""
+        masked = _audapack_project(next_action="re-check the coverage gates")
+        self.addCleanup(lambda: shutil.rmtree(masked.parent, ignore_errors=True))
+    
+        def masked_cli(*args):
+            from saipen_engine.paths import unbound_environment
+    
+            run = subprocess.run(
+                [sys.executable, str(SAIPEN_CLI), *args, "--json"],
+                cwd=str(masked), capture_output=True, text=True,
+                encoding="utf-8", errors="replace",
+                env=unbound_environment(), timeout=600,
+            )
+            try:
+                return json.loads(run.stdout or "{}")
+            except json.JSONDecodeError:
+                return {"_raw": (run.stdout + run.stderr)[:400]}
+    
+        bare = masked_cli("recover")
+        route = bare.get("canonical_next_command", "")
+        self.assertEqual(route.split()[:3], ["saipen", "recover", "--apply-approved-repair"],
+                         f"recover advertised the masking verb instead: {bare}")
+    
+        state_before = (masked / ".saipen" / "STATE.md").read_bytes()
+        board_before = (masked / ".saipen" / "BOARD.md").read_bytes()
+        supplied = masked_cli("recover", "resolve-next-action", "saipen validate")
+        self.assertFalse(supplied.get("ok"), supplied)
+        # The refusal names the route that owns the defect, and writes nothing.
+>       self.assertIn(
+            "--apply-approved-repair",
+            str(supplied.get("canonical_next_command", "")) + str(supplied.get("detail", "")),
+            supplied,
+        )
+E       AssertionError: '--apply-approved-repair' not found in 'saipen recover resolve-blocker preview --dry-runan authority-only Source with its original operator carrier is required; decision text and canonical operation provenance grant no gate authority' : {'ok': False, 'code': 'RECONCILE_REAUTH_REQUIRED', 'detail': 'an authority-only Source with its original operator carrier is required; decision text and canonical operation provenance grant no gate authority', 'cause': 'GATE_AUTHORITY_REQUIRED', 'canonical_next_command': 'saipen recover resolve-blocker preview --dry-run', 'capture_command': 'saipen authority capture --file <UTF8_FILE>'}
+
+tools\test_t1572_ticket_scoped_recovery.py:494: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t1572_ticket_scoped_recovery.py::GapRecoveryRouteTests::test_matrix_J_resolve_next_action_cannot_mask_the_gap
+1 failed, 144 passed in 79.93s (0:01:19)

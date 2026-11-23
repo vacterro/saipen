@@ -1,0 +1,47 @@
+FF..F...F.............F..............F................ [ 84%]
+..........                                               [100%]
+================================== FAILURES ===================================
+_ ContinuationAssessmentSuite.test_c01_empty_board_with_proven_maintenance_continues _
+tools\test_campaign_continuation_assessment.py:125: in test_c01_empty_board_with_proven_maintenance_continues
+    self.assertEqual(assessment["classification"], CA.MAINTENANCE_AVAILABLE)
+E   AssertionError: 'INCOMPLETE_DISCOVERY' != 'MAINTENANCE_AVAILABLE'
+E   - INCOMPLETE_DISCOVERY
+E   + MAINTENANCE_AVAILABLE
+_ ContinuationAssessmentSuite.test_c02_empty_board_no_maintenance_authority_remains_idle _
+tools\test_campaign_continuation_assessment.py:155: in test_c02_empty_board_no_maintenance_authority_remains_idle
+    self.assertEqual(assessment["classification"], CA.QUIESCENT)
+E   AssertionError: 'INCOMPLETE_DISCOVERY' != 'QUIESCENT'
+E   - INCOMPLETE_DISCOVERY
+E   + QUIESCENT
+_ ContinuationAssessmentSuite.test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds _
+tools\test_campaign_continuation_assessment.py:232: in test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds
+    self.assertEqual(assessment["classification"], CA.MAINTENANCE_AVAILABLE)
+E   AssertionError: 'INCOMPLETE_DISCOVERY' != 'MAINTENANCE_AVAILABLE'
+E   - INCOMPLETE_DISCOVERY
+E   + MAINTENANCE_AVAILABLE
+_______________ E2E02TrueTerminal.test_terminal_once_then_stop ________________
+tools\test_t1619_iteration_boundary.py:147: in test_terminal_once_then_stop
+    self.assertEqual(verdict["decision"], iteration.VALID_TERMINAL)
+E   AssertionError: 'RUNTIME_PAUSED' != 'VALID_TERMINAL'
+E   - RUNTIME_PAUSED
+E   + VALID_TERMINAL
+_ PrematureHandbackRegressionTests.test_ac05_genuine_full_goal_terminal_verdict _
+tools\test_t1917_premature_handback.py:142: in test_ac05_genuine_full_goal_terminal_verdict
+    self.assertEqual(verdict["decision"], iteration.VALID_TERMINAL)
+E   AssertionError: 'RUNTIME_PAUSED' != 'VALID_TERMINAL'
+E   - RUNTIME_PAUSED
+E   + VALID_TERMINAL
+__ SupervisorTests.test_a_parked_hold_with_a_due_field_is_never_a_human_stop __
+tools\test_supervisor.py:245: in test_a_parked_hold_with_a_due_field_is_never_a_human_stop
+    self.assertEqual(verdict["verdict"], supervisor.IDLE)
+E   AssertionError: 'INCOMPLETE_DISCOVERY' != 'IDLE'
+E   - INCOMPLETE_DISCOVERY
+E   + IDLE
+=========================== short test summary info ===========================
+FAILED tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c01_empty_board_with_proven_maintenance_continues
+FAILED tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c02_empty_board_no_maintenance_authority_remains_idle
+FAILED tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds
+FAILED tools/test_t1619_iteration_boundary.py::E2E02TrueTerminal::test_terminal_once_then_stop
+FAILED tools/test_t1917_premature_handback.py::PrematureHandbackRegressionTests::test_ac05_genuine_full_goal_terminal_verdict
+FAILED tools/test_supervisor.py::SupervisorTests::test_a_parked_hold_with_a_due_field_is_never_a_human_stop
+6 failed, 58 passed, 34 subtests passed in 3.67s

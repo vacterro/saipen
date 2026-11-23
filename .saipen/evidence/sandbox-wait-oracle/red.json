@@ -1,0 +1,14 @@
+{
+  "label": "red",
+  "verifier_sha256": "caeb4ac52cc3700fb37077b4b9a3b36861ba064873fdd946bc721587f6c2a8a7",
+  "subject_sha256": "54166df9b820a3bdb66f8fe272fedbf5874497e15dec3fbe357d9caf5a9684dd",
+  "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\sandbox-wait-oracle\\test_t1505_core_unit_sandbox_reclaim.before.py",
+  "production_sha256": "65dae1f6d4b3875850d5c445b3df11152442c8a454caa88e50bc47df9b993a3e",
+  "ran": 1,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "sweep_calls": 1,
+  "successful": false,
+  "scope": "Controlled transient empty-sweep contract; not a claim to reproduce the original intermittent shard failure's mechanism."
+}

@@ -1,0 +1,98 @@
+......E.FFF.FFF.F.....FF....
+======================================================================
+ERROR: test_a_foreign_executor_cannot_measure_or_admit_this_work (__main__.ExecutionControls.test_a_foreign_executor_cannot_measure_or_admit_this_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 274, in test_a_foreign_executor_cannot_measure_or_admit_this_work
+    result = EXECUTION.execute_pair(self.project, "T-7", "other", self.contract_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\operations.py", line 212, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\regression_execution.py", line 399, in execute_pair
+    ops._target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\operations.py", line 566, in _target
+    path, role, doc.encode(new_text), doc.raw_hash, hash_bytes(doc.encode(new_text))
+                ^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\codec.py", line 176, in encode
+    body = body.replace("\n", self.newline)
+           ^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'replace'
+
+======================================================================
+FAIL: test_a_new_attempt_cannot_reuse_old_execution (__main__.ExecutionControls.test_a_new_attempt_cannot_reuse_old_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 204, in test_a_new_attempt_cannot_reuse_old_execution
+    self.assertTrue(self.execute().ok)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_a_new_verify_boundary_cannot_reuse_old_execution (__main__.ExecutionControls.test_a_new_verify_boundary_cannot_reuse_old_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 195, in test_a_new_verify_boundary_cannot_reuse_old_execution
+    self.assertTrue(self.execute().ok)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_a_newer_failure_supersedes_the_receipt (__main__.ExecutionControls.test_a_newer_failure_supersedes_the_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 187, in test_a_newer_failure_supersedes_the_receipt
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': 'regression-execution-adc7caecc2d54581876d6eb72028c41a', 'changed_files': [], 'recovery_required': False, 'message': "target .saipen/evidence/regression/regression-execution-adc7caecc2d54581876d6eb72028c41a.json: role 'evidence' outside log/board/state/manifest/report/sweep/contract/contract_revision/coverage/generic"}
+
+======================================================================
+FAIL: test_actual_active_pair_is_admitted_and_typed (__main__.ExecutionControls.test_actual_active_pair_is_admitted_and_typed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 152, in test_actual_active_pair_is_admitted_and_typed
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': 'regression-execution-6fd7888954c84c77b737adb280ede6d0', 'changed_files': [], 'recovery_required': False, 'message': "target .saipen/evidence/regression/regression-execution-6fd7888954c84c77b737adb280ede6d0.json: role 'evidence' outside log/board/state/manifest/report/sweep/contract/contract_revision/coverage/generic"}
+
+======================================================================
+FAIL: test_changed_receipt_cannot_approve_review (__main__.ExecutionControls.test_changed_receipt_cannot_approve_review)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 176, in test_changed_receipt_cannot_approve_review
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': 'regression-execution-eac87dbe484c4a1f801176d967b02587', 'changed_files': [], 'recovery_required': False, 'message': "target .saipen/evidence/regression/regression-execution-eac87dbe484c4a1f801176d967b02587.json: role 'evidence' outside log/board/state/manifest/report/sweep/contract/contract_revision/coverage/generic"}
+
+======================================================================
+FAIL: test_consumer_compatible_javascript_pair_uses_the_same_active_contract (__main__.ExecutionControls.test_consumer_compatible_javascript_pair_uses_the_same_active_contract)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 302, in test_consumer_compatible_javascript_pair_uses_the_same_active_contract
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'REGRESSION_EXECUTION_INVALID: no unambiguous completed TAP summary'}
+
+======================================================================
+FAIL: test_exact_replay_produces_no_duplicate_authority (__main__.ExecutionControls.test_exact_replay_produces_no_duplicate_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 167, in test_exact_replay_produces_no_duplicate_authority
+    self.assertTrue(first.ok, first.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': 'regression-execution-3ea5b3e89f954ce7ba3caea5ab55e048', 'changed_files': [], 'recovery_required': False, 'message': "target .saipen/evidence/regression/regression-execution-3ea5b3e89f954ce7ba3caea5ab55e048.json: role 'evidence' outside log/board/state/manifest/report/sweep/contract/contract_revision/coverage/generic"}
+
+======================================================================
+FAIL: test_oracle_byte_changes_invalidate_execution (__main__.ExecutionControls.test_oracle_byte_changes_invalidate_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 218, in test_oracle_byte_changes_invalidate_execution
+    self.assertTrue(self.execute().ok)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_post_fix_byte_changes_invalidate_execution (__main__.ExecutionControls.test_post_fix_byte_changes_invalidate_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 211, in test_post_fix_byte_changes_invalidate_execution
+    self.assertTrue(self.execute().ok)
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 28 tests in 9.292s
+
+FAILED (failures=9, errors=1)

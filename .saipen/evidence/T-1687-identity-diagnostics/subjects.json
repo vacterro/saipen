@@ -1,0 +1,12 @@
+[
+  {
+    "path": "tools/test_host_authority_broker.py",
+    "before_sha256": "4b4e02a7541a7ddfe2c83856da3f9dd305200e5bafe6cae8aff9e1677a31b07b",
+    "after_sha256": "c8ade4e3526641cd13b5c20024c5190f39630dca8337df4a077d4ff6096da2f3"
+  },
+  {
+    "path": "tools/saipen_engine/core_unit.py",
+    "before_sha256": "366fb632e3e0b893ec0ee69ede1d2092d03ebb4b465a3283470e0c092c4270a1",
+    "after_sha256": "d70de5b55b36f0bc9b26d028a9f5c02fe8ea2addd26de46dba4083aae63123e3"
+  }
+]

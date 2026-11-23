@@ -1,0 +1,566 @@
+FFEFF.FFFFFFFFFFFFEFFFFFFFFFFFF.FFFEFFFFFFEEEFEEFEEEE
+======================================================================
+ERROR: test_false_projection_is_retired_without_done_or_operator_fabrication (test_ingress_authority.FalseAuthorityRecoveryTests.test_false_projection_is_retired_without_done_or_operator_fabrication)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 256, in test_false_projection_is_retired_without_done_or_operator_fabrication
+    result = retire_ticket(
+             ^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\saipen_engine\operations.py", line 201, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+TypeError: retire_ticket() missing 1 required keyword-only argument: 'authority'
+
+======================================================================
+ERROR: test_explicit_artifact_is_bounded_even_when_the_request_is_witnessed (test_response_digest.DetailIntentTests.test_explicit_artifact_is_bounded_even_when_the_request_is_witnessed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 47, in test_explicit_artifact_is_bounded_even_when_the_request_is_witnessed
+    "x" * (RS.ARTIFACT_CHAR_BUDGET + 1),
+           ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'ARTIFACT_CHAR_BUDGET'
+
+======================================================================
+ERROR: test_typed_artifact_carrier_requires_a_whole_human_request (test_response_digest.DetailIntentTests.test_typed_artifact_carrier_requires_a_whole_human_request)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 22, in test_typed_artifact_carrier_requires_a_whole_human_request
+    self.assertEqual(RS.artifact_for_request(request), "HANDOFF")
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'artifact_for_request'
+
+======================================================================
+ERROR: test_digest_reads_actual_finish_event_instead_of_inventing_completion (test_response_delivery.RecordedCompletion.test_digest_reads_actual_finish_event_instead_of_inventing_completion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 284, in test_digest_reads_actual_finish_event_instead_of_inventing_completion
+    facts = RS.canonical_facts(project)
+            ^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'canonical_facts'
+
+======================================================================
+ERROR: test_all_default_classes_have_constant_inventory_weight (test_response_delivery.RepeatedStateDigest.test_all_default_classes_have_constant_inventory_weight)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 189, in test_all_default_classes_have_constant_inventory_weight
+    text = RS.digest_from_facts(facts, reason=reason)
+           ^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'digest_from_facts'
+
+======================================================================
+ERROR: test_canonical_liveness_does_not_depend_on_an_adapter_diagnostic_flag (test_response_delivery.RepeatedStateDigest.test_canonical_liveness_does_not_depend_on_an_adapter_diagnostic_flag)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 38, in test_canonical_liveness_does_not_depend_on_an_adapter_diagnostic_flag
+    self.assertEqual(verdict["delivery"], "")
+                     ~~~~~~~^^^^^^^^^^^^
+KeyError: 'delivery'
+
+======================================================================
+ERROR: test_malformed_facts_fail_compactly_without_dumping_input (test_response_delivery.RepeatedStateDigest.test_malformed_facts_fail_compactly_without_dumping_input)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 101, in test_malformed_facts_fail_compactly_without_dumping_input
+    text = RS.digest_from_facts(facts, reason="stop")
+           ^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'digest_from_facts'
+
+======================================================================
+ERROR: test_model_supplied_status_cannot_end_runnable_work (test_response_delivery.RepeatedStateDigest.test_model_supplied_status_cannot_end_runnable_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 128, in test_model_supplied_status_cannot_end_runnable_work
+    self.assertEqual(verdict["delivery"], "")
+                     ~~~~~~~^^^^^^^^^^^^
+KeyError: 'delivery'
+
+======================================================================
+ERROR: test_three_fresh_turns_cannot_deliver_model_retrospective (test_response_delivery.RepeatedStateDigest.test_three_fresh_turns_cannot_deliver_model_retrospective) (pressure=10)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 165, in test_three_fresh_turns_cannot_deliver_model_retrospective
+    self.assertLessEqual(len(verdict["delivery"].splitlines()), 6)
+                             ~~~~~~~^^^^^^^^^^^^
+KeyError: 'delivery'
+
+======================================================================
+ERROR: test_three_fresh_turns_cannot_deliver_model_retrospective (test_response_delivery.RepeatedStateDigest.test_three_fresh_turns_cannot_deliver_model_retrospective) (pressure=10)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 165, in test_three_fresh_turns_cannot_deliver_model_retrospective
+    self.assertLessEqual(len(verdict["delivery"].splitlines()), 6)
+                             ~~~~~~~^^^^^^^^^^^^
+KeyError: 'delivery'
+
+======================================================================
+ERROR: test_three_fresh_turns_cannot_deliver_model_retrospective (test_response_delivery.RepeatedStateDigest.test_three_fresh_turns_cannot_deliver_model_retrospective) (pressure=1000)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 165, in test_three_fresh_turns_cannot_deliver_model_retrospective
+    self.assertLessEqual(len(verdict["delivery"].splitlines()), 6)
+                             ~~~~~~~^^^^^^^^^^^^
+KeyError: 'delivery'
+
+======================================================================
+ERROR: test_trusted_continue_does_not_authorize_a_caller_chosen_stop_reason (test_response_delivery.RepeatedStateDigest.test_trusted_continue_does_not_authorize_a_caller_chosen_stop_reason)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 92, in test_trusted_continue_does_not_authorize_a_caller_chosen_stop_reason
+    self.assertEqual(verdict["delivery"], "")
+                     ~~~~~~~^^^^^^^^^^^^
+KeyError: 'delivery'
+
+======================================================================
+FAIL: test_model_conflict_does_not_supersede_accepted_requirement (test_ingress_authority.AppendAuthorityTests.test_model_conflict_does_not_supersede_accepted_requirement)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 166, in test_model_conflict_does_not_supersede_accepted_requirement
+    self.assertEqual(intake._read_coverage(project, received["receipt"]), before)
+AssertionError: {'req[85 chars]n': 'SUPERSEDED', 'evidence': 'superseded by a[149 chars]': 1} != {'req[85 chars]n': 'UNKNOWN', 'evidence': None, 'text': 'The [98 chars]': 1}
+Diff is 863 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_unwitnessed_append_does_not_rewrite_active_acceptance_or_rewind (test_ingress_authority.AppendAuthorityTests.test_unwitnessed_append_does_not_rewrite_active_acceptance_or_rewind)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 137, in test_unwitnessed_append_does_not_rewrite_active_acceptance_or_rewind
+    self.assertEqual(self.phase(project), "VERIFY")
+AssertionError: 'BUILD' != 'VERIFY'
+- BUILD
++ VERIFY
+
+
+======================================================================
+FAIL: test_duplicate_captured_model_bytes_cannot_gain_carrier_authority (test_ingress_authority.IngressAuthorityTests.test_duplicate_captured_model_bytes_cannot_gain_carrier_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 126, in test_duplicate_captured_model_bytes_cannot_gain_carrier_authority
+    self.assertNotEqual(board(root)[local["ticket"]]["fields"].get("user_explicit"), "true")
+AssertionError: 'true' == 'true'
+
+======================================================================
+FAIL: test_exact_src164_does_not_preempt_trusted_work (test_ingress_authority.IngressAuthorityTests.test_exact_src164_does_not_preempt_trusted_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 75, in test_exact_src164_does_not_preempt_trusted_work
+    self.assertEqual(after["task"], active, output)
+AssertionError: 'T-2' != 'T-1'
+- T-2
+?   ^
++ T-1
+?   ^
+ : {
+  "ok": true,
+  "code": "STARTED",
+  "project_root": "V:\\_TEMP_\\t1363-72cpu6fg",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-002",
+  "ticket": "T-2",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "resumed": false,
+  "phase": "SCOUT",
+  "action": "PHASE SCOUT T-2",
+  "next_action": "PHASE SCOUT T-2",
+  "event_id": "E-7",
+  "parked": {
+    "ticket": "T-1",
+    "resume_phase": "SCOUT",
+    "blocked_on": "T-2"
+  },
+  "load_path": "V:\\_TEMP_\\saipen-authority-oracle-ryq_ppqy\\subject\\saipen\\phases\\scout.md",
+  "load": "saipen/phases/scout.md",
+  "execution_instruction": "The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first."
+}
+
+
+======================================================================
+FAIL: test_idle_model_request_remains_usable_and_distinguishable (test_ingress_authority.IngressAuthorityTests.test_idle_model_request_remains_usable_and_distinguishable)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 101, in test_idle_model_request_remains_usable_and_distinguishable
+    self.assertNotEqual(work["fields"].get("user_explicit"), "true")
+AssertionError: 'true' == 'true'
+
+======================================================================
+FAIL: test_other_ingress_door_does_not_promote_model_bytes (test_ingress_authority.IngressAuthorityTests.test_other_ingress_door_does_not_promote_model_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 112, in test_other_ingress_door_does_not_promote_model_bytes
+    self.assertNotEqual(work["fields"].get("user_explicit"), "true")
+AssertionError: 'true' == 'true'
+
+======================================================================
+FAIL: test_real_looking_model_request_has_no_operator_preemption (test_ingress_authority.IngressAuthorityTests.test_real_looking_model_request_has_no_operator_preemption)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 86, in test_real_looking_model_request_has_no_operator_preemption
+    self.assertEqual(state(root)["task"], active, output)
+AssertionError: 'T-2' != 'T-1'
+- T-2
+?   ^
++ T-1
+?   ^
+ : {
+  "ok": true,
+  "code": "STARTED",
+  "project_root": "V:\\_TEMP_\\t1363-f67q4m70",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-002",
+  "ticket": "T-2",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "resumed": false,
+  "phase": "SCOUT",
+  "action": "PHASE SCOUT T-2",
+  "next_action": "PHASE SCOUT T-2",
+  "event_id": "E-7",
+  "parked": {
+    "ticket": "T-1",
+    "resume_phase": "SCOUT",
+    "blocked_on": "T-2"
+  },
+  "load_path": "V:\\_TEMP_\\saipen-authority-oracle-ryq_ppqy\\subject\\saipen\\phases\\scout.md",
+  "load": "saipen/phases/scout.md",
+  "execution_instruction": "The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first."
+}
+
+
+======================================================================
+FAIL: test_transport_obligation_is_fidelity_not_operator_identity (test_ingress_authority.IngressAuthorityTests.test_transport_obligation_is_fidelity_not_operator_identity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 119, in test_transport_obligation_is_fidelity_not_operator_identity
+    self.assertEqual(state(root)["task"], active, output)
+AssertionError: 'T-2' != 'T-1'
+- T-2
+?   ^
++ T-1
+?   ^
+ : {
+  "ok": true,
+  "code": "STARTED",
+  "project_root": "V:\\_TEMP_\\t1363-6ymazsxa",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-002",
+  "ticket": "T-2",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "resumed": false,
+  "phase": "SCOUT",
+  "action": "PHASE SCOUT T-2",
+  "next_action": "PHASE SCOUT T-2",
+  "event_id": "E-7",
+  "parked": {
+    "ticket": "T-1",
+    "resume_phase": "SCOUT",
+    "blocked_on": "T-2"
+  },
+  "load_path": "V:\\_TEMP_\\saipen-authority-oracle-ryq_ppqy\\subject\\saipen\\phases\\scout.md",
+  "load": "saipen/phases/scout.md",
+  "execution_instruction": "The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first."
+}
+
+
+======================================================================
+FAIL: test_classified_non_work_cannot_enter_any_implementation_phase_or_finish (test_ingress_authority.NonWorkHistoryTests.test_classified_non_work_cannot_enter_any_implementation_phase_or_finish) (destination='SCOUT')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 196, in test_classified_non_work_cannot_enter_any_implementation_phase_or_finish
+    self.assertEqual(result.code, "TICKET_NOT_WORKABLE", result.to_dict())
+AssertionError: 'ACTIVE_TICKET_MISMATCH' != 'TICKET_NOT_WORKABLE'
+- ACTIVE_TICKET_MISMATCH
++ TICKET_NOT_WORKABLE
+ : {'ok': False, 'code': 'ACTIVE_TICKET_MISMATCH', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'SCOUT is ticket-bearing but no ticket is DOING', 'phase': 'SCOUT'}
+
+======================================================================
+FAIL: test_classified_non_work_cannot_enter_any_implementation_phase_or_finish (test_ingress_authority.NonWorkHistoryTests.test_classified_non_work_cannot_enter_any_implementation_phase_or_finish) (destination='BUILD')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 196, in test_classified_non_work_cannot_enter_any_implementation_phase_or_finish
+    self.assertEqual(result.code, "TICKET_NOT_WORKABLE", result.to_dict())
+AssertionError: 'ACTIVE_TICKET_MISMATCH' != 'TICKET_NOT_WORKABLE'
+- ACTIVE_TICKET_MISMATCH
++ TICKET_NOT_WORKABLE
+ : {'ok': False, 'code': 'ACTIVE_TICKET_MISMATCH', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'BUILD is ticket-bearing but no ticket is DOING', 'phase': 'BUILD'}
+
+======================================================================
+FAIL: test_classified_non_work_cannot_enter_any_implementation_phase_or_finish (test_ingress_authority.NonWorkHistoryTests.test_classified_non_work_cannot_enter_any_implementation_phase_or_finish) (destination='VERIFY')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 196, in test_classified_non_work_cannot_enter_any_implementation_phase_or_finish
+    self.assertEqual(result.code, "TICKET_NOT_WORKABLE", result.to_dict())
+AssertionError: 'ILLEGAL_TRANSITION' != 'TICKET_NOT_WORKABLE'
+- ILLEGAL_TRANSITION
++ TICKET_NOT_WORKABLE
+ : {'ok': False, 'code': 'ILLEGAL_TRANSITION', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'SCOUT -> VERIFY is not a legal edge; from SCOUT the legal edges are BUILD, BLOCKED', 'phase': 'VERIFY', 'legal_destinations': ['BUILD', 'BLOCKED'], 'canonical_next_command': "saipen start '<the task, one line>'"}
+
+======================================================================
+FAIL: test_classified_non_work_cannot_enter_any_implementation_phase_or_finish (test_ingress_authority.NonWorkHistoryTests.test_classified_non_work_cannot_enter_any_implementation_phase_or_finish) (destination='REVIEW')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 196, in test_classified_non_work_cannot_enter_any_implementation_phase_or_finish
+    self.assertEqual(result.code, "TICKET_NOT_WORKABLE", result.to_dict())
+AssertionError: 'ILLEGAL_TRANSITION' != 'TICKET_NOT_WORKABLE'
+- ILLEGAL_TRANSITION
++ TICKET_NOT_WORKABLE
+ : {'ok': False, 'code': 'ILLEGAL_TRANSITION', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'SCOUT -> REVIEW is not a legal edge; from SCOUT the legal edges are BUILD, BLOCKED', 'phase': 'REVIEW', 'legal_destinations': ['BUILD', 'BLOCKED'], 'canonical_next_command': "saipen start '<the task, one line>'"}
+
+======================================================================
+FAIL: test_classified_non_work_cannot_enter_any_implementation_phase_or_finish (test_ingress_authority.NonWorkHistoryTests.test_classified_non_work_cannot_enter_any_implementation_phase_or_finish) (destination='SHIP')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 196, in test_classified_non_work_cannot_enter_any_implementation_phase_or_finish
+    self.assertEqual(result.code, "TICKET_NOT_WORKABLE", result.to_dict())
+AssertionError: 'ILLEGAL_TRANSITION' != 'TICKET_NOT_WORKABLE'
+- ILLEGAL_TRANSITION
++ TICKET_NOT_WORKABLE
+ : {'ok': False, 'code': 'ILLEGAL_TRANSITION', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'SCOUT -> SHIP is not a legal edge; from SCOUT the legal edges are BUILD, BLOCKED', 'phase': 'SHIP', 'legal_destinations': ['BUILD', 'BLOCKED'], 'canonical_next_command': "saipen start '<the task, one line>'"}
+
+======================================================================
+FAIL: test_classified_non_work_cannot_enter_any_implementation_phase_or_finish (test_ingress_authority.NonWorkHistoryTests.test_classified_non_work_cannot_enter_any_implementation_phase_or_finish)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 199, in test_classified_non_work_cannot_enter_any_implementation_phase_or_finish
+    self.assertEqual(closed.code, "TICKET_NOT_WORKABLE")
+AssertionError: 'SOURCE_UNRESOLVED' != 'TICKET_NOT_WORKABLE'
+- SOURCE_UNRESOLVED
++ TICKET_NOT_WORKABLE
+
+
+======================================================================
+FAIL: test_model_authored_operator_capsule_is_not_retirement_authority (test_ingress_authority.NonWorkHistoryTests.test_model_authored_operator_capsule_is_not_retirement_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 240, in test_model_authored_operator_capsule_is_not_retirement_authority
+    self.assertIsNotNone(error, "model-supplied grant retired other Work as human authority")
+AssertionError: unexpectedly None : model-supplied grant retired other Work as human authority
+
+======================================================================
+FAIL: test_src146_invalid_classification_cannot_be_unblocked_as_accept_empty (test_ingress_authority.NonWorkHistoryTests.test_src146_invalid_classification_cannot_be_unblocked_as_accept_empty)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_ingress_authority.py", line 224, in test_src146_invalid_classification_cannot_be_unblocked_as_accept_empty
+    self.assertFalse(rejected.ok, rejected.to_dict())
+AssertionError: True is not false : {'ok': True, 'code': 'UNBLOCK', 'op_id': 'ticket-ac01182cfa984f5c87207509c3b98847', 'changed_files': ['.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'], 'recovery_required': False, 'ticket': 'T-1', 'blocked_on': None, 'event_id': 'E-6'}
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='give me a detailed forensic report with all evidence')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 99, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='produce a full technical audit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 99, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='write a complete implementation handoff')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 99, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='explain everything in full detail including evidence and root cause')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 99, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='дай подробный форензик-отчёт со всеми доказательствами')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 99, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='сделай полный технический аудит')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 99, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='дай полный детальный хендофф')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 99, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='дай полный подробный технический отчёт со всеми доказательствами')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 99, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='anna täielik detailne tehniline aruanne koos tõenditega')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 99, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='tee täielik audit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 99, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='anna detailne täielik handoff')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 99, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_model_cannot_authorize_detail_by_claiming_an_exception (test_response_digest.DetailIntentTests.test_model_cannot_authorize_detail_by_claiming_an_exception) (reasoning='this is an exceptional boundary')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 112, in test_model_cannot_authorize_detail_by_claiming_an_exception
+    self.assertEqual(RS.detail_mode_for_request(reasoning), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXCEPTIONAL_BOUNDARY' != 'NONE'
+- EXCEPTIONAL_BOUNDARY
++ NONE
+
+
+======================================================================
+FAIL: test_summary_brief_and_normal_final_report_remain_compact (test_response_digest.DetailIntentTests.test_summary_brief_and_normal_final_report_remain_compact) (request='give me a summary')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 82, in test_summary_brief_and_normal_final_report_remain_compact
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXPLICIT_REPORT' != 'NONE'
+- EXPLICIT_REPORT
++ NONE
+
+
+======================================================================
+FAIL: test_summary_brief_and_normal_final_report_remain_compact (test_response_digest.DetailIntentTests.test_summary_brief_and_normal_final_report_remain_compact) (request='give me a brief')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 82, in test_summary_brief_and_normal_final_report_remain_compact
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXPLICIT_REPORT' != 'NONE'
+- EXPLICIT_REPORT
++ NONE
+
+
+======================================================================
+FAIL: test_summary_brief_and_normal_final_report_remain_compact (test_response_digest.DetailIntentTests.test_summary_brief_and_normal_final_report_remain_compact) (request='give me a final report')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 82, in test_summary_brief_and_normal_final_report_remain_compact
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXPLICIT_REPORT' != 'NONE'
+- EXPLICIT_REPORT
++ NONE
+
+
+======================================================================
+FAIL: test_a_model_supplied_detail_mode_does_not_authorize_host_output (test_response_digest.SurfacePressureTests.test_a_model_supplied_detail_mode_does_not_authorize_host_output)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 172, in test_a_model_supplied_detail_mode_does_not_authorize_host_output
+    self.assertFalse(verdict["ok"], verdict)
+AssertionError: True is not false : {'ok': True, 'layer': 'NONE', 'class': 'VALID_BOUNDARY', 'errors': [], 'diagnostic': None, 'layers': {'admission': 'NOT_ENFORCEABLE', 'exec_response': 'PASS', 'chat_style': 'NOT_EVALUATED'}}
+
+======================================================================
+FAIL: test_actual_rendered_default_fits_six_visible_lines (test_response_digest.SurfacePressureTests.test_actual_rendered_default_fits_six_visible_lines)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 140, in test_actual_rendered_default_fits_six_visible_lines
+    self.assertLessEqual(len(text.splitlines()), 6, text)
+AssertionError: 12 not less than or equal to 6 : STATUS
+DONE
+RESULT
+T-1598 fixed; T-1510 resumed
+BLOCKER
+NONE
+OPERATOR ACTION
+NONE
+NEXT EXACT ACTION
+NONE
+VALIDATION
+CURRENT_PASS | full core 4728 | red 0 | new_red 0
+
+======================================================================
+FAIL: test_real_blocker_inventory_is_not_a_default_result (test_response_digest.SurfacePressureTests.test_real_blocker_inventory_is_not_a_default_result)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 152, in test_real_blocker_inventory_is_not_a_default_result
+    self.assertTrue(
+AssertionError: [] is not true : 54 complete ticket identities were accepted in the default human surface
+
+======================================================================
+FAIL: test_stop_report_uses_machine_facts_not_the_model_retrospective (test_response_digest.SurfacePressureTests.test_stop_report_uses_machine_facts_not_the_model_retrospective)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_digest.py", line 179, in test_stop_report_uses_machine_facts_not_the_model_retrospective
+    self.assertIsNotNone(builder, "there is no canonical state-to-human digest owner")
+AssertionError: unexpectedly None : there is no canonical state-to-human digest owner
+
+======================================================================
+FAIL: test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing (test_response_delivery.CompletedPartDelivery.test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 232, in test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing
+    self.assertEqual(record["outcome"], outcome, record)
+AssertionError: 'allowed' != 'blocked'
+- allowed
++ blocked
+ : {'id': 'artifact-3', 'outcome': 'allowed', 'message': '', 'hooks': ['experimental.chat.system.transform', 'chat.message', 'experimental.text.complete', 'tool.execute.before'], 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmp7ofg4mg1","project_lineage":"lineage-e0e6cc4e809a420a92b5e0feb6a5c90b","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.'], 'exports': ['default'], 'delivered': '```text\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\nÜleandmise tõendid ja jätkamise käsud.\n```'}
+
+======================================================================
+FAIL: test_real_hook_replaces_three_fresh_oversized_turns (test_response_delivery.CompletedPartDelivery.test_real_hook_replaces_three_fresh_oversized_turns)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 262, in test_real_hook_replaces_three_fresh_oversized_turns
+    self.assertEqual(record["outcome"], "allowed", record)
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'fresh-0', 'outcome': 'blocked', 'message': 'EXEC_RESPONSE_INVALID: prose before STATUS or missing STATUS header; STATUS must occur exactly once; RESULT must occur exactly once', 'hooks': ['experimental.chat.system.transform', 'chat.message', 'experimental.text.complete', 'tool.execute.before'], 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpl76a0cld","project_lineage":"lineage-23e7916b5d594ac89708875bc20fd33e","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.'], 'exports': ['default']}
+
+======================================================================
+FAIL: test_delivery_candidate_itself_is_validated_and_fails_compactly (test_response_delivery.RepeatedStateDigest.test_delivery_candidate_itself_is_validated_and_fails_compactly)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 61, in test_delivery_candidate_itself_is_validated_and_fails_compactly
+    self.assertEqual(verdict.get("delivery_validation"), "COMPACT_FAILURE")
+AssertionError: None != 'COMPACT_FAILURE'
+
+======================================================================
+FAIL: test_stop_checkpoint_has_canonical_delivery_and_durable_facts (test_response_delivery.RepeatedStateDigest.test_stop_checkpoint_has_canonical_delivery_and_durable_facts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-authority-oracle-ryq_ppqy\subject\tools\test_response_delivery.py", line 136, in test_stop_checkpoint_has_canonical_delivery_and_durable_facts
+    self.assertIn("delivery", result.data)
+AssertionError: 'delivery' not found in {'next_action': 'saipen continue', 'digest': 'V:\\_TEMP_\\tmp5a_t5al6\\.saipen\\kitchen\\digest.md', 'digest_lines': ['done: stopped via SAIOPS checkpoint', 'remaining: none', 'awaiting: nothing'], 'op_id': 'stop-ab70b7d07acb4a5aba66885f8a68da19', 'recovery_required': False, 'changed_files': ['.saipen/LOG.md', '.saipen/STATE.md', '.saipen/kitchen/digest.md']}
+
+----------------------------------------------------------------------
+Ran 34 tests in 49.499s
+
+FAILED (failures=39, errors=12)

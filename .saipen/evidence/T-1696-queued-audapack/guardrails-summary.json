@@ -1,0 +1,399 @@
+[
+  {
+    "case": "1-duplicate",
+    "exit_code": 1,
+    "verdict": {
+      "ok": false,
+      "code": "VALIDATION_FAILED",
+      "error_count": 1,
+      "errors": [
+        "BOARD: BOARD.md:6 duplicate ticket ID T-1"
+      ],
+      "detail": "BOARD: BOARD.md:6 duplicate ticket ID T-1",
+      "conformance_status": {
+        "status": "STALE_PASS",
+        "gate": "core",
+        "reason": "receipt checkpoint hashes invalid: BOARD hash mismatch: receipt=bf95a8f5dde84f27 current=51894991afdab00a",
+        "receipt": {
+          "blocking_findings": {
+            "problem_count": 0,
+            "problems": [],
+            "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+            "ruleset_version": 1,
+            "status": "complete",
+            "warning_count": 2
+          },
+          "board_hash": "bf95a8f5dde84f27",
+          "canonical_next_command": null,
+          "content_hash": "503e1da3731605bf",
+          "exit_code": 0,
+          "external_actions": [],
+          "gate": "core",
+          "install_fingerprint": "install-v1:b3be846b6db91606a036700ae2aa1e8c7efbef34fc38b700f74aaed205cae5f6",
+          "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "kind": "conformance_receipt",
+          "log_hash": "1e264f3b04ac4fde",
+          "project_identity": "v:\\_temp_\\saipen-audit-inbox-1lt4kl_5\\project",
+          "receipt_id": "receipt-bf3fc6ea58a1",
+          "remediation_commands": [],
+          "schema_version": 2,
+          "source_head": "no-git",
+          "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+          "state_hash": "6abffecfa31e29a5",
+          "timestamp_utc": "2026-10-10T01:27:08.182205Z",
+          "validator_protocol_version": "1",
+          "verdict": "PASS"
+        },
+        "validator": {
+          "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+          "validator_protocol_version": "1",
+          "project_protocol_version": "7",
+          "gate": "core",
+          "source_head": "no-git",
+          "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4"
+        }
+      }
+    },
+    "fast_errors": [
+      "BOARD: BOARD.md:6 duplicate ticket ID T-1"
+    ],
+    "ledger_errors": [],
+    "canonical_docs_unchanged": true
+  },
+  {
+    "case": "2-unadmitted-done",
+    "exit_code": 1,
+    "verdict": {
+      "ok": false,
+      "code": "CONFORMANCE_UNHEALTHY",
+      "structural_gate": "pass",
+      "validator": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "launched": true,
+        "exit_code": 1,
+        "summary": "t)\nFAIL: BOARD.md: T-2 has no [T-###] allocation event in the complete history (CORE-003 / SRC-026:R003)\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: every DONE closure provenance satisfies its declared closure contract\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nFAIL: lifecycle authority [saio] -- canonical lifecycle state stands on no operation: T-2 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it -- the completion was typed, not run -- run `saipen recover`; it names the journaled repair (T-1671)\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [half-claim]: BOARD.md:6 ticket T-2 carries owner but no claim_time -- \u00a7 1.4 decides liveness from the pair, so one alone cannot be judged live or stale\nWARN [legacy-closure-evidence]: ticket T-2 predates the current closure-evidence contract; original evidence was not recorded under the modern schema and cannot be reconstructed\nWARN [no-conformance-record]: no LOG line records a conformance run in \u00a7 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so \u00a7 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nValidation FAILED: 2 problem(s), 4 warning(s)"
+      },
+      "conformance_status": {
+        "status": "CURRENT_FAIL",
+        "gate": "core",
+        "reason": "canonical validator reports FAIL for the current checkpoint",
+        "receipt": {
+          "blocking_findings": {
+            "problem_count": 2,
+            "problems": [
+              {
+                "category": null,
+                "credential": false,
+                "detail": "BOARD.md: T-2 has no [T-###] allocation event in the complete history (CORE-003 / SRC-026:R003)",
+                "detail_hash": "8c4bbcfbae977af2",
+                "finding_key": "76b48f23558dce11",
+                "rule_id": "unclassified",
+                "severity": "problem",
+                "subject_id": null,
+                "subject_kind": "global",
+                "subject_ref": null
+              },
+              {
+                "category": null,
+                "credential": false,
+                "detail": "lifecycle authority [saio] -- canonical lifecycle state stands on no operation: T-2 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it --",
+                "detail_hash": "f4e268e2f5cf60f1",
+                "finding_key": "76b48f23558dce11",
+                "rule_id": "unclassified",
+                "severity": "problem",
+                "subject_id": null,
+                "subject_kind": "global",
+                "subject_ref": null
+              }
+            ],
+            "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+            "ruleset_version": 1,
+            "status": "complete",
+            "warning_count": 4
+          },
+          "board_hash": "14141c7a9b3afda5",
+          "canonical_next_command": null,
+          "content_hash": "c6f546ed98a9a85e",
+          "exit_code": 1,
+          "external_actions": [],
+          "gate": "core",
+          "install_fingerprint": "install-v1:b3be846b6db91606a036700ae2aa1e8c7efbef34fc38b700f74aaed205cae5f6",
+          "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "kind": "conformance_receipt",
+          "log_hash": "3004be611ca48856",
+          "project_identity": "v:\\_temp_\\saipen-audit-inbox-i1w3cqow\\project",
+          "receipt_id": "receipt-3708caf47139",
+          "remediation_commands": [],
+          "schema_version": 2,
+          "source_head": "no-git",
+          "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+          "state_hash": "ab7cf9c648e85ff2",
+          "timestamp_utc": "2026-10-10T01:27:10.534459Z",
+          "validator_protocol_version": "1",
+          "verdict": "FAIL"
+        },
+        "validator": {
+          "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+          "validator_protocol_version": "1",
+          "project_protocol_version": "7",
+          "gate": "core",
+          "source_head": "no-git",
+          "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4"
+        }
+      },
+      "install_identity": {
+        "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+        "install_fingerprint": "install-v1:b3be846b6db91606a036700ae2aa1e8c7efbef34fc38b700f74aaed205cae5f6",
+        "mismatch": null
+      },
+      "reason": "canonical validator reports FAIL for the current checkpoint",
+      "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+      "canonical_next_command": null,
+      "repair_status": "ENGINEERING_REQUIRED",
+      "diagnostic": {
+        "kind": "ENGINEERING_REQUIRED",
+        "owner": "SAIPEN conformance/remediation",
+        "receipt_id": "receipt-3708caf47139",
+        "findings_status": "complete",
+        "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+      },
+      "terminal": true
+    },
+    "fast_errors": [],
+    "ledger_errors": [],
+    "canonical_docs_unchanged": true
+  },
+  {
+    "case": "3-unnumbered",
+    "exit_code": 0,
+    "verdict": {
+      "ok": true,
+      "code": "VALID",
+      "structural_gate": "pass",
+      "validator": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "launched": true,
+        "exit_code": 0,
+        "summary": " validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-c22ccbf5da7740db9a6c774e34228228)\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: next_action picks the shared Pick Rule's ticket (T-1, start)\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nPASS: cross-doc sets agree (required fields, phase enum, from-any-phase, read-only bans, next_action prefixes, WAIT categories, command surface, ticket fields; no stale re-listing in shipped docs)\nWARN [no-conformance-record]: no LOG line records a conformance run in \u00a7 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so \u00a7 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nValidation complete. Agent is conformant. (2 warning(s))"
+      },
+      "conformance_status": {
+        "status": "CURRENT_PASS",
+        "gate": "core",
+        "reason": "",
+        "receipt": {
+          "blocking_findings": {
+            "problem_count": 0,
+            "problems": [],
+            "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+            "ruleset_version": 1,
+            "status": "complete",
+            "warning_count": 2
+          },
+          "board_hash": "bf95a8f5dde84f27",
+          "canonical_next_command": null,
+          "content_hash": "1504ef418db3a8df",
+          "exit_code": 0,
+          "external_actions": [],
+          "gate": "core",
+          "install_fingerprint": "install-v1:b3be846b6db91606a036700ae2aa1e8c7efbef34fc38b700f74aaed205cae5f6",
+          "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "kind": "conformance_receipt",
+          "log_hash": "2bfc985c34038179",
+          "project_identity": "v:\\_temp_\\saipen-audit-inbox-wc8uwdtg\\project",
+          "receipt_id": "receipt-24b3fbc1873e",
+          "remediation_commands": [],
+          "schema_version": 2,
+          "source_head": "no-git",
+          "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+          "state_hash": "a1b940d5f58db55c",
+          "timestamp_utc": "2026-10-10T01:27:12.604995Z",
+          "validator_protocol_version": "1",
+          "verdict": "PASS"
+        },
+        "validator": {
+          "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+          "validator_protocol_version": "1",
+          "project_protocol_version": "7",
+          "gate": "core",
+          "source_head": "no-git",
+          "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4"
+        }
+      },
+      "install_identity": {
+        "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+        "install_fingerprint": "install-v1:b3be846b6db91606a036700ae2aa1e8c7efbef34fc38b700f74aaed205cae5f6",
+        "mismatch": null
+      },
+      "detail": "canonical STATE/BOARD/LOG pass the structural gate and the canonical validator minted a CURRENT_PASS conformance receipt"
+    },
+    "fast_errors": [],
+    "ledger_errors": [],
+    "canonical_docs_unchanged": true
+  },
+  {
+    "case": "4-heading",
+    "exit_code": 1,
+    "verdict": {
+      "ok": false,
+      "code": "VALIDATION_FAILED",
+      "error_count": 2,
+      "errors": [
+        "BOARD: BOARD.md:4 ticket T-1 sits under ## TODO## DOING -- not one of the four RFC sections, so no operation may mutate a board built around it",
+        "BOARD: BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash"
+      ],
+      "detail": "BOARD: BOARD.md:4 ticket T-1 sits under ## TODO## DOING -- not one of the four RFC sections, so no operation may mutate a board built around it; BOARD: BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+      "conformance_status": {
+        "status": "STALE_PASS",
+        "gate": "core",
+        "reason": "receipt checkpoint hashes invalid: BOARD hash mismatch: receipt=bf95a8f5dde84f27 current=cb18cdae89cda93b",
+        "receipt": {
+          "blocking_findings": {
+            "problem_count": 0,
+            "problems": [],
+            "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+            "ruleset_version": 1,
+            "status": "complete",
+            "warning_count": 2
+          },
+          "board_hash": "bf95a8f5dde84f27",
+          "canonical_next_command": null,
+          "content_hash": "b6721744be19bc9c",
+          "exit_code": 0,
+          "external_actions": [],
+          "gate": "core",
+          "install_fingerprint": "install-v1:b3be846b6db91606a036700ae2aa1e8c7efbef34fc38b700f74aaed205cae5f6",
+          "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "kind": "conformance_receipt",
+          "log_hash": "f37caa68a736c475",
+          "project_identity": "v:\\_temp_\\saipen-audit-inbox-i5m8bxyc\\project",
+          "receipt_id": "receipt-343aa2659fca",
+          "remediation_commands": [],
+          "schema_version": 2,
+          "source_head": "no-git",
+          "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+          "state_hash": "b038d2df5f355265",
+          "timestamp_utc": "2026-10-10T01:27:13.765017Z",
+          "validator_protocol_version": "1",
+          "verdict": "PASS"
+        },
+        "validator": {
+          "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+          "validator_protocol_version": "1",
+          "project_protocol_version": "7",
+          "gate": "core",
+          "source_head": "no-git",
+          "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4"
+        }
+      }
+    },
+    "fast_errors": [
+      "BOARD: BOARD.md:4 ticket T-1 sits under ## TODO## DOING -- not one of the four RFC sections, so no operation may mutate a board built around it",
+      "BOARD: BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash"
+    ],
+    "ledger_errors": [],
+    "canonical_docs_unchanged": true
+  },
+  {
+    "case": "5-evidence-no-event",
+    "exit_code": 1,
+    "verdict": {
+      "ok": false,
+      "code": "CONFORMANCE_UNHEALTHY",
+      "structural_gate": "pass",
+      "validator": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "launched": true,
+        "exit_code": 1,
+        "summary": " acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nFAIL: STATE.md next_action names T-1, which sits under ## DONE -- finished and blocked tickets are not executable, and \u00a7 1.11's Pick Rule selects from ## TODO (## BLOCKED is excluded on purpose)\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: every DONE closure provenance satisfies its declared closure contract\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nFAIL: lifecycle authority [saio] -- canonical lifecycle state stands on no operation: T-1 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it -- the completion was typed, not run -- run `saipen recover`; it names the journaled repair (T-1671)\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [legacy-closure-evidence]: ticket T-1 predates the current closure-evidence contract; original evidence was not recorded under the modern schema and cannot be reconstructed\nWARN [no-conformance-record]: no LOG line records a conformance run in \u00a7 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so \u00a7 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nValidation FAILED: 2 problem(s), 3 warning(s)"
+      },
+      "conformance_status": {
+        "status": "CURRENT_FAIL",
+        "gate": "core",
+        "reason": "canonical validator reports FAIL for the current checkpoint",
+        "receipt": {
+          "blocking_findings": {
+            "problem_count": 2,
+            "problems": [
+              {
+                "category": null,
+                "credential": false,
+                "detail": "STATE.md next_action names T-1, which sits under ## DONE -- finished and blocked tickets are not executable, and \u00a7 1.11's Pick Rule selects from ## TODO (## BLOCKED is excluded on purpose)",
+                "detail_hash": "4f04b2493c7f6668",
+                "finding_key": "76b48f23558dce11",
+                "rule_id": "unclassified",
+                "severity": "problem",
+                "subject_id": null,
+                "subject_kind": "global",
+                "subject_ref": null
+              },
+              {
+                "category": null,
+                "credential": false,
+                "detail": "lifecycle authority [saio] -- canonical lifecycle state stands on no operation: T-1 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it --",
+                "detail_hash": "4bcf47184a50e664",
+                "finding_key": "76b48f23558dce11",
+                "rule_id": "unclassified",
+                "severity": "problem",
+                "subject_id": null,
+                "subject_kind": "global",
+                "subject_ref": null
+              }
+            ],
+            "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+            "ruleset_version": 1,
+            "status": "complete",
+            "warning_count": 3
+          },
+          "board_hash": "a99b69076cb15da3",
+          "canonical_next_command": null,
+          "content_hash": "06ba68d1d4adffff",
+          "exit_code": 1,
+          "external_actions": [],
+          "gate": "core",
+          "install_fingerprint": "install-v1:b3be846b6db91606a036700ae2aa1e8c7efbef34fc38b700f74aaed205cae5f6",
+          "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "kind": "conformance_receipt",
+          "log_hash": "81d8d01b835e3ada",
+          "project_identity": "v:\\_temp_\\saipen-audit-inbox-r_de_5we\\project",
+          "receipt_id": "receipt-a08f3c17df15",
+          "remediation_commands": [],
+          "schema_version": 2,
+          "source_head": "no-git",
+          "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+          "state_hash": "074f3d399fe18b83",
+          "timestamp_utc": "2026-10-10T01:27:16.283433Z",
+          "validator_protocol_version": "1",
+          "verdict": "FAIL"
+        },
+        "validator": {
+          "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+          "validator_protocol_version": "1",
+          "project_protocol_version": "7",
+          "gate": "core",
+          "source_head": "no-git",
+          "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4"
+        }
+      },
+      "install_identity": {
+        "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+        "install_fingerprint": "install-v1:b3be846b6db91606a036700ae2aa1e8c7efbef34fc38b700f74aaed205cae5f6",
+        "mismatch": null
+      },
+      "reason": "canonical validator reports FAIL for the current checkpoint",
+      "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+      "canonical_next_command": null,
+      "repair_status": "ENGINEERING_REQUIRED",
+      "diagnostic": {
+        "kind": "ENGINEERING_REQUIRED",
+        "owner": "SAIPEN conformance/remediation",
+        "receipt_id": "receipt-a08f3c17df15",
+        "findings_status": "complete",
+        "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+      },
+      "terminal": true
+    },
+    "fast_errors": [],
+    "ledger_errors": [],
+    "canonical_docs_unchanged": true
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "updated_utc": "2026-10-10T13:57:06.8984065Z",
+  "ticket": "T-1705",
+  "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\extensions\\adapters\\opencode\\saipen-guard.js",
+  "target": "C:\\Users\\vac34\\.config\\opencode\\plugins\\saipen-guard.js",
+  "backup": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\cc-all-20261010\\opencode-refresh\\saipen-guard.js.before",
+  "before_sha256": "eb30a498ae86ecef6234f18b956403bf1fbc64dab0be8056ae52f7e8973e32e8",
+  "after_sha256": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+  "source_sha256": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+  "opencode_processes_before": 0,
+  "changed_installed_files": 1,
+  "rollback": "Copy the preserved backup to the exact target after verifying its hash and that no OpenCode process is live",
+  "other_runtime_installations": "not refreshed"
+}

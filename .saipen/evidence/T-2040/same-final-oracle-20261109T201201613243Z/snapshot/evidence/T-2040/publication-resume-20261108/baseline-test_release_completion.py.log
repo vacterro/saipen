@@ -1,0 +1,54 @@
+test_r001_shared_index_preservation_and_manifest_identity (test_release_completion.ReleaseCompletionTests.test_r001_shared_index_preservation_and_manifest_identity)
+Verify that all 864 staged entries in the shared index match the forensic manifest exactly. ... ok
+test_r002_reconcile_remote_ancestry_topology (test_release_completion.ReleaseCompletionTests.test_r002_reconcile_remote_ancestry_topology)
+Verify remote ancestry against github-backup/main and origin/main. ... FAIL
+test_r003_candidate_scope_excludes_unreviewed_and_archival (test_release_completion.ReleaseCompletionTests.test_r003_candidate_scope_excludes_unreviewed_and_archival)
+Verify that candidate release scope contains only reviewed code and excludes archives. ... ok
+test_r004_publication_test_gate_baseline_reconciliation (test_release_completion.ReleaseCompletionTests.test_r004_publication_test_gate_baseline_reconciliation)
+Verify that core_unit_baseline exists, defines exactly the 3 known baseline failures, and focused passes. ... ok
+test_r005_approval_packet_validity (test_release_completion.ReleaseCompletionTests.test_r005_approval_packet_validity)
+Verify that approval_packet_20261102.json validates cleanly against decision_request schema. ... ok
+test_r006_r007_trusted_host_and_broker_state (test_release_completion.ReleaseCompletionTests.test_r006_r007_trusted_host_and_broker_state)
+Verify trusted host capability contracts without assuming machine-global broker idleness. ... ok
+test_r008_r009_publication_held_and_dry_run_preflight (test_release_completion.ReleaseCompletionTests.test_r008_r009_publication_held_and_dry_run_preflight)
+Verify that execute_isolated_release dry run passes and protects staging. ... FAIL
+test_r010_standing_continuous_maintenance_grant (test_release_completion.ReleaseCompletionTests.test_r010_standing_continuous_maintenance_grant)
+Verify standing continuous-maintenance grant in STATE.md. ... FAIL
+
+======================================================================
+FAIL: test_r002_reconcile_remote_ancestry_topology (test_release_completion.ReleaseCompletionTests.test_r002_reconcile_remote_ancestry_topology)
+Verify remote ancestry against github-backup/main and origin/main.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_release_completion.py", line 83, in test_r002_reconcile_remote_ancestry_topology
+    self.assertEqual(anc["remote_head"][:8], "3c96a989")
+AssertionError: '667a1235' != '3c96a989'
+- 667a1235
++ 3c96a989
+
+
+======================================================================
+FAIL: test_r008_r009_publication_held_and_dry_run_preflight (test_release_completion.ReleaseCompletionTests.test_r008_r009_publication_held_and_dry_run_preflight)
+Verify that execute_isolated_release dry run passes and protects staging.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_release_completion.py", line 174, in test_r008_r009_publication_held_and_dry_run_preflight
+    self.assertEqual(res["remote_head_before"][:8], "3c96a989")
+AssertionError: '667a1235' != '3c96a989'
+- 667a1235
++ 3c96a989
+
+
+======================================================================
+FAIL: test_r010_standing_continuous_maintenance_grant (test_release_completion.ReleaseCompletionTests.test_r010_standing_continuous_maintenance_grant)
+Verify standing continuous-maintenance grant in STATE.md.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_release_completion.py", line 182, in test_r010_standing_continuous_maintenance_grant
+    self.assertIn("execution_intent: goal", content)
+AssertionError: 'execution_intent: goal' not found in '---\nphase: BUILD\ntask: T-2040\nnext_action: "PHASE BUILD T-2040"\nblocker: none\ntransition_from: BUILD\nsaipen_version: 8\nschema_version: 3\nlast_event: 20757\nstyle_contract: ded-069a4c52\nsaipen_home: "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN"\nagent: saipen-cli\nmode: full\nupdated: "2026-11-08T08:49:52Z"\nrequires:\n  - filesystem\n  - git\n  - python\nexecution_intent: converge\nconverge_target: crew\n---\n'
+
+----------------------------------------------------------------------
+Ran 8 tests in 1.746s
+
+FAILED (failures=3)

@@ -1,0 +1,39 @@
+{
+  "label": "red",
+  "verifier_sha256": "3918c1b07d3f0e155fc27df1e679983656ee05a8772f4b0455d9ff6d8d20e46f",
+  "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\scenario-oracles\\original.py",
+  "subject_sha256": "c3771799a05d88a387d66a59ffbd348ec8656e9b77b3617d3f32114ca439a42e",
+  "production_sha256": {
+    "tools/saipen_engine/operations.py": "bb4d9c95fa10643d2bc829a1a5c972589ae3ef7e8b3eed1551ad8cd8db2c8728",
+    "tools/saipen_engine/operator_task.py": "3027b1341bea2caa2e2c8756c3490598cf74a33ff552f0ff9161e1c33a959d91",
+    "tools/saipen_engine/journal.py": "096328a58ae817d6a67328fb6d5b7e8e6ce9487d333029558954be215f939d9e",
+    "tools/test_fixture_support.py": "10831ae72daf5a4c80fd54a8f337228c682adfe70b95f9a08f89fef865f9ce36"
+  },
+  "checks": 227,
+  "failures": 8,
+  "controls": [
+    {
+      "function": "run_nitro_m3_probes",
+      "checked": 36,
+      "failures": [
+        "goal_entry succeeds with GOAL_SET: Result(ok=True, code='USER_REQUEST_RECORDED', data={'project_root': 'V:\\\\_TEMP_\\\\saipen-m3-goal-5qxaow9y', 'actor': 'probe', 'actor_source': 'operations.goal_entry', 'receipt': 'SRC-001', 'ticket': 'T-3', 'valve_reauthorized': False, 'preserved_decisions': [], 'ingress_authority': {'witness': 'model_supplied', 'capture': True, 'local_work': True, 'user_explicit': False, 'preempt_active_work': False, 'goal_pivot': False, 'reset_bounded_authority': False, 'detailed_response': False, 'external_action': False}, 'active_ticket': 'T-1', 'action': 'PHASE BUILD T-1', 'next_action': 'PHASE BUILD T-1', 'parked': None, 'preempted': False}, message='', changed_files=[], op_id=None, recovery_required=False)",
+        "goal_entry sets execution_intent to goal: {'phase': 'BUILD', 'task': 'T-1', 'next_action': 'PHASE BUILD T-1', 'blocker': '', 'transition_from': 'SCOUT', 'saipen_version': 7, 'schema_version': 3, 'last_event': 905, 'style_contract': 'ded-069a4c52', 'saipen_home': 'V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN', 'agent': 'probe', 'requires': ['filesystem', 'git', 'python'], 'mode': 'full', 'updated': '2026-10-03T10:59:24Z'}",
+        "goal_entry demotes active DOING ticket to TODO: {'id': 'T-1', 'section': '## DOING', 'line_no': 3, 'checkbox': '/', 'needs': [], 'fields': {'verify': 'probe', 'owner': 'probe', 'claim_time': '2026-10-03T10:59:24Z'}, 'raw': '- [/] T-1 [P1] top probe | verify: probe | owner: probe | claim_time: 2026-10-03T10:59:24Z', 'description': '[P1] top probe'}",
+        "goal_entry logs a pivot DEC event: ' -- b\\n- 03.10.26 10:59 [E-905] [parent: E-904] [T-3] [agent: probe] [op: userreq-5a4b43a5a257457faf6939c8ca27ec06] DEC: user request SRC-001 projected as T-3 (local candidate; witness model_supplied)\\n'",
+        "goal_entry logs the recoverable Entry PLAN wave bump: '903] [T-1] [agent: probe] [op: transition-bb1508e90e70448cbed994489f5a9b61] RUN: transition to BUILD -- b\\n- 03.10.26 10:59 [E-905] [parent: E-904] [T-3] [agent: probe] [op: userreq-5a4b43a5a257457faf6939c8ca27ec06] DEC: user request SRC-001 projected as T-3 (local candidate; witness model_supplied)\\n'",
+        "goal_entry with no active ticket still sets goal intent: {'phase': 'SCOUT', 'task': 'T-3', 'next_action': 'PHASE SCOUT T-3', 'blocker': '', 'transition_from': 'DONE', 'saipen_version': 7, 'schema_version': 3, 'last_event': 911, 'style_contract': 'ded-069a4c52', 'saipen_home': 'V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN', 'agent': 'probe', 'requires': ['filesystem', 'git', 'python'], 'mode': 'full', 'updated': '2026-10-03T10:59:25Z'}",
+        "goal_entry redacts ghp_ credentials in LOG: 'cted as T-3 (local candidate; witness model_supplied)\\n- 03.10.26 10:59 [E-904] [parent: E-903] [T-3] [agent: probe] [op: claim-faf5cb863f4b4bbc8c726a9fc27c3c70] DEC: claimed via SAIOPS -- owner probe\\n'"
+      ],
+      "extra": []
+    },
+    {
+      "function": "run_nitro_integrity_probes",
+      "checked": 191,
+      "failures": [
+        "conflict inspect reports the conflicting location read-only: {'ok': True, 'op_id': 'op-t592', 'operation': 'checkpoint', 'status': 'CONFLICT', 'created_at': '2026-10-03T11:00:02Z', 'agent': 'probe', 'verification_policy': 'core_fast', 'read_dependencies': {}, 'targets': [{'path': '.saipen/LOG.md', 'role': 'log', 'action': 'write', 'applied': True, 'expected_before': '825a7de161a2208a', 'planned_after': 'e94019f16bcc3523', 'current': 'e94019f16bcc3523', 'conflicts': False}, {'path': '.saipen/STATE.md', 'role': 'state', 'action': 'write', 'applied': False, 'expected_before': '494ae9cfd71342a6', 'planned_after': '08238528815eec02', 'current': '546a71ddbbfd0a11', 'conflicts': True}], 'conflicting_locations': ['.saipen/STATE.md'], 'staged_identity': 'h', 'safe_resolution_classes': ['accept_live', 'replan', 'reconcile'], 'code': 'CONFLICT_INSPECT'}"
+      ],
+      "extra": []
+    }
+  ],
+  "seconds": 40.735
+}

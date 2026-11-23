@@ -29,6 +29,7 @@ that would have copied more (INV-20).
 
 from __future__ import annotations
 
+import fnmatch
 import hashlib
 import json
 import re
@@ -100,23 +101,63 @@ def _load(root: Path) -> tuple[dict, str | None]:
     return modules, _sha256(raw)
 
 
+def select_modules(root: Path | str, patterns) -> tuple[list[str], list[str]]:
+    """The focused runner's own filename-selection contract, shared by every
+    consumer that needs to know which test modules a pattern set selects.
+
+    ``(selected, unmatched)``: the sorted module filenames in ``tools/`` that
+    at least one pattern matches, and the patterns that match no file today.
+    Selection and sandbox copying must not implement two different pattern
+    languages: a wildcard that the runner expands but the resolver compares as
+    a literal silently degrades a declared run to a FULL copy.
+
+    ``fnmatch.fnmatchcase`` is the contract ``focused_unit`` already used. It
+    is case-sensitive on every platform, so a Windows run and a POSIX run
+    select the same modules from the same names.
+    """
+    root = Path(root)
+    try:
+        filenames = sorted(p.name for p in (root / "tools").iterdir() if p.is_file())
+    except OSError:
+        filenames = []
+    selected: set[str] = set()
+    unmatched: list[str] = []
+    for pattern in sorted(set(patterns)):
+        hits = [name for name in filenames if fnmatch.fnmatchcase(name, pattern)]
+        if hits:
+            selected.update(hits)
+        else:
+            unmatched.append(pattern)
+    return sorted(selected), unmatched
+
+
 def resolve(root: Path | str, patterns) -> dict:
     """The sandbox scope decision for one pattern set.
 
-    ALL patterns must be declared for a narrow copy. One undeclared pattern
-    makes the whole run FULL, because one sandbox holds one snapshot and the
-    undeclared module would otherwise read a tree nobody declared it needs.
+    Patterns are expanded through :func:`select_modules`, the same contract the
+    focused runner executes, so ``test_t2093_*.py`` reaches the four modules it
+    really selects instead of being compared to manifest keys as a literal.
+
+    ALL selected modules must be declared for a narrow copy. One undeclared or
+    unmatched pattern makes the whole run FULL, because one sandbox holds one
+    snapshot and the undeclared module would otherwise read a tree nobody
+    declared it needs. An empty selection is not a refusal here: the focused
+    route refuses it before the copy (`preflight.selection_problem`), and the
+    resolver's answer stays a well-formed FULL decision for record validation.
     """
     root = Path(root)
     patterns = sorted(set(patterns))
     modules, digest = _load(root)
-    undeclared = [name for name in patterns if name not in modules]
-    if undeclared:
-        return {"mode": FULL, "trees": [], "undeclared": undeclared,
-                "manifest_sha256": digest}
-    trees = sorted({entry for name in patterns for entry in modules[name]})
+    selected, unmatched = select_modules(root, patterns)
+    undeclared = sorted({name for name in selected if name not in modules})
+    blocked = sorted(unmatched) + undeclared
+    if blocked:
+        return {"mode": FULL, "trees": [], "undeclared": blocked,
+                "selected": selected, "manifest_sha256": digest}
+    trees = sorted({entry for name in selected for entry in modules[name]})
     return {"mode": DECLARED, "trees": trees, "undeclared": [],
-            "declared_by": {name: list(modules[name]) for name in patterns},
+            "selected": selected,
+            "declared_by": {name: list(modules[name]) for name in selected},
             "manifest_sha256": digest}
 
 

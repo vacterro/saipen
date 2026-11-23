@@ -1,0 +1,5 @@
+STATUS: DONE — Workshopi pakk uuendatud
+RESULT: [VRV 0.3.1 ZIP](V:/___VAC/__K/__CODE/_MISC/_BZDECOMP/vrv/dist/VRV-0.3.1-Workshop.zip). SHA256 algus: 89bb196a0111.
+OPERATOR ACTION: Paki ZIP lahti ja vali BZ2 Uploaderis Update olemasolevale kirjele 3820486276.
+NEXT EXACT ACTION: NONE
+VALIDATION: PASS: ZIP 404/404 faili; mängufailid kattuvad Barrenil ja Dunesil testitud versiooniga.

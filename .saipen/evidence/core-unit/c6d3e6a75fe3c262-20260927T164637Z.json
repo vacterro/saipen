@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "family": "unit",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "fingerprint": "c6d3e6a75fe3c262abe93613fc6a73c1922305f8a24f4f79c3edddb9bf75adf1",
+  "fingerprint_excludes": [
+    ".git",
+    ".saipen"
+  ],
+  "baseline_sha256": "c771e5fadeb2b293e2f867f1af3caf6d7ff6773c29a83121af33fe19bfd44cc5",
+  "head": "af9227678993e9e6258d28316831f4b879e75573",
+  "finished_utc": "2026-09-27T16:46:37Z",
+  "status": "FAIL",
+  "exit_code": 1,
+  "ran": 3949,
+  "duration_s": 2154.2,
+  "timeout_s": 5400,
+  "headers": 9,
+  "unparsed": 0,
+  "tallied": 9,
+  "red": [
+    "test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_a_literal_is_harvested_whole",
+    "test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_every_printed_command_classifies_as_canonical",
+    "test_inject_digest.SurfaceDigest.test_the_two_transports_agree",
+    "test_install_drift.DriftReportTests.test_line_endings_alone_are_not_drift",
+    "test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_optional_explicit_launch_is_checked_and_does_not_leak",
+    "test_refusal_registry.RegistryCompletenessTests.test_every_production_refusal_code_is_registered",
+    "test_t1278_closure_contradiction.CommitGuardTests.test_no_closure_commit_over_a_board_that_leaves_the_ticket_open",
+    "test_t1304_r004_transition.BaselineFailureTests.test_internal_debt_code_in_a_refusal_exception_is_normalized",
+    "test_t1304_r004_transition.BaselineFailureTests.test_internal_debt_code_is_normalized_not_a_crash"
+  ],
+  "jobs": 1,
+  "verdict": "FAIL",
+  "new_red": [
+    "test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_a_literal_is_harvested_whole",
+    "test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_every_printed_command_classifies_as_canonical",
+    "test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_optional_explicit_launch_is_checked_and_does_not_leak",
+    "test_refusal_registry.RegistryCompletenessTests.test_every_production_refusal_code_is_registered",
+    "test_t1278_closure_contradiction.CommitGuardTests.test_no_closure_commit_over_a_board_that_leaves_the_ticket_open"
+  ],
+  "fixed": [
+    "test_public_closure_cli.PublicClosureCliTests.test_control_c_d_cohort_cli_and_publication"
+  ],
+  "problems": [
+    "5 new red outside the baseline"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "before": {
+    "exit_code": 1,
+    "oracle_sha256": "415d2e7ee26f84363af17616d2f5e91f168993eeced3e36bd23041924c9b5007",
+    "tail": [
+      "Ran 2 tests in 0.069s",
+      "",
+      "FAILED (failures=2)"
+    ]
+  },
+  "after": {
+    "exit_code": 0,
+    "oracle_sha256": "415d2e7ee26f84363af17616d2f5e91f168993eeced3e36bd23041924c9b5007",
+    "tail": [
+      "Ran 2 tests in 2.586s",
+      "",
+      "OK"
+    ]
+  }
+}

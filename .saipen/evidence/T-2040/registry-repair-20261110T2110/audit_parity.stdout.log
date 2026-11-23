@@ -1,0 +1,2 @@
+FAIL: tools/validate.py rejects an UNMODIFIED copy (exit 1) -- every number below would be measuring that instead of the floor's coverage. What it said:
+    FAIL: closure provenance does not resolve: EX-000050 was verified against installed engine generation sha256:c6819eff239d8b9c... but the running engine is sha25

@@ -1,0 +1,12 @@
+{
+  "target": "7145548211d2ee3ca9babf5e8b251960ea8f0527",
+  "reflog": "380b30f6374f31e37d10919d1a4ded36be9dc598 7145548211d2ee3ca9babf5e8b251960ea8f0527 VAC34 <vac34@example.com> 1788914277 +0300\tcommit: closure v8.0.1: ticket T-1298 DONE",
+  "candidate_trees": 2444,
+  "matches": [
+    {
+      "tree": "e55f8292181896e63c69427e8af65c0107d64616",
+      "payload": "tree e55f8292181896e63c69427e8af65c0107d64616\nparent 380b30f6374f31e37d10919d1a4ded36be9dc598\nauthor VAC34 <vac34@example.com> 1788914277 +0300\ncommitter VAC34 <vac34@example.com> 1788914277 +0300\n\nclosure v8.0.1: ticket T-1298 DONE\n"
+    }
+  ],
+  "writes": "evidence only"
+}

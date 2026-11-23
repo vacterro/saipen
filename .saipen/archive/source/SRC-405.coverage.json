@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-405:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2049 closed with verification evidence in LOG: verify -> PASS [target: T-2049] conf: high -- core-unit/8431977205e8d6ce-20261112T032119461615Z.json sha256:8431977205e8d6ce21cbae928815c3f6ca16f1cb3b24c0e7e395b80292663f20, 9415 tests, 7 inherited reds, 0 new_reds; targeted 57 tests OK (1 skipped host symlink privilege)",
+      "text": "SAIPEN durable repository GC engine: automatic reclamation every 20 committed DONE ticket identities, budget-triggered early cleanup, evidence lifecycle with canonical receipts, build/recovery retention, scope-bounded bulk-deletion authority, zero-write dry-run, crash-safe incremental deletion, isolated tests plus live acceptance with measured reclaimed bytes",
+      "verification": "the Work this request created reached its own verification gate; see the T-2049 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2049"
+    }
+  },
+  "schema_version": 1
+}

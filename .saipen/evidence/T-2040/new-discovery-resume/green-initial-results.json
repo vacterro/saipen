@@ -1,0 +1,27 @@
+[
+  {
+    "test": "test_t2040_exhaustion_evidence",
+    "exit_code": 1,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\green-initial-test_t2040_exhaustion_evidence.log"
+  },
+  {
+    "test": "test_t2040_discovery_owners",
+    "exit_code": 0,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\green-initial-test_t2040_discovery_owners.log"
+  },
+  {
+    "test": "test_t2040_continuation_truth",
+    "exit_code": 1,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\green-initial-test_t2040_continuation_truth.log"
+  },
+  {
+    "test": "test_premature_victory_prevention",
+    "exit_code": 0,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\green-initial-test_premature_victory_prevention.log"
+  },
+  {
+    "test": "test_t2021_false_idle_maintenance",
+    "exit_code": 0,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\green-initial-test_t2021_false_idle_maintenance.log"
+  }
+]

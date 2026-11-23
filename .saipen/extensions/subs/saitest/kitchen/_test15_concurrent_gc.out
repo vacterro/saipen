@@ -1,0 +1,1 @@
+{"canonical_done": ["T-001"], "counted_done": ["T-001"], "details": [null, "WriterBusy: WRITER_BUSY"], "durable_failures": 1, "maintenance_debt": "GC_BLOCKED_PROTECTED_BUDGET", "maintenance_runs": 1, "result_codes": ["GC_RUN_COMPLETE", "GC_MAINTENANCE_FAILED"]}

@@ -1,0 +1,19 @@
+SCOPED: 13 of 275 control(s) selected by --changed (3 path(s)). This is NOT the full sweep.
+SCOPED: known limitation -- selection reads each control's DECLARED target file only. A control whose target is untouched but whose check reads a changed file indirectly -- a cross-document rule, a manifest, a schema another file is validated against -- is NOT selected and is NOT proven by this run
+SCOPED: known limitation -- the always-on probes still run; only the per-control sweep is narrowed
+PASS: a real root `nul` entry is excluded from audit snapshots
+UNPROVEN: symlink-restore -- host cannot create a symlink, so the red control was never constructed: [WinError 1314] A required privilege is not held by the client: 'V:\\_TEMP_\\audit_checks_50rdzj2b\\probe-symlink-restore\\symlink-restore-probe\\external.md' -> 'V:\\_TEMP_\\audit_checks_50rdzj2b\\probe-symlink-restore\\symlink-restore-probe\\IDENTITY.md'
+PASS: audit-tags missing-Git skip plus enumeration, nonzero, malformed, truncated, and surplus fail-closed controls behave
+PASS: every producer-OUTBOX control runs at a gate where its finding is hard
+PASS: a known-good copy of this repository is built for the mutation controls
+PASS: release-ledger clean/new-tag/new-changelog/stale-baseline controls behave distinctly
+FAIL: validator-check-inventory -- ADDED fail site 2a3e0e9689b5a398 at tools/validate.py:6932 in <module> ('core-unit publication -- ') -- a new check needs a CASE in tools/audit_checks.py, or a recorded reason it has none. Regenerate tools/validator_fail_sites.json in the same change
+PASS: aged unowned WARN slug fails; identical aged slug with a live naming ticket passes; baseline data, never validator wording
+PASS: consistent SCOUT->SCOUTX rename stays green across the DFA, RFC table, schema enum and phase doc -- edge gates catch drift, not deliberate renames
+PASS: release-ledger tag query is observed once; duplicate-query and invalid-validator controls both go red
+PASS: the unmodified copy validates clean, so every expectation below is absent before its mutation
+PASS: callable no-op mutations are rejected before validation
+PASS: every canonical mutation has its target, so the denominator holds still
+PASS: every canonical mutation still drives its own check red
+SCOPED: the 13 selected control(s) each went red on their own condition. This proves nothing about the 262 control(s) that were not run, and is not audit_checks evidence for a checkpoint or a release.
+AUDIT: 12 of 14 probes passed; failed: validator-check-inventory; skipped: none; unproven (host capability): symlink-restore

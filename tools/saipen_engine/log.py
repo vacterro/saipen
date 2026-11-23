@@ -393,6 +393,7 @@ def _restored_detail_text(
     parsed: dict,
     *,
     binding: tuple[str | None, str] | None = None,
+    root_identity: str | None = None,
 ) -> tuple[str | None, str | None]:
     """Return ``(reference, original message)`` for a proved compact event.
 
@@ -409,6 +410,12 @@ def _restored_detail_text(
     restored line must be the SAME event id. Anything else leaves the compacted
     text standing, so a missing or tampered detail file can never invent a
     verdict -- it only fails the way it already failed.
+
+    T-2090 (night-4 W1c): `root_identity` is the caller's pre-resolved
+    `root.resolve().as_posix()` -- one resolve per HISTORY PASS, not one per
+    compacted event (795 per pass on this tree, each a full ntpath
+    realpath). The identity is still COMPUTED fresh per call when not
+    supplied, so standalone callers keep identical behavior.
     """
     compact = compact_detail_reference(str(parsed.get("text") or ""))
     if compact is None:
@@ -419,11 +426,12 @@ def _restored_detail_text(
     # -- would otherwise share entries, and the digest is checked when the file
     # is read, not when the cache is hit, so a collision would serve another
     # project's verdict rather than refuse it.
-    try:
-        identity = root.resolve().as_posix()
-    except OSError:
-        return reference, None
-    cache_key = f"{identity}|{reference}|{parsed.get('event')}"
+    if root_identity is None:
+        try:
+            root_identity = root.resolve().as_posix()
+        except OSError:
+            return reference, None
+    cache_key = f"{root_identity}|{reference}|{parsed.get('event')}"
     restored = _read_detail_text(root, reference, parsed, structure, binding=binding)
     _DETAIL_CACHE[cache_key] = restored
     return reference, restored
@@ -564,6 +572,13 @@ def read_history_snapshot(
     event_lines: list[str] = []
     illegal: list[str] = []
     max_ticket_id = 0
+    # T-2090 (night-4 W1c): resolve the project identity once per pass and
+    # hand it to every compacted-event restoration instead of letting each
+    # re-walk ntpath realpath.
+    try:
+        _root_identity = root.resolve().as_posix()
+    except OSError:
+        _root_identity = None
     for p in valid_paths:
         try:
             raw = p.read_bytes()
@@ -588,7 +603,9 @@ def read_history_snapshot(
         for idx, line in enumerate(text.splitlines()):
             parsed = parse_log_line(line)
             if parsed is not None:
-                reference, restored = _restored_detail_text(root, parsed, binding=binding)
+                reference, restored = _restored_detail_text(
+                    root, parsed, binding=binding, root_identity=_root_identity
+                )
                 if reference is not None:
                     parsed["detail_ref"] = reference
                     parsed["detail_integrity"] = (
@@ -664,6 +681,12 @@ def read_history_routing_summary(project_root: Path | str) -> HistoryRoutingSumm
     event_count = 0
     highest = 0
     seen_ids: set[int] = set()
+    # T-2090 (night-4 W1c): one resolve per pass, shared by every
+    # compacted-event restoration below.
+    try:
+        _root_identity = root.resolve().as_posix()
+    except OSError:
+        _root_identity = None
     for p in valid_paths:
         try:
             raw = p.read_bytes()
@@ -715,7 +738,9 @@ def read_history_routing_summary(project_root: Path | str) -> HistoryRoutingSumm
                         tid = int(m.group(1))
                         if tid > max_ticket_id:
                             max_ticket_id = tid
-                reference, restored = _restored_detail_text(root, parsed, binding=binding)
+                reference, restored = _restored_detail_text(
+                    root, parsed, binding=binding, root_identity=_root_identity
+                )
                 if reference is not None:
                     parsed["detail_ref"] = reference
                     parsed["detail_integrity"] = "valid" if restored is not None else "invalid"
@@ -789,6 +814,12 @@ def read_history_snapshot_and_logs_digest(
     # `logs_dir` and is never visited by the delete-tree walker, so it is
     # deliberately not cached (it is consumed only by the snapshot above).
     sealed_cache: dict[Path, bytes] = {}
+    # T-2090 (night-4 W1c): one resolve per pass, shared by every
+    # compacted-event restoration below.
+    try:
+        _root_identity = root.resolve().as_posix()
+    except OSError:
+        _root_identity = None
     for p in valid_paths:
         try:
             raw = p.read_bytes()
@@ -809,7 +840,9 @@ def read_history_snapshot_and_logs_digest(
         for idx, line in enumerate(text.splitlines()):
             parsed = parse_log_line(line)
             if parsed is not None:
-                reference, restored = _restored_detail_text(root, parsed, binding=binding)
+                reference, restored = _restored_detail_text(
+                    root, parsed, binding=binding, root_identity=_root_identity
+                )
                 if reference is not None:
                     parsed["detail_ref"] = reference
                     parsed["detail_integrity"] = (
@@ -1393,6 +1426,18 @@ _FAIL_FIELD_RE = re.compile(r"\bFAIL(?:S|ED|URE|URES)?\s*[=:]\s*(?!0+\b)\d+", re
 #: Their zero twins, which exempt a token instead of claiming one.
 _ZERO_FIELD_RE = re.compile(r"\bFAIL(?:S|ED|URE|URES)?\s*[=:]\s*0+\b", re.IGNORECASE)
 
+# T-5: an N/N ratio before a FAIL-family token is a proportion, not a count.
+# ZAICODER E-86 narrated its red control as "3/3 failure classes fire on the
+# known-bad fixture"; the bare second digit read as three failures and vetoed
+# a green cycle. Same family as T-1632's identifier citations: a ratio is
+# evidence data, removed before the counted scan. Only the RATIO shape is
+# exempt -- a bare nonzero count, a nonzero field and a real FAIL verdict are
+# untouched and still claim from anywhere, so a real failure cannot be talked
+# past. The shape is the slash, not equality.
+_RATIO_FAIL_RE = re.compile(
+    r"\b\d+\s*/\s*\d+\s+FAIL(?:S|ED|URE|URES)?\b", re.IGNORECASE
+)
+
 # T-1444: a count ATTRIBUTED to a foreign scope is not this ticket's claim.
 #
 # The classifier had no scope. Measured live on SAIMAIL T-99: verify
@@ -1563,7 +1608,10 @@ def _claims_failure(text: str) -> bool:
     # stage words and followed by its green twin, is evidence data too.
     scoped = _PAIR_RED_HALF_RE.sub(" ", scoped)
     # Machine shapes: unambiguous wherever they appear.
-    if _FAIL_COUNTED_RE.search(scoped) or _FAIL_FIELD_RE.search(scoped):
+    # T-5: remove N/N ratios before the counted scan; a ratio is evidence
+    # data, not a failure count (ZAICODER E-86, "3/3 failure classes fire").
+    counted = _RATIO_FAIL_RE.sub(" ", scoped)
+    if _FAIL_COUNTED_RE.search(counted) or _FAIL_FIELD_RE.search(counted):
         return True
     verdict = scoped.split(_VERDICT_SEPARATOR, 1)[0]
     total = len(_FAIL_TOKEN_RE.findall(verdict))

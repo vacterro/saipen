@@ -1,0 +1,23 @@
+FF
+Verified pre-change issuer module: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1932\authority\operator_origin.before.py
+Pre-change result: 2 2 0
+======================================================================
+FAIL: test_claim_handoff_requires_its_native_action (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_claim_handoff_requires_its_native_action)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_origin_broker.py", line 963, in test_claim_handoff_requires_its_native_action
+    self.assertTrue(self.verify(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_work_supersession_requires_a_native_supersession_event (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_work_supersession_requires_a_native_supersession_event)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1844_origin_broker.py", line 990, in test_work_supersession_requires_a_native_supersession_event
+    self.assertTrue(self.verify(
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.123s
+
+FAILED (failures=2)

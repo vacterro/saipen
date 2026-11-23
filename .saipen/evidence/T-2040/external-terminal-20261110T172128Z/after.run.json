@@ -1,0 +1,23 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_t2040_external_terminal_proof.py"
+  ],
+  "started_at": "2026-11-10T17:25:49.785535+00:00",
+  "input_sha256": {
+    "tools/test_t2040_external_terminal_proof.py": "d2da3ce61e651798299a9847568ea68c8dba93fafd09973c0ed78f2ae58b6816",
+    "tools/saipen_engine/external.py": "5a175a694f64ea60b54cc25d20f492100ef343a99e90589d7102bce8598afc49",
+    "tools/saipen_engine/journal.py": "82f5bdc7200dd2091e31065f5bd96db8c6268c4c49e4c65d8b86538b341ccea2",
+    "tools/saipen_engine/board.py": "751767d2aa4761c537f9c098130ea178c33292b8b6b04c781787a5f54eae8f0a",
+    "tools/test_t1640_board_scrub.py": "f02f49def80253ce4c364608c899bc8189125b4077494ea653c1c8d907c02ecc"
+  },
+  "exit_code": 0,
+  "duration_s": 3.157,
+  "finished_at": "2026-11-10T17:25:52.940065+00:00"
+}

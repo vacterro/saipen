@@ -1,0 +1,34 @@
+{
+ "copy": 77173,
+ "live": 77169,
+ "only_copy": [
+  ".saipen/evidence/T-1630-current/green-focused.txt",
+  ".saipen/evidence/T-1630-current/red-pre-fix.txt",
+  ".saipen/evidence/T-1630-current/revert-red.txt",
+  ".saipen/evidence/core-unit/d485d60b0332a03a-20261008T040900Z.json",
+  ".saipen/recovery/conformance/2026-10-08T03_42_12.415362Z_receipt-902b7222fd32_core_PASS.json",
+  ".saipen/recovery/settled/checkpoint-bb7c7993aa174619bfa3119bc72babb4/operation.json"
+ ],
+ "only_live": [
+  ".saipen/cache/admission/4205ed944766d973e5a3b861.json",
+  ".saipen/cache/inflight/core-unit.json"
+ ],
+ "content_diff": [
+  ".git/index",
+  ".saipen/BOARD.md",
+  ".saipen/LOG.md",
+  ".saipen/STATE.md",
+  ".saipen/cache/core-unit/durations.json",
+  ".saipen/recovery/conformance/index/active-gen.json",
+  ".saipen/recovery/conformance/index/collect.json",
+  ".saipen/recovery/conformance/index/core.json",
+  ".saipen/recovery/conformance/index/lineage-head.json",
+  ".saipen/recovery/settled-index/active.json",
+  ".saipen/recovery/settled-index/head.json",
+  ".saipen/recovery/settled-index/loc/47320987f9a49d5b.json",
+  ".saipen/recovery/settled-index/rec/active.json",
+  "extensions/adapters/codex/saipen-guard.py",
+  "tools/install_host_guard.py",
+  "tools/test_codex_stop_hook.py"
+ ]
+}

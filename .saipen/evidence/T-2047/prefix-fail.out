@@ -1,0 +1,16 @@
+F
+======================================================================
+FAIL: test_replaying_the_same_binding_is_idempotent_and_writes_nothing (__main__.CrewRunReceiptTests.test_replaying_the_same_binding_is_idempotent_and_writes_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-2047\prefix-tools\tools\test_t1430_crew_run_receipt.py", line 190, in test_replaying_the_same_binding_is_idempotent_and_writes_nothing
+    self.assertEqual(second["code"], "ALREADY_BOUND", second)
+AssertionError: 'CREW_RUN_RECORDED' != 'ALREADY_BOUND'
+- CREW_RUN_RECORDED
++ ALREADY_BOUND
+ : {'ok': True, 'code': 'CREW_RUN_RECORDED', 'op_id': 'crew-run-116388a9f96f4d9d9fa3accf0f56c7c8', 'changed_files': ['.saipen/LOG.md', '.saipen/STATE.md'], 'recovery_required': False, 'role': 'saihunt', 'crew_epoch': 'converge_intent-55a473ff1cbb49ef8272d5bde0bff7be', 'event_id': 'E-3'}
+
+----------------------------------------------------------------------
+Ran 1 test in 2.378s
+
+FAILED (failures=1)

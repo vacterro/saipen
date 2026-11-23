@@ -89,7 +89,7 @@ class AcceptanceBarTests(fixtures.RepairBoundaryTests):
         routed = R.resolve(Path("."), item, tickets)
         self.assertEqual(routed["code"], "ROUTED_TO_OWNER")
         self.assertEqual(routed["owner"], "T-57")
-        self.assertEqual(R.route_command(routed), "saipen ticket claim T-57")
+        self.assertEqual(R.route_command(routed), "saipen claim T-57")
 
     def test_c_the_route_carries_no_invented_operator_command(self):
         # Clause (f) too: an engine-owned finding renders no operator command.
@@ -105,8 +105,10 @@ class AcceptanceBarTests(fixtures.RepairBoundaryTests):
         self.assertNotIn("recover resolve-blocker", serialized)
 
     def test_d_build_is_not_resumed_over_a_current_fail(self):
-        # The engine reports the failure as terminal and exposes no executable
-        # remediation, so no caller can read it as permission to resume BUILD.
+        # The failure still outranks continuation, so no caller reads it as
+        # permission to resume BUILD. T-2056 changed what the refusal OFFERS:
+        # instead of `action: null` (which left the agent nothing it was allowed
+        # to run) it names the exact executable repair for the blocking finding.
         from saipen_engine import router
 
         root, decision = self._fail_with_subject(
@@ -114,14 +116,22 @@ class AcceptanceBarTests(fixtures.RepairBoundaryTests):
         )
         self.assertFalse(decision["healthy"])
         self.assertEqual(decision["repair_status"], "ENGINEERING_REQUIRED")
+        action = decision["primary_action"]
+        self.assertTrue(action, "the obstacle must become a permitted action")
+        self.assertNotIn("saipen start", action)
         for route in (
             {"ok": True, "action": "saipen continue", "reason": "maintain"},
             {"ok": True, "action": "saipen crew", "reason": "crew-converge"},
         ):
             gated = router.gate_route(root, route)
             self.assertFalse(gated["ok"])
-            self.assertIsNone(gated["canonical_next_command"])
-            self.assertIsNone(gated["action"])
+            self.assertEqual(gated["code"], "CONFORMANCE_UNHEALTHY")
+            self.assertEqual(gated["canonical_next_command"], action)
+            self.assertEqual(gated["action"], action)
+            self.assertFalse(gated["terminal"])
+            # Never a continuation dressed up as a repair.
+            self.assertNotIn("saipen continue", gated["action"])
+            self.assertNotIn("saipen crew", gated["action"])
 
     def test_g_the_goal_surface_does_not_read_complete(self):
         # R007 clause (g): open deliverables keep the goal verifier off PASS.

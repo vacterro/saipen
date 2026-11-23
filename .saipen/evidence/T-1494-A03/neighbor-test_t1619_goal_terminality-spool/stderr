@@ -1,0 +1,21 @@
+test_prose_has_zero_terminal_authority (test_t1619_goal_terminality.RegressionAExactMuseIncident.test_prose_has_zero_terminal_authority) ... ok
+test_the_canonical_classifier_agrees (test_t1619_goal_terminality.RegressionAExactMuseIncident.test_the_canonical_classifier_agrees) ... ok
+test_the_fixture_is_not_goal_completion (test_t1619_goal_terminality.RegressionAExactMuseIncident.test_the_fixture_is_not_goal_completion) ... ok
+test_tripped_valve_stops_without_continuation (test_t1619_goal_terminality.RegressionBSafetyValve.test_tripped_valve_stops_without_continuation) ... ok
+test_operator_due_stops_and_requests (test_t1619_goal_terminality.RegressionCRealOperatorAction.test_operator_due_stops_and_requests) ... ok
+test_candidate_rejected_before_handoff (test_t1619_goal_terminality.RegressionDNoShellExecutor.test_candidate_rejected_before_handoff) ... ok
+test_rejection_is_routing_telemetry_not_a_project_blocker (test_t1619_goal_terminality.RegressionDNoShellExecutor.test_rejection_is_routing_telemetry_not_a_project_blocker) ... ok
+test_unknown_capability_fails_closed (test_t1619_goal_terminality.RegressionDNoShellExecutor.test_unknown_capability_fails_closed) ... ok
+test_each_executor_admitted_independently (test_t1619_goal_terminality.RegressionECapabilityLossAfterSwitch.test_each_executor_admitted_independently) ... ok
+test_identity_never_decides (test_t1619_goal_terminality.RegressionECapabilityLossAfterSwitch.test_identity_never_decides) ... ok
+test_new_epoch_reconsiders (test_t1619_goal_terminality.RegressionFSameBadExecutorLoop.test_new_epoch_reconsiders) ... ok
+test_observed_bad_candidate_not_selected_twice (test_t1619_goal_terminality.RegressionFSameBadExecutorLoop.test_observed_bad_candidate_not_selected_twice) ... ok
+test_truthful_runtime_pause_with_work_preserved (test_t1619_goal_terminality.RegressionGAllExecutorsUnavailable.test_truthful_runtime_pause_with_work_preserved) ... ok
+test_only_canonical_terminal_permits_goal_complete_ui (test_t1619_goal_terminality.RegressionHTrueCompletion.test_only_canonical_terminal_permits_goal_complete_ui) ... ok
+test_remaining_work_outranks_a_completion_claim (test_t1619_goal_terminality.RegressionHTrueCompletion.test_remaining_work_outranks_a_completion_claim) ... ok
+test_unproven_terminal_never_reports_complete (test_t1619_goal_terminality.RegressionHTrueCompletion.test_unproven_terminal_never_reports_complete) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.003s
+
+OK

@@ -1,0 +1,4 @@
+STATUS: VERIFY T-1851  
+RESULT: `cc all` jätkub; täielik testijooks töötab.  
+NEXT EXACT ACTION: Kontrolli testiseansi `77697` tulemust.  
+VALIDATION: Lint ja põhikontroll läbisid; täistestide tulemus ootel.

@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "code": "INIT_COMPLETED",
+  "project_root": "V:\\_TEMP_\\saipen-t1693-4d8nux6m\\project",
+  "identity": "V:\\_TEMP_\\saipen-t1693-4d8nux6m\\project\\.saipen\\IDENTITY.md",
+  "state": "V:\\_TEMP_\\saipen-t1693-4d8nux6m\\project\\.saipen\\STATE.md",
+  "board": "V:\\_TEMP_\\saipen-t1693-4d8nux6m\\project\\.saipen\\BOARD.md",
+  "log": "V:\\_TEMP_\\saipen-t1693-4d8nux6m\\project\\.saipen\\LOG.md",
+  "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "route": "saipen start '<the first goal>'",
+  "mailbox": {
+    "ok": false,
+    "code": "MAILBOX_ATTACH_SKIPPED",
+    "detail": "a mailbox is already bound or SAIMAIL is not installed"
+  }
+}

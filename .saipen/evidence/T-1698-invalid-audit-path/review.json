@@ -1,0 +1,24 @@
+{
+  "verifier_sha256": "8732220cbe13c4a8000201039e652c24fd462f8a67d142fc2410822969ed352d",
+  "runs": [
+    {
+      "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1698-invalid-audit-path\\pre\\audit_inbox.py",
+      "subject_sha256": "7421355627f2b55b109e0df4644a5b49580f2f21173e6bf33d3544dc37968e06",
+      "exit_code": 1,
+      "output": "review-pre.txt"
+    },
+    {
+      "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\audit_inbox.py",
+      "subject_sha256": "8be9ffadd25fc8d8c750ee7694f82e41fdbe2faa2ff593a44a59f3306477c53d",
+      "exit_code": 0,
+      "output": "review-post.txt"
+    }
+  ],
+  "prior_test_definitions_identical": 15,
+  "permanent_oracle_ast_identical": true,
+  "prior_parked_rows_byte_identical": 62,
+  "other_feature_paths_unchanged": 7,
+  "unowned_validate_unchanged": true,
+  "staged_diff_unchanged_after_capture_eol_normalization": true,
+  "memory_promotion": "NO: small diagnostic path fix, no new durable non-cheap lesson"
+}

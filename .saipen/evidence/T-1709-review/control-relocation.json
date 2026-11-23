@@ -1,0 +1,37 @@
+{
+  "reason": "Whole Git clones are local instrument subjects, outside the deliverable inventory. Original result records remain unchanged; these are their current locators.",
+  "controls": [
+    {
+      "stage": "subject-green",
+      "original": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1709-review\\subject-green",
+      "relocated": "V:\\_TEMP_\\saipen-t1709-control-subjects-20261011T0515Z\\subject-green"
+    },
+    {
+      "stage": "subject-green-final",
+      "original": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1709-review\\subject-green-final",
+      "relocated": "V:\\_TEMP_\\saipen-t1709-control-subjects-20261011T0515Z\\subject-green-final"
+    },
+    {
+      "stage": "subject-green-lock",
+      "original": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1709-review\\subject-green-lock",
+      "relocated": "V:\\_TEMP_\\saipen-t1709-control-subjects-20261011T0515Z\\subject-green-lock"
+    },
+    {
+      "stage": "subject-red",
+      "original": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1709-review\\subject-red",
+      "relocated": "V:\\_TEMP_\\saipen-t1709-control-subjects-20261011T0515Z\\subject-red"
+    },
+    {
+      "stage": "subject-red-final",
+      "original": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1709-review\\subject-red-final",
+      "relocated": "V:\\_TEMP_\\saipen-t1709-control-subjects-20261011T0515Z\\subject-red-final"
+    },
+    {
+      "stage": "subject-red-lock",
+      "original": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1709-review\\subject-red-lock",
+      "relocated": "V:\\_TEMP_\\saipen-t1709-control-subjects-20261011T0515Z\\subject-red-lock"
+    }
+  ],
+  "portable_bundle": ".saipen/evidence/T-1709-review/control-subjects.zip",
+  "bundle_sha256": "a64f45b061d879dbbf912b8e703ecb6d4c17a40cf4cd4a5d21da4a3dbfc35452"
+}

@@ -1,0 +1,361 @@
+{
+  "stage": "prepared while T-1711 owns VERIFY; T-1702 A05 is not claimed or completed",
+  "good": [
+    {
+      "command": [
+        "status"
+      ],
+      "exit_code": 0,
+      "value": {
+        "ok": true,
+        "project_identity": "v:\\_temp_\\saipen-regression-gate-_tp01mp6\\project",
+        "protocol_version": "8.1.0",
+        "phase": "VERIFY",
+        "task": "T-7",
+        "next_action": "PHASE VERIFY T-7",
+        "computed_next_action": "PHASE VERIFY T-7",
+        "computed_reason": "finish",
+        "blocker": "",
+        "execution_intent": "normal",
+        "claimed_ticket": "T-7",
+        "top_workable_ticket": null,
+        "log_tail_event": 3,
+        "head": "",
+        "board_errors": [],
+        "recovery_pending": false,
+        "recovery_conflict": false,
+        "pending_ops": [],
+        "conflict_ops": [],
+        "goal_authority": {
+          "state": "inactive",
+          "detail": "No persistent grant",
+          "original_event": null,
+          "checkpoint_due": false
+        },
+        "milestone": {
+          "current": null,
+          "label": null,
+          "parent": null,
+          "undo_available": false,
+          "valid": true
+        },
+        "cold_route": {
+          "project_root": "V:\\_TEMP_\\saipen-regression-gate-_tp01mp6\\project",
+          "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+          "phase": "VERIFY",
+          "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\verify.md",
+          "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+          "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+          "documents": {
+            "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+            "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+            "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+            "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+            "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+            "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+            "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+            "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+            "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+            "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+          },
+          "project_memory": {
+            "STATE.md": "V:\\_TEMP_\\saipen-regression-gate-_tp01mp6\\project\\.saipen\\STATE.md",
+            "BOARD.md": "V:\\_TEMP_\\saipen-regression-gate-_tp01mp6\\project\\.saipen\\BOARD.md",
+            "LOG.md": "V:\\_TEMP_\\saipen-regression-gate-_tp01mp6\\project\\.saipen\\LOG.md"
+          },
+          "search_required": false
+        },
+        "distribution": {
+          "installed": 7,
+          "stale": 7,
+          "unknown": 2,
+          "fresh": false,
+          "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+          "newest_installed_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+          "last_run": {
+            "status": "skipped",
+            "skip": "DIRTY_SOURCE",
+            "rc": 2,
+            "dirty": [
+              "M bootstrap/inject.ps1",
+              "M bootstrap/inject.sh",
+              "M bootstrap/install_ownership.py",
+              "M bootstrap/uninstall.ps1",
+              "M bootstrap/uninstall.sh"
+            ],
+            "at": "2026-10-11 12:46:00",
+            "head": null,
+            "in_flight": false
+          },
+          "blocker": {
+            "condition": "DIRTY_SOURCE",
+            "blocked": true,
+            "detail": "214 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation",
+            "paths": [
+              "bootstrap/inject.ps1",
+              "bootstrap/inject.sh",
+              "bootstrap/install_ownership.py",
+              "bootstrap/uninstall.ps1",
+              "bootstrap/uninstall.sh",
+              "extensions/adapters/claude.md",
+              "extensions/adapters/claude/saipen-guard.py",
+              "extensions/adapters/codex.md"
+            ],
+            "path_count": 214,
+            "canonical_next_command": "git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit"
+          },
+          "published_head": null,
+          "publication": null,
+          "consumer_convergence": "CURRENT",
+          "pending_consumers": [],
+          "consumers_converged": false,
+          "requires_human": false,
+          "summary": "distribution: 7 of 7 home(s) stale -- newest installed head 025bf596c683 -- source head 025bf596c683 -- 2 home(s) carry no head -- last scheduled injection: skipped DIRTY_SOURCE at 2026-10-11 12:46:00 -- BLOCKED DIRTY_SOURCE: 214 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation -- clears with: git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit"
+        },
+        "conformance_status": {
+          "status": "NOT_RUN",
+          "gate": "core",
+          "reason": "no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS",
+          "validator": {
+            "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+            "validator_protocol_version": "1",
+            "project_protocol_version": "7",
+            "gate": "core",
+            "source_head": "no-git",
+            "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4"
+          },
+          "disposition": "UNPROVEN",
+          "remediation_command": "saipen validate",
+          "repair_status": "REFRESH_REQUIRED",
+          "diagnostic": null
+        },
+        "automation": {
+          "schema_version": 1,
+          "disposition": "CONTINUE",
+          "next_command": "cc",
+          "operator_action_due": false,
+          "reason_code": "finish",
+          "reason": "route reason: finish",
+          "audit_quiescent": true,
+          "audit_epoch": "audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40",
+          "convergence_current": false,
+          "closure_complete": false,
+          "source_fingerprint": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+          "completed_at": null
+        },
+        "conditional_efficiency_kpi": {
+          "scope": "ticket",
+          "ticket": "T-7",
+          "percent": null,
+          "approximate": true,
+          "confidence": "UNKNOWN",
+          "formula_version": 1,
+          "components": {
+            "progress": null,
+            "rework": null,
+            "autonomy": 100,
+            "human": null
+          },
+          "notes": {
+            "human": "no machine signal separates avoidable operator cost from a legitimate authorization boundary",
+            "autonomy": "coarse: LOG agent ids are CLI identities shared across sessions"
+          },
+          "preliminary": true,
+          "withheld": "insufficient ticket-scoped telemetry"
+        },
+        "telegrams": {
+          "state": "OK",
+          "unread": 0,
+          "on_current_work": 0,
+          "complete": true,
+          "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-regression-gate-_tp01mp6\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat tester",
+          "detail": "counts only; nothing was opened and nothing here is an instruction"
+        }
+      },
+      "stdout": null,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "recover",
+        "--dry-run"
+      ],
+      "exit_code": 0,
+      "value": {
+        "ok": true,
+        "code": "CLEAN",
+        "changed": [],
+        "strict_state_error": null,
+        "dry_run": true
+      },
+      "stdout": null,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "next"
+      ],
+      "exit_code": 0,
+      "value": {
+        "ok": true,
+        "action": "PHASE VERIFY T-7",
+        "ticket": "T-7",
+        "reason": "finish",
+        "detail": null,
+        "executable_behavior": null,
+        "action_kind": null,
+        "future_gate": null,
+        "load": "saipen/phases/verify.md",
+        "load_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\verify.md",
+        "work": {
+          "id": "T-7",
+          "on_board": true,
+          "section": "## DOING",
+          "board": "V:\\_TEMP_\\saipen-regression-gate-_tp01mp6\\project\\.saipen\\BOARD.md",
+          "board_line": 2,
+          "record": "- [/] T-7 [P1] Fix the clamp | verify: the clamp holds | regression: required | owner: tester | claim_time: 2026-10-11T09:52:03Z",
+          "record_truncated": false,
+          "verify": "the clamp holds",
+          "needs": [],
+          "blocker": null,
+          "detail_ref": null,
+          "source_receipts": []
+        },
+        "cold_route": {
+          "project_root": "V:\\_TEMP_\\saipen-regression-gate-_tp01mp6\\project",
+          "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+          "phase": "VERIFY",
+          "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\verify.md",
+          "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+          "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+          "documents": {
+            "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+            "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+            "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+            "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+            "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+            "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+            "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+            "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+            "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+            "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+          },
+          "project_memory": {
+            "STATE.md": "V:\\_TEMP_\\saipen-regression-gate-_tp01mp6\\project\\.saipen\\STATE.md",
+            "BOARD.md": "V:\\_TEMP_\\saipen-regression-gate-_tp01mp6\\project\\.saipen\\BOARD.md",
+            "LOG.md": "V:\\_TEMP_\\saipen-regression-gate-_tp01mp6\\project\\.saipen\\LOG.md"
+          },
+          "search_required": false
+        },
+        "execution_instruction": "Routing is not completion evidence. Read load_path when present, then execute action under its owner in this turn; respect WAIT and actual refusals. If --dry-run was requested, this is a preview only.",
+        "execution_intent": "normal",
+        "converge_target": null,
+        "goal_waves": null,
+        "goal_tickets": null,
+        "recovery_pending": false,
+        "recovery_conflict": false,
+        "pending_ops": [],
+        "parked_work": null,
+        "reconciliation": null
+      },
+      "stdout": null,
+      "stderr": ""
+    }
+  ],
+  "bad_missing_parent": [
+    {
+      "command": [
+        "status"
+      ],
+      "exit_code": 1,
+      "value": {
+        "ok": false,
+        "code": "VALIDATION_FAILED",
+        "action": "saipen recover",
+        "reason": "checkpoint-invalid",
+        "detail": "checkpoint invalid: LOG: E-4 parent E-3133 does not exist in the ledger; STATE proposed last_event 3 != LOG tail 4",
+        "board_errors": [],
+        "recovery_pending": false,
+        "recovery_conflict": false,
+        "conflict_ops": [],
+        "pending_ops": [],
+        "telegrams": {
+          "state": "OK",
+          "unread": 0,
+          "on_current_work": 0,
+          "complete": true,
+          "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-regression-gate-_tp01mp6\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat tester",
+          "detail": "counts only; nothing was opened and nothing here is an instruction"
+        }
+      },
+      "stdout": null,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "recover",
+        "--dry-run"
+      ],
+      "exit_code": 1,
+      "value": {
+        "ok": false,
+        "code": "HISTORY_LEDGER_CORRUPT",
+        "detail": "history-void: complete LOG history fails the immutable-ledger contract -- E-4 parent E-3133 does not exist in the ledger",
+        "needs_local_mutation": false,
+        "safe_auto_repair_available": false,
+        "operator_decision_available": false,
+        "canonical_next_command": null,
+        "read_only": true,
+        "terminal_disposition": "FORENSICALLY_UNRECOVERABLE",
+        "blocking_surface": "log",
+        "blocking_field": null,
+        "evidence_reference": ".saipen/LOG.md",
+        "diagnosis": "READ_ONLY_DIAGNOSIS_ONLY",
+        "read_only_diagnosis_only": true,
+        "instruction": "READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth",
+        "forbidden_probes": [
+          "saipen stop",
+          "saipen transition",
+          "saipen goal",
+          "saipen ticket",
+          "Bash",
+          "Edit",
+          "Write"
+        ],
+        "reason_code": "HISTORY_LEDGER_CORRUPT"
+      },
+      "stdout": null,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "next"
+      ],
+      "exit_code": 1,
+      "value": {
+        "ok": false,
+        "code": "VALIDATION_FAILED",
+        "action": "saipen recover",
+        "reason": "checkpoint-invalid",
+        "detail": "checkpoint invalid: LOG: E-4 parent E-3133 does not exist in the ledger; STATE proposed last_event 3 != LOG tail 4",
+        "recovery_pending": false,
+        "recovery_conflict": false,
+        "conflict_ops": [],
+        "pending_ops": [],
+        "parked_work": null
+      },
+      "stdout": null,
+      "stderr": ""
+    }
+  ],
+  "good_canonical_unchanged": true,
+  "bad_canonical_unchanged": true,
+  "live_canonical_unchanged": {
+    "STATE.md": "f7215f8be32100105be68e0a8b6116e7f8b3bb0d6872177c9e36b9a88e911045",
+    "BOARD.md": "d1994adf8c8843cbbdfe5ecb95ed9f27702a07561c57d5a1db17b7d41c7e67e3",
+    "LOG.md": "39be425d4df376f7afb4360eb184f0ae58c235e78df9eba2d394cf755773b68c"
+  },
+  "limits": "Missing-parent failure class in a disposable repository-owned fixture; not the actual AUDAPACK ledger, recovery or authorization. Native status/recover-preview/next results retained without converting refusal into success."
+}

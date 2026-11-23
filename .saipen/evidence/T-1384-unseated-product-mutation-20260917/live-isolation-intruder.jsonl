@@ -1,0 +1,4 @@
+{"tool_name": "read", "session_id": null, "actor": null, "action": "read", "code": "NOT_SAIPEN_PROJECT", "admitted": true}
+{"tool_name": "read", "session_id": null, "actor": null, "action": "read", "code": "ADMITTED", "admitted": true}
+{"tool_name": "edit", "session_id": "ses_f5022d0e2ffelIPCgZ9QEMxxGX", "actor": null, "action": "write", "code": "UNSEATED_MUTATION", "admitted": false}
+{"tool_name": "bash", "session_id": "ses_f5022d0e2ffelIPCgZ9QEMxxGX", "actor": null, "action": "saipen_op", "code": "ADMITTED", "admitted": true}

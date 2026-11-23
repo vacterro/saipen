@@ -1,0 +1,138 @@
+--- a/tools/saipen_engine/automation.py
++++ b/tools/saipen_engine/automation.py
+@@ -255,7 +255,8 @@
+         "read-only-mode": (BLOCKED, "read-only-mode"),
+         "unblock": (BLOCKED, "unblock"),
+         "audit-inbox-residue": (WAIT_USER, "audit-inbox-residue"),
+-        "audit-inbox-invalid": (CONTINUE, "audit-inbox-invalid"),
++        "audit-inbox-invalid": (INVALID, "audit-inbox-invalid"),
++        "queued-source-invalid": (INVALID, "queued-source-invalid"),
+         "audit-inbox": (CONTINUE, "audit-inbox"),
+         "audit-inbox-unworkable": (BLOCKED, "audit-inbox-unworkable"),
+         "bootstrap": (CONTINUE, "bootstrap"),
+--- a/tools/saipen_engine/response_surface.py
++++ b/tools/saipen_engine/response_surface.py
+@@ -1144,6 +1144,13 @@
+         # request for operator authority. Preserve the actual lifecycle phase.
+         facts["blocker"] = "AUDIT_INBOX_UNWORKABLE -- ACTIVE audit"
+         facts["next_action"] = "NONE"
++    invalid_stops = {
++        "audit-inbox-invalid": "AUDIT_INBOX_INVALID -- unreadable audit layer",
++        "queued-source-invalid": "QUEUED_SOURCE_INVALID -- unreadable queued Source",
++    }
++    if auto.get("disposition") == "INVALID" and auto.get("reason_code") in invalid_stops:
++        facts["blocker"] = invalid_stops[auto["reason_code"]]
++        facts["next_action"] = "NONE"
+     if facts["operator_due"]:
+         # STATE's legal WAIT owns the actual required decision. Do not print
+         # the router's generic prose or assign its command to the operator.
+--- a/tools/test_automation_block.py
++++ b/tools/test_automation_block.py
+@@ -351,6 +351,107 @@
+ # ---------------------------------------------------------------------------
+ 
+ 
++class InvalidDataStops(AutomationFixture):
++    def invalid_audit(self) -> tuple[dict, dict]:
++        from saipen_engine import audit_inbox
++
++        path = self.root / "audit" / "1.md"
++        path.parent.mkdir(exist_ok=True)
++        path.write_bytes(b"\xffinvalid UTF-8")
++        status = audit_inbox.status(self.root)
++        projection = audit_inbox.projection(self.root)
++        self.assertTrue(projection["invalid_only"])
++        return route_next(_state(), BOARD_EMPTY, audit_inbox=projection), status
++
++    def invalid_queue(self) -> dict:
++        return route_next(
++            _state(), BOARD_EMPTY,
++            queued_source={"invalid": True, "action": "saipen source status"},
++        )
++
++    def assert_invalid_stop(self, routed: dict, audit_status: dict) -> dict:
++        self.assertEqual(routed["executable_behavior"], "RESTATE_AND_STOP")
++        block = self.block(routed=routed, audit_status=audit_status)
++        self.assertEqual(block["disposition"], automation.INVALID)
++        self.assertEqual(block["reason_code"], routed["reason"])
++        self.assertIsNone(block["next_command"])
++        self.assertFalse(block["operator_action_due"])
++        self.assertFalse(block["closure_complete"])
++        return block
++
++    def test_invalid_audit_is_not_a_continuation(self) -> None:
++        routed, status = self.invalid_audit()
++        self.assertEqual(routed["reason"], "audit-inbox-invalid")
++        self.assert_invalid_stop(routed, status)
++
++    def test_invalid_queue_cannot_be_completed_by_clean_closure_evidence(self) -> None:
++        routed = self.invalid_queue()
++        self.assertEqual(routed["reason"], "queued-source-invalid")
++        status = self.audit()
++        state, board = _parsed(_state())
++        gate = automation.closure_gate(
++            status_out=status, convergence=CONVERGENCE_OK,
++            history_events=[], board=board, state=state, agent="probe",
++        )
++        self.assertTrue(gate["complete"], "control must independently permit closure")
++        self.assert_invalid_stop(routed, status)
++
++    def assert_invalid_facts(self, routed: dict, status: dict, code: str) -> None:
++        block = self.block(routed=routed, audit_status=status)
++        facts = RS.canonical_facts(
++            self.root,
++            status={"automation": block, "conformance_status": {"status": "CURRENT_PASS"}},
++        )
++        self.assertTrue(facts["blocker"].startswith(code + " -- "), facts)
++        self.assertEqual(facts["next_action"], "NONE")
++        text = RS.digest_from_facts(facts, reason="final", language="et")
++        self.assertIn("RESULT: Töö säilitatud", text)
++        self.assertIn("BLOCKER: " + code, text)
++        self.assertNotIn("OPERATOR ACTION:", text)
++
++    def test_invalid_audit_has_a_visible_diagnostic_without_cc(self) -> None:
++        routed, status = self.invalid_audit()
++        self.assert_invalid_facts(routed, status, "AUDIT_INBOX_INVALID")
++
++    def test_invalid_queue_has_a_visible_diagnostic_without_cc(self) -> None:
++        self.assert_invalid_facts(self.invalid_queue(), self.audit(), "QUEUED_SOURCE_INVALID")
++
++    def test_active_work_outranks_invalid_data(self) -> None:
++        state_text = _state(phase="BUILD", task="T-900", next_action="PHASE BUILD T-900")
++        state, _ = _parsed(state_text)
++        board = BOARD_EMPTY.replace(
++            "## DOING\n", "## DOING\n- [/] T-900 [P1] active | owner: probe"
++            " | claim_time: 2026-09-06T00:00:00Z\n"
++        )
++        for inputs in (
++            {"audit_inbox": {"invalid_only": True}},
++            {"queued_source": {"invalid": True}},
++        ):
++            with self.subTest(inputs=inputs):
++                routed = route_next(state_text, board, current_agent="probe", **inputs)
++                self.assertEqual(routed["action"], "PHASE BUILD T-900")
++                block = self.block(
++                    routed=routed, state=state, board=parse_board(board),
++                    audit_status=self.audit(), convergence={"ok": False},
++                )
++                self.assertEqual(block["disposition"], CONTINUE)
++                self.assertEqual(block["next_command"], "cc")
++                self.assertFalse(block["operator_action_due"])
++
++    def test_independent_workable_ticket_outranks_invalid_audit(self) -> None:
++        board = BOARD_EMPTY.replace(
++            "## TODO\n", "## TODO\n- [ ] T-900 [P1] runnable | verify: exact control\n"
++        )
++        routed = route_next(_state(), board, audit_inbox={"invalid_only": True})
++        self.assertEqual(routed["action"], "PHASE SCOUT T-900")
++        block = self.block(
++            routed=routed, board=parse_board(board), audit_status=self.audit(layer_counts=1)
++        )
++        self.assertEqual(block["disposition"], CONTINUE)
++        self.assertEqual(block["next_command"], "cc")
++        self.assertFalse(block["operator_action_due"])
++
++
+ class ClosureGate(AutomationFixture):
+     def _idle_route(self) -> dict:
+         return route_next(_state(), BOARD_EMPTY, audit_inbox=None)

@@ -1,0 +1,38 @@
+{
+  "command": "python -B -m unittest test_t1659_run_window   (cwd tools/)",
+  "oracle": [
+    "tools/test_t1659_run_window.py",
+    "tools/test_t1614_future_gate.py",
+    "tools/test_hermetic_env.py",
+    "tools/test_fixture_support.py"
+  ],
+  "subject": [
+    "tools/saipen_engine/response_surface.py"
+  ],
+  "red_files": 970,
+  "red_restored": [
+    "tools/saipen_engine/response_surface.py"
+  ],
+  "red_absent": [],
+  "green_files": 970,
+  "red": {
+    "rc": 1,
+    "verifier": "d7f3b8139e885289",
+    "subject": "c71d51c6272b6953",
+    "tail": [
+      "----------------------------------------------------------------------",
+      "Ran 8 tests in 0.435s",
+      "FAILED (failures=4)"
+    ]
+  },
+  "green": {
+    "rc": 0,
+    "verifier": "d7f3b8139e885289",
+    "subject": "3d34df8e38eeaf5e",
+    "tail": [
+      "----------------------------------------------------------------------",
+      "Ran 8 tests in 0.429s",
+      "OK"
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "observed_at": "2026-10-10T03:50:14.048443+00:00",
+  "registry_path": "C:\\Users\\vac34\\.config\\freebuff-desktop\\projects\\_FastPrompter-233f8ace-de83-4057-a703-41ef1ae21f72\\project.json",
+  "registry_sha256": "a47db8326ee8521c0bb5c2ceef9ea1bad31038df807bf5c103654749e03c630f",
+  "target": "V:\\___VAC\\__K\\__CODE\\_PY\\_FastPrompter",
+  "head": "4d6a59d08e761a02bd2504b64b721ade910b09ef",
+  "reported_state_lines": [
+    "phase: SCOUT",
+    "task: T-1451",
+    "blocker: none",
+    "last_event: 4409"
+  ],
+  "files": {
+    ".saipen/STATE.md": {
+      "sha256": "cafcb87619a49c722cfe162a74e53861968672291cf53c780770586febc7ad7c",
+      "size": 19919
+    },
+    ".saipen/BOARD.md": {
+      "sha256": "af3006ba374aa541a44947bcf7ea5eb9ed1b28c3b025e6927976ce8c26b2d882",
+      "size": 36417
+    },
+    ".saipen/LOG.md": {
+      "sha256": "3313365f52bf9d55dcc7ed53c13824901e6e368f62efa92d3b43b476bdffb2f8",
+      "size": 106417
+    },
+    "src/fastprompter/main.py": {
+      "sha256": "113307a15ec960bfd533dbfadc93cf91c22e4c2f396fbad2561160962ece8bab",
+      "size": 1065438
+    }
+  },
+  "target_writes": 0,
+  "scope": "Read-only next-audit scout; no source adjudication, canonical target command or lifecycle verdict."
+}

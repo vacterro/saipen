@@ -1,0 +1,15 @@
+T-2142 independent re-measure: producer=saipython package=PY-24 (frozen_ref=42e49954dba245ed94ae515764de574ab723f68e)
+PASS: OUTBOX entry present at committed 42e49954d (frozen)
+PASS: package field status present
+PASS: package field source_head present
+PASS: package field source_tree_fingerprint present
+PASS: package field role_revision present
+PASS: package field coverage present
+PASS: package field payload present
+PASS: package field verified present
+PASS: package field instructions present
+PASS: capture _py24_sweep.txt exists at committed 42e49954d
+PASS: capture PY-24.md exists at committed 42e49954d
+PASS: BOARD ticket row carries collect-receipt identity prefix
+PASS: no family-record claim decoded by this package (sensor/adversary/fixer evidence only)
+TOTAL: 13 checks, 0 FAIL

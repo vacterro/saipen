@@ -1,0 +1,6 @@
+test_three_compatible_consumers_share_one_real_execution (test_t1832_single_flight.RealConcurrentCliTests.test_three_compatible_consumers_share_one_real_execution) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 3.086s
+
+OK

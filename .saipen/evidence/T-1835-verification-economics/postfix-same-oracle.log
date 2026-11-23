@@ -1,0 +1,6 @@
+test_incomplete_failure_inventory_is_unknown_and_preserves_known_ids (test_t1835_verification_economics.VerificationEconomics.test_incomplete_failure_inventory_is_unknown_and_preserves_known_ids) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.015s
+
+OK

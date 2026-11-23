@@ -1,0 +1,10 @@
+
+saipen injector report (source: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\saipen)
+------------------------------------------------------------
+OpenCode skill               copied (re-run after updates)
+OpenCode provenance          verified
+OpenCode instructions        already
+OpenCode guard hook          guard hook installed sha256=fae3eed77a4533f836375ee936870a10e84c1f4a5f77c1998204d3e864481cb2; already-running OpenCode processes require restart
+OpenCode legacy hook         clean
+------------------------------------------------------------
+Done. Test: open any project in any agent, say: saipen set

@@ -1,0 +1,20 @@
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "action": "saipen recover",
+  "reason": "checkpoint-invalid",
+  "detail": "checkpoint invalid: FLOOR: STATE.task=T-271 but BOARD DOING has multiple openers at the raw floor; BOARD proposed has more than one ## DOING ticket",
+  "board_errors": [],
+  "recovery_pending": false,
+  "recovery_conflict": false,
+  "conflict_ops": [],
+  "pending_ops": [],
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\___VAC\\__K\\__CODE\\__SAITULS --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat saipen-cli",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

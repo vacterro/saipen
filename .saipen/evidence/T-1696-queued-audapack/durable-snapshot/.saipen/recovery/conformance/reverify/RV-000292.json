@@ -1,0 +1,47 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-10-03T05:06:58Z",
+  "evidence_class": "executed",
+  "findings_digest": "38d457fe9065f58884c895882545dde18120e175d4c5a23a26705bd7423292f7",
+  "gate": "core",
+  "integrity_digest": "a44f4a4a475f2fb1",
+  "journal_op_id": "reverify.5437124980d5",
+  "original_closure": {
+    "owner": "claude"
+  },
+  "own_problem_keys": [
+    "7acf38456aac247e"
+  ],
+  "problem_count": 29,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000292",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:3d240e983a6652dfde8e972181a3b2503a499c642e88858546e1e7f58b9169cd",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "python -m pytest -q tests/test_browser_dispatch.py tests/ui_qt/test_bridge_poll_ownership.py",
+      "duration_ms": 2693,
+      "executed": true,
+      "exit_code": 0,
+      "output_bytes": 260,
+      "output_digest": "365406a694965cf8",
+      "result": "PASS"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "python -m pytest -q tests/test_browser_dispatch.py tests/ui_qt/test_bridge_poll_ownership.py"
+    ],
+    "findings_digest": "38d457fe9065f58884c895882545dde18120e175d4c5a23a26705bd7423292f7",
+    "gate": "core"
+  },
+  "verification_contract_digest": "21c757fff898872b",
+  "verifier": "buffy",
+  "warning_count": 94,
+  "work": "T-91"
+}

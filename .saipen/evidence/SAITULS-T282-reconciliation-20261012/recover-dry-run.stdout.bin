@@ -1,0 +1,89 @@
+{
+  "ok": false,
+  "code": "RECONCILE_REAUTH_REQUIRED",
+  "detail": "next_action 'NONE -- T-260 paused awaiting operator authority; T-282 evidence at .saipen/evidence/T-282-w2-002-ownership-generation.md'->None (legacy next_action 'NONE -- T-260 paused awaiting operator authority; T-282 evidence at .saipen/evidence/T-282-w2-002-ownership-generation.md' cannot be projected: phase 'PAUSED' is not ticket-bearing or task is not a work ticket (OPERATOR_DECISION_REQUIRED))",
+  "changed": {
+    "board": [],
+    "state": [
+      {
+        "field": "phase",
+        "from": "PAUSED",
+        "to": "SCOUT",
+        "surface": "state",
+        "reason": "phase 'PAUSED' disagrees with the newest provable phase-changing event E-2998, which names SCOUT (T-1318)"
+      },
+      {
+        "field": "transition_from",
+        "from": "SCOPED_RUN",
+        "to": "SCOUT",
+        "surface": "state",
+        "reason": "transition_from 'SCOPED_RUN' does not reach SCOUT; the transition chain proves the pair SCOUT -> SCOUT (T-1318)"
+      },
+      {
+        "field": "next_action",
+        "from": "NONE -- T-260 paused awaiting operator authority; T-282 evidence at .saipen/evidence/T-282-w2-002-ownership-generation.md",
+        "to": null,
+        "surface": "state",
+        "refuse": true,
+        "operator_decision_available": true,
+        "canonical_next_command": "saipen recover resolve-next-action <next-action>",
+        "reason": "legacy next_action 'NONE -- T-260 paused awaiting operator authority; T-282 evidence at .saipen/evidence/T-282-w2-002-ownership-generation.md' cannot be projected: phase 'PAUSED' is not ticket-bearing or task is not a work ticket (OPERATOR_DECISION_REQUIRED)"
+      },
+      {
+        "field": "last_event",
+        "from": 3002,
+        "to": 3001,
+        "surface": "state",
+        "_class": "unauthorized-lifecycle-write",
+        "reason": "UNAUTHORIZED_LIFECYCLE_WRITE: STATE.last_event sits above E-3001, the newest event an operation record stands behind; this reconciliation's own journaled event becomes the marker"
+      }
+    ]
+  },
+  "refused": [
+    {
+      "field": "next_action",
+      "from": "NONE -- T-260 paused awaiting operator authority; T-282 evidence at .saipen/evidence/T-282-w2-002-ownership-generation.md",
+      "to": null,
+      "surface": "state",
+      "refuse": true,
+      "operator_decision_available": true,
+      "canonical_next_command": "saipen recover resolve-next-action <next-action>",
+      "reason": "legacy next_action 'NONE -- T-260 paused awaiting operator authority; T-282 evidence at .saipen/evidence/T-282-w2-002-ownership-generation.md' cannot be projected: phase 'PAUSED' is not ticket-bearing or task is not a work ticket (OPERATOR_DECISION_REQUIRED)"
+    }
+  ],
+  "strict_state_error": "phase 'PAUSED' not one of INIT|PLAN|SCOUT|BUILD|VERIFY|REVIEW|SHIP|DONE|BLOCKED|VALIDATE|HUNT|MARKHUNT|ADD|CLEAN|TRANSLATE|PREPARE; transition_from 'SCOPED_RUN' not one of INIT|PLAN|SCOUT|BUILD|VERIFY|REVIEW|SHIP|DONE|BLOCKED|VALIDATE|HUNT|MARKHUNT|ADD|CLEAN|TRANSLATE|PREPARE; transition_from 'SCOPED_RUN' not one of the 16 phase enum values (RFC § 1.6)",
+  "dry_run": true,
+  "needs_local_mutation": false,
+  "safe_auto_repair_available": false,
+  "operator_decision_available": true,
+  "canonical_next_command": "saipen recover resolve-next-action <next-action>",
+  "read_only": true,
+  "terminal_disposition": null,
+  "blocking_surface": "state",
+  "blocking_field": "next_action",
+  "evidence_reference": ".saipen/STATE.md",
+  "diagnosis": "READ_ONLY_DIAGNOSIS_ONLY",
+  "read_only_diagnosis_only": true,
+  "instruction": "READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; the only sanctioned mutation is `saipen recover resolve-next-action <next-action>`",
+  "forbidden_probes": [
+    "saipen stop",
+    "saipen transition",
+    "saipen goal",
+    "saipen ticket",
+    "Bash",
+    "Edit",
+    "Write"
+  ],
+  "reason_code": "RECONCILE_REAUTH_REQUIRED",
+  "remediation": "OPERATOR_DECISION",
+  "safety_valve_tripped": false,
+  "operator_decisions": [
+    {
+      "field": "next_action",
+      "surface": "state",
+      "tickets": [],
+      "command": "saipen recover resolve-next-action <next-action>",
+      "reason": "legacy next_action 'NONE -- T-260 paused awaiting operator authority; T-282 evidence at .saipen/evidence/T-282-w2-002-ownership-generation.md' cannot be projected: phase 'PAUSED' is not ticket-bearing or task is not a work ticket (OPERATOR_DECISION_REQUIRED)"
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+diff --git a/tools/saipen_engine/phases.py b/tools/saipen_engine/phases.py
+index cc79f8b2..3c2b8b7e 100644
+--- a/tools/saipen_engine/phases.py
++++ b/tools/saipen_engine/phases.py
+@@ -65,6 +65,12 @@ def phase_next_action_error(value: str) -> str | None:
+             f"the uppercase § 1.6 enum value, and the phase doc is loaded "
+             f"from its lowercased name, not from what the state says"
+         )
++    if ph not in ALL_PHASES:
++        return (
++            f"{value!r} names phase {ph!r}, which is not in the § 1.6 enum "
++            f"({', '.join(sorted(ALL_PHASES))}) -- a reader would load "
++            f"phases/{ph.lower()}.md and find nothing to execute"
++        )
+     _five = "/".join(sorted(TICKET_BEARING_PHASES))
+     if ph in TICKET_BEARING_PHASES and not ref:
+         return (
+diff --git a/tools/saipen_engine/state.py b/tools/saipen_engine/state.py
+index f149f4e0..6911a577 100644
+--- a/tools/saipen_engine/state.py
++++ b/tools/saipen_engine/state.py
+@@ -9,7 +9,7 @@ import re
+ from pathlib import Path
+ 
+ from . import phases
+-from .board import strict_iso_utc
++from .board import RECORD_SEPARATOR_NAMES, RECORD_SEPARATORS, record_separator_in, strict_iso_utc
+ from .registry import load_registry, require_mapping, require_string_list
+ 
+ 
+@@ -1098,6 +1098,21 @@ def _render_value(value) -> str:
+     text = str(value)
+     if text == "":
+         return '""'
++    # A scalar must render as exactly one frontmatter LINE. Quoting is not a
++    # refuge here: `parse_frontmatter` splits the document on every boundary
++    # `str.splitlines()` honours (LF, CR, VT, FF, NEL, U+2028, U+2029), and the
++    # decoder collapses a quoted body only after that split, so a separator
++    # inside a value reopens the record no matter how it is quoted. The only
++    # honest answer is to refuse the value (T-1606).
++    separator = record_separator_in(text)
++    if separator is not None:
++        index = RECORD_SEPARATORS.index(separator)
++        raise ValueError(
++            f"STATE scalar carries a physical record separator "
++            f"({RECORD_SEPARATOR_NAMES[index]}); one STATE field must be one "
++            f"frontmatter line -- a separator would inject a field no writer "
++            f"set"
++        )
+     would_retype = re.fullmatch(r"-?\d+", text) is not None or text in ("true", "false")
+     needs_quote = (
+         would_retype
+diff --git a/tools/test_next_action_deadlock.py b/tools/test_next_action_deadlock.py
+index 84baf58d..495105e4 100644
+--- a/tools/test_next_action_deadlock.py
++++ b/tools/test_next_action_deadlock.py
+@@ -229,5 +229,44 @@ class NextActionDeadlockTests(unittest.TestCase):
+         )
+ 
+ 
++class UnknownPhaseGrammarTests(unittest.TestCase):
++    """T-1606 / SRC-167:R002: the grammar must name a real phase.
++
++    The grammar matched `[A-Za-z_-]+` and then checked only casing and the
++    ticket-bearing rule, so `PHASE NO_SUCH_PHASE` passed: an uppercase single
++    token that is not in the § 1.6 enum. A cold reader would load
++    `phases/no_such_phase.md` and find nothing to execute, which is the same
++    dead end the ticket-attachment rule exists to prevent.
++    """
++
++    def test_an_unknown_uppercase_phase_is_refused(self) -> None:
++        from saipen_engine import phases
++
++        error = phases.phase_next_action_error("PHASE NO_SUCH_PHASE")
++        self.assertIsNotNone(error, "an unknown phase name passed the grammar")
++        self.assertIn("NO_SUCH_PHASE", error)
++
++    def test_every_enum_phase_is_still_accepted(self) -> None:
++        """The control: the gate must not narrow the legal set."""
++        from saipen_engine import phases
++
++        for name in sorted(phases.ALL_PHASES):
++            with self.subTest(phase=name):
++                value = (
++                    f"PHASE {name} T-1"
++                    if name in phases.TICKET_BEARING_PHASES
++                    else f"PHASE {name}"
++                )
++                self.assertIsNone(phases.phase_next_action_error(value), value)
++
++    def test_a_wait_payload_is_still_a_prefix_not_a_phase(self) -> None:
++        """`WAIT:` is its own next_action form; it never reaches this checker
++        because every caller gates on the `PHASE ` prefix first."""
++        from saipen_engine import phases
++
++        self.assertIsNotNone(phases.phase_next_action_error("PHASE WAIT"))
++        self.assertFalse("WAIT" in phases.ALL_PHASES)
++
++
+ if __name__ == "__main__":
+     unittest.main(verbosity=2)
+diff --git a/tools/test_state_scalar_quoting.py b/tools/test_state_scalar_quoting.py
+index ada8d55b..ba0df44b 100644
+--- a/tools/test_state_scalar_quoting.py
++++ b/tools/test_state_scalar_quoting.py
+@@ -34,8 +34,9 @@ if str(TOOLS) not in sys.path:
+ from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
+ 
+ from saipen_engine.admission import evaluate_admission  # noqa: E402
++from saipen_engine.board import RECORD_SEPARATORS, record_separator_in  # noqa: E402
+ from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
+-from saipen_engine.state import coerce, parse_frontmatter  # noqa: E402
++from saipen_engine.state import coerce, parse_frontmatter, patch_state  # noqa: E402
+ from test_hermetic_env import isolate_host_session  # noqa: E402
+ 
+ 
+@@ -78,6 +79,53 @@ class SingleQuotedScalarTests(unittest.TestCase):
+         self.assertEqual(fields["blocker"], "")
+ 
+ 
++class RecordSeparatorWriterTests(unittest.TestCase):
++    """T-1606: the writer accepted values its own reader splits the document on.
++
++    `parse_frontmatter` splits with `text.splitlines()`, which honours ten
++    physical record separators; `patch_state` split with `text.split("\\n")`
++    and quoted any value instead of rejecting it. A value carrying U+2028 was
++    therefore written back as one line and then read back by the parser as TWO
++    records: the quoted body reopened the frontmatter, and the field it
++    injected was refused as a duplicate. The writer's own output was
++    unreadable to its own reader.
++    """
++
++    BASE = "---\nphase: BUILD\nnext_action: PHASE BUILD T-1\n---\nbody\n"
++
++    def test_every_reader_boundary_is_refused_by_the_writer(self) -> None:
++        for separator in RECORD_SEPARATORS:
++            with self.subTest(separator=repr(separator)):
++                with self.assertRaises(ValueError) as caught:
++                    patch_state(
++                        self.BASE,
++                        {"next_action": "PHASE DONE T-999" + separator + "phase: CORRUPT"},
++                    )
++                self.assertIn("record separator", str(caught.exception))
++
++    def test_the_boundary_predicate_covers_the_same_set(self) -> None:
++        """One predicate, so writer and reader cannot drift apart."""
++        for separator in RECORD_SEPARATORS:
++            with self.subTest(separator=repr(separator)):
++                self.assertIsNotNone(record_separator_in("a" + separator + "b"))
++        self.assertIsNone(record_separator_in("PHASE DONE T-999"))
++
++    def test_a_clean_scalar_still_round_trips(self) -> None:
++        """The control: refusing separators must not refuse ordinary values."""
++        for value in ("PHASE DONE T-999", "saipen continue", 'a "quoted" word', "a\\b"):
++            with self.subTest(value=value):
++                fields, error = parse_frontmatter(
++                    patch_state(self.BASE, {"next_action": value})
++                )
++                self.assertIsNone(error, error)
++                self.assertEqual(fields["next_action"], value)
++
++    def test_list_items_are_refused_the_same_way(self) -> None:
++        """The block renderer feeds the same codec, so it inherits the gate."""
++        with self.assertRaises(ValueError):
++            patch_state(self.BASE, {"requires": ["filesystem", "git\u2028python"]})
++
++
+ class NoPhantomBrakeTests(unittest.TestCase):
+     """The consequence, end to end: no phantom blocker stops an agent."""
+ 

@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "status": "OBSERVED",
+  "advisory": true,
+  "blocks_unrelated_work": false,
+  "total": 1,
+  "counts": {
+    "CURRENT_PASS": 1
+  },
+  "rows": [
+    {
+      "work": "T-1695",
+      "status": "CURRENT_PASS",
+      "changed_paths": [],
+      "receipt_id": "RV-000043",
+      "contract_path": ".saipen/evidence/T-1726-closed-contracts/T1695-focused-contract.json",
+      "reason": "BOUND_DEPENDENCIES",
+      "source_receipts": "SRC-200",
+      "active_repairs": []
+    }
+  ],
+  "has_more": false,
+  "offset": 0,
+  "limit": 3,
+  "errors": [],
+  "paths_read": 633,
+  "bytes_read": 14988767,
+  "duration_ms": 457.77
+}

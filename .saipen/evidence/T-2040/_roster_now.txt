@@ -1,0 +1,23 @@
+...FF.....FF..F...FF.......                                                 [100%]
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_authoritative_external_stop_outranks_stale_workable_board
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_automation_certificate_cannot_complete_unsatisfied_objectives
+SUBFAILED(route={'ok': True, 'reason': 'unknown-success', 'action': 'saipen status'}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_automation_unknown_route_or_missing_certificate_cannot_continue
+SUBFAILED(route={'ok': True, 'reason': 'maintain', 'action': 'saipen continue'}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_automation_unknown_route_or_missing_certificate_cannot_continue
+SUBFAILED(route={'ok': True, 'reason': 'maintain', 'action': 'saipen continue', 'work_exhaustion': 42}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_automation_unknown_route_or_missing_certificate_cannot_continue
+SUBFAILED(status='NO_NEW_EVIDENCE') tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence
+SUBFAILED(status='UNKNOWN_SUCCESS') tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_campaign_no_new_forensic_evidence_is_not_whole_campaign_quiescence
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_campaign_refuses_malformed_assessment_and_delivery_without_throwing
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_campaign_valid_hint_reuses_one_bounded_worker_attempt
+SUBFAILED(lease=None) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_external_wait_supervisor_never_becomes_idle
+SUBFAILED(lease='EXPIRED') tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_external_wait_supervisor_never_becomes_idle
+SUBFAILED(lease='TERMINAL') tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_external_wait_supervisor_never_becomes_idle
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_external_wait_worker_never_reports_success_or_takes_authority
+SUBFAILED(inventory=42) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_iteration_refuses_malformed_goal_inventory_without_throwing
+SUBFAILED(inventory={'goals': [42], 'complete': True}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_iteration_refuses_malformed_goal_inventory_without_throwing
+SUBFAILED(inventory={'goals': 42}) tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_iteration_refuses_malformed_goal_inventory_without_throwing
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_native_grant_valid_hint_automation_continues_without_promotion
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_native_grant_valid_hint_supervisor_uses_existing_execution_seam
+SUBFAILED(classification='WAIT_EXTERNAL') tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_stored_actionable_goals_cannot_override_current_blocked_assessment
+SUBFAILED(classification='WAIT_OPERATOR') tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_stored_actionable_goals_cannot_override_current_blocked_assessment
+20 failed, 20 passed, 56 subtests passed in 2.71s

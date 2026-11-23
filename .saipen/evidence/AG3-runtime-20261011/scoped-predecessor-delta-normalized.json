@@ -1,0 +1,120 @@
+{
+  "tracked_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "owners": {
+    "tools/saipen_engine/audit_manifest.py": {
+      "tracked_head_sha256": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b",
+      "pre_fix_sha256": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b",
+      "identical_bytes": true,
+      "preserved_before_path": ".saipen\\evidence\\AG3-runtime-20261011\\production-before\\tools\\saipen_engine\\audit_manifest.py",
+      "changed_top_level_symbols": []
+    },
+    "tools/saipen_engine/paths.py": {
+      "tracked_head_sha256": "6a513043eb294217dc4bc21826a7c67348d89e7a9ef8ebee300d4f16e31d74b5",
+      "pre_fix_sha256": "055fcc3f9c94eca57f3494e636b8ee31a830b67969958d3d62ca2bbf3a0f93fc",
+      "identical_bytes": false,
+      "preserved_before_path": ".saipen\\evidence\\AG3-runtime-20261011\\production-before\\tools\\saipen_engine\\paths.py",
+      "changed_top_level_symbols": [
+        "_carry_mode",
+        "_mode_to_carry",
+        "_not_granted",
+        "_refused_to_this_account",
+        "_replace_pause",
+        "_transient_replace_error",
+        "_valid_saipen_dir",
+        "prove_owned_dir_chain",
+        "resolve_project_root",
+        "safe_atomic_write_bytes",
+        "write_forbidden_root"
+      ]
+    },
+    "tools/saipen_engine/host_bootstrap.py": {
+      "tracked_head_sha256": "faf80853a339c03391a9422513e33c801ac884cfda5fcc98d6d16c9341f8dd27",
+      "pre_fix_sha256": "785a93b2dd44f76f883c0bf97cce9346c60a2a68c4ac1d927fb5e0d67d4ef27a",
+      "identical_bytes": false,
+      "preserved_before_path": ".saipen\\evidence\\AG3-runtime-20261011\\production-before\\tools\\saipen_engine\\host_bootstrap.py",
+      "changed_top_level_symbols": [
+        "_prove_home",
+        "_prove_readable_home",
+        "resolve_bootstrap"
+      ]
+    },
+    "tools/saipen_engine/machine_runtime.py": {
+      "tracked_head_sha256": null,
+      "pre_fix_sha256": "951d26ad7189d8042bece89c96ad92f293f0560c0e432b9dc0bca6af9d2041ed",
+      "identical_bytes": false,
+      "preserved_before_path": "tools\\saipen_engine\\machine_runtime.py",
+      "changed_top_level_symbols": []
+    },
+    "tools/saipen_engine/protocol_admission.py": {
+      "tracked_head_sha256": "6e9e6f54a218e36c900a754c4d130832c29f69e4ff16e62d2c0b1a49bfcb8bef",
+      "pre_fix_sha256": "63f75f13d608d7aca1ffb84c1ffc8dbb91760bf3619a7f35ae4b58d72ec80ca6",
+      "identical_bytes": false,
+      "preserved_before_path": "tools\\saipen_engine\\protocol_admission.py",
+      "changed_top_level_symbols": [
+        "Context",
+        "_agents_component",
+        "_degraded_verdict",
+        "_establish_presented",
+        "_expand",
+        "_host_component",
+        "_lead",
+        "_read_record",
+        "_refusal",
+        "_runtime",
+        "_runtime_scope",
+        "_typed",
+        "_unbound",
+        "_unstarted_step",
+        "_verdict",
+        "_verify_record_provenance",
+        "_write_record",
+        "admission_mode",
+        "binding_problems",
+        "components",
+        "decision_table",
+        "degradable_only",
+        "degraded",
+        "diagnostic",
+        "establish",
+        "evaluate",
+        "invalidate",
+        "staleness",
+        "unobserved",
+        "verify_transport"
+      ]
+    },
+    "tools/saipen_engine/admission.py": {
+      "tracked_head_sha256": "eff1c06f73b1337b6a3f5d980be8c3286643adfcc8314e582f477ab70a331372",
+      "pre_fix_sha256": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+      "identical_bytes": false,
+      "preserved_before_path": "tools\\saipen_engine\\admission.py",
+      "changed_top_level_symbols": [
+        "canonicalize_target",
+        "evaluate_admission",
+        "protocol_snapshot"
+      ]
+    },
+    "tools/saipen_engine/reconcile.py": {
+      "tracked_head_sha256": "4f3a80e0a1db157e6a0bdef9f452c81dc983597efc988d784a487d0c7ea7c836",
+      "pre_fix_sha256": "fa7555a02d98ef3b6330a6a81ff954e56a556f49ea45a9fae647b7e223521b85",
+      "identical_bytes": false,
+      "preserved_before_path": ".saipen\\evidence\\AG3-runtime-20261011\\production-before\\tools\\saipen_engine\\reconcile.py",
+      "changed_top_level_symbols": [
+        "_board_lifecycle_repairs",
+        "_foreign_tail_route",
+        "_lifecycle_authority_repairs",
+        "reconcile_protocol_state"
+      ]
+    },
+    "tools/saipen_engine/init_project.py": {
+      "tracked_head_sha256": "7a5246452c9f074b7deb1b993c446f7c0cfd8c6450d3f682fa0bb4b21eb74573",
+      "pre_fix_sha256": "7a5246452c9f074b7deb1b993c446f7c0cfd8c6450d3f682fa0bb4b21eb74573",
+      "identical_bytes": true,
+      "preserved_before_path": ".saipen\\evidence\\AG3-runtime-20261011\\production-before\\tools\\saipen_engine\\init_project.py",
+      "changed_top_level_symbols": []
+    }
+  },
+  "patch_sha256": "904c217839e5434b5fa7d0ea829d179ede07f5fc1f37745c821f0c9bfd58c414",
+  "patch_rendering": "CRLF folded to LF for readable diff; raw identities above remain exact",
+  "limits": "HEAD is a tracked reference, not a proven last verified predecessor. Preserved pre-T1712 bytes exclude this Work's repairs. Uncommitted deltas have no inferred model, timestamp or author."
+}

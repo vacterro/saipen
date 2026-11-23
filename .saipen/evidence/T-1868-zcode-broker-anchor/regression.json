@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "tools.test_t1868_zaicode_ingress",
+    "tools.test_t1822_carrier_binding"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "bootstrap",
+    "extensions",
+    "tests/scenarios",
+    "tests/fixtures",
+    "VERSION"
+  ],
+  "oracle_files": [
+    "tools/test_t1868_zaicode_ingress.py",
+    "tools/test_t1822_carrier_binding.py"
+  ],
+  "subject_files": [
+    "extensions/adapters/zaicode/saipen-guard.py",
+    "tools/saipen_engine/operator_task.py"
+  ],
+  "before": {
+    "extensions/adapters/zaicode/saipen-guard.py": ".saipen/evidence/T-1868-zcode-broker-anchor/before/extensions/adapters/zaicode/saipen-guard.py",
+    "tools/saipen_engine/operator_task.py": ".saipen/evidence/T-1868-zcode-broker-anchor/before/tools/saipen_engine/operator_task.py"
+  },
+  "timeout": 900
+}

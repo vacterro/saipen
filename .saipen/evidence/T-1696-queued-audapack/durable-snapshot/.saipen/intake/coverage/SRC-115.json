@@ -1,0 +1,50 @@
+{
+ "requirements": {
+  "SRC-115:R001": {
+   "actionable": true,
+   "class": "requirement",
+   "disposition": "IMPLEMENTED",
+   "evidence": "The stale 0.0.94-era ledger state is gone. resources/AUDAPACK_WIDGET.release.json now records version 0.0.98 with the shipped bytes' SHA-256, recorded through scripts/update_widget_release.py (which validates the transition before writing, so changed bytes can never be laundered under an existing version). The ledger and the shipped bytes agree, and the Bridge serves exactly those bytes. GET http://127.0.0.1:17843/widget.user.js -> @version 0.0.98, 1268046 bytes; python scripts/update_widget_release.py --check -> OK 0.0.98 fc23fc674b734098966d68592c9ac2c2b3edacccfa07129d6c23b4cc5b1cbe12",
+   "text": "SRC-115: the widget release ledger must be reconciled so the recorded release identity matches the shipped userscript bytes, with no stale 0.0.94-era record left standing as the installed browser's believed build.",
+   "verification": "GET http://127.0.0.1:17843/widget.user.js -> @version 0.0.98, 1268046 bytes; python scripts/update_widget_release.py --check -> OK 0.0.98 fc23fc674b734098966d68592c9ac2c2b3edacccfa07129d6c23b4cc5b1cbe12",
+   "work": "T-271"
+  },
+  "SRC-115:R002": {
+   "actionable": true,
+   "class": "requirement",
+   "disposition": "IMPLEMENTED",
+   "evidence": "scripts/probe_widget_live.py already resolves the expected build from canonical runtime truth rather than a baked literal: it reads dispatch.required_widget_build from the Bridge's own /v1/browser/status, and the live run confirms it -- 'required_build=0.0.98 (source: canonical Bridge runtime truth)' while the workers report 0.0.97. The probe did not need a version bump to follow the widget to 0.0.98. A real defect in the same leg WAS fixed: the state-label check asked for '#acb-compact-cell', an id the userscript no longer emits, then fell back to '[id^=acb-]', which lands on the #acb-popup container and reads empty while collapsed. It reported the compact state as '' on a healthy widget. It now reads #acb-super-state / #acb-super-brand and names which one answered. python scripts/probe_widget_live.py (before the selector fix) -> 9/13, [FAIL] state label rendered: '' -> python scripts/probe_widget_live.py (after) -> 10/13, [PASS] state label rendered: 'acb-super-state=CHAT'",
+   "text": "SRC-115: the live widget probe must read the expected widget build from canonical runtime truth rather than a literal baked into the probe, so it cannot go stale on the next widget release.",
+   "verification": "python scripts/probe_widget_live.py (after) -> 10/13, [PASS] state label rendered: 'acb-super-state=CHAT'; the required build in the same run came from canonical Bridge runtime truth, not a literal.",
+   "work": "T-271"
+  },
+  "SRC-115:R003": {
+   "actionable": true,
+   "class": "requirement",
+   "disposition": "IMPLEMENTED",
+   "evidence": "T-25's board state ([x], closure_mode own_patch, claim_time 2026-10-04T03:39:14Z) was written before its own final live re-verification at 05:11 (LOG E-2735, the 7/7 exit-0 re-run after three probe bugs were found and fixed), so the closure record did not describe the ticket's last real state. Re-established against live truth in this ticket rather than edited in place: the probe was run twice against the real Bridge and the real chatgpt.com worker page, and its full output is recorded as this ticket's evidence. Today's truth: widget mounts, connects, self-diagnoses, and reports its own state text at build 0.0.97 against a required 0.0.98. T-25 itself remains closed and is not reopened; no source receipt is re-pointed at it. python scripts/probe_widget_live.py (after) -> 10/13, [PASS] state label rendered: 'acb-super-state=CHAT'",
+   "text": "SRC-115: T-25's recorded state must not be stale relative to its final live re-verification evidence.",
+   "verification": "python scripts/probe_widget_live.py (after) -> 10/13, [PASS] state label rendered: 'acb-super-state=CHAT'",
+   "work": "T-271"
+  },
+  "SRC-115:R004": {
+   "actionable": true,
+   "class": "non-goal",
+   "disposition": "IMPLEMENTED",
+   "evidence": "Three consecutive real one-worker FastPrompter quick3 (A3) audits ran to COMPLETE end to end on 2026-10-05, submitted through the product's own BridgeService.submit_browser_audit and verified against the artifacts, not against the state field: RUN1 dsp-f39463541680436a campaign acb-muuqbdl7-9e33575eb898491ea36f worker audapack-managed-1-1-57e5ecda2bzb3m 30.7min sha256 d8e52c908f26a6c065ddeee104d8bf53f98ba20b95cde130697d94533f6080f1; RUN2 dsp-d675dd314baa4abb campaign acb-muurh5ak-a6ec0f2d85694be090d7 worker audapack-managed-1-1-3596f99cl0uh43 31.2min sha256 16f3ca8d88dd66b0c67e5748ca92e2568b92289dc878da99800c3f71d5c9b1c8; RUN3 dsp-0c9c23ea4e1846d8 campaign acb-muusnai4-7e6f918fbc894262b33f worker audapack-managed-1-1-60e2257fzc5bif 41.9min sha256 e549789ff8ce255a68f04686b5f18a5447091f72bc6ef0d9090bb6629b5fa70a. All three: profile quick3, retry_count 0, error empty. Each produced a real FastPrompter__00_AUDIT_ALL_3.md handoff (RUN1 77934 bytes, RUN2 69980 bytes) whose sha256 was verified equal to the digest the Bridge recorded at that run's completion. All three write the same canonical handoff path, so the file on disk now holds RUN3's bytes and RUN1/RUN2 digests are historical, verified in-window before RUN3 overwrote them; that overwrite is why a later re-read of RUN1/RUN2 does not match and is reported as such rather than smoothed over. This is the run the previous session declared impossible: its stated prerequisite -- two live windows stuck on 0.0.97 while the Bridge served 0.0.98 -- was real, and was cleared here by installing 0.0.98 through Tampermonkey's own UI in the dedicated worker profile. The install is durable profile state, not a one-window state: all three runs used a different worker window (57a5ecda2bzb3m, 3596f99cl0uh43, 60e2257fzc5bif) and each registered at build 0.0.98, CLEAN, eligible, against required_widget_build 0.0.98. No result is estimated from the probe.",
+   "text": "SRC-115: the one-worker FastPrompter Quick3 live A3 acceptance to 3/3 is a live operator acceptance run. This headless agent session must not fabricate it; if it cannot be executed here it is reported as the exact human blocker, not claimed.",
+   "verification": "Three consecutive real quick3 audits COMPLETE with retry_count 0 and verified artifact digests, quoted above; no fabricated or inferred result.",
+   "work": "T-271"
+  },
+  "SRC-115:R005": {
+   "actionable": true,
+   "class": "acceptance-criterion",
+   "disposition": "IMPLEMENTED",
+   "evidence": "All four legs proven live. Reconcile: GET http://127.0.0.1:17843/widget.user.js -> @version 0.0.98, 1268046 bytes; python scripts/update_widget_release.py --check -> OK 0.0.98 fc23fc674b734098966d68592c9ac2c2b3edacccfa07129d6c23b4cc5b1cbe12. Probe: run live against the real Bridge and the real chatgpt.com worker page; the expected build is read from canonical runtime truth (dispatch.required_widget_build), never a literal, so it followed the widget to 0.0.98 without a code change; the stale selector defect it exposed (#acb-compact-cell no longer emitted, falling through to the collapsed #acb-popup container and reading empty) was fixed to read #acb-super-state / #acb-super-brand. T-25: re-established against live truth rather than edited in place, and T-25 keeps its own terminal record. Live A3: Three consecutive real one-worker FastPrompter quick3 (A3) audits ran to COMPLETE end to end on 2026-10-05, submitted through the product's own BridgeService.submit_browser_audit and verified against the artifacts, not against the state field: RUN1 dsp-f39463541680436a campaign acb-muuqbdl7-9e33575eb898491ea36f worker audapack-managed-1-1-57e5ecda2bzb3m 30.7min sha256 d8e52c908f26a6c065ddeee104d8bf53f98ba20b95cde130697d94533f6080f1; RUN2 dsp-d675dd314baa4abb campaign acb-muurh5ak-a6ec0f2d85694be090d7 worker audapack-managed-1-1-3596f99cl0uh43 31.2min sha256 16f3ca8d88dd66b0c67e5748ca92e2568b92289dc878da99800c3f71d5c9b1c8; RUN3 dsp-0c9c23ea4e1846d8 campaign acb-muusnai4-7e6f918fbc894262b33f worker audapack-managed-1-1-60e2257fzc5bif 41.9min sha256 e549789ff8ce255a68f04686b5f18a5447091f72bc6ef0d9090bb6629b5fa70a. All three: profile quick3, retry_count 0, error empty. Each produced a real FastPrompter__00_AUDIT_ALL_3.md handoff (RUN1 77934 bytes, RUN2 69980 bytes) whose sha256 was verified equal to the digest the Bridge recorded at that run's completion. All three write the same canonical handoff path, so the file on disk now holds RUN3's bytes and RUN1/RUN2 digests are historical, verified in-window before RUN3 overwrote them; that overwrite is why a later re-read of RUN1/RUN2 does not match and is reported as such rather than smoothed over. This is the run the previous session declared impossible: its stated prerequisite -- two live windows stuck on 0.0.97 while the Bridge served 0.0.98 -- was real, and was cleared here by installing 0.0.98 through Tampermonkey's own UI in the dedicated worker profile. The install is durable profile state, not a one-window state: all three runs used a different worker window (57a5ecda2bzb3m, 3596f99cl0uh43, 60e2257fzc5bif) and each registered at build 0.0.98, CLEAN, eligible, against required_widget_build 0.0.98. No result is estimated from the probe.",
+   "text": "SRC-115: the reconcile, probe and T-25 legs are proven by running the probe live against the real Bridge and reporting its real output; the live A3 leg is proven only by an operator-run 3/3 result.",
+   "verification": "Reconcile, probe and T-25 legs proven live and quoted. Live A3 3/3 leg now proven by three consecutive real quick3 audits COMPLETE with verified artifact digests, each on its own managed worker window at the required build 0.0.98.",
+   "work": "T-271"
+  }
+ },
+ "schema_version": 1
+}

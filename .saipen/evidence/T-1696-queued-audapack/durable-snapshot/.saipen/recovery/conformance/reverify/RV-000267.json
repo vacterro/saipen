@@ -1,0 +1,47 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-10-03T04:44:06Z",
+  "evidence_class": "executed",
+  "findings_digest": "39f4455d0ae7f0657e5220532d27ca3e69e7b55120720b9509fb398ddf371e6a",
+  "gate": "core",
+  "integrity_digest": "d8e5eef6a2448938",
+  "journal_op_id": "reverify.177542a51df8",
+  "original_closure": {
+    "owner": "claude"
+  },
+  "own_problem_keys": [
+    "ae95c93bf5ebcd6f"
+  ],
+  "problem_count": 54,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000267",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:3d240e983a6652dfde8e972181a3b2503a499c642e88858546e1e7f58b9169cd",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "node --test --test-concurrency=4 tests/widget/w4-004-browser-worker.test.js",
+      "duration_ms": 12486,
+      "executed": true,
+      "exit_code": 0,
+      "output_bytes": 2031,
+      "output_digest": "e3f4db3c85b64735",
+      "result": "PASS"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "node --test --test-concurrency=4 tests/widget/w4-004-browser-worker.test.js"
+    ],
+    "findings_digest": "39f4455d0ae7f0657e5220532d27ca3e69e7b55120720b9509fb398ddf371e6a",
+    "gate": "core"
+  },
+  "verification_contract_digest": "40d243b30a9fe7e3",
+  "verifier": "buffy",
+  "warning_count": 94,
+  "work": "T-64"
+}

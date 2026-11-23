@@ -1,0 +1,7 @@
+{
+  "old": ".saipen/evidence/scenario-oracles/original.py",
+  "current": ".saipen/evidence/scenario-oracles/run_scenarios.before.py",
+  "sha256": "c3771799a05d88a387d66a59ffbd348ec8656e9b77b3617d3f32114ca439a42e",
+  "reason": "Exact shipped-name capture recognized by unchanged T-1589 inheritance oracle",
+  "source_bytes_changed": false
+}

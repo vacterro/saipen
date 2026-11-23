@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "tools/test_t1961_pruned_slice.py"],
+  "format": "unittest",
+  "context": ["tools", "saipen", "extensions", "tests", "bootstrap", "VERSION"],
+  "oracle_files": ["tools/test_t1961_pruned_slice.py"],
+  "subject_files": ["tools/saipen_engine/future_gate.py"],
+  "before": {
+    "tools/saipen_engine/future_gate.py": ".saipen/evidence/T-1961-pruned-slice/pre-fix-future_gate.py"
+  },
+  "timeout": 300
+}

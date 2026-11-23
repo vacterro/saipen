@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+    "-B",
+    "-m",
+    "unittest",
+    "tools.test_t1704_goal_checkpoint_priority",
+    "tools.test_t1494_continuation_authority",
+    "tools.test_t1293_valve_resume_audit_route",
+    "tools.test_audit_route",
+    "tools.test_reconcile_valve",
+    "tools.test_command_routing",
+    "tools.test_t1619_iteration_boundary"
+  ],
+  "cwd": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+  "exit_code": 1,
+  "elapsed_seconds": 0.28813815116882324,
+  "fingerprint_before": "cc9e5274ed4c787e8772b2a7883a2e874e00a7efdd20856f8138542c04801b09",
+  "fingerprint_after": "cc9e5274ed4c787e8772b2a7883a2e874e00a7efdd20856f8138542c04801b09",
+  "counts": {
+    "ran": null,
+    "red": [],
+    "headers": 0,
+    "unparsed": 0,
+    "tallied": null
+  },
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "c81af95f94149c1d2d3f1705f4386fa65bf05ddbcb2c7917915a49713072ada3",
+  "live_root_modified": false,
+  "live_persistent_grant": false
+}

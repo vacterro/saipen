@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\audit_parity.py", line 418, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\audit_parity.py", line 144, in main
+    shutil.copytree(HOME, pristine, ignore=ac.IGNORE)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 573, in copytree
+    return _copytree(entries=entries, src=src, dst=dst, symlinks=symlinks,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 527, in _copytree
+    raise Error(errors)
+shutil.Error: [('V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\locks\\verification-9ff757abd601b5d00a9952da2b857fbb961c8698003db48ca0118bf74f607726.lock', 'C:\\Users\\vac34\\AppData\\Local\\Temp\\audit_parity_gky19v8t\\pristine\\.saipen\\locks\\verification-9ff757abd601b5d00a9952da2b857fbb961c8698003db48ca0118bf74f607726.lock', '[Errno 13] Permission denied'), ('V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\locks\\verification-executor.lock', 'C:\\Users\\vac34\\AppData\\Local\\Temp\\audit_parity_gky19v8t\\pristine\\.saipen\\locks\\verification-executor.lock', '[Errno 13] Permission denied')]

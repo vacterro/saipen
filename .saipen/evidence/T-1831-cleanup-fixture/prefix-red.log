@@ -1,0 +1,28 @@
+test_actual_fixture_is_private_and_keeps_the_unchanged_acceptance_probe (test_t1831_cleanup_fixture_cost.CleanupFixtureCostTests.test_actual_fixture_is_private_and_keeps_the_unchanged_acceptance_probe) ... FAIL
+
+======================================================================
+FAIL: test_actual_fixture_is_private_and_keeps_the_unchanged_acceptance_probe (test_t1831_cleanup_fixture_cost.CleanupFixtureCostTests.test_actual_fixture_is_private_and_keeps_the_unchanged_acceptance_probe)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1831_cleanup_fixture_cost.py", line 36, in test_actual_fixture_is_private_and_keeps_the_unchanged_acceptance_probe
+    case.run_small(1)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1505_core_unit_sandbox_reclaim.py", line 307, in run_small
+    run = core_unit.run_family(TOOLS.parent, jobs=jobs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1189, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1831_cleanup_fixture_cost.py", line 22, in inspect
+    self.assertNotEqual(source, TOOLS.parent.resolve())
+AssertionError: WindowsPath('V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN') == WindowsPath('V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN')
+
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+FAILED (failures=1)

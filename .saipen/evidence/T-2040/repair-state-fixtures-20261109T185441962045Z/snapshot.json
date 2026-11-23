@@ -1,0 +1,8 @@
+{
+  "before": {
+    "tools/test_t1619_iteration_boundary.py": "a5733d06b9dd428e390b8b8e534b565123dfe6a5f81f4153bb0fa1039d4e48b5",
+    "tools/test_t1880_wait_survives_phase_shortcut.py": "6b30ccd28596b9df467cb624071d2968d89c23d5aee388554cbfa0bd16fba121"
+  },
+  "red_log": ".saipen/evidence/T-2040/review-request-inventory-20261109/goal-fixtures-before.log",
+  "scope": "fixture input only; behavioral expectations and production validator unchanged"
+}

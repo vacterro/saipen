@@ -1,0 +1,62 @@
+copying frozen tree...
+frozen copy done 88.7 s
+capture_s: 42.4
+=== READ (open for reading) per bucket ===
+    3304  .saipen/recovery/log-detail
+    1616  <outside>
+     212  .saipen/recovery/settled
+     170  .saipen/milestones/blobs
+      97  .saipen/saitranslate/kitchen
+      86  .saipen/recovery/board-compaction
+      77  extensions
+      74  .saipen/extensions/subs
+      74  tests
+      54  future_gate
+      45  (root file)
+      45  .saipen/future/records
+      34  saipen
+      33  guides
+      29  .saipen/KNOWLEDGE/cards
+      26  .saipen/improve/imp-vacterro-saipen-20260927-1
+      22  .saipen/KNOWLEDGE/roadmaps
+      17  .saipen/improve/imp-saipen-20260810-2
+      15  .saipen/improve/imp-vacterro-saipen-20260810-1
+      13  .saipen/LOG.md
+      13  .saipen/improve/imp-saipen-20260810-1
+      13  .saipen/improve/imp-saipen-20260810-3
+      11  .saipen/BOARD.md
+      10  .saipen/logs/LOG-001.md
+      10  .saipen/logs/LOG-002.md
+      10  .saipen/logs/LOG-003.md
+      10  .saipen/logs/LOG-004.md
+      10  .saipen/logs/LOG-005.md
+      10  .saipen/logs/LOG-006.md
+      10  .saipen/logs/LOG-007.md
+=== STAT per bucket (top 25) ===
+   42012  (scandir) .saipen/recovery/settled
+    8918  (scandir) .saipen/worktrees/rel-42093281080b
+    8492  (scandir) .saipen/evidence/T-1696-queued-audapack
+    8478  (scandir) .saipen/evidence/AUDAPACK-T299-forensics
+    8378  (root file)
+    8238  .saipen/archive/source
+    4878  .saipen/intake/contracts
+    4818  .saipen/intake/active
+    4394  .saipen/intake
+    3486  tools
+    3304  .saipen/recovery/log-detail
+    3010  .saipen/intake/distribution
+    2986  .saipen/quarantine/source
+    2308  (scandir) .saipen/evidence/T-1690-profile-isolation
+    1895  .saipen/archive
+    1666  (scandir) .saipen/evidence/T-1687-identity-diagnostics
+    1515  .saipen/intake/tombstones
+    1485  .saipen/quarantine
+    1474  (scandir) .saipen/evidence/tool-module-identity
+    1136  tests
+     992  .saipen/intake/coverage
+     960  <outside>
+     948  (scandir) .saipen/evidence/T-2040
+     856  (scandir) .saipen/evidence/AUDAPACK-recovery-20261010
+     844  (scandir) .saipen/evidence/T-1686-strict-launch
+problems: 1
+buckets_read: ['(root file)', '.github', '.saipen/BOARD.md', '.saipen/KNOWLEDGE/INDEX.md', '.saipen/KNOWLEDGE/NITRO.md', '.saipen/KNOWLEDGE/PRIME_AGENT_EXTRACTION.md', '.saipen/KNOWLEDGE/T-392-reorg-plan.md', '.saipen/KNOWLEDGE/V9_RUNTIME.md', '.saipen/KNOWLEDGE/XPATCH.md', '.saipen/KNOWLEDGE/agent_creed.md', '.saipen/KNOWLEDGE/audit_2026-08-21.md', '.saipen/KNOWLEDGE/backlog_review_v8.md', '.saipen/KNOWLEDGE/cards', '.saipen/KNOWLEDGE/claim_to_proof_II.md', '.saipen/KNOWLEDGE/claim_to_proof_IV.md', '.saipen/KNOWLEDGE/claim_to_proof_V.md', '.saipen/KNOWLEDGE/claim_to_proof_VI.md', '.saipen/KNOWLEDGE/crew-v8-backlog.md', '.saipen/KNOWLEDGE/decisions.md', '.saipen/KNOWLEDGE/evolution.md', '.saipen/KNOWLEDGE/harness.md', '.saipen/KNOWLEDGE/hotpath-ownership-T-1259.md', '.saipen/KNOWLEDGE/improve_red_controls.md', '.saipen/KNOWLEDGE/phase-ownership-T-1229.md', '.saipen/KNOWLEDGE/roadmaps', '.saipen/KNOWLEDGE/traps.md', '.saipen/KNOWLEDGE/v8_evaluation.md', '.saipen/LOG.md', '.saipen/STATE.md', '.saipen/USERPERSON.md', '.saipen/exchange/xpatch', '.saipen/extensions/subs', '.saipen/future/index.json', '.saipen/future/records', '.saipen/improve/imp-saipen-20260810-1', '.saipen/improve/imp-saipen-20260810-2', '.saipen/improve/imp-saipen-20260810-3', '.saipen/improve/imp-vacterro-saipen-20260810-1', '.saipen/improve/imp-vacterro-saipen-20260812-1', '.saipen/improve/imp-vacterro-saipen-20260812-2', '.saipen/improve/imp-vacterro-saipen-20260830-1', '.saipen/improve/imp-vacterro-saipen-20260919-1', '.saipen/improve/imp-vacterro-saipen-20260919-2', '.saipen/improve/imp-vacterro-saipen-20260925-1', '.saipen/improve/imp-vacterro-saipen-20260925-2', '.saipen/improve/imp-vacterro-saipen-20260925-3', '.saipen/improve/imp-vacterro-saipen-20260925-4', '.saipen/improve/imp-vacterro-saipen-20260927-1', '.saipen/intake/audit_inbox.json', '.saipen/logs/LOG-001.md', '.saipen/logs/LOG-002.md', '.saipen/logs/LOG-003.md', '.saipen/logs/LOG-004.md', '.saipen/logs/LOG-005.md', '.saipen/logs/LOG-006.md', '.saipen/logs/LOG-007.md', '.saipen/logs/LOG-008.md', '.saipen/logs/LOG-009.md', '.saipen/logs/LOG-010.md', '.saipen/logs/LOG-011.md', '.saipen/logs/LOG-012.md', '.saipen/logs/LOG-013.md', '.saipen/logs/LOG-014.md', '.saipen/logs/LOG-015.md', '.saipen/logs/LOG-016.md', '.saipen/logs/LOG-017.md', '.saipen/logs/LOG-018.md', '.saipen/logs/LOG-019.md', '.saipen/logs/LOG-020.md', '.saipen/logs/LOG-021.md', '.saipen/logs/LOG-022.md', '.saipen/milestones/CP-001', '.saipen/milestones/CP-002', '.saipen/milestones/blobs', '.saipen/milestones/current.json', '.saipen/recovery/board-compaction', '.saipen/recovery/board-terminal.json', '.saipen/recovery/conformance', '.saipen/recovery/log-detail', '.saipen/recovery/settled', '.saipen/saitranslate/kitchen', '<outside>', 'bootstrap', 'extensions', 'future_gate', 'guides', 'saipen', 'tests']

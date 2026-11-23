@@ -1,0 +1,146 @@
+{
+  "state_mode": "full",
+  "epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8",
+  "epoch_ticket": null,
+  "verdict": {
+    "status": "ok",
+    "evidence": {
+      "terminal_outcome": "LOCAL_NO_PUBLISH",
+      "publication": "NOT_PERFORMED",
+      "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8",
+      "op_id": "release-3470a48652b1488cbd5596589c0d1ae0",
+      "ticket_id": "",
+      "tag": "",
+      "version": "",
+      "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+      "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4",
+      "closure_commit": "",
+      "created_at": "2026-10-13T14:42:45Z",
+      "stages": [],
+      "pre_ship_evidence": {
+        "saihunt": [
+          {
+            "package_id": "HUNT-012",
+            "status": "reviewed",
+            "role_revision": "sha256:4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5",
+            "producer": "saihunt",
+            "package_identity": "sha256:51d3415645587a2ab195be628a8986e52a7ed887c69270329c1e0618b087e1d9",
+            "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+            "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4",
+            "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8"
+          }
+        ],
+        "saitest": [
+          {
+            "package_id": "TEST-210",
+            "status": "reviewed",
+            "role_revision": "sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08",
+            "producer": "saitest",
+            "package_identity": "sha256:163aaf22402a96a70f05f05831694d5bc7a479be244eb32ee443eaad97d99970",
+            "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+            "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4",
+            "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8"
+          }
+        ],
+        "saipython": [
+          {
+            "package_id": "PY-010",
+            "status": "reviewed",
+            "role_revision": "sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff",
+            "producer": "saipython",
+            "package_identity": "sha256:2d83889fcd96b4f58d03a37001bdf0f4dff700386dead2640b7edcc29e3cab1c",
+            "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+            "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4",
+            "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8"
+          }
+        ],
+        "saiui": [
+          {
+            "package_id": "UI-010",
+            "status": "reviewed",
+            "role_revision": "sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8",
+            "producer": "saiui",
+            "package_identity": "sha256:185c28f982790996a3765ce3dc56167fd70cf177dba8207d64118335cfb3e9ea",
+            "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+            "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4",
+            "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8"
+          }
+        ],
+        "saitranslate": [
+          {
+            "status": "integrated",
+            "role_revision": "sha256:7d18729f8d94eb58471ae3bb5fad9151e8499fea291e574b26439c5c89012e41",
+            "producer": "saitranslate",
+            "package_identity": "sha256:5b747a758dad66aa97b927b7e5a7f0eb63ffbc61d6afdafecd24806833fa2365",
+            "integration_op": "producer-integrate-5b747a758dad66aa97b927b7e5a7f0eb-b5fb1d64af21",
+            "input_source": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+            "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+            "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4",
+            "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8"
+          }
+        ],
+        "saiwiki": [
+          {
+            "package_id": "W-013",
+            "status": "ready",
+            "role_revision": "sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13",
+            "producer": "saiwiki",
+            "package_identity": "sha256:6452be371d057b456fd513f05e9f5b3c4c50ba40fc43614b6055f8f99bef2eeb",
+            "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+            "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4",
+            "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8"
+          }
+        ]
+      },
+      "pre_ship_applicability": {
+        "saihunt": {
+          "probe": "always",
+          "verdict": "APPLICABLE",
+          "reason": "role declares no applicability condition",
+          "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+          "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4"
+        },
+        "saitest": {
+          "probe": "always",
+          "verdict": "APPLICABLE",
+          "reason": "role declares no applicability condition",
+          "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+          "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4"
+        },
+        "saipython": {
+          "probe": "always",
+          "verdict": "APPLICABLE",
+          "reason": "role declares no applicability condition",
+          "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+          "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4"
+        },
+        "saiui": {
+          "probe": "visual-surface",
+          "verdict": "APPLICABLE",
+          "reason": "visual surface present: desktop/targets/betterdiscord/template.css, desktop/targets/obsidian/template.css, tools/fixtures/chatgpt-surface.html",
+          "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+          "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4"
+        },
+        "saitranslate": {
+          "probe": "always",
+          "verdict": "APPLICABLE",
+          "reason": "role declares no applicability condition",
+          "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+          "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4"
+        },
+        "saiwiki": {
+          "probe": "always",
+          "verdict": "APPLICABLE",
+          "reason": "role declares no applicability condition",
+          "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+          "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4"
+        }
+      },
+      "mode": "no-publish"
+    }
+  },
+  "release_current": [
+    true,
+    ""
+  ]
+}

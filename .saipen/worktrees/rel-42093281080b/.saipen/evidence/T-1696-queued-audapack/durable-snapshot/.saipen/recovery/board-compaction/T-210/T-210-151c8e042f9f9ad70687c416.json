@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-1624",
+    "operation_id": "ticket-9e558066fe224b6589dbe6652b1c78a1",
+    "reason": "new BOARD record exceeds the live cap; canonical writer externalized detail"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-210/T-210-151c8e042f9f9ad70687c416.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 1900,
+  "original_record_path": ".saipen/recovery/board-compaction/T-210/T-210-151c8e042f9f9ad70687c416.BOARD.md",
+  "original_record_sha256": "151c8e042f9f9ad70687c416a4b556033fe58f79607b1496999b7242d645789d",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": "",
+  "ticket_id": "T-210"
+}

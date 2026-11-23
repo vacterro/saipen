@@ -1,0 +1,17 @@
+LINES: 997
+def host_session
+def is_freebuff_host
+def authority_for_provenance
+def _receipt_provenance
+def received_source_origin
+def authority_for_receipt
+def projection_priority
+def declared
+def file_route
+def _reachable_route
+def ingress_cache_dir
+def admit_host_ingress
+def active_host_ingress
+def consume_host_ingress
+def witness
+def unstarted

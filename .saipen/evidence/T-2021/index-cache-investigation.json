@@ -1,0 +1,9 @@
+{
+  "original_sha256": "dcb1637b2114fe07b413565018aad079a1fcefbbffe3fff6220d22556f1a9adf",
+  "observed_sha256": "6ed3d04a3cf6e14114833d57eae0a07595e812f38dd089a7e2f36a7221a92b86",
+  "logical_differences": [],
+  "stat_cache_changed_paths": [],
+  "original_extensions_sha256": "4a3683dd58f2425d7901b08f3399e8987552db8f7087e399b9257dd28001e3ca",
+  "observed_extensions_sha256": "7a3ad0802b9508d72f3fe3ed2d37ba63435abac276ab3d2b2a5d1aeaef4c8482",
+  "index_mtime": 1793769649.1253
+}

@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-m",
+    "unittest",
+    "test_t1671_lifecycle_authority",
+    "test_t1673_board_only_terminal",
+    "test_t1679_typed_head_quarantine",
+    "-v"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+  "started_utc": "2026-10-10T09:24:08.562237+00:00",
+  "exit_code": 0,
+  "output_sha256": "a6a8ab426b3ed437b8552cc85806dc69653098ca5cc8b638812243a79cf770c6"
+}

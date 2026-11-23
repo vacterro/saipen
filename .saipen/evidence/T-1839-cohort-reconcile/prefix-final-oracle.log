@@ -1,0 +1,17 @@
+test_real_reconciliation_preserves_history_and_owes_publication (test_t1839_cohort_reconciliation.ReconciliationTests.test_real_reconciliation_preserves_history_and_owes_publication) ... FAIL
+
+======================================================================
+FAIL: test_real_reconciliation_preserves_history_and_owes_publication (test_t1839_cohort_reconciliation.ReconciliationTests.test_real_reconciliation_preserves_history_and_owes_publication)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1839_cohort_reconciliation.py", line 109, in test_real_reconciliation_preserves_history_and_owes_publication
+    result = self.reconcile(project, review)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1839_cohort_reconciliation.py", line 59, in reconcile
+    self.assertTrue(callable(method), "canonical cumulative-batch reconciliation is missing")
+AssertionError: False is not true : canonical cumulative-batch reconciliation is missing
+
+----------------------------------------------------------------------
+Ran 1 test in 2.338s
+
+FAILED (failures=1)

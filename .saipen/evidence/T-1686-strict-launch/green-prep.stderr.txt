@@ -1,0 +1,11 @@
+test_a_proven_runtime_reaches_the_spawn_interlock_under_strict (__main__.StrictLaunch.test_a_proven_runtime_reaches_the_spawn_interlock_under_strict) ... ok
+test_explicit_degraded_policy_retains_the_warning_and_spawn_boundary (__main__.StrictLaunch.test_explicit_degraded_policy_retains_the_warning_and_spawn_boundary) ... ok
+test_malformed_policy_is_strict_at_the_launch_boundary (__main__.StrictLaunch.test_malformed_policy_is_strict_at_the_launch_boundary) ... ok
+test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag (__main__.StrictLaunch.test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag) ... ok
+test_strict_refuses_every_degrading_host_before_executable_selection (__main__.StrictLaunch.test_strict_refuses_every_degrading_host_before_executable_selection) ... ok
+test_the_missing_policy_retains_the_default_warning_and_spawn_boundary (__main__.StrictLaunch.test_the_missing_policy_retains_the_default_warning_and_spawn_boundary) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.045s
+
+OK

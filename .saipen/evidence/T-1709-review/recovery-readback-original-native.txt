@@ -1,0 +1,60 @@
+FAIL: source receipts -- source receipt BOARD projection unreadable: BOARD parse error: BOARD.md:5 ticket T-299 has unrecognized field 'evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md'; BOARD.md:6 duplicate ticket ID T-299; BOARD.md:7 ticket T-298 has unrecognized field 'evidence: .saipen/evidence/T-298-widget-trust-boundary.md'
+saipen conformance validation starting (tools/validate.py)...
+Project root: V:\___VAC\__K\__CODE\_PY\_AUDAPACK (explicit)
+Project lineage: lineage-79944d6c0334416ebe1001e97de6c1cc
+PASS: state.schema.json and the engine STATE contract constants agree
+FAIL: FLOOR: STATE.task=T-299 but BOARD has no DOING section at the raw floor
+PASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)
+FAIL: STATE.md phase: DONE but task is 'T-299' -- DONE must have task: none (no active ticket in terminal state)
+PASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-79944d6c0334416ebe1001e97de6c1cc)
+FAIL: STATE.md invalid phase transition: VERIFY -> DONE (RFC § 1.6). The block-parked shape is legal only with a matching active-block LOG event proving the ticket block (cross-file evidence the shared validator cannot see)
+FAIL: STATE.md next_action does not start with WAIT:/saipen /PHASE /RUN:/RESUME:: 'idle' -- not executable, so a cold agent cannot boot from it (RFC § 1.2, CONFORMANCE TEST-001)
+PASS: goal execution_intent counters present
+PASS: subSaipen STATE.md shape valid (5 checked, live + shipped library)
+PASS: .saipen/extensions/subs/MANIFEST.md parses strictly (4 entries)
+FAIL: BOARD.md:5 ticket T-299 has unrecognized field 'evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md'
+FAIL: BOARD.md:6 duplicate ticket ID T-299
+FAIL: BOARD.md:7 ticket T-298 has unrecognized field 'evidence: .saipen/evidence/T-298-widget-trust-boundary.md'
+FAIL: BOARD.md:8 ticket T-297 has unrecognized field 'evidence: .saipen/evidence/T-297-widget-clock-recorrective.md'
+FAIL: BOARD.md required heading ## DOING appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash
+FAIL: BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash
+FAIL: BOARD.md missing required section heading: ## DOING
+FAIL: BOARD.md missing required section heading: ## TODO
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md Work supersession relations are terminal, existing and acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+FAIL: BOARD.md:15 ticket T-282 T-282 declares closure_mode 'duplicate_reconciled', outside own_patch|inherited_verified|cohort|superseded_verified|external_implementation|finding_invalidated (RFC § 1.2)
+PASS: BOARD.md at most one ## DOING ticket (0 claimed)
+PASS: every DONE closure provenance satisfies its declared closure contract
+FAIL: STATE.md audit route not followed -- the audit inbox routes 'saipen audit ingest' (layer None, audit/AUDAPACK_20261010_1411.md) but next_action is 'idle', which is neither that action nor a live-ticket continuation (SOURCE-AUDIT-INBOX-01)
+FAIL: .saipen/LOG.md:2 violates the Event Graph skeleton (RFC § 1.2): '- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no longer writes canoni'
+FAIL: .saipen/LOG.md:720 parent E-3133 doesn't exist earlier in the sequence -- dangling parent breaks the graph Recovery depends on (RFC § 1.2)
+FAIL: .saipen/LOG.md:722 parent E-3136 doesn't exist earlier in the sequence -- dangling parent breaks the graph Recovery depends on (RFC § 1.2)
+FAIL: .saipen/LOG.md:731 parent E-3145 doesn't exist earlier in the sequence -- dangling parent breaks the graph Recovery depends on (RFC § 1.2)
+FAIL: improve report [improve-report] -- .saipen\improve\imp-vacterro-audapack-20260927-1\buffy-01\saipen_improve_SAIPEN.md: report protocol_fingerprint 'sha256:627e7d3db4dca0edbb3f3aa7decd355fe10603fe37dc25e6cf9995d33ac31d4f' != installed protocol fingerprint 'sha256:368204dac5cb2823b1b5b712140cf1225cd021596ad47834b1583b591ce2a060'; .saipen\improve\imp-vacterro-audapack-20260927-1\buffy-01\saipen_improve_SAIPEN.md: source_tree_fingerprint git-delta-v1:c66baf69a83... != current tree git-delta-v1:0848189002e... at the same HEAD -- the audited tree differs from the live one; stale audit evidence cannot authorize fresh canonical work without current reproduction (DOGFOOD V, T-618); a finding is rejected, not softened; report_status: complete requires the completion bar; a partial scope can never claim full context (T-555); run saipen improve reconcile imp-vacterro-audapack-20260927-1
+PASS: core sweep linkage valid: every disposition resolves to a real finding/ticket, no unverified or INVALID/ALREADY_FIXED finding produced a ticket, source_reports resolve exactly
+PASS: subsaipen write boundary continuous: no sub artifact targets a main-project canonical file (red control 7)
+PASS: hunt skip marks resolve to real commits on the remote (1 checked)
+PASS: KNOWLEDGE/ clean
+PASS: KNOWLEDGE/ structured surface valid (0 card(s), 0 active, index absent)
+PASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)
+PASS: append targets end on a line boundary (22 checked)
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [half-claim]: BOARD.md:191 ticket T-135 carries owner but no claim_time -- § 1.4 decides liveness from the pair, so one alone cannot be judged live or stale
+WARN [half-claim]: BOARD.md:192 ticket T-136 carries owner but no claim_time -- § 1.4 decides liveness from the pair, so one alone cannot be judged live or stale
+WARN [half-claim]: ... and 64 more like the above
+WARN [board-soft-cap]: BOARD.md is 142 KB, of which 60 KB is 112 closed record(s) nothing pins (soft cap 16 KB of such text) -- `saipen transition CLEAN` scrubs them into .saipen/recovery/board-scrub/ (phases/clean.md step 1)
+WARN [log-ticket-ref]: .saipen/logs/LOG-002.md:396 ticket ref [T-80/T-81] isn't numeric T-### or the literal T-none (RFC § 1.2)
+WARN [log-ticket-ref]: .saipen/logs/LOG-002.md:420 ticket ref [T-100/T-101/T-102] isn't numeric T-### or the literal T-none (RFC § 1.2)
+WARN [log-ticket-ref]: ... and 1 more like the above
+WARN [log-timestamp-inversion]: .saipen/LOG.md:689 timestamp moves backwards by 141m from E-3101 to E-3102; historical inversions must be documented with a DEC line carrying `observed historical timestamp inversions` at an event id at or after this one (RFC § 1.2). The newest such DEC is E-2924
+WARN [log-timestamp-inversion]: .saipen/LOG.md:727 timestamp moves backwards by 21m from E-3140 to E-3141; historical inversions must be documented with a DEC line carrying `observed historical timestamp inversions` at an event id at or after this one (RFC § 1.2). The newest such DEC is E-2924
+WARN [log-soft-cap]: .saipen/LOG.md is 731 lines / 226 KB, past the 300 line / 64 KB cap -- `saipen transition CLEAN` seals it into the next .saipen/logs/LOG-<NNN>.md (phases/clean.md step 4)
+WARN [producer-package-malformed]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md fails strict OUTBOX parsing: OUTBOX:3 verified field must be a closed verdict (`PASS -- <command/result evidence>` | `FAIL -- <evidence>` | `BLOCKED -- <missing fact>`); arbitrary prose is never positive evidence (PROTOCOL.md § 2) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-001] carries source_head 'd66d9f63ef2fee4a5a5701136bf26169c7511d8c' but current source_head is '6c6d841df24e5c5d91870def931af99f0af4c81f' -- package is stale and MUST NOT be collected -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-001] carries source_tree_fingerprint 'git-delta-v1:a3fd43351486de05d92256b7508c1b05ffb3ec3cc0d4e9fb1d6a72d59c6813d2' but the current tree computes 'git-delta-v1:0848189002e448f3ecbb49f6dc7926e96a27e2db5f55915cdb90147b3596c262' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [subsaipen-uncollected]: 1 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)
+WARN [sub-role-revision-legacy]: subSaipen STATE(s) predate role-revision recording: saipython, saitranslate -- re-record `role_revision` from the current charter at their next adopt (PROTOCOL.md § 6, T-542)
+WARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this
+Validation FAILED: 20 problem(s), 79 warning(s)

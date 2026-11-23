@@ -1,0 +1,36 @@
+{
+  "CORE-004": {
+    "callback_returned_receipt_without_lineage_or_digest": true,
+    "detail": "Receipt missing project_lineage",
+    "dispatched": false,
+    "status": "ACCEPTANCE_UNVERIFIED"
+  },
+  "CORE-006": {
+    "caller_named_qualification_receipt_accepted": false,
+    "enqueue_call_count": 0,
+    "status": "NOT_QUALIFIED"
+  },
+  "CORE-009": {
+    "evidence_source": "absent",
+    "injected_test_worker": false,
+    "journal_advanced": false,
+    "made_progress": false,
+    "self_asserted_progress_verified": false,
+    "state_mutated": false,
+    "untrusted_worker_assertion": true
+  },
+  "CORE-011": {
+    "error": "VERIFIED evidence must name a durable receipt under .saipen/; free text 'ran 12 tests, all green' proves nothing",
+    "free_text_verification_accepted": false,
+    "status": "DISPOSITION_UNVERIFIED"
+  },
+  "all_four_fail_closed": true,
+  "live_acceptance": "NOT DEMONSTRATED: these controls prove the four pre-fix counterexamples now fail closed. Real installed-host and SAIPAL end-to-end acceptance requires receipts that do not exist and is not inferred from these mocks.",
+  "produced_at": "2026-10-26T16:14:38Z",
+  "scope": "isolated temporary projects against current source; no production enqueue, no external infrastructure, no installed-host or SAIPAL backend contact",
+  "source_hashes": {
+    "tools/saipen_engine/campaign.py": "835105efd0800741c42fdc5653b964a1563b4125fc95b87344b02306d80fa32b",
+    "tools/saipen_engine/host_dispatch.py": "347f90028fa0bfcf1adb47c3a126a28e7f81398a776957ae97f46d8fca68c3d7",
+    "tools/saipen_engine/saipal_adapter.py": "68f6b66b8e505c8e49fed7cf27c52aaf219965d41520186ca0169947a1f43734"
+  }
+}

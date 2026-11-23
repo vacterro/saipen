@@ -1,0 +1,12 @@
+OLD hook (shutil.ignore_patterns -- pre-fix):
+  runtime files copied : 3/3 ['.saipen/cache/verification-flights/x.json', '.saipen/kitchen/scratch.tmp', '.saipen/locks/verification-executor.lock']
+  live state preserved : True
+  transient excluded   : True
+  verdict              : RED
+NEW hook (_ignore_runtime_state -- post-fix):
+  runtime files copied : 0/3 []
+  live state preserved : True
+  transient excluded   : True
+  verdict              : GREEN
+
+CONTROL HOLDS: old code RED, new code GREEN

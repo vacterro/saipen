@@ -1,0 +1,10 @@
+{
+  "verifier": "0c46f099fa16f2a4",
+  "pre_subject": "eaa271b0d89133cb",
+  "post_subject": "3456d10b241fde87",
+  "pre_rc": 1,
+  "post_rc": 0,
+  "control_rc": 0,
+  "held": true,
+  "command": "python -B -m unittest test_t1628_opencode_policy"
+}

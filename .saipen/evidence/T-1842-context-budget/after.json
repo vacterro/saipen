@@ -1,0 +1,25 @@
+{
+  "saipen/COMMANDS.md": {
+    "before_lf_bytes": 23928,
+    "after_lf_bytes": 23426,
+    "sha256": "11936f29f40ae8387228bc1ead89e5babf58efdbbe3a3391c76d09780c97251d",
+    "rule_markers_equal": true
+  },
+  "saipen/phases/verify.md": {
+    "before_lf_bytes": 10962,
+    "after_lf_bytes": 8830,
+    "sha256": "a97a3520200409903a05daec79ee66a4aaf2c9db4bec71302cb077f3c043a48a",
+    "rule_markers_equal": true
+  },
+  "saipen/phases/ship.md": {
+    "before_lf_bytes": 9342,
+    "after_lf_bytes": 6380,
+    "sha256": "83dbb4a200d47a9c10cebbcda367f1bf571ae6588e5c7e7760b4089c63a5f79b",
+    "rule_markers_equal": true
+  },
+  "command_forms_unchanged": true,
+  "registry_unchanged": true,
+  "staged_entries_unchanged": true,
+  "budget_errors": [],
+  "fingerprint": "79e205a5c27359491c8cdc8722e45a885ad4ef6103e8a06d92adf002af5653ed"
+}

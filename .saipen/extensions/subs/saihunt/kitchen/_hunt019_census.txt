@@ -1,0 +1,24 @@
+=== SIGNAL 3 (stale markers) ===
+files: 677 hits: 2217
+   95 .saipen/evidence/T-1586-scenario-candidate/run_scenarios.py
+   94 tools/run_scenarios.py
+   47 .saipen/logs/LOG-018.md
+   47 CHANGELOG_ARCHIVE.md
+   41 tools/saipen_engine/operations.py
+   39 tools/audit_checks.py
+   38 .saipen/evidence/T-1581-retired-evidence-candidate/audit_checks.before.py
+   38 .saipen/evidence/T-1581-retired-evidence-candidate/audit_checks.py
+=== SIGNAL 6 (zero-reference defs) ===
+defs: 760 zero-ref: 421
+   0 tools/install_host_guard.py:854:def _install(host: str, home: Path, root: Path, *, check: bool, verify bool = True,
+   0 tools/saipen_engine/core_unit.py:279:def _copy_saipen_once(source: Path, target: Path, ignore, *, lock bool,
+   1 tools/saipen_engine/crew.py:1031 def _action
+   1 tools/install_host_guard.py:1196 def _activate_verified
+   1 tools/saipen_engine/operations.py:2183 def _active_claim_refusal
+   1 tools/test_t1411_stale_complete_resolution.py:100 def _add_complete_seat
+   1 tools/test_improve_reconcile.py:106 def _add_seat
+   1 tools/producer_backends/saipal_adapter.py:679 def _allocator_find_operation
+   1 tools/saipen_engine/acceptance_contract.py:279 def _amendment
+   1 tools/saipen_engine/host_dispatch.py:552 def _append_journal_records
+   1 tools/test_conformance_lineage.py:53 def _append_with_prior
+   1 tools/saipen_engine/convergence.py:226 def _attribution_snapshot

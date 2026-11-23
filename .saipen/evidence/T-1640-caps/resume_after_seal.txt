@@ -1,0 +1,17 @@
+status before: {"ok": true, "code": null, "phase": "VERIFY", "task": "T-1640"}
+park: {"ok": true, "code": "BLOCK", "ticket": "T-1640"}
+transition CLEAN: {"ok": true, "code": "TRANSITIONED", "phase": "CLEAN"}
+  board_scrub: {"ok": true, "code": "BOARD_SCRUBBED", "pruned_records": 128}
+  log_seal: {"ok": true, "code": "LOG_SEALED", "segment": ".saipen/logs/LOG-018.md", "sealed_from": "E-7039", "sealed_to": "E-13172"}
+transition CLEAN again: {"ok": true, "code": "TRANSITIONED", "phase": "CLEAN"}
+  second entry reports a step: []
+clean exit record: {"ok": true, "code": "CHECKPOINTED", "event_id": "E-13175"}
+transition DONE: {"ok": true, "code": "TRANSITIONED", "phase": "DONE"}
+unblock: {"ok": true, "code": "UNBLOCK", "ticket": "T-1640"}
+claim: {"ok": true, "code": "CLAIMED", "phase": "SCOUT", "ticket": "T-1640"}
+status after resume: {"ok": true, "code": null, "phase": "SCOUT", "task": "T-1640"}
+active LOG lines after resume: 7
+cycle evidence left in the active LOG: 0
+transition REVIEW on sealed VERIFY evidence: {"ok": false, "code": "ILLEGAL_TRANSITION", "phase": "REVIEW"} :: SCOUT -> REVIEW is not a legal edge; from SCOUT the legal edges are BUILD, BLOCKED
+transition SHIP on the sealed family citation: {"ok": false, "code": "ILLEGAL_TRANSITION", "phase": "SHIP"} :: SCOUT -> SHIP is not a legal edge; from SCOUT the legal edges are BUILD, BLOCKED
+status at the end: {"ok": true, "code": null, "phase": "SCOUT", "task": "T-1640"}

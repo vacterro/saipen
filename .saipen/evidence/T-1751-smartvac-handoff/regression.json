@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1751_reconcile_surfaces.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap"
+  ],
+  "oracle_files": [
+    "tools/test_t1751_reconcile_surfaces.py",
+    "tools/test_legacy_lifecycle_compat.py",
+    "tools/test_fixture_support.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "subject_files": [
+    "tools/saipen.py",
+    "tools/saipen_engine/router.py",
+    "tools/saipen_engine/automation.py",
+    "tools/saipen_engine/response_surface.py"
+  ],
+  "before": {
+    "tools/saipen.py": ".saipen/evidence/T-1751-smartvac-handoff/before/saipen.py",
+    "tools/saipen_engine/router.py": ".saipen/evidence/T-1751-smartvac-handoff/before/router.py",
+    "tools/saipen_engine/automation.py": ".saipen/evidence/T-1751-smartvac-handoff/before/automation.py",
+    "tools/saipen_engine/response_surface.py": ".saipen/evidence/T-1751-smartvac-handoff/before/response_surface.py"
+  },
+  "timeout": 900
+}

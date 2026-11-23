@@ -1,0 +1,10 @@
+test_explicit_requests_still_grant_their_own_mode (test_detail_authorization.DetailAuthorizationRegression.test_explicit_requests_still_grant_their_own_mode) ... ok
+test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) ... ok
+test_public_cli_cannot_spend_incidental_or_negated_words (test_detail_authorization.DetailAuthorizationRegression.test_public_cli_cannot_spend_incidental_or_negated_words) ... ok
+test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) ... ok
+test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.786s
+
+OK

@@ -1,0 +1,10 @@
+{
+  "verifier": "b3b8b2f7127ad74a",
+  "pre_subject": "ada128f041001b8c",
+  "post_subject": "a256c2e5aa872482",
+  "pre_rc": 1,
+  "post_rc": 0,
+  "control_rc": 0,
+  "held": true,
+  "command": "python -B -m unittest test_t1685_profile_carrier"
+}

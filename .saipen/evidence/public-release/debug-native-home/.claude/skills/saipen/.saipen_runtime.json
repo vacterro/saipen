@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "adapter_id": "claude",
+  "canonical_source_root": "V:\\_SAIPEN_RELEASE_\\public-20261004",
+  "source_version": "8.0.2",
+  "source_build": "914ea79ac4bdfe64de4f5fd969e3136c2cd8e01f",
+  "runtime_fingerprint": "gen-sha256:9198a3074540c49e4f74df5c92737772e22781380abaa2aa5d08685f3b45ecdb",
+  "installer_generation": "T-1342-runtime-surface-identity-20260915.1"
+}

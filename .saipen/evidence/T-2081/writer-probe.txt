@@ -1,0 +1,17 @@
+.
+----------------------------------------------------------------------
+Ran 1 test in 2.412s
+
+OK
+target=crew receipt=FAIL ok=True state.next_action='saipen crew'
+  raw:   ok=True action='saipen crew' reason='crew-converge'
+  gated: ok=False action=None reason='conformance-unhealthy'
+target=crew receipt=PASS ok=True state.next_action='saipen crew'
+  raw:   ok=True action='saipen crew' reason='crew-converge'
+  gated: ok=False action='saipen validate' reason='conformance-unhealthy'
+target=done receipt=FAIL ok=True state.next_action='saipen continue'
+  raw:   ok=True action='saipen continue' reason='maintain'
+  gated: ok=False action=None reason='conformance-remediation'
+target=done receipt=PASS ok=True state.next_action='saipen continue'
+  raw:   ok=True action='saipen continue' reason='maintain'
+  gated: none

@@ -1,0 +1,11 @@
+git blob hashes at 2026-09-17 ~19:40Z (working tree)
+
+7fdcdacae6eecbd96a560dd1294305d397896435  bootstrap/inject.ps1
+36c2882ecffeb35cef13c270f6d6b2bd21fa6ce0  bootstrap/inject.sh
+f294213554e0e2bc6e2a5c342820a33c67c5e164  tools/saipen_engine/runtime_bootstrap.py
+90fb50c03a19a810e0555086662bc9d4ee40ba40  tools/saipen_engine/entry.py
+
+Other dirty product files (for the record, not this inquest's subject)
+9c679e2d2777fc1427bd277c46c3f19a30559933  tools/saipen_engine/admission.py
+c59adc8535179ae0a8589b6d9f88abdd1cf038c6  extensions/adapters/opencode/saipen-guard.js
+8690c5a9f0377632be1136cf335dd78132f20429  tools/test_canonical_write_route.py

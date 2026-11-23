@@ -1,0 +1,511 @@
+F.FFFFF.FFF                                                            [100%]
+================================== FAILURES ===================================
+_ ContinuationTruthTests.test_assessment_reports_invalid_evidence_override_without_throwing _
+
+self = <test_t2040_continuation_truth.ContinuationTruthTests testMethod=test_assessment_reports_invalid_evidence_override_without_throwing>
+
+    def test_assessment_reports_invalid_evidence_override_without_throwing(self):
+>       result = CA.assess_continuation(self.root, source_evidence=42)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_continuation_truth.py:249: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('V:/_TEMP_/saipen-continuation-truth-9f4o_i6z'), now = None
+current_agent = None, current_capability = None
+state_text = '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\nblocker: none\ntransition_from: SHIP\nsaipen_version: 8...on_authority: operator_required\nauthority_source: E-100\nauthority_until: budget\nsafety_valve_mode: hard_wait\n---\n'
+board_text = '## DOING\n## TODO\n## DONE\n## BLOCKED\n', pending_ops = None
+conflict_ops = None, snap = None, reconciled = None, parsed_board = None
+persistent_goals = None, source_evidence = 42
+
+    def assess_continuation(
+        root: Path | str,
+        *,
+        now: _dt.datetime | None = None,
+        current_agent: str | None = None,
+        current_capability: str | None = None,
+        state_text: str | None = None,
+        board_text: str | None = None,
+        pending_ops: list | None = None,
+        conflict_ops: list | None = None,
+        snap: Any = None,
+        reconciled: dict | None = None,
+        parsed_board: dict | None = None,
+        persistent_goals: list | dict | None = None,
+        source_evidence: dict | None = None,
+    ) -> dict:
+        """Compute the authoritative read-only continuation assessment.
+    
+        Pure of mutations: reads canonical state and projections, applies the
+        ordered router and gate chain, and maps the verdict onto the closed
+        classification vocabulary.
+        """
+        root_path = Path(root).resolve()
+    
+        if state_text is None:
+            try:
+                state_text = (root_path / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+            except OSError as exc:
+                return _unreadable(f"STATE.md unreadable: {exc}")
+    
+        if board_text is None:
+            try:
+                board_text = (root_path / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+            except OSError as exc:
+                return _unreadable(f"BOARD.md unreadable: {exc}")
+    
+        state, state_error = parse_state_or_error(state_text)
+        if state_error and "missing required field updated" in state_error:
+            # Compatibility with fixtures omitting updated field
+            if "\n---" in state_text:
+                fixed_text = state_text.replace("\n---", "\nupdated: '2026-01-01T00:00:00Z'\n---", 1)
+                fixed_state, fixed_err = parse_state_or_error(fixed_text)
+                if not fixed_err and fixed_state:
+                    state, state_error, state_text = fixed_state, None, fixed_text
+    
+        if state_error or not state:
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action=None,
+                reason="state-malformed",
+                detail=f"STATE parse error: {state_error or 'empty'}",
+            )
+    
+        try:
+            # PERF-005: the caller may already hold the parsed BOARD. Re-parsing it
+            # here was the first of the redundant parses in one observation.
+            board = parsed_board if parsed_board is not None else parse_board(board_text)
+        except Exception as exc:
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action=None,
+                reason="board-malformed",
+                detail=f"BOARD parse error: {exc}",
+            )
+    
+        if board.get("errors"):
+            return _make_assessment(
+                INVALID_RUNTIME,
+                action="saipen status",
+                reason="board-malformed",
+                detail="BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            )
+    
+        # Resolve agent
+        acting_agent = current_agent if current_agent is not None else state.get("agent")
+    
+        # Discovery owners run outside the pure router, with the same project root.
+        from .work_exhaustion import discovery_evidence
+    
+        evidence = discovery_evidence(
+            root_path, state=state, tickets=board.get("tickets") or {},
+            pending_ops=pending_ops, conflict_ops=conflict_ops, now=now,
+        )
+        if persistent_goals is not None:
+            evidence["persistent_goals"] = persistent_goals
+        if source_evidence is not None:
+>           evidence["source_evidence"].update(source_evidence)
+E           TypeError: 'int' object is not iterable
+
+tools\saipen_engine\continuation_assessment.py:194: TypeError
+_ ContinuationTruthTests.test_automation_uses_certificate_when_terminal_label_is_missing_or_false (terminal=None) _
+
+self = <test_t2040_continuation_truth.ContinuationTruthTests testMethod=test_automation_uses_certificate_when_terminal_label_is_missing_or_false>
+
+    def test_automation_uses_certificate_when_terminal_label_is_missing_or_false(self):
+        for terminal in (None, "ALL_WORK_COMPLETE"):
+            with self.subTest(terminal=terminal), mock.patch.object(
+                automation, "closure_gate", return_value={
+                    "complete": True, "convergence_current": True, "conditions": {},
+                },
+            ):
+                routed = {**self.routed, "terminal_classification": terminal}
+                result = automation.automation_block(
+                    self.root, state={}, board={"tickets": {}}, routed=routed,
+                    audit_status={"ok": True, "layers": [], "orphans": [], "residue": []},
+                    convergence={"ok": True}, source_identity=mock.Mock(
+                        source_head="head", source_tree_fingerprint="tree",
+                    ),
+                )
+>               self.assertEqual(result["disposition"], automation.BLOCKED, result)
+E               AssertionError: 'CONTINUE' != 'BLOCKED'
+E               - CONTINUE
+E               + BLOCKED
+E                : {'schema_version': 1, 'disposition': 'CONTINUE', 'next_command': 'cc', 'operator_action_due': False, 'reason_code': 'closure-conditions-', 'reason': 'route reason: maintain', 'audit_quiescent': False, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': True, 'closure_complete': False, 'source_fingerprint': 'head+tree', 'completed_at': None}
+
+tools\test_t2040_continuation_truth.py:221: AssertionError
+_ ContinuationTruthTests.test_automation_uses_certificate_when_terminal_label_is_missing_or_false (terminal='ALL_WORK_COMPLETE') _
+
+self = <test_t2040_continuation_truth.ContinuationTruthTests testMethod=test_automation_uses_certificate_when_terminal_label_is_missing_or_false>
+
+    def test_automation_uses_certificate_when_terminal_label_is_missing_or_false(self):
+        for terminal in (None, "ALL_WORK_COMPLETE"):
+            with self.subTest(terminal=terminal), mock.patch.object(
+                automation, "closure_gate", return_value={
+                    "complete": True, "convergence_current": True, "conditions": {},
+                },
+            ):
+                routed = {**self.routed, "terminal_classification": terminal}
+                result = automation.automation_block(
+                    self.root, state={}, board={"tickets": {}}, routed=routed,
+                    audit_status={"ok": True, "layers": [], "orphans": [], "residue": []},
+                    convergence={"ok": True}, source_identity=mock.Mock(
+                        source_head="head", source_tree_fingerprint="tree",
+                    ),
+                )
+>               self.assertEqual(result["disposition"], automation.BLOCKED, result)
+E               AssertionError: 'CONTINUE' != 'BLOCKED'
+E               - CONTINUE
+E               + BLOCKED
+E                : {'schema_version': 1, 'disposition': 'CONTINUE', 'next_command': 'cc', 'operator_action_due': False, 'reason_code': 'closure-conditions-', 'reason': 'route reason: maintain', 'audit_quiescent': False, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': True, 'closure_complete': False, 'source_fingerprint': 'head+tree', 'completed_at': None}
+
+tools\test_t2040_continuation_truth.py:221: AssertionError
+_ ContinuationTruthTests.test_campaign_external_wait_does_not_require_operator _
+
+self = <test_t2040_continuation_truth.ContinuationTruthTests testMethod=test_campaign_external_wait_does_not_require_operator>
+
+    def test_campaign_external_wait_does_not_require_operator(self):
+        controller = self.admit_campaign()
+        state = campaign.inspect_campaign_state(self.root)["state"]
+        state["campaign_state"] = campaign.EXTERNAL_BLOCKED
+        campaign.save_campaign_state(self.root, state)
+        with mock.patch.object(CA, "assess_continuation", return_value=self.assessment(
+            CA.WAIT_EXTERNAL,
+        )) as assess:
+            result = controller.run(max_steps=5)
+>       self.assertNotIn("requires_operator", result["reason"], result)
+E       AssertionError: 'requires_operator' unexpectedly found in 'campaign_external_blocked_requires_operator' : {'ok': True, 'status': 'STOPPED', 'reason': 'campaign_external_blocked_requires_operator', 'steps': []}
+
+tools\test_t2040_continuation_truth.py:169: AssertionError
+_ ContinuationTruthTests.test_campaign_preserves_assessments_exact_discovery_action _
+
+self = <test_t2040_continuation_truth.ContinuationTruthTests testMethod=test_campaign_preserves_assessments_exact_discovery_action>
+
+    def test_campaign_preserves_assessments_exact_discovery_action(self):
+        controller = self.admit_campaign()
+        action = "saipen future promote FG-1"
+        with mock.patch.object(CA, "assess_continuation", return_value=self.assessment(
+            CA.DISCOVERY_AVAILABLE, action,
+        )):
+            result = controller.step()
+        self.assertEqual(result["event"], "DISCOVERY_AVAILABLE", result)
+>       self.assertEqual(result["state"]["next_action"], action)
+E       AssertionError: 'saipen future refresh' != 'saipen future promote FG-1'
+E       - saipen future refresh
+E       + saipen future promote FG-1
+
+tools\test_t2040_continuation_truth.py:125: AssertionError
+_ ContinuationTruthTests.test_campaign_restart_rechecks_evidence_without_operator_or_spin _
+
+self = <test_t2040_continuation_truth.ContinuationTruthTests testMethod=test_campaign_restart_rechecks_evidence_without_operator_or_spin>
+
+    def test_campaign_restart_rechecks_evidence_without_operator_or_spin(self):
+        controller = self.admit_campaign()
+        with mock.patch.object(CA, "assess_continuation", return_value=self.assessment(
+            CA.INCOMPLETE_DISCOVERY,
+        )):
+            first = controller.step()
+        self.assertEqual(first["code"], CA.INCOMPLETE_DISCOVERY, first)
+        self.assertEqual(first["state"]["campaign_state"], campaign.EXTERNAL_BLOCKED)
+        self.assertEqual(first["state"]["worker_generation"], 0)
+    
+        restarted = campaign.CampaignController(self.root)
+        action = "saipen future promote FG-1"
+        with mock.patch.object(CA, "assess_continuation", return_value=self.assessment(
+            CA.DISCOVERY_AVAILABLE, action,
+        )) as assess:
+            resumed = restarted.run(max_steps=1)
+        self.assertTrue(resumed["ok"], resumed)
+>       self.assertEqual(len(resumed["steps"]), 1, resumed)
+E       AssertionError: 0 != 1 : {'ok': True, 'status': 'STOPPED', 'reason': 'campaign_external_blocked_requires_operator', 'steps': []}
+
+tools\test_t2040_continuation_truth.py:144: AssertionError
+_ ContinuationTruthTests.test_fallback_preserves_diagnostics_and_exact_stop_reason _
+
+self = <test_t2040_continuation_truth.ContinuationTruthTests testMethod=test_fallback_preserves_diagnostics_and_exact_stop_reason>
+
+    def test_fallback_preserves_diagnostics_and_exact_stop_reason(self):
+        self.fallback_owners(marker={"cycle_id": "fixture-active"})
+        self.stack.enter_context(mock.patch.object(
+            continue_fallback, "active_cycle_status", return_value="active",
+        ))
+        self.stack.enter_context(mock.patch.object(
+            continue_fallback, "resume_action", return_value=("saipen improve status", "fixture"),
+        ))
+        _, result = self.fallthrough(chain_trace=[{"action": "fixture"}], iterations=1)
+>       self.assertEqual(result.get("work_exhaustion"), self.certificate)
+E       AssertionError: None != {'schema_version': 2, 'status': 'INCOMPLE[142 chars]ed']}
+
+tools\test_t2040_continuation_truth.py:191: AssertionError
+_ ContinuationTruthTests.test_router_accepts_recovery_owner_ids_and_rejects_malformed_envelopes _
+
+self = <test_t2040_continuation_truth.ContinuationTruthTests testMethod=test_router_accepts_recovery_owner_ids_and_rejects_malformed_envelopes>
+
+    def test_router_accepts_recovery_owner_ids_and_rejects_malformed_envelopes(self):
+        text = _format_state()
+>       result = router.route_next(text, BOARD, pending_ops=[{"op_id": "op-fixture"}])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_continuation_truth.py:227: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+state_text = '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\nblocker: none\ntransition_from: SHIP\nsaipen_version: 8...on_authority: operator_required\nauthority_source: E-100\nauthority_until: budget\nsafety_valve_mode: hard_wait\n---\n'
+board_text = '## DOING\n## TODO\n## DONE\n## BLOCKED\n'
+pending_ops = [{'op_id': 'op-fixture'}], conflict_ops = None, now = None
+current_capability = None, current_agent = None, snap = None, audit_inbox = None
+queued_source = None, pending_append = None, future_gate = None, _state = None
+_board = None, _state_error = None, project_root = None, persistent_goals = None
+source_evidence = None, continuous_maintenance_authorized = False
+
+    def route_next(
+        state_text: str,
+        board_text: str,
+        pending_ops: list | None = None,
+        conflict_ops: list | None = None,
+        now: datetime.datetime | None = None,  # noqa: F821
+        current_capability: str | None = None,
+        current_agent: str | None = None,
+        snap=None,
+        audit_inbox: dict | None = None,
+        queued_source: dict | None = None,
+        pending_append: dict | None = None,
+        future_gate: dict | None = None,
+        # PERF-004: optional pre-parsed objects from the caller to avoid
+        # redundant STATE/BOARD parsing. When provided, these take precedence
+        # over parsing state_text/board_text.
+        _state: dict | None = None,
+        _board: dict | None = None,
+        _state_error: str | None = None,
+        project_root: str | Path | None = None,
+        persistent_goals: list | dict | None = None,
+        source_evidence: dict | None = None,
+        continuous_maintenance_authorized: bool = False,
+    ) -> dict:
+        """Compute the exact next executable action.
+    
+        Returns a dict with `action` (an executable mechanical action), `reason`
+        (which priority rule fired), and optional `ticket`/`detail`. Never echoes
+        STATE.next_action -- it is a projection, not a mirror (NITRO dogfood II).
+        `now` (UTC) drives § 1.4 claim-liveness for the active-ticket binding; tests
+        inject a fixed instant (P0 claim-ownership truth).
+    
+        `current_capability` is the FRESHLY NEGOTIATED session capability
+        ("full"/"read-only"/...), supplied by the caller. CORE § 1.3: a persisted
+        `STATE.mode` is only the LAST handshake outcome and MUST NOT prove current
+        authority, so routing never infers write authority from STATE.mode -- it
+        gates only on an explicit current-capability value when one is supplied.
+    
+        `current_agent` is the canonical acting identity (T-1006): the ONE
+        resolver in tools/saipen.py INHERITS persisted STATE.agent for a bare CLI
+        and journals an explicit old -> new DEC for a genuine `--agent` handover.
+        Claim truth and workability are judged relative to THAT value, never by
+        reading STATE.agent a second time here -- a genuinely different actor B
+        entering state last written by A must see A's live claim as FOREIGN_LIVE
+        and refuse takeover, not impersonate A. When `current_agent` is None (a
+        caller that does not know its own identity), routing falls back to the
+        historical value for backward compatibility of pure-semantic callers,
+        but the CLI/adapters always supply the resolved identity.
+    
+        `audit_inbox` is the Audit Inbox's READ-ONLY structural projection
+        (`audit_inbox.projection`), supplied by the caller because this function
+        stays pure -- it never touches the filesystem. `SOURCE-AUDIT-INBOX-01`
+        places it AFTER recovery / WAIT / active continuation and BEFORE the
+        ordinary BOARD Pick Rule: a fresh external audit usually corrects current
+        project truth and must not sit unseen behind a stale backlog, but it never
+        preempts a legitimately active ticket mid-transaction.
+    
+        `future_gate` is the FUTURE GATE projection (`future_gate.projection`),
+        supplied for the same reason. `FUTURE-GATE-01` places it BELOW every
+        audit-idle branch, below the Improve gate and below the BOARD Pick Rule, so
+        a gate is consumed only on an honest AUTONOMOUS WORK EXHAUSTED verdict --
+        never ahead of active Work, an actionable audit, or a live operator hold.
+        """
+        pending = list(pending_ops or [])
+        conflicts = list(conflict_ops or [])
+        # PERF-004: parse STATE/BOARD ONCE and reuse the result for both the
+        # checkpoint-surface validation and the routing logic below. When the
+        # caller provides pre-parsed objects, skip parsing entirely.
+        from .state import parse_state_or_error
+    
+        if _state is not None and _board is not None:
+            # PERF-004: the pre-parsed seam. `_state_error` may be None -- the
+            # NORMAL "no parse error" case -- so it is NOT part of the guard; a
+            # clean pre-parsed call must not silently fall through to re-parsing.
+            state, state_error, board = _state, _state_error, _board
+        else:
+            state, state_error = parse_state_or_error(state_text)
+            board = parse_board(board_text)
+        if snap is not None:
+            from .fast_check import validate_checkpoint_surface
+    
+            errors = validate_checkpoint_surface(
+                state_text,
+                board_text,
+                snap,
+                current_agent=current_agent,
+                _state=state,
+                _board=board,
+                _state_error=state_error,
+            )
+            if errors:
+                # The route is `recover`, never `status`. Naming the command that
+                # just refused is the self-loop measured in the field: a stranded
+                # session reads `action` as an instruction, runs it, gets the same
+                # refusal and the same instruction, and stops. `recover` is the one
+                # canonical entry that owns an invalid checkpoint surface, and it
+                # answers with either the exact approval command or a named
+                # operator decision -- both of which are somewhere to GO.
+                return {
+                    "ok": False,
+                    "action": "saipen recover",
+                    "reason": "checkpoint-invalid",
+                    "detail": "checkpoint invalid: " + "; ".join(errors[:3]),
+                }
+        # A STATE the shared parser cannot read whole is not a routing surface:
+        # duplicate keys or a broken fence must never project an executable next
+        # action from a partial parse (T-1003 hostile findings). Fail closed.
+        if state_error:
+            return {
+                "ok": False,
+                "action": "saipen recover",
+                "reason": "state-malformed",
+                "detail": f"STATE parse error: {state_error}",
+            }
+        # Empty STATE is bootstrap-only (hostile-regression, P1): a file with no
+        # frontmatter reads as {} for status display, but it is NOT a routing
+        # surface -- there is no phase, no agent, no continuation to project.
+        # Only a fresh bootstrap may sit here, and the routed action for a
+        # bootstrap is the INIT entry, never an ordinary maintenance/start
+        # projection.
+        if not state:
+            return {
+                "ok": True,
+                "action": "saipen status",
+                "reason": "bootstrap",
+                "executable_behavior": "RESTATE_AND_STOP",
+                "detail": "empty STATE is bootstrap-only; no continuation "
+                "exists yet -- bootstrap via INIT before routing",
+            }
+        phase = state.get("phase")
+        task = state.get("task")
+        na = state.get("next_action") or ""
+    
+        # Second-wave P0: the CURRENT-SESSION actor, never STATE.agent. STATE.agent
+        # is historical last-writer evidence; claim truth and workability are judged
+        # relative to the identity the caller actually IS.
+        session_agent = current_agent if current_agent is not None else state.get("agent")
+    
+        # CURRENT-SESSION CAPABILITY gate (CORE § 1.3): only an explicitly supplied,
+        # freshly negotiated capability may grant/revoke write authority. A persisted
+        # STATE.mode is the LAST handshake outcome and is NEVER used to infer current
+        # authority (a stale read-only must not suppress a newly writable session,
+        # nor a stale full route mutation into a newly read-only one). Callers that
+        # do not pass current_capability get pure state-semantic routing.
+        #
+        # A capability that was supplied but is not one of the four closed values is
+        # a broken handshake, never permission: fail closed rather than route as if
+        # the session were writable.
+        if current_capability is not None:
+            from .capability import capability_error
+    
+            _cap_problem = capability_error(current_capability)
+            if _cap_problem is not None:
+                return {
+                    "ok": False,
+                    "action": "saipen status",
+                    "reason": "capability-invalid",
+                    "detail": _cap_problem,
+                }
+        if current_capability == "read-only":
+            return {
+                "ok": True,
+                "action": "saipen status",
+                "reason": "read-only-mode",
+                "executable_behavior": "RESTATE_AND_STOP",
+                "detail": "current session capability is read-only; no mutating "
+                "next action may be routed -- inspect only",
+            }
+    
+        # RECOVER outranks everything (after the read-only brake): an unresolved
+        # op or conflict must be resolved before any canonical work.
+        if conflicts:
+            return {
+                "ok": False,
+                "action": "saipen recover",
+                "reason": "recovery-conflict",
+                "detail": f"unresolved conflict: {', '.join(conflicts)}",
+            }
+        if pending:
+            return {
+                "ok": False,
+                "action": "saipen recover",
+                "reason": "recovery-pending",
+>               "detail": f"unresolved operation: {', '.join(pending)}",
+                                                   ^^^^^^^^^^^^^^^^^^
+            }
+E           TypeError: sequence item 0: expected str instance, dict found
+
+tools\saipen_engine\router.py:232: TypeError
+_ ContinuationTruthTests.test_unchanged_source_and_valid_grant_do_not_prove_quiescence _
+
+self = <test_t2040_continuation_truth.ContinuationTruthTests testMethod=test_unchanged_source_and_valid_grant_do_not_prove_quiescence>
+
+    def test_unchanged_source_and_valid_grant_do_not_prove_quiescence(self):
+        improve = self.fallback_owners()
+        rc, result = self.fallthrough()
+        self.assertEqual(rc, 0)
+>       self.assertFalse(result["quiescent"], result)
+E       AssertionError: True is not false : {'ok': True, 'code': 'CONTINUE_QUIESCENT_IDLE', 'quiescent': True, 'continuous_maintenance': True, 'action': 'saipen status', 'reason': 'improve-source-unchanged', 'dry_run': False, 'cycle_id': '', 'detail': 'no automatic improvement discovery: fixture source unchanged. Run `saipen improve` explicitly to audit anyway'}
+
+tools\test_t2040_continuation_truth.py:177: AssertionError
+_ ContinuationTruthTests.test_unreadable_goal_inventory_is_not_unchanged_success _
+
+self = <test_t2040_continuation_truth.ContinuationTruthTests testMethod=test_unreadable_goal_inventory_is_not_unchanged_success>
+
+    def test_unreadable_goal_inventory_is_not_unchanged_success(self):
+        improve = self.fallback_owners()
+        goals = self.root / ".saipen/goals"
+        goals.mkdir()
+        (goals / "bad.json").write_text("{broken", encoding="utf-8")
+        _, result = self.fallthrough()
+>       self.assertEqual(result["code"], W.INCOMPLETE_DISCOVERY, result)
+E       AssertionError: 'CONTINUE_QUIESCENT_IDLE' != 'INCOMPLETE_DISCOVERY'
+E       - CONTINUE_QUIESCENT_IDLE
+E       + INCOMPLETE_DISCOVERY
+E        : {'ok': True, 'code': 'CONTINUE_QUIESCENT_IDLE', 'quiescent': True, 'continuous_maintenance': True, 'action': 'saipen status', 'reason': 'improve-source-unchanged', 'dry_run': False, 'cycle_id': '', 'detail': 'no automatic improvement discovery: fixture source unchanged. Run `saipen improve` explicitly to audit anyway'}
+
+tools\test_t2040_continuation_truth.py:201: AssertionError
+_ ContinuationTruthTests.test_worker_evidence_gap_has_no_operator_action_or_generation _
+
+self = <test_t2040_continuation_truth.ContinuationTruthTests testMethod=test_worker_evidence_gap_has_no_operator_action_or_generation>
+
+    def test_worker_evidence_gap_has_no_operator_action_or_generation(self):
+        verdict = {
+            "verdict": supervisor.INCOMPLETE_DISCOVERY, "reason": "analysis not checked",
+            "next_command": "saipen status --json", "requires_human": False,
+        }
+        with mock.patch.object(watchdog, "observe", return_value=mock.Mock()), mock.patch.object(
+            supervisor, "decide", return_value=verdict,
+        ), mock.patch.object(worker, "take_authority") as take, mock.patch.object(
+            worker, "_run_generation",
+        ) as execute:
+            result = worker._supervise(self.root, ["fixture-agent"], max_cycles=5)
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["stop"], supervisor.INCOMPLETE_DISCOVERY)
+>       self.assertIsNone(result["operator_action"])
+E       AssertionError: 'saipen status --json' is not None
+
+tools\test_t2040_continuation_truth.py:112: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_continuation_truth.py::ContinuationTruthTests::test_assessment_reports_invalid_evidence_override_without_throwing
+SUBFAILED(terminal=None) tools/test_t2040_continuation_truth.py::ContinuationTruthTests::test_automation_uses_certificate_when_terminal_label_is_missing_or_false
+SUBFAILED(terminal='ALL_WORK_COMPLETE') tools/test_t2040_continuation_truth.py::ContinuationTruthTests::test_automation_uses_certificate_when_terminal_label_is_missing_or_false
+FAILED tools/test_t2040_continuation_truth.py::ContinuationTruthTests::test_campaign_external_wait_does_not_require_operator
+FAILED tools/test_t2040_continuation_truth.py::ContinuationTruthTests::test_campaign_preserves_assessments_exact_discovery_action
+FAILED tools/test_t2040_continuation_truth.py::ContinuationTruthTests::test_campaign_restart_rechecks_evidence_without_operator_or_spin
+FAILED tools/test_t2040_continuation_truth.py::ContinuationTruthTests::test_fallback_preserves_diagnostics_and_exact_stop_reason
+FAILED tools/test_t2040_continuation_truth.py::ContinuationTruthTests::test_router_accepts_recovery_owner_ids_and_rejects_malformed_envelopes
+FAILED tools/test_t2040_continuation_truth.py::ContinuationTruthTests::test_unchanged_source_and_valid_grant_do_not_prove_quiescence
+FAILED tools/test_t2040_continuation_truth.py::ContinuationTruthTests::test_unreadable_goal_inventory_is_not_unchanged_success
+FAILED tools/test_t2040_continuation_truth.py::ContinuationTruthTests::test_worker_evidence_gap_has_no_operator_action_or_generation
+11 failed, 2 passed in 1.42s

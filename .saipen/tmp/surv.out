@@ -1,0 +1,18 @@
+recorded 864 live 1238
+lost []
+in-place changed 15
+   .saipen/intake/audit_inbox.json 64c5c044 -> f4b397dd
+   .saipen/intake/index.json 840cc2ed -> 1e8b44b2
+   bootstrap/schedule-run.ps1 6e95b9a2 -> 9dbbc220
+   extensions/adapters/antigravity/saipen-guard.py 43f280ed -> b88bb0b5
+   tools/saipen.py 56d2c82d -> d39dfc1f
+   tools/saipen_engine/campaign.py 7363ab9e -> 7881a286
+   tools/saipen_engine/codec.py 4db199d4 -> c33d9c36
+   tools/saipen_engine/discovery_providers.py f6209c96 -> 849773cb
+   tools/saipen_engine/isolated_release.py 183e6a64 -> 3f8f2ad4
+   tools/saipen_engine/operations.py a50dadc3 -> a666dc91
+   tools/saipen_engine/persistent_goal.py 2f454415 -> 4d91cad9
+   tools/saipen_engine/replenishment.py 38a9df35 -> 44cabc72
+   tools/saipen_engine/response_surface.py 7fdc2afb -> 38387775
+   tools/saipen_engine/router.py 49f9b077 -> 46e6ae53
+   tools/test_t1926_zc_owners_matrix.py 2847a218 -> 09d47a9e

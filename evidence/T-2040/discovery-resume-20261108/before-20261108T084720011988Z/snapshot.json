@@ -1,0 +1,87 @@
+{
+  "created_utc": "20261108T084720011988Z",
+  "root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "files": [
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\work_exhaustion.py",
+      "relative_path": "tools/saipen_engine/work_exhaustion.py",
+      "owned": true,
+      "bytes": 27156,
+      "sha256": "e0f08535c7fc7e05e8084e66a0edec52a51ac2de73da82766984ae1d590f10ee",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\before-20261108T084720011988Z\\tools\\saipen_engine\\work_exhaustion.py"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\continue_fallback.py",
+      "relative_path": "tools/saipen_engine/continue_fallback.py",
+      "owned": true,
+      "bytes": 18768,
+      "sha256": "89462a7516166dc1d1500bcbdec5b1906435db9a2e6d46aaf5027828fdd88ca1",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\before-20261108T084720011988Z\\tools\\saipen_engine\\continue_fallback.py"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\discovery_providers.py",
+      "relative_path": "tools/saipen_engine/discovery_providers.py",
+      "owned": true,
+      "bytes": 58792,
+      "sha256": "5a2dd94922602e091586617866758dd93374eb50619f9264c644cb4dd5f7e574",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\before-20261108T084720011988Z\\tools\\saipen_engine\\discovery_providers.py"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+      "relative_path": "tools/saipen.py",
+      "owned": true,
+      "bytes": 687698,
+      "sha256": "ba58917e11e544c244035eb32f8887989276c94e48a2fd80322326e7eb124541",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\before-20261108T084720011988Z\\tools\\saipen.py"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\improve.py",
+      "relative_path": "tools/improve.py",
+      "owned": true,
+      "bytes": 229427,
+      "sha256": "bc8f957001e2e5b04f5f1bfd73e352e400565a69daf73d3874479d06a3b55faa",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\before-20261108T084720011988Z\\tools\\improve.py"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_exhaustion_evidence.py",
+      "relative_path": "tools/test_t2040_exhaustion_evidence.py",
+      "owned": false,
+      "bytes": 10164,
+      "sha256": "7f8a9aaedb16d5cf18f3cd3cee61c99597b98b01ab85cc85a830853f41c9415f",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\before-20261108T084720011988Z\\tools\\test_t2040_exhaustion_evidence.py"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_discovery_owners.py",
+      "relative_path": "tools/test_t2040_discovery_owners.py",
+      "owned": false,
+      "bytes": 8673,
+      "sha256": "6142525d3581f07da0a049084aa8120150589b7355208cb2ffed98f988a613e1",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\before-20261108T084720011988Z\\tools\\test_t2040_discovery_owners.py"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_continuation_truth.py",
+      "relative_path": "tools/test_t2040_continuation_truth.py",
+      "owned": false,
+      "bytes": 12211,
+      "sha256": "94b7dd9ae3e870bb8e7d9d78b249aee1a1c4de8a2ab1642f70b8f8f40f89ba28",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\before-20261108T084720011988Z\\tools\\test_t2040_continuation_truth.py"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2021_false_idle_maintenance.py",
+      "relative_path": "tools/test_t2021_false_idle_maintenance.py",
+      "owned": false,
+      "bytes": 16971,
+      "sha256": "d1af4612fbb2afec61eddeb31729e9fd9e19c8cf38da4bbea3faf0728db70f47",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\before-20261108T084720011988Z\\tools\\test_t2021_false_idle_maintenance.py"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_premature_victory_prevention.py",
+      "relative_path": "tools/test_premature_victory_prevention.py",
+      "owned": false,
+      "bytes": 41739,
+      "sha256": "18fa8fbcac05bb4f523fc85b49d8033751884cc12bfd99d2943fbe733b7594b8",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\before-20261108T084720011988Z\\tools\\test_premature_victory_prevention.py"
+    }
+  ],
+  "git_status": "MM tools/improve.py\n M tools/saipen.py\n M tools/saipen_engine/continue_fallback.py\nA  tools/saipen_engine/discovery_providers.py\nAM tools/saipen_engine/work_exhaustion.py\nAM tools/test_premature_victory_prevention.py\nAM tools/test_t2021_false_idle_maintenance.py\n?? tools/test_t2040_continuation_truth.py\n?? tools/test_t2040_discovery_owners.py\n?? tools/test_t2040_exhaustion_evidence.py\n"
+}

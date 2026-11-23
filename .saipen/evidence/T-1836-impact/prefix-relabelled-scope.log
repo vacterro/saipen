@@ -1,0 +1,14 @@
+test_relabelled_unit_record_cannot_keep_an_impact_configuration (test_t1836_verification_impact.ImpactExecution.test_relabelled_unit_record_cannot_keep_an_impact_configuration) ... FAIL
+
+======================================================================
+FAIL: test_relabelled_unit_record_cannot_keep_an_impact_configuration (test_t1836_verification_impact.ImpactExecution.test_relabelled_unit_record_cannot_keep_an_impact_configuration)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1836_verification_impact.py", line 258, in test_relabelled_unit_record_cannot_keep_an_impact_configuration
+    self.assertIsNotNone(focused_unit.publication_gate(self.project))
+AssertionError: unexpectedly None
+
+----------------------------------------------------------------------
+Ran 1 test in 0.484s
+
+FAILED (failures=1)

@@ -1,0 +1,17 @@
+{
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "recover",
+    "--json"
+  ],
+  "exit_code": 0,
+  "session_capability": "no-publish",
+  "result": {
+    "ok": true,
+    "code": "RECOVERED",
+    "recovered": [
+      "release-2caf93f3f6c54211b8ab9311674122e0"
+    ],
+    "recovery_required": false
+  }
+}

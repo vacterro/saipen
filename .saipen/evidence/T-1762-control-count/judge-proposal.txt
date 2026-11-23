@@ -1,0 +1,28 @@
+== V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\98f1cace-3e23-49ce-b727-73d522804907\scratchpad\copy\tools
+  must admit | reads as a claim: True  | 33] conf: high -- pre-fix 4 failed (red control), post-fix 0 failed
+  must admit | reads as a claim: True  | -- red control: 4 failed, post-fix green
+  must admit | reads as a claim: True  | -- pre-fix 3 failures, post-fix none
+  must admit | reads as a claim: True  | -- 4 failed (red control), then green on the fixed subject
+  must admit | reads as a claim: True  | -- the pre-fix run had 2 failures and the post-fix run is green
+  must claim | reads as a claim: True  |  conf: high -- 2 FAIL in the family
+  must claim | reads as a claim: True  |  conf: high -- failures=2
+  must claim | reads as a claim: True  |  -- red control: 4 failed
+  must claim | reads as a claim: True  |  conf: high -- pre-fix 4 failed (red control), post-fix 2 failed
+  must claim | reads as a claim: True  |  conf: high -- red control: 4 failed; and 1 failed on the fixed subject
+  must claim | reads as a claim: True  |  conf: high -- 3 failed prefix tests remain
+  must claim | reads as a claim: True  |  conf: high -- prefix 3 failed in the matcher suite
+  red halves still vetoed: 5; current claims talked past: 0
+== V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\98f1cace-3e23-49ce-b727-73d522804907\scratchpad\proposal\tools
+  must admit | reads as a claim: False | 33] conf: high -- pre-fix 4 failed (red control), post-fix 0 failed
+  must admit | reads as a claim: False | -- red control: 4 failed, post-fix green
+  must admit | reads as a claim: False | -- pre-fix 3 failures, post-fix none
+  must admit | reads as a claim: False | -- 4 failed (red control), then green on the fixed subject
+  must admit | reads as a claim: False | -- the pre-fix run had 2 failures and the post-fix run is green
+  must claim | reads as a claim: True  |  conf: high -- 2 FAIL in the family
+  must claim | reads as a claim: True  |  conf: high -- failures=2
+  must claim | reads as a claim: True  |  -- red control: 4 failed
+  must claim | reads as a claim: True  |  conf: high -- pre-fix 4 failed (red control), post-fix 2 failed
+  must claim | reads as a claim: True  |  conf: high -- red control: 4 failed; and 1 failed on the fixed subject
+  must claim | reads as a claim: False |  conf: high -- 3 failed prefix tests remain
+  must claim | reads as a claim: False |  conf: high -- prefix 3 failed in the matcher suite
+  red halves still vetoed: 0; current claims talked past: 2

@@ -1,0 +1,14 @@
+{
+  "bootstrap/inject.sh": {
+    "before_sha256": "b10e862e668dedfefc0c021a3839db9ce974b1b5e89df629c31c5131db8c333c",
+    "after_sha256": "0b423866d466ae3061aee844286294ac27e5547f11201fae5ad8c19e1eb543d4"
+  },
+  "bootstrap/inject.ps1": {
+    "before_sha256": "42eaf81b4848ba748981fe3e554742f8df93e00007afd3912fb054bca18c2454",
+    "after_sha256": "fb7552bf94d42b0d11781b538eb0d9d8264fb4fb823bad05be394f60b732cf2a"
+  },
+  "tools/test_t1683_launcher_profile.py": {
+    "before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "after_sha256": "3b7f159c40afd076250690d4439f162fb5d091d1562f265ff66a8093967e073b"
+  }
+}

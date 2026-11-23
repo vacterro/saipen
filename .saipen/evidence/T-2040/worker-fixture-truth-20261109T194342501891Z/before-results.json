@@ -1,0 +1,50 @@
+[
+  {
+    "module": "test_t1446_supervise",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_t1446_supervise"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "started_at": "2026-11-09T19:44:19.411164+00:00",
+    "repository_write_interlock": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 1,
+    "elapsed_seconds": 15.578
+  },
+  {
+    "module": "test_t1748_worker_clock",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_t1748_worker_clock"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "started_at": "2026-11-09T19:44:34.991330+00:00",
+    "repository_write_interlock": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 1,
+    "elapsed_seconds": 7.156
+  },
+  {
+    "module": "test_worker_turnover",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_worker_turnover"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "started_at": "2026-11-09T19:44:42.136878+00:00",
+    "repository_write_interlock": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 1,
+    "elapsed_seconds": 2.969
+  }
+]

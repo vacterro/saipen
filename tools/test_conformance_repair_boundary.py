@@ -177,7 +177,12 @@ class RealValidatorBoundaryTests(fixtures.T1412Base):
                     self.assertEqual(blocking["status"], "complete")
                     self.assertGreater(blocking["problem_count"], 0)
                     self.assertEqual(blocking["problem_count"], len(blocking["problems"]))
-                    self.assertIsNone(payload["canonical_next_command"])
+                    # T-2056: the boundary still refuses, but it now hands back
+                    # an EXECUTABLE repair for the blocking finding instead of
+                    # `action: null` (an obstacle the agent could not act on).
+                    action = payload["canonical_next_command"]
+                    self.assertTrue(action and action.startswith("saipen "), action)
+                    self.assertNotIn("saipen start", action)
                     self.assertEqual(payload["diagnostic"]["kind"], "ENGINEERING_REQUIRED")
                     receipt_paths = set((root / C.RECEIPT_DIRNAME).glob("*.json"))
                     for command in ("next", "continue", "status", "explain-next"):
@@ -185,13 +190,20 @@ class RealValidatorBoundaryTests(fixtures.T1412Base):
                         self.assertNotIn("Traceback", output)
                         if command == "status":
                             self.assertEqual(current["automation"]["disposition"], "BLOCKED")
-                            self.assertIsNone(current["automation"]["remediation_command"])
+                            self.assertEqual(
+                                current["automation"]["remediation_command"], action
+                            )
                         elif command == "explain-next":
-                            self.assertNotEqual(current["disposition"], "EXECUTE_SELF")
+                            # T-2056: the route is no longer a dead end -- it
+                            # hands back a permitted repair the current agent may
+                            # execute itself, which disposition law classifies as
+                            # EXECUTE_SELF. The old expectation pinned the
+                            # obligation-as-blockage this ticket removed.
+                            self.assertEqual(current["disposition"], "EXECUTE_SELF")
                             self.assertFalse(current["human_required"])
                         else:
-                            self.assertIsNone(current.get("canonical_next_command"))
-                            self.assertIsNone(current["action"])
+                            self.assertEqual(current.get("canonical_next_command"), action)
+                            self.assertEqual(current["action"], action)
                     self.assertEqual(set((root / C.RECEIPT_DIRNAME).glob("*.json")), receipt_paths)
                 self.assertEqual(before, {name: (root / ".saipen" / name).read_bytes()
                                           for name in before})

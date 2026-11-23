@@ -1,0 +1,109 @@
+{
+  "recorded_at": "2026-11-10T17:08:18.445327+00:00",
+  "runtime": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "ruff",
+    "check",
+    "--no-cache",
+    "--output-format",
+    "json",
+    "tools/test_t2040_bounded_discovery_resume.py",
+    "tools/test_t2040_exhaustion_evidence.py",
+    "tools/test_t2040_finish_plan_guards.py",
+    "tools/test_t2040_maintenance_authority.py",
+    "tools/test_t2040_publication_truth.py",
+    "tools/test_t2040_replenishment_recovery.py",
+    "tools/test_t2040_review_proof_binding.py",
+    "tools/test_t2040_terminal_consumer_guards.py",
+    "tools/test_t2040_terminal_consumer_supplementary.py"
+  ],
+  "exit_code": 0,
+  "stderr": "",
+  "semantic_checks": [
+    {
+      "path": "tools/test_t2040_bounded_discovery_resume.py",
+      "before_sha256": "6f6c0218497f19c0234e346feec7007e8feddbd4bf4aea37f6395c17242b820a",
+      "after_sha256": "9f59755bbd6637b7eeec5655c7fe332c6495ad76757ff0faecf0ce4ccd4d9216",
+      "ast_equal_except_unused_imports_and_bindings": true,
+      "assertions_exact": true,
+      "constants_exact": true,
+      "assertions": 52
+    },
+    {
+      "path": "tools/test_t2040_exhaustion_evidence.py",
+      "before_sha256": "f8e4fe00b9b26b2356f0848cb2d9d78e12a46de247ab2f8be77c06473e79ef5b",
+      "after_sha256": "80805e2663cf6394388d325b87b1db6d849f6c01fa491e64ed6f7d12c6143872",
+      "ast_equal_except_unused_imports_and_bindings": true,
+      "assertions_exact": true,
+      "constants_exact": true,
+      "assertions": 41
+    },
+    {
+      "path": "tools/test_t2040_finish_plan_guards.py",
+      "before_sha256": "885d92d772f282538c7b1d98d16239694188feb39672ab10e7af92e767f519e7",
+      "after_sha256": "ab3e7830005614e83c0b12eff86c20c65472abe3b648d26dc9203758f62f8ee8",
+      "ast_equal_except_unused_imports_and_bindings": true,
+      "assertions_exact": true,
+      "constants_exact": true,
+      "assertions": 22
+    },
+    {
+      "path": "tools/test_t2040_maintenance_authority.py",
+      "before_sha256": "365be2370f0e1e2833f15224483bae34affce085da2719c4290ddc66e1308230",
+      "after_sha256": "f5913d411473b53259209e4229acb0d935ee30a8bc076fdb3a7f16deff8970ff",
+      "ast_equal_except_unused_imports_and_bindings": true,
+      "assertions_exact": true,
+      "constants_exact": true,
+      "assertions": 95
+    },
+    {
+      "path": "tools/test_t2040_publication_truth.py",
+      "before_sha256": "fd447a2b169afe99b2996cefc4f8b20031f7ad1b19d850832b2e00c7510901f0",
+      "after_sha256": "4aba98ca168c782dbfc09b889313645d3b6550b3f9019bf9d27924ec0f316c81",
+      "ast_equal_except_unused_imports_and_bindings": true,
+      "assertions_exact": true,
+      "constants_exact": true,
+      "assertions": 95
+    },
+    {
+      "path": "tools/test_t2040_replenishment_recovery.py",
+      "before_sha256": "d848f22b95b564caf047efce2fe328865b3139d0ff9cba8ce1cfe8a7272374a8",
+      "after_sha256": "f1156d61c3841bdd62511e64db3fd7c72cc3acd39d8fc2778afe3aaeb76195ae",
+      "ast_equal_except_unused_imports_and_bindings": true,
+      "assertions_exact": true,
+      "constants_exact": true,
+      "assertions": 49
+    },
+    {
+      "path": "tools/test_t2040_review_proof_binding.py",
+      "before_sha256": "b8237910292b408d62376b700c2805b05c41d318deba67ce95702839463e016a",
+      "after_sha256": "9cf1d0a344154fdb899e53671941c9e4fbe95bccf40e1de261764083910cb9f1",
+      "ast_equal_except_unused_imports_and_bindings": true,
+      "assertions_exact": true,
+      "constants_exact": true,
+      "assertions": 44
+    },
+    {
+      "path": "tools/test_t2040_terminal_consumer_guards.py",
+      "before_sha256": "a1c63c38ea768668e3ab202a56e85641b54b3062190118d3ec7a46f0f1e97dc9",
+      "after_sha256": "24e65047397dff5e24d8a50d18e0515e084e6e2e882dd25f1e1231e3ec08e8b0",
+      "ast_equal_except_unused_imports_and_bindings": true,
+      "assertions_exact": true,
+      "constants_exact": true,
+      "assertions": 99
+    },
+    {
+      "path": "tools/test_t2040_terminal_consumer_supplementary.py",
+      "before_sha256": "1d6031b3e6649ad3d642830eee201e2077fc6019703f05e1e3f913f3f401232b",
+      "after_sha256": "406bc088a1c791c55b8764370c47ff8a2e9c9e80e03dd1a08005e2a51c295f18",
+      "ast_equal_except_unused_imports_and_bindings": true,
+      "assertions_exact": true,
+      "constants_exact": true,
+      "assertions": 6
+    }
+  ],
+  "findings": []
+}

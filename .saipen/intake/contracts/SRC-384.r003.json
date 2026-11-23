@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-384:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Finding A current-state: criteria above satisfied"
+    },
+    "SRC-384:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Finding B source provenance fidelity: a model interpretation cannot become operator-authoritative by being stored under user_instruction; authenticated witness required for authority"
+    },
+    "SRC-384:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Finding C safety valve and native ingress: an authentic operator request follows its supported authorization path; model replays and unsupported origins stay refused; absent native host integration creates a foreign-owner handoff and retains WAIT"
+    }
+  },
+  "derived_at": "2026-11-03T05:18:31Z",
+  "derived_from": "SRC-384",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "80b87b158ac223459bbaf1bac9ab40b512181d52ccf090d14984fe608d8e2373"
+}

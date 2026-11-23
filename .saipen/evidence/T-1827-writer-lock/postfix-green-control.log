@@ -1,0 +1,26 @@
+test_a_capture_overtaken_by_a_mutation_is_retried_outside_the_lock (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_capture_overtaken_by_a_mutation_is_retried_outside_the_lock)
+R009: the remedy is a fresh capture outside the mutex, never a retry ... ok
+test_a_long_external_capture_does_not_block_a_short_mutation (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_long_external_capture_does_not_block_a_short_mutation)
+R001/R003/R006: the measured 240 s hold was the capture, and the ... ok
+test_a_short_hold_is_waited_out_and_acquired (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_short_hold_is_waited_out_and_acquired) ... ok
+test_an_unbounded_holder_is_refused_within_the_declared_budget (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_an_unbounded_holder_is_refused_within_the_declared_budget) ... ok
+test_acquire_docstring_states_the_bounded_wait (test_t1827_writer_lock_contract.ContractAgreementTests.test_acquire_docstring_states_the_bounded_wait) ... ok
+test_core_contract_states_the_budget_override_and_refusal (test_t1827_writer_lock_contract.ContractAgreementTests.test_core_contract_states_the_budget_override_and_refusal) ... ok
+test_the_remediation_names_the_orphan_procedure_not_file_deletion (test_t1827_writer_lock_contract.ContractAgreementTests.test_the_remediation_names_the_orphan_procedure_not_file_deletion) ... ok
+test_a_saipen_holder_is_named_by_pid_and_command (test_t1827_writer_lock_contract.HolderIdentityTests.test_a_saipen_holder_is_named_by_pid_and_command) ... ok
+test_an_unreadable_holder_record_says_the_holder_is_unknown (test_t1827_writer_lock_contract.HolderIdentityTests.test_an_unreadable_holder_record_says_the_holder_is_unknown) ... ok
+test_the_status_projection_names_the_live_holder (test_t1827_writer_lock_contract.HolderIdentityTests.test_the_status_projection_names_the_live_holder) ... ok
+test_a_stale_holder_record_never_blocks_acquisition (test_t1827_writer_lock_contract.ProcessDeathAndRecordTests.test_a_stale_holder_record_never_blocks_acquisition) ... ok
+test_process_death_releases_the_lock (test_t1827_writer_lock_contract.ProcessDeathAndRecordTests.test_process_death_releases_the_lock) ... ok
+test_the_lock_file_stays_a_permanent_zero_byte_carrier (test_t1827_writer_lock_contract.ProcessDeathAndRecordTests.test_the_lock_file_stays_a_permanent_zero_byte_carrier)
+R008: never delete the lock file to cure a hold. ... ok
+test_the_ship_gate_runs_outside_the_writer_lock (test_t1827_writer_lock_contract.ReleaseGateWindowTests.test_the_ship_gate_runs_outside_the_writer_lock) ... ok
+test_a_yielded_lock_is_retaken_and_a_lost_race_refuses (test_t1827_writer_lock_contract.StatusAndYieldTests.test_a_yielded_lock_is_retaken_and_a_lost_race_refuses) ... ok
+test_lock_status_never_acquires_the_lock (test_t1827_writer_lock_contract.StatusAndYieldTests.test_lock_status_never_acquires_the_lock) ... ok
+test_saipen_status_answers_while_another_writer_holds_the_lock (test_t1827_writer_lock_contract.StatusAndYieldTests.test_saipen_status_answers_while_another_writer_holds_the_lock) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 13.671s
+
+OK
+EXIT:0

@@ -1,0 +1,206 @@
+Subject: f462ddc018977f06598f332356f9229f23b2e830
+Exit: 1
+test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) ... 
+  test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='give me a detailed forensic report with all evidence') ... FAIL
+  test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='produce a full technical audit') ... FAIL
+  test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='write a complete implementation handoff') ... FAIL
+  test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='explain everything in full detail including evidence and root cause') ... FAIL
+  test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='дай подробный форензик-отчёт со всеми доказательствами') ... FAIL
+  test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='сделай полный технический аудит') ... FAIL
+  test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='дай полный детальный хендофф') ... FAIL
+  test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='дай полный подробный технический отчёт со всеми доказательствами') ... FAIL
+  test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='anna täielik detailne tehniline aruanne koos tõenditega') ... FAIL
+  test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='tee täielik audit') ... FAIL
+  test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='anna detailne täielik handoff') ... FAIL
+test_model_cannot_authorize_detail_by_claiming_an_exception (test_response_digest.DetailIntentTests.test_model_cannot_authorize_detail_by_claiming_an_exception) ... 
+  test_model_cannot_authorize_detail_by_claiming_an_exception (test_response_digest.DetailIntentTests.test_model_cannot_authorize_detail_by_claiming_an_exception) (reasoning='this is an exceptional boundary') ... FAIL
+test_negations_and_quotes_do_not_authorize_depth (test_response_digest.DetailIntentTests.test_negations_and_quotes_do_not_authorize_depth) ... ok
+test_summary_brief_and_normal_final_report_remain_compact (test_response_digest.DetailIntentTests.test_summary_brief_and_normal_final_report_remain_compact) ... 
+  test_summary_brief_and_normal_final_report_remain_compact (test_response_digest.DetailIntentTests.test_summary_brief_and_normal_final_report_remain_compact) (request='give me a summary') ... FAIL
+  test_summary_brief_and_normal_final_report_remain_compact (test_response_digest.DetailIntentTests.test_summary_brief_and_normal_final_report_remain_compact) (request='give me a brief') ... FAIL
+  test_summary_brief_and_normal_final_report_remain_compact (test_response_digest.DetailIntentTests.test_summary_brief_and_normal_final_report_remain_compact) (request='give me a final report') ... FAIL
+test_a_model_supplied_detail_mode_does_not_authorize_host_output (test_response_digest.SurfacePressureTests.test_a_model_supplied_detail_mode_does_not_authorize_host_output) ... FAIL
+test_actual_rendered_default_fits_six_visible_lines (test_response_digest.SurfacePressureTests.test_actual_rendered_default_fits_six_visible_lines) ... FAIL
+test_real_blocker_inventory_is_not_a_default_result (test_response_digest.SurfacePressureTests.test_real_blocker_inventory_is_not_a_default_result) ... FAIL
+test_stop_report_uses_machine_facts_not_the_model_retrospective (test_response_digest.SurfacePressureTests.test_stop_report_uses_machine_facts_not_the_model_retrospective) ... FAIL
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='give me a detailed forensic report with all evidence')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 26, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='produce a full technical audit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 26, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='write a complete implementation handoff')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 26, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='explain everything in full detail including evidence and root cause')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 26, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='дай подробный форензик-отчёт со всеми доказательствами')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 26, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='сделай полный технический аудит')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 26, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='дай полный детальный хендофф')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 26, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='дай полный подробный технический отчёт со всеми доказательствами')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 26, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='anna täielik detailne tehniline aruanne koos tõenditega')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 26, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='tee täielik audit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 26, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_explicit_depth_works_in_each_supported_ingress_language (test_response_digest.DetailIntentTests.test_explicit_depth_works_in_each_supported_ingress_language) (request='anna detailne täielik handoff')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 26, in test_explicit_depth_works_in_each_supported_ingress_language
+    self.assertNotEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'NONE' == 'NONE'
+
+======================================================================
+FAIL: test_model_cannot_authorize_detail_by_claiming_an_exception (test_response_digest.DetailIntentTests.test_model_cannot_authorize_detail_by_claiming_an_exception) (reasoning='this is an exceptional boundary')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 31, in test_model_cannot_authorize_detail_by_claiming_an_exception
+    self.assertEqual(RS.detail_mode_for_request(reasoning), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXCEPTIONAL_BOUNDARY' != 'NONE'
+- EXCEPTIONAL_BOUNDARY
++ NONE
+
+
+======================================================================
+FAIL: test_summary_brief_and_normal_final_report_remain_compact (test_response_digest.DetailIntentTests.test_summary_brief_and_normal_final_report_remain_compact) (request='give me a summary')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 21, in test_summary_brief_and_normal_final_report_remain_compact
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXPLICIT_REPORT' != 'NONE'
+- EXPLICIT_REPORT
++ NONE
+
+
+======================================================================
+FAIL: test_summary_brief_and_normal_final_report_remain_compact (test_response_digest.DetailIntentTests.test_summary_brief_and_normal_final_report_remain_compact) (request='give me a brief')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 21, in test_summary_brief_and_normal_final_report_remain_compact
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXPLICIT_REPORT' != 'NONE'
+- EXPLICIT_REPORT
++ NONE
+
+
+======================================================================
+FAIL: test_summary_brief_and_normal_final_report_remain_compact (test_response_digest.DetailIntentTests.test_summary_brief_and_normal_final_report_remain_compact) (request='give me a final report')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 21, in test_summary_brief_and_normal_final_report_remain_compact
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXPLICIT_REPORT' != 'NONE'
+- EXPLICIT_REPORT
++ NONE
+
+
+======================================================================
+FAIL: test_a_model_supplied_detail_mode_does_not_authorize_host_output (test_response_digest.SurfacePressureTests.test_a_model_supplied_detail_mode_does_not_authorize_host_output)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 57, in test_a_model_supplied_detail_mode_does_not_authorize_host_output
+    self.assertFalse(verdict["ok"], verdict)
+AssertionError: True is not false : {'ok': True, 'layer': 'NONE', 'class': 'VALID_BOUNDARY', 'errors': [], 'diagnostic': None, 'layers': {'admission': 'NOT_ENFORCEABLE', 'exec_response': 'PASS', 'chat_style': 'NOT_EVALUATED'}}
+
+======================================================================
+FAIL: test_actual_rendered_default_fits_six_visible_lines (test_response_digest.SurfacePressureTests.test_actual_rendered_default_fits_six_visible_lines)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 45, in test_actual_rendered_default_fits_six_visible_lines
+    self.assertLessEqual(len(text.splitlines()), 6, text)
+AssertionError: 12 not less than or equal to 6 : STATUS
+DONE
+RESULT
+T-1598 fixed; T-1510 resumed
+BLOCKER
+NONE
+OPERATOR ACTION
+NONE
+NEXT EXACT ACTION
+NONE
+VALIDATION
+CURRENT_PASS | full core 4728 | red 0 | new_red 0
+
+======================================================================
+FAIL: test_real_blocker_inventory_is_not_a_default_result (test_response_digest.SurfacePressureTests.test_real_blocker_inventory_is_not_a_default_result)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 52, in test_real_blocker_inventory_is_not_a_default_result
+    self.assertTrue(RS.response_errors(raw), "54 complete ticket identities were accepted in the default human surface")
+AssertionError: [] is not true : 54 complete ticket identities were accepted in the default human surface
+
+======================================================================
+FAIL: test_stop_report_uses_machine_facts_not_the_model_retrospective (test_response_digest.SurfacePressureTests.test_stop_report_uses_machine_facts_not_the_model_retrospective)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_digest.py", line 64, in test_stop_report_uses_machine_facts_not_the_model_retrospective
+    self.assertIsNotNone(builder, "there is no canonical state-to-human digest owner")
+AssertionError: unexpectedly None : there is no canonical state-to-human digest owner
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.004s
+
+FAILED (failures=19)
+

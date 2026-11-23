@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "format": "unittest",
+  "timeout": 180,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t1628_opencode_policy.py", "-k", "test_compiled_facet_is_exactly_the_current_canonical_decision_table", "-v"],
+  "context": ["tools", "saipen", "bootstrap", "extensions", "tests/scenarios", "tests/fixtures", "VERSION"],
+  "oracle_files": ["tools/test_t1628_opencode_policy.py"],
+  "subject_files": ["extensions/adapters/opencode/saipen-guard.js"],
+  "before": {
+    "extensions/adapters/opencode/saipen-guard.js": ".saipen/evidence/T-1852-policy-facet/plugin-before.js"
+  }
+}

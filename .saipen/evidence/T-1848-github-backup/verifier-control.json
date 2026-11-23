@@ -1,0 +1,7 @@
+{
+  "bad_exit": 1,
+  "bad_diagnostic": "RuntimeError: the staged manifest moved",
+  "restored_exit": 0,
+  "auxiliary_index_restored_exactly": true,
+  "subject": "only the privately owned auxiliary Git index; main index untouched"
+}

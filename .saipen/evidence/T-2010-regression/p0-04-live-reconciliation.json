@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "ticket": "T-2010",
+  "source_receipt": "SRC-381",
+  "clause": "P0-04",
+  "measured_at": "2026-11-02T17:21Z",
+  "host": "ZAICODE",
+  "defect": {
+    "summary": "The router classified a blocker as live foreign staging from recorded BOARD prose alone; the live index classifier was never consulted by board.py or router.py.",
+    "recorded_claim": "PUBLICATION_STAGING_BLOCKED: 206 foreign paths are pre-staged in the shared tree",
+    "recorded_at": "2026-10-22",
+    "carriers": ["T-1816", "T-1817"]
+  },
+  "live_index": {
+    "classifier": "saipen_engine.isolated_release.inventory_staged_entries",
+    "entries": 864,
+    "by_class": {
+      "OTHER_TICKET_OR_COHORT": 669,
+      "GENERATED_OR_TRANSIENT": 101,
+      "SAIPEN_OWNED_UNREVIEWED": 94
+    },
+    "foreign_owned": 0,
+    "historical_count_discrepancy": "Live staged count (864) differs from historical 206 count"
+  },
+  "before": {
+    "operator_action": "Resolve foreign staged-batch ownership, or authorize a verified canonical isolated release; preserve the live index.",
+    "digest_blocker": "WAIT_USER_DECISION -- shared release index; foreign staging remains protected"
+  },
+  "after": {
+    "operator_action": "Decide this repository's publication policy (T-1644): full SHIP (commit, tag, push) or local commits only. The live index holds no foreign staged path, so no per-file ownership decision is owed; the isolated release path preserves the index.",
+    "digest_blocker": "WAIT_USER_DECISION -- publication policy (T-1644); the recorded foreign-staging label is not corroborated by the live index (864 staged, 0 foreign)",
+    "foreign_staged_count": 0,
+    "live_staged_count": 864,
+    "recorded_claim_corroborated": false
+  },
+  "isolated_release_supported": {
+    "command": "saipen ship --isolated",
+    "dry_run_verdict": "PASS",
+    "foreign_staging_preserved": true,
+    "original_index_sha256": "aac953475ebfdf73c8acb60c422ef7562bfa029d8a6f9beea9583983e1016089",
+    "original_index_sha256_note": "PASS at the live 2026-11-02T17:22Z index; the digest is point-in-time (prior turn measured 4d2898df... on an older index), zero files mutated in both"
+  },
+  "index_preserved": true,
+  "never_attempted": ["reset", "clean", "stash", "force-push", "self-issued publication approval"]
+}

@@ -1,0 +1,19 @@
+{
+  "source_sha256": "5d707d4c0fd724345746b2507a7f3de1d92e3b09e8403449385e231caa4c6928",
+  "candidate_sha256": "ffa94944e553e141174178f4e527bab2b6b5ba6b85cd446acc65a9b0709fae5d",
+  "bytes_removed": 391,
+  "command_resolution_before": 55642,
+  "command_resolution_predicted_after": 55251,
+  "unchanged_limit": 55296,
+  "rules_retained": [
+    "same command verbs and diagnostic/execution classification",
+    "inspect/trace number or filename",
+    "manifest write and force switches",
+    "numbered precedence before TODO",
+    "fresh named files after workable BOARD",
+    "active Work not preempted",
+    "workable inbox forbids idle/Improve",
+    "path+digest generation identity and changed-byte new generation"
+  ],
+  "state": "PREPARED ONLY; live source remains frozen under full family run"
+}

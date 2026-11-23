@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-071:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Supersede duplicate strand T-218 with T-220 which implemented its correction"
+    }
+  },
+  "derived_at": "2026-09-24T11:32:22Z",
+  "derived_from": "SRC-071",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "ba399d30103ce9f3f1b018ac992e532ea79eb86e0b41c3aa4f339bcc9442f16d"
+}

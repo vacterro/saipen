@@ -1,0 +1,21 @@
+.C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\tempfile.py:934: ResourceWarning: Implicitly cleaning up <TemporaryDirectory 'V:\\_TEMP_\\t1412-q91fsp7d'>
+  _warnings.warn(warn_message, ResourceWarning)
+.C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\tempfile.py:934: ResourceWarning: Implicitly cleaning up <TemporaryDirectory 'V:\\_TEMP_\\t1412-5eyh8fms'>
+  _warnings.warn(warn_message, ResourceWarning)
+.C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\tempfile.py:934: ResourceWarning: Implicitly cleaning up <TemporaryDirectory 'V:\\_TEMP_\\t1412-ai3su5pi'>
+  _warnings.warn(warn_message, ResourceWarning)
+.C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\tempfile.py:934: ResourceWarning: Implicitly cleaning up <TemporaryDirectory 'V:\\_TEMP_\\t1412-i0b0_kv7'>
+  _warnings.warn(warn_message, ResourceWarning)
+.....C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\tempfile.py:934: ResourceWarning: Implicitly cleaning up <TemporaryDirectory 'V:\\_TEMP_\\t1412-run6wbl5'>
+  _warnings.warn(warn_message, ResourceWarning)
+.C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\tempfile.py:934: ResourceWarning: Implicitly cleaning up <TemporaryDirectory 'V:\\_TEMP_\\t1412-5trkvi2v'>
+  _warnings.warn(warn_message, ResourceWarning)
+.C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\tempfile.py:934: ResourceWarning: Implicitly cleaning up <TemporaryDirectory 'V:\\_TEMP_\\t1412-z93qsd67'>
+  _warnings.warn(warn_message, ResourceWarning)
+.C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\tempfile.py:934: ResourceWarning: Implicitly cleaning up <TemporaryDirectory 'V:\\_TEMP_\\t1412-9k3tz0hx'>
+  _warnings.warn(warn_message, ResourceWarning)
+..................................................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 286 tests in 208.488s
+
+OK

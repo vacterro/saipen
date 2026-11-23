@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-048:R001": {
+      "class": "requirement",
+      "text": "Repair AUDAPACK's OpenCode launch boundary so SAIPEN-managed projects are launched through the canonical SAIPEN host launcher with bound actor, root, and lineage; preserve ordinary non-SAIPEN project direct launch; route compatible custom templates through SAIPEN and refuse unbound; preserve instance monitor attribution, focus reuse, and multi-instance Shift+click; ensure clean interactive TTY without stderr redirection; disable OpenCode dynamic title updates via OPENCODE_DISABLE_TERMINAL_TITLE=true; ensure durable managed console title and asynchronous non-blocking startup observation; verify on real Windows.",
+      "actionable": true
+    }
+  },
+  "derived_at": "2026-09-14T07:28:48Z",
+  "derived_from": "SRC-048",
+  "interpretation_revision": 0,
+  "schema_version": 1,
+  "source_sha256": "f716941312acb9f0d5d69860da0a7a52040d1e02cd1ee3b191b61b136e15b18a"
+}

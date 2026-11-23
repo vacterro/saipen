@@ -1,0 +1,51 @@
+{
+  "original_index_sha256": "dcb1637b2114fe07b413565018aad079a1fcefbbffe3fff6220d22556f1a9adf",
+  "before_read_only_checks_sha256": "6ed3d04a3cf6e14114833d57eae0a07595e812f38dd089a7e2f36a7221a92b86",
+  "after_read_only_checks_sha256": "6ed3d04a3cf6e14114833d57eae0a07595e812f38dd089a7e2f36a7221a92b86",
+  "original_index_preserved": false,
+  "goal_files_preserved": true,
+  "live_inventory_status": "VERIFIED_COMPLETE",
+  "staged_count": 1238,
+  "classes": {
+    "AMBIGUOUS_PROVENANCE": 50,
+    "OTHER_TICKET_OR_COHORT": 929,
+    "GENERATED_OR_TRANSIENT": 130,
+    "SAIPEN_OWNED_UNREVIEWED": 129
+  },
+  "status_exit_code": 0,
+  "post_ticket_idle_projection": {
+    "disposition": "GOAL_GAPS_ACTIONABLE",
+    "stop_reason": "NO_ADMISSIBLE_WORK",
+    "no_admissible_work": true,
+    "all_requirements_complete": false,
+    "unresolved_audit_count": 0,
+    "next_exact_action": "saipen continue",
+    "externally_blocked": [],
+    "operator_required": [],
+    "future_gated": [],
+    "active_goals": [
+      {
+        "goal_id": "self-maintenance-core",
+        "project_id": "_SAIPEN",
+        "title": "Continuous SAIPEN Self-Maintenance and Defect Elimination",
+        "objective": "Autonomously discover, evaluate, and repair verified regressions, test failures, and maintenance backlog to preserve a healthy repository",
+        "authorization_scope": "MAINTENANCE",
+        "success_criteria": {},
+        "evidence_provider": "failed_tests",
+        "current_progress": {},
+        "target_progress": {},
+        "research_or_work_backlog_source": "",
+        "admission_policy": {},
+        "current_status": "ACTIVE",
+        "last_evaluation": "",
+        "last_successful_work": null,
+        "last_discovery": null,
+        "blockers": [],
+        "completion_evidence": null,
+        "resume_metadata": {},
+        "paused": false
+      }
+    ],
+    "detail": "no runnable Board work; 1 active goals need evidence discovery"
+  }
+}

@@ -1,0 +1,361 @@
+--- a/tools/saipen_engine/release.py
++++ b/tools/saipen_engine/release.py
+@@ -2618,7 +2618,14 @@
+     try:
+         _no_publish_body(root, plan, journal)
+     except ReleaseRefusal as exc:
+-        return _release_failure("NO_PUBLISH", exc.detail)
++        untouched = _no_publish_targets_untouched(root, journal.read())
++        if untouched:
++            _try_journal(journal, "mark", "ABORTED")
++            _try_journal(journal, "update", release_stage="ABORTED")
++            _drop_settled_staged(journal)
++        return _release_failure(
++            "NO_PUBLISH", exc.detail, op_id=plan.op_id, recovery_required=not untouched
++        )
+     _try_journal(journal, "mark", "COMMITTED")
+     _try_journal(journal, "update", release_stage="COMMITTED")
+     cleanup_pending = _drop_settled_staged(journal)
+@@ -2637,6 +2644,33 @@
+     if cleanup_pending:
+         result["cleanup_pending"] = cleanup_pending
+     return result
++
++
++def _no_publish_targets_untouched(root: Path, record: dict) -> bool:
++    """Prove that no effective closure target landed, including marker lag."""
++    from .journal import (
++        MISSING_FILE_DEPENDENCY,
++        TARGET_ALREADY_APPLIED,
++        TARGET_PENDING,
++        classify_target,
++        hash_file_dependency,
++        is_noop_target,
++        owned_target_path,
++    )
++
++    try:
++        for target in record.get("targets", []):
++            live = hash_file_dependency(owned_target_path(root, target["path"]))
++            if live == MISSING_FILE_DEPENDENCY:
++                live = ""
++            classification = classify_target(live, target["before_hash"], target["after_hash"])
++            if is_noop_target(target) and classification == TARGET_ALREADY_APPLIED:
++                continue
++            if target.get("applied") or classification != TARGET_PENDING:
++                return False
++    except (OSError, ValueError, KeyError, TypeError):
++        return False
++    return True
+ 
+ 
+ def _no_publish_body(root: Path, plan: ReleasePlan, journal) -> None:
+@@ -2981,17 +3015,13 @@
+ def _gate_command(root: Path, gate: str) -> list[str]:
+     """The validator that judges this release, as argv.
+ 
+-    A SAIPEN source tree validates itself: the checks it ships are the checks
+-    it is released under. T-1746: a managed project carries no
+-    `tools/validate.py`, and the path was built from the project root alone,
+-    so every release body in a managed project died on a missing file. There
+-    the validator is the one beside this engine, bound to the project by
+-    `--project-root` -- the same authority `conformance` resolves.
++    The running home validates itself. A managed project is judged by that
++    same validator, bound through `--project-root`; the presence of an
++    unrelated project-local `tools/validate.py` grants it no authority.
+     """
+-    local = root / "tools" / "validate.py"
+-    if local.is_file():
+-        return [sys.executable, str(local), "--gate", gate]
+     canonical = Path(__file__).resolve().parent.parent / "validate.py"
++    if root.resolve() == canonical.parent.parent:
++        return [sys.executable, str(canonical), "--gate", gate]
+     return [sys.executable, str(canonical), "--project-root", str(root), "--gate", gate]
+ 
+ 
+@@ -4322,14 +4352,14 @@
+     """no-publish recovery: replay any unapplied closure targets, verify,
+     COMMITTED. No git facts exist to classify.
+ 
+-    A PREPARED no-publish op with NO applied closure target never began: the
++    A no-publish op with byte-proven untouched closure targets never began: the
+     journal was created (Journal.start) and possibly the local gate ran, but
+     no canonical byte changed. Marking it COMMITTED would fabricate a
+     successful release completion out of a crash-before-body -- the journal's
+     own rule for a PREPARED op with nothing applied is ABORTED, and the
+-    no-publish path must mirror it (T-1003 release recovery)."""
+-    targets = record.get("targets", [])
+-    if not any(t.get("applied") for t in targets):
++    no-publish path must mirror it (T-1003 release recovery). Progress markers
++    alone cannot prove absence of a write or waive a third-state conflict."""
++    if _no_publish_targets_untouched(root, record):
+         _try_recovery_journal(journal, "mark", "ABORTED")
+         _try_recovery_journal(journal, "update", release_stage="ABORTED")
+         return {
+--- a/tools/test_t1746_crew_terminal_outcome.py
++++ b/tools/test_t1746_crew_terminal_outcome.py
+@@ -17,11 +17,13 @@
+ import json
+ import shutil
+ import unittest
++from pathlib import Path
+ from types import SimpleNamespace
+ from unittest.mock import patch
+ 
+ import test_source_receipts as fixtures
+ from saipen_engine import crew, release
++from saipen_engine.journal import Journal
+ from saipen_engine.operations import release_scope_hash
+ from saipen_engine.paths import identity_file_content
+ from saipen_engine.subs import CREW_ROLES
+@@ -692,13 +694,9 @@
+         self.assertNotIn("can't open file", verdict.get("detail", ""), verdict)
+ 
+     def test_a_source_tree_keeps_validating_itself(self):
+-        self._shape()
+-        (self.root / "tools").mkdir(exist_ok=True)
+-        local = self.root / "tools" / "validate.py"
+-        local.write_text("raise SystemExit(0)\n", encoding="utf-8")
+-        command = release._gate_command(self.root, "ship")
+-        self.assertEqual(command[1:], [str(local), "--gate", "ship"])
+-        self.assertEqual(release._run_gate(self.root, "ship"), {"ok": True})
++        home = Path(release.__file__).resolve().parents[2]
++        command = release._gate_command(home, "ship")
++        self.assertEqual(command[1:], [str(home / "tools/validate.py"), "--gate", "ship"])
+ 
+ 
+ class RecoveryAndReceipts(_DownstreamShape):
+@@ -763,9 +761,8 @@
+             refused = release.execute_release(self.root, plan)
+         self.assertFalse(refused["ok"], refused)
+         self.assertEqual(refused["stage"], "NO_PUBLISH", refused)
+-        self.assertEqual(self._refusal().code, "RECOVERY_REQUIRED")
+-        aborted = release.recover_release_op(self.root, plan.op_id)
+-        self.assertEqual((aborted["ok"], aborted["code"]), (True, "ABORTED"), aborted)
++        self.assertFalse(refused["recovery_required"], refused)
++        self.assertEqual(Journal(self.root, plan.op_id).read()["status"], "ABORTED")
+         closed, _result = self._close()
+         verdict = self._verdict()
+         self.assertEqual(verdict["status"], "ok", verdict)
+--- /dev/null
++++ b/tools/test_t1750_release_boundary.py
+@@ -0,0 +1,219 @@
++"""Refused local releases settle only untouched plans; runtime owns validation."""
++
++import hashlib
++from pathlib import Path
++import unittest
++from unittest.mock import patch
++
++from saipen_engine import release
++from saipen_engine.journal import Journal, scan_pending
++from test_t1746_crew_terminal_outcome import _DownstreamShape
++
++
++class RefusedLocalReleaseTests(_DownstreamShape):
++    def _record(self, plan):
++        return Journal(self.root, plan.op_id).read()
++
++    def test_failed_gate_aborts_and_two_retries_need_no_recovery(self):
++        self._shape()
++        canonical = self._canonical()
++        for _ in range(2):
++            plan = self._plan()
++            ready, _gate, parity = self._patches()
++            with ready, parity, patch.object(
++                release, "_run_gate", return_value={"ok": False, "detail": "FAIL: fixture"}
++            ):
++                refused = release.execute_release(self.root, plan)
++            self.assertFalse(refused["ok"], refused)
++            self.assertEqual(refused["stage"], "NO_PUBLISH", refused)
++            self.assertEqual(self._record(plan)["status"], "ABORTED")
++            self.assertEqual(scan_pending(self.root), ([], []))
++            self.assertEqual(self._canonical(), canonical)
++            self.assertNotEqual(self._verdict()["status"], "ok")
++        closed, _result = self._close()
++        self.assertEqual(self._verdict()["evidence"]["op_id"], closed.op_id)
++
++    def test_closure_planning_refusal_aborts_without_changing_canonical_bytes(self):
++        self._shape()
++        plan = self._plan()
++        canonical = self._canonical()
++        with patch.object(
++            release, "_finish_targets",
++            side_effect=release.ReleaseRefusal("RELEASE_FAILED", "fixture"),
++        ):
++            refused = self._apply(plan)
++        self.assertFalse(refused["ok"], refused)
++        self.assertEqual(self._record(plan)["status"], "ABORTED")
++        self.assertEqual(self._canonical(), canonical)
++        self.assertEqual(scan_pending(self.root), ([], []))
++
++    def test_registered_but_untouched_targets_abort(self):
++        self._shape()
++        plan = self._plan()
++        canonical = self._canonical()
++
++        def refuse(root, journal, targets):
++            journal.append_targets(targets)
++            raise release.ReleaseRefusal("RELEASE_FAILED", "before the first target")
++
++        with patch.object(release, "_apply_closure_targets", side_effect=refuse):
++            refused = self._apply(plan)
++        self.assertFalse(refused["ok"], refused)
++        self.assertTrue(self._record(plan)["targets"])
++        self.assertEqual(self._record(plan)["status"], "ABORTED")
++        self.assertEqual(self._canonical(), canonical)
++        self.assertEqual(scan_pending(self.root), ([], []))
++
++    def test_refusal_after_a_marked_target_keeps_recovery_and_replays(self):
++        self._shape()
++        plan = self._plan()
++        original = release._mark_target
++
++        def refuse(journal, index):
++            original(journal, index)
++            raise release.ReleaseRefusal("RELEASE_FAILED", "after a target")
++
++        with patch.object(release, "_mark_target", side_effect=refuse):
++            refused = self._apply(plan)
++        self.assertFalse(refused["ok"], refused)
++        self.assertNotEqual(self._record(plan)["status"], "ABORTED")
++        self.assertEqual(self._refusal().code, "RECOVERY_REQUIRED")
++        recovered = release.recover_release_op(self.root, plan.op_id)
++        self.assertEqual((recovered["ok"], recovered["code"]), (True, "COMMITTED"), recovered)
++        self.assertEqual(self._verdict()["status"], "ok")
++
++    def test_landed_bytes_without_a_progress_marker_keep_recovery(self):
++        self._shape()
++        plan = self._plan()
++        with patch.object(
++            release, "_mark_target",
++            side_effect=release.ReleaseRefusal("RELEASE_FAILED", "marker failed"),
++        ):
++            refused = self._apply(plan)
++        self.assertFalse(refused["ok"], refused)
++        record = self._record(plan)
++        self.assertFalse(any(target["applied"] for target in record["targets"]))
++        self.assertNotEqual(record["status"], "ABORTED")
++        self.assertEqual(self._refusal().code, "RECOVERY_REQUIRED")
++        recovered = release.recover_release_op(self.root, plan.op_id)
++        self.assertEqual((recovered["ok"], recovered["code"]), (True, "COMMITTED"), recovered)
++        self.assertEqual(self._verdict()["status"], "ok")
++
++    def test_foreign_bytes_preserve_the_operation_and_refuse_recovery(self):
++        self._shape()
++        plan = self._plan()
++        changed = []
++
++        def refuse(root, journal, targets):
++            journal.append_targets(targets)
++            path = root / targets[0]["path"]
++            foreign = path.read_bytes() + b"\nforeign writer\n"
++            path.write_bytes(foreign)
++            changed.append((path, foreign))
++            raise release.ReleaseRefusal("RELEASE_FAILED", "third-state target")
++
++        with patch.object(release, "_apply_closure_targets", side_effect=refuse):
++            refused = self._apply(plan)
++        self.assertFalse(refused["ok"], refused)
++        self.assertNotEqual(self._record(plan)["status"], "ABORTED")
++        recovered = release.recover_release_op(self.root, plan.op_id)
++        self.assertEqual((recovered["ok"], recovered["code"]), (False, "CONFLICT"), recovered)
++        self.assertEqual(changed[0][0].read_bytes(), changed[0][1])
++
++    def test_a_marked_noop_does_not_turn_an_untouched_refusal_into_recovery(self):
++        self._shape()
++        plan = self._plan()
++        canonical = self._canonical()
++
++        def refuse(root, journal, targets):
++            path = root / ".saipen/STATE.md"
++            content = path.read_bytes()
++            digest = hashlib.sha256(content).hexdigest()[:16]
++            journal.append_targets([{
++                "path": ".saipen/STATE.md", "role": "state", "content": content,
++                "before_hash": digest, "after_hash": digest,
++            }])
++            release._mark_target(journal, 0)
++            raise release.ReleaseRefusal("RELEASE_FAILED", "only a no-op was reached")
++
++        with patch.object(release, "_apply_closure_targets", side_effect=refuse):
++            refused = self._apply(plan)
++        self.assertFalse(refused["ok"], refused)
++        self.assertEqual(self._record(plan)["status"], "ABORTED")
++        self.assertEqual(self._canonical(), canonical)
++        self.assertEqual(scan_pending(self.root), ([], []))
++
++    def test_process_death_before_body_still_requires_canonical_recovery(self):
++        self._shape()
++        plan = self._plan()
++        canonical = self._canonical()
++        death = patch.object(release, "_no_publish_body", side_effect=SystemExit(86))
++        with death, self.assertRaises(SystemExit):
++            self._apply(plan)
++        self.assertEqual(self._record(plan)["status"], "PREPARED")
++        self.assertEqual(self._refusal().code, "RECOVERY_REQUIRED")
++        recovered = release.recover_release_op(self.root, plan.op_id)
++        self.assertEqual((recovered["ok"], recovered["code"]), (True, "ABORTED"), recovered)
++        self.assertEqual(self._canonical(), canonical)
++
++
++class RuntimeValidatorTests(_DownstreamShape):
++    def _home(self):
++        home = self.root / "runtime-home"
++        engine = home / "tools/saipen_engine/release.py"
++        engine.parent.mkdir(parents=True)
++        engine.write_text("# running engine location\n", encoding="utf-8")
++        return home, engine
++
++    def test_downstream_validator_cannot_replace_the_runtime_gate(self):
++        home, engine = self._home()
++        project = self.root / "managed"
++        (project / "tools").mkdir(parents=True)
++        local_marker = project / "local-ran.txt"
++        runtime_marker = home / "runtime-ran.txt"
++        (project / "tools/validate.py").write_text(
++            "from pathlib import Path\n"
++            f"Path({str(local_marker)!r}).write_text('local', encoding='utf-8')\n"
++            "raise SystemExit(0)\n", encoding="utf-8",
++        )
++        canonical = home / "tools/validate.py"
++        canonical.write_text(
++            "from pathlib import Path\n"
++            f"Path({str(runtime_marker)!r}).write_text('runtime', encoding='utf-8')\n"
++            "print('FAIL: canonical fixture')\nraise SystemExit(1)\n", encoding="utf-8",
++        )
++        with patch.object(release, "__file__", str(engine)):
++            command = release._gate_command(project, "core")
++            verdict = release._run_gate(project, "core")
++        self.assertEqual(command[1:], [
++            str(canonical), "--project-root", str(project), "--gate", "core",
++        ])
++        self.assertFalse(verdict["ok"], verdict)
++        self.assertIn("canonical fixture", verdict["detail"])
++        self.assertTrue(runtime_marker.is_file())
++        self.assertFalse(local_marker.exists())
++
++    def test_running_home_keeps_self_validation(self):
++        home, engine = self._home()
++        canonical = home / "tools/validate.py"
++        canonical.write_text("raise SystemExit(0)\n", encoding="utf-8")
++        with patch.object(release, "__file__", str(engine)):
++            self.assertEqual(release._gate_command(home, "ship")[1:], [
++                str(canonical), "--gate", "ship",
++            ])
++            self.assertEqual(release._run_gate(home, "ship"), {"ok": True})
++
++    def test_missing_runtime_validator_cannot_fall_back_to_downstream_code(self):
++        home, engine = self._home()
++        project = self.root / "managed"
++        (project / "tools").mkdir(parents=True)
++        (project / "tools/validate.py").write_text("raise SystemExit(0)\n", encoding="utf-8")
++        with patch.object(release, "__file__", str(engine)):
++            command = release._gate_command(project, "core")
++            verdict = release._run_gate(project, "core")
++        self.assertEqual(Path(command[1]), home / "tools/validate.py")
++        self.assertFalse(verdict["ok"], verdict)
++
++
++if __name__ == "__main__":
++    unittest.main()

@@ -1,0 +1,51 @@
+FF.FFF
+======================================================================
+FAIL: test_a_record_preserves_the_reported_process_ids (test_t1633_process_tree.ProcessOwnership.test_a_record_preserves_the_reported_process_ids)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1633-pair-ipmg2mly\project\tools\test_t1633_process_tree.py", line 128, in test_a_record_preserves_the_reported_process_ids
+    self.assertEqual(record.get("processes_leaked"), [12345])
+AssertionError: None != [12345]
+
+======================================================================
+FAIL: test_core_family_reports_and_reaps_a_shards_lingering_host (test_t1633_process_tree.ProcessOwnership.test_core_family_reports_and_reaps_a_shards_lingering_host)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1633-pair-ipmg2mly\project\tools\test_t1633_process_tree.py", line 112, in test_core_family_reports_and_reaps_a_shards_lingering_host
+    self.assert_host_gone()
+  File "V:\_TEMP_\saipen-t1633-pair-ipmg2mly\project\tools\test_t1633_process_tree.py", line 58, in assert_host_gone
+    self.assertFalse(core_unit.pid_alive(self.host_pid), "host outlived its smoke launcher")
+AssertionError: True is not false : host outlived its smoke launcher
+
+======================================================================
+FAIL: test_successful_shim_cannot_leave_a_detached_host (test_t1633_process_tree.ProcessOwnership.test_successful_shim_cannot_leave_a_detached_host)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1633-pair-ipmg2mly\project\tools\test_t1633_process_tree.py", line 87, in test_successful_shim_cannot_leave_a_detached_host
+    self.assert_host_gone()
+  File "V:\_TEMP_\saipen-t1633-pair-ipmg2mly\project\tools\test_t1633_process_tree.py", line 58, in assert_host_gone
+    self.assertFalse(core_unit.pid_alive(self.host_pid), "host outlived its smoke launcher")
+AssertionError: True is not false : host outlived its smoke launcher
+
+======================================================================
+FAIL: test_timeout_reaps_a_host_even_after_its_shim_has_exited (test_t1633_process_tree.ProcessOwnership.test_timeout_reaps_a_host_even_after_its_shim_has_exited)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1633-pair-ipmg2mly\project\tools\test_t1633_process_tree.py", line 79, in test_timeout_reaps_a_host_even_after_its_shim_has_exited
+    self.assertLess(time.monotonic() - began, 8, "timeout waited for the orphan to exit")
+AssertionError: 15.062000000005355 not less than 8 : timeout waited for the orphan to exit
+
+======================================================================
+FAIL: test_timeout_reaps_host_and_keeps_an_unrelated_process_alive (test_t1633_process_tree.ProcessOwnership.test_timeout_reaps_host_and_keeps_an_unrelated_process_alive)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1633-pair-ipmg2mly\project\tools\test_t1633_process_tree.py", line 68, in test_timeout_reaps_host_and_keeps_an_unrelated_process_alive
+    self.assert_host_gone()
+  File "V:\_TEMP_\saipen-t1633-pair-ipmg2mly\project\tools\test_t1633_process_tree.py", line 58, in assert_host_gone
+    self.assertFalse(core_unit.pid_alive(self.host_pid), "host outlived its smoke launcher")
+AssertionError: True is not false : host outlived its smoke launcher
+
+----------------------------------------------------------------------
+Ran 6 tests in 29.545s
+
+FAILED (failures=5)

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-120:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Separate INAUDIT active Inbox from durable capture History: one canonical presentation classification, Inbox default, History view, truthful counts, no record deletion (AUDAPACK only)"
+    }
+  },
+  "derived_at": "2026-10-05T20:58:26Z",
+  "derived_from": "SRC-120",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "bf6039fe1465a8cf3eefbd3e834263cea31564310f1062104de4ade083d61998"
+}

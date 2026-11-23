@@ -1,0 +1,9 @@
+PASS  pre-change JSON carries no readiness
+PASS  pre-change human output names no readiness
+PASS  pre-change human output is exactly the phase verdict
+PASS  post-change JSON names AUDIT_OUTSTANDING
+PASS  post-change JSON still publishes phase DONE
+PASS  post-change human output names the same status
+PASS  post-change human output quotes the authority unchanged
+PASS  post-change JSON grants no authority
+CONTROL HOLDS

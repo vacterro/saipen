@@ -1,0 +1,68 @@
+"""SCOUT probe (T-1634): which test modules write the OPERATOR's profile?
+
+For each module: snapshot the operator's real health records and the size of
+the live authority service's log, run the module, compare. A record whose
+`hook` is not the operator's installed hook artifact was written by a fixture.
+
+Usage: python leak_probe.py <repo root> <module> [<module> ...]
+"""
+
+import json
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(sys.argv[1]).resolve()
+HOME = Path.home()
+HEALTH = HOME / ".saipen" / "health"
+LOG = HOME / ".saipen" / "authority" / "broker.log"
+
+
+def snapshot() -> dict:
+    seen = {}
+    if HEALTH.is_dir():
+        for path in sorted(HEALTH.glob("*.json")):
+            try:
+                seen[path.name] = path.read_bytes()
+            except OSError:
+                seen[path.name] = None
+    seen["#log"] = LOG.stat().st_size if LOG.is_file() else 0
+    return seen
+
+
+def installed_hook(host: str) -> str:
+    return str((HOME / f".{host}" / "hooks" / "saipen-guard.py").resolve()).lower()
+
+
+for module in sys.argv[2:]:
+    before = snapshot()
+    started = time.perf_counter()
+    proc = subprocess.run(
+        [sys.executable, "-B", "-m", "unittest", module],
+        cwd=str(ROOT / "tools"), capture_output=True, stdin=subprocess.DEVNULL, timeout=1800,
+    )
+    took = time.perf_counter() - started
+    after = snapshot()
+    tail = proc.stderr.decode("utf-8", errors="replace").strip().splitlines()
+    summary = " | ".join(line for line in tail if line.startswith(("Ran ", "OK", "FAILED")))
+    findings = []
+    for name, data in after.items():
+        if name == "#log":
+            if data != before.get(name):
+                findings.append(f"live-authority-log +{data - before.get(name, 0)} bytes")
+            continue
+        if data == before.get(name) or data is None:
+            continue
+        try:
+            record = json.loads(data.decode("utf-8"))
+        except ValueError:
+            findings.append(f"{name}: unreadable")
+            continue
+        hook = str(record.get("hook") or "").lower()
+        if hook != installed_hook(name.removesuffix(".json")):
+            findings.append(f"{name}: FOREIGN hook {record.get('hook')} state {record.get('state')} "
+                            f"code {record.get('code')}")
+        else:
+            findings.append(f"{name}: rewritten by the installed hook (a real prompt)")
+    print(f"{module:44} {took:6.1f}s  {summary:28}  {'; '.join(findings) or 'clean'}", flush=True)

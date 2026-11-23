@@ -1,0 +1,734 @@
+..F...EF.FEEE.FFEEEE.EEEEEEEEEEEEEE..EEEE..EEEFEE....EE.EEFF.EEE..EEFEEEE
+======================================================================
+ERROR: test_a_changed_style_is_redelivered_on_the_next_prompt (test_protocol_admission.ClaudeHostTests.test_a_changed_style_is_redelivered_on_the_next_prompt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 857, in test_a_changed_style_is_redelivered_on_the_next_prompt
+    self.assertIn("=== STYLE.md", out["hookSpecificOutput"]["additionalContext"])
+                                  ~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'hookSpecificOutput'
+
+======================================================================
+ERROR: test_compaction_wipes_the_context_so_the_next_session_start_redelivers (test_protocol_admission.ClaudeHostTests.test_compaction_wipes_the_context_so_the_next_session_start_redelivers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 867, in test_compaction_wipes_the_context_so_the_next_session_start_redelivers
+    self.assertIn("=== BOOT.md", out["hookSpecificOutput"]["additionalContext"])
+                                 ~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'hookSpecificOutput'
+
+======================================================================
+ERROR: test_the_first_prompt_delivers_authority_before_the_model_runs (test_protocol_admission.ClaudeHostTests.test_the_first_prompt_delivers_authority_before_the_model_runs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 834, in test_the_first_prompt_delivers_authority_before_the_model_runs
+    context = out["hookSpecificOutput"]["additionalContext"]
+              ~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'hookSpecificOutput'
+
+======================================================================
+ERROR: test_the_second_prompt_is_not_charged_the_full_delivery (test_protocol_admission.ClaudeHostTests.test_the_second_prompt_is_not_charged_the_full_delivery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 842, in test_the_second_prompt_is_not_charged_the_full_delivery
+    second = self._prompt()["hookSpecificOutput"]["additionalContext"]
+             ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'hookSpecificOutput'
+
+======================================================================
+ERROR: test_a_foreign_session_record_is_not_this_sessions_evidence (test_protocol_admission.ForgedLedgerTests.test_a_foreign_session_record_is_not_this_sessions_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 478, in test_a_foreign_session_record_is_not_this_sessions_evidence
+    self.world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_forged_provenance_field_does_not_verify_either (test_protocol_admission.ForgedLedgerTests.test_a_forged_provenance_field_does_not_verify_either)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 458, in test_a_forged_provenance_field_does_not_verify_either
+    self._admit_then_make_stale()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 422, in _admit_then_make_stale
+    self.world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_resealed_current_looking_record_is_never_admitted (test_protocol_admission.ForgedLedgerTests.test_a_resealed_current_looking_record_is_never_admitted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 447, in test_a_resealed_current_looking_record_is_never_admitted
+    self._admit_then_make_stale()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 422, in _admit_then_make_stale
+    self.world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_establish_without_a_capability_installs_nothing_over_the_forge (test_protocol_admission.ForgedLedgerTests.test_establish_without_a_capability_installs_nothing_over_the_forge)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 467, in test_establish_without_a_capability_installs_nothing_over_the_forge
+    self._admit_then_make_stale()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 422, in _admit_then_make_stale
+    self.world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_new_session_does_not_inherit_the_record (test_protocol_admission.InvalidationTests.test_a_new_session_does_not_inherit_the_record)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 623, in test_a_new_session_does_not_inherit_the_record
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_project_rebind_is_stale (test_protocol_admission.InvalidationTests.test_a_project_rebind_is_stale)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 607, in test_a_project_rebind_is_stale
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_removed_host_hook_refuses (test_protocol_admission.InvalidationTests.test_a_removed_host_hook_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 616, in test_a_removed_host_hook_refuses
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_runtime_version_change_is_stale (test_protocol_admission.InvalidationTests.test_a_runtime_version_change_is_stale)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 602, in test_a_runtime_version_change_is_stale
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_an_unobservable_model_is_reported_not_treated_as_a_change (test_protocol_admission.InvalidationTests.test_an_unobservable_model_is_reported_not_treated_as_a_change)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 575, in test_an_unobservable_model_is_reported_not_treated_as_a_change
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_boot_change_is_stale (test_protocol_admission.InvalidationTests.test_boot_change_is_stale)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 558, in test_boot_change_is_stale
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_execution_change_is_stale (test_protocol_admission.InvalidationTests.test_execution_change_is_stale)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 553, in test_execution_change_is_stale
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_model_replacement_cannot_inherit_the_token (test_protocol_admission.InvalidationTests.test_model_replacement_cannot_inherit_the_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 563, in test_model_replacement_cannot_inherit_the_token
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_provider_replacement_cannot_inherit_the_token (test_protocol_admission.InvalidationTests.test_provider_replacement_cannot_inherit_the_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 571, in test_provider_replacement_cannot_inherit_the_token
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_reconnect_and_crash_leave_no_reusable_token (test_protocol_admission.InvalidationTests.test_reconnect_and_crash_leave_no_reusable_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 629, in test_reconnect_and_crash_leave_no_reusable_token
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_style_change_makes_the_old_token_stale_until_readmission (test_protocol_admission.InvalidationTests.test_style_change_makes_the_old_token_stale_until_readmission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 544, in test_style_change_makes_the_old_token_stale_until_readmission
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_the_activation_block_change_is_stale (test_protocol_admission.InvalidationTests.test_the_activation_block_change_is_stale)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 581, in test_the_activation_block_change_is_stale
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_the_skill_contract_change_is_stale (test_protocol_admission.InvalidationTests.test_the_skill_contract_change_is_stale)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 597, in test_the_skill_contract_change_is_stale
+    self._admit()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 534, in _admit
+    self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_detailed_request_with_admission_passes (test_protocol_admission.LayeringTests.test_a_detailed_request_with_admission_passes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 691, in test_a_detailed_request_with_admission_passes
+    result = gate(self.world, nine, detail_mode=RS.DETAIL_MODE_REPORT)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 642, in gate
+    world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_stale_token_blocks_at_the_admission_layer (test_protocol_admission.LayeringTests.test_a_stale_token_blocks_at_the_admission_layer)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 695, in test_a_stale_token_blocks_at_the_admission_layer
+    self.world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_admission_does_not_excuse_a_style_invalid_reply (test_protocol_admission.LayeringTests.test_admission_does_not_excuse_a_style_invalid_reply)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 679, in test_admission_does_not_excuse_a_style_invalid_reply
+    result = gate(self.world, ESSAY)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 642, in gate
+    world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_admission_does_not_excuse_an_invalid_operational_reply (test_protocol_admission.LayeringTests.test_admission_does_not_excuse_an_invalid_operational_reply)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 673, in test_admission_does_not_excuse_an_invalid_operational_reply
+    result = gate(self.world, "Everything is fine.", operational_turn=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 642, in gate
+    world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_admission_plus_a_compliant_reply_passes_every_layer (test_protocol_admission.LayeringTests.test_admission_plus_a_compliant_reply_passes_every_layer)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 667, in test_admission_plus_a_compliant_reply_passes_every_layer
+    result = gate(self.world, VALID_REPLY)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 642, in gate
+    world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_current_session_is_not_charged_a_second_delivery (test_protocol_admission.OwnerStateTests.test_a_current_session_is_not_charged_a_second_delivery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 167, in test_a_current_session_is_not_charged_a_second_delivery
+    self.world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_ledger_that_proves_fewer_documents_than_required_is_stale (test_protocol_admission.OwnerStateTests.test_a_ledger_that_proves_fewer_documents_than_required_is_stale)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 182, in test_a_ledger_that_proves_fewer_documents_than_required_is_stale
+    self.world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_missing_authority_document_refuses_naming_it (test_protocol_admission.OwnerStateTests.test_a_missing_authority_document_refuses_naming_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 175, in test_a_missing_authority_document_refuses_naming_it
+    verdict = self.world.establish()
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_an_uncompilable_style_authority_is_refused_not_defaulted (test_protocol_admission.OwnerStateTests.test_an_uncompilable_style_authority_is_refused_not_defaulted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 194, in test_an_uncompilable_style_authority_is_refused_not_defaulted
+    verdict = self.world.establish()
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_establishing_delivers_every_authority_and_admits (test_protocol_admission.OwnerStateTests.test_establishing_delivers_every_authority_and_admits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 159, in test_establishing_delivers_every_authority_and_admits
+    verdict = self.world.establish()
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_admitted_through_the_same_oracle_passes (test_protocol_admission.PreFixOracleTests.test_admitted_through_the_same_oracle_passes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 786, in test_admitted_through_the_same_oracle_passes
+    self.world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_missing_required_skill_evidence_escaped_before_and_is_refused_now (test_protocol_admission.PreFixOracleTests.test_missing_required_skill_evidence_escaped_before_and_is_refused_now)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 782, in test_missing_required_skill_evidence_escaped_before_and_is_refused_now
+    verdict = self.world.establish(policy=policy)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_real_init_then_the_same_turn_final_reply_is_gated_by_admission (test_protocol_admission.SameTurnInitTests.test_real_init_then_the_same_turn_final_reply_is_gated_by_admission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 997, in test_real_init_then_the_same_turn_final_reply_is_gated_by_admission
+    context = out["hookSpecificOutput"]["additionalContext"]
+              ~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'hookSpecificOutput'
+
+======================================================================
+ERROR: test_an_edited_record_fails_its_seal (test_protocol_admission.SelfReportTests.test_an_edited_record_fails_its_seal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 213, in test_an_edited_record_fails_its_seal
+    self.world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_an_unresolvable_critical_skill_never_becomes_admitted (test_protocol_admission.SkillTests.test_an_unresolvable_critical_skill_never_becomes_admitted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 519, in test_an_unresolvable_critical_skill_never_becomes_admitted
+    verdict = self.world.establish()
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_an_unresolvable_decorative_skill_is_a_reported_diagnostic_not_silence (test_protocol_admission.SkillTests.test_an_unresolvable_decorative_skill_is_a_reported_diagnostic_not_silence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 511, in test_an_unresolvable_decorative_skill_is_a_reported_diagnostic_not_silence
+    verdict = self.world.establish()
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_the_real_layout_resolves_by_identity_and_the_runtime_delivers_it (test_protocol_admission.SkillTests.test_the_real_layout_resolves_by_identity_and_the_runtime_delivers_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 499, in test_the_real_layout_resolves_by_identity_and_the_runtime_delivers_it
+    verdict = self.world.establish()
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_direct_import_cannot_invalidate (test_protocol_admission.TransportAuthorityTests.test_a_direct_import_cannot_invalidate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 297, in test_a_direct_import_cannot_invalidate
+    self.world.establish()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 126, in establish
+    target, transport=self.transport("establish", session_id=target.session_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_a_forged_transport_env_is_not_a_capability (test_protocol_admission.TransportAuthorityTests.test_a_forged_transport_env_is_not_a_capability)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 310, in test_a_forged_transport_env_is_not_a_capability
+    self.world.transport()  # the key exists; the forger still cannot use it
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_bootstrap_never_replaces_an_existing_key (test_protocol_admission.TransportAuthorityTests.test_bootstrap_never_replaces_an_existing_key)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 411, in test_bootstrap_never_replaces_an_existing_key
+    first = PA.bootstrap_transport_key(self.world.project)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_capability_shapes_are_refused_not_crashed (test_protocol_admission.TransportAuthorityTests.test_capability_shapes_are_refused_not_crashed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 396, in test_capability_shapes_are_refused_not_crashed
+    self.world.transport()  # key exists
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_the_cli_with_a_genuine_host_capability_establishes (test_protocol_admission.TransportAuthorityTests.test_the_cli_with_a_genuine_host_capability_establishes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 345, in test_the_cli_with_a_genuine_host_capability_establishes
+    env[PA.TRANSPORT_ENV] = self.world.transport("establish", "UserPromptSubmit")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 120, in transport
+    key = PA.bootstrap_transport_key(self.project)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute 'bootstrap_transport_key'
+
+======================================================================
+ERROR: test_the_host_hook_mints_capabilities_the_owner_accepts (test_protocol_admission.TransportAuthorityTests.test_the_host_hook_mints_capabilities_the_owner_accepts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 385, in test_the_host_hook_mints_capabilities_the_owner_accepts
+    cap = module.transport_capability(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'claude_guard_hook' has no attribute 'transport_capability'
+
+======================================================================
+FAIL: test_claude_is_mechanical_at_the_prompt_boundary_and_not_universal (test_protocol_admission.CapabilityMatrixTests.test_claude_is_mechanical_at_the_prompt_boundary_and_not_universal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 1053, in test_claude_is_mechanical_at_the_prompt_boundary_and_not_universal
+    self.assertEqual(claude["admission_enforcement"], "MECHANICAL")
+AssertionError: 'UNAVAILABLE' != 'MECHANICAL'
+- UNAVAILABLE
++ MECHANICAL
+
+
+======================================================================
+FAIL: test_a_model_switch_invalidates_the_admission (test_protocol_admission.ClaudeHostTests.test_a_model_switch_invalidates_the_admission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 878, in test_a_model_switch_invalidates_the_admission
+    self.assertEqual(PA.evaluate(self.world.ctx())["state"], PA.STATE_BINDING)
+AssertionError: 'REFUSED' != 'BINDING'
+- REFUSED
++ BINDING
+
+
+======================================================================
+FAIL: test_bootstrap_tool_activity_is_never_gated_while_unadmitted (test_protocol_admission.ClaudeHostTests.test_bootstrap_tool_activity_is_never_gated_while_unadmitted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 895, in test_bootstrap_tool_activity_is_never_gated_while_unadmitted
+    self.assertEqual(PA.evaluate(self.world.ctx())["state"], PA.STATE_BINDING)
+AssertionError: 'REFUSED' != 'BINDING'
+- REFUSED
++ BINDING
+
+
+======================================================================
+FAIL: test_the_stop_gate_passes_an_admitted_compliant_reply (test_protocol_admission.ClaudeHostTests.test_the_stop_gate_passes_an_admitted_compliant_reply)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 923, in test_the_stop_gate_passes_an_admitted_compliant_reply
+    self.assertIsNone(out, out)
+AssertionError: {'decision': 'block', 'reason': 'SAIPEN PROTOCOL ADMISSION REFUSED -- host claude declares admission_enforcement=UNAVAILABLE: no evidence channel to prove it -- No reply is permitted until admission is current. The runtime re-delivers authority on the next prompt; a REFUSED state needs the operator action named above.'} is not None : {'decision': 'block', 'reason': 'SAIPEN PROTOCOL ADMISSION REFUSED -- host claude declares admission_enforcement=UNAVAILABLE: no evidence channel to prove it -- No reply is permitted until admission is current. The runtime re-delivers authority on the next prompt; a REFUSED state needs the operator action named above.'}
+
+======================================================================
+FAIL: test_the_stop_gate_still_rejects_a_style_invalid_reply_after_admission (test_protocol_admission.ClaudeHostTests.test_the_stop_gate_still_rejects_a_style_invalid_reply_after_admission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 934, in test_the_stop_gate_still_rejects_a_style_invalid_reply_after_admission
+    self.assertIn("CHAT_STYLE_DRIFT", out["reason"])
+AssertionError: 'CHAT_STYLE_DRIFT' not found in 'SAIPEN PROTOCOL ADMISSION REFUSED -- host claude declares admission_enforcement=UNAVAILABLE: no evidence channel to prove it -- No reply is permitted until admission is current. The runtime re-delivers authority on the next prompt; a REFUSED state needs the operator action named above.'
+
+======================================================================
+FAIL: test_a_project_with_no_delivered_authority_is_binding_and_not_permitted (test_protocol_admission.OwnerStateTests.test_a_project_with_no_delivered_authority_is_binding_and_not_permitted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 148, in test_a_project_with_no_delivered_authority_is_binding_and_not_permitted
+    self.assertEqual(verdict["state"], PA.STATE_BINDING)
+AssertionError: 'REFUSED' != 'BINDING'
+- REFUSED
++ BINDING
+
+
+======================================================================
+FAIL: test_establish_from_a_shell_is_refused_without_a_hook_transport (test_protocol_admission.SelfReportTests.test_establish_from_a_shell_is_refused_without_a_hook_transport)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 245, in test_establish_from_a_shell_is_refused_without_a_hook_transport
+    self.assertEqual(PA.evaluate(self.world.ctx())["state"], PA.STATE_BINDING)
+AssertionError: 'REFUSED' != 'BINDING'
+- REFUSED
++ BINDING
+
+
+======================================================================
+FAIL: test_prose_cannot_produce_a_ledger_record (test_protocol_admission.SelfReportTests.test_prose_cannot_produce_a_ledger_record)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 203, in test_prose_cannot_produce_a_ledger_record
+    self.assertEqual(PA.evaluate(self.world.ctx())["state"], PA.STATE_BINDING)
+AssertionError: 'REFUSED' != 'BINDING'
+- REFUSED
++ BINDING
+
+
+======================================================================
+FAIL: test_a_project_without_a_key_refuses_every_transport (test_protocol_admission.TransportAuthorityTests.test_a_project_without_a_key_refuses_every_transport)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_admission.py", line 408, in test_a_project_without_a_key_refuses_every_transport
+    self.assertIn("no host transport key", detail)
+AssertionError: 'no host transport key' not found in 'HOST_AUTHORITY_UNAVAILABLE: same-user Python hooks cannot authenticate host transport; a separated host authority is required'
+
+----------------------------------------------------------------------
+Ran 73 tests in 26.850s
+
+FAILED (failures=9, errors=44)

@@ -1,0 +1,8 @@
+# T-1384 final core-unit A/B (python -m unittest discover -s tools, repo root)
+
+inherited record : core-unit-ab-by-identity.txt (34 identities)
+current run      : Ran 2740, FAILED (failures=33, errors=1, skipped=17)
+red identities   : 34
+PATCH_OWNED      : 0
+UNKNOWN          : 0
+FIXED (inherited, green now): 0

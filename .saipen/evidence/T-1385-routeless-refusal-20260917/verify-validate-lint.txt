@@ -1,0 +1,14 @@
+# T-1385 VERIFY validator + lint (2026-09-17T16:29:29Z)
+## python tools/validate.py
+WARN [cross-doc-drift]: ... and 13 more like the above
+WARN [changelog-unarchived]: CHANGELOG.md carries 55 version entries while it states it keeps the most recent ~10 -- the overflow belongs in CHANGELOG_ARCHIVE.md, moved verbatim the way LOG segments are sealed, so the top of the file stays the part anyone actually reads
+Validation complete. Agent is conformant. (32 warning(s))
+
+## python -m ruff check tools/ tests/
+All checks passed!
+
+## python -m ruff check .saipen/evidence/T-1385-routeless-refusal-20260917
+All checks passed!
+
+## node --check extensions/adapters/opencode/saipen-guard.js
+syntax OK

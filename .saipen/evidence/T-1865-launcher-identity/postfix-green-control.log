@@ -1,0 +1,26 @@
+test_a_real_child_does_not_see_the_carrier (__main__.AntigravityCarrierTests.test_a_real_child_does_not_see_the_carrier)
+The property through an actual execution, not only the digest. ... ok
+test_the_carrier_never_reaches_the_canonical_child (__main__.AntigravityCarrierTests.test_the_carrier_never_reaches_the_canonical_child) ... ok
+test_two_step_indices_capture_one_identity (__main__.AntigravityCarrierTests.test_two_step_indices_capture_one_identity) ... ok
+test_no_gate_still_returns_the_bare_sentence (__main__.GateMessageTests.test_no_gate_still_returns_the_bare_sentence)
+The opaque form is only allowed as the PREFIX of an explained one. ... ok
+test_the_focused_gate_asks_the_rule_owner (__main__.GateMessageTests.test_the_focused_gate_asks_the_rule_owner) ... ok
+test_the_full_family_gate_asks_the_rule_owner (__main__.GateMessageTests.test_the_full_family_gate_asks_the_rule_owner) ... ok
+test_a_current_record_names_its_rule_and_is_compatible (__main__.IdentityRuleTests.test_a_current_record_names_its_rule_and_is_compatible) ... ok
+test_a_legacy_record_refusal_names_the_rule_not_the_tree (__main__.IdentityRuleTests.test_a_legacy_record_refusal_names_the_rule_not_the_tree)
+The reader must be able to tell a rule change from a tree change. ... ok
+test_a_semantic_change_still_refuses_without_a_rule_excuse (__main__.IdentityRuleTests.test_a_semantic_change_still_refuses_without_a_rule_excuse)
+The red control on the message: a real change must not blame the rule. ... ok
+test_the_diagnostic_list_names_the_two_per_call_carriers (__main__.NarrowListTests.test_the_diagnostic_list_names_the_two_per_call_carriers) ... ok
+test_the_launcher_list_names_exactly_the_launcher_name (__main__.NarrowListTests.test_the_launcher_list_names_exactly_the_launcher_name) ... ok
+test_a_real_environment_change_still_invalidates_the_identity (__main__.ShellIsLauncherOnlyTests.test_a_real_environment_change_still_invalidates_the_identity)
+The red control: dropping launcher names must not erase real drift. ... ok
+test_the_child_still_inherits_shell_because_a_grandchild_may_use_it (__main__.ShellIsLauncherOnlyTests.test_the_child_still_inherits_shell_because_a_grandchild_may_use_it)
+Narrow by intent: this is dropped from the DIGEST, not from the child. ... ok
+test_two_shell_values_capture_one_identity (__main__.ShellIsLauncherOnlyTests.test_two_shell_values_capture_one_identity)
+The exact T-1862 measurement: one tree, two launch paths, one identity. ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 31.750s
+
+OK

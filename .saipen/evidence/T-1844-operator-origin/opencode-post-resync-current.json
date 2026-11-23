@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "code": "RUNTIME_CURRENT",
+  "generation": "T-1342-runtime-surface-identity-20260915.1",
+  "adapter": "opencode",
+  "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "surface": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+  "stale_before": false,
+  "resynced": false,
+  "requires_host_restart": false,
+  "canonical_fingerprint": "gen-sha256:2fcd13a40df81a62cd38be73bdd63a195282b264bc1a3d036954a41d9e241c83",
+  "installed_fingerprint": "gen-sha256:2fcd13a40df81a62cd38be73bdd63a195282b264bc1a3d036954a41d9e241c83",
+  "fingerprint_match": true,
+  "marker_fingerprint": "gen-sha256:2fcd13a40df81a62cd38be73bdd63a195282b264bc1a3d036954a41d9e241c83",
+  "engine_diff": [],
+  "hook_problems": [],
+  "launcher_problems": [],
+  "provenance_problems": [],
+  "detail": "installed runtime matches the canonical generation"
+}

@@ -1,0 +1,19 @@
+{
+  "event_id": "E-3082",
+  "externalization_event": {
+    "operation_id": "transition-ec01a85fc3b940af8f6641b48abff376",
+    "reason": "new LOG event exceeds the live cap; canonical detail externalization"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/log-detail/E-3082-fbca67d903a8ea29dd171948.json",
+  "operation": "log_event_externalization",
+  "original_event_bytes": 2475,
+  "original_event_path": ".saipen/recovery/log-detail/E-3082-fbca67d903a8ea29dd171948.LOG.md",
+  "original_event_sha256": "fbca67d903a8ea29dd17194866ebd6affa088d806a1b07531abd338be91c7ebc",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "schema_version": 1,
+  "source": ".saipen/LOG.md",
+  "status": "COMMITTED",
+  "ticket_id": null
+}

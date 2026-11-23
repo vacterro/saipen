@@ -1,0 +1,10 @@
+{
+  "pair_holds": true,
+  "checks": {
+    "before_reached_the_validator": true,
+    "after_refused_before_the_validator": true,
+    "after_reports_the_publication_problem": true,
+    "arms_differ_only_by_the_gate": true
+  },
+  "live_problem": "publication requires one full core-unit run of the final batch; run python tools/core_unit.py evidence <T-###> after the last content edit"
+}

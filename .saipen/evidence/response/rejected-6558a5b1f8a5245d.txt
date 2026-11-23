@@ -1,0 +1,6 @@
+STATUS: VERIFY T-1757 (peatatud, `saipen stop` E-15156)
+RESULT: Kasutuslimiit täis, töö katkes. Valmis: T-1747 (Claude 2 degraded-režiim parandatud, AUDAPACK-ist käivitatud sessioon sai ADMITTED) ja T-1751 (`status` ja digest näitavad nüüd sama operaatori otsust, mida `continue`/`recover` nõuavad). Uued defektid registreeritud: T-1756, T-1757, T-1758 (T-1758 on selle repo STALE_FAIL juurpõhjus).
+BLOCKER: USAGE_LIMIT -- T-1757 testiperekonna jooks jäi lõpetamata. Enne VERIFY→REVIEW tuleb regressioonipaar uues sessioonis uuesti mõõta (T-1756).
+NEXT EXACT ACTION: PHASE VERIFY T-1757
+VALIDATION: STALE_FAIL | T-1747 ja T-1751: perekond PASS, 0 punast
+DETAILS: Kuus kontrollitud paika ootavad kaustas `.saipen/evidence/*/apply_*.py`: T-1753, T-1756, T-1752, T-1749, T-1750, T-1758. Lahtised: SRC-242 kiht vajab käsitsi `source close`-i (see ongi T-1752 defekt) ja T-1754/T-1755. Esimene `saipen stop` kukkus cp1251 konsoolil UnicodeEncodeError-iga; see on registreerimata.

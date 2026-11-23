@@ -1,0 +1,21 @@
+{
+ "blockers": [],
+ "bytes_reclaimed": 12411930,
+ "finished": "2026-11-12T01:25:13Z",
+ "kept": 47734,
+ "protected_bytes": 1168650513,
+ "run_id": "20261112T012513-91026d74",
+ "schema": 1,
+ "started": "2026-11-12T01:25:13Z",
+ "targets": [
+  {
+   "bytes_planned": 12411930,
+   "bytes_removed": 12411930,
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "outcome": "removed",
+   "path": ".saipen\\evidence\\public-release\\debug-native-home\\.config",
+   "reason": "reproducible runtime bulk tree (.config); rebuild by re-running the owner",
+   "sha256": null
+  }
+ ]
+}

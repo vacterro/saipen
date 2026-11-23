@@ -1,0 +1,12 @@
+[
+  {
+    "path": "tools/saipen_engine/host_launch.py",
+    "before_sha256": "cf92f0278e6c3093032081393c777a7b35c51075629ed0535835aeee6257c66f",
+    "after_sha256": "dea830182bcf97e7969ee0e5b7e7ec30dbee8ebd2f36357cb6307b7c96b63e97"
+  },
+  {
+    "path": "tools/saipen.py",
+    "before_sha256": "0e9ff6ca5180a9efc29833b92fe10ab046512c19a54c30a3128fb389a25af290",
+    "after_sha256": "068d12ef9914462f36e23bd1f0be4bdbd953addb131ca3d3be461bf3774bfcdc"
+  }
+]

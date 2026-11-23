@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "total: 0\nresults: 0  (rows: name label lines in out; qn = group prefix + \".\" + name)\nhas_more: false\nhint: \"No nodes match this pattern. Check spelling or try a broader regex.\"\n"
+    }
+  ],
+  "isError": false
+}

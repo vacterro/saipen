@@ -1,0 +1,13 @@
+ACTIVE receipts: 148
+    97  complete coverage, every Work DONE
+    38  incomplete coverage, Work still open
+    10  no linked Work
+     3  complete coverage, Work still open
+closed BOARD rows held only through receipts whose coverage is complete: 78 rows, 37297 bytes
+  e.g. SRC-027 ['T-1316'] clauses 15 unresolved 0
+  e.g. SRC-036 ['T-1320'] clauses 12 unresolved 0
+  e.g. SRC-037 ['T-1320'] clauses 4 unresolved 0
+  e.g. SRC-039 ['T-1324'] clauses 1 unresolved 0
+  e.g. SRC-040 ['T-1324'] clauses 6 unresolved 0
+  e.g. SRC-042 ['T-1326'] clauses 1 unresolved 0
+first and last such receipt: ['SRC-027'] ['SRC-190']

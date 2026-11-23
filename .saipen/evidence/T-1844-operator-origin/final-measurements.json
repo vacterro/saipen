@@ -1,0 +1,103 @@
+{
+  "latest_executed_gate_problem": null,
+  "phase": "VERIFY",
+  "last_event": 17087,
+  "measured_records": [
+    {
+      "record": ".saipen/evidence/regression/regression-execution-ce35bfac3d4143169d6527885d92dcbc.json",
+      "runs": [
+        {
+          "stage": "before",
+          "exit_code": 1,
+          "ran": 11,
+          "failed": 6,
+          "skipped": 0
+        },
+        {
+          "stage": "after",
+          "exit_code": 0,
+          "ran": 11,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "record": ".saipen/evidence/regression/regression-execution-783ed40a5a6e4c4b80c288d3c2950628.json",
+      "runs": [
+        {
+          "stage": "before",
+          "exit_code": 1,
+          "ran": 23,
+          "failed": 3,
+          "skipped": 0
+        },
+        {
+          "stage": "after",
+          "exit_code": 0,
+          "ran": 23,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "record": ".saipen/evidence/regression/regression-execution-8e6b463238df482c93839f69bc405a3e.json",
+      "runs": [
+        {
+          "stage": "before",
+          "exit_code": 1,
+          "ran": 4,
+          "failed": 4,
+          "skipped": 0
+        },
+        {
+          "stage": "after",
+          "exit_code": 0,
+          "ran": 4,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "record": ".saipen/evidence/regression/regression-execution-0dbcd4f16c4b44a3ab26865a4d77e58f.json",
+      "runs": [
+        {
+          "stage": "before",
+          "exit_code": 1,
+          "ran": 3,
+          "failed": 1,
+          "skipped": 0
+        },
+        {
+          "stage": "after",
+          "exit_code": 0,
+          "ran": 3,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "record": ".saipen/evidence/regression/regression-execution-4dcf008042fb4765b98e427ac0fbfe42.json",
+      "runs": [
+        {
+          "stage": "before",
+          "exit_code": 1,
+          "ran": 8,
+          "failed": 9,
+          "skipped": 0
+        },
+        {
+          "stage": "after",
+          "exit_code": 0,
+          "ran": 8,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "unchanged_forgery_oracle_sha256": "d51851cf7b403b1e07eb6bc1832b523b936f2ddd9b390e2b2de9cf8075369560"
+}

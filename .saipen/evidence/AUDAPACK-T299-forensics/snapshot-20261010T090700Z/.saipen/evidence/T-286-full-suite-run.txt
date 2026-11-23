@@ -1,0 +1,16 @@
+python -m pytest -q            # full suite on the staged recovery tree
+receipt for: T-286 repository recovery (local source of truth)
+tree: HEAD a37250f + the 271 curated staged paths (worktree == index for all of them)
+run: 2026-10-06
+
+........................................................................ [ 94%]
+........................................................................ [ 97%]
+.................................................................        [100%]
+============================== warnings summary ===============================
+tests/test_context_menu.py::TestSeamlessProjectOperations::test_direct_add_move_and_delete_no_popups
+  V:\___VAC\__K\__CODE\_PY\_AUDAPACK\tests\test_context_menu.py:342: DeprecationWarning: Function: 'QMouseEvent.QMouseEvent(QEvent.Type type, const QPointF &localPos, Qt.MouseButton button, QFlags<Qt.MouseButton> buttons, QFlags<Qt.KeyboardModifier> modifiers, const QPointingDevice *device)' is marked as deprecated, please check the documentation for more information.
+    event = QMouseEvent(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+2713 passed, 16 skipped, 1 warning in 695.31s (0:11:35)
+EXIT=0

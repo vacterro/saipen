@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "code": "FINISHED",
+  "op_id": "finish-28f6ff745bdb4f24af54f417bebfea78",
+  "changed_files": [
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md"
+  ],
+  "recovery_required": false,
+  "ticket": "T-1760",
+  "event_id": "E-15197",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "PHASE SCOUT T-1762",
+  "transition_from": "SHIP"
+}

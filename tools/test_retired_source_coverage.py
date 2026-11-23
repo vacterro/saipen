@@ -150,6 +150,105 @@ class RetiredSourceBoundaryGate(RetiredSourceCoverage):
             self.assertFalse(result.get("ok"), "only a CLOSED tombstone passes a boundary")
 
 
+def retired_only_tombstone(
+    linked_work: str | None, *, retired_at: str | None = "2026-11-12T13:28:07Z"
+) -> dict:
+    """T-2131: the receipt-only retirement shape `source retire` mints.
+
+    Mirrors the live SRC-386 tombstone and `retirement.py`'s writer: the
+    status is INVALID -- retirement's word everywhere else in the engine --
+    and the retired_at/retirement block are what `is_retired_tombstone`
+    verifies. Passing retired_at=None produces the INVALID-but-never-retired
+    shape that must keep refusing.
+    """
+    retirement = {
+        "schema_version": 2,
+        "receipt_only": True,
+        "reason": "ORPHANED_RECEIPT",
+        "successor": "",
+        "note": "",
+        "recorded_sha256": "a" * 64,
+        "measured_sha256": "a" * 64,
+        "digest_mismatch": False,
+        "retired_at": retired_at,
+        "retired_by": "saipen-cli",
+        "retirement_event": "E-19341",
+        "source_reason": "ORPHANED_RECEIPT",
+    }
+    return {
+        "schema_version": 2,
+        "receipt_id": "SRC-777",
+        "source_sha256": "a" * 64,
+        "measured_sha256": "a" * 64,
+        "linked_work": linked_work,
+        "status": "INVALID",
+        "archive_ref": ".saipen/archive/retired/SRC-777.md",
+        "retirement_event": retirement["retirement_event"],
+        "retired_at": retired_at,
+        "retired_by": retirement["retired_by"],
+        "source_reason": retirement["source_reason"],
+        "retirement": retirement,
+    }
+
+
+class RetiredOnlyReceiptCoverage(unittest.TestCase):
+    """T-2131: a cited receipt-only-retired receipt is SETTLED, not missing.
+
+    `audit_inbox.delete_gate` (T-134) and `audit_inbox.classify` (T-135) read
+    this exact tombstone as closed/settled. The two intake gates kept a
+    CLOSED-only reading, so every Work citing a retired receipt was refused
+    with SOURCE_RECEIPT_MISSING at every boundary and at closure -- the
+    official operator-RESTORE reissue route (retire -> reissue successor)
+    has no canonical writer that rebinds a citing row, so the restored duty
+    was structurally unfinishable (measured on T-2016 / SRC-386 -> SRC-439).
+    """
+
+    def _project(self, tomb: dict | None) -> tuple[str, Path]:
+        tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, tmp, True)
+        root = Path(tmp)
+        work = "T-900"
+        write_board(root, work, "SRC-777")
+        write_index(root, {"SRC-777": tomb} if tomb is not None else {})
+        return work, root
+
+    def test_retired_receipt_only_satisfies_coverage(self):
+        work, root = self._project(retired_only_tombstone("T-800"))
+        result = intake.work_closure_gate(root, work)
+        self.assertTrue(result.get("ok"), result)
+        self.assertEqual(result.get("code"), "SOURCE_COVERAGE_COMPLETE")
+        self.assertEqual(result.get("receipts"), ["SRC-777"])
+
+    def test_invalid_status_without_retired_at_still_refuses(self):
+        # "INVALID" alone is not retirement: without the retired_at the
+        # tombstone never passed through the retire verb, and a citing Work
+        # keeps its refusal.
+        work, root = self._project(retired_only_tombstone("T-800", retired_at=None))
+        result = intake.work_closure_gate(root, work)
+        self.assertFalse(result.get("ok"), "not every INVALID status is a retirement")
+        self.assertNotEqual(result.get("code"), "SOURCE_COVERAGE_COMPLETE")
+
+
+class RetiredOnlyReceiptBoundaryGate(RetiredOnlyReceiptCoverage):
+    """T-2131: the same settled reading where it stranded the restored duty."""
+
+    def _all_boundaries(self, root: Path, work: str) -> list:
+        return [intake.boundary_gate(root, work, b) for b in ("BUILD", "REVIEW", "SHIP")]
+
+    def test_boundaries_pass_a_retired_receipt_only_tombstone(self):
+        work, root = self._project(retired_only_tombstone("T-800"))
+        for result in self._all_boundaries(root, work):
+            self.assertTrue(result.get("ok"), result)
+            self.assertEqual(result.get("code"), "SOURCE_REREAD_OK")
+
+    def test_boundaries_refuse_invalid_status_without_retired_at(self):
+        work, root = self._project(retired_only_tombstone("T-800", retired_at=None))
+        for result in self._all_boundaries(root, work):
+            self.assertFalse(
+                result.get("ok"), "an INVALID status without retirement must refuse"
+            )
+
+
 class VacuousRequestCoverage(unittest.TestCase):
     """T-259: a request that specified nothing is covered, not unclosable.
 

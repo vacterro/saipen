@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "format": "unittest",
+  "timeout": 60,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1844_operator_origin.py",
+    "-v"
+  ],
+  "context": [
+    "tools/saipen_engine",
+    "saipen",
+    "extensions/adapters/registry.json",
+    "extensions/adapters/claude/saipen-guard.py",
+    "tools/test_t1844_operator_origin.py"
+  ],
+  "oracle_files": [
+    "tools/test_t1844_operator_origin.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/operator_task.py",
+    "tools/saipen_engine/host_authority_client.py",
+    "tools/saipen_engine/host_authority_broker.py",
+    "tools/saipen_engine/guard_events.py",
+    "tools/saipen_engine/intake.py",
+    "tools/saipen_engine/entry.py",
+    "tools/saipen_engine/operations.py",
+    "tools/saipen_engine/goal_authority.py",
+    "extensions/adapters/claude/saipen-guard.py",
+    "tools/saipen_engine/handoff.py",
+    "tools/saipen_engine/operator_origin.py"
+  ],
+  "before": {
+    "tools/saipen_engine/operator_task.py": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/operator_task.py",
+    "tools/saipen_engine/host_authority_client.py": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/host_authority_client.py",
+    "tools/saipen_engine/host_authority_broker.py": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/host_authority_broker.py",
+    "tools/saipen_engine/guard_events.py": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/guard_events.py",
+    "tools/saipen_engine/intake.py": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/intake.py",
+    "tools/saipen_engine/entry.py": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/entry.py",
+    "tools/saipen_engine/operations.py": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/operations.py",
+    "tools/saipen_engine/goal_authority.py": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/goal_authority.py",
+    "extensions/adapters/claude/saipen-guard.py": ".saipen/evidence/T-1844-operator-origin/prefix/extensions/adapters/claude/saipen-guard.py",
+    "tools/saipen_engine/handoff.py": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/handoff.py",
+    "tools/saipen_engine/operator_origin.py": null
+  }
+}

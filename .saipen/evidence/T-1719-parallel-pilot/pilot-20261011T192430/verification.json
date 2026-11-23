@@ -1,0 +1,62 @@
+{
+  "at": "2026-10-11T19:32:31.793361+00:00",
+  "combined_summary": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\pilot-summary.json",
+  "failure_reclassification": {
+    "classifier_sha256": "965cfc5b34de0ee598dbe4b1cfa0777af6cba5e578d67d610cf528e72e067ef9",
+    "failure": "QUOTA_EXHAUSTED",
+    "job_id": "claude-audit",
+    "original_failure": "UNKNOWN",
+    "reset_message": "You've hit your weekly limit · resets Oct 13, 2pm (Europe/Tallinn)",
+    "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\claude-audit\\result.txt.stdout.jsonl"
+  },
+  "initial_parent_integrity": {
+    "canonical_changed": [],
+    "head_unchanged": true,
+    "index_unchanged": true,
+    "source_changed": [],
+    "source_index_modes_unchanged": true,
+    "source_modes_unchanged": true
+  },
+  "initial_process_overlap_seconds": 4.218,
+  "initial_summary": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\summary.json",
+  "kind": "saipen-parallel-live-pilot-replay",
+  "parser_sha256": "08dd6cee34602c51b6f80d468a5262502a58cc948267103773fddf2702081376",
+  "provider_calls_total": 3,
+  "replacement_account_relation": "DISTINCT",
+  "replacement_parent_integrity": {
+    "canonical_changed": [],
+    "head_unchanged": true,
+    "index_unchanged": true,
+    "source_changed": []
+  },
+  "reports": [
+    {
+      "counterexamples_verified": true,
+      "elapsed_seconds": 45.156,
+      "job_id": "codex-audit",
+      "model": "gpt-6.1-sol",
+      "original_response_unchanged": true,
+      "parsed_findings": 2,
+      "provider": "codex",
+      "response_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\codex-audit\\result.txt",
+      "response_sha256": "96e0ba7786b76f5bb98a40bb7d78bac005fb5adaa6f90a4dedc2f4d805ad829d",
+      "sealed_changed_paths": [],
+      "source_modified_claim": false
+    },
+    {
+      "counterexamples_verified": true,
+      "elapsed_seconds": 56.297,
+      "job_id": "claude-replacement",
+      "model": "opus",
+      "original_response_unchanged": true,
+      "parsed_findings": 2,
+      "provider": "claude",
+      "response_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1719-parallel-pilot\\pilot-20261011T192430\\claude-replacement\\result.txt",
+      "response_sha256": "afb65fb173976d47b289cd55f0e21c86692730c66446b2f7e4d64a49c2d7f95c",
+      "sealed_changed_paths": [],
+      "source_modified_claim": false
+    }
+  ],
+  "schema": 1,
+  "successful_response_overlap_proven": false
+}

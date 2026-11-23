@@ -1,0 +1,9 @@
+{
+  "STATUS": "DONE",
+  "RESULT": "T-2021 kohalik parandus lõpetatud; SRC-391 suletud; avaldamine ootel.",
+  "BLOCKER": "CONTINUATION_AUTHORITY_UNPROVEN -- hooldusluba ja native scheduler puuduvad.",
+  "OPERATOR ACTION": "Operaator seob päris hoolduseesmärgi toetatud hosti autentse loa ja piiridega.",
+  "NEXT EXACT ACTION": "WAIT: praeguse hoolduseesmärgi luba ja hosti scheduler.",
+  "VALIDATION": "CURRENT_FAIL; alamhulk 235/235, regressioon 20/20; täisperekond STALE_FAIL, core 5 viga.",
+  "DETAILS": ".saipen/evidence/T-2021/REPORT.md"
+}

@@ -1,0 +1,119 @@
+======================================================================
+ERROR: test_board_byte_precondition_refuses_concurrent_foreign_edit (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_board_byte_precondition_refuses_concurrent_foreign_edit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1801, in test_board_byte_precondition_refuses_concurrent_foreign_edit
+    result = intake.normalize_receipt_ranges(self.root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.intake' has no attribute 'normalize_receipt_ranges'
+
+======================================================================
+ERROR: test_dry_run_leaves_every_file_and_namespace_unchanged (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_dry_run_leaves_every_file_and_namespace_unchanged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1728, in test_dry_run_leaves_every_file_and_namespace_unchanged
+    result = intake.normalize_receipt_ranges(self.root, dry_run=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.intake' has no attribute 'normalize_receipt_ranges'
+
+======================================================================
+ERROR: test_expansion_has_a_hard_bound_and_ascii_receipt_identity (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_expansion_has_a_hard_bound_and_ascii_receipt_identity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1769, in test_expansion_has_a_hard_bound_and_ascii_receipt_identity
+    self.assertEqual(len(intake._expand_receipt_range("SRC-001..SRC-512")), 512)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.intake' has no attribute '_expand_receipt_range'
+
+======================================================================
+ERROR: test_malformed_ranges_refuse (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_malformed_ranges_refuse)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1673, in test_malformed_ranges_refuse
+    self.assertIsNone(intake._expand_receipt_range(token), token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.intake' has no attribute '_expand_receipt_range'
+
+======================================================================
+ERROR: test_mixed_ranges_and_explicit_ids_preserve_order (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_mixed_ranges_and_explicit_ids_preserve_order)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1749, in test_mixed_ranges_and_explicit_ids_preserve_order
+    result = intake.normalize_receipt_ranges(self.root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.intake' has no attribute 'normalize_receipt_ranges'
+
+======================================================================
+ERROR: test_normalize_expands_and_is_idempotent (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_normalize_expands_and_is_idempotent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1690, in test_normalize_expands_and_is_idempotent
+    plan = intake.normalize_receipt_ranges(self.root, dry_run=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.intake' has no attribute 'normalize_receipt_ranges'
+
+======================================================================
+ERROR: test_normalize_refuses_malformed_range (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_normalize_refuses_malformed_range)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1714, in test_normalize_refuses_malformed_range
+    result = intake.normalize_receipt_ranges(self.root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.intake' has no attribute 'normalize_receipt_ranges'
+
+======================================================================
+ERROR: test_one_malformed_range_refuses_the_whole_plan (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_one_malformed_range_refuses_the_whole_plan)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1764, in test_one_malformed_range_refuses_the_whole_plan
+    result = intake.normalize_receipt_ranges(self.root, dry_run=dry_run)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.intake' has no attribute 'normalize_receipt_ranges'
+
+======================================================================
+ERROR: test_rewrite_only_the_structured_field_not_identical_prose (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_rewrite_only_the_structured_field_not_identical_prose)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1739, in test_rewrite_only_the_structured_field_not_identical_prose
+    result = intake.normalize_receipt_ranges(self.root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.intake' has no attribute 'normalize_receipt_ranges'
+
+======================================================================
+ERROR: test_rewrite_preserves_bom_crlf_and_log_bytes (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_rewrite_preserves_bom_crlf_and_log_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1779, in test_rewrite_preserves_bom_crlf_and_log_bytes
+    result = intake.normalize_receipt_ranges(self.root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.intake' has no attribute 'normalize_receipt_ranges'
+
+======================================================================
+ERROR: test_strict_range_expansion (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_strict_range_expansion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1656, in test_strict_range_expansion
+    expanded = intake._expand_receipt_range("SRC-009..SRC-029")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.intake' has no attribute '_expand_receipt_range'
+
+======================================================================
+FAIL: test_canonical_cli_dry_run_and_surplus_arguments (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_canonical_cli_dry_run_and_surplus_arguments)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1814, in test_canonical_cli_dry_run_and_surplus_arguments
+    self.assertEqual(json.loads(result.stdout)["code"], code, result.stdout + result.stderr)
+AssertionError: 'VALIDATION_FAILED' != 'RECEIPT_RANGE_PLAN'
+- VALIDATION_FAILED
++ RECEIPT_RANGE_PLAN
+ : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "unknown source subcommand 'normalize'"
+}
+
+
+----------------------------------------------------------------------
+Ran 76 tests in 19.614s
+
+FAILED (failures=1, errors=11)

@@ -1,0 +1,48 @@
+{
+  "scope": "DISPOSABLE HISTORICAL COPIES; NO REAL FINDING RESOLUTION CLAIM",
+  "consumer_read_only": true,
+  "consumer_T311_closed": false,
+  "consumer_protected_after": {
+    ".saipen/BOARD.md": "4c3a7c598579f6ea47d5f4e05fc908bc09e43806ab9ff0e2d883c0a6b2361a80",
+    ".saipen/IDENTITY.md": "3ac7e214c409fd5ab32a76171cee7febb38393f00c6cc321c6de33469e28e5c0",
+    ".saipen/improve/imp-vacterro-audapack-20260918-1/buffy-01/saipen_improve_SAIPEN.md": "369cf827930c8b316c6dd90082212002f1b29aff4b0086ad72ba3486fda17503",
+    ".saipen/improve/imp-vacterro-audapack-20260918-1/buffy-02/saipen_improve_SAIPEN.md": "e42b5839322a8d12052b4be84448dd16c8ce21f62aa88b4966ecb842d575c2d2",
+    ".saipen/improve/imp-vacterro-audapack-20260918-1/MANIFEST.md": "2c7d42ae4f8fd302181399bb59fb900c516f368d0ace562052b9ce96b415d756",
+    ".saipen/improve/imp-vacterro-audapack-20260918-1/SWEEP.md": "ABSENT",
+    ".saipen/improve/imp-vacterro-audapack-20260919-7/buffy-01/saipen_improve_SAIPEN.md": "ca07487780a5fda5cc0fb5653e46a9b6c165fa524bbafe41c7819aed453fb730",
+    ".saipen/improve/imp-vacterro-audapack-20260919-7/buffy-02/saipen_improve_SAIPEN.md": "ece55062c92e6e3de7543a906ff2ae3126f7ed7f6e44469934d8861e1c4beaf7",
+    ".saipen/improve/imp-vacterro-audapack-20260919-7/MANIFEST.md": "4029de329954c84e1600b92406a652f8f6dcb3f35aa8b19bf502b156f90ea453",
+    ".saipen/improve/imp-vacterro-audapack-20260919-7/SWEEP.md": "ABSENT",
+    ".saipen/LOG.md": "a60197a96735ea181092f0b96407ed213ea08a5ee4d01d7a14ba73b2dc6e2e0b",
+    ".saipen/STATE.md": "55636295e5e791dbfa0d8e624346be5beea8ea35cf2c191ec1152a701288bcac"
+  },
+  "scratch": "V:\\_TEMP_\\T1803-historical-acceptance-5brl3t8c",
+  "cycles": [
+    {
+      "cycle": "imp-vacterro-audapack-20260918-1",
+      "original_history_unchanged": true,
+      "native_successor_created": true,
+      "pending_findings": 3,
+      "retained_report_statuses": [
+        "draft",
+        "draft"
+      ],
+      "classification": "BLOCKED_EXTERNAL_EVIDENCE; NOT RESOLVED",
+      "repeated_native_continue_stale_advertisement": false,
+      "successor_sha256": "4c754d86839eb4217fe843acb7b4a197787aa58896ff939abf7fa1cc8e379e63"
+    },
+    {
+      "cycle": "imp-vacterro-audapack-20260919-7",
+      "original_history_unchanged": true,
+      "native_successor_created": true,
+      "pending_findings": 3,
+      "retained_report_statuses": [
+        "draft",
+        "draft"
+      ],
+      "classification": "BLOCKED_EXTERNAL_EVIDENCE; NOT RESOLVED",
+      "repeated_native_continue_stale_advertisement": false,
+      "successor_sha256": "43ea7e4e34d35cd0acf055573de616665373be5d8456eb8210aeebce5dfe8362"
+    }
+  ]
+}

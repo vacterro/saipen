@@ -1,0 +1,1001 @@
+diff --git a/saipen/COMMANDS.md b/saipen/COMMANDS.md
+index 71ca8a41..db0ce868 100644
+--- a/saipen/COMMANDS.md
++++ b/saipen/COMMANDS.md
+@@ -65,6 +65,7 @@ global authority and deterministic priority rules.
+ | `saipen --agent <seat> launch opencode -- [args]` | optional explicit-actor host process | CMD-ROUTING-01 |
+ | `saipen knowledge [status\|index\|retrieve]` | project knowledge | CMD-ROUTING-01 |
+ | `saipen start '<task>' [--file PATH] [--hex HEX] [--receipt SRC-###]` | THE entry command for a new actionable task: capture, recover, seat, claim | CMD-ROUTING-01 |
++| `saipen handoff <T-###> --to <agent> [--authority SRC-###]` | Owner or operator-authorized live claim transfer; same Work and phase | CMD-ROUTING-01 |
+ | `saipen user-request <text>` | USER_INTERRUPT ingress | CMD-ROUTING-01 |
+ | `saipen ticket retire <T-###> --reason <CODE> --evidence <E-###\|.saipen/evidence/PATH> --authority <SRC-###> [--discovery-event E-###] [--note TEXT]` | canonical retirement of misrouted/invalid Work -- NOT done, NOT close; the authority must GRANT it (OPS.md) | CMD-ROUTING-01 |
+ | `saipen work reverify <T-###> [--verification <command>:PASS]... [--run <command>]... [--timeout <SECONDS>]` | RECOVERY: re-verify already-DONE Work against the CURRENT tree; writes ONE immutable `RV-NNNNNN` receipt, keeps DONE, never rewrites history (OPS.md); only an EXECUTED contract is current-tree closure evidence, an attested-only contract is recorded but never closure proof | CMD-ROUTING-01 |
+diff --git a/saipen/COMMAND_EFFECTS.json b/saipen/COMMAND_EFFECTS.json
+index 1963ee85..5ba33288 100644
+--- a/saipen/COMMAND_EFFECTS.json
++++ b/saipen/COMMAND_EFFECTS.json
+@@ -202,6 +202,7 @@
+     "stop": "EXECUTION",
+     "launch": "EXECUTION",
+     "autonomy": "DIAGNOSTIC",
+-    "gpu": "DIAGNOSTIC"
++    "gpu": "DIAGNOSTIC",
++    "handoff": "EXECUTION"
+   }
+ }
+diff --git a/saipen/HABITS.md b/saipen/HABITS.md
+index d9f67677..a7acda01 100644
+--- a/saipen/HABITS.md
++++ b/saipen/HABITS.md
+@@ -1,43 +1,13 @@
+ # Statistical Habits of Modern LLMs
+ 
+-SAIPEN is built on the premise that an agent's default behaviour is driven by statistical habits that optimize for conversational compliance rather than engineering correctness. Every rule in SAIPEN that survives is one that pushes back on a specific default behaviour.
+-
+-This document enumerates these habits and maps them to the mechanisms that counter them.
+-
+-## The Habits
+-
+-1. **Drifting to polite consultant prose**
+-   Producing filler, apologies, and hedging instead of terse, actionable output.
+-   *Counter-mechanism*: saipen/STYLE.md and the style_contract field in STATE.md, which pins the active voice (e.g., ded) and forbids consultant prose.
+-
+-2. **Agreeing with whoever spoke last**
+-   Abandoning canonical state or rules if the user's prompt implies otherwise.
+-   *Counter-mechanism*: CORE.md § 1.10 (memory ban) and tools/validate.py cross-doc drift checks which ensure authoritative documents overrule memory or recent chat.
+-
+-3. **Hedging instead of deciding**
+-   Proposing multiple options instead of picking one and executing it, or guessing instead of stopping.
+-   *Counter-mechanism*: CORE.md § 1.11 (Insufficient information is a stop, not a guess) and CORE.md § 1.6 Phase Transitions that force a single deterministic next action.
+-
+-4. **Claiming a read or a verification that never happened**
+-   Hallucinating tool output or test success.
+-   *Counter-mechanism*: CORE.md § 1.11 (A session MUST leave a trace) and tools/audit_checks.py, which require an agent to actually run the checks and parse the logged proof.
+-
+-5. **Inventing plausible detail**
+-   Making up paths, versions, line numbers, or shortcut keys that look correct statistically but do not exist.
+-   *Counter-mechanism*: CORE.md § 1.10 (strict shortcut table enforcement) and tools/validate.py strictly enforcing CONFORMANCE.md row IDs and explicit path validations.
+-
+-6. **Copying an example instead of applying the rule**
+-   Treating a documented example as a template and ignoring the normative rule text.
+-   *Counter-mechanism*: tools/validate.py checks that ensure examples in the docs strictly conform to the normative rules (implemented via T-435).
+-
+-7. **Declaring success at the first green**
+-   Stopping verification after one passing test while ignoring edge cases or other platforms.
+-   *Counter-mechanism*: the SHIP phase gates which enforce that all validation passes before closing (audit_parity.py only verifies shell portability).
+-
+-8. **Summarising work instead of doing it**
+-   Describing what should be done instead of invoking the tools to modify the files.
+-   *Counter-mechanism*: two, both older than the ticket that was filed to invent one. This habit has two shapes and each has its own. **Produced nothing and talked about it**: § 1.11's session-trace rule -- a session that did anything ends having produced a LOG line, a BOARD change, a STATE change or a change to the project's own files, and one that produced none of those MUST say exactly that "rather than summarising activity in chat". **Produced a trace that is itself a plan**: § 1.2's LOG rule -- an entry records what already happened, never what is about to, and its first clause MUST NOT be written as an intention. That second one is mechanically enforced in tools/validate.py, which rejects `will`, `going to`, `about to`, `plans to` and their relatives in that position. That gate has its own standing red control in tools/audit_checks.py, which is what keeps this citation honest -- a counter-mechanism named in prose is only as real as the control behind the check it names. The gap this line used to claim did not exist, and claiming one is its own defect: it sends the next agent to build a duplicate of a rule that is already enforced.
+-
+-9. **Truncating context and assuming the end**
+-   Reading only the first N lines of a file, queue, or command output, and acting as if the unread remainder is empty.
+-   *Counter-mechanism*: CORE.md § 1.11 (Read to the end, never truncate), which forbids declaring a list or queue empty without reading to End-Of-File.
++This retrieval map links common agent errors to existing countermeasures. It creates no new rule.
++
++1. **Consultant drift:** filler replaces an actionable answer. Counter: `STYLE.md` and the STATE style contract.
++2. **Following the last speaker instead of authority:** recent chat displaces canonical state. Counter: `CORE.md` authority and disk-first rules.
++3. **Hedging or guessing:** the agent offers options without choosing, or invents missing facts. Counter: `CORE.md` selection and insufficient-information rules.
++4. **Claiming an unperformed read or test:** a plausible PASS replaces evidence. Counter: `CORE.md` session trace and `tools/audit_checks.py` controls.
++5. **Inventing plausible details:** paths, versions or shortcuts are fabricated. Counter: the closed command registry and `tools/validate.py` path checks.
++6. **Copying an example instead of applying its rule:** example and law diverge. Counter: conformance checks in `tools/validate.py`.
++7. **Stopping at the first green:** narrow tests hide relevant failures. Counter: SHIP gates and the declared test family.
++8. **Describing work instead of doing it:** an empty session must say so under `CORE.md`'s trace rule. A LOG entry that promises future work violates its event rule; `tools/validate.py` rejects future-tense first clauses, with a red control in `tools/audit_checks.py`. Check these existing counters before claiming a new gap.
++9. **Assuming unread material is empty:** a truncated file or queue is treated as complete. Counter: `CORE.md`'s read-to-end rule.
+diff --git a/saipen/IMPROVE.md b/saipen/IMPROVE.md
+index 3ee23a06..aac9fb37 100644
+--- a/saipen/IMPROVE.md
++++ b/saipen/IMPROVE.md
+@@ -1,23 +1,16 @@
+ # SAIPEN Improve — the meta-control that audits SAIPEN
+ 
+-Improve is a META-CONTROL, not a project phase (T-552). It audits SAIPEN and
+-the project under it; it does not run project execution. This file is the
+-single canonical owner of the Improve lifecycle: cycle admission, the seat and
+-report contract, the finding schema, sweep, verify, and archive semantics.
+-CORE.md section 1.10 owns command routing only. STATE owns no Improve
+-semantics. SubSaipen boundaries stay in `extensions/subs/PROTOCOL.md`. There is
+-no improve phase document under the phases directory, and the phase count
+-remains 16.
++Improve is SAIPEN's audit meta-control, not project execution or a phase
++(T-552). This file owns cycle admission, seats, reports, findings, sweep,
++verify and archive. CORE.md §1.10 owns routing; SubSaipen boundaries remain in
++`extensions/subs/PROTOCOL.md`. STATE owns no Improve semantics and the 16
++project phases have no Improve phase.
+ 
+ ## 0. Why a meta-control
+ 
+-Improve is invoked on top of whatever the project is doing. Several seats may
+-audit independently and concurrently; reports are read-only evidence, never
+-canonical state; invoking improve during BUILD or VERIFY must not orphan the
+-DOING ticket; and one global `STATE.phase: IMPROVE` cannot represent several
+-independent audit seats at once. Adding Improve routing fields to STATE turns
+-retrospective evidence collection into project execution state — the category
+-error this file exists to prevent.
++Improve audits independently of project execution. Concurrent seats produce
++read-only reports; they never orphan DOING Work or create a global
++`STATE.phase: IMPROVE`. Improve routing fields do not belong in STATE.
+ 
+ ## 1. Command surface (routing lives in COMMANDS.md, CMD-ROUTING-01)
+ 
+@@ -30,17 +23,14 @@ Each action's own validation rules live in the section that owns it; this list
+ is the surface, not a second copy of the law.
+ 
+ - `saipen improve` — the meta-control entry point: binds the current project,
+-  finds or mechanically admits the one active cycle, registers this seat,
+-  creates the DRAFT report mechanically with the real captured source
+-  identity, and returns a bounded AUDIT ASSIGNMENT (cycle_id, seat_id, report
+-  path, source identity, scope, proof levels, schema, write boundary, next
+-  mechanical submission action). It is NEVER an alias for status, and section 11
+-  owns its phase/task/next_action boundary.
+-  Bare invocation admits a NEW independent `core` seat.
+-  `--new-seat` states that choice explicitly;
++  admits or finds one active cycle, registers a seat, creates its DRAFT report
++  with captured source identity, and returns the bounded AUDIT ASSIGNMENT
++  (cycle/seat/report, source, scope, proof levels, schema, write boundary and
++  submit action). It is not status; section 11 owns its STATE boundary. Bare
++  invocation admits a NEW independent `core` seat. `--new-seat` is explicit;
+   `--session <seat_id>` admits or resumes exactly one stable concrete session;
+-  `--role core|critic` selects the closed role, with `core` as default. A
+-  session retry returns the same assignment and never allocates another seat.
++  `--role core|critic` selects the closed role, default `core`. Retrying the
++  session reuses its assignment.
+ - `saipen improve status` — read-only derived status (section 5). Refuses to
+   round malformed evidence up to a normal lifecycle state: invalid
+   manifests/reports/sweeps are reported as INVALID_CYCLE / INVALID_REPORT.
+@@ -75,24 +65,17 @@ is the surface, not a second copy of the law.
+   (section 2) and flips ACTIVE -> COMPLETE through `complete_cycle`. A partial
+   sweep REFUSES it; complete-before-sweep is impossible.
+ - `saipen improve abort <cycle>` — the sanctioned mechanical exit for a STUCK
+-  DRAFT cycle whose report cannot complete (an interrupted audit, a committed
+-  RUN missing a required field). Refuses once any disposition exists, flips
+-  the manifest to archived with a journaled `cycle_aborted` marker, and
+-  byte-preserves the never-completed draft reports AT THEIR SAME PATH (no
+-  rename, no move, no raw file deletion): the manifest's archived +
+-  cycle_aborted markers are the single source of truth that the cycle and
+-  its drafts are non-authoritative (T-632). The next cycle can be admitted.
++  DRAFT cycle whose report cannot complete. It refuses after any disposition,
++  archives with a journaled `cycle_aborted` marker, and preserves drafts at
++  their original paths. Those manifest markers make the drafts non-authoritative;
++  a new cycle may then start (T-632).
+ - `saipen improve retire <cycle> <seat> --reason <CODE>` — the bounded exit
+-  for ONE expected seat that can never complete (section 3). It marks that
+-  seat `availability: unavailable` through the journaled roster write; the
+-  never-completed report stays byte-identical at its path, every SWEEP
+-  disposition is untouched, and the cycle bar can then be met with the
+-  remaining seats. It never touches a seat whose report IS complete. The one
+-  COMPLETE route is `--reason STALE_COMPLETE --replacement <fresh-seat>`: it
+-  is NOT ordinary retirement and returns `SEAT_SUPERSEDED` (not
+-  `SEAT_RETIRED`), marking the seat `availability: superseded` bound to its
+-  preserved report hash and its current same-scope replacement (section 7).
+-  A COMPLETE report is never made generically retireable.
++  for one expected seat that cannot complete (section 3). A journaled roster
++  write marks `availability: unavailable`, preserving its report bytes at the original path and all SWEEP
++  dispositions; other seats can meet the cycle bar. A COMPLETE seat cannot be
++  retired ordinarily. `--reason STALE_COMPLETE --replacement <fresh-seat>`
++  instead returns `SEAT_SUPERSEDED`, marks `availability: superseded` and binds its preserved report hash to a
++  current same-scope replacement (section 7).
+ - `saipen improve clean <cycle>` — archive/retention meta-operation
+   (section 10). Never means phase CLEAN, never enters the CLEAN phase.
+ - `saipen improve reconcile <cycle>` — ONE canonical finite exit for a strict
+diff --git a/saipen/REGISTRY.json b/saipen/REGISTRY.json
+index cc40b91a..8df6db3f 100644
+--- a/saipen/REGISTRY.json
++++ b/saipen/REGISTRY.json
+@@ -400,6 +400,7 @@
+    "search",
+    "validate",
+    "claim",
++   "handoff",
+    "transition",
+    "checkpoint",
+    "source",
+@@ -843,6 +844,7 @@
+   }
+  },
+  "error_codes": [
++  "HANDOFF_AUTHORITY_REQUIRED",
+   "STALE_STATE",
+   "TICKET_NOT_FOUND",
+   "TICKET_NOT_WORKABLE",
+diff --git a/saipen/SAICRITIC.md b/saipen/SAICRITIC.md
+index 273ae526..d691b792 100644
+--- a/saipen/SAICRITIC.md
++++ b/saipen/SAICRITIC.md
+@@ -1,69 +1,39 @@
+-# SAICRITIC -- the self-critique process (T-603)
++# SAICRITIC -- self-critique (T-603)
+ 
+-SAICRITIC is the periodic full self-critique of SAIPEN against the five proof
+-levels. It is not a separate phase -- it is a real Improve cycle whose seat
+-role is `critic` and whose subject is the protocol's own mechanical layer.
++SAICRITIC periodically audits all SAIPEN mechanical claims through a `critic` Improve seat; it is not a phase.
+ 
+ ## What it does
+ 
+-For every claim a wave made (its tickets' `verify:` clauses and the checks
+-that implement them), classify the proof as:
++Classify each Work claim and its checks at five ordered levels:
+ 
+ | Level | Question |
+ |---|---|
+-| UNIT | is the operation locally correct? |
+-| COMPOSITION | does the predecessor/successor chain work? |
+-| CANONICAL | do the repository invariants validate? |
+-| GATE | did the REQUIRED semantic/protocol gates actually occur? |
+-| PROVENANCE | does the evidence bind the exact source, session, run, finding and result it claims? |
++| UNIT | Is the operation locally correct? |
++| COMPOSITION | Does the predecessor/successor chain work? |
++| CANONICAL | Do repository invariants validate? |
++| GATE | Did required semantic and protocol gates actually run? |
++| PROVENANCE | Does evidence bind the exact source, session, run, finding and result? |
+ 
+-A claim with a missing layer is NOT PROVEN -- record it as such, never PASS.
+-The permanent invariant: VALID END STATE != PROOF OF REQUIRED PROCESS.
+-The provenance invariant: VALID RESULT + VALID PROCESS != VALID EVIDENCE LINK.
++Missing proof is NOT PROVEN, never PASS.
++VALID END STATE != PROOF OF REQUIRED PROCESS.
++VALID RESULT + VALID PROCESS != VALID EVIDENCE LINK.
+ 
+ ## How it runs
+ 
+-1. Run `saipen improve --role critic --new-seat` to register a real Improve
+-   cycle (`cycle_status: active`) with a `critic` seat; the report is written
+-   like any seat report under
+-   `.saipen/improve/<cycle>/<seat>/`.
+-2. The audit targets the wave's mechanical layer: the finish gate, the
+-   sweep-ticket linkage, the report schema, the reasoning gates, the
+-   target-aware verifier, the context projection, the command surface.
+-3. Every finding carries the five-level classification in its `expected/
+-   actual/evidence` block; a `PROTOCOL_VIOLATION` finding records the
+-   cross-project recurrence reasoning and the weak-model answer on its
+-   canonical ticket (IMP-003 spec, T-558).
+-4. Findings are swept with the normal Core sweep; root-cause dedup produces
+-   one canonical ticket per root cause.
+-5. A finding whose subject was ACCIDENTAL_SUCCESS (a wave claim met by luck,
+-   not by verification) is recorded honestly: either reclassify the gap as a
+-   real defect (LOGIC_ERROR) or dispose it as unverified -- never flip it to
+-   PASS in the sweep.
+-6. The cycle completes (full sweep coverage) and is archived with provenance.
++1. `saipen improve --role critic --new-seat` registers a real cycle and critic seat, with a report under `.saipen/improve/<cycle>/<seat>/`.
++2. Audit the wave's mechanical layer: finish gate, sweep linkage, report schema, reasoning gates, verifier, context projection and command surface.
++3. Give each finding the five-level classification in `expected/actual/evidence`. A `PROTOCOL_VIOLATION` records cross-project recurrence reasoning and the weak-model answer on its canonical ticket.
++4. Core sweeps findings and deduplicates by root cause, yielding one ticket per cause.
++5. ACCIDENTAL_SUCCESS is reclassified as LOGIC_ERROR or disposed as unverified; it is never promoted to PASS.
++6. Complete the cycle only with full sweep coverage, then archive it with provenance.
+ 
+ ## Permanent lenses
+ 
+-The proof levels are also applied to recurring boundary failures. These names
+-are audit lenses, not a demand for one new enum per phrase:
++Lenses, not new enums:
+ 
+-- `COMMAND_SURFACE_SPLIT`: declared and executable action sets differ.
+-- `ROLE_LAUNDERING`: evidence is called critic evidence while its roster or
+-  report role says otherwise.
++- `COMMAND_SURFACE_SPLIT`: declared and executable actions differ.
++- `ROLE_LAUNDERING`: critic evidence lacks a critic roster/report role.
+ - `SESSION_COLLAPSE`: independent workers share one logical seat or report.
+-- `PROVENANCE_FABRICATION`: runtime or protocol identity comes from a constant
+-  instead of captured evidence.
+-- `ERROR_NORMALIZATION_GAP`: expected contention is a stable Result in one
+-  public domain but escapes as a traceback in another.
+-- `EVIDENCE_ADVERSARY`: can this currently-green proof stay green after its
+-  witness is made false while the claimed end-state is left superficially
+-  valid? Adversarially mutate only the proof linkage of a recent green claim
+-  -- a stale fingerprint, a wrong seat, a duplicate identity, a missing gate
+-  receipt, a wrong source, a malformed-but-parseable ledger -- and a gate that
+-  stays green is a normal finding, never a PASS. A green proof is useful only
+-  if falsifying its witness makes it red.
+-
+-The first SAICRITIC run (T-603) found the register-without-executor defect:
+-`saipen improve` was registered in the command surface but the CLI had no
+-executor (IMP-001/IMP-003 -> T-606), and the SubSaipen write boundary was
+-admission-only, not continuously checked (IMP-002 -> T-607).
++- `PROVENANCE_FABRICATION`: runtime or protocol identity is asserted, not captured.
++- `ERROR_NORMALIZATION_GAP`: expected contention is structured in one domain but escapes as a traceback in another.
++- `EVIDENCE_ADVERSARY`: falsify only a recent green claim's proof linkage while leaving its end state apparently valid. A gate that stays green after a stale fingerprint, wrong seat/source, duplicate identity, missing gate receipt or malformed-but-parseable ledger is a finding, never PASS.
+diff --git a/tools/saipen.py b/tools/saipen.py
+index dda62b44..fde49a02 100644
+--- a/tools/saipen.py
++++ b/tools/saipen.py
+@@ -1006,12 +1006,24 @@ def _runtime(
+         )
+         return 1
+ 
+-    payload = {"ok": True, "code": "RUNTIME", **projection, "strategy": strategy}
++    _actor, actor_source = _start_actor(project_root)
++    payload = {
++        "ok": True,
++        "code": "RUNTIME",
++        **projection,
++        "actor_source": actor_source,
++        "strategy": strategy,
++    }
+     if as_json:
+         _emit(payload, True)
+         return 0
+     print("SAIPEN runtime (read-only)")
+-    print(f"agent seat : {projection['agent']}")
++    seat_note = (
++        " (inherited from STATE.agent; SAIPEN_AGENT unset)"
++        if actor_source == "inherited"
++        else f" ({actor_source})"
++    )
++    print(f"agent seat : {projection['agent']}{seat_note}")
+     print(f"metadata   : {projection['runtime_info_source']}")
+     for field in ("harness", "provider", "model", "variant"):
+         print(f"{field:<10} : {projection[field] or 'UNKNOWN'}")
+@@ -3388,7 +3400,7 @@ def _start_actor(project_root: Path) -> tuple[str, str]:
+         return _AGENT_OVERRIDE, "explicit"
+     carrier = (os.environ.get("SAIPEN_AGENT") or "").strip()
+     if carrier:
+-        return carrier, "launcher"
++        return carrier, "explicit"
+     inherited = _agent_for(project_root)
+     return inherited, ("inherited" if inherited != AGENT else "default")
+ 
+@@ -6737,6 +6749,11 @@ def _emit(payload: dict, as_json: bool) -> None:
+         value = payload.get(key)
+         if value is not None and value != []:
+             print(f"{key}: {value}")
++    if payload.get("actor_source") == "inherited" and payload.get("actor"):
++        print(
++            f"actor: {payload['actor']} (inherited from STATE.agent; set SAIPEN_AGENT "
++            "or pass --agent to name the agent actually working)"
++        )
+     milestone = payload.get("milestone")
+     if isinstance(milestone, dict) and milestone.get("current"):
+         print(f"CHECKPOINT: {milestone['current']}  {milestone.get('label') or ''}".rstrip())
+@@ -8613,6 +8630,7 @@ def main(argv: list[str] | None = None) -> int:
+             "continue|status|next|runtime [--prelaunch [--adapter ID] "
+             "[--no-resync]|--bootstrap|--check-freshness]|search [--hex HEX]|"
+             "validate|recover|fleet preflight|scan|prepare|claim <T-###> [--explicit]|"
++            "handoff <T-###> --to <agent> [--authority SRC-###]|"
+             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
+             "[T-###] [text]|goal <text>|user-request <text> [--priority P#] "
+             "[--verify <text>] [--needs T-X,T-Y]|ticket add <PRIORITY> <text> --verify <proof> "
+@@ -9178,6 +9196,35 @@ def main(argv: list[str] | None = None) -> int:
+         )
+         _emit(result.to_dict(), as_json)
+         return 0 if result.ok else 1
++    if command == "handoff":
++        from saipen_engine.operations import handoff_claim
++
++        opts, positional, option_error = _parse_value_options(
++            args[1:], {"--to": "to", "--authority": "authority"}
++        )
++        if option_error or len(positional) != 1 or not opts.get("to"):
++            _emit(
++                {
++                    "ok": False,
++                    "code": "VALIDATION_FAILED",
++                    "detail": option_error
++                    or "handoff takes <T-###> --to <agent> [--authority SRC-###]",
++                    "canonical_next_command": "saipen handoff <T-###> --to <agent>",
++                },
++                as_json,
++            )
++            return 2
++        if not dry_run and _negotiate_capability(project_root) == "read-only":
++            return _capability_refusal(as_json)
++        actor, actor_source = _start_actor(project_root)
++        result = handoff_claim(
++            project_root, actor, positional[0], opts["to"],
++            actor_source=actor_source,
++            authority=opts.get("authority"),
++            dry_run=dry_run,
++        )
++        _emit(result.to_dict(), as_json)
++        return 0 if result.ok else 1
+     if command == "transition":
+         if len(args) < 2:
+             _emit(
+diff --git a/tools/saipen_engine/handoff.py b/tools/saipen_engine/handoff.py
+new file mode 100644
+index 00000000..9ac83aa9
+--- /dev/null
++++ b/tools/saipen_engine/handoff.py
+@@ -0,0 +1,160 @@
++"""Voluntary mid-work claim handoff: who may move a LIVE claim (T-1487).
++
++A live foreign claim is never taken by a plain `claim` -- that fail-closed rule
++stays. What was missing is the deliberate case: the operator switches agents
++while Work is in flight, or the owner hands its own Work on. Both collapsed
++into "wait for the 15-minute lease to lapse", and a field session had to call
++`operations.handover_agent(explicit=True)` through the Python API because no
++command reached it (SAI-DEFECT-20260922-silent-actor-inheritance-
++misattribution, future_gate/FUTURE GATE -- VOLUNTARY MID-WORK CLAIM HANDOFF).
++
++Authority is exactly one of:
++
++* the CURRENT owner of the claim hands its own Work on (voluntary); or
++* an ACTIVE operator receipt carries a closed capsule granting this exact
++  ticket to this exact agent:
++
++      This message supplies operator authority for a claim handoff:
++      T-108 -> opus
++      only.
++
++A new session that merely appeared has neither, and is refused.
++"""
++
++from __future__ import annotations
++
++import re
++from dataclasses import dataclass
++from pathlib import Path
++
++from . import intake
++from .supersession import AUTHORITY_SOURCE_KINDS
++
++GRANT_HEADER = "This message supplies operator authority for a claim handoff:"
++GRANT_TERMINATOR = "only."
++
++_GRANT_ITEM_RE = re.compile(
++    r"^[ \t]*(T-\d+)[ \t]+->[ \t]+([A-Za-z0-9][A-Za-z0-9._:-]{0,63})[ \t]*$"
++)
++_FENCE_RE = re.compile(r"^[ \t]{0,3}(```|~~~)")
++
++
++@dataclass(frozen=True)
++class HandoffGrants:
++    grants: dict[str, str]
++    lines: dict[str, str]
++    problems: tuple[str, ...]
++
++
++def handoff_grants(text: str) -> HandoffGrants:
++    """Parse only closed, unfenced `T-### -> agent` capsules."""
++    lines = text.splitlines()
++    grants: dict[str, str] = {}
++    grant_lines: dict[str, str] = {}
++    conflicted: set[str] = set()
++    problems: list[str] = []
++    fence: str | None = None
++    index = 0
++    while index < len(lines):
++        line = lines[index]
++        fenced = _FENCE_RE.match(line)
++        if fence is not None:
++            if fenced and fenced.group(1) == fence:
++                fence = None
++            index += 1
++            continue
++        if fenced:
++            fence = fenced.group(1)
++            index += 1
++            continue
++        if line.rstrip() != GRANT_HEADER:
++            index += 1
++            continue
++        header_line = index + 1
++        items: list[tuple[str, str, str]] = []
++        cursor = index + 1
++        closed = False
++        malformed: str | None = None
++        while cursor < len(lines):
++            candidate = lines[cursor]
++            if not candidate.strip():
++                cursor += 1
++                continue
++            if candidate.rstrip() == GRANT_TERMINATOR:
++                closed = True
++                break
++            item = _GRANT_ITEM_RE.fullmatch(candidate)
++            if not item:
++                malformed = f"line {cursor + 1} is neither T-### -> agent nor the terminator"
++                break
++            items.append((item.group(1), item.group(2), candidate.strip()))
++            cursor += 1
++        if malformed is None and not closed:
++            malformed = "it is never closed"
++        if malformed is None and not items:
++            malformed = "it grants no handoff"
++        if malformed is not None:
++            problems.append(
++                f"claim-handoff capsule at line {header_line} is malformed ({malformed}) "
++                "and grants nothing"
++            )
++            index = cursor + 1 if closed else max(cursor, index + 1)
++            continue
++        for ticket, agent, raw in items:
++            if ticket in grants and grants[ticket] != agent:
++                conflicted.add(ticket)
++            grants.setdefault(ticket, agent)
++            grant_lines.setdefault(ticket, raw)
++        index = cursor + 1
++    for ticket in sorted(conflicted):
++        problems.append(f"{ticket} is handed to conflicting agents and so is not granted")
++        grants.pop(ticket, None)
++        grant_lines.pop(ticket, None)
++    return HandoffGrants(grants, grant_lines, tuple(problems))
++
++
++def grammar_hint() -> str:
++    return (
++        f"a capsule is a line `{GRANT_HEADER}`, one `T-### -> agent` line per grant, "
++        f"then a line `{GRANT_TERMINATOR}`; capture it with `saipen authority capture`"
++    )
++
++
++def authority_error(root: Path, receipt: str, *, ticket: str, agent: str) -> str | None:
++    """Why stored operator authority does not hand `ticket` to `agent`, or None."""
++    if not intake._valid_receipt_id(receipt):
++        return f"authority {receipt!r} is not a receipt id"
++    meta = intake._read_meta(root, receipt)
++    if not meta:
++        return f"authority receipt {receipt} has no active metadata"
++    if meta.get("status") != intake.ACTIVE_STATUS:
++        return (
++            f"authority receipt {receipt} is {meta.get('status')!r}; a handoff needs an "
++            "ACTIVE operator decision"
++        )
++    if meta.get("source_kind") not in AUTHORITY_SOURCE_KINDS:
++        return (
++            f"authority receipt {receipt} is a {meta.get('source_kind')!r} source; a "
++            "handoff needs the operator's own ingress"
++        )
++    provenance = meta.get("request_provenance") or {}
++    if provenance.get("witness") != "operator_carrier":
++        return (
++            f"authority receipt {receipt} has no operator carrier; "
++            "model-supplied text cannot grant a live claim handoff. Reachable "
++            "routes: the owner runs the handoff, or `saipen claim` once the "
++            "owner's lease lapses"
++        )
++    integrity = intake.verify_integrity(root, receipt)
++    if not integrity["ok"]:
++        return f"authority receipt {receipt}: {integrity['code']}"
++    body = intake.read_body(root, receipt)
++    if not body.get("ok"):
++        return f"authority receipt {receipt} body unreadable"
++    parsed = handoff_grants(str(body.get("body") or ""))
++    if parsed.grants.get(ticket) != agent:
++        detail = f"authority receipt {receipt} grants no handoff {ticket} -> {agent}"
++        if parsed.problems:
++            detail += " (" + "; ".join(parsed.problems[:3]) + ")"
++        return detail + " -- " + grammar_hint()
++    return None
+diff --git a/tools/saipen_engine/operations.py b/tools/saipen_engine/operations.py
+index 36f6df28..95d6819b 100644
+--- a/tools/saipen_engine/operations.py
++++ b/tools/saipen_engine/operations.py
+@@ -1140,8 +1140,12 @@ def _plan_claim(
+                 "TICKET_NOT_WORKABLE",
+                 f"{ticket_id} is actively claimed by another agent "
+                 f"({ticket['fields'].get('owner', '')}); a live "
+-                f"foreign claim cannot be taken over",
++                f"foreign claim cannot be taken over. An operator-ordered "
++                f"switch is a handoff the owner or an operator receipt grants",
+                 ticket=ticket_id,
++                canonical_next_command=(
++                    f"saipen handoff {ticket_id} --to {agent} --authority <SRC-###>"
++                ),
+             )
+         if cs == "INVALID":
+             return _refuse(
+@@ -7002,6 +7006,16 @@ def authority_capture(
+             "authority capture needs the exact UTF-8 capsule bytes from --file or --hex",
+         )
+     problem = _ret.capsule_problem(text)
++    if problem and not _ret.authority_grants(text).problems:
++        from . import handoff as _handoff
++
++        handed = _handoff.handoff_grants(text)
++        if handed.problems:
++            problem = "; ".join(handed.problems) + " -- " + _handoff.grammar_hint()
++        elif handed.grants:
++            problem = None
++        else:
++            problem += "; or a claim handoff: " + _handoff.grammar_hint()
+     if problem:
+         return _refuse("INVALID_AUTHORITY_CAPTURE", problem)
+     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+@@ -7022,10 +7036,16 @@ def authority_capture(
+                 "targets": [".saipen/intake/active (source receipt)"],
+             },
+         )
++    from . import operator_task
++
++    provenance = operator_task.witness(text)
++    if "code" in provenance:
++        return _refuse(provenance["code"], provenance["detail"])
+     captured = _intake.capture(
+         root,
+         text,
+         source_kind="user_instruction",
++        request_provenance=provenance,
+         projection_policy=_intake.PROJECTION_AUTHORITY_ONLY,
+     )
+     if not captured.get("ok"):
+@@ -8803,6 +8823,7 @@ def handover_agent(
+     allow_dead_home: bool = False,
+     explicit: bool = False,
+     now: datetime.datetime | None = None,
++    reason: str | None = None,
+ ) -> Result:
+     """The ONE explicit agent-handover operation (T-1006).
+ 
+@@ -8907,6 +8928,8 @@ def handover_agent(
+     pivot_msg = f"agent handover {old_label} -> {new_agent}"
+     if claim_transferred:
+         pivot_msg += f" (active {claim_transferred} claim transferred)"
++    if reason:
++        pivot_msg += f" -- {reason}"
+     pivot_event, pivot_line = _event_line(
+         docs, log_tail, "DEC", claim_transferred, new_agent, pivot_msg, now, op_id
+     )
+@@ -8969,6 +8992,101 @@ def handover_agent(
+     return apply_plan(root, plan)
+ 
+ 
++_SEAT_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,63}")
++
++
++def handoff_claim(
++    project_root: Path | str,
++    actor: str,
++    ticket_id: str,
++    to_agent: str,
++    *,
++    actor_source: str = "explicit",
++    authority: str | None = None,
++    dry_run: bool = False,
++) -> Result:
++    """`saipen handoff T-### --to AGENT`: move a LIVE claim on purpose (T-1487).
++
++    A plain `claim` never takes a live foreign claim, and that stays. This is
++    the deliberate case the lease wait cannot tell apart from a vanished
++    owner: the owner hands its own Work on, or the operator switches agents.
++    Authority is the owner itself -- under a DECLARED identity (`--agent` or
++    the launcher's `SAIPEN_AGENT`), never one inherited from STATE.agent,
++    which is exactly how SAIMAIL T-108 was mislabelled -- or an ACTIVE
++    operator receipt granting this exact ticket to this exact agent. The
++    move itself is `handover_agent(explicit=True)`: same ticket, same phase,
++    one LOG->BOARD->STATE transaction whose DEC names the authority.
++    """
++    from . import handoff as _handoff
++
++    root = Path(project_root)
++    ticket_id = str(ticket_id or "").strip().upper()
++    to_agent = str(to_agent or "").strip()
++    route = f"saipen handoff {ticket_id or '<T-###>'} --to {to_agent or '<agent>'}"
++    if not re.fullmatch(r"T-\d+", ticket_id):
++        return _refuse(
++            "VALIDATION_FAILED",
++            f"handoff needs the active ticket as T-###, got {ticket_id!r}",
++            canonical_next_command="saipen handoff <T-###> --to <agent>",
++        )
++    if not _SEAT_ID_RE.fullmatch(to_agent):
++        return _refuse(
++            "VALIDATION_FAILED",
++            "handoff needs --to <agent>: the receiving seat id",
++            canonical_next_command=f"saipen handoff {ticket_id} --to <agent>",
++        )
++    _docs, state, board, _log_tail = _read(root)
++    ticket = board["tickets"].get(ticket_id)
++    if ticket is None:
++        return _refuse("TICKET_NOT_FOUND", f"{ticket_id} is not on the board", ticket=ticket_id)
++    if ticket.get("section") != "## DOING" or state.get("task") != ticket_id:
++        return _refuse(
++            "TICKET_NOT_WORKABLE",
++            f"{ticket_id} is not the active DOING Work; a handoff moves the live claim "
++            "of the active ticket only",
++            ticket=ticket_id,
++        )
++    owner = str(ticket["fields"].get("owner") or "").strip()
++    if owner == to_agent:
++        return _refuse(
++            "VALIDATION_FAILED",
++            f"{ticket_id} is already claimed by {to_agent!r}; nothing to hand off",
++            ticket=ticket_id,
++        )
++    declared = actor_source in ("explicit", "launcher")
++    if authority:
++        authority = authority.strip().upper()
++        problem = _handoff.authority_error(root, authority, ticket=ticket_id, agent=to_agent)
++        if problem:
++            return _refuse(
++                "HANDOFF_AUTHORITY_REQUIRED",
++                problem,
++                ticket=ticket_id,
++                canonical_next_command=f"{route} --authority <SRC-###>",
++            )
++        basis = f"operator authority {authority}"
++    elif owner and actor == owner and declared:
++        basis = f"voluntary, by its owner {owner}"
++    else:
++        who = f"{actor!r} (inherited from STATE.agent)" if not declared else repr(actor)
++        return _refuse(
++            "HANDOFF_AUTHORITY_REQUIRED",
++            f"{ticket_id} is claimed by {owner or 'nobody'!r}; the caller is {who}. Only "
++            f"the owner under a declared identity, or an ACTIVE operator receipt that "
++            f"grants `{ticket_id} -> {to_agent}`, can hand it on -- "
++            + _handoff.grammar_hint(),
++            ticket=ticket_id,
++            canonical_next_command=f"{route} --authority <SRC-###>",
++        )
++    return handover_agent(
++        root,
++        to_agent,
++        dry_run=dry_run,
++        explicit=True,
++        reason=f"handoff of {ticket_id}, {basis}",
++    )
++
++
+ GOAL_WAVE_CAP = 3
+ GOAL_TICKET_CAP = 20
+ 
+diff --git a/tools/test_t1487_claim_handoff.py b/tools/test_t1487_claim_handoff.py
+new file mode 100644
+index 00000000..75253ea7
+--- /dev/null
++++ b/tools/test_t1487_claim_handoff.py
+@@ -0,0 +1,265 @@
++"""T-1487: an operator-ordered agent switch has a command, and nothing else does.
++
++Field incident SAI-DEFECT-20260922-silent-actor-inheritance-misattribution
++(SAIMAIL T-108): a host with SAIPEN_AGENT unset inherited STATE.agent `astra`
++silently, and when the operator ordered "работай как opus" the only honest move
++-- `operations.handover_agent(explicit=True)` -- had no command, so the session
++called the Python API. These controls hold both halves:
++
++* `saipen handoff T-### --to AGENT` moves a LIVE claim when the current owner
++  runs it, or when an ACTIVE operator receipt grants exactly that pair; a new
++  session that merely appeared is refused, and a plain `claim` still cannot
++  take a live foreign claim;
++* START's human answer says when the acting agent was inherited.
++"""
++
++from __future__ import annotations
++
++import sys
++import unittest
++from pathlib import Path
++
++TOOLS = Path(__file__).resolve().parent
++if str(TOOLS) not in sys.path:
++    sys.path.insert(0, str(TOOLS))
++
++import json  # noqa: E402
++import hashlib  # noqa: E402
++import os  # noqa: E402
++import subprocess  # noqa: E402
++
++from saipen_engine import codec, handoff  # noqa: E402
++from saipen_engine.board import parse_board  # noqa: E402
++from saipen_engine.state import parse_state  # noqa: E402
++from test_hermetic_env import isolate_host_session  # noqa: E402
++from test_t1363_zero_manual_entry import (  # noqa: E402
++    CLI,
++    PYTHON,
++    _allocation_log,
++    _doing,
++    project,
++)
++
++CAPSULE = f"{handoff.GRANT_HEADER}\nT-108 -> opus\n{handoff.GRANT_TERMINATOR}\n"
++WORK = "T-9100"
++
++
++def setUpModule() -> None:
++    isolate_host_session()
++
++
++def run(
++    root: Path, *args: str, agent: str | None = None,
++    task_carrier: str | None = None,
++) -> tuple[int, dict | None, str]:
++    """One real CLI call; `agent=None` means NO declared identity at all."""
++    env = {k: v for k, v in os.environ.items() if not k.startswith("SAIPEN_")}
++    if task_carrier is not None:
++        env["SAIPEN_TASK_SHA256"] = hashlib.sha256(
++            task_carrier.replace("\r\n", "\n").strip().encode("utf-8")
++        ).hexdigest()
++    argv = [PYTHON, str(CLI), *args, "--project-root", str(root)]
++    if agent is not None:
++        argv += ["--agent", agent]
++    proc = subprocess.run(
++        argv, capture_output=True, text=True, env=env, timeout=300,
++        encoding="utf-8", errors="replace",
++    )
++    payload = None
++    if "--json" in args:
++        try:
++            payload = json.loads(proc.stdout)
++        except ValueError:
++            payload = None
++    return proc.returncode, payload, proc.stdout + proc.stderr
++
++
++def live_work(case: unittest.TestCase, owner: str = "test-agent") -> Path:
++    """BUILD on T-9100 under a LIVE claim of `owner`, which is also STATE.agent."""
++    return project(
++        case,
++        phase="BUILD",
++        task=WORK,
++        next_action=f"PHASE BUILD {WORK}",
++        transition_from="SCOUT",
++        agent=owner,
++        board=_doing(WORK, "wire the importer", owner, 0),
++        log=_allocation_log(WORK),
++    )
++
++
++def seat(root: Path) -> tuple[str, str, str]:
++    state = parse_state(codec.read_doc(root / ".saipen" / "STATE.md"))
++    board = parse_board(codec.read_doc(root / ".saipen" / "BOARD.md"))
++    return state.get("agent"), state.get("phase"), board["tickets"][WORK]["fields"]["owner"]
++
++
++def log_of(root: Path) -> str:
++    return (root / ".saipen" / "LOG.md").read_text(encoding="utf-8")
++
++
++class GrantGrammarTests(unittest.TestCase):
++    def test_a_closed_capsule_grants_its_exact_pair(self):
++        parsed = handoff.handoff_grants("please switch\n" + CAPSULE)
++        self.assertEqual(parsed.grants, {"T-108": "opus"})
++        self.assertEqual(parsed.problems, ())
++
++    def test_prose_grants_nothing(self):
++        for text in (
++            "handoff T-108 to opus please",
++            "T-108 -> opus",
++            f"```\n{CAPSULE}```\n",
++            f"{handoff.GRANT_HEADER}\nT-108 -> opus\n",
++            f"{handoff.GRANT_HEADER}\nT-108 to opus\nonly.\n",
++        ):
++            with self.subTest(text=text):
++                self.assertEqual(handoff.handoff_grants(text).grants, {})
++
++    def test_conflicting_grants_grant_nothing(self):
++        text = CAPSULE + f"{handoff.GRANT_HEADER}\nT-108 -> codex\nonly.\n"
++        parsed = handoff.handoff_grants(text)
++        self.assertEqual(parsed.grants, {})
++        self.assertTrue(parsed.problems)
++
++
++class HandoffCommandTests(unittest.TestCase):
++    def test_the_owner_hands_its_own_work_on_at_the_same_phase(self):
++        root = live_work(self)
++        code, payload, text = run(root, "handoff", WORK, "--to", "opus", "--json",
++                                  agent="test-agent")
++        self.assertEqual(code, 0, text)
++        self.assertEqual(payload["code"], "HANDOVERED", text)
++        self.assertEqual(seat(root), ("opus", "BUILD", "opus"))
++        self.assertIn(f"handoff of {WORK}, voluntary, by its owner test-agent", log_of(root))
++
++    def test_an_inherited_identity_is_not_the_owner_speaking(self):
++        root = live_work(self)
++        before = seat(root)
++        code, payload, text = run(root, "handoff", WORK, "--to", "opus", "--json")
++        self.assertNotEqual(code, 0, text)
++        self.assertEqual(payload["code"], "HANDOFF_AUTHORITY_REQUIRED", text)
++        self.assertIn("inherited from STATE.agent", payload["detail"])
++        self.assertEqual(seat(root), before)
++
++    def test_a_new_session_cannot_hand_itself_a_live_claim(self):
++        root = live_work(self)
++        before = seat(root)
++        code, payload, text = run(root, "handoff", WORK, "--to", "intruder", "--json",
++                                  agent="intruder")
++        self.assertNotEqual(code, 0, text)
++        self.assertEqual(payload["code"], "HANDOFF_AUTHORITY_REQUIRED", text)
++        self.assertEqual(
++            payload["canonical_next_command"],
++            f"saipen handoff {WORK} --to intruder --authority <SRC-###>",
++        )
++        self.assertEqual(seat(root), before)
++
++    def test_an_operator_capsule_grants_exactly_its_pair(self):
++        root = live_work(self)
++        capsule = root / "handoff.md"
++        capsule.write_text(
++            f"switch agents\n{handoff.GRANT_HEADER}\n{WORK} -> opus\n"
++            f"{handoff.GRANT_TERMINATOR}\n",
++            encoding="utf-8",
++        )
++        code, captured, text = run(
++            root, "authority", "capture", "--file", str(capsule), "--json",
++            agent="opus", task_carrier=capsule.read_text(encoding="utf-8"),
++        )
++        self.assertEqual(code, 0, text)
++        receipt = captured["receipt"]
++        # The grant is for opus, not for anyone who holds the receipt id.
++        code, payload, text = run(root, "handoff", WORK, "--to", "intruder", "--authority",
++                                  receipt, "--json", agent="intruder")
++        self.assertNotEqual(code, 0, text)
++        self.assertEqual(payload["code"], "HANDOFF_AUTHORITY_REQUIRED", text)
++        code, payload, text = run(root, "handoff", WORK, "--to", "opus", "--authority",
++                                  receipt, "--json", agent="opus")
++        self.assertEqual(code, 0, text)
++        self.assertEqual(seat(root), ("opus", "BUILD", "opus"))
++        self.assertIn(f"handoff of {WORK}, operator authority {receipt}", log_of(root))
++
++    def test_model_supplied_capsule_cannot_grant_a_foreign_claim(self):
++        root = live_work(self)
++        capsule = root / "handoff.md"
++        capsule.write_text(f"{handoff.GRANT_HEADER}\n{WORK} -> intruder\nonly.\n",
++                           encoding="utf-8")
++        code, captured, text = run(root, "authority", "capture", "--file", str(capsule),
++                                   "--json", agent="intruder")
++        self.assertEqual(code, 0, text)
++        code, payload, text = run(root, "handoff", WORK, "--to", "intruder",
++                                  "--authority", captured["receipt"], "--json", agent="intruder")
++        self.assertNotEqual(code, 0, text)
++        self.assertEqual(payload["code"], "HANDOFF_AUTHORITY_REQUIRED")
++        self.assertIn("the owner runs the handoff", payload["detail"])
++        self.assertEqual(seat(root), ("test-agent", "BUILD", "test-agent"))
++
++    def test_claim_still_refuses_a_live_claim_and_names_the_handoff(self):
++        root = live_work(self)
++        code, payload, text = run(root, "claim", WORK, "--json", agent="opus")
++        self.assertNotEqual(code, 0, text)
++        self.assertEqual(payload["code"], "TICKET_NOT_WORKABLE", text)
++        self.assertEqual(
++            payload["canonical_next_command"],
++            f"saipen handoff {WORK} --to opus --authority <SRC-###>",
++        )
++
++
++class InheritedActorIsSaidTests(unittest.TestCase):
++    def test_runtime_reports_inherited_and_explicit_actor_source(self):
++        root = project(self, agent="astra")
++        code, payload, text = run(root, "runtime", "--json")
++        self.assertEqual(code, 0, text)
++        self.assertEqual(payload["actor_source"], "inherited")
++        code, payload, text = run(root, "runtime", "--json", agent="opus")
++        self.assertEqual(code, 0, text)
++        self.assertEqual(payload["actor_source"], "explicit")
++        code, _payload, text = run(root, "runtime")
++        self.assertEqual(code, 0, text)
++        self.assertIn("inherited from STATE.agent", text)
++
++    def test_start_says_when_the_actor_was_inherited(self):
++        root = project(self, agent="astra")
++        code, _payload, text = run(root, "start", "add a docstring to src/app.py")
++        self.assertEqual(code, 0, text)
++        self.assertIn("actor: astra (inherited from STATE.agent", text)
++
++    def test_start_json_names_actor_source(self):
++        root = project(self, agent="astra")
++        code, payload, text = run(root, "start", "add a docstring to src/app.py", "--json")
++        self.assertEqual(code, 0, text)
++        self.assertEqual(payload["actor_source"], "inherited")
++
++    def test_a_declared_actor_is_not_called_inherited(self):
++        root = project(self, agent="astra")
++        code, _payload, text = run(root, "start", "add a docstring to src/app.py",
++                                   agent="opus")
++        self.assertEqual(code, 0, text)
++        self.assertNotIn("inherited from STATE.agent", text)
++
++
++class LogTimeZoneTests(unittest.TestCase):
++    """SAIMAIL T-108 read a UTC LOG stamp as a wrong local time."""
++
++    def test_core_log_skeleton_names_utc(self):
++        core = (TOOLS.parent / "saipen" / "CORE.md").read_text(encoding="utf-8")
++        start = core.index("#### LOG.md")
++        section = core[start:core.index("\n####", start + 1)]
++        self.assertIn("UTC", section)
++
++    def test_the_engine_stamps_log_lines_in_utc(self):
++        import datetime
++
++        from saipen_engine import operations
++
++        before = datetime.datetime.now(datetime.timezone.utc).replace(second=0, microsecond=0)
++        stamp = datetime.datetime.strptime(operations._now(), "%d.%m.%y %H:%M").replace(
++            tzinfo=datetime.timezone.utc
++        )
++        after = datetime.datetime.now(datetime.timezone.utc)
++        self.assertLessEqual(before, stamp)
++        self.assertLessEqual(stamp, after)
++
++
++if __name__ == "__main__":
++    unittest.main()

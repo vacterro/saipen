@@ -1,0 +1,38 @@
+{
+  "op_id": "valve-840380dd6a7e4dca81f5a53b1f920529",
+  "operation": "valve",
+  "created_at": "2026-09-02T17:30:08Z",
+  "agent": "workbuddy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_smart_vac_cleaner",
+  "project_lineage": "lineage-05afdade62f34ea2ab30cb3740a7ad17",
+  "semantic_payload_hash": "26a484334c17031e",
+  "preconditions": {
+    ".saipen/STATE.md": "07301342f0a2a02f",
+    ".saipen/LOG.md": "9d76f8c85cbf9634"
+  },
+  "read_preconditions": {
+    ".saipen/BOARD.md": "c4485e4a55d259aa",
+    ".saipen/logs": "tree-missing-v1"
+  },
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 2,
+  "targets": [
+    {
+      "path": ".saipen/LOG.md",
+      "role": "log",
+      "action": "write",
+      "before_hash": "9d76f8c85cbf9634",
+      "after_hash": "496d4567c177099c",
+      "applied": true
+    },
+    {
+      "path": ".saipen/STATE.md",
+      "role": "state",
+      "action": "write",
+      "before_hash": "07301342f0a2a02f",
+      "after_hash": "933b07032d8136d3",
+      "applied": true
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "source": "C:\\Users\\vac34\\.config\\freebuff-desktop\\projects\\_AUDAPACK-4f7eebe8-9eeb-44db-bce0-9e7514935b65\\desktop-v2.db",
+  "method": "SQLite online backup from read-only connection; WAL-aware consistent snapshot",
+  "captured_utc": "2026-10-10T09:20:45.372592+00:00",
+  "copy": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-T299-forensics\\provenance-capture\\freebuff-desktop-v2.db",
+  "bytes": 55984128,
+  "sha256": "e9c588bf1ea22c9310ec1c94ef6474061da66b657ed89483317dd94996e7bd8e"
+}

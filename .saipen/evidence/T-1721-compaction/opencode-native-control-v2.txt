@@ -1,0 +1,24 @@
+test_1_the_injector_installs_one_hook_on_the_loaded_surface (test_opencode_host_smoke.OpenCodeHostSmoke.test_1_the_injector_installs_one_hook_on_the_loaded_surface) ... ok
+test_2_the_runtime_discovers_and_loads_the_installed_artifact (test_opencode_host_smoke.OpenCodeHostSmoke.test_2_the_runtime_discovers_and_loads_the_installed_artifact)
+P0-2: the ACTIVE GENERATION, identified by its byte identity. ... ok
+test_3_the_installed_artifact_carries_the_whole_chain (test_opencode_host_smoke.OpenCodeHostSmoke.test_3_the_installed_artifact_carries_the_whole_chain) ... ok
+test_4_chain_bytes_prove_prevention_and_a_bypass_changes_them (test_opencode_host_smoke.OpenCodeHostSmoke.test_4_chain_bytes_prove_prevention_and_a_bypass_changes_them)
+CLOSE-3 red control: refusal is observationally meaningful. ... ok
+test_5_fresh_installed_fleet_recovers_and_refuses_old_payload (test_opencode_host_smoke.OpenCodeHostSmoke.test_5_fresh_installed_fleet_recovers_and_refuses_old_payload) ... ok
+test_fresh_process_loads_the_installed_generation_from_one_origin (test_opencode_host_smoke.OpenCodeRealInstalledGeneration.test_fresh_process_loads_the_installed_generation_from_one_origin) ... ok
+test_installed_fastpaths_and_bash_use_the_current_generation (test_opencode_host_smoke.OpenCodeRealInstalledGeneration.test_installed_fastpaths_and_bash_use_the_current_generation) ... ok
+test_later_ticket_smoke_preserves_earlier_durable_proof (test_opencode_host_smoke.OpenCodeSmokeEvidenceOwnership.test_later_ticket_smoke_preserves_earlier_durable_proof) ... ok
+test_same_generation_gets_a_new_run_directory (test_opencode_host_smoke.OpenCodeSmokeEvidenceOwnership.test_same_generation_gets_a_new_run_directory) ... ok
+test_powershell_injector_overwrites_and_verifies_one_canonical_hook (test_opencode_host_smoke.OpenCodeWindowsInjector.test_powershell_injector_overwrites_and_verifies_one_canonical_hook) ... ok
+test_bare_generic_launch_bootstraps_reads_and_inherits_one_canonical_actor (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_bare_generic_launch_bootstraps_reads_and_inherits_one_canonical_actor) ... ok
+test_native_task_child_mutations_receive_the_same_guard (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_native_task_child_mutations_receive_the_same_guard) ... ok
+test_optional_explicit_launch_is_checked_and_does_not_leak (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_optional_explicit_launch_is_checked_and_does_not_leak) ... ok
+test_real_installed_global_plugin_accepts_bare_canonical_continuation (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_real_installed_global_plugin_accepts_bare_canonical_continuation) ... ok
+test_shell_workdir_cannot_hide_a_canonical_append (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_shell_workdir_cannot_hide_a_canonical_append)
+T-1705: native execution cwd must survive the guard transport. ... ok
+test_other_tool_refusals_do_not_satisfy_the_expected_code (test_opencode_bound_launch_smoke.ProviderTranscriptOracleTests.test_other_tool_refusals_do_not_satisfy_the_expected_code) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 223.113s
+
+OK

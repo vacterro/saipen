@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "actor": "saipen-cli",
+  "actor_source": "default",
+  "receipt": "SRC-228",
+  "ticket": "T-1729",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "active_ticket": "T-1726",
+  "action": "PHASE VERIFY T-1726",
+  "next_action": "PHASE VERIFY T-1726",
+  "parked": null,
+  "preempted": false
+}

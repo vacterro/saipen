@@ -1,0 +1,6015 @@
+{
+  "schema_version": 1,
+  "scope": "bounded Tier 2 direct-source fallback",
+  "graph_generation": "2026-09-01T13:16:39Z",
+  "tools_coverage": "excluded",
+  "source_fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "files": {
+    "tools/saipen.py": {
+      "sha256": "3c2e3e7a5708b10e7200ba4315690847da7db9922e8461bc3de8410ea611d02b",
+      "bytes": 592736,
+      "definitions": [
+        {
+          "name": "_agent_for",
+          "line": 130,
+          "end": 146
+        },
+        {
+          "name": "_command_mutates",
+          "line": 164,
+          "end": 196
+        },
+        {
+          "name": "_ensure_handover",
+          "line": 199,
+          "end": 215
+        },
+        {
+          "name": "_validator_terminal_result",
+          "line": 221,
+          "end": 252
+        },
+        {
+          "name": "_project_conformance",
+          "line": 255,
+          "end": 289
+        },
+        {
+          "name": "_protocol_version",
+          "line": 292,
+          "end": 296
+        },
+        {
+          "name": "_same_install_path",
+          "line": 299,
+          "end": 304
+        },
+        {
+          "name": "_runtime_drift_payload",
+          "line": 307,
+          "end": 364
+        },
+        {
+          "name": "_state_path",
+          "line": 367,
+          "end": 368
+        },
+        {
+          "name": "_scan_full",
+          "line": 371,
+          "end": 382
+        },
+        {
+          "name": "_corrupt_refusal",
+          "line": 385,
+          "end": 399
+        },
+        {
+          "name": "_negotiate_capability",
+          "line": 402,
+          "end": 416
+        },
+        {
+          "name": "_invalid_capability_refusal",
+          "line": 419,
+          "end": 447
+        },
+        {
+          "name": "_close_finished_receipts",
+          "line": 450,
+          "end": 461
+        },
+        {
+          "name": "_clean_entry_steps",
+          "line": 464,
+          "end": 489
+        },
+        {
+          "name": "_test_session_refusal",
+          "line": 492,
+          "end": 518
+        },
+        {
+          "name": "_capability_refusal",
+          "line": 521,
+          "end": 539
+        },
+        {
+          "name": "_parked_work",
+          "line": 542,
+          "end": 571
+        },
+        {
+          "name": "_permissions",
+          "line": 574,
+          "end": 635
+        },
+        {
+          "name": "_stats",
+          "line": 638,
+          "end": 695
+        },
+        {
+          "name": "_iteration",
+          "line": 698,
+          "end": 814
+        },
+        {
+          "name": "_hex_decode",
+          "line": 817,
+          "end": 832
+        },
+        {
+          "name": "_bounded_validator_output",
+          "line": 842,
+          "end": 850
+        },
+        {
+          "name": "_canonical_validator_path",
+          "line": 853,
+          "end": 872
+        },
+        {
+          "name": "_ValidatorRun",
+          "line": 875,
+          "end": 885
+        },
+        {
+          "name": "_run_canonical_validator",
+          "line": 888,
+          "end": 925
+        },
+        {
+          "name": "_validator_run_block",
+          "line": 928,
+          "end": 937
+        },
+        {
+          "name": "_validate",
+          "line": 940,
+          "end": 1142
+        },
+        {
+          "name": "_search",
+          "line": 1145,
+          "end": 1279
+        },
+        {
+          "name": "_runtime",
+          "line": 1282,
+          "end": 1365
+        },
+        {
+          "name": "_guard_event",
+          "line": 1368,
+          "end": 1444
+        },
+        {
+          "name": "_guard_event_probe",
+          "line": 1447,
+          "end": 1476
+        },
+        {
+          "name": "_guard",
+          "line": 1479,
+          "end": 1564
+        },
+        {
+          "name": "_cold_route",
+          "line": 1591,
+          "end": 1681
+        },
+        {
+          "name": "_malformed_route",
+          "line": 1684,
+          "end": 1697
+        },
+        {
+          "name": "_status",
+          "line": 1700,
+          "end": 2317
+        },
+        {
+          "name": "_is_idle_maintain_route",
+          "line": 2320,
+          "end": 2335
+        },
+        {
+          "name": "_continue_improve_fallthrough",
+          "line": 2338,
+          "end": 2501
+        },
+        {
+          "name": "_route_once",
+          "line": 2504,
+          "end": 2637
+        },
+        {
+          "name": "_turn_entry_telegrams",
+          "line": 2640,
+          "end": 2647
+        },
+        {
+          "name": "_current_work",
+          "line": 2662,
+          "end": 2710
+        },
+        {
+          "name": "_route_payload",
+          "line": 2713,
+          "end": 2815
+        },
+        {
+          "name": "_continue_chain",
+          "line": 2818,
+          "end": 3084
+        },
+        {
+          "name": "_next_action",
+          "line": 3087,
+          "end": 3142
+        },
+        {
+          "name": "_explain_next",
+          "line": 3145,
+          "end": 3285
+        },
+        {
+          "name": "_recover",
+          "line": 3288,
+          "end": 3872
+        },
+        {
+          "name": "_sub",
+          "line": 3875,
+          "end": 4072
+        },
+        {
+          "name": "_crew",
+          "line": 4075,
+          "end": 4191
+        },
+        {
+          "name": "_crew_liveness",
+          "line": 4194,
+          "end": 4233
+        },
+        {
+          "name": "_start_actor",
+          "line": 4236,
+          "end": 4251
+        },
+        {
+          "name": "_start",
+          "line": 4254,
+          "end": 4391
+        },
+        {
+          "name": "_exact_no_args",
+          "line": 4394,
+          "end": 4408
+        },
+        {
+          "name": "_converge_home_binding",
+          "line": 4411,
+          "end": 4449
+        },
+        {
+          "name": "_continue",
+          "line": 4452,
+          "end": 4769
+        },
+        {
+          "name": "_audit_enqueue",
+          "line": 4772,
+          "end": 4904
+        },
+        {
+          "name": "_audit_manifest",
+          "line": 4907,
+          "end": 4959
+        },
+        {
+          "name": "_audit",
+          "line": 4962,
+          "end": 5290
+        },
+        {
+          "name": "_work_for_source_receipt",
+          "line": 5293,
+          "end": 5347
+        },
+        {
+          "name": "_parse_value_options",
+          "line": 5384,
+          "end": 5412
+        },
+        {
+          "name": "_cohort",
+          "line": 5415,
+          "end": 5524
+        },
+        {
+          "name": "_source_append_command",
+          "line": 5535,
+          "end": 5668
+        },
+        {
+          "name": "_source",
+          "line": 5671,
+          "end": 6214
+        },
+        {
+          "name": "_source_dry_run_plan",
+          "line": 6217,
+          "end": 6619
+        },
+        {
+          "name": "_context",
+          "line": 6622,
+          "end": 6709
+        },
+        {
+          "name": "_future",
+          "line": 6720,
+          "end": 7044
+        },
+        {
+          "name": "_execute_future_promotion",
+          "line": 7047,
+          "end": 7107
+        },
+        {
+          "name": "_knowledge",
+          "line": 7110,
+          "end": 7167
+        },
+        {
+          "name": "_attempt",
+          "line": 7170,
+          "end": 7314
+        },
+        {
+          "name": "_outbox_check",
+          "line": 7317,
+          "end": 7386
+        },
+        {
+          "name": "_acceptance",
+          "line": 7389,
+          "end": 7452
+        },
+        {
+          "name": "_gpu",
+          "line": 7460,
+          "end": 7569
+        },
+        {
+          "name": "_gpu_out",
+          "line": 7572,
+          "end": 7614
+        },
+        {
+          "name": "_gpu_echo_advisory",
+          "line": 7617,
+          "end": 7634
+        },
+        {
+          "name": "_autonomy_recall",
+          "line": 7637,
+          "end": 7706
+        },
+        {
+          "name": "_brief",
+          "line": 7709,
+          "end": 7733
+        },
+        {
+          "name": "_mail",
+          "line": 7736,
+          "end": 7828
+        },
+        {
+          "name": "_userperson_scope",
+          "line": 7831,
+          "end": 7838
+        },
+        {
+          "name": "_userperson",
+          "line": 7841,
+          "end": 8146
+        },
+        {
+          "name": "_human_refusal_lines",
+          "line": 8155,
+          "end": 8193
+        },
+        {
+          "name": "_reverify_default_timeout",
+          "line": 8196,
+          "end": 8209
+        },
+        {
+          "name": "_operator_boundary_hint",
+          "line": 8212,
+          "end": 8233
+        },
+        {
+          "name": "_emit",
+          "line": 8236,
+          "end": 8392
+        },
+        {
+          "name": "_canonical_proof_levels",
+          "line": 8395,
+          "end": 8408
+        },
+        {
+          "name": "_runtime_identity",
+          "line": 8411,
+          "end": 8424
+        },
+        {
+          "name": "_improve_dry_run_plan",
+          "line": 8427,
+          "end": 8677
+        },
+        {
+          "name": "_improve",
+          "line": 8680,
+          "end": 9675
+        },
+        {
+          "name": "_public_improve",
+          "line": 9678,
+          "end": 9721
+        },
+        {
+          "name": "_runtime_install_flags",
+          "line": 9729,
+          "end": 9730
+        },
+        {
+          "name": "_runtime_install_command",
+          "line": 9733,
+          "end": 9828
+        },
+        {
+          "name": "_host_command",
+          "line": 9836,
+          "end": 9924
+        },
+        {
+          "name": "_host_entry",
+          "line": 9927,
+          "end": 10032
+        },
+        {
+          "name": "_fleet_envelope",
+          "line": 10045,
+          "end": 10058
+        },
+        {
+          "name": "_fleet_emit",
+          "line": 10061,
+          "end": 10062
+        },
+        {
+          "name": "_init_command",
+          "line": 10065,
+          "end": 10140
+        },
+        {
+          "name": "_fleet_command",
+          "line": 10143,
+          "end": 10164
+        },
+        {
+          "name": "_fleet_command_inner",
+          "line": 10167,
+          "end": 10299
+        },
+        {
+          "name": "unconsumed_quote_span",
+          "line": 10302,
+          "end": 10318
+        },
+        {
+          "name": "_run_cli_compound",
+          "line": 10321,
+          "end": 10376
+        },
+        {
+          "name": "_flag_value",
+          "line": 10393,
+          "end": 10400
+        },
+        {
+          "name": "_admission_context",
+          "line": 10403,
+          "end": 10439
+        },
+        {
+          "name": "_admission_cli",
+          "line": 10442,
+          "end": 10544
+        },
+        {
+          "name": "_host_integration_command",
+          "line": 10547,
+          "end": 10608
+        },
+        {
+          "name": "_host_machine_command",
+          "line": 10611,
+          "end": 10673
+        },
+        {
+          "name": "_host_launcher_command",
+          "line": 10676,
+          "end": 10743
+        },
+        {
+          "name": "_host_instructions_command",
+          "line": 10746,
+          "end": 10801
+        },
+        {
+          "name": "_emit_host_report",
+          "line": 10804,
+          "end": 10811
+        },
+        {
+          "name": "_overflow_with_home",
+          "line": 10814,
+          "end": 10821
+        },
+        {
+          "name": "_response_cli",
+          "line": 10824,
+          "end": 11264
+        },
+        {
+          "name": "_storage_command",
+          "line": 11267,
+          "end": 11471
+        },
+        {
+          "name": "main",
+          "line": 11483,
+          "end": 14189
+        },
+        {
+          "name": "_version_at",
+          "line": 339,
+          "end": 343
+        },
+        {
+          "name": "__init__",
+          "line": 880,
+          "end": 885
+        },
+        {
+          "name": "_authoritative_block",
+          "line": 971,
+          "end": 975
+        },
+        {
+          "name": "question_context",
+          "line": 1422,
+          "end": 1437
+        },
+        {
+          "name": "_emit_result",
+          "line": 2368,
+          "end": 2376
+        },
+        {
+          "name": "_witness",
+          "line": 2846,
+          "end": 2850
+        },
+        {
+          "name": "_refuse",
+          "line": 3307,
+          "end": 3309
+        },
+        {
+          "name": "_run",
+          "line": 4019,
+          "end": 4043
+        },
+        {
+          "name": "refuse",
+          "line": 7472,
+          "end": 7482
+        },
+        {
+          "name": "_cycle_statuses",
+          "line": 8720,
+          "end": 8866
+        },
+        {
+          "name": "resolve",
+          "line": 9960,
+          "end": 9961
+        },
+        {
+          "name": "finish",
+          "line": 11295,
+          "end": 11297
+        },
+        {
+          "name": "option",
+          "line": 10927,
+          "end": 10933
+        }
+      ]
+    },
+    "tools/saipen_engine/admission.py": {
+      "sha256": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+      "bytes": 75866,
+      "definitions": [
+        {
+          "name": "_load_registry",
+          "line": 124,
+          "end": 147
+        },
+        {
+          "name": "normalize_action",
+          "line": 187,
+          "end": 196
+        },
+        {
+          "name": "is_protected_canonical_path",
+          "line": 199,
+          "end": 211
+        },
+        {
+          "name": "contains_protected_canonical_path",
+          "line": 214,
+          "end": 231
+        },
+        {
+          "name": "_ordinary_namespace_targets",
+          "line": 234,
+          "end": 246
+        },
+        {
+          "name": "_outside_subtree_namespace",
+          "line": 264,
+          "end": 307
+        },
+        {
+          "name": "_is_reparse_point",
+          "line": 310,
+          "end": 323
+        },
+        {
+          "name": "foreign_protected_canonical",
+          "line": 326,
+          "end": 364
+        },
+        {
+          "name": "get_adapter",
+          "line": 367,
+          "end": 370
+        },
+        {
+          "name": "list_adapters",
+          "line": 373,
+          "end": 375
+        },
+        {
+          "name": "_names_this_machine",
+          "line": 383,
+          "end": 390
+        },
+        {
+          "name": "_win32_spelling",
+          "line": 393,
+          "end": 436
+        },
+        {
+          "name": "_alias_identity",
+          "line": 439,
+          "end": 488
+        },
+        {
+          "name": "_hard_link_alias",
+          "line": 500,
+          "end": 530
+        },
+        {
+          "name": "canonicalize_target",
+          "line": 533,
+          "end": 590
+        },
+        {
+          "name": "_target_list",
+          "line": 593,
+          "end": 609
+        },
+        {
+          "name": "_read_text_bounded",
+          "line": 612,
+          "end": 620
+        },
+        {
+          "name": "_log_tail_event",
+          "line": 623,
+          "end": 647
+        },
+        {
+          "name": "_comparable_target",
+          "line": 650,
+          "end": 657
+        },
+        {
+          "name": "_targets_overlap",
+          "line": 660,
+          "end": 680
+        },
+        {
+          "name": "_pending_operation_targets",
+          "line": 683,
+          "end": 721
+        },
+        {
+          "name": "protocol_snapshot",
+          "line": 751,
+          "end": 968
+        },
+        {
+          "name": "effective_strength",
+          "line": 971,
+          "end": 1075
+        },
+        {
+          "name": "_resolve_cached",
+          "line": 1093,
+          "end": 1108
+        },
+        {
+          "name": "evaluate_admission",
+          "line": 1111,
+          "end": 1669
+        },
+        {
+          "name": "refuse",
+          "line": 773,
+          "end": 776
+        },
+        {
+          "name": "result",
+          "line": 1144,
+          "end": 1151
+        }
+      ]
+    },
+    "tools/saipen_engine/automation.py": {
+      "sha256": "1c9393d82a7b55710685c8e42844fd62c77f61736495d9a911b77496dc01bf8a",
+      "bytes": 25454,
+      "definitions": [
+        {
+          "name": "_stamp_to_instant",
+          "line": 108,
+          "end": 129
+        },
+        {
+          "name": "_iso_instant",
+          "line": 132,
+          "end": 136
+        },
+        {
+          "name": "audit_quiescent",
+          "line": 144,
+          "end": 164
+        },
+        {
+          "name": "audit_epoch",
+          "line": 167,
+          "end": 202
+        },
+        {
+          "name": "_routing_disposition",
+          "line": 210,
+          "end": 277
+        },
+        {
+          "name": "_audit_consume_instants",
+          "line": 285,
+          "end": 311
+        },
+        {
+          "name": "_latest_i_created_at",
+          "line": 314,
+          "end": 323
+        },
+        {
+          "name": "closure_gate",
+          "line": 326,
+          "end": 422
+        },
+        {
+          "name": "automation_block",
+          "line": 430,
+          "end": 570
+        },
+        {
+          "name": "failed_automation_block",
+          "line": 573,
+          "end": 588
+        }
+      ]
+    },
+    "tools/saipen_engine/capability.py": {
+      "sha256": "0d58b0d5df95b5c631030dcd35b8d2702878fc04d1afd06e4386392f38edf2fa",
+      "bytes": 8250,
+      "definitions": [
+        {
+          "name": "negotiate_capability",
+          "line": 73,
+          "end": 103
+        },
+        {
+          "name": "capability_error",
+          "line": 106,
+          "end": 122
+        },
+        {
+          "name": "may_mutate",
+          "line": 125,
+          "end": 127
+        },
+        {
+          "name": "may_publish",
+          "line": 130,
+          "end": 132
+        },
+        {
+          "name": "assert_producer_capability",
+          "line": 135,
+          "end": 162
+        },
+        {
+          "name": "guard_core_mutation",
+          "line": 165,
+          "end": 203
+        }
+      ]
+    },
+    "tools/saipen_engine/commands.py": {
+      "sha256": "0e16f0f17e3a089641549f83795c8c8a77f41773172931530529df43a94adbe9",
+      "bytes": 16920,
+      "definitions": [
+        {
+          "name": "normalize_shortcut_token",
+          "line": 61,
+          "end": 71
+        },
+        {
+          "name": "resolve_shortcut",
+          "line": 74,
+          "end": 88
+        },
+        {
+          "name": "derive_cyrillic_twins",
+          "line": 91,
+          "end": 112
+        },
+        {
+          "name": "load_registry",
+          "line": 115,
+          "end": 117
+        },
+        {
+          "name": "load_shortcut_table",
+          "line": 120,
+          "end": 134
+        },
+        {
+          "name": "is_declared_shortcut",
+          "line": 137,
+          "end": 147
+        },
+        {
+          "name": "parse_compound_command",
+          "line": 150,
+          "end": 209
+        },
+        {
+          "name": "split_cli_compound_argv",
+          "line": 212,
+          "end": 240
+        },
+        {
+          "name": "resolve_compound_command",
+          "line": 243,
+          "end": 347
+        },
+        {
+          "name": "chain_disposition",
+          "line": 376,
+          "end": 408
+        }
+      ]
+    },
+    "tools/saipen_engine/conformance.py": {
+      "sha256": "295f512e8be21682aef9e6b62395cc0a90422644a9b3ff0201df6f74bfd50408",
+      "bytes": 74262,
+      "definitions": [
+        {
+          "name": "_validate_conformance_write_containment",
+          "line": 68,
+          "end": 119
+        },
+        {
+          "name": "_validate_conformance_containment",
+          "line": 122,
+          "end": 145
+        },
+        {
+          "name": "_atomic_write_receipt",
+          "line": 148,
+          "end": 165
+        },
+        {
+          "name": "ReceiptDiscoveryError",
+          "line": 187,
+          "end": 193
+        },
+        {
+          "name": "_utc_now_iso",
+          "line": 197,
+          "end": 204
+        },
+        {
+          "name": "_receipt_id",
+          "line": 207,
+          "end": 213
+        },
+        {
+          "name": "_safe_filename_component",
+          "line": 216,
+          "end": 232
+        },
+        {
+          "name": "_strict_iso_utc",
+          "line": 235,
+          "end": 248
+        },
+        {
+          "name": "_future_beyond_skew",
+          "line": 251,
+          "end": 258
+        },
+        {
+          "name": "_quick_hash",
+          "line": 261,
+          "end": 263
+        },
+        {
+          "name": "_hash_file",
+          "line": 266,
+          "end": 270
+        },
+        {
+          "name": "_source_identity",
+          "line": 273,
+          "end": 279
+        },
+        {
+          "name": "_project_identity",
+          "line": 282,
+          "end": 288
+        },
+        {
+          "name": "_log_hash",
+          "line": 291,
+          "end": 297
+        },
+        {
+          "name": "ValidatorVersionInfo",
+          "line": 302,
+          "end": 318
+        },
+        {
+          "name": "validator_version_info",
+          "line": 321,
+          "end": 361
+        },
+        {
+          "name": "stale_validator",
+          "line": 364,
+          "end": 370
+        },
+        {
+          "name": "_bounded_remediation_commands",
+          "line": 374,
+          "end": 397
+        },
+        {
+          "name": "_bounded_external_actions",
+          "line": 400,
+          "end": 422
+        },
+        {
+          "name": "generate_conformance_receipt",
+          "line": 425,
+          "end": 576
+        },
+        {
+          "name": "_receipt_inventory",
+          "line": 584,
+          "end": 611
+        },
+        {
+          "name": "_receipt_inventory_token",
+          "line": 614,
+          "end": 627
+        },
+        {
+          "name": "_receipt_stat_token",
+          "line": 630,
+          "end": 644
+        },
+        {
+          "name": "_receipt_content_token",
+          "line": 647,
+          "end": 669
+        },
+        {
+          "name": "_receipt_content_inventory",
+          "line": 672,
+          "end": 692
+        },
+        {
+          "name": "_receipt_content_inventory_token",
+          "line": 695,
+          "end": 706
+        },
+        {
+          "name": "_receipt_member_inventory",
+          "line": 709,
+          "end": 727
+        },
+        {
+          "name": "_load_lineage_index",
+          "line": 730,
+          "end": 766
+        },
+        {
+          "name": "_receipt_matches_append",
+          "line": 770,
+          "end": 781
+        },
+        {
+          "name": "_update_receipt_index",
+          "line": 784,
+          "end": 945
+        },
+        {
+          "name": "_lookup_receipt_index",
+          "line": 948,
+          "end": 965
+        },
+        {
+          "name": "_read_indexed_receipt",
+          "line": 968,
+          "end": 995
+        },
+        {
+          "name": "_find_receipt_by_id",
+          "line": 998,
+          "end": 1016
+        },
+        {
+          "name": "_iter_receipts",
+          "line": 1019,
+          "end": 1049
+        },
+        {
+          "name": "latest_receipt",
+          "line": 1052,
+          "end": 1114
+        },
+        {
+          "name": "_strict_validate_receipt",
+          "line": 1138,
+          "end": 1229
+        },
+        {
+          "name": "_checkpoint_hash_mismatch",
+          "line": 1232,
+          "end": 1260
+        },
+        {
+          "name": "_parse_utc",
+          "line": 1272,
+          "end": 1282
+        },
+        {
+          "name": "_remediation_evidence_after",
+          "line": 1285,
+          "end": 1347
+        },
+        {
+          "name": "conformance_status",
+          "line": 1351,
+          "end": 1507
+        },
+        {
+          "name": "current_conformance_pass",
+          "line": 1510,
+          "end": 1525
+        },
+        {
+          "name": "conformance_disposition",
+          "line": 1561,
+          "end": 1576
+        },
+        {
+          "name": "conformance_decision",
+          "line": 1579,
+          "end": 1646
+        },
+        {
+          "name": "convergence_stage_satisfied",
+          "line": 1650,
+          "end": 1683
+        },
+        {
+          "name": "clean_exit_allowed",
+          "line": 1687,
+          "end": 1700
+        },
+        {
+          "name": "continue_entry_health",
+          "line": 1704,
+          "end": 1771
+        },
+        {
+          "name": "as_dict",
+          "line": 310,
+          "end": 318
+        },
+        {
+          "name": "_receipt_sort_key",
+          "line": 1110,
+          "end": 1112
+        }
+      ]
+    },
+    "tools/saipen_engine/remediation.py": {
+      "sha256": "6ac25df16d013081e65fdb4a63056a767786b5681f17379c439512cfa3a982e2",
+      "bytes": 12513,
+      "definitions": [
+        {
+          "name": "RemediationSpec",
+          "line": 57,
+          "end": 128
+        },
+        {
+          "name": "_cmd",
+          "line": 131,
+          "end": 152
+        },
+        {
+          "name": "specs_by_rule",
+          "line": 266,
+          "end": 267
+        },
+        {
+          "name": "external_action",
+          "line": 270,
+          "end": 279
+        },
+        {
+          "name": "extract_commands",
+          "line": 282,
+          "end": 304
+        },
+        {
+          "name": "resolve_command",
+          "line": 307,
+          "end": 330
+        },
+        {
+          "name": "is_external",
+          "line": 333,
+          "end": 337
+        },
+        {
+          "name": "__init__",
+          "line": 79,
+          "end": 116
+        },
+        {
+          "name": "to_dict",
+          "line": 118,
+          "end": 128
+        }
+      ]
+    },
+    "tools/saipen_engine/iteration_verdict.py": {
+      "sha256": "e0ec5a87b6f16c4c1304c6c69b92d7a2a98a11ddb79f7f9d0079a4b9a2da5a8a",
+      "bytes": 26210,
+      "definitions": [
+        {
+          "name": "_cap_truthy",
+          "line": 149,
+          "end": 156
+        },
+        {
+          "name": "normalize_capabilities",
+          "line": 159,
+          "end": 175
+        },
+        {
+          "name": "explicit_grants",
+          "line": 183,
+          "end": 208
+        },
+        {
+          "name": "granted_capabilities",
+          "line": 211,
+          "end": 213
+        },
+        {
+          "name": "required_for_state",
+          "line": 216,
+          "end": 248
+        },
+        {
+          "name": "_known_phases",
+          "line": 289,
+          "end": 292
+        },
+        {
+          "name": "parse_ticket_requires",
+          "line": 295,
+          "end": 324
+        },
+        {
+          "name": "format_ticket_requires",
+          "line": 327,
+          "end": 331
+        },
+        {
+          "name": "required_for_ticket",
+          "line": 334,
+          "end": 352
+        },
+        {
+          "name": "admit_normalized",
+          "line": 355,
+          "end": 366
+        },
+        {
+          "name": "_unreadable",
+          "line": 369,
+          "end": 400
+        },
+        {
+          "name": "_recall_decision",
+          "line": 403,
+          "end": 424
+        },
+        {
+          "name": "project_iteration_verdict",
+          "line": 427,
+          "end": 626
+        },
+        {
+          "name": "verdict_allows_goal_complete_ui",
+          "line": 629,
+          "end": 647
+        }
+      ]
+    },
+    "tools/saipen_engine/goal_authority.py": {
+      "sha256": "0a0b32e8712a2bdeca5d581373fc7a64f38e5ff0a3cbd08f46bf7cf28ed735fc",
+      "bytes": 15152,
+      "definitions": [
+        {
+          "name": "grant_fields",
+          "line": 17,
+          "end": 18
+        },
+        {
+          "name": "shape_errors",
+          "line": 21,
+          "end": 44
+        },
+        {
+          "name": "persistent",
+          "line": 47,
+          "end": 48
+        },
+        {
+          "name": "_pin_record",
+          "line": 51,
+          "end": 59
+        },
+        {
+          "name": "current_binding",
+          "line": 62,
+          "end": 116
+        },
+        {
+          "name": "parse_capsule",
+          "line": 119,
+          "end": 131
+        },
+        {
+          "name": "source_proof",
+          "line": 134,
+          "end": 171
+        },
+        {
+          "name": "transition_grant",
+          "line": 174,
+          "end": 213
+        },
+        {
+          "name": "prove",
+          "line": 215,
+          "end": 268
+        },
+        {
+          "name": "describe",
+          "line": 271,
+          "end": 297
+        },
+        {
+          "name": "fresh_cc_provenance",
+          "line": 299,
+          "end": 309
+        },
+        {
+          "name": "reset_authority",
+          "line": 312,
+          "end": 329
+        },
+        {
+          "name": "unique",
+          "line": 120,
+          "end": 126
+        }
+      ]
+    },
+    "tools/saipen_engine/plan.py": {
+      "sha256": "2d26cb0b3fb8cb42a2da5aceb918280a1f8c18ff761b42ea306cf4bb8445f6fb",
+      "bytes": 10281,
+      "definitions": [
+        {
+          "name": "semantic_payload_hash",
+          "line": 30,
+          "end": 33
+        },
+        {
+          "name": "TargetPlan",
+          "line": 37,
+          "end": 58
+        },
+        {
+          "name": "OperationPlan",
+          "line": 62,
+          "end": 79
+        },
+        {
+          "name": "build_plan",
+          "line": 82,
+          "end": 110
+        },
+        {
+          "name": "_hex8",
+          "line": 113,
+          "end": 116
+        },
+        {
+          "name": "_read_only_preconditions",
+          "line": 119,
+          "end": 129
+        },
+        {
+          "name": "apply_plan",
+          "line": 132,
+          "end": 256
+        },
+        {
+          "name": "changed_files",
+          "line": 78,
+          "end": 79
+        }
+      ]
+    },
+    "tools/saipen_engine/journal.py": {
+      "sha256": "be64a585f6af2621da49d5b2053fb55ec5010336ab6590ec19d0bf6548765b9d",
+      "bytes": 256556,
+      "definitions": [
+        {
+          "name": "_canonical_receipt_metadata",
+          "line": 135,
+          "end": 153
+        },
+        {
+          "name": "_now",
+          "line": 156,
+          "end": 157
+        },
+        {
+          "name": "hash_bytes",
+          "line": 160,
+          "end": 161
+        },
+        {
+          "name": "hash_file_dependency",
+          "line": 164,
+          "end": 179
+        },
+        {
+          "name": "_hash_file",
+          "line": 182,
+          "end": 186
+        },
+        {
+          "name": "_hash_tree",
+          "line": 189,
+          "end": 205
+        },
+        {
+          "name": "hash_tree",
+          "line": 208,
+          "end": 210
+        },
+        {
+          "name": "_hash_delete_tree",
+          "line": 213,
+          "end": 260
+        },
+        {
+          "name": "hash_delete_tree",
+          "line": 263,
+          "end": 265
+        },
+        {
+          "name": "hash_tree_dependency",
+          "line": 268,
+          "end": 282
+        },
+        {
+          "name": "hash_directory_listing_dependency",
+          "line": 288,
+          "end": 323
+        },
+        {
+          "name": "empty_delete_tree_hash",
+          "line": 326,
+          "end": 330
+        },
+        {
+          "name": "owned_target_path",
+          "line": 333,
+          "end": 360
+        },
+        {
+          "name": "read_dependency_path",
+          "line": 363,
+          "end": 375
+        },
+        {
+          "name": "validate_op_id",
+          "line": 378,
+          "end": 393
+        },
+        {
+          "name": "safe_op_dir",
+          "line": 396,
+          "end": 416
+        },
+        {
+          "name": "op_id_provenance",
+          "line": 568,
+          "end": 585
+        },
+        {
+          "name": "_release_closure_ids",
+          "line": 588,
+          "end": 606
+        },
+        {
+          "name": "resolvable_op_ids",
+          "line": 609,
+          "end": 652
+        },
+        {
+          "name": "_target_action",
+          "line": 655,
+          "end": 661
+        },
+        {
+          "name": "_target_live_hash",
+          "line": 664,
+          "end": 682
+        },
+        {
+          "name": "classify_target",
+          "line": 710,
+          "end": 740
+        },
+        {
+          "name": "is_noop_target",
+          "line": 743,
+          "end": 757
+        },
+        {
+          "name": "defer_unreached_targets",
+          "line": 760,
+          "end": 792
+        },
+        {
+          "name": "hash_source_identity",
+          "line": 795,
+          "end": 799
+        },
+        {
+          "name": "source_identity_dependency",
+          "line": 802,
+          "end": 805
+        },
+        {
+          "name": "_hash_dependency",
+          "line": 808,
+          "end": 833
+        },
+        {
+          "name": "_slug",
+          "line": 836,
+          "end": 837
+        },
+        {
+          "name": "staged_name",
+          "line": 840,
+          "end": 843
+        },
+        {
+          "name": "_atomic_json",
+          "line": 850,
+          "end": 858
+        },
+        {
+          "name": "_atomic_write",
+          "line": 861,
+          "end": 871
+        },
+        {
+          "name": "_settle_journal",
+          "line": 874,
+          "end": 912
+        },
+        {
+          "name": "_crash_after",
+          "line": 915,
+          "end": 918
+        },
+        {
+          "name": "decode_operation_record",
+          "line": 921,
+          "end": 1197
+        },
+        {
+          "name": "_decode_progress_sidecar",
+          "line": 1200,
+          "end": 1291
+        },
+        {
+          "name": "_merge_progress_sidecar",
+          "line": 1294,
+          "end": 1359
+        },
+        {
+          "name": "scan_pending",
+          "line": 1362,
+          "end": 1600
+        },
+        {
+          "name": "pending_ops",
+          "line": 1603,
+          "end": 1616
+        },
+        {
+          "name": "pending_conflicts",
+          "line": 1619,
+          "end": 1622
+        },
+        {
+          "name": "_conflict_diverges",
+          "line": 1625,
+          "end": 1648
+        },
+        {
+          "name": "recovery_preflight",
+          "line": 1651,
+          "end": 1767
+        },
+        {
+          "name": "Journal",
+          "line": 1770,
+          "end": 2253
+        },
+        {
+          "name": "_drop_settled_staged",
+          "line": 2256,
+          "end": 2266
+        },
+        {
+          "name": "_drop_staged_payloads",
+          "line": 2269,
+          "end": 2329
+        },
+        {
+          "name": "_verify_target_bytes",
+          "line": 2332,
+          "end": 2340
+        },
+        {
+          "name": "_recovery_identity_binding",
+          "line": 2343,
+          "end": 2402
+        },
+        {
+          "name": "LineageRefusal",
+          "line": 2405,
+          "end": 2415
+        },
+        {
+          "name": "_read_lineage_strict",
+          "line": 2418,
+          "end": 2432
+        },
+        {
+          "name": "ensure_project_lineage",
+          "line": 2435,
+          "end": 2539
+        },
+        {
+          "name": "validate_mutation_request",
+          "line": 2542,
+          "end": 2733
+        },
+        {
+          "name": "run_mutation",
+          "line": 2736,
+          "end": 3273
+        },
+        {
+          "name": "recover",
+          "line": 3276,
+          "end": 3299
+        },
+        {
+          "name": "_recover_locked",
+          "line": 3302,
+          "end": 3702
+        },
+        {
+          "name": "_verifier_for",
+          "line": 3705,
+          "end": 3773
+        },
+        {
+          "name": "verify_accepted_debt",
+          "line": 3776,
+          "end": 3832
+        },
+        {
+          "name": "_run_verifier",
+          "line": 3835,
+          "end": 3856
+        },
+        {
+          "name": "verify_improve",
+          "line": 3859,
+          "end": 3891
+        },
+        {
+          "name": "_verify_userperson",
+          "line": 3894,
+          "end": 3907
+        },
+        {
+          "name": "verify_sub_collect",
+          "line": 3910,
+          "end": 4024
+        },
+        {
+          "name": "verify_sub_disposition",
+          "line": 4027,
+          "end": 4057
+        },
+        {
+          "name": "verify_sub_lifecycle",
+          "line": 4060,
+          "end": 4160
+        },
+        {
+          "name": "verify_sub_clean",
+          "line": 4163,
+          "end": 4226
+        },
+        {
+          "name": "verify_sub_sync",
+          "line": 4229,
+          "end": 4236
+        },
+        {
+          "name": "inspect_op",
+          "line": 4239,
+          "end": 4311
+        },
+        {
+          "name": "_reconcile_and_verify",
+          "line": 4314,
+          "end": 4459
+        },
+        {
+          "name": "_rederive_state_cursor",
+          "line": 4462,
+          "end": 4517
+        },
+        {
+          "name": "resolve_conflict",
+          "line": 4520,
+          "end": 4572
+        },
+        {
+          "name": "_resolve_conflict_locked",
+          "line": 4575,
+          "end": 4792
+        },
+        {
+          "name": "auto_recover_pending",
+          "line": 4795,
+          "end": 4852
+        },
+        {
+          "name": "_compact_drop_staged",
+          "line": 4855,
+          "end": 4879
+        },
+        {
+          "name": "_compact_migrate_ops",
+          "line": 4882,
+          "end": 4967
+        },
+        {
+          "name": "_ReceiptEntry",
+          "line": 4987,
+          "end": 4992
+        },
+        {
+          "name": "_receipt_namespace_entries",
+          "line": 4995,
+          "end": 5111
+        },
+        {
+          "name": "_frame_receipt",
+          "line": 5114,
+          "end": 5125
+        },
+        {
+          "name": "_frame_receipts",
+          "line": 5128,
+          "end": 5136
+        },
+        {
+          "name": "_scan_receipt_namespace",
+          "line": 5139,
+          "end": 5245
+        },
+        {
+          "name": "SemanticReceiptSnapshot",
+          "line": 5249,
+          "end": 5264
+        },
+        {
+          "name": "semantic_receipt_snapshot",
+          "line": 5267,
+          "end": 5364
+        },
+        {
+          "name": "semantic_receipt_digest",
+          "line": 5367,
+          "end": 5386
+        },
+        {
+          "name": "SemanticReceiptCorruptionError",
+          "line": 5389,
+          "end": 5402
+        },
+        {
+          "name": "semantic_receipts_for_operation",
+          "line": 5405,
+          "end": 5446
+        },
+        {
+          "name": "semantic_receipts_for_operation_safe",
+          "line": 5449,
+          "end": 5474
+        },
+        {
+          "name": "_compaction_queue_preflight",
+          "line": 5477,
+          "end": 5532
+        },
+        {
+          "name": "enqueue_legacy_staged",
+          "line": 5540,
+          "end": 5588
+        },
+        {
+          "name": "compact_committed",
+          "line": 5591,
+          "end": 5658
+        },
+        {
+          "name": "_terminal_receipt_equivalent",
+          "line": 5661,
+          "end": 5677
+        },
+        {
+          "name": "_bad",
+          "line": 994,
+          "end": 999
+        },
+        {
+          "name": "_strict_iso_utc",
+          "line": 1001,
+          "end": 1004
+        },
+        {
+          "name": "__init__",
+          "line": 1773,
+          "end": 1809
+        },
+        {
+          "name": "exists",
+          "line": 1811,
+          "end": 1812
+        },
+        {
+          "name": "start",
+          "line": 1814,
+          "end": 1919
+        },
+        {
+          "name": "_read_progress_sidecar",
+          "line": 1921,
+          "end": 1927
+        },
+        {
+          "name": "mark",
+          "line": 1929,
+          "end": 1952
+        },
+        {
+          "name": "reconcile_progress",
+          "line": 1954,
+          "end": 1972
+        },
+        {
+          "name": "append_targets",
+          "line": 1974,
+          "end": 2023
+        },
+        {
+          "name": "_target_paths",
+          "line": 2026,
+          "end": 2031
+        },
+        {
+          "name": "_prepare_append_intent",
+          "line": 2033,
+          "end": 2091
+        },
+        {
+          "name": "_read_append_intent",
+          "line": 2093,
+          "end": 2116
+        },
+        {
+          "name": "_finish_append_intent",
+          "line": 2118,
+          "end": 2184
+        },
+        {
+          "name": "_append_intent_path",
+          "line": 2186,
+          "end": 2187
+        },
+        {
+          "name": "resume_append_intent",
+          "line": 2189,
+          "end": 2195
+        },
+        {
+          "name": "update",
+          "line": 2197,
+          "end": 2206
+        },
+        {
+          "name": "read",
+          "line": 2208,
+          "end": 2224
+        },
+        {
+          "name": "fold_progress",
+          "line": 2226,
+          "end": 2234
+        },
+        {
+          "name": "staged_content",
+          "line": 2236,
+          "end": 2253
+        },
+        {
+          "name": "__init__",
+          "line": 2412,
+          "end": 2415
+        },
+        {
+          "name": "refuse",
+          "line": 2570,
+          "end": 2577
+        },
+        {
+          "name": "dependency_path",
+          "line": 2793,
+          "end": 2794
+        },
+        {
+          "name": "_restore",
+          "line": 4353,
+          "end": 4360
+        },
+        {
+          "name": "invalid",
+          "line": 5008,
+          "end": 5010
+        },
+        {
+          "name": "__iter__",
+          "line": 5262,
+          "end": 5264
+        },
+        {
+          "name": "__init__",
+          "line": 5397,
+          "end": 5402
+        },
+        {
+          "name": "_core_fast",
+          "line": 3720,
+          "end": 3752
+        }
+      ]
+    },
+    "tools/saipen_engine/lock.py": {
+      "sha256": "10cff6fe01d74149eb6d88fb1a03a5d6ee6301d3d34a10a740bae5936de44be3",
+      "bytes": 18857,
+      "definitions": [
+        {
+          "name": "_refused_write",
+          "line": 53,
+          "end": 69
+        },
+        {
+          "name": "not_writable",
+          "line": 72,
+          "end": 76
+        },
+        {
+          "name": "_same_node",
+          "line": 79,
+          "end": 84
+        },
+        {
+          "name": "_owned_lock_path",
+          "line": 87,
+          "end": 113
+        },
+        {
+          "name": "_open_owned_lock",
+          "line": 116,
+          "end": 154
+        },
+        {
+          "name": "_reserve",
+          "line": 157,
+          "end": 168
+        },
+        {
+          "name": "_drop_reservation",
+          "line": 171,
+          "end": 176
+        },
+        {
+          "name": "_promote_reservation",
+          "line": 179,
+          "end": 193
+        },
+        {
+          "name": "_os_lock",
+          "line": 196,
+          "end": 205
+        },
+        {
+          "name": "_os_unlock",
+          "line": 208,
+          "end": 213
+        },
+        {
+          "name": "FileLockBusy",
+          "line": 216,
+          "end": 217
+        },
+        {
+          "name": "FileWriterLock",
+          "line": 220,
+          "end": 303
+        },
+        {
+          "name": "file_writer_lock",
+          "line": 307,
+          "end": 319
+        },
+        {
+          "name": "WriterLock",
+          "line": 322,
+          "end": 386
+        },
+        {
+          "name": "project_writer_lock",
+          "line": 390,
+          "end": 398
+        },
+        {
+          "name": "lock_identity",
+          "line": 401,
+          "end": 403
+        },
+        {
+          "name": "ProducerLock",
+          "line": 418,
+          "end": 485
+        },
+        {
+          "name": "producer_writer_lock",
+          "line": 489,
+          "end": 502
+        },
+        {
+          "name": "__init__",
+          "line": 230,
+          "end": 241
+        },
+        {
+          "name": "acquire",
+          "line": 243,
+          "end": 284
+        },
+        {
+          "name": "release",
+          "line": 286,
+          "end": 296
+        },
+        {
+          "name": "__enter__",
+          "line": 298,
+          "end": 300
+        },
+        {
+          "name": "__exit__",
+          "line": 302,
+          "end": 303
+        },
+        {
+          "name": "__init__",
+          "line": 325,
+          "end": 331
+        },
+        {
+          "name": "acquire",
+          "line": 333,
+          "end": 367
+        },
+        {
+          "name": "release",
+          "line": 369,
+          "end": 379
+        },
+        {
+          "name": "__enter__",
+          "line": 381,
+          "end": 383
+        },
+        {
+          "name": "__exit__",
+          "line": 385,
+          "end": 386
+        },
+        {
+          "name": "__init__",
+          "line": 421,
+          "end": 430
+        },
+        {
+          "name": "acquire",
+          "line": 432,
+          "end": 466
+        },
+        {
+          "name": "release",
+          "line": 468,
+          "end": 478
+        },
+        {
+          "name": "__enter__",
+          "line": 480,
+          "end": 482
+        },
+        {
+          "name": "__exit__",
+          "line": 484,
+          "end": 485
+        }
+      ]
+    },
+    "tools/saipen_engine/runtime_surface.py": {
+      "sha256": "f41b3f704db99658ab5b692fdd9a33995c68d7c79a96c8fc5e5e38a291f64e8b",
+      "bytes": 19952,
+      "definitions": [
+        {
+          "name": "RuntimeSurfaceError",
+          "line": 74,
+          "end": 75
+        },
+        {
+          "name": "normalize_content",
+          "line": 78,
+          "end": 99
+        },
+        {
+          "name": "content_bytes",
+          "line": 102,
+          "end": 104
+        },
+        {
+          "name": "installed_relpath",
+          "line": 107,
+          "end": 116
+        },
+        {
+          "name": "_lstat",
+          "line": 119,
+          "end": 125
+        },
+        {
+          "name": "_is_link_info",
+          "line": 128,
+          "end": 131
+        },
+        {
+          "name": "_require_plain_chain",
+          "line": 134,
+          "end": 150
+        },
+        {
+          "name": "_require_regular_file",
+          "line": 153,
+          "end": 160
+        },
+        {
+          "name": "_layout",
+          "line": 163,
+          "end": 181
+        },
+        {
+          "name": "runtime_surface_items",
+          "line": 184,
+          "end": 299
+        },
+        {
+          "name": "_digest_items",
+          "line": 302,
+          "end": 314
+        },
+        {
+          "name": "require_runtime_generation_identity",
+          "line": 317,
+          "end": 321
+        },
+        {
+          "name": "_session_key",
+          "line": 324,
+          "end": 325
+        },
+        {
+          "name": "identity_session",
+          "line": 329,
+          "end": 346
+        },
+        {
+          "name": "identity_memo",
+          "line": 350,
+          "end": 368
+        },
+        {
+          "name": "runtime_generation_identity",
+          "line": 371,
+          "end": 388
+        },
+        {
+          "name": "same_runtime_generation",
+          "line": 391,
+          "end": 396
+        },
+        {
+          "name": "protocol_home_runtime_root",
+          "line": 399,
+          "end": 417
+        },
+        {
+          "name": "surface_delta",
+          "line": 420,
+          "end": 467
+        },
+        {
+          "name": "admit",
+          "line": 215,
+          "end": 231
+        },
+        {
+          "name": "locate",
+          "line": 233,
+          "end": 242
+        },
+        {
+          "name": "reached",
+          "line": 451,
+          "end": 452
+        }
+      ]
+    },
+    "tools/saipen_engine/host_integration.py": {
+      "sha256": "408cdbcb1dd1b31d9daa83bebf80cf1a3204b7af36196123b9f9981c11257461",
+      "bytes": 49873,
+      "definitions": [
+        {
+          "name": "source_root",
+          "line": 110,
+          "end": 112
+        },
+        {
+          "name": "load_registry",
+          "line": 115,
+          "end": 117
+        },
+        {
+          "name": "_expand",
+          "line": 120,
+          "end": 129
+        },
+        {
+          "name": "capability_contract",
+          "line": 132,
+          "end": 167
+        },
+        {
+          "name": "contract_gaps",
+          "line": 170,
+          "end": 175
+        },
+        {
+          "name": "capability_matrix",
+          "line": 178,
+          "end": 185
+        },
+        {
+          "name": "health_path",
+          "line": 191,
+          "end": 197
+        },
+        {
+          "name": "read_health",
+          "line": 200,
+          "end": 207
+        },
+        {
+          "name": "_mtime",
+          "line": 210,
+          "end": 214
+        },
+        {
+          "name": "_hook_facts",
+          "line": 217,
+          "end": 272
+        },
+        {
+          "name": "_runtime_facts",
+          "line": 275,
+          "end": 334
+        },
+        {
+          "name": "_staging_leftovers",
+          "line": 337,
+          "end": 347
+        },
+        {
+          "name": "authority_facts",
+          "line": 350,
+          "end": 383
+        },
+        {
+          "name": "_identity_supported",
+          "line": 386,
+          "end": 389
+        },
+        {
+          "name": "observe",
+          "line": 392,
+          "end": 437
+        },
+        {
+          "name": "_same_file",
+          "line": 440,
+          "end": 443
+        },
+        {
+          "name": "_health_is_current",
+          "line": 446,
+          "end": 466
+        },
+        {
+          "name": "derive_state",
+          "line": 469,
+          "end": 583
+        },
+        {
+          "name": "effective_admission",
+          "line": 586,
+          "end": 598
+        },
+        {
+          "name": "effective_response",
+          "line": 601,
+          "end": 612
+        },
+        {
+          "name": "_source_facts",
+          "line": 615,
+          "end": 651
+        },
+        {
+          "name": "machine_runtime_view",
+          "line": 654,
+          "end": 679
+        },
+        {
+          "name": "refresh_machine_runtime",
+          "line": 682,
+          "end": 705
+        },
+        {
+          "name": "launcher_engine",
+          "line": 708,
+          "end": 711
+        },
+        {
+          "name": "path_launcher_view",
+          "line": 714,
+          "end": 728
+        },
+        {
+          "name": "refresh_path_launcher",
+          "line": 731,
+          "end": 750
+        },
+        {
+          "name": "doctor",
+          "line": 753,
+          "end": 878
+        },
+        {
+          "name": "_stop_authority",
+          "line": 884,
+          "end": 888
+        },
+        {
+          "name": "_start_authority",
+          "line": 891,
+          "end": 908
+        },
+        {
+          "name": "repair",
+          "line": 911,
+          "end": 1023
+        },
+        {
+          "name": "mode",
+          "line": 1026,
+          "end": 1044
+        },
+        {
+          "name": "_cell",
+          "line": 1050,
+          "end": 1052
+        },
+        {
+          "name": "render",
+          "line": 1055,
+          "end": 1138
+        }
+      ]
+    },
+    "tools/saipen_engine/guard_events.py": {
+      "sha256": "d800ed9425c3d5450eb4d024fceb7e60587b57ec8bc989502c2116c9fc17be42",
+      "bytes": 89327,
+      "definitions": [
+        {
+          "name": "_shell_segments",
+          "line": 317,
+          "end": 385
+        },
+        {
+          "name": "_shell_words",
+          "line": 388,
+          "end": 400
+        },
+        {
+          "name": "shell_namespace_paths",
+          "line": 411,
+          "end": 447
+        },
+        {
+          "name": "_shell_verb",
+          "line": 450,
+          "end": 455
+        },
+        {
+          "name": "_ps_parameter",
+          "line": 458,
+          "end": 460
+        },
+        {
+          "name": "_is_redirection",
+          "line": 463,
+          "end": 466
+        },
+        {
+          "name": "_parse_arguments",
+          "line": 469,
+          "end": 519
+        },
+        {
+          "name": "_absolute",
+          "line": 522,
+          "end": 531
+        },
+        {
+          "name": "_resolve_operand",
+          "line": 534,
+          "end": 574
+        },
+        {
+          "name": "_repository_top",
+          "line": 577,
+          "end": 587
+        },
+        {
+          "name": "_git_effect",
+          "line": 590,
+          "end": 646
+        },
+        {
+          "name": "_navigate",
+          "line": 649,
+          "end": 676
+        },
+        {
+          "name": "_output_redirections",
+          "line": 679,
+          "end": 734
+        },
+        {
+          "name": "destructive_shell_effects",
+          "line": 737,
+          "end": 899
+        },
+        {
+          "name": "_wrapped_script",
+          "line": 905,
+          "end": 926
+        },
+        {
+          "name": "_operand_effect",
+          "line": 929,
+          "end": 940
+        },
+        {
+          "name": "EventError",
+          "line": 943,
+          "end": 944
+        },
+        {
+          "name": "load_event",
+          "line": 947,
+          "end": 973
+        },
+        {
+          "name": "_tool_identity",
+          "line": 976,
+          "end": 987
+        },
+        {
+          "name": "_patch_targets",
+          "line": 990,
+          "end": 1015
+        },
+        {
+          "name": "_extract_targets",
+          "line": 1018,
+          "end": 1030
+        },
+        {
+          "name": "_backslashes_are_literal",
+          "line": 1067,
+          "end": 1074
+        },
+        {
+          "name": "ingress_payload_literal",
+          "line": 1089,
+          "end": 1100
+        },
+        {
+          "name": "shell_control_expression",
+          "line": 1116,
+          "end": 1155
+        },
+        {
+          "name": "ingress_payload",
+          "line": 1158,
+          "end": 1188
+        },
+        {
+          "name": "ingress_rewrite",
+          "line": 1191,
+          "end": 1207
+        },
+        {
+          "name": "_ingress_payload_tokens",
+          "line": 1210,
+          "end": 1264
+        },
+        {
+          "name": "_quoted_payload_tokens",
+          "line": 1267,
+          "end": 1348
+        },
+        {
+          "name": "_windows_path_tokens",
+          "line": 1351,
+          "end": 1377
+        },
+        {
+          "name": "_saipen_cli_tokens",
+          "line": 1380,
+          "end": 1426
+        },
+        {
+          "name": "saipen_line_problem",
+          "line": 1449,
+          "end": 1498
+        },
+        {
+          "name": "_saipen_cli_verb",
+          "line": 1501,
+          "end": 1510
+        },
+        {
+          "name": "_reporting_args",
+          "line": 1596,
+          "end": 1604
+        },
+        {
+          "name": "_read_only_git",
+          "line": 1622,
+          "end": 1631
+        },
+        {
+          "name": "_version_probe_args",
+          "line": 1662,
+          "end": 1669
+        },
+        {
+          "name": "provably_read_only_shell",
+          "line": 1672,
+          "end": 1706
+        },
+        {
+          "name": "is_operator_question",
+          "line": 1709,
+          "end": 1714
+        },
+        {
+          "name": "map_event",
+          "line": 1717,
+          "end": 1889
+        },
+        {
+          "name": "_record_pending_ingress",
+          "line": 1907,
+          "end": 1937
+        },
+        {
+          "name": "evaluate_event",
+          "line": 1940,
+          "end": 2049
+        },
+        {
+          "name": "close",
+          "line": 326,
+          "end": 332
+        },
+        {
+          "name": "scope",
+          "line": 610,
+          "end": 621
+        }
+      ]
+    },
+    "tools/saipen_engine/regression_execution.py": {
+      "sha256": "e08177cb2e61d37347015e93cbd20ec2cb8415262b4f24de6d674046b80e29d4",
+      "bytes": 26809,
+      "definitions": [
+        {
+          "name": "_sha",
+          "line": 43,
+          "end": 44
+        },
+        {
+          "name": "_json",
+          "line": 47,
+          "end": 50
+        },
+        {
+          "name": "_unique",
+          "line": 53,
+          "end": 59
+        },
+        {
+          "name": "_relative",
+          "line": 62,
+          "end": 74
+        },
+        {
+          "name": "_read",
+          "line": 77,
+          "end": 82
+        },
+        {
+          "name": "_paths",
+          "line": 85,
+          "end": 93
+        },
+        {
+          "name": "_context",
+          "line": 96,
+          "end": 118
+        },
+        {
+          "name": "_manifest",
+          "line": 121,
+          "end": 122
+        },
+        {
+          "name": "_load",
+          "line": 125,
+          "end": 207
+        },
+        {
+          "name": "_binding",
+          "line": 210,
+          "end": 261
+        },
+        {
+          "name": "parse_summary",
+          "line": 264,
+          "end": 325
+        },
+        {
+          "name": "_measure",
+          "line": 328,
+          "end": 374
+        },
+        {
+          "name": "_records",
+          "line": 377,
+          "end": 396
+        },
+        {
+          "name": "evidence_gate",
+          "line": 399,
+          "end": 456
+        },
+        {
+          "name": "execute_pair",
+          "line": 460,
+          "end": 624
+        }
+      ]
+    },
+    "tools/saipen_engine/reconcile.py": {
+      "sha256": "3874c43ecfb5d9f8649607f183e4b6f7c598221286852c00aa98af5a994d598e",
+      "bytes": 172997,
+      "definitions": [
+        {
+          "name": "_checkbox_drifts",
+          "line": 66,
+          "end": 94
+        },
+        {
+          "name": "_apply_checkbox_repairs",
+          "line": 97,
+          "end": 102
+        },
+        {
+          "name": "_derived_goal_counters",
+          "line": 105,
+          "end": 134
+        },
+        {
+          "name": "_state_marker_repairs",
+          "line": 137,
+          "end": 188
+        },
+        {
+          "name": "_state_output_field_repairs",
+          "line": 191,
+          "end": 263
+        },
+        {
+          "name": "_stale_improve_gate_repairs",
+          "line": 266,
+          "end": 296
+        },
+        {
+          "name": "_state_blocker_repairs",
+          "line": 299,
+          "end": 427
+        },
+        {
+          "name": "_legacy_next_action",
+          "line": 437,
+          "end": 448
+        },
+        {
+          "name": "_state_next_action_repairs",
+          "line": 451,
+          "end": 591
+        },
+        {
+          "name": "_board_adoption_repairs",
+          "line": 594,
+          "end": 680
+        },
+        {
+          "name": "_closure_contract_frontier",
+          "line": 688,
+          "end": 711
+        },
+        {
+          "name": "_mechanized_ticket_ids",
+          "line": 714,
+          "end": 740
+        },
+        {
+          "name": "_is_legacy_generation",
+          "line": 743,
+          "end": 756
+        },
+        {
+          "name": "_board_lifecycle_repairs",
+          "line": 759,
+          "end": 1110
+        },
+        {
+          "name": "_residue_route",
+          "line": 1154,
+          "end": 1169
+        },
+        {
+          "name": "_residue_decision",
+          "line": 1172,
+          "end": 1176
+        },
+        {
+          "name": "duplicate_id_findings",
+          "line": 1179,
+          "end": 1224
+        },
+        {
+          "name": "duplicate_id_decision",
+          "line": 1227,
+          "end": 1270
+        },
+        {
+          "name": "_duplicate_decision_fields",
+          "line": 1273,
+          "end": 1288
+        },
+        {
+          "name": "_residue_evidence",
+          "line": 1291,
+          "end": 1295
+        },
+        {
+          "name": "_reopen_field_removals",
+          "line": 1308,
+          "end": 1326
+        },
+        {
+          "name": "_apply_lifecycle_repairs",
+          "line": 1329,
+          "end": 1374
+        },
+        {
+          "name": "_plan_repair_id",
+          "line": 1377,
+          "end": 1429
+        },
+        {
+          "name": "_state_counter_repairs",
+          "line": 1432,
+          "end": 1529
+        },
+        {
+          "name": "_tripped_valve_repairs",
+          "line": 1532,
+          "end": 1600
+        },
+        {
+          "name": "_transition_chain",
+          "line": 1610,
+          "end": 1659
+        },
+        {
+          "name": "_ticket_epoch",
+          "line": 1662,
+          "end": 1671
+        },
+        {
+          "name": "_proven_pair",
+          "line": 1674,
+          "end": 1727
+        },
+        {
+          "name": "_restored_seat",
+          "line": 1730,
+          "end": 1749
+        },
+        {
+          "name": "_current_done_journal_gap",
+          "line": 1752,
+          "end": 1820
+        },
+        {
+          "name": "_state_phase_repairs",
+          "line": 1823,
+          "end": 2063
+        },
+        {
+          "name": "_lifecycle_authority_repairs",
+          "line": 2066,
+          "end": 2200
+        },
+        {
+          "name": "_repair_summary",
+          "line": 2203,
+          "end": 2215
+        },
+        {
+          "name": "_foreign_tail_route",
+          "line": 2218,
+          "end": 2235
+        },
+        {
+          "name": "_blocked_recovery_fields",
+          "line": 2238,
+          "end": 2339
+        },
+        {
+          "name": "_decision",
+          "line": 2342,
+          "end": 2349
+        },
+        {
+          "name": "_combined_decisions",
+          "line": 2352,
+          "end": 2438
+        },
+        {
+          "name": "_ensure_audit_contract",
+          "line": 2441,
+          "end": 2523
+        },
+        {
+          "name": "_history_ledger_refusal",
+          "line": 2526,
+          "end": 2539
+        },
+        {
+          "name": "checkpoint_ledger_diagnostic",
+          "line": 2542,
+          "end": 2559
+        },
+        {
+          "name": "reconcile_protocol_state",
+          "line": 2562,
+          "end": 3389
+        },
+        {
+          "name": "resolve_duplicate_id",
+          "line": 3399,
+          "end": 3764
+        },
+        {
+          "name": "refuse",
+          "line": 482,
+          "end": 503
+        },
+        {
+          "name": "blocked",
+          "line": 1891,
+          "end": 1902
+        },
+        {
+          "name": "reopen",
+          "line": 2107,
+          "end": 2119
+        }
+      ]
+    },
+    "tools/saipen_engine/operations.py": {
+      "sha256": "fd56609e5a1806fde7a6a06dd6630841835b2419dc9720332c4223bd21b1f2af",
+      "bytes": 515548,
+      "definitions": [
+        {
+          "name": "_now",
+          "line": 97,
+          "end": 98
+        },
+        {
+          "name": "uuid4_hex",
+          "line": 101,
+          "end": 102
+        },
+        {
+          "name": "_utc_iso",
+          "line": 105,
+          "end": 106
+        },
+        {
+          "name": "_operation_clock",
+          "line": 109,
+          "end": 135
+        },
+        {
+          "name": "_clock_instant",
+          "line": 138,
+          "end": 146
+        },
+        {
+          "name": "StateMalformedError",
+          "line": 149,
+          "end": 155
+        },
+        {
+          "name": "CheckpointError",
+          "line": 158,
+          "end": 174
+        },
+        {
+          "name": "HomeDeadError",
+          "line": 177,
+          "end": 186
+        },
+        {
+          "name": "HomeInaccessibleError",
+          "line": 189,
+          "end": 194
+        },
+        {
+          "name": "_state_guard",
+          "line": 197,
+          "end": 230
+        },
+        {
+          "name": "_read",
+          "line": 280,
+          "end": 545
+        },
+        {
+          "name": "_live_before",
+          "line": 548,
+          "end": 559
+        },
+        {
+          "name": "_target",
+          "line": 562,
+          "end": 567
+        },
+        {
+          "name": "_docs_preconditions",
+          "line": 570,
+          "end": 580
+        },
+        {
+          "name": "_actor_provenance",
+          "line": 583,
+          "end": 602
+        },
+        {
+          "name": "_seat_agent",
+          "line": 605,
+          "end": 641
+        },
+        {
+          "name": "OwnershipSplitError",
+          "line": 644,
+          "end": 654
+        },
+        {
+          "name": "goal_blocked_now",
+          "line": 657,
+          "end": 674
+        },
+        {
+          "name": "_recompute_free_slot_route",
+          "line": 677,
+          "end": 709
+        },
+        {
+          "name": "_settle_stop_reason",
+          "line": 712,
+          "end": 728
+        },
+        {
+          "name": "_event_line",
+          "line": 731,
+          "end": 781
+        },
+        {
+          "name": "_producer_event",
+          "line": 784,
+          "end": 803
+        },
+        {
+          "name": "_log_targets",
+          "line": 806,
+          "end": 818
+        },
+        {
+          "name": "_regression_gate",
+          "line": 821,
+          "end": 861
+        },
+        {
+          "name": "_refuse",
+          "line": 864,
+          "end": 865
+        },
+        {
+          "name": "_source_refusal_code",
+          "line": 868,
+          "end": 881
+        },
+        {
+          "name": "_iter_operation_records",
+          "line": 884,
+          "end": 896
+        },
+        {
+          "name": "_strict_created_at",
+          "line": 899,
+          "end": 905
+        },
+        {
+          "name": "_convergence_event_number",
+          "line": 908,
+          "end": 912
+        },
+        {
+          "name": "_latest_convergence_stage",
+          "line": 915,
+          "end": 933
+        },
+        {
+          "name": "host_session_binding",
+          "line": 946,
+          "end": 951
+        },
+        {
+          "name": "_claim_fields_in_place",
+          "line": 954,
+          "end": 1005
+        },
+        {
+          "name": "_ticket_fields_in_place",
+          "line": 1008,
+          "end": 1033
+        },
+        {
+          "name": "_project_board_mutation",
+          "line": 1036,
+          "end": 1071
+        },
+        {
+          "name": "_active_claim_refusal",
+          "line": 1074,
+          "end": 1132
+        },
+        {
+          "name": "_refresh_active_claim",
+          "line": 1135,
+          "end": 1178
+        },
+        {
+          "name": "_plan_claim",
+          "line": 1181,
+          "end": 1599
+        },
+        {
+          "name": "_claim_move",
+          "line": 1602,
+          "end": 1653
+        },
+        {
+          "name": "plan_claim",
+          "line": 1657,
+          "end": 1676
+        },
+        {
+          "name": "apply_claim",
+          "line": 1680,
+          "end": 1695
+        },
+        {
+          "name": "_plan_attempt",
+          "line": 1701,
+          "end": 2071
+        },
+        {
+          "name": "attempt_lifecycle",
+          "line": 2075,
+          "end": 2115
+        },
+        {
+          "name": "_plan_transition",
+          "line": 2121,
+          "end": 2433
+        },
+        {
+          "name": "transition_phase",
+          "line": 2437,
+          "end": 2461
+        },
+        {
+          "name": "_establish_pre_build_baseline",
+          "line": 2464,
+          "end": 2540
+        },
+        {
+          "name": "_schema_upgrade_owned",
+          "line": 2546,
+          "end": 2571
+        },
+        {
+          "name": "_plan_checkpoint",
+          "line": 2574,
+          "end": 2668
+        },
+        {
+          "name": "checkpoint",
+          "line": 2672,
+          "end": 2691
+        },
+        {
+          "name": "next_ticket_id",
+          "line": 2703,
+          "end": 2739
+        },
+        {
+          "name": "_insert_todo",
+          "line": 2742,
+          "end": 2747
+        },
+        {
+          "name": "_plan_handback",
+          "line": 2750,
+          "end": 2976
+        },
+        {
+          "name": "_ticket_targets",
+          "line": 2979,
+          "end": 3338
+        },
+        {
+          "name": "_only_request_clauses_await",
+          "line": 3341,
+          "end": 3358
+        },
+        {
+          "name": "_verification_command",
+          "line": 3361,
+          "end": 3372
+        },
+        {
+          "name": "_evidence_route",
+          "line": 3380,
+          "end": 3393
+        },
+        {
+          "name": "closure_request_error",
+          "line": 3396,
+          "end": 3489
+        },
+        {
+          "name": "_plan_finish_ticket",
+          "line": 3492,
+          "end": 4128
+        },
+        {
+          "name": "invalidation_error",
+          "line": 4132,
+          "end": 4165
+        },
+        {
+          "name": "finish_ticket",
+          "line": 4169,
+          "end": 4215
+        },
+        {
+          "name": "_plan_bind_closed_cohort",
+          "line": 4221,
+          "end": 4340
+        },
+        {
+          "name": "bind_closed_cohort",
+          "line": 4344,
+          "end": 4352
+        },
+        {
+          "name": "_set_closure_fields",
+          "line": 4355,
+          "end": 4409
+        },
+        {
+          "name": "_move_ticket",
+          "line": 4412,
+          "end": 4498
+        },
+        {
+          "name": "_plan_supersede_ticket",
+          "line": 4504,
+          "end": 4755
+        },
+        {
+          "name": "supersede_ticket",
+          "line": 4759,
+          "end": 4786
+        },
+        {
+          "name": "_plan_resolve_external_ticket",
+          "line": 4792,
+          "end": 5126
+        },
+        {
+          "name": "resolve_external_ticket",
+          "line": 5130,
+          "end": 5184
+        },
+        {
+          "name": "_plan_repair_metadata",
+          "line": 5190,
+          "end": 5498
+        },
+        {
+          "name": "repair_metadata",
+          "line": 5502,
+          "end": 5531
+        },
+        {
+          "name": "_plan_retire_source",
+          "line": 5534,
+          "end": 5715
+        },
+        {
+          "name": "retire_source",
+          "line": 5719,
+          "end": 5746
+        },
+        {
+          "name": "_remove_ticket",
+          "line": 5752,
+          "end": 5785
+        },
+        {
+          "name": "_retire_targets",
+          "line": 5788,
+          "end": 6226
+        },
+        {
+          "name": "_retirement_event_oversize",
+          "line": 6229,
+          "end": 6269
+        },
+        {
+          "name": "_bind_legacy_retirement",
+          "line": 6272,
+          "end": 6489
+        },
+        {
+          "name": "retire_ticket",
+          "line": 6493,
+          "end": 6530
+        },
+        {
+          "name": "_is_placeholder_verify",
+          "line": 6533,
+          "end": 6547
+        },
+        {
+          "name": "_ticket_add_route",
+          "line": 6550,
+          "end": 6565
+        },
+        {
+          "name": "ticket_add",
+          "line": 6569,
+          "end": 6740
+        },
+        {
+          "name": "compact_board",
+          "line": 6744,
+          "end": 6930
+        },
+        {
+          "name": "ticket_verify",
+          "line": 6934,
+          "end": 7079
+        },
+        {
+          "name": "ticket_requires",
+          "line": 7082,
+          "end": 7215
+        },
+        {
+          "name": "_improve_module",
+          "line": 7223,
+          "end": 7240
+        },
+        {
+          "name": "_sweep_linkage",
+          "line": 7243,
+          "end": 7249
+        },
+        {
+          "name": "ticket_reasoning",
+          "line": 7252,
+          "end": 7385
+        },
+        {
+          "name": "_user_request_body",
+          "line": 7388,
+          "end": 7422
+        },
+        {
+          "name": "_request_title",
+          "line": 7425,
+          "end": 7436
+        },
+        {
+          "name": "user_request",
+          "line": 7440,
+          "end": 7670
+        },
+        {
+          "name": "authority_capture",
+          "line": 7673,
+          "end": 7767
+        },
+        {
+          "name": "_project_user_request",
+          "line": 7770,
+          "end": 7947
+        },
+        {
+          "name": "cohort_status",
+          "line": 7950,
+          "end": 7982
+        },
+        {
+          "name": "cohort_ship",
+          "line": 7986,
+          "end": 8116
+        },
+        {
+          "name": "ticket_move",
+          "line": 8120,
+          "end": 8163
+        },
+        {
+          "name": "_state_only_plan",
+          "line": 8169,
+          "end": 8317
+        },
+        {
+          "name": "set_goal_intent",
+          "line": 8321,
+          "end": 8366
+        },
+        {
+          "name": "authorize_goal_continuation",
+          "line": 8370,
+          "end": 8492
+        },
+        {
+          "name": "_validate_goal_objective",
+          "line": 8494,
+          "end": 8511
+        },
+        {
+          "name": "_goal_plan_steps",
+          "line": 8514,
+          "end": 8525
+        },
+        {
+          "name": "_goal_plan_ticket_ids",
+          "line": 8528,
+          "end": 8535
+        },
+        {
+          "name": "goal_entry",
+          "line": 8539,
+          "end": 8841
+        },
+        {
+          "name": "set_converge_intent",
+          "line": 8845,
+          "end": 8992
+        },
+        {
+          "name": "enter_ship_convergence",
+          "line": 8996,
+          "end": 9121
+        },
+        {
+          "name": "finalize_converge_intent",
+          "line": 9125,
+          "end": 9203
+        },
+        {
+          "name": "_candidate_home_errors",
+          "line": 9206,
+          "end": 9229
+        },
+        {
+          "name": "_home_layout_errors",
+          "line": 9232,
+          "end": 9267
+        },
+        {
+          "name": "_normalized_log_lines",
+          "line": 9274,
+          "end": 9312
+        },
+        {
+          "name": "normalize_log",
+          "line": 9316,
+          "end": 9400
+        },
+        {
+          "name": "quarantine_log_tail",
+          "line": 9408,
+          "end": 9501
+        },
+        {
+          "name": "_sealed_segment_bindings",
+          "line": 9504,
+          "end": 9533
+        },
+        {
+          "name": "seal_log",
+          "line": 9537,
+          "end": 9703
+        },
+        {
+          "name": "_journal_debt",
+          "line": 9710,
+          "end": 9725
+        },
+        {
+          "name": "compact_journal",
+          "line": 9728,
+          "end": 9793
+        },
+        {
+          "name": "scrub_board",
+          "line": 9797,
+          "end": 9960
+        },
+        {
+          "name": "migrate_saipen_generation",
+          "line": 9964,
+          "end": 10082
+        },
+        {
+          "name": "_commit_rebound_home",
+          "line": 10085,
+          "end": 10141
+        },
+        {
+          "name": "rebind_home_auto",
+          "line": 10144,
+          "end": 10255
+        },
+        {
+          "name": "rebind_saipen_home",
+          "line": 10258,
+          "end": 10307
+        },
+        {
+          "name": "handover_agent",
+          "line": 10311,
+          "end": 10486
+        },
+        {
+          "name": "handoff_claim",
+          "line": 10493,
+          "end": 10581
+        },
+        {
+          "name": "reauthorize_valve",
+          "line": 10589,
+          "end": 10715
+        },
+        {
+          "name": "stop_checkpoint",
+          "line": 10719,
+          "end": 10891
+        },
+        {
+          "name": "release_scope_hash",
+          "line": 10899,
+          "end": 10903
+        },
+        {
+          "name": "release_scope_matches",
+          "line": 10906,
+          "end": 10912
+        },
+        {
+          "name": "_plan_record_scope",
+          "line": 10915,
+          "end": 11087
+        },
+        {
+          "name": "record_scope",
+          "line": 11091,
+          "end": 11118
+        },
+        {
+          "name": "_improve_gate_plan",
+          "line": 11121,
+          "end": 11218
+        },
+        {
+          "name": "hold_improve",
+          "line": 11222,
+          "end": 11264
+        },
+        {
+          "name": "release_improve",
+          "line": 11268,
+          "end": 11276
+        },
+        {
+          "name": "_sanitize_remote",
+          "line": 11282,
+          "end": 11292
+        },
+        {
+          "name": "_plan_first_publish_wait",
+          "line": 11295,
+          "end": 11356
+        },
+        {
+          "name": "record_first_publish_wait",
+          "line": 11360,
+          "end": 11371
+        },
+        {
+          "name": "_first_publish_wait_journaled",
+          "line": 11374,
+          "end": 11404
+        },
+        {
+          "name": "_plan_first_publish_confirm",
+          "line": 11407,
+          "end": 11492
+        },
+        {
+          "name": "confirm_first_publish",
+          "line": 11496,
+          "end": 11507
+        },
+        {
+          "name": "_identity",
+          "line": 11511,
+          "end": 11514
+        },
+        {
+          "name": "_plan_crew_closure",
+          "line": 11517,
+          "end": 11625
+        },
+        {
+          "name": "_is_converge_intent_epoch",
+          "line": 11628,
+          "end": 11632
+        },
+        {
+          "name": "_plan_defer_for_crew",
+          "line": 11635,
+          "end": 11873
+        },
+        {
+          "name": "defer_for_crew",
+          "line": 11877,
+          "end": 11893
+        },
+        {
+          "name": "_plan_clear_wait_role",
+          "line": 11896,
+          "end": 11974
+        },
+        {
+          "name": "clear_wait_role",
+          "line": 11978,
+          "end": 11989
+        },
+        {
+          "name": "_plan_crew_run",
+          "line": 11992,
+          "end": 12077
+        },
+        {
+          "name": "record_crew_run",
+          "line": 12081,
+          "end": 12112
+        },
+        {
+          "name": "_plan_producer_integration",
+          "line": 12115,
+          "end": 12205
+        },
+        {
+          "name": "record_producer_integration",
+          "line": 12209,
+          "end": 12244
+        },
+        {
+          "name": "_plan_convergence_stage",
+          "line": 12247,
+          "end": 12409
+        },
+        {
+          "name": "record_convergence",
+          "line": 12413,
+          "end": 12438
+        },
+        {
+          "name": "_render_plan",
+          "line": 12441,
+          "end": 12454
+        },
+        {
+          "name": "__init__",
+          "line": 126,
+          "end": 127
+        },
+        {
+          "name": "utc",
+          "line": 130,
+          "end": 131
+        },
+        {
+          "name": "now",
+          "line": 134,
+          "end": 135
+        },
+        {
+          "name": "__init__",
+          "line": 172,
+          "end": 174
+        },
+        {
+          "name": "wrapper",
+          "line": 210,
+          "end": 228
+        },
+        {
+          "name": "_baseline_refuse",
+          "line": 2481,
+          "end": 2489
+        },
+        {
+          "name": "_propose",
+          "line": 2875,
+          "end": 2913
+        },
+        {
+          "name": "_propose_moved",
+          "line": 3193,
+          "end": 3220
+        },
+        {
+          "name": "_propose_closed",
+          "line": 3952,
+          "end": 4006
+        },
+        {
+          "name": "mutate",
+          "line": 4331,
+          "end": 4332
+        },
+        {
+          "name": "_propose_superseded",
+          "line": 4667,
+          "end": 4689
+        },
+        {
+          "name": "_propose_resolved",
+          "line": 5031,
+          "end": 5057
+        },
+        {
+          "name": "_propose_repaired",
+          "line": 5426,
+          "end": 5429
+        },
+        {
+          "name": "render",
+          "line": 7801,
+          "end": 7817
+        },
+        {
+          "name": "shrink",
+          "line": 7826,
+          "end": 7842
+        },
+        {
+          "name": "mutate",
+          "line": 8334,
+          "end": 8343
+        },
+        {
+          "name": "mutate",
+          "line": 8459,
+          "end": 8469
+        },
+        {
+          "name": "mutate",
+          "line": 8878,
+          "end": 8910
+        },
+        {
+          "name": "mutate",
+          "line": 9149,
+          "end": 9162
+        },
+        {
+          "name": "mutate",
+          "line": 9369,
+          "end": 9370
+        },
+        {
+          "name": "mutate",
+          "line": 9467,
+          "end": 9468
+        },
+        {
+          "name": "_read_once",
+          "line": 9523,
+          "end": 9527
+        },
+        {
+          "name": "mutate",
+          "line": 9655,
+          "end": 9656
+        },
+        {
+          "name": "mutate",
+          "line": 10040,
+          "end": 10049
+        },
+        {
+          "name": "mutate",
+          "line": 10109,
+          "end": 10118
+        },
+        {
+          "name": "mutate",
+          "line": 10652,
+          "end": 10692
+        }
+      ]
+    },
+    "tools/test_guard_admission.py": {
+      "sha256": "f3d15c1fd6b7b11d657784cf3bd4418feddbfebf4086c36da03a0a0d54136207",
+      "bytes": 20899,
+      "definitions": [
+        {
+          "name": "setUpModule",
+          "line": 35,
+          "end": 38
+        },
+        {
+          "name": "TestAdmissionAuthority",
+          "line": 41,
+          "end": 385
+        },
+        {
+          "name": "TestGuardCLI",
+          "line": 388,
+          "end": 482
+        },
+        {
+          "name": "setUp",
+          "line": 42,
+          "end": 78
+        },
+        {
+          "name": "tearDown",
+          "line": 80,
+          "end": 81
+        },
+        {
+          "name": "test_protected_canonical_paths",
+          "line": 83,
+          "end": 111
+        },
+        {
+          "name": "test_admitted_normal_paths",
+          "line": 113,
+          "end": 133
+        },
+        {
+          "name": "test_admission_cache_protection_is_narrow",
+          "line": 135,
+          "end": 144
+        },
+        {
+          "name": "test_engine_record_directories_refuse_a_host_and_admit_the_engine",
+          "line": 146,
+          "end": 186
+        },
+        {
+          "name": "test_admitted_external_path",
+          "line": 188,
+          "end": 193
+        },
+        {
+          "name": "test_blocked_work_allows_reads_but_not_consequential_mutation",
+          "line": 195,
+          "end": 215
+        },
+        {
+          "name": "test_bound_project_cannot_authorize_foreign_root_mutation",
+          "line": 217,
+          "end": 244
+        },
+        {
+          "name": "test_a_file_belonging_to_no_project_is_not_a_foreign_root",
+          "line": 246,
+          "end": 261
+        },
+        {
+          "name": "_fastest_of_twenty",
+          "line": 263,
+          "end": 268
+        },
+        {
+          "name": "test_performance_budget",
+          "line": 270,
+          "end": 277
+        },
+        {
+          "name": "test_performance_budget_still_sees_a_real_regression",
+          "line": 279,
+          "end": 294
+        },
+        {
+          "name": "test_detached_staging_cwd_with_env",
+          "line": 296,
+          "end": 317
+        },
+        {
+          "name": "test_lineage_mismatch_fails_closed",
+          "line": 319,
+          "end": 333
+        },
+        {
+          "name": "test_adapter_registry_truth",
+          "line": 335,
+          "end": 385
+        },
+        {
+          "name": "setUp",
+          "line": 389,
+          "end": 423
+        },
+        {
+          "name": "tearDown",
+          "line": 425,
+          "end": 426
+        },
+        {
+          "name": "test_cli_guard_status",
+          "line": 428,
+          "end": 434
+        },
+        {
+          "name": "test_cli_guard_status_json",
+          "line": 436,
+          "end": 451
+        },
+        {
+          "name": "test_cli_guard_normal_file_admitted",
+          "line": 453,
+          "end": 461
+        },
+        {
+          "name": "test_cli_guard_protected_file_rejected",
+          "line": 463,
+          "end": 473
+        },
+        {
+          "name": "test_cli_guard_protected_file_human_output",
+          "line": 475,
+          "end": 482
+        },
+        {
+          "name": "verdict",
+          "line": 154,
+          "end": 164
+        },
+        {
+          "name": "slow",
+          "line": 288,
+          "end": 290
+        }
+      ]
+    },
+    "tools/test_recovery_reachability.py": {
+      "sha256": "6d7e4a8d5d8bae1bb8a57e2b1d3f2ffad4bde5b7b1ebaaee3fb4625a628c5341",
+      "bytes": 89888,
+      "definitions": [
+        {
+          "name": "setUpModule",
+          "line": 52,
+          "end": 55
+        },
+        {
+          "name": "BlockerClassificationTests",
+          "line": 60,
+          "end": 116
+        },
+        {
+          "name": "_project",
+          "line": 126,
+          "end": 166
+        },
+        {
+          "name": "StaleBlockerEndToEndTests",
+          "line": 169,
+          "end": 236
+        },
+        {
+          "name": "StaleBlockerCliTests",
+          "line": 243,
+          "end": 274
+        },
+        {
+          "name": "_bound_project",
+          "line": 277,
+          "end": 285
+        },
+        {
+          "name": "RemediationResultTests",
+          "line": 288,
+          "end": 368
+        },
+        {
+          "name": "RemediationPreflightTests",
+          "line": 371,
+          "end": 405
+        },
+        {
+          "name": "DiagnosisModeTests",
+          "line": 408,
+          "end": 444
+        },
+        {
+          "name": "LegacyNextActionClassificationTests",
+          "line": 447,
+          "end": 470
+        },
+        {
+          "name": "LegacyNextActionRepairTests",
+          "line": 473,
+          "end": 608
+        },
+        {
+          "name": "_legacy_project",
+          "line": 625,
+          "end": 663
+        },
+        {
+          "name": "LegacyAdoptionClassificationTests",
+          "line": 666,
+          "end": 737
+        },
+        {
+          "name": "LegacyAdoptionRepairTests",
+          "line": 740,
+          "end": 829
+        },
+        {
+          "name": "LegacyAdoptionCliTests",
+          "line": 832,
+          "end": 883
+        },
+        {
+          "name": "OperatorBlockerDecisionTests",
+          "line": 886,
+          "end": 989
+        },
+        {
+          "name": "OperatorBlockerCliTests",
+          "line": 992,
+          "end": 1028
+        },
+        {
+          "name": "GuardParityTests",
+          "line": 1031,
+          "end": 1124
+        },
+        {
+          "name": "DeadlockReachabilityMatrixTests",
+          "line": 1127,
+          "end": 1216
+        },
+        {
+          "name": "_unbound_history_project",
+          "line": 1261,
+          "end": 1279
+        },
+        {
+          "name": "assert_structural_gate_restored",
+          "line": 1282,
+          "end": 1293
+        },
+        {
+          "name": "UnboundHistoryDeadlockTests",
+          "line": 1296,
+          "end": 1384
+        },
+        {
+          "name": "CyclicRepairDependencyTests",
+          "line": 1453,
+          "end": 1787
+        },
+        {
+          "name": "StrandedClaimTests",
+          "line": 1795,
+          "end": 1900
+        },
+        {
+          "name": "test_empty_and_none_own_no_repair",
+          "line": 63,
+          "end": 66
+        },
+        {
+          "name": "test_blocked_phase_is_consistent",
+          "line": 68,
+          "end": 71
+        },
+        {
+          "name": "test_an_out_of_enum_phase_is_the_phase_repairers_business",
+          "line": 73,
+          "end": 76
+        },
+        {
+          "name": "test_a_malformed_blocker_is_not_read_as_stale",
+          "line": 78,
+          "end": 80
+        },
+        {
+          "name": "test_an_active_phase_without_authority_is_proven_stale",
+          "line": 82,
+          "end": 87
+        },
+        {
+          "name": "test_a_recognised_gate_class_requires_an_operator_decision",
+          "line": 89,
+          "end": 101
+        },
+        {
+          "name": "test_a_live_board_block_refuses",
+          "line": 103,
+          "end": 116
+        },
+        {
+          "name": "_make_project",
+          "line": 172,
+          "end": 175
+        },
+        {
+          "name": "_state",
+          "line": 177,
+          "end": 178
+        },
+        {
+          "name": "test_the_brake_binds_before_the_repair",
+          "line": 180,
+          "end": 185
+        },
+        {
+          "name": "test_the_stale_blocker_is_repaired_and_the_brake_lifts",
+          "line": 187,
+          "end": 212
+        },
+        {
+          "name": "test_the_repair_is_idempotent",
+          "line": 214,
+          "end": 223
+        },
+        {
+          "name": "test_a_real_operator_gate_refuses_with_zero_writes",
+          "line": 225,
+          "end": 236
+        },
+        {
+          "name": "test_recover_lifts_a_proven_stale_brake",
+          "line": 246,
+          "end": 260
+        },
+        {
+          "name": "test_recover_on_an_operator_gate_refuses",
+          "line": 262,
+          "end": 274
+        },
+        {
+          "name": "test_every_result_carries_the_remediation_facts",
+          "line": 316,
+          "end": 331
+        },
+        {
+          "name": "test_a_blocked_state_surface_names_the_blocker_field",
+          "line": 333,
+          "end": 341
+        },
+        {
+          "name": "test_a_braked_classification_is_never_a_dead_end",
+          "line": 343,
+          "end": 353
+        },
+        {
+          "name": "test_a_legacy_unrecognised_block_code_still_has_a_route",
+          "line": 355,
+          "end": 358
+        },
+        {
+          "name": "test_the_conflict_class_owns_no_repair_route",
+          "line": 360,
+          "end": 363
+        },
+        {
+          "name": "test_a_clean_valid_result_routes_to_continue",
+          "line": 365,
+          "end": 368
+        },
+        {
+          "name": "_run",
+          "line": 374,
+          "end": 377
+        },
+        {
+          "name": "test_a_proven_stale_brake_is_safe_with_an_automatic_route",
+          "line": 379,
+          "end": 385
+        },
+        {
+          "name": "test_an_operator_gate_is_blocked_and_requires_a_decision",
+          "line": 387,
+          "end": 405
+        },
+        {
+          "name": "test_a_no_auto_repair_block_is_read_only_diagnosis",
+          "line": 417,
+          "end": 423
+        },
+        {
+          "name": "test_a_safe_auto_repair_is_not_read_only",
+          "line": 425,
+          "end": 429
+        },
+        {
+          "name": "test_valid_and_non_saipen_carry_no_diagnosis_mode",
+          "line": 431,
+          "end": 436
+        },
+        {
+          "name": "test_the_operator_gate_names_the_only_sanctioned_mutation",
+          "line": 438,
+          "end": 444
+        },
+        {
+          "name": "test_legal_actions_are_not_legacy",
+          "line": 450,
+          "end": 454
+        },
+        {
+          "name": "test_freeform_prose_is_legacy",
+          "line": 456,
+          "end": 459
+        },
+        {
+          "name": "test_a_malformed_phase_action_is_legacy",
+          "line": 461,
+          "end": 462
+        },
+        {
+          "name": "test_an_empty_action_is_repaired_when_provable",
+          "line": 464,
+          "end": 470
+        },
+        {
+          "name": "_make",
+          "line": 476,
+          "end": 479
+        },
+        {
+          "name": "test_a_provable_legacy_action_is_repaired",
+          "line": 481,
+          "end": 500
+        },
+        {
+          "name": "test_an_ambiguous_legacy_action_refuses_with_zero_writes",
+          "line": 502,
+          "end": 536
+        },
+        {
+          "name": "test_fleet_does_not_route_ambiguous_truth_back_to_bare_recover",
+          "line": 538,
+          "end": 567
+        },
+        {
+          "name": "test_public_recover_emits_the_same_terminal_remediation_fields",
+          "line": 569,
+          "end": 608
+        },
+        {
+          "name": "test_no_allocation_frontier_means_no_adoption_authority",
+          "line": 669,
+          "end": 675
+        },
+        {
+          "name": "test_an_attested_ticket_owns_no_repair",
+          "line": 677,
+          "end": 684
+        },
+        {
+          "name": "test_a_named_unattested_record_is_an_adoption",
+          "line": 686,
+          "end": 697
+        },
+        {
+          "name": "test_an_unnamed_unattested_record_refuses",
+          "line": 699,
+          "end": 709
+        },
+        {
+          "name": "test_a_parked_record_is_reachable_too",
+          "line": 711,
+          "end": 737
+        },
+        {
+          "name": "_make",
+          "line": 743,
+          "end": 746
+        },
+        {
+          "name": "_read",
+          "line": 748,
+          "end": 749
+        },
+        {
+          "name": "test_an_unattested_record_refuses_with_zero_writes",
+          "line": 751,
+          "end": 762
+        },
+        {
+          "name": "test_fleet_names_the_exact_adoption_command",
+          "line": 764,
+          "end": 782
+        },
+        {
+          "name": "test_an_operator_adoption_lands_a_now_dated_dec",
+          "line": 784,
+          "end": 794
+        },
+        {
+          "name": "test_no_historical_allocation_event_is_fabricated",
+          "line": 796,
+          "end": 811
+        },
+        {
+          "name": "test_adoption_is_idempotent",
+          "line": 813,
+          "end": 820
+        },
+        {
+          "name": "test_an_unknown_adopt_id_does_not_launder_the_record",
+          "line": 822,
+          "end": 829
+        },
+        {
+          "name": "_run",
+          "line": 835,
+          "end": 842
+        },
+        {
+          "name": "_make",
+          "line": 844,
+          "end": 847
+        },
+        {
+          "name": "test_recover_without_adoption_refuses_the_legacy_record",
+          "line": 849,
+          "end": 853
+        },
+        {
+          "name": "test_recover_adopts_the_named_legacy_ticket",
+          "line": 855,
+          "end": 862
+        },
+        {
+          "name": "test_the_closed_grammar_refuses_a_missing_id",
+          "line": 864,
+          "end": 868
+        },
+        {
+          "name": "test_the_closed_grammar_refuses_a_non_ticket_id",
+          "line": 870,
+          "end": 874
+        },
+        {
+          "name": "test_an_unknown_adopt_id_leaves_the_record_blocked",
+          "line": 876,
+          "end": 883
+        },
+        {
+          "name": "_make",
+          "line": 898,
+          "end": 901
+        },
+        {
+          "name": "_read",
+          "line": 903,
+          "end": 904
+        },
+        {
+          "name": "test_a_decision_turns_the_refusal_into_a_committing_repair",
+          "line": 906,
+          "end": 914
+        },
+        {
+          "name": "test_empty_authority_never_clears_a_gate",
+          "line": 916,
+          "end": 923
+        },
+        {
+          "name": "test_the_engine_records_the_authority_and_lifts_the_brake",
+          "line": 925,
+          "end": 959
+        },
+        {
+          "name": "test_a_live_board_gate_is_cleared_but_the_ticket_is_not_owned",
+          "line": 961,
+          "end": 974
+        },
+        {
+          "name": "test_the_verb_does_not_own_phase_blocked",
+          "line": 976,
+          "end": 989
+        },
+        {
+          "name": "_run",
+          "line": 995,
+          "end": 1002
+        },
+        {
+          "name": "_make",
+          "line": 1004,
+          "end": 1007
+        },
+        {
+          "name": "test_recover_resolves_the_gate_with_recorded_authority",
+          "line": 1009,
+          "end": 1016
+        },
+        {
+          "name": "test_the_closed_grammar_refuses_a_missing_decision",
+          "line": 1018,
+          "end": 1022
+        },
+        {
+          "name": "test_an_unknown_flag_is_refused",
+          "line": 1024,
+          "end": 1028
+        },
+        {
+          "name": "test_the_guard_exempts_the_one_verb_the_fleet_names",
+          "line": 1056,
+          "end": 1078
+        },
+        {
+          "name": "test_the_named_board_compaction_repair_is_guard_admitted",
+          "line": 1080,
+          "end": 1095
+        },
+        {
+          "name": "test_every_braked_fleet_command_uses_a_guard_admitted_verb",
+          "line": 1097,
+          "end": 1106
+        },
+        {
+          "name": "test_the_router_brake_is_a_read_only_stop_not_a_mutation",
+          "line": 1108,
+          "end": 1124
+        },
+        {
+          "name": "test_no_classification_is_a_false_dead_end",
+          "line": 1157,
+          "end": 1194
+        },
+        {
+          "name": "test_real_braked_surfaces_are_all_reachable",
+          "line": 1196,
+          "end": 1216
+        },
+        {
+          "name": "setUp",
+          "line": 1299,
+          "end": 1301
+        },
+        {
+          "name": "cli",
+          "line": 1303,
+          "end": 1319
+        },
+        {
+          "name": "test_the_reader_lets_the_repair_planner_see_the_unbound_shape",
+          "line": 1321,
+          "end": 1331
+        },
+        {
+          "name": "test_recover_names_one_command_the_stranded_session_can_run",
+          "line": 1333,
+          "end": 1342
+        },
+        {
+          "name": "test_the_named_route_converges_and_is_idempotent",
+          "line": 1344,
+          "end": 1360
+        },
+        {
+          "name": "test_the_original_bytes_survive_as_recovery_evidence",
+          "line": 1362,
+          "end": 1368
+        },
+        {
+          "name": "test_observing_damage_is_not_authority_to_mutate",
+          "line": 1370,
+          "end": 1384
+        },
+        {
+          "name": "setUp",
+          "line": 1456,
+          "end": 1469
+        },
+        {
+          "name": "cli",
+          "line": 1471,
+          "end": 1482
+        },
+        {
+          "name": "board_path",
+          "line": 1484,
+          "end": 1485
+        },
+        {
+          "name": "decision",
+          "line": 1487,
+          "end": 1493
+        },
+        {
+          "name": "decide",
+          "line": 1495,
+          "end": 1509
+        },
+        {
+          "name": "drive",
+          "line": 1511,
+          "end": 1544
+        },
+        {
+          "name": "test_the_validator_does_not_hide_what_the_write_gate_refuses",
+          "line": 1546,
+          "end": 1554
+        },
+        {
+          "name": "test_an_unaddressable_record_is_one_decision_not_a_dead_end",
+          "line": 1556,
+          "end": 1585
+        },
+        {
+          "name": "test_the_decision_is_reachable_from_the_verbs_a_session_reaches_for",
+          "line": 1587,
+          "end": 1592
+        },
+        {
+          "name": "test_no_ordinary_mutator_writes_through_the_duplicate",
+          "line": 1594,
+          "end": 1617
+        },
+        {
+          "name": "test_nothing_is_written_before_the_operator_decides",
+          "line": 1619,
+          "end": 1630
+        },
+        {
+          "name": "test_a_wrong_or_stale_decision_is_refused_with_zero_writes",
+          "line": 1632,
+          "end": 1655
+        },
+        {
+          "name": "test_one_decision_makes_the_whole_sequence_executable",
+          "line": 1657,
+          "end": 1689
+        },
+        {
+          "name": "test_the_decision_renames_one_record_and_touches_nothing_else",
+          "line": 1691,
+          "end": 1716
+        },
+        {
+          "name": "test_the_decision_cannot_be_replayed",
+          "line": 1718,
+          "end": 1725
+        },
+        {
+          "name": "test_repair_is_idempotent_and_the_route_is_never_a_loop",
+          "line": 1727,
+          "end": 1733
+        },
+        {
+          "name": "test_clean_is_a_claim_about_the_project_not_about_the_repair_set",
+          "line": 1735,
+          "end": 1752
+        },
+        {
+          "name": "test_the_original_bytes_of_every_repaired_surface_survive",
+          "line": 1754,
+          "end": 1787
+        },
+        {
+          "name": "setUp",
+          "line": 1806,
+          "end": 1836
+        },
+        {
+          "name": "cli",
+          "line": 1838,
+          "end": 1849
+        },
+        {
+          "name": "test_recover_does_not_certify_a_project_the_write_gate_refuses",
+          "line": 1851,
+          "end": 1859
+        },
+        {
+          "name": "test_no_surface_points_back_at_the_command_that_refused",
+          "line": 1861,
+          "end": 1866
+        },
+        {
+          "name": "test_the_route_is_the_command_that_actually_repairs_the_floor",
+          "line": 1868,
+          "end": 1877
+        },
+        {
+          "name": "test_a_task_that_is_not_claimable_gets_no_fabricated_route",
+          "line": 1879,
+          "end": 1900
+        }
+      ]
+    },
+    "tools/test_t1494_continuation_authority.py": {
+      "sha256": "c31e968253889bb883dc66fb7fd6e7b90ab60ba0cb23a6984f7af56a2e20b5d8",
+      "bytes": 12453,
+      "definitions": [
+        {
+          "name": "setUpModule",
+          "line": 28,
+          "end": 29
+        },
+        {
+          "name": "ContinuationAuthorityTests",
+          "line": 35,
+          "end": 262
+        },
+        {
+          "name": "bounded",
+          "line": 36,
+          "end": 55
+        },
+        {
+          "name": "persistent",
+          "line": 57,
+          "end": 65
+        },
+        {
+          "name": "read_state",
+          "line": 67,
+          "end": 68
+        },
+        {
+          "name": "snapshot",
+          "line": 70,
+          "end": 72
+        },
+        {
+          "name": "spend",
+          "line": 74,
+          "end": 91
+        },
+        {
+          "name": "patch_state",
+          "line": 93,
+          "end": 95
+        },
+        {
+          "name": "test_explicit_operator_goal_records_persistent_authority_and_source",
+          "line": 97,
+          "end": 102
+        },
+        {
+          "name": "test_model_supplied_goal_does_not_create_persistent_authority",
+          "line": 104,
+          "end": 110
+        },
+        {
+          "name": "test_agent_boot_continue_cannot_reset_an_ordinary_bounded_run",
+          "line": 112,
+          "end": 120
+        },
+        {
+          "name": "test_bounded_status_requires_the_operator_and_synthetic_cc_is_absent",
+          "line": 122,
+          "end": 128
+        },
+        {
+          "name": "test_persistent_cap_status_is_a_checkpoint_without_operator_action",
+          "line": 130,
+          "end": 138
+        },
+        {
+          "name": "test_persistent_cold_continue_checkpoints_then_resumes_same_work",
+          "line": 140,
+          "end": 155
+        },
+        {
+          "name": "test_explicit_fresh_operator_cc_can_reset_the_bounded_cap",
+          "line": 157,
+          "end": 167
+        },
+        {
+          "name": "test_a_different_operator_carrier_is_not_a_fresh_cc",
+          "line": 169,
+          "end": 173
+        },
+        {
+          "name": "test_a_model_source_cannot_be_upgraded_by_a_later_cc_carrier",
+          "line": 175,
+          "end": 186
+        },
+        {
+          "name": "test_under_cap_continue_never_grants_a_fresh_budget",
+          "line": 188,
+          "end": 194
+        },
+        {
+          "name": "test_wave_cap_uses_the_same_persistent_checkpoint_policy",
+          "line": 196,
+          "end": 201
+        },
+        {
+          "name": "test_legitimate_user_safety_brakes_survive_persistent_authority",
+          "line": 203,
+          "end": 213
+        },
+        {
+          "name": "test_missing_or_invented_source_cannot_reuse_persistent_authority",
+          "line": 215,
+          "end": 223
+        },
+        {
+          "name": "test_iteration_does_not_call_a_persistent_checkpoint_a_human_wait",
+          "line": 225,
+          "end": 230
+        },
+        {
+          "name": "test_authority_from_a_different_goal_cannot_reset_the_budget",
+          "line": 232,
+          "end": 238
+        },
+        {
+          "name": "test_inconsistent_authority_tuple_is_invalid",
+          "line": 240,
+          "end": 244
+        },
+        {
+          "name": "test_intent_exit_removes_the_authority_family",
+          "line": 246,
+          "end": 253
+        },
+        {
+          "name": "test_persistent_checkpoint_then_core_validator_is_green",
+          "line": 255,
+          "end": 262
+        }
+      ]
+    },
+    "tools/test_actor_binding_lifecycle.py": {
+      "sha256": "28fa9992c6474283ba7a7f5ad530cb2ca0793544bbb008aba905e163c75280f0",
+      "bytes": 9332,
+      "definitions": [
+        {
+          "name": "setUpModule",
+          "line": 44,
+          "end": 47
+        },
+        {
+          "name": "guard_cli",
+          "line": 54,
+          "end": 55
+        },
+        {
+          "name": "native",
+          "line": 58,
+          "end": 73
+        },
+        {
+          "name": "BootstrapSkillAccess",
+          "line": 76,
+          "end": 108
+        },
+        {
+          "name": "ActorBindingLifecycle",
+          "line": 111,
+          "end": 232
+        },
+        {
+          "name": "test_skill_is_bounded_read_in_the_guard",
+          "line": 79,
+          "end": 85
+        },
+        {
+          "name": "test_skill_tool_runs_even_when_guard_is_unreachable",
+          "line": 87,
+          "end": 95
+        },
+        {
+          "name": "test_reads_stay_available_with_no_actor_at_all",
+          "line": 97,
+          "end": 108
+        },
+        {
+          "name": "test_bound_actor_survives_sequential_guarded_calls",
+          "line": 114,
+          "end": 121
+        },
+        {
+          "name": "test_actor_does_not_leak_across_independent_projects",
+          "line": 123,
+          "end": 139
+        },
+        {
+          "name": "test_valid_bare_continuation_inherits_canonical_actor",
+          "line": 141,
+          "end": 148
+        },
+        {
+          "name": "test_explicit_correct_and_foreign_actors_remain_ownership_checked",
+          "line": 150,
+          "end": 161
+        },
+        {
+          "name": "test_contradictory_canonical_ownership_fails_without_explicit_actor",
+          "line": 163,
+          "end": 169
+        },
+        {
+          "name": "test_bare_unknown_protected_recovery_and_non_saipen_cases_stay_closed",
+          "line": 171,
+          "end": 207
+        },
+        {
+          "name": "test_missing_canonical_actor_fails_as_invalid_protocol_state",
+          "line": 209,
+          "end": 215
+        },
+        {
+          "name": "test_clean_session_path_without_guard_failures",
+          "line": 217,
+          "end": 232
+        }
+      ]
+    },
+    "tools/test_t1575_parallel_lane.py": {
+      "sha256": "d16c1b49ff98305dcc857c20f14956b89df549358708f4c229ed27035b943d7a",
+      "bytes": 7155,
+      "definitions": [
+        {
+          "name": "setUpModule",
+          "line": 29,
+          "end": 30
+        },
+        {
+          "name": "_marker",
+          "line": 33,
+          "end": 43
+        },
+        {
+          "name": "MarkerTests",
+          "line": 46,
+          "end": 69
+        },
+        {
+          "name": "GuardTests",
+          "line": 72,
+          "end": 107
+        },
+        {
+          "name": "TurnEntryTests",
+          "line": 110,
+          "end": 131
+        },
+        {
+          "name": "RunnerWiringTests",
+          "line": 134,
+          "end": 154
+        },
+        {
+          "name": "test_the_marker_lives_exactly_as_long_as_the_gate",
+          "line": 47,
+          "end": 54
+        },
+        {
+          "name": "test_a_stale_marker_never_freezes_the_tree",
+          "line": 56,
+          "end": 63
+        },
+        {
+          "name": "test_only_the_writer_removes_its_marker",
+          "line": 65,
+          "end": 69
+        },
+        {
+          "name": "verdict",
+          "line": 73,
+          "end": 75
+        },
+        {
+          "name": "test_in_root_edits_outside_saipen_are_refused_while_live",
+          "line": 77,
+          "end": 90
+        },
+        {
+          "name": "test_a_foreign_bound_agent_cannot_edit_a_tree_under_test",
+          "line": 92,
+          "end": 107
+        },
+        {
+          "name": "cli",
+          "line": 111,
+          "end": 116
+        },
+        {
+          "name": "test_continue_names_the_gate_and_the_parallel_lane",
+          "line": 118,
+          "end": 131
+        },
+        {
+          "name": "test_the_evidence_run_holds_the_marker_and_always_releases_it",
+          "line": 135,
+          "end": 154
+        },
+        {
+          "name": "Stop",
+          "line": 139,
+          "end": 140
+        },
+        {
+          "name": "fake_run",
+          "line": 142,
+          "end": 144
+        }
+      ]
+    },
+    "tools/test_t1711_regression_execution.py": {
+      "sha256": "5641369e5e2a8a4be73fe401091a43d35dddfae86ec811afdb18309c8aabd6ef",
+      "bytes": 21611,
+      "definitions": [
+        {
+          "name": "IdentityControls",
+          "line": 35,
+          "end": 43
+        },
+        {
+          "name": "AttemptControls",
+          "line": 46,
+          "end": 95
+        },
+        {
+          "name": "ExecutionControls",
+          "line": 106,
+          "end": 501
+        },
+        {
+          "name": "test_contradictory_aliases_do_not_produce_an_identity",
+          "line": 36,
+          "end": 37
+        },
+        {
+          "name": "test_equal_aliases_remain_compatible",
+          "line": 39,
+          "end": 43
+        },
+        {
+          "name": "attempt",
+          "line": 47,
+          "end": 49
+        },
+        {
+          "name": "pair",
+          "line": 51,
+          "end": 53
+        },
+        {
+          "name": "refuse",
+          "line": 55,
+          "end": 58
+        },
+        {
+          "name": "test_contradictory_identity_cannot_approve_review",
+          "line": 60,
+          "end": 63
+        },
+        {
+          "name": "test_halves_from_different_attempts_cannot_approve_review",
+          "line": 65,
+          "end": 72
+        },
+        {
+          "name": "test_a_new_attempt_invalidates_the_previous_attempt_pair",
+          "line": 74,
+          "end": 79
+        },
+        {
+          "name": "test_an_attempt_and_absent_attempt_are_distinct",
+          "line": 81,
+          "end": 86
+        },
+        {
+          "name": "test_legacy_same_attempt_records_remain_valid",
+          "line": 88,
+          "end": 91
+        },
+        {
+          "name": "test_legacy_absent_attempt_records_remain_valid",
+          "line": 93,
+          "end": 95
+        },
+        {
+          "name": "setUp",
+          "line": 107,
+          "end": 128
+        },
+        {
+          "name": "write_contract",
+          "line": 130,
+          "end": 131
+        },
+        {
+          "name": "arm",
+          "line": 133,
+          "end": 138
+        },
+        {
+          "name": "execute",
+          "line": 140,
+          "end": 142
+        },
+        {
+          "name": "assert_refused_without_canonical_writes",
+          "line": 144,
+          "end": 149
+        },
+        {
+          "name": "test_executed_profile_rejects_an_unknown_self_declared_digest",
+          "line": 151,
+          "end": 157
+        },
+        {
+          "name": "test_executed_profile_without_a_genuine_pair_refuses",
+          "line": 159,
+          "end": 163
+        },
+        {
+          "name": "test_actual_active_pair_is_admitted_and_typed",
+          "line": 165,
+          "end": 178
+        },
+        {
+          "name": "test_exact_replay_produces_no_duplicate_authority",
+          "line": 180,
+          "end": 187
+        },
+        {
+          "name": "test_changed_receipt_cannot_approve_review",
+          "line": 189,
+          "end": 198
+        },
+        {
+          "name": "test_a_newer_failure_supersedes_the_receipt",
+          "line": 200,
+          "end": 207
+        },
+        {
+          "name": "test_a_new_verify_boundary_cannot_reuse_old_execution",
+          "line": 209,
+          "end": 216
+        },
+        {
+          "name": "test_a_new_attempt_cannot_reuse_old_execution",
+          "line": 218,
+          "end": 223
+        },
+        {
+          "name": "test_post_fix_byte_changes_invalidate_execution",
+          "line": 225,
+          "end": 230
+        },
+        {
+          "name": "test_oracle_byte_changes_invalidate_execution",
+          "line": 232,
+          "end": 237
+        },
+        {
+          "name": "test_invalid_contracts_cannot_be_results_or_escape_the_project",
+          "line": 239,
+          "end": 253
+        },
+        {
+          "name": "test_identical_subjects_are_not_a_pair",
+          "line": 255,
+          "end": 259
+        },
+        {
+          "name": "test_a_post_fix_failure_is_not_an_approval",
+          "line": 261,
+          "end": 263
+        },
+        {
+          "name": "test_a_launch_error_or_zero_tests_is_not_regression_evidence",
+          "line": 265,
+          "end": 269
+        },
+        {
+          "name": "test_oracle_and_subject_cannot_overlap",
+          "line": 271,
+          "end": 274
+        },
+        {
+          "name": "test_timeout_is_a_structured_refusal_with_owned_cleanup",
+          "line": 276,
+          "end": 281
+        },
+        {
+          "name": "test_preserved_prior_input_changes_invalidate_execution",
+          "line": 283,
+          "end": 292
+        },
+        {
+          "name": "test_changed_input_contract_cannot_spend_the_measured_pair",
+          "line": 294,
+          "end": 302
+        },
+        {
+          "name": "test_prior_material_changed_before_commit_refuses_without_canonical_writes",
+          "line": 304,
+          "end": 319
+        },
+        {
+          "name": "test_original_source_changed_by_a_verifier_cannot_be_admitted",
+          "line": 321,
+          "end": 329
+        },
+        {
+          "name": "test_environment_changes_invalidate_the_configured_verifier",
+          "line": 331,
+          "end": 336
+        },
+        {
+          "name": "test_a_completed_producing_attempt_keeps_its_genuine_pair",
+          "line": 338,
+          "end": 347
+        },
+        {
+          "name": "test_a_changed_acceptance_contract_cannot_spend_old_execution",
+          "line": 349,
+          "end": 362
+        },
+        {
+          "name": "test_the_successful_execution_does_not_replace_ordinary_verification",
+          "line": 364,
+          "end": 369
+        },
+        {
+          "name": "test_forged_checkpoint_halves_cannot_replace_a_measured_pair",
+          "line": 371,
+          "end": 379
+        },
+        {
+          "name": "test_a_fresh_measured_pair_after_a_newer_failure_restores_admission",
+          "line": 381,
+          "end": 389
+        },
+        {
+          "name": "native",
+          "line": 391,
+          "end": 413
+        },
+        {
+          "name": "test_native_cli_admits_the_actual_active_pair",
+          "line": 415,
+          "end": 421
+        },
+        {
+          "name": "test_native_cli_dry_run_is_write_free",
+          "line": 423,
+          "end": 430
+        },
+        {
+          "name": "test_native_cli_can_require_executed_evidence_without_changing_verify",
+          "line": 432,
+          "end": 444
+        },
+        {
+          "name": "test_dry_run_executes_nothing_and_writes_no_project_bytes",
+          "line": 446,
+          "end": 455
+        },
+        {
+          "name": "test_read_only_refuses_before_execution",
+          "line": 457,
+          "end": 460
+        },
+        {
+          "name": "test_a_foreign_executor_cannot_measure_or_admit_this_work",
+          "line": 462,
+          "end": 467
+        },
+        {
+          "name": "test_unrequired_work_preserves_the_existing_flow",
+          "line": 469,
+          "end": 476
+        },
+        {
+          "name": "test_consumer_compatible_javascript_pair_uses_the_same_active_contract",
+          "line": 479,
+          "end": 501
+        },
+        {
+          "name": "move_after_fresh_binding",
+          "line": 309,
+          "end": 316
+        }
+      ]
+    },
+    "tools/test_t1712_manifest_runtime.py": {
+      "sha256": "1eea368ab4c57f16f63823d0bcbc26a6d07b72ba921cd56ccac3096f6f0bbf0b",
+      "bytes": 15326,
+      "definitions": [
+        {
+          "name": "setUpModule",
+          "line": 25,
+          "end": 26
+        },
+        {
+          "name": "digest",
+          "line": 29,
+          "end": 30
+        },
+        {
+          "name": "denied",
+          "line": 33,
+          "end": 36
+        },
+        {
+          "name": "cli_module",
+          "line": 39,
+          "end": 45
+        },
+        {
+          "name": "ManifestRuntimeTests",
+          "line": 48,
+          "end": 358
+        },
+        {
+          "name": "failure",
+          "line": 49,
+          "end": 62
+        },
+        {
+          "name": "lstat_denied",
+          "line": 65,
+          "end": 74
+        },
+        {
+          "name": "test_accessible_project_enrolls_and_second_call_writes_nothing",
+          "line": 76,
+          "end": 82
+        },
+        {
+          "name": "test_missing_project_is_absence_without_creation",
+          "line": 84,
+          "end": 90
+        },
+        {
+          "name": "test_unreadable_existing_ancestor_is_structured_and_zero_write",
+          "line": 92,
+          "end": 99
+        },
+        {
+          "name": "test_inaccessible_child_is_not_missing_or_corrupt",
+          "line": 101,
+          "end": 108
+        },
+        {
+          "name": "test_denied_manifest_stat_cannot_authorize_replacement",
+          "line": 110,
+          "end": 118
+        },
+        {
+          "name": "test_denied_manifest_read_cannot_become_malformed_even_with_force",
+          "line": 120,
+          "end": 135
+        },
+        {
+          "name": "test_denied_state_read_is_availability_not_corruption",
+          "line": 137,
+          "end": 151
+        },
+        {
+          "name": "test_direct_write_contains_original_oserror",
+          "line": 153,
+          "end": 160
+        },
+        {
+          "name": "test_failed_atomic_replace_removes_own_temporary_and_preserves_manifest",
+          "line": 162,
+          "end": 172
+        },
+        {
+          "name": "test_other_oserror_preserves_its_distinct_error",
+          "line": 174,
+          "end": 188
+        },
+        {
+          "name": "test_continue_json_is_hard_refusal_without_phase_or_claim_change",
+          "line": 190,
+          "end": 203
+        },
+        {
+          "name": "test_known_denial_precedes_any_canonical_reconciliation_repair",
+          "line": 205,
+          "end": 215
+        },
+        {
+          "name": "test_manifest_write_denial_precedes_canonical_reconciliation_commit",
+          "line": 217,
+          "end": 228
+        },
+        {
+          "name": "test_read_only_manifest_cli_denial_is_parseable_hard_refusal",
+          "line": 230,
+          "end": 244
+        },
+        {
+          "name": "test_read_only_manifest_inspection_reports_its_own_denial",
+          "line": 246,
+          "end": 260
+        },
+        {
+          "name": "test_manifest_dry_run_denial_has_nonzero_cli_exit",
+          "line": 262,
+          "end": 284
+        },
+        {
+          "name": "test_init_permission_failure_is_json_and_never_init_completed",
+          "line": 286,
+          "end": 300
+        },
+        {
+          "name": "test_init_late_materialization_denial_leaves_no_partial_canonical_files",
+          "line": 302,
+          "end": 323
+        },
+        {
+          "name": "test_one_denied_project_does_not_stop_a_separate_eligible_goal",
+          "line": 325,
+          "end": 340
+        },
+        {
+          "name": "test_repeat_diagnostic_has_stable_fingerprint_without_writes",
+          "line": 342,
+          "end": 351
+        },
+        {
+          "name": "test_topology_refusal_is_still_a_hard_security_boundary",
+          "line": 353,
+          "end": 358
+        },
+        {
+          "name": "lstat",
+          "line": 68,
+          "end": 71
+        },
+        {
+          "name": "read_text",
+          "line": 127,
+          "end": 130
+        },
+        {
+          "name": "read_bytes",
+          "line": 143,
+          "end": 146
+        },
+        {
+          "name": "write_text",
+          "line": 309,
+          "end": 312
+        }
+      ]
+    },
+    "tools/test_t1709_audit_starvation.py": {
+      "sha256": "ea974cc917a32a2a408405763f321a48de226491aa241db44f9f6e11c30b4e20",
+      "bytes": 12033,
+      "definitions": [
+        {
+          "name": "AuditStarvationOracleTests",
+          "line": 30,
+          "end": 259
+        },
+        {
+          "name": "named",
+          "line": 31,
+          "end": 35
+        },
+        {
+          "name": "test_replenished_nonurgent_p2_backlog_cannot_postpone_eligible_audit_intake",
+          "line": 37,
+          "end": 51
+        },
+        {
+          "name": "test_urgent_p0_and_p1_retain_priority_over_named_audit",
+          "line": 53,
+          "end": 65
+        },
+        {
+          "name": "test_active_work_is_never_preempted",
+          "line": 67,
+          "end": 86
+        },
+        {
+          "name": "test_human_gates_and_recovery_retain_priority",
+          "line": 88,
+          "end": 98
+        },
+        {
+          "name": "test_numeric_layers_retain_order_and_outrank_named",
+          "line": 100,
+          "end": 109
+        },
+        {
+          "name": "test_named_generations_retain_durable_first_seen_order_without_mtime",
+          "line": 111,
+          "end": 138
+        },
+        {
+          "name": "test_blocked_or_invalid_entry_retains_evidence_while_eligible_entry_advances",
+          "line": 140,
+          "end": 154
+        },
+        {
+          "name": "test_cleanup_requires_proven_closure",
+          "line": 156,
+          "end": 161
+        },
+        {
+          "name": "test_new_bytes_at_old_path_join_after_older_pending_generation",
+          "line": 163,
+          "end": 177
+        },
+        {
+          "name": "test_observation_is_idempotent_and_read_only_scan_does_not_write",
+          "line": 179,
+          "end": 188
+        },
+        {
+          "name": "test_invalid_named_entry_keeps_observation_when_repaired",
+          "line": 190,
+          "end": 200
+        },
+        {
+          "name": "test_corrupt_chronology_is_refused_without_rewriting_evidence",
+          "line": 202,
+          "end": 214
+        },
+        {
+          "name": "test_named_observation_uses_project_writer_lock",
+          "line": 216,
+          "end": 229
+        },
+        {
+          "name": "test_binding_cannot_clobber_concurrent_named_observations",
+          "line": 231,
+          "end": 259
+        },
+        {
+          "name": "observed_lock",
+          "line": 223,
+          "end": 225
+        },
+        {
+          "name": "concurrent_observation",
+          "line": 239,
+          "end": 247
+        }
+      ]
+    },
+    "tools/test_conformance_repair_boundary.py": {
+      "sha256": "dccabd5b3d1be83cf276b1d2cdef812088e9e8f4ba67fec61624833a006047ba",
+      "bytes": 11453,
+      "definitions": [
+        {
+          "name": "setUpModule",
+          "line": 25,
+          "end": 26
+        },
+        {
+          "name": "diagnostics",
+          "line": 29,
+          "end": 38
+        },
+        {
+          "name": "RepairBoundaryTests",
+          "line": 41,
+          "end": 148
+        },
+        {
+          "name": "RealValidatorBoundaryTests",
+          "line": 151,
+          "end": 218
+        },
+        {
+          "name": "test_failure_after_completed_chain_keeps_its_refusal_and_diagnostic",
+          "line": 42,
+          "end": 69
+        },
+        {
+          "name": "test_current_fail_without_registered_repair_has_terminal_diagnosis",
+          "line": 71,
+          "end": 89
+        },
+        {
+          "name": "test_every_blocking_record_survives_duplicate_family_keys",
+          "line": 91,
+          "end": 103
+        },
+        {
+          "name": "test_stale_fail_refreshes_instead_of_executing_its_old_repair",
+          "line": 105,
+          "end": 115
+        },
+        {
+          "name": "test_registered_repair_remains_executable_but_validate_is_not_a_repair",
+          "line": 117,
+          "end": 128
+        },
+        {
+          "name": "test_tampered_blocking_findings_cannot_be_current_evidence",
+          "line": 130,
+          "end": 140
+        },
+        {
+          "name": "test_classified_credentials_are_redacted_in_receipt",
+          "line": 142,
+          "end": 148
+        },
+        {
+          "name": "installed_fixture",
+          "line": 152,
+          "end": 163
+        },
+        {
+          "name": "test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop",
+          "line": 165,
+          "end": 197
+        },
+        {
+          "name": "test_classifier_failure_is_unavailable_not_an_empty_complete_set",
+          "line": 199,
+          "end": 218
+        },
+        {
+          "name": "idle_gate",
+          "line": 56,
+          "end": 57
+        }
+      ]
+    },
+    "tools/test_dependency_resume_liveness.py": {
+      "sha256": "74b98cc6072eedee6f70fb94a73a45cd79843f0b6003d6f255b5263355fac50d",
+      "bytes": 15652,
+      "definitions": [
+        {
+          "name": "session_env",
+          "line": 73,
+          "end": 81
+        },
+        {
+          "name": "ResumeFixture",
+          "line": 84,
+          "end": 180
+        },
+        {
+          "name": "StaleResumeTests",
+          "line": 183,
+          "end": 263
+        },
+        {
+          "name": "QueuedSourceWakeTests",
+          "line": 266,
+          "end": 323
+        },
+        {
+          "name": "LiveForeignSeatStabilityTests",
+          "line": 326,
+          "end": 367
+        },
+        {
+          "name": "make_project",
+          "line": 85,
+          "end": 119
+        },
+        {
+          "name": "add",
+          "line": 121,
+          "end": 126
+        },
+        {
+          "name": "state",
+          "line": 128,
+          "end": 129
+        },
+        {
+          "name": "tickets",
+          "line": 131,
+          "end": 134
+        },
+        {
+          "name": "log_text",
+          "line": 136,
+          "end": 137
+        },
+        {
+          "name": "to_ship",
+          "line": 139,
+          "end": 155
+        },
+        {
+          "name": "parked_child",
+          "line": 157,
+          "end": 176
+        },
+        {
+          "name": "finish_child",
+          "line": 178,
+          "end": 180
+        },
+        {
+          "name": "test_red1_foreign_session_resume_is_unclaimed_and_adoptable",
+          "line": 184,
+          "end": 200
+        },
+        {
+          "name": "test_red1_control_the_synthetic_shape_still_blocks",
+          "line": 202,
+          "end": 225
+        },
+        {
+          "name": "test_red2_same_live_session_retains_the_lease",
+          "line": 227,
+          "end": 238
+        },
+        {
+          "name": "test_red4_dependency_completion_is_not_a_claim_event",
+          "line": 240,
+          "end": 263
+        },
+        {
+          "name": "test_red5_router_starts_the_queued_source_before_backlog",
+          "line": 269,
+          "end": 288
+        },
+        {
+          "name": "test_red5_captured_user_source_wakes_and_projects",
+          "line": 290,
+          "end": 323
+        },
+        {
+          "name": "test_red6_repeated_receipt_start_is_stable_and_zero_mutation",
+          "line": 327,
+          "end": 367
+        }
+      ]
+    },
+    "tools/test_t1458_queue_reservation.py": {
+      "sha256": "c4e7f0afaf7834e4c5e90193db2aa320d7c6a83159881dbe58cd35abfc11414b",
+      "bytes": 6765,
+      "definitions": [
+        {
+          "name": "ReservationOutranksQueueTests",
+          "line": 71,
+          "end": 114
+        },
+        {
+          "name": "QueueAdmissibilityTests",
+          "line": 117,
+          "end": 154
+        },
+        {
+          "name": "_parked",
+          "line": 72,
+          "end": 86
+        },
+        {
+          "name": "_route",
+          "line": 88,
+          "end": 94
+        },
+        {
+          "name": "test_a_reserved_child_outranks_a_queued_source",
+          "line": 96,
+          "end": 104
+        },
+        {
+          "name": "test_the_reservation_route_equals_the_route_without_a_queue",
+          "line": 106,
+          "end": 114
+        },
+        {
+          "name": "_capture",
+          "line": 118,
+          "end": 121
+        },
+        {
+          "name": "test_an_authority_capsule_is_never_queued",
+          "line": 123,
+          "end": 129
+        },
+        {
+          "name": "test_the_queue_names_only_what_start_accepts",
+          "line": 131,
+          "end": 142
+        },
+        {
+          "name": "test_an_unreadable_queued_receipt_is_surfaced_not_skipped",
+          "line": 144,
+          "end": 154
+        }
+      ]
+    },
+    "tools/test_regression_gate.py": {
+      "sha256": "78f8c8161c70238df53891812709f9e1994011831a326791d662ba1aae46d5c1",
+      "bytes": 12140,
+      "definitions": [
+        {
+          "name": "_evidence",
+          "line": 63,
+          "end": 64
+        },
+        {
+          "name": "_state",
+          "line": 67,
+          "end": 91
+        },
+        {
+          "name": "_board",
+          "line": 94,
+          "end": 102
+        },
+        {
+          "name": "_ship_project",
+          "line": 105,
+          "end": 137
+        },
+        {
+          "name": "RegressionGateFixture",
+          "line": 140,
+          "end": 176
+        },
+        {
+          "name": "GateRefusalTests",
+          "line": 179,
+          "end": 227
+        },
+        {
+          "name": "GateAdmissionTests",
+          "line": 230,
+          "end": 264
+        },
+        {
+          "name": "FinishGateTests",
+          "line": 267,
+          "end": 280
+        },
+        {
+          "name": "UndeclaredTicketTests",
+          "line": 283,
+          "end": 301
+        },
+        {
+          "name": "setUp",
+          "line": 145,
+          "end": 164
+        },
+        {
+          "name": "record",
+          "line": 166,
+          "end": 167
+        },
+        {
+          "name": "to_review",
+          "line": 169,
+          "end": 170
+        },
+        {
+          "name": "canonical_digest",
+          "line": 172,
+          "end": 176
+        },
+        {
+          "name": "test_a_green_run_alone_does_not_leave_verify",
+          "line": 180,
+          "end": 185
+        },
+        {
+          "name": "test_the_refusal_writes_nothing",
+          "line": 187,
+          "end": 190
+        },
+        {
+          "name": "test_a_weakened_oracle_is_refused_although_the_suite_is_green",
+          "line": 192,
+          "end": 198
+        },
+        {
+          "name": "test_moving_both_sides_at_once_is_refused_as_unattributable",
+          "line": 200,
+          "end": 205
+        },
+        {
+          "name": "test_a_pass_with_no_recorded_fail_is_refused",
+          "line": 207,
+          "end": 211
+        },
+        {
+          "name": "test_prose_about_the_evidence_is_not_evidence",
+          "line": 213,
+          "end": 227
+        },
+        {
+          "name": "test_an_honest_pair_is_admitted",
+          "line": 231,
+          "end": 236
+        },
+        {
+          "name": "test_re_establishing_the_fail_under_the_new_oracle_admits_it",
+          "line": 238,
+          "end": 249
+        },
+        {
+          "name": "test_the_recorded_pair_does_not_break_ordinary_verification",
+          "line": 251,
+          "end": 264
+        },
+        {
+          "name": "test_the_finish_gate_refuses_a_missing_pair",
+          "line": 270,
+          "end": 274
+        },
+        {
+          "name": "test_the_finish_gate_does_not_refuse_a_recorded_pair",
+          "line": 276,
+          "end": 280
+        },
+        {
+          "name": "test_an_ordinary_ticket_is_completely_unaffected",
+          "line": 288,
+          "end": 290
+        },
+        {
+          "name": "test_an_unrecognised_value_does_not_arm_the_gate",
+          "line": 292,
+          "end": 301
+        }
+      ]
+    },
+    "saipen/CORE.md": {
+      "sha256": "67852506019f05e6417d07de9915fab5337780052105dfb46497734b58555455",
+      "bytes": 31848
+    },
+    "saipen/OPS.md": {
+      "sha256": "11f58546724d8fe76b3e7e196c6ff7e70724b83b6e60d44e2f8026cd77acb55a",
+      "bytes": 44323
+    },
+    "saipen/MAINTENANCE.md": {
+      "sha256": "56740dad22642f4a4e7a2d7a177de5796740caac0f02d6c02da65f519166589e",
+      "bytes": 14615
+    },
+    "saipen/RUNTIME.md": {
+      "sha256": "691717db61976f72c46a1055926bca740954b0b78c6e8bc03434c1c1c4fd8666",
+      "bytes": 20494
+    },
+    "saipen/EXECUTION.md": {
+      "sha256": "23af34e646058768483ade7985f9e4cb18ddff8662ef18eef180e911de2998b5",
+      "bytes": 7850
+    },
+    "saipen/STYLE.md": {
+      "sha256": "a3fbbfe52cfcd0cf7e67965f993793423be47a62d99134153bfc31529c850346",
+      "bytes": 7361
+    },
+    "saipen/COMMANDS.md": {
+      "sha256": "1da84ca7650a6258826a0cfcf08908ee3e719daa76c7e97c5fc5eb3bd6f34fb0",
+      "bytes": 23337
+    },
+    ".saipen/intake/active/SRC-215.md": {
+      "sha256": "8d54708e5daccb690cc464918d4c81d7f1d2d4ed0f036a62a6e0c2f5ab0c2ce6",
+      "bytes": 14428
+    },
+    ".saipen/intake/contracts/SRC-215.json": {
+      "sha256": "0add3e8e2916da5e6ba0ff4fcad7c6003ac44adde0eb56b08e6f8aaaa350c35e",
+      "bytes": 5900
+    },
+    ".saipen/evidence/T-1711-admission/REPORT-FINAL-GENERATION.md": {
+      "sha256": "a9573191c038dd00cd916c38578417245faacf9d0e3cad55a992e556f857c702",
+      "bytes": 8429
+    },
+    ".saipen/evidence/T-1714-diagnostics/FINAL-ACCEPTANCE.md": {
+      "sha256": "bf9cd0e78d8da831f1d0138780817e0ec72586fec7929b21ccc666c0dd4565b8",
+      "bytes": 3958
+    },
+    ".saipen/evidence/T-1714-diagnostics/verifier-context-comparison.json": {
+      "sha256": "102fc068d218615aad068ea3df26a67db1b679913f0c88932581dd632307f3de",
+      "bytes": 942
+    },
+    ".saipen/evidence/T-1714-diagnostics/dependency-reservation-followup.md": {
+      "sha256": "8471ee107552b5344a72b5e90611221d39168f1e86efc331034b7e44628848be",
+      "bytes": 1856
+    }
+  },
+  "original_root_events": [
+    {
+      "date": "20.09.26 22:17",
+      "event": 7715,
+      "parent": 7714,
+      "ticket": "T-1434",
+      "agent": "astra",
+      "op_id": "finish-0d9c4315a26b4441ae8ad23561295546",
+      "taxonomy": "DEC",
+      "text": "ticket finished via SAIOPS -- completion (from SHIP)"
+    },
+    {
+      "date": "20.09.26 22:17",
+      "event": 7716,
+      "parent": 7715,
+      "ticket": "T-1361",
+      "agent": "astra",
+      "op_id": "finish-0d9c4315a26b4441ae8ad23561295546",
+      "taxonomy": "DEC",
+      "text": "blocked parent resumed after dependency T-1434 reached DONE"
+    },
+    {
+      "date": "22.09.26 14:40",
+      "event": 7976,
+      "parent": 7975,
+      "ticket": "T-1446",
+      "agent": "astra",
+      "op_id": "ticket-6df92fd493724470899f15d33834ef1b",
+      "taxonomy": "DEC",
+      "text": "ticket block via SAIOPS (active) -- dependency T-1457 -- T-1446 parks on the P0 ingress-obligation slice: an undischargeable transport obligation stalls an unattended session at NEXT EXACT ACTION NONE, which defeats the SRC-100 no-manual-continue invariant; T-1457 implementation is present, closure only"
+    },
+    {
+      "date": "22.09.26 14:45",
+      "event": 7995,
+      "parent": 7994,
+      "ticket": "T-1446",
+      "agent": "astra",
+      "op_id": "ticket-44250fcbed6244f683e49bd663ac4e86",
+      "taxonomy": "DEC",
+      "text": "ticket block via SAIOPS (active) -- dependency T-1458 -- T-1446 parks on the router slice T-1458: an unattended runner executing the routed action after any dependency park gets saipen start --receipt SRC-065, which start refuses, so the supervisor RUN_WORK loop would spin on a refusal; the fix belongs in the continuation router the supervisor consumes"
+    },
+    {
+      "date": "11.10.26 09:59",
+      "event": 14412,
+      "parent": 14411,
+      "ticket": "T-1714",
+      "agent": "saipen-cli",
+      "op_id": "ticket-07c7f78cbe334435a60aa9b6e5653912",
+      "taxonomy": "DEC",
+      "text": "ticket block via SAIOPS -- dependency T-1713 -- QUEUE_RESERVATION -- this newly reproduced SRC-205 A05 slice waits for the already queued SRC-214 attribution Work. Preserve the operator-required admissible Work sequence and current T-1711 owner. This is a scheduling dependency, not a failed verifier or global session block; resume the fixture-only slice after T-1713 completes."
+    },
+    {
+      "date": "11.10.26 11:01",
+      "event": 14444,
+      "parent": 14443,
+      "ticket": "T-1714",
+      "agent": "saipen-cli",
+      "op_id": "finish-d8e4a33d27c847ab81cb9cc1782a2415",
+      "taxonomy": "DEC",
+      "text": "blocked parent resumed after dependency T-1713 reached DONE; dependency completion is not a claim event -- no live claim restored"
+    },
+    {
+      "date": "11.10.26 11:03",
+      "event": 14445,
+      "parent": 14444,
+      "ticket": "T-1714",
+      "agent": "saipen-cli",
+      "op_id": "claim-19e08069e210446f9fb35b1189ba3999",
+      "taxonomy": "DEC",
+      "text": "claimed via SAIOPS -- owner saipen-cli"
+    },
+    {
+      "date": "11.10.26 11:03",
+      "event": 14447,
+      "parent": 14446,
+      "ticket": "T-1714",
+      "agent": "saipen-cli",
+      "op_id": "transition-0c5a584094f54b06b0dc6b4e78ae1a5a",
+      "taxonomy": "RUN",
+      "text": "transition to BUILD -- Newly claimed A05 repair has no live BUILD yet. Restore the honest implementation phase from the automatic queue-resume VERIFY pointer; prepared scratch evidence is reconnaissance only. Preserve exact source preimages, copy only the three attributable reviewed candidate files, and execute new owned phase verification."
+    }
+  ],
+  "original_root_history_hash": "5a86c1b0c67ada46",
+  "unobserved": "loaded host generations, original freebuff tool transcript, historical Wintage sidecar bytes"
+}

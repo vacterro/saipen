@@ -1,0 +1,24 @@
+test_a_reply_within_budget_is_kept_with_an_empty_account (test_t1657_refused_reply_preserved.AccountTests.test_a_reply_within_budget_is_kept_with_an_empty_account)
+Refused for another reason than size: the bytes are still kept and ... ok
+test_preserve_keeps_the_overflow_account_beside_the_reply (test_t1657_refused_reply_preserved.AccountTests.test_preserve_keeps_the_overflow_account_beside_the_reply) ... ok
+test_the_same_reply_is_one_record_written_once (test_t1657_refused_reply_preserved.AccountTests.test_the_same_reply_is_one_record_written_once) ... ok
+test_a_correction_without_a_delivery_names_where_the_reply_is_kept (test_t1657_refused_reply_preserved.ClaudeStopHookTests.test_a_correction_without_a_delivery_names_where_the_reply_is_kept) ... ok
+test_a_reentry_keeps_the_reply_it_records_as_unenforced (test_t1657_refused_reply_preserved.ClaudeStopHookTests.test_a_reentry_keeps_the_reply_it_records_as_unenforced) ... ok
+test_a_reply_that_cannot_be_kept_is_still_corrected (test_t1657_refused_reply_preserved.ClaudeStopHookTests.test_a_reply_that_cannot_be_kept_is_still_corrected)
+Preserving is evidence, not a gate: when the engine cannot keep the ... ok
+test_an_accepted_reply_is_not_preserved (test_t1657_refused_reply_preserved.ClaudeStopHookTests.test_an_accepted_reply_is_not_preserved) ... ok
+test_the_incident_reply_is_kept_before_the_correction_is_requested (test_t1657_refused_reply_preserved.ClaudeStopHookTests.test_the_incident_reply_is_kept_before_the_correction_is_requested) ... ok
+test_a_correction_without_a_delivery_names_where_the_reply_is_kept (test_t1657_refused_reply_preserved.CodexStopHookTests.test_a_correction_without_a_delivery_names_where_the_reply_is_kept) ... ok
+test_a_reentry_keeps_the_reply_it_records_as_unenforced (test_t1657_refused_reply_preserved.CodexStopHookTests.test_a_reentry_keeps_the_reply_it_records_as_unenforced) ... ok
+test_an_accepted_reply_is_not_preserved (test_t1657_refused_reply_preserved.CodexStopHookTests.test_an_accepted_reply_is_not_preserved) ... ok
+test_the_incident_reply_is_kept_before_the_correction_is_requested (test_t1657_refused_reply_preserved.CodexStopHookTests.test_the_incident_reply_is_kept_before_the_correction_is_requested) ... ok
+test_each_adapter_with_a_mechanical_response_gate_hands_the_reply_over (test_t1657_refused_reply_preserved.EveryGatedAdapterTests.test_each_adapter_with_a_mechanical_response_gate_hands_the_reply_over)
+The clause is about EVERY adapter that acts on a refused final ... ok
+test_a_reply_that_is_the_delivery_is_not_a_refused_reply (test_t1657_refused_reply_preserved.OpenCodeCompletedPartTests.test_a_reply_that_is_the_delivery_is_not_a_refused_reply) ... ok
+test_an_ordinary_reply_refused_for_style_is_kept_before_the_throw (test_t1657_refused_reply_preserved.OpenCodeCompletedPartTests.test_an_ordinary_reply_refused_for_style_is_kept_before_the_throw) ... ok
+test_the_incident_reply_is_kept_before_it_is_replaced (test_t1657_refused_reply_preserved.OpenCodeCompletedPartTests.test_the_incident_reply_is_kept_before_it_is_replaced) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 28.174s
+
+OK

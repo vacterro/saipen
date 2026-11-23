@@ -1,0 +1,90 @@
+{
+  "ticket": "T-2108",
+  "wave": "O0",
+  "mode": 2,
+  "generated_utc": "2026-11-20",
+  "authority": "read-only measurements on the live project; no production logic changed",
+  "environment": {
+    "os": "Windows 10 19045 x64",
+    "python_repo": "3.14.10 (MSC v.1944 64 bit AMD64)",
+    "python_installed_launcher": "C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.exe",
+    "repo_head": "dc39709c0",
+    "repo_protocol": "8.1.1",
+    "installed_protocol": "8.1.0",
+    "source_sha256": "see git HEAD; installed tools/saipen.py differs from repo tools/saipen.py",
+    "disk": "V: workspace; C: installed engine and agent homes",
+    "fixture_scale": "live project: .saipen history tail ~21950, settled receipts 20542, installed agent homes 10"
+  },
+  "cli_wall_ms": {
+    "status_agent_repo_p50": 6685.4,
+    "status_agent_repo_samples": [6295.5, 6685.4, 7113.8],
+    "status_full_repo_p50_ms": 19123.0,
+    "status_full_repo_output_bytes": 424744,
+    "status_agent_repo_output_bytes": 30994,
+    "status_agent_installed_p50_ms": 19123.0,
+    "note": "installed 8.1.0 is ~2.9x slower than repo source 8.1.1; T-2101/T-2105 wins are NOT installed. Two distinct truth levels."
+  },
+  "internal_cprofile_repo_agent_status": {
+    "total_s": 8.071,
+    "function_calls": 5910076,
+    "top_cumulative_s": {
+      "distribution_report": 2.370,
+      "runtime_generation_identity_61_calls": 2.241,
+      "nt.lstat_27182_calls": 0.926,
+      "intake._read_owned_file_1012_calls": 0.853,
+      "runtime_surface.content_bytes_8228_calls": 0.827,
+      "closed_contracts.inspect": 0.704,
+      "snapshot.capture": 0.701,
+      "log.read_history_snapshot": 0.655,
+      "freshness.compute_source_identity": 0.657,
+      "operator_task.unstarted": 0.596
+    }
+  },
+  "hypothesis_results": {
+    "O3_runtime_identity": {
+      "verdict": "NO_CHANGE / HYPOTHESIS_FALSIFIED",
+      "evidence": "61 runtime_generation_identity calls resolve to exactly 10 DISTINCT roots (one per installed agent home). identity_session memo is active and correct. require_runtime_generation_identity is called 10 times, once per distinct home. Whole-operation digest count: 9 digests over 2 distinct root groups. No repeated hashing of the same root inside one status command. Mandatory freshness work, not redundant work."
+    },
+    "O1_C_duplicate_path_proof": {
+      "verdict": "NO_CHANGE / HYPOTHESIS_FALSIFIED",
+      "evidence": "920 prove_inside calls on LOG.md/STATE.md all come from journal.owned_target_path inside settled-receipt decode, where owner_canonical is deliberately not reused because candidate paths are LIVE-canonicalized per receipt for TOCTOU safety. Collapsing them would weaken substitution-race detection."
+    },
+    "O3_double_lstat": {
+      "verdict": "NO_CHANGE / HYPOTHESIS_FALSIFIED",
+      "evidence": "runtime_surface._require_regular_file re-lstats a manifest member after copy_tree_members already lstat-ed it: deliberate TOCTOU re-witness. intake._is_link_or_reparse uses os.path.islink because paths.py monkeypatches os.path.islink as a security policy; replacing it with stat.S_ISLNK would bypass that policy."
+    },
+    "O1_C_intake_reads": {
+      "verdict": "NO_CHANGE / HYPOTHESIS_FALSIFIED",
+      "evidence": "1012 _read_owned_file calls over 513 unique files; duplicates are emitted from DIFFERENT read-only projections (router.audit_inbox_projection, router.queued_source_projection, audit_inbox.status) that may observe different filesystem epochs. Sharing a byte cache would weaken freshness."
+    },
+    "O2_B_shared_receipt_snapshot": {
+      "verdict": "NO_CHANGE / HYPOTHESIS_FALSIFIED (measured regression)",
+      "evidence": "Three bounded per-operation receipt lookups measured 601.2 ms median (n=3); one full semantic_receipt_snapshot over 20542 receipts measured 5020.0 ms median. A shared full snapshot is ~8.4x slower than the existing bounded index. The index is the authority-preserving accelerator; do not replace it."
+    },
+    "O1_B_agent_view": {
+      "verdict": "NO_CHANGE (already implemented)",
+      "evidence": "agent view output 30994 bytes vs full 424744 bytes (13x reduction) already present; T-2089 contract verified by tools.test_t2089_agent_status_view. Waiting_on_you is the largest field (5089 bytes) but is an authority-bearing blocker projection and must stay."
+    }
+  },
+  "top_cost_centers_ranked": [
+    "1. installed engine 8.1.0 not carrying repo optimizations (19.1s vs 6.7s): OPERATOR RELEASE ROUTE, not a safe source patch",
+    "2. distribution report: 2.37s, dominated by 10 mandatory distinct runtime generation proofs",
+    "3. settled receipt decode: 556 decode calls, 920 mandatory TOCTOU path proofs",
+    "4. intake authority reads: 1012 reads / 513 files across independent freshness-owning projections",
+    "5. runtime surface manifest expansion: 8958 + 8061 lstat calls for link/junction refusal",
+    "6. history snapshot: 0.655s over ~21950 events with per-compaction digest verification"
+  ],
+  "regression_gates": {
+    "python_B_m_unittest_q_tools.test_t1544_audit20_perf_tools.test_t2089_agent_status_view": "25 tests OK",
+    "python_B_m_unittest_q_tools.test_t1944_perf_wave": "22 tests OK (144.9s)",
+    "python_B_tools/perf_wave_regressions.py": "42/42 checks passed, 0 failed (clean re-run; first run's only FAIL was a self-inflicted race from writing the knowledge card during the byte-identity probe)"
+  },
+  "O4_O5_quick_checks": {
+    "core_unit_import_ms": 22.6,
+    "tree_fingerprint_ms": 253.4,
+    "protocol_document_sizes_bytes": {"BOOT.md": 4161, "INDEX.md": 2294, "CORE.md": 32660, "OPS.md": 51508, "EXECUTION.md": 8498},
+    "identity_session_10000_cycles": "no state leak, _SESSION returns to None",
+    "verdict": "no new safe candidate found; agent view already 13x smaller than full status"
+  },
+  "conclusion": "No safe, measured source-level optimization remains in waves O1-O7 under this campaign's rules: every candidate is either a mandatory correctness/security control or is measured worse than the current bounded design. The dominant remaining cost is a RELEASE/INSTALLATION gap (repo 8.1.1 vs installed 8.1.0) requiring operator authority, not a source patch. Campaign records an honest measured performance floor; no production logic was changed. Source optimization: NOT APPLICABLE (no candidate). Installed optimization: NOT VERIFIED (installed 8.1.0 is ~2.9x slower). User-visible performance: UNCHANGED."
+}

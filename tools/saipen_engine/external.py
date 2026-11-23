@@ -171,17 +171,16 @@ def _hash_bytes(data: bytes) -> str:
     return "sha256:" + hashlib.sha256(data).hexdigest()
 
 
-def engine_identity() -> dict:
-    """The identity of the engine generation CURRENTLY executing.
+def _engine_identity_at(tools: Path) -> dict:
+    """The engine identity of ONE install's `tools` directory.
 
-    The digest covers every engine source this resolution depends on, so an
-    installed generation move, a rollback to an older install, or a different
-    engine copy answering the re-check all produce a different identity. The
-    receipt binds it; the closure resolver and the validator recompute it, so
-    an external closure is green only against the generation it verified.
+    `engine_identity()` asks the RUNNING tree; `installed_engine_identity()`
+    asks the tree a project's own STATE names. Both go through this framing,
+    so a receipt sealed by an install and a later check against the same
+    installed bytes compare equal.
     """
-    package = Path(__file__).resolve().parent
-    tools = package.parent
+    tools = Path(tools)
+    package = tools / "saipen_engine"
     files: list[Path] = sorted(
         [path for path in package.glob("*.py") if path.is_file()]
         + [path for path in (tools / "saipen.py", tools / "validate.py") if path.is_file()]
@@ -206,6 +205,85 @@ def engine_identity() -> dict:
         "engine_digest": _hash_bytes(material.encode("utf-8")),
         "files": len(files),
     }
+
+
+def engine_identity() -> dict:
+    """The identity of the engine generation CURRENTLY executing.
+
+    The digest covers every engine source this resolution depends on, so an
+    installed generation move, a rollback to an older install, or a different
+    engine copy answering the re-check all produce a different identity. The
+    receipt binds it; the closure resolver and the validator recompute it, so
+    an external closure is green only against the generation it verified.
+    """
+    return _engine_identity_at(Path(__file__).resolve().parent.parent)
+
+
+def installed_engine_identity(
+    root: Path | str, *, running: dict | None = None
+) -> tuple[dict | None, str | None]:
+    """The engine generation the project records as installed, or why it is unproven.
+
+    An EX receipt binds the generation that EXECUTED the sealed verification,
+    and revalidation is refused unless that executor is the install the
+    project names (HOME_REQUIRED). A read-only validation from a release
+    candidate therefore has to ask the project's RECORDED install, not the
+    candidate's own module tree: comparing the receipt with the executing copy
+    reports "the dependency moved" for a candidate checkout that moved nothing.
+
+    Returns `(identity, None)` when the recorded install is authenticated and
+    proves a coherent shipped runtime generation, `(None, None)` when the
+    project carries no absolute pointer (legacy: the caller keeps the
+    running-generation comparison), and `(None, reason)` when a DECLARED home
+    cannot be authenticated -- the caller must fail closed, never fall back.
+    """
+    from .state import (
+        HOME_INACCESSIBLE,
+        HOME_USABLE,
+        is_absolute_home,
+        machine_runtime_covers,
+        parse_frontmatter,
+        persisted_home_access,
+        running_home,
+    )
+
+    root = Path(root)
+    try:
+        text = (root / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+    except OSError:
+        return None, None
+    if not text.strip():
+        return None, None
+    fields, parse_error = parse_frontmatter(text)
+    if fields is None:
+        return None, f"STATE.md frontmatter is unreadable ({parse_error})"
+    raw = str(fields.get("saipen_home") or "").strip()
+    if not is_absolute_home(raw):
+        return None, None
+    access, reason = persisted_home_access(raw)
+    if access == HOME_INACCESSIBLE and machine_runtime_covers(raw):
+        # The machine runtime IS the standing install for this home; the
+        # receipt was sealed by whichever install executed the checks, and the
+        # digest comparison against the running engine still decides.
+        return (running if running is not None else engine_identity()), None
+    if access != HOME_USABLE:
+        return None, f"STATE.saipen_home {raw!r} cannot be authenticated: {reason or access}"
+    from . import machine_runtime
+    from .runtime_surface import runtime_generation_identity
+
+    home = machine_runtime.current_generation_for(raw) or Path(raw)
+    try:
+        same_as_running = home.resolve() == running_home()
+    except OSError:
+        same_as_running = False
+    if same_as_running:
+        return (running if running is not None else engine_identity()), None
+    if runtime_generation_identity(home) is None:
+        return None, (
+            f"STATE.saipen_home {raw!r} does not prove a coherent shipped "
+            "runtime generation"
+        )
+    return _engine_identity_at(home / "tools"), None
 
 
 def load_receipt(root: Path | str, receipt_id: str) -> dict:
@@ -316,12 +394,20 @@ def resolution_problems(root: Path | str, work: str, ticket: dict) -> list[str]:
         problems.append(f"{work} cites {receipt_id}, which resolves {record.get('work')!r}")
     problems.extend(receipt_binding_problems(root, work, ticket, record))
     current = engine_identity()
-    installed = record.get("installed_identity") or {}
-    if installed.get("engine_digest") != current.get("engine_digest"):
+    recorded = record.get("installed_identity") or {}
+    installed, unproven = installed_engine_identity(root, running=current)
+    if unproven is not None:
+        problems.append(
+            f"{receipt_id}: the engine generation the project records as installed "
+            f"cannot be authenticated -- {unproven}; a closure verified by an "
+            "installed runtime is not green while that install cannot be proven"
+        )
+    elif recorded.get("engine_digest") != (installed or current).get("engine_digest"):
+        where = "installed generation" if installed is not None else "running engine"
         problems.append(
             f"{receipt_id} was verified against installed engine generation "
-            f"{(installed.get('engine_digest') or 'unknown')[:23]}... but the "
-            f"running engine is {(current.get('engine_digest') or 'unknown')[:23]}... "
+            f"{(recorded.get('engine_digest') or 'unknown')[:23]}... but the "
+            f"{where} is {((installed or current).get('engine_digest') or 'unknown')[:23]}... "
             "-- the dependency moved (rollback or upgrade): re-resolve truthfully "
             "instead of inheriting a stale green"
         )
@@ -1001,28 +1087,7 @@ def revalidate_external_dependencies(
         other_problems = [
             p for p in problems if not ("engine generation" in p and "dependency moved" in p)
         ]
-        if not engine_moved and other_problems:
-            # T-1973: this branch used to be an implicit `continue`. A DONE
-            # closure whose problems do not include an engine move -- a moved
-            # external artifact, a changed verifier argv, a corrupted
-            # predecessor -- was dropped with no counter and no finding, so
-            # `--revalidate` answered `discovered 0 / inspected 0 / resolved []`
-            # over work it had just measured as non-green. The operator was
-            # told there was nothing to repair while `validate.py` reported the
-            # same closure as a FAIL. Name it instead: the surface may decline
-            # to re-execute, but it may not report a clean sweep over a defect.
-            inspected_count += 1
-            blocked_findings.append(
-                {
-                    "ticket": work,
-                    "code": "EXTERNAL_CLOSURE_DRIFTED",
-                    "detail": "; ".join(other_problems),
-                    "authority": record.get("external_authority"),
-                    "implementation": record.get("external_implementation"),
-                }
-            )
-            continue
-        if engine_moved:
+        if engine_moved and not other_problems:
             inspected_count += 1
             cand_key = (
                 f"{work}:engine_move:{record.get('external_authority')}:"

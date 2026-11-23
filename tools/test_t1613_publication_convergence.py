@@ -160,13 +160,24 @@ class _DirectoryLock:
 class _Publisher:
     """A throwaway machine: source tree, user home, LOCALAPPDATA, runner."""
 
-    def __init__(self, base: Path):
+    def __init__(self, base: Path, *, prepared_source: Path | None = None):
         self.base = base
         self.source = base / "source"
         self.home = base / "user home"
         self.local = self.home / "AppData" / "Local"
         self._generation = 1
-        self._build_source()
+        if prepared_source is None:
+            self._build_source()
+        else:
+            # T-2163 (Campaign XII P1-C): the fixture source is byte-identical
+            # in every test of the battery -- the SAME manifest-read files, the
+            # SAME initialized git repo. Preparing it once per class and
+            # copying it per test halves the module's git-process count
+            # (every test otherwise paid git init, add and commit for the very
+            # same bytes) without touching any real publish, lock or refusal:
+            # each test still runs the real installer on its own throwaway
+            # machine, with its own git commits on top of the shared fixture.
+            shutil.copytree(prepared_source, self.source)
         self.host_is_installed()
 
     # -- fixture ---------------------------------------------------------
@@ -342,9 +353,29 @@ class _Publisher:
 class PublicationConvergenceTests(unittest.TestCase):
     """One real publisher run per phase, on a real lock."""
 
+    _fixture_base: Path | None = None
+    _prepared_source: Path | None = None
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        # T-2163 (Campaign XII P1-C): the whole battery's throwaway machines
+        # share ONE prepared source fixture; each test copies it and then
+        # publishes real generations on top. The surface bytes read from
+        # ROOT at class time are identical to the per-test reads this
+        # replaces: the module runs inside one session.
+        cls._fixture_base = Path(tempfile.mkdtemp(prefix="saipen-t1613-fixture-"))
+        cls._prepared_source = _Publisher(cls._fixture_base).source
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        if cls._fixture_base is not None:
+            shutil.rmtree(cls._fixture_base, ignore_errors=True)
+            cls._fixture_base = None
+            cls._prepared_source = None
+
     def setUp(self) -> None:
         self._base = Path(tempfile.mkdtemp(prefix="saipen-t1613-"))
-        self.box = _Publisher(self._base)
+        self.box = _Publisher(self._base, prepared_source=self._prepared_source)
 
     def tearDown(self) -> None:
         shutil.rmtree(self._base, ignore_errors=True)

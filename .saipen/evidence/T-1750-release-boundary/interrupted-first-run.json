@@ -1,0 +1,19 @@
+{
+  "observed_utc": "2026-10-15T22:03:57.979044+00:00",
+  "host_handle": 72323,
+  "host_observation": "Unknown process id 72323",
+  "previous_marker": {
+    "schema": 1,
+    "kind": "core-unit",
+    "ticket": "T-1750",
+    "command": "core_unit evidence",
+    "pid": 14344,
+    "pid_created": 1792101669.1398048,
+    "started": 1792101669.4547813,
+    "started_utc": "2026-10-15T22:01:09Z"
+  },
+  "observed_process_creation": null,
+  "live_inflight": null,
+  "result": "STOPPED_UNMEASURED",
+  "limit": "No new full-family receipt exists; no test verdict is inferred."
+}

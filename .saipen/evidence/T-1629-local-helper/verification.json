@@ -1,0 +1,37 @@
+{
+  "paths": 8,
+  "bounded_statement_updated": true,
+  "new_readme_digest": "cf4f4ca5114b2effb2c424c41d4f1283bdd7382c9ccbafcdaa1d9c5671ed7a00",
+  "locales": {
+    "README.ee.md": {
+      "previous_marker_retained": true,
+      "whole_translation_refreshed": false
+    },
+    "README.ded.md": {
+      "previous_marker_retained": true,
+      "whole_translation_refreshed": false
+    },
+    "README.ja.md": {
+      "previous_marker_retained": true,
+      "whole_translation_refreshed": false
+    },
+    ".saipen/saitranslate/kitchen/et/README_ET.md": {
+      "previous_marker_retained": true,
+      "whole_translation_refreshed": false
+    },
+    ".saipen/saitranslate/kitchen/ru/README_RU.md": {
+      "previous_marker_retained": true,
+      "whole_translation_refreshed": false
+    },
+    ".saipen/saitranslate/kitchen/ded/README_DED.md": {
+      "previous_marker_retained": true,
+      "whole_translation_refreshed": false
+    },
+    ".saipen/saitranslate/kitchen/ja/README_JA.md": {
+      "previous_marker_retained": true,
+      "whole_translation_refreshed": false
+    }
+  },
+  "live_source_changed": false,
+  "full_family": "NOT_RUN"
+}

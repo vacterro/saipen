@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-021:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "T07 managed capacity: ManagedWorkerSupervisor slot-bounded to six with cooldown+heartbeat, bridge/supervisor.py; never manipulates personal tabs",
+      "text": "Implement and verify every required change and test in T07 MANAGED WORKER CAPACITY.",
+      "verification": "tests/services/test_audit_run_service.py:374 six-slot bounded and cooldown safe, :389 heartbeat prevents relaunch; live six-lane campaign T-103",
+      "work": "T-52"
+    }
+  },
+  "schema_version": 1
+}

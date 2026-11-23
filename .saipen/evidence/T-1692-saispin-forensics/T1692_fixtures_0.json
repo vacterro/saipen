@@ -1,0 +1,114 @@
+{
+  "status": "fulfilled",
+  "value": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"project\":\"SAITULS\",\"signal\":\"best_effort\",\"indexed_at\":\"2026-09-23T14:49:26Z\",\"metadata\":{\"generation\":\"2026-09-23T14:49:26Z\",\"index_mode\":\"full\",\"recorded_at\":\"2026-09-23T14:49:26Z\",\"recording_status\":\"complete\",\"ignored_files_stored\":25,\"ignored_files_total\":25,\"hash_records_complete\":true,\"coverage_version\":3,\"generation_matches\":true},\"paths\":[],\"scopes\":[{\"requested_scope\":\"Scripts\",\"scope\":\"Scripts\",\"total\":17,\"has_more\":true,\"next_offset\":16,\"entries\":[{\"path\":\"Scripts/saipatch/patches/opencode-queue-mode/probe.ps1\",\"kind\":\"parse_partial\",\"detail\":\"13-13\",\"ranges\":[{\"start\":13,\"end\":13}]},{\"path\":\"Scripts/saipatch/patches/opencode-queue-mode/replacement-853.bin\",\"kind\":\"not_indexed_file\",\"detail\":\"ignored-suffix\"},{\"path\":\"Scripts/secure_apps/__pycache__\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\"},{\"path\":\"Scripts/secure_apps/fido-worker\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\"},{\"path\":\"Scripts/secure_apps/sa_storage_helper.ps1\",\"kind\":\"parse_partial\",\"detail\":\"436-1246\",\"ranges\":[{\"start\":436,\"end\":1246}]},{\"path\":\"Scripts/shell_doctor/SHELL_DOCTOR.ps1\",\"kind\":\"parse_partial\",\"detail\":\"176-176\",\"ranges\":[{\"start\":176,\"end\":176}]},{\"path\":\"Scripts/taskbar_edge/TaskbarEdge.exe\",\"kind\":\"not_indexed_file\",\"detail\":\"ignored-suffix\"},{\"path\":\"Scripts/taskbar_edge/build.ps1\",\"kind\":\"parse_partial\",\"detail\":\"36-36,36-36,37-37\",\"ranges\":[{\"start\":36,\"end\":36},{\"start\":36,\"end\":36},{\"start\":37,\"end\":37}]}],\"status\":\"known_gaps\"}],\"caveat\":\"Best-effort signal only. No recorded issue does not prove graph or source completeness; read flagged source and qualify claims when metadata is changed or unavailable.\"}"
+      }
+    ],
+    "structuredContent": {
+      "project": "SAITULS",
+      "signal": "best_effort",
+      "indexed_at": "2026-09-23T14:49:26Z",
+      "metadata": {
+        "generation": "2026-09-23T14:49:26Z",
+        "index_mode": "full",
+        "recorded_at": "2026-09-23T14:49:26Z",
+        "recording_status": "complete",
+        "ignored_files_stored": 25,
+        "ignored_files_total": 25,
+        "hash_records_complete": true,
+        "coverage_version": 3,
+        "generation_matches": true
+      },
+      "paths": [],
+      "scopes": [
+        {
+          "requested_scope": "Scripts",
+          "scope": "Scripts",
+          "total": 17,
+          "has_more": true,
+          "next_offset": 16,
+          "entries": [
+            {
+              "path": "Scripts/saipatch/patches/opencode-queue-mode/probe.ps1",
+              "kind": "parse_partial",
+              "detail": "13-13",
+              "ranges": [
+                {
+                  "start": 13,
+                  "end": 13
+                }
+              ]
+            },
+            {
+              "path": "Scripts/saipatch/patches/opencode-queue-mode/replacement-853.bin",
+              "kind": "not_indexed_file",
+              "detail": "ignored-suffix"
+            },
+            {
+              "path": "Scripts/secure_apps/__pycache__",
+              "kind": "not_indexed_dir",
+              "detail": "excluded subtree"
+            },
+            {
+              "path": "Scripts/secure_apps/fido-worker",
+              "kind": "not_indexed_dir",
+              "detail": "excluded subtree"
+            },
+            {
+              "path": "Scripts/secure_apps/sa_storage_helper.ps1",
+              "kind": "parse_partial",
+              "detail": "436-1246",
+              "ranges": [
+                {
+                  "start": 436,
+                  "end": 1246
+                }
+              ]
+            },
+            {
+              "path": "Scripts/shell_doctor/SHELL_DOCTOR.ps1",
+              "kind": "parse_partial",
+              "detail": "176-176",
+              "ranges": [
+                {
+                  "start": 176,
+                  "end": 176
+                }
+              ]
+            },
+            {
+              "path": "Scripts/taskbar_edge/TaskbarEdge.exe",
+              "kind": "not_indexed_file",
+              "detail": "ignored-suffix"
+            },
+            {
+              "path": "Scripts/taskbar_edge/build.ps1",
+              "kind": "parse_partial",
+              "detail": "36-36,36-36,37-37",
+              "ranges": [
+                {
+                  "start": 36,
+                  "end": 36
+                },
+                {
+                  "start": 36,
+                  "end": 36
+                },
+                {
+                  "start": 37,
+                  "end": 37
+                }
+              ]
+            }
+          ],
+          "status": "known_gaps"
+        }
+      ],
+      "caveat": "Best-effort signal only. No recorded issue does not prove graph or source completeness; read flagged source and qualify claims when metadata is changed or unavailable."
+    },
+    "isError": false
+  }
+}

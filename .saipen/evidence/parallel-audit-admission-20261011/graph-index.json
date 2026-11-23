@@ -1,0 +1,141 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"project\":\"saipen\",\"nodes\":29195,\"edges\":34768,\"status\":\"ready\",\"root_path\":\"V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN\",\"parse_partial\":{\"files\":[{\"path\":\".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/bootstrap/export.ps1\",\"error_ranges\":\"24-24\"},{\"path\":\".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/bootstrap/inject.ps1\",\"error_ranges\":\"315-315,315-315\"},{\"path\":\".saipen/extensions/subs/saipython/kitchen/pen/verify-current/bootstrap/export.ps1\",\"error_ranges\":\"24-24\"},{\"path\":\".saipen/extensions/subs/saipython/kitchen/pen/verify-current/bootstrap/inject.ps1\",\"error_ranges\":\"315-315,315-315\"},{\"path\":\".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/zh/README_ZH.md\",\"error_ranges\":\"112-112\"},{\"path\":\".saipen/saitranslate/kitchen/zh/README_ZH.md\",\"error_ranges\":\"112-112\"},{\"path\":\"bootstrap/export.ps1\",\"error_ranges\":\"24-24\"},{\"path\":\"bootstrap/inject.ps1\",\"error_ranges\":\"362-362,362-362\"}],\"count\":8,\"truncated\":false},\"skipped\":{\"files\":[],\"count\":0,\"truncated\":false},\"not_indexed\":{\"dirs\":[\".claude\",\".codenomad/background_processes\",\".freebuff\",\".git\",\".pytest_cache\",\".ruff_cache\",\".saipen/cache\",\".saipen/extensions/subs/saipython/kitchen/pen/apply-check-current-2/.git\",\".saipen/extensions/subs/saipython/kitchen/pen/apply-check-current-2/tools\",\".saipen/extensions/subs/saipython/kitchen/pen/apply-check-current/.git\",\".saipen/extensions/subs/saipython/kitchen/pen/apply-check-current/tools\",\".saipen/extensions/subs/saipython/kitchen/pen/patch-stage-current-2/a/tools\",\".saipen/extensions/subs/saipython/kitchen/pen/patch-stage-current-2/b/tools\",\".saipen/extensions/subs/saipython/kitchen/pen/patch-stage-current/a/tools\",\".saipen/extensions/subs/saipython/kitchen/pen/patch-stage-current/b/tools\",\".saipen/extensions/subs/saipython/kitchen/pen/ruff-current-2/tools\",\".saipen/extensions/subs/saipython/kitchen/pen/ruff-current/tools\",\".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/.ruff_cache\",\".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/assets\",\".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/tools\",\".saipen/extensions/subs/saipython/kitchen/pen/verify-current/.ruff_cache\",\".saipen/extensions/subs/saipython/kitchen/pen/verify-current/assets\",\".saipen/extensions/subs/saipython/kitchen/pen/verify-current/tools\",\".saipen/extensions/subs/saiwiki/kitchen/wiki\",\".saipen/intake/coverage\",\".saipen/locks\",\".saipen/recovery\",\".saiwork/background_processes\",\"assets\",\"tests/__pycache__\",\"tools\"],\"dirs_count\":31,\"files\":[{\"path\":\".recovery/saitranslate-pycache-20260826T1850Z/_refresh_readmes.cpython-311.pyc\",\"reason\":\"ignored-suffix\"},{\"path\":\".saipen/extensions/subs/saipython/kitchen/PY-6.patch\",\"reason\":\"ignored-suffix\"},{\"path\":\".saipen/extensions/subs/saipython/kitchen/PY-7.patch\",\"reason\":\"ignored-suffix\"},{\"path\":\".saipen/extensions/subs/saipython/kitchen/PY-8.patch\",\"reason\":\"ignored-suffix\"},{\"path\":\".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/CHANGELOG.md\",\"reason\":\"skip-list\"},{\"path\":\".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/LICENSE\",\"reason\":\"skip-list\"},{\"path\":\".saipen/extensions/subs/saipython/kitchen/pen/verify-current/CHANGELOG.md\",\"reason\":\"skip-list\"},{\"path\":\".saipen/extensions/subs/saipython/kitchen/pen/verify-current/LICENSE\",\"reason\":\"skip-list\"},{\"path\":\"CHANGELOG.md\",\"reason\":\"skip-list\"},{\"path\":\"LICENSE\",\"reason\":\"skip-list\"}],\"files_count\":10,\"truncated\":false,\"note\":\"Purposely not indexed — excluded BY DESIGN via gitignore/.cbmignore/skip-lists (see each file's reason). Not an error: change the ignore rules and re-index to include them.\"},\"coverage_note\":\"Best-effort signal, not a completeness guarantee: parse_partial files WERE indexed, but constructs inside the listed line ranges (1-based) MAY be missing from the graph (tree-sitter error recovery still salvages some). skipped files were not indexed at all. Prefer text search (grep) for flagged files/ranges. Files absent from this list are NOT guaranteed to be fully indexed. (not_indexed entries are a separate, BY-DESIGN class — deliberate ignore rules, not failures.)\"}"
+    }
+  ],
+  "structuredContent": {
+    "project": "saipen",
+    "nodes": 29195,
+    "edges": 34768,
+    "status": "ready",
+    "root_path": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+    "parse_partial": {
+      "files": [
+        {
+          "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/bootstrap/export.ps1",
+          "error_ranges": "24-24"
+        },
+        {
+          "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/bootstrap/inject.ps1",
+          "error_ranges": "315-315,315-315"
+        },
+        {
+          "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current/bootstrap/export.ps1",
+          "error_ranges": "24-24"
+        },
+        {
+          "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current/bootstrap/inject.ps1",
+          "error_ranges": "315-315,315-315"
+        },
+        {
+          "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/zh/README_ZH.md",
+          "error_ranges": "112-112"
+        },
+        {
+          "path": ".saipen/saitranslate/kitchen/zh/README_ZH.md",
+          "error_ranges": "112-112"
+        },
+        {
+          "path": "bootstrap/export.ps1",
+          "error_ranges": "24-24"
+        },
+        {
+          "path": "bootstrap/inject.ps1",
+          "error_ranges": "362-362,362-362"
+        }
+      ],
+      "count": 8,
+      "truncated": false
+    },
+    "skipped": {
+      "files": [],
+      "count": 0,
+      "truncated": false
+    },
+    "not_indexed": {
+      "dirs": [
+        ".claude",
+        ".codenomad/background_processes",
+        ".freebuff",
+        ".git",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".saipen/cache",
+        ".saipen/extensions/subs/saipython/kitchen/pen/apply-check-current-2/.git",
+        ".saipen/extensions/subs/saipython/kitchen/pen/apply-check-current-2/tools",
+        ".saipen/extensions/subs/saipython/kitchen/pen/apply-check-current/.git",
+        ".saipen/extensions/subs/saipython/kitchen/pen/apply-check-current/tools",
+        ".saipen/extensions/subs/saipython/kitchen/pen/patch-stage-current-2/a/tools",
+        ".saipen/extensions/subs/saipython/kitchen/pen/patch-stage-current-2/b/tools",
+        ".saipen/extensions/subs/saipython/kitchen/pen/patch-stage-current/a/tools",
+        ".saipen/extensions/subs/saipython/kitchen/pen/patch-stage-current/b/tools",
+        ".saipen/extensions/subs/saipython/kitchen/pen/ruff-current-2/tools",
+        ".saipen/extensions/subs/saipython/kitchen/pen/ruff-current/tools",
+        ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/.ruff_cache",
+        ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/assets",
+        ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/tools",
+        ".saipen/extensions/subs/saipython/kitchen/pen/verify-current/.ruff_cache",
+        ".saipen/extensions/subs/saipython/kitchen/pen/verify-current/assets",
+        ".saipen/extensions/subs/saipython/kitchen/pen/verify-current/tools",
+        ".saipen/extensions/subs/saiwiki/kitchen/wiki",
+        ".saipen/intake/coverage",
+        ".saipen/locks",
+        ".saipen/recovery",
+        ".saiwork/background_processes",
+        "assets",
+        "tests/__pycache__",
+        "tools"
+      ],
+      "dirs_count": 31,
+      "files": [
+        {
+          "path": ".recovery/saitranslate-pycache-20260826T1850Z/_refresh_readmes.cpython-311.pyc",
+          "reason": "ignored-suffix"
+        },
+        {
+          "path": ".saipen/extensions/subs/saipython/kitchen/PY-6.patch",
+          "reason": "ignored-suffix"
+        },
+        {
+          "path": ".saipen/extensions/subs/saipython/kitchen/PY-7.patch",
+          "reason": "ignored-suffix"
+        },
+        {
+          "path": ".saipen/extensions/subs/saipython/kitchen/PY-8.patch",
+          "reason": "ignored-suffix"
+        },
+        {
+          "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/CHANGELOG.md",
+          "reason": "skip-list"
+        },
+        {
+          "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/LICENSE",
+          "reason": "skip-list"
+        },
+        {
+          "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current/CHANGELOG.md",
+          "reason": "skip-list"
+        },
+        {
+          "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current/LICENSE",
+          "reason": "skip-list"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "reason": "skip-list"
+        },
+        {
+          "path": "LICENSE",
+          "reason": "skip-list"
+        }
+      ],
+      "files_count": 10,
+      "truncated": false,
+      "note": "Purposely not indexed — excluded BY DESIGN via gitignore/.cbmignore/skip-lists (see each file's reason). Not an error: change the ignore rules and re-index to include them."
+    },
+    "coverage_note": "Best-effort signal, not a completeness guarantee: parse_partial files WERE indexed, but constructs inside the listed line ranges (1-based) MAY be missing from the graph (tree-sitter error recovery still salvages some). skipped files were not indexed at all. Prefer text search (grep) for flagged files/ranges. Files absent from this list are NOT guaranteed to be fully indexed. (not_indexed entries are a separate, BY-DESIGN class — deliberate ignore rules, not failures.)"
+  },
+  "isError": false
+}

@@ -1,0 +1,33 @@
+test_a_inventory_cannot_replace_diagnosis (test_response_surface_contract.DiagnosisTests.test_a_inventory_cannot_replace_diagnosis) ... FAIL
+test_b_generic_handoff_cannot_replace_diagnosis (test_response_surface_contract.DiagnosisTests.test_b_generic_handoff_cannot_replace_diagnosis) ... FAIL
+
+======================================================================
+FAIL: test_a_inventory_cannot_replace_diagnosis (test_response_surface_contract.DiagnosisTests.test_a_inventory_cannot_replace_diagnosis)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_surface_contract.py", line 681, in test_a_inventory_cannot_replace_diagnosis
+    self.assertRejected((FIXTURES / "a.md").read_text(encoding="utf-8"))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_surface_contract.py", line 677, in assertRejected
+    self.assertEqual(klass, RS.CLASS_INVALID_OPERATIONAL_PROSE)
+AssertionError: 'ORDINARY_CHAT' != 'INVALID_OPERATIONAL_PROSE'
+- ORDINARY_CHAT
++ INVALID_OPERATIONAL_PROSE
+
+
+======================================================================
+FAIL: test_b_generic_handoff_cannot_replace_diagnosis (test_response_surface_contract.DiagnosisTests.test_b_generic_handoff_cannot_replace_diagnosis)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_surface_contract.py", line 684, in test_b_generic_handoff_cannot_replace_diagnosis
+    self.assertRejected((FIXTURES / "b.md").read_text(encoding="utf-8"))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_surface_contract.py", line 677, in assertRejected
+    self.assertEqual(klass, RS.CLASS_INVALID_OPERATIONAL_PROSE)
+AssertionError: 'ORDINARY_CHAT' != 'INVALID_OPERATIONAL_PROSE'
+- ORDINARY_CHAT
++ INVALID_OPERATIONAL_PROSE
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.006s
+
+FAILED (failures=2)

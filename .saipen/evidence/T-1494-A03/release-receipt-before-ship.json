@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "operation": "release_receipt",
+  "op_id": "release-0fc84546600c4aa4bc21f1e8454340a2",
+  "version": "8.1.0",
+  "tag": "v8.1.0",
+  "ticket_id": "T-1629",
+  "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "source_tree_fingerprint": "git-delta-v1:c5e2a770dbdeda040660574bce6bc9ce595f811037a983eb66e414b6a76942fb",
+  "mode": "no-publish",
+  "crew_epoch": "",
+  "cohort_id": "",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-10-08T19:27:58Z"
+}

@@ -1,0 +1,117 @@
+test_actual_interrupted_close_settlement_reports_repair (test_src276_closure_outcomes.ClosureOutcomeTests.test_actual_interrupted_close_settlement_reports_repair) ... FAIL
+test_corrupt_archive_preserves_active_residue_for_recovery (test_src276_closure_outcomes.ClosureOutcomeTests.test_corrupt_archive_preserves_active_residue_for_recovery) ... FAIL
+test_healthy_repeat_is_verified_already_closed_and_changes_nothing (test_src276_closure_outcomes.ClosureOutcomeTests.test_healthy_repeat_is_verified_already_closed_and_changes_nothing) ... FAIL
+test_malformed_metadata_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_malformed_metadata_refuses_without_writes) ... FAIL
+test_missing_body_still_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_missing_body_still_refuses_without_writes) ... ok
+test_missing_contract_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_missing_contract_refuses_without_writes) ... FAIL
+test_missing_coverage_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_missing_coverage_refuses_without_writes) ... FAIL
+test_missing_metadata_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_missing_metadata_refuses_without_writes) ... FAIL
+test_public_cli_refuses_the_same_missing_sidecar (test_src276_closure_outcomes.ClosureOutcomeTests.test_public_cli_refuses_the_same_missing_sidecar) ... FAIL
+test_real_residue_cleanup_is_distinct_from_archive_repair (test_src276_closure_outcomes.ClosureOutcomeTests.test_real_residue_cleanup_is_distinct_from_archive_repair) ... FAIL
+test_weakened_archived_coverage_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_weakened_archived_coverage_refuses_without_writes) ... FAIL
+
+======================================================================
+FAIL: test_actual_interrupted_close_settlement_reports_repair (test_src276_closure_outcomes.ClosureOutcomeTests.test_actual_interrupted_close_settlement_reports_repair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 129, in test_actual_interrupted_close_settlement_reports_repair
+    self.assertEqual(result.get("outcome"), "REPAIR_APPLIED", result)
+AssertionError: None != 'REPAIR_APPLIED' : {'ok': True, 'code': 'SOURCE_CLOSED', 'receipt': 'SRC-001', 'status': 'CLOSED', 'archive_ref': '.saipen/archive/source/SRC-001.md', 'recovered': True}
+
+======================================================================
+FAIL: test_corrupt_archive_preserves_active_residue_for_recovery (test_src276_closure_outcomes.ClosureOutcomeTests.test_corrupt_archive_preserves_active_residue_for_recovery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 121, in test_corrupt_archive_preserves_active_residue_for_recovery
+    self.assert_corrupt_unchanged()
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 51, in assert_corrupt_unchanged
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'code': 'SOURCE_CLOSED', 'receipt': 'SRC-001', 'status': 'CLOSED', 'archive_ref': '.saipen/archive/source/SRC-001.md', 'recovered': True, 'residue_removed': True}
+
+======================================================================
+FAIL: test_healthy_repeat_is_verified_already_closed_and_changes_nothing (test_src276_closure_outcomes.ClosureOutcomeTests.test_healthy_repeat_is_verified_already_closed_and_changes_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 60, in test_healthy_repeat_is_verified_already_closed_and_changes_nothing
+    self.assertEqual(result.get("outcome"), "ALREADY_CLOSED", result)
+AssertionError: None != 'ALREADY_CLOSED' : {'ok': True, 'code': 'SOURCE_CLOSED', 'receipt': 'SRC-001', 'status': 'CLOSED', 'archive_ref': '.saipen/archive/source/SRC-001.md', 'recovered': True, 'residue_removed': False}
+
+======================================================================
+FAIL: test_malformed_metadata_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_malformed_metadata_refuses_without_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 89, in test_malformed_metadata_refuses_without_writes
+    self.assert_corrupt_unchanged()
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 51, in assert_corrupt_unchanged
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'code': 'SOURCE_CLOSED', 'receipt': 'SRC-001', 'status': 'CLOSED', 'archive_ref': '.saipen/archive/source/SRC-001.md', 'recovered': True, 'residue_removed': False}
+
+======================================================================
+FAIL: test_missing_contract_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_missing_contract_refuses_without_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 74, in test_missing_contract_refuses_without_writes
+    self.assert_corrupt_unchanged()
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 51, in assert_corrupt_unchanged
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'code': 'SOURCE_CLOSED', 'receipt': 'SRC-001', 'status': 'CLOSED', 'archive_ref': '.saipen/archive/source/SRC-001.md', 'recovered': True, 'residue_removed': False}
+
+======================================================================
+FAIL: test_missing_coverage_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_missing_coverage_refuses_without_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 79, in test_missing_coverage_refuses_without_writes
+    self.assert_corrupt_unchanged()
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 51, in assert_corrupt_unchanged
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'code': 'SOURCE_CLOSED', 'receipt': 'SRC-001', 'status': 'CLOSED', 'archive_ref': '.saipen/archive/source/SRC-001.md', 'recovered': True, 'residue_removed': False}
+
+======================================================================
+FAIL: test_missing_metadata_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_missing_metadata_refuses_without_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 69, in test_missing_metadata_refuses_without_writes
+    self.assert_corrupt_unchanged()
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 51, in assert_corrupt_unchanged
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'code': 'SOURCE_CLOSED', 'receipt': 'SRC-001', 'status': 'CLOSED', 'archive_ref': '.saipen/archive/source/SRC-001.md', 'recovered': True, 'residue_removed': False}
+
+======================================================================
+FAIL: test_public_cli_refuses_the_same_missing_sidecar (test_src276_closure_outcomes.ClosureOutcomeTests.test_public_cli_refuses_the_same_missing_sidecar)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 146, in test_public_cli_refuses_the_same_missing_sidecar
+    self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 0 == 0 : {
+  "ok": true,
+  "code": "SOURCE_CLOSED",
+  "receipt": "SRC-001",
+  "status": "CLOSED",
+  "archive_ref": ".saipen/archive/source/SRC-001.md",
+  "recovered": true,
+  "residue_removed": false
+}
+
+
+======================================================================
+FAIL: test_real_residue_cleanup_is_distinct_from_archive_repair (test_src276_closure_outcomes.ClosureOutcomeTests.test_real_residue_cleanup_is_distinct_from_archive_repair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 107, in test_real_residue_cleanup_is_distinct_from_archive_repair
+    self.assertEqual(result.get("outcome"), "RESIDUE_SETTLED", result)
+AssertionError: None != 'RESIDUE_SETTLED' : {'ok': True, 'code': 'SOURCE_CLOSED', 'receipt': 'SRC-001', 'status': 'CLOSED', 'archive_ref': '.saipen/archive/source/SRC-001.md', 'recovered': True, 'residue_removed': True}
+
+======================================================================
+FAIL: test_weakened_archived_coverage_refuses_without_writes (test_src276_closure_outcomes.ClosureOutcomeTests.test_weakened_archived_coverage_refuses_without_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 97, in test_weakened_archived_coverage_refuses_without_writes
+    self.assert_corrupt_unchanged()
+  File "V:\_TEMP_\saipen-src276-closure-_cng6i5o\tools\test_src276_closure_outcomes.py", line 51, in assert_corrupt_unchanged
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'code': 'SOURCE_CLOSED', 'receipt': 'SRC-001', 'status': 'CLOSED', 'archive_ref': '.saipen/archive/source/SRC-001.md', 'recovered': True, 'residue_removed': False}
+
+----------------------------------------------------------------------
+Ran 11 tests in 5.148s
+
+FAILED (failures=10)

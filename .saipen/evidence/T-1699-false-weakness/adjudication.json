@@ -1,0 +1,75 @@
+{
+  "original_carrier_sha256": "3e286871204c99c02256c884a43b16b3e8959fcae7b7bdac8a7cbcd4d58b1110",
+  "observations": [
+    {
+      "old_bad_mutation_changed_bytes": true,
+      "old_bad_payload_inserted": false,
+      "change_is_eol_transport_only": true,
+      "old_insertion_anchor_present": false,
+      "before_sha256": "d9f73c0923470d718bbea2d95e8c94ce00e74884f00477b96738dcbef5a58e10",
+      "after_sha256": "b80d93e1198dd24ad690fd9a0c968589828638114a2fab35c58776ad102dfa6c"
+    },
+    {
+      "injected_payload": "- 10.10.26 [T-1] RUN: ticket finished via SAIOPS -- completion (from SHIP)",
+      "mutation_changed_bytes": true,
+      "before_sha256": "65649bf63889adca29e316dc7dcbe3cf1650fad68a5ab585b5bc54a927103dc0",
+      "after_sha256": "1621c66c80f85d7b146c257e32bf8e890962d2560b68a442dbcbf27a0b234328"
+    },
+    {
+      "injected_payload": "- [T-1] RUN: ticket finished via SAIOPS -- completion (from SHIP)",
+      "mutation_changed_bytes": true,
+      "before_sha256": "6ba80cbc20d913ef64379120a72316e95aa9cb36b516eb521a1204cc5e51a76e",
+      "after_sha256": "c5bc4a01bf1c73bb684cf2b186e3dbef60f234a3ac1db9a1d0fcab616f8eb1ce"
+    },
+    {
+      "injected_payload": "# Notes: RUN and [T-1] are quoted context here",
+      "mutation_changed_bytes": true,
+      "before_sha256": "3f21a54ca6726940265a95a3b0ba1fa825639a170fb47f0982649596110abaab",
+      "after_sha256": "1c521a4fa134c46bd52bdd72940199bc4eb30eef5e22a3a4c625c8a94241efc2"
+    }
+  ],
+  "results": [
+    {
+      "case": "3-unnumbered-noop-confirmed",
+      "exit_code": 0,
+      "code": "VALID",
+      "fast_errors": [],
+      "ledger_errors": [],
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "3-unnumbered-actual-dated",
+      "exit_code": 1,
+      "code": "VALIDATION_FAILED",
+      "fast_errors": [
+        "LOG: LOG.md:1 not a legal event line"
+      ],
+      "ledger_errors": [
+        "LOG.md:1: not a legal LOG event: '- 10.10.26 [T-1] RUN: ticket finished via SAIOPS -- completion (from SHIP)'"
+      ],
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "3-unnumbered-actual-undated",
+      "exit_code": 1,
+      "code": "VALIDATION_FAILED",
+      "fast_errors": [
+        "LOG: LOG.md:1 not a legal event line"
+      ],
+      "ledger_errors": [
+        "LOG.md:1: not a legal LOG event: '- [T-1] RUN: ticket finished via SAIOPS -- completion (from SHIP)'"
+      ],
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "3-unnumbered-heading-commentary",
+      "exit_code": 0,
+      "code": "VALID",
+      "fast_errors": [],
+      "ledger_errors": [],
+      "canonical_docs_unchanged": true
+    }
+  ],
+  "finding": "T-1699 engine-weakness premise was a no-op mutation; actual unnumbered event frames are rejected",
+  "scope": "disposable fixtures; no engine or AUDAPACK writes; old reports and events preserved"
+}

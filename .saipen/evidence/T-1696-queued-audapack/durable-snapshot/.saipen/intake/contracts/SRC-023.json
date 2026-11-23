@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-023:R0001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Implement and verify every READY proof, transition, action, and notification requirement in T09 RESULT READY CONTRACT."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:12Z",
+  "derived_from": "SRC-023",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7efcd18b87946b4051204329d25ee89cdfeefa0a00805b0e7538fed415a85b42"
+}

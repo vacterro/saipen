@@ -1,0 +1,37 @@
+{
+  "ticket": "T-1695",
+  "phase": "DONE",
+  "goal_tickets": 12,
+  "board_counts": {
+    "## DONE": 189,
+    "## BLOCKED": 62
+  },
+  "parked_tickets_byte_identical": 62,
+  "failed_T1606_candidates_preserved": 15,
+  "inherited_index_unchanged": true,
+  "workable_ticket": null,
+  "pick_reason": "none",
+  "route": {
+    "reason": "audit-inbox-unworkable",
+    "action": "saipen audit status",
+    "load_path": null,
+    "executable_behavior": "RESTATE_AND_STOP"
+  },
+  "source_closed": {
+    "actionable": 2,
+    "archive_ref": ".saipen/archive/source/SRC-200.md",
+    "closed_at": "2026-10-09T17:56:08Z",
+    "closure_event": null,
+    "linked_work": "T-1695",
+    "linked_works": [
+      "T-1695"
+    ],
+    "receipt_id": "SRC-200",
+    "requirements": 2,
+    "schema_version": 1,
+    "source_sha256": "7df120d86970f5e6fe211c701181abaa86c0ba6cbaccf1bf0d53a849863e9fb4",
+    "status": "CLOSED",
+    "unresolved": 0
+  },
+  "limits": "Local finish only; no publication, cap lifting, native host claim or global completion."
+}

@@ -1,0 +1,80 @@
+diff --git a/tools/saipen_engine/test_runner.py b/tools/saipen_engine/test_runner.py
+index f74d5e84..15b83f48 100644
+--- a/tools/saipen_engine/test_runner.py
++++ b/tools/saipen_engine/test_runner.py
+@@ -371,6 +371,7 @@ VERIFIER_DIAGNOSTIC_ENV = frozenset(
+         # every focused record was refused at SHIP as "missing or incompatible
+         # verification environment identity". Same class as T-1834's carriers:
+         # it names the CALL, not the subject under verification.
++        "ANTIGRAVITY_SOURCE_METADATA",
+     }
+ )
+ 
+@@ -404,7 +405,7 @@ SHELL_BOOKKEEPING_ENV = frozenset({"_"})
+ #: `python tools/saipen.py transition SHIP T-1862` accepted it on identical
+ #: bytes. A verification gate that depends on which launcher asked is a gate
+ #: on the wrong subject.
+-LAUNCHER_ONLY_ENV = frozenset()
++LAUNCHER_ONLY_ENV = frozenset({"SHELL"})
+ 
+ 
+ def family_environment(family: TestFamily) -> dict:
+@@ -441,7 +442,7 @@ def identity_environment(env: dict) -> dict:
+     (T-1865); every other name still decides compatibility, so a real
+     environment change keeps invalidating evidence (T-1856's red control).
+     """
+-    return dict(env)
++    return {key: value for key, value in env.items() if key not in LAUNCHER_ONLY_ENV}
+ 
+ 
+ def _run_family(
+diff --git a/tools/saipen_engine/verification_cache.py b/tools/saipen_engine/verification_cache.py
+index ad31fc8a..052cad84 100644
+--- a/tools/saipen_engine/verification_cache.py
++++ b/tools/saipen_engine/verification_cache.py
+@@ -219,7 +219,8 @@ def capture(root: Path, configuration: dict) -> dict:
+             "machine": platform.machine(),
+             "node": platform.node(),
+         },
+-        "environment_sha256": digest(env),
++        "environment_sha256": digest(identity_environment(env)),
++        "identity_rule": IDENTITY_RULE,
+         "toolchain": {name: _tool_identity(name, path, memo) for name, path in tools.items()},
+         "configuration_files": [file_identity(path) for path in config_paths],
+         "verifiers": {name: file_identity(Path(__file__).with_name(name)) for name in _VERIFIERS},
+diff --git a/tools/saipen_engine/focused_unit.py b/tools/saipen_engine/focused_unit.py
+index 258ca3aa..4c826171 100644
+--- a/tools/saipen_engine/focused_unit.py
++++ b/tools/saipen_engine/focused_unit.py
+@@ -102,7 +102,10 @@ def record_problem(root: Path, record: dict, *, verification_identity=None) -> s
+         if record.get("verification_identity") != verification_identity:
+             return "focused check used a different verification configuration or environment"
+     elif not compatible(root, record.get("verification_identity")):
+-        return "focused check has missing or incompatible verification environment identity"
++        reason = incompatibility(record.get("verification_identity"))
++        return "focused check has missing or incompatible verification environment identity" + (
++            f" ({reason})" if reason else ""
++        )
+     return None
+ 
+ 
+diff --git a/tools/saipen_engine/core_unit.py b/tools/saipen_engine/core_unit.py
+index a438b692..c61fa50e 100644
+--- a/tools/saipen_engine/core_unit.py
++++ b/tools/saipen_engine/core_unit.py
+@@ -1211,10 +1211,13 @@ def ship_gate(root: Path | str, ticket_id: str, events: list[dict]) -> str | Non
+             "cited core-unit run tested a different tree: the working tree "
+             f"(outside {', '.join(FINGERPRINT_EXCLUDED)}) changed after it ran"
+         )
+-    from .verification_cache import compatible, replay_supported
++    from .verification_cache import compatible, incompatibility, replay_supported
+ 
+     if not compatible(base, record.get("verification_identity")):
+-        return "cited core-unit run has missing or incompatible verification environment identity"
++        reason = incompatibility(record.get("verification_identity"))
++        return "cited core-unit run has missing or incompatible verification environment identity" + (
++            f" ({reason})" if reason else ""
++        )
+     if not replay_supported(record["verification_identity"]):
+         return "cited core-unit run has unresolved verification runtime dependencies"
+     return None

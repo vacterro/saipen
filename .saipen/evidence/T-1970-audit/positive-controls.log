@@ -1,0 +1,11 @@
+=== measured 2026-10-31T01:51:28Z
+--- cc (SAIPEN own shortcut):
+cc exit=0
+--- continue (not attributed to a foreign protocol):
+continue exit=0
+action: PHASE SCOUT T-1970 | ticket: T-1970 | code: None
+--- degraded registry degrades to the old refusal (no invented owner):
+  with exact_namespace     -> {'name': 'saipal', 'kind': 'forensic-observer', 'aliases': ['pal'], 'home_name': '.saipal'
+  block deleted            -> None
+  block not a dict         -> None
+  protocols not a dict     -> None

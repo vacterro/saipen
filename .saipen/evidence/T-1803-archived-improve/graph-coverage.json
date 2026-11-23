@@ -1,0 +1,291 @@
+{
+  "project": "saipen",
+  "signal": "best_effort",
+  "indexed_at": "2026-09-01T13:16:39Z",
+  "metadata": {
+    "generation": "2026-09-01T13:16:39Z",
+    "index_mode": "moderate",
+    "recorded_at": "2026-09-01T13:16:39Z",
+    "recording_status": "complete",
+    "ignored_files_stored": 10,
+    "ignored_files_total": 10,
+    "hash_records_complete": true,
+    "coverage_version": 3,
+    "generation_matches": true
+  },
+  "paths": [
+    {
+      "requested_path": "tools/saipen.py",
+      "path": "tools/saipen.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/admission.py",
+      "path": "tools/saipen_engine/admission.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/capability.py",
+      "path": "tools/saipen_engine/capability.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/journal.py",
+      "path": "tools/saipen_engine/journal.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/audit_manifest.py",
+      "path": "tools/saipen_engine/audit_manifest.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_t38_improve_cycle_liveness.py",
+      "path": "tools/test_t38_improve_cycle_liveness.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/core_unit.py",
+      "path": "tools/core_unit.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/operations.py",
+      "path": "tools/saipen_engine/operations.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/cli_grammar.py",
+      "path": "tools/saipen_engine/cli_grammar.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "saipen/BOOT.md",
+      "path": "saipen/BOOT.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/COMMANDS.md",
+      "path": "saipen/COMMANDS.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/EXECUTION.md",
+      "path": "saipen/EXECUTION.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/phases/verify.md",
+      "path": "saipen/phases/verify.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/phases/review.md",
+      "path": "saipen/phases/review.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/phases/ship.md",
+      "path": "saipen/phases/ship.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/OPS.md",
+      "path": "saipen/OPS.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/SOURCES.md",
+      "path": "saipen/SOURCES.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/STATE.md",
+      "path": ".saipen/STATE.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/BOARD.md",
+      "path": ".saipen/BOARD.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/LOG.md",
+      "path": ".saipen/LOG.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/KNOWLEDGE/INDEX.md",
+      "path": ".saipen/KNOWLEDGE/INDEX.md",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/KNOWLEDGE/harness.md",
+      "path": ".saipen/KNOWLEDGE/harness.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/evidence/T-1803-archived-improve/REPORT.md",
+      "path": ".saipen/evidence/T-1803-archived-improve/REPORT.md",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/evidence/T-1803-archived-improve/baseline-observation.json",
+      "path": ".saipen/evidence/T-1803-archived-improve/baseline-observation.json",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/evidence/T-1803-archived-improve/historical-restart-acceptance.json",
+      "path": ".saipen/evidence/T-1803-archived-improve/historical-restart-acceptance.json",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/evidence/T-1803-archived-improve/current-audit.json",
+      "path": ".saipen/evidence/T-1803-archived-improve/current-audit.json",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    }
+  ],
+  "scopes": [],
+  "caveat": "Best-effort signal only. No recorded issue does not prove graph or source completeness; read flagged source and qualify claims when metadata is changed or unavailable."
+}

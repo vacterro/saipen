@@ -1,0 +1,2 @@
+sairoute/SAIFREN :: long_file_task         measurement=MEASURED first="saipen start 'add docstring to top of src/app.py'" protocol_before=0 productive=shell target_changed=False refusals=['NO_ACTIVE_WORK', 'INGRESS_TASK_MISMATCH'] repeated=[] isolation=PASS minted={'tickets': ['T-1'], 'receipts': ['SRC-001']} attempts=1 authority=None
+wrote .saipen\evidence\T-1385-routeless-refusal-20260917\field-long_file-8ef6a770\polygon.json

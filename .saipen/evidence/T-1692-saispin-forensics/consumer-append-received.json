@@ -1,0 +1,7 @@
+{
+  "chunk_id": "52f567",
+  "wall_time_seconds": 0.4943863,
+  "exit_code": 0,
+  "original_token_count": 61,
+  "output": "{\r\n  \"ok\": true,\r\n  \"code\": \"APPEND_RECEIVED\",\r\n  \"receipt\": \"SRC-093\",\r\n  \"source\": \"SRC-092\",\r\n  \"seq\": 1,\r\n  \"class\": \"APPEND\",\r\n  \"delta\": \"evidence\",\r\n  \"event\": null,\r\n  \"canonical_next_command\": \"saipen source apply-append SRC-093\"\r\n}\r\n"
+}

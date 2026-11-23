@@ -1,0 +1,367 @@
+{
+  "new_work": 0,
+  "primary_work": "T-1647",
+  "real_account_work": "T-1652",
+  "outcomes": [
+    {
+      "receipt": "SRC-222",
+      "clause": "R001",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R001",
+        "revision": 1
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R002",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R002",
+        "revision": 2
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R003",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R003",
+        "revision": 3
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R004",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R004",
+        "revision": 4
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R005",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R005",
+        "revision": 5
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R006",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R006",
+        "revision": 6
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R007",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R007",
+        "revision": 7
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R008",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R008",
+        "revision": 8
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R009",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R009",
+        "revision": 9
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R010",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R010",
+        "revision": 10
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R011",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R011",
+        "revision": 11
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R012",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R012",
+        "revision": 12
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R013",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R013",
+        "revision": 13
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R014",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R014",
+        "revision": 14
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R015",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R015",
+        "revision": 15
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R016",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R016",
+        "revision": 16
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R017",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R017",
+        "revision": 17
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R018",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R018",
+        "revision": 18
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R019",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R019",
+        "revision": 19
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R020",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R020",
+        "revision": 20
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R021",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R021",
+        "revision": 21
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R022",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R022",
+        "revision": 22
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R023",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R023",
+        "revision": 23
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R024",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R024",
+        "revision": 24
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R025",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R025",
+        "revision": 25
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R026",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R026",
+        "revision": 26
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R027",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R027",
+        "revision": 27
+      }
+    },
+    {
+      "receipt": "SRC-222",
+      "clause": "R028",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-222",
+        "rid": "SRC-222:R028",
+        "revision": 28
+      }
+    },
+    {
+      "receipt": "SRC-223",
+      "clause": "R001",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-223",
+        "rid": "SRC-223:R001",
+        "revision": 1
+      }
+    },
+    {
+      "receipt": "SRC-223",
+      "clause": "R002",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": "SRC-223",
+        "rid": "SRC-223:R002",
+        "revision": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+ "collected": 2526,
+ "truncated": [],
+ "citations": 285,
+ "detail_ref_citations": 196,
+ "unresolved": [
+  ".saipen/evidence/RAPORT-",
+  ".saipen/evidence/T-1319-saiopp-live-final-20260913",
+  ".saipen/evidence/T-1354-1362-polygon-20260916",
+  ".saipen/evidence/T-1373-evidence-surface-20260916/",
+  ".saipen/evidence/T-1381-foreign-owner-unseated-mutation-20260917/",
+  ".saipen/evidence/T-1385-foreign-delta-inquest-20260917/",
+  ".saipen/evidence/T-1391-T-1390-fixture-contamination-20260917/",
+  ".saipen/evidence/T-1394-incident-triage-20260919/",
+  ".saipen/evidence/T-1425-host-binding-acceptance-20260920",
+  ".saipen/evidence/T-1438-release-",
+  ".saipen/evidence/T-1446-field-24h-20260922/",
+  ".saipen/evidence/T-1446-field-24h-20260923/",
+  ".saipen/evidence/T-1446-field-24h-20260923b/",
+  ".saipen/evidence/T-1446-field-24h-20260923c/",
+  ".saipen/evidence/core-unit",
+  ".saipen/recovery/board-compaction/T-1380/",
+  ".saipen/recovery/log-detail/E-",
+  ".saipen/recovery/log-detail/E-6934-",
+  ".saipen/recovery/log-detail/E-6937-"
+ ],
+ "verdict": "INCOMPLETE"
+}

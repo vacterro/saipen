@@ -1,0 +1,93 @@
+{
+  "shape": "typed-duplicate",
+  "start": {
+    "lifecycle": "UNAUTHORIZED rows=['T-001']",
+    "board": {
+      "errors": [
+        "BOARD.md:6 duplicate ticket ID T-001"
+      ],
+      "tickets": {
+        "T-001": "## DOING"
+      }
+    }
+  },
+  "1 saipen recover": {
+    "code": "OPERATOR_DECISION_REQUIRED",
+    "ok": false,
+    "detail": "a BOARD repair cannot be aimed through an unaddressable record: BOARD.md:6 duplicate ticket ID T-001",
+    "moved": [],
+    "lifecycle": "UNAUTHORIZED rows=['T-001']"
+  },
+  "2 saipen recover --resolve-duplicate-id T-001 --keep 7dd83e58e8adbd5ab5620f9288": {
+    "code": "DUPLICATE_ID_RESOLVED",
+    "ok": true,
+    "detail": "",
+    "moved": [
+      "BOARD.md",
+      "LOG.md",
+      "STATE.md"
+    ],
+    "lifecycle": "UNAUTHORIZED rows=['T-2']"
+  },
+  "3 saipen recover": {
+    "code": "RECONCILE_REAUTH_REQUIRED",
+    "ok": false,
+    "detail": "UNAUTHORIZED_LIFECYCLE_WRITE: T-2 sits under ## DONE on the word of a typed head that E-9 carried, and no closure operation stands behind it -- the completion was typed, not run; it returns to ## TODO",
+    "moved": [],
+    "lifecycle": "UNAUTHORIZED rows=['T-2']"
+  },
+  "4 saipen recover --apply-approved-repair eb52c85cac24949d69cce9116be54f8166eb9a": {
+    "code": "REPAIRED",
+    "ok": true,
+    "detail": "",
+    "moved": [
+      "BOARD.md",
+      "LOG.md",
+      "STATE.md"
+    ],
+    "lifecycle": "AUTHORIZED rows=[]"
+  },
+  "5 saipen recover": {
+    "code": "RESIDUAL_DEFECTS",
+    "ok": false,
+    "detail": "reconciliation has no repair left to make and the project is still invalid: STATE proposed phase DONE is not ticket-bearing but BOARD has a ## DOING ticket; a DOING ticket requires a ticket-bearing ph",
+    "moved": [],
+    "lifecycle": "AUTHORIZED rows=[]"
+  },
+  "stopped": "the last answer names no command",
+  "last_answer_keys": [
+    "blocking_field",
+    "blocking_surface",
+    "canonical_next_command",
+    "changed",
+    "code",
+    "detail",
+    "diagnosis",
+    "dry_run",
+    "evidence_reference",
+    "forbidden_probes",
+    "instruction",
+    "needs_local_mutation",
+    "ok",
+    "operator_decision",
+    "operator_decision_available",
+    "read_only",
+    "read_only_diagnosis_only",
+    "reason_code",
+    "residual_defects",
+    "safe_auto_repair_available",
+    "strict_state_error",
+    "terminal_disposition"
+  ],
+  "end": {
+    "lifecycle": "AUTHORIZED rows=[]",
+    "board": {
+      "errors": [],
+      "tickets": {
+        "T-001": "## DOING",
+        "T-2": "## TODO"
+      }
+    },
+    "validator lifecycle FAIL lines": 0
+  }
+}

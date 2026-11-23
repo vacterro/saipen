@@ -1,0 +1,18 @@
+test_an_unknown_flag_is_refused (test_recovery_reachability.OperatorBlockerCliTests.test_an_unknown_flag_is_refused) ... ok
+test_recover_resolves_the_gate_with_recorded_authority (test_recovery_reachability.OperatorBlockerCliTests.test_recover_resolves_the_gate_with_recorded_authority) ... FAIL
+test_the_closed_grammar_refuses_a_missing_decision (test_recovery_reachability.OperatorBlockerCliTests.test_the_closed_grammar_refuses_a_missing_decision) ... ok
+
+======================================================================
+FAIL: test_recover_resolves_the_gate_with_recorded_authority (test_recovery_reachability.OperatorBlockerCliTests.test_recover_resolves_the_gate_with_recorded_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovery_reachability.py", line 1021, in test_recover_resolves_the_gate_with_recorded_authority
+    self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+AssertionError: 1 != 0 : REFUSE [RECONCILE_REAUTH_REQUIRED]
+reason: goal authorization source is invalid, revoked or not operator-backed
+
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.648s
+
+FAILED (failures=1)

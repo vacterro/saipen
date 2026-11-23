@@ -1,0 +1,70 @@
+{
+  "scope": "full-state copy and discovery observation; not verification acceptance",
+  "executed_suite": false,
+  "runtime": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "platform": "win32",
+  "stages": {
+    "first_copy_wall_s": 54.618479,
+    "private_worker_clone_wall_s": 51.302679,
+    "discovery_probe_wall_s": 3.440271
+  },
+  "cleanup": [
+    {
+      "path": "V:\\_TEMP_\\saipen-core-unit-mk_tsp89",
+      "removed": true,
+      "wall_s": 13.027404
+    },
+    {
+      "path": "V:\\_TEMP_\\saipen-core-unit-gusph7pq",
+      "removed": true,
+      "wall_s": 15.967571
+    }
+  ],
+  "copy_metrics": {
+    "subject_copy_s": 15.5,
+    "canonical_copy_s": 38.734,
+    "canonical_copy_attempts": 1
+  },
+  "input_inventory": {
+    "files_or_links": 126351,
+    "bytes": 1622323227,
+    "sha256": "43238c107e47276f293483a9b60fa14d5f0b8f79a08a5d5171c83c13adab0dea",
+    "inventory_wall_s": 20.164621
+  },
+  "source_fingerprint": "d23c49152ef1f81d04ae62a34a7eaaac2fb36fc512618946f3dbae3cba5aa24d",
+  "private_worker_inventory": {
+    "files_or_links": 126351,
+    "bytes": 1622323227,
+    "sha256": "43238c107e47276f293483a9b60fa14d5f0b8f79a08a5d5171c83c13adab0dea",
+    "inventory_wall_s": 18.909723
+  },
+  "private_clone_exact": true,
+  "hardlink_witness": {
+    "supported": true,
+    "source_before": "original",
+    "source_after": "worker mutation",
+    "worker_after": "worker mutation",
+    "source_changed": true,
+    "decision": "reject shared mutable hardlinks; original was modified"
+  },
+  "discovery": {
+    "purpose": "full real discovery, select only import failures; no suite acceptance",
+    "status": "PASS",
+    "exit_code": 0,
+    "discovered_occurrences": 7076,
+    "discovery_wall_s": 3.202904,
+    "inventory_sha256": "a6ca2c9a90f79269cd9ca847f9f4384cd6db2609a43b2a0556723eb241864a04",
+    "import_error_indices": [],
+    "ran_import_error_cases": 0,
+    "red": []
+  },
+  "native_linux_launch": {
+    "exit_code": 1,
+    "stdout": "first full-state copy complete: {\"first_copy_wall_s\": 135.860405}\nowned cleanup: {\"path\": \"/tmp/saipen-core-unit-61d55p7q\", \"removed\": true, \"wall_s\": 15.391061}\n",
+    "stderr": "Traceback (most recent call last):\n  File \"/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1829-cost-collapse/measure_sandbox.py\", line 111, in <module>\n    raise RuntimeError(\"native copy is not the same frozen full input\")\nRuntimeError: native copy is not the same frozen full input\n"
+  },
+  "experiment_error": {
+    "type": "CalledProcessError",
+    "detail": "Command '['wsl.exe', '-d', 'saipen-ubuntu', '--exec', 'python3', '-B', '/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1829-cost-collapse/measure_sandbox.py', '--output', '/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1829-cost-collapse/sandbox-paired-corrected-20261020-linux.json', '--frozen', '/mnt/v/_TEMP_/saipen-core-unit-gusph7pq/project', '--expected', '/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1829-cost-collapse/sandbox-paired-corrected-20261020.json']' returned non-zero exit status 1."
+  }
+}

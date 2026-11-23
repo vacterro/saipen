@@ -1,0 +1,22 @@
+{
+  "actual_declared_upstream": {
+    "ok": true,
+    "code": "EXTERNAL_IMPLEMENTATION_VERIFIED",
+    "authority": "lineage-ded945ae8243480ab1bfee73baeb29c6",
+    "implementation": "T-289@041f00ed1bc0b4b4841ca3edbb5912dd39461349",
+    "external_work": "T-289",
+    "external_commit": "041f00ed1bc0b4b4841ca3edbb5912dd39461349",
+    "external_root": "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+    "external_head": "dc030b39f6fad1b3246db989ec9789b39c99205e"
+  },
+  "caller_only_backup_commit_refused": {
+    "ok": false,
+    "code": "EXTERNAL_COMMIT_MISSING",
+    "detail": "commit ee215e0a0bbd5154806673b9baa23533e1eb7402 not found in external repository history",
+    "authority": "lineage-ded945ae8243480ab1bfee73baeb29c6",
+    "implementation": "T-289@ee215e0a0bbd5154806673b9baa23533e1eb7402",
+    "external_root": "V:\\___VAC\\__K\\__CODE\\__SAITULS"
+  },
+  "read_only": true,
+  "controlled_input": "same auxiliary Git repository selectors as actual T-1848 hook incident; no mocked Git or external authority"
+}

@@ -1,0 +1,6 @@
+test_real_installed_global_plugin_accepts_bare_canonical_continuation (tools.test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_real_installed_global_plugin_accepts_bare_canonical_continuation) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 19.843s
+
+OK

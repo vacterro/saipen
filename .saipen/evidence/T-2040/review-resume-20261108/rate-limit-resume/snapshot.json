@@ -1,0 +1,25 @@
+{
+  "attribution": "inherited/concurrent; no worker production or test edits before capture",
+  "files": {
+    "tools/saipen_engine/subs.py": {
+      "sha256": "67c825377015298b7043149fbc51f2b60bb2ab49bef1a1f116f0733d4294cb65",
+      "bytes": 218583
+    },
+    "tools/saipen_engine/crew.py": {
+      "sha256": "de2f8ad1a1172b4c1171280c647f40ea243cb0ea919ebf30f7adfc2091a61e81",
+      "bytes": 133664
+    },
+    "tools/saipen_engine/journal.py": {
+      "sha256": "80a411e6484eb24ac155701c67fef779fa694e65bb4356856468c1c821ebae93",
+      "bytes": 264473
+    },
+    "tools/test_sub_dispose_after_collect.py": {
+      "sha256": "40962a543529aeacb9f90ae3f6ca599209785f365789560e734a01a22ddc1129",
+      "bytes": 24633
+    },
+    "tools/test_t925_sub_terminal_durability.py": {
+      "sha256": "f236252bf12a2bbe305db43deb7f2f25ab8bfc6daa91da67b6ad73ea00e85b19",
+      "bytes": 2739
+    }
+  }
+}

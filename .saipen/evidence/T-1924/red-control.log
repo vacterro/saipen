@@ -1,0 +1,17 @@
+defect_reproduced: True -> False | claim the red arm did not reproduce
+  Ran 16 tests in 0.006s / FAILED (failures=1) | RED (test caught the lie)
+defect_reproduced: False -> True | claim the green arm still reproduced
+  Ran 16 tests in 0.007s / FAILED (failures=1) | RED (test caught the lie)
+after_personal_appears: 'personal' -> 'bundled' | claim green chose bundled
+  Ran 16 tests in 0.008s / FAILED (failures=1) | RED (test caught the lie)
+cache_isolates_cause: True -> False | claim the control isolates nothing
+  Ran 16 tests in 0.007s / FAILED (failures=1) | RED (test caught the lie)
+cache_key_carries_personal_mode: False -> True | claim the key carries the mode
+  Ran 16 tests in 0.006s / FAILED (failures=1) | RED (test caught the lie)
+live_configuration_written: False -> True | claim the control wrote the live profile
+  Ran 16 tests in 0.008s / FAILED (failures=1) | RED (test caught the lie)
+fixture_audio_claimed_as_original: False -> True | claim fixtures are originals
+  Ran 16 tests in 0.006s / FAILED (failures=1) | RED (test caught the lie)
+
+restored record, green rerun: Ran 16 tests in 0.006s / OK
+PASS: all 7 mutations were caught; record restored byte-identically

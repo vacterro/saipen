@@ -1,0 +1,22 @@
+test_apply_reuses_work_preserving_source_origin_and_external_blocker (__main__.RestoredMaintenanceCandidate.test_apply_reuses_work_preserving_source_origin_and_external_blocker) ... FAIL
+test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal (__main__.RestoredMaintenanceCandidate.test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal) ... ok
+test_candidate_text_in_verify_is_not_description_identity (__main__.RestoredMaintenanceCandidate.test_candidate_text_in_verify_is_not_description_identity) ... ok
+test_compacted_identity_is_read_from_validated_detail (__main__.RestoredMaintenanceCandidate.test_compacted_identity_is_read_from_validated_detail) ... ok
+test_corrupt_linked_source_never_restores_work (__main__.RestoredMaintenanceCandidate.test_corrupt_linked_source_never_restores_work) ... ok
+test_dry_run_reuses_work_without_any_source_or_canonical_write (__main__.RestoredMaintenanceCandidate.test_dry_run_reuses_work_without_any_source_or_canonical_write) ... ok
+test_mixed_external_blocker_stays_blocked_with_valid_grant (__main__.RestoredMaintenanceCandidate.test_mixed_external_blocker_stays_blocked_with_valid_grant) ... ok
+test_provider_does_not_suppress_verified_authority_only_work (__main__.RestoredMaintenanceCandidate.test_provider_does_not_suppress_verified_authority_only_work) ... ok
+test_unverified_or_revoked_grant_cannot_restore_or_allocate (__main__.RestoredMaintenanceCandidate.test_unverified_or_revoked_grant_cannot_restore_or_allocate) ... ok
+
+======================================================================
+FAIL: test_apply_reuses_work_preserving_source_origin_and_external_blocker (__main__.RestoredMaintenanceCandidate.test_apply_reuses_work_preserving_source_origin_and_external_blocker)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_maintenance_authority.py", line 315, in test_apply_reuses_work_preserving_source_origin_and_external_blocker
+    self.assertTrue(result.get("replenished"), result)
+AssertionError: False is not true : {'ok': False, 'replenished': False, 'status': 'RECOVERY_BLOCKED', 'admitted_ticket': 'T-2', 'goal_id': 'self-maintenance-core', 'detail': "read dependency .saipen/intake/active/SRC-001.md changed (live 'a3c1352f0a586bce', expected 'a3c1352f0a586bce3026f0a5fab08899588d3d3598c1b457ff55ebed2f20ff33')", 'code': 'STALE_STATE'}
+
+----------------------------------------------------------------------
+Ran 9 tests in 6.763s
+
+FAILED (failures=1)

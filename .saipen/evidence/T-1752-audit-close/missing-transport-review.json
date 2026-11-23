@@ -1,0 +1,66 @@
+{
+  "finish_ok": true,
+  "finish_code": "FINISHED",
+  "continue_trace": null,
+  "source_status": {
+    "ok": true,
+    "receipt": "SRC-001",
+    "status": "CLOSED",
+    "location": "archive",
+    "source_kind": "external_audit",
+    "source_sha256": "9247203f7d110d1cf1f2f88a64a770586a00ec6cbce679b1b3bcd0adf9278061",
+    "linked_work": "T-1",
+    "linked_works": [
+      "T-1"
+    ],
+    "amends": null,
+    "closure_event": null,
+    "coverage": {
+      "receipt": "SRC-001",
+      "requirements": 1,
+      "actionable": 1,
+      "terminal": 1,
+      "dispositions": {
+        "VERIFIED": 1
+      },
+      "unresolved": []
+    },
+    "distribution": {
+      "state": "DISTRIBUTABLE",
+      "receipt_id": "SRC-001",
+      "source_sha256": "9247203f7d110d1cf1f2f88a64a770586a00ec6cbce679b1b3bcd0adf9278061"
+    }
+  },
+  "layer_states": [],
+  "binding_state": "ACTIVE",
+  "layer_preserved": false,
+  "missing_ingest": {
+    "ok": true,
+    "code": "AUDIT_INBOX_STATUS",
+    "rule_id": "SOURCE-AUDIT-INBOX-01",
+    "directory": "audit",
+    "pending": [],
+    "closed_pending_delete": [],
+    "invalid": [],
+    "orphans": [
+      {
+        "rel": "audit/1.md",
+        "layer": 1,
+        "receipt_id": "SRC-001",
+        "linked_work": "T-1",
+        "sha256": "9247203f7d110d1cf1f2f88a64a770586a00ec6cbce679b1b3bcd0adf9278061",
+        "state": "MISSING_AFTER_CAPTURE"
+      }
+    ],
+    "residue": [],
+    "residue_count": 0,
+    "clean": true,
+    "next": null,
+    "last_allocated_id": null,
+    "migrated": null,
+    "detail": "no unconsumed audit generation and nothing to settle; audit/ is clean"
+  },
+  "retained_works": [
+    "T-1"
+  ]
+}

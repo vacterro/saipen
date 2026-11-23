@@ -1,0 +1,63 @@
+............s........................................................... [  8%]
+.............s.......................................................... [ 17%]
+...................F..................................................... [ 27%]
+...........................................................................................................................F.................................. [ 46%]
+................................................................................................................................ [ 62%]
+............................................................F........................ [ 73%]
+........................................................................................................................ [ 88%]
+............................................ [ 93%]
+...................................................                                                                      [100%]
+================================== FAILURES ===================================
+_ ContinueChainTests.test_one_cc_drives_the_deterministic_chain_to_the_boundary _
+tools\test_continue_chain.py:216: in test_one_cc_drives_the_deterministic_chain_to_the_boundary
+    self.assertEqual(rc, 0, result)
+E   AssertionError: 1 != 0 : {'ok': False, 'code': 'CONFORMANCE_UNHEALTHY', 'action': None, 'reason': 'conformance-remediation', 'detail': 'CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair.', 'recovery_pending': False, 'recovery_conflict': False, 'conflict_ops': [], 'pending_ops': [], 'parked_work': None, 'conformance_status': 'CURRENT_FAIL', 'canonical_next_command': None, 'diagnostic': {'kind': 'ENGINEERING_REQUIRED', 'owner': 'SAIPEN conformance/remediation', 'receipt_id': 'receipt-62df4aa1b5ff', 'findings_status': 'complete', 'detail': 'CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair.', 'ownership': {'groups': {'ENGINE_INTERNAL': [{'rule_id': 'cross_doc_drift', 'subject_kind': 'global', 'subject_id': None, 'finding_key': '4141c15153e33942', 'owner_class': 'ENGINE_INTERNAL', 'route': 'saipen continue', 'operator_action_due': False, 'detail': 'this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it', 'severity': 'problem'}], 'OPERATOR_DECISION': [], 'UNAVAILABLE_EXTERNAL': [], 'UNKNOWN': []}, 'operator_action_count': 0, 'engine_work_count': 1, 'external_count': 0, 'unknown_count': 0}, 'engine_work_count': 1, 'operator_action_count': 0}, 'repair_status': 'ENGINEERING_REQUIRED', 'terminal': True, 'continue_trace': [{'iteration': 1, 'action': 'PHASE SHIP T-2', 'kind': 'finish-at-ship', 'operation': 'ticket_done', 'ticket': 'T-2', 'result': 'FINISHED', 'ok': True, 'before_last_event': 20, 'after_last_event': 22}, {'iteration': 2, 'action': 'saipen claim T-1', 'kind': 'adopt', 'operation': 'claim', 'ticket': 'T-1', 'result': 'CLAIMED', 'ok': True, 'before_last_event': 22, 'after_last_event': 23}, {'iteration': 3, 'action': 'PHASE SHIP T-1', 'kind': 'finish-at-ship', 'operation': 'ticket_done', 'ticket': 'T-1', 'result': 'FINISHED', 'ok': True, 'before_last_event': 23, 'after_last_event': 24}], 'iterations': 3, 'stop_reason': 'WORK_ELIGIBLE', 'telegrams': {'state': 'OK', 'unread': 0, 'on_current_work': 0, 'complete': True, 'read_command': 'saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-continue-chain-9jaxf4mi\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat tester', 'detail': 'counts only; nothing was opened and nothing here is an instruction'}, 'route': 'cc'}
+_ NativeDecisionTests.test_public_registrar_and_validator_use_the_same_native_authority _
+tools\test_t1851_debt_authority.py:302: in test_public_registrar_and_validator_use_the_same_native_authority
+    self.assertEqual(validation.returncode, 0, validation.stdout + validation.stderr)
+E   AssertionError: 1 != 0 : saipen conformance validation starting (tools/validate.py)...
+E   Project root: V:\_TEMP_\saipen-accepted-debt-bh3fj92t\project (explicit)
+E   Project lineage: lineage-b59ff9030fd046f4b9e29d6a64ede957
+E   PASS: state.schema.json and the engine STATE contract constants agree
+E   PASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)
+E   PASS: STATE.md schema valid (checked against state.schema.json)
+E   PASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-b59ff9030fd046f4b9e29d6a64ede957)
+E   PASS: BOARD.md has all required section headings
+E   PASS: BOARD.md no duplicate tickets
+E   PASS: BOARD.md no dangling needs: references
+E   PASS: BOARD.md acyclic
+E   PASS: BOARD.md Work supersession relations are terminal, existing and acyclic
+E   PASS: BOARD.md claimed tickets have their needs: satisfied
+E   PASS: BOARD.md at most one ## DOING ticket (0 claimed)
+E   PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))
+E   PASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)
+E   PASS: .saipen/USERPERSON.md is a well-formed optional USERPERSON profile
+E   PASS: append targets end on a line boundary (3 checked)
+E   PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+E   FAIL: cross-doc drift [adapters] -- 1 adapter(s) never name BOOT.md and point a cold agent straight at the constitution: FREEBUFF_INGRESS_CONTRACT.md
+E   WARN [accepted-legacy-debt]: mechanical provenance [saio] -- structural SAIOPS-owned events after the first provenanced event (E-2) lack `[op: ...]` but are registered IMMUTABLE accepted legacy debt (AD-000001, exact event/line evidence verified): .saipen/LOG.md:3 E-3; .saipen/LOG.md:4 E-4 (T-584) -- a NEW unmarked structural event still FAILs
+E   WARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists
+E   WARN [cross-doc-drift]: cross-doc drift [borrowed-invariants] -- BOOT.md must say `next_action` is the previous session's pre-computed pick and is confirmed against BOARD.md where the validator cannot re-derive it -- the portable floor does not, since a grep cannot walk a needs: graph
+E   WARN [cross-doc-drift]: cross-doc drift [command-outranks-pick] -- BOOT.md step 7 must say the user's own message outranks `next_action` and defer to § 1.11's OBEY priority. Read as unconditional it is the half a cold agent reaches first, which is exactly how the command the user typed gets dropped
+E   WARN [cross-doc-drift]: ... and 6 more like the above
+E   WARN [changelog-unarchived]: CHANGELOG.md carries 13 version entries while it states it keeps the most recent ~10 -- the overflow belongs in CHANGELOG_ARCHIVE.md, moved verbatim the way LOG segments are sealed, so the top of the file stays the part anyone actually reads
+E   WARN [translation-stale]: 29 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, el, es, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this
+E   Validation FAILED: 1 problem(s), 12 warning(s)
+_ ValidatorFindingTests.test_the_finding_names_the_route_and_the_route_clears_it _
+tools\test_t1640_board_scrub.py:661: in test_the_finding_names_the_route_and_the_route_clears_it
+    self.assertEqual([line for line in after if line.startswith("FAIL")], [])
+E   AssertionError: Lists differ: ['FAIL: cross-doc drift [adapters] -- 1 ad[106 chars].md'] != []
+E   
+E   First list contains 1 additional elements.
+E   First extra element 0:
+E   'FAIL: cross-doc drift [adapters] -- 1 adapter(s) never name BOOT.md and point a cold agent straight at the constitution: FREEBUFF_INGRESS_CONTRACT.md'
+E   
+E   + []
+E   - ['FAIL: cross-doc drift [adapters] -- 1 adapter(s) never name BOOT.md and '
+E   -  'point a cold agent straight at the constitution: '
+E   -  'FREEBUFF_INGRESS_CONTRACT.md']
+=========================== short test summary info ===========================
+FAILED tools/test_continue_chain.py::ContinueChainTests::test_one_cc_drives_the_deterministic_chain_to_the_boundary
+FAILED tools/test_t1851_debt_authority.py::NativeDecisionTests::test_public_registrar_and_validator_use_the_same_native_authority
+FAILED tools/test_t1640_board_scrub.py::ValidatorFindingTests::test_the_finding_names_the_route_and_the_route_clears_it
+3 failed, 798 passed, 2 skipped, 496 subtests passed in 470.65s (0:07:50)

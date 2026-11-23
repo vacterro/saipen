@@ -1,0 +1,203 @@
+{
+  "requirements": {
+    "SRC-033:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/1.md CORE-001: c92acc4 makes backup establishment a precondition with bounded retry",
+      "text": "CORE-001: a failed pack preserves the previous good archive byte-for-byte",
+      "verification": "tests/test_packing.py::TestBackupIsRollbackAuthority 4 regressions red pre-fix; SRC-031:R001 VERIFIED",
+      "work": "T-142"
+    },
+    "SRC-033:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/1.md CORE-002: c92acc4 routes the profile click through scoped_config_write and fails the settings merge closed",
+      "text": "CORE-002: UI settings cannot overwrite concurrent registry state",
+      "verification": "tests/test_compress_profile.py 2 + tests/ui_qt/test_settings_symmetry.py 1 red pre-fix; SRC-031:R002 VERIFIED",
+      "work": "T-142"
+    },
+    "SRC-033:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "ca967d8 create_zip applies the normalized mandatory+configured matcher to the single-file branch and refuses loudly",
+      "text": "CORE-003: every pack path enforces mandatory secret exclusions",
+      "verification": "tests/test_packing.py::TestSingleFileSecretBoundary 5 regressions, 3 red pre-fix incl. the CLI run_pack_path",
+      "work": "T-142"
+    },
+    "SRC-033:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "ca967d8 cross-wave run-id equality moved into prepare, before registration and directory creation",
+      "text": "CORE-004: rejected ingest is side-effect-free before commit",
+      "verification": "tests/test_ingest.py 3 new: unknown project with conflicting ids leaves config byte-identical and no ghost directory, 1 red pre-fix",
+      "work": "T-142"
+    },
+    "SRC-033:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "ca967d8 find_archive_for_project resolves ordered phases archive_name -> display -> id, blank contributes no alias",
+      "text": "CORE-005: canonical archive resolution honors ordered ownership",
+      "verification": "tests/test_packing.py::TestCanonicalArchiveIdentity 5 regressions, 2 red pre-fix",
+      "work": "T-142"
+    },
+    "SRC-033:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "ca967d8 _redact_diagnostic_text strips credentials and reduces both path grammars to basenames, before truncation",
+      "text": "CORE-006: diagnostics cannot expose paths, tokens or content",
+      "verification": "tests/services/test_audit_run_service.py 4 new, 3 red pre-fix",
+      "work": "T-142"
+    },
+    "SRC-033:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "5c4bb66 _widget_source_for_endpoint rewrites both directives from the serving endpoint, loopback-only; one pair (dbb725a keeps it at 0.0.48)",
+      "text": "CORE-007: widget update routing has one endpoint contract",
+      "verification": "tests/test_bridge.py 4 regressions red pre-fix; exactly-one-pair test",
+      "work": "T-142"
+    },
+    "SRC-033:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/1.md CORE-003: c92acc4 settled the retry contract as portable",
+      "text": "CORE-008: Ubuntu and Windows CI semantics agree",
+      "verification": "tests/test_projects.py portability regressions; SRC-031:R003 VERIFIED",
+      "work": "T-142"
+    },
+    "SRC-033:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/1.md CORE-004: c92acc4 badges to 0.2.3 over T-135's three-source pin",
+      "text": "CORE-009: release version identity is singular",
+      "verification": "tests/test_docs_consistency.py badge test red pre-fix; SRC-031:R004 VERIFIED",
+      "work": "T-142"
+    },
+    "SRC-033:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/1.md W2-001: c92acc4 lane close and mirror past the commit, derived write-set",
+      "text": "W2-001: terminal campaign commit is atomic across artifacts, state and post-commit side effects",
+      "verification": "tests/test_dispatch_end_to_end.py 3 e2e red pre-fix; SRC-031:R005 VERIFIED",
+      "work": "T-142"
+    },
+    "SRC-033:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/2.md W2-002: 5c4bb66 O_CREAT|O_EXCL publication with step-over",
+      "text": "W2-002: concurrent mirror producers cannot overwrite layers",
+      "verification": "tests/test_audit_mirror.py 3 new 2 red pre-fix; SRC-032:R008 VERIFIED",
+      "work": "T-142"
+    },
+    "SRC-033:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/1.md W2-004 and audit/2.md W2-005: febd6be memory restore, 5c4bb66 generation loaded first and advanced under the jobs lock",
+      "text": "W2-003: browser-dispatch state and generation hold one monotonic atomic commit truth",
+      "verification": "tests/test_browser_dispatch.py 4+3 red pre-fix; SRC-032:R011 VERIFIED",
+      "work": "T-142"
+    },
+    "SRC-033:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "ca967d8 direct COMPLETE needs a handoff that exists and hashes right, or the Bridge's own probe; unproven ACKs hold at FINALIZING with the lane owned",
+      "text": "W2-004: workers cannot self-declare unproven COMPLETE",
+      "verification": "tests/test_browser_dispatch.py 7 new + 2 e2e rewritten to the corrected contract, 6 red pre-fix",
+      "work": "T-142"
+    },
+    "SRC-033:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "669118c RESERVED row durable before the spawn and counted occupied; corrupt ledger quarantined and rebuilt from live workers with monotonic generation",
+      "text": "W2-005: managed browser launch intent is durable before spawn and corrupt state never reads as an empty pool",
+      "verification": "tests/services/test_audit_run_service.py 4 new, 3 red pre-fix",
+      "work": "T-142"
+    },
+    "SRC-033:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/1.md W2-002: febd6be copy-then-delete and recovery across all three lifecycle directories",
+      "text": "W2-006: INAUDIT pair moves recover after every partial failure",
+      "verification": "tests/test_inaudit_capture_store.py 4 new 3 red pre-fix; SRC-031:R006 VERIFIED",
+      "work": "T-142"
+    },
+    "SRC-033:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/2.md W2-006: 5c4bb66 stop joins, tick checks the event before provisioning, thread handle cleared",
+      "text": "W2-007: supervisor shutdown is quiescent and restartable",
+      "verification": "tests/test_dispatch_supervisor.py 3 red pre-fix; SRC-032:R012 VERIFIED",
+      "work": "T-142"
+    },
+    "SRC-033:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/2.md W2-004: 8500157 primary handle kept for the recovered instance's life",
+      "text": "W2-008: Win32 zombie recovery transfers canonical single-instance ownership",
+      "verification": "tests/test_single_instance.py 4 new 2 red pre-fix; SRC-032:R010 VERIFIED",
+      "work": "T-142"
+    },
+    "SRC-033:R018": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "1130336 conftest runtime isolation is per-test, so nothing leaks in either direction",
+      "text": "W2-009: auth tests pass in either execution order with no runtime state leaking",
+      "verification": "the two named tests pass in both orders; full 925 green after the fixture change",
+      "work": "T-142"
+    },
+    "SRC-033:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "repaired as T-140 before this layer: 09d152c caches read_bundled_widget_metadata on (path, mtime_ns, size)",
+      "text": "PERF-001: bundled widget metadata is not reread per worker/status/poll",
+      "verification": "six-worker read count 21 -> 1 red pre-fix; SRC-032:R014 DUPLICATE-of-T-140",
+      "work": "T-142"
+    },
+    "SRC-033:R020": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/2.md PERF-002 plus its correction in ca967d8: no load_config in check_auth, dashboard uses cached snapshots and one status fetch",
+      "text": "PERF-002: authentication and dashboard refresh stop doing config reconstruction and forced rescans",
+      "verification": "tests/test_bridge.py 4 new + tests/services 5 red pre-fix; SRC-032:R015 VERIFIED",
+      "work": "T-142"
+    },
+    "SRC-033:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/1.md PERF-003: ec64c3b dirty turns from record.target/addedNodes",
+      "text": "PERF-003: INAUDIT DOM attachment is mutation-local after hydration",
+      "verification": "tests/widget/perf-006 6 red pre-fix; SRC-031:R012 VERIFIED",
+      "work": "T-142"
+    },
+    "SRC-033:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/2.md PERF-004: 5c4bb66 shared eligible_source_files traversal with early short-circuit",
+      "text": "PERF-004: freshness reuse only traverses packable files",
+      "verification": "tests/test_packing.py 5 new 4 red pre-fix; SRC-032:R017 VERIFIED",
+      "work": "T-142"
+    }
+  },
+  "schema_version": 1
+}

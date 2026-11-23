@@ -1,0 +1,140 @@
+{
+  "status": "PARTIAL",
+  "source_receipt": "SRC-254",
+  "work": "T-1794",
+  "root_cause": {
+    "classification": "G",
+    "owner": "Freebuff Desktop SDK executeTool CWD resolver",
+    "executable_missing": false,
+    "requested_cwd": "/v/___VAC/__K/__CODE/_PLUG_SCRIPT/_FREEBUFF_SAI",
+    "resolved_cwd": "V:\\v\\___VAC\\__K\\__CODE\\_PLUG_SCRIPT\\_FREEBUFF_SAI",
+    "original_thread": "96ba4e8c-ef79-47c2-9e91-d2aad7c7096d"
+  },
+  "acceptance": {
+    "SOURCE_VERIFIED": {
+      "passed": true,
+      "scope": "Contract and cause audit; no SAIPEN source fix"
+    },
+    "WINDOWS_RUNTIME_VERIFIED": {
+      "passed": true,
+      "scope": "9 controlled Windows checks plus live registered machine integrity"
+    },
+    "FREEBUFF_HOST_VERIFIED": {
+      "passed": false,
+      "observed": true,
+      "scope": "CWD defect observed in running Freebuff; no host patch"
+    },
+    "REAL_LUNA_ACCEPTANCE": {
+      "passed": false,
+      "observed": true,
+      "thread": "587918ed-22b5-46c3-82e3-9c926ea84f3c",
+      "reason": "Stale account SAIPAL cc conflict, CWD failure, scope drift; owned test stopped and closed"
+    },
+    "BLOCKED": true
+  },
+  "windows_checks": [
+    {
+      "name": "A.native_cwd_spawn",
+      "passed": true
+    },
+    {
+      "name": "G.existing_bash_missing_cwd_red",
+      "passed": true
+    },
+    {
+      "name": "G.translated_cwd_spawn",
+      "passed": true
+    },
+    {
+      "name": "A.installed_sdk_valid_cwd",
+      "passed": true
+    },
+    {
+      "name": "B.missing_configured_override_discovery",
+      "passed": true
+    },
+    {
+      "name": "C.no_bash_sdk_refusal",
+      "passed": true
+    },
+    {
+      "name": "B.native_saipen_without_bash_discovery",
+      "passed": true
+    },
+    {
+      "name": "D.absent_machine_refusal",
+      "passed": true
+    },
+    {
+      "name": "E.absent_project_authority_refusal",
+      "passed": true
+    }
+  ],
+  "unit_negative_controls": {
+    "ran": 3,
+    "passed": 3,
+    "seconds": 8.959,
+    "command": "python -m unittest tools.test_t1647_machine_runtime.ProjectionTests.test_changed_runtime_bytes_are_broken_not_ready tools.test_t1647_machine_runtime.OwnershipTests.test_an_entry_another_account_owns_is_not_ready tools.test_t1647_machine_runtime.OwnershipTests.test_a_registration_cannot_point_the_engine_elsewhere"
+  },
+  "real_cold": {
+    "ran": 1,
+    "passed": 0,
+    "failed": 1,
+    "terminal_calls": 9,
+    "spawn_ENOENT_count": 1,
+    "final_turn_state": "idle",
+    "thread_status": "closed"
+  },
+  "saipen_source": {
+    "implementation_delta": "none for T-1794",
+    "fingerprint": "c408b3c8678817c43be5c4c9d76791f513581ecb6fc026d3506d1ef06beff5a3",
+    "matches_earlier_family": true,
+    "earlier_family": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\core-unit\\c408b3c8678817c4-20261014T233138Z.json",
+    "earlier_family_ran": 6609,
+    "note": "Earlier source family is not Freebuff acceptance."
+  },
+  "target": {
+    "root": "V:\\___VAC\\__K\\__CODE\\_PLUG_SCRIPT\\_FREEBUFF_SAI",
+    "lineage": "lineage-fe5afd6d81564116bfdc3b0184adc0ec",
+    "task": "T-52",
+    "phase": "BUILD",
+    "owner": "saipen",
+    "last_event": 685,
+    "admission": "DEGRADED/permitted/verified:false",
+    "resumed": false,
+    "race_verified": false,
+    "source_changed_by_this_work": false
+  },
+  "evidence_sha256": {
+    "bootstrap-source.json": "b7f131533c8eec1b5054a56f4e67270186443e2f5c12c8f1558cdc92fec1440d",
+    "case-d-absent.json": "ff41446833683a182b2cf2ca3b893c894e16ae7cff1eeaa8318fedb30cfcc353",
+    "case-e-native.json": "a7886653e727fbda8181e12f9e3c6e40ddf149205f65460251de60aca9b2958f",
+    "cold-fixture.json": "1e276b18d48aaa5b8a3949de3a454e51e32a9bc7e00904390ccac8a5950256bf",
+    "FREEBUFF_HANDOFF.md": "18ca17ba92bcc720f2fa85059a84e92262192e6543820076f2ae7503695e232e",
+    "host-models.json": "0f1f627bec8663137722dabc6c3d655e47215820340f5a9febcebc246740f9a9",
+    "host-run-terminal.excerpt.txt": "929e6cb0f688cbbacb3299e59df1fd9959cb4b320c4ecb3c3cac0bebb561611a",
+    "host-windows-bash.excerpt.txt": "e2b462cd800d4b20c7e68ed637cdfe9967151dea76b1b7f4386c42cb34e299e6",
+    "incident-history.json": "756c917c766152b58d55cacb97205964e8a666db4041fbdf6f6ba122f634d40b",
+    "inspect_incident.py": "86140ddd0d4b12cec645ca71696ebd82e7ed3c8633e2b28b0c37179f11bfe32f",
+    "luna-cold-closed.json": "138c459acd5775e6c9b6cd2c8d4ed3ec63e2ff939f653590026e72576f100753",
+    "luna-cold-dispatch.json": "59ce6f6f248a23a38f1471dc548dca4187c13ee912c6f586a3ef148dc725b0f1",
+    "luna-cold-observation.json": "dcdc5dd502a8e509878869d231d53709896a6e4fb951a083938fe2e9d87d38ec",
+    "luna-cold-stop.json": "8fda500332fbc2918c953fe98b09d46195a738f56951d3779677eae563d58d39",
+    "machine-own-status.json": "e0a032f76b0a1de3914effa078be6d8da22bba483976fac5428c4a355e8d6065",
+    "machine-status.json": "5b58feeddf6846465e37ee10668dd1fff26e33fdc226433425e25716484e9ed2",
+    "preservation-after.json": "4479caa7992f16da47ae5cf73a976bccbc60971f62d2d380ffb7b21aebd1d279",
+    "projects-readonly.json": "02d4af7c48d09926364eb8bf911b0b6db6fc01a41b47bac097ed8fc484bc142d",
+    "REPORT.md": "8a0822a001a7dbecd5da506b4f46f436ff79a70be0a556438a703ecccffd46a1",
+    "request.txt": "19ebb44ec01d9b4fde11568d3253e6ae7408315bc2aace0baf5b2a0875f1fb94",
+    "target-admission.json": "6e3619666f311bb5751c56afbea9751cc4637a543c157f7a9a40b1bede6cef49",
+    "target-entry.json": "369d673a9945d5f359463199fd37439dccbf38fb34a67cce28a237312dadb67b",
+    "target-source-status.json": "2d3d8e762316fa3b7d74aefb28a3be501b5e4ced4f99758d22fbef5d023ab493",
+    "ui-bridge-readonly.json": "44241b2479503c74d181f01e517fdf4499df101697b6d1ef0251cafad249f048",
+    "ui-readonly.json": "ad5e7477b684733fef67286fc0a2bba4026019cf55460e55e7c7789473746b8b",
+    "verify_evidence.py": "054be8412bf6f8996391c627cc3bd4ee6827810ae5222ae0a45a28c855a874aa",
+    "windows-host-matrix.cjs": "79949e355dead20d13789bf07bd57d3d243c97fe9d92db104b408b5fc10e00b8",
+    "windows-host-matrix.json": "836a23c7fb7b3ac36114415e28514f12e0ca261d76cc3d8f0531bd34945e79fb",
+    "windows-spawn-probe.cjs": "709c1ef714b48716d7383e24a5fd8aa2129b4917104c31fb5cd17d78a79b7742",
+    "windows-spawn-probe.json": "bc16ce4555af8943ba2188a6492a6392de7c693f47bb5cc5001de36d77d63c4e"
+  }
+}

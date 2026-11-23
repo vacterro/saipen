@@ -1,0 +1,32 @@
+{
+  "requirements": {
+    "SRC-113:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2755",
+      "text": "Recover the T-25 launcher windowless-owner state so the managed browser lane is claimable again",
+      "verification": "python .saipen/scratch_verify5.py -> PASS",
+      "work": "T-266"
+    },
+    "SRC-113:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2755",
+      "text": "Debug the T-261 live A3 lineage on exactly one FastPrompter worker",
+      "verification": "node --test tests/widget/w7-013-live-lineage-snapshot.test.js -> PASS",
+      "work": "T-266"
+    },
+    "SRC-113:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2743",
+      "text": "the lineage defect is named from live evidence, not inferred",
+      "verification": "node --test tests/widget/w7-013-live-lineage-snapshot.test.js -> PASS",
+      "work": "T-266"
+    }
+  },
+  "schema_version": 1
+}

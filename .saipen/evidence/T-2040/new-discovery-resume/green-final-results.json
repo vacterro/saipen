@@ -1,0 +1,63 @@
+[
+  {
+    "test": "test_t2040_bounded_discovery_resume",
+    "exit_code": 0,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\green-final-test_t2040_bounded_discovery_resume.log",
+    "tail": [
+      "Ran 15 tests in 5.346s",
+      "OK"
+    ],
+    "owner": "T-2040"
+  },
+  {
+    "test": "test_premature_victory_prevention",
+    "exit_code": 0,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\green-final-test_premature_victory_prevention.log",
+    "tail": [
+      "Ran 36 tests in 0.404s",
+      "OK"
+    ],
+    "owner": "T-2040"
+  },
+  {
+    "test": "test_t2021_false_idle_maintenance",
+    "exit_code": 0,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\green-final-test_t2021_false_idle_maintenance.log",
+    "tail": [
+      "Ran 20 tests in 2.400s",
+      "OK"
+    ],
+    "owner": "T-2040"
+  },
+  {
+    "test": "test_t2040_continuation_truth",
+    "exit_code": 1,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\green-final-test_t2040_continuation_truth.log",
+    "tail": [
+      "Ran 11 tests in 0.287s",
+      "FAILED (failures=1)"
+    ],
+    "owner": "terminal/continuation (NOT T-2040 owned file)",
+    "seam": "continuation_assessment.assess_continuation returns INVALID_RUNTIME (reason=discovery-invalid) for non-object source_evidence BEFORE route_next; the control expects INCOMPLETE_DISCOVERY. With the guard forwarded, the T-2040 path yields certificate_errors=True and classification INCOMPLETE_DISCOVERY (verified). Fix belongs to the continuation_assessment owner."
+  },
+  {
+    "test": "test_t2040_discovery_owners",
+    "exit_code": 0,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\green-final-test_t2040_discovery_owners.log",
+    "tail": [
+      "Ran 22 tests in 0.594s",
+      "OK"
+    ],
+    "owner": "T-2040"
+  },
+  {
+    "test": "test_t2040_exhaustion_evidence",
+    "exit_code": 0,
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-discovery-resume\\green-final-test_t2040_exhaustion_evidence.log",
+    "tail": [
+      "Ran 20 tests in 0.101s",
+      "OK"
+    ],
+    "owner": "T-2040"
+  }
+]

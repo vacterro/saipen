@@ -1,0 +1,6 @@
+[
+  "extensions/adapters/opencode/saipen-guard.js",
+  "extensions/adapters/opencode.md",
+  "extensions/adapters/registry.json",
+  "tools/test_t1688_stale_plugin_guard.py"
+]

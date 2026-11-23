@@ -1,0 +1,675 @@
+.........................................................................................warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+..............................F............warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................s....F...........................................................................warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+....warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/milestones/CP-001/manifest.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/milestones/current.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/milestone-d502077d8c838efd/operation.json', LF will be replaced by CRLF the next time Git touches it
+...warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+....................................................................................................................................................................................................................F....V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\run_scenarios.py:1765: DeprecationWarning: invalid escape sequence '\e'
+  "</Arguments>", " //E:vbscript C:\evil.vbs</Arguments>", 1
+................................F.F..F.F...F............................................................................................................................................................................................................................................................FFFF.......................................................................................................{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": []
+  },
+  "adopted": [],
+  "lifecycle": [],
+  "repair_id": "847dea4b853bb871b48f9895728343092fcd766026873ed7d9d9f18693daeaaa",
+  "targets": [
+    ".saipen/LOG.md",
+    ".saipen/STATE.md"
+  ],
+  "event": "E-13",
+  "agent": "test-agent",
+  "strict_state_error": null,
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-legacycompat-bjs22f_7/.saipen/MANIFEST.json",
+    "contract_version": 1,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  }
+}
+...............................................................................................................................................FFF..FFFFF.............sssssssss............................................................................................................{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "recover --attest-legacy-done ids must be T-### (digits), comma-separated when several"
+}
+.....FF..F.FFFFF....F.FF...FFFF.F...F...FFE.F..........................................................................................................F.......................................................................F..................................<unknown>:1765: DeprecationWarning: invalid escape sequence '\e'
+.<unknown>:1765: DeprecationWarning: invalid escape sequence '\e'
+..............F....................................................................................................................................................................................................................................................................................sssssss................................................................................................................................................................................................................................................................................................
+======================================================================
+ERROR: test_strict_finding_identity_is_unchanged_by_attribution (test_recovered_attribution.AttributionPositiveTests.test_strict_finding_identity_is_unchanged_by_attribution)
+Phase I: ownership metadata never mints a new finding key.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 407, in test_strict_finding_identity_is_unchanged_by_attribution
+    self.assertEqual(report["carried"][0]["finding_key"], before)
+                     ~~~~~~~~~~~~~~~~~^^^
+IndexError: list index out of range
+
+======================================================================
+FAIL: test_untampered_interrupted_close_settles_idempotently (test_audit_2026_08_28_all3.CoreArchiveSettlementTamperTests.test_untampered_interrupted_close_settles_idempotently)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_audit_2026_08_28_all3.py", line 1927, in test_untampered_interrupted_close_settles_idempotently
+    self.assertEqual(second.get("code"), "TICKET_NOT_FOUND", second)
+AssertionError: 'SOURCE_CLOSED' != 'TICKET_NOT_FOUND'
+- SOURCE_CLOSED
++ TICKET_NOT_FOUND
+ : {'ok': True, 'code': 'SOURCE_CLOSED', 'receipt': 'SRC-001', 'status': 'CLOSED', 'archive_ref': '.saipen/archive/source/SRC-001.md', 'recovered': True, 'residue_removed': False}
+
+======================================================================
+FAIL: test_no_test_module_races_a_concurrent_gate_on_a_constant_timeout (test_concurrency_independence.NoAbsoluteLatencyBudgets.test_no_test_module_races_a_concurrent_gate_on_a_constant_timeout)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_concurrency_independence.py", line 88, in test_no_test_module_races_a_concurrent_gate_on_a_constant_timeout
+    self.assertEqual(
+AssertionError: {'test_opencode_bound_launch_smoke.py': [(144, 5.0)]} != {}
+- {'test_opencode_bound_launch_smoke.py': [(144, 5.0)]}
++ {} : a numeric subprocess timeout under 10s outside a suppress block makes the verdict depend on host load: derive the budget from a measured per-subprocess cost (see PerformanceAuditTests._subprocess_cost) or raise it to a hang guard
+
+======================================================================
+FAIL: test_the_module_form_and_the_script_form_agree (test_entry_point_parity.CliInvocationParityTests.test_the_module_form_and_the_script_form_agree)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_entry_point_parity.py", line 173, in test_the_module_form_and_the_script_form_agree
+    self.assertEqual(script.get(field), module.get(field), field)
+AssertionError: 'REVIEW' != 'SHIP'
+- REVIEW
++ SHIP
+ : phase
+
+======================================================================
+FAIL: test_the_flag_reaches_the_engine_through_the_cli (test_explicit_claim.CliSurfaceTests.test_the_flag_reaches_the_engine_through_the_cli)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_explicit_claim.py", line 169, in test_the_flag_reaches_the_engine_through_the_cli
+    self.assertIn('"CLAIMED"', done.stdout, done.stdout + done.stderr)
+AssertionError: '"CLAIMED"' not found in '{\n  "ok": false,\n  "code": "CONFLICT",\n  "op_id": "claim-c7c62fcd0cbb4f938ac74c66c858c480",\n  "changed_files": [],\n  "recovery_required": true,\n  "message": "post-write semantic verification (policy core_fast) failed: BOARD: T-1 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)",\n  "detail": "post-write semantic verification (policy core_fast) failed: BOARD: T-1 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)"\n}\n' : {
+  "ok": false,
+  "code": "CONFLICT",
+  "op_id": "claim-c7c62fcd0cbb4f938ac74c66c858c480",
+  "changed_files": [],
+  "recovery_required": true,
+  "message": "post-write semantic verification (policy core_fast) failed: BOARD: T-1 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)",
+  "detail": "post-write semantic verification (policy core_fast) failed: BOARD: T-1 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)"
+}
+
+
+======================================================================
+FAIL: test_a_live_doing_ticket_still_refuses_with_the_flag (test_explicit_claim.OverrideBypassesOnlyOrderingTests.test_a_live_doing_ticket_still_refuses_with_the_flag)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_explicit_claim.py", line 148, in test_a_live_doing_ticket_still_refuses_with_the_flag
+    self.assertTrue(apply_claim(self.root, "T-1", "probe").get("ok"))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_a_redundant_flag_writes_no_stepped_over_claim (test_explicit_claim.OverrideWorksTests.test_a_redundant_flag_writes_no_stepped_over_claim)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_explicit_claim.py", line 107, in test_a_redundant_flag_writes_no_stepped_over_claim
+    self.assertTrue(out.get("ok"), out)
+AssertionError: False is not true : Result(ok=False, code='CONFLICT', data={'op_id': 'claim-370786d5de624b7cb16f21a5f68e70d5', 'recovery_required': True}, message='post-write semantic verification (policy core_fast) failed: BOARD: T-2 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)', changed_files=[], op_id='claim-370786d5de624b7cb16f21a5f68e70d5', recovery_required=True)
+
+======================================================================
+FAIL: test_explicit_claims_a_ticket_the_pick_rule_would_refuse (test_explicit_claim.OverrideWorksTests.test_explicit_claims_a_ticket_the_pick_rule_would_refuse)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_explicit_claim.py", line 93, in test_explicit_claims_a_ticket_the_pick_rule_would_refuse
+    self.assertTrue(out.get("ok"), out)
+AssertionError: False is not true : Result(ok=False, code='CONFLICT', data={'op_id': 'claim-0943e5ec4ff44727a903b7edb05a4546', 'recovery_required': True}, message='post-write semantic verification (policy core_fast) failed: BOARD: T-1 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)', changed_files=[], op_id='claim-0943e5ec4ff44727a903b7edb05a4546', recovery_required=True)
+
+======================================================================
+FAIL: test_without_the_flag_the_pick_rule_is_unchanged (test_explicit_claim.RefusalNamesTheRemedyTests.test_without_the_flag_the_pick_rule_is_unchanged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_explicit_claim.py", line 86, in test_without_the_flag_the_pick_rule_is_unchanged
+    self.assertTrue(top.get("ok"), top)
+AssertionError: False is not true : Result(ok=False, code='CONFLICT', data={'op_id': 'claim-41cbb4677bb1427f9eabda084af276dd', 'recovery_required': True}, message='post-write semantic verification (policy core_fast) failed: BOARD: T-2 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)', changed_files=[], op_id='claim-41cbb4677bb1427f9eabda084af276dd', recovery_required=True)
+
+======================================================================
+FAIL: test_audit_core003_converge_target_controls_resume_without_writes (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_converge_target_controls_resume_without_writes) (target='ship')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_intent_audit_fixes.py", line 436, in test_audit_core003_converge_target_controls_resume_without_writes
+    self.assertEqual(rc, 0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_audit_core003_converge_target_controls_resume_without_writes (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_converge_target_controls_resume_without_writes) (target='crew')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_intent_audit_fixes.py", line 436, in test_audit_core003_converge_target_controls_resume_without_writes
+    self.assertEqual(rc, 0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_audit_core003_goal_cc_and_continue_route_identically_without_writes (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_goal_cc_and_continue_route_identically_without_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_intent_audit_fixes.py", line 418, in test_audit_core003_goal_cc_and_continue_route_identically_without_writes
+    self.assertEqual((cc_rc, continue_rc), (0, 0))
+AssertionError: Tuples differ: (1, 1) != (0, 0)
+
+First differing element 0:
+1
+0
+
+- (1, 1)
++ (0, 0)
+
+======================================================================
+FAIL: test_audit_core003_normal_cc_enters_done_convergence (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_normal_cc_enters_done_convergence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_intent_audit_fixes.py", line 447, in test_audit_core003_normal_cc_enters_done_convergence
+    self.assertEqual(rc, 0, result)
+AssertionError: 1 != 0 : {'ok': False, 'code': 'RECONCILE_REAUTH_REQUIRED', 'detail': "T-001 predates this project's closure contract and carries no execution evidence in EITHER the current or its own generation's grammar (no historical execution evidence in the complete history); a missing field that did not exist yet is not proof the completion was fabricated, so this is an operator decision, never an automatic reopen -- run `saipen recover --attest-legacy-done T-001` to let the historical completion stand (OPERATOR_DECISION_REQUIRED)", 'changed': {'board': [], 'state': [{'field': 'last_event', 'from': None, 'to': 7, 'surface': 'state', 'reason': 'STATE freshness marker must equal the LOG tail (CORE section 1.2)'}, {'field': 'schema_version', 'from': 1, 'to': 3, 'surface': 'state', 'reason': 'readable legacy revision must upgrade to the current schema'}, {'field': 'style_contract', 'from': None, 'to': 'ded-4ae736e4', 'surface': 'state', 'reason': 'voice marker must equal the installed STYLE.md boot marker'}], 'lifecycle_refused': [{'field': 'board', 'kind': 'legacy-done-review', 'ticket': 'T-001', 'surface': 'board', 'section': '## DONE', 'refuse': True, 'operator_decision_available': True, 'generation': 'legacy', 'canonical_next_command': 'saipen recover --attest-legacy-done T-001', 'reason': "T-001 predates this project's closure contract and carries no execution evidence in EITHER the current or its own generation's grammar (no historical execution evidence in the complete history); a missing field that did not exist yet is not proof the completion was fabricated, so this is an operator decision, never an automatic reopen -- run `saipen recover --attest-legacy-done T-001` to let the historical completion stand (OPERATOR_DECISION_REQUIRED)"}]}, 'refused': [{'field': 'board', 'kind': 'legacy-done-review', 'ticket': 'T-001', 'surface': 'board', 'section': '## DONE', 'refuse': True, 'operator_decision_available': True, 'generation': 'legacy', 'canonical_next_command': 'saipen recover --attest-legacy-done T-001', 'reason': "T-001 predates this project's closure contract and carries no execution evidence in EITHER the current or its own generation's grammar (no historical execution evidence in the complete history); a missing field that did not exist yet is not proof the completion was fabricated, so this is an operator decision, never an automatic reopen -- run `saipen recover --attest-legacy-done T-001` to let the historical completion stand (OPERATOR_DECISION_REQUIRED)"}], 'repair_id': 'e7f320e7b0a6f214a3a1dc2d993042521aa5d0d83f25a8a246cf54db8efbdff4', 'strict_state_error': None, 'dry_run': False, 'needs_local_mutation': False, 'safe_auto_repair_available': False, 'operator_decision_available': True, 'canonical_next_command': 'saipen recover --attest-legacy-done T-001', 'read_only': True, 'terminal_disposition': None, 'blocking_surface': 'board', 'blocking_field': 'board', 'evidence_reference': '.saipen/BOARD.md', 'diagnosis': 'READ_ONLY_DIAGNOSIS_ONLY', 'read_only_diagnosis_only': True, 'instruction': 'READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; the only sanctioned mutation is `saipen recover --attest-legacy-done T-001`', 'forbidden_probes': ['saipen stop', 'saipen transition', 'saipen goal', 'saipen ticket', 'Bash', 'Edit', 'Write'], 'reason_code': 'RECONCILE_REAUTH_REQUIRED', 'remediation': 'OPERATOR_DECISION', 'safety_valve_tripped': False, 'operator_decisions': [{'field': 'board', 'surface': 'board', 'tickets': ['T-001'], 'command': 'saipen recover --attest-legacy-done T-001', 'reason': "T-001 predates this project's closure contract and carries no execution evidence in EITHER the current or its own generation's grammar (no historical execution evidence in the complete history); a missing field that did not exist yet is not proof the completion was fabricated, so this is an operator decision, never an automatic reopen -- run `saipen recover --attest-legacy-done T-001` to let the h"}], 'route': 'cc'}
+
+======================================================================
+FAIL: test_bare_generic_launch_bootstraps_reads_and_inherits_one_canonical_actor (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_bare_generic_launch_bootstraps_reads_and_inherits_one_canonical_actor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_opencode_bound_launch_smoke.py", line 288, in test_bare_generic_launch_bootstraps_reads_and_inherits_one_canonical_actor
+    self.assertTrue((root / "src" / "allowed-one.py").is_file(), combined)
+AssertionError: False is not true : {"type":"step_start","timestamp":1789560520397,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e7ec0001Hm40UdGEWPkAwG","messageID":"msg_0aa1e7d2d001NEzvcjmOaWuK0L","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-start"}}
+{"type":"tool_use","timestamp":1789560520533,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"type":"tool","tool":"skill","callID":"call_bound_0","state":{"status":"completed","input":{"name":"saipen"},"output":"<skill_content name=\"saipen\">\n# Skill: saipen\n\n# saipen -- skill adapter\n\n**`saipen continue`, bare `saipen`, `cc` and `сс` mean EXECUTE the current\nwork. Loading this skill only returns instructions; it does not run Git,\ninspect the project, or complete a command.** After loading it, follow BOOT,\nrun `saipen continue --json`, read the returned `load_path` and project memory,\nand perform the returned action in this turn. Do not ask what `continue`\nmeans, repeat this skill call, or stop at \"state not checked\": read that state.\nOnly an observed refusal or a canonical WAIT can justify a blocked report;\ninclude its exact evidence and take available safe recovery first.\n\nThin entry for skill-reading platforms. The system lives elsewhere:\n\r\n0. **Resolve the cold route deterministically -- never by searching.** Run the\r\n   installed launcher (`saipen status --json`) and read its `cold_route`\r\n   block. It names the bound `project_root`, `protocol_dir`, `boot`, `style`,\r\n   `phase_module` and the `.saipen/` memory files, and states\r\n   `search_required: false`. Open those exact paths. Do NOT use the host's\r\n   grep/glob/search tool to locate protocol files, and never conclude that\r\n   protocol startup failed because a host search tool errored: a ripgrep or\r\n   search fault is a HOST fault, unrelated to SAIPEN. If the launcher itself\r\n   is unavailable, read `BOOT.md` and the documents beside this SKILL.md by\r\n   their known paths -- still without searching.\r\n\r\n   When a search IS genuinely needed and the host's own search tool returns a\r\n   transport error (never for zero matches -- that is a normal empty result),\r\n   use the canonical read-only fallback `saipen search --hex\r\n   <hex-encoded-utf8>`. It needs no generic shell admission, so it still works\r\n   while the protocol state is invalid. Do not fall back to `grep`/`bash`.\r\n\r\n1. **Read `BOOT.md`** (the file in the same folder as this SKILL.md) -- the\r\n   compact cold-start kernel: STATE -> BOARD -> LOG tail -> execute\r\n   `next_action`. That is everything a bare `saipen continue` needs. **Read it\r\n   once; this list names it once.**\r\n2. **`BOOT.md` loads `STYLE.md` before any output** -- voice governs the first\r\n   token, so the kernel's own step 1 opens it. Nothing here overrides that\r\n   order.\r\n3. **Rule question? Route through `INDEX.md`** (same folder), the document map.\r\n4. **`CORE.md` only for the exact rule you looked up.** It is the constitution;\r\n   do not read it speculatively.\r\n5. **`RFC.md` is a compatibility redirect and nothing else.** It holds no\r\n   rules, it is not a destination, and no step above sends you there.\r\n6. **Phase modules in `phases/`** (same folder) -- loaded by boot per STATE.md\r\n   phase.\r\n7. UI work: also read `UI.md` (Win95 dark golden, Verdana, no AA).\r\n\r\nPlatform notes:\r\n- Native task lists mirror `.saipen/BOARD.md`, never replace it.\r\n- `<project_root>/.saipen/` remains the only project memory/checkpoint area.\r\n  Global USERPERSON lives in the deterministic user-configuration directory\r\n  (`SAIPEN_USER_CONFIG_HOME` override or platform default), never in `.saipen/`\r\n  or `saipen_home`; it cannot bootstrap or become an ancestor project root.\r\n- Prefer file tools over shell redirects -- UTF-8 no BOM.\r\n- CORE.md decides. No rule here overrides it.\n\nBase directory for this skill: V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n<file>V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\VERSION</file>\n<file>V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\UI.md</file>\n<file>V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\COMMANDS.md</file>\n<file>V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\BOOT.md</file>\n<file>V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\.saipen_runtime.json</file>\n<file>V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\ACTIVATION_BLOCK.md</file>\n<file>V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\tools\\audit_floor.py</file>\n<file>V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\tools\\audit_checks.py</file>\n<file>V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\STYLE.md</file>\n<file>V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\SOURCES.md</file>\n</skill_files>\n</skill_content>","metadata":{"name":"saipen","dir":"V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen","truncated":false},"title":"Loaded skill: saipen","time":{"start":1789560520392,"end":1789560520513}},"id":"prt_0aa1e7ec2001hj3171TOibfQ1t","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","messageID":"msg_0aa1e7d2d001NEzvcjmOaWuK0L"}}
+{"type":"step_finish","timestamp":1789560520533,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e7f44001yloZj3rcwwFon5","reason":"tool-calls","messageID":"msg_0aa1e7d2d001NEzvcjmOaWuK0L","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-finish","tokens":{"total":2,"input":1,"output":1,"reasoning":0,"cache":{"write":0,"read":0}},"cost":0}}
+{"type":"step_start","timestamp":1789560520560,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e7f67001iWyxE8Bdm9ugPV","messageID":"msg_0aa1e7f4b0019GN5GpjjZ7hY2D","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-start"}}
+{"type":"tool_use","timestamp":1789560520579,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"type":"tool","tool":"read","callID":"call_bound_1","state":{"status":"completed","input":{"filePath":"src/app.py"},"output":"<path>V:\\_TEMP_\\tmpx_i1ls39\\src\\app.py</path>\n<type>file</type>\n<content>\n1: code\n\n(End of file - total 1 lines)\n</content>","metadata":{"preview":"code","truncated":false,"loaded":[],"display":{"type":"file","path":"V:\\_TEMP_\\tmpx_i1ls39\\src\\app.py","text":"code","lineStart":1,"lineEnd":1,"totalLines":1,"truncated":false}},"title":"_TEMP_\\tmpx_i1ls39\\src\\app.py","time":{"start":1789560520557,"end":1789560520569}},"id":"prt_0aa1e7f690015RkoKxt7ipxlbw","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","messageID":"msg_0aa1e7f4b0019GN5GpjjZ7hY2D"}}
+{"type":"step_finish","timestamp":1789560520579,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e7f7b001f5A3lhGhpBku9m","reason":"tool-calls","messageID":"msg_0aa1e7f4b0019GN5GpjjZ7hY2D","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-finish","tokens":{"total":2,"input":1,"output":1,"reasoning":0,"cache":{"write":0,"read":0}},"cost":0}}
+{"type":"step_start","timestamp":1789560520606,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e7f95001WO0Q04hbnZnr3L","messageID":"msg_0aa1e7f80001jiklWFlHpf4VZC","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-start"}}
+{"type":"tool_use","timestamp":1789560521005,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"type":"tool","tool":"bash","callID":"call_bound_2","state":{"status":"error","input":{"command":"python --version"},"error":"SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\COMMAND_EFFECTS.json: [Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-bound-opencode-ieozsv9x\\\\home\\\\.config\\\\opencode\\\\skills\\\\saipen\\\\COMMAND_EFFECTS.json')","time":{"start":1789560520604,"end":1789560520996}},"id":"prt_0aa1e7f97001klPkex6LPLHB8P","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","messageID":"msg_0aa1e7f80001jiklWFlHpf4VZC"}}
+{"type":"step_finish","timestamp":1789560521005,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e81260017pCzXYmiUic01M","reason":"tool-calls","messageID":"msg_0aa1e7f80001jiklWFlHpf4VZC","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-finish","tokens":{"total":2,"input":1,"output":1,"reasoning":0,"cache":{"write":0,"read":0}},"cost":0}}
+{"type":"step_start","timestamp":1789560521032,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e813f001WvvDABYYxfDgyz","messageID":"msg_0aa1e812b001YrwyjipCGdzbZO","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-start"}}
+{"type":"tool_use","timestamp":1789560521430,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"type":"tool","tool":"write","callID":"call_bound_3","state":{"status":"error","input":{"filePath":"src/allowed-one.py","content":"one\n"},"error":"SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\COMMAND_EFFECTS.json: [Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-bound-opencode-ieozsv9x\\\\home\\\\.config\\\\opencode\\\\skills\\\\saipen\\\\COMMAND_EFFECTS.json')","time":{"start":1789560521030,"end":1789560521420}},"id":"prt_0aa1e8141001KVfRnfABZa9P7A","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","messageID":"msg_0aa1e812b001YrwyjipCGdzbZO"}}
+{"type":"step_finish","timestamp":1789560521430,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e82ce001cU7FH2jAvbUIDs","reason":"tool-calls","messageID":"msg_0aa1e812b001YrwyjipCGdzbZO","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-finish","tokens":{"total":2,"input":1,"output":1,"reasoning":0,"cache":{"write":0,"read":0}},"cost":0}}
+{"type":"step_start","timestamp":1789560521455,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e82e70018FmaC2mYXsCAz0","messageID":"msg_0aa1e82d3001OYbm4e5A8roA1i","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-start"}}
+{"type":"tool_use","timestamp":1789560521854,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"type":"tool","tool":"bash","callID":"call_bound_4","state":{"status":"error","input":{"command":"python -c \"from pathlib import Path; Path('.saipen/STATE.md').write_text('boom')\""},"error":"SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\COMMAND_EFFECTS.json: [Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-bound-opencode-ieozsv9x\\\\home\\\\.config\\\\opencode\\\\skills\\\\saipen\\\\COMMAND_EFFECTS.json')","time":{"start":1789560521454,"end":1789560521844}},"id":"prt_0aa1e82e9001lBKidcj7mZqm5B","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","messageID":"msg_0aa1e82d3001OYbm4e5A8roA1i"}}
+{"type":"step_finish","timestamp":1789560521854,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e8476001WZ4SLUVkTkH2dK","reason":"tool-calls","messageID":"msg_0aa1e82d3001OYbm4e5A8roA1i","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-finish","tokens":{"total":2,"input":1,"output":1,"reasoning":0,"cache":{"write":0,"read":0}},"cost":0}}
+{"type":"step_start","timestamp":1789560521878,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e848f001suWWgvFp3jJ7mI","messageID":"msg_0aa1e847b001oWjAUq8tYYJD9T","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-start"}}
+{"type":"tool_use","timestamp":1789560522289,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"type":"tool","tool":"write","callID":"call_bound_5","state":{"status":"error","input":{"filePath":".saipen/STATE.md","content":"blocked\n"},"error":"SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\COMMAND_EFFECTS.json: [Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-bound-opencode-ieozsv9x\\\\home\\\\.config\\\\opencode\\\\skills\\\\saipen\\\\COMMAND_EFFECTS.json')","time":{"start":1789560521877,"end":1789560522280}},"id":"prt_0aa1e8490001sQrlwo3aqLbWRm","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","messageID":"msg_0aa1e847b001oWjAUq8tYYJD9T"}}
+{"type":"step_finish","timestamp":1789560522289,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e862900177KulktJRdxtUx","reason":"tool-calls","messageID":"msg_0aa1e847b001oWjAUq8tYYJD9T","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-finish","tokens":{"total":2,"input":1,"output":1,"reasoning":0,"cache":{"write":0,"read":0}},"cost":0}}
+{"type":"step_start","timestamp":1789560522329,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e864f001DPyTMGJS2RhVBR","messageID":"msg_0aa1e862e001BVBWm2orAgD5dl","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-start"}}
+{"type":"tool_use","timestamp":1789560522732,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"type":"tool","tool":"invalid","callID":"call_bound_6","state":{"status":"error","input":{"tool":"mystery_tool","error":"Model tried to call unavailable tool 'mystery_tool'. Available tools: bash, edit, glob, grep, invalid, read, skill, task, todowrite, webfetch, websearch, write."},"error":"SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\COMMAND_EFFECTS.json: [Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-bound-opencode-ieozsv9x\\\\home\\\\.config\\\\opencode\\\\skills\\\\saipen\\\\COMMAND_EFFECTS.json')","time":{"start":1789560522327,"end":1789560522723}},"id":"prt_0aa1e86510018Y5pkv73pl6Uf8","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","messageID":"msg_0aa1e862e001BVBWm2orAgD5dl"}}
+{"type":"step_finish","timestamp":1789560522732,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e87e5001rTQh4mxFww3Rxa","reason":"tool-calls","messageID":"msg_0aa1e862e001BVBWm2orAgD5dl","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-finish","tokens":{"total":2,"input":1,"output":1,"reasoning":0,"cache":{"write":0,"read":0}},"cost":0}}
+{"type":"step_start","timestamp":1789560522758,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e87fe001juUH7NAdocW73d","messageID":"msg_0aa1e87e9001jFOCZpdU6n5azu","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-start"}}
+{"type":"tool_use","timestamp":1789560523151,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"type":"tool","tool":"write","callID":"call_bound_7","state":{"status":"error","input":{"filePath":"src/allowed-two.py","content":"two\n"},"error":"SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\COMMAND_EFFECTS.json: [Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-bound-opencode-ieozsv9x\\\\home\\\\.config\\\\opencode\\\\skills\\\\saipen\\\\COMMAND_EFFECTS.json')","time":{"start":1789560522756,"end":1789560523141}},"id":"prt_0aa1e8800001AECjk9KFAPZQb1","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","messageID":"msg_0aa1e87e9001jFOCZpdU6n5azu"}}
+{"type":"step_finish","timestamp":1789560523151,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e8987001dHJZnQvSz80iqY","reason":"tool-calls","messageID":"msg_0aa1e87e9001jFOCZpdU6n5azu","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-finish","tokens":{"total":2,"input":1,"output":1,"reasoning":0,"cache":{"write":0,"read":0}},"cost":0}}
+{"type":"step_start","timestamp":1789560523179,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e89a0001C3QOL3MoEvxwUs","messageID":"msg_0aa1e898c001H3zzd4EVQ7bs2d","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-start"}}
+{"type":"text","timestamp":1789560523179,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e89a1001TBis8295Jm0qSi","messageID":"msg_0aa1e898c001H3zzd4EVQ7bs2d","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"text","text":"Smoke complete.","time":{"start":1789560523169,"end":1789560523171}}}
+{"type":"step_finish","timestamp":1789560523179,"sessionID":"ses_f55e1845dffe5J5osGREahPkbu","part":{"id":"prt_0aa1e89a4001L3X8mF2UJmoS60","reason":"stop","messageID":"msg_0aa1e898c001H3zzd4EVQ7bs2d","sessionID":"ses_f55e1845dffe5J5osGREahPkbu","type":"step-finish","tokens":{"total":2,"input":1,"output":1,"reasoning":0,"cache":{"write":0,"read":0}},"cost":0}}
+
+
+======================================================================
+FAIL: test_native_task_child_mutations_receive_the_same_guard (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_native_task_child_mutations_receive_the_same_guard)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_opencode_bound_launch_smoke.py", line 323, in test_native_task_child_mutations_receive_the_same_guard
+    self.assertTrue(any(item["child"] for item in requests), requests)
+AssertionError: False is not true : [{'tools': [], 'prior': [], 'child': False}, {'tools': ['bash', 'edit', 'glob', 'grep', 'read', 'skill', 'task', 'todowrite', 'webfetch', 'websearch', 'write'], 'prior': [], 'child': False}, {'tools': ['bash', 'edit', 'glob', 'grep', 'read', 'skill', 'task', 'todowrite', 'webfetch', 'websearch', 'write'], 'prior': [{'role': 'tool', 'tool_call_id': 'call_bound_0', 'content': "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-bound-opencode-ieozsv9x\\home\\.config\\opencode\\skills\\saipen\\COMMAND_EFFECTS.json: [Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-bound-opencode-ieozsv9x\\\\home\\\\.config\\\\opencode\\\\skills\\\\saipen\\\\COMMAND_EFFECTS.json')"}], 'child': False}]
+
+======================================================================
+FAIL: test_optional_explicit_launch_is_checked_and_does_not_leak (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_optional_explicit_launch_is_checked_and_does_not_leak)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_opencode_bound_launch_smoke.py", line 373, in test_optional_explicit_launch_is_checked_and_does_not_leak
+    self.assertIn("OWNERSHIP_CONFLICT", combined)
+AssertionError: 'OWNERSHIP_CONFLICT' not found in '{"type":"step_start","timestamp":1789560530439,"sessionID":"ses_f55e15d43ffe8BTbXvXQ4yeY6s","part":{"id":"prt_0aa1ea5fb001JKUUBWTtziBGr2","messageID":"msg_0aa1ea436001aZq9mR1e99KLvm","sessionID":"ses_f55e15d43ffe8BTbXvXQ4yeY6s","type":"step-start"}}\n{"type":"tool_use","timestamp":1789560530847,"sessionID":"ses_f55e15d43ffe8BTbXvXQ4yeY6s","part":{"type":"tool","tool":"write","callID":"call_bound_0","state":{"status":"error","input":{"filePath":"src/foreign.py","content":"no\\n"},"error":"SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\\\_TEMP_\\\\saipen-bound-opencode-ieozsv9x\\\\home\\\\.config\\\\opencode\\\\skills\\\\saipen\\\\COMMAND_EFFECTS.json: [Errno 2] No such file or directory: \'V:\\\\\\\\_TEMP_\\\\\\\\saipen-bound-opencode-ieozsv9x\\\\\\\\home\\\\\\\\.config\\\\\\\\opencode\\\\\\\\skills\\\\\\\\saipen\\\\\\\\COMMAND_EFFECTS.json\')","time":{"start":1789560530437,"end":1789560530829}},"id":"prt_0aa1ea5fd001BNycCno53XkKGP","sessionID":"ses_f55e15d43ffe8BTbXvXQ4yeY6s","messageID":"msg_0aa1ea436001aZq9mR1e99KLvm"}}\n{"type":"step_finish","timestamp":1789560530847,"sessionID":"ses_f55e15d43ffe8BTbXvXQ4yeY6s","part":{"id":"prt_0aa1ea7900012D35gLUG920SCj","reason":"tool-calls","messageID":"msg_0aa1ea436001aZq9mR1e99KLvm","sessionID":"ses_f55e15d43ffe8BTbXvXQ4yeY6s","type":"step-finish","tokens":{"total":2,"input":1,"output":1,"reasoning":0,"cache":{"write":0,"read":0}},"cost":0}}\n{"type":"step_start","timestamp":1789560530876,"sessionID":"ses_f55e15d43ffe8BTbXvXQ4yeY6s","part":{"id":"prt_0aa1ea7b00014cXzoVLl4o5qvo","messageID":"msg_0aa1ea795001IdYC3oToqW2xe2","sessionID":"ses_f55e15d43ffe8BTbXvXQ4yeY6s","type":"step-start"}}\n{"type":"text","timestamp":1789560530876,"sessionID":"ses_f55e15d43ffe8BTbXvXQ4yeY6s","part":{"id":"prt_0aa1ea7b2001dqdmWOkqqLH7yE","messageID":"msg_0aa1ea795001IdYC3oToqW2xe2","sessionID":"ses_f55e15d43ffe8BTbXvXQ4yeY6s","type":"text","text":"Smoke complete.","time":{"start":1789560530866,"end":1789560530868}}}\n{"type":"step_finish","timestamp":1789560530876,"sessionID":"ses_f55e15d43ffe8BTbXvXQ4yeY6s","part":{"id":"prt_0aa1ea7b5001YA8GcTO5MZrCnd","reason":"stop","messageID":"msg_0aa1ea795001IdYC3oToqW2xe2","sessionID":"ses_f55e15d43ffe8BTbXvXQ4yeY6s","type":"step-finish","tokens":{"total":2,"input":1,"output":1,"reasoning":0,"cache":{"write":0,"read":0}},"cost":0}}\n'
+
+======================================================================
+FAIL: test_2_the_runtime_discovers_and_loads_the_installed_artifact (test_opencode_host_smoke.OpenCodeHostSmoke.test_2_the_runtime_discovers_and_loads_the_installed_artifact)
+P0-2: the ACTIVE GENERATION, identified by its byte identity.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_opencode_host_smoke.py", line 341, in test_2_the_runtime_discovers_and_loads_the_installed_artifact
+    self.assertEqual(diagnostic["binding_code"], "ADMITTED", diagnostic)
+AssertionError: 'GUARD_OUTPUT_INVALID' != 'ADMITTED'
+- GUARD_OUTPUT_INVALID
++ ADMITTED
+ : {'build_id': 'T-1327-zero-manual-recovery-20260914.1', 'runtime_generation': {'code': 'RUNTIME_CURRENT', 'stale': False, 'fingerprint_match': True, 'installed_fingerprint': 'gen-sha256:b87897a79ca8a89d20d4d2010875923b7fead6541c929a801717181020a4e8fb', 'canonical_fingerprint': 'gen-sha256:b87897a79ca8a89d20d4d2010875923b7fead6541c929a801717181020a4e8fb'}, 'module_sha256': '961cdf45db8e8da32367018363c491a157129b72a2808648d4cab402eac6cead', 'module_path': 'V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl\\home\\.config\\opencode\\plugins\\saipen-guard.js', 'skill_root': 'V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl\\home\\.config\\opencode\\skills\\saipen', 'guard_runtime_path': 'V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl\\home\\.config\\opencode\\skills\\saipen\\tools\\saipen.py', 'cli_bin': 'V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl\\home\\.config\\opencode\\skills\\saipen\\bin', 'cli_launcher_status': 'ok', 'cli_launcher_detail': '', 'pid': 884, 'factory_started_ms': 1789560551763, 'cwd': '/', 'context_directory': 'V:\\_TEMP_\\tmpa1o6_ee9', 'context_worktree': '/', 'binding_code': 'GUARD_OUTPUT_INVALID', 'project_root': None, 'project_lineage': None, 'root_resolution_provenance': None, 'host_candidates': ['/', 'V:\\_TEMP_\\tmpa1o6_ee9'], 'resolved_from': None, 'binding_detail': '', 'actor': None}
+
+======================================================================
+FAIL: test_3_the_installed_artifact_carries_the_whole_chain (test_opencode_host_smoke.OpenCodeHostSmoke.test_3_the_installed_artifact_carries_the_whole_chain)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_opencode_host_smoke.py", line 521, in test_3_the_installed_artifact_carries_the_whole_chain
+    self.assertEqual(by_id["admitted_write"]["outcome"], "allowed", by_id["admitted_write"])
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'admitted_write', 'outcome': 'blocked', 'message': "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl\\home\\.config\\opencode\\skills\\saipen\\COMMAND_EFFECTS.json: [Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-evidence-opencode-native-smoke-7lzzadgl\\\\home\\\\.config\\\\opencode\\\\skills\\\\saipen\\\\COMMAND_EFFECTS.json')", 'hooks': ['experimental.chat.system.transform', 'tool.execute.before'], 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_OUTPUT_INVALID"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.'], 'exports': ['default']}
+
+======================================================================
+FAIL: test_4_chain_bytes_prove_prevention_and_a_bypass_changes_them (test_opencode_host_smoke.OpenCodeHostSmoke.test_4_chain_bytes_prove_prevention_and_a_bypass_changes_them)
+CLOSE-3 red control: refusal is observationally meaningful.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_opencode_host_smoke.py", line 592, in test_4_chain_bytes_prove_prevention_and_a_bypass_changes_them
+    self.assertEqual(results[0]["outcome"], "allowed", results[0])
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'allowed_recover_rerun', 'outcome': 'blocked', 'message': "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl\\home\\.config\\opencode\\skills\\saipen\\COMMAND_EFFECTS.json: [Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-evidence-opencode-native-smoke-7lzzadgl\\\\home\\\\.config\\\\opencode\\\\skills\\\\saipen\\\\COMMAND_EFFECTS.json')", 'hooks': ['experimental.chat.system.transform', 'tool.execute.before'], 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_OUTPUT_INVALID"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.'], 'exports': ['default']}
+
+======================================================================
+FAIL: test_5_fresh_installed_fleet_recovers_and_refuses_old_payload (test_opencode_host_smoke.OpenCodeHostSmoke.test_5_fresh_installed_fleet_recovers_and_refuses_old_payload)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_opencode_host_smoke.py", line 644, in test_5_fresh_installed_fleet_recovers_and_refuses_old_payload
+    self.assertIn("RECOVERED_REISSUE_REQUIRED", results[0]["message"])
+AssertionError: 'RECOVERED_REISSUE_REQUIRED' not found in "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl\\home\\.config\\opencode\\skills\\saipen\\COMMAND_EFFECTS.json: [Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-evidence-opencode-native-smoke-7lzzadgl\\\\home\\\\.config\\\\opencode\\\\skills\\\\saipen\\\\COMMAND_EFFECTS.json')"
+
+======================================================================
+FAIL: test_fresh_process_loads_the_installed_generation_from_one_origin (test_opencode_host_smoke.OpenCodeRealInstalledGeneration.test_fresh_process_loads_the_installed_generation_from_one_origin)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_opencode_host_smoke.py", line 694, in test_fresh_process_loads_the_installed_generation_from_one_origin
+    self.assertEqual(hashlib.sha256(installed.read_bytes()).hexdigest(), digest)
+AssertionError: 'b7869edadc1ba58b88903262f8bd9b69af2d740a7d8a17a7b6d09acc75bdc54f' != '961cdf45db8e8da32367018363c491a157129b72a2808648d4cab402eac6cead'
+- b7869edadc1ba58b88903262f8bd9b69af2d740a7d8a17a7b6d09acc75bdc54f
++ 961cdf45db8e8da32367018363c491a157129b72a2808648d4cab402eac6cead
+
+
+======================================================================
+FAIL: test_coverage_count_mismatch_refuses (test_recovered_attribution.AttributionNegativeTests.test_coverage_count_mismatch_refuses)
+15 requirements against a tombstone claiming 16 never attributes.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 602, in test_coverage_count_mismatch_refuses
+    self._refuse(self.proof(), "COVERAGE_COUNT_MISMATCH")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_COUNT_MISMATCH'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_COUNT_MISMATCH
+
+
+======================================================================
+FAIL: test_coverage_work_disagrees_with_tombstone_refuses (test_recovered_attribution.AttributionNegativeTests.test_coverage_work_disagrees_with_tombstone_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 628, in test_coverage_work_disagrees_with_tombstone_refuses
+    self._refuse(self.proof(), "COVERAGE_SPLIT_WORK")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_SPLIT_WORK'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_SPLIT_WORK
+
+
+======================================================================
+FAIL: test_linked_work_not_done_refuses (test_recovered_attribution.AttributionNegativeTests.test_linked_work_not_done_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 652, in test_linked_work_not_done_refuses
+    self._refuse(self.proof(), "LINKED_WORK_NOT_DONE")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'LINKED_WORK_NOT_DONE'
+- PRESERVED_ORIGINAL_REPLACED
++ LINKED_WORK_NOT_DONE
+
+
+======================================================================
+FAIL: test_missing_recovery_record_refuses (test_recovered_attribution.AttributionNegativeTests.test_missing_recovery_record_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 474, in test_missing_recovery_record_refuses
+    self._refuse(self.proof(), "RECOVERY_RECORD_MISSING")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'RECOVERY_RECORD_MISSING'
+- PRESERVED_ORIGINAL_REPLACED
++ RECOVERY_RECORD_MISSING
+
+
+======================================================================
+FAIL: test_missing_verification_on_implemented_refuses (test_recovered_attribution.AttributionNegativeTests.test_missing_verification_on_implemented_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 616, in test_missing_verification_on_implemented_refuses
+    self._refuse(self.proof(), "COVERAGE_TERMINAL_MISMATCH")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_TERMINAL_MISMATCH'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_TERMINAL_MISMATCH
+
+
+======================================================================
+FAIL: test_newer_generation_refuses (test_recovered_attribution.AttributionNegativeTests.test_newer_generation_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 684, in test_newer_generation_refuses
+    self._refuse(self.proof(), "NEWER_GENERATION_EXISTS")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'INDEX_UNREADABLE' != 'NEWER_GENERATION_EXISTS'
+- INDEX_UNREADABLE
++ NEWER_GENERATION_EXISTS
+
+
+======================================================================
+FAIL: test_non_requirement_requirement_id_refuses (test_recovered_attribution.AttributionNegativeTests.test_non_requirement_requirement_id_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 635, in test_non_requirement_requirement_id_refuses
+    self._refuse(self.proof(), "COVERAGE_UNINTERPRETABLE")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_UNINTERPRETABLE'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_UNINTERPRETABLE
+
+
+======================================================================
+FAIL: test_one_unknown_actionable_requirement_refuses (test_recovered_attribution.AttributionNegativeTests.test_one_unknown_actionable_requirement_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 609, in test_one_unknown_actionable_requirement_refuses
+    self._refuse(self.proof(), "COVERAGE_TERMINAL_MISMATCH")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_TERMINAL_MISMATCH'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_TERMINAL_MISMATCH
+
+
+======================================================================
+FAIL: test_requirement_without_linked_work_refuses (test_recovered_attribution.AttributionNegativeTests.test_requirement_without_linked_work_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 642, in test_requirement_without_linked_work_refuses
+    self._refuse(self.proof(), "COVERAGE_UNINTERPRETABLE")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_UNINTERPRETABLE'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_UNINTERPRETABLE
+
+
+======================================================================
+FAIL: test_source_still_active_refuses (test_recovered_attribution.AttributionNegativeTests.test_source_still_active_refuses)
+An active projection for a tombstoned receipt corrupts the index;
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 665, in test_source_still_active_refuses
+    self._blocked_global()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 463, in _blocked_global
+    self.assertEqual(report["code"], "WORK_DELTA_BLOCKED")
+AssertionError: 'VALIDATION_FAILED' != 'WORK_DELTA_BLOCKED'
+- VALIDATION_FAILED
++ WORK_DELTA_BLOCKED
+
+
+======================================================================
+FAIL: test_split_linked_work_refuses (test_recovered_attribution.AttributionNegativeTests.test_split_linked_work_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 623, in test_split_linked_work_refuses
+    self._refuse(self.proof(), "COVERAGE_SPLIT_WORK")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'COVERAGE_SPLIT_WORK'
+- PRESERVED_ORIGINAL_REPLACED
++ COVERAGE_SPLIT_WORK
+
+
+======================================================================
+FAIL: test_tombstone_closure_counts_change_refuses (test_recovered_attribution.AttributionNegativeTests.test_tombstone_closure_counts_change_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 580, in test_tombstone_closure_counts_change_refuses
+    self._refuse(self.proof(), "COVERAGE_COUNT_MISMATCH")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'TOMBSTONE_CLOSURE_IDENTITY_CHANGED' != 'COVERAGE_COUNT_MISMATCH'
+- TOMBSTONE_CLOSURE_IDENTITY_CHANGED
++ COVERAGE_COUNT_MISMATCH
+
+
+======================================================================
+FAIL: test_tombstone_linked_work_change_refuses (test_recovered_attribution.AttributionNegativeTests.test_tombstone_linked_work_change_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 565, in test_tombstone_linked_work_change_refuses
+    self._refuse(self.proof(), "TOMBSTONE_CLOSURE_IDENTITY_CHANGED")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'ARCHIVE_WORK_MISMATCH' != 'TOMBSTONE_CLOSURE_IDENTITY_CHANGED'
+- ARCHIVE_WORK_MISMATCH
++ TOMBSTONE_CLOSURE_IDENTITY_CHANGED
+
+
+======================================================================
+FAIL: test_tombstone_not_closed_refuses (test_recovered_attribution.AttributionNegativeTests.test_tombstone_not_closed_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 510, in test_tombstone_not_closed_refuses
+    self._refuse(self.proof(), "TOMBSTONE_NOT_CLOSED")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'INDEX_UNREADABLE' != 'TOMBSTONE_NOT_CLOSED'
+- INDEX_UNREADABLE
++ TOMBSTONE_NOT_CLOSED
+
+
+======================================================================
+FAIL: test_tombstone_source_sha_change_refuses (test_recovered_attribution.AttributionNegativeTests.test_tombstone_source_sha_change_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 572, in test_tombstone_source_sha_change_refuses
+    self._refuse(self.proof(), "TOMBSTONE_CLOSURE_IDENTITY_CHANGED")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'ARCHIVE_SHA_MISMATCH' != 'TOMBSTONE_CLOSURE_IDENTITY_CHANGED'
+- ARCHIVE_SHA_MISMATCH
++ TOMBSTONE_CLOSURE_IDENTITY_CHANGED
+
+
+======================================================================
+FAIL: test_undocumented_tombstone_field_refuses (test_recovered_attribution.AttributionNegativeTests.test_undocumented_tombstone_field_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 594, in test_undocumented_tombstone_field_refuses
+    self._refuse(self.proof(), "TOMBSTONE_CLOSURE_IDENTITY_CHANGED")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 459, in _refuse
+    self.assertEqual(result["reason"], reason)
+AssertionError: 'PRESERVED_ORIGINAL_REPLACED' != 'TOMBSTONE_CLOSURE_IDENTITY_CHANGED'
+- PRESERVED_ORIGINAL_REPLACED
++ TOMBSTONE_CLOSURE_IDENTITY_CHANGED
+
+
+======================================================================
+FAIL: test_current_tombstone_is_not_byte_identical_to_original (test_recovered_attribution.AttributionPositiveTests.test_current_tombstone_is_not_byte_identical_to_original)
+C3: the additive recovery block is expected, never corruption.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 383, in test_current_tombstone_is_not_byte_identical_to_original
+    self.assertTrue(self.proof()["attributable"])
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_positive_fixture_attributes_to_linked_work (test_recovered_attribution.AttributionPositiveTests.test_positive_fixture_attributes_to_linked_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 369, in test_positive_fixture_attributes_to_linked_work
+    self.assertTrue(result["attributable"], result)
+AssertionError: False is not true : {'attributable': False, 'reason': 'PRESERVED_ORIGINAL_REPLACED', 'receipt_id': 'SRC-038', 'detail': 'contract'}
+
+======================================================================
+FAIL: test_release_stays_blocked_with_carried_residue (test_recovered_attribution.AttributionPositiveTests.test_release_stays_blocked_with_carried_residue)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 413, in test_release_stays_blocked_with_carried_residue
+    self.assertEqual(report["code"], "WORK_DELTA_PASS")
+AssertionError: 'WORK_DELTA_BLOCKED' != 'WORK_DELTA_PASS'
+- WORK_DELTA_BLOCKED
++ WORK_DELTA_PASS
+
+
+======================================================================
+FAIL: test_work_delta_carries_residue_through_t160 (test_recovered_attribution.AttributionPositiveTests.test_work_delta_carries_residue_through_t160)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recovered_attribution.py", line 394, in test_work_delta_carries_residue_through_t160
+    self.assertEqual(report["code"], "WORK_DELTA_PASS")
+AssertionError: 'WORK_DELTA_BLOCKED' != 'WORK_DELTA_PASS'
+- WORK_DELTA_BLOCKED
++ WORK_DELTA_PASS
+
+
+======================================================================
+FAIL: test_D_arbitrary_shell_refused (test_runtime_bootstrap.BootstrapAuthorityTests.test_D_arbitrary_shell_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_runtime_bootstrap.py", line 306, in test_D_arbitrary_shell_refused
+    self.assertFalse(res["admitted"], res)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\tmptnyhf4zr', 'target': None, 'targets': [], 'action': 'read', 'effect': 'read', 'provenance': 'ancestor', 'project_lineage': 'lineage-4b1add412b89400aae41414fa36ae7ee', 'detail': 'read-only diagnostic access', 'duration_ms': 0.855}
+
+======================================================================
+FAIL: test_every_protocol_document_beside_boot_is_declared (test_runtime_generation_identity.RealSurfaceCoverageTests.test_every_protocol_document_beside_boot_is_declared)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_runtime_generation_identity.py", line 818, in test_every_protocol_document_beside_boot_is_declared
+    self.assertEqual(undeclared, [])
+AssertionError: Lists differ: ['saipen/COMMAND_EFFECTS.json'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'saipen/COMMAND_EFFECTS.json'
+
+- ['saipen/COMMAND_EFFECTS.json']
++ []
+
+======================================================================
+FAIL: test_generic_shell_search_is_not_canonical (test_search_transport.CanonicalClassificationTests.test_generic_shell_search_is_not_canonical)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_search_transport.py", line 275, in test_generic_shell_search_is_not_canonical
+    self.assertEqual(mapped["action"], "shell", mapped)
+AssertionError: 'read' != 'shell'
+- read
++ shell
+ : {'command_class': 'DIAGNOSTIC', 'fleet_preflight': False, 'canonical_next_command': None, 'action': 'read', 'target_path': None, 'target_paths': [], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': 'tester', 'host': 'opencode', 'event': 1, 'tool_name': 'bash', 'cwd': '.', 'saipen_verb': None, 'detail': 'provably read-only shell probe'}
+
+----------------------------------------------------------------------
+Ran 2532 tests in 842.026s
+
+FAILED (failures=43, errors=1, skipped=17)
+{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": [
+      {
+        "field": "phase",
+        "from": "BUILD",
+        "to": "SCOUT",
+        "surface": "state",
+        "reason": "phase 'BUILD' disagrees with the newest provable phase-changing event E-100, which names SCOUT (T-1318)"
+      }
+    ]
+  },
+  "adopted": [],
+  "lifecycle": [
+    {
+      "field": "board",
+      "kind": "claim-clear",
+      "ticket": "T-9001",
+      "surface": "board",
+      "section": "## DOING",
+      "fields": [
+        "owner",
+        "claim_time"
+      ],
+      "reason": "T-9001 carries a half claim pair (owner='test-agent', claim_time='') on claimable Work; CORE's both-or-neither rule makes the LEASE INVALID, so the deterministic repair removes BOTH halves and fabricates no owner or time (SRC-043)"
+    },
+    {
+      "field": "board",
+      "kind": "section-move",
+      "ticket": "T-9001",
+      "surface": "board",
+      "from_section": "## DOING",
+      "to_section": "## TODO",
+      "reason": "T-9001 sits under ## DOING with no owner/claim_time pair; an unclaimed DOING Work was never started, so it returns to ## TODO (SRC-043)"
+    },
+    {
+      "field": "board",
+      "kind": "section-move",
+      "ticket": "T-9002",
+      "surface": "board",
+      "from_section": "## DOING",
+      "to_section": "## TODO",
+      "reason": "T-9002 sits under ## DOING with no owner/claim_time pair; an unclaimed DOING Work was never started, so it returns to ## TODO (SRC-043)"
+    },
+    {
+      "field": "board",
+      "kind": "section-move",
+      "ticket": "T-9003",
+      "surface": "board",
+      "from_section": "## DONE",
+      "to_section": "## TODO",
+      "requires_approval": true,
+      "generation": "current",
+      "reason": "T-9003 sits under ## DONE with no closure_mode, no owner, no claim_time and no verification evidence in history, and was allocated AFTER this project's closure contract became observable; the completion was never established by a canonical operation, so reopening it into ## TODO requires ONE operator approval of the repair plan (SRC-043)"
+    }
+  ],
+  "repair_id": "2209210f5f9a53764d8d871b5ec9f624ca2997ec4c71916e24fbb3d909a5459f",
+  "targets": [
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md",
+    ".saipen/recovery/state-phase/reconcile-20260916120956572127.STATE.md"
+  ],
+  "event": "E-101",
+  "agent": "test-agent",
+  "strict_state_error": "invalid phase transition: DONE -> BUILD (RFC § 1.6). Allowed from DONE: SCOUT, PLAN, HUNT, BLOCKED",
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-sdefect-166ej1mm/.saipen/MANIFEST.json",
+    "contract_version": 1,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  }
+}

@@ -1,0 +1,6 @@
+STATUS: REVIEW T-1771
+RESULT: Vajab operaatori otsust; 4 lõpetatud; 85 blokeeritud (BLOCKED_EXTERNAL 12, MARKHUNT_TRIAGE_REQUIRED 8, WAIT_USER_DECISION 8)
+OPERATOR ACTION: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue
+NEXT EXACT ACTION: NONE
+VALIDATION: STALE_FAIL | full core 6509 | red 0 | new_red 0 | tõendid säilitatud
+DETAILS: Agent ei saa ohuklappi ise lähtestada: mootor nõuab, et host oleks tunnistanud operaatori värsket `cc`-d, ja /goal hook seda ei ole. Kirjuta `cc` (või `/goal clear`, et kordus lõpetada).

@@ -1,0 +1,98 @@
+{
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "d; it FAILs under `--gate collect:saihunt` and blocks nothing else\nWARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-051] carries source_tree_fingerprint 'git-delta-v1:f6e0d3683fdd49081fb91414517c6da180255dc0af9c762a9570fd6ca474418f' but the current tree computes 'git-delta-v1:dfb713e3f08bea904c2c04d7d7eb7113368093eae901a365e8161eae251b3b60' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else\nWARN [manifest-untracked-orphan]: untracked manifest file tools/test_t1790_dependency_route_budget.py imports runtime that HEAD does not carry: module test_t1789_child_closure_route, saipen_engine.intake -- do NOT commit it alone; it will fail in every clone. Ship the runtime it depends on first\nWARN [subsaipen-uncollected]: 2 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nWARN [release-ledger]: 2 release(s) have a CHANGELOG entry but no git tag: v8.0.2, v8.1.0\nWARN [xpatch-survival]: XP-000001 applied bytes never reached a commit: tools/saipen_engine/intake.py\nWARN [xpatch-survival]: XP-000002 applied bytes never reached a commit: saipen/COMMANDS.md, tools/saipen.py, tools/saipen_engine/debt.py, tools/saipen_engine/operations.py, tools/test_debt_gate.py, tools/validate.py\nValidation FAILED: 2 problem(s), 10 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 2,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "Continuation boundary after E-14044/E-14045 local finish: continue returned audit-inbox-unworkable RESTATE_AND_STOP; its audit status action executed. audit/23 remains ACTIVE SRC-167/T-1606 at VERIFY_RETRY_CAP. Canonical pick has no workable Work. All 62 parked ticket bytes, 15 failed candidates and inherited Git index unchanged. SRC-200 CLOSED, original body hash retained. Full family 6013/0/0; global goal incomplete, counters 0 waves/12 tickets. Evidence: .saipen/evidence/T-1695-invalid-stops/completion-evidence.json.; reverify: no current-tree PASS re-verification receipt",
+            "detail_hash": "e1c43b2354b01b43",
+            "finding_key": "6c74e7473d745ef5",
+            "rule_id": "work_closure_evidence",
+            "severity": "problem",
+            "subject_id": "T-1695",
+            "subject_kind": "work",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1790_dependency_route_budget.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit t",
+            "detail_hash": "6dee5d7dbc411a50",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 10
+      },
+      "board_hash": "3b53b5f2adb72de9",
+      "canonical_next_command": "saipen work reverify T-1695",
+      "content_hash": "d4f1b3ba456954e1",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:499d04fefa0c17dd746a65043854316f7170108ced68fe35ffa09400d5144c09",
+      "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "kind": "conformance_receipt",
+      "log_hash": "5e573ca606ab5c7c",
+      "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+      "receipt_id": "receipt-32ca9ff81655",
+      "remediation_commands": [
+        "saipen work reverify T-1695"
+      ],
+      "schema_version": 2,
+      "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+      "source_tree_fingerprint": "git-delta-v1:dfb713e3f08bea904c2c04d7d7eb7113368093eae901a365e8161eae251b3b60",
+      "state_hash": "bff0d54ffb4b861c",
+      "timestamp_utc": "2026-10-15T15:22:24.998157Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+      "source_tree_fingerprint": "git-delta-v1:dfb713e3f08bea904c2c04d7d7eb7113368093eae901a365e8161eae251b3b60"
+    }
+  },
+  "install_identity": {
+    "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "persisted_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "install_fingerprint": "install-v1:499d04fefa0c17dd746a65043854316f7170108ced68fe35ffa09400d5144c09",
+    "persisted_fingerprint": "install-v1:499d04fefa0c17dd746a65043854316f7170108ced68fe35ffa09400d5144c09",
+    "status": "MATCH",
+    "mismatch": null
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": "saipen work reverify T-1695",
+  "repair_status": "REPAIR_AVAILABLE",
+  "diagnostic": null,
+  "terminal": false,
+  "remediation_commands": [
+    "saipen work reverify T-1695"
+  ]
+}

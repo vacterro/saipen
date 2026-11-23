@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-117:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-001: the SAIPEN memory root must be contract-AUTHORITATIVE, not merely contract-denylisted. After collect_for_inventory(), build the exact allowed-path set from that collection (which already incorporates mandatory, conditional, optional, cited-required, caps, transient exclusions and contract-version semantics) and exclude every inventory entry beneath contract.memory_root unless it is in it, symmetrically for tracked, untracked and filesystem-origin entries, with a dedicated machine reason saipen_undeclared_memory distinct from saipen_non_exportable. Measured on the audited archive: 278 undeclared .saipen/scratch_* files, 4,547,574 bytes, were published as payload while the contract collector correctly excluded them."
+    }
+  },
+  "derived_at": "2026-10-04T19:15:55Z",
+  "derived_from": "SRC-117",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "9d7cdf7bd1a1e8f3771078fa04130a2aa86521811d11591044f7b69f664ac5ea"
+}

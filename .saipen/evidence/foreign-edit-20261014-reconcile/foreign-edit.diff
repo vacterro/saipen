@@ -1,0 +1,15 @@
+--- /dev/fd/63	2026-10-14 00:48:43.000000000 +0300
++++ /dev/fd/62	2026-10-14 00:48:43.000000000 +0300
+@@ -3515,7 +3515,11 @@
+         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+ 
+     try:
+-        docs, state, _board, log_tail = _read(project_root, observe=REPAIR_OBSERVABLE)
++        from .lifecycle_authority import OBSERVABLE as _LIFECYCLE_OBSERVABLE
++
++        docs, state, _board, log_tail = _read(
++            project_root, observe=(*REPAIR_OBSERVABLE, _LIFECYCLE_OBSERVABLE)
++        )
+     except Exception as exc:  # CheckpointError / HomeDeadError / OSError
+         return {
+             "ok": False,

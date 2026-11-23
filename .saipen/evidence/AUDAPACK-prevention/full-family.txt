@@ -1,0 +1,19 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 6096,
+  "red": 2,
+  "new_red": [
+    "test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_optional_explicit_launch_is_checked_and_does_not_leak",
+    "test_session_binding.UnseatedMutationTests.test_the_owner_session_mutates_its_own_work"
+  ],
+  "fixed": [],
+  "problems": [
+    "2 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/8c882ec11b3e1682-20261010T115840Z.json",
+  "reused": false,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

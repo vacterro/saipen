@@ -1,0 +1,2830 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "594cc9c911304d77fb030488c2bff06df794db7b3fed8a46960dc6ceadc9b71f",
+  "verdict": "FAIL",
+  "patterns": [
+    "test_*.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_*.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "status": "TIMEOUT",
+      "exit_code": null,
+      "processes_leaked": [],
+      "duration_s": 208.072349,
+      "process_create_s": 0.045003,
+      "ran": null,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": null,
+      "sections": {},
+      "stdout": "",
+      "stderr": " was red. ... ok\r\ntest_the_line_number_is_report_metadata_only (test_check_inventory.FailSiteIdentityTests.test_the_line_number_is_report_metadata_only) ... ok\r\ntest_unrelated_line_insertion_renames_nothing (test_check_inventory.FailSiteIdentityTests.test_unrelated_line_insertion_renames_nothing) ... ok\r\ntest_every_python_child_is_launched_with_that_env (test_check_inventory.HermeticProbeChildrenTests.test_every_python_child_is_launched_with_that_env) ... ok\r\ntest_the_child_env_strips_every_host_session_carrier (test_check_inventory.HermeticProbeChildrenTests.test_the_child_env_strips_every_host_session_carrier) ... ok\r\ntest_a_covered_record_must_name_a_live_case (test_check_inventory.InventoryGateTests.test_a_covered_record_must_name_a_live_case) ... ok\r\ntest_a_missing_ledger_is_reported (test_check_inventory.InventoryGateTests.test_a_missing_ledger_is_reported) ... ok\r\ntest_a_removed_fail_site_is_named_too (test_check_inventory.InventoryGateTests.test_a_removed_fail_site_is_named_too) ... ok\r\ntest_an_added_fail_site_is_named (test_check_inventory.InventoryGateTests.test_an_added_fail_site_is_named) ... ok\r\ntest_an_unadjudicated_record_keeps_the_gate_red (test_check_inventory.InventoryGateTests.test_an_unadjudicated_record_keeps_the_gate_red) ... ok\r\ntest_an_unparsable_validator_is_reported_not_counted (test_check_inventory.InventoryGateTests.test_an_unparsable_validator_is_reported_not_counted) ... ok\r\ntest_every_covered_record_names_a_case_that_exists (test_check_inventory.InventoryGateTests.test_every_covered_record_names_a_case_that_exists) ... ok\r\ntest_every_disposition_is_in_the_closed_set (test_check_inventory.InventoryGateTests.test_every_disposition_is_in_the_closed_set) ... ok\r\ntest_regeneration_keeps_an_adjudicated_verdict (test_check_inventory.InventoryGateTests.test_regeneration_keeps_an_adjudicated_verdict) ... ok\r\ntest_regeneration_never_mints_a_baseline (test_check_inventory.InventoryGateTests.test_regeneration_never_mints_a_baseline) ... ok\r\ntest_the_bound_is_stated_rather_than_trusted (test_check_inventory.InventoryGateTests.test_the_bound_is_stated_rather_than_trusted) ... ok\r\ntest_the_e6743_delta_is_adjudicated (test_check_inventory.InventoryGateTests.test_the_e6743_delta_is_adjudicated) ... ok\r\ntest_the_live_repository_agrees_with_its_ledger (test_check_inventory.InventoryGateTests.test_the_live_repository_agrees_with_its_ledger) ... ok\r\ntest_the_probe_passes_on_the_real_repository (test_check_inventory.InventoryGateTests.test_the_probe_passes_on_the_real_repository) ... ok\r\ntest_the_same_count_swap_names_BOTH_halves (test_check_inventory.InventoryGateTests.test_the_same_count_swap_names_BOTH_halves) ... ok\r\ntest_unrelated_line_insertion_is_accepted (test_check_inventory.InventoryGateTests.test_unrelated_line_insertion_is_accepted) ... ok\r\ntest_each_mutation_goes_red_then_green_again (test_check_inventory.MutationEfficacyTests.test_each_mutation_goes_red_then_green_again) ... ok\r\ntest_neither_expected_string_is_printed_by_the_clean_fixture (test_check_inventory.MutationEfficacyTests.test_neither_expected_string_is_printed_by_the_clean_fixture) ... ok\r\ntest_the_fixture_starts_green (test_check_inventory.MutationEfficacyTests.test_the_fixture_starts_green) ... ok\r\ntest_the_stale_mutation_does_not_rely_on_prose_wording (test_check_inventory.MutationEfficacyTests.test_the_stale_mutation_does_not_rely_on_prose_wording) ... ok\r\ntest_a_dependent_probe_skips_out_loud_naming_its_prerequisite (test_check_inventory.ProbeIsolationTests.test_a_dependent_probe_skips_out_loud_naming_its_prerequisite) ... ok\r\ntest_a_probe_that_raises_is_a_failed_probe_not_a_dead_run (test_check_inventory.ProbeIsolationTests.test_a_probe_that_raises_is_a_failed_probe_not_a_dead_run) ... ok\r\ntest_each_probe_owns_its_sandbox_even_when_it_fails (test_check_inventory.ProbeIsolationTests.test_each_probe_owns_its_sandbox_even_when_it_fails) ... ok\r\ntest_every_probe_is_judged_in_one_invocation (test_check_inventory.ProbeIsolationTests.test_every_probe_is_judged_in_one_invocation) ... ok\r\ntest_main_carries_no_early_return (test_check_inventory.ProbeIsolationTests.test_main_carries_no_early_return) ... ok\r\ntest_restoring_both_returns_the_same_runner_to_green (test_check_inventory.ProbeIsolationTests.test_restoring_both_returns_the_same_runner_to_green) ... ok\r\ntest_the_independent_probes_declare_no_prerequisite (test_check_inventory.ProbeIsolationTests.test_the_independent_probes_declare_no_prerequisite) ... ok\r\ntest_two_independent_failures_are_BOTH_reported (test_check_inventory.ProbeIsolationTests.test_two_independent_failures_are_BOTH_reported) ... ok\r\ntest_a_hand_written_style_hook_is_reported_not_deleted (test_claude_stop_hook.ClaudeInstallerTests.test_a_hand_written_style_hook_is_reported_not_deleted) ... ok\r\ntest_check_mode_writes_nothing (test_claude_stop_hook.ClaudeInstallerTests.test_check_mode_writes_nothing) ... ok\r\ntest_install_copies_the_shipped_artifact_and_names_this_root (test_claude_stop_hook.ClaudeInstallerTests.test_install_copies_the_shipped_artifact_and_names_this_root) ... ok\r\ntest_install_preserves_every_unrelated_hook_and_key (test_claude_stop_hook.ClaudeInstallerTests.test_install_preserves_every_unrelated_hook_and_key) ... ok\r\ntest_malformed_settings_are_refused_before_any_write (test_claude_stop_hook.ClaudeInstallerTests.test_malformed_settings_are_refused_before_any_write) ... ok\r\ntest_reinstall_is_byte_stable (test_claude_stop_hook.ClaudeInstallerTests.test_reinstall_is_byte_stable) ... ok\r\ntest_the_command_is_executable_by_git_bash (test_claude_stop_hook.ClaudeInstallerTests.test_the_command_is_executable_by_git_bash) ... ok\r\ntest_the_original_settings_are_backed_up_once (test_claude_stop_hook.ClaudeInstallerTests.test_the_original_settings_are_backed_up_once) ... ok\r\ntest_a_current_session_is_injected_the_contract_only (test_claude_stop_hook.ClaudePromptContextTests.test_a_current_session_is_injected_the_contract_only) ... ok\r\ntest_an_unreachable_engine_follows_the_operators_admission_policy (test_claude_stop_hook.ClaudePromptContextTests.test_an_unreachable_engine_follows_the_operators_admission_policy) ... ok\r\ntest_outside_a_saipen_project_nothing_is_injected (test_claude_stop_hook.ClaudePromptContextTests.test_outside_a_saipen_project_nothing_is_injected) ... ok\r\ntest_the_first_prompt_delivers_authority_and_the_contract (test_claude_stop_hook.ClaudePromptContextTests.test_the_first_prompt_delivers_authority_and_the_contract) ... skipped 'LEGACY_TRANSPORT: no production path presents a capability; the positive host path is proven through the hook (ClaudeHostTests, test_t1624_host_integration)'\r\ntest_a_compliant_short_reply_passes_untouched (test_claude_stop_hook.ClaudeStopGateTests.test_a_compliant_short_reply_passes_untouched) ... ok\r\ntest_a_missing_message_is_recorded_not_guessed (test_claude_stop_hook.ClaudeStopGateTests.test_a_missing_message_is_recorded_not_guessed) ... ok\r\ntest_a_reply_outside_the_host_locale_reaches_the_checker (test_claude_stop_hook.ClaudeStopGateTests.test_a_reply_outside_the_host_locale_reaches_the_checker) ... ok\r\ntest_an_unreachable_checker_is_recorded_not_guessed (test_claude_stop_hook.ClaudeStopGateTests.test_an_unreachable_checker_is_recorded_not_guessed) ... ok\r\ntest_an_unsupported_event_is_not_gated (test_claude_stop_hook.ClaudeStopGateTests.test_an_unsupported_event_is_not_gated) ... ok\r\ntest_chat_style_drift_is_intercepted_with_chat_guidance (test_claude_stop_hook.ClaudeStopGateTests.test_chat_style_drift_is_intercepted_with_chat_guidance) ... ok\r\ntest_invalid_operational_prose_is_intercepted (test_claude_stop_hook.ClaudeStopGateTests.test_invalid_operational_prose_is_intercepted) ... ok\r\ntest_outside_a_saipen_project_the_transport_does_nothing (test_claude_stop_hook.ClaudeStopGateTests.test_outside_a_saipen_project_the_transport_does_nothing) ... ok\r\ntest_reentry_records_the_exact_capability_boundary (test_claude_stop_hook.ClaudeStopGateTests.test_reentry_records_the_exact_capability_boundary) ... "
+    }
+  ],
+  "ran": 0,
+  "duration_s": 316.67,
+  "timings_s": {
+    "execution_wall_s": 208.075554,
+    "environment_identity_wall_s": 2.495343,
+    "copy_wall_s": 89.06721,
+    "hash_wall_s": 0.348272,
+    "cleanup_wall_s": 16.650207
+  },
+  "copy_metrics": {
+    "subject_copy_s": 21.553502,
+    "canonical_copy_s": 67.402045,
+    "canonical_copy_attempts": 1,
+    "trees": null
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_acceptance.py",
+      "test_accepted_debt.py",
+      "test_accepted_debt_rebind.py",
+      "test_actor_binding_lifecycle.py",
+      "test_adaptive_runtime.py",
+      "test_admission_auto_doctor.py",
+      "test_adoption_section_parity.py",
+      "test_audit_2026_08_27_core.py",
+      "test_audit_2026_08_27_w2.py",
+      "test_audit_2026_08_28_all3.py",
+      "test_audit_2026_08_29_all3_impl.py",
+      "test_audit_2026_08_30_all3_impl.py",
+      "test_audit_dogfood.py",
+      "test_audit_enqueue.py",
+      "test_audit_enqueue_boundary.py",
+      "test_audit_envelope.py",
+      "test_audit_inbox.py",
+      "test_audit_ingest_resume.py",
+      "test_audit_manifest.py",
+      "test_audit_provenance.py",
+      "test_audit_scope.py",
+      "test_audit_transport_loop.py",
+      "test_authority_capture.py",
+      "test_automation_block.py",
+      "test_autonomy_audit_fixes.py",
+      "test_boot_locator.py",
+      "test_canonical_write_route.py",
+      "test_capability_boundary.py",
+      "test_chat_style.py",
+      "test_check_inventory.py",
+      "test_claude_stop_hook.py",
+      "test_cli_compound_entry.py",
+      "test_closure_provenance.py",
+      "test_codex_stop_hook.py",
+      "test_cold_agent_truth.py",
+      "test_cold_recovery.py",
+      "test_concurrency_independence.py",
+      "test_conformance_lineage.py",
+      "test_conformance_projection.py",
+      "test_conformance_remediation_evidence.py",
+      "test_conformance_repair_boundary.py",
+      "test_continue_chain.py",
+      "test_continue_entry.py",
+      "test_continue_fallback_source_gate.py",
+      "test_continue_improve_fallthrough.py",
+      "test_control_primitives.py",
+      "test_converge_entry_authority.py",
+      "test_core_audit_containment.py",
+      "test_core_ownership_routing.py",
+      "test_core_unit_gate.py",
+      "test_crew_applicability.py",
+      "test_crew_liveness_drift.py",
+      "test_debt_gate.py",
+      "test_defect_delta_controls.py",
+      "test_dependency_resume_liveness.py",
+      "test_effect_authorization.py",
+      "test_engine_module_identity.py",
+      "test_entry_point_parity.py",
+      "test_event_taxonomy_owner.py",
+      "test_evidence_hygiene.py",
+      "test_explicit_claim.py",
+      "test_external_authentication_contract.py",
+      "test_external_resolution.py",
+      "test_field_fixture_isolation.py",
+      "test_finding_invalidated_closure.py",
+      "test_fixture_support.py",
+      "test_foreign_observation_authority.py",
+      "test_foreign_owner_terminal_route.py",
+      "test_freebuff_operator_provenance.py",
+      "test_gc.py",
+      "test_generation_migration.py",
+      "test_gpu_lane.py",
+      "test_guard_admission.py",
+      "test_guard_events.py",
+      "test_guard_execution_reachability.py",
+      "test_guard_hostile_matrix.py",
+      "test_guard_root_parity.py",
+      "test_guard_surface_parity.py",
+      "test_handoff_archive_cross_repo.py",
+      "test_hermetic_env.py",
+      "test_host_bootstrap.py",
+      "test_host_fixture.py",
+      "test_host_launch_net.py",
+      "test_hostile_wave_regressions.py",
+      "test_improve_error_boundary.py",
+      "test_improve_gate.py",
+      "test_improve_reconcile.py",
+      "test_improve_resolve_report_path.py",
+      "test_ingress_authority.py",
+      "test_inject_digest.py",
+      "test_install_identity_doctor.py",
+      "test_instruction_loader_contracts.py",
+      "test_intent_audit_fixes.py",
+      "test_journal_nested_targets.py",
+      "test_knowledge.py",
+      "test_legacy_lifecycle_compat.py",
+      "test_log_detail_evidence.py",
+      "test_log_normalize.py",
+      "test_log_stamp_guard.py",
+      "test_log_tail_quarantine.py",
+      "test_metadata_repair.py",
+      "test_metrics_acceptance.py",
+      "test_narrative_authority.py",
+      "test_native_host_guard.py",
+      "test_nested_git_boundaries.py",
+      "test_nested_source_binding.py",
+      "test_next_action_deadlock.py",
+      "test_no_publish_source_scope.py",
+      "test_opencode_adapter.py",
+      "test_opencode_bound_launch_smoke.py",
+      "test_opencode_host_smoke.py",
+      "test_opencode_live_evaluator.py",
+      "test_opencode_live_session.py",
+      "test_operator_ingress_matrix.py",
+      "test_operator_origin_support.py",
+      "test_operator_task_witness.py",
+      "test_orchestration_repair.py",
+      "test_outbox_write_time_bar.py",
+      "test_pending_ingress.py",
+      "test_portable_floor_fields.py",
+      "test_producer_terminal_consistency.py",
+      "test_project_root_session_binding.py",
+      "test_protocol_admission.py",
+      "test_public_closure_cli.py",
+      "test_public_install_lifecycle.py",
+      "test_reconcile_history_ledger_blocked.py",
+      "test_reconcile_legacy_output_field.py",
+      "test_reconcile_valve.py",
+      "test_recover_approved_repair.py",
+      "test_recovered_attribution.py",
+      "test_recovery_reachability.py",
+      "test_refusal_routes.py",
+      "test_regression_gate.py",
+      "test_remediation_self_consistency.py",
+      "test_request_clause_closure.py",
+      "test_response_surface_contract.py",
+      "test_retired_source_coverage.py",
+      "test_reverify.py",
+      "test_reverify_timeout_and_route.py",
+      "test_runner.py",
+      "test_runtime_bootstrap.py",
+      "test_runtime_generation_identity.py",
+      "test_runtime_namespace.py",
+      "test_sailearn_consumer.py",
+      "test_saipen_metrics.py",
+      "test_saitranslate_charter_namespace.py",
+      "test_sandbox_work_surface.py",
+      "test_scenario_runner_isolation.py",
+      "test_search_transport.py",
+      "test_self_resolving_gates.py",
+      "test_session_binding.py",
+      "test_source_contract_derivation.py",
+      "test_source_multiwork.py",
+      "test_source_quarantine_route.py",
+      "test_source_receipts.py",
+      "test_source_refusal_routing.py",
+      "test_source_retirement.py",
+      "test_src085_improve_run_body.py",
+      "test_state_scalar_quoting.py",
+      "test_storage_artifacts.py",
+      "test_storage_lost_registry.py",
+      "test_style_contract_chokepoint.py",
+      "test_sub_dispose_after_collect.py",
+      "test_supervisor.py",
+      "test_t10_submit_route.py",
+      "test_t1173_empty_intent_normalization.py",
+      "test_t1238_release_commit_publication.py",
+      "test_t1277_source_dry_run_parity.py",
+      "test_t1278_closure_contradiction.py",
+      "test_t1282_op_id_resolution.py",
+      "test_t1287_build_directive_grammar.py",
+      "test_t1293_valve_resume_audit_route.py",
+      "test_t1304_r004_dry_run_purity.py",
+      "test_t1304_r004_transition.py",
+      "test_t1304_r005_verifier_boundary.py",
+      "test_t1304_r006_boundary_refusals.py",
+      "test_t1304_review_p0_repair.py",
+      "test_t1316_recovery_already_applied.py",
+      "test_t1327_live_acceptance.py",
+      "test_t1327_zero_manual_recovery.py",
+      "test_t1363_zero_manual_entry.py",
+      "test_t1374_detail_ref_export.py",
+      "test_t1386_canonical_payload.py",
+      "test_t1387_scratch_one_answer.py",
+      "test_t1389_foreign_delta_adoption.py",
+      "test_t1398_ingress_shell_operator.py",
+      "test_t1401_saipen_grammar_answer.py",
+      "test_t1402_readonly_reporters.py",
+      "test_t1407_structural_log_compaction.py",
+      "test_t1411_stale_complete_resolution.py",
+      "test_t1412_conformance_truth.py",
+      "test_t1429_deferred_due.py",
+      "test_t1434_cross_shape_index.py",
+      "test_t1446_auto_recall.py",
+      "test_t1446_duplicate_ingress.py",
+      "test_t1446_supervise.py",
+      "test_t1452_manifest_authority.py",
+      "test_t1453_ingress_clause.py",
+      "test_t1454_distribution_blocker.py",
+      "test_t1457_ingress_obligation.py",
+      "test_t1458_queue_reservation.py",
+      "test_t1461_source_append.py",
+      "test_t1473_handback.py",
+      "test_t1474_start_goal_entry.py",
+      "test_t1475_host_hook_payload.py",
+      "test_t1476_retired_source_livelock.py",
+      "test_t1478_fixture_clock.py",
+      "test_t1479_core_unit_consistent_copy.py",
+      "test_t147_generation_exit_behind_style_drift.py",
+      "test_t1484_soak_report_survives.py",
+      "test_t1487_claim_handoff.py",
+      "test_t148_sweep_historical_bar.py",
+      "test_t1494_continuation_authority.py",
+      "test_t1497_turn_entry_telegrams.py",
+      "test_t1500_claim_continuity.py",
+      "test_t1501_entry_resolver.py",
+      "test_t1505_core_unit_sandbox_reclaim.py",
+      "test_t1506_xpatch_survival.py",
+      "test_t1508_byte_bound_attributes.py",
+      "test_t1511_soak_source_identity.py",
+      "test_t1513_argv_unconsumed_quotes.py",
+      "test_t1514_portable_history_evidence.py",
+      "test_t1515_posix_shell_entry.py",
+      "test_t1516_portable_receipts.py",
+      "test_t1527_runtime_provenance.py",
+      "test_t152_t154_a_red_gate_names_the_repair_that_resolves_it.py",
+      "test_t1533_terminal_handback.py",
+      "test_t1544_audit20_intake.py",
+      "test_t1544_audit20_perf.py",
+      "test_t1553_mid_session_activation.py",
+      "test_t1557_autonomy_sentinels.py",
+      "test_t1557_sub_style_contract.py",
+      "test_t1561_probe_fixture.py",
+      "test_t1563_authority_minting.py",
+      "test_t1571_lint_surface.py",
+      "test_t1572_ticket_scoped_recovery.py",
+      "test_t1574_followups.py",
+      "test_t1575_parallel_lane.py",
+      "test_t1576_efficiency_kpi.py",
+      "test_t1577_op_id_provenance.py",
+      "test_t1578_restore_owner.py",
+      "test_t1581_phase_rename_knowledge.py",
+      "test_t1585_amnesty_control.py",
+      "test_t1587_stale_closure_recovery.py",
+      "test_t1592_manifest_orphan_advice.py",
+      "test_t1598_stale_claim_next_action.py",
+      "test_t1608_collect_verb_route.py",
+      "test_t1609_unproven_done_recovery.py",
+      "test_t1612_accidental_success_reproduction.py",
+      "test_t1613_publication_convergence.py",
+      "test_t1617_release_surface_ignores_gitignore.py",
+      "test_t1618_future_maturation.py",
+      "test_t1619_goal_terminality.py",
+      "test_t1619_iteration_boundary.py",
+      "test_t1624_host_integration.py",
+      "test_t1627_operator_question.py",
+      "test_t1628_opencode_policy.py",
+      "test_t1631_argv_values.py",
+      "test_t1636_invalid_carrier.py",
+      "test_t1638_future_ingress.py",
+      "test_t1640_log_seal.py",
+      "test_t1642_history_notes.py",
+      "test_t1645_zero_hunt.py",
+      "test_t1647_machine_runtime.py",
+      "test_t1648_transient_replace_lock.py",
+      "test_t1649_refusal_step.py",
+      "test_t1651_executor_admission.py",
+      "test_t1654_project_block.py",
+      "test_t1656_operator_readability.py",
+      "test_t1658_suite_record.py",
+      "test_t1659_run_window.py",
+      "test_t1661_suite_projection.py",
+      "test_t1662_repository_interlock.py",
+      "test_t1663_ticket_requires.py",
+      "test_t1665_guard_verbs.py",
+      "test_t1667_clean_compaction.py",
+      "test_t1668_durable_stores_ship.py",
+      "test_t1669_clean_done_projection.py",
+      "test_t1671_lifecycle_authority.py",
+      "test_t1673_board_only_terminal.py",
+      "test_t1674_typed_closure_mode.py",
+      "test_t1678_path_launcher.py",
+      "test_t1679_typed_head_quarantine.py",
+      "test_t1681_release_closure_op.py",
+      "test_t1684_operand_grammar.py",
+      "test_t1686_launch_policy.py",
+      "test_t1688_stale_plugin_guard.py",
+      "test_t1704_goal_checkpoint_priority.py",
+      "test_t1704_legacy_goal_authority.py",
+      "test_t1705_lifecycle_write_preflight.py",
+      "test_t1707_regression_chronology.py",
+      "test_t1708_regression_declaration.py",
+      "test_t1711_regression_execution.py",
+      "test_t1712_manifest_runtime.py",
+      "test_t1715_block_for_parent_guard.py",
+      "test_t1718_acceptance_contract.py",
+      "test_t1721_acceptance_compaction.py",
+      "test_t1726_closed_contracts.py",
+      "test_t1726_contract_oracle.py",
+      "test_t1729_gate_decision_lifecycle.py",
+      "test_t1729_operator_gate.py",
+      "test_t1732_protocol_hardening.py",
+      "test_t1734_source_drift.py",
+      "test_t1735_tool_failure_boundaries.py",
+      "test_t1739_wait_boundary.py",
+      "test_t1743_cross_user_dead_ends.py",
+      "test_t1744_fleet_foreign_field_skew.py",
+      "test_t1745_sub_collect_foreign_field.py",
+      "test_t1746_crew_terminal_outcome.py",
+      "test_t1750_release_boundary.py",
+      "test_t1751_reconcile_surfaces.py",
+      "test_t1752_audit_auto_close.py",
+      "test_t1753_activation_launcher.py",
+      "test_t1759_single_lifecycle_observer.py",
+      "test_t1760_no_git_ccc_marker.py",
+      "test_t1761_recovery_reaches_a_typed_duplicate.py",
+      "test_t1770_pair_stage_scope.py",
+      "test_t1771_measure_then_finish.py",
+      "test_t1774_sweep_queue_human.py",
+      "test_t1776_protocol_home_valve.py",
+      "test_t1779_family_ignores_inbox.py",
+      "test_t1781_t37_latest_build.py",
+      "test_t1784_dry_run_verdict.py",
+      "test_t1785_dry_run_human.py",
+      "test_t1786_cli_first_activation.py",
+      "test_t1787_parked_brief.py",
+      "test_t1789_child_closure_route.py",
+      "test_t1790_dependency_route_budget.py",
+      "test_t1792_auto_doctor.py",
+      "test_t1801_missing_audit_settlement.py",
+      "test_t1803_archived_improve.py",
+      "test_t1815_header_repair.py",
+      "test_t1815_stale_work_context.py",
+      "test_t1816_protected_root_hold.py",
+      "test_t1816_provenance_inventory.py",
+      "test_t1816_run_append_only.py",
+      "test_t1816_run_provenance.py",
+      "test_t1817_closure_outcomes.py",
+      "test_t1817_handoff_artifacts.py",
+      "test_t1821_markdown_surface.py",
+      "test_t1822_carrier_binding.py",
+      "test_t1826_declared_budgets.py",
+      "test_t1828_verification_policy.py",
+      "test_t1829_publication_boundary.py",
+      "test_t1830_verification_observations.py",
+      "test_t1831_cleanup_fixture_cost.py",
+      "test_t1832_single_flight.py",
+      "test_t1835_verification_economics.py",
+      "test_t1836_verification_impact.py",
+      "test_t1837_ci_family_parity.py",
+      "test_t1839_cohort_reconciliation.py",
+      "test_t1840_external_renewal.py",
+      "test_t1844_authority_preview.py",
+      "test_t1844_goal_turns.py",
+      "test_t1844_source_event.py",
+      "test_t1847_fixture_contract.py",
+      "test_t1849_external_git_environment.py",
+      "test_t1851_debt_authority.py",
+      "test_t1853_dispatch_admission.py",
+      "test_t1854_runtime_home.py",
+      "test_t1855_compound_policy.py",
+      "test_t1856_launcher_identity.py",
+      "test_t1858_valve_guidance.py",
+      "test_t1859_zaicode_seal.py",
+      "test_t1862_readiness.py",
+      "test_t1865_launcher_identity.py",
+      "test_t1866_publication_state.py",
+      "test_t1868_zaicode_ingress.py",
+      "test_t1872_drift_prevention.py",
+      "test_t1873_protrail_drift.py",
+      "test_t1874_wintage_drift.py",
+      "test_t1879_manifest_staging_states.py",
+      "test_t1880_wait_survives_phase_shortcut.py",
+      "test_t1881_authority_brake.py",
+      "test_t1881_publication_prohibition.py",
+      "test_t1883_reconcile_causality.py",
+      "test_t1884_transition_blocker_inheritance.py",
+      "test_t1888_object_store.py",
+      "test_t1897_manifest_findings.py",
+      "test_t1898_lineage_recovery.py",
+      "test_t1900_git_listing_boundary.py",
+      "test_t1902_parallel_source_sampling.py",
+      "test_t1903_lean_receipt_projection.py",
+      "test_t1908_duplicate_settlement.py",
+      "test_t1909_unauthenticated_evidence_diagnostics.py",
+      "test_t1910_log_input_diagnostics.py",
+      "test_t1911_native_origin_diagnostics.py",
+      "test_t1912_redelivery_origin_reconciliation.py",
+      "test_t1913_hook_deadline.py",
+      "test_t1913_origin_recovery.py",
+      "test_t1914_installed_runtime_parity.py",
+      "test_t1915_terminal_next_action.py",
+      "test_t1916_continuation_discipline.py",
+      "test_t1916_external_delta.py",
+      "test_t1917_premature_handback.py",
+      "test_t1924_src330_acceptance.py",
+      "test_t1926_zc_owners_matrix.py",
+      "test_t1927_sp_owners_matrix.py",
+      "test_t1932_campaign_authority.py",
+      "test_t1932_src338_closures.py",
+      "test_t1933_zaicode_goal_seal.py",
+      "test_t1934_deploy_staleness.py",
+      "test_t1935_zaicode_hook_ownership.py",
+      "test_t1936_launch_account_list.py",
+      "test_t1937_future_slice_closure.py",
+      "test_t1938_invalidated_slice_closure.py",
+      "test_t1939_needs_detach.py",
+      "test_t1942_regression_pair.py",
+      "test_t1943_adapter_artifact_tracking.py",
+      "test_t1943_campaign_scope_roundtrip.py",
+      "test_t1943_goal_objective_binding.py",
+      "test_t1944_core_wave1.py",
+      "test_t1944_perf_wave.py",
+      "test_t1944_wave2.py",
+      "test_t1945_analysis_progress.py",
+      "test_t1945_campaign_driver.py",
+      "test_t1945_host_trust.py",
+      "test_t1945_incremental_discovery.py",
+      "test_t1949_hook_validator_status.py",
+      "test_t1951_install_residue.py",
+      "test_t2023_goal_management_and_maintenance_binding.py",
+      "test_t2040_bounded_discovery_resume.py",
+      "test_t2040_continuation_truth.py",
+      "test_t2040_discovery_owners.py",
+      "test_t2040_exhaustion_evidence.py",
+      "test_t2040_finish_plan_guards.py",
+      "test_t2040_maintenance_authority.py",
+      "test_t2040_publication_truth.py",
+      "test_t2040_replenishment_recovery.py",
+      "test_t2040_review_proof_binding.py",
+      "test_t2040_terminal_consumer_guards.py",
+      "test_t2040_terminal_consumer_supplementary.py",
+      "test_t2051_source_reindex.py",
+      "test_t2052_pruned_slice_closure.py",
+      "test_t2052_stage_projection.py",
+      "test_t2055_nested_directory_fingerprint.py",
+      "test_t2056_obstacle_actions.py",
+      "test_t2057_carrier_restore.py",
+      "test_t2059_regression.py",
+      "test_t2066_zaicode_host_policy.py",
+      "test_t2076_installed_generation_binding.py",
+      "test_t2077_unblock_gate.py",
+      "test_t2087_drift_matrix_anchors.py",
+      "test_t2089_lazy_entrypoints.py",
+      "test_t2090_finish_golden.py",
+      "test_t2106_reauth_deadlock.py",
+      "test_t38_improve_cycle_liveness.py",
+      "test_t5_ratio_is_not_a_count.py",
+      "test_t925_sub_terminal_durability.py",
+      "test_telemetry.py",
+      "test_ticket_add_regression.py",
+      "test_ticket_retirement.py",
+      "test_ticket_supersession.py",
+      "test_ticket_verify_preimage.py",
+      "test_tool_module_identity.py",
+      "test_unknown_tool_fail_closed.py",
+      "test_user_wait_release.py",
+      "test_userperson_global.py",
+      "test_v7_producer_parallelism.py",
+      "test_vacterro_t36_checkpoint_usage_taxonomy.py",
+      "test_vacterro_t37_no_delta_closure.py",
+      "test_validator_findings.py",
+      "test_validator_layout_parity.py",
+      "test_watchdog.py",
+      "test_work_reverify_cli.py",
+      "test_worker_turnover.py",
+      "test_writer_route_projection.py",
+      "test_xpatch_controls.py"
+    ],
+    "selected": [
+      "test_acceptance.py",
+      "test_accepted_debt.py",
+      "test_accepted_debt_rebind.py",
+      "test_actor_binding_lifecycle.py",
+      "test_adapter_parity.py",
+      "test_adaptive_runtime.py",
+      "test_admission_auto_doctor.py",
+      "test_adoption_section_parity.py",
+      "test_audit_2026_08_27_core.py",
+      "test_audit_2026_08_27_w2.py",
+      "test_audit_2026_08_28_all3.py",
+      "test_audit_2026_08_29_all3_impl.py",
+      "test_audit_2026_08_30_all3_impl.py",
+      "test_audit_dogfood.py",
+      "test_audit_enqueue.py",
+      "test_audit_enqueue_boundary.py",
+      "test_audit_envelope.py",
+      "test_audit_inbox.py",
+      "test_audit_ingest_resume.py",
+      "test_audit_manifest.py",
+      "test_audit_provenance.py",
+      "test_audit_route.py",
+      "test_audit_scope.py",
+      "test_audit_transport_loop.py",
+      "test_authority_capture.py",
+      "test_automation_block.py",
+      "test_autonomy_audit_fixes.py",
+      "test_board_pseudo_link.py",
+      "test_boot_locator.py",
+      "test_campaign_continuation_assessment.py",
+      "test_campaign_matrix.py",
+      "test_campaign_production_gates.py",
+      "test_canonical_command_reachability.py",
+      "test_canonical_write_route.py",
+      "test_capability_boundary.py",
+      "test_ccc_ff_control.py",
+      "test_chat_style.py",
+      "test_check_inventory.py",
+      "test_claude_stop_hook.py",
+      "test_cli_compound_entry.py",
+      "test_closure_provenance.py",
+      "test_codex_stop_hook.py",
+      "test_cold_agent_truth.py",
+      "test_cold_recovery.py",
+      "test_command_routing.py",
+      "test_concurrency_independence.py",
+      "test_conformance_corpus.py",
+      "test_conformance_lineage.py",
+      "test_conformance_projection.py",
+      "test_conformance_remediation_evidence.py",
+      "test_conformance_repair_boundary.py",
+      "test_continue_chain.py",
+      "test_continue_entry.py",
+      "test_continue_fallback_source_gate.py",
+      "test_continue_improve_fallthrough.py",
+      "test_control_primitives.py",
+      "test_converge_entry_authority.py",
+      "test_core_audit_containment.py",
+      "test_core_ownership_routing.py",
+      "test_core_unit_gate.py",
+      "test_crew_applicability.py",
+      "test_crew_liveness_drift.py",
+      "test_debt_gate.py",
+      "test_defect_delta_controls.py",
+      "test_dependency_resume_liveness.py",
+      "test_detail_authorization.py",
+      "test_distribution_report.py",
+      "test_effect_authorization.py",
+      "test_engine_module_identity.py",
+      "test_entry_answer_agrees.py",
+      "test_entry_point_parity.py",
+      "test_event_taxonomy_owner.py",
+      "test_evidence_hygiene.py",
+      "test_explicit_claim.py",
+      "test_external_authentication_contract.py",
+      "test_external_resolution.py",
+      "test_external_revalidation.py",
+      "test_field_fixture_isolation.py",
+      "test_finding_invalidated_closure.py",
+      "test_first_publish_confirm_evidence.py",
+      "test_fixture_style_authority.py",
+      "test_fixture_support.py",
+      "test_foreign_observation_authority.py",
+      "test_foreign_owner_terminal_route.py",
+      "test_freebuff_operator_provenance.py",
+      "test_gc.py",
+      "test_generation_migration.py",
+      "test_gpu_lane.py",
+      "test_guard_admission.py",
+      "test_guard_events.py",
+      "test_guard_execution_reachability.py",
+      "test_guard_hostile_matrix.py",
+      "test_guard_root_parity.py",
+      "test_guard_surface_parity.py",
+      "test_handoff_archive_cross_repo.py",
+      "test_hermetic_env.py",
+      "test_host_authority_broker.py",
+      "test_host_bootstrap.py",
+      "test_host_fixture.py",
+      "test_host_launch_net.py",
+      "test_hostile_wave_regressions.py",
+      "test_hush_runtime.py",
+      "test_improve_error_boundary.py",
+      "test_improve_gate.py",
+      "test_improve_reconcile.py",
+      "test_improve_resolve_report_path.py",
+      "test_ingress_authority.py",
+      "test_inject_digest.py",
+      "test_install_drift.py",
+      "test_install_identity_doctor.py",
+      "test_instruction_home_parity.py",
+      "test_instruction_loader_contracts.py",
+      "test_intent_audit_fixes.py",
+      "test_journal_nested_targets.py",
+      "test_knowledge.py",
+      "test_ledger_gap.py",
+      "test_legacy_lifecycle_compat.py",
+      "test_log_detail_evidence.py",
+      "test_log_normalize.py",
+      "test_log_stamp_guard.py",
+      "test_log_tail_quarantine.py",
+      "test_log_ticket_slot.py",
+      "test_metadata_repair.py",
+      "test_metrics_acceptance.py",
+      "test_module_duplication_guard.py",
+      "test_narrative_authority.py",
+      "test_native_host_guard.py",
+      "test_nested_git_boundaries.py",
+      "test_nested_source_binding.py",
+      "test_next_action_deadlock.py",
+      "test_no_publish_source_scope.py",
+      "test_opencode_adapter.py",
+      "test_opencode_bound_launch_smoke.py",
+      "test_opencode_host_smoke.py",
+      "test_opencode_launch_binding.py",
+      "test_opencode_live_evaluator.py",
+      "test_opencode_live_session.py",
+      "test_operator_ingress_matrix.py",
+      "test_operator_origin_support.py",
+      "test_operator_task_witness.py",
+      "test_orchestration_repair.py",
+      "test_outbox_write_time_bar.py",
+      "test_pending_ingress.py",
+      "test_portable_floor_fields.py",
+      "test_producer_gate_policy.py",
+      "test_producer_terminal_consistency.py",
+      "test_project_root_session_binding.py",
+      "test_protocol_admission.py",
+      "test_protocol_registry.py",
+      "test_public_closure_cli.py",
+      "test_public_install_lifecycle.py",
+      "test_reconcile_history_ledger_blocked.py",
+      "test_reconcile_legacy_output_field.py",
+      "test_reconcile_valve.py",
+      "test_recover_approved_repair.py",
+      "test_recovered_attribution.py",
+      "test_recovery_noop_targets.py",
+      "test_recovery_reachability.py",
+      "test_refusal_registry.py",
+      "test_refusal_routes.py",
+      "test_regression_gate.py",
+      "test_release_provenance.py",
+      "test_remediation_self_consistency.py",
+      "test_repeated_cc.py",
+      "test_request_clause_closure.py",
+      "test_response_delivery.py",
+      "test_response_digest.py",
+      "test_response_fact_binding.py",
+      "test_response_surface_contract.py",
+      "test_retired_source_coverage.py",
+      "test_reverify.py",
+      "test_reverify_timeout_and_route.py",
+      "test_router_closure_readiness.py",
+      "test_runner.py",
+      "test_runner_failure_roster.py",
+      "test_runtime_bootstrap.py",
+      "test_runtime_generation_identity.py",
+      "test_runtime_namespace.py",
+      "test_sailearn_consumer.py",
+      "test_saipen_metrics.py",
+      "test_saitranslate_charter_namespace.py",
+      "test_sandbox_work_surface.py",
+      "test_scenario_runner_isolation.py",
+      "test_search_transport.py",
+      "test_self_resolving_gates.py",
+      "test_session_binding.py",
+      "test_settled_projection.py",
+      "test_source_contract_derivation.py",
+      "test_source_multiwork.py",
+      "test_source_quarantine_route.py",
+      "test_source_receipts.py",
+      "test_source_refusal_routing.py",
+      "test_source_retirement.py",
+      "test_src085_conformance_disposition.py",
+      "test_src085_improve_run_body.py",
+      "test_state_scalar_quoting.py",
+      "test_storage_artifacts.py",
+      "test_storage_lost_registry.py",
+      "test_storage_policy.py",
+      "test_style_contract_chokepoint.py",
+      "test_sub_dispose_after_collect.py",
+      "test_subprocess_utf8.py",
+      "test_supervisor.py",
+      "test_t10_submit_route.py",
+      "test_t1173_empty_intent_normalization.py",
+      "test_t119_stale_complete_exit.py",
+      "test_t1238_release_commit_publication.py",
+      "test_t1277_source_dry_run_parity.py",
+      "test_t1278_closure_contradiction.py",
+      "test_t1282_op_id_resolution.py",
+      "test_t1283_lineage_legacy_ingest.py",
+      "test_t1286_crew_probe.py",
+      "test_t1287_audit_empty_scope.py",
+      "test_t1287_build_directive_grammar.py",
+      "test_t1293_valve_resume_audit_route.py",
+      "test_t1304_r004_dry_run_purity.py",
+      "test_t1304_r004_transition.py",
+      "test_t1304_r005_verifier_boundary.py",
+      "test_t1304_r006_boundary_refusals.py",
+      "test_t1304_r009_settled_wiring.py",
+      "test_t1304_r011_empty_selection.py",
+      "test_t1304_review_p0_repair.py",
+      "test_t1316_recovery_already_applied.py",
+      "test_t1326_board_compaction.py",
+      "test_t1327_live_acceptance.py",
+      "test_t1327_zero_manual_recovery.py",
+      "test_t1363_zero_manual_entry.py",
+      "test_t1374_detail_ref_export.py",
+      "test_t1383_ticket_add_route.py",
+      "test_t1386_canonical_payload.py",
+      "test_t1387_scratch_one_answer.py",
+      "test_t1389_foreign_delta_adoption.py",
+      "test_t1398_ingress_shell_operator.py",
+      "test_t1401_saipen_grammar_answer.py",
+      "test_t1402_readonly_reporters.py",
+      "test_t1407_structural_log_compaction.py",
+      "test_t1411_stale_complete_resolution.py",
+      "test_t1412_conformance_truth.py",
+      "test_t1429_deferred_due.py",
+      "test_t1430_crew_run_receipt.py",
+      "test_t1434_cross_shape_index.py",
+      "test_t1442_family_env.py",
+      "test_t1445_failure_field_scope.py",
+      "test_t1446_auto_recall.py",
+      "test_t1446_duplicate_ingress.py",
+      "test_t1446_supervise.py",
+      "test_t1452_manifest_authority.py",
+      "test_t1453_ingress_clause.py",
+      "test_t1454_distribution_blocker.py",
+      "test_t1457_ingress_obligation.py",
+      "test_t1458_queue_reservation.py",
+      "test_t1460_consumed_ingress.py",
+      "test_t1461_source_append.py",
+      "test_t1464_matrix_acceptance.py",
+      "test_t1465_budget_line_ends.py",
+      "test_t1472_core_unit_shards.py",
+      "test_t1473_handback.py",
+      "test_t1474_start_goal_entry.py",
+      "test_t1475_host_hook_payload.py",
+      "test_t1476_retired_source_livelock.py",
+      "test_t1478_fixture_clock.py",
+      "test_t1479_core_unit_consistent_copy.py",
+      "test_t147_generation_exit_behind_style_drift.py",
+      "test_t1484_soak_report_survives.py",
+      "test_t1487_claim_handoff.py",
+      "test_t148_sweep_historical_bar.py",
+      "test_t1494_continuation_authority.py",
+      "test_t1497_turn_entry_telegrams.py",
+      "test_t149_reverify_run_records_its_directory.py",
+      "test_t1500_claim_continuity.py",
+      "test_t1501_entry_resolver.py",
+      "test_t1502_ui_aa_contract.py",
+      "test_t1504_zaicode_adapter.py",
+      "test_t1505_core_unit_sandbox_reclaim.py",
+      "test_t1506_xpatch_survival.py",
+      "test_t1508_byte_bound_attributes.py",
+      "test_t150_legacy_generation_evidence_boundary.py",
+      "test_t1511_soak_source_identity.py",
+      "test_t1513_argv_unconsumed_quotes.py",
+      "test_t1514_portable_history_evidence.py",
+      "test_t1515_posix_shell_entry.py",
+      "test_t1516_portable_receipts.py",
+      "test_t1517_reverify_integrity.py",
+      "test_t1518_crew_banner.py",
+      "test_t1519_settled_index.py",
+      "test_t151_foreign_receipt_cannot_erase_a_sibling_verdict.py",
+      "test_t1527_runtime_provenance.py",
+      "test_t152_t154_a_red_gate_names_the_repair_that_resolves_it.py",
+      "test_t1533_terminal_handback.py",
+      "test_t1544_audit20.py",
+      "test_t1544_audit20_intake.py",
+      "test_t1544_audit20_perf.py",
+      "test_t1553_mid_session_activation.py",
+      "test_t1557_autonomy_sentinels.py",
+      "test_t1557_mail_binding.py",
+      "test_t1557_sub_style_contract.py",
+      "test_t1561_probe_fixture.py",
+      "test_t1563_authority_minting.py",
+      "test_t1568_opencode_chat_style.py",
+      "test_t1571_lint_surface.py",
+      "test_t1572_ticket_scoped_recovery.py",
+      "test_t1574_followups.py",
+      "test_t1575_parallel_lane.py",
+      "test_t1576_efficiency_kpi.py",
+      "test_t1577_op_id_provenance.py",
+      "test_t1578_restore_owner.py",
+      "test_t1581_phase_rename_knowledge.py",
+      "test_t1582_sweep_skip_reason.py",
+      "test_t1584_production_zcode_boundary.py",
+      "test_t1585_amnesty_control.py",
+      "test_t1586_scenario_inputs.py",
+      "test_t1587_stale_closure_recovery.py",
+      "test_t1592_manifest_orphan_advice.py",
+      "test_t1598_stale_claim_next_action.py",
+      "test_t1608_collect_verb_route.py",
+      "test_t1609_unproven_done_recovery.py",
+      "test_t1612_accidental_success_reproduction.py",
+      "test_t1613_publication_convergence.py",
+      "test_t1614_future_gate.py",
+      "test_t1617_release_surface_ignores_gitignore.py",
+      "test_t1618_future_maturation.py",
+      "test_t1619_goal_terminality.py",
+      "test_t1619_iteration_boundary.py",
+      "test_t1620_historical_counts.py",
+      "test_t1624_host_integration.py",
+      "test_t1627_operator_question.py",
+      "test_t1628_opencode_policy.py",
+      "test_t1631_argv_values.py",
+      "test_t1632_identifier_is_not_a_count.py",
+      "test_t1633_process_tree.py",
+      "test_t1635_claude_profiles.py",
+      "test_t1636_invalid_carrier.py",
+      "test_t1638_future_ingress.py",
+      "test_t1640_board_scrub.py",
+      "test_t1640_log_seal.py",
+      "test_t1641_gate_ownership.py",
+      "test_t1642_history_notes.py",
+      "test_t1645_zero_hunt.py",
+      "test_t1647_machine_runtime.py",
+      "test_t1648_transient_replace_lock.py",
+      "test_t1649_refusal_step.py",
+      "test_t1650_retired_host_image.py",
+      "test_t1651_executor_admission.py",
+      "test_t1654_project_block.py",
+      "test_t1655_file_mode.py",
+      "test_t1656_operator_readability.py",
+      "test_t1657_refused_reply_preserved.py",
+      "test_t1658_suite_record.py",
+      "test_t1659_run_window.py",
+      "test_t1661_suite_projection.py",
+      "test_t1662_repository_interlock.py",
+      "test_t1663_ticket_requires.py",
+      "test_t1665_guard_verbs.py",
+      "test_t1666_receipt_close.py",
+      "test_t1667_clean_compaction.py",
+      "test_t1668_durable_stores_ship.py",
+      "test_t1669_clean_done_projection.py",
+      "test_t1670_route_budgets.py",
+      "test_t1671_lifecycle_authority.py",
+      "test_t1673_board_only_terminal.py",
+      "test_t1674_typed_closure_mode.py",
+      "test_t1676_lifecycle_code.py",
+      "test_t1678_path_launcher.py",
+      "test_t1679_typed_head_quarantine.py",
+      "test_t1681_release_closure_op.py",
+      "test_t1683_launcher_profile.py",
+      "test_t1684_operand_grammar.py",
+      "test_t1685_profile_carrier.py",
+      "test_t1686_launch_policy.py",
+      "test_t1687_identity_diagnostics.py",
+      "test_t1688_stale_plugin_guard.py",
+      "test_t1690_profile_isolation.py",
+      "test_t1704_goal_checkpoint_priority.py",
+      "test_t1704_legacy_goal_authority.py",
+      "test_t1705_lifecycle_write_preflight.py",
+      "test_t1707_regression_chronology.py",
+      "test_t1708_regression_declaration.py",
+      "test_t1709_audit_starvation.py",
+      "test_t1711_regression_execution.py",
+      "test_t1712_manifest_runtime.py",
+      "test_t1715_block_for_parent_guard.py",
+      "test_t1718_acceptance_contract.py",
+      "test_t1721_acceptance_compaction.py",
+      "test_t1726_closed_contracts.py",
+      "test_t1726_contract_oracle.py",
+      "test_t1729_gate_decision_lifecycle.py",
+      "test_t1729_operator_gate.py",
+      "test_t1732_protocol_hardening.py",
+      "test_t1734_source_drift.py",
+      "test_t1735_tool_failure_boundaries.py",
+      "test_t1736_tool_safety_and_evidence.py",
+      "test_t1739_wait_boundary.py",
+      "test_t1742_pipeline_shell_probe.py",
+      "test_t1743_cross_user_dead_ends.py",
+      "test_t1744_fleet_foreign_field_skew.py",
+      "test_t1745_sub_collect_foreign_field.py",
+      "test_t1746_crew_terminal_outcome.py",
+      "test_t1747_degraded_profile.py",
+      "test_t1748_worker_clock.py",
+      "test_t1749_project_root_subject.py",
+      "test_t1750_release_boundary.py",
+      "test_t1751_reconcile_surfaces.py",
+      "test_t1752_audit_auto_close.py",
+      "test_t1753_activation_launcher.py",
+      "test_t1757_claim_follows_route.py",
+      "test_t1758_closure_cycle.py",
+      "test_t1759_single_lifecycle_observer.py",
+      "test_t1760_no_git_ccc_marker.py",
+      "test_t1761_recovery_reaches_a_typed_duplicate.py",
+      "test_t1762_control_count_scope.py",
+      "test_t1765_finding_subtypes.py",
+      "test_t1767_usage_line.py",
+      "test_t1770_pair_stage_scope.py",
+      "test_t1771_measure_then_finish.py",
+      "test_t1772_empty_draft_exit.py",
+      "test_t1774_sweep_queue_human.py",
+      "test_t1775_continue_never_admits_a_seat.py",
+      "test_t1776_protocol_home_valve.py",
+      "test_t1778_continue_closes_source.py",
+      "test_t1779_family_ignores_inbox.py",
+      "test_t1781_t37_latest_build.py",
+      "test_t1782_capped_builder_identifier.py",
+      "test_t1784_dry_run_verdict.py",
+      "test_t1785_dry_run_human.py",
+      "test_t1786_cli_first_activation.py",
+      "test_t1787_parked_brief.py",
+      "test_t1789_child_closure_route.py",
+      "test_t1790_dependency_route_budget.py",
+      "test_t1792_auto_doctor.py",
+      "test_t1801_missing_audit_settlement.py",
+      "test_t1803_archived_improve.py",
+      "test_t1807_audit_liveness_regression.py",
+      "test_t1815_header_repair.py",
+      "test_t1815_stale_work_context.py",
+      "test_t1816_protected_root_hold.py",
+      "test_t1816_provenance_inventory.py",
+      "test_t1816_run_append_only.py",
+      "test_t1816_run_provenance.py",
+      "test_t1817_acceptance_bar.py",
+      "test_t1817_closure_outcomes.py",
+      "test_t1817_diagnostic_ownership.py",
+      "test_t1817_finding_ownership.py",
+      "test_t1817_finding_route.py",
+      "test_t1817_handoff_artifacts.py",
+      "test_t1821_markdown_surface.py",
+      "test_t1822_carrier_binding.py",
+      "test_t1826_declared_budgets.py",
+      "test_t1827_writer_lock_contract.py",
+      "test_t1828_verification_policy.py",
+      "test_t1829_publication_boundary.py",
+      "test_t1830_verification_observations.py",
+      "test_t1831_cleanup_fixture_cost.py",
+      "test_t1832_single_flight.py",
+      "test_t1833_verification_owner.py",
+      "test_t1834_tool_call_identity.py",
+      "test_t1835_verification_economics.py",
+      "test_t1836_verification_impact.py",
+      "test_t1837_ci_family_parity.py",
+      "test_t1839_cohort_reconciliation.py",
+      "test_t1840_external_renewal.py",
+      "test_t1844_authority_preview.py",
+      "test_t1844_goal_turns.py",
+      "test_t1844_operator_origin.py",
+      "test_t1844_origin_broker.py",
+      "test_t1844_source_event.py",
+      "test_t1847_fixture_contract.py",
+      "test_t1849_external_git_environment.py",
+      "test_t1850_freebuff_diagnostics.py",
+      "test_t1851_debt_authority.py",
+      "test_t1853_dispatch_admission.py",
+      "test_t1854_runtime_home.py",
+      "test_t1855_compound_policy.py",
+      "test_t1856_launcher_identity.py",
+      "test_t1857_budget_owner.py",
+      "test_t1857_shared_blockers.py",
+      "test_t1858_valve_guidance.py",
+      "test_t1859_zaicode_seal.py",
+      "test_t1861_registry_import_coupling.py",
+      "test_t1862_readiness.py",
+      "test_t1864_autonomous_valve.py",
+      "test_t1865_launcher_identity.py",
+      "test_t1866_publication_state.py",
+      "test_t1867_completion_grammar.py",
+      "test_t1868_zaicode_ingress.py",
+      "test_t1872_drift_prevention.py",
+      "test_t1873_protrail_drift.py",
+      "test_t1874_wintage_drift.py",
+      "test_t1875_maintenance_wiring.py",
+      "test_t1876_parallel_cleanup.py",
+      "test_t1879_manifest_staging_states.py",
+      "test_t1880_wait_survives_phase_shortcut.py",
+      "test_t1881_authority_brake.py",
+      "test_t1881_publication_prohibition.py",
+      "test_t1882_future_publication_inventory.py",
+      "test_t1883_reconcile_causality.py",
+      "test_t1884_transition_blocker_inheritance.py",
+      "test_t1885_tag_peel.py",
+      "test_t1886_gate_lock_window.py",
+      "test_t1888_object_store.py",
+      "test_t1889_sandbox_scope.py",
+      "test_t1891_freshness_parser.py",
+      "test_t1892_one_decoder.py",
+      "test_t1893_probe_wrappers.py",
+      "test_t1897_manifest_findings.py",
+      "test_t1898_lineage_recovery.py",
+      "test_t1900_git_listing_boundary.py",
+      "test_t1902_parallel_source_sampling.py",
+      "test_t1903_lean_receipt_projection.py",
+      "test_t1908_duplicate_settlement.py",
+      "test_t1909_unauthenticated_evidence_diagnostics.py",
+      "test_t1910_log_input_diagnostics.py",
+      "test_t1911_native_origin_diagnostics.py",
+      "test_t1912_redelivery_origin_reconciliation.py",
+      "test_t1913_hook_deadline.py",
+      "test_t1913_origin_recovery.py",
+      "test_t1914_installed_runtime_parity.py",
+      "test_t1915_terminal_next_action.py",
+      "test_t1916_continuation_discipline.py",
+      "test_t1916_external_delta.py",
+      "test_t1917_premature_handback.py",
+      "test_t1924_src330_acceptance.py",
+      "test_t1926_zc_owners_matrix.py",
+      "test_t1927_sp_owners_matrix.py",
+      "test_t1931_campaign_lifecycle.py",
+      "test_t1931_saipal_boundary.py",
+      "test_t1932_campaign_authority.py",
+      "test_t1932_src338_closures.py",
+      "test_t1933_zaicode_goal_seal.py",
+      "test_t1934_deploy_staleness.py",
+      "test_t1935_zaicode_hook_ownership.py",
+      "test_t1936_launch_account_list.py",
+      "test_t1937_future_slice_closure.py",
+      "test_t1938_invalidated_slice_closure.py",
+      "test_t1939_needs_detach.py",
+      "test_t1942_regression_pair.py",
+      "test_t1943_adapter_artifact_tracking.py",
+      "test_t1943_campaign_scope_roundtrip.py",
+      "test_t1943_goal_objective_binding.py",
+      "test_t1944_core_wave1.py",
+      "test_t1944_perf_wave.py",
+      "test_t1944_wave2.py",
+      "test_t1945_analysis_progress.py",
+      "test_t1945_campaign_driver.py",
+      "test_t1945_host_trust.py",
+      "test_t1945_incremental_discovery.py",
+      "test_t1949_hook_validator_status.py",
+      "test_t1951_install_residue.py",
+      "test_t2023_goal_management_and_maintenance_binding.py",
+      "test_t2040_bounded_discovery_resume.py",
+      "test_t2040_continuation_truth.py",
+      "test_t2040_discovery_owners.py",
+      "test_t2040_exhaustion_evidence.py",
+      "test_t2040_finish_plan_guards.py",
+      "test_t2040_maintenance_authority.py",
+      "test_t2040_publication_truth.py",
+      "test_t2040_replenishment_recovery.py",
+      "test_t2040_review_proof_binding.py",
+      "test_t2040_terminal_consumer_guards.py",
+      "test_t2040_terminal_consumer_supplementary.py",
+      "test_t2050_pruned_row_restore.py",
+      "test_t2051_source_reindex.py",
+      "test_t2052_pruned_slice_closure.py",
+      "test_t2052_stage_projection.py",
+      "test_t2055_nested_directory_fingerprint.py",
+      "test_t2056_obstacle_actions.py",
+      "test_t2057_carrier_restore.py",
+      "test_t2059_regression.py",
+      "test_t2066_zaicode_host_policy.py",
+      "test_t2071_gate_pinned_row.py",
+      "test_t2076_installed_generation_binding.py",
+      "test_t2077_unblock_gate.py",
+      "test_t2087_drift_matrix_anchors.py",
+      "test_t2089_agent_status_view.py",
+      "test_t2089_lazy_entrypoints.py",
+      "test_t2090_finish_golden.py",
+      "test_t2092_concurrent_family_isolation.py",
+      "test_t2092_flight_replay_recovery.py",
+      "test_t2093_concurrent_cross_process.py",
+      "test_t2093_owner_stamp_grammar.py",
+      "test_t2093_preflight.py",
+      "test_t2093_replay_matrix.py",
+      "test_t2094_pattern_scope.py",
+      "test_t2096_scrub_eligibility_parity.py",
+      "test_t2106_reauth_deadlock.py",
+      "test_t38_improve_cycle_liveness.py",
+      "test_t5_ratio_is_not_a_count.py",
+      "test_t923_crew_invalid_role_errors.py",
+      "test_t925_sub_terminal_durability.py",
+      "test_telemetry.py",
+      "test_ticket_add_regression.py",
+      "test_ticket_retirement.py",
+      "test_ticket_supersession.py",
+      "test_ticket_verify_preimage.py",
+      "test_tool_module_identity.py",
+      "test_unknown_tool_fail_closed.py",
+      "test_user_wait_release.py",
+      "test_userperson_global.py",
+      "test_v7_producer_parallelism.py",
+      "test_vacterro_t36_checkpoint_usage_taxonomy.py",
+      "test_vacterro_t37_no_delta_closure.py",
+      "test_validator_findings.py",
+      "test_validator_layout_parity.py",
+      "test_verification_grammar.py",
+      "test_verify_oracle.py",
+      "test_verify_scope_isolation.py",
+      "test_vocabulary_parity.py",
+      "test_warn_ownership_probe.py",
+      "test_watchdog.py",
+      "test_work_reverify_cli.py",
+      "test_worker_turnover.py",
+      "test_writer_route_projection.py",
+      "test_xpatch.py",
+      "test_xpatch_controls.py"
+    ],
+    "manifest_sha256": "6c43816bc6ea79df1e3f3cce5086c10665c4a681afd091a4a9efb077884064e5"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_*.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.14.10 (tags/v3.14.10:b703b2c, Oct 25 2026, 17:36:52) [MSC v.1944 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python314",
+      "runtime": [
+        {
+          "path": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+          "exists": true,
+          "sha256": "d718435b892db4ad5b547d12fec61be7baa7faf7a58d857ea58053be24c7a000"
+        },
+        {
+          "path": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python314\\python314.dll",
+          "exists": true,
+          "sha256": "d8a06cc6ca3348925ea29e343e1c5c5895fe0bb433ff913e1cee44caf358aa6a"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "617b94b18c0d9a79e9072dd5e1cdcee6642d99619596a1bf55599057154d9afa",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+        "exists": true,
+        "sha256": "fc0f1cae1304fcdcf4d0749f421c5ed21471efc856301f92f56d4b844be84363"
+      },
+      "node": {
+        "path": "C:\\nodejs\\node.exe",
+        "exists": true,
+        "sha256": "d702daa815eabbff763c7d3808e235cf031cf2ca70211b56847bc72f51e240e5"
+      },
+      "npm": {
+        "path": "C:\\nodejs\\npm.cmd",
+        "exists": true,
+        "sha256": "db35b276477a199264f618236d1754975bd2b457c6a79ab214a9936ee3a459ce",
+        "package": {
+          "root": "C:\\nodejs\\node_modules\\npm",
+          "tree_sha256": "5d063b0fc6198f02729d987bfaee87f1ad38e0e29c1602deb6ebd2fe82eaba12",
+          "dependencies": {
+            "@isaacs/string-locale-compare": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@isaacs\\string-locale-compare",
+              "tree_sha256": "1b2a577b484b46a26dc0cff32cd69ddf1a1c057887e82eb3d9cf5b7b98440f58",
+              "dependencies": {}
+            },
+            "@npmcli/arborist": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\arborist",
+              "tree_sha256": "52d58ca720234c7e28a97fa350fd365fd2e4744571f854a384537ba1b187fbba",
+              "dependencies": {
+                "@gar/promise-retry": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry",
+                  "tree_sha256": "75af72b0d8edaa671c34fc662b54daa927cc3653b76a0cacfb6b27985bb160d4",
+                  "dependencies": {}
+                },
+                "@isaacs/string-locale-compare": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@isaacs\\string-locale-compare"
+                },
+                "@npmcli/fs": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\fs",
+                  "tree_sha256": "4bd75b32b027520cfdf214ace9ad0b45d439708b367250d810cbb93a075647dc",
+                  "dependencies": {
+                    "semver": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver",
+                      "tree_sha256": "24046b432a1a88e69de3d8f8913e58d770bb742505fb770217bb3a1c5cafde5c",
+                      "dependencies": {}
+                    }
+                  }
+                },
+                "@npmcli/installed-package-contents": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\installed-package-contents",
+                  "tree_sha256": "185d66c181fe714aae406f25b5c434a5dfd3c101584d0445675169ec48f9cb65",
+                  "dependencies": {
+                    "npm-bundled": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\installed-package-contents\\node_modules\\npm-bundled",
+                      "tree_sha256": "fed173e0ba3158f7cf1874d099645bf5756b726a6740a4aae82dbd97538d57c6",
+                      "dependencies": {
+                        "npm-normalize-package-bin": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\installed-package-contents\\node_modules\\npm-normalize-package-bin",
+                          "tree_sha256": "bbbd80ee15f23062a4e26ce7c116f7d08919094d82ac53c0bf306b06de14da8a",
+                          "dependencies": {}
+                        }
+                      }
+                    },
+                    "npm-normalize-package-bin": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\installed-package-contents\\node_modules\\npm-normalize-package-bin"
+                    }
+                  }
+                },
+                "@npmcli/map-workspaces": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\map-workspaces",
+                  "tree_sha256": "caa02b969f7288ddb03ff2aecd76fa7bcd4a76e51da17b7faa78838dce4d9507",
+                  "dependencies": {
+                    "@npmcli/name-from-folder": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\name-from-folder",
+                      "tree_sha256": "dddd4ce9f42d9991e7aa98878bb3f6e150711cde24a86856b10c50fd54cd0355",
+                      "dependencies": {}
+                    },
+                    "@npmcli/package-json": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json",
+                      "tree_sha256": "a6b3d83c212847511975c36c873b7c8125f7dd8a508640da6b423ce8dd1c6658",
+                      "dependencies": {
+                        "@npmcli/git": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\git",
+                          "tree_sha256": "9c571bf4127403d9a645b667f4ecee10c8d4c57a38136cf14483206983ddc66a",
+                          "dependencies": {
+                            "@gar/promise-retry": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry"
+                            },
+                            "@npmcli/promise-spawn": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\promise-spawn",
+                              "tree_sha256": "cfe86c22cfd5722ecccb2aeb3bc0c62d861b4e32f6707f6187b37de712876669",
+                              "dependencies": {
+                                "which": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\which",
+                                  "tree_sha256": "5b5355c2925cc8242df953c7f9ae930ce6e26dbbc248605371a8b3fa52f07de4",
+                                  "dependencies": {
+                                    "isexe": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\isexe",
+                                      "tree_sha256": "94d4975cb0fc284f04f509362dd0cf03c5a88a9c68ed4dad4509c8f8094fec3e",
+                                      "dependencies": {}
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "ini": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\ini",
+                              "tree_sha256": "19246286ebb774af33514d42adc8f09fc06a8e3ce3a3811873600f8b49a1ac3c",
+                              "dependencies": {}
+                            },
+                            "lru-cache": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\lru-cache",
+                              "tree_sha256": "100c4b622dbd8392af9bbfaada8fbc3cc51d09f7f852199299d2629981390604",
+                              "dependencies": {}
+                            },
+                            "npm-pick-manifest": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-pick-manifest",
+                              "tree_sha256": "99c205124a4ceeb785452c02ebb56de184c4821db3181c05a6348c69a809228e",
+                              "dependencies": {
+                                "npm-install-checks": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-install-checks",
+                                  "tree_sha256": "e43156baba788f110c4acd83a6f8bdfb30e0024c0119e99ed7c62cd7520c2119",
+                                  "dependencies": {
+                                    "semver": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                                    }
+                                  }
+                                },
+                                "npm-normalize-package-bin": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-pick-manifest\\node_modules\\npm-normalize-package-bin",
+                                  "tree_sha256": "bbbd80ee15f23062a4e26ce7c116f7d08919094d82ac53c0bf306b06de14da8a",
+                                  "dependencies": {}
+                                },
+                                "npm-package-arg": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg",
+                                  "tree_sha256": "095a04820f263a29ebf3731c18858e8135d96b82853ce39c7466f7c2ca699a13",
+                                  "dependencies": {
+                                    "hosted-git-info": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\hosted-git-info",
+                                      "tree_sha256": "be78ed6a464012efc90bd360e49506412b701f8f609d9e2a4fa247e8448d12aa",
+                                      "dependencies": {
+                                        "lru-cache": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\lru-cache"
+                                        }
+                                      }
+                                    },
+                                    "proc-log": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log",
+                                      "tree_sha256": "29692ad181690933adf5aefa1d205ee74a546a5282d459af9a8ae25372fe9af3",
+                                      "dependencies": {}
+                                    },
+                                    "semver": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                                    },
+                                    "validate-npm-package-name": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\validate-npm-package-name",
+                                      "tree_sha256": "7d8c77c935728d5f5ae47dcdc6a4f08639bc4102f9cfac27167511399f04eff4",
+                                      "dependencies": {}
+                                    }
+                                  }
+                                },
+                                "semver": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                                }
+                              }
+                            },
+                            "proc-log": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                            },
+                            "semver": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                            },
+                            "which": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\which"
+                            }
+                          }
+                        },
+                        "glob": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\glob",
+                          "tree_sha256": "bdd463b53c8213b1f6b056f860c5bb12707f3e3026680f378189e339119d1c1d",
+                          "dependencies": {
+                            "minimatch": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch",
+                              "tree_sha256": "4a8b4e8720e6dc176f4d7ff2f5de75172257bc4c8cf3725c84008c15e39944c9",
+                              "dependencies": {
+                                "brace-expansion": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\brace-expansion",
+                                  "tree_sha256": "ba9359074215ad3e703fa98225dd1a50f625756cf5574b24035d5c8015f6cd09",
+                                  "dependencies": {
+                                    "balanced-match": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\balanced-match",
+                                      "tree_sha256": "612e1b772e25e91d8852f612cf4e095fa4d7b469d3b7fcee5be89305d7c0411e",
+                                      "dependencies": {}
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "minipass": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass",
+                              "tree_sha256": "ca3d383349e1e1ccc417159b6d9b820b6d26b5e3b8949ac749edb50b206db626",
+                              "dependencies": {}
+                            },
+                            "path-scurry": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\path-scurry",
+                              "tree_sha256": "6fbce85ef75c06baef414b6c40e6a7122254497eb682b5cb013c3730163b0730",
+                              "dependencies": {
+                                "lru-cache": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\lru-cache"
+                                },
+                                "minipass": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "hosted-git-info": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\hosted-git-info"
+                        },
+                        "json-parse-even-better-errors": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\json-parse-even-better-errors",
+                          "tree_sha256": "5eb25f597d6a6dda69232742b847cf41a739122156be013980ea70dc27814266",
+                          "dependencies": {}
+                        },
+                        "proc-log": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                        },
+                        "semver": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                        },
+                        "spdx-expression-parse": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\spdx-expression-parse",
+                          "tree_sha256": "9f253260d140be2601bbc307d0d263d79fc368c9eec0fade64fd96aae0a5663f",
+                          "dependencies": {
+                            "spdx-exceptions": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\spdx-exceptions",
+                              "tree_sha256": "9a71318c9a02c21c25a749ddaa1f2ac2387e7f9a630c1af3c81226bc6660bd18",
+                              "dependencies": {}
+                            },
+                            "spdx-license-ids": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\spdx-license-ids",
+                              "tree_sha256": "73a9a44101a3c825fe39ea4ed2a70dc47e23b0eda55b32e53dba906cb6292025",
+                              "dependencies": {}
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "glob": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\glob"
+                    },
+                    "minimatch": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch"
+                    }
+                  }
+                },
+                "@npmcli/metavuln-calculator": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\metavuln-calculator",
+                  "tree_sha256": "370a1b7a4403c03998493b158f355c7c6a5fbd436a61ed5669922384b42eb2b5",
+                  "dependencies": {
+                    "cacache": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\cacache",
+                      "tree_sha256": "55997ccbe1bfb3acdba0f960beb5ff21eda9d32ec6a07ec6eb4b5850babc6dc2",
+                      "dependencies": {
+                        "@npmcli/fs": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\fs"
+                        },
+                        "fs-minipass": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\fs-minipass",
+                          "tree_sha256": "3a5d569e42711afffa3c2ad9498ba8478f93897548ef144a9d4c4eee39e8e148",
+                          "dependencies": {
+                            "minipass": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                            }
+                          }
+                        },
+                        "glob": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\glob"
+                        },
+                        "lru-cache": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\lru-cache"
+                        },
+                        "minipass": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                        },
+                        "minipass-collect": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-collect",
+                          "tree_sha256": "92e2d210b3710d371bd653f74f055c0fd399ec1d52c9591e72f09d78ec84ba96",
+                          "dependencies": {
+                            "minipass": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                            }
+                          }
+                        },
+                        "minipass-flush": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-flush",
+                          "tree_sha256": "1cbe3430b20851102cd74e5d491108b6d427446b2068e0c6c05069a6e17de165",
+                          "dependencies": {
+                            "minipass": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                            }
+                          }
+                        },
+                        "minipass-pipeline": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-pipeline",
+                          "tree_sha256": "9d30d3c362bae4e9a189679ce21c91b1c63de28d34c66cfed4679aea5e6ac2a7",
+                          "dependencies": {
+                            "minipass": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-pipeline\\node_modules\\minipass",
+                              "tree_sha256": "99a0c640691f362b293a9be43f153b044e1491dbdcbfc5249481f7fe5f9338e8",
+                              "dependencies": {
+                                "yallist": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-pipeline\\node_modules\\yallist",
+                                  "tree_sha256": "73cb02ff7733337212ad9ce43bb6b8272ec353c46ec5517da5be37b697689c8d",
+                                  "dependencies": {}
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "p-map": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\p-map",
+                          "tree_sha256": "e5b540d77512cbe3af67efd8393d7217dd3e7ad4ac486966698f561da3d750be",
+                          "dependencies": {}
+                        },
+                        "ssri": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\ssri",
+                          "tree_sha256": "a7ec73b4aecd6450b81f7fc64abab772cd9fe28b4a1f51455f5ad7eaa2b7b7f1",
+                          "dependencies": {
+                            "minipass": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "json-parse-even-better-errors": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\json-parse-even-better-errors"
+                    },
+                    "pacote": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\pacote",
+                      "tree_sha256": "1f20b341c5fa2f586d0b8a88cfa27515d374ada14c59dcf39e3cc24d26177139",
+                      "dependencies": {
+                        "@gar/promise-retry": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry"
+                        },
+                        "@npmcli/git": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\git"
+                        },
+                        "@npmcli/installed-package-contents": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\installed-package-contents"
+                        },
+                        "@npmcli/package-json": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                        },
+                        "@npmcli/promise-spawn": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\promise-spawn"
+                        },
+                        "@npmcli/run-script": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script",
+                          "tree_sha256": "b103a0e60e9a7cb77f08fead73f294929fad65128c6013b54eb65fc712739b5e",
+                          "dependencies": {
+                            "@npmcli/node-gyp": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\node-gyp",
+                              "tree_sha256": "1e915b6dd66ccf15a835056fc22e8c7f2306cebf12f1a27db394c3efbfb6e771",
+                              "dependencies": {}
+                            },
+                            "@npmcli/package-json": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                            },
+                            "@npmcli/promise-spawn": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\promise-spawn"
+                            },
+                            "node-gyp": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\node-gyp",
+                              "tree_sha256": "207d661ddb035bfea81a8760014ef9dde35d02405beec99b52a6182b70497d0c",
+                              "dependencies": {
+                                "env-paths": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\env-paths",
+                                  "tree_sha256": "f08ba546299e0b06bf1919eff1e37b3f5fded786018ad265ddd326e803782b44",
+                                  "dependencies": {}
+                                },
+                                "exponential-backoff": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\exponential-backoff",
+                                  "tree_sha256": "ba106709995c15b5dc551c55c9a5818f26f6bb7c6f6355e95907d1487430739c",
+                                  "dependencies": {}
+                                },
+                                "graceful-fs": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\graceful-fs",
+                                  "tree_sha256": "70d0d9138c17dc2c843207b427a8845db24b7200c0c04b48e553bb8d490775c1",
+                                  "dependencies": {}
+                                },
+                                "nopt": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\nopt",
+                                  "tree_sha256": "8cafaa8e75682cdc8fa777dae2316b0799f7e1382faf264399829d1b2d5b1807",
+                                  "dependencies": {
+                                    "abbrev": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\abbrev",
+                                      "tree_sha256": "adb34d032bf2324f819a8938dfefc685033d45026ecf1fa85a0b19d3fe563343",
+                                      "dependencies": {}
+                                    }
+                                  }
+                                },
+                                "proc-log": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                                },
+                                "semver": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                                },
+                                "tar": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\tar",
+                                  "tree_sha256": "62e340414111eb68123c80cfa6ad419d95d5604613130254b366f65e23a713f0",
+                                  "dependencies": {
+                                    "@isaacs/fs-minipass": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@isaacs\\fs-minipass",
+                                      "tree_sha256": "0146b3b20ea4a947ca49ec8e3b906dfd3b2bb6d71b5a4f7a9a3ed8860f9d2007",
+                                      "dependencies": {
+                                        "minipass": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                        }
+                                      }
+                                    },
+                                    "chownr": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\chownr",
+                                      "tree_sha256": "c7b129d1b88addde0deef6390ba2a23d763c0e597f057614fe8f0758836b06a0",
+                                      "dependencies": {}
+                                    },
+                                    "minipass": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                    },
+                                    "minizlib": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minizlib",
+                                      "tree_sha256": "330022be803333fee22f4beee8f40632406505e53e8938764e6661b4146defca",
+                                      "dependencies": {
+                                        "minipass": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                        }
+                                      }
+                                    },
+                                    "yallist": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\yallist",
+                                      "tree_sha256": "7ab6ca66fdc24b3b0a0fec5ab016770601e0d74c366f1938d157d694c7b9c722",
+                                      "dependencies": {}
+                                    }
+                                  }
+                                },
+                                "tinyglobby": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\tinyglobby",
+                                  "tree_sha256": "7cf51d460b2ed341e20dc51044c6a8fe61870a8a4a61284f5c31920ff2a05d3b",
+                                  "dependencies": {
+                                    "fdir": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\tinyglobby\\node_modules\\fdir",
+                                      "tree_sha256": "1ace4b0b10f41faec36ec6d25568a4351cc58d03fa7e5cccf832db41cce2c5fb",
+                                      "dependencies": {}
+                                    },
+                                    "picomatch": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\tinyglobby\\node_modules\\picomatch",
+                                      "tree_sha256": "e2cbfa4b34792f7ba5f11fba099bfc4448c0c53dd76d91846ad6741a0a49162b",
+                                      "dependencies": {}
+                                    }
+                                  }
+                                },
+                                "undici": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\undici",
+                                  "tree_sha256": "7c729444057bee31b865290067a337641339c54985db157e2fdb975d9fc62f8e",
+                                  "dependencies": {}
+                                },
+                                "which": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\which"
+                                }
+                              }
+                            },
+                            "proc-log": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                            }
+                          }
+                        },
+                        "cacache": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\cacache"
+                        },
+                        "fs-minipass": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\fs-minipass"
+                        },
+                        "minipass": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                        },
+                        "npm-package-arg": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                        },
+                        "npm-packlist": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-packlist",
+                          "tree_sha256": "cd0189d3d5cb175691be7832d7cb3596a413006ce788338ecd205f5fd100a468",
+                          "dependencies": {
+                            "glob": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\glob"
+                            },
+                            "ignore-walk": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-packlist\\node_modules\\ignore-walk",
+                              "tree_sha256": "e44ca6d74155538a676060852e8291fafbe9b43843ab0de453c31eb10f7b8e0a",
+                              "dependencies": {
+                                "minimatch": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch"
+                                }
+                              }
+                            },
+                            "proc-log": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                            }
+                          }
+                        },
+                        "npm-pick-manifest": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-pick-manifest"
+                        },
+                        "npm-registry-fetch": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch",
+                          "tree_sha256": "bbdd110193dccbc89bab60855b2a9413b0dbf53ea34705c606e4d04fca8614af",
+                          "dependencies": {
+                            "@npmcli/redact": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\redact",
+                              "tree_sha256": "061dc2b33489605eea9c91453a50cdcefc6a4fa4ced8bb96dbb92ca495bbe76d",
+                              "dependencies": {}
+                            },
+                            "jsonparse": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\jsonparse",
+                              "tree_sha256": "9eefb7f482590afbb5ff25ff45642b0dc69cb6646fa3d42849abe7aae709e094",
+                              "dependencies": {}
+                            },
+                            "make-fetch-happen": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\make-fetch-happen",
+                              "tree_sha256": "4d791c35259280fe45f4e1401905b8d38672ba9cf56b387a9c7d70e3423f6112",
+                              "dependencies": {
+                                "@gar/promise-retry": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry"
+                                },
+                                "@npmcli/agent": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\agent",
+                                  "tree_sha256": "40cf4374cec2680f3d28ace6f44b9848d730fd5e34211a9578f7b48e39afeba0",
+                                  "dependencies": {
+                                    "agent-base": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\agent\\node_modules\\agent-base",
+                                      "tree_sha256": "a5daa1a277bc34e48d82fc0927e0348ad27f98e1ec8df5c8dfe87ec95298d7e6",
+                                      "dependencies": {}
+                                    },
+                                    "http-proxy-agent": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\agent\\node_modules\\http-proxy-agent",
+                                      "tree_sha256": "e8dd3612247d4abcb4ccc332e5f2ded09176b6fc5104019307eb728781707e89",
+                                      "dependencies": {
+                                        "agent-base": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\agent\\node_modules\\agent-base"
+                                        },
+                                        "debug": {
+                                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\debug",
+                                          "tree_sha256": "25e76146cce6a1825012afe6c08d9542722c588aae511aa4958c3bf07d19b163",
+                                          "dependencies": {
+                                            "ms": {
+                                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\ms",
+                                              "tree_sha256": "397d16c45b9c13ef96d6b1c1e18a5baf7da7910c04eb77129d007c542f783bf2",
+                                              "dependencies": {}
+                                            }
+                                          }
+                                        },
+                                        "proxy-agent-negotiate": {
+                                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\proxy-agent-negotiate",
+                                          "tree_sha256": "72180f39a5b2dc732097c7b498eb5696f4d062327130ed7d98fc71a62c66cf62",
+                                          "dependencies": {}
+                                        }
+                                      }
+                                    },
+                                    "https-proxy-agent": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\agent\\node_modules\\https-proxy-agent",
+                                      "tree_sha256": "3a2115a7a8488a19d07f3e319dce053794bc6caf88063674198cfc39409209fb",
+                                      "dependencies": {
+                                        "agent-base": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\agent\\node_modules\\agent-base"
+                                        },
+                                        "debug": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\debug"
+                                        },
+                                        "proxy-agent-negotiate": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proxy-agent-negotiate"
+                                        }
+                                      }
+                                    },
+                                    "lru-cache": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\lru-cache"
+                                    },
+                                    "socks-proxy-agent": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\socks-proxy-agent",
+                                      "tree_sha256": "196e8d7f7326bdf694ccad916cd889df14522a0b51cdfa6eebedcf25d99e0249",
+                                      "dependencies": {
+                                        "agent-base": {
+                                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\socks-proxy-agent\\node_modules\\agent-base",
+                                          "tree_sha256": "a5daa1a277bc34e48d82fc0927e0348ad27f98e1ec8df5c8dfe87ec95298d7e6",
+                                          "dependencies": {}
+                                        },
+                                        "debug": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\debug"
+                                        },
+                                        "socks": {
+                                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\socks",
+                                          "tree_sha256": "b0cc7dff4a1422cfe5d35d25801182fdc655b69d0ee4df5fc4d5681fffd6a0f6",
+                                          "dependencies": {
+                                            "ip-address": {
+                                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\ip-address",
+                                              "tree_sha256": "8225dcb39e04a9ff61b2f917eeb2cfba321c745f1e25ce07c5e5edaa3a03ff44",
+                                              "dependencies": {}
+                                            },
+                                            "smart-buffer": {
+                                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\smart-buffer",
+                                              "tree_sha256": "c613a6ef22c6f3726bbf523558c0a8ea4332e0baa9a0ba55fe5fd6518a3929ec",
+                                              "dependencies": {}
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "@npmcli/redact": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\redact"
+                                },
+                                "cacache": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\cacache"
+                                },
+                                "http-cache-semantics": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\http-cache-semantics",
+                                  "tree_sha256": "0c19294aab51137a7080d02b0acda2f9620a607c016f4e5ea7dabddcaf77f709",
+                                  "dependencies": {}
+                                },
+                                "minipass": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                },
+                                "minipass-fetch": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-fetch",
+                                  "tree_sha256": "135a7a1dc48e358439f96b0e5e23604b2c5dacaea0558c95a7af2b961253903d",
+                                  "dependencies": {
+                                    "iconv-lite": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\iconv-lite",
+                                      "tree_sha256": "8170feae7a25610236175d5ad052ae0bae59f35af0170aad41f99730782cd308",
+                                      "dependencies": {
+                                        "safer-buffer": {
+                                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\safer-buffer",
+                                          "tree_sha256": "89d32f91c62aa913eaabe5a7b8b930d19edcc4690a796b106cbb187320842f19",
+                                          "dependencies": {}
+                                        }
+                                      }
+                                    },
+                                    "minipass": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                    },
+                                    "minipass-sized": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-sized",
+                                      "tree_sha256": "f0f4a94bd13c6817b82d114fec01e18557dd017004fe34254361e1df7c006438",
+                                      "dependencies": {
+                                        "minipass": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                        }
+                                      }
+                                    },
+                                    "minizlib": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minizlib"
+                                    }
+                                  }
+                                },
+                                "minipass-flush": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-flush"
+                                },
+                                "minipass-pipeline": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-pipeline"
+                                },
+                                "negotiator": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\negotiator",
+                                  "tree_sha256": "8e90e412d8ed2773b0e48d8c067759b7de37197b4e67082b134a4948a653a21e",
+                                  "dependencies": {}
+                                },
+                                "proc-log": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                                },
+                                "ssri": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ssri"
+                                }
+                              }
+                            },
+                            "minipass": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                            },
+                            "minipass-fetch": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-fetch"
+                            },
+                            "minizlib": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minizlib"
+                            },
+                            "npm-package-arg": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                            },
+                            "proc-log": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                            }
+                          }
+                        },
+                        "proc-log": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                        },
+                        "sigstore": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\sigstore",
+                          "tree_sha256": "a9a397e075f1fd3fec6cfc4f708efdac41e30dc5eb12e40d551129efa8439c42",
+                          "dependencies": {
+                            "@sigstore/bundle": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\bundle",
+                              "tree_sha256": "6dac6f2f49a08298d9dec008afa9bef9dc39cd942457e7d58f7bab8eae19904a",
+                              "dependencies": {
+                                "@sigstore/protobuf-specs": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\protobuf-specs",
+                                  "tree_sha256": "69e77dd0d770900d1068493dcf37afb3053ab7c7c3e63685bb45b9d99c12156c",
+                                  "dependencies": {}
+                                }
+                              }
+                            },
+                            "@sigstore/core": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\core",
+                              "tree_sha256": "b7b6155565e05c958fc58697c338984f79c77159a9eb186b3abe28ed20511926",
+                              "dependencies": {}
+                            },
+                            "@sigstore/protobuf-specs": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\protobuf-specs"
+                            },
+                            "@sigstore/sign": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\sign",
+                              "tree_sha256": "07fb1d1f3a40887babb24b4eced8d75d071d297e08c23ffbf34d3b24ed7f0ffe",
+                              "dependencies": {
+                                "@gar/promise-retry": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry"
+                                },
+                                "@sigstore/bundle": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\bundle"
+                                },
+                                "@sigstore/core": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\core"
+                                },
+                                "@sigstore/protobuf-specs": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\protobuf-specs"
+                                },
+                                "make-fetch-happen": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\make-fetch-happen"
+                                },
+                                "proc-log": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                                }
+                              }
+                            },
+                            "@sigstore/tuf": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\tuf",
+                              "tree_sha256": "32dd5ecc75d64cb6b68eb2963f15b1c502bcaf2662c0725d1c12b18b04fd6dc7",
+                              "dependencies": {
+                                "@sigstore/protobuf-specs": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\protobuf-specs"
+                                },
+                                "tuf-js": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\tuf-js",
+                                  "tree_sha256": "f19f01b33f1966b09f756d7bbd4427808cdc0e6c6b4f4ceab7893d51d8ce4d38",
+                                  "dependencies": {
+                                    "@gar/promise-retry": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry"
+                                    },
+                                    "@tufjs/models": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@tufjs\\models",
+                                      "tree_sha256": "602c97ee3fc57995cde87b50118876c9806269813c32fd25fe9ccf76ea37db9a",
+                                      "dependencies": {
+                                        "@tufjs/canonical-json": {
+                                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@tufjs\\canonical-json",
+                                          "tree_sha256": "dc21aa00376f20d18cf39df42ef905b8d84a688cbc3a583ea8f9cf2830515cc6",
+                                          "dependencies": {}
+                                        },
+                                        "minimatch": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch"
+                                        }
+                                      }
+                                    },
+                                    "debug": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\debug"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "@sigstore/verify": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\verify",
+                              "tree_sha256": "13867e86ec0dd071f2eae2199c0a6cb3a1cfa2cd84853cca5df97307702649a3",
+                              "dependencies": {
+                                "@sigstore/bundle": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\bundle"
+                                },
+                                "@sigstore/core": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\core"
+                                },
+                                "@sigstore/protobuf-specs": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\protobuf-specs"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "ssri": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ssri"
+                        },
+                        "tar": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\tar"
+                        }
+                      }
+                    },
+                    "proc-log": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                    },
+                    "semver": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                    }
+                  }
+                },
+                "@npmcli/name-from-folder": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\name-from-folder"
+                },
+                "@npmcli/node-gyp": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\node-gyp"
+                },
+                "@npmcli/package-json": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                },
+                "@npmcli/query": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\query",
+                  "tree_sha256": "323e17be6efc31451f274587e3a39eb87f4b2502c3545a342167bc5e3c020657",
+                  "dependencies": {
+                    "postcss-selector-parser": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\postcss-selector-parser",
+                      "tree_sha256": "97b006852bf7204e94bd5c3cf5e253ea7a4c517c5c7dfa169fe722fc48fc7aca",
+                      "dependencies": {
+                        "cssesc": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\cssesc",
+                          "tree_sha256": "eb1cb52a02cfd1d142274f3899de9444cdfa5c3f16cb7d1bd80deab14b50d840",
+                          "dependencies": {}
+                        },
+                        "util-deprecate": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\util-deprecate",
+                          "tree_sha256": "d13f20b8ded3f315b68bbd4ee69fc7ca5390c71951034ace51f677bfd7190a54",
+                          "dependencies": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "@npmcli/redact": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\redact"
+                },
+                "@npmcli/run-script": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script"
+                },
+                "bin-links": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\bin-links",
+                  "tree_sha256": "df95a469486c843aad1f1b183666f6bac1ff396229a48fa0e258de21e46baf80",
+                  "dependencies": {
+                    "cmd-shim": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\bin-links\\node_modules\\cmd-shim",
+                      "tree_sha256": "e720e95bf631e3f2a0e550843bed57c297af3efe4f34a8661ab674cb996b1202",
+                      "dependencies": {}
+                    },
+                    "npm-normalize-package-bin": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\bin-links\\node_modules\\npm-normalize-package-bin",
+                      "tree_sha256": "bbbd80ee15f23062a4e26ce7c116f7d08919094d82ac53c0bf306b06de14da8a",
+                      "dependencies": {}
+                    },
+                    "proc-log": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                    },
+                    "read-cmd-shim": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\bin-links\\node_modules\\read-cmd-shim",
+                      "tree_sha256": "d8f4af56df5ed4b9e3aa1a6c88454c9a157c45f0fc62432a501b6262eacabaef",
+                      "dependencies": {}
+                    },
+                    "write-file-atomic": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\write-file-atomic",
+                      "tree_sha256": "4a54fd6430169414e34711f6d9ae4a4182cca6f854af7014b42ed5a5f59a4a66",
+                      "dependencies": {
+                        "signal-exit": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\signal-exit",
+                          "tree_sha256": "bc70e645454d7c1a58642d591a64a842b19c2efe2b11ef913659376fa70c2193",
+                          "dependencies": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "cacache": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\cacache"
+                },
+                "common-ancestor-path": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\common-ancestor-path",
+                  "tree_sha256": "4401385929939bf3a1b143471b42141281122aefacc0baa425cf686e296c4f7a",
+                  "dependencies": {}
+                },
+                "diff": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\diff",
+                  "tree_sha256": "2824012a6dba21e41a8347ea6b3a7fd4cdf48acf0402e6019a35d40dff52acc2",
+                  "dependencies": {}
+                },
+                "hosted-git-info": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\hosted-git-info"
+                },
+                "json-stringify-nice": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\json-stringify-nice",
+                  "tree_sha256": "5ddac8adcc27b1053a6649d3adbd8160479213d1c914477275b6b81d4c1d655b",
+                  "dependencies": {}
+                },
+                "lru-cache": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\lru-cache"
+                },
+                "minimatch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch"
+                },
+                "nopt": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\nopt"
+                },
+                "npm-install-checks": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-install-checks"
+                },
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "npm-pick-manifest": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-pick-manifest"
+                },
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                },
+                "pacote": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\pacote"
+                },
+                "parse-conflict-json": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\parse-conflict-json",
+                  "tree_sha256": "b5a0528ee4c4c17513864c48a3f7b382985071c146d1e33562f04e3efd29c348",
+                  "dependencies": {
+                    "json-parse-even-better-errors": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\json-parse-even-better-errors"
+                    },
+                    "just-diff": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\just-diff",
+                      "tree_sha256": "5c506ba505e126b60fe8804477df43fea616291f48a57e9d1e29d9c3b42ddd84",
+                      "dependencies": {}
+                    },
+                    "just-diff-apply": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\just-diff-apply",
+                      "tree_sha256": "f35892fae81fd820c16f5fc0c06147763af79e8faa9992762bf808234cf912f5",
+                      "dependencies": {}
+                    }
+                  }
+                },
+                "proc-log": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                },
+                "proggy": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\proggy",
+                  "tree_sha256": "a2144ed0e5ab662590d661f17d07ed80f9c5615603f7d8f59ee42a336ec8e735",
+                  "dependencies": {}
+                },
+                "promise-all-reject-late": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\promise-all-reject-late",
+                  "tree_sha256": "d0acebf76c73b10a8d6a023ec3c5e3e49e77edd47d02793b956c7db65ac709a4",
+                  "dependencies": {}
+                },
+                "promise-call-limit": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\promise-call-limit",
+                  "tree_sha256": "95b96a435164eca4a1eebb2da712d6ceb06cb505364901beddfe2052276b9727",
+                  "dependencies": {}
+                },
+                "semver": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                },
+                "ssri": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ssri"
+                },
+                "treeverse": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\treeverse",
+                  "tree_sha256": "c8c70f49de46c5cffe5e5279703c840980ba76c3eae548723eba2e1c0a77ac23",
+                  "dependencies": {}
+                },
+                "validate-npm-package-name": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\validate-npm-package-name"
+                },
+                "walk-up-path": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\walk-up-path",
+                  "tree_sha256": "942457a60bf93b031a52ab6f83f7dd879c674f235ad08383598ed9c7899717b9",
+                  "dependencies": {}
+                }
+              }
+            },
+            "@npmcli/config": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\config",
+              "tree_sha256": "4e4fc6066be9863c5474d7ebe6bdd195a5e5d99f0e65b4e679b396478c280eca",
+              "dependencies": {
+                "@npmcli/map-workspaces": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\map-workspaces"
+                },
+                "@npmcli/package-json": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                },
+                "ci-info": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\ci-info",
+                  "tree_sha256": "cea2bed76450d8d9927eccfebdc11bcde3e18cccc9d85c329c7ffb6d71446c6f",
+                  "dependencies": {}
+                },
+                "ini": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ini"
+                },
+                "nopt": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\nopt"
+                },
+                "proc-log": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                },
+                "semver": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                },
+                "walk-up-path": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\walk-up-path"
+                }
+              }
+            },
+            "@npmcli/fs": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\fs"
+            },
+            "@npmcli/git": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\git"
+            },
+            "@npmcli/map-workspaces": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\map-workspaces"
+            },
+            "@npmcli/metavuln-calculator": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\metavuln-calculator"
+            },
+            "@npmcli/package-json": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+            },
+            "@npmcli/promise-spawn": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\promise-spawn"
+            },
+            "@npmcli/redact": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\redact"
+            },
+            "@npmcli/run-script": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script"
+            },
+            "@sigstore/tuf": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\tuf"
+            },
+            "abbrev": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\abbrev"
+            },
+            "archy": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\archy",
+              "tree_sha256": "825b3636da97141e7e79383eea15de52750806153fd6d9391bd671678be6c5f3",
+              "dependencies": {}
+            },
+            "bin-links": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\bin-links"
+            },
+            "cacache": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\cacache"
+            },
+            "chalk": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\chalk",
+              "tree_sha256": "56863f0c8f5915d6feaa9774c57e57dd472d00aa51a4eb50bb526c6a4b5e15e3",
+              "dependencies": {}
+            },
+            "ci-info": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ci-info"
+            },
+            "diff": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\diff"
+            },
+            "fastest-levenshtein": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\fastest-levenshtein",
+              "tree_sha256": "b8ef95f99e3c5eda75420365cd3a33a0bf0d4213ee6607fc9e82a6c9129fe876",
+              "dependencies": {}
+            },
+            "fs-minipass": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\fs-minipass"
+            },
+            "glob": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\glob"
+            },
+            "graceful-fs": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\graceful-fs"
+            },
+            "hosted-git-info": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\hosted-git-info"
+            },
+            "ini": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ini"
+            },
+            "init-package-json": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\init-package-json",
+              "tree_sha256": "53f600a1bfc17ccd875411016bc531f901107677361b105159f7942909ea2164",
+              "dependencies": {
+                "@npmcli/package-json": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                },
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "promzard": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\promzard",
+                  "tree_sha256": "a534b4443bacc94db1e388e084808751d8061abf41ea8dc102bce93b1ddaf251",
+                  "dependencies": {
+                    "read": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\read",
+                      "tree_sha256": "9e698e35c6f9ed61216aa9b8aa8293a5f073b2d5e971d53ec08c1211cd1b928d",
+                      "dependencies": {
+                        "mute-stream": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\mute-stream",
+                          "tree_sha256": "b6f6a041098cdbc570a684d2d8ae18ffd63cb2a8aa5f8aea35b9b058b25aa368",
+                          "dependencies": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "read": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\read"
+                },
+                "semver": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                },
+                "validate-npm-package-name": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\validate-npm-package-name"
+                }
+              }
+            },
+            "is-cidr": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\is-cidr",
+              "tree_sha256": "0cf9cf51dea7454d48ef5249c0893e356362cf1f4b561b0c97a421ee238a12d2",
+              "dependencies": {
+                "cidr-regex": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\cidr-regex",
+                  "tree_sha256": "3668ae54561bc8a75f4ef656872a3a270041d470e884c3e69229d623e939b392",
+                  "dependencies": {}
+                }
+              }
+            },
+            "json-parse-even-better-errors": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\json-parse-even-better-errors"
+            },
+            "libnpmaccess": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmaccess",
+              "tree_sha256": "e4424142398dafb5b53001339b2d941403508d56b643e731a7ffef9745111736",
+              "dependencies": {
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                }
+              }
+            },
+            "libnpmdiff": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmdiff",
+              "tree_sha256": "31c3e75c955352940d6e778d424579ee0c71a4e3d172de0891d20d067aca82c3",
+              "dependencies": {
+                "@npmcli/arborist": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\arborist"
+                },
+                "@npmcli/installed-package-contents": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\installed-package-contents"
+                },
+                "binary-extensions": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\binary-extensions",
+                  "tree_sha256": "d405121b41dfd5ce3b03b8f00f91cd07e1d539834805754ea920cd978a68f7da",
+                  "dependencies": {}
+                },
+                "diff": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\diff"
+                },
+                "minimatch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch"
+                },
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "pacote": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\pacote"
+                },
+                "tar": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\tar"
+                }
+              }
+            },
+            "libnpmexec": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmexec",
+              "tree_sha256": "1316237f2d525b33b707069582d0ae2d7811528348582fbaef73cc140ef4a981",
+              "dependencies": {
+                "@gar/promise-retry": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry"
+                },
+                "@npmcli/arborist": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\arborist"
+                },
+                "@npmcli/package-json": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                },
+                "@npmcli/run-script": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script"
+                },
+                "ci-info": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ci-info"
+                },
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "pacote": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\pacote"
+                },
+                "proc-log": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                },
+                "read": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\read"
+                },
+                "semver": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                },
+                "signal-exit": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\signal-exit"
+                },
+                "walk-up-path": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\walk-up-path"
+                }
+              }
+            },
+            "libnpmfund": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmfund",
+              "tree_sha256": "cd3f71b4692d9b41969d755f759e03046bfbc875d66b8a3c2fea5e7d2617a1fc",
+              "dependencies": {
+                "@npmcli/arborist": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\arborist"
+                }
+              }
+            },
+            "libnpmorg": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmorg",
+              "tree_sha256": "7e53a66281785a6678a3059e563de12e173e06c86ffd2b1ca2cd1c8091b61698",
+              "dependencies": {
+                "aproba": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\aproba",
+                  "tree_sha256": "1364e0aa35fe93cc7da22054dc10bd4f0c49018f4af5d8672defd1e47aa1fb5f",
+                  "dependencies": {}
+                },
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                }
+              }
+            },
+            "libnpmpack": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmpack",
+              "tree_sha256": "a106ef2d157981a80fbdc67f5c1cfd87071f165c78d0e5179fbaa422b6645930",
+              "dependencies": {
+                "@npmcli/arborist": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\arborist"
+                },
+                "@npmcli/run-script": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script"
+                },
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "pacote": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\pacote"
+                }
+              }
+            },
+            "libnpmpublish": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmpublish",
+              "tree_sha256": "a39a3a400e82da9840ea244edca919ba9e596edcca79a593cc1a21bfe6a599be",
+              "dependencies": {
+                "@npmcli/package-json": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                },
+                "ci-info": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ci-info"
+                },
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                },
+                "proc-log": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                },
+                "semver": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                },
+                "sigstore": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\sigstore"
+                },
+                "ssri": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ssri"
+                }
+              }
+            },
+            "libnpmsearch": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmsearch",
+              "tree_sha256": "0a0ec815b506fb75340016e815a78f642a3c2d59a9dc9559836aa5341e88d304",
+              "dependencies": {
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                }
+              }
+            },
+            "libnpmteam": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmteam",
+              "tree_sha256": "81ed75f6c4b35dc353d231c188d618b2031f083f08b53a5b044fe667732a0cf0",
+              "dependencies": {
+                "aproba": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\aproba"
+                },
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                }
+              }
+            },
+            "libnpmversion": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmversion",
+              "tree_sha256": "dcd951cf519c013a0715c940a260e9f524d4681af67f26c8f50167fabb8fe478",
+              "dependencies": {
+                "@npmcli/git": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\git"
+                },
+                "@npmcli/run-script": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script"
+                },
+                "json-parse-even-better-errors": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\json-parse-even-better-errors"
+                },
+                "proc-log": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                },
+                "semver": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                }
+              }
+            },
+            "make-fetch-happen": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\make-fetch-happen"
+            },
+            "minimatch": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch"
+            },
+            "minipass": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+            },
+            "minipass-pipeline": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-pipeline"
+            },
+            "ms": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ms"
+            },
+            "node-gyp": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\node-gyp"
+            },
+            "nopt": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\nopt"
+            },
+            "npm-audit-report": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-audit-report",
+              "tree_sha256": "56b4dd8ebc9f0bbeb0db034ecce93877602875fa8595daf3b88e32fb36e2a89d",
+              "dependencies": {}
+            },
+            "npm-install-checks": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-install-checks"
+            },
+            "npm-package-arg": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+            },
+            "npm-pick-manifest": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-pick-manifest"
+            },
+            "npm-profile": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-profile",
+              "tree_sha256": "fbe1343c2110d1baf1e5347152971b2f1085e54684f1ee400177e103127bbe54",
+              "dependencies": {
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                },
+                "proc-log": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                }
+              }
+            },
+            "npm-registry-fetch": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+            },
+            "npm-user-validate": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-user-validate",
+              "tree_sha256": "536439084f7d543d3f5b01bbc550a703baf495bb2ae086eac6b4f1f33e464354",
+              "dependencies": {}
+            },
+            "p-map": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\p-map"
+            },
+            "pacote": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\pacote"
+            },
+            "parse-conflict-json": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\parse-conflict-json"
+            },
+            "proc-log": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+            },
+            "qrcode-terminal": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\qrcode-terminal",
+              "tree_sha256": "1bd35a1cda16676a5d26ea2979323432772aceda53ba163d6d11b817c0d86ac3",
+              "dependencies": {}
+            },
+            "read": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\read"
+            },
+            "semver": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+            },
+            "spdx-expression-parse": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\spdx-expression-parse"
+            },
+            "ssri": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ssri"
+            },
+            "supports-color": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\supports-color",
+              "tree_sha256": "596bb866146f4a66cff32416c1e4906044e106b92564da209519aaf55f7beb85",
+              "dependencies": {}
+            },
+            "tar": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\tar"
+            },
+            "text-table": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\text-table",
+              "tree_sha256": "00cf9ff93eea454ce499e0e961c60eecab08ae21c6e36e17936eb6fa7b72d13f",
+              "dependencies": {}
+            },
+            "tiny-relative-date": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\tiny-relative-date",
+              "tree_sha256": "f0ee3bc037cd841e55b6d1b2c28e1dd31e5b3cfa5260c9c0349c7c54fc714ba0",
+              "dependencies": {}
+            },
+            "treeverse": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\treeverse"
+            },
+            "validate-npm-package-name": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\validate-npm-package-name"
+            },
+            "which": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\which"
+            }
+          }
+        }
+      },
+      "npx": {
+        "path": "C:\\nodejs\\npx.cmd",
+        "exists": true,
+        "sha256": "7713cac6a01e6198745fbe2cb01623fcd8a7883e171891ca71dc158088fa1d10",
+        "package": {
+          "reference": "C:\\nodejs\\node_modules\\npm"
+        }
+      },
+      "bash": {
+        "path": "C:\\Program Files\\Git\\usr\\bin\\bash.exe",
+        "exists": true,
+        "sha256": "fc362aae1f217d34d02237d99527839dd6cf85b37c7a0277109400bfa0faa594"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": {
+        "path": "C:\\nodejs\\opencode.cmd",
+        "exists": true,
+        "sha256": "b53b698473bfa46e09487e485a7f1ad5b4881f8a8b319d3619aa251f3be8ae10",
+        "package": {
+          "root": "C:\\nodejs\\node_modules\\opencode-ai",
+          "tree_sha256": "e879b83837f92dfd151a3b8c5cf672df7e41f8f8a485c948084cd480715744fd",
+          "dependencies": {
+            "opencode-darwin-arm64": null,
+            "opencode-darwin-x64": null,
+            "opencode-darwin-x64-baseline": null,
+            "opencode-linux-arm64": null,
+            "opencode-linux-arm64-musl": null,
+            "opencode-linux-x64": null,
+            "opencode-linux-x64-baseline": null,
+            "opencode-linux-x64-baseline-musl": null,
+            "opencode-linux-x64-musl": null,
+            "opencode-windows-arm64": null,
+            "opencode-windows-x64": {
+              "root": "C:\\nodejs\\node_modules\\opencode-ai\\node_modules\\opencode-windows-x64",
+              "tree_sha256": "a0d2acdc30756dbafcde1235d1ff74c23ad2bbec119623f1e9ab3ec060d33fa7",
+              "dependencies": {}
+            },
+            "opencode-windows-x64-baseline": {
+              "root": "C:\\nodejs\\node_modules\\opencode-ai\\node_modules\\opencode-windows-x64-baseline",
+              "tree_sha256": "cbb83374af95e758cd6ccdd1378e58e63b84966c751756459d922abcecedfa6b",
+              "dependencies": {}
+            }
+          }
+        }
+      },
+      "claude": {
+        "path": "C:\\Users\\vac34\\.local\\bin\\claude.exe",
+        "exists": true,
+        "sha256": "87e0cb6ae0f4775da388cd3043f4d8097ef961dcddbf55fe90bc61ffc3f57a30"
+      },
+      "codex": {
+        "path": "C:\\nodejs\\codex.cmd",
+        "exists": true,
+        "sha256": "00743f8084cbc1594683b33cfb8bf14d2ce40d46ca6ba9f7142de6ba31502a84",
+        "package": {
+          "root": "C:\\nodejs\\node_modules\\@openai\\codex",
+          "tree_sha256": "470c9726a934c0dea2b7bd99e48cd8b250430f16034011a95bc91b0e5fe27aaf",
+          "dependencies": {
+            "@openai/codex-darwin-arm64": null,
+            "@openai/codex-darwin-x64": null,
+            "@openai/codex-linux-arm64": null,
+            "@openai/codex-linux-x64": null,
+            "@openai/codex-win32-arm64": null,
+            "@openai/codex-win32-x64": {
+              "root": "C:\\nodejs\\node_modules\\@openai\\codex\\node_modules\\@openai\\codex-win32-x64",
+              "tree_sha256": "a0d7d4a099f96e3e679cec9d8190b5b297b7835fec0c57d1779430da66a9057c",
+              "dependencies": {}
+            }
+          }
+        }
+      },
+      "ruff": {
+        "path": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\Scripts\\ruff.exe",
+        "exists": true,
+        "sha256": "bd38bcef24863ae54a2abb5a0cc33446ef1ed6f1385b60bf6329fcbbce0a105a"
+      }
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\vac34\\.codex\\config.toml",
+        "exists": true,
+        "sha256": "9f59a7f76468d0bcabae332d12af5e7d7e775cc020b73c6fc9fdf49b35976f4f"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.codex\\hooks.json",
+        "exists": true,
+        "sha256": "bd38b967317d2d5a0502c88338dd1f00bb9d1293d10792cc5a3ace94c626c112"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.claude\\settings.json",
+        "exists": true,
+        "sha256": "a69ab2d79a5122ee88f991ff0087b3ecd63e467e33c1307803c840ee6b01c500"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.config\\opencode\\opencode.json",
+        "exists": true,
+        "sha256": "751840e69c629b0b68219b3f3699c0c45cf1e2a6310181eda4d3053ea9fb15f0"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\vac34\\.gitconfig",
+        "exists": true,
+        "sha256": "9e8f1d2f9bb79a75b76a97c92c5e3869644a072c9337f359ec004e530c48f8fa"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\vac34\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\vac34\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "6d51bf6ca978727f654fdccf6cd249534c0adb29e53fca7facedc0fb8d83150c"
+      },
+      "core_unit_shard.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "1a22bac5140eeaf33be64413027a22c474420dbe7e3c6134af9b5e6f90942c9d"
+      },
+      "test_runner.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "11eca655a72d976476797e3c1333714fc1e99c7c7b64dbf44d6865889d599456"
+      },
+      "verification_cache.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "70188f394bb84cc78fe2417daecf5b38b6abcd3be73956194baf1ef1911413ba"
+      },
+      "process_tree.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "798e6663a85d1906533203fe961472ad8eb8b7e645aa3961a694c1192ca5efcb"
+      },
+      "verification_bootstrap.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "8fa1c333bec82156f70bb66e7df786e99265d0b4c5f3da362a830bfc9198ab24"
+      },
+      "verification_impact.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "d2829c9de720e9b84d9dfa4056786c533bf9cff86913c5ed0546fe63e19f5a83"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "f008508f0f88d1c6a74f95d7e541a411a685b375404d7dd1ea49035ff7a5064c"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "FAIL",
+  "problem": "focused check failed, timed out, or collected zero tests"
+}

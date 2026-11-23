@@ -1,0 +1,218 @@
+PASS: nitro-m3 -- plan_claim returns a dry-run plan with no refusal
+PASS: nitro-m3 -- plan writes zero canonical bytes
+PASS: nitro-m3 -- apply_claim commits the claim
+PASS: nitro-m3 -- claim moves exactly one ticket to DOING with / checkbox
+PASS: nitro-m3 -- claim sets STATE to SCOUT/T-777 with a new event
+PASS: nitro-m3 -- claim appends exactly one LOG event with a real taxonomy
+PASS: nitro-m3 -- a same-agent re-claim refreshes the lease in place (no duplicate)
+PASS: nitro-m3 -- a live foreign claim cannot be taken over (TICKET_NOT_WORKABLE)
+PASS: nitro-m3 -- an illegal transition is refused with ILLEGAL_TRANSITION
+PASS: nitro-m3 -- transition dry-run writes zero canonical bytes
+PASS: nitro-m3 -- SCOUT->BUILD transition commits with a new event
+PASS: nitro-m3 -- checkpoint appends exactly one event with an allocated E-ID
+PASS: nitro-m3 -- checkpoint bumps STATE last_event to the new event
+PASS: nitro-m3 -- next_ticket_id ignores prose T-NNN mentions (structured-only)
+PASS: nitro-m3 -- next_ticket_id ignores LOG prose T-NNN mentions
+PASS: nitro-m3 -- ticket_add creates a canonical ticket
+PASS: nitro-m3 -- done on a TODO ticket is refused (IL_LEGAL_TICKET_LIFECYCLE)
+PASS: nitro-m3 -- refused done writes zero canonical bytes
+PASS: nitro-m3 -- done on the active DOING ticket succeeds and moves it to DONE
+PASS: nitro-m3 -- claim of the topmost workable ticket succeeds
+PASS: nitro-m3 -- legal DOING->DONE lifecycle succeeds
+PASS: nitro-m3 -- reauthorize_valve refuses a valve that has not tripped
+PASS: nitro-m3 -- set_goal_intent pivots to goal with counters from 0
+PASS: nitro-m3 -- set_goal_intent preserves phase/task (not a claim)
+PASS: nitro-m3 -- stop_checkpoint writes a resumable next_action
+PASS: nitro-m3 -- goal_entry precondition: active DOING ticket T-1 at BUILD
+PASS: nitro-m3 -- goal_entry sets task to first plan ticket
+PASS: nitro-m3 -- goal_entry cold-start routes to the plan ticket
+PASS: nitro-m3 -- no-active precondition: task is none
+PASS: nitro-integrity -- every shipped saipen_engine module imports in isolation
+PASS: nitro-integrity -- checkpoint preserves phase (no SCOUT rewrite)
+PASS: nitro-integrity -- checkpoint preserves task
+PASS: nitro-integrity -- checkpoint preserves next_action
+PASS: nitro-integrity -- ticket_add preserves execution phase
+PASS: nitro-integrity -- plan_claim dry-run writes zero canonical bytes
+PASS: nitro-integrity -- checkpoint dry-run writes zero bytes
+PASS: nitro-integrity -- normal claim of a non-top workable ticket refuses (NOT_TOP_WORKABLE)
+PASS: nitro-integrity -- claim of the topmost workable ticket succeeds
+PASS: nitro-integrity -- normal claim refuses a TODO ticket carrying blocker
+PASS: nitro-integrity -- explicit claim cannot override blocker authorization
+PASS: nitro-integrity -- refused normal and explicit blocker claims write zero bytes
+PASS: nitro-integrity -- router skips malformed TODO+blocker and never emits SCOUT for it
+PASS: nitro-integrity -- public status refuses structurally invalid TODO+blocker state
+PASS: nitro-integrity -- public next refuses structurally invalid TODO+blocker state
+PASS: nitro-integrity -- satisfied prerequisites never activate a human-decision blocker
+PASS: nitro-integrity -- mutation ignoring blocker makes Pick Rule route forbidden ticket
+PASS: nitro-integrity -- transition with a nonexistent ticket refuses
+PASS: nitro-integrity -- transition with a non-active ticket refuses (ACTIVE_TICKET_MISMATCH)
+PASS: nitro-integrity -- transition binds the exact active DOING ticket
+PASS: nitro-integrity -- block of an active DOING ticket succeeds
+PASS: nitro-integrity -- block of the active ticket never parks the session in a session-level BLOCKED state
+PASS: nitro-integrity -- block routes the next_action to the remaining workable TODO
+PASS: nitro-integrity -- unblock without the lifting decision/evidence refuses
+PASS: nitro-integrity -- unblock atomically creates TODO without active blocker/history
+PASS: nitro-integrity -- claim refuses a board the parser cannot read whole
+PASS: nitro-integrity -- router routes malformed board to inspection, never a ticket
+PASS: nitro-integrity -- ticket add escapes description pipes instead of injecting fields
+PASS: nitro-integrity -- verify text with pipe delimiters cannot inject claim fields
+PASS: nitro-integrity -- blocker payload with pipe delimiters cannot inject a verify field
+PASS: nitro-integrity -- WRITER_BUSY is a structured refusal
+PASS: nitro-integrity -- plan op_id == journal op_id (apply consumed the plan)
+PASS: nitro-integrity -- applied journal is COMMITTED
+PASS: nitro-integrity -- recovery on an externally modified pending target CONFLICTs
+PASS: nitro-integrity -- recovery refuses corrupt staged bytes (CONFLICT, not COMMIT)
+PASS: nitro-integrity -- status derives recovery_pending from real journals
+PASS: nitro-integrity -- recovery preflight recovers the single pending op first
+PASS: nitro-integrity -- a new mutation over no pending op succeeds
+PASS: nitro-integrity -- UTF-8 LF representation preserved
+PASS: nitro-integrity -- UTF-8 CRLF representation preserved by a real operation
+PASS: nitro-integrity -- UTF-8 BOM board refused before any write (zero canonical writes)
+PASS: nitro-integrity -- improve cycle_id traversal is refused
+PASS: nitro-integrity -- only one active Improve cycle is admitted
+PASS: nitro-integrity -- SWEEP disposition enum is enforced at the writer
+PASS: nitro-integrity -- checkpoint event carries [parent: E-<prev>]
+PASS: nitro-integrity -- checkpoint preserves unrelated fields (intent/counters/mode)
+PASS: nitro-integrity -- goal intent from DONE/none does not create SCOUT/none
+PASS: nitro-integrity -- checkpoint after a seal continues from the newest sealed event (E-903, not the oldest segment's E-901)
+PASS: nitro-integrity -- stale apply returns failure, never semantic success
+PASS: nitro-integrity -- every journal target carries before_hash and after_hash
+PASS: nitro-integrity -- proposed-state invalidity refuses before any journal PREPARED
+PASS: nitro-integrity -- UTF-16LE BOM board refused before any write (zero canonical writes)
+PASS: nitro-integrity -- one-file journal uses generic truthful stage, never LOG_WRITTEN
+PASS: nitro-integrity -- seat_id newline injection is refused
+PASS: nitro-integrity -- report_path traversal is refused
+PASS: nitro-integrity -- append_run returns a committed transaction result
+PASS: nitro-integrity -- Improve writer refuses a complete report and propagates
+PASS: nitro-integrity -- SAIOPS structural event carries [op: ...] provenance
+PASS: nitro-integrity -- manual structural event lacks provenance (detectable)
+PASS: nitro-integrity -- a committed op retried returns ALREADY_APPLIED, no second write
+PASS: nitro-integrity -- saipen recover --json returns structured JSON
+PASS: nitro-integrity -- saipen userperson add writes through the journal (COMMITTED)
+PASS: nitro-integrity -- userperson add keeps distinct preferences sharing a leading phrase
+PASS: nitro-integrity -- userperson reset without confirmation REFUSEs
+PASS: nitro-integrity -- project userperson reset deletes only the project profile
+PASS: nitro-integrity -- sub spawn creates a journaled instance (SPAWNED)
+PASS: nitro-integrity -- spawned sub has its own agent + real updated timestamp
+PASS: nitro-integrity -- sub spawn refuses an existing instance, never overwrites
+PASS: nitro-integrity -- sub list reports the spawned instance
+PASS: nitro-integrity -- sub pause is a journaled owned-field BLOCKED patch
+PASS: nitro-integrity -- sub pause leaves a trace in the sub LOG
+PASS: nitro-integrity -- sub resume restores the prior phase and next_action
+PASS: nitro-integrity -- sub resume leaves a trace in the sub LOG
+PASS: nitro-integrity -- resume of a non-paused sub refuses (no fake success)
+PASS: nitro-integrity -- sub clean preflight refuses a fresh instance with evidence
+PASS: nitro-integrity -- sub clean preflight refuses a nonexistent instance
+PASS: nitro-integrity -- sub clean preflight never mutates the instance
+PASS: nitro-integrity -- sub collect reports an empty eligible OUTBOX without writes
+PASS: nitro-integrity -- sub name '..' is refused (no path escape)
+PASS: nitro-integrity -- sub name '.' is refused (no path escape)
+PASS: nitro-integrity -- sub name '../x' is refused (no path escape)
+PASS: nitro-integrity -- sub name 'x/../y' is refused (no path escape)
+PASS: nitro-integrity -- sub name '..\\x' is refused (no path escape)
+PASS: nitro-integrity -- sub name 'V:\\abs' is refused (no path escape)
+PASS: nitro-integrity -- sub name 'a\nb' is refused (no path escape)
+PASS: nitro-integrity -- sub name 'a\x00b' is refused (no path escape)
+PASS: nitro-integrity -- path-escape attempts write zero bytes outside the owner root
+PASS: nitro-integrity -- first spawn installs PROTOCOL.md
+PASS: nitro-integrity -- first spawn installs TEMPLATE/
+PASS: nitro-integrity -- first spawn installs built-in sai*.md charters
+PASS: nitro-integrity -- first spawn does NOT bootstrap on a second instance
+PASS: nitro-integrity -- complete ready OUTBOX package with a verifiable role passes collect
+PASS: nitro-integrity -- ready OUTBOX missing source_head refuses (MALFORMED_PACKAGE)
+PASS: nitro-integrity -- ready OUTBOX missing source_tree_fingerprint refuses (MALFORMED_PACKAGE)
+PASS: nitro-integrity -- ready OUTBOX missing role_revision refuses (MALFORMED_PACKAGE)
+PASS: nitro-integrity -- ready OUTBOX with a superseded role revision refuses (MALFORMED_PACKAGE, STALE)
+PASS: nitro-integrity -- ready OUTBOX with an unverifiable role revision refuses (PACKAGE_INCOMPLETE)
+PASS: nitro-integrity -- malformed nonempty OUTBOX refuses (MALFORMED_PACKAGE)
+PASS: nitro-integrity -- sub collect with no name aggregates all active subs
+PASS: nitro-integrity -- context cold is read-only (zero bytes written)
+PASS: nitro-integrity -- context hot is read-only and names the claimed ticket
+PASS: nitro-integrity -- context audit accounts bytes/tokens per source
+PASS: nitro-integrity -- cold surface bytes are measured as real UTF-8 bytes
+PASS: nitro-integrity -- cold surface token count is modest (token optimization target)
+PASS: nitro-integrity -- context: with a small budget the exact routed ticket (the top workable below the orientation limit) survives in full (description + verify intact)
+PASS: nitro-integrity -- context: routed action + phase doc + recovery state survive a small budget
+PASS: nitro-integrity -- context: the board map is present and truthfully capped
+PASS: nitro-integrity -- context: _board_map omits exactly the right count (+9 more from 12 TODO tickets with cap 2 + protected full T-4)
+PASS: nitro-integrity -- context: bytes == len(surface.encode('utf-8')) and characters == len(surface) exactly (Cyrillic + Japanese)
+PASS: nitro-integrity -- context: multibyte content makes real bytes > characters
+PASS: nitro-integrity -- crash control A: changed unfinished write target CONFLICTs
+PASS: nitro-integrity -- unresolved CONFLICT is listed by pending_ops
+PASS: nitro-integrity -- unresolved CONFLICT is listed by pending_conflicts
+PASS: nitro-integrity -- new mutation over unresolved CONFLICT refuses (RECOVERY_CONFLICT)
+PASS: nitro-integrity -- recovery preflight over a conflict refuses RECOVERY_CONFLICT
+PASS: nitro-integrity -- crash control B: changed read-only dependency CONFLICTs
+PASS: nitro-integrity -- recovered state never COMMITTED over a drifted read dependency
+PASS: nitro-integrity -- new mutation refuses after read-dependency conflict
+PASS: nitro-integrity -- recovered invalid state cannot become COMMITTED (CONFLICT)
+PASS: nitro-integrity -- saipen recover --json refuses a conflict and names the op
+PASS: nitro-integrity -- subprocess crash after LOG leaves an unresolved op
+PASS: nitro-integrity -- crash-then-drifted-read-dep recover CONFLICTs in a real op
+PASS: nitro-integrity -- new mutation refuses after the subprocess-crash conflict
+PASS: nitro-integrity -- route_next on DONE + workable TODO routes to the ticket
+PASS: nitro-integrity -- route_next puts recovery ahead of normal work
+PASS: nitro-integrity -- route_next puts unresolved conflict ahead of everything
+PASS: nitro-integrity -- ticket add with TBD verify REFUSEs INCOMPLETE_TICKET
+PASS: nitro-integrity -- ticket add with a real verify succeeds and never emits TBD
+PASS: nitro-integrity -- userperson add with distilled category projects to saiui
+PASS: nitro-integrity -- cold context names the exact next ticket via the router
+PASS: nitro-integrity -- VERIFY->REVIEW under goal mechanically bumps goal_tickets
+PASS: nitro-integrity -- goal_tickets bump emits the DEC line mechanically
+PASS: nitro-integrity -- HUNT->ADD under goal mechanically bumps goal_waves
+PASS: nitro-integrity -- goal_waves bump emits the DEC line mechanically
+PASS: nitro-integrity -- a committed claim carries no staged bytes (auto-dropped at COMMIT)
+PASS: nitro-integrity -- compaction leaves committed ops staged-free (idempotent)
+PASS: nitro-integrity -- compacted op retried still returns ALREADY_APPLIED
+PASS: nitro-integrity -- a conflict journal is never compacted
+PASS: nitro-integrity -- compaction compacts a RESOLVED journal (settled maintenance op)
+PASS: nitro-integrity -- compaction keeps the full tombstone for a resolved op
+PASS: nitro-integrity -- a PREPARED journal is never compacted (evidence still required)
+PASS: nitro-integrity -- validator FAILs a new TODO ticket with placeholder verify
+PASS: nitro-integrity -- cold context includes the exact next ticket below the 8-ticket truncation boundary
+PASS: nitro-integrity -- public `saipen next` routes DONE+workable to the ticket
+PASS: nitro-integrity -- public `saipen status` exposes computed_next_action
+PASS: nitro-integrity -- public `saipen context hot` includes the computed next
+PASS: nitro-integrity -- public `saipen sub spawn` works through the adapter
+PASS: nitro-integrity -- public sub pause/resume work through the adapter
+PASS: nitro-integrity -- public closure: claim->BUILD->ticket done REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- public closure: the refused done writes zero bytes (ticket stays DOING, phase stays BUILD)
+PASS: nitro-integrity -- public closure: the state stays validator-green after the refusal
+PASS: nitro-integrity -- public `saipen next` pairs action with the routed phase doc
+PASS: nitro-integrity -- closure control A: SHIP->FINISH ends DONE/task none
+PASS: nitro-integrity -- closure control B: no DOING + ticket DONE[x] after finish
+PASS: nitro-integrity -- closure control C: crash during finish leaves an unresolved op
+PASS: nitro-integrity -- closure control C: recovery finishes exactly one ticket
+PASS: nitro-integrity -- closure control E: repeat finish returns ALREADY_APPLIED
+PASS: nitro-integrity -- closure control E: no second completion event
+PASS: nitro-integrity -- closure control F: raw done split is refused (no REVIEW/T-X + BOARD DONE)
+PASS: nitro-integrity -- gate control: finish from SCOUT REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- gate control: finish from SCOUT writes zero canonical bytes
+PASS: nitro-integrity -- gate control: finish from SCOUT leaves phase/task untouched
+PASS: nitro-integrity -- gate control: finish from BUILD REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- gate control: finish from BUILD writes zero canonical bytes
+PASS: nitro-integrity -- gate control: finish from BUILD leaves phase/task untouched
+PASS: nitro-integrity -- gate control: finish from VERIFY REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- gate control: finish from VERIFY writes zero canonical bytes
+PASS: nitro-integrity -- gate control: finish from REVIEW REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- gate control: finish from REVIEW writes zero canonical bytes
+PASS: nitro-integrity -- gate control: finish from REVIEW leaves phase/task untouched
+PASS: nitro-integrity -- gate control D: full chain SHIP->finish ends FINISHED
+PASS: nitro-integrity -- gate control D: full chain ends validator-green
+PASS: nitro-integrity -- gate-closure red control: pre-boundary history passes, post-boundary non-SHIP finish FAILs the validator
+PASS: nitro-integrity -- mutation red-control: removing the SHIP gate makes the BUILD closure succeed (the refuse controls are NOT vacuous)
+PASS: nitro-integrity -- gate control E: VERIFY->REVIEW bumps goal_tickets (0->1), never at finish
+PASS: nitro-integrity -- valve control: VERIFY->REVIEW trips at the 20-ticket cap
+PASS: nitro-integrity -- valve control: next_action is the exact safety-valve WAIT
+PASS: nitro-integrity -- valve control: the ticket stays DOING behind the valve
+PASS: nitro-integrity -- valve control: finish behind the valve REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- valve control: explicit reauthorization resets the counters
+PASS: nitro-integrity -- valve control: after reauthorization REVIEW->SHIP->FINISH completes
+PASS: nitro-integrity -- router: user brake outranks START (RESTATE_AND_STOP)
+PASS: nitro-integrity -- router: a persisted WAIT alone is still classified `wait`, not board work
+PASS: nitro-integrity -- resolution refuses when another unrelated op is unresolved
+PASS: nitro-integrity -- accept_live settles the conflict (RESOLVED)
+PASS: nitro-integrity -- pending_ops clears after resolution
+PASS: nitro-integrity -- a new mutation succeeds after the conflict is resolved
+PASS: nitro-integrity -- replan retires the conflict op (RESOLVED)
+PASS: nitro-integrity -- replan does not touch live canonical bytes

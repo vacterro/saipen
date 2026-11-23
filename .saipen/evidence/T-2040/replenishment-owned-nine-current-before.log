@@ -1,0 +1,17 @@
+Production module under test: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\replenishment.py
+Original 9 RestoredMaintenanceCandidate methods; disposable hermetic fixtures only
+test_apply_reuses_work_preserving_source_origin_and_external_blocker (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_apply_reuses_work_preserving_source_origin_and_external_blocker) ... ok
+test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal) ... ok
+test_candidate_text_in_verify_is_not_description_identity (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_candidate_text_in_verify_is_not_description_identity) ... ok
+test_compacted_identity_is_read_from_validated_detail (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_compacted_identity_is_read_from_validated_detail) ... ok
+test_corrupt_linked_source_never_restores_work (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_corrupt_linked_source_never_restores_work) ... ok
+test_dry_run_reuses_work_without_any_source_or_canonical_write (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_dry_run_reuses_work_without_any_source_or_canonical_write) ... ok
+test_mixed_external_blocker_stays_blocked_with_valid_grant (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_mixed_external_blocker_stays_blocked_with_valid_grant) ... ok
+test_provider_does_not_suppress_verified_authority_only_work (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_provider_does_not_suppress_verified_authority_only_work) ... ok
+test_unverified_or_revoked_grant_cannot_restore_or_allocate (test_t2040_maintenance_authority.RestoredMaintenanceCandidate.test_unverified_or_revoked_grant_cannot_restore_or_allocate) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 10.282s
+
+OK
+COUNTS ran=9 failed=0 errors=0 passed=9

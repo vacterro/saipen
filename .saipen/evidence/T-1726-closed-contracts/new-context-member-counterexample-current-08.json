@@ -1,0 +1,28 @@
+{
+  "baseline": "CURRENT_PASS",
+  "after_new_declared_member_observation": {
+    "work": "T-001",
+    "status": "CURRENT_PASS",
+    "changed_paths": [],
+    "receipt_id": "RV-000001",
+    "contract_path": ".saipen/evidence/focused.json",
+    "reason": "BOUND_DEPENDENCIES",
+    "source_receipts": "",
+    "active_repairs": []
+  },
+  "actual_native_recheck": {
+    "schema": 1,
+    "status": "CURRENT_REGRESSION",
+    "contract_path": ".saipen/evidence/focused.json",
+    "verifier": "34d46dcdc0f6940b2653fccda0ba36d5862637a127ae2b0858d2827022c21290",
+    "executed": true,
+    "summary": {
+      "ran": 1,
+      "failed": 1,
+      "skipped": 0,
+      "exit_code": 1
+    },
+    "dependency_count": 3
+  },
+  "original_receipt_unchanged": true
+}

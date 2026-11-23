@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-101:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-255 closed with verification evidence in LOG: verify -> PASS [target: T-255] conf: high -- T-249 closed with real-Chromium evidence: tests/test_browser_generation_truth_integration.py runs the real widget bytes in headless Chromium and proves a streaming audit reads CORE and never READY, ordinary generation borrows no wave token, and a reload mid-stream reconstructs with zero send clicks and zero bridge POSTs; RED CONTROL disabling the T-249 ",
+      "text": "T-249 close: agent-resolved acceptance, real-Chromium generation-truth contract proven red-then-green",
+      "verification": "the Work this request created reached its own verification gate; see the T-255 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-255"
+    }
+  },
+  "schema_version": 1
+}

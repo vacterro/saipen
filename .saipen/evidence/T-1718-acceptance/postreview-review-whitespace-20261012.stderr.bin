@@ -1,0 +1,3 @@
+warning: in the working copy of 'tools/saipen_engine/acceptance.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tools/saipen_engine/acceptance_contract.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tools/test_t1718_acceptance_contract.py', LF will be replaced by CRLF the next time Git touches it

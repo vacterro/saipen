@@ -1,0 +1,13 @@
+......................................................... [ 21%]
+................................................... [ 39%]
+........................ [ 48%]
+................................................................................ [ 78%]
+.................s....................................... [ 99%]
+..                                                                       [100%]
+============================== warnings summary ===============================
+tools\saipen_engine\test_runner.py:26
+  V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\test_runner.py:26: PytestCollectionWarning: cannot collect test class 'TestFamily' because it has a __init__ constructor (from: tools/test_t1687_identity_diagnostics.py)
+    @dataclass(frozen=True)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+270 passed, 1 skipped, 1 warning, 163 subtests passed in 97.30s (0:01:37)

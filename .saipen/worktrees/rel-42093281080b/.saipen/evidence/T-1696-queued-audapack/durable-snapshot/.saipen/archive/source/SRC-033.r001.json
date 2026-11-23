@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-033:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: a failed pack preserves the previous good archive byte-for-byte"
+    }
+  },
+  "derived_at": "2026-09-04T16:03:14Z",
+  "derived_from": "SRC-033",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "6f52f17521228946a026fac063eba46634436f36f103eb5fcc01903860e9ea23"
+}

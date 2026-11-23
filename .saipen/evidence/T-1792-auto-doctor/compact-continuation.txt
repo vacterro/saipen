@@ -1,0 +1,11 @@
+**Skill-only no-op is not continuation.** BOOT -> `saipen continue --json` ->
+read `load_path` -> execute `action` now. Read missing state; never ask what `cc`
+means or offer phase menus. Questions: EXECUTION OPERATOR-QUESTION-01.
+Clean Git proves no BOARD completion.
+
+**Auto-Doctor (SRC-253 stage 3).** Defect: stale conformance strands `cc`.
+`STALE_PASS`/`NOT_RUN`/`VALIDATOR_VERSION_MISMATCH`: canonical validation once
+per chain; require success, durable `CURRENT_PASS`, fresh route. Resume this
+invocation with Doctor proof. Other refusals retain owners. Read-only,
+`next`, dry-run: no repair. No new authority.
+

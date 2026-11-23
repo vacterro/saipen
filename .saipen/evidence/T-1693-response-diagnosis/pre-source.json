@@ -1,0 +1,23 @@
+{
+  "head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "claim": "claim-7dcde5bd03d44b2fa8f4a2a54475d606",
+  "event": 13976,
+  "subject_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+  "sha256": "df41ca11085f769ba47e40de66d3819d78cd5592469a662f3ebc7561eff45100",
+  "witnesses": {
+    "freebuff-recovery": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\steering-2026-10-09\\freebuff-recovery\\handoff-original.md",
+      "sha256": "1378f149861acd5a345e16c97b0b0a863b667aecd054a3b8a728d1227fe6ed15",
+      "recorded_sha256": "1378f149861acd5a345e16c97b0b0a863b667aecd054a3b8a728d1227fe6ed15",
+      "matches": true,
+      "request_authority": "model_supplied SRC-199; original human transcript not captured"
+    },
+    "sai-website-freebuff": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\steering-2026-10-09\\sai-website-freebuff\\handoff-original.md",
+      "sha256": "a6d6ca9591ea8f052ad6ac6d569cbdaae14910da387dd61543932dafb077d0a1",
+      "recorded_sha256": "a6d6ca9591ea8f052ad6ac6d569cbdaae14910da387dd61543932dafb077d0a1",
+      "matches": true,
+      "request_authority": "model_supplied SRC-199; original human transcript not captured"
+    }
+  }
+}

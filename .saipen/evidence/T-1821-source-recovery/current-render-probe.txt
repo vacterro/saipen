@@ -1,0 +1,5 @@
+STATUS: BLOCKED  
+RESULT: Controlled rendering probe fixture  
+BLOCKER: PROBE_FIXTURE -- rendering only  
+NEXT EXACT ACTION: NONE  
+VALIDATION: NOT_RUN

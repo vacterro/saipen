@@ -1,0 +1,15 @@
+{
+  "scope": "one existing owned symlink mutation case; not the full audit",
+  "verdicts": {
+    "pristine-fixture": "PASS",
+    "validator-baseline": "PASS",
+    "owned-symlink-case": "UNPROVEN"
+  },
+  "output": [
+    "PASS: a known-good copy of this repository is built for the mutation controls",
+    "PASS: the unmodified copy validates clean, so every expectation below is absent before its mutation",
+    "UNPROVEN: owned-symlink-case -- portable project identity becomes an external symlink: this host cannot create a symlink, so the case was never constructed (a host capability, not a missing file): [WinError 1314] A required privilege is not held by the client: 'V:\\\\_TEMP_\\\\t1582-live-control-99jfaf5k\\\\probe-owned-symlink-case\\\\audit-external-identity.md' -> 'V:\\\\_TEMP_\\\\t1582-live-control-99jfaf5k\\\\probe-owned-symlink-case\\\\cases-00\\\\.saipen\\\\IDENTITY.md'",
+    "SKIP: portable project identity becomes an external symlink -- this host cannot create a symlink, so the case was never constructed (a host capability, not a missing file): [WinError 1314] A required privilege is not held by the client: 'V:\\\\_TEMP_\\\\t1582-live-control-99jfaf5k\\\\probe-owned-symlink-case\\\\audit-external-identity.md' -> 'V:\\\\_TEMP_\\\\t1582-live-control-99jfaf5k\\\\probe-owned-symlink-case\\\\cases-00\\\\.saipen\\\\IDENTITY.md'",
+    "PROVEN: 0 of 1 mutation controls; host capability unproven: 1; broken: 0"
+  ]
+}

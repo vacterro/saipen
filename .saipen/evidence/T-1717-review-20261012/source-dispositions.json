@@ -1,0 +1,116 @@
+{
+  "scope": "completed investigation, not foreign product/evidence PASS",
+  "work": "T-1717",
+  "outcomes": [
+    {
+      "clause": "R001",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "COVERAGE_UPDATED",
+        "receipt": "SRC-216",
+        "rid": "SRC-216:R001",
+        "disposition": "VERIFIED"
+      }
+    },
+    {
+      "clause": "R002",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "COVERAGE_UPDATED",
+        "receipt": "SRC-216",
+        "rid": "SRC-216:R002",
+        "disposition": "VERIFIED"
+      }
+    },
+    {
+      "clause": "R003",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "COVERAGE_UPDATED",
+        "receipt": "SRC-216",
+        "rid": "SRC-216:R003",
+        "disposition": "VERIFIED"
+      }
+    },
+    {
+      "clause": "R004",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "COVERAGE_UPDATED",
+        "receipt": "SRC-216",
+        "rid": "SRC-216:R004",
+        "disposition": "VERIFIED"
+      }
+    },
+    {
+      "clause": "R005",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "COVERAGE_UPDATED",
+        "receipt": "SRC-216",
+        "rid": "SRC-216:R005",
+        "disposition": "VERIFIED"
+      }
+    },
+    {
+      "clause": "R006",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "COVERAGE_UPDATED",
+        "receipt": "SRC-216",
+        "rid": "SRC-216:R006",
+        "disposition": "VERIFIED"
+      }
+    },
+    {
+      "clause": "R007",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "COVERAGE_UPDATED",
+        "receipt": "SRC-216",
+        "rid": "SRC-216:R007",
+        "disposition": "VERIFIED"
+      }
+    },
+    {
+      "clause": "R008",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "COVERAGE_UPDATED",
+        "receipt": "SRC-216",
+        "rid": "SRC-216:R008",
+        "disposition": "VERIFIED"
+      }
+    },
+    {
+      "clause": "R009",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "COVERAGE_UPDATED",
+        "receipt": "SRC-216",
+        "rid": "SRC-216:R009",
+        "disposition": "VERIFIED"
+      }
+    },
+    {
+      "clause": "R010",
+      "exit_code": 0,
+      "result": {
+        "ok": true,
+        "code": "COVERAGE_UPDATED",
+        "receipt": "SRC-216",
+        "rid": "SRC-216:R010",
+        "disposition": "VERIFIED"
+      }
+    }
+  ]
+}

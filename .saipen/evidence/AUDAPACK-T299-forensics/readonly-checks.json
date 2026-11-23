@@ -1,0 +1,58 @@
+{
+  "before": {
+    "STATE.md": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50",
+    "BOARD.md": "8bb2a5e68d474ee2ab22b834e6a94440d5389ea352d2969f5ad945cd04ca9952",
+    "LOG.md": "e414d4b54a3e99d9fa515945bf9d8be208581292889b3744edcb11466b0f7c7a",
+    "MANIFEST.json": "6bbb6ca8bed1502f04176d848f24ad12fdd58759e1946f0b2b27a5f023e0e050"
+  },
+  "after": {
+    "STATE.md": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50",
+    "BOARD.md": "8bb2a5e68d474ee2ab22b834e6a94440d5389ea352d2969f5ad945cd04ca9952",
+    "LOG.md": "e414d4b54a3e99d9fa515945bf9d8be208581292889b3744edcb11466b0f7c7a",
+    "MANIFEST.json": "6bbb6ca8bed1502f04176d848f24ad12fdd58759e1946f0b2b27a5f023e0e050"
+  },
+  "core_unchanged": true,
+  "commands": [
+    {
+      "label": "native-before",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "started_utc": "2026-10-10T09:13:52.526871+00:00",
+      "exit_code": 1,
+      "output_sha256": "65bb8a210e7c4a2692face776c4ddff8854961bca43c698be3f288186f5413c1",
+      "core_after": {
+        "STATE.md": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50",
+        "BOARD.md": "8bb2a5e68d474ee2ab22b834e6a94440d5389ea352d2969f5ad945cd04ca9952",
+        "LOG.md": "e414d4b54a3e99d9fa515945bf9d8be208581292889b3744edcb11466b0f7c7a",
+        "MANIFEST.json": "6bbb6ca8bed1502f04176d848f24ad12fdd58759e1946f0b2b27a5f023e0e050"
+      }
+    },
+    {
+      "label": "recover-preview-before",
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "recover",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+        "--dry-run",
+        "--json"
+      ],
+      "started_utc": "2026-10-10T09:13:54.054574+00:00",
+      "exit_code": 1,
+      "output_sha256": "724a23ce978379e1ad2ecd4fc9c7ee52a1ad1134e29f1fab597d0985e836d42f",
+      "core_after": {
+        "STATE.md": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50",
+        "BOARD.md": "8bb2a5e68d474ee2ab22b834e6a94440d5389ea352d2969f5ad945cd04ca9952",
+        "LOG.md": "e414d4b54a3e99d9fa515945bf9d8be208581292889b3744edcb11466b0f7c7a",
+        "MANIFEST.json": "6bbb6ca8bed1502f04176d848f24ad12fdd58759e1946f0b2b27a5f023e0e050"
+      }
+    }
+  ]
+}

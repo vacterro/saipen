@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "task": "T-2040",
+  "created_at": "2026-11-09T21:40:00Z",
+  "directory": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\lifecycle-receipt-truth-20261109T200642579628Z",
+  "summary": {
+    "recovery_full_tests": 85,
+    "lifecycle_tests": 6,
+    "wrappers_tests": 4,
+    "receipt_probe_checks": 35,
+    "journal_m2_checks": 17,
+    "journal_hostile_checks": 24,
+    "additional_journal_total": 41,
+    "journal_symlink_skipped": 1
+  },
+  "source_files_final_sha256": {
+    "tools/regression_second_wave_receipt_fixes.py": "a40951cfaacb96da4a72689d61553158a910dea0d2f6f8e4581e01c4f9da1665",
+    "tools/saipen_engine/journal.py": "82f5bdc7200dd2091e31065f5bd96db8c6268c4c49e4c65d8b86538b341ccea2",
+    "tools/saipen_engine/reconcile.py": "5c718399063d732b134c2a1b59911b15486ac025ad365fb44fe813d58dd0d1b8",
+    "tools/test_lost_active_ticket_recovery.py": "f013b36484d10514eacbbd8f09e6d02790ecf761418b318c42cb8dca3acd8911",
+    "tools/test_recovery_reachability.py": "f30f1e9f99540e5d1b7fd4e9a16d8482dcf317f9d76b1689df408dd39c517c25",
+    "tools/test_t1759_single_lifecycle_observer.py": "c9a00fe65dd1f92bb90e4d110903731b4a737ad3b766b902a381b1c324335671",
+    "tools/test_t1851_debt_authority.py": "32020c7c34b260233cc1bbd94efca22607246673d8dfe86879b697c6f39f5a78",
+    "tools/test_t1893_probe_wrappers.py": "71dd489738f128c8e72aa6d4510fa1d822e3ed0b7a4fd6c132f5f6822558569b"
+  },
+  "unchanged_fixture_files_verified_against_preimages": [
+    "tools/test_lost_active_ticket_recovery.py",
+    "tools/test_recovery_reachability.py",
+    "tools/test_t1851_debt_authority.py",
+    "tools/test_t1893_probe_wrappers.py"
+  ],
+  "runs_returncode_zero": [
+    [
+      "after-fixture-results.json",
+      "lifecycle",
+      0,
+      11.547
+    ],
+    [
+      "after-fixture-results.json",
+      "receipt-probe",
+      0,
+      1.453
+    ],
+    [
+      "after-fixture-results.json",
+      "receipt-wrapper",
+      0,
+      1.531
+    ],
+    [
+      "after-fixture-results.json",
+      "recovery-full",
+      0,
+      47.406
+    ],
+    [
+      "after-fixture-results.json",
+      "wrappers-full",
+      0,
+      10.906
+    ],
+    [
+      "after-production-results.json",
+      "stranded",
+      0,
+      7.891
+    ],
+    [
+      "after-production-results.json",
+      "lost-active",
+      0,
+      0.969
+    ],
+    [
+      "after-production-results.json",
+      "debt",
+      0,
+      0.437
+    ],
+    [
+      "after-production-results.json",
+      "debt-full",
+      0,
+      6.891
+    ],
+    [
+      "after-production-results.json",
+      "journal",
+      0,
+      8.109
+    ],
+    [
+      "after-production-results.json",
+      "debt-replay",
+      0,
+      0.453
+    ],
+    [
+      "after-additional-journal-results.json",
+      "journal-m2",
+      0,
+      1.141
+    ],
+    [
+      "after-additional-journal-results.json",
+      "journal-hostile",
+      0,
+      1.031
+    ]
+  ],
+  "evidence_files": [
+    "after-additional-journal-results.json",
+    "after-debt-full.stderr.log",
+    "after-debt-full.stdout.log",
+    "after-debt-replay.stderr.log",
+    "after-debt-replay.stdout.log",
+    "after-debt.stderr.log",
+    "after-debt.stdout.log",
+    "after-fixture-results.json",
+    "after-journal-hostile.stderr.log",
+    "after-journal-hostile.stdout.log",
+    "after-journal-m2.stderr.log",
+    "after-journal-m2.stdout.log",
+    "after-journal.stderr.log",
+    "after-journal.stdout.log",
+    "after-lifecycle.stderr.log",
+    "after-lifecycle.stdout.log",
+    "after-lost-active.stderr.log",
+    "after-lost-active.stdout.log",
+    "after-production-results.json",
+    "after-receipt-probe.stderr.log",
+    "after-receipt-probe.stdout.log",
+    "after-receipt-wrapper.stderr.log",
+    "after-receipt-wrapper.stdout.log",
+    "after-recovery-full.stderr.log",
+    "after-recovery-full.stdout.log",
+    "after-stranded.stderr.log",
+    "after-stranded.stdout.log",
+    "after-wrappers-full.stderr.log",
+    "after-wrappers-full.stdout.log",
+    "before-debt-full.stderr.log",
+    "before-debt-full.stdout.log",
+    "before-debt-replay.stderr.log",
+    "before-debt-replay.stdout.log",
+    "before-debt.stderr.log",
+    "before-debt.stdout.log",
+    "before-extension-results.json",
+    "before-journal-results.json",
+    "before-journal.stderr.log",
+    "before-journal.stdout.log",
+    "before-lifecycle.stderr.log",
+    "before-lifecycle.stdout.log",
+    "before-lost-active.stderr.log",
+    "before-lost-active.stdout.log",
+    "before-receipt-wrapper.stderr.log",
+    "before-receipt-wrapper.stdout.log",
+    "before-results.json",
+    "before-status.stderr.log",
+    "before-status.stdout.log",
+    "before-stranded.stderr.log",
+    "before-stranded.stdout.log",
+    "coordinator-before.log",
+    "manifest.json",
+    "probe_debt_replay.py",
+    "scope-extension.json",
+    "source-manifest.json"
+  ],
+  "note": "All post-fix runs returncode 0. Receipt probe 35/35 checks; hostile symlink branch explictly SKIP on this host. No failed checks or tests in any recorded run."
+}

@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-049:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Manual project ZIP control decoupled from Auto Audit: compact titlebar control available in ordinary ChatGPT chats, project popover fed by GET /v1/projects (select, change, clear binding, refresh list), explicit state labels (CHECK/PACK/GET/ATTACH/ZIP check/ZIP bang), no Auto enabled or campaign or START required (SRC-049 TARGET A, C, P)."
+    },
+    "SRC-049:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Conversation-to-project binding persisted per ChatGPT conversation key with explicit user selection authoritative, change and clear supported without touching project files, temporary draft identity migrated only through the existing canonical conversation identity transition, and no binding leaking between conversations (SRC-049 TARGET B, N)."
+    },
+    "SRC-049:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Idempotent duplicate protection: canonical identity is project_id plus archive SHA-256 plus byte size, filename alone is never equality proof; ensureProjectArchive is reused without repack or archive churn when unchanged; an already proven attached canonical archive returns ALREADY_ATTACHED with zero GET, File construction, injection or DOM replacement (SRC-049 TARGET D, E, F, G, J)."
+    },
+    "SRC-049:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Single-flight and race safety: all archive operations for one conversation plus project coalesce onto one chain, a concurrent or repeated click joins the live operation, a second check before injection turns a raced duplicate into ALREADY_ATTACHED, and manual plus Auto Audit share one canonical attachment engine and proof state (SRC-049 TARGET H, K, L)."
+    },
+    "SRC-049:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Failure semantics and non-goals: a failed download, SHA or size mismatch, attachment timeout, bridge offline or replacement failure preserves the previous archive and unrelated attachments and composer text; bounded observable result codes; no Send, no campaign transition, no A3 or A10 or START side effects, no file chooser fallback, no second packer or second injection implementation (SRC-049 TARGET I, M, O and NON-GOALS)."
+    },
+    "SRC-049:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Focused widget regression coverage for the manual picker flow plus the repository gates: selection and immediate attach, one-click repeat, ALREADY_ATTACHED no-op without GET or injection, binding isolation and migration, failure preservation, code observability, single-flight; full widget suite green; new coverage proven red against the pre-fix subject (SRC-049 REGRESSION TESTS and ACCEPTANCE)."
+    }
+  },
+  "derived_at": "2026-09-16T17:01:26Z",
+  "derived_from": "SRC-049",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "80dee69f3744af8e037255b5e22fede832243bc4f4b6353d5735030e3b1dc967"
+}

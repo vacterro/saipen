@@ -1,0 +1,14 @@
+test_apply_reuses_work_preserving_source_origin_and_external_blocker (__main__.RestoredMaintenanceCandidate.test_apply_reuses_work_preserving_source_origin_and_external_blocker) ... ok
+test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal (__main__.RestoredMaintenanceCandidate.test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal) ... ok
+test_candidate_text_in_verify_is_not_description_identity (__main__.RestoredMaintenanceCandidate.test_candidate_text_in_verify_is_not_description_identity) ... ok
+test_compacted_identity_is_read_from_validated_detail (__main__.RestoredMaintenanceCandidate.test_compacted_identity_is_read_from_validated_detail) ... ok
+test_corrupt_linked_source_never_restores_work (__main__.RestoredMaintenanceCandidate.test_corrupt_linked_source_never_restores_work) ... ok
+test_dry_run_reuses_work_without_any_source_or_canonical_write (__main__.RestoredMaintenanceCandidate.test_dry_run_reuses_work_without_any_source_or_canonical_write) ... ok
+test_mixed_external_blocker_stays_blocked_with_valid_grant (__main__.RestoredMaintenanceCandidate.test_mixed_external_blocker_stays_blocked_with_valid_grant) ... ok
+test_provider_does_not_suppress_verified_authority_only_work (__main__.RestoredMaintenanceCandidate.test_provider_does_not_suppress_verified_authority_only_work) ... ok
+test_unverified_or_revoked_grant_cannot_restore_or_allocate (__main__.RestoredMaintenanceCandidate.test_unverified_or_revoked_grant_cannot_restore_or_allocate) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 10.548s
+
+OK

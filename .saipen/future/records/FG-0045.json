@@ -1,0 +1,13 @@
+{
+  "declared_status": null,
+  "digest": "f8eb29c7ee9bb06e173b46f17b3cf75d0fbd6acc8dce1be5fe5478f0bf57129b",
+  "facts": {},
+  "gate": "FG-0045",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/SAIPEN_FUTURE_WORKER_POOL.md",
+  "reason": "broad architecture record; kept gated until one bounded slice is named",
+  "reviewed": true,
+  "schema": 2,
+  "title": "future_gate/SAIPEN_FUTURE_WORKER_POOL.md",
+  "verdict": "DEFERRED"
+}

@@ -1,0 +1,34 @@
+test_accepted (test_t1862_readiness.MatrixA.test_accepted) ... ok
+test_not_accepted_while_phase_mid_flight (test_t1862_readiness.MatrixA.test_not_accepted_while_phase_mid_flight)
+Everything terminal but the phase is not terminal -> IDLE, not ACCEPTED. ... ok
+test_execution_done_but_audit_outstanding (test_t1862_readiness.MatrixB.test_execution_done_but_audit_outstanding) ... ok
+test_unknown_clauses_keep_readiness_qualified (test_t1862_readiness.MatrixC.test_unknown_clauses_keep_readiness_qualified) ... ok
+test_external_blocker_distinguished (test_t1862_readiness.MatrixD.test_external_blocker_distinguished) ... ok
+test_work_blocked_is_not_external (test_t1862_readiness.MatrixD.test_work_blocked_is_not_external) ... ok
+test_paused_ticket_visible_but_not_runnable (test_t1862_readiness.MatrixE.test_paused_ticket_visible_but_not_runnable) ... ok
+test_consumed_audit_does_not_reopen (test_t1862_readiness.MatrixF.test_consumed_audit_does_not_reopen) ... ok
+test_orphan_receipt_blocks_acceptance (test_t1862_readiness.MatrixG.test_orphan_receipt_blocks_acceptance) ... ok
+test_archive_and_active_are_not_summed (test_t1862_readiness.MatrixH.test_archive_and_active_are_not_summed) ... ok
+test_malformed_ledger_is_not_zero_outstanding (test_t1862_readiness.MatrixI.test_malformed_ledger_is_not_zero_outstanding)
+The CLI turns a malformed ledger into INTEGRITY, never acceptance. ... ok
+test_authority_quoted_never_escalated (test_t1862_readiness.MatrixJ.test_authority_quoted_never_escalated) ... ok
+test_ready_does_not_imply_permission (test_t1862_readiness.MatrixJ.test_ready_does_not_imply_permission) ... ok
+test_human_and_machine_status_agree (test_t1862_readiness.MatrixK.test_human_and_machine_status_agree)
+The plain-text answer names the same readiness the JSON carries. ... ok
+test_status_is_read_only (test_t1862_readiness.MatrixK.test_status_is_read_only)
+`status` reports readiness and writes nothing into project memory. ... ok
+test_receipt_without_evidence_stays_outstanding (test_t1862_readiness.MatrixL.test_receipt_without_evidence_stays_outstanding)
+A terminal-looking disposition with no evidence is not terminal. ... ok
+test_empty_coverage_still_allows_acceptance (test_t1862_readiness.UnreadableInputs.test_empty_coverage_still_allows_acceptance)
+The other half of the same pair: a READ empty index is complete. ... ok
+test_unknown_inbox_is_not_clean (test_t1862_readiness.UnreadableInputs.test_unknown_inbox_is_not_clean) ... ok
+test_unknown_orphans_do_not_block (test_t1862_readiness.UnreadableInputs.test_unknown_orphans_do_not_block) ... ok
+test_unreadable_coverage_is_not_empty_coverage (test_t1862_readiness.UnreadableInputs.test_unreadable_coverage_is_not_empty_coverage)
+`None` receipts means the index failed, and that is not zero debt. ... ok
+test_matrix_letters_are_documented (test_t1862_readiness.Vocabulary.test_matrix_letters_are_documented) ... ok
+test_statuses_unique_and_headlined (test_t1862_readiness.Vocabulary.test_statuses_unique_and_headlined) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 5.913s
+
+OK

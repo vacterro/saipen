@@ -1,0 +1,8 @@
+[
+  "saipen/REGISTRY.json",
+  "saipen/CLI_OPTION_VALUES.json",
+  "tools/saipen.py",
+  "tools/saipen_engine/commands.py",
+  "tools/saipen_engine/command_effects.py",
+  "tools/test_t1631_option_values.py"
+]

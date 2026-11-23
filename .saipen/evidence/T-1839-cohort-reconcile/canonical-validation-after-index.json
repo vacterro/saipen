@@ -1,0 +1,88 @@
+{
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": " was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else\nWARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-051] carries source_tree_fingerprint 'git-delta-v1:f6e0d3683fdd49081fb91414517c6da180255dc0af9c762a9570fd6ca474418f' but the current tree computes 'git-delta-v1:d9506359978cec83c4dcf1fb7611211d492781d2562b9c2561ace17f54a49716' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else\nWARN [subsaipen-uncollected]: 2 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nWARN [release-ledger]: 2 release(s) have a CHANGELOG entry but no git tag: v8.0.2, v8.1.0\nWARN [xpatch-survival]: XP-000001 tools/saipen_engine/intake.py: Git history unreadable: fatal: bad object refs/codex/turn-diffs/captures/1785165795234/fb80dcb4-2cd2-4789-9618-a9409baff787/base\nWARN [xpatch-survival]: XP-000001 tools/test_source_receipts.py: Git history unreadable: fatal: bad object refs/codex/turn-diffs/captures/1785165795234/fb80dcb4-2cd2-4789-9618-a9409baff787/base\nWARN [xpatch-survival]: ... and 7 more like the above\nValidation FAILED: 1 problem(s), 16 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "stale_reason": null,
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 1,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "closure provenance does not resolve: EX-000010 was verified against installed engine generation sha256:e10a20a075aa310b... but the running engine is sha256:2a84f5a5da648420... -- the dependency moved ",
+            "detail_hash": "de39eb94092e7b48",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "d682e4a0e542976ddfe3e5518a2b4f8bc81d7eea1e4bbdcd8642a8d5c7fefc5c",
+        "ruleset_version": 2,
+        "status": "complete",
+        "warning_count": 16
+      },
+      "board_hash": "25be0b2ab328367e",
+      "canonical_next_command": null,
+      "content_hash": "a85c7ce1be4cfcbd",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:90d49541de3713e23675b20b6c474e81e0b1f90621eba2cbfe19ddabab880595",
+      "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "kind": "conformance_receipt",
+      "log_hash": "b332d454823bf827",
+      "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+      "receipt_id": "receipt-d2478f36907b",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+      "source_tree_fingerprint": "git-delta-v1:d9506359978cec83c4dcf1fb7611211d492781d2562b9c2561ace17f54a49716",
+      "state_hash": "e70ffa8967d557c5",
+      "timestamp_utc": "2026-10-20T19:31:38.953470Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+      "source_tree_fingerprint": "git-delta-v1:d9506359978cec83c4dcf1fb7611211d492781d2562b9c2561ace17f54a49716"
+    }
+  },
+  "install_identity": {
+    "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "persisted_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "install_fingerprint": "install-v1:90d49541de3713e23675b20b6c474e81e0b1f90621eba2cbfe19ddabab880595",
+    "persisted_fingerprint": "install-v1:90d49541de3713e23675b20b6c474e81e0b1f90621eba2cbfe19ddabab880595",
+    "status": "MATCH",
+    "mismatch": null
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-d2478f36907b",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+  },
+  "terminal": true
+}

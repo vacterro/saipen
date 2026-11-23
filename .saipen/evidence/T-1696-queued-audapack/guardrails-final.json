@@ -1,0 +1,63 @@
+{
+  "six_controls": [
+    {
+      "case": "1-duplicate",
+      "artifact": "guard-1-duplicate.json",
+      "sha256": "e77b266c092b3e434d8017131ee9dcc022f9218ff3707de98e56064d12157539",
+      "exit_code": 1,
+      "code": "VALIDATION_FAILED",
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "2-unadmitted-done",
+      "artifact": "guard-2-unadmitted-done.json",
+      "sha256": "f2df66cd0d77a99552b238a4219ca6e8966e098f7909887b24cdf9d27c0819cb",
+      "exit_code": 1,
+      "code": "CONFORMANCE_UNHEALTHY",
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "3-unnumbered",
+      "artifact": "guard-3-unnumbered.json",
+      "sha256": "105a4bf8ddea22a2673b0570d96310ed76341afa62b4998a1d485375033d48a2",
+      "exit_code": 0,
+      "code": "VALID",
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "3-unnumbered-repeat",
+      "artifact": "guard-3-unnumbered-repeat.json",
+      "sha256": "5d53b822e4b7a21167039970d5d7aed125a79efa25ac3afaa99d254b1137e704",
+      "exit_code": 0,
+      "code": "VALID",
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "4-heading",
+      "artifact": "guard-4-heading.json",
+      "sha256": "3e6fe017bcb23628b21fa52fa652428b3cd757098c517711fd5bf41a94d56621",
+      "exit_code": 1,
+      "code": "VALIDATION_FAILED",
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "5-evidence-no-event-v2",
+      "artifact": "guard-5-evidence-no-event-v2.json",
+      "sha256": "f920a6207119c1ff0cbd4525691934b5d1dd7291e17ad078ad6a66aa3d5c72d9",
+      "exit_code": 1,
+      "code": "CONFORMANCE_UNHEALTHY",
+      "canonical_docs_unchanged": true
+    },
+    {
+      "case": "6-unrelated-overwrite",
+      "artifact": "guard-6-unrelated-overwrite.json",
+      "sha256": "10bd44e2b31d1d32f22e41d00a8b46b89096332a668d314d3ef26edd26e025ec",
+      "exit_code": 1,
+      "code": "STALE_DUPLICATE_ID_DECISION",
+      "canonical_docs_unchanged": true
+    }
+  ],
+  "independent_repeat": "3-unnumbered-repeat",
+  "regression_work": "T-1699",
+  "probe_sha256": "3e286871204c99c02256c884a43b16b3e8959fcae7b7bdac8a7cbcd4d58b1110"
+}

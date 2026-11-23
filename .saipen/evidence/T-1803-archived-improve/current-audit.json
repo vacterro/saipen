@@ -1,0 +1,450 @@
+{
+  "observed_utc": "2026-10-16T23:33:45.136834+00:00",
+  "engine_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "version": "8.1.0",
+  "consumer_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "consumer_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "consumer_protected_bytes_unchanged": true,
+  "consumer_protected_sha256": {
+    ".saipen/BOARD.md": "4c3a7c598579f6ea47d5f4e05fc908bc09e43806ab9ff0e2d883c0a6b2361a80",
+    ".saipen/IDENTITY.md": "3ac7e214c409fd5ab32a76171cee7febb38393f00c6cc321c6de33469e28e5c0",
+    ".saipen/improve/imp-vacterro-audapack-20260918-1/buffy-01/saipen_improve_SAIPEN.md": "369cf827930c8b316c6dd90082212002f1b29aff4b0086ad72ba3486fda17503",
+    ".saipen/improve/imp-vacterro-audapack-20260918-1/buffy-02/saipen_improve_SAIPEN.md": "e42b5839322a8d12052b4be84448dd16c8ce21f62aa88b4966ecb842d575c2d2",
+    ".saipen/improve/imp-vacterro-audapack-20260918-1/MANIFEST.md": "2c7d42ae4f8fd302181399bb59fb900c516f368d0ace562052b9ce96b415d756",
+    ".saipen/improve/imp-vacterro-audapack-20260918-1/SWEEP.md": "ABSENT",
+    ".saipen/improve/imp-vacterro-audapack-20260919-7/buffy-01/saipen_improve_SAIPEN.md": "ca07487780a5fda5cc0fb5653e46a9b6c165fa524bbafe41c7819aed453fb730",
+    ".saipen/improve/imp-vacterro-audapack-20260919-7/buffy-02/saipen_improve_SAIPEN.md": "ece55062c92e6e3de7543a906ff2ae3126f7ed7f6e44469934d8861e1c4beaf7",
+    ".saipen/improve/imp-vacterro-audapack-20260919-7/MANIFEST.md": "4029de329954c84e1600b92406a652f8f6dcb3f35aa8b19bf502b156f90ea453",
+    ".saipen/improve/imp-vacterro-audapack-20260919-7/SWEEP.md": "ABSENT",
+    ".saipen/LOG.md": "a60197a96735ea181092f0b96407ed213ea08a5ee4d01d7a14ba73b2dc6e2e0b",
+    ".saipen/STATE.md": "55636295e5e791dbfa0d8e624346be5beea8ea35cf2c191ec1152a701288bcac"
+  },
+  "consumer_t311_record": "- [ ] T-311 [P2] Archived improve cycles retain draft seat reports with no SWEEP.md and unswept composite findings: imp-vacterro-audapack-20260918-1 (buffy-01 and buffy-02 draft, missing... | verify: each stale improve cycle reaches a declared terminal class with its seats' reports... [detail_ref: .saipen/recovery/board-compaction/T-311/T-311-58d928f6a11e07d1cd578c61.json] | owner: buffy | claim_time: 2026-10-15T19:21:39Z | blocker: OPERATOR_REQUIRED: blocked by a defect in the SAIPEN engine repository (V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN, protocol 8.1.0, HEAD 025bf596), which is a separate repository this mission... | blocker_scope: ticket | recurrence: Local to AUDAPACK's improve-home bookkeeping, not a protocol-home defect with a fix owed elsewhere: the six observed stale cycles leave draft seat reports and unswept composite findings behind... | weak_model: The state field held and the transition rules held; the weak link is that a weak but compliant model sees a draft seat report and has no authoritative route to retire or supersede it, so the... | detail_ref: .saipen/recovery/board-compaction/T-311/T-311-58d928f6a11e07d1cd578c61.json",
+  "original_history_cases": [
+    {
+      "cycle": "imp-vacterro-audapack-20260918-1",
+      "scope": "MUTATORS ON DISPOSABLE COPY ONLY",
+      "seats": [
+        {
+          "seat": "buffy-01",
+          "report": "saipen_improve_SAIPEN.md",
+          "sha256": "369cf827930c8b316c6dd90082212002f1b29aff4b0086ad72ba3486fda17503",
+          "report_status": "draft",
+          "errors": [],
+          "findings": [
+            {
+              "ref": "RUN-1/IMP-001",
+              "expected": "a saipen ingress payload is the operator's request text; a shell redirect or pipe operator after an ingress verb is classified as shell and never extracted as the request nor converted into a --hex transport route; the obligation records only bytes a refusal refused as a REQUEST, so BOOT's next route persists request text only",
+              "actual": "guard_events.py:954-975 (ingress_payload) takes head[2] (everything after the ingress verb) as the request, rejecting only a leading '-' (line 973) and never consulting _SHELL_SYNTAX_CHARS (line 184): 'saipen start 2>&1' -> '2>&1'; 'saipen start > out.txt' -> '> out.txt'; 'saipen start | cat' -> '| cat'; 'saipen start 2>/dev/null' -> '2>/dev/null'. ingress_rewrite (978-994) makes each a 'saipen start --hex <hex>' route; map_event (1286-1295) routes there because '>'/'&' are in _SHELL_SYNTAX_CHARS so _saipen_cli_tokens bails; 1469-1497 arms INGRESS_TRANSPORT_UNSAFE and _record_pending_ingress (1413-1443) records the obligation; entry.py:232-245 then discharges it and mints ticket+receipt with witness=transport_obligation",
+              "evidence": "read-only import of guard_events: ingress_payload('saipen start 2>&1')=='2>&1'; ingress_rewrite('saipen start 2>&1')=='saipen start --hex 323e2631'; ingress_payload('saipen start | cat')=='| cat'; ingress_payload('saipen start --json')==None; sha256(b'2>&1')==2642b5d63833864f9c0c6138c0a17d8c320ddd6258dfcdaf7a05abd9fbf24a8a == the recorded obligation digest. Live: 'saipen start 2>&1' on this project produced E-1450 SRC-055->T-199 (user_explicit) and E-1451 claimed; SRC-055.md body '2>&1'; BOARD ## DOING 'T-199 [P1] 2>&1'; STATE phase SCOUT/task T-199. Retire refuses (needs a separate operator-authority capsule; SRC-055 is punctuation). Report: .saipen/evidence/RAPORT-SAIPEN-INGRESS-SHELL-OPERATOR-20260918/REPORT.md; packet: %LOCALAPPDATA%/saipen/protocol_incidents/inbox/SAI-DEFECT-20260918-ingress-shell-operator-as-request.md"
+            },
+            {
+              "ref": "RUN-1/IMP-002",
+              "expected": "the canonical test command `python -m pytest -q` runs the suite; an operator-only live-acceptance script is excluded from collection rather than aborting the whole run with a collection error",
+              "actual": "tests/test_target_g_live.py drives a real Chrome over CDP at IMPORT time (subprocess.Popen line 26, playwright connect_over_cdp lines 29-30) to exercise the T-198 Target-G ZIP acceptance by hand; it defines no test_ function and is untracked, so pytest imports it during collection, the conftest no-browser sentinel (tests/conftest.py:39) raises, and the whole run ends '1 error in 1.53s' before any test executes",
+              "evidence": "`python -m pytest --collect-only -q` -> 'ERROR collecting tests/test_target_g_live.py ... RuntimeError: test tried to launch a real browser: C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe (in <session>) -- stub the launcher instead'; 'Interrupted: 1 error during collection'; 1790 collected, 0 run. `git ls-files --error-unmatch tests/test_target_g_live.py` -> pathspec did not match (untracked). After adding `collect_ignore = [\"test_target_g_live.py\"]` to tests/conftest.py: `python -m pytest -q` -> 1785 passed 5 skipped 0 failed"
+            },
+            {
+              "ref": "RUN-1/IMP-003",
+              "expected": "the repository's declared lint gate `ruff check .` is green on the shipped tree",
+              "actual": "it reported 11 findings across 5 files (audapack/packing.py I001; audapack/saipen_manifest_gate_test_support.py F401 x2; tests/test_saipen_manifest_gate.py F401; tests/repro_widget_geometry.py I001/F401 x2/W293; scripts/probe_chatgpt_live.py I001/W293 x3; tests/test_target_g_live.py E402 x2/I001); after mechanical fixes plus one per-file E402 ignore for the operator live script, `ruff check .` passes",
+              "evidence": "`ruff check .` before -> 15 findings; after -> 'All checks passed!'; `python -m compileall -q audapack scripts` exit 0; `pytest tests/test_packing.py tests/test_fidelity.py` -> 171 passed; `pytest tests/test_saipen_manifest_gate.py` -> 6 passed"
+            }
+          ]
+        },
+        {
+          "seat": "buffy-02",
+          "report": "saipen_improve_SAIPEN.md",
+          "sha256": "e42b5839322a8d12052b4be84448dd16c8ce21f62aa88b4966ecb842d575c2d2",
+          "report_status": "draft",
+          "errors": [],
+          "findings": []
+        }
+      ],
+      "live_read_only_liveness": {
+        "cycle_id": "imp-vacterro-audapack-20260918-1",
+        "status": "archived",
+        "seat_id": "buffy-01",
+        "report_status": "draft",
+        "has_report": true,
+        "runs": 1,
+        "draft": true,
+        "no_run": false,
+        "created_at": "2026-09-18T11:07:39Z",
+        "age_days": 28,
+        "stale": true,
+        "submit_route": "saipen improve submit imp-vacterro-audapack-20260918-1 buffy-01 vacterro-audapack buffy-01/saipen_improve_SAIPEN.md"
+      },
+      "reconcile": {
+        "returned": {
+          "ok": true,
+          "code": "ALREADY_TERMINAL",
+          "outcome": "ABORTED",
+          "cycle_id": "imp-vacterro-audapack-20260918-1",
+          "seats": [
+            {
+              "seat_id": "buffy-01",
+              "role": "core",
+              "report_path": "saipen_improve_SAIPEN.md",
+              "availability": "expected",
+              "report_status": "draft",
+              "class": "STILL_ACTIONABLE",
+              "terminal": false,
+              "retire_reason": "",
+              "detail": "report_status 'draft' with committed audit content",
+              "routes": [
+                "saipen improve submit imp-vacterro-audapack-20260918-1 buffy-01 <project> <findings.json>",
+                "saipen improve complete imp-vacterro-audapack-20260918-1 buffy-01 <project>"
+              ]
+            },
+            {
+              "seat_id": "buffy-02",
+              "role": "core",
+              "report_path": "saipen_improve_SAIPEN.md",
+              "availability": "expected",
+              "report_status": "draft",
+              "class": "EMPTY_DRAFT",
+              "terminal": false,
+              "retire_reason": "",
+              "detail": "zero committed RUNs; the assignment produced no evidence",
+              "routes": [
+                "saipen improve retire imp-vacterro-audapack-20260918-1 buffy-02 --reason EMPTY_DRAFT"
+              ]
+            }
+          ],
+          "seat_classes": {
+            "buffy-01": "STILL_ACTIONABLE",
+            "buffy-02": "EMPTY_DRAFT"
+          },
+          "retired": [],
+          "superseded": [],
+          "bookkeeping": {
+            "status": "UNAVAILABLE",
+            "persisted": null,
+            "detail": "Git persistence could not be measured; no commit was attempted"
+          }
+        }
+      },
+      "retire": {
+        "error_type": "ImproveError",
+        "error": "retire refuses: cycle imp-vacterro-audapack-20260918-1 is archived, not one of active"
+      },
+      "sweep": {
+        "error_type": "ImproveError",
+        "error": "write_sweep_entry refuses: cycle imp-vacterro-audapack-20260918-1 is archived, not one of active"
+      },
+      "amend": {
+        "error_type": "ImproveError",
+        "error": "--amend refuses: the ledger has no line for RUN-1/IMP-001; an amendment corrects a disposition that exists, it never creates one -- drop --amend to record a new disposition"
+      },
+      "complete_report": {
+        "error_type": "ImproveError",
+        "error": "complete_report refuses: cycle imp-vacterro-audapack-20260918-1 is archived, not one of active"
+      },
+      "abort": {
+        "error_type": "ImproveError",
+        "error": "abort refuses: cycle imp-vacterro-audapack-20260918-1 is archived, not one of active"
+      }
+    },
+    {
+      "cycle": "imp-vacterro-audapack-20260919-7",
+      "scope": "MUTATORS ON DISPOSABLE COPY ONLY",
+      "seats": [
+        {
+          "seat": "buffy-01",
+          "report": "saipen_improve_SAIPEN.md",
+          "sha256": "ca07487780a5fda5cc0fb5653e46a9b6c165fa524bbafe41c7819aed453fb730",
+          "report_status": "draft",
+          "errors": [],
+          "findings": []
+        },
+        {
+          "seat": "buffy-02",
+          "report": "saipen_improve_SAIPEN.md",
+          "sha256": "ece55062c92e6e3de7543a906ff2ae3126f7ed7f6e44469934d8861e1c4beaf7",
+          "report_status": "draft",
+          "errors": [],
+          "findings": [
+            {
+              "ref": "RUN-1/IMP-001",
+              "expected": "the improve AUDIT ASSIGNMENT advertises proof_levels [UNIT, COMPOSITION, CANONICAL, GATE, PROVENANCE]; GATE proof means running the repository gate, so the runtimes that gate executes (node, python) are audit inputs and must be reachable in the same state the assignment is issued",
+              "actual": "in the idle DONE bound project the guard routes read-only probes to action=shell and refuses them NO_ACTIVE_WORK, while sibling read-only reporters in the identical state are admitted; `python --version`, `node --version`, `saipen permissions --json`, `saipen explain-next --json`, `Get-Command saipen`, and `(Get-ChildItem tests/widget -Filter *.test.js).Count` were all refused with `SAIPEN_GUARD_REFUSAL: NO_ACTIVE_WORK ... next: saipen start '<the task, one line>'`, so the seat cannot even pwd its own runtime versions or enumerate the suites the assignment calls GATE proof",
+              "evidence": "admitted in the same session and same cwd: `git rev-parse HEAD` -> 38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1; `echo probe-ok` -> probe-ok; `saipen status --json`; `saipen validate --json`; `saipen improve status --json`; `saipen improve sweep-queue imp-vacterro-audapack-20260919-7 --json`; `Get-Content`, `Test-Path`, `git status --short`, `git diff --stat`. Refused: `node --version`, `python --version`, `saipen permissions --json`, `saipen explain-next --json`, `Get-Command saipen`, `(Get-ChildItem ...).Count`. The SAIPEN installation's own board already carries the same class at .saipen/BOARD.md:5 (T-1402) and :6 (T-1401), so the defect is cross-project and not local to AUDAPACK"
+            },
+            {
+              "ref": "RUN-1/IMP-002",
+              "expected": "T-206's own verify clause offered two exits -- release the lingering handle that keeps the process alive, or pin the bounded per-file runner exactly in tests/widget/README.md and CI -- so a matrix that adds a runtime must pair with a gate proven to terminate on it",
+              "actual": "the working tree adds Node 24 to the widget CI matrix while tests/widget/README.md still names `node --test tests/widget/*.test.js` as \"the canonical full-suite gate\" -- the directory-glob form T-206 recorded as stalling on Node v24.15.0 with no summary and no exit -- so the newly-added CI leg runs a gate that the repository already knows never returns, turning a local hang into a CI job that can only hit the job timeout",
+              "evidence": "`git diff HEAD -- .github/workflows/ci.yml` -> `node-version: [18, 20, 22, 24]` (was `[18, 20, 22]`); ci.yml:58 runs `node --test tests/widget/*.test.js`; tests/widget/README.md:29 declares that same glob \"the canonical full-suite gate\"; T-206 (BOARD ## DONE) verify records the directory run stalling after w2-002 completes on Node v24 with the per-file runner completing every file; the README's added sentence (a run that prints results and then hangs is still a gate failure) states the hazard without removing it"
+            },
+            {
+              "ref": "RUN-1/IMP-003",
+              "expected": "a bounded CLEAN pass that deliberately leaves a red strict-core gate records that decision where the next route can see it, so DONE does not advertise a maintain/continue route over an unaddressed gate failure",
+              "actual": "saipen status --json reports conformance CURRENT_FAIL (canonical validator FAIL, exit_code 1, gate core) and saipen validate --json reports 118 problems / 92 warnings, while the same status block emits next_action/computed_next_action `saipen continue` and automation disposition CONTINUE reason maintain; the deliberate non-repair is stated only in LOG E-1649 prose, not in any machine surface the router consults",
+              "evidence": "`saipen status --json` -> conformance \"CURRENT_FAIL\", conformance_status.receipt.exit_code 1, gate core, validator summary \"Validation FAILED: 118 problem(s), 92 warning(s)\"; the same payload -> next_action \"saipen continue\", computed_next_action \"saipen continue\", automation.disposition \"CONTINUE\", automation.reason_code \"closure-conditions-C1-C2-C3-C4-C5-C6-C7\"; LOG E-1649 is the only place the non-repair decision is stated"
+            }
+          ]
+        }
+      ],
+      "live_read_only_liveness": {
+        "cycle_id": "imp-vacterro-audapack-20260919-7",
+        "status": "archived",
+        "seat_id": "buffy-01",
+        "report_status": "draft",
+        "has_report": true,
+        "runs": 0,
+        "draft": true,
+        "no_run": true,
+        "created_at": "2026-09-19T23:21:30Z",
+        "age_days": 26,
+        "stale": true,
+        "submit_route": "saipen improve submit imp-vacterro-audapack-20260919-7 buffy-01 vacterro-audapack buffy-01/saipen_improve_SAIPEN.md"
+      },
+      "reconcile": {
+        "returned": {
+          "ok": true,
+          "code": "ALREADY_TERMINAL",
+          "outcome": "ABORTED",
+          "cycle_id": "imp-vacterro-audapack-20260919-7",
+          "seats": [
+            {
+              "seat_id": "buffy-01",
+              "role": "core",
+              "report_path": "saipen_improve_SAIPEN.md",
+              "availability": "expected",
+              "report_status": "draft",
+              "class": "EMPTY_DRAFT",
+              "terminal": false,
+              "retire_reason": "",
+              "detail": "zero committed RUNs; the assignment produced no evidence",
+              "routes": [
+                "saipen improve retire imp-vacterro-audapack-20260919-7 buffy-01 --reason EMPTY_DRAFT"
+              ]
+            },
+            {
+              "seat_id": "buffy-02",
+              "role": "core",
+              "report_path": "saipen_improve_SAIPEN.md",
+              "availability": "expected",
+              "report_status": "draft",
+              "class": "STILL_ACTIONABLE",
+              "terminal": false,
+              "retire_reason": "",
+              "detail": "report_status 'draft' with committed audit content",
+              "routes": [
+                "saipen improve submit imp-vacterro-audapack-20260919-7 buffy-02 <project> <findings.json>",
+                "saipen improve complete imp-vacterro-audapack-20260919-7 buffy-02 <project>"
+              ]
+            }
+          ],
+          "seat_classes": {
+            "buffy-01": "EMPTY_DRAFT",
+            "buffy-02": "STILL_ACTIONABLE"
+          },
+          "retired": [],
+          "superseded": [],
+          "bookkeeping": {
+            "status": "UNAVAILABLE",
+            "persisted": null,
+            "detail": "Git persistence could not be measured; no commit was attempted"
+          }
+        }
+      },
+      "retire": {
+        "error_type": "ImproveError",
+        "error": "retire refuses: cycle imp-vacterro-audapack-20260919-7 is archived, not one of active"
+      },
+      "sweep": {
+        "error_type": "ImproveError",
+        "error": "write_sweep_entry refuses: cycle imp-vacterro-audapack-20260919-7 is archived, not one of active"
+      },
+      "amend": {
+        "error_type": "ImproveError",
+        "error": "--amend refuses: the ledger has no line for RUN-1/IMP-001; an amendment corrects a disposition that exists, it never creates one -- drop --amend to record a new disposition"
+      },
+      "complete_report": {
+        "error_type": "ImproveError",
+        "error": "complete_report refuses: cycle imp-vacterro-audapack-20260919-7 is archived, not one of active"
+      },
+      "abort": {
+        "error_type": "ImproveError",
+        "error": "abort refuses: cycle imp-vacterro-audapack-20260919-7 is archived, not one of active"
+      }
+    }
+  ],
+  "source_sha256": "42ba0aa9bacd793116f41817203071184da8e7b5e004e9f57f6c53f4cee3743b",
+  "source_provenance": "model_supplied",
+  "actionable_clauses": 33,
+  "mission_preimage_comparison": {
+    "tools/improve.py": {
+      "before_sha256": "d108b895ad3034d54d2e60b764918afacae197837e28caddef804b76f29b86e7",
+      "current_sha256": "af503add87b3ac7708470922bbbc9000002cb816949890e5a621499e33a45e8a",
+      "changed": true,
+      "symbols_added": [],
+      "symbols_removed": [],
+      "symbols_modified": [
+        "_journaled_write",
+        "reconcile_cycle",
+        "retire_seat",
+        "write_sweep_entry"
+      ]
+    },
+    "tools/saipen_engine/continue_fallback.py": {
+      "before_sha256": "4ff193c437a738d3f023669bd9c3dfd76ea6a6a3ec0a2772d2a5dd256c70d842",
+      "current_sha256": "1aa818c5d0939612680c674ec7e921e4944028b7e6320eb28713ada13a29a8d2",
+      "changed": true,
+      "symbols_added": [
+        "_other_cycle_liveness"
+      ],
+      "symbols_removed": [],
+      "symbols_modified": [
+        "cycle_liveness",
+        "stale_cycles",
+        "with_cycle_liveness"
+      ]
+    },
+    "tools/saipen_engine/journal.py": {
+      "before_sha256": "be64a585f6af2621da49d5b2053fb55ec5010336ab6590ec19d0bf6548765b9d",
+      "current_sha256": "aef9453946d70afff2c66d69d0df6f89bba23d31b49befb0ceb7a4e1b17bf394",
+      "changed": true,
+      "symbols_added": [
+        "verify_improve_retrospective"
+      ],
+      "symbols_removed": [],
+      "symbols_modified": [
+        "_verifier_for"
+      ]
+    },
+    "tools/saipen.py": {
+      "before_sha256": "6ad7e9791a500d136d66822918ee82324eaddc86e801dd05bc735f3adda2873a",
+      "current_sha256": "057c4be7e355b51bf3524e9250bd963101b89a3e3f3d9405ba5d5fe1e04e98cc",
+      "changed": true,
+      "symbols_added": [],
+      "symbols_removed": [],
+      "symbols_modified": [
+        "_improve"
+      ]
+    },
+    "tools/test_t38_improve_cycle_liveness.py": {
+      "before_sha256": "e6f8aad7c94b0c5996e8fb58f89979a68ddfe6a0dd9ae4b53c56812843e1e4ed",
+      "current_sha256": "78147c1ca85e9b1d5d4697de932cfee51d5a4591bd7d993c75e4779a59f57b52",
+      "changed": true,
+      "symbols_added": [],
+      "symbols_removed": [],
+      "symbols_modified": [
+        "CycleLiveness",
+        "PayloadMerge"
+      ]
+    },
+    "saipen/IMPROVE.md": {
+      "before_sha256": "e8d71682c09e432b609e0f8022f2828f7c9b1fb26e3346b82a50e0cb1a307c8c",
+      "current_sha256": "32884a57f7c80a86754551ce27abb65697987f72150f8a0e655b801180e460a3",
+      "changed": true
+    },
+    "tools/saipen_engine/audit_manifest.py": {
+      "before_sha256": "accb9c8770dbbcd2d5ec0bc776c3f9a2b156b81b3d2eed5c1b19919511c1b774",
+      "current_sha256": "accb9c8770dbbcd2d5ec0bc776c3f9a2b156b81b3d2eed5c1b19919511c1b774",
+      "changed": false,
+      "symbols_added": [],
+      "symbols_removed": [],
+      "symbols_modified": []
+    },
+    "tools/saipen_engine/admission.py": {
+      "before_sha256": "4c92109adf2a888e98c09f958e7c336f2274d4ae6399c6cdb4cf7cd4e4e65797",
+      "current_sha256": "b70c5950c5b187877c39a6df935ddee40f81d1bc3e2801fba512bb883bc4ab76",
+      "changed": true,
+      "symbols_added": [],
+      "symbols_removed": [],
+      "symbols_modified": []
+    },
+    "tools/saipen_engine/capability.py": {
+      "before_sha256": "0d58b0d5df95b5c631030dcd35b8d2702878fc04d1afd06e4386392f38edf2fa",
+      "current_sha256": "b03597e2d4a1d1ca1b547eb618297baede893246d25fd6bf88ff2fc2924b89b0",
+      "changed": true,
+      "symbols_added": [],
+      "symbols_removed": [],
+      "symbols_modified": [
+        "guard_core_mutation"
+      ]
+    }
+  },
+  "new_module": {
+    "path": "tools\\saipen_engine\\improve_retrospective.py",
+    "sha256": "fd4aba80e97d8a285cf3484e3866396ff2d93c0357349f9536567af26434dcd6",
+    "symbols": [
+      "_admit",
+      "_append",
+      "_fail",
+      "_header",
+      "_json",
+      "_native_hash",
+      "_native_receipt",
+      "_owned_bytes",
+      "_proof",
+      "_prove_owned",
+      "_read",
+      "_sha",
+      "_snapshot",
+      "_view",
+      "inspect_archive",
+      "reconcile_archive",
+      "record_path",
+      "retire_archived",
+      "validate_record",
+      "write_disposition"
+    ]
+  },
+  "focused_tests": {
+    "path": "tools\\test_t1803_archived_improve.py",
+    "sha256": "d12c292af9499b160366f074e33bd786739d941cbf173bbed0f51835710310d2",
+    "count": 36,
+    "names": [
+      "test_archived_draft_cannot_mint_current_confirmed_authority",
+      "test_blocked_retirement_does_not_hide_findings_or_prevent_later_coverage",
+      "test_compacted_native_receipts_still_prove_the_successor",
+      "test_concurrent_dispositions_preserve_both_findings_after_bounded_retry",
+      "test_conflicting_duplicate_disposition_never_overwrites",
+      "test_current_active_cycle_is_not_a_retrospective_target",
+      "test_empty_archive_is_not_advertised_as_pending",
+      "test_exact_disposition_retry_is_idempotent",
+      "test_first_historical_disposition_preserves_original_missing_sweep",
+      "test_foreign_actor_cannot_mutate_claimed_project_history",
+      "test_forged_valid_hash_chain_without_native_writer_receipt_is_blocked",
+      "test_fresh_process_crash_after_verified_rolls_forward",
+      "test_fresh_process_sees_persisted_reconciliation",
+      "test_genuinely_complete_cycle_keeps_existing_terminal_behavior",
+      "test_interrupted_append_recovers_without_mutating_original_cycle",
+      "test_malformed_successor_returns_blocked_without_writes",
+      "test_missing_active_work_is_not_retrospective_admission",
+      "test_missing_admission_refuses_at_existing_public_boundary",
+      "test_needs_external_evidence_stays_visible_without_endless_actionable_retry",
+      "test_no_go_binding_brake_refuses_retrospective_mutation",
+      "test_older_kernel_policy_registry_refuses_new_successor_receipts",
+      "test_ordinary_archived_mutators_remain_forbidden",
+      "test_original_history_change_invalidates_successor_binding",
+      "test_partial_sweep_is_preserved_and_combined_with_successor",
+      "test_pending_external_decision_can_advance_only_by_append_only_correction",
+      "test_producer_cannot_write_successor_canonical_evidence",
+      "test_public_cli_sweep_reconcile_queue_and_repeated_continue",
+      "test_reconciled_archive_stops_repeated_advertisement",
+      "test_recovery_refuses_changed_original_dependency",
+      "test_resolved_disposition_requires_owned_verification_evidence",
+      "test_retrospective_cli_dry_run_validates_without_creating_a_record",
+      "test_secondary_seat_findings_are_visible",
+      "test_stale_disposition_plan_cannot_overwrite_an_intervening_commit",
+      "test_successor_namespace_is_protected_from_direct_file_tools",
+      "test_terminal_status_does_not_hide_unfinished_findings",
+      "test_wrong_lineage_cannot_reuse_successor"
+    ]
+  },
+  "oracle_expansion": {
+    "removed": [],
+    "changed": [],
+    "added": [
+      "test_malformed_successor_returns_blocked_without_writes"
+    ],
+    "reason": "Concrete introduced malformed JSON event/proof-map failure; six RED controls before the implementation-only correction"
+  },
+  "graph_limitation": "Tier 2; saipen generation 2026-09-01T13:16:39Z excludes tools/. Direct current source and executed tests supply engine evidence."
+}

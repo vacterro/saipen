@@ -1,0 +1,9 @@
+{
+  "files": {
+    "saipen/COMMANDS.md": "11936f29f40ae8387228bc1ead89e5babf58efdbbe3a3391c76d09780c97251d",
+    "saipen/phases/verify.md": "3ea0e70188c1debb79a8499492be46f7300660a8cc46fb706ff4c2d76fd876f3",
+    "saipen/phases/ship.md": "2517d5db54c7e4e337c5fe5510110d5ccb697dbfc2311cafa6b9a31911e8186d"
+  },
+  "proof": "complete-proposal-proof.json",
+  "new_diagnostic_scope": "All actual SHIP and borrowed-invariant guards, original positive/saved negative controls"
+}

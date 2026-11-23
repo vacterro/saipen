@@ -172,5 +172,7 @@ def route_command(result: dict) -> str | None:
     yields None so the caller must state its justification.
     """
     if result.get("code") == "ROUTED_TO_OWNER" and result.get("owner"):
-        return f"saipen ticket claim {result['owner']}"
+        # T-2056: the verb is `saipen claim`, not `saipen ticket claim` (no such
+        # action exists, so this resolver used to hand back an unrunnable line).
+        return f"saipen claim {result['owner']}"
     return None

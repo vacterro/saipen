@@ -1,0 +1,167 @@
+{
+  "observed_utc": "2026-10-13T10:09:25.203027+00:00",
+  "python": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "python_version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "runtime": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\log.py",
+  "module_sha256": "a6287bbfd40d19bb4958008dc7a0602f191796ba3fa64ffc94c676c9af2951e0",
+  "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE",
+  "segments": [
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-001.md",
+      "exists": true,
+      "bytes": 214259,
+      "sha256": "9d77443ef6269f798f4e3ddceac0bfd9e249a73f2e3ca0ce2df0b44713003b36",
+      "encoding": "utf-8",
+      "bom_hex": "",
+      "first_event": 1,
+      "last_event": 867,
+      "event_count": 866,
+      "parser_rejection_count": 0,
+      "parser_rejection_lines": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-002.md",
+      "exists": true,
+      "bytes": 70365,
+      "sha256": "de23495e9525a2979258363cd2de0513fd038fa9bf8d36b0127604f2ab21569e",
+      "encoding": "utf-8",
+      "bom_hex": "",
+      "first_event": 868,
+      "last_event": 1156,
+      "event_count": 289,
+      "parser_rejection_count": 0,
+      "parser_rejection_lines": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-003.md",
+      "exists": true,
+      "bytes": 418556,
+      "sha256": "d1f1dde8a9f6331de4bfe1c470b0104a131dc01124ece5f7e0f3c4f36b803839",
+      "encoding": "utf-8",
+      "bom_hex": "",
+      "first_event": 1157,
+      "last_event": 2466,
+      "event_count": 1310,
+      "parser_rejection_count": 0,
+      "parser_rejection_lines": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-004.md",
+      "exists": true,
+      "bytes": 706539,
+      "sha256": "b5371837efc745ed8101d9c99d4fbcb112eb93abf017f66fc7b155c7bc9843ca",
+      "encoding": "utf-8",
+      "bom_hex": "",
+      "first_event": 2467,
+      "last_event": 4674,
+      "event_count": 2208,
+      "parser_rejection_count": 0,
+      "parser_rejection_lines": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\LOG.md",
+      "exists": true,
+      "bytes": 122706,
+      "sha256": "a41ec6ada5eab3e3f72651a14721e977f98e359dc259c5fde8ce67dea7d0eda3",
+      "encoding": "utf-8",
+      "bom_hex": "",
+      "first_event": 4675,
+      "last_event": 5067,
+      "event_count": 393,
+      "parser_rejection_count": 0,
+      "parser_rejection_lines": []
+    }
+  ],
+  "located": [
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-004.md",
+      "line": 667,
+      "text": "- 03.10.26 15:40 [E-3133] [parent: E-3132] [T-192] [agent: saipen-cli] [op: checkpoint-0fd24cfcb219457b94aeaba2baed1da9] DEC: SRC-129 records seven new requirements under T-194 and reauthorizes continued goal work after the completed SRC-128 stop; preserve active T-192 owner and queue. Unicode diagnostics now prove complete emoji data reaches pty.write, while the same unmodified PowerShell/PSReadLine2.4.5 loses emoji with system ConPTY and preserves it with the bundled ConPTY DLL, before any handoff. Use the existing bundled DLL in the independent broker; its existing socket-flush/server-close/process.exit lifecycle releases the DLL reader thread. Keep the mandatory Unicode assertion unchanged. Rollback is frozen T-192-subject-pass3.json; preserve all foreign and T-188 bytes. Then full gates and a fresh packaged proof precede queued SRC-129 work. Official Codex hooks docs identifies separate --dangerously-bypass-hook-trust for R007; no SRC-129 implementation is claimed yet.",
+      "native_event": 3133,
+      "line_bytes": 988,
+      "control_codepoints": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-004.md",
+      "line": 668,
+      "text": "- 03.10.26 15:44 [E-3134] [parent: E-3133] [T-195] [agent: saipen-cli] [op: userreq-023aa656ec354eb88fdda176b28f0a1c] DEC: user request SRC-130 projected as T-195 (local candidate; witness model_supplied)",
+      "native_event": 3134,
+      "line_bytes": 204,
+      "control_codepoints": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-004.md",
+      "line": 670,
+      "text": "- 03.10.26 16:01 [E-3136] [parent: E-3135] [T-192] [agent: saipen-cli] [op: checkpoint-911f12526d964ad5ad2750cf6ea0ee8a] RUN: VERIFY PASS conf: high. Final pinned subject b8dea41379f2ab7dab6fce899e08055fa5439ee659f44bf19b09185923dc0ca6: Unicode service2 PASS, native8 PASS, actual React UI35 PASS and independent UI35 PASS. Mandatory typecheck/build/full gate exit0; 1343 passed/2 skipped/0 failures, lint108 warnings/0errors, architecture0. Fresh DLL bundle exit0 and boot28 sections/0 browser errors. Frozen actual packaged oracle5 PASS: shipped factory and broker, real visible PowerShell, same CLI PID13060/counter5-to10 after forced packaged-host termination. All old failed passes retained. Source coverage SRC127 R001/R002 VERIFIED; all foreign18/T188 twelve paths unchanged.",
+      "native_event": 3136,
+      "line_bytes": 782,
+      "control_codepoints": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-004.md",
+      "line": 671,
+      "text": "- 03.10.26 16:02 [E-3137] [parent: E-3136] [T-192] [agent: saipen-cli] [op: checkpoint-07f56214aafd44ada26745714bddff71] RUN: verify -> PASS [target: T-192] conf: high -- pinned pnpm10 typecheck/build/full verify:pre-push exit0, 1343 passed/2 skipped/0 failed; Unicode service2 PASS, frozen native8 PASS, production React UI35 PASS, fresh DLL package boot28 sections/0 browser errors and unchanged shipped-factory oracle5 PASS with same PID13060/counter5-to10. Receipts T-192-verify-final.json, T-192-packaged-dll/receipt.json, T-192-subject.json; foreign18/T188 twelve paths unchanged.",
+      "native_event": 3137,
+      "line_bytes": 586,
+      "control_codepoints": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-004.md",
+      "line": 679,
+      "text": "- 03.10.26 16:26 [E-3145] [parent: E-3144] [T-192] [agent: saipen-cli] [op: checkpoint-b956a456da074d51b018a22267d479fb] DEC: review -> PASS [target: T-192] conf: high -- independent unchanged native8 PASS in T-192-native-review-release after the exit/resize correction; production UI35 independent PASS remains same source, published client has no ACK workaround. Exact fifteen-path review finds no P0/P1. Foreign18/T188 twelve byte-identical, index empty. No durable knowledge promotion: native console lifecycle is already specified in the product contract. DEC: SHIP exact own patch in separate zcode repo, established origin/zaicode; final evidence T-192-verification.md.",
+      "native_event": 3145,
+      "line_bytes": 676,
+      "control_codepoints": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-004.md",
+      "line": 680,
+      "text": "- 03.10.26 16:26 [E-3146] [parent: E-3145] [T-192] [agent: saipen-cli] [op: transition-a47c8a8744ca4411bd74c36693f69025] RUN: transition to SHIP -- Publish the reviewed fifteen-path subject in the separate zcode repository, preserving all foreign dirty bytes.",
+      "native_event": 3146,
+      "line_bytes": 259,
+      "control_codepoints": []
+    }
+  ],
+  "independent": {
+    "events": 5066,
+    "errors": []
+  },
+  "snapshot": {
+    "events": 5066,
+    "tail": 5067,
+    "hash": "3b83f079017963f6",
+    "illegal": [],
+    "contract_errors": []
+  },
+  "direct_contract_errors": [],
+  "mutation_loader": {
+    "events": 5066,
+    "hash": "3b83f079017963f6",
+    "contract_errors": [],
+    "sealed_dependency_digest": "delete-tree-sha256:b01c21f438a0885d7b2df68eb6561f2a03ac77151e8f45c85479eaa2867d7f36"
+  },
+  "routing_summary": {
+    "events": 5066,
+    "tail": 5067,
+    "hash": "3b83f079017963f6",
+    "illegal": [],
+    "duplicates": [],
+    "ordering": []
+  },
+  "inputs_stable": true,
+  "before_sha256": {
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-001.md": "9d77443ef6269f798f4e3ddceac0bfd9e249a73f2e3ca0ce2df0b44713003b36",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-002.md": "de23495e9525a2979258363cd2de0513fd038fa9bf8d36b0127604f2ab21569e",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-003.md": "d1f1dde8a9f6331de4bfe1c470b0104a131dc01124ece5f7e0f3c4f36b803839",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-004.md": "b5371837efc745ed8101d9c99d4fbcb112eb93abf017f66fc7b155c7bc9843ca",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\LOG.md": "a41ec6ada5eab3e3f72651a14721e977f98e359dc259c5fde8ce67dea7d0eda3"
+  },
+  "after_sha256": {
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-001.md": "9d77443ef6269f798f4e3ddceac0bfd9e249a73f2e3ca0ce2df0b44713003b36",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-002.md": "de23495e9525a2979258363cd2de0513fd038fa9bf8d36b0127604f2ab21569e",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-003.md": "d1f1dde8a9f6331de4bfe1c470b0104a131dc01124ece5f7e0f3c4f36b803839",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\logs\\LOG-004.md": "b5371837efc745ed8101d9c99d4fbcb112eb93abf017f66fc7b155c7bc9843ca",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\LOG.md": "a41ec6ada5eab3e3f72651a14721e977f98e359dc259c5fde8ce67dea7d0eda3"
+  }
+}

@@ -1,0 +1,41 @@
+# R2 CONTROL — saipen/COMMANDS.md publication surface (T-1882)
+# One verifier (tools/validate.py, unmodified), one live tree; only the
+# bytes of saipen/COMMANDS.md differ per run.
+# Each variant was written, measured and reverted; the final md5 is asserted.
+
+## pre-fix (installed-runtime bytes)
+# sha256 06a9ba4a08d4878b13248b920dfd2f526c0ddaad1144efeb9da5fa37fa712c78  lines 118  `saipen future` rows 0
+# exit 1  FAIL: lines 44
+   FAIL: FUTURE-OWNER: `saipen future add` is implemented and declared but never published in saipen/COMMANDS.md
+   FAIL: FUTURE-OWNER: `saipen future promote` is implemented and declared but never published in saipen/COMMANDS.md
+   FAIL: FUTURE-OWNER: `saipen future refine` is implemented and declared but never published in saipen/COMMANDS.md
+   FAIL: FUTURE-OWNER: `saipen future refresh` is implemented and declared but never published in saipen/COMMANDS.md
+   PASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 52 document(s) non-normative, 46 reviewed record(s) canonical)
+
+## stored HEAD version (208 lines)
+# sha256 4605a73210b3775558dc3243bf00206f6d4592d67d546d34f123254aef01bf5c  lines 208  `saipen future` rows 5
+# exit 1  FAIL: lines 40
+   PASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 52 document(s) non-normative, 46 reviewed record(s) canonical)
+
+## post-fix (compact block, this repair)
+# sha256 05a160765d7d1bbaff19bc515826d2c0f3d719b618043d64d4f05a185794c1d6  lines 129  `saipen future` rows 5
+# exit 1  FAIL: lines 40
+   PASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 52 document(s) non-normative, 46 reviewed record(s) canonical)
+
+# post-fix md5 before 15d2d596333efe58b0df8aa7ef485379  after 15d2d596333efe58b0df8aa7ef485379
+# restore OK
+# BUDGET HALF — the same three byte sets measured by tools/protocol_budget.py --summary
+
+## pre-fix (installed-runtime bytes)
+# sha256 06a9ba4a08d4878b13248b920dfd2f526c0ddaad1144efeb9da5fa37fa712c78  exit 0
+   command_resolution    40427 / 56320  PASS
+
+## stored HEAD version (208 lines)
+# sha256 4605a73210b3775558dc3243bf00206f6d4592d67d546d34f123254aef01bf5c  exit 1
+   command_resolution    57232 / 56320  FAIL
+
+## post-fix (compact block, this repair)
+# sha256 05a160765d7d1bbaff19bc515826d2c0f3d719b618043d64d4f05a185794c1d6  exit 0
+   command_resolution    41546 / 56320  PASS
+
+# restored md5 15d2d596333efe58b0df8aa7ef485379 OK

@@ -1,0 +1,41 @@
+test_r001_corrupt_or_mismatched_staged_entry_detected (test_release_reconciliation.ReleaseReconciliationTests.test_r001_corrupt_or_mismatched_staged_entry_detected)
+Detect missing or mismatched staged entries accurately against a manifest. ... ok
+test_r001_live_repository_staged_manifest_matches_100_percent (test_release_reconciliation.ReleaseReconciliationTests.test_r001_live_repository_staged_manifest_matches_100_percent)
+Verify the live SAIPEN repository staging exactly matches the forensic manifest. ... ok
+test_r001_raw_index_stat_cache_mutation_vs_stage_invariance (test_release_reconciliation.ReleaseReconciliationTests.test_r001_raw_index_stat_cache_mutation_vs_stage_invariance)
+Prove that unstaged working tree edits alter index raw bytes while staged state is invariant. ... ok
+test_r002_path_traversal_refused_during_transfer (test_release_reconciliation.ReleaseReconciliationTests.test_r002_path_traversal_refused_during_transfer)
+Verify that transfer_reviewed_scope refuses directory traversal paths. ... ok
+test_r002_separate_reviewed_implementation_from_archive_and_metadata (test_release_reconciliation.ReleaseReconciliationTests.test_r002_separate_reviewed_implementation_from_archive_and_metadata)
+Verify that transfer_reviewed_scope only transfers reviewed files and excludes archive/metadata. ... ok
+test_r003_live_remotes_ancestry_topology (test_release_reconciliation.ReleaseReconciliationTests.test_r003_live_remotes_ancestry_topology)
+Verify the live repository ancestry topology against github-backup and origin. ... FAIL
+test_r003_reconcile_remote_ancestry_detects_merge_base_and_divergence (test_release_reconciliation.ReleaseReconciliationTests.test_r003_reconcile_remote_ancestry_detects_merge_base_and_divergence)
+Verify ancestry reconciliation accurately discovers merge bases and ahead/behind counts. ... ok
+test_r003_refuses_non_fast_forward_push (test_release_reconciliation.ReleaseReconciliationTests.test_r003_refuses_non_fast_forward_push)
+Verify that execute_isolated_release refuses non-fast-forward push when remote has diverged. ... ok
+test_r004_approval_packet_contains_all_decision_request_fields (test_release_reconciliation.ReleaseReconciliationTests.test_r004_approval_packet_contains_all_decision_request_fields)
+Verify that generate_release_approval_packet creates a valid schema decision request. ... ok
+test_r004_live_durable_approval_packet (test_release_reconciliation.ReleaseReconciliationTests.test_r004_live_durable_approval_packet)
+Verify the live durable approval packet exists and adheres to schema. ... ok
+test_r005_verify_remote_head_must_match_expected_sha (test_release_reconciliation.ReleaseReconciliationTests.test_r005_verify_remote_head_must_match_expected_sha)
+Verify that isolated release verifies post-push remote SHA directly. ... ok
+test_r006_independent_work_unblocked_during_release_hold (test_release_reconciliation.ReleaseReconciliationTests.test_r006_independent_work_unblocked_during_release_hold)
+Verify that a pending release gate does not block independent tickets from claiming and running. ... ok
+
+======================================================================
+FAIL: test_r003_live_remotes_ancestry_topology (test_release_reconciliation.ReleaseReconciliationTests.test_r003_live_remotes_ancestry_topology)
+Verify the live repository ancestry topology against github-backup and origin.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_release_reconciliation.py", line 322, in test_r003_live_remotes_ancestry_topology
+    self.assertEqual(res["remote_head"][:8], "3c96a989")
+AssertionError: '667a1235' != '3c96a989'
+- 667a1235
++ 3c96a989
+
+
+----------------------------------------------------------------------
+Ran 12 tests in 3.879s
+
+FAILED (failures=1)

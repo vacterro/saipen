@@ -1,0 +1,24 @@
+{
+  "focused": {
+    "command": "python -B -m unittest test_t1729_operator_gate test_t1729_gate_decision_lifecycle test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_matrix_J_resolve_next_action_cannot_mask_the_gap test_refusal_routes.BlockedProjectNamesItsExitTests.test_an_operator_blocker_names_the_command_that_resolves_it",
+    "chunk_id": "4a27d2",
+    "wall_time_seconds": 0.0000074,
+    "exit_code": 0,
+    "original_token_count": 28,
+    "output": "....\r\n----------------------------------------------------------------------\r\nRan 37 tests in 11.103s\r\n\r\nOK\r\n"
+  },
+  "contracts": {
+    "command": "python -B -m unittest test_refusal_registry test_canonical_command_reachability test_subprocess_utf8",
+    "chunk_id": "6c3c26",
+    "wall_time_seconds": 0.000006,
+    "exit_code": 0,
+    "original_token_count": 27,
+    "output": "...\r\n----------------------------------------------------------------------\r\nRan 21 tests in 24.599s\r\n\r\nOK\r\n"
+  },
+  "lint": {
+    "command": "python -m ruff check tools/ tests/",
+    "version": "0.16.0",
+    "exit_code": 0,
+    "output": "All checks passed!"
+  }
+}

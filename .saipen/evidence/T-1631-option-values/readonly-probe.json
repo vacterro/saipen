@@ -1,0 +1,22 @@
+[
+  {
+    "value": "ordinary proof",
+    "rc": 1,
+    "result": {
+      "ok": false,
+      "code": "CAPABILITY_DENIED",
+      "detail": "current session capability is read-only; no mutating command may proceed without --dry-run"
+    },
+    "board_changed": false
+  },
+  {
+    "value": "--help",
+    "rc": 0,
+    "result": {
+      "ok": true,
+      "code": "USAGE",
+      "usage": "usage: saipen (init|start '<task in one line>' [--file PATH] [--hex HEX] [--receipt SRC-###]|continue|status|storage status|classify|durable|ephemeral|scratch|store|verify|promote|migrate|response render|check --stdin|next|runtime [--prelaunch [--adapter ID] [--no-resync]|--bootstrap|--check-freshness]|search [--hex HEX]|validate|recover|fleet preflight|scan|prepare|collect <producer>|claim <T-###> [--explicit]|handoff <T-###> --to <agent> [--authority SRC-###]|transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> [T-###] [text]|goal <text>|user-request <text> [--priority P#] [--verify <text>] [--needs T-X,T-Y]|ticket add <PRIORITY> <text> --verify <proof> [--needs T-X,T-Y] [--regression required]|ticket done <T-###> [--closure-mode own_patch|inherited_verified|cohort|finding_invalidated] [--closure-cohort C-###] [--implementation-source <release:<id>|T-###|SRC-###>] [--invalidated-by <E-###>] [--paths <p1,p2>]|ticket bind-cohort <T-###> --cohort <C-###> --paths <p1,p2>|ticket supersede <T-OLD> --by <T-NEW> --evidence <E-###> --authority <SRC-###>|ticket resolve-external <T-###> --authority <lineage-32hex> --implementation <T-###@commit> --reason <CLASS> --run <command>...|ticket repair-metadata <T-###> --field source_receipts (--to SRC-### | --legacy-unbound [--authority SRC-###|lineage-<32hex>])|ticket reasoning <T-###> --recurrence <text> --weak-model <text>|ticket requires <T-###> <CAP[@PHASE],...|none>|ticket compact <T-###>|ticket block <T-###> <reason> [--scope ticket|goal]|ticket block-for <parent T-###> <blocker T-###> <reason> [--scope ticket|goal]|ticket unblock <T-###> <decision>|work reverify <T-###> [--verification <cmd>:PASS]... [--run <command>]... [--timeout SECONDS]|source retire <SRC-###> --reason <CLASS> [--successor SRC-###]|source quarantine <SRC-###> [--reason CODE]|source recover|source reconcile <SRC-###> [--confirm]|source normalize [--dry-run]|cohort status <C-###>|cohort ship <C-###>|improve|improve hold <T-###> [reason]|improve unhold|improve status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> |improve sweep-queue <cycle>|improve submit <cycle> <seat> <project> <findings.json>|improve complete <cycle> <seat> <project>|improve verify <cycle>|improve cycle-complete <cycle>|improve reconcile <cycle>|improve abort <cycle>|improve clean <cycle>|ship|push|scope <T-###> <path>...|first-publish-confirm <name> <public|private>|userperson show [--project|--global|--effective]|userperson add|remove <text> [--category NAME] [--project|--global]|userperson reset [--project|--global] --confirm|authority capture [--file PATH|--hex HEX]|sub reconcile <role> --authority <SRC-###>|sub|rebind-home <candidate-home>|context cold|hot|audit|orient [--handoff JSON]|acceptance <T-###>|test suite [status]|declare -- <command>|run [T-###]|withdraw|attempt open|attempt close <RESULT> <STOP>|brief|focus [text]|build <directive>|knowledge status|index|retrieve <objective>|future status|list|refresh|next|refine <FG-####>|promote <FG-####>|add <title>|launch <host> [-- HOST-ARGS]|host doctor|repair|mode [strict|degraded|default]|cut <target>|cut confirm <CUT-ID>|undo|undo confirm <CP-ID> --reason <text>) [--dry-run] [--json] [--project-root PATH] [--agent ID] [--runtime-info JSON-FILE]"
+    },
+    "board_changed": false
+  }
+]

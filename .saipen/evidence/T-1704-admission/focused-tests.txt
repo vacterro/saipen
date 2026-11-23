@@ -1,0 +1,50 @@
+Command (project-root working directory):
+& 'C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.EXE' -m unittest tools.test_t1494_continuation_authority tools.test_t1293_valve_resume_audit_route tools.test_audit_route tools.test_reconcile_valve tools.test_command_routing tools.test_t1619_iteration_boundary
+
+Interpreter: the exec_prefix established by bin/saipen.cmd host entry --json.
+Exit code: 0
+Result: Ran 160 tests in 59.669s; OK.
+All six requested existing focused modules were included.
+No production-host authority was injected. Test fixtures own their explicit external carrier doubles.
+
+Independent live counterexample command:
+& 'C:/Users/vac34/AppData/Local/Programs/Python/Python311/python.EXE' .saipen/evidence/T-1704-admission/reproduce.py
+Exit code: 1
+Result: RED. Live bounded REVIEW / T-1703, reconstructed 0 waves / 20 tickets.
+Positive controls: active REVIEW continuation accepted; audit ingestion accepted.
+Negative control: scope-selection WAIT refused.
+Protected canonical/evidence/source bytes unchanged by reproduction.
+
+Native command:
+& ./bin/saipen.cmd validate --json
+Exit code: 1
+Code: CONFORMANCE_UNHEALTHY
+Structural gate: pass
+Conformance: CURRENT_FAIL, core, 1 problem, 9 warnings.
+Receipt: receipt-a8251e104e8e
+Finding key: 76b48f23558dce11
+Detail hash: 157dd1e548348464
+Ruleset fingerprint: 82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1
+Install fingerprint: install-v1:5fab9f634a8fdd6eada7f89f3345c32880b8c6f9eab338b7b8f6213468a80ce3
+Source tree fingerprint: git-delta-v1:34be14d4d2f352d22c86df7593c41f33da7bbb5f22e5996cecc55b45a1e37476
+Source HEAD: 025bf596c683464788ab698248e8a3c5eb44dfec
+Timestamp UTC: 2026-10-10T08:04:41.967629Z
+
+Continuation command:
+& ./bin/saipen.cmd continue --json
+Exit code: 1
+Code: RECONCILE_REAUTH_REQUIRED
+Reconciliation: CLEAN, changed []
+operator_action_due: true
+bounded run requires a fresh operator cc; WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue
+
+No green repair result or new full-family run is claimed.
+
+Post-checkpoint native rerun (E-14220):
+Command: & ./bin/saipen.cmd validate --json
+Exit code: 1
+Conformance: CURRENT_FAIL, core, 1 problem, 9 warnings.
+Receipt: receipt-9a916446da91
+Timestamp UTC: 2026-10-10T08:10:04.072678Z
+Complete structured output: native-final.json
+Finding key, ruleset/install/source fingerprints unchanged from above.

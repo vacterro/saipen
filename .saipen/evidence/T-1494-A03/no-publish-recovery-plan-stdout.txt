@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "code": "DRY_RUN_PLAN",
+  "action": "recover",
+  "pending_ops": [
+    "release-2caf93f3f6c54211b8ab9311674122e0"
+  ],
+  "plan": [],
+  "adopt_legacy": [],
+  "attest_legacy_done": [],
+  "resolve_blocker": null,
+  "detail": "planned replay targets; no writes"
+}

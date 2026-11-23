@@ -1,0 +1,10 @@
+{
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    ".saipen/evidence/AG3-runtime-20261011/verify-phase-control.py"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.445s\n\nOK\n"
+}

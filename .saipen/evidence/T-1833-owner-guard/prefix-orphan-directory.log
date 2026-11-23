@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1833-owner-guard/check_orphan_directory.py", line 45, in <module>
+    assert not guard.exists(), "owned process group died but its guard directory survived"
+           ^^^^^^^^^^^^^^^^^^
+AssertionError: owned process group died but its guard directory survived

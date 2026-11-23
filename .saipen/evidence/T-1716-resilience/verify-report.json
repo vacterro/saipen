@@ -1,0 +1,20 @@
+{
+  "label": "verify-report",
+  "phase": "VERIFY",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    ".saipen/evidence/T-1716-resilience/verify-report.py",
+    "report-verify"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 1,
+  "duration_s": 0.375,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\r\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1716-resilience\\verify-report.py\", line 90, in <module>\r\n    assert sha(Path(consumer[\"root\"]) / \".saipen\" / basename) == digest, (consumer[\"root\"], basename)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nAssertionError: ('V:\\\\___VAC\\\\__K\\\\__CODE\\\\_TAMPERMONKEY\\\\_WIN95THEME\\\\Wintage', 'STATE.md')\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "eea031623280237f6ee287a36be651da7e50f2acbc189d31fa4842a2eace7a80",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

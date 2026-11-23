@@ -1,0 +1,83 @@
+{
+  "ok": false,
+  "code": "RECONCILE_REAUTH_REQUIRED",
+  "detail": "T-505 is active in STATE (phase SCOUT) with verified claim in LOG, but missing from BOARD.md; deterministic recovery reconstructs the canonical DOING projection from intake/claim evidence (SRC-360 / T-505)",
+  "changed": {
+    "board": [],
+    "state": [],
+    "lifecycle": [
+      {
+        "field": "board",
+        "kind": "ticket-insert",
+        "_class": "lost-active-ticket-projection",
+        "ticket": "T-505",
+        "surface": "board",
+        "section": "## DOING",
+        "to_section": "## DOING",
+        "record": "- [/] T-505 [P1] Work item T-505 description text here | verify: verify it | request_witness: model_supplied | source_receipts: SRC-355 | owner: saipen-cli | claim_time: 2026-11-06T03:20:01Z",
+        "requires_approval": true,
+        "generation": "current",
+        "reason": "T-505 is active in STATE (phase SCOUT) with verified claim in LOG, but missing from BOARD.md; deterministic recovery reconstructs the canonical DOING projection from intake/claim evidence (SRC-360 / T-505)"
+      }
+    ],
+    "lifecycle_refused": []
+  },
+  "refused": [
+    {
+      "field": "board",
+      "kind": "ticket-insert",
+      "_class": "lost-active-ticket-projection",
+      "ticket": "T-505",
+      "surface": "board",
+      "section": "## DOING",
+      "to_section": "## DOING",
+      "record": "- [/] T-505 [P1] Work item T-505 description text here | verify: verify it | request_witness: model_supplied | source_receipts: SRC-355 | owner: saipen-cli | claim_time: 2026-11-06T03:20:01Z",
+      "requires_approval": true,
+      "generation": "current",
+      "reason": "T-505 is active in STATE (phase SCOUT) with verified claim in LOG, but missing from BOARD.md; deterministic recovery reconstructs the canonical DOING projection from intake/claim evidence (SRC-360 / T-505)"
+    }
+  ],
+  "repair_id": "1982e67b814013812f6dd8aad30a3296dfb7ac5533499bfe2f635467ac21e7ad",
+  "strict_state_error": null,
+  "dry_run": true,
+  "needs_local_mutation": false,
+  "safe_auto_repair_available": false,
+  "operator_decision_available": true,
+  "canonical_next_command": "saipen recover --apply-approved-repair 1982e67b814013812f6dd8aad30a3296dfb7ac5533499bfe2f635467ac21e7ad",
+  "read_only": true,
+  "terminal_disposition": null,
+  "blocking_surface": "board",
+  "blocking_field": "board",
+  "evidence_reference": ".saipen/BOARD.md",
+  "diagnosis": "READ_ONLY_DIAGNOSIS_ONLY",
+  "read_only_diagnosis_only": true,
+  "instruction": "READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; the only sanctioned mutation is `saipen recover --apply-approved-repair 1982e67b814013812f6dd8aad30a3296dfb7ac5533499bfe2f635467ac21e7ad`",
+  "forbidden_probes": [
+    "saipen stop",
+    "saipen transition",
+    "saipen goal",
+    "saipen ticket",
+    "Bash",
+    "Edit",
+    "Write"
+  ],
+  "reason_code": "RECONCILE_REAUTH_REQUIRED",
+  "remediation": "OPERATOR_DECISION",
+  "safety_valve_tripped": false,
+  "operator_decisions": [
+    {
+      "field": "board",
+      "surface": "board",
+      "tickets": [
+        "T-505"
+      ],
+      "command": "saipen recover --apply-approved-repair 1982e67b814013812f6dd8aad30a3296dfb7ac5533499bfe2f635467ac21e7ad",
+      "reason": "T-505 is active in STATE (phase SCOUT) with verified claim in LOG, but missing from BOARD.md; deterministic recovery reconstructs the canonical DOING projection from intake/claim evidence (SRC-360 / T-505)"
+    }
+  ]
+}
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "usage: recover --apply-approved-repair <repair_id> (missing id)"
+}

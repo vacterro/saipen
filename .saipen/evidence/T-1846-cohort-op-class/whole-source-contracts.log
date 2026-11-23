@@ -1,0 +1,33 @@
+test_every_production_refusal_code_is_registered (test_refusal_registry.RegistryCompletenessTests.test_every_production_refusal_code_is_registered) ... ok
+test_the_scan_actually_sees_the_measured_case (test_refusal_registry.RegistryCompletenessTests.test_the_scan_actually_sees_the_measured_case)
+The discovery is not vacuously green: the SAITULS code is found. ... ok
+test_source_linkage_drift_is_a_structured_refusal (test_refusal_registry.StructuredRefusalTests.test_source_linkage_drift_is_a_structured_refusal) ... ok
+test_unknown_refusal_code_never_crashes_but_is_marked (test_refusal_registry.StructuredRefusalTests.test_unknown_refusal_code_never_crashes_but_is_marked) ... ok
+test_a_following_flag_is_not_swallowed_into_the_decision (test_canonical_command_reachability.BlockerDecisionParsingTests.test_a_following_flag_is_not_swallowed_into_the_decision) ... ok
+test_a_missing_decision_still_refuses (test_canonical_command_reachability.BlockerDecisionParsingTests.test_a_missing_decision_still_refuses) ... ok
+test_a_multi_word_decision_needs_no_quotes (test_canonical_command_reachability.BlockerDecisionParsingTests.test_a_multi_word_decision_needs_no_quotes) ... ok
+test_a_literal_is_harvested_whole (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_a_literal_is_harvested_whole)
+T-1383: the harvest read a literal only up to its first quote of ... ok
+test_a_modifier_never_carries_an_ingress_payload_past_its_own_grammar (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_a_modifier_never_carries_an_ingress_payload_past_its_own_grammar)
+start/user-request payloads are judged by the ingress grammar only ... ok
+test_a_quoted_payload_is_data_under_its_verb (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_a_quoted_payload_is_data_under_its_verb) ... ok
+test_a_shortcut_is_the_command_it_routes_to (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_a_shortcut_is_the_command_it_routes_to)
+The CLI resolves a registry shortcut before any dispatch, and so ... ok
+test_every_printed_command_classifies_as_canonical (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_every_printed_command_classifies_as_canonical) ... ok
+test_shell_syntax_outside_a_payload_still_disqualifies_the_line (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_shell_syntax_outside_a_payload_still_disqualifies_the_line)
+T-1386 moved ONE thing: a single quoted literal payload of a canonical ... ok
+test_the_blocker_decision_is_reachable_with_real_words (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_the_blocker_decision_is_reachable_with_real_words)
+The field shape: a multi-word decision, and the flag it combines with. ... ok
+test_the_harvest_actually_finds_commands (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_the_harvest_actually_finds_commands)
+Guard: an empty harvest would pass this file silently. ... ok
+test_dict_built_text_settings_are_part_of_the_inventory (test_subprocess_utf8.SubprocessUtf8Contract.test_dict_built_text_settings_are_part_of_the_inventory) ... ok
+test_import_aliases_are_in_the_same_inventory (test_subprocess_utf8.SubprocessUtf8Contract.test_import_aliases_are_in_the_same_inventory) ... ok
+test_missing_encoding_red_control_really_corrupts_utf8 (test_subprocess_utf8.SubprocessUtf8Contract.test_missing_encoding_red_control_really_corrupts_utf8) ... ok
+test_no_production_text_call_uses_the_implicit_locale (test_subprocess_utf8.SubprocessUtf8Contract.test_no_production_text_call_uses_the_implicit_locale) ... ok
+test_unknown_forwarded_settings_are_not_silently_excluded (test_subprocess_utf8.SubprocessUtf8Contract.test_unknown_forwarded_settings_are_not_silently_excluded) ... ok
+test_utf8_sites_preserve_a_real_child_output_under_cp1251 (test_subprocess_utf8.SubprocessUtf8Contract.test_utf8_sites_preserve_a_real_child_output_under_cp1251) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 20.823s
+
+OK

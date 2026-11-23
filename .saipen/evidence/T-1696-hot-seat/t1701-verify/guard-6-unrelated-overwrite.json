@@ -1,0 +1,28 @@
+{
+  "case": "6-unrelated-overwrite",
+  "exit_code": 1,
+  "verdict": {
+    "ok": false,
+    "code": "STALE_DUPLICATE_ID_DECISION",
+    "detail": "the decision does not name the current duplicate records of T-1: the BOARD no longer holds a record with the record to reassign. Re-run `saipen recover` and answer the decision it prints now; nothing was written",
+    "ticket": "T-1",
+    "current_records": [
+      {
+        "digest": "0c14fdc333b3265015a6552d832ae2a2a3669e736e9fae0c5648385acac11018",
+        "section": "## TODO",
+        "line": 5,
+        "description": "[P1] legitimate original"
+      },
+      {
+        "digest": "96f32fba04e5f5c1a0e4166c8b0f17e1a213b872d0eff257184bcdac95a3b07a",
+        "section": "## DONE",
+        "line": 7,
+        "description": "[P1] unrelated Widget"
+      }
+    ],
+    "dry_run": false
+  },
+  "canonical_docs_unchanged": true,
+  "protected_unrelated_record": "- [ ] T-2 [P1] unrelated protected task | verify: proof",
+  "known_good": "VALID"
+}

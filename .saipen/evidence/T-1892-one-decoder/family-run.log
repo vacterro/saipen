@@ -1,0 +1,710 @@
+...............................................................................................EEEEEEEEEEEEEFEFF.EEFEEEEEE.EEEE....EF..EEEEFEEEEE.FEFE.................................................................
+======================================================================
+ERROR: test_a_marked_noop_does_not_turn_an_untouched_refusal_into_recovery (test_t1750_release_boundary.RefusedLocalReleaseTests.test_a_marked_noop_does_not_turn_an_untouched_refusal_into_recovery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1750_release_boundary.py", line 125, in test_a_marked_noop_does_not_turn_an_untouched_refusal_into_recovery
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_closure_planning_refusal_aborts_without_changing_canonical_bytes (test_t1750_release_boundary.RefusedLocalReleaseTests.test_closure_planning_refusal_aborts_without_changing_canonical_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1750_release_boundary.py", line 38, in test_closure_planning_refusal_aborts_without_changing_canonical_bytes
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_failed_gate_aborts_and_two_retries_need_no_recovery (test_t1750_release_boundary.RefusedLocalReleaseTests.test_failed_gate_aborts_and_two_retries_need_no_recovery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1750_release_boundary.py", line 21, in test_failed_gate_aborts_and_two_retries_need_no_recovery
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_foreign_bytes_preserve_the_operation_and_refuse_recovery (test_t1750_release_boundary.RefusedLocalReleaseTests.test_foreign_bytes_preserve_the_operation_and_refuse_recovery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1750_release_boundary.py", line 104, in test_foreign_bytes_preserve_the_operation_and_refuse_recovery
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_landed_bytes_without_a_progress_marker_keep_recovery (test_t1750_release_boundary.RefusedLocalReleaseTests.test_landed_bytes_without_a_progress_marker_keep_recovery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1750_release_boundary.py", line 87, in test_landed_bytes_without_a_progress_marker_keep_recovery
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_process_death_before_body_still_requires_canonical_recovery (test_t1750_release_boundary.RefusedLocalReleaseTests.test_process_death_before_body_still_requires_canonical_recovery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1750_release_boundary.py", line 148, in test_process_death_before_body_still_requires_canonical_recovery
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_refusal_after_a_marked_target_keeps_recovery_and_replays (test_t1750_release_boundary.RefusedLocalReleaseTests.test_refusal_after_a_marked_target_keeps_recovery_and_replays)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1750_release_boundary.py", line 69, in test_refusal_after_a_marked_target_keeps_recovery_and_replays
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_registered_but_untouched_targets_abort (test_t1750_release_boundary.RefusedLocalReleaseTests.test_registered_but_untouched_targets_abort)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1750_release_boundary.py", line 52, in test_registered_but_untouched_targets_abort
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_downstream_validator_cannot_replace_the_runtime_gate (test_t1750_release_boundary.RuntimeValidatorTests.test_downstream_validator_cannot_replace_the_runtime_gate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1750_release_boundary.py", line 186, in test_downstream_validator_cannot_replace_the_runtime_gate
+    command = release._gate_command(project, "core")
+              ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.release' has no attribute '_gate_command'
+
+======================================================================
+ERROR: test_missing_runtime_validator_cannot_fall_back_to_downstream_code (test_t1750_release_boundary.RuntimeValidatorTests.test_missing_runtime_validator_cannot_fall_back_to_downstream_code)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1750_release_boundary.py", line 212, in test_missing_runtime_validator_cannot_fall_back_to_downstream_code
+    command = release._gate_command(project, "core")
+              ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.release' has no attribute '_gate_command'
+
+======================================================================
+ERROR: test_running_home_keeps_self_validation (test_t1750_release_boundary.RuntimeValidatorTests.test_running_home_keeps_self_validation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1750_release_boundary.py", line 201, in test_running_home_keeps_self_validation
+    self.assertEqual(release._gate_command(home, "ship")[1:], [
+                     ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.release' has no attribute '_gate_command'
+
+======================================================================
+ERROR: test_a_receipt_missing_a_roles_evidence_cannot_certify (test_t1746_crew_terminal_outcome.ConvergenceEvidence.test_a_receipt_missing_a_roles_evidence_cannot_certify)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 570, in test_a_receipt_missing_a_roles_evidence_cannot_certify
+    self._close()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_authorization_lost_between_plan_and_apply_writes_nothing (test_t1746_crew_terminal_outcome.ConvergenceEvidence.test_authorization_lost_between_plan_and_apply_writes_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 558, in test_authorization_lost_between_plan_and_apply_writes_nothing
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_no_receipt_is_neither_outcome (test_t1746_crew_terminal_outcome.ConvergenceEvidence.test_no_receipt_is_neither_outcome)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 585, in test_no_receipt_is_neither_outcome
+    len({release.TERMINAL_PUBLISHED, release.TERMINAL_LOCAL_NO_PUBLISH, "unknown"}), 3
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.release' has no attribute 'TERMINAL_PUBLISHED'
+
+======================================================================
+ERROR: test_a_receipt_of_another_epoch_is_not_this_epochs_release (test_t1746_crew_terminal_outcome.IdentityIsNeverBorrowed.test_a_receipt_of_another_epoch_is_not_this_epochs_release)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 435, in test_a_receipt_of_another_epoch_is_not_this_epochs_release
+    self._close()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_a_ticket_that_appears_between_plan_and_apply_writes_nothing (test_t1746_crew_terminal_outcome.IdentityIsNeverBorrowed.test_a_ticket_that_appears_between_plan_and_apply_writes_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 417, in test_a_ticket_that_appears_between_plan_and_apply_writes_nothing
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_another_project_lineage_does_not_inherit_the_receipt (test_t1746_crew_terminal_outcome.IdentityIsNeverBorrowed.test_another_project_lineage_does_not_inherit_the_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 441, in test_another_project_lineage_does_not_inherit_the_receipt
+    self._close()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_a_git_project_sees_zero_git_mutation (test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_a_git_project_sees_zero_git_mutation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 295, in test_a_git_project_sees_zero_git_mutation
+    _plan, result = self._close()
+                    ^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_a_scope_deferred_with_full_identities_is_not_read_as_changed (test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_a_scope_deferred_with_full_identities_is_not_read_as_changed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 258, in test_a_scope_deferred_with_full_identities_is_not_read_as_changed
+    plan, _result = self._close()
+                    ^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 812, in plan_release
+    return _plan_crew_release(
+           ^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 1170, in _plan_crew_release
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [STALE_PLAN] crew scope path theme.css changed since the owning defer (live '12934ce56dee40f6', deferred '12934ce56dee40f6c6cd28ce02a2f516aaf51c2fedd4f25a6d283e2e249357c6')
+
+======================================================================
+ERROR: test_a_ticketless_epoch_of_a_versioned_project_keeps_its_version (test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_a_ticketless_epoch_of_a_versioned_project_keeps_its_version)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 241, in test_a_ticketless_epoch_of_a_versioned_project_keeps_its_version
+    plan, _result = self._close()
+                    ^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 800, in plan_release
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [CREW_NOT_READY] crew is terminal but no deferred crew scope is derivable -- DEFER_FOR_CREW ran for zero tickets?
+
+======================================================================
+ERROR: test_a_versionless_epoch_that_owns_a_ticket_closes_under_that_ticket (test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_a_versionless_epoch_that_owns_a_ticket_closes_under_that_ticket)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 251, in test_a_versionless_epoch_that_owns_a_ticket_closes_under_that_ticket
+    plan, _result = self._close()
+                    ^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_an_operator_owned_ticket_without_a_source_does_not_block (test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_an_operator_owned_ticket_without_a_source_does_not_block)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 274, in test_an_operator_owned_ticket_without_a_source_does_not_block
+    self._close()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_the_verdict_names_a_local_closure_under_a_persisted_full_mode (test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_the_verdict_names_a_local_closure_under_a_persisted_full_mode)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 230, in test_the_verdict_names_a_local_closure_under_a_persisted_full_mode
+    self._close()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_versionless_ticketless_epoch_closes_locally (test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_versionless_ticketless_epoch_closes_locally)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 205, in test_versionless_ticketless_epoch_closes_locally
+    plan, result = self._close()
+                   ^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_a_managed_project_is_judged_by_the_runtimes_validator (test_t1746_crew_terminal_outcome.ManagedProjectGate.test_a_managed_project_is_judged_by_the_runtimes_validator)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 687, in test_a_managed_project_is_judged_by_the_runtimes_validator
+    command = release._gate_command(self.root, "core")
+              ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.release' has no attribute '_gate_command'
+
+======================================================================
+ERROR: test_a_source_tree_keeps_validating_itself (test_t1746_crew_terminal_outcome.ManagedProjectGate.test_a_source_tree_keeps_validating_itself)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 698, in test_a_source_tree_keeps_validating_itself
+    command = release._gate_command(home, "ship")
+              ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.release' has no attribute '_gate_command'
+
+======================================================================
+ERROR: test_a_read_only_session_plans_and_certifies_nothing (test_t1746_crew_terminal_outcome.PublicationKeepsItsGates.test_a_read_only_session_plans_and_certifies_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 353, in test_a_read_only_session_plans_and_certifies_nothing
+    self._close()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_a_closure_that_died_before_its_body_is_aborted_not_committed (test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_a_closure_that_died_before_its_body_is_aborted_not_committed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 737, in test_a_closure_that_died_before_its_body_is_aborted_not_committed
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_a_forged_sibling_receipt_never_becomes_a_pass (test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_a_forged_sibling_receipt_never_becomes_a_pass)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 832, in test_a_forged_sibling_receipt_never_becomes_a_pass
+    plan, _result = self._close()
+                    ^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_a_refused_local_validation_does_not_poison_the_epoch (test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_a_refused_local_validation_does_not_poison_the_epoch)
+Measured on the real downstream bytes: two refused attempts, then a
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 755, in test_a_refused_local_validation_does_not_poison_the_epoch
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_a_second_closure_of_a_verified_epoch_is_refused (test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_a_second_closure_of_a_verified_epoch_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 788, in test_a_second_closure_of_a_verified_epoch_is_refused
+    plan, _result = self._close()
+                    ^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_an_interrupted_closure_recovers_and_the_retry_changes_nothing (test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_an_interrupted_closure_recovers_and_the_retry_changes_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 705, in test_an_interrupted_closure_recovers_and_the_retry_changes_nothing
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_an_unresolved_sibling_still_makes_the_lineage_unclean (test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_an_unresolved_sibling_still_makes_the_lineage_unclean)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 774, in test_an_unresolved_sibling_still_makes_the_lineage_unclean
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_historical_receipts_keep_their_meaning_without_a_rewrite (test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_historical_receipts_keep_their_meaning_without_a_rewrite)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 823, in test_historical_receipts_keep_their_meaning_without_a_rewrite
+    self.assertEqual(local["terminal_outcome"], release.TERMINAL_LOCAL_NO_PUBLISH)
+                     ~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'terminal_outcome'
+
+======================================================================
+ERROR: test_a_foreign_source_change_between_plan_and_apply_writes_nothing (test_t1746_crew_terminal_outcome.ScopeAndSource.test_a_foreign_source_change_between_plan_and_apply_writes_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 518, in test_a_foreign_source_change_between_plan_and_apply_writes_nothing
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_a_source_that_moved_after_the_closure_stales_the_receipt (test_t1746_crew_terminal_outcome.ScopeAndSource.test_a_source_that_moved_after_the_closure_stales_the_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 528, in test_a_source_that_moved_after_the_closure_stales_the_receipt
+    self._close()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 158, in _close
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_an_unresolved_source_of_other_work_still_blocks (test_t1746_crew_terminal_outcome.ScopeAndSource.test_an_unresolved_source_of_other_work_still_blocks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 540, in test_an_unresolved_source_of_other_work_still_blocks
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+ERROR: test_scope_bytes_changed_between_plan_and_apply_write_nothing (test_t1746_crew_terminal_outcome.ScopeAndSource.test_scope_bytes_changed_between_plan_and_apply_write_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 508, in test_scope_bytes_changed_between_plan_and_apply_write_nothing
+    plan = self._plan()
+           ^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 148, in _plan
+    return release.plan_release(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 702, in plan_release
+    version = _installed_version(root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 3767, in _installed_version
+    raise ReleaseRefusal(
+saipen_engine.release.ReleaseRefusal: REFUSE [VALIDATION_FAILED] VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch
+
+======================================================================
+FAIL: test_no_plan_without_crew_authorization (test_t1746_crew_terminal_outcome.ConvergenceEvidence.test_no_plan_without_crew_authorization)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 553, in test_no_plan_without_crew_authorization
+    self.assertEqual(refusal.code, "CREW_NOT_READY")
+AssertionError: 'VALIDATION_FAILED' != 'CREW_NOT_READY'
+- VALIDATION_FAILED
++ CREW_NOT_READY
+
+
+======================================================================
+FAIL: test_a_carrier_naming_a_ticket_the_epoch_does_not_own_is_refused (test_t1746_crew_terminal_outcome.IdentityIsNeverBorrowed.test_a_carrier_naming_a_ticket_the_epoch_does_not_own_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 397, in test_a_carrier_naming_a_ticket_the_epoch_does_not_own_is_refused
+    refusal = self._refusal(crew_carrier=carrier)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 164, in _refusal
+    with self.assertRaises(release.ReleaseRefusal) as caught:
+AssertionError: ReleaseRefusal not raised
+
+======================================================================
+FAIL: test_a_carrier_naming_another_epoch_is_refused (test_t1746_crew_terminal_outcome.IdentityIsNeverBorrowed.test_a_carrier_naming_another_epoch_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 404, in test_a_carrier_naming_another_epoch_is_refused
+    refusal = self._refusal(crew_carrier=carrier)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 164, in _refusal
+    with self.assertRaises(release.ReleaseRefusal) as caught:
+AssertionError: ReleaseRefusal not raised
+
+======================================================================
+FAIL: test_an_epoch_carrier_of_another_lineage_is_refused (test_t1746_crew_terminal_outcome.IdentityIsNeverBorrowed.test_an_epoch_carrier_of_another_lineage_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 412, in test_an_epoch_carrier_of_another_lineage_is_refused
+    self.assertEqual(refusal.code, "CREW_NOT_READY")
+AssertionError: 'VALIDATION_FAILED' != 'CREW_NOT_READY'
+- VALIDATION_FAILED
++ CREW_NOT_READY
+
+
+======================================================================
+FAIL: test_a_ticketless_epoch_cannot_publish_and_is_told_why (test_t1746_crew_terminal_outcome.PublicationKeepsItsGates.test_a_ticketless_epoch_cannot_publish_and_is_told_why)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 315, in test_a_ticketless_epoch_cannot_publish_and_is_told_why
+    self.assertIn("names no ticket", refusal.detail)
+AssertionError: 'names no ticket' not found in 'crew is terminal but no deferred crew scope is derivable -- DEFER_FOR_CREW ran for zero tickets?'
+
+======================================================================
+FAIL: test_admission_of_a_ticketless_receipt_needs_a_local_epoch_closure (test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_admission_of_a_ticketless_receipt_needs_a_local_epoch_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 806, in test_admission_of_a_ticketless_receipt_needs_a_local_epoch_closure
+    self.assertTrue(admit({**base, "mode": "no-publish", "crew_epoch": EPOCH}))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_an_empty_deferred_scope_refuses (test_t1746_crew_terminal_outcome.ScopeAndSource.test_an_empty_deferred_scope_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 471, in test_an_empty_deferred_scope_refuses
+    self.assertEqual(refusal.code, "CREW_NOT_READY")
+AssertionError: 'VALIDATION_FAILED' != 'CREW_NOT_READY'
+- VALIDATION_FAILED
++ CREW_NOT_READY
+
+
+======================================================================
+FAIL: test_scope_bytes_changed_after_the_review_refuse_the_plan (test_t1746_crew_terminal_outcome.ScopeAndSource.test_scope_bytes_changed_after_the_review_refuse_the_plan)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1746_crew_terminal_outcome.py", line 503, in test_scope_bytes_changed_after_the_review_refuse_the_plan
+    self.assertEqual(refusal.code, "STALE_PLAN")
+AssertionError: 'VALIDATION_FAILED' != 'STALE_PLAN'
+- VALIDATION_FAILED
++ STALE_PLAN
+
+
+----------------------------------------------------------------------
+Ran 215 tests in 74.347s
+
+FAILED (failures=8, errors=38)

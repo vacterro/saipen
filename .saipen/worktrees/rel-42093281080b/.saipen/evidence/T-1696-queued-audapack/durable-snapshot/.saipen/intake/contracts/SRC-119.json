@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-119:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "ZAICODE pack still emits zcode nested component included=false reason empty from normal pack path; establish runtime parity, producer identity, stale-resident protection, source-first budget, self-check and normal-path acceptance"
+    }
+  },
+  "derived_at": "2026-10-05T19:53:34Z",
+  "derived_from": "SRC-119",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "116f1beb5fe0dd1be7748784e08c2e75c564b3cdaa830ef6f558dc8783275bd9"
+}

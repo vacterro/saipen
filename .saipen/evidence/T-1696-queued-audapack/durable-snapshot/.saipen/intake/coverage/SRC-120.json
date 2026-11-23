@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-120:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-276 closed with verification evidence in LOG: verify -> PASS [target: T-276] conf: high -- pytest -q 2572 passed 16 skipped on the final tree (after the last edit); focused tests/test_inaudit_inbox_ui.py 32 passed; tests/ui_qt/test_inaudit_operator_paths.py + tests/test_inaudit_capture_store.py 91 passed together with the focused file (the single failure in that combined run is test_ia_plus_captures_clipboard_through_canonical_store, proven p",
+      "text": "Separate INAUDIT active Inbox from durable capture History: one canonical presentation classification, Inbox default, History view, truthful counts, no record deletion (AUDAPACK only)",
+      "verification": "the Work this request created reached its own verification gate; see the T-276 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-276"
+    }
+  },
+  "schema_version": 1
+}

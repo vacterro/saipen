@@ -1,0 +1,29 @@
+{
+  "linked_work": null,
+  "receipt_id": "SRC-409",
+  "received_at": "2026-11-12T13:20:15Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "59ab4484cf51cb58564ee5c6290f58a049d95ab59561453b0fbb13a2387aee48",
+    "sanitized_sha256": "59ab4484cf51cb58564ee5c6290f58a049d95ab59561453b0fbb13a2387aee48"
+  },
+  "request_provenance": {
+    "witness": "model_supplied"
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "59ab4484cf51cb58564ee5c6290f58a049d95ab59561453b0fbb13a2387aee48",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "59ab4484cf51cb58564ee5c6290f58a049d95ab59561453b0fbb13a2387aee48",
+  "status": "ACTIVE",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

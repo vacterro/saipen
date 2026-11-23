@@ -1,0 +1,23 @@
+{
+  "label": "build-source-contracts",
+  "phase": "BUILD",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "test_refusal_registry",
+    "test_canonical_command_reachability",
+    "test_subprocess_utf8"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+  "exit_code": 0,
+  "duration_s": 22.157,
+  "fingerprint": "7b7ff09dfeee7b1b29d35434872c6994739935b761b8db64d1b489a8de53fedc",
+  "stdout": "",
+  "stderr": ".....................\r\n----------------------------------------------------------------------\r\nRan 21 tests in 21.894s\r\n\r\nOK\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "2455c178cfbafe5ffe60865748e20ba9ff52ef6e3bfa40999cdb0ea40508b9e0",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

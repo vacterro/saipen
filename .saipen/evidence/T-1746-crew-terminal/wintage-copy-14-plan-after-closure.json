@@ -1,0 +1,221 @@
+{
+  "ok": true,
+  "code": "CREW_PLAN",
+  "next_action": {
+    "stage": "SC-12",
+    "role": "saitranslate",
+    "action": "PREPARE_TRANSLATE_FINAL",
+    "source_identity": {
+      "source_head": "b5fb1d64af212e9ea7b153a299246025b1fc3330",
+      "source_tree_fingerprint": "git-delta-v1:9148829869244db9b8e927b6bcc80721417e41f72908198780b3903fc2373cf4"
+    },
+    "required_contract": "fresh terminal producer package",
+    "inputs": [
+      ".saipen/saitranslate/kitchen/OUTBOX.md"
+    ],
+    "expected_evidence": "READY translation package",
+    "completion_condition": "READY/current package against shipped HEAD",
+    "on_success": "REPLAN",
+    "on_failure": "BLOCK",
+    "execute_in_current_agent": true,
+    "role_paths": [
+      ".saipen/saitranslate/STATE.md",
+      ".saipen/saitranslate/BOARD.md",
+      ".saipen/saitranslate/LOG.md",
+      ".saipen/saitranslate/kitchen/OUTBOX.md",
+      ".saipen/extensions/subs/saitranslate.md"
+    ],
+    "write_boundary": "V:\\_TEMP_\\claude\\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\\42de2430-5060-4205-bf2e-4dcc056193f4\\scratchpad\\wintage-copy\\.saipen\\saitranslate",
+    "then_action": "REPLAN_CREW",
+    "terminal": false,
+    "requires_human": false,
+    "next_action": "PREPARE_TRANSLATE_FINAL",
+    "resume_after": "REPLAN_CREW",
+    "userperson_projection": {
+      "role": "saitranslate",
+      "projection_policy": [
+        "language",
+        "localization"
+      ],
+      "source_fingerprint": "ffaac79441f6e632",
+      "preferences": [
+        {
+          "category": "Language",
+          "text": "Default user-facing explanations to Russian unless the current request specifies another language.",
+          "id": "ce2c6a40c5bb",
+          "source": "global"
+        },
+        {
+          "category": "Language",
+          "text": "Use English for source code, identifiers, filenames, API names, schema keys, protocol tokens, and code comments unless the project explicitly requires another language.",
+          "id": "f0706c4fb135",
+          "source": "global"
+        },
+        {
+          "category": "Language",
+          "text": "Estonian may be used when explicitly requested or when producing Estonia-specific user-facing material.",
+          "id": "bedaea94084c",
+          "source": "global"
+        },
+        {
+          "category": "Language",
+          "text": "Japanese may be used when explicitly requested.",
+          "id": "2ee99b283a3b",
+          "source": "global"
+        },
+        {
+          "category": "Language",
+          "text": "Preserve exact technical terminology when translating it is likely to create ambiguity.",
+          "id": "188448ab0d9d",
+          "source": "global"
+        },
+        {
+          "category": "Language",
+          "text": "Do not translate literal commands, identifiers, paths, configuration keys, error tokens, or protocol state names unless a localized form is explicitly defined.",
+          "id": "7648e8a8ff23",
+          "source": "global"
+        },
+        {
+          "category": "Language",
+          "text": "When translation is requested, preserve meaning and operational precision rather than translating mechanically word-for-word.",
+          "id": "6ba3d7329aeb",
+          "source": "global"
+        },
+        {
+          "category": "Localization",
+          "text": "Treat localization as product behavior, not simple string substitution.",
+          "id": "a4641c0db75b",
+          "source": "global"
+        },
+        {
+          "category": "Localization",
+          "text": "Preserve placeholders, variables, formatting tokens, command names, paths, and machine-readable identifiers exactly unless the format explicitly requires localization.",
+          "id": "82324dd5e42c",
+          "source": "global"
+        },
+        {
+          "category": "Localization",
+          "text": "Prefer natural target-language phrasing over awkward literal translation.",
+          "id": "99c469b70599",
+          "source": "global"
+        },
+        {
+          "category": "Localization",
+          "text": "Preserve the technical meaning, severity, and actionability of warnings and error messages across languages.",
+          "id": "93178165499d",
+          "source": "global"
+        },
+        {
+          "category": "Localization",
+          "text": "Do not invent localized terminology for protocol tokens that are intentionally canonical.",
+          "id": "d68a91df16f9",
+          "source": "global"
+        },
+        {
+          "category": "Localization",
+          "text": "Keep multilingual documentation structurally aligned enough that important commands and behavioral contracts do not silently disappear from one language.",
+          "id": "c9b8b2c8a764",
+          "source": "global"
+        },
+        {
+          "category": "Localization",
+          "text": "When localized documentation diverges from the canonical implementation, correct the divergence rather than preserving it for consistency with old text.",
+          "id": "6e31ad9edf47",
+          "source": "global"
+        }
+      ]
+    }
+  },
+  "stages": [
+    {
+      "stage": "SC-0",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-1",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-2",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-3",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-4",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-5",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-6",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-7",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-8",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-9",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "WAIT-ROLE",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-10",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-11",
+      "state": "SATISFIED",
+      "reason": ""
+    },
+    {
+      "stage": "SC-12",
+      "state": "UNSATISFIED",
+      "reason": "final EE is not READY/current"
+    },
+    {
+      "stage": "SC-13",
+      "state": "WAITING_ON_PREDECESSOR",
+      "reason": "waiting on predecessor SC-12"
+    }
+  ],
+  "release_context": {
+    "ok": true,
+    "detail": null,
+    "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8",
+    "ticket_id": "",
+    "scope_paths": [
+      ".gitignore",
+      "FINAL_REPORT-T-938.md",
+      "tests/Run-Tests.ps1",
+      "tools/bench-idle-cpu.js",
+      "tools/test-shadow-registry-lifecycle.js",
+      "tools/test-stylesheet-census.js",
+      "wintage.user.js"
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.s.............................................................................................................................................................................s............................................................s......ss.......................................................................................................................................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 605 tests in 532.598s
+
+OK (skipped=5)
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "action": "saipen recover",
+  "reason": "state-malformed",
+  "detail": "state-malformed: unknown STATE field 'parked_work' -- state.schema.json does not define it (retired or misspelled?)",
+  "cold_route": {
+    "project_root": "V:\\_TEMP_\\t1363-4_mdw3mb",
+    "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+    "phase": "DONE",
+    "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\done.md",
+    "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+    "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+    "documents": {
+      "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+      "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+      "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+      "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+      "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+      "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+      "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+      "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+      "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+      "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+    },
+    "project_memory": {
+      "STATE.md": "V:\\_TEMP_\\t1363-4_mdw3mb\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\_TEMP_\\t1363-4_mdw3mb\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\_TEMP_\\t1363-4_mdw3mb\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-continue-dk0c8sa3\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat saipen-cli",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

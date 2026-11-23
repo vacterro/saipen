@@ -1,0 +1,7 @@
+PASS A the pre-fix host-pid binding is refused -- worker is not an observed child of the proven native host
+PASS B registering the hook itself succeeds
+PASS C a sibling shell engine cannot spend the seal -- operator origin or delivering OS worker is unverified
+PASS D the hook's own child engine verifies
+PASS E a second spend is idempotent, not a new grant -- continue
+
+0 FAIL

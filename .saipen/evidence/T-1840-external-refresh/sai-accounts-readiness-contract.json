@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "tools/verify_accounts_readiness.py",
+    "--engine",
+    "C:\\ProgramData\\SAI\\Accounts\\bin\\sai-accounts.exe",
+    "--account",
+    "AG3",
+    "--project",
+    "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER",
+    "--private-home",
+    "C:\\Users\\vac34\\.codex",
+    "--report",
+    ".saipen/evidence/T-1840-external-refresh/live-current.json"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools/verify_accounts_readiness.py",
+    "tools/saipen_engine",
+    "extensions/templates",
+    "extensions/schemas/state.schema.json",
+    "VERSION",
+    "saipen/STYLE.md"
+  ],
+  "oracle_files": [
+    "tools/verify_accounts_readiness.py"
+  ],
+  "subject_files": [],
+  "timeout": 1800
+}

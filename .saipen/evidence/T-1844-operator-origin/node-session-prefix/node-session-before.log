@@ -1,0 +1,19 @@
+test_a_response_cannot_borrow_another_native_sessions_proof (test_response_delivery.CompletedPartDelivery.test_a_response_cannot_borrow_another_native_sessions_proof) ... ok
+test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing (test_response_delivery.CompletedPartDelivery.test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing) ... FAIL
+test_real_hook_replaces_three_fresh_oversized_turns (test_response_delivery.CompletedPartDelivery.test_real_hook_replaces_three_fresh_oversized_turns) ... ok
+
+======================================================================
+FAIL: test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing (test_response_delivery.CompletedPartDelivery.test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_response_delivery.py", line 234, in test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing
+    self.assertEqual(record["outcome"], outcome, record)
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'artifact-0', 'outcome': 'blocked', 'message': 'SAIPEN chat-style gate (CHAT_STYLE_DRIFT): this ordinary reply breaks the measurable chat contract of STYLE.md (reply is 3040 characters in total, code included; the total ceiling is 900). Rewrite it as one short message in the pinned reply language, within the chat line budget, without a banned opener, closer or apology, and reply with only that message. Read the contract with `saipen response style --json`; verify the exact text with `saipen response check --stdin --classify --project-root V:\\_TEMP_\\tmpi07ojyhw"', 'hooks': ['experimental.chat.system.transform', 'chat.message', 'experimental.text.complete', 'tool.execute.before'], 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpi07ojyhw","project_lineage":"lineage-2806485a81704d6eb5cd0b0114adf4c7","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.'], 'exports': ['default']}
+
+----------------------------------------------------------------------
+Ran 3 tests in 33.850s
+
+FAILED (failures=1)

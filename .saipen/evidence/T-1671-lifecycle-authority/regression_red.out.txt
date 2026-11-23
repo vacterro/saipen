@@ -1,0 +1,33 @@
+utc: 2026-10-08T00:28:26Z
+subject: a copy of the repository engine as it stood before the T-1671 repair (tools/, tests/, saipen/, extensions/, bin/ of the working tree at E-13211), plus ONLY the new detector module and the new test module; nothing is wired
+command: python -B -m unittest -v test_t1671_lifecycle_authority (cwd tools/)
+test_a_canonical_closure_with_a_later_typed_note_is_authorized (test_t1671_lifecycle_authority.AssessBoundaryTests.test_a_canonical_closure_with_a_later_typed_note_is_authorized) ... ok
+test_a_closure_before_a_fresh_claim_does_not_back_a_typed_completion (test_t1671_lifecycle_authority.AssessBoundaryTests.test_a_closure_before_a_fresh_claim_does_not_back_a_typed_completion) ... ok
+test_a_ticket_named_only_as_a_target_is_still_named (test_t1671_lifecycle_authority.AssessBoundaryTests.test_a_ticket_named_only_as_a_target_is_still_named) ... ok
+test_an_id_in_the_registered_grammar_with_no_record_is_part_of_the_head (test_t1671_lifecycle_authority.AssessBoundaryTests.test_an_id_in_the_registered_grammar_with_no_record_is_part_of_the_head)
+Measured on a sibling project, 08.10.26: a whole lifecycle typed ... ok
+test_no_ledger_and_no_resolvable_event_are_both_unavailable (test_t1671_lifecycle_authority.AssessBoundaryTests.test_no_ledger_and_no_resolvable_event_are_both_unavailable) ... ok
+test_typed_history_below_the_floor_is_never_judged (test_t1671_lifecycle_authority.AssessBoundaryTests.test_typed_history_below_the_floor_is_never_judged) ... ok
+test_a_checkout_without_a_ledger_is_unavailable_not_accused (test_t1671_lifecycle_authority.TypedLifecycleTests.test_a_checkout_without_a_ledger_is_unavailable_not_accused)
+A fresh clone carries no operation record: nothing to compare with. ... ok
+test_a_marker_moved_by_hand_alone_is_reconciled_by_one_journaled_event (test_t1671_lifecycle_authority.TypedLifecycleTests.test_a_marker_moved_by_hand_alone_is_reconciled_by_one_journaled_event)
+A typed note plus a hand-bumped `last_event`, nothing closed. ... FAIL
+test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing (test_t1671_lifecycle_authority.TypedLifecycleTests.test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing) ... FAIL
+test_a_typed_note_that_moves_nothing_is_still_only_a_note (test_t1671_lifecycle_authority.TypedLifecycleTests.test_a_typed_note_that_moves_nothing_is_still_only_a_note)
+Negative control: untagged semantic LOG entries stay legal. ... ok
+test_ordinary_project_files_stay_writable (test_t1671_lifecycle_authority.TypedLifecycleTests.test_ordinary_project_files_stay_writable)
+Negative control: only lifecycle authority is guarded. ... ok
+test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte (test_t1671_lifecycle_authority.TypedLifecycleTests.test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte) ... 
+  test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte (test_t1671_lifecycle_authority.TypedLifecycleTests.test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte) (keep_task=False) ... FAIL
+  test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte (test_t1671_lifecycle_authority.TypedLifecycleTests.test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte) (keep_task=True) ... FAIL
+FAIL: test_a_marker_moved_by_hand_alone_is_reconciled_by_one_journaled_event (test_t1671_lifecycle_authority.TypedLifecycleTests.test_a_marker_moved_by_hand_alone_is_reconciled_by_one_journaled_event)
+AssertionError: None != 'UNAUTHORIZED_LIFECYCLE_WRITE' : {'ok': True, 'project_identity': 'v:\\_temp_\\t1671-fa9lopl3', 'protocol_version': '8.1.0', 'phase': 'BUILD', 'task': 'T-001', 'next_action': 'PHASE BUILD T-001', 'computed_next_action': 'PHASE BUILD T-001', 'computed_reason': 'finish', 'blocker': 'none', 'execution_intent
+FAIL: test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing (test_t1671_lifecycle_authority.TypedLifecycleTests.test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing)
+AssertionError: True is not false : {'ok': True, 'project_identity': 'v:\\_temp_\\t1671-xbdtnxod', 'protocol_version': '8.1.0', 'phase': 'DONE', 'task': 'none', 'next_action': 'saipen continue', 'computed_next_action': 'saipen continue', 'computed_reason': 'maintain', 'blocker': 'none', 'execution_intent': 'converge', 'claimed_t
+FAIL: test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte (test_t1671_lifecycle_authority.TypedLifecycleTests.test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte) (keep_task=False)
+AssertionError: 'VALIDATION_FAILED' != 'RECONCILE_REAUTH_REQUIRED'
+FAIL: test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte (test_t1671_lifecycle_authority.TypedLifecycleTests.test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte) (keep_task=True)
+AssertionError: 'RESIDUAL_DEFECTS' != 'RECONCILE_REAUTH_REQUIRED'
+Ran 12 tests in 53.932s
+FAILED (failures=4)
+--- exit: 1 ---

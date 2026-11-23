@@ -1,0 +1,35 @@
+ M saipen/COMMANDS_REFERENCE.md
+ M saipen/REGISTRY.json
+ M tools/core_unit_baseline.json
+ M tools/freshness.py
+ M tools/saipen.py
+ M tools/saipen_engine/board_scrub.py
+ M tools/saipen_engine/conformance.py
+ M tools/saipen_engine/intake.py
+ M tools/saipen_engine/journal.py
+ M tools/saipen_engine/operations.py
+ M tools/saipen_engine/remediation.py
+ M tools/saipen_engine/router.py
+ M tools/test_campaign_matrix.py
+ M tools/test_campaign_production_gates.py
+ M tools/test_remediation_self_consistency.py
+ M tools/test_t1619_iteration_boundary.py
+ M tools/test_t1880_wait_survives_phase_shortcut.py
+ M tools/test_t1949_hook_validator_status.py
+?? tools/_t2040_experiment.py
+?? tools/saipen_engine/gc.py
+?? tools/saipen_engine/source_reindex.py
+?? tools/test_nested_git_boundaries.py
+?? tools/test_t2040_bounded_discovery_resume.py
+?? tools/test_t2040_continuation_truth.py
+?? tools/test_t2040_discovery_owners.py
+?? tools/test_t2040_exhaustion_evidence.py
+?? tools/test_t2040_finish_plan_guards.py
+?? tools/test_t2040_maintenance_authority.py
+?? tools/test_t2040_publication_truth.py
+?? tools/test_t2040_replenishment_recovery.py
+?? tools/test_t2040_review_proof_binding.py
+?? tools/test_t2040_terminal_consumer_guards.py
+?? tools/test_t2040_terminal_consumer_supplementary.py
+?? tools/test_t2050_pruned_row_restore.py
+?? tools/test_t2051_source_reindex.py

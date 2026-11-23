@@ -1,0 +1,45 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-386.md",
+  "linked_work": "T-2016",
+  "receipt_id": "SRC-386",
+  "received_at": "2026-11-03T07:15:45Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "ac1d9a4db94073d6fad06a2a4af6ed9360bf573e08463801ff495cc813fc8943",
+    "sanitized_sha256": "ac1d9a4db94073d6fad06a2a4af6ed9360bf573e08463801ff495cc813fc8943"
+  },
+  "request_provenance": {
+    "witness": "model_supplied"
+  },
+  "retirement": {
+    "digest_mismatch": false,
+    "measured_sha256": "ac1d9a4db94073d6fad06a2a4af6ed9360bf573e08463801ff495cc813fc8943",
+    "note": "",
+    "reason": "ORPHANED_RECEIPT",
+    "receipt_only": true,
+    "recorded_sha256": "ac1d9a4db94073d6fad06a2a4af6ed9360bf573e08463801ff495cc813fc8943",
+    "retired_at": "2026-11-12T13:28:07Z",
+    "retired_by": "saipen-cli",
+    "retirement_event": "E-19341",
+    "schema_version": 2,
+    "source_reason": "ORPHANED_RECEIPT",
+    "successor": ""
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "ac1d9a4db94073d6fad06a2a4af6ed9360bf573e08463801ff495cc813fc8943",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "external_audit",
+  "source_sha256": "ac1d9a4db94073d6fad06a2a4af6ed9360bf573e08463801ff495cc813fc8943",
+  "status": "INVALID",
+  "storage_status": "ARCHIVED",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

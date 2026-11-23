@@ -1,0 +1,10 @@
+FAIL test_runtime_bootstrap.HostScopedInstallTests.test_K_red_control_legacy_installer_drops_launchers
+--- 1 local failures ---
+---------------------------
+FAILED. Fix reported errors and re-run.
+
+
+----------------------------------------------------------------------
+Ran 406 tests in 639.624s
+
+FAILED (failures=6, skipped=11)

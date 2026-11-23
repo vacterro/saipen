@@ -1,7 +1,7 @@
 {
   "amends": "SRC-153",
   "archive_ref": ".saipen/archive/source/SRC-155.md",
-  "closed_at": "2026-10-30T02:42:01Z",
+  "closed_at": "2026-11-14T22:52:21Z",
   "closure_event": null,
   "linked_work": "T-1579",
   "receipt_id": "SRC-155",
@@ -15,7 +15,7 @@
   "request_provenance": {
     "witness": "model_supplied"
   },
-  "reread_at": "2026-10-30T02:42:01Z",
+  "reread_at": "2026-11-14T22:52:21Z",
   "schema_version": 1,
   "sensitive": false,
   "source_authority": {

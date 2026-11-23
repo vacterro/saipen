@@ -1,0 +1,74 @@
+test_a_posix_shell_variable_alone_is_enough (test_t1515_posix_shell_entry.PosixShellHostTransport.test_a_posix_shell_variable_alone_is_enough) ... ok
+test_an_msys_shell_types_the_posix_launcher (test_t1515_posix_shell_entry.PosixShellHostTransport.test_an_msys_shell_types_the_posix_launcher) ... ok
+test_an_unproven_posix_launcher_falls_back_to_the_engine_never_the_cmd (test_t1515_posix_shell_entry.PosixShellHostTransport.test_an_unproven_posix_launcher_falls_back_to_the_engine_never_the_cmd) ... ok
+test_argument_text_reaches_the_engine_without_cmd_reparsing_it (test_t1515_posix_shell_entry.PosixShellHostTransport.test_argument_text_reaches_the_engine_without_cmd_reparsing_it) ... ok
+test_cmd_and_powershell_hosts_keep_the_cmd_launcher (test_t1515_posix_shell_entry.PosixShellHostTransport.test_cmd_and_powershell_hosts_keep_the_cmd_launcher) ... ok
+test_failed_or_changed_execution_is_not_an_argument_transport_pass (test_t1515_posix_shell_entry.PosixShellHostTransport.test_failed_or_changed_execution_is_not_an_argument_transport_pass) ... ok
+test_boot_and_execution_name_the_resolved_transport (test_t1501_entry_resolver.ColdStartContractTests.test_boot_and_execution_name_the_resolved_transport) ... ok
+test_entry_contract_is_shipped_and_describes_real_surfaces (test_t1501_entry_resolver.ColdStartContractTests.test_entry_contract_is_shipped_and_describes_real_surfaces) ... ok
+test_case01_empty_path_reaches_status_through_the_entry_runner (test_t1501_entry_resolver.EntryResolutionMatrix.test_case01_empty_path_reaches_status_through_the_entry_runner) ... ok
+test_case02_canonical_path_launcher_is_selected (test_t1501_entry_resolver.EntryResolutionMatrix.test_case02_canonical_path_launcher_is_selected) ... ok
+test_case03_foreign_or_stale_path_launcher_is_never_trusted (test_t1501_entry_resolver.EntryResolutionMatrix.test_case03_foreign_or_stale_path_launcher_is_never_trusted) ... ok
+test_case04_direct_launcher_with_empty_path (test_t1501_entry_resolver.EntryResolutionMatrix.test_case04_direct_launcher_with_empty_path) ... ok
+test_case05_direct_engine_only (test_t1501_entry_resolver.EntryResolutionMatrix.test_case05_direct_engine_only) ... ok
+test_case06_stale_persisted_home_is_rebound_before_the_command (test_t1501_entry_resolver.EntryResolutionMatrix.test_case06_stale_persisted_home_is_rebound_before_the_command) ... ok
+test_case07_unsupported_host_discovers_but_never_mutates (test_t1501_entry_resolver.EntryResolutionMatrix.test_case07_unsupported_host_discovers_but_never_mutates) ... ok
+test_case08_project_unbound_selects_no_repository (test_t1501_entry_resolver.EntryResolutionMatrix.test_case08_project_unbound_selects_no_repository) ... ok
+test_case09_no_runtime_is_one_bounded_structured_answer (test_t1501_entry_resolver.EntryResolutionMatrix.test_case09_no_runtime_is_one_bounded_structured_answer) ... ok
+test_case10_scheduled_cold_start_uses_only_the_published_contract (test_t1501_entry_resolver.EntryResolutionMatrix.test_case10_scheduled_cold_start_uses_only_the_published_contract) ... ok
+test_case11_every_transport_answers_the_same_status (test_t1501_entry_resolver.EntryResolutionMatrix.test_case11_every_transport_answers_the_same_status) ... ok
+test_case12_unadmitted_host_cannot_mutate_through_any_transport (test_t1501_entry_resolver.EntryResolutionMatrix.test_case12_unadmitted_host_cannot_mutate_through_any_transport) ... ok
+test_host_actions_start_then_status_through_the_runner (test_t1501_entry_resolver.EntryResolutionMatrix.test_host_actions_start_then_status_through_the_runner) ... ok
+test_runner_arguments_stay_argv_data_for_every_shell_metacharacter (test_t1501_entry_resolver.EntryResolutionMatrix.test_runner_arguments_stay_argv_data_for_every_shell_metacharacter) ... ok
+test_runner_never_lets_a_shell_reparse_command_text (test_t1501_entry_resolver.EntryResolutionMatrix.test_runner_never_lets_a_shell_reparse_command_text) ... ok
+test_other_rebind_refusal_fails_open_through_the_proven_transport (test_t1501_entry_resolver.EntryRunnerRebindTests.test_other_rebind_refusal_fails_open_through_the_proven_transport) ... ok
+test_rebind_needing_a_named_home_stops_as_human_required (test_t1501_entry_resolver.EntryRunnerRebindTests.test_rebind_needing_a_named_home_stops_as_human_required) ... ok
+test_missing_interpreter_is_not_a_transport (test_t1501_entry_resolver.LauncherProvenanceTests.test_missing_interpreter_is_not_a_transport) ... ok
+test_rendered_launchers_prove_only_for_their_own_engine (test_t1501_entry_resolver.LauncherProvenanceTests.test_rendered_launchers_prove_only_for_their_own_engine) ... ok
+test_wrapped_command_carries_its_own_effect_class (test_t1501_entry_resolver.LauncherProvenanceTests.test_wrapped_command_carries_its_own_effect_class) ... ok
+test_30_ps1_injector_leaves_an_exact_utf8_block (test_host_bootstrap.ActivationDeliveryTests.test_30_ps1_injector_leaves_an_exact_utf8_block) ... ok
+test_31_knowledge_md_alone_is_invisible_to_the_desktop_loader (test_host_bootstrap.ActivationDeliveryTests.test_31_knowledge_md_alone_is_invisible_to_the_desktop_loader) ... ok
+test_32_installed_desktop_loader_reads_the_injected_block (test_host_bootstrap.ActivationDeliveryTests.test_32_installed_desktop_loader_reads_the_injected_block) ... ok
+test_33_pre_fix_injector_is_a_red_control (test_host_bootstrap.ActivationDeliveryTests.test_33_pre_fix_injector_is_a_red_control) ... FAIL
+test_20_auto_rebind_converges_dead_home_and_is_idempotent (test_host_bootstrap.AutoRebindTests.test_20_auto_rebind_converges_dead_home_and_is_idempotent) ... ok
+test_21_dead_home_with_no_proven_replacement_stays_refused (test_host_bootstrap.AutoRebindTests.test_21_dead_home_with_no_proven_replacement_stays_refused) ... ok
+test_22_cc_converges_a_dead_home_without_a_supplied_path (test_host_bootstrap.AutoRebindTests.test_22_cc_converges_a_dead_home_without_a_supplied_path) ... ok
+test_23_bootstrap_admission_contradiction_is_gone_end_to_end (test_host_bootstrap.AutoRebindTests.test_23_bootstrap_admission_contradiction_is_gone_end_to_end) ... ok
+test_01_runtime_on_path_is_bound (test_host_bootstrap.BootstrapResolverTests.test_01_runtime_on_path_is_bound) ... ok
+test_02_missing_from_path_recovered_via_state_pointer (test_host_bootstrap.BootstrapResolverTests.test_02_missing_from_path_recovered_via_state_pointer) ... ok
+test_03_isolated_env_external_home_via_carrier (test_host_bootstrap.BootstrapResolverTests.test_03_isolated_env_external_home_via_carrier) ... ok
+test_04_no_proven_candidate_is_unavailable (test_host_bootstrap.BootstrapResolverTests.test_04_no_proven_candidate_is_unavailable) ... ok
+test_04b_dead_foreign_home_with_proven_engine_names_convergence (test_host_bootstrap.BootstrapResolverTests.test_04b_dead_foreign_home_with_proven_engine_names_convergence) ... ok
+test_05_missing_activation_names_the_activation_boundary (test_host_bootstrap.BootstrapResolverTests.test_05_missing_activation_names_the_activation_boundary) ... ok
+test_06_unregistered_explicit_host_is_never_green (test_host_bootstrap.BootstrapResolverTests.test_06_unregistered_explicit_host_is_never_green) ... ok
+test_07_launcher_transport_is_separate_from_discovery (test_host_bootstrap.BootstrapResolverTests.test_07_launcher_transport_is_separate_from_discovery) ... ok
+test_08_registered_hosts_share_one_resolver_verdict (test_host_bootstrap.BootstrapResolverTests.test_08_registered_hosts_share_one_resolver_verdict) ... ok
+test_40_cc_resolves_to_continue (test_host_bootstrap.CCCommandRecognitionTests.test_40_cc_resolves_to_continue) ... ok
+test_41_cyrillic_twin_resolves_identically (test_host_bootstrap.CCCommandRecognitionTests.test_41_cyrillic_twin_resolves_identically) ... ok
+test_10_unknown_host_exits_nonzero_and_is_not_bound (test_host_bootstrap.CliContractTests.test_10_unknown_host_exits_nonzero_and_is_not_bound) ... ok
+test_11_activation_works_for_an_installed_home_without_saipen_dir (test_host_bootstrap.CliContractTests.test_11_activation_works_for_an_installed_home_without_saipen_dir) ... ok
+test_12_activation_on_a_non_managed_dir_exits_nonzero (test_host_bootstrap.CliContractTests.test_12_activation_on_a_non_managed_dir_exits_nonzero) ... ok
+test_13_rebind_home_auto_confirms_through_the_cli (test_host_bootstrap.CliContractTests.test_13_rebind_home_auto_confirms_through_the_cli) ... ok
+test_50_canonical_state_wins_over_stale_handoff_ticket (test_host_bootstrap.StaleHandoffTests.test_50_canonical_state_wins_over_stale_handoff_ticket) ... ok
+test_51_resolver_never_rewrites_board_bytes (test_host_bootstrap.StaleHandoffTests.test_51_resolver_never_rewrites_board_bytes) ... ok
+
+======================================================================
+FAIL: test_33_pre_fix_injector_is_a_red_control (test_host_bootstrap.ActivationDeliveryTests.test_33_pre_fix_injector_is_a_red_control)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_host_bootstrap.py", line 720, in test_33_pre_fix_injector_is_a_red_control
+    self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+AssertionError: 1 != 0 : 
+saipen injector report (source: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\saipen)
+------------------------------------------------------------
+~/.agents skills             copied (re-run after updates)
+~/.agents provenance         FAILED: installed runtime identity gen-sha256:ebdcf007d58ba8f8ce9ab70843f5accd2b254e8006c25d7e69724c64eb16e226 differs from source gen-sha256:f08abe2a3bb4704e4eb577688682232ef75e26eab0d5eecee33a0e56097022e4
+FreeBuff knowledge           file created
+------------------------------------------------------------
+FAILED. Fix reported errors and re-run.
+
+
+----------------------------------------------------------------------
+Ran 53 tests in 52.561s
+
+FAILED (failures=1)

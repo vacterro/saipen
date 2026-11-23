@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-014:R0001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": "T01-T13 implemented and verified live (110 targeted PASS; full 1162); T14 six-run Windows acceptance gate and T15 release cut/documentation were explicitly deferred to operator/release work per T-52 and this batch forbids release work; the every-ticket-T01-T15 acceptance cannot be truthfully closed while T14/T15 remain open",
+      "text": "Complete and verify every ticket T01 through T15 listed by the manifest against source snapshot 9750a4a.",
+      "verification": null,
+      "work": "T-52"
+    }
+  },
+  "schema_version": 1
+}

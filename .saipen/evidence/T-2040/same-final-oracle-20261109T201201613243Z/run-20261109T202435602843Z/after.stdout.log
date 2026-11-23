@@ -1,0 +1,14 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.exe
+PySide6 6.11.1 -- Qt runtime 6.11.1 -- Qt compiled 6.11.1
+rootdir: V:\_TEMP_\saipen-regression-tv8pm92p
+plugins: anyio-4.15.1, langsmith-0.14.12, asyncio-1.4.0, cov-7.1.0, docker-3.2.5, mock-3.15.1, qt-4.5.0, timeout-2.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 3 items
+
+tools/test_response_delivery.py::RepeatedStateDigest::test_stop_delivery_matches_the_current_route_without_inventing_human_work 
+tools/test_response_delivery.py::RepeatedStateDigest::test_stop_delivery_matches_the_current_route_without_inventing_human_work PASSED [ 33%]
+tools/test_codex_stop_hook.py::CanonicalClassifierTests::test_a_valid_boundary_passes PASSED [ 66%]
+tools/test_codex_stop_hook.py::CodexStopHookTests::test_a_valid_boundary_passes_untouched PASSED [100%]
+
+==================== 3 passed, 3 subtests passed in 12.00s ====================

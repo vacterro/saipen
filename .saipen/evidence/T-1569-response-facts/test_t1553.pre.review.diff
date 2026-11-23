@@ -1,0 +1,19 @@
+--- test_t1553.pre.py
++++ tools/test_t1553_mid_session_activation.py
+@@ -602,7 +602,15 @@
+     about a real `saipen init` -- `RealLauncherInit` and `RealInitSameTurn` say that.
+     """
+ 
+-    def _run_materialized(self, free_form: str = FREE_FORM, valid: str = VALID_SURFACE):
++    def _run_materialized(self, free_form: str = FREE_FORM, valid: str | None = None):
++        # This materialized fixture is PLAN without an operator WAIT route.
++        # Only real canonical INIT owns VALID_SURFACE's required human action.
++        if valid is None:
++            valid = _surface(**{
++                "STATUS": "PLAN -- materialized",
++                "RESULT": "Kontroll tehtud.",
++                "NEXT EXACT ACTION": "NONE",
++            })
+         workdir = Path(tempfile.mkdtemp(prefix="saipen-t1553-materialized-"))
+         self.addCleanup(lambda: shutil.rmtree(workdir, ignore_errors=True))
+         project = workdir / "host-project"

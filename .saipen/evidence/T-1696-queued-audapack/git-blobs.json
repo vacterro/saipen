@@ -1,0 +1,38 @@
+[
+  {
+    "revision": "HEAD",
+    "path": ".saipen/STATE.md",
+    "sha256": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50",
+    "size": 341
+  },
+  {
+    "revision": "HEAD",
+    "path": ".saipen/BOARD.md",
+    "sha256": "d39ce3a61681f46ed075918ffe1f965276eea3dc6b31914ebd25b76a90cf4667",
+    "size": 145628
+  },
+  {
+    "revision": "HEAD",
+    "path": ".saipen/LOG.md",
+    "sha256": "a777d5ad3498d60686177cddd37125e488acc4ea642bfc7456e0a53acaa32e1d",
+    "size": 230632
+  },
+  {
+    "revision": "HEAD^",
+    "path": ".saipen/STATE.md",
+    "sha256": "2c03fd871babeaf56977b5e82aa5b66031304708907140287ce8db0aa4283160",
+    "size": 352
+  },
+  {
+    "revision": "HEAD^",
+    "path": ".saipen/BOARD.md",
+    "sha256": "0f4ea67de9dfa1dbcae8aaf25da6493790490c1e9eaf165900da7117b4070033",
+    "size": 139111
+  },
+  {
+    "revision": "HEAD^",
+    "path": ".saipen/LOG.md",
+    "sha256": "3aede2a5617201699a09f3f8027100ff5d5fd5b6a4d5ccab5e59d01272751ad9",
+    "size": 204294
+  }
+]

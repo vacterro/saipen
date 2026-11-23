@@ -1,0 +1,4 @@
+STATUS: Muudatus kohalikult valmis, avaldamine ootel.  
+RESULT: Väikemuudatustele sihttestid, 5 minuti eelarve ja tulemuste korduskasutus. Täistestid üks kord valmis avaldamiskogumile.  
+VALIDATION: 212 testi PASS / 215 s; korduskontroll 1,5 s. Üldkontrollis püsib varasem `EX-000010` tõendiviga.  
+DETAILS: [Uus kontrollipoliitika](/V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/verification_policy.json)

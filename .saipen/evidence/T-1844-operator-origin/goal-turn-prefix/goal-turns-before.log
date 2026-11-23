@@ -1,0 +1,76 @@
+test_a_changed_model_cannot_use_the_old_goal_registration (test_t1844_goal_turns.NativeGoalTurns.test_a_changed_model_cannot_use_the_old_goal_registration) ... ok
+test_a_changed_provider_cannot_use_the_old_goal_registration (test_t1844_goal_turns.NativeGoalTurns.test_a_changed_provider_cannot_use_the_old_goal_registration) ... ok
+test_a_different_budget_epoch_is_not_session_membership (test_t1844_goal_turns.NativeGoalTurns.test_a_different_budget_epoch_is_not_session_membership) ... ok
+test_a_revoked_next_event_does_not_delegate_the_goal (test_t1844_goal_turns.NativeGoalTurns.test_a_revoked_next_event_does_not_delegate_the_goal) ... FAIL
+test_an_event_from_another_goal_epoch_is_not_session_membership (test_t1844_goal_turns.NativeGoalTurns.test_an_event_from_another_goal_epoch_is_not_session_membership) ... ok
+test_another_registered_session_cannot_borrow_the_goal (test_t1844_goal_turns.NativeGoalTurns.test_another_registered_session_cannot_borrow_the_goal) ... ok
+test_native_new_objective_can_pivot_from_its_same_session_goal (test_t1844_goal_turns.NativeGoalTurns.test_native_new_objective_can_pivot_from_its_same_session_goal) ... FAIL
+test_native_repeat_of_the_same_goal_is_a_zero_write_semantic_retry (test_t1844_goal_turns.NativeGoalTurns.test_native_repeat_of_the_same_goal_is_a_zero_write_semantic_retry) ... FAIL
+test_next_genuine_same_session_event_preserves_the_committed_goal_without_writes (test_t1844_goal_turns.NativeGoalTurns.test_next_genuine_same_session_event_preserves_the_committed_goal_without_writes) ... FAIL
+test_same_session_continuation_survives_both_delivery_expiries (test_t1844_goal_turns.NativeGoalTurns.test_same_session_continuation_survives_both_delivery_expiries) ... FAIL
+
+======================================================================
+FAIL: test_a_revoked_next_event_does_not_delegate_the_goal (test_t1844_goal_turns.NativeGoalTurns.test_a_revoked_next_event_does_not_delegate_the_goal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_t1844_goal_turns.py", line 83, in test_a_revoked_next_event_does_not_delegate_the_goal
+    self.assertEqual(self.prove(), [])
+AssertionError: Lists differ: ['persistent authority has no committed operator grant for this goal'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'persistent authority has no committed operator grant for this goal'
+
+- ['persistent authority has no committed operator grant for this goal']
++ []
+
+======================================================================
+FAIL: test_native_new_objective_can_pivot_from_its_same_session_goal (test_t1844_goal_turns.NativeGoalTurns.test_native_new_objective_can_pivot_from_its_same_session_goal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_t1844_goal_turns.py", line 147, in test_native_new_objective_can_pivot_from_its_same_session_goal
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'goal-authority: persistent authority has no committed operator grant for this goal'}
+
+======================================================================
+FAIL: test_native_repeat_of_the_same_goal_is_a_zero_write_semantic_retry (test_t1844_goal_turns.NativeGoalTurns.test_native_repeat_of_the_same_goal_is_a_zero_write_semantic_retry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_t1844_goal_turns.py", line 133, in test_native_repeat_of_the_same_goal_is_a_zero_write_semantic_retry
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'goal-authority: persistent authority has no committed operator grant for this goal'}
+
+======================================================================
+FAIL: test_next_genuine_same_session_event_preserves_the_committed_goal_without_writes (test_t1844_goal_turns.NativeGoalTurns.test_next_genuine_same_session_event_preserves_the_committed_goal_without_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_t1844_goal_turns.py", line 60, in test_next_genuine_same_session_event_preserves_the_committed_goal_without_writes
+    self.assertEqual(self.prove(), [])
+AssertionError: Lists differ: ['persistent authority has no committed operator grant for this goal'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'persistent authority has no committed operator grant for this goal'
+
+- ['persistent authority has no committed operator grant for this goal']
++ []
+
+======================================================================
+FAIL: test_same_session_continuation_survives_both_delivery_expiries (test_t1844_goal_turns.NativeGoalTurns.test_same_session_continuation_survives_both_delivery_expiries)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_t1844_goal_turns.py", line 68, in test_same_session_continuation_survives_both_delivery_expiries
+    self.assertEqual(self.prove(), [])
+AssertionError: Lists differ: ['persistent authority has no committed operator grant for this goal'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'persistent authority has no committed operator grant for this goal'
+
+- ['persistent authority has no committed operator grant for this goal']
++ []
+
+----------------------------------------------------------------------
+Ran 10 tests in 1.994s
+
+FAILED (failures=5)

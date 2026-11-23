@@ -1,0 +1,75 @@
+{
+  "files": [
+    {
+      "path": "tools/saipen_engine/state.py",
+      "before_sha256": "45a4bd66b5738168362f887bfd7aea5c88dfedf3082e940ea0eec1c53182d2fa",
+      "after_sha256": "40bd0450ffbc4428fa9a7af01842258fe04eda3f5ca1c6565b04ddbb2efe60c9",
+      "live_written": true,
+      "actual_sha256": "40bd0450ffbc4428fa9a7af01842258fe04eda3f5ca1c6565b04ddbb2efe60c9",
+      "normalized_content_matches_tested": true,
+      "raw_bytes_match_tested": true
+    },
+    {
+      "path": "tools/saipen_engine/audit_route.py",
+      "before_sha256": "13c3b7cb8be06742d36a7a37c54b2e7eb73e29df70a4e6a306fb8eba03303f42",
+      "after_sha256": "1758f5a7e5facd9470ad895ee75acbda09c389e4d9a9fdf24ecea8188293b5ba",
+      "live_written": true,
+      "actual_sha256": "1758f5a7e5facd9470ad895ee75acbda09c389e4d9a9fdf24ecea8188293b5ba",
+      "normalized_content_matches_tested": true,
+      "raw_bytes_match_tested": true
+    },
+    {
+      "path": "tools/saipen_engine/router.py",
+      "before_sha256": "b2076c1ada9083998e4833e30536e431a7dad6ef4ba98e297487314b8ffb6ed5",
+      "after_sha256": "5c3f25b6d3514f6ad7affdcac40b1464f4d24c66d86ccf4e1c6409bc74e8ee96",
+      "live_written": true,
+      "actual_sha256": "5481e8faf73e757a4b4ca433316e370d3c8925365e70d399c06ac18ee8bf69da",
+      "normalized_content_matches_tested": true,
+      "raw_bytes_match_tested": false
+    },
+    {
+      "path": "tools/saipen_engine/operations.py",
+      "before_sha256": "5263e9fdf2f2ab13efd4031943227f0ce6036c6e3e47a4ddd60a671674bba1ef",
+      "after_sha256": "d0a3ea67cc7a1d9d168ba1d9aa9028b4c31bc71875496847aaf259d57f58c1a1",
+      "live_written": true,
+      "actual_sha256": "d0a3ea67cc7a1d9d168ba1d9aa9028b4c31bc71875496847aaf259d57f58c1a1",
+      "normalized_content_matches_tested": true,
+      "raw_bytes_match_tested": true
+    },
+    {
+      "path": "tools/validate.py",
+      "before_sha256": "64355ea00c7953faed7911fe771de2c66da23ef7fec84cba15e19ddf77d0196e",
+      "after_sha256": "ccbb14b72ca1703f2003c2fedb4a6afa81ef4aa81d91def9b3bfe46418245c86",
+      "live_written": true,
+      "actual_sha256": "1423937c3439df3ed45400d86a4d3e09868bdd82dbf78e82ee0d284c27fa8394",
+      "normalized_content_matches_tested": true,
+      "raw_bytes_match_tested": false
+    },
+    {
+      "path": "tools/test_t1704_goal_checkpoint_priority.py",
+      "before_sha256": null,
+      "after_sha256": "1cb20991be3a2ab32a4c59dadce10977cf81e3d2af9a4112d7b4463e7aa5b2f4",
+      "live_written": true,
+      "actual_sha256": "7ad1658b13fc529bcf7ac38665baeadc170f530f1c492f6fa48ce8fad53593ab",
+      "normalized_content_matches_tested": true,
+      "raw_bytes_match_tested": false
+    },
+    {
+      "path": "tests/fixtures/t1703-valve-audit.json",
+      "before_sha256": null,
+      "after_sha256": "6a4982752267dfc62d3d372b64c2cd9b640060a42e7e6f515f80751367c9147d",
+      "live_written": true,
+      "actual_sha256": "6a4982752267dfc62d3d372b64c2cd9b640060a42e7e6f515f80751367c9147d",
+      "normalized_content_matches_tested": true,
+      "raw_bytes_match_tested": true
+    }
+  ],
+  "canonical_after": {
+    ".saipen/STATE.md": "d29e00d3b92fc77ea378b8d10a8a49810d3ccabceb91f3da1201d59f5090c641",
+    ".saipen/BOARD.md": "f4faa017ea691b9f991711f558fec9ddf040c08a236791211f308546a06760b5",
+    ".saipen/LOG.md": "42f0293879b656ed9791542dd59a2c99b019a96c77775799b7eb480ab18246db"
+  },
+  "canonical_position_preserved": true,
+  "persistent_authority_granted": false,
+  "application": "git apply --whitespace=error repair.patch completed successfully; the wrapper then exited 1 on its overly strict raw-byte postcheck. Git retained pre-existing source newlines. This readback proves normalized source equals the tested patch and records the real byte hashes; it rewrites no source."
+}

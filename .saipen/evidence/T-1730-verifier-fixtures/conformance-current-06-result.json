@@ -1,0 +1,17 @@
+{
+  "command": [
+    "C:\\Windows\\system32\\cmd.exe",
+    "/d",
+    "/c",
+    "bin\\saipen.cmd",
+    "validate",
+    "--json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "started_utc": "2026-10-12T21:46:54.964441+00:00",
+  "runner_pid": 21624,
+  "child_pid": 8304,
+  "exit_code": 0,
+  "elapsed_s": 33.547,
+  "finished_utc": "2026-10-12T21:47:28.506250+00:00"
+}

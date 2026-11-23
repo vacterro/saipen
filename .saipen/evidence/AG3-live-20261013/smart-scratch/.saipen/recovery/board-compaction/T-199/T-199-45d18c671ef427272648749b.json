@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-241",
+    "operation_id": "board-compact-2155f0f74c684c09b58ace2639e59010",
+    "reason": "explicit canonical legacy BOARD compaction"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-199/T-199-45d18c671ef427272648749b.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 337,
+  "original_record_path": ".saipen/recovery/board-compaction/T-199/T-199-45d18c671ef427272648749b.BOARD.md",
+  "original_record_sha256": "45d18c671ef427272648749be26ff8119dd96068936107ce58667563062ad1ba",
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen\\.saipen\\evidence\\ag3-live-20261013\\smart-scratch",
+  "project_lineage": "lineage-05afdade62f34ea2ab30cb3740a7ad17",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": "",
+  "ticket_id": "T-199"
+}

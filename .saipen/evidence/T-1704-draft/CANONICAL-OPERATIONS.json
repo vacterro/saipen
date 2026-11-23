@@ -1,0 +1,142 @@
+[
+  {
+    "event": 14223,
+    "op_id": "checkpoint-034a1f25bd7c4c7f93e9e15c238f9596",
+    "operation": "checkpoint",
+    "status": "COMMITTED",
+    "created_at": "2026-10-10T10:46:06Z",
+    "manifest": ".saipen/recovery/settled/checkpoint-034a1f25bd7c4c7f93e9e15c238f9596/operation.json",
+    "manifest_sha256": "4001d21bbdd37b6abc1f30e05e7e8d96fec301d0eecee5bee4b46cb7682bed61",
+    "targets": [
+      {
+        "path": ".saipen/LOG.md",
+        "role": "log",
+        "action": "write",
+        "before_hash": "a285d8a78e8b9e1a",
+        "after_hash": "9333d747e4aa2352",
+        "applied": true
+      },
+      {
+        "path": ".saipen/BOARD.md",
+        "role": "board",
+        "action": "write",
+        "before_hash": "e6c5159f756e279c",
+        "after_hash": "c2cbc509ea55e739",
+        "applied": true
+      },
+      {
+        "path": ".saipen/STATE.md",
+        "role": "state",
+        "action": "write",
+        "before_hash": "56ab9702c26fdcff",
+        "after_hash": "7e0d2190c688c754",
+        "applied": true
+      }
+    ]
+  },
+  {
+    "event": 14224,
+    "op_id": "checkpoint-f61682eb02644ca2be5d38b2859ff29f",
+    "operation": "checkpoint",
+    "status": "COMMITTED",
+    "created_at": "2026-10-10T10:47:54Z",
+    "manifest": ".saipen/recovery/settled/checkpoint-f61682eb02644ca2be5d38b2859ff29f/operation.json",
+    "manifest_sha256": "b281f3e647d7f5121aac32d98b9f84644ea9f9fa05bf6e10c6b7dc845b820420",
+    "targets": [
+      {
+        "path": ".saipen/LOG.md",
+        "role": "log",
+        "action": "write",
+        "before_hash": "9333d747e4aa2352",
+        "after_hash": "471ad555cec04bf2",
+        "applied": true
+      },
+      {
+        "path": ".saipen/BOARD.md",
+        "role": "board",
+        "action": "write",
+        "before_hash": "c2cbc509ea55e739",
+        "after_hash": "90242f0c41dd0a13",
+        "applied": true
+      },
+      {
+        "path": ".saipen/STATE.md",
+        "role": "state",
+        "action": "write",
+        "before_hash": "7e0d2190c688c754",
+        "after_hash": "c3141ce04b26e8fe",
+        "applied": true
+      }
+    ]
+  },
+  {
+    "event": 14225,
+    "op_id": "checkpoint-59f2b70a76b44f2a9a0934e823746ff5",
+    "operation": "checkpoint",
+    "status": "COMMITTED",
+    "created_at": "2026-10-10T10:47:55Z",
+    "manifest": ".saipen/recovery/settled/checkpoint-59f2b70a76b44f2a9a0934e823746ff5/operation.json",
+    "manifest_sha256": "7331f00bdf186f21de581c4a1a4fc832feb7ed0c5e331248a651be4af5b1947d",
+    "targets": [
+      {
+        "path": ".saipen/LOG.md",
+        "role": "log",
+        "action": "write",
+        "before_hash": "471ad555cec04bf2",
+        "after_hash": "8993e085257a8309",
+        "applied": true
+      },
+      {
+        "path": ".saipen/BOARD.md",
+        "role": "board",
+        "action": "write",
+        "before_hash": "90242f0c41dd0a13",
+        "after_hash": "146aa5d58d39358f",
+        "applied": true
+      },
+      {
+        "path": ".saipen/STATE.md",
+        "role": "state",
+        "action": "write",
+        "before_hash": "c3141ce04b26e8fe",
+        "after_hash": "55d48e07e77970a0",
+        "applied": true
+      }
+    ]
+  },
+  {
+    "event": 14226,
+    "op_id": "checkpoint-6958523dfa484e1c8a67b0c2ae319541",
+    "operation": "checkpoint",
+    "status": "COMMITTED",
+    "created_at": "2026-10-10T10:47:57Z",
+    "manifest": ".saipen/recovery/settled/checkpoint-6958523dfa484e1c8a67b0c2ae319541/operation.json",
+    "manifest_sha256": "25474d4792c5deb4ea68f9a02c6bce116d094ef9c74d6d75a596a9af3ebb7658",
+    "targets": [
+      {
+        "path": ".saipen/LOG.md",
+        "role": "log",
+        "action": "write",
+        "before_hash": "8993e085257a8309",
+        "after_hash": "1a419fd5151a4747",
+        "applied": true
+      },
+      {
+        "path": ".saipen/BOARD.md",
+        "role": "board",
+        "action": "write",
+        "before_hash": "146aa5d58d39358f",
+        "after_hash": "afad41e3712b8c53",
+        "applied": true
+      },
+      {
+        "path": ".saipen/STATE.md",
+        "role": "state",
+        "action": "write",
+        "before_hash": "55d48e07e77970a0",
+        "after_hash": "0cf8674304062279",
+        "applied": true
+      }
+    ]
+  }
+]

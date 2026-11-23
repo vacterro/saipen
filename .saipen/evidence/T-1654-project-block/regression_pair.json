@@ -1,0 +1,48 @@
+{
+  "command": "python -B -m unittest test_t1654_project_block   (cwd tools/)",
+  "oracle": [
+    "tools/test_t1654_project_block.py",
+    "tests/fixtures/t1654-legacy-block/AGENTS.md.measured",
+    "tools/test_t1614_future_gate.py",
+    "tools/test_hermetic_env.py",
+    "tools/test_fixture_support.py"
+  ],
+  "subject": [
+    "tools/saipen_engine/project_block.py",
+    "tools/saipen.py",
+    "tools/saipen_engine/host_bootstrap.py",
+    "saipen/COMMAND_EFFECTS.json",
+    "saipen/COMMANDS.md"
+  ],
+  "red_files": 967,
+  "red_restored": [
+    "tools/saipen.py",
+    "tools/saipen_engine/host_bootstrap.py",
+    "saipen/COMMAND_EFFECTS.json",
+    "saipen/COMMANDS.md"
+  ],
+  "red_absent": [
+    "tools/saipen_engine/project_block.py"
+  ],
+  "green_files": 967,
+  "red": {
+    "rc": 1,
+    "verifier": "e6513d6a9143a5f2",
+    "subject": "55b0caec7f059d0d",
+    "tail": [
+      "----------------------------------------------------------------------",
+      "Ran 41 tests in 4.191s",
+      "FAILED (failures=6, errors=40, skipped=1)"
+    ]
+  },
+  "green": {
+    "rc": 0,
+    "verifier": "e6513d6a9143a5f2",
+    "subject": "cc9ab639529af29f",
+    "tail": [
+      "----------------------------------------------------------------------",
+      "Ran 41 tests in 8.311s",
+      "OK (skipped=1)"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "captured_at": "2026-11-08T10:02:14.136937+00:00",
+  "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "files": [
+    {
+      "path": "tools/saipen_engine/outcome_truth.py",
+      "sha256": "df90b7548856e11872a9b15645c34ac6f5eff1b96d7ec0200a1ecb94d60850b4",
+      "bytes": 21002
+    },
+    {
+      "path": "tools/saipen_engine/closure.py",
+      "sha256": "e4120bbefa5b96c695318b42f7322bcaa7e1d35f4cbc3497890d797568036b50",
+      "bytes": 33114
+    },
+    {
+      "path": "tools/saipen_engine/context.py",
+      "sha256": "c3a6cb8f06108d7b696501234f3e759f4e3aab266d32f5aeb416cfa69d963909",
+      "bytes": 48271
+    },
+    {
+      "path": "tools/test_t2040_publication_truth.py",
+      "sha256": "764a2d4dcff6d525f29d1b0ab0b7fafac39d68b212b545fc5cc8f2abba2a4ecf",
+      "bytes": 32876
+    },
+    {
+      "path": "tools/test_release_completion.py",
+      "sha256": "4b3052073fd8b9b8edb078cc3f440231c15e93fe652c95f4d9de40e7432c91c7",
+      "bytes": 24529
+    },
+    {
+      "path": ".saipen/evidence/T-2040/publication-truth-audit.md",
+      "sha256": "c91d40b5a8020d4b98c4a304ecc4643537c29100f011db1845a181ed3f65e496",
+      "bytes": 28571
+    }
+  ]
+}

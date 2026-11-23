@@ -1,0 +1,4 @@
+STATUS: T-2019 valmis, avaldamata.
+RESULT: Lisatud eelkontrolli reegel, kukkunud skripti kordusjooks, `--fail-fast`, `suite affected` ning kestuste ja SAIPENi lisakulu väljad. Skriptiajad vajavad jooksutaja ajaridu — BZDECOMPis kuulub see T-651 alla.
+NEXT EXACT ACTION: NONE
+VALIDATION: 76 seotud testi PASS; lõppmuudatuse 12 testi PASS. Uusi lintvigu 0. Üldised core/lint kontrollid jäid punaseks.

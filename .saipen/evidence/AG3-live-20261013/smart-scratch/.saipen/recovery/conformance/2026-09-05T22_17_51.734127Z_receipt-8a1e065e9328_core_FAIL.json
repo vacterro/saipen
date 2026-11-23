@@ -1,0 +1,17 @@
+{
+  "board_hash": "daf11e582bf71f04",
+  "content_hash": "6929327d8c587bd1",
+  "exit_code": 1,
+  "gate": "core",
+  "kind": "conformance_receipt",
+  "log_hash": "a287334feb9e3721",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_smart_vac_cleaner",
+  "receipt_id": "receipt-8a1e065e9328",
+  "schema_version": 2,
+  "source_head": "c826eb7177f29a4714b69637390081e038e052c0",
+  "source_tree_fingerprint": "git-delta-v1:c5f784341149a2c08c565704e439eddc6541811bb32e53c7fa14cab6f14f0ae6",
+  "state_hash": "5e27a9df70ee4bdc",
+  "timestamp_utc": "2026-09-05T22:17:51.734127Z",
+  "validator_protocol_version": "1",
+  "verdict": "FAIL"
+}

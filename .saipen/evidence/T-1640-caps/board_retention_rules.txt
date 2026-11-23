@@ -1,0 +1,4 @@
+live 70 receipt-named DONE 80 own-receipt DONE 79
+V1 machine       kept DONE 151 pruned 128 pruned bytes  91428 board after 149116
+V2 +live prose   kept DONE 179 pruned 100 pruned bytes  72686 board after 167858
+V3 full prose    kept DONE 193 pruned  86 pruned bytes  62303 board after 178241

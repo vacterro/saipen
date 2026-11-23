@@ -1,0 +1,17 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_t2045_operator_gateway.py"
+  ],
+  "exit_code": 0,
+  "duration_s": 1.875,
+  "phase": "REVIEW",
+  "checked_at": "2026-11-10T18:15:27.314141+00:00"
+}

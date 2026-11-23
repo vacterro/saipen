@@ -1,0 +1,36 @@
+[
+  {
+    "label": "pre",
+    "command": [
+      "python",
+      "-B",
+      "-m",
+      "unittest",
+      "test_t1693_response_diagnosis.DiagnosisTests.test_a_inventory_cannot_replace_diagnosis",
+      "test_t1693_response_diagnosis.DiagnosisTests.test_b_generic_handoff_cannot_replace_diagnosis",
+      "-v"
+    ],
+    "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1693-response-diagnosis\\pre-response_surface.py",
+    "subject_sha256": "df41ca11085f769ba47e40de66d3819d78cd5592469a662f3ebc7561eff45100",
+    "verifier_sha256": "74a49f07ace15975e30ee886621f2a0f86974df82fcd9acfec978e87d4f79554",
+    "exit_code": 1,
+    "output": "693_response_diagnosis.DiagnosisTests.test_a_inventory_cannot_replace_diagnosis)\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1693_response_diagnosis.py\", line 80, in test_a_inventory_cannot_replace_diagnosis\r\n    self.assertRejected((FIXTURES / \"a.md\").read_text(encoding=\"utf-8\"))\r\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1693_response_diagnosis.py\", line 76, in assertRejected\r\n    self.assertEqual(klass, RS.CLASS_INVALID_OPERATIONAL_PROSE)\r\nAssertionError: 'ORDINARY_CHAT' != 'INVALID_OPERATIONAL_PROSE'\r\n- ORDINARY_CHAT\r\n+ INVALID_OPERATIONAL_PROSE\r\n\r\n\r\n======================================================================\r\nFAIL: test_b_generic_handoff_cannot_replace_diagnosis (test_t1693_response_diagnosis.DiagnosisTests.test_b_generic_handoff_cannot_replace_diagnosis)\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1693_response_diagnosis.py\", line 83, in test_b_generic_handoff_cannot_replace_diagnosis\r\n    self.assertRejected((FIXTURES / \"b.md\").read_text(encoding=\"utf-8\"))\r\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1693_response_diagnosis.py\", line 76, in assertRejected\r\n    self.assertEqual(klass, RS.CLASS_INVALID_OPERATIONAL_PROSE)\r\nAssertionError: 'ORDINARY_CHAT' != 'INVALID_OPERATIONAL_PROSE'\r\n- ORDINARY_CHAT\r\n+ INVALID_OPERATIONAL_PROSE\r\n\r\n\r\n----------------------------------------------------------------------\r\nRan 2 tests in 0.007s\r\n\r\nFAILED (failures=2)\r\n"
+  },
+  {
+    "label": "post",
+    "command": [
+      "python",
+      "-B",
+      "-m",
+      "unittest",
+      "test_t1693_response_diagnosis.DiagnosisTests.test_a_inventory_cannot_replace_diagnosis",
+      "test_t1693_response_diagnosis.DiagnosisTests.test_b_generic_handoff_cannot_replace_diagnosis",
+      "-v"
+    ],
+    "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+    "subject_sha256": "f809ca742ebbeade1146272725bcf88811d39879e2ea055665caeb24064aa38f",
+    "verifier_sha256": "74a49f07ace15975e30ee886621f2a0f86974df82fcd9acfec978e87d4f79554",
+    "exit_code": 0,
+    "output": "test_a_inventory_cannot_replace_diagnosis (test_t1693_response_diagnosis.DiagnosisTests.test_a_inventory_cannot_replace_diagnosis) ... ok\r\ntest_b_generic_handoff_cannot_replace_diagnosis (test_t1693_response_diagnosis.DiagnosisTests.test_b_generic_handoff_cannot_replace_diagnosis) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 2 tests in 0.004s\r\n\r\nOK\r\n"
+  }
+]

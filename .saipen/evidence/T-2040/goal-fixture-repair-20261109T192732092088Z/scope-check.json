@@ -1,0 +1,56 @@
+{
+  "owned_files": {
+    "tools/test_evidence_gap_ledger_lineage.py": {
+      "sha256": "4ac5df64f9bc2b2e86a7c1a6ee964d8c5d73b34068fbb552199b3b5275f5c903",
+      "bytes": 16723,
+      "preimage_preserved": true,
+      "before_crlf": 0,
+      "after_crlf": 0,
+      "before_lf": 356,
+      "after_lf": 358
+    },
+    "tools/test_persistent_goal_engine.py": {
+      "sha256": "109782661208dcad2ab2a5c761d1f9c9a73f87c19af7f7dd7a6806cbcbe87abe",
+      "bytes": 35084,
+      "preimage_preserved": true,
+      "before_crlf": 0,
+      "after_crlf": 0,
+      "before_lf": 714,
+      "after_lf": 775
+    }
+  },
+  "index_unchanged": true,
+  "read_only_observations": {
+    "tools/saipen_engine/replenishment.py": {
+      "before": "2c4a25b3f88b07c95bd67ec4981e4dbc26ea15035cd6b407ac07ca02cbc178c5",
+      "after": "2c4a25b3f88b07c95bd67ec4981e4dbc26ea15035cd6b407ac07ca02cbc178c5",
+      "unchanged": true
+    },
+    "tools/saipen_engine/board.py": {
+      "before": "751767d2aa4761c537f9c098130ea178c33292b8b6b04c781787a5f54eae8f0a",
+      "after": "751767d2aa4761c537f9c098130ea178c33292b8b6b04c781787a5f54eae8f0a",
+      "unchanged": true
+    },
+    "tools/saipen_engine/discovery_providers.py": {
+      "before": "b82412d9491b8743a55bee4d9f2f91329593f69b26c8ee2dabb82aacc7276a1f",
+      "after": "b82412d9491b8743a55bee4d9f2f91329593f69b26c8ee2dabb82aacc7276a1f",
+      "unchanged": true
+    },
+    ".saipen/STATE.md": {
+      "before": "6e07b5247e7d0d7ab91079c7986ca08655230d9ec9b05e68df38a4ca9b23792e",
+      "after": "6e07b5247e7d0d7ab91079c7986ca08655230d9ec9b05e68df38a4ca9b23792e",
+      "unchanged": true
+    },
+    ".saipen/BOARD.md": {
+      "before": "36740c536dee4a974f682c7fde2caa2c5ea3122f5538585fe50b6a51b153195e",
+      "after": "36740c536dee4a974f682c7fde2caa2c5ea3122f5538585fe50b6a51b153195e",
+      "unchanged": true
+    },
+    ".saipen/LOG.md": {
+      "before": "57c26374fd9b69efed485e2f656e7f2dbc43e28d39fafc51e31941fe275556c7",
+      "after": "57c26374fd9b69efed485e2f656e7f2dbc43e28d39fafc51e31941fe275556c7",
+      "unchanged": true
+    }
+  },
+  "diff_check_returncode": 0
+}

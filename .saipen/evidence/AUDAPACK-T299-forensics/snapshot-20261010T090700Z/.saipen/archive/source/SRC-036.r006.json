@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-036:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Audit 13 opening: preserve SAIPEN deletion policy; closure and unchanged bytes authorize journaled consume, never model confidence."
+    },
+    "SRC-036:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit 13 items 1-3: managed capture and mirror producers use canonical audit enqueue; SAIPEN owns allocation, monotonic IDs, publication and generation identity."
+    },
+    "SRC-036:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit 13 items 2 and 4: AUDAPACK retains exact capture body, stable operation UUID, project selection and retry evidence across failures."
+    },
+    "SRC-036:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit 13 items 5-6: all INAUDIT continuation controls emit bare saipen cc; do not use gg with audit paths as ingestion."
+    },
+    "SRC-036:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit 13 item 7: manual Delete remains explicit operator action; normal successful deletion belongs to SAIPEN consume."
+    },
+    "SRC-036:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit 13 item 8: refresh Layers after enqueue and lifecycle changes; preserve unsaved editor drafts and avoid recreating consumed files."
+    }
+  },
+  "derived_at": "2026-09-05T00:31:00Z",
+  "derived_from": "SRC-036",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "747e8098e8384fc26c81daf9ab42c296fe76fa9b59da8da9186ddda5bf644625"
+}

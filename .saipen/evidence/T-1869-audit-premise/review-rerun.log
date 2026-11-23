@@ -1,0 +1,67 @@
+project home: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+subject     : V:\___VAC\__K\__CODE\_PY\_FastPrompter
+
+== M1: does a ZAICODE adapter exist, and is it what the host runs? ==
+  V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\extensions\adapters\zaicode\saipen-guard.py: exists=True size=7772
+  C:\Users\vac34\.zcode\hooks\saipen-guard.py: exists=True size=7772
+PASS repository adapter present
+PASS installed adapter present
+  sha256[:16] repo=bf9e9a900c86502c installed=bf9e9a900c86502c
+PASS installed copy is byte-identical to the repository copy
+PASS config hooks.enabled
+PASS exactly one UserPromptSubmit entry -- 1
+PASS the configured bootstrap is the one the broker recognises
+PASS the configured script is the installed hook -- ['C:\\Users\\vac34\\.zcode\\hooks\\saipen-guard.py']
+
+== M2: does the hook bind the EVENT's project or --saipen-root? ==
+  rc=0 stdout={"ok": true, "ingress_id": "ing-ea582e3375eb6d8c", "destination_op": "continue", "sealed": false}
+PASS hook exits clean
+PASS hook reports ok -- {"ok": true, "ingress_id": "ing-ea582e3375eb6d8c", "destination_op": "continue", "sealed": false}
+PASS hook admitted an ingress for the operator's prompt -- {"ok": true, "ingress_id": "ing-ea582e3375eb6d8c", "destination_op": "continue", "sealed": false}
+PASS a cc prompt stays a continuation -- continue
+PASS this run's own ingress is still unconsumed -- ing-ea582e3375eb6d8c consumed already
+
+== M3: where did the envelope land? ==
+  records in the event project: 5
+  records in the pinned --saipen-root: 0
+    ing-ea582e3375eb6d8c text='cc' sealed=False
+    ing-77111c6379af237e text='cc' sealed=False
+    ing-01dac7d92b0e5e08 text='cc' sealed=False
+    ing-8e61651e52cc47c4 text='cc' sealed=False
+    ing-896e59f957df5fb2 text='cc' sealed=False
+PASS the envelope landed in the EVENT's project
+PASS nothing leaked into the pinned protocol home -- 0
+
+== M4: can a shell mint an operator seal? (must be NO) ==
+  code=BROKER_CLIENT_NOT_AUTHENTICATED
+  detail=the connecting process is under the host application but is not the installed host hook or the engine it started (a shell tool call is not a hook)
+  host_images=['ZAICODE.exe']
+  ancestry root=zaicode.exe.old pid=22508
+PASS a shell is refused a seal -- BROKER_CLIENT_NOT_AUTHENTICATED
+PASS the refusal names the real host images -- ['ZAICODE.exe']
+
+== M5: is the subject left clean? ==
+  retired ing-ea582e3375eb6d8c: True
+PASS this run's probe ingress was retired -- True
+  active ingress remaining in FastPrompter: 0
+PASS no unconsumed probe ingress is left behind -- 0
+  witness for unrelated text: model_supplied code=None
+PASS unrelated text is still model_supplied, not an operator carrier
+
+== M6: FastPrompter's live refusal and counters ==
+  rc=1
+  ok: False
+  code: RECONCILE_REAUTH_REQUIRED
+  required_ingress: operator_carrier
+  message: bounded run requires a fresh operator cc through authenticated native ingress; WAIT: safety valve reached (3 waves / 39 tickets) -- run 'cc' to continue
+  STATE phase: DONE
+  STATE execution_intent: goal
+  STATE goal_waves: 3
+  STATE goal_tickets: 39
+  STATE continuation_authority: operator_required
+  STATE safety_valve_mode: hard_wait
+PASS the valve still refuses a CLI replay -- RECONCILE_REAUTH_REQUIRED
+PASS it still demands the operator carrier -- operator_carrier
+
+== VERDICT ==
+PASS: all measurements held

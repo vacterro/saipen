@@ -1,0 +1,24 @@
+{
+  "root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1687-identity-diagnostics\\subjects-v1\\pre-fix",
+  "verifier": "af445fe5c899ae7c",
+  "subject": "cd50722c72282e2e676f2c064c178b7d5ff67e7848aa44f790016c54ea8769ba",
+  "configuration": {
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools",
+      "-p",
+      "test_t1687_identity_diagnostics.py",
+      "-v"
+    ],
+    "timeout_s": 120,
+    "encoding": "utf-8",
+    "hermetic_helper_sha256": "b39d8c6e04e15368d7c1753147c596eb521a3af1659da15590928e4b38dfc717"
+  },
+  "ran": 3,
+  "exit_code": 1
+}

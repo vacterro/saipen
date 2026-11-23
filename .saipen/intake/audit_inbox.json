@@ -183,7 +183,7 @@
     "audit/23.md": {
       "binding": "exact",
       "captured_at": "2026-10-04T00:03:43Z",
-      "closed_at": "2026-10-28T22:30:50Z",
+      "closed_at": null,
       "file_sha256": "e65de1f0c46a5857799fecdccfdd4f18961961805462d7b9cc053489c8e5f01c",
       "generation": 1,
       "layer": 23,
@@ -191,7 +191,7 @@
       "receipt_id": "SRC-167",
       "receipt_sha256": "e65de1f0c46a5857799fecdccfdd4f18961961805462d7b9cc053489c8e5f01c",
       "size_bytes": 9256,
-      "state": "DELETED"
+      "state": "ACTIVE"
     },
     "audit/24.md": {
       "binding": "exact",
@@ -260,7 +260,7 @@
     },
     "audit/29.md": {
       "binding": "exact",
-      "captured_at": "2026-10-31T01:46:38Z",
+      "captured_at": "2026-11-13T08:32:34Z",
       "closed_at": null,
       "file_sha256": "d72a8d2cdebdcf545d6b5e920038178625e70fd1d0a18c0426ff88f20491afa9",
       "generation": 1,
@@ -347,58 +347,6 @@
       "receipt_id": "SRC-022",
       "receipt_sha256": "2fafdcbcbf7e5b653028d39f67856b81b25dc5313357402918a89219a4d30a9e",
       "size_bytes": 948,
-      "state": "DELETED"
-    },
-    "audit/AUT31_005_EXTERNAL_OWNER_REQUIREMENTS.md": {
-      "binding": "exact",
-      "captured_at": "2026-10-31T17:38:59Z",
-      "closed_at": "2026-10-31T18:19:29Z",
-      "file_sha256": "f3908585a5b0eda272376e380e72032d5627121ac884618211dcef4bce850344",
-      "generation": 1,
-      "layer": null,
-      "linked_work": "T-1977",
-      "receipt_id": "SRC-353",
-      "receipt_sha256": "f3908585a5b0eda272376e380e72032d5627121ac884618211dcef4bce850344",
-      "size_bytes": 4866,
-      "state": "DELETED"
-    },
-    "audit/AUT31_006_RELEASE_PARITY_AUDIT.md": {
-      "binding": "exact",
-      "captured_at": "2026-10-31T18:19:32Z",
-      "closed_at": "2026-10-31T18:24:58Z",
-      "file_sha256": "84fe70d11cf7d6f44da87b810f842b138b672260bf6b76675baa7fda0272a325",
-      "generation": 1,
-      "layer": null,
-      "linked_work": "T-1978",
-      "receipt_id": "SRC-354",
-      "receipt_sha256": "84fe70d11cf7d6f44da87b810f842b138b672260bf6b76675baa7fda0272a325",
-      "size_bytes": 4076,
-      "state": "DELETED"
-    },
-    "audit/AUT31_007_VERIFICATION_PROFILING_AUDIT.md": {
-      "binding": "exact",
-      "captured_at": "2026-10-31T18:25:01Z",
-      "closed_at": "2026-10-31T18:28:47Z",
-      "file_sha256": "b444355fef5577f6ed560454a1152108729dd93227dda8c933c0a9f252f57d09",
-      "generation": 1,
-      "layer": null,
-      "linked_work": "T-1979",
-      "receipt_id": "SRC-355",
-      "receipt_sha256": "b444355fef5577f6ed560454a1152108729dd93227dda8c933c0a9f252f57d09",
-      "size_bytes": 5802,
-      "state": "DELETED"
-    },
-    "audit/AUT31_008_RUNTIME_DRIFT_INVESTIGATION.md": {
-      "binding": "exact",
-      "captured_at": "2026-10-31T18:28:50Z",
-      "closed_at": "2026-10-31T18:31:23Z",
-      "file_sha256": "26d08cead83ea3b769e3235591976644807a35cd9dc6d44d11365b8999a88177",
-      "generation": 1,
-      "layer": null,
-      "linked_work": "T-1980",
-      "receipt_id": "SRC-356",
-      "receipt_sha256": "26d08cead83ea3b769e3235591976644807a35cd9dc6d44d11365b8999a88177",
-      "size_bytes": 4768,
       "state": "DELETED"
     },
     "audit/BZDECOMP-T293-20261025-protocol-entry.md": {
@@ -531,96 +479,18 @@
       "size_bytes": 9378,
       "state": "DELETED"
     },
-    "audit/SAIHANDOFF_AGENT_DRIFT (1).md": {
+    "audit/SAIHANDOFF_AGENT_DRIFT (7).md": {
       "binding": "exact",
-      "captured_at": "2026-10-31T23:21:46Z",
-      "closed_at": "2026-10-31T23:41:38Z",
-      "file_sha256": "1f3cf96d7a8e0e123eacf86cd6fe39fc5676e0dfe6998d5ff86480aa1ee777b1",
+      "captured_at": "2026-11-13T08:32:34Z",
+      "closed_at": null,
+      "file_sha256": "719801393ad2216548def9d4bc7f58d187e2c64dd8b7ab9f118dd8cfdcba6a72",
       "generation": 1,
       "layer": null,
-      "linked_work": "T-1983",
-      "receipt_id": "SRC-359",
-      "receipt_sha256": "1f3cf96d7a8e0e123eacf86cd6fe39fc5676e0dfe6998d5ff86480aa1ee777b1",
-      "size_bytes": 42175,
-      "state": "DELETED"
-    },
-    "audit/SAIHANDOFF_AGENT_DRIFT (2).md": {
-      "binding": "exact",
-      "captured_at": "2026-10-31T23:41:42Z",
-      "closed_at": "2026-10-31T23:44:38Z",
-      "file_sha256": "8dc5a432a77e2af6cf3d710bdbd92a5079efd22e6af38c2a580e9cc9e509aeb8",
-      "generation": 1,
-      "layer": null,
-      "linked_work": "T-1984",
-      "receipt_id": "SRC-360",
-      "receipt_sha256": "8dc5a432a77e2af6cf3d710bdbd92a5079efd22e6af38c2a580e9cc9e509aeb8",
-      "size_bytes": 34828,
-      "state": "DELETED"
-    },
-    "audit/SAIHANDOFF_AGENT_DRIFT (3).md": {
-      "binding": "exact",
-      "captured_at": "2026-10-31T23:44:42Z",
-      "closed_at": "2026-10-31T23:47:12Z",
-      "file_sha256": "d9c9ee829a233ee6b89e2c953e35c7f1650579422798ff58ebcb7c12b8cc9e06",
-      "generation": 1,
-      "layer": null,
-      "linked_work": "T-1985",
-      "receipt_id": "SRC-361",
-      "receipt_sha256": "d9c9ee829a233ee6b89e2c953e35c7f1650579422798ff58ebcb7c12b8cc9e06",
-      "size_bytes": 32209,
-      "state": "DELETED"
-    },
-    "audit/SAIHANDOFF_AGENT_DRIFT (4).md": {
-      "binding": "exact",
-      "captured_at": "2026-10-31T23:47:18Z",
-      "closed_at": "2026-10-31T23:49:43Z",
-      "file_sha256": "dc2783cff341d3a62acc672de771ed78fdcb5d800fd8045eac00c3a174cf0958",
-      "generation": 1,
-      "layer": null,
-      "linked_work": "T-1986",
-      "receipt_id": "SRC-362",
-      "receipt_sha256": "dc2783cff341d3a62acc672de771ed78fdcb5d800fd8045eac00c3a174cf0958",
-      "size_bytes": 38478,
-      "state": "DELETED"
-    },
-    "audit/SAIHANDOFF_AGENT_DRIFT (5).md": {
-      "binding": "exact",
-      "captured_at": "2026-10-31T23:47:12Z",
-      "closed_at": "2026-10-31T23:47:14Z",
-      "file_sha256": "d9c9ee829a233ee6b89e2c953e35c7f1650579422798ff58ebcb7c12b8cc9e06",
-      "generation": 1,
-      "layer": null,
-      "linked_work": "T-1985",
-      "receipt_id": "SRC-361",
-      "receipt_sha256": "d9c9ee829a233ee6b89e2c953e35c7f1650579422798ff58ebcb7c12b8cc9e06",
-      "size_bytes": 32209,
-      "state": "DELETED"
-    },
-    "audit/SAIHANDOFF_AGENT_DRIFT (6).md": {
-      "binding": "exact",
-      "captured_at": "2026-10-31T23:49:46Z",
-      "closed_at": "2026-10-31T23:51:50Z",
-      "file_sha256": "adf10c64c0c821c507de3a15e89f966ca15d8c5cf73510a9fe7bfbc1adad4e7e",
-      "generation": 1,
-      "layer": null,
-      "linked_work": "T-1987",
-      "receipt_id": "SRC-363",
-      "receipt_sha256": "adf10c64c0c821c507de3a15e89f966ca15d8c5cf73510a9fe7bfbc1adad4e7e",
-      "size_bytes": 38878,
-      "state": "DELETED"
-    },
-    "audit/SAIHANDOFF_AGENT_DRIFT.md": {
-      "binding": "exact",
-      "captured_at": "2026-10-31T23:51:53Z",
-      "closed_at": "2026-10-31T23:54:03Z",
-      "file_sha256": "2d8976dac3f9facbdce7bcdfcd22910181ab595e6884ab4b42053f9e04fa30a4",
-      "generation": 1,
-      "layer": null,
-      "linked_work": "T-1988",
-      "receipt_id": "SRC-364",
-      "receipt_sha256": "2d8976dac3f9facbdce7bcdfcd22910181ab595e6884ab4b42053f9e04fa30a4",
-      "size_bytes": 37321,
-      "state": "DELETED"
+      "linked_work": "T-2005",
+      "receipt_id": "SRC-379",
+      "receipt_sha256": "719801393ad2216548def9d4bc7f58d187e2c64dd8b7ab9f118dd8cfdcba6a72",
+      "size_bytes": 40473,
+      "state": "ACTIVE"
     },
     "audit/SAIHANDOFF_AGENT_DRIFT_2026-10-24.md": {
       "binding": "exact",
@@ -672,19 +542,6 @@
       "receipt_id": "SRC-301",
       "receipt_sha256": "05163ded8addc9fb0b6a5280aad63122c58f4762efbde43a61c890d32b2e41b4",
       "size_bytes": 31776,
-      "state": "DELETED"
-    },
-    "audit/SAIHANDOFF_AGENT_DRIFT_20261029_2328.md": {
-      "binding": "exact",
-      "captured_at": "2026-10-29T21:42:28Z",
-      "closed_at": "2026-10-30T00:24:58Z",
-      "file_sha256": "b907ad13b95eba7436dd367fb898f667e9f17ce2241cbacb3fc35624179f8b8c",
-      "generation": 1,
-      "layer": null,
-      "linked_work": "T-1959",
-      "receipt_id": "SRC-348",
-      "receipt_sha256": "b907ad13b95eba7436dd367fb898f667e9f17ce2241cbacb3fc35624179f8b8c",
-      "size_bytes": 9486,
       "state": "DELETED"
     },
     "audit/SAIHANDOFF_AGENT_DRIFT_ProTrail_ZAICODE_2026-10-24.md": {
@@ -750,6 +607,32 @@
       "receipt_id": "SRC-197",
       "receipt_sha256": "df983dc9ba85b05cba06672a3ae516f4d553aad0874a79bbd99fb6525f35cfa9",
       "size_bytes": 5505,
+      "state": "DELETED"
+    },
+    "audit/SAIHANDOFF_AUDAPACK_AGENT_DRIFT_PROTOCOL_RECONCILIATION_20261103_035536_80b87b15.md": {
+      "binding": "exact",
+      "captured_at": "2026-11-13T08:32:34Z",
+      "closed_at": null,
+      "file_sha256": "80b87b158ac223459bbaf1bac9ab40b512181d52ccf090d14984fe608d8e2373",
+      "generation": 1,
+      "layer": null,
+      "linked_work": "T-2014",
+      "receipt_id": "SRC-384",
+      "receipt_sha256": "80b87b158ac223459bbaf1bac9ab40b512181d52ccf090d14984fe608d8e2373",
+      "size_bytes": 14726,
+      "state": "ACTIVE"
+    },
+    "audit/SAIHANDOFF_BZ_REA_AGENT_DRIFT_RECOVERY.md": {
+      "binding": "exact",
+      "captured_at": "2026-11-12T13:39:44Z",
+      "closed_at": "2026-11-21T07:09:19Z",
+      "file_sha256": "ac1d9a4db94073d6fad06a2a4af6ed9360bf573e08463801ff495cc813fc8943",
+      "generation": 1,
+      "layer": null,
+      "linked_work": "T-2016",
+      "receipt_id": "SRC-386",
+      "receipt_sha256": "ac1d9a4db94073d6fad06a2a4af6ed9360bf573e08463801ff495cc813fc8943",
+      "size_bytes": 9669,
       "state": "DELETED"
     },
     "audit/SAIHANDOFF_EVIDENCE_DRIVEN_HANDOFF_RECONCILIATION_20261025.md": {
@@ -819,7 +702,7 @@
     },
     "audit/SAIHANDOFF_FREEBUFF_WRONG_ROUTE_BZ_REA_20261029.md": {
       "binding": "exact",
-      "captured_at": "2026-10-31T17:38:57Z",
+      "captured_at": "2026-11-13T08:32:34Z",
       "closed_at": null,
       "file_sha256": "d72a8d2cdebdcf545d6b5e920038178625e70fd1d0a18c0426ff88f20491afa9",
       "generation": 1,
@@ -829,6 +712,19 @@
       "receipt_sha256": "d72a8d2cdebdcf545d6b5e920038178625e70fd1d0a18c0426ff88f20491afa9",
       "size_bytes": 11773,
       "state": "ACTIVE"
+    },
+    "audit/SAIHANDOFF_P0_ZAICODE_GOAL_COMMAND_COLLISION_AND_MAINTENANCE_GRANT_BINDING_20261104_132028_172870b3.md": {
+      "binding": "exact",
+      "captured_at": "2026-11-12T13:39:44Z",
+      "closed_at": null,
+      "file_sha256": "609bbc4c2df4af5ffe1494b8140234812ed6a1a60eaef5974325c89d65b148f8",
+      "generation": 1,
+      "layer": null,
+      "linked_work": "T-2024",
+      "receipt_id": "SRC-394",
+      "receipt_sha256": "609bbc4c2df4af5ffe1494b8140234812ed6a1a60eaef5974325c89d65b148f8",
+      "size_bytes": 9713,
+      "state": "CLOSED_PENDING_DELETE"
     },
     "audit/SAIHANDOFF_SAIPEN_PROTOCOL_MAINTAINER_20261027_121545_28acc068.md": {
       "binding": "exact",
@@ -1129,19 +1025,6 @@
       "size_bytes": 23300,
       "state": "ACTIVE"
     },
-    "audit/SAIPEN_Verification_Pipeline_Optimization_20261031.md": {
-      "binding": "exact",
-      "captured_at": "2026-10-31T18:31:26Z",
-      "closed_at": "2026-10-31T18:33:47Z",
-      "file_sha256": "7b610d6b5a841a304af8fc5cea6688338a2f0a649af2e56ee626decd17628f52",
-      "generation": 1,
-      "layer": null,
-      "linked_work": "T-1981",
-      "receipt_id": "SRC-357",
-      "receipt_sha256": "7b610d6b5a841a304af8fc5cea6688338a2f0a649af2e56ee626decd17628f52",
-      "size_bytes": 23673,
-      "state": "DELETED"
-    },
     "audit/SAIPEN_fastprompter1.md": {
       "binding": "exact",
       "captured_at": "2026-10-13T02:28:39Z",
@@ -1396,74 +1279,44 @@
       "rel": "audit/SAIHANDOFF_SAIPEN_PROTOCOL_MAINTAINER_20261027_121545_28acc068.md"
     },
     {
-      "file_sha256": "b907ad13b95eba7436dd367fb898f667e9f17ce2241cbacb3fc35624179f8b8c",
-      "first_seen_at": "2026-10-29T21:42:27Z",
-      "rel": "audit/SAIHANDOFF_AGENT_DRIFT_20261029_2328.md"
+      "file_sha256": "ac1d9a4db94073d6fad06a2a4af6ed9360bf573e08463801ff495cc813fc8943",
+      "first_seen_at": "2026-11-12T13:39:44Z",
+      "rel": "audit/SAIHANDOFF_BZ_REA_AGENT_DRIFT_RECOVERY.md"
+    },
+    {
+      "file_sha256": "609bbc4c2df4af5ffe1494b8140234812ed6a1a60eaef5974325c89d65b148f8",
+      "first_seen_at": "2026-11-12T13:39:44Z",
+      "rel": "audit/SAIHANDOFF_P0_ZAICODE_GOAL_COMMAND_COLLISION_AND_MAINTENANCE_GRANT_BINDING_20261104_132028_172870b3.md"
+    },
+    {
+      "file_sha256": "719801393ad2216548def9d4bc7f58d187e2c64dd8b7ab9f118dd8cfdcba6a72",
+      "first_seen_at": "2026-11-12T13:39:44Z",
+      "rel": "audit/SAIHANDOFF_AGENT_DRIFT (7).md"
+    },
+    {
+      "file_sha256": "80b87b158ac223459bbaf1bac9ab40b512181d52ccf090d14984fe608d8e2373",
+      "first_seen_at": "2026-11-12T13:39:44Z",
+      "rel": "audit/SAIHANDOFF_AUDAPACK_AGENT_DRIFT_PROTOCOL_RECONCILIATION_20261103_035536_80b87b15.md"
     },
     {
       "file_sha256": "d72a8d2cdebdcf545d6b5e920038178625e70fd1d0a18c0426ff88f20491afa9",
-      "first_seen_at": "2026-10-31T01:46:36Z",
+      "first_seen_at": "2026-11-12T13:39:44Z",
       "rel": "audit/SAIHANDOFF_FREEBUFF_WRONG_ROUTE_BZ_REA_20261029.md"
     },
     {
-      "file_sha256": "f3908585a5b0eda272376e380e72032d5627121ac884618211dcef4bce850344",
-      "first_seen_at": "2026-10-31T17:38:57Z",
-      "rel": "audit/AUT31_005_EXTERNAL_OWNER_REQUIREMENTS.md"
+      "file_sha256": "98f6c4ea3faeabc7e64db60b2a895f3883fb91a435dcff339f3056c3f3bf302c",
+      "first_seen_at": "2026-11-14T04:59:41Z",
+      "rel": "audit/SAIHANDOFF_SAIPEN_HOME_AUDIT_BZDECOMP_20261113.md"
     },
     {
-      "file_sha256": "84fe70d11cf7d6f44da87b810f842b138b672260bf6b76675baa7fda0272a325",
-      "first_seen_at": "2026-10-31T17:38:57Z",
-      "rel": "audit/AUT31_006_RELEASE_PARITY_AUDIT.md"
+      "file_sha256": "4cafc55858347687e5ecd5a69424da687ccaaea801b7ea8ab218466bc09e6920",
+      "first_seen_at": "2026-11-14T04:59:41Z",
+      "rel": "audit/SAIHANDOFF_SAIPEN_HOME_AUDIT_BZDECOMP_20261113_INPUT_IDENTITY.md"
     },
     {
-      "file_sha256": "b444355fef5577f6ed560454a1152108729dd93227dda8c933c0a9f252f57d09",
-      "first_seen_at": "2026-10-31T17:38:57Z",
-      "rel": "audit/AUT31_007_VERIFICATION_PROFILING_AUDIT.md"
-    },
-    {
-      "file_sha256": "26d08cead83ea3b769e3235591976644807a35cd9dc6d44d11365b8999a88177",
-      "first_seen_at": "2026-10-31T17:38:57Z",
-      "rel": "audit/AUT31_008_RUNTIME_DRIFT_INVESTIGATION.md"
-    },
-    {
-      "file_sha256": "7b610d6b5a841a304af8fc5cea6688338a2f0a649af2e56ee626decd17628f52",
-      "first_seen_at": "2026-10-31T17:38:57Z",
-      "rel": "audit/SAIPEN_Verification_Pipeline_Optimization_20261031.md"
-    },
-    {
-      "file_sha256": "1f3cf96d7a8e0e123eacf86cd6fe39fc5676e0dfe6998d5ff86480aa1ee777b1",
-      "first_seen_at": "2026-10-31T23:21:45Z",
-      "rel": "audit/SAIHANDOFF_AGENT_DRIFT (1).md"
-    },
-    {
-      "file_sha256": "8dc5a432a77e2af6cf3d710bdbd92a5079efd22e6af38c2a580e9cc9e509aeb8",
-      "first_seen_at": "2026-10-31T23:21:45Z",
-      "rel": "audit/SAIHANDOFF_AGENT_DRIFT (2).md"
-    },
-    {
-      "file_sha256": "d9c9ee829a233ee6b89e2c953e35c7f1650579422798ff58ebcb7c12b8cc9e06",
-      "first_seen_at": "2026-10-31T23:21:45Z",
-      "rel": "audit/SAIHANDOFF_AGENT_DRIFT (3).md"
-    },
-    {
-      "file_sha256": "dc2783cff341d3a62acc672de771ed78fdcb5d800fd8045eac00c3a174cf0958",
-      "first_seen_at": "2026-10-31T23:21:45Z",
-      "rel": "audit/SAIHANDOFF_AGENT_DRIFT (4).md"
-    },
-    {
-      "file_sha256": "d9c9ee829a233ee6b89e2c953e35c7f1650579422798ff58ebcb7c12b8cc9e06",
-      "first_seen_at": "2026-10-31T23:21:45Z",
-      "rel": "audit/SAIHANDOFF_AGENT_DRIFT (5).md"
-    },
-    {
-      "file_sha256": "adf10c64c0c821c507de3a15e89f966ca15d8c5cf73510a9fe7bfbc1adad4e7e",
-      "first_seen_at": "2026-10-31T23:21:45Z",
-      "rel": "audit/SAIHANDOFF_AGENT_DRIFT (6).md"
-    },
-    {
-      "file_sha256": "2d8976dac3f9facbdce7bcdfcd22910181ab595e6884ab4b42053f9e04fa30a4",
-      "first_seen_at": "2026-10-31T23:21:45Z",
-      "rel": "audit/SAIHANDOFF_AGENT_DRIFT.md"
+      "file_sha256": "aef43b7bfd990f307afcb35c36f8d6ebe9eca067da4e72a44350a10bbdd9c07a",
+      "first_seen_at": "2026-11-20T07:23:33Z",
+      "rel": "audit/SAIHANDOFF_P0_REAUTH_DEADLOCK_ANTIGRAVITY_ZAICODE_20261119.md"
     }
   ],
   "schema_version": 2

@@ -1,0 +1,35 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\__main__.py", line 18, in <module>
+    main(module=None)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\main.py", line 101, in __init__
+    self.parseArgs(argv)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\main.py", line 150, in parseArgs
+    self.createTests()
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\main.py", line 161, in createTests
+    self.test = self.testLoader.loadTestsFromNames(self.testNames,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\loader.py", line 232, in loadTestsFromNames
+    suites = [self.loadTestsFromName(name, module) for name in names]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\loader.py", line 232, in <listcomp>
+    suites = [self.loadTestsFromName(name, module) for name in names]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\loader.py", line 162, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t2040-review-baseline-rb2c599e\project\tools\test_t925_sub_terminal_durability.py", line 25, in <module>
+    from test_guard_hostile_matrix import fresh_project  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t2040-review-baseline-rb2c599e\project\tools\test_guard_hostile_matrix.py", line 27, in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t2040-review-baseline-rb2c599e\project\tools\saipen_engine\guard_events.py", line 47, in <module>
+    from .admission import normalize_action
+  File "V:\_TEMP_\t2040-review-baseline-rb2c599e\project\tools\saipen_engine\admission.py", line 152, in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t2040-review-baseline-rb2c599e\project\tools\saipen_engine\admission.py", line 137, in _load_registry
+    raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+RuntimeError: host adapter registry unreadable: V:\_TEMP_\t2040-review-baseline-rb2c599e\project\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t2040-review-baseline-rb2c599e\\project\\extensions\\adapters\\registry.json'

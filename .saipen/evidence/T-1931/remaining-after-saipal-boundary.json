@@ -1,0 +1,27 @@
+{
+  "CORE-009": {
+    "made_progress": true,
+    "journal_advanced": false,
+    "state_mutated": false
+  },
+  "CORE-004": [
+    true,
+    "HOST_ACCEPTED",
+    ""
+  ],
+  "CORE-006": {
+    "ok": true,
+    "status": "DELIVERED_PUBLICATION",
+    "enqueue_calls": 1
+  },
+  "CORE-011": {
+    "ok": true,
+    "status": "DISPOSITION_RECORDED"
+  },
+  "source_hashes": {
+    "tools\\saipen_engine\\campaign.py": "74ee47051ee1df0da725278d21dc280f8ba24c291e87e2828dbf87f20594cc92",
+    "tools\\saipen_engine\\host_dispatch.py": "b6620228ce5b2486ff1fb5c80d9c33a26794c3d5943c591551879524d2caccec",
+    "tools\\saipen_engine\\saipal_adapter.py": "87b616aede138f58614071ff9a6c3327f12c249117b087ef4ee7413e4cbccacd"
+  },
+  "scope": "Isolated current-source counterexamples; no production enqueue or external infrastructure contacted"
+}

@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t1752_audit_auto_close.py", "-v"],
+  "format": "unittest",
+  "context": ["tools", "saipen", "tests", "extensions", "VERSION", "bootstrap"],
+  "oracle_files": [
+    "tools/test_t1752_audit_auto_close.py",
+    "tools/test_t1666_receipt_close.py",
+    "tools/test_dependency_resume_liveness.py",
+    "tools/test_fixture_support.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "subject_files": ["tools/saipen_engine/intake.py"],
+  "before": {"tools/saipen_engine/intake.py": ".saipen/evidence/T-1752-audit-close/before/intake.py"},
+  "timeout": 900
+}

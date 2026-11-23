@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1788_verifier_session_env.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap",
+    "bin"
+  ],
+  "oracle_files": [
+    "tools/test_t1788_verifier_session_env.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/regression_execution.py"
+  ],
+  "before": {
+    "tools/saipen_engine/regression_execution.py": ".saipen/evidence/T-1788-verifier-env/pre/regression_execution.py"
+  },
+  "timeout": 900
+}

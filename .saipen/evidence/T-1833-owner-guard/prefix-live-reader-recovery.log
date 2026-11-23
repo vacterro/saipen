@@ -1,0 +1,6 @@
+test_single_flight_recovers_an_actual_orphaned_reader (test_t1833_verification_owner.PosixVerificationOwner.test_single_flight_recovers_an_actual_orphaned_reader) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.260s
+
+OK

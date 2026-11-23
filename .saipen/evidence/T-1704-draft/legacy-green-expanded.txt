@@ -1,0 +1,20 @@
+======================================================================
+FAIL: test_crashed_transition_recovers_exact_prepared_bytes_without_a_new_grant (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_crashed_transition_recovers_exact_prepared_bytes_without_a_new_grant)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 290, in test_crashed_transition_recovers_exact_prepared_bytes_without_a_new_grant
+    self.assertTrue(replay.ok, replay.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'a fresh externally witnessed operator authorization is required'}
+
+======================================================================
+FAIL: test_imported_source_cannot_be_promoted_by_an_operator_carrier (test_t1704_legacy_goal_authority.LegacyGoalAuthorityTests.test_imported_source_cannot_be_promoted_by_an_operator_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1704_legacy_goal_authority.py", line 224, in test_imported_source_cannot_be_promoted_by_an_operator_carrier
+    self.assertTrue(captured["ok"], captured)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "unknown source kind 'audit_import'"}
+
+----------------------------------------------------------------------
+Ran 23 tests in 23.057s
+
+FAILED (failures=2)

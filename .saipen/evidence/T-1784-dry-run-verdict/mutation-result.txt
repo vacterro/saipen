@@ -1,0 +1,11 @@
+control: ran 12, red 0 -- as expected
+the engine before this Work: ran 12, red 6 -- as expected
+the bar is skipped for a plan: ran 12, red 1 -- as expected
+submit writes under a dry run: ran 12, red 1 -- as expected
+complete writes under a dry run: ran 12, red 1 -- as expected
+rebind writes under a dry run: ran 12, red 1 -- as expected
+cycle-complete writes under a dry run: ran 12, red 1 -- as expected
+abort writes under a dry run: ran 12, red 1 -- as expected
+retire writes under a dry run: ran 12, red 1 -- as expected
+supersession writes under a dry run: ran 12, red 1 -- as expected
+mutations: 9, repetitions each: 3, problems: 0

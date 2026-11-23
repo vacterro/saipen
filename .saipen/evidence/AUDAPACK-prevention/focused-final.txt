@@ -1,0 +1,15 @@
+======================================================================
+ERROR: test_t1673_no_forged_lifecycle (unittest.loader._FailedTest.test_t1673_no_forged_lifecycle)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_t1673_no_forged_lifecycle
+Traceback (most recent call last):
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\loader.py", line 162, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'tools.test_t1673_no_forged_lifecycle'
+
+
+----------------------------------------------------------------------
+Ran 189 tests in 65.934s
+
+FAILED (errors=1, skipped=1)

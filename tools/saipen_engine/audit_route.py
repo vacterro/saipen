@@ -43,6 +43,19 @@ def linked_work_is_workable(
     )
 
 
+def linked_work_is_done(work: str | None, tickets: dict | None) -> bool:
+    """Is this Audit Inbox link bound to Work already closed on the BOARD?
+
+    The question the ingest route's own delete gate asks (`intake.
+    _work_is_done`). A link with no Work, or one whose row is not on the
+    BOARD at all, cannot be proven closed -- a pruned row is not proof, and
+    `tickets` here is the BOARD the router already parsed.
+    """
+    if not work or tickets is None:
+        return False
+    return (tickets.get(work) or {}).get("section") == "## DONE"
+
+
 def audit_route_owns(
     projection: object,
     tickets: dict | None = None,
@@ -58,6 +71,13 @@ def audit_route_owns(
        when tickets is provided, that work ticket must be workable.
        A blocked or unworkable ticket must not own continuation -- the router
        falls through to the Pick Rule, and the validator must agree.
+    4. if the action is the INGEST route (`saipen audit ingest`) and the layer
+       names Work, that Work must already be DONE. Ingest DELETES transport
+       bytes, and its own gate refuses a layer whose Work is still open, so
+       owning continuation while the Work is open would order an action the
+       gate then refuses -- a route the agent is asked to follow and cannot.
+       That is the dead end this module was written to detect, reached from
+       the deletion side instead of the capture side.
     """
     if not isinstance(projection, dict) or not projection.get("action"):
         return False
@@ -65,14 +85,18 @@ def audit_route_owns(
         projection.get("invalid_only")
         or projection.get("residue_only")
         or projection.get("unworkable_active_only")
-        or projection.get("eligibility") == "BLOCKED_EXTERNAL"
-        or projection.get("inbox_eligibility") == "BLOCKED_EXTERNAL"
     ):
         return False
     work = projection.get("work")
     action_str = str(projection.get("action", ""))
-    if work and action_str.startswith("PHASE ") and tickets is not None:
-        if not linked_work_is_workable(work, tickets, agent=agent, now=now):
+    if work and tickets is not None:
+        if action_str.startswith("saipen audit ingest") and not linked_work_is_done(
+            work, tickets
+        ):
+            return False
+        if action_str.startswith("PHASE ") and not linked_work_is_workable(
+            work, tickets, agent=agent, now=now
+        ):
             return False
     if projection.get("idle_only") and tickets is not None:
         from saipen_engine.board import (

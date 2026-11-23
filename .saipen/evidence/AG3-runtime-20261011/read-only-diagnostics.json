@@ -1,0 +1,207 @@
+{
+  "captured_utc": "2026-10-11T05:32:17.6794176Z",
+  "diagnostic_identity": {
+    "sid": "S-1-5-21-6247072-3065140091-1424061869-1002",
+    "authentication": "NTLM",
+    "is_system": false,
+    "account": "DESKTOP-TTH0L52\\vac34"
+  },
+  "reported_execution_account": {
+    "direct_local_groups": [
+      {
+        "group": "Users",
+        "name": "DESKTOP-TTH0L52\\SAIAG_9fabb0d5",
+        "sid": "S-1-5-21-6247072-3065140091-1424061869-1019"
+      }
+    ],
+    "sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+    "limit": "Account and ACL metadata are confirmed; the affected process token and its restricted groups/privileges were not obtained.",
+    "enabled": true,
+    "account": "SAIAG_9fabb0d5",
+    "token_executed": false,
+    "description": "SAI Managed Account Context"
+  },
+  "authorized_project_grants": [
+    {
+      "target_sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+      "workdir": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER",
+      "created": true,
+      "last_seen": "2026-10-11T05:09:07.1782112Z"
+    }
+  ],
+  "paths": [
+    {
+      "path": "V:\\",
+      "exists": true,
+      "attributes": "Hidden, System, Directory",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "protected": false,
+      "sddl": "O:SYG:SYD:(A;OICIIO;SDGXGWGR;;;AU)(A;;0x1301bf;;;AU)(A;;FA;;;SY)(A;OICIIO;GA;;;SY)(A;OICIIO;GA;;;BA)(A;;FA;;;BA)(A;;0x1200a9;;;BU)(A;OICIIO;GXGR;;;BU)",
+      "relevant_aces": [
+        {
+          "sid": "S-1-5-11",
+          "type": "Allow",
+          "rights": "-536805376",
+          "inherited": false,
+          "inheritance": "ContainerInherit, ObjectInherit",
+          "propagation": "InheritOnly"
+        },
+        {
+          "sid": "S-1-5-11",
+          "type": "Allow",
+          "rights": "Modify, Synchronize",
+          "inherited": false,
+          "inheritance": "None",
+          "propagation": "None"
+        },
+        {
+          "sid": "S-1-5-32-545",
+          "type": "Allow",
+          "rights": "ReadAndExecute, Synchronize",
+          "inherited": false,
+          "inheritance": "None",
+          "propagation": "None"
+        },
+        {
+          "sid": "S-1-5-32-545",
+          "type": "Allow",
+          "rights": "-1610612736",
+          "inherited": false,
+          "inheritance": "ContainerInherit, ObjectInherit",
+          "propagation": "InheritOnly"
+        }
+      ]
+    },
+    {
+      "path": "V:\\___VAC",
+      "exists": true,
+      "attributes": "ReadOnly, Directory",
+      "owner": "DESKTOP-TTH0L52\\vac34",
+      "protected": true,
+      "sddl": "O:S-1-5-21-6247072-3065140091-1424061869-1002G:S-1-5-21-758816932-2647220382-3794187505-513D:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;FA;;;BA)(A;OICI;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)(A;OICI;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICI;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)",
+      "relevant_aces": []
+    },
+    {
+      "path": "V:\\___VAC\\__K",
+      "exists": true,
+      "attributes": "ReadOnly, Directory, NotContentIndexed",
+      "owner": "DESKTOP-TTH0L52\\vac34",
+      "protected": false,
+      "sddl": "O:S-1-5-21-6247072-3065140091-1424061869-1002G:S-1-5-21-6247072-3065140091-1424061869-513D:AI(A;;FA;;;BA)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)(A;OICIID;FA;;;BA)(A;OICIID;FA;;;SY)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICIID;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)",
+      "relevant_aces": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE",
+      "exists": true,
+      "attributes": "ReadOnly, Directory, NotContentIndexed",
+      "owner": "DESKTOP-TTH0L52\\vac34",
+      "protected": false,
+      "sddl": "O:S-1-5-21-6247072-3065140091-1424061869-1002G:S-1-5-21-6247072-3065140091-1424061869-513D:AI(A;;FA;;;BA)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)(A;OICIID;FA;;;BA)(A;OICIID;FA;;;SY)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICIID;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)",
+      "relevant_aces": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY",
+      "exists": true,
+      "attributes": "ReadOnly, Directory, NotContentIndexed",
+      "owner": "BUILTIN\\Administrators",
+      "protected": false,
+      "sddl": "O:BAG:S-1-5-21-6247072-3065140091-1424061869-513D:AI(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)(A;OICIID;FA;;;BA)(A;OICIID;FA;;;SY)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICIID;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)",
+      "relevant_aces": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER",
+      "exists": true,
+      "attributes": "ReadOnly, Directory, NotContentIndexed",
+      "owner": "BUILTIN\\Administrators",
+      "protected": false,
+      "sddl": "O:BAG:S-1-5-21-6247072-3065140091-1424061869-513D:AI(A;OICI;0x1301bf;;;S-1-5-21-6247072-3065140091-1424061869-1008)(A;OICI;0x1301bf;;;S-1-5-21-6247072-3065140091-1424061869-1019)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)(A;OICIID;FA;;;BA)(A;OICIID;FA;;;SY)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICIID;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)",
+      "relevant_aces": [
+        {
+          "sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+          "type": "Allow",
+          "rights": "Modify, Synchronize",
+          "inherited": false,
+          "inheritance": "ContainerInherit, ObjectInherit",
+          "propagation": "None"
+        }
+      ]
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER\\.saipen",
+      "exists": true,
+      "attributes": "Directory, NotContentIndexed",
+      "owner": "DESKTOP-TTH0L52\\SAIAG_9fabb0d5",
+      "protected": false,
+      "sddl": "O:S-1-5-21-6247072-3065140091-1424061869-1019G:S-1-5-21-6247072-3065140091-1424061869-513D:AI(A;OICIID;0x1301bf;;;S-1-5-21-6247072-3065140091-1424061869-1008)(A;OICIID;0x1301bf;;;S-1-5-21-6247072-3065140091-1424061869-1019)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)(A;OICIID;FA;;;BA)(A;OICIID;FA;;;SY)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICIID;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)",
+      "relevant_aces": [
+        {
+          "sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+          "type": "Allow",
+          "rights": "Modify, Synchronize",
+          "inherited": true,
+          "inheritance": "ContainerInherit, ObjectInherit",
+          "propagation": "None"
+        }
+      ]
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER\\.saipen\\MANIFEST.json",
+      "observed_by": "DESKTOP-TTH0L52\\vac34",
+      "error_type": "System.Management.Automation.ItemNotFoundException",
+      "error": "Cannot find path 'V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER\\.saipen\\MANIFEST.json' because it does not exist.",
+      "hresult": -2146233087,
+      "classification": "read diagnostic failed"
+    }
+  ],
+  "project_state": "---\r\nphase: PLAN\r\ntask: none\r\nnext_action: \"WAIT: init -- provide the first project goal or raw backlog\"\r\nblocker: none\r\nagent: saipen\r\nsaipen_version: 8\r\nschema_version: 3\r\nstyle_contract: ded-069a4c52\r\nsaipen_home: \"C:/ProgramData/SAI/SAIPEN/runtime/2bd10cc421aacf6a\"\r\nmode: full\r\nexecution_intent: normal\r\ntransition_from: INIT\r\nupdated: 2026-10-11T05:12:06Z\r\n---\r\n",
+  "runtime_files": [
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\audit_manifest.py",
+      "sha256": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b"
+    },
+    {
+      "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\2bd10cc421aacf6a\\tools\\saipen_engine\\audit_manifest.py",
+      "sha256": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\paths.py",
+      "sha256": "055fcc3f9c94eca57f3494e636b8ee31a830b67969958d3d62ca2bbf3a0f93fc"
+    },
+    {
+      "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\2bd10cc421aacf6a\\tools\\saipen_engine\\paths.py",
+      "sha256": "7014ce962731f8cfada60eeb4732507002616097b70735d942c50a10e64e4794"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\reconcile.py",
+      "sha256": "fa7555a02d98ef3b6330a6a81ff954e56a556f49ea45a9fae647b7e223521b85"
+    },
+    {
+      "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\2bd10cc421aacf6a\\tools\\saipen_engine\\reconcile.py",
+      "sha256": "598b5f24fa0802370f986d69d4e3e791a17197db0b732be9ee7ceb27674cc64b"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\VERSION",
+      "sha256": "a0a0bc672b26c017ad0e76dcd10725268a3085574c409e091604bb3c4a15cea9"
+    },
+    {
+      "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\2bd10cc421aacf6a\\VERSION",
+      "sha256": "a0a0bc672b26c017ad0e76dcd10725268a3085574c409e091604bb3c4a15cea9"
+    }
+  ],
+  "canonical_before": {
+    "STATE.md": "f250d7e091fd1fa9d49a24e0dbe5580c1f8988409e5f40772639f1ca586ebe5e",
+    "IDENTITY.md": "523125b90af60622302bf93324566888353a6df6e2079efacaa831a0f31f7b02",
+    "LOG.md": "85d22917455761cf757047362aaad58b9c0e72c3d0797fb30891002b48cea09c",
+    "BOARD.md": "6898704adb75aafd2a74fcaf33de75f52eae5498f3a9db4a035c9ac00f86422f"
+  },
+  "canonical_after": {
+    "STATE.md": "f250d7e091fd1fa9d49a24e0dbe5580c1f8988409e5f40772639f1ca586ebe5e",
+    "IDENTITY.md": "523125b90af60622302bf93324566888353a6df6e2079efacaa831a0f31f7b02",
+    "LOG.md": "85d22917455761cf757047362aaad58b9c0e72c3d0797fb30891002b48cea09c",
+    "BOARD.md": "6898704adb75aafd2a74fcaf33de75f52eae5498f3a9db4a035c9ac00f86422f"
+  },
+  "canonical_bytes_unchanged": true,
+  "acl_mutations": 0,
+  "affected_project_writes": 0,
+  "limit": "Read-only, explicitly bound project and ancestor metadata. No Test-Path inference, account impersonation, grant, ownership change, runtime deployment, or project recovery."
+}

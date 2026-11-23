@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1785_dry_run_human.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap"
+  ],
+  "oracle_files": [
+    "tools/test_t1785_dry_run_human.py",
+    "tools/test_guard_hostile_matrix.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "subject_files": [
+    "tools/saipen.py"
+  ],
+  "before": {
+    "tools/saipen.py": ".saipen/evidence/T-1785-dry-run-human/before/saipen.py"
+  },
+  "timeout": 900
+}

@@ -1,0 +1,28 @@
+{
+  "source": "SRC-070",
+  "commit": "376d7c7806dca4442b25b156415a051daa75906f",
+  "paths": [
+    "saipen/IMPROVE.md",
+    "saipen/REGISTRY.json",
+    "tools/improve.py",
+    "tools/run_scenarios.py",
+    "tools/saipen.py"
+  ],
+  "commit_is_ancestor": true,
+  "foreign_quarantine_hunks_in_cli": false,
+  "later_T1400_commit": "2eecc65c00ed9667b7c5f70259c05f97b062ee2d",
+  "later_T1400_is_ancestor": true,
+  "head": "914ea79ac4bdfe64de4f5fd969e3136c2cd8e01f",
+  "current_hashes": {
+    "saipen/IMPROVE.md": "a0715075b7ae7c8d61f470ba5d9c1477cab4f178e9d32f370c5dba4fc04d9f0c",
+    "saipen/REGISTRY.json": "4f876551a8878ddcb59bb441d1b9ff9f8c8f72d66698da45d607ba1027ba71d4",
+    "tools/improve.py": "092bfac40d3f4ca1ff1090f20700a3ee2da38478fd83181c657c792d01b4ad6e",
+    "tools/run_scenarios.py": "c3771799a05d88a387d66a59ffbd348ec8656e9b77b3617d3f32114ca439a42e",
+    "tools/saipen.py": "f6c6fe648a0376d17b53de9f83c41381f0b43fe740c1d31d2ec3258a0a14dbf0"
+  },
+  "proof_limits": [
+    "Local Git ancestry is not remote push or release publication evidence.",
+    "Historical receipt witness remains model_supplied; not upgraded.",
+    "Current mandatory scenario gate failed and must be repaired before acceptance."
+  ]
+}

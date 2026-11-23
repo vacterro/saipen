@@ -1,0 +1,34 @@
+............................................................................................................s.warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+....warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/milestones/CP-001/manifest.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/milestones/current.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/602dfa2fa3967252.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/milestone-9a8305e07b68df27/operation.json', LF will be replaced by CRLF the next time Git touches it
+...warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.......................................................................................................s......ss................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................s...........................
+----------------------------------------------------------------------
+Ran 993 tests in 654.955s
+
+OK (skipped=5)
+PASS: ownership oracle -- manifest-complete install replaced stale dirs, ran validate.py, and uninstalled config + Aider byte-exact

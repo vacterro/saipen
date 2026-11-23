@@ -1,0 +1,13 @@
+{
+  "gate": "validate",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "tools/validate.py"
+  ],
+  "exit_code": 1,
+  "status": "FAIL",
+  "started_at": "2026-11-10T17:35:05.588227+00:00",
+  "finished_at": "2026-11-10T17:35:25.481916+00:00",
+  "duration_s": 19.89
+}

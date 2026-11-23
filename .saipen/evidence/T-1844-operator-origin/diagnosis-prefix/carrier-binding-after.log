@@ -1,0 +1,13 @@
+test_delivering_session_still_earns_operator_authority (test_t1822_carrier_binding.CarrierBindingTests.test_delivering_session_still_earns_operator_authority) ... ok
+test_no_carrier_at_all_still_reports_model_supplied (test_t1822_carrier_binding.CarrierBindingTests.test_no_carrier_at_all_still_reports_model_supplied) ... ok
+test_redelivery_of_one_message_is_idempotent (test_t1822_carrier_binding.CarrierBindingTests.test_redelivery_of_one_message_is_idempotent) ... ok
+test_refused_replay_leaves_the_owner_envelope_unconsumed (test_t1822_carrier_binding.CarrierBindingTests.test_refused_replay_leaves_the_owner_envelope_unconsumed) ... ok
+test_safe_failure_code_is_the_one_src_280_names (test_t1822_carrier_binding.CarrierBindingTests.test_safe_failure_code_is_the_one_src_280_names) ... ok
+test_same_text_from_two_sessions_keeps_both_envelopes (test_t1822_carrier_binding.CarrierBindingTests.test_same_text_from_two_sessions_keeps_both_envelopes) ... ok
+test_unnamed_legacy_envelope_stays_admissible (test_t1822_carrier_binding.CarrierBindingTests.test_unnamed_legacy_envelope_stays_admissible) ... ok
+test_wrong_session_envelope_is_refused_not_promoted (test_t1822_carrier_binding.CarrierBindingTests.test_wrong_session_envelope_is_refused_not_promoted) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.044s
+
+OK

@@ -1,0 +1,22 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 8874,
+  "red": 4,
+  "new_red": [
+    "test_release_completion.ReleaseCompletionTests.test_r006_r007_trusted_host_and_broker_state"
+  ],
+  "fixed": [],
+  "problems": [
+    "1 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/e01f98b4322c56e8-20261102T064644209898Z.json",
+  "reused": false,
+  "shared": false,
+  "verification_decision": "RUN_FULL_REQUIRED",
+  "execution_trigger": "NEW_TESTED_SOURCE_BYTES",
+  "request_wall_s": 2655.219,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

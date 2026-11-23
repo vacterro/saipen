@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "recover inspect requires exactly <op_id>"
+}

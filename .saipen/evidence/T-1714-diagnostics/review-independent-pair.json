@@ -1,0 +1,17 @@
+{
+  "label": "review-independent-pair",
+  "phase": "REVIEW",
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1714-diagnostics\\review-pair-resumed.cmd"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 38.063,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "{\"ok\": true, \"phase\": \"REVIEW\", \"verifier\": \"571b991d7860660a7ff0e3cb7054484112118a78151dec9a36fdebe5ad4b1880\", \"runs\": [{\"stage\": \"before\", \"exit_code\": 1, \"ran\": 13, \"failed\": 17, \"skipped\": 0}, {\"stage\": \"after\", \"exit_code\": 0, \"ran\": 13, \"failed\": 0, \"skipped\": 0}], \"record\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\T-1714-diagnostics\\\\review-pair-resumed.json\"}\r\n",
+  "stderr": "",
+  "stdout_sha256": "fcce14c3e361d4589de3beb003c7ad50361d4d7fb47a9679e38e66bef3f0e3cb",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

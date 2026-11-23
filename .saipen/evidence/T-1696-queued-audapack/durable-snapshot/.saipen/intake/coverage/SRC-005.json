@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-005:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "c930cc9 ship v0.2.0: sentinel purge, top-level-only Widget, dedicated Chromium profile",
+      "text": "P0 browser audit delivery repair: no flashing console, no random ATTACH identities, Audit Core reliably starts, one-click happy path usable.",
+      "verification": "368 pytest + 23 widget suites + live Bridge restart 6->4 workers",
+      "work": "T-50"
+    }
+  },
+  "schema_version": 1
+}

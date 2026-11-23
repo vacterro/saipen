@@ -1,0 +1,195 @@
+test_full_run_to_closure_sequence (test_automation_block.AcceptanceFixture.test_full_run_to_closure_sequence) ... FAIL
+test_epoch_deterministic_and_drifts_with_transport (test_automation_block.AuditEpoch.test_epoch_deterministic_and_drifts_with_transport) ... ok
+test_diverted_unknown_disposition_cannot_be_emitted (test_automation_block.ClosedVocabulary.test_diverted_unknown_disposition_cannot_be_emitted) ... ok
+test_live_project_continues_with_cc (test_automation_block.ClosedVocabulary.test_live_project_continues_with_cc) ... FAIL
+test_recovery_pending_is_agent_work_not_a_stop (test_automation_block.ClosedVocabulary.test_recovery_pending_is_agent_work_not_a_stop) ... ok
+test_route_refusal_fails_closed (test_automation_block.ClosedVocabulary.test_route_refusal_fails_closed) ... ok
+test_audit_quiescence_is_required (test_automation_block.ClosureGate.test_audit_quiescence_is_required) ... FAIL
+test_binding_wait_vetoes_closure (test_automation_block.ClosureGate.test_binding_wait_vetoes_closure) ... FAIL
+test_bounded_wait_preserves_route_outside_rtc (test_automation_block.ClosureGate.test_bounded_wait_preserves_route_outside_rtc) ... ok
+test_corrupted_route_evidence_is_invalid_fail_closed (test_automation_block.ClosureGate.test_corrupted_route_evidence_is_invalid_fail_closed) ... ok
+test_done_phase_and_empty_board_alone_are_insufficient (test_automation_block.ClosureGate.test_done_phase_and_empty_board_alone_are_insufficient) ... FAIL
+test_empty_physical_folder_with_unsettled_intake_is_not_complete (test_automation_block.ClosureGate.test_empty_physical_folder_with_unsettled_intake_is_not_complete) ... FAIL
+test_full_closure_gate_yields_complete (test_automation_block.ClosureGate.test_full_closure_gate_yields_complete) ... FAIL
+test_no_convergence_evidence_vetoes_closure (test_automation_block.ClosureGate.test_no_convergence_evidence_vetoes_closure) ... FAIL
+test_race_rule_consume_after_convergence_vetoes_closure (test_automation_block.ClosureGate.test_race_rule_consume_after_convergence_vetoes_closure) ... FAIL
+test_race_rule_consume_before_convergence_allows_closure (test_automation_block.ClosureGate.test_race_rule_consume_before_convergence_allows_closure) ... FAIL
+test_residue_vetoes_closure_although_dir_is_empty_of_layers (test_automation_block.ClosureGate.test_residue_vetoes_closure_although_dir_is_empty_of_layers) ... FAIL
+test_same_epoch_and_source_give_stable_machine_output (test_automation_block.ClosureGate.test_same_epoch_and_source_give_stable_machine_output) ... ok
+test_status_json_writes_zero_project_bytes (test_automation_block.ClosureGate.test_status_json_writes_zero_project_bytes) ... ok
+test_workable_board_work_vetoes_closure (test_automation_block.ClosureGate.test_workable_board_work_vetoes_closure) ... FAIL
+test_active_work_outranks_invalid_data (test_automation_block.InvalidDataStops.test_active_work_outranks_invalid_data) ... ok
+test_independent_workable_ticket_outranks_invalid_audit (test_automation_block.InvalidDataStops.test_independent_workable_ticket_outranks_invalid_audit) ... ok
+test_invalid_audit_has_a_visible_diagnostic_without_cc (test_automation_block.InvalidDataStops.test_invalid_audit_has_a_visible_diagnostic_without_cc) ... ok
+test_invalid_audit_is_not_a_continuation (test_automation_block.InvalidDataStops.test_invalid_audit_is_not_a_continuation) ... ok
+test_invalid_queue_cannot_be_completed_by_clean_closure_evidence (test_automation_block.InvalidDataStops.test_invalid_queue_cannot_be_completed_by_clean_closure_evidence) ... ok
+test_invalid_queue_has_a_visible_diagnostic_without_cc (test_automation_block.InvalidDataStops.test_invalid_queue_has_a_visible_diagnostic_without_cc) ... ok
+test_block_never_emits_cc_for_non_continue (test_automation_block.NextCommandLaw.test_block_never_emits_cc_for_non_continue) ... ok
+test_only_continue_gets_cc (test_automation_block.NextCommandLaw.test_only_continue_gets_cc) ... ok
+test_audit_residue_waits_for_the_operator (test_automation_block.WaitOwnership.test_audit_residue_waits_for_the_operator) ... ok
+test_blocked_wait_is_a_stop (test_automation_block.WaitOwnership.test_blocked_wait_is_a_stop) ... ok
+test_bounded_safety_valve_requires_operator_cc (test_automation_block.WaitOwnership.test_bounded_safety_valve_requires_operator_cc) ... ok
+test_foreign_live_is_external (test_automation_block.WaitOwnership.test_foreign_live_is_external) ... ok
+test_manual_verify_is_a_human_stop (test_automation_block.WaitOwnership.test_manual_verify_is_a_human_stop) ... ok
+test_read_only_session_blocks (test_automation_block.WaitOwnership.test_read_only_session_blocks) ... ok
+test_unworkable_audit_has_truthful_final_facts (test_automation_block.WaitOwnership.test_unworkable_audit_has_truthful_final_facts) ... ok
+test_unworkable_audit_stops_without_inventing_operator_authority (test_automation_block.WaitOwnership.test_unworkable_audit_stops_without_inventing_operator_authority) ... ok
+test_user_brake_is_a_human_stop (test_automation_block.WaitOwnership.test_user_brake_is_a_human_stop) ... ok
+test_workable_ticket_outranks_unworkable_audit (test_automation_block.WaitOwnership.test_workable_ticket_outranks_unworkable_audit) ... ok
+test_blocked_claimed_ticket_cannot_grant_execution (test_t1739_wait_boundary.WaitBoundary.test_blocked_claimed_ticket_cannot_grant_execution) ... ok
+test_contradictory_authority_tuple_fails_closed (test_t1739_wait_boundary.WaitBoundary.test_contradictory_authority_tuple_fails_closed) ... ok
+test_genuine_complete_requires_all_current_closure_conditions (test_t1739_wait_boundary.WaitBoundary.test_genuine_complete_requires_all_current_closure_conditions) ... FAIL
+test_independent_candidate_is_eligible_only_after_session_brake_absent (test_t1739_wait_boundary.WaitBoundary.test_independent_candidate_is_eligible_only_after_session_brake_absent) ... ok
+test_native_status_and_continue_use_same_snapshot_without_writes (test_t1739_wait_boundary.WaitBoundary.test_native_status_and_continue_use_same_snapshot_without_writes) ... ok
+test_no_executable_work_is_not_completion (test_t1739_wait_boundary.WaitBoundary.test_no_executable_work_is_not_completion) ... ok
+test_operator_required_wait_dominates_two_candidates_and_eight_blocked (test_t1739_wait_boundary.WaitBoundary.test_operator_required_wait_dominates_two_candidates_and_eight_blocked) ... ok
+test_safety_gates_and_existing_schema_remain_intact (test_t1739_wait_boundary.WaitBoundary.test_safety_gates_and_existing_schema_remain_intact) ... ok
+test_stale_projection_cannot_certify_current_completion (test_t1739_wait_boundary.WaitBoundary.test_stale_projection_cannot_certify_current_completion) ... ok
+
+======================================================================
+FAIL: test_full_run_to_closure_sequence (test_automation_block.AcceptanceFixture.test_full_run_to_closure_sequence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 764, in test_full_run_to_closure_sequence
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_live_project_continues_with_cc (test_automation_block.ClosedVocabulary.test_live_project_continues_with_cc)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 201, in test_live_project_continues_with_cc
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_audit_quiescence_is_required (test_automation_block.ClosureGate.test_audit_quiescence_is_required)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 475, in test_audit_quiescence_is_required
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_binding_wait_vetoes_closure (test_automation_block.ClosureGate.test_binding_wait_vetoes_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 516, in test_binding_wait_vetoes_closure
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_done_phase_and_empty_board_alone_are_insufficient (test_automation_block.ClosureGate.test_done_phase_and_empty_board_alone_are_insufficient)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 577, in test_done_phase_and_empty_board_alone_are_insufficient
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_empty_physical_folder_with_unsettled_intake_is_not_complete (test_automation_block.ClosureGate.test_empty_physical_folder_with_unsettled_intake_is_not_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 604, in test_empty_physical_folder_with_unsettled_intake_is_not_complete
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_full_closure_gate_yields_complete (test_automation_block.ClosureGate.test_full_closure_gate_yields_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 465, in test_full_closure_gate_yields_complete
+    self.assertEqual(block["disposition"], automation.COMPLETE)
+AssertionError: 'BLOCKED' != 'COMPLETE'
+- BLOCKED
++ COMPLETE
+
+
+======================================================================
+FAIL: test_no_convergence_evidence_vetoes_closure (test_automation_block.ClosureGate.test_no_convergence_evidence_vetoes_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 493, in test_no_convergence_evidence_vetoes_closure
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_race_rule_consume_after_convergence_vetoes_closure (test_automation_block.ClosureGate.test_race_rule_consume_after_convergence_vetoes_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 532, in test_race_rule_consume_after_convergence_vetoes_closure
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_race_rule_consume_before_convergence_allows_closure (test_automation_block.ClosureGate.test_race_rule_consume_before_convergence_allows_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 565, in test_race_rule_consume_before_convergence_allows_closure
+    self.assertEqual(block["disposition"], automation.COMPLETE)
+AssertionError: 'BLOCKED' != 'COMPLETE'
+- BLOCKED
++ COMPLETE
+
+
+======================================================================
+FAIL: test_residue_vetoes_closure_although_dir_is_empty_of_layers (test_automation_block.ClosureGate.test_residue_vetoes_closure_although_dir_is_empty_of_layers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 484, in test_residue_vetoes_closure_although_dir_is_empty_of_layers
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_workable_board_work_vetoes_closure (test_automation_block.ClosureGate.test_workable_board_work_vetoes_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 506, in test_workable_board_work_vetoes_closure
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'BLOCKED' != 'CONTINUE'
+- BLOCKED
++ CONTINUE
+
+
+======================================================================
+FAIL: test_genuine_complete_requires_all_current_closure_conditions (test_t1739_wait_boundary.WaitBoundary.test_genuine_complete_requires_all_current_closure_conditions)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1739_wait_boundary.py", line 111, in test_genuine_complete_requires_all_current_closure_conditions
+    self.assertEqual(block["disposition"], automation.COMPLETE)
+AssertionError: 'BLOCKED' != 'COMPLETE'
+- BLOCKED
++ COMPLETE
+
+
+----------------------------------------------------------------------
+Ran 47 tests in 5.143s
+
+FAILED (failures=13)

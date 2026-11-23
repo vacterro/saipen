@@ -1,0 +1,46 @@
+{
+  "op_id": "ticket-8ed6e3eabb184d60969475eda26a3062",
+  "operation": "ticket_move",
+  "created_at": "2026-09-24T06:22:31Z",
+  "agent": "buffy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "3df366ca84648cec",
+  "preconditions": {
+    ".saipen/STATE.md": "b23bd4de77939c56",
+    ".saipen/BOARD.md": "2fd689256c322a98",
+    ".saipen/LOG.md": "3a6c532e32a04dc6"
+  },
+  "read_preconditions": {
+    ".saipen/logs": "delete-tree-sha256:a9fd42093948549e254dc740707438fc8f0f40f60d4d84b215297142215dcbe5"
+  },
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 3,
+  "targets": [
+    {
+      "path": ".saipen/LOG.md",
+      "role": "log",
+      "action": "write",
+      "before_hash": "3a6c532e32a04dc6",
+      "after_hash": "8095e581ad48ccb8",
+      "applied": true
+    },
+    {
+      "path": ".saipen/BOARD.md",
+      "role": "board",
+      "action": "write",
+      "before_hash": "2fd689256c322a98",
+      "after_hash": "673ab3d8c1a80a96",
+      "applied": true
+    },
+    {
+      "path": ".saipen/STATE.md",
+      "role": "state",
+      "action": "write",
+      "before_hash": "b23bd4de77939c56",
+      "after_hash": "e424a3273807b10a",
+      "applied": true
+    }
+  ]
+}

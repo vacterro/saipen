@@ -1,0 +1,5 @@
+hookargv[0:4]: ('C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe', '-c', 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)', 'C:\\Users\\vac34\\.zcode\\hooks\\saipen-guard.py')
+policy host_images: ['zaicode.exe'] signers: [] max_shells: 0
+Traceback (most recent call last):
+  File "<stdin>", line 26, in <module>
+AttributeError: module 'saipen_engine.host_authority_process' has no attribute 'prove_hook_invocation'

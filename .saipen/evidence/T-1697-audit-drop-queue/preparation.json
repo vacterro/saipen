@@ -1,0 +1,23 @@
+{
+  "pre_subject": "C:\\Users\\vac34\\AppData\\Local\\Temp\\saipen-t1697-pre-20261010",
+  "owned_sha256": {
+    "tools/saipen_engine/audit_inbox.py": "aada9fb01baa4a6ee6b36af67d3c6cc4becd6e2712c3ca201b04a41408532d3f",
+    "tools/saipen_engine/router.py": "a069b87b15b59ab01856c697dce5c7d8ac4989c8cab04b432fa32ca033256a1b",
+    "tools/saipen.py": "4c7f6ebfc5681d25dd44a9bad25bd977d52efe5834bd08260928add9329079b6",
+    "tools/test_audit_inbox.py": "7b1e95dafa7778f5bb338436b0f0586a2fafaaf42a32509ca1f710ae7a44e1ee",
+    "tools/test_automation_block.py": "662ff5fd5a66ed93ec114c21daaa71f90fd81ee4c159cf0213ff1ac8be8bd67e",
+    "saipen/REGISTRY.json": "c25171bd998719c1471ccc190516bf65aebe57fee41f2e3bbfc6a04c9f2485e4",
+    "saipen/SOURCES.md": "95269cc83af42f6505541e7f889d857e97096362be54cbf1383129eef8ae383f",
+    "saipen/COMMANDS.md": "844e8e539d3a533b116b267b3ff5b375708806d78681dab1876aa603a310892a"
+  },
+  "queue_proof": {
+    "preexisting_blocked_records_unchanged": 62,
+    "preexisting_blocked_records_total": 62,
+    "source_files_unchanged_before_T1697_build": 663,
+    "source_files_total": 664,
+    "mission": "T-1696 / SRC-201",
+    "mission_state": "BLOCKED: SEQUENCED_AFTER_CURRENT",
+    "audapack_observed": false,
+    "audapack_mutated": false
+  }
+}

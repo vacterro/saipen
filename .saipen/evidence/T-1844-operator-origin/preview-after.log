@@ -1,0 +1,9 @@
+test_fresh_native_preview_does_not_reuse_an_older_model_receipt (test_t1844_authority_preview.AuthorityPreviewEvents.test_fresh_native_preview_does_not_reuse_an_older_model_receipt) ... ok
+test_preview_preserves_the_real_capture_fidelity_refusal (test_t1844_authority_preview.AuthorityPreviewEvents.test_preview_preserves_the_real_capture_fidelity_refusal) ... ok
+test_preview_refuses_corruption_before_filtering_out_an_older_event (test_t1844_authority_preview.AuthorityPreviewEvents.test_preview_refuses_corruption_before_filtering_out_an_older_event) ... ok
+test_preview_selects_the_current_native_event_without_binding_it (test_t1844_authority_preview.AuthorityPreviewEvents.test_preview_selects_the_current_native_event_without_binding_it) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.314s
+
+OK

@@ -1,0 +1,23 @@
+utc: 2026-10-08T01:56:41Z
+CONTROL 1/3 unmutated copy: exit 0, Ran 4 tests
+CONTROL 2/3 unmutated copy: exit 0, Ran 4 tests
+CONTROL 3/3 unmutated copy: exit 0, Ran 4 tests
+M1 the class is switched off: DETECTED in 3 of 3
+      red: test_only_a_value_outside_the_closed_set_is_taken
+      red: test_recovery_names_one_approved_command_and_the_project_is_valid_after_it
+      red: test_the_claim_is_dropped_with_the_closure
+      red: test_the_row_state_is_bound_to_is_left_to_the_current_done_classes
+M2 a value inside the closed set is taken too: DETECTED in 3 of 3
+      red: test_only_a_value_outside_the_closed_set_is_taken
+M3 the reopen asks for no approval: DETECTED in 3 of 3
+      red: test_only_a_value_outside_the_closed_set_is_taken
+M4 the row STATE is bound to is taken: DETECTED in 3 of 3
+      red: test_the_row_state_is_bound_to_is_left_to_the_current_done_classes
+M5 the claim stays on the reopened row: DETECTED in 3 of 3
+      red: test_the_claim_is_dropped_with_the_closure
+command: python -B -m unittest test_t1674_typed_closure_mode (cwd tools/)
+verifier:82c855e6e2070c57  (tools/test_t1674_typed_closure_mode.py, byte-identical in both trees)
+FAIL subject:6ed0bb09b3ab3507  exit 1  red: test_only_a_value_outside_the_closed_set_is_taken, test_recovery_names_one_approved_command_and_the_project_is_valid_after_it, test_the_claim_is_dropped_with_the_closure, test_the_row_state_is_bound_to_is_left_to_the_current_done_classes
+PASS subject:99ab5e5c7545beb3  exit 0  Ran 4 tests
+mutations 5, undetected 0, with an unstable test 0
+--- exit: 0 ---

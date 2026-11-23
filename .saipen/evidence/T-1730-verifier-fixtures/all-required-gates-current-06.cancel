@@ -1,0 +1,4 @@
+Stop at the next safe gate boundary after the current full family finishes.
+The verified missing-source cache-binding case prevents independent probe dispatch.
+Preserve this current subject and its terminal family result; repair that case before later full gates.
+This cancels no goal, changes no lifecycle and kills no running process.

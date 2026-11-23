@@ -1,0 +1,106 @@
+{
+  "timestamp": "2026-10-09T12:38:39.025607+00:00",
+  "records": [
+    {
+      "label": "fixed-pre",
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "test_response_surface_contract.DiagnosisTests.test_a_inventory_cannot_replace_diagnosis",
+        "test_response_surface_contract.DiagnosisTests.test_b_generic_handoff_cannot_replace_diagnosis",
+        "-v"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+      "exit_code": 1,
+      "ran": 2,
+      "output": "review-fixed-pre.out.txt",
+      "output_sha256": "2b7f30012cd8048c63312436e98bddcfc6662f3a1618648dfb2fd79801fe0518",
+      "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+      "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1693-response-diagnosis\\pre-response_surface.py",
+      "subject_sha256": "df41ca11085f769ba47e40de66d3819d78cd5592469a662f3ebc7561eff45100"
+    },
+    {
+      "label": "fixed-post",
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "test_response_surface_contract.DiagnosisTests.test_a_inventory_cannot_replace_diagnosis",
+        "test_response_surface_contract.DiagnosisTests.test_b_generic_handoff_cannot_replace_diagnosis",
+        "-v"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+      "exit_code": 0,
+      "ran": 2,
+      "output": "review-fixed-post.out.txt",
+      "output_sha256": "10d682e494c1f06473f2e763cb74b17a0a934eb1a6428a4d4449acf72caf1133",
+      "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+      "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+      "subject_sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8"
+    },
+    {
+      "label": "robust-pre",
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "test_response_surface_contract.DiagnosisTests.test_source_and_flattened_installs_use_the_same_owner",
+        "test_response_surface_contract.DiagnosisTests.test_deep_json_refuses_instead_of_crashing",
+        "-v"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+      "exit_code": 1,
+      "ran": 2,
+      "output": "review-robust-pre.out.txt",
+      "output_sha256": "e6af337325751543feba98f732e1710cdcb66d2ad72c899842a960cd02b7f9bb",
+      "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+      "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1693-response-diagnosis\\pre-layout-response_surface.py",
+      "subject_sha256": "db95e27c1afb069e9ec19a1228f0f21820989514b1ff1c11f5ec86b1d4b2cf11"
+    },
+    {
+      "label": "robust-post",
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "test_response_surface_contract.DiagnosisTests.test_source_and_flattened_installs_use_the_same_owner",
+        "test_response_surface_contract.DiagnosisTests.test_deep_json_refuses_instead_of_crashing",
+        "-v"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+      "exit_code": 0,
+      "ran": 2,
+      "output": "review-robust-post.out.txt",
+      "output_sha256": "ba049d433e4004a05587be6e3daaba11e134f169f03259b2e3a008d9e31b9084",
+      "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+      "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+      "subject_sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8"
+    },
+    {
+      "label": "diagnosis",
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "test_response_surface_contract.DiagnosisTests",
+        "-v"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+      "exit_code": 0,
+      "ran": 22,
+      "output": "review-diagnosis.out.txt",
+      "output_sha256": "c3a120f74f0babc3fe9e9d636a686f48f1801a24501d083ceaede5190ff6299b",
+      "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+      "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+      "subject_sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8"
+    }
+  ],
+  "original_case_asts_unchanged": true,
+  "limits": "API controls; original human/native FreeBuff transcripts are absent; synthetic request witnesses are not production authority."
+}

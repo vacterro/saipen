@@ -1,0 +1,10 @@
+test_a_task_that_is_not_claimable_gets_no_fabricated_route (test_recovery_reachability.StrandedClaimTests.test_a_task_that_is_not_claimable_gets_no_fabricated_route)
+Two legitimate answers is an operator's call, not a guess. ... ok
+test_no_surface_points_back_at_the_command_that_refused (test_recovery_reachability.StrandedClaimTests.test_no_surface_points_back_at_the_command_that_refused) ... ok
+test_recover_does_not_certify_a_project_the_write_gate_refuses (test_recovery_reachability.StrandedClaimTests.test_recover_does_not_certify_a_project_the_write_gate_refuses) ... ok
+test_the_route_is_the_command_that_actually_repairs_the_floor (test_recovery_reachability.StrandedClaimTests.test_the_route_is_the_command_that_actually_repairs_the_floor) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 7.717s
+
+OK

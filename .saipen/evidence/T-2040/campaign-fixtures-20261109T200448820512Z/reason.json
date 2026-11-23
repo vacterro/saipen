@@ -1,0 +1,80 @@
+{
+  "task": "T-2040",
+  "scope": "Five assigned campaign test files only; production not edited",
+  "oracle_changed": true,
+  "classification": "STALE_FIXTURES",
+  "production_defect_reproduced": false,
+  "remaining_owned_blockers": [],
+  "reason": [
+    {
+      "file": "tools/test_campaign_matrix.py",
+      "control": "test_c35_c36_all_work_complete_legitimately_quiescent",
+      "before": "Empty BOARD plus unchecked schema-2 sources was expected to quiesce.",
+      "after": "Retain unmocked empty-board negative: INCOMPLETE_DISCOVERY, EXTERNAL_BLOCKED, zero worker calls. Positive uses the real certificate owner with explicitly simulated checked_discovery_evidence for all sources, then the real continuation assessment: exact QUIESCENT_WAIT and wake condition.",
+      "boundary": "Only the discovery certificate is injected in the positive. No terminal classification, validator or production guard is weakened. Shared helper stays in the owned matrix file."
+    },
+    {
+      "file": "tools/test_campaign_production_gates.py",
+      "control": "test_gate_i_quiescence_and_wake",
+      "before": "Empty BOARD was mistaken for exhausted discovery.",
+      "after": "Use the same complete schema-2 certificate simulation; require exact QUIESCENT_WAIT. Remove injection before adding new work, retain real assessment, require one worker invocation and RUNNING."
+    },
+    {
+      "file": "tools/test_campaign_production_gates.py",
+      "control": "test_neg_camp_005_and_009_executor_missing_and_supersession",
+      "before": "Only the project-local executor was missing; the installed resolver still found a real executor.",
+      "after": "Assert project-local absence and explicitly simulate installed resolve_tool_path raising FileNotFoundError. Require resolver invocation and EXECUTOR_UNAVAILABLE. Existing supersession and tamper negatives remain."
+    },
+    {
+      "file": "tools/test_t1945_analysis_progress.py",
+      "control": "test_a_completed_objective_may_still_quiesce",
+      "before": "NO_NEW_EVIDENCE from one backend was treated as full campaign completion while active work still existed.",
+      "after": "Seat a disposable empty completed objective. One-backend NO_NEW_EVIDENCE remains a failed discovery with EXTERNAL_BLOCKED. A later real assessment with full checked certificate reaches QUIESCENT_WAIT without invoking discovery again."
+    },
+    {
+      "file": "tools/test_t1945_campaign_driver.py",
+      "control": "test_it_does_not_spin_while_waiting_for_an_operator and two explicit EXTERNAL_BLOCKED controls",
+      "before": "Persisted EXTERNAL_BLOCKED was expected to veto every run, despite an independently executable DOING task.",
+      "after": "Operator, authority and safety states retain zero-step stops. Current externally unavailable work is reassessed exactly once, WAIT_EXTERNAL, zero worker calls. Independent work beside a separate external blocker runs two productive attempt-bound generations."
+    },
+    {
+      "file": "tools/test_aut31_production_autonomy.py",
+      "control": "test_control_01_five_real_successive_model_turns",
+      "before": "LOG-only writes were asserted to be engineering progress, so the bounded driver correctly stopped after one turn.",
+      "after": "Use write_canonical_worker_mutation for distinct source files, current attempt/campaign/generation/lineage and matching disk hashes. Require five productive SOURCE_CHANGED steps and distinct dispatch identities. Explicit simulated host trust replaces no production trust rule.",
+      "boundary": "Local injected-worker/host contract only; does not establish real model turns or production acceptance."
+    },
+    {
+      "file": "tools/test_aut31_production_autonomy.py",
+      "control": "test_control_03_actual_implementation_task_verified_and_closed",
+      "before": "BOARD/STATE/LOG closure writes alone were asserted to prove engineering progress.",
+      "after": "Create attempt-bound source mutation through existing fixture helper; execute the written function with runpy and assert its result before simulated closure. Require SOURCE_CHANGED, closed BOARD ticket and DONE/none STATE. The progress verifier remains unmocked; closure itself is explicitly not proof."
+    }
+  ],
+  "measurements": {
+    "before_owned": "7 failed, 77 passed, 10 subtests passed in 4.25s",
+    "after_owned": "85 passed, 10 subtests passed in 4.04s",
+    "after_original_selection": "7 passed, 3 subtests passed in 1.16s",
+    "skips_added": 0,
+    "baseline_changed": false,
+    "git_diff_check": "exit 0; only Git CRLF conversion warnings",
+    "preimage_hashes_match": true,
+    "post_final_run_hash_changes": []
+  },
+  "artifacts": {
+    "exact_preimages": "preimages/tools/",
+    "provided_prior_selection": "provided-selection.json",
+    "provided_prior_output": "provided-before.log",
+    "own_before_selection": "selection.json",
+    "own_before_output": "before.log",
+    "own_before_full_output": "before-full.log",
+    "intermediate_output": "after-01.log",
+    "final_full_output": "after.log",
+    "final_selected_output": "after-selected.log",
+    "post_foreign_subject_change_recheck": ["after-current.log", "after-selected-current.log"],
+    "exact_commands_and_hashes": ["before.json", "before-full.json", "after-01.json", "after.json", "after-selected.json", "after-current.json", "after-selected-current.json", "current-hashes.json"],
+    "patch_against_preimages": "fixture-changes.patch"
+  },
+  "evidence_limit": "Oracle changed intentionally. These are measured fixture adjudications, not unchanged-oracle production red-to-green evidence. No production acceptance, native host execution or canonical Work completion is claimed.",
+  "prohibited_actions_not_taken": ["production edit", "new agent", "workspace STATE/BOARD/LOG edit", "saipen start/transition", "baseline edit", "skip addition", "git staging", "commit"]
+}

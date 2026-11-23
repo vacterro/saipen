@@ -1,0 +1,19 @@
+{
+  "label": "scout-runtime",
+  "phase": "SCOUT",
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "runtime",
+    "--json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 0.39,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"RUNTIME\",\r\n  \"agent\": \"saipen-cli\",\r\n  \"runtime_info_source\": \"unknown\",\r\n  \"runtime_info_present\": false,\r\n  \"schema_version\": 1,\r\n  \"harness\": null,\r\n  \"provider\": null,\r\n  \"model\": null,\r\n  \"variant\": null,\r\n  \"effort\": null,\r\n  \"capabilities\": {\r\n    \"shell\": null,\r\n    \"filesystem\": null,\r\n    \"patch\": null,\r\n    \"browser\": null,\r\n    \"web\": null,\r\n    \"subagents\": null,\r\n    \"parallel_subagents\": null,\r\n    \"skills\": null,\r\n    \"mcp\": null,\r\n    \"structured_output\": null,\r\n    \"persistent_session\": null,\r\n    \"context_compaction\": null,\r\n    \"reasoning_effort\": null,\r\n    \"tool_search\": null,\r\n    \"programmatic_tool_calling\": null\r\n  },\r\n  \"actor_source\": \"default\",\r\n  \"strategy\": {\r\n    \"task_class\": \"IMPLEMENT\",\r\n    \"strategy\": \"LONG_BUILD\",\r\n    \"why\": \"ordinary implementation is LONG_BUILD: one primary worker, no reflexive subagents; no helper justification was supplied, so helpers are 0\",\r\n    \"helper_justification\": null,\r\n    \"helper_ceiling\": 0,\r\n    \"max_subagent_depth\": 1,\r\n    \"recursive_helpers\": \"DENIED_BY_POLICY\",\r\n    \"depth_enforcement\": \"UNKNOWN\",\r\n    \"context_budget_class\": \"ORDINARY\",\r\n    \"context_budget_bytes\": 40960,\r\n    \"child_packet_ceiling_bytes\": 16384,\r\n    \"capabilities\": {\r\n      \"subagents\": null,\r\n      \"parallel_subagents\": null,\r\n      \"skills\": null,\r\n      \"structured_output\": null,\r\n      \"context_compaction\": null,\r\n      \"persistent_session\": null\r\n    },\r\n    \"unknown_capabilities\": [\r\n      \"subagents\",\r\n      \"parallel_subagents\",\r\n      \"skills\",\r\n      \"structured_output\",\r\n      \"context_compaction\",\r\n      \"persistent_session\"\r\n    ]\r\n  }\r\n}\r\n",
+  "stderr": "",
+  "stdout_sha256": "c76af0c6329fa9355a04f9a78fc1140f71809f366c919cc5fd17b3f0ffc3d415",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

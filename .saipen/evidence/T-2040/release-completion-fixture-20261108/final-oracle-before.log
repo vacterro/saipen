@@ -1,0 +1,42 @@
+test_r001_concurrent_index_is_never_restored_over (test_release_completion.ReleaseCompletionTests.test_r001_concurrent_index_is_never_restored_over) ... ok
+test_r001_shared_index_and_staged_manifest_are_exact (test_release_completion.ReleaseCompletionTests.test_r001_shared_index_and_staged_manifest_are_exact) ... ok
+test_r002_diverged_ancestry_is_reconciled_only_in_isolated_tree (test_release_completion.ReleaseCompletionTests.test_r002_diverged_ancestry_is_reconciled_only_in_isolated_tree) ... ok
+test_r003_only_exact_reviewed_bytes_and_deletions_transfer (test_release_completion.ReleaseCompletionTests.test_r003_only_exact_reviewed_bytes_and_deletions_transfer) ... ok
+test_r004_baseline_does_not_hide_new_red_or_incomplete_execution (test_release_completion.ReleaseCompletionTests.test_r004_baseline_does_not_hide_new_red_or_incomplete_execution) ... ok
+test_r004_focused_evidence_cannot_authorize_publication (test_release_completion.ReleaseCompletionTests.test_r004_focused_evidence_cannot_authorize_publication) ... ok
+test_r005_approval_packet_is_current_proposal_not_a_grant (test_release_completion.ReleaseCompletionTests.test_r005_approval_packet_is_current_proposal_not_a_grant) ... FAIL
+test_r005_unavailable_inventory_cannot_claim_protected_staging (test_release_completion.ReleaseCompletionTests.test_r005_unavailable_inventory_cannot_claim_protected_staging) ... FAIL
+test_r006_host_contract_does_not_prove_broker_availability (test_release_completion.ReleaseCompletionTests.test_r006_host_contract_does_not_prove_broker_availability) ... ok
+test_r007_confirm_tty_and_forged_carrier_never_authorize (test_release_completion.ReleaseCompletionTests.test_r007_confirm_tty_and_forged_carrier_never_authorize) ... ok
+test_r008_unapproved_release_is_held_and_dry_run_is_not_publication (test_release_completion.ReleaseCompletionTests.test_r008_unapproved_release_is_held_and_dry_run_is_not_publication) ... ok
+test_r009_local_closure_and_caller_prose_are_not_published (test_release_completion.ReleaseCompletionTests.test_r009_local_closure_and_caller_prose_are_not_published) ... ok
+test_r009_owner_requires_ticket_project_and_actual_remote_git (test_release_completion.ReleaseCompletionTests.test_r009_owner_requires_ticket_project_and_actual_remote_git) ... ok
+test_r010_exact_fixture_grant_survives_only_its_bound_policy_and_origin (test_release_completion.ReleaseCompletionTests.test_r010_exact_fixture_grant_survives_only_its_bound_policy_and_origin) ... ok
+test_r010_independent_work_is_claimed_despite_external_publication_hold (test_release_completion.ReleaseCompletionTests.test_r010_independent_work_is_claimed_despite_external_publication_hold) ... ok
+test_r010_state_prose_is_not_a_standing_maintenance_grant (test_release_completion.ReleaseCompletionTests.test_r010_state_prose_is_not_a_standing_maintenance_grant) ... ok
+
+======================================================================
+FAIL: test_r005_approval_packet_is_current_proposal_not_a_grant (test_release_completion.ReleaseCompletionTests.test_r005_approval_packet_is_current_proposal_not_a_grant)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_release_completion.py", line 357, in test_r005_approval_packet_is_current_proposal_not_a_grant
+    self.assertEqual(packet["paths_protected"], "1 staged paths in primary shared index")
+AssertionError: '864 staged paths in primary shared index' != '1 staged paths in primary shared index'
+- 864 staged paths in primary shared index
+? ^^^
++ 1 staged paths in primary shared index
+? ^
+
+
+======================================================================
+FAIL: test_r005_unavailable_inventory_cannot_claim_protected_staging (test_release_completion.ReleaseCompletionTests.test_r005_unavailable_inventory_cannot_claim_protected_staging)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_release_completion.py", line 362, in test_r005_unavailable_inventory_cannot_claim_protected_staging
+    with self.assertRaises(IsolatedReleaseError):
+AssertionError: IsolatedReleaseError not raised
+
+----------------------------------------------------------------------
+Ran 16 tests in 7.233s
+
+FAILED (failures=2)

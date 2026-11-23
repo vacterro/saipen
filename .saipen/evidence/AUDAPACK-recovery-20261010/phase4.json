@@ -1,0 +1,21 @@
+{
+  "checked_utc": "2026-10-10T16:09:21.742131+00:00",
+  "original_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "recovery_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+  "original_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "new_lineage": "lineage-0ee6b060c73040d2be567d123691d079",
+  "gates": {
+    "new_identity_and_binding": true
+  },
+  "commands": [],
+  "final_protocol": null,
+  "failure": "Traceback (most recent call last):\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\acceptance.py\", line 106, in main\n    before = inspect_protocol()\n             ^^^^^^^^^^^^^^^^^^\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\acceptance.py\", line 86, in inspect_protocol\n    \"ledger_errors\": ledger_errors, \"ledger_segments\": len(history.paths),\n                                                           ^^^^^^^^^^^^^\nAttributeError: 'HistorySnapshot' object has no attribute 'paths'\n",
+  "acceptance_pass": false,
+  "original_verdict": "NO_GO",
+  "recovery_verdict": "NO_GO",
+  "cutover": false,
+  "publication": false,
+  "consumer_agents_enabled": false,
+  "legacy_terminal_claims": "Unverified; preserved exclusively outside active authority",
+  "host_hook_limit": "CLI authority and native guard refusal are proved; no live-host blocking capability or OS sandbox is inferred."
+}

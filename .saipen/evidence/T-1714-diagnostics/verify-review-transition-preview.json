@@ -1,0 +1,22 @@
+{
+  "label": "verify-review-transition-preview",
+  "phase": "VERIFY",
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "transition",
+    "REVIEW",
+    "T-1714",
+    "--dry-run",
+    "--json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 1,
+  "duration_s": 0.75,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "{\r\n  \"ok\": false,\r\n  \"code\": \"INCOMPLETE_TICKET\",\r\n  \"op_id\": null,\r\n  \"changed_files\": [],\r\n  \"recovery_required\": false,\r\n  \"message\": \"VERIFY -> REVIEW requires explicit verification evidence for ticket T-1714 (got: Continuation evidence audit found STALE_REGRESSION_EVIDENCE on the prior executed pair although current source fingerprint remains 2df2566be72aeb7b. The preserved failed audit is verify-evidence-current.json; no production or historical evidence bytes changed. Remeasure the unchanged current oracle and original pre-fix subjects through work regression in the current runtime/environment before REVIEW. Existing full-family record is exact-generation evidence, not authority to bypass the stale regression gate.)\",\r\n  \"phase\": \"REVIEW\",\r\n  \"ticket\": \"T-1714\",\r\n  \"canonical_next_command\": \"saipen checkpoint RUN T-1714 \\\"verify -> PASS [target: T-1714] conf: high -- <the command that ran and what it reported>\\\"\",\r\n  \"detail\": \"VERIFY -> REVIEW requires explicit verification evidence for ticket T-1714 (got: Continuation evidence audit found STALE_REGRESSION_EVIDENCE on the prior executed pair although current source fingerprint remains 2df2566be72aeb7b. The preserved failed audit is verify-evidence-current.json; no production or historical evidence bytes changed. Remeasure the unchanged current oracle and original pre-fix subjects through work regression in the current runtime/environment before REVIEW. Existing full-family record is exact-generation evidence, not authority to bypass the stale regression gate.)\"\r\n}\r\n",
+  "stderr": "",
+  "stdout_sha256": "66b8c1250340ef075c1a47ccda5ed6ac9f8ec07ace29eefeebe54a2624917adf",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

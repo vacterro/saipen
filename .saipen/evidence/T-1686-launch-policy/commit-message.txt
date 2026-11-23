@@ -1,0 +1,6 @@
+fix(launch): honor strict operator policy
+
+Unproven runtime bytes must not bypass an operator's STRICT admission
+policy through the registry's default degraded launch branch.
+
+Refs T-1686

@@ -1,0 +1,112 @@
+{
+  "completed": [
+    {
+      "rid": "R001",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R001\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R002",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R002\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R003",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R003\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R004",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R004\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R005",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R005\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R006",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R006\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R007",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R007\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R008",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R008\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R009",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R009\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R010",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R010\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R011",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R011\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R012",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R012\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R013",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R013\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R014",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R014\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R015",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R015\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R016",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R016\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R017",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R017\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "rid": "R018",
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"COVERAGE_UPDATED\",\n  \"receipt\": \"SRC-212\",\n  \"rid\": \"SRC-212:R018\",\n  \"disposition\": \"VERIFIED\"\n}\n",
+      "stderr": ""
+    }
+  ]
+}

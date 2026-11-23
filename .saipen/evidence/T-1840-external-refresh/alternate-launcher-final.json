@@ -1,0 +1,8 @@
+{
+  "receipt": "EX-000013",
+  "receipt_runtime": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+  "observer_runtime": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "problems": [],
+  "regression_gate": null,
+  "original_EX000010_sha256": "d381db7b29f215bbe75a5ce5d0dcdef02f476c74b0e6fc40c2c7e004e00e8dad"
+}

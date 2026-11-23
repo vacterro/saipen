@@ -1,0 +1,10 @@
+selection for --changed tools/saipen_engine/fast_check.py: 0 of 272 controls
+instrumented run: exit 0, 338.1 s, executor constructions 0
+  SCOPED: 0 of 272 control(s) selected by --changed (1 path(s)). This is NOT the full sweep.
+  SCOPED: known limitation -- selection reads each control's DECLARED target file only. A control whose target is untouched but whose check reads a changed file indirectly -- a cross-document rule, a manifest, a schema another file is validated against -- is NOT selected and is NOT proven by this run
+  SCOPED: known limitation -- the always-on probes still run; only the per-control sweep is narrowed
+  SCOPED: no control declares any changed path as its target, so none ran. This proves nothing about the 272 control(s) that were not run, and is not audit_checks evidence for a checkpoint or a release.
+  AUDIT: 13 of 14 probes passed; failed: none; skipped: none; unproven (host capability): symlink-restore
+control run without the trap: exit 1, 261.3 s
+  AUDIT: 9 of 14 probes passed; failed: phase-rename, release-ledger, release-ledger-runtime-query, warn-slug-ownership; skipped: none; unproven (host capability): symlink-restore
+R011 END-TO-END: FAIL

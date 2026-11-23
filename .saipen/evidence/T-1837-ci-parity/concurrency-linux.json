@@ -1,0 +1,262 @@
+{
+  "scope": "frozen reduced real copy/shard/cleanup/membership corpus; not production suite",
+  "runtime": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "platform": "linux",
+  "modules": [
+    "test_hermetic_env.py",
+    "test_t1472_core_unit_shards.py",
+    "test_t1505_core_unit_sandbox_reclaim.py",
+    "test_t1830_verification_observations.py"
+  ],
+  "memory_peak_bytes": null,
+  "memory_note": "not measured; no CI memory sizing inferred",
+  "measurements": [
+    {
+      "requested_jobs": 1,
+      "actual_jobs": 1,
+      "wall_s": 3.719262,
+      "ran": 46,
+      "status": "PASS",
+      "same_scope_verified": true,
+      "timings_s": {
+        "shard_copy_wall_s": 0.0,
+        "environment_identity_wall_s": 0.059494,
+        "sweep_wall_s": 0.000559,
+        "copy_wall_s": 0.103261,
+        "hash_wall_s": 0.031039,
+        "execution_wall_s": 3.471913,
+        "cleanup_wall_s": 0.026614
+      },
+      "discovery_process_s": null,
+      "empty_shards": []
+    },
+    {
+      "requested_jobs": 2,
+      "actual_jobs": 2,
+      "wall_s": 2.437816,
+      "ran": 46,
+      "status": "PASS",
+      "same_scope_verified": true,
+      "timings_s": {
+        "shard_copy_wall_s": 0.114489,
+        "environment_identity_wall_s": 0.054151,
+        "sweep_wall_s": 0.000169,
+        "copy_wall_s": 0.080824,
+        "hash_wall_s": 0.033314,
+        "execution_wall_s": 2.110041,
+        "cleanup_wall_s": 0.04304
+      },
+      "discovery_process_s": 0.19,
+      "empty_shards": []
+    },
+    {
+      "requested_jobs": 4,
+      "actual_jobs": 4,
+      "wall_s": 2.606294,
+      "ran": 46,
+      "status": "PASS",
+      "same_scope_verified": true,
+      "timings_s": {
+        "shard_copy_wall_s": 0.227183,
+        "environment_identity_wall_s": 0.053284,
+        "sweep_wall_s": 0.000174,
+        "copy_wall_s": 0.098174,
+        "hash_wall_s": 0.036114,
+        "execution_wall_s": 2.099292,
+        "cleanup_wall_s": 0.089716
+      },
+      "discovery_process_s": 0.464045,
+      "empty_shards": []
+    }
+  ],
+  "source_fingerprint": "a6de20efb328615618b485cd1b10d8932b588f51055c43fa12dd34471f7243f0",
+  "inventory_sha256": "fda11a63c14ef1b055c7605d444fd311e1a23d7867a46849d0d02ddf282d1e16",
+  "inventory": [
+    [
+      "test_hermetic_env.HermeticEnvironmentTests.test_a_child_process_sees_no_outer_binding",
+      "test_hermetic_env"
+    ],
+    [
+      "test_hermetic_env.HermeticEnvironmentTests.test_every_engine_binding_carrier_is_stripped",
+      "test_hermetic_env"
+    ],
+    [
+      "test_hermetic_env.HermeticEnvironmentTests.test_hermetic_env_strips_every_carrier_and_keeps_overrides",
+      "test_hermetic_env"
+    ],
+    [
+      "test_t1472_core_unit_shards.MergeTests.test_a_shard_that_never_reported_refuses",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.MergeTests.test_a_timed_out_shard_times_out_the_run",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.MergeTests.test_one_inconsistent_shard_refuses_a_union_that_looks_consistent",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.MergeTests.test_shards_that_discovered_different_families_refuse",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.MergeTests.test_shards_that_kept_fewer_tests_than_discovered_refuse",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.MergeTests.test_two_consistent_shards_are_one_pass",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.PlanTests.test_a_shard_with_no_module_is_never_planned",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.PlanTests.test_every_module_lands_in_exactly_one_shard",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.PlanTests.test_longest_modules_are_spread_and_the_plan_is_deterministic",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.PlanTests.test_only_the_declared_discovery_shape_is_sharded",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.RealShardedRunTests.test_a_deliberate_red_in_a_sharded_run_is_a_new_red",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.RealShardedRunTests.test_a_record_of_a_sharded_run_keeps_the_partition_proof",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.RealShardedRunTests.test_measured_durations_balance_the_next_run",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1472_core_unit_shards.RealShardedRunTests.test_shards_and_the_whole_run_agree",
+      "test_t1472_core_unit_shards"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.HeldSandboxTests.test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.HeldSandboxTests.test_temporary_directory_raises_and_leaves_a_held_sandbox_forever",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.HeldSandboxTests.test_waiting_for_a_sweep_never_reclaims_a_live_owner",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.ReclaimTests.test_plain_rmtree_cannot_remove_a_read_only_store",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.ReclaimTests.test_reclaim_of_a_missing_tree_is_done",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.ReclaimTests.test_reclaim_removes_a_read_only_store",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_a_sharded_run_leaves_no_sandbox",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_a_whole_run_leaves_no_sandbox",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_an_unreported_own_leak_is_still_detected_including_the_last_shard",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_unrelated_sandboxes_before_and_during_a_run_are_not_its_leaks",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_corrupt_stamp_is_left_alone",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_dead_owners_sandbox_is_reclaimed",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_live_owners_sandbox_is_kept",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_new_sandbox_names_the_project_it_belongs_to",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_real_family_stamps_the_child_reading_the_tree",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_sandbox_of_another_project_is_never_swept",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_sandbox_of_this_project_with_no_live_reader_is_swept",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_sandbox_whose_family_child_is_still_reading_is_kept",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.SweepTests.test_an_unstamped_sandbox_waits_for_the_legacy_age",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.SweepTests.test_liveness_of_self_and_of_nothing",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1505_core_unit_sandbox_reclaim.SweepTests.test_nothing_outside_the_prefix_is_touched",
+      "test_t1505_core_unit_sandbox_reclaim"
+    ],
+    [
+      "test_t1830_verification_observations.ExactMembershipTests.test_equal_counts_cannot_hide_a_duplicate_and_an_omission",
+      "test_t1830_verification_observations"
+    ],
+    [
+      "test_t1830_verification_observations.ExactMembershipTests.test_equal_counts_with_different_test_inventory_refuse",
+      "test_t1830_verification_observations"
+    ],
+    [
+      "test_t1830_verification_observations.ExactMembershipTests.test_every_occurrence_exactly_once_passes",
+      "test_t1830_verification_observations"
+    ],
+    [
+      "test_t1830_verification_observations.ExactMembershipTests.test_legacy_discovery_cost_is_unknown_not_zero",
+      "test_t1830_verification_observations"
+    ],
+    [
+      "test_t1830_verification_observations.ExactMembershipTests.test_missing_or_invalid_membership_fails_closed",
+      "test_t1830_verification_observations"
+    ],
+    [
+      "test_t1830_verification_observations.RealObservationTests.test_actual_serial_and_sharded_runs_keep_verdict_and_timing_scope",
+      "test_t1830_verification_observations"
+    ],
+    [
+      "test_t1830_verification_observations.RealObservationTests.test_copy_reports_actual_phases_and_preserves_all_bytes",
+      "test_t1830_verification_observations"
+    ],
+    [
+      "test_t1830_verification_observations.RealObservationTests.test_new_test_and_import_failure_stay_in_exact_inventory",
+      "test_t1830_verification_observations"
+    ]
+  ],
+  "source_files": 153,
+  "source_bytes": 5524306
+}

@@ -1,0 +1,152 @@
+test_a_forged_terminal_status_is_not_visible_through_read (test_t1892_one_decoder.RefusedSidecarTests.test_a_forged_terminal_status_is_not_visible_through_read)
+The measured defect: the pre-fix projection reported 'COMMITTED'. ... ok
+test_a_legitimate_sidecar_still_merges (test_t1892_one_decoder.LegitimateSidecarTests.test_a_legitimate_sidecar_still_merges) ... ok
+test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.048s
+
+OK
+test_a_forged_terminal_status_is_not_visible_through_read (test_t1892_one_decoder.RefusedSidecarTests.test_a_forged_terminal_status_is_not_visible_through_read)
+The measured defect: the pre-fix projection reported 'COMMITTED'. ... FAIL
+test_a_legitimate_sidecar_still_merges (test_t1892_one_decoder.LegitimateSidecarTests.test_a_legitimate_sidecar_still_merges) ... ok
+test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) ... 
+  test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='invalid JSON') ... FAIL
+  test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='not a JSON object') ... FAIL
+  test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='status outside the closed set') ... FAIL
+  test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='progress_index not an integer') ... FAIL
+  test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='progress_index out of range') ... FAIL
+  test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='applied_frontier not an integer') ... FAIL
+  test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='applied_frontier out of range') ... FAIL
+  test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='terminal over an unresolved manifest') ... FAIL
+
+======================================================================
+FAIL: test_a_forged_terminal_status_is_not_visible_through_read (test_t1892_one_decoder.RefusedSidecarTests.test_a_forged_terminal_status_is_not_visible_through_read)
+The measured defect: the pre-fix projection reported 'COMMITTED'.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1892_one_decoder.py", line 170, in test_a_forged_terminal_status_is_not_visible_through_read
+    self.assertEqual(self.read_verdict(), "RECOVERY_CONFLICT")
+AssertionError: 'OK' != 'RECOVERY_CONFLICT'
+- OK
++ RECOVERY_CONFLICT
+
+
+======================================================================
+FAIL: test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='invalid JSON')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1892_one_decoder.py", line 146, in test_every_decoder_refusal_is_read_s_refusal
+    self.assertEqual(
+AssertionError: 'OK' != 'RECOVERY_CONFLICT'
+- OK
++ RECOVERY_CONFLICT
+ : invalid JSON: read() must refuse with the decoder's code
+
+======================================================================
+FAIL: test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='not a JSON object')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1892_one_decoder.py", line 146, in test_every_decoder_refusal_is_read_s_refusal
+    self.assertEqual(
+AssertionError: 'OK' != 'RECOVERY_CONFLICT'
+- OK
++ RECOVERY_CONFLICT
+ : not a JSON object: read() must refuse with the decoder's code
+
+======================================================================
+FAIL: test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='status outside the closed set')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1892_one_decoder.py", line 146, in test_every_decoder_refusal_is_read_s_refusal
+    self.assertEqual(
+AssertionError: 'OK' != 'VALIDATION_FAILED'
+- OK
++ VALIDATION_FAILED
+ : status outside the closed set: read() must refuse with the decoder's code
+
+======================================================================
+FAIL: test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='progress_index not an integer')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1892_one_decoder.py", line 146, in test_every_decoder_refusal_is_read_s_refusal
+    self.assertEqual(
+AssertionError: 'OK' != 'VALIDATION_FAILED'
+- OK
++ VALIDATION_FAILED
+ : progress_index not an integer: read() must refuse with the decoder's code
+
+======================================================================
+FAIL: test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='progress_index out of range')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1892_one_decoder.py", line 146, in test_every_decoder_refusal_is_read_s_refusal
+    self.assertEqual(
+AssertionError: 'OK' != 'VALIDATION_FAILED'
+- OK
++ VALIDATION_FAILED
+ : progress_index out of range: read() must refuse with the decoder's code
+
+======================================================================
+FAIL: test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='applied_frontier not an integer')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1892_one_decoder.py", line 146, in test_every_decoder_refusal_is_read_s_refusal
+    self.assertEqual(
+AssertionError: 'OK' != 'VALIDATION_FAILED'
+- OK
++ VALIDATION_FAILED
+ : applied_frontier not an integer: read() must refuse with the decoder's code
+
+======================================================================
+FAIL: test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='applied_frontier out of range')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1892_one_decoder.py", line 146, in test_every_decoder_refusal_is_read_s_refusal
+    self.assertEqual(
+AssertionError: 'OK' != 'VALIDATION_FAILED'
+- OK
++ VALIDATION_FAILED
+ : applied_frontier out of range: read() must refuse with the decoder's code
+
+======================================================================
+FAIL: test_every_decoder_refusal_is_read_s_refusal (test_t1892_one_decoder.RefusedSidecarTests.test_every_decoder_refusal_is_read_s_refusal) (shape='terminal over an unresolved manifest')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1892_one_decoder.py", line 146, in test_every_decoder_refusal_is_read_s_refusal
+    self.assertEqual(
+AssertionError: 'OK' != 'RECOVERY_CONFLICT'
+- OK
++ RECOVERY_CONFLICT
+ : terminal over an unresolved manifest: read() must refuse with the decoder's code
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.032s
+
+FAILED (failures=9)
+test_a_legitimate_sidecar_still_merges (test_t1892_one_decoder.LegitimateSidecarTests.test_a_legitimate_sidecar_still_merges) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.008s
+
+OK
+======================================================================
+1. CURRENT TREE -- the three assertions must pass
+======================================================================
+
+======================================================================
+2. PRE-FIX read()/fold_progress() -- the refusal tests must FAIL
+======================================================================
+
+======================================================================
+3. LEGITIMATE-MERGE CONTROL -- must still pass pre-fix
+======================================================================
+
+======================================================================
+VERDICT
+======================================================================
+current tree green            : True
+pre-fix tree green            : False
+pre-fix legitimate merge green: True
+
+CONTROL OK -- the refusals are the fix, not the harness.

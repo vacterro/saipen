@@ -1,0 +1,13 @@
+test_every_hook_artifact_exists_on_disk (__main__.EveryDeclaredArtifactIsARepositoryFile.test_every_hook_artifact_exists_on_disk) ... ok
+test_every_hook_artifact_is_tracked_when_this_is_a_repository (__main__.EveryDeclaredArtifactIsARepositoryFile.test_every_hook_artifact_is_tracked_when_this_is_a_repository)
+SRC-342 R007. The defect: zaicode/ declared, present, untracked. ... ok
+test_the_zaicode_artifact_is_the_one_the_registry_names (__main__.EveryDeclaredArtifactIsARepositoryFile.test_the_zaicode_artifact_is_the_one_the_registry_names)
+The specific declaration this ticket measured, pinned by name. ... ok
+test_every_adapter_artifact_shares_one_tracking_state (__main__.NoSiblingIsRegisteredButUntracked.test_every_adapter_artifact_shares_one_tracking_state) ... ok
+test_every_declared_artifact_is_a_path_git_can_track (__main__.NoSiblingIsRegisteredButUntracked.test_every_declared_artifact_is_a_path_git_can_track)
+A `hook_artifact` outside the repository root could not be shipped. ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.227s
+
+OK

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-420:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "MODE2 companion: audit no-work fixed point automation projection (status/continue/crew dry-run), reproduce crew loop defect before any code change"
+    }
+  },
+  "derived_at": "2026-11-17T11:42:02Z",
+  "derived_from": "SRC-420",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "1546b3436d473ba95b6b413db10657cdddb5be8358aab15db6517a850af00daa"
+}

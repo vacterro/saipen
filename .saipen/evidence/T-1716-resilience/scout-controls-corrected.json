@@ -1,0 +1,19 @@
+{
+  "label": "scout-controls-corrected",
+  "phase": "SCOUT",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    ".saipen/evidence/T-1716-resilience/controls.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 1.75,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "{\"passed\": true, \"artifact\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\T-1716-resilience\\\\controls.json\", \"production_unchanged\": true}\r\n",
+  "stderr": "",
+  "stdout_sha256": "c0b4c55f8cd31a01583ef9c33a0de3cf44d96fadc949fb793bb53f715b847065",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

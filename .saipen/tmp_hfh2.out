@@ -1,0 +1,4 @@
+tools\test_t1635_claude_profiles.py
+tools\saipen_engine\host_authority_broker.py
+tools\saipen_engine\host_authority_client.py
+tools\saipen_engine\host_authority_identity.py

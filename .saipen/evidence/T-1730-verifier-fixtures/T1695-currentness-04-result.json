@@ -1,0 +1,21 @@
+{
+  "command": [
+    "C:\\Windows\\system32\\cmd.exe",
+    "/d",
+    "/c",
+    "bin\\saipen.cmd",
+    "work",
+    "contracts",
+    "T-1695",
+    "--limit",
+    "3",
+    "--json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "started_utc": "2026-10-12T20:27:57.330150+00:00",
+  "runner_pid": 36632,
+  "child_pid": 17840,
+  "exit_code": 0,
+  "elapsed_s": 0.641,
+  "finished_utc": "2026-10-12T20:27:57.973304+00:00"
+}

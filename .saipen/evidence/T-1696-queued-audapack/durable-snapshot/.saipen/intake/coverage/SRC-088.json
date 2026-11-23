@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-088:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-238 closed with verification evidence in LOG: verify -> PASS conf: high -- focused prepared/single_instance/recovery 178 PASS; ruff clean on prepared*.py; compileall rc=0; SRC-086 48/203 + SRC-087 17/79 VERIFIED coverage; GPT Reserve/Luna honest fallback present. Live-provider soak stays gated (operator observation, not code defect).",
+      "text": "Satisfy the captured request SRC-088 in full; the authoritative text is the receipt body (sha256 99c80950aced): \u0410, \u0434\u043e\u0431\u0430\u0432\u044c \u0435\u0449\u0435 GPT Reserve \u0434\u043b\u044f \u043a\u043e\u0434\u0435\u043a\u0441\u0442\u0430 \u0435\u0441\u043b\u0438 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e \u0442\u043e\u0436\u0435 \u043a\u0430\u043a \u043a\u043d\u043e\u043f\u043a\u0443 \u0431\u043e\u043d\u0443\u0441\u043d\u0443\u044e \u0443 \u043f\u0440\u043e\u0435\u043a\u0442\u0430 \u0447\u0442\u043e \u043e\u0442\u043a\u0440\u044b\u0432\u0430\u0442\u044c \u0441\u0440\u0430\u0437\u0443 \u0441 \u0440\u0435\u0437\u0435\u0440\u0432\u0430. --json",
+      "verification": "the Work this request created reached its own verification gate; see the T-238 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-238"
+    }
+  },
+  "schema_version": 1
+}

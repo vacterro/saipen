@@ -1,0 +1,11 @@
+{
+  "raw": "---\nphase: DONE\ntask: none\n---\n",
+  "parsed": {
+    "phase": "CORRUPT",
+    "corrupt_detail": "missing required field next_action; missing required field blocker; missing required field agent; missing required field saipen_version; missing required field mode; missing required field updated; missing transition_from -- required on all non-INIT states to validate phase transitions (RFC \u00a7 1.6)"
+  },
+  "strict": [
+    null,
+    "missing required field next_action; missing required field blocker; missing required field agent; missing required field saipen_version; missing required field mode; missing required field updated; missing transition_from -- required on all non-INIT states to validate phase transitions (RFC \u00a7 1.6)"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-v",
+    "--tb=short",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_release_reconciliation.py",
+    "tools/test_release_completion.py",
+    "tools/test_t2040_publication_truth.py"
+  ],
+  "exit_code": 0,
+  "started_at": "2026-11-09T20:51:56.709905+00:00",
+  "before": {
+    "tools/test_release_reconciliation.py": "ca626aafbf9a9ef3ff3bc80a076c82324636f4de81b86be35093547b81cd30ec",
+    "tools/test_release_completion.py": "4b3052073fd8b9b8edb078cc3f440231c15e93fe652c95f4d9de40e7432c91c7",
+    "tools/test_t2040_publication_truth.py": "fd447a2b169afe99b2996cefc4f8b20031f7ad1b19d850832b2e00c7510901f0"
+  },
+  "after": {
+    "tools/test_release_reconciliation.py": "ca626aafbf9a9ef3ff3bc80a076c82324636f4de81b86be35093547b81cd30ec",
+    "tools/test_release_completion.py": "4b3052073fd8b9b8edb078cc3f440231c15e93fe652c95f4d9de40e7432c91c7",
+    "tools/test_t2040_publication_truth.py": "fd447a2b169afe99b2996cefc4f8b20031f7ad1b19d850832b2e00c7510901f0"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-431:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Autonomous SAIPEN optimization campaign MODE 2: build reproducible performance baseline, find and measure remaining bottlenecks, implement minimal safe optimizations with RED/GREEN oracles and regression gates, waves O0-O7, continue until measured saturation"
+    }
+  },
+  "derived_at": "2026-11-22T01:28:31Z",
+  "derived_from": "SRC-431",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "2068afe4a0dde601f89bff9b4cf22efd70423293c98487b27a18a196d143b13b"
+}

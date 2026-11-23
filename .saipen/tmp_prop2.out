@@ -1,0 +1,24 @@
+continuous_maintenance OK
+{
+ "kind": "saipen-goal-continuation",
+ "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+ "continuation_authority": "operator_persistent",
+ "authority_source": "E-11872",
+ "authority_until": "continuous_maintenance",
+ "safety_valve_mode": "checkpoint",
+ "goal_objective": "T-1599 (SRC-164): test1",
+ "goal_event_sha256": "55602d3c2f0462ce166c716208d2838a4f83328417bcc4cc451c69fe1340f70e",
+ "goal_ingress": "goal-022b1e3f052e9be1"
+}
+goal_complete OK
+{
+ "kind": "saipen-goal-continuation",
+ "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+ "continuation_authority": "operator_persistent",
+ "authority_source": "E-11872",
+ "authority_until": "goal_complete",
+ "safety_valve_mode": "checkpoint",
+ "goal_objective": "T-1599 (SRC-164): test1",
+ "goal_event_sha256": "55602d3c2f0462ce166c716208d2838a4f83328417bcc4cc451c69fe1340f70e",
+ "goal_ingress": "goal-022b1e3f052e9be1"
+}

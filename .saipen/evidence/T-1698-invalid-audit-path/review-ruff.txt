@@ -1,0 +1,19 @@
+F401 [*] `.log.read_history_snapshot` imported but unused
+    --> tools\saipen_engine\subs.py:4169:61
+     |
+4167 |     from .board import escape_ticket_description, parse_board
+4168 |     from .fast_check import validate_texts
+4169 |     from .log import log_tail_event, prepare_bounded_event, read_history_snapshot
+     |                                                             ^^^^^^^^^^^^^^^^^^^^^
+4170 |     from .operations import next_ticket_id
+     |
+help: Remove unused import: `.log.read_history_snapshot`
+     |
+4168 |     from .fast_check import validate_texts
+     -     from .log import log_tail_event, prepare_bounded_event, read_history_snapshot
+4169 +     from .log import log_tail_event, prepare_bounded_event
+4170 |     from .operations import next_ticket_id
+     |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

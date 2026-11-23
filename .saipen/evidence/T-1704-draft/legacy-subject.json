@@ -1,0 +1,42 @@
+{
+  "recorded_utc": "2026-10-10T10:13:37.866650+00:00",
+  "baseline": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+  "files": [
+    {
+      "path": "tools/saipen_engine/goal_authority.py",
+      "draft_before_sha256": "297b69017222fb2d8f7814bcbd6d1d3cde55f1f0e47b10516a208f875c3281e9",
+      "after_sha256": "0a0b32e8712a2bdeca5d581373fc7a64f38e5ff0a3cbd08f46bf7cf28ed735fc"
+    },
+    {
+      "path": "tools/saipen_engine/operations.py",
+      "draft_before_sha256": "d0a3ea67cc7a1d9d168ba1d9aa9028b4c31bc71875496847aaf259d57f58c1a1",
+      "after_sha256": "126189fa0b3a84eea4e430cda8bded676cf578387a86abee700b49f1e6f98256"
+    },
+    {
+      "path": "tools/saipen_engine/journal.py",
+      "draft_before_sha256": "b1987c8e1d1be15fa44ea2646ac7fb377af5facd8be03884076c348c479260fd",
+      "after_sha256": "3375ddd84f33f5d73d5c41e5bd92cf424cb1af737b20677f9cc5afa599fef625"
+    },
+    {
+      "path": "tools/saipen.py",
+      "draft_before_sha256": "8e43b4749f0dca94853056e90b84e0730b2f678dd5e3082b96435165bddab148",
+      "after_sha256": "15fdfd5c7d4077fd397ea26ea4cafc417de41cf5c445ed47b97bc1b72be0f849"
+    },
+    {
+      "path": "saipen/MAINTENANCE.md",
+      "draft_before_sha256": "29d5fc7441195b1ef05bbc9bdc2596bb5b93781ef4559e92703b66e413b7893b",
+      "after_sha256": "56740dad22642f4a4e7a2d7a177de5796740caac0f02d6c02da65f519166589e"
+    },
+    {
+      "path": "saipen/OPS.md",
+      "draft_before_sha256": "4a89109f3d87a9c0d9a51e2d53df9286be205ff2b48592b54aa079eb5dfe2f22",
+      "after_sha256": "c3cdc235cf44ff83318095f896f9deb18a41e3b1417443c510d04d570a6271d0"
+    },
+    {
+      "path": "tools/test_t1704_legacy_goal_authority.py",
+      "draft_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "after_sha256": "acd22a3374567644c060a46b2ac91fdc53b21595326a03d3954aee589b9bbb2a"
+    }
+  ],
+  "patch_sha256": "13d0df275b0b7d24699bba98e4ced0a632aeb5e8379e4182ba5342f7a7fcb71a"
+}

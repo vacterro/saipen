@@ -1,0 +1,4 @@
+HOOK_BOOTSTRAP = 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)'
+installed -c program = 'import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)'
+MATCH: True
+DEFAULT_ENGINE_ENTRIES: None

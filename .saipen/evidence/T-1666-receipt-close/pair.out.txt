@@ -1,0 +1,7 @@
+CONTROL unmutated copy: exit 0, Ran 6 tests
+command: python -B -m unittest test_t1666_receipt_close (cwd tools/)
+verifier:fbe1d22b323173f5  (tools/test_t1666_receipt_close.py, byte-identical in both trees)
+FAIL subject:5902dbbbfeb81f51  exit 1  red 6: test_a_receipt_an_audit_layer_is_bound_to_is_left_to_audit_ingest, test_a_receipt_that_never_produced_work_is_not_swept, test_a_receipt_whose_work_is_still_open_stays_active, test_entering_clean_closes_what_an_older_engine_left_open, test_the_last_clause_reaching_its_disposition_closes_its_receipt, test_the_last_work_reaching_done_closes_its_receipt
+PASS subject:6ebc9491c37af3d3  exit 0  Ran 6 tests
+held: True
+rc=0

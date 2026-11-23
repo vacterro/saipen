@@ -1,0 +1,31 @@
+__SAITULS                        PROJECT_BLOCK_ABSENT   files: - | outside: -
+_TEMP_SAITULS_SNAPSHOT           PROJECT_BLOCK_ABSENT   files: - | outside: -
+__SAIMAIL__                      PROJECT_BLOCK_ABSENT   files: - | outside: -
+__TERMISAI                       PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SAICONT                         PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SAIPAL                          PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SAIPEN                          PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SAIPET                          PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SAIRELAY                        PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SAITALK                         PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SAIWORK2                        PROJECT_BLOCK_ABSENT   files: AGENTS.md=ABSENT | outside: -
+_ZAICODE                         PROJECT_BLOCK_ABSENT   files: AGENTS.md=ABSENT, CLAUDE.md=ABSENT | outside: -
+_9router_extra                   PROJECT_BLOCK_ABSENT   files: - | outside: -
+_AUDAPACK                        PROJECT_BLOCK_STALE    files: AGENTS.md=STALE, CLAUDE.md=ABSENT, GEMINI.md=ABSENT | outside: -
+_AUDAPACK-pub                    PROJECT_BLOCK_ABSENT   files: - | outside: -
+_FastPrompter                    PROJECT_BLOCK_ABSENT   files: AGENTS.md=ABSENT | outside: AGENTS.md:9 per-user-skill-home
+_FP_rel_wt_0926                  PROJECT_BLOCK_ABSENT   files: AGENTS.md=ABSENT | outside: AGENTS.md:9 per-user-skill-home
+_LIMISAW                         PROJECT_BLOCK_ABSENT   files: - | outside: -
+_PROBLIP                         PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SAIMASTER                       PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SAIPENVIEW                      PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SAIPLAN                         PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SAISENT                         PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SMART_VAC_CLEANER               PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SMART_VAC_DUPLICATE_REMOVER     PROJECT_BLOCK_ABSENT   files: - | outside: -
+_SMART_VAC_MEDIA_COMPRESSOR      PROJECT_BLOCK_ABSENT   files: - | outside: -
+_VacWPlayer                      PROJECT_BLOCK_ABSENT   files: - | outside: -
+_VACZEN_CALENDAR                 PROJECT_BLOCK_ABSENT   files: - | outside: -
+Gemini-CLI-UI                    PROJECT_BLOCK_ABSENT   files: - | outside: -
+
+projects: 29 | PROJECT_BLOCK_ABSENT 28, PROJECT_BLOCK_STALE 1

@@ -1,0 +1,39 @@
+test_an_unchanged_committed_finding_is_still_suppressed (test_t1969_finding_revision_identity.ChangedFindingUnderSameIdTests.test_an_unchanged_committed_finding_is_still_suppressed) ... ok
+test_changed_bytes_under_a_committed_id_are_still_yielded (test_t1969_finding_revision_identity.ChangedFindingUnderSameIdTests.test_changed_bytes_under_a_committed_id_are_still_yielded) ... FAIL
+test_a_legacy_row_does_not_suppress_a_different_corpus (test_t1969_finding_revision_identity.LegacyAckScopingTests.test_a_legacy_row_does_not_suppress_a_different_corpus) ... FAIL
+test_a_scoped_row_still_suppresses_its_own_corpus (test_t1969_finding_revision_identity.LegacyAckScopingTests.test_a_scoped_row_still_suppresses_its_own_corpus) ... ok
+
+======================================================================
+FAIL: test_changed_bytes_under_a_committed_id_are_still_yielded (test_t1969_finding_revision_identity.ChangedFindingUnderSameIdTests.test_changed_bytes_under_a_committed_id_are_still_yielded)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1969_finding_revision_identity.py", line 147, in test_changed_bytes_under_a_committed_id_are_still_yielded
+    self.assertEqual(
+AssertionError: Lists differ: [] != ['PAL-1']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'PAL-1'
+
+- []
++ ['PAL-1'] : a revised finding under a committed id was suppressed by the walk; the allocator would have accepted the new bytes as a new operation but the walk never asked it
+
+======================================================================
+FAIL: test_a_legacy_row_does_not_suppress_a_different_corpus (test_t1969_finding_revision_identity.LegacyAckScopingTests.test_a_legacy_row_does_not_suppress_a_different_corpus)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1969_finding_revision_identity.py", line 189, in test_a_legacy_row_does_not_suppress_a_different_corpus
+    self.assertEqual(
+AssertionError: Lists differ: [] != ['PAL-1']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'PAL-1'
+
+- []
++ ['PAL-1'] : a legacy ack row carrying no source digest suppressed an id in a DIFFERENT corpus; an unscoped row must be scoped through an authoritative destination receipt, not trusted for every report
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.072s
+
+FAILED (failures=2)

@@ -1,0 +1,24 @@
+test_a_goal_source_cannot_reset_a_later_bounded_budget (test_t1844_goal_turns.BoundBudgetEpoch.test_a_goal_source_cannot_reset_a_later_bounded_budget) ... FAIL
+test_a_changed_model_cannot_use_the_old_goal_registration (test_t1844_goal_turns.NativeGoalTurns.test_a_changed_model_cannot_use_the_old_goal_registration) ... ok
+test_a_changed_provider_cannot_use_the_old_goal_registration (test_t1844_goal_turns.NativeGoalTurns.test_a_changed_provider_cannot_use_the_old_goal_registration) ... ok
+test_a_different_budget_epoch_is_not_session_membership (test_t1844_goal_turns.NativeGoalTurns.test_a_different_budget_epoch_is_not_session_membership) ... ok
+test_a_revoked_next_event_does_not_delegate_the_goal (test_t1844_goal_turns.NativeGoalTurns.test_a_revoked_next_event_does_not_delegate_the_goal) ... ok
+test_an_event_from_another_goal_epoch_is_not_session_membership (test_t1844_goal_turns.NativeGoalTurns.test_an_event_from_another_goal_epoch_is_not_session_membership) ... ok
+test_another_registered_session_cannot_borrow_the_goal (test_t1844_goal_turns.NativeGoalTurns.test_another_registered_session_cannot_borrow_the_goal) ... ok
+test_native_new_objective_can_pivot_from_its_same_session_goal (test_t1844_goal_turns.NativeGoalTurns.test_native_new_objective_can_pivot_from_its_same_session_goal) ... ok
+test_native_repeat_of_the_same_goal_is_a_zero_write_semantic_retry (test_t1844_goal_turns.NativeGoalTurns.test_native_repeat_of_the_same_goal_is_a_zero_write_semantic_retry) ... ok
+test_next_genuine_same_session_event_preserves_the_committed_goal_without_writes (test_t1844_goal_turns.NativeGoalTurns.test_next_genuine_same_session_event_preserves_the_committed_goal_without_writes) ... ok
+test_same_session_continuation_survives_both_delivery_expiries (test_t1844_goal_turns.NativeGoalTurns.test_same_session_continuation_survives_both_delivery_expiries) ... ok
+
+======================================================================
+FAIL: test_a_goal_source_cannot_reset_a_later_bounded_budget (test_t1844_goal_turns.BoundBudgetEpoch.test_a_goal_source_cannot_reset_a_later_bounded_budget)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_t1844_goal_turns.py", line 170, in test_a_goal_source_cannot_reset_a_later_bounded_budget
+    self.assertFalse(after["reset_bounded_authority"], after)
+AssertionError: True is not false : {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'gate_decision': False, 'retirement': False, 'claim_handoff': False, 'amend_work': False, 'work_supersession': False, 'external_action': False}
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.938s
+
+FAILED (failures=1)

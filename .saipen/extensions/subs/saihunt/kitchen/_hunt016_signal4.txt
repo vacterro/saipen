@@ -1,0 +1,8 @@
+== signal4 exact-string census
+5
+-- in tools/saipen_engine
+3
+-- in tools/ outside engine
+5
+== any bare 'except:' with pass
+0

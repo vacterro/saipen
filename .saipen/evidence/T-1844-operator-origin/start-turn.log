@@ -1,0 +1,715 @@
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task='fix the drag handler in V:\\_TEMP_\\fastprompter_drag\\SAIPENVIEW_main.py')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-002",
+  "ticket": "T-2",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-2 recorded in queue",
+  "detail": "user request recorded as T-2 (SRC-002); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-2 (SRC-002), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-2; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task='fix V:\\repo\\file.py')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-003",
+  "ticket": "T-3",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-3 recorded in queue",
+  "detail": "user request recorded as T-3 (SRC-003); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-3 (SRC-003), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-3; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task='fix $HOME handling')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-004",
+  "ticket": "T-4",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-4 recorded in queue",
+  "detail": "user request recorded as T-4 (SRC-004); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-4 (SRC-004), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-4; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task='allow A&B')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-005",
+  "ticket": "T-5",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-5 recorded in queue",
+  "detail": "user request recorded as T-5 (SRC-005); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-5 (SRC-005), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-5; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task='support 50% threshold')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-006",
+  "ticket": "T-6",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-6 recorded in queue",
+  "detail": "user request recorded as T-6 (SRC-006); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-6 (SRC-006), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-6; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task='ratio 3:4 handling')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-007",
+  "ticket": "T-7",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-7 recorded in queue",
+  "detail": "user request recorded as T-7 (SRC-007); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-7 (SRC-007), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-7; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task='������ ������ �� ���������')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-008",
+  "ticket": "T-8",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-8 recorded in queue",
+  "detail": "user request recorded as T-8 (SRC-008); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-8 (SRC-008), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-8; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task='paranda sisselogimise viga tootekaardil')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-009",
+  "ticket": "T-9",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-9 recorded in queue",
+  "detail": "user request recorded as T-9 (SRC-009); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-9 (SRC-009), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-9; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task="fix the user's profile page")
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-010",
+  "ticket": "T-10",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-10 recorded in queue",
+  "detail": "user request recorded as T-10 (SRC-010); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-10 (SRC-010), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-10; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task='fix the "quoted" label')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-011",
+  "ticket": "T-11",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-11 recorded in queue",
+  "detail": "user request recorded as T-11 (SRC-011); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-11 (SRC-011), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-11; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task='expand %USERPROFILE% correctly')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-012",
+  "ticket": "T-12",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-12 recorded in queue",
+  "detail": "user request recorded as T-12 (SRC-012); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-12 (SRC-012), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-12; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task='handle the trailing separator in a path like C:\\tmp\\')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-013",
+  "ticket": "T-13",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-13 recorded in queue",
+  "detail": "user request recorded as T-13 (SRC-013); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-13 (SRC-013), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-13; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_the_hex_transport_carries_every_required_alphabet (test_t1363_zero_manual_entry.IngressGrammarTests.test_the_hex_transport_carries_every_required_alphabet) (task='first line\nsecond line')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 798, in test_the_hex_transport_carries_every_required_alphabet
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-wq3_ocd4",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-014",
+  "ticket": "T-14",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-1",
+  "ownership_boundary": "active Work T-1 retains execution seat; new request T-14 recorded in queue",
+  "detail": "user request recorded as T-14 (SRC-014); unrelated active Work T-1 is not preempted; execute next_action for T-1",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-14 (SRC-014), but active Work T-1 retains the execution seat. Do not claim or mutate source for T-14; execute PHASE SCOUT T-1 for T-1."
+}
+
+
+======================================================================
+FAIL: test_a_refusal_is_never_reproduced_by_the_command_it_names (test_t1363_zero_manual_entry.LiveTranscriptConvergenceTests.test_a_refusal_is_never_reproduced_by_the_command_it_names) (project='valve_and_blocker_project')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 1744, in test_a_refusal_is_never_reproduced_by_the_command_it_names
+    self.assertNotEqual(
+AssertionError: ('WAIT_OPERATOR', 'the request is durable as SRC-001; one operator decision is open in this project and must be answered before new Work is projected') == ('WAIT_OPERATOR', 'the request is durable as SRC-001; one operator decision is open in this project and must be answered before new Work is projected') : saipen recover resolve-blocker <SRC-###> reproduced its own refusal byte for byte: {
+  "ok": false,
+  "code": "WAIT_OPERATOR",
+  "detail": "the request is durable as SRC-001; one operator decision is open in this project and must be answered before new Work is projected",
+  "decision": {
+    "field": "blocker",
+    "surface": "state",
+    "tickets": [],
+    "command": "saipen recover resolve-blocker <SRC-###>",
+    "reason": "phase 'BUILD' carries blocker 'BLOCKED_EXTERNAL -- upstream API contract unconfirmed' with recognised gate class 'BLOCKED_EXTERNAL'; the engine cannot infer whether that gate still applies, so clearing it requires an explicit operator decision (OPERATOR_DECISION_REQUIRED): run `saipen recover resolve-blocker <SRC-###>` -- zero bytes written"
+  },
+  "canonical_next_command": "saipen recover resolve-blocker <SRC-###>",
+  "operator_decision_available": true,
+  "receipt": "SRC-001",
+  "ticket": null,
+  "resume_command": "saipen start --receipt SRC-001",
+  "refusal": null,
+  "valve_reauthorized": false,
+  "project_root": "V:\\_TEMP_\\t1363-22ffp3uz",
+  "actor": "test-agent",
+  "actor_source": "explicit"
+}
+
+
+======================================================================
+FAIL: test_a_refusal_is_never_reproduced_by_the_command_it_names (test_t1363_zero_manual_entry.LiveTranscriptConvergenceTests.test_a_refusal_is_never_reproduced_by_the_command_it_names) (project='blocker_project')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 1744, in test_a_refusal_is_never_reproduced_by_the_command_it_names
+    self.assertNotEqual(
+AssertionError: ('WAIT_OPERATOR', 'the request is durable as SRC-001; one operator decision is open in this project and must be answered before new Work is projected') == ('WAIT_OPERATOR', 'the request is durable as SRC-001; one operator decision is open in this project and must be answered before new Work is projected') : saipen recover resolve-blocker <SRC-###> reproduced its own refusal byte for byte: {
+  "ok": false,
+  "code": "WAIT_OPERATOR",
+  "detail": "the request is durable as SRC-001; one operator decision is open in this project and must be answered before new Work is projected",
+  "decision": {
+    "field": "blocker",
+    "surface": "state",
+    "tickets": [],
+    "command": "saipen recover resolve-blocker <SRC-###>",
+    "reason": "phase 'BUILD' carries blocker 'BLOCKED_EXTERNAL -- upstream API contract unconfirmed' with recognised gate class 'BLOCKED_EXTERNAL'; the engine cannot infer whether that gate still applies, so clearing it requires an explicit operator decision (OPERATOR_DECISION_REQUIRED): run `saipen recover resolve-blocker <SRC-###>` -- zero bytes written"
+  },
+  "canonical_next_command": "saipen recover resolve-blocker <SRC-###>",
+  "operator_decision_available": true,
+  "receipt": "SRC-001",
+  "ticket": null,
+  "resume_command": "saipen start --receipt SRC-001",
+  "refusal": null,
+  "valve_reauthorized": false,
+  "project_root": "V:\\_TEMP_\\t1363-fl7m3nn3",
+  "actor": "test-agent",
+  "actor_source": "explicit"
+}
+
+
+======================================================================
+FAIL: test_one_operator_decision_costs_exactly_one_question (test_t1363_zero_manual_entry.LiveTranscriptConvergenceTests.test_one_operator_decision_costs_exactly_one_question)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 1704, in test_one_operator_decision_costs_exactly_one_question
+    self.assertEqual(rc, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "RECONCILE_REAUTH_REQUIRED",
+  "detail": "goal authorization source is invalid, revoked or not operator-backed",
+  "cause": "GATE_AUTHORITY_UNVERIFIED"
+}
+
+
+======================================================================
+FAIL: test_continue_reauthorizes_only_a_proven_valve (test_t1363_zero_manual_entry.ReauthProducerMatrixTests.test_continue_reauthorizes_only_a_proven_valve)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 1064, in test_continue_reauthorizes_only_a_proven_valve
+    self.assertIn(
+AssertionError: 'RECONCILE_REAUTH_REQUIRED' not found in ('VALVE_REAUTHORIZED', 'REAUTHORIZED', 'CONTINUE', 'PHASE') : {
+  "ok": false,
+  "code": "RECONCILE_REAUTH_REQUIRED",
+  "op_id": null,
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "bounded run requires a fresh operator cc; WAIT: safety valve reached (4 waves / 2 tickets) -- run 'cc' to continue",
+  "next_action": "WAIT: safety valve reached (4 waves / 2 tickets) -- run 'cc' to continue",
+  "operator_action_due": true,
+  "detail": "bounded run requires a fresh operator cc; WAIT: safety valve reached (4 waves / 2 tickets) -- run 'cc' to continue",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\t1363-64rishyl --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+
+
+======================================================================
+FAIL: test_c_the_seat_is_inherited_not_negotiated (test_t1363_zero_manual_entry.StartEntryTests.test_c_the_seat_is_inherited_not_negotiated)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 1110, in test_c_the_seat_is_inherited_not_negotiated
+    self.assertEqual(payload.get("code"), "STARTED", text)
+AssertionError: 'USER_REQUEST_RECORDED' != 'STARTED'
+- USER_REQUEST_RECORDED
++ STARTED
+ : {
+  "ok": true,
+  "code": "USER_REQUEST_RECORDED",
+  "project_root": "V:\\_TEMP_\\t1363-w8nn0y7l",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-001",
+  "ticket": "T-9301",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "work_claimed": false,
+  "active_ticket": "T-9300",
+  "ownership_boundary": "active Work T-9300 retains execution seat; new request T-9301 recorded in queue",
+  "detail": "user request recorded as T-9301 (SRC-001); unrelated active Work T-9300 is not preempted; execute next_action for T-9300",
+  "action": "PHASE BUILD T-9300",
+  "next_action": "PHASE BUILD T-9300",
+  "parked": null,
+  "preempted": false,
+  "execution_instruction": "Request recorded as T-9301 (SRC-001), but active Work T-9300 retains the execution seat. Do not claim or mutate source for T-9301; execute PHASE BUILD T-9300 for T-9300."
+}
+
+
+======================================================================
+FAIL: test_the_decision_is_asked_once_and_the_retry_starts (test_t1363_zero_manual_entry.StartEntryTests.test_the_decision_is_asked_once_and_the_retry_starts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 1169, in test_the_decision_is_asked_once_and_the_retry_starts
+    self.assertEqual(rc, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "RECONCILE_REAUTH_REQUIRED",
+  "detail": "goal authorization source is invalid, revoked or not operator-backed",
+  "cause": "GATE_AUTHORITY_UNVERIFIED"
+}
+
+
+======================================================================
+FAIL: test_the_valve_is_cleared_but_an_operator_decision_survives (test_t1363_zero_manual_entry.StartEntryTests.test_the_valve_is_cleared_but_an_operator_decision_survives)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1363_zero_manual_entry.py", line 1155, in test_the_valve_is_cleared_but_an_operator_decision_survives
+    self.assertTrue(payload.get("valve_reauthorized"), payload)
+AssertionError: False is not true : {'ok': False, 'code': 'WAIT_OPERATOR', 'detail': 'the request is durable as SRC-001; one operator decision is open in this project and must be answered before new Work is projected', 'decision': {'field': 'blocker', 'surface': 'state', 'tickets': [], 'command': 'saipen recover resolve-blocker <SRC-###>', 'reason': "phase 'BUILD' carries blocker 'BLOCKED_EXTERNAL -- upstream API contract unconfirmed' with recognised gate class 'BLOCKED_EXTERNAL'; the engine cannot infer whether that gate still applies, so clearing it requires an explicit operator decision (OPERATOR_DECISION_REQUIRED): run `saipen recover resolve-blocker <SRC-###>` -- zero bytes written"}, 'canonical_next_command': 'saipen recover resolve-blocker <SRC-###>', 'operator_decision_available': True, 'receipt': 'SRC-001', 'ticket': None, 'resume_command': 'saipen start --receipt SRC-001', 'refusal': None, 'valve_reauthorized': False, 'project_root': 'V:\\_TEMP_\\t1363-37_q7kak', 'actor': 'test-agent', 'actor_source': 'explicit'}
+
+----------------------------------------------------------------------
+Ran 75 tests in 49.272s
+
+FAILED (failures=20)

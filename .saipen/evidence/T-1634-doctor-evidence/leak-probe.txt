@@ -1,0 +1,19 @@
+test_t1624_host_integration                    34.1s  Ran 67 tests in 33.991s | OK  claude.json: FOREIGN hook V:\_TEMP_\tmps85i0vlq\home\.claude\hooks\saipen-guard.py state DEGRADED code AUTHORITY_CLIENT_UNPROVEN
+test_claude_stop_hook                          21.8s  Ran 34 tests in 21.633s | OK (skipped=1)  clean
+test_protocol_admission                        76.2s  Ran 91 tests in 75.999s | OK (skipped=3)  clean
+test_host_fixture                               0.1s  Ran 0 tests in 0.000s | OK    clean
+test_host_authority_broker                     19.7s  Ran 38 tests in 19.510s | OK  clean
+test_t1563_authority_minting                    5.4s  Ran 11 tests in 5.288s | OK   clean
+test_native_host_guard                          3.5s  Ran 3 tests in 3.426s | OK    clean
+test_codex_stop_hook                           20.5s  Ran 34 tests in 20.333s | OK  clean
+test_t1553_mid_session_activation              70.9s  Ran 70 tests in 70.751s | OK  clean
+test_guard_root_parity                          0.3s  Ran 16 tests in 0.174s | OK   clean
+test_guard_execution_reachability               9.2s  Ran 33 tests in 9.042s | OK   clean
+test_guard_hostile_matrix                      10.3s  Ran 43 tests in 10.149s | OK (skipped=1)  clean
+test_recovery_reachability                     27.6s  Ran 84 tests in 27.475s | OK  clean
+test_response_delivery                         20.6s  Ran 11 tests in 20.450s | OK  clean
+test_adapter_parity                            26.1s  Ran 17 tests in 25.944s | OK  clean
+test_runtime_generation_identity                3.9s  Ran 55 tests in 3.598s | OK (skipped=1)  clean
+test_t1446_auto_recall                          6.0s  Ran 21 tests in 5.827s | OK   clean
+test_continue_entry                             1.7s  Ran 4 tests in 1.609s | OK    clean
+exit=0

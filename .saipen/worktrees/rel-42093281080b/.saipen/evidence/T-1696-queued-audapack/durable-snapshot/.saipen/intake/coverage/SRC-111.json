@@ -1,0 +1,23 @@
+{
+  "requirements": {
+    "SRC-111:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2760",
+      "text": "T-35 is implemented and verified against the pre-fix red control",
+      "verification": "python -m pytest -q tests/ui_qt/test_project_room_model.py -> PASS",
+      "work": "T-263"
+    },
+    "SRC-111:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2760",
+      "text": "the red control at project_room_model.py:367 still fails without the fix and passes with it",
+      "verification": "python -m pytest -q tests/ui_qt/test_project_room_model.py -> PASS",
+      "work": "T-263"
+    }
+  },
+  "schema_version": 1
+}

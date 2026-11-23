@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-035:R1": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Project room shows each project INAUDIT item count so the operator does not open every inbox to find pending audits"
+    },
+    "SRC-035:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Double-click on a project row opens that project INAUDIT inbox"
+    }
+  },
+  "derived_at": "2026-09-04T23:58:03Z",
+  "derived_from": "SRC-035",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "a497c439b980d42545f344df47a82ec1787a578a9d6a24d5495efecf94793299"
+}

@@ -1,0 +1,142 @@
+test_a_healthy_foreign_worker_is_awaited_never_stolen (test_t1446_supervise.AuthorityTests.test_a_healthy_foreign_worker_is_awaited_never_stolen) ... ok
+test_corrupt_lease_state_fails_closed (test_t1446_supervise.AuthorityTests.test_corrupt_lease_state_fails_closed) ... ok
+test_a_runtime_without_tools_moves_only_to_an_authorized_runtime (test_t1446_supervise.CapabilityTests.test_a_runtime_without_tools_moves_only_to_an_authorized_runtime) ... FAIL
+test_an_absent_host_executable_is_a_capability_absence (test_t1446_supervise.CapabilityTests.test_an_absent_host_executable_is_a_capability_absence) ... ok
+test_without_an_authorized_runtime_the_blocker_is_truthful (test_t1446_supervise.CapabilityTests.test_without_an_authorized_runtime_the_blocker_is_truthful) ... ok
+test_death_freeze_and_provider_failure_never_lose_the_mission (test_t1446_supervise.ChaosTests.test_death_freeze_and_provider_failure_never_lose_the_mission) ... FAIL
+test_repeated_no_progress_stops_instead_of_burning_budget (test_t1446_supervise.ChaosTests.test_repeated_no_progress_stops_instead_of_burning_budget) ... ok
+test_supervisor_restart_with_zero_memory_continues (test_t1446_supervise.ChaosTests.test_supervisor_restart_with_zero_memory_continues) ... FAIL
+test_unknown_failure_stops_after_the_repeat_bound (test_t1446_supervise.ChaosTests.test_unknown_failure_stops_after_the_repeat_bound) ... ok
+test_a_torn_event_is_transcript_not_error_text (test_t1446_supervise.FailureChannelTests.test_a_torn_event_is_transcript_not_error_text) ... ok
+test_error_events_and_stderr_still_classify (test_t1446_supervise.FailureChannelTests.test_error_events_and_stderr_still_classify) ... ok
+test_transcript_content_never_names_the_failure (test_t1446_supervise.FailureChannelTests.test_transcript_content_never_names_the_failure) ... ok
+test_a_fenced_generation_is_dead_immediately (test_t1446_supervise.FenceTests.test_a_fenced_generation_is_dead_immediately) ... ok
+test_a_frozen_generation_dies_with_every_process_it_started (test_t1446_supervise.ProcessTreeTests.test_a_frozen_generation_dies_with_every_process_it_started) ... FAIL
+test_a_retryable_host_outage_is_retried_not_unknown (test_t1446_supervise.ProviderFailureTests.test_a_retryable_host_outage_is_retried_not_unknown) ... ok
+test_auth_failure_never_falls_back (test_t1446_supervise.ProviderFailureTests.test_auth_failure_never_falls_back) ... ok
+test_missing_model_falls_back_only_to_an_authorized_model (test_t1446_supervise.ProviderFailureTests.test_missing_model_falls_back_only_to_an_authorized_model) ... FAIL
+test_quota_without_authorized_fallback_is_an_operator_stop (test_t1446_supervise.ProviderFailureTests.test_quota_without_authorized_fallback_is_an_operator_stop) ... ok
+test_the_failure_vocabulary_is_closed_and_ordered (test_t1446_supervise.ProviderFailureTests.test_the_failure_vocabulary_is_closed_and_ordered) ... ok
+test_a_slow_generation_that_keeps_progressing_is_not_killed (test_t1446_supervise.QualityOverTimeTests.test_a_slow_generation_that_keeps_progressing_is_not_killed) ... FAIL
+test_an_idle_generation_is_still_bounded (test_t1446_supervise.QualityOverTimeTests.test_an_idle_generation_is_still_bounded) ... FAIL
+test_model_identity_never_enters_canonical_truth (test_t1446_supervise.QualityOverTimeTests.test_model_identity_never_enters_canonical_truth) ... ok
+test_the_host_bound_ends_a_progressing_slice_without_failure (test_t1446_supervise.QualityOverTimeTests.test_the_host_bound_ends_a_progressing_slice_without_failure) ... FAIL
+test_a_cut_inside_a_line_drops_the_fragment (test_t1446_supervise.TailTests.test_a_cut_inside_a_line_drops_the_fragment) ... ok
+test_a_cut_on_a_line_boundary_keeps_the_whole_line (test_t1446_supervise.TailTests.test_a_cut_on_a_line_boundary_keeps_the_whole_line) ... ok
+test_a_short_output_is_whole (test_t1446_supervise.TailTests.test_a_short_output_is_whole) ... ok
+test_one_line_longer_than_the_tail_leaves_nothing (test_t1446_supervise.TailTests.test_one_line_longer_than_the_tail_leaves_nothing) ... ok
+test_a_genuine_error_line_after_a_long_read_still_classifies (test_t1446_supervise.TruncatedTranscriptTests.test_a_genuine_error_line_after_a_long_read_still_classifies) ... ok
+test_a_killed_generation_after_a_long_read_is_a_crash (test_t1446_supervise.TruncatedTranscriptTests.test_a_killed_generation_after_a_long_read_is_a_crash) ... FAIL
+test_a_long_read_never_stops_the_run_on_a_clean_exit (test_t1446_supervise.TruncatedTranscriptTests.test_a_long_read_never_stops_the_run_on_a_clean_exit) ... FAIL
+
+======================================================================
+FAIL: test_a_runtime_without_tools_moves_only_to_an_authorized_runtime (test_t1446_supervise.CapabilityTests.test_a_runtime_without_tools_moves_only_to_an_authorized_runtime)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1446_supervise.py", line 462, in test_a_runtime_without_tools_moves_only_to_an_authorized_runtime
+    self.assertEqual(result["stop"], supervisor.IDLE, result)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'IDLE'
+- INCOMPLETE_DISCOVERY
++ IDLE
+ : {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-35e691f9bd81', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 4, 'worker_generation_count': 3, 'crash_recovery_count': 0, 'model_replacement_recovery_count': 1, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 2, 'slow_progress_slices': 0, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {'CAPABILITY_UNAVAILABLE': 1}}, 'maximum_recovery_latency_seconds': 0.032, 'model': 'tool-model', 'history': [{'cycle': 1, 'verdict': 'RUN_WORK', 'generation': 1, 'model': 'chat-only', 'returncode': 1, 'failure': 'CAPABILITY_UNAVAILABLE', 'progressed': False, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 2, 'model': 'tool-model', 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 3, 'verdict': 'REPLACE_WORKER', 'generation': 3, 'model': 'tool-model', 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+======================================================================
+FAIL: test_death_freeze_and_provider_failure_never_lose_the_mission (test_t1446_supervise.ChaosTests.test_death_freeze_and_provider_failure_never_lose_the_mission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1446_supervise.py", line 253, in test_death_freeze_and_provider_failure_never_lose_the_mission
+    self.assertEqual(result["stop"], supervisor.IDLE, result)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'IDLE'
+- INCOMPLETE_DISCOVERY
++ IDLE
+ : {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-24a263f9454c', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 9, 'worker_generation_count': 8, 'crash_recovery_count': 3, 'model_replacement_recovery_count': 0, 'backoff_count': 1, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 5, 'slow_progress_slices': 0, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {'WORKER_CRASH': 2, 'HOST_RUNTIME_FAILURE': 1, 'RATE_LIMITED': 1}}, 'maximum_recovery_latency_seconds': 0.032, 'model': None, 'history': [{'cycle': 1, 'verdict': 'RUN_WORK', 'generation': 1, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 2, 'model': None, 'returncode': 9, 'failure': 'WORKER_CRASH', 'progressed': False, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 3, 'verdict': 'REPLACE_WORKER', 'generation': 3, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 4, 'verdict': 'REPLACE_WORKER', 'generation': 4, 'model': None, 'returncode': 1, 'failure': 'HOST_RUNTIME_FAILURE', 'progressed': False, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 5, 'verdict': 'REPLACE_WORKER', 'generation': 5, 'model': None, 'returncode': 1, 'failure': 'RATE_LIMITED', 'progressed': False, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 6, 'verdict': 'REPLACE_WORKER', 'generation': 6, 'model': None, 'returncode': 9, 'failure': 'WORKER_CRASH', 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 7, 'verdict': 'REPLACE_WORKER', 'generation': 7, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 8, 'verdict': 'REPLACE_WORKER', 'generation': 8, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+======================================================================
+FAIL: test_supervisor_restart_with_zero_memory_continues (test_t1446_supervise.ChaosTests.test_supervisor_restart_with_zero_memory_continues)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1446_supervise.py", line 288, in test_supervisor_restart_with_zero_memory_continues
+    self.assertIn(second["stop"], (supervisor.IDLE,), second)
+AssertionError: 'INCOMPLETE_DISCOVERY' not found in ('IDLE',) : {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-b02026f9fb7f', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 3, 'worker_generation_count': 2, 'crash_recovery_count': 0, 'model_replacement_recovery_count': 0, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 2, 'slow_progress_slices': 0, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {}}, 'maximum_recovery_latency_seconds': 0.0, 'model': None, 'history': [{'cycle': 1, 'verdict': 'REPLACE_WORKER', 'generation': 3, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 4, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+======================================================================
+FAIL: test_a_frozen_generation_dies_with_every_process_it_started (test_t1446_supervise.ProcessTreeTests.test_a_frozen_generation_dies_with_every_process_it_started)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1446_supervise.py", line 446, in test_a_frozen_generation_dies_with_every_process_it_started
+    self.assertEqual(result["stop"], supervisor.IDLE, result)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'IDLE'
+- INCOMPLETE_DISCOVERY
++ IDLE
+ : {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-76695e2052dd', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 3, 'worker_generation_count': 2, 'crash_recovery_count': 1, 'model_replacement_recovery_count': 0, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 1, 'slow_progress_slices': 0, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {'HOST_RUNTIME_FAILURE': 1}}, 'maximum_recovery_latency_seconds': 0.032, 'model': None, 'history': [{'cycle': 1, 'verdict': 'RUN_WORK', 'generation': 1, 'model': None, 'returncode': 1, 'failure': 'HOST_RUNTIME_FAILURE', 'progressed': False, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 2, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+======================================================================
+FAIL: test_missing_model_falls_back_only_to_an_authorized_model (test_t1446_supervise.ProviderFailureTests.test_missing_model_falls_back_only_to_an_authorized_model)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1446_supervise.py", line 501, in test_missing_model_falls_back_only_to_an_authorized_model
+    self.assertEqual(result["stop"], supervisor.IDLE, result)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'IDLE'
+- INCOMPLETE_DISCOVERY
++ IDLE
+ : {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-73ce91bd34b9', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 4, 'worker_generation_count': 3, 'crash_recovery_count': 0, 'model_replacement_recovery_count': 1, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 2, 'slow_progress_slices': 0, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {'MODEL_UNAVAILABLE': 1}}, 'maximum_recovery_latency_seconds': 0.031, 'model': 'good-model', 'history': [{'cycle': 1, 'verdict': 'RUN_WORK', 'generation': 1, 'model': 'bad-model', 'returncode': 1, 'failure': 'MODEL_UNAVAILABLE', 'progressed': False, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 2, 'model': 'good-model', 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 3, 'verdict': 'REPLACE_WORKER', 'generation': 3, 'model': 'good-model', 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+======================================================================
+FAIL: test_a_slow_generation_that_keeps_progressing_is_not_killed (test_t1446_supervise.QualityOverTimeTests.test_a_slow_generation_that_keeps_progressing_is_not_killed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1446_supervise.py", line 314, in test_a_slow_generation_that_keeps_progressing_is_not_killed
+    self.assertEqual(result["stop"], supervisor.IDLE, result)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'IDLE'
+- INCOMPLETE_DISCOVERY
++ IDLE
+ : {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-564a71590db4', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 3, 'worker_generation_count': 2, 'crash_recovery_count': 0, 'model_replacement_recovery_count': 0, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 2, 'slow_progress_slices': 0, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {}}, 'maximum_recovery_latency_seconds': 0.0, 'model': None, 'history': [{'cycle': 1, 'verdict': 'RUN_WORK', 'generation': 1, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 2, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+======================================================================
+FAIL: test_an_idle_generation_is_still_bounded (test_t1446_supervise.QualityOverTimeTests.test_an_idle_generation_is_still_bounded)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1446_supervise.py", line 346, in test_an_idle_generation_is_still_bounded
+    self.assertEqual(result["stop"], supervisor.IDLE, result)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'IDLE'
+- INCOMPLETE_DISCOVERY
++ IDLE
+ : {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-7d2264e3f3a1', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 3, 'worker_generation_count': 2, 'crash_recovery_count': 1, 'model_replacement_recovery_count': 0, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 1, 'slow_progress_slices': 0, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {'HOST_RUNTIME_FAILURE': 1}}, 'maximum_recovery_latency_seconds': 0.031, 'model': None, 'history': [{'cycle': 1, 'verdict': 'RUN_WORK', 'generation': 1, 'model': None, 'returncode': 1, 'failure': 'HOST_RUNTIME_FAILURE', 'progressed': False, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 2, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+======================================================================
+FAIL: test_the_host_bound_ends_a_progressing_slice_without_failure (test_t1446_supervise.QualityOverTimeTests.test_the_host_bound_ends_a_progressing_slice_without_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1446_supervise.py", line 337, in test_the_host_bound_ends_a_progressing_slice_without_failure
+    self.assertEqual(result["stop"], supervisor.IDLE, result)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'IDLE'
+- INCOMPLETE_DISCOVERY
++ IDLE
+ : {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-4d4c724532d0', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 3, 'worker_generation_count': 2, 'crash_recovery_count': 0, 'model_replacement_recovery_count': 0, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 2, 'slow_progress_slices': 1, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {}}, 'maximum_recovery_latency_seconds': 0.0, 'model': None, 'history': [{'cycle': 1, 'verdict': 'RUN_WORK', 'generation': 1, 'model': None, 'returncode': 1, 'failure': None, 'progressed': True, 'bounded': True, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 2, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+======================================================================
+FAIL: test_a_killed_generation_after_a_long_read_is_a_crash (test_t1446_supervise.TruncatedTranscriptTests.test_a_killed_generation_after_a_long_read_is_a_crash)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1446_supervise.py", line 433, in test_a_killed_generation_after_a_long_read_is_a_crash
+    self.assertEqual(result["stop"], supervisor.IDLE, result)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'IDLE'
+- INCOMPLETE_DISCOVERY
++ IDLE
+ : {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-76ea5aaf99e3', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 3, 'worker_generation_count': 2, 'crash_recovery_count': 1, 'model_replacement_recovery_count': 0, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 1, 'slow_progress_slices': 0, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {'WORKER_CRASH': 1}}, 'maximum_recovery_latency_seconds': 0.047, 'model': None, 'history': [{'cycle': 1, 'verdict': 'RUN_WORK', 'generation': 1, 'model': None, 'returncode': 1, 'failure': 'WORKER_CRASH', 'progressed': False, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 2, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+======================================================================
+FAIL: test_a_long_read_never_stops_the_run_on_a_clean_exit (test_t1446_supervise.TruncatedTranscriptTests.test_a_long_read_never_stops_the_run_on_a_clean_exit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1446_supervise.py", line 427, in test_a_long_read_never_stops_the_run_on_a_clean_exit
+    self.assertEqual(result["stop"], supervisor.IDLE, result)
+AssertionError: 'INCOMPLETE_DISCOVERY' != 'IDLE'
+- INCOMPLETE_DISCOVERY
++ IDLE
+ : {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-bbd91fe3a437', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 3, 'worker_generation_count': 2, 'crash_recovery_count': 0, 'model_replacement_recovery_count': 0, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 1, 'slow_progress_slices': 0, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {}}, 'maximum_recovery_latency_seconds': 0.0, 'model': None, 'history': [{'cycle': 1, 'verdict': 'RUN_WORK', 'generation': 1, 'model': None, 'returncode': 0, 'failure': None, 'progressed': False, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 2, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+----------------------------------------------------------------------
+Ran 30 tests in 15.476s
+
+FAILED (failures=10)

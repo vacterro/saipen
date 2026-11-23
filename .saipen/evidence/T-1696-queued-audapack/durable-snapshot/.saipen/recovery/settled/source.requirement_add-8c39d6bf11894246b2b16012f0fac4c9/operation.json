@@ -1,0 +1,44 @@
+{
+  "op_id": "source.requirement_add-8c39d6bf11894246b2b16012f0fac4c9",
+  "operation": "source.requirement_add",
+  "created_at": "2026-09-23T03:59:19Z",
+  "agent": "buffy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "a0a1e4c4c0cb715c",
+  "preconditions": {
+    ".saipen/intake/contracts/SRC-086.json": "6aeb96a0483c5d74",
+    ".saipen/intake/contracts/SRC-086.r107.json": "",
+    ".saipen/intake/coverage/SRC-086.json": "99c590bc11f44c44"
+  },
+  "read_preconditions": {},
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 3,
+  "targets": [
+    {
+      "path": ".saipen/intake/contracts/SRC-086.json",
+      "role": "contract",
+      "action": "write",
+      "before_hash": "6aeb96a0483c5d74",
+      "after_hash": "2d6905e01d260421",
+      "applied": true
+    },
+    {
+      "path": ".saipen/intake/contracts/SRC-086.r107.json",
+      "role": "contract_revision",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "2d6905e01d260421",
+      "applied": true
+    },
+    {
+      "path": ".saipen/intake/coverage/SRC-086.json",
+      "role": "coverage",
+      "action": "write",
+      "before_hash": "99c590bc11f44c44",
+      "after_hash": "97b8f62e839a00af",
+      "applied": true
+    }
+  ]
+}

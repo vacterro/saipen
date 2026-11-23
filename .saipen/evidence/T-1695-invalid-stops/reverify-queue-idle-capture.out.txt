@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "code": "SOURCE_RECEIVED",
+  "receipt": "SRC-001",
+  "source_sha256": "134f1f87ecc3587df9e34aa46af8d8dbd308523da99cd1ef0996b2971553a6df",
+  "status": "ACTIVE",
+  "linked_work": null,
+  "duplicate": false,
+  "requirements": 0,
+  "sensitive": false,
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "134f1f87ecc3587df9e34aa46af8d8dbd308523da99cd1ef0996b2971553a6df",
+    "sanitized_sha256": "134f1f87ecc3587df9e34aa46af8d8dbd308523da99cd1ef0996b2971553a6df"
+  },
+  "source_authority": {
+    "mode": "exact",
+    "original_available": true,
+    "body_sha256": "134f1f87ecc3587df9e34aa46af8d8dbd308523da99cd1ef0996b2971553a6df"
+  },
+  "distribution": {
+    "state": "DISTRIBUTABLE",
+    "receipt_id": "SRC-001",
+    "source_sha256": "134f1f87ecc3587df9e34aa46af8d8dbd308523da99cd1ef0996b2971553a6df"
+  },
+  "detail": null
+}

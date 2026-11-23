@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1786_cli_first_activation.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap",
+    "bin"
+  ],
+  "oracle_files": [
+    "tools/test_t1786_cli_first_activation.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "subject_files": [
+    "saipen/ACTIVATION_BLOCK.md",
+    "saipen/BOOT.md",
+    "bootstrap/install_ownership.py"
+  ],
+  "before": {
+    "saipen/ACTIVATION_BLOCK.md": ".saipen/evidence/T-1786-mimo-freebuff-audit/pre/ACTIVATION_BLOCK.md",
+    "saipen/BOOT.md": ".saipen/evidence/T-1786-mimo-freebuff-audit/pre/BOOT.md",
+    "bootstrap/install_ownership.py": ".saipen/evidence/T-1786-mimo-freebuff-audit/pre/install_ownership.py"
+  },
+  "timeout": 900
+}

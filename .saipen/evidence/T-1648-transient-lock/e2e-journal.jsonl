@@ -1,0 +1,3 @@
+# real `saipen checkpoint` commands against a fixture project while a second thread holds LOG.md and STATE.md open (hold 30 ms, idle 30 ms). pre = a home copy carrying the pre-fix paths.py; _SAIPEN = this tree after the fix.
+{"home": "e2e_pre_home", "checkpoints": 16, "codes": {"CONFLICT": 5, "CHECKPOINTED": 11}, "recoveries_needed": 5, "first_refusal": "target .saipen/LOG.md action failed: [WinError 5] Access is denied"}
+{"home": "_SAIPEN", "checkpoints": 16, "codes": {"CHECKPOINTED": 16}, "recoveries_needed": 0}

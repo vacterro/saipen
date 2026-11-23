@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-393:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2023 closed with verification evidence in LOG: verify -> PASS [target: T-2023] conf: high -- ship executed local (no-publish): saipen ship refused VALIDATION_FAILED (foreign pre-existing staged paths not this ticket's) and saipen ship --isolated refused NON_FAST_FORWARD (origin tip 60783ac4abb7 not an ancestor of HEAD 66ef622a; publication lineage diverged -- operator decision, no force-push); zero external writes measured: HEAD unmoved, git i",
+      "text": "P0 repair: canonical goal-command grammar excludes all goal CLI subcommands from goal entry; bind maintenance grant to exact PersistentGoal identity instead of historic pivot",
+      "verification": "the Work this request created reached its own verification gate; see the T-2023 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2023"
+    }
+  },
+  "schema_version": 1
+}

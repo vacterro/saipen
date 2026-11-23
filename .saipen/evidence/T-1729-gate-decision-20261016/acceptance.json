@@ -1,0 +1,49 @@
+{
+  "fixture": "V:\\_TEMP_\\tmppfufzh0l",
+  "initial_brake": [
+    "wait",
+    "persisted WAIT binds in this context: 'WAIT: blocked -- Flush(true) physical power-loss durability '"
+  ],
+  "preview": {
+    "ok": true,
+    "code": "REPAIR_REQUIRED",
+    "canonical_next_command": "saipen authority capture --file <UTF8_FILE>",
+    "apply_command": "saipen recover resolve-blocker <SRC-###>",
+    "capsule_resolve": [
+      "next_action"
+    ]
+  },
+  "capture": {
+    "ok": true,
+    "receipt": "SRC-001"
+  },
+  "apply": {
+    "ok": true,
+    "code": "REPAIRED",
+    "authorization_receipt": "SRC-001"
+  },
+  "state_after_apply": {
+    "next_action": "saipen continue",
+    "brake": null
+  },
+  "continue": {
+    "executable_behavior": null
+  },
+  "reconcile_after_restart": {
+    "ok": true,
+    "code": "CLEAN",
+    "next_action": "saipen continue",
+    "brake": null
+  },
+  "prose_refusal": {
+    "ok": false,
+    "cause": "GATE_AUTHORITY_REQUIRED",
+    "canonical_next_command": "saipen recover resolve-blocker preview --dry-run",
+    "next_action": "saipen continue"
+  },
+  "idempotent_reapply": {
+    "ok": true,
+    "code": "ALREADY_APPLIED"
+  },
+  "note": "live acceptance: real CLI in separate OS processes on a disposable fixture; carrier is a TEST HARNESS witness inside the fixture only, never a real operator carrier and never written to SAITULS"
+}

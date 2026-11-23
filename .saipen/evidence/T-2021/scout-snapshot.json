@@ -1,0 +1,42 @@
+{
+  "original_index_sha256": "dcb1637b2114fe07b413565018aad079a1fcefbbffe3fff6220d22556f1a9adf",
+  "after_inventory_sha256": "dcb1637b2114fe07b413565018aad079a1fcefbbffe3fff6220d22556f1a9adf",
+  "index_preserved": true,
+  "inventory_status": "VERIFIED_COMPLETE",
+  "staged_entries": 1238,
+  "classes": {
+    "AMBIGUOUS_PROVENANCE": 50,
+    "OTHER_TICKET_OR_COHORT": 929,
+    "GENERATED_OR_TRANSIENT": 130,
+    "SAIPEN_OWNED_UNREVIEWED": 129
+  },
+  "persistent_goals": [
+    {
+      "goal_id": "self-maintenance-core",
+      "project_id": "_SAIPEN",
+      "title": "Continuous SAIPEN Self-Maintenance and Defect Elimination",
+      "objective": "Autonomously discover, evaluate, and repair verified regressions, test failures, and maintenance backlog to preserve a healthy repository",
+      "authorization_scope": "MAINTENANCE",
+      "success_criteria": {},
+      "evidence_provider": "failed_tests",
+      "current_progress": {},
+      "target_progress": {},
+      "research_or_work_backlog_source": "",
+      "admission_policy": {},
+      "current_status": "ACTIVE",
+      "last_evaluation": "",
+      "last_successful_work": null,
+      "last_discovery": null,
+      "blockers": [],
+      "completion_evidence": null,
+      "resume_metadata": {},
+      "paused": false
+    }
+  ],
+  "continuation_authority": {
+    "state": "protocol_home",
+    "detail": "Protocol home: the goal budget checkpoint clears itself on cc",
+    "original_event": "E-18977",
+    "checkpoint_due": false
+  }
+}

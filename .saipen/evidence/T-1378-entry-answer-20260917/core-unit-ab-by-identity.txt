@@ -1,0 +1,5 @@
+# T-1378 core-unit A/B by TEST IDENTITY
+
+recorded baseline (the inherited set): 34 red identities
+with this ticket: Ran 2690, 34 red identities -- the same ones
+PATCH_OWNED = 0, UNKNOWN = 0. The 9 added tests are tools/test_entry_answer_agrees.py.

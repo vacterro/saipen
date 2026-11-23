@@ -1,0 +1,210 @@
+{
+  "observed_utc": "2026-10-23T06:06:38.9814737Z",
+  "parent": 30700,
+  "parent_live": false,
+  "session": 49627,
+  "session_result": "unknown process id",
+  "terminal_record_found": false,
+  "cause": "not established",
+  "completion": "NOT_COMPLETED",
+  "shards": [
+    {
+      "root": "V:\\_TEMP_\\saipen-core-unit-74pwn_1m",
+      "reader": 37264,
+      "reader_created": 1792735018.4097843,
+      "reader_live": false,
+      "files": [
+        {
+          "name": "owner.json",
+          "bytes": 284,
+          "sha256": "10025BDEE15020F3AC9D4951949570999811B05F339B9773A017C6CFB6B487BA"
+        },
+        {
+          "name": "spec.json",
+          "bytes": 2167,
+          "sha256": "BFA7CF4EA7DA3A7515AD08FCA50CD9F6200CEDA79315A3E06D8CCAFE8CBA8D41"
+        },
+        {
+          "name": "manifest.json",
+          "bytes": 9812,
+          "sha256": "FA6F3808B59F320EC8472A56E835F8689A7CCCD5721DA970ECBCA0743F3896DE"
+        },
+        {
+          "name": "spool\\stdout",
+          "bytes": 2832,
+          "sha256": "E996C94F05AB7B5863E32A5A2F36B43CABDBE3E488AFFF4D3547D631D379A0A0"
+        },
+        {
+          "name": "spool\\stderr",
+          "bytes": 70004,
+          "sha256": "CB615FCD60100F65411CE2EA6962311BBDDD318F51FD1ECB4D8A50D781840FD2"
+        }
+      ]
+    },
+    {
+      "root": "V:\\_TEMP_\\saipen-core-unit-eqwdndow",
+      "reader": 33972,
+      "reader_created": 1792735018.4208603,
+      "reader_live": false,
+      "files": [
+        {
+          "name": "owner.json",
+          "bytes": 283,
+          "sha256": "27F749695EBBB74EB765C0CF8F03F1470094266FF020AB1B0B9922DDFD25660B"
+        },
+        {
+          "name": "spec.json",
+          "bytes": 13039,
+          "sha256": "90A3B69D3A9D4D0CC87B4A832149928FF8F28246D1D9E9104C9D8D247E8F0909"
+        },
+        {
+          "name": "manifest.json",
+          "bytes": 10791,
+          "sha256": "D659FC223FA5119EE3175EAA3961211CF99490B2B9CDF5EAEE02A9BD65E37476"
+        },
+        {
+          "name": "spool\\stdout",
+          "bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "name": "spool\\stderr",
+          "bytes": 59340,
+          "sha256": "864636DE13619205CFB4DCCCFEBD89422CB505E09EC8C89B45049DE48ECD231D"
+        }
+      ]
+    },
+    {
+      "root": "V:\\_TEMP_\\saipen-core-unit-fyxye4t0",
+      "reader": 40828,
+      "reader_created": 1792735018.421299,
+      "reader_live": false,
+      "files": [
+        {
+          "name": "owner.json",
+          "bytes": 283,
+          "sha256": "D548DC229C8A91D8A36A4191D57273C1C220E835742E3AB7E5F4D7E45E6324B8"
+        },
+        {
+          "name": "spec.json",
+          "bytes": 4552,
+          "sha256": "E0D430D6A67128AE15D7E22693D21CB56168495F479D54D7926170DB9AC72392"
+        },
+        {
+          "name": "manifest.json",
+          "bytes": 17153,
+          "sha256": "3860A208E84BA3B95DD63F4F1CA71C7D55CA299ACBB5219ECAAA92EF1D5A2B5F"
+        },
+        {
+          "name": "spool\\stdout",
+          "bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "name": "spool\\stderr",
+          "bytes": 94394,
+          "sha256": "A47D212782F91EBCC1F466FE41FB1683286F566A57FCA060FDF9696AADAFA5A1"
+        }
+      ]
+    },
+    {
+      "root": "V:\\_TEMP_\\saipen-core-unit-obrf86g9",
+      "reader": 31288,
+      "reader_created": 1792735018.4217281,
+      "reader_live": false,
+      "files": [
+        {
+          "name": "owner.json",
+          "bytes": 284,
+          "sha256": "4AAB35E11D1DCA94E85AF23C10B11518B610DC8C47136F7F28C32BA6C19DF993"
+        },
+        {
+          "name": "spec.json",
+          "bytes": 2188,
+          "sha256": "8CEBC458B54CEF7EB25FD3D6FEE95AAB9604D86652BBCA88D4637F9134B1B90D"
+        },
+        {
+          "name": "manifest.json",
+          "bytes": 10766,
+          "sha256": "17B362DA5EA5C6D5ABDC126823A584A502684BDE1784AF9F4FA74A5A3884638B"
+        },
+        {
+          "name": "spool\\stdout",
+          "bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "name": "spool\\stderr",
+          "bytes": 68613,
+          "sha256": "293E672C6EF7AE9AEFE40B662B0650A22EA3BDFBB6C1F636D86E63149D31AED9"
+        }
+      ]
+    },
+    {
+      "root": "V:\\_TEMP_\\saipen-core-unit-olc2cb9t",
+      "reader": 19044,
+      "reader_created": 1792735018.4210243,
+      "reader_live": false,
+      "files": [
+        {
+          "name": "owner.json",
+          "bytes": 284,
+          "sha256": "D7B8C46B3280FED28E0B48D0F5CCACB0898178065BE9D86374E8241617847BD0"
+        },
+        {
+          "name": "spec.json",
+          "bytes": 2142,
+          "sha256": "E517F7874CC034E0BFF3A6E635DCE4B4A5581F10509812C818DE1A78AFFF99D1"
+        },
+        {
+          "name": "manifest.json",
+          "bytes": 9214,
+          "sha256": "864DF1607A50A27B7CAEF90D14643A9B115B16EB30FA30F8A371C50EB4FACD72"
+        },
+        {
+          "name": "spool\\stdout",
+          "bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "name": "spool\\stderr",
+          "bytes": 72186,
+          "sha256": "A0F9A051FA47377CAE3279F465F8CD272F20E21D7189423E329AFE098F2E15FA"
+        }
+      ]
+    },
+    {
+      "root": "V:\\_TEMP_\\saipen-core-unit-q19toor0",
+      "reader": 26740,
+      "reader_created": 1792735018.424469,
+      "reader_live": false,
+      "files": [
+        {
+          "name": "owner.json",
+          "bytes": 283,
+          "sha256": "A7325EA434AAB150699102C4F0CE8B2B037FAD105DFAD8967EC7BB6D518AACE9"
+        },
+        {
+          "name": "spec.json",
+          "bytes": 2042,
+          "sha256": "B20D19D5B8BD79B4FC172BEBE03C2D519046529A89C1979BC129732A75DF1D79"
+        },
+        {
+          "name": "manifest.json",
+          "bytes": 9238,
+          "sha256": "A39381F8E76C902A72686533BD2FB4DD8782BEED4F09BBBEAEAA961CBB48C2F8"
+        },
+        {
+          "name": "spool\\stdout",
+          "bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "name": "spool\\stderr",
+          "bytes": 49615,
+          "sha256": "C3DD9DB012B1FC21A1E1C357777BF91897541ED5DE6287255A8D3C16CA04D934"
+        }
+      ]
+    }
+  ]
+}

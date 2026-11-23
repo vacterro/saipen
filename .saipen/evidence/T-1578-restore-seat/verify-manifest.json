@@ -1,0 +1,26 @@
+{
+  "verifier": "d9e203aa67d41540",
+  "command": "python -B -m unittest -v test_t1578_restore_owner",
+  "oracle": [
+    "tools/test_t1578_restore_owner.py",
+    "tools/test_t1572_ticket_scoped_recovery.py",
+    "tools/saipen_engine/ownership.py",
+    "tools/saipen_engine/fast_check.py"
+  ],
+  "runs": [
+    {
+      "label": "red",
+      "subject": "b09a888d42c5b648",
+      "returncode": 1,
+      "verdict": "FAILED (failures=4)",
+      "errors": 0
+    },
+    {
+      "label": "green",
+      "subject": "1ea67baeb44a30db",
+      "returncode": 0,
+      "verdict": "OK",
+      "errors": 0
+    }
+  ]
+}

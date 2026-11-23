@@ -1,0 +1,7 @@
+T-1943 R005 mechanism evidence (fixture-level), HEAD 66ef622a43ab59512735ac78ce10d1250e26f9df
+
+test_t1494_continuation_authority          Ran 19 tests in 67.051s  OK 
+test_t1875_maintenance_wiring              Ran 11 tests in 0.016s  OK 
+test_campaign_continuation_assessment      Ran 7 tests in 0.432s  OK 
+test_t1857_budget_owner                    Ran 3 tests in 0.148s  OK 
+test_t1704_legacy_goal_authority           Ran 28 tests in 45.906s  OK 

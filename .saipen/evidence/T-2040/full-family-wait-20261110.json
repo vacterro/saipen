@@ -1,0 +1,18 @@
+{
+  "checked_at": "2026-11-10T18:49:47.089592+00:00",
+  "marker": {
+    "schema": 1,
+    "kind": "core-unit",
+    "ticket": "T-2045",
+    "command": "core_unit evidence",
+    "pid": 26968,
+    "pid_created": 1794335038.851406,
+    "started": 1794335042.07926,
+    "started_utc": "2026-11-10T18:24:02Z"
+  },
+  "launched_verifier": false,
+  "status": "WAIT_LIMIT",
+  "wait_result": 258,
+  "exit_code": 259,
+  "finished_at": "2026-11-10T18:58:47.088462+00:00"
+}

@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-001:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 (P0): destructive root establishment must be a no-follow authorization boundary, not a plain Path.resolve(). Reject a destructive base root whose own path or any existing ancestor component is a symlink/junction/reparse point BEFORE canonicalization; capture the raw root no-follow identity; canonicalize; re-check raw path/reparse state and identity after canonicalization so a swap during establishment fails closed. Centralize in the guard/root-scope primitive so every cleaner gets the same invariant."
+    },
+    "SRC-001:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: persist a root boundary token for the active destructive guard/root and require _authorize_mutation() to validate it for EVERY descendant mutation including direct _del_file()/_del_dir() paths, not only _del_dir_contents() plans. When SystemCleaner changes target guard or CustomCleaner changes rule guard, replace the active root token atomically with that target freshly proven token. Worker threads inherit the outer configured-root token in addition to narrower tree tokens."
+    },
+    "SRC-001:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: do not weaken blacklist, candidate-identity, owner/service, exclusion or current per-tree boundary checks; the outer root boundary is additional. Do not rely on normalize_path() alone: config-time provenance is necessary but not sufficient for a later destructive job. VERIFY: portable root replaced by junction after JobSpec resolution -> victim survives byte-identical, planned/freed zero; CustomCleaner non-star rule root replaced before run_all -> victim survives; frozen USER_EXPLORER root replaced -> thumbcache victim survives; root swapped after guard creation before first mutation -> fail-closed refusal; normal unchanged roots keep deleting the same proven candidates; native Windows junction variant covered."
+    },
+    "SRC-001:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002 (P1): one pure validate_and_normalize_config_dict(candidate) contract with the same schema/path checks as strict disk loading without I/O. Inside _config_rmw_transaction(), after merge_fn() returns and BEFORE save_config(), validate/normalize the merged candidate; refuse the write if invalid. Return enough failure information to GUI call sites to distinguish invalid candidate data from lock/write failure; never report a poisoned save as success."
+    },
+    "SRC-001:R0005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002: in _save_exclusions(), normalize each selected path before merge so the user receives an immediate actionable error; keep the dialog open and leave disk and in-memory state unchanged on rejection. Preserve existing cross-process locking and atomic replace. Do not auto-repair an already INVALID config by overwriting unrelated policy. VERIFY: junction exclusion save refused with identical config bytes and strict load VALID; ordinary absolute path normalized and persisted VALID; each safety-critical invalid field class refused post-merge; concurrent disjoint-field RMW tests still pass."
+    },
+    "SRC-001:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003 (P2): parse and validate --sys-targets and --disable-targets completely BEFORE bootstrap_config(); keep load_config_strict(persist=False) before the destructive authorization decision; only after ALL CLI action/modifier validation succeeds may a real DELETE invocation enter the write-authorized bootstrap/migration boundary. Preserve: valid first-run destructive command still bootstraps; dry-run/status stay write-free. VERIFY: fresh dir + unknown --sys-targets/--disable-targets => exit 2 with no config, no lock sidecar; existing INVALID config remains byte-identical and fail-closed."
+    },
+    "SRC-001:R0007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001 (P1): preserve immutable JobSpec semantics. Treat exclusion and system-target changes as safety-policy generation changes: while a tracked foreground destructive worker OR a live retained _bg_proc is active, prevent opening/saving both policy editors or explicitly refuse Save with an actionable stop/wait frozen-policy result; re-check activity inside _save_exclusions() and _save_system_targets() themselves (button disabling alone is insufficient); restore editor availability only after _finish_job()/background terminal observation; never present a save as affecting the running generation."
+    },
+    "SRC-001:R0008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-002 (P1): stop inferring lifecycle/severity from rendered strings. Introduce an explicit queue record carrying message text plus class (ordinary/error/warning/summary/control) or an equivalent explicit priority argument. Move CLOSE/AUTO control state out-of-band where possible (thread-safe flags/events). On saturation an incoming error/warning/summary must displace ordinary telemetry rather than be silently dropped; ordinary producers must never lose a critical item during a requeue race; if bounded critical storage saturates, coalesce overflow into an explicit retained diagnostic/count. Preserve ordinary-log memory bound and batched Tk draining. VERIFY: queue size 2, Logger.error/warning/summary remain observable under ordinary flood; incoming worker-crash error remains observable; CLOSE/AUTO non-eviction tests stay green or replaced by stronger out-of-band tests."
+    },
+    "SRC-001:R0009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-003 (P2): auto-clean timer creation/arming must be single-owner. Preferred narrow repair: timer callback only sets the nonblocking pending flag/event and never creates its successor; _poll_main() consumes the firing and re-arms the next cycle on the main thread regardless of started/skipped/declined/busy (preserves W2-009 recurrence). _schedule_auto_clean() remains the only creator/canceller/publisher. Closing invalidates the active generation so no late callback creates a successor. VERIFY: barrier interleaving shows at most one started uncancelled timer; busy and declined attempts still re-arm; disable (interval 0) and shutdown leave zero live successor timers; stress interleavings create no orphan timer."
+    },
+    "SRC-001:R0010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-004 (P2): one centralized modifier-ownership validation immediately after parsing and before any bootstrap, status scan, analyzer import, Task Scheduler call, logger creation, lease acquisition, or cleaning. Define permitted modifiers per action family explicitly; reject every supplied non-default modifier the selected action does not consume; at minimum --time only belongs to --install-task, clean-only modifiers rejected with status/analyze, install-task continues rejecting clean-only modifiers, hidden --surface accepted only on intended paths. Exit 2 with zero side effects on every compatibility failure. VERIFY: --cli --all --delete --time 23:00 => exit 2, no bootstrap/Logger/lease/job; --status --delete => exit 2; --status --exclude X => exit 2; --analyze-caches --delete => exit 2; valid commands unchanged; table-driven regression over every parser option vs every action family."
+    }
+  },
+  "derived_at": "2026-09-09T15:26:28Z",
+  "derived_from": "SRC-001",
+  "interpretation_revision": 10,
+  "schema_version": 1,
+  "source_sha256": "df25548ce4ce3997cc326a2c3c621cd3049b009a6658a4ffd20c549339fc57a9"
+}

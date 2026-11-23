@@ -1,0 +1,134 @@
+{
+  "clauses": {
+    "SRC-377:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "MISSION: Repair SAIPEN so an authenticated long-term research objective continues without the operator repeatedly typing cc or cc all. The BZCC public 2.0.185 research objective is maximal independently verified engine semantic, architectural, behavioral and modding coverage. An empty Board, a closed ticket, a passing documentation verifier, or a finished model turn must NEVER imply that a long-term research objective has been satisfied. Use existing SAIPEN components. Do not build a competing runtime."
+    },
+    "SRC-377:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 1: Exact cc all is continuation rather than a new ticket."
+    },
+    "SRC-377:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 2: Explicit new-goal intent remains separate."
+    },
+    "SRC-377:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 3: Empty Board with unresolved research gaps cannot satisfy goal."
+    },
+    "SRC-377:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 4: A missing authenticated goal cannot create false completion."
+    },
+    "SRC-377:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 5: Native nested coverage schema produces genuine candidates."
+    },
+    "SRC-377:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 6: Schema mismatch does not silently become zero gaps."
+    },
+    "SRC-377:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 7: Green documentation consistency checks do not imply 100% RE."
+    },
+    "SRC-377:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 8: Generated citations do not count as verified semantics."
+    },
+    "SRC-377:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 9: Current patch-specific evidence cannot be borrowed from another patch."
+    },
+    "SRC-377:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 10: Candidate deduplication preserves real new evidence generations."
+    },
+    "SRC-377:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 11: One verified gap closes; a different gap is automatically selected."
+    },
+    "SRC-377:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 12: _BZDECOMP's active Work is preserved."
+    },
+    "SRC-377:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 13: Cross-project ownership is respected."
+    },
+    "SRC-377:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 14: CLI one-step completion does not imply multi-turn autonomy."
+    },
+    "SRC-377:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 15: Persisted dispatch without host acceptance is not TURN_STARTED."
+    },
+    "SRC-377:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 16: Several genuine successor native turns execute without user cc."
+    },
+    "SRC-377:R018": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 17: Interrupted campaigns resume without duplicate side effects."
+    },
+    "SRC-377:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 18: Expired, revoked and wrong-scope grants refuse mutation."
+    },
+    "SRC-377:R020": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 19: Host offline produces RUNTIME_PAUSED, not success."
+    },
+    "SRC-377:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 20: Genuine exhausted work produces quiet waiting, not fake tasks."
+    },
+    "SRC-377:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 21: A failed SAIPEN command piped through head remains failed."
+    },
+    "SRC-377:R023": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 22: Work progress cannot be inferred solely from journal counters."
+    },
+    "SRC-377:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 23: Routine Windows tests do not capture mouse, focus or keyboard."
+    },
+    "SRC-377:R025": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST 24: Mock-only passing tests never prove installed-host acceptance."
+    }
+  },
+  "derived_at": "2026-11-02T01:07:14Z",
+  "derived_from": "SRC-377",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "c10517960e8a52b7f9a965ffc358c24a0249375865bb4d0425ffa64a0394a1d4"
+}

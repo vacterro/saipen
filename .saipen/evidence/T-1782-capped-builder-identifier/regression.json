@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1782_capped_builder_identifier.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap"
+  ],
+  "oracle_files": [
+    "tools/test_t1782_capped_builder_identifier.py",
+    "tools/test_guard_hostile_matrix.py",
+    "tools/test_orchestration_repair.py",
+    "tools/test_recovery_reachability.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "subject_files": [
+    "tools/test_t1326_board_compaction.py"
+  ],
+  "before": {
+    "tools/test_t1326_board_compaction.py": ".saipen/evidence/T-1782-capped-builder-identifier/before/test_t1326_board_compaction.py"
+  },
+  "timeout": 900
+}

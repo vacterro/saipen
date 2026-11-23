@@ -1,0 +1,14 @@
+test_committed_operation_does_not_report_a_missing_target_repaired (test_t1851_debt_authority.NativeDecisionTests.test_committed_operation_does_not_report_a_missing_target_repaired) ... FAIL
+
+======================================================================
+FAIL: test_committed_operation_does_not_report_a_missing_target_repaired (test_t1851_debt_authority.NativeDecisionTests.test_committed_operation_does_not_report_a_missing_target_repaired)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1851_debt_authority.py", line 461, in test_committed_operation_does_not_report_a_missing_target_repaired
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'code': 'ACCEPTED_DEBT_REGISTERED', 'record_id': 'AD-000001', 'events': ['E-3', 'E-4'], 'journal_op_id': 'accepted_debt.register-a536b63423c4', 'authority': 'SRC-001', 'authority_status': 'KNOWN'}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.345s
+
+FAILED (failures=1)

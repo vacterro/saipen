@@ -1,0 +1,123 @@
+{
+  "kind": "real_os_read_write_access_probe",
+  "targets": [
+    {
+      "path": ".saipen/STATE.md",
+      "read_ok": true,
+      "sha256": "5f5e1ef623615e3f7861baf0344db3d37bc61f244d214119c2f5f8995b34a49f",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\STATE.md'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": ".saipen/BOARD.md",
+      "read_ok": true,
+      "sha256": "d5eb5cf546038f356af20b369f1fe1379085f780dd0f8867e7be6081e5b7a73c",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\BOARD.md'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": ".saipen/LOG.md",
+      "read_ok": true,
+      "sha256": "34f19944f986073fdaa4502bec9c25cba0764c94b36bde0538acab88d55201f2",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\LOG.md'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": ".saipen/IDENTITY.md",
+      "read_ok": true,
+      "sha256": "b49721c7920287213337f18809ce68f92ad118985649fd48f5830d5ff6baf9a4",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\IDENTITY.md'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": ".saipen/intake/index.json",
+      "read_ok": true,
+      "sha256": "ab79b524b44c30429a374b452d87c4625862a4e8982f491c50a4d09676a9aea2",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\intake\\\\index.json'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": ".saipen/intake/audit_inbox.json",
+      "read_ok": true,
+      "sha256": "6a8b147b5c83911ff07bbcd440243d19e140c219315bf9509ecdb86abecdb164",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\intake\\\\audit_inbox.json'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": ".saipen/intake/active/SRC-216.md",
+      "read_ok": true,
+      "sha256": "e272b73351028793fd0882ab77973bf3a22493956f4aa8cd0edd36560df60d15",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\intake\\\\active\\\\SRC-216.md'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": ".saipen/intake/active/SRC-217.md",
+      "read_ok": true,
+      "sha256": "37be3e42d48252c86fff3e4c67ee9e455024fb646a0004ac69e1aa4600677874",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\intake\\\\active\\\\SRC-217.md'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": "tools/saipen_engine/operations.py",
+      "read_ok": true,
+      "sha256": "299eebcc718349527c6bc69432c1bd1ab92a855af1be5f52e262ba530d47703a",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\saipen_engine\\\\operations.py'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": "tools/saipen.py",
+      "read_ok": true,
+      "sha256": "b3045ae7cd4e6e3ff9d348e380eab5cdeca20a130200e112aecb6a2dd1192c64",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\saipen.py'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": "audit/SAIPEN_20261010_1202.md",
+      "read_ok": true,
+      "sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\audit\\\\SAIPEN_20261010_1202.md'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": "audit/SAIPEN_20261011_1832.md",
+      "read_ok": true,
+      "sha256": "ef6e7af8f075af6baf728c83abe4be998d13cd4b681a5ff3c7cce25c2a2bcc2a",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\audit\\\\SAIPEN_20261011_1832.md'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": "audit/SAIPEN_20261011_1901.md",
+      "read_ok": true,
+      "sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\audit\\\\SAIPEN_20261011_1901.md'",
+      "bytes_unchanged": true
+    },
+    {
+      "path": "VERSION",
+      "read_ok": true,
+      "sha256": "a0a0bc672b26c017ad0e76dcd10725268a3085574c409e091604bb3c4a15cea9",
+      "write_access_denied": true,
+      "error": "[Errno 13] Permission denied: 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\VERSION'",
+      "bytes_unchanged": true
+    }
+  ],
+  "child_exit_code": 0,
+  "child_stdout": "{\"path\": \"tools/saipen.py\", \"read_ok\": true, \"sha256\": \"b3045ae7cd4e6e3ff9d348e380eab5cdeca20a130200e112aecb6a2dd1192c64\", \"write_access_denied\": true, \"error\": \"[Errno 13] Permission denied: 'V:\\\\\\\\___VAC\\\\\\\\__K\\\\\\\\__CODE\\\\\\\\_AI_STUFF_AGENTIC\\\\\\\\_SAIPEN\\\\\\\\tools\\\\\\\\saipen.py'\", \"bytes_unchanged\": true}\r\n",
+  "child_stderr": "",
+  "writes_performed": 0,
+  "pass": true,
+  "limit": "Actual OS write-open refusal at listed targets, including child inheritance. No model evaluation yet."
+}

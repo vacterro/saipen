@@ -52,7 +52,7 @@ CACHE_DIRS = frozenset({"__pycache__", ".pytest_cache"})
 GENERATED_SUFFIXES = frozenset({".pyc", ".pyo"})
 
 
-def manifest_source(root: Path, raw: object) -> Path:
+def manifest_source(root: Path, raw: object, *, root_resolved: Path | None = None) -> Path:
     """Resolve one manifest `src` against `root`; reject unsafe spellings.
 
     Non-string sources, backslash escapes, absolute sources and `..`
@@ -64,15 +64,18 @@ def manifest_source(root: Path, raw: object) -> Path:
     relative = PurePosixPath(raw)
     if relative.is_absolute() or ".." in relative.parts:
         raise RuntimeError(f"unsafe runtime manifest source: {raw!r}")
+    owner = root.resolve() if root_resolved is None else root_resolved
     source = (root / Path(*relative.parts)).resolve()
     try:
-        source.relative_to(root.resolve())
+        source.relative_to(owner)
     except ValueError as exc:
         raise RuntimeError(f"runtime manifest source escapes repository root: {raw!r}") from exc
     return source
 
 
-def copy_tree_members(root: Path, raw: object) -> tuple[Path, list[Path]]:
+def copy_tree_members(
+    root: Path, raw: object, *, root_resolved: Path | None = None
+) -> tuple[Path, list[Path]]:
     """Expand one `copy_trees` entry into (source_dir, member files).
 
     Members are enumerated exactly the way the injectors copy them:
@@ -85,7 +88,8 @@ def copy_tree_members(root: Path, raw: object) -> tuple[Path, list[Path]]:
     being skipped: `os.walk` ignores listing errors unless told otherwise, and
     a silently shorter member list is a partial surface that still looks whole.
     """
-    source = manifest_source(root, raw)
+    root_resolved = root.resolve() if root_resolved is None else root_resolved
+    source = manifest_source(root, raw, root_resolved=root_resolved)
     if not source.is_dir() or source.is_symlink():
         raise RuntimeError(f"runtime manifest tree missing or symlinked: {raw}")
 
@@ -101,22 +105,26 @@ def copy_tree_members(root: Path, raw: object) -> tuple[Path, list[Path]]:
     members: list[Path] = []
     for _walk_root, _dirs, _files in os.walk(source, onerror=_unreadable):
         for _d in list(_dirs):
+            # Prune the cache dir BEFORE lstatting it: a pruned subtree is
+            # not part of the surface, so a cache symlink inside tools/ was
+            # never refused before and must not start failing surfaces now.
+            if _d in _CACHE_DIRS:
+                _dirs.remove(_d)
+                continue
             _d_path = Path(_walk_root) / _d
             if is_link(_d_path):
                 raise RuntimeError(
                     "runtime manifest tree contains symlink: "
-                    f"{_d_path.relative_to(root.resolve()).as_posix()}"
+                    f"{_d_path.relative_to(root_resolved).as_posix()}"
                 )
-            if _d in _CACHE_DIRS:
-                _dirs.remove(_d)
         for _file in _files:
-            if _file.endswith((".pyc", ".pyo")):
+            if _file.endswith(tuple(GENERATED_SUFFIXES)):
                 continue
             _f_path = Path(_walk_root) / _file
             if is_link(_f_path):
                 raise RuntimeError(
                     "runtime manifest tree contains symlink: "
-                    f"{_f_path.relative_to(root.resolve()).as_posix()}"
+                    f"{_f_path.relative_to(root_resolved).as_posix()}"
                 )
             members.append(_f_path)
     return source, sorted(members)

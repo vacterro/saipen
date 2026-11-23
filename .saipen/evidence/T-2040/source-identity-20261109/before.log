@@ -1,0 +1,9 @@
+F..                                                                      [100%]
+================================== FAILURES ===================================
+_ OneSourceIdentityPerStatusProjectionTests.test_status_no_longer_captures_its_own_identity _
+tools\test_t1544_audit20.py:210: in test_status_no_longer_captures_its_own_identity
+    self.assertEqual(
+E   AssertionError: 3 != 2 : status recomputed the source identity 3x
+=========================== short test summary info ===========================
+FAILED tools/test_t1544_audit20.py::OneSourceIdentityPerStatusProjectionTests::test_status_no_longer_captures_its_own_identity
+1 failed, 2 passed in 4.95s

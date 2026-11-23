@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*t3[678]_*.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap"
+  ],
+  "oracle_files": [
+    "tools/test_t1781_t37_latest_build.py",
+    "tools/test_vacterro_t36_checkpoint_usage_taxonomy.py",
+    "tools/test_vacterro_t37_no_delta_closure.py",
+    "tools/test_t38_improve_cycle_liveness.py",
+    "tools/test_orchestration_repair.py",
+    "tools/test_public_closure_cli.py",
+    "tools/test_guard_hostile_matrix.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/operations.py",
+    "tools/saipen_engine/continue_fallback.py",
+    "tools/saipen.py"
+  ],
+  "before": {
+    "tools/saipen_engine/operations.py": ".saipen/evidence/T-1781-foreign-adoption/before/operations.py",
+    "tools/saipen_engine/continue_fallback.py": ".saipen/evidence/T-1781-foreign-adoption/before/continue_fallback.py",
+    "tools/saipen.py": ".saipen/evidence/T-1781-foreign-adoption/before/saipen.py"
+  },
+  "timeout": 900
+}

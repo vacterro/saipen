@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "V:\_TEMP_\saipen-evidence-t1341-build-h4yo0ur9\original\tools\saipen.py", line 30, in <module>
+    from saipen_engine import codec, snapshot
+  File "V:\_TEMP_\saipen-evidence-t1341-build-h4yo0ur9\shadow\saipen_engine\__init__.py", line 4, in <module>
+    raise RuntimeError('foreign saipen_engine executed')
+RuntimeError: foreign saipen_engine executed

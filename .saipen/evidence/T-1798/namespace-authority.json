@@ -1,0 +1,17 @@
+{
+  "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "actor": "saipen-cli",
+  "active_work": "T-1798",
+  "owner": "saipen-cli",
+  "protocol_admission_block": null,
+  "execution_intent": "goal",
+  "continuation_authority": "operator_required",
+  "authority_source": "E-15751",
+  "source_provenance": {
+    "witness": "model_supplied"
+  },
+  "source_used_as_new_operator_grant": false,
+  "source_body_sha256": "f6b2335725fef75ff9805ed3e53d50bf7eb13db3c3bc2f97745e50b5e18c7f0c",
+  "publishing_permitted_for_this_work": false
+}

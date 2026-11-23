@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "scope": "intake attribution only; null means unavailable, never zero or PASS",
+  "aggregate_pass": false,
+  "product_tests_executed_by_intake": 0,
+  "observations": [
+    {
+      "command": "python tests/test_saispin.py",
+      "execution_environment": "reported Windows SAITULS session; exact token/environment unavailable",
+      "exit_code": null,
+      "tests_collected": null,
+      "tests_passed": null,
+      "tests_failed": null,
+      "tests_skipped": null,
+      "tests_blocked": null,
+      "fixture_isolation": "historical fixture state unverified; production lease writes reported",
+      "baseline_revision": null,
+      "changed_source_revision": null,
+      "evidence_identity": {
+        "receipt": "SRC-198",
+        "source_sha256": "f71fed2ec4d221941a4ea46eace2f2e0d608b37ab4abbc0ffea659c2aafc0ba5",
+        "observation": "F-05:001",
+        "raw_stream_available": false
+      },
+      "reported_result": "PASS after weakened predicate",
+      "classification": "PASS",
+      "blocked_acceptance": false,
+      "attribution": "operator-supplied incident account; not independently executed",
+      "current_acceptance": false
+    },
+    {
+      "command": "python -m pytest tests/test_saispin.py",
+      "execution_environment": "reported Windows SAITULS session; exact token/environment unavailable",
+      "exit_code": null,
+      "tests_collected": 0,
+      "tests_passed": null,
+      "tests_failed": null,
+      "tests_skipped": null,
+      "tests_blocked": null,
+      "fixture_isolation": "historical fixture state unverified; production lease writes reported",
+      "baseline_revision": null,
+      "changed_source_revision": null,
+      "evidence_identity": {
+        "receipt": "SRC-198",
+        "source_sha256": "f71fed2ec4d221941a4ea46eace2f2e0d608b37ab4abbc0ffea659c2aafc0ba5",
+        "observation": "F-05:002",
+        "raw_stream_available": false
+      },
+      "reported_result": "0 items collected",
+      "classification": "TEST_DISCOVERY_EMPTY",
+      "blocked_acceptance": false,
+      "attribution": "operator-supplied incident account; not independently executed",
+      "current_acceptance": false
+    },
+    {
+      "command": "Scripts/saispin_watch.ps1 -SelfTest",
+      "execution_environment": "reported Windows SAITULS session; exact token/environment unavailable",
+      "exit_code": null,
+      "tests_collected": null,
+      "tests_passed": null,
+      "tests_failed": null,
+      "tests_skipped": null,
+      "tests_blocked": null,
+      "fixture_isolation": "historical fixture state unverified; production lease writes reported",
+      "baseline_revision": null,
+      "changed_source_revision": null,
+      "evidence_identity": {
+        "receipt": "SRC-198",
+        "source_sha256": "f71fed2ec4d221941a4ea46eace2f2e0d608b37ab4abbc0ffea659c2aafc0ba5",
+        "observation": "F-05:003",
+        "raw_stream_available": false
+      },
+      "reported_result": "PASS in one run",
+      "classification": "PASS",
+      "blocked_acceptance": false,
+      "attribution": "operator-supplied incident account; not independently executed",
+      "current_acceptance": false
+    },
+    {
+      "command": "tests/test_saispin_settings.ps1",
+      "execution_environment": "reported Windows SAITULS session; exact token/environment unavailable",
+      "exit_code": null,
+      "tests_collected": null,
+      "tests_passed": null,
+      "tests_failed": null,
+      "tests_skipped": null,
+      "tests_blocked": null,
+      "fixture_isolation": "historical fixture state unverified; production lease writes reported",
+      "baseline_revision": null,
+      "changed_source_revision": null,
+      "evidence_identity": {
+        "receipt": "SRC-198",
+        "source_sha256": "f71fed2ec4d221941a4ea46eace2f2e0d608b37ab4abbc0ffea659c2aafc0ba5",
+        "observation": "F-05:004",
+        "raw_stream_available": false
+      },
+      "reported_result": "PASS in one run",
+      "classification": "PASS",
+      "blocked_acceptance": false,
+      "attribution": "operator-supplied incident account; not independently executed",
+      "current_acceptance": false
+    },
+    {
+      "command": "tests/test_saispin_task.ps1",
+      "execution_environment": "reported Windows SAITULS session; exact token/environment unavailable",
+      "exit_code": null,
+      "tests_collected": null,
+      "tests_passed": null,
+      "tests_failed": 9,
+      "tests_skipped": null,
+      "tests_blocked": null,
+      "fixture_isolation": "historical fixture state unverified; production lease writes reported",
+      "baseline_revision": null,
+      "changed_source_revision": null,
+      "evidence_identity": {
+        "receipt": "SRC-198",
+        "source_sha256": "f71fed2ec4d221941a4ea46eace2f2e0d608b37ab4abbc0ffea659c2aafc0ba5",
+        "observation": "F-05:005",
+        "raw_stream_available": false
+      },
+      "reported_result": "nine failures in a separate run",
+      "classification": "TEST_FAILURE",
+      "blocked_acceptance": false,
+      "attribution": "operator-supplied incident account; not independently executed",
+      "current_acceptance": false
+    },
+    {
+      "command": "other tests/test_saispin_task.ps1 invocations (exact arguments unavailable)",
+      "execution_environment": "reported Windows SAITULS session; exact token/environment unavailable",
+      "exit_code": null,
+      "tests_collected": null,
+      "tests_passed": null,
+      "tests_failed": null,
+      "tests_skipped": null,
+      "tests_blocked": null,
+      "fixture_isolation": "historical fixture state unverified; production lease writes reported",
+      "baseline_revision": null,
+      "changed_source_revision": null,
+      "evidence_identity": {
+        "receipt": "SRC-198",
+        "source_sha256": "f71fed2ec4d221941a4ea46eace2f2e0d608b37ab4abbc0ffea659c2aafc0ba5",
+        "observation": "F-05:006",
+        "raw_stream_available": false
+      },
+      "reported_result": "Register-ScheduledTask : Access is denied",
+      "classification": "PERMISSION_DENIED",
+      "blocked_acceptance": true,
+      "attribution": "operator-supplied incident account; not independently executed",
+      "current_acceptance": false
+    }
+  ]
+}

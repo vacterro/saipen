@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-097:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SRC-097.md: '# User request / priority: P1 / verify: the requested change is present and demonstrated against the user own description of it / ## Request / T-249 close hydration/reconciliation hole: characterData-only audit turn recovery before READY' -> T-250"
+    }
+  },
+  "derived_at": "2026-10-04T19:05:19Z",
+  "derived_from": "SRC-097",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "ce701cca918bb71282f12d7a435e0fbc48f08241302f6d7d236873d1fd4e3e4a"
+}

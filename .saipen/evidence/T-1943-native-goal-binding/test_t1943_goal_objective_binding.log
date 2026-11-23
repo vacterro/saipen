@@ -1,0 +1,31 @@
+test_a_cli_history_newline_does_not_disqualify_a_command (__main__.NothingIsPromotedByAccident.test_a_cli_history_newline_does_not_disqualify_a_command)
+The control for the rule above: one trailing newline is not a document. ... ok
+test_a_multiline_handoff_is_not_a_goal_entry (__main__.NothingIsPromotedByAccident.test_a_multiline_handoff_is_not_a_goal_entry)
+SRC-342 section 4: prose beginning with a shortcut stays prose. ... ok
+test_an_unknown_shortcut_is_not_resolved_by_similarity (__main__.NothingIsPromotedByAccident.test_an_unknown_shortcut_is_not_resolved_by_similarity)
+The registry is authoritative; no fuzzy matching, no word list. ... ok
+test_the_hook_refuses_the_same_multiline_body (__main__.NothingIsPromotedByAccident.test_the_hook_refuses_the_same_multiline_body)
+The hook's fallback must not be a second, looser grammar. ... ok
+test_these_are_not_goal_entries (__main__.NothingIsPromotedByAccident.test_these_are_not_goal_entries) ... ok
+test_the_broker_uses_the_shared_function_not_a_copy (__main__.TheHookAndTheBrokerReadTheSameBytes.test_the_broker_uses_the_shared_function_not_a_copy)
+Structural: the broker must import the parser, never re-implement it. ... ok
+test_the_hook_helper_returns_the_canonical_objective (__main__.TheHookAndTheBrokerReadTheSameBytes.test_the_hook_helper_returns_the_canonical_objective) ... ok
+test_the_hook_still_refuses_prose_and_continuation (__main__.TheHookAndTheBrokerReadTheSameBytes.test_the_hook_still_refuses_prose_and_continuation) ... ok
+test_a_hostile_or_malformed_path_is_never_an_authorization (__main__.TheNativeAuthorizeGoalSpelling.test_a_hostile_or_malformed_path_is_never_an_authorization) ... ok
+test_a_missing_capsule_file_authorizes_nothing (__main__.TheNativeAuthorizeGoalSpelling.test_a_missing_capsule_file_authorizes_nothing) ... ok
+test_both_spellings_resolve_to_the_same_exact_bytes (__main__.TheNativeAuthorizeGoalSpelling.test_both_spellings_resolve_to_the_same_exact_bytes) ... ok
+test_the_file_form_is_an_authorization_not_an_objective (__main__.TheNativeAuthorizeGoalSpelling.test_the_file_form_is_an_authorization_not_an_objective) ... ok
+test_every_accepted_spelling_declares_the_same_objective (__main__.TheObjectiveIsWhatGetsBound.test_every_accepted_spelling_declares_the_same_objective) ... ok
+test_every_accepted_spelling_produces_the_objective_target (__main__.TheObjectiveIsWhatGetsBound.test_every_accepted_spelling_produces_the_objective_target)
+The regression: pre-fix each spelling hashed its own command line. ... ok
+test_no_accepted_spelling_binds_the_raw_command_line (__main__.TheObjectiveIsWhatGetsBound.test_no_accepted_spelling_binds_the_raw_command_line)
+Naming the old bug directly, so a regression cannot be subtle. ... ok
+test_the_target_is_stable_across_whitespace (__main__.TheObjectiveIsWhatGetsBound.test_the_target_is_stable_across_whitespace) ... ok
+test_the_old_expression_produced_a_different_target (__main__.TheRedControlReproducesTheOldTarget.test_the_old_expression_produced_a_different_target) ... ok
+test_the_old_expression_would_fail_the_primary_assertion (__main__.TheRedControlReproducesTheOldTarget.test_the_old_expression_would_fail_the_primary_assertion)
+Simulates the pre-fix value entering the primary assertion. ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.030s
+
+OK

@@ -1,0 +1,17 @@
+{
+  "wall_s": 1562.5,
+  "duration_s": 1562.5,
+  "jobs": 12,
+  "ran": 7546,
+  "status": "FAIL",
+  "timings_s": {
+    "shard_copy_wall_s": 350.063,
+    "environment_identity_wall_s": 2.375,
+    "sweep_wall_s": 0.0,
+    "copy_wall_s": 75.562,
+    "hash_wall_s": 0.141,
+    "execution_wall_s": 1059.438,
+    "cleanup_wall_s": 74.89
+  },
+  "sandboxes_leaked": []
+}

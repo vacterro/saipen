@@ -1,0 +1,1215 @@
+{
+  "ticket": "T-1695",
+  "phase": "VERIFY",
+  "goal_tickets": 11,
+  "board_counts": {
+    "## DOING": 1,
+    "## DONE": 188,
+    "## BLOCKED": 62
+  },
+  "blocked_tickets": {
+    "T-1621": {
+      "id": "T-1621",
+      "section": "## BLOCKED",
+      "line_no": 195,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "request_witness": "model_supplied",
+        "source_receipts": "SRC-180",
+        "blocker": "OUT_OF_SCOPE -- current operator reply confirms SRC-180 was sent to the wrong repository and instructs ignoring it; exclude this UI request from SAIPEN protocol hardening. Preserve the untouched source and history; no implementation or acceptance claimed. Evidence: .saipen/evidence/steering-2026-10-09/ui-wrong-project.txt",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1621 [P2] Composer toolbar buttons overflow fix + Bevels on list rows no visible effect fix | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-180 | blocker: OUT_OF_SCOPE -- current operator reply confirms SRC-180 was sent to the wrong repository and instructs ignoring it; exclude this UI request from SAIPEN protocol hardening. Preserve the untouched source and history; no implementation or acceptance claimed. Evidence: .saipen/evidence/steering-2026-10-09/ui-wrong-project.txt | blocker_scope: ticket",
+      "description": "[P2] Composer toolbar buttons overflow fix + Bevels on list rows no visible effect fix"
+    },
+    "T-1607": {
+      "id": "T-1607",
+      "section": "## BLOCKED",
+      "line_no": 196,
+      "checkbox": " ",
+      "needs": [
+        "T-1609"
+      ],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "request_witness": "model_supplied",
+        "source_receipts": "SRC-168",
+        "needs": "T-1609",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-08T11:35:08Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1644 -- SRC-168 accepts only on the published version (fresh clone, install, set, continue, validate, uninstall, reinstall, GitHub main and CI, a release tag), and nothing built since 2026-10-05 is committed while the operator's publication policy (T-1644) is open; this ticket also forbids a push without a fresh operator instruction (E-13181). Resume at SCOUT once T-1644 is decided",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1607 [P2] \u0421\u043b\u0443\u0448\u0430\u0439, \u043c\u043e\u0436\u0435\u0448\u044c \u043c\u0435\u0436\u0434\u0443 \u0442\u0435\u043a\u0443\u0449\u0435\u0439 \u0440\u0430\u0431\u043e\u0442\u043e\u0439 \u0434\u043e\u0432\u0435\u0441\u0442\u0438 SAIPEN \u0434\u043e \u0441\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u044f, \u043a\u043e\u0442\u043e\u0440\u043e\u0435 \u0443\u0436\u0435 \u043d\u0435 \u0441\u0442\u044b\u0434\u043d\u043e \u0434\u0430\u0442\u044c \u043b\u044e\u0434\u044f\u043c \u043f\u043e\u0449\u0443\u043f\u0430\u0442\u044c, \u0438 \u043f\u0443\u0448\u043d\u0443\u0442\u044c \u0440\u0430\u0431\u043e\u0447\u0443\u044e \u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u0443\u044e \u0432\u0435\u0440\u0441\u0438\u044e \u043d\u0430 GitHub \u0436\u0435... | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-168 | needs: T-1609 | owner: saipen-cli | claim_time: 2026-10-08T11:35:08Z | blocker: ACTIVE_DEPENDENCY:T-1644 -- SRC-168 accepts only on the published version (fresh clone, install, set, continue, validate, uninstall, reinstall, GitHub main and CI, a release tag), and nothing built since 2026-10-05 is committed while the operator's publication policy (T-1644) is open; this ticket also forbids a push without a fresh operator instruction (E-13181). Resume at SCOUT once T-1644 is decided | blocker_scope: ticket",
+      "description": "[P2] \u0421\u043b\u0443\u0448\u0430\u0439, \u043c\u043e\u0436\u0435\u0448\u044c \u043c\u0435\u0436\u0434\u0443 \u0442\u0435\u043a\u0443\u0449\u0435\u0439 \u0440\u0430\u0431\u043e\u0442\u043e\u0439 \u0434\u043e\u0432\u0435\u0441\u0442\u0438 SAIPEN \u0434\u043e \u0441\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u044f, \u043a\u043e\u0442\u043e\u0440\u043e\u0435 \u0443\u0436\u0435 \u043d\u0435 \u0441\u0442\u044b\u0434\u043d\u043e \u0434\u0430\u0442\u044c \u043b\u044e\u0434\u044f\u043c \u043f\u043e\u0449\u0443\u043f\u0430\u0442\u044c, \u0438 \u043f\u0443\u0448\u043d\u0443\u0442\u044c \u0440\u0430\u0431\u043e\u0447\u0443\u044e \u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u0443\u044e \u0432\u0435\u0440\u0441\u0438\u044e \u043d\u0430 GitHub \u0436\u0435..."
+    },
+    "T-1663": {
+      "id": "T-1663",
+      "section": "## BLOCKED",
+      "line_no": 197,
+      "checkbox": " ",
+      "needs": [
+        "T-1639"
+      ],
+      "fields": {
+        "regression": "required",
+        "verify": "a requires field on a BOARD ticket is read by the iteration verdict for the claimed ticket and merged into required_capabilities; a ticket that declares itself read-only is admitted on an executor that reads and...... [detail_ref: .saipen/recovery/board-compaction/T-1663/T-1663-c489354cd1b06b25b51bc291.json]",
+        "source_receipts": "SRC-189",
+        "needs": "T-1639",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-08T10:56:06Z",
+        "blocker": "BLOCKED_EXTERNAL -- the ticket requires delta is built, verified, reviewed and gated (regression pair on verifier e571ea0713fb70be, core-unit d1fdfeb92c691189: 5813 ran, 0 red; SRC-189 R002, R004,...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1663/T-1663-c489354cd1b06b25b51bc291.json"
+      },
+      "raw": "- [ ] T-1663 [P2] A ticket cannot say what its own step needs of an executor (SRC-189 R004, R002, R016, R017, R018; found in T-1651): the required set of saipen iteration is STATE requires... | regression: required | verify: a requires field on a BOARD ticket is read by the iteration verdict for the claimed ticket and merged into required_capabilities; a ticket that declares itself read-only is admitted on an executor that reads and...... [detail_ref: .saipen/recovery/board-compaction/T-1663/T-1663-c489354cd1b06b25b51bc291.json] | source_receipts: SRC-189 | needs: T-1639 | owner: saipen-cli | claim_time: 2026-10-08T10:56:06Z | blocker: BLOCKED_EXTERNAL -- the ticket requires delta is built, verified, reviewed and gated (regression pair on verifier e571ea0713fb70be, core-unit d1fdfeb92c691189: 5813 ran, 0 red; SRC-189 R002, R004,... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1663/T-1663-c489354cd1b06b25b51bc291.json",
+      "description": "[P2] A ticket cannot say what its own step needs of an executor (SRC-189 R004, R002, R016, R017, R018; found in T-1651): the required set of saipen iteration is STATE requires..."
+    },
+    "T-1671": {
+      "id": "T-1671",
+      "section": "## BLOCKED",
+      "line_no": 198,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "request_witness": "model_supplied",
+        "source_receipts": "SRC-192",
+        "blocker": "ACTIVE_DEPENDENCY:T-1672 -- the operator's request is carried by T-1672 (SRC-193, appended to this source): the engine half is built and gated there and the PATH launcher is installed on this machine (E-13246); this ticket owns no independent implementation and closes with T-1672 once its four open clauses are terminal, or earlier on the operator's own report that a FreeBuff session reached saipen",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1671 [P2] file:///V:/_TEMP_/fastprompter_drag/SAIPEN_20261008_0223.md - \u043e\u043f\u044f\u0442\u044c \u0444\u0440\u0438\u0431\u0430\u0444 \u043d\u0435 \u043c\u043e\u0436\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u0447\u0430\u0442\u044c \u0434\u043e \u0441\u0430\u0439\u043f\u0435\u043d\u0430, \u043d\u0443\u0436\u043d\u043e \u0440\u0435\u0448\u0438\u0442\u044c /goal cc all | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-192 | blocker: ACTIVE_DEPENDENCY:T-1672 -- the operator's request is carried by T-1672 (SRC-193, appended to this source): the engine half is built and gated there and the PATH launcher is installed on this machine (E-13246); this ticket owns no independent implementation and closes with T-1672 once its four open clauses are terminal, or earlier on the operator's own report that a FreeBuff session reached saipen | blocker_scope: ticket",
+      "description": "[P2] file:///V:/_TEMP_/fastprompter_drag/SAIPEN_20261008_0223.md - \u043e\u043f\u044f\u0442\u044c \u0444\u0440\u0438\u0431\u0430\u0444 \u043d\u0435 \u043c\u043e\u0436\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u0447\u0430\u0442\u044c \u0434\u043e \u0441\u0430\u0439\u043f\u0435\u043d\u0430, \u043d\u0443\u0436\u043d\u043e \u0440\u0435\u0448\u0438\u0442\u044c /goal cc all"
+    },
+    "T-1675": {
+      "id": "T-1675",
+      "section": "## BLOCKED",
+      "line_no": 199,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "an operator decision is recorded on whether managed projects get the hook by default; with the hook, a commit or push whose .saipen head is unauthorized, or whose control route cannot be resolved, is refused with the exact recovery command, and a project without .saipen is untouched",
+        "blocker": "WAIT_USER_DECISION -- the operator decides whether managed projects get a git hook by default: (a) the installer puts a pre-commit and pre-push hook into every managed project; (b) hooks stay opt-in through tools/install_hook.py; (c) no hook, publication outside saipen stays ungated. Repository evidence cannot supply it: six managed projects carry no hook today and none asked for one",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1675 [P2] Publication outside SAIPEN is not gated: an executor that never calls saipen can still run git commit and git push in a managed project (the SRC-193 incident pushed to main). tools/install_hook.py installs a validating pre-commit hook only on request; measured 2026-10-08, none of six managed sibling projects carries one | verify: an operator decision is recorded on whether managed projects get the hook by default; with the hook, a commit or push whose .saipen head is unauthorized, or whose control route cannot be resolved, is refused with the exact recovery command, and a project without .saipen is untouched | blocker: WAIT_USER_DECISION -- the operator decides whether managed projects get a git hook by default: (a) the installer puts a pre-commit and pre-push hook into every managed project; (b) hooks stay opt-in through tools/install_hook.py; (c) no hook, publication outside saipen stays ungated. Repository evidence cannot supply it: six managed projects carry no hook today and none asked for one | blocker_scope: ticket",
+      "description": "[P2] Publication outside SAIPEN is not gated: an executor that never calls saipen can still run git commit and git push in a managed project (the SRC-193 incident pushed to main). tools/install_hook.py installs a validating pre-commit hook only on request; measured 2026-10-08, none of six managed sibling projects carries one"
+    },
+    "T-1672": {
+      "id": "T-1672",
+      "section": "## BLOCKED",
+      "line_no": 200,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "every derived clause of SRC-193 carries a terminal disposition with evidence",
+        "source_receipts": "SRC-193",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-08T01:43:52Z",
+        "blocker": "BLOCKED_EXTERNAL -- the engine delta is built, verified, reviewed and gated (regression pair E-13233/E-13234, core-unit 58c3c1da1506d690: 5732 ran, none red; 12 actionable clauses of SRC-193 VERIFIED on E-13235); the ticket cannot finish while SRC-193 keeps four clauses open: R050 waits on T-1644 (operator: publication policy; until it is decided the injector refuses DIRTY_SOURCE and every installed host keeps the old activation block), R051 on T-1677 (FastPrompter, SAIRoute and SAIOPP, other repositories), R052 on T-1673 and R053 on T-1675 (in this repository). Finish with ticket done once coverage is terminal",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1672 [P2] Append SRC-193 to SRC-192: operator spec file SAIPEN_20261008_0223.md | verify: every derived clause of SRC-193 carries a terminal disposition with evidence | source_receipts: SRC-193 | owner: saipen-cli | claim_time: 2026-10-08T01:43:52Z | blocker: BLOCKED_EXTERNAL -- the engine delta is built, verified, reviewed and gated (regression pair E-13233/E-13234, core-unit 58c3c1da1506d690: 5732 ran, none red; 12 actionable clauses of SRC-193 VERIFIED on E-13235); the ticket cannot finish while SRC-193 keeps four clauses open: R050 waits on T-1644 (operator: publication policy; until it is decided the injector refuses DIRTY_SOURCE and every installed host keeps the old activation block), R051 on T-1677 (FastPrompter, SAIRoute and SAIOPP, other repositories), R052 on T-1673 and R053 on T-1675 (in this repository). Finish with ticket done once coverage is terminal | blocker_scope: ticket",
+      "description": "[P2] Append SRC-193 to SRC-192: operator spec file SAIPEN_20261008_0223.md"
+    },
+    "T-1677": {
+      "id": "T-1677",
+      "section": "## BLOCKED",
+      "line_no": 201,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "each launcher records the bootstrap answer before starting the executor and starts no managed Work on a non-BOUND answer; shown by that repository's own regression on a session with saipen absent from PATH",
+        "blocker": "BLOCKED_EXTERNAL -- the launchers that hand a project to FreeBuff live in other repositories (FastPrompter, SAIRoute, SAIOPP); the SAIPEN half of the contract (saipen host bootstrap, the activation block's launcher line, the machine runtime) is delivered here and described in .saipen/evidence/T-1671-lifecycle-authority/",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1677 [P2] Pre-handoff admission for hookless executors lives outside this repository (SRC-193): the launchers that hand a managed project to FreeBuff (FastPrompter, SAIRoute, SAIOPP) must ask saipen host bootstrap --host freebuff --project-root PATH before the handoff and refuse or fail over on SAIPEN_HOST_RUNTIME_UNAVAILABLE; the SAIPEN half (the read-only bootstrap answer, the launcher line of the activation block, the machine runtime) is delivered by T-1645, T-1647 and T-1672 | verify: each launcher records the bootstrap answer before starting the executor and starts no managed Work on a non-BOUND answer; shown by that repository's own regression on a session with saipen absent from PATH | blocker: BLOCKED_EXTERNAL -- the launchers that hand a project to FreeBuff live in other repositories (FastPrompter, SAIRoute, SAIOPP); the SAIPEN half of the contract (saipen host bootstrap, the activation block's launcher line, the machine runtime) is delivered here and described in .saipen/evidence/T-1671-lifecycle-authority/ | blocker_scope: ticket",
+      "description": "[P2] Pre-handoff admission for hookless executors lives outside this repository (SRC-193): the launchers that hand a managed project to FreeBuff (FastPrompter, SAIRoute, SAIOPP) must ask saipen host bootstrap --host freebuff --project-root PATH before the handoff and refuse or fail over on SAIPEN_HOST_RUNTIME_UNAVAILABLE; the SAIPEN half (the read-only bootstrap answer, the launcher line of the activation block, the machine runtime) is delivered by T-1645, T-1647 and T-1672"
+    },
+    "T-1664": {
+      "id": "T-1664",
+      "section": "## BLOCKED",
+      "line_no": 202,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the ZAICODE or SAIRoute controller queries saipen iteration --json with the tool manifest of the candidate session before it generates or sends a handoff, reroutes on next FAILOVER and reports NO_COMPATIBLE_EXECUTOR... [detail_ref: .saipen/recovery/board-compaction/T-1664/T-1664-d6ee55d2cbd49d102bf41ced.json]",
+        "source_receipts": "SRC-189",
+        "blocker": "BLOCKED_EXTERNAL -- the native iteration controllers live in ZAICODE and SAIRoute, which are other repositories; the SAIPEN half of the contract (saipen iteration --json with required_capabilities,...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1664/T-1664-d6ee55d2cbd49d102bf41ced.json"
+      },
+      "raw": "- [ ] T-1664 [P2] The native iteration controllers do not yet consume the admission contract (SRC-189 R001, R010, R014 on the real host; found in T-1651): the verdict now carries... | verify: the ZAICODE or SAIRoute controller queries saipen iteration --json with the tool manifest of the candidate session before it generates or sends a handoff, reroutes on next FAILOVER and reports NO_COMPATIBLE_EXECUTOR... [detail_ref: .saipen/recovery/board-compaction/T-1664/T-1664-d6ee55d2cbd49d102bf41ced.json] | source_receipts: SRC-189 | blocker: BLOCKED_EXTERNAL -- the native iteration controllers live in ZAICODE and SAIRoute, which are other repositories; the SAIPEN half of the contract (saipen iteration --json with required_capabilities,... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1664/T-1664-d6ee55d2cbd49d102bf41ced.json",
+      "description": "[P2] The native iteration controllers do not yet consume the admission contract (SRC-189 R001, R010, R014 on the real host; found in T-1651): the verdict now carries..."
+    },
+    "T-1651": {
+      "id": "T-1651",
+      "section": "## BLOCKED",
+      "line_no": 203,
+      "checkbox": " ",
+      "needs": [
+        "T-1663"
+      ],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "request_witness": "model_supplied",
+        "source_receipts": "SRC-189",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-07T14:26:15Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1663 -- the slice of SRC-189 this ticket builds is verified, reviewed and gated (regression pair E-13131/E-13132, core-unit a36534b2b35ace49: 5616 ran, 0 red, 19 clauses VERIFIED or IMPLEMENTED on E-13135); the ticket cannot finish while SRC-189 keeps seven clauses open: R002, R004, R016, R017 and R018 wait on T-1663 (in this repository, next in the queue), R010 on T-1664 (ZAICODE and SAIRoute, other repositories), R021 on the future gate FG-0046. Finish with ticket done once coverage is terminal",
+        "blocker_scope": "ticket",
+        "needs": "T-1663",
+        "blocked_on": "T-1663",
+        "resume_phase": "REVIEW",
+        "resume_transition_from": "VERIFY"
+      },
+      "raw": "- [ ] T-1651 [P2] SAIPEN | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-189 | owner: saipen-cli | claim_time: 2026-10-07T14:26:15Z | blocker: ACTIVE_DEPENDENCY:T-1663 -- the slice of SRC-189 this ticket builds is verified, reviewed and gated (regression pair E-13131/E-13132, core-unit a36534b2b35ace49: 5616 ran, 0 red, 19 clauses VERIFIED or IMPLEMENTED on E-13135); the ticket cannot finish while SRC-189 keeps seven clauses open: R002, R004, R016, R017 and R018 wait on T-1663 (in this repository, next in the queue), R010 on T-1664 (ZAICODE and SAIRoute, other repositories), R021 on the future gate FG-0046. Finish with ticket done once coverage is terminal | blocker_scope: ticket | needs: T-1663 | blocked_on: T-1663 | resume_phase: REVIEW | resume_transition_from: VERIFY",
+      "description": "[P2] SAIPEN"
+    },
+    "T-1655": {
+      "id": "T-1655",
+      "section": "## BLOCKED",
+      "line_no": 204,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "regression": "required",
+        "verify": "on a POSIX host a file with mode 0755 that xpatch patches and then reverts keeps 0755 after both steps; the repair lives where every product-file caller of the helper gets it, or each such caller is shown to restore... [detail_ref: .saipen/recovery/board-compaction/T-1655/T-1655-4d14f0c996096913b81530ee.json]",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-07T13:52:14Z",
+        "blocker": "WAIT_USER_CONFIRMATION -- the repair is built and gated on this Windows host (regression pair E-13120/E-13121 on the decision and wiring cases; core-unit bec5a943bb90b071: 5594 ran, 0 red), and...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1655/T-1655-4d14f0c996096913b81530ee.json"
+      },
+      "raw": "- [ ] T-1655 [P2] XPATCH apply and revert narrow a product file mode on POSIX (read from code 2026-10-07 during T-1654 REVIEW, not reproduced on this Windows host):... | regression: required | verify: on a POSIX host a file with mode 0755 that xpatch patches and then reverts keeps 0755 after both steps; the repair lives where every product-file caller of the helper gets it, or each such caller is shown to restore... [detail_ref: .saipen/recovery/board-compaction/T-1655/T-1655-4d14f0c996096913b81530ee.json] | owner: saipen-cli | claim_time: 2026-10-07T13:52:14Z | blocker: WAIT_USER_CONFIRMATION -- the repair is built and gated on this Windows host (regression pair E-13120/E-13121 on the decision and wiring cases; core-unit bec5a943bb90b071: 5594 ran, 0 red), and... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1655/T-1655-4d14f0c996096913b81530ee.json",
+      "description": "[P2] XPATCH apply and revert narrow a product file mode on POSIX (read from code 2026-10-07 during T-1654 REVIEW, not reproduced on this Windows host):..."
+    },
+    "T-1647": {
+      "id": "T-1647",
+      "section": "## BLOCKED",
+      "line_no": 205,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "request_witness": "model_supplied",
+        "source_receipts": "SRC-188",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-07T01:23:09Z",
+        "blocker": "BLOCKED_EXTERNAL -- the engine delta is built, verified, reviewed and gated (core-unit c63302aec1cd2ea6, machine runtime installed and READY on this machine); the ticket cannot finish while SRC-188 keeps seven clauses open: R006, R013 and R016 wait on T-1654 (in this repository, next in the queue), R009 and R010 on T-1653 (SAI Accounts, another repository), R020 and R025 on T-1652 (the operator's run as antigravity_b). Finish with ticket done once coverage is terminal",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1647 [P2] SAIPEN | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-188 | owner: saipen-cli | claim_time: 2026-10-07T01:23:09Z | blocker: BLOCKED_EXTERNAL -- the engine delta is built, verified, reviewed and gated (core-unit c63302aec1cd2ea6, machine runtime installed and READY on this machine); the ticket cannot finish while SRC-188 keeps seven clauses open: R006, R013 and R016 wait on T-1654 (in this repository, next in the queue), R009 and R010 on T-1653 (SAI Accounts, another repository), R020 and R025 on T-1652 (the operator's run as antigravity_b). Finish with ticket done once coverage is terminal | blocker_scope: ticket",
+      "description": "[P2] SAIPEN"
+    },
+    "T-1653": {
+      "id": "T-1653",
+      "section": "## BLOCKED",
+      "line_no": 206,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "SAI Accounts reports SAIPEN-runtime readiness separately from provider and project readiness, and a managed account is not READY while saipen host machine status is not MACHINE_RUNTIME_READY; closed through ticket resolve-external naming the SAI Accounts implementation",
+        "blocker": "BLOCKED_EXTERNAL -- the SAI Accounts source is outside this repository; the SAIPEN half of the contract (saipen host machine status and install, saipen_runtime_ready) is delivered by T-1647 and described in .saipen/evidence/T-1647-machine-runtime/ACCEPTANCE.md",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1653 [P2] SAI Accounts does not consume the machine runtime (SRC-188 SAI Accounts integration and account creation/repair; external product, its source is not in this repository): account readiness has to read saipen host machine status --json (saipen_runtime_ready), run saipen host machine install through its own trusted updater when that is false, and stop reporting a managed account ready for autonomous SAIPEN work while it is false; account creation, adoption and repair verify the eight SRC-188 checks without manual ACL commands | verify: SAI Accounts reports SAIPEN-runtime readiness separately from provider and project readiness, and a managed account is not READY while saipen host machine status is not MACHINE_RUNTIME_READY; closed through ticket resolve-external naming the SAI Accounts implementation | blocker: BLOCKED_EXTERNAL -- the SAI Accounts source is outside this repository; the SAIPEN half of the contract (saipen host machine status and install, saipen_runtime_ready) is delivered by T-1647 and described in .saipen/evidence/T-1647-machine-runtime/ACCEPTANCE.md | blocker_scope: ticket",
+      "description": "[P2] SAI Accounts does not consume the machine runtime (SRC-188 SAI Accounts integration and account creation/repair; external product, its source is not in this repository): account readiness has to read saipen host machine status --json (saipen_runtime_ready), run saipen host machine install through its own trusted updater when that is false, and stop reporting a managed account ready for autonomous SAIPEN work while it is false; account creation, adoption and repair verify the eight SRC-188 checks without manual ACL commands"
+    },
+    "T-1652": {
+      "id": "T-1652",
+      "section": "## BLOCKED",
+      "line_no": 207,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "MANUAL-VERIFY RESULT recorded from the operator's own report: host bootstrap answers HOST_BOOTSTRAP_BOUND with runtime_source MACHINE_RUNTIME and legacy_saipen_home INACCESSIBLE_BUT_REPLACED; continue names the project's current Work with a load_path under C:/ProgramData/SAI/SAIPEN; the operator profile file answers Access is denied; the same holds for a second managed SID",
+        "blocker": "WAIT_USER_CONFIRMATION -- the operator runs the three commands of this ticket as antigravity_b and reports pass or fail; this seat holds no logon for a managed account and does not use the SAI Accounts vault",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1652 [P2] Manual acceptance of the machine runtime as a real managed Windows account (SRC-188 matrix and success condition): this seat has no logon for antigravity_b, so T-1647 measured the scenario with an equivalent principal only (the operator token with its own SID deny-only). Steps: as antigravity_b in a granted project (AUDAPACK), nothing on PATH, run C:/ProgramData/SAI/SAIPEN/bin/saipen.cmd host bootstrap --json, then continue --json, then type the operator's .claude/CLAUDE.md | verify: MANUAL-VERIFY RESULT recorded from the operator's own report: host bootstrap answers HOST_BOOTSTRAP_BOUND with runtime_source MACHINE_RUNTIME and legacy_saipen_home INACCESSIBLE_BUT_REPLACED; continue names the project's current Work with a load_path under C:/ProgramData/SAI/SAIPEN; the operator profile file answers Access is denied; the same holds for a second managed SID | blocker: WAIT_USER_CONFIRMATION -- the operator runs the three commands of this ticket as antigravity_b and reports pass or fail; this seat holds no logon for a managed account and does not use the SAI Accounts vault | blocker_scope: ticket",
+      "description": "[P2] Manual acceptance of the machine runtime as a real managed Windows account (SRC-188 matrix and success condition): this seat has no logon for antigravity_b, so T-1647 measured the scenario with an equivalent principal only (the operator token with its own SID deny-only). Steps: as antigravity_b in a granted project (AUDAPACK), nothing on PATH, run C:/ProgramData/SAI/SAIPEN/bin/saipen.cmd host bootstrap --json, then continue --json, then type the operator's .claude/CLAUDE.md"
+    },
+    "T-1644": {
+      "id": "T-1644",
+      "section": "## BLOCKED",
+      "line_no": 208,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "STATE mode (or one registry-declared publication value) states the operator's publication policy and SHIP, the finish and the validator all read it; ship.md cites what CORE says; the expiry of a pausing receipt is a... [detail_ref: .saipen/recovery/board-compaction/T-1644/T-1644-05550d088dc5f5bf33ce30c6.json]",
+        "blocker": "WAIT_USER_DECISION -- the operator chooses this repository's publication policy: (a) full: SHIP commits, tags and pushes; (b) local commits only, no push or tag (the practice recorded in this...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1644/T-1644-05550d088dc5f5bf33ce30c6.json"
+      },
+      "raw": "- [ ] T-1644 [P2] Publication authority has no single machine owner (T-1637 C2): STATE mode is full, sessions apply a 'standing no-publish policy' citing SRC-039, whose own text pauses... | verify: STATE mode (or one registry-declared publication value) states the operator's publication policy and SHIP, the finish and the validator all read it; ship.md cites what CORE says; the expiry of a pausing receipt is a... [detail_ref: .saipen/recovery/board-compaction/T-1644/T-1644-05550d088dc5f5bf33ce30c6.json] | blocker: WAIT_USER_DECISION -- the operator chooses this repository's publication policy: (a) full: SHIP commits, tags and pushes; (b) local commits only, no push or tag (the practice recorded in this... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1644/T-1644-05550d088dc5f5bf33ce30c6.json",
+      "description": "[P2] Publication authority has no single machine owner (T-1637 C2): STATE mode is full, sessions apply a 'standing no-publish policy' citing SRC-039, whose own text pauses..."
+    },
+    "T-1610": {
+      "id": "T-1610",
+      "section": "## BLOCKED",
+      "line_no": 209,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "request_witness": "model_supplied",
+        "source_receipts": "SRC-172,SRC-173",
+        "blocker": "CONTEXT_MISSING -- the reserved seat child cannot be specified truthfully from this seat (measured 2026-10-05): SRC-172 asks that an agent never ask about the artifact fast_Scheduler_Continuinity bundle, and quotes the operator's 'your 12 requirements', which this seat does not carry; the archive is absent from the workspace and from the standard download locations (find over the repo to depth 3 and the user profile to depth 4, measured). Not permanent and not a refusal of the request: resume T-1610 when the artifact or the 12 requirements are supplied; the seat is released for the operator's explicit T-1614 finishing handoff (SRC-176)",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1610 [P2] \u2022 FastPrompter / SAIPEN / Audit \u0441\u043b\u0443\u0447\u0430\u0439 | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-172,SRC-173 | blocker: CONTEXT_MISSING -- the reserved seat child cannot be specified truthfully from this seat (measured 2026-10-05): SRC-172 asks that an agent never ask about the artifact fast_Scheduler_Continuinity bundle, and quotes the operator's 'your 12 requirements', which this seat does not carry; the archive is absent from the workspace and from the standard download locations (find over the repo to depth 3 and the user profile to depth 4, measured). Not permanent and not a refusal of the request: resume T-1610 when the artifact or the 12 requirements are supplied; the seat is released for the operator's explicit T-1614 finishing handoff (SRC-176) | blocker_scope: ticket",
+      "description": "[P2] \u2022 FastPrompter / SAIPEN / Audit \u0441\u043b\u0443\u0447\u0430\u0439"
+    },
+    "T-1611": {
+      "id": "T-1611",
+      "section": "## BLOCKED",
+      "line_no": 210,
+      "checkbox": " ",
+      "needs": [
+        "T-1610"
+      ],
+      "fields": {
+        "verify": "every derived clause of SRC-173 carries a terminal disposition with evidence",
+        "source_receipts": "SRC-173",
+        "blocker": "ACTIVE_DEPENDENCY:T-1610 -- Duplicate append projection of SRC-173; operator explicitly requires reuse of T-1610. T-1611 owns no independent implementation; supersede by T-1610 with E-12264/SRC-173 once successor is verified DONE.",
+        "blocker_scope": "ticket",
+        "needs": "T-1610",
+        "blocked_on": "T-1610",
+        "resume_phase": "REVIEW",
+        "resume_transition_from": "VERIFY"
+      },
+      "raw": "- [ ] T-1611 [P2] Append SRC-173 to SRC-172: ARTIFACT-REFERENCE-01 complete operator handoff; preserve T-1610, no ZAICODE implementation | verify: every derived clause of SRC-173 carries a terminal disposition with evidence | source_receipts: SRC-173 | blocker: ACTIVE_DEPENDENCY:T-1610 -- Duplicate append projection of SRC-173; operator explicitly requires reuse of T-1610. T-1611 owns no independent implementation; supersede by T-1610 with E-12264/SRC-173 once successor is verified DONE. | blocker_scope: ticket | needs: T-1610 | blocked_on: T-1610 | resume_phase: REVIEW | resume_transition_from: VERIFY",
+      "description": "[P2] Append SRC-173 to SRC-172: ARTIFACT-REFERENCE-01 complete operator handoff; preserve T-1610, no ZAICODE implementation"
+    },
+    "T-1606": {
+      "id": "T-1606",
+      "section": "## BLOCKED",
+      "line_no": 211,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "every actionable clause of SRC-167 is terminal with evidence; linked Work DONE; source closure succeeds; audit/23.md consumed by the journaled audit inbox cleanup; source_receipt=SRC-167",
+        "source_receipts": "SRC-167",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-04T01:30:57Z",
+        "verify_attempts": "2",
+        "blocker": "VERIFY_RETRY_CAP: two failed correction cycles; complete family 4908 ran with seven new regressions. Candidate and exact failures are preserved under .saipen/kitchen/failed/T-1606; lift only after changed evidence resolves the seven neighbors and the Unicode line-separator writer mismatch. SRC-167 and audit/23 remain open.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1606 [P1] Execute external audit inbox layer audit/23.md (SRC-167); source_receipt=SRC-167 | verify: every actionable clause of SRC-167 is terminal with evidence; linked Work DONE; source closure succeeds; audit/23.md consumed by the journaled audit inbox cleanup; source_receipt=SRC-167 | source_receipts: SRC-167 | owner: saipen-cli | claim_time: 2026-10-04T01:30:57Z | verify_attempts: 2 | blocker: VERIFY_RETRY_CAP: two failed correction cycles; complete family 4908 ran with seven new regressions. Candidate and exact failures are preserved under .saipen/kitchen/failed/T-1606; lift only after changed evidence resolves the seven neighbors and the Unicode line-separator writer mismatch. SRC-167 and audit/23 remain open. | blocker_scope: ticket",
+      "description": "[P1] Execute external audit inbox layer audit/23.md (SRC-167); source_receipt=SRC-167"
+    },
+    "T-1602": {
+      "id": "T-1602",
+      "section": "## BLOCKED",
+      "line_no": 212,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "regression": "required",
+        "verify": "Same fixed fixture is green on both floors when narrative mentions needs: and real needs fields remain enforced; dangling/cyclic controls still red; canonical parity instrument recognizes its known-good control without weakening rules or coverage",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-03T10:21:25Z",
+        "blocker": "BLOCKED_EXTERNAL -- unchanged portable parity cannot construct external-identity symlink (WinError 1314): 246/247 cases, 14 caught, baseline 11 unchanged. Full unit 4855/red 0 and fixed oracle pass; no denominator waiver. Pending owned patch and exact refusal: .saipen/evidence/floor-fields/VERIFY-notes.md. Resume VERIFY after real host symlink capability is available.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1602 [P2] Portable floor consumes needs: inside opaque blocker prose as a dependency; Windows parity known-good control also stalls under captured subprocess transport | regression: required | verify: Same fixed fixture is green on both floors when narrative mentions needs: and real needs fields remain enforced; dangling/cyclic controls still red; canonical parity instrument recognizes its known-good control without weakening rules or coverage | owner: saipen-cli | claim_time: 2026-10-03T10:21:25Z | blocker: BLOCKED_EXTERNAL -- unchanged portable parity cannot construct external-identity symlink (WinError 1314): 246/247 cases, 14 caught, baseline 11 unchanged. Full unit 4855/red 0 and fixed oracle pass; no denominator waiver. Pending owned patch and exact refusal: .saipen/evidence/floor-fields/VERIFY-notes.md. Resume VERIFY after real host symlink capability is available. | blocker_scope: ticket",
+      "description": "[P2] Portable floor consumes needs: inside opaque blocker prose as a dependency; Windows parity known-good control also stalls under captured subprocess transport"
+    },
+    "T-1507": {
+      "id": "T-1507",
+      "section": "## BLOCKED",
+      "line_no": 213,
+      "checkbox": " ",
+      "needs": [
+        "T-1510",
+        "T-1602"
+      ],
+      "fields": {
+        "verify": "port onto current intake with its XP tests green; dry-run zero writes; red control on a BOARD with a structured range",
+        "needs": "T-1510,T-1602",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-03T09:04:43Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1602 -- Mandatory portable parity oracle: structured needs parsing reads prose; Windows native runner is unreachable because sys.platform is compared with nt. Preserve restored normalization and family PASS; fix the oracle and floors before parent closure.",
+        "blocker_scope": "ticket",
+        "blocked_on": "T-1602",
+        "resume_phase": "VERIFY",
+        "resume_transition_from": "BUILD"
+      },
+      "raw": "- [ ] T-1507 [P3] Restore receipt-range normalization lost with XP-000001: saipen source normalize (normalize_receipt_ranges, _expand_receipt_range, _plan_receipt_range_rewrite; AUDAPACK T-52) and its ReceiptRangeNormalizationTests exist only in .saipen/exchange/xpatch/XP-000001/payload.json | verify: port onto current intake with its XP tests green; dry-run zero writes; red control on a BOARD with a structured range | needs: T-1510,T-1602 | owner: saipen-cli | claim_time: 2026-10-03T09:04:43Z | blocker: ACTIVE_DEPENDENCY:T-1602 -- Mandatory portable parity oracle: structured needs parsing reads prose; Windows native runner is unreachable because sys.platform is compared with nt. Preserve restored normalization and family PASS; fix the oracle and floors before parent closure. | blocker_scope: ticket | blocked_on: T-1602 | resume_phase: VERIFY | resume_transition_from: BUILD",
+      "description": "[P3] Restore receipt-range normalization lost with XP-000001: saipen source normalize (normalize_receipt_ranges, _expand_receipt_range, _plan_receipt_range_rewrite; AUDAPACK T-52) and its ReceiptRangeNormalizationTests exist only in .saipen/exchange/xpatch/XP-000001/payload.json"
+    },
+    "T-1449": {
+      "id": "T-1449",
+      "section": "## BLOCKED",
+      "line_no": 214,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "cc all is complete and the repository-declared verification harness passes",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-02T19:21:56Z",
+        "blocker": "QUEUE_NOT_TERMINAL -- cc all acceptance still needs completion or truthful disposition of admitted runnable Work. The current queue snapshot is .saipen/evidence/response-authority/parent-final-queue.json; its counts are observed evidence, not a permanent readiness rule. T-1510 remains active and T-1507 owns its continuation reservation. Eight MARKHUNT findings retain their explicit-human-triage gate; other real external and strategic boundaries remain. Current complete unit oracle is green but does not complete the queue. Shared cohort evidence closure and publication are separate; release publication remains excluded.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1449 [P1] cc all | verify: cc all is complete and the repository-declared verification harness passes | owner: saipen-cli | claim_time: 2026-10-02T19:21:56Z | blocker: QUEUE_NOT_TERMINAL -- cc all acceptance still needs completion or truthful disposition of admitted runnable Work. The current queue snapshot is .saipen/evidence/response-authority/parent-final-queue.json; its counts are observed evidence, not a permanent readiness rule. T-1510 remains active and T-1507 owns its continuation reservation. Eight MARKHUNT findings retain their explicit-human-triage gate; other real external and strategic boundaries remain. Current complete unit oracle is green but does not complete the queue. Shared cohort evidence closure and publication are separate; release publication remains excluded. | blocker_scope: ticket",
+      "description": "[P1] cc all"
+    },
+    "T-1450": {
+      "id": "T-1450",
+      "section": "## BLOCKED",
+      "line_no": 215,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "cc all is complete and the repository-declared verification harness passes",
+        "owner": "astra",
+        "claim_time": "2026-09-21T21:42:41Z",
+        "blocker": "QUEUE_NOT_TERMINAL -- cc all acceptance still needs completion or truthful disposition of admitted runnable Work. The current queue snapshot is .saipen/evidence/response-authority/parent-final-queue.json; its counts are observed evidence, not a permanent readiness rule. T-1510 remains active and T-1507 owns its continuation reservation. Eight MARKHUNT findings retain their explicit-human-triage gate; other real external and strategic boundaries remain. Current complete unit oracle is green but does not complete the queue. Shared cohort evidence closure and publication are separate; release publication remains excluded.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1450 [P1] cc all | verify: cc all is complete and the repository-declared verification harness passes | owner: astra | claim_time: 2026-09-21T21:42:41Z | blocker: QUEUE_NOT_TERMINAL -- cc all acceptance still needs completion or truthful disposition of admitted runnable Work. The current queue snapshot is .saipen/evidence/response-authority/parent-final-queue.json; its counts are observed evidence, not a permanent readiness rule. T-1510 remains active and T-1507 owns its continuation reservation. Eight MARKHUNT findings retain their explicit-human-triage gate; other real external and strategic boundaries remain. Current complete unit oracle is green but does not complete the queue. Shared cohort evidence closure and publication are separate; release publication remains excluded. | blocker_scope: ticket",
+      "description": "[P1] cc all"
+    },
+    "T-1314": {
+      "id": "T-1314",
+      "section": "## BLOCKED",
+      "line_no": 216,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "a retention or settlement rule exists for saiwiki READY/ (settle superseded packages on publish, or prune beyond newest, or document READY/ as append-only archive with the OUTBOX as sole truth); after one publish...... [detail_ref: .saipen/recovery/board-compaction/T-1314/T-1314-0f9d99a49679569e902a1eef.json]",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1314/T-1314-0f9d99a49679569e902a1eef.json"
+      },
+      "raw": "- [ ] T-1314 [P3] [MARKHUNT] cluster x1 (pass E-5980 @71455482): saiwiki's READY/ directory accumulates every publish as a distinct sha256-named snapshot with no settlement path -- 12... | verify: a retention or settlement rule exists for saiwiki READY/ (settle superseded packages on publish, or prune beyond newest, or document READY/ as append-only archive with the OUTBOX as sole truth); after one publish...... [detail_ref: .saipen/recovery/board-compaction/T-1314/T-1314-0f9d99a49679569e902a1eef.json] | blocker: MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1314/T-1314-0f9d99a49679569e902a1eef.json",
+      "description": "[P3] [MARKHUNT] cluster x1 (pass E-5980 @71455482): saiwiki's READY/ directory accumulates every publish as a distinct sha256-named snapshot with no settlement path -- 12..."
+    },
+    "T-1313": {
+      "id": "T-1313",
+      "section": "## BLOCKED",
+      "line_no": 217,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "CHANGELOG overflow (entries beyond the declared ~10) moved verbatim to CHANGELOG_ARCHIVE.md and the warning stops emitting, or a live owner ticket exists naming the slug; the T-1245 descending-order red-control... [detail_ref: .saipen/recovery/board-compaction/T-1313/T-1313-f19d136a050017ea25d9e5b3.json]",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1313/T-1313-f19d136a050017ea25d9e5b3.json"
+      },
+      "raw": "- [ ] T-1313 [P3] [MARKHUNT] cluster x1 (pass E-5979 @71455482): the `changelog-unarchived` warning emits on every validation (CHANGELOG.md carries 55 version entries while it states it... | verify: CHANGELOG overflow (entries beyond the declared ~10) moved verbatim to CHANGELOG_ARCHIVE.md and the warning stops emitting, or a live owner ticket exists naming the slug; the T-1245 descending-order red-control... [detail_ref: .saipen/recovery/board-compaction/T-1313/T-1313-f19d136a050017ea25d9e5b3.json] | blocker: MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1313/T-1313-f19d136a050017ea25d9e5b3.json",
+      "description": "[P3] [MARKHUNT] cluster x1 (pass E-5979 @71455482): the `changelog-unarchived` warning emits on every validation (CHANGELOG.md carries 55 version entries while it states it..."
+    },
+    "T-1312": {
+      "id": "T-1312",
+      "section": "## BLOCKED",
+      "line_no": 218,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the mirror directory is either committed by decision or retired by decision (T-1307 owns the which), and MANIFEST.md's advertisement matches what git actually tracks; a validator check (or checklist rule) FAILs...... [detail_ref: .saipen/recovery/board-compaction/T-1312/T-1312-d177ae6ee670bb9814b94abf.json]",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1312/T-1312-d177ae6ee670bb9814b94abf.json"
+      },
+      "raw": "- [ ] T-1312 [P1] [MARKHUNT] cluster x1 (pass E-5979 @71455482): the ENTIRE mirror sub instance .saipen/extensions/subs/saitranslate/ is untracked in git -- zero files in the index (git... | verify: the mirror directory is either committed by decision or retired by decision (T-1307 owns the which), and MANIFEST.md's advertisement matches what git actually tracks; a validator check (or checklist rule) FAILs...... [detail_ref: .saipen/recovery/board-compaction/T-1312/T-1312-d177ae6ee670bb9814b94abf.json] | blocker: MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1312/T-1312-d177ae6ee670bb9814b94abf.json",
+      "description": "[P1] [MARKHUNT] cluster x1 (pass E-5979 @71455482): the ENTIRE mirror sub instance .saipen/extensions/subs/saitranslate/ is untracked in git -- zero files in the index (git..."
+    },
+    "T-1311": {
+      "id": "T-1311",
+      "section": "## BLOCKED",
+      "line_no": 219,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the untracked-manifest finding names its entry source (explicit files entry vs copy tree src), so the remediation is actionable per case; explicit-entry and copy-tree-swept untracked files are distinguishable... [detail_ref: .saipen/recovery/board-compaction/T-1311/T-1311-4e7f72fb44aecb68a63d8ec2.json]",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1311/T-1311-4e7f72fb44aecb68a63d8ec2.json"
+      },
+      "raw": "- [ ] T-1311 [P2] [MARKHUNT] cluster x1 (pass E-5978 @71455482): the runtime-manifest untracked-file finding sweeps in untracked files through copy-tree enumeration and its remediation text... | verify: the untracked-manifest finding names its entry source (explicit files entry vs copy tree src), so the remediation is actionable per case; explicit-entry and copy-tree-swept untracked files are distinguishable... [detail_ref: .saipen/recovery/board-compaction/T-1311/T-1311-4e7f72fb44aecb68a63d8ec2.json] | blocker: MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1311/T-1311-4e7f72fb44aecb68a63d8ec2.json",
+      "description": "[P2] [MARKHUNT] cluster x1 (pass E-5978 @71455482): the runtime-manifest untracked-file finding sweeps in untracked files through copy-tree enumeration and its remediation text..."
+    },
+    "T-1310": {
+      "id": "T-1310",
+      "section": "## BLOCKED",
+      "line_no": 220,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "removing the staged active-surface files of a tombstoned receipt (or the named reverse reconciliation) returns validate_project to zero ORPHAN_RECEIPT; a gate distinguishes staged-add resurrection of a... [detail_ref: .saipen/recovery/board-compaction/T-1310/T-1310-3100c7e47185e6818ee69399.json]",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1310/T-1310-3100c7e47185e6818ee69399.json"
+      },
+      "raw": "- [ ] T-1310 [P2] [MARKHUNT] cluster x1 (pass E-5978 @71455482): a CLOSED source receipt's active surface was resurrected through git staging, and the global gate FAILs on it every run... | verify: removing the staged active-surface files of a tombstoned receipt (or the named reverse reconciliation) returns validate_project to zero ORPHAN_RECEIPT; a gate distinguishes staged-add resurrection of a... [detail_ref: .saipen/recovery/board-compaction/T-1310/T-1310-3100c7e47185e6818ee69399.json] | blocker: MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1310/T-1310-3100c7e47185e6818ee69399.json",
+      "description": "[P2] [MARKHUNT] cluster x1 (pass E-5978 @71455482): a CLOSED source receipt's active surface was resurrected through git staging, and the global gate FAILs on it every run..."
+    },
+    "T-1309": {
+      "id": "T-1309",
+      "section": "## BLOCKED",
+      "line_no": 221,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "locale_readme_paths (and every kitchen glob consumer) excludes non-locale directories by closed rule (dunder dirs, .translation-cache, no README_<NAME>.md convention match), so a __pycache__ beside locales changes...... [detail_ref: .saipen/recovery/board-compaction/T-1309/T-1309-a6239a182de2f5e025c78f49.json]",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1309/T-1309-a6239a182de2f5e025c78f49.json"
+      },
+      "raw": "- [ ] T-1309 [P2] [MARKHUNT] cluster x1 (pass E-5977 @71455482): my own verification import of .saipen/saitranslate/kitchen/_refresh_readmes.py spawned kitchen/__pycache__/ and the... | verify: locale_readme_paths (and every kitchen glob consumer) excludes non-locale directories by closed rule (dunder dirs, .translation-cache, no README_<NAME>.md convention match), so a __pycache__ beside locales changes...... [detail_ref: .saipen/recovery/board-compaction/T-1309/T-1309-a6239a182de2f5e025c78f49.json] | blocker: MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1309/T-1309-a6239a182de2f5e025c78f49.json",
+      "description": "[P2] [MARKHUNT] cluster x1 (pass E-5977 @71455482): my own verification import of .saipen/saitranslate/kitchen/_refresh_readmes.py spawned kitchen/__pycache__/ and the..."
+    },
+    "T-1308": {
+      "id": "T-1308",
+      "section": "## BLOCKED",
+      "line_no": 222,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "a ready package whose declared read_set hashes all still match the live tree is collectable under the documented COMPATIBLE_DRIFT path even when the global triple moved, while any moved declared read dependency... [detail_ref: .saipen/recovery/board-compaction/T-1308/T-1308-0094b92e3f12112aa09f01b2.json]",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1308/T-1308-0094b92e3f12112aa09f01b2.json"
+      },
+      "raw": "- [ ] T-1308 [P2] [MARKHUNT] cluster x1 (pass E-5977 @71455482): W-044 went stale on the freshness triple alone while its payload stayed byte-current, and the two produce indistinguishable... | verify: a ready package whose declared read_set hashes all still match the live tree is collectable under the documented COMPATIBLE_DRIFT path even when the global triple moved, while any moved declared read dependency... [detail_ref: .saipen/recovery/board-compaction/T-1308/T-1308-0094b92e3f12112aa09f01b2.json] | blocker: MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1308/T-1308-0094b92e3f12112aa09f01b2.json",
+      "description": "[P2] [MARKHUNT] cluster x1 (pass E-5977 @71455482): W-044 went stale on the freshness triple alone while its payload stayed byte-current, and the two produce indistinguishable..."
+    },
+    "T-1307": {
+      "id": "T-1307",
+      "section": "## BLOCKED",
+      "line_no": 223,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "exactly ONE STATE/BOARD/LOG/OUTBOX surface answers for saitranslate: either extensions/subs/saitranslate/ is retired (MANIFEST entry removed, mirror OUTBOX deleted, canonical kitchen gains STATE/BOARD/LOG per......... [detail_ref: .saipen/recovery/board-compaction/T-1307/T-1307-4885f97f4117d1549cd892b3.json]",
+        "blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1307/T-1307-4885f97f4117d1549cd892b3.json"
+      },
+      "raw": "- [ ] T-1307 [P1] [MARKHUNT] cluster x1 (pass E-5977 @71455482): TWO live STATE/BOARD/LOG/OUTBOX surfaces for producer saitranslate, one deliberate, one orphaned, and every consumer reads a... | verify: exactly ONE STATE/BOARD/LOG/OUTBOX surface answers for saitranslate: either extensions/subs/saitranslate/ is retired (MANIFEST entry removed, mirror OUTBOX deleted, canonical kitchen gains STATE/BOARD/LOG per......... [detail_ref: .saipen/recovery/board-compaction/T-1307/T-1307-4885f97f4117d1549cd892b3.json] | blocker: MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1307/T-1307-4885f97f4117d1549cd892b3.json",
+      "description": "[P1] [MARKHUNT] cluster x1 (pass E-5977 @71455482): TWO live STATE/BOARD/LOG/OUTBOX surfaces for producer saitranslate, one deliberate, one orphaned, and every consumer reads a..."
+    },
+    "T-1099": {
+      "id": "T-1099",
+      "section": "## BLOCKED",
+      "line_no": 224,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "board-soft-cap owned",
+        "blocker": "FUTURE/STRATEGIC HOLD -- CLEAN-phase remediation, restated 02.10.26 under T-1596. NOT permanent: measured today, BOARD.md is 188.7 KB against the ~16 KB soft cap (validate.py:2766-2780 warns 'board-soft-cap'), of which 143.4 KB is 225 closed-ticket lines. The declared mechanism is the CLEAN board scrub (phases/clean.md step 1), which may prune a DONE entry only when permanent LOG evidence exists AND no live ticket names it in needs: AND no ACTIVE source receipt references it -- a scrub that ignores those gates produced ten 'active receipt references missing Work' failures in a previous pass (IMP-002). Removing DONE text alone still leaves ~45 KB, so this is a real hygiene project, not a one-line prune. Class: FUTURE/STRATEGIC HOLD, not a stale blocker.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1099 [P2] Own the board-soft-cap warning. | verify: board-soft-cap owned | blocker: FUTURE/STRATEGIC HOLD -- CLEAN-phase remediation, restated 02.10.26 under T-1596. NOT permanent: measured today, BOARD.md is 188.7 KB against the ~16 KB soft cap (validate.py:2766-2780 warns 'board-soft-cap'), of which 143.4 KB is 225 closed-ticket lines. The declared mechanism is the CLEAN board scrub (phases/clean.md step 1), which may prune a DONE entry only when permanent LOG evidence exists AND no live ticket names it in needs: AND no ACTIVE source receipt references it -- a scrub that ignores those gates produced ten 'active receipt references missing Work' failures in a previous pass (IMP-002). Removing DONE text alone still leaves ~45 KB, so this is a real hygiene project, not a one-line prune. Class: FUTURE/STRATEGIC HOLD, not a stale blocker. | blocker_scope: ticket",
+      "description": "[P2] Own the board-soft-cap warning."
+    },
+    "T-1564": {
+      "id": "T-1564",
+      "section": "## BLOCKED",
+      "line_no": 225,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-141",
+        "blocker": "SUPERSEDED WORK (restated 02.10.26 under T-1596): T-1563 owns this repair, SRC-142 appends SRC-140, SRC-141 is preserved as historical START input. The canonical route 'saipen ticket supersede T-1564 --by T-1563' is closed on three gates: this Work carries Source receipts (SRC-141) so the route refuses source migration, successor T-1563 is BLOCKED rather than DONE, and no ACTIVE operator receipt grants T-1564 - T-1563. Manufacturing that grant is not authorized. Class: SUPERSEDED/RETIRED WORK plus ACTIVE_DEPENDENCY:T-1563.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1564 [P1] \u041f\u0440\u0438\u0432\u0435\u0442 GPT 6.1 Sol. \u0414\u0430\u0432\u0430\u0439 \u0434\u0430\u043b\u044c\u0448\u0435 \u0443\u043b\u0443\u0447\u0448\u0430\u0442\u044c \u044d\u0442\u043e\u0442 \u043f\u0440\u043e\u0442\u043e\u043a\u043e\u043b SAIPEN. | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-141 | blocker: SUPERSEDED WORK (restated 02.10.26 under T-1596): T-1563 owns this repair, SRC-142 appends SRC-140, SRC-141 is preserved as historical START input. The canonical route 'saipen ticket supersede T-1564 --by T-1563' is closed on three gates: this Work carries Source receipts (SRC-141) so the route refuses source migration, successor T-1563 is BLOCKED rather than DONE, and no ACTIVE operator receipt grants T-1564 - T-1563. Manufacturing that grant is not authorized. Class: SUPERSEDED/RETIRED WORK plus ACTIVE_DEPENDENCY:T-1563. | blocker_scope: ticket",
+      "description": "[P1] \u041f\u0440\u0438\u0432\u0435\u0442 GPT 6.1 Sol. \u0414\u0430\u0432\u0430\u0439 \u0434\u0430\u043b\u044c\u0448\u0435 \u0443\u043b\u0443\u0447\u0448\u0430\u0442\u044c \u044d\u0442\u043e\u0442 \u043f\u0440\u043e\u0442\u043e\u043a\u043e\u043b SAIPEN."
+    },
+    "T-1321": {
+      "id": "T-1321",
+      "section": "## BLOCKED",
+      "line_no": 226,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "--help is complete and the repository-declared verification harness passes",
+        "owner": "codex",
+        "claim_time": "2026-09-13T18:51:03Z",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596. Not Work: 'saipen goal --help' was parsed as goal text; superseded by the production-hardening objective. No canonical route retires a Work row (done/supersede only), and supersede would need an ACTIVE operator receipt granting the exact pair against a DONE successor that is still on the board. Class: INVALID_OR_AMBIGUOUS.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1321 [P1] --help | verify: --help is complete and the repository-declared verification harness passes | owner: codex | claim_time: 2026-09-13T18:51:03Z | blocker: INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596. Not Work: 'saipen goal --help' was parsed as goal text; superseded by the production-hardening objective. No canonical route retires a Work row (done/supersede only), and supersede would need an ACTIVE operator receipt granting the exact pair against a DONE successor that is still on the board. Class: INVALID_OR_AMBIGUOUS. | blocker_scope: ticket",
+      "description": "[P1] --help"
+    },
+    "T-1195": {
+      "id": "T-1195",
+      "section": "## BLOCKED",
+      "line_no": 227,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "Implement, verify, ship is complete and the repository-declared verification harness passes",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596. Not Work: the row text is the tail of a goal command parsed as its own ticket, created in the same BOARD write as T-1194 at b23019f4 (ship v7.231.11); T-1194 is compacted off the board. No canonical route retires a Work row, and supersede would need an ACTIVE operator receipt granting the exact pair. Class: INVALID_OR_AMBIGUOUS.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1195 [P1] Implement, verify, ship | verify: Implement, verify, ship is complete and the repository-declared verification harness passes | blocker: INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596. Not Work: the row text is the tail of a goal command parsed as its own ticket, created in the same BOARD write as T-1194 at b23019f4 (ship v7.231.11); T-1194 is compacted off the board. No canonical route retires a Work row, and supersede would need an ACTIVE operator receipt granting the exact pair. Class: INVALID_OR_AMBIGUOUS. | blocker_scope: ticket",
+      "description": "[P1] Implement, verify, ship"
+    },
+    "T-1172": {
+      "id": "T-1172",
+      "section": "## BLOCKED",
+      "line_no": 228,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "--help is complete and the repository-declared verification harness passes",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596. Not Work: 'saipen goal --help' was parsed as goal text; superseded by T-1173, which is compacted off the board. No canonical route retires a Work row: supersede refuses a compacted successor (operations.py:4219-4231) and demands an ACTIVE operator receipt granting the exact pair, which does not exist and must not be manufactured. Class: INVALID_OR_AMBIGUOUS.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1172 [P1] --help | verify: --help is complete and the repository-declared verification harness passes | blocker: INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596. Not Work: 'saipen goal --help' was parsed as goal text; superseded by T-1173, which is compacted off the board. No canonical route retires a Work row: supersede refuses a compacted successor (operations.py:4219-4231) and demands an ACTIVE operator receipt granting the exact pair, which does not exist and must not be manufactured. Class: INVALID_OR_AMBIGUOUS. | blocker_scope: ticket",
+      "description": "[P1] --help"
+    },
+    "T-1155": {
+      "id": "T-1155",
+      "section": "## BLOCKED",
+      "line_no": 229,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "--help is complete and the repository-declared verification harness passes",
+        "owner": "saipen-cli",
+        "claim_time": "2026-08-24T16:09:23Z",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, unchanged in truth and restated 02.10.26 under T-1596. This row is not Work: an accidental 'saipen goal --help' usage probe was parsed as goal text and became a ticket, superseded by the real FF/XX/VV/ZZ mission. No canonical route retires a Work row -- 'saipen ticket' offers done and supersede only; supersede needs an ACTIVE operator receipt granting T-1155 - <successor>, a successor that is DONE and still on the board, and an OLD Work with no Source receipts (operations.py:4219-4260). None of those exists and none may be manufactured. Class: INVALID_OR_AMBIGUOUS, not a real blocker of any repair.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1155 [P1] --help | verify: --help is complete and the repository-declared verification harness passes | owner: saipen-cli | claim_time: 2026-08-24T16:09:23Z | blocker: INVALID OR AMBIGUOUS BLOCKER, unchanged in truth and restated 02.10.26 under T-1596. This row is not Work: an accidental 'saipen goal --help' usage probe was parsed as goal text and became a ticket, superseded by the real FF/XX/VV/ZZ mission. No canonical route retires a Work row -- 'saipen ticket' offers done and supersede only; supersede needs an ACTIVE operator receipt granting T-1155 - <successor>, a successor that is DONE and still on the board, and an OLD Work with no Source receipts (operations.py:4219-4260). None of those exists and none may be manufactured. Class: INVALID_OR_AMBIGUOUS, not a real blocker of any repair. | blocker_scope: ticket",
+      "description": "[P1] --help"
+    },
+    "T-1566": {
+      "id": "T-1566",
+      "section": "## BLOCKED",
+      "line_no": 230,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-144",
+        "blocker": "SUPERSEDED WORK, not settleable locally (restated 02.10.26 under T-1596). SRC-144 corrects the T-1563/T-1565 stabilization chain; graph reconciliation and containment are preserved in E-10859..E-10862. The canonical retirement route is 'saipen ticket supersede T-1566 --by T-1563', and every gate it names is closed here: this Work carries Source receipts (SRC-144) so the route refuses source migration; successor T-1563 is BLOCKED, not DONE; and no ACTIVE operator receipt grants T-1566 - T-1563. Manufacturing that grant is not authorized. Remaining class: EXTERNAL HUMAN AUTHORITY plus ACTIVE_DEPENDENCY:T-1563.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1566 [P1] SAIPEN | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-144 | blocker: SUPERSEDED WORK, not settleable locally (restated 02.10.26 under T-1596). SRC-144 corrects the T-1563/T-1565 stabilization chain; graph reconciliation and containment are preserved in E-10859..E-10862. The canonical retirement route is 'saipen ticket supersede T-1566 --by T-1563', and every gate it names is closed here: this Work carries Source receipts (SRC-144) so the route refuses source migration; successor T-1563 is BLOCKED, not DONE; and no ACTIVE operator receipt grants T-1566 - T-1563. Manufacturing that grant is not authorized. Remaining class: EXTERNAL HUMAN AUTHORITY plus ACTIVE_DEPENDENCY:T-1563. | blocker_scope: ticket",
+      "description": "[P1] SAIPEN"
+    },
+    "T-1446": {
+      "id": "T-1446",
+      "section": "## BLOCKED",
+      "line_no": 231,
+      "checkbox": " ",
+      "needs": [
+        "T-1447",
+        "T-1448",
+        "T-1302",
+        "T-1457",
+        "T-1458",
+        "T-1453",
+        "T-1452",
+        "T-1456",
+        "T-1455",
+        "T-1454",
+        "T-1461",
+        "T-1460",
+        "T-1463",
+        "T-1467",
+        "T-1468",
+        "T-1469",
+        "T-1470",
+        "T-1500",
+        "T-1501",
+        "T-1520"
+      ],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it [detail_ref: .saipen/recovery/board-compaction/T-1446/T-1446-757c49a80530e954a607771f.json]",
+        "user_explicit": "true",
+        "source_receipts": "SRC-100, SRC-105, SRC-106",
+        "needs": "T-1447, T-1448, T-1302, T-1457, T-1458, T-1453, T-1452, T-1456, T-1455, T-1454, T-1461, T-1460, T-1463, T-1467, T-1468, T-1469, T-1470, T-1500, T-1501, T-1520",
+        "owner": "astra",
+        "claim_time": "2026-09-26T11:41:45Z",
+        "blocker": "STALE SEAT CLAIM REMOVED, live measurement still outstanding (02.10.26 under T-1596). FALSE, proved today: 'the soak rerun is a long-running live 24H measurement ... PID 24736' -- tasklist reports...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1446/T-1446-757c49a80530e954a607771f.json"
+      },
+      "raw": "- [ ] T-1446 [P1] \u041d\u0435\u0442, \u044d\u0442\u043e \u043d\u0435 \u0444\u0430\u043d\u0442\u0430\u0437\u0438\u044f. \u041d\u043e \u0432\u0430\u0436\u043d\u0430\u044f \u043f\u043e\u043f\u0440\u0430\u0432\u043a\u0430: **\u00ab\u0430\u0433\u0435\u043d\u0442 \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0441\u0443\u0442\u043a\u0430\u043c\u0438\u00bb \u043d\u0435 \u0434\u043e\u043b\u0436\u043d\u043e \u043e\u0437\u043d\u0430\u0447\u0430\u0442\u044c \u043e\u0434\u0438\u043d \u0431\u0435\u0441\u0441\u043c\u0435\u0440\u0442\u043d\u044b\u0439 LLM-\u0441\u0435\u0430\u043d\u0441, \u043a\u043e\u0442\u043e\u0440\u044b\u0439 36 \u0447\u0430\u0441\u043e\u0432 \u0434\u0435\u0440\u0436\u0438\u0442 \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442 \u0438 \u043d\u0430\u0434\u0435\u0435\u0442... | verify: the requested change is present and demonstrated against the user own description of it [detail_ref: .saipen/recovery/board-compaction/T-1446/T-1446-757c49a80530e954a607771f.json] | user_explicit: true | source_receipts: SRC-100, SRC-105, SRC-106 | needs: T-1447, T-1448, T-1302, T-1457, T-1458, T-1453, T-1452, T-1456, T-1455, T-1454, T-1461, T-1460, T-1463, T-1467, T-1468, T-1469, T-1470, T-1500, T-1501, T-1520 | owner: astra | claim_time: 2026-09-26T11:41:45Z | blocker: STALE SEAT CLAIM REMOVED, live measurement still outstanding (02.10.26 under T-1596). FALSE, proved today: 'the soak rerun is a long-running live 24H measurement ... PID 24736' -- tasklist reports... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1446/T-1446-757c49a80530e954a607771f.json",
+      "description": "[P1] \u041d\u0435\u0442, \u044d\u0442\u043e \u043d\u0435 \u0444\u0430\u043d\u0442\u0430\u0437\u0438\u044f. \u041d\u043e \u0432\u0430\u0436\u043d\u0430\u044f \u043f\u043e\u043f\u0440\u0430\u0432\u043a\u0430: **\u00ab\u0430\u0433\u0435\u043d\u0442 \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0441\u0443\u0442\u043a\u0430\u043c\u0438\u00bb \u043d\u0435 \u0434\u043e\u043b\u0436\u043d\u043e \u043e\u0437\u043d\u0430\u0447\u0430\u0442\u044c \u043e\u0434\u0438\u043d \u0431\u0435\u0441\u0441\u043c\u0435\u0440\u0442\u043d\u044b\u0439 LLM-\u0441\u0435\u0430\u043d\u0441, \u043a\u043e\u0442\u043e\u0440\u044b\u0439 36 \u0447\u0430\u0441\u043e\u0432 \u0434\u0435\u0440\u0436\u0438\u0442 \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442 \u0438 \u043d\u0430\u0434\u0435\u0435\u0442..."
+    },
+    "T-1563": {
+      "id": "T-1563",
+      "section": "## BLOCKED",
+      "line_no": 232,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-140,SRC-142,SRC-143,SRC-144",
+        "owner": "saipen-cli",
+        "claim_time": "2026-09-30T11:46:15Z",
+        "blocker": "BLOCKED_EXTERNAL -- CAPABILITY_UNAVAILABLE: no separated production host authority; containment and negative controls preserved; SRC-140 R007/R008/R009/R012 positive acceptance unresolved; tests use explicit downstream-only doubles, ten real positives unavailable; no fake HARD or DONE",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1563 [P1] T-1562 verify rejected: reconcile SCOUT to BUILD, complete admission provenance repair | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-140,SRC-142,SRC-143,SRC-144 | owner: saipen-cli | claim_time: 2026-09-30T11:46:15Z | blocker: BLOCKED_EXTERNAL -- CAPABILITY_UNAVAILABLE: no separated production host authority; containment and negative controls preserved; SRC-140 R007/R008/R009/R012 positive acceptance unresolved; tests use explicit downstream-only doubles, ten real positives unavailable; no fake HARD or DONE | blocker_scope: ticket",
+      "description": "[P1] T-1562 verify rejected: reconcile SCOUT to BUILD, complete admission provenance repair"
+    },
+    "T-1562": {
+      "id": "T-1562",
+      "section": "## BLOCKED",
+      "line_no": 233,
+      "checkbox": " ",
+      "needs": [
+        "T-1563"
+      ],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-139",
+        "owner": "saipen-cli",
+        "claim_time": "2026-09-29T13:57:28Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1563 -- PAUSED by user request SRC-140: explicit new task T-1563 takes the seat; resumes at SCOUT when T-1563 closes",
+        "blocker_scope": "ticket",
+        "needs": "T-1563",
+        "blocked_on": "T-1563",
+        "resume_phase": "SCOUT",
+        "resume_transition_from": "DONE"
+      },
+      "raw": "- [ ] T-1562 [P1] T-1558: Harden protocol-admission ledger provenance and mutation guards | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-139 | owner: saipen-cli | claim_time: 2026-09-29T13:57:28Z | blocker: ACTIVE_DEPENDENCY:T-1563 -- PAUSED by user request SRC-140: explicit new task T-1563 takes the seat; resumes at SCOUT when T-1563 closes | blocker_scope: ticket | needs: T-1563 | blocked_on: T-1563 | resume_phase: SCOUT | resume_transition_from: DONE",
+      "description": "[P1] T-1558: Harden protocol-admission ledger provenance and mutation guards"
+    },
+    "T-1558": {
+      "id": "T-1558",
+      "section": "## BLOCKED",
+      "line_no": 234,
+      "checkbox": " ",
+      "needs": [
+        "T-1562"
+      ],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-137,SRC-138",
+        "owner": "saipen-cli",
+        "claim_time": "2026-09-29T11:54:39Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1562 -- PAUSED by user request SRC-139: explicit new task T-1562 takes the seat; resumes at BUILD when T-1562 closes",
+        "blocker_scope": "ticket",
+        "needs": "T-1562",
+        "blocked_on": "T-1562",
+        "resume_phase": "BUILD",
+        "resume_transition_from": "VERIFY"
+      },
+      "raw": "- [ ] T-1558 [P1] \u0421\u0434\u0435\u043b\u0430\u0442\u044c \u043f\u0440\u043e\u0442\u043e\u043a\u043e\u043b \u0436\u0435\u043b\u0435\u0437\u043e\u0431\u0435\u0442\u043e\u043d\u043d\u044b\u043c: \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u0442\u044c future_gate/SAIPEN_agent_stillWritesProses.md \u043a\u0430\u043a \u043e\u0440\u0438\u0435\u043d\u0442\u0438\u0440 (\u0430\u0433\u0435\u043d\u0442 \u043f\u0438\u0448\u0435\u0442 \u0440\u043e\u043c\u0430\u043d\u044b \u0432\u043c\u0435\u0441\u0442\u043e \u043f\u0440\u043e\u0442\u043e\u043a\u043e\u043b\u044c\u043d\u043e\u0433\u043e \u043e\u0442\u0432\u0435\u0442\u0430) \u0438 \u0434\u043e\u0432\u0435... | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-137,SRC-138 | owner: saipen-cli | claim_time: 2026-09-29T11:54:39Z | blocker: ACTIVE_DEPENDENCY:T-1562 -- PAUSED by user request SRC-139: explicit new task T-1562 takes the seat; resumes at BUILD when T-1562 closes | blocker_scope: ticket | needs: T-1562 | blocked_on: T-1562 | resume_phase: BUILD | resume_transition_from: VERIFY",
+      "description": "[P1] \u0421\u0434\u0435\u043b\u0430\u0442\u044c \u043f\u0440\u043e\u0442\u043e\u043a\u043e\u043b \u0436\u0435\u043b\u0435\u0437\u043e\u0431\u0435\u0442\u043e\u043d\u043d\u044b\u043c: \u043f\u0440\u043e\u0447\u0438\u0442\u0430\u0442\u044c future_gate/SAIPEN_agent_stillWritesProses.md \u043a\u0430\u043a \u043e\u0440\u0438\u0435\u043d\u0442\u0438\u0440 (\u0430\u0433\u0435\u043d\u0442 \u043f\u0438\u0448\u0435\u0442 \u0440\u043e\u043c\u0430\u043d\u044b \u0432\u043c\u0435\u0441\u0442\u043e \u043f\u0440\u043e\u0442\u043e\u043a\u043e\u043b\u044c\u043d\u043e\u0433\u043e \u043e\u0442\u0432\u0435\u0442\u0430) \u0438 \u0434\u043e\u0432\u0435..."
+    },
+    "T-1551": {
+      "id": "T-1551",
+      "section": "## BLOCKED",
+      "line_no": 235,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "A registry-backed Codex hook observes an operational turn final message, blocks invalid EXEC-RESPONSE-01 text and autonomous handback, permits a valid status boundary and ordinary non-operational chat, survives cold start and current install; focused tests and a real trusted host proof or exact trust blocker are recorded",
+        "owner": "saipen-cli",
+        "claim_time": "2026-09-28T12:25:30Z",
+        "blocker": "HOST_EXECUTION_UNAVAILABLE -- live Codex negative probe failed helper_sandbox_lock_failed / SetNamedSecurityInfoW 5, so REFUSED_EFFECT_PROVED is absent. Deterministic preflight found DUAL_HOOK_REPRESENTATION (hooks.json plus config.toml) and HOOK_TRUST_UNPROVEN; direct canonical checker reachable, host checker execution unproven. Keep user hooks intact. Resume VERIFY only after genuine host trust and successful real negative/positive controls; current-tree full core new_red=0 also owed.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1551 [P1] Codex Stop hook must check SAIPEN operational final responses through the canonical renderer/checker | verify: A registry-backed Codex hook observes an operational turn final message, blocks invalid EXEC-RESPONSE-01 text and autonomous handback, permits a valid status boundary and ordinary non-operational chat, survives cold start and current install; focused tests and a real trusted host proof or exact trust blocker are recorded | owner: saipen-cli | claim_time: 2026-09-28T12:25:30Z | blocker: HOST_EXECUTION_UNAVAILABLE -- live Codex negative probe failed helper_sandbox_lock_failed / SetNamedSecurityInfoW 5, so REFUSED_EFFECT_PROVED is absent. Deterministic preflight found DUAL_HOOK_REPRESENTATION (hooks.json plus config.toml) and HOOK_TRUST_UNPROVEN; direct canonical checker reachable, host checker execution unproven. Keep user hooks intact. Resume VERIFY only after genuine host trust and successful real negative/positive controls; current-tree full core new_red=0 also owed. | blocker_scope: ticket",
+      "description": "[P1] Codex Stop hook must check SAIPEN operational final responses through the canonical renderer/checker"
+    },
+    "T-1548": {
+      "id": "T-1548",
+      "section": "## BLOCKED",
+      "line_no": 236,
+      "checkbox": " ",
+      "needs": [
+        "T-1549",
+        "T-1551"
+      ],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-131,SRC-132,SRC-133",
+        "needs": "T-1549,T-1551",
+        "owner": "saipen-cli",
+        "claim_time": "2026-09-28T09:14:20Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1551 -- EXEC_RESPONSE_HOST_GAP -- Codex has a documented Stop hook but SAIPEN has no installed final-response guard for that supported executor; T-1551 owns the runtime binding and proof",
+        "blocker_scope": "ticket",
+        "blocked_on": "T-1551",
+        "resume_phase": "VERIFY",
+        "resume_transition_from": "BUILD"
+      },
+      "raw": "- [ ] T-1548 [P1] \u041f\u0440\u0438\u0432\u0435\u0442. \u0412\u043e\u0442 \u0434\u0435\u0440\u0436\u0438, \u043d\u0443\u0436\u043d\u043e \u0438\u0441\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u0432\u043e\u0442 \u0442\u0430\u043a\u0438\u0435 \u043d\u0435\u0440\u043e\u0432\u043d\u043e\u0441\u0442\u0438 V:\\\\_TEMP_\\\\fastprompter_drag\\\\SAIPEN_20260928_0951_2.md \u0438 V:\\\\_TEMP_\\\\fastprompter_drag\\\\SAIPEN_20260928_0... | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-131,SRC-132,SRC-133 | needs: T-1549,T-1551 | owner: saipen-cli | claim_time: 2026-09-28T09:14:20Z | blocker: ACTIVE_DEPENDENCY:T-1551 -- EXEC_RESPONSE_HOST_GAP -- Codex has a documented Stop hook but SAIPEN has no installed final-response guard for that supported executor; T-1551 owns the runtime binding and proof | blocker_scope: ticket | blocked_on: T-1551 | resume_phase: VERIFY | resume_transition_from: BUILD",
+      "description": "[P1] \u041f\u0440\u0438\u0432\u0435\u0442. \u0412\u043e\u0442 \u0434\u0435\u0440\u0436\u0438, \u043d\u0443\u0436\u043d\u043e \u0438\u0441\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u0432\u043e\u0442 \u0442\u0430\u043a\u0438\u0435 \u043d\u0435\u0440\u043e\u0432\u043d\u043e\u0441\u0442\u0438 V:\\_TEMP_\\fastprompter_drag\\SAIPEN_20260928_0951_2.md \u0438 V:\\_TEMP_\\fastprompter_drag\\SAIPEN_20260928_0..."
+    },
+    "T-1541": {
+      "id": "T-1541",
+      "section": "## BLOCKED",
+      "line_no": 237,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "regression": "required",
+        "verify": "test_optional_explicit_launch_is_checked_and_does_not_leak observes OWNERSHIP_CONFLICT for the explicit actor, records actor launch-seat, and confirms no foreign write; bare launch control stays valid.",
+        "owner": "saipen-cli",
+        "claim_time": "2026-09-27T18:45:17Z",
+        "blocker": "ORACLE_CHANGED -- hidden-runner stdout assertion was invalid for OpenCode; refusal reaches the provider transcript, and current tree only changes that verifier. No same-verifier pre/post implementation pair; preserve until canonical regression authority is resolved.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1541 [P1] OpenCode explicit bound launch reports its ownership refusal | regression: required | verify: test_optional_explicit_launch_is_checked_and_does_not_leak observes OWNERSHIP_CONFLICT for the explicit actor, records actor launch-seat, and confirms no foreign write; bare launch control stays valid. | owner: saipen-cli | claim_time: 2026-09-27T18:45:17Z | blocker: ORACLE_CHANGED -- hidden-runner stdout assertion was invalid for OpenCode; refusal reaches the provider transcript, and current tree only changes that verifier. No same-verifier pre/post implementation pair; preserve until canonical regression authority is resolved. | blocker_scope: ticket",
+      "description": "[P1] OpenCode explicit bound launch reports its ownership refusal"
+    },
+    "T-1532": {
+      "id": "T-1532",
+      "section": "## BLOCKED",
+      "line_no": 238,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it [detail_ref: .saipen/recovery/board-compaction/T-1532/T-1532-3fa08c5e08c92683b6805025.json]",
+        "user_explicit": "true",
+        "source_receipts": "SRC-121",
+        "owner": "astra",
+        "claim_time": "2026-09-27T02:56:27Z",
+        "blocker": "CONTRACT_CONFLICT -- the requested behavior is forbidden by a declared contract this implementation cannot change unilaterally. SRC-121 asks for '/goal cc all'. The delivered shape (route a gg...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1532/T-1532-3fa08c5e08c92683b6805025.json"
+      },
+      "raw": "- [ ] T-1532 [P1] /goal cc all | verify: the requested change is present and demonstrated against the user own description of it [detail_ref: .saipen/recovery/board-compaction/T-1532/T-1532-3fa08c5e08c92683b6805025.json] | user_explicit: true | source_receipts: SRC-121 | owner: astra | claim_time: 2026-09-27T02:56:27Z | blocker: CONTRACT_CONFLICT -- the requested behavior is forbidden by a declared contract this implementation cannot change unilaterally. SRC-121 asks for '/goal cc all'. The delivered shape (route a gg... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1532/T-1532-3fa08c5e08c92683b6805025.json",
+      "description": "[P1] /goal cc all"
+    },
+    "T-1509": {
+      "id": "T-1509",
+      "section": "## BLOCKED",
+      "line_no": 239,
+      "checkbox": " ",
+      "needs": [
+        "T-1506"
+      ],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-117",
+        "needs": "T-1506",
+        "owner": "astra",
+        "claim_time": "2026-09-24T21:03:52Z",
+        "blocker": "SEQUENCED_AFTER:T-1507 -- T-1506 DONE 34c32202 (XPATCH survival now reports XP-000001 intake.py + test_source_receipts.py). Next child is T-1507 (restore receipt-range normalization from XP-000001), paused under T-1510 which resumes after the T-1521 post-soak batch. No human action.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1509 [P1] \u0425\u043e\u0440\u043e\u0448\u043e, \u043f\u0440\u043e\u0434\u043e\u043b\u0436\u0430\u0439 \u0434\u0430\u043b\u044c\u0448\u0435 \u0443\u043b\u0443\u0447\u0448\u0430\u0442\u044c SAIPEN, \u041e\u043f\u0443\u0441 :) | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-117 | needs: T-1506 | owner: astra | claim_time: 2026-09-24T21:03:52Z | blocker: SEQUENCED_AFTER:T-1507 -- T-1506 DONE 34c32202 (XPATCH survival now reports XP-000001 intake.py + test_source_receipts.py). Next child is T-1507 (restore receipt-range normalization from XP-000001), paused under T-1510 which resumes after the T-1521 post-soak batch. No human action. | blocker_scope: ticket",
+      "description": "[P1] \u0425\u043e\u0440\u043e\u0448\u043e, \u043f\u0440\u043e\u0434\u043e\u043b\u0436\u0430\u0439 \u0434\u0430\u043b\u044c\u0448\u0435 \u0443\u043b\u0443\u0447\u0448\u0430\u0442\u044c SAIPEN, \u041e\u043f\u0443\u0441 :)"
+    },
+    "T-1327": {
+      "id": "T-1327",
+      "section": "## BLOCKED",
+      "line_no": 240,
+      "checkbox": " ",
+      "needs": [
+        "T-1326"
+      ],
+      "fields": {
+        "needs": "T-1326",
+        "verify": "saipen runtime --prelaunch --adapter <id> reports RUNTIME_CURRENT with zero mutation on a current install and RUNTIME_RESYNCED after verifying engine, guard hook, launcher surface and provenance marker; a failed resync leaves the known-good install intact; the supported launch refuses to start a host on any non-green code; live OpenCode acceptance bootstraps an empty host home and reaches BOUND_VALID with no operator shell",
+        "owner": "astra",
+        "claim_time": "2026-09-24T06:52:30Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1446 -- acceptance resyncs the installed OpenCode runtime the live 24H soak worker executes, and needs live OpenCode runs on the same model pool. Resume SCOUT after T-1446 DONE; no human action.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1327 [P1] Zero-manual convergence of installed-runtime generation skew: prove and resync the installed host runtime through one canonical prelaunch operation so no operator runs inject.ps1 or compares hashes | needs: T-1326 | verify: saipen runtime --prelaunch --adapter <id> reports RUNTIME_CURRENT with zero mutation on a current install and RUNTIME_RESYNCED after verifying engine, guard hook, launcher surface and provenance marker; a failed resync leaves the known-good install intact; the supported launch refuses to start a host on any non-green code; live OpenCode acceptance bootstraps an empty host home and reaches BOUND_VALID with no operator shell | owner: astra | claim_time: 2026-09-24T06:52:30Z | blocker: ACTIVE_DEPENDENCY:T-1446 -- acceptance resyncs the installed OpenCode runtime the live 24H soak worker executes, and needs live OpenCode runs on the same model pool. Resume SCOUT after T-1446 DONE; no human action. | blocker_scope: ticket",
+      "description": "[P1] Zero-manual convergence of installed-runtime generation skew: prove and resync the installed host runtime through one canonical prelaunch operation so no operator runs inject.ps1 or compares hashes"
+    },
+    "T-1429": {
+      "id": "T-1429",
+      "section": "## BLOCKED",
+      "line_no": 241,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "a blocked ticket can declare one canonical due-time surface that status and explain-next project as deferred before its due instant and operator-actionable after it; a red control proves a due time written only as... [detail_ref: .saipen/recovery/board-compaction/T-1429/T-1429-5009a0ab2ae8ca38d4ea6b8e.json]",
+        "source_receipts": "SRC-101",
+        "owner": "astra",
+        "claim_time": "2026-09-24T06:51:04Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1426 -- clauses 1-2 implemented (E-8114); clause 3 needs T-1426 live use of retry_not_before, and T-1426 resumes only after T-1428 -> T-1446. Resume VERIFY then; no human action.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1429/T-1429-5009a0ab2ae8ca38d4ea6b8e.json"
+      },
+      "raw": "- [ ] T-1429 [P2] Deferred operator gates have no native due-time surface: a ## BLOCKED ticket can carry retry_not_before, the operator action and pass/fail signals only as free prose in... | verify: a blocked ticket can declare one canonical due-time surface that status and explain-next project as deferred before its due instant and operator-actionable after it; a red control proves a due time written only as... [detail_ref: .saipen/recovery/board-compaction/T-1429/T-1429-5009a0ab2ae8ca38d4ea6b8e.json] | source_receipts: SRC-101 | owner: astra | claim_time: 2026-09-24T06:51:04Z | blocker: ACTIVE_DEPENDENCY:T-1426 -- clauses 1-2 implemented (E-8114); clause 3 needs T-1426 live use of retry_not_before, and T-1426 resumes only after T-1428 -> T-1446. Resume VERIFY then; no human action. | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1429/T-1429-5009a0ab2ae8ca38d4ea6b8e.json",
+      "description": "[P2] Deferred operator gates have no native due-time surface: a ## BLOCKED ticket can carry retry_not_before, the operator action and pass/fail signals only as free prose in..."
+    },
+    "T-1375": {
+      "id": "T-1375",
+      "section": "## BLOCKED",
+      "line_no": 242,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "a fixture whose LOG quotes another project memory-root evidence path packs COMPLETE while a fixture citing its own absent proof still packs PROTOCOL_INCOMPLETE; SAIPEN own snapshot stays COMPLETE with that sentence... [detail_ref: .saipen/recovery/board-compaction/T-1375/T-1375-034d4e11a94f628522fcb07d.json]",
+        "owner": "astra",
+        "claim_time": "2026-09-23T19:36:02Z",
+        "blocker": "WAIT_USER_DECISION -- the quoted foreign path is lexically identical to a local claim (.saipen/evidence/PERF-001_WINDOWS_EVIDENCE.md) and the COMPLETE verdict is made by AUDAPACK's consumer in...",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1375/T-1375-034d4e11a94f628522fcb07d.json"
+      },
+      "raw": "- [ ] T-1375 [P1] Citation grammar cannot tell a QUOTED foreign evidence path from a claim about this project: any memory-root evidence spelling written into a closure carrier (LOG, BOARD,... | verify: a fixture whose LOG quotes another project memory-root evidence path packs COMPLETE while a fixture citing its own absent proof still packs PROTOCOL_INCOMPLETE; SAIPEN own snapshot stays COMPLETE with that sentence... [detail_ref: .saipen/recovery/board-compaction/T-1375/T-1375-034d4e11a94f628522fcb07d.json] | owner: astra | claim_time: 2026-09-23T19:36:02Z | blocker: WAIT_USER_DECISION -- the quoted foreign path is lexically identical to a local claim (.saipen/evidence/PERF-001_WINDOWS_EVIDENCE.md) and the COMPLETE verdict is made by AUDAPACK's consumer in... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1375/T-1375-034d4e11a94f628522fcb07d.json",
+      "description": "[P1] Citation grammar cannot tell a QUOTED foreign evidence path from a claim about this project: any memory-root evidence spelling written into a closure carrier (LOG, BOARD,..."
+    },
+    "T-1431": {
+      "id": "T-1431",
+      "section": "## BLOCKED",
+      "line_no": 243,
+      "checkbox": " ",
+      "needs": [
+        "T-1344",
+        "T-1476",
+        "T-1482",
+        "T-1481",
+        "T-1484",
+        "T-1485",
+        "T-1472",
+        "T-1383",
+        "T-1445",
+        "T-1474",
+        "T-1401",
+        "T-1402",
+        "T-1478",
+        "T-1489",
+        "T-1488",
+        "T-1465",
+        "T-1466",
+        "T-1442",
+        "T-1490",
+        "T-1491",
+        "T-1387",
+        "T-1496",
+        "T-1495",
+        "T-1430",
+        "T-1374",
+        "T-1375"
+      ],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-084",
+        "needs": "T-1344,T-1476,T-1482,T-1481,T-1484,T-1485,T-1472,T-1383,T-1445,T-1474,T-1401,T-1402,T-1478,T-1489,T-1488,T-1465,T-1466,T-1442,T-1490,T-1491,T-1387,T-1496,T-1495,T-1430,T-1374,T-1375",
+        "owner": "astra",
+        "claim_time": "2026-09-23T19:35:56Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1375 -- SRC-084 phase F: T-1375 next; T-1431 resumes at SCOUT after it",
+        "blocker_scope": "ticket",
+        "blocked_on": "T-1375",
+        "resume_phase": "SCOUT",
+        "resume_transition_from": "DONE"
+      },
+      "raw": "- [ ] T-1431 [P1] SAIPEN | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-084 | needs: T-1344,T-1476,T-1482,T-1481,T-1484,T-1485,T-1472,T-1383,T-1445,T-1474,T-1401,T-1402,T-1478,T-1489,T-1488,T-1465,T-1466,T-1442,T-1490,T-1491,T-1387,T-1496,T-1495,T-1430,T-1374,T-1375 | owner: astra | claim_time: 2026-09-23T19:35:56Z | blocker: ACTIVE_DEPENDENCY:T-1375 -- SRC-084 phase F: T-1375 next; T-1431 resumes at SCOUT after it | blocker_scope: ticket | blocked_on: T-1375 | resume_phase: SCOUT | resume_transition_from: DONE",
+      "description": "[P1] SAIPEN"
+    },
+    "T-1493": {
+      "id": "T-1493",
+      "section": "## BLOCKED",
+      "line_no": 244,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "needs": "",
+        "verify": "red-then-green: at 20/20 the finishing operation checkpoints next_action WAIT: safety valve reached (N waves / M tickets) -- run cc to continue; an agent-run saipen continue on that state returns the WAIT and leaves... [detail_ref: .saipen/recovery/board-compaction/T-1493/T-1493-512f449eef31f98abbe1d1c3.json]",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1493/T-1493-512f449eef31f98abbe1d1c3.json",
+        "source_receipts": "SRC-112",
+        "blocker": "SUPERSEDED_PENDING:T-1494 -- operator note SRC-112 (captured 2026-09-23): the current verify clause (an agent-run continue must leave the WAIT) would degrade the autonomy an explicit /goal grants; the defect is the missing machine distinction between persistent /goal authority and fresh cc authority, owned by T-1494. Formal ticket supersede T-1493 --by T-1494 --authority SRC-112 once T-1494 is DONE",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1493 [P1] The goal safety valve is cleared by the agent itself: saipen continue reauthorizes a tripped valve on every invocation (tools/saipen.py continue: goal_tickets >= 20 ->... | needs:  | verify: red-then-green: at 20/20 the finishing operation checkpoints next_action WAIT: safety valve reached (N waves / M tickets) -- run cc to continue; an agent-run saipen continue on that state returns the WAIT and leaves... [detail_ref: .saipen/recovery/board-compaction/T-1493/T-1493-512f449eef31f98abbe1d1c3.json] | detail_ref: .saipen/recovery/board-compaction/T-1493/T-1493-512f449eef31f98abbe1d1c3.json | source_receipts: SRC-112 | blocker: SUPERSEDED_PENDING:T-1494 -- operator note SRC-112 (captured 2026-09-23): the current verify clause (an agent-run continue must leave the WAIT) would degrade the autonomy an explicit /goal grants; the defect is the missing machine distinction between persistent /goal authority and fresh cc authority, owned by T-1494. Formal ticket supersede T-1493 --by T-1494 --authority SRC-112 once T-1494 is DONE | blocker_scope: ticket",
+      "description": "[P1] The goal safety valve is cleared by the agent itself: saipen continue reauthorizes a tripped valve on every invocation (tools/saipen.py continue: goal_tickets >= 20 ->..."
+    },
+    "T-1428": {
+      "id": "T-1428",
+      "section": "## BLOCKED",
+      "line_no": 245,
+      "checkbox": " ",
+      "needs": [
+        "T-1427",
+        "T-1420",
+        "T-1361",
+        "T-1346",
+        "T-1345",
+        "T-1446"
+      ],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-083",
+        "owner": "astra",
+        "claim_time": "2026-09-21T20:36:32Z",
+        "claim_session": "973332d5b6502aed0ab65e43ff8e09a1",
+        "needs": "T-1427,T-1420,T-1361,T-1346,T-1345,T-1446",
+        "blocker": "ACTIVE_DEPENDENCY:T-1446 -- PAUSED by user request SRC-100: explicit new task T-1446 takes the seat; resumes at BUILD when T-1446 closes",
+        "blocker_scope": "ticket",
+        "blocked_on": "T-1446",
+        "resume_phase": "BUILD",
+        "resume_transition_from": "SCOUT"
+      },
+      "raw": "- [ ] T-1428 [P1] SAIPEN | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-083 | owner: astra | claim_time: 2026-09-21T20:36:32Z | claim_session: 973332d5b6502aed0ab65e43ff8e09a1 | needs: T-1427,T-1420,T-1361,T-1346,T-1345,T-1446 | blocker: ACTIVE_DEPENDENCY:T-1446 -- PAUSED by user request SRC-100: explicit new task T-1446 takes the seat; resumes at BUILD when T-1446 closes | blocker_scope: ticket | blocked_on: T-1446 | resume_phase: BUILD | resume_transition_from: SCOUT",
+      "description": "[P1] SAIPEN"
+    },
+    "T-1425": {
+      "id": "T-1425",
+      "section": "## BLOCKED",
+      "line_no": 246,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-079,SRC-080",
+        "owner": "glm-5.3-max",
+        "claim_time": "2026-09-20T16:31:17Z",
+        "claim_session": "58f9a7c59fcb66ddd6166c4e8f42d736",
+        "blocker": "ACTIVE_DEPENDENCY:T-1426 -- T-1425 is the superseded umbrella of the T-1424 mission (SRC-079/SRC-080); its technical repairs 1-5 and 7 are implemented and preserved under T-1426; T-1426 owns the unresolved live FreeBuff Desktop cc first-turn acceptance (SRC-081); this umbrella stays truthfully blocked on that manual result -- never reopened, never duplicated, and never falsely closed by deterministic green",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1425 [P1] T-1424 acceptance repair - universal cc bootstrap must actually converge; handoff file V:\\\\_TEMP_\\\\fastprompter_drag\\\\SAIPEN_20260920_1903.md | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-079,SRC-080 | owner: glm-5.3-max | claim_time: 2026-09-20T16:31:17Z | claim_session: 58f9a7c59fcb66ddd6166c4e8f42d736 | blocker: ACTIVE_DEPENDENCY:T-1426 -- T-1425 is the superseded umbrella of the T-1424 mission (SRC-079/SRC-080); its technical repairs 1-5 and 7 are implemented and preserved under T-1426; T-1426 owns the unresolved live FreeBuff Desktop cc first-turn acceptance (SRC-081); this umbrella stays truthfully blocked on that manual result -- never reopened, never duplicated, and never falsely closed by deterministic green | blocker_scope: ticket",
+      "description": "[P1] T-1424 acceptance repair - universal cc bootstrap must actually converge; handoff file V:\\_TEMP_\\fastprompter_drag\\SAIPEN_20260920_1903.md"
+    },
+    "T-1426": {
+      "id": "T-1426",
+      "section": "## BLOCKED",
+      "line_no": 247,
+      "checkbox": " ",
+      "needs": [
+        "T-1428"
+      ],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-081,SRC-082",
+        "owner": "glm-5.3-max",
+        "claim_time": "2026-09-20T16:55:09Z",
+        "claim_session": "ee3cbdb7033140fb08128456aca56e84",
+        "blocker": "ACTIVE_DEPENDENCY:T-1428 -- PAUSED by user request SRC-083: explicit new task T-1428 takes the seat; resumes at VERIFY when T-1428 closes",
+        "blocker_scope": "ticket",
+        "needs": "T-1428",
+        "blocked_on": "T-1428",
+        "resume_phase": "VERIFY",
+        "resume_transition_from": "BUILD"
+      },
+      "raw": "- [ ] T-1426 [P1] T-1425 Live FreeBuff cc first-turn activation FAILED: inject minimal SAIPEN activation contract into guaranteed startup instruction surface, capture effectiv... | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-081,SRC-082 | owner: glm-5.3-max | claim_time: 2026-09-20T16:55:09Z | claim_session: ee3cbdb7033140fb08128456aca56e84 | blocker: ACTIVE_DEPENDENCY:T-1428 -- PAUSED by user request SRC-083: explicit new task T-1428 takes the seat; resumes at VERIFY when T-1428 closes | blocker_scope: ticket | needs: T-1428 | blocked_on: T-1428 | resume_phase: VERIFY | resume_transition_from: BUILD",
+      "description": "[P1] T-1425 Live FreeBuff cc first-turn activation FAILED: inject minimal SAIPEN activation contract into guaranteed startup instruction surface, capture effectiv..."
+    },
+    "T-1323": {
+      "id": "T-1323",
+      "section": "## BLOCKED",
+      "line_no": 248,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "public-release-polish-installer-certification-canonical-ship is complete and the repository-declared verification harness passes",
+        "owner": "codex",
+        "claim_time": "2026-09-13T20:54:50Z",
+        "blocker": "PAUSED by operator interrupt SRC-039 -- public ship/polish is explicitly paused; the P0 recovery-reachability wave takes the seat",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1323 [P1] public-release-polish-installer-certification-canonical-ship | verify: public-release-polish-installer-certification-canonical-ship is complete and the repository-declared verification harness passes | owner: codex | claim_time: 2026-09-13T20:54:50Z | blocker: PAUSED by operator interrupt SRC-039 -- public ship/polish is explicitly paused; the P0 recovery-reachability wave takes the seat | blocker_scope: ticket",
+      "description": "[P1] public-release-polish-installer-certification-canonical-ship"
+    },
+    "T-1317": {
+      "id": "T-1317",
+      "section": "## BLOCKED",
+      "line_no": 249,
+      "checkbox": " ",
+      "needs": [
+        "T-1318"
+      ],
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-028,SRC-029,SRC-030,SRC-031,SRC-032,SRC-033,SRC-034,SRC-035",
+        "owner": "codex",
+        "claim_time": "2026-09-13T16:26:17Z",
+        "needs": "T-1318",
+        "blocker": "BLOCKED_EXTERNAL -- SRC-028:R010 is an unconditional Kiro blocking-adapter requirement; current read-only registry probe found no kiro command and no declared ~/.kiro home, and no real host refused-effect proof exists. Source coverage is BLOCKED, not waived; do not install Kiro to manufacture closure.",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-1317 [P0] SAIPEN protocol truth repair + agent enforcement foundation: canonical SRC-027/T-1316 linkage, corrected R008/R013/R014 dispositions, single protocol admissi... | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-028,SRC-029,SRC-030,SRC-031,SRC-032,SRC-033,SRC-034,SRC-035 | owner: codex | claim_time: 2026-09-13T16:26:17Z | needs: T-1318 | blocker: BLOCKED_EXTERNAL -- SRC-028:R010 is an unconditional Kiro blocking-adapter requirement; current read-only registry probe found no kiro command and no declared ~/.kiro home, and no real host refused-effect proof exists. Source coverage is BLOCKED, not waived; do not install Kiro to manufacture closure. | blocker_scope: ticket",
+      "description": "[P0] SAIPEN protocol truth repair + agent enforcement foundation: canonical SRC-027/T-1316 linkage, corrected R008/R013/R014 dispositions, single protocol admissi..."
+    },
+    "T-1257": {
+      "id": "T-1257",
+      "section": "## BLOCKED",
+      "line_no": 250,
+      "checkbox": " ",
+      "needs": [
+        "T-473"
+      ],
+      "fields": {
+        "needs": "T-473",
+        "verify": "direct apply performs zero target-source writes when target lineage changed, intent malformed, any before-hash moved, path escaped declared scope, target path was already dirty, receipt namespace unsafe or the effect is irreversible, and degrades to TARGET_DRIFT mode=proposal writes=0; the CAS guard is proven to be the shared T-473 stale-write detector rather than a private second mechanism; the implementation names why it is bounded interoperability and not v8 Concurrent Mode",
+        "blocker": "HELD -- unmet dependency T-473; not schedulable until the concurrent whole-file clobber guard exists"
+      },
+      "raw": "- [ ] T-1257 [P2] XPATCH direct mode: bounded compare-and-swap write of an exact clean target file set in another SAIPEN project, so the source agent continues immediately instead of leaving a proposal. Held because direct mode IS a stale-write guard on files another agent may hold -- exactly T-473, which is HELD on T-442. Without that guard the target agent writes its stale in-memory copy over a landed XPATCH and the receipt becomes a lie. Design in .saipen/KNOWLEDGE/XPATCH.md | needs: T-473 | verify: direct apply performs zero target-source writes when target lineage changed, intent malformed, any before-hash moved, path escaped declared scope, target path was already dirty, receipt namespace unsafe or the effect is irreversible, and degrades to TARGET_DRIFT mode=proposal writes=0; the CAS guard is proven to be the shared T-473 stale-write detector rather than a private second mechanism; the implementation names why it is bounded interoperability and not v8 Concurrent Mode | blocker: HELD -- unmet dependency T-473; not schedulable until the concurrent whole-file clobber guard exists",
+      "description": "[P2] XPATCH direct mode: bounded compare-and-swap write of an exact clean target file set in another SAIPEN project, so the source agent continues immediately instead of leaving a proposal. Held because direct mode IS a stale-write guard on files another agent may hold -- exactly T-473, which is HELD on T-442. Without that guard the target agent writes its stale in-memory copy over a landed XPATCH and the receipt becomes a lie. Design in .saipen/KNOWLEDGE/XPATCH.md"
+    },
+    "T-1119": {
+      "id": "T-1119",
+      "section": "## BLOCKED",
+      "line_no": 251,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "log-soft-cap owned",
+        "blocker": "PERMANENT_WARNING_OWNER -- the condition can never be met and immutable history is why. LOG.md carries 125 pre-date sealed entries; new entries are FAILed, so the warning emits forever and no work closes it"
+      },
+      "raw": "- [ ] T-1119 [P2] Own the log-soft-cap warning. | verify: log-soft-cap owned | blocker: PERMANENT_WARNING_OWNER -- the condition can never be met and immutable history is why. LOG.md carries 125 pre-date sealed entries; new entries are FAILed, so the warning emits forever and no work closes it",
+      "description": "[P2] Own the log-soft-cap warning."
+    },
+    "T-473": {
+      "id": "T-473",
+      "section": "## BLOCKED",
+      "line_no": 252,
+      "checkbox": " ",
+      "needs": [
+        "T-442"
+      ],
+      "fields": {
+        "needs": "T-442",
+        "verify": "a read-then-foreign-write-then-write sequence is refused; an unchanged file writes normally; the guard stays a detector and never becomes a scope or locking scheme",
+        "blocker": "HELD -- unmet dependency; not schedulable until concurrent-mode gate completes"
+      },
+      "raw": "- [ ] T-473 [P1] HELD, not scheduled: Rosary A3, the concurrent whole-file clobber guard. Witnessed twice this session -- a parallel session overwrote `BOARD.md` and reverted six `## DONE` moves whose work was already committed and pushed (E-1863), caught an hour later by CONFORMANCE 199 rather than at the moment of damage. \u00a7 1.5 already reads each file before writing it, so the guard is cheap: compare the content against what was read immediately before the write and refuse on a difference. It is held deliberately because it touches the checkpoint path every session runs and because T-442..T-451 already own the v8 Crew concurrency design; landing a collision detector ahead of that design risks pre-empting it. | needs: T-442 | verify: a read-then-foreign-write-then-write sequence is refused; an unchanged file writes normally; the guard stays a detector and never becomes a scope or locking scheme | blocker: HELD -- unmet dependency; not schedulable until concurrent-mode gate completes",
+      "description": "[P1] HELD, not scheduled: Rosary A3, the concurrent whole-file clobber guard. Witnessed twice this session -- a parallel session overwrote `BOARD.md` and reverted six `## DONE` moves whose work was already committed and pushed (E-1863), caught an hour later by CONFORMANCE 199 rather than at the moment of damage. \u00a7 1.5 already reads each file before writing it, so the guard is cheap: compare the content against what was read immediately before the write and refuse on a difference. It is held deliberately because it touches the checkpoint path every session runs and because T-442..T-451 already own the v8 Crew concurrency design; landing a collision detector ahead of that design risks pre-empting it."
+    },
+    "T-407": {
+      "id": "T-407",
+      "section": "## BLOCKED",
+      "line_no": 253,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "validator PASS while this ticket is live and names the slug; closing it while the warning emits fails the ownership check (T-401)",
+        "blocker": "PERMANENT_WARNING_OWNER -- the condition can never be met and immutable history is why. E-1659 logged a `DEC: goal reauthorized` under the caps, `LOG.md` is append-only, so the warning emits forever and no work closes it. Same trap as T-406: in `## TODO` the Pick Rule was obliged to select a ticket whose own `verify:` says closing it FAILs"
+      },
+      "raw": "- [ ] T-407 [P2] Own the `goal-reauth-untripped` warning: E-1659 logged a `DEC: goal reauthorized` with counters under the \u00a7 2.4 caps, and LOG is immutable by append-only, so the warning emits forever. Keep this ticket live while the warning emits. | verify: validator PASS while this ticket is live and names the slug; closing it while the warning emits fails the ownership check (T-401) | blocker: PERMANENT_WARNING_OWNER -- the condition can never be met and immutable history is why. E-1659 logged a `DEC: goal reauthorized` under the caps, `LOG.md` is append-only, so the warning emits forever and no work closes it. Same trap as T-406: in `## TODO` the Pick Rule was obliged to select a ticket whose own `verify:` says closing it FAILs",
+      "description": "[P2] Own the `goal-reauth-untripped` warning: E-1659 logged a `DEC: goal reauthorized` with counters under the \u00a7 2.4 caps, and LOG is immutable by append-only, so the warning emits forever. Keep this ticket live while the warning emits."
+    },
+    "T-406": {
+      "id": "T-406",
+      "section": "## BLOCKED",
+      "line_no": 254,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "validator PASS while this ticket is live and names the slug; closing it while the warning emits fails the ownership check (T-401)",
+        "blocker": "PERMANENT_WARNING_OWNER -- the condition can never be met and immutable history is why. `MANIFEST.md` advertises saipython live until its board opens, so the warning emits every validation; this ticket exists to own it, and its own `verify:` says closing it while the warning emits FAILs the ownership check. Sitting in `## TODO` it was a ticket the Pick Rule MUST take and no agent can finish. It leaves `## BLOCKED` when saipython actually runs or is de-advertised -- a real event, not work anyone can pick"
+      },
+      "raw": "- [ ] T-406 [P2] Own the `subsaipen-never-ran` warning for the life of the saipython sub: saipython was spawned on migration but never run, and MANIFEST.md advertises it live until its board opens, so the warning emits on every validation. Keep this ticket live while the warning emits; close only when the sub runs or is de-advertised. | verify: validator PASS while this ticket is live and names the slug; closing it while the warning emits fails the ownership check (T-401) | blocker: PERMANENT_WARNING_OWNER -- the condition can never be met and immutable history is why. `MANIFEST.md` advertises saipython live until its board opens, so the warning emits every validation; this ticket exists to own it, and its own `verify:` says closing it while the warning emits FAILs the ownership check. Sitting in `## TODO` it was a ticket the Pick Rule MUST take and no agent can finish. It leaves `## BLOCKED` when saipython actually runs or is de-advertised -- a real event, not work anyone can pick",
+      "description": "[P2] Own the `subsaipen-never-ran` warning for the life of the saipython sub: saipython was spawned on migration but never run, and MANIFEST.md advertises it live until its board opens, so the warning emits on every validation. Keep this ticket live while the warning emits; close only when the sub runs or is de-advertised."
+    },
+    "T-442": {
+      "id": "T-442",
+      "section": "## BLOCKED",
+      "line_no": 255,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the unblock decision names the closed defect classes, current green evidence and the exact sequential release used as the stability checkpoint; no Crew implementation exists before this ticket reaches DONE",
+        "blocker": "HELD -- sequential stability gate; unblocks when the v8 prerequisites are proven"
+      },
+      "raw": "- [ ] T-442 [P0] GATE: do not begin SAIPEN v8 Concurrent Mode while the sequential protocol still has known foundational defects. Unblock only when no open P0/P1 ticket owns an RFC contradiction, ambiguous state transition, unenforced MUST, source-of-truth conflict, ownership gap, recovery gap or validator blind spot; all canonical gates are green; and one ordinary sequential release completes without exposing another foundational defect. The detailed Crew design backlog (T-443..T-451) lives in KNOWLEDGE/crew-v8-backlog.md (moved there by T-464). | verify: the unblock decision names the closed defect classes, current green evidence and the exact sequential release used as the stability checkpoint; no Crew implementation exists before this ticket reaches DONE | blocker: HELD -- sequential stability gate; unblocks when the v8 prerequisites are proven",
+      "description": "[P0] GATE: do not begin SAIPEN v8 Concurrent Mode while the sequential protocol still has known foundational defects. Unblock only when no open P0/P1 ticket owns an RFC contradiction, ambiguous state transition, unenforced MUST, source-of-truth conflict, ownership gap, recovery gap or validator blind spot; all canonical gates are green; and one ordinary sequential release completes without exposing another foundational defect. The detailed Crew design backlog (T-443..T-451) lives in KNOWLEDGE/crew-v8-backlog.md (moved there by T-464)."
+    },
+    "T-575": {
+      "id": "T-575",
+      "section": "## BLOCKED",
+      "line_no": 256,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "the unblock decision names each prerequisite with fresh evidence including the completed v8 soak and a green post-release v8 stability checkpoint; every copied/adapted unit is recorded in saipen/runtime/UPSTREAM.json and THIRD_PARTY_NOTICES.md; the 30 red controls in V9_RUNTIME.md are listed before any V9-M1 implementation",
+        "blocker": "HELD -- until actual v8 Concurrent Mode exists and is stable"
+      },
+      "raw": "- [ ] T-575 [P0] GATE: V9-M1 resident-continue implementation may start ONLY after ACTUAL v8 Concurrent Mode exists and is stable, not merely after the v8 gate is allowed. Required v9 prerequisites: T-442 gate completed; T-443..T-450 implemented or decided; T-451 real-world Concurrent Mode soak completed; v8 released; at least one post-release v8 stability checkpoint green; current Improve cycle clean; HUNT/CLEAN baseline clean. Research, source mapping, isolated-kitchen prototypes, architecture documents and red controls remain allowed earlier (full design in .saipen/KNOWLEDGE/V9_RUNTIME.md; upstream a18809e MIT, provenance in saipen/runtime/UPSTREAM.json and THIRD_PARTY_NOTICES.md). No v9 runtime implementation before actual v8 completion. | verify: the unblock decision names each prerequisite with fresh evidence including the completed v8 soak and a green post-release v8 stability checkpoint; every copied/adapted unit is recorded in saipen/runtime/UPSTREAM.json and THIRD_PARTY_NOTICES.md; the 30 red controls in V9_RUNTIME.md are listed before any V9-M1 implementation | blocker: HELD -- until actual v8 Concurrent Mode exists and is stable",
+      "description": "[P0] GATE: V9-M1 resident-continue implementation may start ONLY after ACTUAL v8 Concurrent Mode exists and is stable, not merely after the v8 gate is allowed. Required v9 prerequisites: T-442 gate completed; T-443..T-450 implemented or decided; T-451 real-world Concurrent Mode soak completed; v8 released; at least one post-release v8 stability checkpoint green; current Improve cycle clean; HUNT/CLEAN baseline clean. Research, source mapping, isolated-kitchen prototypes, architecture documents and red controls remain allowed earlier (full design in .saipen/KNOWLEDGE/V9_RUNTIME.md; upstream a18809e MIT, provenance in saipen/runtime/UPSTREAM.json and THIRD_PARTY_NOTICES.md). No v9 runtime implementation before actual v8 completion."
+    }
+  },
+  "failed_T1606_candidate_hash_checks": [
+    {
+      "path": "saipen/REGISTRY.json",
+      "sha256": "cab2bcf6fe8b56cd4f09a57e519fad98e238dd036b4977e0ef55111db2a6381f",
+      "matches_manifest": true
+    },
+    {
+      "path": "saipen/COMMANDS.md",
+      "sha256": "90852ebf4a971692d6f5868c51b21c6ca41895e32457907979ef4c2a64ac4b5d",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen.py",
+      "sha256": "ee18e6c972a7a02ad071dedba7f112fd10be9a205f7060fa1c6b59931d15e742",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/validate.py",
+      "sha256": "8d4b671033ba637d025b3344fe05e372b8d4b2e0c3ea8a2fa7b991e874241e09",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/state.py",
+      "sha256": "2f63ff2dc2c02113470fd2b255e41ebe11630c75065ee8258636873c94c78da7",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/phases.py",
+      "sha256": "88834aedc6cbe4f46f75f02879cf889d6f68be06fb8f5e16fbcd2085aae87e9c",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/fast_check.py",
+      "sha256": "914958fa78105c5ae95a3c3a6e2552ab6694856a7736c4afba3175a4f496fdc9",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/reconcile.py",
+      "sha256": "7637becdffb8d955c84591fc461cab9e6da69008052429efa4f782642389a44d",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/operations.py",
+      "sha256": "b795f364a7de7b82ec77e16c98f0024a80a2a0087342b31ebe0f313df7080317",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/subs.py",
+      "sha256": "1f1bfbec77225b63d41bb12ecca5a920a9a08ab0c0ead543bd979116bf2f422e",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/router.py",
+      "sha256": "fe1b6a4980c18950d0b2e9c9ff1d074f3a2b996934a411aa406618da8cf11034",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/test_next_action_deadlock.py",
+      "sha256": "2fa15ee02e28debdb39867bc09bead994eb82af0709fe2716a33a66116f3b14c",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/test_refusal_registry.py",
+      "sha256": "0043415ce3d028d631c17a2ef6911a23876ff53db020efda29f72e136b1cff25",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/test_recovery_reachability.py",
+      "sha256": "695ff50bb7b7ba03b11c4b5db4258731241bdf23f213eaf4818d9f941d9f7112",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/test_next_action_grammar.py",
+      "sha256": "bc9334c3a67961448ce787f7b1b342bc2fb18603e7b2f6ee025ab5ca3afcaca0",
+      "matches_manifest": true
+    }
+  ],
+  "scope_limit": "Strengthening invalid-data machine projections does not close existing parked requirements or grant publication authority."
+}

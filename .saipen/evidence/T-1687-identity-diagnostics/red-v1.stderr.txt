@@ -1,0 +1,25 @@
+test_a_real_probe_outage_is_a_named_refusal_in_both_borrowed_cases (test_t1687_identity_diagnostics.IdentityDiagnostics.test_a_real_probe_outage_is_a_named_refusal_in_both_borrowed_cases) ... 
+  test_a_real_probe_outage_is_a_named_refusal_in_both_borrowed_cases (test_t1687_identity_diagnostics.IdentityDiagnostics.test_a_real_probe_outage_is_a_named_refusal_in_both_borrowed_cases) (method='test_an_arbitrary_same_user_python_client_is_refused') ... FAIL
+test_an_unnamed_refusal_still_fails_both_borrowed_checks (test_t1687_identity_diagnostics.IdentityDiagnostics.test_an_unnamed_refusal_still_fails_both_borrowed_checks) ... ok
+test_the_record_retains_the_decisive_real_unittest_failure_section (test_t1687_identity_diagnostics.IdentityDiagnostics.test_the_record_retains_the_decisive_real_unittest_failure_section) ... FAIL
+
+======================================================================
+FAIL: test_a_real_probe_outage_is_a_named_refusal_in_both_borrowed_cases (test_t1687_identity_diagnostics.IdentityDiagnostics.test_a_real_probe_outage_is_a_named_refusal_in_both_borrowed_cases) (method='test_an_arbitrary_same_user_python_client_is_refused')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1687-identity-diagnostics\subjects-v1\pre-fix\tools\test_t1687_identity_diagnostics.py", line 42, in test_a_real_probe_outage_is_a_named_refusal_in_both_borrowed_cases
+    self.assertTrue(result.wasSuccessful(), result.failures + result.errors)
+AssertionError: False is not true : [(<test_host_authority_broker.IdentityTests testMethod=test_an_arbitrary_same_user_python_client_is_refused>, 'Traceback (most recent call last):\n  File "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1687-identity-diagnostics\\subjects-v1\\pre-fix\\tools\\test_host_authority_broker.py", line 234, in test_an_arbitrary_same_user_python_client_is_refused\n    self.assertEqual(reply["code"], HB.CODE_NOT_AUTHENTICATED)\nAssertionError: \'BROKER_PEER_IDENTITY_UNAVAILABLE\' != \'BROKER_CLIENT_NOT_AUTHENTICATED\'\n- BROKER_PEER_IDENTITY_UNAVAILABLE\n+ BROKER_CLIENT_NOT_AUTHENTICATED\n\n')]
+
+======================================================================
+FAIL: test_the_record_retains_the_decisive_real_unittest_failure_section (test_t1687_identity_diagnostics.IdentityDiagnostics.test_the_record_retains_the_decisive_real_unittest_failure_section)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1687-identity-diagnostics\subjects-v1\pre-fix\tools\test_t1687_identity_diagnostics.py", line 86, in test_the_record_retains_the_decisive_real_unittest_failure_section
+    self.assertIn("test_outage.Outage.test_reason", sections)
+AssertionError: 'test_outage.Outage.test_reason' not found in {}
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.427s
+
+FAILED (failures=2)

@@ -1,0 +1,23 @@
+{
+  "label": "verify-source-contracts-corrected",
+  "phase": "VERIFY",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "test_refusal_registry",
+    "test_canonical_command_reachability",
+    "test_subprocess_utf8"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+  "exit_code": 0,
+  "duration_s": 22.266,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "",
+  "stderr": ".....................\r\n----------------------------------------------------------------------\r\nRan 21 tests in 22.006s\r\n\r\nOK\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "d881247609e79d5e9bd7066d317bd85ccdab08ac5ee086debabf7af4f4dc45ea",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

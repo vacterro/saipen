@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-043:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-240 closed with verification evidence in LOG: verify -> PASS [target: T-240] conf: high -- full python -m pytest -q => 2255 passed 5 skipped; release identity focused 30 PASS; W6-004 59 PASS incl false-ack regression; W6-001 50 PASS; SAIHANDOFF 36 PASS; Ruff clean; compileall clean",
+      "text": "SAIHANDOFF M1 Archive Auto Send per SRC-042 (db81366a626ea28c39e8102096208d3a5c66a6caec65c72ae0ea8306ad8381b1): freeze TOPIC-first canonical handoff title, executable SAIHANDOFF_V1 envelope with fail-closed validation, one protocol doc authority, and the widget Archive Auto Send exactly-once send transaction reusing existing archive/composer primitives; activation-gated on T-185 P0 acceptance; T-185 stays VERIFY; non-goals M2, final-turn capture, Bridge queueing, agent routing, Auto Fill, Auto Submit",
+      "verification": "the Work this request created reached its own verification gate; see the T-240 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-240"
+    }
+  },
+  "schema_version": 1
+}

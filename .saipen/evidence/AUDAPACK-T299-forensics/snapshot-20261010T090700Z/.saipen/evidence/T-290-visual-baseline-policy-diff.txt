@@ -1,0 +1,29 @@
+source: V:\___VAC\__K\__CODE\_HTML\_SAI_WEBSITE
+NEW policy: kept 12
+   + tests/baselines/debug-components.png
+   + tests/baselines/debug-rendering.png
+   + tests/baselines/debug-themes.png
+   + tests/baselines/docs-mobile.png
+   + tests/baselines/docs.png
+   + tests/baselines/ecosystem.png
+   + tests/baselines/home-dracula.png
+   + tests/baselines/home-mobile.png
+   + tests/baselines/home.png
+   + tests/baselines/pricing.png
+   + tests/baselines/spec.png
+   + tests/baselines/status-mobile.png
+   dropped 0
+OLD policy: kept 3
+   + tests/baselines/debug-rendering.png
+   + tests/baselines/docs.png
+   + tests/baselines/home-dracula.png
+   dropped 9
+   - tests/baselines/debug-components.png
+   - tests/baselines/debug-themes.png
+   - tests/baselines/docs-mobile.png
+   - tests/baselines/ecosystem.png
+   - tests/baselines/home-mobile.png
+   - tests/baselines/home.png
+   - tests/baselines/pricing.png
+   - tests/baselines/spec.png
+   - tests/baselines/status-mobile.png

@@ -1,0 +1,6 @@
+test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone (sandbox_wait_subject.HeldSandboxTests.test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 3.749s
+
+OK

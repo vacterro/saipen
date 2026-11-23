@@ -1,0 +1,613 @@
+--- preimage/tools/improve.py
++++ current/tools/improve.py
+@@ -955,6 +955,10 @@
+         raise ImproveError(
+             f"disposition {disposition!r} outside the closed set {sorted(DISPOSITION)}"
+         )
++    if entry.get("retrospective"):
++        from saipen_engine.improve_retrospective import write_disposition
++
++        return write_disposition(cycle_dir, entry)
+     amend = bool(entry.get("amend"))
+     if amend:
+         return _amend_sweep_entry(cycle_dir, entry, disposition)
+@@ -1102,7 +1106,11 @@
+     return result
+ 
+ 
+-def _journaled_write(path: Path, content: str, kind: str, base_hash: str | None = None) -> dict:
++def _journaled_write(
++    path: Path, content: str, kind: str, base_hash: str | None = None, *,
++    read_preconditions: dict | None = None, receipt_metadata: dict | None = None,
++    op_id: str | None = None, actor: str = "saipen",
++) -> dict:
+     """Write one file through the common lock + journal + roll-forward
+     machinery. Returns the transaction result; callers inspect and propagate.
+ 
+@@ -1121,7 +1129,7 @@
+     """
+     import uuid
+     from saipen_engine import codec
+-    from saipen_engine.journal import _hash_file, hash_bytes, run_mutation
++    from saipen_engine.journal import RETROSPECTIVE_POLICY, _hash_file, hash_bytes, run_mutation
+     from saipen_engine.lock import project_writer_lock
+ 
+     root = path
+@@ -1129,9 +1137,11 @@
+         root = root.parent
+     root = root.parent  # project root (parent of .saipen)
+     rel = path.relative_to(root).as_posix()
+-    op_id = f"{kind}-" + uuid.uuid4().hex
++    op_id = op_id or f"{kind}-" + uuid.uuid4().hex
+     doc = codec.read_document(path)
+-    content_bytes = doc.encode(content)
++    # The append-only successor has one versioned UTF-8/LF representation;
++    # existing Improve documents keep their established codec policy.
++    content_bytes = content.encode("utf-8") if kind == "retrospective" else doc.encode(content)
+     live = _hash_file(path) if path.is_file() else ""
+     before = base_hash if base_hash is not None else live
+     # TARGET ROLE (NITRO dogfood IV, T-601): the journal target must name the
+@@ -1145,13 +1155,14 @@
+         "sweep": "sweep",
+         "run": "report",
+         "rebind": "report",
++        "retrospective": "coverage",
+     }.get(kind, "generic")
+     with project_writer_lock(root):
+         return run_mutation(
+             root,
+             op_id,
+             kind,
+-            "saipen",
++            actor,
+             _identity(root),
+             hash_bytes(rel.encode("utf-8")),
+             [
+@@ -1164,7 +1175,11 @@
+                 }
+             ],
+             preconditions={rel: before},
+-            verification_policy="improve_atomic_file",
++            verification_policy=(
++                RETROSPECTIVE_POLICY if kind == "retrospective" else "improve_atomic_file"
++            ),
++            read_preconditions=read_preconditions,
++            receipt_metadata=receipt_metadata,
+         )
+ 
+ 
+@@ -3157,7 +3172,10 @@
+     return result
+ 
+ 
+-def retire_seat(cycle_dir: Path, seat_id: str, reason: str, *, dry_run: bool = False) -> dict:
++def retire_seat(
++    cycle_dir: Path, seat_id: str, reason: str, *, dry_run: bool = False,
++    retrospective: bool = False, actor: str | None = None,
++) -> dict:
+     """Canonical bounded exit for a seat that can never complete (T-1406).
+ 
+     A cycle can be stuck after its Core sweep started: one expected seat's
+@@ -3173,6 +3191,10 @@
+     and when it would leave the roster with no expected seat -- a cycle is
+     never completed into evidence-free history.
+     """
++    if retrospective:
++        from saipen_engine.improve_retrospective import retire_archived
++
++        return retire_archived(cycle_dir, seat_id, reason, dry_run=dry_run, actor=actor)
+     seat = _validate_safe_id(seat_id, "seat_id")
+     if not isinstance(reason, str) or not _RETIRE_REASON_RE.fullmatch(reason):
+         raise ImproveError("retire reason must match [A-Z][A-Z0-9_-]{0,63}")
+@@ -3408,7 +3430,7 @@
+     }.get(status, status.upper())
+ 
+ 
+-def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
++def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False, actor: str | None = None) -> dict:
+     """ONE canonical finite exit for a strict Improve cycle (T-1434 M4).
+ 
+     The operation inspects every roster seat, executes the deterministic
+@@ -3439,15 +3461,9 @@
+         "seat_classes": {record["seat_id"]: record["class"] for record in records},
+     }
+     if status in TERMINAL_CYCLE_STATUSES:
+-        return {
+-            "ok": True,
+-            "code": "ALREADY_TERMINAL",
+-            "outcome": _outcome_for_status(status),
+-            **base,
+-            "retired": [],
+-            "superseded": [],
+-            "bookkeeping": protocol_git_status(_project_root_of(cycle_dir), cycle_dir),
+-        }
++        from saipen_engine.improve_retrospective import reconcile_archive
++
++        return reconcile_archive(cycle_dir, dry_run=dry_run, actor=actor)
+     actionable = [record for record in records if record["class"] == "STILL_ACTIONABLE"]
+     if actionable:
+         raise ImproveError(
+--- preimage/tools/saipen_engine/continue_fallback.py
++++ current/tools/saipen_engine/continue_fallback.py
+@@ -146,7 +146,7 @@
+         if draft and seat_id and report_path
+         else ""
+     )
+-    return {
++    result = {
+         "cycle_id": cycle_id,
+         "status": status,
+         "seat_id": seat_id,
+@@ -160,9 +160,33 @@
+         "stale": stale,
+         "submit_route": submit,
+     }
+-
+-
+-def stale_cycles(root: Path, exclude: str = "") -> list[dict]:
++    # A terminal manifest never proves that every historical finding was
++    # adjudicated. Read every seat and the native successor instead of offering
++    # submit/complete commands that are forbidden on the sealed original.
++    from improve import TERMINAL_CYCLE_STATUSES, _field, _seat_blocks
++
++    if status in TERMINAL_CYCLE_STATUSES:
++        from .improve_retrospective import inspect_archive
++
++        result.update(inspect_archive(cycle_dir))
++        result["submit_route"] = ""
++    else:
++        unfinished = False
++        for block in _seat_blocks(text):
++            if (_field(block, "availability") or "expected") != "expected":
++                continue
++            path = cycle_dir / _field(block, "seat_id") / _field(block, "report_path")
++            try:
++                seat_text = path.read_text(encoding="utf-8")
++            except OSError:
++                seat_text = ""
++            unfinished = unfinished or _manifest_field(seat_text, "report_status") != "complete"
++            unfinished = unfinished or not _RUN_HEADING_RE.search(seat_text)
++        result["stale"] = bool(unfinished and age_days is not None and age_days >= STALE_DRAFT_DAYS)
++    return result
++
++
++def _other_cycle_liveness(root: Path, exclude: str = "") -> list[dict]:
+     """Every OTHER cycle in this project's registry whose liveness is stale.
+ 
+     The assigned cycle and the genuinely unfinished one are different cycles
+@@ -182,10 +206,14 @@
+         if entry.name == exclude:
+             continue
+         live = cycle_liveness(root, entry.name)
+-        if live is not None and live["stale"]:
++        if live is not None:
+             stale.append(live)
+     stale.sort(key=lambda item: (item["age_days"] is not None, item["age_days"] or 0), reverse=True)
+     return stale
++
++
++def stale_cycles(root: Path, exclude: str = "") -> list[dict]:
++    return [item for item in _other_cycle_liveness(root, exclude) if item["stale"]]
+ 
+ 
+ def with_cycle_liveness(payload: dict, root: Path) -> dict:
+@@ -200,14 +228,18 @@
+     """
+     cycle_id = str(payload.get("cycle_id") or read_marker(root).get("cycle_id") or "")
+     live = cycle_liveness(root, cycle_id) if cycle_id else None
+-    stale = stale_cycles(root, cycle_id)
+-    if live is None and not stale:
++    others = _other_cycle_liveness(root, cycle_id)
++    stale = [item for item in others if item["stale"]]
++    blocked = [item for item in others if item.get("blocked")]
++    if live is None and not stale and not blocked:
+         return payload
+     answer = dict(payload)
+     if live is not None:
+         answer["improve_cycle"] = live
+     if stale:
+         answer["improve_stale_cycles"] = stale
++    if blocked:
++        answer["improve_blocked_cycles"] = blocked
+     return answer
+ 
+ 
+--- preimage/tools/saipen_engine/journal.py
++++ current/tools/saipen_engine/journal.py
+@@ -96,10 +96,13 @@
+ _ACCEPTED_DEBT_DIR_PREFIX = ".saipen/recovery/conformance/accepted_debt/"
+ _ACCEPTED_DEBT_OPERATIONS = frozenset({"accepted_debt.register", "accepted_debt.rebind"})
+ 
++RETROSPECTIVE_POLICY = "improve_retrospective_v1"
++
+ VERIFICATION_POLICIES = frozenset(
+     {
+         "core_fast",
+         "improve_atomic_file",
++        RETROSPECTIVE_POLICY,
+         "userperson",
+         "sub_collect",
+         "sub_disposition",
+@@ -500,6 +503,7 @@
+             "improve-rebind-",
+             "report-",
+             "regression-execution-",
++            "retrospective-",
+             "run-",
+             "seat-",
+             "sweep-",
+@@ -3754,6 +3758,8 @@
+         return _core_fast
+     if policy == "improve_atomic_file":
+         return verify_improve
++    if policy == RETROSPECTIVE_POLICY:
++        return verify_improve_retrospective
+     if policy == "userperson":
+         return lambda root, targets, receipt_metadata=None: _verify_userperson(
+             root, receipt_metadata
+@@ -3888,6 +3894,24 @@
+                 pass  # no domain grammar for an unknown Improve file
+     except Exception as exc:
+         errors.append(f"improve verification failed: {exc}")
++    return errors
++
++
++def verify_improve_retrospective(root, targets, receipt_metadata=None) -> list[str]:
++    """Versioned policy: older kernels must refuse, never skip this grammar."""
++    from .improve_retrospective import validate_record
++
++    errors = []
++    if not targets:
++        return ["retrospective verification requires a coverage target"]
++    for target in targets:
++        if target.get("role") != "coverage":
++            errors.append("retrospective verification refuses a non-coverage target")
++            continue
++        errors.extend(validate_record(
++            root, root / target["path"],
++            allowed_operation=(receipt_metadata or {}).get("retrospective_operation"),
++        ))
+     return errors
+ 
+ 
+--- preimage/tools/saipen.py
++++ current/tools/saipen.py
+@@ -9434,6 +9434,30 @@
+                         "evidence": finding.evidence,
+                     }
+                 )
++        historical = None
++        from improve import _cycle_status, _cycle_schema, TERMINAL_CYCLE_STATUSES
++
++        if (
++            _cycle_schema(cycle / "MANIFEST.md") == "strict"
++            and _cycle_status(cycle / "MANIFEST.md") in TERMINAL_CYCLE_STATUSES
++        ):
++            from saipen_engine.improve_retrospective import inspect_archive
++
++            historical = inspect_archive(cycle)
++            if historical.get("pending_findings_known"):
++                queue = []
++                for item in historical["pending_findings"]:
++                    run, imp = item["finding_ref"].split("/", 1)
++                    queue.append({
++                        **item,
++                        "finding_ref": f"{cycle.name}/{item['report']}#{item['finding_ref']}",
++                        "run": int(run.removeprefix("RUN-")), "imp": imp,
++                    })
++                precheck = []
++            else:
++                precheck = [historical.get(
++                    "detail", "historical reconciliation evidence unavailable"
++                )]
+         _emit(
+             {
+                 "ok": True,
+@@ -9441,6 +9465,7 @@
+                 "cycle": args[1],
+                 "queue": queue,
+                 "precheck_errors": precheck[:5],
++                **({"retrospective": historical} if historical is not None else {}),
+                 "note": "semantic adjudication (reproduce/classify/dedupe/"
+                 "decide) is Core-owned; commit each decision via "
+                 "saipen improve sweep",
+@@ -9525,7 +9550,7 @@
+                     "detail": "improve sweep needs <cycle> <finding_ref> "
+                     "<disposition> [--ticket T-###] [--report "
+                     "<ident>] [--reproduced y|n] [--fixed-by <ref>] "
+-                    "[--verification <ref>] [--amend] where finding_ref "
++                    "[--verification <ref>] [--amend] [--retrospective] where finding_ref "
+                     "is RUN-N/IMP-NNN (strict) or IMP-NNN (legacy); "
+                     "--verification binds a historical SUPERSEDED/"
+                     "NOT_REPRODUCED disposition to its successor evidence; "
+@@ -9559,6 +9584,7 @@
+         fixed_by = "-"
+         verification = "-"
+         amend = False
++        retrospective = False
+         rest = args[4:]
+         while rest:
+             if rest[0] == "--ticket" and len(rest) > 1:
+@@ -9573,9 +9599,11 @@
+                 verification, rest = rest[1], rest[2:]
+             elif rest[0] == "--amend":
+                 amend, rest = True, rest[1:]
++            elif rest[0] == "--retrospective":
++                retrospective, rest = True, rest[1:]
+             else:
+                 rest = rest[1:]
+-        if dry_run:
++        if dry_run and not retrospective:
+             _emit(
+                 {
+                     "ok": True,
+@@ -9598,6 +9626,9 @@
+                 "fixed_by": fixed_by,
+                 "verification": verification,
+                 "amend": amend,
++                "retrospective": retrospective,
++                "actor": _agent_for(project_root),
++                "dry_run": dry_run,
+             }
+             if run_raw is not None:
+                 entry["run"] = f"RUN-{run_raw}"
+@@ -9639,7 +9670,7 @@
+ 
+         cycle = cycle_dir(project_root, args[1])
+         try:
+-            result = _reconcile_cycle(cycle, dry_run=dry_run)
++            result = _reconcile_cycle(cycle, dry_run=dry_run, actor=_agent_for(project_root))
+             _emit(result, as_json)
+             return 0 if result.get("ok") else 1
+         except ValueError as exc:
+@@ -9767,7 +9798,7 @@
+                     "ok": False,
+                     "code": "VALIDATION_FAILED",
+                     "detail": "improve retire needs <cycle_id> <seat_id> "
+-                    "--reason <CODE> [--replacement <fresh-seat>] "
++                    "--reason <CODE> [--replacement <fresh-seat>] [--retrospective] "
+                     "(pattern [A-Z][A-Z0-9_-]{0,63})",
+                 },
+                 as_json,
+@@ -9775,12 +9806,15 @@
+             return 2
+         reason = ""
+         replacement = ""
++        retrospective = False
+         tail = args[3:]
+         while tail:
+             if tail[0] == "--reason" and len(tail) > 1 and not reason:
+                 reason, tail = tail[1], tail[2:]
+             elif tail[0] == "--replacement" and len(tail) > 1 and not replacement:
+                 replacement, tail = tail[1], tail[2:]
++            elif tail[0] == "--retrospective" and not retrospective:
++                retrospective, tail = True, tail[1:]
+             else:
+                 _emit(
+                     {
+@@ -9801,6 +9835,12 @@
+                 as_json,
+             )
+             return 2
++        if retrospective and (reason == "STALE_COMPLETE" or replacement):
++            _emit({
++                "ok": False, "code": "VALIDATION_FAILED",
++                "detail": "retrospective retirement cannot rewrite an active replacement binding",
++            }, as_json)
++            return 2
+         if reason == "STALE_COMPLETE" and not replacement:
+             _emit(
+                 {
+@@ -9831,7 +9871,11 @@
+                     cycle, args[2], replacement, dry_run=dry_run
+                 )
+             else:
+-                result = _retire_seat(cycle, args[2], reason, dry_run=dry_run)
++                if retrospective:
++                    result = _retire_seat(cycle, args[2], reason, dry_run=dry_run,
++                                          retrospective=True, actor=_agent_for(project_root))
++                else:
++                    result = _retire_seat(cycle, args[2], reason, dry_run=dry_run)
+             _emit(result, as_json)
+             return 0 if result.get("ok") else 1
+         except ValueError as exc:
+--- preimage/tools/test_t38_improve_cycle_liveness.py
++++ current/tools/test_t38_improve_cycle_liveness.py
+@@ -122,7 +122,7 @@
+ 
+ 
+ class CycleLiveness(_NeedsThePatch):
+-    def test_the_measured_stale_cycle_is_reported_as_stale_work(self) -> None:
++    def test_archived_empty_draft_is_preserved_without_pending_work(self) -> None:
+         with tempfile.TemporaryDirectory() as tmp:
+             root = _cycle(Path(tmp))
+             live = cycle_liveness(root, CYCLE)
+@@ -135,15 +135,13 @@
+             self.assertTrue(live["draft"])
+             self.assertTrue(live["no_run"])
+             self.assertGreaterEqual(live["age_days"], 6)
+-            self.assertTrue(live["stale"])
+-            self.assertEqual(
+-                live["submit_route"],
+-                f"saipen improve submit {CYCLE} {SEAT} {PROJECT} {SEAT}/{REPORT}",
+-            )
++            self.assertFalse(live["stale"])
++            self.assertEqual(live["pending_findings"], [])
++            self.assertEqual(live["submit_route"], "")
+ 
+     def test_a_complete_report_with_a_run_block_is_not_stale(self) -> None:
+         report = DRAFT_REPORT.replace("report_status: draft", "report_status: complete")
+-        report += "\n## RUN 1\nIMP-001 something was audited\n"
++        report += "\n## RUN 1\nNO_FINDINGS\n"
+         with tempfile.TemporaryDirectory() as tmp:
+             root = _cycle(Path(tmp), days_ago=30, status="complete", report=report)
+             live = cycle_liveness(root, CYCLE)
+@@ -166,7 +164,13 @@
+     def test_an_unfinished_report_on_a_cycle_that_left_flight_is_stale(self) -> None:
+         """Stale by state: an archived draft cannot resume on its own."""
+         with tempfile.TemporaryDirectory() as tmp:
+-            root = _cycle(Path(tmp), days_ago=1, status="archived")
++            pending = DRAFT_REPORT + (
++                "\n## RUN 1\nIMP-001 [P2] [OTHER] [observed] [note]\n"
++                "expected: synthetic archived finding remains visible\n"
++                "actual: no historical disposition exists\n"
++                "evidence: T-38 disposable liveness control\n"
++            )
++            root = _cycle(Path(tmp), days_ago=1, status="archived", report=pending)
+             live = cycle_liveness(root, CYCLE)
+             assert live is not None
+             self.assertTrue(live["stale"])
+@@ -187,7 +191,7 @@
+         with tempfile.TemporaryDirectory() as tmp:
+             root = _cycle(Path(tmp))
+             merged = with_cycle_liveness(self._payload(), root)
+-            self.assertTrue(merged["improve_cycle"]["stale"])
++            self.assertFalse(merged["improve_cycle"]["stale"])
+             self.assertEqual(merged["ok"], True)
+ 
+     def test_the_marker_names_the_cycle_when_the_answer_does_not(self) -> None:
+@@ -210,7 +214,13 @@
+             root = _cycle(
+                 Path(tmp), ASSIGNED, days_ago=0, status="complete", report=COMPLETE_REPORT
+             )
+-            _cycle(root, CYCLE, days_ago=7, status="archived")
++            pending = DRAFT_REPORT + (
++                "\n## RUN 1\nIMP-001 [P2] [OTHER] [observed] [note]\n"
++                "expected: synthetic archived finding remains visible\n"
++                "actual: no historical disposition exists\n"
++                "evidence: T-38 disposable liveness control\n"
++            )
++            _cycle(root, CYCLE, days_ago=7, status="archived", report=pending)
+             merged = with_cycle_liveness(self._payload(cycle=ASSIGNED), root)
+             self.assertEqual(merged["improve_cycle"]["cycle_id"], ASSIGNED)
+             self.assertFalse(merged["improve_cycle"]["stale"])
+@@ -218,12 +228,19 @@
+             self.assertEqual(len(stale), 1)
+             self.assertEqual(stale[0]["cycle_id"], CYCLE)
+             self.assertGreaterEqual(stale[0]["age_days"], 6)
+-            self.assertTrue(stale[0]["no_run"])
+-            self.assertIn(f"saipen improve submit {CYCLE}", stale[0]["submit_route"])
++            self.assertFalse(stale[0]["no_run"])
++            self.assertEqual(stale[0]["submit_route"], "")
++            self.assertIn(f"saipen improve sweep-queue {CYCLE}", stale[0]["canonical_next_command"])
+ 
+     def test_a_stale_cycle_is_visible_with_no_assigned_cycle_at_all(self) -> None:
+         with tempfile.TemporaryDirectory() as tmp:
+-            root = _cycle(Path(tmp))
++            pending = DRAFT_REPORT + (
++                "\n## RUN 1\nIMP-001 [P2] [OTHER] [observed] [note]\n"
++                "expected: synthetic archived finding remains visible\n"
++                "actual: no historical disposition exists\n"
++                "evidence: T-38 disposable liveness control\n"
++            )
++            root = _cycle(Path(tmp), report=pending)
+             marker = root / cf.FALLBACK_MARKER_REL
+             marker.parent.mkdir(parents=True, exist_ok=True)
+             marker.write_text('{"schema_version": 1}', encoding="utf-8")
+--- preimage/saipen/IMPROVE.md
++++ current/saipen/IMPROVE.md
+@@ -663,10 +663,81 @@
+   reported, `superseded` when seats were canonically unavailable,
+   `blocked_external` when an external blockage was explicitly recorded;
+ - reports, SWEEP bytes and preserved report hashes are never rewritten;
+-- an already-terminal cycle returns `ALREADY_TERMINAL` with ZERO writes.
++- an already-terminal cycle with no pending historical findings returns
++  `ALREADY_TERMINAL` with ZERO writes; section 15 owns unfinished strict
++  archives rather than rounding their lifecycle marker up to completion.
+ 
+ Legacy (non-strict) cycles are sealed read-only history: reconcile refuses
+ them and the historical exits (`retire`, `abort`) keep their meaning.
+ 
+ A real IMPROVE phase may still be proposed only by first proving a failure the
+ meta-control design cannot solve.
++
++## 15. Retrospective coverage of immutable strict archives (T-1803)
++
++Defect class: an archived lifecycle marker hid unfinished seat findings while
++ordinary writers correctly refused the same sealed cycle. An amendment could
++not create the first missing disposition, and liveness repeatedly advertised
++empty archived assignments or offered impossible submit routes. Historical
++coverage now has a canonical successor; original cycle bytes remain immutable.
++
++`saipen improve reconcile <cycle>` inspects all seats and exact composite
++findings before treating a strict terminal cycle as settled. Empty archived
++assignments contain no pending audit work; they are never called completed
++reports. Unadjudicated findings remain discoverable through the read-only
++`improve sweep-queue` route. Missing external evidence or corrupt provenance
++is an explicit blocker, not a repeated actionable submit/complete instruction.
++
++An admitted Core owner may append historical decisions with the existing
++`improve sweep` verb and explicit `--retrospective`. It still requires the
++exact `--report`, RUN/IMP identity and `--reproduced y|n`. A resolved decision
++requires `--verification <owned-project-file>`; its content hash is bound to
++the record. `ALREADY_FIXED` additionally requires `--fixed-by`. The finding
++must actually exist, with an unambiguous identity and evidence triple.
++Archived drafts cannot mint fresh `CONFIRMED` authority or new canonical
++Work. A current confirmation still requires the ordinary fresh active audit.
++
++The version-1 successor is
++`.saipen/improve-reconciliation/<cycle>.jsonl`, outside the original cycle
++directory. Its header binds portable project lineage and exact original
++manifest/report/SWEEP hashes, including an explicitly absent SWEEP. Every
++append preserves its prior byte prefix and hash chain, and names a genuinely
++COMMITTED native writer receipt binding that exact prefix. A digest alone is
++integrity data, never operator authority. Original reports, archive identity,
++prior SWEEP entries and producer ownership remain unchanged.
++
++Historical corrections use `--retrospective --amend`: prior records remain
++readable. Final committed authority cannot be replaced or re-pointed. An
++explicit pending `NEEDS_EXTERNAL_EVIDENCE` decision may advance with newly
++bound proof; it cannot be silently converted to success. Exact retries write
++nothing, and conflicting duplicate decisions refuse.
++
++Retrospective seat retirement uses the existing `improve retire` verb with
++`--retrospective`. `EMPTY_DRAFT` requires no committed audit content;
++`HISTORICAL_ADJUDICATED` requires resolved finding coverage;
++`BLOCKED_EXTERNAL` preserves unresolved findings visibly. No retirement
++changes the original draft to complete. Once every historical finding is
++adjudicated, reconcile appends the explicit retirement/outcome evidence using
++the existing COMPLETE / SUPERSEDED / BLOCKED_EXTERNAL lifecycle vocabulary.
++Successful sealed coverage stops stale-work advertisement; original report
++status remains truthful. Legacy non-strict history remains read-only.
++
++Every consequential retrospective write requires a current admitted owned
++Work, live writable capability, valid lineage and no binding WAIT/NO_GO,
++ownership conflict or overlapping pending transaction. Existing operator
++provenance, safety valves and continuation budgets are preserved. The common
++project writer lock, compare-and-swap base hash and read-only dependency
++bindings prevent stale or concurrent overwrites.
++
++The journal uses its existing `coverage` target role and the explicitly
++versioned `improve_retrospective_v1` verification policy. Apply and recovery
++run the same target-aware semantic validator. Older kernels refuse the
++unknown policy rather than silently replaying a successor they cannot verify.
++Untouched PREPARED work may abort safely; materialized interrupted work must
++converge or retain an explicit dependency/integrity conflict. No cleanup
++erases the original history or a committed correction.
++
++Audit-manifest contract v3 is unchanged: neither Improve tree becomes a broad
++default export. A bounded sanitized forensic adjunct requires an explicit
++producer/consumer contract transition and independent consumer admission;
++omitted original evidence remains unknown, never inferred from a snapshot.
+--- preimage/tools/saipen_engine/admission.py
++++ current/tools/saipen_engine/admission.py
+@@ -89,6 +89,7 @@
+     ".saipen/IDENTITY.md",
+     ".saipen/logs",
+     ".saipen/intake",
++    ".saipen/improve-reconciliation",
+     ".saipen/recovery",
+     # Durable host admission evidence is protected exactly; disposable siblings
+     # under `.saipen/cache/` remain ordinary runtime caches.
+--- preimage/tools/saipen_engine/capability.py
++++ current/tools/saipen_engine/capability.py
+@@ -200,4 +200,9 @@
+                 return True, (
+                     f"path {str(p)!r} resolves to Core KNOWLEDGE tree; producers may not mutate it"
+                 )
++            if next_part == "improve-reconciliation":
++                return True, (
++                    f"path {str(p)!r} resolves to Core retrospective evidence; "
++                    "producers may not mutate it"
++                )
+     return False, ""

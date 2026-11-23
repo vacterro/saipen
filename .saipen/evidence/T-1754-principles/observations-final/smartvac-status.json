@@ -1,0 +1,298 @@
+{
+  "ok": true,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_smart_vac_cleaner",
+  "protocol_version": "8.1.0",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "saipen continue",
+  "computed_next_action": "saipen continue",
+  "computed_reason": "maintain",
+  "blocker": "",
+  "execution_intent": "converge",
+  "claimed_ticket": null,
+  "top_workable_ticket": null,
+  "log_tail_event": 633,
+  "head": "b4fbaa4",
+  "board_errors": [],
+  "recovery_pending": false,
+  "recovery_conflict": false,
+  "pending_ops": [],
+  "conflict_ops": [],
+  "goal_authority": {
+    "state": "inactive",
+    "detail": "No persistent grant",
+    "original_event": null,
+    "checkpoint_due": false
+  },
+  "milestone": {
+    "current": null,
+    "label": null,
+    "parent": null,
+    "undo_available": false,
+    "valid": true
+  },
+  "cold_route": {
+    "project_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER",
+    "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+    "phase": "DONE",
+    "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\done.md",
+    "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+    "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+    "documents": {
+      "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+      "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+      "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+      "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+      "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+      "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+      "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+      "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+      "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+      "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+    },
+    "project_memory": {
+      "STATE.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  },
+  "audit_inbox": {
+    "pending": 0,
+    "active_layer": null,
+    "bound_receipt": null,
+    "bound_work": null,
+    "closed_pending_delete": 0,
+    "invalid": 0,
+    "residue": 0,
+    "clean": true,
+    "last_allocated_id": 1,
+    "inbox_state": null,
+    "error_state": null
+  },
+  "distribution": {
+    "installed": 7,
+    "stale": 7,
+    "unknown": 2,
+    "fresh": false,
+    "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+    "newest_installed_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+    "last_run": {
+      "status": "skipped",
+      "skip": "DIRTY_SOURCE",
+      "rc": 2,
+      "dirty": [
+        "M bootstrap/inject.ps1",
+        "M bootstrap/inject.sh",
+        "M bootstrap/install_ownership.py",
+        "M bootstrap/uninstall.ps1",
+        "M bootstrap/uninstall.sh"
+      ],
+      "at": "2026-10-16 02:16:00",
+      "head": null,
+      "in_flight": false
+    },
+    "blocker": {
+      "condition": "DIRTY_SOURCE",
+      "blocked": true,
+      "detail": "291 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation",
+      "paths": [
+        "bootstrap/inject.ps1",
+        "bootstrap/inject.sh",
+        "bootstrap/install_ownership.py",
+        "bootstrap/uninstall.ps1",
+        "bootstrap/uninstall.sh",
+        "extensions/adapters/claude.md",
+        "extensions/adapters/claude/saipen-guard.py",
+        "extensions/adapters/codex.md"
+      ],
+      "path_count": 291,
+      "canonical_next_command": "git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit"
+    },
+    "published_head": null,
+    "publication": null,
+    "consumer_convergence": "CURRENT",
+    "pending_consumers": [],
+    "consumers_converged": false,
+    "requires_human": false,
+    "summary": "distribution: 7 of 7 home(s) stale -- newest installed head 025bf596c683 -- source head 025bf596c683 -- 2 home(s) carry no head -- last scheduled injection: skipped DIRTY_SOURCE at 2026-10-16 02:16:00 -- BLOCKED DIRTY_SOURCE: 291 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation -- clears with: git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit"
+  },
+  "claimed_but_unproven": [
+    "T-150",
+    "T-151",
+    "T-152",
+    "T-153",
+    "T-155",
+    "T-156",
+    "T-157",
+    "T-158",
+    "T-159",
+    "T-160",
+    "T-161",
+    "T-165",
+    "T-182",
+    "T-162",
+    "T-163",
+    "T-168",
+    "T-169",
+    "T-170",
+    "T-172",
+    "T-173",
+    "T-174",
+    "T-175",
+    "T-176",
+    "T-177",
+    "T-178",
+    "T-179",
+    "T-180",
+    "T-181",
+    "T-183",
+    "T-184",
+    "T-185",
+    "T-186",
+    "T-187",
+    "T-188",
+    "T-189",
+    "T-164",
+    "T-166",
+    "T-167",
+    "T-171"
+  ],
+  "conformance_history": "FAIL (20.08.26 09:46)",
+  "staleness": "1h ago",
+  "conformance_status": {
+    "status": "CURRENT_PASS",
+    "gate": "core",
+    "reason": "",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 0,
+        "problems": [],
+        "ruleset_fingerprint": "d682e4a0e542976ddfe3e5518a2b4f8bc81d7eea1e4bbdcd8642a8d5c7fefc5c",
+        "ruleset_version": 2,
+        "status": "complete",
+        "warning_count": 33
+      },
+      "board_hash": "01f2400a3e61068c",
+      "canonical_next_command": null,
+      "content_hash": "419cf808171d8bf3",
+      "exit_code": 0,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:2ebe093217f76e70d6bae7caeee109da276eff235fb95c08fa88ff9d650d572c",
+      "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "kind": "conformance_receipt",
+      "log_hash": "577dff46b9da7f19",
+      "project_identity": "v:\\___vac\\__k\\__code\\_py\\_smart_vac_cleaner",
+      "receipt_id": "receipt-7ec635616325",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "b4fbaa409ec793df9d7fa1b0aec008dce304edd6",
+      "source_tree_fingerprint": "git-delta-v1:491473312fb3eb840a5e5ee847df758dc2b2c50d8d97f1da71b2d15d815f59dc",
+      "state_hash": "d3495109be448733",
+      "timestamp_utc": "2026-10-15T22:32:10.328701Z",
+      "validator_protocol_version": "1",
+      "verdict": "PASS"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "b4fbaa409ec793df9d7fa1b0aec008dce304edd6",
+      "source_tree_fingerprint": "git-delta-v1:491473312fb3eb840a5e5ee847df758dc2b2c50d8d97f1da71b2d15d815f59dc"
+    },
+    "disposition": "HEALTHY",
+    "remediation_command": null,
+    "repair_status": "HEALTHY",
+    "diagnostic": null
+  },
+  "closed_contracts": {
+    "ok": true,
+    "status": "OBSERVED",
+    "advisory": true,
+    "blocks_unrelated_work": false,
+    "total": 61,
+    "counts": {
+      "UNVERIFIED": 49,
+      "REGRESSION_SUSPECT": 8,
+      "UNCHANGED_SCOPE": 4
+    },
+    "rows": [
+      {
+        "work": "T-150",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-151",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-152",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-153",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-155",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      }
+    ],
+    "has_more": true,
+    "offset": 0,
+    "limit": 5,
+    "errors": [],
+    "paths_read": 43,
+    "bytes_read": 832202
+  },
+  "automation": {
+    "schema_version": 1,
+    "disposition": "CONTINUE",
+    "next_command": "cc",
+    "operator_action_due": false,
+    "reason_code": "closure-conditions-C3-C4-C5-C6",
+    "reason": "route reason: maintain",
+    "audit_quiescent": true,
+    "audit_epoch": "audit-epoch-v1:a7fd3c69ad0ecf048c784d94a9c1ec3885f0b97bbb616d8542e83a888f0ddb1d",
+    "convergence_current": false,
+    "closure_complete": false,
+    "source_fingerprint": "b4fbaa409ec793df9d7fa1b0aec008dce304edd6+git-delta-v1:491473312fb3eb840a5e5ee847df758dc2b2c50d8d97f1da71b2d15d815f59dc",
+    "completed_at": null
+  },
+  "conditional_efficiency_kpi": {
+    "scope": "ticket",
+    "ticket": "T-206",
+    "percent": 100,
+    "approximate": true,
+    "confidence": "LOW",
+    "formula_version": 1,
+    "components": {
+      "progress": 100,
+      "rework": 100,
+      "autonomy": 100,
+      "human": null
+    },
+    "notes": {
+      "human": "no machine signal separates avoidable operator cost from a legitimate authorization boundary",
+      "autonomy": "coarse: LOG agent ids are CLI identities shared across sessions"
+    },
+    "preliminary": false,
+    "withheld": null
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat workbuddy",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "record_schema": 1,
+  "modern_reader_after_revocation": {
+    "accepted": false,
+    "record_id": null,
+    "reason": "authority UNKNOWN: the original native reservation is unverified",
+    "authority_status": "UNKNOWN"
+  },
+  "pre_fix_reader_on_new_record_after_revocation": {
+    "accepted": true,
+    "record_id": "AD-000001",
+    "reason": "exact missing set and line evidence verified"
+  },
+  "scope": "actual old reader over actual newly generated record in disposable simulated-native fixture; no source edit or live project mutation"
+}

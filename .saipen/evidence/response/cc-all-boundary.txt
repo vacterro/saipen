@@ -1,0 +1,7 @@
+STATUS: WAIT  
+RESULT: Vajab operaatori otsust; 2 lõpetatud; 114 blokeeritud (BLOCKED_EXTERNAL 20, WAIT_USER_DECISION 9, MARKHUNT_TRIAGE_REQUIRED 8)  
+BLOCKER: WAIT_USER_DECISION -- shared release index; foreign staging remains protected  
+OPERATOR ACTION: Resolve foreign staged-batch ownership, or authorize a verified canonical isolated release; preserve the live index.  
+NEXT EXACT ACTION: NONE  
+VALIDATION: CURRENT_FAIL  
+DETAILS: E-20494, E-20499

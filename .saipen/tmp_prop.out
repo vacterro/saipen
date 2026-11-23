@@ -1,0 +1,9 @@
+continuous_maintenance FAIL ValueError 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\recovery\\settled\\goal-b14d64dda57b46b6bd33833a2b93b776\\operation.json' is not in the subpath of '' OR one path is relative and the other is absolute.
+goal_complete FAIL ValueError 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\recovery\\settled\\goal-b14d64dda57b46b6bd33833a2b93b776\\operation.json' is not in the subpath of '' OR one path is relative and the other is absolute.
+describe: {
+ "state": "protocol_home",
+ "detail": "Protocol home: the goal budget checkpoint clears itself on cc",
+ "original_event": "E-18977",
+ "checkpoint_due": false
+}
+protocol_home: True

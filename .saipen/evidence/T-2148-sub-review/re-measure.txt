@@ -1,0 +1,15 @@
+T-2148 independent re-measure: producer=saitest package=TEST-25 (frozen_ref=working-tree)
+PASS: OUTBOX entry present at working tree at HEAD 5706afe0d (role files pending ship commit) (frozen)
+PASS: package field status present (live pending commit)
+PASS: package field source_head present (live pending commit)
+PASS: package field source_tree_fingerprint present (live pending commit)
+PASS: package field role_revision present (live pending commit)
+PASS: package field coverage present (live pending commit)
+PASS: package field payload present (live pending commit)
+PASS: package field verified present (live pending commit)
+PASS: package field instructions present (live pending commit)
+PASS: capture _test25_scenarios.txt exists at working tree (pending commit)
+PASS: capture TEST-25.md exists at working tree (pending commit)
+PASS: BOARD ticket row carries collect-receipt identity prefix
+PASS: no family-record claim decoded by this package (sensor/adversary/fixer evidence only)
+TOTAL: 13 checks, 0 FAIL

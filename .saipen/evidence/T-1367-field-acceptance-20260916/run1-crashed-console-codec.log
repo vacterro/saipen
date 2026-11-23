@@ -1,0 +1,15 @@
+sairoute/SAIFREN :: healthy                measurement=MEASURED first='saipen start "add a one-line docstring to the top of src/app.py"' protocol_before=1 productive=shell target_changed=True refusals=['INCOMPLETE_TICKET', 'PROJECT_BINDING_INVALID', 'PROTECTED_CANONICAL_NAMESPACE', 'VALIDATION_FAILED', 'SOURCE_UNRESOLVED', 'SOURCE_UNRESOLVED', 'SOURCE_UNRESOLVED', 'VALIDATION_FAILED', 'SOURCE_LINKAGE_MISSING', 'SOURCE_RECEIPT_MISSING', 'VALIDATION_FAILED', 'VALIDATION_FAILED', 'ENVIRONMENT_PROOF_UNAVAILABLE', 'ENVIRONMENT_PRESENT', 'ENVIRONMENT_ABSENT', 'REQUIREMENT_ADDED', 'COVERAGE_UPDATED', 'PROTECTED_CANONICAL_NAMESPACE'] repeated=['SOURCE_UNRESOLVED', 'VALIDATION_FAILED'] isolation=FAIL minted={'tickets': ['T-1'], 'receipts': ['SRC-001']}
+sairoute/SAIFREN :: operator_decision      measurement=MEASURED first='saipen start "add a one-line docstring to the top of src/app.py" 2>&1' protocol_before=0 productive=shell target_changed=False refusals=['INGRESS_TRANSPORT_UNSAFE', 'WAIT_OPERATOR'] repeated=[] isolation=PASS minted={'tickets': [], 'receipts': ['SRC-001']}
+sairoute/SAIFREN :: safety_valve           measurement=MEASURED first="saipen start 'add a one-line docstring to the top of src/app.py'" protocol_before=0 productive=edit target_changed=True refusals=['NO_ACTIVE_WORK', 'TRANSITIONED', 'CHECKPOINTED', 'TRANSITIONED', 'CHECKPOINTED', 'INCOMPLETE_TICKET', 'VALID', 'INCOMPLETE_TICKET', 'CHECKPOINTED', 'TRANSITIONED', 'CHECKPOINTED', 'TRANSITIONED', 'PROTECTED_CANONICAL_NAMESPACE', 'VALIDATION_FAILED', 'PROTECTED_CANONICAL_NAMESPACE', 'CODE', 'VALIDATION_FAILED', 'VALIDATION_FAILED', 'RELEASED', 'SOURCE_UNRESOLVED'] repeated=['INVALID', 'SOURCE_UNRESOLVED', 'USAGE', 'VALIDATION_FAILED'] isolation=PASS minted={'tickets': ['T-1'], 'receipts': ['SRC-001']}
+sairoute/SAIFREN :: repairable_debt        measurement=MEASURED first="saipen start 'add a one-line docstring to the top of src/app.py'" protocol_before=0 productive=shell target_changed=False refusals=['PROTECTED_CANONICAL_NAMESPACE', 'WAIT_OPERATOR', 'VALIDATION_FAILED', 'NO_ACTIVE_WORK', 'COLD_ORIENTATION'] repeated=[] isolation=PASS minted={'tickets': [], 'receipts': ['SRC-001']}
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\t1363_field_polygon.py", line 517, in <module>
+    task = CONDITION_TASKS.get(name, SIMPLE_TASK)
+             ^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\t1363_field_polygon.py", line 495, in main
+    if not OPENCODE:
+            ^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\encodings\cp1251.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\xfc' in position 90: character maps to <undefined>

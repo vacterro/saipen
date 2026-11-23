@@ -1,0 +1,37 @@
+{
+  "argv": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "response",
+    "check",
+    "--stdin",
+    "--classify",
+    "--auto-eligibility",
+    "--project-root",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "--json"
+  ],
+  "exit_code": 1,
+  "stdout": {
+    "ok": false,
+    "code": "EXEC_RESPONSE_INVALID",
+    "class": "INVALID_OPERATIONAL_PROSE",
+    "layer": "EXEC_RESPONSE",
+    "layers": {
+      "admission": "NOT_CONSULTED",
+      "exec_response": "FAIL",
+      "chat_style": "NOT_REACHED"
+    },
+    "errors": [
+      "DETAILS is not authorized on an ordinary response -- the detailed path is an explicit report, audit, handoff or exceptional boundary; an ordinary response may carry one short line of references only"
+    ],
+    "detail_mode": "NONE",
+    "turn_decision": "OPERATOR_WAIT",
+    "detail": "DETAILS is not authorized on an ordinary response -- the detailed path is an explicit report, audit, handoff or exceptional boundary; an ordinary response may carry one short line of references only",
+    "diagnostic": null,
+    "delivery": "STATUS: REVIEW T-1703\nRESULT: Vajab operaatori otsust; 63 blokeeritud (BLOCKED_EXTERNAL 9, MARKHUNT_TRIAGE_REQUIRED 8, HELD 4)\nOPERATOR ACTION: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue\nNEXT EXACT ACTION: NONE\nVALIDATION: CURRENT_FAIL",
+    "overflow": null,
+    "contract": "SAIPEN chat contract, generated from STYLE.md (ded-069a4c52). Reply language is pinned to Estonian (et) by STYLE.md: answer in it on every reply, whatever language the user wrote in. Voice: caveman-ded, blunt and compressed. Higher-priority host instructions retain precedence. Chat prose is at most 8 lines (target 5) and 900 characters unless witnessed human ingress explicitly requests depth or a typed artifact. Summary, brief and ordinary final report stay compact. Fences never escape the total budget. Never open with: Sure, Certainly, Okay, Here is, I will, Let me, Based on my analysis, I'd be happy to. Never close with: Hope this helps, Let me know if you need anything else, Feel free to ask. Never apologize with: Sorry, My apologies, I made a mistake. Commands, PASS/FAIL, file:line, error strings and code stay exact. An operational boundary is the EXEC-RESPONSE-01 control surface generated from machine facts (`saipen response digest --project-root ROOT --reason final|stop|status`), never a model retrospective. The low-level diagnostic renderer is `saipen response render --stdin`. Completed-part gates replace default operational output. Post-render Stop gates request one correction; they cannot retract visible text. Runnable work continues silently. Evidence remains durable, not narrated."
+  },
+  "stderr": ""
+}

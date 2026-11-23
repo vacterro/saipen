@@ -1,0 +1,497 @@
+{
+  "ok": true,
+  "project_identity": "v:\\___vac\\__k\\__code\\__saituls",
+  "protocol_version": "8.1.0",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "saipen continue",
+  "computed_next_action": "saipen work reverify T-231",
+  "computed_reason": "conformance-remediation",
+  "blocker": "none",
+  "execution_intent": "goal",
+  "continuation_authority": "operator_required",
+  "authority_source": "E-3128",
+  "authority_until": "budget",
+  "safety_valve_mode": "hard_wait",
+  "claimed_ticket": null,
+  "top_workable_ticket": null,
+  "log_tail_event": 3243,
+  "head": "5f0dc0c",
+  "board_errors": [],
+  "recovery_pending": false,
+  "recovery_conflict": false,
+  "pending_ops": [],
+  "conflict_ops": [],
+  "goal_authority": {
+    "state": "bounded",
+    "detail": "No persistent grant",
+    "original_event": "E-3128",
+    "checkpoint_due": false
+  },
+  "milestone": {
+    "current": null,
+    "label": null,
+    "parent": null,
+    "undo_available": false,
+    "valid": true
+  },
+  "cold_route": {
+    "project_root": "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+    "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+    "phase": "DONE",
+    "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\done.md",
+    "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+    "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+    "documents": {
+      "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+      "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+      "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+      "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+      "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+      "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+      "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+      "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+      "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+      "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+    },
+    "project_memory": {
+      "STATE.md": "V:\\___VAC\\__K\\__CODE\\__SAITULS\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\___VAC\\__K\\__CODE\\__SAITULS\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\___VAC\\__K\\__CODE\\__SAITULS\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  },
+  "audit_inbox": {
+    "pending": 0,
+    "active_layer": null,
+    "bound_receipt": null,
+    "bound_work": null,
+    "closed_pending_delete": 0,
+    "invalid": 0,
+    "residue": 0,
+    "clean": true,
+    "last_allocated_id": 19,
+    "inbox_state": null,
+    "error_state": null
+  },
+  "distribution": {
+    "installed": 7,
+    "stale": 7,
+    "unknown": 2,
+    "fresh": false,
+    "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+    "newest_installed_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+    "last_run": {
+      "status": "skipped",
+      "skip": "DIRTY_SOURCE",
+      "rc": 2,
+      "dirty": [
+        "M bootstrap/inject.ps1",
+        "M bootstrap/inject.sh",
+        "M bootstrap/install_ownership.py",
+        "M bootstrap/uninstall.ps1",
+        "M bootstrap/uninstall.sh"
+      ],
+      "at": "2026-10-16 02:16:00",
+      "head": null,
+      "in_flight": false
+    },
+    "blocker": {
+      "condition": "DIRTY_SOURCE",
+      "blocked": true,
+      "detail": "291 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation",
+      "paths": [
+        "bootstrap/inject.ps1",
+        "bootstrap/inject.sh",
+        "bootstrap/install_ownership.py",
+        "bootstrap/uninstall.ps1",
+        "bootstrap/uninstall.sh",
+        "extensions/adapters/claude.md",
+        "extensions/adapters/claude/saipen-guard.py",
+        "extensions/adapters/codex.md"
+      ],
+      "path_count": 291,
+      "canonical_next_command": "git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit"
+    },
+    "published_head": null,
+    "publication": null,
+    "consumer_convergence": "CURRENT",
+    "pending_consumers": [],
+    "consumers_converged": false,
+    "requires_human": false,
+    "summary": "distribution: 7 of 7 home(s) stale -- newest installed head 025bf596c683 -- source head 025bf596c683 -- 2 home(s) carry no head -- last scheduled injection: skipped DIRTY_SOURCE at 2026-10-16 02:16:00 -- BLOCKED DIRTY_SOURCE: 291 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation -- clears with: git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit"
+  },
+  "parked_work": [
+    "T-220 blocked: BLOCKED on external unrecoverable human artifacts R004 (E-1267 incident report) and R005 (previous wave handoff bytes / PREVIOUS_WAVE_SHA256)",
+    "T-262 blocked: PAUSED_BY_OPERATOR 2026-10-08: latest directive allows T-247 only and STOP AFTER T-247; preserve key-migration acceptance until a later explicit Vault continuation. No T-248/later implementation in this pass.",
+    "T-261 blocked: PAUSED_BY_OPERATOR 2026-10-08: current directive supersedes prior Vault handoff. Finish T-270 evidence portability, then T-247 only; stop after T-247. Preserve unfinished A-I hardware acceptance, evidence and ownership; no T-248/later or FUTURE_GATE work authorized in this pass.",
+    "T-143 blocked: CLOSURE_BLOCKED_PROTOCOL_STATE: DEL JUNK implementation complete + all 4 automatable gates green (depth 26/26, all-disks ready, busy-recovery, identity 12 OK), but ticket done refuses because (1)...",
+    "T-144 blocked: AWAITING_USER_LIVE_RETEST + SOURCE_LINKAGE_PURGED: all automatable 2.5.2 gates green (node 166/166, native history 8/8, test_saipatch 0 failures incl live-hash-unchanged/no-plugin-file); closure blocked on two user-gated facts: (1) real OpenCode 1.18.29/1.18.30 live retest not automatable here, (2) SRC-013 body purged in a prior session leaving 18 actionable clauses whose disposition cannot be re-derived -- ticket done refuses SOURCE_LINKAGE_MISSING",
+    "T-167 blocked: T167_PACKAGE_AUTHORITY_AND_GUI_PROOF_PENDING -> package-authority half GREEN (SRC-021 clean assembly proven); remaining sole gate: real Windows GUI evidence list (launch SAITULS; FFmpeg actions..."
+  ],
+  "appends": [
+    {
+      "source": "SRC-057",
+      "appends": 1,
+      "latest_append": "SRC-058",
+      "latest_class": "APPEND",
+      "unprojected": [],
+      "active_requirements": 0,
+      "superseded_requirements": 0,
+      "affected_work": [
+        "T-219"
+      ],
+      "next_action": "saipen continue --json",
+      "error": null
+    },
+    {
+      "source": "SRC-092",
+      "appends": 1,
+      "latest_append": "SRC-093",
+      "latest_class": "APPEND",
+      "unprojected": [],
+      "active_requirements": 0,
+      "superseded_requirements": 0,
+      "affected_work": [
+        "T-274"
+      ],
+      "next_action": "saipen continue --json",
+      "error": null
+    }
+  ],
+  "claimed_but_unproven": [
+    "T-273",
+    "T-232",
+    "T-233",
+    "T-246",
+    "T-240",
+    "T-231",
+    "T-177",
+    "T-176",
+    "T-173",
+    "T-175",
+    "T-169",
+    "T-132",
+    "T-135",
+    "T-134",
+    "T-133",
+    "T-131",
+    "T-104",
+    "T-103",
+    "T-102",
+    "T-178"
+  ],
+  "conformance_history": "PASS (02.09.26 10:23)",
+  "staleness": "1h ago",
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 14,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "source receipts -- active receipt SRC-013: INVALID",
+            "detail_hash": "00d31284f170e9f2",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "source receipts -- active receipt SRC-014: INVALID",
+            "detail_hash": "064e6eabd4da1387",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "source receipts -- active receipt SRC-014 has no Work Contract",
+            "detail_hash": "7a2418ced89587dc",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "SRC-060,T-231",
+            "detail_hash": "1d82a3b4d71bf2fd",
+            "finding_key": "b4d89984460fe6d8",
+            "rule_id": "source_receipt_unresolved_work",
+            "severity": "problem",
+            "subject_id": "T-231",
+            "subject_kind": "work",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "SRC-061,T-232",
+            "detail_hash": "93282bb884d5aef4",
+            "finding_key": "19837964a2e86ef7",
+            "rule_id": "source_receipt_unresolved_work",
+            "severity": "problem",
+            "subject_id": "T-232",
+            "subject_kind": "work",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "SRC-062,T-233",
+            "detail_hash": "26004aa3118b214c",
+            "finding_key": "d8c7be9a7df18a21",
+            "rule_id": "source_receipt_unresolved_work",
+            "severity": "problem",
+            "subject_id": "T-233",
+            "subject_kind": "work",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "SRC-075,T-246",
+            "detail_hash": "214256e177d6dfeb",
+            "finding_key": "05ee9fce067dcdf7",
+            "rule_id": "source_receipt_unresolved_work",
+            "severity": "problem",
+            "subject_id": "T-246",
+            "subject_kind": "work",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "source receipts -- active receipt SRC-092 has no Work Contract",
+            "detail_hash": "beea4f57018922b0",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "SRC-092,T-273",
+            "detail_hash": "2cd784ca9574cf83",
+            "finding_key": "949a00dea6b9ac00",
+            "rule_id": "source_receipt_unresolved_work",
+            "severity": "problem",
+            "subject_id": "T-273",
+            "subject_kind": "work",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "closure provenance does not resolve: T-232: T-243 is DONE but no committed release evidence names it; DONE is an evidence claim, never proof of publication; T-233: T-243 is DONE but no committed relea",
+            "detail_hash": "570ac115f4674b1f",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt",
+            "detail_hash": "186e51123c0cc004",
+            "finding_key": "f93ad1abbeae0cf3",
+            "rule_id": "work_closure_evidence",
+            "severity": "problem",
+            "subject_id": "T-231",
+            "subject_kind": "work",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "BUILD+VERIFY evidence, all executed on this machine. Root cause proven, not guessed: helper.log shows LogonUser succeeded, CreateProcessWithTokenW spawned the broker, then 'Broker process exit code after 300ms: 0x8007045A (2147943514",
+            "detail_hash": "6ca342f442d4115f",
+            "finding_key": "615db9fc04e86510",
+            "rule_id": "work_closure_evidence",
+            "severity": "problem",
+            "subject_id": "T-232",
+            "subject_kind": "work",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "unproven/failed; reverify: no current-tree PASS re-verification receipt",
+            "detail_hash": "22c553d8629caa9a",
+            "finding_key": "78b967c407c492bf",
+            "rule_id": "work_closure_evidence",
+            "severity": "problem",
+            "subject_id": "T-233",
+            "subject_kind": "work",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt",
+            "detail_hash": "186e51123c0cc004",
+            "finding_key": "af25515f37d105ed",
+            "rule_id": "work_closure_evidence",
+            "severity": "problem",
+            "subject_id": "T-273",
+            "subject_kind": "work",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "d682e4a0e542976ddfe3e5518a2b4f8bc81d7eea1e4bbdcd8642a8d5c7fefc5c",
+        "ruleset_version": 2,
+        "status": "complete",
+        "warning_count": 38
+      },
+      "board_hash": "6054ba4255bbcd35",
+      "canonical_next_command": "saipen work reverify T-231",
+      "content_hash": "270b279e81726871",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:0fb40b86ce6237cb085172513f548d254b42bde0d60aadcaa669bb2a400441de",
+      "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "kind": "conformance_receipt",
+      "log_hash": "d62f598945eb0734",
+      "project_identity": "v:\\___vac\\__k\\__code\\__saituls",
+      "receipt_id": "receipt-2feda5085ac6",
+      "remediation_commands": [
+        "saipen work reverify T-231",
+        "saipen work reverify T-232",
+        "saipen work reverify T-233",
+        "saipen work reverify T-273"
+      ],
+      "schema_version": 2,
+      "source_head": "5f0dc0c6abe1f9a0a34487d87f56fb129410cb7f",
+      "source_tree_fingerprint": "git-delta-v1:b4265fc3024c9d3e966c5c791037d912f15c2feef94bd5f012deab040b41b60c",
+      "state_hash": "37c1021c5c04deda",
+      "timestamp_utc": "2026-10-15T21:38:17.463235Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "7",
+      "gate": "core",
+      "source_head": "5f0dc0c6abe1f9a0a34487d87f56fb129410cb7f",
+      "source_tree_fingerprint": "git-delta-v1:b4265fc3024c9d3e966c5c791037d912f15c2feef94bd5f012deab040b41b60c"
+    },
+    "disposition": "REMEDIATION_REQUIRED",
+    "remediation_command": "saipen work reverify T-231",
+    "repair_status": "REPAIR_AVAILABLE",
+    "diagnostic": null
+  },
+  "closed_contracts": {
+    "ok": true,
+    "status": "OBSERVED",
+    "advisory": true,
+    "blocks_unrelated_work": false,
+    "total": 184,
+    "counts": {
+      "UNVERIFIED": 136,
+      "REGRESSION_SUSPECT": 45,
+      "UNCHANGED_SCOPE": 3
+    },
+    "rows": [
+      {
+        "work": "T-86",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-87",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-88",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-89",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-90",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      }
+    ],
+    "has_more": true,
+    "offset": 0,
+    "limit": 5,
+    "errors": [],
+    "paths_read": 197,
+    "bytes_read": 6944081
+  },
+  "automation": {
+    "schema_version": 1,
+    "disposition": "BLOCKED",
+    "next_command": null,
+    "operator_action_due": false,
+    "reason_code": "conformance-remediation",
+    "reason": "idle continuation is owned by the unaccepted conformance red gate (CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint); run 'saipen work reverify T-231' before continuing",
+    "audit_quiescent": false,
+    "audit_epoch": "audit-epoch-v1:ce05b92484cf36c6a58d96bafa987d1e364da13d0e31f26b5a4a7a17ec1ed4ff",
+    "convergence_current": false,
+    "closure_complete": false,
+    "source_fingerprint": "5f0dc0c6abe1f9a0a34487d87f56fb129410cb7f+git-delta-v1:b4265fc3024c9d3e966c5c791037d912f15c2feef94bd5f012deab040b41b60c",
+    "completed_at": null,
+    "remediation_command": "saipen work reverify T-231",
+    "diagnostic": null
+  },
+  "conditional_efficiency_kpi": {
+    "scope": "ticket",
+    "ticket": "T-290",
+    "percent": 100,
+    "approximate": true,
+    "confidence": "LOW",
+    "formula_version": 1,
+    "components": {
+      "progress": 100,
+      "rework": 100,
+      "autonomy": 100,
+      "human": null
+    },
+    "notes": {
+      "human": "no machine signal separates avoidable operator cost from a legitimate authorization boundary",
+      "autonomy": "coarse: LOG agent ids are CLI identities shared across sessions"
+    },
+    "preliminary": true,
+    "withheld": null
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\___VAC\\__K\\__CODE\\__SAITULS --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat saipen-cli",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

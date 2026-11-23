@@ -1,0 +1,13 @@
+............
+----------------------------------------------------------------------
+Ran 12 tests in 7.755s
+
+OK
+{
+  "routed claim DEC": "claimed via SAIOPS -- owner probe -- audit route (SOURCE-AUDIT-INBOX-01), ahead of PICK-01 topmost workable T-1",
+  "unrouted claim": "NOT_TOP_WORKABLE",
+  "claim beside the routed Work": "NOT_TOP_WORKABLE",
+  "START claim DEC": "claimed via SAIOPS -- owner probe -- user request SRC-001, ahead of PICK-01 topmost workable T-1",
+  "under a crew target, next": "saipen validate (conformance-unhealthy)",
+  "under a crew target, claim T-2": "CLAIMED: "
+}

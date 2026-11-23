@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-016:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement and verify every required change and test in T02 AUDIT RUN COORDINATOR."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:10Z",
+  "derived_from": "SRC-016",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0426aa69989ce4951e222fd490a9dbf7a2ec6f6eaf86f96eeee0c3ba5f36551d"
+}

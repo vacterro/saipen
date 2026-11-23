@@ -1,0 +1,25 @@
+== baseline: the copy as the repository stands
+   suite test_protocol_registry: exit 0, ran 16, red 0
+   human_markdown_total: 334841 (cap 334848)
+   route budget cold: 26110 / 27648
+   route budget ordinary_continue: 33792 / 35840
+   route budget command_resolution: 54262 / 54272
+   route budget ordinary_phase: 40012 / 40960
+   route budget ship_improve: 50068 / 56320
+   route budget single_doc: 41395 / 51200
+   route budgets over their limit: []
+== subject: 102 bytes of one sentence appended to saipen/FUTURE.md
+== after the clause
+   suite test_protocol_registry: exit 1, ran 16, red 1
+     red: test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry
+     AssertionError: 334943 not less than or equal to 334848
+   human_markdown_total: 334943 (cap 334848)
+   route budget cold: 26110 / 27648
+   route budget ordinary_continue: 33792 / 35840
+   route budget command_resolution: 54262 / 54272
+   route budget ordinary_phase: 40012 / 40960
+   route budget ship_improve: 50068 / 56320
+   route budget single_doc: 41395 / 51200
+   route budgets over their limit: []
+== verdict: RED BY THE REPOSITORY TOTAL ALONE -- every route budget is unchanged and within its limit; the one red assertion is the total against its cap
+exit=0

@@ -1,0 +1,551 @@
+{
+  "acceptance_gate": false,
+  "observations": [
+    {
+      "platform": "sh",
+      "available": true,
+      "uninstall_exit": 0,
+      "leftovers": [
+        {
+          "path": "tools/saipen_engine/__pycache__/applicability.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "d9f8fd7a42264073d296581703ea25e7212b1de53cfe909a90c9b185a9e313c1"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/attempt.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "f5fc55baca46481ce4d1973673d922189407b4f8b411f7c3982a91410a3d3ea4"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/audit_inbox.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "a8eb8b9a54fba45a6ce4956689a7a2b49e0db67bf67718b5fdeb50a7bf4c833b"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/audit_route.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "a17224387e729fd51f64cd3e6b1839494ad5e0313c08f07f7d7f03415206bd02"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/board.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "2ae83cbb93b163db2d16f720c7794f7af48bd6ed63d150046de9ed779205ef09"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/board_compaction.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "49957b1caf7e36eb9f3cccce9b1f40128a0703c9e7ff87282880b28c2347d98b"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/board_scrub.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "a79f859ac2380c5dd03c02455af880b00378f40cfdbda592d5866bc464b9f06a"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/cli_grammar.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "6e7eca499048819e15f4cf981627c3c7f5c1d16b9c23c41a7074365a02674c0d"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/closure.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "904370868721d4a800957c69b92cd65e0cf77301b05b72c354dc769803bac7e1"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/codec.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "85bcd0d78f721b7381c32598c2c70f161fd727ede91ebdf35921294349bff8be"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/commands.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "c736fda0e7987ec81dfaf6f394e0249625cb44426adc9bed60737765aea9a68c"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/conformance.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "67d9415ee23aba241536c43e5c40b3b70f4f0fc6c25124a1c9ff3c16e9ef412f"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/conformance_lineage.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "4aba40e3bcb181333e54ccc96b502d796a23b3771bf797690630606f29c7ae49"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/controls.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "94379faea4d5a7a90a35a3c642fb44ab85b26eca586b7ace20d67a844c769ed4"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/convergence.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "0ca16b50f12b2386722989184503a4dfa65d558f24be82d2b1bdb4e8e72ced87"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/corpus.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "f7ce641184ddb043295402befc5aa786f0d5ce321947d04a2bb0576702b921a4"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/crew.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "0a879342f1cbd0eae2b219d896f1e4ef2ee6c62dea894f409e6ab54270e1acbe"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/distribution.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "0575addaa77431301ad6fb24f416a5fddec320cc08ba6e8d1ec09c4adb3a314f"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/errors.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "28e0e003529332011c347249bb39bf10ef11900c84373da661f8c37b4bf3c3bd"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/fast_check.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "9a8afa535dd41f588e996a79f18a433be7bfb224bb004a283faed04d05ab57a8"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/findings.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "5a3055dccfbdb1add3bcf786ba6287f54edd421d5dc214ee909051d50127ec8c"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/floor.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "9da885c1b73800f21b82695ad6457c2dfbfa343d3b8acc33d7a2b1e224d41c1a"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/future_gate.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "e0d06626bfb2e94248db151c5019918a7677bb4b324a80057366bc4b4fb86913"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/goal_authority.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "9218cc652f5d4b48696632f93cb1af6b1d67d34c8882c2aaa93981c8eb142ee7"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/intake.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "83fdfcdf0adcdebb3f4a80433d5057aa7ec9f7a450ac9e562b028830b3f69389"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/journal.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "442a20ddb629485702cfa7d635a8d19d7544cf0d9db96c6a36b213ac922a2570"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/lifecycle_authority.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "2274fedaa5e1aa28d623b0dc106bdef9babb5c86f3b6bfa7f88f1a711efed2a3"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/lock.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "c43dcb2b84847eca452c583f1b0208efb3ae99aba8317a9983e84e1a2e8efd69"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/log.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "4e97091d9bc6c3b79ea759f87d4debf11117c4cf26911ae7e2b9391e5476929e"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/manifest.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "c6b0da9e9d5d904bf7bc27eac4bebee609a022ebedfb43fdcec7f26d5eff29f3"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/operations.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "fab9e813440c9958c3ee7fdeeaecb8db5b2fd425b76cee80bab7b36bd081fe37"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/ownership.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "0c4fca7fd0e1f103e3af48cdd60629c007eb7665260be5763cb03be475cb987e"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/paths.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "5f84e21d5a34b562cdd57406bf0327c56e45726fb76931db87c2f8257a0c2e2f"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/phases.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "563ef2fb604c4208c51f0b78fd4cf5e43424ee601045c9e95caa9dcb452eefc3"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/plan.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "14801cccc836b7e1bceaf067d808707d7e438185073fbe573eac6d4b77030915"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/producer_gate.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "407b9b6a3d8b71339b86583302b1ddb902c35bd65c3c56205afd567884018e4f"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/registry.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "c01faddb3f278c86a5ca00a75dc824550d49a63fb1c6e25780d80f33624c59da"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/release_contract.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "cfbd66b8eb3effde5974415801f6a7e58d70a0a839e9b25ab8cbde67969f6879"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/remediation.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "c419c09372a44c412663b6a0a1b313049df9f5c7bc56c10b9fd27e1ae99d7d0e"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/result.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "be9ba4f09cfee21a49e2e00566e05b3f8eda405fb5b900e9d3835dd347715b41"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/runtime_bootstrap.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "0e4555da0cd31fff9b2ef3daed0deaa9ef983185c5017d14e7fae15c4cd98301"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/runtime_surface.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "8999d67a2663d3725310d653d51228ab02087bb5cdc1979a8bed8c68675a367f"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/safeid.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "5a868d9f4015e92738f0f30fd8a8cd488f0d9969421fd2c68e25195d2bf615ac"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/snapshot.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "1565291e63ee978927343c746874407c107160cad1527731ee256fa758ef85c8"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/state.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "9b692e01988013b0f3db1fbe88a5409f9bef54e4ef5c0f861ed64c6739c24d37"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/subs.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "ddd613ca8b7b49d3b687f4fb6ce384887e23147cfecac66797ad84811a95cc4f"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/supersession.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "cd5d570d7b99f19ce6c5e826cd93b386de24d4223a133a60d4d6fcf20d2aea21"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/xpatch.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "940acd00c1138ec99f2e9c9e6d326975e98f563bdb3581dd4445f60ae318e6b9"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/__init__.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "07e948a6cd164cfc60eec2d558b4eae263df96df011df7af35ffd0b8a31dc54b"
+        },
+        {
+          "path": "tools/__pycache__/autoinject.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "d6a34a9b2e593db7ea008c4042aa20ea5303092745a2bb08016fa16848b05419"
+        },
+        {
+          "path": "tools/__pycache__/freshness.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "a504d9f6dce21831ef4bfdf2badd77d5b9932e23645c68beadaff7b01e6995a5"
+        },
+        {
+          "path": "tools/__pycache__/improve.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "1a93f7169e34a607aea0012c651d2bd883674256d7ca8e5130bafa830a9c6b23"
+        },
+        {
+          "path": "tools/__pycache__/userperson.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "b0e112f6a1709c7eed99d697496306901fcfd2d34eb543d012b8baba5551076b"
+        }
+      ],
+      "probe_problem": "bootstrap/inject.sh: uninstaller left the installed skill directory | no failure line"
+    },
+    {
+      "platform": "ps1",
+      "available": true,
+      "uninstall_exit": 0,
+      "leftovers": [
+        {
+          "path": "tools/saipen_engine/__pycache__/applicability.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "b17bf9e30157c6e7e2a65b0dc0d8dfc556a2cd04354e50208cae08ea778a65d8"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/attempt.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "370ab389fe2244107a5a59065bdb3186386a57c5337cd2c21b9489570001ca8f"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/audit_inbox.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "2f4e2b10fd12e26a99083822dff0114425ffb30f8c0f04d9282abf47180dff6e"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/audit_route.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "ea1c4e18cad551e2334e8fc5e9cdea935afe1542b3685018aa3a0a2446e2ab9a"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/board.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "079303dcdfcc8d8fb4a128cc1e6bc92b410652ce9719afc12f5bdc179c68865c"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/board_compaction.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "7e5a9e8a0515800153c078faba51c8f152801ffa7639e0e004bb1a64d774ea8d"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/board_scrub.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "b62aaf23b44d8b255c5b6aaddee333a1a82b61b6b51fe6df2a52ac2acb77da20"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/cli_grammar.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "4e408552db1afeaf74acf67206c1dd40df979895c29d6dbf5f37e15c37f87e4d"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/closure.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "be541d9d4b37c6d324ad28092a6f97464843add0df7ba97c2841c83e1013c6ca"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/codec.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "61a8d877231cca14877d27e5fc85ce41b08680213e80f39c3bcffc88ec362012"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/commands.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "8f060294030b1eabb3a27eb83faefc6b737d2d5bfec1078f822dafc3cc04731e"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/conformance.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "3cfd02355614e43df396fbaa240ddfe69f537d276ae8a3cdf8586418d611f071"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/conformance_lineage.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "2cec21c15e2fcc6185756176fd0ebda2212bccb1bf8f5d0bdb582b1682e29628"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/controls.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "9630eef5e8d96f0d18da2d9bdd5dc3688423bf6867065dbb996e37f71018e1aa"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/convergence.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "60eb496d6b9c233ff6ca697da5fa00c740843cb978b89c1e5baf6a6ba998ad0b"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/corpus.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "238380795c8c03a01347018d23bd81f00911f9e8f83c92f896e6225a01da2c87"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/crew.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "2161d0c9099f44fc1f080f6ecf2ddd6c432db81d48c3970168d8a3e3938b2d3e"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/distribution.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "4d2291e424da25a2bedbc77bb2ff1dbb7a65edfa7a6e761149a0d3b6fc36cd10"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/errors.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "0b4dbc204e92111215f24f7c9a87b68b54e2a45dd7e9a64646a0a96f8fe77295"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/fast_check.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "e8fce879d96801b3da2bc880bbee421632c3e6e9df468a7fd50c758fe148938a"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/findings.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "60ecc659f4009e870e25d124df740dd051eaf82f3638a3b796d0e333454ea3bf"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/floor.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "37bff79db0b8c8410074f817584b717018c1411ba256cde2e83ad1f24366c4c9"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/future_gate.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "16a35ea975935472d384ed728e8c145f3fba0d000e092f9ea0338629fa9a79df"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/goal_authority.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "d762f2e28b33752563884a9c7686806d7f0a9bf9836853dead3df779bc86d05a"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/intake.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "d895561f1305b16983cc3c424811e61390d313c458cfd206a6e090e036e69c57"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/journal.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "458e6714627236e06f81e82b3a6740191cccb50c7422ade0058246a698d88883"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/lifecycle_authority.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "4636b9807ea8761817a598ac4fb1e1ec66d50f10b29717532a7c910e31e042fe"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/lock.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "e244db3c6dc2cdf9c0e409a1cbc101a4b4397f5eebe8a79185b63974f15fa8bd"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/log.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "d277b60b7fbe0f07be89011ed555ef9c9af633a87b612937e9bc83628921f2b4"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/manifest.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "2a7b00ae58780b33b7ffde6c6ccca8868b06dcfe71d6b376f022ad589f18178b"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/operations.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "3dd2fd345d56ac9735af2fbdf96f0f9a9c5b858f3ea813400dc4a72d2da2704c"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/ownership.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "57312dc561995f2535b545841c37046b8ef79baa8b96fdde8539c0d77d47e85a"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/paths.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "b049eeb519a2951182817085b7b1bc91d1b04d546b4064051075e581cca3fa80"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/phases.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "b55b3ac663e3973ecb7fe9063ac11379d71b66fb2abd222eb0135e8f8e75f6c3"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/plan.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "8d18f08cecafd0bd812caaf59721e92e81b03a4830b3917f29277977f69922fd"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/producer_gate.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "3c5a7a8f7eb61082b813319c03e22bc7124b642a1da9571961cc9711cb4d09cb"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/registry.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "46db038be3092c1ad7e5665fc4ade13447ee9d6a0d0a61c88bda50333b560537"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/release_contract.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "817707bb25631a3e748607d6b89c39076449fd9807a71024800801e4f5566078"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/remediation.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "b66f966f566d18ce331bc6a6ebb8cfb3db9ed50c7f44ed461a2df7e7f27f053a"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/result.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "cfaef1af91f2a84c72932ee7335d62077598b85eef47dc68c3107a5ca292f9a8"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/runtime_bootstrap.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "5c4a11af26b7cacab5279de776fa2720a41d897e6d268d7567dba5be0a3ef6e8"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/runtime_surface.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "b2ccd5f03792be6a54a5f390ca28cbc85daf211137d6c9edce9320177b1e9627"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/safeid.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "442f02062ffe047e15ed90663009ec033add2280f7880f3a027038da5cdca90d"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/snapshot.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "7fe978e88d7a7112a9e9bafcb9b2cf57d992e4d757682fa5ce8ad053e592fa68"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/state.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "7538660712d7c1ee6d25657b48dcd52e5728f1a174dfb50765569867221f826c"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/subs.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "b624609e5483540549c7f9f83c8c277cb53de138ebc27c7c5472f554b31ebf7c"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/supersession.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "4211eb7297ea37aa49def778cdddc628460c0a3bcb02a75e259dc5b154a004a5"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/xpatch.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "c99ad8b0203a81fb3b3ca5353d196c66cf596d183efc1c0b053b158bf3b2eb65"
+        },
+        {
+          "path": "tools/saipen_engine/__pycache__/__init__.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "838e25219abdecfb294f5d00b27691aa0cd59d007edc8f1406783fe07a44e8e5"
+        },
+        {
+          "path": "tools/__pycache__/autoinject.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "05125ede877b4283b0cdfbf2dfa0f26a516abdc7a95d7a8c4754dff0018440f4"
+        },
+        {
+          "path": "tools/__pycache__/freshness.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "41bc112568005f0b8913208eb3bcd7b19bc26ce24541fc277332c5131524fad9"
+        },
+        {
+          "path": "tools/__pycache__/improve.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "8cf251e378a906946efdab681e7e6cd9a98b720c155633dd44685e2128306521"
+        },
+        {
+          "path": "tools/__pycache__/userperson.cpython-311.pyc",
+          "listed_in_ownership_ledger": false,
+          "sha256": "90f5f38dd65e0af82d85389f7a01c827b5d6ed73721414c853c8dc7335ed5206"
+        }
+      ],
+      "probe_problem": "bootstrap/inject.ps1: uninstaller left the installed skill directory | no failure line"
+    }
+  ]
+}

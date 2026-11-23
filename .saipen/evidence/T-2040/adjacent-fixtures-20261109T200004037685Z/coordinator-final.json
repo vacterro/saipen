@@ -1,0 +1,25 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tools/test_t2022_protocol_home_maintenance_distinction.py",
+    "tools/test_t1790_dependency_route_budget.py",
+    "tools/test_t1577_op_id_provenance.py",
+    "-q",
+    "--tb=short"
+  ],
+  "exit_code": 1,
+  "files": {
+    "tools/test_t2022_protocol_home_maintenance_distinction.py": "47b0a11ecd89be4c7850746380f24bded09208de50da357da2b62a18c925edf7",
+    "tools/test_t1790_dependency_route_budget.py": "73c6b5bdd45584e736b2fe9f0d7b98953be4ff4d2f66c1394742bf8d401dee62",
+    "tools/test_t1577_op_id_provenance.py": "fdc6bf2262d741555875b48a7b25d4961f2aedc995d908108be3408970df7b20"
+  },
+  "rationale": {
+    "test_t2022": "A proven grant double requires an existing registered MAINTENANCE goal for the real policy owner. No live grant asserted.",
+    "test_t1790": "Canonical intake includes original request R001. Assert all 35 clauses, exact identities, bounded command; 35 owners means 34 other owners.",
+    "test_t1577": "campaign_test_support is an isolated simulated issuer, not a production op writer. Exact test helper exclusion only."
+  },
+  "evidence_class": "fixture correction; not an unchanged-oracle implementation regression pair"
+}

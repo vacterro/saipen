@@ -1,0 +1,39 @@
+test_unworkable_audit_stops_without_inventing_operator_authority (test_automation_block.WaitOwnership.test_unworkable_audit_stops_without_inventing_operator_authority) ... FAIL
+test_workable_ticket_outranks_unworkable_audit (test_automation_block.WaitOwnership.test_workable_ticket_outranks_unworkable_audit) ... ok
+test_unworkable_audit_has_truthful_final_facts (test_automation_block.WaitOwnership.test_unworkable_audit_has_truthful_final_facts) ... FAIL
+test_blocked_automation_is_a_handback_not_project_completion (test_response_surface_contract.AutonomyTests.test_blocked_automation_is_a_handback_not_project_completion) ... FAIL
+
+======================================================================
+FAIL: test_unworkable_audit_stops_without_inventing_operator_authority (test_automation_block.WaitOwnership.test_unworkable_audit_stops_without_inventing_operator_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 311, in test_unworkable_audit_stops_without_inventing_operator_authority
+    self.assertEqual(block["disposition"], automation.BLOCKED)
+AssertionError: 'CONTINUE' != 'BLOCKED'
+- CONTINUE
++ BLOCKED
+
+
+======================================================================
+FAIL: test_unworkable_audit_has_truthful_final_facts (test_automation_block.WaitOwnership.test_unworkable_audit_has_truthful_final_facts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 341, in test_unworkable_audit_has_truthful_final_facts
+    self.assertEqual(facts["blocker"], "AUDIT_INBOX_UNWORKABLE -- ACTIVE audit")
+AssertionError: 'none' != 'AUDIT_INBOX_UNWORKABLE -- ACTIVE audit'
+- none
++ AUDIT_INBOX_UNWORKABLE -- ACTIVE audit
+
+
+======================================================================
+FAIL: test_blocked_automation_is_a_handback_not_project_completion (test_response_surface_contract.AutonomyTests.test_blocked_automation_is_a_handback_not_project_completion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_surface_contract.py", line 543, in test_blocked_automation_is_a_handback_not_project_completion
+    self.assertIn("RESULT: T\xf6\xf6 s\xe4ilitatud", text)
+AssertionError: 'RESULT: T\xf6\xf6 s\xe4ilitatud' not found in 'STATUS: DONE\nRESULT: Valmis\nBLOCKER: AUDIT_INBOX_UNWORKABLE -- audit/23\nNEXT EXACT ACTION: NONE\nVALIDATION: CURRENT_PASS'
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.045s
+
+FAILED (failures=3)

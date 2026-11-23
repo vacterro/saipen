@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-031:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "c92acc4 audapack/packing.py: securing the predecessor is a precondition, retried 4x",
+      "text": "CORE-001: a failed pack must never remove or overwrite the previous good archive when backup establishment or later verification fails",
+      "verification": "tests/test_packing.py::TestBackupIsRollbackAuthority 4 regressions, red on the pre-fix module; 837 pytest",
+      "work": "T-139"
+    },
+    "SRC-031:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "c92acc4 main_window._on_select_audit_profile via scoped_config_write; settings_dialog._persist_settings fails closed",
+      "text": "CORE-002: every non-project config mutation rebases on the latest durable state and fails closed instead of writing a stale registry",
+      "verification": "tests/test_compress_profile.py 2 regressions + tests/ui_qt/test_settings_symmetry.py 1, all red pre-fix",
+      "work": "T-139"
+    },
+    "SRC-031:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "c92acc4 config.py retry is portable with a missing-file exclusion; audit_run_service._basename_any_platform",
+      "text": "CORE-003: the Windows/Ubuntu CI retry contract is green and diagnostic redaction is host-independent",
+      "verification": "tests/test_projects.py 2 new + tests/services/test_audit_run_service.py host-independent basename test",
+      "work": "T-139"
+    },
+    "SRC-031:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "c92acc4 README.md and README.ru.md badges moved to v0.2.3",
+      "text": "CORE-004: one consistent release version, enforced by regression",
+      "verification": "tests/test_docs_consistency.py::test_the_readme_release_badge_matches_the_version, red pre-fix",
+      "work": "T-139"
+    },
+    "SRC-031:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "c92acc4 server.py: lane close and mirror moved past the commit; _rollback_error reports residue; _final_artifact_paths covers every profile",
+      "text": "W2-001: final-wave completion is published only after one verified durable campaign commit, and incomplete rollback is explicit and recoverable",
+      "verification": "tests/test_dispatch_end_to_end.py 3 new e2e regressions over real HTTP, 2 red pre-fix",
+      "work": "T-139"
+    },
+    "SRC-031:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "febd6be inaudit_capture.py: copy-then-delete, recovery walks all three lifecycle dirs, raw-byte digest, get() reports body_undecodable",
+      "text": "W2-002: the INAUDIT body+metadata lifecycle survives split moves and corrupt bytes without losing API access",
+      "verification": "tests/test_inaudit_capture_store.py 4 new, 3 red pre-fix",
+      "work": "T-139"
+    },
+    "SRC-031:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "c92acc4 browser_dispatch.complete_runs_for_project matches canonical ids only, name is a legacy fallback",
+      "text": "W2-003: project completion matches canonical ids without cross-namespace name/id collisions",
+      "verification": "tests/test_browser_dispatch.py 4 new collision regressions, 2 red pre-fix",
+      "work": "T-139"
+    },
+    "SRC-031:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "febd6be browser_dispatch: memory restored from the last durable document, generation publish deferred, idempotent terminal cancel",
+      "text": "W2-004: dispatch transitions cannot diverge between memory, jobs.json and generation under partial persistence, and terminal retries are idempotent",
+      "verification": "tests/test_browser_dispatch.py 4 new, all red pre-fix",
+      "work": "T-139"
+    },
+    "SRC-031:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "febd6be single_instance: owner PID liveness, bounded window wait, POSIX held lock stands down; app.main requires a provably dead owner",
+      "text": "W2-005: single-instance ownership never fails open merely because a live owner's window is not yet visible",
+      "verification": "tests/test_single_instance.py 6 new, all red pre-fix",
+      "work": "T-139"
+    },
+    "SRC-031:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "ec64c3b widget 0.0.47: size_bytes carried per record, one transport probe per cycle, unattempted records not charged",
+      "text": "PERF-001: INAUDIT retry processing is O(N) in local queue work with bounded transport probing during a global outage, durability semantics unchanged",
+      "verification": "tests/widget/w5-001 2 new, 265 widget pass",
+      "work": "T-139"
+    },
+    "SRC-031:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "182b7f5 audit_run_service: get_snapshot instead of force_rescan, status snapshot passed in, AuditStartIntentStore.reconcile",
+      "text": "PERF-002: periodic audit-run refresh scales with live/changed runs rather than retained history, batches intent reconciliation and performs one Bridge-status fetch",
+      "verification": "tests/services/test_audit_run_service.py 5 new, 3 red pre-fix",
+      "work": "T-139"
+    },
+    "SRC-031:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "ec64c3b widget 0.0.47: dirty turns from record.target/addedNodes, full-scan fallback, no processed flag",
+      "text": "PERF-003: INAUDIT DOM attachment is mutation-local after initial hydration while preserving streaming and action-rerender recovery",
+      "verification": "tests/widget/perf-006-inaudit-locality.test.js 6 new, all 6 red pre-fix",
+      "work": "T-139"
+    }
+  },
+  "schema_version": 1
+}

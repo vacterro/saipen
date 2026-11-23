@@ -1,0 +1,15 @@
+{
+  "group": "injector",
+  "root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "result": [
+    [
+      "bootstrap/inject.sh: uninstaller left the installed skill directory | no failure line",
+      "bootstrap/inject.ps1: uninstaller left the installed skill directory | no failure line"
+    ],
+    6,
+    0
+  ],
+  "error": null,
+  "seconds": 80.25,
+  "output": "PASS: bootstrap/inject.sh grep failure -- exits nonzero without completion text\nPASS: bootstrap/inject.sh grep failure -- exits nonzero without Done\nPASS: bootstrap/inject.sh write failure -- exits nonzero without completion text\nPASS: bootstrap/uninstall.sh transform failure -- exits nonzero without completion text\nPASS: bootstrap/uninstall.sh grep failure -- exits nonzero without completion text\nPASS: bootstrap/uninstall.sh grep failure -- exits nonzero without Done\nPASS: bootstrap/uninstall.sh regular-file skill -- unowned bytes preserved\nPASS: bootstrap/inject.sh late missing source -- old install preserved, no staging debris\nPASS: bootstrap/inject.sh manifest traversal -- old install preserved, no staging debris\nPASS: bootstrap/inject.ps1 copy failure -- exits nonzero without completion text\nPASS: bootstrap/uninstall.ps1 read failure -- exits nonzero without completion text\nPASS: bootstrap/inject.ps1 late missing source -- old install preserved, no staging debris\nPASS: bootstrap/inject.ps1 manifest traversal -- old install preserved, no staging debris\nPASS: injector probe red-control -- deleted tests/ goes red\nPASS: injector probe red-control -- installed bytecode goes red\n"
+}

@@ -1,0 +1,4118 @@
+{
+  "ok": false,
+  "executed": false,
+  "selection": {
+    "schema": 1,
+    "kind": "conservative-impact-plan",
+    "executed": false,
+    "scope": "supplied changed paths; unlisted changes are not certified",
+    "fingerprint": "ab4c6be15d2f1e552af7d97801a5d082ede635fa42cd8b6d749ab39cb67c5d43",
+    "changed": [
+      "tools/saipen_engine/release.py",
+      "tools/test_host_bootstrap.py",
+      "tools/test_instruction_loader_contracts.py",
+      "tools/test_next_action_deadlock.py",
+      "tools/test_state_scalar_quoting.py",
+      "tools/test_t1443_basetemp_transience.py",
+      "tools/test_t1443_identity_audit.py",
+      "tools/test_t1711_regression_execution.py",
+      "tools/test_t1750_release_boundary.py",
+      "tools/test_t1952_sandbox_points_at_itself.py",
+      "tools/test_t1953_suite_reuse.py",
+      "tools/test_t1961_pruned_slice.py",
+      "tools/test_ticket_retirement.py"
+    ],
+    "ignored": [],
+    "tier": "FULL",
+    "test_inventory": [
+      "saipen_engine.test_runner",
+      "test_acceptance",
+      "test_accepted_debt",
+      "test_accepted_debt_rebind",
+      "test_actor_binding_lifecycle",
+      "test_adapter_parity",
+      "test_adaptive_runtime",
+      "test_admission_auto_doctor",
+      "test_adoption_section_parity",
+      "test_audit_2026_08_27_core",
+      "test_audit_2026_08_27_w2",
+      "test_audit_2026_08_28_all3",
+      "test_audit_2026_08_29_all3_impl",
+      "test_audit_2026_08_30_all3_impl",
+      "test_audit_dogfood",
+      "test_audit_enqueue",
+      "test_audit_enqueue_boundary",
+      "test_audit_envelope",
+      "test_audit_inbox",
+      "test_audit_ingest_resume",
+      "test_audit_manifest",
+      "test_audit_provenance",
+      "test_audit_route",
+      "test_audit_scope",
+      "test_audit_transport_loop",
+      "test_authority_capture",
+      "test_automation_block",
+      "test_autonomy_audit_fixes",
+      "test_board_pseudo_link",
+      "test_boot_locator",
+      "test_campaign_continuation_assessment",
+      "test_campaign_matrix",
+      "test_campaign_production_gates",
+      "test_canonical_command_reachability",
+      "test_canonical_write_route",
+      "test_capability_boundary",
+      "test_ccc_ff_control",
+      "test_chat_style",
+      "test_check_inventory",
+      "test_claude_stop_hook",
+      "test_cli_compound_entry",
+      "test_closure_provenance",
+      "test_codex_stop_hook",
+      "test_cold_agent_truth",
+      "test_cold_recovery",
+      "test_command_routing",
+      "test_concurrency_independence",
+      "test_conformance_corpus",
+      "test_conformance_lineage",
+      "test_conformance_projection",
+      "test_conformance_remediation_evidence",
+      "test_conformance_repair_boundary",
+      "test_continue_chain",
+      "test_continue_entry",
+      "test_continue_fallback_source_gate",
+      "test_continue_improve_fallthrough",
+      "test_control_primitives",
+      "test_core_audit_containment",
+      "test_core_ownership_routing",
+      "test_core_unit_gate",
+      "test_crew_applicability",
+      "test_crew_liveness_drift",
+      "test_debt_gate",
+      "test_defect_delta_controls",
+      "test_dependency_resume_liveness",
+      "test_detail_authorization",
+      "test_distribution_report",
+      "test_effect_authorization",
+      "test_engine_module_identity",
+      "test_entry_answer_agrees",
+      "test_entry_point_parity",
+      "test_event_taxonomy_owner",
+      "test_evidence_hygiene",
+      "test_explicit_claim",
+      "test_external_authentication_contract",
+      "test_external_resolution",
+      "test_external_revalidation",
+      "test_field_fixture_isolation",
+      "test_finding_invalidated_closure",
+      "test_first_publish_confirm_evidence",
+      "test_fixture_style_authority",
+      "test_fixture_support",
+      "test_foreign_observation_authority",
+      "test_foreign_owner_terminal_route",
+      "test_freebuff_operator_provenance",
+      "test_generation_migration",
+      "test_gpu_lane",
+      "test_guard_admission",
+      "test_guard_events",
+      "test_guard_execution_reachability",
+      "test_guard_hostile_matrix",
+      "test_guard_root_parity",
+      "test_guard_surface_parity",
+      "test_handoff_archive_cross_repo",
+      "test_hermetic_env",
+      "test_host_authority_broker",
+      "test_host_bootstrap",
+      "test_host_fixture",
+      "test_host_launch_net",
+      "test_hostile_wave_regressions",
+      "test_hush_runtime",
+      "test_improve_error_boundary",
+      "test_improve_gate",
+      "test_improve_reconcile",
+      "test_improve_resolve_report_path",
+      "test_ingress_authority",
+      "test_inject_digest",
+      "test_install_drift",
+      "test_install_identity_doctor",
+      "test_instruction_home_parity",
+      "test_instruction_loader_contracts",
+      "test_intent_audit_fixes",
+      "test_journal_nested_targets",
+      "test_knowledge",
+      "test_ledger_gap",
+      "test_legacy_lifecycle_compat",
+      "test_log_detail_evidence",
+      "test_log_normalize",
+      "test_log_stamp_guard",
+      "test_log_tail_quarantine",
+      "test_log_ticket_slot",
+      "test_metadata_repair",
+      "test_metrics_acceptance",
+      "test_module_duplication_guard",
+      "test_narrative_authority",
+      "test_native_host_guard",
+      "test_nested_source_binding",
+      "test_next_action_deadlock",
+      "test_no_publish_source_scope",
+      "test_opencode_adapter",
+      "test_opencode_bound_launch_smoke",
+      "test_opencode_host_smoke",
+      "test_opencode_launch_binding",
+      "test_opencode_live_evaluator",
+      "test_opencode_live_session",
+      "test_operator_ingress_matrix",
+      "test_operator_origin_support",
+      "test_operator_task_witness",
+      "test_orchestration_repair",
+      "test_outbox_write_time_bar",
+      "test_pending_ingress",
+      "test_portable_floor_fields",
+      "test_producer_gate_policy",
+      "test_producer_terminal_consistency",
+      "test_project_root_session_binding",
+      "test_protocol_admission",
+      "test_protocol_registry",
+      "test_public_closure_cli",
+      "test_public_install_lifecycle",
+      "test_reconcile_history_ledger_blocked",
+      "test_reconcile_legacy_output_field",
+      "test_reconcile_valve",
+      "test_recover_approved_repair",
+      "test_recovered_attribution",
+      "test_recovery_noop_targets",
+      "test_recovery_reachability",
+      "test_refusal_registry",
+      "test_refusal_routes",
+      "test_regression_gate",
+      "test_release_provenance",
+      "test_remediation_self_consistency",
+      "test_repeated_cc",
+      "test_request_clause_closure",
+      "test_response_delivery",
+      "test_response_digest",
+      "test_response_fact_binding",
+      "test_response_surface_contract",
+      "test_retired_source_coverage",
+      "test_reverify",
+      "test_reverify_timeout_and_route",
+      "test_router_closure_readiness",
+      "test_runner",
+      "test_runner_failure_roster",
+      "test_runtime_bootstrap",
+      "test_runtime_generation_identity",
+      "test_runtime_namespace",
+      "test_sailearn_consumer",
+      "test_saipen_metrics",
+      "test_saitranslate_charter_namespace",
+      "test_sandbox_work_surface",
+      "test_scenario_runner_isolation",
+      "test_search_transport",
+      "test_self_resolving_gates",
+      "test_session_binding",
+      "test_settled_projection",
+      "test_source_contract_derivation",
+      "test_source_multiwork",
+      "test_source_quarantine_route",
+      "test_source_receipts",
+      "test_source_refusal_routing",
+      "test_source_retirement",
+      "test_src085_conformance_disposition",
+      "test_src085_improve_run_body",
+      "test_state_scalar_quoting",
+      "test_storage_artifacts",
+      "test_storage_lost_registry",
+      "test_storage_policy",
+      "test_style_contract_chokepoint",
+      "test_sub_dispose_after_collect",
+      "test_subprocess_utf8",
+      "test_supervisor",
+      "test_t1173_empty_intent_normalization",
+      "test_t119_stale_complete_exit",
+      "test_t1238_release_commit_publication",
+      "test_t1277_source_dry_run_parity",
+      "test_t1278_closure_contradiction",
+      "test_t1282_op_id_resolution",
+      "test_t1283_lineage_legacy_ingest",
+      "test_t1286_crew_probe",
+      "test_t1287_audit_empty_scope",
+      "test_t1287_build_directive_grammar",
+      "test_t1293_valve_resume_audit_route",
+      "test_t1304_r004_dry_run_purity",
+      "test_t1304_r004_transition",
+      "test_t1304_r005_verifier_boundary",
+      "test_t1304_r006_boundary_refusals",
+      "test_t1304_r009_settled_wiring",
+      "test_t1304_r011_empty_selection",
+      "test_t1304_review_p0_repair",
+      "test_t1316_recovery_already_applied",
+      "test_t1326_board_compaction",
+      "test_t1327_live_acceptance",
+      "test_t1327_zero_manual_recovery",
+      "test_t1363_zero_manual_entry",
+      "test_t1374_detail_ref_export",
+      "test_t1383_ticket_add_route",
+      "test_t1386_canonical_payload",
+      "test_t1387_scratch_one_answer",
+      "test_t1389_foreign_delta_adoption",
+      "test_t1398_ingress_shell_operator",
+      "test_t1401_saipen_grammar_answer",
+      "test_t1402_readonly_reporters",
+      "test_t1407_structural_log_compaction",
+      "test_t1411_stale_complete_resolution",
+      "test_t1412_conformance_truth",
+      "test_t1429_deferred_due",
+      "test_t1430_crew_run_receipt",
+      "test_t1434_cross_shape_index",
+      "test_t1442_family_env",
+      "test_t1443_basetemp_transience",
+      "test_t1443_identity_audit",
+      "test_t1445_failure_field_scope",
+      "test_t1446_auto_recall",
+      "test_t1446_duplicate_ingress",
+      "test_t1446_supervise",
+      "test_t1452_manifest_authority",
+      "test_t1453_ingress_clause",
+      "test_t1454_distribution_blocker",
+      "test_t1457_ingress_obligation",
+      "test_t1458_queue_reservation",
+      "test_t1460_consumed_ingress",
+      "test_t1461_source_append",
+      "test_t1464_matrix_acceptance",
+      "test_t1465_budget_line_ends",
+      "test_t1472_core_unit_shards",
+      "test_t1473_handback",
+      "test_t1474_start_goal_entry",
+      "test_t1475_host_hook_payload",
+      "test_t1476_retired_source_livelock",
+      "test_t1478_fixture_clock",
+      "test_t1479_core_unit_consistent_copy",
+      "test_t147_generation_exit_behind_style_drift",
+      "test_t1484_soak_report_survives",
+      "test_t1487_claim_handoff",
+      "test_t148_sweep_historical_bar",
+      "test_t1494_continuation_authority",
+      "test_t1497_turn_entry_telegrams",
+      "test_t149_reverify_run_records_its_directory",
+      "test_t1500_claim_continuity",
+      "test_t1501_entry_resolver",
+      "test_t1502_ui_aa_contract",
+      "test_t1504_zaicode_adapter",
+      "test_t1505_core_unit_sandbox_reclaim",
+      "test_t1506_xpatch_survival",
+      "test_t1508_byte_bound_attributes",
+      "test_t150_legacy_generation_evidence_boundary",
+      "test_t1511_soak_source_identity",
+      "test_t1513_argv_unconsumed_quotes",
+      "test_t1514_portable_history_evidence",
+      "test_t1515_posix_shell_entry",
+      "test_t1516_portable_receipts",
+      "test_t1517_reverify_integrity",
+      "test_t1518_crew_banner",
+      "test_t1519_settled_index",
+      "test_t151_foreign_receipt_cannot_erase_a_sibling_verdict",
+      "test_t1527_runtime_provenance",
+      "test_t152_t154_a_red_gate_names_the_repair_that_resolves_it",
+      "test_t1533_terminal_handback",
+      "test_t1544_audit20",
+      "test_t1544_audit20_intake",
+      "test_t1544_audit20_perf",
+      "test_t1553_mid_session_activation",
+      "test_t1557_autonomy_sentinels",
+      "test_t1557_mail_binding",
+      "test_t1557_sub_style_contract",
+      "test_t1561_probe_fixture",
+      "test_t1563_authority_minting",
+      "test_t1568_opencode_chat_style",
+      "test_t1571_lint_surface",
+      "test_t1572_ticket_scoped_recovery",
+      "test_t1574_followups",
+      "test_t1575_parallel_lane",
+      "test_t1576_efficiency_kpi",
+      "test_t1577_op_id_provenance",
+      "test_t1578_restore_owner",
+      "test_t1581_phase_rename_knowledge",
+      "test_t1582_sweep_skip_reason",
+      "test_t1584_production_zcode_boundary",
+      "test_t1585_amnesty_control",
+      "test_t1586_scenario_inputs",
+      "test_t1587_stale_closure_recovery",
+      "test_t1592_manifest_orphan_advice",
+      "test_t1598_stale_claim_next_action",
+      "test_t1608_collect_verb_route",
+      "test_t1609_unproven_done_recovery",
+      "test_t1612_accidental_success_reproduction",
+      "test_t1613_publication_convergence",
+      "test_t1614_future_gate",
+      "test_t1617_release_surface_ignores_gitignore",
+      "test_t1618_future_maturation",
+      "test_t1619_goal_terminality",
+      "test_t1619_iteration_boundary",
+      "test_t1620_historical_counts",
+      "test_t1624_host_integration",
+      "test_t1627_operator_question",
+      "test_t1628_opencode_policy",
+      "test_t1631_argv_values",
+      "test_t1632_identifier_is_not_a_count",
+      "test_t1633_process_tree",
+      "test_t1635_claude_profiles",
+      "test_t1636_invalid_carrier",
+      "test_t1638_future_ingress",
+      "test_t1640_board_scrub",
+      "test_t1640_log_seal",
+      "test_t1641_gate_ownership",
+      "test_t1642_history_notes",
+      "test_t1645_zero_hunt",
+      "test_t1647_machine_runtime",
+      "test_t1648_transient_replace_lock",
+      "test_t1649_refusal_step",
+      "test_t1650_retired_host_image",
+      "test_t1651_executor_admission",
+      "test_t1654_project_block",
+      "test_t1655_file_mode",
+      "test_t1656_operator_readability",
+      "test_t1657_refused_reply_preserved",
+      "test_t1658_suite_record",
+      "test_t1659_run_window",
+      "test_t1661_suite_projection",
+      "test_t1662_repository_interlock",
+      "test_t1663_ticket_requires",
+      "test_t1665_guard_verbs",
+      "test_t1666_receipt_close",
+      "test_t1667_clean_compaction",
+      "test_t1668_durable_stores_ship",
+      "test_t1669_clean_done_projection",
+      "test_t1670_route_budgets",
+      "test_t1671_lifecycle_authority",
+      "test_t1673_board_only_terminal",
+      "test_t1674_typed_closure_mode",
+      "test_t1676_lifecycle_code",
+      "test_t1678_path_launcher",
+      "test_t1679_typed_head_quarantine",
+      "test_t1681_release_closure_op",
+      "test_t1683_launcher_profile",
+      "test_t1684_operand_grammar",
+      "test_t1685_profile_carrier",
+      "test_t1686_launch_policy",
+      "test_t1687_identity_diagnostics",
+      "test_t1688_stale_plugin_guard",
+      "test_t1690_profile_isolation",
+      "test_t1704_goal_checkpoint_priority",
+      "test_t1704_legacy_goal_authority",
+      "test_t1705_lifecycle_write_preflight",
+      "test_t1707_regression_chronology",
+      "test_t1708_regression_declaration",
+      "test_t1709_audit_starvation",
+      "test_t1711_regression_execution",
+      "test_t1712_manifest_runtime",
+      "test_t1715_block_for_parent_guard",
+      "test_t1718_acceptance_contract",
+      "test_t1721_acceptance_compaction",
+      "test_t1726_closed_contracts",
+      "test_t1726_contract_oracle",
+      "test_t1729_gate_decision_lifecycle",
+      "test_t1729_operator_gate",
+      "test_t1732_protocol_hardening",
+      "test_t1734_source_drift",
+      "test_t1735_tool_failure_boundaries",
+      "test_t1736_tool_safety_and_evidence",
+      "test_t1739_wait_boundary",
+      "test_t1742_pipeline_shell_probe",
+      "test_t1743_cross_user_dead_ends",
+      "test_t1744_fleet_foreign_field_skew",
+      "test_t1745_sub_collect_foreign_field",
+      "test_t1746_crew_terminal_outcome",
+      "test_t1747_degraded_profile",
+      "test_t1748_worker_clock",
+      "test_t1749_project_root_subject",
+      "test_t1750_release_boundary",
+      "test_t1751_reconcile_surfaces",
+      "test_t1752_audit_auto_close",
+      "test_t1753_activation_launcher",
+      "test_t1757_claim_follows_route",
+      "test_t1758_closure_cycle",
+      "test_t1759_single_lifecycle_observer",
+      "test_t1760_no_git_ccc_marker",
+      "test_t1761_recovery_reaches_a_typed_duplicate",
+      "test_t1762_control_count_scope",
+      "test_t1765_finding_subtypes",
+      "test_t1767_usage_line",
+      "test_t1770_pair_stage_scope",
+      "test_t1771_measure_then_finish",
+      "test_t1772_empty_draft_exit",
+      "test_t1774_sweep_queue_human",
+      "test_t1775_continue_never_admits_a_seat",
+      "test_t1776_protocol_home_valve",
+      "test_t1778_continue_closes_source",
+      "test_t1779_family_ignores_inbox",
+      "test_t1781_t37_latest_build",
+      "test_t1782_capped_builder_identifier",
+      "test_t1784_dry_run_verdict",
+      "test_t1785_dry_run_human",
+      "test_t1786_cli_first_activation",
+      "test_t1787_parked_brief",
+      "test_t1789_child_closure_route",
+      "test_t1790_dependency_route_budget",
+      "test_t1792_auto_doctor",
+      "test_t1801_missing_audit_settlement",
+      "test_t1803_archived_improve",
+      "test_t1807_audit_liveness_regression",
+      "test_t1815_header_repair",
+      "test_t1815_stale_work_context",
+      "test_t1816_protected_root_hold",
+      "test_t1816_provenance_inventory",
+      "test_t1816_run_append_only",
+      "test_t1816_run_provenance",
+      "test_t1817_acceptance_bar",
+      "test_t1817_closure_outcomes",
+      "test_t1817_diagnostic_ownership",
+      "test_t1817_finding_ownership",
+      "test_t1817_finding_route",
+      "test_t1817_handoff_artifacts",
+      "test_t1821_markdown_surface",
+      "test_t1822_carrier_binding",
+      "test_t1826_declared_budgets",
+      "test_t1827_writer_lock_contract",
+      "test_t1828_verification_policy",
+      "test_t1829_publication_boundary",
+      "test_t1830_verification_observations",
+      "test_t1831_cleanup_fixture_cost",
+      "test_t1832_single_flight",
+      "test_t1833_verification_owner",
+      "test_t1834_tool_call_identity",
+      "test_t1835_verification_economics",
+      "test_t1836_verification_impact",
+      "test_t1837_ci_family_parity",
+      "test_t1839_cohort_reconciliation",
+      "test_t1840_external_renewal",
+      "test_t1844_authority_preview",
+      "test_t1844_goal_turns",
+      "test_t1844_operator_origin",
+      "test_t1844_origin_broker",
+      "test_t1844_source_event",
+      "test_t1847_fixture_contract",
+      "test_t1849_external_git_environment",
+      "test_t1850_freebuff_diagnostics",
+      "test_t1851_debt_authority",
+      "test_t1853_dispatch_admission",
+      "test_t1854_runtime_home",
+      "test_t1855_compound_policy",
+      "test_t1856_launcher_identity",
+      "test_t1857_budget_owner",
+      "test_t1857_shared_blockers",
+      "test_t1858_valve_guidance",
+      "test_t1859_zaicode_seal",
+      "test_t1861_registry_import_coupling",
+      "test_t1862_readiness",
+      "test_t1864_autonomous_valve",
+      "test_t1865_launcher_identity",
+      "test_t1866_publication_state",
+      "test_t1867_completion_grammar",
+      "test_t1868_zaicode_ingress",
+      "test_t1872_drift_prevention",
+      "test_t1873_protrail_drift",
+      "test_t1874_wintage_drift",
+      "test_t1875_maintenance_wiring",
+      "test_t1876_parallel_cleanup",
+      "test_t1879_manifest_staging_states",
+      "test_t1880_wait_survives_phase_shortcut",
+      "test_t1881_authority_brake",
+      "test_t1881_publication_prohibition",
+      "test_t1882_future_publication_inventory",
+      "test_t1883_reconcile_causality",
+      "test_t1884_transition_blocker_inheritance",
+      "test_t1885_tag_peel",
+      "test_t1886_gate_lock_window",
+      "test_t1888_object_store",
+      "test_t1889_sandbox_scope",
+      "test_t1891_freshness_parser",
+      "test_t1892_one_decoder",
+      "test_t1893_probe_wrappers",
+      "test_t1897_manifest_findings",
+      "test_t1898_lineage_recovery",
+      "test_t1900_git_listing_boundary",
+      "test_t1902_parallel_source_sampling",
+      "test_t1903_lean_receipt_projection",
+      "test_t1908_duplicate_settlement",
+      "test_t1909_unauthenticated_evidence_diagnostics",
+      "test_t1910_log_input_diagnostics",
+      "test_t1911_native_origin_diagnostics",
+      "test_t1912_redelivery_origin_reconciliation",
+      "test_t1913_hook_deadline",
+      "test_t1913_origin_recovery",
+      "test_t1914_installed_runtime_parity",
+      "test_t1915_terminal_next_action",
+      "test_t1916_continuation_discipline",
+      "test_t1916_external_delta",
+      "test_t1917_premature_handback",
+      "test_t1924_src330_acceptance",
+      "test_t1926_zc_owners_matrix",
+      "test_t1927_sp_owners_matrix",
+      "test_t1931_campaign_lifecycle",
+      "test_t1931_saipal_boundary",
+      "test_t1932_campaign_authority",
+      "test_t1932_src338_closures",
+      "test_t1933_zaicode_goal_seal",
+      "test_t1934_deploy_staleness",
+      "test_t1935_zaicode_hook_ownership",
+      "test_t1936_launch_account_list",
+      "test_t1937_future_slice_closure",
+      "test_t1938_invalidated_slice_closure",
+      "test_t1939_needs_detach",
+      "test_t1942_regression_pair",
+      "test_t1943_adapter_artifact_tracking",
+      "test_t1943_campaign_scope_roundtrip",
+      "test_t1943_goal_objective_binding",
+      "test_t1944_core_wave1",
+      "test_t1944_perf_wave",
+      "test_t1944_wave2",
+      "test_t1945_analysis_progress",
+      "test_t1945_campaign_driver",
+      "test_t1945_host_trust",
+      "test_t1945_incremental_discovery",
+      "test_t1949_hook_validator_status",
+      "test_t1951_install_residue",
+      "test_t1952_sandbox_points_at_itself",
+      "test_t1953_suite_reuse",
+      "test_t1961_pruned_slice",
+      "test_t38_improve_cycle_liveness",
+      "test_t923_crew_invalid_role_errors",
+      "test_t925_sub_terminal_durability",
+      "test_telemetry",
+      "test_ticket_add_regression",
+      "test_ticket_retirement",
+      "test_ticket_supersession",
+      "test_ticket_verify_preimage",
+      "test_tool_module_identity",
+      "test_unknown_tool_fail_closed",
+      "test_user_wait_release",
+      "test_userperson_global",
+      "test_v7_producer_parallelism",
+      "test_vacterro_t36_checkpoint_usage_taxonomy",
+      "test_vacterro_t37_no_delta_closure",
+      "test_validator_findings",
+      "test_validator_layout_parity",
+      "test_verification_grammar",
+      "test_verify_oracle",
+      "test_verify_scope_isolation",
+      "test_vocabulary_parity",
+      "test_warn_ownership_probe",
+      "test_watchdog",
+      "test_work_reverify_cli",
+      "test_worker_turnover",
+      "test_xpatch",
+      "test_xpatch_controls"
+    ],
+    "selected_tests": [
+      "saipen_engine.test_runner",
+      "test_acceptance",
+      "test_accepted_debt",
+      "test_accepted_debt_rebind",
+      "test_actor_binding_lifecycle",
+      "test_adapter_parity",
+      "test_adaptive_runtime",
+      "test_admission_auto_doctor",
+      "test_adoption_section_parity",
+      "test_audit_2026_08_27_core",
+      "test_audit_2026_08_27_w2",
+      "test_audit_2026_08_28_all3",
+      "test_audit_2026_08_29_all3_impl",
+      "test_audit_2026_08_30_all3_impl",
+      "test_audit_dogfood",
+      "test_audit_enqueue",
+      "test_audit_enqueue_boundary",
+      "test_audit_envelope",
+      "test_audit_inbox",
+      "test_audit_ingest_resume",
+      "test_audit_manifest",
+      "test_audit_provenance",
+      "test_audit_route",
+      "test_audit_scope",
+      "test_audit_transport_loop",
+      "test_authority_capture",
+      "test_automation_block",
+      "test_autonomy_audit_fixes",
+      "test_board_pseudo_link",
+      "test_boot_locator",
+      "test_campaign_continuation_assessment",
+      "test_campaign_matrix",
+      "test_campaign_production_gates",
+      "test_canonical_command_reachability",
+      "test_canonical_write_route",
+      "test_capability_boundary",
+      "test_ccc_ff_control",
+      "test_chat_style",
+      "test_check_inventory",
+      "test_claude_stop_hook",
+      "test_cli_compound_entry",
+      "test_closure_provenance",
+      "test_codex_stop_hook",
+      "test_cold_agent_truth",
+      "test_cold_recovery",
+      "test_command_routing",
+      "test_concurrency_independence",
+      "test_conformance_corpus",
+      "test_conformance_lineage",
+      "test_conformance_projection",
+      "test_conformance_remediation_evidence",
+      "test_conformance_repair_boundary",
+      "test_continue_chain",
+      "test_continue_entry",
+      "test_continue_fallback_source_gate",
+      "test_continue_improve_fallthrough",
+      "test_control_primitives",
+      "test_core_audit_containment",
+      "test_core_ownership_routing",
+      "test_core_unit_gate",
+      "test_crew_applicability",
+      "test_crew_liveness_drift",
+      "test_debt_gate",
+      "test_defect_delta_controls",
+      "test_dependency_resume_liveness",
+      "test_detail_authorization",
+      "test_distribution_report",
+      "test_effect_authorization",
+      "test_engine_module_identity",
+      "test_entry_answer_agrees",
+      "test_entry_point_parity",
+      "test_event_taxonomy_owner",
+      "test_evidence_hygiene",
+      "test_explicit_claim",
+      "test_external_authentication_contract",
+      "test_external_resolution",
+      "test_external_revalidation",
+      "test_field_fixture_isolation",
+      "test_finding_invalidated_closure",
+      "test_first_publish_confirm_evidence",
+      "test_fixture_style_authority",
+      "test_fixture_support",
+      "test_foreign_observation_authority",
+      "test_foreign_owner_terminal_route",
+      "test_freebuff_operator_provenance",
+      "test_generation_migration",
+      "test_gpu_lane",
+      "test_guard_admission",
+      "test_guard_events",
+      "test_guard_execution_reachability",
+      "test_guard_hostile_matrix",
+      "test_guard_root_parity",
+      "test_guard_surface_parity",
+      "test_handoff_archive_cross_repo",
+      "test_hermetic_env",
+      "test_host_authority_broker",
+      "test_host_bootstrap",
+      "test_host_fixture",
+      "test_host_launch_net",
+      "test_hostile_wave_regressions",
+      "test_hush_runtime",
+      "test_improve_error_boundary",
+      "test_improve_gate",
+      "test_improve_reconcile",
+      "test_improve_resolve_report_path",
+      "test_ingress_authority",
+      "test_inject_digest",
+      "test_install_drift",
+      "test_install_identity_doctor",
+      "test_instruction_home_parity",
+      "test_instruction_loader_contracts",
+      "test_intent_audit_fixes",
+      "test_journal_nested_targets",
+      "test_knowledge",
+      "test_ledger_gap",
+      "test_legacy_lifecycle_compat",
+      "test_log_detail_evidence",
+      "test_log_normalize",
+      "test_log_stamp_guard",
+      "test_log_tail_quarantine",
+      "test_log_ticket_slot",
+      "test_metadata_repair",
+      "test_metrics_acceptance",
+      "test_module_duplication_guard",
+      "test_narrative_authority",
+      "test_native_host_guard",
+      "test_nested_source_binding",
+      "test_next_action_deadlock",
+      "test_no_publish_source_scope",
+      "test_opencode_adapter",
+      "test_opencode_bound_launch_smoke",
+      "test_opencode_host_smoke",
+      "test_opencode_launch_binding",
+      "test_opencode_live_evaluator",
+      "test_opencode_live_session",
+      "test_operator_ingress_matrix",
+      "test_operator_origin_support",
+      "test_operator_task_witness",
+      "test_orchestration_repair",
+      "test_outbox_write_time_bar",
+      "test_pending_ingress",
+      "test_portable_floor_fields",
+      "test_producer_gate_policy",
+      "test_producer_terminal_consistency",
+      "test_project_root_session_binding",
+      "test_protocol_admission",
+      "test_protocol_registry",
+      "test_public_closure_cli",
+      "test_public_install_lifecycle",
+      "test_reconcile_history_ledger_blocked",
+      "test_reconcile_legacy_output_field",
+      "test_reconcile_valve",
+      "test_recover_approved_repair",
+      "test_recovered_attribution",
+      "test_recovery_noop_targets",
+      "test_recovery_reachability",
+      "test_refusal_registry",
+      "test_refusal_routes",
+      "test_regression_gate",
+      "test_release_provenance",
+      "test_remediation_self_consistency",
+      "test_repeated_cc",
+      "test_request_clause_closure",
+      "test_response_delivery",
+      "test_response_digest",
+      "test_response_fact_binding",
+      "test_response_surface_contract",
+      "test_retired_source_coverage",
+      "test_reverify",
+      "test_reverify_timeout_and_route",
+      "test_router_closure_readiness",
+      "test_runner",
+      "test_runner_failure_roster",
+      "test_runtime_bootstrap",
+      "test_runtime_generation_identity",
+      "test_runtime_namespace",
+      "test_sailearn_consumer",
+      "test_saipen_metrics",
+      "test_saitranslate_charter_namespace",
+      "test_sandbox_work_surface",
+      "test_scenario_runner_isolation",
+      "test_search_transport",
+      "test_self_resolving_gates",
+      "test_session_binding",
+      "test_settled_projection",
+      "test_source_contract_derivation",
+      "test_source_multiwork",
+      "test_source_quarantine_route",
+      "test_source_receipts",
+      "test_source_refusal_routing",
+      "test_source_retirement",
+      "test_src085_conformance_disposition",
+      "test_src085_improve_run_body",
+      "test_state_scalar_quoting",
+      "test_storage_artifacts",
+      "test_storage_lost_registry",
+      "test_storage_policy",
+      "test_style_contract_chokepoint",
+      "test_sub_dispose_after_collect",
+      "test_subprocess_utf8",
+      "test_supervisor",
+      "test_t1173_empty_intent_normalization",
+      "test_t119_stale_complete_exit",
+      "test_t1238_release_commit_publication",
+      "test_t1277_source_dry_run_parity",
+      "test_t1278_closure_contradiction",
+      "test_t1282_op_id_resolution",
+      "test_t1283_lineage_legacy_ingest",
+      "test_t1286_crew_probe",
+      "test_t1287_audit_empty_scope",
+      "test_t1287_build_directive_grammar",
+      "test_t1293_valve_resume_audit_route",
+      "test_t1304_r004_dry_run_purity",
+      "test_t1304_r004_transition",
+      "test_t1304_r005_verifier_boundary",
+      "test_t1304_r006_boundary_refusals",
+      "test_t1304_r009_settled_wiring",
+      "test_t1304_r011_empty_selection",
+      "test_t1304_review_p0_repair",
+      "test_t1316_recovery_already_applied",
+      "test_t1326_board_compaction",
+      "test_t1327_live_acceptance",
+      "test_t1327_zero_manual_recovery",
+      "test_t1363_zero_manual_entry",
+      "test_t1374_detail_ref_export",
+      "test_t1383_ticket_add_route",
+      "test_t1386_canonical_payload",
+      "test_t1387_scratch_one_answer",
+      "test_t1389_foreign_delta_adoption",
+      "test_t1398_ingress_shell_operator",
+      "test_t1401_saipen_grammar_answer",
+      "test_t1402_readonly_reporters",
+      "test_t1407_structural_log_compaction",
+      "test_t1411_stale_complete_resolution",
+      "test_t1412_conformance_truth",
+      "test_t1429_deferred_due",
+      "test_t1430_crew_run_receipt",
+      "test_t1434_cross_shape_index",
+      "test_t1442_family_env",
+      "test_t1443_basetemp_transience",
+      "test_t1443_identity_audit",
+      "test_t1445_failure_field_scope",
+      "test_t1446_auto_recall",
+      "test_t1446_duplicate_ingress",
+      "test_t1446_supervise",
+      "test_t1452_manifest_authority",
+      "test_t1453_ingress_clause",
+      "test_t1454_distribution_blocker",
+      "test_t1457_ingress_obligation",
+      "test_t1458_queue_reservation",
+      "test_t1460_consumed_ingress",
+      "test_t1461_source_append",
+      "test_t1464_matrix_acceptance",
+      "test_t1465_budget_line_ends",
+      "test_t1472_core_unit_shards",
+      "test_t1473_handback",
+      "test_t1474_start_goal_entry",
+      "test_t1475_host_hook_payload",
+      "test_t1476_retired_source_livelock",
+      "test_t1478_fixture_clock",
+      "test_t1479_core_unit_consistent_copy",
+      "test_t147_generation_exit_behind_style_drift",
+      "test_t1484_soak_report_survives",
+      "test_t1487_claim_handoff",
+      "test_t148_sweep_historical_bar",
+      "test_t1494_continuation_authority",
+      "test_t1497_turn_entry_telegrams",
+      "test_t149_reverify_run_records_its_directory",
+      "test_t1500_claim_continuity",
+      "test_t1501_entry_resolver",
+      "test_t1502_ui_aa_contract",
+      "test_t1504_zaicode_adapter",
+      "test_t1505_core_unit_sandbox_reclaim",
+      "test_t1506_xpatch_survival",
+      "test_t1508_byte_bound_attributes",
+      "test_t150_legacy_generation_evidence_boundary",
+      "test_t1511_soak_source_identity",
+      "test_t1513_argv_unconsumed_quotes",
+      "test_t1514_portable_history_evidence",
+      "test_t1515_posix_shell_entry",
+      "test_t1516_portable_receipts",
+      "test_t1517_reverify_integrity",
+      "test_t1518_crew_banner",
+      "test_t1519_settled_index",
+      "test_t151_foreign_receipt_cannot_erase_a_sibling_verdict",
+      "test_t1527_runtime_provenance",
+      "test_t152_t154_a_red_gate_names_the_repair_that_resolves_it",
+      "test_t1533_terminal_handback",
+      "test_t1544_audit20",
+      "test_t1544_audit20_intake",
+      "test_t1544_audit20_perf",
+      "test_t1553_mid_session_activation",
+      "test_t1557_autonomy_sentinels",
+      "test_t1557_mail_binding",
+      "test_t1557_sub_style_contract",
+      "test_t1561_probe_fixture",
+      "test_t1563_authority_minting",
+      "test_t1568_opencode_chat_style",
+      "test_t1571_lint_surface",
+      "test_t1572_ticket_scoped_recovery",
+      "test_t1574_followups",
+      "test_t1575_parallel_lane",
+      "test_t1576_efficiency_kpi",
+      "test_t1577_op_id_provenance",
+      "test_t1578_restore_owner",
+      "test_t1581_phase_rename_knowledge",
+      "test_t1582_sweep_skip_reason",
+      "test_t1584_production_zcode_boundary",
+      "test_t1585_amnesty_control",
+      "test_t1586_scenario_inputs",
+      "test_t1587_stale_closure_recovery",
+      "test_t1592_manifest_orphan_advice",
+      "test_t1598_stale_claim_next_action",
+      "test_t1608_collect_verb_route",
+      "test_t1609_unproven_done_recovery",
+      "test_t1612_accidental_success_reproduction",
+      "test_t1613_publication_convergence",
+      "test_t1614_future_gate",
+      "test_t1617_release_surface_ignores_gitignore",
+      "test_t1618_future_maturation",
+      "test_t1619_goal_terminality",
+      "test_t1619_iteration_boundary",
+      "test_t1620_historical_counts",
+      "test_t1624_host_integration",
+      "test_t1627_operator_question",
+      "test_t1628_opencode_policy",
+      "test_t1631_argv_values",
+      "test_t1632_identifier_is_not_a_count",
+      "test_t1633_process_tree",
+      "test_t1635_claude_profiles",
+      "test_t1636_invalid_carrier",
+      "test_t1638_future_ingress",
+      "test_t1640_board_scrub",
+      "test_t1640_log_seal",
+      "test_t1641_gate_ownership",
+      "test_t1642_history_notes",
+      "test_t1645_zero_hunt",
+      "test_t1647_machine_runtime",
+      "test_t1648_transient_replace_lock",
+      "test_t1649_refusal_step",
+      "test_t1650_retired_host_image",
+      "test_t1651_executor_admission",
+      "test_t1654_project_block",
+      "test_t1655_file_mode",
+      "test_t1656_operator_readability",
+      "test_t1657_refused_reply_preserved",
+      "test_t1658_suite_record",
+      "test_t1659_run_window",
+      "test_t1661_suite_projection",
+      "test_t1662_repository_interlock",
+      "test_t1663_ticket_requires",
+      "test_t1665_guard_verbs",
+      "test_t1666_receipt_close",
+      "test_t1667_clean_compaction",
+      "test_t1668_durable_stores_ship",
+      "test_t1669_clean_done_projection",
+      "test_t1670_route_budgets",
+      "test_t1671_lifecycle_authority",
+      "test_t1673_board_only_terminal",
+      "test_t1674_typed_closure_mode",
+      "test_t1676_lifecycle_code",
+      "test_t1678_path_launcher",
+      "test_t1679_typed_head_quarantine",
+      "test_t1681_release_closure_op",
+      "test_t1683_launcher_profile",
+      "test_t1684_operand_grammar",
+      "test_t1685_profile_carrier",
+      "test_t1686_launch_policy",
+      "test_t1687_identity_diagnostics",
+      "test_t1688_stale_plugin_guard",
+      "test_t1690_profile_isolation",
+      "test_t1704_goal_checkpoint_priority",
+      "test_t1704_legacy_goal_authority",
+      "test_t1705_lifecycle_write_preflight",
+      "test_t1707_regression_chronology",
+      "test_t1708_regression_declaration",
+      "test_t1709_audit_starvation",
+      "test_t1711_regression_execution",
+      "test_t1712_manifest_runtime",
+      "test_t1715_block_for_parent_guard",
+      "test_t1718_acceptance_contract",
+      "test_t1721_acceptance_compaction",
+      "test_t1726_closed_contracts",
+      "test_t1726_contract_oracle",
+      "test_t1729_gate_decision_lifecycle",
+      "test_t1729_operator_gate",
+      "test_t1732_protocol_hardening",
+      "test_t1734_source_drift",
+      "test_t1735_tool_failure_boundaries",
+      "test_t1736_tool_safety_and_evidence",
+      "test_t1739_wait_boundary",
+      "test_t1742_pipeline_shell_probe",
+      "test_t1743_cross_user_dead_ends",
+      "test_t1744_fleet_foreign_field_skew",
+      "test_t1745_sub_collect_foreign_field",
+      "test_t1746_crew_terminal_outcome",
+      "test_t1747_degraded_profile",
+      "test_t1748_worker_clock",
+      "test_t1749_project_root_subject",
+      "test_t1750_release_boundary",
+      "test_t1751_reconcile_surfaces",
+      "test_t1752_audit_auto_close",
+      "test_t1753_activation_launcher",
+      "test_t1757_claim_follows_route",
+      "test_t1758_closure_cycle",
+      "test_t1759_single_lifecycle_observer",
+      "test_t1760_no_git_ccc_marker",
+      "test_t1761_recovery_reaches_a_typed_duplicate",
+      "test_t1762_control_count_scope",
+      "test_t1765_finding_subtypes",
+      "test_t1767_usage_line",
+      "test_t1770_pair_stage_scope",
+      "test_t1771_measure_then_finish",
+      "test_t1772_empty_draft_exit",
+      "test_t1774_sweep_queue_human",
+      "test_t1775_continue_never_admits_a_seat",
+      "test_t1776_protocol_home_valve",
+      "test_t1778_continue_closes_source",
+      "test_t1779_family_ignores_inbox",
+      "test_t1781_t37_latest_build",
+      "test_t1782_capped_builder_identifier",
+      "test_t1784_dry_run_verdict",
+      "test_t1785_dry_run_human",
+      "test_t1786_cli_first_activation",
+      "test_t1787_parked_brief",
+      "test_t1789_child_closure_route",
+      "test_t1790_dependency_route_budget",
+      "test_t1792_auto_doctor",
+      "test_t1801_missing_audit_settlement",
+      "test_t1803_archived_improve",
+      "test_t1807_audit_liveness_regression",
+      "test_t1815_header_repair",
+      "test_t1815_stale_work_context",
+      "test_t1816_protected_root_hold",
+      "test_t1816_provenance_inventory",
+      "test_t1816_run_append_only",
+      "test_t1816_run_provenance",
+      "test_t1817_acceptance_bar",
+      "test_t1817_closure_outcomes",
+      "test_t1817_diagnostic_ownership",
+      "test_t1817_finding_ownership",
+      "test_t1817_finding_route",
+      "test_t1817_handoff_artifacts",
+      "test_t1821_markdown_surface",
+      "test_t1822_carrier_binding",
+      "test_t1826_declared_budgets",
+      "test_t1827_writer_lock_contract",
+      "test_t1828_verification_policy",
+      "test_t1829_publication_boundary",
+      "test_t1830_verification_observations",
+      "test_t1831_cleanup_fixture_cost",
+      "test_t1832_single_flight",
+      "test_t1833_verification_owner",
+      "test_t1834_tool_call_identity",
+      "test_t1835_verification_economics",
+      "test_t1836_verification_impact",
+      "test_t1837_ci_family_parity",
+      "test_t1839_cohort_reconciliation",
+      "test_t1840_external_renewal",
+      "test_t1844_authority_preview",
+      "test_t1844_goal_turns",
+      "test_t1844_operator_origin",
+      "test_t1844_origin_broker",
+      "test_t1844_source_event",
+      "test_t1847_fixture_contract",
+      "test_t1849_external_git_environment",
+      "test_t1850_freebuff_diagnostics",
+      "test_t1851_debt_authority",
+      "test_t1853_dispatch_admission",
+      "test_t1854_runtime_home",
+      "test_t1855_compound_policy",
+      "test_t1856_launcher_identity",
+      "test_t1857_budget_owner",
+      "test_t1857_shared_blockers",
+      "test_t1858_valve_guidance",
+      "test_t1859_zaicode_seal",
+      "test_t1861_registry_import_coupling",
+      "test_t1862_readiness",
+      "test_t1864_autonomous_valve",
+      "test_t1865_launcher_identity",
+      "test_t1866_publication_state",
+      "test_t1867_completion_grammar",
+      "test_t1868_zaicode_ingress",
+      "test_t1872_drift_prevention",
+      "test_t1873_protrail_drift",
+      "test_t1874_wintage_drift",
+      "test_t1875_maintenance_wiring",
+      "test_t1876_parallel_cleanup",
+      "test_t1879_manifest_staging_states",
+      "test_t1880_wait_survives_phase_shortcut",
+      "test_t1881_authority_brake",
+      "test_t1881_publication_prohibition",
+      "test_t1882_future_publication_inventory",
+      "test_t1883_reconcile_causality",
+      "test_t1884_transition_blocker_inheritance",
+      "test_t1885_tag_peel",
+      "test_t1886_gate_lock_window",
+      "test_t1888_object_store",
+      "test_t1889_sandbox_scope",
+      "test_t1891_freshness_parser",
+      "test_t1892_one_decoder",
+      "test_t1893_probe_wrappers",
+      "test_t1897_manifest_findings",
+      "test_t1898_lineage_recovery",
+      "test_t1900_git_listing_boundary",
+      "test_t1902_parallel_source_sampling",
+      "test_t1903_lean_receipt_projection",
+      "test_t1908_duplicate_settlement",
+      "test_t1909_unauthenticated_evidence_diagnostics",
+      "test_t1910_log_input_diagnostics",
+      "test_t1911_native_origin_diagnostics",
+      "test_t1912_redelivery_origin_reconciliation",
+      "test_t1913_hook_deadline",
+      "test_t1913_origin_recovery",
+      "test_t1914_installed_runtime_parity",
+      "test_t1915_terminal_next_action",
+      "test_t1916_continuation_discipline",
+      "test_t1916_external_delta",
+      "test_t1917_premature_handback",
+      "test_t1924_src330_acceptance",
+      "test_t1926_zc_owners_matrix",
+      "test_t1927_sp_owners_matrix",
+      "test_t1931_campaign_lifecycle",
+      "test_t1931_saipal_boundary",
+      "test_t1932_campaign_authority",
+      "test_t1932_src338_closures",
+      "test_t1933_zaicode_goal_seal",
+      "test_t1934_deploy_staleness",
+      "test_t1935_zaicode_hook_ownership",
+      "test_t1936_launch_account_list",
+      "test_t1937_future_slice_closure",
+      "test_t1938_invalidated_slice_closure",
+      "test_t1939_needs_detach",
+      "test_t1942_regression_pair",
+      "test_t1943_adapter_artifact_tracking",
+      "test_t1943_campaign_scope_roundtrip",
+      "test_t1943_goal_objective_binding",
+      "test_t1944_core_wave1",
+      "test_t1944_perf_wave",
+      "test_t1944_wave2",
+      "test_t1945_analysis_progress",
+      "test_t1945_campaign_driver",
+      "test_t1945_host_trust",
+      "test_t1945_incremental_discovery",
+      "test_t1949_hook_validator_status",
+      "test_t1951_install_residue",
+      "test_t1952_sandbox_points_at_itself",
+      "test_t1953_suite_reuse",
+      "test_t1961_pruned_slice",
+      "test_t38_improve_cycle_liveness",
+      "test_t923_crew_invalid_role_errors",
+      "test_t925_sub_terminal_durability",
+      "test_telemetry",
+      "test_ticket_add_regression",
+      "test_ticket_retirement",
+      "test_ticket_supersession",
+      "test_ticket_verify_preimage",
+      "test_tool_module_identity",
+      "test_unknown_tool_fail_closed",
+      "test_user_wait_release",
+      "test_userperson_global",
+      "test_v7_producer_parallelism",
+      "test_vacterro_t36_checkpoint_usage_taxonomy",
+      "test_vacterro_t37_no_delta_closure",
+      "test_validator_findings",
+      "test_validator_layout_parity",
+      "test_verification_grammar",
+      "test_verify_oracle",
+      "test_verify_scope_isolation",
+      "test_vocabulary_parity",
+      "test_warn_ownership_probe",
+      "test_watchdog",
+      "test_work_reverify_cli",
+      "test_worker_turnover",
+      "test_xpatch",
+      "test_xpatch_controls"
+    ],
+    "scope_family": "unit",
+    "focused_tests": [
+      "test_host_bootstrap",
+      "test_instruction_loader_contracts",
+      "test_next_action_deadlock",
+      "test_state_scalar_quoting",
+      "test_t1443_basetemp_transience",
+      "test_t1443_identity_audit",
+      "test_t1711_regression_execution",
+      "test_t1750_release_boundary",
+      "test_t1952_sandbox_points_at_itself",
+      "test_t1953_suite_reuse",
+      "test_t1961_pruned_slice",
+      "test_ticket_retirement"
+    ],
+    "integration_tests": [
+      "saipen_engine.test_runner",
+      "test_acceptance",
+      "test_accepted_debt",
+      "test_accepted_debt_rebind",
+      "test_actor_binding_lifecycle",
+      "test_adapter_parity",
+      "test_adaptive_runtime",
+      "test_admission_auto_doctor",
+      "test_adoption_section_parity",
+      "test_audit_2026_08_27_core",
+      "test_audit_2026_08_27_w2",
+      "test_audit_2026_08_28_all3",
+      "test_audit_2026_08_29_all3_impl",
+      "test_audit_2026_08_30_all3_impl",
+      "test_audit_dogfood",
+      "test_audit_enqueue",
+      "test_audit_enqueue_boundary",
+      "test_audit_envelope",
+      "test_audit_inbox",
+      "test_audit_ingest_resume",
+      "test_audit_manifest",
+      "test_audit_provenance",
+      "test_audit_route",
+      "test_audit_scope",
+      "test_audit_transport_loop",
+      "test_authority_capture",
+      "test_automation_block",
+      "test_autonomy_audit_fixes",
+      "test_board_pseudo_link",
+      "test_boot_locator",
+      "test_campaign_continuation_assessment",
+      "test_campaign_matrix",
+      "test_campaign_production_gates",
+      "test_canonical_command_reachability",
+      "test_canonical_write_route",
+      "test_capability_boundary",
+      "test_ccc_ff_control",
+      "test_chat_style",
+      "test_check_inventory",
+      "test_claude_stop_hook",
+      "test_cli_compound_entry",
+      "test_closure_provenance",
+      "test_codex_stop_hook",
+      "test_cold_agent_truth",
+      "test_cold_recovery",
+      "test_command_routing",
+      "test_concurrency_independence",
+      "test_conformance_corpus",
+      "test_conformance_lineage",
+      "test_conformance_projection",
+      "test_conformance_remediation_evidence",
+      "test_conformance_repair_boundary",
+      "test_continue_chain",
+      "test_continue_entry",
+      "test_continue_fallback_source_gate",
+      "test_continue_improve_fallthrough",
+      "test_control_primitives",
+      "test_core_audit_containment",
+      "test_core_ownership_routing",
+      "test_core_unit_gate",
+      "test_crew_applicability",
+      "test_crew_liveness_drift",
+      "test_debt_gate",
+      "test_defect_delta_controls",
+      "test_dependency_resume_liveness",
+      "test_detail_authorization",
+      "test_distribution_report",
+      "test_effect_authorization",
+      "test_engine_module_identity",
+      "test_entry_answer_agrees",
+      "test_entry_point_parity",
+      "test_event_taxonomy_owner",
+      "test_evidence_hygiene",
+      "test_explicit_claim",
+      "test_external_authentication_contract",
+      "test_external_resolution",
+      "test_external_revalidation",
+      "test_field_fixture_isolation",
+      "test_finding_invalidated_closure",
+      "test_first_publish_confirm_evidence",
+      "test_fixture_style_authority",
+      "test_fixture_support",
+      "test_foreign_observation_authority",
+      "test_foreign_owner_terminal_route",
+      "test_freebuff_operator_provenance",
+      "test_generation_migration",
+      "test_gpu_lane",
+      "test_guard_admission",
+      "test_guard_events",
+      "test_guard_execution_reachability",
+      "test_guard_hostile_matrix",
+      "test_guard_root_parity",
+      "test_guard_surface_parity",
+      "test_handoff_archive_cross_repo",
+      "test_hermetic_env",
+      "test_host_authority_broker",
+      "test_host_fixture",
+      "test_host_launch_net",
+      "test_hostile_wave_regressions",
+      "test_hush_runtime",
+      "test_improve_error_boundary",
+      "test_improve_gate",
+      "test_improve_reconcile",
+      "test_improve_resolve_report_path",
+      "test_ingress_authority",
+      "test_inject_digest",
+      "test_install_drift",
+      "test_install_identity_doctor",
+      "test_instruction_home_parity",
+      "test_intent_audit_fixes",
+      "test_journal_nested_targets",
+      "test_knowledge",
+      "test_ledger_gap",
+      "test_legacy_lifecycle_compat",
+      "test_log_detail_evidence",
+      "test_log_normalize",
+      "test_log_stamp_guard",
+      "test_log_tail_quarantine",
+      "test_log_ticket_slot",
+      "test_metadata_repair",
+      "test_metrics_acceptance",
+      "test_module_duplication_guard",
+      "test_narrative_authority",
+      "test_native_host_guard",
+      "test_nested_source_binding",
+      "test_no_publish_source_scope",
+      "test_opencode_adapter",
+      "test_opencode_bound_launch_smoke",
+      "test_opencode_host_smoke",
+      "test_opencode_launch_binding",
+      "test_opencode_live_evaluator",
+      "test_opencode_live_session",
+      "test_operator_ingress_matrix",
+      "test_operator_origin_support",
+      "test_operator_task_witness",
+      "test_orchestration_repair",
+      "test_outbox_write_time_bar",
+      "test_pending_ingress",
+      "test_portable_floor_fields",
+      "test_producer_gate_policy",
+      "test_producer_terminal_consistency",
+      "test_project_root_session_binding",
+      "test_protocol_admission",
+      "test_protocol_registry",
+      "test_public_closure_cli",
+      "test_public_install_lifecycle",
+      "test_reconcile_history_ledger_blocked",
+      "test_reconcile_legacy_output_field",
+      "test_reconcile_valve",
+      "test_recover_approved_repair",
+      "test_recovered_attribution",
+      "test_recovery_noop_targets",
+      "test_recovery_reachability",
+      "test_refusal_registry",
+      "test_refusal_routes",
+      "test_regression_gate",
+      "test_release_provenance",
+      "test_remediation_self_consistency",
+      "test_repeated_cc",
+      "test_request_clause_closure",
+      "test_response_delivery",
+      "test_response_digest",
+      "test_response_fact_binding",
+      "test_response_surface_contract",
+      "test_retired_source_coverage",
+      "test_reverify",
+      "test_reverify_timeout_and_route",
+      "test_router_closure_readiness",
+      "test_runner",
+      "test_runner_failure_roster",
+      "test_runtime_bootstrap",
+      "test_runtime_generation_identity",
+      "test_runtime_namespace",
+      "test_sailearn_consumer",
+      "test_saipen_metrics",
+      "test_saitranslate_charter_namespace",
+      "test_sandbox_work_surface",
+      "test_scenario_runner_isolation",
+      "test_search_transport",
+      "test_self_resolving_gates",
+      "test_session_binding",
+      "test_settled_projection",
+      "test_source_contract_derivation",
+      "test_source_multiwork",
+      "test_source_quarantine_route",
+      "test_source_receipts",
+      "test_source_refusal_routing",
+      "test_source_retirement",
+      "test_src085_conformance_disposition",
+      "test_src085_improve_run_body",
+      "test_storage_artifacts",
+      "test_storage_lost_registry",
+      "test_storage_policy",
+      "test_style_contract_chokepoint",
+      "test_sub_dispose_after_collect",
+      "test_subprocess_utf8",
+      "test_supervisor",
+      "test_t1173_empty_intent_normalization",
+      "test_t119_stale_complete_exit",
+      "test_t1238_release_commit_publication",
+      "test_t1277_source_dry_run_parity",
+      "test_t1278_closure_contradiction",
+      "test_t1282_op_id_resolution",
+      "test_t1283_lineage_legacy_ingest",
+      "test_t1286_crew_probe",
+      "test_t1287_audit_empty_scope",
+      "test_t1287_build_directive_grammar",
+      "test_t1293_valve_resume_audit_route",
+      "test_t1304_r004_dry_run_purity",
+      "test_t1304_r004_transition",
+      "test_t1304_r005_verifier_boundary",
+      "test_t1304_r006_boundary_refusals",
+      "test_t1304_r009_settled_wiring",
+      "test_t1304_r011_empty_selection",
+      "test_t1304_review_p0_repair",
+      "test_t1316_recovery_already_applied",
+      "test_t1326_board_compaction",
+      "test_t1327_live_acceptance",
+      "test_t1327_zero_manual_recovery",
+      "test_t1363_zero_manual_entry",
+      "test_t1374_detail_ref_export",
+      "test_t1383_ticket_add_route",
+      "test_t1386_canonical_payload",
+      "test_t1387_scratch_one_answer",
+      "test_t1389_foreign_delta_adoption",
+      "test_t1398_ingress_shell_operator",
+      "test_t1401_saipen_grammar_answer",
+      "test_t1402_readonly_reporters",
+      "test_t1407_structural_log_compaction",
+      "test_t1411_stale_complete_resolution",
+      "test_t1412_conformance_truth",
+      "test_t1429_deferred_due",
+      "test_t1430_crew_run_receipt",
+      "test_t1434_cross_shape_index",
+      "test_t1442_family_env",
+      "test_t1445_failure_field_scope",
+      "test_t1446_auto_recall",
+      "test_t1446_duplicate_ingress",
+      "test_t1446_supervise",
+      "test_t1452_manifest_authority",
+      "test_t1453_ingress_clause",
+      "test_t1454_distribution_blocker",
+      "test_t1457_ingress_obligation",
+      "test_t1458_queue_reservation",
+      "test_t1460_consumed_ingress",
+      "test_t1461_source_append",
+      "test_t1464_matrix_acceptance",
+      "test_t1465_budget_line_ends",
+      "test_t1472_core_unit_shards",
+      "test_t1473_handback",
+      "test_t1474_start_goal_entry",
+      "test_t1475_host_hook_payload",
+      "test_t1476_retired_source_livelock",
+      "test_t1478_fixture_clock",
+      "test_t1479_core_unit_consistent_copy",
+      "test_t147_generation_exit_behind_style_drift",
+      "test_t1484_soak_report_survives",
+      "test_t1487_claim_handoff",
+      "test_t148_sweep_historical_bar",
+      "test_t1494_continuation_authority",
+      "test_t1497_turn_entry_telegrams",
+      "test_t149_reverify_run_records_its_directory",
+      "test_t1500_claim_continuity",
+      "test_t1501_entry_resolver",
+      "test_t1502_ui_aa_contract",
+      "test_t1504_zaicode_adapter",
+      "test_t1505_core_unit_sandbox_reclaim",
+      "test_t1506_xpatch_survival",
+      "test_t1508_byte_bound_attributes",
+      "test_t150_legacy_generation_evidence_boundary",
+      "test_t1511_soak_source_identity",
+      "test_t1513_argv_unconsumed_quotes",
+      "test_t1514_portable_history_evidence",
+      "test_t1515_posix_shell_entry",
+      "test_t1516_portable_receipts",
+      "test_t1517_reverify_integrity",
+      "test_t1518_crew_banner",
+      "test_t1519_settled_index",
+      "test_t151_foreign_receipt_cannot_erase_a_sibling_verdict",
+      "test_t1527_runtime_provenance",
+      "test_t152_t154_a_red_gate_names_the_repair_that_resolves_it",
+      "test_t1533_terminal_handback",
+      "test_t1544_audit20",
+      "test_t1544_audit20_intake",
+      "test_t1544_audit20_perf",
+      "test_t1553_mid_session_activation",
+      "test_t1557_autonomy_sentinels",
+      "test_t1557_mail_binding",
+      "test_t1557_sub_style_contract",
+      "test_t1561_probe_fixture",
+      "test_t1563_authority_minting",
+      "test_t1568_opencode_chat_style",
+      "test_t1571_lint_surface",
+      "test_t1572_ticket_scoped_recovery",
+      "test_t1574_followups",
+      "test_t1575_parallel_lane",
+      "test_t1576_efficiency_kpi",
+      "test_t1577_op_id_provenance",
+      "test_t1578_restore_owner",
+      "test_t1581_phase_rename_knowledge",
+      "test_t1582_sweep_skip_reason",
+      "test_t1584_production_zcode_boundary",
+      "test_t1585_amnesty_control",
+      "test_t1586_scenario_inputs",
+      "test_t1587_stale_closure_recovery",
+      "test_t1592_manifest_orphan_advice",
+      "test_t1598_stale_claim_next_action",
+      "test_t1608_collect_verb_route",
+      "test_t1609_unproven_done_recovery",
+      "test_t1612_accidental_success_reproduction",
+      "test_t1613_publication_convergence",
+      "test_t1614_future_gate",
+      "test_t1617_release_surface_ignores_gitignore",
+      "test_t1618_future_maturation",
+      "test_t1619_goal_terminality",
+      "test_t1619_iteration_boundary",
+      "test_t1620_historical_counts",
+      "test_t1624_host_integration",
+      "test_t1627_operator_question",
+      "test_t1628_opencode_policy",
+      "test_t1631_argv_values",
+      "test_t1632_identifier_is_not_a_count",
+      "test_t1633_process_tree",
+      "test_t1635_claude_profiles",
+      "test_t1636_invalid_carrier",
+      "test_t1638_future_ingress",
+      "test_t1640_board_scrub",
+      "test_t1640_log_seal",
+      "test_t1641_gate_ownership",
+      "test_t1642_history_notes",
+      "test_t1645_zero_hunt",
+      "test_t1647_machine_runtime",
+      "test_t1648_transient_replace_lock",
+      "test_t1649_refusal_step",
+      "test_t1650_retired_host_image",
+      "test_t1651_executor_admission",
+      "test_t1654_project_block",
+      "test_t1655_file_mode",
+      "test_t1656_operator_readability",
+      "test_t1657_refused_reply_preserved",
+      "test_t1658_suite_record",
+      "test_t1659_run_window",
+      "test_t1661_suite_projection",
+      "test_t1662_repository_interlock",
+      "test_t1663_ticket_requires",
+      "test_t1665_guard_verbs",
+      "test_t1666_receipt_close",
+      "test_t1667_clean_compaction",
+      "test_t1668_durable_stores_ship",
+      "test_t1669_clean_done_projection",
+      "test_t1670_route_budgets",
+      "test_t1671_lifecycle_authority",
+      "test_t1673_board_only_terminal",
+      "test_t1674_typed_closure_mode",
+      "test_t1676_lifecycle_code",
+      "test_t1678_path_launcher",
+      "test_t1679_typed_head_quarantine",
+      "test_t1681_release_closure_op",
+      "test_t1683_launcher_profile",
+      "test_t1684_operand_grammar",
+      "test_t1685_profile_carrier",
+      "test_t1686_launch_policy",
+      "test_t1687_identity_diagnostics",
+      "test_t1688_stale_plugin_guard",
+      "test_t1690_profile_isolation",
+      "test_t1704_goal_checkpoint_priority",
+      "test_t1704_legacy_goal_authority",
+      "test_t1705_lifecycle_write_preflight",
+      "test_t1707_regression_chronology",
+      "test_t1708_regression_declaration",
+      "test_t1709_audit_starvation",
+      "test_t1712_manifest_runtime",
+      "test_t1715_block_for_parent_guard",
+      "test_t1718_acceptance_contract",
+      "test_t1721_acceptance_compaction",
+      "test_t1726_closed_contracts",
+      "test_t1726_contract_oracle",
+      "test_t1729_gate_decision_lifecycle",
+      "test_t1729_operator_gate",
+      "test_t1732_protocol_hardening",
+      "test_t1734_source_drift",
+      "test_t1735_tool_failure_boundaries",
+      "test_t1736_tool_safety_and_evidence",
+      "test_t1739_wait_boundary",
+      "test_t1742_pipeline_shell_probe",
+      "test_t1743_cross_user_dead_ends",
+      "test_t1744_fleet_foreign_field_skew",
+      "test_t1745_sub_collect_foreign_field",
+      "test_t1746_crew_terminal_outcome",
+      "test_t1747_degraded_profile",
+      "test_t1748_worker_clock",
+      "test_t1749_project_root_subject",
+      "test_t1751_reconcile_surfaces",
+      "test_t1752_audit_auto_close",
+      "test_t1753_activation_launcher",
+      "test_t1757_claim_follows_route",
+      "test_t1758_closure_cycle",
+      "test_t1759_single_lifecycle_observer",
+      "test_t1760_no_git_ccc_marker",
+      "test_t1761_recovery_reaches_a_typed_duplicate",
+      "test_t1762_control_count_scope",
+      "test_t1765_finding_subtypes",
+      "test_t1767_usage_line",
+      "test_t1770_pair_stage_scope",
+      "test_t1771_measure_then_finish",
+      "test_t1772_empty_draft_exit",
+      "test_t1774_sweep_queue_human",
+      "test_t1775_continue_never_admits_a_seat",
+      "test_t1776_protocol_home_valve",
+      "test_t1778_continue_closes_source",
+      "test_t1779_family_ignores_inbox",
+      "test_t1781_t37_latest_build",
+      "test_t1782_capped_builder_identifier",
+      "test_t1784_dry_run_verdict",
+      "test_t1785_dry_run_human",
+      "test_t1786_cli_first_activation",
+      "test_t1787_parked_brief",
+      "test_t1789_child_closure_route",
+      "test_t1790_dependency_route_budget",
+      "test_t1792_auto_doctor",
+      "test_t1801_missing_audit_settlement",
+      "test_t1803_archived_improve",
+      "test_t1807_audit_liveness_regression",
+      "test_t1815_header_repair",
+      "test_t1815_stale_work_context",
+      "test_t1816_protected_root_hold",
+      "test_t1816_provenance_inventory",
+      "test_t1816_run_append_only",
+      "test_t1816_run_provenance",
+      "test_t1817_acceptance_bar",
+      "test_t1817_closure_outcomes",
+      "test_t1817_diagnostic_ownership",
+      "test_t1817_finding_ownership",
+      "test_t1817_finding_route",
+      "test_t1817_handoff_artifacts",
+      "test_t1821_markdown_surface",
+      "test_t1822_carrier_binding",
+      "test_t1826_declared_budgets",
+      "test_t1827_writer_lock_contract",
+      "test_t1828_verification_policy",
+      "test_t1829_publication_boundary",
+      "test_t1830_verification_observations",
+      "test_t1831_cleanup_fixture_cost",
+      "test_t1832_single_flight",
+      "test_t1833_verification_owner",
+      "test_t1834_tool_call_identity",
+      "test_t1835_verification_economics",
+      "test_t1836_verification_impact",
+      "test_t1837_ci_family_parity",
+      "test_t1839_cohort_reconciliation",
+      "test_t1840_external_renewal",
+      "test_t1844_authority_preview",
+      "test_t1844_goal_turns",
+      "test_t1844_operator_origin",
+      "test_t1844_origin_broker",
+      "test_t1844_source_event",
+      "test_t1847_fixture_contract",
+      "test_t1849_external_git_environment",
+      "test_t1850_freebuff_diagnostics",
+      "test_t1851_debt_authority",
+      "test_t1853_dispatch_admission",
+      "test_t1854_runtime_home",
+      "test_t1855_compound_policy",
+      "test_t1856_launcher_identity",
+      "test_t1857_budget_owner",
+      "test_t1857_shared_blockers",
+      "test_t1858_valve_guidance",
+      "test_t1859_zaicode_seal",
+      "test_t1861_registry_import_coupling",
+      "test_t1862_readiness",
+      "test_t1864_autonomous_valve",
+      "test_t1865_launcher_identity",
+      "test_t1866_publication_state",
+      "test_t1867_completion_grammar",
+      "test_t1868_zaicode_ingress",
+      "test_t1872_drift_prevention",
+      "test_t1873_protrail_drift",
+      "test_t1874_wintage_drift",
+      "test_t1875_maintenance_wiring",
+      "test_t1876_parallel_cleanup",
+      "test_t1879_manifest_staging_states",
+      "test_t1880_wait_survives_phase_shortcut",
+      "test_t1881_authority_brake",
+      "test_t1881_publication_prohibition",
+      "test_t1882_future_publication_inventory",
+      "test_t1883_reconcile_causality",
+      "test_t1884_transition_blocker_inheritance",
+      "test_t1885_tag_peel",
+      "test_t1886_gate_lock_window",
+      "test_t1888_object_store",
+      "test_t1889_sandbox_scope",
+      "test_t1891_freshness_parser",
+      "test_t1892_one_decoder",
+      "test_t1893_probe_wrappers",
+      "test_t1897_manifest_findings",
+      "test_t1898_lineage_recovery",
+      "test_t1900_git_listing_boundary",
+      "test_t1902_parallel_source_sampling",
+      "test_t1903_lean_receipt_projection",
+      "test_t1908_duplicate_settlement",
+      "test_t1909_unauthenticated_evidence_diagnostics",
+      "test_t1910_log_input_diagnostics",
+      "test_t1911_native_origin_diagnostics",
+      "test_t1912_redelivery_origin_reconciliation",
+      "test_t1913_hook_deadline",
+      "test_t1913_origin_recovery",
+      "test_t1914_installed_runtime_parity",
+      "test_t1915_terminal_next_action",
+      "test_t1916_continuation_discipline",
+      "test_t1916_external_delta",
+      "test_t1917_premature_handback",
+      "test_t1924_src330_acceptance",
+      "test_t1926_zc_owners_matrix",
+      "test_t1927_sp_owners_matrix",
+      "test_t1931_campaign_lifecycle",
+      "test_t1931_saipal_boundary",
+      "test_t1932_campaign_authority",
+      "test_t1932_src338_closures",
+      "test_t1933_zaicode_goal_seal",
+      "test_t1934_deploy_staleness",
+      "test_t1935_zaicode_hook_ownership",
+      "test_t1936_launch_account_list",
+      "test_t1937_future_slice_closure",
+      "test_t1938_invalidated_slice_closure",
+      "test_t1939_needs_detach",
+      "test_t1942_regression_pair",
+      "test_t1943_adapter_artifact_tracking",
+      "test_t1943_campaign_scope_roundtrip",
+      "test_t1943_goal_objective_binding",
+      "test_t1944_core_wave1",
+      "test_t1944_perf_wave",
+      "test_t1944_wave2",
+      "test_t1945_analysis_progress",
+      "test_t1945_campaign_driver",
+      "test_t1945_host_trust",
+      "test_t1945_incremental_discovery",
+      "test_t1949_hook_validator_status",
+      "test_t1951_install_residue",
+      "test_t38_improve_cycle_liveness",
+      "test_t923_crew_invalid_role_errors",
+      "test_t925_sub_terminal_durability",
+      "test_telemetry",
+      "test_ticket_add_regression",
+      "test_ticket_supersession",
+      "test_ticket_verify_preimage",
+      "test_tool_module_identity",
+      "test_unknown_tool_fail_closed",
+      "test_user_wait_release",
+      "test_userperson_global",
+      "test_v7_producer_parallelism",
+      "test_vacterro_t36_checkpoint_usage_taxonomy",
+      "test_vacterro_t37_no_delta_closure",
+      "test_validator_findings",
+      "test_validator_layout_parity",
+      "test_verification_grammar",
+      "test_verify_oracle",
+      "test_verify_scope_isolation",
+      "test_vocabulary_parity",
+      "test_warn_ownership_probe",
+      "test_watchdog",
+      "test_work_reverify_cli",
+      "test_worker_turnover",
+      "test_xpatch",
+      "test_xpatch_controls"
+    ],
+    "selector_modules": [
+      "saipen_engine.test_runner",
+      "test_acceptance",
+      "test_accepted_debt",
+      "test_accepted_debt_rebind",
+      "test_actor_binding_lifecycle",
+      "test_adapter_parity",
+      "test_adaptive_runtime",
+      "test_admission_auto_doctor",
+      "test_adoption_section_parity",
+      "test_audit_2026_08_27_core",
+      "test_audit_2026_08_27_w2",
+      "test_audit_2026_08_28_all3",
+      "test_audit_2026_08_29_all3_impl",
+      "test_audit_2026_08_30_all3_impl",
+      "test_audit_dogfood",
+      "test_audit_enqueue",
+      "test_audit_enqueue_boundary",
+      "test_audit_envelope",
+      "test_audit_inbox",
+      "test_audit_ingest_resume",
+      "test_audit_manifest",
+      "test_audit_provenance",
+      "test_audit_route",
+      "test_audit_scope",
+      "test_audit_transport_loop",
+      "test_authority_capture",
+      "test_automation_block",
+      "test_autonomy_audit_fixes",
+      "test_board_pseudo_link",
+      "test_boot_locator",
+      "test_campaign_continuation_assessment",
+      "test_campaign_matrix",
+      "test_campaign_production_gates",
+      "test_canonical_command_reachability",
+      "test_canonical_write_route",
+      "test_capability_boundary",
+      "test_ccc_ff_control",
+      "test_chat_style",
+      "test_check_inventory",
+      "test_claude_stop_hook",
+      "test_cli_compound_entry",
+      "test_closure_provenance",
+      "test_codex_stop_hook",
+      "test_cold_agent_truth",
+      "test_cold_recovery",
+      "test_command_routing",
+      "test_concurrency_independence",
+      "test_conformance_corpus",
+      "test_conformance_lineage",
+      "test_conformance_projection",
+      "test_conformance_remediation_evidence",
+      "test_conformance_repair_boundary",
+      "test_continue_chain",
+      "test_continue_entry",
+      "test_continue_fallback_source_gate",
+      "test_continue_improve_fallthrough",
+      "test_control_primitives",
+      "test_core_audit_containment",
+      "test_core_ownership_routing",
+      "test_core_unit_gate",
+      "test_crew_applicability",
+      "test_crew_liveness_drift",
+      "test_debt_gate",
+      "test_defect_delta_controls",
+      "test_dependency_resume_liveness",
+      "test_detail_authorization",
+      "test_distribution_report",
+      "test_effect_authorization",
+      "test_engine_module_identity",
+      "test_entry_answer_agrees",
+      "test_entry_point_parity",
+      "test_event_taxonomy_owner",
+      "test_evidence_hygiene",
+      "test_explicit_claim",
+      "test_external_authentication_contract",
+      "test_external_resolution",
+      "test_external_revalidation",
+      "test_field_fixture_isolation",
+      "test_finding_invalidated_closure",
+      "test_first_publish_confirm_evidence",
+      "test_fixture_style_authority",
+      "test_fixture_support",
+      "test_foreign_observation_authority",
+      "test_foreign_owner_terminal_route",
+      "test_freebuff_operator_provenance",
+      "test_generation_migration",
+      "test_gpu_lane",
+      "test_guard_admission",
+      "test_guard_events",
+      "test_guard_execution_reachability",
+      "test_guard_hostile_matrix",
+      "test_guard_root_parity",
+      "test_guard_surface_parity",
+      "test_handoff_archive_cross_repo",
+      "test_hermetic_env",
+      "test_host_authority_broker",
+      "test_host_bootstrap",
+      "test_host_fixture",
+      "test_host_launch_net",
+      "test_hostile_wave_regressions",
+      "test_hush_runtime",
+      "test_improve_error_boundary",
+      "test_improve_gate",
+      "test_improve_reconcile",
+      "test_improve_resolve_report_path",
+      "test_ingress_authority",
+      "test_inject_digest",
+      "test_install_drift",
+      "test_install_identity_doctor",
+      "test_instruction_home_parity",
+      "test_instruction_loader_contracts",
+      "test_intent_audit_fixes",
+      "test_journal_nested_targets",
+      "test_knowledge",
+      "test_ledger_gap",
+      "test_legacy_lifecycle_compat",
+      "test_log_detail_evidence",
+      "test_log_normalize",
+      "test_log_stamp_guard",
+      "test_log_tail_quarantine",
+      "test_log_ticket_slot",
+      "test_metadata_repair",
+      "test_metrics_acceptance",
+      "test_module_duplication_guard",
+      "test_narrative_authority",
+      "test_native_host_guard",
+      "test_nested_source_binding",
+      "test_next_action_deadlock",
+      "test_no_publish_source_scope",
+      "test_opencode_adapter",
+      "test_opencode_bound_launch_smoke",
+      "test_opencode_host_smoke",
+      "test_opencode_launch_binding",
+      "test_opencode_live_evaluator",
+      "test_opencode_live_session",
+      "test_operator_ingress_matrix",
+      "test_operator_origin_support",
+      "test_operator_task_witness",
+      "test_orchestration_repair",
+      "test_outbox_write_time_bar",
+      "test_pending_ingress",
+      "test_portable_floor_fields",
+      "test_producer_gate_policy",
+      "test_producer_terminal_consistency",
+      "test_project_root_session_binding",
+      "test_protocol_admission",
+      "test_protocol_registry",
+      "test_public_closure_cli",
+      "test_public_install_lifecycle",
+      "test_reconcile_history_ledger_blocked",
+      "test_reconcile_legacy_output_field",
+      "test_reconcile_valve",
+      "test_recover_approved_repair",
+      "test_recovered_attribution",
+      "test_recovery_noop_targets",
+      "test_recovery_reachability",
+      "test_refusal_registry",
+      "test_refusal_routes",
+      "test_regression_gate",
+      "test_release_provenance",
+      "test_remediation_self_consistency",
+      "test_repeated_cc",
+      "test_request_clause_closure",
+      "test_response_delivery",
+      "test_response_digest",
+      "test_response_fact_binding",
+      "test_response_surface_contract",
+      "test_retired_source_coverage",
+      "test_reverify",
+      "test_reverify_timeout_and_route",
+      "test_router_closure_readiness",
+      "test_runner",
+      "test_runner_failure_roster",
+      "test_runtime_bootstrap",
+      "test_runtime_generation_identity",
+      "test_runtime_namespace",
+      "test_sailearn_consumer",
+      "test_saipen_metrics",
+      "test_saitranslate_charter_namespace",
+      "test_sandbox_work_surface",
+      "test_scenario_runner_isolation",
+      "test_search_transport",
+      "test_self_resolving_gates",
+      "test_session_binding",
+      "test_settled_projection",
+      "test_source_contract_derivation",
+      "test_source_multiwork",
+      "test_source_quarantine_route",
+      "test_source_receipts",
+      "test_source_refusal_routing",
+      "test_source_retirement",
+      "test_src085_conformance_disposition",
+      "test_src085_improve_run_body",
+      "test_state_scalar_quoting",
+      "test_storage_artifacts",
+      "test_storage_lost_registry",
+      "test_storage_policy",
+      "test_style_contract_chokepoint",
+      "test_sub_dispose_after_collect",
+      "test_subprocess_utf8",
+      "test_supervisor",
+      "test_t1173_empty_intent_normalization",
+      "test_t119_stale_complete_exit",
+      "test_t1238_release_commit_publication",
+      "test_t1277_source_dry_run_parity",
+      "test_t1278_closure_contradiction",
+      "test_t1282_op_id_resolution",
+      "test_t1283_lineage_legacy_ingest",
+      "test_t1286_crew_probe",
+      "test_t1287_audit_empty_scope",
+      "test_t1287_build_directive_grammar",
+      "test_t1293_valve_resume_audit_route",
+      "test_t1304_r004_dry_run_purity",
+      "test_t1304_r004_transition",
+      "test_t1304_r005_verifier_boundary",
+      "test_t1304_r006_boundary_refusals",
+      "test_t1304_r009_settled_wiring",
+      "test_t1304_r011_empty_selection",
+      "test_t1304_review_p0_repair",
+      "test_t1316_recovery_already_applied",
+      "test_t1326_board_compaction",
+      "test_t1327_live_acceptance",
+      "test_t1327_zero_manual_recovery",
+      "test_t1363_zero_manual_entry",
+      "test_t1374_detail_ref_export",
+      "test_t1383_ticket_add_route",
+      "test_t1386_canonical_payload",
+      "test_t1387_scratch_one_answer",
+      "test_t1389_foreign_delta_adoption",
+      "test_t1398_ingress_shell_operator",
+      "test_t1401_saipen_grammar_answer",
+      "test_t1402_readonly_reporters",
+      "test_t1407_structural_log_compaction",
+      "test_t1411_stale_complete_resolution",
+      "test_t1412_conformance_truth",
+      "test_t1429_deferred_due",
+      "test_t1430_crew_run_receipt",
+      "test_t1434_cross_shape_index",
+      "test_t1442_family_env",
+      "test_t1443_basetemp_transience",
+      "test_t1443_identity_audit",
+      "test_t1445_failure_field_scope",
+      "test_t1446_auto_recall",
+      "test_t1446_duplicate_ingress",
+      "test_t1446_supervise",
+      "test_t1452_manifest_authority",
+      "test_t1453_ingress_clause",
+      "test_t1454_distribution_blocker",
+      "test_t1457_ingress_obligation",
+      "test_t1458_queue_reservation",
+      "test_t1460_consumed_ingress",
+      "test_t1461_source_append",
+      "test_t1464_matrix_acceptance",
+      "test_t1465_budget_line_ends",
+      "test_t1472_core_unit_shards",
+      "test_t1473_handback",
+      "test_t1474_start_goal_entry",
+      "test_t1475_host_hook_payload",
+      "test_t1476_retired_source_livelock",
+      "test_t1478_fixture_clock",
+      "test_t1479_core_unit_consistent_copy",
+      "test_t147_generation_exit_behind_style_drift",
+      "test_t1484_soak_report_survives",
+      "test_t1487_claim_handoff",
+      "test_t148_sweep_historical_bar",
+      "test_t1494_continuation_authority",
+      "test_t1497_turn_entry_telegrams",
+      "test_t149_reverify_run_records_its_directory",
+      "test_t1500_claim_continuity",
+      "test_t1501_entry_resolver",
+      "test_t1502_ui_aa_contract",
+      "test_t1504_zaicode_adapter",
+      "test_t1505_core_unit_sandbox_reclaim",
+      "test_t1506_xpatch_survival",
+      "test_t1508_byte_bound_attributes",
+      "test_t150_legacy_generation_evidence_boundary",
+      "test_t1511_soak_source_identity",
+      "test_t1513_argv_unconsumed_quotes",
+      "test_t1514_portable_history_evidence",
+      "test_t1515_posix_shell_entry",
+      "test_t1516_portable_receipts",
+      "test_t1517_reverify_integrity",
+      "test_t1518_crew_banner",
+      "test_t1519_settled_index",
+      "test_t151_foreign_receipt_cannot_erase_a_sibling_verdict",
+      "test_t1527_runtime_provenance",
+      "test_t152_t154_a_red_gate_names_the_repair_that_resolves_it",
+      "test_t1533_terminal_handback",
+      "test_t1544_audit20",
+      "test_t1544_audit20_intake",
+      "test_t1544_audit20_perf",
+      "test_t1553_mid_session_activation",
+      "test_t1557_autonomy_sentinels",
+      "test_t1557_mail_binding",
+      "test_t1557_sub_style_contract",
+      "test_t1561_probe_fixture",
+      "test_t1563_authority_minting",
+      "test_t1568_opencode_chat_style",
+      "test_t1571_lint_surface",
+      "test_t1572_ticket_scoped_recovery",
+      "test_t1574_followups",
+      "test_t1575_parallel_lane",
+      "test_t1576_efficiency_kpi",
+      "test_t1577_op_id_provenance",
+      "test_t1578_restore_owner",
+      "test_t1581_phase_rename_knowledge",
+      "test_t1582_sweep_skip_reason",
+      "test_t1584_production_zcode_boundary",
+      "test_t1585_amnesty_control",
+      "test_t1586_scenario_inputs",
+      "test_t1587_stale_closure_recovery",
+      "test_t1592_manifest_orphan_advice",
+      "test_t1598_stale_claim_next_action",
+      "test_t1608_collect_verb_route",
+      "test_t1609_unproven_done_recovery",
+      "test_t1612_accidental_success_reproduction",
+      "test_t1613_publication_convergence",
+      "test_t1614_future_gate",
+      "test_t1617_release_surface_ignores_gitignore",
+      "test_t1618_future_maturation",
+      "test_t1619_goal_terminality",
+      "test_t1619_iteration_boundary",
+      "test_t1620_historical_counts",
+      "test_t1624_host_integration",
+      "test_t1627_operator_question",
+      "test_t1628_opencode_policy",
+      "test_t1631_argv_values",
+      "test_t1632_identifier_is_not_a_count",
+      "test_t1633_process_tree",
+      "test_t1635_claude_profiles",
+      "test_t1636_invalid_carrier",
+      "test_t1638_future_ingress",
+      "test_t1640_board_scrub",
+      "test_t1640_log_seal",
+      "test_t1641_gate_ownership",
+      "test_t1642_history_notes",
+      "test_t1645_zero_hunt",
+      "test_t1647_machine_runtime",
+      "test_t1648_transient_replace_lock",
+      "test_t1649_refusal_step",
+      "test_t1650_retired_host_image",
+      "test_t1651_executor_admission",
+      "test_t1654_project_block",
+      "test_t1655_file_mode",
+      "test_t1656_operator_readability",
+      "test_t1657_refused_reply_preserved",
+      "test_t1658_suite_record",
+      "test_t1659_run_window",
+      "test_t1661_suite_projection",
+      "test_t1662_repository_interlock",
+      "test_t1663_ticket_requires",
+      "test_t1665_guard_verbs",
+      "test_t1666_receipt_close",
+      "test_t1667_clean_compaction",
+      "test_t1668_durable_stores_ship",
+      "test_t1669_clean_done_projection",
+      "test_t1670_route_budgets",
+      "test_t1671_lifecycle_authority",
+      "test_t1673_board_only_terminal",
+      "test_t1674_typed_closure_mode",
+      "test_t1676_lifecycle_code",
+      "test_t1678_path_launcher",
+      "test_t1679_typed_head_quarantine",
+      "test_t1681_release_closure_op",
+      "test_t1683_launcher_profile",
+      "test_t1684_operand_grammar",
+      "test_t1685_profile_carrier",
+      "test_t1686_launch_policy",
+      "test_t1687_identity_diagnostics",
+      "test_t1688_stale_plugin_guard",
+      "test_t1690_profile_isolation",
+      "test_t1704_goal_checkpoint_priority",
+      "test_t1704_legacy_goal_authority",
+      "test_t1705_lifecycle_write_preflight",
+      "test_t1707_regression_chronology",
+      "test_t1708_regression_declaration",
+      "test_t1709_audit_starvation",
+      "test_t1711_regression_execution",
+      "test_t1712_manifest_runtime",
+      "test_t1715_block_for_parent_guard",
+      "test_t1718_acceptance_contract",
+      "test_t1721_acceptance_compaction",
+      "test_t1726_closed_contracts",
+      "test_t1726_contract_oracle",
+      "test_t1729_gate_decision_lifecycle",
+      "test_t1729_operator_gate",
+      "test_t1732_protocol_hardening",
+      "test_t1734_source_drift",
+      "test_t1735_tool_failure_boundaries",
+      "test_t1736_tool_safety_and_evidence",
+      "test_t1739_wait_boundary",
+      "test_t1742_pipeline_shell_probe",
+      "test_t1743_cross_user_dead_ends",
+      "test_t1744_fleet_foreign_field_skew",
+      "test_t1745_sub_collect_foreign_field",
+      "test_t1746_crew_terminal_outcome",
+      "test_t1747_degraded_profile",
+      "test_t1748_worker_clock",
+      "test_t1749_project_root_subject",
+      "test_t1750_release_boundary",
+      "test_t1751_reconcile_surfaces",
+      "test_t1752_audit_auto_close",
+      "test_t1753_activation_launcher",
+      "test_t1757_claim_follows_route",
+      "test_t1758_closure_cycle",
+      "test_t1759_single_lifecycle_observer",
+      "test_t1760_no_git_ccc_marker",
+      "test_t1761_recovery_reaches_a_typed_duplicate",
+      "test_t1762_control_count_scope",
+      "test_t1765_finding_subtypes",
+      "test_t1767_usage_line",
+      "test_t1770_pair_stage_scope",
+      "test_t1771_measure_then_finish",
+      "test_t1772_empty_draft_exit",
+      "test_t1774_sweep_queue_human",
+      "test_t1775_continue_never_admits_a_seat",
+      "test_t1776_protocol_home_valve",
+      "test_t1778_continue_closes_source",
+      "test_t1779_family_ignores_inbox",
+      "test_t1781_t37_latest_build",
+      "test_t1782_capped_builder_identifier",
+      "test_t1784_dry_run_verdict",
+      "test_t1785_dry_run_human",
+      "test_t1786_cli_first_activation",
+      "test_t1787_parked_brief",
+      "test_t1789_child_closure_route",
+      "test_t1790_dependency_route_budget",
+      "test_t1792_auto_doctor",
+      "test_t1801_missing_audit_settlement",
+      "test_t1803_archived_improve",
+      "test_t1807_audit_liveness_regression",
+      "test_t1815_header_repair",
+      "test_t1815_stale_work_context",
+      "test_t1816_protected_root_hold",
+      "test_t1816_provenance_inventory",
+      "test_t1816_run_append_only",
+      "test_t1816_run_provenance",
+      "test_t1817_acceptance_bar",
+      "test_t1817_closure_outcomes",
+      "test_t1817_diagnostic_ownership",
+      "test_t1817_finding_ownership",
+      "test_t1817_finding_route",
+      "test_t1817_handoff_artifacts",
+      "test_t1821_markdown_surface",
+      "test_t1822_carrier_binding",
+      "test_t1826_declared_budgets",
+      "test_t1827_writer_lock_contract",
+      "test_t1828_verification_policy",
+      "test_t1829_publication_boundary",
+      "test_t1830_verification_observations",
+      "test_t1831_cleanup_fixture_cost",
+      "test_t1832_single_flight",
+      "test_t1833_verification_owner",
+      "test_t1834_tool_call_identity",
+      "test_t1835_verification_economics",
+      "test_t1836_verification_impact",
+      "test_t1837_ci_family_parity",
+      "test_t1839_cohort_reconciliation",
+      "test_t1840_external_renewal",
+      "test_t1844_authority_preview",
+      "test_t1844_goal_turns",
+      "test_t1844_operator_origin",
+      "test_t1844_origin_broker",
+      "test_t1844_source_event",
+      "test_t1847_fixture_contract",
+      "test_t1849_external_git_environment",
+      "test_t1850_freebuff_diagnostics",
+      "test_t1851_debt_authority",
+      "test_t1853_dispatch_admission",
+      "test_t1854_runtime_home",
+      "test_t1855_compound_policy",
+      "test_t1856_launcher_identity",
+      "test_t1857_budget_owner",
+      "test_t1857_shared_blockers",
+      "test_t1858_valve_guidance",
+      "test_t1859_zaicode_seal",
+      "test_t1861_registry_import_coupling",
+      "test_t1862_readiness",
+      "test_t1864_autonomous_valve",
+      "test_t1865_launcher_identity",
+      "test_t1866_publication_state",
+      "test_t1867_completion_grammar",
+      "test_t1868_zaicode_ingress",
+      "test_t1872_drift_prevention",
+      "test_t1873_protrail_drift",
+      "test_t1874_wintage_drift",
+      "test_t1875_maintenance_wiring",
+      "test_t1876_parallel_cleanup",
+      "test_t1879_manifest_staging_states",
+      "test_t1880_wait_survives_phase_shortcut",
+      "test_t1881_authority_brake",
+      "test_t1881_publication_prohibition",
+      "test_t1882_future_publication_inventory",
+      "test_t1883_reconcile_causality",
+      "test_t1884_transition_blocker_inheritance",
+      "test_t1885_tag_peel",
+      "test_t1886_gate_lock_window",
+      "test_t1888_object_store",
+      "test_t1889_sandbox_scope",
+      "test_t1891_freshness_parser",
+      "test_t1892_one_decoder",
+      "test_t1893_probe_wrappers",
+      "test_t1897_manifest_findings",
+      "test_t1898_lineage_recovery",
+      "test_t1900_git_listing_boundary",
+      "test_t1902_parallel_source_sampling",
+      "test_t1903_lean_receipt_projection",
+      "test_t1908_duplicate_settlement",
+      "test_t1909_unauthenticated_evidence_diagnostics",
+      "test_t1910_log_input_diagnostics",
+      "test_t1911_native_origin_diagnostics",
+      "test_t1912_redelivery_origin_reconciliation",
+      "test_t1913_hook_deadline",
+      "test_t1913_origin_recovery",
+      "test_t1914_installed_runtime_parity",
+      "test_t1915_terminal_next_action",
+      "test_t1916_continuation_discipline",
+      "test_t1916_external_delta",
+      "test_t1917_premature_handback",
+      "test_t1924_src330_acceptance",
+      "test_t1926_zc_owners_matrix",
+      "test_t1927_sp_owners_matrix",
+      "test_t1931_campaign_lifecycle",
+      "test_t1931_saipal_boundary",
+      "test_t1932_campaign_authority",
+      "test_t1932_src338_closures",
+      "test_t1933_zaicode_goal_seal",
+      "test_t1934_deploy_staleness",
+      "test_t1935_zaicode_hook_ownership",
+      "test_t1936_launch_account_list",
+      "test_t1937_future_slice_closure",
+      "test_t1938_invalidated_slice_closure",
+      "test_t1939_needs_detach",
+      "test_t1942_regression_pair",
+      "test_t1943_adapter_artifact_tracking",
+      "test_t1943_campaign_scope_roundtrip",
+      "test_t1943_goal_objective_binding",
+      "test_t1944_core_wave1",
+      "test_t1944_perf_wave",
+      "test_t1944_wave2",
+      "test_t1945_analysis_progress",
+      "test_t1945_campaign_driver",
+      "test_t1945_host_trust",
+      "test_t1945_incremental_discovery",
+      "test_t1949_hook_validator_status",
+      "test_t1951_install_residue",
+      "test_t1952_sandbox_points_at_itself",
+      "test_t1953_suite_reuse",
+      "test_t1961_pruned_slice",
+      "test_t38_improve_cycle_liveness",
+      "test_t923_crew_invalid_role_errors",
+      "test_t925_sub_terminal_durability",
+      "test_telemetry",
+      "test_ticket_add_regression",
+      "test_ticket_retirement",
+      "test_ticket_supersession",
+      "test_ticket_verify_preimage",
+      "test_tool_module_identity",
+      "test_unknown_tool_fail_closed",
+      "test_user_wait_release",
+      "test_userperson_global",
+      "test_v7_producer_parallelism",
+      "test_vacterro_t36_checkpoint_usage_taxonomy",
+      "test_vacterro_t37_no_delta_closure",
+      "test_validator_findings",
+      "test_validator_layout_parity",
+      "test_verification_grammar",
+      "test_verify_oracle",
+      "test_verify_scope_isolation",
+      "test_vocabulary_parity",
+      "test_warn_ownership_probe",
+      "test_watchdog",
+      "test_work_reverify_cli",
+      "test_worker_turnover",
+      "test_xpatch",
+      "test_xpatch_controls"
+    ],
+    "selection_reasons": {
+      "test_host_bootstrap": [
+        "depends on tools/test_host_bootstrap.py",
+        "full canonical selection required"
+      ],
+      "test_instruction_loader_contracts": [
+        "depends on tools/test_instruction_loader_contracts.py",
+        "full canonical selection required"
+      ],
+      "test_next_action_deadlock": [
+        "depends on tools/test_next_action_deadlock.py",
+        "full canonical selection required"
+      ],
+      "test_state_scalar_quoting": [
+        "depends on tools/test_state_scalar_quoting.py",
+        "full canonical selection required"
+      ],
+      "test_t1443_basetemp_transience": [
+        "depends on tools/test_t1443_basetemp_transience.py",
+        "full canonical selection required"
+      ],
+      "test_t1443_identity_audit": [
+        "depends on tools/test_t1443_identity_audit.py",
+        "full canonical selection required"
+      ],
+      "test_t1711_regression_execution": [
+        "depends on tools/test_t1711_regression_execution.py",
+        "full canonical selection required"
+      ],
+      "test_t1750_release_boundary": [
+        "depends on tools/test_t1750_release_boundary.py",
+        "full canonical selection required"
+      ],
+      "test_t1952_sandbox_points_at_itself": [
+        "depends on tools/test_t1952_sandbox_points_at_itself.py",
+        "full canonical selection required"
+      ],
+      "test_t1953_suite_reuse": [
+        "depends on tools/test_t1953_suite_reuse.py",
+        "full canonical selection required"
+      ],
+      "test_t1961_pruned_slice": [
+        "depends on tools/test_t1961_pruned_slice.py",
+        "full canonical selection required"
+      ],
+      "test_ticket_retirement": [
+        "depends on tools/test_ticket_retirement.py",
+        "full canonical selection required"
+      ],
+      "saipen_engine.test_runner": [
+        "full canonical selection required"
+      ],
+      "test_acceptance": [
+        "full canonical selection required"
+      ],
+      "test_accepted_debt": [
+        "full canonical selection required"
+      ],
+      "test_accepted_debt_rebind": [
+        "full canonical selection required"
+      ],
+      "test_actor_binding_lifecycle": [
+        "full canonical selection required"
+      ],
+      "test_adapter_parity": [
+        "full canonical selection required"
+      ],
+      "test_adaptive_runtime": [
+        "full canonical selection required"
+      ],
+      "test_admission_auto_doctor": [
+        "full canonical selection required"
+      ],
+      "test_adoption_section_parity": [
+        "full canonical selection required"
+      ],
+      "test_audit_2026_08_27_core": [
+        "full canonical selection required"
+      ],
+      "test_audit_2026_08_27_w2": [
+        "full canonical selection required"
+      ],
+      "test_audit_2026_08_28_all3": [
+        "full canonical selection required"
+      ],
+      "test_audit_2026_08_29_all3_impl": [
+        "full canonical selection required"
+      ],
+      "test_audit_2026_08_30_all3_impl": [
+        "full canonical selection required"
+      ],
+      "test_audit_dogfood": [
+        "full canonical selection required"
+      ],
+      "test_audit_enqueue": [
+        "full canonical selection required"
+      ],
+      "test_audit_enqueue_boundary": [
+        "full canonical selection required"
+      ],
+      "test_audit_envelope": [
+        "full canonical selection required"
+      ],
+      "test_audit_inbox": [
+        "full canonical selection required"
+      ],
+      "test_audit_ingest_resume": [
+        "full canonical selection required"
+      ],
+      "test_audit_manifest": [
+        "full canonical selection required"
+      ],
+      "test_audit_provenance": [
+        "full canonical selection required"
+      ],
+      "test_audit_route": [
+        "full canonical selection required"
+      ],
+      "test_audit_scope": [
+        "full canonical selection required"
+      ],
+      "test_audit_transport_loop": [
+        "full canonical selection required"
+      ],
+      "test_authority_capture": [
+        "full canonical selection required"
+      ],
+      "test_automation_block": [
+        "full canonical selection required"
+      ],
+      "test_autonomy_audit_fixes": [
+        "full canonical selection required"
+      ],
+      "test_board_pseudo_link": [
+        "full canonical selection required"
+      ],
+      "test_boot_locator": [
+        "full canonical selection required"
+      ],
+      "test_campaign_continuation_assessment": [
+        "full canonical selection required"
+      ],
+      "test_campaign_matrix": [
+        "full canonical selection required"
+      ],
+      "test_campaign_production_gates": [
+        "full canonical selection required"
+      ],
+      "test_canonical_command_reachability": [
+        "full canonical selection required"
+      ],
+      "test_canonical_write_route": [
+        "full canonical selection required"
+      ],
+      "test_capability_boundary": [
+        "full canonical selection required"
+      ],
+      "test_ccc_ff_control": [
+        "full canonical selection required"
+      ],
+      "test_chat_style": [
+        "full canonical selection required"
+      ],
+      "test_check_inventory": [
+        "full canonical selection required"
+      ],
+      "test_claude_stop_hook": [
+        "full canonical selection required"
+      ],
+      "test_cli_compound_entry": [
+        "full canonical selection required"
+      ],
+      "test_closure_provenance": [
+        "full canonical selection required"
+      ],
+      "test_codex_stop_hook": [
+        "full canonical selection required"
+      ],
+      "test_cold_agent_truth": [
+        "full canonical selection required"
+      ],
+      "test_cold_recovery": [
+        "full canonical selection required"
+      ],
+      "test_command_routing": [
+        "full canonical selection required"
+      ],
+      "test_concurrency_independence": [
+        "full canonical selection required"
+      ],
+      "test_conformance_corpus": [
+        "full canonical selection required"
+      ],
+      "test_conformance_lineage": [
+        "full canonical selection required"
+      ],
+      "test_conformance_projection": [
+        "full canonical selection required"
+      ],
+      "test_conformance_remediation_evidence": [
+        "full canonical selection required"
+      ],
+      "test_conformance_repair_boundary": [
+        "full canonical selection required"
+      ],
+      "test_continue_chain": [
+        "full canonical selection required"
+      ],
+      "test_continue_entry": [
+        "full canonical selection required"
+      ],
+      "test_continue_fallback_source_gate": [
+        "full canonical selection required"
+      ],
+      "test_continue_improve_fallthrough": [
+        "full canonical selection required"
+      ],
+      "test_control_primitives": [
+        "full canonical selection required"
+      ],
+      "test_core_audit_containment": [
+        "full canonical selection required"
+      ],
+      "test_core_ownership_routing": [
+        "full canonical selection required"
+      ],
+      "test_core_unit_gate": [
+        "full canonical selection required"
+      ],
+      "test_crew_applicability": [
+        "full canonical selection required"
+      ],
+      "test_crew_liveness_drift": [
+        "full canonical selection required"
+      ],
+      "test_debt_gate": [
+        "full canonical selection required"
+      ],
+      "test_defect_delta_controls": [
+        "full canonical selection required"
+      ],
+      "test_dependency_resume_liveness": [
+        "full canonical selection required"
+      ],
+      "test_detail_authorization": [
+        "full canonical selection required"
+      ],
+      "test_distribution_report": [
+        "full canonical selection required"
+      ],
+      "test_effect_authorization": [
+        "full canonical selection required"
+      ],
+      "test_engine_module_identity": [
+        "full canonical selection required"
+      ],
+      "test_entry_answer_agrees": [
+        "full canonical selection required"
+      ],
+      "test_entry_point_parity": [
+        "full canonical selection required"
+      ],
+      "test_event_taxonomy_owner": [
+        "full canonical selection required"
+      ],
+      "test_evidence_hygiene": [
+        "full canonical selection required"
+      ],
+      "test_explicit_claim": [
+        "full canonical selection required"
+      ],
+      "test_external_authentication_contract": [
+        "full canonical selection required"
+      ],
+      "test_external_resolution": [
+        "full canonical selection required"
+      ],
+      "test_external_revalidation": [
+        "full canonical selection required"
+      ],
+      "test_field_fixture_isolation": [
+        "full canonical selection required"
+      ],
+      "test_finding_invalidated_closure": [
+        "full canonical selection required"
+      ],
+      "test_first_publish_confirm_evidence": [
+        "full canonical selection required"
+      ],
+      "test_fixture_style_authority": [
+        "full canonical selection required"
+      ],
+      "test_fixture_support": [
+        "full canonical selection required"
+      ],
+      "test_foreign_observation_authority": [
+        "full canonical selection required"
+      ],
+      "test_foreign_owner_terminal_route": [
+        "full canonical selection required"
+      ],
+      "test_freebuff_operator_provenance": [
+        "full canonical selection required"
+      ],
+      "test_generation_migration": [
+        "full canonical selection required"
+      ],
+      "test_gpu_lane": [
+        "full canonical selection required"
+      ],
+      "test_guard_admission": [
+        "full canonical selection required"
+      ],
+      "test_guard_events": [
+        "full canonical selection required"
+      ],
+      "test_guard_execution_reachability": [
+        "full canonical selection required"
+      ],
+      "test_guard_hostile_matrix": [
+        "full canonical selection required"
+      ],
+      "test_guard_root_parity": [
+        "full canonical selection required"
+      ],
+      "test_guard_surface_parity": [
+        "full canonical selection required"
+      ],
+      "test_handoff_archive_cross_repo": [
+        "full canonical selection required"
+      ],
+      "test_hermetic_env": [
+        "full canonical selection required"
+      ],
+      "test_host_authority_broker": [
+        "full canonical selection required"
+      ],
+      "test_host_fixture": [
+        "full canonical selection required"
+      ],
+      "test_host_launch_net": [
+        "full canonical selection required"
+      ],
+      "test_hostile_wave_regressions": [
+        "full canonical selection required"
+      ],
+      "test_hush_runtime": [
+        "full canonical selection required"
+      ],
+      "test_improve_error_boundary": [
+        "full canonical selection required"
+      ],
+      "test_improve_gate": [
+        "full canonical selection required"
+      ],
+      "test_improve_reconcile": [
+        "full canonical selection required"
+      ],
+      "test_improve_resolve_report_path": [
+        "full canonical selection required"
+      ],
+      "test_ingress_authority": [
+        "full canonical selection required"
+      ],
+      "test_inject_digest": [
+        "full canonical selection required"
+      ],
+      "test_install_drift": [
+        "full canonical selection required"
+      ],
+      "test_install_identity_doctor": [
+        "full canonical selection required"
+      ],
+      "test_instruction_home_parity": [
+        "full canonical selection required"
+      ],
+      "test_intent_audit_fixes": [
+        "full canonical selection required"
+      ],
+      "test_journal_nested_targets": [
+        "full canonical selection required"
+      ],
+      "test_knowledge": [
+        "full canonical selection required"
+      ],
+      "test_ledger_gap": [
+        "full canonical selection required"
+      ],
+      "test_legacy_lifecycle_compat": [
+        "full canonical selection required"
+      ],
+      "test_log_detail_evidence": [
+        "full canonical selection required"
+      ],
+      "test_log_normalize": [
+        "full canonical selection required"
+      ],
+      "test_log_stamp_guard": [
+        "full canonical selection required"
+      ],
+      "test_log_tail_quarantine": [
+        "full canonical selection required"
+      ],
+      "test_log_ticket_slot": [
+        "full canonical selection required"
+      ],
+      "test_metadata_repair": [
+        "full canonical selection required"
+      ],
+      "test_metrics_acceptance": [
+        "full canonical selection required"
+      ],
+      "test_module_duplication_guard": [
+        "full canonical selection required"
+      ],
+      "test_narrative_authority": [
+        "full canonical selection required"
+      ],
+      "test_native_host_guard": [
+        "full canonical selection required"
+      ],
+      "test_nested_source_binding": [
+        "full canonical selection required"
+      ],
+      "test_no_publish_source_scope": [
+        "full canonical selection required"
+      ],
+      "test_opencode_adapter": [
+        "full canonical selection required"
+      ],
+      "test_opencode_bound_launch_smoke": [
+        "full canonical selection required"
+      ],
+      "test_opencode_host_smoke": [
+        "full canonical selection required"
+      ],
+      "test_opencode_launch_binding": [
+        "full canonical selection required"
+      ],
+      "test_opencode_live_evaluator": [
+        "full canonical selection required"
+      ],
+      "test_opencode_live_session": [
+        "full canonical selection required"
+      ],
+      "test_operator_ingress_matrix": [
+        "full canonical selection required"
+      ],
+      "test_operator_origin_support": [
+        "full canonical selection required"
+      ],
+      "test_operator_task_witness": [
+        "full canonical selection required"
+      ],
+      "test_orchestration_repair": [
+        "full canonical selection required"
+      ],
+      "test_outbox_write_time_bar": [
+        "full canonical selection required"
+      ],
+      "test_pending_ingress": [
+        "full canonical selection required"
+      ],
+      "test_portable_floor_fields": [
+        "full canonical selection required"
+      ],
+      "test_producer_gate_policy": [
+        "full canonical selection required"
+      ],
+      "test_producer_terminal_consistency": [
+        "full canonical selection required"
+      ],
+      "test_project_root_session_binding": [
+        "full canonical selection required"
+      ],
+      "test_protocol_admission": [
+        "full canonical selection required"
+      ],
+      "test_protocol_registry": [
+        "full canonical selection required"
+      ],
+      "test_public_closure_cli": [
+        "full canonical selection required"
+      ],
+      "test_public_install_lifecycle": [
+        "full canonical selection required"
+      ],
+      "test_reconcile_history_ledger_blocked": [
+        "full canonical selection required"
+      ],
+      "test_reconcile_legacy_output_field": [
+        "full canonical selection required"
+      ],
+      "test_reconcile_valve": [
+        "full canonical selection required"
+      ],
+      "test_recover_approved_repair": [
+        "full canonical selection required"
+      ],
+      "test_recovered_attribution": [
+        "full canonical selection required"
+      ],
+      "test_recovery_noop_targets": [
+        "full canonical selection required"
+      ],
+      "test_recovery_reachability": [
+        "full canonical selection required"
+      ],
+      "test_refusal_registry": [
+        "full canonical selection required"
+      ],
+      "test_refusal_routes": [
+        "full canonical selection required"
+      ],
+      "test_regression_gate": [
+        "full canonical selection required"
+      ],
+      "test_release_provenance": [
+        "full canonical selection required"
+      ],
+      "test_remediation_self_consistency": [
+        "full canonical selection required"
+      ],
+      "test_repeated_cc": [
+        "full canonical selection required"
+      ],
+      "test_request_clause_closure": [
+        "full canonical selection required"
+      ],
+      "test_response_delivery": [
+        "full canonical selection required"
+      ],
+      "test_response_digest": [
+        "full canonical selection required"
+      ],
+      "test_response_fact_binding": [
+        "full canonical selection required"
+      ],
+      "test_response_surface_contract": [
+        "full canonical selection required"
+      ],
+      "test_retired_source_coverage": [
+        "full canonical selection required"
+      ],
+      "test_reverify": [
+        "full canonical selection required"
+      ],
+      "test_reverify_timeout_and_route": [
+        "full canonical selection required"
+      ],
+      "test_router_closure_readiness": [
+        "full canonical selection required"
+      ],
+      "test_runner": [
+        "full canonical selection required"
+      ],
+      "test_runner_failure_roster": [
+        "full canonical selection required"
+      ],
+      "test_runtime_bootstrap": [
+        "full canonical selection required"
+      ],
+      "test_runtime_generation_identity": [
+        "full canonical selection required"
+      ],
+      "test_runtime_namespace": [
+        "full canonical selection required"
+      ],
+      "test_sailearn_consumer": [
+        "full canonical selection required"
+      ],
+      "test_saipen_metrics": [
+        "full canonical selection required"
+      ],
+      "test_saitranslate_charter_namespace": [
+        "full canonical selection required"
+      ],
+      "test_sandbox_work_surface": [
+        "full canonical selection required"
+      ],
+      "test_scenario_runner_isolation": [
+        "full canonical selection required"
+      ],
+      "test_search_transport": [
+        "full canonical selection required"
+      ],
+      "test_self_resolving_gates": [
+        "full canonical selection required"
+      ],
+      "test_session_binding": [
+        "full canonical selection required"
+      ],
+      "test_settled_projection": [
+        "full canonical selection required"
+      ],
+      "test_source_contract_derivation": [
+        "full canonical selection required"
+      ],
+      "test_source_multiwork": [
+        "full canonical selection required"
+      ],
+      "test_source_quarantine_route": [
+        "full canonical selection required"
+      ],
+      "test_source_receipts": [
+        "full canonical selection required"
+      ],
+      "test_source_refusal_routing": [
+        "full canonical selection required"
+      ],
+      "test_source_retirement": [
+        "full canonical selection required"
+      ],
+      "test_src085_conformance_disposition": [
+        "full canonical selection required"
+      ],
+      "test_src085_improve_run_body": [
+        "full canonical selection required"
+      ],
+      "test_storage_artifacts": [
+        "full canonical selection required"
+      ],
+      "test_storage_lost_registry": [
+        "full canonical selection required"
+      ],
+      "test_storage_policy": [
+        "full canonical selection required"
+      ],
+      "test_style_contract_chokepoint": [
+        "full canonical selection required"
+      ],
+      "test_sub_dispose_after_collect": [
+        "full canonical selection required"
+      ],
+      "test_subprocess_utf8": [
+        "full canonical selection required"
+      ],
+      "test_supervisor": [
+        "full canonical selection required"
+      ],
+      "test_t1173_empty_intent_normalization": [
+        "full canonical selection required"
+      ],
+      "test_t119_stale_complete_exit": [
+        "full canonical selection required"
+      ],
+      "test_t1238_release_commit_publication": [
+        "full canonical selection required"
+      ],
+      "test_t1277_source_dry_run_parity": [
+        "full canonical selection required"
+      ],
+      "test_t1278_closure_contradiction": [
+        "full canonical selection required"
+      ],
+      "test_t1282_op_id_resolution": [
+        "full canonical selection required"
+      ],
+      "test_t1283_lineage_legacy_ingest": [
+        "full canonical selection required"
+      ],
+      "test_t1286_crew_probe": [
+        "full canonical selection required"
+      ],
+      "test_t1287_audit_empty_scope": [
+        "full canonical selection required"
+      ],
+      "test_t1287_build_directive_grammar": [
+        "full canonical selection required"
+      ],
+      "test_t1293_valve_resume_audit_route": [
+        "full canonical selection required"
+      ],
+      "test_t1304_r004_dry_run_purity": [
+        "full canonical selection required"
+      ],
+      "test_t1304_r004_transition": [
+        "full canonical selection required"
+      ],
+      "test_t1304_r005_verifier_boundary": [
+        "full canonical selection required"
+      ],
+      "test_t1304_r006_boundary_refusals": [
+        "full canonical selection required"
+      ],
+      "test_t1304_r009_settled_wiring": [
+        "full canonical selection required"
+      ],
+      "test_t1304_r011_empty_selection": [
+        "full canonical selection required"
+      ],
+      "test_t1304_review_p0_repair": [
+        "full canonical selection required"
+      ],
+      "test_t1316_recovery_already_applied": [
+        "full canonical selection required"
+      ],
+      "test_t1326_board_compaction": [
+        "full canonical selection required"
+      ],
+      "test_t1327_live_acceptance": [
+        "full canonical selection required"
+      ],
+      "test_t1327_zero_manual_recovery": [
+        "full canonical selection required"
+      ],
+      "test_t1363_zero_manual_entry": [
+        "full canonical selection required"
+      ],
+      "test_t1374_detail_ref_export": [
+        "full canonical selection required"
+      ],
+      "test_t1383_ticket_add_route": [
+        "full canonical selection required"
+      ],
+      "test_t1386_canonical_payload": [
+        "full canonical selection required"
+      ],
+      "test_t1387_scratch_one_answer": [
+        "full canonical selection required"
+      ],
+      "test_t1389_foreign_delta_adoption": [
+        "full canonical selection required"
+      ],
+      "test_t1398_ingress_shell_operator": [
+        "full canonical selection required"
+      ],
+      "test_t1401_saipen_grammar_answer": [
+        "full canonical selection required"
+      ],
+      "test_t1402_readonly_reporters": [
+        "full canonical selection required"
+      ],
+      "test_t1407_structural_log_compaction": [
+        "full canonical selection required"
+      ],
+      "test_t1411_stale_complete_resolution": [
+        "full canonical selection required"
+      ],
+      "test_t1412_conformance_truth": [
+        "full canonical selection required"
+      ],
+      "test_t1429_deferred_due": [
+        "full canonical selection required"
+      ],
+      "test_t1430_crew_run_receipt": [
+        "full canonical selection required"
+      ],
+      "test_t1434_cross_shape_index": [
+        "full canonical selection required"
+      ],
+      "test_t1442_family_env": [
+        "full canonical selection required"
+      ],
+      "test_t1445_failure_field_scope": [
+        "full canonical selection required"
+      ],
+      "test_t1446_auto_recall": [
+        "full canonical selection required"
+      ],
+      "test_t1446_duplicate_ingress": [
+        "full canonical selection required"
+      ],
+      "test_t1446_supervise": [
+        "full canonical selection required"
+      ],
+      "test_t1452_manifest_authority": [
+        "full canonical selection required"
+      ],
+      "test_t1453_ingress_clause": [
+        "full canonical selection required"
+      ],
+      "test_t1454_distribution_blocker": [
+        "full canonical selection required"
+      ],
+      "test_t1457_ingress_obligation": [
+        "full canonical selection required"
+      ],
+      "test_t1458_queue_reservation": [
+        "full canonical selection required"
+      ],
+      "test_t1460_consumed_ingress": [
+        "full canonical selection required"
+      ],
+      "test_t1461_source_append": [
+        "full canonical selection required"
+      ],
+      "test_t1464_matrix_acceptance": [
+        "full canonical selection required"
+      ],
+      "test_t1465_budget_line_ends": [
+        "full canonical selection required"
+      ],
+      "test_t1472_core_unit_shards": [
+        "full canonical selection required"
+      ],
+      "test_t1473_handback": [
+        "full canonical selection required"
+      ],
+      "test_t1474_start_goal_entry": [
+        "full canonical selection required"
+      ],
+      "test_t1475_host_hook_payload": [
+        "full canonical selection required"
+      ],
+      "test_t1476_retired_source_livelock": [
+        "full canonical selection required"
+      ],
+      "test_t1478_fixture_clock": [
+        "full canonical selection required"
+      ],
+      "test_t1479_core_unit_consistent_copy": [
+        "full canonical selection required"
+      ],
+      "test_t147_generation_exit_behind_style_drift": [
+        "full canonical selection required"
+      ],
+      "test_t1484_soak_report_survives": [
+        "full canonical selection required"
+      ],
+      "test_t1487_claim_handoff": [
+        "full canonical selection required"
+      ],
+      "test_t148_sweep_historical_bar": [
+        "full canonical selection required"
+      ],
+      "test_t1494_continuation_authority": [
+        "full canonical selection required"
+      ],
+      "test_t1497_turn_entry_telegrams": [
+        "full canonical selection required"
+      ],
+      "test_t149_reverify_run_records_its_directory": [
+        "full canonical selection required"
+      ],
+      "test_t1500_claim_continuity": [
+        "full canonical selection required"
+      ],
+      "test_t1501_entry_resolver": [
+        "full canonical selection required"
+      ],
+      "test_t1502_ui_aa_contract": [
+        "full canonical selection required"
+      ],
+      "test_t1504_zaicode_adapter": [
+        "full canonical selection required"
+      ],
+      "test_t1505_core_unit_sandbox_reclaim": [
+        "full canonical selection required"
+      ],
+      "test_t1506_xpatch_survival": [
+        "full canonical selection required"
+      ],
+      "test_t1508_byte_bound_attributes": [
+        "full canonical selection required"
+      ],
+      "test_t150_legacy_generation_evidence_boundary": [
+        "full canonical selection required"
+      ],
+      "test_t1511_soak_source_identity": [
+        "full canonical selection required"
+      ],
+      "test_t1513_argv_unconsumed_quotes": [
+        "full canonical selection required"
+      ],
+      "test_t1514_portable_history_evidence": [
+        "full canonical selection required"
+      ],
+      "test_t1515_posix_shell_entry": [
+        "full canonical selection required"
+      ],
+      "test_t1516_portable_receipts": [
+        "full canonical selection required"
+      ],
+      "test_t1517_reverify_integrity": [
+        "full canonical selection required"
+      ],
+      "test_t1518_crew_banner": [
+        "full canonical selection required"
+      ],
+      "test_t1519_settled_index": [
+        "full canonical selection required"
+      ],
+      "test_t151_foreign_receipt_cannot_erase_a_sibling_verdict": [
+        "full canonical selection required"
+      ],
+      "test_t1527_runtime_provenance": [
+        "full canonical selection required"
+      ],
+      "test_t152_t154_a_red_gate_names_the_repair_that_resolves_it": [
+        "full canonical selection required"
+      ],
+      "test_t1533_terminal_handback": [
+        "full canonical selection required"
+      ],
+      "test_t1544_audit20": [
+        "full canonical selection required"
+      ],
+      "test_t1544_audit20_intake": [
+        "full canonical selection required"
+      ],
+      "test_t1544_audit20_perf": [
+        "full canonical selection required"
+      ],
+      "test_t1553_mid_session_activation": [
+        "full canonical selection required"
+      ],
+      "test_t1557_autonomy_sentinels": [
+        "full canonical selection required"
+      ],
+      "test_t1557_mail_binding": [
+        "full canonical selection required"
+      ],
+      "test_t1557_sub_style_contract": [
+        "full canonical selection required"
+      ],
+      "test_t1561_probe_fixture": [
+        "full canonical selection required"
+      ],
+      "test_t1563_authority_minting": [
+        "full canonical selection required"
+      ],
+      "test_t1568_opencode_chat_style": [
+        "full canonical selection required"
+      ],
+      "test_t1571_lint_surface": [
+        "full canonical selection required"
+      ],
+      "test_t1572_ticket_scoped_recovery": [
+        "full canonical selection required"
+      ],
+      "test_t1574_followups": [
+        "full canonical selection required"
+      ],
+      "test_t1575_parallel_lane": [
+        "full canonical selection required"
+      ],
+      "test_t1576_efficiency_kpi": [
+        "full canonical selection required"
+      ],
+      "test_t1577_op_id_provenance": [
+        "full canonical selection required"
+      ],
+      "test_t1578_restore_owner": [
+        "full canonical selection required"
+      ],
+      "test_t1581_phase_rename_knowledge": [
+        "full canonical selection required"
+      ],
+      "test_t1582_sweep_skip_reason": [
+        "full canonical selection required"
+      ],
+      "test_t1584_production_zcode_boundary": [
+        "full canonical selection required"
+      ],
+      "test_t1585_amnesty_control": [
+        "full canonical selection required"
+      ],
+      "test_t1586_scenario_inputs": [
+        "full canonical selection required"
+      ],
+      "test_t1587_stale_closure_recovery": [
+        "full canonical selection required"
+      ],
+      "test_t1592_manifest_orphan_advice": [
+        "full canonical selection required"
+      ],
+      "test_t1598_stale_claim_next_action": [
+        "full canonical selection required"
+      ],
+      "test_t1608_collect_verb_route": [
+        "full canonical selection required"
+      ],
+      "test_t1609_unproven_done_recovery": [
+        "full canonical selection required"
+      ],
+      "test_t1612_accidental_success_reproduction": [
+        "full canonical selection required"
+      ],
+      "test_t1613_publication_convergence": [
+        "full canonical selection required"
+      ],
+      "test_t1614_future_gate": [
+        "full canonical selection required"
+      ],
+      "test_t1617_release_surface_ignores_gitignore": [
+        "full canonical selection required"
+      ],
+      "test_t1618_future_maturation": [
+        "full canonical selection required"
+      ],
+      "test_t1619_goal_terminality": [
+        "full canonical selection required"
+      ],
+      "test_t1619_iteration_boundary": [
+        "full canonical selection required"
+      ],
+      "test_t1620_historical_counts": [
+        "full canonical selection required"
+      ],
+      "test_t1624_host_integration": [
+        "full canonical selection required"
+      ],
+      "test_t1627_operator_question": [
+        "full canonical selection required"
+      ],
+      "test_t1628_opencode_policy": [
+        "full canonical selection required"
+      ],
+      "test_t1631_argv_values": [
+        "full canonical selection required"
+      ],
+      "test_t1632_identifier_is_not_a_count": [
+        "full canonical selection required"
+      ],
+      "test_t1633_process_tree": [
+        "full canonical selection required"
+      ],
+      "test_t1635_claude_profiles": [
+        "full canonical selection required"
+      ],
+      "test_t1636_invalid_carrier": [
+        "full canonical selection required"
+      ],
+      "test_t1638_future_ingress": [
+        "full canonical selection required"
+      ],
+      "test_t1640_board_scrub": [
+        "full canonical selection required"
+      ],
+      "test_t1640_log_seal": [
+        "full canonical selection required"
+      ],
+      "test_t1641_gate_ownership": [
+        "full canonical selection required"
+      ],
+      "test_t1642_history_notes": [
+        "full canonical selection required"
+      ],
+      "test_t1645_zero_hunt": [
+        "full canonical selection required"
+      ],
+      "test_t1647_machine_runtime": [
+        "full canonical selection required"
+      ],
+      "test_t1648_transient_replace_lock": [
+        "full canonical selection required"
+      ],
+      "test_t1649_refusal_step": [
+        "full canonical selection required"
+      ],
+      "test_t1650_retired_host_image": [
+        "full canonical selection required"
+      ],
+      "test_t1651_executor_admission": [
+        "full canonical selection required"
+      ],
+      "test_t1654_project_block": [
+        "full canonical selection required"
+      ],
+      "test_t1655_file_mode": [
+        "full canonical selection required"
+      ],
+      "test_t1656_operator_readability": [
+        "full canonical selection required"
+      ],
+      "test_t1657_refused_reply_preserved": [
+        "full canonical selection required"
+      ],
+      "test_t1658_suite_record": [
+        "full canonical selection required"
+      ],
+      "test_t1659_run_window": [
+        "full canonical selection required"
+      ],
+      "test_t1661_suite_projection": [
+        "full canonical selection required"
+      ],
+      "test_t1662_repository_interlock": [
+        "full canonical selection required"
+      ],
+      "test_t1663_ticket_requires": [
+        "full canonical selection required"
+      ],
+      "test_t1665_guard_verbs": [
+        "full canonical selection required"
+      ],
+      "test_t1666_receipt_close": [
+        "full canonical selection required"
+      ],
+      "test_t1667_clean_compaction": [
+        "full canonical selection required"
+      ],
+      "test_t1668_durable_stores_ship": [
+        "full canonical selection required"
+      ],
+      "test_t1669_clean_done_projection": [
+        "full canonical selection required"
+      ],
+      "test_t1670_route_budgets": [
+        "full canonical selection required"
+      ],
+      "test_t1671_lifecycle_authority": [
+        "full canonical selection required"
+      ],
+      "test_t1673_board_only_terminal": [
+        "full canonical selection required"
+      ],
+      "test_t1674_typed_closure_mode": [
+        "full canonical selection required"
+      ],
+      "test_t1676_lifecycle_code": [
+        "full canonical selection required"
+      ],
+      "test_t1678_path_launcher": [
+        "full canonical selection required"
+      ],
+      "test_t1679_typed_head_quarantine": [
+        "full canonical selection required"
+      ],
+      "test_t1681_release_closure_op": [
+        "full canonical selection required"
+      ],
+      "test_t1683_launcher_profile": [
+        "full canonical selection required"
+      ],
+      "test_t1684_operand_grammar": [
+        "full canonical selection required"
+      ],
+      "test_t1685_profile_carrier": [
+        "full canonical selection required"
+      ],
+      "test_t1686_launch_policy": [
+        "full canonical selection required"
+      ],
+      "test_t1687_identity_diagnostics": [
+        "full canonical selection required"
+      ],
+      "test_t1688_stale_plugin_guard": [
+        "full canonical selection required"
+      ],
+      "test_t1690_profile_isolation": [
+        "full canonical selection required"
+      ],
+      "test_t1704_goal_checkpoint_priority": [
+        "full canonical selection required"
+      ],
+      "test_t1704_legacy_goal_authority": [
+        "full canonical selection required"
+      ],
+      "test_t1705_lifecycle_write_preflight": [
+        "full canonical selection required"
+      ],
+      "test_t1707_regression_chronology": [
+        "full canonical selection required"
+      ],
+      "test_t1708_regression_declaration": [
+        "full canonical selection required"
+      ],
+      "test_t1709_audit_starvation": [
+        "full canonical selection required"
+      ],
+      "test_t1712_manifest_runtime": [
+        "full canonical selection required"
+      ],
+      "test_t1715_block_for_parent_guard": [
+        "full canonical selection required"
+      ],
+      "test_t1718_acceptance_contract": [
+        "full canonical selection required"
+      ],
+      "test_t1721_acceptance_compaction": [
+        "full canonical selection required"
+      ],
+      "test_t1726_closed_contracts": [
+        "full canonical selection required"
+      ],
+      "test_t1726_contract_oracle": [
+        "full canonical selection required"
+      ],
+      "test_t1729_gate_decision_lifecycle": [
+        "full canonical selection required"
+      ],
+      "test_t1729_operator_gate": [
+        "full canonical selection required"
+      ],
+      "test_t1732_protocol_hardening": [
+        "full canonical selection required"
+      ],
+      "test_t1734_source_drift": [
+        "full canonical selection required"
+      ],
+      "test_t1735_tool_failure_boundaries": [
+        "full canonical selection required"
+      ],
+      "test_t1736_tool_safety_and_evidence": [
+        "full canonical selection required"
+      ],
+      "test_t1739_wait_boundary": [
+        "full canonical selection required"
+      ],
+      "test_t1742_pipeline_shell_probe": [
+        "full canonical selection required"
+      ],
+      "test_t1743_cross_user_dead_ends": [
+        "full canonical selection required"
+      ],
+      "test_t1744_fleet_foreign_field_skew": [
+        "full canonical selection required"
+      ],
+      "test_t1745_sub_collect_foreign_field": [
+        "full canonical selection required"
+      ],
+      "test_t1746_crew_terminal_outcome": [
+        "full canonical selection required"
+      ],
+      "test_t1747_degraded_profile": [
+        "full canonical selection required"
+      ],
+      "test_t1748_worker_clock": [
+        "full canonical selection required"
+      ],
+      "test_t1749_project_root_subject": [
+        "full canonical selection required"
+      ],
+      "test_t1751_reconcile_surfaces": [
+        "full canonical selection required"
+      ],
+      "test_t1752_audit_auto_close": [
+        "full canonical selection required"
+      ],
+      "test_t1753_activation_launcher": [
+        "full canonical selection required"
+      ],
+      "test_t1757_claim_follows_route": [
+        "full canonical selection required"
+      ],
+      "test_t1758_closure_cycle": [
+        "full canonical selection required"
+      ],
+      "test_t1759_single_lifecycle_observer": [
+        "full canonical selection required"
+      ],
+      "test_t1760_no_git_ccc_marker": [
+        "full canonical selection required"
+      ],
+      "test_t1761_recovery_reaches_a_typed_duplicate": [
+        "full canonical selection required"
+      ],
+      "test_t1762_control_count_scope": [
+        "full canonical selection required"
+      ],
+      "test_t1765_finding_subtypes": [
+        "full canonical selection required"
+      ],
+      "test_t1767_usage_line": [
+        "full canonical selection required"
+      ],
+      "test_t1770_pair_stage_scope": [
+        "full canonical selection required"
+      ],
+      "test_t1771_measure_then_finish": [
+        "full canonical selection required"
+      ],
+      "test_t1772_empty_draft_exit": [
+        "full canonical selection required"
+      ],
+      "test_t1774_sweep_queue_human": [
+        "full canonical selection required"
+      ],
+      "test_t1775_continue_never_admits_a_seat": [
+        "full canonical selection required"
+      ],
+      "test_t1776_protocol_home_valve": [
+        "full canonical selection required"
+      ],
+      "test_t1778_continue_closes_source": [
+        "full canonical selection required"
+      ],
+      "test_t1779_family_ignores_inbox": [
+        "full canonical selection required"
+      ],
+      "test_t1781_t37_latest_build": [
+        "full canonical selection required"
+      ],
+      "test_t1782_capped_builder_identifier": [
+        "full canonical selection required"
+      ],
+      "test_t1784_dry_run_verdict": [
+        "full canonical selection required"
+      ],
+      "test_t1785_dry_run_human": [
+        "full canonical selection required"
+      ],
+      "test_t1786_cli_first_activation": [
+        "full canonical selection required"
+      ],
+      "test_t1787_parked_brief": [
+        "full canonical selection required"
+      ],
+      "test_t1789_child_closure_route": [
+        "full canonical selection required"
+      ],
+      "test_t1790_dependency_route_budget": [
+        "full canonical selection required"
+      ],
+      "test_t1792_auto_doctor": [
+        "full canonical selection required"
+      ],
+      "test_t1801_missing_audit_settlement": [
+        "full canonical selection required"
+      ],
+      "test_t1803_archived_improve": [
+        "full canonical selection required"
+      ],
+      "test_t1807_audit_liveness_regression": [
+        "full canonical selection required"
+      ],
+      "test_t1815_header_repair": [
+        "full canonical selection required"
+      ],
+      "test_t1815_stale_work_context": [
+        "full canonical selection required"
+      ],
+      "test_t1816_protected_root_hold": [
+        "full canonical selection required"
+      ],
+      "test_t1816_provenance_inventory": [
+        "full canonical selection required"
+      ],
+      "test_t1816_run_append_only": [
+        "full canonical selection required"
+      ],
+      "test_t1816_run_provenance": [
+        "full canonical selection required"
+      ],
+      "test_t1817_acceptance_bar": [
+        "full canonical selection required"
+      ],
+      "test_t1817_closure_outcomes": [
+        "full canonical selection required"
+      ],
+      "test_t1817_diagnostic_ownership": [
+        "full canonical selection required"
+      ],
+      "test_t1817_finding_ownership": [
+        "full canonical selection required"
+      ],
+      "test_t1817_finding_route": [
+        "full canonical selection required"
+      ],
+      "test_t1817_handoff_artifacts": [
+        "full canonical selection required"
+      ],
+      "test_t1821_markdown_surface": [
+        "full canonical selection required"
+      ],
+      "test_t1822_carrier_binding": [
+        "full canonical selection required"
+      ],
+      "test_t1826_declared_budgets": [
+        "full canonical selection required"
+      ],
+      "test_t1827_writer_lock_contract": [
+        "full canonical selection required"
+      ],
+      "test_t1828_verification_policy": [
+        "full canonical selection required"
+      ],
+      "test_t1829_publication_boundary": [
+        "full canonical selection required"
+      ],
+      "test_t1830_verification_observations": [
+        "full canonical selection required"
+      ],
+      "test_t1831_cleanup_fixture_cost": [
+        "full canonical selection required"
+      ],
+      "test_t1832_single_flight": [
+        "full canonical selection required"
+      ],
+      "test_t1833_verification_owner": [
+        "full canonical selection required"
+      ],
+      "test_t1834_tool_call_identity": [
+        "full canonical selection required"
+      ],
+      "test_t1835_verification_economics": [
+        "full canonical selection required"
+      ],
+      "test_t1836_verification_impact": [
+        "full canonical selection required"
+      ],
+      "test_t1837_ci_family_parity": [
+        "full canonical selection required"
+      ],
+      "test_t1839_cohort_reconciliation": [
+        "full canonical selection required"
+      ],
+      "test_t1840_external_renewal": [
+        "full canonical selection required"
+      ],
+      "test_t1844_authority_preview": [
+        "full canonical selection required"
+      ],
+      "test_t1844_goal_turns": [
+        "full canonical selection required"
+      ],
+      "test_t1844_operator_origin": [
+        "full canonical selection required"
+      ],
+      "test_t1844_origin_broker": [
+        "full canonical selection required"
+      ],
+      "test_t1844_source_event": [
+        "full canonical selection required"
+      ],
+      "test_t1847_fixture_contract": [
+        "full canonical selection required"
+      ],
+      "test_t1849_external_git_environment": [
+        "full canonical selection required"
+      ],
+      "test_t1850_freebuff_diagnostics": [
+        "full canonical selection required"
+      ],
+      "test_t1851_debt_authority": [
+        "full canonical selection required"
+      ],
+      "test_t1853_dispatch_admission": [
+        "full canonical selection required"
+      ],
+      "test_t1854_runtime_home": [
+        "full canonical selection required"
+      ],
+      "test_t1855_compound_policy": [
+        "full canonical selection required"
+      ],
+      "test_t1856_launcher_identity": [
+        "full canonical selection required"
+      ],
+      "test_t1857_budget_owner": [
+        "full canonical selection required"
+      ],
+      "test_t1857_shared_blockers": [
+        "full canonical selection required"
+      ],
+      "test_t1858_valve_guidance": [
+        "full canonical selection required"
+      ],
+      "test_t1859_zaicode_seal": [
+        "full canonical selection required"
+      ],
+      "test_t1861_registry_import_coupling": [
+        "full canonical selection required"
+      ],
+      "test_t1862_readiness": [
+        "full canonical selection required"
+      ],
+      "test_t1864_autonomous_valve": [
+        "full canonical selection required"
+      ],
+      "test_t1865_launcher_identity": [
+        "full canonical selection required"
+      ],
+      "test_t1866_publication_state": [
+        "full canonical selection required"
+      ],
+      "test_t1867_completion_grammar": [
+        "full canonical selection required"
+      ],
+      "test_t1868_zaicode_ingress": [
+        "full canonical selection required"
+      ],
+      "test_t1872_drift_prevention": [
+        "full canonical selection required"
+      ],
+      "test_t1873_protrail_drift": [
+        "full canonical selection required"
+      ],
+      "test_t1874_wintage_drift": [
+        "full canonical selection required"
+      ],
+      "test_t1875_maintenance_wiring": [
+        "full canonical selection required"
+      ],
+      "test_t1876_parallel_cleanup": [
+        "full canonical selection required"
+      ],
+      "test_t1879_manifest_staging_states": [
+        "full canonical selection required"
+      ],
+      "test_t1880_wait_survives_phase_shortcut": [
+        "full canonical selection required"
+      ],
+      "test_t1881_authority_brake": [
+        "full canonical selection required"
+      ],
+      "test_t1881_publication_prohibition": [
+        "full canonical selection required"
+      ],
+      "test_t1882_future_publication_inventory": [
+        "full canonical selection required"
+      ],
+      "test_t1883_reconcile_causality": [
+        "full canonical selection required"
+      ],
+      "test_t1884_transition_blocker_inheritance": [
+        "full canonical selection required"
+      ],
+      "test_t1885_tag_peel": [
+        "full canonical selection required"
+      ],
+      "test_t1886_gate_lock_window": [
+        "full canonical selection required"
+      ],
+      "test_t1888_object_store": [
+        "full canonical selection required"
+      ],
+      "test_t1889_sandbox_scope": [
+        "full canonical selection required"
+      ],
+      "test_t1891_freshness_parser": [
+        "full canonical selection required"
+      ],
+      "test_t1892_one_decoder": [
+        "full canonical selection required"
+      ],
+      "test_t1893_probe_wrappers": [
+        "full canonical selection required"
+      ],
+      "test_t1897_manifest_findings": [
+        "full canonical selection required"
+      ],
+      "test_t1898_lineage_recovery": [
+        "full canonical selection required"
+      ],
+      "test_t1900_git_listing_boundary": [
+        "full canonical selection required"
+      ],
+      "test_t1902_parallel_source_sampling": [
+        "full canonical selection required"
+      ],
+      "test_t1903_lean_receipt_projection": [
+        "full canonical selection required"
+      ],
+      "test_t1908_duplicate_settlement": [
+        "full canonical selection required"
+      ],
+      "test_t1909_unauthenticated_evidence_diagnostics": [
+        "full canonical selection required"
+      ],
+      "test_t1910_log_input_diagnostics": [
+        "full canonical selection required"
+      ],
+      "test_t1911_native_origin_diagnostics": [
+        "full canonical selection required"
+      ],
+      "test_t1912_redelivery_origin_reconciliation": [
+        "full canonical selection required"
+      ],
+      "test_t1913_hook_deadline": [
+        "full canonical selection required"
+      ],
+      "test_t1913_origin_recovery": [
+        "full canonical selection required"
+      ],
+      "test_t1914_installed_runtime_parity": [
+        "full canonical selection required"
+      ],
+      "test_t1915_terminal_next_action": [
+        "full canonical selection required"
+      ],
+      "test_t1916_continuation_discipline": [
+        "full canonical selection required"
+      ],
+      "test_t1916_external_delta": [
+        "full canonical selection required"
+      ],
+      "test_t1917_premature_handback": [
+        "full canonical selection required"
+      ],
+      "test_t1924_src330_acceptance": [
+        "full canonical selection required"
+      ],
+      "test_t1926_zc_owners_matrix": [
+        "full canonical selection required"
+      ],
+      "test_t1927_sp_owners_matrix": [
+        "full canonical selection required"
+      ],
+      "test_t1931_campaign_lifecycle": [
+        "full canonical selection required"
+      ],
+      "test_t1931_saipal_boundary": [
+        "full canonical selection required"
+      ],
+      "test_t1932_campaign_authority": [
+        "full canonical selection required"
+      ],
+      "test_t1932_src338_closures": [
+        "full canonical selection required"
+      ],
+      "test_t1933_zaicode_goal_seal": [
+        "full canonical selection required"
+      ],
+      "test_t1934_deploy_staleness": [
+        "full canonical selection required"
+      ],
+      "test_t1935_zaicode_hook_ownership": [
+        "full canonical selection required"
+      ],
+      "test_t1936_launch_account_list": [
+        "full canonical selection required"
+      ],
+      "test_t1937_future_slice_closure": [
+        "full canonical selection required"
+      ],
+      "test_t1938_invalidated_slice_closure": [
+        "full canonical selection required"
+      ],
+      "test_t1939_needs_detach": [
+        "full canonical selection required"
+      ],
+      "test_t1942_regression_pair": [
+        "full canonical selection required"
+      ],
+      "test_t1943_adapter_artifact_tracking": [
+        "full canonical selection required"
+      ],
+      "test_t1943_campaign_scope_roundtrip": [
+        "full canonical selection required"
+      ],
+      "test_t1943_goal_objective_binding": [
+        "full canonical selection required"
+      ],
+      "test_t1944_core_wave1": [
+        "full canonical selection required"
+      ],
+      "test_t1944_perf_wave": [
+        "full canonical selection required"
+      ],
+      "test_t1944_wave2": [
+        "full canonical selection required"
+      ],
+      "test_t1945_analysis_progress": [
+        "full canonical selection required"
+      ],
+      "test_t1945_campaign_driver": [
+        "full canonical selection required"
+      ],
+      "test_t1945_host_trust": [
+        "full canonical selection required"
+      ],
+      "test_t1945_incremental_discovery": [
+        "full canonical selection required"
+      ],
+      "test_t1949_hook_validator_status": [
+        "full canonical selection required"
+      ],
+      "test_t1951_install_residue": [
+        "full canonical selection required"
+      ],
+      "test_t38_improve_cycle_liveness": [
+        "full canonical selection required"
+      ],
+      "test_t923_crew_invalid_role_errors": [
+        "full canonical selection required"
+      ],
+      "test_t925_sub_terminal_durability": [
+        "full canonical selection required"
+      ],
+      "test_telemetry": [
+        "full canonical selection required"
+      ],
+      "test_ticket_add_regression": [
+        "full canonical selection required"
+      ],
+      "test_ticket_supersession": [
+        "full canonical selection required"
+      ],
+      "test_ticket_verify_preimage": [
+        "full canonical selection required"
+      ],
+      "test_tool_module_identity": [
+        "full canonical selection required"
+      ],
+      "test_unknown_tool_fail_closed": [
+        "full canonical selection required"
+      ],
+      "test_user_wait_release": [
+        "full canonical selection required"
+      ],
+      "test_userperson_global": [
+        "full canonical selection required"
+      ],
+      "test_v7_producer_parallelism": [
+        "full canonical selection required"
+      ],
+      "test_vacterro_t36_checkpoint_usage_taxonomy": [
+        "full canonical selection required"
+      ],
+      "test_vacterro_t37_no_delta_closure": [
+        "full canonical selection required"
+      ],
+      "test_validator_findings": [
+        "full canonical selection required"
+      ],
+      "test_validator_layout_parity": [
+        "full canonical selection required"
+      ],
+      "test_verification_grammar": [
+        "full canonical selection required"
+      ],
+      "test_verify_oracle": [
+        "full canonical selection required"
+      ],
+      "test_verify_scope_isolation": [
+        "full canonical selection required"
+      ],
+      "test_vocabulary_parity": [
+        "full canonical selection required"
+      ],
+      "test_warn_ownership_probe": [
+        "full canonical selection required"
+      ],
+      "test_watchdog": [
+        "full canonical selection required"
+      ],
+      "test_work_reverify_cli": [
+        "full canonical selection required"
+      ],
+      "test_worker_turnover": [
+        "full canonical selection required"
+      ],
+      "test_xpatch": [
+        "full canonical selection required"
+      ],
+      "test_xpatch_controls": [
+        "full canonical selection required"
+      ]
+    },
+    "unknown_coverage": [
+      "tools/saipen_engine/release.py: verification/fixture/protocol or unknown source boundary",
+      "tools/test_t1750_release_boundary.py: verification/fixture/protocol or unknown source boundary"
+    ],
+    "escalation_reasons": [
+      "tools/saipen_engine/release.py: verification/fixture/protocol or unknown source boundary",
+      "tools/test_t1750_release_boundary.py: verification/fixture/protocol or unknown source boundary"
+    ],
+    "source_inventory_sha256": "34171b2f2469d2a4d9d3e91d767ea7f07afd5f88d821bc7d050a754dda5f22ea",
+    "dependency_information": "closed static domain only; no dynamic completeness assumed",
+    "dependency_scan_complete": false,
+    "scanned_dependency_modules": [],
+    "dependency_files": {},
+    "early_full_escalation": true,
+    "historical_failure_policy": "historical failures never justify omitting coverage",
+    "escalation_requirements": [
+      "FULL unit family"
+    ],
+    "contracts": [
+      "canonical unit discovery and fixtures",
+      "import failures always selected",
+      "focused evidence remains distinct from full publication evidence"
+    ]
+  },
+  "detail": "impact coverage is not a certified subset; no verification was executed",
+  "required_command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "tools/core_unit.py",
+    "evidence",
+    "T-1962",
+    "--project-root",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
+  ]
+}

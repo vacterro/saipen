@@ -1,0 +1,14 @@
+test_optional_explicit_launch_is_checked_and_does_not_leak (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_optional_explicit_launch_is_checked_and_does_not_leak) ... FAIL
+
+======================================================================
+FAIL: test_optional_explicit_launch_is_checked_and_does_not_leak (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_optional_explicit_launch_is_checked_and_does_not_leak)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_opencode_bound_launch_smoke.py", line 409, in test_optional_explicit_launch_is_checked_and_does_not_leak
+    self.assertTrue(
+AssertionError: False is not true : [{'tools': [], 'prior': [], 'child': False}, {'tools': ['bash', 'edit', 'glob', 'grep', 'read', 'skill', 'task', 'todowrite', 'webfetch', 'websearch', 'write'], 'prior': [], 'child': False}, {'tools': ['bash', 'edit', 'glob', 'grep', 'read', 'skill', 'task', 'todowrite', 'webfetch', 'websearch', 'write'], 'prior': [{'role': 'tool', 'tool_call_id': 'call_bound_0', 'content': "SAIPEN_GUARD_REFUSAL: TARGET_UNRESOLVED: the saipen guard refused tool 'write'; the host tool did not execute"}], 'child': False}]
+
+----------------------------------------------------------------------
+Ran 1 test in 48.302s
+
+FAILED (failures=1)

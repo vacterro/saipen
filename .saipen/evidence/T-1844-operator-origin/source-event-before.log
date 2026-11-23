@@ -1,0 +1,124 @@
+======================================================================
+FAIL: test_append_caller_preserves_the_native_event_with_an_explicit_project (test_t1844_source_event.SourceEventTests.test_append_caller_preserves_the_native_event_with_an_explicit_project)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 242, in test_append_caller_preserves_the_native_event_with_an_explicit_project
+    self.assertTrue(OT.authority_for_receipt(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_body_only_crash_adopts_the_orphan_after_an_older_event (test_t1844_source_event.SourceEventTests.test_body_only_crash_adopts_the_orphan_after_an_older_event)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 124, in test_body_only_crash_adopts_the_orphan_after_an_older_event
+    self.assertFalse(failed["ok"], failed)
+AssertionError: True is not false : {'ok': True, 'code': 'SOURCE_DUPLICATE', 'receipt': 'SRC-001', 'source_sha256': 'f5e8cb4bd2d5c64faba4533733b6869d948bc6355e0b7a21151033c2b391a59d', 'status': 'ACTIVE', 'linked_work': None, 'coverage': {'receipt': 'SRC-001', 'requirements': 0, 'actionable': 0, 'terminal': 0, 'dispositions': {}, 'unresolved': []}, 'distribution': {'state': 'DISTRIBUTABLE', 'receipt_id': 'SRC-001', 'source_sha256': 'f5e8cb4bd2d5c64faba4533733b6869d948bc6355e0b7a21151033c2b391a59d'}}
+
+======================================================================
+FAIL: test_bound_goal_retry_finds_its_event_after_an_earlier_model_source (test_t1844_source_event.SourceEventTests.test_bound_goal_retry_finds_its_event_after_an_earlier_model_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 266, in test_bound_goal_retry_finds_its_event_after_an_earlier_model_source
+    self.assertTrue(second.ok, second.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'goal authorization source is invalid, revoked or not operator-backed'}
+
+======================================================================
+FAIL: test_captured_request_cannot_substitute_its_source_body (test_t1844_source_event.SourceEventTests.test_captured_request_cannot_substitute_its_source_body)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 216, in test_captured_request_cannot_substitute_its_source_body
+    self.assertIn("source_receipt", inspect.signature(operations.user_request).parameters,
+AssertionError: 'source_receipt' not found in mappingproxy(OrderedDict([('project_root', <Parameter "project_root: 'Path | str'">), ('agent', <Parameter "agent: 'str'">), ('text', <Parameter "text: 'str'">), ('priority', <Parameter "priority: 'str' = 'P1'">), ('verify', <Parameter "verify: 'str | None' = None">), ('needs', <Parameter "needs: 'list[str] | None' = None">), ('dry_run', <Parameter "dry_run: 'bool' = False">), ('supersedes', <Parameter "supersedes: 'str | None' = None">), ('supersede_ingress', <Parameter "supersede_ingress: 'bool' = False">)])) : START must be able to project its already bound canonical Source
+
+======================================================================
+FAIL: test_closed_other_event_does_not_shadow_a_new_native_source (test_t1844_source_event.SourceEventTests.test_closed_other_event_does_not_shadow_a_new_native_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 183, in test_closed_other_event_does_not_shadow_a_new_native_source
+    self.assertNotEqual(self.capture(second), old)
+AssertionError: 'SRC-001' == 'SRC-001'
+
+======================================================================
+FAIL: test_corrupt_orphan_metadata_cannot_be_silently_ignored (test_t1844_source_event.SourceEventTests.test_corrupt_orphan_metadata_cannot_be_silently_ignored)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 158, in test_corrupt_orphan_metadata_cannot_be_silently_ignored
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'code': 'ORPHAN_RECEIPT_RECOVERED', 'receipt': 'SRC-001', 'source_sha256': 'f5e8cb4bd2d5c64faba4533733b6869d948bc6355e0b7a21151033c2b391a59d', 'status': 'ACTIVE', 'linked_work': None, 'duplicate': False, 'requirements': 0, 'sensitive': False, 'redaction': {'applied': False, 'authoritative': False, 'original_sha256': 'f5e8cb4bd2d5c64faba4533733b6869d948bc6355e0b7a21151033c2b391a59d', 'sanitized_sha256': 'f5e8cb4bd2d5c64faba4533733b6869d948bc6355e0b7a21151033c2b391a59d'}, 'source_authority': {'mode': 'exact', 'original_available': True, 'body_sha256': 'f5e8cb4bd2d5c64faba4533733b6869d948bc6355e0b7a21151033c2b391a59d'}, 'distribution': {'state': 'DISTRIBUTABLE', 'receipt_id': 'SRC-001', 'source_sha256': 'f5e8cb4bd2d5c64faba4533733b6869d948bc6355e0b7a21151033c2b391a59d'}, 'detail': None}
+
+======================================================================
+FAIL: test_different_native_events_with_identical_text_keep_distinct_sources (test_t1844_source_event.SourceEventTests.test_different_native_events_with_identical_text_keep_distinct_sources)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 69, in test_different_native_events_with_identical_text_keep_distinct_sources
+    self.assertNotEqual(a, b)
+AssertionError: 'SRC-001' == 'SRC-001'
+
+======================================================================
+FAIL: test_event_probe_selects_the_later_matching_receipt_without_writing (test_t1844_source_event.SourceEventTests.test_event_probe_selects_the_later_matching_receipt_without_writing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 102, in test_event_probe_selects_the_later_matching_receipt_without_writing
+    self.assertIn("request_provenance", inspect.signature(intake.find_by_body).parameters,
+AssertionError: 'request_provenance' not found in mappingproxy(OrderedDict([('root', <Parameter "root: 'Path | str'">), ('body', <Parameter "body: 'str'">)])) : the read-only probe must distinguish operator events with identical bytes
+
+======================================================================
+FAIL: test_expired_native_source_is_not_automatically_retracted_as_model_fabrication (test_t1844_source_event.SourceEventTests.test_expired_native_source_is_not_automatically_retracted_as_model_fabrication)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 298, in test_expired_native_source_is_not_automatically_retracted_as_model_fabrication
+    self.assertIsNotNone(problem, "expiry is not evidence of a false historical projection")
+AssertionError: unexpectedly None : expiry is not evidence of a false historical projection
+
+======================================================================
+FAIL: test_metadata_crash_preserves_event_identity_before_index_recovery (test_t1844_source_event.SourceEventTests.test_metadata_crash_preserves_event_identity_before_index_recovery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 141, in test_metadata_crash_preserves_event_identity_before_index_recovery
+    self.assertEqual(orphan.read_bytes(), original)
+AssertionError: b'{\n[70 chars]2026-10-21T08:34:33Z",\n  "redaction": {\n    [1820 chars]n}\n' != b'{\n[70 chars]2026-01-01T00:00:00Z",\n  "redaction": {\n    [1815 chars]n}\n'
+
+======================================================================
+FAIL: test_model_labelled_copy_of_a_real_proof_cannot_shadow_the_native_source (test_t1844_source_event.SourceEventTests.test_model_labelled_copy_of_a_real_proof_cannot_shadow_the_native_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 91, in test_model_labelled_copy_of_a_real_proof_cannot_shadow_the_native_source
+    self.assertNotEqual(current, old["receipt"])
+AssertionError: 'SRC-001' == 'SRC-001'
+
+======================================================================
+FAIL: test_model_retry_never_borrows_an_earlier_native_event (test_t1844_source_event.SourceEventTests.test_model_retry_never_borrows_an_earlier_native_event)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 77, in test_model_retry_never_borrows_an_earlier_native_event
+    self.assertNotEqual(untrusted, original)
+AssertionError: 'SRC-001' == 'SRC-001'
+
+======================================================================
+FAIL: test_new_native_event_preserves_earlier_model_source_and_its_own_retries (test_t1844_source_event.SourceEventTests.test_new_native_event_preserves_earlier_model_source_and_its_own_retries)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 58, in test_new_native_event_preserves_earlier_model_source_and_its_own_retries
+    self.assertNotEqual(current, old)
+AssertionError: 'SRC-001' == 'SRC-001'
+
+======================================================================
+FAIL: test_response_and_decision_queries_never_bind_an_unused_source (test_t1844_source_event.SourceEventTests.test_response_and_decision_queries_never_bind_an_unused_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 323, in test_response_and_decision_queries_never_bind_an_unused_source
+    self.assertFalse(response_surface.human_response_authority(
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_user_request_uses_its_independent_root_for_native_event_verification (test_t1844_source_event.SourceEventTests.test_user_request_uses_its_independent_root_for_native_event_verification)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-source-event-pair-z5mf995m\before\tools\test_t1844_source_event.py", line 211, in test_user_request_uses_its_independent_root_for_native_event_verification
+    self.assertTrue(result.data["user_explicit"], result.to_dict())
+AssertionError: False is not true : {'ok': True, 'code': 'USER_REQUEST_RECORDED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'user request captured as SRC-001 and projected as T-1', 'receipt': 'SRC-001', 'ticket': 'T-1', 'user_explicit': False, 'next_action': 'PHASE SCOUT T-1', 'event_id': 'E-2'}
+
+----------------------------------------------------------------------
+Ran 18 tests in 2.007s
+
+FAILED (failures=15)

@@ -1,0 +1,123 @@
+======================================================================
+FAIL: test_alias_loader_supports_runpy (tools.test_tool_module_identity.ToolModuleIdentityTests.test_alias_loader_supports_runpy)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 119, in test_alias_loader_supports_runpy
+    self.probe("""
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 24, in probe
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<string>", line 7, in <module>
+AssertionError
+
+
+======================================================================
+FAIL: test_concurrent_alias_waits_for_the_same_initialized_object (tools.test_tool_module_identity.ToolModuleIdentityTests.test_concurrent_alias_waits_for_the_same_initialized_object)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 175, in test_concurrent_alias_waits_for_the_same_initialized_object
+    self.probe('''
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 24, in probe
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<string>", line 28, in <module>
+AssertionError
+
+
+======================================================================
+FAIL: test_dotted_first_reuses_the_mutable_cli_object (tools.test_tool_module_identity.ToolModuleIdentityTests.test_dotted_first_reuses_the_mutable_cli_object)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 58, in test_dotted_first_reuses_the_mutable_cli_object
+    self.probe("""
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 24, in probe
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<string>", line 8, in <module>
+AssertionError: CLI file executed twice
+
+
+======================================================================
+FAIL: test_failed_import_cleans_both_names_before_retry (tools.test_tool_module_identity.ToolModuleIdentityTests.test_failed_import_cleans_both_names_before_retry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 142, in test_failed_import_cleans_both_names_before_retry
+    self.probe('''
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 24, in probe
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<string>", line 14, in <module>
+AssertionError
+
+
+======================================================================
+FAIL: test_flat_first_reuses_the_mutable_cli_object (tools.test_tool_module_identity.ToolModuleIdentityTests.test_flat_first_reuses_the_mutable_cli_object)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 45, in test_flat_first_reuses_the_mutable_cli_object
+    self.probe("""
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 24, in probe
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<string>", line 8, in <module>
+AssertionError: CLI file executed twice
+
+
+======================================================================
+FAIL: test_flat_import_after_tools_binds_the_package_attribute (tools.test_tool_module_identity.ToolModuleIdentityTests.test_flat_import_after_tools_binds_the_package_attribute)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 83, in test_flat_import_after_tools_binds_the_package_attribute
+    self.probe("""
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 24, in probe
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+AssertionError
+
+
+======================================================================
+FAIL: test_flat_test_module_and_dotted_test_module_share_identity (tools.test_tool_module_identity.ToolModuleIdentityTests.test_flat_test_module_and_dotted_test_module_share_identity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 73, in test_flat_test_module_and_dotted_test_module_share_identity
+    self.probe("""
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 24, in probe
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<string>", line 7, in <module>
+AssertionError: test harness executed twice
+
+
+======================================================================
+FAIL: test_reload_reexecutes_owned_source_once (tools.test_tool_module_identity.ToolModuleIdentityTests.test_reload_reexecutes_owned_source_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 215, in test_reload_reexecutes_owned_source_once
+    self.probe('''
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_tool_module_identity.py", line 24, in probe
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+AssertionError
+
+
+======================================================================
+FAIL: test_the_mixed_form_shares_every_loaded_file (tools.test_module_duplication_guard.DeclaredHarnessTests.test_the_mixed_form_shares_every_loaded_file)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-evidence-t1348-review-pair-7690o2ig\original\tools\test_module_duplication_guard.py", line 119, in test_the_mixed_form_shares_every_loaded_file
+    self.assertEqual(report["duplicated"], [], report)
+AssertionError: Lists differ: ['tools/test_guard_hostile_matrix.py', 'tools/test_hermetic_env.py'] != []
+
+First list contains 2 additional elements.
+First extra element 0:
+'tools/test_guard_hostile_matrix.py'
+
+- ['tools/test_guard_hostile_matrix.py', 'tools/test_hermetic_env.py']
++ [] : {'loaded': 33, 'duplicated': ['tools/test_guard_hostile_matrix.py', 'tools/test_hermetic_env.py']}
+
+----------------------------------------------------------------------
+Ran 35 tests in 6.222s
+
+FAILED (failures=9)

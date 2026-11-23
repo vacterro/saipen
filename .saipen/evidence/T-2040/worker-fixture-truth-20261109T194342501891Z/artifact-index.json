@@ -1,0 +1,269 @@
+{
+  "observed_at": "2026-11-09T20:03:43.711796+00:00",
+  "task": "T-2040",
+  "owned_files": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1446_supervise.py",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1748_worker_clock.py",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_worker_turnover.py"
+  ],
+  "before_tests": 44,
+  "before_failures": 14,
+  "after_tests": 44,
+  "after_failures": 0,
+  "after_returncodes": [
+    0,
+    0,
+    0
+  ],
+  "production_edits_performed": false,
+  "additional_fixture_script_edits_performed": false,
+  "direct_saipen_commands_performed": false,
+  "existing_fixture_cli": "The requested unchanged ColdTurnoverTests restart-observation test invokes tools/saipen.py autonomy against its disposable project; no workspace CLI command was issued.",
+  "concurrent_change_note": "Coordinator confirmed restored implementation hashes before final runs; later reported ongoing production work. Final observation found operations.py and live STATE/BOARD/LOG changed versus initial hashes. This task never wrote those paths and did not revert them.",
+  "before_replay_caveat": "Baseline began near coordinator replay window. Restored-production snapshot matched every initial production hash; subsequent finish diagnostic reproduced INCOMPLETE_DISCOVERY. Final owned-module runs started after explicit restoration confirmation.",
+  "module_counts": [
+    {
+      "module": "test_t1446_supervise",
+      "before_tests": 30,
+      "before_failures": 10,
+      "after_tests": 30,
+      "after_failures": 0,
+      "after_errors": 0,
+      "after_skips": 0
+    },
+    {
+      "module": "test_t1748_worker_clock",
+      "before_tests": 5,
+      "before_failures": 3,
+      "after_tests": 5,
+      "after_failures": 0,
+      "after_errors": 0,
+      "after_skips": 0
+    },
+    {
+      "module": "test_worker_turnover",
+      "before_tests": 9,
+      "before_failures": 1,
+      "after_tests": 9,
+      "after_failures": 0,
+      "after_errors": 0,
+      "after_skips": 0
+    }
+  ],
+  "negative_controls": {
+    "early": "returncode=1; clock 1.2 not greater than 2.5",
+    "disabled": "returncode=1; slow_progress_slices 0 != 1"
+  },
+  "artifacts": [
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-git-status.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-git-status.stdout.log",
+      "bytes": 5779849,
+      "sha256": "065873a6c19f0334abf98aa1994bfb96d10a93b260aa74aa2dce8bf9908214b6"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-owned-diff.stderr.log",
+      "bytes": 247,
+      "sha256": "35ca2e9728e68731599f5635991be29447f05ca83a4ed2e2360052f2ffa36a6f"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-owned-diff.stdout.log",
+      "bytes": 9848,
+      "sha256": "e80b42613f15c1b9890f905fddfdbfa5d5b330ff2ba409a147170404062eac4b"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-probe-disabled.stderr.log",
+      "bytes": 1039,
+      "sha256": "616f88326adbb6b3d281bbeaa33739700ea7d39885ef058f6632daa350d9fd47"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-probe-disabled.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-probe-early.stderr.log",
+      "bytes": 1056,
+      "sha256": "d7cd498a3adcce88ed08df1d11246b1ce2f5ccfb2589799f765d1b51ae302248"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-probe-early.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-probe-results.json",
+      "bytes": 2832,
+      "sha256": "b1b8cbad4f243f0bf171a0eaf41527fddcedc37327533a3a95c13f3247002a87"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-test_t1446_supervise.stderr.log",
+      "bytes": 4635,
+      "sha256": "3405fd00c4372b9d80357e6105f7ecc6b5bd8eb9a37dad8dba1ee2d386b20059"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-test_t1446_supervise.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-test_t1748_worker_clock.stderr.log",
+      "bytes": 901,
+      "sha256": "418ec4b6892858dbfe6d1bc610aaeec147ec43f4c5a9e0efb01261d4c5ae6e90"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-test_t1748_worker_clock.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-test_worker_turnover.stderr.log",
+      "bytes": 1540,
+      "sha256": "577f783c1e716366bea442a20af122b81627eab7f46a897f9c337e33f133df6e"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\after-test_worker_turnover.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-git-status.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-git-status.stdout.log",
+      "bytes": 5775585,
+      "sha256": "43327c08240d8feaa6154206767068bed31d7c8c7bb584dcdb3922d8df3ecd09"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-head.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-head.stdout.log",
+      "bytes": 41,
+      "sha256": "d8c88d1ec2580f102e61e2c2040b6e5cfc4a2ebd6030ecd701a90c24e92f5e96"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-owned-diff.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-owned-diff.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-results.json",
+      "bytes": 1548,
+      "sha256": "d9745d4f2f073ddb2d25e42f2e2dd4b1b02bea2921a067c2268a032dac7594a6"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-test_t1446_supervise.stderr.log",
+      "bytes": 23242,
+      "sha256": "163d19ac4ccb4eac6e58939708aa9aab224bc0592a6d8459fc15548b935d0c04"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-test_t1446_supervise.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-test_t1748_worker_clock.stderr.log",
+      "bytes": 5881,
+      "sha256": "ab6bb811138473677f8209f6f6a56e09eab41a76aac0577b49d48b256d35261b"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-test_t1748_worker_clock.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-test_worker_turnover.stderr.log",
+      "bytes": 2177,
+      "sha256": "1d31b89d7bf9deb2205abe80a94e650f3fd2368240441635a9a33bd9e9fc67f6"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\before-test_worker_turnover.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\changed-assertions.json",
+      "bytes": 14922,
+      "sha256": "8addc7335428eeaf8b3c79d07ebeb4fc34935e0c2181490a18d434b540d831dd"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\diff-check.stderr.log",
+      "bytes": 247,
+      "sha256": "35ca2e9728e68731599f5635991be29447f05ca83a4ed2e2360052f2ffa36a6f"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\diff-check.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\manifest.json",
+      "bytes": 45528,
+      "sha256": "330845a0e5156488efa6c4c432df544cb4dc37c742e91b2ff3c627033b1b0e80"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\postimages\\tools\\test_t1446_supervise.py",
+      "bytes": 30021,
+      "sha256": "66c47843a58257ca2b202181255f870bbfb2b89d2f608d25a4c0dc60e16fe1bb"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\postimages\\tools\\test_t1748_worker_clock.py",
+      "bytes": 5278,
+      "sha256": "3f809c279fcac164743d294743f484c248830b65c0936e305911e24cf1dd418d"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\postimages\\tools\\test_worker_turnover.py",
+      "bytes": 14159,
+      "sha256": "bd72aa9b81603308bfadafa47fba297c8471ec299420e41243e5c797ab835395"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\preimage-to-current.diff",
+      "bytes": 9616,
+      "sha256": "3154c3ce2a7c5ee81bc8b440498997e6c621de497bfaa6fee0deed0d542cf849"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\preimages\\tools\\test_t1446_supervise.py",
+      "bytes": 28701,
+      "sha256": "a521322271a3dd82a7bdbf1cef1d73b237f79813015467b14fb4795f00be7a68"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\preimages\\tools\\test_t1748_worker_clock.py",
+      "bytes": 5222,
+      "sha256": "dc3120d4eac798a6286a199965c8834f474c306e386b6164309453d600e70835"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\preimages\\tools\\test_worker_turnover.py",
+      "bytes": 13262,
+      "sha256": "e58057bc6620c51c1f7ad7006ca90bc0db962715e4f4866fbae6336eebe5b685"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\restored-finish-diagnostic.json",
+      "bytes": 23936,
+      "sha256": "cb2677e7070db81a3d1350408f47e3d1f1a67da40d53ca613bb43e4204e791a4"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\restored-production.json",
+      "bytes": 20628,
+      "sha256": "fdcd4d2aa7e6b9971312f490b497045030c039b191cb138d3dfaccfc788edbc2"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z\\verification.json",
+      "bytes": 8177,
+      "sha256": "416ff688503ae111ba58046f47ca8af4f284ca44f5491bbb52f84baaab7380fe"
+    }
+  ]
+}

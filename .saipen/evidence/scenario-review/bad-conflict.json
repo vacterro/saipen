@@ -1,0 +1,25 @@
+{
+  "label": "bad-conflict",
+  "verifier_sha256": "3918c1b07d3f0e155fc27df1e679983656ee05a8772f4b0455d9ff6d8d20e46f",
+  "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\run_scenarios.py",
+  "subject_sha256": "786e69f7d96cf857ad0383dcae62484a0a3906104491c72ab9d6d56ec07b638b",
+  "production_sha256": {
+    "tools/saipen_engine/operations.py": "bb4d9c95fa10643d2bc829a1a5c972589ae3ef7e8b3eed1551ad8cd8db2c8728",
+    "tools/saipen_engine/operator_task.py": "3027b1341bea2caa2e2c8756c3490598cf74a33ff552f0ff9161e1c33a959d91",
+    "tools/saipen_engine/journal.py": "096328a58ae817d6a67328fb6d5b7e8e6ce9487d333029558954be215f939d9e",
+    "tools/test_fixture_support.py": "10831ae72daf5a4c80fd54a8f337228c682adfe70b95f9a08f89fef865f9ce36"
+  },
+  "checks": 191,
+  "failures": 1,
+  "controls": [
+    {
+      "function": "run_nitro_integrity_probes",
+      "checked": 191,
+      "failures": [
+        "conflict inspect reports the conflicting location read-only: {'ok': True, 'op_id': 'op-t592', 'operation': 'checkpoint', 'status': 'CONFLICT', 'created_at': '2026-10-03T13:44:12Z', 'agent': 'probe', 'verification_policy': 'core_fast', 'read_dependencies': {}, 'targets': [{'path': '.saipen/LOG.md', 'role': 'log', 'action': 'write', 'applied': True, 'expected_before': '825a7de161a2208a', 'planned_after': 'e94019f16bcc3523', 'current': 'e94019f16bcc3523', 'conflicts': False}, {'path': '.saipen/STATE.md', 'role': 'state', 'action': 'write', 'applied': False, 'expected_before': '494ae9cfd71342a6', 'planned_after': '08238528815eec02', 'current': '546a71ddbbfd0a11', 'conflicts': True}], 'conflicting_locations': ['.saipen/STATE.md'], 'staged_identity': 'h', 'safe_resolution_classes': ['accept_live', 'replan'], 'code': 'CONFLICT_INSPECT'}"
+      ],
+      "extra": []
+    }
+  ],
+  "seconds": 70.453
+}

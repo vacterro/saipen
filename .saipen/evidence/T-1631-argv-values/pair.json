@@ -1,0 +1,10 @@
+{
+  "verifier": "bc612a368dadc5e2",
+  "pre_subject": "43dc09847fe30cab",
+  "post_subject": "4ad469c22dcced5f",
+  "pre_rc": 1,
+  "post_rc": 0,
+  "control_rc": 0,
+  "held": true,
+  "command": "python -B -m unittest test_t1631_argv_values"
+}

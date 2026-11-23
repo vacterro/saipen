@@ -1,0 +1,66 @@
+{
+  "ok": true,
+  "code": "VALID",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 0,
+    "summary": "s fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [log-soft-cap]: .saipen/LOG.md is 572 lines / 204 KB, past the 300 line / 64 KB cap -- `saipen transition CLEAN` seals it into the next .saipen/logs/LOG-<NNN>.md (phases/clean.md step 4)\nWARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-051] carries source_head '025bf596c683464788ab698248e8a3c5eb44dfec' but current source_head is '3373fe9f455c092a865f75f93102fdaf40c64920' -- package is stale and MUST NOT be collected -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else\nWARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-051] carries source_tree_fingerprint 'git-delta-v1:f6e0d3683fdd49081fb91414517c6da180255dc0af9c762a9570fd6ca474418f' but the current tree computes 'git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else\nWARN [subsaipen-uncollected]: 1 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)\nWARN [changelog-unarchived]: CHANGELOG.md carries 13 version entries while it states it keeps the most recent ~10 -- the overflow belongs in CHANGELOG_ARCHIVE.md, moved verbatim the way LOG segments are sealed, so the top of the file stays the part anyone actually reads\nWARN [release-ledger]: 2 release(s) have a CHANGELOG entry but no git tag: v8.0.2, v8.1.1\nValidation complete. Agent is conformant. (8 warning(s))"
+  },
+  "conformance_status": {
+    "status": "CURRENT_PASS",
+    "gate": "core",
+    "stale_reason": null,
+    "reason": "",
+    "retry_blocked": false,
+    "retry_fingerprint": null,
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 0,
+        "problems": [],
+        "ruleset_fingerprint": "9a47d608ed3f3a833348aaeeca5cd9e9076f3bf53b1ef92b6ade46958e3e3fec",
+        "ruleset_version": 2,
+        "status": "complete",
+        "warning_count": 8
+      },
+      "board_hash": "eec85c94d28b268e",
+      "canonical_next_command": null,
+      "content_hash": "be88f4d187788b63",
+      "exit_code": 0,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:c3cdc23620f8598d38e7343aaa03fae109bb87f9624c8b5439c33be27c4075b4",
+      "install_home": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source",
+      "kind": "conformance_receipt",
+      "log_hash": "73ee58e2d1545198",
+      "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+      "receipt_id": "receipt-1a78ef7c2f02",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "3373fe9f455c092a865f75f93102fdaf40c64920",
+      "source_tree_fingerprint": "git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195",
+      "state_hash": "beadbdd799177d45",
+      "timestamp_utc": "2026-11-22T03:54:44.290423Z",
+      "validator_protocol_version": "1",
+      "verdict": "PASS"
+    },
+    "validator": {
+      "validator_path": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "3373fe9f455c092a865f75f93102fdaf40c64920",
+      "source_tree_fingerprint": "git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195"
+    }
+  },
+  "install_identity": {
+    "running_home": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source",
+    "persisted_home": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source",
+    "install_fingerprint": "install-v1:c3cdc23620f8598d38e7343aaa03fae109bb87f9624c8b5439c33be27c4075b4",
+    "persisted_fingerprint": "install-v1:c3cdc23620f8598d38e7343aaa03fae109bb87f9624c8b5439c33be27c4075b4",
+    "status": "MATCH",
+    "mismatch": null
+  },
+  "detail": "canonical STATE/BOARD/LOG pass the structural gate and the canonical validator minted a CURRENT_PASS conformance receipt"
+}

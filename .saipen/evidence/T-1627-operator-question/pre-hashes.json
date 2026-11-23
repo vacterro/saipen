@@ -1,0 +1,12 @@
+{
+  "tools/saipen.py": "0e9ff6ca5180a9efc29833b92fe10ab046512c19a54c30a3128fb389a25af290",
+  "tools/saipen_engine/guard_events.py": "212e10a9329f92dfbafece8cfc59ab0908d18db576d48b400be05497235ab87d",
+  "tools/saipen_engine/response_surface.py": "7f55b101f2e4c5dde95a3f89df2500fa4631af2834a2632806f78925be5a3b38",
+  "tools/install_host_guard.py": "d7686eefb110caa4b37cbed7d2a4a0270c8f926395d8b6d40789f74d2179b62d",
+  "extensions/adapters/opencode/saipen-guard.js": "2d11f967f79ddd5c43531c34ec5870527a73e62220f059572921a6b86db0a7fa",
+  "extensions/adapters/claude/saipen-guard.py": "b7f15de8a689c0419da72cbfe228814177eb3032212ba230e8daad48de639442",
+  "extensions/adapters/registry.json": "ba25eb7782edab713e68132c7ee38c6869d88557d615ef42707ed36607ad6cdb",
+  "saipen/EXECUTION.md": "a11e32a7531518b8ac1a32344211b964645fcde20edb4d729c5e0a92d8faa4b8",
+  "saipen/COMMANDS.md": "99ba659a112dc67cefdc012986565b90668e690e7897215d7342bd10a2ddd70f",
+  "saipen/REGISTRY.json": "84ce73e9d105cae766fb9dd87aeebd0a5c91f9aa79ee733ba9770081c8465cad"
+}

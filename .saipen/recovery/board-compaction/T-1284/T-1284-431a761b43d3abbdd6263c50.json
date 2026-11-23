@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-6221",
+    "operation_id": "board-compact-252febef9b62423faf6b0d2c034a9978",
+    "reason": "explicit canonical legacy BOARD compaction"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-1284/T-1284-431a761b43d3abbdd6263c50.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 1623,
+  "original_record_path": ".saipen/recovery/board-compaction/T-1284/T-1284-431a761b43d3abbdd6263c50.BOARD.md",
+  "original_record_sha256": "431a761b43d3abbdd6263c50868686e5139479a3c881614d60307f047d58a4e6",
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": "",
+  "ticket_id": "T-1284"
+}

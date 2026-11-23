@@ -1,0 +1,24 @@
+F.                                                                       [100%]
+================================== FAILURES ===================================
+____________ ClosedVocabulary.test_live_project_continues_with_cc _____________
+
+self = <test_automation_block.ClosedVocabulary testMethod=test_live_project_continues_with_cc>
+
+    def test_live_project_continues_with_cc(self) -> None:
+        routed = route_next(
+            _state(),
+            BOARD_EMPTY,
+            pending_ops=[],
+            conflict_ops=[],
+            audit_inbox=None,
+        )
+        block = self.block(routed=routed, audit_status=self.audit(), convergence=None)
+>       self.assertEqual(block["disposition"], CONTINUE)
+E       AssertionError: 'BLOCKED' != 'CONTINUE'
+E       - BLOCKED
+E       + CONTINUE
+
+tools\test_automation_block.py:201: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_automation_block.py::ClosedVocabulary::test_live_project_continues_with_cc
+1 failed, 1 passed, 36 deselected in 0.88s

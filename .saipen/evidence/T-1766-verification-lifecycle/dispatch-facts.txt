@@ -1,0 +1,10 @@
+== dispatch of the verbs the handoff reported as unknown (current tree, read-only)
+11462:        if action == "store" and len(args) == 8 and args[1] == "declare":
+14194:    if command in ("test", "tt"):
+14204:                and _command_mutates("test", args[1:])
+== how the usage line presents them
+== asked of the commands themselves, in a scratch project root that is not a project (no writes possible)
+saipen run -> PROJECT_BINDING_INVALID | explicit --project-root has no .saipen/ directory: V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\98f1cace-3e23-49ce-b727-73d52280490
+saipen declare -> PROJECT_BINDING_INVALID | explicit --project-root has no .saipen/ directory: V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\98f1cace-3e23-49ce-b727-73d52280490
+saipen test suite status -> PROJECT_BINDING_INVALID | explicit --project-root has no .saipen/ directory: V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\98f1cace-3e23-49ce-b727-73d52280490
+saipen work reverify -> PROJECT_BINDING_INVALID | explicit --project-root has no .saipen/ directory: V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\98f1cace-3e23-49ce-b727-73d52280490

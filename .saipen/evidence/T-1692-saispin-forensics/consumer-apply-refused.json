@@ -1,0 +1,7 @@
+{
+  "chunk_id": "4e3cc4",
+  "wall_time_seconds": 0.3809205,
+  "exit_code": 1,
+  "original_token_count": 115,
+  "output": "{\r\n  \"ok\": false,\r\n  \"code\": \"VALIDATION_FAILED\",\r\n  \"detail\": \"proposed state fails fast validation: FLOOR: STATE.task=T-271 but BOARD DOING has multiple openers at the raw floor; BOARD proposed has more than one ## DOING ticket; BOARD: T-273 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)\",\r\n  \"receipt\": \"SRC-093\"\r\n}\r\n"
+}

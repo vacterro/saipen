@@ -1,0 +1,57 @@
+{
+  "scope": "Actual complete SHIP/no-publish/borrowed-invariant code and route-budget diagnostic; not full conformance",
+  "outcomes": {
+    "original_good": {
+      "warnings": [],
+      "failures": []
+    },
+    "saved_bad": {
+      "warnings": [
+        "cross-doc drift [first-publish-order] -- phases/ship.md no longer names both the first-publish gate and the branch push; update tools/validate.py deliberately rather than letting the ordering check quietly stop checking",
+        "cross-doc drift [first-publish-order] -- phases/ship.md must classify the remote before any external write, so the first-publish gate is decided while everything is still local",
+        "cross-doc drift [ship-stage-before-gate] -- phases/ship.md no longer names the explicit staging step, the post-stage ship gate, or the exact-scope commit. Update tools/validate.py deliberately rather than letting the ordering check quietly stop checking",
+        "cross-doc drift [ship-stage-before-gate] -- phases/ship.md must forbid blind `git add .`/`git add -A` in the staging step. Staging by explicit path is what makes step 5's 'staged set equals reviewed scope' provable; a blind add stages whatever else the tree is carrying and the proof becomes a description of the accident (T-569)",
+        "cross-doc drift [tag-after-branch] -- phases/ship.md no longer names both the branch-landed gate and the tag push; update tools/validate.py deliberately rather than letting the ordering check quietly stop checking",
+        "cross-doc drift [ticket-stays-doing] -- phases/review.md no longer states that the passed ticket stays in `## DOING` through SHIP, or phases/ship.md no longer cites it. A ticket closed at REVIEW makes `PHASE SHIP T-###` name a `## DONE` ticket and fail the pick check twice over (E-1879, T-466); update tools/validate.py deliberately rather than letting the check quietly stop checking",
+        "cross-doc drift [borrowed-invariants] -- phases/verify.md must say the first failed MANDATORY gate ends the PASS claim, so a green from a higher rung cannot read as repairing a red one below it",
+        "cross-doc drift [borrowed-invariants] -- phases/verify.md must read the project's commands from KNOWLEDGE/ rather than re-deriving them, or executor and reviewer can each verify a different thing and both report green"
+      ],
+      "failures": [
+        "cross-doc drift [no-publish-split] -- phases/ship.md must say `no-publish` is a permission and not an absence of git, must record the real reason in the skipped-publish line rather than a hardcoded `no git`, and must keep the release step split into a LOCAL half and a GIT half. Fused, the block ordered a step that commits and pushes while calling it local, and told a mode that forbids committing to skip only the push"
+      ]
+    },
+    "current": {
+      "warnings": [
+        "cross-doc drift [first-publish-order] -- phases/ship.md no longer names both the first-publish gate and the branch push; update tools/validate.py deliberately rather than letting the ordering check quietly stop checking",
+        "cross-doc drift [first-publish-order] -- phases/ship.md must classify the remote before any external write, so the first-publish gate is decided while everything is still local",
+        "cross-doc drift [ship-stage-before-gate] -- phases/ship.md no longer names the explicit staging step, the post-stage ship gate, or the exact-scope commit. Update tools/validate.py deliberately rather than letting the ordering check quietly stop checking",
+        "cross-doc drift [ship-stage-before-gate] -- phases/ship.md must forbid blind `git add .`/`git add -A` in the staging step. Staging by explicit path is what makes step 5's 'staged set equals reviewed scope' provable; a blind add stages whatever else the tree is carrying and the proof becomes a description of the accident (T-569)",
+        "cross-doc drift [tag-after-branch] -- phases/ship.md no longer names both the branch-landed gate and the tag push; update tools/validate.py deliberately rather than letting the ordering check quietly stop checking",
+        "cross-doc drift [ticket-stays-doing] -- phases/review.md no longer states that the passed ticket stays in `## DOING` through SHIP, or phases/ship.md no longer cites it. A ticket closed at REVIEW makes `PHASE SHIP T-###` name a `## DONE` ticket and fail the pick check twice over (E-1879, T-466); update tools/validate.py deliberately rather than letting the check quietly stop checking",
+        "cross-doc drift [borrowed-invariants] -- phases/verify.md must say the first failed MANDATORY gate ends the PASS claim, so a green from a higher rung cannot read as repairing a red one below it",
+        "cross-doc drift [borrowed-invariants] -- phases/verify.md must read the project's commands from KNOWLEDGE/ rather than re-deriving them, or executor and reviewer can each verify a different thing and both report green"
+      ],
+      "failures": []
+    },
+    "proposal": {
+      "warnings": [],
+      "failures": []
+    }
+  },
+  "budget_errors": [],
+  "files": {
+    "COMMANDS.md": {
+      "sha256": "11936f29f40ae8387228bc1ead89e5babf58efdbbe3a3391c76d09780c97251d",
+      "lf_bytes": 23426
+    },
+    "phases/verify.md": {
+      "sha256": "3ea0e70188c1debb79a8499492be46f7300660a8cc46fb706ff4c2d76fd876f3",
+      "lf_bytes": 8826
+    },
+    "phases/ship.md": {
+      "sha256": "2517d5db54c7e4e337c5fe5510110d5ccb697dbfc2311cafa6b9a31911e8186d",
+      "lf_bytes": 6384
+    }
+  },
+  "validator_sha256": "23b39ab429ef6f9e5b1f2533579bd7120dd75c2fd98399431895967a1308f786"
+}

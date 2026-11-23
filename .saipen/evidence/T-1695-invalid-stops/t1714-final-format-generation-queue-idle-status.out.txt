@@ -1,0 +1,153 @@
+{
+  "ok": true,
+  "project_identity": "v:\\_temp_\\saipen-t1695-tu61ho2b\\queue-idle",
+  "protocol_version": "8.1.0",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "saipen continue",
+  "computed_next_action": "saipen source status",
+  "computed_reason": "queued-source-invalid",
+  "blocker": "none",
+  "execution_intent": null,
+  "claimed_ticket": null,
+  "top_workable_ticket": null,
+  "log_tail_event": 1,
+  "head": "",
+  "board_errors": [],
+  "recovery_pending": false,
+  "recovery_conflict": false,
+  "pending_ops": [],
+  "conflict_ops": [],
+  "goal_authority": {
+    "state": "inactive",
+    "detail": "No persistent grant",
+    "original_event": null,
+    "checkpoint_due": false
+  },
+  "milestone": {
+    "current": null,
+    "label": null,
+    "parent": null,
+    "undo_available": false,
+    "valid": true
+  },
+  "cold_route": {
+    "project_root": "V:\\_TEMP_\\saipen-t1695-tu61ho2b\\queue-idle",
+    "saipen_home": null,
+    "protocol_dir": null,
+    "phase": "DONE",
+    "phase_module": null,
+    "boot": null,
+    "style": null,
+    "documents": {},
+    "project_memory": {
+      "STATE.md": "V:\\_TEMP_\\saipen-t1695-tu61ho2b\\queue-idle\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\_TEMP_\\saipen-t1695-tu61ho2b\\queue-idle\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\_TEMP_\\saipen-t1695-tu61ho2b\\queue-idle\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  },
+  "distribution": {
+    "installed": 7,
+    "stale": 7,
+    "unknown": 2,
+    "fresh": false,
+    "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+    "newest_installed_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+    "last_run": {
+      "status": "skipped",
+      "skip": "DIRTY_SOURCE",
+      "rc": 2,
+      "dirty": [
+        "M bootstrap/inject.ps1",
+        "M bootstrap/inject.sh",
+        "M bootstrap/install_ownership.py",
+        "M bootstrap/uninstall.ps1",
+        "M bootstrap/uninstall.sh"
+      ],
+      "at": "2026-10-11 14:31:00",
+      "head": null,
+      "in_flight": false
+    },
+    "blocker": {
+      "condition": "DIRTY_SOURCE",
+      "blocked": true,
+      "detail": "215 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation",
+      "paths": [
+        "bootstrap/inject.ps1",
+        "bootstrap/inject.sh",
+        "bootstrap/install_ownership.py",
+        "bootstrap/uninstall.ps1",
+        "bootstrap/uninstall.sh",
+        "extensions/adapters/claude.md",
+        "extensions/adapters/claude/saipen-guard.py",
+        "extensions/adapters/codex.md"
+      ],
+      "path_count": 215,
+      "canonical_next_command": "git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit"
+    },
+    "published_head": null,
+    "publication": null,
+    "consumer_convergence": "CURRENT",
+    "pending_consumers": [],
+    "consumers_converged": false,
+    "requires_human": false,
+    "summary": "distribution: 7 of 7 home(s) stale -- newest installed head 025bf596c683 -- source head 025bf596c683 -- 2 home(s) carry no head -- last scheduled injection: skipped DIRTY_SOURCE at 2026-10-11 14:31:00 -- BLOCKED DIRTY_SOURCE: 215 injected-surface path(s) differ from HEAD; the scheduled injector refuses to publish an edited protocol, so every installed home stays on the last committed generation -- clears with: git add bootstrap/inject.ps1 bootstrap/inject.sh bootstrap/install_ownership.py bootstrap/uninstall.ps1 bootstrap/uninstall.sh extensions/adapters/claude.md extensions/adapters/claude/saipen-guard.py extensions/adapters/codex.md ... && git commit"
+  },
+  "staleness": "64d ago",
+  "conformance_status": {
+    "status": "NOT_RUN",
+    "gate": "core",
+    "reason": "no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS",
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "7",
+      "gate": "core",
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:15ec3c9ad4ee18e2d52249072695b5af94ad0903c0fc0fff1c8f9a745c67c89d"
+    },
+    "disposition": "UNPROVEN",
+    "remediation_command": "saipen validate",
+    "repair_status": "REFRESH_REQUIRED",
+    "diagnostic": null
+  },
+  "automation": {
+    "schema_version": 1,
+    "disposition": "INVALID",
+    "next_command": null,
+    "operator_action_due": false,
+    "reason_code": "queued-source-invalid",
+    "reason": "queued Source SRC-001 cannot be read (SRC-001: INVALID source body is not UTF-8); inspect the intake surface before treating the project as idle",
+    "audit_quiescent": true,
+    "audit_epoch": "audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40",
+    "convergence_current": false,
+    "closure_complete": false,
+    "source_fingerprint": "no-git+no-git-tree-v1:15ec3c9ad4ee18e2d52249072695b5af94ad0903c0fc0fff1c8f9a745c67c89d",
+    "completed_at": null
+  },
+  "conditional_efficiency_kpi": {
+    "scope": "session",
+    "ticket": null,
+    "percent": null,
+    "approximate": true,
+    "confidence": "UNKNOWN",
+    "formula_version": 1,
+    "components": {
+      "progress": null,
+      "rework": null,
+      "autonomy": null,
+      "human": null
+    },
+    "preliminary": true,
+    "withheld": "no ticket attribution; no session KPI is derived in formula v1"
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-t1695-tu61ho2b\\queue-idle --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat probe",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

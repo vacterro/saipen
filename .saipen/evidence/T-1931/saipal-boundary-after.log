@@ -1,0 +1,55 @@
+======================================================================
+ERROR: test_complete_history_preserves_all_records (test_t1931_saipal_boundary.SaipalBoundaryTests.test_complete_history_preserves_all_records) (name='dispositions.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 229, in test_complete_history_preserves_all_records
+    self.assertEqual(result["snapshot_size"], len(raw))
+                     ~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'snapshot_size'
+
+======================================================================
+ERROR: test_complete_history_preserves_all_records (test_t1931_saipal_boundary.SaipalBoundaryTests.test_complete_history_preserves_all_records) (name='saipal_receipts.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 229, in test_complete_history_preserves_all_records
+    self.assertEqual(result["snapshot_size"], len(raw))
+                     ~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'snapshot_size'
+
+======================================================================
+FAIL: test_bad_record_types_and_unreadable_logs_are_not_empty_success (test_t1931_saipal_boundary.SaipalBoundaryTests.test_bad_record_types_and_unreadable_logs_are_not_empty_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 269, in test_bad_record_types_and_unreadable_logs_are_not_empty_success
+    self.assertEqual(self.history(path.name)["status"], "LOG_IO_ERROR")
+AssertionError: 'LOG_VALID' != 'LOG_IO_ERROR'
+- LOG_VALID
++ LOG_IO_ERROR
+
+
+======================================================================
+FAIL: test_missing_and_valid_empty_logs_are_distinct (test_t1931_saipal_boundary.SaipalBoundaryTests.test_missing_and_valid_empty_logs_are_distinct) (name='dispositions.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 216, in test_missing_and_valid_empty_logs_are_distinct
+    self.assertEqual(self.history(name)["status"], "LOG_ABSENT")
+AssertionError: 'LOG_VALID' != 'LOG_ABSENT'
+- LOG_VALID
++ LOG_ABSENT
+
+
+======================================================================
+FAIL: test_missing_and_valid_empty_logs_are_distinct (test_t1931_saipal_boundary.SaipalBoundaryTests.test_missing_and_valid_empty_logs_are_distinct) (name='saipal_receipts.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 216, in test_missing_and_valid_empty_logs_are_distinct
+    self.assertEqual(self.history(name)["status"], "LOG_ABSENT")
+AssertionError: 'LOG_VALID' != 'LOG_ABSENT'
+- LOG_VALID
++ LOG_ABSENT
+
+
+----------------------------------------------------------------------
+Ran 17 tests in 3.314s
+
+FAILED (failures=3, errors=2)

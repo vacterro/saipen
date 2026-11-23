@@ -1,0 +1,7 @@
+# Affected-surface neighbour: python -B tools/test_t1640_log_seal.py
+...........................
+----------------------------------------------------------------------
+Ran 27 tests in 6.607s
+
+OK
+EXIT=0

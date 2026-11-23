@@ -106,72 +106,6 @@ class ZC01SecretContainmentTests(unittest.TestCase):
             self.assertNotIn(value[:16], out, "a key fragment survived redaction")
 
 
-class RedactionCostIsBoundedTests(unittest.TestCase):
-    """T-1965: the boundary must stay linear in the subject, or callers hang.
-
-    The T-1926 rule keyed on the field name with an unanchored `[a-z0-9_]*`
-    prefix, which restarted its scan at every character of a long identifier and
-    backtracked the remainder at each one. A 100KB userperson entry therefore
-    cost minutes of CPU inside `context_cold`, and the declared core-unit family
-    could never finish. These controls fail if that shape returns.
-    """
-
-    #: Large enough that quadratic behaviour is unmistakable (it took ~2 minutes
-    #: before the fix) and small enough to stay instantaneous once linear.
-    LARGE = 100_000
-
-    def test_a_long_word_run_without_the_field_name_is_cheap(self) -> None:
-        # The T-1965 reproduction: no `private_key` anywhere, so no match is
-        # possible. This is the shape the 100KB userperson entry actually had,
-        # and it must never reach the pattern at all.
-        self.assertEqual(redact_credentials("x" * self.LARGE), "x" * self.LARGE)
-
-    def test_the_field_name_present_but_unmatchable_stays_linear(self) -> None:
-        # The discriminating shape for the ANCHOR, the one the literal gate
-        # cannot rescue: the field name is here so the pattern must run, but the
-        # value is too short to match anything, so the only work left is the
-        # scan itself. Unanchored, `[a-z0-9_]*private_key` retries at every
-        # interior position and re-walks the remainder each time.
-        subject = "x" * self.LARGE + " private_key: short"
-        self.assertEqual(
-            redact_credentials(subject), subject,
-            "text with no matchable key must come back unchanged",
-        )
-
-    def test_a_long_identifier_run_ending_in_the_field_name_stays_linear(self) -> None:
-        # Here the match really does occur, so the anchor must not be so strict
-        # that it loses the key: a prefixed field name is still a field name.
-        subject = "a" * self.LARGE + f"private_key: {RAW_KEY}"
-        out = redact_credentials(subject)
-        self.assertNotIn(RAW_KEY, out, "redaction must still fire on this shape")
-
-    def test_the_bound_is_linear_not_merely_faster(self) -> None:
-        # Doubling the subject must not quadruple the time. Compared as a ratio
-        # with generous slack so a loaded machine cannot make this flaky, and
-        # measured after a warm-up so import and first-call costs are excluded.
-        # Measured on the anchor-only shape, so this bound isolates the scan.
-        import time
-
-        def cost(n: int) -> float:
-            subject = "x" * n + " private_key: short"
-            best = None
-            for _ in range(3):
-                start = time.perf_counter()
-                redact_credentials(subject)
-                elapsed = time.perf_counter() - start
-                best = elapsed if best is None else min(best, elapsed)
-            return best
-
-        cost(1_000)
-        small, large = cost(20_000), cost(160_000)
-        # 8x the input: linear stays near 8x, quadratic would be near 64x.
-        self.assertLess(
-            large / max(small, 1e-6), 24,
-            f"redaction scaled superlinearly: {small:.6f}s -> {large:.6f}s "
-            "for an 8x larger subject",
-        )
-
-
 class ZC03TransportTests(unittest.TestCase):
     """ZC-03 / DRIFT-007: a failing verifier must not report success."""
 
@@ -207,6 +141,77 @@ class ZC03TransportTests(unittest.TestCase):
         )
 
 
+class RedactionScanCostRegressionTests(unittest.TestCase):
+    """Campaign IX (T-2134): the private_key scan was Θ(n²) in text length.
+
+    Measured 2026-11-21 on the family interpreter (3.11.9, this host):
+    `redact_credentials("x" * n)` cost 0.33 s at n=5 000, 3.5 s at 20 000 and
+    25.6 s at 50 000 -- quadratic in the long non-matching run, because
+    `[a-z0-9_]*` consumed the whole run at every start offset and backtracked
+    one char at a time hunting the `private_key` literal. A single 100 KB
+    USERPERSON preference then paid ~250-320 s per context parse, which is the
+    measured cause of `test_userperson_global`'s chronic 780-1200 s family
+    duration (871.3 s of one test's 874.4 s instrumented module run).
+
+    The repair keeps every redacted and every surviving byte identical and
+    only bounds the prefix scan (Python 3.11 possessive quantifier -- the
+    documented interpreter floor). These tests pin BOTH properties so the
+    optimization cannot silently weaken the security boundary.
+    """
+
+    def test_private_key_scan_costs_scale_linearly(self) -> None:
+        import time
+
+        duration: dict[int, float] = {}
+        for size in (10_000, 100_000):
+            text = "x" * size + ' "sender_private_key": "not-a-real-key"'
+            began = time.monotonic()
+            redact_credentials(text)
+            duration[size] = time.monotonic() - began
+        # Absolute generous bound (pre-fix reality at 100 000 chars: ~100 s+;
+        # post-fix ~0.01 s) -- a 250x margin, immune to ordinary host noise.
+        self.assertLess(
+            duration[100_000], 2.0,
+            f"the private_key scan degenerated again: {duration[100_000]:.2f}s for 100 KB",
+        )
+
+    def test_possessive_prefix_keeps_every_output_byte_identical(self) -> None:
+        # The greedy-backtracking semantics the rewrite must preserve,
+        # evaluated against short inputs: prefix identifiers, quote-adjacent
+        # fields, quoted/spaceless/spaced separators, mixed case, benign
+        # digests, and long values.
+        import re
+
+        reference = re.compile(
+            r'(?i)(["\']?[a-z0-9_]*private_key["\']?\s*[:=]\s*)'
+            r'("[^"]{8,}"|\'[^\']{8,}\'|[0-9a-f]{16,})'
+        )
+        corpus = (
+            f'{{"sender_private_key": "{RAW_KEY}"}}',
+            f'{{"recipient_private_key":"{RAW_KEY}"}}',
+            f"sender_private_key: {RAW_KEY}",
+            f"private_key={RAW_KEY}",
+            f'{{\'recipient_private_key\': \'{RAW_KEY}\'}}',
+            'was-now abc_private_key: ' + RAW_KEY,
+            'raw my_private_key="' + RAW_KEY + '"',
+            'adjacent"private_key": "' + RAW_KEY + '"',
+            "UPPER PRIVATE_KEY: " + RAW_KEY,
+            f"sha256:{RAW_KEY}",
+            f"record:x.json sha256:{RAW_KEY}",
+            f'{{"nonce": "{RAW_KEY}"}}',
+            f'{{"project_lineage": "{RAW_KEY}"}}',
+            "xx" * 40 + ' no field here: ' + RAW_KEY[2:],
+            "private_key: " + RAW_KEY + " trailing " + RAW_KEY,
+            "no credentials in this line at all",
+        )
+        for text in corpus:
+            self.assertEqual(
+                redact_credentials(text),
+                reference.sub(r"\1***", text),
+                f"redaction output changed for input: {text!r}",
+            )
+
+
 class ExternalReachabilityTests(unittest.TestCase):
     """ZC-02/04/05/06: state the boundary instead of implying coverage."""
 
@@ -216,7 +221,7 @@ class ExternalReachabilityTests(unittest.TestCase):
         sources = [
             path for pattern in ("*.js", "*.mjs", "*.ts")
             for path in host.rglob(pattern)
-            if "plugins" not in path.parts and "tmp" not in path.parts and "tmpfile" not in path.name
+            if "plugins" not in path.parts and "tmpfile" not in path.name
         ]
         # If the host ever ships readable source, ZC-02/04/06 stop being external
         # and this ticket's boundary must be re-measured rather than inherited.

@@ -1,0 +1,57 @@
+{
+ "accounting_matches": true,
+ "agent": "saipen-cli",
+ "blockers": [
+  {
+   "code": "EVIDENCE_KEPT",
+   "detail": "1563835784 bytes under .saipen/evidence are canonical proof; no compact replacement is verified by a consumer, so none is planned"
+  }
+ ],
+ "bytes_planned": 10735629,
+ "bytes_reclaimed": 10735629,
+ "finished": "2026-11-18T01:20:15Z",
+ "kept": 3,
+ "protected_bytes": 1563835784,
+ "recovered_runs": [],
+ "run_id": "20261118T012002-8b98309c",
+ "schema": 1,
+ "started": "2026-11-18T01:20:02Z",
+ "targets": [
+  {
+   "bytes_planned": 4071015,
+   "bytes_removed": 4071015,
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "outcome": "removed",
+   "path": "tools/__pycache__",
+   "reason": "owning tool rebuilds it (__pycache__)",
+   "state": "COMMITTED"
+  },
+  {
+   "bytes_planned": 141775,
+   "bytes_removed": 141775,
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "outcome": "removed",
+   "path": "tools/producer_backends/__pycache__",
+   "reason": "owning tool rebuilds it (__pycache__)",
+   "state": "COMMITTED"
+  },
+  {
+   "bytes_planned": 6491162,
+   "bytes_removed": 6491162,
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "outcome": "removed",
+   "path": "tools/saipen_engine/__pycache__",
+   "reason": "owning tool rebuilds it (__pycache__)",
+   "state": "COMMITTED"
+  },
+  {
+   "bytes_planned": 31677,
+   "bytes_removed": 31677,
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "outcome": "removed",
+   "path": "tools/saipen_engine/runtime/__pycache__",
+   "reason": "owning tool rebuilds it (__pycache__)",
+   "state": "COMMITTED"
+  }
+ ]
+}

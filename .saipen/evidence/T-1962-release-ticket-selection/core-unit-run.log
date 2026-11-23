@@ -1,0 +1,21 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 8459,
+  "red": 2,
+  "new_red": [
+    "test_t1816_provenance_inventory.ProvenanceInventoryTests.test_displaced_bodies_are_gone_but_the_archive_kept_them",
+    "test_t1816_provenance_inventory.ProvenanceInventoryTests.test_working_tree_renumbers_committed_ids_instead_of_repairing"
+  ],
+  "fixed": [],
+  "problems": [
+    "2 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/ab4c6be15d2f1e55-20261030T051625654807Z.json",
+  "reused": false,
+  "shared": false,
+  "request_wall_s": 2191.109,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

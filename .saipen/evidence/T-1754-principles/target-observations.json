@@ -1,0 +1,208 @@
+[
+  {
+    "name": "smartvac",
+    "root": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER",
+    "started_utc": "2026-10-15T22:05:19.689656+00:00",
+    "finished_utc": "2026-10-15T22:05:22.973569+00:00",
+    "command": [
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+      "--project-root",
+      "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER",
+      "status",
+      "--json"
+    ],
+    "exit_code": 0,
+    "head": "b4fbaa409ec793df9d7fa1b0aec008dce304edd6",
+    "phase": "DONE",
+    "task": "none",
+    "next_action": "PHASE SCOUT T-206",
+    "code": null,
+    "detail": null,
+    "automation": {
+      "schema_version": 1,
+      "disposition": "CONTINUE",
+      "next_command": "cc",
+      "operator_action_due": false,
+      "reason_code": "start",
+      "reason": "topmost workable ticket",
+      "audit_quiescent": true,
+      "audit_epoch": "audit-epoch-v1:a7fd3c69ad0ecf048c784d94a9c1ec3885f0b97bbb616d8542e83a888f0ddb1d",
+      "convergence_current": false,
+      "closure_complete": false,
+      "source_fingerprint": "b4fbaa409ec793df9d7fa1b0aec008dce304edd6+git-delta-v1:49f42252acb534931db1c832a8cb109c9fabf9c2a7f56163cb150b6d8d46abf1",
+      "completed_at": null
+    },
+    "conformance": null,
+    "before_hashes": {
+      ".saipen/STATE.md": "4671e6ec2cc0d2093e10180b422fb5bae72c401953f5955622c668a6555fd2af",
+      ".saipen/BOARD.md": "68a47935b625be86acfc64e7da6fea328ef9075bb9db7579e6d9d462b6454dfe",
+      ".saipen/LOG.md": "547ea7ecb35f135f812c3bd6c94bea38f43edff86e1393485b52c0eed7456fe8",
+      ".saipen/IDENTITY.md": "d69712a396f0bf8481f5f4ba885cf7f6cc8652e90d5937d8e29b2de80f060bef",
+      ".git/index": "97b437071f25ce4e6ec74afe89dbaccfa6dd76cc5470bb629a1692e927ac6d6c"
+    },
+    "after_hashes": {
+      ".saipen/STATE.md": "4671e6ec2cc0d2093e10180b422fb5bae72c401953f5955622c668a6555fd2af",
+      ".saipen/BOARD.md": "68a47935b625be86acfc64e7da6fea328ef9075bb9db7579e6d9d462b6454dfe",
+      ".saipen/LOG.md": "547ea7ecb35f135f812c3bd6c94bea38f43edff86e1393485b52c0eed7456fe8",
+      ".saipen/IDENTITY.md": "d69712a396f0bf8481f5f4ba885cf7f6cc8652e90d5937d8e29b2de80f060bef",
+      ".git/index": "97b437071f25ce4e6ec74afe89dbaccfa6dd76cc5470bb629a1692e927ac6d6c"
+    },
+    "observed_inputs_unchanged": true,
+    "limit": "This collector writes only its own SAIPEN evidence; concurrent target edits are not excluded."
+  },
+  {
+    "name": "saituls",
+    "root": "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+    "started_utc": "2026-10-15T22:05:19.689656+00:00",
+    "finished_utc": "2026-10-15T22:05:27.852702+00:00",
+    "command": [
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+      "--project-root",
+      "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+      "status",
+      "--json"
+    ],
+    "exit_code": 0,
+    "head": "5f0dc0c6abe1f9a0a34487d87f56fb129410cb7f",
+    "phase": "DONE",
+    "task": "none",
+    "next_action": "saipen work reverify T-231",
+    "code": null,
+    "detail": null,
+    "automation": {
+      "schema_version": 1,
+      "disposition": "BLOCKED",
+      "next_command": null,
+      "operator_action_due": false,
+      "reason_code": "conformance-remediation",
+      "reason": "idle continuation is owned by the unaccepted conformance red gate (CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint); run 'saipen work reverify T-231' before continuing",
+      "audit_quiescent": false,
+      "audit_epoch": "audit-epoch-v1:ce05b92484cf36c6a58d96bafa987d1e364da13d0e31f26b5a4a7a17ec1ed4ff",
+      "convergence_current": false,
+      "closure_complete": false,
+      "source_fingerprint": "5f0dc0c6abe1f9a0a34487d87f56fb129410cb7f+git-delta-v1:b4265fc3024c9d3e966c5c791037d912f15c2feef94bd5f012deab040b41b60c",
+      "completed_at": null,
+      "remediation_command": "saipen work reverify T-231",
+      "diagnostic": null
+    },
+    "conformance": null,
+    "before_hashes": {
+      ".saipen/STATE.md": "37c1021c5c04deda520ed8e041e6e70e1b67470b3eb9039acaf0cee18db95b8d",
+      ".saipen/BOARD.md": "6054ba4255bbcd351cc88d0b61bef767d7f69610074c47d0074d8a94a5c87f01",
+      ".saipen/LOG.md": "c675c9a982d62be3387b30d680f0d0c2ea588a77065e75b6b0fd02c05307fecd",
+      ".saipen/IDENTITY.md": "dcaaf3956076e8404014b1eddabe695e2679aa57cda017563ac2b5885857a854",
+      ".git/index": "eb999357cb8264673e8bdbe3a03984d2e5b4f9bebf410de53ce1e006d1fa3206"
+    },
+    "after_hashes": {
+      ".saipen/STATE.md": "37c1021c5c04deda520ed8e041e6e70e1b67470b3eb9039acaf0cee18db95b8d",
+      ".saipen/BOARD.md": "6054ba4255bbcd351cc88d0b61bef767d7f69610074c47d0074d8a94a5c87f01",
+      ".saipen/LOG.md": "c675c9a982d62be3387b30d680f0d0c2ea588a77065e75b6b0fd02c05307fecd",
+      ".saipen/IDENTITY.md": "dcaaf3956076e8404014b1eddabe695e2679aa57cda017563ac2b5885857a854",
+      ".git/index": "eb999357cb8264673e8bdbe3a03984d2e5b4f9bebf410de53ce1e006d1fa3206"
+    },
+    "observed_inputs_unchanged": true,
+    "limit": "This collector writes only its own SAIPEN evidence; concurrent target edits are not excluded."
+  },
+  {
+    "name": "audapack_recovery",
+    "root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+    "started_utc": "2026-10-15T22:05:19.689656+00:00",
+    "finished_utc": "2026-10-15T22:05:42.079574+00:00",
+    "command": [
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+      "--project-root",
+      "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK_RECOVERY_20261010",
+      "status",
+      "--json"
+    ],
+    "exit_code": 0,
+    "head": "6c6d841df24e5c5d91870def931af99f0af4c81f",
+    "phase": "DONE",
+    "task": "none",
+    "next_action": "saipen audit status",
+    "code": null,
+    "detail": null,
+    "automation": {
+      "schema_version": 1,
+      "disposition": "WAIT_USER",
+      "next_command": null,
+      "operator_action_due": true,
+      "reason_code": "audit-inbox-residue",
+      "reason": "audit/ is settled but not clean: 2 non-layer entries SAIPEN never captured (audit/sai_accounts_live_acceptance.py, audit/t277_live_reconciliation.py); nothing is deleted for you",
+      "audit_quiescent": false,
+      "audit_epoch": "audit-epoch-v1:92e7ae4f43a946e8df6d37efcb914f63a9be86a2414d914b79849d7eff053e61",
+      "convergence_current": false,
+      "closure_complete": false,
+      "source_fingerprint": "6c6d841df24e5c5d91870def931af99f0af4c81f+git-delta-v1:159fd7bed3286535a35ff4a9340e1fea42b03cf7bc0b107495d0e0392ec80d88",
+      "completed_at": null
+    },
+    "conformance": null,
+    "before_hashes": {
+      ".saipen/STATE.md": "ce2ddf330ab93b2602124fd6969b48269a18e5659573b0c44e9eab0c7d53f86b",
+      ".saipen/BOARD.md": "b2201eb3aaff431ab6f32579b71c8f5bbf70717e6a8eec5b9d176efd984edf39",
+      ".saipen/LOG.md": "dae327536aae041eb1c8ad30c401bdf084a55efbd0fd9f1446760f748dee12ce",
+      ".saipen/IDENTITY.md": "91a7fea18d8779f7d866d504fb673276986871a927e333985e7dec418eb39d42",
+      ".git/index": "6268e52fce51b2d716ac175aed2d022ff64f3f7e86d74a42ec45274a12c98595"
+    },
+    "after_hashes": {
+      ".saipen/STATE.md": "ce2ddf330ab93b2602124fd6969b48269a18e5659573b0c44e9eab0c7d53f86b",
+      ".saipen/BOARD.md": "b2201eb3aaff431ab6f32579b71c8f5bbf70717e6a8eec5b9d176efd984edf39",
+      ".saipen/LOG.md": "dae327536aae041eb1c8ad30c401bdf084a55efbd0fd9f1446760f748dee12ce",
+      ".saipen/IDENTITY.md": "91a7fea18d8779f7d866d504fb673276986871a927e333985e7dec418eb39d42",
+      ".git/index": "6268e52fce51b2d716ac175aed2d022ff64f3f7e86d74a42ec45274a12c98595"
+    },
+    "observed_inputs_unchanged": true,
+    "limit": "This collector writes only its own SAIPEN evidence; concurrent target edits are not excluded."
+  },
+  {
+    "name": "audapack_original",
+    "root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+    "started_utc": "2026-10-15T22:05:19.689656+00:00",
+    "finished_utc": "2026-10-15T22:05:31.446060+00:00",
+    "command": [
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+      "--project-root",
+      "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+      "status",
+      "--json"
+    ],
+    "exit_code": 0,
+    "head": "6c6d841df24e5c5d91870def931af99f0af4c81f",
+    "phase": "DONE",
+    "task": "none",
+    "next_action": "saipen continue",
+    "code": null,
+    "detail": null,
+    "automation": {
+      "schema_version": 1,
+      "disposition": "CONTINUE",
+      "next_command": "cc",
+      "operator_action_due": false,
+      "reason_code": "closure-conditions-C3-C4-C5-C6-C7",
+      "reason": "route reason: maintain",
+      "audit_quiescent": true,
+      "audit_epoch": "audit-epoch-v1:84fe3593c51e7737880fb8a397f75bc4597ce4ee0bc7720ae2b10d9cfed0202c",
+      "convergence_current": false,
+      "closure_complete": false,
+      "source_fingerprint": "6c6d841df24e5c5d91870def931af99f0af4c81f+git-delta-v1:cb2b801e8528c7f3d899ceee71785b1e15bdfb13dee028f81807abe04e873211",
+      "completed_at": null
+    },
+    "conformance": null,
+    "before_hashes": {
+      ".saipen/STATE.md": "55636295e5e791dbfa0d8e624346be5beea8ea35cf2c191ec1152a701288bcac",
+      ".saipen/BOARD.md": "4c3a7c598579f6ea47d5f4e05fc908bc09e43806ab9ff0e2d883c0a6b2361a80",
+      ".saipen/LOG.md": "a60197a96735ea181092f0b96407ed213ea08a5ee4d01d7a14ba73b2dc6e2e0b",
+      ".saipen/IDENTITY.md": "3ac7e214c409fd5ab32a76171cee7febb38393f00c6cc321c6de33469e28e5c0",
+      ".git/index": "a9ce2d5bac7f12cc3b6b54b2305e8a71690be5ff0bedd93513a756bb693ea94e"
+    },
+    "after_hashes": {
+      ".saipen/STATE.md": "55636295e5e791dbfa0d8e624346be5beea8ea35cf2c191ec1152a701288bcac",
+      ".saipen/BOARD.md": "4c3a7c598579f6ea47d5f4e05fc908bc09e43806ab9ff0e2d883c0a6b2361a80",
+      ".saipen/LOG.md": "a60197a96735ea181092f0b96407ed213ea08a5ee4d01d7a14ba73b2dc6e2e0b",
+      ".saipen/IDENTITY.md": "3ac7e214c409fd5ab32a76171cee7febb38393f00c6cc321c6de33469e28e5c0",
+      ".git/index": "a9ce2d5bac7f12cc3b6b54b2305e8a71690be5ff0bedd93513a756bb693ea94e"
+    },
+    "observed_inputs_unchanged": true,
+    "limit": "This collector writes only its own SAIPEN evidence; concurrent target edits are not excluded."
+  }
+]

@@ -1,0 +1,13 @@
+R001	requirement	A foreign protocol command is refused with a typed FOREIGN_PROTOCOL_COMMAND that names the protocol owner, the full invocation and the route to run instead, and is never refused as a bare unknown command.
+R002	requirement	The refusal names the owning protocol, the exact requested command, and carries next_action guidance, so the caller cannot read it as a typo.
+R003	invariant	SAIPEN verbs and shortcuts (cc, continue, next, status) remain SAIPEN-owned and unaffected by foreign-protocol routing.
+R004	invariant	A malformed or absent exact_namespace block degrades to the old refusal without inventing an owner.
+R005	requirement	The router and registry suites are unaffected by the exact-namespace declaration.
+R006	invariant	Never present a foreign protocol as a candidate for an explicit SAIPEN command; an explicit /saipen <cmd> must never be dispatched to a skill whose name merely resembles it, and exact namespace ownership is decided before semantic skill matching.
+R007	invariant	A NO_HOME or similar refusal from a foreign protocol must not trigger a working-directory change into another protocol repository, a sibling-repo search, or the creation of that protocol home.
+R008	acceptance-criterion	Re-read the installed skills directory on session start so a stale inventory cannot map a namespace to the wrong owner.
+R009	requirement	The FreeBuff host stops offering a substitute protocol for an explicit SAIPEN command.
+R010	acceptance-criterion	A live /saipen continue in _BZ_REA on FreeBuff executes the SAIPEN route end to end.
+R011	requirement	Foreign-protocol side effects are reconciled by their owner through canonical append-only operations, preserving chronology and provenance, with no rewrite and no deletion.
+R012	requirement	No native pre-render interception is claimed for a host that declares response enforcement ADVISORY and pre-output interception NONE.
+R013	invariant	SAIPAL recognition is not authorization: a model-supplied witness is never upgraded to an authenticated operator-origin event.

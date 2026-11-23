@@ -1,0 +1,20 @@
+diff --git a/.saipen/improve/imp-vacterro-audapack-20260927-1/buffy-01/saipen_improve_SAIPEN.md b/.saipen/improve/imp-vacterro-audapack-20260927-1/buffy-01/saipen_improve_SAIPEN.md
+index ba762fd..751bbd3 100644
+--- a/.saipen/improve/imp-vacterro-audapack-20260927-1/buffy-01/saipen_improve_SAIPEN.md
++++ b/.saipen/improve/imp-vacterro-audapack-20260927-1/buffy-01/saipen_improve_SAIPEN.md
+@@ -2,10 +2,10 @@ agent: buffy-01
+ role: core
+ model_or_runtime: unknown
+ project: vacterro-audapack
+-saipen_version: 8.0.1
+-protocol_fingerprint: sha256:63ba940f408711410413d3ff33e8c5eabb8063879f10d4b69096de9f02f0ea78
+-source_head: 38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1
+-source_tree_fingerprint: git-delta-v1:cb9db00f94604ff07c68f3c22f6f376d78fe78d2f3760f64152c3bb91f8c3b0b
++saipen_version: 8.1.0
++protocol_fingerprint: sha256:627e7d3db4dca0edbb3f3aa7decd355fe10603fe37dc25e6cf9995d33ac31d4f
++source_head: 6c6d841df24e5c5d91870def931af99f0af4c81f
++source_tree_fingerprint: git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195
+ discovery_model: git-delta-v1
+ context_scope: SAIPEN audit, phase DONE
+ context_available: partial
+warning: in the working copy of '.saipen/improve/imp-vacterro-audapack-20260927-1/buffy-01/saipen_improve_SAIPEN.md', LF will be replaced by CRLF the next time Git touches it

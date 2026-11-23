@@ -1,0 +1,77 @@
+test_all_modifier_resumes_the_existing_goal_with_real_origin (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_resumes_the_existing_goal_with_real_origin) ... 
+  test_all_modifier_resumes_the_existing_goal_with_real_origin (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_resumes_the_existing_goal_with_real_origin) (original='cc all') ... FAIL
+  test_all_modifier_resumes_the_existing_goal_with_real_origin (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_resumes_the_existing_goal_with_real_origin) (original='saipen continue all') ... FAIL
+test_all_modifier_cannot_supply_operator_authority (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_cannot_supply_operator_authority) ... FAIL
+
+======================================================================
+FAIL: test_all_modifier_resumes_the_existing_goal_with_real_origin (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_resumes_the_existing_goal_with_real_origin) (original='cc all')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1858_valve_guidance.py", line 74, in test_all_modifier_resumes_the_existing_goal_with_real_origin
+    self.assertEqual(code, 0, text)
+AssertionError: 2 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "Use: gg <objective>",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\t1363-0nhl7ax_ --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  },
+  "route": "cc"
+}
+
+
+======================================================================
+FAIL: test_all_modifier_resumes_the_existing_goal_with_real_origin (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_resumes_the_existing_goal_with_real_origin) (original='saipen continue all')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1858_valve_guidance.py", line 74, in test_all_modifier_resumes_the_existing_goal_with_real_origin
+    self.assertEqual(code, 0, text)
+AssertionError: 2 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "continue accepts no positional arguments; surplus: all",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\t1363-3p4__6eb --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+
+
+======================================================================
+FAIL: test_all_modifier_cannot_supply_operator_authority (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_cannot_supply_operator_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1858_valve_guidance.py", line 87, in test_all_modifier_cannot_supply_operator_authority
+    self.assertEqual(payload["code"], "RECONCILE_REAUTH_REQUIRED", text)
+AssertionError: 'VALIDATION_FAILED' != 'RECONCILE_REAUTH_REQUIRED'
+- VALIDATION_FAILED
++ RECONCILE_REAUTH_REQUIRED
+ : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "Use: gg <objective>",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\t1363-f6hng2j1 --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  },
+  "route": "cc"
+}
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 1.207s
+
+FAILED (failures=3)

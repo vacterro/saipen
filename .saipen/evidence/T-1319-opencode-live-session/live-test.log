@@ -1,0 +1,18 @@
+test_1_the_installed_generation_is_one_byte_identity (test_opencode_live_session.OpenCodeLiveSession.test_1_the_installed_generation_is_one_byte_identity) ... ok
+test_2_a_fresh_process_resolves_the_binding_before_any_tool (test_opencode_live_session.OpenCodeLiveSession.test_2_a_fresh_process_resolves_the_binding_before_any_tool) ... ok
+test_3_the_model_sees_the_binding_and_never_asks_for_a_root (test_opencode_live_session.OpenCodeLiveSession.test_3_the_model_sees_the_binding_and_never_asks_for_a_root) ... ok
+test_4_exact_native_todo_completes_in_a_fresh_process (test_opencode_live_session.OpenCodeLiveSession.test_4_exact_native_todo_completes_in_a_fresh_process)
+The exact OpenCode builtin reaches the host, and the guard admits it. ... ok
+test_5_staging_read_ordinary_write_and_protected_refusal (test_opencode_live_session.OpenCodeLiveSession.test_5_staging_read_ordinary_write_and_protected_refusal) ... ok
+test_6_malformed_protocol_keeps_the_root_known_through_a_real_session (test_opencode_live_session.OpenCodeLiveSession.test_6_malformed_protocol_keeps_the_root_known_through_a_real_session) ... ok
+test_7_canonical_recovery_repairs_a_fresh_malformed_session (test_opencode_live_session.OpenCodeLiveSession.test_7_canonical_recovery_repairs_a_fresh_malformed_session)
+T-1318 AC-05: BOUND + INVALID -> canonical repair -> BOUND + VALID. ... ok
+test_8_a_fresh_process_admits_ordinary_work_after_the_repair (test_opencode_live_session.OpenCodeLiveSession.test_8_a_fresh_process_admits_ordinary_work_after_the_repair)
+BOUND + VALID is ordinary again, proven from a NEW process. ... ok
+test_9_canonical_search_serves_a_fresh_session_without_the_host_search_layer (test_opencode_live_session.OpenCodeLiveSession.test_9_canonical_search_serves_a_fresh_session_without_the_host_search_layer)
+T-1320 Phase F: a real session must not die with a search error. ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 777.396s
+
+OK

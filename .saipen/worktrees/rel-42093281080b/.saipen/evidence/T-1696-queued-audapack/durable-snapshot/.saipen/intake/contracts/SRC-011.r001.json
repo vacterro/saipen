@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-011:R0001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Enforce the one-click, operator-state, durable READY proof, and six-run lane contract exactly as captured."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:09Z",
+  "derived_from": "SRC-011",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "ba885225d8d733c3a1c8fbf4dfe8f28b6a01fd51e12152bfdd7313035982a9ac"
+}

@@ -1,0 +1,53 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-059.md",
+  "linked_work": "T-1390",
+  "receipt_id": "SRC-059",
+  "received_at": "2026-09-17T19:47:38Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "cb1d490e3e5db4157a79d25e8bd03670a36041e925e0b36ebfc02a5e18eb60d6",
+    "sanitized_sha256": "cb1d490e3e5db4157a79d25e8bd03670a36041e925e0b36ebfc02a5e18eb60d6"
+  },
+  "request_provenance": {
+    "compared_digest": "0f6c6518a71b5a4330a5bd174f6ee3a13450a73c4a62e0dcac9d207163a8ee0d",
+    "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+    "witness": "model_supplied"
+  },
+  "retirement": {
+    "authority_grant": "T-1390 / SRC-059",
+    "authority_receipt": "SRC-065",
+    "authority_sha256": "688642993f7a3ebc87054ddbb939bc04f4f645ce8e497dd605b870d70fb44192",
+    "board_record": "- [/] T-1390 [P1] add a docstring to src/app.py | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-059 | owner: claude | claim_time: 2026-09-18T17:17:51Z",
+    "board_record_sha256": "2f0ba7aee472a7118db453230029f2aa65e46ce26ae694e94305116ca7b08ebb",
+    "discovery_event": null,
+    "evidence": {
+      "kind": "event",
+      "ref": "E-7014"
+    },
+    "evidence_bound_event": "E-7074",
+    "evidence_note": "fixture contamination; proof dir T-1391-T-1390-fixture-contamination-20260917",
+    "reason": "TEST_FIXTURE_CONTAMINATION",
+    "retired_at": "2026-09-18T17:17:56Z",
+    "retired_by": "claude",
+    "retired_work": "T-1390",
+    "retirement_event": "E-7074",
+    "schema_version": 2
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "cb1d490e3e5db4157a79d25e8bd03670a36041e925e0b36ebfc02a5e18eb60d6",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "cb1d490e3e5db4157a79d25e8bd03670a36041e925e0b36ebfc02a5e18eb60d6",
+  "status": "INVALID",
+  "storage_status": "ARCHIVED",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

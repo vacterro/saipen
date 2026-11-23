@@ -1,0 +1,19 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 5797,
+  "red": 1,
+  "new_red": [
+    "test_ticket_retirement.HostileControlTests.test_control_2_completed_work_cannot_be_rewritten_as_misrouted"
+  ],
+  "fixed": [],
+  "problems": [
+    "1 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/bcc2b5af89963dd2-20261008T070552Z.json",
+  "reused": false,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}
+rc=1

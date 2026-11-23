@@ -1,0 +1,350 @@
+======================================================================
+FAIL: test_environment_present_cannot_be_labeled_unavailable (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_environment_present_cannot_be_labeled_unavailable)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 28, in test_environment_present_cannot_be_labeled_unavailable
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_inc_archive_context_pollution_001 (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_inc_archive_context_pollution_001)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 563, in test_inc_archive_context_pollution_001
+    self.normalized(receipt)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_inc_lossy_work_summary_001_cold_agent_recovers_full_intent (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_inc_lossy_work_summary_001_cold_agent_recovers_full_intent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 547, in test_inc_lossy_work_summary_001_cold_agent_recovers_full_intent
+    self.normalized(receipt, 4)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_inc_repeated_audit_uncertainty_001 (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_inc_repeated_audit_uncertainty_001)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 554, in test_inc_repeated_audit_uncertainty_001
+    self.normalized(first["receipt"], 4)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_mechanically_absent_conditional_environment_is_terminal (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_mechanically_absent_conditional_environment_is_terminal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 50, in test_mechanically_absent_conditional_environment_is_terminal
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_rewrite_preserves_bom_crlf_and_log_bytes (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_rewrite_preserves_bom_crlf_and_log_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1780, in test_rewrite_preserves_bom_crlf_and_log_bytes
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': 'BOARD parse error: BOARD.md required heading ## DOING appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash; BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash; BOARD.md required heading ## DONE appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash'}
+
+======================================================================
+FAIL: test_src05_closed_duplicate_reports_history_without_reopen (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_src05_closed_duplicate_reports_history_without_reopen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 181, in test_src05_closed_duplicate_reports_history_without_reopen
+    self.normalized(receipt)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_src08_dropped_contract_clause_is_detected (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_src08_dropped_contract_clause_is_detected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 202, in test_src08_dropped_contract_clause_is_detected
+    self.normalized(receipt, 20)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_src11_done_gate_rejects_one_unresolved_clause (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_src11_done_gate_rejects_one_unresolved_clause)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 251, in test_src11_done_gate_rejects_one_unresolved_clause
+    self.normalized(receipt, 2)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_src12_umbrella_done_requires_all_17_dispositions (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_src12_umbrella_done_requires_all_17_dispositions)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 257, in test_src12_umbrella_done_requires_all_17_dispositions
+    self.normalized(receipt, 17)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_src15_close_archives_and_removes_hot_body (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_src15_close_archives_and_removes_hot_body)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 276, in test_src15_close_archives_and_removes_hot_body
+    self.normalized(receipt)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_src16_archived_body_is_forensic_only (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_src16_archived_body_is_forensic_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 286, in test_src16_archived_body_is_forensic_only
+    self.normalized(receipt)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_src17_purge_keeps_honest_tombstone (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_src17_purge_keeps_honest_tombstone)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 295, in test_src17_purge_keeps_honest_tombstone
+    self.normalized(receipt)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_src20_terminal_disposition_requires_evidence_and_verification (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_src20_terminal_disposition_requires_evidence_and_verification)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 318, in test_src20_terminal_disposition_requires_evidence_and_verification
+    self.normalized(receipt)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_src21_contract_digest_drift_blocks_work_closure (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_src21_contract_digest_drift_blocks_work_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 328, in test_src21_contract_digest_drift_blocks_work_closure
+    self.normalized(receipt)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_src26_linked_active_work_prevents_source_close (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_src26_linked_active_work_prevents_source_close)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 398, in test_src26_linked_active_work_prevents_source_close
+    self.normalized(receipt)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_src29_purge_cli_requires_confirmation (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_src29_purge_cli_requires_confirmation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 440, in test_src29_purge_cli_requires_confirmation
+    self.normalized(receipt)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_src30_integrated_30_clause_resume_and_closure (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_src30_integrated_30_clause_resume_and_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 466, in test_src30_integrated_30_clause_resume_and_closure
+    self.normalized(receipt, 30)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_t1399_corrupt_unrelated_receipt_still_blocks_globally (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1399_corrupt_unrelated_receipt_still_blocks_globally)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 730, in test_t1399_corrupt_unrelated_receipt_still_blocks_globally
+    self._complete_work("independent verified source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1399_current_work_incomplete_still_blocks (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1399_current_work_incomplete_still_blocks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 683, in test_t1399_current_work_incomplete_still_blocks
+    self._incomplete_work("unfinished current source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 657, in _incomplete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1399_primary_independent_work_releases_over_unrelated_parked_work (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1399_primary_independent_work_releases_over_unrelated_parked_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 664, in test_t1399_primary_independent_work_releases_over_unrelated_parked_work
+    self._complete_work("independent verified source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1399_relevant_overlapping_work_still_blocks (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1399_relevant_overlapping_work_still_blocks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 694, in test_t1399_relevant_overlapping_work_still_blocks
+    self._complete_work("independent verified source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1399_scope_follows_repository_wide_when_no_target_is_named (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1399_scope_follows_repository_wide_when_no_target_is_named)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 761, in test_t1399_scope_follows_repository_wide_when_no_target_is_named
+    self._complete_work("independent verified source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1399_sensitive_unrelated_receipt_still_blocks_globally (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1399_sensitive_unrelated_receipt_still_blocks_globally)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 747, in test_t1399_sensitive_unrelated_receipt_still_blocks_globally
+    self._complete_work("independent verified source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1399_unprojected_authoritative_receipt_still_blocks (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1399_unprojected_authoritative_receipt_still_blocks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 707, in test_t1399_unprojected_authoritative_receipt_still_blocks
+    self._complete_work("independent verified source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1400_quarantined_active_receipt_keeps_execution_and_coverage (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1400_quarantined_active_receipt_keeps_execution_and_coverage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 970, in test_t1400_quarantined_active_receipt_keeps_execution_and_coverage
+    self.normalized(receipt)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_t1400_quarantined_archived_receipt_retains_exact_local_authority (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1400_quarantined_archived_receipt_retains_exact_local_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 982, in test_t1400_quarantined_archived_receipt_retains_exact_local_authority
+    self.normalized(receipt)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+======================================================================
+FAIL: test_t1400_release_gate_accepts_verified_quarantined_current_work (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1400_release_gate_accepts_verified_quarantined_current_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 1033, in test_t1400_release_gate_accepts_verified_quarantined_current_work
+    receipt = self._complete_work("api_key = test-secret-material\n", "T-002")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1405_continuation_scope_stays_trusted_when_reviewed_head_is_an_ancestor (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1405_continuation_scope_stays_trusted_when_reviewed_head_is_an_ancestor)
+A scope reviewed before the release's own commits stays trusted.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 818, in test_t1405_continuation_scope_stays_trusted_when_reviewed_head_is_an_ancestor
+    self._complete_work("independent verified source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1405_foreign_other_work_scope_fails_closed (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1405_foreign_other_work_scope_fails_closed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 865, in test_t1405_foreign_other_work_scope_fails_closed
+    self._complete_work("independent verified source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1405_invalid_other_work_scope_fails_closed (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1405_invalid_other_work_scope_fails_closed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 885, in test_t1405_invalid_other_work_scope_fails_closed
+    self._complete_work("independent verified source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1405_missing_other_work_scope_fails_closed (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1405_missing_other_work_scope_fails_closed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 771, in test_t1405_missing_other_work_scope_fails_closed
+    self._complete_work("independent verified source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1405_stale_other_work_scope_fails_closed (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1405_stale_other_work_scope_fails_closed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 785, in test_t1405_stale_other_work_scope_fails_closed
+    self._complete_work("independent verified source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_t1405_tampered_other_work_path_hash_fails_closed (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_t1405_tampered_other_work_path_hash_fails_closed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 847, in test_t1405_tampered_other_work_path_hash_fails_closed
+    self._complete_work("independent verified source", "T-002")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 647, in _complete_work
+    self.assertTrue(
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_unfinished_requirement_cannot_self_waive_as_environment_unavailable (tools.test_source_receipts.ReceiptRangeNormalizationTests.test_unfinished_requirement_cannot_self_waive_as_environment_unavailable)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 81, in test_unfinished_requirement_cannot_self_waive_as_environment_unavailable
+    self.normalized(receipt)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 124, in normalized
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': "[Errno 2] No such file or directory: 'V:\\\\_TEMP_\\\\saipen-source-receipts-v80fc91o\\\\project\\\\.saipen\\\\BOARD.md'"}
+
+----------------------------------------------------------------------
+Ran 76 tests in 4.850s
+
+FAILED (failures=35)

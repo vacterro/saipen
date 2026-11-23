@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-023:R0001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "T09 READY contract: dispatch COMPLETE + matching campaign_run_id + campaign_complete + waves complete + final handoff file + sha256 proof before READY; SAVING/VERIFYING until converge; terminal notification only on real READY",
+      "text": "Implement and verify every READY proof, transition, action, and notification requirement in T09 RESULT READY CONTRACT.",
+      "verification": "tests/services/test_audit_run_service.py:217/:250/:317; main_window.py:1444 _notify_dispatch_terminal with run.ready gate",
+      "work": "T-52"
+    }
+  },
+  "schema_version": 1
+}

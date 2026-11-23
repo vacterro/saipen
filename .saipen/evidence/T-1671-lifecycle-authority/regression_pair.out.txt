@@ -1,0 +1,7 @@
+utc: 2026-10-08T01:18:15Z
+command: python -B -m unittest test_t1671_lifecycle_authority (cwd tools/)
+verifier:2ad759a3456794c6  (tools/test_t1671_lifecycle_authority.py, byte-identical in both trees)
+FAIL subject:8d06a52ea2f35ba5  exit 1  Ran 14 tests, ?; red: test_a_marker_moved_by_hand_alone_is_reconciled_by_one_journaled_event, test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing, test_ops_names_no_manual_fallback, test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte, test_the_activation_block_forbids_the_hand_checkpoint_it_used_to_order
+PASS subject:5e6aa1b8ae344bb9  exit 0  Ran 14 tests, OK
+subject paths: tools/saipen_engine/operations.py, tools/saipen_engine/reconcile.py, tools/saipen_engine/lifecycle_authority.py, tools/saipen.py, tools/validate.py, saipen/OPS.md, saipen/ACTIVATION_BLOCK.md
+--- exit: 0 ---

@@ -1,0 +1,22 @@
+{
+  "reason": "Bind the executed regression pair to owned fixture inputs. The environment-dependent live-host smoke remains in the full declared family and is separately required by SRC-258:R011; actual C/V runtime parity will be measured after the canonical managed repair. Disable optional external librarian I/O for the controlled pair. Re-execute both pre-fix and post-fix subjects under this identical command; never combine the old FAIL with a new PASS.",
+  "previous_command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_install_identity_doctor.py"
+  ],
+  "new_command": [
+    "{python}",
+    "-B",
+    "-c",
+    "import os,sys,unittest; sys.path.insert(0,'tools'); os.environ['SAIPEN_LIBRARIAN']='off'; import test_install_identity_doctor as checks; suite=unittest.TestSuite(checks.InstallIdentityDoctorTests(name) for name in unittest.defaultTestLoader.getTestCaseNames(checks.InstallIdentityDoctorTests) if name!='test_live_host_surfaces_inspection'); result=unittest.TextTestRunner(verbosity=2).run(suite); sys.exit(0 if result.wasSuccessful() else 1)"
+  ],
+  "unchanged_failure_controls": 9,
+  "full_family_live_smoke_retained": true
+}

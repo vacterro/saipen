@@ -1,0 +1,10 @@
+{
+  "verifier": "7b5ad783c2f3012f",
+  "pre_subject": "e7d78d0b81368704",
+  "post_subject": "27df3b55b1700a2a",
+  "pre_rc": 1,
+  "post_rc": 0,
+  "control_rc": 0,
+  "held": true,
+  "command": "python -B -m unittest test_t1628_opencode_gap"
+}

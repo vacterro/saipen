@@ -1,0 +1,13 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1687-identity-diagnostics\\oracle.py",
+    "."
+  ],
+  "root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1687-identity-diagnostics\\subjects-1gnefq4o\\pre-fix",
+  "verifier": "95bb958e677d30b4",
+  "subject": "a1900788252a05e1e9cdd15e35b85992edb34b9eb48b28f4be18c767fe40d7da",
+  "exit_code": 1,
+  "queued_scratch_only": true
+}

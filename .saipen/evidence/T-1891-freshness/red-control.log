@@ -1,0 +1,127 @@
+test_a_padded_stamp_reads_as_aged_beyond_the_window (test_t1891_freshness_parser.PaddedStampTests.test_a_padded_stamp_reads_as_aged_beyond_the_window) ... ok
+test_the_same_receipt_with_a_clean_stamp_keeps_its_verdict (test_t1891_freshness_parser.PaddedStampTests.test_the_same_receipt_with_a_clean_stamp_keeps_its_verdict) ... ok
+test_padding_no_longer_changes_the_classification (test_t1891_freshness_parser.PaddedStampTests.test_padding_no_longer_changes_the_classification)
+The whole defect in one assertion: whitespace is not a verdict. ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.788s
+
+OK
+test_a_padded_stamp_reads_as_aged_beyond_the_window (test_t1891_freshness_parser.PaddedStampTests.test_a_padded_stamp_reads_as_aged_beyond_the_window) ... FAIL
+test_the_same_receipt_with_a_clean_stamp_keeps_its_verdict (test_t1891_freshness_parser.PaddedStampTests.test_the_same_receipt_with_a_clean_stamp_keeps_its_verdict) ... ok
+test_padding_no_longer_changes_the_classification (test_t1891_freshness_parser.PaddedStampTests.test_padding_no_longer_changes_the_classification)
+The whole defect in one assertion: whitespace is not a verdict. ... 
+  test_padding_no_longer_changes_the_classification (test_t1891_freshness_parser.PaddedStampTests.test_padding_no_longer_changes_the_classification) (padding="' 2020-01-01T00:00:00.000000Z'")
+The whole defect in one assertion: whitespace is not a verdict. ... FAIL
+  test_padding_no_longer_changes_the_classification (test_t1891_freshness_parser.PaddedStampTests.test_padding_no_longer_changes_the_classification) (padding="'2020-01-01T00:00:00.000000Z '")
+The whole defect in one assertion: whitespace is not a verdict. ... FAIL
+  test_padding_no_longer_changes_the_classification (test_t1891_freshness_parser.PaddedStampTests.test_padding_no_longer_changes_the_classification) (padding="'\\t2020-01-01T00:00:00.000000Z\\n'")
+The whole defect in one assertion: whitespace is not a verdict. ... FAIL
+  test_padding_no_longer_changes_the_classification (test_t1891_freshness_parser.PaddedStampTests.test_padding_no_longer_changes_the_classification) (padding="'  2020-01-01T00:00:00.000000Z  '")
+The whole defect in one assertion: whitespace is not a verdict. ... FAIL
+
+======================================================================
+FAIL: test_a_padded_stamp_reads_as_aged_beyond_the_window (test_t1891_freshness_parser.PaddedStampTests.test_a_padded_stamp_reads_as_aged_beyond_the_window)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1891_freshness_parser.py", line 115, in test_a_padded_stamp_reads_as_aged_beyond_the_window
+    self.assertEqual(status["status"], C.STATUS_STALE_PASS, status)
+AssertionError: 'CURRENT_PASS' != 'STALE_PASS'
+- CURRENT_PASS
++ STALE_PASS
+ : {'status': 'CURRENT_PASS', 'gate': 'core', 'receipt': {'board_hash': '71e8a5a3b2153d61', 'content_hash': 'b8ffddc0e336003c', 'exit_code': 0, 'gate': 'core', 'kind': 'conformance_receipt', 'log_hash': 'b8ac2e870b13121d', 'project_identity': '', 'schema_version': 1, 'source_head': '12c59682be33c53cfc34ad47a09f69cf83a1ffe0', 'source_tree_fingerprint': 'git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195', 'state_hash': 'eaab0bf2b3705068', 'timestamp_utc': '  2020-01-01T00:00:00.000000Z  ', 'validator_protocol_version': '1', 'verdict': 'PASS'}, 'validator': {'validator_path': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py', 'validator_protocol_version': '1', 'project_protocol_version': '8', 'gate': 'core', 'source_head': '12c59682be33c53cfc34ad47a09f69cf83a1ffe0', 'source_tree_fingerprint': 'git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195'}}
+
+======================================================================
+FAIL: test_padding_no_longer_changes_the_classification (test_t1891_freshness_parser.PaddedStampTests.test_padding_no_longer_changes_the_classification) (padding="' 2020-01-01T00:00:00.000000Z'")
+The whole defect in one assertion: whitespace is not a verdict.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1891_freshness_parser.py", line 133, in test_padding_no_longer_changes_the_classification
+    self.assertEqual(
+AssertionError: Tuples differ: ('CURRENT_PASS', None) != ('STALE_PASS', 'aged-beyond-freshness-window')
+
+First differing element 0:
+'CURRENT_PASS'
+'STALE_PASS'
+
+- ('CURRENT_PASS', None)
++ ('STALE_PASS', 'aged-beyond-freshness-window') : padding ' 2020-01-01T00:00:00.000000Z' changed the classification
+
+======================================================================
+FAIL: test_padding_no_longer_changes_the_classification (test_t1891_freshness_parser.PaddedStampTests.test_padding_no_longer_changes_the_classification) (padding="'2020-01-01T00:00:00.000000Z '")
+The whole defect in one assertion: whitespace is not a verdict.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1891_freshness_parser.py", line 133, in test_padding_no_longer_changes_the_classification
+    self.assertEqual(
+AssertionError: Tuples differ: ('CURRENT_PASS', None) != ('STALE_PASS', 'aged-beyond-freshness-window')
+
+First differing element 0:
+'CURRENT_PASS'
+'STALE_PASS'
+
+- ('CURRENT_PASS', None)
++ ('STALE_PASS', 'aged-beyond-freshness-window') : padding '2020-01-01T00:00:00.000000Z ' changed the classification
+
+======================================================================
+FAIL: test_padding_no_longer_changes_the_classification (test_t1891_freshness_parser.PaddedStampTests.test_padding_no_longer_changes_the_classification) (padding="'\\t2020-01-01T00:00:00.000000Z\\n'")
+The whole defect in one assertion: whitespace is not a verdict.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1891_freshness_parser.py", line 133, in test_padding_no_longer_changes_the_classification
+    self.assertEqual(
+AssertionError: Tuples differ: ('CURRENT_PASS', None) != ('STALE_PASS', 'aged-beyond-freshness-window')
+
+First differing element 0:
+'CURRENT_PASS'
+'STALE_PASS'
+
+- ('CURRENT_PASS', None)
++ ('STALE_PASS', 'aged-beyond-freshness-window') : padding '\t2020-01-01T00:00:00.000000Z\n' changed the classification
+
+======================================================================
+FAIL: test_padding_no_longer_changes_the_classification (test_t1891_freshness_parser.PaddedStampTests.test_padding_no_longer_changes_the_classification) (padding="'  2020-01-01T00:00:00.000000Z  '")
+The whole defect in one assertion: whitespace is not a verdict.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1891_freshness_parser.py", line 133, in test_padding_no_longer_changes_the_classification
+    self.assertEqual(
+AssertionError: Tuples differ: ('CURRENT_PASS', None) != ('STALE_PASS', 'aged-beyond-freshness-window')
+
+First differing element 0:
+'CURRENT_PASS'
+'STALE_PASS'
+
+- ('CURRENT_PASS', None)
++ ('STALE_PASS', 'aged-beyond-freshness-window') : padding '  2020-01-01T00:00:00.000000Z  ' changed the classification
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.886s
+
+FAILED (failures=5)
+test_the_same_receipt_with_a_clean_stamp_keeps_its_verdict (test_t1891_freshness_parser.PaddedStampTests.test_the_same_receipt_with_a_clean_stamp_keeps_its_verdict) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.266s
+
+OK
+======================================================================
+1. CURRENT TREE -- the three assertions must pass
+======================================================================
+
+======================================================================
+2. PRE-FIX freshness arithmetic -- the padded test must FAIL
+======================================================================
+
+======================================================================
+3. CLEAN-STAMP CONTROL -- must still pass pre-fix
+======================================================================
+
+======================================================================
+VERDICT
+======================================================================
+current tree green         : True
+pre-fix tree green         : False
+pre-fix clean-stamp green  : True
+
+CONTROL OK -- the age arithmetic is the fix, not the harness.

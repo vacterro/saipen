@@ -1,0 +1,8 @@
+{
+  "shell": "C:\\Program Files\\Git\\bin\\bash.exe",
+  "command_form": "\"V:/_TEMP_/tmpb8w4ws5z/home/bin/saipen\"",
+  "returncode": 0,
+  "stdout": "{\n  \"ok\": true,\n  \"engine\": \"FALLBACK\",\n  \"query\": \"x\\\"y > injected.txt\",\n  \"mode\": \"regex\",\n  \"root\": \"V:\\\\_TEMP_\\\\tmpp4py0105\",\n  \"scope\": \".\",\n  \"files_considered\": 5,\n  \"files_scanned\": 5,\n  \"matches_returned\": 0,\n  \"truncated\": false,\n  \"truncation_reasons\": [],\n  \"skipped\": {\n    \"binary\": 0,\n    \"oversize\": 0,\n    \"unreadable\": 0,\n    \"excluded\": 0\n  },\n  \"matches\": [],\n  \"limits\": {\n    \"max_files\": 4000,\n    \"max_matches\": 200,\n    \"max_result_bytes\": 65536,\n    \"max_file_bytes\": 1000000,\n    \"max_per_file\": 20\n  },\n  \"status\": \"OK\",\n  \"diagnostic\": \"SEARCH_OK\",\n  \"native_search\": \"UNKNOWN\"\n}\n",
+  "stderr": "",
+  "files": []
+}

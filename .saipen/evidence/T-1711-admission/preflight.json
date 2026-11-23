@@ -1,0 +1,106 @@
+[
+  {
+    "case": "missing_pair",
+    "result": {
+      "ok": false,
+      "code": "INCOMPLETE_TICKET",
+      "op_id": null,
+      "changed_files": [],
+      "recovery_required": false,
+      "message": "VERIFY -> REVIEW: ticket T-7 declares `regression: required`, so a green run is not enough -- the SAME verifier must be red against the pre-fix subject and green against the post-fix one (NO_REGRESSION_EVIDENCE: no FAIL half of a regression pair was recorded in this VERIFY cycle. A ticket declaring `regression: required` owes both: the SAME verifier red against the pre-fix subject and green against the post-fix one)",
+      "phase": "REVIEW",
+      "ticket": "T-7"
+    },
+    "refusal_preserves_canonical_bytes": true
+  },
+  {
+    "case": "documented_active_pair",
+    "result": {
+      "ok": true,
+      "code": "TRANSITIONED",
+      "op_id": "transition-699361ead0904c58a1b626f8f8ec40e8",
+      "changed_files": [
+        ".saipen/LOG.md",
+        ".saipen/BOARD.md",
+        ".saipen/STATE.md"
+      ],
+      "recovery_required": false,
+      "phase": "REVIEW",
+      "next_action": "PHASE REVIEW T-7",
+      "event_id": "E-7",
+      "ticket": "T-7"
+    },
+    "refusal_preserves_canonical_bytes": null
+  },
+  {
+    "case": "unregistered_digest_without_executed_verifier",
+    "result": {
+      "ok": true,
+      "code": "TRANSITIONED",
+      "op_id": "transition-0f747cc2a6f04f6cbeee80d9d0b1e1d0",
+      "changed_files": [
+        ".saipen/LOG.md",
+        ".saipen/BOARD.md",
+        ".saipen/STATE.md"
+      ],
+      "recovery_required": false,
+      "phase": "REVIEW",
+      "next_action": "PHASE REVIEW T-7",
+      "event_id": "E-7",
+      "ticket": "T-7"
+    },
+    "refusal_preserves_canonical_bytes": null
+  },
+  {
+    "case": "contradictory_duplicate_identity",
+    "result": {
+      "ok": true,
+      "code": "TRANSITIONED",
+      "op_id": "transition-7b30507593e047499a637ec6298065d1",
+      "changed_files": [
+        ".saipen/LOG.md",
+        ".saipen/BOARD.md",
+        ".saipen/STATE.md"
+      ],
+      "recovery_required": false,
+      "phase": "REVIEW",
+      "next_action": "PHASE REVIEW T-7",
+      "event_id": "E-7",
+      "ticket": "T-7"
+    },
+    "refusal_preserves_canonical_bytes": null
+  },
+  {
+    "case": "newer_failure_invalidates_approval",
+    "result": {
+      "ok": false,
+      "code": "INCOMPLETE_TICKET",
+      "op_id": null,
+      "changed_files": [],
+      "recovery_required": false,
+      "message": "VERIFY -> REVIEW: ticket T-7 declares `regression: required`, so a green run is not enough -- the SAME verifier must be red against the pre-fix subject and green against the post-fix one (NOT_A_REGRESSION_PAIR: the latest regression PASS precedes the latest FAIL in this VERIFY cycle. A newer failure invalidates the earlier pair; record a fresh PASS against the corrected subject with the same verifier)",
+      "phase": "REVIEW",
+      "ticket": "T-7"
+    },
+    "refusal_preserves_canonical_bytes": true
+  },
+  {
+    "case": "ordinary_undeclared_ticket",
+    "result": {
+      "ok": true,
+      "code": "TRANSITIONED",
+      "op_id": "transition-76f456ae4f1c426b95ae0585576e6016",
+      "changed_files": [
+        ".saipen/LOG.md",
+        ".saipen/BOARD.md",
+        ".saipen/STATE.md"
+      ],
+      "recovery_required": false,
+      "phase": "REVIEW",
+      "next_action": "PHASE REVIEW T-7",
+      "event_id": "E-5",
+      "ticket": "T-7"
+    },
+    "refusal_preserves_canonical_bytes": null
+  }
+]

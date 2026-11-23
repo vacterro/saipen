@@ -1,0 +1,28 @@
+# T-1885 red control -- reproduces from HEAD bytes, no repo residue
+# run: T="$(mktemp -d)/prefix_validate.py"; git show HEAD:tools/validate.py > "$T"; SAIPEN_T1885_VALIDATE="$T" python -B -m unittest tools.test_t1885_tag_peel
+# pre-fix bytes: 589280; expected: FAILED (failures=2)
+.....FF
+======================================================================
+FAIL: test_the_warning_names_counts_not_just_a_problem (test_t1885_tag_peel.ValidatorCarriesTheGuardTests.test_the_warning_names_counts_not_just_a_problem)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1885_tag_peel.py", line 185, in test_the_warning_names_counts_not_just_a_problem
+    self._require(needle, "the operator-facing warning text is gone")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1885_tag_peel.py", line 163, in _require
+    self.fail(f"{message} (inspected {VALIDATE_PATH})")
+AssertionError: the operator-facing warning text is gone (inspected V:\_TEMP_\tmp.PTBKcxvsPM\prefix_validate.py)
+
+======================================================================
+FAIL: test_validate_py_still_contains_the_guard (test_t1885_tag_peel.ValidatorCarriesTheGuardTests.test_validate_py_still_contains_the_guard)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1885_tag_peel.py", line 166, in test_validate_py_still_contains_the_guard
+    self._require(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1885_tag_peel.py", line 163, in _require
+    self.fail(f"{message} (inspected {VALIDATE_PATH})")
+AssertionError: the unreadable-tag counter is gone; the silent-zero defect would return (inspected V:\_TEMP_\tmp.PTBKcxvsPM\prefix_validate.py)
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.002s
+
+FAILED (failures=2)

@@ -1,0 +1,17 @@
+T-2147 independent re-measure: producer=saihunt package=HUNT-030 (frozen_ref=working-tree)
+PASS: OUTBOX entry present at working tree at HEAD 5706afe0d (role files pending ship commit) (frozen)
+PASS: package field status present (live pending commit)
+PASS: package field source_head present (live pending commit)
+PASS: package field source_tree_fingerprint present (live pending commit)
+PASS: package field role_revision present (live pending commit)
+PASS: package field coverage present (live pending commit)
+PASS: package field payload present (live pending commit)
+PASS: package field verified present (live pending commit)
+PASS: package field instructions present (live pending commit)
+PASS: capture _hunt030_installed_validate.json exists at working tree (pending commit)
+PASS: capture _hunt030_repo_validate.txt exists at working tree (pending commit)
+PASS: capture _hunt030_signals.txt exists at working tree (pending commit)
+PASS: capture HUNT-030.md exists at working tree (pending commit)
+PASS: BOARD ticket row carries collect-receipt identity prefix
+PASS: family record 4404dda4f5d33ff2-20261122T025758382034Z.json exists
+TOTAL: 15 checks, 0 FAIL

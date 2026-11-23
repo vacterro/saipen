@@ -1,0 +1,77 @@
+PASS: scheduler -- one manager and no generated repository wrapper
+PASS: scheduler -- wrapper publication is atomic and outside the repository
+PASS: scheduler -- external-wrapper contract red control
+PASS: scheduler -- all removers own current task, legacy task, and runtime wrapper
+PASS: scheduler -- background runner never updates the development clone
+PASS: scheduler -- background Git disables optional index mutation
+PASS: scheduler -- status distinguishes NOT_INSTALLED
+PASS: scheduler -- unknown command is nonzero with concise usage
+PASS: scheduler -- install migrates legacy task and publishes external wrapper
+PASS: scheduler -- atomic install leaves no temporary wrapper
+PASS: scheduler -- wrapper preserves a Unicode runner path
+PASS: scheduler -- status distinguishes HEALTHY
+PASS: scheduler -- wrong scheduled action is DEGRADED
+PASS: scheduler -- quoted wrapper path is HEALTHY (host quoting is not a contract)
+PASS: scheduler -- an extra argument after the wrapper is DEGRADED
+PASS: scheduler -- wrong task principal is DEGRADED
+PASS: scheduler -- disabled scheduled task is DEGRADED
+PASS: scheduler -- wrong task trigger type is DEGRADED
+PASS: scheduler -- finite repetition duration is DEGRADED
+PASS: scheduler -- wrong task trigger or runtime policy is DEGRADED
+PASS: scheduler -- run-now triggers only a healthy installation
+PASS: scheduler -- wrapper with canonical path hidden in dead text is DEGRADED
+PASS: scheduler -- run-now refuses a noncanonical wrapper body
+PASS: scheduler -- generated wrapper waits and returns runner status
+PASS: scheduler -- duplicate current and legacy tasks are DEGRADED
+PASS: scheduler -- run-now refuses a DEGRADED duplicate installation
+PASS: scheduler -- missing VBS wrapper is DEGRADED
+PASS: scheduler -- run-now refuses a task with missing wrapper
+PASS: scheduler -- wrapper referencing a missing runner is DEGRADED
+PASS: scheduler -- remove cleans both task names and scheduler runtime
+PASS: scheduler -- remove sweeps killed-run temp files but keeps the canonical log
+PASS: scheduler -- install and remove leave repository status unchanged
+PASS: scheduler -- failed reinstall restores previous task and wrapper
+PASS: scheduler -- fresh settings failure removes new task and wrapper
+PASS: scheduler -- query failure is nonzero and preserves task and wrapper
+PASS: scheduler -- delete failure is nonzero and preserves runnable wrapper
+PASS: scheduler -- PowerShell global uninstall removes both tasks and wrapper
+PASS: scheduler -- PowerShell uninstall sweeps killed-run temp files but keeps the canonical log
+PASS: scheduler -- PowerShell global uninstall fails closed on query error
+PASS: scheduler -- PowerShell uninstall falls back when ScheduledTasks cmdlets are absent
+PASS: scheduler -- PowerShell fallback uninstall sweeps temp files, keeps canonical log
+PASS: scheduler -- PowerShell schtasks fallback fails closed on query error
+PASS: scheduler -- shell global uninstall removes both tasks and wrapper
+PASS: scheduler -- shell uninstall sweeps killed-run temp files but keeps the canonical log
+PASS: scheduler -- shell global uninstall fails closed on query error
+PASS: scheduler -- shell uninstall without schtasks still cleans runtime source
+PASS: scheduler -- shell uninstall without schtasks sweeps temp files, keeps canonical log
+PASS: scheduler -- clean committed source injects exact HEAD without network access
+PASS: scheduler -- successful injection keeps its advertised source path alive
+PASS: scheduler -- background run never changes HEAD or working-tree bytes
+PASS: scheduler -- a successful inject writes the freshness stamp through its one owner
+PASS: scheduler -- dirty tracked source skips and preserves installed snapshot
+PASS: scheduler -- untracked file outside the injected surface does not block the refresh
+PASS: scheduler -- untracked file inside the injected surface still skips
+PASS: scheduler -- a source with no manifest refuses instead of guessing its surface
+PASS: scheduler -- source operation failure never falls through into injection
+PASS: scheduler -- source change during preflight refuses mixed-source injection
+PASS: scheduler -- every refusal preserves previous installed snapshot and HEAD
+PASS: scheduler -- stale snapshot backup from a killed run is refused
+PASS: scheduler -- failed injector restores previous persistent source snapshot
+PASS: hr-state -- contract accepts a fully valid state
+PASS: hr-state -- unknown field refused (additionalProperties false)
+PASS: hr-state -- phase outside the 16-phase enum refused
+PASS: hr-state -- transition_from outside the enum refused
+PASS: hr-state -- mode outside enum refused
+PASS: hr-state -- goal intent without counters refused
+PASS: hr-state -- converge intent without target refused
+PASS: hr-state -- converge intent with goal counters refused
+PASS: hr-state -- non-goal intent with goal counters refused
+PASS: hr-state -- string schema_version refused
+PASS: hr-state -- future schema_version is not an engine error (gate WARNS, bump stays alive)
+PASS: hr-state -- negative goal_waves refused (schema minimum)
+PASS: hr-state -- required field missing refused
+PASS: hr-state -- empty STATE routes bootstrap-only, never an ordinary action
+PASS: hr-state -- plain-UTF-8 project passes post-write verification
+PASS: hr-state -- BOM-carrying STATE refused byte-wise at post-write verification
+PASS: hr-state -- codec reports the BOM file as non-canonical

@@ -1,0 +1,263 @@
+--- pre/tools/test_t2040_terminal_consumer_guards.py
++++ tools/test_t2040_terminal_consumer_guards.py
+@@ -15,14 +15,14 @@
+ 
+ TOOLS = Path(__file__).resolve().parent
+ sys.path.insert(0, str(TOOLS))
+-from campaign_test_support import inspect_fixture_campaign, write_scoped_fixture_grant
+-from test_campaign_continuation_assessment import _format_state
+-from test_fixture_support import checked_discovery_evidence
+-from test_hermetic_env import isolate_host_session
+-from test_t2023_goal_management_and_maintenance_binding import (
++from campaign_test_support import inspect_fixture_campaign, write_scoped_fixture_grant  # noqa: E402
++from test_campaign_continuation_assessment import _format_state  # noqa: E402
++from test_fixture_support import checked_discovery_evidence  # noqa: E402
++from test_hermetic_env import isolate_host_session  # noqa: E402
++from test_t2023_goal_management_and_maintenance_binding import (  # noqa: E402
+     MAINTENANCE_OBJECTIVE, _project, _read_history, _register_maintenance, _witnessed_apply,
+ )
+-from saipen_engine import (
++from saipen_engine import (  # noqa: E402
+     automation, backend_protocol, board, campaign, continuation_assessment as CA,
+     goal_authority, iteration_verdict as IV, operations, outcome_truth, persistent_goal,
+     router, state as state_owner, supervisor, watchdog, worker, work_exhaustion as W,
+@@ -102,7 +102,11 @@
+         )
+ 
+     def owners(self):
+-        for name in ("audit_inbox_projection", "queued_source_projection", "pending_append_projection"):
++        for name in (
++            "audit_inbox_projection",
++            "queued_source_projection",
++            "pending_append_projection",
++        ):
+             self.stack.enter_context(mock.patch.object(CA, name, return_value=None))
+         self.stack.enter_context(mock.patch.object(CA, "future_gate_projection", return_value=None))
+         for name in ("goal_checkpoint_gate", "continuous_maintenance_gate", "conformance_crew_gate",
+@@ -148,7 +152,8 @@
+         ))
+         controller = campaign.CampaignController(root, backend=backend)
+         result = controller.admit_campaign(
+-            campaign_id="CAMP-T2040-TERMINAL", authority_proof_reference=".saipen/authority/grant.json",
++            campaign_id="CAMP-T2040-TERMINAL",
++            authority_proof_reference=".saipen/authority/grant.json",
+         )
+         self.assertTrue(result["admitted"], result)
+         return controller
+@@ -194,7 +199,9 @@
+         self.write_state(blocker="BLOCKED_EXTERNAL -- current external boundary")
+         watchdog.acquire_lease(self.root, "live", now=T0)
+         for seconds in (5, 45):
+-            result = supervisor.decide(self.root, now=T0 + dt.timedelta(seconds=seconds), worker_id="other")
++            result = supervisor.decide(
++                self.root, now=T0 + dt.timedelta(seconds=seconds), worker_id="other"
++            )
+             self.assertEqual(result["verdict"], supervisor.AWAIT_WORKER)
+             self.assertFalse(result["may_mutate"])
+         (self.root / watchdog.CACHE_REL).write_text("{broken", encoding="utf-8")
+@@ -204,7 +211,8 @@
+     def test_authoritative_external_stop_outranks_stale_workable_board(self):
+         self.write_state(blocker="BLOCKED_EXTERNAL -- current external boundary")
+         (self.root / ".saipen/BOARD.md").write_text(
+-            "## DOING\n## TODO\n- [ ] T-1 [P1] stale work | verify: local test\n## DONE\n## BLOCKED\n",
++            "## DOING\n## TODO\n- [ ] T-1 [P1] stale work | verify: local test\n"
++            "## DONE\n## BLOCKED\n",
+             encoding="utf-8",
+         )
+         picture = supervisor.observe(self.root, now=T0)
+@@ -215,8 +223,11 @@
+ 
+     def test_stored_actionable_goals_cannot_override_current_blocked_assessment(self):
+         goal = persistent_goal.PersistentGoal(
+-            goal_id="stale-goal", project_id=self.root.name, title="Stale observation",
+-            objective="Current proof required", current_status=persistent_goal.STATUS_ACTIONABLE_GAPS,
++            goal_id="stale-goal",
++            project_id=self.root.name,
++            title="Stale observation",
++            objective="Current proof required",
++            current_status=persistent_goal.STATUS_ACTIONABLE_GAPS,
+         )
+         persistent_goal.save_goal(self.root, goal)
+         for kwargs, classification in (
+@@ -328,14 +339,20 @@
+                 W, "discovery_evidence", return_value=evidence,
+             ):
+                 result = CA.assess_continuation(self.root, source_evidence={"hunt_findings": {}})
+-                self.assertIn(result["classification"], (CA.INVALID_RUNTIME, CA.INCOMPLETE_DISCOVERY))
++                self.assertIn(
++                    result["classification"], (CA.INVALID_RUNTIME, CA.INCOMPLETE_DISCOVERY)
++                )
+                 self.assertFalse(result["actionable"])
+ 
+     def test_assessment_refuses_malformed_effective_route(self):
+         for routed in (42, ["truthy"], {"ok": True, "reason": "maintain", "primary_blocker": 42}):
+             with self.subTest(route=routed):
+-                result = CA._classify_effective_route(self.root, routed, {}, self.state, board.parse_board(BOARD))
+-                self.assertIn(result["classification"], (CA.INVALID_RUNTIME, CA.INCOMPLETE_DISCOVERY))
++                result = CA._classify_effective_route(
++                    self.root, routed, {}, self.state, board.parse_board(BOARD)
++                )
++                self.assertIn(
++                    result["classification"], (CA.INVALID_RUNTIME, CA.INCOMPLETE_DISCOVERY)
++                )
+                 self.assertFalse(result["actionable"])
+ 
+     def test_completion_requires_verified_quiescence_and_all_goals_satisfied(self):
+@@ -350,14 +367,22 @@
+                 result = board.classify_idle_work({}, state=self.state, persistent_goals=goals)
+                 self.assertEqual(result["all_requirements_complete"], expected, result)
+                 routed = self.route(persistent_goals=goals)
+-                self.assertEqual(routed.get("stop_reason") == "ALL_REQUIREMENTS_COMPLETE", expected, routed)
+-        with mock.patch.object(W, "certify_work_exhaustion", return_value=certificate(source=W.IMPROVE_CANDIDATES)):
++                self.assertEqual(
++                    routed.get("stop_reason") == "ALL_REQUIREMENTS_COMPLETE", expected, routed
++                )
++        with mock.patch.object(
++            W, "certify_work_exhaustion", return_value=certificate(source=W.IMPROVE_CANDIDATES)
++        ):
+             result = board.classify_idle_work({}, state=self.state, persistent_goals=[])
+             self.assertFalse(result["all_requirements_complete"])
+ 
+     def test_outcome_failure_cannot_leak_router_completion(self):
+-        with mock.patch.object(W, "certify_work_exhaustion", return_value=certificate()), mock.patch.object(
+-            outcome_truth, "compute_outcome_truth", side_effect=ValueError("owner proof unreadable"),
++        with mock.patch.object(
++            W, "certify_work_exhaustion", return_value=certificate()
++        ), mock.patch.object(
++            outcome_truth,
++            "compute_outcome_truth",
++            side_effect=ValueError("owner proof unreadable"),
+         ):
+             result = self.route(persistent_goals=[])
+         self.assertNotEqual(result.get("stop_reason"), "ALL_REQUIREMENTS_COMPLETE", result)
+@@ -384,7 +409,9 @@
+         ):
+             with self.subTest(route=routed):
+                 result = self.automation(routed)
+-                self.assertNotIn(result["disposition"], (automation.CONTINUE, automation.COMPLETE), result)
++                self.assertNotIn(
++                    result["disposition"], (automation.CONTINUE, automation.COMPLETE), result
++                )
+                 self.assertIsNone(result["next_command"])
+ 
+     def test_automation_certificate_cannot_complete_unsatisfied_objectives(self):
+@@ -405,7 +432,9 @@
+             ) as compute, mock.patch.object(outcome_truth, "read_publication_evidence",
+                                            side_effect=AssertionError("pure owner IO")):
+                 if consumer == "board":
+-                    board.classify_idle_work({}, state=self.state, persistent_goals=[], publication_evidence=carrier)
++                    board.classify_idle_work(
++                        {}, state=self.state, persistent_goals=[], publication_evidence=carrier
++                    )
+                 else:
+                     self.route(persistent_goals=[], publication_evidence=carrier)
+                 self.assertIsNone(compute.call_args.args[0])
+@@ -426,7 +455,9 @@
+         root, current = self.native_grant()
+         cert = certificate(generation=str(current["last_event"]), source=W.IMPROVE_CANDIDATES)
+         routed = idle_route(cert)
+-        result = CA._classify_effective_route(root, routed, routed, current, board.parse_board(BOARD))
++        result = CA._classify_effective_route(
++            root, routed, routed, current, board.parse_board(BOARD)
++        )
+         self.assertEqual(result["classification"], CA.INCOMPLETE_DISCOVERY, result)
+         self.assertFalse(result["actionable"])
+         self.assertFalse(result["quiescent"])
+@@ -449,29 +480,44 @@
+     def test_native_grant_valid_hint_supervisor_uses_existing_execution_seam(self):
+         root, current = self.native_grant()
+         cert = certificate(generation=str(current["last_event"]), source=W.IMPROVE_CANDIDATES)
+-        with mock.patch.object(supervisor, "assess_continuation", return_value=self.assessment(cert, proven=True)):
++        with mock.patch.object(
++            supervisor, "assess_continuation", return_value=self.assessment(cert, proven=True)
++        ):
+             result = supervisor.decide(root)
+         self.assertEqual(result["verdict"], supervisor.RUN_WORK, result)
+         self.assertEqual(result["work"], cert["discovery_dispatch"]["action"])
+-        self.assertEqual(result["observation"]["continuation_classification"], CA.INCOMPLETE_DISCOVERY)
++        self.assertEqual(
++            result["observation"]["continuation_classification"], CA.INCOMPLETE_DISCOVERY
++        )
+         self.assertFalse(result["observation"]["continuation_actionable"])
+ 
+     def test_unproven_or_stale_hint_never_creates_authority(self):
+-        self.write_state(continuation_authority="operator_persistent", authority_until="continuous_maintenance",
+-                         goal_ingress="goal-0123456789abcdef")
++        self.write_state(
++            continuation_authority="operator_persistent",
++            authority_until="continuous_maintenance",
++            goal_ingress="goal-0123456789abcdef",
++        )
+         cert = certificate(source=W.IMPROVE_CANDIDATES)
+         routed = idle_route(cert)
+-        result = CA._classify_effective_route(self.root, routed, routed, self.state, board.parse_board(BOARD))
++        result = CA._classify_effective_route(
++            self.root, routed, routed, self.state, board.parse_board(BOARD)
++        )
+         self.assertEqual(result["classification"], CA.WAIT_AUTHORITY, result)
+         self.assertFalse(result["actionable"])
+         self.assertFalse(result.get("discovery_dispatch"))
+         result = self.automation(routed)
+         self.assertNotEqual(result["disposition"], automation.CONTINUE, result)
+-        for change in ({"source_generation": "stale"}, {"bounded": 1}, {"action": "saipen release"}):
++        for change in (
++            {"source_generation": "stale"},
++            {"bounded": 1},
++            {"action": "saipen release"},
++        ):
+             broken = copy.deepcopy(cert)
+             broken["discovery_dispatch"].update(change)
+             with self.subTest(hint=change), mock.patch.object(
+-                supervisor, "assess_continuation", return_value=self.assessment(broken, proven=True),
++                supervisor,
++                "assess_continuation",
++                return_value=self.assessment(broken, proven=True),
+             ):
+                 result = supervisor.decide(self.root)
+                 self.assertFalse(result["may_mutate"], result)
+@@ -481,8 +527,12 @@
+         root, current = self.native_grant()
+         controller = self.admit(root)
+         cert = certificate(generation=str(current["last_event"]), source=W.IMPROVE_CANDIDATES)
+-        with mock.patch.object(CA, "assess_continuation", return_value=self.assessment(cert, proven=True)), mock.patch.object(
+-            controller, "_execute_canonical_worker", return_value={"ok": True, "route_only": True},
++        with mock.patch.object(
++            CA, "assess_continuation", return_value=self.assessment(cert, proven=True)
++        ), mock.patch.object(
++            controller,
++            "_execute_canonical_worker",
++            return_value={"ok": True, "route_only": True},
+         ) as execute:
+             result = controller.step()
+         self.assertTrue(result["ok"], result)
+@@ -500,10 +550,14 @@
+         assessment = CA._make_assessment(CA.MAINTENANCE_AVAILABLE, action="saipen continue",
+                                          reason="maintain", detail="bounded forensic source")
+         for status in (backend_protocol.NO_NEW_EVIDENCE, "UNKNOWN_SUCCESS"):
+-            with self.subTest(status=status), mock.patch.object(CA, "assess_continuation", return_value=assessment):
++            with self.subTest(status=status), mock.patch.object(
++                CA, "assess_continuation", return_value=assessment
++            ):
+                 backend.discover.return_value = {"ok": True, "status": status}
+                 result = controller.step()
+-                self.assertNotEqual(result["state"]["campaign_state"], campaign.QUIESCENT_WAIT, result)
++                self.assertNotEqual(
++                    result["state"]["campaign_state"], campaign.QUIESCENT_WAIT, result
++                )
+                 self.assertFalse(result["ok"], result)
+         self.assertEqual(backend.discover.call_count, 2)
+ 
+@@ -516,8 +570,11 @@
+         backend.discover.assert_not_called()
+         assessment = CA._make_assessment(CA.MAINTENANCE_AVAILABLE, action="saipen continue",
+                                          reason="maintain", detail="bounded forensic source")
+-        backend.discover.return_value = {"ok": True, "status": backend_protocol.NEW_QUALIFIED_FINDINGS,
+-                                         "findings": [{"finding_id": "f"}]}
++        backend.discover.return_value = {
++            "ok": True,
++            "status": backend_protocol.NEW_QUALIFIED_FINDINGS,
++            "findings": [{"finding_id": "f"}],
++        }
+         backend.deliver_finding_to_audit_inbox.return_value = 42
+         with mock.patch.object(CA, "assess_continuation", return_value=assessment):
+             result = controller.step()

@@ -1,0 +1,132 @@
+--- preimages/tools/test_bz_rea_acceptance_fixture.py
++++ tools/test_bz_rea_acceptance_fixture.py
+@@ -171,21 +171,29 @@
+         res1 = replenish_from_goals(self.tmp, "bzcc-researcher", dry_run=True)
+         self.assertTrue(res1["replenished"])
+         cid1 = res1["candidate"]["candidate_id"]
+-
+-        # 2. Simulate task 1 completed on BOARD
++        self.assertEqual(cid1, "bzcc_procedure_semantics-sub_41B200")
++
++        # 2. Simulate task 1 completed with exact identity in the escaped description.
+         self.board_file.write_text(
+-            f"# Board\n\n## DOING\n\n## TODO\n\n## DONE\n- [x] T-49 NetSession_ProcessPacket | candidate: {cid1}\n\n## BLOCKED\n",
++            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n"
++            f"- [x] T-49 [P1] NetSession_ProcessPacket \\| goal: {self.goal.goal_id} \\| candidate: {cid1}"
++            f" \\| evidence_fp: {res1['candidate']['evidence_fingerprint']}"
++            " | verify: fixture sub_41B200 semantics verified\n\n## BLOCKED\n",
+             encoding="utf-8",
+         )
+ 
+         # 3. Replenish next task: must skip sub_41B200 and select the next P1 or P2 candidate
++        board_before = self.board_file.read_bytes()
+         res2 = replenish_from_goals(self.tmp, "bzcc-researcher", dry_run=True)
++        self.assertTrue(res2["ok"], res2)
+         self.assertTrue(res2["replenished"])
+         cid2 = res2["candidate"]["candidate_id"]
+ 
+         self.assertNotEqual(cid1, cid2)
+         # Next candidate should be sub_430050 (the other P1)
++        self.assertEqual(cid2, "bzcc_procedure_semantics-sub_430050")
+         self.assertIn("VehiclePhysics_ApplyImpulse", res2["candidate"]["title"])
++        self.assertEqual(self.board_file.read_bytes(), board_before)
+ 
+ 
+ if __name__ == "__main__":
+--- preimages/tools/test_bzcc_overnight_autonomy.py
++++ tools/test_bzcc_overnight_autonomy.py
+@@ -20,7 +20,7 @@
+ 17. Interrupted campaigns resume without duplicate side effects.
+ 18. Expired, revoked and wrong-scope grants refuse mutation.
+ 19. Host offline produces RUNTIME_PAUSED, not success.
+-20. Genuine exhausted work produces quiet waiting, not fake tasks.
++20. Empty project with a satisfied goal waits without fake tasks; unchecked discovery is not quiescence.
+ 21. A failed SAIPEN command piped through head remains failed.
+ 22. Work progress cannot be inferred solely from journal counters.
+ 23. Routine Windows tests do not capture mouse, focus or keyboard.
+@@ -51,6 +51,7 @@
+     operations,
+     persistent_goal,
+     replenishment,
++    work_exhaustion as we,
+ )
+ 
+ 
+@@ -356,7 +357,7 @@
+             "doing": [],
+             "todo": [],
+             "done": [
+-                {"id": "T-100", "state": "x", "text": "Investigate FUN_1 [G1] candidate: G1-FUN_1 | evidence_fp: sha256:gen1"}
++                {"id": "T-100", "state": "x", "text": "Investigate FUN_1 [G1] | goal: G1 | candidate: G1-FUN_1 | evidence_fp: sha256:gen1"}
+             ],
+             "blocked": [],
+         }
+@@ -389,7 +390,8 @@
+         # First 10 items (FUN_0 through FUN_9) are already in DONE
+         # 11th item (FUN_10) is eligible and unprocessed
+         done_lines = "\n".join(
+-            f"- [x] T-{100+i} Investigate FUN_{i} [BZ-G] candidate: BZ-G-FUN_{i}"
++            f"- [x] T-{100+i} [P2] Investigate FUN_{i} [BZ-G] \\| goal: BZ-G \\| candidate: BZ-G-FUN_{i}"
++            f" | verify: fixture FUN_{i} semantics verified"
+             for i in range(10)
+         )
+         (self.saipen_dir / "BOARD.md").write_text(
+@@ -581,8 +583,8 @@
+         )
+         self.assertEqual(act, host_iteration.REPORT_RUNTIME_PAUSED)
+ 
+-    # 20. Genuine exhausted work produces quiet waiting, not fake tasks.
+-    def test_20_genuine_exhausted_work_produces_quiet_waiting(self) -> None:
++    # 20. Empty project with a satisfied goal waits without fake tasks; unchecked discovery is not quiescence.
++    def test_20_empty_project_does_not_prove_exhaustion(self) -> None:
+         goal = persistent_goal.PersistentGoal(
+             goal_id="BZ-DONE",
+             project_id="test",
+@@ -591,10 +593,32 @@
+             current_status=persistent_goal.STATUS_SATISFIED,
+         )
+         persistent_goal.save_goal(self.root, goal)
+-
++        before = {p: p.read_bytes() for p in self.saipen_dir.rglob("*") if p.is_file()}
++
++        # Schema 2 requires checked absence across all twelve surfaces. A stored
++        # satisfied goal supplies neither analysis receipts nor a maintenance grant.
+         assessment = ca.assess_continuation(self.root)
+-        self.assertEqual(assessment["classification"], ca.QUIESCENT)
++        self.assertEqual(assessment["classification"], ca.INCOMPLETE_DISCOVERY)
+         self.assertFalse(assessment["actionable"])
++        self.assertFalse(assessment["quiescent"])
++        self.assertIsNone(assessment["executable_work"])
++        self.assertEqual(assessment["action"], "saipen status")
++        certificate = assessment["effective_route"]["work_exhaustion"]
++        self.assertEqual(certificate["schema_version"], 2)
++        self.assertEqual(we.certificate_diagnostics(certificate), [])
++        self.assertEqual(len(certificate["sources"]), 12)
++        self.assertEqual({row["source_name"] for row in certificate["sources"]}, set(we.ALL_WORK_SOURCES))
++        self.assertTrue(certificate["no_work_available"])
++        self.assertFalse(certificate["all_checked"])
++        self.assertFalse(certificate["exhausted"])
++        sources = {row["source_name"]: row for row in certificate["sources"]}
++        self.assertEqual(sources[we.PERSISTENT_GOALS]["eligibility_result"], we.CLEAN_VERIFIED)
++        for name in (we.HUNT_FINDINGS, we.EXTERNAL_FORENSICS, we.CONFORMANCE_DEBT):
++            with self.subTest(source=name):
++                self.assertFalse(sources[name]["checked"])
++                self.assertEqual(sources[name]["eligibility_result"], we.NOT_CHECKED)
++        self.assertEqual(sources[we.IMPROVE_CANDIDATES]["eligibility_result"], we.BLOCKED_AUTHORITY)
++        self.assertEqual({p: p.read_bytes() for p in self.saipen_dir.rglob("*") if p.is_file()}, before)
+ 
+     # 21. A failed SAIPEN command piped through head remains failed.
+     def test_21_failed_saipen_command_piped_through_head_remains_failed(self) -> None:
+--- preimages/tools/test_persistent_autonomy_recovery.py
++++ tools/test_persistent_autonomy_recovery.py
+@@ -363,7 +363,9 @@
+     def test_blocked_first_candidate_selects_second_candidate(self) -> None:
+         """If candidate 1 is blocked on the board, replenishment selects candidate 2 from the pool."""
+         self.board_file.write_text(
+-            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n- [-] T-99 Investigate cand-1 | goal: g-pool | candidate: g-pool-c1\n",
++            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
++            "- [ ] T-99 [P1] Investigate cand-1 \\| goal: g-pool \\| candidate: g-pool-c1"
++            " | blocker: BLOCKED_EXTERNAL -- awaiting capture | verify: cand-1 semantics documented\n",
+             encoding="utf-8",
+         )
+         evidence_dir = self.saipen_dir / "evidence"

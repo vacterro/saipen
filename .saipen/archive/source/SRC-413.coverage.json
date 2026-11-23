@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-413:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-21134",
+      "text": "P0: SAIPEN must turn obstacles into permitted actions, not operator obligations. The cc CURRENT_FAIL dead-end (\"no registered executable repair\") must project an exact executable repair per blocking conformance finding, derived from registered verbs/owners, and prove it with a focused regression.",
+      "verification": "focused core-unit 0fdc272a1a6f747b-20261114T204024444258Z.json PASS ran=80 (same-verifier regression 6f0deb4e pre-FAIL/post-PASS); 20 obstacle + 60 direct consumer tests green",
+      "work": "T-2056"
+    }
+  },
+  "schema_version": 1
+}

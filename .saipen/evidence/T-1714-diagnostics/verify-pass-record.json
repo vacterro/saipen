@@ -1,0 +1,22 @@
+{
+  "label": "verify-pass-record",
+  "phase": "VERIFY",
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "checkpoint",
+    "RUN",
+    "T-1714",
+    "verify -> PASS [target: T-1714] conf: high -- Actual current-launcher executed pair f63225ac11a14d8d914eab879e571504 collects 13 before/after cases, FAIL 17 subcontrols then PASS zero failures/skips; unchanged oracle/original preimages. current-evidence-audit.json validates source/ownership/raw gate hashes and current pair admission, 126 neighbors, 21 whole-source contracts, pinned Ruff 0.16.0, owned whitespace, native core zero failures/eight warnings and exact 6207-case full-family PASS at 2df2566be72aeb7b. Earlier direct audit was an instrument-context mismatch: identical Python bytes at different executable paths plus cmd PROMPT; verifier-context-comparison.json proves the cause without secrets. The correct launcher audit passes; no production fix or evidence weakening. REVIEW and local no-publish closure remain due; SRC-205 parent remains open.",
+    "--json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 1.172,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"CHECKPOINTED\",\r\n  \"op_id\": \"checkpoint-555fe6bb6b3f4f32868ceff0761d4a40\",\r\n  \"changed_files\": [\r\n    \".saipen/LOG.md\",\r\n    \".saipen/BOARD.md\",\r\n    \".saipen/STATE.md\"\r\n  ],\r\n  \"recovery_required\": false,\r\n  \"event_id\": \"E-14471\"\r\n}\r\n",
+  "stderr": "",
+  "stdout_sha256": "c9074b2791153d7e8fb23c1b014ca0712c3018326cddd8ebd1f012587e4c9ce6",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

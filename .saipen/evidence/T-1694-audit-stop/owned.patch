@@ -1,0 +1,124 @@
+--- pre-automation.py
++++ tools/saipen_engine/automation.py
+@@ -257,6 +257,7 @@
+         "audit-inbox-residue": (WAIT_USER, "audit-inbox-residue"),
+         "audit-inbox-invalid": (CONTINUE, "audit-inbox-invalid"),
+         "audit-inbox": (CONTINUE, "audit-inbox"),
++        "audit-inbox-unworkable": (BLOCKED, "audit-inbox-unworkable"),
+         "bootstrap": (CONTINUE, "bootstrap"),
+         # SRC-085 M3: a red conformance gate that owns the route is a STOP for
+         # the transport, never a synthetic `cc` -- the routed action itself
+--- pre-response_surface.py
++++ tools/saipen_engine/response_surface.py
+@@ -947,6 +947,7 @@
+         if due
+         else words[1]
+         if phase == "DONE"
++        and auto.get("disposition") not in {"BLOCKED", "WAIT_EXTERNAL", "INVALID"}
+         else words[3]
+     )
+     completed = facts.get("completed") or []
+@@ -1138,6 +1139,11 @@
+         else [],
+         "response_reason": "stop" if since and state.get("last_event") == since else "final",
+     }
++    if auto.get("disposition") == "BLOCKED" and auto.get("reason_code") == "audit-inbox-unworkable":
++        # The router's diagnostic is a stop, never another synthetic cc or a
++        # request for operator authority. Preserve the actual lifecycle phase.
++        facts["blocker"] = "AUDIT_INBOX_UNWORKABLE -- ACTIVE audit"
++        facts["next_action"] = "NONE"
+     if facts["operator_due"]:
+         # STATE's legal WAIT owns the actual required decision. Do not print
+         # the router's generic prose or assign its command to the operator.
+--- pre-test_automation_block.py
++++ tools/test_automation_block.py
+@@ -25,7 +25,7 @@
+ sys.path.insert(0, str(ROOT / "tools"))
+ from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
+ 
+-from saipen_engine import automation  # noqa: E402
++from saipen_engine import automation, response_surface as RS  # noqa: E402
+ from saipen_engine.board import parse_board  # noqa: E402
+ from saipen_engine.router import route_next  # noqa: E402
+ from saipen_engine.state import parse_state_or_error  # noqa: E402
+@@ -303,6 +303,48 @@
+         block = self.block(routed=routed, audit_status=self.audit(residue=True))
+         self.assertEqual(block["disposition"], automation.WAIT_USER)
+ 
++    def test_unworkable_audit_stops_without_inventing_operator_authority(self) -> None:
++        inbox = {"unworkable_active_only": True, "action": "saipen audit status"}
++        routed = route_next(_state(), BOARD_EMPTY, audit_inbox=inbox)
++        self.assertEqual(routed["executable_behavior"], "RESTATE_AND_STOP")
++        block = self.block(routed=routed, audit_status=self.audit(layer_counts=1))
++        self.assertEqual(block["disposition"], automation.BLOCKED)
++        self.assertEqual(block["reason_code"], "audit-inbox-unworkable")
++        self.assertIsNone(block["next_command"])
++        self.assertFalse(block["operator_action_due"])
++        self.assertFalse(block["closure_complete"])
++
++    def test_workable_ticket_outranks_unworkable_audit(self) -> None:
++        board = BOARD_EMPTY.replace(
++            "## TODO\n", "## TODO\n- [ ] T-900 [P1] runnable | verify: exact control\n"
++        )
++        inbox = {"unworkable_active_only": True, "action": "saipen audit status"}
++        routed = route_next(_state(), board, audit_inbox=inbox)
++        self.assertEqual(routed["action"], "PHASE SCOUT T-900")
++        block = self.block(
++            routed=routed, board=parse_board(board), audit_status=self.audit(layer_counts=1)
++        )
++        self.assertEqual(block["disposition"], CONTINUE)
++        self.assertEqual(block["next_command"], "cc")
++        self.assertFalse(block["operator_action_due"])
++
++    def test_unworkable_audit_has_truthful_final_facts(self) -> None:
++        routed = route_next(
++            _state(), BOARD_EMPTY,
++            audit_inbox={"unworkable_active_only": True, "action": "saipen audit status"},
++        )
++        block = self.block(routed=routed, audit_status=self.audit(layer_counts=1))
++        facts = RS.canonical_facts(
++            self.root,
++            status={"automation": block, "conformance_status": {"status": "CURRENT_PASS"}},
++        )
++        self.assertEqual(facts["blocker"], "AUDIT_INBOX_UNWORKABLE -- ACTIVE audit")
++        self.assertEqual(facts["next_action"], "NONE")
++        text = RS.digest_from_facts(facts, reason="final", language="et")
++        self.assertIn("RESULT: Töö säilitatud", text)
++        self.assertIn("BLOCKER: AUDIT_INBOX_UNWORKABLE", text)
++        self.assertNotIn("OPERATOR ACTION:", text)
++
+ 
+ # ---------------------------------------------------------------------------
+ # R5/R6: the closure gate
+@@ -705,4 +747,4 @@
+ 
+ 
+ if __name__ == "__main__":
+-    unittest.main()+    unittest.main()
+--- pre-test_response_surface_contract.py
++++ tools/test_response_surface_contract.py
+@@ -528,6 +528,24 @@
+ 
+ 
+ class AutonomyTests(unittest.TestCase):
++    def test_blocked_automation_is_a_handback_not_project_completion(self):
++        facts = {
++            "phase": "DONE",
++            "task": "none",
++            "automation": {
++                "disposition": "BLOCKED", "next_command": None, "operator_action_due": False
++            },
++            "blocker": "AUDIT_INBOX_UNWORKABLE -- audit/23",
++            "next_action": "NONE",
++            "validation": "CURRENT_PASS",
++        }
++        text = RS.digest_from_facts(facts, reason="final", language="et")
++        self.assertIn("RESULT: Töö säilitatud", text)
++        self.assertNotIn("RESULT: Valmis", text)
++        self.assertIn("BLOCKER: AUDIT_INBOX_UNWORKABLE", text)
++        self.assertIn("NEXT EXACT ACTION: NONE", text)
++        self.assertNotIn("OPERATOR ACTION:", text)
++
+     def test_deterministic_continuation_does_not_return_to_the_user(self):
+         self.assertTrue(
+             RS.should_continue(

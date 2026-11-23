@@ -1,0 +1,44 @@
+{
+  "broker_alive": true,
+  "continuation_authority_declared": "DECLARED_NOT_GRANTED",
+  "dispatch_dispatched": false,
+  "dispatch_status": null,
+  "installed_adapters": [
+    "antigravity",
+    "claude",
+    "codebuddy",
+    "codex",
+    "freebuff",
+    "gemini",
+    "opencode",
+    "zaicode",
+    "zcode-production"
+  ],
+  "note": "read-only: this probe dispatched nothing; run authorized_dispatch_test for the mutating half, which uses a disposable fixture root",
+  "ok": false,
+  "ready_now": false,
+  "reason": "no host-scheduler transport is registered: a request is durable (DISPATCH_REQUEST_PERSISTED) but no host started it; the authority broker is live, so an authenticated receipt remains possible",
+  "scheduler_supported": false,
+  "session_bound": false,
+  "stages": {
+    "acceptance_tier": null,
+    "campaigns": {},
+    "host_accepted": false,
+    "multi_turn_continuation": 0,
+    "paired_campaign": false,
+    "readable_records": 0,
+    "request_persisted": false,
+    "successor_turn_started": false,
+    "truncated_unverified": 0,
+    "turn_completed": false,
+    "turn_started": false
+  },
+  "synthetic_receipt_authenticated": false,
+  "taxonomy": "HOST_INSTALLED_TRANSPORT_UNREGISTERED",
+  "transport": {
+    "host_dispatch_endpoint": false,
+    "host_scheduler_dispatch_cmd": false
+  },
+  "verdict": "HOST_DISPATCH_UNAVAILABLE",
+  "verified_history": false
+}

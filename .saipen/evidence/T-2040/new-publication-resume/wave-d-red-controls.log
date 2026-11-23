@@ -1,0 +1,185 @@
+test_bound_no_publish_receipt_is_local_only (test_t2040_publication_truth.PublicationTruthTests.test_bound_no_publish_receipt_is_local_only) ... ok
+test_claimed_published_without_owner_proof_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_claimed_published_without_owner_proof_is_unknown) ... ok
+test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof (test_t2040_publication_truth.PublicationTruthTests.test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof) ... ok
+test_corrupt_or_duplicate_receipts_remain_unknown (test_t2040_publication_truth.PublicationTruthTests.test_corrupt_or_duplicate_receipts_remain_unknown) ... ok
+test_done_published_field_is_not_proof (test_t2040_publication_truth.PublicationTruthTests.test_done_published_field_is_not_proof) ... ok
+test_exact_canonical_receipt_and_local_remote_prove_publication (test_t2040_publication_truth.PublicationTruthTests.test_exact_canonical_receipt_and_local_remote_prove_publication) ... ok
+test_explicit_blocker_remains_blocked (test_t2040_publication_truth.PublicationTruthTests.test_explicit_blocker_remains_blocked) ... ok
+test_explicit_unknown_remains_unknown (test_t2040_publication_truth.PublicationTruthTests.test_explicit_unknown_remains_unknown) ... ok
+test_external_hold_does_not_suppress_executable_work_or_budget_veto (test_t2040_publication_truth.PublicationTruthTests.test_external_hold_does_not_suppress_executable_work_or_budget_veto) ... ok
+test_fabricated_verified_release_id_never_publishes (test_t2040_publication_truth.PublicationTruthTests.test_fabricated_verified_release_id_never_publishes) ... ok
+test_foreign_root_replay_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_foreign_root_replay_is_unknown) ... ok
+test_foreign_staging_context_survives_outcome_projection (test_t2040_publication_truth.PublicationTruthTests.test_foreign_staging_context_survives_outcome_projection) ... ok
+test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown) ... ok
+test_missing_or_foreign_project_binding_never_publishes (test_t2040_publication_truth.PublicationTruthTests.test_missing_or_foreign_project_binding_never_publishes) ... ok
+test_missing_remote_git_proof_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_missing_remote_git_proof_is_unknown) ... ok
+test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication (test_t2040_publication_truth.PublicationTruthTests.test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication) ... ok
+test_no_publish_intent_is_local_not_pending_or_published (test_t2040_publication_truth.PublicationTruthTests.test_no_publish_intent_is_local_not_pending_or_published) ... ok
+test_other_ticket_receipt_cannot_publish_this_ticket (test_t2040_publication_truth.PublicationTruthTests.test_other_ticket_receipt_cannot_publish_this_ticket) ... ok
+test_owner_reads_absence_as_pending (test_t2040_publication_truth.PublicationTruthTests.test_owner_reads_absence_as_pending) ... ok
+test_partial_or_competing_matching_receipts_remain_unknown (test_t2040_publication_truth.PublicationTruthTests.test_partial_or_competing_matching_receipts_remain_unknown) ... ok
+test_pending_without_hold_is_not_blocked (test_t2040_publication_truth.PublicationTruthTests.test_pending_without_hold_is_not_blocked) ... ok
+test_primary_blocker_context_survives_outcome_projection (test_t2040_publication_truth.PublicationTruthTests.test_primary_blocker_context_survives_outcome_projection) ... ok
+test_pv15_exact_old_pending_oracle_has_no_blocker (test_t2040_publication_truth.PublicationTruthTests.test_pv15_exact_old_pending_oracle_has_no_blocker) ... ok
+test_pv21_executable_budgeted_work_does_not_invent_release_hold (test_t2040_publication_truth.PublicationTruthTests.test_pv21_executable_budgeted_work_does_not_invent_release_hold) ... ok
+test_root_none_consumes_owner_carrier_without_io (test_t2040_publication_truth.PublicationTruthTests.test_root_none_consumes_owner_carrier_without_io) ... ok
+test_stale_git_proof_is_rejected_at_explicit_root_boundary (test_t2040_publication_truth.PublicationTruthTests.test_stale_git_proof_is_rejected_at_explicit_root_boundary) ... ok
+test_stale_local_no_publish_source_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_stale_local_no_publish_source_is_unknown) ... ok
+test_wave_d_canonical_full_closure_has_explicit_publication_flag (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_canonical_full_closure_has_explicit_publication_flag) ... ERROR
+test_wave_d_context_captures_publication_and_source_identity_once (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_context_captures_publication_and_source_identity_once) ... FAIL
+test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result) ... 
+  test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result) (command='context_cold') ... FAIL
+  test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result) (command='context_hot') ... FAIL
+  test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result) (command='context_audit') ... FAIL
+test_wave_d_corrupt_receipt_cannot_borrow_kitchen_publication (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_corrupt_receipt_cannot_borrow_kitchen_publication) ... FAIL
+test_wave_d_duplicate_terminal_operations_cannot_publish (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_duplicate_terminal_operations_cannot_publish) ... FAIL
+test_wave_d_finish_and_owner_receipt_binding_cannot_be_borrowed (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_finish_and_owner_receipt_binding_cannot_be_borrowed) ... ok
+test_wave_d_identical_tracked_producer_bytes_do_not_discharge_adopted_delta (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_identical_tracked_producer_bytes_do_not_discharge_adopted_delta) ... ok
+test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication) ... 
+  test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication) (artifact={'commit': 'c0ffee', 'version': '1.0.0', 'op_id': 'release-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}) ... FAIL
+  test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication) (artifact={'mode': 'no-publish', 'op_id': 'release-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}) ... FAIL
+test_wave_d_local_finish_stale_payload_rejected_at_explicit_root (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_local_finish_stale_payload_rejected_at_explicit_root) ... FAIL
+test_wave_d_no_new_code_prose_is_not_zero_delta_authority (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_no_new_code_prose_is_not_zero_delta_authority) ... FAIL
+test_wave_d_no_publish_closure_is_compatible_but_not_publication (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_no_publish_closure_is_compatible_but_not_publication) ... FAIL
+test_wave_d_pure_aggregation_rejects_hints_and_carrier_reconstruction (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_pure_aggregation_rejects_hints_and_carrier_reconstruction) ... ok
+test_wave_d_verified_ignored_zero_delta_finish_is_local_only (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_verified_ignored_zero_delta_finish_is_local_only) ... FAIL
+
+======================================================================
+ERROR: test_wave_d_canonical_full_closure_has_explicit_publication_flag (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_canonical_full_closure_has_explicit_publication_flag)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 433, in test_wave_d_canonical_full_closure_has_explicit_publication_flag
+    self.assertTrue(verdict.published, verdict.to_dict())
+                    ^^^^^^^^^^^^^^^^^
+AttributeError: 'SourceVerdict' object has no attribute 'published'
+
+======================================================================
+FAIL: test_wave_d_context_captures_publication_and_source_identity_once (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_context_captures_publication_and_source_identity_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 520, in test_wave_d_context_captures_publication_and_source_identity_once
+    self.assertEqual(publication.call_count, 1)
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result) (command='context_cold')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 551, in test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result
+    self.assertIs(discovery.call_args.kwargs.get("publication_evidence"), carrier)
+AssertionError: None is not PublicationEvidence(project_root='V:\\_TEMP_\\saipen-publication-truth-lp2zwygg\\project', project_lineage='lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project_identity='v:\\_temp_\\saipen-publication-truth-lp2zwygg\\project', ticket_snapshot='d2919c16ff49b8fe27dc6437b901856184dc8ebedf8fa3d2e1ac1b6f84e98108', receipt_digest='ops-receipt-sha256:0eb03c99ae9a06966b61f242ae018fe735c024928e7509773e5e5f4b734aea81', tickets=(('T-1', 'pending', (), 'no canonical ticket-bound release receipt'),), diagnostics=())
+
+======================================================================
+FAIL: test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result) (command='context_hot')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 551, in test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result
+    self.assertIs(discovery.call_args.kwargs.get("publication_evidence"), carrier)
+AssertionError: None is not PublicationEvidence(project_root='V:\\_TEMP_\\saipen-publication-truth-lp2zwygg\\project', project_lineage='lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project_identity='v:\\_temp_\\saipen-publication-truth-lp2zwygg\\project', ticket_snapshot='d2919c16ff49b8fe27dc6437b901856184dc8ebedf8fa3d2e1ac1b6f84e98108', receipt_digest='ops-receipt-sha256:0eb03c99ae9a06966b61f242ae018fe735c024928e7509773e5e5f4b734aea81', tickets=(('T-1', 'pending', (), 'no canonical ticket-bound release receipt'),), diagnostics=())
+
+======================================================================
+FAIL: test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result) (command='context_audit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 551, in test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result
+    self.assertIs(discovery.call_args.kwargs.get("publication_evidence"), carrier)
+AssertionError: None is not PublicationEvidence(project_root='V:\\_TEMP_\\saipen-publication-truth-lp2zwygg\\project', project_lineage='lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project_identity='v:\\_temp_\\saipen-publication-truth-lp2zwygg\\project', ticket_snapshot='d2919c16ff49b8fe27dc6437b901856184dc8ebedf8fa3d2e1ac1b6f84e98108', receipt_digest='ops-receipt-sha256:0eb03c99ae9a06966b61f242ae018fe735c024928e7509773e5e5f4b734aea81', tickets=(('T-1', 'pending', (), 'no canonical ticket-bound release receipt'),), diagnostics=())
+
+======================================================================
+FAIL: test_wave_d_corrupt_receipt_cannot_borrow_kitchen_publication (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_corrupt_receipt_cannot_borrow_kitchen_publication)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 451, in test_wave_d_corrupt_receipt_cannot_borrow_kitchen_publication
+    self.assertEqual(closure.publication_state(self.root, "T-1"), "pending")
+AssertionError: 'published' != 'pending'
+- published
++ pending
+
+
+======================================================================
+FAIL: test_wave_d_duplicate_terminal_operations_cannot_publish (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_duplicate_terminal_operations_cannot_publish)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 441, in test_wave_d_duplicate_terminal_operations_cannot_publish
+    self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_UNKNOWN", "UNKNOWN")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 116, in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+AssertionError: 'RELEASE_PUBLISHED' != 'RELEASE_UNKNOWN'
+- RELEASE_PUBLISHED
++ RELEASE_UNKNOWN
+ : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_PUBLISHED', 'publication_details': {'tickets': [{'ticket_id': 'T-1', 'status': 'published', 'receipt_ids': ['release-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'release-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'], 'reason': 'canonical release independently verified'}], 'diagnostics': [], 'project_root': 'V:\\_TEMP_\\saipen-publication-truth-5aq5m43s\\project', 'project_lineage': 'lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'receipt_digest': 'ops-receipt-sha256:5a871b5df60b245f0b0b61434a5e6a84436cd12e347bdff464f1b90d8ec8cafb'}, 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PUBLISHED', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PUBLISHED', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PUBLISHED'}
+
+======================================================================
+FAIL: test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication) (artifact={'commit': 'c0ffee', 'version': '1.0.0', 'op_id': 'release-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 423, in test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication
+    self.assertEqual(closure.publication_state(self.root, "T-1"), "pending")
+AssertionError: 'published' != 'pending'
+- published
++ pending
+
+
+======================================================================
+FAIL: test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication) (artifact={'mode': 'no-publish', 'op_id': 'release-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 423, in test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication
+    self.assertEqual(closure.publication_state(self.root, "T-1"), "pending")
+AssertionError: 'published' != 'pending'
+- published
++ pending
+
+
+======================================================================
+FAIL: test_wave_d_local_finish_stale_payload_rejected_at_explicit_root (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_local_finish_stale_payload_rejected_at_explicit_root)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 470, in test_wave_d_local_finish_stale_payload_rejected_at_explicit_root
+    self.assert_publication(self.truth(self.root, publication_evidence=evidence), "RELEASE_UNKNOWN", "UNKNOWN")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 116, in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+AssertionError: 'RELEASE_PENDING' != 'RELEASE_UNKNOWN'
+- RELEASE_PENDING
++ RELEASE_UNKNOWN
+ : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_PENDING', 'publication_details': {'tickets': [{'ticket_id': 'T-1', 'status': 'pending', 'receipt_ids': [], 'reason': 'no canonical ticket-bound release receipt'}], 'diagnostics': [], 'project_root': 'V:\\_TEMP_\\saipen-publication-truth-6rww0d69\\project', 'project_lineage': 'lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'receipt_digest': 'ops-receipt-sha256:722eb268a1d0e09fdcd3f5278641a1ee0bbd3e950861244c988de7a4515d931c'}, 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PENDING'}
+
+======================================================================
+FAIL: test_wave_d_no_new_code_prose_is_not_zero_delta_authority (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_no_new_code_prose_is_not_zero_delta_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 495, in test_wave_d_no_new_code_prose_is_not_zero_delta_authority
+    self.assertEqual(self.evidence().tickets[0][1], "pending")
+AssertionError: 'unknown' != 'pending'
+- unknown
++ pending
+
+
+======================================================================
+FAIL: test_wave_d_no_publish_closure_is_compatible_but_not_publication (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_no_publish_closure_is_compatible_but_not_publication)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 409, in test_wave_d_no_publish_closure_is_compatible_but_not_publication
+    self.assertEqual(closure.publication_state(self.root, "T-1"), "pending")
+AssertionError: 'published' != 'pending'
+- published
++ pending
+
+
+======================================================================
+FAIL: test_wave_d_verified_ignored_zero_delta_finish_is_local_only (test_t2040_publication_truth.PublicationTruthTests.test_wave_d_verified_ignored_zero_delta_finish_is_local_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 457, in test_wave_d_verified_ignored_zero_delta_finish_is_local_only
+    self.assert_publication(self.truth(publication_evidence=evidence), "LOCAL_NO_PUBLISH", "LOCAL_NO_PUBLISH")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 116, in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+AssertionError: 'RELEASE_PENDING' != 'LOCAL_NO_PUBLISH'
+- RELEASE_PENDING
++ LOCAL_NO_PUBLISH
+ : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_PENDING', 'publication_details': {'tickets': [{'ticket_id': 'T-1', 'status': 'pending', 'receipt_ids': [], 'reason': 'no canonical ticket-bound release receipt'}], 'diagnostics': [], 'project_root': 'V:\\_TEMP_\\saipen-publication-truth-0mfsknve\\project', 'project_lineage': 'lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'receipt_digest': 'ops-receipt-sha256:8f5b59789db85e93a8639b282c6637cc04c816882aa9a271fb053ea774c647b2'}, 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PENDING'}
+
+----------------------------------------------------------------------
+Ran 40 tests in 10.678s
+
+FAILED (failures=12, errors=1)

@@ -1,0 +1,26 @@
+======================================================================
+ERROR: test_oracle (unittest.loader._FailedTest.test_oracle)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_oracle
+Traceback (most recent call last):
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\loader.py", line 162, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'tools.test_oracle'
+
+
+======================================================================
+ERROR: test_log (unittest.loader._FailedTest.test_log)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_log
+Traceback (most recent call last):
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\loader.py", line 162, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'tools.test_log'
+
+
+----------------------------------------------------------------------
+Ran 100 tests in 104.102s
+
+FAILED (errors=2)

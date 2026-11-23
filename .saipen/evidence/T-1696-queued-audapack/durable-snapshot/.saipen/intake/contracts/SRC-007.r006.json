@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-007:R0001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Keep OUTAUDIT, CAPTURE, INAUDIT layers, and GG/CC execution as separate concepts and state machines."
+    },
+    "SRC-007:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Provide a transparent filesystem-backed global INAUDIT Inbox with canonical UUID body and metadata pairs and complete provenance fields."
+    },
+    "SRC-007:R0003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A successful capture ACK means the normalized body and metadata are durably and atomically saved; partial pairs are retained as RECOVERY diagnostics."
+    },
+    "SRC-007:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Expose authenticated loopback capture list/detail/create/assign/archive/delete/restore endpoints with idempotent capture identity and bounded validation."
+    },
+    "SRC-007:R0005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Add one-click IA actions for stable whole assistant responses and individual blocks while preserving source text and showing ready/sending/saved/queued/error states."
+    },
+    "SRC-007:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Persist offline browser captures in bounded IndexedDB using the same capture_id, durable transaction completion, capped backoff, and delete only after durable Bridge ACK."
+    }
+  },
+  "derived_at": "2026-08-31T02:36:14Z",
+  "derived_from": "SRC-007",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "9d4634e519e651c61e5366bd1efb06a5b190a98ab343542e6fe7c6a67ddfa6b1"
+}

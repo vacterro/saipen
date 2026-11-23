@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t1790_dependency_route_budget.py", "-v"],
+  "format": "unittest",
+  "context": ["tools", "saipen", "tests", "extensions", "VERSION", "bootstrap"],
+  "oracle_files": [
+    "tools/test_t1790_dependency_route_budget.py",
+    "tools/test_t1789_child_closure_route.py",
+    "tools/test_request_clause_closure.py",
+    "tools/test_t1363_zero_manual_entry.py",
+    "tools/test_hermetic_env.py",
+    "tools/test_fixture_support.py"
+  ],
+  "subject_files": ["tools/saipen_engine/closure_readiness.py"],
+  "before": {"tools/saipen_engine/closure_readiness.py": ".saipen/evidence/T-1790-dependency-route/before/closure_readiness.py"},
+  "timeout": 900
+}

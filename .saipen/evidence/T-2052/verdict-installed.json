@@ -1,0 +1,37 @@
+{
+ "engine": "C:/Users/vac34/AppData/Local/saipen/scheduled-source/tools",
+ "ok": true,
+ "reasons": [],
+ "stages": [
+  [
+   "",
+   "PASS",
+   "2026-11-13T11:43:31Z"
+  ],
+  [
+   "",
+   "CLEAN",
+   "2026-11-13T11:43:55Z"
+  ],
+  [
+   "",
+   "NOTHING_SAFE_REMAINED",
+   "2026-11-13T11:44:18Z"
+  ],
+  [
+   "",
+   "PASS",
+   "2026-11-13T11:44:22Z"
+  ],
+  [
+   "",
+   "CLEAN",
+   "2026-11-13T11:45:14Z"
+  ]
+ ],
+ "source": {
+  "source_head": "17559c20c44bea4665c83aeded368c15e39bb249",
+  "source_tree_fingerprint": "git-delta-v1:bd064f25e95b0154fedfb71b5579fc8ceb0e353f94f56440357204ce03474190"
+ },
+ "attribution_problems": []
+}

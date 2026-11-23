@@ -1,0 +1,38 @@
+1384a1385,1408
+> # vacterro-saiwebsite T-39 (improve 20261013-1 IMP-004): a count ATTRIBUTED to
+> # a measured red control is evidence data, not this checkpoint's claim. The
+> # verify vocabulary REQUIRES a control: `verify -> PASS [target: T-33] conf:
+> # high -- pre-fix 4 failed (red control), post-fix 0 failed` is the honest
+> # record of a measured pair, and the counted shape vetoed it -- the same
+> # narrative-authority leak T-1444 (foreign scope) and T-1620 (previous run)
+> # each cured, at a third polarity. Same cure, same discipline: CLOSED
+> # vocabulary, ADJACENT attribution, and only the counted shape is honoured, so
+> # an unattributed `2 FAIL`, a `failures=2` field, a bare `FAIL` verdict and a
+> # current nonzero count beside the control still claim and a real failure
+> # cannot be talked past.
+> _CONTROL_SCOPE = r"(?:red[- ]?controls?|pre[- ]?fix)"
+> _CONTROL_RUN = r"(?:runs?|measures?|measurements?|baselines?|states?)"
+> _CONTROL_FAIL_RE = re.compile(
+>     r"\b" + _CONTROL_SCOPE + r"(?:\s+" + _CONTROL_RUN + r")?\s*[:;,]?\s*"
+>     r"(?:had|showed|with|of\s+)?\s*\b\d+\s+FAIL(?:S|ED|URE|URES)?\b"
+>     r"|\b\d+\s+FAIL(?:S|ED|URE|URES)?\b"
+>     r"(?:\s*/?\s*\d*\s*WARN(?:ING|INGS)?\b)?\s*"
+>     r"(?:\(\s*" + _CONTROL_SCOPE
+>     + r"(?:\s*[,;][^()]{0,40})?\s*\)|\b" + _CONTROL_SCOPE + r"\b)",
+>     re.IGNORECASE,
+> )
+> 
+> 
+1432a1457,1464
+> 
+>     vacterro-saiwebsite T-39 scopes them a third time: a count explicitly
+>     attributed to a measured red control (`red control: 4 failed`,
+>     `4 failed (red control)`, `pre-fix 3 failures`) is the REQUIRED red half of
+>     a control pair -- the very thing the verify grammar asks an agent to
+>     measure and record -- and reports another state, not this checkpoint's
+>     claim. The `verify -> PASS`/`verify -> FAIL` verdict token keeps owning
+>     the current-state claim exactly as before.
+1442a1475,1477
+>     # vacterro-saiwebsite T-39: a count attributed to a measured red control
+>     # is evidence data, never this checkpoint's claim.
+>     scoped = _CONTROL_FAIL_RE.sub(" ", scoped)

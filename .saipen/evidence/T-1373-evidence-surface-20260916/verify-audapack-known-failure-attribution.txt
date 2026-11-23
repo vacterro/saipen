@@ -1,0 +1,23 @@
+# T-1373: attribution control for the one focused-suite red
+# claim: BASELINE environment debt -- saipen.cmd is not on PATH (audapack/saipen_manifest_gate.py:64), not the T-1373 consumer path.
+## A: as the suite runs (saipen.cmd absent from PATH)
+=========================== short test summary info ===========================
+FAILED tests/test_saipen_evidence.py::TestArchiveProvenance::test_incomplete_snapshot_does_not_claim_authority
+1 failed in 0.32s
+## B: identical bytes, same test, with SAIPEN bin/ on PATH
+=========================== short test summary info ===========================
+FAILED tests/test_saipen_evidence.py::TestArchiveProvenance::test_incomplete_snapshot_does_not_claim_authority
+1 failed in 0.34s
+## C: same red under a Windows-style PATH carrying V:\...\_SAIPEN\bin (saipen.cmd present there)
+1 failed in 0.67s -- identical AUDIT_MANIFEST_STALE_REGENERATION_FAILED message
+
+VERDICT: BASELINE, not T-1373.
+- identical test identity AND identical error string appear in the pre-change
+  full run (audapack-full-suite-baseline-pre-change.txt), recorded before
+  audapack/saipen_evidence.py was touched at 23:36;
+- the failure is raised by audapack/saipen_manifest_gate.py CLI discovery
+  (SAIPEN_CLI_CANDIDATES at :62, AUDIT_MANIFEST_STALE_REGENERATION_FAILED),
+  a path T-1373 does not modify;
+- the fixture cannot reach an installed protocol CLI at all: putting SAIPEN's
+  bin/ on PATH in either shell leaves the message byte-identical, so it is
+  fixture/environment debt owned by AUDAPACK, not consumer behaviour.

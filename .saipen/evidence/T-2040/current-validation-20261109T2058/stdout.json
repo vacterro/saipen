@@ -1,0 +1,137 @@
+{
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "ry_resume, module test_t2040_terminal_consumer_guards -- do NOT commit it alone; it will fail in every clone. Ship the runtime it depends on first\nWARN [subsaipen-uncollected]: 1 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)\nWARN [cross-doc-drift]: cross-doc drift [borrowed-invariants] -- BOOT.md must say `next_action` is the previous session's pre-computed pick and is confirmed against BOARD.md where the validator cannot re-derive it -- the portable floor does not, since a grep cannot walk a needs: graph\nWARN [cross-doc-drift]: cross-doc drift [command-outranks-pick] -- BOOT.md step 7 must say the user's own message outranks `next_action` and defer to § 1.11's OBEY priority. Read as unconditional it is the half a cold agent reaches first, which is exactly how the command the user typed gets dropped\nWARN [cross-doc-drift]: ... and 6 more like the above\nWARN [changelog-unarchived]: CHANGELOG.md carries 13 version entries while it states it keeps the most recent ~10 -- the overflow belongs in CHANGELOG_ARCHIVE.md, moved verbatim the way LOG segments are sealed, so the top of the file stays the part anyone actually reads\nWARN [translation-stale]: 29 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, el, es, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nWARN [release-ledger]: 2 release(s) have a CHANGELOG entry but no git tag: v8.0.2, v8.2.0\nWARN [xpatch-survival]: XP-000001 applied bytes never reached a commit: tools/saipen_engine/intake.py\nWARN [xpatch-survival]: XP-000002 applied bytes never reached a commit: tools/saipen.py, tools/saipen_engine/operations.py\nValidation FAILED: 2 problem(s), 17 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "stale_reason": null,
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 2,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "closure provenance does not resolve: EX-000050 was verified against installed engine generation sha256:c6819eff239d8b9c... but the running engine is sha256e3ec02ec08c0231... -- the dependency moved (rollback or upgrade): re-resolve truthfully instead of inheriting a stale green -- a DONE line may record HOW it closed, never that something was published when it was not (CORE-003)",
+            "detail_hash": "25304e6b2b28650a",
+            "finding_key": "5b134fa202e4b3a1",
+            "rule_id": "closure_provenance_drift",
+            "severity": "problem",
+            "subject_id": "EX-000050",
+            "subject_kind": "event",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t2040_iteration_truth.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "27ec8599b58f30f0",
+            "finding_key": "b6cf5299bb9bae62",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_t2040_iteration_truth.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "9a47d608ed3f3a833348aaeeca5cd9e9076f3bf53b1ef92b6ade46958e3e3fec",
+        "ruleset_version": 2,
+        "status": "complete",
+        "warning_count": 17
+      },
+      "board_hash": "fea8e213c2bb2718",
+      "canonical_next_command": null,
+      "content_hash": "01eca026b257d1ec",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:016021eebcc032b1f64065b2eabfa8ecf116542e0d6567faab797a79d04c0cc5",
+      "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "kind": "conformance_receipt",
+      "log_hash": "8d97fd7fde5ccbcb",
+      "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+      "receipt_id": "receipt-48612c1d9b77",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+      "source_tree_fingerprint": "git-delta-v1:fb5e121ff15fcaf2c844b20d6ac5d0bd8238c03cd518cb96a14ccc966b99ddff",
+      "state_hash": "bf7814d90da39a9d",
+      "timestamp_utc": "2026-11-09T20:38:56.723702Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+      "source_tree_fingerprint": "git-delta-v1:fb5e121ff15fcaf2c844b20d6ac5d0bd8238c03cd518cb96a14ccc966b99ddff"
+    }
+  },
+  "install_identity": {
+    "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "persisted_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "install_fingerprint": "install-v1:016021eebcc032b1f64065b2eabfa8ecf116542e0d6567faab797a79d04c0cc5",
+    "persisted_fingerprint": "install-v1:016021eebcc032b1f64065b2eabfa8ecf116542e0d6567faab797a79d04c0cc5",
+    "status": "MATCH",
+    "mismatch": null
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-48612c1d9b77",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair.",
+    "ownership": {
+      "groups": {
+        "ENGINE_INTERNAL": [
+          {
+            "rule_id": "closure_provenance_drift",
+            "subject_kind": "event",
+            "subject_id": "EX-000050",
+            "finding_key": "5b134fa202e4b3a1",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_t2040_iteration_truth.py",
+            "finding_key": "b6cf5299bb9bae62",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          }
+        ],
+        "OPERATOR_DECISION": [],
+        "UNAVAILABLE_EXTERNAL": [],
+        "UNKNOWN": []
+      },
+      "operator_action_count": 0,
+      "engine_work_count": 2,
+      "external_count": 0,
+      "unknown_count": 0
+    },
+    "engine_work_count": 2,
+    "operator_action_count": 0
+  },
+  "terminal": true
+}

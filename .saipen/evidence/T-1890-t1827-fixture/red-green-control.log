@@ -1,0 +1,3 @@
+RED   pre-fix release.py (HEAD): exec_ok=True gate_ran=True held_during_gate=True -> assertion 'lock must be free' would be VIOLATED (test RED)
+GREEN post-fix release.py: exec_ok=True gate_ran=True held_during_gate=False -> assertion 'lock must be free' is SATISFIED (test GREEN)
+temp module removed: True

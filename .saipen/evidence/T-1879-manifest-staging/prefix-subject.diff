@@ -1,0 +1,37 @@
+@@ T-1879 red control @@
+The defect is the absence of ONE expression in tools/validate.py, so the red
+control is that expression emptied. Removing it reproduces the pre-fix verdict
+exactly: `git ls-files` lists the intent-to-add name, nothing reports it, and
+the gate prints the green line over bytes no commit will carry.
+
+--- tools/validate.py (post-fix)
+
+  T-1879: `ls-files` answers "does the INDEX carry this name", which is not the
+  question. ...
+  _runtime_intent_only: set[str] = set()
+      ...
+      _landed_rc, _landed_out = _git("diff", "--cached", "--name-only",
+                                     "--diff-filter=d", "-z")
+      _head_rc, _head_out = _git("ls-tree", "-r", "--name-only", "-z", "HEAD")
+      if _landed_rc == 0 and _head_rc == 0:
+          _runtime_landed_set = {paths staged} | {paths in HEAD}
+-         _runtime_intent_only = set(_runtime_tracked_set) - _runtime_landed_set
++         _runtime_intent_only = set()          # RED CONTROL: pre-fix verdict
+
+  manifest_intent_only = [f for f in manifest if f in _runtime_intent_only]
+  for f in manifest_intent_only:
+      fail(f"runtime manifest names a file whose content is not staged: {f} ...")
+  if not manifest_missing and not manifest_untracked and not manifest_intent_only:
+      ok(f"runtime manifest complete ({len(manifest)} files, all tracked)")
+
+Measured on the fixture, same three states, same real validator subprocess:
+
+  state          post-fix                                   red control
+  -------------  -----------------------------------------  ----------------------
+  intent-only    FAIL "content is not staged" + repair      PASS "manifest complete"
+  staged         PASS "manifest complete"                   PASS "manifest complete"
+  untracked      FAIL "git does not track" (T-1592 text)    FAIL "git does not track"
+
+The middle column is the delivered behaviour; the right column is what the
+code did before this ticket and is reproduced by the control test rather than
+asserted from memory.

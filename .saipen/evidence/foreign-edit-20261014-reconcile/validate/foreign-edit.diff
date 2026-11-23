@@ -1,0 +1,11 @@
+--- /dev/fd/63	2026-10-14 01:22:30.000000000 +0300
++++ /dev/fd/62	2026-10-14 01:22:30.000000000 +0300
+@@ -3292,7 +3292,7 @@
+     _ccc_markers = [
+         (index, match.group(1))
+         for index, line in enumerate(_ccc_lines)
+-        if (match := re.search(rf"DEC: ccc converge target -> ship @({OID_RE})\b", line))
++        if (match := re.search(rf"DEC: ccc converge target -> ship @({OID_RE}|no-git)\b", line))
+     ]
+     if not _ccc_markers:
+         fail(

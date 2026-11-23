@@ -1,0 +1,14 @@
+{
+  "tools/saipen_engine/regression_execution.py": null,
+  "tools/saipen_engine/oracle.py": "61d4b36335f775862ffc3a82b83601387fc6c08a7705b580c8fb5b9b83fc8e9a",
+  "tools/saipen_engine/log.py": "1298621aeef31e5d166e565ff11425ab67e5fbad587de756f3e099908d61bca8",
+  "tools/saipen_engine/operations.py": "9a44a8061261716261759ff80b83ce1858192cfec9c6b07dfbf7f776f037af06",
+  "tools/saipen_engine/board.py": "20d34dbb19d15612135ebbda7c9383984ea5c702b5386a65158b5bc9177e1ce3",
+  "tools/saipen_engine/journal.py": "3375ddd84f33f5d73d5c41e5bd92cf424cb1af737b20677f9cc5afa599fef625",
+  "tools/saipen.py": "da6d0d610333114236822c4fec6142fc704753940012420df33b6aebeef9a930",
+  "saipen/REGISTRY.json": "6078e409098510e29bc97b3360487b1f55ca8003e59f1c3ec98a202684c8a918",
+  "saipen/COMMANDS.md": "259454d5aa26a292a051c5d63d22aa5ec75f3b9a395c92117d6eeafb5876edde",
+  "saipen/phases/verify.md": "3f558bb105f8b978514ff08c74a6242d83e77b5993087f85f64993f38e2b4bf7",
+  "saipen/CORE.md": "67852506019f05e6417d07de9915fab5337780052105dfb46497734b58555455",
+  "tools/test_t1711_regression_execution.py": null
+}

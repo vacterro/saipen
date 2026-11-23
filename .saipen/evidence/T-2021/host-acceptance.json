@@ -1,0 +1,44 @@
+{
+  "ok": false,
+  "verdict": "HOST_DISPATCH_UNAVAILABLE",
+  "reason": "no host-scheduler transport is registered: a request is durable (DISPATCH_REQUEST_PERSISTED) but no host started it; the authority broker is live, so an authenticated receipt remains possible",
+  "taxonomy": "HOST_INSTALLED_TRANSPORT_UNREGISTERED",
+  "verified_history": false,
+  "ready_now": false,
+  "transport": {
+    "host_scheduler_dispatch_cmd": false,
+    "host_dispatch_endpoint": false
+  },
+  "broker_alive": true,
+  "installed_adapters": [
+    "antigravity",
+    "claude",
+    "codebuddy",
+    "codex",
+    "freebuff",
+    "gemini",
+    "opencode",
+    "zaicode",
+    "zcode-production"
+  ],
+  "session_bound": false,
+  "continuation_authority_declared": "DECLARED_NOT_GRANTED",
+  "scheduler_supported": false,
+  "stages": {
+    "request_persisted": false,
+    "host_accepted": false,
+    "turn_started": false,
+    "turn_completed": false,
+    "multi_turn_continuation": 0,
+    "campaigns": {},
+    "paired_campaign": false,
+    "successor_turn_started": false,
+    "acceptance_tier": null,
+    "truncated_unverified": 0,
+    "readable_records": 0
+  },
+  "dispatch_dispatched": false,
+  "dispatch_status": null,
+  "synthetic_receipt_authenticated": false,
+  "note": "read-only: this probe dispatched nothing; run authorized_dispatch_test for the mutating half, which uses a disposable fixture root"
+}

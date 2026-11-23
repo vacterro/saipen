@@ -1,0 +1,46 @@
+[
+  {
+    "root": "V:\\_TEMP_\\saipen-m3-k_o27bzr",
+    "phase": "REVIEW",
+    "result": {
+      "ok": false,
+      "code": "ILLEGAL_TRANSITION",
+      "op_id": null,
+      "changed_files": [],
+      "recovery_required": false,
+      "message": "SCOUT -> REVIEW is not a legal edge; from SCOUT the legal edges are BUILD, BLOCKED",
+      "phase": "REVIEW",
+      "legal_destinations": [
+        "BUILD",
+        "BLOCKED"
+      ],
+      "canonical_next_command": "saipen transition BUILD T-777 '<why>'"
+    }
+  },
+  {
+    "root": "V:\\_TEMP_\\saipen-integrity-kps3bxob",
+    "phase": "BUILD",
+    "result": {
+      "ok": false,
+      "code": "TICKET_NOT_FOUND",
+      "op_id": null,
+      "changed_files": [],
+      "recovery_required": false,
+      "message": "T-999 is not on the board",
+      "ticket": "T-999"
+    }
+  },
+  {
+    "root": "V:\\_TEMP_\\saipen-integrity-kps3bxob",
+    "phase": "BUILD",
+    "result": {
+      "ok": false,
+      "code": "ACTIVE_TICKET_MISMATCH",
+      "op_id": null,
+      "changed_files": [],
+      "recovery_required": false,
+      "message": "requested ticket T-2 != active DOING T-1; a ticket-bearing transition binds the exact active DOING ticket",
+      "ticket": "T-2"
+    }
+  }
+]

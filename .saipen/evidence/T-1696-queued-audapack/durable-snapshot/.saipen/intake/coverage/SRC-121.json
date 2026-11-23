@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-121:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-277 closed with verification evidence in LOG: verify -> PASS [target: T-277] conf: high -- python -m pytest -q reported 2610 passed, 16 skipped (14m21s); ruff check audapack tests audit = All checks passed; python -m compileall -q audapack tests exit 0; python -m pytest tests/test_launch_federation.py -q = 32 passed; python audit/t277_live_reconciliation.py = all checks passed read-only against generation 25 (7 drawn rows, 0 dup, 0 alias, 4 l",
+      "text": "Federate AUDAPACK account-backed launchers onto the canonical SAI Accounts registry: one effective launch inventory, canonical account ids, no static Codex/Claude/Antigravity authority, additive migration, live refresh, operator machine reconciliation",
+      "verification": "the Work this request created reached its own verification gate; see the T-277 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-277"
+    }
+  },
+  "schema_version": 1
+}

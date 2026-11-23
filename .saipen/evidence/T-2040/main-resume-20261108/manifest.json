@@ -1,0 +1,7 @@
+{
+  "tools/saipen_engine/intake.py": "7b5ed52a9f8f9d4cf7a1b1fde44bb903b90dd43c06862f0aa01e21ebc32f2801",
+  "tools/saipen_engine/operations.py": "f7b5d795eb3417fc358994a680340463c304a5dd1e204c0dff742431671c0aab",
+  "tools/saipen_engine/goal_authority.py": "d28593c5d83034338e55b16c6c0bc0a8bcd4eda991ec5541155ffd319f9b2e8a",
+  "tools/saipen_engine/closure_readiness.py": "3c82f06fec5cbee75448bdcba4ce5bbd32e7a2cad952257e5f24d9c982903e94",
+  "tools/test_request_clause_closure.py": "1f23208a024b9511f08c8174b110b96edb300534b09543cb0d6c9295ae313af9"
+}

@@ -1,0 +1,98 @@
+{
+  "op_id": "source.reconcile-ed8285031def",
+  "operation": "source.reconcile",
+  "created_at": "2026-09-07T14:32:00Z",
+  "agent": "opencode",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "a7a87dc1f16f44ab",
+  "preconditions": {
+    ".saipen/archive/source/SRC-038.md": "",
+    ".saipen/archive/source/SRC-038.meta.json": "",
+    ".saipen/archive/source/SRC-038.recovery.json": "",
+    ".saipen/intake/tombstones/SRC-038.json": "78be465abbba09ba",
+    ".saipen/intake/index.json": "e66211c9bc332a8a",
+    ".saipen/intake/active/SRC-038.md": "9a32a6e55a39add6",
+    ".saipen/intake/active/SRC-038.meta.json": "e2c9bcafc7ab02b7",
+    ".saipen/intake/contracts/SRC-038.json": "4adc5cecf1286c54",
+    ".saipen/intake/coverage/SRC-038.json": "5ffb5a2eefd78bfc"
+  },
+  "read_preconditions": {},
+  "verification_policy": "none",
+  "status": "COMMITTED",
+  "progress_index": 9,
+  "targets": [
+    {
+      "path": ".saipen/archive/source/SRC-038.md",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "9a32a6e55a39add6",
+      "applied": true
+    },
+    {
+      "path": ".saipen/archive/source/SRC-038.meta.json",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "321cdb0dea30fd9d",
+      "applied": true
+    },
+    {
+      "path": ".saipen/archive/source/SRC-038.recovery.json",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "fd2f124114070ccb",
+      "applied": true
+    },
+    {
+      "path": ".saipen/intake/tombstones/SRC-038.json",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "78be465abbba09ba",
+      "after_hash": "98a1dda8ef961a7f",
+      "applied": true
+    },
+    {
+      "path": ".saipen/intake/index.json",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "e66211c9bc332a8a",
+      "after_hash": "d9c41a4e512b6ede",
+      "applied": true
+    },
+    {
+      "path": ".saipen/intake/active/SRC-038.md",
+      "role": "generic",
+      "action": "delete_file",
+      "before_hash": "9a32a6e55a39add6",
+      "after_hash": "",
+      "applied": true
+    },
+    {
+      "path": ".saipen/intake/active/SRC-038.meta.json",
+      "role": "generic",
+      "action": "delete_file",
+      "before_hash": "e2c9bcafc7ab02b7",
+      "after_hash": "",
+      "applied": true
+    },
+    {
+      "path": ".saipen/intake/contracts/SRC-038.json",
+      "role": "generic",
+      "action": "delete_file",
+      "before_hash": "4adc5cecf1286c54",
+      "after_hash": "",
+      "applied": true
+    },
+    {
+      "path": ".saipen/intake/coverage/SRC-038.json",
+      "role": "generic",
+      "action": "delete_file",
+      "before_hash": "5ffb5a2eefd78bfc",
+      "after_hash": "",
+      "applied": true
+    }
+  ]
+}

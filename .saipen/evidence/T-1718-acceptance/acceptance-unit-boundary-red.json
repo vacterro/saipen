@@ -1,0 +1,22 @@
+{
+  "label": "acceptance-unit-boundary-red",
+  "phase": "BUILD",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "test_t1718_acceptance_contract.NativeEscapeRegressionTests.test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass",
+    "-v"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+  "exit_code": 1,
+  "duration_s": 0.688,
+  "fingerprint": "bb01afecd7ef05f1335438ecdab5d43999338d1747f3648273b3ae85a216ee1b",
+  "stdout": "",
+  "stderr": "test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass (test_t1718_acceptance_contract.NativeEscapeRegressionTests.test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass) ... FAIL\r\n\r\n======================================================================\r\nFAIL: test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass (test_t1718_acceptance_contract.NativeEscapeRegressionTests.test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass)\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t1718_acceptance_contract.py\", line 130, in test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass\r\n    self.assertFalse(result.ok, result.to_dict())\r\nAssertionError: True is not false : {'ok': True, 'code': 'TICKET_VERIFIED', 'op_id': 'ticket-verify-8faadd52df5640f787fbb1208275b532', 'changed_files': ['.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'], 'recovery_required': False, 'ticket': 'T-7', 'event_id': 'E-6'}\r\n\r\n----------------------------------------------------------------------\r\nRan 1 test in 0.368s\r\n\r\nFAILED (failures=1)\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "9846666cd7445878c68b38f00704392929f11cb2562fb0b2707dbd7a2f144218",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

@@ -1,0 +1,24 @@
+### test_audit_route
+Ran 32 tests in 0.054s
+
+OK
+### test_t2071_gate_pinned_row
+Ran 8 tests in 0.008s
+
+OK
+### test_t2052_pruned_slice_closure
+Ran 4 tests in 0.195s
+
+OK
+### test_t1614_future_gate
+Ran 48 tests in 51.383s
+
+OK
+### test_t1430_crew_run_receipt
+Ran 3 tests in 6.523s
+
+OK
+### test_refusal_registry
+Ran 6 tests in 7.713s
+
+OK

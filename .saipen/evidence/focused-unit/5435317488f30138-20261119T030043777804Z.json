@@ -1,0 +1,450 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "5435317488f30138a2bc165ad45978f0b9b72175c7121469a41ad12c0fb900fe",
+  "verdict": "PASS",
+  "patterns": [
+    "test_distribution_report.py",
+    "test_runtime_generation_identity.py",
+    "test_settled_projection.py",
+    "test_t1519_settled_index.py",
+    "test_t1544_audit20.py",
+    "test_t1712_manifest_runtime.py",
+    "test_t1726_closed_contracts.py",
+    "test_t2089_agent_status_view.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_distribution_report.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_distribution_report.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        18952
+      ],
+      "duration_s": 1.422,
+      "process_create_s": 0.047,
+      "ran": 27,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_fully_current_set_reports_fresh_with_a_sentence (test_distribution_report.FreshIsAnAnswerTests.test_a_fully_current_set_reports_fresh_with_a_sentence) ... ok\r\ntest_fresh_and_stale_produce_different_sentences (test_distribution_report.FreshIsAnAnswerTests.test_fresh_and_stale_produce_different_sentences) ... ok\r\ntest_no_installed_home_says_so_rather_than_printing_nothing (test_distribution_report.FreshIsAnAnswerTests.test_no_installed_home_says_so_rather_than_printing_nothing) ... ok\r\ntest_a_historical_skip_no_longer_poisons_current_homes (test_distribution_report.LastScheduledRunTests.test_a_historical_skip_no_longer_poisons_current_homes) ... ok\r\ntest_a_nonzero_run_with_no_skip_line_is_history_not_a_verdict (test_distribution_report.LastScheduledRunTests.test_a_nonzero_run_with_no_skip_line_is_history_not_a_verdict) ... ok\r\ntest_a_reassuring_history_cannot_make_an_unknown_surface_fresh (test_distribution_report.LastScheduledRunTests.test_a_reassuring_history_cannot_make_an_unknown_surface_fresh) ... ok\r\ntest_a_run_still_in_flight_is_provenance_and_never_a_success (test_distribution_report.LastScheduledRunTests.test_a_run_still_in_flight_is_provenance_and_never_a_success) ... ok\r\ntest_a_skipped_run_keeps_its_reason_and_dirty_paths_as_history (test_distribution_report.LastScheduledRunTests.test_a_skipped_run_keeps_its_reason_and_dirty_paths_as_history) ... ok\r\ntest_a_successful_history_cannot_hide_currently_stale_bytes (test_distribution_report.LastScheduledRunTests.test_a_successful_history_cannot_hide_currently_stale_bytes) ... ok\r\ntest_a_successful_run_is_history_too (test_distribution_report.LastScheduledRunTests.test_a_successful_run_is_history_too) ... ok\r\ntest_no_scheduler_log_is_a_normal_answer (test_distribution_report.LastScheduledRunTests.test_no_scheduler_log_is_a_normal_answer) ... ok\r\ntest_only_the_newest_run_is_provenance (test_distribution_report.LastScheduledRunTests.test_only_the_newest_run_is_provenance) ... ok\r\ntest_it_never_creates_an_absent_home (test_distribution_report.ReadOnlyTests.test_it_never_creates_an_absent_home) ... ok\r\ntest_it_never_writes_a_stamp_into_an_unstamped_home (test_distribution_report.ReadOnlyTests.test_it_never_writes_a_stamp_into_an_unstamped_home) ... ok\r\ntest_the_report_writes_nothing (test_distribution_report.ReadOnlyTests.test_the_report_writes_nothing) ... ok\r\ntest_a_current_stamp_and_head_over_a_stale_engine_is_stale (test_distribution_report.RuntimeContentTests.test_a_current_stamp_and_head_over_a_stale_engine_is_stale) ... ok\r\ntest_a_dirty_source_with_the_same_head_is_not_fresh (test_distribution_report.RuntimeContentTests.test_a_dirty_source_with_the_same_head_is_not_fresh) ... ok\r\ntest_a_launcher_that_does_not_run_the_installed_engine_is_stale (test_distribution_report.RuntimeContentTests.test_a_launcher_that_does_not_run_the_installed_engine_is_stale) ... ok\r\ntest_a_stamp_without_a_runtime_is_never_fresh (test_distribution_report.RuntimeContentTests.test_a_stamp_without_a_runtime_is_never_fresh) ... ok\r\ntest_an_extra_installed_module_is_a_different_generation (test_distribution_report.RuntimeContentTests.test_an_extra_installed_module_is_a_different_generation) ... ok\r\ntest_crlf_transport_of_the_same_runtime_stays_fresh (test_distribution_report.RuntimeContentTests.test_crlf_transport_of_the_same_runtime_stays_fresh) ... ok\r\ntest_a_home_with_no_head_is_unknown_and_never_counted_fresh (test_distribution_report.StaleCountTests.test_a_home_with_no_head_is_unknown_and_never_counted_fresh) ... ok\r\ntest_a_stale_home_is_counted_and_named (test_distribution_report.StaleCountTests.test_a_stale_home_is_counted_and_named) ... ok\r\ntest_all_stale_still_reports_the_newest_head_they_carry (test_distribution_report.StaleCountTests.test_all_stale_still_reports_the_newest_head_they_carry) ... ok\r\ntest_an_absent_home_is_not_stale_it_is_simply_not_installed (test_distribution_report.StaleCountTests.test_an_absent_home_is_not_stale_it_is_simply_not_installed) ... ok\r\ntest_the_newest_installed_head_is_the_most_recently_stamped (test_distribution_report.StaleCountTests.test_the_newest_installed_head_is_the_most_recently_stamped) ... ok\r\ntest_the_summary_names_both_numbers (test_distribution_report.StaleCountTests.test_the_summary_names_both_numbers) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 27 tests in 1.232s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_runtime_generation_identity.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_runtime_generation_identity.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        20168
+      ],
+      "duration_s": 5.922,
+      "process_create_s": 0.047,
+      "ran": 55,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "entity.FailClosed.test_an_empty_declared_tree_is_unknown) ... ok\r\ntest_an_unreadable_directory_inside_a_tree_is_unknown (test_runtime_generation_identity.FailClosed.test_an_unreadable_directory_inside_a_tree_is_unknown)\r\nos.walk skips unlistable directories unless told otherwise. ... ok\r\ntest_both_layout_manifests_are_ambiguous_and_unknown (test_runtime_generation_identity.FailClosed.test_both_layout_manifests_are_ambiguous_and_unknown) ... ok\r\ntest_malformed_manifest_is_unknown (test_runtime_generation_identity.FailClosed.test_malformed_manifest_is_unknown) ... ok\r\ntest_missing_declared_runtime_file_is_unknown (test_runtime_generation_identity.FailClosed.test_missing_declared_runtime_file_is_unknown) ... ok\r\ntest_require_raises_where_none_is_unknown (test_runtime_generation_identity.FailClosed.test_require_raises_where_none_is_unknown) ... ok\r\ntest_traversal_manifest_source_is_unknown (test_runtime_generation_identity.FailClosed.test_traversal_manifest_source_is_unknown) ... ok\r\ntest_two_declared_names_landing_on_one_installed_path_are_unknown (test_runtime_generation_identity.FailClosed.test_two_declared_names_landing_on_one_installed_path_are_unknown) ... ok\r\ntest_unreadable_declared_runtime_file_is_unknown (test_runtime_generation_identity.FailClosed.test_unreadable_declared_runtime_file_is_unknown) ... ok\r\ntest_unsupported_symlink_in_the_surface_is_unknown (test_runtime_generation_identity.FailClosed.test_unsupported_symlink_in_the_surface_is_unknown) ... skipped \"this host cannot create a symlink: [WinError 1314] A required privilege is not held by the client: 'C:\\\\\\\\Temp\\\\\\\\saipen-gen-failclosed-xk9zft3r\\\\\\\\authority\\\\\\\\VERSION' -> 'C:\\\\\\\\Temp\\\\\\\\saipen-gen-failclosed-xk9zft3r\\\\\\\\symlink\\\\\\\\VERSION'\"\r\ntest_caches_never_move_the_identity (test_runtime_generation_identity.HostileMatrix.test_caches_never_move_the_identity) ... ok\r\ntest_case10_a_dirty_shipped_file_moves_the_generation (test_runtime_generation_identity.HostileMatrix.test_case10_a_dirty_shipped_file_moves_the_generation) ... ok\r\ntest_case1_same_docs_stale_engine_is_stale (test_runtime_generation_identity.HostileMatrix.test_case1_same_docs_stale_engine_is_stale) ... ok\r\ntest_case2_same_docs_stale_engine_module_is_stale (test_runtime_generation_identity.HostileMatrix.test_case2_same_docs_stale_engine_module_is_stale) ... ok\r\ntest_case3_same_docs_stale_validator_is_stale (test_runtime_generation_identity.HostileMatrix.test_case3_same_docs_stale_validator_is_stale) ... ok\r\ntest_case4_same_bytes_another_path_is_current (test_runtime_generation_identity.HostileMatrix.test_case4_same_bytes_another_path_is_current) ... ok\r\ntest_case5_source_and_flattened_layout_share_one_identity (test_runtime_generation_identity.HostileMatrix.test_case5_source_and_flattened_layout_share_one_identity) ... ok\r\ntest_case6_crlf_text_is_transport_and_binary_is_exact (test_runtime_generation_identity.HostileMatrix.test_case6_crlf_text_is_transport_and_binary_is_exact) ... ok\r\ntest_case6_nul_bearing_utf8_is_binary_and_never_normalised (test_runtime_generation_identity.HostileMatrix.test_case6_nul_bearing_utf8_is_binary_and_never_normalised)\r\nValid UTF-8 is not text when it carries NUL: git's own test. ... ok\r\ntest_case7_boot_and_core_only_is_unknown (test_runtime_generation_identity.HostileMatrix.test_case7_boot_and_core_only_is_unknown) ... ok\r\ntest_case7_truncated_surface_is_unknown (test_runtime_generation_identity.HostileMatrix.test_case7_truncated_surface_is_unknown) ... ok\r\ntest_case8_current_wrapper_stale_delegated_root_reads_stale (test_runtime_generation_identity.HostileMatrix.test_case8_current_wrapper_stale_delegated_root_reads_stale) ... ok\r\ntest_case9_current_stamp_stale_hook_root_is_not_fresh (test_runtime_generation_identity.HostileMatrix.test_case9_current_stamp_stale_hook_root_is_not_fresh) ... ok\r\ntest_the_memo_lives_only_inside_the_session (test_runtime_generation_identity.IdentitySessionTests.test_the_memo_lives_only_inside_the_session) ... ok\r\ntest_the_shell_identity_probe_matches_the_owner (test_runtime_generation_identity.InjectorIdentityTests.test_the_shell_identity_probe_matches_the_owner) ... ok\r\ntest_neither_injector_defines_its_own_fingerprint (test_runtime_generation_identity.OneOwnerTests.test_neither_injector_defines_its_own_fingerprint)\r\nThe provenance fingerprint is asked of the owner, never re-derived. ... ok\r\ntest_paths_no_longer_owns_a_second_generation_definition (test_runtime_generation_identity.OneOwnerTests.test_paths_no_longer_owns_a_second_generation_definition) ... ok\r\ntest_the_drift_report_and_landing_path_have_one_owner (test_runtime_generation_identity.OneOwnerTests.test_the_drift_report_and_landing_path_have_one_owner) ... ok\r\ntest_the_guard_and_injector_use_the_one_owner (test_runtime_generation_identity.OneOwnerTests.test_the_guard_and_injector_use_the_one_owner) ... ok\r\ntest_a_crlf_transport_of_the_same_hook_is_not_a_stale_hook (test_runtime_generation_identity.PrelaunchIdentityTests.test_a_crlf_transport_of_the_same_hook_is_not_a_stale_hook) ... ok\r\ntest_an_extra_installed_module_is_a_different_generation (test_runtime_generation_identity.PrelaunchIdentityTests.test_an_extra_installed_module_is_a_different_generation)\r\nDigesting the install over the CANONICAL inventory could not see this. ... ok\r\ntest_an_unprovable_canonical_surface_never_reaches_the_installer (test_runtime_generation_identity.PrelaunchIdentityTests.test_an_unprovable_canonical_surface_never_reaches_the_installer) ... ok\r\ntest_prelaunch_calls_an_extra_installed_module_stale (test_runtime_generation_identity.PrelaunchIdentityTests.test_prelaunch_calls_an_extra_installed_module_stale) ... ok\r\ntest_surface_fingerprint_is_the_one_runtime_identity (test_runtime_generation_identity.PrelaunchIdentityTests.test_surface_fingerprint_is_the_one_runtime_identity) ... ok\r\ntest_the_installed_side_is_proven_over_its_own_inventory (test_runtime_generation_identity.PrelaunchIdentityTests.test_the_installed_side_is_proven_over_its_own_inventory) ... ok\r\ntest_a_flattened_home_named_saipen_is_its_own_root (test_runtime_generation_identity.ProtocolHomeTests.test_a_flattened_home_named_saipen_is_its_own_root) ... ok\r\ntest_a_source_protocol_directory_resolves_to_its_runtime_root (test_runtime_generation_identity.ProtocolHomeTests.test_a_source_protocol_directory_resolves_to_its_runtime_root) ... ok\r\ntest_a_stranger_saipen_directory_is_never_rerooted_into_a_match (test_runtime_generation_identity.ProtocolHomeTests.test_a_stranger_saipen_directory_is_never_rerooted_into_a_match) ... ok\r\ntest_the_exact_rendering_still_needs_the_generation (test_runtime_generation_identity.ProtocolHomeTests.test_the_exact_rendering_still_needs_the_generation) ... ok\r\ntest_every_executed_runtime_file_is_declared (test_runtime_generation_identity.RealSurfaceCoverageTests.test_every_executed_runtime_file_is_declared) ... ok\r\ntest_every_protocol_document_beside_boot_is_declared (test_runtime_generation_identity.RealSurfaceCoverageTests.test_every_protocol_document_beside_boot_is_declared) ... ok\r\ntest_one_enforcement_critical_file_at_a_time_moves_the_generation (test_runtime_generation_identity.RealSurfaceCoverageTests.test_one_enforcement_critical_file_at_a_time_moves_the_generation)\r\nMutate each critical shipped file in an installed copy; restore it. ... ok\r\ntest_a_copied_current_stamp_over_stale_bytes_is_stale (test_runtime_generation_identity.SelfDeclaredProofTests.test_a_copied_current_stamp_over_stale_bytes_is_stale) ... ok\r\ntest_a_copied_provenance_marker_never_makes_a_stale_install_current (test_runtime_generation_identity.SelfDeclaredProofTests.test_a_copied_provenance_marker_never_makes_a_stale_install_current) ... ok\r\ntest_current_bytes_under_an_old_stamp_are_fresh_and_named_unstamped (test_runtime_generation_identity.SelfDeclaredProofTests.test_current_bytes_under_an_old_stamp_are_fresh_and_named_unstamped) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 55 tests in 5.465s\r\n\r\nOK (skipped=1)\r\n"
+    },
+    {
+      "pattern": "test_settled_projection.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_settled_projection.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "duration_s": 41.171,
+      "process_create_s": 0.046,
+      "ran": 23,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_convergence_verdict_fails_closed_when_crew_defer_locator_corrupt (test_settled_projection.ConvergenceBoundedProjectionTests.test_convergence_verdict_fails_closed_when_crew_defer_locator_corrupt) ... ok\r\ntest_convergence_verdict_fails_closed_when_projection_corrupt (test_settled_projection.ConvergenceBoundedProjectionTests.test_convergence_verdict_fails_closed_when_projection_corrupt) ... ok\r\ntest_convergence_verdict_full_chain_and_crew_defer_parity (test_settled_projection.ConvergenceBoundedProjectionTests.test_convergence_verdict_full_chain_and_crew_defer_parity) ... ok\r\ntest_convergence_verdict_uses_bounded_projection_without_snapshot_scan (test_settled_projection.ConvergenceBoundedProjectionTests.test_convergence_verdict_uses_bounded_projection_without_snapshot_scan) ... ok\r\ntest_absent_projection_falls_back_to_canonical_scan_readonly (test_settled_projection.SettledProjectionTests.test_absent_projection_falls_back_to_canonical_scan_readonly) ... ok\r\ntest_append_below_bound_never_reads_sealed_bodies (test_settled_projection.SettledProjectionTests.test_append_below_bound_never_reads_sealed_bodies) ... ok\r\ntest_bounded_records_equal_snapshot_records (test_settled_projection.SettledProjectionTests.test_bounded_records_equal_snapshot_records) ... ok\r\ntest_corrupt_projection_head_fails_closed_instead_of_legacy_scan (test_settled_projection.SettledProjectionTests.test_corrupt_projection_head_fails_closed_instead_of_legacy_scan) ... ok\r\ntest_crash_shaped_token_mismatch_fails_closed (test_settled_projection.SettledProjectionTests.test_crash_shaped_token_mismatch_fails_closed)\r\nA receipt moved after the head's token (crash between move and ... ok\r\ntest_direct_caller_without_token_rebuilds_canonically (test_settled_projection.SettledProjectionTests.test_direct_caller_without_token_rebuilds_canonically)\r\nA direct caller with no pre-move token never gets the bounded fold ... ok\r\ntest_match_query_cost_bounded_by_relevant_segments (test_settled_projection.SettledProjectionTests.test_match_query_cost_bounded_by_relevant_segments) ... ok\r\ntest_normal_append_does_not_scale_with_sealed_segment_count (test_settled_projection.SettledProjectionTests.test_normal_append_does_not_scale_with_sealed_segment_count)\r\nR010-B red control: one normal append across growing sealed ... ok\r\ntest_ops_namespace_matches_stay_visible_on_bounded_path (test_settled_projection.SettledProjectionTests.test_ops_namespace_matches_stay_visible_on_bounded_path) ... ok\r\ntest_population_scaling_counters (test_settled_projection.SettledProjectionTests.test_population_scaling_counters)\r\n100 / 1,000 / 10,000 receipts: hot cost stays bounded, not lifetime. ... ok\r\ntest_rebuild_and_advance_publish_bounded_projection (test_settled_projection.SettledProjectionTests.test_rebuild_and_advance_publish_bounded_projection) ... ok\r\ntest_seal_happens_exactly_once_at_the_bound (test_settled_projection.SettledProjectionTests.test_seal_happens_exactly_once_at_the_bound) ... ok\r\ntest_seal_relocates_only_bounded_affected_locators (test_settled_projection.SettledProjectionTests.test_seal_relocates_only_bounded_affected_locators)\r\nSealing the full tail relocates exactly the operations present in ... ok\r\ntest_settlement_advances_after_stale_projection (test_settled_projection.SettledProjectionTests.test_settlement_advances_after_stale_projection) ... ok\r\ntest_stale_projection_detected_without_opening_receipts (test_settled_projection.SettledProjectionTests.test_stale_projection_detected_without_opening_receipts) ... ok\r\ntest_tampered_relevant_receipt_fails_closed (test_settled_projection.SettledProjectionTests.test_tampered_relevant_receipt_fails_closed) ... ok\r\ntest_tampered_unrelated_sealed_receipt_leaves_hot_lookup_clean_and_deep_red (test_settled_projection.SettledProjectionTests.test_tampered_unrelated_sealed_receipt_leaves_hot_lookup_clean_and_deep_red) ... ok\r\ntest_zero_match_never_enumerates_settled_namespace (test_settled_projection.SettledProjectionTests.test_zero_match_never_enumerates_settled_namespace)\r\nR010-A red control: a hot zero-match lookup must not enumerate ... ok\r\ntest_zero_match_query_never_decodes_or_opens_lifetime_receipts (test_settled_projection.SettledProjectionTests.test_zero_match_query_never_decodes_or_opens_lifetime_receipts) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 23 tests in 40.933s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1519_settled_index.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1519_settled_index.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        20196
+      ],
+      "duration_s": 5.25,
+      "process_create_s": 0.047,
+      "ran": 7,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_broken_memo_costs_decodes_and_never_a_wrong_record (test_t1519_settled_index.SettledIndexTests.test_a_broken_memo_costs_decodes_and_never_a_wrong_record) ... ok\r\ntest_a_failed_payload_drop_is_still_reported (test_t1519_settled_index.SettledIndexTests.test_a_failed_payload_drop_is_still_reported) ... ok\r\ntest_a_snapshot_of_a_settled_project_decodes_no_settled_receipt (test_t1519_settled_index.SettledIndexTests.test_a_snapshot_of_a_settled_project_decodes_no_settled_receipt) ... ok\r\ntest_a_stale_projection_is_rebuilt_at_the_next_settlement (test_t1519_settled_index.SettledIndexTests.test_a_stale_projection_is_rebuilt_at_the_next_settlement) ... ok\r\ntest_a_tampered_settled_receipt_is_never_answered_from_the_memo (test_t1519_settled_index.SettledIndexTests.test_a_tampered_settled_receipt_is_never_answered_from_the_memo) ... ok\r\ntest_settlement_never_rewrites_the_retired_whole_history_index (test_t1519_settled_index.SettledIndexTests.test_settlement_never_rewrites_the_retired_whole_history_index) ... ok\r\ntest_the_projection_is_current_after_every_settlement (test_t1519_settled_index.SettledIndexTests.test_the_projection_is_current_after_every_settlement) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 7 tests in 4.864s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1544_audit20.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1544_audit20.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        21156
+      ],
+      "duration_s": 3.985,
+      "process_create_s": 0.032,
+      "ran": 11,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "{\r\n  \"ok\": false,\r\n  \"code\": \"VALIDATION_FAILED\",\r\n  \"action\": \"saipen recover\",\r\n  \"reason\": \"state-malformed\",\r\n  \"detail\": \"state-malformed: unknown STATE field 'parked_work' -- state.schema.json does not define it (retired or misspelled?)\",\r\n  \"cold_route\": {\r\n    \"project_root\": \"C:\\\\Temp\\\\t1363-fnnqd6am\",\r\n    \"saipen_home\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\",\r\n    \"protocol_dir\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\",\r\n    \"phase\": \"DONE\",\r\n    \"phase_module\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\phases\\\\done.md\",\r\n    \"boot\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\BOOT.md\",\r\n    \"style\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\STYLE.md\",\r\n    \"documents\": {\r\n      \"STYLE.md\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\STYLE.md\",\r\n      \"BOOT.md\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\BOOT.md\",\r\n      \"INDEX.md\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\INDEX.md\",\r\n      \"COMMANDS.md\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\COMMANDS.md\",\r\n      \"OPS.md\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\OPS.md\",\r\n      \"SOURCES.md\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\SOURCES.md\",\r\n      \"EXECUTION.md\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\EXECUTION.md\",\r\n      \"MAINTENANCE.md\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\MAINTENANCE.md\",\r\n      \"CORE.md\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\CORE.md\",\r\n      \"RUNTIME.md\": \"C:\\\\Temp\\\\saipen-core-unit-im0cdnhj\\\\project\\\\saipen\\\\RUNTIME.md\"\r\n    },\r\n    \"project_memory\": {\r\n      \"STATE.md\": \"C:\\\\Temp\\\\t1363-fnnqd6am\\\\.saipen\\\\STATE.md\",\r\n      \"BOARD.md\": \"C:\\\\Temp\\\\t1363-fnnqd6am\\\\.saipen\\\\BOARD.md\",\r\n      \"LOG.md\": \"C:\\\\Temp\\\\t1363-fnnqd6am\\\\.saipen\\\\LOG.md\"\r\n    },\r\n    \"search_required\": false\r\n  }\r\n}\r\n",
+      "stderr": "test_status_no_longer_captures_its_own_identity (test_t1544_audit20.OneSourceIdentityPerStatusProjectionTests.test_status_no_longer_captures_its_own_identity)\r\nInstrumenting the ONE function every consumer reaches for. ... ok\r\ntest_the_three_consumers_share_one_captured_identity (test_t1544_audit20.OneSourceIdentityPerStatusProjectionTests.test_the_three_consumers_share_one_captured_identity)\r\nEach consumer already accepted a pre-computed identity and none was ... ok\r\ntest_the_two_published_fingerprints_are_the_same_fingerprint (test_t1544_audit20.OneSourceIdentityPerStatusProjectionTests.test_the_two_published_fingerprints_are_the_same_fingerprint)\r\nThe second-order symptom: independently captured identities publish ... ok\r\ntest_no_installed_target_means_no_installed_target (test_t1544_audit20.TheDistributionHashIsNotPaidForNothingTests.test_no_installed_target_means_no_installed_target)\r\nThe registry is the authority, both directions. ... ok\r\ntest_status_skips_the_report_when_no_home_is_installed (test_t1544_audit20.TheDistributionHashIsNotPaidForNothingTests.test_status_skips_the_report_when_no_home_is_installed)\r\nThe measured cost: `runtime_generation_identity(HOME)` runs before ... ok\r\ntest_status_still_projects_the_report_when_a_home_is_installed (test_t1544_audit20.TheDistributionHashIsNotPaidForNothingTests.test_status_still_projects_the_report_when_a_home_is_installed)\r\nThe negative control: the gate must not have become a suppression. ... ok\r\ntest_continue_carries_the_route_it_short_circuited_past (test_t1544_audit20.TheRouterOwnsTheMalformedStateRouteTests.test_continue_carries_the_route_it_short_circuited_past)\r\n`_route_once` is the only route owner `continue` has. It returns its ... ok\r\ntest_explain_next_carries_the_route_it_short_circuited_past (test_t1544_audit20.TheRouterOwnsTheMalformedStateRouteTests.test_explain_next_carries_the_route_it_short_circuited_past) ... ok\r\ntest_nothing_is_written_and_the_route_needs_no_search_layer (test_t1544_audit20.TheRouterOwnsTheMalformedStateRouteTests.test_nothing_is_written_and_the_route_needs_no_search_layer)\r\nClassification only: the fix must not have become a mutation. ... ok\r\ntest_status_carries_the_route_it_short_circuited_past (test_t1544_audit20.TheRouterOwnsTheMalformedStateRouteTests.test_status_carries_the_route_it_short_circuited_past) ... ok\r\ntest_the_router_routes_a_malformed_state_to_recover (test_t1544_audit20.TheRouterOwnsTheMalformedStateRouteTests.test_the_router_routes_a_malformed_state_to_recover)\r\nThe control the three wrappers are measured against. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 11 tests in 3.642s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1712_manifest_runtime.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1712_manifest_runtime.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "duration_s": 4.125,
+      "process_create_s": 0.047,
+      "ran": 22,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_accessible_project_enrolls_and_second_call_writes_nothing (test_t1712_manifest_runtime.ManifestRuntimeTests.test_accessible_project_enrolls_and_second_call_writes_nothing) ... ok\r\ntest_continue_json_is_hard_refusal_without_phase_or_claim_change (test_t1712_manifest_runtime.ManifestRuntimeTests.test_continue_json_is_hard_refusal_without_phase_or_claim_change) ... ok\r\ntest_denied_ancestor_above_the_project_root_is_outside_the_boundary (test_t1712_manifest_runtime.ManifestRuntimeTests.test_denied_ancestor_above_the_project_root_is_outside_the_boundary) ... ok\r\ntest_denied_manifest_read_cannot_become_malformed_even_with_force (test_t1712_manifest_runtime.ManifestRuntimeTests.test_denied_manifest_read_cannot_become_malformed_even_with_force) ... ok\r\ntest_denied_manifest_stat_cannot_authorize_replacement (test_t1712_manifest_runtime.ManifestRuntimeTests.test_denied_manifest_stat_cannot_authorize_replacement) ... ok\r\ntest_denied_state_read_is_availability_not_corruption (test_t1712_manifest_runtime.ManifestRuntimeTests.test_denied_state_read_is_availability_not_corruption) ... ok\r\ntest_direct_write_contains_original_oserror (test_t1712_manifest_runtime.ManifestRuntimeTests.test_direct_write_contains_original_oserror) ... ok\r\ntest_failed_atomic_replace_removes_own_temporary_and_preserves_manifest (test_t1712_manifest_runtime.ManifestRuntimeTests.test_failed_atomic_replace_removes_own_temporary_and_preserves_manifest) ... ok\r\ntest_inaccessible_child_is_not_missing_or_corrupt (test_t1712_manifest_runtime.ManifestRuntimeTests.test_inaccessible_child_is_not_missing_or_corrupt) ... ok\r\ntest_init_late_materialization_denial_leaves_no_partial_canonical_files (test_t1712_manifest_runtime.ManifestRuntimeTests.test_init_late_materialization_denial_leaves_no_partial_canonical_files) ... ok\r\ntest_init_permission_failure_is_json_and_never_init_completed (test_t1712_manifest_runtime.ManifestRuntimeTests.test_init_permission_failure_is_json_and_never_init_completed) ... ok\r\ntest_known_denial_precedes_any_canonical_reconciliation_repair (test_t1712_manifest_runtime.ManifestRuntimeTests.test_known_denial_precedes_any_canonical_reconciliation_repair) ... ok\r\ntest_manifest_dry_run_denial_has_nonzero_cli_exit (test_t1712_manifest_runtime.ManifestRuntimeTests.test_manifest_dry_run_denial_has_nonzero_cli_exit) ... ok\r\ntest_manifest_write_denial_precedes_canonical_reconciliation_commit (test_t1712_manifest_runtime.ManifestRuntimeTests.test_manifest_write_denial_precedes_canonical_reconciliation_commit) ... ok\r\ntest_missing_project_is_absence_without_creation (test_t1712_manifest_runtime.ManifestRuntimeTests.test_missing_project_is_absence_without_creation) ... ok\r\ntest_one_denied_project_does_not_stop_a_separate_eligible_goal (test_t1712_manifest_runtime.ManifestRuntimeTests.test_one_denied_project_does_not_stop_a_separate_eligible_goal) ... ok\r\ntest_other_oserror_preserves_its_distinct_error (test_t1712_manifest_runtime.ManifestRuntimeTests.test_other_oserror_preserves_its_distinct_error) ... ok\r\ntest_read_only_manifest_cli_denial_is_parseable_hard_refusal (test_t1712_manifest_runtime.ManifestRuntimeTests.test_read_only_manifest_cli_denial_is_parseable_hard_refusal) ... ok\r\ntest_read_only_manifest_inspection_reports_its_own_denial (test_t1712_manifest_runtime.ManifestRuntimeTests.test_read_only_manifest_inspection_reports_its_own_denial) ... ok\r\ntest_repeat_diagnostic_has_stable_fingerprint_without_writes (test_t1712_manifest_runtime.ManifestRuntimeTests.test_repeat_diagnostic_has_stable_fingerprint_without_writes) ... ok\r\ntest_topology_refusal_is_still_a_hard_security_boundary (test_t1712_manifest_runtime.ManifestRuntimeTests.test_topology_refusal_is_still_a_hard_security_boundary) ... ok\r\ntest_unreadable_existing_ancestor_is_structured_and_zero_write (test_t1712_manifest_runtime.ManifestRuntimeTests.test_unreadable_existing_ancestor_is_structured_and_zero_write) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 22 tests in 3.701s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1726_closed_contracts.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1726_closed_contracts.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        18588
+      ],
+      "duration_s": 17.61,
+      "process_create_s": 0.063,
+      "ran": 33,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_active_successor_is_reported_without_duplicate_work (test_t1726_closed_contracts.ClosedContracts.test_active_successor_is_reported_without_duplicate_work) ... ok\r\ntest_changed_environment_invalidates_scoped_currentness (test_t1726_closed_contracts.ClosedContracts.test_changed_environment_invalidates_scoped_currentness) ... ok\r\ntest_changed_environment_neither_proves_regression_nor_excuses_oracle_change (test_t1726_closed_contracts.ClosedContracts.test_changed_environment_neither_proves_regression_nor_excuses_oracle_change) ... ok\r\ntest_changed_focused_inputs_need_remeasurement_for_closure (test_t1726_closed_contracts.ClosedContracts.test_changed_focused_inputs_need_remeasurement_for_closure) ... ok\r\ntest_changed_or_missing_oracle_is_unverified_without_executing_it (test_t1726_closed_contracts.ClosedContracts.test_changed_or_missing_oracle_is_unverified_without_executing_it) ... ok\r\ntest_deleted_or_weakened_oracle_is_never_a_pass_even_on_retry (test_t1726_closed_contracts.ClosedContracts.test_deleted_or_weakened_oracle_is_never_a_pass_even_on_retry) ... ok\r\ntest_dependency_hash_budget_is_explicit_and_nonblocking (test_t1726_closed_contracts.ClosedContracts.test_dependency_hash_budget_is_explicit_and_nonblocking) ... ok\r\ntest_directory_membership_enumeration_respects_the_shared_path_budget (test_t1726_closed_contracts.ClosedContracts.test_directory_membership_enumeration_respects_the_shared_path_budget) ... ok\r\ntest_dry_run_never_executes_focused_command_or_writes (test_t1726_closed_contracts.ClosedContracts.test_dry_run_never_executes_focused_command_or_writes) ... ok\r\ntest_explicit_cache_directory_remains_a_bound_dependency (test_t1726_closed_contracts.ClosedContracts.test_explicit_cache_directory_remains_a_bound_dependency) ... ok\r\ntest_explicit_cache_file_remains_a_bound_dependency (test_t1726_closed_contracts.ClosedContracts.test_explicit_cache_file_remains_a_bound_dependency) ... ok\r\ntest_explicit_remeasurement_refreshes_environment_and_preserves_history (test_t1726_closed_contracts.ClosedContracts.test_explicit_remeasurement_refreshes_environment_and_preserves_history) ... ok\r\ntest_explicit_subject_inside_cache_remains_in_directory_context (test_t1726_closed_contracts.ClosedContracts.test_explicit_subject_inside_cache_remains_in_directory_context) ... ok\r\ntest_first_failure_does_not_invent_historical_regression (test_t1726_closed_contracts.ClosedContracts.test_first_failure_does_not_invent_historical_regression) ... ok\r\ntest_formatting_and_refactor_are_suspects_until_focused_pass (test_t1726_closed_contracts.ClosedContracts.test_formatting_and_refactor_are_suspects_until_focused_pass) ... ok\r\ntest_generic_strict_pass_cannot_hide_a_confirmed_focused_failure (test_t1726_closed_contracts.ClosedContracts.test_generic_strict_pass_cannot_hide_a_confirmed_focused_failure) ... ok\r\ntest_implicit_cache_changes_do_not_invalidate_focused_proof (test_t1726_closed_contracts.ClosedContracts.test_implicit_cache_changes_do_not_invalidate_focused_proof) ... ok\r\ntest_invalid_input_and_legacy_binding_do_not_claim_green (test_t1726_closed_contracts.ClosedContracts.test_invalid_input_and_legacy_binding_do_not_claim_green) ... ok\r\ntest_native_read_only_cli_paginates_and_never_executes (test_t1726_closed_contracts.ClosedContracts.test_native_read_only_cli_paginates_and_never_executes) ... ok\r\ntest_new_declared_directory_member_invalidates_currentness_before_recheck (test_t1726_closed_contracts.ClosedContracts.test_new_declared_directory_member_invalidates_currentness_before_recheck) ... ok\r\ntest_new_explicit_cache_member_is_in_the_declared_dependency_scope (test_t1726_closed_contracts.ClosedContracts.test_new_explicit_cache_member_is_in_the_declared_dependency_scope) ... ok\r\ntest_observer_python_does_not_replace_the_recorded_verifier (test_t1726_closed_contracts.ClosedContracts.test_observer_python_does_not_replace_the_recorded_verifier) ... ok\r\ntest_real_regression_preserves_historical_receipt_and_done (test_t1726_closed_contracts.ClosedContracts.test_real_regression_preserves_historical_receipt_and_done) ... ok\r\ntest_removed_binding_with_recomputed_digest_is_still_untrusted (test_t1726_closed_contracts.ClosedContracts.test_removed_binding_with_recomputed_digest_is_still_untrusted) ... ok\r\ntest_removed_dependency_runs_the_unchanged_verifier_and_fails (test_t1726_closed_contracts.ClosedContracts.test_removed_dependency_runs_the_unchanged_verifier_and_fails) ... ok\r\ntest_same_inputs_reuse_one_immutable_observation (test_t1726_closed_contracts.ClosedContracts.test_same_inputs_reuse_one_immutable_observation) ... ok\r\ntest_scope_only_never_claims_semantic_pass_or_failure (test_t1726_closed_contracts.ClosedContracts.test_scope_only_never_claims_semantic_pass_or_failure) ... ok\r\ntest_simultaneous_rechecks_keep_receipt_ids_serialized (test_t1726_closed_contracts.ClosedContracts.test_simultaneous_rechecks_keep_receipt_ids_serialized) ... ok\r\ntest_tampered_latest_receipt_cannot_resurrect_old_pass (test_t1726_closed_contracts.ClosedContracts.test_tampered_latest_receipt_cannot_resurrect_old_pass) ... ok\r\ntest_timeout_is_unverified_and_never_a_regression_verdict (test_t1726_closed_contracts.ClosedContracts.test_timeout_is_unverified_and_never_a_regression_verdict) ... ok\r\ntest_unrelated_edit_does_not_invalidate_focused_observation (test_t1726_closed_contracts.ClosedContracts.test_unrelated_edit_does_not_invalidate_focused_observation) ... ok\r\ntest_unrelated_tree_change_preserves_executed_dependency_proof (test_t1726_closed_contracts.ClosedContracts.test_unrelated_tree_change_preserves_executed_dependency_proof) ... ok\r\ntest_zero_collection_and_runtime_failure_are_unverified (test_t1726_closed_contracts.ClosedContracts.test_zero_collection_and_runtime_failure_are_unverified) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 33 tests in 17.167s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t2089_agent_status_view.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t2089_agent_status_view.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        19536,
+        10836
+      ],
+      "duration_s": 12.125,
+      "process_create_s": 0.047,
+      "ran": 4,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_agent_view_envelope_is_bounded_under_many_blockers (test_t2089_agent_status_view.AgentViewParity.test_agent_view_envelope_is_bounded_under_many_blockers) ... ok\r\ntest_agent_view_matches_full_projection_verdicts (test_t2089_agent_status_view.AgentViewParity.test_agent_view_matches_full_projection_verdicts) ... ok\r\ntest_full_view_unchanged_by_the_agent_route (test_t2089_agent_status_view.AgentViewParity.test_full_view_unchanged_by_the_agent_route) ... ok\r\ntest_text_status_rejects_the_view_option (test_t2089_agent_status_view.AgentViewParity.test_text_status_rejects_the_view_option) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 4 tests in 11.981s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 182,
+  "duration_s": 177.828,
+  "timings_s": {
+    "execution_wall_s": 91.625,
+    "environment_identity_wall_s": 0.031,
+    "copy_wall_s": 66.61,
+    "hash_wall_s": 0.156,
+    "cleanup_wall_s": 19.375
+  },
+  "copy_metrics": {
+    "subject_copy_s": 13.406,
+    "canonical_copy_s": 52.938,
+    "canonical_copy_attempts": 1,
+    "trees": null
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_runtime_generation_identity.py",
+      "test_t1712_manifest_runtime.py",
+      "test_t1726_closed_contracts.py"
+    ],
+    "manifest_sha256": "6c43816bc6ea79df1e3f3cce5086c10665c4a681afd091a4a9efb077884064e5"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_distribution_report.py",
+        "test_runtime_generation_identity.py",
+        "test_settled_projection.py",
+        "test_t1519_settled_index.py",
+        "test_t1544_audit20.py",
+        "test_t1712_manifest_runtime.py",
+        "test_t1726_closed_contracts.py",
+        "test_t2089_agent_status_view.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "30888f8c2c9bd2385eb22056d39994ebfee110f946b67c87fa72278685e984a6",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "2271ca5434892f15f981f28ed5ded00314be23f853d23c8db56c527f302b0463"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "86d04f8a8d42dd8b365b33a29ca7b3cc1eacae9ddcfc2ae1b9bdbf3ee1e5e32f"
+      },
+      "core_unit_shard.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "1a22bac5140eeaf33be64413027a22c474420dbe7e3c6134af9b5e6f90942c9d"
+      },
+      "test_runner.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "e8d4d18e93abd3843f0d911071bc729c15ad767502b72c567be436e6f17545ed"
+      },
+      "verification_cache.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "70188f394bb84cc78fe2417daecf5b38b6abcd3be73956194baf1ef1911413ba"
+      },
+      "process_tree.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "798e6663a85d1906533203fe961472ad8eb8b7e645aa3961a694c1192ca5efcb"
+      },
+      "verification_bootstrap.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "8fa1c333bec82156f70bb66e7df786e99265d0b4c5f3da362a830bfc9198ab24"
+      },
+      "verification_impact.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "d2829c9de720e9b84d9dfa4056786c533bf9cff86913c5ed0546fe63e19f5a83"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "f008508f0f88d1c6a74f95d7e541a411a685b375404d7dd1ea49035ff7a5064c"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

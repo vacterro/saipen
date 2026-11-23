@@ -1,0 +1,15 @@
+{
+  "phase": "DONE",
+  "ticket": "T-2021",
+  "closure_event": "E-20529",
+  "source_closed": {
+    "ok": true,
+    "closed": [
+      "SRC-391"
+    ],
+    "refused": {}
+  },
+  "original_index_sha256": "dcb1637b2114fe07b413565018aad079a1fcefbbffe3fff6220d22556f1a9adf",
+  "final_index_sha256": "dcb1637b2114fe07b413565018aad079a1fcefbbffe3fff6220d22556f1a9adf",
+  "original_index_preserved": true
+}

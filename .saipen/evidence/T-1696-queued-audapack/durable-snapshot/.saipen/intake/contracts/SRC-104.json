@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-104:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Fix live A3 stall: completed ChatGPT audit response stays classified as generating (widget 0.0.84)"
+    }
+  },
+  "derived_at": "2026-09-29T13:32:46Z",
+  "derived_from": "SRC-104",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7cb34fd7ad67c539cd71458b907de1589b6ee2319cf993fd0e5b8a5b5f8fa774"
+}

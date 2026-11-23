@@ -1,0 +1,9 @@
+{
+  "head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "staged_sha256": "cf572d0dedad24a93a2d7ca58670c38df1f67177abe2cffced6a7f2a6bd00685",
+  "expected_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "expected_staged_sha256": "cf572d0dedad24a93a2d7ca58670c38df1f67177abe2cffced6a7f2a6bd00685",
+  "scope": "SAIPEN owned source; no main-repository publication command performed",
+  "head_preserved": true,
+  "staging_preserved": true
+}

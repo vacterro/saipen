@@ -1,0 +1,58 @@
+
+CONTROLLED RED: incomplete-discovery-allowed
+test_empty_project_without_discovery_cannot_continue (test_automation_block.ClosedVocabulary.test_empty_project_without_discovery_cannot_continue) ... FAIL
+
+======================================================================
+FAIL: test_empty_project_without_discovery_cannot_continue (test_automation_block.ClosedVocabulary.test_empty_project_without_discovery_cannot_continue)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 250, in test_empty_project_without_discovery_cannot_continue
+    self.assertEqual(block["disposition"], automation.BLOCKED)
+AssertionError: 'CONTINUE' != 'BLOCKED'
+- CONTINUE
++ BLOCKED
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.029s
+
+FAILED (failures=1)
+
+CONTROLLED RED: closure-vetoes-erased
+test_audit_quiescence_is_required (test_automation_block.ClosureGate.test_audit_quiescence_is_required) ... FAIL
+test_binding_wait_vetoes_closure (test_automation_block.ClosureGate.test_binding_wait_vetoes_closure) ... FAIL
+test_stale_projection_cannot_certify_current_completion (test_t1739_wait_boundary.WaitBoundary.test_stale_projection_cannot_certify_current_completion) ... FAIL
+
+======================================================================
+FAIL: test_audit_quiescence_is_required (test_automation_block.ClosureGate.test_audit_quiescence_is_required)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 522, in test_audit_quiescence_is_required
+    self.assertEqual(block["disposition"], CONTINUE)
+AssertionError: 'COMPLETE' != 'CONTINUE'
+- COMPLETE
++ CONTINUE
+
+
+======================================================================
+FAIL: test_binding_wait_vetoes_closure (test_automation_block.ClosureGate.test_binding_wait_vetoes_closure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 573, in test_binding_wait_vetoes_closure
+    self.assertFalse(gate["complete"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_stale_projection_cannot_certify_current_completion (test_t1739_wait_boundary.WaitBoundary.test_stale_projection_cannot_certify_current_completion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1739_wait_boundary.py", line 125, in test_stale_projection_cannot_certify_current_completion
+    self.assertFalse(block["closure_complete"])
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.022s
+
+FAILED (failures=3)
+
+EXPECTED RED CONFIRMED: [{"mutation": "incomplete-discovery-allowed", "tests": 1, "failures": 1, "errors": 0, "skipped": 0}, {"mutation": "closure-vetoes-erased", "tests": 3, "failures": 3, "errors": 0, "skipped": 0}]

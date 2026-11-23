@@ -1,0 +1,20 @@
+{
+  "kind": "saipen-gate-decision",
+  "schema": 1,
+  "project_lineage": "lineage-7fc61754568d4196af19dcab7875ddf0",
+  "gate": {
+    "phase": "SCOUT",
+    "task": "T-001",
+    "last_event": 2,
+    "blocker": "WAIT_USER_CONFIRMATION -- fixture limitation",
+    "next_action": "WAIT: blocked -- operator must accept-or-extend the Flush(true) power-loss durability ceiling before any further work"
+  },
+  "gate_id": "59c9895df4217637dff0222d3f9cb9f1a3a420747d2ff27d76ba78253977f354",
+  "resolve": [
+    "blocker",
+    "next_action"
+  ],
+  "decision": "ACCEPT_LIMITATION",
+  "statement": "PENDING HUMAN DECISION: replace this draft with the operator's own acceptance of the synthetic disposable fixture limitation only.",
+  "expires_at": "2026-10-18T10:18:59Z"
+}

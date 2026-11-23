@@ -1,0 +1,27 @@
+test_dead_owner_reclaims_guard_after_reader_registration (test_t1832_single_flight.FlightRecoveryTests.test_dead_owner_reclaims_guard_after_reader_registration) ... FAIL
+test_dead_owner_reclaims_guard_before_reader_registration (test_t1832_single_flight.FlightRecoveryTests.test_dead_owner_reclaims_guard_before_reader_registration) ... FAIL
+
+======================================================================
+FAIL: test_dead_owner_reclaims_guard_after_reader_registration (test_t1832_single_flight.FlightRecoveryTests.test_dead_owner_reclaims_guard_after_reader_registration)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/test_t1832_single_flight.py", line 181, in test_dead_owner_reclaims_guard_after_reader_registration
+    self.guard_directory_after_owner_death(False)
+  File "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/test_t1832_single_flight.py", line 158, in guard_directory_after_owner_death
+    self.assertFalse(directory.exists(), "dead owner's guard directory leaked")
+AssertionError: True is not false : dead owner's guard directory leaked
+
+======================================================================
+FAIL: test_dead_owner_reclaims_guard_before_reader_registration (test_t1832_single_flight.FlightRecoveryTests.test_dead_owner_reclaims_guard_before_reader_registration)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/test_t1832_single_flight.py", line 177, in test_dead_owner_reclaims_guard_before_reader_registration
+    self.guard_directory_after_owner_death(True)
+  File "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/test_t1832_single_flight.py", line 158, in guard_directory_after_owner_death
+    self.assertFalse(directory.exists(), "dead owner's guard directory leaked")
+AssertionError: True is not false : dead owner's guard directory leaked
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.312s
+
+FAILED (failures=2)

@@ -1,0 +1,10 @@
+{
+  "authoritative_body_exported": false,
+  "body_ref": ".saipen/quarantine/source/SRC-401.md",
+  "quarantined_at": "2026-11-12T13:29:14Z",
+  "reason": "OPERATOR_MARKED",
+  "receipt_id": "SRC-401",
+  "schema_version": 1,
+  "source_sha256": "db19390c4bd638e1472abfed1d74704d9d3692853c7631373e026482694197d3",
+  "state": "QUARANTINED"
+}

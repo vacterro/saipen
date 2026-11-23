@@ -1,0 +1,11 @@
+{
+  "files": {
+    "tools/saipen_engine/operator_task.py": "eed35875bbd58f12e990cde73125c2d559cd5ef31405dbc268b2dab0f9c033ad",
+    "tools/saipen_engine/host_taxonomy.py": "66e66d673a92d564f1ed365a42aec0cfa8b3f87d933b57571b2bffd73c5504b9",
+    "tools/saipen_engine/admission_doctor.py": "fb8cc56aba3e93ecd547da43308610fef033fc2c69dd8b1190aa9237ae006340",
+    "tools/test_t1850_freebuff_diagnostics.py": "f136bbf7be6c05c4b23b42270d5bd1c517fe01ff81a238d4a360e2b525d924b3"
+  },
+  "self_audit": "One focused executing-agent inspection: diagnostic markers do not enter origin verification; taxonomy gap permits no operator privilege and strict still blocks; doctor preserves state, Work and hard_wait. Reviewed raw-carrier and other-host failure paths and unchanged inherited controls. No confirmed remaining owned finding.",
+  "memory_promotion": "NO: marker-specific correction and existing trust/integrity distinction already documented",
+  "limits": "No native FreeBuff UI/Luna or FastPrompter acceptance; whole-family publication gate remains independently required."
+}

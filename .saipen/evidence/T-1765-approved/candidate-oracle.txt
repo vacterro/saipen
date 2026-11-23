@@ -1,0 +1,16 @@
+test_a_fresh_v2_snapshot_loads_and_preserves_the_legacy_file (test_t1765_finding_subtypes.BaselineCompatibilityTests.test_a_fresh_v2_snapshot_loads_and_preserves_the_legacy_file) ... ok
+test_loading_a_v1_baseline_refuses_by_name_without_rewriting_it (test_t1765_finding_subtypes.BaselineCompatibilityTests.test_loading_a_v1_baseline_refuses_by_name_without_rewriting_it) ... ok
+test_work_comparison_refuses_the_old_baseline_without_rewriting_it (test_t1765_finding_subtypes.BaselineCompatibilityTests.test_work_comparison_refuses_the_old_baseline_without_rewriting_it) ... ok
+test_another_offending_filename_changes_the_condition (test_t1765_finding_subtypes.FindingSubtypeTests.test_another_offending_filename_changes_the_condition) ... ok
+test_captured_global_rules_keep_non_id_parts_of_the_capture (test_t1765_finding_subtypes.FindingSubtypeTests.test_captured_global_rules_keep_non_id_parts_of_the_capture) ... ok
+test_credential_redaction_precedes_global_subtype_preservation (test_t1765_finding_subtypes.FindingSubtypeTests.test_credential_redaction_precedes_global_subtype_preservation) ... ok
+test_different_subtypes_with_the_same_id_are_changed_conditions (test_t1765_finding_subtypes.FindingSubtypeTests.test_different_subtypes_with_the_same_id_are_changed_conditions) ... ok
+test_ruleset_version_two_changes_the_explicit_compatibility_binding (test_t1765_finding_subtypes.FindingSubtypeTests.test_ruleset_version_two_changes_the_explicit_compatibility_binding) ... ok
+test_subject_scoped_id_normalization_stays_stable (test_t1765_finding_subtypes.FindingSubtypeTests.test_subject_scoped_id_normalization_stays_stable) ... ok
+test_the_handoff_retains_its_rule_subtype_and_both_filenames (test_t1765_finding_subtypes.FindingSubtypeTests.test_the_handoff_retains_its_rule_subtype_and_both_filenames) ... ok
+test_volatile_line_numbers_counts_and_spacing_stay_normalized (test_t1765_finding_subtypes.FindingSubtypeTests.test_volatile_line_numbers_counts_and_spacing_stay_normalized) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 1.584s
+
+OK

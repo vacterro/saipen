@@ -1,0 +1,66 @@
+--- a/apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/commands/continue-diagnostics.ts
++++ b/apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/commands/continue-diagnostics.ts
+@@ -1,3 +1,4 @@
++import { describeZaicodeOperatorIngressState } from "@zcode/shared/zaicode-operator-ingress";
+ import type { SaipenContinueAnswer } from "./continue-owner.js";
+ import type { V4SessionRecordView } from "./types.js";
+ 
+@@ -43,29 +44,25 @@
+  * code itself and the message is decoration again.
+  */
+ export function saipenRefusalCode(answer: SaipenContinueAnswer): "guard.recognizedContinueSaipenValve" | "guard.recognizedContinueSaipenOperator" | "guard.recognizedContinueSaipenRefused" | "guard.recognizedContinueOperatorAuthorizationRequired" | "guard.recognizedContinueTrustedIngressUnavailable" | "guard.recognizedContinueBrokerUnhealthy" | "guard.recognizedContinueRuntimeStale" {
++  // 缺失可信入口是基础设施故障，不能被预算暂停误报成“再输入 cc”。
++  if (!answer.ingressDelivered) {
++    switch (answer.ingressState) {
++      case "trusted-ingress-unavailable":
++        return "guard.recognizedContinueTrustedIngressUnavailable";
++      case "broker-unhealthy":
++        return "guard.recognizedContinueBrokerUnhealthy";
++      case "runtime-stale":
++        return "guard.recognizedContinueRuntimeStale";
++    }
++  }
+   if (answer.safetyValveTripped || answer.remediation === "SAFETY_VALVE_TRIPPED") {
+     return "guard.recognizedContinueSaipenValve";
+   }
+   if (answer.operatorActionDue || answer.remediation === "OPERATOR_DECISION") {
+     return "guard.recognizedContinueSaipenOperator";
+   }
+-  // T-415: a REFUSED continuation whose trusted ingress never delivered tells
+-  // the operator WHICH precondition is missing. The launcher's own verdict
+-  // still travels inside the message, so the trust-side fact never replaces
+-  // the launcher's reason -- it names it.
+-  if (!answer.ingressDelivered && answer.ingressState) {
+-    if (answer.ingressState === "runtime-stale") {
+-      return "guard.recognizedContinueRuntimeStale";
+-    }
+-    if (answer.ingressState === "broker-unhealthy") {
+-      return "guard.recognizedContinueBrokerUnhealthy";
+-    }
+-    if (answer.ingressState === "trusted-ingress-unavailable") {
+-      return "guard.recognizedContinueTrustedIngressUnavailable";
+-    }
+-    if (answer.ingressState === "operator-authorization-required") {
+-      return "guard.recognizedContinueOperatorAuthorizationRequired";
+-    }
++  if (!answer.ingressDelivered && answer.ingressState === "operator-authorization-required") {
++    return "guard.recognizedContinueOperatorAuthorizationRequired";
+   }
+   return "guard.recognizedContinueSaipenRefused";
+ }
+@@ -94,6 +91,15 @@
+     !answer.ingressDelivered && answer.ingressDetail
+       ? ` (trusted ingress: ${answer.ingressDetail})`
+       : "";
++  // 保留内核拒绝事实，同时先说明本次请求的可信传输缺口。
++  const ingress = !answer.ingressDelivered ? answer.ingressState : null;
++  if (ingress === "trusted-ingress-unavailable" || ingress === "broker-unhealthy" || ingress === "runtime-stale") {
++    return describeZaicodeOperatorIngressState(
++      ingress,
++      (answer.ingressDetail ? answer.ingressDetail + " " : "") +
++        "SAIPEN refusal: " + detail + codeHint,
++    );
++  }
+   if (answer.safetyValveTripped) {
+     return `the SAIPEN safety valve is reached: ${detail}${codeHint}${ingressHint}`;
+   }

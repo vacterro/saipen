@@ -253,8 +253,19 @@ REMEDIATIONS = (
         "tools/saipen_engine/operations.py",
     ),
     _cmd(
+        # T-2050: a closed row an ACTIVE receipt still names was moveable but not
+        # restorable, so the finding degraded to ENGINEERING_REQUIRED. The
+        # restoring form is its own registered shape.
+        "source coverage:pruned-work-row",
+        r"saipen source recover --confirm",
+        "saipen source recover --confirm",
+        "source",
+        "recover",
+        "tools/saipen_engine/intake.py",
+    ),
+    _cmd(
         "source coverage",
-        r"saipen source recover",
+        r"saipen source recover(?! --confirm)",
         "saipen source recover",
         "source",
         "recover",

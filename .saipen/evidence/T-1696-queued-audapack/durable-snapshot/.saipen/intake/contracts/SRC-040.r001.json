@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-040:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Create exactly one new repair ticket through the normal SAIPEN/SAIOPS workflow for the verified T-150 residue and claim it before editing; do not reopen T-150; use the live allocator id (expected T-168)."
+    }
+  },
+  "derived_at": "2026-09-07T12:36:49Z",
+  "derived_from": "SRC-040",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "f0eafd761272fafb291971705b367067624f579d77d8319d16db6fd2b8a496c7"
+}

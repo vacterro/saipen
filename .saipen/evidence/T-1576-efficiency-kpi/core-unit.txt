@@ -1,0 +1,21 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 4472,
+  "red": 4,
+  "new_red": [
+    "test_metrics_acceptance.AcceptanceSectionTests.test_the_import_is_one_way",
+    "test_refusal_registry.RegistryCompletenessTests.test_every_production_refusal_code_is_registered",
+    "test_t1553_mid_session_activation.CompactnessContractCoherence.test_execution_prose_matches_the_machine_copy",
+    "test_t1553_mid_session_activation.CompactnessContractCoherence.test_execution_states_the_character_budgets_and_the_ceiling"
+  ],
+  "fixed": [],
+  "problems": [
+    "4 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/9146881f84e42c51-20260930T235606Z.json",
+  "reused": false,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

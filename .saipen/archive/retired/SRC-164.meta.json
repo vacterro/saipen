@@ -1,0 +1,54 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-164.md",
+  "linked_work": "T-1599",
+  "receipt_id": "SRC-164",
+  "received_at": "2026-10-02T21:17:36Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "4c86d94aaa3166ae687ff84210d5753292e78df2016b14dae75cb2de4cf0ce92",
+    "sanitized_sha256": "4c86d94aaa3166ae687ff84210d5753292e78df2016b14dae75cb2de4cf0ce92"
+  },
+  "request_provenance": {
+    "compared_digest": "1b4f0e9851971998e732078544c96b36c3d01cedf7caa332359d6f1d83567014",
+    "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+    "witness": "model_supplied"
+  },
+  "retirement": {
+    "authority_grant": "system:FALSE_AUTHORITY_PROJECTION",
+    "authority_receipt": null,
+    "authority_sha256": null,
+    "board_record": "- [/] T-1599 [P1] test1 | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-164 | owner: saipen-cli | claim_time: 2026-10-02T22:19:51Z",
+    "board_record_sha256": "4b5d89288c28bc5f9e4045f40e002e84fe783994639a09fd71ede56b78e61246",
+    "discovery_event": null,
+    "evidence": {
+      "kind": "artifact",
+      "ref": ".saipen/evidence/response-authority/authority-red.txt",
+      "sha256": "129fc79918ae509923632b74535d9fd2c23041c59b46a0cdecf7f27f2bd0ec86"
+    },
+    "evidence_bound_event": "E-11885",
+    "evidence_note": "SRC-164 model_supplied; zero clauses and requirements; revoke false operator projection, not implementation completion",
+    "reason": "FALSE_AUTHORITY_PROJECTION",
+    "retired_at": "2026-10-02T22:20:01Z",
+    "retired_by": "saipen-cli",
+    "retired_work": "T-1599",
+    "retirement_event": "E-11885",
+    "schema_version": 2
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "4c86d94aaa3166ae687ff84210d5753292e78df2016b14dae75cb2de4cf0ce92",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "4c86d94aaa3166ae687ff84210d5753292e78df2016b14dae75cb2de4cf0ce92",
+  "status": "INVALID",
+  "storage_status": "ARCHIVED",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

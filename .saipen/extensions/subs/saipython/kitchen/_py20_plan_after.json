@@ -1,0 +1,480 @@
+{
+  "ok": true,
+  "code": "CREW_PLAN",
+  "crew_complete": false,
+  "action_required": true,
+  "dry_run": true,
+  "stages": [
+    {
+      "stage": "SC-0",
+      "name": "recover-sync",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-1",
+      "name": "instances",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-2",
+      "name": "saihunt",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-3",
+      "name": "saitest",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-4",
+      "name": "saipython",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-5",
+      "name": "saiui",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "NOT_APPLICABLE -- no visual implementation file in 64521 scanned project files (extensions .css .htm .html .jsx .less .qml .sass .scss .storyboard .svelte .tsx .ui .vue .xaml .xib; no desktop UI toolkit import)",
+      "action": null
+    },
+    {
+      "stage": "SC-6",
+      "name": "core-collect",
+      "state": "UNSATISFIED",
+      "satisfied": false,
+      "reason": "ready package(s): saihunt, saitest, saipython",
+      "action": {
+        "stage": "SC-6",
+        "role": "saihunt",
+        "action": "COLLECT_ROLE",
+        "source_identity": {
+          "source_head": "dc39709c0c17a3272126c01a626ffcaa4176140b",
+          "source_tree_fingerprint": "git-delta-v1:cf7cd4a7512b88c0b0f2e57a05d17aef9e41b432f907486635c87aa3ab53aa42"
+        },
+        "required_contract": "core-review package durably ingested once (INTAKE != REVIEW)",
+        "inputs": [
+          ".saipen/extensions/subs/saihunt/kitchen/OUTBOX.md"
+        ],
+        "expected_evidence": "ordinary Core review unit + durable collect receipt binding package identity to the ticket",
+        "completion_condition": "saihunt health REVIEW_PENDING with a linked review ticket",
+        "on_success": "REPLAN",
+        "on_failure": "BLOCK",
+        "execute_in_current_agent": true,
+        "role_paths": [
+          ".saipen/extensions/subs/saihunt.md",
+          ".saipen/extensions/subs/saihunt/STATE.md",
+          ".saipen/extensions/subs/saihunt/BOARD.md",
+          ".saipen/extensions/subs/saihunt/LOG.md",
+          ".saipen/extensions/subs/saihunt/kitchen/OUTBOX.md"
+        ],
+        "write_boundary": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\extensions\\subs",
+        "then_action": "REPLAN_CREW",
+        "terminal": false,
+        "requires_human": false,
+        "next_action": "COLLECT_ROLE",
+        "resume_after": "REPLAN_CREW",
+        "userperson_projection": {
+          "role": "saihunt",
+          "projection_policy": [
+            "automation"
+          ],
+          "source_fingerprint": "2f3ac492d9e934ec",
+          "preferences": [
+            {
+              "category": "Automation",
+              "text": "Prefer automation that removes recurring manual repetition rather than automation created merely because automation is possible.",
+              "id": "b9b80947ea47",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Prefer unattended execution when the operation is sufficiently specified, bounded, recoverable, and safe.",
+              "id": "b789a4487c35",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Long-running automation should survive interruption, restart, transient failure, and temporary provider unavailability where practical.",
+              "id": "4f59edf32a4a",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Prefer resumable operations over restart-from-zero behavior.",
+              "id": "bb3b64a3c1a2",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Prefer persistent queue state over volatile in-memory-only queue state when losing work after restart would matter.",
+              "id": "3771ed686ca6",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Prefer idempotent operations so retries do not duplicate work or corrupt state.",
+              "id": "8d474c157221",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Explicitly distinguish queued, running, blocked, retrying, cancelled, failed, and completed states when those distinctions matter.",
+              "id": "f34aa8086854",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "A retry mechanism should have bounded behavior, visible state, and a meaningful terminal failure rather than retrying forever.",
+              "id": "5ab239eebb11",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Prefer event-driven behavior over frequent polling when a reliable event mechanism exists.",
+              "id": "9bc054ea3706",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "When polling is necessary, avoid unnecessarily aggressive intervals and redundant repeated work.",
+              "id": "f064e3b74609",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Do not silently swallow automation failures; preserve enough evidence to understand what failed and why.",
+              "id": "01d9cdd8e114",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Prefer automation whose actions can be inspected before or after execution.",
+              "id": "de630400f35f",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Preserve manually created user state and do not overwrite unrelated user changes.",
+              "id": "c352751f1c4f",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Avoid hidden background behavior that materially changes project state without an observable trace.",
+              "id": "a2cff30110a9",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Prefer machine-readable receipts or state markers for operations whose completion must later be proven.",
+              "id": "d9f61d13716b",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Queue processors should avoid duplicate execution after restart or retry.",
+              "id": "4f25be1961fe",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Cancellation should leave the system in a coherent recoverable state.",
+              "id": "c62e4352c69b",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "A stuck worker should not permanently block unrelated queued work when safe isolation or recovery is possible.",
+              "id": "71663d1e1f10",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Prefer single-writer ownership for shared mutable state unless concurrent writers are explicitly coordinated.",
+              "id": "24fd9caba668",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Never infer successful completion merely because a process stopped producing visible errors.",
+              "id": "1defb9ddfd4b",
+              "source": "global"
+            },
+            {
+              "category": "Automation",
+              "text": "Detect false-ready and false-success states explicitly when they can cause unattended workflows to advance incorrectly.",
+              "id": "6ed10c935cb5",
+              "source": "global"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "stage": "SC-7",
+      "name": "core-converge",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "SC-8",
+      "name": "saitranslate",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "SC-9",
+      "name": "saiwiki",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "WAIT-ROLE",
+      "name": "wait-role",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "SC-10",
+      "name": "final-fixed-point",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "SC-11",
+      "name": "ship",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "SC-12",
+      "name": "post-ship",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    },
+    {
+      "stage": "SC-13",
+      "name": "finalize",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-6",
+      "action": null
+    }
+  ],
+  "first_unsatisfied": "SC-6",
+  "action": {
+    "stage": "SC-6",
+    "role": "saihunt",
+    "action": "COLLECT_ROLE",
+    "source_identity": {
+      "source_head": "dc39709c0c17a3272126c01a626ffcaa4176140b",
+      "source_tree_fingerprint": "git-delta-v1:cf7cd4a7512b88c0b0f2e57a05d17aef9e41b432f907486635c87aa3ab53aa42"
+    },
+    "required_contract": "core-review package durably ingested once (INTAKE != REVIEW)",
+    "inputs": [
+      ".saipen/extensions/subs/saihunt/kitchen/OUTBOX.md"
+    ],
+    "expected_evidence": "ordinary Core review unit + durable collect receipt binding package identity to the ticket",
+    "completion_condition": "saihunt health REVIEW_PENDING with a linked review ticket",
+    "on_success": "REPLAN",
+    "on_failure": "BLOCK",
+    "execute_in_current_agent": true,
+    "role_paths": [
+      ".saipen/extensions/subs/saihunt.md",
+      ".saipen/extensions/subs/saihunt/STATE.md",
+      ".saipen/extensions/subs/saihunt/BOARD.md",
+      ".saipen/extensions/subs/saihunt/LOG.md",
+      ".saipen/extensions/subs/saihunt/kitchen/OUTBOX.md"
+    ],
+    "write_boundary": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\extensions\\subs",
+    "then_action": "REPLAN_CREW",
+    "terminal": false,
+    "requires_human": false,
+    "next_action": "COLLECT_ROLE",
+    "resume_after": "REPLAN_CREW",
+    "userperson_projection": {
+      "role": "saihunt",
+      "projection_policy": [
+        "automation"
+      ],
+      "source_fingerprint": "2f3ac492d9e934ec",
+      "preferences": [
+        {
+          "category": "Automation",
+          "text": "Prefer automation that removes recurring manual repetition rather than automation created merely because automation is possible.",
+          "id": "b9b80947ea47",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Prefer unattended execution when the operation is sufficiently specified, bounded, recoverable, and safe.",
+          "id": "b789a4487c35",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Long-running automation should survive interruption, restart, transient failure, and temporary provider unavailability where practical.",
+          "id": "4f59edf32a4a",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Prefer resumable operations over restart-from-zero behavior.",
+          "id": "bb3b64a3c1a2",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Prefer persistent queue state over volatile in-memory-only queue state when losing work after restart would matter.",
+          "id": "3771ed686ca6",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Prefer idempotent operations so retries do not duplicate work or corrupt state.",
+          "id": "8d474c157221",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Explicitly distinguish queued, running, blocked, retrying, cancelled, failed, and completed states when those distinctions matter.",
+          "id": "f34aa8086854",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "A retry mechanism should have bounded behavior, visible state, and a meaningful terminal failure rather than retrying forever.",
+          "id": "5ab239eebb11",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Prefer event-driven behavior over frequent polling when a reliable event mechanism exists.",
+          "id": "9bc054ea3706",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "When polling is necessary, avoid unnecessarily aggressive intervals and redundant repeated work.",
+          "id": "f064e3b74609",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Do not silently swallow automation failures; preserve enough evidence to understand what failed and why.",
+          "id": "01d9cdd8e114",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Prefer automation whose actions can be inspected before or after execution.",
+          "id": "de630400f35f",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Preserve manually created user state and do not overwrite unrelated user changes.",
+          "id": "c352751f1c4f",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Avoid hidden background behavior that materially changes project state without an observable trace.",
+          "id": "a2cff30110a9",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Prefer machine-readable receipts or state markers for operations whose completion must later be proven.",
+          "id": "d9f61d13716b",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Queue processors should avoid duplicate execution after restart or retry.",
+          "id": "4f25be1961fe",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Cancellation should leave the system in a coherent recoverable state.",
+          "id": "c62e4352c69b",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "A stuck worker should not permanently block unrelated queued work when safe isolation or recovery is possible.",
+          "id": "71663d1e1f10",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Prefer single-writer ownership for shared mutable state unless concurrent writers are explicitly coordinated.",
+          "id": "24fd9caba668",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Never infer successful completion merely because a process stopped producing visible errors.",
+          "id": "1defb9ddfd4b",
+          "source": "global"
+        },
+        {
+          "category": "Automation",
+          "text": "Detect false-ready and false-success states explicitly when they can cause unattended workflows to advance incorrectly.",
+          "id": "6ed10c935cb5",
+          "source": "global"
+        }
+      ]
+    }
+  },
+  "roles": {
+    "saihunt": "READY_FOR_REVIEW",
+    "saitest": "READY_FOR_REVIEW",
+    "saipython": "READY_FOR_REVIEW",
+    "saiui": "STALE",
+    "saitranslate": "NOT_RUN",
+    "saiwiki": "NOT_RUN"
+  },
+  "source": {
+    "source_head": "dc39709c0c17a3272126c01a626ffcaa4176140b",
+    "source_tree_fingerprint": "git-delta-v1:cf7cd4a7512b88c0b0f2e57a05d17aef9e41b432f907486635c87aa3ab53aa42"
+  },
+  "snapshot": {
+    "state": "36e08f39a77fd77d",
+    "board": "d8305c9bfcd2b3ca",
+    "log_tail": 21500,
+    "stable": true
+  },
+  "finalized": false
+}

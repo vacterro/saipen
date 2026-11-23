@@ -1,0 +1,419 @@
+test_classifier_failure_is_unavailable_not_an_empty_complete_set (tools.test_conformance_repair_boundary.RealValidatorBoundaryTests.test_classifier_failure_is_unavailable_not_an_empty_complete_set) ... ok
+test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop (tools.test_conformance_repair_boundary.RealValidatorBoundaryTests.test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop) ... ok
+test_classified_credentials_are_redacted_in_receipt (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_classified_credentials_are_redacted_in_receipt) ... ok
+test_current_fail_without_registered_repair_has_terminal_diagnosis (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_current_fail_without_registered_repair_has_terminal_diagnosis) ... ok
+test_every_blocking_record_survives_duplicate_family_keys (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_every_blocking_record_survives_duplicate_family_keys) ... ok
+test_registered_repair_remains_executable_but_validate_is_not_a_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_registered_repair_remains_executable_but_validate_is_not_a_repair) ... ok
+test_stale_fail_refreshes_instead_of_executing_its_old_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_stale_fail_refreshes_instead_of_executing_its_old_repair) ... ok
+test_tampered_blocking_findings_cannot_be_current_evidence (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_tampered_blocking_findings_cannot_be_current_evidence) ... ok
+test_continue_crew_route_is_refused_and_the_named_remediation_clears_it (tools.test_t1412_conformance_truth.RouterConformanceGateTests.test_continue_crew_route_is_refused_and_the_named_remediation_clears_it)
+The PRODUCTION continuation path, not just the Result wrapper. ... FAIL
+test_named_remediation_is_executable_and_clears_the_refusal (tools.test_t1412_conformance_truth.RouterConformanceGateTests.test_named_remediation_is_executable_and_clears_the_refusal) ... FAIL
+test_router_admits_only_current_pass (tools.test_t1412_conformance_truth.RouterConformanceGateTests.test_router_admits_only_current_pass) ... ok
+test_human_status_prints_receipt_truth_not_the_legacy_pass (tools.test_t1412_conformance_truth.StatusSurfaceTests.test_human_status_prints_receipt_truth_not_the_legacy_pass) ... ok
+test_status_matrix_json_and_human_agree_with_authority (tools.test_t1412_conformance_truth.StatusSurfaceTests.test_status_matrix_json_and_human_agree_with_authority) ... ok
+test_moved_source_pass_never_certifies_the_new_source (tools.test_t1412_conformance_truth.ValidateSurfaceTests.test_moved_source_pass_never_certifies_the_new_source) ... ok
+test_receipt_write_failure_cannot_return_valid (tools.test_t1412_conformance_truth.ValidateSurfaceTests.test_receipt_write_failure_cannot_return_valid) ... FAIL
+test_structural_failure_refuses_before_the_validator_runs (tools.test_t1412_conformance_truth.ValidateSurfaceTests.test_structural_failure_refuses_before_the_validator_runs) ... ok
+test_validate_current_fail_is_non_green (tools.test_t1412_conformance_truth.ValidateSurfaceTests.test_validate_current_fail_is_non_green) ... ok
+test_validate_refreshes_stale_fail_to_current_pass (tools.test_t1412_conformance_truth.ValidateSurfaceTests.test_validate_refreshes_stale_fail_to_current_pass) ... FAIL
+test_the_closed_mapping (tools.test_src085_conformance_disposition.DispositionMappingTests.test_the_closed_mapping) ... ok
+test_active_work_route_is_not_owned_by_the_idle_gate (tools.test_src085_conformance_disposition.IdleGateTests.test_active_work_route_is_not_owned_by_the_idle_gate) ... ok
+test_clean_conformance_keeps_ordinary_continuation (tools.test_src085_conformance_disposition.IdleGateTests.test_clean_conformance_keeps_ordinary_continuation) ... ok
+test_crew_route_still_uses_the_crew_gate (tools.test_src085_conformance_disposition.IdleGateTests.test_crew_route_still_uses_the_crew_gate) ... ok
+test_current_fail_owns_the_idle_continuation (tools.test_src085_conformance_disposition.IdleGateTests.test_current_fail_owns_the_idle_continuation) ... ok
+test_current_failure_does_not_recommend_another_idle_validation (tools.test_src085_conformance_disposition.IdleGateTests.test_current_failure_does_not_recommend_another_idle_validation) ... ok
+test_unproven_is_not_a_stop (tools.test_src085_conformance_disposition.IdleGateTests.test_unproven_is_not_a_stop) ... ok
+test_clean_conformance_keeps_continue_in_the_automation_block (tools.test_src085_conformance_disposition.StatusSurfaceTests.test_clean_conformance_keeps_continue_in_the_automation_block) ... ok
+test_explain_next_agrees_with_status_and_next_on_a_red_gate (tools.test_src085_conformance_disposition.StatusSurfaceTests.test_explain_next_agrees_with_status_and_next_on_a_red_gate) ... ok
+test_explain_next_keeps_a_healthy_route_executable (tools.test_src085_conformance_disposition.StatusSurfaceTests.test_explain_next_keeps_a_healthy_route_executable) ... ok
+test_status_exposes_the_disposition_and_stops_advertising_continue (tools.test_src085_conformance_disposition.StatusSurfaceTests.test_status_exposes_the_disposition_and_stops_advertising_continue) ... ok
+test_classifier_failure_never_publishes_partial_findings (tools.test_validator_findings.ValidatorFindingsTests.test_classifier_failure_never_publishes_partial_findings) ... ok
+test_findings_json_side_artifact_matches_standard_counts (tools.test_validator_findings.ValidatorFindingsTests.test_findings_json_side_artifact_matches_standard_counts) ... ok
+test_every_table_pattern_is_exercised (tools.test_remediation_self_consistency.EmittedLiteralScanTests.test_every_table_pattern_is_exercised) ... ok
+test_validate_py_delegates_to_the_closed_table (tools.test_remediation_self_consistency.EmittedLiteralScanTests.test_validate_py_delegates_to_the_closed_table) ... ok
+test_01_table_is_closed_and_typed (tools.test_remediation_self_consistency.RemediationTableTests.test_01_table_is_closed_and_typed) ... ok
+test_02_command_specs_resolve_in_registry_and_effects (tools.test_remediation_self_consistency.RemediationTableTests.test_02_command_specs_resolve_in_registry_and_effects) ... ok
+test_03_no_internal_python_or_pseudocommands (tools.test_remediation_self_consistency.RemediationTableTests.test_03_no_internal_python_or_pseudocommands) ... ok
+test_04_no_generic_validate_when_a_specific_repair_exists (tools.test_remediation_self_consistency.RemediationTableTests.test_04_no_generic_validate_when_a_specific_repair_exists) ... ok
+test_05_external_records_are_not_commands (tools.test_remediation_self_consistency.RemediationTableTests.test_05_external_records_are_not_commands) ... ok
+test_06_extraction_admits_only_table_shapes (tools.test_remediation_self_consistency.RemediationTableTests.test_06_extraction_admits_only_table_shapes) ... ok
+test_07_unregistered_commands_are_refused (tools.test_remediation_self_consistency.RemediationTableTests.test_07_unregistered_commands_are_refused) ... ok
+test_08_cli_dispatches_every_registered_command (tools.test_remediation_self_consistency.RemediationTableTests.test_08_cli_dispatches_every_registered_command)
+Parser + registry + dispatch owner are mechanically proven. ... ok
+test_09_closure_evidence_remediation_round_trip (tools.test_remediation_self_consistency.RemediationTableTests.test_09_closure_evidence_remediation_round_trip)
+Emit -> parse -> registry -> effects -> dispatch -> execute -> green. ... FAIL
+test_10_help_and_docs_name_every_remediation_command (tools.test_remediation_self_consistency.RemediationTableTests.test_10_help_and_docs_name_every_remediation_command)
+M5 audit surface: help syntax and documentation agree. ... ok
+test_budget_exhaustion_is_classified_not_silent (tools.test_continue_chain.ContinueChainTests.test_budget_exhaustion_is_classified_not_silent) ... ok
+test_dry_run_projects_the_chain_and_writes_nothing (tools.test_continue_chain.ContinueChainTests.test_dry_run_projects_the_chain_and_writes_nothing) ... ok
+test_fixed_point_stops_bounded (tools.test_continue_chain.ContinueChainTests.test_fixed_point_stops_bounded) ... ok
+test_next_stays_a_pure_projection (tools.test_continue_chain.ContinueChainTests.test_next_stays_a_pure_projection) ... ok
+test_one_cc_drives_the_deterministic_chain_to_the_boundary (tools.test_continue_chain.ContinueChainTests.test_one_cc_drives_the_deterministic_chain_to_the_boundary) ... FAIL
+test_trace_is_machine_readable_and_bounded (tools.test_continue_chain.ContinueChainTests.test_trace_is_machine_readable_and_bounded) ... ok
+test_full_run_to_closure_sequence (tools.test_automation_block.AcceptanceFixture.test_full_run_to_closure_sequence) ... ok
+test_epoch_deterministic_and_drifts_with_transport (tools.test_automation_block.AuditEpoch.test_epoch_deterministic_and_drifts_with_transport) ... ok
+test_diverted_unknown_disposition_cannot_be_emitted (tools.test_automation_block.ClosedVocabulary.test_diverted_unknown_disposition_cannot_be_emitted) ... ok
+test_live_project_continues_with_cc (tools.test_automation_block.ClosedVocabulary.test_live_project_continues_with_cc) ... ok
+test_recovery_pending_is_agent_work_not_a_stop (tools.test_automation_block.ClosedVocabulary.test_recovery_pending_is_agent_work_not_a_stop) ... ok
+test_route_refusal_fails_closed (tools.test_automation_block.ClosedVocabulary.test_route_refusal_fails_closed) ... ok
+test_audit_quiescence_is_required (tools.test_automation_block.ClosureGate.test_audit_quiescence_is_required) ... ok
+test_binding_wait_vetoes_closure (tools.test_automation_block.ClosureGate.test_binding_wait_vetoes_closure) ... ok
+test_corrupted_route_evidence_is_invalid_fail_closed (tools.test_automation_block.ClosureGate.test_corrupted_route_evidence_is_invalid_fail_closed) ... ok
+test_done_phase_and_empty_board_alone_are_insufficient (tools.test_automation_block.ClosureGate.test_done_phase_and_empty_board_alone_are_insufficient) ... ok
+test_empty_physical_folder_with_unsettled_intake_is_not_complete (tools.test_automation_block.ClosureGate.test_empty_physical_folder_with_unsettled_intake_is_not_complete) ... ok
+test_full_closure_gate_yields_complete (tools.test_automation_block.ClosureGate.test_full_closure_gate_yields_complete) ... ok
+test_manual_semantics_unchanged_outside_rtc (tools.test_automation_block.ClosureGate.test_manual_semantics_unchanged_outside_rtc) ... ok
+test_no_convergence_evidence_vetoes_closure (tools.test_automation_block.ClosureGate.test_no_convergence_evidence_vetoes_closure) ... ok
+test_race_rule_consume_after_convergence_vetoes_closure (tools.test_automation_block.ClosureGate.test_race_rule_consume_after_convergence_vetoes_closure) ... ok
+test_race_rule_consume_before_convergence_allows_closure (tools.test_automation_block.ClosureGate.test_race_rule_consume_before_convergence_allows_closure) ... ok
+test_residue_vetoes_closure_although_dir_is_empty_of_layers (tools.test_automation_block.ClosureGate.test_residue_vetoes_closure_although_dir_is_empty_of_layers) ... ok
+test_same_epoch_and_source_give_stable_machine_output (tools.test_automation_block.ClosureGate.test_same_epoch_and_source_give_stable_machine_output) ... ok
+test_status_json_writes_zero_project_bytes (tools.test_automation_block.ClosureGate.test_status_json_writes_zero_project_bytes) ... ok
+test_workable_board_work_vetoes_closure (tools.test_automation_block.ClosureGate.test_workable_board_work_vetoes_closure) ... ok
+test_block_never_emits_cc_for_non_continue (tools.test_automation_block.NextCommandLaw.test_block_never_emits_cc_for_non_continue) ... ok
+test_only_continue_gets_cc (tools.test_automation_block.NextCommandLaw.test_only_continue_gets_cc) ... ok
+test_audit_residue_waits_for_the_operator (tools.test_automation_block.WaitOwnership.test_audit_residue_waits_for_the_operator) ... ok
+test_blocked_wait_is_a_stop (tools.test_automation_block.WaitOwnership.test_blocked_wait_is_a_stop) ... ok
+test_foreign_live_is_external (tools.test_automation_block.WaitOwnership.test_foreign_live_is_external) ... ok
+test_manual_verify_is_a_human_stop (tools.test_automation_block.WaitOwnership.test_manual_verify_is_a_human_stop) ... ok
+test_read_only_session_blocks (tools.test_automation_block.WaitOwnership.test_read_only_session_blocks) ... ok
+test_safety_valve_keeps_ordinary_cc_legal (tools.test_automation_block.WaitOwnership.test_safety_valve_keeps_ordinary_cc_legal) ... ok
+test_user_brake_is_a_human_stop (tools.test_automation_block.WaitOwnership.test_user_brake_is_a_human_stop) ... ok
+test_absent_lineage_falls_back_to_legacy_without_mutating (tools.test_conformance_lineage.ConformanceLineageTests.test_absent_lineage_falls_back_to_legacy_without_mutating) ... ok
+test_append_below_bound_hashes_no_sealed_receipt_bodies (tools.test_conformance_lineage.ConformanceLineageTests.test_append_below_bound_hashes_no_sealed_receipt_bodies)
+An append below the bound never re-hashes sealed receipt bodies: ... ok
+test_append_does_not_rehash_sealed_history (tools.test_conformance_lineage.ConformanceLineageTests.test_append_does_not_rehash_sealed_history) ... ok
+test_bounded_lookup_cost_is_constant_in_population (tools.test_conformance_lineage.ConformanceLineageTests.test_bounded_lookup_cost_is_constant_in_population) ... ok
+test_canonical_append_never_enumerates_receipt_directory (tools.test_conformance_lineage.ConformanceLineageTests.test_canonical_append_never_enumerates_receipt_directory)
+R011-A red control: the canonical append enumerates ZERO receipt ... ok
+test_deep_validation_proves_complete_generation_authority (tools.test_conformance_lineage.ConformanceLineageTests.test_deep_validation_proves_complete_generation_authority)
+The deep path proves the COMPLETE sealed-generation authority: ... ok
+test_deleted_and_duplicated_and_reordered_history_goes_deep_red (tools.test_conformance_lineage.ConformanceLineageTests.test_deleted_and_duplicated_and_reordered_history_goes_deep_red) ... ok
+test_direct_caller_without_token_refuses_bounded_advance (tools.test_conformance_lineage.ConformanceLineageTests.test_direct_caller_without_token_refuses_bounded_advance)
+A direct caller lacking a trustworthy pre-append token never ... ok
+test_first_direct_caller_without_token_never_creates_lineage (tools.test_conformance_lineage.ConformanceLineageTests.test_first_direct_caller_without_token_never_creates_lineage) ... ok
+test_old_gate_latest_in_old_sealed_generation_is_authenticated_by_current_head (tools.test_conformance_lineage.ConformanceLineageTests.test_old_gate_latest_in_old_sealed_generation_is_authenticated_by_current_head)
+R011-B red control: gen-0000 + gen-0001 + active. The latest ... ok
+test_out_of_band_sibling_refuses_advance_and_never_becomes_indexed (tools.test_conformance_lineage.ConformanceLineageTests.test_out_of_band_sibling_refuses_advance_and_never_becomes_indexed) ... ok
+test_prior_token_mismatch_refuses_bounded_advance (tools.test_conformance_lineage.ConformanceLineageTests.test_prior_token_mismatch_refuses_bounded_advance)
+A pre-append token that disagrees with the head (crash between ... ok
+test_rebuild_is_idempotent_and_never_rewrites_receipt_bytes (tools.test_conformance_lineage.ConformanceLineageTests.test_rebuild_is_idempotent_and_never_rewrites_receipt_bytes) ... ok
+test_rebuild_latest_uses_completion_order_across_generations (tools.test_conformance_lineage.ConformanceLineageTests.test_rebuild_latest_uses_completion_order_across_generations) ... ok
+test_rebuild_then_bounded_latest_per_gate (tools.test_conformance_lineage.ConformanceLineageTests.test_rebuild_then_bounded_latest_per_gate) ... ok
+test_tampered_generation_manifest_refuses (tools.test_conformance_lineage.ConformanceLineageTests.test_tampered_generation_manifest_refuses) ... ok
+test_tampered_locator_refuses (tools.test_conformance_lineage.ConformanceLineageTests.test_tampered_locator_refuses) ... ok
+test_tampered_referenced_receipt_refuses_bounded_trust (tools.test_conformance_lineage.ConformanceLineageTests.test_tampered_referenced_receipt_refuses_bounded_trust) ... ok
+test_unrelated_sealed_tamper_leaves_latest_clean_and_deep_red (tools.test_conformance_lineage.ConformanceLineageTests.test_unrelated_sealed_tamper_leaves_latest_clean_and_deep_red) ... ok
+test_update_receipt_index_creates_and_advances_v2 (tools.test_conformance_lineage.ConformanceLineageTests.test_update_receipt_index_creates_and_advances_v2) ... ok
+
+======================================================================
+FAIL: test_continue_crew_route_is_refused_and_the_named_remediation_clears_it (tools.test_t1412_conformance_truth.RouterConformanceGateTests.test_continue_crew_route_is_refused_and_the_named_remediation_clears_it)
+The PRODUCTION continuation path, not just the Result wrapper.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1412_conformance_truth.py", line 523, in test_continue_crew_route_is_refused_and_the_named_remediation_clears_it
+    self.assertEqual(rc, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: append targets end on a line boundary (3 checked)\nFAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260920.md', 'SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260921.md', 'SAIPEN � SAIHANDOFF � credential-gate-src033_20260921_0140.md']. Both orphans removed alongside this check arrived that way, on a `git add -A` in a commit about something else, and neither was referenced by any document or tool -- so no other check here could ever see them. A deliberate new root file is a one-line addition to ROOT_ALLOWED in tools/validate.py; a scratch file belongs in .gitignore, which this check honours\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [no-conformance-record]: no LOG line records a conformance run in � 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so � 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up\nWARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order � 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file\nWARN [cross-doc-drift]: ... and 13 more like the above\nValidation FAILED: 1 problem(s), 16 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 1,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260920.md', 'SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260921.md', 'SAIPEN � SAIHANDOFF � credential-gate-src033_20260921_0140.md']. Both orphans removed alongside this check arrived that way, on a `git add -A` in a commit about something else, and neither was referenced by any document or tool -- so no other check here could ever see them. A deliberate new root file is a one-line addition to ROOT_ALLOWED in tools/validate.py; a scratch file belongs in .gitignore, which this check honours",
+            "detail_hash": "1a278b6fe58a1eb0",
+            "finding_key": "4141c15153e33942",
+            "rule_id": "cross_doc_drift",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 16
+      },
+      "board_hash": "71e8a5a3b2153d61",
+      "canonical_next_command": null,
+      "content_hash": "367895b1c1b2ea9b",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "kind": "conformance_receipt",
+      "log_hash": "b8ac2e870b13121d",
+      "project_identity": "v:\\_temp_\\t1412-zie0klgv\\router-continue",
+      "receipt_id": "receipt-cb2f1812ad87",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "d56dcc1d16db0b1cc534b0e35264aa419eb2d6d5",
+      "source_tree_fingerprint": "git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195",
+      "state_hash": "4fba122682c42b71",
+      "timestamp_utc": "2026-09-20T23:45:25.007952Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "d56dcc1d16db0b1cc534b0e35264aa419eb2d6d5",
+      "source_tree_fingerprint": "git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195"
+    }
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-cb2f1812ad87",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+  },
+  "terminal": true
+}
+
+
+======================================================================
+FAIL: test_named_remediation_is_executable_and_clears_the_refusal (tools.test_t1412_conformance_truth.RouterConformanceGateTests.test_named_remediation_is_executable_and_clears_the_refusal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1412_conformance_truth.py", line 489, in test_named_remediation_is_executable_and_clears_the_refusal
+    self.assertEqual(rc, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: append targets end on a line boundary (3 checked)\nFAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260920.md', 'SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260921.md', 'SAIPEN � SAIHANDOFF � credential-gate-src033_20260921_0140.md']. Both orphans removed alongside this check arrived that way, on a `git add -A` in a commit about something else, and neither was referenced by any document or tool -- so no other check here could ever see them. A deliberate new root file is a one-line addition to ROOT_ALLOWED in tools/validate.py; a scratch file belongs in .gitignore, which this check honours\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [no-conformance-record]: no LOG line records a conformance run in � 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so � 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up\nWARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order � 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file\nWARN [cross-doc-drift]: ... and 13 more like the above\nValidation FAILED: 1 problem(s), 16 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 1,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260920.md', 'SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260921.md', 'SAIPEN � SAIHANDOFF � credential-gate-src033_20260921_0140.md']. Both orphans removed alongside this check arrived that way, on a `git add -A` in a commit about something else, and neither was referenced by any document or tool -- so no other check here could ever see them. A deliberate new root file is a one-line addition to ROOT_ALLOWED in tools/validate.py; a scratch file belongs in .gitignore, which this check honours",
+            "detail_hash": "1a278b6fe58a1eb0",
+            "finding_key": "4141c15153e33942",
+            "rule_id": "cross_doc_drift",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 16
+      },
+      "board_hash": "71e8a5a3b2153d61",
+      "canonical_next_command": null,
+      "content_hash": "2dedf53656002fa5",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "kind": "conformance_receipt",
+      "log_hash": "b8ac2e870b13121d",
+      "project_identity": "v:\\_temp_\\t1412-gie9_rwc\\router-not-run",
+      "receipt_id": "receipt-2071ffab64ea",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "85f7b3210998c97193dae3361e4c834976221159",
+      "source_tree_fingerprint": "git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195",
+      "state_hash": "5c87196451fccaef",
+      "timestamp_utc": "2026-09-20T23:45:26.240584Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "85f7b3210998c97193dae3361e4c834976221159",
+      "source_tree_fingerprint": "git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195"
+    }
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-2071ffab64ea",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+  },
+  "terminal": true
+}
+
+
+======================================================================
+FAIL: test_receipt_write_failure_cannot_return_valid (tools.test_t1412_conformance_truth.ValidateSurfaceTests.test_receipt_write_failure_cannot_return_valid)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1412_conformance_truth.py", line 382, in test_receipt_write_failure_cannot_return_valid
+    self.assertEqual(payload["validator"]["exit_code"], 0, payload)
+AssertionError: 1 != 0 : {'ok': False, 'code': 'CONFORMANCE_UNHEALTHY', 'structural_gate': 'pass', 'validator': {'path': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py', 'launched': True, 'exit_code': 1, 'summary': "BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: append targets end on a line boundary (3 checked)\nFAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260920.md', 'SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260921.md', 'SAIPEN � SAIHANDOFF � credential-gate-src033_20260921_0140.md']. Both orphans removed alongside this check arrived that way, on a `git add -A` in a commit about something else, and neither was referenced by any document or tool -- so no other check here could ever see them. A deliberate new root file is a one-line addition to ROOT_ALLOWED in tools/validate.py; a scratch file belongs in .gitignore, which this check honours\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [no-conformance-record]: no LOG line records a conformance run in � 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so � 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up\nWARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order � 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file\nWARN [cross-doc-drift]: ... and 13 more like the above\nValidation FAILED: 1 problem(s), 16 warning(s)"}, 'conformance_status': {'status': 'NOT_RUN', 'gate': 'core', 'reason': 'no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS', 'validator': {'validator_path': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py', 'validator_protocol_version': '1', 'project_protocol_version': '8', 'gate': 'core', 'source_head': '5f134615712a5b4c939e426c9df5df958e86d38b', 'source_tree_fingerprint': 'git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195'}}, 'reason': 'no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS', 'detail': 'conformance is NOT_RUN: no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS', 'canonical_next_command': 'saipen validate', 'repair_status': 'REFRESH_REQUIRED', 'diagnostic': None, 'terminal': False}
+
+======================================================================
+FAIL: test_validate_refreshes_stale_fail_to_current_pass (tools.test_t1412_conformance_truth.ValidateSurfaceTests.test_validate_refreshes_stale_fail_to_current_pass)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1412_conformance_truth.py", line 338, in test_validate_refreshes_stale_fail_to_current_pass
+    self.assertEqual(rc, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "d section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: append targets end on a line boundary (3 checked)\nFAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260920.md', 'SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260921.md', 'SAIPEN � SAIHANDOFF � credential-gate-src033_20260921_0140.md']. Both orphans removed alongside this check arrived that way, on a `git add -A` in a commit about something else, and neither was referenced by any document or tool -- so no other check here could ever see them. A deliberate new root file is a one-line addition to ROOT_ALLOWED in tools/validate.py; a scratch file belongs in .gitignore, which this check honours\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up\nWARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order � 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file\nWARN [cross-doc-drift]: ... and 13 more like the above\nValidation FAILED: 1 problem(s), 15 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 1,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260920.md', 'SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260921.md', 'SAIPEN � SAIHANDOFF � credential-gate-src033_20260921_0140.md']. Both orphans removed alongside this check arrived that way, on a `git add -A` in a commit about something else, and neither was referenced by any document or tool -- so no other check here could ever see them. A deliberate new root file is a one-line addition to ROOT_ALLOWED in tools/validate.py; a scratch file belongs in .gitignore, which this check honours",
+            "detail_hash": "1a278b6fe58a1eb0",
+            "finding_key": "4141c15153e33942",
+            "rule_id": "cross_doc_drift",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 15
+      },
+      "board_hash": "71e8a5a3b2153d61",
+      "canonical_next_command": null,
+      "content_hash": "b93d3bd03e828de6",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "kind": "conformance_receipt",
+      "log_hash": "12bd0e2f381243fc",
+      "project_identity": "v:\\_temp_\\t1412-vrnfn0lv\\refresh",
+      "receipt_id": "receipt-f79eea23ec68",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "baa1f2088a444edd9d9384d87510c5e8db755b5f",
+      "source_tree_fingerprint": "git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195",
+      "state_hash": "5c87196451fccaef",
+      "timestamp_utc": "2026-09-20T23:46:01.896831Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "baa1f2088a444edd9d9384d87510c5e8db755b5f",
+      "source_tree_fingerprint": "git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195"
+    }
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-f79eea23ec68",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+  },
+  "terminal": true
+}
+
+
+======================================================================
+FAIL: test_09_closure_evidence_remediation_round_trip (tools.test_remediation_self_consistency.RemediationTableTests.test_09_closure_evidence_remediation_round_trip)
+Emit -> parse -> registry -> effects -> dispatch -> execute -> green.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_remediation_self_consistency.py", line 234, in test_09_closure_evidence_remediation_round_trip
+    self.assertEqual(rc_after, 0, after)
+AssertionError: 1 != 0 : saipen conformance validation starting (tools/validate.py)...
+Project root: V:\_TEMP_\t1434-m5-roundtrip-0wkjudp5\project (explicit)
+Project lineage: lineage-5f40804e32f644949498585a3e3da349
+PASS: state.schema.json and the engine STATE contract constants agree
+PASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)
+PASS: STATE.md schema valid (checked against state.schema.json)
+PASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-5f40804e32f644949498585a3e3da349)
+PASS: BOARD.md has all required section headings
+PASS: BOARD.md no duplicate tickets
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md Work supersession relations are terminal, existing and acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+PASS: BOARD.md at most one ## DOING ticket (0 claimed)
+PASS: every DONE closure provenance satisfies its declared closure contract
+PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))
+PASS: append targets end on a line boundary (3 checked)
+FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260920.md', 'SAIPEN � SAIHANDOFF � conformance-validation-deadlock_20260921.md', 'SAIPEN � SAIHANDOFF � credential-gate-src033_20260921_0140.md']. Both orphans removed alongside this check arrived that way, on a `git add -A` in a commit about something else, and neither was referenced by any document or tool -- so no other check here could ever see them. A deliberate new root file is a one-line addition to ROOT_ALLOWED in tools/validate.py; a scratch file belongs in .gitignore, which this check honours
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [schema-version]: STATE.md has no schema_version -- legacy pre-v1 format. At the next checkpoint set schema_version: 3, last_event to the current LOG tail (omit last_event only while LOG is empty), and style_contract to saipen/STYLE.md's boot marker.
+WARN [no-conformance-record]: no LOG line records a conformance run in � 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so � 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists
+WARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up
+WARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order � 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file
+WARN [cross-doc-drift]: ... and 13 more like the above
+Validation FAILED: 1 problem(s), 17 warning(s)
+
+
+======================================================================
+FAIL: test_one_cc_drives_the_deterministic_chain_to_the_boundary (tools.test_continue_chain.ContinueChainTests.test_one_cc_drives_the_deterministic_chain_to_the_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_continue_chain.py", line 225, in test_one_cc_drives_the_deterministic_chain_to_the_boundary
+    self.assertEqual(result.get("code"), "IMPROVE_AUDIT_ASSIGNMENT", result)
+AssertionError: None != 'IMPROVE_AUDIT_ASSIGNMENT' : {'ok': True, 'action': None, 'ticket': 'none', 'reason': 'conformance-remediation', 'detail': 'CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair.', 'executable_behavior': None, 'load': None, 'load_path': None, 'cold_route': {'project_root': 'V:\\_TEMP_\\saipen-continue-chain-1q2a1cx6\\project', 'saipen_home': None, 'protocol_dir': None, 'phase': 'DONE', 'phase_module': None, 'boot': None, 'style': None, 'documents': {}, 'project_memory': {'STATE.md': 'V:\\_TEMP_\\saipen-continue-chain-1q2a1cx6\\project\\.saipen\\STATE.md', 'BOARD.md': 'V:\\_TEMP_\\saipen-continue-chain-1q2a1cx6\\project\\.saipen\\BOARD.md', 'LOG.md': 'V:\\_TEMP_\\saipen-continue-chain-1q2a1cx6\\project\\.saipen\\LOG.md'}, 'search_required': False}, 'execution_instruction': 'Routing is not completion evidence. Read load_path when present, then execute action under its owner in this turn; respect WAIT and actual refusals. If --dry-run was requested, this is a preview only.', 'execution_intent': 'converge', 'converge_target': 'done', 'goal_waves': None, 'goal_tickets': None, 'recovery_pending': False, 'recovery_conflict': False, 'pending_ops': [], 'parked_work': None, 'reconciliation': {'ok': True, 'code': 'AUDIT_MANIFEST_WRITTEN', 'changed': {'board': [], 'state': [], 'audit_manifest': ['V:/_TEMP_/saipen-continue-chain-1q2a1cx6/project/.saipen/MANIFEST.json']}, 'strict_state_error': None, 'dry_run': False, 'audit_manifest': {'ok': True, 'code': 'AUDIT_MANIFEST_WRITTEN', 'path': 'V:/_TEMP_/saipen-continue-chain-1q2a1cx6/project/.saipen/MANIFEST.json', 'contract_version': 2, 'changed': True, 'layout': 'CURRENT', 'dry_run': False, 'declared': 'ABSENT', 'manifest_present': True, 'manifest_current': True, 'detail': ''}, 'detail': 'audit manifest AUDIT_MANIFEST_WRITTEN -- reconciliation mutated the canonical surface, so this is not CLEAN; the next steady-state call may be CLEAN'}, 'continue_trace': [{'iteration': 1, 'action': 'PHASE SHIP T-2', 'kind': 'finish-at-ship', 'operation': 'ticket_done', 'ticket': 'T-2', 'result': 'FINISHED', 'ok': True, 'before_last_event': 20, 'after_last_event': 22}, {'iteration': 2, 'action': 'saipen claim T-1', 'kind': 'adopt', 'operation': 'claim', 'ticket': 'T-1', 'result': 'CLAIMED', 'ok': True, 'before_last_event': 22, 'after_last_event': 23}, {'iteration': 3, 'action': 'PHASE SHIP T-1', 'kind': 'finish-at-ship', 'operation': 'ticket_done', 'ticket': 'T-1', 'result': 'FINISHED', 'ok': True, 'before_last_event': 23, 'after_last_event': 24}], 'iterations': 3, 'stop_reason': 'boundary', 'route': 'cc'}
+
+----------------------------------------------------------------------
+Ran 98 tests in 283.013s
+
+FAILED (failures=6)

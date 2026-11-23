@@ -1,0 +1,30 @@
+{
+  "row": {
+    "id": "queue_01a1526e-bcf3-7d65-ae34-929f67ce178e",
+    "session_id": "sess_987a3358-f5f7-4b4c-95b8-9825ad9966db",
+    "kind": "sendText",
+    "delivery": "startNow",
+    "status": "promoted",
+    "time_created": 1792384351483
+  },
+  "matches": [
+    {
+      "path": [
+        "text"
+      ],
+      "bytes": 8545,
+      "sha256": "ebc5c44d765cd50fa1d4a4869aa93ad65a33e758082b2524e83e30b28f11fdd9",
+      "exact_artifact": true
+    },
+    {
+      "path": [
+        "conversationInputIntent",
+        "text"
+      ],
+      "bytes": 8545,
+      "sha256": "ebc5c44d765cd50fa1d4a4869aa93ad65a33e758082b2524e83e30b28f11fdd9",
+      "exact_artifact": true
+    }
+  ],
+  "artifact_sha256": "ebc5c44d765cd50fa1d4a4869aa93ad65a33e758082b2524e83e30b28f11fdd9"
+}

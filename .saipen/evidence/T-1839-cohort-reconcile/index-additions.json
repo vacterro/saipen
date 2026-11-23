@@ -1,0 +1,19 @@
+{
+  "index_before": "6a5ce80ebdcf6bdd963028504af65c09853985e4",
+  "prior_index_preserved_outside_added_paths": true,
+  "index_after": "aee9450bae5038f9e9cce19e42f39583f8ba753a",
+  "changed_paths": [
+    "tools/saipen_engine/cohort_reconcile.py",
+    "tools/saipen_engine/verification_bootstrap.py",
+    "tools/saipen_engine/verification_cache.py",
+    "tools/saipen_engine/verification_impact.py",
+    "tools/test_t1832_single_flight.py",
+    "tools/test_t1833_verification_owner.py",
+    "tools/test_t1834_tool_call_identity.py",
+    "tools/test_t1835_verification_economics.py",
+    "tools/test_t1836_verification_impact.py",
+    "tools/test_t1837_ci_family_parity.py",
+    "tools/test_t1839_cohort_reconciliation.py",
+    "tools/verification_metrics.py"
+  ]
+}

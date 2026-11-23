@@ -1,0 +1,65 @@
+--- pre/tools/test_host_authority_broker.py
++++ tools/test_host_authority_broker.py
+@@ -86,6 +86,11 @@
+ 
+ HOST_IMAGES = ["claude.exe", "claude", "claude-code", "claude-code.exe"]
+ WINDOWS = os.name == "nt"
++NON_HOOK_REFUSALS = (
++    HI.REASON_NOT_HOST_DESCENDANT,
++    HI.REASON_HOOK_NOT_FOUND,
++    HI.REASON_IDENTITY_UNAVAILABLE,
++)
+ 
+ 
+ def PROVEN(peer, host, home):
+@@ -230,15 +235,13 @@
+ 
+     def test_an_arbitrary_same_user_python_client_is_refused(self):
+         reply = self.harness.admitted(self.world)
+-        self.assertFalse(reply["ok"])
+-        self.assertEqual(reply["code"], HB.CODE_NOT_AUTHENTICATED)
+-        # WHICH part of the hook invocation is missing depends on where the
+-        # suite runs: outside any host, or inside one as an ordinary tool call.
+-        # Both are refusals with a named reason, never a generic "no".
+-        self.assertIn(
+-            reply["identity"]["reason"],
+-            (HI.REASON_NOT_HOST_DESCENDANT, HI.REASON_HOOK_NOT_FOUND),
+-        )
++        self.assertFalse(reply["ok"], reply)
++        reason = reply["identity"]["reason"]
++        self.assertIn(reason, NON_HOOK_REFUSALS, reply)
++        expected = (HB.CODE_IDENTITY_UNAVAILABLE
++                    if reason == HI.REASON_IDENTITY_UNAVAILABLE
++                    else HB.CODE_NOT_AUTHENTICATED)
++        self.assertEqual(reply["code"], expected, reply)
+         self.assertTrue(reply["detail"])
+         self.assertFalse((self.world.project / PA.LEDGER_DIR).exists())
+         self.assertEqual(self.harness.broker.stats.last_refusal["op"], "admission")
+@@ -278,15 +281,8 @@
+         # This interpreter is the suite, never a host's hook -- whether or not
+         # the suite itself was started from inside a host session.
+         shape = HC.hook_invocation("claude", self.world.home)
+-        self.assertFalse(shape["ok"])
+-        self.assertIn(
+-            shape["reason"],
+-            (
+-                HI.REASON_NOT_HOST_DESCENDANT,
+-                HI.REASON_HOOK_NOT_FOUND,
+-                HI.REASON_IDENTITY_UNAVAILABLE,
+-            ),
+-        )
++        self.assertFalse(shape["ok"], shape)
++        self.assertIn(shape["reason"], NON_HOOK_REFUSALS, shape)
+         self.assertFalse(HC.identify_self(host="claude", home=self.world.home)["hook"])
+         unserved = self.tmp / "unserved-runtime"
+         report = HC.ensure(ROOT, runtime=unserved, host="claude", home=self.world.home)
+--- pre/tools/saipen_engine/core_unit.py
++++ tools/saipen_engine/core_unit.py
+@@ -841,6 +841,7 @@
+         "unparsed": run.get("unparsed"),
+         "tallied": run.get("tallied"),
+         "red": run["red"],
++        "red_sections": run.get("sections") or {},
+         "processes_leaked": run.get("processes_leaked") or [],
+         # T-1472: how the one discovery was executed, and the proof that its
+         # shards covered it. Absent for a whole (single-process) run.

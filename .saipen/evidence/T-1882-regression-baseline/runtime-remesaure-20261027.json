@@ -1,0 +1,56 @@
+[
+ {
+  "module": "test_t1746_crew_terminal_outcome",
+  "exit": 1,
+  "tail": [
+   "----------------------------------------------------------------------",
+   "Ran 45 tests in 0.018s",
+   "FAILED (errors=45)"
+  ]
+ },
+ {
+  "module": "test_t1750_release_boundary",
+  "exit": 1,
+  "tail": [
+   "----------------------------------------------------------------------",
+   "Ran 11 tests in 0.005s",
+   "FAILED (errors=11)"
+  ]
+ },
+ {
+  "module": "test_t1827_writer_lock_contract",
+  "exit": 1,
+  "tail": [
+   "----------------------------------------------------------------------",
+   "Ran 19 tests in 0.041s",
+   "FAILED (errors=19)"
+  ]
+ },
+ {
+  "module": "test_t1681_release_closure_op",
+  "exit": 1,
+  "tail": [
+   "----------------------------------------------------------------------",
+   "Ran 5 tests in 0.003s",
+   "FAILED (errors=5)"
+  ]
+ },
+ {
+  "module": "test_t1828_verification_policy",
+  "exit": 0,
+  "tail": [
+   "----------------------------------------------------------------------",
+   "Ran 14 tests in 3.571s",
+   "OK"
+  ]
+ },
+ {
+  "module": "test_source_contract_derivation",
+  "exit": 1,
+  "tail": [
+   "----------------------------------------------------------------------",
+   "Ran 13 tests in 3.559s",
+   "FAILED (failures=2)"
+  ]
+ }
+]

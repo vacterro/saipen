@@ -1,0 +1,51 @@
+test_event_cwd_spelling_project_root_does_not_hide_project (independent_t1631_oracle.RealCLIValues.test_event_cwd_spelling_project_root_does_not_hide_project) ... ok
+test_json_value_does_not_enable_json_output (independent_t1631_oracle.RealCLIValues.test_json_value_does_not_enable_json_output) ... ok
+test_model_spelling_agent_flag_is_a_value (independent_t1631_oracle.RealCLIValues.test_model_spelling_agent_flag_is_a_value) ... ok
+test_model_spelling_boundary_is_a_value (independent_t1631_oracle.RealCLIValues.test_model_spelling_boundary_is_a_value) ... ok
+test_model_spelling_compound_separator_is_a_value (independent_t1631_oracle.RealCLIValues.test_model_spelling_compound_separator_is_a_value) ... FAIL
+test_model_spelling_help_flag_is_a_value (independent_t1631_oracle.RealCLIValues.test_model_spelling_help_flag_is_a_value) ... ok
+test_model_spelling_json_flag_is_a_value (independent_t1631_oracle.RealCLIValues.test_model_spelling_json_flag_is_a_value) ... ok
+test_model_spelling_project_root_keeps_strict_binding (independent_t1631_oracle.RealCLIValues.test_model_spelling_project_root_keeps_strict_binding) ... ok
+test_response_request_spelling_dry_run_reaches_real_checker (independent_t1631_oracle.RealCLIValues.test_response_request_spelling_dry_run_reaches_real_checker) ... ok
+test_session_spelling_project_root_keeps_strict_binding (independent_t1631_oracle.RealCLIValues.test_session_spelling_project_root_keeps_strict_binding) ... ok
+test_verify_value_does_not_enable_dry_run (independent_t1631_oracle.RealCLIValues.test_verify_value_does_not_enable_dry_run) ... ok
+test_compound_separator_and_boundary_operands_stay_literal (independent_t1631_oracle.StructuralValues.test_compound_separator_and_boundary_operands_stay_literal) ... ERROR
+test_help_value_does_not_change_execution_effect (independent_t1631_oracle.StructuralValues.test_help_value_does_not_change_execution_effect) ... FAIL
+test_wrapped_command_starts_after_actual_boundary (independent_t1631_oracle.StructuralValues.test_wrapped_command_starts_after_actual_boundary) ... ok
+
+======================================================================
+ERROR: test_compound_separator_and_boundary_operands_stay_literal (independent_t1631_oracle.StructuralValues.test_compound_separator_and_boundary_operands_stay_literal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-kkrri_3g\project\tools\test_t1631_option_values.py", line 138, in test_compound_separator_and_boundary_operands_stay_literal
+    self.assertEqual(commands.split_cli_compound_argv(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\commands.py", line 229, in split_cli_compound_argv
+    raise ValueError("compound command has an empty segment")
+ValueError: compound command has an empty segment
+
+======================================================================
+FAIL: test_model_spelling_compound_separator_is_a_value (independent_t1631_oracle.RealCLIValues.test_model_spelling_compound_separator_is_a_value)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-kkrri_3g\project\tools\test_t1631_option_values.py", line 109, in test_model_spelling_compound_separator_is_a_value
+    self.admit("+")
+  File "V:\_TEMP_\saipen-t1631-draft-kkrri_3g\project\tools\test_t1631_option_values.py", line 66, in admit
+    self.assertEqual(proc.returncode, 1, payload)
+AssertionError: 2 != 1 : {'ok': False, 'code': 'COMPOUND_RESULT', 'segments': [{'index': 0, 'command': 'admission', 'disposition': 'FAILED', 'exit_code': 2, 'result': {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': '--model needs a value'}}, {'index': 1, 'command': '--home', 'disposition': 'NOT_RUN'}]}
+
+======================================================================
+FAIL: test_help_value_does_not_change_execution_effect (independent_t1631_oracle.StructuralValues.test_help_value_does_not_change_execution_effect)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-kkrri_3g\project\tools\test_t1631_option_values.py", line 146, in test_help_value_does_not_change_execution_effect
+    self.assertEqual(effects.classify_invocation(
+AssertionError: 'DIAGNOSTIC' != 'EXECUTION'
+- DIAGNOSTIC
++ EXECUTION
+
+
+----------------------------------------------------------------------
+Ran 14 tests in 5.775s
+
+FAILED (failures=2, errors=1)

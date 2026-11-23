@@ -1,0 +1,358 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "fa85d6cb43a07bda80fffd387949aea9fa829d18ec50c6e12d4eabb1478f870c",
+  "verdict": "PASS",
+  "patterns": [
+    "test_settled_projection.py",
+    "test_t1519_settled_index.py",
+    "test_t1544_audit20.py",
+    "test_t2089_agent_status_view.py",
+    "test_xpatch.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_settled_projection.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_settled_projection.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        13116
+      ],
+      "duration_s": 31.047,
+      "process_create_s": 0.031,
+      "ran": 23,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_convergence_verdict_fails_closed_when_crew_defer_locator_corrupt (test_settled_projection.ConvergenceBoundedProjectionTests.test_convergence_verdict_fails_closed_when_crew_defer_locator_corrupt) ... ok\r\ntest_convergence_verdict_fails_closed_when_projection_corrupt (test_settled_projection.ConvergenceBoundedProjectionTests.test_convergence_verdict_fails_closed_when_projection_corrupt) ... ok\r\ntest_convergence_verdict_full_chain_and_crew_defer_parity (test_settled_projection.ConvergenceBoundedProjectionTests.test_convergence_verdict_full_chain_and_crew_defer_parity) ... ok\r\ntest_convergence_verdict_uses_bounded_projection_without_snapshot_scan (test_settled_projection.ConvergenceBoundedProjectionTests.test_convergence_verdict_uses_bounded_projection_without_snapshot_scan) ... ok\r\ntest_absent_projection_falls_back_to_canonical_scan_readonly (test_settled_projection.SettledProjectionTests.test_absent_projection_falls_back_to_canonical_scan_readonly) ... ok\r\ntest_append_below_bound_never_reads_sealed_bodies (test_settled_projection.SettledProjectionTests.test_append_below_bound_never_reads_sealed_bodies) ... ok\r\ntest_bounded_records_equal_snapshot_records (test_settled_projection.SettledProjectionTests.test_bounded_records_equal_snapshot_records) ... ok\r\ntest_corrupt_projection_head_fails_closed_instead_of_legacy_scan (test_settled_projection.SettledProjectionTests.test_corrupt_projection_head_fails_closed_instead_of_legacy_scan) ... ok\r\ntest_crash_shaped_token_mismatch_fails_closed (test_settled_projection.SettledProjectionTests.test_crash_shaped_token_mismatch_fails_closed)\r\nA receipt moved after the head's token (crash between move and ... ok\r\ntest_direct_caller_without_token_rebuilds_canonically (test_settled_projection.SettledProjectionTests.test_direct_caller_without_token_rebuilds_canonically)\r\nA direct caller with no pre-move token never gets the bounded fold ... ok\r\ntest_match_query_cost_bounded_by_relevant_segments (test_settled_projection.SettledProjectionTests.test_match_query_cost_bounded_by_relevant_segments) ... ok\r\ntest_normal_append_does_not_scale_with_sealed_segment_count (test_settled_projection.SettledProjectionTests.test_normal_append_does_not_scale_with_sealed_segment_count)\r\nR010-B red control: one normal append across growing sealed ... ok\r\ntest_ops_namespace_matches_stay_visible_on_bounded_path (test_settled_projection.SettledProjectionTests.test_ops_namespace_matches_stay_visible_on_bounded_path) ... ok\r\ntest_population_scaling_counters (test_settled_projection.SettledProjectionTests.test_population_scaling_counters)\r\n100 / 1,000 / 10,000 receipts: hot cost stays bounded, not lifetime. ... ok\r\ntest_rebuild_and_advance_publish_bounded_projection (test_settled_projection.SettledProjectionTests.test_rebuild_and_advance_publish_bounded_projection) ... ok\r\ntest_seal_happens_exactly_once_at_the_bound (test_settled_projection.SettledProjectionTests.test_seal_happens_exactly_once_at_the_bound) ... ok\r\ntest_seal_relocates_only_bounded_affected_locators (test_settled_projection.SettledProjectionTests.test_seal_relocates_only_bounded_affected_locators)\r\nSealing the full tail relocates exactly the operations present in ... ok\r\ntest_settlement_advances_after_stale_projection (test_settled_projection.SettledProjectionTests.test_settlement_advances_after_stale_projection) ... ok\r\ntest_stale_projection_detected_without_opening_receipts (test_settled_projection.SettledProjectionTests.test_stale_projection_detected_without_opening_receipts) ... ok\r\ntest_tampered_relevant_receipt_fails_closed (test_settled_projection.SettledProjectionTests.test_tampered_relevant_receipt_fails_closed) ... ok\r\ntest_tampered_unrelated_sealed_receipt_leaves_hot_lookup_clean_and_deep_red (test_settled_projection.SettledProjectionTests.test_tampered_unrelated_sealed_receipt_leaves_hot_lookup_clean_and_deep_red) ... ok\r\ntest_zero_match_never_enumerates_settled_namespace (test_settled_projection.SettledProjectionTests.test_zero_match_never_enumerates_settled_namespace)\r\nR010-A red control: a hot zero-match lookup must not enumerate ... ok\r\ntest_zero_match_query_never_decodes_or_opens_lifetime_receipts (test_settled_projection.SettledProjectionTests.test_zero_match_query_never_decodes_or_opens_lifetime_receipts) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 23 tests in 30.821s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1519_settled_index.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1519_settled_index.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        14928
+      ],
+      "duration_s": 2.375,
+      "process_create_s": 0.031,
+      "ran": 7,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_broken_memo_costs_decodes_and_never_a_wrong_record (test_t1519_settled_index.SettledIndexTests.test_a_broken_memo_costs_decodes_and_never_a_wrong_record) ... ok\r\ntest_a_failed_payload_drop_is_still_reported (test_t1519_settled_index.SettledIndexTests.test_a_failed_payload_drop_is_still_reported) ... ok\r\ntest_a_snapshot_of_a_settled_project_decodes_no_settled_receipt (test_t1519_settled_index.SettledIndexTests.test_a_snapshot_of_a_settled_project_decodes_no_settled_receipt) ... ok\r\ntest_a_stale_projection_is_rebuilt_at_the_next_settlement (test_t1519_settled_index.SettledIndexTests.test_a_stale_projection_is_rebuilt_at_the_next_settlement) ... ok\r\ntest_a_tampered_settled_receipt_is_never_answered_from_the_memo (test_t1519_settled_index.SettledIndexTests.test_a_tampered_settled_receipt_is_never_answered_from_the_memo) ... ok\r\ntest_settlement_never_rewrites_the_retired_whole_history_index (test_t1519_settled_index.SettledIndexTests.test_settlement_never_rewrites_the_retired_whole_history_index) ... ok\r\ntest_the_projection_is_current_after_every_settlement (test_t1519_settled_index.SettledIndexTests.test_the_projection_is_current_after_every_settlement) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 7 tests in 2.011s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1544_audit20.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1544_audit20.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        4332
+      ],
+      "duration_s": 4.672,
+      "process_create_s": 0.031,
+      "ran": 11,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "{\r\n  \"ok\": false,\r\n  \"code\": \"VALIDATION_FAILED\",\r\n  \"action\": \"saipen recover\",\r\n  \"reason\": \"state-malformed\",\r\n  \"detail\": \"state-malformed: unknown STATE field 'parked_work' -- state.schema.json does not define it (retired or misspelled?)\",\r\n  \"cold_route\": {\r\n    \"project_root\": \"C:\\\\Temp\\\\t1363-7ywmyldn\",\r\n    \"saipen_home\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\",\r\n    \"protocol_dir\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\",\r\n    \"phase\": \"DONE\",\r\n    \"phase_module\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\phases\\\\done.md\",\r\n    \"boot\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\BOOT.md\",\r\n    \"style\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\STYLE.md\",\r\n    \"documents\": {\r\n      \"STYLE.md\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\STYLE.md\",\r\n      \"BOOT.md\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\BOOT.md\",\r\n      \"INDEX.md\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\INDEX.md\",\r\n      \"COMMANDS.md\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\COMMANDS.md\",\r\n      \"OPS.md\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\OPS.md\",\r\n      \"SOURCES.md\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\SOURCES.md\",\r\n      \"EXECUTION.md\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\EXECUTION.md\",\r\n      \"MAINTENANCE.md\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\MAINTENANCE.md\",\r\n      \"CORE.md\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\CORE.md\",\r\n      \"RUNTIME.md\": \"C:\\\\Temp\\\\saipen-core-unit-h11g8wjj\\\\project\\\\saipen\\\\RUNTIME.md\"\r\n    },\r\n    \"project_memory\": {\r\n      \"STATE.md\": \"C:\\\\Temp\\\\t1363-7ywmyldn\\\\.saipen\\\\STATE.md\",\r\n      \"BOARD.md\": \"C:\\\\Temp\\\\t1363-7ywmyldn\\\\.saipen\\\\BOARD.md\",\r\n      \"LOG.md\": \"C:\\\\Temp\\\\t1363-7ywmyldn\\\\.saipen\\\\LOG.md\"\r\n    },\r\n    \"search_required\": false\r\n  }\r\n}\r\n",
+      "stderr": "test_status_no_longer_captures_its_own_identity (test_t1544_audit20.OneSourceIdentityPerStatusProjectionTests.test_status_no_longer_captures_its_own_identity)\r\nInstrumenting the ONE function every consumer reaches for. ... ok\r\ntest_the_three_consumers_share_one_captured_identity (test_t1544_audit20.OneSourceIdentityPerStatusProjectionTests.test_the_three_consumers_share_one_captured_identity)\r\nEach consumer already accepted a pre-computed identity and none was ... ok\r\ntest_the_two_published_fingerprints_are_the_same_fingerprint (test_t1544_audit20.OneSourceIdentityPerStatusProjectionTests.test_the_two_published_fingerprints_are_the_same_fingerprint)\r\nThe second-order symptom: independently captured identities publish ... ok\r\ntest_no_installed_target_means_no_installed_target (test_t1544_audit20.TheDistributionHashIsNotPaidForNothingTests.test_no_installed_target_means_no_installed_target)\r\nThe registry is the authority, both directions. ... ok\r\ntest_status_skips_the_report_when_no_home_is_installed (test_t1544_audit20.TheDistributionHashIsNotPaidForNothingTests.test_status_skips_the_report_when_no_home_is_installed)\r\nThe measured cost: `runtime_generation_identity(HOME)` runs before ... ok\r\ntest_status_still_projects_the_report_when_a_home_is_installed (test_t1544_audit20.TheDistributionHashIsNotPaidForNothingTests.test_status_still_projects_the_report_when_a_home_is_installed)\r\nThe negative control: the gate must not have become a suppression. ... ok\r\ntest_continue_carries_the_route_it_short_circuited_past (test_t1544_audit20.TheRouterOwnsTheMalformedStateRouteTests.test_continue_carries_the_route_it_short_circuited_past)\r\n`_route_once` is the only route owner `continue` has. It returns its ... ok\r\ntest_explain_next_carries_the_route_it_short_circuited_past (test_t1544_audit20.TheRouterOwnsTheMalformedStateRouteTests.test_explain_next_carries_the_route_it_short_circuited_past) ... ok\r\ntest_nothing_is_written_and_the_route_needs_no_search_layer (test_t1544_audit20.TheRouterOwnsTheMalformedStateRouteTests.test_nothing_is_written_and_the_route_needs_no_search_layer)\r\nClassification only: the fix must not have become a mutation. ... ok\r\ntest_status_carries_the_route_it_short_circuited_past (test_t1544_audit20.TheRouterOwnsTheMalformedStateRouteTests.test_status_carries_the_route_it_short_circuited_past) ... ok\r\ntest_the_router_routes_a_malformed_state_to_recover (test_t1544_audit20.TheRouterOwnsTheMalformedStateRouteTests.test_the_router_routes_a_malformed_state_to_recover)\r\nThe control the three wrappers are measured against. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 11 tests in 4.254s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t2089_agent_status_view.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t2089_agent_status_view.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        11176,
+        18320
+      ],
+      "duration_s": 12.968,
+      "process_create_s": 0.031,
+      "ran": 4,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_agent_view_envelope_is_bounded_under_many_blockers (test_t2089_agent_status_view.AgentViewParity.test_agent_view_envelope_is_bounded_under_many_blockers) ... ok\r\ntest_agent_view_matches_full_projection_verdicts (test_t2089_agent_status_view.AgentViewParity.test_agent_view_matches_full_projection_verdicts) ... ok\r\ntest_full_view_unchanged_by_the_agent_route (test_t2089_agent_status_view.AgentViewParity.test_full_view_unchanged_by_the_agent_route) ... ok\r\ntest_text_status_rejects_the_view_option (test_t2089_agent_status_view.AgentViewParity.test_text_status_rejects_the_view_option) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 4 tests in 12.842s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_xpatch.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_xpatch.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "duration_s": 1.5,
+      "process_create_s": 0.031,
+      "ran": 38,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_forged_receipt_leaves_the_delta_unattributed_and_visible (test_xpatch.ConvergenceAttribution.test_forged_receipt_leaves_the_delta_unattributed_and_visible) ... ok\r\ntest_receipt_explained_delta_is_attributed (test_xpatch.ConvergenceAttribution.test_receipt_explained_delta_is_attributed) ... ok\r\ntest_target_repair_after_the_patch_stays_attributed (test_xpatch.ConvergenceAttribution.test_target_repair_after_the_patch_stays_attributed) ... ok\r\ntest_unexplained_delta_is_unattributed (test_xpatch.ConvergenceAttribution.test_unexplained_delta_is_unattributed) ... ok\r\ntest_applied_record_cannot_contradict_its_intent (test_xpatch.CrashWindows.test_applied_record_cannot_contradict_its_intent) ... ok\r\ntest_direct_intent_without_applied_still_explains_the_declared_bytes (test_xpatch.CrashWindows.test_direct_intent_without_applied_still_explains_the_declared_bytes)\r\nThe real crash window: a direct receipt is durable BEFORE the bytes ... ok\r\ntest_disposition_without_apply_refuses (test_xpatch.CrashWindows.test_disposition_without_apply_refuses) ... ok\r\ntest_partial_disposition_refuses (test_xpatch.CrashWindows.test_partial_disposition_refuses) ... ok\r\ntest_payload_without_intent_is_ignored_not_claimed (test_xpatch.CrashWindows.test_payload_without_intent_is_ignored_not_claimed) ... ok\r\ntest_pending_proposal_claims_nothing (test_xpatch.CrashWindows.test_pending_proposal_claims_nothing)\r\nNobody wrote those bytes yet, so a proposal must not claim them -- ... ok\r\ntest_creation_and_deletion_round_trip (test_xpatch.CreationAndDeletion.test_creation_and_deletion_round_trip) ... ok\r\ntest_creation_into_a_new_directory_works (test_xpatch.CreationAndDeletion.test_creation_into_a_new_directory_works) ... ok\r\ntest_deleting_a_missing_file_refuses (test_xpatch.CreationAndDeletion.test_deleting_a_missing_file_refuses) ... ok\r\ntest_no_op_mutation_refuses (test_xpatch.CreationAndDeletion.test_no_op_mutation_refuses) ... ok\r\ntest_direct_apply_refuses_and_names_the_gate (test_xpatch.DirectModeStaysGated.test_direct_apply_refuses_and_names_the_gate) ... ok\r\ntest_target_may_finish_a_stranded_direct_receipt (test_xpatch.DirectModeStaysGated.test_target_may_finish_a_stranded_direct_receipt)\r\nMode says who was SUPPOSED to write, not who MAY. A direct receipt ... ok\r\ntest_double_apply_refuses (test_xpatch.DriftAndCas.test_double_apply_refuses) ... ok\r\ntest_partial_payload_writes_nothing (test_xpatch.DriftAndCas.test_partial_payload_writes_nothing) ... ok\r\ntest_revert_refuses_once_the_bytes_moved_on (test_xpatch.DriftAndCas.test_revert_refuses_once_the_bytes_moved_on) ... ok\r\ntest_revert_restores_only_its_own_bytes (test_xpatch.DriftAndCas.test_revert_restores_only_its_own_bytes) ... ok\r\ntest_target_modification_after_apply_reads_as_conflicting (test_xpatch.DriftAndCas.test_target_modification_after_apply_reads_as_conflicting) ... ok\r\ntest_target_moved_before_apply_yields_zero_writes (test_xpatch.DriftAndCas.test_target_moved_before_apply_yields_zero_writes) ... ok\r\ntest_foreign_target_lineage_does_not_bind (test_xpatch.ForgedAndForeignReceipts.test_foreign_target_lineage_does_not_bind) ... ok\r\ntest_forged_after_hash_is_caught_at_apply (test_xpatch.ForgedAndForeignReceipts.test_forged_after_hash_is_caught_at_apply) ... ok\r\ntest_receipt_id_must_match_its_directory (test_xpatch.ForgedAndForeignReceipts.test_receipt_id_must_match_its_directory) ... ok\r\ntest_stranger_directory_in_the_namespace_is_a_problem_not_a_claim (test_xpatch.ForgedAndForeignReceipts.test_stranger_directory_in_the_namespace_is_a_problem_not_a_claim) ... ok\r\ntest_unreadable_lineage_refuses_to_bind (test_xpatch.ForgedAndForeignReceipts.test_unreadable_lineage_refuses_to_bind) ... ok\r\ntest_verification_result_vocabulary_is_closed (test_xpatch.ForgedAndForeignReceipts.test_verification_result_vocabulary_is_closed) ... ok\r\ntest_apply_then_verify (test_xpatch.HappyPath.test_apply_then_verify) ... ok\r\ntest_repair_supersedes_the_foreign_after_state (test_xpatch.HappyPath.test_repair_supersedes_the_foreign_after_state) ... ok\r\ntest_ids_are_unique_and_sequential (test_xpatch.IdAllocation.test_ids_are_unique_and_sequential) ... ok\r\ntest_taken_id_is_never_reused (test_xpatch.IdAllocation.test_taken_id_is_never_reused) ... ok\r\ntest_backslash_paths_refuse (test_xpatch.NamespaceBoundary.test_backslash_paths_refuse) ... ok\r\ntest_path_escape_and_absolute_paths_refuse (test_xpatch.NamespaceBoundary.test_path_escape_and_absolute_paths_refuse) ... ok\r\ntest_target_protocol_state_is_never_writable (test_xpatch.NamespaceBoundary.test_target_protocol_state_is_never_writable) ... ok\r\ntest_intent_writes_zero_target_source_bytes (test_xpatch.RecordingLeavesTargetSourceUntouched.test_intent_writes_zero_target_source_bytes) ... ok\r\ntest_pending_proposal_claims_nothing_live (test_xpatch.RecordingLeavesTargetSourceUntouched.test_pending_proposal_claims_nothing_live) ... ok\r\ntest_a_receipt_never_claims_a_path_it_did_not_declare (test_xpatch.UnrelatedDirtStaysUnattributed.test_a_receipt_never_claims_a_path_it_did_not_declare) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 38 tests in 1.337s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 83,
+  "duration_s": 132.546,
+  "timings_s": {
+    "execution_wall_s": 52.578,
+    "environment_identity_wall_s": 0.031,
+    "copy_wall_s": 64.063,
+    "hash_wall_s": 0.156,
+    "cleanup_wall_s": 15.687
+  },
+  "copy_metrics": {
+    "subject_copy_s": 14.156,
+    "canonical_copy_s": 49.61,
+    "canonical_copy_attempts": 1,
+    "trees": null
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_settled_projection.py",
+      "test_t1519_settled_index.py",
+      "test_t1544_audit20.py",
+      "test_t2089_agent_status_view.py",
+      "test_xpatch.py"
+    ],
+    "manifest_sha256": "7e00ef6771254f78299856d2748152c8d86034a23e04046ff72bf337366e6ab1"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_settled_projection.py",
+        "test_t1519_settled_index.py",
+        "test_t1544_audit20.py",
+        "test_t2089_agent_status_view.py",
+        "test_xpatch.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "30888f8c2c9bd2385eb22056d39994ebfee110f946b67c87fa72278685e984a6",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "2271ca5434892f15f981f28ed5ded00314be23f853d23c8db56c527f302b0463"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "86d04f8a8d42dd8b365b33a29ca7b3cc1eacae9ddcfc2ae1b9bdbf3ee1e5e32f"
+      },
+      "core_unit_shard.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "1a22bac5140eeaf33be64413027a22c474420dbe7e3c6134af9b5e6f90942c9d"
+      },
+      "test_runner.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "e8d4d18e93abd3843f0d911071bc729c15ad767502b72c567be436e6f17545ed"
+      },
+      "verification_cache.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "70188f394bb84cc78fe2417daecf5b38b6abcd3be73956194baf1ef1911413ba"
+      },
+      "process_tree.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "798e6663a85d1906533203fe961472ad8eb8b7e645aa3961a694c1192ca5efcb"
+      },
+      "verification_bootstrap.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "8fa1c333bec82156f70bb66e7df786e99265d0b4c5f3da362a830bfc9198ab24"
+      },
+      "verification_impact.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "d2829c9de720e9b84d9dfa4056786c533bf9cff86913c5ed0546fe63e19f5a83"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "f008508f0f88d1c6a74f95d7e541a411a685b375404d7dd1ea49035ff7a5064c"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

@@ -171,8 +171,8 @@ class ContinuationIntegration(fixtures.T1412Base):
         fixtures.write_receipt(root, "PASS", source_head="old", source_fp="old")
         validate = CLI._validate
 
-        def raced(project, as_json):
-            rc = validate(project, as_json)
+        def raced(project, as_json, **kwargs):
+            rc = validate(project, as_json, **kwargs)
             state = root / ".saipen/STATE.md"
             state.write_text(state.read_text(encoding="utf-8").replace(
                 "2026-09-19T21:00:00Z", "2026-09-19T21:00:01Z"

@@ -1,0 +1,23 @@
+{
+  "observed_utc": "2026-10-15T06:45:15.7051859Z",
+  "current_work": "T-1799",
+  "phase": "VERIFY",
+  "full_family_command": "python tools/core_unit.py evidence T-1799 --jobs 6 --timeout 5400",
+  "native_exec_session": 95399,
+  "native_exec_observation": "write_stdin confirmed running after CURRENT_PASS validation; re-poll this handle before any restart",
+  "parent_work": "T-1798",
+  "parent_status": "BLOCKED_ON:T-1799",
+  "pending_parent_regression": ".saipen/evidence/T-1798/regression.json",
+  "parent_preimages": ".saipen/evidence/T-1798/pre/",
+  "conformance": ".saipen/evidence/T-1798/conformance-final.json",
+  "focused_tests": 86,
+  "focused_result": "PASS",
+  "reverified_work": "T-1695",
+  "reverify_receipt": "RV-000053",
+  "focused_reverify_tests": 38,
+  "staged_manifest_paths": 144,
+  "git_commit_created": false,
+  "published": false,
+  "original_goal": "cc all",
+  "original_goal_complete": false
+}

@@ -1,0 +1,77 @@
+{
+  "requirements": {
+    "SRC-036:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/T-158-validation.md",
+      "text": "Audit 13 opening: preserve SAIPEN deletion policy; closure and unchanged bytes authorize journaled consume, never model confidence.",
+      "verification": "pytest:982-PASS;SAIPEN-inbox-enqueue-loop:138-PASS;regression:4-red-4-green",
+      "work": "T-158"
+    },
+    "SRC-036:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/T-158-validation.md",
+      "text": "Audit 13 items 1-3: managed capture and mirror producers use canonical audit enqueue; SAIPEN owns allocation, monotonic IDs, publication and generation identity.",
+      "verification": "pytest:982-PASS;SAIPEN-inbox-enqueue-loop:138-PASS;regression:4-red-4-green",
+      "work": "T-158"
+    },
+    "SRC-036:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/T-158-validation.md",
+      "text": "Audit 13 items 2 and 4: AUDAPACK retains exact capture body, stable operation UUID, project selection and retry evidence across failures.",
+      "verification": "pytest:982-PASS;SAIPEN-inbox-enqueue-loop:138-PASS;regression:4-red-4-green",
+      "work": "T-158"
+    },
+    "SRC-036:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/T-158-validation.md",
+      "text": "Audit 13 items 5-6: all INAUDIT continuation controls emit bare saipen cc; do not use gg with audit paths as ingestion.",
+      "verification": "pytest:982-PASS;SAIPEN-inbox-enqueue-loop:138-PASS;regression:4-red-4-green",
+      "work": "T-158"
+    },
+    "SRC-036:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/T-158-validation.md",
+      "text": "Audit 13 item 7: manual Delete remains explicit operator action; normal successful deletion belongs to SAIPEN consume.",
+      "verification": "pytest:982-PASS;SAIPEN-inbox-enqueue-loop:138-PASS;regression:4-red-4-green",
+      "work": "T-158"
+    },
+    "SRC-036:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/T-158-validation.md",
+      "text": "Audit 13 item 8: refresh Layers after enqueue and lifecycle changes; preserve unsaved editor drafts and avoid recreating consumed files.",
+      "verification": "pytest:982-PASS;SAIPEN-inbox-enqueue-loop:138-PASS;regression:4-red-4-green",
+      "work": "T-158"
+    },
+    "SRC-036:R007": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Audit 13 item 9: optional per-layer transport labels deferred; do not fabricate state without binding. Existing project-level transport reader remains available.",
+      "verification": null,
+      "work": "T-158"
+    },
+    "SRC-036:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/T-158-validation.md",
+      "text": "Audit 13 item 10: verify canonical enqueue, bare cc capture, incomplete Work and unsupported done retention, closure consume, changed-byte generation, foreign file retention, concurrent monotonic IDs.",
+      "verification": "pytest:982-PASS;SAIPEN-inbox-enqueue-loop:138-PASS;regression:4-red-4-green",
+      "work": "T-158"
+    }
+  },
+  "schema_version": 1
+}

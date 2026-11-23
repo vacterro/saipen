@@ -1,0 +1,52 @@
+### FAIL test_runtime_bootstrap.HostScopedInstallTests.test_K_red_control_legacy_installer_drops_launchers
+    Traceback (most recent call last):
+    File "/tmp/saipen-test-1tar5to1/project/tools/test_runtime_bootstrap.py", line 600, in test_K_red_control_legacy_installer_drops_launchers
+    self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    AssertionError: 1 != 0 :
+    ======================================================================
+
+### FAIL test_t1389_foreign_delta_adoption.AgentsSurfaceTests.test_D_ps1_injector_marks_the_agents_skill_surface
+    Traceback (most recent call last):
+    File "/tmp/saipen-test-1tar5to1/project/tools/test_t1389_foreign_delta_adoption.py", line 199, in test_D_ps1_injector_marks_the_agents_skill_surface
+    self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    AssertionError: 1 != 0 :
+    Traceback (most recent call last):
+    File "<string>", line 1, in <module>
+    import json,sys;sys.path.insert(0,sys.argv[1]);from saipen_engine.runtime_bootstrap import GENERATION;from saipen_engine.runtime_surface import require_runtime_generation_identity as identity;print(json.dumps({'installer_generation':GENERATION,'runtime_fingerprint':identity(sys.argv[2])}))
+    ~~~~~~~~^^^^^^^^^^^^^
+    File "/tmp/saipen-test-1tar5to1/project/tools/saipen_engine/runtime_surface.py", line 321, in require_runtime_generation_identity
+    return _digest_items(runtime_surface_items(root))
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+    File "/tmp/saipen-test-1tar5to1/project/tools/saipen_engine/runtime_surface.py", line 197, in runtime_surface_items
+    raise RuntimeSurfaceError(f"runtime root is not a directory: {base}")
+    ======================================================================
+
+### FAIL test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_a_sharded_run_leaves_no_sandbox
+    Traceback (most recent call last):
+    File "/tmp/saipen-test-1tar5to1/project/tools/test_t1505_core_unit_sandbox_reclaim.py", line 259, in test_a_sharded_run_leaves_no_sandbox
+    self.assert_run_leaves_no_sandbox(2)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+    File "/tmp/saipen-test-1tar5to1/project/tools/test_t1505_core_unit_sandbox_reclaim.py", line 251, in assert_run_leaves_no_sandbox
+    self.assertEqual(run["status"], "PASS", run)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    AssertionError: 'FAIL' != 'PASS'
+    ======================================================================
+
+### FAIL test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_crlf_bytes_committed_under_text_auto_are_not_reported
+    Traceback (most recent call last):
+    File "/tmp/saipen-test-1tar5to1/project/tools/test_t1506_xpatch_survival.py", line 133, in test_crlf_bytes_committed_under_text_auto_are_not_reported
+    self.assertEqual(xpatch.commit_survival(self.root)["uncommitted"], [])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    AssertionError: Lists differ: [{'patch_id': 'XP-000001', 'paths': ['src/session.py']}] != []
+    ======================================================================
+
+### FAIL test_t1582_sweep_skip_reason.ActualSweepCapabilityTests.test_capability_reason_reaches_skip_and_unproven_runner
+    Traceback (most recent call last):
+    File "/tmp/saipen-test-1tar5to1/project/tools/test_t1582_sweep_skip_reason.py", line 179, in test_capability_reason_reaches_skip_and_unproven_runner
+    self.assertIn("1314", text)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^
+    AssertionError: '1314' not found in 'UNPROVEN: sweep -- portable project identity: this host cannot create a symlink, so the case was never constructed (a host capability, not a missing file): [Errno 1] symlink privilege unavailable\nSKIP: portable project identity -- this host cannot create a symli
+    FAILED (failures=20, errors=3, skipped=72)
+    Temporarily overriding HOME='/home/runner/work/_temp/7bc27d81-1f22-44d7-a3cd-8f95c358750f' before making global git config changes

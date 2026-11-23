@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-084:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Seed the archive hot proof at pack time: measured 2026-09-23 on the live Bridge, the first ensure AFTER a pack runs a full source-tree freshness walk (AUDAPACK 3212ms, ProTrail 2496ms, hot_proof=False); only the next ensure is hot (0.6ms). Every manual ZIP click after a source change pays pack plus one extra full walk in CHECK. PackingService must record the hot proof for the tree it just packed, with exact invalidation."
+    }
+  },
+  "derived_at": "2026-09-24T03:27:14Z",
+  "derived_from": "SRC-084",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "96285fbd8f7619e0b4290cab683a0d92216c378a73ed644157b096d8b23b1fb5"
+}

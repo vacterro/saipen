@@ -1,0 +1,7 @@
+112     profile_hook: str | None = None
+254 def _same_argv(payload: Sequence[str], argv: Sequence[str]) -> bool:
+313 def _shell_payloads(argv: Sequence[str]) -> list[list[str]]:
+383             script and policy.profile_hook
+384             and norm_path(script).endswith("/" + norm_path(policy.profile_hook))
+497     if policy.profile_hook:
+552         profile=(norm_path(selected_hook).rsplit("/", 2)[0] if policy.profile_hook else None),

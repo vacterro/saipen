@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-070:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-226 closed with verification evidence in LOG: verify -> PASS conf: high -- audit/10 DELETED, SRC-044 CLOSED 15/15, inbox clean",
+      "text": "Claim stranded audit/10 T-218 into DOING and finish it: layer already consumed per T-222, SRC-044 CLOSED 15/15 VERIFIED, inbox clean",
+      "verification": "the Work this request created reached its own verification gate; see the T-226 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-226"
+    }
+  },
+  "schema_version": 1
+}

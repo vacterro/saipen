@@ -1,0 +1,19 @@
+--- (1) HEAD-reachable commits are readable ---
+reachable=1133 unreadable=0
+
+--- (2) tag refs are readable ---
+for-each-ref exit=0 tags=396 unreadable=0
+
+--- (3) git log -S resolves a known historical string ---
+exit=0 commits=5
+   56191314 feat(t406): finding_invalidated -- a closure verb for a disproven premise
+   e6799642 chore(state): checkpoint T-1597 claim, lifecycle and core-unit citation
+   7b9c0fed chore(evidence): close T-1617 and T-1616; track the records their closures cite
+   2357c9ef chore(state): record the second SHIP attempt and its measured cause
+
+--- (4) fsck connectivity ---
+exit=2 non-dangling lines=1
+   error: refs/codex/turn-diffs/captures/1785165795234/fb80dcb4-2cd2-4789-9618-a9409baff787/base: invalid sha1 pointer 9d3542bdcbde564af2cd22f6237802c2ba924c4f
+  (note: a refs/codex/... error is a foreign ref outside HEAD)
+
+VERDICT: PASS -- no HEAD-reachable object is unreadable and no tag is unreadable

@@ -1,0 +1,48 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-10-05T03:27:35Z",
+  "evidence_class": "executed",
+  "findings_digest": "22c67d795189a718d7188e1d12c27f9ecd48ff590ffb3f0c18d5cbb2218553c8",
+  "gate": "core",
+  "integrity_digest": "aa73e6f189d6b87d",
+  "journal_op_id": "reverify.55c2043c2b09",
+  "original_closure": {
+    "owner": "claude"
+  },
+  "own_problem_keys": [
+    "27eb6b29d7e9a4fe"
+  ],
+  "problem_count": 7,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000573",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:c66d14eed9c4a5be630dd038c2e5c3ba464e2220de5d6a987fb09556af1a54bb",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "node --test tests/widget/w4-009-work-mode.test.js",
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+      "duration_ms": 5809,
+      "executed": true,
+      "exit_code": 0,
+      "output_bytes": 959,
+      "output_digest": "1b859fa5fa57e192",
+      "result": "PASS"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "node --test tests/widget/w4-009-work-mode.test.js"
+    ],
+    "findings_digest": "22c67d795189a718d7188e1d12c27f9ecd48ff590ffb3f0c18d5cbb2218553c8",
+    "gate": "core"
+  },
+  "verification_contract_digest": "2a555796babfa6a4",
+  "verifier": "buffy",
+  "warning_count": 95,
+  "work": "T-95"
+}

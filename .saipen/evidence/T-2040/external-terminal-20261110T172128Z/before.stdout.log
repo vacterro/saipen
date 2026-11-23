@@ -1,0 +1,191 @@
+.FFFFFF.F.FFF                                                            [100%]
+================================== FAILURES ===================================
+__________ ExternalTerminalProof.test_archive_directory_node_refuses __________
+
+self = <test_t2040_external_terminal_proof.ExternalTerminalProof testMethod=test_archive_directory_node_refuses>
+
+    def test_archive_directory_node_refuses(self):
+        self.archive()
+        self.archive_path.unlink()
+        self.archive_path.mkdir()
+>       self.assert_invalid()
+
+tools\test_t2040_external_terminal_proof.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_external_terminal_proof.py:73: in assert_invalid
+    self.assertEqual(result["code"], "EXTERNAL_TERMINAL_EVIDENCE_INVALID", result)
+E   AssertionError: 'EXTERNAL_TICKET_ABSENT' != 'EXTERNAL_TERMINAL_EVIDENCE_INVALID'
+E   - EXTERNAL_TICKET_ABSENT
+E   + EXTERNAL_TERMINAL_EVIDENCE_INVALID
+E    : {'ok': False, 'code': 'EXTERNAL_TICKET_ABSENT', 'detail': 'external ticket T-289 not found on external board', 'authority': 'lineage-755f03292e174bd28ef72e97b38082ed', 'implementation': 'T-289@a91efa31ee29d4349b5e395a3cb623696d32c4ce', 'external_root': 'V:\\_TEMP_\\tmp2t2zdxnk'}
+___________ ExternalTerminalProof.test_changed_archive_bytes_refuse ___________
+
+self = <test_t2040_external_terminal_proof.ExternalTerminalProof testMethod=test_changed_archive_bytes_refuse>
+
+    def test_changed_archive_bytes_refuse(self):
+        self.archive()
+        self.archive_path.write_bytes(self.archive_path.read_bytes() + b"\n")
+>       self.assert_invalid()
+
+tools\test_t2040_external_terminal_proof.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_external_terminal_proof.py:73: in assert_invalid
+    self.assertEqual(result["code"], "EXTERNAL_TERMINAL_EVIDENCE_INVALID", result)
+E   AssertionError: 'EXTERNAL_TICKET_ABSENT' != 'EXTERNAL_TERMINAL_EVIDENCE_INVALID'
+E   - EXTERNAL_TICKET_ABSENT
+E   + EXTERNAL_TERMINAL_EVIDENCE_INVALID
+E    : {'ok': False, 'code': 'EXTERNAL_TICKET_ABSENT', 'detail': 'external ticket T-289 not found on external board', 'authority': 'lineage-c0472b876d2e435f8c6504b5a922df4d', 'implementation': 'T-289@a91efa31ee29d4349b5e395a3cb623696d32c4ce', 'external_root': 'V:\\_TEMP_\\tmp5nkcd4js'}
+_ ExternalTerminalProof.test_committed_scrub_recovers_exact_done_row_without_writes _
+
+self = <test_t2040_external_terminal_proof.ExternalTerminalProof testMethod=test_committed_scrub_recovers_exact_done_row_without_writes>
+
+    def test_committed_scrub_recovers_exact_done_row_without_writes(self):
+        self.archive()
+        before = {
+            path.relative_to(self.root).as_posix(): path.read_bytes()
+            for path in (self.board, self.archive_path, self.record_path)
+        }
+        result = self.inspect()
+>       self.assertTrue(result["ok"], result)
+E       AssertionError: False is not true : {'ok': False, 'code': 'EXTERNAL_TICKET_ABSENT', 'detail': 'external ticket T-289 not found on external board', 'authority': 'lineage-7ce58fbaed5d418ba0955da0eb3e6eb2', 'implementation': 'T-289@a91efa31ee29d4349b5e395a3cb623696d32c4ce', 'external_root': 'V:\\_TEMP_\\tmp9d_fa4q7'}
+
+tools\test_t2040_external_terminal_proof.py:86: AssertionError
+____ ExternalTerminalProof.test_conflicting_committed_archive_rows_refuse _____
+
+self = <test_t2040_external_terminal_proof.ExternalTerminalProof testMethod=test_conflicting_committed_archive_rows_refuse>
+
+    def test_conflicting_committed_archive_rows_refuse(self):
+        self.archive()
+        rows = self.archive_path.read_text(encoding="utf-8").replace(
+            "T-289 [P2] closed work", "T-289 [P2] different work"
+        )
+        self.board.write_text(
+            "## DOING\n## TODO\n## DONE\n" + rows + "## BLOCKED\n", encoding="utf-8",
+        )
+        second = scrub_board(self.root, AGENT)
+        self.assertTrue(second.ok, second.to_dict())
+        self.assertEqual(journal.semantic_receipt_snapshot(self.root).errors, ())
+>       self.assert_invalid()
+
+tools\test_t2040_external_terminal_proof.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_external_terminal_proof.py:73: in assert_invalid
+    self.assertEqual(result["code"], "EXTERNAL_TERMINAL_EVIDENCE_INVALID", result)
+E   AssertionError: 'EXTERNAL_TICKET_ABSENT' != 'EXTERNAL_TERMINAL_EVIDENCE_INVALID'
+E   - EXTERNAL_TICKET_ABSENT
+E   + EXTERNAL_TERMINAL_EVIDENCE_INVALID
+E    : {'ok': False, 'code': 'EXTERNAL_TICKET_ABSENT', 'detail': 'external ticket T-289 not found on external board', 'authority': 'lineage-7fdf9d52194044439f3d88d5b709811f', 'implementation': 'T-289@a91efa31ee29d4349b5e395a3cb623696d32c4ce', 'external_root': 'V:\\_TEMP_\\tmp5ve384yr'}
+_ ExternalTerminalProof.test_equivalent_committed_archive_rows_are_not_conflicting _
+
+self = <test_t2040_external_terminal_proof.ExternalTerminalProof testMethod=test_equivalent_committed_archive_rows_are_not_conflicting>
+
+    def test_equivalent_committed_archive_rows_are_not_conflicting(self):
+        self.archive()
+        self.board.write_text(
+            "## DOING\n## TODO\n## DONE\n"
+            + self.archive_path.read_text(encoding="utf-8") + "## BLOCKED\n", encoding="utf-8",
+        )
+        second = scrub_board(self.root, AGENT)
+        self.assertTrue(second.ok, second.to_dict())
+>       self.assertTrue(self.inspect()["ok"])
+E       AssertionError: False is not true
+
+tools\test_t2040_external_terminal_proof.py:173: AssertionError
+__________ ExternalTerminalProof.test_foreign_scrub_journal_refuses ___________
+
+self = <test_t2040_external_terminal_proof.ExternalTerminalProof testMethod=test_foreign_scrub_journal_refuses>
+
+    def test_foreign_scrub_journal_refuses(self):
+        self.archive()
+        self.rewrite_record(project_lineage="lineage-" + "f" * 32)
+>       self.assert_invalid()
+
+tools\test_t2040_external_terminal_proof.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_external_terminal_proof.py:73: in assert_invalid
+    self.assertEqual(result["code"], "EXTERNAL_TERMINAL_EVIDENCE_INVALID", result)
+E   AssertionError: 'EXTERNAL_TICKET_ABSENT' != 'EXTERNAL_TERMINAL_EVIDENCE_INVALID'
+E   - EXTERNAL_TICKET_ABSENT
+E   + EXTERNAL_TERMINAL_EVIDENCE_INVALID
+E    : {'ok': False, 'code': 'EXTERNAL_TICKET_ABSENT', 'detail': 'external ticket T-289 not found on external board', 'authority': 'lineage-6f1220a4f8844290ba0849a2b1218cea', 'implementation': 'T-289@705a2f8deeba35adb3d5eb2634d89b8cf1616485', 'external_root': 'V:\\_TEMP_\\tmpxvi519q3'}
+_ ExternalTerminalProof.test_live_board_parse_errors_refuse_even_with_done_row _
+
+self = <test_t2040_external_terminal_proof.ExternalTerminalProof testMethod=test_live_board_parse_errors_refuse_even_with_done_row>
+
+    def test_live_board_parse_errors_refuse_even_with_done_row(self):
+        self.board.write_text(
+            self.board.read_text(encoding="utf-8").replace(
+                "## BLOCKED", "detached malformed record\n## BLOCKED"
+            ), encoding="utf-8",
+        )
+>       self.assertEqual(self.inspect()["code"], "EXTERNAL_BOARD_MALFORMED")
+E       AssertionError: 'EXTERNAL_IMPLEMENTATION_VERIFIED' != 'EXTERNAL_BOARD_MALFORMED'
+E       - EXTERNAL_IMPLEMENTATION_VERIFIED
+E       + EXTERNAL_BOARD_MALFORMED
+
+tools\test_t2040_external_terminal_proof.py:109: AssertionError
+_____________ ExternalTerminalProof.test_missing_archive_refuses ______________
+
+self = <test_t2040_external_terminal_proof.ExternalTerminalProof testMethod=test_missing_archive_refuses>
+
+    def test_missing_archive_refuses(self):
+        self.archive()
+        self.archive_path.unlink()
+>       self.assert_invalid()
+
+tools\test_t2040_external_terminal_proof.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_external_terminal_proof.py:73: in assert_invalid
+    self.assertEqual(result["code"], "EXTERNAL_TERMINAL_EVIDENCE_INVALID", result)
+E   AssertionError: 'EXTERNAL_TICKET_ABSENT' != 'EXTERNAL_TERMINAL_EVIDENCE_INVALID'
+E   - EXTERNAL_TICKET_ABSENT
+E   + EXTERNAL_TERMINAL_EVIDENCE_INVALID
+E    : {'ok': False, 'code': 'EXTERNAL_TICKET_ABSENT', 'detail': 'external ticket T-289 not found on external board', 'authority': 'lineage-523f58eda6714305b005fe92fad812bf', 'implementation': 'T-289@705a2f8deeba35adb3d5eb2634d89b8cf1616485', 'external_root': 'V:\\_TEMP_\\tmp_5ewmii3'}
+_______ ExternalTerminalProof.test_uncommitted_scrub_never_proves_done ________
+
+self = <test_t2040_external_terminal_proof.ExternalTerminalProof testMethod=test_uncommitted_scrub_never_proves_done>
+
+    def test_uncommitted_scrub_never_proves_done(self):
+        self.archive()
+        self.rewrite_record(status="PREPARED")
+>       self.assert_invalid()
+
+tools\test_t2040_external_terminal_proof.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_external_terminal_proof.py:73: in assert_invalid
+    self.assertEqual(result["code"], "EXTERNAL_TERMINAL_EVIDENCE_INVALID", result)
+E   AssertionError: 'EXTERNAL_TICKET_ABSENT' != 'EXTERNAL_TERMINAL_EVIDENCE_INVALID'
+E   - EXTERNAL_TICKET_ABSENT
+E   + EXTERNAL_TERMINAL_EVIDENCE_INVALID
+E    : {'ok': False, 'code': 'EXTERNAL_TICKET_ABSENT', 'detail': 'external ticket T-289 not found on external board', 'authority': 'lineage-c9662cba2f1f45e698a60b3d83146745', 'implementation': 'T-289@705a2f8deeba35adb3d5eb2634d89b8cf1616485', 'external_root': 'V:\\_TEMP_\\tmpsv174r2p'}
+_ ExternalTerminalProof.test_unrelated_corrupt_receipt_prevents_positive_archive_authority _
+
+self = <test_t2040_external_terminal_proof.ExternalTerminalProof testMethod=test_unrelated_corrupt_receipt_prevents_positive_archive_authority>
+
+    def test_unrelated_corrupt_receipt_prevents_positive_archive_authority(self):
+        self.archive()
+        broken = self.root / ".saipen/recovery/ops/broken/operation.json"
+        broken.parent.mkdir(parents=True)
+        broken.write_text("{broken", encoding="utf-8")
+>       self.assert_invalid()
+
+tools\test_t2040_external_terminal_proof.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_external_terminal_proof.py:73: in assert_invalid
+    self.assertEqual(result["code"], "EXTERNAL_TERMINAL_EVIDENCE_INVALID", result)
+E   AssertionError: 'EXTERNAL_TICKET_ABSENT' != 'EXTERNAL_TERMINAL_EVIDENCE_INVALID'
+E   - EXTERNAL_TICKET_ABSENT
+E   + EXTERNAL_TERMINAL_EVIDENCE_INVALID
+E    : {'ok': False, 'code': 'EXTERNAL_TICKET_ABSENT', 'detail': 'external ticket T-289 not found on external board', 'authority': 'lineage-5165ae62590544878b569a930ba53d66', 'implementation': 'T-289@705a2f8deeba35adb3d5eb2634d89b8cf1616485', 'external_root': 'V:\\_TEMP_\\tmpdxvwxu1x'}
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_external_terminal_proof.py::ExternalTerminalProof::test_archive_directory_node_refuses
+FAILED tools/test_t2040_external_terminal_proof.py::ExternalTerminalProof::test_changed_archive_bytes_refuse
+FAILED tools/test_t2040_external_terminal_proof.py::ExternalTerminalProof::test_committed_scrub_recovers_exact_done_row_without_writes
+FAILED tools/test_t2040_external_terminal_proof.py::ExternalTerminalProof::test_conflicting_committed_archive_rows_refuse
+FAILED tools/test_t2040_external_terminal_proof.py::ExternalTerminalProof::test_equivalent_committed_archive_rows_are_not_conflicting
+FAILED tools/test_t2040_external_terminal_proof.py::ExternalTerminalProof::test_foreign_scrub_journal_refuses
+FAILED tools/test_t2040_external_terminal_proof.py::ExternalTerminalProof::test_live_board_parse_errors_refuse_even_with_done_row
+FAILED tools/test_t2040_external_terminal_proof.py::ExternalTerminalProof::test_missing_archive_refuses
+FAILED tools/test_t2040_external_terminal_proof.py::ExternalTerminalProof::test_uncommitted_scrub_never_proves_done
+FAILED tools/test_t2040_external_terminal_proof.py::ExternalTerminalProof::test_unrelated_corrupt_receipt_prevents_positive_archive_authority
+10 failed, 3 passed in 2.07s

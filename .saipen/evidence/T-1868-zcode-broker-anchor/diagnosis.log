@@ -1,0 +1,37 @@
+# T-1868 -- the ZAICODE host can never authenticate: measured chain
+
+1. The adapter declares everything the broker needs:
+   zaicode.hook_install_surface = '~/.zcode/hooks/saipen-guard.py'
+   zaicode.hook_artifact        = 'extensions/adapters/zaicode/saipen-guard.py'
+   zaicode.admission_authority  = True
+   hook_artifacts()            = ('C:\\Users\\vac34\\.zcode\\hooks\\saipen-guard.py',)
+
+2. The hook is registered and enabled in the live host config:
+   ~/.zcode/cli/config.json hooks.enabled = True
+   event UserPromptSubmit -> --host zaicode --saipen-root <project>
+
+3. The hook self-test passes:
+   python ~/.zcode/hooks/saipen-guard.py --self-test  -> exit 0
+
+4. But the broker's trust anchor is Claude-only:
+   HOST_IMAGES = ('claude.exe', 'claude', 'claude-code', 'claude-code.exe')
+   HOST_SIGNERS = ('Anthropic, PBC',)
+
+5. So the broker refuses the real ZAICODE ancestry:
+   ok     = False
+   code   = BROKER_CLIENT_NOT_AUTHENTICATED
+   detail = the connecting process is under the host application but is not the installed host hook or the engine it started (a shell tool call is not a hook)
+
+6. The hook therefore returns sealed=false to every prompt:
+   {"ok": true, "ingress_id": null, "sealed": false}
+
+Consequence: SRC-297 carried the operator word 'reauthorize' and was
+stored as request_provenance.witness = model_supplied, because the host
+hook could not seal an operator origin. The bounded goal stayed on
+hard_wait. That IS the operator-reported reauth/bounded-ticket defect:
+not a missing hook, but a trust anchor that cannot name this host.
+
+The fix is NOT an operator command. The proof shape is unchanged --
+OS-reported ancestry, hook bytes equal to the shipped artifact, and a
+command line that is exactly the hook invocation. ZAICODE simply has to
+be a declared host image so that proof can be evaluated at all.

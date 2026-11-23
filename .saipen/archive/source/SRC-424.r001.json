@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-424:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Night shift 4: fix agent-view projection P0 defects (long root IDs, nested byte-budget bypass, projection CPU cost, dead loop, digests) and deliver measured status speedup"
+    }
+  },
+  "derived_at": "2026-11-18T08:54:24Z",
+  "derived_from": "SRC-424",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "034c45586e6f1ae7947d9a76465303b1574b3fe4794238469966193bef6a8469"
+}

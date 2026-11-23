@@ -1,0 +1,32 @@
+{
+  "requirements": {
+    "SRC-097:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Implemented in the widget at widget 0.0.82, SHA ff6af482e50e953dae89b49342fa475fbf7ffa596b07c7a7ebb0d430387087df: hydrationRecoveryWindowOpen() plus the AUTO_HYDRATION_RECOVERY_WINDOW_MS=120s cap. SRC-097 was ACTIVE with an EMPTY clause set (derived_at null, interpretation_revision 0) while T-250 was DONE and cited it as a source receipt, which is exactly the 'DONE Work has unresolved source receipt' conformance failure; the ticket was never the problem, the ledger was. T-269 derives the three clauses from the receipt's own text and disposes them against the work that actually implemented them.",
+      "text": "SRC-097.md: '# User request / priority: P1 / verify: the requested change is present and demonstrated against the user own description of it / ## Request / T-249 close hydration/reconciliation hole: characterData-only audit turn recovery before READY' -> T-250",
+      "verification": "node --test tests/widget/w7-004-hydration-miss-recovery.test.js -> 5 tests, 5 pass, 0 fail, 0 cancelled, exit 0, executed on the CURRENT tree during T-269 (node v24.15.0); and the whole current tree is green: python -m pytest -q -> 2481 passed 16 skipped; python -m ruff check audapack tests -> 0 findings; node --test tests/widget/*.test.js -> 807 tests, 807 pass, 0 fail, 0 cancelled, 146s, exit 0",
+      "work": "T-250"
+    },
+    "SRC-097:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "tests/widget/w7-004-hydration-miss-recovery.test.js, 5 cases, taken verbatim from the T-250 closure: RED1 (the hydration-miss itself), RED2 (characterData-only recovery of a Core AND of a Super10 non-Core wave), plus the safety cases. Every one was proven RED against the pre-fix observer and GREEN after it, which is why the observer escalated idle->stream only on liveAuditActivitySnapshot().active in the first place: that call needs a classifiable audit turn, and during hydration the audit user node exists but its text is not yet classifiable while generating. and the whole current tree is green: python -m pytest -q -> 2481 passed 16 skipped; python -m ruff check audapack tests -> 0 findings; node --test tests/widget/*.test.js -> 807 tests, 807 pass, 0 fail, 0 cancelled, 146s, exit 0",
+      "text": "Before an audit turn is READY, a hydration that changes only characterData (no new node, no click, no Resume) must still re-arm reconcileEnabledIdleAuditRuntime so an enabled+idle+generating runtime adopts wait-<wave> for a Core and for a non-Core wave alike.",
+      "verification": "node --test tests/widget/w7-004-hydration-miss-recovery.test.js -> 5 tests, 5 pass, 0 fail, 0 cancelled, exit 0, executed on the CURRENT tree during T-269 (node v24.15.0); and the whole current tree is green: python -m pytest -q -> 2481 passed 16 skipped; python -m ruff check audapack tests -> 0 findings; node --test tests/widget/*.test.js -> 807 tests, 807 pass, 0 fail, 0 cancelled, 146s, exit 0",
+      "work": "T-250"
+    },
+    "SRC-097:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Invariants held and still asserted on the current tree. The window is bounded and collapses: it opens only while enabled+idle+generating+no-lineage and returns to the cheap childList-only 'turns' observer on generation end, adoption, auth wall, or the 120s cap. No parallel state machine was added -- the window only changes which observer is armed; reconcileEnabledIdleAuditRuntime() and resumeRuntimeFromAuditTurn() remain the sole adoption authority. Ordinary generation rides the window harmlessly and is never adopted: it reads BUSY, and the suite asserts that as a safety case rather than assuming it. and the whole current tree is green: python -m pytest -q -> 2481 passed 16 skipped; python -m ruff check audapack tests -> 0 findings; node --test tests/widget/*.test.js -> 807 tests, 807 pass, 0 fail, 0 cancelled, 146s, exit 0",
+      "text": "The recovery window must be BOUNDED (AUTO_HYDRATION_RECOVERY_WINDOW_MS, 120s) and must not become a second state machine: it opens only while enabled+idle+generating+no-lineage, collapses to the cheap childList-only 'turns' observer on generation end / adoption / auth / cap, ordinary generation rides it harmlessly (BUSY, never adopted), and reconcileEnabledIdleAuditRuntime() / resumeRuntimeFromAuditTurn() remain the sole runtime-adoption authority.",
+      "verification": "node --test tests/widget/w7-004-hydration-miss-recovery.test.js -> 5 tests, 5 pass, 0 fail, 0 cancelled, exit 0, executed on the CURRENT tree during T-269 (node v24.15.0); and the whole current tree is green: python -m pytest -q -> 2481 passed 16 skipped; python -m ruff check audapack tests -> 0 findings; node --test tests/widget/*.test.js -> 807 tests, 807 pass, 0 fail, 0 cancelled, 146s, exit 0",
+      "work": "T-250"
+    }
+  },
+  "schema_version": 1
+}

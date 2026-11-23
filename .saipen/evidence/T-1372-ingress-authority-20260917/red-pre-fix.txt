@@ -1,0 +1,116 @@
+# T-1372 RED: controls vs the engine with the obligation RECORDED but NOT ENFORCED
+# (the pre-fix behaviour: a refusal names a command, nothing compares the bytes)
+command: python -m unittest tools.test_pending_ingress
+.FFFFFF...
+======================================================================
+FAIL: test_unreadable_pending_record_refuses_with_a_route_out (tools.test_pending_ingress.MalformedRecordFailsClosedTests.test_unreadable_pending_record_refuses_with_a_route_out)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_pending_ingress.py", line 203, in test_unreadable_pending_record_refuses_with_a_route_out
+    self.assertNotEqual(code, 0, output)
+AssertionError: 0 == 0 : {
+  "ok": true,
+  "code": "STARTED",
+  "project_root": "V:\\_TEMP_\\t1363-v4egq813",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-001",
+  "ticket": "T-1",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "resumed": false,
+  "phase": "SCOUT",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "event_id": "E-3",
+  "parked": null,
+  "load_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\scout.md",
+  "load": "saipen/phases/scout.md",
+  "execution_instruction": "The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first."
+}
+
+
+======================================================================
+FAIL: test_supersede_starts_the_new_text_and_clears_the_record (tools.test_pending_ingress.OperatorSupersedeTests.test_supersede_starts_the_new_text_and_clears_the_record)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_pending_ingress.py", line 180, in test_supersede_starts_the_new_text_and_clears_the_record
+    self.assertEqual(code, 0, output)
+AssertionError: 2 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "unknown option --supersede-ingress",
+  "usage": "Use: saipen start '<task in one line>'  (or --file PATH, --hex <utf-8 hex>, or --receipt SRC-###)"
+}
+
+
+======================================================================
+FAIL: test_supersede_without_a_pending_record_is_not_an_error (tools.test_pending_ingress.OperatorSupersedeTests.test_supersede_without_a_pending_record_is_not_an_error)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_pending_ingress.py", line 190, in test_supersede_without_a_pending_record_is_not_an_error
+    self.assertEqual(code, 0, output)
+AssertionError: 2 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "unknown option --supersede-ingress",
+  "usage": "Use: saipen start '<task in one line>'  (or --file PATH, --hex <utf-8 hex>, or --receipt SRC-###)"
+}
+
+
+======================================================================
+FAIL: test_file_transport_starts_and_clears_the_pending_record (tools.test_pending_ingress.OriginalBytesClearTheObligationTests.test_file_transport_starts_and_clears_the_pending_record)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_pending_ingress.py", line 163, in test_file_transport_starts_and_clears_the_pending_record
+    self.assertIsNone(pending_ingress.pending(root), "the obligation outlived its answer")
+AssertionError: {'schema_version': 1, 'digest': '2adeec885bc31544a052984aeb633f3945e9b7f8bf93ccc45493ad0077360bdc', 'bytes': 496, 'route': 'saipen start --file <path>', 'recorded': '2026-09-16T21:37:09Z', 'preview': 'Rewrite the greeting in src/app.py so it reads as one paragraph.\n\nConstraints, all four of them:\n1. one paragraph, no bullet list;\n2. plain wording, no marketin'} is not None : the obligation outlived its answer
+
+======================================================================
+FAIL: test_a_different_payload_is_refused_naming_digest_and_command (tools.test_pending_ingress.ParaphraseIsRefusedTests.test_a_different_payload_is_refused_naming_digest_and_command)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_pending_ingress.py", line 135, in test_a_different_payload_is_refused_naming_digest_and_command
+    self.assertNotEqual(code, 0, output)
+AssertionError: 0 == 0 : {
+  "ok": true,
+  "code": "STARTED",
+  "project_root": "V:\\_TEMP_\\t1363-vtx51zt_",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-001",
+  "ticket": "T-1",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "resumed": false,
+  "phase": "SCOUT",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "event_id": "E-3",
+  "parked": null,
+  "load_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\scout.md",
+  "load": "saipen/phases/scout.md",
+  "execution_instruction": "The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first."
+}
+
+
+======================================================================
+FAIL: test_the_refusal_captures_nothing (tools.test_pending_ingress.ParaphraseIsRefusedTests.test_the_refusal_captures_nothing)
+A refused paraphrase must not leave a receipt to be believed later.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_pending_ingress.py", line 147, in test_the_refusal_captures_nothing
+    self.assertEqual(receipts_of(self.root), [])
+AssertionError: Lists differ: ['SRC-001'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'SRC-001'
+
+- ['SRC-001']
++ []
+
+----------------------------------------------------------------------
+Ran 10 tests in 1.729s
+
+FAILED (failures=6)

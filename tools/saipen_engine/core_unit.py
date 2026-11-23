@@ -35,7 +35,6 @@ import re
 import shutil
 import stat
 import subprocess
-import sys
 import tempfile
 import time
 from pathlib import Path
@@ -59,22 +58,7 @@ SCHEMA_VERSION = 1
 #: `.saipen/` is left out on purpose: every checkpoint rewrites it, so
 #: fingerprinting it would make any record stale the moment its own LOG line
 #: lands. `.git/` is history, not the tree under test.
-#:
-#: `bin/` (T-1952) is GENERATED install plumbing: it is gitignored, carries the
-#: absolute paths of the machine that installed it, and the install identity
-#: already frames zero files under it. Leaving it in the subject digest meant
-#: two hosts with identical source and different install roots disagreed about
-#: the same tree, and it put a copy's rewritten pointers inside the identity it
-#: was being compared by. The launcher and `STATE.saipen_home` are rewritten in
-#: every sandbox to name the sandbox, so a run can no longer be answered by the
-#: source tree's engine.
-FINGERPRINT_EXCLUDED = (".git", ".saipen", "bin")
-
-#: Generated plumbing a copy always carries: two launcher files of a few
-#: hundred bytes that the family EXECUTES (T-1645 proves the PATH-miss route
-#: end to end). They are excluded from the fingerprint, so a declared sandbox
-#: scope must not also drop them from the copy the way it drops `.git`.
-COPY_ALWAYS = ("bin",)
+FINGERPRINT_EXCLUDED = (".git", ".saipen")
 
 #: T-1779: top-level operator INPUT, not tested subject. The audit inbox takes
 #: handoff drops at any moment; inside the family it moved the fingerprint
@@ -257,10 +241,7 @@ def load_baseline(root: Path | str) -> tuple[dict | None, str | None]:
 
 
 def baseline_digest(root: Path | str) -> str:
-    p = Path(root) / BASELINE_REL
-    if not p.is_file():
-        return ""
-    return _sha256_file(p)
+    return _sha256_file(Path(root) / BASELINE_REL)
 
 
 #: The four files one checkpoint writes together. A copy that straddles a
@@ -296,7 +277,7 @@ def _without_locks(ignore):
 
 
 def _copy_saipen_once(source: Path, target: Path, ignore, *, lock: bool,
-                      allowed=None) -> bool:
+                      allowed=None, counts: dict | None = None) -> bool:
     """Copy ``source/.saipen`` to ``target``; True when no checkpoint landed meanwhile.
 
     The checkpoint files are compared before and after, so an optimistic copy
@@ -328,76 +309,22 @@ def _copy_saipen_once(source: Path, target: Path, ignore, *, lock: bool,
         if allowed is not None:
             inner = _only_saipen_subtrees(canonical, allowed, ignore)
         before = _checkpoint_stamp(canonical)
-        shutil.copytree(canonical, target, symlinks=True, ignore=_without_locks(inner))
+
+        def counting(target_counts=counts):
+            def copy_function(source_file, destination_file):
+                with contextlib.suppress(OSError):
+                    target_counts["bytes"] += os.path.getsize(source_file)
+                target_counts["files"] += 1
+                shutil.copy2(source_file, destination_file)
+
+            return copy_function if target_counts is not None else shutil.copy2
+
+        shutil.copytree(canonical, target, symlinks=True, ignore=_without_locks(inner),
+                        copy_function=counting())
         return held or _checkpoint_stamp(canonical) == before
     finally:
         if held:
             writer.release()
-
-
-def rebind_sandbox_pointers(sandbox: Path) -> dict:
-    """Point a copy's two install pointers at the COPY, never at its source.
-
-    T-1952. A sandbox is a copy of the working tree, and the family inside it
-    resolves its own install by two files that were copied verbatim:
-
-      * ``bin/saipen`` and ``bin/saipen.cmd`` name the engine by ABSOLUTE path.
-        A test that executes the copy's launcher (T-1645 proves the PATH-miss
-        route end to end) therefore ran the SOURCE tree's engine against the
-        source tree's STATE. Measured: with that tree drifted, the same copied
-        module answered ``assertEqual: None != 'T-1'`` -- the fixture project
-        was never read.
-      * ``.saipen/STATE.md``'s ``saipen_home:`` line names the source install.
-        Every mutation then compared the RUNNING home (the copy, by
-        ``state.running_home()``) against that line and refused with
-        ``home-dead: home-divergent`` as soon as the two trees differed --
-        which is exactly the state a tree under test is in.
-
-    Both are install GENERATED data: gitignored, machine-specific, and outside
-    the install fingerprint. Rewriting them makes the copy describe itself, so
-    agreement between the two pointers is a property of the copy and no longer
-    of whether the source tree happened to be clean. Neither file is part of
-    the subject fingerprint, so the record still describes the same bytes.
-
-    Returns what was rewritten, for the evidence record.
-    """
-    from . import machine_runtime
-
-    done: list[str] = []
-    target = sandbox.resolve()
-    launchers = machine_runtime.render_launchers(".", None, sys.executable)
-    for name, payload in launchers.items():
-        path = sandbox / "bin" / name
-        try:
-            if path.is_file() and path.read_bytes() == payload:
-                continue
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(payload)
-            done.append(f"bin/{name}")
-        except OSError:
-            # A missing launcher is already the honest answer (`launcher_problems`
-            # reports `missing:`); inventing one here would hide that.
-            continue
-    state = sandbox / ".saipen" / "STATE.md"
-    try:
-        text = state.read_text(encoding="utf-8")
-    except OSError:
-        return {"rewritten": done, "home": None}
-    home = f'saipen_home: "{target.as_posix()}"'
-    if re.search(r"(?m)^saipen_home:.*$", text):
-        rebound = re.sub(r"(?m)^saipen_home:.*$", lambda _: home, text)
-    else:
-        close = text.find("\n---", 3)
-        if close < 0:
-            return {"rewritten": done, "home": None}
-        rebound = text[:close] + "\n" + home + text[close:]
-    if rebound != text:
-        try:
-            state.write_text(rebound, encoding="utf-8")
-            done.append(".saipen/STATE.md")
-        except OSError:
-            return {"rewritten": done, "home": None}
-    return {"rewritten": done, "home": target.as_posix()}
 
 
 def _only_saipen_subtrees(canonical: Path, allowed, ignore):
@@ -459,18 +386,32 @@ def copy_tree_consistent(source: Path, sandbox: Path, ignore, *, scope=None) -> 
                 # fingerprint never covered it, so a subject that does not read
                 # it must not pay 345 MiB to carry it.
                 ignored |= {name for name in names
-                            if name in FINGERPRINT_EXCLUDED and name not in extra_top
-                            and name not in COPY_ALWAYS}
+                            if name in FINGERPRINT_EXCLUDED and name not in extra_top}
             ignored |= set(FAMILY_INPUT_EXCLUDED) & set(names)
         return ignored
 
     began = time.monotonic()
-    shutil.copytree(source, sandbox, symlinks=True, ignore=ignore_top_saipen)
+    subject_counts = {"files": 0, "bytes": 0}
+
+    def counted_copy(source_file, target_file):
+        with contextlib.suppress(OSError):
+            subject_counts["bytes"] += os.path.getsize(source_file)
+        subject_counts["files"] += 1
+        shutil.copy2(source_file, target_file)
+
+    shutil.copytree(source, sandbox, symlinks=True, ignore=ignore_top_saipen,
+                    copy_function=counted_copy)
     observed = {"subject_copy_s": round(time.monotonic() - began, 6),
                 "canonical_copy_s": 0.0, "canonical_copy_attempts": 0,
-                "trees": None if scope is None else sorted(scope["trees"])}
+                "trees": None if scope is None else sorted(scope["trees"]),
+                # T-2163 (Campaign XIII, Wave E): the resource bill of the
+                # copy itself -- what a zero-test preparation spent, measured
+                # per stage, so the next caller can reason about the
+                # preparation cost instead of re-paying it blindly.
+                "subject_files": subject_counts["files"],
+                "subject_bytes": subject_counts["bytes"],
+                "canonical_files": 0, "canonical_bytes": 0}
     if not (source / ".saipen").is_dir():
-        observed["pointers"] = rebind_sandbox_pointers(sandbox)
         return observed
     for attempt in range(CONSISTENT_COPY_ATTEMPTS):
         # Each attempt gets a fresh directory BESIDE the sandbox, never inside
@@ -480,14 +421,17 @@ def copy_tree_consistent(source: Path, sandbox: Path, ignore, *, scope=None) -> 
         # FileExistsError. The enclosing temporary directory reclaims them.
         staging = sandbox.parent / f"saipen-copy-{attempt}"
         began = time.monotonic()
+        counts = {"files": 0, "bytes": 0}
         consistent = _copy_saipen_once(source, staging, ignore, lock=attempt > 0,
-                                       allowed=saipen_children)
+                                       allowed=saipen_children, counts=counts)
         observed["canonical_copy_s"] += time.monotonic() - began
         observed["canonical_copy_attempts"] += 1
+        # A torn attempt's bytes were still written: the cost was paid.
+        observed["canonical_files"] += counts["files"]
+        observed["canonical_bytes"] += counts["bytes"]
         if consistent:
             os.replace(staging, sandbox / ".saipen")
             observed["canonical_copy_s"] = round(observed["canonical_copy_s"], 6)
-            observed["pointers"] = rebind_sandbox_pointers(sandbox)
             return observed
         time.sleep(min(0.25 * (attempt + 1), 2.0))
     raise RuntimeError(
@@ -851,13 +795,17 @@ def reclaim(path: Path) -> bool:
         except FileNotFoundError:
             pass
 
+    # The stamp as THIS cleanup found it. A foreign writer may clobber the
+    # stamp while the tree is held; restoring what a later iteration happened
+    # to re-read would hand the tree to whatever execution the foreign bytes
+    # named (T-2092). One read up front, and only those bytes go back.
+    try:
+        saved = stamp.read_bytes() if stamp.is_file() else None
+    except OSError:
+        saved = None
     for attempt in range(RECLAIM_ATTEMPTS):
         if not path.exists():
             return True
-        try:
-            saved = stamp.read_bytes() if stamp.is_file() else None
-        except OSError:
-            saved = None
         with contextlib.suppress(OSError):
             for child in list(path.iterdir()):
                 if child.name == SANDBOX_OWNER:
@@ -917,6 +865,48 @@ def new_sandbox_root(project: Path | str | None = None) -> Path:
     return root
 
 
+def _stamp_pid(value) -> int | None:
+    """A process id the ownership grammar can hold, or None.
+
+    bool is an int subclass that parses as pid 0/1, so it is rejected by
+    type, not by range. A field the grammar cannot hold says nothing about
+    the tree: treating it as "no process" would delete a live run's working
+    copy on evidence the stamp never carried (T-2093).
+    """
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        return None
+    return value
+
+
+def _owner_stamp(candidate: Path) -> tuple[str, dict | None]:
+    """Classify one sandbox's ownership stamp: ``(state, stamp)``.
+
+    Three states, and they are not interchangeable (T-2094):
+
+    * ``absent``  -- no ``owner.json`` at all: a sandbox that predates
+      T-1505. It carries no project identity, so only the global legacy age
+      policy may touch it.
+    * ``damaged`` -- a PRESENT file the grammar cannot hold: unreadable,
+      invalid JSON, JSON ``null``, a list, a scalar. Treating JSON ``null`` as
+      "no stamp" routed a damaged record into the legacy delete path.
+    * ``stamped`` -- a JSON object; its project/process fields are judged by
+      the ownership grammar, never by the legacy path.
+    """
+    try:
+        raw = (candidate / SANDBOX_OWNER).read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return "absent", None
+    except (OSError, UnicodeDecodeError):
+        return "damaged", None
+    try:
+        stamp = json.loads(raw)
+    except ValueError:
+        return "damaged", None
+    if not isinstance(stamp, dict):
+        return "damaged", None
+    return "stamped", stamp
+
+
 def _owner_pids(owner: dict) -> list:
     """Every process a stamp names as reading the tree: the process that
     created the sandbox, and the family child it handed the tree to.
@@ -948,6 +938,20 @@ def sweep_stale_sandboxes(
     liveness. A pid is only meaningful inside one process space, so the
     liveness of a foreign stamp says nothing about the tree, and reclaiming on
     it deletes a live run's working copy (T-1823).
+
+    Ownership is fail-closed (T-2093, T-2094): under an explicit ``project``
+    filter, a stamp whose project field is missing or not a string is UNKNOWN
+    ownership and is never reclaimed, whatever its pids say. A malformed
+    process field likewise licenses no delete -- the stamp must name a valid
+    creator pid, and every reader field it does carry must be valid too,
+    before the tree may be judged dead. UNKNOWN is kept, not cleaned.
+
+    A sandbox with NO stamp and one with a PRESENT but damaged stamp are
+    different states (T-2094). Under a ``project`` filter the unstamped
+    legacy tree is kept too: it names no project, so the sweep has no proof
+    it is ours, and age alone is not ownership. The legacy age policy still
+    runs for a genuinely unstamped tree when the caller asks for a global
+    sweep (no ``project``), which is exactly the pre-T-1505 behaviour.
     """
     base = (Path(temp_root).resolve() if temp_root is not None
             else Path(tempfile.gettempdir()).resolve())
@@ -962,18 +966,41 @@ def sweep_stale_sandboxes(
         if not candidate.is_dir() or candidate.is_symlink():
             continue
         stale = False
-        try:
-            owner = json.loads((candidate / SANDBOX_OWNER).read_text(encoding="utf-8"))
-        except FileNotFoundError:
-            owner = None
-        except (OSError, ValueError):
+        state, owner = _owner_stamp(candidate)
+        if state == "damaged":
+            # A present stamp the grammar cannot hold is UNKNOWN ownership.
+            # It must never fall through to the legacy delete path, and JSON
+            # null is a damaged stamp, not an absent one (T-2094).
             continue
-        if isinstance(owner, dict):
+        if state == "stamped":
             recorded = owner.get("project")
-            if isinstance(recorded, str) and recorded != mine:
+            if mine is not None and recorded != mine:
+                # Under an explicit project filter, missing or non-string
+                # project is UNKNOWN: not "foreign", and not "mine" either.
                 continue
-            stale = not any(pid_alive(pid) for pid in _owner_pids(owner))
-        elif owner is None:
+            # V4 (T-2092): a stamp that names no usable process is UNKNOWN
+            # ownership, not "no live owner". A pid the grammar cannot hold
+            # (missing, non-int, bool) says nothing about the tree, and
+            # deleting on it reclaims a live run's working copy.
+            creator = _stamp_pid(owner.get("pid"))
+            if creator is None:
+                continue
+            reader = _stamp_pid(owner.get("reader"))
+            if "reader" in owner and reader is None:
+                # A reader field that exists but cannot be held is UNKNOWN:
+                # the documented spawn phases (COPYING -> STARTING ->
+                # STARTED) either omit the reader or carry a valid pid, so a
+                # malformed one is a damaged stamp, not a phase to skip over.
+                continue
+            pids = [creator] if reader is None else [creator, reader]
+            stale = not any(pid_alive(pid) for pid in pids)
+        else:
+            # Genuinely unstamped (pre-T-1505). It names no project, so a
+            # project-scoped sweep cannot prove it belongs to the caller:
+            # age alone is not ownership (T-2094). The compatible global
+            # policy stays available when no project filter is passed.
+            if mine is not None:
+                continue
             try:
                 age = now - candidate.stat().st_mtime
             except OSError:
@@ -1049,13 +1076,6 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
             with ThreadPoolExecutor(max_workers=count) as pool:
                 list(pool.map(lambda target: shutil.copytree(sandboxes[0], target, symlinks=True),
                               sandboxes[1:]))
-                # T-1952: a shard is copied FROM shard 0, which already names
-                # ITSELF, so every shard would otherwise inherit shard 0's
-                # `saipen_home` and launchers. Rebind each one to its own path
-                # before it runs, or 5 of 6 shards test a project that lives in
-                # another shard.
-                for target in sandboxes[1:]:
-                    rebind_sandbox_pointers(target)
                 copies = list(pool.map(tree_fingerprint, sandboxes[1:]))
             timings["shard_copy_wall_s"] = round(time.monotonic() - mark, 6)
             if any(item != tested for item in copies):
@@ -1078,21 +1098,6 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
         mark = time.monotonic()
         leaked = reclaim_all(tmps)
         timings["cleanup_wall_s"] = round(time.monotonic() - mark, 6)
-    timings["sandbox_copy_wall_s"] = timings.get("copy_wall_s", 0.0)
-    timings["fingerprint_wall_s"] = timings.get("hash_wall_s", 0.0)
-    timings["identity_capture_wall_s"] = timings.get("environment_identity_wall_s", 0.0)
-    timings["actual_test_execution_wall_s"] = timings.get("execution_wall_s", 0.0)
-    timings["test_discovery_wall_s"] = round(float(run.get("discovery_process_s") or 0.0), 6)
-    proc_launches = (1 if shape else 0) + count
-    total_elapsed = round(time.monotonic() - started, 1)
-    latency_diag = None
-    if total_elapsed > 600.0:
-        latency_diag = {
-            "exceeded_10m": True,
-            "elapsed_s": total_elapsed,
-            "threshold_s": 600,
-            "reason": "full family execution exceeded 10 min alert threshold",
-        }
     return {
         **run,
         "sandboxes_swept": swept,
@@ -1102,11 +1107,9 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
         "timings_s": timings,
         "copy_metrics": copy_metrics,
         "verification_identity": verification_identity,
-        "duration_s": total_elapsed,
+        "duration_s": round(time.monotonic() - started, 1),
         "timeout_s": declared_family.timeout,
         "command": ["python", *declared_family.command[1:]],
-        "process_launch_count": proc_launches,
-        "latency_diagnostic": latency_diag,
     }
 
 
@@ -1233,8 +1236,7 @@ def write_record(root: Path | str, run: dict, fingerprint: str) -> dict:
             key: run[key]
             for key in ("jobs", "discovered", "partition_error", "shards", "module_durations_s",
                         "timings_s", "copy_metrics", "membership_required", "membership_proof",
-                        "discovery_process_s", "execution_trigger", "process_launch_count",
-                        "latency_diagnostic", "telemetry")
+                        "discovery_process_s")
             if run.get(key) is not None
         },
         **verdict,
@@ -1259,97 +1261,8 @@ def verification_configuration(*, timeout=None, jobs=None) -> dict:
                                   if declared_family.environment_tools is not None else None)}
 
 
-VERIFICATION_DECISIONS = (
-    "REUSE_VALID_RECORD",
-    "JOIN_IDENTICAL_IN_FLIGHT",
-    "RUN_TARGETED_REQUIRED",
-    "RUN_CERTIFIED_IMPACT",
-    "RUN_FULL_REQUIRED",
-    "BLOCK_STALE_OR_INCOMPATIBLE",
-    "BLOCK_ORACLE_INCONSISTENCY",
-    "RECONCILE_UNKNOWN_OUTCOME",
-)
-
-EXECUTION_TRIGGERS = (
-    "NEW_TESTED_SOURCE_BYTES",
-    "CHANGED_BASELINE",
-    "CHANGED_TEST_SELECTION",
-    "CHANGED_VERIFICATION_CONFIGURATION",
-    "CHANGED_TOOL_OR_RUNTIME_IDENTITY",
-    "MANDATORY_FULL_ACCEPTANCE_GATE",
-    "NO_COMPATIBLE_VERIFIED_RECORD",
-    "EXPLICIT_AUTHORIZED_FRESH_PROBE",
-    "PRIOR_INCONSISTENCY_INVESTIGATION",
-    "REPLAY_UNSAFE",
-)
-
-
-def compatible_records(
-    base: Path,
-    fingerprint: str,
-    *,
-    digest: str,
-    expected: dict,
-    baseline_red: list,
-) -> list[dict]:
-    found = []
-    for path in sorted((base / RECORD_DIR_REL).glob(f"{fingerprint[:16]}-*.json"), reverse=True):
-        try:
-            record = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            continue
-        if not isinstance(record, dict):
-            continue
-        if (
-            record.get("fingerprint") == fingerprint
-            and record.get("baseline_sha256") == digest
-            and record.get("verification_identity") == expected
-            and not full_scope_problem(record)
-        ):
-            verdict = judge(record, baseline_red)["verdict"]
-            found.append({
-                "path": path.relative_to(base).as_posix(),
-                "sha256": _sha256_file(path),
-                "record": record,
-                "verdict": verdict,
-                "finished_utc": record.get("finished_utc"),
-            })
-    return found
-
-
-def oracle_conflict(
-    base: Path,
-    fingerprint: str,
-    *,
-    digest: str,
-    expected: dict,
-    baseline_red: list,
-) -> dict | None:
-    records = compatible_records(
-        base, fingerprint, digest=digest, expected=expected, baseline_red=baseline_red
-    )
-    passes = [r for r in records if r["verdict"] == "PASS"]
-    fails = [r for r in records if r["verdict"] == "FAIL"]
-    if passes and fails:
-        return {
-            "conflict": True,
-            "fingerprint": fingerprint,
-            "pass_records": [p["path"] for p in passes],
-            "fail_records": [f["path"] for f in fails],
-            "detail": (
-                f"identical fingerprint {fingerprint[:16]} produced both PASS and FAIL "
-                f"across {len(records)} runs"
-            ),
-        }
-    return None
-
-
 def reusable_record(
-    root: Path | str,
-    fingerprint: str,
-    *,
-    verification_identity=None,
-    disallow_conflict: bool = False,
+    root: Path | str, fingerprint: str, *, verification_identity=None
 ) -> dict | None:
     """The newest PASS record of exactly this tree and baseline, or None.
 
@@ -1361,187 +1274,178 @@ def reusable_record(
     baseline, error = load_baseline(base)
     if error:
         return None
-    from .verification_cache import capture, replay_supported
+    from .verification_cache import capture
+
+    from .verification_cache import replay_supported
 
     expected = verification_identity or capture(base, verification_configuration())
     if not replay_supported(expected):
         return None
     digest = baseline_digest(base)
-    if disallow_conflict and oracle_conflict(
-        base, fingerprint, digest=digest, expected=expected, baseline_red=baseline["red"]
-    ):
-        return None
-    records = compatible_records(
-        base, fingerprint, digest=digest, expected=expected, baseline_red=baseline["red"]
-    )
-    if not records:
-        return None
-    newest = records[0]
-    if newest["verdict"] != "PASS":
-        return None
-    return {
-        "record": newest["record"],
-        "path": newest["path"],
-        "sha256": newest["sha256"],
-    }
-
-
-def evaluate_verification_decision(
-    root: Path | str,
-    fingerprint: str,
-    *,
-    verification_identity=None,
-    fresh=False,
-    rerun_reason=None,
-    config=None,
-) -> dict:
-    base = Path(root)
-    baseline, error = load_baseline(base)
-    if error:
-        return {
-            "decision": "BLOCK_STALE_OR_INCOMPATIBLE",
-            "trigger": None,
-            "reason": f"the declared core-unit family has no usable baseline: {error}",
-            "available": None,
-        }
-    from .verification_cache import capture, replay_supported
-
-    expected = verification_identity or capture(base, config or verification_configuration())
-    if not replay_supported(expected):
-        return {
-            "decision": "RUN_FULL_REQUIRED" if fresh else "BLOCK_STALE_OR_INCOMPATIBLE",
-            "trigger": "REPLAY_UNSAFE",
-            "reason": "unresolved external verification runtime identity; replay refused",
-            "available": None,
-        }
-    digest = baseline_digest(base)
-    base_red = baseline.get("red", []) if isinstance(baseline, dict) else []
-    records = compatible_records(
-        base, fingerprint, digest=digest, expected=expected, baseline_red=base_red
-    )
-    conflict = oracle_conflict(
-        base, fingerprint, digest=digest, expected=expected, baseline_red=base_red
-    )
-
-    if conflict:
-        if fresh and rerun_reason in {
-            "PRIOR_INCONSISTENCY_INVESTIGATION",
-            "EXPLICIT_AUTHORIZED_FRESH_PROBE",
-        }:
-            return {
-                "decision": "RUN_FULL_REQUIRED",
-                "trigger": rerun_reason,
-                "reason": (
-                    "fresh full run authorized to investigate oracle conflict: "
-                    f"{conflict['detail']}"
-                ),
-                "available": None,
-                "conflict": conflict,
-            }
-        return {
-            "decision": "BLOCK_ORACLE_INCONSISTENCY",
-            "trigger": None,
-            "reason": (
-                f"oracle inconsistency: {conflict['detail']}; investigate before reuse "
-                "or supply --rerun-reason PRIOR_INCONSISTENCY_INVESTIGATION"
-            ),
-            "available": None,
-            "conflict": conflict,
-        }
-
-    if records:
-        newest = records[0]
-        if newest["verdict"] == "PASS":
-            if not fresh:
-                return {
-                    "decision": "REUSE_VALID_RECORD",
-                    "trigger": None,
-                    "reason": "compatible PASS record describes the current tested bytes",
-                    "available": {
-                        "record": newest["record"],
-                        "path": newest["path"],
-                        "sha256": newest["sha256"],
-                    },
-                }
-            trigger = (
-                rerun_reason
-                if rerun_reason in EXECUTION_TRIGGERS
-                else "EXPLICIT_AUTHORIZED_FRESH_PROBE"
-            )
-            return {
-                "decision": "RUN_FULL_REQUIRED",
-                "trigger": trigger,
-                "reason": f"fresh run authorized: {trigger}",
-                "available": None,
-            }
-        else:
-            if not fresh:
-                return {
-                    "decision": "BLOCK_STALE_OR_INCOMPATIBLE",
-                    "trigger": None,
-                    "reason": (
-                        "latest compatible execution failed; "
-                        "rerun requires explicit reason and --fresh"
-                    ),
-                    "available": None,
-                }
-            if not rerun_reason:
-                return {
-                    "decision": "BLOCK_STALE_OR_INCOMPATIBLE",
-                    "trigger": None,
-                    "reason": (
-                        "repeated same-generation full run after FAIL requires an explicit "
-                        "machine-readable --rerun-reason"
-                    ),
-                    "available": None,
-                }
-            trigger = (
-                rerun_reason
-                if rerun_reason in EXECUTION_TRIGGERS
-                else "PRIOR_INCONSISTENCY_INVESTIGATION"
-            )
-            return {
-                "decision": "RUN_FULL_REQUIRED",
-                "trigger": trigger,
-                "reason": f"rerun authorized after FAIL: {trigger}",
-                "available": None,
-            }
-
-    all_records = sorted((base / RECORD_DIR_REL).glob("*.json"), reverse=True)
-    trigger = "NO_COMPATIBLE_VERIFIED_RECORD"
-    for prev_path in all_records:
+    for path in sorted((base / RECORD_DIR_REL).glob(f"{fingerprint[:16]}-*.json"), reverse=True):
         try:
-            prev = json.loads(prev_path.read_text(encoding="utf-8"))
-            if not isinstance(prev, dict) or prev.get("family") != FAMILY_NAME:
-                continue
-            if prev.get("fingerprint") != fingerprint:
-                trigger = "NEW_TESTED_SOURCE_BYTES"
-                break
-            elif prev.get("baseline_sha256") != digest:
-                trigger = "CHANGED_BASELINE"
-                break
-            elif prev.get("verification_identity") != expected:
-                prev_ident = prev.get("verification_identity") or {}
-                if (
-                    prev_ident.get("toolchain") != expected.get("toolchain")
-                    or prev_ident.get("runtime") != expected.get("runtime")
-                ):
-                    trigger = "CHANGED_TOOL_OR_RUNTIME_IDENTITY"
-                else:
-                    trigger = "CHANGED_VERIFICATION_CONFIGURATION"
-                break
+            record = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
-            continue
+            return None
+        if not isinstance(record, dict):
+            return None
+        if (
+            record.get("fingerprint") == fingerprint
+            and record.get("baseline_sha256") == digest
+            and record.get("verification_identity") == expected
+        ):
+            # Latest compatible outcome wins. A new red must not resurrect
+            # an older PASS of the same generation/environment/configuration.
+            if full_scope_problem(record) or judge(record, baseline["red"])["verdict"] != "PASS":
+                return None
+            return {
+                "record": record,
+                "path": path.relative_to(base).as_posix(),
+                "sha256": _sha256_file(path),
+            }
+    return None
 
-    if rerun_reason and rerun_reason in EXECUTION_TRIGGERS:
-        trigger = rerun_reason
 
-    return {
-        "decision": "RUN_FULL_REQUIRED",
-        "trigger": trigger,
-        "reason": f"full suite execution required (trigger: {trigger})",
-        "available": None,
+#: T-2163 Campaign XII: the pre-run answers to "must this family run again?".
+#: Derived from the records the evidence store already owns; never a second
+#: source of truth, and never a permission: the decision categories explain a
+#: refusal, ``reusable_record`` stays the single reuse owner.
+DECISION_REUSABLE = "REUSABLE_EXACT_RECORD"
+DECISION_NEW_SOURCE = "NEW_SOURCE_VERIFICATION_REQUIRED"
+DECISION_NEW_BASELINE = "NEW_BASELINE_VERIFICATION_REQUIRED"
+DECISION_NEW_ENVIRONMENT = "NEW_ENVIRONMENT_VERIFICATION_REQUIRED"
+DECISION_TRIAGE = "PREVIOUS_FAILURE_REQUIRES_TRIAGE"
+DECISION_EVALUATOR_MISMATCH = "EVALUATOR_ENVIRONMENT_MISMATCH"
+DECISION_INVALID = "INVALID_OR_CORRUPT_RECORD"
+
+
+def preflight(
+    root: Path | str,
+    fingerprint: str | None = None,
+    *,
+    verification_identity: dict | None = None,
+) -> dict:
+    """Read-only: does an expensive family run have to run, and why.
+
+    One identity capture (the caller's when ``verification_identity`` holds
+    it), the records already on disk for THIS tree fingerprint, newest first,
+    and a decision category with dimension-level reasons. Nothing is written,
+    no record is rewritten, and a mismatching record is reported, never
+    resuscitated: an unusable PASS answers EVALUATOR_ENVIRONMENT_MISMATCH or
+    NEW_ENVIRONMENT_VERIFICATION_REQUIRED instead of silent reuse.
+    """
+    base = Path(root)
+    fingerprint = fingerprint or tree_fingerprint(base)
+    from .verification_cache import dimension_mismatches
+
+    report: dict = {
+        "ok": True,
+        "decision": None,
+        "fingerprint": fingerprint,
+        "baseline_sha256": None,
+        "evaluator": {},
+        "records": [],
+        "reusable_record": None,
+        "reasons": [],
     }
+    baseline, error = load_baseline(base)
+    if error or not isinstance(baseline, dict):
+        report["ok"] = False
+        report["reasons"] = [str(error)]
+        return report
+    report["baseline_sha256"] = baseline_digest(base)
+    from .verification_cache import capture
+
+    expected = verification_identity or capture(base, verification_configuration())
+    verifiers = expected.get("verifiers") if isinstance(expected, dict) else {}
+    engine_file = (verifiers or {}).get("core_unit.py") or {}
+    report["evaluator"] = {
+        "identity_rule": expected.get("identity_rule") if isinstance(expected, dict) else None,
+        "verifiers_root": str(Path(str(engine_file.get("path", ""))).parent),
+    }
+    reusable = reusable_record(base, fingerprint, verification_identity=expected)
+    if reusable is not None:
+        report["reusable_record"] = reusable
+        report["decision"] = DECISION_REUSABLE
+        report["reasons"] = [
+            "a PASS record of this exact tree, baseline and verification "
+            "identity already exists -- reuse it; do not re-run the family"
+        ]
+        return report
+    for path in sorted(
+        (base / RECORD_DIR_REL).glob(f"{fingerprint[:16]}-*.json"), reverse=True
+    ):
+        entry: dict = {"path": path.relative_to(base).as_posix()}
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            entry["problem"] = "record is not readable JSON"
+            report["records"].append(entry)
+            continue
+        if not isinstance(record, dict):
+            entry["problem"] = "record is not a mapping"
+            report["records"].append(entry)
+            continue
+        verdict = judge(record, baseline.get("red") or [])
+        entry["verdict"] = verdict["verdict"]
+        entry["new_red"] = verdict["new_red"]
+        entry["problems"] = verdict["problems"]
+        entry["baseline_match"] = record.get("baseline_sha256") == report["baseline_sha256"]
+        if issue := full_scope_problem(record):
+            entry["scope_problem"] = issue
+        identity = record.get("verification_identity")
+        if not isinstance(identity, dict):
+            entry["identity_compatible"] = False
+            entry["invalid_identity"] = True
+            entry["reasons"] = ["record carries no verification environment identity"]
+        else:
+            entry["identity_compatible"] = identity == expected
+            if not entry["identity_compatible"]:
+                entry["reasons"] = dimension_mismatches(expected, identity)
+        report["records"].append(entry)
+    if not report["records"]:
+        report["decision"] = DECISION_NEW_SOURCE
+        report["reasons"] = [
+            "no core-unit record exists for this tree fingerprint -- a full "
+            "family run at this boundary is new source verification"
+        ]
+        return report
+    newest = report["records"][0]
+    if newest.get("problem") or newest.get("invalid_identity"):
+        report["decision"] = DECISION_INVALID
+        report["reasons"] = [
+            newest.get("problem")
+            or "record carries no verification environment identity"
+        ]
+        return report
+    if newest.get("identity_compatible") is False:
+        reasons = list(newest.get("reasons") or [])
+        report["reasons"] = reasons
+        report["decision"] = (
+            DECISION_EVALUATOR_MISMATCH
+            if reasons and all("verifier route differs" in item for item in reasons)
+            else DECISION_NEW_ENVIRONMENT
+        )
+        return report
+    if not newest.get("baseline_match"):
+        report["decision"] = DECISION_NEW_BASELINE
+        report["reasons"] = [
+            "the current baseline differs from the one this record was judged "
+            "against -- fresh verification against the current baseline"
+        ]
+        return report
+    if newest.get("verdict") != "PASS":
+        report["decision"] = DECISION_TRIAGE
+        report["reasons"] = [
+            "the newest record for this tree failed: triage the named new red "
+            "with a focused run before repeating the whole family"
+        ]
+        return report
+    report["decision"] = DECISION_NEW_SOURCE
+    report["reasons"] = [
+        "no admissible record answers this tree, baseline and environment yet"
+    ]
+    return report
 
 
 def evidence_line(written: dict) -> str:
@@ -1579,6 +1483,99 @@ def evidence_command(ticket_id: str) -> str:
     return f"python tools/core_unit.py evidence {ticket_id}"
 
 
+_DELTA_CLASS_RE = re.compile(r"\bdelta-class:\s*(none|source)\b")
+
+
+def _current_cycle_delta_class(ticket_id: str, events: list[dict]) -> str | None:
+    """The ticket's CURRENT VERIFY cycle delta-class declaration, or None.
+
+    W-A (SRC-436 INV-8; SRC-437 IV): the focused corridor exists for
+    delta-free Work; a ticket that carries a source delta remains owned by
+    the declared family. The declaration rides the machine-owned VERIFY
+    boundary reason -- `saipen transition VERIFY <T-###> delta-class: source`
+    (or `none`) -- because `_is_verify_boundary` already owns that grammar
+    (T-1577's hostile-regression marker rule), so no hand-written prose and
+    no foreign event can reach this branch. An undeclared cycle keeps the
+    corridor's pre-W-A behavior, which is why T-2115's measured closure
+    (`ae206267c`, focused-only with 109 inherited family reds) names the
+    exact defect class this enforcement eliminates.
+    """
+    cycle = _current_cycle(ticket_id, events)
+    if not cycle:
+        return None
+    match = re.match(
+        r"^transition to VERIFY(?:\s+--\s+(.*))?$", str(cycle[0].get("text") or "")
+    )
+    if not match or not match.group(1):
+        return None
+    declared = _DELTA_CLASS_RE.search(match.group(1))
+    return declared.group(1) if declared else None
+
+
+# T-2133 (Campaign VII P0-B, SRC-436 measurement): the machine-minted
+# BUILD-boundary identity. ``_plan_transition`` appends the token AFTER the
+# composed reason text, so the token is the only text that can anchor the
+# line END -- caller prose can reach the reason but never the last position.
+# A cycle whose BUILD boundary predates the minting answers None and keeps
+# the declared-class rule: the honest activation bound, never a silent
+# "unchanged" verdict.
+_TREE_IDENTITY_RE = re.compile(r"\s+tree-identity:([0-9a-f]{16})$")
+
+
+def _cycle_boundary_identity(ticket_id: str, phase: str, events: list[dict]) -> str | None:
+    """The ticket's measured tree identity at its latest ``phase`` entry.
+
+    Scans backward for the ticket's latest ``transition to {phase}`` event and
+    reads the END-anchored machine token off it. A boundary without a token
+    answers None, so a legacy construction stays honestly unmeasured instead
+    of being misread as an unchanged tree; a foreign ticket's boundary and
+    mid-line prose never match this ticket's measurement.
+    """
+    prefix = f"transition to {phase}"
+    for event in reversed(events):
+        text = str(event.get("text") or "")
+        if (
+            event.get("ticket") != ticket_id
+            or event.get("taxonomy") != "RUN"
+            or not text.startswith(prefix)
+        ):
+            continue
+        match = _TREE_IDENTITY_RE.search(text)
+        return match.group(1) if match else None
+    return None
+
+
+def _current_tree_family_record(root: Path | str) -> str | None:
+    """The independent no-delta proof for a legacy cycle, or None.
+
+    Campaign VIII P0 (T-2133 activation): a full-family record whose
+    fingerprint IS the current tree's and whose baseline IS the current
+    baseline proves the whole declared family already ran on EXACTLY these
+    bytes -- so a legacy BUILD cycle without a minted identity still has an
+    honest answer to the source-delta question. Anything else (a stale
+    record of an older tree, a broken shard, other baselines) is not a
+    proof, and a missing measurement must never authorize the corridor.
+    """
+    base = Path(root)
+    fingerprint = tree_fingerprint(base)
+    for path in sorted(
+        (base / RECORD_DIR_REL).glob(f"{fingerprint[:16]}-*.json"), reverse=True
+    ):
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if (
+            record.get("schema") == SCHEMA_VERSION
+            and record.get("family") == FAMILY_NAME
+            and record.get("fingerprint") == fingerprint
+            and record.get("baseline_sha256") == baseline_digest(base)
+            and full_scope_problem(record) is None
+        ):
+            return path.name
+    return None
+
+
 def ship_gate(root: Path | str, ticket_id: str, events: list[dict]) -> str | None:
     """Why ``ticket_id`` may not enter SHIP, or None.
 
@@ -1586,6 +1583,18 @@ def ship_gate(root: Path | str, ticket_id: str, events: list[dict]) -> str | Non
     ticket's CURRENT VERIFY cycle must cite intact executed evidence for the
     current tree. A focused-policy project may use focused evidence locally;
     otherwise the full family and current baseline are mandatory here.
+    A cycle that declares `delta-class: source` (W-A, SRC-436 INV-8) carries
+    a source delta, so focused evidence cannot substitute for the family.
+    T-2133 (Campaign VII P0-B) closes the declaration's blind side: the
+    machine-minted BUILD-boundary identity is compared with the current
+    tree, and a measured delta takes the family corridor NO MATTER what the
+    cycle declared -- the declaration stays advisory, the bytes decide.
+    Campaign VIII P0 (T-2133 activation) closes the legacy side too: a
+    BUILD boundary WITHOUT the minted identity no longer falls back to the
+    declaration; the focused corridor opens only with an independent
+    no-delta proof (``_current_tree_family_record``), so across new and
+    legacy work the same invariant holds -- unmeasured trees never ship
+    focused-only.
     """
     base = Path(root)
     if not declared(base):
@@ -1595,7 +1604,30 @@ def ship_gate(root: Path | str, ticket_id: str, events: list[dict]) -> str | Non
     focused, policy_error = focused_unit.policy(base)
     if policy_error:
         return policy_error
-    if focused:
+    delta_class = _current_cycle_delta_class(ticket_id, events)
+    cycle = _current_cycle(ticket_id, events)
+    build_identity = None
+    measured_identity = None
+    if cycle is not None:
+        build_identity = _cycle_boundary_identity(
+            ticket_id, "BUILD", events[: len(events) - len(cycle)]
+        )
+        if build_identity is not None:
+            measured_identity = tree_fingerprint(base)[:16]
+    measured_delta = (
+        build_identity is not None and measured_identity != build_identity
+    )
+    if focused and delta_class != "source" and not measured_delta:
+        if build_identity is None and _current_tree_family_record(base) is None:
+            return (
+                f"{ticket_id} may not take the focused corridor: its BUILD "
+                "boundary carries no measured tree identity (legacy cycle) "
+                "and no independent no-delta proof exists -- no full-family "
+                "record of the current tree and baseline; a missing "
+                "measurement never authorizes focused-only publication "
+                "(Campaign VIII, T-2133). Re-enter BUILD to mint the "
+                "identity, or run the declared family."
+            )
         cited, problem = focused_unit.ship_gate(base, ticket_id, events)
         if cited:
             return problem
@@ -1613,10 +1645,24 @@ def ship_gate(root: Path | str, ticket_id: str, events: list[dict]) -> str | Non
         if cited is not None:
             break
     if cited is None:
-        return (
+        why = (
             f"the current VERIFY cycle of {ticket_id} names no run of the declared "
             f"core-unit family ({' '.join(family().command[1:])})"
         )
+        if delta_class == "source":
+            why += (
+                "; this cycle declares a source delta (W-A, SRC-436 INV-8), so "
+                "focused evidence cannot substitute for the family"
+            )
+        elif measured_delta:
+            why += (
+                f"; the tree identity measured at this cycle's BUILD boundary "
+                f"({build_identity}) differs from the current tree "
+                f"({measured_identity}) -- T-2133 (Campaign VII P0-B): a "
+                "delta-class declaration is a claim and the bytes decide, so "
+                "focused evidence cannot substitute for the family"
+            )
+        return why
     path = base / cited["record"]
     try:
         if not path.resolve().is_relative_to((base / RECORD_DIR_REL).resolve()):
@@ -1640,22 +1686,13 @@ def ship_gate(root: Path | str, ticket_id: str, events: list[dict]) -> str | Non
             "cited core-unit run tested a different tree: the working tree "
             f"(outside {', '.join(FINGERPRINT_EXCLUDED)}) changed after it ran"
         )
-    compat = compatible_records(
-        base,
-        record["fingerprint"],
-        digest=record["baseline_sha256"],
-        expected=record.get("verification_identity") or {},
-        baseline_red=baseline["red"],
-    )
-    if compat and compat[0]["verdict"] != "PASS":
-        return (
-            "cited core-unit run is superseded by a newer failing run of the same tree: "
-            f"{compat[0]['path']}"
-        )
     from .verification_cache import compatible, incompatibility, replay_supported
+    from .verification_cache import incompatibility_detail
 
     if not compatible(base, record.get("verification_identity")):
         reason = incompatibility(record.get("verification_identity"))
+        if reason is None:
+            reason = incompatibility_detail(base, record.get("verification_identity"))
         message = ("cited core-unit run has missing or incompatible "
                    "verification environment identity")
         return message + (f" ({reason})" if reason else "")
@@ -1684,20 +1721,15 @@ def main(argv: list[str] | None = None) -> int:
     evidence.add_argument(
         "--fresh", action="store_true", help="run even when a PASS record of this tree exists"
     )
-    evidence.add_argument(
-        "--rerun-reason",
-        help=(
-            "machine-readable justification required when forcing a rerun "
-            "or investigating an inconsistency"
-        ),
-    )
-    evidence.add_argument(
-        "--force-fresh-reason",
-        help="alias/reason for forcing fresh verification",
-    )
     focused = sub.add_parser(
         "focused", help="bounded ticket checks; full evidence is still required to publish"
     )
+    preflight_parser = sub.add_parser(
+        "preflight",
+        help="read-only: must this family run, and if an existing record is refused, why",
+    )
+    preflight_parser.add_argument("--project-root", default=".")
+    preflight_parser.add_argument("--fingerprint")
     focused.add_argument("ticket")
     focused.add_argument("--project-root", default=".")
     focused.add_argument("--agent")
@@ -1736,6 +1768,10 @@ def main(argv: list[str] | None = None) -> int:
         from .verification_impact import command
 
         return command(root, args)
+    if args.command == "preflight":
+        report = preflight(root, getattr(args, "fingerprint", None))
+        _emit(report)
+        return 0 if report.get("ok") else 1
     if args.command == "baseline":
         return _baseline(root, args)
     if args.command == "focused":
@@ -1788,25 +1824,13 @@ class _EvidenceIncomplete(ValueError):
         self.payload = payload
 
 
-def _produce_evidence(
-    root: Path,
-    args,
-    fingerprint: str,
-    expected: dict,
-    *,
-    trigger: str | None = None,
-    decision: str | None = None,
-) -> dict:
+def _produce_evidence(root: Path, args, fingerprint: str, expected: dict) -> dict:
     from .inflight import holding
 
     with holding(root, args.ticket, "core_unit evidence"):
         for attempts in range(1, EVIDENCE_DRIFT_RETRIES + 1):
             run = run_family(root, timeout=args.timeout, jobs=args.jobs)
             run.setdefault("verification_identity", expected)
-            if trigger:
-                run["execution_trigger"] = trigger
-            if decision:
-                run["verification_decision"] = decision
             keep_durations(root, run.get("module_durations_s") or {})
             written = write_record(root, run, run.get("fingerprint") or fingerprint)
             keep_red_sections(root, written["path"], run.get("sections") or {})
@@ -1829,108 +1853,40 @@ def _produce_evidence(
 def _evidence(root: Path, args) -> int:
     request_started = time.monotonic()
     request_started_ns = time.time_ns()
-    timings = {}
     from . import operations
     from .state import parse_state
     from .verification_cache import capture, compatible, single_flight
 
-    t0 = time.monotonic()
     _baseline_data, error = load_baseline(root)
     if error:
         return _emit({"ok": False, "detail": error})
     state = parse_state((root / ".saipen/STATE.md").read_text(encoding="utf-8"))
-    agent = getattr(args, "agent", None) or state.get("agent") or "unknown"
+    agent = args.agent or state.get("agent") or "unknown"
     board = (root / ".saipen/BOARD.md").read_text(encoding="utf-8")
-    timings["canonical_state_read_wall_s"] = round(time.monotonic() - t0, 6)
-
-    t0 = time.monotonic()
     refusal = operations._active_claim_refusal(state, board, agent)
     if refusal is not None:
         return _emit(refusal.to_dict())
-    timings["validation_and_conformance_wall_s"] = round(time.monotonic() - t0, 6)
-
-    t0 = time.monotonic()
     fingerprint = tree_fingerprint(root)
-    timings["fingerprint_wall_s"] = round(time.monotonic() - t0, 6)
-
     try:
-        t0 = time.monotonic()
-        config = verification_configuration(
-            timeout=getattr(args, "timeout", None),
-            jobs=getattr(args, "jobs", DEFAULT_JOBS),
+        expected = capture(root, verification_configuration(timeout=args.timeout, jobs=args.jobs))
+        written = None if args.fresh else reusable_record(
+            root, fingerprint, verification_identity=expected
         )
-        expected = capture(root, config)
-        timings["identity_capture_wall_s"] = round(time.monotonic() - t0, 6)
-
-        t0 = time.monotonic()
-        raw_rerun = getattr(args, "rerun_reason", None) or getattr(args, "force_fresh_reason", None)
-        rerun_reason = str(raw_rerun) if isinstance(raw_rerun, str) else None
-        raw_force = getattr(args, "force_fresh_reason", None)
-        force_fresh_reason = str(raw_force) if isinstance(raw_force, str) else None
-        fresh = bool(getattr(args, "fresh", False))
-        eval_result = evaluate_verification_decision(
-            root,
-            fingerprint,
-            verification_identity=expected,
-            fresh=fresh,
-            rerun_reason=rerun_reason,
-            config=config,
-        )
-        timings["evidence_lookup_wall_s"] = round(time.monotonic() - t0, 6)
-
-        if eval_result["decision"] in ("BLOCK_ORACLE_INCONSISTENCY", "BLOCK_STALE_OR_INCOMPATIBLE"):
-            return _emit({
-                "ok": False,
-                "verification_decision": eval_result["decision"],
-                "detail": eval_result["reason"],
-                "conflict": eval_result.get("conflict"),
-            })
-
-        written = eval_result["available"]
-        decision = eval_result["decision"]
-        trigger = eval_result.get("trigger")
-        identity = {
-            "family": FAMILY_NAME,
-            "fingerprint": fingerprint,
-            "verification_identity": expected,
-        }
-        profiler = {
-            "timings": timings,
-            "execution_trigger": trigger,
-            "verification_decision": decision,
-        }
-        with single_flight(
-            root,
-            identity,
-            fresh=fresh,
-            available=written,
-            request_started_ns=request_started_ns,
-            request_started_monotonic=request_started,
-            consumer=args.ticket,
-            rerun_reason=rerun_reason,
-            force_fresh_reason=force_fresh_reason,
-            profiler=profiler,
-        ) as flight:
+        identity = {"family": FAMILY_NAME, "fingerprint": fingerprint,
+                    "verification_identity": expected}
+        with single_flight(root, identity, fresh=args.fresh, available=written,
+                           request_started_ns=request_started_ns,
+                           request_started_monotonic=request_started,
+                           consumer=args.ticket) as flight:
             if flight.written is None:
                 if tree_fingerprint(root) != fingerprint:
                     raise ValueError("source generation changed while waiting for verification")
-                flight.publish(
-                    _produce_evidence(
-                        root,
-                        args,
-                        fingerprint,
-                        expected,
-                        trigger=trigger,
-                        decision=decision,
-                    )
-                )
+                flight.publish(_produce_evidence(root, args, fingerprint, expected))
             written = flight.written
             reused, joined = flight.reused, flight.joined
             if not compatible(root, written["record"].get("verification_identity")):
                 raise ValueError("verification environment changed before citation")
-            t_cite = time.monotonic()
             result = cite_evidence(root, agent, args.ticket, evidence_line(written))
-            timings["evidence_citation_wall_s"] = round(time.monotonic() - t_cite, 6)
     except _EvidenceIncomplete as exc:
         return _emit(exc.payload)
     except (OSError, ValueError, TimeoutError) as exc:
@@ -1948,8 +1904,6 @@ def _evidence(root: Path, args) -> int:
             "record": written["path"],
             "reused": reused,
             "shared": joined,
-            "verification_decision": decision,
-            "execution_trigger": trigger,
             "request_wall_s": round(time.monotonic() - request_started, 6),
             "checkpoint": result.code,
             "checkpoint_detail": result.message or None,

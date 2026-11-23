@@ -1,0 +1,14 @@
+{
+  "gate": "audit_tags",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "tools/audit_tags.py"
+  ],
+  "started_at": "2026-11-10T17:48:17.967482+00:00",
+  "pid": 13544,
+  "exit_code": 0,
+  "status": "PASS",
+  "duration_s": 0.156,
+  "finished_at": "2026-11-10T17:48:18.121498+00:00"
+}

@@ -1,0 +1,393 @@
+--- tools/saipen_engine/operations.py.before
++++ tools/saipen_engine/operations.py
+@@ -6926,17 +6926,28 @@
+     project_root: Path | str,
+     ticket_id: str,
+     agent: str,
+-    verify: str,
++    verify: str | None,
+     dry_run: bool = False,
++    *,
++    regression: str | None = None,
+ ) -> Result:
+-    """Canonical verify-field update, including legacy BOARD repair."""
++    """Update verification metadata through its existing journaled writer."""
+     root = Path(project_root)
+-    if not verify or not verify.strip():
++    if regression is not None:
++        if not isinstance(regression, str) or regression.strip().lower() != REGRESSION_REQUIRED:
++            return _refuse(
++                "VALIDATION_FAILED", "regression must be required", ticket=ticket_id
++            )
++        regression = REGRESSION_REQUIRED
++    if verify is None and regression is None:
+         return _refuse("VALIDATION_FAILED", "verify text is required", ticket=ticket_id)
+-    try:
+-        assert_single_record(verify, "verify")
+-    except ValueError as exc:
+-        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
++    if verify is not None:
++        if not verify or not verify.strip():
++            return _refuse("VALIDATION_FAILED", "verify text is required", ticket=ticket_id)
++        try:
++            assert_single_record(verify, "verify")
++        except ValueError as exc:
++            return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+     op_id = "ticket-verify-" + uuid4_hex()
+     now, utc = _now(), _utc_iso()
+     docs, state, board, log_tail = _read(root)
+@@ -6948,7 +6959,15 @@
+         )
+     if ticket_id not in board["tickets"]:
+         return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
+-    verify = escape_ticket_description(redact_credentials(verify))
++    if regression is not None and board["tickets"][ticket_id]["section"] == "## DONE":
++        return _refuse(
++            "TICKET_NOT_WORKABLE", "historical DONE cannot declare regression", ticket=ticket_id
++        )
++    fields = {}
++    if verify is not None:
++        fields["verify"] = escape_ticket_description(redact_credentials(verify))
++    if regression is not None:
++        fields["regression"] = regression
+     # T-1616: the verify field is the ticket's FALSIFIABLE acceptance surface,
+     # and `_ticket_fields_in_place` below replaces it wholesale -- so the
+     # superseded clause used to exist nowhere in the project once this verb
+@@ -6965,9 +6984,14 @@
+     # and splitting a DEC event on it would hand a verify clause's prose to the
+     # verdict readers in `log.py`. A semicolon keeps the event one clause.
+     _prior = (board["tickets"][ticket_id].get("fields") or {}).get("verify") or ""
+-    _message = "ticket verify updated via SAIOPS"
+-    if _prior.strip():
++    _message = (
++        "ticket verify updated via SAIOPS" if verify is not None
++        else "ticket regression declared via SAIOPS"
++    )
++    if verify is not None and _prior.strip():
+         _message += f"; superseded clause: {_prior}"
++    if regression is not None:
++        _message += f"; regression: {regression}"
+     event, line = _event_line(
+         docs,
+         log_tail,
+@@ -6983,7 +7007,7 @@
+             root,
+             docs["board"].text_norm,
+             lambda board: _ticket_fields_in_place(
+-                board, ticket_id, {"verify": verify}, enforce_cap=False
++                board, ticket_id, fields, enforce_cap=False
+             ),
+             [ticket_id],
+             op_id=op_id,
+@@ -7021,7 +7045,8 @@
+         "ticket_verify",
+         agent,
+         _identity(root),
+-        {"operation": "ticket_verify", "ticket": ticket_id},
++        {"operation": "ticket_verify", "ticket": ticket_id,
++         **({"regression": regression} if regression is not None else {})},
+         _docs_preconditions(docs, "state", "board", "log"),
+         targets,
+         {"ok": True, "code": "TICKET_VERIFIED", "ticket": ticket_id, "event_id": f"E-{event}"},
+--- tools/saipen.py.before
++++ tools/saipen.py
+@@ -11616,6 +11616,7 @@
+             "[T-###] [text]|goal <text>|user-request <text> [--priority P#] "
+             "[--verify <text>] [--needs T-X,T-Y]|ticket add <PRIORITY> <text> --verify <proof> "
+             "[--needs T-X,T-Y] [--regression required]|ticket "
++            "regression <T-###> required|ticket "
+             "done <T-###> [--closure-mode "
+             "own_patch|inherited_verified|cohort|finding_invalidated] "
+             "[--closure-cohort C-###] [--implementation-source "
+@@ -12375,7 +12376,7 @@
+                     "ok": False,
+                     "code": "VALIDATION_FAILED",
+                     "detail": "ticket needs an action: "
+-                    "add|compact|verify|requires|reasoning|done|supersede|retire|resolve-external|"
++                    "add|compact|verify|regression|requires|reasoning|done|supersede|retire|resolve-external|"
+                     "repair-metadata|bind-cohort|block|block-for|unblock",
+                 },
+                 as_json,
+@@ -12426,6 +12427,25 @@
+                 _agent_for(project_root),
+                 " ".join(rest[1:]),
+                 dry_run=dry_run,
++            )
++            _emit(result.to_dict(), as_json)
++            return 0 if result.ok else 1
++        if action == "regression":
++            if len(rest) != 2 or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
++                _emit(
++                    {"ok": False, "code": "VALIDATION_FAILED",
++                     "detail": "ticket regression needs exactly <T-###> required"},
++                    as_json,
++                )
++                return 2
++            if not dry_run and _negotiate_capability(project_root) == "read-only":
++                return _capability_refusal(as_json)
++            _ho = _ensure_handover(project_root, as_json, dry_run)
++            if _ho is not None:
++                return _ho
++            result = ticket_verify(
++                project_root, rest[0].upper(), _agent_for(project_root), None,
++                dry_run=dry_run, regression=rest[1],
+             )
+             _emit(result.to_dict(), as_json)
+             return 0 if result.ok else 1
+--- saipen/COMMANDS.md.before
++++ saipen/COMMANDS.md
+@@ -86,7 +86,7 @@
+ | `saipen ticket resolve-external <T-###> --authority <lineage-32hex> --implementation <T-###@commit> --reason <CLASS> --run <command>...` | EXECUTION: close BLOCKED Work implemented by an external authority with an immutable `EX-NNNNNN` receipt bound to the installed engine generation (OPS.md) | CMD-ROUTING-01 |
+ | `saipen ticket repair-metadata <T-###> --field source_receipts (--to <SRC-###> \| --legacy-unbound [--authority <SRC-###\|lineage-32hex>])` | RECOVERY: migrate malformed legacy metadata on historical DONE Work; `--to` needs an exact linked receipt, `--legacy-unbound` removes an unprovable token and preserves its bytes in an immutable `MR-NNNNNN` receipt; non-DONE rows and conflicting second migrations refuse with zero writes (T-1435) | CMD-ROUTING-01 |
+ | `saipen ticket reasoning <T-###> --recurrence <text> --weak-model <text>` | EXECUTION: canonical writer for the strict-sweep reasoning gates; refuses unless a strict CONFIRMED PROTOCOL_VIOLATION disposition names the ticket | CMD-ROUTING-01 |
+-| `saipen ticket requires <T-###> <CAP[@PHASE[+PHASE]],...\|read_only\|none>` | EXECUTION: set what this ticket's steps need of an executor beyond the phase; `saipen iteration` reads it (RUNTIME.md) | CMD-ROUTING-01 |
++| `saipen ticket requires <T-###> <CAP[@PHASE[+PHASE]],...\|read_only\|none>` / `saipen ticket regression <T-###> required` | EXECUTION: Work capabilities (RUNTIME.md) or strengthen non-DONE regression metadata (OPS.md) | CMD-ROUTING-01 |
+ | `saipen cohort [status\|ship] <C-###>` | batch publication authority | CMD-ROUTING-01 |
+ | `saipen ticket bind-cohort <T-###> --cohort <C-###> --paths <p1,p2>` | RECOVERY: bind canonically finished, verified, unpublished own_patch DONE to a pending cohort; preserve original row/finish, current active Work and history; exact retry is byte-noop, published/legacy/foreign/conflicting bindings refuse (OPS.md) | CMD-ROUTING-01 |
+ | `saipen source` | intake | CMD-ROUTING-01 |
+--- saipen/OPS.md.before
++++ saipen/OPS.md
+@@ -451,6 +451,16 @@
+ Publication resolution may follow `T-OLD -> T-NEW` recursively, but success
+ still requires the successor chain to reach committed release evidence. DONE
+ and local Git commits remain insufficient publication authority.
++
++### Existing Work regression declaration
++
++This eliminates a creation-only regression gate leaving existing bug-fix Work
++without a canonical updater. `saipen ticket regression T-N required` uses the
++existing `ticket_verify` PLAN/APPLY writer to strengthen only that field from
++one snapshot. Verify, Sources, phase, ownership, goal and authority are preserved.
++Invalid values and historical DONE refuse with zero writes; removal is unsupported.
++Dry-run follows §6; capability admission is unchanged. Existing verify updates retain
++their lossless preimage history; CORE owns the declared regression gate.
+ 
+ ## 5. Locks
+ 
+--- /dev/null
++++ tools/test_t1708_regression_declaration.py
+@@ -0,0 +1,224 @@
++"""T-1708: existing Work can strengthen its real regression gate canonically.
++
++Drive the journaled API and the native CLI, then the real VERIFY gate. The
++same verifier runs against the missing route and its correction; fixture
++setup never requires that route. Declaration cannot rewrite verify text,
++grant authority, relax the gate, or amend historical DONE.
++"""
++
++from __future__ import annotations
++
++import json
++import shutil
++import subprocess
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++TOOLS = Path(__file__).resolve().parent
++if str(TOOLS) not in sys.path:
++    sys.path.insert(0, str(TOOLS))
++
++from saipen_engine import intake  # noqa: E402
++from saipen_engine.board import parse_board  # noqa: E402
++from saipen_engine.board_compaction import resolve_detail  # noqa: E402
++from saipen_engine.operations import ticket_verify  # noqa: E402
++from saipen_engine.state import parse_state  # noqa: E402
++from test_hermetic_env import hermetic_env, isolate_host_session  # noqa: E402
++from test_regression_gate import (  # noqa: E402
++    RegressionGateFixture,
++    S1,
++    S2,
++    V1,
++    _evidence,
++)
++from test_ticket_verify_preimage import FIRST, SECOND, _build  # noqa: E402
++
++
++def setUpModule() -> None:
++    isolate_host_session()
++
++
++def _memory(root: Path) -> dict[str, bytes]:
++    return {
++        str(path.relative_to(root)).replace("\\", "/"): path.read_bytes()
++        for path in (root / ".saipen").rglob("*")
++        if path.is_file() and "locks" not in path.relative_to(root).parts
++    }
++
++
++def _row(root: Path) -> dict:
++    parsed = parse_board((root / ".saipen/BOARD.md").read_text(encoding="utf-8"))
++    if parsed["errors"]:
++        raise AssertionError(parsed["errors"])
++    return parsed["tickets"]["T-7"]
++
++
++def _state(root: Path) -> dict:
++    return parse_state((root / ".saipen/STATE.md").read_text(encoding="utf-8"))
++
++
++def _declare(case, root: Path, value="required", *, dry_run=False):
++    try:
++        return ticket_verify(root, "T-7", "tester", None, dry_run=dry_run, regression=value)
++    except TypeError as exc:
++        case.fail(f"existing canonical ticket_verify cannot declare regression: {exc}")
++
++
++class DeclarationTests(unittest.TestCase):
++    def setUp(self) -> None:
++        base = Path(tempfile.mkdtemp(prefix="t1708-declaration-"))
++        self.addCleanup(shutil.rmtree, base, True)
++        self.root = _build(base, FIRST)
++
++    def cli(self, *args, capability="full") -> dict:
++        run = subprocess.run(
++            [sys.executable, "-B", str(TOOLS / "saipen.py"), "--project-root",
++             str(self.root), "--agent", "tester", "--json", *args],
++            cwd=self.root, env=hermetic_env(SAIPEN_CAPABILITY=capability),
++            capture_output=True, text=True, encoding="utf-8", timeout=120,
++        )
++        self.assertIn(run.returncode, (0, 1, 2), run.stderr)
++        try:
++            return json.loads(run.stdout)
++        except json.JSONDecodeError:
++            self.fail(f"native CLI returned no structured result: {run.stdout} {run.stderr}")
++
++    def test_declaration_preserves_contract_sources_seat_phase_and_goal(self):
++        receipt = intake.capture(self.root, "Keep the original falsifiable clause.", work="T-7")
++        self.assertTrue(receipt["ok"], receipt)
++        before_row, before_state = _row(self.root), _state(self.root)
++        before_source = {
++            key: value for key, value in _memory(self.root).items() if "/intake/" in key
++        }
++        result = _declare(self, self.root)
++        self.assertTrue(result.ok, result.to_dict())
++        after = _row(self.root)
++        self.assertEqual(after["fields"].get("regression"), "required")
++        fields = dict(after["fields"])
++        fields.pop("regression")
++        self.assertEqual(fields, before_row["fields"])
++        self.assertEqual(after["section"], before_row["section"])
++        for key, value in before_state.items():
++            if key not in {"last_event", "updated"}:
++                self.assertEqual(_state(self.root).get(key), value, key)
++        self.assertEqual({key: _memory(self.root)[key] for key in before_source}, before_source)
++        log = (self.root / ".saipen/LOG.md").read_text(encoding="utf-8")
++        self.assertIn("regression", log)
++        self.assertNotIn("superseded clause", log)
++
++    def test_dry_run_writes_no_canonical_bytes(self):
++        before = _memory(self.root)
++        result = _declare(self, self.root, dry_run=True)
++        self.assertTrue(result.ok, result.to_dict())
++        self.assertEqual(_memory(self.root), before)
++        self.assertNotIn("regression", _row(self.root)["fields"])
++
++    def test_invalid_values_cannot_remove_or_relax_the_gate(self):
++        result = _declare(self, self.root)
++        self.assertTrue(result.ok, result.to_dict())
++        before = _memory(self.root)
++        for value in ("", "none", "optional", "off", "required\nowner: other", True, 17):
++            with self.subTest(value=value):
++                result = _declare(self, self.root, value)
++                self.assertFalse(result.ok, result.to_dict())
++                self.assertEqual(result.code, "VALIDATION_FAILED")
++                self.assertEqual(_memory(self.root), before)
++
++    def test_done_history_is_refused_without_writes(self):
++        board = self.root / ".saipen/BOARD.md"
++        board.write_text("## DOING\n## TODO\n## DONE\n- [x] T-8 [P1] Historical Work "
++                         "| verify: historical contract\n## BLOCKED\n" +
++                         "- [ ] T-7 [P1] Existing Work | verify: " + FIRST + "\n",
++                         encoding="utf-8")
++        before = _memory(self.root)
++        try:
++            result = ticket_verify(self.root, "T-8", "tester", None, regression="required")
++        except TypeError as exc:
++            self.fail(f"canonical regression declaration is missing: {exc}")
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(result.code, "TICKET_NOT_WORKABLE")
++        self.assertEqual(_memory(self.root), before)
++
++    def test_missing_ticket_is_refused_without_writes(self):
++        before = _memory(self.root)
++        try:
++            result = ticket_verify(self.root, "T-404", "tester", None, regression="required")
++        except TypeError as exc:
++            self.fail(f"canonical regression declaration is missing: {exc}")
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(result.code, "TICKET_NOT_FOUND")
++        self.assertEqual(_memory(self.root), before)
++
++    def test_existing_verify_updater_keeps_the_preimage_and_declared_gate(self):
++        self.assertTrue(_declare(self, self.root).ok)
++        result = ticket_verify(self.root, "T-7", "tester", SECOND)
++        self.assertTrue(result.ok, result.to_dict())
++        self.assertEqual(_row(self.root)["fields"]["verify"], SECOND)
++        self.assertEqual(_row(self.root)["fields"]["regression"], "required")
++        self.assertIn(FIRST, (self.root / ".saipen/LOG.md").read_text(encoding="utf-8"))
++
++    def test_oversized_original_contract_is_preserved_losslessly(self):
++        long_clause = "UNCHANGED_LONG_CLAUSE " + "falsifiable proof " * 180
++        result = ticket_verify(self.root, "T-7", "tester", long_clause)
++        self.assertTrue(result.ok, result.to_dict())
++        before = resolve_detail(self.root, _row(self.root)["fields"]["detail_ref"])
++        self.assertTrue(_declare(self, self.root).ok)
++        after = resolve_detail(self.root, _row(self.root)["fields"]["detail_ref"])
++        self.assertIn(long_clause.strip().encode(), after["original_record"])
++        self.assertEqual(before["original_record"].split(b" | verify: ")[1].split(b" | owner:")[0],
++                         after["original_record"].split(b" | verify: ")[1].split(b" | owner:")[0])
++
++    def test_native_cli_updates_only_the_declared_field(self):
++        before = _row(self.root)["fields"]
++        result = self.cli("ticket", "regression", "T-7", "required")
++        self.assertTrue(result.get("ok"), result)
++        after = dict(_row(self.root)["fields"])
++        self.assertEqual(after.pop("regression"), "required")
++        self.assertEqual(after, before)
++
++    def test_native_cli_dry_run_is_write_free(self):
++        before = _memory(self.root)
++        result = self.cli("--dry-run", "ticket", "regression", "T-7", "required")
++        self.assertTrue(result.get("ok"), result)
++        self.assertEqual(_memory(self.root), before)
++
++    def test_native_cli_read_only_cannot_declare_the_field(self):
++        before = _memory(self.root)
++        result = self.cli("ticket", "regression", "T-7", "required", capability="read-only")
++        self.assertFalse(result.get("ok"), result)
++        self.assertEqual(result.get("code"), "CAPABILITY_DENIED")
++        self.assertEqual(_memory(self.root), before)
++
++    def test_native_cli_refuses_invalid_value_and_extra_operands(self):
++        before = _memory(self.root)
++        for operands in (("off",), ("required", "extra")):
++            with self.subTest(operands=operands):
++                result = self.cli("ticket", "regression", "T-7", *operands)
++                self.assertFalse(result.get("ok"), result)
++                self.assertEqual(result.get("code"), "VALIDATION_FAILED")
++                self.assertEqual(_memory(self.root), before)
++
++
++class DeclaredGateTests(RegressionGateFixture):
++    REGRESSION = ""
++
++    def test_declaring_required_activates_the_current_cycle_gate(self):
++        self.assertTrue(_declare(self, self.project).ok)
++        before = self.canonical_digest()
++        result = self.to_review()
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(result.code, "INCOMPLETE_TICKET")
++        self.assertIn("regression: required", result.message)
++        self.assertEqual(self.canonical_digest(), before)
++        self.record(_evidence("FAIL", V1, S1))
++        self.record(_evidence("PASS", V1, S2))
++        self.assertTrue(self.to_review().ok)
++
++    def test_without_declaration_the_existing_unrequired_gate_is_unchanged(self):
++        self.assertTrue(self.to_review().ok)
++
++
++if __name__ == "__main__":
++    unittest.main()

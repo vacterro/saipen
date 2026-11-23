@@ -1,0 +1,20 @@
+
+=== A: zero blocked tickets
+  BEFORE ok=True code=REPAIRED repair={"to": "none", "refuse": false, "classification": "SAFE_CANONICAL_REPAIR"} wrote={'STATE.md': True, 'BOARD.md': False, 'LOG.md': True}
+  AFTER  ok=True code=REPAIRED repair={"to": "none", "refuse": false, "classification": "SAFE_CANONICAL_REPAIR"} wrote={'STATE.md': True, 'BOARD.md': False, 'LOG.md': True}
+
+=== B: four UNRELATED blocked tickets
+  BEFORE ok=False code=RECONCILE_REAUTH_REQUIRED repair={"to": null, "refuse": true, "classification": "RELATED_ACTIVE_GATE"} wrote={'STATE.md': False, 'BOARD.md': False, 'LOG.md': False}
+  AFTER  ok=True code=REPAIRED repair={"to": "none", "refuse": false, "classification": "SAFE_CANONICAL_REPAIR"} wrote={'STATE.md': True, 'BOARD.md': False, 'LOG.md': True}
+
+=== C: one causally RELATED blocked ticket
+  BEFORE ok=False code=RECONCILE_REAUTH_REQUIRED repair={"to": null, "refuse": true, "classification": "RELATED_ACTIVE_GATE"} wrote={'STATE.md': False, 'BOARD.md': False, 'LOG.md': False}
+  AFTER  ok=False code=RECONCILE_REAUTH_REQUIRED repair={"to": null, "refuse": true, "classification": "RELATED_ACTIVE_GATE"} wrote={'STATE.md': False, 'BOARD.md': False, 'LOG.md': False}
+
+verdicts:
+  HELD  BEFORE the defect reproduces: unrelated blocks flip the verdict
+  HELD  AFTER unrelated blocks change nothing
+  HELD  AFTER the incident blocker is repairably stale
+  HELD  AFTER a causally related block STILL refuses
+
+E2E OK

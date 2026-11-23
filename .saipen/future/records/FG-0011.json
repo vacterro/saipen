@@ -1,0 +1,13 @@
+{
+  "declared_status": "REGISTERED / NOT IMPLEMENTED",
+  "digest": "05409b36d6049590458b610b19ac4b302e4342fad0278c18680ec51e4ad07ad6",
+  "facts": {},
+  "gate": "FG-0011",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/FUTURE GATE — OPTIONAL PORTFOLIO CONTEXT PROVIDER.md",
+  "reason": "explicitly recorded as not implemented; preserved deferred intent",
+  "reviewed": true,
+  "schema": 2,
+  "title": "future_gate/FUTURE GATE — OPTIONAL PORTFOLIO CONTEXT PROVIDER.md",
+  "verdict": "DEFERRED"
+}

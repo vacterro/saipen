@@ -1,0 +1,85 @@
+--- pre/tools/saipen_engine/audit_inbox.py
++++ post/tools/saipen_engine/audit_inbox.py
+@@ -119,6 +119,14 @@
+ def _layer_key(item: dict) -> int | str:
+     """Legacy numbers stay numbers; a named drop is identified by its path."""
+     return item["layer"] if item["layer"] is not None else item["rel"]
++
++
++def _invalid_summary(item: dict) -> dict:
++    """Identify named failures while retaining the legacy numeric shape."""
++    summary = {"layer": item["layer"], "reason": item.get("reason") or item.get("detail")}
++    if item["layer"] is None:
++        summary["path"] = item["rel"]
++    return summary
+ 
+ 
+ def scan_layers(root: Path | str) -> list[dict]:
+@@ -712,10 +720,7 @@
+         "closed_pending_delete": [
+             _layer_key(item) for item in layers if item["state"] == CLOSED_PENDING_DELETE
+         ],
+-        "invalid": [
+-            {"layer": item["layer"], "reason": item.get("reason") or item.get("detail")}
+-            for item in invalid
+-        ],
++        "invalid": [_invalid_summary(item) for item in invalid],
+         "residue": [item["rel"] for item in residue[:RESIDUE_REPORT_CAP]],
+         "residue_count": len(residue),
+     }
+@@ -897,7 +902,7 @@
+             _layer_key(item) for item in layers if item["state"] == CLOSED_PENDING_DELETE
+         ],
+         "invalid": [
+-            {"layer": item["layer"], "reason": item.get("reason") or item.get("detail")}
++            _invalid_summary(item)
+             for item in layers
+             if item["state"] in (INVALID, BLOCKED)
+         ],
+--- pre/tools/test_audit_inbox.py
++++ post/tools/test_audit_inbox.py
+@@ -1263,5 +1263,44 @@
+         self.assertIn("audit", self.registry["commands"]["saipen"])
+ 
+ 
++class InvalidPathTests(AuditInboxFixture):
++    def invalid_pair(self, numbered=False):
++        directory = self.root / "audit"
++        directory.mkdir()
++        names = ("1.md", "2.md") if numbered else ("a-empty.md", "b-encoding.txt")
++        for name, body in zip(names, (b"", b"\xff")):
++            (directory / name).write_bytes(body)
++
++    def test_status_identifies_each_named_failure(self):
++        self.invalid_pair()
++        self.assertEqual(audit_inbox.status(self.root)["invalid"], [
++            {"layer": None, "path": "audit/a-empty.md", "reason": "empty"},
++            {"layer": None, "path": "audit/b-encoding.txt", "reason": "not-utf8"},
++        ])
++
++    def test_projection_identifies_each_named_failure(self):
++        self.invalid_pair()
++        self.assertEqual(audit_inbox.projection(self.root)["invalid"], [
++            {"layer": None, "path": "audit/a-empty.md", "reason": "empty"},
++            {"layer": None, "path": "audit/b-encoding.txt", "reason": "not-utf8"},
++        ])
++
++    def test_numbered_summary_shape_is_unchanged(self):
++        self.invalid_pair(numbered=True)
++        expected = [{"layer": 1, "reason": "empty"}, {"layer": 2, "reason": "not-utf8"}]
++        self.assertEqual(audit_inbox.status(self.root)["invalid"], expected)
++        self.assertEqual(audit_inbox.projection(self.root)["invalid"], expected)
++
++    def test_diagnostics_preserve_every_fixture_byte(self):
++        self.invalid_pair()
++        def snapshot():
++            return {str(path.relative_to(self.root)): hashlib.sha256(path.read_bytes()).hexdigest()
++                    for path in self.root.rglob("*") if path.is_file()}
++        before = snapshot()
++        audit_inbox.status(self.root)
++        audit_inbox.projection(self.root)
++        self.assertEqual(snapshot(), before)
++
++
+ if __name__ == "__main__":
+     unittest.main()

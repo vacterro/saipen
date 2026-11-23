@@ -1,0 +1,9 @@
+test_diagnostics_preserve_every_fixture_byte (__main__.InvalidPathTests.test_diagnostics_preserve_every_fixture_byte) ... ok
+test_numbered_summary_shape_is_unchanged (__main__.InvalidPathTests.test_numbered_summary_shape_is_unchanged) ... ok
+test_projection_identifies_each_named_failure (__main__.InvalidPathTests.test_projection_identifies_each_named_failure) ... ok
+test_status_identifies_each_named_failure (__main__.InvalidPathTests.test_status_identifies_each_named_failure) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.026s
+
+OK

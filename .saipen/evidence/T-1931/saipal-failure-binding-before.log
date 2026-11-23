@@ -1,0 +1,15 @@
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value={'ok': False, 'command': 'status', 'findings': [], 'counts': {}, 'status': 'ANALYSIS_BLOCKED'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 102, in test_invalid_common_fields_are_protocol_errors
+    self.assertEqual(result["status"], "BACKEND_PROTOCOL_ERROR")
+AssertionError: 'ANALYSIS_BLOCKED' != 'BACKEND_PROTOCOL_ERROR'
+- ANALYSIS_BLOCKED
++ BACKEND_PROTOCOL_ERROR
+
+
+----------------------------------------------------------------------
+Ran 1 test in 1.089s
+
+FAILED (failures=1)

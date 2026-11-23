@@ -1,0 +1,54 @@
+{
+  "ok": false,
+  "code": "BLOCKED_AUTHORITY_GATE",
+  "detail": "publication to origin/main is held: no active operator release authorization grant. Operator approval required before publication.",
+  "approval_packet": {
+    "action": "publish_isolated_release",
+    "reviewed_scope": "tools/saipen_engine/host_integration.py, tools/test_t1624_host_integration.py",
+    "target_destination": "origin/main (https://gitlab.com/vacuum34/saipen.git)",
+    "paths_changed": "tools/saipen_engine/host_integration.py, tools/test_t1624_host_integration.py",
+    "paths_protected": "864 staged paths in primary shared index",
+    "expected_side_effects": "Transfer reviewed changes (2 files) into isolated worktree on top of 60783ac4abb7; run verification gates; fast-forward synchronize origin/main; zero modifications to primary index or unreviewed files",
+    "rollback": "Isolated worktree is deleted on failure; no commit or push to remote; shared staging preserved",
+    "reason_insufficient": "Missing cryptographic broker receipt or operator signed publication capsule",
+    "blocked_operation": "publish_isolated_release (target=origin/main (https://gitlab.com/vacuum34/saipen.git))",
+    "existing_authority": "operator_required",
+    "missing_authorization": "Missing cryptographic broker receipt or operator signed publication capsule",
+    "consequences_approval": "Execute publish_isolated_release isolated to origin/main (https://gitlab.com/vacuum34/saipen.git); 864 staged paths in primary shared index protected",
+    "consequences_refusal": "Publication remains blocked; foreign staging remains protected",
+    "safe_default": "Preserve existing live index and foreign staging without mutating repository",
+    "recording_mechanism": "saipen authority capture <signed-operator-capsule>",
+    "ancestry": {
+      "remote": "origin",
+      "push_url": "https://gitlab.com/vacuum34/saipen.git",
+      "branch": "main",
+      "local_head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+      "remote_head": "60783ac4abb78c06867aa833d692801f8e36b80c",
+      "merge_base": "95a06bdd0877e0dbe6fd5db11845eb43a518ebfe",
+      "ahead_count": 9,
+      "behind_count": 5,
+      "ahead_commits": [
+        "66ef622a fix(t1950): resolve EX-000022 by correcting the oracle and carrying the external bytes",
+        "b152e6de measure(t1950): the receipt's external bytes are gone, and its worktree is dirty",
+        "88dab8ae chore(t1943): correct a stale blocker's evidence to what is measured",
+        "983470bd chore(t1951): record E-19091, the live end-to-end verification",
+        "bc752edf chore(t1951): record E-19090, the ship event for 326fcddd",
+        "326fcddd fix(t1951): keep a publish loadable and its bindings on one generation",
+        "08e84d13 chore(t1950): record the goal's stop point and T-1950's blocked measurement",
+        "d5eca177 fix(hook): a failing validator can no longer be masked by a passing one",
+        "7373fcb9 fix(test): the pair oracle runs on the stdlib, not on pytest"
+      ],
+      "behind_commits": [
+        "60783ac4 fix: enforce state and host policy boundaries",
+        "63877bcf fix: preserve binding snapshots during rollback",
+        "9eebcfde merge(origin): adopt the remote tip, docs resolved to local",
+        "f227cda2 merge(origin): adopt the remote tip, docs resolved to local",
+        "4f03d79f Initial commit"
+      ],
+      "is_fast_forward": false,
+      "requires_integration": true
+    }
+  },
+  "canonical_next_command": "saipen release approve --standing --remote origin --branch main",
+  "foreign_staging_preserved": true
+}

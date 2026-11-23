@@ -1,0 +1,19 @@
+{
+  "contract_version": 3,
+  "module_unchanged_from_preimage": true,
+  "classification": {
+    "improve/cycle/MANIFEST.md": {
+      "not_excluded": true,
+      "selected_by_declared_directory": false
+    },
+    "improve-reconciliation/cycle.jsonl": {
+      "not_excluded": true,
+      "selected_by_declared_directory": false
+    },
+    "evidence/report.json": {
+      "not_excluded": true,
+      "selected_by_declared_directory": true
+    }
+  },
+  "deployment": "NO_CONTRACT_CHANGE; BOUNDED_OPT_IN_CLASS_DEFINED_ONLY"
+}

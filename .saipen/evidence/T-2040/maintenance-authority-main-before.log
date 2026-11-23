@@ -1,0 +1,352 @@
+FFFFFFFFFFFFF.FFFF.F.F.                                                  [100%]
+================================== FAILURES ===================================
+_ FinishPlanPurity.test_applied_finish_owns_request_targets_in_its_single_journal _
+
+self = <test_t2040_maintenance_authority.FinishPlanPurity testMethod=test_applied_finish_owns_request_targets_in_its_single_journal>
+
+    def test_applied_finish_owns_request_targets_in_its_single_journal(self):
+        root = self.fixture()
+        receipt = receipts_of(root)[0]
+        result = operations.finish_ticket(root, "T-1", "test-agent")
+        self.assertTrue(result.ok, result.to_dict())
+        record = Journal(root, result.op_id).read()
+        paths = {target["path"] for target in record["targets"]}
+>       self.assertTrue({f".saipen/intake/contracts/{receipt}.json",
+                         f".saipen/intake/contracts/{receipt}.r001.json",
+                         f".saipen/intake/coverage/{receipt}.json"} <= paths, paths)
+E       AssertionError: False is not true : {'.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'}
+
+tools\test_t2040_maintenance_authority.py:126: AssertionError
+_______ FinishPlanPurity.test_compound_source_refusal_is_also_byte_pure _______
+
+self = <test_t2040_maintenance_authority.FinishPlanPurity testMethod=test_compound_source_refusal_is_also_byte_pure>
+
+    def test_compound_source_refusal_is_also_byte_pure(self):
+        root = self.fixture()
+        source(self, root, "1. Repair the parser regression\n2. Preserve packaging metadata", "T-1")
+        before = snapshot(root)
+        result = operations.finish_ticket(root, "T-1", "test-agent", dry_run=True)
+        self.assertFalse(result.ok, result.to_dict())
+>       self.assertEqual(snapshot(root), before)
+E       AssertionError: {'.gi[1174 chars]n': 'b2a111caad6a6395bb6260d37a75197626f84fefb[4322 chars]665'} != {'.gi[1174 chars]n': '40e00c5ad455dadac670a8528c3768516fcc911d3[3632 chars]665'}
+E       Diff is 6489 characters long. Set self.maxDiff to None to see it.
+
+tools\test_t2040_maintenance_authority.py:117: AssertionError
+____ FinishPlanPurity.test_derived_clause_refusal_keeps_all_coverage_bytes ____
+
+self = <test_t2040_maintenance_authority.FinishPlanPurity testMethod=test_derived_clause_refusal_keeps_all_coverage_bytes>
+
+    def test_derived_clause_refusal_keeps_all_coverage_bytes(self):
+        root = self.fixture()
+        receipt = receipts_of(root)[0]
+        self.assertTrue(intake.ensure_request_clause(root, receipt).get("ok"))
+        self.assertTrue(intake.add_requirement(root, receipt, rid="R002",
+            text="Never touch packaging metadata", clause_class="requirement").get("ok"))
+        before = snapshot(root)
+        result = operations.finish_ticket(root, "T-1", "test-agent")
+        self.assertFalse(result.ok, result.to_dict())
+        self.assertEqual(result.code, "SOURCE_UNRESOLVED")
+>       self.assertEqual(snapshot(root), before)
+E       AssertionError: {'.gi[1296 chars]': '4671f6530bf10df6279c5f7104b6042f622dfc80ef[3768 chars]665'} != {'.gi[1296 chars]': '4ca364718c795880eddb940fea51df511834ed69ef[3768 chars]665'}
+E       Diff is 5357 characters long. Set self.maxDiff to None to see it.
+
+tools\test_t2040_maintenance_authority.py:109: AssertionError
+_ FinishPlanPurity.test_done_dry_run_preserves_every_source_and_journal_byte __
+
+self = <test_t2040_maintenance_authority.FinishPlanPurity testMethod=test_done_dry_run_preserves_every_source_and_journal_byte>
+
+    def test_done_dry_run_preserves_every_source_and_journal_byte(self):
+        root = self.fixture()
+        before = snapshot(root)
+        code, result, text = cli(root, "ticket", "done", "T-1", "--closure-mode",
+                                 "own_patch", "--dry-run", "--json")
+        self.assertEqual(code, 0, text)
+        self.assertTrue(result["dry_run"], result)
+>       self.assertEqual(snapshot(root), before)
+E       AssertionError: {'.gi[959 chars]n': '5f52d1ce664f3d85c1d1afddeef70ce85634b81d0[3824 chars]665'} != {'.gi[959 chars]n': '40e00c5ad455dadac670a8528c3768516fcc911d3[3415 chars]665'}
+E       Diff is 5535 characters long. Set self.maxDiff to None to see it.
+
+tools\test_t2040_maintenance_authority.py:81: AssertionError
+____ FinishPlanPurity.test_late_refusal_does_not_discharge_or_seed_source _____
+
+self = <test_t2040_maintenance_authority.FinishPlanPurity testMethod=test_late_refusal_does_not_discharge_or_seed_source>
+
+    def test_late_refusal_does_not_discharge_or_seed_source(self):
+        root = self.fixture()
+        before = snapshot(root)
+        result = operations.finish_ticket(root, "T-1", "test-agent",
+            closure_mode="inherited_verified", implementation_source="T-999")
+        self.assertFalse(result.ok, result.to_dict())
+>       self.assertEqual(snapshot(root), before)
+E       AssertionError: {'.gi[959 chars]n': '10251a8789d23e262101281e73f5451170fa4447b[3824 chars]665'} != {'.gi[959 chars]n': '40e00c5ad455dadac670a8528c3768516fcc911d3[3415 chars]665'}
+E       Diff is 5535 characters long. Set self.maxDiff to None to see it.
+
+tools\test_t2040_maintenance_authority.py:89: AssertionError
+_____ FinishPlanPurity.test_missing_verification_refuses_without_seeding ______
+
+self = <test_t2040_maintenance_authority.FinishPlanPurity testMethod=test_missing_verification_refuses_without_seeding>
+
+    def test_missing_verification_refuses_without_seeding(self):
+        root = healthy(self)
+        drive(self, root, verified=False)
+        before = snapshot(root)
+        result = operations.finish_ticket(root, "T-1", "test-agent", dry_run=True)
+        self.assertFalse(result.ok, result.to_dict())
+>       self.assertEqual(snapshot(root), before)
+E       AssertionError: {'.gi[959 chars]n': '9778407b8447967bfbad46a374d6efcd5d9257e93[3359 chars]665'} != {'.gi[959 chars]n': '40e00c5ad455dadac670a8528c3768516fcc911d3[2950 chars]665'}
+E       Diff is 5061 characters long. Set self.maxDiff to None to see it.
+
+tools\test_t2040_maintenance_authority.py:97: AssertionError
+_ ExactProtectedGoalIdentity.test_identical_linked_replay_has_same_source_work_and_bytes _
+
+self = <test_t2040_maintenance_authority.ExactProtectedGoalIdentity testMethod=test_identical_linked_replay_has_same_source_work_and_bytes>
+
+    def test_identical_linked_replay_has_same_source_work_and_bytes(self):
+        root, ticket, _receipt = self.fixture()
+        first = self.request(root)
+>       self.assertEqual(first.data["ticket"], ticket)
+E       AssertionError: None != 'T-2'
+
+tools\test_t2040_maintenance_authority.py:188: AssertionError
+_ ExactProtectedGoalIdentity.test_link_refusal_is_not_reported_as_a_duplicate _
+
+self = <test_t2040_maintenance_authority.ExactProtectedGoalIdentity testMethod=test_link_refusal_is_not_reported_as_a_duplicate>
+
+    def test_link_refusal_is_not_reported_as_a_duplicate(self):
+        root, _ticket, _receipt = self.fixture()
+        with mock.patch.object(intake, "link_work_to", return_value={
+            "ok": False, "code": "WRITER_BUSY", "detail": "fixture writer busy"
+        }):
+            result = self.request(root)
+        self.assertFalse(result.ok, result.to_dict())
+>       self.assertEqual(result.code, "WRITER_BUSY")
+E       AssertionError: 'PROTECTED_OPERATION_BLOCKED' != 'WRITER_BUSY'
+E       - PROTECTED_OPERATION_BLOCKED
+E       + WRITER_BUSY
+
+tools\test_t2040_maintenance_authority.py:182: AssertionError
+_ ExactProtectedGoalIdentity.test_nested_blocker_reuses_exact_durable_goal_membership _
+
+self = <test_t2040_maintenance_authority.ExactProtectedGoalIdentity testMethod=test_nested_blocker_reuses_exact_durable_goal_membership>
+
+    def test_nested_blocker_reuses_exact_durable_goal_membership(self):
+        root, ticket, _receipt = self.fixture()
+        result = self.request(root)
+        self.assertEqual(result.code, "PROTECTED_OPERATION_BLOCKED", result.to_dict())
+>       self.assertEqual(result.data["ticket"], ticket)
+E       AssertionError: None != 'T-2'
+
+tools\test_t2040_maintenance_authority.py:159: AssertionError
+_ ExactProtectedGoalIdentity.test_unrelated_self_maintenance_prose_cannot_acquire_source _
+
+self = <test_t2040_maintenance_authority.ExactProtectedGoalIdentity testMethod=test_unrelated_self_maintenance_prose_cannot_acquire_source>
+
+    def test_unrelated_self_maintenance_prose_cannot_acquire_source(self):
+        root, ticket, _receipt = self.fixture(matching=False,
+            description="Discuss self-maintenance documentation")
+        result = self.request(root)
+        self.assertEqual(result.code, "PROTECTED_OPERATION_BLOCKED", result.to_dict())
+>       self.assertIsNone(result.data["ticket"])
+E       AssertionError: 'T-2' is not None
+
+tools\test_t2040_maintenance_authority.py:170: AssertionError
+_ NativeGrantAndIdentity.test_active_native_entry_keeps_exact_pivot_objective _
+
+self = <test_t2040_maintenance_authority.NativeGrantAndIdentity testMethod=test_active_native_entry_keeps_exact_pivot_objective>
+
+    def test_active_native_entry_keeps_exact_pivot_objective(self):
+        root, _host, _proof = self.native(active=True)
+>       binding = goal_authority.current_binding(root, current(root),
+            _read_history(root), {}, until="continuous_maintenance")
+
+tools\test_t2040_maintenance_authority.py:212: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\saipen_engine\goal_authority.py:498: in current_binding
+    binding.update(maintenance_binding_fields(root, objective))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('V:/_TEMP_/t2023-jqf4evz7')
+pivot_objective = 'Autonomously discover, evaluate, and repair verified regressions, test failures, and maintenance backlog to preserve a healthy repository (active T-1 checkpointed to TODO)'
+goal_id = None
+
+    def maintenance_binding_fields(
+        root: Path | str, pivot_objective: str, *, goal_id: str | None = None
+    ) -> dict:
+        """The exact maintenance identity a `continuous_maintenance` grant binds.
+    
+        SRC-393 P0-2. The continuation binding used to be derived from the latest
+        committed goal pivot alone, so a capsule for the operator's self-maintenance
+        objective described whatever a historic test pivot said ("T-1599 (SRC-164):
+        test1") and the apply path wrote that old goal's authority into STATE. This
+        binds the grant to the registered PersistentGoal instead:
+    
+        * exactly ONE ACTIVE MAINTENANCE goal (ambiguous -> fail closed);
+        * its canonical objective must EQUAL the current pivot objective (a test
+          pivot can never stand in for the maintenance objective);
+        * the goal must belong to this project;
+        * the identity digest is returned so proposal, apply and `prove` agree.
+    
+        Raises ValueError -- fail closed -- on any mismatch, so a wrong goal, a
+        stale source, an altered objective, a mismatched provider or a mismatched
+        project never produces a capsule at all.
+        """
+        goals = active_maintenance_goals(root)
+        if not goals:
+            raise ValueError("no ACTIVE maintenance goal is registered in this project")
+        if goal_id is not None:
+            goals = [goal for goal in goals if goal.goal_id == goal_id]
+            if not goals:
+                raise ValueError(f"maintenance goal {goal_id!r} is not registered as ACTIVE")
+        if len(goals) != 1:
+            raise ValueError(
+                "ambiguous maintenance objective: "
+                f"{len(goals)} ACTIVE MAINTENANCE goals ({', '.join(g.goal_id for g in goals)})"
+            )
+        goal = goals[0]
+        if _normalize_objective(goal.objective) != _normalize_objective(pivot_objective):
+            # SRC-395: the operator must not have to guess the goal identity. The
+            # refusal carries the exact canonical objective so the approval surface
+            # can print the one entry command that resolves it.
+>           raise MaintenanceObjectiveMismatch(
+                goal.goal_id,
+                _normalize_objective(goal.objective),
+                "the current goal pivot does not describe the registered maintenance goal "
+                f"{goal.goal_id!r}; re-enter the goal with its exact objective before approving",
+            )
+E           saipen_engine.goal_authority.MaintenanceObjectiveMismatch: the current goal pivot does not describe the registered maintenance goal 'self-maintenance-core'; re-enter the goal with its exact objective before approving
+
+tools\saipen_engine\goal_authority.py:223: MaintenanceObjectiveMismatch
+_ NativeGrantAndIdentity.test_native_same_goal_upgrade_preserves_ingress_budget_and_replay _
+
+self = <test_t2040_maintenance_authority.NativeGrantAndIdentity testMethod=test_native_same_goal_upgrade_preserves_ingress_budget_and_replay>
+
+    def test_native_same_goal_upgrade_preserves_ingress_budget_and_replay(self):
+        root, _host, _proof = self.native()
+        before = current(root)
+        capsule = goal_authority.propose_capsule(root, before, _read_history(root))
+        self.assertTrue(capsule["ok"], capsule)
+        upgraded = _witnessed_apply(self, root, capsule["capsule_text"])
+>       self.assertTrue(upgraded.ok, upgraded.to_dict())
+E       AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'the goal already has a different persistent grant'}
+
+tools\test_t2040_maintenance_authority.py:225: AssertionError
+_ NativeGrantAndIdentity.test_revocation_preview_names_only_existing_native_owner _
+
+self = <test_t2040_maintenance_authority.NativeGrantAndIdentity testMethod=test_revocation_preview_names_only_existing_native_owner>
+
+    def test_revocation_preview_names_only_existing_native_owner(self):
+        root = _project(self, objective=MAINTENANCE_OBJECTIVE)
+        _register_maintenance(root)
+        proposal = goal_authority.propose_capsule(root, current(root), _read_history(root))
+        self.assertTrue(proposal["ok"], proposal)
+        route = proposal["preview"]["revocation_path"]
+>       self.assertIn("revoke-origin", route)
+E       AssertionError: 'revoke-origin' not found in 'saipen goal authorize with a new capsule, or saipen recover reset_authority'
+
+tools\test_t2040_maintenance_authority.py:256: AssertionError
+_ RestoredMaintenanceCandidate.test_apply_reuses_work_preserving_source_origin_and_external_blocker _
+
+self = <test_t2040_maintenance_authority.RestoredMaintenanceCandidate testMethod=test_apply_reuses_work_preserving_source_origin_and_external_blocker>
+
+    def test_apply_reuses_work_preserving_source_origin_and_external_blocker(self):
+        root, _goal, _candidate, ticket, receipt = self.fixture()
+        external = rows(root)["T-1"]["raw"]
+        before_source = intake.read_body(root, receipt)["meta"]
+        result = replenishment.replenish_from_goals(root, "fix")
+>       self.assertTrue(result.get("replenished"), result)
+E       AssertionError: False is not true : {'ok': True, 'replenished': False, 'status': 'NO_ADMISSIBLE_WORK', 'detail': 'persistent goals remain incomplete but no new admissible task could be selected (blockers: none)', 'blockers': [], 'goals': [{'goal_id': 'self-maintenance-core', 'project_id': 't2023-avrbsjqm', 'title': 'Continuous Self-Maintenance', 'objective': 'Autonomously discover, evaluate, and repair verified regressions, test failures, and maintenance backlog to preserve a healthy repository', 'authorization_scope': 'MAINTENANCE', 'success_criteria': {}, 'evidence_provider': 'evidence_gap_ledger', 'current_progress': {'total': 1, 'resolved': 0, 'anchored': 0, 'gap_count': 1, 'current_coverage_percent': 0.0, 'target_coverage_percent': 100.0, 'inventoried': 1, 'semantically_described': 0, 'cited': 0, 'interface_only': 0, 'unresolved': 1, 'enumerated': 1, 'independently_verified': 0, 'independent_shortfall': 1, 'capture_sha256': '', 'capture_provenance': 'UNREQUIRED', 'target_patch': ''}, 'target_progress': {}, 'research_or_work_backlog_source': '.saipen/evidence/coverage_gap.json', 'admission_policy': {}, 'current_status': 'NO_ADMISSIBLE_WORK', 'last_evaluation': '2026-11-07T20:18:30Z', 'last_successful_work': None, 'last_discovery': None, 'blockers': [], 'completion_evidence': None, 'resume_metadata': {'cursor_index': 0, 'source_digest': '1a9d9081a03c71d1'}, 'paused': False}]}
+
+tools\test_t2040_maintenance_authority.py:315: AssertionError
+_ RestoredMaintenanceCandidate.test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal _
+
+self = <test_t2040_maintenance_authority.RestoredMaintenanceCandidate testMethod=test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal>
+
+    def test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal(self):
+        candidate = CandidateTask("parser-gap-1", "maintenance", "Parser repair")
+>       self.assertFalse(replenishment._matches_candidate(candidate,
+            "Parser repair | goal: maintenance | candidate: parser-gap-10"))
+E       AssertionError: True is not false
+
+tools\test_t2040_maintenance_authority.py:360: AssertionError
+_ RestoredMaintenanceCandidate.test_candidate_text_in_verify_is_not_description_identity _
+
+self = <test_t2040_maintenance_authority.RestoredMaintenanceCandidate testMethod=test_candidate_text_in_verify_is_not_description_identity>
+
+    def test_candidate_text_in_verify_is_not_description_identity(self):
+        root = _project(self, objective=MAINTENANCE_OBJECTIVE)
+        added = operations.ticket_add(root, "fix", "P1", "Unrelated fixture work",
+            needs=[], verify="Discuss candidate: parser-gap-1 in this oracle")
+        self.assertTrue(added.ok, added.to_dict())
+        candidate = CandidateTask("parser-gap-1", "maintenance", "Parser repair")
+        duplicate, _reason = replenishment._is_candidate_duplicate(candidate,
+            replenishment._parse_board_tickets(root))
+>       self.assertFalse(duplicate)
+E       AssertionError: True is not false
+
+tools\test_t2040_maintenance_authority.py:375: AssertionError
+_ RestoredMaintenanceCandidate.test_compacted_identity_is_read_from_validated_detail _
+
+self = <test_t2040_maintenance_authority.RestoredMaintenanceCandidate testMethod=test_compacted_identity_is_read_from_validated_detail>
+
+    def test_compacted_identity_is_read_from_validated_detail(self):
+        root, _goal, candidate, ticket, _receipt = self.fixture(long=True)
+        self.assertTrue(rows(root)[ticket]["fields"].get("detail_ref"))
+        projected = replenishment._parse_board_tickets(root)["blocked"]
+        row = next(row for row in projected if row["id"] == ticket)
+>       self.assertIn(f"candidate: {candidate.candidate_id}", row["text"])
+E       AssertionError: 'candidate: self-maintenance-core-repair-1' not found in '[P1] Bounded local repair detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail detail... | needs:  | verify: The exact local regression oracle passes [detail_ref: .saipen/recovery/board-compaction/T-2/T-2-a6c001f8d4c359868a0ff46d.json] | detail_ref: .saipen/recovery/board-compaction/T-2/T-2-a6c001f8d4c359868a0ff46d.json | source_receipts: SRC-001 | blocker: CONTINUATION_AUTHORITY_UNPROVEN -- standing maintenance grant missing | blocker_scope: ticket'
+
+tools\test_t2040_maintenance_authority.py:329: AssertionError
+_ RestoredMaintenanceCandidate.test_dry_run_reuses_work_without_any_source_or_canonical_write _
+
+self = <test_t2040_maintenance_authority.RestoredMaintenanceCandidate testMethod=test_dry_run_reuses_work_without_any_source_or_canonical_write>
+
+    def test_dry_run_reuses_work_without_any_source_or_canonical_write(self):
+        root, _goal, _candidate, ticket, _receipt = self.fixture()
+        before = snapshot(root)
+        result = replenishment.replenish_from_goals(root, "fix", dry_run=True)
+>       self.assertTrue(result.get("replenished"), result)
+E       AssertionError: False is not true : {'ok': True, 'replenished': False, 'status': 'NO_ADMISSIBLE_WORK', 'detail': 'persistent goals remain incomplete but no new admissible task could be selected (blockers: none)', 'blockers': [], 'goals': [{'goal_id': 'self-maintenance-core', 'project_id': 't2023-y4qnkzxc', 'title': 'Continuous Self-Maintenance', 'objective': 'Autonomously discover, evaluate, and repair verified regressions, test failures, and maintenance backlog to preserve a healthy repository', 'authorization_scope': 'MAINTENANCE', 'success_criteria': {}, 'evidence_provider': 'evidence_gap_ledger', 'current_progress': {'total': 1, 'resolved': 0, 'anchored': 0, 'gap_count': 1, 'current_coverage_percent': 0.0, 'target_coverage_percent': 100.0, 'inventoried': 1, 'semantically_described': 0, 'cited': 0, 'interface_only': 0, 'unresolved': 1, 'enumerated': 1, 'independently_verified': 0, 'independent_shortfall': 1, 'capture_sha256': '', 'capture_provenance': 'UNREQUIRED', 'target_patch': ''}, 'target_progress': {}, 'research_or_work_backlog_source': '.saipen/evidence/coverage_gap.json', 'admission_policy': {}, 'current_status': 'NO_ADMISSIBLE_WORK', 'last_evaluation': '2026-11-07T20:18:33Z', 'last_successful_work': None, 'last_discovery': None, 'blockers': [], 'completion_evidence': None, 'resume_metadata': {'cursor_index': 0, 'source_digest': '1a9d9081a03c71d1'}, 'paused': False}]}
+
+tools\test_t2040_maintenance_authority.py:305: AssertionError
+_ RestoredMaintenanceCandidate.test_provider_does_not_suppress_verified_authority_only_work _
+
+self = <test_t2040_maintenance_authority.RestoredMaintenanceCandidate testMethod=test_provider_does_not_suppress_verified_authority_only_work>
+
+    def test_provider_does_not_suppress_verified_authority_only_work(self):
+        root, goal, candidate, _ticket, _receipt = self.fixture()
+        before = snapshot(root)
+        evaluation = get_provider(goal.evidence_provider).evaluate(root, goal)
+>       self.assertEqual(evaluation.candidate_ids, [candidate.candidate_id])
+E       AssertionError: Lists differ: [] != ['self-maintenance-core-repair-1']
+E       
+E       Second list contains 1 additional elements.
+E       First extra element 0:
+E       'self-maintenance-core-repair-1'
+E       
+E       - []
+E       + ['self-maintenance-core-repair-1']
+
+tools\test_t2040_maintenance_authority.py:298: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_maintenance_authority.py::FinishPlanPurity::test_applied_finish_owns_request_targets_in_its_single_journal
+FAILED tools/test_t2040_maintenance_authority.py::FinishPlanPurity::test_compound_source_refusal_is_also_byte_pure
+FAILED tools/test_t2040_maintenance_authority.py::FinishPlanPurity::test_derived_clause_refusal_keeps_all_coverage_bytes
+FAILED tools/test_t2040_maintenance_authority.py::FinishPlanPurity::test_done_dry_run_preserves_every_source_and_journal_byte
+FAILED tools/test_t2040_maintenance_authority.py::FinishPlanPurity::test_late_refusal_does_not_discharge_or_seed_source
+FAILED tools/test_t2040_maintenance_authority.py::FinishPlanPurity::test_missing_verification_refuses_without_seeding
+FAILED tools/test_t2040_maintenance_authority.py::ExactProtectedGoalIdentity::test_identical_linked_replay_has_same_source_work_and_bytes
+FAILED tools/test_t2040_maintenance_authority.py::ExactProtectedGoalIdentity::test_link_refusal_is_not_reported_as_a_duplicate
+FAILED tools/test_t2040_maintenance_authority.py::ExactProtectedGoalIdentity::test_nested_blocker_reuses_exact_durable_goal_membership
+FAILED tools/test_t2040_maintenance_authority.py::ExactProtectedGoalIdentity::test_unrelated_self_maintenance_prose_cannot_acquire_source
+FAILED tools/test_t2040_maintenance_authority.py::NativeGrantAndIdentity::test_active_native_entry_keeps_exact_pivot_objective
+FAILED tools/test_t2040_maintenance_authority.py::NativeGrantAndIdentity::test_native_same_goal_upgrade_preserves_ingress_budget_and_replay
+FAILED tools/test_t2040_maintenance_authority.py::NativeGrantAndIdentity::test_revocation_preview_names_only_existing_native_owner
+FAILED tools/test_t2040_maintenance_authority.py::RestoredMaintenanceCandidate::test_apply_reuses_work_preserving_source_origin_and_external_blocker
+FAILED tools/test_t2040_maintenance_authority.py::RestoredMaintenanceCandidate::test_candidate_marker_has_exact_identity_not_prefix_or_foreign_goal
+FAILED tools/test_t2040_maintenance_authority.py::RestoredMaintenanceCandidate::test_candidate_text_in_verify_is_not_description_identity
+FAILED tools/test_t2040_maintenance_authority.py::RestoredMaintenanceCandidate::test_compacted_identity_is_read_from_validated_detail
+FAILED tools/test_t2040_maintenance_authority.py::RestoredMaintenanceCandidate::test_dry_run_reuses_work_without_any_source_or_canonical_write
+FAILED tools/test_t2040_maintenance_authority.py::RestoredMaintenanceCandidate::test_provider_does_not_suppress_verified_authority_only_work
+19 failed, 4 passed in 45.10s

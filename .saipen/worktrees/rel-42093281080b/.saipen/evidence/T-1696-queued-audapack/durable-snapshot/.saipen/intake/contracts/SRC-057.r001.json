@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-057:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-198 contract correction: align acceptance doc and browser integration test with current Widget 0.0.61 auto-send ZIP semantics"
+    }
+  },
+  "derived_at": "2026-09-19T16:05:53Z",
+  "derived_from": "SRC-057",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "a43b284d5e1859079ceeffff1f3558c4f1d70fac04b77115fa22e3ab07b323a2"
+}

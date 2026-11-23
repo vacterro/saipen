@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-438:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2120 closed with verification evidence in LOG: verify -> PASS [target: T-2120] conf: high -- command: env -u SUBPROCESS_BAGGAGE -u SUBPROCESS_SENTRY_TRACE -u _ python311 C:/Users/vac34/.agents/skills/saipen/tools/saipen.py validate --json --project-root V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN -> reported exit 0, code VALID, conformance_status CURRENT_PASS, receipt receipt-de0bbabaaf50, blocking_findings problem_count 0; plus EXTERNAL_RE",
+      "text": "OPERATOR DECISIONS for CAMPAIGN IV delivered explicitly via interactive request (real user, not model): (1) RELEASE 8.1.1 authorized: commit the 52-file runtime manifest blob (RELEASE-COMMIT-THE-BLOB-LIST.txt) AND install candidate iv v2 (V:/_TEMP_/saipen-candidate-iv, 8388 files, tree 689803a4dfd2..., rollback scheduled-source-previous); (2) BASELINE POLICY: populate red_owners with undecided owner dispositions for open WIP and record the shrink of the 4 healed foreign reds (test_sailearn_consumer.soft_fallback, test_t1647_machine_runtime x3) measured by family record 6904e2d2...-2004Z; (3) SRC-386/T-2016: RESTORE disposition chosen (original bytes proven intact at .saipen/archive/retired/SRC-386.*).",
+      "verification": "the Work this request created reached its own verification gate; see the T-2120 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2120"
+    }
+  },
+  "schema_version": 1
+}

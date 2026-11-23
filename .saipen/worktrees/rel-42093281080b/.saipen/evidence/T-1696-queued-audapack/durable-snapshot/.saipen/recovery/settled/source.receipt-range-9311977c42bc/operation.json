@@ -1,0 +1,26 @@
+{
+  "op_id": "source.receipt-range-9311977c42bc",
+  "operation": "source.receipt_range_normalize",
+  "created_at": "2026-09-07T14:31:27Z",
+  "agent": "opencode",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "4b0b45f04e33e652",
+  "preconditions": {
+    ".saipen/BOARD.md": "866f8765d316d4f9"
+  },
+  "read_preconditions": {},
+  "verification_policy": "none",
+  "status": "COMMITTED",
+  "progress_index": 1,
+  "targets": [
+    {
+      "path": ".saipen/BOARD.md",
+      "role": "board",
+      "action": "write",
+      "before_hash": "866f8765d316d4f9",
+      "after_hash": "98574215f0430536",
+      "applied": true
+    }
+  ]
+}

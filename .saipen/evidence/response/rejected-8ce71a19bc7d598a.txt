@@ -1,0 +1,1 @@
+T-1742 parandus tehtud ja regressioonipaar uuesti mõõdetud (FAIL enne / PASS pärast). Nüüd jookseb täispere T-1742 jaoks, umbes 28 min; selle tulemus läheb ka T-1743 SHIP-i tõendiks. AG3 konsool on SUNO-s avatud ja ootab sind (`cc`).

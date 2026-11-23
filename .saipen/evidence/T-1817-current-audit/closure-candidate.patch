@@ -1,0 +1,83 @@
+--- a/tools/saipen_engine/intake.py
++++ b/tools/saipen_engine/intake.py
+@@ -4196,6 +4196,7 @@
+     # malformed evidence returned above before any write.
+     try:
+         _finish_archive_bundle_locked(root, receipt_id)
++        _closed_archive_bundle(root, receipt_id, tombstone, allow_active_fallback=False)
+     except (OSError, ValueError) as exc:
+         return {
+             "ok": False,
+@@ -4215,6 +4216,8 @@
+         "status": CLOSED_STATUS,
+         "archive_ref": tombstone["archive_ref"],
+         "recovered": True,
++        "outcome": "REPAIR_APPLIED",
++        "archive_verified": True,
+     }
+ 
+ 
+@@ -4382,29 +4385,15 @@
+ def _settle_closed_residue_locked(root: Path, receipt_id: str, tomb: dict) -> dict:
+     """Remove stale `active/` bytes for a receipt that is ALREADY closed.
+ 
+-    The close transaction archives the body, then unlinks the active body and
+-    metadata. A crash between those steps (or a foreign restore of the hot
+-    surface) leaves `active/<SRC>.md`(+meta) beside a valid tombstone. The
+-    receipt is fully reconstructed in the archive, so this is residue, never a
+-    deletion of SRC-024. Proof is the archived body digest against the
+-    tombstone's recorded digest; a mismatch is corruption, not a cleanup.
+-    Caller holds the project writer lock.
++    A closed pointer alone does not prove that the archive is intact. Prove
++    the complete existing body/metadata/contract/coverage/revision bundle before
++    removing any hot residue. A no-op and a residue cleanup are distinct from
++    repairing an interrupted close. Caller holds the project writer lock.
+     """
+     try:
+-        raw = _read_owned_file(
+-            root,
+-            _canonical_body_rel(root, receipt_id, str(tomb.get("source_sha256") or ""), "archive"),
+-            kind="source body",
+-            max_bytes=_BODY_MAX,
+-        )
++        _closed_archive_bundle(root, receipt_id, tomb, allow_active_fallback=False)
+     except (FileNotFoundError, OSError, ValueError) as exc:
+         return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+-    if hashlib.sha256(raw).hexdigest() != tomb.get("source_sha256"):
+-        return {
+-            "ok": False,
+-            "code": "SOURCE_CORRUPTION",
+-            "detail": f"closed receipt {receipt_id} archived body digest mismatch",
+-        }
+     removed = False
+     for rel, kind in (
+         (f".saipen/intake/active/{receipt_id}.md", "active source body"),
+@@ -4420,8 +4409,10 @@
+         "receipt": receipt_id,
+         "status": CLOSED_STATUS,
+         "archive_ref": tomb.get("archive_ref"),
+-        "recovered": True,
++        "recovered": removed,
+         "residue_removed": removed,
++        "outcome": "RESIDUE_SETTLED" if removed else "ALREADY_CLOSED",
++        "archive_verified": True,
+     }
+ 
+ 
+@@ -4497,6 +4488,7 @@
+                 "unresolved": 0,
+             }
+             archived = _archive_closed_locked(root, receipt_id, meta)
++            _closed_archive_bundle(root, receipt_id, tombstone, allow_active_fallback=False)
+             index = _read_index(root)
+             index["active"].pop(receipt_id, None)
+             index["tombstones"][receipt_id] = tombstone
+@@ -4509,6 +4501,8 @@
+                 "closure_event": closure_event,
+                 "status": CLOSED_STATUS,
+                 "archive_ref": archived["archive_ref"],
++                "outcome": "CLOSED",
++                "archive_verified": True,
+             }
+     except (OSError, PermissionError, ValueError) as exc:
+         return _write_refusal(exc)

@@ -1,0 +1,179 @@
+diff --git a/tools/saipen_engine/operations.py b/tools/saipen_engine/operations.py
+index 96cac725..eb1d7e91 100644
+--- a/tools/saipen_engine/operations.py
++++ b/tools/saipen_engine/operations.py
+@@ -2176,6 +2176,71 @@ def attempt_lifecycle(
+ # ------------------------------------------------------------ transition
+ 
+ 
++def _trip_checkpoint(
++    root: Path,
++    docs: dict,
++    new_log: str,
++    state: dict,
++    *,
++    waves: int,
++    tickets: int,
++    event: int,
++    agent: str,
++    now: str,
++    utc: str,
++    op_id: str,
++) -> tuple[str, dict] | None:
++    """Clear a tripped goal budget in ONE operation, or say a human must decide.
++
++    T-1864 (SRC-296). Reaching a cap counts WORK, never authority: the grant
++    that authorized the first ticket authorizes the twentieth. Writing
++    `WAIT: safety valve ...` there turned a mechanical checkpoint into an
++    operator obligation, and the engine then cleared the very same counters by
++    itself one command later -- so the human was asked to type a command whose
++    only effect was to let the engine do what it already knew how to do.
++
++    The budget itself is NOT removed. It still fires, and the marker below
++    still records that it fired; only the question "who has to be awake for
++    it" changes. `goal_authority.trip_checkpoint` owns that answer and returns
++    None exactly when the budget is the run's ONLY authority -- no persisting
++    grant, no protocol home -- because auto-renewing a bounded grant would
++    fabricate authority the operator never gave.
++
++    Returns (new_log, owned_updates), or None when the caller must write the
++    WAIT. `next_action` is deliberately left alone: the transition that
++    tripped the budget is mid-flight, and its own destination is the correct
++    route (`PHASE REVIEW T-###`), which is strictly better than a generic
++    continue.
++    """
++    from . import goal_authority
++
++    prospective = {**state, "goal_waves": waves, "goal_tickets": tickets}
++    decision = goal_authority.trip_checkpoint(root, prospective)
++    if decision is None:
++        return None
++    marker_event, marker_line = _producer_event(
++        docs,
++        event,
++        "DEC",
++        f"goal checkpoint -- goal_waves {waves}->0, goal_tickets {tickets}->0; "
++        f"authority_source {decision['source']}; "
++        f"budget reached, continuing under the same grant",
++        ticket=None,
++        agent=agent,
++        now=now,
++        op_id=op_id,
++    )
++    return (
++        new_log.rstrip("\n") + "\n" + marker_line + "\n",
++        {
++            "goal_waves": 0,
++            "goal_tickets": 0,
++            "last_event": marker_event,
++            "updated": utc,
++        },
++    )
++
++
+ def _plan_transition(
+     root: Path,
+     destination: str,
+@@ -2393,10 +2458,19 @@ def _plan_transition(
+         owned["goal_tickets"] = new_tickets
+         owned["last_event"] = dec_event
+         if cap_reached:
+-            owned["next_action"] = (
+-                f"WAIT: safety valve reached ({state.get('goal_waves') or 0} "
+-                f"waves / {new_tickets} tickets) -- run 'cc' to continue"
++            cleared = _trip_checkpoint(
++                root, docs, new_log, state,
++                waves=int(state.get("goal_waves") or 0), tickets=new_tickets,
++                event=dec_event, agent=agent, now=now, utc=utc, op_id=op_id,
+             )
++            if cleared is None:
++                owned["next_action"] = (
++                    f"WAIT: safety valve reached ({state.get('goal_waves') or 0} "
++                    f"waves / {new_tickets} tickets) -- run 'cc' to continue"
++                )
++            else:
++                new_log, extra = cleared
++                owned.update(extra)
+         new_state = patch_state(docs["state"].text_norm, owned)
+ 
+     # Goal-wave mechanics (NITRO dogfood II, T-590): a HUNT -> ADD transition
+@@ -2421,11 +2495,20 @@ def _plan_transition(
+         owned["goal_waves"] = new_waves
+         owned["last_event"] = wave_event
+         if cap_reached:
+-            owned["next_action"] = (
+-                f"WAIT: safety valve reached ({new_waves} waves / "
+-                f"{state.get('goal_tickets') or 0} tickets) -- run 'cc' to "
+-                "continue"
++            cleared = _trip_checkpoint(
++                root, docs, new_log, state,
++                waves=new_waves, tickets=int(state.get("goal_tickets") or 0),
++                event=wave_event, agent=agent, now=now, utc=utc, op_id=op_id,
+             )
++            if cleared is None:
++                owned["next_action"] = (
++                    f"WAIT: safety valve reached ({new_waves} waves / "
++                    f"{state.get('goal_tickets') or 0} tickets) -- run 'cc' to "
++                    "continue"
++                )
++            else:
++                new_log, extra = cleared
++                owned.update(extra)
+         new_state = patch_state(docs["state"].text_norm, owned)
+ 
+     # SELF-owned active ticket: refresh its claim lease in place (CORE § 1.4).
+@@ -2479,7 +2562,7 @@ def _plan_transition(
+     if destination == "REVIEW" and current == "VERIFY" and state.get("execution_intent") == "goal":
+         # T-1864: report the tickets this operation actually COMMITS. A tripped
+         # cap that cleared itself commits 0, not the pre-clear count.
+-        expected["goal_tickets"] = int(state.get("goal_tickets") or 0) + 1
++        expected["goal_tickets"] = parse_state(new_state).get("goal_tickets")
+     return build_plan(
+         "transition",
+         agent,
+diff --git a/tools/saipen_engine/goal_authority.py b/tools/saipen_engine/goal_authority.py
+index 558c7898..78506428 100644
+--- a/tools/saipen_engine/goal_authority.py
++++ b/tools/saipen_engine/goal_authority.py
+@@ -91,6 +91,41 @@ def protocol_home_checkpoint(root: Path | str, state: dict) -> bool:
+     )
+ 
+ 
++def trip_checkpoint(root: Path | str, state: dict) -> dict | None:
++    """How a TRIPPED budget clears itself, or None when a human must decide.
++
++    T-1864 (SRC-296). The cap counts WORK, not authority: reaching the 20th
++    ticket says nothing the original grant did not already say. Writing a
++    `WAIT: safety valve ...` there turned a mechanical checkpoint into an
++    operator obligation -- the run stopped, a human was asked to type `cc`, and
++    the engine then cleared the same counters by itself one command later. The
++    budget MUST still exist (it is how an unbounded session gets a periodic
++    look at its own work), so the checkpoint is recorded either way; the only
++    question this answers is who has to be awake for it.
++
++    It answers `None` -- a real operator boundary -- exactly when the budget is
++    the ONLY authority the run has: no persisting grant and no protocol home.
++    A bounded grant is the operator saying "do up to N, then ask me", and
++    auto-renewing it would fabricate authority. Every other brake in the system
++    (`user brake`, `destructive-op`, `first-publish`, `manual-verify`) is
++    untouched and keeps its WAIT.
++    """
++    if not budget_exhausted(state):
++        return None
++    if protocol_home(root):
++        return {"source": "protocol_home"}
++    if persistent(state):
++        try:
++            errors = prove(root, state)
++        except (OSError, ValueError, KeyError, TypeError):
++            # An unreadable grant is not a proven grant. Degrade to the human
++            # boundary rather than crashing the transition that tripped the cap.
++            return None
++        if not errors:
++            return {"source": state["authority_source"]}
++    return None
++
++
+ def _pin_record(root: Path, record: dict, dependencies: dict) -> None:
+     from .journal import Journal, hash_file_dependency
+ 

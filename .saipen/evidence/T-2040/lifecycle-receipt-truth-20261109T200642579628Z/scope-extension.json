@@ -1,0 +1,43 @@
+{
+  "created_at": "2026-11-09T20:22:18.856803+00:00",
+  "initial_scope_extension": "Coordinator authorized minimal reconcile.py fix only; operations.py and journal.py remained read-only at that point.",
+  "scope_extension": "Coordinator subsequently authorized minimal journal.py COMMITTED-replay repair. Final production ownership: reconcile.py and journal.py only; operations.py remains read-only. No workspace protocol commands, staging, commits or ledger edits.",
+  "authorization_history": [
+    {
+      "order": 1,
+      "source": "coordinator message: Repair proven stranded TODO defect with guarded regression",
+      "authorized_change": "extant TODO/no competing DOING/no prior claim => no lost-projection finding; absent/prior-claim/conflict refusals preserved",
+      "required_oracle": "Same unchanged StrandedClaimTests before/after and existing lost-active controls"
+    },
+    {
+      "order": 2,
+      "source": "coordinator message: Remove unsafe committed replay resurrection, preserve idempotency",
+      "authorized_change": "journal.py minimal COMMITTED resurrection removal; preserve no-write idempotency and semantic collisions; no blanket live postcondition equality",
+      "required_oracle": "Unchanged t1851 missing-target, whole debt module, existing journal committed retry/collision/delete/changed-target tests"
+    }
+  ],
+  "preimages": [
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\reconcile.py",
+      "preimage": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\lifecycle-receipt-truth-20261109T200642579628Z\\preimages\\tools\\saipen_engine\\reconcile.py",
+      "bytes": 194186,
+      "sha256": "3727f192a0e04f642b6cb18cd7a4790154535b846b18ab10b619ea9b89ff9167"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\journal.py",
+      "preimage": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\lifecycle-receipt-truth-20261109T200642579628Z\\preimages\\tools\\saipen_engine\\journal.py",
+      "bytes": 267381,
+      "sha256": "96bbbe379fa16e09319b2bf7c75f4bd37e0f0452b328a719a09b915e02d5c2ac"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_lost_active_ticket_recovery.py",
+      "preimage": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\lifecycle-receipt-truth-20261109T200642579628Z\\preimages\\tools\\test_lost_active_ticket_recovery.py",
+      "bytes": 17456,
+      "sha256": "f013b36484d10514eacbbd8f09e6d02790ecf761418b318c42cb8dca3acd8911"
+    }
+  ],
+  "invalid_run": {
+    "command": "python -B -m unittest -v test_t1759_single_lifecycle_observer test_t1851_debt_authority test_t1893_probe_wrappers",
+    "reason": "Missing tools PYTHONPATH; three import errors, no tests executed; excluded from behavioral evidence."
+  }
+}

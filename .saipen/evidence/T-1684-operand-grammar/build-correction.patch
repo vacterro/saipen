@@ -1,0 +1,69 @@
+--- candidate/tools/saipen.py
++++ tools/saipen.py
+@@ -9778,8 +9778,11 @@
+     host: str | None = None
+     root_opt = project_root_opt
+     command: list[str] = []
+-    if sub == "entry" and "--" in tokens:
+-        cut = tokens.index("--")
++    # T-1684: an option operand spelled `--` is data, not the transport boundary.
++    values = _option_value_positions(tokens)
++    cut = next((index for index, token in enumerate(tokens)
++                if token == "--" and index not in values), None)
++    if sub == "entry" and cut is not None:
+         tokens, command = tokens[:cut], tokens[cut + 1 :]
+     index = 1
+     while index < len(tokens):
+@@ -11422,7 +11425,10 @@
+                     "names the proven transport."
+                 ),
+             },
+-            _has_cli_option(raw_args, {"--json"}),
++            # A damaged text may hold a split `--`, so no boundary is trusted
++            # here; only an option operand stays literal.
++            any(token == "--json" and index not in value_positions
++                for index, token in enumerate(raw_args)),
+         )
+         return 2
+     dd_idx = next((index for index, token in enumerate(raw_args)
+@@ -12486,8 +12492,11 @@
+             has_needs = False
+             has_regression = False
+ 
+-            if "--" in rest:
+-                dd_idx = rest.index("--")
++            # T-1684: `--verify --` carries a literal proof, not the boundary.
++            rest_values = _option_value_positions(rest)
++            dd_idx = next((index for index, token in enumerate(rest)
++                           if token == "--" and index not in rest_values), None)
++            if dd_idx is not None:
+                 pre_dd = rest[:dd_idx]
+                 post_dd = rest[dd_idx + 1 :]
+             else:
+--- candidate/tools/test_t1684_operand_grammar.py
++++ tools/test_t1684_operand_grammar.py
+@@ -103,6 +103,24 @@
+         board = (self.project / ".saipen/BOARD.md").read_text(encoding="utf-8")
+         self.assertIn("verify: --help", board)
+ 
++    def test_verify_boundary_is_literal_proof_text(self):
++        proc = self.invoke("ticket", "add", "P3", "Literal boundary proof", "--verify", "--")
++        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
++        self.assertEqual(json.loads(proc.stdout)["code"], "TICKET_ADDED")
++        board = (self.project / ".saipen/BOARD.md").read_text(encoding="utf-8")
++        self.assertIn("Literal boundary proof | verify: --\n", board)
++        # The actual boundary after a complete option keeps its meaning.
++        proc = self.invoke("ticket", "add", "P3", "Real boundary",
++                           "--verify", "proof", "--", "tail")
++        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
++        board = (self.project / ".saipen/BOARD.md").read_text(encoding="utf-8")
++        self.assertIn("Real boundary tail | verify: proof\n", board)
++
++    def test_host_entry_runs_the_command_after_the_actual_boundary(self):
++        proc = self.invoke("host", "entry", "--host", "--", "--", "status", json_output=False)
++        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
++        self.assertIn("phase:", proc.stdout)
++
+     def test_literal_help_does_not_grant_write_in_readonly_session(self):
+         self.env["SAIPEN_CAPABILITY"] = "read-only"
+         board = self.project / ".saipen/BOARD.md"

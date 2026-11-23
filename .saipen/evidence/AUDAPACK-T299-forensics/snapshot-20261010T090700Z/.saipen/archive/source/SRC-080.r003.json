@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-080:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: existing-but-corrupt durable audit generation state must fail closed, never infer generation 0, and never publish a generation <= prior durable N; Bridge, browser-dispatch and INAUDIT channels share one coherent semantics; missing file may bootstrap at 1; pending INAUDIT notification stays owed on publish failure; consumers adopt an explicit recovery/reset baseline lower than last observed generation."
+    },
+    "SRC-080:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002: one explicit cross-process ProjectRegistry refresh primitive acquires the canonical registry lock, loads latest config, synchronizes the existing AppConfig/project collection IN PLACE (preserving object identity) and rebuilds ID indexes; invoked at external Bridge generation consumption and explicit Refresh All so a Bridge-created project is resolvable by AuditService and visible in ProjectRoomModel without restart; no disk I/O on paint/data lookup paths."
+    },
+    "SRC-080:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003: v3 campaign artifacts require non-empty CAMPAIGN_PROFILE, CAMPAIGN_PROFILE_VERSION and CAMPAIGN_MANIFEST_SHA256; profile id and version must match the selected profile; manifest hash must be exact unless an explicit proven compatibility ledger maps it; manifest_hash_is_compatible rejects missing/arbitrary mismatches by default; parser, resolver and Bridge server agree and never launder an absent/untrusted identity into the current canonical identity after acceptance."
+    }
+  },
+  "derived_at": "2026-09-22T10:41:25Z",
+  "derived_from": "SRC-080",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "1a65c43e12ee4453d6036de7216e131b95a6fb83d3d596b77ece69bdb35ef3da"
+}

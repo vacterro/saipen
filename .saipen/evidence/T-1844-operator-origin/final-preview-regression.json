@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "format": "unittest",
+  "timeout": 60,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1844_authority_preview.py",
+    "-v"
+  ],
+  "context": [
+    "tools/saipen_engine",
+    "saipen",
+    "extensions/adapters/registry.json",
+    "tools/test_t1844_authority_preview.py",
+    "tools/test_t1844_origin_broker.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "oracle_files": [
+    "tools/test_t1844_authority_preview.py",
+    "tools/test_t1844_origin_broker.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/operations.py"
+  ],
+  "before": {
+    "tools/saipen_engine/operations.py": ".saipen/evidence/T-1844-operator-origin/preview-prefix/operations.py"
+  }
+}

@@ -1,0 +1,11 @@
+test_a_record_preserves_the_reported_process_ids (test_t1633_process_tree.ProcessOwnership.test_a_record_preserves_the_reported_process_ids) ... ok
+test_core_family_reports_and_reaps_a_shards_lingering_host (test_t1633_process_tree.ProcessOwnership.test_core_family_reports_and_reaps_a_shards_lingering_host) ... ok
+test_regular_output_and_check_contract_are_preserved (test_t1633_process_tree.ProcessOwnership.test_regular_output_and_check_contract_are_preserved) ... ok
+test_successful_shim_cannot_leave_a_detached_host (test_t1633_process_tree.ProcessOwnership.test_successful_shim_cannot_leave_a_detached_host) ... ok
+test_timeout_reaps_a_host_even_after_its_shim_has_exited (test_t1633_process_tree.ProcessOwnership.test_timeout_reaps_a_host_even_after_its_shim_has_exited) ... ok
+test_timeout_reaps_host_and_keeps_an_unrelated_process_alive (test_t1633_process_tree.ProcessOwnership.test_timeout_reaps_host_and_keeps_an_unrelated_process_alive) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 4.468s
+
+OK

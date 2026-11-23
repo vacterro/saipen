@@ -1,0 +1,5 @@
+perf(test): verify small changes proportionally
+
+Require current-tree focused evidence for local tickets and one full
+core-unit run for the finished publication batch. Keep legacy gates
+and reject missing, stale, tampered, empty, red or incomplete results.

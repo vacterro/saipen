@@ -78,7 +78,7 @@ class ConvergenceVerdict:
             "reasons": list(self.reasons),
             "stages": [
                 {
-                    "stage": item.get("stage", ""),
+                    "stage": (item.get("receipt_metadata") or {}).get("stage", ""),
                     "verdict": (item.get("receipt_metadata") or {}).get("verdict", ""),
                     "op_id": item.get("op_id", ""),
                     "created_at": item.get("created_at", ""),
@@ -114,6 +114,19 @@ def _iter_operation_records(root: Path, receipt_snapshot=None):
     yield from snapshot.records
 
 
+def _operation_records_safe(
+    root: Path, operation: str, receipt_snapshot=None
+) -> tuple[list[dict], tuple[str, ...]]:
+    """Bounded per-operation receipt lookup when no pre-captured snapshot was supplied."""
+    if receipt_snapshot is not None:
+        if receipt_snapshot.errors:
+            return [], tuple(receipt_snapshot.errors)
+        return [r for r in receipt_snapshot.records if r.get("operation") == operation], ()
+    from .journal import semantic_receipts_for_operation_safe
+
+    return semantic_receipts_for_operation_safe(root, operation)
+
+
 def _event_number(record: dict) -> int:
     """The LOG event id a receipt committed under (secondary chronology key).
 
@@ -143,10 +156,17 @@ def _chrono_key(record: dict):
     )
 
 
-def _stage_receipts(root: Path, receipt_snapshot=None) -> list[dict]:
+def _stage_receipts(
+    root: Path, receipt_snapshot=None, *, stage_records: list[dict] | None = None
+) -> list[dict]:
     """Every COMMITTED convergence_stage receipt, oldest first by real UTC."""
     out = []
-    for record in _iter_operation_records(root, receipt_snapshot):
+    records = (
+        stage_records
+        if stage_records is not None
+        else _operation_records_safe(root, "convergence_stage", receipt_snapshot)[0]
+    )
+    for record in records:
         if record.get("operation") != "convergence_stage":
             continue
         if record.get("status") != "COMMITTED":
@@ -344,7 +364,12 @@ def _attribution_snapshot(
                 op_id=str(record.get("op_id") or scope.name),
                 binding=binding,
             )
-    for record in _iter_operation_records(root, receipt_snapshot):
+    defer_records, defer_errors = _operation_records_safe(
+        root, "crew_defer", receipt_snapshot
+    )
+    if defer_errors and receipt_snapshot is None:
+        errors.append("operation receipt corruption: " + "; ".join(defer_errors[:3]))
+    for record in defer_records:
         meta = record.get("receipt_metadata") or {}
         if record.get("operation") != "crew_defer" or record.get("status") != "COMMITTED":
             continue
@@ -584,15 +609,20 @@ def convergence_verdict(
     """
     root = Path(project_root)
     reasons: list[str] = []
-    if receipt_snapshot is None:
-        from .journal import semantic_receipt_snapshot
-
-        receipt_snapshot = semantic_receipt_snapshot(root)
-    if receipt_snapshot.errors:
-        return ConvergenceVerdict(
-            False,
-            ("operation receipt corruption: " + "; ".join(receipt_snapshot.errors[:3]),),
-        )
+    stage_records: list[dict] | None = None
+    if receipt_snapshot is not None:
+        if receipt_snapshot.errors:
+            return ConvergenceVerdict(
+                False,
+                ("operation receipt corruption: " + "; ".join(receipt_snapshot.errors[:3]),),
+            )
+    else:
+        stage_records, stage_errors = _operation_records_safe(root, "convergence_stage")
+        if stage_errors:
+            return ConvergenceVerdict(
+                False,
+                ("operation receipt corruption: " + "; ".join(stage_errors[:3]),),
+            )
     if source_id is None:
         try:
             from freshness import compute_source_identity
@@ -604,7 +634,7 @@ def convergence_verdict(
             )
     live = (source_id.source_head, source_id.source_tree_fingerprint)
 
-    receipts = _stage_receipts(root, receipt_snapshot)
+    receipts = _stage_receipts(root, receipt_snapshot, stage_records=stage_records)
     if not receipts:
         return ConvergenceVerdict(
             False,

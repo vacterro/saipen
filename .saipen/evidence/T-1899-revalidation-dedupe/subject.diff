@@ -1,0 +1,70 @@
+--- a/tools/saipen_engine/external.py
++++ b/tools/saipen_engine/external.py
+@@ -929,12 +929,13 @@
+     recomputes work eligibility, and skips unchanged evidence generations.
+     Every executable check arrives as an authenticated argv plan (sealed
+     receipt identity or sealed execution contract); BOARD prose never runs.
+     """
+     from .board import (
+         external_authority as _authority,
++        external_evidence as _evidence,
+         external_implementation as _implementation,
+         parse_board,
+     )
+     from .operations import resolve_external_ticket
+ 
+     root = Path(project_root).resolve()
+@@ -960,25 +961,43 @@
+     candidate_keys: list[str] = []
+ 
+     cur_engine = engine_identity()
+     engine_digest = cur_engine.get("engine_digest", "")[:16]
+ 
+     # 1. Existing external receipts: check for installed engine moves
+-    receipt_files = existing_receipts(root)
+-    for rpath in receipt_files:
++    #
++    # T-1899: iterate the DONE Work that cites a receipt, NOT every receipt
++    # file. `resolution_problems` answers about the BOARD-CITED receipt --
++    # `external_evidence` -- so its verdict is a function of the WORK alone.
++    # Looping over files asked the identical question once per superseded
++    # resolution: measured on the live tree, 22 EX files for one Work, ONE
++    # distinct answer, 3.95 s of every `continue` spent recomputing it 22
++    # times.
++    #
++    # The receipt the loop used was also whichever file it happened to reach,
++    # so a re-resolution could carry a SUPERSEDED receipt's authority,
++    # implementation and recorded checks -- the live tree holds two
++    # implementations (T-289@5f0dc0c for EX-000001..10, T-289@041f00ed for
++    # EX-000011..22) across one Work's history. Re-resolving under the
++    # superseded spelling would write a receipt for an identity the board no
++    # longer names. Both halves are fixed by resolving the cited record once.
++    cited_work: dict[str, str] = {}
++    for tid, ticket in tickets.items():
++        if ticket.get("section") != "## DONE":
++            continue
++        evidence = _evidence(ticket)
++        if evidence:
++            cited_work[tid] = evidence
++    for work, receipt_id in sorted(cited_work.items()):
++        if target_ticket and work != target_ticket:
++            continue
+         try:
+-            record = load_receipt(root, rpath.stem)
++            record = load_receipt(root, receipt_id)
+         except ExternalRefusal:
+             continue
+-        work = record.get("work")
+-        if target_ticket and work != target_ticket:
+-            continue
+-        ticket = tickets.get(work)
+-        if not ticket or ticket.get("section") != "## DONE":
+-            continue
+-        problems = resolution_problems(root, work, ticket)
++        problems = resolution_problems(root, work, tickets[work])
+         if not problems:
+             continue
+         engine_moved = any("engine generation" in p and "dependency moved" in p for p in problems)
+         other_problems = [
+             p for p in problems if not ("engine generation" in p and "dependency moved" in p)
+         ]

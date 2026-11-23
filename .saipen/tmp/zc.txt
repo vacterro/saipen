@@ -1,0 +1,137 @@
+== zaicode
+{
+  "id": "zaicode",
+  "name": "ZAICODE",
+  "home_variable": "ZAICODE_HOME",
+  "home_note": "ZAICODE runs with an isolated HOME (<workspace>/.zaicode/home) and never shares ~/.zcode with a production ZCode; ZAICODE_HOME names that HOME, and an unset variable means ZAICODE is not configured on this machine.",
+  "instruction_surfaces": [
+    "$ZAICODE_HOME/.zcode/AGENTS.md"
+  ],
+  "skill_surfaces": [
+    "$ZAICODE_HOME/.zcode/skills/saipen"
+  ],
+  "blocking_capability": false,
+  "hook_install_surface": "~/.zcode/hooks/saipen-guard.py",
+  "hook_artifact": "extensions/adapters/zaicode/saipen-guard.py",
+  "hook_installer": "tools/install_host_guard.py",
+  "hook_surface_note": "ZAICODE loads this process hook from ~/.zcode/cli/config.json and runs it as argv with shell:false, which is why the installer writes it with HOOK_BOOTSTRAP and the broker's max_shells:0 policy. The SKILL and instruction surfaces stay inside ZAICODE_HOME (the isolated home); the hook config is the operator profile's ~/.zcode because that is the file the running host reads. Without this declaration the canonical injector skipped the hook step entirely and runtime_bootstrap.hook_problems answered [] at any drift, so a repaired artifact never reached the operator (T-1934/T-1935).",
+  "freshness_surfaces": [
+    "skill",
+    "instruction",
+    "hook"
+  ],
+  "declared_strength": "ADVISORY",
+  "response_enforcement": "ADVISORY",
+  "response_hook": null,
+  "response_enforcement_note": "No final-response hook surface is installed for this host.",
+  "artifact_version": null,
+  "install": {
+    "home": "$ZAICODE_HOME/.zcode",
+    "skill": "$ZAICODE_HOME/.zcode/skills/saipen",
+    "instruction": "$ZAICODE_HOME/.zcode/AGENTS.md",
+    "hook": "~/.zcode/hooks/saipen-guard.py"
+  },
+  "pre_output_interception": "NONE",
+  "stop_output_interception": "NONE",
+  "admission_enforcement": "ADVISORY",
+  "style_enforcement": "ADVISORY",
+  "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+  "execution_capabilities": {
+    "silent_tool_continuation": "ADVISORY",
+    "intermediate_text_suppression": "ADVISORY",
+    "structured_progress": "CANONICAL_RUNTIME_STATUS",
+    "host_thought_visibility_control": "UNAVAILABLE",
+    "final_response_gate": "ADVISORY"
+  },
+  "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+  "operator_ingress_capability": {
+    "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+    "witness_without_launch_carrier": "model_supplied",
+    "transport_obligation": "AUTHENTICATED_OPERATOR_ORIGIN",
+    "local_candidate_policy": "NATIVE_INGRESS_REQUIRED",
+    "host_prompt_available": true,
+    "prompt_to_work_binding": "INSTALLED",
+    "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+  },
+  "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+  "iteration_controller": {
+    "model_turn_vs_goal": "MODEL_TURN_FINISHED != SAIPEN_GOAL_FINISHED; a provider returning a final answer ends its turn, never the goal",
+    "decision_owner": [
+      "saipen iteration --json (canonical public verdict, schema v1)",
+      "saipen_engine.iteration_verdict.project_iteration_verdict",
+      "saipen_engine.host_iteration.HostIterationController (reference HOST FLOW)",
+      "saipen_engine.iteration.decide_turn (internal precedence primitive)"
+    ],
+    "executor_admission": "saipen_engine.iteration_verdict.admit_normalized + host_iteration.admit_candidates/admit_one -- STATE requires plus process_execution/patch_application, normalized per switch, never inferred from model identity",
+    "goal_complete_gate": "saipen_engine.iteration_verdict.verdict_allows_goal_complete_ui -- true on known-schema VALID_TERMINAL with proven terminality only",
+    "enforcement": "ADVISORY -- no iteration gate is installed on this host; the native controller must query `saipen iteration` before printing goal-complete, and must reroute (never block the project) on EXECUTOR_CAPABILITY_MISMATCH. Reference wiring proven SAIPEN-side only (E2E-01..E2E-10); see .saipen/evidence/T-1619-zaicode-handoff.md"
+  },
+  "routine_launch": "native ZAICODE launch; no SAIPEN seat, wrapper or launcher is required",
+  "auto_recovery": "NONE",
+  "degraded_mode": "NOT_APPLICABLE",
+  "question_enforcement": "ADVISORY",
+  "question_hook": null,
+  "question_tools": [],
+  "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host.",
+  "admission_authority": true,
+  "hook_config_surface": "~/.zcode/cli/config.json"
+}
+== zcode-production
+{
+  "id": "zcode-production",
+  "name": "ZCode (production ~/.zcode home)",
+  "home_note": "The production ZCode desktop app reads the REAL user home ~/.zcode (global AGENTS.md instructions) and the shared ~/.agents skills tree; it never sees $ZAICODE_HOME. Distinct from the isolated 'zaicode' dev entry, which names a variable-guarded HOME.",
+  "instruction_surfaces": [
+    "~/.zcode/AGENTS.md"
+  ],
+  "skill_surfaces": [
+    "~/.agents/skills/saipen"
+  ],
+  "blocking_capability": false,
+  "hook_install_surface": null,
+  "hook_artifact": null,
+  "freshness_surfaces": [
+    "skill",
+    "instruction"
+  ],
+  "declared_strength": "ADVISORY",
+  "response_enforcement": "ADVISORY",
+  "response_hook": null,
+  "response_enforcement_note": "No final-response hook surface exists for this host: the T-1583 incident (a STYLE-breaking reply escaping on the live production host) measured the limit, so ADVISORY states the enforced boundary, not an aspiration.",
+  "artifact_version": null,
+  "install": {
+    "home": "~/.zcode",
+    "skill": "~/.agents/skills/saipen",
+    "instruction": "~/.zcode/AGENTS.md"
+  },
+  "pre_output_interception": "NONE",
+  "stop_output_interception": "NONE",
+  "admission_enforcement": "ADVISORY",
+  "style_enforcement": "ADVISORY",
+  "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+  "execution_capabilities": {
+    "silent_tool_continuation": "ADVISORY",
+    "intermediate_text_suppression": "ADVISORY",
+    "structured_progress": "CANONICAL_RUNTIME_STATUS",
+    "host_thought_visibility_control": "UNAVAILABLE",
+    "final_response_gate": "ADVISORY"
+  },
+  "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+  "operator_ingress_capability": {
+    "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+    "witness_without_launch_carrier": "model_supplied",
+    "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+    "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+    "host_prompt_available": false,
+    "prompt_to_work_binding": "NOT_INSTALLED",
+    "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+  },
+  "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+  "routine_launch": "native ZCode (production ~/.zcode home) launch; no SAIPEN seat, wrapper or launcher is required",
+  "auto_recovery": "NONE",
+  "degraded_mode": "NOT_APPLICABLE",
+  "question_enforcement": "ADVISORY",
+  "question_hook": null,
+  "question_tools": [],
+  "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
+}

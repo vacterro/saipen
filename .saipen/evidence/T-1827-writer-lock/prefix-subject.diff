@@ -1,0 +1,86 @@
+# T-1827 pre-fix subject diff (disposable copy V:/_TEMP_/t1827-prefix)
+
+The copy carries the audited defects restored, tests untouched:
+1. WriterLock._os_lock_bounded: ONE non-blocking attempt (no bounded wait).
+2. WriterLock.acquire: no holder record written (refusal cannot name the holder).
+3. debt.create_snapshot: capture_findings runs INSIDE project_writer_lock (single attempt).
+
+--- tools/saipen_engine/lock.py	2026-10-20 07:46:25.956826500 +0300
++++ /tmp/t1827-prefix/tools/saipen_engine/lock.py	2026-10-20 08:00:33.855823500 +0300
+@@ -649,31 +649,13 @@
+             return writer_lock_timeout()
+ 
+     def _os_lock_bounded(self) -> None:
+-        """Take the byte lock within one deadline, or raise WriterBusy.
+-
+-        The OS call itself stays non-blocking: a blocking msvcrt lock cannot
+-        be interrupted, and its holder record must be readable on refusal.
+-        A non-contention OS failure is re-raised as itself, never retried as
+-        if waiting could clear it.
+-        """
+-        budget = self.wait_budget()
+-        deadline = time.monotonic() + budget
+-        while True:
+-            try:
+-                _os_lock(self._handle)
+-                return
+-            except OSError as exc:
+-                if not _is_lock_contention(exc):
+-                    raise
+-                last = exc
+-            remaining = deadline - time.monotonic()
+-            if remaining <= 0:
+-                record = _read_holder_record(_holder_record_path(self.path))
+-                detail = _holder_detail(record)
+-                if budget > 0:
+-                    detail += f" (waited {budget:.1f}s)"
+-                raise WriterBusy(detail, holder=record) from last
+-            time.sleep(min(_LOCK_RETRY_SLEEP, remaining))
++        """PRE-FIX SUBJECT (T-1827 control): one non-blocking attempt, no wait."""
++        try:
++            _os_lock(self._handle)
++        except OSError as exc:
++            if _is_lock_contention(exc):
++                raise WriterBusy(_holder_detail(None)) from exc
++            raise
+ 
+     def acquire(self, timeout: float | None = None) -> bool:
+         """Exclusive project writer lock, bounded wait; True or WriterBusy.
+@@ -725,7 +707,6 @@
+                 if not _is_lock_contention(exc):
+                     raise
+                 raise WriterBusy(_holder_detail(None)) from exc
+-            _write_holder_record(_holder_record_path(self.path))
+         except BaseException as exc:
+             if self._handle is not None:
+                 self._handle.close()
+--- tools/saipen_engine/debt.py	2026-10-20 07:34:54.630692200 +0300
++++ /tmp/t1827-prefix/tools/saipen_engine/debt.py	2026-10-20 08:00:43.809423200 +0300
+@@ -428,19 +428,20 @@
+     # BEFORE the capture so the under-lock equality proves no protocol write
+     # intervened between them. A capture overtaken by a mutation is retried
+     # outside the lock, never under it (R009).
++    # PRE-FIX SUBJECT (T-1827 control): the validator capture runs INSIDE
++    # the one writer mutex -- the 240.6 s hold the audit measured.
+     stale_detail = None
+-    for _attempt in range(_CAPTURE_ATTEMPTS):
++    with project_writer_lock(root):
+         fingerprints = _project_state_fingerprints(root)
+         identity_object, identity = _source_identity_object(root)
+         capture = capture_findings(root)
+         if not capture.get("ok"):
+             return capture
+-        with project_writer_lock(root):
+-            stale_detail = _checkpoint_still_current(root, identity_object, fingerprints)
+-            if stale_detail is None:
+-                return _create_snapshot_apply(
+-                    root, agent, reason, bound_work, capture=capture, identity=identity
+-                )
++        stale_detail = _checkpoint_still_current(root, identity_object, fingerprints)
++        if stale_detail is None:
++            return _create_snapshot_apply(
++                root, agent, reason, bound_work, capture=capture, identity=identity
++            )
+     return _stale_capture_refusal("project checkpoint", stale_detail)
+ 
+ 

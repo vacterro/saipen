@@ -1,0 +1,26 @@
+{
+  "read_only": true,
+  "external_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_MEDIA_COMPRESSOR",
+  "bound_home": "V:\\___VAC\\__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+  "last_event": 867,
+  "accepted_debt_records": [
+    {
+      "record": "AD-000001",
+      "authority": "SRC-011",
+      "events": [
+        "E-371"
+      ],
+      "created_at": "2026-10-20T05:04:01Z",
+      "op_id": "accepted_debt.register-d47c66544a58"
+    }
+  ],
+  "event_371": [
+    {
+      "file": ".saipen/LOG.md",
+      "line": 372,
+      "raw": "- 16.09.26 21:29 [E-371] [parent: E-370] [T-50] [agent: buffy] DEC: ticket added via SAIOPS and claimed -- T-50 [P0] [CORE-014] Quick Converter non-destructive publication, the next P0 candidate promoted from E-368/E-370. Source: SRC-003 audit/2.md CORE-014 (never previously derived into the rev-1 intake contract either). Red control: tests/test_audit_core014.py executed UNCHANGED against the pre-fix subject: 7 failed / 4 passed. Evidence: the pre-existing image destination sentinel was overwritten (sha mismatch) and the action returned the occupied path itself (V:...\\img_fail\\clip_cq512.png published onto the sentinel); a failing tool left its partial artifact at the FINAL path; Extract Frames left the existing frame set as ['%04d.jpg', 'keep.jpg'] instead of ['keep.jpg']; a second identical run returned the same destination. The new regression coverage detects the old defect.",
+      "event": 371,
+      "op_id": null
+    }
+  ]
+}

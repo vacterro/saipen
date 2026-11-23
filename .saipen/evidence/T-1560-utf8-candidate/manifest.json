@@ -1,0 +1,1362 @@
+{
+  "ticket": "T-1560",
+  "scope": [
+    "tools",
+    "extensions",
+    "bootstrap"
+  ],
+  "missing_before": 226,
+  "explicit_before": 11,
+  "limitations": [
+    "constant text flags, including local dict-built kwargs; unresolved dynamic settings refuse"
+  ],
+  "files": [
+    {
+      "path": "tools/audit_checks.py",
+      "before_sha256": "994ca5631702bf2a39a9c24609e623f615f2bf55f768547247f44748f44fb769",
+      "after_sha256": "09c960c6638069c392c45c3bbf928f7c61fda771660bce3add9f38822390fa48",
+      "sites": [
+        {
+          "path": "tools/audit_checks.py",
+          "line": 944,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_checks.py",
+          "line": 957,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_checks.py",
+          "line": 981,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_checks.py",
+          "line": 4558,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_checks.py",
+          "line": 352,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_checks.py",
+          "line": 416,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_checks.py",
+          "line": 668,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_checks.py",
+          "line": 724,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_checks.py",
+          "line": 1048,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_checks.py",
+          "line": 1074,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/audit_floor.py",
+      "before_sha256": "004688d7d21b9d2806e82b1df0eaa6c239c2bf9f61f7a50b04c128444b46318b",
+      "after_sha256": "efd53ce452872192e9f30f52bc488d5e644053e407a45786c7c4c1ed28c14754",
+      "sites": [
+        {
+          "path": "tools/audit_floor.py",
+          "line": 229,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_floor.py",
+          "line": 299,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_floor.py",
+          "line": 253,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/audit_parity.py",
+      "before_sha256": "308ee68ba9848cadb5e350feb6348e512202ed40f44f94fa30aa179924e2c088",
+      "after_sha256": "b2d72f45d9417b161e8f95c4c970792280d2265f39e1cde20fff9f5edfc84a29",
+      "sites": [
+        {
+          "path": "tools/audit_parity.py",
+          "line": 154,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_parity.py",
+          "line": 246,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_parity.py",
+          "line": 172,
+          "callee": "run"
+        },
+        {
+          "path": "tools/audit_parity.py",
+          "line": 191,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/audit_tags.py",
+      "before_sha256": "4bc5580bdf4616a58338a1f07cd5df457cec27ad7258ec47eef7aacb39ca7dea",
+      "after_sha256": "62c3740dfa361b984beafe2f26366d3365bef0bdc34a4506a75b45ac642394db",
+      "sites": [
+        {
+          "path": "tools/audit_tags.py",
+          "line": 100,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/autoinject.py",
+      "before_sha256": "be5b75611ede3aca7b2b64fb8d595f868637f2d6b4d04cb48f9335d906c4de42",
+      "after_sha256": "9c5ab3005e9d192e33232d92620abdeb3f2e47e5f2e23c4f78f8cef499920317",
+      "sites": [
+        {
+          "path": "tools/autoinject.py",
+          "line": 222,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/build_handoff_archive.py",
+      "before_sha256": "e3e90de99ad30fcc3ee2392395c4663442f0990a937eb7a5c4f176ab7d79c973",
+      "after_sha256": "8fb3feca76c82fdf0866385bd9b1cd809fe53bfd71c286f9e7d5bee0417e033c",
+      "sites": [
+        {
+          "path": "tools/build_handoff_archive.py",
+          "line": 414,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/ci_status.py",
+      "before_sha256": "b45ff6fa34bc98a83720ac827fd24a03a6d3209c1adca8d84c58bf098f694776",
+      "after_sha256": "8bc4d79eba8a74b78277bfe36a537977528ddd3815f35615154ac56f9186f0f4",
+      "sites": [
+        {
+          "path": "tools/ci_status.py",
+          "line": 66,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/continuity_probes.py",
+      "before_sha256": "236095794a59783d643152b8c8f9cf28bbbe6f04698929a706ae56a4e03a90a8",
+      "after_sha256": "3de9cef0161affc35c5623a8b8a137ab040bd25a88389515bbcb6942457903a1",
+      "sites": [
+        {
+          "path": "tools/continuity_probes.py",
+          "line": 51,
+          "callee": "run"
+        },
+        {
+          "path": "tools/continuity_probes.py",
+          "line": 77,
+          "callee": "run"
+        },
+        {
+          "path": "tools/continuity_probes.py",
+          "line": 97,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/host_guard.py",
+      "before_sha256": "dcc5c48bbc734009963f399bd0091ad79a1dcc0a5657bc04a9b75effc6b369a0",
+      "after_sha256": "dbba552643a3657b86febde39d9bdfb558800535e3e8aec719e299c59a0eb48f",
+      "sites": [
+        {
+          "path": "tools/host_guard.py",
+          "line": 68,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/perf_wave_regressions.py",
+      "before_sha256": "363a2ebb3701ed2425009ca3579090d6e390508768af741c086e7e3ae94ec39b",
+      "after_sha256": "94eff9160d799daf309a780159f67378f1c801b57fa29732a52be6e4754f717c",
+      "sites": [
+        {
+          "path": "tools/perf_wave_regressions.py",
+          "line": 710,
+          "callee": "run"
+        },
+        {
+          "path": "tools/perf_wave_regressions.py",
+          "line": 185,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/regression_second_wave.py",
+      "before_sha256": "063ab4b663aad381717ea66970e5edbacde12db0de74cd5cfda31696a8c5e2db",
+      "after_sha256": "de8df34792b591f32cce4c06c94998d196964943949771132e81052cd861b952",
+      "sites": [
+        {
+          "path": "tools/regression_second_wave.py",
+          "line": 8,
+          "callee": "run"
+        },
+        {
+          "path": "tools/regression_second_wave.py",
+          "line": 24,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/release_provenance.py",
+      "before_sha256": "a412999e265c120a8cbd2bb88eaf38e58af3b87ad98148763015176f709f25ab",
+      "after_sha256": "be8ba11674342644cc0f1b34b6f68193e4d141734a50cd96dd1124b96096c83e",
+      "sites": [
+        {
+          "path": "tools/release_provenance.py",
+          "line": 65,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/run_scenarios.py",
+      "before_sha256": "c6c6d14e3c8aef198edc8e9f9659f3d2b89d656057c3f6d425fde967a11c53b3",
+      "after_sha256": "af030beceacc195b8898a645089a731abe91c20d8a5f03782745525c63968a40",
+      "sites": [
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 909,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 9383,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 10619,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 10637,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 10656,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 10684,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 10710,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 10893,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 11362,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 12073,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 12096,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 12161,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 12202,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 12263,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 12545,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 12592,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 12643,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 12791,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 12819,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 13310,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 13311,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 13312,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 13371,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 13382,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 14245,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 14259,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 15081,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 15106,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 15125,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 15144,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 15164,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 15753,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 15843,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 15865,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 15892,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16161,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16200,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16212,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16224,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16236,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16264,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16271,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16290,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16297,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16312,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16322,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16353,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16563,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16612,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16626,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 284,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 498,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 520,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 539,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 576,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 615,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 667,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 919,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 958,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 1028,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2160,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2200,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2669,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2672,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2817,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2824,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 3071,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 5556,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 5699,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 6747,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 6754,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7101,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7247,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7263,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7348,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7422,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7445,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7534,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7567,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7624,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7847,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 8022,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 8184,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 8851,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 9736,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 10980,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 11059,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 12007,
+          "callee": "Popen"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 12187,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 13235,
+          "callee": "Popen"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 15781,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16252,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16419,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 16954,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 17482,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 18241,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 18990,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 19024,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 438,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 730,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 748,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 1102,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 1125,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 1153,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 1174,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 1197,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 1283,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 1311,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 1650,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 1672,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 1884,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2283,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2316,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2345,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2433,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2457,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 3225,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 5484,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 5495,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 5734,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 5845,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 5856,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 6093,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 6104,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 6592,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 6601,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 6891,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7191,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7357,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7454,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7577,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 8081,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 8295,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 8787,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 9112,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 10338,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 13452,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 18887,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 19148,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 19309,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 19341,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 19357,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 741,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 756,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2258,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 2980,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 3105,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 3196,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7270,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7699,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7890,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 8522,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 10581,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 19403,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 19408,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 19519,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 19628,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 6915,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 7900,
+          "callee": "run"
+        },
+        {
+          "path": "tools/run_scenarios.py",
+          "line": 10596,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/saipen_engine/cold_truth.py",
+      "before_sha256": "0024e5f3f0713192616f73a8d5b8454b8e736563a7a70238670f9d60413c8d21",
+      "after_sha256": "67cfb05694d912d71c3cd655cfc54c3a578e475a369c46b118c01cc3809e9ec8",
+      "sites": [
+        {
+          "path": "tools/saipen_engine/cold_truth.py",
+          "line": 153,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/saipen_engine/controls.py",
+      "before_sha256": "f06a13da4ca97cf2009d094189df8382b0ce2afd0084264e5be41b408a68fa48",
+      "after_sha256": "ea8e20b6cf2e99e4fb4447db9f5ee9419918a71a3dcc9ef175b9a38ea63ce090",
+      "sites": [
+        {
+          "path": "tools/saipen_engine/controls.py",
+          "line": 128,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/saipen_engine/core_unit.py",
+      "before_sha256": "1f448484e86868c41b679dc46328288096cf08c0e79d867f50ce94c7b6cc6585",
+      "after_sha256": "b0bb1241966d4b35c2440b4240f50878fe305149745629261872efc6c1198860",
+      "sites": [
+        {
+          "path": "tools/saipen_engine/core_unit.py",
+          "line": 785,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/saipen_engine/debt.py",
+      "before_sha256": "26835b39fbbffd853518de994d1baf74186bd70060de07d2c8e126344e5f0c98",
+      "after_sha256": "414a63863b419fa9296deada1b515f58a41be8931792cea0956a8ea2e1b366c6",
+      "sites": [
+        {
+          "path": "tools/saipen_engine/debt.py",
+          "line": 120,
+          "callee": "run"
+        },
+        {
+          "path": "tools/saipen_engine/debt.py",
+          "line": 1259,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/saipen_engine/fleet.py",
+      "before_sha256": "c3a86f745520b6ac37753e7a6c3c3f8987bd8a6e547e324cef31f1711437d1a0",
+      "after_sha256": "5b09fb1ca26911b06ea32fd89f04b75942d0af261a0b59e38e38a82e73a647ea",
+      "sites": [
+        {
+          "path": "tools/saipen_engine/fleet.py",
+          "line": 744,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/saipen_engine/gpu.py",
+      "before_sha256": "915d7966b80fe6d4f0aea596f28b6b85cbc8347afe0ac0c979af42a0320d14f1",
+      "after_sha256": "a0b800181a0c54caea796afd66a8c02cfd603ebb52a1a2afdb408bf0184469c2",
+      "sites": [
+        {
+          "path": "tools/saipen_engine/gpu.py",
+          "line": 171,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/saipen_engine/intent.py",
+      "before_sha256": "0f2596ea87dbe34584959cb4b83cc57b928975cdd32d80133ccb646305549f9f",
+      "after_sha256": "4d3d71c051061ee4c0bda910af18c7721543dfe96438c5abe0f76f4fb6c0e795",
+      "sites": [
+        {
+          "path": "tools/saipen_engine/intent.py",
+          "line": 1700,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/saipen_engine/paths.py",
+      "before_sha256": "516e03a03236ab731699be442d355b171760b0ecd9d543a01d03f9bae91d6fe4",
+      "after_sha256": "d4893d9e4ecc9f066d353e5af6a9fe90c956e9389ad61b416c4c600ac87db843",
+      "sites": [
+        {
+          "path": "tools/saipen_engine/paths.py",
+          "line": 397,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/saipen_engine/release.py",
+      "before_sha256": "8f4b1431ee3c472089bea09a7604fe1894a22736fb8c885e8b9addbb179c21dd",
+      "after_sha256": "126625b8c95b9019d97ae24fbe9acfa7edae9b8826950539c0f8e140cb2f55c3",
+      "sites": [
+        {
+          "path": "tools/saipen_engine/release.py",
+          "line": 2821,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/saipen_engine/runtime_bootstrap.py",
+      "before_sha256": "f6aad9261b801d54c6dbe67662bfba656f02b02eb8da8e668c0d8fbbfdb9b749",
+      "after_sha256": "a7a0d4254341ba4a3962478cb219645eba936c4825ffc4a8691515c246a63e2d",
+      "sites": [
+        {
+          "path": "tools/saipen_engine/runtime_bootstrap.py",
+          "line": 332,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/saipen_engine/snapshot.py",
+      "before_sha256": "3bb19e12a7277fdffe3bcab143b514df316a3f3161dc250ccb6f1b45540d2351",
+      "after_sha256": "c22d0bae132d92ba35decd452e855285878804b675ca6d80bb32837af7b5a6ce",
+      "sites": [
+        {
+          "path": "tools/saipen_engine/snapshot.py",
+          "line": 47,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/saipen_metrics.py",
+      "before_sha256": "e12063117cade3480e5aba58947ca033e7d14c23b4ab380cc156055a556b6743",
+      "after_sha256": "6da163d3ffe993d80338670caa6afa3767d3e38dd8ae9835657817cf56920efd",
+      "sites": [
+        {
+          "path": "tools/saipen_metrics.py",
+          "line": 142,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/second_wave_regressions.py",
+      "before_sha256": "4623a9bf2a6e08fb5ba81d9036a94e94e1d1bed9efb5b0a49d83717596fb03ef",
+      "after_sha256": "b0967b94f7beb48d0c3157856a735988cfee0e64c1575be4c257dee39254fff1",
+      "sites": [
+        {
+          "path": "tools/second_wave_regressions.py",
+          "line": 8,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/t1318_current_generation_probe.py",
+      "before_sha256": "5050fd927d09695eae921d402c096b5d39dc9fd8b5ea1ad262af416842a381f7",
+      "after_sha256": "c1563f46f8c380011d59e4aabf46de98a2fc63bd80746806ee8b6a7e5d4a5215",
+      "sites": [
+        {
+          "path": "tools/t1318_current_generation_probe.py",
+          "line": 68,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/t1320_fleet_native_smoke.py",
+      "before_sha256": "52e43d44fb807ecf43bdfaadd9a1df47e47c46e1bcc5d888bcf1179ae24fb1ff",
+      "after_sha256": "380fffa861b9690085641cf004f8e718f1511ceb706f5d171ff70ce1afe1eb35",
+      "sites": [
+        {
+          "path": "tools/t1320_fleet_native_smoke.py",
+          "line": 65,
+          "callee": "run"
+        },
+        {
+          "path": "tools/t1320_fleet_native_smoke.py",
+          "line": 202,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/t1446_field_soak.py",
+      "before_sha256": "a77f0e2d091be4dd0e2d80731ab5d01f0f2cfa0e96a7fe745a950e92fabfbf01",
+      "after_sha256": "5f6aba43bd52f5c370edd0fd4b7dc9e9458ba84c646e2c8c6254d9ae4038c11b",
+      "sites": [
+        {
+          "path": "tools/t1446_field_soak.py",
+          "line": 295,
+          "callee": "run"
+        },
+        {
+          "path": "tools/t1446_field_soak.py",
+          "line": 291,
+          "callee": "run"
+        },
+        {
+          "path": "tools/t1446_field_soak.py",
+          "line": 261,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/validate.py",
+      "before_sha256": "7f13e2c417e7041965fc6d5b62a304cd2c4a7e791dc2f392c16bfd326c84d7ae",
+      "after_sha256": "33feb0a4b89180674b349fd52be6fc15bf39ea384853f5ba63319e6e4e2830b1",
+      "sites": [
+        {
+          "path": "tools/validate.py",
+          "line": 498,
+          "callee": "run"
+        },
+        {
+          "path": "tools/validate.py",
+          "line": 583,
+          "callee": "run"
+        },
+        {
+          "path": "tools/validate.py",
+          "line": 6785,
+          "callee": "run"
+        },
+        {
+          "path": "tools/validate.py",
+          "line": 8960,
+          "callee": "run"
+        },
+        {
+          "path": "tools/validate.py",
+          "line": 9169,
+          "callee": "run"
+        },
+        {
+          "path": "tools/validate.py",
+          "line": 9265,
+          "callee": "run"
+        },
+        {
+          "path": "tools/validate.py",
+          "line": 9191,
+          "callee": "run"
+        },
+        {
+          "path": "tools/validate.py",
+          "line": 9217,
+          "callee": "run"
+        },
+        {
+          "path": "tools/validate.py",
+          "line": 9272,
+          "callee": "run"
+        },
+        {
+          "path": "tools/validate.py",
+          "line": 9240,
+          "callee": "run"
+        },
+        {
+          "path": "tools/validate.py",
+          "line": 9298,
+          "callee": "run"
+        },
+        {
+          "path": "tools/validate.py",
+          "line": 9314,
+          "callee": "run"
+        }
+      ]
+    },
+    {
+      "path": "tools/verify_handoff_archive.py",
+      "before_sha256": "8c49a17d7408fec52508c5cc03ebf09e69a31bf0418c22fc9e77ddd3927504f4",
+      "after_sha256": "0d67b3ade74a211aa334a1ab88cfc4e7465aa0d8bc4234ca23dac9a552ca866d",
+      "sites": [
+        {
+          "path": "tools/verify_handoff_archive.py",
+          "line": 462,
+          "callee": "run"
+        },
+        {
+          "path": "tools/verify_handoff_archive.py",
+          "line": 488,
+          "callee": "run"
+        },
+        {
+          "path": "tools/verify_handoff_archive.py",
+          "line": 545,
+          "callee": "run"
+        },
+        {
+          "path": "tools/verify_handoff_archive.py",
+          "line": 513,
+          "callee": "run"
+        }
+      ]
+    }
+  ]
+}

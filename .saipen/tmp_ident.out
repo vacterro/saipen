@@ -1,0 +1,161 @@
+360 
+361     # A parent that started AFTER its child is not that child's parent: the pid
+362     # was reused. Everything above the reused link is unrelated.
+363     for index in range(len(facts) - 1):
+364         child, parent = facts[index], facts[index + 1]
+365         child_born = getattr(child, "created", None)
+366         parent_born = getattr(parent, "created", None)
+367         if child_born is not None and parent_born is not None and parent_born > child_born:
+368             facts = facts[: index + 1]
+369             if not any(_host_matches(item, policy.host_images) for item in facts):
+370                 return refuse(
+371                     REASON_PARENT_REUSED,
+372                     f"process {child.pid} names a parent pid that was reused by a newer process",
+373                 )
+374             break
+375 
+376     artifacts = {norm_path(item) for item in policy.hook_artifacts if str(item).strip()}
+377 
+378     # 1. The hook: the peer itself, or the process that started the peer's engine.
+379     hook_index = None
+380     for index, fact in enumerate(facts[: _MAX_ENGINE_HOPS + 1]):
+381         script = _script(getattr(fact, "argv", None))
+382         profile_candidate = bool(
+383             script and policy.profile_hook
+384             and norm_path(script).endswith("/" + norm_path(policy.profile_hook))
+385         )
+386         if script is not None and (norm_path(script) in artifacts or profile_candidate):
+387             hook_index = index
+388             break
+389     if hook_index is None:
+390         if not any(_host_matches(item, policy.host_images) for item in facts):
+391             return refuse(
+392                 REASON_NOT_HOST_DESCENDANT,
+393                 _not_host(
+394                     "the connecting process is not started by a registered host application",
+395                     facts,
+396                     policy.host_images,
+397                 ),
+398             )
+399         return refuse(
+400             REASON_HOOK_NOT_FOUND,
+401             "the connecting process is under the host application but is not the "
+402             "installed host hook or the engine it started (a shell tool call is not a hook)",
+403         )
+404     hook = facts[hook_index]
+405     hook_argv = list(hook.argv or [])
+406     hook_root = _flag(hook_argv, "--saipen-root")
+407     declared_host = _flag(hook_argv, "--host")
+408     if declared_host != policy.host:
+409         return refuse(
+410             REASON_HOOK_HOST_MISMATCH,
+411             f"the hook declares host {declared_host!r}, the request names {policy.host!r}",
+412             hook_pid=hook.pid,
+413         )
+414     # Below the hook only the engine it started may sit.
+415     for fact in facts[:hook_index]:
+416         script = _script(getattr(fact, "argv", None))
+417         allowed = {
+418             norm_path(f"{hook_root}/{entry}") for entry in policy.engine_entries if hook_root
+419         }
+420         if script is None or norm_path(script) not in allowed:
+421             return refuse(
+422                 REASON_HOOK_NOT_FOUND,
+423                 "the connecting process was started by the hook but is not its engine",
+424                 hook_pid=hook.pid,
+425             )
+426 
+427     # 2. Above the hook: an interpreter re-exec of the same command, then shells
+428     #    that were each started to run exactly this hook command.
+429     cursor = hook_index + 1
+430     reexec = 0
+431     while (
+432         cursor < len(facts)
+433         and reexec < _MAX_REEXEC
+434         and facts[cursor].argv
+435         and _same_argv(list(facts[cursor].argv), hook_argv)
+436         and not _name_matches(facts[cursor].image, policy.shells)
+437     ):
+438         cursor += 1
+439         reexec += 1
+440     shells = 0
+441     while cursor < len(facts) and _name_matches(facts[cursor].image, policy.shells):
+442         shell = facts[cursor]
+443         if not any(
+444             _same_argv(tokens, hook_argv) for tokens in _shell_payloads(list(shell.argv or []))
+445         ):
+446             return refuse(
+447                 REASON_HOOK_CHAIN_UNRECOGNIZED,
+448                 f"shell {shell.pid} above the hook was not started to run exactly the hook "
+449                 "command, so this is not the host's own hook invocation",
+450                 hook_pid=hook.pid,
+451                 hook_root=hook_root,
+452             )
+453         shells += 1
+454         cursor += 1
+455         if shells > policy.max_shells:
+456             return refuse(
+457                 REASON_HOOK_CHAIN_UNRECOGNIZED,
+458                 "too many shells between the hook and the host application",
+459                 hook_pid=hook.pid,
+460                 hook_root=hook_root,
+461             )
+462 
+463     # 2b. Named host-owned intermediaries (not shells) between hook and host.
+464     bridges = 0
+465     while cursor < len(facts) and _name_matches(facts[cursor].image, policy.bridge_images):
+466         cursor += 1
+467         bridges += 1
+468         if bridges > policy.max_bridges:
+469             return refuse(
+470                 REASON_HOOK_CHAIN_UNRECOGNIZED,
+471                 "too many intermediaries between the hook and the host application",
+472                 hook_pid=hook.pid,
+473                 hook_root=hook_root,
+474             )
+475 
+476     # 3. The host application itself, directly above.
+477     if cursor >= len(facts) or not _host_matches(facts[cursor], policy.host_images):
+478         above = facts[cursor].name if cursor < len(facts) else None
+479         if not any(_host_matches(item, policy.host_images) for item in facts):
+480             return refuse(
+481                 REASON_NOT_HOST_DESCENDANT,
+482                 _not_host(
+483                     "the hook was not started by a registered host application",
+484                     facts,
+485                     policy.host_images,
+486                 ),
+487                 hook_pid=hook.pid,
+488                 hook_root=hook_root,
+489             )
+490         return refuse(
+491             REASON_HOOK_CHAIN_UNRECOGNIZED,
+492             f"the hook was started through {above!r}, not directly by the host application",
+493             hook_pid=hook.pid,
+494             hook_root=hook_root,
+495         )
+496     host = facts[cursor]
+497     if policy.profile_hook:
+498         try:
+499             selected_hook = hook_for_host(host.pid) if hook_for_host else None
+500         except Exception:
+501             selected_hook = None
+502         if selected_hook is None:
+503             return refuse(REASON_IDENTITY_UNAVAILABLE,
+504                           "the host's configuration profile could not be observed",
+505                           host_pid=host.pid, hook_pid=hook.pid, hook_root=hook_root)
+506         if norm_path(_script(hook_argv)) != norm_path(selected_hook):
+507             return refuse(REASON_HOOK_ARTIFACT_MISMATCH,
+508                           "the hook belongs to another configuration profile than the host",
+509                           host_pid=host.pid, hook_pid=hook.pid, hook_root=hook_root)
+510     signer = None
+511     if policy.host_signers:
+512         try:
+513             signer = signer_of(str(host.image)) if signer_of and host.image else None
+514         except Exception:
+515             signer = None
+516         if signer not in policy.host_signers:
+517             return refuse(
+518                 REASON_HOST_IMAGE_UNVERIFIED,
+519                 f"host image {host.name!r} is not signed by a registered publisher "
+520                 f"(found {signer!r})",

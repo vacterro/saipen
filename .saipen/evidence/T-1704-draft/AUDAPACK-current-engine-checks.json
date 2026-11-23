@@ -1,0 +1,52 @@
+{
+  "before": {
+    "STATE.md": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50",
+    "BOARD.md": "8bb2a5e68d474ee2ab22b834e6a94440d5389ea352d2969f5ad945cd04ca9952",
+    "LOG.md": "e414d4b54a3e99d9fa515945bf9d8be208581292889b3744edcb11466b0f7c7a",
+    "MANIFEST.json": "6bbb6ca8bed1502f04176d848f24ad12fdd58759e1946f0b2b27a5f023e0e050"
+  },
+  "after": {
+    "STATE.md": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50",
+    "BOARD.md": "8bb2a5e68d474ee2ab22b834e6a94440d5389ea352d2969f5ad945cd04ca9952",
+    "LOG.md": "e414d4b54a3e99d9fa515945bf9d8be208581292889b3744edcb11466b0f7c7a",
+    "MANIFEST.json": "6bbb6ca8bed1502f04176d848f24ad12fdd58759e1946f0b2b27a5f023e0e050"
+  },
+  "core_unchanged": true,
+  "commands": [
+    {
+      "name": "native-current",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "started_utc": "2026-10-10T10:51:45.526289+00:00",
+      "exit_code": 1,
+      "output": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1704-draft\\AUDAPACK-native-current.txt",
+      "output_sha256": "0b29472dbb07431069d5444a73e6db0f3bb4c8c954627dd56c333ef0808e2b71",
+      "tail": "OT be collected -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else\r\nWARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-001] carries source_tree_fingerprint 'git-delta-v1:a3fd43351486de05d92256b7508c1b05ffb3ec3cc0d4e9fb1d6a72d59c6813d2' but the current tree computes 'git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else\r\nWARN [subsaipen-uncollected]: 1 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)\r\nWARN [sub-role-revision-legacy]: subSaipen STATE(s) predate role-revision recording: saipython, saitranslate -- re-record `role_revision` from the current charter at their next adopt (PROTOCOL.md § 6, T-542)\r\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\r\nValidation FAILED: 19 problem(s), 79 warning(s)\r\n"
+    },
+    {
+      "name": "recovery-current",
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "recover",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+        "--dry-run",
+        "--json"
+      ],
+      "started_utc": "2026-10-10T10:51:45.526289+00:00",
+      "exit_code": 1,
+      "output": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1704-draft\\AUDAPACK-recovery-current.txt",
+      "output_sha256": "9c844e719d0b6624191f0b46f8f64c9bca619f658179ff1c24cc9de490cc5451",
+      "tail": "{\r\n  \"ok\": false,\r\n  \"code\": \"HISTORY_LEDGER_CORRUPT\",\r\n  \"detail\": \"history-void: complete LOG history fails the immutable-ledger contract -- E-3134 parent E-3133 does not exist in the ledger; E-3137 parent E-3136 does not exist in the ledger; E-3146 parent E-3145 does not exist in the ledger\",\r\n  \"needs_local_mutation\": false,\r\n  \"safe_auto_repair_available\": false,\r\n  \"operator_decision_available\": false,\r\n  \"canonical_next_command\": null,\r\n  \"read_only\": true,\r\n  \"terminal_disposition\": \"FORENSICALLY_UNRECOVERABLE\",\r\n  \"blocking_surface\": \"log\",\r\n  \"blocking_field\": null,\r\n  \"evidence_reference\": \".saipen/LOG.md\",\r\n  \"diagnosis\": \"READ_ONLY_DIAGNOSIS_ONLY\",\r\n  \"read_only_diagnosis_only\": true,\r\n  \"instruction\": \"READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth\",\r\n  \"forbidden_probes\": [\r\n    \"saipen stop\",\r\n    \"saipen transition\",\r\n    \"saipen goal\",\r\n    \"saipen ticket\",\r\n    \"Bash\",\r\n    \"Edit\",\r\n    \"Write\"\r\n  ],\r\n  \"reason_code\": \"HISTORY_LEDGER_CORRUPT\"\r\n}\r\n"
+    }
+  ],
+  "admission": "NO_GO",
+  "live_mutations": 0
+}

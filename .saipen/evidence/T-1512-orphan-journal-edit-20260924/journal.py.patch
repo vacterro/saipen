@@ -1,0 +1,87 @@
+diff --git a/tools/saipen_engine/journal.py b/tools/saipen_engine/journal.py
+index 5a3a5017..1ec45c58 100644
+--- a/tools/saipen_engine/journal.py
++++ b/tools/saipen_engine/journal.py
+@@ -63,6 +63,16 @@ ROLES = (
+     "coverage",
+     "generic",
+ )
++# Closed path -> operation writer registry.  A protected semantic artifact is
++# not writable through the generic journal CAS: only the named domain writer,
++# with its domain token and semantic verifier, may target it.
++WRITER_REGISTRY = {
++    ".saipen/recovery/conformance/accepted_debt": {
++        "operations": frozenset({"accepted_debt.register", "accepted_debt.rebind"}),
++        "verification_policies": frozenset({"accepted_debt"}),
++    },
++}
++_DOMAIN_WRITER_TOKENS = {"accepted_debt": object()}
+ OPS_DIR = ".saipen/recovery/ops"
+ LINEAGE_MIGRATION_OP = "op-migrate-lineage"
+ # Engine-written settled receipt marker (perf wave T-1020): a tiny summary
+@@ -96,6 +106,7 @@ VERIFICATION_POLICIES = frozenset(
+         "sub_lifecycle",
+         "sub_clean",
+         "sub_sync",
++        "accepted_debt",
+         "none",
+     }
+ )
+@@ -118,6 +129,14 @@ _CRASH_MAP = {
+ TARGET_ACTIONS = ("write", "delete_file", "delete_dir")
+ 
+ 
++def domain_writer_token(domain: str) -> object:
++    """Return the private capability token for one closed semantic writer."""
++    try:
++        return _DOMAIN_WRITER_TOKENS[domain]
++    except KeyError as exc:
++        raise ValueError(f"unknown domain writer {domain!r}") from exc
++
++
+ def _canonical_receipt_metadata(value: object) -> tuple[dict | None, str | None]:
+     """Normalize the one optional semantic-receipt ticket representation.
+ 
+@@ -2201,6 +2220,7 @@ def validate_mutation_request(
+     verification_policy: str = "none",
+     read_preconditions: dict | None = None,
+     receipt_metadata: dict | None = None,
++    writer_token: object | None = None,
+ ) -> dict:
+     """ONE pure validation gate for mutation requests (hostile-regression).
+ 
+@@ -2271,6 +2291,26 @@ def validate_mutation_request(
+             if not isinstance(path, str) or not path:
+                 return refuse("target path must be a non-empty string")
+             canonical = owned_target_path(root, path).relative_to(root).as_posix()
++            protected_prefix = next(
++                (prefix for prefix in WRITER_REGISTRY
++                 if canonical == prefix or canonical.startswith(prefix + "/")),
++                None,
++            )
++            if protected_prefix is not None:
++                protected = WRITER_REGISTRY[protected_prefix]
++                if operation not in protected["operations"]:
++                    return refuse(
++                        f"target {canonical} is protected by the {protected_prefix} domain writer"
++                    )
++                if verification_policy not in protected["verification_policies"]:
++                    return refuse(
++                        f"target {canonical} requires a registered domain verification policy"
++                    )
++                expected_token = _DOMAIN_WRITER_TOKENS[protected_prefix]
++                if writer_token is not expected_token:
++                    return refuse(
++                        f"target {canonical} requires the {operation} domain writer capability"
++                    )
+             if canonical in seen_target_paths:
+                 return refuse(
+                     f"duplicate target path {canonical!r}: one path may "
+@@ -2291,7 +2331,6 @@ def validate_mutation_request(
+                     return refuse(f"target {path}: write action requires content")
+                 if not isinstance(content, (str, bytes)):
+                     return refuse(f"target {path}: write content must be str or bytes")
+-            # Keep mutated target with canonical path
+             new_target = dict(target)
+             new_target["path"] = canonical
+             canonical_targets.append(new_target)

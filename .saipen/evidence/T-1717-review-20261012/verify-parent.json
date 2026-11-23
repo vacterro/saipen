@@ -1,0 +1,40 @@
+{
+  "phase": "VERIFY",
+  "work": "T-1717",
+  "gate": {
+    "ok": true,
+    "code": "SOURCE_COVERAGE_COMPLETE",
+    "work": "T-1717",
+    "receipts": [
+      "SRC-216"
+    ]
+  },
+  "coverage": {
+    "receipt": "SRC-216",
+    "requirements": 10,
+    "actionable": 10,
+    "terminal": 10,
+    "dispositions": {
+      "VERIFIED": 10
+    },
+    "unresolved": []
+  },
+  "source_integrity": {
+    "ok": true,
+    "code": "SOURCE_INTEGRITY_OK",
+    "receipt": "SRC-216"
+  },
+  "completed_children": [
+    "T-1718",
+    "T-1721"
+  ],
+  "premature_source_closure_refused": {
+    "ok": false,
+    "code": "SOURCE_WORK_ACTIVE",
+    "detail": "linked Work T-1717 is not DONE"
+  },
+  "canonical_unchanged": true,
+  "consumer_verdict": "FAIL: 4 problems/57 warnings; original detail absent and LIVE outcome unproved",
+  "source_ready_after_work_done": true,
+  "source_closed": false
+}

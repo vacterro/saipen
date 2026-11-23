@@ -1,0 +1,30 @@
+AUT-007 red-before-green pair (SRC-344 / audit/28.md)
+
+Subject: tools/saipen_engine/campaign.py, the MAINTENANCE_AVAILABLE discovery
+edge in CampaignController.step(). Pre-fix bytes have no ANALYSIS_PROGRESS
+branch: the status increments last_saipal_generation and then falls through to
+the no-findings `else`, saving QUIESCENT_WAIT and reporting
+DISCOVERY_NO_NEW_FINDINGS.
+
+Pre-fix tree: V:\_TEMP_\saipen-aut007-prefix-7ak9lzpd (tools/ + saipen/ copied, .saipen/STATE.md copied; the
+1575-char AUT-007 branch deleted from campaign.py, nothing else changed).
+
+current tree: rc=0 8 passed in 0.37s
+pre-fix tree: rc=1  5 failed, 3 passed in 0.47s
+
+Red on pre-fix bytes (the defect):
+  test_analysis_progress_does_not_quiesce            QUIESCENT_WAIT, not FORENSIC_ANALYSIS
+  test_analysis_progress_is_not_reported_as_no_findings  event == DISCOVERY_NO_NEW_FINDINGS
+  test_analysis_progress_names_the_next_action       'forensic_analysis', not '..._slice'
+  test_the_slice_is_recorded_with_its_identity       last_analysis_slice absent (None)
+  test_progress_branch_precedes_the_findings_branch  no progress branch in source
+
+Green on pre-fix bytes by design (controls, not the repair):
+  test_each_slice_advances_the_recorded_generation   generation guard predates AUT-007
+  test_a_completed_objective_may_still_quiesce       genuine empty corpus must sleep
+  test_new_findings_still_reach_delivery             findings branch predates AUT-007
+
+Green on current bytes: 8 passed. The five red assertions all bind the single
+added branch, so the pair isolates the repair rather than the file.
+
+PROVEN

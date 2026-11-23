@@ -1,0 +1,251 @@
+--- pre/tools/install_host_guard.py
++++ tools/install_host_guard.py
+@@ -815,9 +815,9 @@
+     )
+     entry = next(item for item in registry["adapters"] if item["id"] == host)
+     if host == "claude":
+-        from saipen_engine.claude_profiles import adapter_for, directory
+-
+-        entry = adapter_for(entry, home, directory(home, profile))
++        from saipen_engine.claude_profiles import adapter_for, write_directory
++
++        entry = adapter_for(entry, home, write_directory(home, profile))
+     elif profile is not None:
+         raise ValueError("--profile is only supported for Claude Code")
+     artifact = home / entry["hook_install_surface"].removeprefix("~/")
+@@ -1160,9 +1160,9 @@
+     )
+     entry = next(item for item in registry["adapters"] if item["id"] == host)
+     if host == "claude":
+-        from saipen_engine.claude_profiles import adapter_for, directory
+-
+-        entry = adapter_for(entry, home, directory(home, profile))
++        from saipen_engine.claude_profiles import adapter_for, write_directory
++
++        entry = adapter_for(entry, home, write_directory(home, profile))
+     artifact = home / entry["hook_install_surface"].removeprefix("~/")
+     kept = previous_artifact(artifact)
+     if not kept.is_file():
+@@ -1218,9 +1218,9 @@
+     entry = next(item for item in registry["adapters"] if item["id"] == host)
+     allowed_root = home
+     if host == "claude":
+-        from saipen_engine.claude_profiles import adapter_for, directory
+-
+-        allowed_root = directory(home, profile)
++        from saipen_engine.claude_profiles import adapter_for, write_directory
++
++        allowed_root = write_directory(home, profile)
+         if allowed_root.is_symlink():
+             raise ValueError("Claude profile is a link")
+         entry = adapter_for(entry, home, allowed_root)
+--- pre/tools/saipen_engine/claude_profiles.py
++++ tools/saipen_engine/claude_profiles.py
+@@ -17,6 +17,27 @@
+     if selected:
+         return Path(os.path.expandvars(os.path.expanduser(str(selected)))).absolute()
+     return base / ".claude"
++
++
++def carrier_applies(home: Path | None) -> bool:
++    """An ambient launch profile selects writes only for the launcher's home."""
++    if home is None:
++        return True
++    try:
++        return Path(home).resolve() == Path.home().resolve()
++    except (OSError, RuntimeError):
++        return False
++
++
++def write_directory(home: Path | None = None, profile: Path | str | None = None) -> Path:
++    """Select a writer's profile without redirecting a separately named home.
++
++    Observation still uses `directory`: a hook's explicit home and its launch
++    profile may differ. Writers opt into the ambient profile only for their
++    own home; an explicit profile remains valid for any home.
++    """
++    selected = profile if profile is not None or carrier_applies(home) else ""
++    return directory(home, selected)
+ 
+ 
+ def surface(value: str, home: Path, profile: Path) -> Path:
+--- pre/tools/saipen_engine/host_integration.py
++++ tools/saipen_engine/host_integration.py
+@@ -921,9 +921,9 @@
+     """
+     from .runtime_bootstrap import CanonicalSourceUnproven, _invoke_installer, canonical_source_root
+ 
+-    from .claude_profiles import directory
+-
+-    selected = directory(home, profile)
++    from .claude_profiles import write_directory
++
++    selected = write_directory(home, profile)
+     if profile is not None and not selected.is_dir():
+         raise ValueError(f"Claude profile directory does not exist: {selected}")
+     before = doctor(home=home, only=only, profile=profile)
+@@ -948,7 +948,7 @@
+                           "code": "CANONICAL_RUNTIME_SOURCE_UNPROVEN",
+                           "detail": "no proven source to install from"})
+             continue
+-        if item["id"] == "claude" and (profile is not None or os.environ.get("CLAUDE_CONFIG_DIR")):
++        if item["id"] == "claude":
+             proc = _invoke_installer(canonical, item["id"], profile=selected)
+         else:
+             proc = _invoke_installer(canonical, item["id"])
+--- pre/tools/test_hermetic_env.py
++++ tools/test_hermetic_env.py
+@@ -26,6 +26,7 @@
+ from __future__ import annotations
+ 
+ import os
++import contextlib
+ import shutil
+ import subprocess
+ import sys
+@@ -304,6 +305,42 @@
+     return dict(record.removed)
+ 
+ 
++@contextlib.contextmanager
++def nested_run():
++    """Protect outer module cleanups while a test runs an inner unittest suite.
++
++    unittest drains its process-wide cleanup list at the end of each suite.
++    Only cleanups registered inside this block belong to the nested run;
++    restoring the outer list preserves its order even when the inner run fails.
++    """
++    cleanups = unittest.case._module_cleanups
++    held = list(cleanups)
++    del cleanups[:]
++    try:
++        yield
++    finally:
++        cleanups[:0] = held
++
++
++def borrow(test: unittest.TestCase) -> unittest.TestResult:
++    """Run one test without module/class fixtures or an outer suite teardown."""
++    fixtures = (type(test).setUpClass, type(test).tearDownClass)
++    inherited = (unittest.TestCase.setUpClass, unittest.TestCase.tearDownClass)
++    if any(own.__func__ is not base.__func__ for own, base in zip(fixtures, inherited)):
++        raise ValueError(
++            f"{type(test).__qualname__} has a class fixture; use nested_run() with a suite"
++        )
++    result = unittest.TestResult()
++    with nested_run():
++        test.run(result)
++    return result
++
++
++def project_write_interlock() -> str | None:
++    """Observe the held repository through the interlock's owning test helper."""
++    return os.environ.get(FORBID_PROJECT_WRITE)
++
++
+ def retained_fixtures() -> list:
+     """The process-global list that keeps disposable fixtures alive.
+ 
+--- pre/tools/test_protocol_admission.py
++++ tools/test_protocol_admission.py
+@@ -120,7 +120,9 @@
+             # The staged self-test is the installer's own subject
+             # (test_t1624_host_integration); a fixture built for every case
+             # does not re-run it.
+-            install_host_guard.install("claude", self.home, ROOT, verify=False)
++            install_host_guard.install(
++                "claude", self.home, ROOT, verify=False, profile=self.home / ".claude"
++            )
+         self.policy = json.loads(json.dumps(REAL_POLICY))
+ 
+     def put_skill(self, relative: str, name: str = "caveman") -> Path:
+@@ -1442,7 +1444,9 @@
+             (world_home / ".claude").mkdir()
+             block = autoinject.rendered_activation_block(ROOT / "saipen")
+             (world_home / ".claude" / "CLAUDE.md").write_text(block + "\n", encoding="utf-8")
+-            install_host_guard.install("claude", world_home, ROOT, verify=False)
++            install_host_guard.install(
++                "claude", world_home, ROOT, verify=False, profile=world_home / ".claude"
++            )
+             skill = world_home / ".agents" / "skills" / "caveman"
+             skill.mkdir(parents=True)
+             (skill / "SKILL.md").write_text("---\nname: caveman\n---\nTerse.\n", encoding="utf-8")
+--- pre/tools/test_t1613_publication_convergence.py
++++ tools/test_t1613_publication_convergence.py
+@@ -59,6 +59,12 @@
+ IS_WINDOWS = os.name == "nt"
+ 
+ sys.path.insert(0, str(ROOT / "tools"))
++
++from test_hermetic_env import isolate_host_session, nested_run  # noqa: E402
++
++
++def setUpModule() -> None:
++    isolate_host_session()
+ 
+ 
+ def _surface_files() -> list[str]:
+@@ -541,11 +547,11 @@
+             "test_runtime_generation_identity",
+         ]
+         suite = unittest.TestSuite(loader.loadTestsFromName(name) for name in names)
+-        with open(os.devnull, "w") as sink:
++        with open(os.devnull, "w") as sink, nested_run():
+             result = unittest.TextTestRunner(stream=sink, verbosity=0).run(suite)
+         broken = [str(f[0]) for f in result.failures + result.errors]
+         self.assertTrue(result.wasSuccessful(), broken)
+ 
+ 
+ if __name__ == "__main__":
+-    unittest.main()+    unittest.main()
+--- pre/tools/test_t1624_host_integration.py
++++ tools/test_t1624_host_integration.py
+@@ -1844,7 +1844,8 @@
+         install_host_guard.install("claude", self.profile, ROOT, verify=False)
+         calls: list = []
+ 
+-        def installer(source, host):
++        def installer(source, host, *, profile=None):
++            self.assertEqual(profile, self.profile / ".claude")
+             calls.append((Path(source), host))
+             return subprocess.CompletedProcess(
+                 [], 1, stdout="Claude Code skill FAILED\n", stderr=""
+--- pre/tools/test_t1635_claude_profiles.py
++++ tools/test_t1635_claude_profiles.py
+@@ -258,7 +258,9 @@
+                 second.mkdir()
+                 shutil.copyfile(world.home / ".claude" / "CLAUDE.md", second / "CLAUDE.md")
+                 with mock.patch.dict(os.environ, {"CLAUDE_CONFIG_DIR": str(second)}):
+-                    install_host_guard.install("claude", world.home, ROOT, verify=False)
++                    install_host_guard.install(
++                        "claude", world.home, ROOT, verify=False, profile=second
++                    )
+                 fixture = HostFixture(scratch, home=world.home, project=world.project,
+                                       authority=world.authority)
+                 try:
+--- pre/tools/test_xpatch_controls.py
++++ tools/test_xpatch_controls.py
+@@ -9,7 +9,6 @@
+ 
+ from __future__ import annotations
+ 
+-import io
+ import sys
+ import unittest
+ from pathlib import Path
+@@ -18,13 +17,12 @@
+ sys.path.insert(0, str(Path(__file__).resolve().parent))
+ 
+ import test_xpatch
++import test_hermetic_env as hermetic
+ from saipen_engine import xpatch
+ 
+ 
+ def _run(case_class, method: str) -> unittest.TestResult:
+-    suite = unittest.TestSuite([case_class(method)])
+-    with io.StringIO() as sink:
+-        return unittest.TextTestRunner(stream=sink, verbosity=0).run(suite)
++    return hermetic.borrow(case_class(method))
+ 
+ 
+ class ControlsAreRed(unittest.TestCase):

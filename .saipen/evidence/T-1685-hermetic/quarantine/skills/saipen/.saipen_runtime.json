@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "adapter_id": "claude",
+  "canonical_source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "source_version": "8.1.0",
+  "source_build": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "runtime_fingerprint": "gen-sha256:75a18e4dba466f944d12b098698130416385b62e5f01da1989200698a982074b",
+  "installer_generation": "T-1342-runtime-surface-identity-20260915.1"
+}

@@ -1,0 +1,33 @@
+test_a_lost_projection_with_verified_claim (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_a_lost_projection_with_verified_claim)
+Case A: STATE.task=T-505, BOARD missing, LOG has verified claim. ... ok
+test_b_missing_or_untrusted_claim_evidence (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_b_missing_or_untrusted_claim_evidence)
+Case B: Same defect with missing or untrusted claim evidence. ... ok
+test_c_duplicate_entries_across_board_sections (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_c_duplicate_entries_across_board_sections)
+Case C: Duplicate T-505 entries across BOARD sections. ... ok
+test_d_state_task_null_and_empty_doing (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_d_state_task_null_and_empty_doing)
+Case D: STATE.task=NULL and legitimate empty DOING. ... ok
+test_e_incomplete_transaction_between_log_and_board (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_e_incomplete_transaction_between_log_and_board)
+Case E: Incomplete transaction between LOG and BOARD. ... ok
+test_f_concurrent_claims_conflict (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_f_concurrent_claims_conflict)
+Case F: Concurrent claims for one ticket (another ticket already in DOING). ... ok
+test_g_repeated_recovery_is_idempotent (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_g_repeated_recovery_is_idempotent)
+Case G: Repeated recovery is idempotent. ... ok
+test_h_crash_during_recovery_transaction (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_h_crash_during_recovery_transaction)
+Case H: Crash during recovery transaction leaves recoverable state. ... ok
+test_i_unexpected_filesystem_write_failure (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_i_unexpected_filesystem_write_failure)
+Case I: Unexpected filesystem/write failure rolls back cleanly. ... ok
+test_j_unauthorized_operator_cannot_perform_recovery (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_j_unauthorized_operator_cannot_perform_recovery)
+Case J: Unauthorized operator cannot perform recovery. ... ok
+test_k_genuine_authority_block_remains_blocked (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_k_genuine_authority_block_remains_blocked)
+Case K: Genuine authority block remains blocked. ... ok
+test_l_style_contract_reconciliation_cannot_corrupt_projection (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_l_style_contract_reconciliation_cannot_corrupt_projection)
+Case L: Style-contract reconciliation cannot corrupt ticket projection. ... ok
+test_m_successful_recovery_returns_consistency (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_m_successful_recovery_returns_consistency)
+Case M: Successful recovery returns validate/current state to consistency. ... ok
+test_n_already_healthy_projects_remain_unchanged (test_lost_active_ticket_recovery.LostActiveTicketRecoveryTests.test_n_already_healthy_projects_remain_unchanged)
+Case N: Already healthy projects remain unchanged. ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.900s
+
+OK

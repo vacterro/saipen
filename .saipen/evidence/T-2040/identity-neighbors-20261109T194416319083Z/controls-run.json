@@ -1,0 +1,19 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "tools.test_persistent_goal_engine",
+    "tools.test_evidence_gap_ledger_lineage",
+    "tools.test_t2040_exhaustion_evidence.ExhaustionEvidenceTests.test_not_checked_cannot_certify_exhaustion",
+    "tools.test_t2040_exhaustion_evidence.ExhaustionEvidenceTests.test_checked_absence_is_quiescent"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "started_at": "2026-11-09T20:06:34.349147+00:00",
+  "finished_at": "2026-11-09T20:06:34.768483+00:00",
+  "elapsed_s": 0.422,
+  "returncode": 0,
+  "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\identity-neighbors-20261109T194416319083Z\\controls.log"
+}

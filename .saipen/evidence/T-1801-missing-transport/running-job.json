@@ -1,0 +1,17 @@
+{
+  "ticket": "T-1801",
+  "phase": "DONE",
+  "command": "python tools/core_unit.py evidence T-1801",
+  "tool_session_id": 14999,
+  "pid": 31864,
+  "pid_created": 1792086595.8403778,
+  "started_utc": "2026-10-15T17:49:56Z",
+  "marker": ".saipen/cache/inflight/core-unit.json",
+  "fingerprint": "54ca6c4a8207d8cdaa70ab546e4441fb2a3c00140614248fbcb91b327122734d",
+  "regression_record": ".saipen/evidence/regression/regression-execution-581eab5798d74385b360b33a1c3c7f4b.json",
+  "terminal": true,
+  "resume": "T-1801 canonically DONE E-15963 after family 6676/0, independent REVIEW 8/0 and final CURRENT_PASS 0 problems/9 warnings. Do not restart the completed run or replay finish. Next approved repair is T-1765 ruleset 2 (SRC-260), then append Work T-1802 accounting and full cc all queue.",
+  "exit_code": 0,
+  "family_record": ".saipen/evidence/core-unit/54ca6c4a8207d8cd-20261015T181538Z.json",
+  "ticket_completion_event": "E-15963"
+}

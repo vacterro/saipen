@@ -1,0 +1,179 @@
+{
+  "clauses": {
+    "SRC-404:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Avoid creating another umbrella ticket."
+    },
+    "SRC-404:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Make Russian the intended default reply language for this installation."
+    },
+    "SRC-404:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Change the authoritative configuration to `reply_language: ru`."
+    },
+    "SRC-404:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Ensure all generated host instructions derive from the same selected contract."
+    },
+    "SRC-404:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not duplicate language rules independently in Claude, Freebuff, OpenCode, Gemini or other host adapters."
+    },
+    "SRC-404:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Detect contradictions between the effective host instruction and SAIPEN language configuration."
+    },
+    "SRC-404:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Report effective language and its authoritative source through machine-readable diagnostics."
+    },
+    "SRC-404:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Preserve the actual higher-priority instruction hierarchy."
+    },
+    "SRC-404:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never silently treat an explicitly conflicting language instruction as compatible."
+    },
+    "SRC-404:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Keep protocol fields, code, paths, logs and machine-readable evidence unchanged."
+    },
+    "SRC-404:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not merely edit STYLE.md and globally replace STATE markers."
+    },
+    "SRC-404:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A new user request must not disappear because unrelated work was active."
+    },
+    "SRC-404:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never preempt foreign-owned work or bypass authority restrictions."
+    },
+    "SRC-404:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent a deadlock if the agent is simply executing SCOUT."
+    },
+    "SRC-404:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Unchanged authenticated policy plus ordinary observation update must not revoke an otherwise valid standing grant."
+    },
+    "SRC-404:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Conversely, a genuine policy or authority change must still invalidate the grant."
+    },
+    "SRC-404:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not weaken the authorization boundary to make the test pass."
+    },
+    "SRC-404:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not claim a performance root cause from unrelated SAIPEN logs."
+    },
+    "SRC-404:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Any optimization must preserve unit orders, legitimate AI behavior and deterministic simulation requirements."
+    },
+    "SRC-404:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not mutate BZDECOMP merely because this SAIPEN handoff mentions it."
+    },
+    "SRC-404:R021": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Russian language selected without contradictory host instructions."
+    },
+    "SRC-404:R022": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "STYLE migration does not corrupt active project checkpoints."
+    },
+    "SRC-404:R023": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Existing jobs survive a host restart."
+    },
+    "SRC-404:R024": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "New requests are durably captured and correctly queued or executed."
+    },
+    "SRC-404:R025": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Active work is not silently overwritten."
+    },
+    "SRC-404:R026": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "No false claims of deadlock."
+    },
+    "SRC-404:R027": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Standing grants survive harmless observation updates."
+    },
+    "SRC-404:R028": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Real authority-policy changes still invalidate grants."
+    },
+    "SRC-404:R029": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Malformed collect hypotheses fail closed without exceptions."
+    },
+    "SRC-404:R030": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "T-2040 regressions pass independent verification."
+    },
+    "SRC-404:R031": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Canonical validation passes before final closure."
+    },
+    "SRC-404:R032": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "No unauthorized Git, release or foreign-project mutations."
+    },
+    "SRC-404:R033": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Ordinary tests must not disturb Windows foreground focus, keyboard, mouse or active desktop windows."
+    },
+    "SRC-404:R034": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not substitute a green test summary for a completed canonical lifecycle."
+    }
+  },
+  "derived_at": "2026-11-09T16:05:02Z",
+  "derived_from": "SRC-404",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "541fb167d924ccbe455a65d280dacffe1209b55cb91e8a28ffbb2b18a16b22e5"
+}

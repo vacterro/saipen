@@ -1,0 +1,33 @@
+{
+  "verdict": "PASS",
+  "fixture_only": true,
+  "bzdecomp_executed": false,
+  "elapsed_s": 0.1720000000204891,
+  "status_code": "SUITE_STATUS",
+  "newest": {
+    "verdict": "FAIL",
+    "status": "FAIL",
+    "exit_code": 1,
+    "totals": null,
+    "problems": [
+      "exit code 1"
+    ],
+    "finished_utc": "2026-11-04T04:04:55Z",
+    "record": ".saipen/evidence/suite/ace33c29f463e1cd-20261104T040455777806Z.json",
+    "duration_s": 0.2,
+    "overhead_s": {
+      "pre_hash": 0.031,
+      "post_hash": 0.031,
+      "parsing": 0.0,
+      "total": 0.062
+    },
+    "scripts": [
+      {
+        "script": "Test-Stub.ps1",
+        "duration_s": 0.25
+      }
+    ],
+    "first_failure_line": "FAIL: NativeMissionRouterTests: DllBase.cpp stub lacks vrv::satmap"
+  },
+  "partial_fail": true
+}

@@ -1,0 +1,75 @@
+test_another_ticket_s_evidence_does_not_count (test_acceptance.BindingTests.test_another_ticket_s_evidence_does_not_count) ... ok
+test_evidence_for_one_criterion_never_satisfies_another (test_acceptance.BindingTests.test_evidence_for_one_criterion_never_satisfies_another) ... ok
+test_evidence_naming_an_undeclared_criterion_is_reported (test_acceptance.BindingTests.test_evidence_naming_an_undeclared_criterion_is_reported) ... ok
+test_structured_evidence_binds_to_its_criterion (test_acceptance.BindingTests.test_structured_evidence_binds_to_its_criterion) ... ok
+test_a_duplicate_id_keeps_the_first_declaration (test_acceptance.CriterionParsingTests.test_a_duplicate_id_keeps_the_first_declaration)
+An id that changes meaning mid-clause is worse than a stable one. ... ok
+test_a_legacy_clause_declares_nothing_and_is_not_an_error (test_acceptance.CriterionParsingTests.test_a_legacy_clause_declares_nothing_and_is_not_an_error) ... ok
+test_an_empty_clause_declares_nothing (test_acceptance.CriterionParsingTests.test_an_empty_clause_declares_nothing) ... ok
+test_criteria_are_read_in_declaration_order (test_acceptance.CriterionParsingTests.test_criteria_are_read_in_declaration_order) ... ok
+test_prose_mentioning_an_ac_id_mid_sentence_is_not_a_criterion (test_acceptance.CriterionParsingTests.test_prose_mentioning_an_ac_id_mid_sentence_is_not_a_criterion) ... ok
+test_a_producer_claim_has_no_representable_form (test_acceptance.EvidenceGrammarTests.test_a_producer_claim_has_no_representable_form) ... ok
+test_a_well_formed_record_parses (test_acceptance.EvidenceGrammarTests.test_a_well_formed_record_parses) ... ok
+test_an_unknown_evidence_class_is_malformed (test_acceptance.EvidenceGrammarTests.test_an_unknown_evidence_class_is_malformed)
+An open vocabulary is how `verified-by-agent` walks back in. ... ok
+test_detail_is_optional (test_acceptance.EvidenceGrammarTests.test_detail_is_optional) ... ok
+test_a_positive_violation_is_failed_not_unverified (test_acceptance.HonestStateTests.test_a_positive_violation_is_failed_not_unverified) ... ok
+test_conflicting_current_evidence_is_contested (test_acceptance.HonestStateTests.test_conflicting_current_evidence_is_contested) ... ok
+test_fresh_evidence_after_a_rebuild_is_current (test_acceptance.HonestStateTests.test_fresh_evidence_after_a_rebuild_is_current) ... ok
+test_missing_evidence_is_unverified (test_acceptance.HonestStateTests.test_missing_evidence_is_unverified) ... ok
+test_stale_evidence_alone_is_contested_not_satisfied (test_acceptance.HonestStateTests.test_stale_evidence_alone_is_contested_not_satisfied)
+It proved something -- about a tree that has since moved. ... ok
+test_unknown_result_does_not_become_pass (test_acceptance.HonestStateTests.test_unknown_result_does_not_become_pass) ... ok
+test_a_checkpoint_asserting_completion_moves_nothing (test_acceptance.ProseCannotBecomeEvidenceTests.test_a_checkpoint_asserting_completion_moves_nothing) ... ok
+test_auditor_prose_quoting_the_marker_is_not_evidence (test_acceptance.ProseCannotBecomeEvidenceTests.test_auditor_prose_quoting_the_marker_is_not_evidence) ... ok
+test_this_module_docstring_activates_nothing (test_acceptance.ProseCannotBecomeEvidenceTests.test_this_module_docstring_activates_nothing) ... ok
+test_reconciling_the_live_ticket_changes_no_canonical_byte (test_acceptance.ReadOnlyTests.test_reconciling_the_live_ticket_changes_no_canonical_byte) ... ok
+test_render_distinguishes_a_legacy_ticket_from_a_proven_one (test_acceptance.ReadOnlyTests.test_render_distinguishes_a_legacy_ticket_from_a_proven_one) ... ok
+test_the_projection_is_reproducible_from_the_same_inputs (test_acceptance.ReadOnlyTests.test_the_projection_is_reproducible_from_the_same_inputs) ... ok
+test_the_finish_gate_does_not_refuse_a_recorded_pair (test_regression_gate.FinishGateTests.test_the_finish_gate_does_not_refuse_a_recorded_pair)
+Positive control: it is this gate that changes, not the fixture. ... ok
+test_the_finish_gate_refuses_a_missing_pair (test_regression_gate.FinishGateTests.test_the_finish_gate_refuses_a_missing_pair) ... ok
+test_an_honest_pair_is_admitted (test_regression_gate.GateAdmissionTests.test_an_honest_pair_is_admitted)
+Same verifier red against the pre-fix subject, green against the post. ... ok
+test_re_establishing_the_fail_under_the_new_oracle_admits_it (test_regression_gate.GateAdmissionTests.test_re_establishing_the_fail_under_the_new_oracle_admits_it)
+The legitimate-test-change escape path, end to end. ... ok
+test_the_recorded_pair_does_not_break_ordinary_verification (test_regression_gate.GateAdmissionTests.test_the_recorded_pair_does_not_break_ordinary_verification)
+The two channels must not fight. ... ok
+test_a_green_run_alone_does_not_leave_verify (test_regression_gate.GateRefusalTests.test_a_green_run_alone_does_not_leave_verify)
+The headline. `PASS conf: high` used to be the whole gate. ... ok
+test_a_pass_with_no_recorded_fail_is_refused (test_regression_gate.GateRefusalTests.test_a_pass_with_no_recorded_fail_is_refused) ... ok
+test_a_weakened_oracle_is_refused_although_the_suite_is_green (test_regression_gate.GateRefusalTests.test_a_weakened_oracle_is_refused_although_the_suite_is_green)
+Same subject, moved verifier: the classic greenwash. ... ok
+test_moving_both_sides_at_once_is_refused_as_unattributable (test_regression_gate.GateRefusalTests.test_moving_both_sides_at_once_is_refused_as_unattributable) ... ok
+test_prose_about_the_evidence_is_not_evidence (test_regression_gate.GateRefusalTests.test_prose_about_the_evidence_is_not_evidence)
+Anchoring: a line DESCRIBING a record is not that record. ... ok
+test_the_refusal_writes_nothing (test_regression_gate.GateRefusalTests.test_the_refusal_writes_nothing) ... ok
+test_an_ordinary_ticket_is_completely_unaffected (test_regression_gate.UndeclaredTicketTests.test_an_ordinary_ticket_is_completely_unaffected) ... ok
+test_an_unrecognised_value_does_not_arm_the_gate (test_regression_gate.UndeclaredTicketTests.test_an_unrecognised_value_does_not_arm_the_gate)
+A typo must not silently arm the strictest check in the chain. ... ok
+test_malformed_field_combinations_are_rejected (test_ticket_supersession.BoardModelTests.test_malformed_field_combinations_are_rejected) ... ok
+test_retirement_vocabulary_includes_bounded_system_corrections (test_ticket_supersession.BoardModelTests.test_retirement_vocabulary_includes_bounded_system_corrections) ... ok
+test_ordinary_finish_from_todo_stays_illegal (test_ticket_supersession.BoardWriterControlTests.test_ordinary_finish_from_todo_stays_illegal) ... ok
+test_supersession_closes_todo_and_blocked_with_x (test_ticket_supersession.BoardWriterControlTests.test_supersession_closes_todo_and_blocked_with_x) ... ok
+test_closure_evidence_exemption_is_not_blindness (test_ticket_supersession.GreenPathTests.test_closure_evidence_exemption_is_not_blindness)
+The superseded_verified skip exempts a MODE, never a claim (T-1418). ... ok
+test_identical_repeat_is_idempotent (test_ticket_supersession.GreenPathTests.test_identical_repeat_is_idempotent) ... ok
+test_public_cli_is_the_canonical_operation (test_ticket_supersession.GreenPathTests.test_public_cli_is_the_canonical_operation) ... ok
+test_terminal_relation_preserves_history_and_separates_publication (test_ticket_supersession.GreenPathTests.test_terminal_relation_preserves_history_and_separates_publication) ... ok
+test_validator_accepts_local_lifecycle_while_publication_stays_unproven (test_ticket_supersession.GreenPathTests.test_validator_accepts_local_lifecycle_while_publication_stays_unproven)
+One question, two intentionally different answers (T-1418). ... ok
+test_arbitrary_prose_fenced_and_conflicting_authority_grant_nothing (test_ticket_supersession.HostileGateTests.test_arbitrary_prose_fenced_and_conflicting_authority_grant_nothing) ... ok
+test_evidence_must_target_old_work (test_ticket_supersession.HostileGateTests.test_evidence_must_target_old_work) ... ok
+test_longer_cycle (test_ticket_supersession.HostileGateTests.test_longer_cycle) ... ok
+test_old_source_receipts_fail_closed (test_ticket_supersession.HostileGateTests.test_old_source_receipts_fail_closed) ... ok
+test_self_cycle (test_ticket_supersession.HostileGateTests.test_self_cycle) ... ok
+test_successor_missing (test_ticket_supersession.HostileGateTests.test_successor_missing) ... ok
+test_successor_todo_and_blocked (test_ticket_supersession.HostileGateTests.test_successor_todo_and_blocked) ... ok
+test_tampered_evidence_fails_closed (test_ticket_supersession.HostileGateTests.test_tampered_evidence_fails_closed) ... ok
+test_supersession_codes_are_the_canonical_registry_set (test_ticket_supersession.RegistryParityTests.test_supersession_codes_are_the_canonical_registry_set) ... ok
+test_supersession_refusal_vocabulary_is_registry_owned (test_ticket_supersession.RegistryParityTests.test_supersession_refusal_vocabulary_is_registry_owned) ... ok
+
+----------------------------------------------------------------------
+Ran 57 tests in 25.077s
+
+OK

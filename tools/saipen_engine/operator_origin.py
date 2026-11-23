@@ -87,33 +87,27 @@ class OperatorOrigins:
         self.lock = threading.RLock()
 
     def _chain(self, pid):
-        """The verified prefix of `pid`'s ancestry: peer first, then parents.
-
-        Every admitted fact has a readable creation time and was born no later
-        than the fact below it. The walk ENDS at the first ancestor this account
-        cannot observe instead of discarding the whole chain: on an interactive
-        Windows desktop every ancestry terminates at a protected system process
-        (`winlogon.exe`), whose creation time no ordinary token may read, so an
-        all-or-nothing rule refused every genuine operator event -- measured
-        2026-10-30, `issue-origin` never sealed on this machine. Truncation keeps
-        every admitted fact verified and drops only the unverifiable top; each
-        consumer already refuses when the fact it needs is absent (a worker must
-        still find its host below it). An unreadable fact is not evidence of
-        tampering; a CONTRADICTION still is, and still voids the chain.
-        """
         if _pid(pid) is None:
             return []
         facts = list(self.ancestry(pid, 32))
         if not facts or facts[0].pid != pid:
             return []
-        chain = []
-        for i, fact in enumerate(facts):
-            born = _birth(fact)
-            if born is None:
+        # Birth times defeat pid reuse, and only the caller and the host are
+        # used by a binding. A protected Windows ancestor above the host
+        # (wininit, services) hides its own creation time from the OS, so
+        # requiring a birth for EVERY ancestor discarded a fully measured
+        # chain -- measured on this machine, the broker answered "native host
+        # process birth could not be observed" for a genuine host delivery.
+        # The chain therefore keeps its verified prefix and stops at the first
+        # ancestor it cannot measure: a shorter chain proves less, never more.
+        if _birth(facts[0]) is None:
+            return []
+        chain = [facts[0]]
+        for index in range(1, len(facts)):
+            fact, previous = facts[index], facts[index - 1]
+            birth = _birth(fact)
+            if birth is None or birth > _birth(previous) or previous.ppid != fact.pid:
                 break
-            if i:
-                if born > _birth(facts[i - 1]) or facts[i - 1].ppid != fact.pid:
-                    return []
             chain.append(fact)
         return chain
 

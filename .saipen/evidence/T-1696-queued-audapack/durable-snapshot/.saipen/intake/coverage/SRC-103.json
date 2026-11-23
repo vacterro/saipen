@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-103:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-253 closed with verification evidence in LOG: verify -> PASS [target: T-253] conf: high -- new tests/test_packing.py::ReservedControlInNonGitSources 4 PASS; RED CONTROL removing the walk reserved guard turns 3 of them red; a non-git source-owned reserved name now fails closed as FAILED_INVENTORY / TRACKED_RESERVED_ARCHIVE_NAME_CONFLICT with a sentence that does not tell a filesystem operator to touch source control; a generated control is sup",
+      "text": "SRC-100 fix Wintage PACK FAILED_VERIFY duplicate .audapack/manifest.json archive member ownership",
+      "verification": "the Work this request created reached its own verification gate; see the T-253 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-253"
+    }
+  },
+  "schema_version": 1
+}

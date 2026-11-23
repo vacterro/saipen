@@ -1,0 +1,1434 @@
+--- pre-T1711/tools/saipen_engine/regression_execution.py
++++ prior-bound/tools/saipen_engine/regression_execution.py
+@@ -0,0 +1,624 @@
++"""Measured active VERIFY pairs; legacy checkpoint arithmetic remains typed as attested."""
++
++from __future__ import annotations
++
++import datetime
++import hashlib
++import json
++import os
++import re
++import shutil
++import stat
++import subprocess
++import sys
++import tempfile
++from pathlib import Path, PurePosixPath
++
++from . import operations as ops
++from .attempt import build_attempts
++from .capability import may_mutate, negotiate_capability
++from .journal import hash_bytes, hash_source_identity, semantic_receipts_for_operation_safe
++from .log import _hand_authored, _is_verify_boundary
++from .paths import (
++    project_lineage_identity,
++    prove_owned_dir_chain,
++    prove_owned_regular,
++    read_bound_regular_bytes,
++    update_digest_regular_bytes,
++)
++from .plan import TargetPlan, apply_plan, build_plan
++from .process_tree import run
++from .result import Result
++from .state import patch_state
++
++OPERATION = "regression_execution"
++PROFILE = "executed"
++MAX_BYTES = 32 * 1024 * 1024
++FORMATS = frozenset({"unittest", "pytest", "tap", "playwright-json"})
++FIELDS = frozenset(
++    {"schema", "command", "format", "context", "oracle_files", "subject_files", "before", "timeout"}
++)
++
++
++def _sha(raw):
++    return hashlib.sha256(raw).hexdigest()
++
++
++def _json(value):
++    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode(
++        "utf-8"
++    )
++
++
++def _unique(pairs):
++    found = {}
++    for key, value in pairs:
++        if key in found:
++            raise ValueError("duplicate JSON field: " + key)
++        found[key] = value
++    return found
++
++
++def _relative(value):
++    if (
++        not isinstance(value, str)
++        or not value
++        or "\\" in value
++        or ":" in value
++        or any(ord(char) < 32 for char in value)
++    ):
++        raise ValueError("a canonical project-relative path is required")
++    path = PurePosixPath(value)
++    if path.is_absolute() or any(part in (".", "..") for part in value.split("/")):
++        raise ValueError("path leaves the owned project")
++    return str(path)
++
++
++def _read(root, relative):
++    relative = _relative(relative)
++    path = root / relative
++    prove_owned_dir_chain(path.parent, ownership_root=root, kind="regression input")
++    info = prove_owned_regular(path, kind="regression input")
++    return read_bound_regular_bytes(path, info, max_bytes=MAX_BYTES)
++
++
++def _paths(values):
++    if not isinstance(values, list) or not values or len(values) > 256:
++        raise ValueError("a nonempty bounded path list is required")
++    result = [_relative(value) for value in values]
++    if len({value.casefold() for value in result}) != len(result):
++        raise ValueError("duplicate or case-aliased input path")
++    if any(value.split("/")[0].casefold() in (".git", ".saipen") for value in result):
++        raise ValueError("canonical memory and Git are not execution subjects")
++    return result
++
++
++def _context(root, paths):
++    files = {}
++    pending = list(paths)
++    while pending:
++        relative = pending.pop()
++        path = root / relative
++        prove_owned_dir_chain(path.parent, ownership_root=root, kind="regression context")
++        info = path.lstat()
++        if (
++            stat.S_ISDIR(info.st_mode)
++            and not path.is_symlink()
++            and not (getattr(info, "st_file_attributes", 0) & 0x400)
++        ):
++            pending.extend(
++                str(child.relative_to(root)).replace("\\", "/") for child in path.iterdir()
++            )
++        else:
++            files[relative] = _read(root, relative)
++        if len(files) + len(pending) > 100000:
++            raise ValueError("execution context exceeds its bounded file count")
++    if not files:
++        raise ValueError("execution context is empty")
++    return files
++
++
++def _manifest(files):
++    return {key: _sha(value) if value is not None else None for key, value in sorted(files.items())}
++
++
++def _load(root, path):
++    path = Path(path)
++    if not path.is_absolute():
++        path = root / path
++    try:
++        relative = path.relative_to(root).as_posix()
++    except ValueError:
++        raise ValueError("contract must be inside the owned project") from None
++    if not relative.startswith(".saipen/evidence/"):
++        raise ValueError("contract must be under project evidence")
++    raw = _read(root, relative)
++    value = json.loads(raw.decode("utf-8"), object_pairs_hook=_unique)
++    if not isinstance(value, dict) or set(value) != FIELDS or type(value["schema"]) is not int:
++        raise ValueError("unsupported or incomplete regression execution contract")
++    if value["schema"] != 1 or value["format"] not in FORMATS:
++        raise ValueError("unrecognized verifier format/schema")
++    if type(value["timeout"]) is not int or not 1 <= value["timeout"] <= 5400:
++        raise ValueError("timeout must be 1..5400 seconds")
++    command = value["command"]
++    if (
++        not isinstance(command, list)
++        or not 2 <= len(command) <= 64
++        or any(not isinstance(arg, str) or not arg or "\0" in arg for arg in command)
++    ):
++        raise ValueError("command requires bounded argv; caller verdicts are not inputs")
++    context = _context(root, _paths(value["context"]))
++    oracle = _paths(value["oracle_files"])
++    subjects = _paths(value["subject_files"])
++    if set(oracle) & set(subjects) or not set(oracle + subjects) <= set(context):
++        raise ValueError("oracle/subject must be disjoint files present in context")
++    before = value["before"]
++    if not isinstance(before, dict) or set(before) != set(subjects):
++        raise ValueError("before must name exactly the subject files")
++    prior = {}
++    for target, carrier in before.items():
++        if carrier is None:
++            prior[target] = None
++        else:
++            normalized_carrier = _relative(carrier)
++            if not normalized_carrier.startswith(".saipen/evidence/"):
++                raise ValueError("pre-fix material must be preserved in project evidence")
++            prior[target] = _read(root, normalized_carrier)
++    current = {key: context[key] for key in subjects}
++    if _manifest(current) == _manifest(prior):
++        raise ValueError("SUBJECT_UNCHANGED: no material implementation difference")
++    executable = sys.executable if command[0] == "{python}" else shutil.which(command[0])
++    if not executable:
++        raise ValueError("verifier runtime is unavailable")
++    executable = Path(executable).absolute()
++    if os.name == "nt" and executable.suffix.lower() != ".exe":
++        raise ValueError("use a native executable with argv, not a shell shim")
++    info = prove_owned_regular(executable, kind="verifier runtime")
++    digest = hashlib.sha256()
++    update_digest_regular_bytes(executable, info, digest)
++    runtime = {"path": str(executable), "sha256": digest.hexdigest()}
++    argv = [str(executable), *command[1:]]
++    environment = {key: item for key, item in os.environ.items() if not key.startswith("SAIPEN_")}
++    environment["PYTHONDONTWRITEBYTECODE"] = "1"
++    environment["SAIPEN_CAPABILITY"] = "no-publish"
++    verifier = _sha(
++        _json(
++            {
++                "command": command,
++                "format": value["format"],
++                "timeout": value["timeout"],
++                "runtime": runtime,
++                "oracle": {key: _sha(context[key]) for key in oracle},
++                "environment_digest": _sha(_json(environment)),
++            }
++        )
++    )
++    return {
++        "contract": value,
++        "contract_path": relative,
++        "contract_raw": raw,
++        "context": context,
++        "prior": prior,
++        "current": current,
++        "argv": argv,
++        "runtime": runtime,
++        "verifier": verifier,
++        "environment": environment,
++    }
++
++
++def _binding(root, ticket, agent, docs, state):
++    if state.get("task") != ticket:
++        raise ValueError("execution belongs to the active Work")
++    refused = ops._active_claim_refusal(state, docs["board"].text_norm, agent)
++    if refused is not None:
++        raise ValueError(refused.message)
++    events = docs["_history"].events
++    boundaries = [
++        event["event"]
++        for event in events
++        if event.get("ticket") == ticket
++        and event.get("taxonomy") == "RUN"
++        and not _hand_authored(event)
++        and _is_verify_boundary(event)
++    ]
++    if not boundaries:
++        raise ValueError("no canonical VERIFY boundary")
++    attempts, errors = build_attempts(events)
++    if errors:
++        raise ValueError("invalid Attempt history")
++    own = [item for item in attempts.values() if item.get("ticket") == ticket]
++    active = [item for item in own if item.get("close_event") is None]
++    if len(active) > 1:
++        raise ValueError("ambiguous producing Attempt")
++    lineage = project_lineage_identity(root)
++    if not lineage:
++        raise ValueError("canonical project lineage is required")
++    fields = ops.parse_board(docs["board"].text_norm)["tickets"][ticket].get("fields", {})
++    source_receipts = {}
++    for receipt_id in sorted(set(re.findall(r"SRC-\d+", str(fields.get("source_receipts", ""))))):
++        from . import intake
++
++        source = intake.status(root, receipt_id)
++        if not source.get("ok") or not source.get("source_sha256"):
++            raise ValueError("unavailable Source identity: " + receipt_id)
++        contract = intake._read_contract(root, receipt_id)
++        source_receipts[receipt_id] = {
++            "body_sha256": source["source_sha256"],
++            "contract_sha256": _sha(_json(contract)),
++        }
++    return {
++        "project_identity": ops._identity(root),
++        "project_lineage": lineage,
++        "ticket": ticket,
++        "agent": agent,
++        "verify_boundary": boundaries[-1],
++        "attempt": active[0]["id"] if active else None,
++        "latest_attempt_open": max((item["open_event"] for item in own), default=0),
++        "source_identity": hash_source_identity(root),
++        "acceptance_sha256": _sha(str(fields.get("verify", "")).encode("utf-8")),
++        "source_receipts": source_receipts,
++    }
++
++
++def parse_summary(body, format_name):
++    """A completed, nonzero test execution; a process exit alone is not a check."""
++    if format_name not in FORMATS:
++        raise ValueError("unrecognized verifier summary format")
++    if format_name == "unittest":
++        counts = re.findall(r"^Ran (\d+) tests? in ", body, re.MULTILINE)
++        finals = re.findall(r"^(OK|FAILED)(?: \(([^\n]*)\))?\s*$", body, re.MULTILINE)
++        if len(counts) != 1 or len(finals) != 1:
++            raise ValueError("no unambiguous completed unittest summary")
++        ran = int(counts[0])
++        bad = sum(
++            int(value)
++            for value in re.findall(r"(?:failures|errors|unexpected successes)=(\d+)", finals[0][1])
++        )
++        skipped = sum(int(value) for value in re.findall(r"skipped=(\d+)", finals[0][1]))
++        if finals[0][0] == "FAILED" and not bad:
++            raise ValueError("failure summary contains no failing test")
++    elif format_name == "tap":
++        values = {}
++        for key in ("tests", "pass", "fail", "skipped", "cancelled"):
++            found = re.findall(r"^# " + key + r" (\d+)\s*$", body, re.MULTILINE)
++            if len(found) != 1:
++                raise ValueError("no unambiguous completed TAP summary")
++            values[key] = int(found[0])
++        ran, bad, skipped = values["tests"], values["fail"] + values["cancelled"], values["skipped"]
++        if values["pass"] + bad + skipped != ran:
++            raise ValueError("contradictory TAP totals")
++    elif format_name == "playwright-json":
++        value = json.loads(body, object_pairs_hook=_unique)
++        numbers = value.get("stats") if isinstance(value, dict) else None
++        if not isinstance(numbers, dict) or any(
++            type(numbers.get(key)) is not int
++            for key in ("expected", "unexpected", "skipped", "flaky")
++        ):
++            raise ValueError("invalid Playwright test totals")
++        if numbers["flaky"] or value.get("errors"):
++            raise ValueError("flaky/startup error cannot prove a regression pair")
++        if any(numbers[key] < 0 for key in ("expected", "unexpected", "skipped", "flaky")):
++            raise ValueError("negative test totals")
++        bad, skipped = numbers["unexpected"], numbers["skipped"]
++        ran = numbers["expected"] + bad + skipped
++    else:
++        matches = re.findall(r"^=+ (.+?) in [\d.]+s(?: \([^\n]*\))? =+\s*$", body, re.MULTILINE)
++        if len(matches) != 1:
++            raise ValueError("no unambiguous completed pytest summary")
++        totals = {
++            key: int(number)
++            for number, key in re.findall(
++                r"(\d+) (passed|failed|error|errors|skipped|xfailed|xpassed)", matches[0]
++            )
++        }
++        bad = (
++            totals.get("failed", 0)
++            + totals.get("error", 0)
++            + totals.get("errors", 0)
++            + totals.get("xpassed", 0)
++        )
++        skipped = totals.get("skipped", 0) + totals.get("xfailed", 0)
++        ran = totals.get("passed", 0) + bad + skipped
++    if ran <= 0 or ran <= skipped:
++        raise ValueError("zero executed tests cannot prove a pair")
++    return {"ran": ran, "failed": bad, "skipped": skipped}
++
++
++def _measure(material, stage, subject):
++    temp_root = Path(tempfile.gettempdir()).resolve()
++    with tempfile.TemporaryDirectory(prefix="saipen-regression-", dir=temp_root) as temporary:
++        sandbox = Path(temporary).resolve()
++        if not sandbox.is_relative_to(temp_root):
++            raise ValueError("temporary execution scope escaped")
++        files = {**material["context"], **subject}
++        for relative, raw in files.items():
++            if raw is None:
++                continue
++            target = sandbox / relative
++            target.parent.mkdir(parents=True, exist_ok=True)
++            target.write_bytes(raw)
++        env = material["environment"]
++        started = datetime.datetime.now(datetime.timezone.utc).isoformat()
++        with (sandbox / ".stdout").open("wb") as stdout, (sandbox / ".stderr").open("wb") as stderr:
++            result = run(
++                material["argv"],
++                cwd=sandbox,
++                env=env,
++                stdout=stdout,
++                stderr=stderr,
++                timeout=material["contract"]["timeout"],
++            )
++        finished = datetime.datetime.now(datetime.timezone.utc).isoformat()
++        for relative, raw in files.items():
++            target = sandbox / relative
++            if raw is None:
++                if target.exists():
++                    raise ValueError("pre-fix absence changed during execution")
++            elif _read(sandbox, relative) != raw:
++                raise ValueError("subject/oracle/context moved during execution")
++        out = _read(sandbox, ".stdout").decode("utf-8", errors="replace")
++        err = _read(sandbox, ".stderr").decode("utf-8", errors="replace")
++        summary = parse_summary(
++            err if material["contract"]["format"] == "unittest" else out,
++            material["contract"]["format"],
++        )
++        return {
++            "stage": stage,
++            "started_utc": started,
++            "finished_utc": finished,
++            "exit_code": result.returncode,
++            "stdout": out,
++            "stderr": err,
++            **summary,
++        }
++
++
++def _records(root):
++    records, errors = semantic_receipts_for_operation_safe(root, OPERATION)
++    if errors:
++        raise ValueError("regression receipt journal is corrupt: " + "; ".join(errors[:2]))
++    result = []
++    for receipt in records:
++        if receipt.get("status") != "COMMITTED":
++            continue
++        meta = receipt.get("receipt_metadata") or {}
++        relative = meta.get("regression_record")
++        if not isinstance(relative, str) or not relative.startswith(".saipen/evidence/regression/"):
++            raise ValueError("regression receipt has no owned evidence carrier")
++        raw = _read(root, relative)
++        if _sha(raw) != meta.get("regression_sha256"):
++            raise ValueError("regression execution receipt integrity mismatch")
++        value = json.loads(raw.decode("utf-8"), object_pairs_hook=_unique)
++        if value.get("op_id") != receipt.get("op_id") or value.get("evidence_class") != PROFILE:
++            raise ValueError("unrecognized execution receipt identity")
++        result.append((receipt, value, relative))
++    return result
++
++
++def evidence_gate(root, ticket, docs, state):
++    """Consume committed execution, rechecking authority and exact current inputs."""
++    try:
++        binding = _binding(Path(root), ticket, str(state.get("agent") or ""), docs, state)
++        stored = _records(Path(root))
++        own = [
++            event
++            for event in docs["_history"].events
++            if event.get("ticket") == ticket
++            and event.get("taxonomy") == "RUN"
++            and not _hand_authored(event)
++            and event.get("event", 0) >= binding["verify_boundary"]
++            and event.get("text", "").startswith("REGRESSION-EVIDENCE ")
++        ]
++        if len(own) < 2 or own[-2].get("op_id") != own[-1].get("op_id"):
++            return "UNRECOGNIZED_VERIFIER: executed profile has no measured regression receipt"
++        producing = own[-1].get("op_id")
++        candidates = [item for item in stored if item[0].get("op_id") == producing]
++        if len(candidates) != 1 or candidates[0][1].get("ticket") != ticket:
++            return "UNRECOGNIZED_VERIFIER: latest pair is not a registered execution"
++        receipt, value, _ = candidates[0]
++        if value.get("attempt") is not None and binding["attempt"] is None:
++            attempts, errors = build_attempts(docs["_history"].events)
++            produced = attempts.get(value["attempt"])
++            if (
++                not errors
++                and produced
++                and produced.get("result") == "candidate"
++                and produced.get("open_event") == binding["latest_attempt_open"]
++                and produced.get("close_event", 0) > own[-1]["event"]
++            ):
++                binding["attempt"] = value["attempt"]
++        for key in (
++            "project_identity",
++            "project_lineage",
++            "verify_boundary",
++            "attempt",
++            "latest_attempt_open",
++            "source_identity",
++            "acceptance_sha256",
++            "source_receipts",
++        ):
++            if value.get(key) != binding[key]:
++                return "STALE_REGRESSION_EVIDENCE: execution binding changed: " + key
++        material = _load(Path(root), Path(root) / value["contract_path"])
++        if (
++            material["verifier"] != value["after"]["verifier"]
++            or _sha(material["contract_raw"]) != value.get("contract_sha256")
++            or _sha(_json(_manifest(material["prior"]))) != value["before"]["subject"]
++            or _sha(_json(_manifest(material["context"]))) != value["context_digest"]
++            or _sha(_json(_manifest(material["current"]))) != value["after"]["subject"]
++        ):
++            return "STALE_REGRESSION_EVIDENCE: verifier or subject bytes changed"
++        if len(own) < 2 or [event.get("op_id") for event in own[-2:]] != [receipt["op_id"]] * 2:
++            return "UNRECOGNIZED_VERIFIER: latest pair is not the measured execution"
++        return None
++    except (OSError, ValueError, KeyError, TypeError) as exc:
++        return "REGRESSION_EXECUTION_INVALID: " + str(exc)
++
++
++@ops._state_guard
++def execute_pair(project_root, ticket, agent, contract_path, *, dry_run=False):
++    root = Path(project_root).absolute()
++    if not may_mutate(negotiate_capability()):
++        return ops._refuse("CAPABILITY_READ_ONLY", "current capability forbids evidence admission")
++    if negotiate_capability() == "manual-verify":
++        return ops._refuse("INCOMPLETE_TICKET", "manual verification requires its operator result")
++    try:
++        docs, state, board, tail = ops._read(root)
++        if ticket not in board["tickets"]:
++            return ops._refuse("TICKET_NOT_FOUND", "Work is not on the canonical board")
++        if str(board["tickets"][ticket].get("fields", {}).get("regression")) != "required":
++            return ops._refuse(
++                "INCOMPLETE_TICKET", "declare the regression requirement before execution"
++            )
++        binding = _binding(root, ticket, agent, docs, state)
++        if state.get("phase") != "VERIFY":
++            return ops._refuse("INCOMPLETE_TICKET", "execution requires the active VERIFY phase")
++        material = _load(root, contract_path)
++        if dry_run:
++            return Result(True, "DRY_RUN", data={"ticket": ticket, "execution": "not_run"})
++        for _, value, relative in reversed(_records(root)):
++            if value.get("ticket") == ticket and all(
++                value.get(key) == item for key, item in binding.items()
++            ):
++                if value.get("verifier") == material["verifier"] and value.get(
++                    "context_digest"
++                ) == _sha(_json(_manifest(material["context"]))):
++                    if evidence_gate(root, ticket, docs, state) is None:
++                        return Result(
++                            True,
++                            "ALREADY_APPLIED",
++                            data={"record": relative, "evidence_class": PROFILE},
++                        )
++                    break
++        observations = [
++            _measure(material, "before", material["prior"]),
++            _measure(material, "after", material["current"]),
++        ]
++        if not (
++            observations[0]["exit_code"] == 1
++            and observations[0]["failed"] > 0
++            and observations[1]["exit_code"] == 0
++            and observations[1]["failed"] == 0
++        ):
++            return ops._refuse(
++                "INCOMPLETE_TICKET",
++                "REGRESSION_PAIR_FAILED: measured runs do not prove FAIL then PASS",
++                runs=observations,
++            )
++        fresh_docs, fresh_state, _, _ = ops._read(root)
++        refreshed = _load(root, contract_path)
++        if (
++            ops._docs_preconditions(fresh_docs, "state", "board", "log")
++            != ops._docs_preconditions(docs, "state", "board", "log")
++            or _binding(root, ticket, agent, fresh_docs, fresh_state) != binding
++            or _manifest(refreshed["context"]) != _manifest(material["context"])
++            or _manifest(refreshed["prior"]) != _manifest(material["prior"])
++            or refreshed["verifier"] != material["verifier"]
++        ):
++            return ops._refuse("STALE_STATE", "source or active authority moved during execution")
++        op_id = "regression-execution-" + ops.uuid4_hex()
++        before = {
++            "result": "FAIL",
++            "verifier": material["verifier"],
++            "subject": _sha(_json(_manifest(material["prior"]))),
++        }
++        after = {
++            "result": "PASS",
++            "verifier": material["verifier"],
++            "subject": _sha(_json(_manifest(material["current"]))),
++        }
++        value = {
++            "schema": 1,
++            "evidence_class": PROFILE,
++            "op_id": op_id,
++            **binding,
++            "contract_path": material["contract_path"],
++            "contract_sha256": _sha(material["contract_raw"]),
++            "verifier": material["verifier"],
++            "context_digest": _sha(_json(_manifest(material["context"]))),
++            "before": before,
++            "after": after,
++            "runs": observations,
++            "runtime": material["runtime"],
++        }
++        record = ".saipen/evidence/regression/" + op_id + ".json"
++        raw = _json(value) + b"\n"
++        now, utc = ops._now(), ops._utc_iso()
++        lines = []
++        for half in (before, after):
++            event, line = ops._event_line(
++                docs,
++                tail,
++                "RUN",
++                ticket,
++                agent,
++                f"REGRESSION-EVIDENCE {half['result']} verifier:{half['verifier']} "
++                f"subject:{half['subject']} -- measured execution {record}",
++                now,
++                op_id,
++            )
++            tail = event
++            lines.append(line)
++        new_log = docs["log"].text_norm.rstrip("\n") + "\n" + "\n".join(lines) + "\n"
++        projected = ops._project_board_mutation(
++            root,
++            docs["board"].text_norm,
++            lambda text: ops._ticket_fields_in_place(
++                text, ticket, {"regression_evidence": PROFILE}, enforce_cap=False
++            ),
++            [ticket],
++            op_id=op_id,
++            event_id=f"E-{tail}",
++            reason="bounded executed regression evidence profile",
++        )
++        new_board = projected.board_text
++        refreshed_board, _ = ops._refresh_active_claim(new_board, state, agent, utc, root=root)
++        if refreshed_board is not None:
++            new_board = refreshed_board
++        new_state = patch_state(
++            docs["state"].text_norm, {"last_event": tail, "updated": utc, "agent": agent}
++        )
++        preconditions = ops._docs_preconditions(docs, "state", "board", "log")
++        preconditions["."] = binding["source_identity"]
++        for relative, body in material["context"].items():
++            preconditions[relative] = hash_bytes(body)
++        preconditions[material["contract_path"]] = hash_bytes(material["contract_raw"])
++        for target, carrier in material["contract"]["before"].items():
++            if carrier is not None:
++                preconditions[carrier] = hash_bytes(material["prior"][target])
++        targets = [
++            TargetPlan(record, "generic", raw, "", hash_bytes(raw)),
++            *ops._log_targets(docs, new_log),
++            *projected.targets,
++            ops._target(docs["board"], ".saipen/BOARD.md", "board", new_board),
++            ops._target(docs["state"], ".saipen/STATE.md", "state", new_state),
++        ]
++        plan = build_plan(
++            OPERATION,
++            agent,
++            binding["project_identity"],
++            {"operation": OPERATION, "ticket": ticket, "verifier": material["verifier"]},
++            preconditions,
++            targets,
++            {
++                "ok": True,
++                "code": "CHECKPOINTED",
++                "record": record,
++                "evidence_class": PROFILE,
++                "event_id": f"E-{tail}",
++            },
++            op_id=op_id,
++            receipt_metadata={
++                "ticket_id": ticket,
++                "regression_record": record,
++                "regression_sha256": _sha(raw),
++            },
++        )
++        return apply_plan(root, plan)
++    except subprocess.TimeoutExpired:
++        return ops._refuse(
++            "INCOMPLETE_TICKET", "REGRESSION_EXECUTION_TIMEOUT: owned process tree reaped"
++        )
++    except (OSError, ValueError, KeyError, TypeError) as exc:
++        return ops._refuse("VALIDATION_FAILED", "REGRESSION_EXECUTION_INVALID: " + str(exc))
+--- pre-T1711/tools/saipen_engine/oracle.py
++++ prior-bound/tools/saipen_engine/oracle.py
+@@ -104,13 +104,15 @@
+     """The identity tokens carried by an evidence line, in RECORD shape.
+ 
+     The result is exactly what `regression_pair_verdict` consumes: keys
+-    `verifier` and `subject`, never the wire spellings. A line carrying both
+-    `verifier:` and `oracle:` keeps the first occurrence, so a second spelling
+-    cannot quietly redefine the identity a reader already saw.
++    `verifier` and `subject`, never the wire spellings. Equal aliases remain
++    compatible. Contradictory declarations produce no identity.
+     """
+     found: dict[str, str] = {}
+     for token, value in _TOKEN.findall(text or ""):
+-        found.setdefault(_TOKEN_KEY[token], value)
++        key = _TOKEN_KEY[token]
++        if key in found and found[key] != value:
++            return {}
++        found[key] = value
+     return found
+ 
+ 
+--- pre-T1711/tools/saipen_engine/log.py
++++ prior-bound/tools/saipen_engine/log.py
+@@ -1525,15 +1525,30 @@
+     if boundary is None:
+         return False, NO_VERIFY_BOUNDARY
+ 
++    from .attempt import build_attempts
++
++    attempts, errors = build_attempts(events)
++    if errors:
++        return False, "NOT_A_REGRESSION_PAIR: invalid producing Attempt history"
++    own = [item for item in attempts.values() if item.get("ticket") == ticket_id]
++    latest_open = max((item["open_event"] for item in own), default=0)
+     records = []
+     for ev in events[boundary:]:
+         if ev.get("ticket") != ticket_id or ev.get("taxonomy") != "RUN":
+             continue
+-        if _hand_authored(ev):
++        if _hand_authored(ev) or ev.get("event", 0) < latest_open:
+             continue
+         record = parse_evidence(ev.get("text", ""))
+         if record is not None:
++            producing = [item["id"] for item in own
++                         if item["open_event"] <= ev["event"]
++                         and (item["close_event"] is None or ev["event"] <= item["close_event"])]
++            record["attempt"] = producing[0] if len(producing) == 1 else None
+             records.append(record)
++    before = next((item for item in reversed(records) if item["result"] == "FAIL"), None)
++    after = next((item for item in reversed(records) if item["result"] == "PASS"), None)
++    if before is not None and after is not None and before["attempt"] != after["attempt"]:
++        return False, "NOT_A_REGRESSION_PAIR: different producing Attempts"
+     verdict = regression_evidence_verdict(records)
+     return bool(verdict.get("admissible")), f"{verdict['code']}: {verdict['reason']}"
+ 
+--- pre-T1711/tools/saipen_engine/operations.py
++++ prior-bound/tools/saipen_engine/operations.py
+@@ -844,6 +844,15 @@
+         return None
+     ok, reason = regression_evidence(ticket_id, docs["_history"].events)
+     if ok:
++        if ticket.get("fields", {}).get("regression_evidence") == "executed":
++            from .regression_execution import evidence_gate
++
++            from .state import parse_state
++
++            error = evidence_gate(docs["_root"], ticket_id, docs,
++                                  parse_state(docs["state"].text_norm))
++            if error:
++                return error
+         return None
+     return (
+         f"ticket {ticket_id} declares `regression: required`, so a green run is "
+@@ -6930,16 +6939,19 @@
+     dry_run: bool = False,
+     *,
+     regression: str | None = None,
++    evidence_profile: str | None = None,
+ ) -> Result:
+     """Update verification metadata through its existing journaled writer."""
+     root = Path(project_root)
++    if evidence_profile is not None and evidence_profile != "executed":
++        return _refuse("VALIDATION_FAILED", "evidence profile must be executed", ticket=ticket_id)
+     if regression is not None:
+         if not isinstance(regression, str) or regression.strip().lower() != REGRESSION_REQUIRED:
+             return _refuse(
+                 "VALIDATION_FAILED", "regression must be required", ticket=ticket_id
+             )
+         regression = REGRESSION_REQUIRED
+-    if verify is None and regression is None:
++    if verify is None and regression is None and evidence_profile is None:
+         return _refuse("VALIDATION_FAILED", "verify text is required", ticket=ticket_id)
+     if verify is not None:
+         if not verify or not verify.strip():
+@@ -6959,7 +6971,8 @@
+         )
+     if ticket_id not in board["tickets"]:
+         return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
+-    if regression is not None and board["tickets"][ticket_id]["section"] == "## DONE":
++    if ((regression is not None or evidence_profile is not None)
++            and board["tickets"][ticket_id]["section"] == "## DONE"):
+         return _refuse(
+             "TICKET_NOT_WORKABLE", "historical DONE cannot declare regression", ticket=ticket_id
+         )
+@@ -6968,6 +6981,12 @@
+         fields["verify"] = escape_ticket_description(redact_credentials(verify))
+     if regression is not None:
+         fields["regression"] = regression
++    if evidence_profile is not None:
++        declared = board["tickets"][ticket_id].get("fields", {}).get("regression")
++        if regression != "required" and declared != "required":
++            return _refuse("VALIDATION_FAILED", "executed profile requires regression: required",
++                           ticket=ticket_id)
++        fields["regression_evidence"] = evidence_profile
+     # T-1616: the verify field is the ticket's FALSIFIABLE acceptance surface,
+     # and `_ticket_fields_in_place` below replaces it wholesale -- so the
+     # superseded clause used to exist nowhere in the project once this verb
+@@ -6992,6 +7011,8 @@
+         _message += f"; superseded clause: {_prior}"
+     if regression is not None:
+         _message += f"; regression: {regression}"
++    if evidence_profile is not None:
++        _message += "; regression_evidence: executed"
+     event, line = _event_line(
+         docs,
+         log_tail,
+@@ -7046,7 +7067,8 @@
+         agent,
+         _identity(root),
+         {"operation": "ticket_verify", "ticket": ticket_id,
+-         **({"regression": regression} if regression is not None else {})},
++         **({"regression": regression} if regression is not None else {}),
++         **({"evidence_profile": evidence_profile} if evidence_profile is not None else {})},
+         _docs_preconditions(docs, "state", "board", "log"),
+         targets,
+         {"ok": True, "code": "TICKET_VERIFIED", "ticket": ticket_id, "event_id": f"E-{event}"},
+--- pre-T1711/tools/saipen_engine/board.py
++++ prior-bound/tools/saipen_engine/board.py
+@@ -629,6 +629,9 @@
+     if isinstance(ticket.get("description"), str):
+         scalars["description"] = ticket["description"]
+     errors.extend(board_scalar_errors(scalars, tid))
++    profile = fields.get("regression_evidence")
++    if profile is not None and (profile != "executed" or fields.get("regression") != "required"):
++        errors.append(f"{tid} regression_evidence must be executed with regression: required")
+     errors.extend(closure_metadata_errors(ticket))
+     return errors
+ 
+--- pre-T1711/tools/saipen_engine/journal.py
++++ prior-bound/tools/saipen_engine/journal.py
+@@ -499,6 +499,7 @@
+             "improve-admit-",
+             "improve-rebind-",
+             "report-",
++            "regression-execution-",
+             "run-",
+             "seat-",
+             "sweep-",
+--- pre-T1711/tools/saipen.py
++++ prior-bound/tools/saipen.py
+@@ -12445,7 +12445,8 @@
+             _emit(result.to_dict(), as_json)
+             return 0 if result.ok else 1
+         if action == "regression":
+-            if len(rest) != 2 or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
++            _opts, _pos, _opt_err = _parse_value_options(rest, {"--evidence": "evidence"})
++            if _opt_err or len(_pos) != 2 or not re.fullmatch(r"T-\d+", _pos[0], re.IGNORECASE):
+                 _emit(
+                     {"ok": False, "code": "VALIDATION_FAILED",
+                      "detail": "ticket regression needs exactly <T-###> required"},
+@@ -12458,8 +12459,8 @@
+             if _ho is not None:
+                 return _ho
+             result = ticket_verify(
+-                project_root, rest[0].upper(), _agent_for(project_root), None,
+-                dry_run=dry_run, regression=rest[1],
++                project_root, _pos[0].upper(), _agent_for(project_root), None,
++                dry_run=dry_run, regression=_pos[1], evidence_profile=_opts.get("evidence"),
+             )
+             _emit(result.to_dict(), as_json)
+             return 0 if result.ok else 1
+@@ -13124,6 +13125,24 @@
+         )
+         return 2
+     if command == "work":
++        if len(args) > 1 and args[1] == "regression":
++            _opts, _pos, _opt_err = _parse_value_options(args[2:], {"--file": "file"})
++            if _opt_err or len(_pos) != 1 or not _opts.get("file"):
++                _emit({"ok": False, "code": "VALIDATION_FAILED",
++                       "detail": "work regression requires one Work id and --file contract"},
++                      as_json)
++                return 2
++            if not dry_run and _negotiate_capability(project_root) == "read-only":
++                return _capability_refusal(as_json)
++            _ho = _ensure_handover(project_root, as_json, dry_run)
++            if _ho is not None:
++                return _ho
++            from saipen_engine.regression_execution import execute_pair
++
++            result = execute_pair(project_root, _pos[0], _agent_for(project_root),
++                                  _opts["file"], dry_run=dry_run)
++            _emit(result.to_dict(), as_json)
++            return 0 if result.ok else 1
+         # T-1434 M1: first-class DONE-Work re-verification. The engine logic
+         # existed (debt.reverify_work) but no canonical CLI route reached it,
+         # so the validator's own remediation named a move this surface could
+--- pre-T1711/saipen/REGISTRY.json
++++ prior-bound/saipen/REGISTRY.json
+@@ -616,6 +616,7 @@
+    "owner",
+    "recurrence",
+    "regression",
++   "regression_evidence",
+    "request_witness",
+    "requires",
+    "resolution_reason",
+--- pre-T1711/saipen/COMMANDS.md
++++ prior-bound/saipen/COMMANDS.md
+@@ -82,11 +82,12 @@
+ | `saipen user-request <text>` | USER_INTERRUPT ingress | CMD-ROUTING-01 |
+ | `saipen ticket compact <T-###>` | RECOVERY: compact one historical BOARD record to its minimum truthful form (OPS.md) | CMD-ROUTING-01 |
+ | `saipen ticket retire <T-###> --reason <CODE> --evidence <E-###\|.saipen/evidence/PATH> --authority <SRC-###> [--discovery-event E-###] [--note TEXT]` | canonical retirement of misrouted/invalid Work -- NOT done, NOT close; the authority must GRANT it (OPS.md) | CMD-ROUTING-01 |
+-| `saipen work reverify <T-###> [--verification <command>:PASS]... [--run <command>]... [--timeout <SECONDS>]` | RECOVERY: re-verify already-DONE Work against the CURRENT tree; writes ONE immutable `RV-NNNNNN` receipt, keeps DONE, never rewrites history (OPS.md); only an EXECUTED contract is current-tree closure evidence, an attested-only contract is recorded but never closure proof | CMD-ROUTING-01 |
++| `saipen work reverify <T-###> [--verification <command>:PASS]... [--run <command>]... [--timeout <SECONDS>]` | RECOVERY: current-tree RV; DONE/history retained; executed proof required (OPS.md) | CMD-ROUTING-01 |
++| `saipen work regression <T-###> --file <contract.json>` | EXECUTION: owned VERIFY pair (phases/verify.md) | VERIFY-ORACLE-01 |
+ | `saipen ticket resolve-external <T-###> --authority <lineage-32hex> --implementation <T-###@commit> --reason <CLASS> --run <command>...` | EXECUTION: close BLOCKED Work implemented by an external authority with an immutable `EX-NNNNNN` receipt bound to the installed engine generation (OPS.md) | CMD-ROUTING-01 |
+ | `saipen ticket repair-metadata <T-###> --field source_receipts (--to <SRC-###> \| --legacy-unbound [--authority <SRC-###\|lineage-32hex>])` | RECOVERY: migrate malformed legacy metadata on historical DONE Work; `--to` needs an exact linked receipt, `--legacy-unbound` removes an unprovable token and preserves its bytes in an immutable `MR-NNNNNN` receipt; non-DONE rows and conflicting second migrations refuse with zero writes (T-1435) | CMD-ROUTING-01 |
+ | `saipen ticket reasoning <T-###> --recurrence <text> --weak-model <text>` | EXECUTION: canonical writer for the strict-sweep reasoning gates; refuses unless a strict CONFIRMED PROTOCOL_VIOLATION disposition names the ticket | CMD-ROUTING-01 |
+-| `saipen ticket requires <T-###> <CAP[@PHASE[+PHASE]],...\|read_only\|none>` / `saipen ticket regression <T-###> required` | EXECUTION: Work capabilities (RUNTIME.md) or strengthen non-DONE regression metadata (OPS.md) | CMD-ROUTING-01 |
++| `saipen ticket requires <T-###> <CAP[@PHASE[+PHASE]],...\|read_only\|none>` / `saipen ticket regression <T-###> required [--evidence executed]` | EXECUTION: Work capabilities (RUNTIME.md) or strengthen non-DONE regression metadata; executed profile in phases/verify.md | CMD-ROUTING-01 |
+ | `saipen cohort [status\|ship] <C-###>` | batch publication authority | CMD-ROUTING-01 |
+ | `saipen ticket bind-cohort <T-###> --cohort <C-###> --paths <p1,p2>` | RECOVERY: bind canonically finished, verified, unpublished own_patch DONE to a pending cohort; preserve original row/finish, current active Work and history; exact retry is byte-noop, published/legacy/foreign/conflicting bindings refuse (OPS.md) | CMD-ROUTING-01 |
+ | `saipen source` | intake | CMD-ROUTING-01 |
+--- pre-T1711/saipen/phases/verify.md
++++ prior-bound/saipen/phases/verify.md
+@@ -92,6 +92,30 @@
+ matters as everywhere else: a line DESCRIBING an evidence record is not one.
+ Tickets that do not declare the field are untouched.
+ 
++### Active execution (`SRC-212`)
++
++Absent `regression_evidence: executed` means legacy attestation, never execution.
++`ticket regression ... --evidence executed` strengthens it; no downgrade.
++`work regression ... --file` measures owned VERIFY Work: atomic pair/receipt/profile; phase stays unchanged.
++
++Closed schema:
++```json
++{"schema":1,"command":["node","--test","--test-reporter=tap","control.cjs"],
++ "format":"tap","context":["subject.cjs","control.cjs"],
++ "oracle_files":["control.cjs"],"subject_files":["subject.cjs"],
++ "before":{"subject.cjs":".saipen/evidence/pre/subject.cjs"},"timeout":60}
++```
++Context: all dependencies/config, owned inputs, disjoint oracle/subject; before
++material in evidence (null=absent). Refuse links and root memory/Git.
++Timeout: 1..5400s. Native argv; `{python}` selects Python. Formats: unittest,
++pytest, tap, playwright-json; pin reporters (`--reporter=json` for Playwright).
++One runtime/environment/oracle: completed FAIL/exit1 before, PASS/exit0 after.
++Startup/timeout/zero tests refuse; reap descendants.
++REVIEW/finish recheck committed carrier integrity, Work/lineage/Source/acceptance,
++cycle/Attempt/inputs; forged/changed/stale refuses. Replay
++adds no authority. Dry-run executes/writes nothing; read-only refuses.
++Other checks remain due; copies claim no sandbox.
++
+ **Changing the verifier is allowed, and it spends the old evidence.** A test
+ can be wrong and a requirement can move, so tests are not frozen during a
+ fix; what is forbidden is spending the old FAIL on a new oracle. A changed
+--- pre-T1711/tools/test_t1711_regression_execution.py
++++ prior-bound/tools/test_t1711_regression_execution.py
+@@ -0,0 +1,505 @@
++"""SRC-212: measured active regression evidence, not a caller's verdict."""
++
++from __future__ import annotations
++
++import importlib
++import inspect
++import json
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++from unittest.mock import patch
++
++from saipen_engine import operations
++from saipen_engine.board import parse_board
++from saipen_engine.oracle import parse_identity
++from test_regression_gate import (
++    GREEN,
++    S1,
++    S2,
++    V1,
++    RegressionGateFixture,
++    _evidence,
++)
++
++try:
++    EXECUTION = importlib.import_module("saipen_engine.regression_execution")
++except ModuleNotFoundError:
++    EXECUTION = None
++
++
++class IdentityControls(unittest.TestCase):
++    def test_contradictory_aliases_do_not_produce_an_identity(self):
++        self.assertEqual(parse_identity("verifier:1111aaaa oracle:9999dddd subject:2222bbbb"), {})
++
++    def test_equal_aliases_remain_compatible(self):
++        self.assertEqual(
++            parse_identity("verifier:1111aaaa oracle:1111aaaa subject:2222bbbb"),
++            {"verifier": "1111aaaa", "subject": "2222bbbb"},
++        )
++
++
++class AttemptControls(RegressionGateFixture):
++    def attempt(self, action, **kwargs):
++        result = operations.attempt_lifecycle(self.project, "tester", action, **kwargs)
++        self.assertTrue(result.ok, result.to_dict())
++
++    def pair(self):
++        self.record(_evidence("FAIL", V1, S1))
++        self.record(_evidence("PASS", V1, S2))
++
++    def refuse(self):
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_contradictory_identity_cannot_approve_review(self):
++        self.record(_evidence("FAIL", V1, S1) + " oracle:9999dddd")
++        self.record(_evidence("PASS", V1, S2))
++        self.refuse()
++
++    def test_halves_from_different_attempts_cannot_approve_review(self):
++        self.attempt("open")
++        self.record(_evidence("FAIL", V1, S1))
++        self.attempt("close", result="failed", stop="validation_failure")
++        self.attempt("open")
++        self.record(_evidence("PASS", V1, S2))
++        self.attempt("close", result="yielded", stop="deliberate_handoff")
++        self.refuse()
++
++    def test_a_new_attempt_invalidates_the_previous_attempt_pair(self):
++        self.attempt("open")
++        self.pair()
++        self.attempt("close", result="candidate", stop="completed_execution")
++        self.attempt("open")
++        self.refuse()
++
++    def test_an_attempt_and_absent_attempt_are_distinct(self):
++        self.attempt("open")
++        self.record(_evidence("FAIL", V1, S1))
++        self.attempt("close", result="failed", stop="validation_failure")
++        self.record(_evidence("PASS", V1, S2))
++        self.refuse()
++
++    def test_legacy_same_attempt_records_remain_valid(self):
++        self.attempt("open")
++        self.pair()
++        self.assertTrue(self.to_review().ok)
++
++    def test_legacy_absent_attempt_records_remain_valid(self):
++        self.pair()
++        self.assertTrue(self.to_review().ok)
++
++
++CHECK = """import unittest
++from subject import answer
++class Control(unittest.TestCase):
++    def test_answer(self): self.assertEqual(answer(), 2)
++if __name__ == "__main__": unittest.main()
++"""
++
++
++class ExecutionControls(RegressionGateFixture):
++    def setUp(self):
++        super().setUp()
++        self.assertTrue(
++            self.project.resolve().is_relative_to(Path(tempfile.gettempdir()).resolve())
++        )
++        (self.project / "subject.py").write_text("def answer(): return 2\n", encoding="utf-8")
++        (self.project / "check.py").write_text(CHECK, encoding="utf-8")
++        evidence = self.project / ".saipen/evidence"
++        evidence.mkdir(exist_ok=True)
++        (evidence / "before.py").write_text("def answer(): return 1\n", encoding="utf-8")
++        self.contract_path = evidence / "contract.json"
++        self.contract = {
++            "schema": 1,
++            "command": ["{python}", "-B", "check.py"],
++            "format": "unittest",
++            "context": ["subject.py", "check.py"],
++            "oracle_files": ["check.py"],
++            "subject_files": ["subject.py"],
++            "before": {"subject.py": ".saipen/evidence/before.py"},
++            "timeout": 30,
++        }
++        self.write_contract()
++
++    def write_contract(self):
++        self.contract_path.write_text(json.dumps(self.contract), encoding="utf-8")
++
++    def arm(self):
++        options = {"regression": "required"}
++        if "evidence_profile" in inspect.signature(operations.ticket_verify).parameters:
++            options["evidence_profile"] = "executed"
++        result = operations.ticket_verify(self.project, "T-7", "tester", None, **options)
++        self.assertTrue(result.ok, result.to_dict())
++
++    def execute(self, **kwargs):
++        self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
++        return EXECUTION.execute_pair(self.project, "T-7", "tester", self.contract_path, **kwargs)
++
++    def assert_refused_without_canonical_writes(self, **kwargs):
++        before = self.canonical_digest()
++        result = self.execute(**kwargs)
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(before, self.canonical_digest())
++        return result
++
++    def test_executed_profile_rejects_an_unknown_self_declared_digest(self):
++        self.arm()
++        self.record(_evidence("FAIL", "1234abcd", S1))
++        self.record(_evidence("PASS", "1234abcd", S2))
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(before, self.canonical_digest())
++
++    def test_executed_profile_without_a_genuine_pair_refuses(self):
++        self.arm()
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(before, self.canonical_digest())
++
++    def test_actual_active_pair_is_admitted_and_typed(self):
++        result = self.execute()
++        self.assertTrue(result.ok, result.to_dict())
++        evidence = json.loads((self.project / result.data["record"]).read_text(encoding="utf-8"))
++        self.assertEqual(evidence["evidence_class"], "executed")
++        self.assertEqual(evidence["ticket"], "T-7")
++        self.assertEqual(evidence["runs"][0]["exit_code"], 1)
++        self.assertEqual(evidence["runs"][1]["exit_code"], 0)
++        self.assertGreater(evidence["runs"][0]["ran"], 0)
++        self.assertEqual(evidence["before"]["verifier"], evidence["after"]["verifier"])
++        self.assertNotEqual(evidence["before"]["subject"], evidence["after"]["subject"])
++        board = parse_board((self.project / ".saipen/BOARD.md").read_text(encoding="utf-8"))
++        self.assertEqual(board["tickets"]["T-7"]["fields"]["regression_evidence"], "executed")
++        self.assertTrue(self.to_review().ok)
++
++    def test_exact_replay_produces_no_duplicate_authority(self):
++        first = self.execute()
++        self.assertTrue(first.ok, first.to_dict())
++        before = self.canonical_digest()
++        second = self.execute()
++        self.assertTrue(second.ok, second.to_dict())
++        self.assertEqual(second.data["record"], first.data["record"])
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_changed_receipt_cannot_approve_review(self):
++        result = self.execute()
++        self.assertTrue(result.ok, result.to_dict())
++        target = self.project / result.data["record"]
++        value = json.loads(target.read_text(encoding="utf-8"))
++        value["ticket"] = "T-999"
++        target.write_text(json.dumps(value), encoding="utf-8")
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_a_newer_failure_supersedes_the_receipt(self):
++        result = self.execute()
++        self.assertTrue(result.ok, result.to_dict())
++        value = json.loads((self.project / result.data["record"]).read_text(encoding="utf-8"))
++        self.record(_evidence("FAIL", value["before"]["verifier"], value["before"]["subject"]))
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_a_new_verify_boundary_cannot_reuse_old_execution(self):
++        self.assertTrue(self.execute().ok)
++        self.assertTrue(operations.transition_phase(self.project, "BUILD", "tester", "T-7").ok)
++        self.assertTrue(operations.transition_phase(self.project, "VERIFY", "tester", "T-7").ok)
++        self.record(GREEN)
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_a_new_attempt_cannot_reuse_old_execution(self):
++        self.assertTrue(self.execute().ok)
++        self.assertTrue(operations.attempt_lifecycle(self.project, "tester", "open").ok)
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_post_fix_byte_changes_invalidate_execution(self):
++        self.assertTrue(self.execute().ok)
++        (self.project / "subject.py").write_text("def answer(): return 3\n", encoding="utf-8")
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_oracle_byte_changes_invalidate_execution(self):
++        self.assertTrue(self.execute().ok)
++        (self.project / "check.py").write_text(CHECK + "# different check\n", encoding="utf-8")
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_invalid_contracts_cannot_be_results_or_escape_the_project(self):
++        for key, value in (
++            ("verifier", "1234abcd"),
++            ("result", "PASS"),
++            ("format", "unknown"),
++            ("context", ["../outside.py"]),
++            ("timeout", 0),
++        ):
++            with self.subTest(key=key):
++                original = dict(self.contract)
++                self.contract[key] = value
++                self.write_contract()
++                self.assert_refused_without_canonical_writes()
++                self.contract = original
++                self.write_contract()
++
++    def test_identical_subjects_are_not_a_pair(self):
++        (self.project / ".saipen/evidence/before.py").write_text(
++            "def answer(): return 2\n", encoding="utf-8"
++        )
++        self.assert_refused_without_canonical_writes()
++
++    def test_a_post_fix_failure_is_not_an_approval(self):
++        (self.project / "subject.py").write_text("def answer(): return 3\n", encoding="utf-8")
++        self.assert_refused_without_canonical_writes()
++
++    def test_a_launch_error_or_zero_tests_is_not_regression_evidence(self):
++        for code in ("raise RuntimeError('startup')\n", "import unittest; unittest.main()\n"):
++            with self.subTest(code=code):
++                (self.project / "check.py").write_text(code, encoding="utf-8")
++                self.assert_refused_without_canonical_writes()
++
++    def test_oracle_and_subject_cannot_overlap(self):
++        self.contract["oracle_files"] = ["subject.py"]
++        self.write_contract()
++        self.assert_refused_without_canonical_writes()
++
++    def test_timeout_is_a_structured_refusal_with_owned_cleanup(self):
++        self.contract["command"] = ["{python}", "-c", "import time; time.sleep(30)"]
++        self.contract["timeout"] = 1
++        self.write_contract()
++        result = self.assert_refused_without_canonical_writes()
++        self.assertIn("TIMEOUT", result.message)
++
++    def test_preserved_prior_input_changes_invalidate_execution(self):
++        self.assertTrue(self.execute().ok)
++        carrier = self.project / ".saipen/evidence/before.py"
++        original = carrier.read_bytes()
++        carrier.write_text("def answer(): return 99\n", encoding="utf-8")
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(self.canonical_digest(), before)
++        carrier.write_bytes(original)
++        self.assertTrue(self.to_review().ok)
++
++    def test_changed_input_contract_cannot_spend_the_measured_pair(self):
++        self.assertTrue(self.execute().ok)
++        alternative = self.project / ".saipen/evidence/alternative.py"
++        alternative.write_bytes((self.project / ".saipen/evidence/before.py").read_bytes())
++        self.contract["before"]["subject.py"] = ".saipen/evidence/alternative.py"
++        self.write_contract()
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_prior_material_changed_before_commit_refuses_without_canonical_writes(self):
++        self.assertIsNotNone(EXECUTION)
++        original = EXECUTION._binding
++        calls = []
++
++        def move_after_fresh_binding(*args, **kwargs):
++            binding = original(*args, **kwargs)
++            calls.append(binding)
++            if len(calls) == 2:
++                (self.project / ".saipen/evidence/before.py").write_text(
++                    "def answer(): return 99\n", encoding="utf-8"
++                )
++            return binding
++
++        with patch.object(EXECUTION, "_binding", move_after_fresh_binding):
++            self.assert_refused_without_canonical_writes()
++
++    def test_original_source_changed_by_a_verifier_cannot_be_admitted(self):
++        original = repr(str(self.project / "subject.py"))
++        (self.project / "check.py").write_text(
++            "from pathlib import Path\n"
++            + f"Path({original}).write_text('def answer(): return 99\\n')\n"
++            + CHECK,
++            encoding="utf-8",
++        )
++        self.assert_refused_without_canonical_writes()
++
++    def test_environment_changes_invalidate_the_configured_verifier(self):
++        self.assertTrue(self.execute().ok)
++        with patch.dict(os.environ, {"REGRESSION_CONTROL_ENV": "changed"}):
++            before = self.canonical_digest()
++            self.assertFalse(self.to_review().ok)
++            self.assertEqual(self.canonical_digest(), before)
++
++    def test_a_completed_producing_attempt_keeps_its_genuine_pair(self):
++        self.assertTrue(operations.attempt_lifecycle(self.project, "tester", "open").ok)
++        result = self.execute()
++        self.assertTrue(result.ok, result.to_dict())
++        self.assertTrue(
++            operations.attempt_lifecycle(
++                self.project, "tester", "close", result="candidate", stop="completed_execution"
++            ).ok
++        )
++        self.assertTrue(self.to_review().ok)
++
++    def test_a_changed_acceptance_contract_cannot_spend_old_execution(self):
++        self.assertTrue(self.execute().ok)
++        self.assertTrue(
++            operations.ticket_verify(
++                self.project,
++                "T-7",
++                "tester",
++                "A newly required and different verification contract",
++            ).ok
++        )
++        self.record(GREEN)
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_the_successful_execution_does_not_replace_ordinary_verification(self):
++        self.record("verify -> FAIL: another mandatory gate failed")
++        self.assertTrue(self.execute().ok)
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_forged_checkpoint_halves_cannot_replace_a_measured_pair(self):
++        result = self.execute()
++        self.assertTrue(result.ok, result.to_dict())
++        value = json.loads((self.project / result.data["record"]).read_text(encoding="utf-8"))
++        self.record(_evidence("FAIL", value["before"]["verifier"], value["before"]["subject"]))
++        self.record(_evidence("PASS", value["after"]["verifier"], value["after"]["subject"]))
++        before = self.canonical_digest()
++        self.assertFalse(self.to_review().ok)
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_a_fresh_measured_pair_after_a_newer_failure_restores_admission(self):
++        first = self.execute()
++        self.assertTrue(first.ok, first.to_dict())
++        value = json.loads((self.project / first.data["record"]).read_text(encoding="utf-8"))
++        self.record(_evidence("FAIL", value["before"]["verifier"], value["before"]["subject"]))
++        second = self.execute()
++        self.assertTrue(second.ok, second.to_dict())
++        self.assertNotEqual(first.data["record"], second.data["record"])
++        self.assertTrue(self.to_review().ok)
++
++    def native(self, words, *, env=None):
++        self.assertIsNotNone(EXECUTION)
++        command = [
++            sys.executable,
++            "-B",
++            str(Path(EXECUTION.__file__).resolve().parents[1] / "saipen.py"),
++            "--project-root",
++            str(self.project),
++            "--agent",
++            "tester",
++            *words,
++            "--json",
++        ]
++        result = subprocess.run(
++            command,
++            capture_output=True,
++            text=True,
++            encoding="utf-8",
++            errors="replace",
++            timeout=45,
++            env=env,
++        )
++        return result, json.loads(result.stdout)
++
++    def test_native_cli_admits_the_actual_active_pair(self):
++        result, value = self.native(
++            ["work", "regression", "T-7", "--file", str(self.contract_path)]
++        )
++        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
++        self.assertTrue(value["ok"], value)
++        self.assertEqual(value["evidence_class"], "executed")
++
++    def test_native_cli_dry_run_is_write_free(self):
++        before = self.canonical_digest()
++        result, value = self.native(
++            ["work", "regression", "T-7", "--file", str(self.contract_path), "--dry-run"]
++        )
++        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
++        self.assertTrue(value["ok"], value)
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_native_cli_can_require_executed_evidence_without_changing_verify(self):
++        original = parse_board((self.project / ".saipen/BOARD.md").read_text(encoding="utf-8"))
++        result, value = self.native(
++            ["ticket", "regression", "T-7", "required", "--evidence", "executed"]
++        )
++        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
++        self.assertTrue(value["ok"], value)
++        changed = parse_board((self.project / ".saipen/BOARD.md").read_text(encoding="utf-8"))
++        self.assertEqual(changed["tickets"]["T-7"]["fields"]["regression_evidence"], "executed")
++        self.assertEqual(
++            changed["tickets"]["T-7"]["fields"]["verify"],
++            original["tickets"]["T-7"]["fields"]["verify"],
++        )
++
++    def test_dry_run_executes_nothing_and_writes_no_project_bytes(self):
++        (self.project / "check.py").write_text(
++            "from pathlib import Path; Path('UNSAFE').write_text('ran')\n", encoding="utf-8"
++        )
++        before = self.canonical_digest()
++        result = self.execute(dry_run=True)
++        self.assertTrue(result.ok, result.to_dict())
++        self.assertEqual(self.canonical_digest(), before)
++        self.assertFalse((self.project / "UNSAFE").exists())
++        self.assertNotIn("record", result.data)
++
++    def test_read_only_refuses_before_execution(self):
++        with patch.dict(os.environ, {"SAIPEN_CAPABILITY": "read-only"}):
++            result = self.assert_refused_without_canonical_writes()
++        self.assertEqual(result.code, "CAPABILITY_READ_ONLY")
++
++    def test_a_foreign_executor_cannot_measure_or_admit_this_work(self):
++        self.assertIsNotNone(EXECUTION)
++        before = self.canonical_digest()
++        result = EXECUTION.execute_pair(self.project, "T-7", "other", self.contract_path)
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(self.canonical_digest(), before)
++
++    def test_unrequired_work_preserves_the_existing_flow(self):
++        fixture = RegressionGateFixture(methodName="runTest")
++        fixture.REGRESSION = ""
++        try:
++            fixture.setUp()
++            self.assertTrue(fixture.to_review().ok)
++        finally:
++            fixture.doCleanups()
++
++    @unittest.skipUnless(shutil.which("node"), "native Node is unavailable")
++    def test_consumer_compatible_javascript_pair_uses_the_same_active_contract(self):
++        (self.project / "subject.cjs").write_text("exports.answer = () => 2;\n", encoding="utf-8")
++        (self.project / ".saipen/evidence/before.cjs").write_text(
++            "exports.answer = () => 1;\n", encoding="utf-8"
++        )
++        (self.project / "check.cjs").write_text(
++            "const test = require('node:test'); const assert = require('node:assert/strict');\n"
++            "const {answer} = require('./subject.cjs');\n"
++            "test('clipboard result contract', () => assert.equal(answer(), 2));\n",
++            encoding="utf-8",
++        )
++        self.contract.update(
++            command=[shutil.which("node"), "--test", "--test-reporter=tap", "check.cjs"],
++            format="tap",
++            context=["subject.cjs", "check.cjs"],
++            oracle_files=["check.cjs"],
++            subject_files=["subject.cjs"],
++            before={"subject.cjs": ".saipen/evidence/before.cjs"},
++        )
++        self.write_contract()
++        result = self.execute()
++        self.assertTrue(result.ok, result.to_dict())
++        self.assertTrue(self.to_review().ok)
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- pre-T1711/tools/saipen_engine/board_compaction.py
++++ prior-bound/tools/saipen_engine/board_compaction.py
+@@ -92,6 +92,7 @@
+     "owner": "inline",
+     "recurrence": "inline",
+     "regression": "inline",
++    "regression_evidence": "inline",
+     "resume_phase": "inline",
+     "resume_transition_from": "inline",
+     # T-1429: the deferred due instant is machine-routing truth -- a cold
+@@ -143,6 +144,7 @@
+         "user_explicit",
+         "request_witness",
+         "requires",
++        "regression_evidence",
+         "verify",
+         "verify_attempts",
+     }
+--- pre-T1711/extensions/schemas/board.schema.json
++++ prior-bound/extensions/schemas/board.schema.json
+@@ -89,6 +89,11 @@
+       "regression": {
+         "type": "string",
+         "description": "CORE-001: `required` declares that this ticket owes a regression PAIR -- a FAIL against the pre-fix subject and a PASS against the post-fix one under the SAME verifier -- and arms the extra gate in VERIFY -> REVIEW and finish. A machine-owned field, never inferred from prose."
++      },
++      "regression_evidence": {
++        "type": "string",
++        "enum": ["executed"],
++        "description": "Monotonic native execution profile; requires regression: required and a current committed paired execution receipt. Absence retains legacy attested identity comparisons."
+       },
+       "blocker_scope": {
+         "type": "string",

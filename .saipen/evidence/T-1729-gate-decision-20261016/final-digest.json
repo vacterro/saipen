@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "response digest requires --project-root"
+}

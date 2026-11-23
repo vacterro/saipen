@@ -1,0 +1,16 @@
+{
+  "scope_sha256": {
+    "tools/saipen_engine/automation.py": "1c9393d82a7b55710685c8e42844fd62c77f61736495d9a911b77496dc01bf8a",
+    "tools/saipen_engine/response_surface.py": "08ee26601d9ed962891a186b8b72b619a8d3f977fa2986d4f8116048c97c4a55",
+    "tools/test_automation_block.py": "662ff5fd5a66ed93ec114c21daaa71f90fd81ee4c159cf0213ff1ac8be8bd67e"
+  },
+  "inherited_index_unchanged": true,
+  "preexisting_test_module_ast_unchanged": true,
+  "family_record": ".saipen/evidence/core-unit/86b8193b28128c2b-20261009T175213Z.json",
+  "family_record_sha256": "79fec88fd234c2d77e4905178ccb2f54d8e45533e7f6ec9d946f60005b52f52c",
+  "family_fingerprint": "86b8193b28128c2b91a3e140601c10dabcc442aa6b6aaf354763eea294a9399e",
+  "ran": 6013,
+  "red": 0,
+  "new_red": 0,
+  "family_duration_s": 1096.7
+}

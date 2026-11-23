@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "rebind refuses: only a DRAFT report may be rebound, report_status is 'complete' -- committed and swept evidence is immutable"
+}

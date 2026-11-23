@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-085:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-238 closed with verification evidence in LOG: verify -> PASS conf: high -- focused prepared/single_instance/recovery 178 PASS; ruff clean on prepared*.py; compileall rc=0; SRC-086 48/203 + SRC-087 17/79 VERIFIED coverage; GPT Reserve/Luna honest fallback present. Live-provider soak stays gated (operator observation, not code defect).",
+      "text": "Implement new P1 AUDAPACK resource-aware prepared launch scheduler from current user mission, preserving T-236 blocked and T-237 queued.",
+      "verification": "the Work this request created reached its own verification gate; see the T-238 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-238"
+    }
+  },
+  "schema_version": 1
+}

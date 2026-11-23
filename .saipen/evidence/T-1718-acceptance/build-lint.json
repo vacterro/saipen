@@ -1,0 +1,22 @@
+{
+  "label": "build-lint",
+  "phase": "BUILD",
+  "command": [
+    "python",
+    "-m",
+    "ruff",
+    "check",
+    "tools/",
+    "tests/"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 1,
+  "duration_s": 0.312,
+  "fingerprint": "797cc04ad9f3eccd59737e8a9c408cfb1398acb48655e245daaeb0bc838f0bd6",
+  "stdout": "",
+  "stderr": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe: No module named ruff\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "996dc75d1a068e5884a5d7f4bb6caa63d5f5bedb89c9ef6e59d2e7e2748f3d6c",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

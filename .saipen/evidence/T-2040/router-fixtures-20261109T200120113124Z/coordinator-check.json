@@ -1,0 +1,16 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tools/test_continue_improve_fallthrough.py",
+    "tools/test_t1775_continue_never_admits_a_seat.py",
+    "tools/test_intent_audit_fixes.py",
+    "tools/test_improve_gate.py",
+    "tools/test_t1614_future_gate.py",
+    "-q",
+    "--tb=short"
+  ],
+  "exit_code": 1
+}

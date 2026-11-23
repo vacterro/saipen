@@ -1,0 +1,12 @@
+{
+  "tools/saipen_engine/operator_task.py": "c16998ce3b17ce5cfceab93c6b378bf5b3c15760a42e4cbffdfb6f6fde3fa358",
+  "tools/saipen_engine/host_authority_client.py": "97acab7c82cde40a18e6ec93cf3ccc9424a00d28912a50120cde1a376cd76935",
+  "tools/saipen_engine/host_authority_broker.py": "d8700087c6a173e075d65170173a3741d016f5d3085fbeda18a548e659646322",
+  "tools/saipen_engine/guard_events.py": "04df17216fd4467bd58f789483ec99fdd3af031ce84f669294f6c7eb0f3b75f6",
+  "tools/saipen_engine/intake.py": "0ba0abed0aaf78c634293a5328b1fdf576a04533911cd042c7fffeb25b5ca40f",
+  "tools/saipen_engine/entry.py": "670272e003e8d1ca5ef11c852904127c2681073e392d506d0d1be0b885f4f594",
+  "tools/saipen_engine/operations.py": "bda0ea40e51a469f41f94e0a83e07ff19f9ceef67e8ab72ed21a84877ec85c97",
+  "tools/saipen_engine/goal_authority.py": "a27adcf68b364a234434cff006c3826b1b20a5ae1e921700f5b8517b38e0a14e",
+  "extensions/adapters/claude/saipen-guard.py": "2a5955eb10ecd6791dc4ee21615e6d130708f1b27402d488c1dee4919d3e0d8d",
+  "tools/saipen_engine/handoff.py": "c5a4928f3ad1dc3e236eb5f5a30a60eec1b7b01f8f4ed9ea76c8273754757e8f"
+}

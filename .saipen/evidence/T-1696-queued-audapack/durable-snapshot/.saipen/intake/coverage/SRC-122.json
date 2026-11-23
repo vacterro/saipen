@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-122:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-285 closed with verification evidence in LOG: verify -> PASS [target: T-285] conf: high -- python -m pytest -q -p no:cacheprovider on the frozen tree => 2712 passed, 16 skipped, 1 warning in 714.66s, exit 0 (receipt .saipen/evidence/T-285-full-suite-run.txt; the delta over the 2684 closure-hardening boundary is exactly the 28 new controls); plane triple test_plane_launch/test_launch_federation/test_sai_accounts_federation => 171 passed (was 1",
+      "text": "T-279 final envelope consistency: optional provider_id/workdir in the plane launch envelope must not contradict the requested launch (LAUNCH_PROVIDER_MISMATCH / LAUNCH_WORKDIR_MISMATCH), and reconcile the T-279 evidence+LOG with the latest closure-hardening truth",
+      "verification": "the Work this request created reached its own verification gate; see the T-285 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-285"
+    }
+  },
+  "schema_version": 1
+}

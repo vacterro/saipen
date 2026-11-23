@@ -1,0 +1,9 @@
+{
+  "oracle_sha256": "8f1400dc3789f42a5e3f9eaaa1f0fadabb060b37e530498eeb09fd35fc7762ff",
+  "subject_sha256": "a76ef54d9521bf504ac5d3844a03dd94e9a7352cd9369ea7fe12a0c4a47b6a1c",
+  "tests": 4,
+  "failures": 1,
+  "errors": 0,
+  "status": "FAIL",
+  "output": "F...\n======================================================================\nFAIL: test_capability_dependent_probe_is_skipped_without_a_false_failure (__main__.AuditRepairControls.test_capability_dependent_probe_is_skipped_without_a_false_failure)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\kitchen\\t1561_audit_candidate.py\", line 157, in test_capability_dependent_probe_is_skipped_without_a_false_failure\n    self.assertIn(\"SKIP: dependent because prerequisite symlink-restore unproven\", lines)\nAssertionError: 'SKIP: dependent because prerequisite symlink-restore unproven' not found in ['UNPROVEN: symlink-restore -- host cannot create a symlink, so the red control was never constructed: missing Windows symlink privilege', 'SKIP: dependent because prerequisite symlink-restore failed', 'PASS: independent probe ran']\n\n----------------------------------------------------------------------\nRan 4 tests in 0.089s\n\nFAILED (failures=1)\n"
+}

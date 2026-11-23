@@ -1,0 +1,7 @@
+root exists: True
+registry exists: True
+adapter ids: ['opencode', 'claude', 'codex', 'zaicode', 'zcode-production', 'gemini', 'codebuddy', 'freebuff', 'aider', 'antigravity', 'kiro', 'deepseek', 'openai', 'qwen', 'generic']
+hook_artifact = extensions/adapters/zaicode/saipen-guard.py
+hook_install_surface = ~/.zcode/hooks/saipen-guard.py
+declared_strength = ADVISORY
+admission_enforcement = ADVISORY

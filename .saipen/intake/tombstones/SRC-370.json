@@ -1,0 +1,16 @@
+{
+  "actionable": 24,
+  "archive_ref": ".saipen/archive/source/SRC-370.md",
+  "closed_at": "2026-11-01T22:28:28Z",
+  "closure_event": null,
+  "linked_work": "T-1996",
+  "linked_works": [
+    "T-1996"
+  ],
+  "receipt_id": "SRC-370",
+  "requirements": 24,
+  "schema_version": 1,
+  "source_sha256": "002ea66dd643dc81ca27d54188b05a6963bbf6cf1b82ad2f64c97d5fadde14f2",
+  "status": "CLOSED",
+  "unresolved": 0
+}

@@ -1,0 +1,20 @@
+{
+  "operation": "stage exact owned T-2040 regression files",
+  "before_index_sha256": "1f330b0aa6479403e834630160d4ab980faca87723dd85eae500189ba2939f7f",
+  "after_index_sha256": "a5d4964d75fd4630e5b76df779683efa97bc93f14c34f5b94f73285a1ce8e7f1",
+  "changed_paths": [
+    "tools/test_t2040_review_authority_hypotheses.py",
+    "tools/test_t2040_review_input_boundaries.py"
+  ],
+  "unrelated_index_entries_unchanged": true,
+  "staged": {
+    "tools/test_t2040_review_authority_hypotheses.py": "100644 428aeb25f514a26e53b898c679406d75823cc553 0",
+    "tools/test_t2040_review_input_boundaries.py": "100644 290898d8fb51b89020e5ff2fc89308a8c2abadab 0"
+  },
+  "worktree_sha256": {
+    "tools/test_t2040_review_authority_hypotheses.py": "e893758f9b2324b6b159aa7f41c77ec0f78074037ba1a1171b6e7ba77241a1ba",
+    "tools/test_t2040_review_input_boundaries.py": "299008909b0c5d40a3e1ede61e41a4728e5e88fbd70c6a117e58c036c9b7c2c9"
+  },
+  "commit": false,
+  "publication": false
+}

@@ -1,0 +1,15 @@
+test_only_actual_successor_publication_resolves_old_work (test_t1839_cohort_reconciliation.ReconciliationTests.test_only_actual_successor_publication_resolves_old_work) ... 
+  test_only_actual_successor_publication_resolves_old_work (test_t1839_cohort_reconciliation.ReconciliationTests.test_only_actual_successor_publication_resolves_old_work) (publication_cohort=None) ... FAIL
+
+======================================================================
+FAIL: test_only_actual_successor_publication_resolves_old_work (test_t1839_cohort_reconciliation.ReconciliationTests.test_only_actual_successor_publication_resolves_old_work) (publication_cohort=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1839_cohort_reconciliation.py", line 147, in test_only_actual_successor_publication_resolves_old_work
+    self.assertFalse(closure.resolve_implementation_source(project, "T-7").ok)
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 1 test in 2.716s
+
+FAILED (failures=1)

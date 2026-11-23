@@ -1,0 +1,552 @@
+--- .saipen\evidence\T-1693-response-diagnosis\pre-response_surface.py
++++ tools\saipen_engine\response_surface.py
+@@ -496,6 +496,196 @@
+ )
+ 
+ 
++def _diagnosis_request(request: object) -> bool:
++    """Closed affirmative ingress, never keywords found in an outgoing report.
++
++    This recognizes a request, not the meaning or truth of its eventual answer.
++    Ambiguous free prose remains subject to semantic review.
++    """
++    if not isinstance(request, str):
++        return False
++    return bool(
++        re.fullmatch(
++            r"\s*(?:explain why (?:the |an? )?agent deviated from SAIPEN|"
++            r"(?:write|prepare) (?:a |an? )?handoff explaining why the agent deviated from SAIPEN|"
++            r"объясни[ ,]+почему агент отклонился от (?:SAIPEN|протокола)|"
++            r"(?:напиши|подготовь) хендофф[ ,]+почему агент отклонился от (?:SAIPEN|протокола)|"
++            r"selgita[ ,]+miks agent kaldus SAIPENist kõrvale)\s*[.!?]?\s*",
++            request,
++            re.IGNORECASE,
++        )
++    )
++
++
++def request_class_for_request(request: object) -> str:
++    """Candidate intent; human_response_authority separately settles authority."""
++    if _diagnosis_request(request):
++        return "PROTOCOL_DIAGNOSIS"
++    if isinstance(request, str) and request.strip().casefold() in {
++        "report the recovery refusal",
++        "report the operational wait",
++    }:
++        return "RECOVERY_REPORT"
++    artifact = artifact_for_request(request)
++    if artifact == "HANDOFF":
++        return "IMPLEMENTATION_HANDOFF"
++    if artifact == "AUDIT":
++        return "AUDIT"
++    if reason_for_request(request) == "summary":
++        return "ENGINEERING_STATUS"
++    return "ORDINARY"
++
++
++def _diagnosis_errors(rendered: object, request: str, root: object) -> list[str]:
++    """Bound structure and citations; DOES NOT prove semantic applicability.
++
++    A cited quote remains attributed evidence, not a recovered project, a
++    hidden motive, or verified host enforcement. Independent semantic review
++    must judge request/delivery mismatch and rule applicability. No keyword
++    score or a self-declared PASS stands in for that review.
++    """
++    import json
++    from pathlib import Path
++
++    from .paths import resolve_protocol_dir
++
++    try:
++        packet = json.loads(str(rendered))
++    except (ValueError, TypeError, RecursionError):
++        return [
++            "protocol diagnosis requires an evidence-bound record; an inventory is not a diagnosis"
++        ]
++    fields = {
++        "type",
++        "request",
++        "observed",
++        "rule",
++        "assessment",
++        "cause",
++        "correction",
++        "recovery",
++        "host",
++        "enforcement",
++        "semantic_review",
++    }
++    if not isinstance(packet, dict) or set(packet) != fields:
++        return [
++            "diagnosis must cover request, observation, evidence, rule/owner, "
++            "uncertainty, cause and proposed correction"
++        ]
++    if any(
++        not isinstance(packet[key], str)
++        for key in (
++            "type",
++            "request",
++            "assessment",
++            "recovery",
++            "host",
++            "enforcement",
++            "semantic_review",
++        )
++    ):
++        return ["diagnosis scalar fields must be text"]
++    if packet["type"] != "PROTOCOL_DIAGNOSIS" or packet["request"] != request:
++        return ["diagnosis is not bound to the witnessed request"]
++    if packet["semantic_review"] != "REQUIRED" or packet["assessment"] not in {
++        "UNVERIFIED",
++        "REPORTED",
++        "LEGITIMATE_REFUSAL",
++    }:
++        return ["structural verification cannot assert a proven semantic violation"]
++    cause = packet["cause"]
++    if (
++        not isinstance(cause, dict)
++        or set(cause) != {"kind", "reason"}
++        or cause["kind"] != "UNKNOWN"
++        or not isinstance(cause["reason"], str)
++        or not cause["reason"].strip()
++        or len(cause["reason"]) > 1024
++    ):
++        return ["this carrier cannot prove an internal motive or infer a cause from a quote"]
++    correction = packet["correction"]
++    if (
++        not isinstance(correction, dict)
++        or set(correction) != {"status", "text"}
++        or correction["status"] != "PROPOSED"
++        or not isinstance(correction["text"], str)
++        or not correction["text"].strip()
++    ):
++        return ["correction must be proposed; the diagnostic cannot claim it executed"]
++    if packet["recovery"] not in {"UNVERIFIED", "REFUSED", "NOT_REQUESTED"}:
++        return ["a diagnostic is not evidence of successful recovery"]
++    engine = Path(__file__).resolve().parents[2]
++    rule = packet["rule"]
++    if not isinstance(rule, dict) or set(rule) != {"id", "owner"}:
++        return ["an applicable rule needs its exact owner"]
++    if not all(isinstance(rule[key], str) for key in ("id", "owner")):
++        return ["rule identity and owner must be text"]
++    # Existing owners only; no arbitrary file-read API or invented rule ID.
++    owners = {
++        "EXEC-RESPONSE-01": "saipen/EXECUTION.md",
++        "PROTOCOL-ADMISSION-01": "saipen/EXECUTION.md",
++    }
++    if owners.get(rule.get("id")) != rule.get("owner"):
++        return ["rule does not name its existing response/admission owner"]
++    try:
++        owner_text = (resolve_protocol_dir(engine) / "EXECUTION.md").read_text(encoding="utf-8")
++        if f"RULE-OWNER: {rule['id']}" not in owner_text and rule["id"] != "PROTOCOL-ADMISSION-01":
++            return ["rule owner document is unavailable"]
++        registry = json.loads(
++            (engine / "extensions/adapters/registry.json").read_text(encoding="utf-8")
++        )
++        adapter = next((a for a in registry["adapters"] if a["id"] == packet["host"]), None)
++    except (OSError, ValueError, KeyError):
++        return ["diagnosis owner or host capability is unverified"]
++    # Registry is declared capability only; it cannot prove an active gate.
++    if (
++        adapter is None
++        or packet["enforcement"] not in {"ADVISORY", "UNAVAILABLE", "UNVERIFIED"}
++        or (
++            packet["enforcement"] == "ADVISORY"
++            and adapter.get("response_enforcement") != "ADVISORY"
++        )
++    ):
++        return ["diagnostic cannot assert unproven mechanical host enforcement"]
++    if not isinstance(root, (str, Path)):
++        return ["diagnosis needs the caller's bound evidence root"]
++    try:
++        base = Path(root).resolve()
++        evidence_root = (base / ".saipen/evidence").resolve()
++        evidence_root.relative_to(base)
++    except (OSError, ValueError):
++        return ["evidence root is not bound to this project"]
++    observed = packet["observed"]
++    if not isinstance(observed, list) or not observed or len(observed) > 32:
++        return ["diagnosis needs bounded cited observations"]
++    for item in observed:
++        if not isinstance(item, dict) or set(item) != {"ref", "sha256", "quote"}:
++            return ["observation needs a source reference, digest and exact quote"]
++        ref, quote = item["ref"], item["quote"]
++        if (
++            not isinstance(ref, str)
++            or not ref.startswith(".saipen/evidence/")
++            or not isinstance(quote, str)
++            or not quote.strip()
++        ):
++            return ["observation is not bound to project evidence"]
++        try:
++            path = (base / ref).resolve()
++            path.relative_to(evidence_root)
++            with path.open("rb") as stream:
++                raw = stream.read(256 * 1024 + 1)
++            if len(raw) > 256 * 1024:
++                return ["cited evidence exceeds its bounded reader"]
++            if hashlib.sha256(raw).hexdigest() != item["sha256"] or quote not in raw.decode(
++                "utf-8-sig"
++            ):
++                return ["observation quote or digest does not match its source"]
++        except (OSError, ValueError, UnicodeError):
++            return ["cited evidence is unavailable or outside the bound project"]
++    return []
++
++
+ def detail_mode_for_request(request: object) -> str:
+     """The authorized DETAILS mode for one human request, or DETAIL_MODE_NONE.
+ 
+@@ -505,6 +695,8 @@
+     """
+     if not isinstance(request, str) or not request.strip():
+         return DETAIL_MODE_NONE
++    if _diagnosis_request(request):
++        return DETAIL_MODE_REPORT
+     for mode, grammar in _DETAIL_REQUEST_GRAMMARS:
+         if grammar.fullmatch(request):
+             return mode
+@@ -536,6 +728,8 @@
+     """
+     if not isinstance(request, str):
+         return None
++    if _diagnosis_request(request):
++        return "PROTOCOL_DIAGNOSIS"
+     mode = detail_mode_for_request(request)
+     if mode == DETAIL_MODE_HANDOFF:
+         return "HANDOFF"
+@@ -956,6 +1150,8 @@
+ def reason_for_request(request: object) -> str:
+     if not isinstance(request, str):
+         return "final"
++    if _diagnosis_request(request):
++        return "summary"
+     if re.fullmatch(
+         r"\s*(?:(?:saipen\s+)?(?:stop|st)|peatu|стоп|остановись)\s*[.!]?\s*", request, re.IGNORECASE
+     ):
+@@ -1408,6 +1604,7 @@
+         ]
+     human_request = check_context.pop("human_request", "")
+     request_authority = check_context.pop("request_authority", None)
++    diagnosis_root = check_context.pop("diagnosis_root", None)
+     witnessed = human_response_authority(human_request, request_authority)
+     detail_mode = detail_mode_for_request(human_request) if witnessed else DETAIL_MODE_NONE
+     if requested_mode != DETAIL_MODE_NONE and requested_mode != detail_mode:
+@@ -1416,6 +1613,14 @@
+         ]
+     check_context["detail_mode"] = detail_mode
+     artifact = artifact_for_request(human_request) if witnessed else None
++    if artifact == "PROTOCOL_DIAGNOSIS":
++        text = rendered if isinstance(rendered, str) else ""
++        if len(text) > ARTIFACT_CHAR_BUDGET:
++            return CLASS_INVALID_OPERATIONAL_PROSE, [
++                "diagnosis exceeds its bounded artifact carrier"
++            ]
++        errors = _diagnosis_errors(text, human_request, diagnosis_root)
++        return (CLASS_INVALID_OPERATIONAL_PROSE, errors) if errors else (CLASS_ORDINARY_CHAT, [])
+     if artifact and not operational_turn:
+         text = rendered if isinstance(rendered, str) else ""
+         if len(text) > ARTIFACT_CHAR_BUDGET:
+@@ -1712,4 +1917,7 @@
+         # attempt. A capable host replaces operational model output with it.
+         "delivery": delivery,
+         "delivery_validation": delivery_validation,
++        **({"diagnosis_verification": "STRUCTURE_AND_CITATIONS_ONLY",
++            "semantic_review": "REQUIRED"}
++           if authorized and artifact_for_request(ingress) == "PROTOCOL_DIAGNOSIS" else {}),
+     }
+--- .saipen\evidence\T-1693-response-diagnosis\hotswitch-backup\validate.py
++++ tools\validate.py
+@@ -9215,6 +9215,10 @@
+         ("GUIDE.md", "guide WAIT-shape check"),
+         ("tests/scenarios/*/README.md", "required-field-count check + expect/reason parsing"),
+         (
++            "tests/fixtures/protocol-diagnosis/[ab].md",
++            "immutable response witnesses hash-checked by tools/test_response_surface_contract.py",
++        ),
++        (
+             "tests/scenarios/*/.saipen/*.md",
+             "run_scenarios.py runs this validator against each fixture",
+         ),
+@@ -9297,6 +9301,10 @@
+         (".github/**/*.md", "issue/PR templates, not agent-facing"),
+         (".github/*.md", "issue/PR templates, not agent-facing"),
+         ("tests/scenarios/README.md", "scenario format documentation, not a fixture"),
++        (
++            "tests/fixtures/protocol-diagnosis/README.md",
++            "historical witness provenance and test assumptions, not a protocol rule source",
++        ),
+         (".pytest_cache/*.md", "generated tool cache, never a shipped document"),
+         ("**/.pytest_cache/*.md", "generated tool cache, never a shipped document"),
+           (
+--- .saipen\evidence\T-1693-response-diagnosis\hotswitch-backup\test_response_surface_contract.py
++++ tools\test_response_surface_contract.py
+@@ -8,11 +8,14 @@
+ 
+ from __future__ import annotations
+ 
++import hashlib
++import importlib.util
+ import json
+ import os
+ import shutil
+ import subprocess
+ import sys
++import tempfile
+ import unittest
+ from pathlib import Path
+ 
+@@ -22,7 +25,7 @@
+     if _entry not in sys.path:
+         sys.path.insert(0, _entry)
+ 
+-from saipen_engine import response_surface as RS  # noqa: E402
++from saipen_engine import operator_task, pending_ingress, response_surface as RS  # noqa: E402
+ from saipen_engine.hush import HUSHED, MANDATORY as HUSH_MANDATORY  # noqa: E402
+ 
+ PROTOCOL = ROOT / "saipen"
+@@ -591,5 +594,244 @@
+         self.assertEqual(errors, [], errors)
+ 
+ 
++# Identical oracle/fixtures; ONLY the authenticated production subject changes.
++if os.environ.get("SAIPEN_DIAGNOSIS_SUBJECT"):
++    spec = importlib.util.spec_from_file_location(
++        "saipen_engine._diagnosis_subject", os.environ["SAIPEN_DIAGNOSIS_SUBJECT"]
++    )
++    RS = importlib.util.module_from_spec(spec)
++    sys.modules[spec.name] = RS
++    spec.loader.exec_module(RS)
++
++REQUEST = "Explain why the agent deviated from SAIPEN."
++FIXTURES = TOOLS.parent / "tests/fixtures/protocol-diagnosis"
++HASHES = {
++    "a.md": "1378f149861acd5a345e16c97b0b0a863b667aecd054a3b8a728d1227fe6ed15",
++    "b.md": "a6d6ca9591ea8f052ad6ac6d569cbdaae14910da387dd61543932dafb077d0a1",
++}
++
++
++class DiagnosisTests(unittest.TestCase):
++    def setUp(self):
++        self.temp = tempfile.TemporaryDirectory(prefix="saipen-t1693-")
++        self.addCleanup(self.temp.cleanup)
++        self.root = Path(self.temp.name)
++        self.carrier = operator_task.witness(
++            REQUEST, env={operator_task.ENV_TASK_SHA256: pending_ingress.ingress_digest(REQUEST)}
++        )
++        for name, digest in HASHES.items():
++            raw = (FIXTURES / name).read_bytes()
++            self.assertEqual(hashlib.sha256(raw).hexdigest(), digest)
++            target = self.root / ".saipen/evidence" / name
++            target.parent.mkdir(parents=True, exist_ok=True)
++            target.write_bytes(raw)
++
++    def check(self, text, request=REQUEST, authority=None):
++        if authority is None:
++            authority = operator_task.witness(
++                request,
++                env={operator_task.ENV_TASK_SHA256: pending_ingress.ingress_digest(request)},
++            )
++        return RS.classify_final_response(
++            text,
++            operational_turn=False,
++            style_contract=None,
++            human_request=request,
++            request_authority=authority,
++            diagnosis_root=self.root,
++        )
++
++    def packet(self, witness="a.md"):
++        text = (FIXTURES / witness).read_text(encoding="utf-8")
++        quote = text.splitlines()[0]
++        return {
++            "type": "PROTOCOL_DIAGNOSIS",
++            "request": REQUEST,
++            "observed": [
++                {"ref": f".saipen/evidence/{witness}", "sha256": HASHES[witness], "quote": quote}
++            ],
++            "rule": {"id": "EXEC-RESPONSE-01", "owner": "saipen/EXECUTION.md"},
++            "assessment": "UNVERIFIED",
++            "cause": {
++                "kind": "UNKNOWN",
++                "reason": (
++                    "Original operator/host transcript is absent; "
++                    "the artifact cannot reveal internal intent."
++                ),
++            },
++            "correction": {
++                "status": "PROPOSED",
++                "text": (
++                    "Explain the request/delivery mismatch with attributed evidence; "
++                    "preserve legitimate refusals."
++                ),
++            },
++            "recovery": "UNVERIFIED",
++            "host": "freebuff",
++            "enforcement": "ADVISORY",
++            "semantic_review": "REQUIRED",
++        }
++
++    def assertRejected(self, text):
++        klass, errors = self.check(text)
++        self.assertEqual(klass, RS.CLASS_INVALID_OPERATIONAL_PROSE)
++        self.assertTrue(errors)
++
++    def test_a_inventory_cannot_replace_diagnosis(self):
++        self.assertRejected((FIXTURES / "a.md").read_text(encoding="utf-8"))
++
++    def test_b_generic_handoff_cannot_replace_diagnosis(self):
++        self.assertRejected((FIXTURES / "b.md").read_text(encoding="utf-8"))
++
++    def test_c_rule_needs_owner_and_bound_evidence(self):
++        for field in ("rule", "observed"):
++            packet = self.packet()
++            del packet[field]
++            with self.subTest(field=field):
++                self.assertRejected(json.dumps(packet))
++        packet = self.packet()
++        packet["rule"]["owner"] = "saipen/STYLE.md"
++        self.assertRejected(json.dumps(packet))
++
++    def test_d_hidden_motive_is_not_observed_cause(self):
++        packet = self.packet()
++        packet["cause"] = {"kind": "INTERNAL_MOTIVE", "text": "The agent deliberately disobeyed."}
++        self.assertRejected(json.dumps(packet))
++
++    def test_e_successful_recovery_cannot_be_invented(self):
++        packet = self.packet()
++        packet["recovery"] = "RECOVERED"
++        self.assertRejected(json.dumps(packet))
++
++    def test_f_freebuff_cannot_claim_mechanical_enforcement(self):
++        packet = self.packet()
++        packet["enforcement"] = "MECHANICAL"
++        self.assertRejected(json.dumps(packet))
++
++    def test_g_cited_diagnosis_with_bounded_uncertainty(self):
++        for witness in HASHES:
++            with self.subTest(witness=witness):
++                klass, errors = self.check(json.dumps(self.packet(witness)))
++                self.assertEqual((klass, errors), (RS.CLASS_ORDINARY_CHAT, []))
++
++    def test_h_truthful_refusal_is_not_misconduct(self):
++        packet = self.packet()
++        packet["assessment"] = "LEGITIMATE_REFUSAL"
++        packet["recovery"] = "REFUSED"
++        packet["observed"][0]["quote"] = "SAIPEN в read-only блокировке"
++        self.assertEqual(self.check(json.dumps(packet)), (RS.CLASS_ORDINARY_CHAT, []))
++
++    def test_i_implementation_handoff_keeps_its_own_contract(self):
++        self.assertEqual(
++            self.check("Implementation and tests listed here.", "write an implementation handoff"),
++            (RS.CLASS_ORDINARY_CHAT, []),
++        )
++
++    def test_j_compact_status_is_not_diagnosis(self):
++        self.assertEqual(RS.reason_for_request("give me a summary"), "summary")
++
++    def test_k_witnessed_detailed_artifact_is_still_allowed(self):
++        self.assertEqual(
++            self.check("Evidence and findings.", "prepare the audit"), (RS.CLASS_ORDINARY_CHAT, [])
++        )
++
++    def test_l_unverified_host_is_reported_truthfully(self):
++        packet = self.packet()
++        packet["enforcement"] = "UNVERIFIED"
++        self.assertEqual(self.check(json.dumps(packet)), (RS.CLASS_ORDINARY_CHAT, []))
++
++    def test_changed_quote_digest_path_and_request_are_rejected(self):
++        for key, value in [("quote", "fiction"), ("sha256", "0" * 64), ("ref", "../../outside")]:
++            packet = self.packet()
++            packet["observed"][0][key] = value
++            with self.subTest(key=key):
++                self.assertRejected(json.dumps(packet))
++        packet = self.packet()
++        packet["request"] = "write an implementation handoff"
++        self.assertRejected(json.dumps(packet))
++
++    def test_no_caller_root_is_not_evidence(self):
++        klass, errors = RS.classify_final_response(
++            json.dumps(self.packet()),
++            operational_turn=False,
++            human_request=REQUEST,
++            request_authority=self.carrier,
++        )
++        self.assertEqual(klass, RS.CLASS_INVALID_OPERATIONAL_PROSE)
++        self.assertTrue(errors)
++
++    def test_request_classes_come_from_ingress(self):
++        for request, kind in [
++            (REQUEST, "PROTOCOL_DIAGNOSIS"),
++            ("write an implementation handoff", "IMPLEMENTATION_HANDOFF"),
++            ("give me a summary", "ENGINEERING_STATUS"),
++            ("report the recovery refusal", "RECOVERY_REPORT"),
++            ("prepare the audit", "AUDIT"),
++        ]:
++            with self.subTest(request=request):
++                self.assertEqual(RS.request_class_for_request(request), kind)
++
++    def test_quoted_or_negated_request_never_grants_diagnosis(self):
++        for request in [f'"{REQUEST}"', f"example: {REQUEST}", f"do not {REQUEST}"]:
++            self.assertNotEqual(RS.artifact_for_request(request), "PROTOCOL_DIAGNOSIS")
++
++    def test_model_supplied_request_cannot_authorize_artifact(self):
++        self.assertFalse(RS.human_response_authority(REQUEST, {"witness": "model_supplied"}))
++
++    def test_layered_gate_discloses_semantic_limit_and_preserves_admission(self):
++        kwargs = dict(
++            admission=None,
++            admission_consulted=False,
++            operational_turn=True,
++            style_contract=None,
++            human_request=REQUEST,
++            request_authority=self.carrier,
++            diagnosis_root=self.root,
++        )
++        verdict = RS.gate_final_response(json.dumps(self.packet()), **kwargs)
++        self.assertTrue(verdict["ok"])
++        self.assertEqual(verdict["diagnosis_verification"], "STRUCTURE_AND_CITATIONS_ONLY")
++        self.assertEqual(verdict["semantic_review"], "REQUIRED")
++        kwargs.update(
++            admission={"permitted": False, "state": "REFUSED", "problems": []},
++            admission_consulted=True,
++        )
++        self.assertFalse(RS.gate_final_response(json.dumps(self.packet()), **kwargs)["ok"])
++
++    def test_malformed_values_refuse_instead_of_crashing(self):
++        for field in ["assessment", "host", "rule", "cause", "observed", "recovery"]:
++            packet = self.packet()
++            packet[field] = []
++            with self.subTest(field=field):
++                self.assertRejected(json.dumps(packet))
++
++    def test_correction_is_not_an_execution_receipt(self):
++        packet = self.packet()
++        packet["correction"]["status"] = "IMPLEMENTED"
++        self.assertRejected(json.dumps(packet))
++
++    def test_source_and_flattened_installs_use_the_same_owner(self):
++        from unittest.mock import patch
++
++        for layout in ("source", "flat"):
++            with self.subTest(layout=layout):
++                install = self.root / layout
++                protocol = install / "saipen" if layout == "source" else install
++                protocol.mkdir(parents=True)
++                for name in ("BOOT.md", "EXECUTION.md"):
++                    shutil.copy2(PROTOCOL / name, protocol / name)
++                registry = install / "extensions/adapters/registry.json"
++                registry.parent.mkdir(parents=True)
++                shutil.copy2(ROOT / "extensions/adapters/registry.json", registry)
++                subject = install / "tools/saipen_engine/response_surface.py"
++                with patch.object(RS, "__file__", str(subject)):
++                    self.assertEqual(
++                        self.check(json.dumps(self.packet())), (RS.CLASS_ORDINARY_CHAT, [])
++                    )
++
++    def test_deep_json_refuses_instead_of_crashing(self):
++        self.assertRejected("[" * 1100 + "0" + "]" * 1100)
++
++
+ if __name__ == "__main__":
+     unittest.main()

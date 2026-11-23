@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "code": "RESPONSE_RENDERED",
+  "text": "STATUS: WAIT  \nRESULT: Vajab operaatori otsust; T-2021 lõpetatud; 114 blokeeritud (BLOCKED_EXTERNAL 20, WAIT_USER_DECISION 9, MARKHUNT_TRIAGE_REQUIRED 8)  \nOPERATOR ACTION: Operaator kinnitab selle projekti ja eesmärgi kohaliku hoolduse kapsli ning rakendab saipen goal authorize --file <UTF8_FILE>.  \nNEXT EXACT ACTION: saipen continue  \nVALIDATION: CURRENT_FAIL  \nDETAILS: E-20529",
+  "reason": "final",
+  "emit": true
+}

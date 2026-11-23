@@ -1,0 +1,23 @@
+test_automation_keeps_hard_wait_and_exposes_the_missing_input (test_t1858_valve_guidance.ValveGuidanceTests.test_automation_keeps_hard_wait_and_exposes_the_missing_input) ... FAIL
+test_bounded_reset_refusal_names_missing_native_ingress (test_t1858_valve_guidance.ValveGuidanceTests.test_bounded_reset_refusal_names_missing_native_ingress) ... FAIL
+
+======================================================================
+FAIL: test_automation_keeps_hard_wait_and_exposes_the_missing_input (test_t1858_valve_guidance.ValveGuidanceTests.test_automation_keeps_hard_wait_and_exposes_the_missing_input)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1858_valve_guidance.py", line 44, in test_automation_keeps_hard_wait_and_exposes_the_missing_input
+    self.assertEqual(block.get("required_ingress"), "operator_carrier")
+AssertionError: None != 'operator_carrier'
+
+======================================================================
+FAIL: test_bounded_reset_refusal_names_missing_native_ingress (test_t1858_valve_guidance.ValveGuidanceTests.test_bounded_reset_refusal_names_missing_native_ingress)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1858_valve_guidance.py", line 27, in test_bounded_reset_refusal_names_missing_native_ingress
+    self.assertEqual(refusal.get("required_ingress"), "operator_carrier")
+AssertionError: None != 'operator_carrier'
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.043s
+
+FAILED (failures=2)

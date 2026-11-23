@@ -1,0 +1,17 @@
+test_only_proved_empty_worker_is_neutral_and_raw_result_stays_visible (test_t1837_ci_family_parity.EmptyPartitionTests.test_only_proved_empty_worker_is_neutral_and_raw_result_stays_visible) ... FAIL
+
+======================================================================
+FAIL: test_only_proved_empty_worker_is_neutral_and_raw_result_stays_visible (test_t1837_ci_family_parity.EmptyPartitionTests.test_only_proved_empty_worker_is_neutral_and_raw_result_stays_visible)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1837_ci_family_parity.py", line 64, in test_only_proved_empty_worker_is_neutral_and_raw_result_stays_visible
+    self.assertEqual(core_unit.judge(merged, [])["verdict"], "PASS", merged)
+AssertionError: 'FAIL' != 'PASS'
+- FAIL
++ PASS
+ : {'status': 'FAIL', 'exit_code': 5, 'ran': 2, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': None, 'sections': {}, 'processes_leaked': [], 'discovered': 2, 'partition_error': None, 'membership_required': True, 'membership_proof': {'inventory_sha256': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'occurrences': 2}, 'discovery_process_s': None, 'shards': [{'status': 'PASS', 'exit_code': 0, 'ran': 2, 'selected': 2, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': 0, 'duration_s': None, 'inventory_sha256': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'selected_indices': [0, 1], 'discovery_s': None, 'processes_leaked': []}, {'status': 'FAIL', 'exit_code': 5, 'ran': 0, 'selected': 0, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': None, 'duration_s': None, 'inventory_sha256': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'selected_indices': [], 'discovery_s': None, 'processes_leaked': []}], 'module_durations_s': {}}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)

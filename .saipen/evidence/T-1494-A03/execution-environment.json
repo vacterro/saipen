@@ -1,0 +1,25 @@
+{
+  "python_executable": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "python_version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "working_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "rule_and_runner_sha256": {
+    "tools/saipen_engine/test_runner.py": "532c8a7f8fa4e1e7847c3fbd477da816e64474e1128658219deb30554263d96e",
+    "tools/saipen_engine/core_unit.py": "d70de5b55b36f0bc9b26d028a9f5c02fe8ea2addd26de46dba4083aae63123e3",
+    "tools/core_unit.py": "9fe6c6f555db7ef045cb3628bb15df477311aa5de91c10cf4728d0f2350fa0be",
+    "tools/core_unit_baseline.json": "81516ef194be0dcb17a85f38a290d9f166d7b2ebd4f55dd41e484a690b501244",
+    "tools/validate.py": "f20692709bf5fb04aa4a161a6891c60ba5bf3a77200b78aad56ce754bf635acd",
+    "tools/audit_checks.py": "a61a58ce4bda4e7939decaf791198fe7ba0f4b87d5e8afea74c427763e178759",
+    "tools/validator_fail_sites.json": "a0502d2ac6b5ab788606a806d2af7b0d404373a2fc7a1bfc9e6d9b66f3baae30",
+    "tools/test_t1494_continuation_authority.py": "c31e968253889bb883dc66fb7fd6e7b90ab60ba0cb23a6984f7af56a2e20b5d8"
+  },
+  "current_operator_carriers": {
+    "SAIPEN_TASK_SHA256": false,
+    "SAIPEN_TASK_FILE": false
+  },
+  "runner_environment": "canonical test_runner._run_family; unbound_environment; explicit test-only witnesses",
+  "whole_family": "python -B -m unittest discover -s tools -p test_*.py -v",
+  "jobs": 1,
+  "baseline_edits": [],
+  "no_publish_authority": "current operator A03 instruction; future canonical calls explicitly negotiate SAIPEN_CAPABILITY=no-publish"
+}

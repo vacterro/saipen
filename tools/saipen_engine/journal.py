@@ -468,6 +468,7 @@ OP_CLASSES: dict[str, frozenset[int]] = {
             "attempt-open-",
             "bind-cohort-",
             "board-compact-",
+            "board-restore-",
             "board-scrub-",
             "ccc-entry-",
             "clear-wait-role-",
@@ -483,6 +484,7 @@ OP_CLASSES: dict[str, frozenset[int]] = {
             "migrate_generation-",
             "needs-detach-",
             "normalize-log-",
+            "producer-integration-",
             "quarantine-log-tail-",
             "rebind_home-",
             "resolve-external-",
@@ -498,6 +500,7 @@ OP_CLASSES: dict[str, frozenset[int]] = {
             "duplicate-id-",
             "release-",
             "source.requirement_add-",
+            "source-reindex-",
             # improve.py (`_journaled_write` kinds, admit, rebind), userperson.py
             "cycle-",
             "improve-admit-",
@@ -537,6 +540,7 @@ OP_CLASSES: dict[str, frozenset[int]] = {
             "cut-intake-",
             "milestone-",
             "source-link-",
+            "source-rebind-",
             "undo-",
             "undo-intake-",
         ),
@@ -931,6 +935,7 @@ def decode_operation_record(
     progress_raw: bytes | None = None,
     progress_captured: bool = False,
     allow_settlement_fold: bool = False,
+    resolved_root: Path | None = None,
 ) -> dict:
     """STRICT single operation-record decoder (T-1003 hostile findings).
 
@@ -969,7 +974,7 @@ def decode_operation_record(
     # "resolved path relative to resolved root", so a relative root and a
     # resolved target can never be relative_to()'d into a crash
     # (hostile-regression canonical-identity rule).
-    root = Path(root).resolve()
+    root = Path(root).resolve() if resolved_root is None else resolved_root
     from .safeid import InvalidIdError
 
     manifest = op_dir / "operation.json"
@@ -5051,6 +5056,31 @@ def _compact_migrate_ops(
 _RECEIPT_STRUCTURE_SENTINEL = b"\0saipen-receipt-structure-v1\0"
 _PROGRESS_ABSENT_SENTINEL = b"\0saipen-progress-absent-v1\0"
 _PROGRESS_UNAVAILABLE_SENTINEL = b"\0saipen-progress-unavailable-v1\0"
+# Hard capture cap for one receipt-side file. The canonical contract reads
+# exact bytes to EOF; a receipt file larger than this is a structural
+# anomaly (a growing/looped writer), classified instead of feeding the
+# digest unbounded bytes.
+_RECEIPT_READ_HARD_CAP = 256 * 1024 * 1024
+
+
+def _descriptor_unchanged(fd: int, detail_prefix: str, opened: os.stat_result) -> bool:
+    """Night-6 completeness probe: re-fstat the SAME descriptor and
+    confirm the file did not grow, shrink or re-stat as a different
+    entity while its bytes were being read. A concurrent writer that
+    lands bytes after the capture window must surface as a named
+    refusal -- an exact-size first read proves nothing about EOF."""
+    try:
+        current = os.fstat(fd)
+    except OSError as exc:
+        raise OSError(f"{detail_prefix} re-stat failed ({type(exc).__name__}): {exc}") from exc
+    if (
+        current.st_dev != opened.st_dev
+        or current.st_ino != opened.st_ino
+    ):
+        return False
+    if current.st_size != opened.st_size or current.st_mtime_ns != opened.st_mtime_ns:
+        return False
+    return True
 
 
 @dataclass(frozen=True)
@@ -5073,11 +5103,107 @@ def _receipt_namespace_entries(
     absence and allowed the stability proof to miss the race.  Invalid shapes
     now receive deterministic sentinel bytes; valid manifests are still read
     exactly once and decoded from those same bytes.
+
+    T-2090 (night-4 W1): one scandir pass replaces per-name lstat -- each
+    directory entry is stated ONCE from scandir's own metadata instead of
+    three pathlib constructions and lstat calls per receipt, and manifests
+    are read through os-level descriptors without intermediate Path objects.
+    The verdicts, their exact detail strings, the name ordering and the
+    framed bytes are unchanged.
     """
 
     def invalid(name: str, detail: str) -> _ReceiptEntry:
         token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8", errors="replace")
         return _ReceiptEntry(name, None, token, _PROGRESS_UNAVAILABLE_SENTINEL, detail)
+
+    def _verified_read(path_str: str, detail_prefix: str, pre_info):
+        """(raw|None, structural_error|None) for one receipt-side file.
+
+        Night-6 contract (the capture invariants I1-I4):
+
+        - Identity: the opened descriptor's (st_dev, st_ino) must equal
+          the pre-open lstat observation. A different regular file
+          substituted between lstat and open is the SAME class of
+          structural event as a symlink swap -- type checks alone bless
+          the new bytes, so identity is compared, never inferred.
+        - Completeness: one exact-size read is confirmed against a
+          closing fstat; a file that grew or shrank between the reads is
+          a named refusal, not a silently truncated capture. Short
+          reads still fall back to a chunked read-to-EOF loop, whose
+          EOF is confirmed the same way.
+        - Memory bound: a size beyond the hard cap is refused BEFORE
+          any read of that size is requested; the loop re-checks the
+          cumulative total against the same cap.
+        - A filesystem that exposes no usable file identity (st_ino 0)
+          fails closed rather than accepting an unverified entity.
+        """
+        try:
+            # O_NOFOLLOW where the platform provides it (POSIX): a
+            # post-lstat symlink substitution raises ELOOP -> a named
+            # structural error instead of reading through the link.
+            # Windows has no O_NOFOLLOW; the identity comparison below
+            # covers every substitution class the platform can express.
+            fd = os.open(
+                path_str,
+                os.O_RDONLY
+                | getattr(os, "O_BINARY", 0)
+                | getattr(os, "O_NOFOLLOW", 0),
+            )
+        except FileNotFoundError:
+            # The lstat above SAW this file: its disappearance between
+            # lstat and open is a present->vanished structural event, not
+            # the "never existed" shape.
+            return None, f"{detail_prefix} vanished between stat and open"
+        except OSError as exc:
+            return None, f"{detail_prefix} open failed ({type(exc).__name__}): {exc}"
+        try:
+            info = os.fstat(fd)
+            if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+                return None, f"{detail_prefix} is a symlink or reparse point"
+            if not stat.S_ISREG(info.st_mode):
+                return None, f"{detail_prefix} is not a regular file"
+            # Identity through the descriptor vs the pre-open observation.
+            # st_ino 0 (identity-less mounts) must fail closed instead of
+            # comparing two meaningless zeros as a match.
+            if pre_info is not None:
+                if (
+                    pre_info.st_ino != info.st_ino
+                    or pre_info.st_dev != info.st_dev
+                    or info.st_ino == 0
+                ):
+                    return None, f"{detail_prefix} identity changed between stat and open"
+            # Memory bound BEFORE the allocation: an oversized file is a
+            # named structural anomaly, refused without requesting the
+            # huge read at all.
+            size = info.st_size
+            if size > _RECEIPT_READ_HARD_CAP:
+                return None, f"{detail_prefix} exceeds the capture cap"
+            # Fast path: one exact-size read (measured equal to the
+            # night-4 single read on NTFS). A short read is LAWFUL and
+            # corrupts capture if trusted -- short results fall back to
+            # a chunked read-to-EOF loop that finishes the job.
+            data = os.read(fd, size)
+            if len(data) == size or size == 0:
+                if _descriptor_unchanged(fd, detail_prefix, info):
+                    return data, None
+                return None, f"{detail_prefix} changed size during read"
+            chunks = [data]
+            seen = len(data)
+            while True:
+                chunk = os.read(fd, 1 << 20)
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                seen += len(chunk)
+                if seen > _RECEIPT_READ_HARD_CAP:
+                    return None, f"{detail_prefix} exceeds the capture cap"
+            if _descriptor_unchanged(fd, detail_prefix, info):
+                return b"".join(chunks), None
+            return None, f"{detail_prefix} changed size during read"
+        except OSError as exc:
+            return None, f"{detail_prefix} read failed ({type(exc).__name__}): {exc}"
+        finally:
+            os.close(fd)
 
     try:
         ns_info = os.lstat(ns_dir)
@@ -5091,45 +5217,46 @@ def _receipt_namespace_entries(
     if not stat.S_ISDIR(ns_info.st_mode):
         return [invalid("NAMESPACE", "namespace exists but is not a directory")]
     try:
-        entries = sorted(ns_dir.iterdir())
+        with os.scandir(ns_dir) as scan:
+            entries = sorted(scan, key=lambda entry: entry.name)
     except OSError as exc:
         detail = f"namespace listing failed ({type(exc).__name__}): {exc}"
         return [invalid("NAMESPACE", detail)]
 
-    for op_dir in entries:
+    for op_entry in entries:
         # Engine-owned cleanup debt is not a semantic operation receipt and
         # intentionally does not stale a crew decision.
-        if ns_dir.name == Path(SETTLED_DIR).name and op_dir.name in {
+        if ns_dir.name == Path(SETTLED_DIR).name and op_entry.name in {
             ".cleanup-needed",
             SETTLED_INDEX_NAME,
         }:
             continue
         try:
-            op_info = os.lstat(op_dir)
+            op_info = op_entry.stat(follow_symlinks=False)
         except FileNotFoundError:
             # A deletion raced this pass. The membership changed, so frame a
             # sentinel rather than pretending the listing never contained it.
-            yield invalid(op_dir.name, "op entry vanished during capture")
+            yield invalid(op_entry.name, "op entry vanished during capture")
             continue
         except OSError as exc:
-            yield invalid(op_dir.name, f"op entry stat failed ({type(exc).__name__}): {exc}")
+            yield invalid(op_entry.name, f"op entry stat failed ({type(exc).__name__}): {exc}")
             continue
         if stat.S_ISLNK(op_info.st_mode) or getattr(op_info, "st_file_attributes", 0) & 0x400:
-            yield invalid(op_dir.name, "op directory is a symlink or reparse point")
+            yield invalid(op_entry.name, "op directory is a symlink or reparse point")
             continue
         if not stat.S_ISDIR(op_info.st_mode):
-            yield invalid(op_dir.name, "op entry is not a directory")
+            yield invalid(op_entry.name, "op entry is not a directory")
             continue
 
-        manifest = op_dir / "operation.json"
+        manifest = os.path.join(op_entry.path, "operation.json")
         try:
             manifest_info = os.lstat(manifest)
         except FileNotFoundError:
-            yield invalid(op_dir.name, "op directory has no operation.json")
+            yield invalid(op_entry.name, "op directory has no operation.json")
             continue
         except OSError as exc:
             yield invalid(
-                op_dir.name,
+                op_entry.name,
                 f"operation.json stat failed ({type(exc).__name__}): {exc}",
             )
             continue
@@ -5137,17 +5264,22 @@ def _receipt_namespace_entries(
             stat.S_ISLNK(manifest_info.st_mode)
             or getattr(manifest_info, "st_file_attributes", 0) & 0x400
         ):
-            yield invalid(op_dir.name, "operation.json is a symlink or reparse point")
+            yield invalid(op_entry.name, "operation.json is a symlink or reparse point")
             continue
         if not stat.S_ISREG(manifest_info.st_mode):
-            yield invalid(op_dir.name, "operation.json is not a regular file")
+            yield invalid(op_entry.name, "operation.json is not a regular file")
             continue
         try:
-            raw = manifest.read_bytes()
+            raw, read_err = _verified_read(manifest, "operation.json", manifest_info)
         except OSError as exc:
-            yield invalid(op_dir.name, f"operation.json unreadable ({type(exc).__name__}): {exc}")
+            yield invalid(op_entry.name, f"operation.json unreadable ({type(exc).__name__}): {exc}")
             continue
-        progress = op_dir / "progress.json"
+        if read_err is not None:
+            # read_err distinguishes vanished-after-lstat from every other
+            # open/read failure -- all are structural, none are absence.
+            yield invalid(op_entry.name, read_err)
+            continue
+        progress = os.path.join(op_entry.path, "progress.json")
         try:
             progress_info = os.lstat(progress)
         except FileNotFoundError:
@@ -5155,7 +5287,7 @@ def _receipt_namespace_entries(
         except OSError as exc:
             detail = f"progress.json stat failed ({type(exc).__name__}): {exc}"
             token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8", errors="replace")
-            yield _ReceiptEntry(op_dir.name, None, raw, token, detail)
+            yield _ReceiptEntry(op_entry.name, None, raw, token, detail)
             continue
         else:
             if (
@@ -5164,21 +5296,30 @@ def _receipt_namespace_entries(
             ):
                 detail = "progress.json is a symlink or reparse point"
                 token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8")
-                yield _ReceiptEntry(op_dir.name, None, raw, token, detail)
+                yield _ReceiptEntry(op_entry.name, None, raw, token, detail)
                 continue
             if not stat.S_ISREG(progress_info.st_mode):
                 detail = "progress.json is not a regular file"
                 token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8")
-                yield _ReceiptEntry(op_dir.name, None, raw, token, detail)
+                yield _ReceiptEntry(op_entry.name, None, raw, token, detail)
                 continue
             try:
-                progress_raw = progress.read_bytes()
+                progress_raw, progress_err = _verified_read(
+                    progress, "progress.json", progress_info
+                )
             except OSError as exc:
                 detail = f"progress.json unreadable ({type(exc).__name__}): {exc}"
                 token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8", errors="replace")
-                yield _ReceiptEntry(op_dir.name, None, raw, token, detail)
+                yield _ReceiptEntry(op_entry.name, None, raw, token, detail)
                 continue
-        yield _ReceiptEntry(op_dir.name, op_dir, raw, progress_raw, None)
+            if progress_err is not None:
+                detail = progress_err
+                token = _RECEIPT_STRUCTURE_SENTINEL + detail.encode("utf-8", errors="replace")
+                yield _ReceiptEntry(op_entry.name, None, raw, token, detail)
+                continue
+        yield _ReceiptEntry(
+            op_entry.name, Path(op_entry.path), raw, progress_raw, None
+        )
 
 
 def _frame_receipt(digest, namespace: str, entry: _ReceiptEntry) -> None:

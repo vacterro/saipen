@@ -1,0 +1,35 @@
+{
+  "temporary_root": "V:\\_TEMP_\\saipen-core-unit-743bfmsm",
+  "case_table_sha256": "a61a58ce4bda4e7939decaf791198fe7ba0f4b87d5e8afea74c427763e178759",
+  "validator_sha256": "f20692709bf5fb04aa4a161a6891c60ba5bf3a77200b78aad56ce754bf635acd",
+  "cases": [
+    {
+      "site_id": "0431d336022873eb",
+      "label": "T-1494 schema rejects malformed authority_source",
+      "expected": "field authority_source: 'NOT-A-SOURCE' does not match its schema pattern",
+      "failures": [
+        "FAIL: STATE.md field authority_source: 'NOT-A-SOURCE' does not match its schema pattern",
+        "FAIL: STATE.md continuation authority requires the complete authority family",
+        "FAIL: goal-authority: continuation authority requires the complete authority family"
+      ],
+      "red_exit": 1,
+      "green_exit": 0,
+      "restored_exact_bytes": true
+    },
+    {
+      "site_id": "d6912c3d75fcfd51",
+      "label": "T-1494 goal authority rejects an unbacked persistent grant",
+      "expected": "goal-authority: persistent authority does not name the current goal pivot",
+      "failures": [
+        "FAIL: goal-authority: persistent authority does not name the current goal pivot"
+      ],
+      "red_exit": 1,
+      "green_exit": 0,
+      "restored_exact_bytes": true
+    }
+  ],
+  "unrelated_line_shift_preserves_all_identities": true,
+  "site_count": 358,
+  "accepted": true,
+  "cleanup_complete": true
+}

@@ -1,0 +1,9 @@
+control: ran 7, red 0 -- as expected
+the engine before this Work: ran 7, red 7 -- as expected
+the own seat is ignored: ran 7, red 1 -- as expected
+another family's seat routes to the sweep: ran 7, red 1 -- as expected
+the bar test is inverted: ran 7, red 3 -- as expected
+the family is misread: ran 7, red 1 -- as expected
+a fault admits a seat: ran 7, red 1 -- as expected
+the emission keeps the bare form: ran 7, red 6 -- as expected
+mutations: 7, repetitions each: 3, problems: 0

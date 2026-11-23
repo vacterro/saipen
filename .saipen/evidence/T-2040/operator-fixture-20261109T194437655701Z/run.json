@@ -1,0 +1,23 @@
+{
+  "evidence": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\operator-fixture-20261109T194437655701Z",
+  "preimage_sha256": "752b03655dc7d02230e29f44b6e16dec7712b5a06d69029cbcea9aef745294a5",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+    "-p",
+    "test_t1627_operator_question.py",
+    "-v"
+  ],
+  "python_version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "historical_record": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\core-unit\\f48bded68d33a538-20261109T183729854817Z.json",
+  "historical_red_count": 6,
+  "node": "C:\\nodejs\\node.EXE",
+  "before_exit_code": 0,
+  "before_duration_s": 11.718
+}

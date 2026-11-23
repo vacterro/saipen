@@ -1,0 +1,13 @@
+{
+  "authorized": false,
+  "canonical_next_command": "saipen goal authorize --file <UTF8_FILE>",
+  "operator_action": "Operaator kinnitab selle projekti ja eesm\u00e4rgi kohaliku hoolduse kapsli ning rakendab saipen goal authorize --file <UTF8_FILE>.",
+  "required_scope": "continuous_maintenance",
+  "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "checkpoint_ticket_limit": 20,
+  "checkpoint_wave_limit": 3,
+  "detail": "No verified standing maintenance grant is bound to the current goal",
+  "authority_created": false,
+  "campaign_state_absent": true,
+  "draft_limitation": "Canonical native goal binding still names T-1599 (SRC-164): test1, not self-maintenance-core. No capsule for that obsolete objective is offered as maintenance authority. A fresh genuine native operator binding is required."
+}

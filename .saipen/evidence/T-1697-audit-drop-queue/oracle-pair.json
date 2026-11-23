@@ -1,0 +1,14 @@
+{
+  "verifier_sha256": "1d521a7db3953a9198545fcd79a9164c2368c760b00da4b77bd1cdfdb71c3d22",
+  "pre_subject_sha256": "d969557c8ebcdd5482d86443c512753f9d6438d9175c7a4451bc3c57893817b2",
+  "post_subject_sha256": "86d9c67227a7bb7a90771ae088e3e7bebc979945a06305ebee45f1070551668e",
+  "subject_paths": [
+    "tools/saipen_engine/audit_inbox.py",
+    "tools/saipen_engine/router.py",
+    "tools/saipen_engine/audit_enqueue.py",
+    "tools/saipen.py"
+  ],
+  "pre_result": "10 ran: 7 assertion failures, 2 pass, 1 Windows symlink skip; no instrument errors",
+  "post_result": "10 ran: 9 pass, 1 Windows symlink skip",
+  "limits": "Project-local source CLI in sacrificial fixtures; no native host or deployed-runtime claim."
+}

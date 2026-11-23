@@ -1,0 +1,406 @@
+test_duplicate_missing_stale_and_malformed_rows_refused (__main__.CertificateDispatchTests.test_duplicate_missing_stale_and_malformed_rows_refused) ... ERROR
+test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) ... 
+  test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (action='saipen hunt') ... ERROR
+  test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (action='saipen improve') ... ERROR
+  test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (action='saipen improve --session tester-01') ... ERROR
+  test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (source='hunt_findings', action='saipen improve') ... ERROR
+  test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (source='improve_candidates', action='saipen improve sweep-queue cycle') ... ERROR
+  test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (source='improve_candidates', action='saipen improve --session ../foreign') ... ERROR
+  test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (source='improve_candidates', action='saipen improve; git push') ... ERROR
+  test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (source='external_forensics', action='saipen sub') ... ERROR
+  test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (source='canonical_recovery', action='saipen recover') ... ERROR
+test_hint_must_name_exact_unchecked_row_and_generation (__main__.CertificateDispatchTests.test_hint_must_name_exact_unchecked_row_and_generation) ... ERROR
+test_same_bounded_hint_not_work_or_exhaustion (__main__.CertificateDispatchTests.test_same_bounded_hint_not_work_or_exhaustion) ... ERROR
+test_total_diagnostics_on_hostile_envelopes (__main__.CertificateDispatchTests.test_total_diagnostics_on_hostile_envelopes) ... 
+  test_total_diagnostics_on_hostile_envelopes (__main__.CertificateDispatchTests.test_total_diagnostics_on_hostile_envelopes) (value=None) ... ERROR
+  test_total_diagnostics_on_hostile_envelopes (__main__.CertificateDispatchTests.test_total_diagnostics_on_hostile_envelopes) (value=42) ... ERROR
+  test_total_diagnostics_on_hostile_envelopes (__main__.CertificateDispatchTests.test_total_diagnostics_on_hostile_envelopes) (value=[]) ... ERROR
+  test_total_diagnostics_on_hostile_envelopes (__main__.CertificateDispatchTests.test_total_diagnostics_on_hostile_envelopes) (value={'sources': 42}) ... ERROR
+  test_total_diagnostics_on_hostile_envelopes (__main__.CertificateDispatchTests.test_total_diagnostics_on_hostile_envelopes) (value={'schema_version': 2, 'status': []}) ... ERROR
+test_reused_work_keeps_actual_ticket_and_receipt_fields (__main__.ContinuationAdmissionTests.test_reused_work_keeps_actual_ticket_and_receipt_fields) ... ERROR
+test_structured_admission_failures_never_fall_through_improve (__main__.ContinuationAdmissionTests.test_structured_admission_failures_never_fall_through_improve) ... 
+  test_structured_admission_failures_never_fall_through_improve (__main__.ContinuationAdmissionTests.test_structured_admission_failures_never_fall_through_improve) (status='BOARD_INVALID') ... FAIL
+  test_structured_admission_failures_never_fall_through_improve (__main__.ContinuationAdmissionTests.test_structured_admission_failures_never_fall_through_improve) (status='RECOVERY_BLOCKED') ... FAIL
+  test_structured_admission_failures_never_fall_through_improve (__main__.ContinuationAdmissionTests.test_structured_admission_failures_never_fall_through_improve) (status='ADMISSION_FAILED') ... FAIL
+  test_structured_admission_failures_never_fall_through_improve (__main__.ContinuationAdmissionTests.test_structured_admission_failures_never_fall_through_improve) (status='ADMISSION_POLICY_DRIFT') ... FAIL
+test_actual_canonical_hunt_clean_current_head (__main__.NativeObservationTests.test_actual_canonical_hunt_clean_current_head) ... ERROR
+test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) ... 
+  test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='agent') ... ERROR
+  test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='project') ... ERROR
+  test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='saipen_version') ... ERROR
+  test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='protocol_fingerprint') ... ERROR
+  test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='source_head') ... ERROR
+  test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='source_tree_fingerprint') ... ERROR
+  test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='discovery_model') ... ERROR
+  test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='report_status') ... ERROR
+  test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='run_source_head') ... ERROR
+  test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='run_source_tree_fingerprint') ... ERROR
+test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) ... ERROR
+test_current_complete_improve_uses_shared_bound_bar (__main__.NativeObservationTests.test_current_complete_improve_uses_shared_bound_bar) ... ERROR
+test_dirty_missing_unreadable_and_prose_hunt_never_clean (__main__.NativeObservationTests.test_dirty_missing_unreadable_and_prose_hunt_never_clean) ... ERROR
+test_discovery_keys_same_generation_no_publication_copy (__main__.NativeObservationTests.test_discovery_keys_same_generation_no_publication_copy) ... ERROR
+test_grant_recovery_and_owned_work_gate_one_analysis_hint (__main__.NativeObservationTests.test_grant_recovery_and_owned_work_gate_one_analysis_hint) ... ERROR
+test_header_cannot_mix_head_and_tree_from_different_runs (__main__.NativeObservationTests.test_header_cannot_mix_head_and_tree_from_different_runs) ... FAIL
+test_source_change_marker_is_not_completed_analysis (__main__.NativeObservationTests.test_source_change_marker_is_not_completed_analysis) ... FAIL
+
+======================================================================
+ERROR: test_duplicate_missing_stale_and_malformed_rows_refused (__main__.CertificateDispatchTests.test_duplicate_missing_stale_and_malformed_rows_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 95, in test_duplicate_missing_stale_and_malformed_rows_refused
+    self.assertTrue(W.certificate_diagnostics(cert), cert)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'certificate_diagnostics'
+
+======================================================================
+ERROR: test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (action='saipen hunt')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 70, in test_exact_native_allowlist
+    self.assertIs(W.discovery_dispatch_for(cert), cert["discovery_dispatch"])
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'discovery_dispatch_for'
+
+======================================================================
+ERROR: test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (action='saipen improve')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 70, in test_exact_native_allowlist
+    self.assertIs(W.discovery_dispatch_for(cert), cert["discovery_dispatch"])
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'discovery_dispatch_for'
+
+======================================================================
+ERROR: test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (action='saipen improve --session tester-01')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 70, in test_exact_native_allowlist
+    self.assertIs(W.discovery_dispatch_for(cert), cert["discovery_dispatch"])
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'discovery_dispatch_for'
+
+======================================================================
+ERROR: test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (source='hunt_findings', action='saipen improve')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 80, in test_exact_native_allowlist
+    self.assertIsNone(W.discovery_dispatch_for(incomplete_certificate(source, action)))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'discovery_dispatch_for'
+
+======================================================================
+ERROR: test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (source='improve_candidates', action='saipen improve sweep-queue cycle')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 80, in test_exact_native_allowlist
+    self.assertIsNone(W.discovery_dispatch_for(incomplete_certificate(source, action)))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'discovery_dispatch_for'
+
+======================================================================
+ERROR: test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (source='improve_candidates', action='saipen improve --session ../foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 80, in test_exact_native_allowlist
+    self.assertIsNone(W.discovery_dispatch_for(incomplete_certificate(source, action)))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'discovery_dispatch_for'
+
+======================================================================
+ERROR: test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (source='improve_candidates', action='saipen improve; git push')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 80, in test_exact_native_allowlist
+    self.assertIsNone(W.discovery_dispatch_for(incomplete_certificate(source, action)))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'discovery_dispatch_for'
+
+======================================================================
+ERROR: test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (source='external_forensics', action='saipen sub')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 80, in test_exact_native_allowlist
+    self.assertIsNone(W.discovery_dispatch_for(incomplete_certificate(source, action)))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'discovery_dispatch_for'
+
+======================================================================
+ERROR: test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) (source='canonical_recovery', action='saipen recover')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 80, in test_exact_native_allowlist
+    self.assertIsNone(W.discovery_dispatch_for(incomplete_certificate(source, action)))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'discovery_dispatch_for'
+
+======================================================================
+ERROR: test_hint_must_name_exact_unchecked_row_and_generation (__main__.CertificateDispatchTests.test_hint_must_name_exact_unchecked_row_and_generation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 114, in test_hint_must_name_exact_unchecked_row_and_generation
+    self.assertIsNone(W.discovery_dispatch_for(cert), cert)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'discovery_dispatch_for'
+
+======================================================================
+ERROR: test_same_bounded_hint_not_work_or_exhaustion (__main__.CertificateDispatchTests.test_same_bounded_hint_not_work_or_exhaustion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 57, in test_same_bounded_hint_not_work_or_exhaustion
+    self.assertEqual(W.certificate_diagnostics(cert), [])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'certificate_diagnostics'
+
+======================================================================
+ERROR: test_total_diagnostics_on_hostile_envelopes (__main__.CertificateDispatchTests.test_total_diagnostics_on_hostile_envelopes) (value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 119, in test_total_diagnostics_on_hostile_envelopes
+    self.assertTrue(W.certificate_diagnostics(value))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'certificate_diagnostics'
+
+======================================================================
+ERROR: test_total_diagnostics_on_hostile_envelopes (__main__.CertificateDispatchTests.test_total_diagnostics_on_hostile_envelopes) (value=42)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 119, in test_total_diagnostics_on_hostile_envelopes
+    self.assertTrue(W.certificate_diagnostics(value))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'certificate_diagnostics'
+
+======================================================================
+ERROR: test_total_diagnostics_on_hostile_envelopes (__main__.CertificateDispatchTests.test_total_diagnostics_on_hostile_envelopes) (value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 119, in test_total_diagnostics_on_hostile_envelopes
+    self.assertTrue(W.certificate_diagnostics(value))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'certificate_diagnostics'
+
+======================================================================
+ERROR: test_total_diagnostics_on_hostile_envelopes (__main__.CertificateDispatchTests.test_total_diagnostics_on_hostile_envelopes) (value={'sources': 42})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 119, in test_total_diagnostics_on_hostile_envelopes
+    self.assertTrue(W.certificate_diagnostics(value))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'certificate_diagnostics'
+
+======================================================================
+ERROR: test_total_diagnostics_on_hostile_envelopes (__main__.CertificateDispatchTests.test_total_diagnostics_on_hostile_envelopes) (value={'schema_version': 2, 'status': []})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 119, in test_total_diagnostics_on_hostile_envelopes
+    self.assertTrue(W.certificate_diagnostics(value))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.work_exhaustion' has no attribute 'certificate_diagnostics'
+
+======================================================================
+ERROR: test_reused_work_keeps_actual_ticket_and_receipt_fields (__main__.ContinuationAdmissionTests.test_reused_work_keeps_actual_ticket_and_receipt_fields)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 350, in test_reused_work_keeps_actual_ticket_and_receipt_fields
+    self.assertTrue(payload["reused_work"])
+                    ~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 'reused_work'
+
+======================================================================
+ERROR: test_actual_canonical_hunt_clean_current_head (__main__.NativeObservationTests.test_actual_canonical_hunt_clean_current_head)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 159, in test_actual_canonical_hunt_clean_current_head
+    observed = CF.hunt_observation(self.root, source_identity=self.identity, history=history)
+               ^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'hunt_observation'
+
+======================================================================
+ERROR: test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='agent')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 247, in test_complete_improve_cannot_restamp_any_identity_dimension
+    self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'improve_observation'
+
+======================================================================
+ERROR: test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='project')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 247, in test_complete_improve_cannot_restamp_any_identity_dimension
+    self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'improve_observation'
+
+======================================================================
+ERROR: test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='saipen_version')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 247, in test_complete_improve_cannot_restamp_any_identity_dimension
+    self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'improve_observation'
+
+======================================================================
+ERROR: test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='protocol_fingerprint')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 247, in test_complete_improve_cannot_restamp_any_identity_dimension
+    self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'improve_observation'
+
+======================================================================
+ERROR: test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='source_head')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 247, in test_complete_improve_cannot_restamp_any_identity_dimension
+    self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'improve_observation'
+
+======================================================================
+ERROR: test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='source_tree_fingerprint')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 247, in test_complete_improve_cannot_restamp_any_identity_dimension
+    self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'improve_observation'
+
+======================================================================
+ERROR: test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='discovery_model')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 247, in test_complete_improve_cannot_restamp_any_identity_dimension
+    self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'improve_observation'
+
+======================================================================
+ERROR: test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='report_status')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 247, in test_complete_improve_cannot_restamp_any_identity_dimension
+    self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'improve_observation'
+
+======================================================================
+ERROR: test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='run_source_head')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 247, in test_complete_improve_cannot_restamp_any_identity_dimension
+    self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'improve_observation'
+
+======================================================================
+ERROR: test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) (key='run_source_tree_fingerprint')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 247, in test_complete_improve_cannot_restamp_any_identity_dimension
+    self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'improve_observation'
+
+======================================================================
+ERROR: test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 250, in test_complete_improve_cannot_restamp_any_identity_dimension
+    self.assertEqual(CF.improve_observation(self.root, source_identity=self.identity)["eligibility_result"],
+                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'improve_observation'
+
+======================================================================
+ERROR: test_current_complete_improve_uses_shared_bound_bar (__main__.NativeObservationTests.test_current_complete_improve_uses_shared_bound_bar)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 224, in test_current_complete_improve_uses_shared_bound_bar
+    observed = CF.improve_observation(self.root, source_identity=self.identity)
+               ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'improve_observation'
+
+======================================================================
+ERROR: test_dirty_missing_unreadable_and_prose_hunt_never_clean (__main__.NativeObservationTests.test_dirty_missing_unreadable_and_prose_hunt_never_clean)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 170, in test_dirty_missing_unreadable_and_prose_hunt_never_clean
+    self.assertEqual(CF.hunt_observation(self.root, source_identity=self.identity)["eligibility_result"],
+                     ^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.continue_fallback' has no attribute 'hunt_observation'
+
+======================================================================
+ERROR: test_discovery_keys_same_generation_no_publication_copy (__main__.NativeObservationTests.test_discovery_keys_same_generation_no_publication_copy)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 280, in test_discovery_keys_same_generation_no_publication_copy
+    evidence = W.discovery_evidence(
+               ^^^^^^^^^^^^^^^^^^^^^
+TypeError: discovery_evidence() got an unexpected keyword argument 'publication_evidence'
+
+======================================================================
+ERROR: test_grant_recovery_and_owned_work_gate_one_analysis_hint (__main__.NativeObservationTests.test_grant_recovery_and_owned_work_gate_one_analysis_hint)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 301, in test_grant_recovery_and_owned_work_gate_one_analysis_hint
+    evidence = W.discovery_evidence(self.root, **args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: discovery_evidence() got an unexpected keyword argument 'source_identity'
+
+======================================================================
+FAIL: test_structured_admission_failures_never_fall_through_improve (__main__.ContinuationAdmissionTests.test_structured_admission_failures_never_fall_through_improve) (status='BOARD_INVALID')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 360, in test_structured_admission_failures_never_fall_through_improve
+    self.assertEqual(rc, 1)
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_structured_admission_failures_never_fall_through_improve (__main__.ContinuationAdmissionTests.test_structured_admission_failures_never_fall_through_improve) (status='RECOVERY_BLOCKED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 360, in test_structured_admission_failures_never_fall_through_improve
+    self.assertEqual(rc, 1)
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_structured_admission_failures_never_fall_through_improve (__main__.ContinuationAdmissionTests.test_structured_admission_failures_never_fall_through_improve) (status='ADMISSION_FAILED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 360, in test_structured_admission_failures_never_fall_through_improve
+    self.assertEqual(rc, 1)
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_structured_admission_failures_never_fall_through_improve (__main__.ContinuationAdmissionTests.test_structured_admission_failures_never_fall_through_improve) (status='ADMISSION_POLICY_DRIFT')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 360, in test_structured_admission_failures_never_fall_through_improve
+    self.assertEqual(rc, 1)
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_header_cannot_mix_head_and_tree_from_different_runs (__main__.NativeObservationTests.test_header_cannot_mix_head_and_tree_from_different_runs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 257, in test_header_cannot_mix_head_and_tree_from_different_runs
+    self.assertTrue(improve._header_repair_errors(text))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_source_change_marker_is_not_completed_analysis (__main__.NativeObservationTests.test_source_change_marker_is_not_completed_analysis)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_bounded_discovery_resume.py", line 263, in test_source_change_marker_is_not_completed_analysis
+    self.assertEqual(result.satisfaction_status, persistent_goal.STATUS_DISCOVERY_REQUIRED)
+AssertionError: 'NO_ADMISSIBLE_WORK' != 'DISCOVERY_REQUIRED'
+- NO_ADMISSIBLE_WORK
++ DISCOVERY_REQUIRED
+
+
+----------------------------------------------------------------------
+Ran 15 tests in 4.273s
+
+FAILED (failures=6, errors=34)

@@ -1,0 +1,264 @@
+# T-1866 / SRC-295 F-03 -- subject diff
+# before: the T-1866 hunks removed from the post-fix bytes (red: 3 of 6 tests FAIL)
+# after: the bytes that ship (green: 6 of 6 tests OK)
+# Six coupled surfaces: closure oracle -> engine helper -> finish writer -> board
+# vocabulary/validation -> compaction disposition -> schema -> registry known_fields.
+
+--- a/tools/saipen_engine/closure.py
++++ b/tools/saipen_engine/closure.py
+@@ -429,6 +429,40 @@
+     return record.get("mode") == "no-publish" and bool(record.get("op_id"))
+ 
+ 
++def publication_state(root: Path | str, ticket_id: str) -> str:
++    """Is this Work's own delta PUBLISHED, or still waiting for a release?
++
++    T-1866 / SRC-295 F-03. `saipen ticket done --closure-mode own_patch` used to
++    answer FINISHED and leave the DONE line silent about publication, so the
++    line implied a shipment nobody had made: the measured case closed a ticket
++    whose implementation files were still modified in the worktree fifteen
++    minutes later. The two neighbouring gates do not cover it -- T-37 refuses
++    `own_patch` when BUILD declared NO delta, and `_resolve_work` refuses to
++    INHERIT an unpublished DONE -- so between them sat the case this answers:
++    a real delta that is not released.
++
++    The answer is DERIVED, never claimed by the caller: the same committed
++    release evidence `_resolve_work` trusts names the ticket or it does not.
++    Returned vocabulary is deliberately two-valued -- ``published`` and
++    ``pending`` -- because a third value would be a state no reader could act
++    on. This is read-only; it writes nothing and cannot be satisfied by prose.
++    """
++    root = Path(root)
++    ticket = (str(ticket_id) or "").strip()
++    if not ticket:
++        return "pending"
++    try:
++        records = _published_releases(root)
++    except (OSError, ValueError):
++        # Publication evidence that cannot be read proves nothing; the honest
++        # answer is the unshipped one, and the downstream resolver agrees.
++        return "pending"
++    for record in records:
++        if str(record.get("ticket_id") or "") == ticket:
++            return "published"
++    return "pending"
++
++
+ 
+ def _release_matches(record: dict, wanted: str) -> bool:
+     candidates = {
+--- a/tools/saipen_engine/operations.py
++++ b/tools/saipen_engine/operations.py
+@@ -3729,6 +3729,23 @@
+ #: on top of it asserted an implementation patch that does not exist.
+ _NO_DELTA_BUILD_RE = re.compile(r"implementation_delta\s+none", re.IGNORECASE)
+ 
++
++def _closure_publication_state(root: Path, ticket_id: str) -> str:
++    """`published` or `pending` for this Work's own delta (T-1866).
++
++    ONE owner for the question -- `closure.publication_state` -- so the DONE
++    line and the harvest resolver can never disagree about the same ticket.
++    An unreadable answer degrades to `pending`, which is the value that makes
++    a reader check before inheriting.
++    """
++    try:
++        from . import closure as _closure_module
++
++        return _closure_module.publication_state(root, ticket_id)
++    except (OSError, ValueError, ImportError):
++        return "pending"
++
++
+ def no_delta_build_events(ticket_id: str, events) -> list[dict]:
+     """This ticket's BUILD records that declared no implementation delta."""
+     found = []
+@@ -3861,6 +3878,19 @@
+             "C-### --paths <p1,p2>",
+             ticket=ticket_id,
+         )
++    # T-1866 / SRC-295 F-03: an `own_patch` DONE used to say nothing about
++    # whether its delta was PUBLISHED, so the line read as "shipped" while the
++    # implementation files were still modified in the worktree (measured: a
++    # ticket closed FINISHED, git status still dirty fifteen minutes later).
++    # The truth is derived, never requested -- the same committed release
++    # evidence `closure._resolve_work` trusts -- and written onto the DONE line
++    # so a reader can tell an inheritable closure from one awaiting release.
++    # Deliberately NOT a refusal: publication is blocked here for reasons a
++    # ticket does not own (a foreign staged batch in the shared index today),
++    # and refusing would turn every closure into an operator obligation.
++    _publication_state = (
++        _closure_publication_state(root, ticket_id) if _mode == "own_patch" else ""
++    )
+     # T-1162: a short BOARD title cannot close Work whose authoritative
+     # source still has missing, corrupt, or uncovered clauses. This gate
+     # rereads the original body and verifies its digest; model memory and a
+@@ -4113,7 +4143,17 @@
+ 
+     # One LOG completion event naming the ACTUAL closure phase -- the event
+     # is the provenance that the gate chain actually ended at SHIP.
++    # T-1866: an own_patch closure also records, in the SAME event, whether its
++    # delta is out and -- when it is not -- the one command that publishes it.
++    # A state without a route is the dead end this audit's F-03 describes.
+     _completion_detail = f"ticket finished via SAIOPS -- completion (from {prev_phase})"
++    if _publication_state:
++        _completion_detail += f"; publication_state {_publication_state}"
++        if _publication_state == "pending":
++            _completion_detail += (
++                "; release route: saipen cohort ship <C-###> (a released batch "
++                "names this ticket, flipping the state to published)"
++            )
+     if prefix_run:
+         # ONE truthful RUN event emitted immediately before the completion
+         # event, both through the canonical LOG builder (T-994 / § 15). The
+@@ -4268,6 +4308,7 @@
+             implementation_source=_impl_source,
+             paths=_paths,
+             invalidation=_invalidation,
++            publication_state=_publication_state,
+             enforce_cap=False,
+         )
+         if resume_parent is not None:
+@@ -4711,6 +4752,7 @@
+     implementation_source: str,
+     paths,
+     invalidation: str = "",
++    publication_state: str = "",
+     enforce_cap: bool = True,
+ ) -> str:
+     """Write closure provenance onto the DONE line, surgically (CORE-003).
+@@ -4752,6 +4794,19 @@
+         # apart from "we changed something" without opening the LOG.
+         new = set_ticket_field(new, "implementation_delta", "none", enforce_cap=enforce_cap)
+         new = set_ticket_field(new, "invalidation_evidence", invalidation, enforce_cap=enforce_cap)
++    if publication_state:
++        # T-1866: `own_patch` owns its delta, so the DONE line states whether
++        # that delta is out. The value is derived by the caller from release
++        # evidence; nothing here trusts a request to supply it.
++        new = set_ticket_field(
++            new, "publication_state", publication_state, enforce_cap=enforce_cap
++        )
++    elif mode != "own_patch":
++        # Only `own_patch` owns its own delta. A row that migrates to another
++        # mode (a proved own_patch DONE later bound into a cohort) must not
++        # keep state that describes a delta its new mode says it does not own;
++        # this writer preserves fields it does not touch, so clear it here.
++        new = remove_ticket_field(new, "publication_state")
+     lines = board_text.splitlines(keepends=True)
+     idx = ticket["line_no"] - 1
+     suffix = "\n" if lines[idx].endswith("\n") else ""
+--- a/tools/saipen_engine/board.py
++++ b/tools/saipen_engine/board.py
+@@ -257,6 +257,12 @@
+ )
+ DEFAULT_CLOSURE_MODE = "own_patch"
+ 
++#: T-1866: whether an `own_patch` closure's own delta reached publication.
++#: DERIVED by `closure.publication_state` from committed release evidence, so
++#: a caller cannot assert it; the two values are the two facts a reader of a
++#: DONE line can act on -- inherit it, or release it first.
++PUBLICATION_STATES = ("published", "pending")
++
+ #: The ONLY value that arms explicit-user scheduling precedence. Anything else
+ #: is a declaration the parser keeps and the scheduler ignores, so a typo can
+ #: never silently promote ordinary Work to the front of the queue.
+@@ -662,6 +668,13 @@
+     # to stay readable at a glance: the mode says WHAT kind of closure this
+     # is, and this field says WHICH event proved it.
+     "invalidation_evidence",
++    # T-1866 / SRC-295 F-03: whether this closure's own delta is PUBLISHED or
++    # still awaiting a release. The DONE line used to be silent about it, so
++    # `closure_mode: own_patch` read as "shipped" while the implementation
++    # files were still modified in the worktree. Derived by
++    # closure.publication_state from committed release evidence, never
++    # asserted by the caller.
++    "publication_state",
+ )
+ 
+ #: A ## BLOCKED row may DECLARE an upstream external dependency with these
+@@ -790,6 +803,21 @@
+         errors.append(f"{tid} closes inherited_verified with no | implementation_source:")
+     if implementation_source_value and mode.lower() != "inherited_verified":
+         errors.append(f"{tid} names implementation_source outside closure_mode inherited_verified")
++    published = str(fields.get("publication_state", "")).strip()
++    if published and published not in PUBLICATION_STATES:
++        errors.append(
++            f"{tid} declares publication_state {published!r}, outside "
++            f"{'|'.join(PUBLICATION_STATES)} -- a state no reader can act on"
++        )
++    if published and mode.lower() != "own_patch":
++        # Every other mode either adds no code (inherited_verified,
++        # finding_invalidated) or defers publication to a batch identity
++        # (cohort) or an external authority -- so a publication_state on it
++        # would describe a delta the mode says it does not own.
++        errors.append(
++            f"{tid} names publication_state {published} but closes as "
++            f"{mode or DEFAULT_CLOSURE_MODE} -- only own_patch owns its own delta"
++        )
+ 
+     # T-406: `finding_invalidated` is a claim like any other -- "this ticket's
+     # premise was disproven" -- so it carries the same discipline the other
+--- a/tools/saipen_engine/board_compaction.py
++++ b/tools/saipen_engine/board_compaction.py
+@@ -92,6 +92,11 @@
+     # would assert "nothing was wrong" with the proof one click away -- the
+     # same reason every identifier in this map stays inline.
+     "invalidation_evidence": "inline",
++    # T-1866: two-valued state (`published`|`pending`) a cold reader needs in
++    # order to decide whether this DONE may be inherited. Inline for the same
++    # reason as every other identifier here -- behind a detail_ref it would be
++    # a fact nobody sees, which is the exact silence this field removes.
++    "publication_state": "inline",
+     "resolution_reason": "inline",
+     "needs": "tokenized",
+     "owner": "inline",
+--- a/extensions/schemas/board.schema.json
++++ b/extensions/schemas/board.schema.json
+@@ -196,6 +196,11 @@
+         "type": "string",
+         "description": "Orchestration repair (T-1302 FINDING 4): comma-separated worktree paths this COHORT-mode member attributes to its C-### batch; publication belongs to the cohort authority, never to an imaginary per-ticket diff."
+       },
++      "publication_state": {
++        "type": "string",
++        "enum": ["published", "pending"],
++        "description": "T-1866 / SRC-295 F-03: whether this own_patch closure's OWN delta reached publication. DERIVED by closure.publication_state from committed release evidence naming the ticket; a caller can never assert it. `pending` says the work is closed and its delta is not out yet, which is a real state the engine must be able to record -- refusing the closure instead would make every ticket wait on a release it does not control. Valid ONLY with closure_mode own_patch, because every other mode either adds no code or defers publication to a batch identity. closure.resolve_implementation_source still refuses to inherit a pending DONE as publication authority."
++      },
+       "retry_not_before": {
+         "type": "string",
+         "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
+@@ -397,6 +402,13 @@
+             "invalidation_evidence": {
+               "type": "string",
+               "pattern": "^E-\\d+$"
++            },
++            "publication_state": {
++              "type": "string",
++              "enum": [
++                "published",
++                "pending"
++              ]
+             }
+           }
+         },
+@@ -441,6 +453,11 @@
+               {
+                 "required": [
+                   "invalidation_evidence"
++                ]
++              },
++              {
++                "required": [
++                  "publication_state"
+                 ]
+               }
+             ]
+--- a/saipen/REGISTRY.json
++++ b/saipen/REGISTRY.json
+@@ -636,6 +636,7 @@
+    "invalidation_evidence",
+    "needs",
+    "owner",
++   "publication_state",
+    "recurrence",
+    "regression",
+    "regression_evidence",

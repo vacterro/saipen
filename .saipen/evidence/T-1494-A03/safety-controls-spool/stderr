@@ -1,0 +1,9 @@
+test_authorized_dry_run_persists_no_grant_or_journal (__main__.SafetyControls.test_authorized_dry_run_persists_no_grant_or_journal) ... ok
+test_missing_and_corrupt_committed_grants_refuse_without_history_writes (__main__.SafetyControls.test_missing_and_corrupt_committed_grants_refuse_without_history_writes) ... ok
+test_operator_required_manual_wait_survives_persistent_cap (__main__.SafetyControls.test_operator_required_manual_wait_survives_persistent_cap) ... ok
+test_repeated_identical_cc_cannot_duplicate_operator_authorization (__main__.SafetyControls.test_repeated_identical_cc_cannot_duplicate_operator_authorization) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 7.799s
+
+OK

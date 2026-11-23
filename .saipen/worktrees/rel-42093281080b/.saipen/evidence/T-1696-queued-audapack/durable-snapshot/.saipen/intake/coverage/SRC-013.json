@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-013:R0001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "One composite mapping: AuditRunSnapshot (audit_run_service.py:81) is the single render source for row, panel, notifications and details; no per-widget state machines",
+      "text": "Use one composite presentation mapping over coordinator, packing, dispatcher, worker, and durable audit state; do not create a competing state machine.",
+      "verification": "tests/ui_qt/test_project_room_model.py + test_audit_runs_widget.py green; snapshot model single-source verified in review",
+      "work": "T-52"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "7ca3b9b4e7be67174e3fb298ccc5bdb1231b5ea9b0bcbfeab9cba2a159f0c70d",
+  "verdict": "PASS",
+  "patterns": [
+    "test_core_unit_gate.py",
+    "test_source_receipts.py",
+    "test_t1828_verification_policy.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_core_unit_gate.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_core_unit_gate.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "ran": 28,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_source_receipts.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_source_receipts.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        3924
+      ],
+      "ran": 170,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_t1828_verification_policy.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1828_verification_policy.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "ran": 14,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    }
+  ],
+  "ran": 212,
+  "duration_s": 215.484,
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

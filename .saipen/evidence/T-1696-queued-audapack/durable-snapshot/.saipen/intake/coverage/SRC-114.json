@@ -1,0 +1,50 @@
+{
+  "requirements": {
+    "SRC-114:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2755",
+      "text": "Observe the live one-worker FastPrompter A3 lineage with the widget classifyLiveAuditLineage and name the layer that actually breaks",
+      "verification": "node --test tests/widget/w7-013-live-lineage-snapshot.test.js -> PASS",
+      "work": "T-267"
+    },
+    "SRC-114:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2743",
+      "text": "Fix only the layer the live observation proves broken, and change nothing else",
+      "verification": "node --test tests/widget/w7-012-core-turn-registration.test.js -> PASS",
+      "work": "T-267"
+    },
+    "SRC-114:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2744",
+      "text": "Land a red fixture that fails on the unfixed widget",
+      "verification": "node --test tests/widget/w7-014-current-build-turn-discovery.test.js -> PASS",
+      "work": "T-267"
+    },
+    "SRC-114:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2755",
+      "text": "Ship a successor widget build carrying that fix",
+      "verification": "python scripts/update_widget_release.py --check -> PASS",
+      "work": "T-267"
+    },
+    "SRC-114:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2755",
+      "text": "Rerun the same one-worker live loop on the successor build and record the outcome",
+      "verification": "python .saipen/scratch_verify5.py -> PASS",
+      "work": "T-267"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1747_degraded_profile.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap"
+  ],
+  "oracle_files": [
+    "tools/test_t1747_degraded_profile.py",
+    "tools/test_t1624_host_integration.py"
+  ],
+  "subject_files": [
+    "tools/saipen.py",
+    "tools/saipen_engine/host_authority_client.py",
+    "tools/saipen_engine/host_taxonomy.py",
+    "tools/saipen_engine/protocol_admission.py",
+    "tools/saipen_engine/runtime_bootstrap.py",
+    "tools/saipen_engine/host_integration.py"
+  ],
+  "before": {
+    "tools/saipen.py": ".saipen/evidence/T-1747-degraded-claude2/before/saipen.py",
+    "tools/saipen_engine/host_authority_client.py": ".saipen/evidence/T-1747-degraded-claude2/before/host_authority_client.py",
+    "tools/saipen_engine/host_taxonomy.py": ".saipen/evidence/T-1747-degraded-claude2/before/host_taxonomy.py",
+    "tools/saipen_engine/protocol_admission.py": ".saipen/evidence/T-1747-degraded-claude2/before/protocol_admission.py",
+    "tools/saipen_engine/runtime_bootstrap.py": ".saipen/evidence/T-1747-degraded-claude2/before/runtime_bootstrap.py",
+    "tools/saipen_engine/host_integration.py": ".saipen/evidence/T-1747-degraded-claude2/before/host_integration.py"
+  },
+  "timeout": 300
+}

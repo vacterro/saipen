@@ -1,0 +1,12 @@
+control (unmutated): green x3, ran 16
+M1 the installer does not install the launcher: detected 3/3 by ['test_powershell_installer_owns_the_path_launcher_and_uninstall_removes_it']
+M2 the uninstaller does not remove it: detected 3/3 by ['test_powershell_installer_owns_the_path_launcher_and_uninstall_removes_it']
+M3 host repair has no launcher step: detected 3/3 by ['test_doctor_reports_a_missing_launcher_and_repair_writes_it', 'test_doctor_reports_a_stale_hand_copy_and_repair_replaces_it_with_an_owned_one']
+M4 the doctor does not report the launcher: detected 3/3 by ['test_a_profile_whose_path_names_no_declared_directory_gets_no_repair_step', 'test_doctor_reports_a_missing_launcher_and_repair_writes_it', 'test_doctor_reports_a_stale_hand_copy_and_repair_replaces_it_with_an_owned_one']
+M5 a foreign launcher counts as adoptable: detected 3/3 by ['test_a_foreign_launcher_is_never_touched', 'test_an_owned_launcher_for_a_moved_engine_is_stale_and_rewritten']
+M6 the engine removes a launcher someone edited: detected 3/3 by ['test_removal_takes_only_what_is_still_as_written']
+M7 the uninstaller follows a record outside the declared directories: detected 3/3 by ['test_the_uninstaller_refuses_a_record_that_names_a_file_elsewhere']
+M8 a declared directory PATH does not name is used anyway: detected 3/3 by ['test_a_profile_whose_path_names_no_declared_directory_gets_no_repair_step', 'test_no_declared_directory_on_path_writes_nothing_and_names_the_one_to_add']
+M9 shadowing goes unreported: detected 3/3 by ['test_a_saipen_earlier_on_path_is_reported_as_shadowing']
+held: True
+--- exit: 0 ---

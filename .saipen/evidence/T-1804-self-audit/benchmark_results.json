@@ -1,0 +1,43 @@
+{
+  "iterations_per_case": 25,
+  "cases": {
+    "small_python_correction": {
+      "impl_files_count": 1,
+      "baseline_ms": 0.1471,
+      "enhanced_ms": 0.4218,
+      "delta_ms": 0.2747,
+      "audit_status": "PASS",
+      "files_scanned": 1
+    },
+    "medium_multi_file_change": {
+      "impl_files_count": 3,
+      "baseline_ms": 0.2584,
+      "enhanced_ms": 1.0907,
+      "delta_ms": 0.8323,
+      "audit_status": "PASS",
+      "files_scanned": 3
+    },
+    "verification_only_ticket": {
+      "impl_files_count": 0,
+      "baseline_ms": 0.0819,
+      "enhanced_ms": 0.1217,
+      "delta_ms": 0.0397,
+      "audit_status": "SKIPPED_NO_DELTA",
+      "files_scanned": 0
+    },
+    "security_sensitive_correction": {
+      "impl_files_count": 1,
+      "baseline_ms": 0.1499,
+      "enhanced_ms": 0.4787,
+      "delta_ms": 0.3288,
+      "audit_status": "PASS",
+      "files_scanned": 1
+    }
+  },
+  "protocol_doc_bytes": {
+    "review_md_before_lf_bytes": 2249,
+    "review_md_after_lf_bytes": 5325,
+    "ordinary_phase_route_bytes": 40801,
+    "ordinary_phase_budget_bytes": 40960
+  }
+}

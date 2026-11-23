@@ -1,0 +1,1848 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "27c91d0138655908e6b3edb600cc0d7a3b20982b7659a5225fe69e48ba84ced3",
+  "verdict": "PASS",
+  "patterns": [
+    "test_install_drift.py",
+    "test_runtime_generation_identity.py",
+    "test_t1879_manifest_staging_states.py",
+    "test_t1949_hook_validator_status.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_install_drift.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_install_drift.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        28168
+      ],
+      "duration_s": 3.437,
+      "process_create_s": 0.031,
+      "ran": 10,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_faithful_copy_reports_no_drift (test_install_drift.DriftReportTests.test_a_faithful_copy_reports_no_drift) ... ok\r\ntest_a_missing_file_is_named_as_missing (test_install_drift.DriftReportTests.test_a_missing_file_is_named_as_missing) ... ok\r\ntest_a_never_installed_home_is_bounded_by_the_limit (test_install_drift.DriftReportTests.test_a_never_installed_home_is_bounded_by_the_limit) ... ok\r\ntest_an_extra_installed_module_is_named (test_install_drift.DriftReportTests.test_an_extra_installed_module_is_named)\r\nT-1342: a file the home carries but the source does not ship is drift. ... ok\r\ntest_an_older_generation_is_named_with_both_byte_counts (test_install_drift.DriftReportTests.test_an_older_generation_is_named_with_both_byte_counts) ... ok\r\ntest_every_routing_document_is_caught_when_all_four_go_stale (test_install_drift.DriftReportTests.test_every_routing_document_is_caught_when_all_four_go_stale) ... ok\r\ntest_line_endings_alone_are_not_drift (test_install_drift.DriftReportTests.test_line_endings_alone_are_not_drift)\r\nThe T-1253 boundary: the snapshot ships CRLF, the clone holds LF. ... ok\r\ntest_other_trees_keep_their_names (test_install_drift.InstalledPathTests.test_other_trees_keep_their_names) ... ok\r\ntest_saipen_prefix_is_stripped_once (test_install_drift.InstalledPathTests.test_saipen_prefix_is_stripped_once) ... ok\r\ntest_the_routing_documents_are_on_the_shipped_surface (test_install_drift.SurfaceMembershipTests.test_the_routing_documents_are_on_the_shipped_surface)\r\nA document off the manifest is one the injector never refreshes. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 10 tests in 3.285s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_runtime_generation_identity.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_runtime_generation_identity.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        33460
+      ],
+      "duration_s": 5.235,
+      "process_create_s": 0.047,
+      "ran": 55,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "ty.FailClosed.test_an_empty_declared_tree_is_unknown) ... ok\r\ntest_an_unreadable_directory_inside_a_tree_is_unknown (test_runtime_generation_identity.FailClosed.test_an_unreadable_directory_inside_a_tree_is_unknown)\r\nos.walk skips unlistable directories unless told otherwise. ... ok\r\ntest_both_layout_manifests_are_ambiguous_and_unknown (test_runtime_generation_identity.FailClosed.test_both_layout_manifests_are_ambiguous_and_unknown) ... ok\r\ntest_malformed_manifest_is_unknown (test_runtime_generation_identity.FailClosed.test_malformed_manifest_is_unknown) ... ok\r\ntest_missing_declared_runtime_file_is_unknown (test_runtime_generation_identity.FailClosed.test_missing_declared_runtime_file_is_unknown) ... ok\r\ntest_require_raises_where_none_is_unknown (test_runtime_generation_identity.FailClosed.test_require_raises_where_none_is_unknown) ... ok\r\ntest_traversal_manifest_source_is_unknown (test_runtime_generation_identity.FailClosed.test_traversal_manifest_source_is_unknown) ... ok\r\ntest_two_declared_names_landing_on_one_installed_path_are_unknown (test_runtime_generation_identity.FailClosed.test_two_declared_names_landing_on_one_installed_path_are_unknown) ... ok\r\ntest_unreadable_declared_runtime_file_is_unknown (test_runtime_generation_identity.FailClosed.test_unreadable_declared_runtime_file_is_unknown) ... ok\r\ntest_unsupported_symlink_in_the_surface_is_unknown (test_runtime_generation_identity.FailClosed.test_unsupported_symlink_in_the_surface_is_unknown) ... skipped \"this host cannot create a symlink: [WinError 1314] A required privilege is not held by the client: 'V:\\\\\\\\_TEMP_\\\\\\\\saipen-gen-failclosed-zozy5l2a\\\\\\\\authority\\\\\\\\VERSION' -> 'V:\\\\\\\\_TEMP_\\\\\\\\saipen-gen-failclosed-zozy5l2a\\\\\\\\symlink\\\\\\\\VERSION'\"\r\ntest_caches_never_move_the_identity (test_runtime_generation_identity.HostileMatrix.test_caches_never_move_the_identity) ... ok\r\ntest_case10_a_dirty_shipped_file_moves_the_generation (test_runtime_generation_identity.HostileMatrix.test_case10_a_dirty_shipped_file_moves_the_generation) ... ok\r\ntest_case1_same_docs_stale_engine_is_stale (test_runtime_generation_identity.HostileMatrix.test_case1_same_docs_stale_engine_is_stale) ... ok\r\ntest_case2_same_docs_stale_engine_module_is_stale (test_runtime_generation_identity.HostileMatrix.test_case2_same_docs_stale_engine_module_is_stale) ... ok\r\ntest_case3_same_docs_stale_validator_is_stale (test_runtime_generation_identity.HostileMatrix.test_case3_same_docs_stale_validator_is_stale) ... ok\r\ntest_case4_same_bytes_another_path_is_current (test_runtime_generation_identity.HostileMatrix.test_case4_same_bytes_another_path_is_current) ... ok\r\ntest_case5_source_and_flattened_layout_share_one_identity (test_runtime_generation_identity.HostileMatrix.test_case5_source_and_flattened_layout_share_one_identity) ... ok\r\ntest_case6_crlf_text_is_transport_and_binary_is_exact (test_runtime_generation_identity.HostileMatrix.test_case6_crlf_text_is_transport_and_binary_is_exact) ... ok\r\ntest_case6_nul_bearing_utf8_is_binary_and_never_normalised (test_runtime_generation_identity.HostileMatrix.test_case6_nul_bearing_utf8_is_binary_and_never_normalised)\r\nValid UTF-8 is not text when it carries NUL: git's own test. ... ok\r\ntest_case7_boot_and_core_only_is_unknown (test_runtime_generation_identity.HostileMatrix.test_case7_boot_and_core_only_is_unknown) ... ok\r\ntest_case7_truncated_surface_is_unknown (test_runtime_generation_identity.HostileMatrix.test_case7_truncated_surface_is_unknown) ... ok\r\ntest_case8_current_wrapper_stale_delegated_root_reads_stale (test_runtime_generation_identity.HostileMatrix.test_case8_current_wrapper_stale_delegated_root_reads_stale) ... ok\r\ntest_case9_current_stamp_stale_hook_root_is_not_fresh (test_runtime_generation_identity.HostileMatrix.test_case9_current_stamp_stale_hook_root_is_not_fresh) ... ok\r\ntest_the_memo_lives_only_inside_the_session (test_runtime_generation_identity.IdentitySessionTests.test_the_memo_lives_only_inside_the_session) ... ok\r\ntest_the_shell_identity_probe_matches_the_owner (test_runtime_generation_identity.InjectorIdentityTests.test_the_shell_identity_probe_matches_the_owner) ... ok\r\ntest_neither_injector_defines_its_own_fingerprint (test_runtime_generation_identity.OneOwnerTests.test_neither_injector_defines_its_own_fingerprint)\r\nThe provenance fingerprint is asked of the owner, never re-derived. ... ok\r\ntest_paths_no_longer_owns_a_second_generation_definition (test_runtime_generation_identity.OneOwnerTests.test_paths_no_longer_owns_a_second_generation_definition) ... ok\r\ntest_the_drift_report_and_landing_path_have_one_owner (test_runtime_generation_identity.OneOwnerTests.test_the_drift_report_and_landing_path_have_one_owner) ... ok\r\ntest_the_guard_and_injector_use_the_one_owner (test_runtime_generation_identity.OneOwnerTests.test_the_guard_and_injector_use_the_one_owner) ... ok\r\ntest_a_crlf_transport_of_the_same_hook_is_not_a_stale_hook (test_runtime_generation_identity.PrelaunchIdentityTests.test_a_crlf_transport_of_the_same_hook_is_not_a_stale_hook) ... ok\r\ntest_an_extra_installed_module_is_a_different_generation (test_runtime_generation_identity.PrelaunchIdentityTests.test_an_extra_installed_module_is_a_different_generation)\r\nDigesting the install over the CANONICAL inventory could not see this. ... ok\r\ntest_an_unprovable_canonical_surface_never_reaches_the_installer (test_runtime_generation_identity.PrelaunchIdentityTests.test_an_unprovable_canonical_surface_never_reaches_the_installer) ... ok\r\ntest_prelaunch_calls_an_extra_installed_module_stale (test_runtime_generation_identity.PrelaunchIdentityTests.test_prelaunch_calls_an_extra_installed_module_stale) ... ok\r\ntest_surface_fingerprint_is_the_one_runtime_identity (test_runtime_generation_identity.PrelaunchIdentityTests.test_surface_fingerprint_is_the_one_runtime_identity) ... ok\r\ntest_the_installed_side_is_proven_over_its_own_inventory (test_runtime_generation_identity.PrelaunchIdentityTests.test_the_installed_side_is_proven_over_its_own_inventory) ... ok\r\ntest_a_flattened_home_named_saipen_is_its_own_root (test_runtime_generation_identity.ProtocolHomeTests.test_a_flattened_home_named_saipen_is_its_own_root) ... ok\r\ntest_a_source_protocol_directory_resolves_to_its_runtime_root (test_runtime_generation_identity.ProtocolHomeTests.test_a_source_protocol_directory_resolves_to_its_runtime_root) ... ok\r\ntest_a_stranger_saipen_directory_is_never_rerooted_into_a_match (test_runtime_generation_identity.ProtocolHomeTests.test_a_stranger_saipen_directory_is_never_rerooted_into_a_match) ... ok\r\ntest_the_exact_rendering_still_needs_the_generation (test_runtime_generation_identity.ProtocolHomeTests.test_the_exact_rendering_still_needs_the_generation) ... ok\r\ntest_every_executed_runtime_file_is_declared (test_runtime_generation_identity.RealSurfaceCoverageTests.test_every_executed_runtime_file_is_declared) ... ok\r\ntest_every_protocol_document_beside_boot_is_declared (test_runtime_generation_identity.RealSurfaceCoverageTests.test_every_protocol_document_beside_boot_is_declared) ... ok\r\ntest_one_enforcement_critical_file_at_a_time_moves_the_generation (test_runtime_generation_identity.RealSurfaceCoverageTests.test_one_enforcement_critical_file_at_a_time_moves_the_generation)\r\nMutate each critical shipped file in an installed copy; restore it. ... ok\r\ntest_a_copied_current_stamp_over_stale_bytes_is_stale (test_runtime_generation_identity.SelfDeclaredProofTests.test_a_copied_current_stamp_over_stale_bytes_is_stale) ... ok\r\ntest_a_copied_provenance_marker_never_makes_a_stale_install_current (test_runtime_generation_identity.SelfDeclaredProofTests.test_a_copied_provenance_marker_never_makes_a_stale_install_current) ... ok\r\ntest_current_bytes_under_an_old_stamp_are_fresh_and_named_unstamped (test_runtime_generation_identity.SelfDeclaredProofTests.test_current_bytes_under_an_old_stamp_are_fresh_and_named_unstamped) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 55 tests in 4.863s\r\n\r\nOK (skipped=1)\r\n"
+    },
+    {
+      "pattern": "test_t1879_manifest_staging_states.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1879_manifest_staging_states.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        33740
+      ],
+      "duration_s": 32.828,
+      "process_create_s": 0.031,
+      "ran": 14,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_missing_hook_is_why_this_suite_installs_it (test_t1879_manifest_staging_states.AdmissionTests.test_a_missing_hook_is_why_this_suite_installs_it)\r\nGuard against a fixture that silently has no gate at all. ... ok\r\ntest_the_shipped_hook_accepts_the_same_file_once_its_content_is_staged (test_t1879_manifest_staging_states.AdmissionTests.test_the_shipped_hook_accepts_the_same_file_once_its_content_is_staged) ... ok\r\ntest_the_shipped_hook_refuses_a_commit_whose_only_runtime_file_is_intent_only (test_t1879_manifest_staging_states.AdmissionTests.test_the_shipped_hook_refuses_a_commit_whose_only_runtime_file_is_intent_only) ... ok\r\ntest_copy_tree_members_reads_the_disk_not_the_index (test_t1879_manifest_staging_states.InjectionStillShipsTheDiskTests.test_copy_tree_members_reads_the_disk_not_the_index)\r\nThe shared expansion must stay disk-based, or the FAIL loses meaning. ... ok\r\ntest_the_powershell_injector_copies_the_whole_tree (test_t1879_manifest_staging_states.InjectionStillShipsTheDiskTests.test_the_powershell_injector_copies_the_whole_tree) ... ok\r\ntest_the_shell_injector_copies_the_whole_tree (test_t1879_manifest_staging_states.InjectionStillShipsTheDiskTests.test_the_shell_injector_copies_the_whole_tree) ... ok\r\ntest_the_red_control_anchor_still_exists (test_t1879_manifest_staging_states.RedControlTests.test_the_red_control_anchor_still_exists) ... ok\r\ntest_without_the_fix_the_intent_only_state_reads_green (test_t1879_manifest_staging_states.RedControlTests.test_without_the_fix_the_intent_only_state_reads_green) ... ok\r\ntest_a_file_the_index_never_met_is_not_called_intent_only (test_t1879_manifest_staging_states.ThreeStateTests.test_a_file_the_index_never_met_is_not_called_intent_only)\r\nThe three states must not collapse: only a staged name is intent-only. ... ok\r\ntest_conformance_passes_on_a_tree_whose_only_defect_would_be_untracked (test_t1879_manifest_staging_states.ThreeStateTests.test_conformance_passes_on_a_tree_whose_only_defect_would_be_untracked)\r\nThe verify clause's third half, asserted on the whole gate. ... ok\r\ntest_intent_only_content_fails_and_names_the_real_repair (test_t1879_manifest_staging_states.ThreeStateTests.test_intent_only_content_fails_and_names_the_real_repair)\r\nTHE DEFECT. Pre-fix this printed PASS (see RedControlTests). ... ok\r\ntest_plain_untracked_still_fails_with_the_original_message (test_t1879_manifest_staging_states.ThreeStateTests.test_plain_untracked_still_fails_with_the_original_message)\r\nT-1592's finding must not be reworded by this change. ... ok\r\ntest_staged_content_passes (test_t1879_manifest_staging_states.ThreeStateTests.test_staged_content_passes)\r\nThe middle state is the ordinary case: one commit will carry it. ... ok\r\ntest_the_baseline_is_green (test_t1879_manifest_staging_states.ThreeStateTests.test_the_baseline_is_green) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 14 tests in 32.671s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1949_hook_validator_status.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1949_hook_validator_status.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        34560
+      ],
+      "duration_s": 0.922,
+      "process_create_s": 0.031,
+      "ran": 3,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_red_floor_is_not_masked_by_a_green_python_gate (test_t1949_hook_validator_status.HookValidatorStatusTests.test_a_red_floor_is_not_masked_by_a_green_python_gate) ... ok\r\ntest_a_red_python_gate_is_not_masked_by_a_green_floor (test_t1949_hook_validator_status.HookValidatorStatusTests.test_a_red_python_gate_is_not_masked_by_a_green_floor) ... ok\r\ntest_both_green_lets_the_commit_through (test_t1949_hook_validator_status.HookValidatorStatusTests.test_both_green_lets_the_commit_through) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 3 tests in 0.781s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 82,
+  "duration_s": 110.813,
+  "timings_s": {
+    "execution_wall_s": 42.422,
+    "environment_identity_wall_s": 2.047,
+    "copy_wall_s": 50.984,
+    "hash_wall_s": 0.125,
+    "cleanup_wall_s": 15.219
+  },
+  "copy_metrics": {
+    "subject_copy_s": 14.828,
+    "canonical_copy_s": 35.984,
+    "canonical_copy_attempts": 1,
+    "trees": null
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_runtime_generation_identity.py",
+      "test_t1879_manifest_staging_states.py",
+      "test_t1949_hook_validator_status.py"
+    ],
+    "manifest_sha256": "3074253aa569fc7009f08347adf22f8bb6ea529b6d775987fc1d90b7b8dd76a4"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_install_drift.py",
+        "test_runtime_generation_identity.py",
+        "test_t1879_manifest_staging_states.py",
+        "test_t1949_hook_validator_status.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "3faa88c8f031d9dd0a751497dcff31d3a745ab15f9105ae606e69ed7e487eb2c",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
+        "exists": true,
+        "sha256": "fc0f1cae1304fcdcf4d0749f421c5ed21471efc856301f92f56d4b844be84363"
+      },
+      "node": {
+        "path": "C:\\nodejs\\node.exe",
+        "exists": true,
+        "sha256": "d702daa815eabbff763c7d3808e235cf031cf2ca70211b56847bc72f51e240e5"
+      },
+      "npm": {
+        "path": "C:\\nodejs\\npm.cmd",
+        "exists": true,
+        "sha256": "db35b276477a199264f618236d1754975bd2b457c6a79ab214a9936ee3a459ce",
+        "package": {
+          "root": "C:\\nodejs\\node_modules\\npm",
+          "tree_sha256": "5d063b0fc6198f02729d987bfaee87f1ad38e0e29c1602deb6ebd2fe82eaba12",
+          "dependencies": {
+            "@isaacs/string-locale-compare": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@isaacs\\string-locale-compare",
+              "tree_sha256": "1b2a577b484b46a26dc0cff32cd69ddf1a1c057887e82eb3d9cf5b7b98440f58",
+              "dependencies": {}
+            },
+            "@npmcli/arborist": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\arborist",
+              "tree_sha256": "52d58ca720234c7e28a97fa350fd365fd2e4744571f854a384537ba1b187fbba",
+              "dependencies": {
+                "@gar/promise-retry": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry",
+                  "tree_sha256": "75af72b0d8edaa671c34fc662b54daa927cc3653b76a0cacfb6b27985bb160d4",
+                  "dependencies": {}
+                },
+                "@isaacs/string-locale-compare": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@isaacs\\string-locale-compare"
+                },
+                "@npmcli/fs": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\fs",
+                  "tree_sha256": "4bd75b32b027520cfdf214ace9ad0b45d439708b367250d810cbb93a075647dc",
+                  "dependencies": {
+                    "semver": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver",
+                      "tree_sha256": "24046b432a1a88e69de3d8f8913e58d770bb742505fb770217bb3a1c5cafde5c",
+                      "dependencies": {}
+                    }
+                  }
+                },
+                "@npmcli/installed-package-contents": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\installed-package-contents",
+                  "tree_sha256": "185d66c181fe714aae406f25b5c434a5dfd3c101584d0445675169ec48f9cb65",
+                  "dependencies": {
+                    "npm-bundled": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\installed-package-contents\\node_modules\\npm-bundled",
+                      "tree_sha256": "fed173e0ba3158f7cf1874d099645bf5756b726a6740a4aae82dbd97538d57c6",
+                      "dependencies": {
+                        "npm-normalize-package-bin": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\installed-package-contents\\node_modules\\npm-normalize-package-bin",
+                          "tree_sha256": "bbbd80ee15f23062a4e26ce7c116f7d08919094d82ac53c0bf306b06de14da8a",
+                          "dependencies": {}
+                        }
+                      }
+                    },
+                    "npm-normalize-package-bin": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\installed-package-contents\\node_modules\\npm-normalize-package-bin"
+                    }
+                  }
+                },
+                "@npmcli/map-workspaces": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\map-workspaces",
+                  "tree_sha256": "caa02b969f7288ddb03ff2aecd76fa7bcd4a76e51da17b7faa78838dce4d9507",
+                  "dependencies": {
+                    "@npmcli/name-from-folder": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\name-from-folder",
+                      "tree_sha256": "dddd4ce9f42d9991e7aa98878bb3f6e150711cde24a86856b10c50fd54cd0355",
+                      "dependencies": {}
+                    },
+                    "@npmcli/package-json": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json",
+                      "tree_sha256": "a6b3d83c212847511975c36c873b7c8125f7dd8a508640da6b423ce8dd1c6658",
+                      "dependencies": {
+                        "@npmcli/git": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\git",
+                          "tree_sha256": "9c571bf4127403d9a645b667f4ecee10c8d4c57a38136cf14483206983ddc66a",
+                          "dependencies": {
+                            "@gar/promise-retry": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry"
+                            },
+                            "@npmcli/promise-spawn": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\promise-spawn",
+                              "tree_sha256": "cfe86c22cfd5722ecccb2aeb3bc0c62d861b4e32f6707f6187b37de712876669",
+                              "dependencies": {
+                                "which": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\which",
+                                  "tree_sha256": "5b5355c2925cc8242df953c7f9ae930ce6e26dbbc248605371a8b3fa52f07de4",
+                                  "dependencies": {
+                                    "isexe": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\isexe",
+                                      "tree_sha256": "94d4975cb0fc284f04f509362dd0cf03c5a88a9c68ed4dad4509c8f8094fec3e",
+                                      "dependencies": {}
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "ini": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\ini",
+                              "tree_sha256": "19246286ebb774af33514d42adc8f09fc06a8e3ce3a3811873600f8b49a1ac3c",
+                              "dependencies": {}
+                            },
+                            "lru-cache": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\lru-cache",
+                              "tree_sha256": "100c4b622dbd8392af9bbfaada8fbc3cc51d09f7f852199299d2629981390604",
+                              "dependencies": {}
+                            },
+                            "npm-pick-manifest": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-pick-manifest",
+                              "tree_sha256": "99c205124a4ceeb785452c02ebb56de184c4821db3181c05a6348c69a809228e",
+                              "dependencies": {
+                                "npm-install-checks": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-install-checks",
+                                  "tree_sha256": "e43156baba788f110c4acd83a6f8bdfb30e0024c0119e99ed7c62cd7520c2119",
+                                  "dependencies": {
+                                    "semver": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                                    }
+                                  }
+                                },
+                                "npm-normalize-package-bin": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-pick-manifest\\node_modules\\npm-normalize-package-bin",
+                                  "tree_sha256": "bbbd80ee15f23062a4e26ce7c116f7d08919094d82ac53c0bf306b06de14da8a",
+                                  "dependencies": {}
+                                },
+                                "npm-package-arg": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg",
+                                  "tree_sha256": "095a04820f263a29ebf3731c18858e8135d96b82853ce39c7466f7c2ca699a13",
+                                  "dependencies": {
+                                    "hosted-git-info": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\hosted-git-info",
+                                      "tree_sha256": "be78ed6a464012efc90bd360e49506412b701f8f609d9e2a4fa247e8448d12aa",
+                                      "dependencies": {
+                                        "lru-cache": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\lru-cache"
+                                        }
+                                      }
+                                    },
+                                    "proc-log": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log",
+                                      "tree_sha256": "29692ad181690933adf5aefa1d205ee74a546a5282d459af9a8ae25372fe9af3",
+                                      "dependencies": {}
+                                    },
+                                    "semver": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                                    },
+                                    "validate-npm-package-name": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\validate-npm-package-name",
+                                      "tree_sha256": "7d8c77c935728d5f5ae47dcdc6a4f08639bc4102f9cfac27167511399f04eff4",
+                                      "dependencies": {}
+                                    }
+                                  }
+                                },
+                                "semver": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                                }
+                              }
+                            },
+                            "proc-log": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                            },
+                            "semver": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                            },
+                            "which": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\which"
+                            }
+                          }
+                        },
+                        "glob": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\glob",
+                          "tree_sha256": "bdd463b53c8213b1f6b056f860c5bb12707f3e3026680f378189e339119d1c1d",
+                          "dependencies": {
+                            "minimatch": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch",
+                              "tree_sha256": "4a8b4e8720e6dc176f4d7ff2f5de75172257bc4c8cf3725c84008c15e39944c9",
+                              "dependencies": {
+                                "brace-expansion": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\brace-expansion",
+                                  "tree_sha256": "ba9359074215ad3e703fa98225dd1a50f625756cf5574b24035d5c8015f6cd09",
+                                  "dependencies": {
+                                    "balanced-match": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\balanced-match",
+                                      "tree_sha256": "612e1b772e25e91d8852f612cf4e095fa4d7b469d3b7fcee5be89305d7c0411e",
+                                      "dependencies": {}
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "minipass": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass",
+                              "tree_sha256": "ca3d383349e1e1ccc417159b6d9b820b6d26b5e3b8949ac749edb50b206db626",
+                              "dependencies": {}
+                            },
+                            "path-scurry": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\path-scurry",
+                              "tree_sha256": "6fbce85ef75c06baef414b6c40e6a7122254497eb682b5cb013c3730163b0730",
+                              "dependencies": {
+                                "lru-cache": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\lru-cache"
+                                },
+                                "minipass": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "hosted-git-info": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\hosted-git-info"
+                        },
+                        "json-parse-even-better-errors": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\json-parse-even-better-errors",
+                          "tree_sha256": "5eb25f597d6a6dda69232742b847cf41a739122156be013980ea70dc27814266",
+                          "dependencies": {}
+                        },
+                        "proc-log": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                        },
+                        "semver": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                        },
+                        "spdx-expression-parse": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\spdx-expression-parse",
+                          "tree_sha256": "9f253260d140be2601bbc307d0d263d79fc368c9eec0fade64fd96aae0a5663f",
+                          "dependencies": {
+                            "spdx-exceptions": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\spdx-exceptions",
+                              "tree_sha256": "9a71318c9a02c21c25a749ddaa1f2ac2387e7f9a630c1af3c81226bc6660bd18",
+                              "dependencies": {}
+                            },
+                            "spdx-license-ids": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\spdx-license-ids",
+                              "tree_sha256": "73a9a44101a3c825fe39ea4ed2a70dc47e23b0eda55b32e53dba906cb6292025",
+                              "dependencies": {}
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "glob": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\glob"
+                    },
+                    "minimatch": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch"
+                    }
+                  }
+                },
+                "@npmcli/metavuln-calculator": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\metavuln-calculator",
+                  "tree_sha256": "370a1b7a4403c03998493b158f355c7c6a5fbd436a61ed5669922384b42eb2b5",
+                  "dependencies": {
+                    "cacache": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\cacache",
+                      "tree_sha256": "55997ccbe1bfb3acdba0f960beb5ff21eda9d32ec6a07ec6eb4b5850babc6dc2",
+                      "dependencies": {
+                        "@npmcli/fs": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\fs"
+                        },
+                        "fs-minipass": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\fs-minipass",
+                          "tree_sha256": "3a5d569e42711afffa3c2ad9498ba8478f93897548ef144a9d4c4eee39e8e148",
+                          "dependencies": {
+                            "minipass": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                            }
+                          }
+                        },
+                        "glob": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\glob"
+                        },
+                        "lru-cache": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\lru-cache"
+                        },
+                        "minipass": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                        },
+                        "minipass-collect": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-collect",
+                          "tree_sha256": "92e2d210b3710d371bd653f74f055c0fd399ec1d52c9591e72f09d78ec84ba96",
+                          "dependencies": {
+                            "minipass": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                            }
+                          }
+                        },
+                        "minipass-flush": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-flush",
+                          "tree_sha256": "1cbe3430b20851102cd74e5d491108b6d427446b2068e0c6c05069a6e17de165",
+                          "dependencies": {
+                            "minipass": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                            }
+                          }
+                        },
+                        "minipass-pipeline": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-pipeline",
+                          "tree_sha256": "9d30d3c362bae4e9a189679ce21c91b1c63de28d34c66cfed4679aea5e6ac2a7",
+                          "dependencies": {
+                            "minipass": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-pipeline\\node_modules\\minipass",
+                              "tree_sha256": "99a0c640691f362b293a9be43f153b044e1491dbdcbfc5249481f7fe5f9338e8",
+                              "dependencies": {
+                                "yallist": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-pipeline\\node_modules\\yallist",
+                                  "tree_sha256": "73cb02ff7733337212ad9ce43bb6b8272ec353c46ec5517da5be37b697689c8d",
+                                  "dependencies": {}
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "p-map": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\p-map",
+                          "tree_sha256": "e5b540d77512cbe3af67efd8393d7217dd3e7ad4ac486966698f561da3d750be",
+                          "dependencies": {}
+                        },
+                        "ssri": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\ssri",
+                          "tree_sha256": "a7ec73b4aecd6450b81f7fc64abab772cd9fe28b4a1f51455f5ad7eaa2b7b7f1",
+                          "dependencies": {
+                            "minipass": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "json-parse-even-better-errors": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\json-parse-even-better-errors"
+                    },
+                    "pacote": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\pacote",
+                      "tree_sha256": "1f20b341c5fa2f586d0b8a88cfa27515d374ada14c59dcf39e3cc24d26177139",
+                      "dependencies": {
+                        "@gar/promise-retry": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry"
+                        },
+                        "@npmcli/git": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\git"
+                        },
+                        "@npmcli/installed-package-contents": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\installed-package-contents"
+                        },
+                        "@npmcli/package-json": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                        },
+                        "@npmcli/promise-spawn": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\promise-spawn"
+                        },
+                        "@npmcli/run-script": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script",
+                          "tree_sha256": "b103a0e60e9a7cb77f08fead73f294929fad65128c6013b54eb65fc712739b5e",
+                          "dependencies": {
+                            "@npmcli/node-gyp": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\node-gyp",
+                              "tree_sha256": "1e915b6dd66ccf15a835056fc22e8c7f2306cebf12f1a27db394c3efbfb6e771",
+                              "dependencies": {}
+                            },
+                            "@npmcli/package-json": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                            },
+                            "@npmcli/promise-spawn": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\promise-spawn"
+                            },
+                            "node-gyp": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\node-gyp",
+                              "tree_sha256": "207d661ddb035bfea81a8760014ef9dde35d02405beec99b52a6182b70497d0c",
+                              "dependencies": {
+                                "env-paths": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\env-paths",
+                                  "tree_sha256": "f08ba546299e0b06bf1919eff1e37b3f5fded786018ad265ddd326e803782b44",
+                                  "dependencies": {}
+                                },
+                                "exponential-backoff": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\exponential-backoff",
+                                  "tree_sha256": "ba106709995c15b5dc551c55c9a5818f26f6bb7c6f6355e95907d1487430739c",
+                                  "dependencies": {}
+                                },
+                                "graceful-fs": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\graceful-fs",
+                                  "tree_sha256": "70d0d9138c17dc2c843207b427a8845db24b7200c0c04b48e553bb8d490775c1",
+                                  "dependencies": {}
+                                },
+                                "nopt": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\nopt",
+                                  "tree_sha256": "8cafaa8e75682cdc8fa777dae2316b0799f7e1382faf264399829d1b2d5b1807",
+                                  "dependencies": {
+                                    "abbrev": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\abbrev",
+                                      "tree_sha256": "adb34d032bf2324f819a8938dfefc685033d45026ecf1fa85a0b19d3fe563343",
+                                      "dependencies": {}
+                                    }
+                                  }
+                                },
+                                "proc-log": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                                },
+                                "semver": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                                },
+                                "tar": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\tar",
+                                  "tree_sha256": "62e340414111eb68123c80cfa6ad419d95d5604613130254b366f65e23a713f0",
+                                  "dependencies": {
+                                    "@isaacs/fs-minipass": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@isaacs\\fs-minipass",
+                                      "tree_sha256": "0146b3b20ea4a947ca49ec8e3b906dfd3b2bb6d71b5a4f7a9a3ed8860f9d2007",
+                                      "dependencies": {
+                                        "minipass": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                        }
+                                      }
+                                    },
+                                    "chownr": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\chownr",
+                                      "tree_sha256": "c7b129d1b88addde0deef6390ba2a23d763c0e597f057614fe8f0758836b06a0",
+                                      "dependencies": {}
+                                    },
+                                    "minipass": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                    },
+                                    "minizlib": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minizlib",
+                                      "tree_sha256": "330022be803333fee22f4beee8f40632406505e53e8938764e6661b4146defca",
+                                      "dependencies": {
+                                        "minipass": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                        }
+                                      }
+                                    },
+                                    "yallist": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\yallist",
+                                      "tree_sha256": "7ab6ca66fdc24b3b0a0fec5ab016770601e0d74c366f1938d157d694c7b9c722",
+                                      "dependencies": {}
+                                    }
+                                  }
+                                },
+                                "tinyglobby": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\tinyglobby",
+                                  "tree_sha256": "7cf51d460b2ed341e20dc51044c6a8fe61870a8a4a61284f5c31920ff2a05d3b",
+                                  "dependencies": {
+                                    "fdir": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\tinyglobby\\node_modules\\fdir",
+                                      "tree_sha256": "1ace4b0b10f41faec36ec6d25568a4351cc58d03fa7e5cccf832db41cce2c5fb",
+                                      "dependencies": {}
+                                    },
+                                    "picomatch": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\tinyglobby\\node_modules\\picomatch",
+                                      "tree_sha256": "e2cbfa4b34792f7ba5f11fba099bfc4448c0c53dd76d91846ad6741a0a49162b",
+                                      "dependencies": {}
+                                    }
+                                  }
+                                },
+                                "undici": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\undici",
+                                  "tree_sha256": "7c729444057bee31b865290067a337641339c54985db157e2fdb975d9fc62f8e",
+                                  "dependencies": {}
+                                },
+                                "which": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\which"
+                                }
+                              }
+                            },
+                            "proc-log": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                            }
+                          }
+                        },
+                        "cacache": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\cacache"
+                        },
+                        "fs-minipass": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\fs-minipass"
+                        },
+                        "minipass": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                        },
+                        "npm-package-arg": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                        },
+                        "npm-packlist": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-packlist",
+                          "tree_sha256": "cd0189d3d5cb175691be7832d7cb3596a413006ce788338ecd205f5fd100a468",
+                          "dependencies": {
+                            "glob": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\glob"
+                            },
+                            "ignore-walk": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-packlist\\node_modules\\ignore-walk",
+                              "tree_sha256": "e44ca6d74155538a676060852e8291fafbe9b43843ab0de453c31eb10f7b8e0a",
+                              "dependencies": {
+                                "minimatch": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch"
+                                }
+                              }
+                            },
+                            "proc-log": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                            }
+                          }
+                        },
+                        "npm-pick-manifest": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-pick-manifest"
+                        },
+                        "npm-registry-fetch": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch",
+                          "tree_sha256": "bbdd110193dccbc89bab60855b2a9413b0dbf53ea34705c606e4d04fca8614af",
+                          "dependencies": {
+                            "@npmcli/redact": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\redact",
+                              "tree_sha256": "061dc2b33489605eea9c91453a50cdcefc6a4fa4ced8bb96dbb92ca495bbe76d",
+                              "dependencies": {}
+                            },
+                            "jsonparse": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\jsonparse",
+                              "tree_sha256": "9eefb7f482590afbb5ff25ff45642b0dc69cb6646fa3d42849abe7aae709e094",
+                              "dependencies": {}
+                            },
+                            "make-fetch-happen": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\make-fetch-happen",
+                              "tree_sha256": "4d791c35259280fe45f4e1401905b8d38672ba9cf56b387a9c7d70e3423f6112",
+                              "dependencies": {
+                                "@gar/promise-retry": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry"
+                                },
+                                "@npmcli/agent": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\agent",
+                                  "tree_sha256": "40cf4374cec2680f3d28ace6f44b9848d730fd5e34211a9578f7b48e39afeba0",
+                                  "dependencies": {
+                                    "agent-base": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\agent\\node_modules\\agent-base",
+                                      "tree_sha256": "a5daa1a277bc34e48d82fc0927e0348ad27f98e1ec8df5c8dfe87ec95298d7e6",
+                                      "dependencies": {}
+                                    },
+                                    "http-proxy-agent": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\agent\\node_modules\\http-proxy-agent",
+                                      "tree_sha256": "e8dd3612247d4abcb4ccc332e5f2ded09176b6fc5104019307eb728781707e89",
+                                      "dependencies": {
+                                        "agent-base": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\agent\\node_modules\\agent-base"
+                                        },
+                                        "debug": {
+                                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\debug",
+                                          "tree_sha256": "25e76146cce6a1825012afe6c08d9542722c588aae511aa4958c3bf07d19b163",
+                                          "dependencies": {
+                                            "ms": {
+                                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\ms",
+                                              "tree_sha256": "397d16c45b9c13ef96d6b1c1e18a5baf7da7910c04eb77129d007c542f783bf2",
+                                              "dependencies": {}
+                                            }
+                                          }
+                                        },
+                                        "proxy-agent-negotiate": {
+                                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\proxy-agent-negotiate",
+                                          "tree_sha256": "72180f39a5b2dc732097c7b498eb5696f4d062327130ed7d98fc71a62c66cf62",
+                                          "dependencies": {}
+                                        }
+                                      }
+                                    },
+                                    "https-proxy-agent": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\agent\\node_modules\\https-proxy-agent",
+                                      "tree_sha256": "3a2115a7a8488a19d07f3e319dce053794bc6caf88063674198cfc39409209fb",
+                                      "dependencies": {
+                                        "agent-base": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\agent\\node_modules\\agent-base"
+                                        },
+                                        "debug": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\debug"
+                                        },
+                                        "proxy-agent-negotiate": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proxy-agent-negotiate"
+                                        }
+                                      }
+                                    },
+                                    "lru-cache": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\lru-cache"
+                                    },
+                                    "socks-proxy-agent": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\socks-proxy-agent",
+                                      "tree_sha256": "196e8d7f7326bdf694ccad916cd889df14522a0b51cdfa6eebedcf25d99e0249",
+                                      "dependencies": {
+                                        "agent-base": {
+                                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\socks-proxy-agent\\node_modules\\agent-base",
+                                          "tree_sha256": "a5daa1a277bc34e48d82fc0927e0348ad27f98e1ec8df5c8dfe87ec95298d7e6",
+                                          "dependencies": {}
+                                        },
+                                        "debug": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\debug"
+                                        },
+                                        "socks": {
+                                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\socks",
+                                          "tree_sha256": "b0cc7dff4a1422cfe5d35d25801182fdc655b69d0ee4df5fc4d5681fffd6a0f6",
+                                          "dependencies": {
+                                            "ip-address": {
+                                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\ip-address",
+                                              "tree_sha256": "8225dcb39e04a9ff61b2f917eeb2cfba321c745f1e25ce07c5e5edaa3a03ff44",
+                                              "dependencies": {}
+                                            },
+                                            "smart-buffer": {
+                                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\smart-buffer",
+                                              "tree_sha256": "c613a6ef22c6f3726bbf523558c0a8ea4332e0baa9a0ba55fe5fd6518a3929ec",
+                                              "dependencies": {}
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "@npmcli/redact": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\redact"
+                                },
+                                "cacache": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\cacache"
+                                },
+                                "http-cache-semantics": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\http-cache-semantics",
+                                  "tree_sha256": "0c19294aab51137a7080d02b0acda2f9620a607c016f4e5ea7dabddcaf77f709",
+                                  "dependencies": {}
+                                },
+                                "minipass": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                },
+                                "minipass-fetch": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-fetch",
+                                  "tree_sha256": "135a7a1dc48e358439f96b0e5e23604b2c5dacaea0558c95a7af2b961253903d",
+                                  "dependencies": {
+                                    "iconv-lite": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\iconv-lite",
+                                      "tree_sha256": "8170feae7a25610236175d5ad052ae0bae59f35af0170aad41f99730782cd308",
+                                      "dependencies": {
+                                        "safer-buffer": {
+                                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\safer-buffer",
+                                          "tree_sha256": "89d32f91c62aa913eaabe5a7b8b930d19edcc4690a796b106cbb187320842f19",
+                                          "dependencies": {}
+                                        }
+                                      }
+                                    },
+                                    "minipass": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                    },
+                                    "minipass-sized": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-sized",
+                                      "tree_sha256": "f0f4a94bd13c6817b82d114fec01e18557dd017004fe34254361e1df7c006438",
+                                      "dependencies": {
+                                        "minipass": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                                        }
+                                      }
+                                    },
+                                    "minizlib": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minizlib"
+                                    }
+                                  }
+                                },
+                                "minipass-flush": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-flush"
+                                },
+                                "minipass-pipeline": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-pipeline"
+                                },
+                                "negotiator": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\negotiator",
+                                  "tree_sha256": "8e90e412d8ed2773b0e48d8c067759b7de37197b4e67082b134a4948a653a21e",
+                                  "dependencies": {}
+                                },
+                                "proc-log": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                                },
+                                "ssri": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ssri"
+                                }
+                              }
+                            },
+                            "minipass": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+                            },
+                            "minipass-fetch": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-fetch"
+                            },
+                            "minizlib": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minizlib"
+                            },
+                            "npm-package-arg": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                            },
+                            "proc-log": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                            }
+                          }
+                        },
+                        "proc-log": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                        },
+                        "sigstore": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\sigstore",
+                          "tree_sha256": "a9a397e075f1fd3fec6cfc4f708efdac41e30dc5eb12e40d551129efa8439c42",
+                          "dependencies": {
+                            "@sigstore/bundle": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\bundle",
+                              "tree_sha256": "6dac6f2f49a08298d9dec008afa9bef9dc39cd942457e7d58f7bab8eae19904a",
+                              "dependencies": {
+                                "@sigstore/protobuf-specs": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\protobuf-specs",
+                                  "tree_sha256": "69e77dd0d770900d1068493dcf37afb3053ab7c7c3e63685bb45b9d99c12156c",
+                                  "dependencies": {}
+                                }
+                              }
+                            },
+                            "@sigstore/core": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\core",
+                              "tree_sha256": "b7b6155565e05c958fc58697c338984f79c77159a9eb186b3abe28ed20511926",
+                              "dependencies": {}
+                            },
+                            "@sigstore/protobuf-specs": {
+                              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\protobuf-specs"
+                            },
+                            "@sigstore/sign": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\sign",
+                              "tree_sha256": "07fb1d1f3a40887babb24b4eced8d75d071d297e08c23ffbf34d3b24ed7f0ffe",
+                              "dependencies": {
+                                "@gar/promise-retry": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry"
+                                },
+                                "@sigstore/bundle": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\bundle"
+                                },
+                                "@sigstore/core": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\core"
+                                },
+                                "@sigstore/protobuf-specs": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\protobuf-specs"
+                                },
+                                "make-fetch-happen": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\make-fetch-happen"
+                                },
+                                "proc-log": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                                }
+                              }
+                            },
+                            "@sigstore/tuf": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\tuf",
+                              "tree_sha256": "32dd5ecc75d64cb6b68eb2963f15b1c502bcaf2662c0725d1c12b18b04fd6dc7",
+                              "dependencies": {
+                                "@sigstore/protobuf-specs": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\protobuf-specs"
+                                },
+                                "tuf-js": {
+                                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\tuf-js",
+                                  "tree_sha256": "f19f01b33f1966b09f756d7bbd4427808cdc0e6c6b4f4ceab7893d51d8ce4d38",
+                                  "dependencies": {
+                                    "@gar/promise-retry": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry"
+                                    },
+                                    "@tufjs/models": {
+                                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@tufjs\\models",
+                                      "tree_sha256": "602c97ee3fc57995cde87b50118876c9806269813c32fd25fe9ccf76ea37db9a",
+                                      "dependencies": {
+                                        "@tufjs/canonical-json": {
+                                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@tufjs\\canonical-json",
+                                          "tree_sha256": "dc21aa00376f20d18cf39df42ef905b8d84a688cbc3a583ea8f9cf2830515cc6",
+                                          "dependencies": {}
+                                        },
+                                        "minimatch": {
+                                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch"
+                                        }
+                                      }
+                                    },
+                                    "debug": {
+                                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\debug"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "@sigstore/verify": {
+                              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\verify",
+                              "tree_sha256": "13867e86ec0dd071f2eae2199c0a6cb3a1cfa2cd84853cca5df97307702649a3",
+                              "dependencies": {
+                                "@sigstore/bundle": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\bundle"
+                                },
+                                "@sigstore/core": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\core"
+                                },
+                                "@sigstore/protobuf-specs": {
+                                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\protobuf-specs"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "ssri": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ssri"
+                        },
+                        "tar": {
+                          "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\tar"
+                        }
+                      }
+                    },
+                    "proc-log": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                    },
+                    "semver": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                    }
+                  }
+                },
+                "@npmcli/name-from-folder": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\name-from-folder"
+                },
+                "@npmcli/node-gyp": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\node-gyp"
+                },
+                "@npmcli/package-json": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                },
+                "@npmcli/query": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\query",
+                  "tree_sha256": "323e17be6efc31451f274587e3a39eb87f4b2502c3545a342167bc5e3c020657",
+                  "dependencies": {
+                    "postcss-selector-parser": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\postcss-selector-parser",
+                      "tree_sha256": "97b006852bf7204e94bd5c3cf5e253ea7a4c517c5c7dfa169fe722fc48fc7aca",
+                      "dependencies": {
+                        "cssesc": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\cssesc",
+                          "tree_sha256": "eb1cb52a02cfd1d142274f3899de9444cdfa5c3f16cb7d1bd80deab14b50d840",
+                          "dependencies": {}
+                        },
+                        "util-deprecate": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\util-deprecate",
+                          "tree_sha256": "d13f20b8ded3f315b68bbd4ee69fc7ca5390c71951034ace51f677bfd7190a54",
+                          "dependencies": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "@npmcli/redact": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\redact"
+                },
+                "@npmcli/run-script": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script"
+                },
+                "bin-links": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\bin-links",
+                  "tree_sha256": "df95a469486c843aad1f1b183666f6bac1ff396229a48fa0e258de21e46baf80",
+                  "dependencies": {
+                    "cmd-shim": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\bin-links\\node_modules\\cmd-shim",
+                      "tree_sha256": "e720e95bf631e3f2a0e550843bed57c297af3efe4f34a8661ab674cb996b1202",
+                      "dependencies": {}
+                    },
+                    "npm-normalize-package-bin": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\bin-links\\node_modules\\npm-normalize-package-bin",
+                      "tree_sha256": "bbbd80ee15f23062a4e26ce7c116f7d08919094d82ac53c0bf306b06de14da8a",
+                      "dependencies": {}
+                    },
+                    "proc-log": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                    },
+                    "read-cmd-shim": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\bin-links\\node_modules\\read-cmd-shim",
+                      "tree_sha256": "d8f4af56df5ed4b9e3aa1a6c88454c9a157c45f0fc62432a501b6262eacabaef",
+                      "dependencies": {}
+                    },
+                    "write-file-atomic": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\write-file-atomic",
+                      "tree_sha256": "4a54fd6430169414e34711f6d9ae4a4182cca6f854af7014b42ed5a5f59a4a66",
+                      "dependencies": {
+                        "signal-exit": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\signal-exit",
+                          "tree_sha256": "bc70e645454d7c1a58642d591a64a842b19c2efe2b11ef913659376fa70c2193",
+                          "dependencies": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "cacache": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\cacache"
+                },
+                "common-ancestor-path": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\common-ancestor-path",
+                  "tree_sha256": "4401385929939bf3a1b143471b42141281122aefacc0baa425cf686e296c4f7a",
+                  "dependencies": {}
+                },
+                "diff": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\diff",
+                  "tree_sha256": "2824012a6dba21e41a8347ea6b3a7fd4cdf48acf0402e6019a35d40dff52acc2",
+                  "dependencies": {}
+                },
+                "hosted-git-info": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\hosted-git-info"
+                },
+                "json-stringify-nice": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\json-stringify-nice",
+                  "tree_sha256": "5ddac8adcc27b1053a6649d3adbd8160479213d1c914477275b6b81d4c1d655b",
+                  "dependencies": {}
+                },
+                "lru-cache": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\lru-cache"
+                },
+                "minimatch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch"
+                },
+                "nopt": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\nopt"
+                },
+                "npm-install-checks": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-install-checks"
+                },
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "npm-pick-manifest": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-pick-manifest"
+                },
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                },
+                "pacote": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\pacote"
+                },
+                "parse-conflict-json": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\parse-conflict-json",
+                  "tree_sha256": "b5a0528ee4c4c17513864c48a3f7b382985071c146d1e33562f04e3efd29c348",
+                  "dependencies": {
+                    "json-parse-even-better-errors": {
+                      "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\json-parse-even-better-errors"
+                    },
+                    "just-diff": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\just-diff",
+                      "tree_sha256": "5c506ba505e126b60fe8804477df43fea616291f48a57e9d1e29d9c3b42ddd84",
+                      "dependencies": {}
+                    },
+                    "just-diff-apply": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\just-diff-apply",
+                      "tree_sha256": "f35892fae81fd820c16f5fc0c06147763af79e8faa9992762bf808234cf912f5",
+                      "dependencies": {}
+                    }
+                  }
+                },
+                "proc-log": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                },
+                "proggy": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\proggy",
+                  "tree_sha256": "a2144ed0e5ab662590d661f17d07ed80f9c5615603f7d8f59ee42a336ec8e735",
+                  "dependencies": {}
+                },
+                "promise-all-reject-late": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\promise-all-reject-late",
+                  "tree_sha256": "d0acebf76c73b10a8d6a023ec3c5e3e49e77edd47d02793b956c7db65ac709a4",
+                  "dependencies": {}
+                },
+                "promise-call-limit": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\promise-call-limit",
+                  "tree_sha256": "95b96a435164eca4a1eebb2da712d6ceb06cb505364901beddfe2052276b9727",
+                  "dependencies": {}
+                },
+                "semver": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                },
+                "ssri": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ssri"
+                },
+                "treeverse": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\treeverse",
+                  "tree_sha256": "c8c70f49de46c5cffe5e5279703c840980ba76c3eae548723eba2e1c0a77ac23",
+                  "dependencies": {}
+                },
+                "validate-npm-package-name": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\validate-npm-package-name"
+                },
+                "walk-up-path": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\walk-up-path",
+                  "tree_sha256": "942457a60bf93b031a52ab6f83f7dd879c674f235ad08383598ed9c7899717b9",
+                  "dependencies": {}
+                }
+              }
+            },
+            "@npmcli/config": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\config",
+              "tree_sha256": "4e4fc6066be9863c5474d7ebe6bdd195a5e5d99f0e65b4e679b396478c280eca",
+              "dependencies": {
+                "@npmcli/map-workspaces": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\map-workspaces"
+                },
+                "@npmcli/package-json": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                },
+                "ci-info": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\ci-info",
+                  "tree_sha256": "cea2bed76450d8d9927eccfebdc11bcde3e18cccc9d85c329c7ffb6d71446c6f",
+                  "dependencies": {}
+                },
+                "ini": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ini"
+                },
+                "nopt": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\nopt"
+                },
+                "proc-log": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                },
+                "semver": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                },
+                "walk-up-path": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\walk-up-path"
+                }
+              }
+            },
+            "@npmcli/fs": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\fs"
+            },
+            "@npmcli/git": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\git"
+            },
+            "@npmcli/map-workspaces": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\map-workspaces"
+            },
+            "@npmcli/metavuln-calculator": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\metavuln-calculator"
+            },
+            "@npmcli/package-json": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+            },
+            "@npmcli/promise-spawn": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\promise-spawn"
+            },
+            "@npmcli/redact": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\redact"
+            },
+            "@npmcli/run-script": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script"
+            },
+            "@sigstore/tuf": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@sigstore\\tuf"
+            },
+            "abbrev": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\abbrev"
+            },
+            "archy": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\archy",
+              "tree_sha256": "825b3636da97141e7e79383eea15de52750806153fd6d9391bd671678be6c5f3",
+              "dependencies": {}
+            },
+            "bin-links": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\bin-links"
+            },
+            "cacache": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\cacache"
+            },
+            "chalk": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\chalk",
+              "tree_sha256": "56863f0c8f5915d6feaa9774c57e57dd472d00aa51a4eb50bb526c6a4b5e15e3",
+              "dependencies": {}
+            },
+            "ci-info": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ci-info"
+            },
+            "diff": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\diff"
+            },
+            "fastest-levenshtein": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\fastest-levenshtein",
+              "tree_sha256": "b8ef95f99e3c5eda75420365cd3a33a0bf0d4213ee6607fc9e82a6c9129fe876",
+              "dependencies": {}
+            },
+            "fs-minipass": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\fs-minipass"
+            },
+            "glob": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\glob"
+            },
+            "graceful-fs": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\graceful-fs"
+            },
+            "hosted-git-info": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\hosted-git-info"
+            },
+            "ini": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ini"
+            },
+            "init-package-json": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\init-package-json",
+              "tree_sha256": "53f600a1bfc17ccd875411016bc531f901107677361b105159f7942909ea2164",
+              "dependencies": {
+                "@npmcli/package-json": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                },
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "promzard": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\promzard",
+                  "tree_sha256": "a534b4443bacc94db1e388e084808751d8061abf41ea8dc102bce93b1ddaf251",
+                  "dependencies": {
+                    "read": {
+                      "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\read",
+                      "tree_sha256": "9e698e35c6f9ed61216aa9b8aa8293a5f073b2d5e971d53ec08c1211cd1b928d",
+                      "dependencies": {
+                        "mute-stream": {
+                          "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\mute-stream",
+                          "tree_sha256": "b6f6a041098cdbc570a684d2d8ae18ffd63cb2a8aa5f8aea35b9b058b25aa368",
+                          "dependencies": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "read": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\read"
+                },
+                "semver": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                },
+                "validate-npm-package-name": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\validate-npm-package-name"
+                }
+              }
+            },
+            "is-cidr": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\is-cidr",
+              "tree_sha256": "0cf9cf51dea7454d48ef5249c0893e356362cf1f4b561b0c97a421ee238a12d2",
+              "dependencies": {
+                "cidr-regex": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\cidr-regex",
+                  "tree_sha256": "3668ae54561bc8a75f4ef656872a3a270041d470e884c3e69229d623e939b392",
+                  "dependencies": {}
+                }
+              }
+            },
+            "json-parse-even-better-errors": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\json-parse-even-better-errors"
+            },
+            "libnpmaccess": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmaccess",
+              "tree_sha256": "e4424142398dafb5b53001339b2d941403508d56b643e731a7ffef9745111736",
+              "dependencies": {
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                }
+              }
+            },
+            "libnpmdiff": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmdiff",
+              "tree_sha256": "31c3e75c955352940d6e778d424579ee0c71a4e3d172de0891d20d067aca82c3",
+              "dependencies": {
+                "@npmcli/arborist": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\arborist"
+                },
+                "@npmcli/installed-package-contents": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\installed-package-contents"
+                },
+                "binary-extensions": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\binary-extensions",
+                  "tree_sha256": "d405121b41dfd5ce3b03b8f00f91cd07e1d539834805754ea920cd978a68f7da",
+                  "dependencies": {}
+                },
+                "diff": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\diff"
+                },
+                "minimatch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch"
+                },
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "pacote": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\pacote"
+                },
+                "tar": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\tar"
+                }
+              }
+            },
+            "libnpmexec": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmexec",
+              "tree_sha256": "1316237f2d525b33b707069582d0ae2d7811528348582fbaef73cc140ef4a981",
+              "dependencies": {
+                "@gar/promise-retry": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@gar\\promise-retry"
+                },
+                "@npmcli/arborist": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\arborist"
+                },
+                "@npmcli/package-json": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                },
+                "@npmcli/run-script": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script"
+                },
+                "ci-info": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ci-info"
+                },
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "pacote": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\pacote"
+                },
+                "proc-log": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                },
+                "read": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\read"
+                },
+                "semver": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                },
+                "signal-exit": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\signal-exit"
+                },
+                "walk-up-path": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\walk-up-path"
+                }
+              }
+            },
+            "libnpmfund": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmfund",
+              "tree_sha256": "cd3f71b4692d9b41969d755f759e03046bfbc875d66b8a3c2fea5e7d2617a1fc",
+              "dependencies": {
+                "@npmcli/arborist": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\arborist"
+                }
+              }
+            },
+            "libnpmorg": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmorg",
+              "tree_sha256": "7e53a66281785a6678a3059e563de12e173e06c86ffd2b1ca2cd1c8091b61698",
+              "dependencies": {
+                "aproba": {
+                  "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\aproba",
+                  "tree_sha256": "1364e0aa35fe93cc7da22054dc10bd4f0c49018f4af5d8672defd1e47aa1fb5f",
+                  "dependencies": {}
+                },
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                }
+              }
+            },
+            "libnpmpack": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmpack",
+              "tree_sha256": "a106ef2d157981a80fbdc67f5c1cfd87071f165c78d0e5179fbaa422b6645930",
+              "dependencies": {
+                "@npmcli/arborist": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\arborist"
+                },
+                "@npmcli/run-script": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script"
+                },
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "pacote": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\pacote"
+                }
+              }
+            },
+            "libnpmpublish": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmpublish",
+              "tree_sha256": "a39a3a400e82da9840ea244edca919ba9e596edcca79a593cc1a21bfe6a599be",
+              "dependencies": {
+                "@npmcli/package-json": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\package-json"
+                },
+                "ci-info": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ci-info"
+                },
+                "npm-package-arg": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+                },
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                },
+                "proc-log": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                },
+                "semver": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                },
+                "sigstore": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\sigstore"
+                },
+                "ssri": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ssri"
+                }
+              }
+            },
+            "libnpmsearch": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmsearch",
+              "tree_sha256": "0a0ec815b506fb75340016e815a78f642a3c2d59a9dc9559836aa5341e88d304",
+              "dependencies": {
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                }
+              }
+            },
+            "libnpmteam": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmteam",
+              "tree_sha256": "81ed75f6c4b35dc353d231c188d618b2031f083f08b53a5b044fe667732a0cf0",
+              "dependencies": {
+                "aproba": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\aproba"
+                },
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                }
+              }
+            },
+            "libnpmversion": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\libnpmversion",
+              "tree_sha256": "dcd951cf519c013a0715c940a260e9f524d4681af67f26c8f50167fabb8fe478",
+              "dependencies": {
+                "@npmcli/git": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\git"
+                },
+                "@npmcli/run-script": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script"
+                },
+                "json-parse-even-better-errors": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\json-parse-even-better-errors"
+                },
+                "proc-log": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                },
+                "semver": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+                }
+              }
+            },
+            "make-fetch-happen": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\make-fetch-happen"
+            },
+            "minimatch": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minimatch"
+            },
+            "minipass": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass"
+            },
+            "minipass-pipeline": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\minipass-pipeline"
+            },
+            "ms": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ms"
+            },
+            "node-gyp": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\node-gyp"
+            },
+            "nopt": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\nopt"
+            },
+            "npm-audit-report": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-audit-report",
+              "tree_sha256": "56b4dd8ebc9f0bbeb0db034ecce93877602875fa8595daf3b88e32fb36e2a89d",
+              "dependencies": {}
+            },
+            "npm-install-checks": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-install-checks"
+            },
+            "npm-package-arg": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-package-arg"
+            },
+            "npm-pick-manifest": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-pick-manifest"
+            },
+            "npm-profile": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-profile",
+              "tree_sha256": "fbe1343c2110d1baf1e5347152971b2f1085e54684f1ee400177e103127bbe54",
+              "dependencies": {
+                "npm-registry-fetch": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+                },
+                "proc-log": {
+                  "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+                }
+              }
+            },
+            "npm-registry-fetch": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-registry-fetch"
+            },
+            "npm-user-validate": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\npm-user-validate",
+              "tree_sha256": "536439084f7d543d3f5b01bbc550a703baf495bb2ae086eac6b4f1f33e464354",
+              "dependencies": {}
+            },
+            "p-map": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\p-map"
+            },
+            "pacote": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\pacote"
+            },
+            "parse-conflict-json": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\parse-conflict-json"
+            },
+            "proc-log": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\proc-log"
+            },
+            "qrcode-terminal": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\qrcode-terminal",
+              "tree_sha256": "1bd35a1cda16676a5d26ea2979323432772aceda53ba163d6d11b817c0d86ac3",
+              "dependencies": {}
+            },
+            "read": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\read"
+            },
+            "semver": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\semver"
+            },
+            "spdx-expression-parse": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\spdx-expression-parse"
+            },
+            "ssri": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\ssri"
+            },
+            "supports-color": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\supports-color",
+              "tree_sha256": "596bb866146f4a66cff32416c1e4906044e106b92564da209519aaf55f7beb85",
+              "dependencies": {}
+            },
+            "tar": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\tar"
+            },
+            "text-table": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\text-table",
+              "tree_sha256": "00cf9ff93eea454ce499e0e961c60eecab08ae21c6e36e17936eb6fa7b72d13f",
+              "dependencies": {}
+            },
+            "tiny-relative-date": {
+              "root": "C:\\nodejs\\node_modules\\npm\\node_modules\\tiny-relative-date",
+              "tree_sha256": "f0ee3bc037cd841e55b6d1b2c28e1dd31e5b3cfa5260c9c0349c7c54fc714ba0",
+              "dependencies": {}
+            },
+            "treeverse": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\treeverse"
+            },
+            "validate-npm-package-name": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\validate-npm-package-name"
+            },
+            "which": {
+              "reference": "C:\\nodejs\\node_modules\\npm\\node_modules\\which"
+            }
+          }
+        }
+      },
+      "npx": {
+        "path": "C:\\nodejs\\npx.cmd",
+        "exists": true,
+        "sha256": "7713cac6a01e6198745fbe2cb01623fcd8a7883e171891ca71dc158088fa1d10",
+        "package": {
+          "reference": "C:\\nodejs\\node_modules\\npm"
+        }
+      },
+      "bash": {
+        "path": "C:\\Program Files\\Git\\usr\\bin\\bash.exe",
+        "exists": true,
+        "sha256": "fc362aae1f217d34d02237d99527839dd6cf85b37c7a0277109400bfa0faa594"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": {
+        "path": "C:\\nodejs\\opencode.cmd",
+        "exists": true,
+        "sha256": "b53b698473bfa46e09487e485a7f1ad5b4881f8a8b319d3619aa251f3be8ae10",
+        "package": {
+          "root": "C:\\nodejs\\node_modules\\opencode-ai",
+          "tree_sha256": "263d7a113c484b20966dd0b4aa67b35201bc76fb14744dbca678fbe78040e616",
+          "dependencies": {
+            "opencode-darwin-arm64": null,
+            "opencode-darwin-x64": null,
+            "opencode-darwin-x64-baseline": null,
+            "opencode-linux-arm64": null,
+            "opencode-linux-arm64-musl": null,
+            "opencode-linux-x64": null,
+            "opencode-linux-x64-baseline": null,
+            "opencode-linux-x64-baseline-musl": null,
+            "opencode-linux-x64-musl": null,
+            "opencode-windows-arm64": null,
+            "opencode-windows-x64": {
+              "root": "C:\\nodejs\\node_modules\\opencode-ai\\node_modules\\opencode-windows-x64",
+              "tree_sha256": "b0061b4a99b42721432bd40df293b9253686a0ec8cc399939bcbf6e1706f5a19",
+              "dependencies": {}
+            },
+            "opencode-windows-x64-baseline": {
+              "root": "C:\\nodejs\\node_modules\\opencode-ai\\node_modules\\opencode-windows-x64-baseline",
+              "tree_sha256": "56118ae78b6197fa727d9761153dced03335c7c447efa6be7324660543cfee51",
+              "dependencies": {}
+            }
+          }
+        }
+      },
+      "claude": {
+        "path": "C:\\Users\\vac34\\.local\\bin\\claude.exe",
+        "exists": true,
+        "sha256": "6099672ebe5dcb518b67d1d32dde1e3360bc6bee1dae7f8d28a69c49acc7c865"
+      },
+      "codex": {
+        "path": "C:\\nodejs\\codex.cmd",
+        "exists": true,
+        "sha256": "00743f8084cbc1594683b33cfb8bf14d2ce40d46ca6ba9f7142de6ba31502a84",
+        "package": {
+          "root": "C:\\nodejs\\node_modules\\@openai\\codex",
+          "tree_sha256": "31c729964f8aa95f37e7beea05e6ffe4c32f437a682329d2594f519d57a00c4b",
+          "dependencies": {
+            "@openai/codex-darwin-arm64": null,
+            "@openai/codex-darwin-x64": null,
+            "@openai/codex-linux-arm64": null,
+            "@openai/codex-linux-x64": null,
+            "@openai/codex-win32-arm64": null,
+            "@openai/codex-win32-x64": {
+              "root": "C:\\nodejs\\node_modules\\@openai\\codex\\node_modules\\@openai\\codex-win32-x64",
+              "tree_sha256": "b322024d1e2c332d4ae58c058babe8e824b94f21b06dfe79d1705b50ecd22031",
+              "dependencies": {}
+            }
+          }
+        }
+      },
+      "ruff": {
+        "path": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\Scripts\\ruff.exe",
+        "exists": true,
+        "sha256": "bd38bcef24863ae54a2abb5a0cc33446ef1ed6f1385b60bf6329fcbbce0a105a"
+      }
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\vac34\\.codex\\config.toml",
+        "exists": true,
+        "sha256": "f1200946f7a7f0119a020e5ee5f6475c993823e30ca0184866019847281bcddc"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.codex\\hooks.json",
+        "exists": true,
+        "sha256": "bd38b967317d2d5a0502c88338dd1f00bb9d1293d10792cc5a3ace94c626c112"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.claude\\settings.json",
+        "exists": true,
+        "sha256": "eaf8fd4abc13bdbe58da509eec45fe4b25ac408c7abe3685d77e3a641fbbd3da"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.config\\opencode\\opencode.json",
+        "exists": true,
+        "sha256": "ff87fd972f35a2751fa262488c31b1bfd2000c806ab8a39e9bf08e3e959c85f4"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\vac34\\.gitconfig",
+        "exists": true,
+        "sha256": "97ced6bb02ba21ba5c7a8834a392ba9adda6938c6e7be528912116859e1ac02f"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\vac34\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\vac34\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "86d04f8a8d42dd8b365b33a29ca7b3cc1eacae9ddcfc2ae1b9bdbf3ee1e5e32f"
+      },
+      "core_unit_shard.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "b31bafde4ad2f78069e8f5ef839e26c59a4cbb38c9bcc4a19ad3e7acee7b6be0"
+      },
+      "test_runner.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "07a8109e808f10bb5268ac12f0da981db4b1fad2ec97a58da84f13b0509a1e81"
+      },
+      "verification_cache.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "8e7d43527554403147454d440d3b86d460ad166a21226fdfda2fd1a6384f5c5b"
+      },
+      "process_tree.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "e5f07f80d2a6802d95c3ccbebe4ca5f66cdbbcbb25b13450123baa896d8e8356"
+      },
+      "verification_bootstrap.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "df9bdce3388bf2511ce13a5a4329219810096ac58be0323675afd78b48cb605e"
+      },
+      "verification_impact.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "cf5c146ee2931cc1baa2765fa00e8bb9129d3370cb8bb8a2b7eb020dd8bba455"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "3627ca5abc5117cc71e7afd0f24f36a255bfed9757459fa2c815cbe81c4220c2"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

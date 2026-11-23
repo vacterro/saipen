@@ -1,0 +1,449 @@
+E501 Line too long (102 > 100)
+  --> tools\saipen_engine\closure_readiness.py:87:101
+   |
+85 |             gate = proposed["gate"] if proposed.get("ok") else proposed
+86 |             if gate.get("ok"):
+87 |                 return _ready(ticket_id, "SOURCE_UNRESOLVED_SETTLED_BY_EVIDENCE", gate.get("receipt"))
+   |                                                                                                     ^^
+88 |         else:
+89 |             from .operations import _only_request_clauses_await
+   |
+
+E501 Line too long (117 > 100)
+  --> tools\saipen_engine\closure_readiness.py:93:101
+   |
+91 |             receipt = gate.get("receipt")
+92 |             unresolved = list((gate.get("coverage") or {}).get("unresolved") or [])
+93 |             if not _foreign_owners(root, ticket_id, receipt, unresolved) and _only_request_clauses_await(root, gate):
+   |                                                                                                     ^^^^^^^^^^^^^^^^^
+94 |                 return _not_ready(ticket_id, receipt, unresolved, "INCOMPLETE_TICKET", _evidence_route(ticket_id))
+95 |     code = str(gate.get("code") or "SOURCE_UNRESOLVED")
+   |
+
+E501 Line too long (114 > 100)
+  --> tools\saipen_engine\closure_readiness.py:94:101
+   |
+92 |             unresolved = list((gate.get("coverage") or {}).get("unresolved") or [])
+93 |             if not _foreign_owners(root, ticket_id, receipt, unresolved) and _only_request_clauses_await(root, gate):
+94 |                 return _not_ready(ticket_id, receipt, unresolved, "INCOMPLETE_TICKET", _evidence_route(ticket_id))
+   |                                                                                                     ^^^^^^^^^^^^^^
+95 |     code = str(gate.get("code") or "SOURCE_UNRESOLVED")
+96 |     receipt = gate.get("receipt")
+   |
+
+E501 Line too long (113 > 100)
+   --> tools\saipen_engine\closure_readiness.py:209:101
+    |
+207 |         return _block_route(ticket_id, code)
+208 |     if code == "SOURCE_UNRESOLVED" and receipt:
+209 |         if _only_request_clauses_await(root, gate) and not _foreign_owners(root, ticket_id, receipt, unresolved):
+    |                                                                                                     ^^^^^^^^^^^^^
+210 |             return _evidence_route(ticket_id) or _block_route(ticket_id)
+211 |         if not unresolved:
+    |
+
+E501 Line too long (106 > 100)
+   --> tools\saipen_engine\intake.py:308:101
+    |
+306 |             p = Path(path)
+307 |             if ".saipen" in p.parts:
+308 |                 if _is_isolated_worktree(p) or any(_is_isolated_worktree(parent) for parent in p.parents):
+    |                                                                                                     ^^^^^^
+309 |                     return False
+310 |         except Exception:
+    |
+
+E501 Line too long (127 > 100)
+    --> tools\saipen_engine\intake.py:2395:101
+     |
+2393 |                         }
+2394 |                     v_clean = str(verification).strip().lower()
+2395 |                     if v_clean in {"pass", "passed", "ok", "true", "yes", "done", "test", "verified", "lifecycle progression"}:
+     |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2396 |                         return {
+2397 |                             "ok": False,
+     |
+
+E501 Line too long (125 > 100)
+    --> tools\saipen_engine\intake.py:2399:101
+     |
+2397 |                             "ok": False,
+2398 |                             "code": "VALIDATION_FAILED",
+2399 |                             "detail": "verification requires concrete proof (command, assertion, record, or event citation)",
+     |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+2400 |                         }
+     |
+
+E501 Line too long (124 > 100)
+    --> tools\saipen_engine\intake.py:2437:101
+     |
+2435 | …                         "ok": False,
+2436 | …                         "code": "EVIDENCE_IDENTITY_MISMATCH",
+2437 | …                         "detail": f"evidence references foreign source receipt {frcpt} instead of {receipt_id}",
+     |                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^
+2438 | …                     }
+     |
+
+E501 Line too long (116 > 100)
+    --> tools\saipen_engine\intake.py:2443:101
+     |
+2441 |                     contract = _read_contract(root, receipt_id) or {}
+2442 |                     meta = _read_meta(root, receipt_id) or {}
+2443 |                     if contract.get("source_sha256") and contract.get("source_sha256") != meta.get("source_sha256"):
+     |                                                                                                     ^^^^^^^^^^^^^^^^
+2444 |                         return {
+2445 |                             "ok": False,
+     |
+
+E501 Line too long (199 > 100)
+    --> tools\saipen_engine\intake.py:2469:101
+     |
+2467 | …
+2468 | …
+2469 | …it", "core_unit", "unittest discover", "core suite", "discover -s tools", "aggregate pass", "aggregate core pass"))
+     |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2470 | …
+2471 | …
+     |
+
+E501 Line too long (192 > 100)
+    --> tools\saipen_engine\intake.py:2486:101
+     |
+2485 | …
+2486 | …rm in ("partial fulfillment", "partially verified", "incomplete fulfillment", "partial proof", "subset only")):
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2487 | …
+2488 | …
+     |
+
+E501 Line too long (111 > 100)
+    --> tools\saipen_engine\intake.py:2490:101
+     |
+2488 |                             "ok": False,
+2489 |                             "code": "PARTIAL_FULFILLMENT_REFUSED",
+2490 |                             "detail": f"partial fulfillment cannot satisfy complete section requirement {rid}",
+     |                                                                                                     ^^^^^^^^^^^
+2491 |                         }
+     |
+
+E501 Line too long (141 > 100)
+    --> tools\saipen_engine\intake.py:2494:101
+     |
+2493 | …     # Test E: Missing external runtime evidence
+2494 | …     if clause.get("when_environment") and not environment and "environment_evidence" not in entry and "probe" not in v_clean:
+     |                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2495 | …         return {
+2496 | …             "ok": False,
+     |
+
+E501 Line too long (135 > 100)
+    --> tools\saipen_engine\intake.py:2507:101
+     |
+2505 | …     test_topic_words = set(re.findall(r"[a-z0-9]+", test_file)) - {"test", "py"}
+2506 | …     clause_words = set(re.findall(r"[a-z0-9]+", clause_text))
+2507 | …     known_domains = {"intake", "parser", "revalidation", "external", "reconciliation", "matrix", "host", "adapter"}
+     |                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2508 | …     clause_domains = clause_words & known_domains
+2509 | …     test_domains = test_topic_words & known_domains
+     |
+
+E501 Line too long (113 > 100)
+    --> tools\saipen_engine\intake.py:2514:101
+     |
+2512 | …                         "ok": False,
+2513 | …                         "code": "EVIDENCE_UNRELATED",
+2514 | …                         "detail": f"test evidence in {verification!r} is unrelated to requirement {rid}",
+     |                                                                                               ^^^^^^^^^^^^^
+2515 | …                     }
+     |
+
+E501 Line too long (120 > 100)
+    --> tools\saipen_engine\intake.py:2587:101
+     |
+2586 |                         if not receipt_file:
+2587 |                             test_target = Path(test_files[0]).name if test_files else Path(str(verification or "")).name
+     |                                                                                                     ^^^^^^^^^^^^^^^^^^^^
+2588 |                             target_work = work or "<T-###>"
+2589 |                             missing_oracle = test_files[0] if test_files else verification
+     |
+
+E501 Line too long (116 > 100)
+    --> tools\saipen_engine\intake.py:2591:101
+     |
+2589 | …                     missing_oracle = test_files[0] if test_files else verification
+2590 | …                     if test_target.startswith("test_") and test_target.endswith(".py"):
+2591 | …                         command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
+     |                                                                                               ^^^^^^^^^^^^^^^^
+2592 | …                     else:
+2593 | …                         command = f"saipen work reverify {target_work} --contract <contract-path>"
+     |
+
+E501 Line too long (106 > 100)
+    --> tools\saipen_engine\intake.py:2593:101
+     |
+2591 | …                         command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
+2592 | …                     else:
+2593 | …                         command = f"saipen work reverify {target_work} --contract <contract-path>"
+     |                                                                                               ^^^^^^
+2594 | …                     return {
+2595 | …                         "ok": False,
+     |
+
+E501 Line too long (101 > 100)
+    --> tools\saipen_engine\intake.py:2612:101
+     |
+2610 | …                         "ok": False,
+2611 | …                         "code": "EVIDENCE_CORRUPTION",
+2612 | …                         "detail": f"execution receipt {receipt_file.name} is corrupt: {exc}",
+     |                                                                                               ^
+2613 | …                     }
+     |
+
+E501 Line too long (117 > 100)
+    --> tools\saipen_engine\intake.py:2683:101
+     |
+2681 | …                         continue
+2682 | …                     txt = str(ev.get("text") or "").strip()
+2683 | …                     if "FOCUSED-UNIT-EVIDENCE PASS" in txt and relative in txt and digest in txt:
+     |                                                                                   ^^^^^^^^^^^^^^^^^
+2684 | …                         authenticated = dict(receipt_data)
+2685 | …                         authenticated["ticket"] = ev.get("ticket")
+     |
+
+E501 Line too long (110 > 100)
+    --> tools\saipen_engine\intake.py:2705:101
+     |
+2703 | …                         continue
+2704 | …                     txt = str(ev.get("text") or "").strip()
+2705 | …                     if "CORE-UNIT-EVIDENCE PASS" in txt and relative in txt and digest in txt:
+     |                                                                                       ^^^^^^^^^^
+2706 | …                         authenticated = dict(receipt_data)
+2707 | …                         authenticated["ticket"] = ev.get("ticket")
+     |
+
+E501 Line too long (138 > 100)
+    --> tools\saipen_engine\intake.py:2708:101
+     |
+2706 | …                                 authenticated = dict(receipt_data)
+2707 | …                                 authenticated["ticket"] = ev.get("ticket")
+2708 | …                                 proven_oracles = {Path(tf).name for tf in test_files} | {Path(tf).as_posix() for tf in test_files}
+     |                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2709 | …                                 break
+2710 | …                     else:
+     |
+
+E501 Line too long (120 > 100)
+    --> tools\saipen_engine\intake.py:2736:101
+     |
+2734 |                         }
+2735 |                         if authenticated is None or base_auth != base_carrier:
+2736 |                             test_target = Path(test_files[0]).name if test_files else Path(str(verification or "")).name
+     |                                                                                                     ^^^^^^^^^^^^^^^^^^^^
+2737 |                             target_work = work or "<T-###>"
+2738 |                             if test_target.startswith("test_") and test_target.endswith(".py"):
+     |
+
+E501 Line too long (116 > 100)
+    --> tools\saipen_engine\intake.py:2739:101
+     |
+2737 | …                     target_work = work or "<T-###>"
+2738 | …                     if test_target.startswith("test_") and test_target.endswith(".py"):
+2739 | …                         command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
+     |                                                                                               ^^^^^^^^^^^^^^^^
+2740 | …                     else:
+2741 | …                         command = f"saipen work reverify {target_work} --contract <contract-path>"
+     |
+
+E501 Line too long (106 > 100)
+    --> tools\saipen_engine\intake.py:2741:101
+     |
+2739 | …                         command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
+2740 | …                     else:
+2741 | …                         command = f"saipen work reverify {target_work} --contract <contract-path>"
+     |                                                                                               ^^^^^^
+2742 | …                     return {
+2743 | …                         "ok": False,
+     |
+
+E501 Line too long (129 > 100)
+    --> tools\saipen_engine\intake.py:2747:101
+     |
+2745 | …                     "detail": (
+2746 | …                         "PASS JSON is not a current committed "
+2747 | …                         f"regression execution receipt; to produce an authentic receipt for live Work run: {command}"
+     |                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2748 | …                     ),
+2749 | …                     "canonical_next_command": command,
+     |
+
+E501 Line too long (101 > 100)
+    --> tools\saipen_engine\intake.py:2769:101
+     |
+2767 | …                         "ok": False,
+2768 | …                         "code": "EVIDENCE_UNRELATED",
+2769 | …                         "detail": "execution did not bind this Source body and contract",
+     |                                                                                           ^
+2770 | …                     }
+     |
+
+E501 Line too long (104 > 100)
+    --> tools\saipen_engine\intake.py:2774:101
+     |
+2772 |                         if proven_oracles is not None and test_files:
+2773 |                             if not any(
+2774 |                                 Path(tf).name in proven_oracles or Path(tf).as_posix() in proven_oracles
+     |                                                                                                     ^^^^
+2775 |                                 for tf in test_files
+2776 |                             ):
+     |
+
+E501 Line too long (104 > 100)
+    --> tools\saipen_engine\intake.py:2783:101
+     |
+2781 |                                 }
+2782 |
+2783 |                         if work and authenticated.get("ticket") and authenticated.get("ticket") != work:
+     |                                                                                                     ^^^^
+2784 |                             return {
+2785 |                                 "ok": False,
+     |
+
+E501 Line too long (113 > 100)
+    --> tools\saipen_engine\intake.py:2787:101
+     |
+2785 | …                         "ok": False,
+2786 | …                         "code": "EVIDENCE_UNRELATED",
+2787 | …                         "detail": f"execution belongs to Work {authenticated.get('ticket')}, not {work}",
+     |                                                                                               ^^^^^^^^^^^^^
+2788 | …                     }
+     |
+
+SIM103 Return the condition directly
+    --> tools\saipen_engine\intake.py:3119:5
+     |
+3117 |       if len(extract_request_clauses(text)) >= 2:
+3118 |           return True
+3119 | /     if len(re.findall(r"(?:^|\n)\s*(?:={5,}|\#{1,3})\s*\n*\s*(?:\d+\.\s+)?[A-Z0-9_ -]+", text)) >= 2:
+3120 | |         return True
+3121 | |     return False
+     | |________________^
+     |
+help: Inline condition
+
+E501 Line too long (101 > 100)
+    --> tools\saipen_engine\intake.py:3119:101
+     |
+3117 |     if len(extract_request_clauses(text)) >= 2:
+3118 |         return True
+3119 |     if len(re.findall(r"(?:^|\n)\s*(?:={5,}|\#{1,3})\s*\n*\s*(?:\d+\.\s+)?[A-Z0-9_ -]+", text)) >= 2:
+     |                                                                                                     ^
+3120 |         return True
+3121 |     return False
+     |
+
+E501 Line too long (122 > 100)
+    --> tools\saipen_engine\intake.py:3264:101
+     |
+3262 |         if disp in {"IMPLEMENTED", "VERIFIED"}:
+3263 |             req_text = entry.get("text", "")
+3264 |             req_class = entry.get("required_evidence_class") or evidence_fitness.extract_required_evidence_class(req_text)
+     |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^
+3265 |             act_class = entry.get("actual_evidence_class") or evidence_fitness.UNIT
+3266 |             fitness = evidence_fitness.validate_evidence_fitness(
+     |
+
+E402 Module level import not at top of file
+  --> tools\test_t2040_finish_plan_guards.py:13:1
+   |
+11 | TOOLS = Path(__file__).resolve().parent
+12 | sys.path.insert(0, str(TOOLS))
+13 | from test_hermetic_env import isolate_host_session
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+14 | from test_request_clause_closure import drive
+15 | from test_t1363_zero_manual_entry import healthy, receipts_of
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> tools\test_t2040_finish_plan_guards.py:14:1
+   |
+12 | sys.path.insert(0, str(TOOLS))
+13 | from test_hermetic_env import isolate_host_session
+14 | from test_request_clause_closure import drive
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+15 | from test_t1363_zero_manual_entry import healthy, receipts_of
+16 | from test_t2040_maintenance_authority import snapshot, source
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> tools\test_t2040_finish_plan_guards.py:15:1
+   |
+13 | from test_hermetic_env import isolate_host_session
+14 | from test_request_clause_closure import drive
+15 | from test_t1363_zero_manual_entry import healthy, receipts_of
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+16 | from test_t2040_maintenance_authority import snapshot, source
+17 | from saipen_engine import closure_readiness, intake, operations
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> tools\test_t2040_finish_plan_guards.py:16:1
+   |
+14 | from test_request_clause_closure import drive
+15 | from test_t1363_zero_manual_entry import healthy, receipts_of
+16 | from test_t2040_maintenance_authority import snapshot, source
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+17 | from saipen_engine import closure_readiness, intake, operations
+18 | from saipen_engine.distribution import distribution_record_rel, quarantine_body_rel
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> tools\test_t2040_finish_plan_guards.py:17:1
+   |
+15 | from test_t1363_zero_manual_entry import healthy, receipts_of
+16 | from test_t2040_maintenance_authority import snapshot, source
+17 | from saipen_engine import closure_readiness, intake, operations
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+18 | from saipen_engine.distribution import distribution_record_rel, quarantine_body_rel
+19 | from saipen_engine.journal import hash_file_dependency
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> tools\test_t2040_finish_plan_guards.py:18:1
+   |
+16 | from test_t2040_maintenance_authority import snapshot, source
+17 | from saipen_engine import closure_readiness, intake, operations
+18 | from saipen_engine.distribution import distribution_record_rel, quarantine_body_rel
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+19 | from saipen_engine.journal import hash_file_dependency
+20 | from saipen_engine.plan import OperationPlan, apply_plan
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> tools\test_t2040_finish_plan_guards.py:19:1
+   |
+17 | from saipen_engine import closure_readiness, intake, operations
+18 | from saipen_engine.distribution import distribution_record_rel, quarantine_body_rel
+19 | from saipen_engine.journal import hash_file_dependency
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+20 | from saipen_engine.plan import OperationPlan, apply_plan
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> tools\test_t2040_finish_plan_guards.py:20:1
+   |
+18 | from saipen_engine.distribution import distribution_record_rel, quarantine_body_rel
+19 | from saipen_engine.journal import hash_file_dependency
+20 | from saipen_engine.plan import OperationPlan, apply_plan
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+help: Move module level imports to top of file
+
+Found 41 errors.
+No fixes available (1 hidden fix can be enabled with the `--unsafe-fixes` option).

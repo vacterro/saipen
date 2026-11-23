@@ -1,0 +1,17 @@
+{
+  "board_hash": "97abf259a2f72cb2",
+  "content_hash": "d7ade22e96059fc8",
+  "exit_code": 0,
+  "gate": "core",
+  "kind": "conformance_receipt",
+  "log_hash": "d7fcf24c266511a2",
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen\\tests\\scenarios\\stale-state-reconciliation",
+  "receipt_id": "receipt-8ef75218ad85",
+  "schema_version": 2,
+  "source_head": "no-git",
+  "source_tree_fingerprint": "no-git-tree-v1:d7a26dfe1897f3373124f30938b950f3aaa15b14275e16b8c555181dac82dade",
+  "state_hash": "e7e2f3a799c82318",
+  "timestamp_utc": "2026-08-29T23:13:05.382476Z",
+  "validator_protocol_version": "1",
+  "verdict": "PASS"
+}

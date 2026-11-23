@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-004:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "One-click reliable browser audit orchestration: Project Room -> START AUDIT -> fresh project ZIP -> localhost Bridge -> responsive Widget worker -> attach ZIP -> exactly-once Audit Core START -> automatic campaign -> every wave durably saved -> canonical final audit synthesized and verified."
+    }
+  },
+  "derived_at": "2026-08-31T05:41:40Z",
+  "derived_from": "SRC-004",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "4ecc9c6bbaeda2c9945f2cd1880f4fc9995b2cba09dbf7c54cc402ead7bb2bb8"
+}

@@ -1,0 +1,36 @@
+======================================================================
+FAIL: test_forensic_backend_failures_never_become_quiescent_success (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_forensic_backend_failures_never_become_quiescent_success) (status='ANALYSIS_BLOCKED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 307, in test_forensic_backend_failures_never_become_quiescent_success
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_forensic_backend_failures_never_become_quiescent_success (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_forensic_backend_failures_never_become_quiescent_success) (status='RETRYABLE_FAILURE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 307, in test_forensic_backend_failures_never_become_quiescent_success
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_forensic_backend_failures_never_become_quiescent_success (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_forensic_backend_failures_never_become_quiescent_success) (status='AUTHORITY_REQUIRED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 307, in test_forensic_backend_failures_never_become_quiescent_success
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_forensic_backend_failures_never_become_quiescent_success (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_forensic_backend_failures_never_become_quiescent_success) (status='LOG_CORRUPT')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_campaign_lifecycle.py", line 307, in test_forensic_backend_failures_never_become_quiescent_success
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 1 test in 0.125s
+
+FAILED (failures=4)

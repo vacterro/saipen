@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "created_at": "2026-11-09T21:40:00Z",
+  "source_manifest": ".saipen/evidence/T-2040/lifecycle-receipt-truth-20261109T200642579628Z/source-manifest.json",
+  "postimages": ".saipen/evidence/T-2040/lifecycle-receipt-truth-20261109T200642579628Z/postimages/",
+  "final_pre_post": {
+    "tools/regression_second_wave_receipt_fixes.py": {
+      "post_sha256": "a40951cfaacb96da4a72689d61553158a910dea0d2f6f8e4581e01c4f9da1665"
+    },
+    "tools/saipen_engine/journal.py": {
+      "post_sha256": "82f5bdc7200dd2091e31065f5bd96db8c6268c4c49e4c65d8b86538b341ccea2"
+    },
+    "tools/saipen_engine/reconcile.py": {
+      "post_sha256": "5c718399063d732b134c2a1b59911b15486ac025ad365fb44fe813d58dd0d1b8"
+    },
+    "tools/test_lost_active_ticket_recovery.py": {
+      "post_sha256": "f013b36484d10514eacbbd8f09e6d02790ecf761418b318c42cb8dca3acd8911"
+    },
+    "tools/test_recovery_reachability.py": {
+      "post_sha256": "f30f1e9f99540e5d1b7fd4e9a16d8482dcf317f9d76b1689df408dd39c517c25"
+    },
+    "tools/test_t1759_single_lifecycle_observer.py": {
+      "post_sha256": "c9a00fe65dd1f92bb90e4d110903731b4a737ad3b766b902a381b1c324335671"
+    },
+    "tools/test_t1851_debt_authority.py": {
+      "post_sha256": "32020c7c34b260233cc1bbd94efca22607246673d8dfe86879b697c6f39f5a78"
+    },
+    "tools/test_t1893_probe_wrappers.py": {
+      "post_sha256": "71dd489738f128c8e72aa6d4510fa1d822e3ed0b7a4fd6c132f5f6822558569b"
+    }
+  },
+  "postimages_match_working_tree": true
+}

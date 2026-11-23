@@ -1,0 +1,34 @@
+
+saipen injector report (source: V:\_SAIPEN_RELEASE_\public-20261004\saipen)
+------------------------------------------------------------
+OpenCode skill               copied (re-run after updates)
+OpenCode provenance          verified
+OpenCode instructions        file created
+OpenCode guard hook          guard hook installed sha256=fae3eed77a4533f836375ee936870a10e84c1f4a5f77c1998204d3e864481cb2; already-running OpenCode processes require restart
+OpenCode legacy hook         clean
+Claude Code skill            copied (re-run after updates)
+Claude Code provenance       verified
+Claude Code instructions     file created
+Claude Code guard hook       guard hook and configuration installed; health unproven
+Claude Code legacy hook      clean
+Codex CLI skill              copied (re-run after updates)
+Codex CLI provenance         verified
+Codex CLI instructions       file created
+Codex CLI guard hook         guard hook and configuration installed; health unproven
+Codex CLI legacy hook        clean
+ZAICODE                      not installed - skip
+ZCode (production ~/.zcode home) not installed - skip
+Gemini CLI / Antigravity skill copied (re-run after updates)
+Gemini CLI / Antigravity provenance verified
+Gemini CLI / Antigravity instructions file created
+Gemini CLI / Antigravity guard hook guard hook and configuration installed; health unproven
+Gemini CLI / Antigravity legacy hook clean
+CodeBuddy Code               not installed - skip
+~/.agents skills             copied (re-run after updates)
+~/.agents provenance         verified
+FreeBuff ~/.knowledge.md     file created
+FreeBuff ~/.AGENTS.md        file created
+Aider conf                   created
+Kiro                         not installed - skip
+------------------------------------------------------------
+Done. Test: open any project in any agent, say: saipen set

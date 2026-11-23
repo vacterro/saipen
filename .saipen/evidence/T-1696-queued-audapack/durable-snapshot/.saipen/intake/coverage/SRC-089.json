@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-089:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-241 closed with verification evidence in LOG: review -> PASS [target: T-241] conf: high -- python -m pytest tests/test_fidelity.py -q -> 107 passed",
+      "text": "PACK FAILED (_ZAICODE): [FAILED_INVENTORY] [SOURCE_INVENTORY_INCONSISTENT] source traversal incomplete; the frozen inventory cannot be trusted -- fix packing",
+      "verification": "the Work this request created reached its own verification gate; see the T-241 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-241"
+    }
+  },
+  "schema_version": 1
+}

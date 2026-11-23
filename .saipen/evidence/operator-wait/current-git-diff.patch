@@ -1,0 +1,1115 @@
+diff --git a/saipen/COMMANDS.md b/saipen/COMMANDS.md
+index b3a32b4b..d16dd542 100644
+--- a/saipen/COMMANDS.md
++++ b/saipen/COMMANDS.md
+@@ -10,13 +10,13 @@ global authority and deterministic priority rules.
+ 
+ | Input | Routes to | Rule ref | Notes |
+ |-------|-----------|-----------------|-------|
+-| `gg` | `saipen goal` | CMD-ROUTING-01 | New goal; payload is the objective |
++| `gg` | `saipen goal` | CMD-ROUTING-01 | NEW GOAL ONLY; `gg <objective>` names it, and it is never a continuation alias -- `cc` resumes |
+ | `hh` | `saipen hunt` | CMD-ROUTING-01 | Autonomous defect/improvement scan |
+ | `ff` | `saipen focus` | CMD-ROUTING-01 | Read-only closer inspection |
+ | `xx` | `saipen cut` | CMD-ROUTING-01 | `xx confirm <CUT-ID>` authorizes the planned mutation |
+ | `vv` | `saipen build` | CMD-ROUTING-01 | Bounded foreground Work |
+ | `zz` | `saipen undo` | CMD-ROUTING-01 | Restore the last safe milestone |
+-| `cc` | `saipen continue` | CMD-CONTINUE-01 | Resume the active intent through deterministic routing |
++| `cc` | `saipen continue` | CMD-CONTINUE-01 | It enters convergence from `normal` and resumes `execution_intent: goal`, and it never asks for an objective; `cc <args>` is not a goal |
+ | `ccc` | `saipen continue` | CMD-CONTINUE-01 | Converge target `ship`, then refresh stages J-M |
+ | `st` | `saipen stop` | CMD-ROUTING-01 | Checkpoint and return control; `ss` retired |
+ | `sss` | `saipen status` | CMD-ROUTING-01 | Read-only status |
+@@ -78,14 +78,16 @@ global authority and deterministic priority rules.
+ | `saipen ticket repair-metadata <T-###> --field source_receipts (--to <SRC-###> \| --legacy-unbound [--authority <SRC-###\|lineage-32hex>])` | RECOVERY: migrate malformed legacy metadata on historical DONE Work; `--to` needs an exact linked receipt, `--legacy-unbound` removes an unprovable token and preserves its bytes in an immutable `MR-NNNNNN` receipt; non-DONE rows and conflicting second migrations refuse with zero writes (T-1435) | CMD-ROUTING-01 |
+ | `saipen ticket reasoning <T-###> --recurrence <text> --weak-model <text>` | EXECUTION: canonical writer for the strict-sweep reasoning gates; refuses unless a strict CONFIRMED PROTOCOL_VIOLATION disposition names the ticket | CMD-ROUTING-01 |
+ | `saipen cohort [status\|ship] <C-###>` | batch publication authority | CMD-ROUTING-01 |
++| `saipen ticket bind-cohort <T-###> --cohort <C-###> --paths <p1,p2>` | RECOVERY: bind canonically finished, verified, unpublished own_patch DONE to a pending cohort; preserve original row/finish, current active Work and history; exact retry is byte-noop, published/legacy/foreign/conflicting bindings refuse (OPS.md) | CMD-ROUTING-01 |
+ | `saipen source` | intake | CMD-ROUTING-01 |
+-| `saipen source retire <SRC-###> --reason <CLASS> [--successor SRC-###] [--note TEXT]` | EXECUTION: receipt-only source retirement; cold-copies the original bytes, refuses while any unresolved actionable requirement would be discarded or live Work names the receipt (OPS.md) | CMD-ROUTING-01 |
+-| `saipen source link <SRC-###> --work T-###` | EXECUTION: canonical multi-work membership (T-1437); adds ONE Work to a receipt's durable membership, never moves the historical primary `linked_work`, idempotent, refuses an unknown receipt / Work / integrity failure with zero writes | CMD-ROUTING-01 |
++| `saipen source retire <SRC-###> --reason <CLASS> [--successor SRC-###] [--note TEXT]` | EXECUTION: receipt-only retirement; preserve cold original bytes; unresolved clauses or live Work refuse (OPS.md) | CMD-ROUTING-01 |
++| `saipen source link <SRC-###> --work T-###` | EXECUTION: add one durable Work membership, preserve primary; idempotent; unknown receipt/Work or failed integrity refuses with zero writes (T-1437) | CMD-ROUTING-01 |
+ | `saipen source append [--to <SRC-###>] [--class APPEND\|SUPERSEDE\|CLARIFICATION\|CONFLICT] [--delta implementation\|evidence\|review\|packaging\|context] [--supersedes <ID,...>] [--label TEXT] (--file <PATH> \| --hex <HEX> \| -- <TEXT>)` | INGRESS: make ONE operational handoff/brick durable against the controlling mission source (T-1461); verbatim immutable receipt with `amends:`, exact-digest dedupe, ordered per-source ledger; never edits the source it amends (SOURCES.md) | CMD-ROUTING-01 |
+ | `saipen source apply-append <SRC-###>` | EXECUTION: project the oldest RECEIVED append into requirements, Work and the minimum truthful rewind; idempotent and crash-resumable; what it supersedes becomes SUPERSEDED, never deleted (SOURCES.md) | CMD-ROUTING-01 |
+ | `saipen source appends` | DIAGNOSTIC: read-only per-mission append view status shares -- latest append, active and superseded clause counts, unprojected appends, affected Work | CMD-ROUTING-01 |
+ | `saipen source recover` | DIAGNOSTIC: read-only orphan/crash diagnostic; never deletes or invents source intent | CMD-ROUTING-01 |
+ | `saipen source reconcile <SRC-###> [--confirm]` | RECOVERY: read-only contradiction report; `--confirm` converges tombstone-authoritatively only on strong proof, else zero writes | CMD-ROUTING-01 |
++| `saipen source normalize [--dry-run]` | RECOVERY: journal BOARD ranges as explicit receipt IDs; malformed ranges refuse; preview writes zero | CMD-ROUTING-01 |
+ | `saipen source quarantine <SRC-###> [--reason CODE]` | EXECUTION: preserve the exact active or archived body locally and exclude it from release/export; `--dry-run` previews without writing; does not close Work or waive coverage (SOURCES.md) | CMD-ROUTING-01 |
+ | `saipen authority capture --file <UTF8_FILE>\|--hex <UTF8_HEX>` | persist ONE operator-authority Source from exact bytes; never projects Work | CMD-ROUTING-01 |
+ | `saipen audit [status\|inspect\|ingest]` | intake transport | CMD-CONTINUE-01 |
+@@ -112,6 +114,12 @@ A host session id is never an actor.
+ 
+ ## Compound parsing
+ 
++Legacy recovery encodes 1..4096 UTF-8 bytes as one hex token; STATE grammar applies.
++Global flags precede `recover`:
++`saipen --json recover resolve-next-action --hex HEX`.
++Explicit recovery records a user brake and preserves original STATE bytes.
++WAIT grants no work authority.
++
+ <!-- RULE-OWNER: CMD-COMPOUND-01 -->
+ 
+ - Segments separated by ` + ` (space-plus-space) or newlines.
+diff --git a/saipen/REGISTRY.json b/saipen/REGISTRY.json
+index 95a9e62f..53f70c98 100644
+--- a/saipen/REGISTRY.json
++++ b/saipen/REGISTRY.json
+@@ -1052,6 +1052,10 @@
+   "UNSEATED_MUTATION",
+   "VALIDATION_UNAVAILABLE",
+   "WAIT_BLOCKED",
++  "WAIT_OPERATOR",
++  "WAIT_FOREIGN_OWNER",
++  "RUNTIME_UNAVAILABLE",
++  "SAIPEN_HOST_RUNTIME_UNAVAILABLE",
+   "METADATA_REPAIR_REQUIRES_DONE",
+   "METADATA_REPAIR_FIELD_UNSUPPORTED",
+   "METADATA_REPAIR_TARGET_UNPROVEN",
+diff --git a/tools/saipen.py b/tools/saipen.py
+index cb256dfe..010d2f57 100644
+--- a/tools/saipen.py
++++ b/tools/saipen.py
+@@ -38,6 +38,7 @@ from saipen_engine.journal import auto_recover_pending
+ from saipen_engine.operations import (
+     _ticket_add_route,
+     apply_claim,
++    bind_closed_cohort,
+     checkpoint,
+     compact_board,
+     finish_ticket,
+@@ -2911,6 +2912,26 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
+             # disqualifies the whole line from the canonical grammar.
+             words: list[str] = []
+             index += 1
++            if index < len(args) and args[index] == "--hex":
++                # A bounded UTF-8 hex token keeps spaces and punctuation out
++                # of shell syntax; the decoded value still passes STATE law.
++                if index + 1 >= len(args):
++                    return _refuse("resolve-next-action --hex requires one UTF-8 hex token")
++                encoded = args[index + 1]
++                if not re.fullmatch(r"(?:[0-9a-fA-F]{2}){1,4096}", encoded):
++                    return _refuse("resolve-next-action --hex requires 1..4096 UTF-8 bytes")
++                try:
++                    proposed = bytes.fromhex(encoded).decode("utf-8")
++                except UnicodeDecodeError:
++                    return _refuse("resolve-next-action --hex is not valid UTF-8")
++                from saipen_engine.state import next_action_error
++
++                problem = next_action_error(proposed)
++                if problem is not None:
++                    return _refuse(f"invalid next_action: {problem}")
++                resolve_next_action = proposed
++                index += 2
++                continue
+             # A real flag ends the decision; a BARE `--` does not. The
+             # canonical WAIT grammar is `WAIT: <category> -- <text>`, so
+             # treating the separator as a flag boundary made every legal WAIT
+@@ -4167,6 +4188,22 @@ def _continue(
+         )
+         return 1
+ 
++    from saipen_engine.state import binding_brake
++    from saipen_engine.board import parse_board
++
++    continuation_board = parse_board(codec.read_doc(project_root / ".saipen" / "BOARD.md"))
++    empty_todo = not any(
++        ticket.get("section") == "## TODO"
++        for ticket in continuation_board.get("tickets", {}).values()
++    )
++    if binding_brake(state, empty_todo=empty_todo) is not None:
++        # A real brake is an observation boundary. Ordinary continue must
++        # not pivot intent, rewrite its WAIT or spend an unrelated valve.
++        return _next_action(
++            project_root, as_json, reconciliation=reconciliation,
++            fallthrough_to_improve=False, dry_run=dry_run,
++        )
++
+     execution_intent = state.get("execution_intent") or "normal"
+     actor = _agent_for(project_root)
+     if execution_intent == "normal":
+@@ -5147,7 +5184,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
+                 "ok": False,
+                 "code": "VALIDATION_FAILED",
+                 "detail": "source needs a subcommand: capture|status|show|req|"
+-                "disp|quarantine|link|close|archive|purge|retire|recover|reconcile|"
++                "disp|quarantine|link|close|archive|purge|retire|recover|reconcile|normalize|"
+                 "append|apply-append|appends",
+             },
+             as_json,
+@@ -5445,6 +5482,20 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
+         _emit(result, as_json)
+         return 0 if result.get("ok") else 1
+ 
++    if action == "normalize":
++        if rest:
++            _emit(
++                {"ok": False, "code": "VALIDATION_FAILED",
++                 "detail": "source normalize accepts no arguments"},
++                as_json,
++            )
++            return 2
++        if not dry_run and _negotiate_capability(project_root) == "read-only":
++            return _capability_refusal(as_json)
++        result = intake.normalize_receipt_ranges(project_root, dry_run=dry_run)
++        _emit(result, as_json)
++        return 0 if result.get("ok") else 1
++
+     if action == "recover":
+         if rest:
+             _emit(
+@@ -10258,6 +10309,7 @@ def main(argv: list[str] | None = None) -> int:
+             "done <T-###> [--closure-mode own_patch|inherited_verified|cohort] "
+             "[--closure-cohort C-###] [--implementation-source "
+             "<release:<id>|T-###|SRC-###>] [--paths <p1,p2>]|"
++            "ticket bind-cohort <T-###> --cohort <C-###> --paths <p1,p2>|"
+             "ticket supersede <T-OLD> --by <T-NEW> --evidence <E-###> "
+             "--authority <SRC-###>|ticket resolve-external <T-###> --authority "
+             "<lineage-32hex> --implementation <T-###@commit> --reason <CLASS> "
+@@ -10272,7 +10324,7 @@ def main(argv: list[str] | None = None) -> int:
+             "[--verification <cmd>:PASS]... [--run <command>]... "
+             "[--timeout SECONDS]|source retire <SRC-###> --reason <CLASS> "
+             "[--successor SRC-###]|source quarantine <SRC-###> [--reason CODE]|"
+-            "source recover|source reconcile <SRC-###> [--confirm]|"
++            "source recover|source reconcile <SRC-###> [--confirm]|source normalize [--dry-run]|"
+             "cohort status <C-###>|cohort ship "
+             "<C-###>|improve|improve hold <T-###> [reason]|improve unhold|improve "
+             "status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> "
+@@ -10967,7 +11019,7 @@ def main(argv: list[str] | None = None) -> int:
+                     "code": "VALIDATION_FAILED",
+                     "detail": "ticket needs an action: "
+                     "add|compact|verify|reasoning|done|supersede|retire|resolve-external|"
+-                    "repair-metadata|block|block-for|unblock",
++                    "repair-metadata|bind-cohort|block|block-for|unblock",
+                 },
+                 as_json,
+             )
+@@ -11518,6 +11570,25 @@ def main(argv: list[str] | None = None) -> int:
+             )
+             _emit(result.to_dict(), as_json)
+             return 0 if result.ok else 1
++        if action == "bind-cohort":
++            if not rest or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
++                _emit({"ok": False, "code": "VALIDATION_FAILED",
++                       "detail": "ticket bind-cohort needs <T-###> --cohort C-### --paths p1,p2"},
++                      as_json)
++                return 2
++            _opts, _pos, _opt_err = _parse_value_options(
++                rest[1:], {"--cohort": "cohort", "--paths": "paths"})
++            if _opt_err or _pos:
++                _emit({"ok": False, "code": "VALIDATION_FAILED",
++                       "detail": _opt_err or "surplus bind-cohort arguments"}, as_json)
++                return 2
++            if not dry_run and _negotiate_capability(project_root) == "read-only":
++                return _capability_refusal(as_json)
++            result = bind_closed_cohort(project_root, rest[0].upper(), _agent_for(project_root),
++                cohort_id=_opts.get("cohort", ""),
++                paths=str(_opts.get("paths", "")).replace(",", " ").split(), dry_run=dry_run)
++            _emit(result.to_dict(), as_json)
++            return 0 if result.ok else 1
+         if action == "done":
+             if not rest:
+                 _emit(
+diff --git a/tools/saipen_engine/fast_check.py b/tools/saipen_engine/fast_check.py
+index 8c8a0fe6..018384f7 100644
+--- a/tools/saipen_engine/fast_check.py
++++ b/tools/saipen_engine/fast_check.py
+@@ -22,7 +22,7 @@ from .board import (
+     claim_status,
+     board_graph_errors,
+ )
+-from .state import _current_schema_version, is_absolute_home
++from .state import _current_schema_version, is_absolute_home, next_action_error
+ 
+ 
+ def _log_errors(log_text: str) -> list[str]:
+@@ -347,17 +347,9 @@ def validate_checkpoint_surface(
+         errors.append(f"STATE proposed phase {phase!r} outside the enum")
+     na = state.get("next_action")
+     if isinstance(na, str):
+-        if na.startswith("PHASE "):
+-            error = phases.phase_next_action_error(na)
+-            if error:
+-                errors.append(f"STATE proposed next_action invalid: {error}")
+-        else:
+-            prefixes = ("WAIT:", "saipen ", "RUN:", "RESUME:")
+-            if not na.startswith(prefixes):
+-                errors.append(
+-                    f"STATE proposed next_action {na!r} does not "
+-                    "start with WAIT:/saipen /PHASE /RUN:/RESUME:"
+-                )
++        error = next_action_error(na)
++        if error:
++            errors.append(f"STATE proposed next_action invalid: {error}")
+         subject = state.get("task")
+         m = re.match(r"^PHASE\s+([A-Za-z_-]+)(?:\s+(T-\d+))?", na.strip())
+         if (
+@@ -640,17 +632,9 @@ def validate_texts(
+         errors.append(f"STATE proposed phase {phase!r} outside the enum")
+     na = state.get("next_action")
+     if isinstance(na, str):
+-        if na.startswith("PHASE "):
+-            error = phases.phase_next_action_error(na)
+-            if error:
+-                errors.append(f"STATE proposed next_action invalid: {error}")
+-        else:
+-            prefixes = ("WAIT:", "saipen ", "RUN:", "RESUME:")
+-            if not na.startswith(prefixes):
+-                errors.append(
+-                    f"STATE proposed next_action {na!r} does not "
+-                    "start with WAIT:/saipen /PHASE /RUN:/RESUME:"
+-                )
++        error = next_action_error(na)
++        if error:
++            errors.append(f"STATE proposed next_action invalid: {error}")
+         # A PHASE next_action naming a ticket must agree with the active task
+         # ONLY in a ticket-bearing phase, where task is the active DOING
+         # ticket. In a non-ticket-bearing phase (DONE after closure) task is
+diff --git a/tools/saipen_engine/operations.py b/tools/saipen_engine/operations.py
+index 29b53dcf..c1011214 100644
+--- a/tools/saipen_engine/operations.py
++++ b/tools/saipen_engine/operations.py
+@@ -208,6 +208,10 @@ def _state_guard(fn):
+         except (StateMalformedError, CheckpointError) as exc:
+             return _refuse(getattr(exc, "code", "VALIDATION_FAILED"), str(exc))
+         except ValueError as exc:
++            from .state import NextActionError
++
++            if isinstance(exc, NextActionError):
++                return _refuse(exc.code, str(exc), field="next_action")
+             detail = str(exc)
+             for code in ("LOG_EVENT_OVERSIZE", "BOARD_RECORD_OVERSIZE"):
+                 if detail.startswith(code + ":"):
+@@ -4022,6 +4026,140 @@ def finish_ticket(
+ _COHORT_ID_RE = re.compile(r"C-\d+")
+ 
+ 
++def _plan_bind_closed_cohort(root, ticket_id, agent, cohort_id, paths, now, utc):
++    """Bind proved unpublished own_patch DONE without replaying its lifecycle."""
++    from . import closure
++    from .journal import hash_file_dependency, hash_tree_dependency, semantic_receipt_snapshot
++    from .log import verification_evidence
++    from .safeid import prove_inside
++
++    if not re.fullmatch(r"T-\d+", ticket_id or ""):
++        return _refuse("INVALID_ID", f"ticket {ticket_id!r}")
++    problem = closure_request_error("cohort", cohort_id, None, paths)
++    if problem:
++        return _refuse("VALIDATION_FAILED", problem, ticket=ticket_id)
++    checked_paths = []
++    for raw in paths:
++        rel = str(raw).replace("\\", "/")
++        if any(ord(ch) < 32 or ord(ch) == 127 for ch in rel):
++            return _refuse("VALIDATION_FAILED", "cohort path contains control characters")
++        rel = rel.strip()
++        parts = rel.split("/")
++        if (":" in rel or rel.startswith("/") or any(part in ("", ".", "..") for part in parts)
++                or parts[0].lower() in (".git", ".saipen")):
++            return _refuse("VALIDATION_FAILED", f"cohort path {rel!r} is not a source path")
++        try:
++            resolved = prove_inside(root / rel, root, kind="cohort source")
++            if resolved.relative_to(root.resolve()).parts[0].lower() in (".git", ".saipen"):
++                raise ValueError("cohort source resolves into protocol or Git metadata")
++        except (OSError, ValueError) as exc:
++            return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
++        checked_paths.append(rel)
++    paths = sorted(set(checked_paths))
++    read_once = _read(root)
++    docs, _state, board, _tail = read_once
++    ticket = board["tickets"].get(ticket_id)
++    if ticket is None:
++        return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
++    fields = ticket.get("fields") or {}
++    if ticket["section"] != "## DONE" or ticket["checkbox"] != "x":
++        return _refuse("ILLEGAL_TICKET_LIFECYCLE", "cohort binding requires DONE [x] Work")
++    if fields.get("owner") != agent or not fields.get("claim_time"):
++        return _refuse("VALIDATION_FAILED", "cohort binding requires the original canonical owner")
++    if fields.get("closure_mode") not in ("own_patch", "cohort"):
++        return _refuse("VALIDATION_FAILED", "only proved own_patch DONE may acquire a cohort")
++    authority = semantic_receipt_snapshot(root)
++    if authority.errors:
++        return _refuse("CORRUPT_JOURNAL", "; ".join(authority.errors[:3]))
++    finishes = {record["op_id"] for record in authority.records
++                if record.get("operation") == "finish" and record.get("status") == "COMMITTED"}
++    proof = next((event for event in reversed(docs["_history"].events)
++                  if event.get("ticket") == ticket_id and event.get("op_id") in finishes), None)
++    proven, reason = verification_evidence(ticket_id, docs["_history"].events)
++    if proof is None or not proven:
++        return _refuse("INCOMPLETE_TICKET", f"canonical finish and verification required: {reason}")
++    from .intake import work_closure_gate
++
++    evidence_preconditions = {
++        ".saipen/recovery": authority.digest,
++        ".saipen/intake": hash_tree_dependency(root / ".saipen/intake"),
++        ".saipen/kitchen/release_receipt.json": hash_file_dependency(
++            root / ".saipen/kitchen/release_receipt.json"),
++        closure.COHORT_REGISTRY_REL: hash_file_dependency(closure.registry_path(root)),
++    }
++    source_gate = work_closure_gate(root, ticket_id)
++    if not source_gate.get("ok"):
++        return _refuse(source_gate.get("code", "SOURCE_UNRESOLVED"), str(source_gate))
++    if closure.resolve_implementation_source(root, ticket_id).ok:
++        return _refuse("VALIDATION_FAILED", "published Work cannot acquire a different closure")
++    try:
++        registry = closure.read_registry(root)
++        hashes = closure.hash_paths(root, paths)
++    except FileNotFoundError as exc:
++        return _refuse("SOURCE_SCOPE_MISSING", f"cohort source is missing: {exc}")
++    except (OSError, ValueError) as exc:
++        return _refuse("VALIDATION_FAILED", str(exc))
++    existing = (registry.get("cohorts") or {}).get(cohort_id) or {}
++    if existing.get("publication_status") == "shipped":
++        return _refuse("VALIDATION_FAILED", "published cohort cannot accept a new binding")
++    if fields.get("closure_mode") == "cohort":
++        member = (existing.get("members") or {}).get(ticket_id) or {}
++        if (fields.get("closure_cohort") == cohort_id and member.get("paths") == hashes
++                and fields.get("closure_paths") == ", ".join(paths)):
++            return Result(True, "ALREADY_APPLIED", data={"ticket": ticket_id, "cohort": cohort_id,
++                "idempotent": True}, message="exact unpublished cohort binding already exists")
++        return _refuse("VALIDATION_FAILED",
++                       "an existing cohort binding cannot be moved or rewritten")
++    if any(ticket_id in (cohort.get("members") or {})
++           for cohort in registry.get("cohorts", {}).values()):
++        return _refuse("VALIDATION_FAILED",
++                       "existing registry membership disagrees with own_patch row")
++    updated = closure.upsert_member(registry, cohort_id, ticket_id, paths=hashes,
++        verification=str(fields.get("verify", "")), closed_at=utc, agent=agent)
++    try:
++        closure.cohort_scope(updated["cohorts"][cohort_id])
++    except ValueError as exc:
++        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
++    op_id = "bind-cohort-" + uuid4_hex()
++    evidence_path = f".saipen/recovery/closure-binding/{op_id}/before.json"
++    preserved = (json.dumps({"ticket": ticket_id, "original_row": ticket["raw"],
++        "original_finish": proof["op_id"], "original_finish_event": proof["event"],
++        "cohort": cohort_id, "paths": hashes}, sort_keys=True, indent=2) + "\n").encode("utf-8")
++    registry_doc = codec.read_document(closure.registry_path(root))
++    registry_bytes = registry_doc.encode(closure.render_registry(updated))
++    evidence_preconditions.update(hashes)
++    extras = [TargetPlan(evidence_path, "generic", preserved, "", hash_bytes(preserved)),
++        _target(docs["board"], ".saipen/BOARD.md", "board", _set_closure_fields(
++            docs["board"].text_norm, ticket_id, mode="cohort", cohort=cohort_id,
++            implementation_source="", paths=paths)),
++        TargetPlan(closure.COHORT_REGISTRY_REL, "report", registry_bytes,
++                   _live_before(root, closure.COHORT_REGISTRY_REL, registry_doc),
++                   hash_bytes(registry_bytes))]
++
++    def mutate(text, event):
++        return patch_state(text, {"last_event": event, "updated": utc, "agent": agent})
++
++    return _state_only_plan(root, "ticket_bind_cohort", agent, mutate,
++        f"unpublished DONE {ticket_id} bound to cohort {cohort_id}; "
++        f"original finish {proof['op_id']} preserved",
++        {"ok": True, "code": "COHORT_BOUND", "ticket": ticket_id, "cohort": cohort_id,
++         "original_finish": proof["op_id"], "evidence_path": evidence_path}, now, utc,
++        {"last_event", "updated", "agent"}, ticket_id=ticket_id, extra_targets=extras,
++        evidence_preconditions=evidence_preconditions, op_id=op_id, read_once=read_once)
++
++
++@_state_guard
++def bind_closed_cohort(project_root, ticket_id, agent, *, cohort_id, paths, dry_run=False):
++    """Explicit recovery of default closure; publication and lifecycle stay separate."""
++    root = Path(project_root)
++    plan = _plan_bind_closed_cohort(root, ticket_id, agent, cohort_id, paths, _now(), _utc_iso())
++    if isinstance(plan, Result):
++        return plan
++    if dry_run:
++        return _render_plan(plan)
++    return apply_plan(root, plan)
++
++
+ def _set_closure_fields(
+     board_text: str,
+     ticket_id: str,
+diff --git a/tools/saipen_engine/phases.py b/tools/saipen_engine/phases.py
+index cc79f8b2..e187a561 100644
+--- a/tools/saipen_engine/phases.py
++++ b/tools/saipen_engine/phases.py
+@@ -65,6 +65,8 @@ def phase_next_action_error(value: str) -> str | None:
+             f"the uppercase § 1.6 enum value, and the phase doc is loaded "
+             f"from its lowercased name, not from what the state says"
+         )
++    if ph not in ALL_PHASES:
++        return f"{value!r} names {ph!r}, which is outside the phase enum"
+     _five = "/".join(sorted(TICKET_BEARING_PHASES))
+     if ph in TICKET_BEARING_PHASES and not ref:
+         return (
+diff --git a/tools/saipen_engine/reconcile.py b/tools/saipen_engine/reconcile.py
+index 770f6ff6..93ae0128 100644
+--- a/tools/saipen_engine/reconcile.py
++++ b/tools/saipen_engine/reconcile.py
+@@ -431,21 +431,22 @@ _GOAL_WAVES_CAP = 3
+ _GOAL_TICKETS_CAP = 20
+ 
+ 
+-_LEGAL_NEXT_PREFIXES = ("WAIT:", "saipen ", "RUN:", "RESUME:")
++LEGACY_NEXT_ACTION_WAIT = (
++    "WAIT: user brake -- choose a canonical replacement for the legacy next_action"
++)
++LEGACY_NEXT_ACTION_COMMAND = (
++    "saipen recover resolve-next-action --hex " + LEGACY_NEXT_ACTION_WAIT.encode("utf-8").hex()
++)
+ 
+ 
+ def _legacy_next_action(na: str) -> bool:
+     """True when `next_action` violates the executable grammar (CORE / T-1324).
+ 
+-    Mirrors the exact predicate `fast_check` refuses on: a `PHASE` action must
+-    pass `phases.phase_next_action_error`, anything else must open with one of
+-    the four legal prefixes. Everything else is legacy/freeform prose.
++    Uses the same predicate as strict readers, owned writers and fast_check.
+     """
+-    from . import phases
++    from .state import next_action_error
+ 
+-    if na.startswith("PHASE "):
+-        return phases.phase_next_action_error(na) is not None
+-    return not na.startswith(_LEGAL_NEXT_PREFIXES)
++    return next_action_error(na) is not None
+ 
+ 
+ def _state_next_action_repairs(
+@@ -475,7 +476,6 @@ def _state_next_action_repairs(
+     na = state.get("next_action")
+     if not isinstance(na, str):
+         return []
+-    na = na.strip()
+     if not _legacy_next_action(na):
+         return []
+ 
+@@ -497,18 +497,20 @@ def _state_next_action_repairs(
+                 "surface": "state",
+                 "refuse": True,
+                 "operator_decision_available": True,
+-                "canonical_next_command": "saipen recover resolve-next-action <next-action>",
++                "canonical_next_command": LEGACY_NEXT_ACTION_COMMAND,
+                 "reason": reason + " (OPERATOR_DECISION_REQUIRED)",
+             }
+         ]
+ 
+     if isinstance(resolve_next_action, str) and resolve_next_action.strip():
+-        proposed = resolve_next_action.strip()
++        proposed = resolve_next_action
+         if _legacy_next_action(proposed):
++            from .state import next_action_error
++
+             return refuse(
+                 f"the supplied next_action {proposed!r} is not executable either: it "
+-                f"must start with one of {_LEGAL_NEXT_PREFIXES} or be a legal "
+-                "`PHASE <phase> <T-###>` line. The operator decides the VALUE; the "
++                f"violates the shared grammar: {next_action_error(proposed)}. "
++                "The operator decides the VALUE; the "
+                 "grammar is not theirs to waive"
+             )
+         return [
+@@ -542,12 +544,14 @@ def _state_next_action_repairs(
+     # the brake branch. Nothing here is committed -- only the parsed action is.
+     from .state import patch_state
+ 
+-    provisional = state_text
+-    if str(state.get("blocker") or "").strip().lower() not in ("", "none"):
+-        try:
+-            provisional = patch_state(state_text, {"blocker": "none"})
+-        except ValueError as exc:
+-            return refuse(f"cannot stage routing over malformed STATE: {exc}")
++    canonical = f"PHASE {phase} {task}"
++    try:
++        # The strict reader now rejects the legacy action itself. Stage only
++        # the already-proven phase/task and let BOARD ownership prove FINISH;
++        # this in-memory input grants no operator decision and writes nothing.
++        provisional = patch_state(state_text, {"blocker": "none", "next_action": canonical})
++    except ValueError as exc:
++        return refuse(f"cannot stage routing over malformed STATE: {exc}")
+ 
+     from .router import (
+         audit_inbox_projection,
+@@ -564,7 +568,6 @@ def _state_next_action_repairs(
+         queued_source=queued_source_projection(Path(project_root)),
+         pending_append=pending_append_projection(Path(project_root)),
+     )
+-    canonical = f"PHASE {phase} {task}"
+     if (
+         routed.get("ok")
+         and routed.get("action") == canonical
+diff --git a/tools/saipen_engine/router.py b/tools/saipen_engine/router.py
+index 88c6701e..b06fbf89 100644
+--- a/tools/saipen_engine/router.py
++++ b/tools/saipen_engine/router.py
+@@ -25,7 +25,7 @@ from .board import (
+     pick_next_work,
+ )
+ from .result import Result
+-from .state import binding_brake
++from .state import binding_brake, binding_wait
+ 
+ 
+ def _top_workable(board: dict, agent: str | None = None, now=None) -> str | None:
+@@ -247,7 +247,9 @@ def route_next(
+     _brake = binding_brake(state, empty_todo=_empty_todo)
+     if _brake is not None:
+         _kind, _detail = _brake
+-        if _kind == "wait":
++        if _kind == "wait" or binding_wait(
++            na, phase=phase, empty_todo=_empty_todo, intent=state.get("execution_intent")
++        ):
+             # CORE-004: the safety valve is an AUTHORIZATION boundary, not a
+             # resumable yield. Once the 3-wave / 20-ticket budget is exhausted,
+             # the persisted WAIT is a HARD STOP (RESTATE_AND_STOP) until the
+diff --git a/tools/saipen_engine/state.py b/tools/saipen_engine/state.py
+index b42a0ed7..d53f828a 100644
+--- a/tools/saipen_engine/state.py
++++ b/tools/saipen_engine/state.py
+@@ -325,6 +325,52 @@ def is_legal_wait(na: object) -> bool:
+     return parse_wait(na) is not None
+ 
+ 
++NEXT_ACTION_PREFIXES = require_string_list(
++    require_mapping(_REGISTRY, "next_action_forms"), "executable_prefixes"
++)
++_SAIPEN_COMMANDS = frozenset(
++    require_string_list(require_mapping(_REGISTRY, "commands"), "saipen")
++)
++_RESUME_NEXT_ACTION_RE = re.compile(
++    r"^RESUME:\s+(T-\d+)\s+([A-Z_-]+)(?:\s+\[[^\]]*\])?\s*$"
++)
++
++
++def next_action_error(value: object) -> str | None:
++    """Validate the owned action without converting prose into an instruction.
++
++    Writers, strict readers and repair planners use this same grammar. WAIT
++    is a boundary, not a command; its payload is never parsed as executable.
++    """
++    if not isinstance(value, str):
++        return "next_action is not a string"
++    if not value or any(char in value for char in ("\n", "\r", "\x00")):
++        return "next_action must be a nonempty single line"
++    if not value.startswith(NEXT_ACTION_PREFIXES):
++        return "next_action does not start with WAIT:/saipen /PHASE /RUN:/RESUME:"
++    if value.startswith("WAIT:"):
++        return wait_grammar_error(value)
++    if value.startswith("PHASE "):
++        return phases.phase_next_action_error(value)
++    if value.startswith("RUN:"):
++        return None if value[len("RUN:"):].strip() else "RUN: requires a concrete command"
++    if value.startswith("RESUME:"):
++        match = _RESUME_NEXT_ACTION_RE.fullmatch(value)
++        if not match or match.group(2) not in phases.ALL_PHASES:
++            return "RESUME: requires T-### and an uppercase phase enum value"
++        return None
++    rest = value[len("saipen "):].split()
++    if not rest or rest[0] not in _SAIPEN_COMMANDS:
++        return "saipen action requires a registered command"
++    return None
++
++
++class NextActionError(ValueError):
++    """An invalid newly owned action; canonical callers return a refusal."""
++
++    code = "VALIDATION_FAILED"
++
++
+ def safety_valve_resume_key(na: object) -> str | None:
+     """The resume command an exact safety-valve pause names, else None.
+ 
+@@ -753,12 +799,12 @@ def state_contract_errors(
+                 f"across timezones otherwise (RFC § 1.2)"
+             )
+     na = fields.get("next_action")
+-    if isinstance(na, str) and na.strip().startswith("WAIT:"):
++    problem = next_action_error(na) if isinstance(na, str) else None
++    if problem is not None and na.startswith("WAIT:"):
+         # THE structured § 1.2 grammar via the ONE shared parser
+         # (hostile-regression, P1#5): `WAIT: <category> -- <one sentence>`.
+         # The delimiter, the closed category and the one-sentence bound are all
+         # mandatory, and the parser names which one was broken.
+-        problem = wait_grammar_error(na)
+         if problem is not None:
+             errors.append(
+                 f"next_action is a malformed WAIT (a WAIT with no category "
+@@ -768,6 +814,8 @@ def state_contract_errors(
+                 f"{'/'.join(WAIT_CATEGORIES)} (or the exact safety-valve "
+                 f"pause); it {problem}"
+             )
++    elif problem is not None:
++        errors.append(f"next_action is invalid: {problem} (CORE § 1.2)")
+     # § 1.2 VERSION GUARD: a state written by a NEWER protocol than the one
+     # running cannot be interpreted by it -- the running install does not know
+     # the rules that state was written under. The guard is one-directional:
+@@ -1009,6 +1057,10 @@ def patch_state(text: str, owned: dict) -> str:
+     replace the original block (including any prior list items). Unknown but
+     schema-valid future fields are preserved byte-for-byte.
+     """
++    if "next_action" in owned:
++        problem = next_action_error(owned["next_action"])
++        if problem is not None:
++            raise NextActionError(f"invalid owned next_action: {problem}")
+     if not text or not text.startswith("---"):
+         raise ValueError("STATE has no opening --- frontmatter fence")
+     fields, parse_error = parse_frontmatter(text)
+diff --git a/tools/saipen_engine/subs.py b/tools/saipen_engine/subs.py
+index 6e5e8453..6187e184 100644
+--- a/tools/saipen_engine/subs.py
++++ b/tools/saipen_engine/subs.py
+@@ -63,7 +63,7 @@ from .lock import project_writer_lock
+ from .paths import project_identity
+ from .result import Result
+ from .safeid import prove_inside, validate_safe_id
+-from .state import parse_state_or_error, patch_state, running_style_token
++from .state import next_action_error, parse_state_or_error, patch_state, running_style_token
+ 
+ SUBS_REL = ".saipen/extensions/subs"
+ MANIFEST_REL = f"{SUBS_REL}/MANIFEST.md"
+@@ -1682,12 +1682,9 @@ def validate_sub_state(state: dict) -> list[str]:
+         errors.append("updated must be a real ISO-8601 UTC instant (Z or +00:00)")
+     na = state.get("next_action")
+     if isinstance(na, str):
+-        if na.startswith("PHASE "):
+-            err = phases.phase_next_action_error(na)
+-            if err:
+-                errors.append(f"next_action {err}")
+-        elif not na.startswith(("WAIT:", "saipen ", "RUN:", "RESUME:")):
+-            errors.append("next_action does not start with WAIT:/saipen /PHASE /RUN:/RESUME:")
++        err = next_action_error(na)
++        if err:
++            errors.append(f"next_action {err}")
+     if state.get("execution_intent") == "goal":
+         for counter in ("goal_waves", "goal_tickets"):
+             if not isinstance(state.get(counter), int):
+diff --git a/tools/test_next_action_deadlock.py b/tools/test_next_action_deadlock.py
+index 9628fe6d..a00a0cfc 100644
+--- a/tools/test_next_action_deadlock.py
++++ b/tools/test_next_action_deadlock.py
+@@ -42,6 +42,9 @@ from saipen_engine.reconcile import reconcile_protocol_state  # noqa: E402
+ from test_hermetic_env import hermetic_env, isolate_host_session  # noqa: E402
+ 
+ HOME = TOOLS.parent
++LEGACY_RECOVERY_WAIT = (
++    "WAIT: user brake -- choose a canonical replacement for the legacy next_action"
++)
+ 
+ 
+ def setUpModule() -> None:
+@@ -135,7 +138,7 @@ class NextActionDeadlockTests(unittest.TestCase):
+         )
+         self.assertEqual(
+             record.get("canonical_next_command"),
+-            "saipen recover resolve-next-action <next-action>",
++            "saipen recover resolve-next-action --hex " + LEGACY_RECOVERY_WAIT.encode().hex(),
+             record,
+         )
+ 
+@@ -143,9 +146,11 @@ class NextActionDeadlockTests(unittest.TestCase):
+         root = project(self.base)
+         named = self.cli(root, "recover")["canonical_next_command"]
+         self.assertTrue(named.startswith("saipen recover resolve-next-action"))
+-        repaired = self.cli(root, "recover", "resolve-next-action", "saipen", "continue")
++        # Execute the rendered command exactly, with diagnostic global flags
++        # supplied by cli() in their documented position.
++        repaired = self.cli(root, *named.split()[1:])
+         self.assertTrue(repaired.get("ok"), repaired)
+-        self.assertIn('next_action: "saipen continue"', self.next_action(root))
++        self.assertIn(f'next_action: "{LEGACY_RECOVERY_WAIT}"', self.next_action(root))
+         self.assertTrue(self.cli(root, "validate").get("ok"))
+ 
+     def test_the_operator_decides_the_value_not_the_grammar(self) -> None:
+@@ -204,6 +209,32 @@ class NextActionDeadlockTests(unittest.TestCase):
+             "recover",
+         )
+ 
++    def test_hex_wait_preserves_spaces_and_shell_punctuation(self) -> None:
++        from saipen_engine.state import parse_state_or_error
++
++        root = project(self.base)
++        value = 'WAIT: user brake -- supply  C:\\release root; retain "a&b" $(literal)'
++        named = "saipen recover resolve-next-action --hex " + value.encode().hex()
++        repaired = self.cli(root, *named.split()[1:])
++        self.assertTrue(repaired.get("ok"), repaired)
++        fields, error = parse_state_or_error(
++            (root / ".saipen" / "STATE.md").read_text(encoding="utf-8")
++        )
++        self.assertIsNone(error)
++        self.assertEqual(fields["next_action"], value)
++
++    def test_invalid_hex_refuses_without_canonical_writes(self) -> None:
++        root = project(self.base)
++        files = [root / ".saipen" / name for name in ("STATE.md", "BOARD.md", "LOG.md")]
++        before = [path.read_bytes() for path in files]
++        for encoded in ("", "00", "ff", "123", "aa" * 4097,
++                        "operator: manual".encode().hex(), "RUN:".encode().hex(),
++                        "RUN: echo x\nRUN: echo y".encode().hex()):
++            with self.subTest(encoded=encoded[:40]):
++                record = self.cli(root, "recover", "resolve-next-action", "--hex", encoded)
++                self.assertFalse(record.get("ok"), record)
++                self.assertEqual([path.read_bytes() for path in files], before)
++
+ 
+ if __name__ == "__main__":
+     unittest.main(verbosity=2)
+diff --git a/tools/test_next_action_grammar.py b/tools/test_next_action_grammar.py
+new file mode 100644
+index 00000000..e3975f97
+--- /dev/null
++++ b/tools/test_next_action_grammar.py
+@@ -0,0 +1,144 @@
++"""Shared action grammar and operator WAIT boundaries (audit/23, T-1606)."""
++
++from __future__ import annotations
++
++import json
++import subprocess
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++TOOLS = Path(__file__).resolve().parent
++if str(TOOLS) not in sys.path:
++    sys.path.insert(0, str(TOOLS))
++
++import test_next_action_deadlock as fixture  # noqa: E402
++from saipen_engine import state  # noqa: E402
++from saipen_engine.reconcile import _legacy_next_action  # noqa: E402
++from test_hermetic_env import hermetic_env, isolate_host_session  # noqa: E402
++
++
++def setUpModule() -> None:
++    isolate_host_session()
++
++
++INVALID = (
++    "operator: manually provide release roots", "PHASE scout T-9",
++    "PHASE NO_SUCH_PHASE", "PHASE BUILD", "PHASE DONE T-9", "RUN:",
++    "RESUME:", "RESUME: missing ticket", "RESUME: T-9 NO_SUCH_PHASE",
++    "RESUME: T-9 build", "saipen ", "saipen no-such-command",
++    "RUN: first\nRUN: second", "WAIT: blocked", "WAIT: unknown -- question",
++)
++
++
++class NextActionGrammarTests(unittest.TestCase):
++    def test_owned_writer_and_repair_grammar_refuse_invalid_values(self) -> None:
++        for value in (*INVALID, None, 1, [], ""):
++            with self.subTest(value=value):
++                self.assertIsNotNone(state.next_action_error(value))
++                with self.assertRaises(state.NextActionError):
++                    state.patch_state(fixture.STATE, {"next_action": value})
++                if isinstance(value, str):
++                    self.assertTrue(_legacy_next_action(value))
++
++    def test_strict_reader_refuses_raw_legacy_bytes(self) -> None:
++        # Deliberately construct corrupt input as bytes, never through the
++        # writer whose invalid-value prevention this regression protects.
++        for value in INVALID:
++            if "\n" in value:
++                continue
++            with self.subTest(value=value):
++                text = fixture.STATE.format(next_action=value, home=fixture.HOME.as_posix())
++                fields, error = state.parse_state_or_error(text)
++                self.assertIsNone(fields)
++                self.assertIsNotNone(error)
++
++    def test_existing_valid_actions_round_trip_exactly(self) -> None:
++        text = fixture.STATE.format(next_action="saipen continue", home=fixture.HOME.as_posix())
++        for value in (
++            "PHASE SCOUT T-9", "PHASE DONE", "PHASE BUILD T-9 [50%]",
++            "RUN: python -B tools/check.py", "RUN: echo a; echo b",
++            "RESUME: T-9 BUILD", "RESUME: T-9 REVIEW [2/3]", "saipen continue",
++            "WAIT: blocked -- supply a release-root PATH; 0 of 751 sessions are agent-runnable",
++        ):
++            with self.subTest(value=value):
++                self.assertIsNone(state.next_action_error(value))
++                fields, error = state.parse_state_or_error(
++                    state.patch_state(text, {"next_action": value})
++                )
++                self.assertIsNone(error)
++                self.assertEqual(fields["next_action"], value)
++                self.assertFalse(_legacy_next_action(value))
++
++    def test_unowned_legacy_field_and_suffix_remain_exact(self) -> None:
++        text = fixture.STATE.format(next_action="operator: manual", home=fixture.HOME.as_posix())
++        text += "\n<!-- BOUNDARY: retained -->\n"
++        patched = state.patch_state(text, {"agent": "other"})
++        self.assertEqual(patched, text.replace("agent: buffy", "agent: other"))
++
++
++class OperatorWaitBoundaryTests(unittest.TestCase):
++    def setUp(self) -> None:
++        temporary = tempfile.TemporaryDirectory(prefix="t1606-wait-")
++        self.addCleanup(temporary.cleanup)
++        self.root = fixture.project(Path(temporary.name))
++
++    def cli(self, *args: str) -> dict:
++        completed = subprocess.run(
++            [sys.executable, str(TOOLS / "saipen.py"), "--json", "--project-root",
++             str(self.root), *args],
++            capture_output=True, text=True, encoding="utf-8", errors="replace",
++            env=hermetic_env(), timeout=600,
++        )
++        self.assertNotIn("Traceback", completed.stderr)
++        return json.loads(completed.stdout)
++
++    def test_valid_operator_wait_is_readable_and_never_executed(self) -> None:
++        wait = "WAIT: blocked -- supply a release-root PATH; 0 of 751 sessions are agent-runnable"
++        path = self.root / ".saipen" / "STATE.md"
++        text = path.read_text(encoding="utf-8")
++        text = state.patch_state(text, {
++            "phase": "BLOCKED", "transition_from": "DONE", "blocker": "OPERATOR_INPUT_REQUIRED",
++            "next_action": wait,
++        })
++        path.write_text(text, encoding="utf-8")
++        files = [self.root / ".saipen" / name for name in ("STATE.md", "BOARD.md", "LOG.md")]
++        before = [file.read_bytes() for file in files]
++        for command in ("status", "continue", "recover"):
++            with self.subTest(command=command):
++                record = self.cli(command)
++                self.assertNotEqual(record.get("code"), "RECONCILE_REAUTH_REQUIRED", record)
++                self.assertEqual([file.read_bytes() for file in files], before)
++                if command == "continue":
++                    self.assertEqual(record.get("action"), wait, record)
++                    self.assertEqual(record.get("executable_behavior"), "RESTATE_AND_STOP", record)
++
++    def test_exact_rendered_recovery_preserves_original_and_requires_real_decision(self) -> None:
++        path = self.root / ".saipen" / "STATE.md"
++        original = path.read_bytes()
++        diagnostic = self.cli("recover")
++        command = diagnostic["canonical_next_command"]
++        self.assertEqual(path.read_bytes(), original)
++        self.assertFalse(diagnostic["safe_auto_repair_available"])
++        self.assertTrue(diagnostic["operator_decision_available"])
++        self.assertNotIn("<", command)
++        self.assertTrue(self.cli(*command.split()[1:])["ok"])
++        fields, error = state.parse_state_or_error(path.read_text(encoding="utf-8"))
++        self.assertIsNone(error)
++        self.assertEqual(fields["next_action"], fixture.LEGACY_RECOVERY_WAIT)
++        archives = self.root / ".saipen" / "recovery"
++        self.assertTrue(any(
++            p.is_file() and p.read_bytes() == original for p in archives.rglob("*")
++        ))
++        log = (self.root / ".saipen" / "LOG.md").read_text(encoding="utf-8")
++        self.assertIn("operator-authorized STATE.next_action", log)
++        before = path.read_bytes()
++        outcome = self.cli("continue")
++        self.assertEqual(outcome["action"], fixture.LEGACY_RECOVERY_WAIT)
++        self.assertEqual(outcome["executable_behavior"], "RESTATE_AND_STOP")
++        self.assertEqual(path.read_bytes(), before)
++
++
++if __name__ == "__main__":
++    unittest.main(verbosity=2)
+diff --git a/tools/test_recovery_reachability.py b/tools/test_recovery_reachability.py
+index 8ac49633..0548e675 100644
+--- a/tools/test_recovery_reachability.py
++++ b/tools/test_recovery_reachability.py
+@@ -48,6 +48,10 @@ from saipen_engine.state import binding_brake
+ 
+ from test_hermetic_env import isolate_host_session
+ 
++EXPECTED_LEGACY_COMMAND = "saipen recover resolve-next-action --hex " + (
++    b"WAIT: user brake -- choose a canonical replacement for the legacy next_action"
++).hex()
++
+ 
+ def setUpModule() -> None:
+     # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+@@ -448,8 +452,8 @@ class LegacyNextActionClassificationTests(unittest.TestCase):
+     """The grammar predicate is the fast_check predicate, never a new rule."""
+ 
+     def test_legal_actions_are_not_legacy(self):
+-        for na in ("PHASE SCOUT T-001", "WAIT: operator input", "saipen continue",
+-                   "RUN: tests", "RESUME: build"):
++        for na in ("PHASE SCOUT T-001", "WAIT: blocked -- operator input", "saipen continue",
++                   "RUN: tests", "RESUME: T-001 BUILD"):
+             with self.subTest(na=na):
+                 self.assertFalse(_legacy_next_action(na))
+ 
+@@ -461,6 +465,13 @@ class LegacyNextActionClassificationTests(unittest.TestCase):
+     def test_a_malformed_phase_action_is_legacy(self):
+         self.assertTrue(_legacy_next_action("PHASE IMPL T-001"))
+ 
++    def test_malformed_wait_and_resume_are_legacy(self):
++        # These historical fixtures proved only a prefix, not the canonical
++        # grammar. Keep them as negative controls rather than dropping them.
++        for na in ("WAIT: operator input", "RESUME: build"):
++            with self.subTest(na=na):
++                self.assertTrue(_legacy_next_action(na))
++
+     def test_an_empty_action_is_repaired_when_provable(self):
+         root = _project(next_action="")
+         self.addCleanup(lambda: shutil.rmtree(root, ignore_errors=True))
+@@ -525,7 +536,7 @@ class LegacyNextActionRepairTests(unittest.TestCase):
+         self.assertTrue(result["operator_decision_available"], result)
+         self.assertEqual(
+             result["canonical_next_command"],
+-            "saipen recover resolve-next-action <next-action>",
++            EXPECTED_LEGACY_COMMAND,
+             result,
+         )
+         self.assertEqual(result["blocking_surface"], "state", result)
+@@ -561,7 +572,7 @@ class LegacyNextActionRepairTests(unittest.TestCase):
+         self.assertTrue(result["operator_decision_available"], result)
+         self.assertEqual(
+             result["canonical_next_command"],
+-            "saipen recover resolve-next-action <next-action>",
++            EXPECTED_LEGACY_COMMAND,
+             result,
+         )
+         self.assertEqual(result["blocking_field"], "next_action", result)
+@@ -600,7 +611,7 @@ class LegacyNextActionRepairTests(unittest.TestCase):
+         self.assertTrue(result["operator_decision_available"], result)
+         self.assertEqual(
+             result["canonical_next_command"],
+-            "saipen recover resolve-next-action <next-action>",
++            EXPECTED_LEGACY_COMMAND,
+             result,
+         )
+         self.assertEqual(result["blocking_surface"], "state", result)
+diff --git a/tools/test_refusal_registry.py b/tools/test_refusal_registry.py
+index 6b3e3055..7151e43a 100644
+--- a/tools/test_refusal_registry.py
++++ b/tools/test_refusal_registry.py
+@@ -53,9 +53,11 @@ def _iter_sources():
+                 yield path
+ 
+ 
+-def _literal_str(node: ast.AST) -> str | None:
++def _literal_str(node: ast.AST, constants: dict[str, str]) -> str | None:
+     if isinstance(node, ast.Constant) and isinstance(node.value, str):
+         return node.value
++    if isinstance(node, ast.Name):
++        return constants.get(node.id)
+     return None
+ 
+ 
+@@ -67,6 +69,18 @@ def _refusal_literals(tree: ast.AST) -> set[str]:
+     engine's `_refuse(code, detail)` plus the `{"ok": False, "code": ...}`
+     dict shape are the two construction sites the measured crash travelled.
+     """
++    # Module-level literal constants are another construction of the same
++    # refusal inventory, e.g. entry.WAIT_OPERATOR. Never execute source.
++    constants: dict[str, str] = {}
++    for statement in getattr(tree, "body", []):
++        if isinstance(statement, ast.Assign) and isinstance(statement.value, ast.Constant):
++            if isinstance(statement.value.value, str):
++                for target in statement.targets:
++                    if isinstance(target, ast.Name):
++                        constants[target.id] = statement.value.value
++        elif isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name):
++            if isinstance(statement.value, ast.Constant) and isinstance(statement.value.value, str):
++                constants[statement.target.id] = statement.value.value
+     found: set[str] = set()
+     for node in ast.walk(tree):
+         if isinstance(node, ast.Dict):
+@@ -75,7 +89,7 @@ def _refusal_literals(tree: ast.AST) -> set[str]:
+                 ok_value = node.values[keys.index("ok")]
+                 code_value = node.values[keys.index("code")]
+                 if isinstance(ok_value, ast.Constant) and ok_value.value is False:
+-                    value = _literal_str(code_value)
++                    value = _literal_str(code_value, constants)
+                     if value is not None:
+                         found.add(value)
+             continue
+@@ -88,7 +102,7 @@ def _refusal_literals(tree: ast.AST) -> set[str]:
+             # `Result.refuse(code, message)` are code-first; the code-shape
+             # filter below drops the message-first local helpers' prose.
+             for arg in node.args:
+-                value = _literal_str(arg)
++                value = _literal_str(arg, constants)
+                 if value is not None:
+                     found.add(value)
+                     break
+@@ -96,12 +110,13 @@ def _refusal_literals(tree: ast.AST) -> set[str]:
+             keywords = {kw.arg: kw.value for kw in node.keywords}
+             ok = keywords.get("ok")
+             if isinstance(ok, ast.Constant) and ok.value is False:
+-                value = _literal_str(keywords.get("code")) if keywords.get("code") else None
++                code_node = keywords.get("code")
++                value = _literal_str(code_node, constants) if code_node is not None else None
+                 if value is not None:
+                     found.add(value)
+         if name == "EngineError":
+             keywords = {kw.arg: kw.value for kw in node.keywords}
+-            value = _literal_str(keywords.get("code")) if keywords.get("code") else None
++            value = _literal_str(keywords.get("code"), constants) if keywords.get("code") else None
+             if value is not None:
+                 found.add(value)
+     return {code for code in found if re.fullmatch(r"[A-Z][A-Z0-9_]*", code)}
+@@ -130,6 +145,17 @@ class RegistryCompletenessTests(unittest.TestCase):
+         """The discovery is not vacuously green: the SAITULS code is found."""
+         self.assertIn("SOURCE_LINKAGE_DRIFT", discovered_production_codes())
+ 
++    def test_the_scan_sees_entry_wait_constant(self) -> None:
++        self.assertIn("WAIT_OPERATOR", discovered_production_codes())
++
++    def test_constant_constructions_are_scanned_without_executing_source(self) -> None:
++        tree = ast.parse(
++            'OPERATOR_CODE = "WAIT_OPERATOR"\n'
++            'raise RuntimeError("source must not execute")\n'
++            'reply = {"ok": False, "code": OPERATOR_CODE}\n'
++        )
++        self.assertEqual(_refusal_literals(tree), {"WAIT_OPERATOR"})
++
+ 
+ class StructuredRefusalTests(unittest.TestCase):
+     def test_source_linkage_drift_is_a_structured_refusal(self) -> None:
+diff --git a/tools/validate.py b/tools/validate.py
+index b577d4df..6a9eda97 100644
+--- a/tools/validate.py
++++ b/tools/validate.py
+@@ -55,7 +55,10 @@ source-text assertions (e.g. naive string inclusion) to verify runtime logic.
+ 
+ import ast
+ import datetime
+-from saipen_engine.phases import ANY_FROM, TICKET_BEARING_PHASES, VALID_TRANSITIONS
++from saipen_engine.phases import (
++    ANY_FROM, TICKET_BEARING_PHASES, VALID_TRANSITIONS,
++    phase_next_action_error as _phase_next_action_error,
++)
+ from saipen_engine.commands import (
+     CYRILLIC_CONFUSABLE_MAP,
+     derive_cyrillic_twins as _derive_cyrillic_twins,
+@@ -724,46 +727,6 @@ WAIT_CATEGORIES = require_string_list(_MACHINE_REGISTRY, "wait_categories")
+ # worse than no example". Deliberately a hand-kept constant plus a drift check
+ # against § 1.2's sentence, the same shape the phase enum uses.
+ 
+-_PHASE_NA_RE = re.compile(r"^PHASE\s+([A-Za-z_-]+)(?:\s+(T-\d+))?(?:\s+\[[^\]]*\])?\s*$")
+-
+-
+-def _phase_next_action_error(value):
+-    """RFC § 1.2's `PHASE` pairing rule, or None when the value obeys it.
+-
+-    Shared by Core and subSaipen states on purpose: the protocol has twice
+-    shipped a rule enforced on only one of the two, in both directions.
+-    """
+-    m = _PHASE_NA_RE.match(value.strip())
+-    if not m:
+-        return (
+-            f"{value!r} is not a legal `PHASE <phase-enum> [T-###]` -- "
+-            f"the argument is one uppercase phase plus at most a ticket "
+-            f"ref, and nothing but the optional [...] progress tag may "
+-            f"follow it"
+-        )
+-    ph, ref = m.group(1), m.group(2)
+-    if ph != ph.upper():
+-        return (
+-            f"{value!r} writes the phase in lower case -- RFC § 1.2 takes "
+-            f"the uppercase § 1.6 enum value, and the phase doc is loaded "
+-            f"from its lowercased name, not from what the state says"
+-        )
+-    _five = "/".join(sorted(TICKET_BEARING_PHASES))
+-    if ph in TICKET_BEARING_PHASES and not ref:
+-        return (
+-            f"{value!r} enters ticket-bearing phase {ph} with no T-### -- "
+-            f"RFC § 1.2 REQUIRES the ref for {_five}, and a cold agent "
+-            f"cannot act on a phase with no subject"
+-        )
+-    if ph not in TICKET_BEARING_PHASES and ref:
+-        return (
+-            f"{value!r} attaches {ref} to {ph}, which is not one of the "
+-            f"five ticket-bearing phases ({_five}) -- RFC § 1.2 omits the "
+-            f"ref for every other phase; name the ticket in `task:`"
+-        )
+-    return None
+-
+-
+ PACKAGE_HANDOFF_FIELDS = {
+     "status",
+     "producer",

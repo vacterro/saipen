@@ -1,0 +1,23 @@
+{
+  "label": "verify-whitespace",
+  "phase": "VERIFY",
+  "command": [
+    "git",
+    "diff",
+    "--check",
+    "--",
+    "tools/saipen_engine/reconcile.py",
+    "tools/saipen.py",
+    "tools/test_reconcile_history_ledger_blocked.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 0.219,
+  "fingerprint": "7b7ff09dfeee7b1b29d35434872c6994739935b761b8db64d1b489a8de53fedc",
+  "stdout": "",
+  "stderr": "warning: in the working copy of 'tools/test_reconcile_history_ledger_blocked.py', LF will be replaced by CRLF the next time Git touches it\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "8699b362b44cdc5af1d21ef70d2f1cbecb97359df932c787d75eca3038e44d40",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

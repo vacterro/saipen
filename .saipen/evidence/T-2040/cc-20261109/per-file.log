@@ -1,0 +1,33 @@
+EXIT:0 SECS:12 FILE:tools/test_t2040_bounded_discovery_resume.py
+...............                          [100%]
+15 passed, 32 subtests passed in 8.35s
+EXIT:0 SECS:5 FILE:tools/test_t2040_continuation_truth.py
+...........                                                        [100%]
+11 passed, 6 subtests passed in 1.91s
+EXIT:0 SECS:3 FILE:tools/test_t2040_discovery_owners.py
+......................                                              [100%]
+22 passed, 5 subtests passed in 0.68s
+EXIT:0 SECS:2 FILE:tools/test_t2040_exhaustion_evidence.py
+....................                                                     [100%]
+20 passed in 0.35s
+EXIT:0 SECS:30 FILE:tools/test_t2040_finish_plan_guards.py
+.......                                                             [100%]
+7 passed, 5 subtests passed in 28.40s
+EXIT:0 SECS:30 FILE:tools/test_t2040_maintenance_authority.py
+.......................                                                  [100%]
+23 passed in 26.71s
+EXIT:0 SECS:27 FILE:tools/test_t2040_publication_truth.py
+........................................                    [100%]
+40 passed, 13 subtests passed in 22.43s
+EXIT:0 SECS:30 FILE:tools/test_t2040_replenishment_recovery.py
+.......................                               [100%]
+23 passed, 19 subtests passed in 25.53s
+EXIT:0 SECS:398 FILE:tools/test_t2040_review_proof_binding.py
+..........                                  [100%]
+10 passed, 29 subtests passed in 393.57s (0:06:33)
+EXIT:0 SECS:10 FILE:tools/test_t2040_terminal_consumer_guards.py
+...........................                                                 [100%]
+27 passed, 69 subtests passed in 5.91s
+EXIT:0 SECS:5 FILE:tools/test_t2040_terminal_consumer_supplementary.py
+.                                                                        [100%]
+1 passed in 1.07s

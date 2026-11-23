@@ -1,0 +1,142 @@
+test_a_wrong_digest_still_fails_the_same_validator (t1581_retirement_oracle.PhaseRenameKnowledgeTests.test_a_wrong_digest_still_fails_the_same_validator) ... ok
+test_absent_knowledge_remains_absent (t1581_retirement_oracle.PhaseRenameKnowledgeTests.test_absent_knowledge_remains_absent) ... ok
+test_existing_wrong_digest_is_not_restamped (t1581_retirement_oracle.PhaseRenameKnowledgeTests.test_existing_wrong_digest_is_not_restamped) ... ok
+test_invalid_card_is_not_repaired_into_valid_evidence (t1581_retirement_oracle.PhaseRenameKnowledgeTests.test_invalid_card_is_not_repaired_into_valid_evidence) ... ok
+test_renamed_card_body_gets_a_fresh_index (t1581_retirement_oracle.PhaseRenameKnowledgeTests.test_renamed_card_body_gets_a_fresh_index) ... ok
+test_a_wrong_digest_still_fails_the_same_validator (t1581_retirement_oracle.RetirementEvidenceRenameTests.test_a_wrong_digest_still_fails_the_same_validator) ... FAIL
+test_absent_knowledge_remains_absent (t1581_retirement_oracle.RetirementEvidenceRenameTests.test_absent_knowledge_remains_absent) ... FAIL
+test_bound_artifact_and_retired_record_remain_exact_bytes (t1581_retirement_oracle.RetirementEvidenceRenameTests.test_bound_artifact_and_retired_record_remain_exact_bytes) ... FAIL
+test_corrupt_original_artifact_is_refused_before_rename (t1581_retirement_oracle.RetirementEvidenceRenameTests.test_corrupt_original_artifact_is_refused_before_rename) ... ok
+test_existing_wrong_digest_is_not_restamped (t1581_retirement_oracle.RetirementEvidenceRenameTests.test_existing_wrong_digest_is_not_restamped) ... ok
+test_invalid_card_is_not_repaired_into_valid_evidence (t1581_retirement_oracle.RetirementEvidenceRenameTests.test_invalid_card_is_not_repaired_into_valid_evidence) ... ok
+test_missing_original_artifact_is_refused_before_rename (t1581_retirement_oracle.RetirementEvidenceRenameTests.test_missing_original_artifact_is_refused_before_rename) ... ok
+test_renamed_card_body_gets_a_fresh_index (t1581_retirement_oracle.RetirementEvidenceRenameTests.test_renamed_card_body_gets_a_fresh_index) ... FAIL
+
+======================================================================
+FAIL: test_a_wrong_digest_still_fails_the_same_validator (t1581_retirement_oracle.RetirementEvidenceRenameTests.test_a_wrong_digest_still_fails_the_same_validator)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 98, in test_a_wrong_digest_still_fails_the_same_validator
+    error = self.run_probe(corrupt_digest)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 176, in run_probe
+    return super().run_probe(validate_proof)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 75, in run_probe
+    return A.phase_rename_probe(self.source, self.destination)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\audit_checks.py", line 959, in phase_rename_probe
+    proc = subprocess.run(
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1189, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 65, in run
+    before_validation(tree)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 174, in validate_proof
+    raise AssertionError("; ".join(errors))
+AssertionError: retired ticket record T-1580 evidence artifact .saipen/evidence/incident/proof.txt no longer hashes to the sha256 its retirement bound
+
+======================================================================
+FAIL: test_absent_knowledge_remains_absent (t1581_retirement_oracle.RetirementEvidenceRenameTests.test_absent_knowledge_remains_absent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 123, in test_absent_knowledge_remains_absent
+    self.assertIsNone(self.run_probe())
+                      ^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 176, in run_probe
+    return super().run_probe(validate_proof)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 75, in run_probe
+    return A.phase_rename_probe(self.source, self.destination)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\audit_checks.py", line 959, in phase_rename_probe
+    proc = subprocess.run(
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1189, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 65, in run
+    before_validation(tree)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 174, in validate_proof
+    raise AssertionError("; ".join(errors))
+AssertionError: retired ticket record T-1580 evidence artifact .saipen/evidence/incident/proof.txt no longer hashes to the sha256 its retirement bound
+
+======================================================================
+FAIL: test_bound_artifact_and_retired_record_remain_exact_bytes (t1581_retirement_oracle.RetirementEvidenceRenameTests.test_bound_artifact_and_retired_record_remain_exact_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 181, in test_bound_artifact_and_retired_record_remain_exact_bytes
+    self.assertIsNone(self.run_probe())
+                      ^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 176, in run_probe
+    return super().run_probe(validate_proof)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 75, in run_probe
+    return A.phase_rename_probe(self.source, self.destination)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\audit_checks.py", line 959, in phase_rename_probe
+    proc = subprocess.run(
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1189, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 65, in run
+    before_validation(tree)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 174, in validate_proof
+    raise AssertionError("; ".join(errors))
+AssertionError: retired ticket record T-1580 evidence artifact .saipen/evidence/incident/proof.txt no longer hashes to the sha256 its retirement bound
+
+======================================================================
+FAIL: test_renamed_card_body_gets_a_fresh_index (t1581_retirement_oracle.RetirementEvidenceRenameTests.test_renamed_card_body_gets_a_fresh_index)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 78, in test_renamed_card_body_gets_a_fresh_index
+    self.assertIsNone(self.run_probe())
+                      ^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 176, in run_probe
+    return super().run_probe(validate_proof)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 75, in run_probe
+    return A.phase_rename_probe(self.source, self.destination)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\audit_checks.py", line 959, in phase_rename_probe
+    proc = subprocess.run(
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1189, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 65, in run
+    before_validation(tree)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1581-retired-evidence-candidate\test_t1581_phase_rename_knowledge.py", line 174, in validate_proof
+    raise AssertionError("; ".join(errors))
+AssertionError: retired ticket record T-1580 evidence artifact .saipen/evidence/incident/proof.txt no longer hashes to the sha256 its retirement bound
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.343s
+
+FAILED (failures=4)

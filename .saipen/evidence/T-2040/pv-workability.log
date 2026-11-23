@@ -1,0 +1,57 @@
+F.F                                                                      [100%]
+================================== FAILURES ===================================
+_ PrematureVictoryPreventionTests.test_pv21_operator_bounded_grant_executes_within_scope _
+
+self = <test_premature_victory_prevention.PrematureVictoryPreventionTests testMethod=test_pv21_operator_bounded_grant_executes_within_scope>
+
+    def test_pv21_operator_bounded_grant_executes_within_scope(self) -> None:
+        truth = outcome_truth.compute_outcome_truth(
+            self.root,
+            tickets={"T-1": {"id": "T-1", "section": "## TODO", "blocked": False}},
+            state={"phase": "PLAN", "authority_until": "budget"},
+            has_continuous_maintenance=False,
+        )
+>       self.assertEqual(truth["queue_status"], outcome_truth.QUEUE_HAS_WORK)
+E       AssertionError: 'QUEUE_DRAINED' != 'QUEUE_HAS_WORK'
+E       - QUEUE_DRAINED
+E       + QUEUE_HAS_WORK
+
+tools\test_premature_victory_prevention.py:391: AssertionError
+_ PrematureVictoryPreventionTests.test_pv26_lane_statuses_distinct_under_foreign_staged_blocker _
+
+self = <test_premature_victory_prevention.PrematureVictoryPreventionTests testMethod=test_pv26_lane_statuses_distinct_under_foreign_staged_blocker>
+
+    def test_pv26_lane_statuses_distinct_under_foreign_staged_blocker(self) -> None:
+        """P0-01: Distinct lane statuses prevent release conflict from masquerading as global completion."""
+        from saipen_engine import outcome_truth
+    
+        # Case 1: Shared staging blocker with an actionable TODO ticket
+        tickets = {
+            "T-1816": {
+                "id": "T-1816",
+                "section": "## BLOCKED",
+                "fields": {"blocker": "PUBLICATION_STAGING_BLOCKED: foreign staged paths"},
+            },
+            "T-2001": {
+                "id": "T-2001",
+                "section": "## TODO",
+                "blocked": False,
+                "fields": {"blocker": ""},
+            },
+        }
+        lanes = outcome_truth.compute_lane_statuses(
+            tickets=tickets,
+            foreign_staged=True,
+            has_continuous_maintenance=False,
+        )
+        self.assertEqual(lanes["RELEASE_LANE"], outcome_truth.RELEASE_LANE_BLOCKED_FOREIGN_INDEX)
+>       self.assertEqual(lanes["IMPLEMENTATION_LANE"], outcome_truth.IMPLEMENTATION_LANE_ELIGIBLE)
+E       AssertionError: 'AUTHORITY_REQUIRED' != 'ELIGIBLE'
+E       - AUTHORITY_REQUIRED
+E       + ELIGIBLE
+
+tools\test_premature_victory_prevention.py:567: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_premature_victory_prevention.py::PrematureVictoryPreventionTests::test_pv21_operator_bounded_grant_executes_within_scope
+FAILED tools/test_premature_victory_prevention.py::PrematureVictoryPreventionTests::test_pv26_lane_statuses_distinct_under_foreign_staged_blocker
+2 failed, 1 passed, 33 deselected in 1.58s

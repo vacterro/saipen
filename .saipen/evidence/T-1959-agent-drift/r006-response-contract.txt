@@ -1,0 +1,36 @@
+T-1959 / SRC-348 R006 response-contract measurement
+HEAD 66ef622a43ab59512735ac78ce10d1250e26f9df, measured 2026-10-29.
+
+R006  the response contract is enforced against actual output: the active reply
+      language and style are bound to the session and validated, with no
+      repeated tool execution on a format retry.
+
+(a) enforced against ACTUAL output
+    `_response_cli` (tools/saipen.py:11678) is a "single read-only
+    renderer/checker for host operational handbacks". `saipen response check`
+    and `response render` both read the reply text from --stdin and decide it
+    mechanically: response_errors() in response_surface.py validates mandatory
+    field presence, canonical order, DETAILS last, and a WAIT that states a
+    human action. Difficulty is measured, not predicted.
+
+(b) reply language and style bound to the session
+    `response digest` and `render` resolve the active language from
+    `running_style_contract().reply_language`, so the emitted digest uses the
+    session's bound language rather than the caller's. STYLE.md is the single
+    authoritative source for that value; test_response_surface_contract.py
+    includes test_boot_loads_style_and_execution_before_first_output and
+    test_pinned_languages_change_values_but_never_field_labels.
+
+(c) no repeated tool execution on a format retry
+    The retry path is `response check` / `response render`, both read-only
+    commands that consume text on stdin. A refused reply re-enters the pure
+    validator, which cannot execute a tool, so re-formatting never re-runs the
+    work. This is structural, not observed: the checker has no side effects and
+    no tool dispatch.
+
+Measured suites on HEAD 66ef622a (authenticated focused records):
+  test_response_surface_contract.py + test_response_digest.py   66 tests PASS
+    .saipen/evidence/focused-unit/80573d5680492f06-20261029T232223012982Z.json
+  test_response_delivery.py + test_response_fact_binding.py     19 tests PASS
+    .saipen/evidence/focused-unit/80573d5680492f06-20261029T232420223418Z.json
+Total 85 tests, 0 red.

@@ -1,0 +1,8 @@
+test_boundary_matrix_preserves_bounded_goal_semantics (test_t1857_budget_owner.BudgetOwnerTests.test_boundary_matrix_preserves_bounded_goal_semantics) ... ok
+test_public_operations_caps_are_preserved (test_t1857_budget_owner.BudgetOwnerTests.test_public_operations_caps_are_preserved) ... ok
+test_read_only_boundary_proof_does_not_import_mutation_engine (test_t1857_budget_owner.BudgetOwnerTests.test_read_only_boundary_proof_does_not_import_mutation_engine) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.183s
+
+OK

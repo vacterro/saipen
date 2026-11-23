@@ -1,0 +1,18 @@
+[
+  {
+    "tool": "audit_parity.py",
+    "exit_code": 1,
+    "tail": [
+      "  File \"C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\shutil.py\", line 527, in _copytree",
+      "    raise Error(errors)",
+      "shutil.Error: [('V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\locks\\\\verification-9ff757abd601b5d00a9952da2b857fbb961c8698003db48ca0118bf74f607726.lock', 'C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Temp\\\\audit_parity_gky19v8t\\\\pristine\\\\.saipen\\\\locks\\\\verification-9ff757abd601b5d00a9952da2b857fbb961c8698003db48ca0118bf74f607726.lock', '[Errno 13] Permission denied'), ('V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\locks\\\\verification-executor.lock', 'C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Temp\\\\audit_parity_gky19v8t\\\\pristine\\\\.saipen\\\\locks\\\\verification-executor.lock', '[Errno 13] Permission denied')]"
+    ]
+  },
+  {
+    "tool": "audit_order.py",
+    "exit_code": 0,
+    "tail": [
+      "PASS: 518 tool(s) read no module-level name before assigning it"
+    ]
+  }
+]

@@ -1,0 +1,27 @@
+{
+ "enabled": true,
+ "timeoutMs": 30000,
+ "maxOutputBytes": 262144,
+ "events": {
+  "UserPromptSubmit": [
+   {
+    "hooks": [
+     {
+      "type": "process",
+      "command": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "args": [
+       "-c",
+       "import os,runpy,sys;a=sys.argv[1];sys.argv=sys.argv[1:];os.path.isfile(a) and runpy.run_path(a,run_name=__name__)",
+       "C:\\Users\\vac34\\.zcode\\hooks\\saipen-guard.py",
+       "--host",
+       "zaicode",
+       "--saipen-root",
+       "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN"
+      ],
+      "timeoutMs": 30000
+     }
+    ]
+   }
+  ]
+ }
+}

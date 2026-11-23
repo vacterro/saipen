@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-384:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Finding A current-state: criteria above satisfied"
+    }
+  },
+  "derived_at": "2026-11-03T05:17:46Z",
+  "derived_from": "SRC-384",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "80b87b158ac223459bbaf1bac9ab40b512181d52ccf090d14984fe608d8e2373"
+}

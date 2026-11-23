@@ -1,0 +1,22 @@
+{
+  "label": "verify-lint",
+  "phase": "VERIFY",
+  "command": [
+    "python",
+    "-m",
+    "ruff",
+    "check",
+    "tools/",
+    "tests/"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 1,
+  "duration_s": 0.282,
+  "fingerprint": "7b7ff09dfeee7b1b29d35434872c6994739935b761b8db64d1b489a8de53fedc",
+  "stdout": "E501 Line too long (102 > 100)\n    --> tools\\saipen.py:1750:101\n     |\n1748 |         )\n1749 |         if diagnostic is not None:\n1750 |             _emit({**diagnostic, \"cold_route\": _cold_route(project_root, state, state_text)}, as_json)\n     |                                                                                                     ^^\n1751 |             return 1\n1752 |         _emit(\n     |\n\nE501 Line too long (102 > 100)\n   --> tools\\test_reconcile_history_ledger_blocked.py:321:101\n    |\n319 |         before = self.bytes(self.project)\n320 |         with mock.patch(\"saipen_engine.audit_manifest.ensure\", return_value=unavailable):\n321 |             self.assertEqual(reconcile.reconcile_protocol_state(self.project, \"tester\", dry_run=True),\n    |                                                                                                     ^^\n322 |                              unavailable)\n323 |             self.assertIsNone(diagnostic(self.project, {\"ok\": False, \"reason\": \"checkpoint-invalid\"}))\n    |\n\nE501 Line too long (102 > 100)\n   --> tools\\test_reconcile_history_ledger_blocked.py:323:101\n    |\n321 |             self.assertEqual(reconcile.reconcile_protocol_state(self.project, \"tester\", dry_run=True),\n322 |                              unavailable)\n323 |             self.assertIsNone(diagnostic(self.project, {\"ok\": False, \"reason\": \"checkpoint-invalid\"}))\n    |                                                                                                     ^^\n324 |         self.assertEqual(self.bytes(self.project), before)\n    |\n\nFound 3 errors.\n",
+  "stderr": "",
+  "stdout_sha256": "0bb6651e90b6b6575c0329e5faea891ea26b30cc510ee866dfc6c36b2a13b04a",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

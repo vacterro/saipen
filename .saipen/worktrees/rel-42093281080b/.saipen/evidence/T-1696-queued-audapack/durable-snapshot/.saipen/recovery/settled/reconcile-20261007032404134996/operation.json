@@ -1,0 +1,87 @@
+{
+  "op_id": "reconcile-20261007032404134996",
+  "operation": "reconcile",
+  "created_at": "2026-10-07T03:24:04Z",
+  "agent": "buffy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "6445f300fd52ed2f",
+  "preconditions": {
+    ".saipen/STATE.md": "c83dca3a353c4887",
+    ".saipen/BOARD.md": "aa1b359a306a2682",
+    ".saipen/LOG.md": "bb296389ebe04d0e"
+  },
+  "read_preconditions": {
+    ".saipen/logs": "delete-tree-sha256:937337c45728d38258704cc0ec14fd144d30502172e4407ac6357b501f37a2f3"
+  },
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 7,
+  "targets": [
+    {
+      "path": ".saipen/recovery/terminal-gap/reconcile-20261007032404134996.STATE.md",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "c83dca3a353c4887",
+      "applied": true
+    },
+    {
+      "path": ".saipen/recovery/terminal-gap/reconcile-20261007032404134996.BOARD.md",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "aa1b359a306a2682",
+      "applied": true
+    },
+    {
+      "path": ".saipen/recovery/terminal-gap/reconcile-20261007032404134996.LOG.md",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "bb296389ebe04d0e",
+      "applied": true
+    },
+    {
+      "path": ".saipen/LOG.md",
+      "role": "log",
+      "action": "write",
+      "before_hash": "bb296389ebe04d0e",
+      "after_hash": "bba3a242f29ed089",
+      "applied": true
+    },
+    {
+      "path": ".saipen/BOARD.md",
+      "role": "board",
+      "action": "write",
+      "before_hash": "aa1b359a306a2682",
+      "after_hash": "4fbc9707ff2c95f7",
+      "applied": true
+    },
+    {
+      "path": ".saipen/STATE.md",
+      "role": "state",
+      "action": "write",
+      "before_hash": "c83dca3a353c4887",
+      "after_hash": "fda12d24d6ff024e",
+      "applied": true
+    },
+    {
+      "path": ".saipen/recovery/state-phase/reconcile-20261007032404134996.STATE.md",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "c83dca3a353c4887",
+      "applied": true
+    }
+  ],
+  "receipt_metadata": {
+    "inherited_findings": [
+      "FLOOR: STATE.task=T-290 but BOARD DOING is empty at the raw floor",
+      "STATE proposed next_action 'T-290 DONE; next open board ticket' does not start with WAIT:/saipen /PHASE /RUN:/RESUME:",
+      "BOARD: BOARD.md:12 ticket T-290 has unrecognized field 'verify_result: tests/test_nested_git_components.py + tests/test_projects.py + tests/test_freshness.py + tests/test_complete_source_end_to_end.py + tests/ui_qt/test_archive_scope_menu.py + tests/test_config.py = 150 passed / 1 skipped; full suite 2796 passed / 17 skipped; ruff 0; compileall 0; live ZAICODE acceptance 28/28 (evidence: .saipen/evidence/T-290-zaicode-complete-source-acceptance-20261007.txt)'",
+      "STATE proposed invalid phase transition: SCOUT -> DONE (RFC \u00a7 1.6). The block-parked shape requires the latest phase-changing event through STATE.last_event to be the canonical active-block DEC for the exact ticket still in BOARD.BLOCKED",
+      "STATE proposed phase DONE is not ticket-bearing but task is 'T-290'; task must be none outside a ticket-bearing phase"
+    ]
+  }
+}

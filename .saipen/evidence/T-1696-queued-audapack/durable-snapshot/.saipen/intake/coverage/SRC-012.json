@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-012:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Toolbar START AUDIT, row state columns, compact six-lane AUDIT RUNS panel and details diagnostics implemented: ui_qt/dialogs/audit_runs_widget.py, main_window.py:2065 diagnostics, project_room_model state columns",
+      "text": "Implement the captured Project Room toolbar, selected-row states, compact six-lane Audit Runs panel, context actions, and advanced Details pane.",
+      "verification": "tests/ui_qt/test_audit_runs_widget.py + test_state_columns.py + test_toolbar_fits_640.py green",
+      "work": "T-52"
+    }
+  },
+  "schema_version": 1
+}

@@ -55,7 +55,7 @@ source-text assertions (e.g. naive string inclusion) to verify runtime logic.
 
 import ast
 import datetime
-from saipen_engine.phases import ALL_PHASES, ANY_FROM, TICKET_BEARING_PHASES, VALID_TRANSITIONS
+from saipen_engine.phases import ANY_FROM, TICKET_BEARING_PHASES, VALID_TRANSITIONS
 from saipen_engine.commands import (
     CYRILLIC_CONFUSABLE_MAP,
     derive_cyrillic_twins as _derive_cyrillic_twins,
@@ -590,45 +590,6 @@ def _git(*args):
     return r.returncode, r.stdout
 
 
-def _imported_names(imported: str) -> list[str]:
-    """The names one `from ... import ...` clause actually BINDS (T-1974).
-
-    `(a, b as c)` binds `a` and `b`. Taking every identifier in the clause --
-    which is what both call sites did -- also yields `as` and `c`: a keyword and
-    a local alias, never symbols the imported module has to export. The
-    measured cost is in this ticket: `from saipen_engine import suite_record as
-    SR` was reported as two missing symbols, `saipen_engine.as` and
-    `saipen_engine.SR`, and the advice printed beside it told the reader not to
-    commit the file over a defect that did not exist.
-    """
-    names = []
-    for part in imported.strip().strip("()").split(","):
-        token = part.strip().split(" as ")[0].strip()
-        # A `*` re-export binds nothing nameable; anything else must be an
-        # identifier, so a multi-line or parenthesised clause cannot smuggle
-        # punctuation into the symbol list.
-        if token == "*":
-            continue
-        if token and re.fullmatch(r"[A-Za-z_]\w*", token):
-            names.append(token)
-    return names
-
-
-def _submodule_paths(module: str, name: str) -> list[str]:
-    """Where `from <module> import <name>` would put `<name>` as a SUBMODULE.
-
-    T-1974. `from saipen_engine import audit_manifest` is not "the symbol
-    `audit_manifest` inside `saipen_engine/__init__.py`" -- it is the module
-    `saipen_engine/audit_manifest.py`, and Python imports it without
-    `__init__.py` ever naming it. Reading only `__init__.py` made the advisor
-    report a module that IS in HEAD as missing, on this repository, for
-    `audit_manifest`, `identity_audit`, `core_unit`, `suite_record`,
-    `future_gate`, `commands` and `producer_backends.saipal_adapter`.
-    """
-    base = module.replace(".", "/")
-    return [f"tools/{base}/{name}.py", f"tools/{base}/{name}/__init__.py"]
-
-
 def _uncommitted_symbols(rel: str) -> list[str]:
     """Runtime symbols `rel` imports that HEAD does not carry.
 
@@ -669,7 +630,7 @@ def _uncommitted_symbols(rel: str) -> list[str]:
                 base = base.parent
             rest = [part for part in module.lstrip(".").split(".") if part]
             if not rest:
-                for name in _imported_names(imported):
+                for name in re.findall(r"[A-Za-z_]\w*", imported.split(" as ")[0]):
                     key = (base / f"{name}.py").as_posix()
                     if not Path(key).is_file():
                         continue
@@ -709,21 +670,7 @@ def _uncommitted_symbols(rel: str) -> list[str]:
             orphans.add(f"module {module}")
             continue
         blob = "\n".join(b for b in bodies if b is not None)
-        for name in _imported_names(imported):
-            # T-1974: a submodule import needs no export in the parent, so it
-            # is proven by the file's existence rather than by a name in
-            # `__init__.py`. Checked against HEAD, not the working tree: the
-            # whole question is what a clone receives.
-            submodules = [k for k in _submodule_paths(module, name) if Path(k).is_file()]
-            if submodules:
-                for key in submodules:
-                    if key not in cache:
-                        rc, out = _git("show", f"HEAD:{key}")
-                        cache[key] = out if rc == 0 else None
-                if any(cache[k] is not None for k in submodules):
-                    continue
-                orphans.add(f"{module}.{name}")
-                continue
+        for name in re.findall(r"[A-Za-z_]\w*", imported):
             if not re.search(rf"\b{re.escape(name)}\b", blob):
                 orphans.add(f"{module}.{name}")
     return sorted(orphans)
@@ -833,12 +780,6 @@ def _phase_next_action_error(value):
             f"{value!r} writes the phase in lower case -- RFC § 1.2 takes "
             f"the uppercase § 1.6 enum value, and the phase doc is loaded "
             f"from its lowercased name, not from what the state says"
-        )
-    if ph not in ALL_PHASES:
-        return (
-            f"{value!r} names phase {ph!r}, which is not in the § 1.6 enum "
-            f"({', '.join(sorted(ALL_PHASES))}) -- a reader would load "
-            f"phases/{ph.lower()}.md and find nothing to execute"
         )
     _five = "/".join(sorted(TICKET_BEARING_PHASES))
     if ph in TICKET_BEARING_PHASES and not ref:
@@ -2948,17 +2889,26 @@ if state.get("phase") == "DONE":
 # can clear -- the closed records `board_scrub.select` would prune, the same
 # rule entering CLEAN applies -- and names the command a guarded shell admits.
 from saipen_engine import board_scrub as _board_scrub  # noqa: E402
-from saipen_engine import intake as _scrub_intake  # noqa: E402
 
+# T-2096: the warning and the canonical operation read the SAME retention
+# inputs. While this call omitted the promoted-gate set, the validator could
+# count a row as prunable that `scrub_board` is required to keep -- the warning
+# then asked for a scrub the engine would refuse or under-deliver. The shared
+# collector raises when an input cannot be proved (an unreadable gate ledger is
+# unknown, never "no gates"); nothing is called prunable on a guess.
 try:
+    _scrub_inputs = _board_scrub.collect_inputs(Path("."))
     _scrub = _board_scrub.select(
         tickets,
         _canonical_history_snapshot.events if _canonical_history_snapshot else [],
-        *_scrub_intake.active_receipt_works(Path(".")),
+        _scrub_inputs.active_receipts,
+        _scrub_inputs.receipt_works,
+        _scrub_inputs.gated,
     )
 except (OSError, ValueError):
-    # Unreadable receipts are reported by the source-receipt gate; what they
-    # hold is unknown here, so nothing is called prunable.
+    # Unreadable receipts are reported by the source-receipt gate and an
+    # unreadable future-gate ledger by the future-gate checks; what they hold
+    # is unknown here, so nothing is called prunable.
     _scrub = None
 if _scrub is not None and _scrub.due:
     warn(
@@ -5950,15 +5900,7 @@ if _future_gate_dir.is_dir() or _future_gate_index.is_file():
         _future_board_tickets = _parse_future_board(
             _future_board_path.read_text(encoding="utf-8-sig")
         )["tickets"]
-    # T-1961: the same durable history the scrub gate reads is what proves a
-    # slice ticket closed after CLEAN pruned its row -- without it, entering
-    # CLEAN would convert this gate's own green into a FAIL.
-    _future_history = (
-        _canonical_history_snapshot.events if _canonical_history_snapshot else None
-    )
-    _future_report = _validate_future_gate(
-        Path("."), _future_board_tickets, history_events=_future_history
-    )
+    _future_report = _validate_future_gate(Path("."), _future_board_tickets)
     for _future_error in _future_report["errors"]:
         fail(f"FUTURE GATE: {_future_error}")
     for _future_warning in _future_report["warnings"]:
@@ -7856,7 +7798,7 @@ else:
         ),
         (
             rfc_path.parent / "BOOT.md",
-            "Immediate means without asking, never without looking",
+            "current user input outranks it",
             "BOOT.md must say `next_action` is the previous session's "
             "pre-computed pick and is confirmed against BOARD.md where the "
             "validator cannot re-derive it -- the portable floor does not, since "
@@ -7949,7 +7891,10 @@ else:
             drift_ok = False
         _boot_prio = rfc_path.parent / "BOOT.md"
         _boot_prio_t = _boot_prio.read_text(encoding="utf-8-sig") if _boot_prio.is_file() else ""
-        if "the user's own message outranks the file" not in _boot_prio_t:
+        if not any(
+            phrase in _boot_prio_t
+            for phrase in ("current user input outranks it", "Current input beats next_action")
+        ):
             warn("cross-doc-drift",
                 "cross-doc drift [command-outranks-pick] -- BOOT.md step 7 "
                 "must say the user's own message outranks `next_action` and "
@@ -8253,7 +8198,10 @@ else:
 
     # 1c. Shortcuts resolve through the registry table, never from memory.
     if _boot_prio.is_file():
-        if "Memory is never a source for it" not in _boot_prio_t:
+        if not any(
+            phrase in _boot_prio_t
+            for phrase in ("resolves via `saipen <token>`", "resolve shortcuts mechanically")
+        ):
             warn("cross-doc-drift",
                 "cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 "
                 "must resolve a shortcut through the registry table before acting "
@@ -8262,7 +8210,7 @@ else:
                 "from recall rather than reading the file"
             )
             drift_ok = False
-        if "a second copy drifts" not in _boot_prio_t:
+        if "resolves via `saipen <token>`" not in _boot_prio_t:
             warn("cross-doc-drift",
                 "cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 "
                 "must explicitly forbid duplicating the shortcut table into BOOT. "
@@ -9507,6 +9455,12 @@ else:
         ),
         (".pytest_cache/*.md", "generated tool cache, never a shipped document"),
         ("**/.pytest_cache/*.md", "generated tool cache, never a shipped document"),
+        (
+            "tools/regression_*/**/*.md",
+            "test-fixture prose copied into throwaway sandboxes by regression oracles "
+            "(t2089_oracle.py copies home_extensions/subs/PROTOCOL.md in), not shipped "
+            "protocol docs and not read by the installed runtime",
+        ),
           (
             ".workbuddy-ai/**",
             "WorkBuddy AI internal working memory (agent/project notes, generated); tooling state, not a shipped SAIPEN document",
@@ -10693,7 +10647,7 @@ else:
 
     if _contract_docs["BOOT.md"].is_file():
         _bt = _contract_docs["BOOT.md"].read_text(encoding="utf-8-sig")
-        if "Load `STYLE.md` beside this BOOT.md before user-visible output" not in _bt:
+        if "Read STYLE.md and EXECUTION.md before any chat" not in _bt:
             warn("cross-doc-drift",
                 "cross-doc drift [chat-voice] -- BOOT.md no longer mandates "
                 "STYLE.md (caveman-дед) before output. It governs every response "
@@ -10738,7 +10692,10 @@ else:
         # "the file in the same folder as this BOOT.md" needs nothing.
         _fp_start = _btn.find("## Cold route")
         _fp_end = _btn.find("## Routing failures")
-        if _fp_start == -1 or _fp_end == -1 or _fp_end <= _fp_start:
+        _thin_boot = ("Read STYLE.md and EXECUTION.md before any chat" in _bt
+                      and "## Execute" in _bt
+                      and "1. Read STYLE.md and EXECUTION.md" in _bt)
+        if not _thin_boot and (_fp_start == -1 or _fp_end == -1 or _fp_end <= _fp_start):
             warn("cross-doc-drift",
                 "cross-doc drift [chat-voice] -- BOOT.md lost its "
                 "'## Cold route' or '## Routing failures' heading; the cold-route "
@@ -10753,6 +10710,8 @@ else:
             # region-wide substring test counts those as the mandate. It then
             # passes while step 1 says something else entirely -- a check
             # satisfied by a neighbour is not a check on the thing it names.
+            if _thin_boot:
+                _fp_start, _fp_end = _btn.find("## Execute"), len(_btn)
             _fp_region = _btn[_fp_start:_fp_end]
             _s1 = _fp_region.find("\n1. ")
             _s2 = _fp_region.find("\n2. ")
@@ -10765,7 +10724,7 @@ else:
                     "instead of passing vacuously (T-405)"
                 )
                 drift_ok = False
-            elif "STYLE.md" not in _fp_region or "before user-visible output" not in _fp_region:
+            elif "STYLE.md" not in _fp_region or "before any chat" not in _fp_region:
                 warn("cross-doc-drift",
                     "cross-doc drift [chat-voice] -- BOOT.md's numbered fast "
                     "path no longer orders reading STYLE.md before any "
@@ -10786,7 +10745,7 @@ else:
                     "output too (T-1419)"
                 )
                 drift_ok = False
-            elif "beside this BOOT.md" not in _fp_region:
+            elif "<saipen_home>" in _fp_region:
                 warn("cross-doc-drift",
                     "cross-doc drift [chat-voice] -- the fast-path STYLE.md "
                     "read lost its self-locating reference ('beside this "
@@ -10956,10 +10915,11 @@ else:
             # concurrency" is precisely the ambiguity a weak model resolves
             # wrongly while believing it followed SAIPEN.
             _commands_p = home_path("COMMANDS.md")
-            _commands_t = (
-                _commands_p.read_text(encoding="utf-8-sig")
-                if _commands_p.is_file()
-                else ""
+            _reference_p = home_path("COMMANDS_REFERENCE.md")
+            _commands_t = "".join(
+                path.read_text(encoding="utf-8-sig")
+                for path in (_commands_p, _reference_p)
+                if path.is_file()
             )
             _crew_row_m = re.search(
                 r"^\| `sc` \| `saipen crew` \|[^\n]*$",

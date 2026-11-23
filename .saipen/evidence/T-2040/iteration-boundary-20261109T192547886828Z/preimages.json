@@ -1,0 +1,8 @@
+{
+  "tools/saipen_engine/iteration.py": "49a3ac5a670a2b99908271aade9292f3b1157ba75c056c6c5b0f4ef0f4425ca5",
+  "tools/saipen_engine/iteration_verdict.py": "bada873b188f3f257263c9aa1de5a0413dd7c0c5a115a31f30ec194546c40245",
+  "tools/saipen_engine/supervisor.py": "77dbb7308365dc8f183f436c1c87f10bd825262949c6ba50b47a4842e5c0e1cd",
+  "tools/test_campaign_continuation_assessment.py": "1f6f66debdc9dbc31dc50e8c661ac0d11061733eb9477d4126aec18851de832c",
+  "tools/test_t1619_iteration_boundary.py": "a4061769b76054f873af0d36b66d041441cae05cb8a3db57cd0e8ccb482cbec8",
+  "tools/test_t1917_premature_handback.py": "1f70343ff4bffb4b8014357da8f518d08636551223a2f01bfbb4d093e18ad60f"
+}

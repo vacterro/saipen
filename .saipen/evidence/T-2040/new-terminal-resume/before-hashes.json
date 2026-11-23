@@ -1,0 +1,38 @@
+{
+  "tools\\saipen_engine\\board.py": {
+    "sha256": "74cf0a77e64a91edadc8c6c65800aa7366ec7b3fc2f47b8612dbd66fafb80a2b",
+    "bytes": 106569
+  },
+  "tools\\saipen_engine\\router.py": {
+    "sha256": "feeb90bb4ad4b9ca2f0dfa7854e20ae4ec7cad042fb136f57de44c8c3a889e95",
+    "bytes": 82009
+  },
+  "tools\\saipen_engine\\continuation_assessment.py": {
+    "sha256": "6eae95545c64d77baf149fa4a0ed9d052577a7b1c1c3db9d0da1b42e2df4da49",
+    "bytes": 23873
+  },
+  "tools\\saipen_engine\\automation.py": {
+    "sha256": "be6a29bd7860b2e89002f4c8ae1ec82fcc8cb95b31aea0a87db41e68609ddff1",
+    "bytes": 28975
+  },
+  "tools\\saipen_engine\\campaign.py": {
+    "sha256": "6691070541a535468f97ebf013c3862d7d29db19ca2d544a127e2a880a4853ab",
+    "bytes": 134393
+  },
+  "tools\\saipen_engine\\supervisor.py": {
+    "sha256": "3c6d6e5c8986218486ef2afe97615f65b6d52c7480a3358e777dee5ee746d203",
+    "bytes": 20351
+  },
+  "tools\\saipen_engine\\worker.py": {
+    "sha256": "49023e87eaa8f788c969c9f58ef9d35bbbdae6f2ac63295b56d3467fee0aa6f1",
+    "bytes": 31040
+  },
+  "tools\\saipen_engine\\iteration_verdict.py": {
+    "sha256": "30e58aaf0586f30a85420d05c71e60715aeff7e998e65ef2bdce0c51a30e1fb4",
+    "bytes": 27215
+  },
+  "tools\\test_t2040_terminal_consumer_guards.py": {
+    "sha256": "40d465cee2271b3048ff155853cef59c6ae628de95b9c4f65d750db60a112adb",
+    "bytes": 28162
+  }
+}

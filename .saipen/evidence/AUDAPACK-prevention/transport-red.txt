@@ -1,0 +1,78 @@
+======================================================================
+FAIL: test_execution_cwd_is_separate_from_project_binding_cwd (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_execution_cwd_is_separate_from_project_binding_cwd) (tool='write')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 76, in test_execution_cwd_is_separate_from_project_binding_cwd
+    self.assert_protected(event)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 52, in assert_protected
+    self.assertFalse(answer["admitted"], answer)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\t1671-nzhynyj7', 'target': 'STATE.md', 'targets': ['STATE.md'], 'action': 'write', 'effect': 'mutating', 'provenance': 'git-worktree', 'detail': 'protocol state sound', 'duration_ms': 2.583, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'V:\\_TEMP_\\t1671-nzhynyj7', 'tool_name': 'write', 'action': 'write', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': 'STATE.md', 'target_paths': ['STATE.md'], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': 'buffy', 'saipen_verb': None, 'detail': ''}, 'strength': {'host': 'opencode', 'capability': True, 'installed': True, 'current': True, 'health': None, 'effective': 'UNKNOWN', 'reason': 'current hook exists but guard reachability or host health is unobserved'}}
+
+======================================================================
+FAIL: test_execution_cwd_is_separate_from_project_binding_cwd (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_execution_cwd_is_separate_from_project_binding_cwd) (tool='bash')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 76, in test_execution_cwd_is_separate_from_project_binding_cwd
+    self.assert_protected(event)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 52, in assert_protected
+    self.assertFalse(answer["admitted"], answer)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\t1671-nzhynyj7', 'target': None, 'targets': [], 'action': 'shell', 'effect': 'mutating', 'provenance': 'git-worktree', 'detail': 'protocol state sound', 'duration_ms': 3.136, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'V:\\_TEMP_\\t1671-nzhynyj7', 'tool_name': 'bash', 'action': 'shell', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': None, 'target_paths': [], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [{'action': 'write', 'verb': 'redirection', 'targets': ['V:\\_TEMP_\\t1671-nzhynyj7\\LOG.md']}], 'shell_effects_unresolved': None, 'actor': 'buffy', 'saipen_verb': None, 'detail': 'shell command carries destructive filesystem effects; each is judged as the file effect it is'}, 'strength': {'host': 'opencode', 'capability': True, 'installed': True, 'current': True, 'health': None, 'effective': 'UNKNOWN', 'reason': 'current hook exists but guard reachability or host health is unobserved'}}
+
+======================================================================
+FAIL: test_invalid_execution_cwd_carrier_is_not_silently_ignored (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_invalid_execution_cwd_carrier_is_not_silently_ignored) (value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 83, in test_invalid_execution_cwd_carrier_is_not_silently_ignored
+    with self.assertRaises(guard_events.EventError):
+AssertionError: EventError not raised
+
+======================================================================
+FAIL: test_invalid_execution_cwd_carrier_is_not_silently_ignored (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_invalid_execution_cwd_carrier_is_not_silently_ignored) (value='')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 83, in test_invalid_execution_cwd_carrier_is_not_silently_ignored
+    with self.assertRaises(guard_events.EventError):
+AssertionError: EventError not raised
+
+======================================================================
+FAIL: test_invalid_execution_cwd_carrier_is_not_silently_ignored (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_invalid_execution_cwd_carrier_is_not_silently_ignored) (value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 83, in test_invalid_execution_cwd_carrier_is_not_silently_ignored
+    with self.assertRaises(guard_events.EventError):
+AssertionError: EventError not raised
+
+======================================================================
+FAIL: test_invalid_execution_cwd_carrier_is_not_silently_ignored (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_invalid_execution_cwd_carrier_is_not_silently_ignored) (value=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 83, in test_invalid_execution_cwd_carrier_is_not_silently_ignored
+    with self.assertRaises(guard_events.EventError):
+AssertionError: EventError not raised
+
+======================================================================
+FAIL: test_opencode_transport_preserves_execution_directory_and_workdir (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_opencode_transport_preserves_execution_directory_and_workdir) (case='file-from-memory-directory')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 121, in test_opencode_transport_preserves_execution_directory_and_workdir
+    self.assertEqual(row["outcome"], "blocked", row)
+AssertionError: 'allowed' != 'blocked'
+- allowed
++ blocked
+ : {'id': 'file-from-memory-directory', 'outcome': 'allowed', 'message': '', 'hooks': ['experimental.chat.system.transform', 'chat.message', 'experimental.text.complete', 'tool.execute.before'], 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\t1671-nzhynyj7","project_lineage":"lineage-c86bc2b7df4c4ce18503e097aab189f7","provenance":"git-worktree"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-001", "agent_incarnation": "inc-3e0cf27dfcf5ce0f", "decision": "AUTO_KICK", "execution_epoch": "ep-492c0d576cf44706", "ingress": "NONE", "last_event": "E-5", "next_action": "PHASE BUILD T-001", "phase": "BUILD", "replacement_detected": true, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.'], 'exports': ['default']}
+
+======================================================================
+FAIL: test_opencode_transport_preserves_execution_directory_and_workdir (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_opencode_transport_preserves_execution_directory_and_workdir) (case='shell-workdir')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 121, in test_opencode_transport_preserves_execution_directory_and_workdir
+    self.assertEqual(row["outcome"], "blocked", row)
+AssertionError: 'allowed' != 'blocked'
+- allowed
++ blocked
+ : {'id': 'shell-workdir', 'outcome': 'allowed', 'message': '', 'hooks': ['experimental.chat.system.transform', 'chat.message', 'experimental.text.complete', 'tool.execute.before'], 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\t1671-nzhynyj7","project_lineage":"lineage-c86bc2b7df4c4ce18503e097aab189f7","provenance":"git-worktree"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-001", "agent_incarnation": "inc-3e0cf27dfcf5ce0f", "decision": "AUTO_KICK", "execution_epoch": "ep-492c0d576cf44706", "ingress": "NONE", "last_event": "E-5", "next_action": "PHASE BUILD T-001", "phase": "BUILD", "replacement_detected": false, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.'], 'exports': ['default']}
+
+----------------------------------------------------------------------
+Ran 20 tests in 5.743s
+
+FAILED (failures=8)

@@ -1,0 +1,22 @@
+SCOPED: 26 of 273 control(s) selected by --changed (1 path(s)). This is NOT the full sweep.
+SCOPED: known limitation -- selection reads each control's DECLARED target file only. A control whose target is untouched but whose check reads a changed file indirectly -- a cross-document rule, a manifest, a schema another file is validated against -- is NOT selected and is NOT proven by this run
+SCOPED: known limitation -- the always-on probes still run; only the per-control sweep is narrowed
+PASS: a real root `nul` entry is excluded from audit snapshots
+UNPROVEN: symlink-restore -- host cannot create a symlink, so the red control was never constructed: [WinError 1314] A required privilege is not held by the client: 'V:\\_TEMP_\\audit_checks_sd9l7q0s\\probe-symlink-restore\\symlink-restore-probe\\external.md' -> 'V:\\_TEMP_\\audit_checks_sd9l7q0s\\probe-symlink-restore\\symlink-restore-probe\\IDENTITY.md'
+PASS: audit-tags missing-Git skip plus enumeration, nonzero, malformed, truncated, and surplus fail-closed controls behave
+PASS: every producer-OUTBOX control runs at a gate where its finding is hard
+PASS: a known-good copy of this repository is built for the mutation controls
+PASS: release-ledger clean/new-tag/new-changelog/stale-baseline controls behave distinctly
+PASS: tools/validate.py declares exactly the adjudicated fail sites, and added, removed and same-count SWAPPED sites are each named
+NOTE: 356 fail site(s) recorded by identity in tools/validator_fail_sites.json
+NOTE: known limitation -- identity binds WHICH fail sites tools/validate.py declares, so an added, removed or same-count swapped site is named -- but a BASELINE record is inherited surface that was never individually adjudicated, which is recorded per site and is NOT detected here as missing coverage
+PASS: aged unowned WARN slug fails; identical aged slug with a live naming ticket passes; baseline data, never validator wording
+FAIL: phase-rename -- consistent SCOUT->SCOUTX rename was rejected: FAIL: closure-evidence -- ticket T-1669 is ## DONE but carries no current-cycle verification evidence (classifier: unproven/failed; reverify: no current-tree PASS re-verification receipt); an unproven closure is never protocol-green -- run saipen work reverify T-1669 --run '<executable check for this Work>' to record ONE immutable current-tree re-verification receipt with EXECUTED evidence (an attested-only --verification contract is recorded evidence, never closure proof), or re-verify with real evidence before DONE
+PASS: release-ledger tag query is observed once; duplicate-query and invalid-validator controls both go red
+PASS: the unmodified copy validates clean, so every expectation below is absent before its mutation
+PASS: callable no-op mutations are rejected before validation
+PASS: every canonical mutation has its target, so the denominator holds still
+PASS: every canonical mutation still drives its own check red
+SCOPED: the 26 selected control(s) each went red on their own condition. This proves nothing about the 247 control(s) that were not run, and is not audit_checks evidence for a checkpoint or a release.
+AUDIT: 12 of 14 probes passed; failed: phase-rename; skipped: none; unproven (host capability): symlink-restore
+rc=1

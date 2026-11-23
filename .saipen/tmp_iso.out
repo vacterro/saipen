@@ -1,0 +1,10 @@
+ZAICODE_HOME: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_ZAICODE\.zaicode\home
+MISSING V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_ZAICODE\.zaicode\home\.zcode\cli\config.json
+MISSING V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_ZAICODE\.zaicode\home\cli\config.json
+MISSING V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_ZAICODE\.zaicode\home\.zcode\hooks\saipen-guard.py
+EXISTS  C:\Users\vac34\.zcode\cli\config.json
+CFG: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_ZAICODE\.zaicode\home\AppData\Local\ProTrail\config.json
+HOOK: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_ZAICODE\.zaicode\home\.zcode\skills\saipen\extensions\adapters\antigravity\saipen-guard.py
+HOOK: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_ZAICODE\.zaicode\home\.zcode\skills\saipen\extensions\adapters\claude\saipen-guard.py
+HOOK: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_ZAICODE\.zaicode\home\.zcode\skills\saipen\extensions\adapters\codex\saipen-guard.py
+HOOK: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_ZAICODE\.zaicode\home\.zcode\skills\saipen\extensions\adapters\zaicode\saipen-guard.py

@@ -1,0 +1,32 @@
+{
+  "scope": "Generated disposable source fixture, not original-history recovery or live host proof",
+  "controls": [
+    {
+      "case": "the registered command inventory disappears",
+      "path": "saipen/COMMANDS_REFERENCE.md",
+      "known_good_exit": 0,
+      "mutated_exit": 1,
+      "expected": "Command reference unavailable:",
+      "original_sha256": "ecacf6e0a3bd4046f7222976ee848e61ff2bfb1148c10f4363128ff8d578150d",
+      "restored_exit": 0
+    },
+    {
+      "case": "a future verb stops being published",
+      "path": "saipen/COMMANDS_REFERENCE.md",
+      "known_good_exit": 0,
+      "mutated_exit": 1,
+      "expected": "FUTURE-OWNER: `saipen future refine` is implemented and declared but",
+      "original_sha256": "ecacf6e0a3bd4046f7222976ee848e61ff2bfb1148c10f4363128ff8d578150d",
+      "restored_exit": 0
+    },
+    {
+      "case": "COMMANDS.md shortcut row leaves the registry behind",
+      "path": "saipen/COMMANDS_REFERENCE.md",
+      "known_good_exit": 0,
+      "mutated_exit": 1,
+      "expected": "cross-doc drift [commands-vs-registry]",
+      "original_sha256": "ecacf6e0a3bd4046f7222976ee848e61ff2bfb1148c10f4363128ff8d578150d",
+      "restored_exit": 0
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "tools/saipen_engine/board.py": {
+    "before": 6,
+    "after": 6,
+    "introduced": [],
+    "removed": []
+  },
+  "tools/saipen_engine/work_exhaustion.py": {
+    "before": 35,
+    "after": 35,
+    "introduced": [],
+    "removed": []
+  },
+  "tools/saipen_engine/persistent_goal.py": {
+    "before": 3,
+    "after": 3,
+    "introduced": [],
+    "removed": []
+  },
+  "tools/saipen_engine/goal_authority.py": {
+    "before": 0,
+    "after": 0,
+    "introduced": [],
+    "removed": []
+  },
+  "tools/saipen_engine/subs.py": {
+    "before": 12,
+    "after": 11,
+    "introduced": [],
+    "removed": [
+      [
+        "E501",
+        "matches = [item for item in hypotheses if all(item.get(key) == value for key, value in expected.items())]"
+      ]
+    ]
+  },
+  "tools/saipen_engine/operations.py": {
+    "before": 11,
+    "after": 11,
+    "introduced": [],
+    "removed": []
+  }
+}

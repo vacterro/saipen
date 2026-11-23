@@ -1,0 +1,49 @@
+== the test dispatch block (current tree)
+    if command in ("test", "tt"):
+        # CORE § 1.10: `tt` routes to `saipen test` -- read-only suite report.
+        if args[1:2] == ["suite"]:
+            # T-1658: the project's own declared suite, run by the engine and
+            # kept as a typed record. `declare`, `run` and `withdraw` write; the
+            # bare form and `status` only read.
+            from saipen_engine import suite_record
+
+            if (
+                not dry_run
+                and _command_mutates("test", args[1:])
+                and _negotiate_capability(project_root) == "read-only"
+            ):
+                return _capability_refusal(as_json)
+            payload, exit_code = suite_record.cli(
+                project_root, args[2:], agent=_agent_for(project_root), dry_run=dry_run
+            )
+            payload["route"] = command
+            _emit(payload, as_json)
+            return exit_code
+        if len(args) > 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"test accepts no arguments; surplus: {' '.join(args[1:])}",
+                    "canonical_next_command": "saipen test",
+                },
+                as_json,
+            )
+            return 2
+        from saipen_engine.test_runner import canonical_test_plan, run_canonical_suite
+
+        if dry_run:
+            _emit(
+                {
+                    "ok": True,
+                    "code": "TEST_PLAN",
+                    "detail": "canonical test families planned; zero suites executed",
+== asked of the real commands in this bound project, dry run only
+saipen run --dry-run -> VALIDATION_FAILED | unknown command: run
+saipen declare --dry-run -> VALIDATION_FAILED | unknown command: declare
+saipen test --dry-run -> TEST_PLAN | canonical test families planned; zero suites executed
+saipen test run --dry-run -> VALIDATION_FAILED | test accepts no arguments; surplus: run
+saipen test declare --dry-run -> VALIDATION_FAILED | test accepts no arguments; surplus: declare
+saipen test suite status --dry-run -> SUITE_STATUS | 
+== ledger unchanged by the dry runs
+- 14.10.26 01:06 [E-15252] [parent: E-15251] [T-1766] [agent: saipen-cli] [op: claim-a04d5

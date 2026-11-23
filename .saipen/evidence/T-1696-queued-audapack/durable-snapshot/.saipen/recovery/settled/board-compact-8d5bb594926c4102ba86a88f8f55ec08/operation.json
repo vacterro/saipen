@@ -1,0 +1,71 @@
+{
+  "op_id": "board-compact-8d5bb594926c4102ba86a88f8f55ec08",
+  "operation": "board_legacy_compaction",
+  "created_at": "2026-09-14T09:05:58Z",
+  "agent": "buffy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "53f82d23fa3004c0",
+  "preconditions": {
+    ".saipen/STATE.md": "08238f180eba3be4",
+    ".saipen/BOARD.md": "532a983975089474",
+    ".saipen/LOG.md": "48bf8e0a65f94cdf"
+  },
+  "read_preconditions": {
+    ".saipen/logs": "delete-tree-sha256:ccffe3625544839b1a2f22c985260a3a13612d7b0a0b80fe6cd23b76cdbe5841"
+  },
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 5,
+  "targets": [
+    {
+      "path": ".saipen/recovery/board-compaction/T-176/T-176-a3f2216235c1c08401ae0441.BOARD.md",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "a3f2216235c1c084",
+      "applied": true
+    },
+    {
+      "path": ".saipen/recovery/board-compaction/T-176/T-176-a3f2216235c1c08401ae0441.json",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "ed40d5947e7eb676",
+      "applied": true
+    },
+    {
+      "path": ".saipen/LOG.md",
+      "role": "log",
+      "action": "write",
+      "before_hash": "48bf8e0a65f94cdf",
+      "after_hash": "d779e42f26ad5f84",
+      "applied": true
+    },
+    {
+      "path": ".saipen/BOARD.md",
+      "role": "board",
+      "action": "write",
+      "before_hash": "532a983975089474",
+      "after_hash": "babe7d7475c16b48",
+      "applied": true
+    },
+    {
+      "path": ".saipen/STATE.md",
+      "role": "state",
+      "action": "write",
+      "before_hash": "08238f180eba3be4",
+      "after_hash": "d59878290b58c934",
+      "applied": true
+    }
+  ],
+  "receipt_metadata": {
+    "operation": "board_legacy_compaction",
+    "status": "COMMITTED",
+    "ticket": "T-176",
+    "detail_ref": ".saipen/recovery/board-compaction/T-176/T-176-a3f2216235c1c08401ae0441.json",
+    "original_record_sha256": "a3f2216235c1c08401ae044109ef907f11af1573b54f32c55abc7f92c710b137",
+    "event_id": "E-1365",
+    "reason": "lossless historical BOARD repair"
+  }
+}

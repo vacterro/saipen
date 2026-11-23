@@ -1,0 +1,9 @@
+{
+  "authority": "Existing goal scope; canonical unblock E-16917 with new proposal-proof.json evidence; no new operator grant claimed",
+  "files": {
+    "saipen/COMMANDS.md": "11936f29f40ae8387228bc1ead89e5babf58efdbbe3a3391c76d09780c97251d",
+    "saipen/phases/verify.md": "a97a3520200409903a05daec79ee66a4aaf2c9db4bec71302cb077f3c043a48a",
+    "saipen/phases/ship.md": "96bce56b6564790ec07db403645a8577ab85a1a50cbd69548b0a475a492fae3d"
+  },
+  "prior_attempt_preserved": true
+}

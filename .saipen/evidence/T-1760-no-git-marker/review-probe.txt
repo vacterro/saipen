@@ -1,0 +1,12 @@
+.
+----------------------------------------------------------------------
+Ran 1 test in 2.611s
+
+OK
+{
+  "marker the CLI wrote": "ccc converge target -> ship @no-git",
+  "validator ccc FAIL lines without Git": [],
+  "validator ccc FAIL lines once it is a Git project": [
+    "FAIL: STATE.md converge_target: ship has no ccc entry marker -- a crash cannot recover the I -> SHIP -> J rout"
+  ]
+}

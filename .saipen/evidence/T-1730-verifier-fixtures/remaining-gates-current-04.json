@@ -1,0 +1,13 @@
+{
+  "job_pid": 24332,
+  "status": "stopped",
+  "completed": [
+    "T1695-current-04",
+    "T1695-currentness-04",
+    "conformance-current-04"
+  ],
+  "started_utc": "2026-10-12T20:27:20.631442+00:00",
+  "current_gate": "audit-current-04",
+  "reason": "RuntimeError: required verification audit-current-04 returned 1",
+  "finished_utc": "2026-10-12T20:56:14.626063+00:00"
+}

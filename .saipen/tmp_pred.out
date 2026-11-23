@@ -1,0 +1,6 @@
+HOME: C:\Users\vac34\.zcode
+  pred: {'ok': False, 'host': None, 'reason': 'HOOK_NOT_FOUND', 'detail': 'the connecting process is under the host application but is not the installed host hook or the engine it started (a shell tool call is not a hook)'}
+HOME: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_ZAICODE\.zaicode\home
+  pred: {'ok': False, 'host': None, 'reason': 'HOOK_NOT_FOUND', 'detail': 'the connecting process is under the host application but is not the installed host hook or the engine it started (a shell tool call is not a hook)'}
+settings zaicode keys: {'host_images': ['zaicode.exe'], 'host_signers': [], 'max_shells': 0, 'max_bridges': 2, 'ancestry_limit': 16}
+hosts.zaicode: {'host_images': ['zaicode.exe'], 'host_signers': [], 'max_shells': 0}

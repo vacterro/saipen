@@ -1,0 +1,7 @@
+{
+  "chunk_id": "0465a9",
+  "wall_time_seconds": 1.1837238,
+  "exit_code": 0,
+  "original_token_count": 169,
+  "output": "{\r\n  \"scope\": \"current account, exact SAITULS/SAISPIN task\",\r\n  \"available\": false,\r\n  \"category\": \"ObjectNotFound\",\r\n  \"error_id\": \"CmdletizationQuery_NotFound,Get-ScheduledTask\",\r\n  \"detail\": \"No matching MSFT_ScheduledTask objects found by CIM query for instances of the Root/Microsoft/Windows/TaskScheduler/MSFT_ScheduledTask class on the  CIM server: SELECT * FROM MSFT_ScheduledTask  WHERE ((TaskName LIKE 'SAISPIN')) AND ((TaskPath LIKE '\\\\\\\\SAITULS\\\\\\\\')). Verify query parameters and retry.\"\r\n}\r\n{\r\n  \"ok\": true,\r\n  \"code\": \"SUITE_STATUS\",\r\n  \"declared\": false,\r\n  \"command\": null,\r\n  \"timeout_s\": null,\r\n  \"newest\": null,\r\n  \"current\": false,\r\n  \"route\": \"test\"\r\n}\r\n"
+}

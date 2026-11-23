@@ -141,8 +141,17 @@ def cycle_liveness(root: Path, cycle_id: str) -> dict | None:
     stale = bool(draft or no_run) and (
         status != "active" or (age_days is not None and age_days >= STALE_DRAFT_DAYS)
     )
+    # T-10: the fourth argument is a JSON findings payload with a non-empty
+    # string `run_text`, never the seat's own markdown report. Naming the
+    # documented placeholder keeps the advertised route executable after the
+    # seat writes its semantic audit into a findings file; feeding the report
+    # path here made every advertised route fail (findings file not found /
+    # not valid JSON). This mirrors improve.py:3515 and improve --session's
+    # `next` field. The consumer's JSON contract stays intact -- accepting a
+    # report path as payload would let a report append itself and bypass the
+    # immutable RUN-body bar.
     submit = (
-        f"saipen improve submit {cycle_id} {seat_id} {project} {seat_id}/{report_path}"
+        f"saipen improve submit {cycle_id} {seat_id} {project} <findings.json>"
         if draft and seat_id and report_path
         else ""
     )

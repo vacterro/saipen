@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-419:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "P0 verify EX-000053 installed-generation provenance deadlock, prepare T-2058 + 8.1.1 within authorized scope"
+    }
+  },
+  "derived_at": "2026-11-17T03:14:46Z",
+  "derived_from": "SRC-419",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "057d1710590ad51cead962a6b567e6bab92a6e6f5fc649ce022570257a2f9d4c"
+}

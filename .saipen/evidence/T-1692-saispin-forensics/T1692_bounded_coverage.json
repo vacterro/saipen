@@ -1,0 +1,219 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"project\":\"SAITULS\",\"signal\":\"best_effort\",\"indexed_at\":\"2026-09-23T14:49:26Z\",\"metadata\":{\"generation\":\"2026-09-23T14:49:26Z\",\"index_mode\":\"full\",\"recorded_at\":\"2026-09-23T14:49:26Z\",\"recording_status\":\"complete\",\"ignored_files_stored\":25,\"ignored_files_total\":25,\"hash_records_complete\":true,\"coverage_version\":3,\"generation_matches\":true},\"paths\":[{\"requested_path\":\"Scripts/saispin_logic.py\",\"path\":\"Scripts/saispin_logic.py\",\"status\":\"no_recorded_issue\",\"freshness\":\"metadata_changed\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[]},{\"requested_path\":\"Scripts/saispin_watch.ps1\",\"path\":\"Scripts/saispin_watch.ps1\",\"status\":\"no_recorded_issue\",\"freshness\":\"metadata_changed\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[]},{\"requested_path\":\"tests/test_saispin.py\",\"path\":\"tests/test_saispin.py\",\"status\":\"no_recorded_issue\",\"freshness\":\"metadata_changed\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[]}],\"scopes\":[{\"requested_scope\":\"Scripts\",\"scope\":\"Scripts\",\"total\":17,\"has_more\":true,\"next_offset\":8,\"entries\":[{\"path\":\"Scripts/_.txt\",\"kind\":\"not_indexed_file\",\"detail\":\"gitignore\"},{\"path\":\"Scripts/__pycache__\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\"},{\"path\":\"Scripts/_other/wa-debloat.ps1\",\"kind\":\"parse_partial\",\"detail\":\"66-66,141-141\",\"ranges\":[{\"start\":66,\"end\":66},{\"start\":141,\"end\":141}]},{\"path\":\"Scripts/_other/wa-fix-wns.ps1\",\"kind\":\"parse_partial\",\"detail\":\"50-50\",\"ranges\":[{\"start\":50,\"end\":50}]},{\"path\":\"Scripts/build_payload.ps1\",\"kind\":\"parse_partial\",\"detail\":\"99-99,99-99\",\"ranges\":[{\"start\":99,\"end\":99},{\"start\":99,\"end\":99}]},{\"path\":\"Scripts/saipatch/__pycache__\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\"},{\"path\":\"Scripts/saipatch/lib/transaction.ps1\",\"kind\":\"parse_partial\",\"detail\":\"132-132,202-202\",\"ranges\":[{\"start\":132,\"end\":132},{\"start\":202,\"end\":202}]},{\"path\":\"Scripts/saipatch/patches/opencode-queue-mode/anchor-853.bin\",\"kind\":\"not_indexed_file\",\"detail\":\"ignored-suffix\"}],\"status\":\"known_gaps\"},{\"requested_scope\":\"tests\",\"scope\":\"tests\",\"total\":6,\"has_more\":false,\"entries\":[{\"path\":\"tests/PROOF-2026-08-24.txt\",\"kind\":\"not_indexed_file\",\"detail\":\"gitignore\"},{\"path\":\"tests/__pycache__\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\"},{\"path\":\"tests/test_native_tui_probe.ps1\",\"kind\":\"parse_partial\",\"detail\":\"130-130\",\"ranges\":[{\"start\":130,\"end\":130}]},{\"path\":\"tests/test_saituls_repaint.ps1\",\"kind\":\"parse_partial\",\"detail\":\"23-23,23-23,26-27\",\"ranges\":[{\"start\":23,\"end\":23},{\"start\":23,\"end\":23},{\"start\":26,\"end\":27}]},{\"path\":\"tests/test_taskbar_edge_integration.ps1\",\"kind\":\"parse_partial\",\"detail\":\"201-201,348-348\",\"ranges\":[{\"start\":201,\"end\":201},{\"start\":348,\"end\":348}]},{\"path\":\"tests/test_taskbar_edge_logic.ps1\",\"kind\":\"parse_partial\",\"detail\":\"27-27,27-27\",\"ranges\":[{\"start\":27,\"end\":27},{\"start\":27,\"end\":27}]}],\"status\":\"known_gaps\"}],\"caveat\":\"Best-effort signal only. No recorded issue does not prove graph or source completeness; read flagged source and qualify claims when metadata is changed or unavailable.\"}"
+    }
+  ],
+  "structuredContent": {
+    "project": "SAITULS",
+    "signal": "best_effort",
+    "indexed_at": "2026-09-23T14:49:26Z",
+    "metadata": {
+      "generation": "2026-09-23T14:49:26Z",
+      "index_mode": "full",
+      "recorded_at": "2026-09-23T14:49:26Z",
+      "recording_status": "complete",
+      "ignored_files_stored": 25,
+      "ignored_files_total": 25,
+      "hash_records_complete": true,
+      "coverage_version": 3,
+      "generation_matches": true
+    },
+    "paths": [
+      {
+        "requested_path": "Scripts/saispin_logic.py",
+        "path": "Scripts/saispin_logic.py",
+        "status": "no_recorded_issue",
+        "freshness": "metadata_changed",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": []
+      },
+      {
+        "requested_path": "Scripts/saispin_watch.ps1",
+        "path": "Scripts/saispin_watch.ps1",
+        "status": "no_recorded_issue",
+        "freshness": "metadata_changed",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": []
+      },
+      {
+        "requested_path": "tests/test_saispin.py",
+        "path": "tests/test_saispin.py",
+        "status": "no_recorded_issue",
+        "freshness": "metadata_changed",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": []
+      }
+    ],
+    "scopes": [
+      {
+        "requested_scope": "Scripts",
+        "scope": "Scripts",
+        "total": 17,
+        "has_more": true,
+        "next_offset": 8,
+        "entries": [
+          {
+            "path": "Scripts/_.txt",
+            "kind": "not_indexed_file",
+            "detail": "gitignore"
+          },
+          {
+            "path": "Scripts/__pycache__",
+            "kind": "not_indexed_dir",
+            "detail": "excluded subtree"
+          },
+          {
+            "path": "Scripts/_other/wa-debloat.ps1",
+            "kind": "parse_partial",
+            "detail": "66-66,141-141",
+            "ranges": [
+              {
+                "start": 66,
+                "end": 66
+              },
+              {
+                "start": 141,
+                "end": 141
+              }
+            ]
+          },
+          {
+            "path": "Scripts/_other/wa-fix-wns.ps1",
+            "kind": "parse_partial",
+            "detail": "50-50",
+            "ranges": [
+              {
+                "start": 50,
+                "end": 50
+              }
+            ]
+          },
+          {
+            "path": "Scripts/build_payload.ps1",
+            "kind": "parse_partial",
+            "detail": "99-99,99-99",
+            "ranges": [
+              {
+                "start": 99,
+                "end": 99
+              },
+              {
+                "start": 99,
+                "end": 99
+              }
+            ]
+          },
+          {
+            "path": "Scripts/saipatch/__pycache__",
+            "kind": "not_indexed_dir",
+            "detail": "excluded subtree"
+          },
+          {
+            "path": "Scripts/saipatch/lib/transaction.ps1",
+            "kind": "parse_partial",
+            "detail": "132-132,202-202",
+            "ranges": [
+              {
+                "start": 132,
+                "end": 132
+              },
+              {
+                "start": 202,
+                "end": 202
+              }
+            ]
+          },
+          {
+            "path": "Scripts/saipatch/patches/opencode-queue-mode/anchor-853.bin",
+            "kind": "not_indexed_file",
+            "detail": "ignored-suffix"
+          }
+        ],
+        "status": "known_gaps"
+      },
+      {
+        "requested_scope": "tests",
+        "scope": "tests",
+        "total": 6,
+        "has_more": false,
+        "entries": [
+          {
+            "path": "tests/PROOF-2026-08-24.txt",
+            "kind": "not_indexed_file",
+            "detail": "gitignore"
+          },
+          {
+            "path": "tests/__pycache__",
+            "kind": "not_indexed_dir",
+            "detail": "excluded subtree"
+          },
+          {
+            "path": "tests/test_native_tui_probe.ps1",
+            "kind": "parse_partial",
+            "detail": "130-130",
+            "ranges": [
+              {
+                "start": 130,
+                "end": 130
+              }
+            ]
+          },
+          {
+            "path": "tests/test_saituls_repaint.ps1",
+            "kind": "parse_partial",
+            "detail": "23-23,23-23,26-27",
+            "ranges": [
+              {
+                "start": 23,
+                "end": 23
+              },
+              {
+                "start": 23,
+                "end": 23
+              },
+              {
+                "start": 26,
+                "end": 27
+              }
+            ]
+          },
+          {
+            "path": "tests/test_taskbar_edge_integration.ps1",
+            "kind": "parse_partial",
+            "detail": "201-201,348-348",
+            "ranges": [
+              {
+                "start": 201,
+                "end": 201
+              },
+              {
+                "start": 348,
+                "end": 348
+              }
+            ]
+          },
+          {
+            "path": "tests/test_taskbar_edge_logic.ps1",
+            "kind": "parse_partial",
+            "detail": "27-27,27-27",
+            "ranges": [
+              {
+                "start": 27,
+                "end": 27
+              },
+              {
+                "start": 27,
+                "end": 27
+              }
+            ]
+          }
+        ],
+        "status": "known_gaps"
+      }
+    ],
+    "caveat": "Best-effort signal only. No recorded issue does not prove graph or source completeness; read flagged source and qualify claims when metadata is changed or unavailable."
+  },
+  "isError": false
+}

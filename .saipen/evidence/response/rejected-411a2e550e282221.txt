@@ -1,0 +1,8 @@
+Sammud 1 ja 2 on valmis (`0b92f16`, lokaalselt). Testi neid uues mängus. Mängus pole ma neid ise näinud, sest sinu mäng jookseb ja testi käivitamine võtaks sul akna fookuse.
+
+- **Konfetti-killud:** VRV lisab mängu alguses sinu enda `xcarxpl` ja `xvehxpl` plahvatustesse kaks liiki kilde. Need on 4 suurt ja 8 väikest metallitükki, mis lendavad kaugele ja kõrgele ning põrkavad ja pöörlevad mööda maad 5–6 s. Need on ainult pilt, mängus ei muuda nad midagi. Mudelikildude ja põrkefüüsika sama kombinatsiooni kasutavad ka BZTC modderid.
+- **Kaugem lend:** plahvatuse löök on kahekordne: `xvehxpl` 5 → 10, `xcarxpl` 3 → 6. Vrakk lendab kaugemale, aga ka lähedal olevad elusad üksused saavad tugevama tõuke.
+- **Testid:** projektsiooni test PASS. Kontrollisin seda ka päris mängufailidega: `xvehxpl` 14 → 16 osakeseliiki, mis on mootori maksimum. Kogu komplektist 32/33 PASS (`Test-Release` otsib endiselt vana installi-zipi).
+- **Pakett:** `dist/VRV.zip` sha256 `5512f2fd`. Proovi uues mängus `vrv_latest_start.bat`-iga. `VRV.log`-is peab olema rida `Native death effects: 2 explosion(s)`.
+
+Kui kildude suurus, kogus või põrkamine ei meeldi, muudan numbreid. Siis võtan ette 3. sammu ehk veereva vraki.

@@ -1,0 +1,27 @@
+..............F.....F...............
+======================================================================
+FAIL: test_pv15_local_done_pending_publication_not_published (__main__.PrematureVictoryPreventionTests.test_pv15_local_done_pending_publication_not_published)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_premature_victory_prevention.py", line 333, in test_pv15_local_done_pending_publication_not_published
+    self.assertEqual(truth["publication_status"], outcome_truth.RELEASE_BLOCKED)
+AssertionError: 'RELEASE_PENDING' != 'RELEASE_BLOCKED'
+- RELEASE_PENDING
++ RELEASE_BLOCKED
+
+
+======================================================================
+FAIL: test_pv21_operator_bounded_grant_executes_within_scope (__main__.PrematureVictoryPreventionTests.test_pv21_operator_bounded_grant_executes_within_scope)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_premature_victory_prevention.py", line 403, in test_pv21_operator_bounded_grant_executes_within_scope
+    self.assertEqual(truth["publication_status"], outcome_truth.RELEASE_BLOCKED)
+AssertionError: 'RELEASE_PENDING' != 'RELEASE_BLOCKED'
+- RELEASE_PENDING
++ RELEASE_BLOCKED
+
+
+----------------------------------------------------------------------
+Ran 36 tests in 2.722s
+
+FAILED (failures=2)

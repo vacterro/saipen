@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+    "-B",
+    "-m",
+    "unittest",
+    "tools.test_t1704_goal_checkpoint_priority"
+  ],
+  "cwd": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+  "exit_code": 1,
+  "elapsed_seconds": 9.245851755142212,
+  "fingerprint_before": "0fc1cf555d0182d8e9d022eb230057bd2dd763a83d667308b5bb08946b43d0b4",
+  "fingerprint_after": "0fc1cf555d0182d8e9d022eb230057bd2dd763a83d667308b5bb08946b43d0b4",
+  "counts": {
+    "ran": 24,
+    "red": [
+      "test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_review_ticket_and_phase_survive_the_bounded_native_check"
+    ],
+    "headers": 1,
+    "unparsed": 0,
+    "tallied": 1
+  },
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "ae01db3fd11c592baf6e9829627a18cac5a42758da205e399dc7fcd280f814b3",
+  "live_root_modified": false,
+  "live_persistent_grant": false
+}

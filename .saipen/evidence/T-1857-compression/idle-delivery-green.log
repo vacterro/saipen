@@ -1,0 +1,20 @@
+test_102_blocked_and_three_todo_never_mean_all_complete (test_t1857_shared_blockers.SharedBlockerTests.test_102_blocked_and_three_todo_never_mean_all_complete) ... ok
+test_audit_uses_project_wide_shared_blocker_owner (test_t1857_shared_blockers.SharedBlockerTests.test_audit_uses_project_wide_shared_blocker_owner) ... ok
+test_dependency_cycle_is_not_recoverable_or_complete (test_t1857_shared_blockers.SharedBlockerTests.test_dependency_cycle_is_not_recoverable_or_complete) ... ok
+test_done_phase_alone_cannot_claim_campaign_completion (test_t1857_shared_blockers.SharedBlockerTests.test_done_phase_alone_cannot_claim_campaign_completion) ... ok
+test_each_blocked_item_has_one_complete_diagnostic (test_t1857_shared_blockers.SharedBlockerTests.test_each_blocked_item_has_one_complete_diagnostic) ... ok
+test_human_status_cannot_look_complete_while_automation_is_blocked (test_t1857_shared_blockers.SharedBlockerTests.test_human_status_cannot_look_complete_while_automation_is_blocked) ... ok
+test_idle_projection_cannot_waive_an_active_phase_or_claim_done (test_t1857_shared_blockers.SharedBlockerTests.test_idle_projection_cannot_waive_an_active_phase_or_claim_done) ... ok
+test_idle_verdict_round_trips_through_the_authoritative_checker (test_t1857_shared_blockers.SharedBlockerTests.test_idle_verdict_round_trips_through_the_authoritative_checker) ... ok
+test_incidental_words_do_not_grant_staging_recovery_authority (test_t1857_shared_blockers.SharedBlockerTests.test_incidental_words_do_not_grant_staging_recovery_authority) ... ok
+test_independent_work_still_runs_before_blocker_diagnostics (test_t1857_shared_blockers.SharedBlockerTests.test_independent_work_still_runs_before_blocker_diagnostics) ... ok
+test_multiple_dependency_roots_are_retained (test_t1857_shared_blockers.SharedBlockerTests.test_multiple_dependency_roots_are_retained) ... ok
+test_projection_groups_roots_and_transitive_todo_without_mutation (test_t1857_shared_blockers.SharedBlockerTests.test_projection_groups_roots_and_transitive_todo_without_mutation) ... ok
+test_publication_aliases_use_existing_operator_class (test_t1857_shared_blockers.SharedBlockerTests.test_publication_aliases_use_existing_operator_class) ... ok
+test_router_carries_the_actionable_blocker_with_no_synthetic_progress (test_t1857_shared_blockers.SharedBlockerTests.test_router_carries_the_actionable_blocker_with_no_synthetic_progress) ... ok
+test_shared_release_obstruction_is_prioritized_over_older_external_work (test_t1857_shared_blockers.SharedBlockerTests.test_shared_release_obstruction_is_prioritized_over_older_external_work) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.007s
+
+OK

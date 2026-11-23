@@ -1,0 +1,13 @@
+utc: 2026-10-08T06:02:58Z  sandbox: V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\f76e40b0-5ac7-4462-b119-34e5f363e7ec\scratchpad\sbhome
+--- install through the engine verb, sandbox profile, its bin first on PATH
+  "code": "PATH_LAUNCHER_INSTALLED",
+  "directory": "V:\\_TEMP_\\claude\\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\\f76e40b0-5ac7-4462-b119-34e5f363e7ec\\scratchpad\\sbhome\\bin",
+  "status": "PATH_LAUNCHER_READY",
+saipen
+saipen.cmd
+--- edit one launcher by hand, then bash uninstall.sh
+PATH launcher                {"removed": 1, "preserved": 1}
+PATH launcher removed; edited files preserved
+Done. SAIPEN global hooks removed.
+--- left in bin (the edited one must stay):
+saipen.cmd

@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-418.md",
+  "closed_at": "2026-11-16T20:48:58Z",
+  "closure_event": null,
+  "linked_work": "T-2072",
+  "linked_works": [
+    "T-2072"
+  ],
+  "receipt_id": "SRC-418",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "c2570277e41bd3965324f9bd02a972a383d65fbcc31e060077aac6faeabab174",
+  "status": "CLOSED",
+  "unresolved": 0
+}

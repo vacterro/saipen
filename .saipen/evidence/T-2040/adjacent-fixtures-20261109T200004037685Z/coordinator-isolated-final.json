@@ -1,0 +1,25 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tools/test_t2022_protocol_home_maintenance_distinction.py",
+    "tools/test_t1790_dependency_route_budget.py",
+    "tools/test_t1577_op_id_provenance.py",
+    "-q",
+    "--tb=short"
+  ],
+  "exit_code": 0,
+  "before": {
+    "tools/test_t2022_protocol_home_maintenance_distinction.py": "02794d6202c6e2700c729dffab2df488a6a91ad0611f385d37d8a2b45150b00f",
+    "tools/test_t1790_dependency_route_budget.py": "73c6b5bdd45584e736b2fe9f0d7b98953be4ff4d2f66c1394742bf8d401dee62",
+    "tools/test_t1577_op_id_provenance.py": "fdc6bf2262d741555875b48a7b25d4961f2aedc995d908108be3408970df7b20"
+  },
+  "after": {
+    "tools/test_t2022_protocol_home_maintenance_distinction.py": "02794d6202c6e2700c729dffab2df488a6a91ad0611f385d37d8a2b45150b00f",
+    "tools/test_t1790_dependency_route_budget.py": "73c6b5bdd45584e736b2fe9f0d7b98953be4ff4d2f66c1394742bf8d401dee62",
+    "tools/test_t1577_op_id_provenance.py": "fdc6bf2262d741555875b48a7b25d4961f2aedc995d908108be3408970df7b20"
+  },
+  "rationale": "Fingerprint determinism requires unchanged subject bytes. Disposable source + stable injected broker replaces changing shared cwd; both content-change and authority-kind controls retained. Other adjacent oracle corrections explained in coordinator-final.json."
+}

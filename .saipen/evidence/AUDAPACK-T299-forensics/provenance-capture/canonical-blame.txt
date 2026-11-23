@@ -1,0 +1,104 @@
+c498723c18f1ee0c3dc6d6dc843ee9044c986ce7 1 1 2
+author VAC34
+author-mail <vac34@example.com>
+author-time 1787784840
+author-tz +0300
+committer VAC34
+committer-mail <vac34@example.com>
+committer-time 1787784840
+committer-tz +0300
+summary feat(release): v0.1.0 AUDAPACK release
+boundary
+filename .saipen/BOARD.md
+	# Board
+c498723c18f1ee0c3dc6d6dc843ee9044c986ce7 2 2
+author VAC34
+author-mail <vac34@example.com>
+author-time 1787784840
+author-tz +0300
+committer VAC34
+committer-mail <vac34@example.com>
+committer-time 1787784840
+committer-tz +0300
+summary feat(release): v0.1.0 AUDAPACK release
+boundary
+filename .saipen/BOARD.md
+	
+6c6d841df24e5c5d91870def931af99f0af4c81f 3 3 1
+author VAC34
+author-mail <vac34@example.com>
+author-time 1791540482
+author-tz +0300
+committer VAC34
+committer-mail <vac34@example.com>
+committer-time 1791540482
+committer-tz +0300
+summary fix(widget): P1-A/P1-B trust-boundary hardening in 0.1.07
+previous d66d9f63ef2fee4a5a5701136bf26169c7511d8c .saipen/BOARD.md
+filename .saipen/BOARD.md
+	## TODO## DOING
+479b412af63a3e606adf8e36fdfbf37bc0e73bfe 7 4 1
+author VAC34
+author-mail <vac34@example.com>
+author-time 1787795649
+author-tz +0300
+committer VAC34
+committer-mail <vac34@example.com>
+committer-time 1787795649
+committer-tz +0300
+summary feat(packing): settings switch for archive layout (single_folder / alongside_projects) (T-26)
+previous b7984cb339f21f6ae9cc54992781e81f11d122e9 .saipen/BOARD.md
+filename .saipen/BOARD.md
+	## DONE
+6c6d841df24e5c5d91870def931af99f0af4c81f 5 5 4
+author VAC34
+author-mail <vac34@example.com>
+author-time 1791540482
+author-tz +0300
+committer VAC34
+committer-mail <vac34@example.com>
+committer-time 1791540482
+committer-tz +0300
+summary fix(widget): P1-A/P1-B trust-boundary hardening in 0.1.07
+previous d66d9f63ef2fee4a5a5701136bf26169c7511d8c .saipen/BOARD.md
+filename .saipen/BOARD.md
+	- [x] T-299 [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt must not overwrite canonical archive (setVerifiedProjectArchive removed from manualArchiveRecordSent, receipt writes zero canonical-store writes), P1-B rejected attachment-only Send + manual removal + delayed history must not fabricate accepted Send (noteComposerAttachmentRemoved + capture-phase click/keydown listeners + tile-count check in retireStaleManualSendIntent for React remount) | verify: w7-016 110/110 (21 new C1-C10 D1-D11 RED->GREEN), full widget suite 772/772 PASS, w6-006 85/85, w6-001 50/50, w3-002 14/14, w7-011 7/7, test_bridge_project_archive.py 30/30, release contracts 21/21 PASS, update_widget_release.py --check OK 0.1.07 5efa3a49fee7bdef83f63ecfa3324e2746eb12b874baad4e1bba03edd03a09fa | evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md | owner: buffy | claim_time: 2026-10-09T05:00:00Z | closure_mode: own_patch
+6c6d841df24e5c5d91870def931af99f0af4c81f 6 6
+author VAC34
+author-mail <vac34@example.com>
+author-time 1791540482
+author-tz +0300
+committer VAC34
+committer-mail <vac34@example.com>
+committer-time 1791540482
+committer-tz +0300
+summary fix(widget): P1-A/P1-B trust-boundary hardening in 0.1.07
+previous d66d9f63ef2fee4a5a5701136bf26169c7511d8c .saipen/BOARD.md
+filename .saipen/BOARD.md
+	- [x] T-299 [P2] Audit-bundle packaging: transient npm-cache blobs under .saipen/kitchen/tmp-control (ctrlv-probe _cacache, ~20.7 MB compressed) refused as reproducible machine state via _REPRODUCIBLE_CACHE_SEGMENTS += _cacache/content-v2/index-v5 (T-274 precedent, named transient omission, memory-root-only); probe notes, kitchen docs, sources, tests unaffected | verify: new TestNpmCacheBlobsAreNotEvidence 3/3 (2 RED pre-fix), test_saipen_evidence.py 107 passed + 1 skip, packing/projects/freshness 124 passed + 1 skip, ruff/compileall clean | owner: buffy | claim_time: 2026-10-09T03:00:00Z | closure_mode: own_patch
+6c6d841df24e5c5d91870def931af99f0af4c81f 7 7
+author VAC34
+author-mail <vac34@example.com>
+author-time 1791540482
+author-tz +0300
+committer VAC34
+committer-mail <vac34@example.com>
+committer-time 1791540482
+committer-tz +0300
+summary fix(widget): P1-A/P1-B trust-boundary hardening in 0.1.07
+previous d66d9f63ef2fee4a5a5701136bf26169c7511d8c .saipen/BOARD.md
+filename .saipen/BOARD.md
+	- [x] T-298 [P1] Corrective Widget clock trust-boundary hardening post T-297: P1-A unverified newer attachment can no longer enter the verified canonical store (canonical always wins clock, attached stays tooltip-noted, observed-only display + session-local post-detach memory), P1-B failed Send + user-cleared duplicate text + delayed same-text history can no longer fabricate Send (capture-phase input listener poisons intent, corroboration refuses, sync retires) | verify: w7-016 89/89 incl new A11/A12 B15/B16 (4 RED pre-fix with mission signatures), full widget sweep 915/915, w6-006 85/85, w6-001 50/50, test_bridge_project_archive.py 30/30, release contracts 36/36, node --check pass, update_widget_release.py --check OK 0.1.06 5136324da8a12c2f0647cb5ef5d7eceaa854f1cd487fa474068195d642e0d610 | evidence: .saipen/evidence/T-298-widget-trust-boundary.md | owner: buffy | claim_time: 2026-10-09T02:00:00Z | closure_mode: own_patch
+6c6d841df24e5c5d91870def931af99f0af4c81f 8 8
+author VAC34
+author-mail <vac34@example.com>
+author-time 1791540482
+author-tz +0300
+committer VAC34
+committer-mail <vac34@example.com>
+committer-time 1791540482
+committer-tz +0300
+summary fix(widget): P1-A/P1-B trust-boundary hardening in 0.1.07
+previous d66d9f63ef2fee4a5a5701136bf26169c7511d8c .saipen/BOARD.md
+filename .saipen/BOARD.md
+	- [x] T-297 [P1] Corrective Widget repair post T-296: stale composer ZIP cannot downgrade verified canonical archive (precedence + change-driven writes, Attached: tooltip), failed Send + edited draft + late history cannot fabricate Send (payload-to-turn correlation, stale-intent retirement, draft-stable rekey) | verify: w7-016 85/85 incl new A1-A10 B1-B14 (11 RED pre-fix, 24/24 post-fix), full widget sweep 911/911, w6-006 85/85, w6-001 50/50, test_bridge_project_archive.py 30/30, node --check pass, ruff/compileall clean, release contracts 36/36, update_widget_release.py --check OK 0.1.05 9c7d40b9595c605e98077d77f81e0ada8e0456ca2cbb689954f780b788e4aa25 | evidence: .saipen/evidence/T-297-widget-clock-recorrective.md | owner: buffy | claim_time: 2026-10-09T01:09:00Z | closure_mode: own_patch

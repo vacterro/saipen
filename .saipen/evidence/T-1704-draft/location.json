@@ -1,0 +1,15 @@
+{
+  "root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "workspace": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f",
+  "subject": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+  "baseline_fingerprint": "8ee00e71000df4229d62cd7b82b8dca2ff54d6a3e7eb6021495994bcec5e967a",
+  "canonical_sha256": {
+    ".saipen/STATE.md": "0cfacabbf0b407da6dae3bc6475d6b1495fec0e1b0b2edd3654715cd8f5b1df5",
+    ".saipen/BOARD.md": "31bda677b83527bf373d586d2d9f6c8e4a49f6bb5195b4ab83ada0c4abeb3eb3",
+    ".saipen/LOG.md": "a4efa66dd7c6340faa33274fca581079bd4ce51734a7e6183a178764696b182d"
+  },
+  "canonical_state_copied": true,
+  "persistent_authority_granted": false,
+  "code_applied_to_live_root": false,
+  "copy_purpose": "Immutable test input only; no authority granted and no live mutations"
+}

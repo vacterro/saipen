@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-433.md",
+  "closed_at": "2026-11-22T01:35:07Z",
+  "closure_event": null,
+  "linked_work": "T-2110",
+  "linked_works": [
+    "T-2110"
+  ],
+  "receipt_id": "SRC-433",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "ce69c2fa2014595a8a9a65d3c11422f5fa3545d13df4d09f1f715c622f9e8a0a",
+  "status": "CLOSED",
+  "unresolved": 0
+}

@@ -1,0 +1,37 @@
+{
+  "argv": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+    "-B",
+    "-m",
+    "unittest",
+    "tools.test_t1704_goal_checkpoint_priority",
+    "tools.test_t1494_continuation_authority",
+    "tools.test_t1293_valve_resume_audit_route",
+    "tools.test_audit_route",
+    "tools.test_reconcile_valve",
+    "tools.test_command_routing",
+    "tools.test_t1619_iteration_boundary"
+  ],
+  "cwd": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+  "exit_code": 0,
+  "elapsed_seconds": 73.173330783844,
+  "fingerprint_before": "4e198213e476980f0ad386106336a3aff44cace5f196bfa9d6bfca18dc9cc24a",
+  "fingerprint_after": "4e198213e476980f0ad386106336a3aff44cace5f196bfa9d6bfca18dc9cc24a",
+  "counts": {
+    "ran": 184,
+    "red": [],
+    "headers": 0,
+    "unparsed": 0,
+    "tallied": 0
+  },
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "c451f1381ef6a61f3ab968f4d36ff6e52e090605da450c4b54ce31e174dfb050",
+  "live_source_fingerprint": "314699cb53e099686709efa1c2d33f1dbcd632a9c684b4d9e25283d207d94705",
+  "live_canonical_sha256": {
+    ".saipen/STATE.md": "0cfacabbf0b407da6dae3bc6475d6b1495fec0e1b0b2edd3654715cd8f5b1df5",
+    ".saipen/BOARD.md": "31bda677b83527bf373d586d2d9f6c8e4a49f6bb5195b4ab83ada0c4abeb3eb3",
+    ".saipen/LOG.md": "a4efa66dd7c6340faa33274fca581079bd4ce51734a7e6183a178764696b182d"
+  },
+  "live_root_modified": true,
+  "live_persistent_grant": false
+}

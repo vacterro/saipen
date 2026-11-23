@@ -1,0 +1,25 @@
+test_failing_contract_never_terminalizes (test_external_authentication_contract.ExternalAuthenticationContractTests.test_failing_contract_never_terminalizes) ... {
+  "ok": false,
+  "code": "CONFLICT",
+  "op_id": "resolve-external-1a4c135d172a455ba19eaa44817f02c8",
+  "changed_files": [],
+  "recovery_required": true,
+  "message": "post-write semantic verification (policy core_fast) failed: STATE proposed last_event 2 != LOG tail 1"
+}
+FAIL
+
+======================================================================
+FAIL: test_failing_contract_never_terminalizes (test_external_authentication_contract.ExternalAuthenticationContractTests.test_failing_contract_never_terminalizes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_external_authentication_contract.py", line 194, in test_failing_contract_never_terminalizes
+    self.assertEqual(outcome["still_blocked"][0]["code"], "EXTERNAL_VERIFICATION_FAILED")
+AssertionError: 'CONFLICT' != 'EXTERNAL_VERIFICATION_FAILED'
+- CONFLICT
++ EXTERNAL_VERIFICATION_FAILED
+
+
+----------------------------------------------------------------------
+Ran 1 test in 1.406s
+
+FAILED (failures=1)

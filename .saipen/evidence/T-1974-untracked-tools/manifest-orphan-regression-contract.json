@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "tools.test_t1974_manifest_orphan_symbols", "-v"],
+  "format": "unittest",
+  "context": ["tools", "saipen"],
+  "oracle_files": ["tools/test_t1974_manifest_orphan_symbols.py"],
+  "subject_files": ["tools/validate.py", "tools/test_t1592_manifest_orphan_advice.py"],
+  "before": {
+    "tools/validate.py": ".saipen/evidence/T-1974-untracked-tools/prefix-validate.py",
+    "tools/test_t1592_manifest_orphan_advice.py": ".saipen/evidence/T-1974-untracked-tools/prefix-t1592-orphan-advice.py"
+  },
+  "timeout": 240
+}

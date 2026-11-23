@@ -1,0 +1,1234 @@
+--- pre/bootstrap/inject.ps1
++++ post/bootstrap/inject.ps1
+@@ -496,6 +496,9 @@
+ 
+ function Expand-Home([string]$path) {
+   if ([string]::IsNullOrWhiteSpace($path)) { return $null }
++  if ($env:CLAUDE_CONFIG_DIR -and ($path -eq '~/.claude' -or $path.StartsWith('~/.claude/'))) {
++    return Get-NativePath (Join-Path $env:CLAUDE_CONFIG_DIR $path.Substring(9).TrimStart('/'))
++  }
+   # `$NAME/...`: a host whose HOME is not the user profile (ZAICODE isolates
+   # its own) is named by an environment variable. Unset means the host is not
+   # configured on this machine, so the caller skips it.
+--- pre/bootstrap/inject.sh
++++ post/bootstrap/inject.sh
+@@ -476,6 +476,13 @@
+   # own) is named by an environment variable. Unset prints an empty line,
+   # which the caller reads as "not configured on this machine".
+   case "$1" in
++    '~/.claude'|'~/.claude/'*)
++      if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then
++        printf '%s%s\n' "$CLAUDE_CONFIG_DIR" "${1#\~/.claude}"
++      else
++        printf '%s\n' "${1/#\~/$HOME}"
++      fi
++      ;;
+     '$'*)
+       local _name="${1#\$}"
+       _name="${_name#\{}"
+--- pre/bootstrap/uninstall.ps1
++++ post/bootstrap/uninstall.ps1
+@@ -7,6 +7,13 @@
+ # platform-native spelling.
+ function Get-NativePath([string]$path) {
+   return $path.Replace('\', [System.IO.Path]::DirectorySeparatorChar)
++}
++
++function Resolve-HostSurface([string]$path) {
++  if ($env:CLAUDE_CONFIG_DIR -and ($path -eq '~/.claude' -or $path.StartsWith('~/.claude/'))) {
++    return Get-NativePath (Join-Path $env:CLAUDE_CONFIG_DIR $path.Substring(9).TrimStart('/'))
++  }
++  return Get-NativePath ($path.Replace('~', $h))
+ }
+ 
+ function Remove-Block([string]$file) {
+@@ -371,8 +378,8 @@
+   # and where the file returns to what the installer first found, those
+   # original bytes are restored exactly. Returns the number of entries removed.
+   $hostId = [string]$adapter.id
+-  $artifact = Get-NativePath (([string]$adapter.hook_install_surface).Replace("~", $h).Replace('/', '\'))
+-  $config = Get-NativePath (([string]$adapter.hook_config_surface).Replace("~", $h).Replace('/', '\'))
++  $artifact = Resolve-HostSurface ([string]$adapter.hook_install_surface)
++  $config = Resolve-HostSurface ([string]$adapter.hook_config_surface)
+   foreach ($path in @($artifact, $config)) {
+     if ((Test-Path -LiteralPath $path) -and (Test-Link $path)) {
+       throw "hook uninstall path is a link: $path"
+@@ -557,8 +564,8 @@
+   Write-Host "No working Python interpreter: removing natively, by the same ownership rules."
+ }
+ Write-Host "------------------------------------------------------------"
+-Report "Claude Code skill" (Remove-Skill "$h\.claude\skills\saipen")
+-Report "Claude Code CLAUDE.md" (Remove-Block "$h\.claude\CLAUDE.md")
++Report "Claude Code skill" (Remove-Skill (Resolve-HostSurface '~/.claude/skills/saipen'))
++Report "Claude Code CLAUDE.md" (Remove-Block (Resolve-HostSurface '~/.claude/CLAUDE.md'))
+ Report "OpenCode skill" (Remove-Skill "$h\.config\opencode\skills\saipen")
+ Report "OpenCode AGENTS.md" (Remove-Block "$h\.config\opencode\AGENTS.md")
+ Report "guard hooks" (Remove-Hooks)
+--- pre/bootstrap/uninstall.sh
++++ post/bootstrap/uninstall.sh
+@@ -291,8 +291,8 @@
+ 
+ echo "saipen uninstaller"
+ echo "------------------------------------------------------------"
+-report "Claude Code skill" rm_skill "$HOME/.claude/skills/saipen"
+-report "Claude Code CLAUDE.md" strip_block "$HOME/.claude/CLAUDE.md"
++report "Claude Code skill" rm_skill "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/saipen"
++report "Claude Code CLAUDE.md" strip_block "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/CLAUDE.md"
+ report "OpenCode skill" rm_skill "$HOME/.config/opencode/skills/saipen"
+ report "OpenCode AGENTS.md" strip_block "$HOME/.config/opencode/AGENTS.md"
+ # Removes every registry-declared guard hook surface, including the legacy
+--- pre/extensions/adapters/claude/saipen-guard.py
++++ post/extensions/adapters/claude/saipen-guard.py
+@@ -83,6 +83,7 @@
+ 
+ import argparse
+ import contextlib
++import hashlib
+ import json
+ import os
+ from pathlib import Path
+@@ -539,7 +540,12 @@
+     """
+     try:
+         home = Path(options.home) if options.home else Path.home()
+-        target = home / ".saipen" / "health" / "claude.json"
++        profile = os.path.normcase(os.path.abspath(os.environ.get("CLAUDE_CONFIG_DIR")
++                                                 or home / ".claude"))
++        default = os.path.normcase(os.path.abspath(home / ".claude"))
++        suffix = ("" if profile == default
++                  else "-" + hashlib.sha256(profile.encode("utf-8")).hexdigest()[:16])
++        target = home / ".saipen" / "health" / f"claude{suffix}.json"
+         target.parent.mkdir(parents=True, exist_ok=True)
+         # Arguments of another generation were read past, not obeyed: say so.
+         facts.setdefault("unread_arguments", getattr(options, "unread", 0) or None)
+--- pre/saipen/RUNTIME.md
++++ post/saipen/RUNTIME.md
+@@ -84,6 +84,13 @@
+     saipen host doctor [--host ID] [--json]    read-only; writes and starts nothing
+     saipen host repair [--host ID] [--json]    the canonical installer, host-scoped
+     saipen host mode [strict|degraded|default]
++
++Claude profile conflation (T-1635): doctor lists default, `CLAUDE_CONFIG_DIR`,
++registered launcher `env.CLAUDE_CONFIG_DIR` and sibling `.claude-*` directories
++separately. `saipen host repair --host claude --profile PATH` installs only the
++named profile; other profiles are observed only. Hook proof uses the host
++process's observed profile, never the authority service's environment.
++Credentials are neither read nor copied.
+ 
+ All three run outside a bound project. `repair` acts only on present hosts
+ that are BROKEN, STALE_RUNTIME or INSTALLING, retires an authority service of
+--- pre/tools/install_host_guard.py
++++ post/tools/install_host_guard.py
+@@ -451,9 +451,9 @@
+         return source
+     install_plan = entry.get("install") if isinstance(entry.get("install"), dict) else {}
+     skill = install_plan.get("skill")
+-    if not isinstance(skill, str) or not skill.startswith("~/"):
++    if not isinstance(skill, str):
+         return source
+-    candidate = home / skill.removeprefix("~/")
++    candidate = home / skill.removeprefix("~/") if skill.startswith("~/") else Path(skill)
+     try:
+         if candidate.is_dir() and same_runtime_generation(source, candidate):
+             return candidate
+@@ -790,7 +790,8 @@
+ 
+ 
+ def install(
+-    host: str, home: Path, root: Path = ROOT, *, check: bool = False, verify: bool = True
++    host: str, home: Path, root: Path = ROOT, *, check: bool = False, verify: bool = True,
++    profile: Path | None = None,
+ ) -> dict:
+     """Install (or with `check`, only observe) one native guard hook.
+ 
+@@ -804,14 +805,21 @@
+     and prove the artifact elsewhere, and no installer entry point passes it.
+     """
+     with identity_session():
+-        return _install(host, home, root, check=check, verify=verify)
+-
+-
+-def _install(host: str, home: Path, root: Path, *, check: bool, verify: bool = True) -> dict:
++        return _install(host, home, root, check=check, verify=verify, profile=profile)
++
++
++def _install(host: str, home: Path, root: Path, *, check: bool, verify: bool = True,
++             profile: Path | None = None) -> dict:
+     registry = json.loads(
+         (root / "extensions/adapters/registry.json").read_text(encoding="utf-8-sig")
+     )
+     entry = next(item for item in registry["adapters"] if item["id"] == host)
++    if host == "claude":
++        from saipen_engine.claude_profiles import adapter_for, directory
++
++        entry = adapter_for(entry, home, directory(home, profile))
++    elif profile is not None:
++        raise ValueError("--profile is only supported for Claude Code")
+     artifact = home / entry["hook_install_surface"].removeprefix("~/")
+     config = home / entry["hook_config_surface"].removeprefix("~/")
+     delegate = delegated_root(entry, home, root)
+@@ -1143,7 +1151,7 @@
+     }
+ 
+ 
+-def rollback(host: str, home: Path, root: Path = ROOT) -> dict:
++def rollback(host: str, home: Path, root: Path = ROOT, *, profile: Path | None = None) -> dict:
+     """Put the previous hook generation back. One action, no arguments beyond
+     the host: the artifact kept by the last activation replaces the active one
+     after passing the same self-test a new artifact must pass."""
+@@ -1151,6 +1159,10 @@
+         (root / "extensions/adapters/registry.json").read_text(encoding="utf-8-sig")
+     )
+     entry = next(item for item in registry["adapters"] if item["id"] == host)
++    if host == "claude":
++        from saipen_engine.claude_profiles import adapter_for, directory
++
++        entry = adapter_for(entry, home, directory(home, profile))
+     artifact = home / entry["hook_install_surface"].removeprefix("~/")
+     kept = previous_artifact(artifact)
+     if not kept.is_file():
+@@ -1193,7 +1205,8 @@
+ 
+ 
+ def uninstall(
+-    host: str, home: Path, root: Path = ROOT, *, live_host: bool | None = None
++    host: str, home: Path, root: Path = ROOT, *, live_host: bool | None = None,
++    profile: Path | None = None,
+ ) -> dict:
+     """Remove this host's configured guard entries and unchanged guard artifact.
+ 
+@@ -1203,10 +1216,18 @@
+     home = home.resolve()
+     registry = json.loads((root / "extensions/adapters/registry.json").read_text(encoding="utf-8"))
+     entry = next(item for item in registry["adapters"] if item["id"] == host)
++    allowed_root = home
++    if host == "claude":
++        from saipen_engine.claude_profiles import adapter_for, directory
++
++        allowed_root = directory(home, profile)
++        if allowed_root.is_symlink():
++            raise ValueError("Claude profile is a link")
++        entry = adapter_for(entry, home, allowed_root)
+     artifact = home / entry["hook_install_surface"].removeprefix("~/")
+     config = home / entry["hook_config_surface"].removeprefix("~/")
+     for path in (artifact, config):
+-        if path.is_symlink() or not path.resolve().is_relative_to(home):
++        if path.is_symlink() or not path.resolve().is_relative_to(allowed_root.resolve()):
+             raise ValueError("hook uninstall path escapes the selected home")
+     removed = 0
+     if config.exists():
+@@ -1304,7 +1325,12 @@
+     service = sync_authority_service(entry, home, removing=True)
+     if service is not None:
+         result["authority_service"] = service
+-    health = home / ".saipen" / "health" / f"{host}.json"
++    if host == "claude":
++        from saipen_engine.claude_profiles import health_file
++
++        health = health_file(home, allowed_root)
++    else:
++        health = home / ".saipen" / "health" / f"{host}.json"
+     if health.is_file() and not health.is_symlink():
+         health.unlink()
+     return result
+@@ -1314,6 +1340,7 @@
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument("host", choices=("kiro", "gemini", "codex", "claude"))
+     parser.add_argument("--home", type=Path, default=Path.home())
++    parser.add_argument("--profile", type=Path)
+     parser.add_argument("--check", action="store_true")
+     parser.add_argument("--uninstall", action="store_true")
+     parser.add_argument(
+@@ -1321,16 +1348,18 @@
+     )
+     args = parser.parse_args()
+     try:
++        if args.profile is not None and args.host != "claude":
++            raise ValueError("--profile is only supported for Claude Code")
+         if sum((args.uninstall, args.check, args.rollback)) > 1:
+             raise ValueError("--check, --uninstall and --rollback are mutually exclusive")
+         if args.rollback:
+-            result = rollback(args.host, args.home)
++            result = rollback(args.host, args.home, profile=args.profile)
+             print(json.dumps(result, indent=2))
+             return 0 if result.get("rolled_back") else 1
+         result = (
+-            uninstall(args.host, args.home)
++            uninstall(args.host, args.home, profile=args.profile)
+             if args.uninstall
+-            else install(args.host, args.home, check=args.check)
++            else install(args.host, args.home, check=args.check, profile=args.profile)
+         )
+         print(json.dumps(result, indent=2))
+         activation = result.get("activation") if isinstance(result, dict) else None
+--- pre/tools/saipen.py
++++ post/tools/saipen.py
+@@ -10481,22 +10481,26 @@
+     rest = tokens[1:]
+     home = None
+     host = None
++    profile = None
+     positional: list[str] = []
+     index = 0
+     while index < len(rest):
+         token = rest[index]
+-        if token in ("--home", "--host") and index + 1 < len(rest):
++        if token in ("--home", "--host", "--profile") and index + 1 < len(rest):
+             if token == "--home":
+                 home = Path(rest[index + 1])
++            elif token == "--host":
++                host = rest[index + 1]
+             else:
+-                host = rest[index + 1]
++                profile = Path(rest[index + 1])
+             index += 2
+         elif token.startswith("--"):
+             _emit(
+                 {
+                     "ok": False,
+                     "code": "VALIDATION_FAILED",
+-                    "detail": f"host {sub} accepts --host ID and --home PATH; surplus: {token}",
++                    "detail": (f"host {sub} accepts --host ID, --home PATH and --profile PATH; "
++                               f"surplus: {token}"),
+                 },
+                 as_json,
+             )
+@@ -10505,12 +10509,14 @@
+             positional.append(token)
+             index += 1
+     try:
++        if profile is not None and (host != "claude" or sub not in ("doctor", "repair")):
++            raise ValueError("--profile requires host doctor or repair with --host claude")
+         if sub == "doctor":
+-            report = host_integration.doctor(home=home, only=host)
++            report = host_integration.doctor(home=home, only=host, profile=profile)
+             _emit_host_report(report, as_json)
+             return 0 if report.get("ok") else 1
+         if sub == "repair":
+-            report = host_integration.repair(home=home, only=host)
++            report = host_integration.repair(home=home, only=host, profile=profile)
+             _emit_host_report(report, as_json)
+             return 0 if report.get("ok") else 1
+         report = host_integration.mode(positional[0] if positional else None, home=home)
+--- pre/tools/saipen_engine/host_authority_broker.py
++++ post/tools/saipen_engine/host_authority_broker.py
+@@ -249,6 +249,7 @@
+         "host_authority_identity.py",
+         "host_authority_process.py",
+         "host_authority_transport.py",
++        "claude_profiles.py",
+         "host_taxonomy.py",
+         "protocol_admission.py",
+     ):
+@@ -647,12 +648,16 @@
+             hook_artifacts=self._hook_artifacts(str(host or ""), home),
+             host_signers=signers,
+             shells=tuple(self.config.get("hook_shells") or identity_proof.DEFAULT_SHELLS),
+-        )
++            profile_hook="hooks/saipen-guard.py" if host == "claude" else None,
++        )
++        from .claude_profiles import hook_for_process
++
+         proof = identity_proof.prove_hook_invocation(
+             proc.ancestry(int(peer.pid), limit),
+             policy,
+             signer_of=proc.image_signer,
+             artifact_current=self._artifact_current(str(host or "")),
++            hook_for_host=lambda pid: hook_for_process(pid, Path(str(home)) if home else None),
+             report_limit=MAX_CHAIN_REPORTED,
+         )
+         view = {
+@@ -662,6 +667,7 @@
+             "host_pid": proof.host_pid,
+             "host_signer": proof.host_signer,
+             "hook_pid": proof.hook_pid,
++            "profile": proof.profile,
+             "chain": [
+                 {key: item.get(key) for key in ("pid", "ppid", "image", "name")}
+                 for item in proof.chain
+@@ -869,6 +875,7 @@
+             "authority_root": payload.get("authority_root"),
+             "home": payload.get("home"),
+             "event": payload.get("event") or "hook",
++            "profile": payload.get("profile"),
+         }, None
+ 
+     def _context(self, scope_fields: dict):
+@@ -884,6 +891,7 @@
+                 Path(scope_fields["authority_root"]) if scope_fields["authority_root"] else None
+             ),
+             home=Path(scope_fields["home"]) if scope_fields["home"] else None,
++            profile=Path(scope_fields["profile"]) if scope_fields.get("profile") else None,
+         )
+ 
+     def _authorize(self, payload: dict, identity: dict) -> dict:
+@@ -919,6 +927,14 @@
+         scope_fields, refusal = self._scope(payload)
+         if refusal is not None:
+             return refusal
++        proven_profile = identity.get("profile")
++        claimed_profile = scope_fields.get("profile")
++        if proven_profile:
++            if (claimed_profile and identity_proof.norm_path(claimed_profile)
++                    != identity_proof.norm_path(proven_profile)):
++                return self._refuse(CODE_BINDING_MISMATCH,
++                                    "requested profile differs from the host's observed profile")
++            scope_fields["profile"] = proven_profile
+         ctx = self._context(scope_fields)
+         policy = pa.load_policy()
+         if payload.get("fresh"):
+--- pre/tools/saipen_engine/host_authority_client.py
++++ post/tools/saipen_engine/host_authority_client.py
+@@ -254,6 +254,7 @@
+     made on its behalf. Never raises; proves nothing to anyone but the caller.
+     """
+     from . import host_authority_identity as identity_proof
++    from .claude_profiles import hook_for_process
+ 
+     config = broker.settings()
+     reason, detail = identity_proof.REASON_IDENTITY_UNAVAILABLE, ""
+@@ -266,7 +267,9 @@
+                     host_images=tuple(config.get("host_images") or ()),
+                     hook_artifacts=broker.hook_artifacts(candidate, home),
+                     shells=tuple(config.get("hook_shells") or identity_proof.DEFAULT_SHELLS),
++                    profile_hook="hooks/saipen-guard.py" if candidate == "claude" else None,
+                 ),
++                hook_for_host=lambda pid: hook_for_process(pid, Path(home) if home else None),
+             )
+         except Exception as exc:  # pragma: no cover - defensive only
+             reason, detail = identity_proof.REASON_IDENTITY_UNAVAILABLE, type(exc).__name__
+@@ -393,6 +396,10 @@
+         payload["authority_root"] = str(authority_root)
+     if home:
+         payload["home"] = str(home)
++    if host == "claude":
++        from .claude_profiles import directory
++
++        payload["profile"] = str(directory(Path(home) if home else None))
+     if event:
+         payload["event"] = str(event)
+     if capability:
+--- pre/tools/saipen_engine/host_authority_identity.py
++++ post/tools/saipen_engine/host_authority_identity.py
+@@ -104,6 +104,7 @@
+     shells: tuple[str, ...] = DEFAULT_SHELLS
+     engine_entries: tuple[str, ...] = DEFAULT_ENGINE_ENTRIES
+     max_shells: int = 4
++    profile_hook: str | None = None
+ 
+ 
+ @dataclass(frozen=True)
+@@ -118,6 +119,7 @@
+     hook_root: str | None = None
+     shells: int = 0
+     chain: list[dict] = field(default_factory=list)
++    profile: str | None = None
+ 
+     def as_dict(self) -> dict:
+         return {
+@@ -131,6 +133,7 @@
+             "hook_root": self.hook_root,
+             "shells": self.shells,
+             "chain": self.chain,
++            "profile": self.profile,
+         }
+ 
+ 
+@@ -333,6 +336,7 @@
+     *,
+     signer_of: Callable[[str], str | None] | None = None,
+     artifact_current: Callable[[str], bool] | None = None,
++    hook_for_host: Callable[[int], str | None] | None = None,
+     report_limit: int = 8,
+ ) -> Proof:
+     """Decide whether `chain` (peer first, then each parent) is the host's hook.
+@@ -370,7 +374,11 @@
+     hook_index = None
+     for index, fact in enumerate(facts[: _MAX_ENGINE_HOPS + 1]):
+         script = _script(getattr(fact, "argv", None))
+-        if script is not None and norm_path(script) in artifacts:
++        profile_candidate = bool(
++            script and policy.profile_hook
++            and norm_path(script).endswith("/" + norm_path(policy.profile_hook))
++        )
++        if script is not None and (norm_path(script) in artifacts or profile_candidate):
+             hook_index = index
+             break
+     if hook_index is None:
+@@ -468,6 +476,19 @@
+             hook_root=hook_root,
+         )
+     host = facts[cursor]
++    if policy.profile_hook:
++        try:
++            selected_hook = hook_for_host(host.pid) if hook_for_host else None
++        except Exception:
++            selected_hook = None
++        if selected_hook is None:
++            return refuse(REASON_IDENTITY_UNAVAILABLE,
++                          "the host's configuration profile could not be observed",
++                          host_pid=host.pid, hook_pid=hook.pid, hook_root=hook_root)
++        if norm_path(_script(hook_argv)) != norm_path(selected_hook):
++            return refuse(REASON_HOOK_ARTIFACT_MISMATCH,
++                          "the hook belongs to another configuration profile than the host",
++                          host_pid=host.pid, hook_pid=hook.pid, hook_root=hook_root)
+     signer = None
+     if policy.host_signers:
+         try:
+@@ -510,6 +531,7 @@
+         hook_root=hook_root,
+         shells=shells,
+         chain=view,
++        profile=(norm_path(selected_hook).rsplit("/", 2)[0] if policy.profile_hook else None),
+     )
+ 
+ 
+--- pre/tools/saipen_engine/host_authority_process.py
++++ post/tools/saipen_engine/host_authority_process.py
+@@ -420,6 +420,99 @@
+         return None
+ 
+ 
++def _windows_environment(pid: int) -> str | None:
++    """Bounded read of process parameters; unavailable layouts fail as unknown.
++
++    PEB/RTL offsets are architecture-specific Windows implementation details.
++    The result is consumed locally for one named value, never logged or returned.
++    """
++    if _WINDOWS is None or _WINDOWS["query"] is None:
++        return None
++    ctypes, wintypes = _WINDOWS["ctypes"], _WINDOWS["wintypes"]
++    kernel32, query = _WINDOWS["kernel32"], _WINDOWS["query"]
++    handle = kernel32.OpenProcess(_PROCESS_QUERY_LIMITED_INFORMATION | 0x10, False, pid)
++    if not handle:
++        return None
++    try:
++        read = kernel32.ReadProcessMemory
++        read.argtypes = [wintypes.HANDLE, ctypes.c_void_p, ctypes.c_void_p,
++                         ctypes.c_size_t, ctypes.POINTER(ctypes.c_size_t)]
++        read.restype = wintypes.BOOL
++
++        def memory(address: int, size: int) -> bytes | None:
++            buffer = ctypes.create_string_buffer(size)
++            count = ctypes.c_size_t()
++            if read(handle, address, buffer, size, ctypes.byref(count)) and count.value == size:
++                return buffer.raw
++            return None
++
++        basic = _WINDOWS["basic"]()
++        returned = wintypes.ULONG()
++        if query(handle, 0, ctypes.byref(basic), ctypes.sizeof(basic), ctypes.byref(returned)):
++            return None
++        width = ctypes.sizeof(ctypes.c_void_p)
++        peb = int(basic.PebBaseAddress or 0)
++        wow = ctypes.c_void_p()
++        if (query(handle, 26, ctypes.byref(wow), ctypes.sizeof(wow), ctypes.byref(returned)) == 0
++                and wow.value):
++            width, peb = 4, int(wow.value)
++        if not peb or width not in (4, 8):
++            return None
++        pointer = memory(peb + (0x20 if width == 8 else 0x10), width)
++        if pointer is None:
++            return None
++        parameters = int.from_bytes(pointer, "little")
++        pointer = memory(parameters + (0x80 if width == 8 else 0x48), width) if parameters else None
++        if pointer is None:
++            return None
++        address = int.from_bytes(pointer, "little")
++        if not address:
++            return None
++        collected = bytearray()
++        for _ in range(33):
++            size = 4096 - address % 4096
++            block = memory(address, size)
++            if block is None:
++                return None
++            collected.extend(block)
++            # UTF-16 termination must be aligned; raw substring matching can
++            # mistake the last ASCII letter plus its zero high byte for it.
++            for offset in range(0, len(collected) - 3, 2):
++                if collected[offset:offset + 4] == b"\0\0\0\0":
++                    return collected[:offset].decode("utf-16-le", errors="strict")
++            address += size
++        return None
++    except (OSError, ValueError, OverflowError, UnicodeError, ctypes.ArgumentError):
++        return None
++    finally:
++        kernel32.CloseHandle(handle)
++
++
++def environment_value(pid: int, name: str) -> tuple[bool, str | None]:
++    """One OS-observed variable; (False, None) means unavailable, not absent."""
++    if not isinstance(pid, int) or isinstance(pid, bool) or pid <= 0 or not name or "=" in name:
++        return False, None
++    try:
++        if sys.platform == "win32":
++            text = _windows_environment(pid)
++            if text is None:
++                return False, None
++        else:
++            with Path(f"/proc/{pid}/environ").open("rb") as stream:
++                blob = stream.read(131073)
++            if len(blob) > 131072:
++                return False, None
++            text = blob.decode("utf-8", errors="strict")
++        for item in text.split("\0"):
++            key, separator, value = item.partition("=")
++            matches = key.casefold() == name.casefold() if sys.platform == "win32" else key == name
++            if separator and matches:
++                return True, value
++        return True, None
++    except (OSError, UnicodeError, ValueError):
++        return False, None
++
++
+ def ancestry(pid: int, limit: int = 16) -> list[ProcessFact]:
+     """Self, then parent, then grandparent... bounded, cycle-safe, never raising."""
+     chain: list[ProcessFact] = []
+--- pre/tools/saipen_engine/host_integration.py
++++ post/tools/saipen_engine/host_integration.py
+@@ -188,16 +188,20 @@
+ # --------------------------------------------------------------- observation
+ 
+ 
+-def health_path(host: str, home: Path | None = None) -> Path:
++def health_path(host: str, home: Path | None = None, profile: Path | None = None) -> Path:
+     base = Path(home) if home is not None else Path.home()
++    if host == "claude" and profile is not None:
++        from .claude_profiles import health_file
++
++        return health_file(base, profile)
+     return base / ".saipen" / "health" / f"{host}.json"
+ 
+ 
+-def read_health(host: str, home: Path | None = None) -> dict | None:
++def read_health(host: str, home: Path | None = None, profile: Path | None = None) -> dict | None:
+     """The last outcome the host's own hook recorded, or None. Diagnostics
+     only: nothing decides admission from this file."""
+     try:
+-        payload = json.loads(health_path(host, home).read_text(encoding="utf-8"))
++        payload = json.loads(health_path(host, home, profile).read_text(encoding="utf-8"))
+     except (OSError, ValueError):
+         return None
+     return payload if isinstance(payload, dict) else None
+@@ -249,7 +253,8 @@
+                 facts["retired"] = True
+                 return facts
+ 
+-            result = install(str(adapter["id"]), home, checker, check=True)
++            options = {"profile": Path(adapter["profile"])} if adapter.get("profile") else {}
++            result = install(str(adapter["id"]), home, checker, check=True, **options)
+             facts["status"] = "current" if result.get("current") else "stale"
+             facts["delegated_root"] = result.get("saipen_root")
+             facts["delegated_current"] = bool(result.get("root_current"))
+@@ -412,7 +417,8 @@
+                 instruction = "unknown"
+         else:
+             instruction = "unknown"
+-    health = read_health(str(adapter.get("id")), home)
++    profile = Path(adapter["profile"]) if adapter.get("profile") else None
++    health = read_health(str(adapter.get("id")), home, profile)
+     return {
+         "id": adapter.get("id"),
+         "name": adapter.get("name"),
+@@ -744,7 +750,8 @@
+     }
+ 
+ 
+-def doctor(*, home: Path | None = None, only: str | None = None) -> dict:
++def doctor(*, home: Path | None = None, only: str | None = None,
++           profile: Path | None = None) -> dict:
+     """The read-only state of every registered host. Writes and starts nothing.
+ 
+     `ok` is False only when an installed host is BROKEN or the source this
+@@ -758,15 +765,28 @@
+         canonical = Path(source["canonical"]) if source["canonical"] else None
+         authority = authority_facts(home)
+         registry = load_registry(canonical or source_root())
++        from .claude_profiles import adapter_for, directory, discover
++
++        base = Path(home) if home is not None else Path.home()
++        if profile is not None and only != "claude":
++            raise ValueError("--profile requires --host claude")
++        adapters = []
++        for entry in registry.get("adapters", []):
++            if entry.get("id") == "claude":
++                profiles = ([directory(base, profile)] if profile is not None
++                            else discover(base, entry))
++                adapters.extend(adapter_for(entry, base, selected) for selected in profiles)
++            else:
++                adapters.append(entry)
+         by_runtime: dict[str, list[str]] = {}
+-        for adapter in registry.get("adapters", []):
++        for adapter in adapters:
+             plan = adapter.get("install") if isinstance(adapter.get("install"), dict) else {}
+             target = _expand(plan.get("skill"))
+             if target is not None and adapter.get("id"):
+                 key = os.path.normcase(str(target))
+                 by_runtime.setdefault(key, []).append(str(adapter["id"]))
+         hosts: list[dict] = []
+-        for adapter in registry.get("adapters", []):
++        for adapter in adapters:
+             host_id = str(adapter.get("id") or "")
+             if not host_id or (only and host_id != only):
+                 continue
+@@ -782,9 +802,13 @@
+                 sharing=sharing,
+             )
+             state, reasons, action = derive_state(facts)
++            if (action == taxonomy.REPAIR and adapter.get("profile")
++                    and not _same_file(adapter["profile"], base / ".claude")):
++                action = f'saipen host repair --host claude --profile "{adapter["profile"]}"'
+             hosts.append(
+                 {
+                     "id": host_id,
++                    "profile": adapter.get("profile"),
+                     "name": facts["name"],
+                     "state": state,
+                     "reasons": reasons,
+@@ -884,7 +908,8 @@
+     return payload if isinstance(payload, dict) else {"ok": False, "detail": "unreadable answer"}
+ 
+ 
+-def repair(*, home: Path | None = None, only: str | None = None) -> dict:
++def repair(*, home: Path | None = None, only: str | None = None,
++           profile: Path | None = None) -> dict:
+     """Bring installed hosts back to the canonical generation. One entry point.
+ 
+     For every installed host that is BROKEN, STALE_RUNTIME or half-installed it
+@@ -896,7 +921,12 @@
+     """
+     from .runtime_bootstrap import CanonicalSourceUnproven, _invoke_installer, canonical_source_root
+ 
+-    before = doctor(home=home, only=only)
++    from .claude_profiles import directory
++
++    selected = directory(home, profile)
++    if profile is not None and not selected.is_dir():
++        raise ValueError(f"Claude profile directory does not exist: {selected}")
++    before = doctor(home=home, only=only, profile=profile)
+     steps: list[dict] = []
+     try:
+         canonical = canonical_source_root(source_root())
+@@ -908,14 +938,20 @@
+         )
+     restart_authority = False
+     for item in before["hosts"]:
+-        if item["state"] not in REPAIRABLE or not item["host_present"]:
++        if item["id"] == "claude" and not _same_file(item["profile"], selected):
++            continue
++        explicit_install = profile is not None and item["state"] == STATE_UNINSTALLED
++        if (item["state"] not in REPAIRABLE and not explicit_install) or not item["host_present"]:
+             continue
+         if canonical is None:
+             steps.append({"step": f"install:{item['id']}", "ok": False,
+                           "code": "CANONICAL_RUNTIME_SOURCE_UNPROVEN",
+                           "detail": "no proven source to install from"})
+             continue
+-        proc = _invoke_installer(canonical, item["id"])
++        if item["id"] == "claude" and (profile is not None or os.environ.get("CLAUDE_CONFIG_DIR")):
++            proc = _invoke_installer(canonical, item["id"], profile=selected)
++        else:
++            proc = _invoke_installer(canonical, item["id"])
+         rc = proc.returncode if proc is not None else None
+         tail = "\n".join(((proc.stdout or "") if proc is not None else "").splitlines()[-6:])
+         steps.append(
+@@ -945,7 +981,7 @@
+         launcher_step = refresh_path_launcher(canonical, home)
+         if launcher_step is not None:
+             steps.append(launcher_step)
+-    after = doctor(home=home, only=only)
++    after = doctor(home=home, only=only, profile=profile)
+     for item in after["hosts"]:
+         if not item["contract"]["separated_authority"] or item["state"] in (
+             STATE_UNINSTALLED, STATE_BROKEN, STATE_INSTALLING
+@@ -965,13 +1001,16 @@
+                 "detail": str(started.get("detail") or started.get("state") or ""),
+             }
+         )
+-        after = doctor(home=home, only=only)
++        after = doctor(home=home, only=only, profile=profile)
+         break
+     remaining = [
+         {"id": item["id"], "state": item["state"], "action": item["action"],
+          "reasons": item["reasons"]}
+         for item in after["hosts"]
+-        if item["state"] in REPAIRABLE and item["host_present"]
++        if (item["state"] in REPAIRABLE
++            or (profile is not None and item["state"] == STATE_UNINSTALLED))
++        and item["host_present"]
++        and (item["id"] != "claude" or _same_file(item["profile"], selected))
+     ]
+     failed = [step for step in steps if not step.get("ok")]
+     return {
+@@ -1066,6 +1105,8 @@
+             + _cell(item["admission"], 22)
+             + str(item.get("action") or "-")
+         )
++        if item.get("profile"):
++            lines.append("    profile: " + str(item["profile"]))
+         if item.get("action") or item["state"] == STATE_BROKEN:
+             for reason in item.get("reasons") or []:
+                 lines.append("    " + str(reason)[:150])
+@@ -1084,7 +1125,7 @@
+     lines.append("")
+     if report.get("code") in ("HOST_REPAIRED", "REPAIR_INCOMPLETE"):
+         lines.append(
+-            "repair complete: every installed host is on the canonical generation"
++            "repair complete: selected installations are on the canonical generation"
+             if report.get("ok")
+             else "repair incomplete: " + ", ".join(
+                 f"{item['id']} {item['state']}" for item in report.get("remaining") or []
+--- pre/tools/saipen_engine/protocol_admission.py
++++ post/tools/saipen_engine/protocol_admission.py
+@@ -232,15 +232,21 @@
+     #: The authority service's runtime root. None = the operator's real one;
+     #: a diagnostic or test carrier names an isolated endpoint here.
+     runtime: Path | None = None
++    #: Claude configuration directory. The broker replaces it with OS-proven identity.
++    profile: Path | None = None
+ 
+     def __post_init__(self) -> None:
+         # A caller may hand any of these over as text (a CLI flag, a JSON
+         # payload). Every reader below joins paths, and a string there was a
+         # TypeError in the middle of a verdict instead of an answer.
+-        for name in ("project_root", "authority_root", "home", "event_cwd", "runtime"):
++        for name in ("project_root", "authority_root", "home", "event_cwd", "runtime", "profile"):
+             value = getattr(self, name)
+             if value is not None and not isinstance(value, Path):
+                 object.__setattr__(self, name, Path(str(value)))
++        if self.host == "claude" and self.profile is None:
++            from saipen_engine.claude_profiles import directory
++
++            object.__setattr__(self, "profile", directory(self.home))
+ 
+ 
+ def _sha(data: bytes | str) -> str:
+@@ -327,6 +333,10 @@
+ 
+ 
+ def _expand(ctx: Context, surface: str) -> Path:
++    if ctx.host == "claude" and ctx.profile is not None:
++        from saipen_engine.claude_profiles import surface as profile_surface
++
++        return profile_surface(surface, ctx.home or Path.home(), ctx.profile)
+     if surface.startswith("~"):
+         base = ctx.home if ctx.home is not None else Path.home()
+         return base / surface[1:].lstrip("/\\")
+@@ -439,12 +449,16 @@
+         from install_host_guard import install
+ 
+         home = ctx.home if ctx.home is not None else Path.home()
+-        result = install(ctx.host, home, Path(__file__).resolve().parents[2], check=True)
++        options = {"profile": ctx.profile} if ctx.host == "claude" else {}
++        result = install(ctx.host, home, Path(__file__).resolve().parents[2], check=True, **options)
+     except Exception as exc:
+         return (None, ("HOOK_UNOBSERVABLE", f"host hook cannot be observed: {type(exc).__name__}"))
+     if not (result.get("current") and result.get("configured")):
+         return (None, ("HOOK_STALE", f"host {ctx.host} hook is not installed and current"))
+-    return (_sha(json.dumps({"host": ctx.host, "artifact": entry.get("hook_artifact")})), None)
++    identity = {"host": ctx.host, "artifact": entry.get("hook_artifact")}
++    if ctx.profile is not None:
++        identity["profile"] = os.path.normcase(os.path.abspath(ctx.profile))
++    return (_sha(json.dumps(identity)), None)
+ 
+ 
+ def binding_problems(ctx: Context) -> list[dict]:
+--- pre/tools/saipen_engine/runtime_bootstrap.py
++++ post/tools/saipen_engine/runtime_bootstrap.py
+@@ -313,7 +313,8 @@
+     return None
+ 
+ 
+-def _invoke_installer(source: Path, adapter_id: str) -> subprocess.CompletedProcess | None:
++def _invoke_installer(source: Path, adapter_id: str, *,
++                      profile: Path | None = None) -> subprocess.CompletedProcess | None:
+     """Run the ONE canonical installer, host-scoped. No caller-supplied paths."""
+     if os.name == "nt":
+         shell = _powershell()
+@@ -339,6 +340,8 @@
+     # `bin/saipen` names a real interpreter instead of guessing from PATH.
+     env = dict(os.environ)
+     env["SAIPEN_PYTHON"] = sys.executable
++    if profile is not None:
++        env["CLAUDE_CONFIG_DIR"] = str(profile)
+     kwargs["env"] = env
+     if os.name == "nt":
+         kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+--- pre/tools/saipen_engine/claude_profiles.py
++++ post/tools/saipen_engine/claude_profiles.py
+@@ -0,0 +1,86 @@
++"""Claude configuration directories; observe metadata, never account credentials."""
++
++from __future__ import annotations
++
++import copy
++import contextlib
++import hashlib
++import os
++from pathlib import Path
++
++ENVIRONMENT = "CLAUDE_CONFIG_DIR"
++
++
++def directory(home: Path | None = None, profile: Path | str | None = None) -> Path:
++    base = Path(home) if home is not None else Path.home()
++    selected = profile if profile is not None else os.environ.get(ENVIRONMENT)
++    if selected:
++        return Path(os.path.expandvars(os.path.expanduser(str(selected)))).absolute()
++    return base / ".claude"
++
++
++def surface(value: str, home: Path, profile: Path) -> Path:
++    if value == "~/.claude" or value.startswith("~/.claude/"):
++        return profile / value.removeprefix("~/.claude").lstrip("/")
++    if value.startswith("~/"):
++        return home / value[2:]
++    return Path(os.path.expandvars(os.path.expanduser(value)))
++
++
++def adapter_for(adapter: dict, home: Path, profile: Path) -> dict:
++    """Project the existing registry's surfaces into one named profile."""
++    result = copy.deepcopy(adapter)
++    for key in ("hook_install_surface", "hook_config_surface"):
++        if result.get(key):
++            result[key] = str(surface(result[key], home, profile))
++    for key in ("home", "skill", "instruction", "hook"):
++        if result.get("install", {}).get(key):
++            result["install"][key] = str(surface(result["install"][key], home, profile))
++    for key in ("instruction_surfaces", "skill_surfaces"):
++        if key in result:
++            result[key] = [str(surface(value, home, profile)) for value in result[key]]
++    result["profile"] = str(profile)
++    return result
++
++
++def discover(home: Path, adapter: dict) -> list[Path]:
++    """Default, launch environment, declared launchers and sibling profiles.
++
++    The directory probe is one level only. No settings or credentials are read.
++    """
++    candidates = [home / ".claude"]
++    if os.environ.get(ENVIRONMENT):
++        candidates.append(directory(home))
++    for launcher in adapter.get("launchers", []):
++        if isinstance(launcher, dict) and isinstance(launcher.get("env"), dict):
++            selected = launcher["env"].get(ENVIRONMENT)
++            if isinstance(selected, str) and selected:
++                candidates.append(surface(selected, home, home / ".claude"))
++    with contextlib.suppress(OSError):
++        candidates.extend(sorted(path for path in home.glob(".claude-*") if path.is_dir()))
++    unique = {}
++    for path in candidates:
++        unique.setdefault(os.path.normcase(os.path.abspath(path)), path)
++    return list(unique.values())
++
++
++def health_file(home: Path, profile: Path) -> Path:
++    key = os.path.normcase(os.path.abspath(profile))
++    default = os.path.normcase(os.path.abspath(home / ".claude"))
++    suffix = "" if key == default else "-" + hashlib.sha256(key.encode("utf-8")).hexdigest()[:16]
++    return home / ".saipen" / "health" / f"claude{suffix}.json"
++
++
++def hook_for_process(pid: int, home: Path | None = None) -> str | None:
++    """The hook of the OS-observed host's profile; unknown never means default."""
++    from .host_authority_process import environment_value
++
++    observed, selected = environment_value(pid, ENVIRONMENT)
++    if not observed:
++        return None
++    if selected and not Path(selected).is_absolute():
++        return None
++    base = Path(home) if home is not None else Path.home()
++    # Empty explicitly selects the default, regardless of the service's environment.
++    profile = directory(base, selected) if selected else base / ".claude"
++    return str(profile / "hooks" / "saipen-guard.py")
+--- pre/tools/test_t1635_claude_profiles.py
++++ post/tools/test_t1635_claude_profiles.py
+@@ -0,0 +1,285 @@
++"""T-1635: profile discovery, scoped installation and process-bound hook proof."""
++
++from __future__ import annotations
++
++import json
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++from unittest import mock
++
++import install_host_guard
++from saipen_engine import host_authority_identity as identity
++from saipen_engine import host_authority_process as processes
++from saipen_engine import host_integration as integration
++from saipen_engine import runtime_bootstrap as bootstrap
++
++ROOT = Path(__file__).resolve().parent.parent
++
++
++class Profiles(unittest.TestCase):
++    def setUp(self):
++        scratch = tempfile.TemporaryDirectory()
++        self.addCleanup(scratch.cleanup)
++        self.home = Path(scratch.name)
++        self.first = self.home / ".claude"
++        self.second = self.home / ".claude-account2"
++        self.first.mkdir()
++        self.second.mkdir()
++        environment = mock.patch.dict(os.environ, {
++            "HOME": str(self.home), "USERPROFILE": str(self.home),
++            "HOMEDRIVE": "", "HOMEPATH": "", "CLAUDE_CONFIG_DIR": "",
++        })
++        environment.start()
++        self.addCleanup(environment.stop)
++
++    def test_doctor_lists_each_profile_without_reading_credentials(self):
++        for directory in (self.first, self.second):
++            (directory / ".credentials.json").write_text("must not be read", encoding="utf-8")
++        original = Path.open
++
++        def guarded(path, *args, **kwargs):
++            if "credential" in path.name:
++                raise AssertionError("credential file was opened")
++            return original(path, *args, **kwargs)
++
++        with mock.patch.object(Path, "open", guarded):
++            report = integration.doctor(home=self.home, only="claude")
++        rows = {Path(item["facts"]["host_home"]): item for item in report["hosts"]}
++        self.assertEqual(set(rows), {self.first, self.second})
++        self.assertEqual(rows[self.second]["state"], integration.STATE_UNINSTALLED)
++        self.assertIn(str(self.second), integration.render(report))
++
++    def test_environment_profile_outside_home_is_observed_beside_default(self):
++        with tempfile.TemporaryDirectory() as directory:
++            with mock.patch.dict(os.environ, {"CLAUDE_CONFIG_DIR": directory}):
++                report = integration.doctor(home=self.home, only="claude")
++            homes = {Path(item["facts"]["host_home"]) for item in report["hosts"]}
++            self.assertIn(Path(directory), homes)
++            self.assertIn(self.first, homes)
++
++    def test_native_install_selects_one_profile_and_keeps_unrelated_settings(self):
++        config = self.second / "settings.json"
++        config.write_text(json.dumps({"permissions": {"allow": ["Read"]}}), encoding="utf-8")
++        first_bytes = b'{"first":true}\n'
++        (self.first / "settings.json").write_bytes(first_bytes)
++        with mock.patch.dict(os.environ, {"CLAUDE_CONFIG_DIR": str(self.second)}):
++            result = install_host_guard.install("claude", self.home, ROOT, verify=False)
++        self.assertEqual(Path(result["artifact"]), self.second / "hooks" / "saipen-guard.py")
++        self.assertEqual(Path(result["config"]), config)
++        self.assertEqual(json.loads(config.read_text())["permissions"], {"allow": ["Read"]})
++        self.assertEqual((self.first / "settings.json").read_bytes(), first_bytes)
++        self.assertFalse((self.first / "hooks").exists())
++
++    def test_explicit_repair_installs_only_the_requested_profile(self):
++        source = {"canonical": str(ROOT), "generation": "test", "proven": True,
++                  "detail": "", "kind": "checkout", "version": "test"}
++        installed = subprocess.CompletedProcess([], 0, "installed", "")
++        with mock.patch.object(integration, "_source_facts", return_value=source), \
++             mock.patch.object(bootstrap, "_invoke_installer", return_value=installed) as invoke, \
++             mock.patch.object(integration, "_start_authority", return_value={"ok": True}):
++            integration.repair(home=self.home, only="claude", profile=self.second)
++        self.assertEqual(invoke.call_count, 1)
++        self.assertEqual(invoke.call_args.args[:2], (ROOT, "claude"))
++        self.assertEqual(Path(invoke.call_args.kwargs["profile"]), self.second)
++
++    def test_registered_launcher_profile_is_discovered_without_scanning_its_parent(self):
++        registry = integration.load_registry(ROOT)
++        launcher_profile = self.home / "launcher-home" / "account"
++        launcher_profile.mkdir(parents=True)
++        adapter = next(item for item in registry["adapters"] if item["id"] == "claude")
++        adapter["launchers"] = [{"env": {"CLAUDE_CONFIG_DIR": str(launcher_profile)}}]
++        with mock.patch.object(integration, "load_registry", return_value=registry):
++            report = integration.doctor(home=self.home, only="claude")
++        homes = {Path(item["facts"]["host_home"]) for item in report["hosts"]}
++        self.assertIn(launcher_profile, homes)
++
++    def test_health_records_do_not_overwrite_another_profiles_verification(self):
++        from saipen_engine.claude_profiles import health_file
++
++        for profile, state in ((self.first, "ADMITTED"), (self.second, "DEGRADED")):
++            path = health_file(self.home, profile)
++            path.parent.mkdir(parents=True, exist_ok=True)
++            path.write_text(json.dumps({"state": state}), encoding="utf-8")
++        self.assertEqual(integration.read_health("claude", self.home, self.first)["state"],
++                         "ADMITTED")
++        self.assertEqual(integration.read_health("claude", self.home, self.second)["state"],
++                         "DEGRADED")
++
++    def test_selected_profile_uninstall_preserves_the_other_profile_and_credentials(self):
++        install_host_guard.install("claude", self.home, ROOT, verify=False)
++        with mock.patch.dict(os.environ, {"CLAUDE_CONFIG_DIR": str(self.second)}):
++            install_host_guard.install("claude", self.home, ROOT, verify=False)
++            credentials = self.second / ".credentials.json"
++            credentials.write_bytes(b"preserve exactly")
++            result = install_host_guard.uninstall("claude", self.home, ROOT, live_host=False)
++        self.assertTrue(result["artifact_removed"])
++        self.assertTrue((self.first / "hooks" / "saipen-guard.py").is_file())
++        self.assertFalse((self.second / "hooks" / "saipen-guard.py").exists())
++        self.assertEqual(credentials.read_bytes(), b"preserve exactly")
++
++    def test_named_profile_cli_is_reachable_and_requires_claude(self):
++        command = [sys.executable, "-B", str(ROOT / "tools" / "saipen.py"), "host", "doctor",
++                   "--home", str(self.home), "--host", "claude", "--profile", str(self.second),
++                   "--json"]
++        result = subprocess.run(command, capture_output=True, stdin=subprocess.DEVNULL,
++                                timeout=90, cwd=str(self.home), check=False)
++        self.assertEqual(result.returncode, 0, result.stderr)
++        self.assertEqual(len(json.loads(result.stdout)["hosts"]), 1)
++        command[command.index("claude")] = "codex"
++        result = subprocess.run(command, capture_output=True, stdin=subprocess.DEVNULL,
++                                timeout=90, cwd=str(self.home), check=False)
++        self.assertNotEqual(result.returncode, 0)
++        self.assertEqual(json.loads(result.stdout)["code"], "VALIDATION_FAILED")
++
++    def test_canonical_injector_installs_runtime_into_only_the_selected_profile(self):
++        from test_runtime_bootstrap import POWERSHELL, _disposable_env
++
++        if os.name == "nt":
++            self.assertIsNotNone(POWERSHELL, "PowerShell runtime unavailable")
++            command = [POWERSHELL, "-NoProfile", "-NonInteractive", "-File",
++                       str(ROOT / "bootstrap" / "inject.ps1"), "-SkillHome", str(ROOT / "saipen"),
++                       "-AdapterId", "claude"]
++        else:
++            command = ["bash", str(ROOT / "bootstrap" / "inject.sh"), "--adapter", "claude"]
++        env = _disposable_env(self.home)
++        env["CLAUDE_CONFIG_DIR"] = str(self.second)
++        result = subprocess.run(command, capture_output=True, stdin=subprocess.DEVNULL,
++                                timeout=600, cwd=str(ROOT), env=env, check=False)
++        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
++        runtime = self.second / "skills" / "saipen"
++        self.assertTrue((runtime / "tools" / "saipen.py").is_file())
++        self.assertTrue((self.second / "hooks" / "saipen-guard.py").is_file())
++        self.assertFalse((self.first / "skills" / "saipen").exists())
++        self.assertFalse((self.first / "hooks").exists())
++        installed = install_host_guard.install("claude", self.home, ROOT,
++                                              check=True, profile=self.second)
++        self.assertTrue(installed["current"])
++        self.assertEqual(Path(installed["saipen_root"]), runtime)
++
++    def test_bash_injector_expands_selected_profile_and_keeps_other_hosts(self):
++        bash = shutil.which("bash") if os.name != "nt" else None
++        if os.name == "nt":
++            candidate = (Path(os.environ.get("PROGRAMFILES", "C:/Program Files"))
++                         / "Git/bin/bash.exe")
++            bash = str(candidate) if candidate.is_file() else None
++        if bash is None:
++            self.skipTest("Bash runtime unavailable; native injector covered separately")
++        source = (ROOT / "bootstrap/inject.sh").read_text(encoding="utf-8")
++        # Execute the shipped expansion function, without the installer's effects.
++        function = source[source.index("expand_home() {"):].split("\n}\n", 1)[0] + "\n}\n"
++        command = (function + "expand_home '~/.claude/skills/saipen'\n"
++                   "expand_home '~/.config/opencode'\n")
++        env = dict(os.environ, CLAUDE_CONFIG_DIR="/selected/profile with spaces",
++                   HOME="/default/home")
++        result = subprocess.run([bash, "--noprofile", "--norc"], input=command,
++                                env=env, capture_output=True, text=True,
++                                timeout=30, check=False)
++        self.assertEqual(result.returncode, 0, result.stderr)
++        self.assertEqual(result.stdout.splitlines(), [
++            "/selected/profile with spaces/skills/saipen", "/default/home/.config/opencode",
++        ])
++
++
++class HookProfileProof(unittest.TestCase):
++    def proof(self, hook, selected):
++        chain = [
++            processes.ProcessFact(20, 10, "python", "python", (
++                "python", hook, "--host", "claude", "--saipen-root", "/runtime"), 20),
++            processes.ProcessFact(10, 1, "claude", "claude", ("claude",), 10),
++        ]
++        policy = identity.IdentityPolicy(
++            host="claude", host_images=("claude",),
++            hook_artifacts=("/user/.claude/hooks/saipen-guard.py",),
++            profile_hook="hooks/saipen-guard.py",
++        )
++        return identity.prove_hook_invocation(
++            chain, policy, hook_for_host=lambda pid: selected,
++            artifact_current=lambda script: True,
++        )
++
++    def test_selected_profile_hook_is_accepted(self):
++        hook = "/user/.claude-account2/hooks/saipen-guard.py"
++        self.assertTrue(self.proof(hook, hook).ok)
++
++    def test_other_profile_hook_is_refused_even_with_current_bytes(self):
++        hook = "/user/.claude/hooks/saipen-guard.py"
++        selected = "/user/.claude-account2/hooks/saipen-guard.py"
++        proof = self.proof(hook, selected)
++        self.assertFalse(proof.ok)
++        self.assertEqual(proof.reason, identity.REASON_HOOK_ARTIFACT_MISMATCH)
++
++    def test_unobservable_profile_is_not_treated_as_default(self):
++        proof = self.proof("/user/.claude/hooks/saipen-guard.py", None)
++        self.assertFalse(proof.ok)
++        self.assertEqual(proof.reason, identity.REASON_IDENTITY_UNAVAILABLE)
++
++    def test_real_process_environment_observes_only_requested_value(self):
++        env = dict(os.environ)
++        env["CLAUDE_CONFIG_DIR"] = str(ROOT / "tests" / "profile with spaces")
++        child = subprocess.Popen(
++            [sys.executable, "-c", "import time; print('ready', flush=True); time.sleep(30)"],
++            env=env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
++            stderr=subprocess.DEVNULL,
++        )
++        try:
++            self.assertEqual(child.stdout.readline().strip(), b"ready")
++            self.assertEqual(processes.environment_value(child.pid, "CLAUDE_CONFIG_DIR"),
++                             (True, env["CLAUDE_CONFIG_DIR"]))
++            self.assertEqual(processes.environment_value(child.pid, "SAIPEN_MISSING_PROFILE_TEST"),
++                             (True, None))
++        finally:
++            child.kill()
++            child.wait(timeout=10)
++            child.stdout.close()
++
++
++class SharedAuthority(unittest.TestCase):
++    def test_real_hooks_in_two_profiles_share_one_service_without_profile_confusion(self):
++        from saipen_engine import protocol_admission
++        from test_host_fixture import HostFixture
++        from test_protocol_admission import World
++
++        with tempfile.TemporaryDirectory() as temporary:
++            scratch = Path(temporary)
++            world = World(scratch, mode="strict")
++            try:
++                second = world.home / ".claude-account2"
++                second.mkdir()
++                shutil.copyfile(world.home / ".claude" / "CLAUDE.md", second / "CLAUDE.md")
++                with mock.patch.dict(os.environ, {"CLAUDE_CONFIG_DIR": str(second)}):
++                    install_host_guard.install("claude", world.home, ROOT, verify=False)
++                fixture = HostFixture(scratch, home=world.home, project=world.project,
++                                      authority=world.authority)
++                try:
++                    self.assertTrue(fixture.available, "stand-in host interpreter unavailable")
++                    # The service is started in the default profile's environment.
++                    with mock.patch.dict(os.environ, {"CLAUDE_CONFIG_DIR": ""}):
++                        first = fixture.prompt(session="profile-1")
++                    self.assertNotIn("decision", first, first)
++                    with mock.patch.dict(os.environ, {"CLAUDE_CONFIG_DIR": str(second)}):
++                        with mock.patch.object(fixture, "hook_path",
++                                               return_value=second / "hooks" / "saipen-guard.py"):
++                            admitted = fixture.prompt(session="profile-2")
++                        self.assertNotIn("decision", admitted, admitted)
++                        context = admitted["hookSpecificOutput"]["additionalContext"]
++                        self.assertIn("=== BOOT.md", context)
++                        # Identical current bytes from another profile are still refused.
++                        foreign = fixture.prompt(session="profile-foreign")
++                    self.assertEqual(foreign["decision"], "block", foreign)
++                    self.assertIn("another configuration profile", foreign["reason"])
++                    for session in ("profile-1", "profile-2"):
++                        ledger = protocol_admission._ledger_path(world.project, session)
++                        self.assertTrue(ledger.is_file(), session)
++                finally:
++                    fixture.close()
++            finally:
++                shutil.rmtree(world.project)
++
++
++if __name__ == "__main__":
++    unittest.main()

@@ -1,0 +1,20 @@
+Peatatud (`saipen stop`), kasutuslimiit sai ka täis. T-1747 jääb VERIFY-sse; `VALIDATION: STALE_FAIL` on stop-väljundi enda rida, seda ma üle ei kontrollinud.
+
+**Tehtud**
+- **T-1746 (SRC-240) DONE.** Auditi neli viga parandatud, lisaks kolm, mis tulid välja alles Wintage'i ühekordsel koopial. Koopial läks kohalik sulgemine läbi ja SC-11 on `SATISFIED`, aga alles pärast seda, kui ma koopias kaks sidumata kviitungit (SRC-002, SRC-069) proovi jaoks kaetuks märkisin. Päris Wintage'i ei puutunud; seal ootavad need kaks kviitungit ja SC-12 rollijooksud.
+- **Claude 2:** profiil `C:\Users\vac34\.claude-account2` polnud üldse paigaldatud, tema `settings.json` jooksutas vaikeprofiili hooki. Nüüd on tal oma runtime, hook ja `CLAUDE.md`. Päris Claude 2 käivitust pole nähtud — käivita korra ja vaata, kas degraded-rida kadus.
+- **T-1747 mootoriparandus on puus:** teade ja `host doctor` nimetavad tegeliku põhjuse ja profiili käsu, `--dry-run` enam päris remonti ei käivita, prelaunch järgib `CLAUDE_CONFIG_DIR`-i.
+- Sinu suunis on kirjas kui SRC-243 / T-1754.
+
+**Pooleli**
+- T-1747 lõpliku puu testipere jookseb veel taustal (pid 23012). Kolm varasemat jooksu olid `PASS`, selle tulemust ma ei näinud. Tegemata on review, ship, SRC-241 klauslid ja sulgemine.
+- Pärast viimast `host repair`-it muutsin veel `host_integration.py`, nii et paigaldatud koopiad on jälle vanad. Enne järgmist Claude'i käivitust: `saipen host repair` ja `saipen host repair --host claude --profile "C:\Users\vac34\.claude-account2"`.
+- Selle sessiooni hook ütleb nüüd `AUTHORITY_IMPOSTOR` (`saipen host doctor`). See tekkis pärast minu remonte; põhjust ei jõudnud uurida.
+- T-1753 paik ja testid on valmis ainult scratchpadis (`patch_t1753.py`, `test_t1753_activation_launcher.py`), puusse panemata. See kaust võib teise Claude'i käivitusel kaduda.
+- T-1750, T-1749, T-1752, T-1748 on puutumata.
+
+**Minu kõrvalmõjud**
+- Kell 18:58 käivitasin `saipen host repair --dry-run`, et plaani näha — see tegi päris remondi kõigile vaikehostidele. Sama viga on nüüd T-1747-s parandatud.
+- Minu käsitsi hooki-proov kirjutas Claude 2 profiilile vale tervisekirje; kustutasin selle, koopia on tõendites.
+
+Tõendid: `.saipen/evidence/T-1746-crew-terminal/REPORT.md` ja `.saipen/evidence/T-1747-degraded-claude2/REPORT.md`.

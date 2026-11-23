@@ -1,0 +1,1517 @@
+{
+  "requirements": {
+    "SRC-081:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "do not redo the work.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not falsify provenance by pretending they were present in the immutable audit/11 source document or SRC-080 source bytes.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "do not block productive implementation merely because append support itself is incomplete.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not manually rewrite immutable historical receipts or LOG entries.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "They must behave like real AUDAPACK launchers, not decorative custom entries.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not throw it away.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not collapse Claude 1 and Claude 2 into one launcher identity.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "A normal click on Claude 1 must never focus Claude 2.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "A normal click on Claude 2 must never focus Claude 1.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not silently launch a GUI product when a functional CLI/TUI path exists.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not perform network installation automatically.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not invent credentials.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not copy authentication state between accounts.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not overwrite provider configuration merely to make discovery easier.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Claude 1 and Claude 2 must be real distinct launch targets.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "The implementation must discover and use the machine's existing profile/account isolation mechanism.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not assume that two invocations of a generic `claude` command automatically represent two accounts.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not invent a fake second-account mechanism.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R019": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not mutate or duplicate authentication secrets.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Claude 2 must not silently launch the same account while being labelled Claude 2",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R021": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not assume that the presence of Antigravity-related local data proves a particular executable name.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "The launcher must:",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R023": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Existing generic ZCode title recognition must remain compatible with windows launched outside AUDAPACK.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "AUDAPACK-launched ZCode sessions must use the exact configured launcher ID `zcode`.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not allow the fallback detector to create duplicate or conflicting identities for the same registered process.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R026": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "do not silently replace it with the built-in command.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R027": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not append the same built-ins on every application start.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R028": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not resurrect unrelated launchers the operator deliberately removed in later-schema configurations.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not simply change:",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R030": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "The layout must derive from actual configured enabled launchers where practical.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R031": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Paint and hit-testing must remain based on the same geometry.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R032": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "The project name, state columns, layer buttons, info button and launcher buttons must not overlap.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R033": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "A narrow window must degrade deliberately rather than painting controls on top of one another.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R034": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Avoid duplicating launcher label truth across multiple hard-coded maps.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R035": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not reuse C1/C2 because those already identify Codex 1 / Codex 2.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R036": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "The exact two-character labels may be adjusted if a cleaner consistent scheme already exists, but they must remain visually unambiguous.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R037": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "If longer labels are supported, button geometry must derive from actual label width instead of clipping silently.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R038": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "The current Ctrl+1..6 implementation must not remain a hidden six-launcher limit.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R039": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not make the tenth launcher clickable but unreachable from the same keyboard model without documenting the decision.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R040": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Launcher reordering must continue to define positional shortcut order.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R041": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Claude 1 and Claude 2 remain distinct",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R042": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Antigravity remains distinct",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R043": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "ZCode remains distinct",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R044": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "normal click focuses the exact existing project + launcher combination",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R045": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Shift+click may request another instance subject to configured limits",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R046": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "launch records preserve exact launcher ID",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R047": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "process cleanup removes only the intended record",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R048": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "project A never focuses project B",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R049": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Claude 1 never satisfies Claude 2",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R050": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Codex family behavior must not accidentally spread to Claude launchers.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R051": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "project",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R052": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "launcher",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R053": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "project path or other existing canonical project discriminator.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R054": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not include credentials, tokens or account secrets in window titles.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R055": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "it must NOT be guessed as Claude 1 or Claude 2 without evidence",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R056": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "do not classify arbitrary browser/chat windows as agent consoles.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R057": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "It must not crash Project Room.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R058": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not convert one missing provider launcher into a blocker for all other launchers.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R059": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "default config contains all ten intended launchers after a fresh install",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R060": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "schema migration adds only the four new built-ins to an old six-launcher config",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R061": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "migration preserves modified existing launcher settings",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R062": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "migration is idempotent",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R063": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "a pre-existing custom launcher with ID `zcode` is not overwritten",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R064": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "command_template overrides built-in Claude 1 behavior",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R065": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Claude 1 and Claude 2 have distinct IDs",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R066": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Claude 1 repeated normal click focuses Claude 1",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R067": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Claude 2 does not focus Claude 1",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R068": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Shift+click preserves force-new semantics",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R069": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Antigravity launch uses the selected project root",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R070": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "ZCode launch uses the selected project root",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R071": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "missing CLI produces a bounded launcher-specific diagnostic",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R072": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "one missing launcher does not disable other launchers",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R073": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "ten enabled launchers produce ten non-overlapping clickable button rectangles",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R074": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "paint and hit-testing agree for all ten",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R075": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "narrow-row degradation remains non-overlapping",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R076": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "launcher reorder changes positional shortcut mapping correctly",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R077": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Ctrl+1..9 and Ctrl+0 resolve to the intended launcher positions",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R078": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "generic externally launched Claude remains generic rather than being guessed as Claude 1/2",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R079": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "generic ZCode fallback remains functional",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R080": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "browser windows containing provider names remain rejected as agent windows",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R081": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "existing OpenCode/FreeBuff/Cline/Codex launcher tests remain green.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R082": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not place credentials in evidence.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R083": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not close it merely because existing synthetic Widget tests pass.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R084": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not assume the manual path is the only complaint.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R085": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not assume the worker path is the only complaint.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R086": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not create a competing timing system unnecessarily.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R087": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Never log:",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R088": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "The operator must be able to tell where time went without opening DevTools.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R089": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not clutter the normal UI permanently.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R090": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not add fixed sleeps merely for \"stability\".",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R091": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Every internal gap materially above normal event-loop scheduling must have a named reason.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R092": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "zero project-registry GET on the normal bound click",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R093": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "hot freshness proof skips source walk when valid",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R094": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "exact archive receipt skips server rehash when valid",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R095": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "exact browser byte-cache hit skips archive GET",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R096": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "exact byte-cache hit skips repeated browser hash",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R097": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "already attached archive performs no duplicate injection",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R098": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "already sent identical payload performs no duplicate transport or Send.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R099": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Attachment registration is likely to be externally variable, but AUDAPACK must add no extra fixed delay.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R100": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Likewise, Send readiness must be condition-driven.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R101": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not wait for the whole timeout.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R102": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not perform a second full timeout merely because a cached Send DOM node remounted.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R103": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Avoid effectively doubling the deadline.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R104": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not apply failure backoff to healthy empty polls.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R105": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not create a high-frequency busy loop.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R106": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "healthy idle worker remains low-cost",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R107": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "queued work is claimed promptly",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R108": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "network/Bridge failure backs off",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R109": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "recovery does not create a retry storm.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R110": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "do not download the same archive twice",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R111": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "do not hash the same immutable bytes twice in the browser",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R112": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "do not hash the same unchanged archive repeatedly on the server when a valid receipt exists",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R113": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "do not walk the source tree twice when a reusable freshness/packing plan exists",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R114": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "do not rebuild the archive when existing canonical bytes are proven fresh.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R115": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "The click itself must acknowledge within one paint opportunity.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R116": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Project Room and Widget must remain responsive while:",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R117": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "The operator must never wonder whether the click registered.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R118": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "There must be no unexplained idle interval.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R119": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not hide external ChatGPT latency by attributing it to AUDAPACK.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R120": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not hide AUDAPACK latency by calling the entire measurement \"ChatGPT upload\".",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R121": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Avoid fragile machine-specific absolute performance claims as the only gate.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R122": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "first visible feedback occurs immediately",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R123": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "no fixed penalty where the condition is already satisfied",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R124": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "warm bound manual path performs zero registry request",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R125": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "hot canonical archive avoids source walk",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R126": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "exact byte-cache hit performs zero archive GET",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R127": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "exact byte-cache hit performs zero new browser SHA",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R128": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "already-attached path performs zero injection",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R129": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "already-sent path performs zero Send",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R130": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "one fresh attachment produces one injection",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R131": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "one accepted delivery produces one Send",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R132": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "healthy browser worker does not sleep behind failure backoff",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R133": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "real timing output accounts for almost all wall-clock delay by named phases.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R134": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "immediate visible CHECK phase",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R135": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "bound warm path does not fetch project registry",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R136": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "hot proof avoids source walk",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R137": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "SHA receipt avoids server rehash",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R138": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "browser SHA cache avoids GET and second hash",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R139": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "tile readiness releases immediately when condition becomes true",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R140": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Send readiness releases immediately when button becomes usable",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R141": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Send DOM remount does not restart a full timeout",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R142": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "attachment DOM remount does not restart the full transaction",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R143": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "one injection only",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R144": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "one Send only",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R145": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "already-attached is zero-injection",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R146": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "already-sent is zero-transport",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R147": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "failed Send keeps attachment for Send-only retry",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R148": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "healthy browser poll re-enters promptly",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R149": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "failed browser poll backs off",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R150": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "a queued worker job wakes a long poll promptly",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R151": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "multiple worker windows do not create a request storm",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R152": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "timing trace remains bounded",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R153": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "timing trace contains no composer content/token/credential material",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R154": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "live timing diagnostic identifies the largest phase",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R155": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "the release endpoint serves the actual updated Widget bytes.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R156": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not fix either requirement by creating a parallel subsystem.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R157": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not add repeated hard-coded maps of launcher IDs.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R158": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "These launcher additions must remain compatible with the previously supplied fail-open OpenCode principle.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R159": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not generalize a provider-specific configuration problem into a global Project Room blocker.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R160": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not introduce arbitrary limits merely because the previous UI happened to contain six buttons.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R161": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Resource limits must correspond to actual constraints.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R162": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not rely exclusively on mocks for:",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R163": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not expose account secrets in evidence.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R164": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not mark these append requirements complete merely because launcher buttons exist or a Widget test suite is green.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R165": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "do not keep rewriting AUDAPACK code trying to remove latency outside AUDAPACK's control.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R166": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "A new `/new` session must be able to continue from repository machine truth plus this checkpoint without requiring the previous chat transcript.",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R167": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not end at: \"Claude launchers added.\"",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    },
+    "SRC-081:R168": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2031",
+      "text": "Do not end at: \"PERF-011 tests pass.\"",
+      "verification": "audit/11 SRC-081 clauses satisfied by verified implementation: CLI launcher parity (test_cli_launchers 23 PASS), distinct Claude profiles, generation fail-closed + fencing (48 PASS), PERF regressions (199 PASS); no historical rewrite, no falsified provenance:PASS",
+      "work": "T-234"
+    }
+  },
+  "schema_version": 1
+}

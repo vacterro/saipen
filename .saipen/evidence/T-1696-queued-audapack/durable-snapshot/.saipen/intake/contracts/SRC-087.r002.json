@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-087:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT create another scheduler ticket."
+    },
+    "SRC-087:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT restart SCOUT."
+    }
+  },
+  "derived_at": "2026-09-23T12:29:44Z",
+  "derived_from": "SRC-087",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "a71ce00bc107837c605bc56060020ea49607c508c8bc05c650a4b5988da36c38"
+}

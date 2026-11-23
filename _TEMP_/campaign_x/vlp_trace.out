@@ -1,0 +1,32 @@
+copying frozen tree...
+frozen copy done 70.6 s
+capture_s: 34.5
+=== READ (open for reading) per bucket ===
+=== STAT per bucket (top 25) ===
+   42672  (scandir) .saipen/recovery
+   30636  (scandir) .saipen/evidence
+   19634  .saipen/intake
+   10599  .saipen/archive
+    8920  (scandir) .saipen/worktrees
+    8378  (root file)
+    4471  .saipen/quarantine
+    3486  tools
+    3304  .saipen/recovery
+    1136  tests
+     960  <outside>
+     528  future_gate
+     505  (scandir) tests
+     361  .saipen/KNOWLEDGE
+     353  (scandir) .saipen/archive
+     345  .saipen/milestones
+     280  (scandir) .saipen/improve
+     217  (scandir) .saipen/saitranslate
+     200  extensions
+     184  saipen
+     182  evidence
+     176  (scandir) <outside>
+     132  guides
+     122  _TEMP_
+     106  (scandir) .saipen/extensions
+problems: 1
+buckets_read: []

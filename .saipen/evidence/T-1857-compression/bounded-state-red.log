@@ -1,0 +1,33 @@
+test_large_historical_state_body_does_not_hide_complete_frontmatter (test_cold_agent_truth.ColdProject.test_large_historical_state_body_does_not_hide_complete_frontmatter) ... FAIL
+test_large_body_cannot_hide_duplicate_authority_fields (test_cold_agent_truth.ColdProject.test_large_body_cannot_hide_duplicate_authority_fields) ... FAIL
+test_partial_closing_fence_at_cap_cannot_validate_a_malformed_state (test_cold_agent_truth.ColdProject.test_partial_closing_fence_at_cap_cannot_validate_a_malformed_state) ... ok
+test_valid_multibyte_body_can_be_cut_without_decoding_the_omitted_body (test_cold_agent_truth.ColdProject.test_valid_multibyte_body_can_be_cut_without_decoding_the_omitted_body) ... FAIL
+
+======================================================================
+FAIL: test_large_historical_state_body_does_not_hide_complete_frontmatter (test_cold_agent_truth.ColdProject.test_large_historical_state_body_does_not_hide_complete_frontmatter)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_cold_agent_truth.py", line 177, in test_large_historical_state_body_does_not_hide_complete_frontmatter
+    self.assertTrue(out["ok"], out)
+AssertionError: False is not true : {'ok': False, 'code': 'READ_ONLY_DIAGNOSIS_ONLY', 'reason_code': 'COLD_ORIENTATION_BLOCKED', 'diagnosis': 'STATE.md is 42245 bytes, over bounded cap 8192', 'needs_local_mutation': False, 'safe_auto_repair_available': False, 'operator_decision_available': False, 'canonical_next_command': None, 'read_only': True, 'terminal_disposition': 'READ_ONLY_DIAGNOSIS_ONLY', 'blocking_surface': '.saipen', 'blocking_field': 'orientation_input', 'evidence_reference': '.saipen/STATE.md', 'instruction': 'repair only through the exact canonical remediation returned by Fleet/recover; this projection will not probe mutations', 'forbidden_probes': ['do not edit canonical protocol files manually', 'do not execute a handoff next_action', 'do not use file mtimes as authority']}
+
+======================================================================
+FAIL: test_large_body_cannot_hide_duplicate_authority_fields (test_cold_agent_truth.ColdProject.test_large_body_cannot_hide_duplicate_authority_fields)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_cold_agent_truth.py", line 190, in test_large_body_cannot_hide_duplicate_authority_fields
+    self.assertIn("duplicate STATE field", out["diagnosis"])
+AssertionError: 'duplicate STATE field' not found in 'STATE.md is 32257 bytes, over bounded cap 8192'
+
+======================================================================
+FAIL: test_valid_multibyte_body_can_be_cut_without_decoding_the_omitted_body (test_cold_agent_truth.ColdProject.test_valid_multibyte_body_can_be_cut_without_decoding_the_omitted_body)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_cold_agent_truth.py", line 207, in test_valid_multibyte_body_can_be_cut_without_decoding_the_omitted_body
+    self.assertTrue(out["ok"], out)
+AssertionError: False is not true : {'ok': False, 'code': 'READ_ONLY_DIAGNOSIS_ONLY', 'reason_code': 'COLD_ORIENTATION_BLOCKED', 'diagnosis': 'STATE.md is 20245 bytes, over bounded cap 8192', 'needs_local_mutation': False, 'safe_auto_repair_available': False, 'operator_decision_available': False, 'canonical_next_command': None, 'read_only': True, 'terminal_disposition': 'READ_ONLY_DIAGNOSIS_ONLY', 'blocking_surface': '.saipen', 'blocking_field': 'orientation_input', 'evidence_reference': '.saipen/STATE.md', 'instruction': 'repair only through the exact canonical remediation returned by Fleet/recover; this projection will not probe mutations', 'forbidden_probes': ['do not edit canonical protocol files manually', 'do not execute a handoff next_action', 'do not use file mtimes as authority']}
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.025s
+
+FAILED (failures=3)

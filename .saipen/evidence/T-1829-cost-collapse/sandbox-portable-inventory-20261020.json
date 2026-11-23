@@ -1,0 +1,17 @@
+{
+  "purpose": "order-normalized byte inventory, not test acceptance",
+  "source": "V:\\_TEMP_\\saipen-core-unit-gusph7pq\\project",
+  "legacy_windows_inventory": {
+    "files_or_links": 126351,
+    "bytes": 1622323227,
+    "sha256": "43238c107e47276f293483a9b60fa14d5f0b8f79a08a5d5171c83c13adab0dea"
+  },
+  "portable_posix_parts_inventory": {
+    "files_or_links": 126351,
+    "bytes": 1622323227,
+    "sha256": "97ba952d4921486f74101eea92cb7cd4d8b3490762410e67e85e1717ac88db78"
+  },
+  "same_frozen_windows_bytes_proved": true,
+  "wall_s": 20.038068,
+  "note": "Windows Path sorts case-insensitively; Linux Path sorts case-sensitively. Same entries can have different ordered digests."
+}

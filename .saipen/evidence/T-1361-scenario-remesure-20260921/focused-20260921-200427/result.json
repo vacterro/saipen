@@ -1,0 +1,14 @@
+{
+  "command": "focused.py run_release_freshness_probes",
+  "head": "d97abdc097db432bafe2316b1e3577e44cd9cc4c",
+  "harness_sha256": "70957fdecc49d9c34bce5bb85183160e25602be0589a59ecc7c1a37bcfbad3d3",
+  "results": [
+    {
+      "function": "run_release_freshness_probes",
+      "elapsed": 49.85899999999674,
+      "checked": 11,
+      "skipped": 0,
+      "failures": []
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+[
+  {
+    "name": "focused",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "unittest",
+      "tools.test_audit_inbox",
+      "tools.test_audit_enqueue",
+      "tools.test_audit_manifest",
+      "tools.test_automation_block",
+      "tools.test_next_action_deadlock",
+      "tools.test_protocol_registry",
+      "tools.test_response_surface_contract.BudgetTests"
+    ],
+    "exit_code": 0,
+    "output": "review-focused.txt",
+    "sha256": "8b8233972c74d2209482326938144b0955c600462b60ee4ae1ff5c02bfb92508"
+  },
+  {
+    "name": "ruff",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "ruff",
+      "check",
+      "tools/",
+      "tests/"
+    ],
+    "exit_code": 0,
+    "output": "review-ruff.txt",
+    "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  {
+    "name": "whitespace",
+    "command": [
+      "git",
+      "-c",
+      "core.safecrlf=false",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "output": "review-whitespace.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "core",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "tools/validate.py",
+      "--gate",
+      "core"
+    ],
+    "exit_code": 0,
+    "output": "review-core.txt",
+    "sha256": "f4f28c80045fde85483f93087bd898c9f42c8d8d5eaf23d5c0a6bf9138eebd22"
+  }
+]

@@ -1,0 +1,30 @@
+opencode | declared BLOCKING | resp MECHANICAL | launch python ~/.config/opencode/skills/saipen/tools/saipen.py --ag
+   keys: []
+claude | declared ADVISORY | resp MECHANICAL | launch saipen --agent <seat> launch claude -- [arguments]
+   keys: []
+codex | declared ADVISORY | resp MECHANICAL | launch 
+   keys: []
+zaicode | declared ADVISORY | resp ADVISORY | launch 
+   keys: ['iteration_controller']
+zcode-production | declared ADVISORY | resp ADVISORY | launch 
+   keys: []
+gemini | declared ADVISORY | resp ADVISORY | launch 
+   keys: []
+codebuddy | declared ADVISORY | resp ADVISORY | launch 
+   keys: []
+freebuff | declared ADVISORY | resp ADVISORY | launch 
+   keys: []
+aider | declared ADVISORY | resp ADVISORY | launch 
+   keys: []
+antigravity | declared ADVISORY | resp ADVISORY | launch 
+   keys: []
+kiro | declared ENFORCEMENT_GAP | resp UNAVAILABLE | launch 
+   keys: []
+deepseek | declared ADVISORY | resp ADVISORY | launch 
+   keys: []
+openai | declared ADVISORY | resp ADVISORY | launch 
+   keys: []
+qwen | declared ADVISORY | resp ADVISORY | launch 
+   keys: []
+generic | declared ENFORCEMENT_GAP | resp UNAVAILABLE | launch 
+   keys: []

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-079:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "adopt evidence-integrity correction state"
+    }
+  },
+  "derived_at": "2026-09-24T11:39:14Z",
+  "derived_from": "SRC-079",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7989b9fee03e753445a64796f7cc2afdbe3b25ed87831bd51902032e8db06def"
+}

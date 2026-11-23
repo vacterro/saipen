@@ -1,0 +1,186 @@
+{
+  "scope": "canonical sealed/active event history and nine requested runtime owners; read-only",
+  "history_hash": "65febad6c5743892",
+  "tail": 14379,
+  "parsed_events": 14378,
+  "illegal_history_lines": [],
+  "attempt_count": 5,
+  "attempt_errors": [],
+  "model_provenance_count": 0,
+  "gemini_bound_attempts": [],
+  "runtime_provenance_records": [],
+  "succession_event": {
+    "date": "10.10.26 12:33",
+    "event": 14232,
+    "parent": 14231,
+    "ticket": "T-1706",
+    "agent": "saipen-cli",
+    "op_id": "checkpoint-2f4b17b2029443d99a1a7ad7863e82e4",
+    "taxonomy": "DEC",
+    "text": "Operator clarified hot switch: the previous executor reached its provider limit; this successor now leads the same SAIPEN PROTOCOL hardening mission. This is continuation, not a concurrent-worker inquiry or an independent task pivot."
+  },
+  "nearby_verification_candidates": [
+    {
+      "date": "09.10.26 06:03",
+      "event": 13954,
+      "parent": 13953,
+      "ticket": "T-1494",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-9374a432d27a47af98ad0aa972abe705",
+      "taxonomy": "RUN",
+      "text": "CORE-UNIT-EVIDENCE FAIL family:unit ran:5981 red:8 new_red:8 fixed:0 fingerprint:e61e71672bc5e044 record:.saipen/evidence/core-unit/e61e71672bc5e044-20261009T060346Z.json sha256:c956381721005000bdd3837a3877c0506f0d303bad3e7c7ccc1c7435dba2e3f4"
+    },
+    {
+      "date": "09.10.26 09:39",
+      "event": 13956,
+      "parent": 13955,
+      "ticket": "T-1494",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-d4ebc42fe55a4f95a19e8e2cfecf290f",
+      "taxonomy": "RUN",
+      "text": "CORE-UNIT-EVIDENCE PASS family:unit ran:5981 red:0 new_red:0 fixed:0 fingerprint:1f6ed1d51a2c43cd record:.saipen/evidence/core-unit/1f6ed1d51a2c43cd-20261009T093924Z.json sha256:aa29c5b58a27b9788d24777b8a9d313bd048ee16433d41ef24efd66ea731f6d8"
+    },
+    {
+      "date": "09.10.26 09:48",
+      "event": 13961,
+      "parent": 13960,
+      "ticket": "T-1494",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-5886337b50ce4ac6829fa51e35a9c6e4",
+      "taxonomy": "RUN",
+      "text": "verify -> PASS [target: T-1494] conf: high -- A03 inventory 358, 46 inventory tests, 69 routing, 11 hostile, 18 authority, 83 neighbors (3 declared skips), four supplemental effect controls and 20 invariants covered. Two A01 exact validator red/green controls and fixed-fixture authentic pre/post pairs ADMISSIBLE. Ruff 0.16.0 and core PASS; declared core-unit 5981 ran, red 0, new_red 0, 59 declared skips; fingerprint 1f6ed1d51a2c43cd, baseline unchanged. PID 4948 detected then reaped, no active leaks. .saipen/evidence/T-1494-A03/core-unit-acceptance.json"
+    },
+    {
+      "date": "09.10.26 10:01",
+      "event": 13965,
+      "parent": 13964,
+      "ticket": "T-1494",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-4b26f3ea7da74571a2b1dc81c8dc039c",
+      "taxonomy": "RUN",
+      "text": "review -> PASS; conf: high; review_passes: 1; correction_cycles: 0. Own verifier rerun 18/18, exit 0; unchanged primary verifier detects authentic pre-fix 9 failures/2 API errors and accepted subject 18 PASS; A02 3 RED/3 GREEN and original automation checks 2 RED/2 GREEN with identical fixtures. Core exit 0, nine baseline warnings; full core-unit current source 5981/new_red 0. P0/P1 and unresolved P2/P3: none. Journal/provenance, scoped test witnesses, mutation CASEs, foreign hunks and 248 unchanged foreign BOARD rows audited. Evidence: .saipen/evidence/T-1494-A03/review.json and review-oracle-pair.json. Memory promotion: NO. Closure mode own_patch; publication forbidden."
+    },
+    {
+      "date": "09.10.26 10:10",
+      "event": 13973,
+      "parent": 13972,
+      "ticket": "T-1494",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-ea0d9234279b417f8d0ad86c6d6103a9",
+      "taxonomy": "RUN",
+      "text": "review -> PASS [target: T-1494] conf: high -- current accepted subject: own authority verifier 18/18, A02 controls 3/3, original automation controls 2/2; exit 0, skipped 0. Authentic restored-bug comparison ADMISSIBLE, separately typed as REGRESSION-EVIDENCE; same command, verifier and fixtures. Core validation exit 0, nine baseline warnings. Full declared family 5981, new_red:0, 59 declared skips, source fingerprint 1f6ed1d51a2c43cd. P0/P1 findings: none; review_passes:1, source correction cycles:0. Current implementation unchanged. Evidence .saipen/evidence/T-1494-A03/review.json and review-oracle-pair.json. Local own_patch closure, no-publish policy."
+    },
+    {
+      "date": "09.10.26 12:34",
+      "event": 13987,
+      "parent": 13986,
+      "ticket": "T-1693",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-c376953f86b040bea853efd7bce0e510",
+      "taxonomy": "RUN",
+      "text": "CORE-UNIT-EVIDENCE PASS family:unit ran:6003 red:0 new_red:0 fixed:0 fingerprint:c67e7ff7069ab7d7 record:.saipen/evidence/core-unit/c67e7ff7069ab7d7-20261009T123405Z.json sha256:9a7ea6000f4d2f0baa2b61ecb01230ad4dfcbea7a1c0e1e2cbad2ea8b64c3689"
+    },
+    {
+      "date": "09.10.26 12:38",
+      "event": 13988,
+      "parent": 13987,
+      "ticket": "T-1693",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-3bf8943c2cc444f089b1ab7a05eee187",
+      "taxonomy": "RUN",
+      "text": "verify -> PASS [target: T-1693] conf: high -- declared unit family 6003 collected, zero red/new red; E-13987 record c67e7ff7069ab7d7-20261009T123405Z.json. Same final verifier detects both original inventories and both robustness bugs before repair, passes after; 22 diagnosis controls, 75 response/whole-source contracts, public CLI inverse controls, ruff, whitespace and core validator green. Evidence: hotswitch-pair.json, hotswitch-cli.json, hotswitch-cheap.json. Baseline unchanged. Semantic analysis and native-host limits explicit; no deployment claimed."
+    },
+    {
+      "date": "09.10.26 12:39",
+      "event": 13991,
+      "parent": 13990,
+      "ticket": "T-1693",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-3e74c53c8f614f05afc7d518865a66bc",
+      "taxonomy": "RUN",
+      "text": "CORE-UNIT-EVIDENCE PASS family:unit ran:6003 red:0 new_red:0 fixed:0 fingerprint:c67e7ff7069ab7d7 record:.saipen/evidence/core-unit/c67e7ff7069ab7d7-20261009T123405Z.json sha256:9a7ea6000f4d2f0baa2b61ecb01230ad4dfcbea7a1c0e1e2cbad2ea8b64c3689"
+    },
+    {
+      "date": "09.10.26 12:40",
+      "event": 13992,
+      "parent": 13991,
+      "ticket": "T-1693",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-52322e1bd2a84a1782abe1d0a416a106",
+      "taxonomy": "RUN",
+      "text": "review -> PASS [target: T-1693] -- own verify rerun: original fixed pair FAIL before/PASS after; robustness pair FAIL before/PASS after; 22 diagnosis controls, public CLI inverse controls, 75 response and whole-source contracts, ruff, whitespace, core validator PASS. Full family reuse confirmed current: 6003, zero red, baseline unchanged. Independent witness/rule analysis preserves legitimate A refusal, unproven B transport, model-supplied historical provenance and FreeBuff ADVISORY/stale-runtime limits. No P0/P1 in attributed delta. Memory promotion NO. Evidence: .saipen/evidence/T-1693-response-diagnosis/review-evidence.md."
+    },
+    {
+      "date": "10.10.26 03:16",
+      "event": 14192,
+      "parent": 14191,
+      "ticket": "T-1701",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-587bfc6b8d5c418b842b120d451955ff",
+      "taxonomy": "RUN",
+      "text": "CORE-UNIT-EVIDENCE PASS family:unit ran:6027 red:0 new_red:0 fixed:0 fingerprint:e76b1a3ad1e68ea8 record:.saipen/evidence/core-unit/e76b1a3ad1e68ea8-20261010T025217Z.json sha256:cf8cc32524cb5dd2e47c0b40dfab567c87ab33494184bf3e10388517ef5d1ae3"
+    },
+    {
+      "date": "10.10.26 03:16",
+      "event": 14193,
+      "parent": 14192,
+      "ticket": "T-1701",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-e90c8f9ac4ae49c8a9d0f17cd5c38865",
+      "taxonomy": "RUN",
+      "text": "verify -> PASS [target: T-1701] conf: high -- exact source/file SHA agrees f03cbc8c86212164; current six controls and good baselines pass, 8048 preserved copies/live SHA256s and producer bytes unchanged, copied-target readers idempotent with four expected integrity errors/4170 receipts. All four SRC-204 clauses VERIFIED on explicit forensic-stop branch; consumer remains blocked. Native CURRENT_PASS with nine inherited warnings, Ruff 0.16.0/whitespace PASS, exact full family 6027/0/0 reused at E-14192. Source-specific report is the only deliverable delta; no engine mutation."
+    },
+    {
+      "date": "10.10.26 03:17",
+      "event": 14196,
+      "parent": 14195,
+      "ticket": "T-1701",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-25a8a8d12a2545f4b11121d5af4eac98",
+      "taxonomy": "RUN",
+      "text": "review -> PASS [target: T-1701] conf: high -- independent t1701-review six actual guardrails plus known-good controls and byte-preserving refusals agree; preservation/readers rehash all 8048 original/copy and producer bytes, idempotent four corrupt-target ledger errors/4170 valid receipts. Four SRC-204 clauses cover complete mission and lawful explicit stop; seven findings/source digest retain exact generation. No P0/P1 in deliverable, no consumer repair claim or production delta; memory promotion NO."
+    },
+    {
+      "date": "10.10.26 12:33",
+      "event": 14232,
+      "parent": 14231,
+      "ticket": "T-1706",
+      "agent": "saipen-cli",
+      "op_id": "checkpoint-2f4b17b2029443d99a1a7ad7863e82e4",
+      "taxonomy": "DEC",
+      "text": "Operator clarified hot switch: the previous executor reached its provider limit; this successor now leads the same SAIPEN PROTOCOL hardening mission. This is continuation, not a concurrent-worker inquiry or an independent task pivot."
+    }
+  ],
+  "scoped_git_history": {
+    "tools/saipen_engine/audit_manifest.py": "c7e25f9281934de8f38da26d2dd599f358c77f79 2026-09-23T22:33:01+03:00 VAC34 fix(audit): exported snapshots carry the LOG detail their detail_ref cites (T-1374)\nb1d7c22ffdd4262e690bdd9a1b8c5580b6c2e508 2026-09-22T18:42:38+03:00 VAC34 feat(runtime): integrate the reviewed runtime delta since d97abdc0 (T-1454)\n2eecc65c00ed9667b7c5f70259c05f97b062ee2d 2026-09-19T16:22:01+03:00 VAC34 feat(source): quarantine receipt bodies from distribution while preserving authority\nd4bb4738a534fe3a7cbbf0bc9a3c4371df1ea83d 2026-09-17T00:27:16+03:00 VAC34 fix(audit): a proof the contract never declared does not survive its own regeneration\n8f91d779cc4d65f6e1db952eee58db7fb3b14a78 2026-09-15T13:36:08+03:00 VAC34 chore(audit-manifest): track cross-repo snapshot contract under T-1328\n",
+    "tools/saipen_engine/paths.py": "fb91135ab9b59520485edcd3a0c73bb395cc663a 2026-10-02T04:06:33+03:00 VAC34 fix(engine): ship the accumulated tools/ code delta as one unit\n8aedb43b4cb602e5bd53aaf4d9e722da55ee3d93 2026-09-24T03:20:30+03:00 VAC34 fix(supervise): a crashed generation's claim continues in its same-run successor (T-1500)\ncaa96f690bbc52fd509cf8cffbb0d50977397ef6 2026-09-21T01:15:34+03:00 VAC34 feat(recovery): T-1434 protocol recovery -- finite closure, external resolution, source retirement, improve reconcile, remediation contract, foreign observation\n14c8675b309872b90be6ee7884a77e4d049423aa 2026-09-18T00:15:04+03:00 VAC34 fix(binding): a leftover carrier is not a host saying where it is\nef654110ab4c2462e1074caaa6982a91efcb66c7 2026-09-15T18:43:04+03:00 VAC34 fix(distribution): freshness proves the executed runtime, not a stamp or a doc tuple\nb2343541e3ebe939bc583408a173c54aeb57939b 2026-09-15T15:25:20+03:00 VAC34 fix(recovery): legacy lifecycle compatibility + reachable allocation-identity stop\nb23019f4aec536eb4902d6aabb39994d39003177 2026-08-31T09:19:52+03:00 VAC34 ship v7.231.11: W4/W5 audit implementation + PERF-006 (T-1208)\ndbbfad94688515d604b54e2c97dc92aa5fa7eab1 2026-08-27T23:33:14+03:00 VAC34 ship v7.231.9\n",
+    "tools/saipen_engine/host_bootstrap.py": "464003066fd9c21789500d1e9d61c80d989a2638 2026-09-20T21:48:37+03:00 VAC34 feat(runtime): commit host bootstrap runtime and its tests\n",
+    "tools/saipen_engine/machine_runtime.py": "",
+    "tools/saipen_engine/protocol_admission.py": "fb91135ab9b59520485edcd3a0c73bb395cc663a 2026-10-02T04:06:33+03:00 VAC34 fix(engine): ship the accumulated tools/ code delta as one unit\n7009c0bee26cbbd4bdc3064eadbe7c1da474423e 2026-10-01T21:33:34+03:00 VAC34 fix(improve): declare the rebind action the CLI already implements\n",
+    "tools/saipen_engine/admission.py": "9975126f6c9d2c806ac5ceb574384a7bf998f28a 2026-10-02T15:56:40+03:00 VAC34 fix(audit): execute the audit/20 layer T-1544 (SRC-128)\nfb91135ab9b59520485edcd3a0c73bb395cc663a 2026-10-02T04:06:33+03:00 VAC34 fix(engine): ship the accumulated tools/ code delta as one unit\n8aedb43b4cb602e5bd53aaf4d9e722da55ee3d93 2026-09-24T03:20:30+03:00 VAC34 fix(supervise): a crashed generation's claim continues in its same-run successor (T-1500)\n0c5ced58be5ba6b90a136c4f2afe0414e84c4725 2026-09-23T21:12:14+03:00 VAC34 fix(guard): one scratch file gets one answer on every surface (T-1387)\n28a6de8e1f6ed048e60d0e1e228a2232e05fa836 2026-09-23T18:31:41+03:00 VAC34 fix(guard): common read-only reporters are admitted, setting forms are not (T-1402)\ncaa96f690bbc52fd509cf8cffbb0d50977397ef6 2026-09-21T01:15:34+03:00 VAC34 feat(recovery): T-1434 protocol recovery -- finite closure, external resolution, source retirement, improve reconcile, remediation contract, foreign observation\nbf8b57f563ca1eafb2c33322f632717f075c9302 2026-09-19T00:00:49+03:00 VAC34 fix(guard): the canonical route lives in the refusal verdict\n8cd798cc5ffa2ea87470fea069bb4da68cdb0e91 2026-09-17T17:55:47+03:00 VAC34 fix(ownership): a name is not a process, so a claim now says which session\n",
+    "tools/saipen_engine/reconcile.py": "ac12754654c9750503ba0073ee165be645882247 2026-10-05T07:28:23+03:00 VAC34 chore(state): T-1614 DONE, audit route followed, T-1615 projected as SRC-177\n677989b84df3a42d815fe181ceb74f39e921f962 2026-10-03T06:14:31+03:00 VAC34 T-150: bound legacy DONE execution proof to the ticket's own generation\nfb91135ab9b59520485edcd3a0c73bb395cc663a 2026-10-02T04:06:33+03:00 VAC34 fix(engine): ship the accumulated tools/ code delta as one unit\n08505b6b072ee12fc3098b5d575b05bcfaa4542f 2026-09-28T00:43:11+03:00 VAC34 fix(recover): an empty optional intent field is unset, not corruption (T-1173)\n481081bdf3b056a005c021a189b3889d8d804d37 2026-09-22T19:37:57+03:00 VAC34 feat(sources): operational handoff appends are mission state (T-1461, SRC-104)\nb1d7c22ffdd4262e690bdd9a1b8c5580b6c2e508 2026-09-22T18:42:38+03:00 VAC34 feat(runtime): integrate the reviewed runtime delta since d97abdc0 (T-1454)\nd97abdc097db432bafe2316b1e3577e44cd9cc4c 2026-09-21T01:48:13+03:00 VAC34 fix(protocol): dependency resume restores no synthetic live claim; queued user Source wakes (T-1436, SRC-092)\nf40952af5a1bd634d58437941ccc493964414caf 2026-09-19T23:35:27+03:00 VAC34 feat(routing): parked operator gate holds Improve discovery\n",
+    "tools/saipen_engine/init_project.py": "c138bfd8aa89ec82728587dd7c9ae43e9a69b7c3 2026-09-28T23:34:31+03:00 VAC34 chore(runtime): track the 34 declared runtime files git was not carrying\n",
+    "tools/saipen_engine/isolation_windows.py": ""
+  },
+  "sealed_log_hashes": {
+    ".saipen\\logs\\LOG-001.md": "e86fc37508e79fa6f215dd280ca31386c0aa3bd636db613c515ce608f95c892c",
+    ".saipen\\logs\\LOG-002.md": "e50def4a7d73dcd3afc4010c6b075f55a81331094360b17a208ffaa2e2ca1915",
+    ".saipen\\logs\\LOG-003.md": "f588e05df2f6bf1caffcb21fb41c16cacf235724f21cac36d21f1133539d3b40",
+    ".saipen\\logs\\LOG-004.md": "ee4a099e7a86a098b0d708b2d2fad43d70e6fb7857c3318130fb3b12a40762d9",
+    ".saipen\\logs\\LOG-005.md": "cf21df0a6c8466c5045a2e8a308baa0231d769dacdfa24cf7134937ec19aec38",
+    ".saipen\\logs\\LOG-006.md": "9bbc60b3876195a0ab99f96e9ca3b3a9881ee794bcebbba1d238f9ea8f8648e4",
+    ".saipen\\logs\\LOG-007.md": "c5707e64c08c341354373dc88452d7d81536650cfb7000f2c6352d7e0cc01b9f",
+    ".saipen\\logs\\LOG-008.md": "904bac7c3d360bb53b99b57e6e45681c54b14c500c22d3d1099d4c0277645aa6",
+    ".saipen\\logs\\LOG-009.md": "7f12087dc2e7d7695a84daf2644920377bd13d833f29363285b98136450f0949",
+    ".saipen\\logs\\LOG-010.md": "dda04504759ff929d2366fe6740741f51e195bf437b87592cdc1d137d15f12e5",
+    ".saipen\\logs\\LOG-011.md": "d361b95c56dd1a7fdfcee8db6cb741dec5fc9d4d54e86af854c5a58abeffc115",
+    ".saipen\\logs\\LOG-012.md": "54e652cf571225de82f4a0ba462020f6b59d8f3d4c95abfa2b3e9b4931871390",
+    ".saipen\\logs\\LOG-013.md": "866836a8c89d508f49500e581dd319b4f985ed55cae1e7481e662c6d6398fec4",
+    ".saipen\\logs\\LOG-014.md": "e981819ba8a4ce26cc3d45694e739132459af7f5993dc375492531f57094b22a",
+    ".saipen\\logs\\LOG-015.md": "67d3b654da64b5dcc6a9a9f5f41fc3f8b88c4bd521773f762825b862e0fb5e02",
+    ".saipen\\logs\\LOG-016.md": "7657dce0a96a5ccc53e299bd6621f60619d3706a69b2fbeb4fa49449e157b9a0",
+    ".saipen\\logs\\LOG-017.md": "6c64a8b072e9cea9d088b27011b1c3c526f61637808f52d3b09459fdd284e00d",
+    ".saipen\\logs\\LOG-018.md": "c4b0f972689d0168c71cf5dc091e970b9acc99979397f245a04c1a5ad819b101"
+  },
+  "limit": "A host provenance declaration is a declaration, not model authentication. A nearby green is not the prior executor's verified source predecessor. No missing model-bound change window or material source snapshot is inferred."
+}

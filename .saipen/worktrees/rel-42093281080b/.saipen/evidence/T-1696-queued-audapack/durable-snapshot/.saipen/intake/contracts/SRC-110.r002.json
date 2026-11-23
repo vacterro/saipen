@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-110:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Fix the live A3 CORE lineage failure: the widget must not read BUSY during a managed Core generation (widget 0.0.91). superCompactAutoLabel() answers BUSY while generating only when BOTH the live lineage scan and the runtime stage fail to name a wave, so the repair belongs in whichever layer loses the Core's identity. The proven failing layer is TURN_DISCOVERY: the 2026-10 ChatGPT build renamed every attribute the turn reader knew, so getChatGPTTurns() returned an empty list over a conversation that plainly held the authored Core (lineage=TURN_DISCOVERY reason=no-user-turn-discovered turns=0(u0/a0)), leaving the runtime nothing to adopt and the cell reading BUSY over an audit that is demonstrably running."
+    },
+    "SRC-110:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The requested change must be present and demonstrated against the user's own description of it: a managed Core generation reads CORE and never BUSY. Demonstrated on the MEASURED live DOM captured by the T-267 CDP session, not a synthetic fixture, in every stage a managed Core can legally occupy while ChatGPT is generating: the post-SEND park await-core-user, the adopted wait-core wave, and an enabled runtime that has lost its own state and sits at idle with the Core still on screen. The reader sees the Core, the lineage classifier no longer reports TURN_DISCOVERY, and the historic build shape still resolves identically."
+    }
+  },
+  "derived_at": "2026-10-04T17:11:16Z",
+  "derived_from": "SRC-110",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "41cce4ad22f63d5b7c4c186403b7d4000488354707fcd17d65d18dd1f3f06ad6"
+}

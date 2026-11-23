@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-439:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "REISSUE of retired SRC-386 per operator RESTORE decision (interactive packet, SRC-438 item 3). Original receipt retired at E-19341 as ORPHANED_RECEIPT with the audit obligation audit/SAIHANDOFF_BZ_REA_AGENT_DRIFT_RECOVERY.md; the archived bytes are VERIFIED INTACT at .saipen/archive/retired/SRC-386.md (+meta/.contract/.coverage/r001-r004) and remain unmodified tombstone history. This reissue restores the duty as an ACTIVE operator source: execute the external audit inbox layer of SAIHANDOFF_BZ_REA_AGENT_DRIFT_RECOVERY.md -- every actionable clause terminal with evidence, linked Work DONE, honest phase/test/delivery reporting, no synthetic PASS, no cross-project writes -- with T-2016 remaining the executing Work; the old SRC-386 tombstone stays immutable history. Backed by the current 8.1.1 installed runtime (generation 9718c86a..., CURRENT_PASS receipt-de0bbabaaf50)."
+    }
+  },
+  "derived_at": "2026-11-21T06:16:41Z",
+  "derived_from": "SRC-439",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "78208a24f11ba76900dcdaccf5ad197fd57223c19b6f94211c2376fe678e4bb0"
+}

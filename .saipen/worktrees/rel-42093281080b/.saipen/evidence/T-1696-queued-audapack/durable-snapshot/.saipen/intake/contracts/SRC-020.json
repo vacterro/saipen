@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-020:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement and verify every required change and test in T06 AUDIT RUNS PANEL 6 LANES."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:11Z",
+  "derived_from": "SRC-020",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "f1e59a2670c0040885df53e6f39f6c115fd2802dc2bcf5e0241f7d071557ec33"
+}

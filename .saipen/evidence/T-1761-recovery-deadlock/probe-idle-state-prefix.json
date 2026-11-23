@@ -1,0 +1,14 @@
+{
+  "recover": {
+    "code": "RESIDUAL_DEFECTS",
+    "detail": "reconciliation has no repair left to make and the project is still invalid: STATE proposed phase DONE is not ticket-bearing but BOARD has a ## DOING ticket; a DOING ticket requires a ticket-bearing phase (a completed tic",
+    "canonical_next_command": null,
+    "moved": []
+  },
+  "continue": {
+    "code": "RESIDUAL_DEFECTS",
+    "detail": "reconciliation has no repair left to make and the project is still invalid: STATE proposed phase DONE is not ticket-bearing but BOARD has a ## DOING ticket; a DOING ticket requires a ticket-bearing phase (a completed tic",
+    "canonical_next_command": null,
+    "moved": []
+  }
+}

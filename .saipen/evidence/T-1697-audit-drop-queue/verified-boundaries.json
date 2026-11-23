@@ -1,0 +1,8 @@
+{
+  "blocked_rows_byte_identical": 62,
+  "blocked_rows_total": 62,
+  "staged_diff_identical_after_capture_EOL_normalization": true,
+  "raw_index_hash_changed": true,
+  "raw_index_writer": "UNKNOWN; no staging or index restoration performed",
+  "notes": "Supersedes both earlier boundary-summary counts: baseline hashes include original CRLF. Earlier scripts discarded line terminators. Older index patch was captured through text transport with CRLF; current patch is raw LF. Normalized full staged diff is identical; no staged blob change observed. No AUDAPACK files read or written."
+}

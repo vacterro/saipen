@@ -80,6 +80,19 @@ class RetirementRefusesTheSourceOfLiveWorkTests(unittest.TestCase):
 
 
 class AStrandedWorkIsRoutedOutTests(unittest.TestCase):
+    """T-1 in SHIP whose only source was retired by a pre-fix engine.
+
+    T-1476 routed the stranded Work to `ticket block` because the closure
+    gate refused every retired receipt (SOURCE_RECEIPT_MISSING) and
+    `source recover` changed nothing. T-2131 removed the strand itself: the
+    gate now reads a receipt-only retirement the way `audit_inbox.delete_gate`
+    (T-134) and `classify` (T-135) always did -- settled -- so the abused
+    state is NOT stranded anymore and the no-progress loop can no longer form.
+    What stays pinned is the loop protection itself: the router never names
+    `saipen source recover` for a receipt the diagnostic cannot see, and no
+    route ever repeats.
+    """
+
     def _stranded(self) -> tuple[Path, str]:
         """T-1 in SHIP whose only source was retired by a pre-fix engine.
 
@@ -122,29 +135,37 @@ class AStrandedWorkIsRoutedOutTests(unittest.TestCase):
         root, receipt = self._stranded()
         _code, recovered, text = cli(root, "source", "recover", "--json")
         self.assertNotIn(receipt, [item.get("receipt") for item in recovered["orphans"]], text)
+        # T-2131: the abused state is no longer stranded -- the gates read the
+        # receipt-only retirement as settled, so the router never needs the
+        # block route T-1476 minted, and it still never names the diagnostic
+        # that cannot see the receipt.
+        settled = intake.work_closure_gate(root, "T-1")
+        self.assertTrue(settled.get("ok"), f"the retired source is settled: {settled}")
+        rerun = intake.boundary_gate(root, "T-1", "SHIP")
+        self.assertTrue(rerun.get("ok"), f"SHIP re-read passes: {rerun}")
         _code, routed, text = cli(root, "continue", "--json")
         self.assertNotEqual(routed.get("action"), "saipen source recover", text)
-        self.assertTrue(str(routed.get("action")).startswith("saipen ticket block T-1 "), text)
 
     def test_following_the_route_ends_the_loop(self):
-        """Obey every route the way a worker does; one route must never repeat."""
+        """Obey every route the way a worker does; one route must never repeat.
+
+        T-1476 measured the original loop at 15661 s of wall clock. T-2131
+        removed the strand, so the mechanical chain runs the formerly
+        stranded Work to its own termination: no recover step, no block
+        route, and the row ends live or DONE -- never parked in BLOCKED.
+        """
         root, _receipt = self._stranded()
-        seen = []
-        for _step in range(4):
-            _code, routed, text = cli(root, "continue", "--json")
-            action = str(routed.get("action") or "")
-            self.assertNotIn(action, seen, f"the same route came back: {text}")
-            seen.append(action)
-            if action == "saipen source recover":
-                code, _payload, text = cli(root, "source", "recover", "--json")
-            elif action.startswith("saipen ticket block T-1 "):
-                reason = action.split("T-1 ", 1)[1].strip('"')
-                code, _payload, text = cli(root, "ticket", "block", "T-1", reason, "--json")
-            else:
-                break
-            self.assertEqual(code, 0, text)
+        _code, routed, text = cli(root, "continue", "--json")
+        action = str(routed.get("action") or "")
+        self.assertNotEqual(action, "saipen source recover", text)
         board = (root / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
-        self.assertIn("T-1 ", board.split("## BLOCKED", 1)[1])
+        blocked_tail = board.split("## BLOCKED", 1)[-1]
+        self.assertNotIn("T-1 ", blocked_tail, "the block route can never fire again")
+        live = "- [/] T-1 " in board
+        done = "- [x] T-1 " in board
+        self.assertTrue(
+            live or done, f"the Work ended live or DONE, never parked: {board}"
+        )
 
 
 if __name__ == "__main__":

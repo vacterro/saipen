@@ -1,0 +1,48 @@
+Red control for T-1821 -- disposable copy at V:\_TEMP_\t1821red
+Two defects restored in tools/saipen_engine/response_surface.py:
+  1. FIELD_SEPARATOR reverted to a bare newline (no Markdown hard break)
+  2. render_boundary calls value.strip() instead of _field_text(value),
+     so a multi-line DETAILS value keeps bare newlines inside the field.
+Project state: tools/ + saipen/ copied from the live tree at the fix;
+nothing else changed. Command: python -B -m unittest tools.test_t1821_markdown_surface
+
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1821red\tools\test_t1821_markdown_surface.py", line 122, in test_a_field_value_never_introduces_an_unhard_broken_line
+    self.assertEqual(soft_breaks(rendered), 0, rendered)
+AssertionError: 6 != 0 : STATUS: BLOCKED
+RESULT: T-301 retained; no fabricated PASS
+BLOCKER: ENV_UNAVAILABLE -- no interactive desktop for the test worker
+NEXT EXACT ACTION: NONE
+VALIDATION: CURRENT_PASS
+DETAILS: .saipen/evidence/a.md
+.saipen/evidence/b.md
+
+======================================================================
+FAIL: test_regression_a_every_field_line_is_a_markdown_hard_break (test_t1821_markdown_surface.FieldsSurviveAMarkdownHost.test_regression_a_every_field_line_is_a_markdown_hard_break)
+A: raw multiline response remains multiline once Markdown renders it.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1821red\tools\test_t1821_markdown_surface.py", line 73, in test_regression_a_every_field_line_is_a_markdown_hard_break
+    self.assertEqual(
+AssertionError: 4 != 0 : a Markdown host would collapse these lines into one paragraph:
+STATUS: BLOCKED
+RESULT: T-301 retained; no fabricated PASS
+BLOCKER: ENV_UNAVAILABLE -- no interactive desktop for the test worker
+NEXT EXACT ACTION: NONE
+VALIDATION: CURRENT_PASS | full core 6958 | red 0 | new_red 0
+
+======================================================================
+FAIL: test_the_separator_is_the_measured_fix_not_a_relabelled_newline (test_t1821_markdown_surface.FieldsSurviveAMarkdownHost.test_the_separator_is_the_measured_fix_not_a_relabelled_newline)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1821red\tools\test_t1821_markdown_surface.py", line 127, in test_the_separator_is_the_measured_fix_not_a_relabelled_newline
+    self.assertEqual(RS.FIELD_SEPARATOR, "  \n")
+AssertionError: '\n' != '  \n'
+- 
++   
+
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.002s
+
+FAILED (failures=3)

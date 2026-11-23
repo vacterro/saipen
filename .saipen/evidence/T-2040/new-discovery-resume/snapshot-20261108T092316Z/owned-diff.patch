@@ -1,0 +1,2042 @@
+diff --git a/tools/improve.py b/tools/improve.py
+index 62f6405c..0d4ae253 100644
+--- a/tools/improve.py
++++ b/tools/improve.py
+@@ -93,6 +93,23 @@ DISPOSITION = {
+     "INVALID",
+     "NEEDS_EXTERNAL_EVIDENCE",
+ }
++#: T-7: ONE definition of FINAL coverage, shared by every projection.
++#:
++#: A disposition in `DISPOSITION` is not automatically a FINAL decision:
++#: `NEEDS_EXTERNAL_EVIDENCE` is an explicit PENDING decision -- IMPROVE.md
++#: section 15 requires missing external evidence to be "an explicit blocker,
++#: not a repeated actionable submit/complete instruction". It used to read as
++#: swept/PASS to `derive_status`/`verify_cycle`/`complete_cycle` (any closed-set
++#: string counted) while reading as blocked to `improve_retrospective._view`
++#: and `reconcile`, so one ledger answered two opposite questions. Coverage is
++#: now decided here only, so an externally blocked finding keeps refusing the
++#: cycle bar instead of freezing the cycle as COMPLETE.
++NON_FINAL_DISPOSITIONS = frozenset({"NEEDS_EXTERNAL_EVIDENCE"})
++
++
++def is_final_coverage(disposition: str) -> bool:
++    """Does this disposition CLOSE its finding for the cycle bar?"""
++    return disposition in DISPOSITION and disposition not in NON_FINAL_DISPOSITIONS
+ 
+ _MISSING = object()
+ 
+@@ -646,13 +663,27 @@ def derive_status(
+     parsed = parse_report(report_text)
+     expected = {(f.run, f.imp) for f in parsed.findings}
+     ledger_keys = _report_ledger_keys(roster_text, seat_id, report_ident)
+-    disposed = {(r.run(), r.imp()) for r in _sweep_records(sweep_text) if r.report in ledger_keys}
++    records = [r for r in _sweep_records(sweep_text) if r.report in ledger_keys]
++    # T-7: ONE definition of final coverage. A `NEEDS_EXTERNAL_EVIDENCE`
++    # disposition is a committed decision but an UNRESOLVED one (IMPROVE.md
++    # section 15: an explicit blocker), so it never closes the finding for the
++    # cycle bar -- the same reading `improve_retrospective._view` and
++    # `reconcile` already give it. Before, any closed-set string counted, so
++    # this projection said swept/PASS while those said blocked.
++    disposed = {(r.run(), r.imp()) for r in records if is_final_coverage(r.disposition)}
++    blocked = sorted(
++        f"{'' if r.run() is None else f'RUN-{r.run()}/'}{r.imp()}"
++        for r in records
++        if not is_final_coverage(r.disposition)
++    )
+     missing = sorted(
+         f"{'' if f.run is None else f'RUN-{f.run}/'}{f.imp}"
+         for f in parsed.findings
+         if (f.run, f.imp) not in disposed
+     )
+     fully_swept = bool(expected) and not missing
++    blocked_set = set(blocked)
++    externally_blocked = bool(blocked_set) and set(missing) == blocked_set
+     if availability == "unavailable":
+         visible = "unavailable"
+     elif availability == "superseded":
+@@ -663,6 +694,10 @@ def derive_status(
+         visible = "draft"
+     elif fully_swept:
+         visible = "swept"
++    elif externally_blocked:
++        # T-7: not recovered to a submit/complete route -- an explicit
++        # externally blocked finding, the honest visible class beside `swept`.
++        visible = "blocked"
+     else:
+         visible = "complete"
+     return {
+@@ -672,6 +707,8 @@ def derive_status(
+         "swept": fully_swept,
+         "disposed": sorted({f"RUN-{r}/{i}" if r is not None else i for r, i in disposed}),
+         "missing": missing,
++        "blocked": blocked,
++        "externally_blocked": externally_blocked,
+     }
+ 
+ 
+diff --git a/tools/saipen.py b/tools/saipen.py
+index 37211637..655f035b 100644
+--- a/tools/saipen.py
++++ b/tools/saipen.py
+@@ -1933,6 +1933,13 @@ def _status(project_root: Path, as_json: bool) -> int:
+         routing_failure_code,
+     )
+ 
++    from saipen_engine.work_exhaustion import discovery_evidence
++
++    evidence = discovery_evidence(
++        project_root, state=state, tickets=board["tickets"],
++        pending_ops=pending, conflict_ops=conflicts,
++    )
++    goal_report = evidence["persistent_goals"]
+     # P0#4: the freshly negotiated current-session capability gates routing --
+     # a read-only session routes RESTATE_AND_STOP, never a mutating action.
+     # T-1006: routing judges claim truth against the canonical acting seat.
+@@ -1948,6 +1955,8 @@ def _status(project_root: Path, as_json: bool) -> int:
+         queued_source=queued_source_projection(project_root),
+         pending_append=pending_append_projection(project_root),
+         future_gate=future_gate_projection(project_root, board_text),
++        project_root=project_root,
++        **evidence,
+     )
+     # SRC-085 M3: `computed_next_action`, `computed_reason` and the automation
+     # block must classify the SAME gated route every other surface executes --
+@@ -2107,6 +2116,35 @@ def _status(project_root: Path, as_json: bool) -> int:
+         "pending_ops": pending,
+         "conflict_ops": conflicts,
+     }
++    persistent_goals = goal_report["goals"]
++    payload["goal_inventory"] = {
++        "complete": goal_report["complete"], "root_available": goal_report["root_available"],
++        "errors": goal_report["errors"], "unreadable": goal_report["unreadable"],
++    }
++    for key in ("work_exhaustion", "work_exhaustion_error", "outcome_truth", "outcome_truth_error",
++                "queue_status", "campaign_status", "objective_status"):
++        if key in routed:
++            payload[key] = routed[key]
++    if persistent_goals:
++        active_goals = [g for g in persistent_goals if not g.paused]
++        payload["persistent_goals"] = [
++            {
++                "goal_id": g.goal_id,
++                "title": g.title,
++                "status": g.current_status,
++                "progress": g.current_progress,
++                "scope": g.authorization_scope,
++                "provider": g.evidence_provider,
++                "last_evaluation": g.last_evaluation,
++                "blockers": g.blockers,
++            }
++            for g in persistent_goals
++        ]
++        payload["goal_summary"] = {
++            "total_goals": len(persistent_goals),
++            "active_goals": len(active_goals),
++            "satisfied_goals": len([g for g in persistent_goals if g.current_status == "SATISFIED"]),
++        }
+     if not board["errors"]:
+         from saipen_engine.board import project_blockers
+ 
+@@ -2616,12 +2654,19 @@ def _continue_improve_fallthrough(
+         from saipen_engine.continue_fallback import with_cycle_liveness
+ 
+         payload = with_cycle_liveness(payload, project_root)
++        for key in (
++            "work_exhaustion", "work_exhaustion_error", "outcome_truth",
++            "outcome_truth_error", "queue_status", "campaign_status", "objective_status",
++            "terminal_classification", "stop_reason",
++        ):
++            if key in routed:
++                payload.setdefault(key, routed[key])
+         if chain_trace:
+             payload = {
+                 **payload,
+                 "continue_trace": chain_trace,
+                 "iterations": iterations,
+-                "stop_reason": "idle",
++                "stop_reason": payload.get("stop_reason") or "idle",
+             }
+         _emit(payload, as_json)
+ 
+@@ -2664,6 +2709,103 @@ def _continue_improve_fallthrough(
+             )
+             return 0
+ 
++    # SRC-367 (T-1993): Persistent Goal Engine & Self-Replenishing Work Queue
++    from saipen_engine.persistent_goal import goal_inventory, list_goals_report
++    from saipen_engine.work_exhaustion import INCOMPLETE_DISCOVERY
++
++    try:
++        goal_report = list_goals_report(project_root)
++        goals = goal_inventory(goal_report)
++    except Exception as exc:
++        goal_report = {"goals": [], "complete": False,
++                       "errors": [f"goal loader raised {type(exc).__name__}: {exc}"]}
++        goals = goal_report
++    if not goals["complete"]:
++        _emit_result({
++            "ok": True, "code": INCOMPLETE_DISCOVERY, "quiescent": False,
++            "action": "saipen status", "reason": "goal-inventory-incomplete",
++            "terminal_classification": INCOMPLETE_DISCOVERY,
++            "stop_reason": INCOMPLETE_DISCOVERY, "persistent_goals": goal_report,
++            "dry_run": bool(dry_run), "detail": "persistent goal discovery did not complete",
++        })
++        return 0
++    active_goals = [g for g in goals["goals"] if not g.paused]
++    if active_goals:
++        from saipen_engine.replenishment import replenish_from_goals
++        actor = _agent_for(project_root)
++        replenish_res = replenish_from_goals(
++            project_root, actor, as_json=as_json, dry_run=dry_run
++        )
++        if replenish_res.get("replenished"):
++            _emit_result({
++                "ok": True,
++                "code": "GOAL_TASK_REPLENISHED",
++                "action": replenish_res.get("action", f"PHASE SCOUT {replenish_res.get('admitted_ticket')}"),
++                "ticket": replenish_res.get("admitted_ticket"),
++                "goal_id": replenish_res.get("goal_id"),
++                "candidate": replenish_res.get("candidate"),
++                "reason": "goal-task-replenished",
++                "detail": replenish_res.get("detail"),
++                "dry_run": bool(dry_run),
++            })
++            return 0
++        elif replenish_res.get("status") == "WAITING_AUTHORITY":
++            _emit_result({
++                "ok": True,
++                "code": "WAITING_AUTHORITY",
++                "action": "saipen status",
++                "reason": "goal-waiting-authority",
++                "detail": replenish_res.get("detail"),
++                "selected_candidate": replenish_res.get("selected_candidate"),
++                "operator_action": replenish_res.get("operator_action"),
++                "canonical_next_command": replenish_res.get("canonical_next_command"),
++                "required_scope": replenish_res.get("required_scope"),
++                "checkpoint_ticket_limit": replenish_res.get("checkpoint_ticket_limit"),
++                "checkpoint_wave_limit": replenish_res.get("checkpoint_wave_limit"),
++                # SRC-392 R014: the WAIT's own evidence digest. Unchanged digest
++                # = unchanged evidence: do not re-run this diagnostic, do not
++                # open another ticket to re-investigate it.
++                "blocker_fingerprint": replenish_res.get("blocker_fingerprint"),
++                "dry_run": bool(dry_run),
++            })
++            return 0
++        elif replenish_res.get("status") == "ALL_CANDIDATES_BLOCKED":
++            _emit_result({
++                "ok": True,
++                "code": "ALL_CANDIDATES_BLOCKED",
++                "action": "saipen status",
++                "reason": "goal-all-candidates-blocked",
++                "blockers": replenish_res.get("blockers"),
++                "detail": replenish_res.get("detail"),
++                "dry_run": bool(dry_run),
++            })
++            return 0
++        elif replenish_res.get("status") == "GOAL_GAPS_UNVERIFIED":
++            _emit_result({
++                "ok": True,
++                "code": "GOAL_GAPS_UNVERIFIED",
++                "action": "saipen status",
++                "reason": "goal-gaps-unverified",
++                "blockers": replenish_res.get("blockers"),
++                "detail": replenish_res.get("detail"),
++                "dry_run": bool(dry_run),
++            })
++            return 0
++        elif replenish_res.get("status") == "GOAL_SATISFIED":
++            _unchanged, _identity_detail = source_unchanged(project_root, marker)
++            if _unchanged:
++                _emit_result({
++                    "ok": True,
++                    "code": "GOAL_SATISFIED",
++                    "goal_satisfied": True,
++                    "action": "saipen status",
++                    "reason": "goal-satisfied",
++                    "dry_run": bool(dry_run),
++                    "goals": replenish_res.get("goals"),
++                    "detail": "all declared persistent goals are satisfied; source unchanged",
++                })
++                return 0
++
+     # The source gate (T-76). A terminal cycle frees a fresh discovery only
+     # when the source actually moved: a `git-delta-v1` discovery against an
+     # unchanged tree re-derives a verdict already held, and every admitted
+@@ -2673,17 +2815,18 @@ def _continue_improve_fallthrough(
+     if _unchanged:
+         from saipen_engine import goal_authority as _ga
+         _st, _ = parse_state_or_error(codec.read_doc(_state_path(project_root)))
+-        # T-1875 (SRC-304): a quiescent campaign is a claim the grant must
+-        # prove. `is_continuous_maintenance` reads only the STATE tuple, so
+-        # emitting QUIESCENT on it alone let a state file assert a standing
+-        # campaign. The proven predicate keeps the same public shape while
+-        # making the claim falsifiable.
++        from saipen_engine.work_exhaustion import verified_quiescence
++
+         _is_cm = _ga.continuous_maintenance_proven(project_root, _st or {})
++        _quiescent = verified_quiescence(routed.get("work_exhaustion"))
++        _certificate_status = (routed.get("work_exhaustion") or {}).get("status")
+         _emit_result(
+             {
+                 "ok": True,
+-                "code": "CONTINUE_QUIESCENT_IDLE" if _is_cm else "CONTINUE_IDLE_SOURCE_UNCHANGED",
+-                "quiescent": _is_cm,
++                "code": "CONTINUE_QUIESCENT_IDLE" if _quiescent else (
++                    _certificate_status or INCOMPLETE_DISCOVERY
++                ),
++                "quiescent": _quiescent,
+                 "continuous_maintenance": _is_cm,
+                 "action": "saipen status",
+                 "reason": "improve-source-unchanged",
+@@ -2835,6 +2978,8 @@ def _route_once(project_root: Path, *, reconciled: dict | None = None) -> dict:
+     # fresh objective is never silently substituted out of view by persisted
+     # Work. Read-only: nothing here consumes the receipt.
+     _queued = queued_source_projection(project_root)
++    from saipen_engine.work_exhaustion import discovery_evidence
++
+     routed = route_next(
+         state_text,
+         board_text,
+@@ -2847,6 +2992,11 @@ def _route_once(project_root: Path, *, reconciled: dict | None = None) -> dict:
+         queued_source=_queued,
+         pending_append=pending_append_projection(project_root),
+         future_gate=future_gate_projection(project_root, board_text),
++        project_root=project_root,
++        **discovery_evidence(
++            project_root, state=state, tickets=board["tickets"],
++            pending_ops=pending, conflict_ops=conflicts,
++        ),
+     )
+     # T-1412 + T-1403 + SRC-085 M3: the SAME ordered gate chain the Result
+     # wrapper applies, so `continue` can never hand out a route another surface
+@@ -3043,7 +3193,22 @@ def _route_payload(
+         "reconciliation": reconciliation,
+         "stop_reason": routed.get("stop_reason"),
+         "terminal_classification": routed.get("terminal_classification"),
++        **{key: routed[key] for key in (
++            "work_exhaustion", "work_exhaustion_error", "outcome_truth",
++            "outcome_truth_error", "queue_status", "campaign_status", "objective_status",
++        ) if key in routed},
+     }
++    # SRC-392 R014: the maintenance-authority WAIT carries its own evidence
++    # digest. `continuous_maintenance_gate` attaches `blocker_fingerprint`
++    # (and the operator action that resolves it) to the route; this public
++    # projection must forward it or the agent repeats the same diagnostic
++    # with no way to tell that the evidence never changed.
++    if routed.get("reason") == "goal-waiting-authority":
++        for key in ("blocker_fingerprint", "operator_action", "canonical_next_command",
++                    "required_scope", "checkpoint_ticket_limit", "checkpoint_wave_limit",
++                    "authority_kind"):
++            if key in routed:
++                payload[key] = routed[key]
+     # SRC-274:R003: a fresh objective waiting behind this route is a FACT the
+     # answer states, not something a reader infers from silence. Absent means
+     # no fresh unprojected operator receipt exists at all.
+@@ -3864,6 +4029,8 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
+     from saipen_engine.board import operator_gates, parse_board
+ 
+     _parsed_board = parse_board(board_text)
++    from saipen_engine.work_exhaustion import discovery_evidence
++
+     parked = _parked_work(_parsed_board["tickets"], state)
+     _gates = operator_gates(_parsed_board["tickets"])
+     from saipen_engine.router import (
+@@ -3891,6 +4058,11 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
+         queued_source=queued_source_projection(project_root),
+         pending_append=pending_append_projection(project_root),
+         future_gate=future_gate_projection(project_root, board_text),
++        project_root=project_root,
++        **discovery_evidence(
++            project_root, state=state, tickets=_parsed_board["tickets"],
++            pending_ops=pending, conflict_ops=conflicts,
++        ),
+     )
+     # Explain the executable route, including the same conformance and closure
+     # gates used by status/next/continue. A raw route can name a refused action.
+@@ -6092,6 +6264,30 @@ def _parse_value_options(tokens: list[str], spec: dict[str, str]) -> tuple[dict,
+     return values, positionals, ""
+ 
+ 
++def _ticket_and_text(rest: list[str]) -> tuple[str | None, str]:
++    """Split positional args into ``(ticket, text)`` for checkpoint/transition.
++
++    T-31: the ticket id is a WHOLE argv token and may be written before OR
++    after the text. The historical parse read only ``rest[0]``, so
++    ``checkpoint RUN "<text>" T-27`` silently journaled a ticketless RUN and
++    folded the stray id into the text. A ``T-27`` mentioned inside quoted prose
++    is one argv element and can never satisfy the whole-token test, so lifting
++    the token here cannot misread prose. With no whole-token ticket the text is
++    passed through unchanged and the ticket is None.
++    """
++    ticket = None
++    parts: list[str] = []
++    for token in rest:
++        if ticket is None and re.fullmatch(r"T-\d+", token, re.IGNORECASE):
++            ticket = token.upper()
++        else:
++            parts.append(token)
++    if ticket is None and rest and re.match(r"^T-\d+", rest[0], re.IGNORECASE):
++        ticket = rest[0]
++        parts = rest[1:]
++    return ticket, " ".join(parts)
++
++
+ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
+     """`saipen cohort status|reconcile|ship C-###` -- batch publication (CORE-003).
+ 
+@@ -6129,7 +6325,7 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
+             review_work=options.get("review_work", ""), dry_run=dry_run)
+         _emit(result.to_dict(), as_json)
+         return 0 if result.ok else 1
+-    if len(args) > 2:
++    if len(args) > 2 and action != "ship":
+         _emit(
+             {
+                 "ok": False,
+@@ -6205,6 +6401,43 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
+             as_json,
+         )
+         return 2
++    isolated = False
++    remote = "origin"
++    branch = "main"
++    extra = args[2:]
++    idx = 0
++    while idx < len(extra):
++        tok = extra[idx]
++        if tok == "--isolated":
++            isolated = True
++            idx += 1
++        elif tok == "--remote":
++            if idx + 1 < len(extra) and not extra[idx + 1].startswith("--"):
++                remote = extra[idx + 1]
++                idx += 2
++            else:
++                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--remote requires a remote name"}, as_json)
++                return 2
++        elif tok.startswith("--remote="):
++            remote = tok.split("=", 1)[1]
++            idx += 1
++        elif tok == "--branch":
++            if idx + 1 < len(extra) and not extra[idx + 1].startswith("--"):
++                branch = extra[idx + 1]
++                idx += 2
++            else:
++                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--branch requires a branch name"}, as_json)
++                return 2
++        elif tok.startswith("--branch="):
++            branch = tok.split("=", 1)[1]
++            idx += 1
++        elif tok.startswith("--"):
++            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown option {tok}"}, as_json)
++            return 2
++        else:
++            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"cohort ship takes exactly one C-### id; surplus: {' '.join(extra[idx:])}"}, as_json)
++            return 2
++
+     if not dry_run and _negotiate_capability(project_root) == "read-only":
+         return _capability_refusal(as_json)
+     from saipen_engine.operations import cohort_ship
+@@ -6215,6 +6448,9 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
+         _agent_for(project_root),
+         dry_run=dry_run,
+         current_capability=_negotiate_capability(project_root),
++        isolated=isolated,
++        remote=remote,
++        branch=branch,
+     )
+     payload = result.to_dict()
+     if not dry_run:
+@@ -6400,7 +6636,12 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
+       recover           read-only orphan-receipt crash diagnostic
+       req <SRC> <RID> <class> [--when-environment HOST] <text...>
+       disp <SRC> <RID> <DISPOSITION> [--work T-x] [--evidence E-y]
+-           [--environment HOST]
++           [--verification 'cmd -> PASS'] [--environment HOST]
++           [--evidence-class CLASS]
++                        CLASS (UNIT|CONTRACT|INTEGRATION|INSTALLED_RUNTIME|
++                        LIVE_END_TO_END|PERFORMANCE_BENCHMARK|REAL_SOAK|
++                        PUBLICATION_RECEIPT) declares what the cited evidence
++                        IS, so a [CLASS]-tagged clause can satisfy its class
+       quarantine <SRC> [--reason CODE]
+                         retain exact local authority; exclude body from export
+       close <SRC>       close ONLY when coverage is terminal (mutating)
+@@ -6855,7 +7096,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
+             )
+             return 2
+         receipt_id, rid, disposition = rest[0], rest[1], rest[2]
+-        work = evidence = verification = environment = None
++        work = evidence = verification = environment = evidence_class = None
+         i = 3
+         while i < len(rest):
+             if rest[i] == "--work" and i + 1 < len(rest):
+@@ -6870,6 +7111,9 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
+             elif rest[i] == "--environment" and i + 1 < len(rest):
+                 environment = rest[i + 1]
+                 i += 2
++            elif rest[i] == "--evidence-class" and i + 1 < len(rest):
++                evidence_class = rest[i + 1]
++                i += 2
+             else:
+                 _emit(
+                     {
+@@ -6889,6 +7133,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
+             evidence=evidence,
+             verification=verification,
+             environment=environment,
++            evidence_class=evidence_class,
+         )
+         if result.get("ok"):
+             _close_finished_receipts(project_root, result, receipts=[receipt_id])
+@@ -7085,10 +7330,10 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
+             )
+             return 2
+         receipt_id, rid, disposition = rest[0], rest[1], rest[2]
+-        work = evidence = verification = environment = None
++        work = evidence = verification = environment = evidence_class = None
+         i = 3
+         while i < len(rest):
+-            if rest[i] in ("--work", "--evidence", "--verification", "--environment"):
++            if rest[i] in ("--work", "--evidence", "--verification", "--environment", "--evidence-class"):
+                 if i + 1 >= len(rest):
+                     _emit(
+                         {
+@@ -7106,6 +7351,8 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
+                     evidence = value
+                 elif rest[i] == "--verification":
+                     verification = value
++                elif rest[i] == "--evidence-class":
++                    evidence_class = value
+                 else:
+                     environment = value
+                 i += 2
+@@ -7125,6 +7372,12 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
+         if refusal is not None:
+             _emit(refusal, as_json)
+             return 1
++        # T-34: the same evidence-class authority the mutator uses, so an
++        # unknown --evidence-class refuses identically with and without --dry-run.
++        class_refusal = intake.validate_evidence_class(evidence_class)
++        if class_refusal is not None:
++            _emit(class_refusal, as_json)
++            return 1
+         assert normalized_rid is not None
+         # T-1531: mirror the apply path's read-only STATE check. set_disposition
+         # refuses a rid absent from coverage ('unknown requirement {rid}'); the
+@@ -9198,6 +9451,28 @@ def _operator_boundary_hint(root: Path) -> dict | None:
+     }
+ 
+ 
++def _release_provenance(project_root: Path, invocation: str):
++    """The release approval's operator provenance, or (None, None) (T-2027 P0-02).
++
++    A TTY flag and `--confirm` prove nothing about WHO invoked the command: a
++    model that allocates a pseudoterminal satisfies both and mints a grant.
++    The only provenance this CLI can offer is the one the operator's own host
++    surface delivered: the exact invocation text as an admitted operator
++    ingress, carrying a sealed operator origin the separated broker can
++    reproduce. `operator_task.witness` is that reader -- it matches the bytes
++    against the active envelope and returns the sealed origin, or a refusal.
++    Absence is not an error here: `approve_release_command` refuses the
++    approval itself, with the presentation the operator needs.
++    """
++    from saipen_engine import operator_task
++
++    provenance = operator_task.witness(invocation, root=project_root)
++    if not isinstance(provenance, dict) or "code" in provenance:
++        return None, None
++    origin = provenance.get("operator_origin")
++    return provenance, (origin if isinstance(origin, dict) else None)
++
++
+ def _emit(payload: dict, as_json: bool) -> None:
+     # ONE public refusal shape. CLI-side refusals have always carried
+     # `detail`; engine `Result` refusals carry `message`, so the same public
+@@ -10794,7 +11069,7 @@ def _host_entry(
+         and command[0] != "rebind-home"
+     ):
+         proc = subprocess.run(
+-            [*resolved["exec_prefix"], "rebind-home", "--auto", "--json"],
++            [*resolved["exec_prefix"], "rebind-home", "--auto", "--repair", "--json"],
+             cwd=resolved["project_root"],
+             capture_output=True,
+             text=True,
+@@ -12576,7 +12851,8 @@ def main(argv: list[str] | None = None) -> int:
+             "[--project|--global] --confirm|authority capture [--file PATH|--hex HEX]|"
+             "sub reconcile <role> --authority <SRC-###>|sub|rebind-home "
+             "<candidate-home>|context (cold|hot|audit|orient [--handoff JSON])|"
+-            "acceptance <T-###>|test suite [status|declare -- <command>|run [T-###]|withdraw]|"
++            "acceptance <T-###>|test suite [status|declare -- <command>|"
++            "run [T-###] [--fail-fast]|affected [T-###]|withdraw]|"
+             "attempt open|attempt close <RESULT> "
+             "<STOP>|brief|lock [status]|focus [text]|build <directive>|knowledge "
+             "(status|index|retrieve <objective>)|future "
+@@ -13303,8 +13579,7 @@ def main(argv: list[str] | None = None) -> int:
+                 as_json,
+             )
+             return 2
+-        ticket = args[2] if len(args) > 2 and args[2].upper().startswith("T-") else None
+-        text = " ".join(args[3:] if ticket else args[2:])
++        ticket, text = _ticket_and_text(args[2:])
+         if not dry_run and _negotiate_capability(project_root) == "read-only":
+             return _capability_refusal(as_json)
+         _ho = _ensure_handover(project_root, as_json, dry_run)
+@@ -13329,8 +13604,7 @@ def main(argv: list[str] | None = None) -> int:
+                 as_json,
+             )
+             return 2
+-        ticket = args[2] if len(args) > 2 and args[2].upper().startswith("T-") else None
+-        text = " ".join(args[3:] if ticket else args[2:])
++        ticket, text = _ticket_and_text(args[2:])
+         if not dry_run and _negotiate_capability(project_root) == "read-only":
+             return _capability_refusal(as_json)
+         _ho = _ensure_handover(project_root, as_json, dry_run)
+@@ -14433,6 +14707,122 @@ def main(argv: list[str] | None = None) -> int:
+     if command == "cohort":
+         return _cohort(project_root, args[1:], as_json, dry_run)
+     if command in ("goal", "gg"):
++        if len(args) > 1 and args[1] in ("status", "list", "eval", "replenish", "add", "pause", "resume"):
++            from saipen_engine.persistent_goal import (
++                list_goals, get_goal, save_goal, PersistentGoal, STATUS_ACTIVE
++            )
++            from saipen_engine.replenishment import evaluate_all_goals, replenish_from_goals
++
++            subaction = args[1]
++            if subaction == "list":
++                all_g = list_goals(project_root)
++                _emit({"ok": True, "code": "GOAL_LIST", "goals": [g.to_dict() for g in all_g]}, as_json)
++                return 0
++            elif subaction == "status":
++                target_gid = args[2] if len(args) > 2 else None
++                if target_gid:
++                    g = get_goal(project_root, target_gid)
++                    if not g:
++                        _emit({"ok": False, "code": "GOAL_NOT_FOUND", "detail": f"goal {target_gid} not found"}, as_json)
++                        return 1
++                    _emit({"ok": True, "code": "GOAL_STATUS", "goal": g.to_dict()}, as_json)
++                else:
++                    all_g = list_goals(project_root)
++                    _emit({"ok": True, "code": "GOAL_STATUS", "goals": [g.to_dict() for g in all_g]}, as_json)
++                return 0
++            elif subaction == "eval":
++                eval_res = evaluate_all_goals(project_root)
++                _emit({
++                    "ok": True,
++                    "code": "GOAL_EVALUATED",
++                    "results": [{"goal": g.to_dict(), "evaluation": ev.to_dict()} for g, ev in eval_res]
++                }, as_json)
++                return 0
++            elif subaction == "replenish":
++                res = replenish_from_goals(project_root, _agent_for(project_root), as_json=as_json, dry_run=dry_run)
++                _emit(res, as_json)
++                return 0 if res.get("ok") else 1
++            elif subaction == "pause":
++                if len(args) < 3:
++                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "Use: saipen goal pause <goal_id>"}, as_json)
++                    return 2
++                g = get_goal(project_root, args[2])
++                if not g:
++                    _emit({"ok": False, "code": "GOAL_NOT_FOUND", "detail": f"goal {args[2]} not found"}, as_json)
++                    return 1
++                g.paused = True
++                save_goal(project_root, g)
++                _emit({"ok": True, "code": "GOAL_PAUSED", "goal_id": g.goal_id}, as_json)
++                return 0
++            elif subaction == "resume":
++                if len(args) < 3:
++                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "Use: saipen goal resume <goal_id>"}, as_json)
++                    return 2
++                g = get_goal(project_root, args[2])
++                if not g:
++                    _emit({"ok": False, "code": "GOAL_NOT_FOUND", "detail": f"goal {args[2]} not found"}, as_json)
++                    return 1
++                g.paused = False
++                save_goal(project_root, g)
++                _emit({"ok": True, "code": "GOAL_RESUMED", "goal_id": g.goal_id}, as_json)
++                return 0
++            elif subaction == "add":
++                opts, pos, opt_err = _parse_value_options(
++                    args[2:],
++                    {"--objective": "objective", "--provider": "provider", "--source": "source", "--scope": "scope"}
++                )
++                if opt_err or len(pos) < 2:
++                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "Use: saipen goal add <goal_id> <title> --objective <text> [--provider <p>] [--source <s>] [--scope <sc>]"}, as_json)
++                    return 2
++                gid = pos[0]
++                title = pos[1]
++                obj = opts.get("objective") or title
++                prov = opts.get("provider") or "evidence_gap_ledger"
++                src_path = opts.get("source") or ""
++                sc = opts.get("scope") or "RESEARCH"
++                from saipen_engine.safeid import InvalidIdError
++                from saipen_engine.persistent_goal import register_goal, DuplicateGoalError
++                try:
++                    new_g = PersistentGoal(
++                        goal_id=gid,
++                        project_id=str(project_root.name),
++                        title=title,
++                        objective=obj,
++                        authorization_scope=sc,
++                        evidence_provider=prov,
++                        research_or_work_backlog_source=src_path,
++                    )
++                    register_goal(project_root, new_g)
++                except (InvalidIdError, ValueError, DuplicateGoalError) as exc:
++                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"invalid goal: {exc}"}, as_json)
++                    return 2
++                _emit({"ok": True, "code": "GOAL_ADDED", "goal": new_g.to_dict()}, as_json)
++                return 0
++        if len(args) > 1 and args[1] == "propose":
++            # SRC-392: generate the CURRENT goal's exact authorization capsule
++            # so the operator never hand-computes pivot hashes, ingress, lineage
++            # or grant fields. Read-only: it proposes, it never authorizes.
++            from saipen_engine import goal_authority as _ga, codec as _codec
++            from saipen_engine.state import parse_state as _parse_state
++            from saipen_engine.log import read_history_snapshot as _read_hist
++
++            opts, _pos, opt_err = _parse_value_options(
++                args[2:], {"--scope": "scope"}
++            )
++            if opt_err:
++                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": opt_err}, as_json)
++                return 2
++            scope = opts.get("scope") or "continuous_maintenance"
++            try:
++                st = _parse_state(_codec.read_doc(project_root / ".saipen/STATE.md"))
++                hist = _read_hist(project_root, lean=True).events
++            except (OSError, ValueError, TypeError) as exc:
++                _emit({"ok": False, "code": "PROPOSAL_UNAVAILABLE",
++                       "detail": f"{type(exc).__name__}: {exc}"}, as_json)
++                return 1
++            proposal = _ga.propose_capsule(project_root, st, hist, until=scope)
++            _emit(proposal, as_json)
++            return 0 if proposal.get("ok") else 1
+         if len(args) > 1 and args[1] == "authorize":
+             if len(args) != 4 or args[2] != "--file":
+                 _emit({"ok": False, "code": "VALIDATION_FAILED",
+@@ -14471,6 +14861,12 @@ def main(argv: list[str] | None = None) -> int:
+             else:
+                 print("Use: gg <objective text>")
+             return 2
++        from saipen_engine.cold_recovery import is_continuation_command
++
++        goal_arg_text = " ".join(args[1:])
++        if is_continuation_command(goal_arg_text) or is_continuation_command(" ".join(args)):
++            cont_args = ["all"] if any(a.lower() in ("all", "--all", "-a") for a in args[1:]) else []
++            return _continue(project_root, cont_args, as_json, dry_run)
+         if not dry_run and _negotiate_capability(project_root) == "read-only":
+             return _capability_refusal(as_json)
+         _ho = _ensure_handover(project_root, as_json, dry_run)
+@@ -14479,7 +14875,7 @@ def main(argv: list[str] | None = None) -> int:
+         from saipen_engine.operations import goal_entry
+ 
+         result = goal_entry(
+-            project_root, _agent_for(project_root), " ".join(args[1:]), dry_run=dry_run
++            project_root, _agent_for(project_root), goal_arg_text, dry_run=dry_run
+         )
+         _emit(result.to_dict(), as_json)
+         return 0 if result.ok else 1
+@@ -14492,7 +14888,9 @@ def main(argv: list[str] | None = None) -> int:
+         # adopts only a runtime host bootstrap already PROVED (executing
+         # engine or a verified carrier), never a guessed path, and refuses
+         # HOME_REQUIRED with the explicit form when nothing is proven.
+-        if len(args) == 2 and args[1] == "--auto":
++        repair = "--repair" in args
++        clean_args = [a for a in args if a != "--repair"]
++        if len(clean_args) == 2 and clean_args[1] == "--auto":
+             from saipen_engine.operations import rebind_home_auto
+ 
+             if not dry_run and _negotiate_capability(project_root) == "read-only":
+@@ -14500,12 +14898,14 @@ def main(argv: list[str] | None = None) -> int:
+             _ho = _ensure_handover(project_root, as_json, dry_run)
+             if _ho is not None:
+                 return _ho
+-            result = rebind_home_auto(project_root, _agent_for(project_root), dry_run=dry_run)
++            result = rebind_home_auto(
++                project_root, _agent_for(project_root), dry_run=dry_run, repair=repair
++            )
+             payload = result.to_dict()
+             payload["route"] = "rebind-home --auto"
+             _emit(payload, as_json)
+             return 0 if result.ok else 1
+-        if len(args) < 2:
++        if len(clean_args) < 2:
+             _emit(
+                 {
+                     "ok": False,
+@@ -14518,12 +14918,12 @@ def main(argv: list[str] | None = None) -> int:
+                 as_json,
+             )
+             return 2
+-        if len(args) > 2:
++        if len(clean_args) > 2:
+             _emit(
+                 {
+                     "ok": False,
+                     "code": "VALIDATION_FAILED",
+-                    "detail": f"rebind-home takes <candidate-home-path>; surplus: {' '.join(args[2:])}",  # noqa: E501
++                    "detail": f"rebind-home takes <candidate-home-path>; surplus: {' '.join(clean_args[2:])}",  # noqa: E501
+                 },
+                 as_json,
+             )
+@@ -14536,7 +14936,7 @@ def main(argv: list[str] | None = None) -> int:
+         if _ho is not None:
+             return _ho
+         result = rebind_saipen_home(
+-            project_root, _agent_for(project_root), args[1], dry_run=dry_run
++            project_root, _agent_for(project_root), clean_args[1], dry_run=dry_run, repair=repair
+         )
+         _emit(result.to_dict(), as_json)
+         return 0 if result.ok else 1
+@@ -14574,6 +14974,82 @@ def main(argv: list[str] | None = None) -> int:
+                 as_json,
+             )
+             return 1
++    if command == "release":
++        from saipen_engine import release_authority
++
++        rest = args[1:]
++        subcmd = rest[0] if rest else "status"
++        if subcmd in ("approve", "release-approve"):
++            standing = False
++            confirm = False
++            packet = None
++            max_releases = None
++            remote = None
++            branch = None
++            idx = 1
++            while idx < len(rest):
++                tok = rest[idx]
++                if tok == "--standing":
++                    standing = True
++                    idx += 1
++                elif tok == "--confirm":
++                    confirm = True
++                    idx += 1
++                elif tok == "--packet" and idx + 1 < len(rest):
++                    packet = rest[idx + 1]
++                    idx += 2
++                elif tok == "--max-releases" and idx + 1 < len(rest):
++                    try:
++                        max_releases = int(rest[idx + 1])
++                    except ValueError:
++                        pass
++                    idx += 2
++                elif tok == "--remote" and idx + 1 < len(rest):
++                    remote = rest[idx + 1]
++                    idx += 2
++                elif tok == "--branch" and idx + 1 < len(rest):
++                    branch = rest[idx + 1]
++                    idx += 2
++                elif not tok.startswith("--") and packet is None:
++                    packet = tok
++                    idx += 1
++                else:
++                    idx += 1
++            provenance, operator_origin = _release_provenance(
++                project_root, " ".join(args)
++            )
++            res = release_authority.approve_release_command(
++                project_root,
++                packet_path=packet,
++                remote=remote,
++                branch=branch,
++                standing=standing,
++                max_releases=max_releases,
++                confirm=confirm,
++                provenance=provenance,
++                operator_origin=operator_origin,
++                operator_operation="release-authorize",
++            )
++            _emit(res, as_json)
++            return 0 if res.get("ok") else 1
++        elif subcmd in ("status", "list"):
++            grants = release_authority.list_grants(project_root)
++            _emit({"ok": True, "code": "RELEASE_GRANTS", "grants": grants, "count": len(grants)}, as_json)
++            return 0
++        elif subcmd == "revoke":
++            grant_id = rest[1] if len(rest) > 1 else ""
++            if not grant_id:
++                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "release revoke requires grant-id"}, as_json)
++                return 2
++            reason = "Operator revoked via CLI"
++            if len(rest) > 2 and not rest[2].startswith("--"):
++                reason = rest[2]
++            res = release_authority.revoke_grant(project_root, grant_id, reason=reason)
++            _emit(res, as_json)
++            return 0 if res.get("ok") else 1
++        else:
++            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown release subcommand {subcmd!r}"}, as_json)
++            return 2
+     if command == "authority":
+         # T-1414: persist ONE operator-authority Source and project NOTHING.
+         # The capsule grammar is retirement's own closed parser; this verb is
+@@ -14581,6 +15057,80 @@ def main(argv: list[str] | None = None) -> int:
+         from saipen_engine.operations import authority_capture
+ 
+         rest = args[1:]
++        if rest and rest[0] in ("release-approve", "approve-release"):
++            from saipen_engine import release_authority
++
++            standing = False
++            confirm = False
++            packet = None
++            max_releases = None
++            remote = None
++            branch = None
++            idx = 1
++            while idx < len(rest):
++                tok = rest[idx]
++                if tok == "--standing":
++                    standing = True
++                    idx += 1
++                elif tok == "--confirm":
++                    confirm = True
++                    idx += 1
++                elif tok == "--packet" and idx + 1 < len(rest):
++                    packet = rest[idx + 1]
++                    idx += 2
++                elif tok == "--max-releases" and idx + 1 < len(rest):
++                    try:
++                        max_releases = int(rest[idx + 1])
++                    except ValueError:
++                        pass
++                    idx += 2
++                elif tok == "--remote" and idx + 1 < len(rest):
++                    remote = rest[idx + 1]
++                    idx += 2
++                elif tok == "--branch" and idx + 1 < len(rest):
++                    branch = rest[idx + 1]
++                    idx += 2
++                elif not tok.startswith("--") and packet is None:
++                    packet = tok
++                    idx += 1
++                else:
++                    idx += 1
++            provenance, operator_origin = _release_provenance(
++                project_root, " ".join(args)
++            )
++            res = release_authority.approve_release_command(
++                project_root,
++                packet_path=packet,
++                remote=remote,
++                branch=branch,
++                standing=standing,
++                max_releases=max_releases,
++                confirm=confirm,
++                provenance=provenance,
++                operator_origin=operator_origin,
++                operator_operation="release-authorize",
++            )
++            _emit(res, as_json)
++            return 0 if res.get("ok") else 1
++        if rest and rest[0] == "release-status":
++            from saipen_engine import release_authority
++
++            grants = release_authority.list_grants(project_root)
++            _emit({"ok": True, "code": "RELEASE_GRANTS", "grants": grants, "count": len(grants)}, as_json)
++            return 0
++        if rest and rest[0] == "release-revoke":
++            from saipen_engine import release_authority
++
++            grant_id = rest[1] if len(rest) > 1 else ""
++            if not grant_id:
++                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "authority release-revoke requires grant-id"}, as_json)
++                return 2
++            reason = "Operator revoked via CLI"
++            if len(rest) > 2 and not rest[2].startswith("--"):
++                reason = rest[2]
++            res = release_authority.revoke_grant(project_root, grant_id, reason=reason)
++            _emit(res, as_json)
++            return 0 if res.get("ok") else 1
+         if not rest or rest[0] != "capture":
+             _emit(
+                 {
+@@ -14789,16 +15339,62 @@ def main(argv: list[str] | None = None) -> int:
+         _emit(result.to_dict(), as_json)
+         return 0 if result.ok else 1
+     if command in ("ship", "push"):
+-        surplus = [a for a in args[1:] if not a.startswith("--")]
+-        unknown_flags = [a for a in args[1:] if a.startswith("--")]
+-        if surplus or unknown_flags:
++        isolated = False
++        remote = "origin"
++        branch = "main"
++        reconcile_remote_head = None
++        surplus = []
++        i = 1
++        while i < len(args):
++            arg = args[i]
++            if arg == "--isolated":
++                isolated = True
++                i += 1
++            elif arg == "--remote":
++                if i + 1 < len(args) and not args[i+1].startswith("--"):
++                    remote = args[i+1]
++                    i += 2
++                else:
++                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--remote requires a remote name"}, as_json)
++                    return 2
++            elif arg.startswith("--remote="):
++                remote = arg.split("=", 1)[1]
++                i += 1
++            elif arg == "--branch":
++                if i + 1 < len(args) and not args[i+1].startswith("--"):
++                    branch = args[i+1]
++                    i += 2
++                else:
++                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--branch requires a branch name"}, as_json)
++                    return 2
++            elif arg.startswith("--branch="):
++                branch = arg.split("=", 1)[1]
++                i += 1
++            elif arg == "--reconcile-remote-head":
++                if i + 1 < len(args) and not args[i+1].startswith("--"):
++                    reconcile_remote_head = args[i+1]
++                    i += 2
++                else:
++                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--reconcile-remote-head requires a SHA"}, as_json)
++                    return 2
++            elif arg.startswith("--reconcile-remote-head="):
++                reconcile_remote_head = arg.split("=", 1)[1]
++                i += 1
++            elif arg.startswith("--"):
++                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown option {arg}"}, as_json)
++                return 2
++            else:
++                surplus.append(arg)
++                i += 1
++
++        if surplus:
+             _emit(
+                 {
+                     "ok": False,
+                     "code": "VALIDATION_FAILED",
+                     "detail": (
+-                        f"{command} accepts no arguments; surplus: "
+-                        f"{' '.join(surplus + unknown_flags)}"
++                        f"{command} accepts no positional arguments; surplus: "
++                        f"{' '.join(surplus)}"
+                     ),
+                 },
+                 as_json,
+@@ -14838,6 +15434,49 @@ def main(argv: list[str] | None = None) -> int:
+                 # release verdict itself is untouched.
+                 verdict["attempt_record_error"] = logged.get("error", "unknown")
+ 
++        if isolated:
++            from saipen_engine.isolated_release import execute_isolated_release
++            try:
++                result = execute_isolated_release(
++                    project_root,
++                    command,
++                    remote=remote,
++                    branch=branch,
++                    current_capability=_negotiate_capability(project_root),
++                    current_agent=_agent_for(project_root),
++                    dry_run=dry_run,
++                    reconcile_remote_head=reconcile_remote_head,
++                )
++            except ReleaseRefusal as exc:
++                refusal = {
++                    "ok": False,
++                    "code": exc.code,
++                    "detail": exc.detail,
++                    "canonical_next_command": getattr(exc, "next_command", None),
++                }
++                _record_attempt(refusal, ticket=str(getattr(exc, "forbidden_ticket", "") or ""))
++                _emit(refusal, as_json)
++                return 1
++            except Exception as exc:
++                refusal = {
++                    "ok": False,
++                    "code": getattr(exc, "code", "ISOLATED_RELEASE_FAILED"),
++                    "detail": str(exc),
++                }
++                _record_attempt(refusal)
++                _emit(refusal, as_json)
++                return 1
++
++            _record_attempt(
++                result,
++                ticket=str(result.get("ticket_id") or ""),
++                mode=str(result.get("mode") or ""),
++            )
++            if result.get("ok") and result.get("ticket_id"):
++                _close_finished_receipts(project_root, result, works=[result["ticket_id"]])
++            _emit(result, as_json)
++            return 0 if result.get("ok") else 1
++
+         try:
+             # P0#4: inject the freshly negotiated current-session capability so
+             # a read-only session cannot PLAN a release. Second-wave P0: the
+@@ -15451,6 +16090,51 @@ def main(argv: list[str] | None = None) -> int:
+         return 2
+     from saipen_engine.command_effects import nested_routes
+ 
++    # EXACT-NAMESPACE-01 (T-1968): a token owned by a FOREIGN protocol is not a
++    # typo and must not be refused like one. The field failure: an agent told to
++    # run `/saipen continue` in a `.saipen` project loaded SAIPAL instead, got
++    # NO_HOME from it, then moved into the SAIPAL repository. Naming the owner,
++    # the route it answers, and the standing NO_HOME rule removes the ambiguity
++    # a bare "unknown command" left in place.
++    from saipen_engine.commands import foreign_protocol_owner
++
++    foreign = foreign_protocol_owner(command)
++    if foreign is not None:
++        name = str(foreign.get("name") or "another protocol")
++        invocation = " ".join(str(part) for part in args)
++        refusal = str(foreign.get("refusal") or "").strip()
++        if refusal and not refusal.endswith("."):
++            refusal += "."
++        foreign_payload = {
++            "ok": False,
++            "code": "FOREIGN_PROTOCOL_COMMAND",
++            "protocol": name,
++            "requested_command": invocation,
++            "foreign_protocol": foreign,
++            "detail": (
++                f"`{invocation}` is a {name} command, not a saipen command. "
++                f"{refusal} An explicit SAIPEN command is never satisfied by a "
++                "different protocol."
++            ).strip(),
++            "no_home_substitution": (
++                f"If {name} answers NO_HOME, that is expected in a .saipen "
++                "project: it is never repaired by changing directory, searching "
++                "for its home, or creating one."
++            ),
++            "next_action": (
++                "run the saipen command you actually need (for an explicit "
++                "`/saipen continue` that is `saipen continue`), or name "
++                f"{name} deliberately if that protocol is what you want"
++            ),
++        }
++        if as_json:
++            _emit(foreign_payload, as_json)
++        else:
++            print(foreign_payload["detail"])
++            print(foreign_payload["no_home_substitution"])
++            print(f"Action: {foreign_payload['next_action']}")
++        return 2
++
+     detail = f"unknown command: {command}"
+     routes = nested_routes(command)
+     if routes:
+diff --git a/tools/saipen_engine/continue_fallback.py b/tools/saipen_engine/continue_fallback.py
+index 5aa8deaf..529ad854 100644
+--- a/tools/saipen_engine/continue_fallback.py
++++ b/tools/saipen_engine/continue_fallback.py
+@@ -304,6 +304,8 @@ def resume_action(root: Path, cycle_id: str, agent: str) -> tuple[str, str]:
+                 f"improvement discovery cycle {cycle_id} meets its bar; complete it",
+             )
+         has_unswept = False
++        has_blocked = False
++        blocked_refs: list[str] = []
+         for block in _seat_blocks(roster):
+             if (_field(block, "availability") or "expected") != "expected":
+                 continue
+@@ -312,7 +314,15 @@ def resume_action(root: Path, cycle_id: str, agent: str) -> tuple[str, str]:
+             report = cycle / seat / report_name
+             text = report.read_text(encoding="utf-8-sig") if report.is_file() else ""
+             status = derive_status(report_name, roster, text, sweep, seat)
+-            if status.get("missing"):
++            # T-7: an externally blocked disposition (`NEEDS_EXTERNAL_EVIDENCE`)
++            # is a committed but UNRESOLVED decision. It is not stale work and
++            # cannot be re-swept -- sweep-queue enumerates nothing for it -- so
++            # name the blocker instead of recommending the empty route.
++            blocked_here = set(status.get("blocked", []))
++            blocked_refs.extend(f"{seat}:{ref}" for ref in sorted(blocked_here))
++            has_blocked = has_blocked or bool(status.get("externally_blocked"))
++            actionable = [ref for ref in status.get("missing", []) if ref not in blocked_here]
++            if actionable:
+                 has_unswept = True
+                 break
+         if has_unswept:
+@@ -321,6 +331,15 @@ def resume_action(root: Path, cycle_id: str, agent: str) -> tuple[str, str]:
+                 f"improvement discovery cycle {cycle_id} is already active and every "
+                 "expected report is complete; the Core sweep of its findings is next",
+             )
++        if has_blocked:
++            return (
++                f"saipen improve status {cycle_id}",
++                f"improvement discovery cycle {cycle_id} is already active and its "
++                "remaining finding(s) are explicitly blocked on external evidence "
++                f"({', '.join(blocked_refs[:5])}); this is a recorded blocker, not "
++                "actionable sweep work -- supply the external evidence and amend the "
++                "disposition, or retire the seat as BLOCKED_EXTERNAL",
++            )
+         return (
+             f"saipen improve abort {cycle_id}",
+             f"improvement discovery cycle {cycle_id} is already active and every "
+diff --git a/tools/saipen_engine/work_exhaustion.py b/tools/saipen_engine/work_exhaustion.py
+index b038071a..a7cb82f2 100644
+--- a/tools/saipen_engine/work_exhaustion.py
++++ b/tools/saipen_engine/work_exhaustion.py
+@@ -1,35 +1,14 @@
+-"""Work-Exhaustion Certificate across independent discovery surfaces (PV-004, PV-008).
+-
+-Proves whether no-work is genuine exhaustion across all eligible sources:
+-1. active_work
+-2. canonical_recovery
+-3. actionable_todo
+-4. unresolved_source
+-5. unconsumed_audit_inbox
+-6. release_obligations
+-7. future_gates
+-8. hunt_findings
+-9. improve_candidates
+-10. saipal_forensics
+-11. conformance_debt
+-
+-Each source record provides:
+-- SOURCE_NAME
+-- SOURCE_GENERATION
+-- LAST_CHECKED_GENERATION
+-- ELIGIBILITY_RESULT (WORK_AVAILABLE, BLOCKED_EXTERNAL, BLOCKED_OPERATOR,
+-  BLOCKED_AUTHORITY, DEFERRED, UNCHANGED, NOT_DUE, CLEAN_VERIFIED, NOT_CHECKED)
+-- AUTHORIZED_ACTIONS
+-- EXACT_BLOCKER
+-- NEXT_RECHECK_CONDITION
++"""Evidence-backed exhaustion of the twelve independent discovery surfaces.
++
++Schema 2 narrows `exhausted` to verified, unblocked quiescence. Consumers of
++schema 1's weaker queue claim use `no_work_available`; `legacy_status` retains
++the old quiescent spelling. Discovery observations never grant authority.
+ """
+ 
+ from __future__ import annotations
+ 
+ from pathlib import Path
+-from typing import Any
+ 
+-# Source names
+ ACTIVE_WORK = "active_work"
+ CANONICAL_RECOVERY = "canonical_recovery"
+ ACTIONABLE_TODO = "actionable_todo"
+@@ -42,23 +21,12 @@ IMPROVE_CANDIDATES = "improve_candidates"
+ EXTERNAL_FORENSICS = "external_forensics"
+ CONFORMANCE_DEBT = "conformance_debt"
+ PERSISTENT_GOALS = "persistent_goals"
+-
+ ALL_WORK_SOURCES = (
+-    ACTIVE_WORK,
+-    CANONICAL_RECOVERY,
+-    ACTIONABLE_TODO,
+-    UNRESOLVED_SOURCE,
+-    UNCONSUMED_AUDIT_INBOX,
+-    RELEASE_OBLIGATIONS,
+-    FUTURE_GATES,
+-    HUNT_FINDINGS,
+-    IMPROVE_CANDIDATES,
+-    EXTERNAL_FORENSICS,
+-    CONFORMANCE_DEBT,
+-    PERSISTENT_GOALS,
++    ACTIVE_WORK, CANONICAL_RECOVERY, ACTIONABLE_TODO, UNRESOLVED_SOURCE,
++    UNCONSUMED_AUDIT_INBOX, RELEASE_OBLIGATIONS, FUTURE_GATES, HUNT_FINDINGS,
++    IMPROVE_CANDIDATES, EXTERNAL_FORENSICS, CONFORMANCE_DEBT, PERSISTENT_GOALS,
+ )
+ 
+-# Eligibility classifications
+ WORK_AVAILABLE = "WORK_AVAILABLE"
+ BLOCKED_EXTERNAL = "BLOCKED_EXTERNAL"
+ BLOCKED_OPERATOR = "BLOCKED_OPERATOR"
+@@ -68,6 +36,237 @@ UNCHANGED = "UNCHANGED"
+ NOT_DUE = "NOT_DUE"
+ CLEAN_VERIFIED = "CLEAN_VERIFIED"
+ NOT_CHECKED = "NOT_CHECKED"
++WORK_ELIGIBLE = "WORK_ELIGIBLE"
++VERIFIED_QUIESCENT = "VERIFIED_QUIESCENT"
++INCOMPLETE_DISCOVERY = "INCOMPLETE_DISCOVERY"
++EXHAUSTED_QUIESCENT = "EXHAUSTED_QUIESCENT"
++SCHEMA_VERSION = 2
++_RESULTS = frozenset((
++    WORK_AVAILABLE, BLOCKED_EXTERNAL, BLOCKED_OPERATOR, BLOCKED_AUTHORITY,
++    DEFERRED, UNCHANGED, NOT_DUE, CLEAN_VERIFIED, NOT_CHECKED,
++))
++_BLOCKERS = (BLOCKED_AUTHORITY, BLOCKED_OPERATOR, BLOCKED_EXTERNAL)
++
++
++def verified_quiescence(certificate) -> bool:
++    """Accept only a complete schema-2 certificate, never a legacy queue flag."""
++    if not isinstance(certificate, dict) or not (
++        certificate.get("schema_version") == SCHEMA_VERSION
++        and certificate.get("status") == VERIFIED_QUIESCENT
++        and certificate.get("exhausted") is True
++        and certificate.get("all_checked") is True
++        and not certificate.get("certificate_errors")
++    ):
++        return False
++    sources = certificate.get("sources")
++    if not isinstance(sources, list) or len(sources) != len(ALL_WORK_SOURCES):
++        return False
++    generation = certificate.get("source_generation")
++    return bool(generation) and all(
++        isinstance(source, dict)
++        and source.get("checked") is True
++        and isinstance(source.get("source_name"), str)
++        and source.get("eligibility_result") in (CLEAN_VERIFIED, UNCHANGED, NOT_DUE, DEFERRED)
++        and source.get("source_generation") == generation
++        and source.get("last_checked_generation") == generation
++        for source in sources
++    ) and {source.get("source_name") for source in sources} == set(ALL_WORK_SOURCES)
++
++
++def _count(value) -> int:
++    if isinstance(value, (list, tuple)):
++        return len(value)
++    if type(value) is int and value >= 0:
++        return value
++    raise ValueError("a nonnegative finding count or list is required")
++
++
++def _blocker_result(group: dict) -> str:
++    klass = group["blocker_class"]
++    if "AUTHORITY" in klass:
++        return BLOCKED_AUTHORITY
++    if group["cause"] == "publication-staging" or "USER" in klass:
++        return BLOCKED_OPERATOR
++    if klass in ("HELD", "FUTURE_GATE", "FUTURE/STRATEGIC"):
++        return DEFERRED
++    return NOT_CHECKED if klass == "UNKNOWN" else BLOCKED_EXTERNAL
++
++
++def _ticket_inventory_valid(tickets) -> bool:
++    return isinstance(tickets, dict) and all(
++        isinstance(ticket, dict)
++        and ticket.get("section") in ("## DOING", "## TODO", "## DONE", "## BLOCKED")
++        and isinstance(ticket.get("fields", {}), dict)
++        and isinstance(ticket.get("needs", []), (list, tuple))
++        and all(isinstance(need, str) for need in ticket.get("needs", []))
++        for ticket in tickets.values()
++    )
++
++
++def recovery_identities(inventory) -> list[str]:
++    """Accept either canonical journal rows or their projected operation IDs."""
++    if not isinstance(inventory, (list, tuple)):
++        raise ValueError("recovery inventory must be a list")
++    identities = []
++    for row in inventory:
++        if isinstance(row, dict) and row.get("corrupt"):
++            raise ValueError("recovery inventory contains corrupt journals")
++        identity = row.get("op_id") if isinstance(row, dict) else row
++        if not isinstance(identity, str) or not identity.strip():
++            raise ValueError("recovery inventory contains an invalid operation identity")
++        identities.append(identity)
++    return identities
++
++
++def discovery_evidence(
++    root, *, state, tickets, pending_ops=None, conflict_ops=None, now=None,
++) -> dict:
++    """Read current owner evidence outside the routing/classification layer."""
++    from . import conformance, goal_authority, intake, journal, persistent_goal, source_append
++    from .board import claim_status, project_blockers, workable_tickets
++    from .paths import prove_owned_dir_chain
++
++    state = state if isinstance(state, dict) else {}
++    generation = str(state.get("last_event") or "gen-current")
++    records = {}
++
++    def record(name, result=NOT_CHECKED, *, actions=(), detail=None, error=None):
++        records[name] = {
++            "source_generation": generation,
++            "last_checked_generation": generation if result != NOT_CHECKED else None,
++            "eligibility_result": result, "authorized_actions": list(actions),
++            "exact_blocker": detail, "error": error,
++        }
++
++    try:
++        goals = persistent_goal.list_goals_report(root)
++        if not isinstance(goals, dict) or type(goals.get("root_available")) is not bool:
++            raise ValueError("goal loader did not supply a valid inventory report")
++        normalized = persistent_goal.goal_inventory(goals)
++        goals = {**goals, **normalized}
++    except Exception as exc:
++        goals = {"goals": [], "complete": False, "root_available": False,
++                 "errors": [f"goal loader raised {type(exc).__name__}: {exc}"]}
++    if goals.get("root_available") is not True:
++        for name in (CANONICAL_RECOVERY, UNRESOLVED_SOURCE, CONFORMANCE_DEBT,
++                     HUNT_FINDINGS, IMPROVE_CANDIDATES, EXTERNAL_FORENSICS):
++            record(name, detail="project root is unavailable")
++        return {"persistent_goals": goals, "source_evidence": records,
++                "continuous_maintenance_authorized": False}
++
++    try:
++        authorized = goal_authority.continuous_maintenance_proven(root, state) is True
++    except Exception as exc:
++        authorized = False
++        record(IMPROVE_CANDIDATES, error=f"authority probe raised {type(exc).__name__}: {exc}")
++    evidence = {"persistent_goals": goals, "source_evidence": records,
++                "continuous_maintenance_authorized": authorized}
++    try:
++        if not _ticket_inventory_valid(tickets):
++            raise ValueError("ticket inventory must be an object of valid ticket objects")
++        workable = workable_tickets(tickets, agent=state.get("agent"), now=now)
++        if any(ticket.get("section") == "## DOING" for ticket in tickets.values()) or workable:
++            return evidence
++    except Exception as exc:
++        for name in (CANONICAL_RECOVERY, UNRESOLVED_SOURCE, CONFORMANCE_DEBT,
++                     HUNT_FINDINGS, IMPROVE_CANDIDATES, EXTERNAL_FORENSICS):
++            record(name, error=f"BOARD discovery raised {type(exc).__name__}: {exc}")
++        return evidence
++
++    try:
++        if pending_ops is None or conflict_ops is None:
++            pending_ops, conflict_ops = journal.scan_pending(root)
++        pending_ids = recovery_identities(pending_ops)
++        conflict_ids = recovery_identities(conflict_ops)
++        record(CANONICAL_RECOVERY,
++               WORK_AVAILABLE if pending_ids or conflict_ids else CLEAN_VERIFIED,
++               actions=("saipen recover",) if pending_ids or conflict_ids else ())
++    except Exception as exc:
++        record(CANONICAL_RECOVERY, error=f"recovery discovery raised {type(exc).__name__}: {exc}")
++
++    try:
++        project = Path(root)
++        for relative in (".saipen/intake", ".saipen/intake/active", ".saipen/intake/appends"):
++            directory = project / relative
++            prove_owned_dir_chain(directory, ownership_root=project, kind="Source inventory")
++            try:
++                list(directory.iterdir())
++            except FileNotFoundError:
++                pass
++        rows = intake.active_receipts(root)
++        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
++            raise ValueError("source inventory must be a list of receipt objects")
++        orphans = intake.recover_orphans(root)
++        if not isinstance(orphans, dict) or orphans.get("ok") is not True or orphans.get("orphans"):
++            raise ValueError("source inventory has unreadable or orphaned receipts")
++        ledgers = source_append.ledgers(root)
++        if not isinstance(ledgers, list):
++            raise ValueError("append inventory must be a list")
++        for ledger in ledgers:
++            if not isinstance(ledger, dict) or ledger.get("error"):
++                raise ValueError(f"append ledger unreadable: {ledger!r}")
++        appends = source_append.pending_appends(root)
++        if not isinstance(appends, list):
++            raise ValueError("pending append inventory must be a list")
++        unresolved = []
++        linked_ids = set()
++        unlinked = False
++        for row in rows:
++            receipt = row["receipt"]
++            integrity = intake.verify_integrity(root, receipt)
++            if not isinstance(integrity, dict) or integrity.get("ok") is not True:
++                raise ValueError(f"{receipt}: source integrity did not verify")
++            if row["unresolved"] or not intake.coverage_complete(root, receipt):
++                unresolved.append(row)
++                meta = intake._read_meta(root, receipt)
++                if not isinstance(meta, dict):
++                    raise ValueError(f"{receipt}: Source membership is unreadable")
++                members = intake.linked_works(meta)
++                missing = members - tickets.keys()
++                if missing:
++                    raise ValueError(f"{receipt}: missing linked Work: {', '.join(sorted(missing))}")
++                linked_ids.update(members)
++                unlinked |= not members
++        linked = [tickets[tid] for tid in sorted(linked_ids)]
++        owned = any(
++            ticket.get("section") == "## DOING"
++            and claim_status(ticket, state.get("agent"), now) in ("SELF", "UNCLAIMED")
++            for ticket in linked
++        )
++        if appends or unlinked or owned or linked_ids.intersection(workable):
++            record(UNRESOLVED_SOURCE, WORK_AVAILABLE, actions=("saipen continue",))
++        elif unresolved:
++            projection = project_blockers(tickets)
++            groups = [group for group in projection["groups"] if
++                      linked_ids.intersection((*group["root_tickets"], *group["dependent_tickets"]))]
++            results = [_blocker_result(group) for group in groups]
++            if any(ticket.get("section") == "## DOING" for ticket in linked):
++                results.append(BLOCKED_EXTERNAL)
++            if not results or NOT_CHECKED in results:
++                raise ValueError("unresolved Source has no executable Work or verified root blocker")
++            result = next((value for value in _BLOCKERS if value in results), DEFERRED)
++            record(UNRESOLVED_SOURCE, result,
++                   detail="unresolved Source: " + ", ".join(row["receipt"] for row in unresolved))
++        else:
++            record(UNRESOLVED_SOURCE, CLEAN_VERIFIED)
++    except Exception as exc:
++        record(UNRESOLVED_SOURCE, error=f"source discovery raised {type(exc).__name__}: {exc}")
++
++    try:
++        observed = conformance.conformance_status(root, now=now)
++        status = observed.get("status")
++        record(CONFORMANCE_DEBT,
++               CLEAN_VERIFIED if status == conformance.STATUS_CURRENT_PASS
++               else WORK_AVAILABLE if status == conformance.STATUS_CURRENT_FAIL else NOT_CHECKED,
++               actions=("saipen validate",) if status == conformance.STATUS_CURRENT_FAIL else (),
++               detail=observed.get("reason") or status)
++    except Exception as exc:
++        record(CONFORMANCE_DEBT, error=f"conformance discovery raised {type(exc).__name__}: {exc}")
++
++    for name in (HUNT_FINDINGS, IMPROVE_CANDIDATES, EXTERNAL_FORENSICS):
++        if name not in records:
++            record(name, detail="current-generation analysis result not supplied")
++    return evidence
+ 
+ 
+ def certify_work_exhaustion(
+@@ -82,334 +281,254 @@ def certify_work_exhaustion(
+     forensic_state: dict | None = None,
+     continuous_maintenance_authorized: bool = False,
+     is_budget_exhausted: bool = False,
++    persistent_goals: list | dict | None = None,
++    source_evidence: dict | None = None,
++    now=None,
++    current_agent: str | None = None,
++    # Schema-1 check flags remain accepted, but cannot stand in for results.
++    recovery_checked: bool = False,
++    recovery_pending: bool = False,
++    source_checked: bool = False,
++    conformance_checked: bool = False,
++    improve_checked: bool = False,
+ ) -> dict:
+-    """Build bounded read-only work exhaustion certificate across all sources."""
+-    tickets = tickets or {}
+-    state = state or {}
+-    generation = source_generation or state.get("last_event") or "gen-current"
++    """Classify supplied observations; only an explicit root loads local goals.
+ 
++    `source_evidence` holds current source records from discovery owners. A
++    record requires eligibility_result, source_generation and matching
++    last_checked_generation. Calling a check without its result proves nothing.
++    """
++    from .board import claim_status, project_blockers, workable_tickets
++    from .persistent_goal import goal_inventory, list_goals_report
++
++    errors: list[str] = []
++    if state is not None and not isinstance(state, dict):
++        errors.append("state: inventory must be an object")
++    state = state if isinstance(state, dict) else {}
++    generation = str(source_generation or state.get("last_event") or "gen-current")
++    evidence = source_evidence if isinstance(source_evidence, dict) else {}
++    if source_evidence is not None and not isinstance(source_evidence, dict):
++        errors.append("source_evidence: provider records must be an object")
+     sources: list[dict] = []
++    blocked_obligations: list[dict] = []
++    agent = current_agent if current_agent is not None else state.get("agent")
+ 
+-    # 1. active_work
+-    doing = [t for t in tickets.values() if t.get("section") == "## DOING"]
+-    if doing:
++    def add(name, result, actions=(), blocker=None, recheck="new evidence arrives", *, checked=True):
+         sources.append({
+-            "source_name": ACTIVE_WORK,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": WORK_AVAILABLE,
+-            "authorized_actions": [f"saipen claim {doing[0]['id']}"],
+-            "exact_blocker": None,
+-            "next_recheck_condition": "active work completed",
+-        })
+-    else:
+-        sources.append({
+-            "source_name": ACTIVE_WORK,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": CLEAN_VERIFIED,
+-            "authorized_actions": [],
+-            "exact_blocker": None,
+-            "next_recheck_condition": "new ticket claimed",
++            "source_name": name, "source_generation": generation,
++            "last_checked_generation": generation if checked else None,
++            "eligibility_result": result, "authorized_actions": list(actions),
++            "exact_blocker": blocker, "next_recheck_condition": recheck,
++            "checked": checked,
+         })
+ 
+-    # 2. canonical_recovery
+-    sources.append({
+-        "source_name": CANONICAL_RECOVERY,
+-        "source_generation": generation,
+-        "last_checked_generation": generation,
+-        "eligibility_result": CLEAN_VERIFIED,
+-        "authorized_actions": [],
+-        "exact_blocker": None,
+-        "next_recheck_condition": "uncommitted crash or interrupted operation",
+-    })
+-
+-    # 3. actionable_todo
+-    todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+-    workable_todo = [t for t in todo if not t.get("blocked")]
+-    if workable_todo:
+-        sources.append({
+-            "source_name": ACTIONABLE_TODO,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": WORK_AVAILABLE,
+-            "authorized_actions": [f"saipen claim {workable_todo[0]['id']}"],
+-            "exact_blocker": None,
+-            "next_recheck_condition": "workable todo ticket claimed",
+-        })
+-    else:
+-        sources.append({
+-            "source_name": ACTIONABLE_TODO,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": CLEAN_VERIFIED,
+-            "authorized_actions": [],
+-            "exact_blocker": None,
+-            "next_recheck_condition": "new todo ticket added",
+-        })
++    def unknown(name, detail="provider result not supplied", actions=()):
++        add(name, NOT_CHECKED, actions, detail, "provider supplies current evidence", checked=False)
+ 
+-    # 4. unresolved_source
+-    sources.append({
+-        "source_name": UNRESOLVED_SOURCE,
+-        "source_generation": generation,
+-        "last_checked_generation": generation,
+-        "eligibility_result": CLEAN_VERIFIED,
+-        "authorized_actions": [],
+-        "exact_blocker": None,
+-        "next_recheck_condition": "new source admitted",
+-    })
+-
+-    # 5. unconsumed_audit_inbox
+-    unconsumed = 0
+-    if isinstance(audit_inbox, dict):
+-        unconsumed = int(audit_inbox.get("unresolved_audit_count", len(audit_inbox.get("pending", []))))
+-    if unconsumed > 0:
+-        sources.append({
+-            "source_name": UNCONSUMED_AUDIT_INBOX,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": WORK_AVAILABLE,
+-            "authorized_actions": ["saipen audit ingest"],
+-            "exact_blocker": None,
+-            "next_recheck_condition": "audit ingest executed",
+-        })
+-    else:
+-        sources.append({
+-            "source_name": UNCONSUMED_AUDIT_INBOX,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": CLEAN_VERIFIED,
+-            "authorized_actions": [],
+-            "exact_blocker": None,
+-            "next_recheck_condition": "new audit finding submitted",
+-        })
++    def projection_fault(name, projection):
++        if not isinstance(projection, dict):
++            if projection is not None:
++                errors.append(f"{name}: provider result must be an object")
++            unknown(name)
++            return True
++        if projection.get("error") or projection.get("corrupt") or projection.get("ok") is False:
++            detail = str(projection.get("error") or projection.get("corrupt") or projection.get("detail") or "provider failed")
++            errors.append(f"{name}: {detail}")
++            unknown(name, detail)
++            return True
++        observed = projection.get("source_generation")
++        if observed is not None and str(observed) != generation:
++            unknown(name, "stale provider generation")
++            return True
++        return False
+ 
+-    # 6. release_obligations
+-    staging_blocked = any(
+-        "PUBLICATION_STAGING_BLOCKED" in str((t.get("fields") or {}).get("blocker", ""))
+-        for t in tickets.values()
+-    )
+-    if staging_blocked:
+-        sources.append({
+-            "source_name": RELEASE_OBLIGATIONS,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": BLOCKED_OPERATOR,
+-            "authorized_actions": [],
+-            "exact_blocker": "Foreign pre-staged paths in shared Git index",
+-            "next_recheck_condition": "Foreign staging resolved or release isolated",
++    def supplied(name):
++        record = evidence.get(name)
++        if projection_fault(name, record):
++            return
++        result = record.get("eligibility_result")
++        actions = record.get("authorized_actions", ())
++        if not isinstance(actions, (list, tuple)) or any(
++            not isinstance(action, str) or not action.strip() for action in actions
++        ):
++            errors.append(f"{name}: invalid discovery action list")
++            unknown(name, "invalid discovery action list")
++            return
++        if result == NOT_CHECKED:
++            unknown(name, str(record.get("exact_blocker") or "discovery did not complete"), actions)
++            return
++        if (
++            not isinstance(result, str) or result not in _RESULTS
++            or str(record.get("source_generation")) != generation
++            or str(record.get("last_checked_generation")) != generation
++        ):
++            errors.append(f"{name}: missing, invalid or stale discovery result")
++            unknown(name, "missing, invalid or stale discovery result")
++            return
++        detail = str(record.get("exact_blocker") or "") or None
++        if "checked" in record and record["checked"] is not True:
++            unknown(name, "provider did not complete the discovery", actions)
++            return
++        add(name, result, actions, detail,
++            record.get("next_recheck_condition") or "new evidence arrives")
++
++    inventory_valid = _ticket_inventory_valid(tickets)
++    inventory = tickets if inventory_valid else {}
++    if tickets is not None and not inventory_valid:
++        errors.append("tickets: inventory must be an object of valid ticket objects")
++    doing = [t for t in inventory.values() if t.get("section") == "## DOING"]
++    groups = project_blockers(inventory)["groups"]
++    for group in groups:
++        result = _blocker_result(group)
++        blocked_obligations.append({
++            "source_name": ACTIVE_WORK, "eligibility_result": result,
++            "tickets": group["root_tickets"], "exact_blocker": group["root_cause"],
+         })
++    if not inventory_valid:
++        unknown(ACTIVE_WORK)
++    elif doing:
++        own = [t for t in doing if claim_status(t, agent, now) in ("SELF", "UNCLAIMED")]
++        add(ACTIVE_WORK, WORK_AVAILABLE if own else BLOCKED_EXTERNAL,
++            ("saipen continue",) if own else (),
++            None if own else "active work belongs to another live or invalid claim")
++    elif any(item["eligibility_result"] == NOT_CHECKED for item in blocked_obligations):
++        errors.append("active_work: unresolved root blocker evidence")
++        unknown(ACTIVE_WORK, "root blocker is not verified")
++    elif blocked_obligations:
++        result = next((c for c in _BLOCKERS if any(b["eligibility_result"] == c for b in blocked_obligations)), DEFERRED)
++        add(ACTIVE_WORK, result, blocker=blocked_obligations[0]["exact_blocker"])
+     else:
+-        sources.append({
+-            "source_name": RELEASE_OBLIGATIONS,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": CLEAN_VERIFIED,
+-            "authorized_actions": [],
+-            "exact_blocker": None,
+-            "next_recheck_condition": "new release candidate ready",
+-        })
++        add(ACTIVE_WORK, CLEAN_VERIFIED)
+ 
+-    # 7. future_gates
+-    if isinstance(future_gate, dict) and future_gate.get("eligible"):
+-        sources.append({
+-            "source_name": FUTURE_GATES,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": WORK_AVAILABLE,
+-            "authorized_actions": [f"saipen future promote {future_gate['eligible'][0]}"],
+-            "exact_blocker": None,
+-            "next_recheck_condition": "future gate promoted",
+-        })
++    supplied(CANONICAL_RECOVERY)
++    if recovery_pending:
++        sources[-1].update(eligibility_result=WORK_AVAILABLE, authorized_actions=["saipen recover"])
++    if not inventory_valid:
++        unknown(ACTIONABLE_TODO)
+     else:
+-        sources.append({
+-            "source_name": FUTURE_GATES,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": DEFERRED,
+-            "authorized_actions": [],
+-            "exact_blocker": "Deferred architecture holds intact",
+-            "next_recheck_condition": "prerequisites satisfied",
+-        })
++        workable = workable_tickets(inventory, agent=agent, now=now)
++        todo = [t for t in inventory.values() if t.get("section") == "## TODO"]
++        add(ACTIONABLE_TODO, WORK_AVAILABLE if workable else DEFERRED if todo else CLEAN_VERIFIED,
++            (f"saipen claim {workable[0]}",) if workable else (),
++            "TODO dependencies or claim are not satisfied" if todo and not workable else None)
++    supplied(UNRESOLVED_SOURCE)
+ 
+-    # 8. hunt_findings
+-    if hunt_state:
+-        last_hunt_gen = hunt_state.get("last_analyzed_generation")
+-        if last_hunt_gen != generation:
+-            sources.append({
+-                "source_name": HUNT_FINDINGS,
+-                "source_generation": generation,
+-                "last_checked_generation": last_hunt_gen,
+-                "eligibility_result": NOT_CHECKED,
+-                "authorized_actions": ["saipen hunt"] if continuous_maintenance_authorized else [],
+-                "exact_blocker": None if continuous_maintenance_authorized else "Continuous maintenance unauthorized",
+-                "next_recheck_condition": "source generation changes",
+-            })
++    if not projection_fault(UNCONSUMED_AUDIT_INBOX, audit_inbox):
++        try:
++            pending = _count(audit_inbox.get("unresolved_audit_count", audit_inbox.get("pending")))
++        except ValueError as exc:
++            unknown(UNCONSUMED_AUDIT_INBOX, str(exc))
+         else:
+-            sources.append({
+-                "source_name": HUNT_FINDINGS,
+-                "source_generation": generation,
+-                "last_checked_generation": generation,
+-                "eligibility_result": UNCHANGED,
+-                "authorized_actions": [],
+-                "exact_blocker": None,
+-                "next_recheck_condition": "source generation changes",
+-            })
+-    else:
+-        # HUNT has not run on this generation: NOT_CHECKED, never assumed clean
+-        sources.append({
+-            "source_name": HUNT_FINDINGS,
+-            "source_generation": generation,
+-            "last_checked_generation": None,
+-            "eligibility_result": NOT_CHECKED,
+-            "authorized_actions": ["saipen hunt"] if continuous_maintenance_authorized else [],
+-            "exact_blocker": None if continuous_maintenance_authorized else "Continuous maintenance unauthorized",
+-            "next_recheck_condition": "hunt execution authorized",
+-        })
++            if audit_inbox.get("binding_corrupt"):
++                unknown(UNCONSUMED_AUDIT_INBOX, "audit binding is corrupt")
++            elif audit_inbox.get("unworkable_active_only"):
++                result = BLOCKED_OPERATOR if "OPERATOR" in str(audit_inbox.get("idle_classification")) else BLOCKED_EXTERNAL
++                add(UNCONSUMED_AUDIT_INBOX, result, blocker="linked audit work is unworkable")
++            elif audit_inbox.get("invalid") or audit_inbox.get("residue") or audit_inbox.get("invalid_only") or audit_inbox.get("residue_only"):
++                add(UNCONSUMED_AUDIT_INBOX, BLOCKED_EXTERNAL, blocker="invalid or unresolved audit residue")
++            elif pending or audit_inbox.get("closed_pending_delete"):
++                add(UNCONSUMED_AUDIT_INBOX, WORK_AVAILABLE, ("saipen audit ingest",))
++            else:
++                add(UNCONSUMED_AUDIT_INBOX, CLEAN_VERIFIED)
+ 
+-    # 9. improve_candidates
+-    if not continuous_maintenance_authorized:
+-        sources.append({
+-            "source_name": IMPROVE_CANDIDATES,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": BLOCKED_AUTHORITY,
+-            "authorized_actions": [],
+-            "exact_blocker": "Autonomous improvement requires continuous maintenance authority",
+-            "next_recheck_condition": "operator reauthorizes standing grant",
+-        })
++    pending_release = [tid for tid, t in inventory.items() if (t.get("fields") or {}).get("publication_state") == "pending"]
++    staging = any(g["cause"] == "publication-staging" for g in groups)
++    if not inventory_valid:
++        unknown(RELEASE_OBLIGATIONS)
++    elif staging or pending_release:
++        add(RELEASE_OBLIGATIONS, BLOCKED_OPERATOR if staging else BLOCKED_EXTERNAL,
++            blocker="foreign staged release scope" if staging else f"pending publication: {', '.join(pending_release)}",
++            recheck="durable release or ownership evidence changes")
+     else:
+-        sources.append({
+-            "source_name": IMPROVE_CANDIDATES,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": UNCHANGED,
+-            "authorized_actions": [],
+-            "exact_blocker": None,
+-            "next_recheck_condition": "new code changes committed",
+-        })
++        add(RELEASE_OBLIGATIONS, CLEAN_VERIFIED)
+ 
+-    # 10. saipal_forensics
+-    if forensic_state and forensic_state.get("unfinished_slices"):
+-        sources.append({
+-            "source_name": EXTERNAL_FORENSICS,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": WORK_AVAILABLE,
+-            "authorized_actions": ["saipen sub"],
+-            "exact_blocker": None,
+-            "next_recheck_condition": "forensic slice analyzed",
+-        })
+-    else:
+-        sources.append({
+-            "source_name": EXTERNAL_FORENSICS,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": CLEAN_VERIFIED,
+-            "authorized_actions": [],
+-            "exact_blocker": None,
+-            "next_recheck_condition": "forensic anomaly detected",
+-        })
++    if not projection_fault(FUTURE_GATES, future_gate):
++        fresh = future_gate.get("index_state")
++        empty = fresh == "MISSING" and future_gate.get("documents") == [] and not future_gate.get("refresh_required")
++        if fresh != "CURRENT" and not empty:
++            unknown(FUTURE_GATES, "future inventory missing, stale or unreadable", ("saipen future refresh",))
++        elif future_gate.get("eligible"):
++            add(FUTURE_GATES, WORK_AVAILABLE, (f"saipen future promote {future_gate['eligible'][0]}",))
++        elif future_gate.get("refinable"):
++            add(FUTURE_GATES, WORK_AVAILABLE, ("saipen future status",))
++        elif any(future_gate.get("counts", {}).values()):
++            add(FUTURE_GATES, DEFERRED, blocker="future gate prerequisites or holds remain")
++        else:
++            add(FUTURE_GATES, CLEAN_VERIFIED)
+ 
+-    # 11. conformance_debt
+-    sources.append({
+-        "source_name": CONFORMANCE_DEBT,
+-        "source_generation": generation,
+-        "last_checked_generation": generation,
+-        "eligibility_result": CLEAN_VERIFIED,
+-        "authorized_actions": [],
+-        "exact_blocker": None,
+-        "next_recheck_condition": "conformance drift occurs",
+-    })
+-
+-    # 12. persistent_goals
+-    if root is not None:
+-        try:
+-            from .persistent_goal import list_goals, STATUS_SATISFIED, STATUS_ACTIONABLE_GAPS, STATUS_WAITING_AUTHORITY
+-            goals = list_goals(root)
+-            active_goals = [g for g in goals if not g.paused and g.current_status != STATUS_SATISFIED]
+-            if active_goals:
+-                has_actionable = any(g.current_status == STATUS_ACTIONABLE_GAPS for g in active_goals)
+-                has_waiting_auth = any(g.current_status == STATUS_WAITING_AUTHORITY for g in active_goals)
+-                if has_actionable:
+-                    sources.append({
+-                        "source_name": PERSISTENT_GOALS,
+-                        "source_generation": generation,
+-                        "last_checked_generation": generation,
+-                        "eligibility_result": WORK_AVAILABLE,
+-                        "authorized_actions": ["saipen continue"],
+-                        "exact_blocker": None,
+-                        "next_recheck_condition": "goal task admitted or goal evaluated",
+-                    })
+-                elif has_waiting_auth:
+-                    sources.append({
+-                        "source_name": PERSISTENT_GOALS,
+-                        "source_generation": generation,
+-                        "last_checked_generation": generation,
+-                        "eligibility_result": BLOCKED_AUTHORITY,
+-                        "authorized_actions": [],
+-                        "exact_blocker": "Persistent goal candidates require authority",
+-                        "next_recheck_condition": "operator grants goal authority",
+-                    })
+-                else:
+-                    sources.append({
+-                        "source_name": PERSISTENT_GOALS,
+-                        "source_generation": generation,
+-                        "last_checked_generation": generation,
+-                        "eligibility_result": WORK_AVAILABLE,
+-                        "authorized_actions": ["saipen continue"],
+-                        "exact_blocker": None,
+-                        "next_recheck_condition": "goal task admitted",
+-                    })
++    if hunt_state is None and HUNT_FINDINGS in evidence:
++        supplied(HUNT_FINDINGS)
++    elif not projection_fault(HUNT_FINDINGS, hunt_state):
++        if str(hunt_state.get("last_analyzed_generation")) != generation:
++            unknown(HUNT_FINDINGS, "HUNT has not analyzed the current generation")
++        else:
++            try:
++                findings = _count(hunt_state.get("findings"))
++            except ValueError as exc:
++                unknown(HUNT_FINDINGS, str(exc))
+             else:
+-                sources.append({
+-                    "source_name": PERSISTENT_GOALS,
+-                    "source_generation": generation,
+-                    "last_checked_generation": generation,
+-                    "eligibility_result": CLEAN_VERIFIED,
+-                    "authorized_actions": [],
+-                    "exact_blocker": None,
+-                    "next_recheck_condition": "new persistent goal declared",
+-                })
+-        except Exception:
+-            sources.append({
+-                "source_name": PERSISTENT_GOALS,
+-                "source_generation": generation,
+-                "last_checked_generation": generation,
+-                "eligibility_result": CLEAN_VERIFIED,
+-                "authorized_actions": [],
+-                "exact_blocker": None,
+-                "next_recheck_condition": "new persistent goal declared",
+-            })
+-    else:
+-        sources.append({
+-            "source_name": PERSISTENT_GOALS,
+-            "source_generation": generation,
+-            "last_checked_generation": generation,
+-            "eligibility_result": CLEAN_VERIFIED,
+-            "authorized_actions": [],
+-            "exact_blocker": None,
+-            "next_recheck_condition": "new persistent goal declared",
+-        })
++                add(HUNT_FINDINGS, WORK_AVAILABLE if findings else UNCHANGED,
++                    ("saipen status",) if findings else ())
+ 
+-    # Overall certificate verdict
+-    has_available = any(s["eligibility_result"] == WORK_AVAILABLE for s in sources)
+-    all_clean_or_deferred = all(
+-        s["eligibility_result"] in (CLEAN_VERIFIED, DEFERRED, UNCHANGED, BLOCKED_EXTERNAL, BLOCKED_OPERATOR, BLOCKED_AUTHORITY)
+-        for s in sources
+-    )
++    supplied(IMPROVE_CANDIDATES)
++    if not continuous_maintenance_authorized or is_budget_exhausted:
++        sources[-1].update(
++            eligibility_result=BLOCKED_AUTHORITY, authorized_actions=[],
++            exact_blocker="current continuous maintenance grant is not proven",
++            next_recheck_condition="authenticated grant restored within its scope",
++        )
++    if forensic_state is None and EXTERNAL_FORENSICS in evidence:
++        supplied(EXTERNAL_FORENSICS)
++    elif not projection_fault(EXTERNAL_FORENSICS, forensic_state):
++        try:
++            unfinished = _count(forensic_state.get("unfinished_slices"))
++        except ValueError as exc:
++            unknown(EXTERNAL_FORENSICS, str(exc))
++        else:
++            add(EXTERNAL_FORENSICS, WORK_AVAILABLE if unfinished else CLEAN_VERIFIED,
++                ("saipen sub",) if unfinished else ())
++    supplied(CONFORMANCE_DEBT)
+ 
+-    if has_available:
+-        status = "WORK_ELIGIBLE"
+-    elif all_clean_or_deferred:
+-        status = "EXHAUSTED_QUIESCENT"
++    goal_evidence = persistent_goals
++    if goal_evidence is None and root is not None:
++        try:
++            goal_evidence = list_goals_report(root)
++        except Exception as exc:
++            goal_evidence = {"goals": [], "complete": False, "errors": [f"loader raised {type(exc).__name__}: {exc}"]}
++    goals = goal_inventory(goal_evidence)
++    errors.extend(f"{PERSISTENT_GOALS}: {e}" for e in goals["errors"])
++    errors.extend(f"{PERSISTENT_GOALS}: unreadable {p}" for p in goals["unreadable"])
++    active = [g for g in goals["goals"] if not (g.get("paused", False) if isinstance(g, dict) else g.paused)]
++    statuses = [g.get("current_status", "ACTIVE") if isinstance(g, dict) else g.current_status for g in active]
++    if any(s in ("ACTIVE", "ACTIONABLE_GAPS", "DISCOVERY_REQUIRED", "VERIFICATION_REQUIRED") for s in statuses):
++        add(PERSISTENT_GOALS, WORK_AVAILABLE, ("saipen continue",), checked=goals["complete"])
++    elif not goals["complete"] or "BLOCKED_BY_EVIDENCE" in statuses:
++        unknown(PERSISTENT_GOALS, "goal inventory or evaluation is incomplete")
++    elif "WAITING_AUTHORITY" in statuses:
++        add(PERSISTENT_GOALS, BLOCKED_AUTHORITY, blocker="goal requires authenticated authority")
++    elif "WAITING_DEPENDENCY" in statuses:
++        add(PERSISTENT_GOALS, BLOCKED_EXTERNAL, blocker="goal dependency remains unavailable")
++    elif "NO_ADMISSIBLE_WORK" in statuses or len(active) < len(goals["goals"]):
++        add(PERSISTENT_GOALS, DEFERRED, recheck="goal evaluation evidence or pause state changes")
+     else:
+-        status = "INCOMPLETE_DISCOVERY"
++        add(PERSISTENT_GOALS, CLEAN_VERIFIED)
+ 
++    all_checked = all(s["checked"] for s in sources) and not errors
++    available = any(s["eligibility_result"] == WORK_AVAILABLE for s in sources)
++    blocked = [s for s in sources if s["eligibility_result"] in _BLOCKERS]
++    if available:
++        status = WORK_ELIGIBLE
++    elif not all_checked:
++        status = INCOMPLETE_DISCOVERY
++    else:
++        status = next((c for c in _BLOCKERS if any(s["eligibility_result"] == c for s in blocked)), VERIFIED_QUIESCENT)
++    exhausted = status == VERIFIED_QUIESCENT and all_checked
+     return {
+-        "status": status,
+-        "source_generation": generation,
+-        "sources": sources,
+-        "exhausted": not has_available,
+-        "all_checked": all(s["eligibility_result"] != NOT_CHECKED for s in sources),
++        "schema_version": SCHEMA_VERSION, "status": status,
++        "legacy_status": EXHAUSTED_QUIESCENT if exhausted else status,
++        "source_generation": generation, "sources": sources,
++        "exhausted": exhausted, "verified_exhausted": exhausted,
++        "no_work_available": not available, "all_checked": all_checked,
++        "blocked_sources": list(dict.fromkeys(s["source_name"] for s in (*blocked, *blocked_obligations))),
++        "blocked_obligations": blocked_obligations, "certificate_errors": errors,
+     }
+warning: in the working copy of 'tools/improve.py', LF will be replaced by CRLF the next time Git touches it

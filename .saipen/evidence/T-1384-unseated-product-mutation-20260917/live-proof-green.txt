@@ -1,0 +1,21 @@
+## A. Carrier -- does a live host hand the CLI its session identity?
+project        : V:\_TEMP_\t1363-jwjsmg_6
+returncode     : 0
+saipen_op seen : 2
+target changed : True
+binding on any board line: True
+  - [x] T-1 [P1] add a one-line docstring to the top of src/app.py | verify: the requested change is present and demonstrated against the user own descr
+
+## B. Isolation -- a live window against a claim held elsewhere
+project         : V:\_TEMP_\t1363-467tkfwh
+returncode      : 0
+mutations tried : 1   refused UNSEATED_MUTATION: 1
+mutations let   : []
+saipen_op run   : 1 (a blocked window must keep its route)
+read admitted   : 2
+target changed  : False
+canonical moved : none
+
+## Verdict
+GREEN A carrier
+GREEN B isolation

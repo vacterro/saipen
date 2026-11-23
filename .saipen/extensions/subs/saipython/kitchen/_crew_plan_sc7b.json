@@ -1,0 +1,150 @@
+{
+  "ok": true,
+  "code": "CREW_PLAN",
+  "crew_complete": false,
+  "action_required": true,
+  "dry_run": true,
+  "stages": [
+    {
+      "stage": "SC-0",
+      "name": "recover-sync",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-1",
+      "name": "instances",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-2",
+      "name": "saihunt",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-3",
+      "name": "saitest",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-4",
+      "name": "saipython",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-5",
+      "name": "saiui",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "NOT_APPLICABLE -- no visual implementation file in 64531 scanned project files (extensions .css .htm .html .jsx .less .qml .sass .scss .storyboard .svelte .tsx .ui .vue .xaml .xib; no desktop UI toolkit import)",
+      "action": null
+    },
+    {
+      "stage": "SC-6",
+      "name": "core-collect",
+      "state": "SATISFIED",
+      "satisfied": true,
+      "reason": "",
+      "action": null
+    },
+    {
+      "stage": "SC-7",
+      "name": "core-converge",
+      "state": "UNSATISFIED",
+      "satisfied": false,
+      "reason": "closure-blocking ticket(s): T-2062, T-2044, T-2058; canonical convergence proof missing: final forced HUNT binds source 66ef622a43ab/git-delta-v1:ad0 but the CURRENT source is dc39709c0c17/git-delta-v1:cf7 -- a main-source mutation after the final HUNT invalidates the fixed point",
+      "action": null
+    },
+    {
+      "stage": "SC-8",
+      "name": "saitranslate",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-7",
+      "action": null
+    },
+    {
+      "stage": "SC-9",
+      "name": "saiwiki",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-7",
+      "action": null
+    },
+    {
+      "stage": "WAIT-ROLE",
+      "name": "wait-role",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-7",
+      "action": null
+    },
+    {
+      "stage": "SC-10",
+      "name": "final-fixed-point",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-7",
+      "action": null
+    },
+    {
+      "stage": "SC-11",
+      "name": "ship",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-7",
+      "action": null
+    },
+    {
+      "stage": "SC-12",
+      "name": "post-ship",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-7",
+      "action": null
+    },
+    {
+      "stage": "SC-13",
+      "name": "finalize",
+      "state": "WAITING_ON_PREDECESSOR",
+      "satisfied": false,
+      "reason": "waiting on predecessor SC-7",
+      "action": null
+    }
+  ],
+  "first_unsatisfied": "SC-7",
+  "action": null,
+  "roles": {
+    "saihunt": "CURRENT",
+    "saitest": "CURRENT",
+    "saipython": "CURRENT",
+    "saiui": "STALE",
+    "saitranslate": "NOT_RUN",
+    "saiwiki": "NOT_RUN"
+  },
+  "source": {
+    "source_head": "dc39709c0c17a3272126c01a626ffcaa4176140b",
+    "source_tree_fingerprint": "git-delta-v1:cf7cd4a7512b88c0b0f2e57a05d17aef9e41b432f907486635c87aa3ab53aa42"
+  },
+  "snapshot": {
+    "state": "eef6a4216173934e",
+    "board": "adb06c0349971b37",
+    "log_tail": 21513,
+    "stable": true
+  },
+  "finalized": false
+}

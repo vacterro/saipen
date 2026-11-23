@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-022:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement and verify every required change and test in T08 BATCH START UP TO 6."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:12Z",
+  "derived_from": "SRC-022",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "3dfc042ccdaa4e3d31a740cd588c3834ee9efb7e82f5f9d45a09562f76bc9cff"
+}

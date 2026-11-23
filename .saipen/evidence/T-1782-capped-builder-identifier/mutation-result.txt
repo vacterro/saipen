@@ -1,0 +1,7 @@
+control: ran 6, red 0 -- as expected
+the check before this Work: ran 4, red 2 -- as expected
+no left boundary: ran 6, red 1 -- as expected
+no right boundary: ran 6, red 1 -- as expected
+comments count: ran 6, red 2 -- as expected
+a call is required: ran 6, red 1 -- as expected
+mutations: 5, repetitions each: 3, problems: 0

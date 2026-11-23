@@ -1,0 +1,5 @@
+STATUS: VERIFY T-1757
+RESULT: Peatatud operaatori soovil; 2 lõpetatud (T-1747, T-1751)
+BLOCKER: USAGE_LIMIT -- kasutuslimiit täis; T-1757 perekonnajooks jäi pooleli
+NEXT EXACT ACTION: PHASE VERIFY T-1757
+VALIDATION: STALE_FAIL

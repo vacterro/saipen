@@ -1,0 +1,16 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "V:\\_TEMP_\\saipen-evidence-t1603-full-scenarios-xa77qg2_\\home\\tools\\run_scenarios.py"
+  ],
+  "source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "snapshot": "V:\\_TEMP_\\saipen-evidence-t1603-full-scenarios-xa77qg2_\\home",
+  "fingerprint": "54ad859af386ae71ba05cd6bd0368cad8fa11b18c546eee41f958f1b56ccb7a9",
+  "baseline_sha256": "0e98ff25a686832646b69a657695281114034764d348a02cd6644ca87f203224",
+  "scenario_sha256": "786e69f7d96cf857ad0383dcae62484a0a3906104491c72ab9d6d56ec07b638b",
+  "snapshot_state_sha256": "4026c01890d485b6f9636b8cfd0083c9f30cb2ad5de6b86fe6c0f7f431e6f056",
+  "snapshot_board_sha256": "250e4e4cfc6556fd1d53dea2bf1c49e6a8c0f07ebb910f65428b8501f445da89",
+  "snapshot_log_sha256": "d402ee51a96681819f5b7b64b3b57baa5f97fe00fff14d5cdb40a19c1f3ed0e1",
+  "mode": "complete native scenario gate; no selector or new timeout",
+  "wrapper_sha256": "b294a582729cf0118f1356441537ab515e7c9c0a404c5ebd2032f84f393a4f9b"
+}

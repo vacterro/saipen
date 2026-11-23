@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-039:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "config+settings+timer+execution regressions all green",
+      "text": "A checkbox-driven automatic periodic PACK ALL of all archives, configurable interval, hourly default, enabled by default -- implemented as PackingConfig.auto_pack_all_enabled (default True) and auto_pack_all_interval_minutes (default 60, normalized 5..1440), Packing Settings controls wired into the touched-field autosave, one MainWindow auto_pack_timer reconfigured during init and on every Settings save before the audit-fingerprint early return, periodic ticks reusing the manual PACK ALL eligibility and _start_sequential_pack_queue under the AUTO PACK ALL label, skipping an occurrence while any packing work is busy, never packing at startup",
+      "verification": "tests/test_config.py 28 passed (legacy defaults enabled/60, custom round-trip, 0/-5/garbage/None->60, 3->5 floor, 9999->1440 ceiling); tests/ui_qt/test_settings_symmetry.py 16 passed (widgets load persisted values, disabled checkbox disables interval, autosave persists both fields without overwriting unrelated config); tests/ui_qt/test_auto_pack_all.py 11 passed (one timer at 60min default, disabled stops, custom interval, reconfigure reuses the same QTimer, settings save reconfigures before the fingerprint early return, no startup pack, AUTO PACK ALL queue reuses manual eligibility, ignore_archive/disabled/sourceless skipped, busy queue and in-flight individual pack both skip the tick, no backlog); combined focused gate 116 passed; Qt suites 49 passed; full suite 1149 passed 2 skipped; ruff clean; compileall clean",
+      "work": "T-167"
+    }
+  },
+  "schema_version": 1
+}

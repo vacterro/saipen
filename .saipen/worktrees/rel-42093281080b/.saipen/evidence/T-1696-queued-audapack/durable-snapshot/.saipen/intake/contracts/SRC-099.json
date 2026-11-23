@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-099:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Finish 0.0.83 managed A3 ownership repair: operator OFF -> canonical Bridge stop transition, SRC-098 ticket, docs/release truth"
+    }
+  },
+  "derived_at": "2026-09-29T09:16:55Z",
+  "derived_from": "SRC-099",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "dd89c8dc9dfcc7cf78f4237e86b344c9be6f1fc897bbdca6795f6042ac57e5a1"
+}

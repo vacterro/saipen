@@ -1,0 +1,67 @@
+--- pre/tools/test_t2040_replenishment_recovery.py
++++ tools/test_t2040_replenishment_recovery.py
+@@ -20,7 +20,7 @@
+ from test_t2023_goal_management_and_maintenance_binding import (
+     MAINTENANCE_OBJECTIVE, _read_history, _witnessed_apply,
+ )
+-from saipen_engine import goal_authority, intake, operations, replenishment
++from saipen_engine import goal_authority, operations, replenishment
+ from saipen_engine.discovery_providers import CandidateTask
+ from saipen_engine.journal import Journal, recover
+ from saipen_engine.plan import apply_plan
+@@ -98,7 +98,11 @@
+             root = Path(name)
+             board = root / ".saipen/BOARD.md"
+             board.parent.mkdir()
+-            for data in (b"", b"## TODO\n", b"\xef\xbb\xbf## DOING\n## TODO\n## DONE\n## BLOCKED\n"):
++            for data in (
++                b"",
++                b"## TODO\n",
++                b"\xef\xbb\xbf## DOING\n## TODO\n## DONE\n## BLOCKED\n",
++            ):
+                 with self.subTest(data=data):
+                     board.write_bytes(data)
+                     before = snapshot(root)
+@@ -144,13 +148,18 @@
+     def test_native_restore_preserves_sources_origin_foreign_work_and_replay(self):
+         root, _goal, _candidate, ticket, _receipt = self.fixture(native=True)
+         foreign = rows(root)["T-1"]["raw"]
+-        before_sources = {p: h for p, h in snapshot(root).items() if p.startswith(".saipen/intake/")}
++        before_sources = {
++            p: h for p, h in snapshot(root).items() if p.startswith(".saipen/intake/")
++        }
+         plan = self.plan(root)
+         result = apply_plan(root, plan)
+         self.assertTrue(result.ok, result.to_dict())
+         self.assertEqual(rows(root)[ticket]["section"], "## TODO")
+         self.assertEqual(rows(root)["T-1"]["raw"], foreign)
+-        self.assertEqual({p: h for p, h in snapshot(root).items() if p.startswith(".saipen/intake/")}, before_sources)
++        self.assertEqual(
++            {p: h for p, h in snapshot(root).items() if p.startswith(".saipen/intake/")},
++            before_sources,
++        )
+         self.assertEqual(goal_authority.prove(root, current(root)), [])
+         before = snapshot(root)
+         replay = replenishment.replenish_from_goals(root, "fix")
+@@ -194,7 +203,9 @@
+                     self.interrupted(root, plan)
+                 body = root / f".saipen/intake/active/{receipt}.md"
+                 body.write_bytes(body.read_bytes() + b"\nfixture drift\n")
+-                result = recover(root, plan.op_id) if recovering else apply_plan(root, plan).to_dict()
++                result = (
++                    recover(root, plan.op_id) if recovering else apply_plan(root, plan).to_dict()
++                )
+                 self.assertFalse(result["ok"], result)
+                 self.assertEqual(rows(root)[ticket]["section"], "## BLOCKED")
+ 
+@@ -209,7 +220,9 @@
+                 data = json.loads(path.read_text(encoding="utf-8"))
+                 data["success_criteria"]["new_policy"] = "fresh approval required"
+                 path.write_text(json.dumps(data), encoding="utf-8")
+-                result = recover(root, plan.op_id) if recovering else apply_plan(root, plan).to_dict()
++                result = (
++                    recover(root, plan.op_id) if recovering else apply_plan(root, plan).to_dict()
++                )
+                 self.assertFalse(result["ok"], result)
+                 self.assertEqual(rows(root)[ticket]["section"], "## BLOCKED")
+ 

@@ -1,0 +1,183 @@
+{
+  "witness": "EFFECT_PATH",
+  "surface": "real engine and CLI against disposable fixtures; external operator carriers are explicit test doubles, never production host admission",
+  "source_fingerprint": "1f6ed1d51a2c43cde02b8d5763fcb8e5e6c725ac04c025cab1c63792790b30be",
+  "invariants": [
+    {
+      "id": "S01",
+      "invariant": "Agent cc cannot grant operator authority",
+      "status": "PASS",
+      "controls": [
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_agent_boot_continue_cannot_reset_an_ordinary_bounded_run",
+        "test_command_routing.CommandSemanticsTests.test_tripped_goal_valve_cc_reauthorizes_keeps_objective"
+      ]
+    },
+    {
+      "id": "S02",
+      "invariant": "Bounded cap without fresh input stops",
+      "status": "PASS",
+      "controls": [
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_bounded_status_requires_the_operator_and_synthetic_cc_is_absent"
+      ]
+    },
+    {
+      "id": "S03",
+      "invariant": "Fresh witnessed cc resumes bounded cap",
+      "status": "PASS",
+      "controls": [
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_explicit_fresh_operator_cc_can_reset_the_bounded_cap",
+        "test_command_routing.CommandSemanticsTests.test_tripped_goal_valve_cc_reauthorizes_keeps_objective"
+      ]
+    },
+    {
+      "id": "S04",
+      "invariant": "Committed persistent grant survives checkpoint",
+      "status": "PASS",
+      "controls": [
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_persistent_cold_continue_checkpoints_then_resumes_same_work",
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_wave_cap_uses_the_same_persistent_checkpoint_policy"
+      ]
+    },
+    {
+      "id": "S05",
+      "invariant": "Original objective survives authorized renewal",
+      "status": "PASS",
+      "controls": [
+        "test_command_routing.CommandSemanticsTests.test_tripped_goal_valve_cc_reauthorizes_keeps_objective",
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_persistent_cold_continue_checkpoints_then_resumes_same_work"
+      ]
+    },
+    {
+      "id": "S06",
+      "invariant": "Other-goal authority refuses",
+      "status": "PASS",
+      "controls": [
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_authority_from_a_different_goal_cannot_reset_the_budget"
+      ]
+    },
+    {
+      "id": "S07",
+      "invariant": "Malformed authority_source refuses",
+      "status": "PASS",
+      "controls": [
+        "A01 CASE 0431d336022873eb"
+      ]
+    },
+    {
+      "id": "S08",
+      "invariant": "Syntactically valid invented source refuses",
+      "status": "PASS",
+      "controls": [
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_missing_or_invented_source_cannot_reuse_persistent_authority",
+        "A01 CASE d6912c3d75fcfd51"
+      ]
+    },
+    {
+      "id": "S09",
+      "invariant": "Missing or corrupted committed grant refuses",
+      "status": "PASS",
+      "controls": [
+        "SafetyControls.test_missing_and_corrupt_committed_grants_refuse_without_history_writes"
+      ]
+    },
+    {
+      "id": "S10",
+      "invariant": "Dry-run writes no grant or journal",
+      "status": "PASS",
+      "controls": [
+        "SafetyControls.test_authorized_dry_run_persists_no_grant_or_journal"
+      ]
+    },
+    {
+      "id": "S11",
+      "invariant": "Refusal preserves counters and canonical bytes",
+      "status": "PASS",
+      "controls": [
+        "test_command_routing.CommandSemanticsTests.test_tripped_goal_valve_cc_reauthorizes_keeps_objective",
+        "test_hostile_wave_regressions.Wave2ObeyTests.test_safety_valve_cc_reauthorizes"
+      ]
+    },
+    {
+      "id": "S12",
+      "invariant": "Authorized reset commits exact LOG/STATE targets",
+      "status": "PASS",
+      "controls": [
+        "test_command_routing.CommandSemanticsTests.test_tripped_goal_valve_cc_reauthorizes_keeps_objective"
+      ]
+    },
+    {
+      "id": "S13",
+      "invariant": "Repeated identical cc does not duplicate authorization",
+      "status": "PASS",
+      "controls": [
+        "SafetyControls.test_repeated_identical_cc_cannot_duplicate_operator_authorization"
+      ]
+    },
+    {
+      "id": "S14",
+      "invariant": "Cold continuation preserves valid authority and invents none",
+      "status": "PASS",
+      "controls": [
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_persistent_cold_continue_checkpoints_then_resumes_same_work",
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_model_supplied_goal_does_not_create_persistent_authority"
+      ]
+    },
+    {
+      "id": "S15",
+      "invariant": "Operator-required manual WAIT binds",
+      "status": "PASS",
+      "controls": [
+        "SafetyControls.test_operator_required_manual_wait_survives_persistent_cap"
+      ]
+    },
+    {
+      "id": "S16",
+      "invariant": "Destructive approval WAIT binds",
+      "status": "PASS",
+      "controls": [
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_legitimate_user_safety_brakes_survive_persistent_authority [destructive-op subcase]"
+      ]
+    },
+    {
+      "id": "S17",
+      "invariant": "Publication approval WAIT binds",
+      "status": "PASS",
+      "controls": [
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_legitimate_user_safety_brakes_survive_persistent_authority [first-publish subcase]"
+      ]
+    },
+    {
+      "id": "S18",
+      "invariant": "User brake binds",
+      "status": "PASS",
+      "controls": [
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_legitimate_user_safety_brakes_survive_persistent_authority [user brake subcase]"
+      ]
+    },
+    {
+      "id": "S19",
+      "invariant": "bare/continue/cc parity uses equivalent authority",
+      "status": "PASS",
+      "controls": [
+        "test_command_routing.CommandSemanticsTests.test_bare_continue_cc_identical_on_tripped_goal_valve"
+      ]
+    },
+    {
+      "id": "S20",
+      "invariant": "Invalid authority is never reported as legal continuation",
+      "status": "PASS",
+      "controls": [
+        "test_t1494_continuation_authority.ContinuationAuthorityTests.test_missing_or_invented_source_cannot_reuse_persistent_authority",
+        "SafetyControls.test_missing_and_corrupt_committed_grants_refuse_without_history_writes"
+      ]
+    }
+  ],
+  "executed_evidence": [
+    "authority.json",
+    "a02-routing.json",
+    "a02-hostile.json",
+    "safety-controls.json",
+    "a01-mutations.json"
+  ],
+  "native_hard_admission_claimed": false
+}

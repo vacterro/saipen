@@ -1,0 +1,14 @@
+signal2: last25 whole-hash cited: 0 uncited: 25
+signal3: marker lines: 162 naming tickets: 3 files: 175
+signal4: bare-except: 0 pass-only handlers: 47
+Traceback (most recent call last):
+  File "C:\Users\vac34\AppData\Local\Temp\cuprobe\hunt_census.py", line 38, in <module>
+    eng = (root/'tools/saipen_engine').read_text(encoding='utf-8', errors='replace')
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 1058, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 1044, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine'

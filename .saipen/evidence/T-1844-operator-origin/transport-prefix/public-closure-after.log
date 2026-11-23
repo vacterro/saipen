@@ -1,0 +1,25 @@
+test_a_foreign_actor_cannot_finish_block_or_take_the_seat (test_public_closure_cli.ForeignActorRefusalTests.test_a_foreign_actor_cannot_finish_block_or_take_the_seat) ... ok
+test_a_foreign_actor_may_still_record_intent (test_public_closure_cli.ForeignActorRefusalTests.test_a_foreign_actor_may_still_record_intent)
+Refusal is about the SEAT, not about the agent existing. ... ok
+test_control_a_inherited_cli (test_public_closure_cli.PublicClosureCliTests.test_control_a_inherited_cli)
+A verification-only ticket closes through the PUBLIC CLI with ... ok
+test_control_b_malformed_inherited_cli (test_public_closure_cli.PublicClosureCliTests.test_control_b_malformed_inherited_cli)
+Missing / malformed / duplicate / unknown closure options REFUSE ... ok
+test_control_c_d_cohort_cli_and_publication (test_public_closure_cli.PublicClosureCliTests.test_control_c_d_cohort_cli_and_publication)
+CONTROL C/D: two overlapping members join C-001 through the public ... ok
+test_control_d_scope_free_cohort_ship_refuses (test_public_closure_cli.PublicClosureCliTests.test_control_d_scope_free_cohort_ship_refuses)
+Red control for T-1451: members closed WITHOUT a recorded release ... ok
+test_control_e_fastprompter_verification_only (test_public_closure_cli.PublicClosureCliTests.test_control_e_fastprompter_verification_only)
+CONTROL E: the original T-1201 class -- implementation already ... ok
+test_control_f_user_interrupt (test_public_closure_cli.PublicClosureCliTests.test_control_f_user_interrupt)
+CONTROL F: public `user-request` persists the new explicit request ... ok
+test_control_g_h_blocked_release_and_goal_block (test_public_closure_cli.PublicClosureCliTests.test_control_g_h_blocked_release_and_goal_block)
+CONTROL G/H: `saipen continue` + `saipen status --json` agree that ... ok
+test_control_i_help_advertises_the_block_scope (test_public_closure_cli.PublicClosureCliTests.test_control_i_help_advertises_the_block_scope) ... ok
+test_control_i_help_contract (test_public_closure_cli.PublicClosureCliTests.test_control_i_help_contract)
+CONTROL I: `saipen --help` advertises every surface the agent ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 26.037s
+
+OK

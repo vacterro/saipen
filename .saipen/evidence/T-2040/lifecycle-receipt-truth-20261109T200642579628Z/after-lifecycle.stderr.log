@@ -1,0 +1,11 @@
+test_the_decision_executes_on_a_head_operations_wrote (test_t1759_single_lifecycle_observer.DuplicateDecisionOnATypedHeadTests.test_the_decision_executes_on_a_head_operations_wrote) ... ok
+test_the_decision_over_a_typed_head_buries_nothing (test_t1759_single_lifecycle_observer.DuplicateDecisionOnATypedHeadTests.test_the_decision_over_a_typed_head_buries_nothing) ... ok
+test_only_repairing_readers_name_the_lifecycle_class (test_t1759_single_lifecycle_observer.LifecycleObserverContractTests.test_only_repairing_readers_name_the_lifecycle_class) ... ok
+test_the_detector_resolves_only_the_immediate_literal_alias (test_t1759_single_lifecycle_observer.LifecycleObserverContractTests.test_the_detector_resolves_only_the_immediate_literal_alias) ... ok
+test_the_detector_sees_an_aliased_name (test_t1759_single_lifecycle_observer.LifecycleObserverContractTests.test_the_detector_sees_an_aliased_name) ... ok
+test_state_only_rebind_observation_cannot_bury_a_typed_head (test_t1759_single_lifecycle_observer.RebindStateObservationTests.test_state_only_rebind_observation_cannot_bury_a_typed_head) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 11.395s
+
+OK

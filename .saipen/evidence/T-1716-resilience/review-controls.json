@@ -1,0 +1,20 @@
+{
+  "label": "review-controls",
+  "phase": "REVIEW",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    ".saipen/evidence/T-1716-resilience/controls.py",
+    "controls-review.json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 1.671,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "{\"passed\": true, \"artifact\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\T-1716-resilience\\\\controls-review.json\", \"production_unchanged\": true}\r\n",
+  "stderr": "",
+  "stdout_sha256": "24e3160aff9f2b520925ff77347fc6baa811303e05f4407255f796fd15361d95",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

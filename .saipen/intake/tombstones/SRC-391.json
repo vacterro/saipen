@@ -1,0 +1,16 @@
+{
+  "actionable": 12,
+  "archive_ref": ".saipen/archive/source/SRC-391.md",
+  "closed_at": "2026-11-04T05:36:11Z",
+  "closure_event": null,
+  "linked_work": "T-2021",
+  "linked_works": [
+    "T-2021"
+  ],
+  "receipt_id": "SRC-391",
+  "requirements": 12,
+  "schema_version": 1,
+  "source_sha256": "5fcddef0cc2604dae54306c8de9ae2eb2930fb42f4aa87d7538c3f3164c9c4a9",
+  "status": "CLOSED",
+  "unresolved": 0
+}

@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "9f096bc85c6201e5fc51fb0d1c723b5d904fb67e90f7d70ad4c3cf60eea86906",
+  "verdict": "PASS",
+  "patterns": [
+    "test_log_detail_evidence.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_log_detail_evidence.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_log_detail_evidence.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        16232
+      ],
+      "duration_s": 0.594,
+      "process_create_s": 0.078,
+      "ran": 12,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_compacted_failure_claim_still_refuses (test_log_detail_evidence.CompactedVerdictTests.test_a_compacted_failure_claim_still_refuses)\r\nDecoding restores the real text, whatever it says. ... ok\r\ntest_a_compacted_verdict_is_still_evidence (test_log_detail_evidence.CompactedVerdictTests.test_a_compacted_verdict_is_still_evidence) ... ok\r\ntest_a_missing_detail_file_leaves_the_compacted_text (test_log_detail_evidence.CompactedVerdictTests.test_a_missing_detail_file_leaves_the_compacted_text) ... ok\r\ntest_a_non_regular_detail_node_restores_nothing (test_log_detail_evidence.CompactedVerdictTests.test_a_non_regular_detail_node_restores_nothing)\r\nDetail is history, so it obeys the rule every LOG segment obeys. ... ok\r\ntest_a_reference_outside_the_compaction_directory_restores_nothing (test_log_detail_evidence.CompactedVerdictTests.test_a_reference_outside_the_compaction_directory_restores_nothing) ... ok\r\ntest_a_short_verdict_is_unchanged (test_log_detail_evidence.CompactedVerdictTests.test_a_short_verdict_is_unchanged) ... ok\r\ntest_a_symlinked_detail_node_restores_nothing (test_log_detail_evidence.CompactedVerdictTests.test_a_symlinked_detail_node_restores_nothing)\r\nThe bytes are perfect; the node points out of the project. ... skipped \"this host cannot create a symlink: [WinError 1314] A required privilege is not held by the client: 'C:\\\\\\\\temp\\\\\\\\t1362-t7xxpaee\\\\\\\\outside.LOG.md' -> 'C:\\\\\\\\temp\\\\\\\\t1362-t7xxpaee\\\\\\\\project\\\\\\\\.saipen\\\\\\\\recovery\\\\\\\\log-detail\\\\\\\\E-101-85e6a48810b97cda055d452c.LOG.md'\"\r\ntest_another_events_line_restores_nothing (test_log_detail_evidence.CompactedVerdictTests.test_another_events_line_restores_nothing)\r\nA swapped detail file must not lend its text to this event. ... ok\r\ntest_edited_detail_bytes_restore_nothing (test_log_detail_evidence.CompactedVerdictTests.test_edited_detail_bytes_restore_nothing) ... ok\r\ntest_lineage_identity_is_proved_once_per_history_pass (test_log_detail_evidence.CompactedVerdictTests.test_lineage_identity_is_proved_once_per_history_pass)\r\nT-1904: project_lineage_identity is called once per pass, not per compacted event. ... ok\r\ntest_the_fixture_verdict_really_is_compacted (test_log_detail_evidence.CompactedVerdictTests.test_the_fixture_verdict_really_is_compacted)\r\nGuard: a short verdict would prove nothing about compaction. ... ok\r\ntest_two_projects_spelled_alike_do_not_share_the_cache (test_log_detail_evidence.CompactedVerdictTests.test_two_projects_spelled_alike_do_not_share_the_cache)\r\nA shared entry is a WRONG answer, not a stale one. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 12 tests in 0.198s\r\n\r\nOK (skipped=1)\r\n"
+    }
+  ],
+  "ran": 12,
+  "duration_s": 118.578,
+  "timings_s": {
+    "execution_wall_s": 0.609,
+    "environment_identity_wall_s": 0.063,
+    "copy_wall_s": 97.14,
+    "hash_wall_s": 0.188,
+    "cleanup_wall_s": 20.547
+  },
+  "copy_metrics": {
+    "subject_copy_s": 30.625,
+    "canonical_copy_s": 66.344,
+    "canonical_copy_attempts": 1,
+    "trees": null
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_log_detail_evidence.py"
+    ],
+    "manifest_sha256": "5e88effb752d63adc28040bda583ba8c56a4be1f9046f0d0af3fa75d9300413d"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_log_detail_evidence.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "d6c4acaf9e208d5abd46d4154bf121e4be2c9c45a2070dd999477be7022e11a2",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "dc803ffe929ce7ea68687e5d63bf4c444ac457ba5b2e50978b632cc1558d1dec"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "8ad51abb7ea05b8d85dc3563aa849cd4524d740ba803edee5de4343c4956908d"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "86d04f8a8d42dd8b365b33a29ca7b3cc1eacae9ddcfc2ae1b9bdbf3ee1e5e32f"
+      },
+      "core_unit_shard.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "b31bafde4ad2f78069e8f5ef839e26c59a4cbb38c9bcc4a19ad3e7acee7b6be0"
+      },
+      "test_runner.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "07a8109e808f10bb5268ac12f0da981db4b1fad2ec97a58da84f13b0509a1e81"
+      },
+      "verification_cache.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "8e7d43527554403147454d440d3b86d460ad166a21226fdfda2fd1a6384f5c5b"
+      },
+      "process_tree.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "e5f07f80d2a6802d95c3ccbebe4ca5f66cdbbcbb25b13450123baa896d8e8356"
+      },
+      "verification_bootstrap.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "df9bdce3388bf2511ce13a5a4329219810096ac58be0323675afd78b48cb605e"
+      },
+      "verification_impact.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "cf5c146ee2931cc1baa2765fa00e8bb9129d3370cb8bb8a2b7eb020dd8bba455"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "81516ef194be0dcb17a85f38a290d9f166d7b2ebd4f55dd41e484a690b501244"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

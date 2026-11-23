@@ -1,0 +1,15 @@
+{
+  "before": {
+    "exit_code": 1,
+    "oracle_sha256": "d51851cf7b403b1e07eb6bc1832b523b936f2ddd9b390e2b2de9cf8075369560",
+    "operator_task_sha256": "c16998ce3b17ce5cfceab93c6b378bf5b3c15760a42e4cbffdfb6f6fde3fa358",
+    "log": ".saipen/evidence/T-1844-operator-origin/diagnostic-carrier-before.log"
+  },
+  "after": {
+    "exit_code": 0,
+    "oracle_sha256": "d51851cf7b403b1e07eb6bc1832b523b936f2ddd9b390e2b2de9cf8075369560",
+    "operator_task_sha256": "d7aeac177c410c50900e865b56fdb68eb0b4543675ce09e4c22f72e62a8c2fbd",
+    "log": ".saipen/evidence/T-1844-operator-origin/diagnostic-carrier-after.log"
+  },
+  "classification": "diagnostic-only; canonical final VERIFY pair remains due"
+}

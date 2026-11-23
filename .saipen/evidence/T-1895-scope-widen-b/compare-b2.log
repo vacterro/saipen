@@ -1,0 +1,12 @@
+full  : .saipen/evidence/focused-unit/0a505d1573cf9678-20261024T215553731557Z.json
+        duration 102.047s copy 50.062s mode FULL ran 139
+narrow: .saipen/evidence/focused-unit/db8d7f033f8386b0-20261024T215731784377Z.json
+        duration 39.25s copy 0.39s mode DECLARED trees [] ran 139
+
+patterns compared: 19
+only in full     : []
+only in narrow   : []
+ran mismatches   : 0
+red-set changes  : 0
+
+VERDICT EQUAL

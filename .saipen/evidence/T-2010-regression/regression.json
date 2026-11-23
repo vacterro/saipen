@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t2010_publication_staging_reconciliation.py", "-v"],
+  "format": "unittest",
+  "context": ["tools", "saipen"],
+  "oracle_files": ["tools/test_t2010_publication_staging_reconciliation.py"],
+  "subject_files": ["tools/saipen_engine/router.py"],
+  "before": {"tools/saipen_engine/router.py": ".saipen/evidence/T-2010-regression/pre/router.py"},
+  "timeout": 300
+}

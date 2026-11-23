@@ -1,0 +1,206 @@
+{
+  "checked_utc": "2026-10-10T09:27:10.922999+00:00",
+  "acquired_files_checked": 8098,
+  "drifts": {
+    "source": [],
+    "snapshot": []
+  },
+  "live_authority": {
+    "status": "UNAUTHORIZED",
+    "floor": 3131,
+    "head": [
+      3132,
+      3134,
+      3135,
+      3137,
+      3138,
+      3139,
+      3140,
+      3141,
+      3142,
+      3143,
+      3144,
+      3146
+    ],
+    "findings": [
+      {
+        "rule": "state-ahead-of-journal",
+        "last_event": 3146,
+        "floor": 3131,
+        "detail": "STATE.last_event is E-3146, above E-3131, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-278",
+        "events": [
+          3135
+        ],
+        "floor": 3131,
+        "detail": "T-278 sits under ## DONE on the word of E-3135, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-292",
+        "events": [
+          3132
+        ],
+        "floor": 3131,
+        "detail": "T-292 sits under ## DONE on the word of E-3132, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-293",
+        "events": [
+          3134
+        ],
+        "floor": 3131,
+        "detail": "T-293 sits under ## DONE on the word of E-3134, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-294",
+        "events": [
+          3137
+        ],
+        "floor": 3131,
+        "detail": "T-294 sits under ## DONE on the word of E-3137, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-295",
+        "events": [
+          3138
+        ],
+        "floor": 3131,
+        "detail": "T-295 sits under ## DONE on the word of E-3138, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-296",
+        "events": [
+          3139,
+          3140
+        ],
+        "floor": 3131,
+        "detail": "T-296 sits under ## DONE on the word of E-3139, E-3140, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-297",
+        "events": [
+          3141,
+          3142
+        ],
+        "floor": 3131,
+        "detail": "T-297 sits under ## DONE on the word of E-3141, E-3142, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-298",
+        "events": [
+          3143,
+          3144
+        ],
+        "floor": 3131,
+        "detail": "T-298 sits under ## DONE on the word of E-3143, E-3144, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      },
+      {
+        "rule": "terminal-without-operation",
+        "ticket": "T-299",
+        "events": [
+          3146
+        ],
+        "floor": 3131,
+        "detail": "T-299 sits under ## DONE on the word of E-3146, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+      }
+    ],
+    "detail": "STATE.last_event is E-3146, above E-3131, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand; T-278 sits under ## DONE on the word of E-3135, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run; T-292 sits under ## DONE on the word of E-3132, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typed, not run"
+  },
+  "pending": [],
+  "conflicts": [],
+  "duplicate_findings": [
+    {
+      "ticket": "T-299",
+      "records": [
+        {
+          "digest": "1b028a689439ac0579d23743f129e3884e8bfb358ba91c725b14883a7b0d9392",
+          "section": "## DONE",
+          "line": 5,
+          "checkbox": "x",
+          "description": "[P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt must not overwrite canonical archive (setVerifiedProjectArchive removed from manualArchiveRecordSent, receipt writes zero canonical-store writ"
+        },
+        {
+          "digest": "4a92ef79bd7c77c1076a44ecc23acb331cf77427273711440c07b848ec284c95",
+          "section": "## DONE",
+          "line": 6,
+          "checkbox": "x",
+          "description": "[P2] Audit-bundle packaging: transient npm-cache blobs under .saipen/kitchen/tmp-control (ctrlv-probe _cacache, ~20.7 MB compressed) refused as reproducible machine state via _REPRODUCIBLE_CACHE_SEGME"
+        }
+      ],
+      "errors": [
+        "BOARD.md:6 duplicate ticket ID T-299"
+      ]
+    }
+  ],
+  "pure_quarantine_predicate": {
+    "cut_proven": false,
+    "error": "the ledger is damaged before the checkpointed tail too, so a cut cannot repair it: LOG.md:2: not a legal LOG event: '- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no '",
+    "live_mutation_attempted": false
+  },
+  "commands": [
+    {
+      "label": "native-after",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "exit_code": 1,
+      "output_sha256": "65bb8a210e7c4a2692face776c4ddff8854961bca43c698be3f288186f5413c1",
+      "tail": " `--gate collect:saiwiki` and blocks nothing else\nWARN [subsaipen-uncollected]: 1 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)\nWARN [sub-role-revision-legacy]: subSaipen STATE(s) predate role-revision recording: saipython, saitranslate -- re-record `role_revision` from the current charter at their next adopt (PROTOCOL.md § 6, T-542)\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nValidation FAILED: 19 problem(s), 79 warning(s)\n"
+    },
+    {
+      "label": "recover-preview-after",
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "recover",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+        "--dry-run",
+        "--json"
+      ],
+      "exit_code": 1,
+      "output_sha256": "724a23ce978379e1ad2ecd4fc9c7ee52a1ad1134e29f1fab597d0985e836d42f",
+      "tail": "table-ledger contract -- E-3134 parent E-3133 does not exist in the ledger; E-3137 parent E-3136 does not exist in the ledger; E-3146 parent E-3145 does not exist in the ledger\",\n  \"needs_local_mutation\": false,\n  \"safe_auto_repair_available\": false,\n  \"operator_decision_available\": false,\n  \"canonical_next_command\": null,\n  \"read_only\": true,\n  \"terminal_disposition\": \"FORENSICALLY_UNRECOVERABLE\",\n  \"blocking_surface\": \"log\",\n  \"blocking_field\": null,\n  \"evidence_reference\": \".saipen/LOG.md\",\n  \"diagnosis\": \"READ_ONLY_DIAGNOSIS_ONLY\",\n  \"read_only_diagnosis_only\": true,\n  \"instruction\": \"READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth\",\n  \"forbidden_probes\": [\n    \"saipen stop\",\n    \"saipen transition\",\n    \"saipen goal\",\n    \"saipen ticket\",\n    \"Bash\",\n    \"Edit\",\n    \"Write\"\n  ],\n  \"reason_code\": \"HISTORY_LEDGER_CORRUPT\"\n}\n"
+    },
+    {
+      "label": "git-status-after",
+      "argv": [
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "exit_code": 0,
+      "output_sha256": "f1582a451085690e24a8f895658d3ce8f2bf0882da61940df32835c44f45e279",
+      "tail": " M .saipen/improve/imp-vacterro-audapack-20260927-1/buffy-01/saipen_improve_SAIPEN.md\n"
+    },
+    {
+      "label": "git-head-after",
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "output_sha256": "c56b4cfa1368c502bda88f185d5c5e482123e64b61a71a8245c1143bb602c994",
+      "tail": "6c6d841df24e5c5d91870def931af99f0af4c81f\n"
+    }
+  ],
+  "audapack_lifecycle_mutations": [],
+  "native_validation": "CURRENT_FAIL"
+}

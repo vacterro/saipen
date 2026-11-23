@@ -1,0 +1,31 @@
+{
+  "linked_work": "T-288",
+  "receipt_id": "SRC-124",
+  "received_at": "2026-10-06T16:09:49Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "4fb80e08b06b2483d2b79730ffe2d786848c429de7268f5c9805908df12b11b7",
+    "sanitized_sha256": "4fb80e08b06b2483d2b79730ffe2d786848c429de7268f5c9805908df12b11b7"
+  },
+  "request_provenance": {
+    "compared_digest": "a3563abb16a4b79b2c12208f6c6caaf7d162a35ce2097652f4522c02d585e103",
+    "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+    "witness": "model_supplied"
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "4fb80e08b06b2483d2b79730ffe2d786848c429de7268f5c9805908df12b11b7",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "4fb80e08b06b2483d2b79730ffe2d786848c429de7268f5c9805908df12b11b7",
+  "status": "ACTIVE",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "receipt": "SRC-391",
+  "status": "ACTIVE",
+  "location": "active",
+  "source_kind": "user_instruction",
+  "source_sha256": "5fcddef0cc2604dae54306c8de9ae2eb2930fb42f4aa87d7538c3f3164c9c4a9",
+  "linked_work": "T-2021",
+  "linked_works": [
+    "T-2021"
+  ],
+  "amends": null,
+  "closure_event": null,
+  "coverage": {
+    "receipt": "SRC-391",
+    "requirements": 12,
+    "actionable": 12,
+    "terminal": 12,
+    "dispositions": {
+      "VERIFIED": 12
+    },
+    "unresolved": [],
+    "unresolved_fitness": []
+  },
+  "distribution": {
+    "state": "DISTRIBUTABLE",
+    "receipt_id": "SRC-391",
+    "source_sha256": "5fcddef0cc2604dae54306c8de9ae2eb2930fb42f4aa87d7538c3f3164c9c4a9"
+  }
+}

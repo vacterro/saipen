@@ -1,0 +1,50 @@
+{
+  "kind": "read-only-human-triage-preparation",
+  "observed_at": "2026-10-03T05:47:54.371305+00:00",
+  "files": {
+    "tools/saipen_engine/release_contract.py": "93bfdd2c24366e5a3420f1ad019d2f7ebbcf1e16cbef721c3af78e9266e0b3f4",
+    "tools/saipen_engine/producer.py": "fd25b0418a03fbb45b6939f236338a72d3d498fad10ae848379686ab6993279e",
+    "tools/saipen_engine/subs.py": "cb72628d96028255e7088b52ae82ef333d43835f166c196afe9de957012d3b0c",
+    "tools/validate.py": "1212311880ec14b94cbe4c75ba3d7a823371fe18ffaf5be316afafe79d3c6b50",
+    ".saipen/extensions/subs/MANIFEST.md": "a2d3b912099f1ac2b89e68be414d3a0b03b54d0f733962ca134d6260c32f2399",
+    ".saipen/extensions/subs/saiwiki/kitchen/_publish_package.py": "38f67cad5f62ce85d902455f4f0750d417b761e7480d6cea29bb64590704c35b",
+    "CHANGELOG.md": "ff06bfaa78906def815508a5c970f9deb9b63f1b0feb7dce58fa18850e1f998e",
+    "CHANGELOG_ARCHIVE.md": "17b1fa5b6cf836325cced39af03de1e18d31a6edceaf043d8b932396264c99a6"
+  },
+  "locale_probe": {
+    "observed": [
+      ".translation-cache/README_.TRANSLATION-CACHE.md",
+      "__pycache__/README___PYCACHE__.md",
+      "en/README_EN.md",
+      "zz/README_ZZ.md"
+    ],
+    "required_missing_locale_retained": true,
+    "dunder_incorrectly_counted": true,
+    "cache_incorrectly_counted": true
+  },
+  "translate_mirror_exists": false,
+  "translate_mirror_advertised": false,
+  "translate_canonical_state_exists": false,
+  "src024_active_exists": false,
+  "src024_tombstone_exists": true,
+  "current_orphan_receipts": [],
+  "changelog_headings": 11,
+  "archive_tracked": true,
+  "wiki_ready_exists": true,
+  "approval": false,
+  "completed_work": [],
+  "wiki_ready_valid_count": 10,
+  "wiki_ready_error_count": 0,
+  "wiki_ready_package_ids": [
+    "sha256:01cab8d2feceed8638a4de9c7e352e260d694b38f18da157d232fbbeafa44b9b",
+    "sha256:04aa5d678b22d941aa6e610c6478129a28fc171af8dc2a3554300edf18561511",
+    "sha256:2da5a6d14740e288854b59e0da1d717acd92f3ede481e15cdb14154c6070f74f",
+    "sha256:647ed9d3394ac8954a1acd78904a92d0f43514cbcf93d26a5a15c1543fc2801b",
+    "sha256:803655825defff1adfff6379b347b2d543fd2736b352a3451db928ac650c04b1",
+    "sha256:9a4c65e5863dadb595194b7c6fab2666f4a19aee2614aa2a259d078e7afe8dc9",
+    "sha256:aff306cebb5a7802ea1ba7be64422dc2fbc6997badc5797371f2dd00720f0a5e",
+    "sha256:e1bf2dc14cbae72a500d8dde9a6529ecafbe8c56d173f7b79541a0da2de786ba",
+    "sha256:e49ade8ce70a194159afed13402e80398b212cd6abcefaf276915f5d9278d334",
+    "sha256:ffb013440ef327dc5e45fbcba3058f5e252d151b83f3e27645359001e209356f"
+  ]
+}

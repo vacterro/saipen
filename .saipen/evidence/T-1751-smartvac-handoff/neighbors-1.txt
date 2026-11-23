@@ -1,0 +1,274 @@
+...............................warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+....................................s.....................................................................................................................................................................................................................................................................................................................................s......ss....{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": []
+  },
+  "adopted": [],
+  "lifecycle": [],
+  "repair_id": "e2cf02b7100dc49f8a50db940afa5639777c7e26df018d7c87ff6491943bd79f",
+  "targets": [
+    ".saipen/LOG.md",
+    ".saipen/STATE.md"
+  ],
+  "event": "E-13",
+  "agent": "test-agent",
+  "strict_state_error": null,
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-legacycompat-5uaxsexf/.saipen/MANIFEST.json",
+    "contract_version": 3,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-continue-8g7nswf9\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+........{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "recover --attest-legacy-done ids must be T-### (digits), comma-separated when several",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-continue-8g7nswf9\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": []
+  },
+  "adopted": [],
+  "lifecycle": [],
+  "repair_id": "98d5dca80fd7018b75748cc6db154dcff556832aa9173bdf0c719ad01d9908ed",
+  "targets": [
+    ".saipen/LOG.md",
+    ".saipen/STATE.md"
+  ],
+  "event": "E-3",
+  "agent": "test-agent",
+  "strict_state_error": null,
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-legacycompat-h9tcwryx/.saipen/MANIFEST.json",
+    "contract_version": 3,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-continue-8g7nswf9\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+...........................................................................................{
+  "ok": true,
+  "code": "CONVERGE_SET",
+  "op_id": "converge_intent-9d513f075c1542e9a27be684b1e21f7b",
+  "changed_files": [
+    ".saipen/LOG.md",
+    ".saipen/STATE.md"
+  ],
+  "recovery_required": false,
+  "execution_intent": "converge",
+  "converge_target": "done",
+  "event_id": "E-4",
+  "dry_run": true,
+  "reconciliation": {
+    "ok": true,
+    "code": "CLEAN",
+    "changed": [],
+    "strict_state_error": null,
+    "dry_run": true
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-legacycompat-h9tcwryx --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+..................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 1244 tests in 877.773s
+
+OK (skipped=4)
+{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": [
+      {
+        "field": "phase",
+        "from": "BUILD",
+        "to": "SCOUT",
+        "surface": "state",
+        "reason": "phase 'BUILD' disagrees with the newest provable phase-changing event E-100, which names SCOUT (T-1318)"
+      }
+    ]
+  },
+  "adopted": [],
+  "lifecycle": [
+    {
+      "field": "board",
+      "kind": "claim-clear",
+      "ticket": "T-9001",
+      "surface": "board",
+      "section": "## DOING",
+      "fields": [
+        "owner",
+        "claim_time"
+      ],
+      "_class": "incomplete-claim-pair",
+      "reason": "T-9001 carries a half claim pair (owner='test-agent', claim_time='') on claimable Work; CORE's both-or-neither rule makes the LEASE INVALID, so the deterministic repair removes BOTH halves and fabricates no owner or time (SRC-043)"
+    },
+    {
+      "field": "board",
+      "kind": "section-move",
+      "ticket": "T-9001",
+      "surface": "board",
+      "from_section": "## DOING",
+      "to_section": "## TODO",
+      "reason": "T-9001 sits under ## DOING with no owner/claim_time pair; an unclaimed DOING Work was never started, so it returns to ## TODO (SRC-043)"
+    },
+    {
+      "field": "board",
+      "kind": "section-move",
+      "ticket": "T-9002",
+      "surface": "board",
+      "from_section": "## DOING",
+      "to_section": "## TODO",
+      "reason": "T-9002 sits under ## DOING with no owner/claim_time pair; an unclaimed DOING Work was never started, so it returns to ## TODO (SRC-043)"
+    },
+    {
+      "field": "board",
+      "kind": "section-move",
+      "ticket": "T-9003",
+      "surface": "board",
+      "from_section": "## DONE",
+      "to_section": "## TODO",
+      "requires_approval": true,
+      "generation": "current",
+      "reason": "T-9003 sits under ## DONE with no closure_mode, no owner, no claim_time and no verification evidence in history, and was allocated AFTER this project's closure contract became observable; the completion was never established by a canonical operation, so reopening it into ## TODO requires ONE operator approval of the repair plan (SRC-043)"
+    }
+  ],
+  "repair_id": "79199c7be70e616656f2a82ef210ab61518ece19355f8d90a74fc1da72737260",
+  "targets": [
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md",
+    ".saipen/recovery/state-phase/reconcile-20261013192813890856.STATE.md"
+  ],
+  "event": "E-101",
+  "agent": "test-agent",
+  "strict_state_error": "invalid phase transition: DONE -> BUILD (RFC § 1.6). Allowed from DONE: SCOUT, PLAN, HUNT, BLOCKED",
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-sdefect-p7zqw22p/.saipen/MANIFEST.json",
+    "contract_version": 3,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-legacycompat-h9tcwryx --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "action": "saipen recover",
+  "reason": "state-malformed",
+  "detail": "state-malformed: unknown STATE field 'parked_work' -- state.schema.json does not define it (retired or misspelled?)",
+  "cold_route": {
+    "project_root": "V:\\_TEMP_\\t1363-3n8pfk9d",
+    "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+    "phase": "DONE",
+    "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\done.md",
+    "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+    "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+    "documents": {
+      "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+      "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+      "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+      "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+      "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+      "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+      "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+      "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+      "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+      "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+    },
+    "project_memory": {
+      "STATE.md": "V:\\_TEMP_\\t1363-3n8pfk9d\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\_TEMP_\\t1363-3n8pfk9d\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\_TEMP_\\t1363-3n8pfk9d\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-legacycompat-h9tcwryx --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

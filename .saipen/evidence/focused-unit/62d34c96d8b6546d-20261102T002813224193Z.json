@@ -1,0 +1,236 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "62d34c96d8b6546d962ac75817f24bca6451c1e8c46806d71334d5b874eae1c8",
+  "verdict": "PASS",
+  "patterns": [
+    "test_release_approval_contract.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_release_approval_contract.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_release_approval_contract.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        16284,
+        22052
+      ],
+      "duration_s": 2.766,
+      "process_create_s": 0.047,
+      "ran": 6,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_r001_release_grant_kind_and_decision_request_conversion (test_release_approval_contract.TestReleaseApprovalContract.test_r001_release_grant_kind_and_decision_request_conversion)\r\nR001: Release admission owner defines saipen-release-authorization and converts proposals. ... ok\r\ntest_r002_operator_approval_surface_anti_synthesis_and_presentation (test_release_approval_contract.TestReleaseApprovalContract.test_r002_operator_approval_surface_anti_synthesis_and_presentation)\r\nR002: Human approval surface presents full scope and refuses synthetic model execution. ... ok\r\ntest_r003_bounded_standing_release_authority (test_release_approval_contract.TestReleaseApprovalContract.test_r003_bounded_standing_release_authority)\r\nR003: Standing authority binds project, destination, finite quota, and durable revocation. ... ok\r\ntest_r004_release_candidate_freezing_and_verification_policy (test_release_approval_contract.TestReleaseApprovalContract.test_r004_release_candidate_freezing_and_verification_policy)\r\nR004: Release candidate commit identity frozen; full gate distinguished from focused checks. ... ok\r\ntest_r005_isolated_release_requires_grant_and_stores_separate_receipt (test_release_approval_contract.TestReleaseApprovalContract.test_r005_isolated_release_requires_grant_and_stores_separate_receipt)\r\nR005: Release publication held without grant; succeeds with grant; receipts separated. ... ok\r\ntest_r006_autonomous_engineering_maintained (test_release_approval_contract.TestReleaseApprovalContract.test_r006_autonomous_engineering_maintained)\r\nR006: Autonomous maintenance authority (E-18977) remains active while release is held. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 6 tests in 2.321s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 6,
+  "duration_s": 122.937,
+  "timings_s": {
+    "execution_wall_s": 2.766,
+    "environment_identity_wall_s": 0.047,
+    "copy_wall_s": 103.141,
+    "hash_wall_s": 0.156,
+    "cleanup_wall_s": 16.812
+  },
+  "copy_metrics": {
+    "subject_copy_s": 25.156,
+    "canonical_copy_s": 77.782,
+    "canonical_copy_attempts": 1,
+    "trees": null,
+    "pointers": {
+      "rewritten": [
+        "bin/saipen.cmd",
+        "bin/saipen",
+        ".saipen/STATE.md"
+      ],
+      "home": "C:/temp/saipen-core-unit-da2o5o5f/project"
+    }
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_release_approval_contract.py"
+    ],
+    "manifest_sha256": "3074253aa569fc7009f08347adf22f8bb6ea529b6d775987fc1d90b7b8dd76a4"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_release_approval_contract.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "7aa6f721d417765af82be478594118cc39d400b020cf0bea8367446bf3ece957",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "2271ca5434892f15f981f28ed5ded00314be23f853d23c8db56c527f302b0463"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "a47f93dee387b41f3ac6e6755a3bd8083826824b65f31590a35ebc3d061ae5a7"
+      },
+      "core_unit_shard.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "b31bafde4ad2f78069e8f5ef839e26c59a4cbb38c9bcc4a19ad3e7acee7b6be0"
+      },
+      "test_runner.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "07a8109e808f10bb5268ac12f0da981db4b1fad2ec97a58da84f13b0509a1e81"
+      },
+      "verification_cache.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "e3ef0d9f3d48c1d6afa7af2bb383ce2ae57149f0c76bd5bc9efee06443566af7"
+      },
+      "process_tree.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "e5f07f80d2a6802d95c3ccbebe4ca5f66cdbbcbb25b13450123baa896d8e8356"
+      },
+      "verification_bootstrap.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "df9bdce3388bf2511ce13a5a4329219810096ac58be0323675afd78b48cb605e"
+      },
+      "verification_impact.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "cf5c146ee2931cc1baa2765fa00e8bb9129d3370cb8bb8a2b7eb020dd8bba455"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "2d091fe11e7e6cf4002e34bc6c69f0104a53378e6980e906842eeeb973ffcade"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

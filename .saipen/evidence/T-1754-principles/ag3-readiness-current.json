@@ -1,0 +1,8 @@
+{
+  "kind": "local_cli_availability_observation",
+  "command": "Get-Command sai-accounts -ErrorAction SilentlyContinue",
+  "code": "SAI_ACCOUNTS_CLI_UNAVAILABLE",
+  "probe_executed": false,
+  "target_mutation": false,
+  "limit": "This is local CLI unavailability, not a failure verdict for the AG3 broker or its account."
+}

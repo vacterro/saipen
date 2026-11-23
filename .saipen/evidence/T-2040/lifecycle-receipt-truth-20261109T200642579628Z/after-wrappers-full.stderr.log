@@ -1,0 +1,9 @@
+test_conformance_closure_probe (test_t1893_probe_wrappers.LegacyProbeTests.test_conformance_closure_probe) ... ok
+test_second_wave_probe (test_t1893_probe_wrappers.LegacyProbeTests.test_second_wave_probe) ... ok
+test_second_wave_receipt_probe (test_t1893_probe_wrappers.LegacyProbeTests.test_second_wave_receipt_probe) ... ok
+test_userperson_redaction_probe (test_t1893_probe_wrappers.LegacyProbeTests.test_userperson_redaction_probe) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 10.826s
+
+OK

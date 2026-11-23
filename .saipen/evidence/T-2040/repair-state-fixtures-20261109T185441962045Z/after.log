@@ -1,0 +1,18 @@
+.F............................                             [100%]
+================================== FAILURES ===================================
+_______________ E2E02TrueTerminal.test_terminal_once_then_stop ________________
+
+self = <test_t1619_iteration_boundary.E2E02TrueTerminal testMethod=test_terminal_once_then_stop>
+
+    def test_terminal_once_then_stop(self):
+        root = make_project(terminal_state(), TERMINAL_BOARD)
+        verdict = IV.project_iteration_verdict(root)
+>       self.assertEqual(verdict["decision"], iteration.VALID_TERMINAL)
+E       AssertionError: 'OPERATOR_WAIT' != 'VALID_TERMINAL'
+E       - OPERATOR_WAIT
+E       + VALID_TERMINAL
+
+tools\test_t1619_iteration_boundary.py:147: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t1619_iteration_boundary.py::E2E02TrueTerminal::test_terminal_once_then_stop
+1 failed, 29 passed, 14 subtests passed in 12.22s

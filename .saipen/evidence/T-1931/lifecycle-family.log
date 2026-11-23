@@ -1,0 +1,48 @@
+
+[SAIPEN_HOST_DISPATCH_ADVISORY]
+action: kick_next_iteration
+campaign_id: CAMPAIGN-00000000-0000-0000-0000-000000000000
+iteration_id: 1
+worker_generation: 1
+idempotency_key: 54e82e970e6c71f1f031831a2d0cf4f0d6cbe6988255c700a7e0b7f0d57967ea
+inbox_path: V:\_TEMP_\saipen-camp-mat-nds3f76l\.saipen\campaign\dispatch_inbox.jsonl
+advisory: Native host iteration dispatch not registered; pump turn via host harness or external watcher.
+[/SAIPEN_HOST_DISPATCH_ADVISORY]
+======================================================================
+FAIL: test_c05_model_final_response_dispatches_next_turn (test_campaign_matrix.TestCampaignMatrix.test_c05_model_final_response_dispatches_next_turn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_campaign_matrix.py", line 154, in test_c05_model_final_response_dispatches_next_turn
+    self.assertEqual(action, host_iteration.KICK_NEXT_ITERATION)
+AssertionError: 'dispatch_unconfirmed' != 'kick_next_iteration'
+- dispatch_unconfirmed
++ kick_next_iteration
+
+
+======================================================================
+FAIL: test_c06_final_response_callback_delivered_twice_is_idempotent (test_campaign_matrix.TestCampaignMatrix.test_c06_final_response_callback_delivered_twice_is_idempotent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_campaign_matrix.py", line 173, in test_c06_final_response_callback_delivered_twice_is_idempotent
+    self.assertEqual(act1, host_iteration.KICK_NEXT_ITERATION)
+AssertionError: 'dispatch_unconfirmed' != 'kick_next_iteration'
+- dispatch_unconfirmed
++ kick_next_iteration
+
+
+======================================================================
+FAIL: test_gate_c_host_auto_kick (test_campaign_production_gates.TestProductionAcceptanceGates.test_gate_c_host_auto_kick)
+GATE C: Turn completion starts real native scheduler dispatch with bound grant.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_campaign_production_gates.py", line 215, in test_gate_c_host_auto_kick
+    self.assertEqual(action, host_iteration.KICK_NEXT_ITERATION)
+AssertionError: 'dispatch_unconfirmed' != 'kick_next_iteration'
+- dispatch_unconfirmed
++ kick_next_iteration
+
+
+----------------------------------------------------------------------
+Ran 84 tests in 1.906s
+
+FAILED (failures=3)

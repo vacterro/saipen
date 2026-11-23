@@ -1,0 +1,287 @@
+{
+  "scope": "Incremental campaign delta against captured working bytes; not all file-vs-HEAD changes",
+  "publication_authorized": false,
+  "files": [
+    {
+      "path": "tools/saipen_engine/registry.py",
+      "before_artifact": "tools__saipen_engine__registry.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "cab0d3c447a8d7af1efd1e0b5231e78e25929152e269e3e1ea16f4edd3fae8ec",
+      "after_sha256": "9edcc0d9fe9e49e0fe7467dbe61839b228242149a1ed6b80d04dd6f17f4d8719"
+    },
+    {
+      "path": "tools/validate.py",
+      "before_artifact": "tools__validate.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "fbee16b8eb970c5e62a864df98947d05d008c612014116e49801de86ef3bedac",
+      "after_sha256": "4399eb55251c56b9bd7e312c4486d1011285b10e76d1687b618ea6b10d70907d"
+    },
+    {
+      "path": "tools/audit_checks.py",
+      "before_artifact": "audit_checks.before.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "3f65514af299739f2298f8242c7dffd27823b0ca11d17a40901f24951ebce735",
+      "after_sha256": "a07f7b6eed9f8472d93b342e4dbd6e6fde009efc73c0759e3ef6540b03bcc351"
+    },
+    {
+      "path": "tools/validator_fail_sites.json",
+      "before_artifact": "tools__validator_fail_sites.json",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "02074993235115f9d5fe19106f80b06f74c11870649578eb89437a4a8496ecf4",
+      "after_sha256": "f84467aff9274141dffd45eaff130de5fbede3ba18655cb91d988854cea8b3b0"
+    },
+    {
+      "path": "tools/test_protocol_registry.py",
+      "before_artifact": "tools__test_protocol_registry.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "7ba8f2eb82695aa280ac9aee6ce9d0e4ce2b5749f6020a36db0ffe2820d82d7c",
+      "after_sha256": "7b8f65c1fd072dbf83caf278624584ae85016be8984d4c003ea45ef56169061e"
+    },
+    {
+      "path": "tools/test_vocabulary_parity.py",
+      "before_artifact": "tools__test_vocabulary_parity.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "1d9ebe05fcf2f31f310d57211ac8ba3af129c4804732f063e969207f205fa1f6",
+      "after_sha256": "7a5fee739b66ea1300bf21291f08577b76c372ae6b56b261eeb1c8661ee376e3"
+    },
+    {
+      "path": "tools/test_remediation_self_consistency.py",
+      "before_artifact": "tools__test_remediation_self_consistency.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "7ca7d249d42550d91b531bac93d63d33856887db9652b95bc06ee71c0b77e1c6",
+      "after_sha256": "2f4a5b3f1ad304fcd63bf2e74ebf69fedeffe160c0a21d5f031bf4cfba341426"
+    },
+    {
+      "path": "tools/test_t1647_machine_runtime.py",
+      "before_artifact": "tools__test_t1647_machine_runtime.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "a0a44db537b47c916b2ea4b9ec63c79ed3c3d9692593f7fc639cb4779cc49870",
+      "after_sha256": "73bc7014486d24e872fd8b2639975a937da2c9988dbef324a33c7bf9bde77356"
+    },
+    {
+      "path": "tools/test_t1654_project_block.py",
+      "before_artifact": "tools__test_t1654_project_block.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "229adbecaa1b0a886dbad09ebd18592ab0693a158a12982c9e1d94ccada553d7",
+      "after_sha256": "33614a95ed507d84798bd3b0688ae573a3b1cfa91d9f7f137fd394c8c508859e"
+    },
+    {
+      "path": "tools/test_t1839_cohort_reconciliation.py",
+      "before_artifact": "tools__test_t1839_cohort_reconciliation.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "dca04e7ae16411907884d3ce61ccb944c1aca54ca1f128573f49d2981c4c3963",
+      "after_sha256": "16efc1b2f9c05b56e3d1594eb7735197537294a472631715e3d0677c0db1d3b4"
+    },
+    {
+      "path": "saipen/RUNTIME.md",
+      "before_artifact": "saipen__RUNTIME.md",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "51daa41d11edd0b0eeb2398a0f836f2ec7eaf4d0480548e8d8e87916379ec603",
+      "after_sha256": "d80b8784719e7e8307e517ea9e3c4f29c96b0bbe67b83ef4392b9163586a103b"
+    },
+    {
+      "path": "tools/saipen_engine/board.py",
+      "before_artifact": "tools__saipen_engine__board.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "e106062326b6680ad970855510858df1f3a3472affe4c2b07c6873343cf0633a",
+      "after_sha256": "347fc328287277b79ed5f7126965d12a2e8a71af02d71a7deab4b898b8880445"
+    },
+    {
+      "path": "tools/saipen_engine/router.py",
+      "before_artifact": "tools__saipen_engine__router.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "8fb541f7950d887ba8cec15e34274423b67c9261ff4dde240f7c11d842731a27",
+      "after_sha256": "0c4b83a938ea2205ce172f04de0ac51da362fb949f7b71127b4df3e483cc00c8"
+    },
+    {
+      "path": "tools/saipen_engine/audit_inbox.py",
+      "before_artifact": "tools__saipen_engine__audit_inbox.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "966330ba8de0bcf6b57db65dee1e99ab700c3a9a6d4d4b7b91ad37a2c9a2654a",
+      "after_sha256": "800c1057a852124849ae0fb6d493a48c9c1c6b3c711bf24ad1d5c9e310622f84"
+    },
+    {
+      "path": "tools/saipen_engine/automation.py",
+      "before_artifact": "tools__saipen_engine__automation.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "74ef96e4a627e6bfe707f2b4db149e0c524d49545938a187b7fb3e8a1cbcf638",
+      "after_sha256": "e17d02722026a63ecd4c06e2f2644863c739f9edef0a92489cce9ef4b52f6b6b"
+    },
+    {
+      "path": "tools/saipen_engine/response_surface.py",
+      "before_artifact": "tools__saipen_engine__response_surface.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "0745296d5c180fb33f4d6c15b2668c1a8623ccdcd4d18de145c0c598618e8c0e",
+      "after_sha256": "5b84905167811ee1d4cab9f046f6b0c1a199d85d900b0a431300b9d2f3901d4c"
+    },
+    {
+      "path": "tools/saipen_engine/goal_authority.py",
+      "before_artifact": "tools__saipen_engine__goal_authority.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "96149a4827b8d6b1ca80b38f603ae9c38e54a721c06f193673120b84174cc7ec",
+      "after_sha256": "c859a41aa5f43e7f9a283ef0406a5c74607c2027dfc81ad7df9573b3bc8fe49b"
+    },
+    {
+      "path": "tools/saipen_engine/operations.py",
+      "before_artifact": "tools__saipen_engine__operations.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "ace5312350b428a7cf37477792b24521b83c567de07fc6684b103c6cdf16bf42",
+      "after_sha256": "04a8c5fc02d7eb7c9c0a9b614fe26c726dbce8f86da693e187c723475e1df5f2"
+    },
+    {
+      "path": "tools/saipen_engine/state.py",
+      "before_artifact": "tools__saipen_engine__state.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "be007e269596311d0792131363eff8fe3cdc7a8c262eb3be88ef4a5cc1ae171f",
+      "after_sha256": "d619fe88008def2d62c0ce7be9083d90c87b2b0d04b5c330e8f968c45e62c71f"
+    },
+    {
+      "path": "tools/saipen_engine/entry.py",
+      "before_artifact": "tools__saipen_engine__entry.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "4dd0186d2abb9e96968b01203aa8d306e9f774cad58f9ed25cbe989191753a8c",
+      "after_sha256": "1dfe6573623cbad8b7f5db3a9ceac9e96a11198cd34375626990a1c3f8b4ae00"
+    },
+    {
+      "path": "tools/saipen_engine/reconcile.py",
+      "before_artifact": "tools__saipen_engine__reconcile.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "2410e5eb8ed00aedac5b3c60052dd2a063d391172e28a878b9c7c502de03552e",
+      "after_sha256": "7c7bdeca345b10269c4ab667de82bd0f85634bb508a88ef4b5f7d97f66fb31df"
+    },
+    {
+      "path": "tools/saipen_engine/commands.py",
+      "before_artifact": "tools__saipen_engine__commands.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "187942c23665de0ca42e72b6216d062f4a37ead8d6709a4b32caef2cc93912dc",
+      "after_sha256": "8b9dd96b69e133c4d3b03f7be7d6c268d547338a3c05a5179cd2db42e10e42bc"
+    },
+    {
+      "path": "tools/saipen_engine/cold_truth.py",
+      "before_artifact": "tools__saipen_engine__cold_truth.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "67cfb05694d912d71c3cd655cfc54c3a578e475a369c46b118c01cc3809e9ec8",
+      "after_sha256": "34f7e3b872c5ff8591f522d145495a9a90c19fe6e8f72716102f043b6d14b38d"
+    },
+    {
+      "path": "tools/saipen.py",
+      "before_artifact": "tools__saipen.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "5be98576b1f988477de7809acecf03ee749ff49f4cadee6a04076fcb14db7093",
+      "after_sha256": "d3bd4aaba77dae22c5426db86ef8c741d5327ab656f2a4cb2bf7ed9ee9435c8a"
+    },
+    {
+      "path": "tools/test_cold_agent_truth.py",
+      "before_artifact": "tools__test_cold_agent_truth.py",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "a2f2a6a3f99d480317375e63365585aa6a54002a62ace8c3b3f8faaba0a6b36d",
+      "after_sha256": "ca17d68dba878f3f106e8fe7dbfcd247e17acf034a442b136d72ce8c4bbe3c0c"
+    },
+    {
+      "path": "tools/saipen_engine/conformance.py",
+      "before_artifact": "tools__saipen_engine__conformance.py.lint",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "8e34c4196aa193d84c72fbc06f871241f382f3195b5984d48f898ded282841f7",
+      "after_sha256": "37868cea13e74b6b2b56c3c29d8303e29f4c769d3e88668115ebebfbec72fedf"
+    },
+    {
+      "path": "tools/saipen_engine/finding_route.py",
+      "before_artifact": "tools__saipen_engine__finding_route.py.lint",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "7939f000b0faa6fac90c36aaf291ed79f28b8d0957767498afdc9ce87ff3ccd1",
+      "after_sha256": "4af48c304c632b24ec03fb6018e3eb4736ae6828e5174d27431c1f4de0b1f660"
+    },
+    {
+      "path": "tools/saipen_engine/findings.py",
+      "before_artifact": "tools__saipen_engine__findings.py.lint",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "81f1c8e867c1997625a92d4519bb825c6a2d336ded0826bc0b8d1a4b12824563",
+      "after_sha256": "6b3c9ea5b4ce59a2f6c6b53f364059b35adcee99e92dc2f593debb4c17f4b5e2"
+    },
+    {
+      "path": "tools/test_t1817_acceptance_bar.py",
+      "before_artifact": "tools__test_t1817_acceptance_bar.py.lint",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "383b43fe1bcb9b8f9eb6e89b8a4f137658aa4c4bedb64ecdc57ee1d747095667",
+      "after_sha256": "48a313e4d133ed86c69b7e2216db5cbee008c78fe37619d3ddeebdbd54ad7c4b"
+    },
+    {
+      "path": "tools/test_t1817_diagnostic_ownership.py",
+      "before_artifact": "tools__test_t1817_diagnostic_ownership.py.lint",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "6dfbfe168af61be2a41cf517ac17eeacd64aab20b8344ef34b270338afdbf548",
+      "after_sha256": "37362ead5a14e5eb70b697918ac5675e74c8f72d3dfcc754004559c6834471b1"
+    },
+    {
+      "path": "tools/test_t1817_finding_route.py",
+      "before_artifact": "tools__test_t1817_finding_route.py.lint",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "2c5ae75a6c04dd164b083d49e2d44e82049a729b48cba2342696c98d0d4695b9",
+      "after_sha256": "c155b9545d382f48fc9e40a9362b9b0b52248c213368301d6ce1f79f7f87bc0b"
+    },
+    {
+      "path": "saipen/BOOT.md",
+      "before_artifact": "saipen__BOOT.md",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "7c79e1a4f159f6b2e18375b240bd3e27d2f7ee350d8352e3d1965dc61b891a87",
+      "after_sha256": "a6960b114f381cc7304860eb283d839f89d80ee56de6ad4ccba32fb8c6fedc06"
+    },
+    {
+      "path": "saipen/COMMANDS.md",
+      "before_artifact": "saipen__COMMANDS.md",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "5e69e8a358c35681582ab5177b6254dd7e672321621fa509d25e5b7d17a9547d",
+      "after_sha256": "21c218409995e42264ffed2937c97d1dfc734f96e28bc18938a748fcfde4720b"
+    },
+    {
+      "path": "saipen/REGISTRY.json",
+      "before_artifact": "saipen__REGISTRY.json",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "b9248c43730e87d6eb9d512204ae0e14ab6ccb5f10544d69d631e2b95e9eafdc",
+      "after_sha256": "4da91e251d655b6150bbf0b7ee5efb081d89c85151f925c83b7db88367a37377"
+    },
+    {
+      "path": "saipen/MANIFEST.json",
+      "before_artifact": "saipen__MANIFEST.json",
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": "6a15cc26e4ef94c036feb9a7a144a7b64bf73e78887cd2975bbb9f74de6e3ba5",
+      "after_sha256": "0f77d32d47d4e8563357bfa17f62df363524eb3e40351618337aa4f96a6220f6"
+    },
+    {
+      "path": "saipen/EXECUTION.md",
+      "before_artifact": "saipen__EXECUTION.W4.md",
+      "before_reconstructed_from_recorded_hunk": true,
+      "before_sha256": "23af34e646058768483ade7985f9e4cb18ddff8662ef18eef180e911de2998b5",
+      "after_sha256": "a43ec161ca13171871f2f5e39bcd81169a7df09ea9a3449adc8d6b3e30679d16"
+    },
+    {
+      "path": "tools/test_t1857_shared_blockers.py",
+      "before_artifact": null,
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": null,
+      "after_sha256": "ec490da47a89f84063dc4e4ccc0ff240cd63604de3584110d3889da44569dfaf"
+    },
+    {
+      "path": "tools/test_t1857_budget_owner.py",
+      "before_artifact": null,
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": null,
+      "after_sha256": "11ba369f3fb205b266fb3b473576a272092d0a57f8a4a4b1dc8853ea80a25798"
+    },
+    {
+      "path": "tools/test_t1858_valve_guidance.py",
+      "before_artifact": null,
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": null,
+      "after_sha256": "848eeadddbe002d8c3b802bcf4a77b64a5bfad3d59721d70102c2b0329a6598e"
+    },
+    {
+      "path": "saipen/COMMANDS_REFERENCE.md",
+      "before_artifact": null,
+      "before_reconstructed_from_recorded_hunk": false,
+      "before_sha256": null,
+      "after_sha256": "ecacf6e0a3bd4046f7222976ee848e61ff2bfb1148c10f4363128ff8d578150d"
+    }
+  ],
+  "caveat": "Requires the captured unpublished working baseline. This does not adopt foreign foundational content or staged entries."
+}

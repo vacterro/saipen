@@ -3,8 +3,8 @@
     "SRC-351:R001": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "VERIFIED",
-      "evidence": "refusal-separation.log: saipal continue returns code FOREIGN_PROTOCOL_COMMAND with protocol=saipal and requested_command='saipal continue' (the full invocation), not VALIDATION_FAILED/unknown command",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1970-audit/CLAUSE-REGRESSION-MEASUREMENT.md",
       "text": "A foreign protocol command is refused with a typed FOREIGN_PROTOCOL_COMMAND that names the protocol owner, the full invocation and the route to run instead, and is never refused as a bare unknown command.\r",
       "verification": "PYTHONPATH=tools python -m unittest tools.test_t1968_foreign_protocol_route -> Ran 15 tests, OK (t1968-module-fresh.log)",
       "work": "T-1970"
@@ -12,8 +12,8 @@
     "SRC-351:R002": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "VERIFIED",
-      "evidence": "refusal-separation.log + registry-and-skills.log: the response carries protocol, requested_command (full invocation 'saipal continue' / 'pal') and next_action, plus the exact_namespace declaration naming rule EXACT-NAMESPACE-01, owner, test and refusal_code",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1970-audit/CLAUSE-REGRESSION-MEASUREMENT.md",
       "text": "The refusal names the owning protocol, the exact requested command, and carries next_action guidance, so the caller cannot read it as a typo.\r",
       "verification": "PYTHONPATH=tools python -m unittest tools.test_t1968_foreign_protocol_route -> Ran 15 tests, OK",
       "work": "T-1970"

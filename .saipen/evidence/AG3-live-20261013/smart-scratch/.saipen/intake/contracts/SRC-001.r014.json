@@ -1,0 +1,79 @@
+{
+  "clauses": {
+    "SRC-001:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 (P0): destructive root establishment must be a no-follow authorization boundary, not a plain Path.resolve(). Reject a destructive base root whose own path or any existing ancestor component is a symlink/junction/reparse point BEFORE canonicalization; capture the raw root no-follow identity; canonicalize; re-check raw path/reparse state and identity after canonicalization so a swap during establishment fails closed. Centralize in the guard/root-scope primitive so every cleaner gets the same invariant."
+    },
+    "SRC-001:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: persist a root boundary token for the active destructive guard/root and require _authorize_mutation() to validate it for EVERY descendant mutation including direct _del_file()/_del_dir() paths, not only _del_dir_contents() plans. When SystemCleaner changes target guard or CustomCleaner changes rule guard, replace the active root token atomically with that target freshly proven token. Worker threads inherit the outer configured-root token in addition to narrower tree tokens."
+    },
+    "SRC-001:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: do not weaken blacklist, candidate-identity, owner/service, exclusion or current per-tree boundary checks; the outer root boundary is additional. Do not rely on normalize_path() alone: config-time provenance is necessary but not sufficient for a later destructive job. VERIFY: portable root replaced by junction after JobSpec resolution -> victim survives byte-identical, planned/freed zero; CustomCleaner non-star rule root replaced before run_all -> victim survives; frozen USER_EXPLORER root replaced -> thumbcache victim survives; root swapped after guard creation before first mutation -> fail-closed refusal; normal unchanged roots keep deleting the same proven candidates; native Windows junction variant covered."
+    },
+    "SRC-001:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002 (P1): one pure validate_and_normalize_config_dict(candidate) contract with the same schema/path checks as strict disk loading without I/O. Inside _config_rmw_transaction(), after merge_fn() returns and BEFORE save_config(), validate/normalize the merged candidate; refuse the write if invalid. Return enough failure information to GUI call sites to distinguish invalid candidate data from lock/write failure; never report a poisoned save as success."
+    },
+    "SRC-001:R0005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002: in _save_exclusions(), normalize each selected path before merge so the user receives an immediate actionable error; keep the dialog open and leave disk and in-memory state unchanged on rejection. Preserve existing cross-process locking and atomic replace. Do not auto-repair an already INVALID config by overwriting unrelated policy. VERIFY: junction exclusion save refused with identical config bytes and strict load VALID; ordinary absolute path normalized and persisted VALID; each safety-critical invalid field class refused post-merge; concurrent disjoint-field RMW tests still pass."
+    },
+    "SRC-001:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003 (P2): parse and validate --sys-targets and --disable-targets completely BEFORE bootstrap_config(); keep load_config_strict(persist=False) before the destructive authorization decision; only after ALL CLI action/modifier validation succeeds may a real DELETE invocation enter the write-authorized bootstrap/migration boundary. Preserve: valid first-run destructive command still bootstraps; dry-run/status stay write-free. VERIFY: fresh dir + unknown --sys-targets/--disable-targets => exit 2 with no config, no lock sidecar; existing INVALID config remains byte-identical and fail-closed."
+    },
+    "SRC-001:R0007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001 (P1): preserve immutable JobSpec semantics. Treat exclusion and system-target changes as safety-policy generation changes: while a tracked foreground destructive worker OR a live retained _bg_proc is active, prevent opening/saving both policy editors or explicitly refuse Save with an actionable stop/wait frozen-policy result; re-check activity inside _save_exclusions() and _save_system_targets() themselves (button disabling alone is insufficient); restore editor availability only after _finish_job()/background terminal observation; never present a save as affecting the running generation."
+    },
+    "SRC-001:R0008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-002 (P1): stop inferring lifecycle/severity from rendered strings. Introduce an explicit queue record carrying message text plus class (ordinary/error/warning/summary/control) or an equivalent explicit priority argument. Move CLOSE/AUTO control state out-of-band where possible (thread-safe flags/events). On saturation an incoming error/warning/summary must displace ordinary telemetry rather than be silently dropped; ordinary producers must never lose a critical item during a requeue race; if bounded critical storage saturates, coalesce overflow into an explicit retained diagnostic/count. Preserve ordinary-log memory bound and batched Tk draining. VERIFY: queue size 2, Logger.error/warning/summary remain observable under ordinary flood; incoming worker-crash error remains observable; CLOSE/AUTO non-eviction tests stay green or replaced by stronger out-of-band tests."
+    },
+    "SRC-001:R0009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-003 (P2): auto-clean timer creation/arming must be single-owner. Preferred narrow repair: timer callback only sets the nonblocking pending flag/event and never creates its successor; _poll_main() consumes the firing and re-arms the next cycle on the main thread regardless of started/skipped/declined/busy (preserves W2-009 recurrence). _schedule_auto_clean() remains the only creator/canceller/publisher. Closing invalidates the active generation so no late callback creates a successor. VERIFY: barrier interleaving shows at most one started uncancelled timer; busy and declined attempts still re-arm; disable (interval 0) and shutdown leave zero live successor timers; stress interleavings create no orphan timer."
+    },
+    "SRC-001:R0010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-004 (P2): one centralized modifier-ownership validation immediately after parsing and before any bootstrap, status scan, analyzer import, Task Scheduler call, logger creation, lease acquisition, or cleaning. Define permitted modifiers per action family explicitly; reject every supplied non-default modifier the selected action does not consume; at minimum --time only belongs to --install-task, clean-only modifiers rejected with status/analyze, install-task continues rejecting clean-only modifiers, hidden --surface accepted only on intended paths. Exit 2 with zero side effects on every compatibility failure. VERIFY: --cli --all --delete --time 23:00 => exit 2, no bootstrap/Logger/lease/job; --status --delete => exit 2; --status --exclude X => exit 2; --analyze-caches --delete => exit 2; valid commands unchanged; table-driven regression over every parser option vs every action family."
+    },
+    "SRC-001:R0011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-001 (P1, NEW generation): the advertised plan resource cap must bound TOTAL retained planner state, not only accepted files. Replace the accepted-file-only concept with a total plan budget covering files + directories + protected/excluded records + staged records (prefer explicit SMARTVAC_PLAN_MAX_RECORDS or documented estimated-byte budget; existing env var semantics must become truthful). Charge the budget BEFORE committing/staging the record that would exceed it; keep one transaction-wide aborted state so overflow anywhere returns None; add a job/in-flight planning budget shared by concurrent child _plan_tree() calls (or reduce concurrent planning dynamically); keep _del_dir_contents_inner submission bounded independently; avoid the global directory sorted() allocation where practical; integrate every refusal with the existing CORE-007 contract: no executable plan, no mutation, no byte claim, no CandidateLedger claim. Guardrails: planning stays fully read-only; no streaming destructive mutation during incomplete discovery; preserve incomplete-enumeration fail-closed behavior, protected-descendant detection, dry-run/real parity, captured identities and fresh apply-time authorization; concurrent workers must not share mutable plan lists or corrupt the job-wide budget; a budget refusal must not suppress later independent narrower targets via CandidateLedger."
+    },
+    "SRC-001:R0012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-002 (P2): consolidate read-only planning metadata observations. Introduce one authoritative no-follow observation per candidate: for os.scandir candidates derive kind, reparse/symlink status, size and planned identity from DirEntry.stat(follow_symlinks=False) plus Windows file attributes; add a guard validation path accepting already-observed no-follow link/reparse state instead of another lstat(); _plan_file() uses one conservative no-follow observation for kind/link/identity/size rather than exists+link+guard-link+identity+stat; avoid re-observing an accepted directory when it moves from staged discovery to the expansion stack unless a security invariant requires a fresh read-only boundary observation; update comments to describe the real observation model. Guardrails: stops at the plan/apply boundary; _authorize_mutation() continues fresh just-in-time observation before chmod/unlink/rmdir; never reuse planning DirEntry.stat() as mutation authorization; junction/reparse refusal stays fail-closed; if the filesystem cannot provide enough identity from one observation, perform the extra conservative probe; disappearing/replaced-entry cases stay refusals. VERIFY: 1,000-file plan metadata observations approach one authoritative no-follow observation per candidate plus necessary canonical confinement; before/after candidate paths, identities and byte totals compared; ordinary file/dir, symlink, junction/reparse, disappearing entry and replacement-between-plan-and-apply covered; mutation-race tests prove fresh _authorize_mutation() before every mutation."
+    },
+    "SRC-001:R0013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-003 (P2): close the O(queue size) producer rotation in App._log: overflow handling must be O(1) per ordinary message, independent of protected backlog size. Close jointly with W2-002 through explicit typed/severity queue records instead of string-prefix inference; separate lossy ordinary telemetry (bounded ring with O(1) oldest-ordinary overwrite/drop) from a separately bounded protected/control queue; _poll_main() drains protected first or under a deliberate fairness policy; move CLOSE/AUTO state out of the telemetry queue to thread-safe flags/events where feasible; explicit bounded policy for protected-channel saturation; producers stay nonblocking. Guardrails: ordinary telemetry must never evict errors/warnings/summaries/control; critical storage finitely bounded; no Tk calls from worker/timer threads; FIFO within semantic class where needed; _poll_main() retains bounded per-cycle work and yields to Tk; no blocking puts on cleaning workers. VERIFY: at protected backlogs 1k/8k/32k, 1,000 ordinary producer calls each remain O(1) with no Q get/put rotations; saturating ordinary traffic keeps memory bounded; saturating protected traffic keeps documented overflow/coalescing truthful; W2-002 observability tests pass; STOP/CLOSE/auto-clean exercised while both channels saturated."
+    },
+    "SRC-001:R0014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-004 (P2): Universal Sweeper must prune verified dedicated-owner roots at enqueue/descent time instead of re-traversing owned subtrees after their dedicated cleaners ran; use the same exact verified portable-root/app mapping as _universal_owner_for (no arbitrary substring inference); continue descending unknown/unowned subtrees; add an explicit visited-node/queue budget with one controlled truncation diagnostic on exhaustion (discovery-only, zero mutation); optionally coarse dedicated-owner-deferred diagnostic at the owner root instead of one message per rediscovered cache descendant; bounded DFS acceptable if depth/discovery semantics retained. Guardrails: Universal gains no deletion authority; unknown-owner cache-like directories remain DISCOVERED / NOT AUTHORIZED; dedicated sweepers keep process-owner, SafetyGuard, exclusion, ledger and mutation-authorization gates; pruning only at a verified dedicated-owner boundary; budget refusal must not mutate or create misleading candidate bytes; real deletion candidate truth identical before/after. VERIFY: 2,000/5,000-branch _CENT fixture traversal stops at the verified owner boundary; traversal queue/stack within documented bound; adjacent unknown subtree still discovered and logged NOT AUTHORIZED; unknown high-breadth tree beyond budget yields one controlled truncation diagnostic, zero mutation, bounded memory; dedicated/Universal candidate and byte accounting exactly unchanged."
+    }
+  },
+  "derived_at": "2026-09-09T15:26:29Z",
+  "derived_from": "SRC-001",
+  "interpretation_revision": 14,
+  "schema_version": 1,
+  "source_sha256": "df25548ce4ce3997cc326a2c3c621cd3049b009a6658a4ffd20c549339fc57a9"
+}

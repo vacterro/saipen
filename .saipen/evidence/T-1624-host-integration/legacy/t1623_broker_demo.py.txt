@@ -1,0 +1,209 @@
+"""T-1623 end-to-end proof against the real project, with a host-named client.
+
+This is the demonstration, not a unit test: it runs the ACTUAL installed hook
+artifact against the ACTUAL project, over the ACTUAL named pipe, with the ACTUAL
+broker process, and prints the hook's own stdout.
+
+Two things are stand-ins and they are named here so the evidence is not read as
+more than it is:
+
+* the client process is a copy of this interpreter named `claude.exe`, because
+  the broker authenticates by OS image name and a script cannot launch the real
+  GUI binary; and
+* the adapter home is a scratch directory, so the operator's own installed hook
+  (which delegates to the scheduled-source generation) is left untouched.
+
+Everything else is real: the project, its .saipen/STATE.md, the authority bytes,
+the hook artifact, the pipe, the broker process, the capability and the ledger
+record.
+"""
+
+from __future__ import annotations
+
+import contextlib
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+import unittest.mock as mock
+from pathlib import Path
+
+TOOLS = Path(__file__).resolve().parent
+ROOT = TOOLS.parent
+sys.path.insert(0, str(TOOLS))
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "bootstrap"))
+
+import install_host_guard  # noqa: E402
+import autoinject  # noqa: E402
+from saipen_engine import host_authority_broker as HB  # noqa: E402
+from saipen_engine import host_authority_client as HC  # noqa: E402
+from saipen_engine import protocol_admission as PA  # noqa: E402
+
+HOOK = ROOT / "extensions" / "adapters" / "claude" / "saipen-guard.py"
+
+
+def simhost(tmp: Path) -> Path:
+    target = tmp / "simhost"
+    target.mkdir(parents=True, exist_ok=True)
+    binary = target / "claude.exe"
+    source = Path(sys.executable).resolve()
+    shutil.copy2(source, binary)
+    for pattern in ("python3*.dll", "vcruntime*.dll"):
+        for item in source.parent.glob(pattern):
+            with contextlib.suppress(OSError, shutil.SameFileError):
+                shutil.copy2(item, target / item.name)
+    return binary
+
+
+def main() -> int:
+    tmp = Path(tempfile.mkdtemp(prefix="saipen-t1623-"))
+    host = simhost(tmp)
+    home = tmp / "adapter-home"
+    home.mkdir()
+    profile = tmp / "profile"
+    profile.mkdir()
+    runtime = profile / ".saipen" / "authority"
+    env = {
+        **os.environ,
+        "USERPROFILE": str(profile),
+        "HOME": str(profile),
+        "HOMEDRIVE": "",
+        "HOMEPATH": "",
+        "PYTHONHOME": str(Path(sys.executable).resolve().parent),
+    }
+
+    # A scratch adapter home needs what the operator's own home has: the
+    # installed hook AND the delivered activation block. Otherwise the refusal
+    # is about the scratch home, which is not what this proof is testing.
+    (home / ".claude").mkdir(parents=True, exist_ok=True)
+    (home / ".claude" / "CLAUDE.md").write_text(
+        "# operator notes\n\n" + autoinject.rendered_activation_block(ROOT / "saipen") + "\n",
+        encoding="utf-8",
+    )
+    skill = home / ".agents" / "skills" / "caveman"
+    skill.mkdir(parents=True, exist_ok=True)
+    (skill / "SKILL.md").write_text(
+        "---\nname: caveman\ndescription: voice\n---\n\nRespond terse.\n", encoding="utf-8"
+    )
+    with mock.patch.object(sys, "executable", str(host)):
+        install_host_guard.install("claude", home, ROOT)
+
+    def hook(event: dict) -> dict | None:
+        payload = {"session_id": "t1623-demo-session", "cwd": str(ROOT), **event}
+        proc = subprocess.run(
+            [
+                str(host),
+                str(HOOK),
+                "--host",
+                "claude",
+                "--saipen-root",
+                str(ROOT),
+                "--home",
+                str(home),
+            ],
+            input=json.dumps(payload).encode("utf-8"),
+            capture_output=True,
+            cwd=str(ROOT),
+            check=False,
+            env=env,
+            timeout=300,
+        )
+        out = proc.stdout.decode("utf-8", errors="replace").strip()
+        if not out:
+            print("  !! no stdout: rc", proc.returncode)
+            print("  !!", proc.stderr.decode("utf-8", errors="replace")[-800:])
+            return None
+        return json.loads(out)
+
+    print("== before: is anything serving? ==")
+    print("  broker health:", bool(HB.health(runtime)))
+
+    started = time.time()
+    first = hook({"hook_event_name": "UserPromptSubmit", "user_prompt": "ordinary GUI prompt"})
+    print(f"== first prompt ({time.time() - started:.1f}s) ==")
+    print("  keys:", sorted(first or {}))
+    print("  blocked:", "decision" in (first or {}))
+    context = ((first or {}).get("hookSpecificOutput") or {}).get("additionalContext", "")
+    print("  delivery blocks:", [name for name in PA.AUTHORITY_DOCUMENTS if f"=== {name}" in context])
+    print("  chat contract delivered:", "SAIPEN chat contract" in context)
+
+    print("== after: authority recovered automatically? ==")
+    status = HC.status(runtime)
+    print("  health:", bool(HB.health(runtime)))
+    print("  authenticated requests:", (status or {}).get("authenticated_requests"))
+    print("  refused requests:", (status or {}).get("refused_requests"))
+    print("  instance:", (status or {}).get("instance"))
+
+    second = hook({"hook_event_name": "UserPromptSubmit", "user_prompt": "second prompt"})
+    again = ((second or {}).get("hookSpecificOutput") or {}).get("additionalContext", "")
+    print("== second prompt: charged a full delivery again? ==")
+    print("  BOOT.md redelivered:", "=== BOOT.md" in again, "| blocked:", "decision" in (second or {}))
+
+    print("== ledger record written by the broker ==")
+    record = PA._ledger_path(ROOT, "t1623-demo-session")
+    print("  path exists:", record.exists())
+    print("  provenance kid:", json.loads(record.read_text(encoding="utf-8"))["provenance"]["kid"] if record.exists() else None)
+
+    print("== an ordinary python client (no host binding) ==")
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(HOOK),
+            "--host",
+            "claude",
+            "--saipen-root",
+            str(ROOT),
+            "--home",
+            str(home),
+        ],
+        input=json.dumps(
+            {
+                "session_id": "t1623-demo-session",
+                "cwd": str(ROOT),
+                "hook_event_name": "UserPromptSubmit",
+                "user_prompt": "ordinary GUI prompt",
+            }
+        ).encode("utf-8"),
+        capture_output=True,
+        cwd=str(ROOT),
+        check=False,
+        env=env,
+        timeout=300,
+    )
+    raw = proc.stdout.decode("utf-8", errors="replace").strip()
+    if not raw:
+        print("  !! no stdout: rc", proc.returncode)
+        print("  !!", proc.stderr.decode("utf-8", errors="replace")[-800:])
+        return 1
+    verdict = json.loads(raw)
+    print("  decision:", verdict.get("decision"))
+    print("  reason:", (verdict.get("reason") or "")[:420])
+
+    # Shutdown is an authenticated operation: an ordinary client cannot stop the
+    # authority either. That refusal is the property, not a failure, so the
+    # demonstration stops the service the way its owner would -- by pid.
+    print("== shutdown ==")
+    unauthenticated = HC.shutdown(runtime)
+    print("  refused to an unauthenticated client:", not unauthenticated.get("ok"))
+    try:
+        holder = json.loads(HB.lock_path(runtime).read_text(encoding="utf-8"))
+        os.kill(int(holder["pid"]), 9)
+    except (OSError, ValueError, TypeError, KeyError):
+        pass
+    deadline = time.time() + 10
+    while time.time() < deadline and HB.health(runtime):
+        time.sleep(0.2)
+    print("  service still answering:", bool(HB.health(runtime)))
+    with contextlib.suppress(OSError):
+        record.unlink()
+    with contextlib.suppress(OSError):
+        shutil.rmtree(tmp, ignore_errors=True)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

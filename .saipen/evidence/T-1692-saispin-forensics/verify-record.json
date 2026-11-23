@@ -1,0 +1,18 @@
+{
+  "intake_proof": "PASS",
+  "receipt_bytes_match_original": true,
+  "append_sha256": "b2001ebab6a8da415d929baafe23bab371ce3564bf23951067b8a34eacdd0502",
+  "consumer_admission": "PENDING_ADMISSION",
+  "canonical_refusal": {
+    "ok": false,
+    "code": "VALIDATION_FAILED",
+    "detail": "proposed state fails fast validation: FLOOR: STATE.task=T-271 but BOARD DOING has multiple openers at the raw floor; BOARD proposed has more than one ## DOING ticket; BOARD: T-273 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)",
+    "receipt": "SRC-093"
+  },
+  "consumer_authority_unchanged": true,
+  "machine_report_observations": 6,
+  "current_product_acceptance": false,
+  "current_source_revision": "snapshot-002 at 2026-10-09T00:24:12Z; concurrent watcher change preserved",
+  "product_tests_executed": 0,
+  "complete_requested_report_fields": 16
+}

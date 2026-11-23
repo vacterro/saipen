@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-422:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Record the assignment without starting new work.\\\"},{\\\"url\\\":\\\"https://developers.openai.com/codex/concepts/sandboxing\\\"},{\\\"max_skill_file_read_bytes\\\":269484032,\\\"max_archive_read_bytes\\\":838860800,\\\"max_file_bytes\\\":268435456,\\\"max_skill_upload_bytes\\\":817889280,\\\"max_visual_editor_archive_bytes\\\":104857600,\\\"max_skill_total_uncompressed_bytes\\\":838860800,\\\"max_skill_bundle_read_bytes\\\":838860\u2026"
+    },
+    "SRC-422:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not mention, suggest, or imply that this is a revision, improvement, or result of feedback."
+    }
+  },
+  "derived_at": "2026-11-17T23:06:18Z",
+  "derived_from": "SRC-422",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0600cee65ae041b603e0f67940d207cd13b7829cfbfd607362c51a3240eb9ce0"
+}

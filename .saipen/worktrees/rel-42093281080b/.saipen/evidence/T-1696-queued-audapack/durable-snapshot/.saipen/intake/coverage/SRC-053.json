@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-053:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-197 closed with verification evidence in LOG: verify -> PASS [target: T-197] conf: high -- python -m pytest -q focused suites -> 59 passed 0 failed; full pytest 1785 passed 5 skipped 0 failed; node --test tests/widget/*.test.js 532 pass 0 fail; live probe VERDICT PASS 0.0.59 -> 0.0.60; red control test_same_version_changed_bytes_is_refused_and_ledger_unchanged proves the pre-fix overwrite laundered same-version drift and the fixed recorder re",
+      "text": "T-196 REOPEN/CLOSURE CORRECTION: enforce monotonic release identity in scripts/update_widget_release.py (refuse same-version changed-bytes ledger rewrite), add recorder transition regression tests, prove red-control, complete production/operator acceptance record, then resume T-188",
+      "verification": "the Work this request created reached its own verification gate; see the T-197 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-197"
+    }
+  },
+  "schema_version": 1
+}

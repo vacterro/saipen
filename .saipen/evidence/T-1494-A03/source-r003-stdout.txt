@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "code": "COVERAGE_UPDATED",
+  "receipt": "SRC-112",
+  "rid": "SRC-112:R003",
+  "disposition": "VERIFIED"
+}

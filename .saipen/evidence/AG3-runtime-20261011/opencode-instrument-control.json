@@ -1,0 +1,32 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_opencode_host_smoke.py"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "..........\n----------------------------------------------------------------------\nRan 10 tests in 91.101s\n\nOK\n",
+  "instrument_change": "existing native payload directory prepended only in verification child PATH",
+  "files_before": {
+    "C:\\nodejs\\node_modules\\opencode-ai\\node_modules\\opencode-windows-x64\\bin\\opencode.exe": "83567c13cc5e361ded7e48351cb024cd4503285960d82c30fc585194da46d757",
+    "C:\\nodejs\\node_modules\\opencode-ai\\bin\\opencode.exe": "21c366f53283d5b5e1cdbbec2aafc98286b4c1075a4c3d5afd5ce1f5c9bf46dd",
+    "C:\\Users\\vac34\\.config\\opencode\\plugins\\saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\extensions\\adapters\\opencode\\saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2"
+  },
+  "files_after": {
+    "C:\\nodejs\\node_modules\\opencode-ai\\node_modules\\opencode-windows-x64\\bin\\opencode.exe": "83567c13cc5e361ded7e48351cb024cd4503285960d82c30fc585194da46d757",
+    "C:\\nodejs\\node_modules\\opencode-ai\\bin\\opencode.exe": "21c366f53283d5b5e1cdbbec2aafc98286b4c1075a4c3d5afd5ce1f5c9bf46dd",
+    "C:\\Users\\vac34\\.config\\opencode\\plugins\\saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\extensions\\adapters\\opencode\\saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2"
+  },
+  "files_unchanged": true,
+  "host_install_writes": 0,
+  "scope": "instrument control; not full-family evidence or host repair"
+}

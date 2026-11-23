@@ -1,0 +1,24 @@
+{
+  "subject": "tools/audit_checks.py",
+  "oracle": "tools/test_t1582_sweep_skip_reason.py",
+  "before_sha256": "2572f2125203533ab3e0d8e5d979009d7a6a44c790c24420f2ad0cedee073c02",
+  "after_sha256": "3e6cbeb54585a4b392111dfa507a615dc3b6ca5b87585a3229511fa7174d52a2",
+  "oracle_before_sha256": "5ba5c0868febd3067189d0f5256137a0d9bd4a612d510e50c7adcf03903ff366",
+  "oracle_sha256": "d7a28590ebdb2aaa6ea11a602517e0e427ff9d931830c42ea6f982f249cd81b9",
+  "runs": {
+    "before": {
+      "ran": 13,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 1,
+      "ok": false
+    },
+    "candidate": {
+      "ran": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "ok": true
+    }
+  }
+}

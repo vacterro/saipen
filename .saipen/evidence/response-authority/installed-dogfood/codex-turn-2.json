@@ -1,0 +1,6 @@
+{
+  "turn": 2,
+  "returncode": 0,
+  "stdout": "{\"decision\": \"block\", \"reason\": \"SAIPEN canonical delivery (INVALID_OPERATIONAL_PROSE; do not add prose):\\nSTATUS: DONE\\nRESULT: Vajab operaatori otsust\\nBLOCKER: HUMAN_DECISION -- choose disposition\\nOPERATOR ACTION: manual-verify -- run the manual check and reply with its verdict\\nNEXT EXACT ACTION: NONE\\nVALIDATION: NOT_RUN\"}\r\n",
+  "stderr": ""
+}

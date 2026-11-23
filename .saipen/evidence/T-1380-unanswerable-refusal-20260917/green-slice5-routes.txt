@@ -1,0 +1,5 @@
+# T-1380 slice 5 green: same command, post-fix subject
+----------------------------------------------------------------------
+Ran 8 tests in 10.023s
+
+OK

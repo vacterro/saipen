@@ -1,0 +1,53 @@
+{
+  "passed": true,
+  "source_fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "sections": 16,
+  "clauses": 16,
+  "blocker_classes": 12,
+  "metrics": 7,
+  "decisions": 6,
+  "roadmap_items": 8,
+  "known_bad_controls": {
+    "missing_section": [
+      "sixteen ordered report sections",
+      "mapped report sections R004",
+      "mapped report sections R005",
+      "mapped report sections R006",
+      "mapped report sections R012"
+    ],
+    "missing_metric": [
+      "seven KPI definitions"
+    ],
+    "wrong_source_identity": [
+      "exact source identity"
+    ]
+  },
+  "consumer_observations": {
+    "SAI_WEBSITE": {
+      "unchanged_during_probe": true,
+      "changed_since_probe": [],
+      "checked_utc": "2026-10-11T14:20:08.485068+00:00"
+    },
+    "Wintage": {
+      "unchanged_during_probe": true,
+      "changed_since_probe": [
+        "STATE.md",
+        "BOARD.md",
+        "LOG.md"
+      ],
+      "checked_utc": "2026-10-11T14:20:08.485068+00:00"
+    }
+  },
+  "catalog_files_current": 43,
+  "artifact_sha256": {
+    ".saipen\\evidence\\T-1716-resilience\\REPORT.md": "35aefefcbc28dcab6b7b811526cab9c99ec40e8ef91fa837ff1d4c073ebf1174",
+    ".saipen\\evidence\\T-1716-resilience\\ROADMAP.md": "1dd34b9fdc2a35419cfaf463ff0c956e75677c3409e3413f232a238ce335d1ef",
+    ".saipen\\evidence\\T-1716-resilience\\coverage-map.json": "910a43394bbbd027ced78d39433fd8a0bfafbd7a2a2e4b5a1d01dd9ea2420f3b",
+    ".saipen\\evidence\\T-1716-resilience\\controls.json": "f897c0f59a3f6628c7a58444f3f9f3f4959cf750f877afbc7f31d1204c60893d",
+    ".saipen\\evidence\\T-1716-resilience\\source-catalog.json": "4bde121a6695e175d5f1fa56bddcdebca312159ac88a9328b298213d0255e05b",
+    ".saipen\\evidence\\T-1716-resilience\\consumer-current.json": "8c47e99fa20790c254d71dcdacef15fd1bae8d9da849b56a2b8ced8460c48dbb",
+    ".saipen\\evidence\\T-1716-resilience\\consumer-refresh.json": "c9b5ae18f480f8102ae57989ed90265528ea23ba5a2697466f673687a953c78b",
+    ".saipen\\evidence\\T-1716-resilience\\build-root-status.json": "7ef12792e69274fa029101215216a7ed768e624817599a41c24a0c1bdd0a2691"
+  },
+  "limit": "structural coverage and byte integrity only; independent semantic review required"
+}

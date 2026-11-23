@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1716-resilience\controls.py", line 114, in <module>
+    "mode_contract": mode_control()}
+                     ^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1716-resilience\controls.py", line 97, in mode_control
+    return {"live_no_publish_may_mutate": may_mutate(), "normal": normal,
+                                          ^^^^^^^^^^^^
+TypeError: may_mutate() missing 1 required positional argument: 'capability'

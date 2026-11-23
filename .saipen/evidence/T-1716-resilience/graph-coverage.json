@@ -1,0 +1,606 @@
+{
+  "project": "saipen",
+  "signal": "best_effort",
+  "indexed_at": "2026-09-01T13:16:39Z",
+  "metadata": {
+    "generation": "2026-09-01T13:16:39Z",
+    "index_mode": "moderate",
+    "recorded_at": "2026-09-01T13:16:39Z",
+    "recording_status": "complete",
+    "ignored_files_stored": 10,
+    "ignored_files_total": 10,
+    "hash_records_complete": true,
+    "coverage_version": 3,
+    "generation_matches": true
+  },
+  "paths": [
+    {
+      "requested_path": "tools/saipen.py",
+      "path": "tools/saipen.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/admission.py",
+      "path": "tools/saipen_engine/admission.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/automation.py",
+      "path": "tools/saipen_engine/automation.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/capability.py",
+      "path": "tools/saipen_engine/capability.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/commands.py",
+      "path": "tools/saipen_engine/commands.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/conformance.py",
+      "path": "tools/saipen_engine/conformance.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/remediation.py",
+      "path": "tools/saipen_engine/remediation.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/iteration_verdict.py",
+      "path": "tools/saipen_engine/iteration_verdict.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/goal_authority.py",
+      "path": "tools/saipen_engine/goal_authority.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/plan.py",
+      "path": "tools/saipen_engine/plan.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/journal.py",
+      "path": "tools/saipen_engine/journal.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/lock.py",
+      "path": "tools/saipen_engine/lock.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/runtime_surface.py",
+      "path": "tools/saipen_engine/runtime_surface.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/host_integration.py",
+      "path": "tools/saipen_engine/host_integration.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/guard_events.py",
+      "path": "tools/saipen_engine/guard_events.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/regression_execution.py",
+      "path": "tools/saipen_engine/regression_execution.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/reconcile.py",
+      "path": "tools/saipen_engine/reconcile.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/saipen_engine/operations.py",
+      "path": "tools/saipen_engine/operations.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_guard_admission.py",
+      "path": "tools/test_guard_admission.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_recovery_reachability.py",
+      "path": "tools/test_recovery_reachability.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_t1494_continuation_authority.py",
+      "path": "tools/test_t1494_continuation_authority.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_actor_binding_lifecycle.py",
+      "path": "tools/test_actor_binding_lifecycle.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_t1575_parallel_lane.py",
+      "path": "tools/test_t1575_parallel_lane.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_t1711_regression_execution.py",
+      "path": "tools/test_t1711_regression_execution.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_t1712_manifest_runtime.py",
+      "path": "tools/test_t1712_manifest_runtime.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_t1709_audit_starvation.py",
+      "path": "tools/test_t1709_audit_starvation.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_conformance_repair_boundary.py",
+      "path": "tools/test_conformance_repair_boundary.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_dependency_resume_liveness.py",
+      "path": "tools/test_dependency_resume_liveness.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_t1458_queue_reservation.py",
+      "path": "tools/test_t1458_queue_reservation.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "tools/test_regression_gate.py",
+      "path": "tools/test_regression_gate.py",
+      "status": "excluded",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": [
+        {
+          "path": "tools",
+          "kind": "not_indexed_dir",
+          "detail": "excluded subtree",
+          "match": "ancestor"
+        }
+      ]
+    },
+    {
+      "requested_path": "saipen/CORE.md",
+      "path": "saipen/CORE.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/OPS.md",
+      "path": "saipen/OPS.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/MAINTENANCE.md",
+      "path": "saipen/MAINTENANCE.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/RUNTIME.md",
+      "path": "saipen/RUNTIME.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/EXECUTION.md",
+      "path": "saipen/EXECUTION.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/STYLE.md",
+      "path": "saipen/STYLE.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": "saipen/COMMANDS.md",
+      "path": "saipen/COMMANDS.md",
+      "status": "no_recorded_issue",
+      "freshness": "metadata_changed",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/intake/active/SRC-215.md",
+      "path": ".saipen/intake/active/SRC-215.md",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/intake/contracts/SRC-215.json",
+      "path": ".saipen/intake/contracts/SRC-215.json",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/evidence/T-1711-admission/REPORT-FINAL-GENERATION.md",
+      "path": ".saipen/evidence/T-1711-admission/REPORT-FINAL-GENERATION.md",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/evidence/T-1714-diagnostics/FINAL-ACCEPTANCE.md",
+      "path": ".saipen/evidence/T-1714-diagnostics/FINAL-ACCEPTANCE.md",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/evidence/T-1714-diagnostics/verifier-context-comparison.json",
+      "path": ".saipen/evidence/T-1714-diagnostics/verifier-context-comparison.json",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/evidence/T-1714-diagnostics/dependency-reservation-followup.md",
+      "path": ".saipen/evidence/T-1714-diagnostics/dependency-reservation-followup.md",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/evidence/T-1716-resilience/controls.py",
+      "path": ".saipen/evidence/T-1716-resilience/controls.py",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/evidence/T-1716-resilience/catalog.py",
+      "path": ".saipen/evidence/T-1716-resilience/catalog.py",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/evidence/T-1716-resilience/REPORT.md",
+      "path": ".saipen/evidence/T-1716-resilience/REPORT.md",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    },
+    {
+      "requested_path": ".saipen/evidence/T-1716-resilience/ROADMAP.md",
+      "path": ".saipen/evidence/T-1716-resilience/ROADMAP.md",
+      "status": "no_recorded_issue",
+      "freshness": "not_tracked",
+      "recommended_action": "read_source_and_reindex",
+      "coverage": []
+    }
+  ],
+  "scopes": [],
+  "caveat": "Best-effort signal only. No recorded issue does not prove graph or source completeness; read flagged source and qualify claims when metadata is changed or unavailable."
+}

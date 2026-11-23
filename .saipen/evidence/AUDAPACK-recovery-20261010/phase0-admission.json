@@ -1,0 +1,19 @@
+{
+  "phase0_pass": true,
+  "original_full_content_unchanged": true,
+  "source_phase0_sha256": "cfb80fde6c25f1f1f131670cbc412a7215c848ffd353879007ac30a073081fd0",
+  "source_registration": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK\\.git\\worktrees\\_AUDAPACK-pub",
+  "registration_head": "ref: refs/heads/publication/source-inventory-20261005",
+  "observation": "Independent main Git storage contains one registered external publication worktree; no commondir or object alternate on the main root. The publication branch and its complete objects are already in the captured refs/object storage.",
+  "mandatory_copy_constraints": [
+    "Create only the absent approved root with regular independent files.",
+    "Preserve .git/worktrees registrations byte-for-byte under .recovery-legacy/original/.git/worktrees, never under active .git/worktrees.",
+    "Preserve .saipen byte-for-byte under .recovery-legacy/original/.saipen, outside active authority.",
+    "Preserve the nonportable inherited .venv under .recovery-legacy/original/.venv; the canonical runtime remains the proven global interpreter.",
+    "Do not operate on the original or external _AUDAPACK-pub worktree.",
+    "Require destination Git refs/reachable-history/index projection and each mapped file digest to match acquisition."
+  ],
+  "mailbox": "Already bound default; canonical _init_command skips provisioning.",
+  "native_preflight": "SAIPEN serialized native core: 0 problems / 9 warnings; original native core: 20 problems / 79 warnings. Concurrent evidence creation invalidated freshness during the first SAIPEN read; its unchanged serialized retry passed.",
+  "gate": "PASS with mandatory independent-copy constraints; no recovery consumer created or admitted yet."
+}

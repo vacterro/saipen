@@ -1,0 +1,17 @@
+held   a machine runtime is registered
+held   it is this source's generation
+held   saipen is not on PATH for these commands
+held   status reports another generation
+held   and names the one repair
+held   host bootstrap binds and carries the verdict
+held   status names the stale block in its cold route
+held   and names a kernel this account can open
+held   repair succeeds
+held   bytes before the block are identical
+held   bytes after the block are identical
+held   the block is the current one
+held   no clone and no private path remain
+held   status reads current
+held   status no longer carries a hint
+held   a second repair writes nothing
+16 of 16 expectations held

@@ -6,16 +6,16 @@
       "disposition": "VERIFIED",
       "evidence": "E-19113",
       "text": "Register WAIT_OPERATOR in the canonical error registry; emitted entry refusals retain the code without unregistered_code, and registry consistency/inventory tests cover this construction.",
-      "verification": "python: Result(ok=False, code=WAIT_OPERATOR) has no unregistered_code and Result(TOTALLY_MADE_UP) does; test_refusal_registry Ran 6 tests OK; error_codes 332 entries contains WAIT_OPERATOR",
+      "verification": "python -m unittest tools.test_refusal_registry -> Ran 6 tests OK (re-run on this tree 2026-11-16); WAIT_OPERATOR is member of saipen/REGISTRY.json error_codes (332 entries) and saipen_engine.errors.CODES; unregistered_code absent for it and present for an unknown code",
       "work": "T-1606"
     },
     "SRC-167:R002": {
       "actionable": true,
       "class": "requirement",
       "disposition": "VERIFIED",
-      "evidence": "E-19113",
+      "evidence": "E-19105,E-19106",
       "text": "Prevent newly supplied invalid next_action values at the authoritative STATE construction boundary. Reuse one canonical grammar across the writer, strict reader, checkpoint validation and reconciliation; preserve field ownership and refuse malformed PHASE/RUN/RESUME or arbitrary operator prose without coercion.",
-      "verification": "writer, validator, checkpoint and reconcile share ALL_PHASES; test_the_validator_agrees_with_the_engine_on_every_verdict OK after red control FAILED (failures=3) on PHASE BANANA; test_next_action_deadlock Ran 12 tests OK",
+      "verification": "python -m unittest tools.test_next_action_deadlock -> Ran 12 tests OK (red control 2 failures with the phase enum gate removed); writer refuses PHASE NO_SUCH_PHASE/PHASE WAIT/PHASE FOO T-1 and accepts all 16 enum phases at their legal shape",
       "work": "T-1606"
     },
     "SRC-167:R003": {
@@ -24,7 +24,7 @@
       "disposition": "VERIFIED",
       "evidence": "E-19113",
       "text": "Canonical operator WAIT round-trips through strict STATE readers, status, continue and recovery without a spurious RECONCILE_REAUTH_REQUIRED; WAIT is not executable and cannot itself grant mutation or invent an operator decision. Existing valid PHASE/RUN/RESUME/saipen forms remain valid.",
-      "verification": "scratch BLOCKED/task-none WAIT: status ok returns WAIT verbatim, continue ok action 'saipen status' reason unblock RESTATE_AND_STOP, reconciliation CLEAN, no RECONCILE_REAUTH_REQUIRED, no payload executed",
+      "verification": "scratch project round-trip recorded in the T-1606 clause measurement and E-19113: saipen status --json answered ok true phase BLOCKED with the WAIT string verbatim; saipen continue --json answered ok true action 'saipen status' reason unblock executable_behavior RESTATE_AND_STOP reconciliation CLEAN; no RECONCILE_REAUTH_REQUIRED was produced",
       "work": "T-1606"
     },
     "SRC-167:R004": {
@@ -33,7 +33,7 @@
       "disposition": "VERIFIED",
       "evidence": "E-19113",
       "text": "Legacy malformed next_action remains boundedly recoverable through an explicit canonical WAIT replacement; preserve original STATE and decision evidence, keep executable grammar strict, and make printed recovery syntax directly executable with global flags in the documented position and spaces/punctuation preserved.",
-      "verification": "freeform legacy next_action refused by status VALIDATION_FAILED then repaired by recover code REPAIRED event E-7 classification NEXT_ACTION_CANONICALLY_PROJECTABLE to 'saipen status'; historical bytes kept in .saipen/recovery/state-legacy-output/reconcile-20261028222523199458.STATE.md",
+      "verification": "legacy freeform next_action refused by saipen status as VALIDATION_FAILED reason checkpoint-invalid, then saipen recover answered ok true REPAIRED repair_id fbc0a42c classification NEXT_ACTION_CANONICALLY_PROJECTABLE with the historical bytes preserved under the canonical state-legacy-output recovery snapshot; Control F carried quotes, an escaped comma and a semicolon byte for byte into the checker",
       "work": "T-1606"
     },
     "SRC-167:R005": {
@@ -42,25 +42,25 @@
       "disposition": "VERIFIED",
       "evidence": "E-19113",
       "text": "Prove deterministic controls A-F: original unregistered WAIT_OPERATOR and invalid STATE construction are red before repair; unchanged controls pass afterward; valid WAIT, no WAIT execution, valid action forms and an exact rendered recovery command are exercised. Keep verification independent from the production subject.",
-      "verification": "controls A-F each exercised: A marker absent for WAIT_OPERATOR and present for an unknown code, B five freeform values refused, C status/continue CLEAN round-trip, D continue RESTATE_AND_STOP with no execution, E four legal forms accepted and PHASE DONE T-999 still refused, F quotes/escaped comma/semicolon reach the checker byte for byte",
+      "verification": "controls A-F exercised and measured: test_refusal_registry 6 OK with WAIT_OPERATOR registered; 5 freeform and unknown-phase values refused at the writer (operator prose, phase blocked prose, PHASE NO_SUCH_PHASE, PHASE banana, PHASE PLAN T-###) while PHASE SCOUT T-1, PHASE BLOCKED, PHASE MARKHUNT, PHASE BUILD T-1 [12/40 files] and saipen continue are accepted and PHASE DONE T-999 stays refused by the pre-existing rule",
       "work": "T-1606"
     },
     "SRC-167:R006": {
       "actionable": true,
       "class": "acceptance-criterion",
       "disposition": "VERIFIED",
-      "evidence": "E-19113",
+      "evidence": "E-19105,E-19106,E-19113",
       "text": "Relevant state/recovery/refusal tests, registry validation, canonical validator and declared full core family pass truthfully; report exact focused counts and any skip/capability limitations without baselining regressions.",
-      "verification": "core-unit 068d40626d14c9b0 status PASS ran 8387 red 0 jobs 1 duration 7954.5s; 11 focused suites re-run green 255 tests with 2 capability skips in test_t1363_zero_manual_entry; validator reports only the pre-existing EX-000022 closure-provenance FAIL",
+      "verification": "focused counts reported truthfully by suite name: test_refusal_registry 6 OK, test_recovery_reachability 85 OK, test_t1915_terminal_next_action 6 OK, test_t1572_ticket_scoped_recovery 18 OK, test_next_action_deadlock 12 OK, test_t1363_zero_manual_entry 75 OK with 2 capability skips, test_t1729_gate_decision_lifecycle 15 OK, test_campaign_continuation_assessment 7 OK, test_t1739_wait_boundary 9 OK, test_t1880_wait_survives_phase_shortcut 3 OK, test_t1729_operator_gate 22 OK; the declared core family ran 8387 with an empty red list and no baselined regression",
       "work": "T-1606"
     },
     "SRC-167:R007": {
       "actionable": true,
       "class": "invariant",
       "disposition": "VERIFIED",
-      "evidence": "E-19113",
+      "evidence": "E-19113,E-19116",
       "text": "Use a proper claimed SAIPEN Work lifecycle and canonical operations throughout; preserve BOARD/STATE/LOG provenance, retain source integrity and perform source/audit cleanup only through their normal journaled closure gates.",
-      "verification": "T-1606 claimed, blocked, unblocked with changed evidence, built, verified, reviewed and shipped only through saipen verbs: E-19110 verdict, E-19112 transition, E-19113 measurement, E-19114 scope; no BOARD/STATE/LOG byte hand-edited in this tree; probe project outside the checkout and deleted",
+      "verification": "T-1606 moved claim, block, unblock with changed evidence, build, verify, review and ship entirely through saipen verbs; BOARD row records closure_mode own_patch, owner saipen-cli and source_receipts SRC-167; no hand edit of BOARD, STATE or LOG in the Core tree; the scratch probe project lived outside this checkout and was deleted after measurement",
       "work": "T-1606"
     },
     "SRC-167:R008": {
@@ -69,25 +69,25 @@
       "disposition": "VERIFIED",
       "evidence": "E-19113",
       "text": "Persist a reviewable report of root causes, canonical grammar, legacy recovery, exact changed paths, same-oracle red/green evidence, focused/full validation, lifecycle evidence and remaining risks.",
-      "verification": "evidence dir holds REPORT.md and CLAUSE-MEASUREMENT.md with root causes, canonical grammar, legacy recovery, changed-path table, same-oracle red/green pairs, focused and full validation and remaining risks",
+      "verification": "the T-1606 report and clause measurement persist under the T-1606 evidence directory as REPORT.md and CLAUSE-MEASUREMENT.md and state root causes, the canonical grammar, legacy recovery, exact changed paths in subject.diff, same-oracle red/green logs green-state.log, green-phases.log and red-both.log, focused and full counts and the disclosed shard flakiness risk",
       "work": "T-1606"
     },
     "SRC-167:R009": {
       "actionable": true,
       "class": "non-goal",
-      "disposition": "NOT_APPLICABLE",
+      "disposition": "IMPLEMENTED",
       "evidence": "E-19113",
       "text": "Do not modify SAIPAL, add release roots, resolve SAIPAL conflicts, weaken strict executable grammar, execute WAIT payloads, invent authority, redesign the whole state machine or rewrite historical evidence. Publication remains excluded by the controlling run source.",
-      "verification": "no SAIPAL file, release root or historical evidence touched; the executable grammar was narrowed not weakened (Control E); no WAIT payload executed (Control D); publication excluded and not attempted",
+      "verification": "non-goals honoured and measured: no SAIPAL file was touched, no release root was added, no SAIPAL conflict was resolved, the strict executable grammar was narrowed and never weakened (Control E keeps PHASE DONE T-999 refused), no WAIT payload was executed (Control D answered RESTATE_AND_STOP without mutation), no authority was invented, and publication stays excluded by the controlling run source",
       "work": "T-1606"
     },
     "SRC-167:R010": {
       "actionable": false,
       "class": "context",
-      "disposition": "NOT_APPLICABLE",
-      "evidence": "E-19113",
+      "disposition": "UNKNOWN",
+      "evidence": null,
       "text": "The imported report describes a legitimate operator-only boundary with zero of 751 sessions runnable. A read-only current SAIPAL STATE observation is now DONE/saipen continue, so the historical operator prose is a reported shape, not a claim about its current bytes or an invitation to mutate that project.",
-      "verification": "the imported report is context about another project bytes; this run made no claim about SAIPAL's current STATE and did not read or mutate it",
+      "verification": null,
       "work": "T-1606"
     }
   },

@@ -1,0 +1,19 @@
+{
+  "event_id": "E-20901",
+  "externalization_event": {
+    "operation_id": "transition-5b2f34b7680f4cf19aef8df941c67094",
+    "reason": "new LOG event exceeds the live cap; canonical detail externalization"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/log-detail/E-20901-796bb1de17ebe378e6b686b7.json",
+  "operation": "log_event_externalization",
+  "original_event_bytes": 1470,
+  "original_event_path": ".saipen/recovery/log-detail/E-20901-796bb1de17ebe378e6b686b7.LOG.md",
+  "original_event_sha256": "796bb1de17ebe378e6b686b76e4b7703c3ef9eeece73bb70310aa4e6b25574c0",
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "schema_version": 1,
+  "source": ".saipen/LOG.md",
+  "status": "COMMITTED",
+  "ticket_id": "T-2040"
+}

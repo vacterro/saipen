@@ -1,0 +1,30 @@
+{
+  "blocking_findings": {
+    "problem_count": 0,
+    "problems": [],
+    "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+    "ruleset_version": 1,
+    "status": "complete",
+    "warning_count": 14
+  },
+  "board_hash": "1ffb8ef11ed34d00",
+  "canonical_next_command": null,
+  "content_hash": "4afb16f84dfe44fc",
+  "exit_code": 0,
+  "external_actions": [],
+  "gate": "core",
+  "install_fingerprint": "install-v1:5ba6946f08d3016d0998a6d93011ef68fc65df9dbb58d726736750f679703ece",
+  "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\public-release\\continuation\\injector-home-before\\.claude\\skills\\saipen",
+  "kind": "conformance_receipt",
+  "log_hash": "d403b2ea6fac0c23",
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen\\.saipen\\evidence\\public-release\\continuation\\injector-home-before\\validator-project",
+  "receipt_id": "receipt-b3a1762a657e",
+  "remediation_commands": [],
+  "schema_version": 2,
+  "source_head": "no-git",
+  "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+  "state_hash": "79b94264f839bcfe",
+  "timestamp_utc": "2026-10-04T13:33:48.722983Z",
+  "validator_protocol_version": "1",
+  "verdict": "PASS"
+}

@@ -1,0 +1,18 @@
+{
+  "command": [
+    "git",
+    "add",
+    "--",
+    "tools/test_t2040_iteration_truth.py"
+  ],
+  "exit_code": 0,
+  "before_index_tree": "e9067ae57ea8afeec80028738347b3510afb2d7a",
+  "path": "tools/test_t2040_iteration_truth.py",
+  "worktree_sha256": "41115d91a412173544a48a2b1c64f091edfcb96e14ec50fbd4f0226ccf4ecd6b",
+  "prior_entry": null,
+  "new_entry": "100644 9138aedb8bdf8773ad70a560d622f71b9f3f0d1b 0",
+  "foreign_entries_unchanged": true,
+  "stdout": "",
+  "stderr": "warning: in the working copy of 'tools/test_t2040_iteration_truth.py', LF will be replaced by CRLF the next time Git touches it\n",
+  "publication": "not committed; not published"
+}

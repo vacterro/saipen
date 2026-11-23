@@ -1,0 +1,76 @@
+{
+  "worker_id": "SAIPEN_AUDITOR_003",
+  "assignment_id": "0a7850f735d1325c11dc8c96f45161c162e86002f48e305dc0ac1c1906836e59",
+  "audit_sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+  "boundary_probe": "PASS: executed the exact prescribed Python -B probe once; pass=true, writes_performed=0, read access succeeded, write-open access was denied at every listed target, bytes remained unchanged, and child-process inheritance passed.",
+  "findings": [
+    "The copied audit's SHA-256 matches the assignment.",
+    "PAUSED is unsupported as a durable phase in the supplied source baseline. The registry excludes it and validation derives accepted phases from that registry. This supports refusal of phase: PAUSED; it does not establish a validator defect.",
+    "Existing interruption handling uses ticket block-for with a retained execution resume_phase. Its PAUSED wording is a blocker description, not a phase enum.",
+    "Revision-zero empty contracts have an explicit recovery classification. Empty clauses alone do not prove corruption or authorize closure; the audit does not supply the complete receipt surfaces needed to determine SRC-100 disposition.",
+    "The asserted SAITULS state, E-3002 history, admission refusal and subsequent application mutation cannot be independently verified from this snapshot.",
+    "Provenance discrepancy: snapshot-manifest.json hashes to ccdd5800cea802b1215d9264c5c224d5e7fbb925c64e99a60af3ebb15d99d35a, differing from the assignment's expected manifest digest. Findings describe inspected bytes; assignment-level snapshot integrity is unverified."
+  ],
+  "confirmed_root_causes": [
+    "Conditional on the reported STATE actually containing phase: PAUSED, enum rejection follows from the canonical registry and shared validation logic. The source does not prove who produced that unsupported projection.",
+    "Existing admission parking cannot retain PAUSED as an execution resume point: entry.start_work explicitly rejects a DOING seat whose phase is outside its execution-phase set."
+  ],
+  "source_symbols": [
+    "saipen/REGISTRY.json:270 — phases; complete all list at lines 271–287 excludes PAUSED.",
+    "tools/saipen_engine/phases.py:13 — registry-derived _PHASES and VALID_TRANSITIONS; ALL_PHASES at line 25.",
+    "tools/saipen_engine/fast_check.py:346 — proposed-state enum rejection; persisted-state phase check at line 639.",
+    "tools/saipen_engine/entry.py:54 — _WORK_PHASES.",
+    "tools/saipen_engine/entry.py:386 — start_work; execution resume-point rejection at line 844, descriptive PAUSED wording at line 852, ticket_move block-for at line 859.",
+    "tools/saipen_engine/intake.py:4982 — _active_contract_state; revision-zero residue requires empty clauses and derived_at=None.",
+    "tools/saipen_engine/intake.py:4995 — _reconcile_survey; developed-contract recovery restriction at line 5092.",
+    "tools/saipen_engine/intake.py:5316 — reconcile_receipt, apply=False default.",
+    "tools/saipen_engine/intake.py:1965 — add_requirements; contract/coverage validation at line 1261."
+  ],
+  "reproduction": [
+    "EXECUTED: exact OS boundary probe, audit SHA-256 verification, manifest SHA-256 verification and bounded source inspection. No lifecycle commands, imports of product runtime, test suite or mutations executed.",
+    "SUGGESTED ONLY: in an authorized disposable fixture, retain a valid claimed DOING ticket and change only STATE.phase to PAUSED; exercise proposed-state and persisted-state validators and record enum refusal.",
+    "SUGGESTED ONLY: attempt admission against that fixture and record refusal, retained ownership, unchanged application hashes and unchanged historical events.",
+    "SUGGESTED ONLY: construct the supported block-for interruption representation with the original valid execution resume_phase; verify validation and restart round-trip without resuming unrelated Work.",
+    "SUGGESTED ONLY: use complete foreign SRC-100 body, metadata, index, contract and coverage evidence to survey reconciliation before any authorized application. Do not substitute this snapshot's unrelated SRC-100."
+  ],
+  "suggested_correction": [
+    "Resolve the manifest discrepancy before treating this copy as a fully verified assigned baseline.",
+    "Locate the original foreign producer and admission evidence before deciding whether protocol repair is needed. Prefer the existing blocked-ticket and resume-phase mechanism over adding PAUSED to a validator whitelist.",
+    "If reconciliation is authorized later, preserve original events and append evidenced corrections through existing mechanisms; do not rewrite E-3002 or invent its preceding execution phase.",
+    "Preserve the foreign SRC-100 receipt identity, develop its contract through existing requirement operations, and retain pending status until authority and coverage are established.",
+    "Verify the executor boundary separately: a protocol refusal must not become application-write permission through a directive fallback."
+  ],
+  "negative_controls": [
+    "Unsupported PAUSED refuses consistently; supported blocked interruption validates and survives restart.",
+    "T-260 ownership and T-282 TODO/PARTIAL evidence remain unchanged absent explicit supported authority.",
+    "Foreign SRC-100 is deduplicated by project and immutable receipt evidence; no replacement request is captured.",
+    "Rejected admission produces zero application-source writes, including fallback and child-executor paths.",
+    "Contract revisions and requirement coverage remain consistent after restart.",
+    "Historical event bytes remain unchanged; corrections are new evidenced events.",
+    "No unrelated paused or blocked task resumes.",
+    "Malformed or missing receipt evidence refuses reconciliation; developed contracts cannot use residue recovery to bypass official closure."
+  ],
+  "evidence": [
+    "Provided base_commit: 025bf596c683464788ab698248e8a3c5eb44dfec.",
+    "Provided full base_tree_fingerprint: 41247edf69d91ef36f1e0857104ee548c76119cb6fc9761a9d43cdbe3d0fd3e9; not independently recomputed.",
+    "Provided snapshot_manifest_sha256: f6078bcd84065db839a2b0ba269447d188dbdda58b4cea77cd5d3b52f6df6f2a.",
+    "Executed snapshot-manifest.json SHA-256: ccdd5800cea802b1215d9264c5c224d5e7fbb925c64e99a60af3ebb15d99d35a.",
+    "Inspected source root: V:\\_TEMP_\\saipen-readonly-audit-pilot-20261011T1628Z\\inputs.",
+    "Coordinator-supplied graph evidence: Tier 2 Verify, saipen generation 2026-09-01T13:16:39Z, tools excluded by design. No MCP invoked or graph absence used as negative evidence.",
+    "context/STATE.snapshot.md:2 reports VERIFY, not the audit's foreign PAUSED state.",
+    "context/BOARD.snapshot.md:254 associates this project's SRC-100 with T-1446; this is context evidence of a different receipt namespace, not the SAITULS receipt.",
+    "No files written, Work claimed, Source captured, agents spawned or canonical lifecycle operations invoked."
+  ],
+  "uncertainty": [
+    "Original SAITULS state, validator version, receipt surfaces, application changes and executor session were not captured.",
+    "Manifest mismatch limits provenance confidence; the supplied commit and tree fingerprint are coordinator assertions.",
+    "No runtime admission or restart reproduction was executed because those fixtures require writes.",
+    "Source establishes current mechanisms, not historical incident resolution or enforcement by an external agent.",
+    "No definitive SRC-100 disposition or next authorized SAITULS application action can be established."
+  ],
+  "potential_overlap": [
+    "T-1718 retains canonical VERIFY ownership; T-1717 retains SRC-216 dependency reservation. This evaluation creates no competing Work.",
+    "Contract and admission recommendations may overlap existing acceptance-preservation Work; coordinate through its owners after obtaining original foreign evidence.",
+    "T-442 remains HELD; this evaluation authorizes no concurrency implementation or engineering worker."
+  ]
+}

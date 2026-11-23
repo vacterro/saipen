@@ -1,0 +1,19 @@
+{
+  "label": "build-focused",
+  "phase": "BUILD",
+  "command": [
+    "python",
+    "-B",
+    "tools/test_reconcile_history_ledger_blocked.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 10.797,
+  "fingerprint": "7b7ff09dfeee7b1b29d35434872c6994739935b761b8db64d1b489a8de53fedc",
+  "stdout": "",
+  "stderr": ".............\r\n----------------------------------------------------------------------\r\nRan 13 tests in 10.517s\r\n\r\nOK\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "37c8f6d1360bba3b7237a182d123f634861bb33bd013b72d105bc6f91e139b21",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

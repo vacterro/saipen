@@ -1,0 +1,16 @@
+DONE, no Work    saipen clean                 admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+DONE, no Work    saipen translate             admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+DONE, no Work    saipen hunt                  admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+DONE, no Work    saipen markhunt              admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+DONE, no Work    saipen plan                  admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+DONE, no Work    saipen validate              admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+DONE, no Work    saipen transition CLEAN      admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+DONE, no Work    saipen transition TRANSLATE  admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+BUILD, own Work  saipen clean                 admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+BUILD, own Work  saipen translate             admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+BUILD, own Work  saipen hunt                  admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+BUILD, own Work  saipen markhunt              admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+BUILD, own Work  saipen plan                  admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+BUILD, own Work  saipen validate              admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+BUILD, own Work  saipen transition CLEAN      admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted
+BUILD, own Work  saipen transition TRANSLATE  admitted=True  action=saipen_op code=ADMITTED :: canonical operation admitted

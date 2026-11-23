@@ -1,0 +1,62 @@
+{
+  "checked_at": "2026-10-21T14:30:25.155300+00:00",
+  "state": "running",
+  "family": "unit",
+  "exec_session": 59751,
+  "pid": 7960,
+  "command": [
+    "C:/ProgramData/SAI/SAIPEN/python/3.11.9-64/python.exe",
+    "tools/core_unit.py",
+    "evidence",
+    "T-1844",
+    "--fresh"
+  ],
+  "console": ".saipen/evidence/T-1844-operator-origin/post-resync-full-family-console.log",
+  "last_canonical_event": 17092,
+  "prior_full": {
+    "state": "terminal",
+    "exec_session": 91063,
+    "pid": 21856,
+    "verdict": "FAIL",
+    "ran": 7192,
+    "red": 72,
+    "record": ".saipen/evidence/core-unit/f8840587a75c2b7d-20261021T113844239907Z.json"
+  },
+  "previous_full": {
+    "state": "terminal",
+    "exec_session": 54521,
+    "pid": 28872,
+    "verdict": "FAIL",
+    "ran": 7207,
+    "red": 2,
+    "record": ".saipen/evidence/core-unit/b6dc79950e870846-20261021T141547438363Z.json",
+    "cause": "Actual ambient managed OpenCode generation stale; preserved requirements, canonical resync then actual fresh-process controls PASS"
+  },
+  "failed_correction_cycles": 1,
+  "shards": [
+    {
+      "pid": 10000,
+      "root": "V:/_TEMP_/saipen-core-unit-yhbqujr3"
+    },
+    {
+      "pid": 11336,
+      "root": "V:/_TEMP_/saipen-core-unit-gkbchrkp"
+    },
+    {
+      "pid": 11060,
+      "root": "V:/_TEMP_/saipen-core-unit-sr183zui"
+    },
+    {
+      "pid": 4008,
+      "root": "V:/_TEMP_/saipen-core-unit-x5cpdwz1"
+    },
+    {
+      "pid": 18664,
+      "root": "V:/_TEMP_/saipen-core-unit-doftn9hn"
+    },
+    {
+      "pid": 17192,
+      "root": "V:/_TEMP_/saipen-core-unit-oes88aw3"
+    }
+  ]
+}

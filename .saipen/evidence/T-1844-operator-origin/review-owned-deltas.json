@@ -1,0 +1,498 @@
+[
+  {
+    "path": "extensions/adapters/opencode/saipen-guard.js",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/node-session-prefix/extensions/adapters/opencode/saipen-guard.js",
+    "preimage_sha256": "5ceb358c3af9a4ac6c9d9e7ef6a59add1c9caa275fba008eecb59abad3ebba89",
+    "current_sha256": "8a0c6e6ac8c7ed9bc938037a4d391b460bdfda20ac02aaddaba0f9f793ff0831",
+    "delta_lines": 75
+  },
+  {
+    "path": "saipen/REGISTRY.json",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/saipen/REGISTRY.json",
+    "preimage_sha256": "0e33e2f37ec47cf45bce96a069e578a4ef7abb533e35fbd773a97eadf496db7a",
+    "current_sha256": "c87a2a67314096c05924deab6c1ea022e09c8c43888ece8e9d7b6b6da1d6ad59",
+    "delta_lines": 10
+  },
+  {
+    "path": "tools/saipen.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/resume-prefix/saipen-cli.py",
+    "preimage_sha256": "3c1c4b8863b897b36e410cef7761666a4c43f2ae531bf71372d594816d2c06e0",
+    "current_sha256": "62fad31fa8cd068611976da6750a3b950cbe022e515b5b1087de6680ba808003",
+    "delta_lines": 56
+  },
+  {
+    "path": "tools/saipen_engine/acceptance_contract.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/saipen_engine/acceptance_contract.py",
+    "preimage_sha256": "e22d7e5e584a38cdfe2e90fa0b8553eac6da19d3d4007e83a3e9f5753e40e57f",
+    "current_sha256": "55d030ecb73f77d40a0c54e9742d56f7f5b71111604d329be568503e3f852716",
+    "delta_lines": 64
+  },
+  {
+    "path": "tools/saipen_engine/decision_request.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/resume-prefix/decision_request.py",
+    "preimage_sha256": "24eadd6ecb648a9b635f26176f7bafef78d2c9d9fddb5a3436fbe517a163e0f9",
+    "current_sha256": "79378fa3558b063108cb4e7d8a63370c9e8fa507e9d6c9ea989b6961ed8fa888",
+    "delta_lines": 28
+  },
+  {
+    "path": "tools/saipen_engine/entry.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/entry.py",
+    "preimage_sha256": "670272e003e8d1ca5ef11c852904127c2681073e392d506d0d1be0b885f4f594",
+    "current_sha256": "6bc3a59b37151da7892f824de9e3b7a0399ef6f1769d68a57ef8eaf3326d6a27",
+    "delta_lines": 86
+  },
+  {
+    "path": "tools/saipen_engine/gate_decision.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/saipen_engine/gate_decision.py",
+    "preimage_sha256": "2e0c051ef941b46d1ffd7dcd6680df825836333d78b3c44bd7ed128f429ea2b3",
+    "current_sha256": "2227181297d42a6bef3c7a8229108a9483bbe60dac9cfddf662339395c4dae60",
+    "delta_lines": 13
+  },
+  {
+    "path": "tools/saipen_engine/goal_authority.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/goal_authority.py",
+    "preimage_sha256": "a27adcf68b364a234434cff006c3826b1b20a5ae1e921700f5b8517b38e0a14e",
+    "current_sha256": "96149a4827b8d6b1ca80b38f603ae9c38e54a721c06f193673120b84174cc7ec",
+    "delta_lines": 85
+  },
+  {
+    "path": "tools/saipen_engine/handoff.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/handoff.py",
+    "preimage_sha256": "c5a4928f3ad1dc3e236eb5f5a30a60eec1b7b01f8f4ed9ea76c8273754757e8f",
+    "current_sha256": "070180345c630c148d3ad6b12aff18a103917596b4c1ff69a5428e5353f4ad81",
+    "delta_lines": 18
+  },
+  {
+    "path": "tools/saipen_engine/host_authority_broker.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/host_authority_broker.py",
+    "preimage_sha256": "d8700087c6a173e075d65170173a3741d016f5d3085fbeda18a548e659646322",
+    "current_sha256": "c89025d341830c9d4157c11b12f011d544c1434b99cddb585a4e48a56128ad82",
+    "delta_lines": 75
+  },
+  {
+    "path": "tools/saipen_engine/host_authority_client.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/host_authority_client.py",
+    "preimage_sha256": "97acab7c82cde40a18e6ec93cf3ccc9424a00d28912a50120cde1a376cd76935",
+    "current_sha256": "1e9e88690fd6a5b42587c5e8fcccafa308ab1f45476e6dc905dd93a8406117c3",
+    "delta_lines": 162
+  },
+  {
+    "path": "tools/saipen_engine/intake.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/intake.py",
+    "preimage_sha256": "0ba0abed0aaf78c634293a5328b1fdf576a04533911cd042c7fffeb25b5ca40f",
+    "current_sha256": "537ff4fdaaf99b4d253c3abedb2f40a21f61fd1410eeb5108613151741de669c",
+    "delta_lines": 150
+  },
+  {
+    "path": "tools/saipen_engine/operations.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/operations.py",
+    "preimage_sha256": "bda0ea40e51a469f41f94e0a83e07ff19f9ceef67e8ab72ed21a84877ec85c97",
+    "current_sha256": "83101fab75af09f01cc5433c03b4bfe4ddc6cbc99d989dc88827be6d0481e782",
+    "delta_lines": 233
+  },
+  {
+    "path": "tools/saipen_engine/operator_origin.py",
+    "created_in_work": true,
+    "preimage": null,
+    "preimage_sha256": null,
+    "current_sha256": "dce8b7d513959edcddec1c39b7257282a0b7b86e398c973b83ce6b47951dc945",
+    "delta_lines": 503
+  },
+  {
+    "path": "tools/saipen_engine/operator_task.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/prefix/tools/saipen_engine/operator_task.py",
+    "preimage_sha256": "c16998ce3b17ce5cfceab93c6b378bf5b3c15760a42e4cbffdfb6f6fde3fa358",
+    "current_sha256": "b840b345e7f4a8f89030bceaec6e031ed89d4001e2312299bf3379aa139135f1",
+    "delta_lines": 305
+  },
+  {
+    "path": "tools/saipen_engine/response_surface.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/resume-prefix/response_surface.py",
+    "preimage_sha256": "842d30bf642ff3d7eb6e79eec104f2d3f49abd4d73f5eb5621d41e52e52618bf",
+    "current_sha256": "0745296d5c180fb33f4d6c15b2668c1a8623ccdcd4d18de145c0c598618e8c0e",
+    "delta_lines": 49
+  },
+  {
+    "path": "tools/saipen_engine/retirement.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/turn-prefix/tools/saipen_engine/retirement.py",
+    "preimage_sha256": "9d500e5a04bfd1d76226ab5ec54dc5cbe3093a77dd9684cc7c753434e8124816",
+    "current_sha256": "c6dc889c85b68b8917d41393b96f0b1a75dd19b527df7bb9e442c7186398644d",
+    "delta_lines": 54
+  },
+  {
+    "path": "tools/saipen_engine/source_append.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/turn-prefix/tools/saipen_engine/source_append.py",
+    "preimage_sha256": "c271b4238fd4194092c7eb279503f0b32c50e31269e66d608501d978ff9874c2",
+    "current_sha256": "144ffe4701ee1d8959b7bbeffaa6789a4ca352e695408a630e94d508740e5970",
+    "delta_lines": 59
+  },
+  {
+    "path": "tools/saipen_engine/supersession.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/saipen_engine/supersession.py",
+    "preimage_sha256": "3780c1d9fd722baec1fd7aa868a3c5b47b53e7d4025874b075b8ab444a46924a",
+    "current_sha256": "1a09d7250de1d28e7576d7bb46f97ce5ba2e7d8e53440f9512b2295426f213f5",
+    "delta_lines": 25
+  },
+  {
+    "path": "tools/test_authority_capture.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_authority_capture.py",
+    "preimage_sha256": "0db057679593c2dd8bcda2ec7e0c4a97660ac7728af6d09243a23e482f462a77",
+    "current_sha256": "8fea46292c5acd983ec89da2dbc6edf6fca1cf5e1a26f6d2dddc42d0da52ab73",
+    "delta_lines": 12
+  },
+  {
+    "path": "tools/test_chat_style.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/goal-turn-prefix/tools/test_chat_style.py",
+    "preimage_sha256": "d64e068abb51c062bb1c0a488553ca5fdcbb19f7d3867c9138643cb3e6617373",
+    "current_sha256": "a320cc0d3c2e7e21a518ebc15588ed36b39fb21e574eee1d39d88f9156a259b1",
+    "delta_lines": 43
+  },
+  {
+    "path": "tools/test_claude_stop_hook.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/goal-turn-prefix/tools/test_claude_stop_hook.py",
+    "preimage_sha256": "fbaa047a61a1c31d877b50953f595926498cd67cbe33b775c2d959a17f6104c0",
+    "current_sha256": "8cea2ca0cca97cf2c98e0426972c03e048f231ca7f518bee02b980709e7441f8",
+    "delta_lines": 95
+  },
+  {
+    "path": "tools/test_closure_provenance.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/goal-turn-prefix/tools/test_closure_provenance.py",
+    "preimage_sha256": "6a8674cdc4d89efff9fd6518863a0029bfc740aad8718d85d942f8cbc8fb0cbe",
+    "current_sha256": "1d7739d37df2a629e7f8d0b90cef481406239c911f60f817c424ba9209bdfcba",
+    "delta_lines": 50
+  },
+  {
+    "path": "tools/test_cold_recovery.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_cold_recovery.py",
+    "preimage_sha256": "79b8a5f89d7c4af49d8c7470958718a2e4b2231c3b1a423d7a2c68d4c276461f",
+    "current_sha256": "2c259336851889f2d1bf4d2211eddceface708cc9538f65e1fc208efdfd3d0a8",
+    "delta_lines": 61
+  },
+  {
+    "path": "tools/test_command_routing.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_command_routing.py",
+    "preimage_sha256": "9100208b85cea604af8f646c58699194b11ea83b4af5c5d9cd2af170ecce6d3c",
+    "current_sha256": "8cc1c7de39039b0c8cecc2089f9fb3ad429467fc829113f8711bc2c31afdb12f",
+    "delta_lines": 31
+  },
+  {
+    "path": "tools/test_detail_authorization.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_detail_authorization.py",
+    "preimage_sha256": "506ea493be2cd5e7c96ee56fd54258baac9f9a0a200a36bfd596cc5e109e0865",
+    "current_sha256": "2f679dc5a718ddfe3490c62f01068f163e7805bbde8dd34d8217938cd2e98c99",
+    "delta_lines": 50
+  },
+  {
+    "path": "tools/test_fixture_support.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_fixture_support.py",
+    "preimage_sha256": "10831ae72daf5a4c80fd54a8f337228c682adfe70b95f9a08f89fef865f9ce36",
+    "current_sha256": "5a1258c96a3bd079ae01ee347806b9838cccf653ae07f10b8db1417de261680c",
+    "delta_lines": 33
+  },
+  {
+    "path": "tools/test_hostile_wave_regressions.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_hostile_wave_regressions.py",
+    "preimage_sha256": "0c84bd0990b93fa05d20444e15a21b5f9dad9972b683dfbc110dc7663cdc3623",
+    "current_sha256": "6732cd574bb07cce4fc8e6f1471a8cb3c6f40359a979365a6d4e9668b767ecf0",
+    "delta_lines": 22
+  },
+  {
+    "path": "tools/test_ingress_authority.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/turn-prefix/tools/test_ingress_authority.py",
+    "preimage_sha256": "a99f509e4c41e14383806687a69eab03c5276cde013e3e57c56c777333cb311e",
+    "current_sha256": "f4974fa1f04cbcb7487ca58f56c02104877d3ec4e891b5023d78a2f50e5fe2e1",
+    "delta_lines": 15
+  },
+  {
+    "path": "tools/test_intent_audit_fixes.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/transport-prefix/tools/test_intent_audit_fixes.py",
+    "preimage_sha256": "ccefa87cd97dabaa23d3338476097e370b74bb18e2fa709c02624008324e15b0",
+    "current_sha256": "ba4ba469a20acaaa23633f30f5145273e9a9d508f74848b0e720437f45885c87",
+    "delta_lines": 13
+  },
+  {
+    "path": "tools/test_next_action_deadlock.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/diagnosis-prefix/tools/test_next_action_deadlock.py",
+    "preimage_sha256": "5c66f92b59b9a032b3b5af8960aaa8ba98a5b2215f756be65f72a699b8b88582",
+    "current_sha256": "226f1bb75d0ed6ec1a11a4e870f8bdf53b591d08a502cc5aa04def69208ce164",
+    "delta_lines": 44
+  },
+  {
+    "path": "tools/test_operator_ingress_matrix.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/budget-prefix/tools/test_operator_ingress_matrix.py",
+    "preimage_sha256": "aa82f3a4363619dae429177e92a0621c63b80e71a1c1bc3543675a3acd52fd07",
+    "current_sha256": "eac4e83c2d1f31bed7e5d0386eefee6b20d1876f6c30f2f1e9017da6f1181115",
+    "delta_lines": 407
+  },
+  {
+    "path": "tools/test_operator_origin_support.py",
+    "created_in_work": true,
+    "preimage": null,
+    "preimage_sha256": null,
+    "current_sha256": "8172d9110824b742191b4555ea3beff31b9aecf002064fb215ebd218809a7f46",
+    "delta_lines": 323
+  },
+  {
+    "path": "tools/test_orchestration_repair.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_orchestration_repair.py",
+    "preimage_sha256": "919d25e7d5e5c8abc545504ee2d1ee5c12d0f8fc3a222cc2b39ffdd3aaaa0a4e",
+    "current_sha256": "4da7ff8079b1ee61e0091eb7844246da90d2601d91ccb4d15423a29cbfaedca4",
+    "delta_lines": 11
+  },
+  {
+    "path": "tools/test_protocol_admission.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_protocol_admission.py",
+    "preimage_sha256": "1e5d8b21fdfedfe04c137dedb47a4e19b946fbdc8be984b0b2ff0a2b21de858a",
+    "current_sha256": "f26f4287337b6b2944d057e74e4cf3ab198e7b613991eff13d393c542493ec41",
+    "delta_lines": 29
+  },
+  {
+    "path": "tools/test_public_closure_cli.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_public_closure_cli.py",
+    "preimage_sha256": "b1863294423d31a1ce0810d26c225afbb66ba03047dcfde8f79f1e596cee86d5",
+    "current_sha256": "52b29195f1cd103e595a184fedd17e5b030f671fb582582d832c7f4f2263bcf5",
+    "delta_lines": 28
+  },
+  {
+    "path": "tools/test_recovery_reachability.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/transport-prefix/tools/test_recovery_reachability.py",
+    "preimage_sha256": "589e67b68c2ffbf39f622c5070491c7531cd92e260b40d71c2ed54c49bf19e08",
+    "current_sha256": "22310eb8618324592dbe5e6cd2d3dc7c0a85be952dc7cfbcadb24a64035b8817",
+    "delta_lines": 18
+  },
+  {
+    "path": "tools/test_response_delivery.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/node-session-prefix/tools/test_response_delivery.py",
+    "preimage_sha256": "824c7c7dcbae15e8ccfe92eddbb62f5a6e9f64d71db74ca3aa55b5073ab2a9bd",
+    "current_sha256": "a12ea991519b24d21e7c47f1603aa5c416ad46ab0e7be21db69a801723457bf2",
+    "delta_lines": 51
+  },
+  {
+    "path": "tools/test_response_digest.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/goal-turn-prefix/tools/test_response_digest.py",
+    "preimage_sha256": "fd9c07b786ea0e8233a0dabf89f4614de03a504698298e2e23cbe39beb3ec2c5",
+    "current_sha256": "2886b749c7c53ca1f69893ec6050e549067fb23ca46ea0f0ae9b6e4b05a03e1d",
+    "delta_lines": 35
+  },
+  {
+    "path": "tools/test_response_surface_contract.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/diagnosis-prefix/tools/test_response_surface_contract.py",
+    "preimage_sha256": "7f775244eca541447dea1c5a24aba210e249c03148ebaff78328cdd14d467126",
+    "current_sha256": "a70421543b231b674da9958c4341c02b829d9c77b5947e375865656cac1db22b",
+    "delta_lines": 174
+  },
+  {
+    "path": "tools/test_t1293_valve_resume_audit_route.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/transport-prefix/tools/test_t1293_valve_resume_audit_route.py",
+    "preimage_sha256": "0671bf03c1fabf8b117aac476e55d0146ef6c9c7ca4c6d2669c51aec403bb684",
+    "current_sha256": "9da8940973860337df93a433bfc61c8d2f7a78e82fc4cb1540f867685d69fb82",
+    "delta_lines": 23
+  },
+  {
+    "path": "tools/test_t1363_zero_manual_entry.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/turn-prefix/tools/test_t1363_zero_manual_entry.py",
+    "preimage_sha256": "3e397e6da902e4edec0465cc213ab3ea3de237fe22ba13f03228b59a96024b2d",
+    "current_sha256": "29596f79b98dc67d76bc3e1f9b58c1c9b52578240e2bb2c39d2cf4a81414dc21",
+    "delta_lines": 18
+  },
+  {
+    "path": "tools/test_t1461_source_append.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_t1461_source_append.py",
+    "preimage_sha256": "88730000b5c7c8acb9b9a3c32d16208c6e3bea3ce3e95dd1bfacce66d806dab6",
+    "current_sha256": "1f15ce83ec997203f51596140b57c728890e130c1996bc85d3913cf696d0556f",
+    "delta_lines": 86
+  },
+  {
+    "path": "tools/test_t1474_start_goal_entry.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/transport-prefix/tools/test_t1474_start_goal_entry.py",
+    "preimage_sha256": "9a1d83e791d0c9d2605b164c866e0fdc6f3809cfc151827d715cfd60030f6fbb",
+    "current_sha256": "cd0f605e47230b54028c161d6fdf6c1c94308a7d3f6bb40b6123f99ec625a3a6",
+    "delta_lines": 31
+  },
+  {
+    "path": "tools/test_t1487_claim_handoff.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_t1487_claim_handoff.py",
+    "preimage_sha256": "f2380aa3a12ff221f682b8b4a0d1eaab8f72b449e160ee732a2901dcbffff807",
+    "current_sha256": "2291cc03eb5eacd2120c29256484a3ec723d7e314c99b84cdfe103fbe7b4fb06",
+    "delta_lines": 12
+  },
+  {
+    "path": "tools/test_t1494_continuation_authority.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/turn-prefix/tools/test_t1494_continuation_authority.py",
+    "preimage_sha256": "c31e968253889bb883dc66fb7fd6e7b90ab60ba0cb23a6984f7af56a2e20b5d8",
+    "current_sha256": "628202c21fefbab01b8585dc9786b2d129f0a3eabff59fedd40347d1011b7103",
+    "delta_lines": 18
+  },
+  {
+    "path": "tools/test_t1501_entry_resolver.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_t1501_entry_resolver.py",
+    "preimage_sha256": "857cabf96e38beee55765d3a57a49fbd1847ea16ecc922240999e12bada1d1e3",
+    "current_sha256": "dec8b7b3beecb10ecbe77d0d64454d97024e60a584719a922c1e14754b744250",
+    "delta_lines": 52
+  },
+  {
+    "path": "tools/test_t1553_mid_session_activation.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_t1553_mid_session_activation.py",
+    "preimage_sha256": "ff347b550a34434503439b03b1e6bb921f0d4f3b868d9d0803637b5469800233",
+    "current_sha256": "83a3c861ef2f6f8019e9cba9453983bf5f5d2998a9884794352b8dd5a9211cc8",
+    "delta_lines": 79
+  },
+  {
+    "path": "tools/test_t1657_refused_reply_preserved.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/node-session-prefix/tools/test_t1657_refused_reply_preserved.py",
+    "preimage_sha256": "ed32eb8e7202b745376e0a5603d5ab5263b5f7259219621712d2790a719b16d4",
+    "current_sha256": "165750f0d9354ba7f1a7dc6f60bc0f88bbf964a0a72d5199deb7b1ed6ab6bd04",
+    "delta_lines": 11
+  },
+  {
+    "path": "tools/test_t1704_legacy_goal_authority.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/turn-prefix/tools/test_t1704_legacy_goal_authority.py",
+    "preimage_sha256": "acd22a3374567644c060a46b2ac91fdc53b21595326a03d3954aee589b9bbb2a",
+    "current_sha256": "e8ddaced90fdff4a0048fca2d2f8a977f385f95bf37bb508eceaed1d2c1a8181",
+    "delta_lines": 81
+  },
+  {
+    "path": "tools/test_t1718_acceptance_contract.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_t1718_acceptance_contract.py",
+    "preimage_sha256": "7df4959c2cb2e92c9dedeec34b7e5deb311e09d5e86d4ca8a9a887405b0aaf19",
+    "current_sha256": "f21f190147032c560f33a3e39f9df163111ba37c2fd12f714c13b6ca9fd1f365",
+    "delta_lines": 58
+  },
+  {
+    "path": "tools/test_t1729_gate_decision_lifecycle.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/goal-turn-prefix/tools/test_t1729_gate_decision_lifecycle.py",
+    "preimage_sha256": "e2557359dcf8f3d8b554ea9ce75e381e9f120c500a8672c6fb294e5c223df7b9",
+    "current_sha256": "f03e73652748dd7e024dfd29b1d6bdc9edcdcbc816d20de1593ad4bc4ed536b9",
+    "delta_lines": 16
+  },
+  {
+    "path": "tools/test_t1729_operator_gate.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_t1729_operator_gate.py",
+    "preimage_sha256": "b29ddd67399685e33a0902acb86696472022105af1564ec75dc75cbb5f12707b",
+    "current_sha256": "157b46d22c53270549633817814ab902ebb5dae505079a23d0be7ed50c01f37c",
+    "delta_lines": 50
+  },
+  {
+    "path": "tools/test_t1822_carrier_binding.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/diagnosis-prefix/tools/test_t1822_carrier_binding.py",
+    "preimage_sha256": "30cf1eb5df2ee3bdc2ec324595d8fecfed48b822eda58746336e9aae4ec3450a",
+    "current_sha256": "91f14acc6fdd4a2061910c4be328f3b25327b2eadff073133a97f2e1a6e44bf5",
+    "delta_lines": 91
+  },
+  {
+    "path": "tools/test_t1844_authority_preview.py",
+    "created_in_work": true,
+    "preimage": null,
+    "preimage_sha256": null,
+    "current_sha256": "8dfc4965ad59a7190338294abc350a5d1e576f1d688bd1af8846cfcf92bb267d",
+    "delta_lines": 129
+  },
+  {
+    "path": "tools/test_t1844_goal_turns.py",
+    "created_in_work": true,
+    "preimage": null,
+    "preimage_sha256": null,
+    "current_sha256": "200f52678ae66097f3d9eb478f1483e2d439c19589bfe59cf9ae2bfa51f802bf",
+    "delta_lines": 178
+  },
+  {
+    "path": "tools/test_t1844_operator_origin.py",
+    "created_in_work": true,
+    "preimage": null,
+    "preimage_sha256": null,
+    "current_sha256": "d51851cf7b403b1e07eb6bc1832b523b936f2ddd9b390e2b2de9cf8075369560",
+    "delta_lines": 151
+  },
+  {
+    "path": "tools/test_t1844_origin_broker.py",
+    "created_in_work": true,
+    "preimage": null,
+    "preimage_sha256": null,
+    "current_sha256": "764f7617982b9ccfd2449c4d6b21c3c65aa13ca896e18cb0ef9af8fdfe2d50a7",
+    "delta_lines": 1029
+  },
+  {
+    "path": "tools/test_t1844_source_event.py",
+    "created_in_work": true,
+    "preimage": null,
+    "preimage_sha256": null,
+    "current_sha256": "f849bbe71def5577f92de41da803dac71a51831ce9e49e035d551060868a92fa",
+    "delta_lines": 379
+  },
+  {
+    "path": "tools/test_ticket_retirement.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_ticket_retirement.py",
+    "preimage_sha256": "79e7dd7f4d3c0cf71b73f490036898a2527118b88f20210f710494f8bf247690",
+    "current_sha256": "bbea8847bf2f1d80dbab05adf4b8706029d18996900798029b16c2666738e275",
+    "delta_lines": 57
+  },
+  {
+    "path": "tools/test_ticket_supersession.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/test_ticket_supersession.py",
+    "preimage_sha256": "ab53de3c794c7d8618d7202405ecd21f1a162b9039819ffc73d05db99279f918",
+    "current_sha256": "7cf9cac033ae9a372a27d7045844d30be11bf50a22a6468c1618b79cf8340f6d",
+    "delta_lines": 95
+  },
+  {
+    "path": "tools/validate.py",
+    "created_in_work": false,
+    "preimage": ".saipen/evidence/T-1844-operator-origin/scope-prefix/tools/validate.py",
+    "preimage_sha256": "23b39ab429ef6f9e5b1f2533579bd7120dd75c2fd98399431895967a1308f786",
+    "current_sha256": "2f52724745a9cfa8d4b3e760f8e99c32e1d65ecf2d00552bdce0e1a659a6cc71",
+    "delta_lines": 10
+  }
+]

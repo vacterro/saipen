@@ -1,0 +1,34 @@
+{
+  "bytes": 991,
+  "kind": "saipen-rejected-response",
+  "overflow": {
+    "code": "OPERATOR_OUTPUT_OVERFLOW",
+    "detail_ref": ".saipen/evidence/response/rejected-6558a5b1f8a5245d.txt",
+    "fields": [
+      {
+        "char_budget": 300,
+        "chars": 334,
+        "field": "RESULT",
+        "line_budget": 1,
+        "lines": 1
+      },
+      {
+        "char_budget": 120,
+        "chars": 311,
+        "field": "DETAILS",
+        "line_budget": 1,
+        "lines": 1
+      }
+    ],
+    "response_class": "COMPACT_FINAL",
+    "total": {
+      "char_budget": 900,
+      "chars": 974,
+      "line_budget": 6,
+      "lines": 6
+    }
+  },
+  "ref": ".saipen/evidence/response/rejected-6558a5b1f8a5245d.txt",
+  "schema": 1,
+  "sha256": "6558a5b1f8a5245de1beb3589dfec787391d9a79507da7e0cabedd3c014eeefc"
+}

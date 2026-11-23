@@ -20,3 +20,4 @@ tests/fixtures/t1624-lockout/saipen-guard.py -text
 tests/fixtures/t1654-legacy-block/AGENTS.md.measured -text
 # T-1656 incident reply, transcribed from the operator screenshot: kept byte-exact.
 tests/fixtures/t1656-operator-wall/response.transcribed.txt -text
+tests/fixtures/protocol-diagnosis/* -text

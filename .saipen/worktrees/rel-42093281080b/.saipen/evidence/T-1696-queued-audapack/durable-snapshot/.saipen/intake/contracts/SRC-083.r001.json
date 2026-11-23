@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-083:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Auto-catch finished SAIHANDOFF blocks and file them ready-to-use (FastPrompter-style path), plus GET-phase latency instrumentation for widget ZIP delivery"
+    }
+  },
+  "derived_at": "2026-09-25T16:26:41Z",
+  "derived_from": "SRC-083",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "d4b76d8a8fbf7aba69c52d61fd922397b6bcae2fba23329e84df7a5d2e18c51b"
+}

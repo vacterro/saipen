@@ -1,0 +1,187 @@
+--- preimages/tools/test_automation_block.py
++++ tools/test_automation_block.py
+@@ -23,9 +23,9 @@
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ sys.path.insert(0, str(ROOT / "tools"))
+-from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
+-
+-from saipen_engine import automation, response_surface as RS  # noqa: E402
++from test_fixture_support import CURRENT_STYLE_CONTRACT, checked_discovery_evidence  # noqa: E402
++
++from saipen_engine import automation, response_surface as RS, work_exhaustion as W  # noqa: E402
+ from saipen_engine.board import parse_board  # noqa: E402
+ from saipen_engine.router import route_next  # noqa: E402
+ from saipen_engine.state import parse_state_or_error  # noqa: E402
+@@ -107,6 +107,26 @@
+         self.tmp.cleanup()
+ 
+     # helpers -------------------------------------------------------------
++
++    def _idle_route(self) -> dict:
++        """Explicit discovery/authority fixture for the independent C1-C8 gate."""
++        state, board = _parsed(_state())
++        certificate = W.certify_work_exhaustion(
++            None, state=state, tickets=board["tickets"],
++            audit_inbox={"pending": [], "unresolved_audit_count": 0},
++            future_gate={"index_state": "CURRENT", "eligible": [], "counts": {}},
++            persistent_goals=[],
++            source_evidence=checked_discovery_evidence(str(state["last_event"])),
++            continuous_maintenance_authorized=True,  # Explicit simulated owner grant.
++        )
++        self.assertTrue(W.verified_quiescence(certificate), certificate)
++        # ponytail: a bounded HUNT carrier isolates C1-C8; native route/grant
++        # admission belongs to terminal-consumer tests. Never use this for WAIT.
++        return {
++            "ok": True, "reason": "maintain", "action": "saipen hunt",
++            "terminal_classification": certificate["status"],
++            "work_exhaustion": certificate,
++        }
+ 
+     def block(
+         self,
+@@ -190,17 +210,47 @@
+ 
+ class ClosedVocabulary(AutomationFixture):
+     def test_live_project_continues_with_cc(self) -> None:
++        # An empty real project is INCOMPLETE_DISCOVERY; supply the actual
++        # queued ticket a live project would route instead.
++        board = BOARD_EMPTY.replace(
++            "## TODO\n", "## TODO\n- [ ] T-900 [P1] runnable | verify: exact control\n"
++        )
+         routed = route_next(
+             _state(),
+-            BOARD_EMPTY,
++            board,
+             pending_ops=[],
+             conflict_ops=[],
+             audit_inbox=None,
+         )
+-        block = self.block(routed=routed, audit_status=self.audit(), convergence=None)
++        self.assertEqual(routed["action"], "PHASE SCOUT T-900")
++        block = self.block(
++            routed=routed, board=parse_board(board), audit_status=self.audit(),
++            convergence=None,
++        )
+         self.assertEqual(block["disposition"], CONTINUE)
+         self.assertEqual(block["next_command"], "cc")
+         self.assertEqual(block["schema_version"], 1)
++
++    def test_empty_project_without_discovery_cannot_continue(self) -> None:
++        # Negative control: the legacy fixture is now truthfully incomplete.
++        routed = route_next(_state(), BOARD_EMPTY, audit_inbox=None)
++        audit_status = self.audit()
++        block = self.block(routed=routed, audit_status=audit_status)
++        state, board = _parsed(_state())
++        gate = automation.closure_gate(
++            status_out=audit_status, convergence=CONVERGENCE_OK,
++            history_events=[], state=state, board=board, agent="probe",
++        )
++        self.assertTrue(gate["complete"], "closure conditions alone must not certify discovery")
++        self.assertEqual(routed["terminal_classification"], W.INCOMPLETE_DISCOVERY)
++        self.assertEqual(routed["work_exhaustion"]["status"], W.INCOMPLETE_DISCOVERY)
++        self.assertFalse(routed["work_exhaustion"]["all_checked"])
++        self.assertFalse(W.verified_quiescence(routed["work_exhaustion"]))
++        self.assertEqual(len(routed["work_exhaustion"]["sources"]), len(W.ALL_WORK_SOURCES))
++        self.assertEqual(block["disposition"], automation.BLOCKED)
++        self.assertEqual(block["reason_code"], "incomplete-discovery")
++        self.assertIsNone(block["next_command"])
++        self.assertFalse(block["closure_complete"])
+ 
+     def test_diverted_unknown_disposition_cannot_be_emitted(self) -> None:
+         block = self.block(routed=None)
+@@ -453,9 +503,6 @@
+ 
+ 
+ class ClosureGate(AutomationFixture):
+-    def _idle_route(self) -> dict:
+-        return route_next(_state(), BOARD_EMPTY, audit_inbox=None)
+-
+     def test_full_closure_gate_yields_complete(self) -> None:
+         block = self.block(
+             routed=self._idle_route(),
+@@ -507,14 +554,24 @@
+         self.assertFalse(block["closure_complete"])
+ 
+     def test_binding_wait_vetoes_closure(self) -> None:
+-        state, _ = _parsed(_state(next_action="WAIT: user brake -- wait for the human"))
+-        block = self.block(
+-            routed=self._idle_route(),
+-            state=state,
+-            audit_status=self.audit(),
+-        )
+-        self.assertEqual(block["disposition"], CONTINUE)
+-        self.assertFalse(block["closure_complete"])
++        text = _state(next_action="WAIT: user brake -- wait for the human")
++        state, board = _parsed(text)
++        routed = route_next(text, BOARD_EMPTY, audit_inbox=None)
++        self.assertEqual(routed["action"], state["next_action"])
++        self.assertEqual(routed["reason"], "wait")
++        self.assertEqual(routed["executable_behavior"], "RESTATE_AND_STOP")
++        audit_status = self.audit()
++        block = self.block(routed=routed, state=state, audit_status=audit_status)
++        self.assertEqual(block["disposition"], automation.WAIT_USER)
++        self.assertIsNone(block["next_command"])
++        self.assertTrue(block["operator_action_due"])
++        self.assertFalse(block["closure_complete"])
++        gate = automation.closure_gate(
++            status_out=audit_status, convergence=CONVERGENCE_OK,
++            history_events=[], state=state, board=board, agent="probe",
++        )
++        self.assertFalse(gate["complete"])
++        self.assertEqual(gate["conditions"], {f"C{i}": i != 8 for i in range(1, 9)})
+ 
+     def test_race_rule_consume_after_convergence_vetoes_closure(self) -> None:
+         block = self.block(
+@@ -673,10 +730,10 @@
+ class AcceptanceFixture(AutomationFixture):
+     """The disposable three-layer project audit/10.md §10 demands.
+ 
+-    Drive the REAL engine modules (audit_inbox transport state, the closure
+-    gate, the router) through the full sequence: work -> first quiescence ->
+-    post-boundary convergence -> COMPLETE -> a new generation invalidates ->
+-    drains again -> COMPLETE returns.
++    Drive the REAL audit_inbox transport and C1-C8 closure gate against the
++    explicitly simulated discovery/authority fixture through the full sequence:
++    work -> first quiescence -> post-boundary convergence -> COMPLETE -> a new
++    generation invalidates -> drains again -> COMPLETE returns.
+     """
+ 
+     def setUp(self) -> None:
+@@ -753,7 +810,7 @@
+         return out
+ 
+     def test_full_run_to_closure_sequence(self) -> None:
+-        idle = route_next(_state(), BOARD_EMPTY, audit_inbox=None)
++        idle = self._idle_route()
+         self.assertEqual(idle["reason"], "maintain")
+ 
+         # 1. While audit generations and their work remain -> CONTINUE.
+--- preimages/tools/test_t1739_wait_boundary.py
++++ tools/test_t1739_wait_boundary.py
+@@ -107,15 +107,23 @@
+         self.assertNotEqual(block["disposition"], automation.COMPLETE)
+ 
+     def test_genuine_complete_requires_all_current_closure_conditions(self):
+-        _, _, _, block = self.evaluate(_state(), BOARD_EMPTY, convergence=CONVERGENCE_OK)
++        # Completion needs the schema-2 certificate, not an empty queue; the
++        # idle fixture supplies checked discovery plus its explicit grant.
++        block = self.block(
++            routed=self._idle_route(), audit_status=self.audit(),
++            convergence=CONVERGENCE_OK, history_events=[],
++        )
+         self.assertEqual(block["disposition"], automation.COMPLETE)
+         self.assertTrue(block["closure_complete"])
+         self.assertIsNone(block["next_command"])
+ 
+     def test_stale_projection_cannot_certify_current_completion(self):
+         stale = {**CONVERGENCE_OK, "ok": False, "reasons": ["source changed"]}
+-        _, _, _, block = self.evaluate(_state(), BOARD_EMPTY, convergence=stale)
++        block = self.block(
++            routed=self._idle_route(), audit_status=self.audit(), convergence=stale,
++        )
+         self.assertFalse(block["closure_complete"])
++        self.assertFalse(block["convergence_current"])
+         self.assertNotEqual(block["disposition"], automation.COMPLETE)
+ 
+     def test_contradictory_authority_tuple_fails_closed(self):

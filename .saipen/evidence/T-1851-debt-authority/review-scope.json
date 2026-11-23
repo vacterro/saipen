@@ -1,0 +1,17 @@
+{
+  "paths": {
+    "tools/accept_legacy_debt.py": "2bf8d192be40692dbf6b957fe5c27c8ad6ce30f4794277a497d959ba5eb1fe50",
+    "tools/saipen_engine/accepted_debt.py": "cd557bfecbe6753d468f72064d50498e9c25ec47148ecbe6003e142e07f5fcbb",
+    "tools/saipen_engine/debt_authority.py": "e6a70d98b4bce5efa0efc414f32859ea54b6336247532b12f81ebaccb2da05d8",
+    "tools/saipen_engine/host_authority_broker.py": "154a68024bf9838a8011a98ae7cbb0d3072f75ccc3df9fafb37139a75fd272c1",
+    "tools/saipen_engine/host_authority_client.py": "2f84344b2599ac51ea7d55be1366b7cbf9aa88c6ffe50a4bb2d022cc03687e3c",
+    "tools/saipen_engine/journal.py": "c39f93dcf4ab0a363992243b595d8e4b209fd02eda4b4cc82d9a72d5f724c1d0",
+    "tools/saipen_engine/operator_origin.py": "c0ba048b4a505520b8cc9eda7ae6e8644e3b46a29cfea452653183afba85e37a",
+    "tools/test_accepted_debt.py": "890dcae298682ccb2a2aba2f0874e990fcbc8f156c45aa92456987c8ee8cad92",
+    "tools/test_accepted_debt_rebind.py": "74e79bf0d3aff8098872c8d64a73970d5909cafd0deef3c8f4725542efdfc056",
+    "tools/test_operator_origin_support.py": "7e977df16e999b3d4be313195691ed952b0203a910f4b871e12d1d0db280d396",
+    "tools/test_t1851_debt_authority.py": "32020c7c34b260233cc1bbd94efca22607246673d8dfe86879b697c6f39f5a78"
+  },
+  "reviewer": "executing agent self-audit; no independent person/agent",
+  "ticket": "T-1851"
+}

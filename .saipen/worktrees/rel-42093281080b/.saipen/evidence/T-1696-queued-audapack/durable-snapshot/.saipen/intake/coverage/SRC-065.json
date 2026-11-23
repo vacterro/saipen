@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-065:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-220 closed with verification evidence in LOG: verify -> PASS conf: high -- red-first regression proof per target. PERF-005: 6 new tests tests/ui_qt/test_pack_progress_timer_lifecycle.py (idle window timer inactive; first pack arms; overlap keeps one; last settle stops; later pack restarts; worker callback never starts timer). PERF-003: 5 new tests tests/test_browser_dispatch.py (expiry/offline retire dedup entry; 512-bound backstop; 5000-sess",
+      "text": "T-218 closure correction audit/10 SRC-044 PERF-002 PERF-003 PERF-004 PERF-005 residuals and T-219 externalize",
+      "verification": "the Work this request created reached its own verification gate; see the T-220 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-220"
+    }
+  },
+  "schema_version": 1
+}

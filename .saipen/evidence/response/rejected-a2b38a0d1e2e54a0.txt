@@ -1,0 +1,8 @@
+STATUS: REVIEW T-1703
+RESULT: Paranduspaik valmis eraldatud koopias; elus puule rakendamata.
+BLOCKER: RECONCILE_REAUTH_REQUIRED -- hosti operaatorisisendi tõend puudub.
+OPERATOR ACTION: Edasta juba antud luba hosti kontrollitava operaatorisisendi kaudu.
+NEXT EXACT ACTION: NONE
+VALIDATION: CURRENT_FAIL | eraldatud: RED 12; GREEN 184/0 | uut täisperekonda ei käivitatud
+DETAILS: .saipen/evidence/T-1704-draft/REPORT.md
+

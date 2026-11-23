@@ -1,0 +1,5 @@
+control: ran 3, red 0 -- as expected
+the engine before this Work: ran 3, red 1 -- as expected
+the derivation is defined and never called: ran 3, red 1 -- as expected
+the binding stops covering the clauses: ran 3, red 1 -- as expected
+mutations: 3, repetitions each: 3, problems: 0

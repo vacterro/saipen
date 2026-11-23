@@ -1,0 +1,166 @@
+{
+  "assembled_utc": "2026-10-10T12:05:20.343704+00:00",
+  "subjects": [
+    {
+      "path": "tools/saipen_engine/guard_events.py",
+      "before_sha256": "403ba384450a9cdb4f484fc56a98a444dedfff9f80a717fb81c6749043223a2d",
+      "after_sha256": "297cc2794610a12f620d290f4d5b1a0f19b0aadc827c39715fdd0bc2a86f739b"
+    },
+    {
+      "path": "tools/saipen_engine/admission.py",
+      "before_sha256": "6c682c7149545ce8474d830a525de66adc48fd5a1e357e840e9fb0a80330957b",
+      "after_sha256": "6dd09f4f793b8f132669308718d845b45a7623ec8920bd1090984238b53cce48"
+    },
+    {
+      "path": "tools/test_t1705_lifecycle_write_preflight.py",
+      "before_sha256": null,
+      "after_sha256": "5f2bfd5571db0df5ca688eee9fa71f9a6455b7798b1326f8376d16a40f0dd2eb"
+    },
+    {
+      "path": "saipen/CORE.md",
+      "before_sha256": "1a4ee35801de2b5d881dc9dd6fd739c2bbeefe9aab2973a87c0d659a5f688de1",
+      "after_sha256": "aad2f0465f1ed0ecb067a50fc8005823bd3a3b756875634cb4e950fecf34ebe9"
+    },
+    {
+      "path": "saipen/OPS.md",
+      "before_sha256": "c3cdc235cf44ff83318095f896f9deb18a41e3b1417443c510d04d570a6271d0",
+      "after_sha256": "99af38d5624409331382c945d02372d4153d8173cae88af40e2eaa7cf59a9d33"
+    }
+  ],
+  "patch_sha256": "5f619f98a77f4f7482b26d509a29f07bc61fde116d00e9a8b06020c21dd588ff",
+  "runs": [
+    {
+      "output": "preflight-red.txt",
+      "command": "python -m unittest tools.test_t1705_lifecycle_write_preflight -q",
+      "exit_code": 1,
+      "ran": 2,
+      "failures_or_errors": 4,
+      "skipped": 0,
+      "duration_s": null,
+      "output_sha256": "27ab22e1731ea8e01cde15e7be6ae03910aab3f06432ad581905f2165c235c98"
+    },
+    {
+      "output": "preflight-expanded-red.txt",
+      "command": "python -m unittest tools.test_t1705_lifecycle_write_preflight -q",
+      "exit_code": 1,
+      "ran": 14,
+      "failures_or_errors": 20,
+      "skipped": 0,
+      "duration_s": null,
+      "output_sha256": "fccd74ba97efc08505763c5448c2a8412c4c42888818d40aec4deb5285a65d43"
+    },
+    {
+      "output": "preflight-green.txt",
+      "command": "python -m unittest tools.test_t1705_lifecycle_write_preflight -q",
+      "exit_code": 0,
+      "ran": 14,
+      "failures_or_errors": 0,
+      "skipped": 0,
+      "duration_s": null,
+      "output_sha256": "4b21de70406879b1128b0f03314b7e120bc9871d409906688225f705ccda815c"
+    },
+    {
+      "output": "preflight-wrapper-red.txt",
+      "command": "python -m unittest tools.test_t1705_lifecycle_write_preflight -q",
+      "exit_code": 1,
+      "ran": 15,
+      "failures_or_errors": 3,
+      "skipped": 0,
+      "duration_s": null,
+      "output_sha256": "8ab4818ec056876e603f6c496b633631d56632d82c4ca3a12b47b7f86064362f"
+    },
+    {
+      "output": "guard-focused.txt",
+      "command": "python -m unittest tools.test_t1705_lifecycle_write_preflight tools.test_guard_events tools.test_guard_hostile_matrix tools.test_guard_surface_parity tools.test_guard_admission tools.test_guard_execution_reachability -q",
+      "exit_code": 0,
+      "ran": 172,
+      "failures_or_errors": 0,
+      "skipped": 1,
+      "duration_s": 29.252,
+      "output_sha256": "2225bf6a2ccb3dec8c65d029c4cde45a09651e3ac705373c1810d17f6a8669ae"
+    },
+    {
+      "output": "preflight-base-red.txt",
+      "command": "python -m unittest tools.test_t1705_lifecycle_write_preflight -q",
+      "exit_code": 1,
+      "ran": 17,
+      "failures_or_errors": 2,
+      "skipped": 0,
+      "duration_s": null,
+      "output_sha256": "5cf3782e3d023fa39498c2a5781213e6c01543228ff70faec0adf3c7f8adfd89",
+      "note": "One actual unresolved-cwd counterexample plus one test expectation error: the guard CLI returns 1, host transports translate refusal to 2. Original output retained."
+    },
+    {
+      "output": "preflight-final-green.txt",
+      "command": "python -m unittest tools.test_t1705_lifecycle_write_preflight -q",
+      "exit_code": 0,
+      "ran": 17,
+      "failures_or_errors": 0,
+      "skipped": 0,
+      "duration_s": 2.531,
+      "output_sha256": "261092606424d06f922a69c8ac78bf7633bd11f0c1b1a6b62654cd0cb85e3221"
+    },
+    {
+      "output": "focused-final.txt",
+      "command": "python -m unittest tools.test_t1705_lifecycle_write_preflight tools.test_guard_events tools.test_guard_hostile_matrix tools.test_guard_surface_parity tools.test_guard_admission tools.test_guard_execution_reachability tools.test_t1671_lifecycle_authority tools.test_t1673_no_forged_lifecycle -q",
+      "exit_code": 1,
+      "ran": 189,
+      "failures_or_errors": 1,
+      "skipped": 1,
+      "duration_s": 65.934,
+      "output_sha256": "c4d58f1c512eaa88b138382d0d5bb8176cdb38ad4d29048bb438f03a7a00ad8c",
+      "note": "Test command used a nonexistent module spelling; this is a command/setup error, not an engine regression or an overall PASS."
+    },
+    {
+      "output": "focused-corrected.txt",
+      "command": "python -m unittest tools.test_t1705_lifecycle_write_preflight tools.test_guard_events tools.test_guard_hostile_matrix tools.test_guard_surface_parity tools.test_guard_admission tools.test_guard_execution_reachability tools.test_t1671_lifecycle_authority tools.test_t1673_board_only_terminal tools.test_t1679_typed_head_quarantine -q",
+      "exit_code": 0,
+      "ran": 205,
+      "failures_or_errors": 0,
+      "skipped": 1,
+      "duration_s": 134.401,
+      "output_sha256": "69bd4cae9f86415807581eb23ddb3b095498550c0003fa58bd98c62a205d0b12"
+    }
+  ],
+  "full_family": {
+    "state": "FAIL",
+    "command": "python tools/core_unit.py evidence T-1705 --fresh --jobs 6",
+    "exit_code": 1,
+    "ran": 6096,
+    "red": 2,
+    "new_red": [
+      "test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_optional_explicit_launch_is_checked_and_does_not_leak",
+      "test_session_binding.UnseatedMutationTests.test_the_owner_session_mutates_its_own_work"
+    ],
+    "record": ".saipen/evidence/core-unit/8c882ec11b3e1682-20261010T115840Z.json",
+    "record_sha256": "7aa462c5e43212135537069cde10f428626519c477c3d6032961b6d625ac1672",
+    "fingerprint": "8c882ec11b3e1682bd88b6a9eb4b926f8dc03daf65e7f6cacd1059ed1737795d",
+    "duration_s": 1779.1,
+    "checkpoint_event": "E-14229",
+    "sandboxes_leaked": [],
+    "note": "Historical first T-1705 subject, preserved FAIL. Both failures independently reproduced; no baseline change."
+  },
+  "live_persistent_grant": false,
+  "audapack_lifecycle_mutations": [],
+  "transport_fix_subject": {
+    "timestamp_utc": "2026-10-10T12:04:27.6534073Z",
+    "files": {
+      "tools/saipen_engine/guard_events.py": "d800ed9425c3d5450eb4d024fceb7e60587b57ec8bc989502c2116c9fc17be42",
+      "tools/saipen_engine/admission.py": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+      "tools/test_t1705_lifecycle_write_preflight.py": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+      "tools/test_opencode_bound_launch_smoke.py": "4fe8bc30def8c6c0dc1daebef73ca8f575dd633a80d1093a161929ddd6a580f0",
+      "extensions/adapters/opencode/saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+      "saipen/CORE.md": "67852506019f05e6417d07de9915fab5337780052105dfb46497734b58555455",
+      "saipen/OPS.md": "1156215ad5d755a8ec6a3def14227fa5695c7ecc762bca86de2fae5654c22099"
+    }
+  },
+  "native_opencode_control": {
+    "command": "python -m unittest tools.test_opencode_bound_launch_smoke -v",
+    "exit_code": 0,
+    "ran": 6,
+    "failures_or_errors": 0,
+    "duration_s": 72.442,
+    "output": "native-opencode-green.txt",
+    "output_sha256": "edef7c8086fe4f7505ea47f7edfa9c9e2cfce8086af27edce6e9e2a93daef53f"
+  }
+}

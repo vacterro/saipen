@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "checkpoint",
+    "RUN",
+    "T-1704",
+    "ISOLATED_DRAFT -- T-1704 parity patch only; identical 24-test oracle RED 12 exit 1, focused 184/0 GREEN exit 0; native fixtures pass, not live validation. Patch applicability/lint pass; no live code applied or authority granted. T-1703 REVIEW bounded 0/20 preserved; genuine host ingress unavailable. New audit/SAIPEN_20261010_1136.md retained unconsumed; no full-family run or DONE. Evidence: .saipen/evidence/T-1704-draft/REPORT.md",
+    "--json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "stdout": {
+    "ok": true,
+    "code": "CHECKPOINTED",
+    "op_id": "checkpoint-fb99aab251a944a0b2e2343095e12fa7",
+    "changed_files": [
+      ".saipen/LOG.md",
+      ".saipen/BOARD.md",
+      ".saipen/STATE.md"
+    ],
+    "recovery_required": false,
+    "event_id": "E-14221",
+    "operator_boundary": {
+      "command": "saipen response digest --project-root \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\" --reason final --json",
+      "instruction": "The project now waits for the operator. To end the turn, reply with the `text` of that command verbatim and nothing else: the detail is already in LOG, and a DETAILS line, when there is one, names where."
+    }
+  },
+  "stderr": ""
+}

@@ -1,0 +1,40 @@
+{
+  "subject": "HEAD",
+  "pre_fix_commit": "f462ddc018977f06598f332356f9229f23b2e830",
+  "command": "python -X utf8 -m unittest test_ingress_authority test_response_digest test_response_delivery",
+  "returncode": 1,
+  "verifier": "12b954a7d9c4664a",
+  "subject_digest": "f6bbc6071e5b3db9",
+  "oracle_paths": [
+    "tools/test_ingress_authority.py",
+    "tools/test_response_digest.py",
+    "tools/test_response_delivery.py",
+    "tests/fixtures/response-authority/incidents.json",
+    "tools/test_ticket_retirement.py",
+    "tools/test_t1461_source_append.py",
+    "tools/test_opencode_adapter.py",
+    "tools/test_guard_hostile_matrix.py",
+    "tools/test_operator_task_witness.py",
+    "tools/test_t1363_zero_manual_entry.py",
+    "tools/test_dependency_resume_liveness.py",
+    "tools/test_fixture_support.py",
+    "tools/test_hermetic_env.py",
+    "tools/test_orchestration_repair.py"
+  ],
+  "production_paths": [
+    "tools/saipen.py",
+    "tools/saipen_engine/operator_task.py",
+    "tools/saipen_engine/board.py",
+    "tools/saipen_engine/board_compaction.py",
+    "tools/saipen_engine/entry.py",
+    "tools/saipen_engine/operations.py",
+    "tools/saipen_engine/retirement.py",
+    "tools/saipen_engine/response_surface.py",
+    "tools/saipen_engine/chat_style.py",
+    "tools/saipen_engine/hush.py",
+    "tools/saipen_engine/source_append.py",
+    "extensions/adapters/opencode/saipen-guard.js",
+    "extensions/adapters/codex/saipen-guard.py",
+    "extensions/adapters/claude/saipen-guard.py"
+  ]
+}

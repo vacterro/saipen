@@ -1,0 +1,9 @@
+{
+  "captured_at": "2026-11-09T12:08:39.886999+00:00",
+  "files": {
+    "tools/saipen_engine/board.py": "751767d2aa4761c537f9c098130ea178c33292b8b6b04c781787a5f54eae8f0a",
+    "tools/saipen_engine/work_exhaustion.py": "a64920437f572f7009538516cdfc72cfe09e5bcdb347c71e3d9c76bf074f64ad",
+    "tools/saipen_engine/persistent_goal.py": "452e9724a5ba81cab5f04961bb07a57b576b9397d4e096d52ce5f2818274ae9d",
+    "tools/test_t2040_review_input_boundaries.py": "28855197a813d8c5012ee9900d6391fa11935f3c00b29e64c8a8c9cb3d7ad7b9"
+  }
+}

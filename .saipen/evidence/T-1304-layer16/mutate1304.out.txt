@@ -1,0 +1,72 @@
+CONTROL unmutated copy: exit 0, Ran 43 tests
+M1 R005: the verifier hands an unreadable history to the ledger contract again: exit 1 failures=3, errors=2
+      red: test_the_journal_boundary_carries_the_cause
+      red: test_the_operation_settles_on_a_structured_conflict_that_names_the_cause
+      red: test_the_verifier_reports_the_cause_and_dereferences_nothing
+M2 R006: an unknown source diagnostic is forwarded raw: exit 1 failures=4
+      red: test_a_diagnostic_intake_does_not_have_yet_still_answers_in_the_closed_vocabulary
+      red: test_the_adapter_keeps_what_is_registered_and_closes_what_is_not
+M3 R009: settlement does not advance the projection: exit 1 failures=16, errors=3
+      red: test_a_broken_memo_costs_decodes_and_never_a_wrong_record
+      red: test_a_document_that_stays_unreadable_is_untrusted_not_absent
+      red: test_a_failed_advance_never_fails_the_settlement_and_heals_at_the_next
+      red: test_a_matching_query_opens_only_its_own_receipts
+      red: test_a_read_that_meets_a_replace_is_looked_at_again
+      red: test_a_settlement_folds_the_one_receipt_it_moved
+      red: test_a_snapshot_of_a_settled_project_decodes_no_settled_receipt
+      red: test_a_stale_projection_is_rebuilt_at_the_next_settlement
+      red: test_a_tampered_matched_receipt_refuses_the_bounded_answer
+      red: test_a_tampered_settled_receipt_is_never_answered_from_the_memo
+      red: test_a_zero_match_query_opens_no_settled_receipt_and_lists_nothing
+      red: test_an_absent_or_stale_projection_is_answered_from_the_receipts
+      red: test_an_advance_interrupted_before_its_head_is_never_trusted
+      red: test_one_torn_look_is_taken_again_and_two_refuse
+      red: test_only_a_terminal_record_is_ever_taken_from_the_memo
+      red: test_projection_bytes_that_fail_verification_refuse
+      red: test_the_projection_is_current_after_every_settlement
+      red: test_the_retired_index_is_never_written_and_a_leftover_is_removed
+M4 R009: settlement advances without the pre-move token (rebuilds every time): exit 1 failures=3
+      red: test_a_settlement_folds_the_one_receipt_it_moved
+      red: test_a_settlement_reads_no_other_settled_receipt
+      red: test_an_advance_interrupted_before_its_head_is_never_trusted
+M5 R009: an operation query filters the lifetime snapshot: exit 1 failures=7
+      red: test_a_document_that_stays_unreadable_is_untrusted_not_absent
+      red: test_a_matching_query_opens_only_its_own_receipts
+      red: test_a_tampered_matched_receipt_refuses_the_bounded_answer
+      red: test_a_zero_match_query_opens_no_settled_receipt_and_lists_nothing
+      red: test_an_advance_interrupted_before_its_head_is_never_trusted
+      red: test_one_torn_look_is_taken_again_and_two_refuse
+      red: test_projection_bytes_that_fail_verification_refuse
+M6 R009: a stale projection refuses the operation query: exit 1 errors=3
+      red: test_a_failed_advance_never_fails_the_settlement_and_heals_at_the_next
+      red: test_an_absent_or_stale_projection_is_answered_from_the_receipts
+      red: test_an_advance_interrupted_before_its_head_is_never_trusted
+M7 R009: projection bytes that fail verification are scanned around: exit 1 failures=2
+      red: test_a_document_that_stays_unreadable_is_untrusted_not_absent
+      red: test_projection_bytes_that_fail_verification_refuse
+M8 the whole-history snapshot never asks the memo: exit 1 failures=2
+      red: test_a_snapshot_of_a_settled_project_decodes_no_settled_receipt
+      red: test_a_tampered_settled_receipt_is_never_answered_from_the_memo
+M9 a memoized record is used whatever its status: exit 1 failures=2
+      red: test_an_advance_interrupted_before_its_head_is_never_trusted
+      red: test_only_a_terminal_record_is_ever_taken_from_the_memo
+M10 the memo is asked by name, not by the digests of the bytes read: exit 1 failures=2
+      red: test_a_receipt_whose_bytes_changed_is_decoded_again
+      red: test_a_tampered_settled_receipt_is_never_answered_from_the_memo
+M11 a rebuild leaves the retired index behind: exit 1 failures=2
+      red: test_an_advance_interrupted_before_its_head_is_never_trusted
+      red: test_the_retired_index_is_never_written_and_a_leftover_is_removed
+M12 the projection directory is not classed machine-local: exit 1 failures=2
+      red: test_an_advance_interrupted_before_its_head_is_never_trusted
+      red: test_the_projection_is_machine_local_and_the_receipts_stay_durable
+M13 R011: an empty selection constructs a pool again: exit 1 failures=1
+      red: test_zero_runnable_controls_construct_no_executor
+M14 a rebuild publishes its head before its locators: exit 1 failures=1
+      red: test_a_rebuild_interrupted_before_its_head_is_never_trusted
+M15 an advance publishes its head before the new locator: exit 1 failures=1
+      red: test_an_advance_interrupted_before_its_head_is_never_trusted
+M16 a reader believes the first refused read: exit 1 failures=1, errors=1
+      red: test_a_read_that_meets_a_replace_is_looked_at_again
+M17 an operation query takes one look only: exit 1 errors=1
+      red: test_one_torn_look_is_taken_again_and_two_refuse
+restored; mutations 17, undetected 0

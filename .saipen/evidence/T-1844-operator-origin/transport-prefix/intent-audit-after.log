@@ -1,0 +1,57 @@
+test_audit_core003_cc_surplus_exact_and_sc_surplus_zero_write (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_cc_surplus_exact_and_sc_surplus_zero_write) ... ok
+test_audit_core003_converge_target_controls_resume_without_writes (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_converge_target_controls_resume_without_writes) ... ok
+test_audit_core003_goal_cc_and_continue_route_identically_without_writes (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_goal_cc_and_continue_route_identically_without_writes) ... ok
+test_audit_core003_normal_cc_enters_done_convergence (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_normal_cc_enters_done_convergence) ... ok
+test_audit_core003_normal_entry_refuses_intent_race_without_writes (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_normal_entry_refuses_intent_race_without_writes) ... ok
+test_audit_core003_sc_and_crew_establish_equivalent_crew_intent (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_sc_and_crew_establish_equivalent_crew_intent) ... ok
+test_audit_core003_tripped_goal_cc_reauthorizes_and_clears_wait (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_tripped_goal_cc_reauthorizes_and_clears_wait) ... ok
+test_audit_core004_each_stale_dimension_still_reaches_prepare (test_intent_audit_fixes.IntentAuditTests.test_audit_core004_each_stale_dimension_still_reaches_prepare) ... ok
+test_audit_core004_matching_ready_dry_run_plans_fresh_execution (test_intent_audit_fixes.IntentAuditTests.test_audit_core004_matching_ready_dry_run_plans_fresh_execution) ... ok
+test_audit_core004_matching_ready_never_bypasses_named_prepare (test_intent_audit_fixes.IntentAuditTests.test_audit_core004_matching_ready_never_bypasses_named_prepare) ... ok
+test_audit_core005_exact_prepare_commands_keep_fixed_bindings (test_intent_audit_fixes.IntentAuditTests.test_audit_core005_exact_prepare_commands_keep_fixed_bindings) ... ok
+test_audit_core005_exact_ship_commands_keep_fixed_bindings (test_intent_audit_fixes.IntentAuditTests.test_audit_core005_exact_ship_commands_keep_fixed_bindings) ... ok
+test_audit_core005_malformed_producer_commands_are_zero_write (test_intent_audit_fixes.IntentAuditTests.test_audit_core005_malformed_producer_commands_are_zero_write) ... ok
+test_cli_prepare_dry_run_keeps_existing_producer_trees_byte_identical (test_intent_audit_fixes.IntentAuditTests.test_cli_prepare_dry_run_keeps_existing_producer_trees_byte_identical) ... ok
+test_core001_capability_default_is_full_when_unset (test_intent_audit_fixes.IntentAuditTests.test_core001_capability_default_is_full_when_unset) ... ok
+test_core001_readonly_refuses_mutation (test_intent_audit_fixes.IntentAuditTests.test_core001_readonly_refuses_mutation) ... ok
+test_core002_dryrun_zero_write (test_intent_audit_fixes.IntentAuditTests.test_core002_dryrun_zero_write) ... ERROR
+test_core003_existing_outbox_is_not_fresh_execution (test_intent_audit_fixes.IntentAuditTests.test_core003_existing_outbox_is_not_fresh_execution) ... ok
+test_core003_no_fabrication_producer (test_intent_audit_fixes.IntentAuditTests.test_core003_no_fabrication_producer) ... ok
+test_core003_no_fabrication_sub_role (test_intent_audit_fixes.IntentAuditTests.test_core003_no_fabrication_sub_role) ... ok
+test_core004_no_destruction (test_intent_audit_fixes.IntentAuditTests.test_core004_no_destruction) ... ok
+test_core005_recover_live_writer_no_delete (test_intent_audit_fixes.IntentAuditTests.test_core005_recover_live_writer_no_delete) ... ok
+test_core006_saitranslate_namespace (test_intent_audit_fixes.IntentAuditTests.test_core006_saitranslate_namespace) ... ok
+test_core007_crew_defer_accepts_canonical_epoch_shape (test_intent_audit_fixes.IntentAuditTests.test_core007_crew_defer_accepts_canonical_epoch_shape) ... ok
+test_core007_no_unknown_action (test_intent_audit_fixes.IntentAuditTests.test_core007_no_unknown_action) ... ok
+test_core007_targeted_collect_creates_ticket_before_review (test_intent_audit_fixes.IntentAuditTests.test_core007_targeted_collect_creates_ticket_before_review) ... ok
+test_core007_targeted_release_context_requires_ticket_bound_receipt (test_intent_audit_fixes.IntentAuditTests.test_core007_targeted_release_context_requires_ticket_bound_receipt) ... ok
+test_core007_targeted_shortcuts_are_ready_only (test_intent_audit_fixes.IntentAuditTests.test_core007_targeted_shortcuts_are_ready_only) ... ok
+test_core007_targeted_shortcuts_resume_own_ticket_not_crew (test_intent_audit_fixes.IntentAuditTests.test_core007_targeted_shortcuts_resume_own_ticket_not_crew) ... ok
+test_core008_path_containment (test_intent_audit_fixes.IntentAuditTests.test_core008_path_containment) ... ok
+test_core010_conformance_containment (test_intent_audit_fixes.IntentAuditTests.test_core010_conformance_containment) ... skipped 'symlinks not supported on this host'
+test_legacy_autonomous_loop_contract_is_crew_only (test_intent_audit_fixes.IntentAuditTests.test_legacy_autonomous_loop_contract_is_crew_only) ... ok
+test_perf001_progress_tracker_bounds_all_sequences (test_intent_audit_fixes.IntentAuditTests.test_perf001_progress_tracker_bounds_all_sequences) ... ok
+test_review_crew_integrator_refuses_corrupt_epoch_before_payload (test_intent_audit_fixes.IntentAuditTests.test_review_crew_integrator_refuses_corrupt_epoch_before_payload) ... ok
+test_review_descriptor_reader_rejects_short_concurrent_snapshot (test_intent_audit_fixes.IntentAuditTests.test_review_descriptor_reader_rejects_short_concurrent_snapshot) ... ok
+test_review_durable_epoch_carrier_is_strict_project_authority (test_intent_audit_fixes.IntentAuditTests.test_review_durable_epoch_carrier_is_strict_project_authority) ... ok
+test_review_durable_epoch_corruption_never_downgrades_to_legacy (test_intent_audit_fixes.IntentAuditTests.test_review_durable_epoch_corruption_never_downgrades_to_legacy) ... ok
+test_review_durable_epoch_refuses_symlinked_ancestor (test_intent_audit_fixes.IntentAuditTests.test_review_durable_epoch_refuses_symlinked_ancestor) ... skipped "directory symlinks unavailable: [WinError 1314] A required privilege is not held by the client: 'V:\\\\_TEMP_\\\\saipen-epoch-link-t5dx72as\\\\outside' -> 'V:\\\\_TEMP_\\\\saipen-epoch-link-t5dx72as\\\\project\\\\.saipen\\\\kitchen'"
+test_review_durable_epoch_refuses_symlinked_project_identity (test_intent_audit_fixes.IntentAuditTests.test_review_durable_epoch_refuses_symlinked_project_identity) ... skipped "file symlinks unavailable: [WinError 1314] A required privilege is not held by the client: 'V:\\\\_TEMP_\\\\saipen-identity-link-1urmgcp4\\\\outside-identity.md' -> 'V:\\\\_TEMP_\\\\saipen-identity-link-1urmgcp4\\\\project\\\\.saipen\\\\IDENTITY.md'"
+test_review_project_identity_descriptor_rejects_lstat_open_pivot (test_intent_audit_fixes.IntentAuditTests.test_review_project_identity_descriptor_rejects_lstat_open_pivot) ... ok
+test_review_targeted_collect_refuses_corrupt_epoch_before_any_write (test_intent_audit_fixes.IntentAuditTests.test_review_targeted_collect_refuses_corrupt_epoch_before_any_write) ... ok
+
+======================================================================
+ERROR: test_core002_dryrun_zero_write (test_intent_audit_fixes.IntentAuditTests.test_core002_dryrun_zero_write)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_intent_audit_fixes.py", line 214, in test_core002_dryrun_zero_write
+    shutil.copytree(
+  File "C:\ProgramData\SAI\SAIPEN\python\3.11.9-64\Lib\shutil.py", line 571, in copytree
+    with os.scandir(src) as itr:
+         ^^^^^^^^^^^^^^^
+FileNotFoundError: [WinError 3] The system cannot find the path specified: 'V:\\_TEMP_\\saipen-t1844-next-ph7ly19z\\.saipen'
+
+----------------------------------------------------------------------
+Ran 41 tests in 10.231s
+
+FAILED (errors=1, skipped=3)

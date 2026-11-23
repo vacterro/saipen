@@ -1,0 +1,27 @@
+{
+  "bytes": 957,
+  "kind": "saipen-rejected-response",
+  "overflow": {
+    "code": "OPERATOR_OUTPUT_OVERFLOW",
+    "detail_ref": ".saipen/evidence/response/rejected-27efcfc6e57c9bf2.txt",
+    "fields": [
+      {
+        "char_budget": 64,
+        "chars": 810,
+        "field": "STATUS",
+        "line_budget": 1,
+        "lines": 6
+      }
+    ],
+    "response_class": "COMPACT_FINAL",
+    "total": {
+      "char_budget": 900,
+      "chars": 941,
+      "line_budget": 6,
+      "lines": 10
+    }
+  },
+  "ref": ".saipen/evidence/response/rejected-27efcfc6e57c9bf2.txt",
+  "schema": 1,
+  "sha256": "27efcfc6e57c9bf2e5bfa663e1a71ad0dad5d4a91ae11f844285dfc4ca08fb1d"
+}

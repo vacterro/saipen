@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-104:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-257 closed with verification evidence in LOG: verify -> PASS [target: T-257] conf: high -- generation truth rebuilt as ONE authority. chatGPTGenerationSnapshot() (resources/AUDAPACK_WIDGET.user.js) is now consumed identically by chatGPTIsGenerating(), superCompactAutoLabel(), evaluateAutoAudit(), the observer, worker cleanliness and Send availability, so no layer can say generating while another says terminal. Two independent causes closed: C",
+      "text": "Fix live A3 stall: completed ChatGPT audit response stays classified as generating (widget 0.0.84)",
+      "verification": "the Work this request created reached its own verification gate; see the T-257 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-257"
+    }
+  },
+  "schema_version": 1
+}

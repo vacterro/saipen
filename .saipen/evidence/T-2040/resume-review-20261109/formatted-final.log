@@ -1,0 +1,42 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.exe
+PySide6 6.11.1 -- Qt runtime 6.11.1 -- Qt compiled 6.11.1
+rootdir: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+plugins: anyio-4.15.1, langsmith-0.14.12, asyncio-1.4.0, cov-7.1.0, docker-3.2.5, mock-3.15.1, qt-4.5.0, timeout-2.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 28 items / 3 deselected / 25 selected
+
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_bad_or_unproven_hint_cannot_schedule 
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_bad_or_unproven_hint_cannot_schedule PASSED [  4%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_checked_terminal_control_retains_completion PASSED [  8%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_foreign_external_ticket_cannot_hide_authorized_discovery PASSED [ 12%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_hint_never_overrides_real_authority_or_operator_boundary 
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_hint_never_overrides_real_authority_or_operator_boundary PASSED [ 16%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_native_no_blocker_spellings_keep_bounded_discovery_available 
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_native_no_blocker_spellings_keep_bounded_discovery_available PASSED [ 20%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_native_operator_stop_never_gets_a_discovery_hint PASSED [ 24%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_pure_unproven_terminal_is_runtime_pause_not_operator_wait PASSED [ 28%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_supervisor_queued_identity_does_not_lose_remediation_command 
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_supervisor_queued_identity_does_not_lose_remediation_command PASSED [ 32%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_unchecked_native_inventory_never_requests_a_human PASSED [ 36%]
+tools/test_t2040_iteration_truth.py::IterationTruthTests::test_valid_bounded_hint_remains_incomplete_but_resumes PASSED [ 40%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r001_corrupt_or_mismatched_staged_entry_detected PASSED [ 44%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r001_raw_index_stat_cache_mutation_vs_stage_invariance PASSED [ 48%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r002_path_traversal_refused_during_transfer PASSED [ 52%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r002_separate_reviewed_implementation_from_archive_and_metadata PASSED [ 56%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip 
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip PASSED [ 60%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero 
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero PASSED [ 64%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_known_graphs_report_measured_counts 
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_known_graphs_report_measured_counts PASSED [ 68%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_measures_push_destination_not_fetch_remote PASSED [ 72%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_missing_local_commit_is_unmeasured PASSED [ 76%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_reconcile_remote_ancestry_detects_merge_base_and_divergence PASSED [ 80%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_refuses_non_fast_forward_push PASSED [ 84%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_remote_object_absent_locally_is_unknown_not_zero PASSED [ 88%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r004_approval_packet_contains_all_decision_request_fields PASSED [ 92%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r005_verify_remote_head_must_match_expected_sha PASSED [ 96%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r006_independent_work_unblocked_during_release_hold PASSED [100%]
+
+============ 25 passed, 3 deselected, 25 subtests passed in 5.43s =============

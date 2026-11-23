@@ -1,0 +1,41 @@
+test_current_artifact_without_host_health_is_unknown (test_guard_hostile_matrix.RealAdapterEvidence.test_current_artifact_without_host_health_is_unknown) ... FAIL
+test_18_missing_adapter_cannot_report_effective_blocking (test_guard_hostile_matrix.RealAdapterEvidence.test_18_missing_adapter_cannot_report_effective_blocking) ... FAIL
+test_19_stale_adapter_cannot_report_effective_blocking (test_guard_hostile_matrix.RealAdapterEvidence.test_19_stale_adapter_cannot_report_effective_blocking) ... FAIL
+
+======================================================================
+FAIL: test_current_artifact_without_host_health_is_unknown (test_guard_hostile_matrix.RealAdapterEvidence.test_current_artifact_without_host_health_is_unknown)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_guard_hostile_matrix.py", line 634, in test_current_artifact_without_host_health_is_unknown
+    self.assertEqual(verdict["effective"], "UNKNOWN")
+AssertionError: 'BLOCKING' != 'UNKNOWN'
+- BLOCKING
++ UNKNOWN
+
+
+======================================================================
+FAIL: test_18_missing_adapter_cannot_report_effective_blocking (test_guard_hostile_matrix.RealAdapterEvidence.test_18_missing_adapter_cannot_report_effective_blocking)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_guard_hostile_matrix.py", line 666, in test_18_missing_adapter_cannot_report_effective_blocking
+    self.assertEqual(verdict["effective"], ENFORCEMENT_STRENGTH_GAP)
+AssertionError: 'BLOCKING' != 'ENFORCEMENT_GAP'
+- BLOCKING
++ ENFORCEMENT_GAP
+
+
+======================================================================
+FAIL: test_19_stale_adapter_cannot_report_effective_blocking (test_guard_hostile_matrix.RealAdapterEvidence.test_19_stale_adapter_cannot_report_effective_blocking)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_guard_hostile_matrix.py", line 678, in test_19_stale_adapter_cannot_report_effective_blocking
+    self.assertEqual(verdict["effective"], ENFORCEMENT_STRENGTH_GAP)
+AssertionError: 'BLOCKING' != 'ENFORCEMENT_GAP'
+- BLOCKING
++ ENFORCEMENT_GAP
+
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+FAILED (failures=3)

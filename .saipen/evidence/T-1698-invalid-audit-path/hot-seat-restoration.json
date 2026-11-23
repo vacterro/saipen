@@ -1,0 +1,15 @@
+{
+  "owned": [
+    {
+      "path": "tools/saipen_engine/audit_inbox.py",
+      "before": "7421355627f2b55b109e0df4644a5b49580f2f21173e6bf33d3544dc37968e06",
+      "after": "8be9ffadd25fc8d8c750ee7694f82e41fdbe2faa2ff593a44a59f3306477c53d"
+    },
+    {
+      "path": "tools/test_audit_inbox.py",
+      "before": "370927381ec5eb6db4db1a8723620963a4b6c22a2bee05cb4e9df7998e8e265a",
+      "after": "e702c8403074fb1584048c582bc234efd342a7bd0dabca8b3e7aa54740bb3a2e"
+    }
+  ],
+  "scope": "exact original T-1698 candidate only; no foreign source or staged blob changes"
+}

@@ -1,0 +1,11 @@
+{
+  "verifier_actual": "c31e968253889bb883dc66fb7fd6e7b90ab60ba0cb23a6984f7af56a2e20b5d8",
+  "verifier_recorded": "c31e968253889bb883dc66fb7fd6e7b90ab60ba0cb23a6984f7af56a2e20b5d8",
+  "pre_digest": "3841e88094b76b325377fe31c132b156c65050ded7361c46a46ec134d0100e3b",
+  "pre_expected": "3841e88094b76b325377fe31c132b156c65050ded7361c46a46ec134d0100e3b",
+  "pre_mismatches": [],
+  "post_actual": "56e9cdb73c9d8ab02fcc5ff41804208fae10754211c492cc78978c2ee3df810f",
+  "post_expected": "56e9cdb73c9d8ab02fcc5ff41804208fae10754211c492cc78978c2ee3df810f",
+  "post_mismatches": [],
+  "candidate_patch_sha256": "752264b326036228d522c596b694712289cc33e83d1882223be6ee89cb1d6605"
+}

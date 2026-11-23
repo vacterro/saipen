@@ -1,0 +1,53 @@
+# R3 CONTROL — tools/validator_fail_sites.json (T-1882)
+# One verifier (tools/test_check_inventory.py, unmodified bytes) over a throwaway
+# copy of tools/ + saipen/ + .saipen/KNOWLEDGE; only the e736f31b20f2d116
+# ledger record differs between the halves.
+
+## RED — record absent (the pre-fix drift)
+# exit 1
+# FAIL: test_regeneration_keeps_an_adjudicated_verdict (test_check_inventory.InventoryGateTests.test_regeneration_keeps_an_adjudicated_verdict)
+# FAIL: test_regeneration_never_mints_a_baseline (test_check_inventory.InventoryGateTests.test_regeneration_never_mints_a_baseline)
+# FAIL: test_the_live_repository_agrees_with_its_ledger (test_check_inventory.InventoryGateTests.test_the_live_repository_agrees_with_its_ledger)
+# FAIL: test_the_probe_passes_on_the_real_repository (test_check_inventory.InventoryGateTests.test_the_probe_passes_on_the_real_repository)
+# FAIL: test_unrelated_line_insertion_is_accepted (test_check_inventory.InventoryGateTests.test_unrelated_line_insertion_is_accepted)
+# Ran 0
+" is not None
+
+======================================================================
+FAIL: test_unrelated_line_insertion_is_accepted (test_check_inventory.InventoryGateTests.test_unrelated_line_insertion_is_accepted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1882-r3-by6l3s12\tools\test_check_inventory.py", line 299, in test_unrelated_line_insertion_is_accepted
+    self.assertEqual(I.inventory_errors(padded), [])
+AssertionError: Lists differ: ["ADDED fail site e736f31b20f2d116 at tool[341 chars]son'] != []
+
+First list contains 2 additional elements.
+First extra element 0:
+"ADDED fail site e736f31b20f2d116 at tools/validate.py:5968 in <module> ('FUTURE-OWNER: `saipen future ` is implemented and declared but never p') -- a new check needs a CASE in tools/audit_checks.py, or a recorded reason it has none. Regenerate tools/validator_fail_sites.json in the same change"
+
++ []
+- ['ADDED fail site e736f31b20f2d116 at tools/validate.py:5968 in <module> '
+-  "('FUTURE-OWNER: `saipen future ` is implemented and declared but never p') "
+-  '-- a new check needs a CASE in tools/audit_checks.py, or a recorded reason '
+-  'it has none. Regenerate tools/validator_fail_sites.json in the same change',
+-  'ledger declares 358 sites and lists 357 -- regenerate '
+-  'tools/validator_fail_sites.json']
+
+----------------------------------------------------------------------
+Ran 46 tests in 5.603s
+
+FAILED (failures=5)
+
+
+## GREEN — record present (the repair)
+# exit 0
+
+
+test_the_independent_probes_declare_no_prerequisite (test_check_inventory.ProbeIsolationTests.test_the_independent_probes_declare_no_prerequisite) ... ok
+test_two_independent_failures_are_BOTH_reported (test_check_inventory.ProbeIsolationTests.test_two_independent_failures_are_BOTH_reported) ... ok
+
+----------------------------------------------------------------------
+Ran 46 tests in 6.007s
+
+OK
+

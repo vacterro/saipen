@@ -1,0 +1,62 @@
+[
+  {
+    "pid": 10000,
+    "root": "V:/_TEMP_/saipen-core-unit-yhbqujr3",
+    "observed_status_lines": 509,
+    "red": [],
+    "tail": [
+      "test_environment_present_cannot_be_labeled_unavailable (test_source_receipts.SourceReceiptTests.test_environment_present_cannot_be_labeled_unavailable) ... ok",
+      "test_inc_archive_context_pollution_001 (test_source_receipts.SourceReceiptTests.test_inc_archive_context_pollution_001) ... "
+    ]
+  },
+  {
+    "pid": 11336,
+    "root": "V:/_TEMP_/saipen-core-unit-gkbchrkp",
+    "observed_status_lines": 483,
+    "red": [],
+    "tail": [
+      "test_diagnostics_and_ingress_never_run_fleet_prepare (test_t1363_zero_manual_entry.PluginFleetRoutingTests.test_diagnostics_and_ingress_never_run_fleet_prepare) ... ok",
+      "test_the_exemption_survives_unrelated_recovery_debt (test_t1363_zero_manual_entry.PluginFleetRoutingTests.test_the_exemption_survives_unrelated_recovery_debt) ... "
+    ]
+  },
+  {
+    "pid": 11060,
+    "root": "V:/_TEMP_/saipen-core-unit-sr183zui",
+    "observed_status_lines": 1020,
+    "red": [],
+    "tail": [
+      "test_a_passing_gate_is_left_exactly_as_it_was (test_source_refusal_routing.RoutableRefusalTests.test_a_passing_gate_is_left_exactly_as_it_was) ... ok",
+      "test_a_release_refusal_names_release_scope_membership (test_source_refusal_routing.RoutableRefusalTests.test_a_release_refusal_names_release_scope_membership) ... "
+    ]
+  },
+  {
+    "pid": 4008,
+    "root": "V:/_TEMP_/saipen-core-unit-x5cpdwz1",
+    "observed_status_lines": 484,
+    "red": [],
+    "tail": [
+      "test_one_unknown_actionable_requirement_refuses (test_recovered_attribution.AttributionNegativeTests.test_one_unknown_actionable_requirement_refuses) ... ok",
+      "test_original_contract_digest_mismatch_refuses (test_recovered_attribution.AttributionNegativeTests.test_original_contract_digest_mismatch_refuses) ... "
+    ]
+  },
+  {
+    "pid": 18664,
+    "root": "V:/_TEMP_/saipen-core-unit-doftn9hn",
+    "observed_status_lines": 358,
+    "red": [],
+    "tail": [
+      "test_case10_scheduled_cold_start_uses_only_the_published_contract (test_t1501_entry_resolver.EntryResolutionMatrix.test_case10_scheduled_cold_start_uses_only_the_published_contract) ... ok",
+      "test_case11_every_transport_answers_the_same_status (test_t1501_entry_resolver.EntryResolutionMatrix.test_case11_every_transport_answers_the_same_status) ... "
+    ]
+  },
+  {
+    "pid": 17192,
+    "root": "V:/_TEMP_/saipen-core-unit-oes88aw3",
+    "observed_status_lines": 537,
+    "red": [],
+    "tail": [
+      "test_a_response_cannot_borrow_another_native_sessions_proof (test_response_delivery.CompletedPartDelivery.test_a_response_cannot_borrow_another_native_sessions_proof) ... ok",
+      "test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing (test_response_delivery.CompletedPartDelivery.test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing) ... "
+    ]
+  }
+]

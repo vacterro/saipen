@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-207",
+    "operation_id": "board-compact-dc15d7f748fe4b66ac9484ad14b2d2de",
+    "reason": "explicit canonical legacy BOARD compaction"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-195/T-195-36147efc9b05ad5b42526448.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 9178,
+  "original_record_path": ".saipen/recovery/board-compaction/T-195/T-195-36147efc9b05ad5b42526448.BOARD.md",
+  "original_record_sha256": "36147efc9b05ad5b425264487ca091673f763412a3b1118922e114c90a32b672",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_smart_vac_cleaner",
+  "project_lineage": "lineage-05afdade62f34ea2ab30cb3740a7ad17",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": "",
+  "ticket_id": "T-195"
+}

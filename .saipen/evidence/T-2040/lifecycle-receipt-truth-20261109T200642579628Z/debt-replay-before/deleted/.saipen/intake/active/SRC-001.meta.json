@@ -1,0 +1,61 @@
+{
+  "linked_work": null,
+  "projection_policy": "authority_only",
+  "receipt_id": "SRC-001",
+  "received_at": "2026-11-09T20:24:42Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "4fdcbf15328797a5e9ad2f46ff75fc459f033a1752b4d21d32c3539d9f5c894c",
+    "sanitized_sha256": "4fdcbf15328797a5e9ad2f46ff75fc459f033a1752b4d21d32c3539d9f5c894c"
+  },
+  "request_provenance": {
+    "compared_digest": "4fdcbf15328797a5e9ad2f46ff75fc459f033a1752b4d21d32c3539d9f5c894c",
+    "declared_by": "host_ingress",
+    "ingress_id": "ing-834f69703a7e9630",
+    "message_id": "6d40cc4ba2b54511940e3744770982f7",
+    "operator_origin": {
+      "action": "resolve-gate",
+      "budget": "",
+      "event_id": "6d40cc4ba2b54511940e3744770982f7",
+      "expires": 160.0,
+      "goal": "",
+      "host": "claude",
+      "host_birth": 1,
+      "host_pid": 10,
+      "issued": 100.0,
+      "kind": "operator-origin",
+      "lineage": "lineage-3dd8ed3cc8334aaf94ddfb7b66ff458c",
+      "model": "",
+      "nonce": "e580fb5584a3d51c9d8831b870c12f16",
+      "project": "v:\\_temp_\\saipen-accepted-debt-52cvzzk0\\project",
+      "provenance": {
+        "alg": "hmac-sha256",
+        "kid": "broker-f95ec7ea773381e002a8a7d9",
+        "mac": "f7afcb14e84d88e1b086f60909888ca133027486f5f62a66bd6c631dc509ec1f"
+      },
+      "provider": "",
+      "request_digest": "4fdcbf15328797a5e9ad2f46ff75fc459f033a1752b4d21d32c3539d9f5c894c",
+      "schema": 1,
+      "session": "simulated-native-1fe8e8da4cb4466cb3ab6a63ab095a37",
+      "task": "none"
+    },
+    "session_id": "simulated-native-1fe8e8da4cb4466cb3ab6a63ab095a37",
+    "witness": "operator_carrier"
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "4fdcbf15328797a5e9ad2f46ff75fc459f033a1752b4d21d32c3539d9f5c894c",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "4fdcbf15328797a5e9ad2f46ff75fc459f033a1752b4d21d32c3539d9f5c894c",
+  "status": "ACTIVE",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

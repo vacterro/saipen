@@ -1,0 +1,18 @@
+{
+  "layers": {
+    "audit/1.md": {
+      "binding": "exact",
+      "captured_at": "2026-09-09T14:59:26Z",
+      "closed_at": null,
+      "file_sha256": "df25548ce4ce3997cc326a2c3c621cd3049b009a6658a4ffd20c549339fc57a9",
+      "generation": 1,
+      "layer": 1,
+      "linked_work": "T-198",
+      "receipt_id": "SRC-001",
+      "receipt_sha256": "df25548ce4ce3997cc326a2c3c621cd3049b009a6658a4ffd20c549339fc57a9",
+      "size_bytes": 64584,
+      "state": "ACTIVE"
+    }
+  },
+  "schema_version": 1
+}

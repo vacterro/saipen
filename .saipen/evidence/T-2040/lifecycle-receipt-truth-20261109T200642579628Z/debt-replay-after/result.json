@@ -1,0 +1,36 @@
+{
+  "fixture_kind": "actual_broker_with_explicitly_simulated_native_identity",
+  "fixture_root": "V:\\_TEMP_\\saipen-accepted-debt-q15lgqcx\\project",
+  "first": {
+    "ok": true,
+    "code": "ACCEPTED_DEBT_REGISTERED",
+    "record_id": "AD-000001",
+    "events": [
+      "E-3",
+      "E-4"
+    ],
+    "journal_op_id": "accepted_debt.register-aa6d173eda0c",
+    "authority": "SRC-001",
+    "authority_status": "KNOWN"
+  },
+  "second": {
+    "ok": false,
+    "code": "VALIDATION_FAILED",
+    "detail": "acceptance postcondition failed: .saipen/recovery/conformance/accepted_debt/AD-000001.json: engine refuses the written record: AD-000001 does not exist",
+    "authority_status": "UNKNOWN"
+  },
+  "target": ".saipen/recovery/conformance/accepted_debt/AD-000001.json",
+  "target_existed_before": true,
+  "target_absent_before_retry": true,
+  "target_exists_after_retry": false,
+  "restored_exact_original_bytes": false,
+  "journal_status": "COMMITTED",
+  "journal_bytes_unchanged": true,
+  "changed_after_retry": [],
+  "original_target_sha256": "7b92d57250522d703b7b936c005a9c43d31a96ca2d26b8a47a127cab86c6168b",
+  "production_sha256": {
+    "accepted_debt.py": "cd557bfecbe6753d468f72064d50498e9c25ec47148ecbe6003e142e07f5fcbb",
+    "journal.py": "82f5bdc7200dd2091e31065f5bd96db8c6268c4c49e4c65d8b86538b341ccea2",
+    "operator_origin.py": "59861793d389190b2a455b99bc5448904980a80973e8389c071937a4f573696d"
+  }
+}

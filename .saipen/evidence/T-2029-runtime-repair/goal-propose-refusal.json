@@ -1,0 +1,10 @@
+{
+  "ok": false,
+  "code": "PROPOSAL_OBJECTIVE_MISMATCH",
+  "scope": "continuous_maintenance",
+  "detail": "the current goal pivot does not describe the registered maintenance goal 'self-maintenance-core'; re-enter the goal with its exact objective before approving",
+  "maintenance_goal_id": "self-maintenance-core",
+  "required_objective": "Autonomously discover, evaluate, and repair verified regressions, test failures, and maintenance backlog to preserve a healthy repository",
+  "operator_action": "Send the goal entry for the registered maintenance objective, then propose again. Exact command (paste as your next message): saipen goal Autonomously discover, evaluate, and repair verified regressions, test failures, and maintenance backlog to preserve a healthy repository",
+  "operator_action_blocked": "Do NOT approve a capsule that names another objective. The entry records the operator's own goal pivot for THIS project; a historic test pivot is not a substitute."
+}

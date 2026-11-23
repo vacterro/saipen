@@ -1,0 +1,10 @@
+{
+  "preexisting_blocked_records_unchanged": 62,
+  "preexisting_blocked_records_total": 62,
+  "source_files_unchanged_before_T1697_build": 663,
+  "source_files_total": 664,
+  "mission": "T-1696 / SRC-201",
+  "mission_state": "BLOCKED: SEQUENCED_AFTER_CURRENT",
+  "audapack_observed": false,
+  "audapack_mutated": false
+}

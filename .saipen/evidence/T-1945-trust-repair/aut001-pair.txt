@@ -1,0 +1,5 @@
+current tree: rc=0 18 passed, 10 subtests passed in 0.26s
+reverted: broker gate, persisted-status split, both int() coercions
+pre-fix tree: rc=1 17 failed, 11 passed in 0.44s
+
+PROVEN

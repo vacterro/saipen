@@ -1,0 +1,27 @@
+{
+  "kind": "executing-agent source self-audit",
+  "revision": {
+    "tools/saipen_engine/cohort_reconcile.py": "15ff6829037057edefec3e12229ca742b070b349cb5a823ae2413125c29c2c14",
+    "tools/saipen_engine/closure.py": "e880c0e65f813b68c1611f9ffef17ddf905b756be217943a355498f997ca4760",
+    "tools/saipen_engine/operations.py": "bda0ea40e51a469f41f94e0a83e07ff19f9ceef67e8ab72ed21a84877ec85c97",
+    "tools/saipen.py": "3c1c4b8863b897b36e410cef7761666a4c43f2ae531bf71372d594816d2c06e0",
+    "tools/test_t1839_cohort_reconciliation.py": "dca04e7ae16411907884d3ce61ccb944c1aca54ca1f128573f49d2981c4c3963",
+    "saipen/OPS.md": "cf65745da9135e21b0be3ad75a6f808fa39c7d42f1962ac32396a32b39092f6e"
+  },
+  "scope": [
+    "flat same-owner canonical PLAN/APPLY and actual committed finish authority",
+    "journal-bound immutable reconciliation receipt and original cohort/member preimages",
+    "owned complete reviewed target union and current evidence/source gates",
+    "exact matching terminal release op/version/cohort identity",
+    "missing/malformed/forged/tampered/nested edges, frozen public finish/bind membership",
+    "read-only/dry-run/retry and stale APPLY behavior",
+    "existing release executor retains current full-family and scoped publication protection",
+    "original history and active Work/counters preserved",
+    "strengthened real publication case positive/missing/foreign/restore/later-history controls"
+  ],
+  "finding": "Missing receipt cohort_id was incorrectly defaulted to target; reproduced and corrected by exact comparison. Final unchanged case red on saved publication-prefix/current green. No unresolved findings in inspected revision.",
+  "source_fallback": "Graph/coverage MCP unavailable; exact source/diff and direct callers inspected.",
+  "reviewer": "same executing agent, no independent agent/human review claimed",
+  "validation_limit": "Final current four-pattern record 08c4c80e3de18442-20261020T223015682093Z.json: 105 PASS, independently reused in REVIEW in 7.047 s; actual Linux 19 PASS/no skips; canonical core CURRENT_PASS and EX-000014 current. Full publication and inherited T-1841 Ruff debt remain due.",
+  "result": "PASS for exact current local delta; missing/foreign release identity finding resolved, no unresolved findings"
+}

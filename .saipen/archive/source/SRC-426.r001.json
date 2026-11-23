@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-426:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "HYPERLEAN NIGHT SHIFT 7 (SAIHANDOFF 2026-11-18): parallel-agent verification isolation, verification cost optimization, T-2090/T-2091 lifecycle recovery, autonomy, release convergence"
+    }
+  },
+  "derived_at": "2026-11-18T13:04:31Z",
+  "derived_from": "SRC-426",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "24627c592f81745da1ca9b6b5d2a333853b80c6db090529cd5b35d693688da1b"
+}

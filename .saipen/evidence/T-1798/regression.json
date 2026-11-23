@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-c",
+    "import os,sys,unittest; sys.path.insert(0,'tools'); os.environ['SAIPEN_LIBRARIAN']='off'; import test_install_identity_doctor as checks; suite=unittest.TestSuite(checks.InstallIdentityDoctorTests(name) for name in unittest.defaultTestLoader.getTestCaseNames(checks.InstallIdentityDoctorTests) if name!='test_live_host_surfaces_inspection'); result=unittest.TextTestRunner(verbosity=2).run(suite); sys.exit(0 if result.wasSuccessful() else 1)"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "extensions",
+    "bootstrap",
+    "tests",
+    "VERSION",
+    "ruff.toml"
+  ],
+  "oracle_files": [
+    "tools/test_install_identity_doctor.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/install_identity.py",
+    "tools/saipen_engine/operations.py",
+    "tools/saipen_engine/state.py",
+    "tools/saipen.py"
+  ],
+  "before": {
+    "tools/saipen_engine/install_identity.py": ".saipen/evidence/T-1798/pre/install_identity.py",
+    "tools/saipen_engine/operations.py": ".saipen/evidence/T-1798/pre/operations.py",
+    "tools/saipen_engine/state.py": ".saipen/evidence/T-1798/pre/state.py",
+    "tools/saipen.py": ".saipen/evidence/T-1798/pre/saipen.py"
+  },
+  "timeout": 120
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "variant": "before",
+    "ran": 6,
+    "failures": 5,
+    "errors": 0,
+    "passed": false,
+    "subject_sha256": "d25e83735980e23f5050a6df351b52869a64a0f68a1577cf07c064d1db6c0a17",
+    "verifier_sha256": "5656a05f2e490948ec39164f201c1396eb4e63a1dc5146ab2d5bb156a0575139"
+  },
+  {
+    "variant": "live",
+    "ran": 6,
+    "failures": 0,
+    "errors": 0,
+    "passed": true,
+    "subject_sha256": "0f19b878b64a136a41c9a0cb09609360c5f327af74a1bc5998fefccb121bd363",
+    "verifier_sha256": "5656a05f2e490948ec39164f201c1396eb4e63a1dc5146ab2d5bb156a0575139"
+  }
+]

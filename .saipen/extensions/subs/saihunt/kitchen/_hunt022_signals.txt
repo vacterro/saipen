@@ -1,0 +1,35 @@
+== signal 2: last 12 commits vs LOG citation
+CITED dc39709c0
+UNCITED 7857dbf21
+UNCITED 00f290d90
+UNCITED 66ef622a4
+UNCITED b152e6de2
+UNCITED 88dab8ae4
+UNCITED 983470bd3
+UNCITED bc752edfa
+UNCITED 326fcdddb
+UNCITED 08e84d137
+UNCITED d5eca177a
+UNCITED 7373fcb9b
+cited=1 uncited=11
+== signal 3: TODO/FIXME/HACK/XXX census
+engine files scanned: 177 raw marker lines: 164 in payload: [('tools/saipen_engine/audit_route.py', 1), ('tools/saipen_engine/future_gate.py', 2), ('tools/saipen_engine/operations.py', 43)]
+== signal 4: empty exception-handler census (AST)
+bare pass/continue handlers: 127 ['tools/saipen_engine/account_list.py:143', 'tools/saipen_engine/admission.py:280', 'tools/saipen_engine/admission.py:298']
+== signal 5: symmetry pairs present
+board_scrub: {'def gated_tickets': [128], 'def select': [156], '"gate"': [182]}
+operations: {'def restore_board_rows': [27025], 'gated_missing': [27065, 27066], 'gated_tickets': [21769, 27064]}
+audit_route: {'def linked_work_is_done': [46], 'saipen audit ingest': [74, 93], 'startswith("PHASE ")': [97]}
+future_gate: {'closed_elsewhere': [1661, 1706], '_closed_in_history': [1517, 1661]}
+== signal 6: new-symbol reference census
+linked_work_is_done files: 2 ['saipen_engine\\audit_route.py', 'test_audit_route.py']
+gated_tickets files: 3 ['saipen_engine\\board_scrub.py', 'saipen_engine\\operations.py', 'test_t2071_gate_pinned_row.py']
+restored_board_text files: 4 ['saipen_engine\\board_scrub.py', 'saipen_engine\\operations.py', 'test_t2050_pruned_row_restore.py', 'test_t2071_gate_pinned_row.py']
+closed_elsewhere files: 1 ['saipen_engine\\future_gate.py']
+== repo gate absence check
+FUTURE GATE fail lines: 1 | audit route fail lines: 0
+== signal 2 refined: whole-token hash prefixes (7-12 hex)
+cited: ['dc39709c0']
+uncited: ['7857dbf21', '00f290d90', '66ef622a4', 'b152e6de2', '88dab8ae4', '983470bd3', 'bc752edfa', '326fcdddb', '08e84d137', 'd5eca177a', '7373fcb9b']
+== signal 4 refined: BARE except / except Exception with pass-only body
+bare except: 0 | except Exception/BaseException: 16 | examples: ['tools/saipen_engine/campaign.py:1651 Exception', 'tools/saipen_engine/campaign.py:1660 Exception', 'tools/saipen_engine/campaign.py:901 Exception']

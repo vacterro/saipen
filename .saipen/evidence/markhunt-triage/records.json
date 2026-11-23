@@ -1,0 +1,239 @@
+{
+  "kind": "human-triage-preparation-not-approval",
+  "rows": [
+    {
+      "ticket": "T-1307",
+      "description": "[P1] [MARKHUNT] cluster x1 (pass E-5977 @71455482): TWO live STATE/BOARD/LOG/OUTBOX surfaces for producer saitranslate, one deliberate, one orphaned, and every consumer reads a different pair -- split-brain instance. The T-504 canonical layout is `.saipen/saitranslate/` (CrewRole subs.py:165 outbox=.saipen/saitranslate/kitchen/OUTBOX.md; crew.py:1084 role_paths base=.saipen/saitranslate; crew.py:249-255 snapshot adds .saipen/saitranslate/kitchen/OUTBOX.md; producer.py:1772 producer_namespace special-cases saitranslate -> .saipen/saitranslate) while MANIFEST.md:8 still maps saitranslate -- .saipen/extensions/subs/saitranslate/ and the manifest parser (subs.py:~467 canonical = {SUBS_REL}/{name}/) forbids every other path. A second full instance lives at .saipen/extensions/subs/saitranslate/ (STATE/BOARD/LOG/OUTBOX, 101-line OUTBOX) and validate.py:4130-4133 adds BOTH outboxes to the producer loop, _producer_of (validate.py:4171-4180) tagging the extensions path saitranslate. Witnessed live 09.09.26: prepare updated only the canonical OUTBOX; the extensions mirror still carried SAIT-029 status ready at the dead triple 35ca656e/f2e3a0e1 and `collect:saitranslate` FAILED on a package the canonical kitchen had already superseded; the mirror STATE is DONE while the canonical kitchen has no STATE at all (`ls .saipen/saitranslate/` = LOG.md READY SETTLED kitchen producer_epoch.json). validator sub-lifecycle sweeps skip .saipen/saitranslate/STATE.md because the sub-board glob is extensions/subs-only",
+      "verify": "exactly ONE STATE/BOARD/LOG/OUTBOX surface answers for saitranslate: either extensions/subs/saitranslate/ is retired (MANIFEST entry removed, mirror OUTBOX deleted, canonical kitchen gains STATE/BOARD/LOG per crew.py:1084) or the canonical path is re-pointed and every special-case (subs.py:165, crew.py:249/1084, producer.py:1772, validate.py:4131, _producer_of) updated to one convention; a validation gate fails when the mirror and canonical OUTBOXes disagree on the newest ready package; unittest and ruff PASS",
+      "prior_blocker": "STILL TRUE, restated from current evidence 02.10.26 under T-1596 (the old text was 'unvetted audit -- validate.py:4130-4133 dual outbox loop; live collect:saitranslate FAIL 09.09.26 03:38 from the superseded mirror entry'). What is GONE: the mirror half -- .saipen/extensions/subs/saitranslate/ no longer exists, so the FAIL no longer comes from a superseded mirror entry. What is TRUE: tools/validate.py --gate collect:saitranslate still FAILs (3 problems) and the remaining package failure is the live OUTBOX entry .saipen/saitranslate/kitchen/OUTBOX.md [SAIT-032], whose source_head a1e9c09f and source_tree_fingerprint 4c6fd9b3 no longer match the tree; together with the current --gate core WARN [producer-package-stale] (HUNT-014, 9 more) there are two live outbox surfaces carrying stale packages. The remediation is producer-owned refresh of those packages (the gate already refuses to collect them); what is missing is an owner seat, and the drain does not manufacture one. Not markhunt's move was true on 09.09.26; the finding is still real today.",
+      "current_blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+      "filing_pass": "E-5977",
+      "filing_events": [
+        {
+          "date": "09.09.26 04:31",
+          "event": 5977,
+          "parent": 5976,
+          "ticket": null,
+          "agent": "buffy",
+          "op_id": null,
+          "taxonomy": "RUN",
+          "text": "markhunt -> 3 findings, 5/5 vectors, @71455482 tickets=T-1307,T-1308,T-1309 -- dry audit of the saitranslate dual-layout producer surfaces witnessed live during this session's qq/ee prepares; no project bytes fixed, findings recorded under ## BLOCKED for human triage"
+        }
+      ],
+      "detail_chain": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1307/T-1307-11f601595f184d158d6280de.BOARD.md",
+          "sha256": "11f601595f184d158d6280de25d96db26293e761042e511c0b3557ddc4094754"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1307/T-1307-9c8aac3c34192135076c6023.BOARD.md",
+          "sha256": "9c8aac3c34192135076c60236c3578a90556f9e1ee692b04000e319df4b5b598"
+        }
+      ]
+    },
+    {
+      "ticket": "T-1308",
+      "description": "[P2] [MARKHUNT] cluster x1 (pass E-5977 @71455482): W-044 went stale on the freshness triple alone while its payload stayed byte-current, and the two produce indistinguishable outcomes for a consumer -- triple staleness exists to protect the consumer from CONTENT drift (Avenue: read dependencies), so a zero-drift rebind costs a full re-verify cycle with no information gained. Class evidence: W-034 and W-045/W-046 were both zero-page-delta rebins; the current contract makes every engine-side mutation (staging writes, mirror syncs, unrelated tools/ edits) invalidate the whole wiki payload even when no declared read dependency moved. classify_integration (producer.py) already implements the precise model (read_set/write_set -> COMPATIBLE_DRIFT) that the OUTBOX triple check refuses to use",
+      "verify": "a ready package whose declared read_set hashes all still match the live tree is collectable under the documented COMPATIBLE_DRIFT path even when the global triple moved, while any moved declared read dependency or write target still refuses; the collect gate prints which dependencies moved rather than only the global fingerprint; zero content-drift rebins stop being mandatory; unittest and ruff PASS",
+      "prior_blocker": "STILL TRUE, restated 02.10.26 under T-1596: classify_integration (tools/saipen_engine/producer.py:775) and its COMPATIBLE_DRIFT class (producer.py:215) are still called ONLY from producer.py internals (lines 1844, 2013) and from tools/test_v7_producer_parallelism.py; tools/validate.py contains no reference to classify_integration or COMPATIBLE_DRIFT, so the gate that reports a stale package cannot classify the drift it just measured. The live symptom is unchanged and visible in the current --gate core output: WARN [producer-package-stale] for .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-014] plus 8 more, each saying 'package is stale and MUST NOT be collected', and --gate collect:saitranslate FAILs on the same class for SAIT-032. The remedy (let the gate classify the drift through COMPATIBLE_DRIFT instead of only refusing) is real Work and has no owner; the drain records it, it does not silently clear it.",
+      "current_blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+      "filing_pass": "E-5977",
+      "filing_events": [
+        {
+          "date": "09.09.26 04:31",
+          "event": 5977,
+          "parent": 5976,
+          "ticket": null,
+          "agent": "buffy",
+          "op_id": null,
+          "taxonomy": "RUN",
+          "text": "markhunt -> 3 findings, 5/5 vectors, @71455482 tickets=T-1307,T-1308,T-1309 -- dry audit of the saitranslate dual-layout producer surfaces witnessed live during this session's qq/ee prepares; no project bytes fixed, findings recorded under ## BLOCKED for human triage"
+        }
+      ],
+      "detail_chain": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1308/T-1308-8681ca8965dd5ff9460a2cca.BOARD.md",
+          "sha256": "8681ca8965dd5ff9460a2ccadd5947759d930ffe4830530187132665c4be0189"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1308/T-1308-cbdd9fe2e10b9c3fa8f7c492.BOARD.md",
+          "sha256": "cbdd9fe2e10b9c3fa8f7c492d2f9acf60dd725a583a17ea093e3246d82904606"
+        }
+      ]
+    },
+    {
+      "ticket": "T-1309",
+      "description": "[P2] [MARKHUNT] cluster x1 (pass E-5977 @71455482): my own verification import of .saipen/saitranslate/kitchen/_refresh_readmes.py spawned kitchen/__pycache__/ and the validator's locale enumeration (release_contract.locale_readme_paths = every kitchen subdirectory) counted __pycache__ as a 33rd locale: three findings at once -- locale-readme-absent WARN, shortcut-callouts FAIL (missing README___PYCACHE__.md), locale-coverage FAIL (translated locale without guide). Python bytecode caching is ordinary interpreter behaviour on this host, so any python run beside the kitchen can redden the collect gate for content that has nothing to do with translations",
+      "verify": "locale_readme_paths (and every kitchen glob consumer) excludes non-locale directories by closed rule (dunder dirs, .translation-cache, no README_<NAME>.md convention match), so a __pycache__ beside locales changes nothing; a real locale directory without its README still reports as before; red control proves the exclusion is a closed list rather than broad stat ignore; unittest and ruff PASS",
+      "prior_blocker": "RESOLVED IN FACT, closure provenance is what remains (re-blocked 02.10.26 under T-1596 after the stale 'unvetted audit ... not markhunt's move' blocker was proven false). The finding is gone on live evidence. This ticket owns no implementation delta, so the only closure modes available are inherited_verified (which needs an implementation source) or own_patch (which needs a per-ticket diff); measured on this tree, resolve_implementation_source returns False for every local-only Work ('DONE is an evidence claim, never proof of publication') and True for exactly one token, release:v8.0.1, which did not implement this repair. Closing therefore requires the same operator publication authorization as T-1283 and T-1565, and the drain does not manufacture it. Row stays truthfully blocked rather than runnable-but-unclosable.",
+      "current_blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+      "filing_pass": "E-5977",
+      "filing_events": [
+        {
+          "date": "09.09.26 04:31",
+          "event": 5977,
+          "parent": 5976,
+          "ticket": null,
+          "agent": "buffy",
+          "op_id": null,
+          "taxonomy": "RUN",
+          "text": "markhunt -> 3 findings, 5/5 vectors, @71455482 tickets=T-1307,T-1308,T-1309 -- dry audit of the saitranslate dual-layout producer surfaces witnessed live during this session's qq/ee prepares; no project bytes fixed, findings recorded under ## BLOCKED for human triage"
+        }
+      ],
+      "detail_chain": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1309/T-1309-9206e39fc2e9e04ccb4610c3.BOARD.md",
+          "sha256": "9206e39fc2e9e04ccb4610c3e790f2537dde03b6487814f08dc00179f40be5ba"
+        }
+      ]
+    },
+    {
+      "ticket": "T-1310",
+      "description": "[P2] [MARKHUNT] cluster x1 (pass E-5978 @71455482): a CLOSED source receipt's active surface was resurrected through git staging, and the global gate FAILs on it every run while offering no recovery path for this direction -- SRC-024 is mechanically closed: index.json lists it under tombstones (status CLOSED, closed_at 2026-09-06T23:38:00Z, unresolved 0, linked_work T-1297, archive_ref .saipen/archive/source/SRC-024.md), the tombstone file is tracked at HEAD (380b30f6 ship v8.0.1) and the full archive bundle exists -- yet the working tree and git index hold .saipen/intake/active/SRC-024.md (byte-identical to the archive body, sha256 29382825df116709...), .saipen/intake/active/SRC-024.meta.json with status ACTIVE and the pre-closure received_at 2026-09-06T18:09:53Z, plus 8 contracts/coverage files, all staged as adds (status A, 09.09.26 04:48). recover_orphans (intake.py:2614) reads the active DIRECTORY against index.active (SRC-015/017/026 only): tombstoned id + present active body -> ORPHAN_RECEIPT SRC-024 -> validate.py:753 global FAIL, witnessed live in every validator run this session. The reverse crash direction is named and recoverable (ARCHIVE_COMMIT_PENDING, intake.py:2583) but the ghost direction gets only the generic tag. Committing the staged adds does NOT clear it -- the orphan condition is index-vs-disk, not staging-vs-HEAD -- and SRC-025 shows the legitimate half of the same lifecycle: its active+contract files are unstaged deletions and its archive bundle is untracked, i.e. the tree sits mid-transition between two valid intake states with only SRC-024 contradicting its own index",
+      "verify": "removing the staged active-surface files of a tombstoned receipt (or the named reverse reconciliation) returns validate_project to zero ORPHAN_RECEIPT; a gate distinguishes staged-add resurrection of a tombstoned receipt from a legitimate active receipt and names the receipt id and the contradicting index state; red control proves a genuinely missing active body still FAILs; unittest and ruff PASS",
+      "prior_blocker": "RESOLVED IN FACT, closure provenance is what remains (re-blocked 02.10.26 under T-1596 after the stale 'unvetted audit ... not markhunt's move' blocker was proven false). The finding is gone on live evidence. This ticket owns no implementation delta, so the only closure modes available are inherited_verified (which needs an implementation source) or own_patch (which needs a per-ticket diff); measured on this tree, resolve_implementation_source returns False for every local-only Work ('DONE is an evidence claim, never proof of publication') and True for exactly one token, release:v8.0.1, which did not implement this repair. Closing therefore requires the same operator publication authorization as T-1283 and T-1565, and the drain does not manufacture it. Row stays truthfully blocked rather than runnable-but-unclosable.",
+      "current_blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+      "filing_pass": "E-5978",
+      "filing_events": [
+        {
+          "date": "09.09.26 04:48",
+          "event": 5978,
+          "parent": 5977,
+          "ticket": null,
+          "agent": "buffy",
+          "op_id": null,
+          "taxonomy": "RUN",
+          "text": "markhunt -> 2 findings, 5/5 vectors, @71455482 tickets=T-1310,T-1311 -- dry audit of the SRC-024 intake truth surface (tombstoned receipt whose active surface is resurrected through git staging, ORPHAN_RECEIPT every gate run, staged-add resurrection vs ARCHIVE_COMMIT_PENDING asymmetry) and the runtime-manifest copy-tree sweep (untracked engine files enter via copy_trees enumeration, not files[], while the finding's remediation names a nonexistent explicit entry; 4 files are imported by committed code at HEAD-clean state, clears on commit); no project bytes fixed, findings recorded under ## BLOCKED for human triage"
+        }
+      ],
+      "detail_chain": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1310/T-1310-04b681ab5a3446a98102f94f.BOARD.md",
+          "sha256": "04b681ab5a3446a98102f94fa6e103d514a2b933d2b3b7167e9752e08361fe41"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1310/T-1310-af9be30548a3df75851bd003.BOARD.md",
+          "sha256": "af9be30548a3df75851bd00348a93a389fa98167d4fff981e6274f0f6553f174"
+        }
+      ]
+    },
+    {
+      "ticket": "T-1311",
+      "description": "[P2] [MARKHUNT] cluster x1 (pass E-5978 @71455482): the runtime-manifest untracked-file finding sweeps in untracked files through copy-tree enumeration and its remediation text names an entry that does not exist -- saipen/MANIFEST.json carries no explicit entry for tools/saipen_engine/closure.py, tools/saipen_engine/ownership.py, tools/test_orchestration_repair.py or tools/test_public_closure_cli.py (files[] total 43, zero hits); they enter via copy_trees [{src: tools, dst: tools}] whose copy_tree_members enumerates the working TREE (validate.py:5440-5455), so untracked files are swept into `manifest` and then fail the tracked-set check (validate.py:5509) with \"Commit the file or drop the manifest entry\". The 4 files are real in-flight engine work created 09.09.26 06:21-06:45 (T-1302/T-1304 arc) and are imported by committed files -- validate.py:2606 ownership_invariant_errors, router.py:17 from . import ownership, operations.py:2302/2311/3001/3051 closure, release.py:3051, saipen.py:2716, fast_check.py:613 -- while HEAD's versions of those importers do not import them (verified: git show HEAD greps clean), so HEAD is import-clean and the FAILs clear mechanically on commit; but a maintainer following the printed remediation opens MANIFEST.json and finds nothing to drop, and the finding does not say whether the entry came from files[] or from a copy tree",
+      "verify": "the untracked-manifest finding names its entry source (explicit files entry vs copy tree src), so the remediation is actionable per case; explicit-entry and copy-tree-swept untracked files are distinguishable in validator output; red control with an untracked file outside any copy tree still FAILs identically; unittest and ruff PASS",
+      "prior_blocker": "RESOLVED IN FACT, closure provenance is what remains (re-blocked 02.10.26 under T-1596 after the stale 'unvetted audit ... not markhunt's move' blocker was proven false on live evidence). The finding itself no longer exists; measured on this tree, resolve_implementation_source returns False for every local-only Work and True only for release:v8.0.1, which did not implement this repair, so neither inherited_verified nor own_patch can close a ticket with no attributable delta. Closure needs the same operator publication authorization as T-1283 and T-1565. Row stays truthfully blocked rather than runnable-but-unclosable.",
+      "current_blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+      "filing_pass": "E-5978",
+      "filing_events": [
+        {
+          "date": "09.09.26 04:48",
+          "event": 5978,
+          "parent": 5977,
+          "ticket": null,
+          "agent": "buffy",
+          "op_id": null,
+          "taxonomy": "RUN",
+          "text": "markhunt -> 2 findings, 5/5 vectors, @71455482 tickets=T-1310,T-1311 -- dry audit of the SRC-024 intake truth surface (tombstoned receipt whose active surface is resurrected through git staging, ORPHAN_RECEIPT every gate run, staged-add resurrection vs ARCHIVE_COMMIT_PENDING asymmetry) and the runtime-manifest copy-tree sweep (untracked engine files enter via copy_trees enumeration, not files[], while the finding's remediation names a nonexistent explicit entry; 4 files are imported by committed code at HEAD-clean state, clears on commit); no project bytes fixed, findings recorded under ## BLOCKED for human triage"
+        }
+      ],
+      "detail_chain": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1311/T-1311-69098c5ba2b6f84319a293c4.BOARD.md",
+          "sha256": "69098c5ba2b6f84319a293c44f795b46bd873006b41d10c712eca3942f268961"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1311/T-1311-b5a0cf1a9e9e05da9e613ad6.BOARD.md",
+          "sha256": "b5a0cf1a9e9e05da9e613ad6389ec13eed286eff11f2cd2f90bd4d86af351184"
+        }
+      ]
+    },
+    {
+      "ticket": "T-1312",
+      "description": "[P1] [MARKHUNT] cluster x1 (pass E-5979 @71455482): the ENTIRE mirror sub instance .saipen/extensions/subs/saitranslate/ is untracked in git -- zero files in the index (git ls-files count 0), while every sibling sub is tracked (saiwiki 4, saipython 6, saitest 4 files) and MANIFEST.md:8 advertises the path `saitranslate -- .saipen/extensions/subs/saitranslate/`. A fresh clone of HEAD therefore gets a MANIFEST that advertises a sub whose directory does not exist, and the dual-surface condition of T-1307 only half exists in history: the canonical .saipen/saitranslate/ tree is tracked (kitchen tools + OUTBOX) but the mirror STATE/BOARD/LOG/OUTBOX that twice produced stale-package gate FAILs (E-5977 witness, SAIT-029 `ready` at dead triple) was never once visible to a diff or a review -- the mirror could rot silently precisely because git never saw it. Root cause is git-add hygiene, not code: whatever created the mirror never staged it, and no gate checks advertised-but-untracked sub directories",
+      "verify": "the mirror directory is either committed by decision or retired by decision (T-1307 owns the which), and MANIFEST.md's advertisement matches what git actually tracks; a validator check (or checklist rule) FAILs any MANIFEST.md-advertised sub whose tracked file count is 0; red control proves a tracked sub passes and an advertised-untracked sub fails; unittest and ruff PASS",
+      "prior_blocker": "RESOLVED IN FACT, closure provenance is what remains (re-blocked 02.10.26 under T-1596 after the stale 'unvetted audit ... not markhunt's move' blocker was proven false on live evidence). The finding itself no longer exists; measured on this tree, resolve_implementation_source returns False for every local-only Work and True only for release:v8.0.1, which did not implement this repair, so neither inherited_verified nor own_patch can close a ticket with no attributable delta. Closure needs the same operator publication authorization as T-1283 and T-1565. Row stays truthfully blocked rather than runnable-but-unclosable.",
+      "current_blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+      "filing_pass": "E-5979",
+      "filing_events": [
+        {
+          "date": "09.09.26 04:55",
+          "event": 5979,
+          "parent": 5978,
+          "ticket": null,
+          "agent": "buffy",
+          "op_id": null,
+          "taxonomy": "RUN",
+          "text": "markhunt -> 2 findings, 5/5 vectors, @71455482 tickets=T-1312,T-1313 -- dry audit of git-vs-disk persistence for engine-named state surfaces (extensions/subs/saitranslate/ mirror entirely untracked while MANIFEST.md:8 advertises it and every sibling sub is tracked -- T-1307 split-brain could rot silently because git never saw the mirror; two falsified hypotheses discarded en route: markhunt_progress.md untracked [it is tracked], producer_epoch.json at project root [does not exist]) and the unowned changelog-unarchived warning (55 entries vs declared ~10, remedy verbatim in the warning, no BOARD owner, fixable unlike T-1099/T-1119); no project bytes fixed, findings recorded under ## BLOCKED for human triage"
+        }
+      ],
+      "detail_chain": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1312/T-1312-97114551db3a7f71db4e84a4.BOARD.md",
+          "sha256": "97114551db3a7f71db4e84a4232506366835ae408c0db5ec1a403cca9c668fab"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1312/T-1312-de0d0ebdebac190ca43a17ea.BOARD.md",
+          "sha256": "de0d0ebdebac190ca43a17ea6ada503ea34ae48d26c23558f32ab8af3ddf1813"
+        }
+      ]
+    },
+    {
+      "ticket": "T-1313",
+      "description": "[P3] [MARKHUNT] cluster x1 (pass E-5979 @71455482): the `changelog-unarchived` warning emits on every validation (CHANGELOG.md carries 55 version entries while it states it keeps the most recent ~10, remedy written verbatim into the warning: move the overflow to CHANGELOG_ARCHIVE.md) and nothing owns it -- BOARD's only changelog mention is DONE T-1245, a different class (red-control ordering anchor). Not the T-1099/T-1119 PERMANENT_WARNING_OWNER shape: this one is fixable, which makes it a drift trap instead of an owned constant -- an actionable warning with a written remedy that no ticket carries is ignored until it becomes furniture. Same slot those tickets occupy for board-soft-cap/log-missing-date, minus the permanence excuse",
+      "verify": "CHANGELOG overflow (entries beyond the declared ~10) moved verbatim to CHANGELOG_ARCHIVE.md and the warning stops emitting, or a live owner ticket exists naming the slug; the T-1245 descending-order red-control stays green after the move; validator output shows the warning count drop; unittest and ruff PASS",
+      "prior_blocker": "PUBLICATION ONLY (re-blocked 02.10.26 under T-1596, replacing the false 'unvetted audit, observed live 09.09.26' blocker). The finding is fixed: CHANGELOG_ARCHIVE.md is tracked (caa96f69), CHANGELOG.md carries 11 version headings against its own ~10 header, and the current tools/validate.py --gate core run emits no changelog-unarchived warning. What remains is closure provenance only: inherited_verified resolution of T-1434 returns False ('T-1434 is DONE but no committed release evidence names it'), and the only green implementation source on this machine is release:v8.0.1, because every local-only Work fails the same check. Closing T-1313 therefore needs the same operator publish authorization as T-1283 and T-1565; until then the row is truthfully blocked, not runnable.",
+      "current_blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+      "filing_pass": "E-5979",
+      "filing_events": [
+        {
+          "date": "09.09.26 04:55",
+          "event": 5979,
+          "parent": 5978,
+          "ticket": null,
+          "agent": "buffy",
+          "op_id": null,
+          "taxonomy": "RUN",
+          "text": "markhunt -> 2 findings, 5/5 vectors, @71455482 tickets=T-1312,T-1313 -- dry audit of git-vs-disk persistence for engine-named state surfaces (extensions/subs/saitranslate/ mirror entirely untracked while MANIFEST.md:8 advertises it and every sibling sub is tracked -- T-1307 split-brain could rot silently because git never saw the mirror; two falsified hypotheses discarded en route: markhunt_progress.md untracked [it is tracked], producer_epoch.json at project root [does not exist]) and the unowned changelog-unarchived warning (55 entries vs declared ~10, remedy verbatim in the warning, no BOARD owner, fixable unlike T-1099/T-1119); no project bytes fixed, findings recorded under ## BLOCKED for human triage"
+        }
+      ],
+      "detail_chain": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1313/T-1313-5c6c7f602356736d006ab94d.BOARD.md",
+          "sha256": "5c6c7f602356736d006ab94da20636c313bbf17615886d46fd6e6d4bcd61619d"
+        }
+      ]
+    },
+    {
+      "ticket": "T-1314",
+      "description": "[P3] [MARKHUNT] cluster x1 (pass E-5980 @71455482): saiwiki's READY/ directory accumulates every publish as a distinct sha256-named snapshot with no settlement path -- 12 distinct packages on disk 09.09.26 05:05, while the engine defines the three-stage lifecycle (producer.py:67-69 READY_DIRNAME/SETTLED_DIRNAME/SUPERSEDED_DIRNAME) and saitranslate actually uses it (.saipen/saitranslate/SETTLED/ carries 4, its LOG records the moves); saiwiki's kitchen _publish_package.py contains no READY/SETTLED/SUPERSEDED handling at all and .saipen/extensions/subs/saiwiki/ has no SETTLED/ or SUPERSEDED/ directory. Interaction with T-1308 makes it grow by construction: each triple-fragility rebind writes a new file even at zero content drift (triple is inside the package, so digest changes), and the whole directory is untracked (?? in git status) so nothing review-visible ever bounds it. Consumption is OUTBOX-driven (producer.py:557 references READY/ relative paths from the outbox entry), so the 11 older snapshots are inert -- but a directory of 12 ready-named packages with exactly one valid is a standing ambiguity trap for any consumer or human scanning READY/",
+      "verify": "a retention or settlement rule exists for saiwiki READY/ (settle superseded packages on publish, or prune beyond newest, or document READY/ as append-only archive with the OUTBOX as sole truth); after one publish the count rule is mechanical, not discretionary; red control proves a stale READY snapshot is never collectable; unittest and ruff PASS",
+      "prior_blocker": "RESOLVED IN FACT, closure provenance is what remains (re-blocked 02.10.26 under T-1596 after the stale 'unvetted audit ... not markhunt's move' blocker was proven false on live evidence). The finding itself no longer exists; measured on this tree, resolve_implementation_source returns False for every local-only Work and True only for release:v8.0.1, which did not implement this repair, so neither inherited_verified nor own_patch can close a ticket with no attributable delta. Closure needs the same operator publication authorization as T-1283 and T-1565. Row stays truthfully blocked rather than runnable-but-unclosable.",
+      "current_blocker": "MARKHUNT_TRIAGE_REQUIRED -- phases/markhunt.md:30 requires later explicit human triage before TODO acceptance. My promotion lacked that decision and the required ticket plus filing-pass DEC, so it...",
+      "filing_pass": "E-5980",
+      "filing_events": [
+        {
+          "date": "09.09.26 05:05",
+          "event": 5980,
+          "parent": 5979,
+          "ticket": null,
+          "agent": "buffy",
+          "op_id": null,
+          "taxonomy": "RUN",
+          "text": "markhunt -> 1 finding, 5/5 vectors, @71455482 tickets=T-1314 -- fourth pass on unchanged HEAD: closure re-proofs clean (5 FAILs all ticketed T-1310/T-1311), remaining surfaces swept -- saiwiki READY/ accumulates 12 sha-named packages with no SETTLED/SUPERSEDED stage while the engine defines the three-stage lifecycle (producer.py:67-69) and saitranslate uses it live (SETTLED=4); XP receipts complete 4/4, audit_inbox layers closed-bound; no project bytes fixed, finding recorded under ## BLOCKED for human triage"
+        }
+      ],
+      "detail_chain": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1314/T-1314-e35ed585b41e2b57cd9da964.BOARD.md",
+          "sha256": "e35ed585b41e2b57cd9da964a612be48440be7d553a2d38cc225440e63331e1f"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1314/T-1314-006fc4ef0593e9aa1f0d64ed.BOARD.md",
+          "sha256": "006fc4ef0593e9aa1f0d64ed1a851484eb6b6a2925c469db20f4d324114d97bb"
+        }
+      ]
+    }
+  ],
+  "authority": "saipen/phases/markhunt.md:29",
+  "publication_authorized": false
+}

@@ -1,0 +1,38 @@
+{
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "action": null,
+  "reason": "conformance-unhealthy",
+  "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair.",
+  "recovery_pending": false,
+  "recovery_conflict": false,
+  "conflict_ops": [],
+  "pending_ops": [],
+  "parked_work": [
+    "T-911 blocked: WAIT_USER_DECISION (engine owner T-607, not this tree's authority): relax the sub-write-boundary detector to the rule's stated intent -- an actionable TARGET (payload/instructions), not a mere...",
+    "T-907 blocked: WAIT_USER_DECISION: three items, all outside the working tree's authority. (a) the launcher shim: ~/bin/saipen and ~/bin/saipen.cmd exec V:\\_TEMP_\\saipen-core-unit-gzehwnwk\\project\\tools\\saipen.py,...",
+    "T-903 blocked: WAIT_USER_DECISION: the ledger repair is an operator choice -- re-derive the 115 lost events from .saipen/recovery/**/operation.json, or declare the active ledger sealed and restart above E-3368...",
+    "T-902 blocked: source closure not ready (SOURCE_RECEIPT_MISSING)",
+    "T-376 blocked: T-376 BLOCKED, NARROWED to two sub-clauses that need the operator, both because producing the input is an outward-facing action. RESOLVED since the last blocker: the CDP endpoint the previous...",
+    "T-359 blocked: T-359 BLOCKED -- NOT accepted, and the gap is a product fact, not unfinished work. What is proven on the live page right now, with the product's own CHATGPT_FAST_CSS injected (goldendefault 1.36.6,..."
+  ],
+  "conformance_status": "CURRENT_FAIL",
+  "canonical_next_command": null,
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-417946d3e1da",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+  },
+  "repair_status": "ENGINEERING_REQUIRED",
+  "terminal": true,
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_WIN95THEME\\Wintage --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat saipen-cli",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

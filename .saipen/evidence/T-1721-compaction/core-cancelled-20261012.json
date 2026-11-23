@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "ticket": "T-1721",
+  "status": "CANCELLED",
+  "reason": "Newly reproduced same-scope writer bypass when compaction hides every AC marker; candidate requires correction",
+  "pid": 36664,
+  "creation_utc": "2026-10-12T06:50:14.4460640Z",
+  "command": "\"C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -B tools/core_unit.py evidence T-1721",
+  "cancelled_utc": "2026-10-12T07:01:07.2237282Z"
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-065:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-218 closure correction audit/10 SRC-044 PERF-002 PERF-003 PERF-004 PERF-005 residuals and T-219 externalize"
+    }
+  },
+  "derived_at": "2026-09-20T20:05:52Z",
+  "derived_from": "SRC-065",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "a16ef43e3c671a82b61138bb86217ec651c1d61de79dcf8584cddf964445a560"
+}

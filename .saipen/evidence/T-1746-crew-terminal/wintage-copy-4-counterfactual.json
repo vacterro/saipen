@@ -1,0 +1,28 @@
+{
+  "SRC-002": {
+    "add": {
+      "ok": true,
+      "code": "REQUIREMENT_ADDED",
+      "detail": null
+    },
+    "disposition": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "detail": null
+    },
+    "coverage_complete": true
+  },
+  "SRC-069": {
+    "add": {
+      "ok": true,
+      "code": "REQUIREMENT_ADDED",
+      "detail": null
+    },
+    "disposition": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "detail": null
+    },
+    "coverage_complete": true
+  }
+}

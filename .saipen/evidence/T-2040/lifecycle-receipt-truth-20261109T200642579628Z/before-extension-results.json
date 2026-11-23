@@ -1,0 +1,42 @@
+[
+  {
+    "label": "debt-replay",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\lifecycle-receipt-truth-20261109T200642579628Z\\probe_debt_replay.py",
+      "before"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 1,
+    "elapsed_seconds": 0.453
+  },
+  {
+    "label": "lost-active",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_lost_active_ticket_recovery"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 0,
+    "elapsed_seconds": 1.016
+  },
+  {
+    "label": "debt-full",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_t1851_debt_authority"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 1,
+    "elapsed_seconds": 6.843
+  }
+]

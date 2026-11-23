@@ -1,0 +1,269 @@
+{
+ "control": [
+  {
+   "ran": 45,
+   "reds": []
+  },
+  {
+   "ran": 45,
+   "reds": []
+  }
+ ],
+ "mutations": [
+  {
+   "mutation": "M01 versionless route never admitted",
+   "expected_red": "test_versionless_ticketless_epoch_closes_locally",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_closure_that_died_before_its_body_is_aborted_not_committed",
+    "test_a_foreign_source_change_between_plan_and_apply_writes_nothing",
+    "test_a_forged_sibling_receipt_never_becomes_a_pass",
+    "test_a_git_project_sees_zero_git_mutation",
+    "test_a_read_only_session_plans_and_certifies_nothing",
+    "test_a_receipt_missing_a_roles_evidence_cannot_certify",
+    "test_a_receipt_of_another_epoch_is_not_this_epochs_release",
+    "test_a_refused_local_validation_does_not_poison_the_epoch",
+    "test_a_second_closure_of_a_verified_epoch_is_refused",
+    "test_a_source_that_moved_after_the_closure_stales_the_receipt",
+    "test_a_ticket_that_appears_between_plan_and_apply_writes_nothing",
+    "test_a_versionless_epoch_that_owns_a_ticket_closes_under_that_ticket",
+    "test_an_empty_deferred_scope_refuses",
+    "test_an_epoch_carrier_of_another_lineage_is_refused",
+    "test_an_interrupted_closure_recovers_and_the_retry_changes_nothing",
+    "test_an_operator_owned_ticket_without_a_source_does_not_block",
+    "test_an_unresolved_sibling_still_makes_the_lineage_unclean",
+    "test_an_unresolved_source_of_other_work_still_blocks",
+    "test_another_project_lineage_does_not_inherit_the_receipt",
+    "test_authorization_lost_between_plan_and_apply_writes_nothing",
+    "test_no_plan_without_crew_authorization",
+    "test_scope_bytes_changed_after_the_review_refuse_the_plan",
+    "test_scope_bytes_changed_between_plan_and_apply_write_nothing",
+    "test_the_verdict_names_a_local_closure_under_a_persisted_full_mode",
+    "test_versionless_ticketless_epoch_closes_locally"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M02 ticketless epoch never owned",
+   "expected_red": "test_a_ticketless_epoch_of_a_versioned_project_keeps_its_version",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_closure_that_died_before_its_body_is_aborted_not_committed",
+    "test_a_foreign_source_change_between_plan_and_apply_writes_nothing",
+    "test_a_forged_sibling_receipt_never_becomes_a_pass",
+    "test_a_git_project_sees_zero_git_mutation",
+    "test_a_read_only_session_plans_and_certifies_nothing",
+    "test_a_receipt_missing_a_roles_evidence_cannot_certify",
+    "test_a_receipt_of_another_epoch_is_not_this_epochs_release",
+    "test_a_refused_local_validation_does_not_poison_the_epoch",
+    "test_a_second_closure_of_a_verified_epoch_is_refused",
+    "test_a_source_that_moved_after_the_closure_stales_the_receipt",
+    "test_a_ticket_that_appears_between_plan_and_apply_writes_nothing",
+    "test_a_ticketless_epoch_of_a_versioned_project_keeps_its_version",
+    "test_an_epoch_carrier_of_another_lineage_is_refused",
+    "test_an_interrupted_closure_recovers_and_the_retry_changes_nothing",
+    "test_an_operator_owned_ticket_without_a_source_does_not_block",
+    "test_an_unresolved_sibling_still_makes_the_lineage_unclean",
+    "test_an_unresolved_source_of_other_work_still_blocks",
+    "test_another_project_lineage_does_not_inherit_the_receipt",
+    "test_authorization_lost_between_plan_and_apply_writes_nothing",
+    "test_scope_bytes_changed_after_the_review_refuse_the_plan",
+    "test_scope_bytes_changed_between_plan_and_apply_write_nothing",
+    "test_the_verdict_names_a_local_closure_under_a_persisted_full_mode",
+    "test_versionless_ticketless_epoch_closes_locally"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M03 scope compared by the 16-hex token",
+   "expected_red": "test_a_scope_deferred_with_full_identities_is_not_read_as_changed",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_closure_that_died_before_its_body_is_aborted_not_committed",
+    "test_a_foreign_source_change_between_plan_and_apply_writes_nothing",
+    "test_a_forged_sibling_receipt_never_becomes_a_pass",
+    "test_a_git_project_sees_zero_git_mutation",
+    "test_a_read_only_session_plans_and_certifies_nothing",
+    "test_a_receipt_missing_a_roles_evidence_cannot_certify",
+    "test_a_receipt_of_another_epoch_is_not_this_epochs_release",
+    "test_a_refused_local_validation_does_not_poison_the_epoch",
+    "test_a_scope_deferred_with_full_identities_is_not_read_as_changed",
+    "test_a_second_closure_of_a_verified_epoch_is_refused",
+    "test_a_source_that_moved_after_the_closure_stales_the_receipt",
+    "test_a_ticket_that_appears_between_plan_and_apply_writes_nothing",
+    "test_an_interrupted_closure_recovers_and_the_retry_changes_nothing",
+    "test_an_operator_owned_ticket_without_a_source_does_not_block",
+    "test_an_unresolved_sibling_still_makes_the_lineage_unclean",
+    "test_an_unresolved_source_of_other_work_still_blocks",
+    "test_another_project_lineage_does_not_inherit_the_receipt",
+    "test_authorization_lost_between_plan_and_apply_writes_nothing",
+    "test_scope_bytes_changed_between_plan_and_apply_write_nothing",
+    "test_the_verdict_names_a_local_closure_under_a_persisted_full_mode",
+    "test_versionless_ticketless_epoch_closes_locally"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M04 completion chosen from STATE.mode",
+   "expected_red": "test_the_verdict_names_a_local_closure_under_a_persisted_full_mode",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_persisted_no_publish_mode_cannot_waive_the_proof_of_a_publication",
+    "test_a_receipt_missing_a_roles_evidence_cannot_certify",
+    "test_a_receipt_naming_a_ticket_the_epoch_does_not_own_cannot_certify",
+    "test_a_refused_local_validation_does_not_poison_the_epoch",
+    "test_a_source_that_moved_after_the_closure_stales_the_receipt",
+    "test_a_ticketless_epoch_of_a_versioned_project_keeps_its_version",
+    "test_an_interrupted_closure_recovers_and_the_retry_changes_nothing",
+    "test_the_verdict_names_a_local_closure_under_a_persisted_full_mode"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M05 receipt ticket not compared with the epoch",
+   "expected_red": "test_a_receipt_naming_a_ticket_the_epoch_does_not_own_cannot_certify",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_receipt_naming_a_ticket_the_epoch_does_not_own_cannot_certify"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M06 carrier never checked against the durable epoch",
+   "expected_red": "test_a_carrier_naming_a_ticket_the_epoch_does_not_own_is_refused",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_carrier_naming_a_ticket_the_epoch_does_not_own_is_refused",
+    "test_a_carrier_naming_another_epoch_is_refused"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M07 plan epoch not rechecked at apply",
+   "expected_red": "test_a_ticket_that_appears_between_plan_and_apply_writes_nothing",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_ticket_that_appears_between_plan_and_apply_writes_nothing"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M08 second closure admitted",
+   "expected_red": "test_a_second_closure_of_a_verified_epoch_is_refused",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_second_closure_of_a_verified_epoch_is_refused"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M09 aborted sibling counted",
+   "expected_red": "test_a_refused_local_validation_does_not_poison_the_epoch",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_refused_local_validation_does_not_poison_the_epoch"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M10 gate always project-local",
+   "expected_red": "test_a_managed_project_is_judged_by_the_runtimes_validator",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_managed_project_is_judged_by_the_runtimes_validator"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M11 producer edge not recorded",
+   "expected_red": "test_an_integrated_producer_is_recorded_by_its_integration_edge",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_an_integrated_producer_is_recorded_by_its_integration_edge"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M12 same-instant defers not judged",
+   "expected_red": "test_two_defers_of_one_instant_approving_different_bytes_are_ambiguous",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_two_defers_of_one_instant_approving_different_bytes_are_ambiguous"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M13 no source recheck before the local closure",
+   "expected_red": "test_a_foreign_source_change_between_plan_and_apply_writes_nothing",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_foreign_source_change_between_plan_and_apply_writes_nothing"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M14 any ticketless receipt admitted",
+   "expected_red": "test_admission_of_a_ticketless_receipt_needs_a_local_epoch_closure",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_admission_of_a_ticketless_receipt_needs_a_local_epoch_closure"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M15 local closure worded as shipped",
+   "expected_red": "test_versionless_ticketless_epoch_closes_locally",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_versionless_ticketless_epoch_closes_locally"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M16 versionless publication not refused at plan",
+   "expected_red": "test_missing_version_never_reaches_a_publication",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_missing_version_never_reaches_a_publication"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M17 ticketless publication refused under the old sentence",
+   "expected_red": "test_a_ticketless_epoch_cannot_publish_and_is_told_why",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_ticketless_epoch_cannot_publish_and_is_told_why"
+   ],
+   "reds_second": "same"
+  },
+  {
+   "mutation": "M18 full-mode evidence never asked for HEAD proof",
+   "expected_red": "test_a_persisted_no_publish_mode_cannot_waive_the_proof_of_a_publication",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_persisted_no_publish_mode_cannot_waive_the_proof_of_a_publication"
+   ],
+   "reds_second": "same"
+  }
+ ],
+ "undetected_or_unstable": 0
+}

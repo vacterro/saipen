@@ -1,0 +1,316 @@
+{
+  "ok": true,
+  "project_identity": "v:\\___vac\\__k\\__code\\_-game-_\\hoverstrata",
+  "protocol_version": "8.1.0",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "saipen continue",
+  "computed_next_action": "saipen continue",
+  "computed_reason": "maintain",
+  "blocker": "",
+  "execution_intent": "converge",
+  "claimed_ticket": null,
+  "top_workable_ticket": null,
+  "log_tail_event": 138,
+  "head": "17559c2",
+  "board_errors": [],
+  "recovery_pending": false,
+  "recovery_conflict": false,
+  "pending_ops": [],
+  "conflict_ops": [],
+  "blocker_projection": {
+    "schema_version": 1,
+    "groups": [],
+    "items": {}
+  },
+  "goal_authority": {
+    "state": "inactive",
+    "detail": "No persistent grant",
+    "original_event": null,
+    "checkpoint_due": false
+  },
+  "milestone": {
+    "current": null,
+    "label": null,
+    "parent": null,
+    "undo_available": false,
+    "valid": true
+  },
+  "cold_route": {
+    "project_root": "V:\\___VAC\\__K\\__CODE\\_-GAME-_\\HOVERSTRATA",
+    "saipen_home": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source",
+    "protocol_dir": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen",
+    "phase": "DONE",
+    "phase_module": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\phases\\done.md",
+    "boot": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\BOOT.md",
+    "style": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\STYLE.md",
+    "documents": {
+      "STYLE.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\STYLE.md",
+      "BOOT.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\BOOT.md",
+      "INDEX.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\INDEX.md",
+      "COMMANDS.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\COMMANDS.md",
+      "OPS.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\OPS.md",
+      "SOURCES.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\SOURCES.md",
+      "EXECUTION.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\EXECUTION.md",
+      "MAINTENANCE.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\MAINTENANCE.md",
+      "CORE.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\CORE.md",
+      "RUNTIME.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\RUNTIME.md"
+    },
+    "project_memory": {
+      "STATE.md": "V:\\___VAC\\__K\\__CODE\\_-GAME-_\\HOVERSTRATA\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\___VAC\\__K\\__CODE\\_-GAME-_\\HOVERSTRATA\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\___VAC\\__K\\__CODE\\_-GAME-_\\HOVERSTRATA\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  },
+  "readiness": {
+    "schema_version": 1,
+    "rule_id": "T-1862",
+    "status": "PROJECT_ACCEPTED",
+    "headline": "every declared obligation is terminal and no Work remains",
+    "accepted": true,
+    "ready": true,
+    "reasons": [
+      "no outstanding audit, source or Work obligation"
+    ],
+    "execution": {
+      "phase": "DONE",
+      "task": "none",
+      "terminal_phase": true,
+      "claimed_ticket": "none"
+    },
+    "dimensions": {
+      "work": {
+        "counts": {
+          "doing": 0,
+          "todo": 0,
+          "done": 7,
+          "blocked": 0
+        },
+        "open": 0,
+        "runnable": 0,
+        "claimed": 0,
+        "work_available": false,
+        "top_workable": null,
+        "blocked": 0,
+        "blocked_external": 0
+      },
+      "audit": {
+        "known": true,
+        "pending": 0,
+        "invalid": 0,
+        "closed_pending_delete": 0,
+        "residue": 0,
+        "clean": true,
+        "error_state": null,
+        "inbox_state": null
+      },
+      "source": {
+        "active_receipts": 0,
+        "requirements": 0,
+        "outstanding": 0,
+        "terminal": 0,
+        "archived": {
+          "receipts": 5,
+          "unresolved_at_closure": 0
+        },
+        "receipts_known": true
+      },
+      "integrity": {
+        "known": true,
+        "orphans": 0,
+        "items": []
+      },
+      "authority": {
+        "continuation_authority": null,
+        "authority_source": null,
+        "authority_until": null,
+        "safety_valve_mode": null,
+        "execution_intent": "converge",
+        "waiting": false,
+        "next_action": "saipen continue",
+        "goal_authority": {
+          "state": "inactive",
+          "detail": "No persistent grant",
+          "original_event": null,
+          "checkpoint_due": false
+        }
+      }
+    },
+    "grants_authority": false,
+    "authority_unchanged": true
+  },
+  "distribution": {
+    "installed": 7,
+    "stale": 1,
+    "unknown": 0,
+    "fresh": false,
+    "source_head": null,
+    "newest_installed_head": "7857dbf21567bc387d14b556d3826eeb544ed2a6",
+    "last_run": {
+      "status": "skipped",
+      "skip": "DIRTY_SOURCE",
+      "rc": 2,
+      "dirty": [
+        "M saipen/COMMANDS_REFERENCE.md",
+        "M saipen/REGISTRY.json",
+        "M tools/core_unit_baseline.json",
+        "M tools/freshness.py",
+        "M tools/saipen.py"
+      ],
+      "at": "2026-11-13 15:16:00",
+      "head": null,
+      "in_flight": false
+    },
+    "blocker": {
+      "condition": "SOURCE_NOT_A_GIT_WORKTREE",
+      "blocked": true,
+      "detail": "git could not report the injected surface's status",
+      "paths": [],
+      "path_count": 0,
+      "canonical_next_command": "git -C <source> status --porcelain"
+    },
+    "published_head": "7857dbf21567bc387d14b556d3826eeb544ed2a6",
+    "publication": "CURRENT",
+    "consumer_convergence": "CURRENT",
+    "pending_consumers": [],
+    "consumers_converged": false,
+    "requires_human": false,
+    "summary": "distribution: 1 of 7 home(s) stale -- newest installed head 7857dbf21567 -- source head unknown -- last scheduled injection: skipped DIRTY_SOURCE at 2026-11-13 15:16:00 -- BLOCKED SOURCE_NOT_A_GIT_WORKTREE: git could not report the injected surface's status -- clears with: git -C <source> status --porcelain"
+  },
+  "conformance_history": "PASS (13.11.26 11:43)",
+  "conformance_status": {
+    "status": "STALE_PASS",
+    "gate": "core",
+    "stale_reason": "checkpoint-hashes-stale",
+    "reason": "receipt checkpoint hashes invalid: STATE hash mismatch: receipt=e3dd99fffeaf6db1 current=7679473cde0efc19",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 0,
+        "problems": [],
+        "ruleset_fingerprint": "9a47d608ed3f3a833348aaeeca5cd9e9076f3bf53b1ef92b6ade46958e3e3fec",
+        "ruleset_version": 2,
+        "status": "complete",
+        "warning_count": 9
+      },
+      "board_hash": "c798ec655c70e7cf",
+      "canonical_next_command": null,
+      "content_hash": "376a43973db4fa5f",
+      "exit_code": 0,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:53afd2f114f7b07be0c0ade0948aceef29703aa7337c99ba03ee774c21d43fc3",
+      "install_home": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source",
+      "kind": "conformance_receipt",
+      "log_hash": "24e72ffadf170220",
+      "project_identity": "v:\\___vac\\__k\\__code\\_-game-_\\hoverstrata",
+      "receipt_id": "receipt-a0fbe9f8e16c",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "17559c20c44bea4665c83aeded368c15e39bb249",
+      "source_tree_fingerprint": "git-delta-v1:bd064f25e95b0154fedfb71b5579fc8ceb0e353f94f56440357204ce03474190",
+      "state_hash": "e3dd99fffeaf6db1",
+      "timestamp_utc": "2026-11-13T13:21:25.850449Z",
+      "validator_protocol_version": "1",
+      "verdict": "PASS"
+    },
+    "validator": {
+      "validator_path": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "17559c20c44bea4665c83aeded368c15e39bb249",
+      "source_tree_fingerprint": "git-delta-v1:bd064f25e95b0154fedfb71b5579fc8ceb0e353f94f56440357204ce03474190"
+    },
+    "disposition": "UNPROVEN",
+    "remediation_command": "saipen validate",
+    "repair_status": "REFRESH_REQUIRED",
+    "diagnostic": null
+  },
+  "closed_contracts": {
+    "ok": true,
+    "status": "OBSERVED",
+    "advisory": true,
+    "blocks_unrelated_work": false,
+    "total": 7,
+    "counts": {
+      "UNVERIFIED": 6,
+      "UNCHANGED_SCOPE": 1
+    },
+    "rows": [
+      {
+        "work": "T-1",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-2",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-3",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-4",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-5",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      }
+    ],
+    "has_more": true,
+    "offset": 0,
+    "limit": 5,
+    "errors": [],
+    "paths_read": 18,
+    "bytes_read": 47848
+  },
+  "automation": {
+    "schema_version": 1,
+    "disposition": "COMPLETE",
+    "next_command": null,
+    "operator_action_due": false,
+    "reason_code": "closure-complete",
+    "reason": "all eight closure conditions mechanically true; convergence bound to source 17559c20c44bea4665c83aeded368c15e39bb249+git-delta-v1:bd064f25e95b0154fedfb71b5579fc8ceb0e353f94f56440357204ce03474190 and audit epoch audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40",
+    "audit_quiescent": true,
+    "audit_epoch": "audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40",
+    "convergence_current": true,
+    "closure_complete": true,
+    "source_fingerprint": "17559c20c44bea4665c83aeded368c15e39bb249+git-delta-v1:bd064f25e95b0154fedfb71b5579fc8ceb0e353f94f56440357204ce03474190",
+    "completed_at": "2026-11-13T11:45:14Z"
+  },
+  "conditional_efficiency_kpi": {
+    "scope": "ticket",
+    "ticket": "T-7",
+    "percent": 100,
+    "approximate": true,
+    "confidence": "LOW",
+    "formula_version": 1,
+    "components": {
+      "progress": 100,
+      "rework": 100,
+      "autonomy": 100,
+      "human": null
+    },
+    "notes": {
+      "human": "no machine signal separates avoidable operator cost from a legitimate authorization boundary",
+      "autonomy": "coarse: LOG agent ids are CLI identities shared across sessions"
+    },
+    "preliminary": true,
+    "withheld": null
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\___VAC\\__K\\__CODE\\_-GAME-_\\HOVERSTRATA --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat saipen",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "kind": "evidence audit, not Source terminal dispositions",
+  "ticket": "T-1857",
+  "source": "SRC-289",
+  "goal_complete": false,
+  "live_gate": {
+    "session_id": null,
+    "pid": 572,
+    "last_observed_live": true,
+    "started_utc": "2026-10-23T06:06:44Z",
+    "previous_full_record": ".saipen/evidence/core-unit/f7662308cbc6556a-20261023T051543856290Z.json",
+    "previous_verdict": "FAIL",
+    "previous_ran": 7419,
+    "previous_new_red_identities": 75,
+    "controller": "Start-Process Hidden",
+    "pid_created": 1792735601.1084347
+  },
+  "user_retention_decision": "pending; active-goal resume is not storage-root approval",
+  "requirements": [
+    {
+      "id": "SRC-289:R001",
+      "text": "Sections 0, 19: use canonical START and genuine host ingress; preserve the entire original request and honest original provenance. Never forge authority, reset hard_wait without trusted input, substitute persisted work, or cross a real admission or approval boundary.",
+      "status": "BLOCKED_NATIVE_INGRESS",
+      "evidence_limit": "START admitted honest local candidate Work; authenticated native operator origin remains unavailable."
+    },
+    {
+      "id": "SRC-289:R002",
+      "text": "Sections 1, 6: measure the live canonical state, dependency topology, source sizes and all five unchanged context budgets; distinguish historical snapshots from current evidence and separate context, code and storage metrics.",
+      "status": "PROVEN_WITH_HISTORICAL_LIMITS",
+      "evidence_limit": "Current checkpoint, context profiles, source imports and storage snapshot measured separately."
+    },
+    {
+      "id": "SRC-289:R003",
+      "text": "Sections 2, 3: one canonical machine-readable blocker projection exposes class, root cause, owner, shared identity, dependent IDs, internal recovery authority, external-input need, read-only eligibility, exact recovery operation and safe-resumption preconditions. Group the shared publication obstruction without erasing tickets or edges.",
+      "status": "IMPLEMENTED_SCOPED",
+      "evidence_limit": "Every projected blocked item has conservative metadata; tested shared release obstruction and dependent graph."
+    },
+    {
+      "id": "SRC-289:R004",
+      "text": "Section 3: retain registered verdict semantics and distinguish all work complete, no runnable work, operator wait, external wait, recoverable blockers and unsafe continuation. 102 blocked plus three dependent TODO items must never imply completion; display the immediate actionable shared obstruction while preserving older Work.",
+      "status": "IMPLEMENTED_SCOPED",
+      "evidence_limit": "Existing automation vocabulary and COMPLETE gate retained; shared staging priority and human idle status corrected."
+    },
+    {
+      "id": "SRC-289:R005",
+      "text": "Section 4: inspect release scope, foreign staging, index capture and ownership, journal recovery, preflight and attribution. Preserve every existing strict protection; do not reset, stash, add all, clear or commit foreign staging, force-push, rewrite branches or replace history.",
+      "status": "PROVEN_RETAINED",
+      "evidence_limit": "Existing strict release checks inspected; no foreign staging, reset, stash, commit or push performed."
+    },
+    {
+      "id": "SRC-289:R006",
+      "text": "Section 4: prove a canonical isolated publication mechanism commits only the exact reviewed source generation, preserves live index and foreign entries byte-for-byte and worktree contents, ancestry, history, evidence identity, concurrency safety and crash recovery. Use adversarial staged-file fixtures and executed red-before-green controls; explicitly amend and test the release contract if required, otherwise retain the refusal and exact missing operator action.",
+      "status": "BLOCKED_PRODUCTION_BINDING",
+      "evidence_limit": "Detached-worktree Git feasibility proved in disposable fixtures; canonical journal/full-tree/authority integration remains unproved."
+    },
+    {
+      "id": "SRC-289:R007",
+      "text": "Sections 5, 7: recursively remove proven duplicate knowledge and decisions through one authoritative owner, caller and contract maps, equivalence tests, redirected callers, dead-code removal and before/after measurements. Preserve all qualifications, errors, semantics and capabilities; never substitute physical archive compression or obscured side effects for simpler architecture.",
+      "status": "PARTIAL",
+      "evidence_limit": "Several measured consolidation loops completed; this is not exhaustive simplification of the entire protocol."
+    },
+    {
+      "id": "SRC-289:R008",
+      "text": "Section 8: build a rule-ownership graph across the named registry, protocol owners and phase documents; classify normative, derived, explanatory, compatibility, contradictory and obsolete occurrences. Each normative rule has one owner; preserve Rule IDs, observable meaning, conditional loads and acyclic references; measure actual loaded surfaces.",
+      "status": "PARTIAL",
+      "evidence_limit": "Complete declared-marker/reference inventory and selected manual obligation map; unnumbered global prose not exhaustively proven equivalent."
+    },
+    {
+      "id": "SRC-289:R009",
+      "text": "Section 9: consolidate executable command, compound-order, admission, authority, lifecycle, blocker, response, HUSH, verification and publication facts into existing machine owners and schemas. Derive compatible runtime, validator, documentation and regression projections without another registry.",
+      "status": "PARTIAL",
+      "evidence_limit": "Resume, limits, blockers and response projections improved; no claim that every candidate policy system was redesigned."
+    },
+    {
+      "id": "SRC-289:R010",
+      "text": "Sections 9, 17: reuse existing T-1853, T-1854 and T-1855 Work and acceptance contracts; do not create competing implementations or duplicate tickets for their requirements.",
+      "status": "PROVEN_RETAINED",
+      "evidence_limit": "Existing T-1853/T-1854/T-1855 remain intact; no duplicate replacement tickets or competing implementations."
+    },
+    {
+      "id": "SRC-289:R011",
+      "text": "Section 10: inspect actual ownership in the listed engine modules and narrowly consolidate equivalent validation, transaction preparation, BOARD/registry reads, source and authority checks, classifications, hashes, Git probes, projections, recovery and repeated validation. Move cohesive subsystems with API/data parity and explicit safety.",
+      "status": "PARTIAL",
+      "evidence_limit": "One cohesive budget/import subsystem consolidated; distinct transactional safety boundaries retained."
+    },
+    {
+      "id": "SRC-289:R012",
+      "text": "Section 11: classify active state, immutable evidence, derived indexes, disposable cache and historical archive from contracts. Investigate repeated snapshots, reports, outputs, indexes and serialization; do not delete evidence. Any dedupe or migration preserves hashes, attribution, references, exact reconstruction, rollback, old-reader compatibility and crash/partial-migration safety.",
+      "status": "WAIT_OPERATOR_RETENTION",
+      "evidence_limit": "Read-only role/duplicate inventory done; no migration/deletion; explicit storage-root decision pending."
+    },
+    {
+      "id": "SRC-289:R013",
+      "text": "Section 12: reduce actual conditional context loads using complete bounded canonical projections, never model memory. Measure every profile before and after; target at least 25 percent cold and 30 percent ordinary-phase and command-resolution reductions plus fewer rereads. Preserve all mandatory semantic dependencies and existing budget limits; report unmet targets honestly.",
+      "status": "PARTIAL_TARGETS",
+      "evidence_limit": "Current corrected generation: cold -22.6242%, command resolution -29.7151%, ordinary phase unchanged. No numerical target currently achieved; budgets/must sets retained."
+    },
+    {
+      "id": "SRC-289:R014",
+      "text": "Section 13: preserve test-cost-collapse mechanisms, STATIC/FOCUSED/IMPACT/FULL scope, single-flight and compatible evidence reuse. Never trust stale identities, fabricate PASS or weaken SHIP; run full evidence on a stable generation when required and measure comparable invocation counts, reuse, wall time and regressions.",
+      "status": "PENDING_FULL_GATE",
+      "evidence_limit": "First full FAIL:7419 tests/75 red identities; all 75 then green in diagnostic selection, 90 contracts green, one corrected full generation now running. No obsolete PASS reused."
+    },
+    {
+      "id": "SRC-289:R015",
+      "text": "Section 14: maintain a semantic preservation map of old/new owner, original Rule ID, callers, preserved contract and regression evidence for every consolidation. Cover all listed authority, ownership, transactions, recovery, replay, sources, lifecycle, publication, verification, host, historical, concurrency, refusal and confirmation boundaries with valid, hostile and controlled golden comparisons.",
+      "status": "PARTIAL_PENDING_FULL_AND_LIVE",
+      "evidence_limit": "Changed obligations mapped and scoped hostile tests run; full and live native acceptance not yet proven."
+    },
+    {
+      "id": "SRC-289:R016",
+      "text": "Section 15: demonstrate every adversarial control A-T: honest idle, fresh ingress, grouped and prioritized blockers, dependency safety, independent work, foreign staging and reviewed scope, absent authority and invalid receipts, malformed state, compatible versus stale PASS, valid workflows, evidence discovery, host privilege limits, interruption safety, complete projections, acyclic rule ownership and no fabricated progress.",
+      "status": "PARTIAL",
+      "evidence_limit": "Owned adversarial controls have frozen red/green; cannot infer all A-T live/platform outcomes from fixtures."
+    },
+    {
+      "id": "SRC-289:R017",
+      "text": "Section 16: use bounded read-only connectivity checks for T-1829 original-object integrity; distinguish GitHub access, backup availability, history, source publication and release authority. Recover only trustworthy original objects; never synthesize commits, force-push or repeatedly probe the unchanged frontier.",
+      "status": "BLOCKED_ORIGINAL_OBJECTS",
+      "evidence_limit": "112 explicit objects missing; reachable origin does not supply exact commit; known local packs have no matches."
+    },
+    {
+      "id": "SRC-289:R018",
+      "text": "Section 17: execute bounded waves W0-W10 in measured dependency order, preserving evidence, metrics and canonical transitions; re-evaluate admissible work and continue independent authorized waves when one blocks. Admit meaningful new Work with real sources and avoid campaign-wide artificial dependency chains.",
+      "status": "PARTIAL",
+      "evidence_limit": "Independent local waves continued despite native/publication blockers; campaign closure and release restoration remain open."
+    },
+    {
+      "id": "SRC-289:R019",
+      "text": "Section 18: before expensive operations identify the decision, existing evidence, generation and expected cost; prefer focused checks and eliminate repeated self-audits and executions. Measure context, boundaries, branches, reads, processed bytes, startup/routing/continuation latency, test time, storage and recovery behavior rather than line count alone.",
+      "status": "PROVEN_MEASURED_SCOPE",
+      "evidence_limit": "Separate actual context/import/read/storage/test measures preserved; no invented global speed/storage percentages."
+    },
+    {
+      "id": "SRC-289:R020",
+      "text": "Section 19: stop product mutation at genuine authority, approval, identity, ownership, index-safety, irreversible-action or environment boundaries; preserve all work/evidence, identify the exact blocker and owner, and never disguise refusal as completion or ask the operator to do routine safe diagnosis.",
+      "status": "PROVEN_RETAINED",
+      "evidence_limit": "No authority forgery, counter reset, foreign project mutation, unauthorized publication or policy assumption."
+    },
+    {
+      "id": "SRC-289:R021",
+      "text": "Section 20: preserve per-wave STATUS, ROOT CAUSE, CHANGED COMPONENTS, RULES CONSOLIDATED, BEFORE/AFTER MEASUREMENTS, VERIFICATION, SEMANTIC PARITY, SAFETY REGRESSIONS and NEXT EXACT ACTION. Track every requested campaign total, actual completed Work, regressions and remaining external blockers without invented percentages or premature completion.",
+      "status": "PARTIAL_PENDING_FINAL_RESULT",
+      "evidence_limit": "Corrective report preserves first failure, precise test/measurement corrections, P0 sources and actual native gap. Full2 and native acceptance remain pending."
+    },
+    {
+      "id": "SRC-289:R022",
+      "text": "Section 21: prove the full campaign yields smaller required context, simpler execution, cheaper verification, faster continuation, clearer blockers and maintainability with no security, correctness or recovery loss. Preserve distinctions among absent, blocked, authority-limited, recoverable and independently executable work; one shortened document cannot discharge this mission.",
+      "status": "NOT_ACHIEVED",
+      "evidence_limit": "The complete end state remains unproved, including native continuation and safe production publication."
+    }
+  ],
+  "p0_sources": {
+    "request": "SRC-291",
+    "clarification": "SRC-292",
+    "forwarded_handoff": "SRC-293",
+    "incident_work": [
+      "T-1858",
+      "T-1859"
+    ],
+    "native_positive_proven": false,
+    "fresh_authority_granted": false
+  },
+  "interrupted_attempt": {
+    "session_id": 49627,
+    "pid": 30700,
+    "all_six_readers_dead": true,
+    "terminal_record": null,
+    "evidence": "interrupted-full2/observation.json",
+    "cause": "not established"
+  }
+}

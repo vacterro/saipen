@@ -1,0 +1,64 @@
+{
+ "schema": 1,
+ "work": "T-2137",
+ "pruned_trees": [
+  ".saipen/evidence",
+  ".saipen/worktrees"
+ ],
+ "full_files": 106215,
+ "pruned_files": 67522,
+ "remaining_files": 38693,
+ "full_copy_seconds": 59.6,
+ "total_seconds": 129.1,
+ "source_problems_full": 1,
+ "source_problems_pruned": 5,
+ "source_keys_identical": false,
+ "source_fingerprint_identical": true,
+ "source_delta": {
+  "full_only": [],
+  "pruned_only": [
+   [
+    "problem",
+    "4bb9d0e3fc751282"
+   ],
+   [
+    "problem",
+    "da8e2cca1800eaa3"
+   ],
+   [
+    "problem",
+    "de03360a77e8d868"
+   ],
+   [
+    "problem",
+    "b0e25f09a9506b4a"
+   ]
+  ]
+ },
+ "flat_problems_full": 1,
+ "flat_problems_pruned": 5,
+ "flat_keys_identical": false,
+ "flat_fingerprint_identical": true,
+ "flat_delta": {
+  "full_only": [],
+  "pruned_only": [
+   [
+    "problem",
+    "4bb9d0e3fc751282"
+   ],
+   [
+    "problem",
+    "da8e2cca1800eaa3"
+   ],
+   [
+    "problem",
+    "de03360a77e8d868"
+   ],
+   [
+    "problem",
+    "b0e25f09a9506b4a"
+   ]
+  ]
+ },
+ "equivalence": "FAIL"
+}

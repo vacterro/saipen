@@ -1,0 +1,84 @@
+{
+  "clauses": {
+    "SRC-087:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT create another scheduler ticket."
+    },
+    "SRC-087:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT restart SCOUT."
+    },
+    "SRC-087:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT replay already-completed account/limit/prepared implementation."
+    },
+    "SRC-087:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT discard valid E-1881..E-1888 evidence."
+    },
+    "SRC-087:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT mark unfinished workflow placeholders complete merely because their enums or UI fields exist."
+    },
+    "SRC-087:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not ask for ordinary continuation between milestones."
+    },
+    "SRC-087:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT interpret UNKNOWN as \"not implemented\"."
+    },
+    "SRC-087:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Therefore real PRIME/SYNC claims must remain conservative."
+    },
+    "SRC-087:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not treat this external validation as a replacement for the real Windows and Qt gates."
+    },
+    "SRC-087:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create a parallel scheduler."
+    },
+    "SRC-087:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not remove the gate before the corresponding implementation is safe."
+    },
+    "SRC-087:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT start with visual polish."
+    },
+    "SRC-087:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT consume real provider quota merely to make PRIME tests green."
+    },
+    "SRC-087:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Every mutation of an active execution must prove:"
+    },
+    "SRC-087:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A stale worker must not update a receipt after takeover."
+    }
+  },
+  "derived_at": "2026-09-23T12:29:47Z",
+  "derived_from": "SRC-087",
+  "interpretation_revision": 15,
+  "schema_version": 1,
+  "source_sha256": "a71ce00bc107837c605bc56060020ea49607c508c8bc05c650a4b5988da36c38"
+}

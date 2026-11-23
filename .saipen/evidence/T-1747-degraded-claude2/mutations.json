@@ -1,0 +1,148 @@
+{
+ "control": [
+  {
+   "ran": 22,
+   "reds": []
+  },
+  {
+   "ran": 22,
+   "reds": []
+  }
+ ],
+ "mutations": [
+  {
+   "mutation": "M1 notice keeps the table sentence",
+   "expected_red": "test_a_foreign_profile_hook_is_named_instead_of_a_silent_service",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_foreign_profile_hook_is_named_instead_of_a_silent_service"
+   ]
+  },
+  {
+   "mutation": "M2 scoped repair never printed",
+   "expected_red": "test_the_short_marker_carries_the_scoped_command_too",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_foreign_profile_hook_is_named_instead_of_a_silent_service",
+    "test_the_cap_is_never_spent_on_the_command",
+    "test_the_short_marker_carries_the_scoped_command_too"
+   ]
+  },
+  {
+   "mutation": "M3 scoped repair replaces every action",
+   "expected_red": "test_a_scoped_repair_never_replaces_another_action",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_scoped_repair_never_replaces_another_action"
+   ]
+  },
+  {
+   "mutation": "M4 second profile gets the bare command",
+   "expected_red": "test_a_second_profile_is_repaired_by_name",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_second_profile_is_repaired_by_name"
+   ]
+  },
+  {
+   "mutation": "M5 default profile gets a scoped command",
+   "expected_red": "test_the_default_profile_and_other_hosts_keep_the_bare_command",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_the_default_profile_and_other_hosts_keep_the_bare_command"
+   ]
+  },
+  {
+   "mutation": "M6 host repair drops the flag again",
+   "expected_red": "test_host_repair_answers_a_dry_run_with_the_doctor_report",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_profile_repair_plans_for_that_profile_only",
+    "test_host_repair_answers_a_dry_run_with_the_doctor_report"
+   ]
+  },
+  {
+   "mutation": "M7 writers without a plan run under the flag",
+   "expected_red": "test_writers_with_no_plan_refuse_a_dry_run",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_runtime_resync_refuses_a_dry_run",
+    "test_writers_with_no_plan_refuse_a_dry_run"
+   ]
+  },
+  {
+   "mutation": "M8 a dry run refuses a real repair too",
+   "expected_red": "test_host_repair_without_the_flag_still_repairs",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_host_repair_without_the_flag_still_repairs"
+   ]
+  },
+  {
+   "mutation": "M9 one identity step loses its sentence",
+   "expected_red": "test_every_identity_step_has_its_own_sentence",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_every_identity_step_has_its_own_sentence"
+   ]
+  },
+  {
+   "mutation": "M10 the cap may cut the command",
+   "expected_red": "test_the_cap_is_never_spent_on_the_command",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_the_cap_is_never_spent_on_the_command"
+   ]
+  },
+  {
+   "mutation": "M11 host mode writes under the flag",
+   "expected_red": "test_host_mode_refuses_whatever_precedes_its_value",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_host_mode_refuses_whatever_precedes_its_value",
+    "test_writers_with_no_plan_refuse_a_dry_run"
+   ]
+  },
+  {
+   "mutation": "M12 freshness judged on the default profile",
+   "expected_red": "test_prelaunch_measures_and_resyncs_the_profile_the_host_starts_with",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_another_host_ignores_the_claude_carrier",
+    "test_bootstrap_measures_the_profile_it_installs_into",
+    "test_prelaunch_measures_and_resyncs_the_profile_the_host_starts_with"
+   ]
+  },
+  {
+   "mutation": "M13 the default profile treated as a second one",
+   "expected_red": "test_prelaunch_without_a_carrier_keeps_the_default_profile",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_prelaunch_without_a_carrier_keeps_the_default_profile"
+   ]
+  },
+  {
+   "mutation": "M14 the doctor keeps the table sentence",
+   "expected_red": "test_a_foreign_profile_hook_is_named_by_the_doctor",
+   "detected": true,
+   "stable": true,
+   "reds": [
+    "test_a_foreign_profile_hook_is_named_by_the_doctor"
+   ]
+  }
+ ],
+ "undetected_or_unstable": 0
+}

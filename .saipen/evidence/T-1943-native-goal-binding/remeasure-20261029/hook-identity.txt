@@ -1,0 +1,28 @@
+T-1943 re-measurement, 2026-10-29T22:20:24Z
+HEAD: 66ef622a43ab59512735ac78ce10d1250e26f9df
+
+== hook identity ==
+7864a6d8209809b91345da5ebfb6f3f17910779ca953cea94e261458f886b408 *C:/Users/vac34/.zcode/hooks/saipen-guard.py
+7864a6d8209809b91345da5ebfb6f3f17910779ca953cea94e261458f886b408 *extensions/adapters/zaicode/saipen-guard.py
+31593 bytes C:/Users/vac34/.zcode/hooks/saipen-guard.py
+31593 bytes extensions/adapters/zaicode/saipen-guard.py
+cmp: BYTE-IDENTICAL
+
+== committed blob identity ==
+7864a6d8209809b91345da5ebfb6f3f17910779ca953cea94e261458f886b408 *-
+
+== installer check ==
+{
+  "host": "zaicode",
+  "capability": true,
+  "installed": true,
+  "current": true,
+  "configured": true,
+  "saipen_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "root_current": true,
+  "problems": [],
+  "health": null,
+  "effective": "UNKNOWN",
+  "artifact": "C:\\Users\\vac34\\.zcode\\hooks\\saipen-guard.py",
+  "config": "C:\\Users\\vac34\\.zcode\\cli\\config.json"
+}

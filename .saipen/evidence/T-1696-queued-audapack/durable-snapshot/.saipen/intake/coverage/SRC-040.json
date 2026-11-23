@@ -1,0 +1,158 @@
+{
+  "requirements": {
+    "SRC-040:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "T-168 carrier created by the goal entry and claimed before editing; live allocator produced the expected id T-168; exactly one repair carrier for the T-150 residue; T-150 not reopened (board T-150 stays DONE)",
+      "text": "Create exactly one new repair ticket through the normal SAIPEN/SAIOPS workflow for the verified T-150 residue and claim it before editing; do not reopen T-150; use the live allocator id (expected T-168).",
+      "verification": "board DOING T-168; LOG E-1024/E-1025",
+      "work": null
+    },
+    "SRC-040:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Pre-fix defect reproduced on a real case-sensitive directory (fsutil setCaseSensitiveInfo rc=0): plan.referenced_files empty for Sounds/sounds_0.wav against physical Sounds/Sounds_0.wav, priority 3; focused test passes on case-insensitive Windows only by accident; the regression expectation was never edited to pass",
+      "text": "Reproduce before edit: run the focused test tests/test_fidelity.py::TestMediaSampling::test_referenced_media_outranks_the_sample_cap and record the observed case-sensitive failure; do not change the regression expectation to make it green.",
+      "verification": "V:\\_TEMP_ repro + LOG E-1026 evidence; test file untouched at that stage",
+      "work": null
+    },
+    "SRC-040:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Root cause isolated to scan_asset_references() exact-case candidate.is_file() existence; FileDecision identity and FidelityPlan.decision_for() untouched (diff shows only the three intended hunks: optional param + docstring, membership fast path, call-site derivation)",
+      "text": "Root cause is scan_asset_references() exact-case candidate.is_file() existence verification; the repair touches reference matching only: FileDecision identity stays exact-case and FidelityPlan.decision_for() gains no lowercase fallback.",
+      "verification": "git diff audapack/fidelity.py reviewed in REVIEW pass 1; decision_for docstring intact",
+      "work": null
+    },
+    "SRC-040:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Case-insensitive reference existence implemented from the already-discovered media inventory: build_fidelity_plan derives known_media_rel_lower from media_groups and passes it to scan_asset_references; membership hit adds the ORIGINAL textual spelling; exact candidate containment+is_file fallback unchanged for callers without membership",
+      "text": "Implement case-insensitive reference existence from the already-discovered media inventory (optional known_media_rel_lower membership input derived from media_groups, no second full source walk); add the original textual spelling to referenced_files and keep the exact candidate validation path when no known-media membership is supplied.",
+      "verification": "audapack/fidelity.py scan_asset_references + call site; test_reference_verification_adds_no_second_discovery_walk green",
+      "work": null
+    },
+    "SRC-040:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Case-collision semantics preserved: case-distinct siblings keep two exact-case decisions; one case-insensitive reference ranked both protected; no traversal-order twin choice; deterministic second plan equal",
+      "text": "Case-distinct physical siblings keep two distinct exact-case FileDecisions; one case-insensitive reference may rank both; never choose one case twin by traversal order and never collapse decision identities.",
+      "verification": "tests/test_fidelity.py::TestCaseInsensitiveReferenceMatching::test_case_distinct_ambiguous_reference_protects_both_twins; T-150 identity tests still green",
+      "work": null
+    },
+    "SRC-040:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Source containment preserved: the membership set only ever contains paths the classification walk found inside the source tree, and the fallback keeps is_relative_to + is_file; traversal-like and missing candidates never promoted",
+      "text": "Source containment is preserved: traversal-like, absolute and nonexistent references must never enter referenced_files as verified project assets; keep the existing fallback containment checks.",
+      "verification": "test_outside_source_candidates_never_become_references + test_missing_reference_is_not_promoted + membership-vs-fallback simulation test green",
+      "work": null
+    },
+    "SRC-040:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Six focused regressions added in tests/test_fidelity.py::TestCaseInsensitiveReferenceMatching: fsutil case-differing reference, membership-vs-exact-fallback simulation, case-distinct ambiguous twins (skips honestly where FS cannot), missing reference, source boundary, single-walk; existing T-150 tests untouched and green",
+      "text": "Focused regressions in tests/test_fidelity.py cover: case-differing reference recorded in plan.referenced_files with the exact-case decision included and referenced-priority; exact identity API not aliased by lowercase fallback; case-distinct ambiguous reference keeps two decisions both protected (skip only if the filesystem cannot hold them); a missing reference with a media extension is not promoted; a traversal-like outside-source candidate is refused via the existing scanner grammar; and no second full walk beyond existing PERF-001 coverage.",
+      "verification": "6 passed on this host (fsutil real); full test_fidelity.py green",
+      "work": null
+    },
+    "SRC-040:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "All gates green: focused 1 passed; broad five-file gate 188 passed; ruff check audapack/fidelity.py tests/test_fidelity.py clean; python -m compileall -q audapack clean; PySide6 available so full pytest ran: 1162 passed 2 skipped; widget 292 pass 0 fail",
+      "text": "Focused test passes, then the broad gate tests/test_fidelity.py tests/test_packing.py tests/test_config.py tests/test_inaudit_notification_boundary.py tests/test_single_instance.py is green with reference result 174 passed 8 skipped 22 subtests, ruff check on audapack/fidelity.py and tests/test_fidelity.py is clean, python -m compileall -q audapack is clean, and full pytest runs if PySide6 is available (record unavailability otherwise, no dependency installs).",
+      "verification": "pytest+ruff+compileall+node --test outputs recorded at LOG E-1030 and E-1044",
+      "work": null
+    },
+    "SRC-040:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "SRC-009..SRC-029 adjudicated clause by clause via official saipen source disp against the live tree: 19 IMPLEMENTED with file:line + targeted-test evidence, SRC-014/SRC-028/SRC-029 BLOCKED truthfully (T14 A-K Windows gate and T15 release/docs are operator-only; release forbidden this batch); no bulk IMPLEMENTED; DUPLICATE not used at all. Ordering note recorded at E-1040: the work-closure coverage gate requires the linked receipt terminal before ticket done, so adjudication ran under the T-168 claim after the repair was already verified green -- repair-first intent preserved",
+      "text": "Only after T-168 DONE adjudicate SRC-009..SRC-029 (T-52) clause by clause via official saipen source verbs against the live tree: no bulk IMPLEMENTED from DONE status; SRC-028 (T14 six-run Windows release gate) and SRC-029 (T15 release cut/documentation) stay unresolved unless protocol truthfully allows otherwise; DUPLICATE only for genuine restatements with concrete evidence; leave genuinely operator-only requirements unresolved.",
+      "verification": "24 COVERAGE_UPDATED results; source status 19 terminal / 3 honest BLOCKED; LOG E-1040",
+      "work": null
+    },
+    "SRC-040:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "T01-T13 representative contracts revalidated against the live tree with existing targeted tests (one-click, coordinator, composite snapshot, wave progress, generation watcher, six lanes, managed capacity, batch queue, READY proof, failure/cancel/recovery, start intents, run history, diagnostics): no regression found, so no new ticket and no system rewrite",
+      "text": "For T01-T13 implementation clauses sample live evidence with existing targeted tests (one-click START AUDIT, coordinator ownership, composite run snapshot, audit wave progress, refresh/event propagation, six-lane run model, managed worker capacity, group/batch start if still required, AUDIT READY proof, failure/cancel/recovery UX, start-intent persistence, run history, diagnostics); on a found regression create a narrow new ticket, record the blocked source requirement, and stop closure for that requirement.",
+      "verification": "tests/services/test_audit_run_service.py + tests/ui_qt/test_audit_runs_widget.py + tests/ui_qt/test_project_room_model.py 110 passed",
+      "work": null
+    },
+    "SRC-040:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "SRC-030 adjudicated from durable evidence only: R0001/R0002/R0003 SUPERSEDED with precise references to the later live campaign (T-103 six-lane COMPLETE and READY 3/3 proof chain; T-85 closure; T-55..T-133 live observation campaign); no browser interaction fabricated",
+      "text": "Adjudicate SRC-030 (T-54) from durable evidence only: use SUPERSEDED or DUPLICATE with precise references to later runs/tests only where the protocol supports it, otherwise leave unresolved; never fabricate browser interaction.",
+      "verification": "source status SRC-030 3/3 terminal SUPERSEDED; T-103/T-85 LOG references in the disposition evidence",
+      "work": null
+    },
+    "SRC-040:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "SRC-034 and SRC-038 not hand-repaired: T-170 (settle-vs-r017 derived-metadata invariant) and T-171 (contradictory index/tombstone/archive/contract state) created as protocol-engine defect records and immediately BLOCKED with the exact invariant and required recovery behavior; no SAIPEN Core changes from AUDAPACK",
+      "text": "Do not hand-repair SRC-034 or SRC-038 intake corruption; record protocol-engine defect report(s) describing the exact invariant and required recovery behavior (SRC-034: safe settle path when the current contract equals its final revision and only derived metadata differs; SRC-038: canonical recovery for contradictory index/tombstone/archive/active-contract state) if the SAIPEN workflow supports cross-repo/core defects; no AUDAPACK-side SAIPEN Core changes unless the cross-repo patch protocol authorizes them.",
+      "verification": "board BLOCKED T-170/T-171; zero intake JSON edits (git status shows only .saipen protocol-verb outputs)",
+      "work": null
+    },
+    "SRC-040:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "SRC-033 credential evidence untouched: no deletion, no archived-source rewrite, no redaction, no hash mutation; recorded as an external user-authorized blocker in the T-158 blocker refresh and visible in validate.py SOURCE_CREDENTIALS_UNSAFE",
+      "text": "SRC-033 SOURCE_CREDENTIALS_UNSAFE stays untouched: no deletion, no archived-source rewrite, no silent redaction, no hash mutation, no manufactured sanitized source; record it as an external user-authorized blocker only.",
+      "verification": "T-158 blocker text item 4; validate.py FAIL line preserved unchanged",
+      "work": null
+    },
+    "SRC-040:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Validation gate re-run: before 111 problems / 141 warnings (E-1020 baseline), after 92 problems / 141 warnings; exact remaining classes recorded (3 truthful T-52 receipt debts, SRC-034/038 engine defects via T-170/T-171, SRC-033 credentials, board range-parse, ~35 legacy closure-evidence, [saio] legacy debt); T-158 stays BLOCKED with the refreshed blocker set through normal SAIOPS unblock+block",
+      "text": "Re-run the current SAIPEN validation gate and record problem and warning counts before and after with the exact remaining blocker classes; close T-158 only if its global gate is genuinely green under current rules; otherwise leave T-158 BLOCKED with the refreshed exact blocker set via normal SAIOPS blocker refresh; never modify T-158 production code.",
+      "verification": "tools/validate.py output 92/141; T-158 blocker refresh journaled",
+      "work": null
+    },
+    "SRC-040:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Final regression after all protocol work: broad five-file gate 188 passed; ruff check . clean; python -m compileall -q audapack clean; widget 292 pass 0 fail; full pytest 1162 passed 2 skipped; production behavior unchanged after T-168 (only .saipen protocol surfaces moved during protocol work)",
+      "text": "After protocol work run the final regression: the broad production gate green again, ruff check ., python -m compileall -q audapack, the widget gate in the established environment, and full pytest if available; protocol cleanup must not modify production behavior after T-168.",
+      "verification": "final gate outputs this phase; git diff audapack unchanged since the T-168 fix",
+      "work": null
+    },
+    "SRC-040:R016": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Hard exclusions honored throughout: T-150 not reopened; identity exact; no lowercase fallback; no second walk; intake index/coverage/contracts/tombstones never hand-edited; no receipts deleted; no fabricated acceptance; T-27/T-012/T-009 and T-158 production code untouched; no release, no push, no version bump, no commits",
+      "text": "Hard exclusions: never reopen T-150, weaken exact FileDecision identity, add a decision_for lowercase fallback, introduce a second recursive media-discovery walk, hand-edit intake index/coverage/contracts/tombstones, delete source receipts manually, fabricate Windows browser acceptance, touch T-27/T-012/T-009, modify T-158 production implementation, repair SAIPEN Core corruption via arbitrary AUDAPACK metadata edits, alter or redact SRC-033 without user authorization, release, push, or version bump.",
+      "verification": "batch LOG E-1024..E-1044; git status shows only the repair + tests + protocol surfaces",
+      "work": null
+    },
+    "SRC-040:R017": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "Final report delivered in the closing session message with ticket id, pre-fix failing test, root cause, changed files, tests, gate results, dispositions, statuses, validation counts, T-158 status and next_action; batch then stops",
+      "text": "The batch ends with a final report naming the new repair ticket, exact pre-fix failing test, root cause, changed production files, tests added or changed, focused and full/non-Qt gate results, ruff and compileall and widget results, SRC-009..SRC-029 and SRC-030 dispositions, SRC-033/SRC-034/SRC-038 status, validation counts before and after, T-158 final status and next_action; then stop.",
+      "verification": "closing report + final checkpoint",
+      "work": null
+    }
+  },
+  "schema_version": 1
+}

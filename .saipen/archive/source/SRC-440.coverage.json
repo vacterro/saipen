@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-440:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2123 closed with verification evidence in LOG: verify -> PASS [target: T-2123] conf: high (in-phase) -- fresh focused run of the wave-surface corpora at the new tree e17960b85: test_t2122_red_owner_fail_closed (13, wave B's corpus) + test_t2119_wa_delta_boundary (5, wave C's boundary controls) + test_t2118_baseline_admission (5, wave B's back-compat) = verdict PASS ran:23 CHECKPOINTED in-cycle; campaign verify conjunct: handoff chain + homes +",
+      "text": "SAIHANDOFF SAIPEN CAMPAIGN VI (operator, delivered 2026-11-20 ~23:43Z snapshot SAIPEN_20.11.26-T23-43-13.zip): MODE 2 post-install hardening -- waves A..G order: (A) read-only runtime/authority audit; (B) fail-closed repair of the red_owners admission guard (unknown/empty dispositions, non-dict red_owners admitted today -- measured PUBLICATION_ALLOW); (C) delta-class bypass investigation; (D) REGISTRY WAIT_USER_DECISION gap; (E) truthful T-2120 lifecycle (already DONE live, receipt-21e080f705f8 blocking 0); (F) SRC-386/T-2016/T-2121 single-obligation model; (G) measured performance continuing. Safety rules per handoff \u00a714 preserved (no model_supplied upgrade to host authority -- SRC-438 stays chat-mediated model_supplied as recorded, subsequent privileged installs need real operator confirmation).",
+      "verification": "the Work this request created reached its own verification gate; see the T-2123 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2123"
+    }
+  },
+  "schema_version": 1
+}

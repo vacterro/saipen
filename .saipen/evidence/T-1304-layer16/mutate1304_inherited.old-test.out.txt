@@ -1,0 +1,48 @@
+verifier: test_debt_gate.py with the R008 assertion as it stood before the repair
+CONTROL 1/3 unmutated copy: exit 0, Ran 92 tests
+CONTROL 2/3 unmutated copy: exit 0, Ran 92 tests
+CONTROL 3/3 unmutated copy: exit 1, Ran 92 tests
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1304-layer16\mutate1304_inherited.py", line 216, in <module>
+    assert code == 0, out[-3000:]
+           ^^^^^^^^^
+AssertionError: _snapshot_id` allocated
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\b6608259-1ad2-44f6-b76a-1063fbe8598d\scratchpad\mutcopy-old\tools\test_debt_gate.py", line 238, in test_snapshot_id_allocation_runs_inside_the_writer_boundary
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'FINDINGS_CAPTURE_FAILED', 'exit_code': 3221225794, 'detail': ''}
+
+======================================================================
+FAIL: test_snapshot_is_immutable_project_bound_and_reused (test_debt_gate.DebtGateFixtureTests.test_snapshot_is_immutable_project_bound_and_reused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\b6608259-1ad2-44f6-b76a-1063fbe8598d\scratchpad\mutcopy-old\tools\test_debt_gate.py", line 139, in test_snapshot_is_immutable_project_bound_and_reused
+    self.assertTrue(first["ok"], first)
+AssertionError: False is not true : {'ok': False, 'code': 'FINDINGS_CAPTURE_FAILED', 'exit_code': 3221225794, 'detail': ''}
+
+======================================================================
+FAIL: test_the_safe_atomic_ownership_race_is_a_conflict_not_an_escape (test_debt_gate.DebtGateFixtureTests.test_the_safe_atomic_ownership_race_is_a_conflict_not_an_escape)
+`paths.safe_atomic_replace_owned` raises ValueError when the final
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\b6608259-1ad2-44f6-b76a-1063fbe8598d\scratchpad\mutcopy-old\tools\test_debt_gate.py", line 272, in test_the_safe_atomic_ownership_race_is_a_conflict_not_an_escape
+    self.assertEqual(result["code"], "CONFLICT", result)
+AssertionError: 'FINDINGS_CAPTURE_FAILED' != 'CONFLICT'
+- FINDINGS_CAPTURE_FAILED
++ CONFLICT
+ : {'ok': False, 'code': 'FINDINGS_CAPTURE_FAILED', 'exit_code': 3221225794, 'detail': ''}
+
+======================================================================
+FAIL: test_strict_core_stays_red_with_carried_debt (test_debt_gate.StrictGateInvariantTests.test_strict_core_stays_red_with_carried_debt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\b6608259-1ad2-44f6-b76a-1063fbe8598d\scratchpad\mutcopy-old\tools\test_debt_gate.py", line 844, in test_strict_core_stays_red_with_carried_debt
+    self.assertTrue(capture["ok"], capture)
+AssertionError: False is not true : {'ok': False, 'code': 'FINDINGS_CAPTURE_FAILED', 'exit_code': 3221225794, 'detail': ''}
+
+----------------------------------------------------------------------
+Ran 92 tests in 101.456s
+
+FAILED (failures=7, errors=1)
+

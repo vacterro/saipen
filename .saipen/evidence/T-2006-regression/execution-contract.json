@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "tools/test_evidence_gap_ledger_lineage.py"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools/saipen_engine",
+    "tools/__init__.py",
+    "tools/test_evidence_gap_ledger_lineage.py",
+    "saipen"
+  ],
+  "oracle_files": [
+    "tools/test_evidence_gap_ledger_lineage.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/discovery_providers.py"
+  ],
+  "before": {
+    "tools/saipen_engine/discovery_providers.py": ".saipen/evidence/T-2006-regression/pre/discovery_providers.py"
+  },
+  "timeout": 300
+}

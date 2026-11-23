@@ -1,0 +1,1 @@
+{"host": "claude", "event": "SessionStart", "state": "DEGRADED", "at": 1791907189.473761, "elapsed_ms": 677, "saipen_root": "C:\\Users\\vac34\\.claude-account2\\skills\\saipen", "hook": "C:\\Users\\vac34\\.claude-account2\\hooks\\saipen-guard.py", "code": "AUTHORITY_UNREACHABLE", "step": "HOOK_CHAIN_UNRECOGNIZED"}

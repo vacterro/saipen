@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1670_route_budgets.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools/protocol_budget.py",
+    "tools/test_t1670_route_budgets.py",
+    "tools/saipen_engine",
+    "saipen"
+  ],
+  "oracle_files": [
+    "tools/test_t1670_route_budgets.py",
+    "tools/protocol_budget.py"
+  ],
+  "subject_files": [
+    "saipen/COMMANDS.md"
+  ],
+  "before": {
+    "saipen/COMMANDS.md": ".saipen/evidence/T-1845-command-budget/COMMANDS.before.md"
+  },
+  "timeout": 60
+}

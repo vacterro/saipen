@@ -1,0 +1,26 @@
+{
+  "authority_grant": "system:INVALID_INVOCATION",
+  "authority_receipt": null,
+  "authority_sha256": null,
+  "board_record": "- [ ] T-2002 [P2] list | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-376 | owner: saipen-cli | claim_time: 2026-11-02T00:50:25Z | blocker: INVALID_INVOCATION -- accidental CLI token parse; no work owed | blocker_scope: ticket",
+  "board_record_sha256": "ed4f7c788265a177d49c57feb9f5c50e555dd9c7c2434e038094719a8d90bf7f",
+  "discovery_event": null,
+  "evidence": {
+    "kind": "event",
+    "ref": "E-21640"
+  },
+  "evidence_bound_event": "E-21641",
+  "evidence_note": "accidental CLI token parse: the ticket text is the bare word 'list'; no user description of a change exists, SRC-376 is model_supplied with empty contract/coverage, and the row owes no implementation",
+  "reason": "INVALID_INVOCATION",
+  "restored_parent": null,
+  "restored_parent_owner": null,
+  "retired_at": "2026-11-17T16:32:15Z",
+  "retired_by": "saipen-cli",
+  "retirement_event": "E-21641",
+  "schema_version": 2,
+  "section": "## BLOCKED",
+  "source_receipts": [
+    "SRC-376"
+  ],
+  "ticket": "T-2002"
+}

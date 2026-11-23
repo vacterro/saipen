@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "aeec13909575911f808bb6c43c76ff4ff7e7b474bed76441fda9caebb0d75fb2",
+  "verdict": "PASS",
+  "patterns": [
+    "test_t1505_core_unit_sandbox_reclaim.py",
+    "test_t1831_cleanup_fixture_cost.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_t1505_core_unit_sandbox_reclaim.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1505_core_unit_sandbox_reclaim.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        25264
+      ],
+      "duration_s": 6.969,
+      "process_create_s": 0.047,
+      "ran": 21,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_t1831_cleanup_fixture_cost.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1831_cleanup_fixture_cost.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        21892
+      ],
+      "duration_s": 0.297,
+      "process_create_s": 0.047,
+      "ran": 1,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    }
+  ],
+  "ran": 22,
+  "duration_s": 76.516,
+  "timings_s": {
+    "execution_wall_s": 7.266,
+    "copy_wall_s": 54.938,
+    "hash_wall_s": 0.14,
+    "cleanup_wall_s": 14.172
+  },
+  "copy_metrics": {
+    "subject_copy_s": 14.703,
+    "canonical_copy_s": 39.86,
+    "canonical_copy_attempts": 1
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

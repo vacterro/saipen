@@ -1,0 +1,53 @@
+=== REVERT RED: pre-fix artifact restored ===
+d747325e7564b44ad6ea84cfbd67cdc304f5d53ac4373458cc83a24bc43cd74e *../extensions/adapters/codex/saipen-guard.py
+test_a_foreign_host_records_the_boundary (test_codex_stop_hook.CommandLineFaultTests.test_a_foreign_host_records_the_boundary) ... FAIL
+test_a_malformed_command_line_on_reentry_still_never_blocks (test_codex_stop_hook.CommandLineFaultTests.test_a_malformed_command_line_on_reentry_still_never_blocks) ... FAIL
+test_a_missing_saipen_root_records_the_boundary (test_codex_stop_hook.CommandLineFaultTests.test_a_missing_saipen_root_records_the_boundary) ... FAIL
+test_an_unknown_argument_records_the_boundary (test_codex_stop_hook.CommandLineFaultTests.test_an_unknown_argument_records_the_boundary) ... FAIL
+test_a_refused_installation_preserves_the_installed_bytes (test_codex_stop_hook.BrokenArtifactInstallTests.test_a_refused_installation_preserves_the_installed_bytes) ... ok
+test_installer_refuses_an_artifact_that_exits_two (test_codex_stop_hook.BrokenArtifactInstallTests.test_installer_refuses_an_artifact_that_exits_two) ... ok
+
+======================================================================
+FAIL: test_a_foreign_host_records_the_boundary (test_codex_stop_hook.CommandLineFaultTests.test_a_foreign_host_records_the_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\wt1630\tools\test_codex_stop_hook.py", line 605, in test_a_foreign_host_records_the_boundary
+    self.assert_boundary(rc, out, "names host 'claude'")
+  File "V:\_TEMP_\wt1630\tools\test_codex_stop_hook.py", line 584, in assert_boundary
+    self.assertEqual(rc, 0, out)
+AssertionError: 2 != 0
+
+======================================================================
+FAIL: test_a_malformed_command_line_on_reentry_still_never_blocks (test_codex_stop_hook.CommandLineFaultTests.test_a_malformed_command_line_on_reentry_still_never_blocks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\wt1630\tools\test_codex_stop_hook.py", line 613, in test_a_malformed_command_line_on_reentry_still_never_blocks
+    self.assert_boundary(rc, out, "unrecognized option(s): --unexpected x")
+  File "V:\_TEMP_\wt1630\tools\test_codex_stop_hook.py", line 584, in assert_boundary
+    self.assertEqual(rc, 0, out)
+AssertionError: 2 != 0
+
+======================================================================
+FAIL: test_a_missing_saipen_root_records_the_boundary (test_codex_stop_hook.CommandLineFaultTests.test_a_missing_saipen_root_records_the_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\wt1630\tools\test_codex_stop_hook.py", line 601, in test_a_missing_saipen_root_records_the_boundary
+    self.assert_boundary(rc, out, "names no --saipen-root")
+  File "V:\_TEMP_\wt1630\tools\test_codex_stop_hook.py", line 584, in assert_boundary
+    self.assertEqual(rc, 0, out)
+AssertionError: 2 != 0
+
+======================================================================
+FAIL: test_an_unknown_argument_records_the_boundary (test_codex_stop_hook.CommandLineFaultTests.test_an_unknown_argument_records_the_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\wt1630\tools\test_codex_stop_hook.py", line 597, in test_an_unknown_argument_records_the_boundary
+    self.assert_boundary(rc, out, "unrecognized option(s): --unexpected x")
+  File "V:\_TEMP_\wt1630\tools\test_codex_stop_hook.py", line 584, in assert_boundary
+    self.assertEqual(rc, 0, out)
+AssertionError: 2 != 0
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.332s
+
+FAILED (failures=4)

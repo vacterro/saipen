@@ -1,0 +1,15 @@
+settings -> dict keys: ['host_images', 'host_signers', 'hook_shells', 'bridge_images', 'ancestry_limit', 'max_shells', 'max_bridges', 'capability_ttl_seconds', 'idle_exit_seconds', 'identity_cache_seconds', 'hosts']
+def prove_hook_invocation(
+    chain: Sequence,
+    policy: IdentityPolicy,
+    *,
+    signer_of: Callable[[str], str | None] | None = None,
+    artifact_current: Callable[[str], bool] | None = None,
+    hook_for_host: Callable[[int], str | None] | None = None,
+    report_limit: int = 8,
+) -> Proof:
+    """Decide whether `chain` (peer first, then each parent) is the host's hook.
+
+    Never raises.
+IdentityPolicy fields: ['IdentityPolicy']
+['host', 'host_images', 'hook_artifacts', 'host_signers', 'shells', 'engine_entries', 'max_shells', 'bridge_images', 'max_bridges', 'profile_hook']

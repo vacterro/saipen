@@ -1,0 +1,37 @@
+[
+  {
+    "file": "tools/saipen.py",
+    "before_sha256": "4668e5157c453efb1832d435b01fa8347b3d8f950634808f365d640ffb7cbbe8",
+    "after_sha256": "09696e8c233d5ed5d6eb4ee8f09d3c4c8c9b4dc7c4ecd14b2d13d5f50fb8d7c6",
+    "normalized_ast_equal": true,
+    "assertions_equal": true
+  },
+  {
+    "file": "tools/test_t1732_protocol_hardening.py",
+    "before_sha256": "66789e0497c7f3b44edbd52f03de2b5d1211b99e681ed06af6119d4ec43b8e1b",
+    "after_sha256": "1689ee20ec83f0c5e3f5fa7c17294dbe74d69d95be6bb97aa10eef8f6dc7ec97",
+    "normalized_ast_equal": true,
+    "assertions_equal": true
+  },
+  {
+    "file": "tools/test_t1734_source_drift.py",
+    "before_sha256": "32ee6ede3f05cf711973ba951565548ce993a18a60d451b8f5d23429a056ce79",
+    "after_sha256": "943eeb05b8ba8be693eef9e8223bd539cac773d3516188ed5b917cae7b060afa",
+    "normalized_ast_equal": true,
+    "assertions_equal": true
+  },
+  {
+    "file": "tools/test_t1735_tool_failure_boundaries.py",
+    "before_sha256": "040db39baf97f82e5184e9da7a01e5151f5a93a5b6d4717de047814f142e8b92",
+    "after_sha256": "e8a078e0752f07d4fa6bbb3fddd6a83c9889eef5f9e5de88caec979b53438d82",
+    "normalized_ast_equal": true,
+    "assertions_equal": true
+  },
+  {
+    "file": "tools/test_t1736_tool_safety_and_evidence.py",
+    "before_sha256": "ab896f710ee780c959738a7ce07674f7e59842b94f4d610f3ba6e6c35d57ff10",
+    "after_sha256": "a7cd46b9b0ba1e62017abd3812fc57bb10f87dcc5f889ab7d38af0f86d569b37",
+    "normalized_ast_equal": true,
+    "assertions_equal": true
+  }
+]

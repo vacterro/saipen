@@ -1,0 +1,14 @@
+{
+  "observed_by": "saipen-cli (Claude session 98f1cace)",
+  "host": "zcode (ZAICODE desktop app-server), model gemini-3.8-flash-tiered via provider SAIOPP",
+  "session": "sess_6512c22d-d9bc-4f10-899e-fd639f61707f",
+  "session_project": "V:\\___VAC\\__K\\__CODE\\_PLUG_SCRIPT\\_FREEBUFF_SAI",
+  "created_at": "2026-10-13T22:22:12.148Z",
+  "tool": "Edit",
+  "tool_call": "call_334197",
+  "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+  "line": 3295,
+  "change": "ccc entry marker regex accepts '@no-git' beside a commit id",
+  "stated_reason": "its own project's `saipen validate` failed on a no-git ccc marker",
+  "artifact_dir": "C:\\Users\\vac34\\.zcode\\cli\\artifacts\\sess_6512c22d-d9bc-4f10-899e-fd639f61707f"
+}

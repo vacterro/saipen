@@ -1,0 +1,47 @@
+23 failing tests
+test_real_init_then_the_same_turn_final_reply_is_gated_by_admission
+    -> tools\test_protocol_admission.py:1018
+test_a_consistent_closure_is_committed
+    -> tools\test_t1278_closure_contradiction.py:139
+test_real_init_still_binds_the_same_session_but_cannot_invent_host_admission
+    -> tools\test_t1563_authority_minting.py:144
+test_both_injectors_install_identical_normalized_blocks
+    -> tools\test_adapter_parity.py:278
+test_a_covered_record_must_name_a_live_case
+    -> tools\test_check_inventory.py:315
+test_regeneration_keeps_an_adjudicated_verdict
+    -> tools\test_check_inventory.py:307
+test_regeneration_never_mints_a_baseline
+    -> tools\test_check_inventory.py:291
+test_the_live_repository_agrees_with_its_ledger
+    -> tools\test_check_inventory.py:252
+test_the_probe_passes_on_the_real_repository
+    -> tools\test_check_inventory.py:255
+test_unrelated_line_insertion_is_accepted
+    -> tools\test_check_inventory.py:276
+test_deep_validation_proves_complete_generation_authority
+    -> tools\test_conformance_lineage.py:347
+test_the_positive_task_names_a_real_readable_file
+    -> tools\test_field_fixture_isolation.py:817
+test_one_file_spelled_two_ways_is_still_one_file
+    -> tools\test_guard_execution_reachability.py:364
+test_explicit_protected_shell_paths_are_refused
+    -> tools\test_guard_hostile_matrix.py:761
+test_30_ps1_injector_leaves_an_exact_utf8_block
+    -> tools\test_host_bootstrap.py:582
+test_33_pre_fix_injector_is_a_red_control
+    -> tools\test_host_bootstrap.py:694
+test_powershell_injector_overwrites_and_verifies_one_canonical_hook
+    -> tools\test_opencode_host_smoke.py:661
+test_powershell_install_set_continue_validate_uninstall_reinstall
+    -> tools\test_public_install_lifecycle.py:198
+test_K_red_control_legacy_installer_drops_launchers
+    -> tools\test_runtime_bootstrap.py:579
+test_D_ps1_injector_marks_the_agents_skill_surface
+    -> tools\test_t1389_foreign_delta_adoption.py:185
+test_a_sharded_run_leaves_no_sandbox
+    -> tools\test_t1505_core_unit_sandbox_reclaim.py:258
+test_crlf_bytes_committed_under_text_auto_are_not_reported
+    -> tools\test_t1506_xpatch_survival.py:121
+test_capability_reason_reaches_skip_and_unproven_runner
+    -> tools\test_t1582_sweep_skip_reason.py:175

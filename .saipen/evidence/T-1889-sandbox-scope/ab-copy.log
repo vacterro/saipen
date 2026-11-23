@@ -1,0 +1,76 @@
+{
+  "patterns": [
+    "test_t1885_tag_peel.py",
+    "test_t1886_gate_lock_window.py"
+  ],
+  "resolved_scope_mode": "DECLARED"
+}
+{
+  "arm": "FULL (pre-T-1889 behaviour)",
+  "scope_mode": "FULL",
+  "scope_trees": [],
+  "wall_s": 51.422,
+  "metrics": {
+    "subject_copy_s": 14.141,
+    "canonical_copy_s": 37.015,
+    "canonical_copy_attempts": 1,
+    "trees": null
+  },
+  "copied_files": 132904,
+  "copied_mib": 1793.1,
+  "sandbox_git": true,
+  "sandbox_canonical_files": [
+    "BOARD.md",
+    "IDENTITY.md",
+    "LOG.md",
+    "MANIFEST.json",
+    "STATE.md"
+  ],
+  "sandbox_saipen_children": [
+    "KNOWLEDGE",
+    "archive",
+    "cache",
+    "evidence",
+    "exchange",
+    "extensions",
+    "future",
+    "improve",
+    "intake",
+    "kitchen",
+    "locks",
+    "logs",
+    "milestones",
+    "quarantine",
+    "recovery",
+    "saitranslate",
+    "tmp"
+  ]
+}
+{
+  "arm": "DECLARED (source tree only)",
+  "scope_mode": "DECLARED",
+  "scope_trees": [],
+  "wall_s": 0.39,
+  "metrics": {
+    "subject_copy_s": 0.39,
+    "canonical_copy_s": 0.0,
+    "canonical_copy_attempts": 1,
+    "trees": []
+  },
+  "copied_files": 1210,
+  "copied_mib": 22.4,
+  "sandbox_git": false,
+  "sandbox_canonical_files": [
+    "BOARD.md",
+    "IDENTITY.md",
+    "LOG.md",
+    "MANIFEST.json",
+    "STATE.md"
+  ],
+  "sandbox_saipen_children": []
+}
+{
+  "same_subject_file_count": "differs by 131694",
+  "wall_delta_s": 51.032,
+  "mib_ratio": 0.0125
+}

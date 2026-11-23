@@ -1,0 +1,31 @@
+PASS: project root -- correct root
+PASS: project root -- nested cwd
+PASS: project root -- wrong cwd rejected
+PASS: project root -- explicit root overrides cwd
+PASS: project root -- non-Git nested cwd
+PASS: project root -- linked worktree uses main owner
+PASS: project root -- linked worktree with its own .saipen/ is validated as itself
+PASS: last_event -- legacy absence warns but remains readable
+PASS: last_event -- current schema missing marker fails
+PASS: last_event -- current schema missing style marker fails
+PASS: last_event -- exact recovered tail passes
+PASS: last_event -- advanced LOG makes old marker stale
+PASS: last_event -- recovered exact tail passes
+PASS: last_event -- marker above LOG is repairable drift
+PASS: hr-state -- contract accepts a fully valid state
+PASS: hr-state -- unknown field refused (additionalProperties false)
+PASS: hr-state -- phase outside the 16-phase enum refused
+PASS: hr-state -- transition_from outside the enum refused
+PASS: hr-state -- mode outside enum refused
+PASS: hr-state -- goal intent without counters refused
+PASS: hr-state -- converge intent without target refused
+PASS: hr-state -- converge intent with goal counters refused
+PASS: hr-state -- non-goal intent with goal counters refused
+PASS: hr-state -- string schema_version refused
+PASS: hr-state -- future schema_version is not an engine error (gate WARNS, bump stays alive)
+PASS: hr-state -- negative goal_waves refused (schema minimum)
+PASS: hr-state -- required field missing refused
+PASS: hr-state -- empty STATE routes bootstrap-only, never an ordinary action
+FAIL: hr-state -- plain-UTF-8 project passes post-write verification -- BOARD: BOARD.md:9 unexpected physical BOARD record under ## DOING ('- none') -- a detached continuation or record fragment never becomes authority; the board grammar is closed and the bytes are ambiguous or corrupt, refuse them; BOARD: BOARD.md:13 unexpected physical BOARD record under ## TODO ('- none') -- a detached continuation or record fragment never becomes authority; the board grammar is closed and the bytes are ambiguous or corrupt, refuse them; BOARD: BOARD.md:17 unexpected physical BOARD record under ## BLOCKED ('- none') -- a detached continuation or record fragment never becomes authority; the board grammar is closed and the bytes are ambiguous or corrupt, refuse them; BOARD: BOARD.md:21 unexpected physical BOARD record under ## DONE ('- none') -- a detached continuation or record fragment never becomes authority; the board grammar is closed and the bytes are ambiguous or corrupt, refuse them
+PASS: hr-state -- BOM-carrying STATE refused byte-wise at post-write verification
+PASS: hr-state -- codec reports the BOM file as non-canonical

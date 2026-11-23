@@ -1,0 +1,37 @@
+{
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "validate",
+    "--json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "started_utc": "2026-10-10T14:25:35.047887+00:00",
+  "finished_utc": "2026-10-10T14:26:10.131164+00:00",
+  "duration_s": 35.078,
+  "exit_code": 0,
+  "output": ".saipen/evidence/T-1706-hot-switch/t1708-native-validate-after-index.txt",
+  "output_sha256": "87ea6f66e33e09305c658592ac142c4e96113f96ce867e33008811c37cd6b74a",
+  "subject_before": {
+    "tools/saipen_engine/oracle.py": "61d4b36335f775862ffc3a82b83601387fc6c08a7705b580c8fb5b9b83fc8e9a",
+    "tools/test_t1707_regression_chronology.py": "68aaf62bf06ceef23f48b5bfe4d2bb95c66fdca6caab5d9922ce224808bdf143",
+    "tools/saipen_engine/guard_events.py": "d800ed9425c3d5450eb4d024fceb7e60587b57ec8bc989502c2116c9fc17be42",
+    "tools/saipen_engine/admission.py": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+    "tools/test_t1705_lifecycle_write_preflight.py": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+    "tools/test_opencode_bound_launch_smoke.py": "4fe8bc30def8c6c0dc1daebef73ca8f575dd633a80d1093a161929ddd6a580f0",
+    "extensions/adapters/opencode/saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+    "saipen/CORE.md": "67852506019f05e6417d07de9915fab5337780052105dfb46497734b58555455",
+    "saipen/OPS.md": "11f58546724d8fe76b3e7e196c6ff7e70724b83b6e60d44e2f8026cd77acb55a"
+  },
+  "subject_after": {
+    "tools/saipen_engine/oracle.py": "61d4b36335f775862ffc3a82b83601387fc6c08a7705b580c8fb5b9b83fc8e9a",
+    "tools/test_t1707_regression_chronology.py": "68aaf62bf06ceef23f48b5bfe4d2bb95c66fdca6caab5d9922ce224808bdf143",
+    "tools/saipen_engine/guard_events.py": "d800ed9425c3d5450eb4d024fceb7e60587b57ec8bc989502c2116c9fc17be42",
+    "tools/saipen_engine/admission.py": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+    "tools/test_t1705_lifecycle_write_preflight.py": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+    "tools/test_opencode_bound_launch_smoke.py": "4fe8bc30def8c6c0dc1daebef73ca8f575dd633a80d1093a161929ddd6a580f0",
+    "extensions/adapters/opencode/saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+    "saipen/CORE.md": "67852506019f05e6417d07de9915fab5337780052105dfb46497734b58555455",
+    "saipen/OPS.md": "11f58546724d8fe76b3e7e196c6ff7e70724b83b6e60d44e2f8026cd77acb55a"
+  },
+  "subject_unchanged": true
+}

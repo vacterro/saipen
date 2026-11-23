@@ -1,0 +1,13 @@
+{
+  "receipt": "SRC-011",
+  "source_kind": "user_instruction",
+  "status": "CLOSED",
+  "request_provenance": {
+    "compared_digest": "cb61bb924f6d8a0b7849d163c310a9ba1d081149e5e0347c8e2d130a07457843",
+    "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+    "witness": "model_supplied"
+  },
+  "body": "# User request\n\npriority: P1\nverify: the requested change is present and demonstrated against the user own description of it\n\n## Request\n\nconformance: SRC-003 archive bundle invalid (missing .meta.json/.contract.json sidecars) + E-371 claims SAIOPS structural provenance without an [op:] marker; diagnose receipt-887cd5dcc5ad blocking findings and route each to its registered repair\n",
+  "read_only": true,
+  "note": "This is the authority reference named by AD-000001; historical missing operator permission is not inferred merely from a syntax or absence observation."
+}

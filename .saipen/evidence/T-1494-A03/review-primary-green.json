@@ -1,0 +1,44 @@
+{
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "checkpoint",
+    "RUN",
+    "T-1494",
+    "REGRESSION-EVIDENCE PASS verifier:c31e968253889bb883dc66fb7fd6e7b90ab60ba0cb23a6984f7af56a2e20b5d8 subject:60537c50696bb501d3b93ed4897e61bf543b006a1f194d74db5a616680f8e5c1 -- REVIEW accepted production: same 18-case verifier and fixtures; 18 PASS; review-oracle-pair.json",
+    "--json"
+  ],
+  "exit_code": 0,
+  "session_capability": "no-publish",
+  "result": {
+    "ok": true,
+    "code": "CHECKPOINTED",
+    "op_id": "checkpoint-e4c1d97431b84622899a9540adbcff41",
+    "changed_files": [
+      ".saipen/LOG.md",
+      ".saipen/BOARD.md",
+      ".saipen/STATE.md"
+    ],
+    "recovery_required": false,
+    "event_id": "E-13970"
+  },
+  "committed_operation": {
+    "path": ".saipen\\recovery\\settled\\checkpoint-e4c1d97431b84622899a9540adbcff41\\operation.json",
+    "status": "COMMITTED",
+    "operation": "checkpoint",
+    "progress_index": 3,
+    "targets": [
+      {
+        "path": ".saipen/LOG.md",
+        "applied": true
+      },
+      {
+        "path": ".saipen/BOARD.md",
+        "applied": true
+      },
+      {
+        "path": ".saipen/STATE.md",
+        "applied": true
+      }
+    ]
+  }
+}

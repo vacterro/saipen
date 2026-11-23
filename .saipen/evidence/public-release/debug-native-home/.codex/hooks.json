@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "'C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe' 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\public-release\\debug-native-home\\.codex\\hooks\\saipen-guard.py' --host codex --saipen-root 'V:\\_SAIPEN_RELEASE_\\public-20261004'",
+            "commandWindows": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\public-release\\debug-native-home\\.codex\\hooks\\saipen-guard.py --host codex --saipen-root V:\\_SAIPEN_RELEASE_\\public-20261004",
+            "timeout": 60,
+            "statusMessage": "SAIPEN EXEC-RESPONSE-01 final-response gate"
+          }
+        ]
+      }
+    ]
+  }
+}

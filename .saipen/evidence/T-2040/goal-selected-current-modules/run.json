@@ -1,0 +1,32 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_audit_inbox.py",
+    "tools/test_aut31_production_autonomy.py",
+    "tools/test_campaign_matrix.py",
+    "tools/test_campaign_production_gates.py",
+    "tools/test_continue_chain.py",
+    "tools/test_orchestration_repair.py",
+    "tools/test_recovery_reachability.py",
+    "tools/test_release_reconciliation.py",
+    "tools/test_src085_conformance_disposition.py",
+    "tools/test_t1293_valve_resume_audit_route.py",
+    "tools/test_t1544_audit20.py",
+    "tools/test_t1759_single_lifecycle_observer.py",
+    "tools/test_t1851_debt_authority.py",
+    "tools/test_t1893_probe_wrappers.py",
+    "tools/test_t1932_src338_closures.py",
+    "tools/test_t1945_analysis_progress.py",
+    "tools/test_t1945_campaign_driver.py"
+  ],
+  "exit_code": 0,
+  "duration_s": 209.25,
+  "finished_at": "2026-11-09T21:18:53.604391+00:00"
+}

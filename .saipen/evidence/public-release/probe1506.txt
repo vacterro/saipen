@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "V:\_TEMP_\probe1506.py", line 23, in <module>
+    xpatch.apply_proposal(root, pid, now="2026-09-01T10:46:30Z")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\xpatch.py", line 848, in apply_proposal
+    receipt = load_receipt(root, patch_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\xpatch.py", line 330, in load_receipt
+    directory = receipt_dir(root, patch_id)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\xpatch.py", line 180, in receipt_dir
+    if not PATCH_ID_RE.match(patch_id or ""):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: expected string or bytes-like object, got 'dict'

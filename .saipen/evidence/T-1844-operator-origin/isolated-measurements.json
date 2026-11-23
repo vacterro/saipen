@@ -1,0 +1,171 @@
+{
+  "kind": "read-only receipt observation; no new test execution",
+  "phase": "VERIFY",
+  "task": "T-1844",
+  "last_event": 17116,
+  "latest_executed_gate_problem": null,
+  "records": [
+    {
+      "selection": "goal",
+      "record": ".saipen/evidence/regression/regression-execution-604141dc73e847cfa57072df8a1b0b20.json",
+      "runtime": {
+        "path": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+        "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+      },
+      "verifier": "38c2a4b03abfac23cd6d6312478a07876a6cffa7d0f96ee65160f0c9e4568185",
+      "runs": [
+        {
+          "stage": "before",
+          "exit_code": 1,
+          "ran": 11,
+          "failed": 6,
+          "skipped": 0
+        },
+        {
+          "stage": "after",
+          "exit_code": 0,
+          "ran": 11,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "selection": "diagnosis",
+      "record": ".saipen/evidence/regression/regression-execution-92c7eb3f1db24eb9b9db6972deec5024.json",
+      "runtime": {
+        "path": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+        "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+      },
+      "verifier": "173af90ac5e13b2f80cd02ad127b4e0226f7771d2e52cccd91927a6d01305ae5",
+      "runs": [
+        {
+          "stage": "before",
+          "exit_code": 1,
+          "ran": 23,
+          "failed": 3,
+          "skipped": 0
+        },
+        {
+          "stage": "after",
+          "exit_code": 0,
+          "ran": 23,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "selection": "preview",
+      "record": ".saipen/evidence/regression/regression-execution-e1ffc67d43e74d01a1a78a4dc62e07f1.json",
+      "runtime": {
+        "path": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+        "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+      },
+      "verifier": "a25746338af51c7410c59c0bc41fe4b97fa15f171dafce2d705030278f78bd23",
+      "runs": [
+        {
+          "stage": "before",
+          "exit_code": 1,
+          "ran": 4,
+          "failed": 4,
+          "skipped": 0
+        },
+        {
+          "stage": "after",
+          "exit_code": 0,
+          "ran": 4,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "selection": "node",
+      "record": ".saipen/evidence/regression/regression-execution-d1ad244883d04b41b5ae83ec484fc70b.json",
+      "runtime": {
+        "path": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+        "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+      },
+      "verifier": "b72cc5569cd62a1f0b8f9bd77135bbe36b00789c6ae0ced2d7b435006977760a",
+      "runs": [
+        {
+          "stage": "before",
+          "exit_code": 1,
+          "ran": 3,
+          "failed": 1,
+          "skipped": 0
+        },
+        {
+          "stage": "after",
+          "exit_code": 0,
+          "ran": 3,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "selection": "carrier",
+      "record": ".saipen/evidence/regression/regression-execution-19abada44b7048078f83005a94ba0c99.json",
+      "runtime": {
+        "path": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+        "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+      },
+      "verifier": "458fe4452dd2ccd73950bcb65ea564e4033af127e8537538dc2cbf0657c97430",
+      "runs": [
+        {
+          "stage": "before",
+          "exit_code": 1,
+          "ran": 8,
+          "failed": 9,
+          "skipped": 0
+        },
+        {
+          "stage": "after",
+          "exit_code": 0,
+          "ran": 8,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "selection": "project-launcher-carrier",
+      "record": ".saipen/evidence/regression/regression-execution-23ca2a06af7a4086b73263dd3e887d45.json",
+      "runtime": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+        "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+      },
+      "verifier": "b4b08de32f08215158adaf8fa483fbf001b90e49a11ddb8928af8f72fac19104",
+      "runs": [
+        {
+          "stage": "before",
+          "exit_code": 1,
+          "ran": 8,
+          "failed": 9,
+          "skipped": 0
+        },
+        {
+          "stage": "after",
+          "exit_code": 0,
+          "ran": 8,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "full_family": {
+    "record": ".saipen/evidence/core-unit/b6dc79950e870846-20261021T220231451753Z.json",
+    "verdict": "PASS",
+    "ran": 7207,
+    "red": [],
+    "problems": [],
+    "fingerprint": "b6dc79950e87084614b6a070eeeca1f167410f736c65f40256a94762ca9a0c3c",
+    "membership_proof": {
+      "inventory_sha256": "b37ce459ce901e855a54d72ec15a80b5f8ed02fcecfca71f94f19326bb9e5e86",
+      "occurrences": 7207
+    }
+  }
+}

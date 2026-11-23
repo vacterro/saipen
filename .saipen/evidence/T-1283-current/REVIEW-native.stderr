@@ -1,0 +1,61 @@
+test_append_does_not_reread_sealed_generations (test_t1283_lineage_legacy_ingest.TestBoundedLookup.test_append_does_not_reread_sealed_generations)
+AC-04: a fold inside the active segment reads the active tail only. ... ok
+test_bounded_lookup_does_not_scale_with_the_population (test_t1283_lineage_legacy_ingest.TestBoundedLookup.test_bounded_lookup_does_not_scale_with_the_population)
+AC-03 by COUNT, never by timing: growing the population must not grow ... ok
+test_bounded_lookup_equals_the_strict_scan (test_t1283_lineage_legacy_ingest.TestBoundedLookup.test_bounded_lookup_equals_the_strict_scan) ... ok
+test_exact_bytes_stay_authoritative (test_t1283_lineage_legacy_ingest.TestBoundedLookup.test_exact_bytes_stay_authoritative)
+AC-05: a receipt whose BYTES no longer match its member digest is ... ok
+test_foreign_object_is_refused_fail_closed (test_t1283_lineage_legacy_ingest.TestBoundedLookup.test_foreign_object_is_refused_fail_closed)
+AC-06 red control: the lineage must not seed from a population it ... ok
+test_out_of_band_sibling_is_degraded_never_laundered (test_t1283_lineage_legacy_ingest.TestBoundedLookup.test_out_of_band_sibling_is_degraded_never_laundered)
+AC-06 red control: an out-of-band file moves the directory mtime, so ... ok
+test_tampered_referenced_generation_degrades (test_t1283_lineage_legacy_ingest.TestBoundedLookup.test_tampered_referenced_generation_degrades)
+AC-06 red control: the generation the locator actually references is ... ok
+test_append_over_a_v1_population_does_not_raise (test_t1283_lineage_legacy_ingest.TestLegacyIngest.test_append_over_a_v1_population_does_not_raise)
+RED against pre-fix code: the KeyError escaped generate_conformance_receipt ... ok
+test_deep_audit_ingests_a_v1_receipt (test_t1283_lineage_legacy_ingest.TestLegacyIngest.test_deep_audit_ingests_a_v1_receipt)
+RED against pre-fix code: validate_lineage_deep raised KeyError too. ... ok
+test_deep_rebuild_ingests_a_v1_receipt (test_t1283_lineage_legacy_ingest.TestLegacyIngest.test_deep_rebuild_ingests_a_v1_receipt)
+RED against pre-fix code: raised KeyError: 'receipt_id'. ... ok
+test_legacy_identity_is_content_addressed_and_stable (test_t1283_lineage_legacy_ingest.TestLegacyIngest.test_legacy_identity_is_content_addressed_and_stable)
+The derived id must be deterministic, and must not collide with an ... ok
+test_v1_receipt_is_accepted_by_the_canonical_scan (test_t1283_lineage_legacy_ingest.TestLegacyIngest.test_v1_receipt_is_accepted_by_the_canonical_scan)
+The premise. If this fails the engine no longer admits v1 receipts and ... ok
+test_absent_lineage_falls_back_to_legacy_without_mutating (test_conformance_lineage.ConformanceLineageTests.test_absent_lineage_falls_back_to_legacy_without_mutating) ... ok
+test_append_below_bound_hashes_no_sealed_receipt_bodies (test_conformance_lineage.ConformanceLineageTests.test_append_below_bound_hashes_no_sealed_receipt_bodies)
+An append below the bound never re-hashes sealed receipt bodies: ... ok
+test_append_does_not_rehash_sealed_history (test_conformance_lineage.ConformanceLineageTests.test_append_does_not_rehash_sealed_history) ... ok
+test_appended_and_rebuilt_preconditions_are_one_lineage (test_conformance_lineage.ConformanceLineageTests.test_appended_and_rebuilt_preconditions_are_one_lineage)
+T-1489: the rebuilt precondition IS the appended one, so the cheap ... ok
+test_bounded_lookup_cost_is_constant_in_population (test_conformance_lineage.ConformanceLineageTests.test_bounded_lookup_cost_is_constant_in_population) ... ok
+test_canonical_append_never_enumerates_receipt_directory (test_conformance_lineage.ConformanceLineageTests.test_canonical_append_never_enumerates_receipt_directory)
+R011-A red control: the canonical append enumerates ZERO receipt ... ok
+test_deep_validation_proves_complete_generation_authority (test_conformance_lineage.ConformanceLineageTests.test_deep_validation_proves_complete_generation_authority)
+The deep path proves the COMPLETE sealed-generation authority: ... ok
+test_deleted_and_duplicated_and_reordered_history_goes_deep_red (test_conformance_lineage.ConformanceLineageTests.test_deleted_and_duplicated_and_reordered_history_goes_deep_red) ... ok
+test_direct_caller_without_token_refuses_bounded_advance (test_conformance_lineage.ConformanceLineageTests.test_direct_caller_without_token_refuses_bounded_advance)
+A direct caller lacking a trustworthy pre-append token never ... ok
+test_first_direct_caller_without_token_never_creates_lineage (test_conformance_lineage.ConformanceLineageTests.test_first_direct_caller_without_token_never_creates_lineage) ... ok
+test_old_gate_latest_in_old_sealed_generation_is_authenticated_by_current_head (test_conformance_lineage.ConformanceLineageTests.test_old_gate_latest_in_old_sealed_generation_is_authenticated_by_current_head)
+R011-B red control: gen-0000 + gen-0001 + active. The latest ... ok
+test_out_of_band_sibling_refuses_advance_and_never_becomes_indexed (test_conformance_lineage.ConformanceLineageTests.test_out_of_band_sibling_refuses_advance_and_never_becomes_indexed) ... ok
+test_prior_token_mismatch_refuses_bounded_advance (test_conformance_lineage.ConformanceLineageTests.test_prior_token_mismatch_refuses_bounded_advance)
+A pre-append token that disagrees with the head (crash between ... ok
+test_rebuild_is_idempotent_and_never_rewrites_receipt_bytes (test_conformance_lineage.ConformanceLineageTests.test_rebuild_is_idempotent_and_never_rewrites_receipt_bytes) ... ok
+test_rebuild_latest_uses_completion_order_across_generations (test_conformance_lineage.ConformanceLineageTests.test_rebuild_latest_uses_completion_order_across_generations) ... ok
+test_rebuild_then_bounded_latest_per_gate (test_conformance_lineage.ConformanceLineageTests.test_rebuild_then_bounded_latest_per_gate) ... ok
+test_tampered_generation_manifest_refuses (test_conformance_lineage.ConformanceLineageTests.test_tampered_generation_manifest_refuses) ... ok
+test_tampered_locator_refuses (test_conformance_lineage.ConformanceLineageTests.test_tampered_locator_refuses) ... ok
+test_tampered_referenced_receipt_refuses_bounded_trust (test_conformance_lineage.ConformanceLineageTests.test_tampered_referenced_receipt_refuses_bounded_trust) ... ok
+test_unrelated_sealed_tamper_leaves_latest_clean_and_deep_red (test_conformance_lineage.ConformanceLineageTests.test_unrelated_sealed_tamper_leaves_latest_clean_and_deep_red) ... ok
+test_update_receipt_index_creates_and_advances_v2 (test_conformance_lineage.ConformanceLineageTests.test_update_receipt_index_creates_and_advances_v2) ... ok
+test_a_failed_payload_drop_is_still_reported (test_t1519_settled_index.SettledIndexTests.test_a_failed_payload_drop_is_still_reported) ... ok
+test_a_snapshot_over_a_valid_index_decodes_no_settled_receipt (test_t1519_settled_index.SettledIndexTests.test_a_snapshot_over_a_valid_index_decodes_no_settled_receipt) ... ok
+test_a_stale_index_is_rebuilt_at_the_next_settlement (test_t1519_settled_index.SettledIndexTests.test_a_stale_index_is_rebuilt_at_the_next_settlement) ... ok
+test_a_tampered_settled_receipt_still_forces_the_strict_scan (test_t1519_settled_index.SettledIndexTests.test_a_tampered_settled_receipt_still_forces_the_strict_scan) ... ok
+test_the_index_validates_after_every_settlement (test_t1519_settled_index.SettledIndexTests.test_the_index_validates_after_every_settlement) ... ok
+
+----------------------------------------------------------------------
+Ran 38 tests in 51.254s
+
+OK

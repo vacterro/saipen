@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-063:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-217 closed with verification evidence in LOG: verify -> PASS [target: T-217] conf: high -- post-reconciliation re-read agrees with the requested end state. saipen status --json: TODO workable = none (top_workable_ticket now T-214 which is ## BLOCKED, not workable); BOARD ## TODO empty; T-212/T-213/T-215/T-214 all ## BLOCKED with BLOCKED_EXTERNAL-class or operator-boundary text; T-216 DONE. Evidence chain: E-1673 T-212, E-1674 T-213, E-1675 T-",
+      "text": "Reconcile AUDAPACK TODO queue: close T-214 as ALREADY_FIXED, externalize T-212/T-213/T-215 to SAIPEN owner, T-216 operator soak pending",
+      "verification": "the Work this request created reached its own verification gate; see the T-217 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-217"
+    }
+  },
+  "schema_version": 1
+}

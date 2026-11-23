@@ -1,0 +1,37 @@
+[
+  {
+    "test": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_exhaustion_evidence.py",
+    "exit_code": 0,
+    "seconds": 0.23,
+    "sha256": "7f8a9aaedb16d5cf18f3cd3cee61c99597b98b01ab85cc85a830853f41c9415f",
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\baseline-test_t2040_exhaustion_evidence.log"
+  },
+  {
+    "test": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_discovery_owners.py",
+    "exit_code": 0,
+    "seconds": 0.17,
+    "sha256": "6142525d3581f07da0a049084aa8120150589b7355208cb2ffed98f988a613e1",
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\baseline-test_t2040_discovery_owners.log"
+  },
+  {
+    "test": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_continuation_truth.py",
+    "exit_code": 0,
+    "seconds": 0.42,
+    "sha256": "94b7dd9ae3e870bb8e7d9d78b249aee1a1c4de8a2ab1642f70b8f8f40f89ba28",
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\baseline-test_t2040_continuation_truth.log"
+  },
+  {
+    "test": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2021_false_idle_maintenance.py",
+    "exit_code": 0,
+    "seconds": 1.28,
+    "sha256": "d1af4612fbb2afec61eddeb31729e9fd9e19c8cf38da4bbea3faf0728db70f47",
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\baseline-test_t2021_false_idle_maintenance.log"
+  },
+  {
+    "test": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_premature_victory_prevention.py",
+    "exit_code": 1,
+    "seconds": 2.86,
+    "sha256": "18fa8fbcac05bb4f523fc85b49d8033751884cc12bfd99d2943fbe733b7594b8",
+    "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\evidence\\T-2040\\discovery-resume-20261108\\baseline-test_premature_victory_prevention.log"
+  }
+]

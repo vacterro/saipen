@@ -1,0 +1,98 @@
+{
+  "state": {
+    "phase": "DONE",
+    "task": "none",
+    "next_action": "PHASE SCOUT T-1693",
+    "blocker": "none",
+    "transition_from": "SHIP",
+    "saipen_version": 8,
+    "schema_version": 3,
+    "last_event": 13975,
+    "style_contract": "ded-069a4c52",
+    "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "agent": "saipen-cli",
+    "mode": "full",
+    "updated": "2026-10-09T10:11:41Z",
+    "requires": [
+      "filesystem",
+      "git",
+      "python"
+    ],
+    "execution_intent": "goal",
+    "goal_waves": 0,
+    "goal_tickets": 9
+  },
+  "ticket": {
+    "id": "T-1494",
+    "section": "## DONE",
+    "line_no": 5,
+    "checkbox": "x",
+    "needs": [],
+    "fields": {
+      "needs": "",
+      "verify": "SRC-112 R002-R005 each VERIFIED with red-then-green evidence: a persistent /goal run at 20/20 writes a checkpoint DEC naming its authority_source and continues with validate --gate core green; a bounded run at 20/20... [detail_ref: .saipen/recovery/board-compaction/T-1494/T-1494-81852cf1d70fc9395f76bfd5.json]",
+      "detail_ref": ".saipen/recovery/board-compaction/T-1494/T-1494-81852cf1d70fc9395f76bfd5.json",
+      "owner": "saipen-cli",
+      "claim_time": "2026-10-09T10:10:14Z",
+      "source_receipts": "SRC-112",
+      "closure_mode": "own_patch"
+    },
+    "raw": "- [x] T-1494 [P2] Goal continuation authority is not machine truth: STATE carries execution_intent goal and two counters, so persistent operator authority (an explicit /goal: continue until... | needs:  | verify: SRC-112 R002-R005 each VERIFIED with red-then-green evidence: a persistent /goal run at 20/20 writes a checkpoint DEC naming its authority_source and continues with validate --gate core green; a bounded run at 20/20... [detail_ref: .saipen/recovery/board-compaction/T-1494/T-1494-81852cf1d70fc9395f76bfd5.json] | detail_ref: .saipen/recovery/board-compaction/T-1494/T-1494-81852cf1d70fc9395f76bfd5.json | owner: saipen-cli | claim_time: 2026-10-09T10:10:14Z | source_receipts: SRC-112 | closure_mode: own_patch",
+    "description": "[P2] Goal continuation authority is not machine truth: STATE carries execution_intent goal and two counters, so persistent operator authority (an explicit /goal: continue until..."
+  },
+  "release_operation": "release-2398c14dcffa4bbca9ac32e4f3aff49c",
+  "closure_operation": "finish-ebae4595ec10490682810dbf2600061e",
+  "journal_status": "COMMITTED",
+  "mode": "no-publish",
+  "progress_index": 0,
+  "applied_targets": [
+    {
+      "path": ".saipen/LOG.md",
+      "applied": true
+    },
+    {
+      "path": ".saipen/BOARD.md",
+      "applied": true
+    },
+    {
+      "path": ".saipen/STATE.md",
+      "applied": true
+    },
+    {
+      "path": ".saipen/kitchen/digest.md",
+      "applied": true
+    },
+    {
+      "path": ".saipen/kitchen/release_receipt.json",
+      "applied": true
+    }
+  ],
+  "closure_events": [
+    {
+      "date": "09.10.26 10:11",
+      "event": 13974,
+      "parent": 13973,
+      "ticket": "T-1494",
+      "agent": "saipen-cli",
+      "op_id": "finish-ebae4595ec10490682810dbf2600061e",
+      "taxonomy": "RUN",
+      "text": "ship v8.1.0 -> skipped publish (no-publish: policy)"
+    },
+    {
+      "date": "09.10.26 10:11",
+      "event": 13975,
+      "parent": 13974,
+      "ticket": "T-1494",
+      "agent": "saipen-cli",
+      "op_id": "finish-ebae4595ec10490682810dbf2600061e",
+      "taxonomy": "DEC",
+      "text": "ticket finished via SAIOPS -- completion (from SHIP)"
+    }
+  ],
+  "publication_identities": {
+    "content_commit": "",
+    "closure_commit": "",
+    "remote_tag_sha": "",
+    "remote_push_url": ""
+  }
+}

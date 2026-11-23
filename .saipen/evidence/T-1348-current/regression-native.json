@@ -1,0 +1,5 @@
+{
+  "ticket": "T-1348",
+  "admissible": true,
+  "reason": "ADMISSIBLE: the same verifier failed against the pre-fix subject and passed against the post-fix subject, so the implementation is what changed"
+}

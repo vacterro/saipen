@@ -171,24 +171,24 @@ _INT_SETTINGS = (
 )
 
 
-def _policy_int(config: dict, key: str, default: int) -> int:
-    """Read an int policy field, honouring an explicit 0.
+# ------------------------------------------------------------------ helpers
 
-    `config.get(key) or default` would turn a declared `max_shells: 0` back
-    into the permissive default -- for ZAICODE, whose hook the host spawns
-    with no shell in between, that would admit a chain that runs through a
-    shell tool, which is exactly the caller this boundary exists to refuse.
+
+def int_setting(config: dict, key: str) -> int:
+    """An integer setting where an explicit zero is a value, not an absence.
+
+    `or DEFAULT` treats 0 as missing: a host that execs its own hook with no
+    shell between (ZAICODE, `shell:false`) declares `max_shells: 0`, and the
+    old spelling restored 4, admitting exactly the shells the host policy
+    forbids. Absent or unreadable keeps the shipped default.
     """
     value = config.get(key)
     if value is None:
-        return default
+        return int(DEFAULT_SETTINGS[key])
     try:
         return int(value)
     except (TypeError, ValueError):
-        return default
-
-
-# ------------------------------------------------------------------ helpers
+        return int(DEFAULT_SETTINGS[key])
 
 
 def _sha(text: object, size: int = 64) -> str:
@@ -720,8 +720,11 @@ class Broker:
             host_signers=signers,
             shells=tuple(host_cfg.get("hook_shells") or identity_proof.DEFAULT_SHELLS),
             bridge_images=tuple(host_cfg.get("bridge_images") or ()),
-            max_shells=_policy_int(host_cfg, "max_shells", 4),
-            max_bridges=_policy_int(host_cfg, "max_bridges", 2),
+            # An EXPLICIT zero is a bound, not an absence: a host that execs
+            # its own hook with shell:false (ZAICODE) declares max_shells 0,
+            # and `or DEFAULT` silently restored 4 and admitted shells.
+            max_shells=int_setting(host_cfg, "max_shells"),
+            max_bridges=int_setting(host_cfg, "max_bridges"),
             profile_hook="hooks/saipen-guard.py" if host == "claude" else None,
         )
         from .claude_profiles import hook_for_process

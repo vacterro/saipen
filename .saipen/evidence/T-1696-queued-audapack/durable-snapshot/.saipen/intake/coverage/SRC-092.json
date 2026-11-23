@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-092:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-245 closed with verification evidence in LOG: verify -> PASS conf: high -- full pytest 2276 passed/5 skipped; current authority/fidelity 227; UI 47; Ruff clean; compileall clean; live Wintage PACK fresh",
+      "text": "Fix Wintage PACK production regression: reproduce stale SAIPEN manifest failure, repair canonical launcher discovery without weakening the authority gate, expose exact failure in UX, pass regression matrix",
+      "verification": "the Work this request created reached its own verification gate; see the T-245 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-245"
+    }
+  },
+  "schema_version": 1
+}

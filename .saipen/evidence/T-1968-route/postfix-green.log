@@ -1,0 +1,4 @@
+saipal continue --json exit=2 code=FOREIGN_PROTOCOL_COMMAND `saipal continue` is a saipal command, not a saipen command. saipal is
+pal --json exit=2 code=FOREIGN_PROTOCOL_COMMAND `pal` is a saipal command, not a saipen command. saipal is a forensic 
+bogusxyz --json exit=2 code=VALIDATION_FAILED unknown command: bogusxyz
+cc --json exit=0 code=None 

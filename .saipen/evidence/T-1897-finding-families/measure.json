@@ -1,0 +1,26 @@
+{
+  "before": {
+    "problems": 41,
+    "distinct_keys": 2,
+    "unclassified": 40,
+    "families": {
+      "unclassified": 40,
+      "cross_doc_drift": 1
+    },
+    "distinct_manifest_paths": 0
+  },
+  "after": {
+    "problems": 42,
+    "distinct_keys": 42,
+    "unclassified": 0,
+    "families": {
+      "closure_provenance_drift": 1,
+      "runtime_manifest_untracked": 39,
+      "cross_doc_drift": 1,
+      "coverage_gap": 1
+    },
+    "distinct_manifest_paths": 39
+  },
+  "subject": "tools/saipen_engine/findings.py + finding_ownership.py",
+  "workload": "python tools/validate.py --project-root . --gate core --findings-json"
+}

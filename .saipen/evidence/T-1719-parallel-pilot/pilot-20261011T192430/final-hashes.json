@@ -1,0 +1,34 @@
+{
+  "draft_files": {
+    ".saipen\\cache\\parallel-draft\\tools\\saipen_engine\\parallel_hosts.py": "08dd6cee34602c51b6f80d468a5262502a58cc948267103773fddf2702081376",
+    ".saipen\\cache\\parallel-draft\\tools\\saipen_engine\\parallel_worktree.py": "36e07a5419c067db59b293b3a60213d882202199440b1b069dd5de3ab9aaf951",
+    ".saipen\\cache\\parallel-draft\\tools\\test_parallel_hosts.py": "0f534ab734afc12903094e47889b38068c8072359a4b441640b1af705e2b55dc",
+    ".saipen\\cache\\parallel-draft\\tools\\test_parallel_worktree.py": "73f0ec1987b692467c7a40902f4a4bc80a427db7facbd8f74b93d6fc09c8bcad"
+  },
+  "frozen_docs": {
+    "saipen/BOOT.md": {
+      "sha256": "1fa066b97485564f2d45dd746196f129a4b3c59090a6b81daebf23af9508cb2b",
+      "unchanged_from_pilot_start": true
+    },
+    "saipen/STYLE.md": {
+      "sha256": "a3fbbfe52cfcd0cf7e67965f993793423be47a62d99134153bfc31529c850346",
+      "unchanged_from_pilot_start": true
+    },
+    "saipen/EXECUTION.md": {
+      "sha256": "23af34e646058768483ade7985f9e4cb18ddff8662ef18eef180e911de2998b5",
+      "unchanged_from_pilot_start": true
+    },
+    "saipen/CORE.md": {
+      "sha256": "67852506019f05e6417d07de9915fab5337780052105dfb46497734b58555455",
+      "unchanged_from_pilot_start": true
+    },
+    "saipen/COMMANDS.md": {
+      "sha256": "1da84ca7650a6258826a0cfcf08908ee3e719daa76c7e97c5fc5eb3bd6f34fb0",
+      "unchanged_from_pilot_start": true
+    },
+    "saipen/REGISTRY.json": {
+      "sha256": "a684e07b05d99561f44ca8a4b4568e62b424e416b6472c116a6f9f29160174d1",
+      "unchanged_from_pilot_start": true
+    }
+  }
+}

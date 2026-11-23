@@ -1,0 +1,10 @@
+ZAICODE_HOME           : V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_ZAICODE\.zaicode\home
+canonical hook exists  : true
+
+RED   (no override)     -> null
+GREEN (with override)   -> "C:\\Users\\vac34\\.zcode\\hooks\\saipen-guard.py"
+
+RED reproduces the report : PASS
+GREEN resolves the hook   : PASS
+
+CONTROL HOLDS: the shipped resolver cannot find the hook, and the documented override makes it find the canonical one.

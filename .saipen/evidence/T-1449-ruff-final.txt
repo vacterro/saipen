@@ -1,0 +1,559 @@
+tests\test_producer_effect_deduplication.py:21:1: E402 Module level import not at top of file
+tests\test_producer_effect_deduplication.py:22:1: E402 Module level import not at top of file
+tests\test_producer_effect_deduplication.py:23:1: E402 Module level import not at top of file
+tests\test_producer_effect_deduplication.py:24:1: E402 Module level import not at top of file
+tests\test_producer_effect_deduplication.py:24:27: F401 [*] `saipen_engine.goal_authority` imported but unused
+tests\test_producer_effect_deduplication.py:25:1: E402 Module level import not at top of file
+tests\test_producer_effect_deduplication.py:26:1: E402 Module level import not at top of file
+tests\test_producer_effect_deduplication.py:27:1: E402 Module level import not at top of file
+tests\test_producer_effect_deduplication.py:42:101: E501 Line too long (121 > 100)
+tests\test_producer_effect_deduplication.py:44:101: E501 Line too long (109 > 100)
+tests\test_producer_effect_deduplication.py:48:101: E501 Line too long (117 > 100)
+tests\test_producer_effect_deduplication.py:50:101: E501 Line too long (116 > 100)
+tests\test_producer_effect_deduplication.py:108:101: E501 Line too long (103 > 100)
+tests\test_producer_effect_deduplication.py:124:101: E501 Line too long (101 > 100)
+tests\test_producer_effect_deduplication.py:166:9: F841 Local variable `pkg2` is assigned to but never used
+tests\test_producer_effect_deduplication.py:188:101: E501 Line too long (155 > 100)
+tests\test_producer_effect_deduplication.py:250:101: E501 Line too long (176 > 100)
+tests\test_producer_effect_deduplication.py:255:101: E501 Line too long (127 > 100)
+tests\test_producer_effect_deduplication.py:273:101: E501 Line too long (125 > 100)
+tests\test_producer_effect_deduplication.py:284:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_deduplication.py:287:101: E501 Line too long (103 > 100)
+tests\test_producer_effect_deduplication.py:312:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:3:8: F401 [*] `os` imported but unused
+tests\test_producer_effect_truth.py:13:1: E402 Module level import not at top of file
+tests\test_producer_effect_truth.py:19:1: E402 Module level import not at top of file
+tests\test_producer_effect_truth.py:20:1: E402 Module level import not at top of file
+tests\test_producer_effect_truth.py:20:45: F401 [*] `saipen_engine.operations` imported but unused
+tests\test_producer_effect_truth.py:21:1: E402 Module level import not at top of file
+tests\test_producer_effect_truth.py:39:101: E501 Line too long (121 > 100)
+tests\test_producer_effect_truth.py:41:101: E501 Line too long (109 > 100)
+tests\test_producer_effect_truth.py:44:101: E501 Line too long (117 > 100)
+tests\test_producer_effect_truth.py:63:101: E501 Line too long (101 > 100)
+tests\test_producer_effect_truth.py:65:101: E501 Line too long (116 > 100)
+tests\test_producer_effect_truth.py:241:101: E501 Line too long (101 > 100)
+tests\test_producer_effect_truth.py:242:101: E501 Line too long (109 > 100)
+tests\test_producer_effect_truth.py:255:101: E501 Line too long (104 > 100)
+tests\test_producer_effect_truth.py:276:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:371:101: E501 Line too long (103 > 100)
+tests\test_producer_effect_truth.py:381:9: F841 Local variable `pkg2` is assigned to but never used
+tests\test_producer_effect_truth.py:406:101: E501 Line too long (107 > 100)
+tests\test_producer_effect_truth.py:436:101: E501 Line too long (118 > 100)
+tests\test_producer_effect_truth.py:466:101: E501 Line too long (103 > 100)
+tests\test_producer_effect_truth.py:473:101: E501 Line too long (114 > 100)
+tests\test_producer_effect_truth.py:476:101: E501 Line too long (103 > 100)
+tests\test_producer_effect_truth.py:525:101: E501 Line too long (106 > 100)
+tests\test_producer_effect_truth.py:533:101: E501 Line too long (105 > 100)
+tests\test_producer_effect_truth.py:560:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:561:101: E501 Line too long (112 > 100)
+tests\test_producer_effect_truth.py:572:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:574:101: E501 Line too long (119 > 100)
+tests\test_producer_effect_truth.py:589:101: E501 Line too long (109 > 100)
+tests\test_producer_effect_truth.py:590:101: E501 Line too long (112 > 100)
+tests\test_producer_effect_truth.py:607:101: E501 Line too long (110 > 100)
+tests\test_producer_effect_truth.py:617:9: F841 Local variable `pkg2` is assigned to but never used
+tests\test_producer_effect_truth.py:635:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:653:101: E501 Line too long (103 > 100)
+tests\test_producer_effect_truth.py:676:101: E501 Line too long (119 > 100)
+tests\test_producer_effect_truth.py:814:101: E501 Line too long (108 > 100)
+tests\test_producer_effect_truth.py:832:101: E501 Line too long (101 > 100)
+tests\test_producer_effect_truth.py:851:101: E501 Line too long (101 > 100)
+tests\test_producer_effect_truth.py:879:101: E501 Line too long (154 > 100)
+tests\test_producer_effect_truth.py:882:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:888:101: E501 Line too long (110 > 100)
+tests\test_producer_effect_truth.py:897:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:900:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:917:101: E501 Line too long (154 > 100)
+tests\test_producer_effect_truth.py:920:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:943:101: E501 Line too long (160 > 100)
+tests\test_producer_effect_truth.py:946:101: E501 Line too long (105 > 100)
+tests\test_producer_effect_truth.py:964:101: E501 Line too long (154 > 100)
+tests\test_producer_effect_truth.py:967:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:1018:101: E501 Line too long (154 > 100)
+tests\test_producer_effect_truth.py:1021:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:1025:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:1140:101: E501 Line too long (104 > 100)
+tests\test_producer_effect_truth.py:1211:101: E501 Line too long (103 > 100)
+tests\test_producer_effect_truth.py:1236:101: E501 Line too long (119 > 100)
+tests\test_producer_effect_truth.py:1269:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:1280:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:1293:101: E501 Line too long (107 > 100)
+tests\test_producer_effect_truth.py:1305:101: E501 Line too long (116 > 100)
+tests\test_producer_effect_truth.py:1308:101: E501 Line too long (110 > 100)
+tests\test_producer_effect_truth.py:1320:101: E501 Line too long (110 > 100)
+tests\test_producer_effect_truth.py:1365:101: E501 Line too long (109 > 100)
+tests\test_producer_effect_truth.py:1369:101: E501 Line too long (113 > 100)
+tests\test_producer_effect_truth.py:1427:101: E501 Line too long (108 > 100)
+tests\test_producer_effect_truth.py:1490:101: E501 Line too long (101 > 100)
+tests\test_producer_effect_truth.py:1511:101: E501 Line too long (102 > 100)
+tests\test_producer_effect_truth.py:1516:101: E501 Line too long (116 > 100)
+tests\test_producer_effect_truth.py:1519:101: E501 Line too long (115 > 100)
+tests\test_producer_effect_truth.py:1562:101: E501 Line too long (101 > 100)
+tests\test_producer_effect_truth.py:1586:101: E501 Line too long (116 > 100)
+tests\test_producer_effect_truth.py:1605:101: E501 Line too long (118 > 100)
+tests\test_producer_effect_truth.py:1619:101: E501 Line too long (141 > 100)
+tests\test_producer_effect_truth.py:1854:101: E501 Line too long (117 > 100)
+tests\test_producer_effect_truth.py:1856:101: E501 Line too long (105 > 100)
+tests\test_producer_effect_truth.py:1860:101: E501 Line too long (112 > 100)
+tests\test_producer_effect_truth.py:1872:101: E501 Line too long (117 > 100)
+tests\test_producer_effect_truth.py:1882:101: E501 Line too long (110 > 100)
+tests\test_producer_effect_truth.py:1888:101: E501 Line too long (196 > 100)
+tests\test_producer_effect_truth.py:1897:22: RUF012 Mutable default value for class attribute
+tools\_t2040_experiment.py:32:1: E402 Module level import not at top of file
+tools\install_host_guard.py:1471:41: FURB171 Membership test against single-item container
+tools\saipen.py:3599:101: E501 Line too long (148 > 100)
+tools\saipen.py:3643:101: E501 Line too long (122 > 100)
+tools\saipen.py:3647:101: E501 Line too long (107 > 100)
+tools\saipen.py:12845:38: RUF010 [*] Use explicit conversion flag
+tools\saipen.py:14937:101: E501 Line too long (124 > 100)
+tools\saipen.py:15398:33: FURB110 [*] Replace ternary `if` expression with `or` operator
+tools\saipen.py:15436:101: E501 Line too long (115 > 100)
+tools\saipen_engine\continuation_assessment.py:36:33: F401 [*] `.board.workable_tickets` imported but unused
+tools\saipen_engine\continuation_assessment.py:40:5: F401 [*] `.router.gate_route` imported but unused
+tools\saipen_engine\continuation_assessment.py:318:101: E501 Line too long (117 > 100)
+tools\saipen_engine\continuation_assessment.py:395:101: E501 Line too long (104 > 100)
+tools\saipen_engine\continuation_assessment.py:552:101: E501 Line too long (124 > 100)
+tools\saipen_engine\continuation_assessment.py:655:101: E501 Line too long (104 > 100)
+tools\saipen_engine\gc.py:245:101: E501 Line too long (109 > 100)
+tools\saipen_engine\gc.py:394:101: E501 Line too long (104 > 100)
+tools\saipen_engine\gc.py:578:101: E501 Line too long (107 > 100)
+tools\saipen_engine\gc.py:582:101: E501 Line too long (106 > 100)
+tools\saipen_engine\gc.py:954:101: E501 Line too long (102 > 100)
+tools\saipen_engine\gc.py:962:101: E501 Line too long (121 > 100)
+tools\saipen_engine\gc.py:964:101: E501 Line too long (107 > 100)
+tools\saipen_engine\gc.py:1026:101: E501 Line too long (101 > 100)
+tools\saipen_engine\gc.py:1039:101: E501 Line too long (115 > 100)
+tools\saipen_engine\gc.py:1055:101: E501 Line too long (110 > 100)
+tools\saipen_engine\gc.py:1084:101: E501 Line too long (135 > 100)
+tools\saipen_engine\gc.py:1103:24: RUF059 Unpacked variable `build_kept` is never used
+tools\saipen_engine\gc.py:1131:101: E501 Line too long (103 > 100)
+tools\saipen_engine\gc.py:1178:101: E501 Line too long (103 > 100)
+tools\saipen_engine\gc.py:1179:101: E501 Line too long (120 > 100)
+tools\saipen_engine\gc.py:1270:13: PLW2901 `for` loop variable `line` overwritten by assignment target
+tools\saipen_engine\gc.py:1334:101: E501 Line too long (102 > 100)
+tools\saipen_engine\gc.py:1342:9: SIM105 Use `contextlib.suppress(OSError)` instead of `try`-`except`-`pass`
+tools\saipen_engine\gc.py:1468:101: E501 Line too long (119 > 100)
+tools\saipen_engine\gc.py:1472:101: E501 Line too long (142 > 100)
+tools\saipen_engine\gc.py:1475:101: E501 Line too long (135 > 100)
+tools\saipen_engine\gc.py:1521:9: SIM105 Use `contextlib.suppress(OSError)` instead of `try`-`except`-`pass`
+tools\saipen_engine\gc.py:1594:101: E501 Line too long (112 > 100)
+tools\saipen_engine\gc.py:1606:101: E501 Line too long (108 > 100)
+tools\saipen_engine\gc.py:1646:9: F841 Local variable `sync` is assigned to but never used
+tools\saipen_engine\gc.py:1685:101: E501 Line too long (113 > 100)
+tools\saipen_engine\gc.py:1752:101: E501 Line too long (103 > 100)
+tools\saipen_engine\gc.py:1775:101: E501 Line too long (103 > 100)
+tools\saipen_engine\gc.py:1791:101: E501 Line too long (103 > 100)
+tools\saipen_engine\gc.py:1794:5: F841 Local variable `evidence` is assigned to but never used
+tools\saipen_engine\gc.py:1865:101: E501 Line too long (105 > 100)
+tools\saipen_engine\host_dispatch.py:128:101: E501 Line too long (101 > 100)
+tools\saipen_engine\host_dispatch.py:151:101: E501 Line too long (133 > 100)
+tools\saipen_engine\host_dispatch.py:164:101: E501 Line too long (117 > 100)
+tools\saipen_engine\host_dispatch.py:177:101: E501 Line too long (120 > 100)
+tools\saipen_engine\host_dispatch.py:183:101: E501 Line too long (142 > 100)
+tools\saipen_engine\host_dispatch.py:198:101: E501 Line too long (131 > 100)
+tools\saipen_engine\host_dispatch.py:218:101: E501 Line too long (109 > 100)
+tools\saipen_engine\host_dispatch.py:489:101: E501 Line too long (101 > 100)
+tools\saipen_engine\host_dispatch.py:670:101: E501 Line too long (103 > 100)
+tools\saipen_engine\host_dispatch.py:845:101: E501 Line too long (102 > 100)
+tools\saipen_engine\host_dispatch.py:904:101: E501 Line too long (135 > 100)
+tools\saipen_engine\host_dispatch.py:918:101: E501 Line too long (105 > 100)
+tools\saipen_engine\host_dispatch.py:926:101: E501 Line too long (119 > 100)
+tools\saipen_engine\host_dispatch.py:965:51: RUF100 [*] Unused `noqa` directive (non-enabled: `BLE001`)
+tools\saipen_engine\host_dispatch.py:1038:101: E501 Line too long (102 > 100)
+tools\saipen_engine\host_dispatch.py:1043:101: E501 Line too long (125 > 100)
+tools\saipen_engine\host_dispatch.py:1074:28: RUF005 Consider `[*shlex.split(cmd), json.dumps(payload)]` instead of concatenation
+tools\saipen_engine\host_dispatch.py:1085:25: SIM105 Use `contextlib.suppress(Exception)` instead of `try`-`except`-`pass`
+tools\saipen_engine\host_dispatch.py:1090:101: E501 Line too long (111 > 100)
+tools\saipen_engine\host_dispatch.py:1148:29: SIM105 Use `contextlib.suppress(Exception)` instead of `try`-`except`-`pass`
+tools\saipen_engine\host_dispatch.py:1153:101: E501 Line too long (116 > 100)
+tools\saipen_engine\host_dispatch.py:1247:17: SIM105 Use `contextlib.suppress(Exception)` instead of `try`-`except`-`pass`
+tools\saipen_engine\host_iteration.py:274:101: E501 Line too long (119 > 100)
+tools\saipen_engine\host_iteration.py:308:101: E501 Line too long (127 > 100)
+tools\saipen_engine\host_iteration.py:318:101: E501 Line too long (118 > 100)
+tools\saipen_engine\host_iteration.py:319:101: E501 Line too long (108 > 100)
+tools\saipen_engine\intake.py:2329:101: E501 Line too long (127 > 100)
+tools\saipen_engine\intake.py:2333:101: E501 Line too long (125 > 100)
+tools\saipen_engine\intake.py:2371:101: E501 Line too long (124 > 100)
+tools\saipen_engine\intake.py:2377:101: E501 Line too long (116 > 100)
+tools\saipen_engine\intake.py:2403:101: E501 Line too long (199 > 100)
+tools\saipen_engine\intake.py:2420:101: E501 Line too long (192 > 100)
+tools\saipen_engine\intake.py:2424:101: E501 Line too long (111 > 100)
+tools\saipen_engine\intake.py:2428:101: E501 Line too long (141 > 100)
+tools\saipen_engine\intake.py:2441:101: E501 Line too long (135 > 100)
+tools\saipen_engine\intake.py:2448:101: E501 Line too long (113 > 100)
+tools\saipen_engine\intake.py:2521:101: E501 Line too long (120 > 100)
+tools\saipen_engine\intake.py:2523:101: E501 Line too long (112 > 100)
+tools\saipen_engine\intake.py:2542:101: E501 Line too long (101 > 100)
+tools\saipen_engine\intake.py:2613:101: E501 Line too long (117 > 100)
+tools\saipen_engine\intake.py:2635:101: E501 Line too long (110 > 100)
+tools\saipen_engine\intake.py:2638:101: E501 Line too long (138 > 100)
+tools\saipen_engine\intake.py:2666:101: E501 Line too long (120 > 100)
+tools\saipen_engine\intake.py:2668:101: E501 Line too long (112 > 100)
+tools\saipen_engine\intake.py:2674:101: E501 Line too long (129 > 100)
+tools\saipen_engine\intake.py:2696:101: E501 Line too long (101 > 100)
+tools\saipen_engine\intake.py:2701:101: E501 Line too long (104 > 100)
+tools\saipen_engine\intake.py:2710:101: E501 Line too long (104 > 100)
+tools\saipen_engine\intake.py:2714:101: E501 Line too long (113 > 100)
+tools\saipen_engine\intake.py:3024:5: SIM103 Return the condition directly
+tools\saipen_engine\intake.py:3024:101: E501 Line too long (101 > 100)
+tools\saipen_engine\iteration_verdict.py:29:21: F401 [*] `.router.route_next` imported but unused
+tools\saipen_engine\iteration_verdict.py:509:5: F841 Local variable `routed` is assigned to but never used
+tools\saipen_engine\operations.py:12520:11: RUF059 Unpacked variable `state` is never used
+tools\saipen_engine\operations.py:12563:101: E501 Line too long (115 > 100)
+tools\saipen_engine\operations.py:27152:101: E501 Line too long (116 > 100)
+tools\saipen_engine\operations.py:27337:101: E501 Line too long (105 > 100)
+tools\saipen_engine\operator_task.py:451:101: E501 Line too long (101 > 100)
+tools\saipen_engine\operator_task.py:459:101: E501 Line too long (104 > 100)
+tools\saipen_engine\operator_task.py:469:101: E501 Line too long (116 > 100)
+tools\saipen_engine\operator_task.py:477:101: E501 Line too long (116 > 100)
+tools\saipen_engine\operator_task.py:486:101: E501 Line too long (104 > 100)
+tools\saipen_engine\operator_task.py:518:101: E501 Line too long (103 > 100)
+tools\saipen_engine\operator_task.py:936:101: E501 Line too long (112 > 100)
+tools\saipen_engine\release.py:2852:23: F401 [*] `.lock.WriterBusy` imported but unused
+tools\saipen_engine\release.py:2856:9: SIM117 [*] Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\saipen_engine\release.py:3084:23: F401 [*] `.lock.WriterBusy` imported but unused
+tools\saipen_engine\release.py:3087:9: SIM117 [*] Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\saipen_engine\release.py:3431:12: RUF005 Consider `[*command, "--gate", gate]` instead of concatenation
+tools\saipen_engine\response_surface.py:1439:5: SIM114 [*] Combine `if` branches using logical `or` operator
+tools\saipen_engine\saipal_report_stream.py:128:9: F811 Redefinition of unused `value` from line 119: `value` redefined here
+tools\saipen_engine\saipal_report_stream.py:314:15: RUF059 Unpacked variable `count` is never used
+tools\saipen_engine\supervisor.py:40:5: F401 [*] `.continuation_assessment.CONFORMANCE_STOP` imported but unused
+tools\saipen_engine\supervisor.py:41:5: F401 [*] `.continuation_assessment.EXECUTABLE_CLASSIFICATIONS` imported but unused
+tools\saipen_engine\supervisor.py:42:5: F401 [*] `.continuation_assessment.HUMAN_BOUNDARY_CLASSIFICATIONS` imported but unused
+tools\saipen_engine\supervisor.py:44:5: F401 [*] `.continuation_assessment.MAINTENANCE_AVAILABLE` imported but unused
+tools\saipen_engine\supervisor.py:45:5: F401 [*] `.continuation_assessment.QUIESCENT` imported but unused
+tools\saipen_engine\supervisor.py:48:5: F401 [*] `.continuation_assessment.WAIT_EXTERNAL` imported but unused
+tools\saipen_engine\supervisor.py:49:5: F401 [*] `.continuation_assessment.WAIT_OPERATOR` imported but unused
+tools\saipen_engine\supervisor.py:379:101: E501 Line too long (102 > 100)
+tools\saipen_engine\supervisor.py:411:101: E501 Line too long (101 > 100)
+tools\saipen_engine\supervisor.py:413:101: E501 Line too long (115 > 100)
+tools\saipen_engine\supervisor.py:436:101: E501 Line too long (103 > 100)
+tools\saipen_engine\verification_cache.py:254:101: E501 Line too long (102 > 100)
+tools\test_campaign_continuation_assessment.py:36:5: F401 [*] `saipen_engine.continue_loop` imported but unused
+tools\test_campaign_continuation_assessment.py:40:5: F401 [*] `saipen_engine.router` imported but unused
+tools\test_campaign_continuation_assessment.py:42:5: F401 [*] `saipen_engine.watchdog` imported but unused
+tools\test_campaign_continuation_assessment.py:79:101: E501 Line too long (113 > 100)
+tools\test_campaign_continuation_assessment.py:105:101: E501 Line too long (101 > 100)
+tools\test_campaign_continuation_assessment.py:108:101: E501 Line too long (101 > 100)
+tools\test_campaign_continuation_assessment.py:172:101: E501 Line too long (111 > 100)
+tools\test_campaign_matrix.py:12:8: F401 [*] `json` imported but unused
+tools\test_campaign_matrix.py:40:47: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+tools\test_campaign_matrix.py:183:24: E741 Ambiguous variable name: `l`
+tools\test_campaign_matrix.py:210:101: E501 Line too long (122 > 100)
+tools\test_campaign_matrix.py:211:101: E501 Line too long (122 > 100)
+tools\test_campaign_matrix.py:215:101: E501 Line too long (114 > 100)
+tools\test_campaign_matrix.py:226:9: E731 Do not assign a `lambda` expression, use a `def`
+tools\test_campaign_matrix.py:270:101: E501 Line too long (104 > 100)
+tools\test_campaign_matrix.py:274:101: E501 Line too long (102 > 100)
+tools\test_campaign_matrix.py:289:101: E501 Line too long (119 > 100)
+tools\test_campaign_matrix.py:301:101: E501 Line too long (128 > 100)
+tools\test_campaign_matrix.py:364:101: E501 Line too long (115 > 100)
+tools\test_campaign_matrix.py:375:101: E501 Line too long (104 > 100)
+tools\test_campaign_matrix.py:377:101: E501 Line too long (103 > 100)
+tools\test_campaign_matrix.py:416:101: E501 Line too long (112 > 100)
+tools\test_campaign_matrix.py:467:101: E501 Line too long (115 > 100)
+tools\test_campaign_matrix.py:480:9: F841 Local variable `c2` is assigned to but never used
+tools\test_campaign_matrix.py:534:101: E501 Line too long (113 > 100)
+tools\test_campaign_matrix.py:558:101: E501 Line too long (102 > 100)
+tools\test_campaign_matrix.py:572:101: E501 Line too long (110 > 100)
+tools\test_campaign_matrix.py:592:101: E501 Line too long (102 > 100)
+tools\test_campaign_matrix.py:609:101: E501 Line too long (107 > 100)
+tools\test_campaign_matrix.py:650:101: E501 Line too long (121 > 100)
+tools\test_campaign_matrix.py:651:101: E501 Line too long (121 > 100)
+tools\test_campaign_matrix.py:653:13: F841 Local variable `results` is assigned to but never used
+tools\test_campaign_matrix.py:658:101: E501 Line too long (103 > 100)
+tools\test_campaign_matrix.py:661:9: E731 Do not assign a `lambda` expression, use a `def`
+tools\test_campaign_matrix.py:662:101: E501 Line too long (108 > 100)
+tools\test_campaign_matrix.py:680:9: E731 Do not assign a `lambda` expression, use a `def`
+tools\test_campaign_matrix.py:688:9: E731 Do not assign a `lambda` expression, use a `def`
+tools\test_campaign_production_gates.py:25:8: F401 [*] `os` imported but unused
+tools\test_campaign_production_gates.py:28:8: F401 [*] `time` imported but unused
+tools\test_campaign_production_gates.py:41:5: F401 [*] `saipen_engine.audit_enqueue` imported but unused
+tools\test_campaign_production_gates.py:43:32: F401 [*] `saipen_engine.continuation_assessment` imported but unused
+tools\test_campaign_production_gates.py:53:47: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+tools\test_campaign_production_gates.py:98:101: E501 Line too long (112 > 100)
+tools\test_campaign_production_gates.py:224:101: E501 Line too long (103 > 100)
+tools\test_campaign_production_gates.py:262:101: E501 Line too long (104 > 100)
+tools\test_campaign_production_gates.py:315:101: E501 Line too long (112 > 100)
+tools\test_campaign_production_gates.py:332:101: E501 Line too long (139 > 100)
+tools\test_campaign_production_gates.py:477:101: E501 Line too long (110 > 100)
+tools\test_campaign_production_gates.py:502:101: E501 Line too long (114 > 100)
+tools\test_campaign_production_gates.py:514:101: E501 Line too long (104 > 100)
+tools\test_campaign_production_gates.py:602:101: E501 Line too long (104 > 100)
+tools\test_log_detail_evidence.py:319:101: E501 Line too long (103 > 100)
+tools\test_log_detail_evidence.py:328:101: E501 Line too long (103 > 100)
+tools\test_log_detail_evidence.py:329:13: F841 Local variable `summary` is assigned to but never used
+tools\test_log_detail_evidence.py:333:101: E501 Line too long (103 > 100)
+tools\test_log_detail_evidence.py:334:20: RUF059 Unpacked variable `digest` is never used
+tools\test_nested_git_boundaries.py:359:72: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+tools\test_nested_git_boundaries.py:360:49: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+tools\test_t1544_audit20_perf.py:279:13: F841 Local variable `res` is assigned to but never used
+tools\test_t1544_audit20_perf.py:280:101: E501 Line too long (109 > 100)
+tools\test_t1544_audit20_perf.py:283:101: E501 Line too long (104 > 100)
+tools\test_t1544_audit20_perf.py:292:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\test_t1544_audit20_perf.py:292:101: E501 Line too long (101 > 100)
+tools\test_t1544_audit20_perf.py:293:101: E501 Line too long (120 > 100)
+tools\test_t1544_audit20_perf.py:309:13: RUF059 Unpacked variable `payload` is never used
+tools\test_t1792_auto_doctor.py:329:101: E501 Line too long (136 > 100)
+tools\test_t1792_auto_doctor.py:330:101: E501 Line too long (145 > 100)
+tools\test_t1792_auto_doctor.py:332:101: E501 Line too long (105 > 100)
+tools\test_t1844_origin_broker.py:979:101: E501 Line too long (109 > 100)
+tools\test_t1854_runtime_home.py:17:8: F401 [*] `subprocess` imported but unused
+tools\test_t1859_zaicode_seal.py:73:101: E501 Line too long (120 > 100)
+tools\test_t1859_zaicode_seal.py:74:101: E501 Line too long (130 > 100)
+tools\test_t1859_zaicode_seal.py:75:101: E501 Line too long (118 > 100)
+tools\test_t1859_zaicode_seal.py:111:101: E501 Line too long (114 > 100)
+tools\test_t1859_zaicode_seal.py:322:16: RUF059 Unpacked variable `record` is never used
+tools\test_t1868_zaicode_ingress.py:81:9: PLW2901 `for` loop variable `line` overwritten by assignment target
+tools\test_t1868_zaicode_ingress.py:220:101: E501 Line too long (110 > 100)
+tools\test_t1879_manifest_staging_states.py:316:101: E501 Line too long (103 > 100)
+tools\test_t1879_manifest_staging_states.py:443:101: E501 Line too long (104 > 100)
+tools\test_t1879_manifest_staging_states.py:452:101: E501 Line too long (102 > 100)
+tools\test_t1881_publication_prohibition.py:356:101: E501 Line too long (107 > 100)
+tools\test_t1902_parallel_source_sampling.py:42:19: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+tools\test_t1903_lean_receipt_projection.py:45:40: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+tools\test_t1909_unauthenticated_evidence_diagnostics.py:42:101: E501 Line too long (152 > 100)
+tools\test_t1909_unauthenticated_evidence_diagnostics.py:122:101: E501 Line too long (109 > 100)
+tools\test_t1910_log_input_diagnostics.py:61:18: invalid-syntax: Cannot use parentheses within a `with` statement on Python 3.8 (syntax was added in Python 3.9)
+tools\test_t1912_redelivery_origin_reconciliation.py:19:8: F401 [*] `os` imported but unused
+tools\test_t1912_redelivery_origin_reconciliation.py:98:101: E501 Line too long (114 > 100)
+tools\test_t1912_redelivery_origin_reconciliation.py:145:101: E501 Line too long (103 > 100)
+tools\test_t1912_redelivery_origin_reconciliation.py:167:101: E501 Line too long (114 > 100)
+tools\test_t1912_redelivery_origin_reconciliation.py:231:101: E501 Line too long (114 > 100)
+tools\test_t1912_redelivery_origin_reconciliation.py:237:101: E501 Line too long (101 > 100)
+tools\test_t1912_redelivery_origin_reconciliation.py:253:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\test_t1913_hook_deadline.py:80:101: E501 Line too long (107 > 100)
+tools\test_t1913_hook_deadline.py:81:101: E501 Line too long (117 > 100)
+tools\test_t1913_origin_recovery.py:68:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\test_t1913_origin_recovery.py:112:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\test_t1913_origin_recovery.py:151:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\test_t1913_origin_recovery.py:190:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\test_t1913_origin_recovery.py:225:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\test_t1913_origin_recovery.py:252:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\test_t1913_origin_recovery.py:254:17: RUF059 Unpacked variable `reply` is never used
+tools\test_t1917_premature_handback.py:15:8: F401 [*] `re` imported but unused
+tools\test_t1917_premature_handback.py:40:101: E501 Line too long (105 > 100)
+tools\test_t1917_premature_handback.py:74:101: E501 Line too long (132 > 100)
+tools\test_t1917_premature_handback.py:111:101: E501 Line too long (116 > 100)
+tools\test_t1917_premature_handback.py:115:101: E501 Line too long (113 > 100)
+tools\test_t1917_premature_handback.py:158:101: E501 Line too long (111 > 100)
+tools\test_t1917_premature_handback.py:170:101: E501 Line too long (104 > 100)
+tools\test_t1926_zc_owners_matrix.py:97:101: E501 Line too long (105 > 100)
+tools\test_t1927_sp_owners_matrix.py:5:101: E501 Line too long (120 > 100)
+tools\test_t1927_sp_owners_matrix.py:6:101: E501 Line too long (117 > 100)
+tools\test_t1927_sp_owners_matrix.py:7:101: E501 Line too long (144 > 100)
+tools\test_t1927_sp_owners_matrix.py:8:101: E501 Line too long (230 > 100)
+tools\test_t1927_sp_owners_matrix.py:14:8: F401 [*] `json` imported but unused
+tools\test_t1927_sp_owners_matrix.py:15:8: F401 [*] `os` imported but unused
+tools\test_t1927_sp_owners_matrix.py:78:14: invalid-syntax: Cannot use parentheses within a `with` statement on Python 3.8 (syntax was added in Python 3.9)
+tools\test_t1927_sp_owners_matrix.py:102:101: E501 Line too long (110 > 100)
+tools\test_t1927_sp_owners_matrix.py:117:101: E501 Line too long (102 > 100)
+tools\test_t1927_sp_owners_matrix.py:221:101: E501 Line too long (116 > 100)
+tools\test_t1932_src338_closures.py:18:8: F401 [*] `sys` imported but unused
+tools\test_t1932_src338_closures.py:25:5: F401 [*] `saipen_engine.audit_enqueue` imported but unused
+tools\test_t1932_src338_closures.py:38:47: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+tools\test_t1932_src338_closures.py:129:30: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:203:23: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:216:23: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:244:101: E501 Line too long (114 > 100)
+tools\test_t1932_src338_closures.py:248:23: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:420:31: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:424:101: E501 Line too long (103 > 100)
+tools\test_t1932_src338_closures.py:474:23: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:736:47: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:756:48: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:760:48: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:782:47: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:824:49: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:850:49: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:922:45: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:925:45: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tools\test_t1932_src338_closures.py:1018:101: E501 Line too long (101 > 100)
+tools\test_t1932_src338_closures.py:1232:9: F841 Local variable `adapter` is assigned to but never used
+tools\test_t1934_deploy_staleness.py:79:101: E501 Line too long (103 > 100)
+tools\test_t1935_zaicode_hook_ownership.py:257:26: RUF005 Consider `[*expected["args"][:-1], str(bogus)]` instead of concatenation
+tools\test_t1935_zaicode_hook_ownership.py:259:26: RUF005 Consider iterable unpacking instead of concatenation
+tools\test_t1936_launch_account_list.py:149:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\test_t1936_launch_account_list.py:219:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\test_t1936_launch_account_list.py:232:9: SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\test_t1937_future_slice_closure.py:208:17: RUF059 Unpacked variable `before_reasons` is never used
+tools\test_t1937_future_slice_closure.py:220:9: RUF059 Unpacked variable `after` is never used
+tools\test_t1938_invalidated_slice_closure.py:38:101: E501 Line too long (115 > 100)
+tools\test_t1939_needs_detach.py:129:101: E501 Line too long (101 > 100)
+tools\test_t1939_needs_detach.py:347:25: RUF005 Consider iterable unpacking instead of concatenation
+tools\test_t1943_campaign_scope_roundtrip.py:56:46: F401 [*] `saipen_engine.state.state_contract_errors` imported but unused
+tools\test_t1943_goal_objective_binding.py:101:101: E501 Line too long (101 > 100)
+tools\test_t2040_bounded_discovery_resume.py:9:8: F401 [*] `json` imported but unused
+tools\test_t2040_bounded_discovery_resume.py:158:101: E501 Line too long (110 > 100)
+tools\test_t2040_bounded_discovery_resume.py:159:101: E501 Line too long (101 > 100)
+tools\test_t2040_bounded_discovery_resume.py:170:101: E501 Line too long (113 > 100)
+tools\test_t2040_bounded_discovery_resume.py:174:101: E501 Line too long (109 > 100)
+tools\test_t2040_bounded_discovery_resume.py:178:101: E501 Line too long (109 > 100)
+tools\test_t2040_bounded_discovery_resume.py:182:101: E501 Line too long (113 > 100)
+tools\test_t2040_bounded_discovery_resume.py:211:101: E501 Line too long (108 > 100)
+tools\test_t2040_bounded_discovery_resume.py:221:9: RUF059 Unpacked variable `cycle` is never used
+tools\test_t2040_bounded_discovery_resume.py:221:22: RUF059 Unpacked variable `report` is never used
+tools\test_t2040_bounded_discovery_resume.py:223:101: E501 Line too long (114 > 100)
+tools\test_t2040_bounded_discovery_resume.py:234:9: RUF059 Unpacked variable `cycle` is never used
+tools\test_t2040_bounded_discovery_resume.py:247:101: E501 Line too long (120 > 100)
+tools\test_t2040_bounded_discovery_resume.py:249:101: E501 Line too long (112 > 100)
+tools\test_t2040_bounded_discovery_resume.py:250:101: E501 Line too long (112 > 100)
+tools\test_t2040_bounded_discovery_resume.py:255:101: E501 Line too long (108 > 100)
+tools\test_t2040_bounded_discovery_resume.py:256:101: E501 Line too long (111 > 100)
+tools\test_t2040_bounded_discovery_resume.py:292:101: E501 Line too long (110 > 100)
+tools\test_t2040_bounded_discovery_resume.py:293:101: E501 Line too long (112 > 100)
+tools\test_t2040_bounded_discovery_resume.py:313:101: E501 Line too long (109 > 100)
+tools\test_t2040_bounded_discovery_resume.py:332:101: E501 Line too long (114 > 100)
+tools\test_t2040_bounded_discovery_resume.py:337:101: E501 Line too long (110 > 100)
+tools\test_t2040_bounded_discovery_resume.py:356:101: E501 Line too long (106 > 100)
+tools\test_t2040_exhaustion_evidence.py:71:101: E501 Line too long (102 > 100)
+tools\test_t2040_exhaustion_evidence.py:93:101: E501 Line too long (103 > 100)
+tools\test_t2040_exhaustion_evidence.py:112:101: E501 Line too long (105 > 100)
+tools\test_t2040_exhaustion_evidence.py:115:101: E501 Line too long (106 > 100)
+tools\test_t2040_exhaustion_evidence.py:117:101: E501 Line too long (109 > 100)
+tools\test_t2040_exhaustion_evidence.py:124:101: E501 Line too long (111 > 100)
+tools\test_t2040_exhaustion_evidence.py:142:101: E501 Line too long (105 > 100)
+tools\test_t2040_exhaustion_evidence.py:161:101: E501 Line too long (102 > 100)
+tools\test_t2040_exhaustion_evidence.py:167:101: E501 Line too long (124 > 100)
+tools\test_t2040_exhaustion_evidence.py:198:101: E501 Line too long (103 > 100)
+tools\test_t2040_finish_plan_guards.py:13:1: E402 Module level import not at top of file
+tools\test_t2040_finish_plan_guards.py:14:1: E402 Module level import not at top of file
+tools\test_t2040_finish_plan_guards.py:15:1: E402 Module level import not at top of file
+tools\test_t2040_finish_plan_guards.py:16:1: E402 Module level import not at top of file
+tools\test_t2040_finish_plan_guards.py:17:1: E402 Module level import not at top of file
+tools\test_t2040_finish_plan_guards.py:18:1: E402 Module level import not at top of file
+tools\test_t2040_finish_plan_guards.py:19:1: E402 Module level import not at top of file
+tools\test_t2040_finish_plan_guards.py:20:1: E402 Module level import not at top of file
+tools\test_t2040_maintenance_authority.py:18:1: E402 Module level import not at top of file
+tools\test_t2040_maintenance_authority.py:19:1: E402 Module level import not at top of file
+tools\test_t2040_maintenance_authority.py:20:1: E402 Module level import not at top of file
+tools\test_t2040_maintenance_authority.py:21:1: E402 Module level import not at top of file
+tools\test_t2040_maintenance_authority.py:22:1: E402 Module level import not at top of file
+tools\test_t2040_maintenance_authority.py:26:1: E402 Module level import not at top of file
+tools\test_t2040_maintenance_authority.py:27:1: E402 Module level import not at top of file
+tools\test_t2040_maintenance_authority.py:28:1: E402 Module level import not at top of file
+tools\test_t2040_maintenance_authority.py:29:1: E402 Module level import not at top of file
+tools\test_t2040_maintenance_authority.py:30:1: E402 Module level import not at top of file
+tools\test_t2040_maintenance_authority.py:274:101: E501 Line too long (102 > 100)
+tools\test_t2040_publication_truth.py:92:101: E501 Line too long (101 > 100)
+tools\test_t2040_publication_truth.py:108:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:180:101: E501 Line too long (109 > 100)
+tools\test_t2040_publication_truth.py:190:101: E501 Line too long (104 > 100)
+tools\test_t2040_publication_truth.py:197:101: E501 Line too long (102 > 100)
+tools\test_t2040_publication_truth.py:200:101: E501 Line too long (115 > 100)
+tools\test_t2040_publication_truth.py:221:101: E501 Line too long (106 > 100)
+tools\test_t2040_publication_truth.py:226:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:230:101: E501 Line too long (115 > 100)
+tools\test_t2040_publication_truth.py:232:101: E501 Line too long (108 > 100)
+tools\test_t2040_publication_truth.py:233:101: E501 Line too long (114 > 100)
+tools\test_t2040_publication_truth.py:239:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:240:101: E501 Line too long (101 > 100)
+tools\test_t2040_publication_truth.py:243:101: E501 Line too long (112 > 100)
+tools\test_t2040_publication_truth.py:244:101: E501 Line too long (114 > 100)
+tools\test_t2040_publication_truth.py:250:101: E501 Line too long (102 > 100)
+tools\test_t2040_publication_truth.py:251:101: E501 Line too long (120 > 100)
+tools\test_t2040_publication_truth.py:254:101: E501 Line too long (113 > 100)
+tools\test_t2040_publication_truth.py:256:101: E501 Line too long (104 > 100)
+tools\test_t2040_publication_truth.py:263:101: E501 Line too long (113 > 100)
+tools\test_t2040_publication_truth.py:269:101: E501 Line too long (121 > 100)
+tools\test_t2040_publication_truth.py:271:101: E501 Line too long (104 > 100)
+tools\test_t2040_publication_truth.py:275:101: E501 Line too long (109 > 100)
+tools\test_t2040_publication_truth.py:278:101: E501 Line too long (105 > 100)
+tools\test_t2040_publication_truth.py:282:101: E501 Line too long (126 > 100)
+tools\test_t2040_publication_truth.py:288:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:292:101: E501 Line too long (103 > 100)
+tools\test_t2040_publication_truth.py:294:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:298:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:302:101: E501 Line too long (102 > 100)
+tools\test_t2040_publication_truth.py:305:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:310:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:317:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:320:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:326:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:332:101: E501 Line too long (115 > 100)
+tools\test_t2040_publication_truth.py:343:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:368:101: E501 Line too long (102 > 100)
+tools\test_t2040_publication_truth.py:375:101: E501 Line too long (106 > 100)
+tools\test_t2040_publication_truth.py:377:101: E501 Line too long (102 > 100)
+tools\test_t2040_publication_truth.py:385:101: E501 Line too long (105 > 100)
+tools\test_t2040_publication_truth.py:388:101: E501 Line too long (106 > 100)
+tools\test_t2040_publication_truth.py:390:101: E501 Line too long (112 > 100)
+tools\test_t2040_publication_truth.py:393:101: E501 Line too long (102 > 100)
+tools\test_t2040_publication_truth.py:394:101: E501 Line too long (107 > 100)
+tools\test_t2040_publication_truth.py:396:101: E501 Line too long (107 > 100)
+tools\test_t2040_publication_truth.py:399:101: E501 Line too long (122 > 100)
+tools\test_t2040_publication_truth.py:400:101: E501 Line too long (116 > 100)
+tools\test_t2040_publication_truth.py:403:101: E501 Line too long (109 > 100)
+tools\test_t2040_publication_truth.py:441:101: E501 Line too long (111 > 100)
+tools\test_t2040_publication_truth.py:449:101: E501 Line too long (104 > 100)
+tools\test_t2040_publication_truth.py:457:101: E501 Line too long (114 > 100)
+tools\test_t2040_publication_truth.py:460:101: E501 Line too long (109 > 100)
+tools\test_t2040_publication_truth.py:461:101: E501 Line too long (118 > 100)
+tools\test_t2040_publication_truth.py:464:101: E501 Line too long (118 > 100)
+tools\test_t2040_publication_truth.py:470:101: E501 Line too long (115 > 100)
+tools\test_t2040_publication_truth.py:493:101: E501 Line too long (117 > 100)
+tools\test_t2040_publication_truth.py:500:101: E501 Line too long (114 > 100)
+tools\test_t2040_publication_truth.py:503:101: E501 Line too long (109 > 100)
+tools\test_t2040_publication_truth.py:504:101: E501 Line too long (119 > 100)
+tools\test_t2040_publication_truth.py:508:101: E501 Line too long (101 > 100)
+tools\test_t2040_publication_truth.py:517:101: E501 Line too long (115 > 100)
+tools\test_t2040_publication_truth.py:544:101: E501 Line too long (112 > 100)
+tools\test_t2040_publication_truth.py:548:101: E501 Line too long (103 > 100)
+tools\test_t2040_publication_truth.py:556:101: E501 Line too long (113 > 100)
+tools\test_t2040_replenishment_recovery.py:23:43: F401 [*] `saipen_engine.intake` imported but unused
+tools\test_t2040_replenishment_recovery.py:101:101: E501 Line too long (101 > 100)
+tools\test_t2040_replenishment_recovery.py:147:101: E501 Line too long (101 > 100)
+tools\test_t2040_replenishment_recovery.py:153:101: E501 Line too long (118 > 100)
+tools\test_t2040_replenishment_recovery.py:197:101: E501 Line too long (102 > 100)
+tools\test_t2040_replenishment_recovery.py:212:101: E501 Line too long (102 > 100)
+tools\test_t2040_review_proof_binding.py:22:1: E402 Module level import not at top of file
+tools\test_t2040_review_proof_binding.py:23:1: E402 Module level import not at top of file
+tools\test_t2040_review_proof_binding.py:24:1: E402 Module level import not at top of file
+tools\test_t2040_review_proof_binding.py:25:1: E402 Module level import not at top of file
+tools\test_t2040_review_proof_binding.py:190:101: E501 Line too long (102 > 100)
+tools\test_t2040_review_proof_binding.py:256:101: E501 Line too long (102 > 100)
+tools\test_t2040_review_proof_binding.py:271:101: E501 Line too long (105 > 100)
+tools\test_t2040_review_proof_binding.py:272:101: E501 Line too long (111 > 100)
+tools\test_t2040_review_proof_binding.py:276:101: E501 Line too long (114 > 100)
+tools\test_t2040_review_proof_binding.py:294:101: E501 Line too long (108 > 100)
+tools\test_t2040_terminal_consumer_guards.py:18:1: E402 Module level import not at top of file
+tools\test_t2040_terminal_consumer_guards.py:19:1: E402 Module level import not at top of file
+tools\test_t2040_terminal_consumer_guards.py:20:1: E402 Module level import not at top of file
+tools\test_t2040_terminal_consumer_guards.py:21:1: E402 Module level import not at top of file
+tools\test_t2040_terminal_consumer_guards.py:22:1: E402 Module level import not at top of file
+tools\test_t2040_terminal_consumer_guards.py:25:1: E402 Module level import not at top of file
+tools\test_t2040_terminal_consumer_guards.py:105:101: E501 Line too long (104 > 100)
+tools\test_t2040_terminal_consumer_guards.py:151:101: E501 Line too long (104 > 100)
+tools\test_t2040_terminal_consumer_guards.py:197:101: E501 Line too long (108 > 100)
+tools\test_t2040_terminal_consumer_guards.py:207:101: E501 Line too long (103 > 100)
+tools\test_t2040_terminal_consumer_guards.py:219:101: E501 Line too long (102 > 100)
+tools\test_t2040_terminal_consumer_guards.py:331:101: E501 Line too long (102 > 100)
+tools\test_t2040_terminal_consumer_guards.py:337:101: E501 Line too long (114 > 100)
+tools\test_t2040_terminal_consumer_guards.py:338:101: E501 Line too long (102 > 100)
+tools\test_t2040_terminal_consumer_guards.py:353:101: E501 Line too long (108 > 100)
+tools\test_t2040_terminal_consumer_guards.py:354:101: E501 Line too long (116 > 100)
+tools\test_t2040_terminal_consumer_guards.py:359:101: E501 Line too long (108 > 100)
+tools\test_t2040_terminal_consumer_guards.py:360:101: E501 Line too long (101 > 100)
+tools\test_t2040_terminal_consumer_guards.py:387:101: E501 Line too long (107 > 100)
+tools\test_t2040_terminal_consumer_guards.py:408:101: E501 Line too long (117 > 100)
+tools\test_t2040_terminal_consumer_guards.py:429:101: E501 Line too long (102 > 100)
+tools\test_t2040_terminal_consumer_guards.py:452:101: E501 Line too long (115 > 100)
+tools\test_t2040_terminal_consumer_guards.py:456:101: E501 Line too long (103 > 100)
+tools\test_t2040_terminal_consumer_guards.py:460:101: E501 Line too long (112 > 100)
+tools\test_t2040_terminal_consumer_guards.py:464:101: E501 Line too long (110 > 100)
+tools\test_t2040_terminal_consumer_guards.py:470:101: E501 Line too long (101 > 100)
+tools\test_t2040_terminal_consumer_guards.py:474:101: E501 Line too long (101 > 100)
+tools\test_t2040_terminal_consumer_guards.py:484:101: E501 Line too long (126 > 100)
+tools\test_t2040_terminal_consumer_guards.py:503:101: E501 Line too long (116 > 100)
+tools\test_t2040_terminal_consumer_guards.py:506:101: E501 Line too long (103 > 100)
+tools\test_t2040_terminal_consumer_guards.py:519:101: E501 Line too long (103 > 100)
+tools\test_t2040_terminal_consumer_supplementary.py:15:1: E402 Module level import not at top of file
+tools\test_t2040_terminal_consumer_supplementary.py:15:61: F401 [*] `saipen_engine.continuation_assessment` imported but unused
+tools\test_t2040_terminal_consumer_supplementary.py:16:1: E402 Module level import not at top of file
+tools\test_t2040_terminal_consumer_supplementary.py:16:51: F401 [*] `test_campaign_continuation_assessment._format_state` imported but unused
+tools\test_t2040_terminal_consumer_supplementary.py:17:1: E402 Module level import not at top of file
+tools\test_t2040_terminal_consumer_supplementary.py:18:1: E402 Module level import not at top of file
+tools\test_t2040_terminal_consumer_supplementary.py:36:101: E501 Line too long (109 > 100)
+tools\verify_accounts_readiness.py:210:101: E501 Line too long (101 > 100)
+Found 557 errors.
+[*] 48 fixable with the `--fix` option (53 hidden fixes can be enabled with the `--unsafe-fixes` option).

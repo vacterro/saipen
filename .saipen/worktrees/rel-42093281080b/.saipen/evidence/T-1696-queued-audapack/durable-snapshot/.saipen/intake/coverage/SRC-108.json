@@ -1,0 +1,41 @@
+{
+  "requirements": {
+    "SRC-108:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2755",
+      "text": "Split send acceptance from Core user-turn adoption: a send the Core accepts is not proof the user turn registered",
+      "verification": "node --test tests/widget/w7-012-core-turn-registration.test.js -> PASS",
+      "work": "T-261"
+    },
+    "SRC-108:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2755",
+      "text": "Enter Bridge AUDITING only after the local runtime has adopted the Core user turn",
+      "verification": "node --test tests/widget/w7-012-core-turn-registration.test.js -> PASS",
+      "work": "T-261"
+    },
+    "SRC-108:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-2755",
+      "text": "A runtime that owns no current audit wave never writes AUDITING, so the bridge never sees a split-brain claim",
+      "verification": "node --test tests/widget/w7-013-live-lineage-snapshot.test.js -> PASS",
+      "work": "T-261"
+    },
+    "SRC-108:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2755",
+      "text": "the change is demonstrated against the operator own description of the split",
+      "verification": "python .saipen/scratch_verify5.py -> PASS",
+      "work": "T-261"
+    }
+  },
+  "schema_version": 1
+}

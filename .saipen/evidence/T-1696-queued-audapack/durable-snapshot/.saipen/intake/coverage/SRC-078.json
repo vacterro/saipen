@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-078:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-233 closed with verification evidence in LOG: verify -> PASS [target: T-233] conf: high -- audit: the only records asserting operator LIVE ACCEPTANCE PASS are E-1834 and E-1836 in .saipen/logs/LOG-003.md:194-196, and they name no operator evidence; T-229's real closure is E-2221..E-2229 (LOG-003.md:581-589) and cites the landed code (E-1779), 135/135 focused widget PASS, an explicit red control (COMPOSER_CHANGED_BEFORE_SEND asserts SENT) and ",
+      "text": "AUDAPACKT-229 live acceptance: close canonically if every normal ZIP transaction yields exactly one user turn with zero manual Send clicks; else keep open and record exact failing transaction + terminal widget state. No new improve cycle; no widget byte changes without demonstrated live failure.",
+      "verification": "the Work this request created reached its own verification gate; see the T-233 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-233"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "payload_chars": 65536,
+    "ok": true,
+    "status": "SUCCESS",
+    "peak_python_bytes": 552028,
+    "scope": "isolated local CLI; disk spool, no production corpus"
+  },
+  {
+    "payload_chars": 262144,
+    "ok": true,
+    "status": "SUCCESS",
+    "peak_python_bytes": 814755,
+    "scope": "isolated local CLI; disk spool, no production corpus"
+  },
+  {
+    "payload_chars": 1048576,
+    "ok": true,
+    "status": "SUCCESS",
+    "peak_python_bytes": 3173843,
+    "scope": "isolated local CLI; disk spool, no production corpus"
+  },
+  {
+    "payload_chars": 6291456,
+    "ok": false,
+    "status": "BACKEND_RESOURCE_LIMIT",
+    "peak_python_bytes": 47876,
+    "scope": "isolated local CLI; disk spool, no production corpus"
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "path": "saipen/CORE.md",
+    "unchanged": true
+  },
+  {
+    "path": "tools/saipen_engine/guard_events.py",
+    "unchanged": true
+  },
+  {
+    "path": "tools/test_t1705_lifecycle_write_preflight.py",
+    "unchanged": true
+  },
+  {
+    "path": "tools/saipen_engine/admission.py",
+    "unchanged": true
+  },
+  {
+    "path": "saipen/OPS.md",
+    "unchanged": true
+  }
+]

@@ -1,0 +1,25 @@
+F
+======================================================================
+FAIL: test_every_production_refusal_code_is_registered (test_refusal_registry.RegistryCompletenessTests.test_every_production_refusal_code_is_registered)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_refusal_registry.py", line 122, in test_every_production_refusal_code_is_registered
+    self.assertEqual(
+AssertionError: Lists differ: ['AMBIGUOUS', 'EVIDENCE_CORRUPTION', 'EVID[86 chars]TED'] != []
+
+First list contains 6 additional elements.
+First extra element 0:
+'AMBIGUOUS'
+
++ []
+- ['AMBIGUOUS',
+-  'EVIDENCE_CORRUPTION',
+-  'EVIDENCE_EXECUTION_FAILED',
+-  'EVIDENCE_NOT_FOUND',
+-  'EVIDENCE_STALE',
+-  'EVIDENCE_UNAUTHENTICATED'] : production refusal codes absent from REGISTRY.json error_codes: AMBIGUOUS, EVIDENCE_CORRUPTION, EVIDENCE_EXECUTION_FAILED, EVIDENCE_NOT_FOUND, EVIDENCE_STALE, EVIDENCE_UNAUTHENTICATED
+
+----------------------------------------------------------------------
+Ran 1 test in 1.898s
+
+FAILED (failures=1)

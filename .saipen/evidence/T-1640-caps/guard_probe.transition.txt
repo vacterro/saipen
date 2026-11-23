@@ -1,0 +1,12 @@
+DONE, no ticket    saipen transition CLEAN exit=0 admitted=True action=saipen_op code=ADMITTED detail=canonical operation admitted
+DONE, no ticket    bin/saipen transition CLEAN exit=1 admitted=False action=shell code=NO_ACTIVE_WORK detail=this shell line is outside the closed read-only probe set, so it is judged a consequential mutation, and conse
+DONE, no ticket    saipen translate   exit=1 admitted=False action=shell code=NO_ACTIVE_WORK detail=`saipen translate` is not a canonical SAIPEN operation: 'translate' is not a verb (`saipen --help` prints the 
+DONE, no ticket    saipen transition DONE exit=0 admitted=True action=saipen_op code=ADMITTED detail=canonical operation admitted
+CLEAN, no ticket   saipen transition CLEAN exit=0 admitted=True action=saipen_op code=ADMITTED detail=canonical operation admitted
+CLEAN, no ticket   bin/saipen transition CLEAN exit=1 admitted=False action=shell code=NO_ACTIVE_WORK detail=this shell line is outside the closed read-only probe set, so it is judged a consequential mutation, and conse
+CLEAN, no ticket   saipen translate   exit=1 admitted=False action=shell code=NO_ACTIVE_WORK detail=`saipen translate` is not a canonical SAIPEN operation: 'translate' is not a verb (`saipen --help` prints the 
+CLEAN, no ticket   saipen transition DONE exit=0 admitted=True action=saipen_op code=ADMITTED detail=canonical operation admitted
+BUILD, own ticket  saipen transition CLEAN exit=0 admitted=True action=saipen_op code=ADMITTED detail=canonical operation admitted
+BUILD, own ticket  bin/saipen transition CLEAN exit=0 admitted=True action=shell code=ADMITTED detail=protocol state sound
+BUILD, own ticket  saipen translate   exit=0 admitted=True action=shell code=ADMITTED detail=protocol state sound
+BUILD, own ticket  saipen transition DONE exit=0 admitted=True action=saipen_op code=ADMITTED detail=canonical operation admitted

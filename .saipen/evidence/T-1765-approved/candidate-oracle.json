@@ -1,0 +1,10 @@
+{
+  "scope": "isolated candidate; not native product verification",
+  "ran": 11,
+  "failed": 0,
+  "skipped": 0,
+  "product_unchanged": true,
+  "product_sha256": "d0272a8ae2957a37d1f745e9548b7ab324a4a5b88110324f06203ea00a540d40",
+  "oracle_sha256": "9cc7a48a751ef4803357264a48ef6d8472d868d0797b5e342bb2acc2e167dd64",
+  "candidate_sha256": "972e818011a27bd533264040188c9db9ab6a7c6d18628337661eca650fb1ce9f"
+}

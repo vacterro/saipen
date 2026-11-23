@@ -1,0 +1,106 @@
+FF.FF..                                                                  [100%]
+================================== FAILURES ===================================
+_ ContinuationAssessmentSuite.test_c01_empty_board_with_proven_maintenance_continues _
+
+self = <test_campaign_continuation_assessment.ContinuationAssessmentSuite testMethod=test_c01_empty_board_with_proven_maintenance_continues>
+
+    def test_c01_empty_board_with_proven_maintenance_continues(self):
+        self.write_board(doing=(), todo=(), blocked=())
+        self.write_state(
+            phase="DONE",
+            task="none",
+            continuation_authority="operator_persistent",
+            authority_until="continuous_maintenance",
+            authority_source="SRC-304",
+            goal_ingress="goal-0123456789abcdef",
+        )
+    
+        with patch.object(goal_authority, "prove", return_value=[]):
+            # Surface 1: Authoritative assessment
+            assessment = CA.assess_continuation(self.project, now=T0)
+>           self.assertEqual(assessment["classification"], CA.MAINTENANCE_AVAILABLE)
+E           AssertionError: 'INCOMPLETE_DISCOVERY' != 'MAINTENANCE_AVAILABLE'
+E           - INCOMPLETE_DISCOVERY
+E           + MAINTENANCE_AVAILABLE
+
+tools\test_campaign_continuation_assessment.py:125: AssertionError
+_ ContinuationAssessmentSuite.test_c02_empty_board_no_maintenance_authority_remains_idle _
+
+self = <test_campaign_continuation_assessment.ContinuationAssessmentSuite testMethod=test_c02_empty_board_no_maintenance_authority_remains_idle>
+
+    def test_c02_empty_board_no_maintenance_authority_remains_idle(self):
+        self.write_board(doing=(), todo=(), blocked=())
+        self.write_state(
+            phase="DONE",
+            task="none",
+            continuation_authority="operator_required",
+            authority_until="budget",
+        )
+    
+        # Surface 1: Assessment
+        assessment = CA.assess_continuation(self.project, now=T0)
+>       self.assertEqual(assessment["classification"], CA.QUIESCENT)
+E       AssertionError: 'INCOMPLETE_DISCOVERY' != 'QUIESCENT'
+E       - INCOMPLETE_DISCOVERY
+E       + QUIESCENT
+
+tools\test_campaign_continuation_assessment.py:155: AssertionError
+_ ContinuationAssessmentSuite.test_c04_independent_work_proceeds_beside_blocked_work _
+
+self = <test_campaign_continuation_assessment.ContinuationAssessmentSuite testMethod=test_c04_independent_work_proceeds_beside_blocked_work>
+
+    def test_c04_independent_work_proceeds_beside_blocked_work(self):
+        self.write_board(
+            todo=("T-10 [P1] Independent workable ticket",),
+            blocked=("T-99 [P1] External blocked | blocker: BLOCKED_EXTERNAL",),
+        )
+        self.write_state(phase="DONE", task="none")
+    
+        # Surface 1: Assessment
+        assessment = CA.assess_continuation(self.project, now=T0)
+        self.assertEqual(assessment["classification"], CA.QUEUED_WORK)
+        self.assertTrue(assessment["actionable"])
+        self.assertEqual(assessment["ticket"], "T-10")
+    
+        # Surface 2: Worker supervisor
+        dec = supervisor.decide(self.project, now=T0)
+        self.assertEqual(dec["verdict"], supervisor.RUN_WORK)
+>       self.assertEqual(dec["work"], "T-10")
+E       AssertionError: 'PHASE SCOUT T-10' != 'T-10'
+E       - PHASE SCOUT T-10
+E       + T-10
+
+tools\test_campaign_continuation_assessment.py:207: AssertionError
+_ ContinuationAssessmentSuite.test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds _
+
+self = <test_campaign_continuation_assessment.ContinuationAssessmentSuite testMethod=test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds>
+
+    def test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds(self):
+        self.write_board(
+            todo=(),
+            blocked=("T-99 [P1] Foreign blocked ticket | blocker: BLOCKED_EXTERNAL",),
+        )
+        self.write_state(
+            phase="DONE",
+            task="none",
+            continuation_authority="operator_persistent",
+            authority_until="continuous_maintenance",
+            authority_source="SRC-304",
+            goal_ingress="goal-0123456789abcdef",
+        )
+    
+        with patch.object(goal_authority, "prove", return_value=[]):
+            # Surface 1: Assessment
+            assessment = CA.assess_continuation(self.project, now=T0)
+>           self.assertEqual(assessment["classification"], CA.MAINTENANCE_AVAILABLE)
+E           AssertionError: 'WAIT_EXTERNAL' != 'MAINTENANCE_AVAILABLE'
+E           - WAIT_EXTERNAL
+E           + MAINTENANCE_AVAILABLE
+
+tools\test_campaign_continuation_assessment.py:232: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c01_empty_board_with_proven_maintenance_continues
+FAILED tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c02_empty_board_no_maintenance_authority_remains_idle
+FAILED tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c04_independent_work_proceeds_beside_blocked_work
+FAILED tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds
+4 failed, 3 passed in 0.88s

@@ -1,0 +1,26 @@
+PASS: hr-journal -- relative root commits
+PASS: hr-journal -- receipt decodes
+PASS: hr-journal -- terminal receipt refuses appended targets
+PASS: hr-journal -- malformed op bad refuses VALIDATION_FAILED
+PASS: hr-journal -- malformed agent None refuses VALIDATION_FAILED
+PASS: hr-journal -- malformed opid hostile refuses VALIDATION_FAILED
+PASS: hr-journal -- targets=None refuses
+PASS: hr-journal -- no journal left after refusals
+PASS: hr-journal -- non-JSON metadata refuses VALIDATION_FAILED
+PASS: hr-journal -- no orphan op dir after failed PREPARED
+PASS: hr-journal -- int precondition value refuses
+PASS: hr-journal -- alias targets refuse
+PASS: hr-journal -- target+read same file zero-write refusal
+PASS: hr-journal -- file unchanged
+PASS: hr-journal -- external absolute read legal
+PASS: hr-journal -- decoder rejects alias pair
+SKIP: hr-journal -- symlink corrupt probe (host cannot symlink)
+PASS: hr-journal -- healthy op commits
+PASS: hr-journal -- first op commits
+PASS: hr-journal -- IDENTITY minted
+PASS: hr-journal -- healthy retry ALREADY_APPLIED
+PASS: hr-journal -- retry with deleted carrier refuses (no ALREADY_APPLIED)
+PASS: hr-journal -- carrier not recreated
+PASS: hr-journal -- file unchanged by refused retry
+PASS: hr-journal -- append uses bounded staged_name
+{"group": "run_hostile_journal_probes", "checked": 24, "problems": []}

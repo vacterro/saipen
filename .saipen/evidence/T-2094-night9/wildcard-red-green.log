@@ -1,0 +1,3 @@
+HEAD   (pre-fix): FULL undeclared= ['test_t2093_*.py']
+WORKTREE (fixed): DECLARED selected= 4 trees= []
+R5 RED confirmed on HEAD bytes; worktree is GREEN

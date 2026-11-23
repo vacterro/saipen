@@ -1,0 +1,30 @@
+[
+  {
+    "subject": "test_runner-before",
+    "exit_code": 1,
+    "oracle": "DispatchTests.test_unit_cli_uses_existing_full_engine_without_a_lifecycle_citation",
+    "oracle_sha256": "d922350b7aa479e3c141b4e051f40a3d2be8404c14f782c4086a62047cf0f2f9",
+    "subject_sha256": "ddc432151d26fad49a06bb195ad90f6044552bedf1d6c1ebf12756246642baea"
+  },
+  {
+    "subject": "test_runner-corrected",
+    "exit_code": 0,
+    "oracle": "DispatchTests.test_unit_cli_uses_existing_full_engine_without_a_lifecycle_citation",
+    "oracle_sha256": "d922350b7aa479e3c141b4e051f40a3d2be8404c14f782c4086a62047cf0f2f9",
+    "subject_sha256": "4f2950036436bd975be03f44f98725eac9b0cfd443a7c346680012f31fe579b3"
+  },
+  {
+    "subject": "core_unit-before",
+    "exit_code": 1,
+    "oracle": "EmptyPartitionTests.test_only_proved_empty_worker_is_neutral_and_raw_result_stays_visible",
+    "oracle_sha256": "d922350b7aa479e3c141b4e051f40a3d2be8404c14f782c4086a62047cf0f2f9",
+    "subject_sha256": "a0772dd9d2cfe2bdef027f94b6f8e74c624b4073ed67a3ffa78d9589fd6840ed"
+  },
+  {
+    "subject": "core_unit-corrected",
+    "exit_code": 0,
+    "oracle": "EmptyPartitionTests.test_only_proved_empty_worker_is_neutral_and_raw_result_stays_visible",
+    "oracle_sha256": "d922350b7aa479e3c141b4e051f40a3d2be8404c14f782c4086a62047cf0f2f9",
+    "subject_sha256": "988c9b9cfb2c3b813b3b8f619b0889c04dc63ecdc900d51297562648837fe0ea"
+  }
+]

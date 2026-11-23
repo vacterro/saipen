@@ -1,0 +1,177 @@
+{
+  "scope": "copied evidence only",
+  "passes": [
+    {
+      "history_sha256": "d73f80c7815e698e",
+      "tail": 3146,
+      "parsed_events": 3143,
+      "illegal_lines": [
+        "LOG.md:2: not a legal LOG event: '- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no '"
+      ],
+      "ledger_errors": [
+        "LOG.md:2: not a legal LOG event: '- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no '",
+        "E-3134 parent E-3133 does not exist in the ledger",
+        "E-3137 parent E-3136 does not exist in the ledger",
+        "E-3146 parent E-3145 does not exist in the ledger"
+      ],
+      "structural_prefix_through_E3131_errors": [
+        "LOG.md:2: not a legal LOG event: '- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no '"
+      ],
+      "fast_errors": [
+        "FLOOR: STATE.task=T-299 but BOARD has no DOING section at the raw floor",
+        "STATE proposed next_action 'idle' does not start with WAIT:/saipen /PHASE /RUN:/RESUME:",
+        "BOARD: BOARD.md:5 ticket T-299 has unrecognized field 'evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md'",
+        "BOARD: BOARD.md:6 duplicate ticket ID T-299",
+        "BOARD: BOARD.md:7 ticket T-298 has unrecognized field 'evidence: .saipen/evidence/T-298-widget-trust-boundary.md'",
+        "BOARD: BOARD.md:8 ticket T-297 has unrecognized field 'evidence: .saipen/evidence/T-297-widget-clock-recorrective.md'",
+        "BOARD: BOARD.md required heading ## DOING appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+        "BOARD: BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+        "BOARD proposed T-282 declares closure_mode 'duplicate_reconciled', outside own_patch|inherited_verified|cohort|superseded_verified|external_implementation|finding_invalidated",
+        "STATE proposed invalid phase transition: VERIFY -> DONE (RFC § 1.6). The block-parked shape requires the latest phase-changing event through STATE.last_event to be the canonical active-block DEC for the exact ticket still in BOARD.BLOCKED",
+        "LOG: LOG.md:2 not a legal event line",
+        "LOG: LOG.md:720 E-3134 is not consecutive after E-3132; an unexplained gap means events were lost or removed from an append-only ledger. A documented historical gap is exempted by a DEC line at or after E-3134 whose text BEGINS `LEDGER-GAP AMNESTY E-3132 -> E-3134`",
+        "LOG: LOG.md:722 E-3137 is not consecutive after E-3135; an unexplained gap means events were lost or removed from an append-only ledger. A documented historical gap is exempted by a DEC line at or after E-3137 whose text BEGINS `LEDGER-GAP AMNESTY E-3135 -> E-3137`",
+        "LOG: LOG.md:731 E-3146 is not consecutive after E-3144; an unexplained gap means events were lost or removed from an append-only ledger. A documented historical gap is exempted by a DEC line at or after E-3146 whose text BEGINS `LEDGER-GAP AMNESTY E-3144 -> E-3146`",
+        "STATE proposed phase DONE is not ticket-bearing but task is 'T-299'; task must be none outside a ticket-bearing phase"
+      ],
+      "semantic_receipts": 4170,
+      "semantic_receipt_errors": [],
+      "semantic_receipt_digest": "ops-receipt-sha256:44b2c1593576c0a8c14385d30235e2b75360a415d3461591b1dbfcc272d3107e",
+      "finish_receipt": [
+        {
+          "agent": "buffy",
+          "created_at": "2026-10-07T22:47:28Z",
+          "op_id": "finish-29deadc9792e498ca581916d8a22c785",
+          "operation": "finish",
+          "preconditions": {
+            ".saipen/BOARD.md": "e0d1b343a339d494",
+            ".saipen/LOG.md": "42fc2daac51dcbad",
+            ".saipen/STATE.md": "d3ddbf903e8c3b68"
+          },
+          "progress_index": 3,
+          "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+          "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+          "read_preconditions": {
+            ".saipen/logs": "delete-tree-sha256:937337c45728d38258704cc0ec14fd144d30502172e4407ac6357b501f37a2f3"
+          },
+          "semantic_payload_hash": "73633068a7c3e571",
+          "status": "COMMITTED",
+          "targets": [
+            {
+              "action": "write",
+              "after_hash": "5b7433f9e757c879",
+              "applied": true,
+              "before_hash": "42fc2daac51dcbad",
+              "path": ".saipen/LOG.md",
+              "role": "log"
+            },
+            {
+              "action": "write",
+              "after_hash": "ff84134960196dfc",
+              "applied": true,
+              "before_hash": "e0d1b343a339d494",
+              "path": ".saipen/BOARD.md",
+              "role": "board"
+            },
+            {
+              "action": "write",
+              "after_hash": "b76222ea78451493",
+              "applied": true,
+              "before_hash": "d3ddbf903e8c3b68",
+              "path": ".saipen/STATE.md",
+              "role": "state"
+            }
+          ],
+          "verification_policy": "core_fast"
+        }
+      ]
+    },
+    {
+      "history_sha256": "d73f80c7815e698e",
+      "tail": 3146,
+      "parsed_events": 3143,
+      "illegal_lines": [
+        "LOG.md:2: not a legal LOG event: '- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no '"
+      ],
+      "ledger_errors": [
+        "LOG.md:2: not a legal LOG event: '- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no '",
+        "E-3134 parent E-3133 does not exist in the ledger",
+        "E-3137 parent E-3136 does not exist in the ledger",
+        "E-3146 parent E-3145 does not exist in the ledger"
+      ],
+      "structural_prefix_through_E3131_errors": [
+        "LOG.md:2: not a legal LOG event: '- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no '"
+      ],
+      "fast_errors": [
+        "FLOOR: STATE.task=T-299 but BOARD has no DOING section at the raw floor",
+        "STATE proposed next_action 'idle' does not start with WAIT:/saipen /PHASE /RUN:/RESUME:",
+        "BOARD: BOARD.md:5 ticket T-299 has unrecognized field 'evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md'",
+        "BOARD: BOARD.md:6 duplicate ticket ID T-299",
+        "BOARD: BOARD.md:7 ticket T-298 has unrecognized field 'evidence: .saipen/evidence/T-298-widget-trust-boundary.md'",
+        "BOARD: BOARD.md:8 ticket T-297 has unrecognized field 'evidence: .saipen/evidence/T-297-widget-clock-recorrective.md'",
+        "BOARD: BOARD.md required heading ## DOING appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+        "BOARD: BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+        "BOARD proposed T-282 declares closure_mode 'duplicate_reconciled', outside own_patch|inherited_verified|cohort|superseded_verified|external_implementation|finding_invalidated",
+        "STATE proposed invalid phase transition: VERIFY -> DONE (RFC § 1.6). The block-parked shape requires the latest phase-changing event through STATE.last_event to be the canonical active-block DEC for the exact ticket still in BOARD.BLOCKED",
+        "LOG: LOG.md:2 not a legal event line",
+        "LOG: LOG.md:720 E-3134 is not consecutive after E-3132; an unexplained gap means events were lost or removed from an append-only ledger. A documented historical gap is exempted by a DEC line at or after E-3134 whose text BEGINS `LEDGER-GAP AMNESTY E-3132 -> E-3134`",
+        "LOG: LOG.md:722 E-3137 is not consecutive after E-3135; an unexplained gap means events were lost or removed from an append-only ledger. A documented historical gap is exempted by a DEC line at or after E-3137 whose text BEGINS `LEDGER-GAP AMNESTY E-3135 -> E-3137`",
+        "LOG: LOG.md:731 E-3146 is not consecutive after E-3144; an unexplained gap means events were lost or removed from an append-only ledger. A documented historical gap is exempted by a DEC line at or after E-3146 whose text BEGINS `LEDGER-GAP AMNESTY E-3144 -> E-3146`",
+        "STATE proposed phase DONE is not ticket-bearing but task is 'T-299'; task must be none outside a ticket-bearing phase"
+      ],
+      "semantic_receipts": 4170,
+      "semantic_receipt_errors": [],
+      "semantic_receipt_digest": "ops-receipt-sha256:44b2c1593576c0a8c14385d30235e2b75360a415d3461591b1dbfcc272d3107e",
+      "finish_receipt": [
+        {
+          "agent": "buffy",
+          "created_at": "2026-10-07T22:47:28Z",
+          "op_id": "finish-29deadc9792e498ca581916d8a22c785",
+          "operation": "finish",
+          "preconditions": {
+            ".saipen/BOARD.md": "e0d1b343a339d494",
+            ".saipen/LOG.md": "42fc2daac51dcbad",
+            ".saipen/STATE.md": "d3ddbf903e8c3b68"
+          },
+          "progress_index": 3,
+          "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+          "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+          "read_preconditions": {
+            ".saipen/logs": "delete-tree-sha256:937337c45728d38258704cc0ec14fd144d30502172e4407ac6357b501f37a2f3"
+          },
+          "semantic_payload_hash": "73633068a7c3e571",
+          "status": "COMMITTED",
+          "targets": [
+            {
+              "action": "write",
+              "after_hash": "5b7433f9e757c879",
+              "applied": true,
+              "before_hash": "42fc2daac51dcbad",
+              "path": ".saipen/LOG.md",
+              "role": "log"
+            },
+            {
+              "action": "write",
+              "after_hash": "ff84134960196dfc",
+              "applied": true,
+              "before_hash": "e0d1b343a339d494",
+              "path": ".saipen/BOARD.md",
+              "role": "board"
+            },
+            {
+              "action": "write",
+              "after_hash": "b76222ea78451493",
+              "applied": true,
+              "before_hash": "d3ddbf903e8c3b68",
+              "path": ".saipen/STATE.md",
+              "role": "state"
+            }
+          ],
+          "verification_policy": "core_fast"
+        }
+      ]
+    }
+  ],
+  "idempotent": true,
+  "target_writes": []
+}

@@ -1,0 +1,100 @@
+....F.F                                                                  [100%]
+================================== FAILURES ===================================
+_ OpenCodeLiveSession.test_5_staging_read_ordinary_write_and_protected_refusal _
+
+self = <test_opencode_live_session.OpenCodeLiveSession testMethod=test_5_staging_read_ordinary_write_and_protected_refusal>
+
+    def test_5_staging_read_ordinary_write_and_protected_refusal(self):
+        record = self.sessions["good"]
+        reads = [item for item in record["tools"] if item["tool"] == "read"]
+        self.assertTrue(reads, record["tools"])
+        # The staging path is a detached drag directory OUTSIDE the project: the
+        # read must resolve it and be admitted (bounded external read).
+        resolved = [
+            item for item in reads
+            if item["status"] == "completed"
+            and str(item["input"].get("filePath", "")).endswith(self.audit_good.name)
+        ]
+        self.assertTrue(resolved, reads)
+        note = self.good / "src" / "agent_note.txt"
+        self.assertTrue(note.is_file(), "an admitted ordinary write did not land")
+        self.assertEqual(note.read_text(encoding="utf-8").strip(), "ok")
+    
+        malformed = self.sessions["malformed"]
+        # A READ of protected canonical state is diagnostic access and stays
+        # available; a MUTATION of it is refused before host execution.
+        protected_reads = [
+            item for item in malformed["tools"]
+            if item["tool"] == "read" and ".saipen" in str(item["input"].get("filePath", ""))
+        ]
+        for item in protected_reads:
+            self.assertEqual(item["status"], "completed", item)
+        protected_mutations = [
+            item for item in malformed["tools"]
+            if item["tool"] == "bash"
+            and ".saipen" in str(item["input"].get("command", ""))
+        ]
+        self.assertTrue(protected_mutations, malformed["tools"])
+        for item in protected_mutations:
+            self.assertEqual(item["status"], "error", item)
+            self.assertIn("PROTECTED_CANONICAL_NAMESPACE", item["error"], item)
+        # The refused mutation is refused BEFORE host execution, so nothing may
+        # change STATE.md after the sessions completed. The pre-session vs
+        # post-recovery difference is the canonical repair, proven in test_7.
+>       self.assertEqual(_sha256(self.bad / ".saipen" / "STATE.md"), self.state_after_sessions_sha,
+                         "a refused protected mutation still changed STATE.md")
+E       AssertionError: '9adecce736f9819f55cb5c599abd3eebae3f0fd53e263a8b55f4806e9ba82d77' != '3a6b3d0ddb7e755a953fd3806e58f4137923fed8da5e2ee41516add5d2fc1719'
+E       - 9adecce736f9819f55cb5c599abd3eebae3f0fd53e263a8b55f4806e9ba82d77
+E       + 3a6b3d0ddb7e755a953fd3806e58f4137923fed8da5e2ee41516add5d2fc1719
+E        : a refused protected mutation still changed STATE.md
+
+tools\test_opencode_live_session.py:529: AssertionError
+_ OpenCodeLiveSession.test_7_canonical_recovery_repairs_a_fresh_malformed_session _
+
+self = <test_opencode_live_session.OpenCodeLiveSession testMethod=test_7_canonical_recovery_repairs_a_fresh_malformed_session>
+
+    def test_7_canonical_recovery_repairs_a_fresh_malformed_session(self):
+        """T-1318 AC-05: BOUND + INVALID -> canonical repair -> BOUND + VALID.
+    
+        Every step is host evidence from a genuinely new process. The repair is
+        invoked by the MODEL through the guard, never by this test, so the
+        reachability of the canonical surface is proven rather than assumed.
+        """
+        record = self.sessions["malformed"]
+        recover = [
+            item for item in record["tools"]
+            if item["tool"] == "bash" and "saipen recover" in str(item["input"].get("command", ""))
+        ]
+        self.assertTrue(recover, f"the model never invoked canonical recovery: {record['tool_names']}")
+        call = recover[0]
+        self.assertNotIn("SAIPEN_GUARD_REFUSAL", call["error"], call)
+        self.assertEqual(call["status"], "completed", call)
+        self.assertIn("REPAIRED", call["output"], call)
+    
+        # The repair landed on disk: the invalid phase is gone and the exact
+        # pre-repair bytes survive under the recovery namespace (A6).
+        state_path = self.bad / ".saipen" / "STATE.md"
+        repaired = state_path.read_text(encoding="utf-8")
+        repaired_sha = _sha256(state_path)
+        self.assertNotIn("IMPL", repaired, repaired)
+        artifacts = sorted((self.bad / ".saipen" / "recovery").rglob("*.STATE.md"))
+        self.assertTrue(artifacts, "no forensic copy of the original STATE")
+        self.assertEqual(_sha256(artifacts[0]), self.malformed_state_sha)
+        self.assertIn("IMPL", artifacts[0].read_text(encoding="utf-8"))
+    
+        # Ordinary consequential work is admitted again AFTER the repair. A
+        # generic shell command that was refused while malformed is the proof.
+        after = self._bash_after(record, "echo POST_RECOVERY_ORDINARY_OK", call["start_ms"])
+        self.assertIsNotNone(after, f"no post-recovery ordinary command: {record['tool_names']}")
+>       self.assertEqual(after["status"], "completed", after)
+E       AssertionError: 'error' != 'completed'
+E       - error
+E       + completed
+E        : {'tool': 'bash', 'status': 'error', 'input': {'command': 'echo POST_RECOVERY_ORDINARY_OK', 'workdir': 'V:\\_TEMP_\\tmpp407mtfq'}, 'output': '', 'error': "SAIPEN_GUARD_REFUSAL: PROTOCOL_STATE_INVALID: the saipen guard refused tool 'bash'; the host tool did not execute", 'start_ms': 1789288065402}
+
+tools\test_opencode_live_session.py:587: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_opencode_live_session.py::OpenCodeLiveSession::test_5_staging_read_ordinary_write_and_protected_refusal
+FAILED tools/test_opencode_live_session.py::OpenCodeLiveSession::test_7_canonical_recovery_repairs_a_fresh_malformed_session
+2 failed, 5 passed in 56.80s
+EXIT=1

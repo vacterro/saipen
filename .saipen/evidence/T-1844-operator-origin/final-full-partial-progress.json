@@ -1,0 +1,50 @@
+[
+  {
+    "root": "V:\\_TEMP_\\saipen-core-unit-c6iy65of",
+    "terminal_ran": null,
+    "progress_failures": 0,
+    "last": [
+      "test_both_forms_ignore_a_foreign_package (test_entry_point_parity.HostileForeignEngineTests.test_both_forms_ignore_a_foreign_package) ... "
+    ]
+  },
+  {
+    "root": "V:\\_TEMP_\\saipen-core-unit-oqwomsjs",
+    "terminal_ran": null,
+    "progress_failures": 0,
+    "last": [
+      "test_3_the_installed_artifact_carries_the_whole_chain (test_opencode_host_smoke.OpenCodeHostSmoke.test_3_the_installed_artifact_carries_the_whole_chain) ... "
+    ]
+  },
+  {
+    "root": "V:\\_TEMP_\\saipen-core-unit-4w1dl_t8",
+    "terminal_ran": null,
+    "progress_failures": 0,
+    "last": [
+      "test_m_b_valid_historical_binding_reconstructed (test_external_revalidation.TestExternalRevalidation.test_m_b_valid_historical_binding_reconstructed) ... "
+    ]
+  },
+  {
+    "root": "V:\\_TEMP_\\saipen-core-unit-03ycjtet",
+    "terminal_ran": null,
+    "progress_failures": 0,
+    "last": [
+      "T-1705: native execution cwd must survive the guard transport. ... "
+    ]
+  },
+  {
+    "root": "V:\\_TEMP_\\saipen-core-unit-vxewjm9h",
+    "terminal_ran": null,
+    "progress_failures": 0,
+    "last": [
+      "test_bash_install_set_continue_validate_uninstall_reinstall (test_public_install_lifecycle.PublicInstallLifecycleTests.test_bash_install_set_continue_validate_uninstall_reinstall) ... "
+    ]
+  },
+  {
+    "root": "V:\\_TEMP_\\saipen-core-unit-a3t49wq8",
+    "terminal_ran": null,
+    "progress_failures": 1,
+    "last": [
+      "test_user_request_carrying_the_original_bytes_succeeds (test_pending_ingress.BothIngressDoorsTests.test_user_request_carrying_the_original_bytes_succeeds) ... "
+    ]
+  }
+]

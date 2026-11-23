@@ -1,0 +1,7 @@
+test_a_inventory_cannot_replace_diagnosis (test_response_surface_contract.DiagnosisTests.test_a_inventory_cannot_replace_diagnosis) ... ok
+test_b_generic_handoff_cannot_replace_diagnosis (test_response_surface_contract.DiagnosisTests.test_b_generic_handoff_cannot_replace_diagnosis) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.004s
+
+OK

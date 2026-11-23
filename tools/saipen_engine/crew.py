@@ -1543,6 +1543,47 @@ def crew_record_run(
             "NO_READY_PACKAGE",
             f"{role.name} has no current package to bind to crew epoch {epoch.op_id}",
         )
+    identities = [package["package_identity"] for package in chosen]
+    # T-2047: replaying the exact same call must not double the evidence. The
+    # defect (TEST-13 S8) is that a retry after a lost reply appended a second
+    # COMMITTED receipt for the identical epoch+role+source+revision+package
+    # binding, so receipt counts stopped measuring how often a role ran and
+    # nothing could detect the duplication. Only receipts the journal wrote
+    # count (T-1430), and a DIFFERENT package set is a genuinely new binding.
+    binding = (
+        role.name,
+        source_id.source_head,
+        source_id.source_tree_fingerprint,
+        chosen[0]["role_revision"],
+        tuple(sorted(identities)),
+    )
+    for receipt in _crew_run_receipts(root, epoch.op_id, records, history=history):
+        meta = receipt.get("receipt_metadata") or {}
+        if (
+            meta.get("role"),
+            meta.get("source_head"),
+            meta.get("source_tree_fingerprint"),
+            meta.get("role_revision"),
+            tuple(
+                sorted(str(item) for item in (meta.get("package_identities") or ()))
+            ),
+        ) == binding:
+            return Result(
+                ok=True,
+                code="ALREADY_BOUND",
+                message=(
+                    f"the exact {role.name} binding already exists for crew epoch "
+                    f"{epoch.op_id}: nothing is written"
+                ),
+                data={
+                    "crew_epoch": epoch.op_id,
+                    "role": role.name,
+                    "event_id": meta.get("event_id"),
+                    "receipt_op_id": receipt.get("op_id"),
+                    "package_identities": identities,
+                    "idempotent": True,
+                },
+            )
     return record_crew_run(
         root,
         agent,

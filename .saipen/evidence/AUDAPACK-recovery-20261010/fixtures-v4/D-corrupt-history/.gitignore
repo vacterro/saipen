@@ -1,0 +1,12 @@
+# SAIPEN runtime namespace (machine-local; never release source) -- T-1435.
+# Durable protocol/evidence history (.saipen/evidence, archive, intake,
+# recovery/log-detail, recovery/board-compaction, recovery/conformance,
+# recovery/log-normalize, recovery/log-foreign-tail, extensions) stays
+# versioned; only the mechanics below are excluded.
+.saipen/locks/
+.saipen/cache/
+.saipen/recovery/ops/
+.saipen/recovery/settled-index/
+.saipen/recovery/board-terminal.json
+.saipen/recovery/legacy-staged-swept
+.saipen/snapshots/

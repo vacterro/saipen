@@ -1,0 +1,27 @@
+TEST-28 scenario captures at the 2e458d5b2 epoch
+
+--- S1 second crew record-run HUNT-033 (idempotence) rc=0
+code: ALREADY_BOUND
+
+--- S2 crew record-run saihunt HUNT-032 (superseded-triple staleness refusal) rc=1
+REFUSE [STALE_PACKAGE]
+reason: HUNT-032 is not a current saihunt package: it must be ready or reviewed and carry the live source triple and the current role revision
+
+--- S3 ticket block-for T-2156 T-2117 <reason> (post-DONE lifecycle) rc=1
+REFUSE [ILLEGAL_TICKET_LIFECYCLE]
+reason: block-for accepts DOING or TODO; T-2156 is under ## DONE
+
+--- S4 the T-2062 serialized-GC oracle on the committed tree: rc=0 answer=OK (verdict read from the combined stdout+stderr stream; the regression oracle stays green at the published identity, 3.8s)
+
+--- S5 structured-refusal canary refresh (in-process Result.refuse)
+  CORRUPT_GC_STATE             code_ok=True unregistered_code=False
+  GC_MAINTENANCE_FAILED        code_ok=True unregistered_code=False
+  GC_STATE_REPAIR_UNVERIFIED   code_ok=True unregistered_code=False
+  GIT_GUARD_FAILED             code_ok=True unregistered_code=False
+  INVALID_POLICY_KEY           code_ok=True unregistered_code=False
+  ROWS_UNRECOVERABLE           code_ok=True unregistered_code=False
+  SOURCE_INDEX_UNRECOVERABLE   code_ok=True unregistered_code=False
+  canary unregistered_code=True
+  summary: 0 of 7 marked | canary marked: True
+
+--- observed S1 rc=0 S2 rc=1 S3 rc=1 (expected 0 1 1)

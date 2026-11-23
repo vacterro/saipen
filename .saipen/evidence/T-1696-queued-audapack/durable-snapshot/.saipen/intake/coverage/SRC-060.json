@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-060:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-209 closed with verification evidence in LOG: VERIFY -- tests/test_title_guardian.py 26 PASS (incl. unknown-HWND self-heal, heartbeat-alone repair, 100x drift stress with no accumulation, bind_hwnd reuse-safety, retirement); tests/test_title_guardian_native.py 3 PASS on real Win32: pythonw console-less worker resolved a real CREATE_NEW_CONSOLE HWND (66847232), registered the canonical title, saw real SetWindowTextW drift to \"Administrator: Wi",
+      "text": "next",
+      "verification": "the Work this request created reached its own verification gate; see the T-209 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-209"
+    }
+  },
+  "schema_version": 1
+}

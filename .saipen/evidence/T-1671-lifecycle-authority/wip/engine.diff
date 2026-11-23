@@ -1,0 +1,360 @@
+--- tools/saipen_engine/operations.py	2026-10-08 00:54:06.879238500 +0300
++++ b/tools/saipen_engine/operations.py	2026-10-08 03:13:34.473525400 +0300
+@@ -457,6 +457,24 @@
+                 ),
+                 code="HISTORY_LEDGER_CORRUPT",
+             )
++    # T-1671 (SRC-192): canonical lifecycle state must stand on an operation.
++    # A STATE whose `last_event` sits above the newest journaled event, or a
++    # `## DONE` row vouched for only by events no operation wrote, was typed by
++    # an executor that lost the control route -- and every reader used to
++    # accept it because the bytes parse. Refusing here is what keeps a later
++    # operation from building on that head and burying it under a new floor.
++    # Only the reconciliation planner names the class, because it is the one
++    # reader that repairs it (`lifecycle_authority.OBSERVABLE`).
++    from . import lifecycle_authority as _lifecycle_authority
++
++    lifecycle = _lifecycle_authority.assess(root, state, board, snapshot.events)
++    if lifecycle["status"] == _lifecycle_authority.UNAUTHORIZED:
++        if _lifecycle_authority.OBSERVABLE not in observe:
++            raise CheckpointError(
++                _lifecycle_authority.refusal_detail(lifecycle),
++                code=_lifecycle_authority.CODE,
++            )
++        observed[_lifecycle_authority.OBSERVABLE] = lifecycle["detail"]
+     log_tail = snapshot.tail
+     # ALWAYS bind the complete sealed history (`.saipen/logs` numeric segments)
+     # as a read precondition so APPLY rechecks it under the lock and refuses
+@@ -483,6 +501,9 @@
+         # present, as the strict verdict text. A caller that named a class and
+         # finds nothing here read a surface that is clean on that class.
+         "_observed": observed,
++        # T-1671: the lifecycle-authority verdict of THIS read, for the planner
++        # that asked to observe an unauthorized head and must repair it.
++        "_lifecycle": lifecycle,
+         # T-1326 P0: the canonical project root travels WITH the documents. Every
+         # later `_event_line` therefore externalizes an oversized event
+         # losslessly without the caller having to remember a `root=` keyword --
+@@ -4111,6 +4132,7 @@
+     return f"invalidation evidence E-{number} does not exist in this project's LOG"
+ 
+ 
++@_state_guard
+ def finish_ticket(
+     project_root: Path | str,
+     ticket_id: str,
+@@ -10013,6 +10035,7 @@
+ _SEAT_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,63}")
+ 
+ 
++@_state_guard
+ def handoff_claim(
+     project_root: Path | str,
+     actor: str,
+--- tools/saipen_engine/reconcile.py	2026-10-04 19:06:02.549271100 +0300
++++ b/tools/saipen_engine/reconcile.py	2026-10-08 03:10:19.699881900 +0300
+@@ -2011,6 +2011,132 @@
+     return repairs
+ 
+ 
++def _lifecycle_authority_repairs(
++    state: dict, board: dict | None, events, verdict: dict | None
++) -> dict:
++    """Repairs for an UNAUTHORIZED lifecycle head (T-1671, SRC-192).
++
++    Defect class: canonical lifecycle state typed by an executor that lost the
++    control route. `lifecycle_authority.assess` names it from the journal; the
++    classes above cannot, because they read a closure from BOARD fields
++    (`closure_mode`, `owner`) and from LOG prose (`verify -> PASS`), and a hand
++    types all three.
++
++    The repair demotes exactly what no operation produced and invents nothing:
++
++      * a `## DONE` row vouched for only by hand-written head events returns
++        to `## TODO` with its closure metadata and claim dropped, so the
++        ordinary lifecycle re-establishes the completion. It is a BOARD
++        lifecycle atom and therefore rides the one-approval plan (SRC-043);
++      * a STATE bound to such a ticket, or to a ticket no operation ever
++        touched, goes idle (`DONE` / `task: none`): the journal proves no
++        phase for it, and an invented phase is the fabrication T-1318 refuses;
++      * `last_event` is rebound, which is what makes this reconciliation
++        commit its own journaled event even when nothing else is owed -- the
++        hand-written lines stay in the append-only LOG as history, and the
++        operation that says so becomes the new floor.
++
++    A STATE bound to a ticket the journal DOES know keeps its phase: judging a
++    hand-moved phase of a journaled ticket needs the per-ticket lifecycle
++    proof, which `_state_phase_repairs` owns for the pairs it can decide.
++    """
++    from . import lifecycle_authority as _la
++
++    plan: dict = {"state": [], "board": [], "idle": False, "trace": ""}
++    if not verdict or verdict.get("status") != _la.UNAUTHORIZED:
++        return plan
++    floor = verdict.get("floor")
++    findings = verdict.get("findings") or []
++    tickets = (board or {}).get("tickets", {}) or {}
++    unbacked = sorted(
++        f["ticket"] for f in findings if f.get("rule") == _la.TERMINAL_UNBACKED
++    )
++
++    def reopen(tid: str, origin: str, reason: str) -> dict:
++        row = tickets.get(tid) or {}
++        dropped = _reopen_field_removals(row.get("raw", ""))
++        for name in ("owner", "claim_time"):
++            if name in (row.get("fields") or {}) and name not in dropped:
++                dropped.append(name)
++        return {
++            "field": "board", "surface": "board", "kind": "section-move",
++            "_class": _la.REPAIR_CLASS, "ticket": tid,
++            "from_section": origin, "to_section": "## TODO",
++            "fields": dropped, "requires_approval": True, "generation": "current",
++            "reason": reason,
++        }
++
++    for finding in findings:
++        if finding.get("rule") != _la.TERMINAL_UNBACKED:
++            continue
++        plan["board"].append(reopen(
++            finding["ticket"], "## DONE",
++            f"UNAUTHORIZED_LIFECYCLE_WRITE: {finding['detail']}; it returns to "
++            "## TODO without closure metadata or claim and the canonical "
++            "lifecycle re-establishes the completion -- original bytes preserved",
++        ))
++    task = state.get("task")
++    bound = task if isinstance(task, str) and re.fullmatch(r"T-\d+", task) else None
++    journaled = bound is not None and any(
++        event.get("ticket") == bound
++        and event.get("op_id")
++        and isinstance(event.get("event"), int)
++        and not isinstance(event.get("event"), bool)
++        and (floor is None or event["event"] <= floor)
++        for event in (events or ())
++    )
++    state_ahead = any(f.get("rule") == _la.STATE_AHEAD for f in findings)
++    if bound is not None and (bound in unbacked or (state_ahead and not journaled)):
++        plan["idle"] = True
++        why = (
++            f"UNAUTHORIZED_LIFECYCLE_WRITE: STATE is bound to {bound}, "
++            + (
++                "whose completion no operation produced"
++                if bound in unbacked
++                else "which no operation ever touched"
++            )
++            + "; the journal proves no phase for it, so STATE goes idle and the "
++            "queue decides -- never an invented phase"
++        )
++        for field, value in (
++            ("phase", "DONE"), ("transition_from", "DONE"),
++            ("task", "none"), ("next_action", "saipen continue"),
++        ):
++            if state.get(field) != value:
++                plan["state"].append({
++                    "field": field, "from": state.get(field), "to": value,
++                    "surface": "state", "_class": _la.REPAIR_CLASS, "reason": why,
++                })
++        row = tickets.get(bound)
++        if bound not in unbacked and isinstance(row, dict) and row.get("section") == "## DOING":
++            plan["board"].append(reopen(
++                bound, "## DOING",
++                f"UNAUTHORIZED_LIFECYCLE_WRITE: {bound} sits under ## DOING on a "
++                "claim no operation wrote; it returns to ## TODO unclaimed",
++            ))
++    if state_ahead:
++        plan["state"].append({
++            "field": "last_event", "from": state.get("last_event"), "to": floor,
++            "surface": "state", "_class": _la.REPAIR_CLASS,
++            "reason": (
++                f"UNAUTHORIZED_LIFECYCLE_WRITE: STATE.last_event sits above "
++                f"E-{floor}, the newest event an operation record stands behind; "
++                "this reconciliation's own journaled event becomes the marker"
++            ),
++        })
++    head = verdict.get("head") or []
++    if len(head) > 1:
++        span = f"E-{head[0]}..E-{head[-1]}"
++    else:
++        span = f"E-{head[0]}" if head else "no event"
++    plan["trace"] = (
++        f"lifecycle authority: {span} above E-{floor} carry no operation record "
++        "(written by hand); kept as history, nothing stands on their word"
++        + ("; reopened " + ", ".join(unbacked) if unbacked else "")
++    )
++    return plan
++
++
+ def _repair_summary(board_drifts: list[dict], state_repairs: list[dict]) -> str:
+     parts: list[str] = []
+     if board_drifts:
+@@ -2383,7 +2509,11 @@
+         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+ 
+     try:
+-        docs, state, _board, log_tail = _read(project_root, observe=REPAIR_OBSERVABLE)
++        from .lifecycle_authority import OBSERVABLE as _LIFECYCLE_OBSERVABLE
++
++        docs, state, _board, log_tail = _read(
++            project_root, observe=REPAIR_OBSERVABLE + (_LIFECYCLE_OBSERVABLE,)
++        )
+     except Exception as exc:
+         # CheckpointError / HomeDeadError / OSError all mean the surface cannot
+         # be reconciled mechanically. Refuse loudly -- none of them is the
+@@ -2423,7 +2553,11 @@
+     strict_state_error = docs.get("_state_error", "")
+ 
+     board_drifts = _checkbox_drifts(board_text)
+-    phase_repairs = _state_phase_repairs(state, events, _board)
++    # T-1671: an unauthorized head is judged FIRST. Where it sends STATE idle,
++    # the phase and next_action it replaces were typed by hand, and deriving a
++    # repair from them would be reconciling toward a forgery.
++    authority = _lifecycle_authority_repairs(state, _board, events, docs.get("_lifecycle"))
++    phase_repairs = [] if authority["idle"] else _state_phase_repairs(state, events, _board)
+     gap = next((r["gap"] for r in phase_repairs if r.get("gap")), None)
+     state_repairs = (
+         _state_output_field_repairs(state)
+@@ -2433,14 +2567,24 @@
+         + _tripped_valve_repairs(state)
+         + phase_repairs
+         + _state_blocker_repairs(state, _board, resolve_blocker)
+-        + ([] if gap else _state_next_action_repairs(
++        + ([] if gap or authority["idle"] else _state_next_action_repairs(
+             state, state_text, board_text, agent, project_root, resolve_next_action
+         ))
+     )
++    if authority["state"]:
++        _owned_fields = {repair["field"] for repair in authority["state"]}
++        state_repairs = [
++            repair for repair in state_repairs if repair.get("field") not in _owned_fields
++        ] + authority["state"]
+     adoption_repairs = _board_adoption_repairs(_board, docs.get("_history"), adopt_legacy)
+     lifecycle_all = _board_lifecycle_repairs(
+         _board, events, state, docs.get("_history")
+     )
++    if authority["board"]:
++        _reopened = {repair["ticket"] for repair in authority["board"]}
++        lifecycle_all = [
++            repair for repair in lifecycle_all if repair.get("ticket") not in _reopened
++        ] + authority["board"]
+     if gap:
+         lifecycle_all = [r for r in lifecycle_all if r.get("ticket") != gap["ticket"]]
+         dropped = _reopen_field_removals(_board["tickets"][gap["ticket"]].get("raw", ""))
+@@ -2810,6 +2954,8 @@
+             f"; current-done-unproven {gap['ticket']}: closure revoked now; "
+             "no lifecycle phase proven, queued TODO for fresh claim and verification"
+         )
++    if authority["trace"]:
++        description += "; " + authority["trace"]
+     # T-1358: the DEC names the field each decision actually authorized. It
+     # said `STATE.blocker clear` for every operator-authorized repair and read
+     # `resolve_blocker` directly, so the moment a second field gained an
+@@ -3052,11 +3198,13 @@
+         )
+         preserved_path = preserved_rel
+ 
+-    if gap:
++    if gap or authority["trace"]:
+         from .journal import hash_bytes
+         from .plan import TargetPlan
+ 
+         # Preserve evidence before canonical writes, including crash prefixes.
++        # T-1671: an unauthorized head is the same obligation -- the bytes an
++        # executor typed are the only record of what it claimed.
+         originals = []
+         for name in ("STATE", "BOARD", "LOG"):
+             original = (project_root / ".saipen" / (name + ".md")).read_bytes()
+--- tools/saipen_engine/fleet.py	2026-10-01 17:02:25.008427500 +0300
++++ b/tools/saipen_engine/fleet.py	2026-10-08 03:09:35.900938900 +0300
+@@ -90,6 +90,7 @@
+     "RECOVERY_REQUIRED": "journal",
+     "RECOVERY_EVIDENCE_UNBOUND": "binding",
+     "HISTORY_LEDGER_CORRUPT": "log",
++    "UNAUTHORIZED_LIFECYCLE_WRITE": "state",
+     "BOARD_RECORD_OVERSIZE": "board",
+     "BOARD_DETAIL_UNRESOLVABLE": "board",
+     "PROJECT_BINDING_INVALID": "binding",
+--- tools/saipen.py	2026-10-07 18:24:07.229631100 +0300
++++ b/tools/saipen.py	2026-10-08 03:09:35.909396800 +0300
+@@ -1690,6 +1690,34 @@
+         )
+         return 1
+     board = parse_board(board_text)
++    # T-1671: a lifecycle head no operation produced is not a status to
++    # project. Reporting phase DONE and an idle route over a hand-written
++    # completion is how the forgery became the project's truth; the refusal
++    # carries the same route an invalid checkpoint does.
++    from saipen_engine import lifecycle_authority as _lifecycle_authority
++
++    _lifecycle = _lifecycle_authority.assess(project_root, state, board, snap.history_events)
++    if _lifecycle["status"] == _lifecycle_authority.UNAUTHORIZED:
++        _emit(
++            {
++                "ok": False,
++                "code": _lifecycle_authority.CODE,
++                "action": "saipen recover",
++                "reason": "lifecycle-unauthorized",
++                "detail": _lifecycle_authority.refusal_detail(_lifecycle),
++                "lifecycle_authority": {
++                    "floor": _lifecycle["floor"],
++                    "head": _lifecycle["head"][:16],
++                    "findings": [
++                        {key: value for key, value in finding.items() if key != "detail"}
++                        for finding in _lifecycle["findings"]
++                    ],
++                },
++                "cold_route": _cold_route(project_root, state, state_text),
++            },
++            as_json,
++        )
++        return 1
+     doing = [t for t in board["tickets"].values() if t["section"] == "## DOING"]
+     todo = [t for t in board["tickets"].values() if t["section"] == "## TODO"]
+     done_tickets = [t for t in board["tickets"].values() if t["section"] == "## DONE"]
+--- tools/validate.py	2026-10-07 18:57:23.514097600 +0300
++++ b/tools/validate.py	2026-10-08 03:09:35.912167000 +0300
+@@ -3847,6 +3847,36 @@
+                     + "; T-1577)"
+                 )
+ 
++    # [lifecycle-authority] (T-1671, SRC-192): the three [saio] checks above
++    # read the LOG alone, so each one judges a TAG. None of them asks whether
++    # the canonical STATE and BOARD stand on an operation, and that is the
++    # question the hand-written lifecycle answered wrong: untagged
++    # `RUN: verify -> PASS` lines are legal semantic entries, a `## DONE` row
++    # with `closure_mode` parses, and a STATE whose `last_event` names the
++    # hand-typed tail is "fresh". `lifecycle_authority.assess` binds the two
++    # surfaces to the newest event an operation record stands behind. Same
++    # boundary as T-1282: no ledger on this checkout means UNAVAILABLE.
++    if log_ok and _canonical_history_snapshot is not None:
++        from saipen_engine import lifecycle_authority as _lifecycle_authority
++
++        _lifecycle_last_event = (state or {}).get("last_event")
++        if isinstance(_lifecycle_last_event, str) and _lifecycle_last_event.strip().isdigit():
++            _lifecycle_last_event = int(_lifecycle_last_event.strip())
++        _lifecycle = _lifecycle_authority.assess(
++            PROJECT_ROOT,
++            {"last_event": _lifecycle_last_event},
++            {"tickets": tickets},
++            _canonical_history_snapshot.events,
++        )
++        if _lifecycle["status"] == _lifecycle_authority.UNAUTHORIZED:
++            fail(
++                "lifecycle authority [saio] -- canonical lifecycle state stands "
++                "on no operation: "
++                + "; ".join(f["detail"] for f in _lifecycle["findings"][:4])
++                + " -- run `saipen recover`; it names the journaled repair "
++                "(T-1671)"
++            )
++
+     # [gate-closure] (NITRO dogfood IV, T-602): a ticket's DONE state is
+     # evidence of the phase chain that produced it, NEVER of a legal-looking
+     # final STATE. finish_ticket now REFUSEs every non-SHIP closure (the
+--- saipen/REGISTRY.json	2026-10-07 03:58:41.237108600 +0300
++++ saipen/REGISTRY.json	2026-10-08 03:09:35.900188800 +0300
+@@ -930,6 +930,7 @@
+   "RECOVERY_CONFLICT",
+   "CORRUPT_JOURNAL",
+   "HISTORY_LEDGER_CORRUPT",
++  "UNAUTHORIZED_LIFECYCLE_WRITE",
+   "NEEDS_REPAIR",
+   "DESTRUCTIVE_CONFIRMATION_REQUIRED",
+   "CONFLICT",

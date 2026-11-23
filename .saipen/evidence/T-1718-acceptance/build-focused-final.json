@@ -1,0 +1,29 @@
+{
+  "label": "build-focused-final",
+  "phase": "BUILD",
+  "command": [
+    "C:/ProgramData/SAI/SAIPEN/python/3.11.9-64/python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "test_t1718_acceptance_contract",
+    "test_acceptance",
+    "test_ticket_verify_preimage",
+    "test_ticket_supersession",
+    "test_regression_gate",
+    "test_cold_agent_truth",
+    "test_refusal_registry",
+    "test_canonical_command_reachability",
+    "test_subprocess_utf8"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+  "exit_code": 0,
+  "duration_s": 74.844,
+  "fingerprint": "d4962eafe91a6ec43364145ea106032e1deb0e86162cb6176160216aa1735270",
+  "stdout": "",
+  "stderr": "...................................................................................................................................\r\n----------------------------------------------------------------------\r\nRan 131 tests in 74.374s\r\n\r\nOK\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "0e114b4f31dee89fc26d182edd6d2579d499e5e8dd4f5205e8d667342c94eb51",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

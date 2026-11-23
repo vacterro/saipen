@@ -1,0 +1,6 @@
+EXIT 0
+STDOUT:
+{"ok": true, "ingress_id": "ing-f49a39e186a5041d", "destination_op": "continue", "sealed": false, "authenticated": false, "seal": {"ok": false, "stage": "issue-origin", "code": "BROKER_CLIENT_NOT_AUTHENTICATED", "category": "refused", "detail": "the hook was started through 'python.exe', not directly by the host application", "recovery": {"component": "SAIPEN host-authority broker", "attempted": ["connect"], "started": false, "state": "answered", "log": "C:\\Users\\vac34\\.saipen\\authority\\broker.log", "identity": null, "detail": null}}, "systemMessage": "SAIPEN: this prompt was NOT authenticated (BROKER_CLIENT_NOT_AUTHENTICATED, refused, stage issue-origin). the hook was started through 'python.exe', not directly by the host application It was recorded as model_supplied, so a bounded run will still ask for authorization. Service log: C:\\Users\\vac34\\.saipen\\authority\\broker.log Do this: saipen host doctor", "additionalContext": "SAIPEN: this prompt was NOT authenticated (BROKER_CLIENT_NOT_AUTHENTICATED, refused, stage issue-origin). the hook was started through 'python.exe', not directly by the host application It was recorded as model_supplied, so a bounded run will still ask for authorization. Service log: C:\\Users\\vac34\\.saipen\\authority\\broker.log Do this: saipen host doctor"}
+
+STDERR:
+

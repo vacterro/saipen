@@ -1,0 +1,7 @@
+chore: snapshot cc-all work for GitHub backup
+
+Save the current source and verification campaign on an isolated branch.
+The working tree passed 7207 unit tests and 140 REVIEW checks.
+Pending cohorts and actual host/UI acceptance remain open.
+
+Refs T-1848, T-1844

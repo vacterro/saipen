@@ -1,0 +1,2 @@
+{"job_pid": 23072, "status": "waiting", "runner_pid": 13008, "started_utc": "2026-10-12T19:22:34.158824+00:00", "completed": []}
+{"job_pid": 23072, "status": "stopped", "runner_pid": 13008, "started_utc": "2026-10-12T19:22:34.158824+00:00", "completed": [], "reason": "RuntimeError: the adopted whole family did not complete PASS", "finished_utc": "2026-10-12T19:38:13.781162+00:00"}

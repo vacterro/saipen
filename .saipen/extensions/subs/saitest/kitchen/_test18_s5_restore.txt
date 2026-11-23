@@ -1,0 +1,5 @@
+occurrences_before 1
+occurrences_after 2
+parsed_sections {'T-9000': 9}
+absent_row_inserted 1
+refusal_before_insert True

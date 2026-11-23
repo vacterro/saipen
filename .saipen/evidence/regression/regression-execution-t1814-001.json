@@ -1,0 +1,35 @@
+{
+  "after": {
+    "result": "PASS",
+    "subject": "tools/saipen_engine/intake.py",
+    "verifier": "tools/test_source_contract_derivation.py"
+  },
+  "command": [
+    "python",
+    "-m",
+    "unittest",
+    "tools/test_source_contract_derivation.py"
+  ],
+  "created_at": "2026-10-18T14:56:52.979391+00:00",
+  "evidence_class": "executed",
+  "op_id": "regression-execution-t1814-001",
+  "oracle_files": [
+    "tools/test_source_contract_derivation.py"
+  ],
+  "runs": [
+    {
+      "command": "python -m unittest tools/test_source_contract_derivation.py",
+      "duration_ms": 3658,
+      "exit_code": 0,
+      "failed": 0,
+      "output_digest": "380e07cebf89514e",
+      "passed": 13,
+      "result": "PASS"
+    }
+  ],
+  "status": "PASS",
+  "subject_files": [
+    "tools/saipen_engine/intake.py"
+  ],
+  "ticket": "T-1814"
+}

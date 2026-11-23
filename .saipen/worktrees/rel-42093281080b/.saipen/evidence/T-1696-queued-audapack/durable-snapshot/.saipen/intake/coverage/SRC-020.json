@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-020:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "T06 six-lane panel: ui_qt/dialogs/audit_runs_widget.py, exactly six visible lanes, lane belongs to project+dispatch not worker, bounded recent history, queue section for beyond-six demand",
+      "text": "Implement and verify every required change and test in T06 AUDIT RUNS PANEL 6 LANES.",
+      "verification": "tests/ui_qt/test_audit_runs_widget.py::test_panel_has_exactly_six_visible_lanes_and_ready_truth, :52 recent history bounded, queue ordering tests",
+      "work": "T-52"
+    }
+  },
+  "schema_version": 1
+}

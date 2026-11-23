@@ -1,0 +1,33 @@
+== HOOK_ARTIFACT_MISMATCH 114
+   72 python.exe zaicode.exe zaicode.exe zaicode.exe zaicode.exe autohotkeyu64.exe autohotkeyux.exe totalcmd64.exe
+   19 python.exe cmd.exe agy.exe sai-accounts.exe
+   12 python.exe zaicode.exe zaicode.exe zaicode.exe zaicode.exe autohotkeyu64.exe
+   9 python.exe python.exe bash.exe bash.exe claude.exe powershell.exe pythonw.exe
+   1 python.exe zaicode.exe zaicode.exe zaicode.exe zaicode.exe autohotkeyu64.exe conhost.exe cmd.exe
+   1 python.exe zaicode.exe zaicode.exe zaicode.exe zaicode.exe
+== HOOK_CHAIN_UNRECOGNIZED 40
+   25 python.exe python.exe cmd.exe agy.exe sai-accounts.exe
+   8 python.exe python.exe bash.exe bash.exe bash.exe zaicode.exe zaicode.exe zaicode.exe
+   4 python.exe node.exe node.exe bash.exe bash.exe bash.exe zaicode.exe zaicode.exe
+   2 python.exe bash.exe bash.exe bash.exe zaicode.exe zaicode.exe zaicode.exe zaicode.exe
+   1 python.exe bash.exe bash.exe bash.exe zaicode.exe zaicode.exe zaicode.exe zaicode.exe.old
+== PARENT_REUSED 1
+   1 python.exe bash.exe bash.exe bash.exe zaicode.exe zaicode.exe zaicode.exe zaicode.exe
+== HOOK_NOT_FOUND 302
+   140 python.exe python.exe python.exe bash.exe bash.exe bash.exe zaicode.exe zaicode.exe
+   75 python.exe python.exe bash.exe bash.exe bash.exe zaicode.exe zaicode.exe zaicode.exe
+   34 python.exe cmd.exe agy.exe sai-accounts.exe
+   20 python.exe python.exe python.exe timeout.exe timeout.exe  bash.exe bash.exe
+   9 python.exe python.exe pwsh.exe agy.exe sai-accounts.exe
+   8 python.exe python.exe python.exe sh.exe  bash.exe bash.exe zaicode.exe
+   6 python.exe bash.exe bash.exe bash.exe zaicode.exe zaicode.exe zaicode.exe zaicode.exe
+   4 python.exe python.exe timeout.exe timeout.exe  bash.exe bash.exe zaicode.exe
+== NOT_HOST_DESCENDANT 72
+   20 python.exe python.exe pwsh.exe agy.exe sai-accounts.exe
+   14 python.exe python.exe bash.exe bash.exe bash.exe zaicode.exe zaicode.exe zaicode.exe
+   11 python.exe python.exe python.exe bash.exe bash.exe bash.exe zaicode.exe zaicode.exe
+   7 python.exe zaicode.exe zaicode.exe zaicode.exe zaicode.exe
+   5 python.exe zaicode.exe zaicode.exe zaicode.exe zaicode.exe autohotkeyu64.exe
+   4 python.exe python.exe python.exe pwsh.exe agy.exe sai-accounts.exe
+   4 python.exe python.exe python.exe bash.exe  
+   4 python.exe python.exe python.exe nohup.exe  

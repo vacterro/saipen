@@ -1,0 +1,27 @@
+--- automation.pre_wait.py
++++ tools/saipen_engine/automation.py
+@@ -527,12 +527,24 @@
+         else:
+             reason_text = f"route reason: {route_reason or 'none'}"
+ 
++        # A binding blocker can route as `unblock` before the WAIT route is
++        # reached. Its canonical human WAIT still requires operator action;
++        # never infer that obligation from the outgoing response.
++        blocked_human_wait = False
++        if reason_code == "unblock" and state:
++            from .state import parse_wait
++
++            blocked_human_wait = (
++                parse_wait(str(state.get("next_action") or "")) in _HUMAN_WAIT_CATEGORIES
++            )
++
+         block = {
+             "schema_version": SCHEMA_VERSION,
+             "disposition": disposition,
+             "next_command": _NEXT_COMMAND.get(disposition),
+             "operator_action_due": (
+                 disposition == WAIT_USER
++                or blocked_human_wait
+                 or (
+                     reason_code.startswith("wait-")
+                     and reason_code[len("wait-"):].replace("-", " ")

@@ -1,0 +1,25 @@
+{
+  "status": "PASS_TERMINAL",
+  "final_record": ".saipen/evidence/core-unit/2fc1f8dc089b4d68-20261014T224242Z.json",
+  "ran": 6606,
+  "red": 0,
+  "finished_work_event": "E-15728",
+  "command": "python tools/core_unit.py evidence T-1793 --timeout 5400",
+  "exec_session_id": 3251,
+  "controller_pid": 32608,
+  "controller_started_utc": "2026-10-14T22:19:44.276281Z",
+  "root": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+  "shards": ["lv0i0kt5", "3k78yiye", "v91nysbz", "q0eq3c1o", "ppze4aco", "0whi8yec"],
+  "spool_pattern": "V:/_TEMP_/saipen-core-unit-{shard}/spool/stderr",
+  "previous_run": {
+    "exec_session_id": 64834,
+    "controller_pid": 29388,
+    "status": "FAIL",
+    "ran": 6606,
+    "red": 9,
+    "cause": "command_resolution 56204 > 55296, all nine members",
+    "record": ".saipen/evidence/core-unit/e86aa5bb69345c20-20261014T221559Z.json"
+  },
+  "correction": "Compact continuation contract: canonical profiles all PASS, command_resolution 55281 / 55296; 34 unchanged budget/registry tests and pinned lint PASS. Budget and oracle unchanged.",
+  "instructions": "Revalidate live exec session 3251 or matching OS process before waiting. This file alone is not liveness or completion evidence. Session 64834 is terminal; do not restart it. Keep source frozen until the new native run settles. After PASS: complete T-1793 review/ship/finish, resume T-1792 at BUILD, execute its native regression contract in VERIFY, reuse the exact final-tree family record, then resume parent T-1791 and the remaining cc all queue. Never claim the full goal complete from this gate alone."
+}

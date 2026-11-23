@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "tools/test_t1937_future_slice_closure.py"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "extensions",
+    "bootstrap"
+  ],
+  "oracle_files": [
+    "tools/test_t1937_future_slice_closure.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/future_gate.py"
+  ],
+  "before": {
+    "tools/saipen_engine/future_gate.py": ".saipen/evidence/T-1937-future-slice-closure/pre/future_gate.py"
+  },
+  "timeout": 300
+}

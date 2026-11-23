@@ -1,0 +1,11 @@
+test_active_work_outranks_invalid_data (test_automation_block.InvalidDataStops.test_active_work_outranks_invalid_data) ... ok
+test_independent_workable_ticket_outranks_invalid_audit (test_automation_block.InvalidDataStops.test_independent_workable_ticket_outranks_invalid_audit) ... ok
+test_invalid_audit_has_a_visible_diagnostic_without_cc (test_automation_block.InvalidDataStops.test_invalid_audit_has_a_visible_diagnostic_without_cc) ... ok
+test_invalid_audit_is_not_a_continuation (test_automation_block.InvalidDataStops.test_invalid_audit_is_not_a_continuation) ... ok
+test_invalid_queue_cannot_be_completed_by_clean_closure_evidence (test_automation_block.InvalidDataStops.test_invalid_queue_cannot_be_completed_by_clean_closure_evidence) ... ok
+test_invalid_queue_has_a_visible_diagnostic_without_cc (test_automation_block.InvalidDataStops.test_invalid_queue_has_a_visible_diagnostic_without_cc) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.063s
+
+OK

@@ -1,0 +1,39 @@
+{
+  "scope": [
+    {
+      "path": "saipen/EXECUTION.md",
+      "sha256": "23af34e646058768483ade7985f9e4cb18ddff8662ef18eef180e911de2998b5"
+    },
+    {
+      "path": "tools/saipen.py",
+      "sha256": "4c7f6ebfc5681d25dd44a9bad25bd977d52efe5834bd08260928add9329079b6"
+    },
+    {
+      "path": "tools/saipen_engine/response_surface.py",
+      "sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8"
+    },
+    {
+      "path": "tools/test_response_surface_contract.py",
+      "sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165"
+    },
+    {
+      "path": "tools/validate.py",
+      "sha256": "9dce736f06652cd9292de3d4eec5d7b1535fd657825dd088e420ec3262c78ea7"
+    },
+    {
+      "path": "tests/fixtures/protocol-diagnosis/README.md",
+      "sha256": "2933c31f52918eddc8204c593231baf593e2ac0ef63be685ca87b266ee359851"
+    },
+    {
+      "path": "tests/fixtures/protocol-diagnosis/a.md",
+      "sha256": "1378f149861acd5a345e16c97b0b0a863b667aecd054a3b8a728d1227fe6ed15"
+    },
+    {
+      "path": "tests/fixtures/protocol-diagnosis/b.md",
+      "sha256": "a6d6ca9591ea8f052ad6ac6d569cbdaae14910da387dd61543932dafb077d0a1"
+    }
+  ],
+  "owned_delta": "request-bound diagnosis; recovered CLI root/metadata wiring; unchanged original 20 tests plus 2 robustness cases; frozen witnesses and document coverage; budget-preserving owner prose",
+  "foreign_context": "All other existing hunks in these paths are retained; no blanket checkout, staging, commit, tag or push.",
+  "limitations": "The inherited CLI diagnostic wiring has no separate pre-ticket snapshot in the handoff. Only reviewed relevant lines are attributed, never every historical hunk in the shared files."
+}

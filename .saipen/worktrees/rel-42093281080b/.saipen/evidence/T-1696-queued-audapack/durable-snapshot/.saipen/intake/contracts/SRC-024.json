@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-024:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement and verify every operator failure, cancel, and recovery rule in T10 FAILURE CANCEL RECOVERY UX."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:12Z",
+  "derived_from": "SRC-024",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "b5c64b503919892c759e95c5532846fa11a01ad967e4eb30a2181de4fe2bf928"
+}

@@ -1,0 +1,209 @@
+test_ambiguous_or_partial_collect_linkage_refuses (test_sub_dispose_after_collect.CoreReviewProofTests.test_ambiguous_or_partial_collect_linkage_refuses) ... FAIL
+test_blocked_only_dispose_refuses_without_writes (test_sub_dispose_after_collect.CoreReviewProofTests.test_blocked_only_dispose_refuses_without_writes) ... FAIL
+test_blocked_only_never_schedules_disposition (test_sub_dispose_after_collect.CoreReviewProofTests.test_blocked_only_never_schedules_disposition) ... FAIL
+test_blocked_only_reviewed_claim_is_invalid (test_sub_dispose_after_collect.CoreReviewProofTests.test_blocked_only_reviewed_claim_is_invalid) ... FAIL
+test_collect_generation_event_cannot_be_rebound_by_prose (test_sub_dispose_after_collect.CoreReviewProofTests.test_collect_generation_event_cannot_be_rebound_by_prose) ... FAIL
+test_digest_bound_record_still_requires_executed_native_shape (test_sub_dispose_after_collect.CoreReviewProofTests.test_digest_bound_record_still_requires_executed_native_shape) ... FAIL
+test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) ... 
+  test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='package_identity') ... FAIL
+  test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='producer') ... FAIL
+  test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='package') ... FAIL
+  test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='source_head') ... FAIL
+  test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='source_tree_fingerprint') ... FAIL
+  test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='role_revision') ... FAIL
+  test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='collect_op') ... FAIL
+  test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='review_event') ... FAIL
+  test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='ticket_id') ... FAIL
+test_finding_invalidated_no_patch_remains_disposable (test_sub_dispose_after_collect.CoreReviewProofTests.test_finding_invalidated_no_patch_remains_disposable) ... ok
+test_genuinely_reviewed_blocked_remains_disposable (test_sub_dispose_after_collect.CoreReviewProofTests.test_genuinely_reviewed_blocked_remains_disposable) ... ok
+test_latest_review_failure_wins (test_sub_dispose_after_collect.CoreReviewProofTests.test_latest_review_failure_wins) ... FAIL
+test_nonactive_review_checkpoint_is_not_a_recording_route (test_sub_dispose_after_collect.CoreReviewProofTests.test_nonactive_review_checkpoint_is_not_a_recording_route) ... ok
+test_postcondition_checks_exact_package_not_any_reviewed (test_sub_dispose_after_collect.CoreReviewProofTests.test_postcondition_checks_exact_package_not_any_reviewed) ... FAIL
+test_postcondition_requires_owned_outbox_target (test_sub_dispose_after_collect.CoreReviewProofTests.test_postcondition_requires_owned_outbox_target) ... FAIL
+test_proof_is_ticket_and_full_generation_bound (test_sub_dispose_after_collect.CoreReviewProofTests.test_proof_is_ticket_and_full_generation_bound) ... FAIL
+test_review_does_not_make_reopened_ticket_terminal (test_sub_dispose_after_collect.CoreReviewProofTests.test_review_does_not_make_reopened_ticket_terminal) ... ok
+test_review_prose_needs_its_own_committed_payload (test_sub_dispose_after_collect.CoreReviewProofTests.test_review_prose_needs_its_own_committed_payload) ... FAIL
+test_uncommitted_attested_and_tampered_proof_refuse (test_sub_dispose_after_collect.CoreReviewProofTests.test_uncommitted_attested_and_tampered_proof_refuse) ... FAIL
+test_uncommitted_execution_citation_and_new_verify_refuse (test_sub_dispose_after_collect.CoreReviewProofTests.test_uncommitted_execution_citation_and_new_verify_refuse) ... FAIL
+test_dispose_reaches_the_collected_package (test_sub_dispose_after_collect.DisposeReachesCollectedPackageTests.test_dispose_reaches_the_collected_package) ... ok
+
+======================================================================
+FAIL: test_ambiguous_or_partial_collect_linkage_refuses (test_sub_dispose_after_collect.CoreReviewProofTests.test_ambiguous_or_partial_collect_linkage_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 305, in test_ambiguous_or_partial_collect_linkage_refuses
+    self.assertFalse(self._dispose().ok)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_blocked_only_dispose_refuses_without_writes (test_sub_dispose_after_collect.CoreReviewProofTests.test_blocked_only_dispose_refuses_without_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 252, in test_blocked_only_dispose_refuses_without_writes
+    self.assertFalse(result.ok, result.to_dict())
+AssertionError: True is not false : {'ok': True, 'code': 'SUB_DISPOSITION_PLAN', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'name': 'saiui', 'package': 'UI-001', 'package_identity': 'sha256:039dd108848704b0dfdda1d5331055964405b7f31132228a9997b9d77cc3723c', 'ticket': 'T-7', 'dry_run': True, 'would_result': 'SUB_DISPOSITIONED', 'would_write': ['.saipen/LOG.md', '.saipen/STATE.md', '.saipen/extensions/subs/saiui/kitchen/OUTBOX.md']}
+
+======================================================================
+FAIL: test_blocked_only_never_schedules_disposition (test_sub_dispose_after_collect.CoreReviewProofTests.test_blocked_only_never_schedules_disposition)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 244, in test_blocked_only_never_schedules_disposition
+    self.assertFalse(self._health()["disposition_pending"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_blocked_only_reviewed_claim_is_invalid (test_sub_dispose_after_collect.CoreReviewProofTests.test_blocked_only_reviewed_claim_is_invalid)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 247, in test_blocked_only_reviewed_claim_is_invalid
+    self.assertTrue(self._health("reviewed")["reviewed_without_disposition"])
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_collect_generation_event_cannot_be_rebound_by_prose (test_sub_dispose_after_collect.CoreReviewProofTests.test_collect_generation_event_cannot_be_rebound_by_prose)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 356, in test_collect_generation_event_cannot_be_rebound_by_prose
+    self.assertFalse(self._dispose().ok)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_digest_bound_record_still_requires_executed_native_shape (test_sub_dispose_after_collect.CoreReviewProofTests.test_digest_bound_record_still_requires_executed_native_shape)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 337, in test_digest_bound_record_still_requires_executed_native_shape
+    self.assertFalse(self._dispose().ok)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='package_identity')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 332, in test_exact_reviewed_postcondition_and_metadata_controls
+    self.assertTrue(self._postcondition(metadata))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='producer')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 332, in test_exact_reviewed_postcondition_and_metadata_controls
+    self.assertTrue(self._postcondition(metadata))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='package')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 332, in test_exact_reviewed_postcondition_and_metadata_controls
+    self.assertTrue(self._postcondition(metadata))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='source_head')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 332, in test_exact_reviewed_postcondition_and_metadata_controls
+    self.assertTrue(self._postcondition(metadata))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='source_tree_fingerprint')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 332, in test_exact_reviewed_postcondition_and_metadata_controls
+    self.assertTrue(self._postcondition(metadata))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='role_revision')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 332, in test_exact_reviewed_postcondition_and_metadata_controls
+    self.assertTrue(self._postcondition(metadata))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='collect_op')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 332, in test_exact_reviewed_postcondition_and_metadata_controls
+    self.assertTrue(self._postcondition(metadata))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='review_event')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 332, in test_exact_reviewed_postcondition_and_metadata_controls
+    self.assertTrue(self._postcondition(metadata))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_exact_reviewed_postcondition_and_metadata_controls (test_sub_dispose_after_collect.CoreReviewProofTests.test_exact_reviewed_postcondition_and_metadata_controls) (field='ticket_id')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 332, in test_exact_reviewed_postcondition_and_metadata_controls
+    self.assertTrue(self._postcondition(metadata))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_latest_review_failure_wins (test_sub_dispose_after_collect.CoreReviewProofTests.test_latest_review_failure_wins)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 291, in test_latest_review_failure_wins
+    self.assertFalse(self._dispose().ok)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_postcondition_checks_exact_package_not_any_reviewed (test_sub_dispose_after_collect.CoreReviewProofTests.test_postcondition_checks_exact_package_not_any_reviewed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 321, in test_postcondition_checks_exact_package_not_any_reviewed
+    self.assertTrue(self._postcondition(), "unrelated reviewed package satisfied exact disposition")
+AssertionError: [] is not true : unrelated reviewed package satisfied exact disposition
+
+======================================================================
+FAIL: test_postcondition_requires_owned_outbox_target (test_sub_dispose_after_collect.CoreReviewProofTests.test_postcondition_requires_owned_outbox_target)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 362, in test_postcondition_requires_owned_outbox_target
+    self.assertTrue(errors)
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_proof_is_ticket_and_full_generation_bound (test_sub_dispose_after_collect.CoreReviewProofTests.test_proof_is_ticket_and_full_generation_bound)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 268, in test_proof_is_ticket_and_full_generation_bound
+    self.assertFalse(self._dispose().ok)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_review_prose_needs_its_own_committed_payload (test_sub_dispose_after_collect.CoreReviewProofTests.test_review_prose_needs_its_own_committed_payload)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 342, in test_review_prose_needs_its_own_committed_payload
+    self.assertFalse(self._dispose().ok)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_uncommitted_attested_and_tampered_proof_refuse (test_sub_dispose_after_collect.CoreReviewProofTests.test_uncommitted_attested_and_tampered_proof_refuse)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 281, in test_uncommitted_attested_and_tampered_proof_refuse
+    self.assertFalse(self._dispose().ok)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_uncommitted_execution_citation_and_new_verify_refuse (test_sub_dispose_after_collect.CoreReviewProofTests.test_uncommitted_execution_citation_and_new_verify_refuse)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools\test_sub_dispose_after_collect.py", line 347, in test_uncommitted_execution_citation_and_new_verify_refuse
+    self.assertFalse(self._dispose().ok)
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 19 tests in 111.510s
+
+FAILED (failures=22)

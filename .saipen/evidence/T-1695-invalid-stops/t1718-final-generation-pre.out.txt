@@ -1,0 +1,57 @@
+test_active_work_outranks_invalid_data (test_automation_block.InvalidDataStops.test_active_work_outranks_invalid_data) ... ok
+test_independent_workable_ticket_outranks_invalid_audit (test_automation_block.InvalidDataStops.test_independent_workable_ticket_outranks_invalid_audit) ... ok
+test_invalid_audit_has_a_visible_diagnostic_without_cc (test_automation_block.InvalidDataStops.test_invalid_audit_has_a_visible_diagnostic_without_cc) ... FAIL
+test_invalid_audit_is_not_a_continuation (test_automation_block.InvalidDataStops.test_invalid_audit_is_not_a_continuation) ... FAIL
+test_invalid_queue_cannot_be_completed_by_clean_closure_evidence (test_automation_block.InvalidDataStops.test_invalid_queue_cannot_be_completed_by_clean_closure_evidence) ... FAIL
+test_invalid_queue_has_a_visible_diagnostic_without_cc (test_automation_block.InvalidDataStops.test_invalid_queue_has_a_visible_diagnostic_without_cc) ... FAIL
+
+======================================================================
+FAIL: test_invalid_audit_has_a_visible_diagnostic_without_cc (test_automation_block.InvalidDataStops.test_invalid_audit_has_a_visible_diagnostic_without_cc)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 414, in test_invalid_audit_has_a_visible_diagnostic_without_cc
+    self.assert_invalid_facts(routed, status, "AUDIT_INBOX_INVALID")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 405, in assert_invalid_facts
+    self.assertTrue(facts["blocker"].startswith(code + " -- "), facts)
+AssertionError: False is not true : {'phase': 'DONE', 'task': 'none', 'next_action': 'saipen continue', 'blocker': 'none', 'transition_from': 'SHIP', 'saipen_version': 7, 'schema_version': 3, 'last_event': 1, 'style_contract': 'ded-069a4c52', 'agent': 'probe', 'mode': 'full', 'updated': '2026-08-08T00:00:00Z', 'validation': 'CURRENT_PASS', 'completed': [], 'automation': {'schema_version': 1, 'disposition': 'CONTINUE', 'next_command': 'cc', 'operator_action_due': False, 'reason_code': 'audit-inbox-invalid', 'reason': 'audit inbox holds only invalid layer(s); it is not idle', 'audit_quiescent': False, 'audit_epoch': 'audit-epoch-v1:ab993674f1b0687a42f4f1e2b8a593ecdd62f47490d43fbe8cc9b2be90c3d643', 'convergence_current': True, 'closure_complete': False, 'source_fingerprint': '0000000000000000000000000000000000000000+git-delta-v1:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'completed_at': None}, 'operator_due': False, 'blockers': [], 'evidence': [], 'suite_groups': [], 'detail_refs': [], 'test_groups': [], 'response_reason': 'final'}
+
+======================================================================
+FAIL: test_invalid_audit_is_not_a_continuation (test_automation_block.InvalidDataStops.test_invalid_audit_is_not_a_continuation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 385, in test_invalid_audit_is_not_a_continuation
+    self.assert_invalid_stop(routed, status)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 375, in assert_invalid_stop
+    self.assertEqual(block["disposition"], automation.INVALID)
+AssertionError: 'CONTINUE' != 'INVALID'
+- CONTINUE
++ INVALID
+
+
+======================================================================
+FAIL: test_invalid_queue_cannot_be_completed_by_clean_closure_evidence (test_automation_block.InvalidDataStops.test_invalid_queue_cannot_be_completed_by_clean_closure_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 397, in test_invalid_queue_cannot_be_completed_by_clean_closure_evidence
+    self.assert_invalid_stop(routed, status)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 375, in assert_invalid_stop
+    self.assertEqual(block["disposition"], automation.INVALID)
+AssertionError: 'COMPLETE' != 'INVALID'
+- COMPLETE
++ INVALID
+
+
+======================================================================
+FAIL: test_invalid_queue_has_a_visible_diagnostic_without_cc (test_automation_block.InvalidDataStops.test_invalid_queue_has_a_visible_diagnostic_without_cc)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 417, in test_invalid_queue_has_a_visible_diagnostic_without_cc
+    self.assert_invalid_facts(self.invalid_queue(), self.audit(), "QUEUED_SOURCE_INVALID")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_automation_block.py", line 405, in assert_invalid_facts
+    self.assertTrue(facts["blocker"].startswith(code + " -- "), facts)
+AssertionError: False is not true : {'phase': 'DONE', 'task': 'none', 'next_action': 'saipen continue', 'blocker': 'none', 'transition_from': 'SHIP', 'saipen_version': 7, 'schema_version': 3, 'last_event': 1, 'style_contract': 'ded-069a4c52', 'agent': 'probe', 'mode': 'full', 'updated': '2026-08-08T00:00:00Z', 'validation': 'CURRENT_PASS', 'completed': [], 'automation': {'schema_version': 1, 'disposition': 'COMPLETE', 'next_command': None, 'operator_action_due': False, 'reason_code': 'closure-complete', 'reason': 'all eight closure conditions mechanically true; convergence bound to source 0000000000000000000000000000000000000000+git-delta-v1:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa and audit epoch audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'audit_quiescent': True, 'audit_epoch': 'audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40', 'convergence_current': True, 'closure_complete': True, 'source_fingerprint': '0000000000000000000000000000000000000000+git-delta-v1:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'completed_at': '2026-09-06T12:00:00Z'}, 'operator_due': False, 'blockers': [], 'evidence': [], 'suite_groups': [], 'detail_refs': [], 'test_groups': [], 'response_reason': 'final'}
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.068s
+
+FAILED (failures=4)

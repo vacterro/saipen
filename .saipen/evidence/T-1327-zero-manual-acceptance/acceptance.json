@@ -1,0 +1,170 @@
+{
+  "prelaunch": {
+    "ok": true,
+    "code": "RUNTIME_RESYNCED",
+    "generation": "T-1327-runtime-prelaunch-20260914.1",
+    "adapter": "opencode",
+    "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "surface": "V:\\_TEMP_\\saipen-t1327-live-v048yxwx\\home\\.config\\opencode\\skills\\saipen",
+    "stale_before": true,
+    "resynced": true,
+    "requires_host_restart": true,
+    "canonical_fingerprint": "f27f03258a1d07a603959da9024e2ee44e4dedbc628b3adc5a161cf9fd850f4b",
+    "installed_fingerprint": "f27f03258a1d07a603959da9024e2ee44e4dedbc628b3adc5a161cf9fd850f4b",
+    "fingerprint_match": true,
+    "marker_fingerprint": "2b9469b3e01f7bdf0dbe3411e496d66a7f01ac9040ac0f49535f9685982de504",
+    "engine_diff": [],
+    "hook_problems": [],
+    "launcher_problems": [],
+    "provenance_problems": [],
+    "detail": "installed runtime resynced to the canonical generation and verified (engine, guard hook, launcher surface, provenance marker)",
+    "installer_rc": 0
+  },
+  "prelaunch_rc": 0,
+  "prelaunch_ms": 1922,
+  "classification_before": "BOUND_RECOVERY_REQUIRED_SAFE",
+  "reason_before": "BOARD_RECORD_OVERSIZE",
+  "named_repair": "saipen ticket compact T-158",
+  "classification_after": "BOUND_VALID",
+  "session": {
+    "model": "opencode/ling-3.0-flash-fin-free",
+    "attempts": [
+      {
+        "model": "opencode/ling-3.0-flash-fin-free",
+        "returncode": 0,
+        "tool_events": [
+          {
+            "tool": "read",
+            "status": "completed",
+            "input": {
+              "filePath": "V:\\_TEMP_\\tmp8oyg0xoh\\src"
+            },
+            "output": "<path>V:\\_TEMP_\\tmp8oyg0xoh\\src</path>\n<type>directory</type>\n<entries>\napp.py\n\n(1 entries)\n</entries>",
+            "error": "",
+            "start_ms": 1789417894936
+          },
+          {
+            "tool": "read",
+            "status": "completed",
+            "input": {
+              "filePath": "V:\\_TEMP_\\tmp8oyg0xoh\\.saipen\\STATE.md"
+            },
+            "output": "<path>V:\\_TEMP_\\tmp8oyg0xoh\\.saipen\\STATE.md</path>\n<type>file</type>\n<content>\n1: ---\n2: phase: BUILD\n3: task: T-158\n4: next_action: \"PHASE BUILD T-158\"\n5: blocker: \"\"\n6: transition_from: SHIP\n7: saipen_version: 7\n8: schema_version: 3\n9: last_event: 100\n10: style_contract: ded-4ae736e4\n11: mode: full\n12: updated: 2026-09-12T00:00:00Z\n13: agent: test-agent\n14: ---\n\n(End of file - total 14 lines)\n</content>",
+            "error": "",
+            "start_ms": 1789417894959
+          },
+          {
+            "tool": "write",
+            "status": "error",
+            "input": {
+              "filePath": "V:\\_TEMP_\\tmp8oyg0xoh\\src\\agent_note.txt",
+              "content": "ok"
+            },
+            "output": "",
+            "error": "SAIPEN_FLEET_REFUSAL: RECOVERED_REISSUE_REQUIRED: the host tool did not execute. Reread current canonical STATE/BOARD/LOG, reroute once, then issue a fresh consequential action against current project bytes.",
+            "start_ms": 1789417896735
+          },
+          {
+            "tool": "read",
+            "status": "completed",
+            "input": {
+              "filePath": "V:\\_TEMP_\\tmp8oyg0xoh\\.saipen\\STATE.md"
+            },
+            "output": "<path>V:\\_TEMP_\\tmp8oyg0xoh\\.saipen\\STATE.md</path>\n<type>file</type>\n<content>\n1: ---\n2: phase: BUILD\n3: task: T-158\n4: next_action: \"PHASE BUILD T-158\"\n5: blocker: \"\"\n6: transition_from: SHIP\n7: saipen_version: 7\n8: schema_version: 3\n9: last_event: 101\n10: style_contract: ded-4ae736e4\n11: mode: full\n12: updated: \"2026-09-14T20:31:37Z\"\n13: agent: test-agent\n14: ---\n\n(End of file - total 14 lines)\n</content>",
+            "error": "",
+            "start_ms": 1789417900482
+          },
+          {
+            "tool": "read",
+            "status": "completed",
+            "input": {
+              "filePath": "V:\\_TEMP_\\tmp8oyg0xoh\\.saipen\\BOARD.md"
+            },
+            "output": "<path>V:\\_TEMP_\\tmp8oyg0xoh\\.saipen\\BOARD.md</path>\n<type>file</type>\n<content>\n1: ## DOING\n2: - [/] T-158 [P1] legacy evidence legacy evidence legacy evidence legacy evidence legacy evidence legacy evidence legacy evidence legacy evidence legacy evidence legacy evidence legacy... | verify: proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof... [detail_ref: .saipen/recovery/board-compaction/T-158/T-158-6d2b3c25ddeee373ba8e98e2.json] | owner: test-agent | claim_time: 2026-09-14T08:00:00Z | detail_ref: .saipen/recovery/board-compaction/T-158/T-158-6d2b3c25ddeee373ba8e98e2.json\n3: ## TODO\n4: ## DONE\n5: ## BLOCKED\n\n(End of file - total 5 lines)\n</content>",
+            "error": "",
+            "start_ms": 1789417900699
+          },
+          {
+            "tool": "write",
+            "status": "completed",
+            "input": {
+              "filePath": "V:\\_TEMP_\\tmp8oyg0xoh\\src\\agent_note.txt",
+              "content": "ok"
+            },
+            "output": "Wrote file successfully.",
+            "error": "",
+            "start_ms": 1789417902353
+          }
+        ],
+        "stderr_tail": ""
+      }
+    ],
+    "tool_events": [
+      {
+        "tool": "read",
+        "status": "completed",
+        "input": {
+          "filePath": "V:\\_TEMP_\\tmp8oyg0xoh\\src"
+        },
+        "output": "<path>V:\\_TEMP_\\tmp8oyg0xoh\\src</path>\n<type>directory</type>\n<entries>\napp.py\n\n(1 entries)\n</entries>",
+        "error": "",
+        "start_ms": 1789417894936
+      },
+      {
+        "tool": "read",
+        "status": "completed",
+        "input": {
+          "filePath": "V:\\_TEMP_\\tmp8oyg0xoh\\.saipen\\STATE.md"
+        },
+        "output": "<path>V:\\_TEMP_\\tmp8oyg0xoh\\.saipen\\STATE.md</path>\n<type>file</type>\n<content>\n1: ---\n2: phase: BUILD\n3: task: T-158\n4: next_action: \"PHASE BUILD T-158\"\n5: blocker: \"\"\n6: transition_from: SHIP\n7: saipen_version: 7\n8: schema_version: 3\n9: last_event: 100\n10: style_contract: ded-4ae736e4\n11: mode: full\n12: updated: 2026-09-12T00:00:00Z\n13: agent: test-agent\n14: ---\n\n(End of file - total 14 lines)\n</content>",
+        "error": "",
+        "start_ms": 1789417894959
+      },
+      {
+        "tool": "write",
+        "status": "error",
+        "input": {
+          "filePath": "V:\\_TEMP_\\tmp8oyg0xoh\\src\\agent_note.txt",
+          "content": "ok"
+        },
+        "output": "",
+        "error": "SAIPEN_FLEET_REFUSAL: RECOVERED_REISSUE_REQUIRED: the host tool did not execute. Reread current canonical STATE/BOARD/LOG, reroute once, then issue a fresh consequential action against current project bytes.",
+        "start_ms": 1789417896735
+      },
+      {
+        "tool": "read",
+        "status": "completed",
+        "input": {
+          "filePath": "V:\\_TEMP_\\tmp8oyg0xoh\\.saipen\\STATE.md"
+        },
+        "output": "<path>V:\\_TEMP_\\tmp8oyg0xoh\\.saipen\\STATE.md</path>\n<type>file</type>\n<content>\n1: ---\n2: phase: BUILD\n3: task: T-158\n4: next_action: \"PHASE BUILD T-158\"\n5: blocker: \"\"\n6: transition_from: SHIP\n7: saipen_version: 7\n8: schema_version: 3\n9: last_event: 101\n10: style_contract: ded-4ae736e4\n11: mode: full\n12: updated: \"2026-09-14T20:31:37Z\"\n13: agent: test-agent\n14: ---\n\n(End of file - total 14 lines)\n</content>",
+        "error": "",
+        "start_ms": 1789417900482
+      },
+      {
+        "tool": "read",
+        "status": "completed",
+        "input": {
+          "filePath": "V:\\_TEMP_\\tmp8oyg0xoh\\.saipen\\BOARD.md"
+        },
+        "output": "<path>V:\\_TEMP_\\tmp8oyg0xoh\\.saipen\\BOARD.md</path>\n<type>file</type>\n<content>\n1: ## DOING\n2: - [/] T-158 [P1] legacy evidence legacy evidence legacy evidence legacy evidence legacy evidence legacy evidence legacy evidence legacy evidence legacy evidence legacy evidence legacy... | verify: proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof proof... [detail_ref: .saipen/recovery/board-compaction/T-158/T-158-6d2b3c25ddeee373ba8e98e2.json] | owner: test-agent | claim_time: 2026-09-14T08:00:00Z | detail_ref: .saipen/recovery/board-compaction/T-158/T-158-6d2b3c25ddeee373ba8e98e2.json\n3: ## TODO\n4: ## DONE\n5: ## BLOCKED\n\n(End of file - total 5 lines)\n</content>",
+        "error": "",
+        "start_ms": 1789417900699
+      },
+      {
+        "tool": "write",
+        "status": "completed",
+        "input": {
+          "filePath": "V:\\_TEMP_\\tmp8oyg0xoh\\src\\agent_note.txt",
+          "content": "ok"
+        },
+        "output": "Wrote file successfully.",
+        "error": "",
+        "start_ms": 1789417902353
+      }
+    ]
+  },
+  "proof": {
+    "prelaunch_code": "RUNTIME_RESYNCED"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "observed_at": "2026-10-10T01:20:31.961739+00:00",
+  "registry": "codebase-memory list_projects: audapack, single normalized root",
+  "target": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "files": {
+    ".saipen/STATE.md": {
+      "sha256": "a766ca86d185ea24d4b1818f4295ef839826bcc913347047abcecf8dfcf5cc50",
+      "size": 341,
+      "observed_mtime_ns": 1791521367816381300
+    },
+    ".saipen/BOARD.md": {
+      "sha256": "8bb2a5e68d474ee2ab22b834e6a94440d5389ea352d2969f5ad945cd04ca9952",
+      "size": 145914,
+      "observed_mtime_ns": 1791540413592802400
+    },
+    ".saipen/LOG.md": {
+      "sha256": "e414d4b54a3e99d9fa515945bf9d8be208581292889b3744edcb11466b0f7c7a",
+      "size": 231363,
+      "observed_mtime_ns": 1791540400560430500
+    },
+    ".saipen/MANIFEST.json": {
+      "sha256": "6bbb6ca8bed1502f04176d848f24ad12fdd58759e1946f0b2b27a5f023e0e050",
+      "size": 3666,
+      "observed_mtime_ns": 1791400048068570600
+    },
+    ".saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md": {
+      "sha256": "4a2c9ca6b08eb9fd6e5d50a761c4fe26578fccae376f843db1588846e6b8cff0",
+      "size": 5807,
+      "observed_mtime_ns": 1791540345506312700
+    },
+    ".saipen/IDENTITY.md": {
+      "sha256": "3ac7e214c409fd5ab32a76171cee7febb38393f00c6cc321c6de33469e28e5c0",
+      "size": 66,
+      "observed_mtime_ns": 1787708414443681100
+    },
+    "AGENTS.md": {
+      "sha256": "c2d3c0585977651881a17e49695beccde8175b57328848a825c8cd3b4d523d44",
+      "size": 386,
+      "observed_mtime_ns": 1788044108657738900
+    }
+  },
+  "git": [
+    {
+      "command": "git rev-parse --show-toplevel",
+      "exit_code": 0,
+      "output": "git-0.txt",
+      "sha256": "c742bf6a85dd7899f0cafb1a67a795ef73b6e9692cc73d232a15883851254c21"
+    },
+    {
+      "command": "git rev-parse HEAD",
+      "exit_code": 0,
+      "output": "git-1.txt",
+      "sha256": "c56b4cfa1368c502bda88f185d5c5e482123e64b61a71a8245c1143bb602c994"
+    },
+    {
+      "command": "git status --porcelain=v1 -uall",
+      "exit_code": 0,
+      "output": "git-2.txt",
+      "sha256": "f1582a451085690e24a8f895658d3ce8f2bf0882da61940df32835c44f45e279"
+    },
+    {
+      "command": "git diff --binary",
+      "exit_code": 0,
+      "output": "git-3.txt",
+      "sha256": "f0cd0e4b1a69c3627e2074a688e8a85c8368d7ffad14a6d8eff8d897b18cfffe"
+    },
+    {
+      "command": "git diff --cached --binary",
+      "exit_code": 0,
+      "output": "git-4.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "git log -6 --format=%H%x20%aI%x20%s",
+      "exit_code": 0,
+      "output": "git-5.txt",
+      "sha256": "09bc5b82cffc01098037cb02e166dfa93280596ffda09a62919a3c0250ba613e"
+    }
+  ],
+  "target_mutations": [],
+  "copies_byte_identical": true
+}

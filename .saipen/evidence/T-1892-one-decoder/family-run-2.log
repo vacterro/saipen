@@ -1,0 +1,41 @@
+FF..F...........................................................................F..............................................................................................ssss.
+======================================================================
+FAIL: test_a_no_publish_ship_closes_under_an_id_the_ledger_resolves (test_t1681_release_closure_op.ReleaseClosureOpTests.test_a_no_publish_ship_closes_under_an_id_the_ledger_resolves)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1681_release_closure_op.py", line 84, in test_a_no_publish_ship_closes_under_an_id_the_ledger_resolves
+    self.assert_closure_stands_on_a_record(plan)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1681_release_closure_op.py", line 58, in assert_closure_stands_on_a_record
+    self.assertIn(closure_id, journal.resolvable_op_ids(self.root))
+AssertionError: 'finish-9e338bdd1fb94c419fd74b18ce171020' not found in {'source.requirement_add-af1d5f747be74f598189a2a0a27a3f2a', 'transition-a06a52e0281b4fc88d6cbe1c0ba6037b', 'transition-afc33da12217411b9af6ebaa134dd3ee', 'source.requirement_add-09a1073592974f14a6255c4c6fe90057', 'release-8853f1386726408f9afcc4d925dfa230', 'transition-a42dcc2adfb74e38bf9752ed1b80f30c', 'checkpoint-00edc001879748ceb0c1eefeef42443c', 'op-migrate-lineage', 'transition-bdc1f685b5ab4b96af1af7901475ff81', 'debt.snapshot-57ff8fcd0b3c'}
+
+======================================================================
+FAIL: test_a_recovered_ship_closes_under_an_id_the_ledger_resolves (test_t1681_release_closure_op.ReleaseClosureOpTests.test_a_recovered_ship_closes_under_an_id_the_ledger_resolves)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1681_release_closure_op.py", line 109, in test_a_recovered_ship_closes_under_an_id_the_ledger_resolves
+    self.assert_closure_stands_on_a_record(plan)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1681_release_closure_op.py", line 58, in assert_closure_stands_on_a_record
+    self.assertIn(closure_id, journal.resolvable_op_ids(self.root))
+AssertionError: 'finish-5569a744ab7145e88afc866ce8cad93d' not found in {'release-9b954a5e6f684184afaf15f60a44e28e', 'debt.snapshot-0f7596d0360c', 'transition-a17cee42139441a7abbe60b2b8a7ecd0', 'transition-87c5f510926b41449dbc135759d14368', 'source.requirement_add-ef29ca7f7e38487cb0830b3c836b2161', 'checkpoint-eb816a973bec4683b6ba5d99922f768f', 'transition-60bf2c2b1c22499ab11eaaa4edafe8ef', 'transition-2c44f168fee0443db982a27baac49d2a', 'source.requirement_add-29cff2781d034fcb8a8facafdb3b9397', 'op-migrate-lineage'}
+
+======================================================================
+FAIL: test_the_full_publish_closure_records_the_same_id (test_t1681_release_closure_op.ReleaseClosureOpTests.test_the_full_publish_closure_records_the_same_id)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1681_release_closure_op.py", line 121, in test_the_full_publish_closure_records_the_same_id
+    self.assertTrue(str(closure_id).startswith("finish-"), record.keys())
+AssertionError: False is not true : dict_keys(['op_id', 'operation', 'created_at', 'agent', 'project_identity', 'project_lineage', 'semantic_payload_hash', 'preconditions', 'read_preconditions', 'verification_policy', 'status', 'progress_index', 'targets'])
+
+======================================================================
+FAIL: test_release_executor_refuses_before_external_validator (test_t1828_verification_policy.PublicationWiringTests.test_release_executor_refuses_before_external_validator)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1828_verification_policy.py", line 201, in test_release_executor_refuses_before_external_validator
+    self.assertIn("full run missing", result["detail"])
+AssertionError: 'full run missing' not found in <MagicMock name='run().stdout.__add__().__getitem__().strip()' id='2202825371920'>
+
+----------------------------------------------------------------------
+Ran 180 tests in 113.942s
+
+FAILED (failures=4, skipped=4)

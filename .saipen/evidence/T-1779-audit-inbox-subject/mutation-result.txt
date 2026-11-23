@@ -1,0 +1,6 @@
+control: ran 4, red 0 -- as expected
+the family before this Work: ran 4, red 2 -- as expected
+the copy still takes the inbox: ran 4, red 1 -- as expected
+the fingerprint still takes the inbox: ran 4, red 2 -- as expected
+every level drops audit: ran 4, red 1 -- as expected
+mutations: 4, repetitions each: 3, problems: 0

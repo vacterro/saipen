@@ -1,0 +1,19 @@
+{
+  "saipen/COMMANDS.md": {
+    "sha256": "29631c5042a290c025c7958605851ffe1cfae3f612e3aeef14704eba26788622",
+    "lf_bytes": 23928,
+    "backup": ".saipen/evidence/T-1842-context-budget/prefix/COMMANDS.md"
+  },
+  "saipen/phases/verify.md": {
+    "sha256": "4d2be7f8accf1e91960e5e0f02134ed5f14bf7d0826d4fff89a760f4e71ed66a",
+    "lf_bytes": 10962,
+    "backup": ".saipen/evidence/T-1842-context-budget/prefix/verify.md"
+  },
+  "saipen/phases/ship.md": {
+    "sha256": "ec599340a113369836ecad0a5bfd0b64ad81c7e4b66e5e13af11554d183d74da",
+    "lf_bytes": 9342,
+    "backup": ".saipen/evidence/T-1842-context-budget/prefix/ship.md"
+  },
+  "registry_sha256": "0e33e2f37ec47cf45bce96a069e578a4ef7abb533e35fbd773a97eadf496db7a",
+  "staged_entries_sha256": "ba8d806d2a34bae7b3f08bf49ffbb9ed6d5fbfbaa8e0e7015d8bf5eb03aae1fe"
+}

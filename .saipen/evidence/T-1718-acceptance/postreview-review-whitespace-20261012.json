@@ -1,0 +1,27 @@
+{
+  "label": "postreview-review-whitespace-20261012",
+  "phase": "REVIEW",
+  "command": [
+    "git",
+    "diff",
+    "--check",
+    "--",
+    "tools/saipen_engine/acceptance_contract.py",
+    "tools/saipen_engine/acceptance.py",
+    "tools/saipen_engine/operations.py",
+    "tools/saipen.py",
+    "tools/test_t1718_acceptance_contract.py",
+    "saipen/OPS.md",
+    "saipen/phases/verify.md"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 0.203,
+  "fingerprint": "f07ab6d183ddcf28ac4990b50dd4ec0cde675bf3a66e716c07d941d1e0d5e9f1",
+  "stdout": "",
+  "stderr": "warning: in the working copy of 'tools/saipen_engine/acceptance.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'tools/saipen_engine/acceptance_contract.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'tools/test_t1718_acceptance_contract.py', LF will be replaced by CRLF the next time Git touches it\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "b4bee732b595920cddaa6f955ee62ec2728c096aa4ad3e80697d80585338fcac",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

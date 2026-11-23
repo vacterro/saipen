@@ -1,0 +1,15 @@
+{
+  "controller": "Start-Process Hidden",
+  "pid": 572,
+  "born_utc": "2026-10-23T06:06:41.1084348Z",
+  "project": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "tools/core_unit.py",
+    "evidence",
+    "T-1857"
+  ],
+  "stdout": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1857-compression\\full-family3.stdout.log",
+  "stderr": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1857-compression\\full-family3.stderr.log"
+}

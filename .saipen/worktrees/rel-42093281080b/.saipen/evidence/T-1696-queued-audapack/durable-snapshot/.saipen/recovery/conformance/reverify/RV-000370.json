@@ -1,0 +1,49 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-10-04T18:56:30Z",
+  "evidence_class": "executed",
+  "findings_digest": "63fa228cfe9ea52c8a30951cf45ee41948d7dfd7a66b499baae87b7ff7129cf3",
+  "gate": "core",
+  "integrity_digest": "b16a2ee3d5b81606",
+  "journal_op_id": "reverify.ca7423208711",
+  "original_closure": {
+    "claim_time": "2026-09-28T15:39:23Z",
+    "closure_mode": "own_patch",
+    "last_ticket_event": "E-2445",
+    "owner": "buffy",
+    "source_receipts": "SRC-097"
+  },
+  "own_problem_keys": [
+    "7baa643aa4e323e5",
+    "e64df8af8238f921"
+  ],
+  "problem_count": 70,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000370",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:6d55e001bbc6c22c069dfbbbdee0204b27c4dffe7810f56507c7df2845aa23e5",
+  "verdict": "FAIL",
+  "verification": [
+    {
+      "command": "strict_gate:core",
+      "default_contract": true,
+      "executed": true,
+      "result": "FAIL"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "strict_gate:core"
+    ],
+    "findings_digest": "63fa228cfe9ea52c8a30951cf45ee41948d7dfd7a66b499baae87b7ff7129cf3",
+    "gate": "core"
+  },
+  "verification_contract_digest": "c8fe5ad87ab553f3",
+  "verifier": "buffy",
+  "warning_count": 96,
+  "work": "T-250"
+}

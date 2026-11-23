@@ -1,0 +1,9 @@
+{
+  "raw_output": "final-core.out.txt",
+  "raw_sha256": "3e843d53131d9c234f1fdb1f0f449a41cf1bcae702a57801742dafc6e82013da",
+  "raw_encoding": "utf-8",
+  "readable_copy": "final-core-readable.txt",
+  "exit_code": 0,
+  "warnings": 9,
+  "instrument_refusal_preserved": "final-core.json is the unsupported --json attempt, not a successful gate"
+}

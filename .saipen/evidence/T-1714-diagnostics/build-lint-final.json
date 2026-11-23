@@ -1,0 +1,22 @@
+{
+  "label": "build-lint-final",
+  "phase": "BUILD",
+  "command": [
+    "python",
+    "-m",
+    "ruff",
+    "check",
+    "tools/",
+    "tests/"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 1,
+  "duration_s": 0.218,
+  "fingerprint": "0480aec9400e266e8c3012aba0ea993f17514f18c76514b4cba3b6ea75faf32f",
+  "stdout": "E501 Line too long (101 > 100)\n   --> tools\\test_reconcile_history_ledger_blocked.py:322:101\n    |\n320 |         with mock.patch(\"saipen_engine.audit_manifest.ensure\", return_value=unavailable):\n321 |             self.assertEqual(\n322 |                 reconcile.reconcile_protocol_state(self.project, \"tester\", dry_run=True), unavailable\n    |                                                                                                     ^\n323 |             )\n324 |             self.assertIsNone(\n    |\n\nFound 1 error.\n",
+  "stderr": "",
+  "stdout_sha256": "2b309813eca32753d028a568a75fc6f0a78befe523f94bcd6b9a51f42402fcef",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

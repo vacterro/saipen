@@ -1,0 +1,63 @@
+test_a_inventory_cannot_replace_diagnosis (test_response_surface_contract.DiagnosisTests.test_a_inventory_cannot_replace_diagnosis) ... ok
+test_b_generic_handoff_cannot_replace_diagnosis (test_response_surface_contract.DiagnosisTests.test_b_generic_handoff_cannot_replace_diagnosis) ... ok
+test_c_rule_needs_owner_and_bound_evidence (test_response_surface_contract.DiagnosisTests.test_c_rule_needs_owner_and_bound_evidence) ... ok
+test_changed_quote_digest_path_and_request_are_rejected (test_response_surface_contract.DiagnosisTests.test_changed_quote_digest_path_and_request_are_rejected) ... ok
+test_correction_is_not_an_execution_receipt (test_response_surface_contract.DiagnosisTests.test_correction_is_not_an_execution_receipt) ... ok
+test_d_hidden_motive_is_not_observed_cause (test_response_surface_contract.DiagnosisTests.test_d_hidden_motive_is_not_observed_cause) ... ok
+test_deep_json_refuses_instead_of_crashing (test_response_surface_contract.DiagnosisTests.test_deep_json_refuses_instead_of_crashing) ... ok
+test_e_successful_recovery_cannot_be_invented (test_response_surface_contract.DiagnosisTests.test_e_successful_recovery_cannot_be_invented) ... ok
+test_f_freebuff_cannot_claim_mechanical_enforcement (test_response_surface_contract.DiagnosisTests.test_f_freebuff_cannot_claim_mechanical_enforcement) ... ok
+test_g_cited_diagnosis_with_bounded_uncertainty (test_response_surface_contract.DiagnosisTests.test_g_cited_diagnosis_with_bounded_uncertainty) ... ok
+test_h_truthful_refusal_is_not_misconduct (test_response_surface_contract.DiagnosisTests.test_h_truthful_refusal_is_not_misconduct) ... ok
+test_i_implementation_handoff_keeps_its_own_contract (test_response_surface_contract.DiagnosisTests.test_i_implementation_handoff_keeps_its_own_contract) ... ok
+test_j_compact_status_is_not_diagnosis (test_response_surface_contract.DiagnosisTests.test_j_compact_status_is_not_diagnosis) ... ok
+test_k_witnessed_detailed_artifact_is_still_allowed (test_response_surface_contract.DiagnosisTests.test_k_witnessed_detailed_artifact_is_still_allowed) ... ok
+test_l_unverified_host_is_reported_truthfully (test_response_surface_contract.DiagnosisTests.test_l_unverified_host_is_reported_truthfully) ... ok
+test_layered_gate_discloses_semantic_limit_and_preserves_admission (test_response_surface_contract.DiagnosisTests.test_layered_gate_discloses_semantic_limit_and_preserves_admission) ... ok
+test_malformed_values_refuse_instead_of_crashing (test_response_surface_contract.DiagnosisTests.test_malformed_values_refuse_instead_of_crashing) ... ok
+test_model_supplied_request_cannot_authorize_artifact (test_response_surface_contract.DiagnosisTests.test_model_supplied_request_cannot_authorize_artifact) ... ok
+test_no_caller_root_is_not_evidence (test_response_surface_contract.DiagnosisTests.test_no_caller_root_is_not_evidence) ... FAIL
+test_quoted_or_negated_request_never_grants_diagnosis (test_response_surface_contract.DiagnosisTests.test_quoted_or_negated_request_never_grants_diagnosis) ... ok
+test_request_classes_come_from_ingress (test_response_surface_contract.DiagnosisTests.test_request_classes_come_from_ingress) ... ok
+test_source_and_flattened_installs_use_the_same_owner (test_response_surface_contract.DiagnosisTests.test_source_and_flattened_installs_use_the_same_owner) ... ok
+test_unverified_diagnosis_never_falls_back_to_unchecked_chat (test_response_surface_contract.DiagnosisTests.test_unverified_diagnosis_never_falls_back_to_unchecked_chat) ... 
+  test_unverified_diagnosis_never_falls_back_to_unchecked_chat (test_response_surface_contract.DiagnosisTests.test_unverified_diagnosis_never_falls_back_to_unchecked_chat) (provenance={'witness': 'model_supplied'}) ... FAIL
+  test_unverified_diagnosis_never_falls_back_to_unchecked_chat (test_response_surface_contract.DiagnosisTests.test_unverified_diagnosis_never_falls_back_to_unchecked_chat) (provenance={'witness': 'operator_carrier', 'declared_by': 'SAIPEN_TASK_SHA256', 'compared_digest': 'ae94c9dd3fee8aa3a30e8a537f748ba78440ac68e5398776c251293e56bac8b8'}) ... FAIL
+
+======================================================================
+FAIL: test_no_caller_root_is_not_evidence (test_response_surface_contract.DiagnosisTests.test_no_caller_root_is_not_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_response_surface_contract.py", line 784, in test_no_caller_root_is_not_evidence
+    self.assertEqual(klass, RS.CLASS_INVALID_OPERATIONAL_PROSE)
+AssertionError: 'ORDINARY_CHAT' != 'INVALID_OPERATIONAL_PROSE'
+- ORDINARY_CHAT
++ INVALID_OPERATIONAL_PROSE
+
+
+======================================================================
+FAIL: test_unverified_diagnosis_never_falls_back_to_unchecked_chat (test_response_surface_contract.DiagnosisTests.test_unverified_diagnosis_never_falls_back_to_unchecked_chat) (provenance={'witness': 'model_supplied'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_response_surface_contract.py", line 813, in test_unverified_diagnosis_never_falls_back_to_unchecked_chat
+    self.assertEqual(klass, RS.CLASS_INVALID_OPERATIONAL_PROSE)
+AssertionError: 'ORDINARY_CHAT' != 'INVALID_OPERATIONAL_PROSE'
+- ORDINARY_CHAT
++ INVALID_OPERATIONAL_PROSE
+
+
+======================================================================
+FAIL: test_unverified_diagnosis_never_falls_back_to_unchecked_chat (test_response_surface_contract.DiagnosisTests.test_unverified_diagnosis_never_falls_back_to_unchecked_chat) (provenance={'witness': 'operator_carrier', 'declared_by': 'SAIPEN_TASK_SHA256', 'compared_digest': 'ae94c9dd3fee8aa3a30e8a537f748ba78440ac68e5398776c251293e56bac8b8'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_response_surface_contract.py", line 813, in test_unverified_diagnosis_never_falls_back_to_unchecked_chat
+    self.assertEqual(klass, RS.CLASS_INVALID_OPERATIONAL_PROSE)
+AssertionError: 'ORDINARY_CHAT' != 'INVALID_OPERATIONAL_PROSE'
+- ORDINARY_CHAT
++ INVALID_OPERATIONAL_PROSE
+
+
+----------------------------------------------------------------------
+Ran 23 tests in 0.327s
+
+FAILED (failures=3)

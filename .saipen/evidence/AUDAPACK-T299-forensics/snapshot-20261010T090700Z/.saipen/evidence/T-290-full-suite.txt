@@ -1,0 +1,127 @@
+........................................................................ [  2%]
+........................................................................ [  5%]
+........................................................................ [  7%]
+...................................................s.................... [ 10%]
+........................................................................ [ 12%]
+........................................................................ [ 15%]
+........................................................................ [ 17%]
+........................................................................ [ 20%]
+........................................................................ [ 22%]
+........................................................................ [ 25%]
+........................................................................ [ 27%]
+........................................................................ [ 30%]
+.............................ss.sssss................................... [ 32%]
+........................................................................ [ 35%]
+...............................s........................................ [ 38%]
+........................................................................ [ 40%]
+.....................................sss................................ [ 43%]
+........................................................................ [ 45%]
+........................................................................ [ 48%]
+.........................................F....F......................... [ 50%]
+............................................s........................... [ 53%]
+........................................................................ [ 55%]
+...........s...............................s............................ [ 58%]
+........................................................................ [ 60%]
+........................................................................ [ 63%]
+........................................................................ [ 65%]
+........................................................................ [ 68%]
+........................................................................ [ 70%]
+....................................................................s... [ 73%]
+........................................................................ [ 76%]
+..............................s......................................... [ 78%]
+........................................................................ [ 81%]
+........................................................................ [ 83%]
+........................................................................ [ 86%]
+........................................................................ [ 88%]
+........................................................................ [ 91%]
+........................................................................ [ 93%]
+........................................................................ [ 96%]
+........................................................................ [ 98%]
+.................................                                        [100%]
+================================== FAILURES ===================================
+_ TestVerifiedWindowlessOwnerIsRecoveredLive.test_one_launch_recovers_the_brick_and_opens_the_real_gui _
+
+self = <test_launcher_windowless_recovery.TestVerifiedWindowlessOwnerIsRecoveredLive testMethod=test_one_launch_recovers_the_brick_and_opens_the_real_gui>
+
+    @WIN32_ONLY
+    def test_one_launch_recovers_the_brick_and_opens_the_real_gui(self):
+>       owner = _spawn(self.NAME, _WINDOWLESS_OWNER)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_launcher_windowless_recovery.py:317: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_launcher_windowless_recovery.py:166: in _spawn
+    return _Child(script_template.format(root=str(ROOT), name=name, **extra), ready_token)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <test_launcher_windowless_recovery._Child object at 0x0000029C3E2C8050>
+script = '\nimport sys, time\nsys.path.insert(0, \'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK\')\nfrom audapack.single_i...OVERY\')\nif guard.is_already_running():\n    raise SystemExit(3)\nprint("OWNER_READY", flush=True)\ntime.sleep(300)\n'
+ready_token = 'OWNER_READY'
+
+    def __init__(self, script: str, ready_token: str = "OWNER_READY"):
+        self.proc = subprocess.Popen(
+            [sys.executable, "-c", script],
+            cwd=str(ROOT),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        ready = self.proc.stdout.readline().strip()
+        if not ready.startswith(ready_token):
+            err = self.proc.stderr.read()
+            self.stop()
+>           raise AssertionError(f"live owner never became ready: {ready!r} / {err}")
+E           AssertionError: live owner never became ready: '' /
+
+tests\test_launcher_windowless_recovery.py:144: AssertionError
+_ TestRecoveryIsSerialized.test_an_owner_that_dies_naturally_is_not_terminated _
+
+self = <test_launcher_windowless_recovery.TestRecoveryIsSerialized testMethod=test_an_owner_that_dies_naturally_is_not_terminated>
+
+    @WIN32_ONLY
+    def test_an_owner_that_dies_naturally_is_not_terminated(self):
+        """It exited between our probe and our recovery: take the abandoned
+        guard, do not fire TerminateProcess at a PID the OS may already reuse."""
+        name = "TEST_SI_T25_SERIAL_DEAD"
+>       owner = _spawn(name, _WINDOWLESS_OWNER)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_launcher_windowless_recovery.py:467: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_launcher_windowless_recovery.py:166: in _spawn
+    return _Child(script_template.format(root=str(ROOT), name=name, **extra), ready_token)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <test_launcher_windowless_recovery._Child object at 0x0000029C427E78D0>
+script = '\nimport sys, time\nsys.path.insert(0, \'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK\')\nfrom audapack.single_i..._DEAD\')\nif guard.is_already_running():\n    raise SystemExit(3)\nprint("OWNER_READY", flush=True)\ntime.sleep(300)\n'
+ready_token = 'OWNER_READY'
+
+    def __init__(self, script: str, ready_token: str = "OWNER_READY"):
+        self.proc = subprocess.Popen(
+            [sys.executable, "-c", script],
+            cwd=str(ROOT),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        ready = self.proc.stdout.readline().strip()
+        if not ready.startswith(ready_token):
+            err = self.proc.stderr.read()
+            self.stop()
+>           raise AssertionError(f"live owner never became ready: {ready!r} / {err}")
+E           AssertionError: live owner never became ready: '' /
+
+tests\test_launcher_windowless_recovery.py:144: AssertionError
+============================== warnings summary ===============================
+tests/test_context_menu.py::TestSeamlessProjectOperations::test_direct_add_move_and_delete_no_popups
+  V:\___VAC\__K\__CODE\_PY\_AUDAPACK\tests\test_context_menu.py:342: DeprecationWarning: Function: 'QMouseEvent.QMouseEvent(QEvent.Type type, const QPointF &localPos, Qt.MouseButton button, QFlags<Qt.MouseButton> buttons, QFlags<Qt.KeyboardModifier> modifiers, const QPointingDevice *device)' is marked as deprecated, please check the documentation for more information.
+    event = QMouseEvent(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_launcher_windowless_recovery.py::TestVerifiedWindowlessOwnerIsRecoveredLive::test_one_launch_recovers_the_brick_and_opens_the_real_gui
+FAILED tests/test_launcher_windowless_recovery.py::TestRecoveryIsSerialized::test_an_owner_that_dies_naturally_is_not_terminated
+2 failed, 2822 passed, 17 skipped, 1 warning in 767.26s (0:12:47)
+RC=1

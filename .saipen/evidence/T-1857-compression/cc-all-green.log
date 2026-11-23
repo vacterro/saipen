@@ -1,0 +1,10 @@
+test_all_modifier_cannot_supply_operator_authority (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_cannot_supply_operator_authority) ... ok
+test_all_modifier_resumes_the_existing_goal_with_real_origin (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_resumes_the_existing_goal_with_real_origin) ... ok
+test_automation_keeps_hard_wait_and_exposes_the_missing_input (test_t1858_valve_guidance.ValveGuidanceTests.test_automation_keeps_hard_wait_and_exposes_the_missing_input) ... ok
+test_bounded_reset_refusal_names_missing_native_ingress (test_t1858_valve_guidance.ValveGuidanceTests.test_bounded_reset_refusal_names_missing_native_ingress) ... ok
+test_native_resume_spellings_are_equivalent_without_weakening_hard_wait (test_t1858_valve_guidance.ValveGuidanceTests.test_native_resume_spellings_are_equivalent_without_weakening_hard_wait) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 3.828s
+
+OK

@@ -1,0 +1,126 @@
+[
+  {
+    "id": "T-1691",
+    "section": "## DOING",
+    "line_no": 2,
+    "checkbox": "/",
+    "needs": [],
+    "fields": {
+      "verify": "the requested change is present and demonstrated against the user own description of it",
+      "request_witness": "model_supplied",
+      "source_receipts": "SRC-196,SRC-197",
+      "owner": "saipen-cli",
+      "claim_time": "2026-10-08T23:58:06Z"
+    },
+    "raw": "- [/] T-1691 [P2] V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\audit\\\\SAIHANDOFF_AGENT_PROTOCOL_DRIFT_AUDIT.md - \u0432\u043e\u0442 \u044d\u0442\u043e \u0435\u0449\u0435 \u043f\u043e\u0447\u0438\u0442\u0430\u0439 \u043f\u043e\u0436\u0430\u043b\u0443\u0439\u0441\u0442\u0430 \u0438 \u0437\u0430\u0444\u0438\u043a\u0441\u0438\u0440\u0443\u0446\u0439. | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-196,SRC-197 | owner: saipen-cli | claim_time: 2026-10-08T23:58:06Z",
+    "description": "[P2] V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\audit\\SAIHANDOFF_AGENT_PROTOCOL_DRIFT_AUDIT.md - \u0432\u043e\u0442 \u044d\u0442\u043e \u0435\u0449\u0435 \u043f\u043e\u0447\u0438\u0442\u0430\u0439 \u043f\u043e\u0436\u0430\u043b\u0443\u0439\u0441\u0442\u0430 \u0438 \u0437\u0430\u0444\u0438\u043a\u0441\u0438\u0440\u0443\u0446\u0439."
+  },
+  {
+    "id": "T-1692",
+    "section": "## TODO",
+    "line_no": 4,
+    "checkbox": " ",
+    "needs": [],
+    "fields": {
+      "verify": "the requested change is present and demonstrated against the user own description of it",
+      "request_witness": "model_supplied",
+      "source_receipts": "SRC-198"
+    },
+    "raw": "- [ ] T-1692 [P2] SAIPEN | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-198",
+    "description": "[P2] SAIPEN"
+  },
+  {
+    "id": "T-1671",
+    "section": "## BLOCKED",
+    "line_no": 195,
+    "checkbox": " ",
+    "needs": [],
+    "fields": {
+      "verify": "the requested change is present and demonstrated against the user own description of it",
+      "request_witness": "model_supplied",
+      "source_receipts": "SRC-192",
+      "blocker": "ACTIVE_DEPENDENCY:T-1672 -- the operator's request is carried by T-1672 (SRC-193, appended to this source): the engine half is built and gated there and the PATH launcher is installed on this machine (E-13246); this ticket owns no independent implementation and closes with T-1672 once its four open clauses are terminal, or earlier on the operator's own report that a FreeBuff session reached saipen",
+      "blocker_scope": "ticket"
+    },
+    "raw": "- [ ] T-1671 [P2] file:///V:/_TEMP_/fastprompter_drag/SAIPEN_20261008_0223.md - \u043e\u043f\u044f\u0442\u044c \u0444\u0440\u0438\u0431\u0430\u0444 \u043d\u0435 \u043c\u043e\u0436\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u0447\u0430\u0442\u044c \u0434\u043e \u0441\u0430\u0439\u043f\u0435\u043d\u0430, \u043d\u0443\u0436\u043d\u043e \u0440\u0435\u0448\u0438\u0442\u044c /goal cc all | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-192 | blocker: ACTIVE_DEPENDENCY:T-1672 -- the operator's request is carried by T-1672 (SRC-193, appended to this source): the engine half is built and gated there and the PATH launcher is installed on this machine (E-13246); this ticket owns no independent implementation and closes with T-1672 once its four open clauses are terminal, or earlier on the operator's own report that a FreeBuff session reached saipen | blocker_scope: ticket",
+    "description": "[P2] file:///V:/_TEMP_/fastprompter_drag/SAIPEN_20261008_0223.md - \u043e\u043f\u044f\u0442\u044c \u0444\u0440\u0438\u0431\u0430\u0444 \u043d\u0435 \u043c\u043e\u0436\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u0447\u0430\u0442\u044c \u0434\u043e \u0441\u0430\u0439\u043f\u0435\u043d\u0430, \u043d\u0443\u0436\u043d\u043e \u0440\u0435\u0448\u0438\u0442\u044c /goal cc all"
+  },
+  {
+    "id": "T-1672",
+    "section": "## BLOCKED",
+    "line_no": 197,
+    "checkbox": " ",
+    "needs": [],
+    "fields": {
+      "verify": "every derived clause of SRC-193 carries a terminal disposition with evidence",
+      "source_receipts": "SRC-193",
+      "owner": "saipen-cli",
+      "claim_time": "2026-10-08T01:43:52Z",
+      "blocker": "BLOCKED_EXTERNAL -- the engine delta is built, verified, reviewed and gated (regression pair E-13233/E-13234, core-unit 58c3c1da1506d690: 5732 ran, none red; 12 actionable clauses of SRC-193 VERIFIED on E-13235); the ticket cannot finish while SRC-193 keeps four clauses open: R050 waits on T-1644 (operator: publication policy; until it is decided the injector refuses DIRTY_SOURCE and every installed host keeps the old activation block), R051 on T-1677 (FastPrompter, SAIRoute and SAIOPP, other repositories), R052 on T-1673 and R053 on T-1675 (in this repository). Finish with ticket done once coverage is terminal",
+      "blocker_scope": "ticket"
+    },
+    "raw": "- [ ] T-1672 [P2] Append SRC-193 to SRC-192: operator spec file SAIPEN_20261008_0223.md | verify: every derived clause of SRC-193 carries a terminal disposition with evidence | source_receipts: SRC-193 | owner: saipen-cli | claim_time: 2026-10-08T01:43:52Z | blocker: BLOCKED_EXTERNAL -- the engine delta is built, verified, reviewed and gated (regression pair E-13233/E-13234, core-unit 58c3c1da1506d690: 5732 ran, none red; 12 actionable clauses of SRC-193 VERIFIED on E-13235); the ticket cannot finish while SRC-193 keeps four clauses open: R050 waits on T-1644 (operator: publication policy; until it is decided the injector refuses DIRTY_SOURCE and every installed host keeps the old activation block), R051 on T-1677 (FastPrompter, SAIRoute and SAIOPP, other repositories), R052 on T-1673 and R053 on T-1675 (in this repository). Finish with ticket done once coverage is terminal | blocker_scope: ticket",
+    "description": "[P2] Append SRC-193 to SRC-192: operator spec file SAIPEN_20261008_0223.md"
+  },
+  {
+    "id": "T-1647",
+    "section": "## BLOCKED",
+    "line_no": 202,
+    "checkbox": " ",
+    "needs": [],
+    "fields": {
+      "verify": "the requested change is present and demonstrated against the user own description of it",
+      "request_witness": "model_supplied",
+      "source_receipts": "SRC-188",
+      "owner": "saipen-cli",
+      "claim_time": "2026-10-07T01:23:09Z",
+      "blocker": "BLOCKED_EXTERNAL -- the engine delta is built, verified, reviewed and gated (core-unit c63302aec1cd2ea6, machine runtime installed and READY on this machine); the ticket cannot finish while SRC-188 keeps seven clauses open: R006, R013 and R016 wait on T-1654 (in this repository, next in the queue), R009 and R010 on T-1653 (SAI Accounts, another repository), R020 and R025 on T-1652 (the operator's run as antigravity_b). Finish with ticket done once coverage is terminal",
+      "blocker_scope": "ticket"
+    },
+    "raw": "- [ ] T-1647 [P2] SAIPEN | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-188 | owner: saipen-cli | claim_time: 2026-10-07T01:23:09Z | blocker: BLOCKED_EXTERNAL -- the engine delta is built, verified, reviewed and gated (core-unit c63302aec1cd2ea6, machine runtime installed and READY on this machine); the ticket cannot finish while SRC-188 keeps seven clauses open: R006, R013 and R016 wait on T-1654 (in this repository, next in the queue), R009 and R010 on T-1653 (SAI Accounts, another repository), R020 and R025 on T-1652 (the operator's run as antigravity_b). Finish with ticket done once coverage is terminal | blocker_scope: ticket",
+    "description": "[P2] SAIPEN"
+  },
+  {
+    "id": "T-1653",
+    "section": "## BLOCKED",
+    "line_no": 203,
+    "checkbox": " ",
+    "needs": [],
+    "fields": {
+      "verify": "SAI Accounts reports SAIPEN-runtime readiness separately from provider and project readiness, and a managed account is not READY while saipen host machine status is not MACHINE_RUNTIME_READY; closed through ticket resolve-external naming the SAI Accounts implementation",
+      "blocker": "BLOCKED_EXTERNAL -- the SAI Accounts source is outside this repository; the SAIPEN half of the contract (saipen host machine status and install, saipen_runtime_ready) is delivered by T-1647 and described in .saipen/evidence/T-1647-machine-runtime/ACCEPTANCE.md",
+      "blocker_scope": "ticket"
+    },
+    "raw": "- [ ] T-1653 [P2] SAI Accounts does not consume the machine runtime (SRC-188 SAI Accounts integration and account creation/repair; external product, its source is not in this repository): account readiness has to read saipen host machine status --json (saipen_runtime_ready), run saipen host machine install through its own trusted updater when that is false, and stop reporting a managed account ready for autonomous SAIPEN work while it is false; account creation, adoption and repair verify the eight SRC-188 checks without manual ACL commands | verify: SAI Accounts reports SAIPEN-runtime readiness separately from provider and project readiness, and a managed account is not READY while saipen host machine status is not MACHINE_RUNTIME_READY; closed through ticket resolve-external naming the SAI Accounts implementation | blocker: BLOCKED_EXTERNAL -- the SAI Accounts source is outside this repository; the SAIPEN half of the contract (saipen host machine status and install, saipen_runtime_ready) is delivered by T-1647 and described in .saipen/evidence/T-1647-machine-runtime/ACCEPTANCE.md | blocker_scope: ticket",
+    "description": "[P2] SAI Accounts does not consume the machine runtime (SRC-188 SAI Accounts integration and account creation/repair; external product, its source is not in this repository): account readiness has to read saipen host machine status --json (saipen_runtime_ready), run saipen host machine install through its own trusted updater when that is false, and stop reporting a managed account ready for autonomous SAIPEN work while it is false; account creation, adoption and repair verify the eight SRC-188 checks without manual ACL commands"
+  },
+  {
+    "id": "T-1652",
+    "section": "## BLOCKED",
+    "line_no": 204,
+    "checkbox": " ",
+    "needs": [],
+    "fields": {
+      "verify": "MANUAL-VERIFY RESULT recorded from the operator's own report: host bootstrap answers HOST_BOOTSTRAP_BOUND with runtime_source MACHINE_RUNTIME and legacy_saipen_home INACCESSIBLE_BUT_REPLACED; continue names the project's current Work with a load_path under C:/ProgramData/SAI/SAIPEN; the operator profile file answers Access is denied; the same holds for a second managed SID",
+      "blocker": "WAIT_USER_CONFIRMATION -- the operator runs the three commands of this ticket as antigravity_b and reports pass or fail; this seat holds no logon for a managed account and does not use the SAI Accounts vault",
+      "blocker_scope": "ticket"
+    },
+    "raw": "- [ ] T-1652 [P2] Manual acceptance of the machine runtime as a real managed Windows account (SRC-188 matrix and success condition): this seat has no logon for antigravity_b, so T-1647 measured the scenario with an equivalent principal only (the operator token with its own SID deny-only). Steps: as antigravity_b in a granted project (AUDAPACK), nothing on PATH, run C:/ProgramData/SAI/SAIPEN/bin/saipen.cmd host bootstrap --json, then continue --json, then type the operator's .claude/CLAUDE.md | verify: MANUAL-VERIFY RESULT recorded from the operator's own report: host bootstrap answers HOST_BOOTSTRAP_BOUND with runtime_source MACHINE_RUNTIME and legacy_saipen_home INACCESSIBLE_BUT_REPLACED; continue names the project's current Work with a load_path under C:/ProgramData/SAI/SAIPEN; the operator profile file answers Access is denied; the same holds for a second managed SID | blocker: WAIT_USER_CONFIRMATION -- the operator runs the three commands of this ticket as antigravity_b and reports pass or fail; this seat holds no logon for a managed account and does not use the SAI Accounts vault | blocker_scope: ticket",
+    "description": "[P2] Manual acceptance of the machine runtime as a real managed Windows account (SRC-188 matrix and success condition): this seat has no logon for antigravity_b, so T-1647 measured the scenario with an equivalent principal only (the operator token with its own SID deny-only). Steps: as antigravity_b in a granted project (AUDAPACK), nothing on PATH, run C:/ProgramData/SAI/SAIPEN/bin/saipen.cmd host bootstrap --json, then continue --json, then type the operator's .claude/CLAUDE.md"
+  },
+  {
+    "id": "T-1644",
+    "section": "## BLOCKED",
+    "line_no": 205,
+    "checkbox": " ",
+    "needs": [],
+    "fields": {
+      "verify": "STATE mode (or one registry-declared publication value) states the operator's publication policy and SHIP, the finish and the validator all read it; ship.md cites what CORE says; the expiry of a pausing receipt is a... [detail_ref: .saipen/recovery/board-compaction/T-1644/T-1644-05550d088dc5f5bf33ce30c6.json]",
+      "blocker": "WAIT_USER_DECISION -- the operator chooses this repository's publication policy: (a) full: SHIP commits, tags and pushes; (b) local commits only, no push or tag (the practice recorded in this...",
+      "blocker_scope": "ticket",
+      "detail_ref": ".saipen/recovery/board-compaction/T-1644/T-1644-05550d088dc5f5bf33ce30c6.json"
+    },
+    "raw": "- [ ] T-1644 [P2] Publication authority has no single machine owner (T-1637 C2): STATE mode is full, sessions apply a 'standing no-publish policy' citing SRC-039, whose own text pauses... | verify: STATE mode (or one registry-declared publication value) states the operator's publication policy and SHIP, the finish and the validator all read it; ship.md cites what CORE says; the expiry of a pausing receipt is a... [detail_ref: .saipen/recovery/board-compaction/T-1644/T-1644-05550d088dc5f5bf33ce30c6.json] | blocker: WAIT_USER_DECISION -- the operator chooses this repository's publication policy: (a) full: SHIP commits, tags and pushes; (b) local commits only, no push or tag (the practice recorded in this... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-1644/T-1644-05550d088dc5f5bf33ce30c6.json",
+    "description": "[P2] Publication authority has no single machine owner (T-1637 C2): STATE mode is full, sessions apply a 'standing no-publish policy' citing SRC-039, whose own text pauses..."
+  }
+]

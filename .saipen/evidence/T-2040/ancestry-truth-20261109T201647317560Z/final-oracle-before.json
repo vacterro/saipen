@@ -1,0 +1,25 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tools/test_release_reconciliation.py",
+    "-k",
+    "r003",
+    "-v",
+    "--tb=short",
+    "--color=no",
+    "-p",
+    "no:cacheprovider"
+  ],
+  "exit_code": 1,
+  "before": {
+    "tools/saipen_engine/isolated_release.py": "45d5ce0b6d45b7bc5836853221ce744c66ae385aa5cb5fdaf199aa3326b050b7",
+    "tools/test_release_reconciliation.py": "089aec3741b6f686b1e45a6eb02f31202f823c3f94ddb5034116c06277a1e974"
+  },
+  "after": {
+    "tools/saipen_engine/isolated_release.py": "45d5ce0b6d45b7bc5836853221ce744c66ae385aa5cb5fdaf199aa3326b050b7",
+    "tools/test_release_reconciliation.py": "089aec3741b6f686b1e45a6eb02f31202f823c3f94ddb5034116c06277a1e974"
+  }
+}

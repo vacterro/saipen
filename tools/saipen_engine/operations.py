@@ -3064,6 +3064,20 @@ def _plan_claim(
 
         return _refuse("ALREADY_CLAIMED", f"DOING holds {doing[0]['id']}", ticket=ticket_id)
 
+    _valve_wait = _tripped_consumer_valve_wait(root, state, str(state.get("next_action") or ""))
+
+    if _valve_wait is not None:
+
+        return _refuse(
+
+            "WAIT_BLOCKED",
+
+            f"safety valve is exhausted ({_valve_wait[:80]}); renew via operator cc before claiming",
+
+            ticket=ticket_id,
+
+        )
+
 
 
     reserved_child = reserved_continuation_child(tickets, agent=agent, now=instant)
@@ -4816,6 +4830,24 @@ def _plan_transition(
 
     event_text = marker if not event_text else f"{marker} -- {event_text}"
 
+    # T-2133 (Campaign VII P0-B, SRC-436 measurement): the BUILD boundary
+
+    # carries the machine-measured tree identity -- appended AFTER any
+
+    # caller-supplied reason, END-anchored, so the corridor's oracle can
+
+    # compare the bytes the ticket started from. A declaration rides the
+
+    # reason and stays a claim; a forged token can never occupy the last
+
+    # position because this append happens after composition.
+
+    if destination == "BUILD":
+
+        from .core_unit import tree_fingerprint
+
+        event_text = f"{event_text} tree-identity:{tree_fingerprint(root)[:16]}"
+
     event, line = _event_line(
 
         docs, log_tail, "RUN", subject, agent, event_text, now, op_id, root=root
@@ -5121,15 +5153,23 @@ def _plan_transition(
 
     if destination == "DONE":
 
-        from .router import route_next
+        _valve_wait = _tripped_consumer_valve_wait(root, state, str(state.get("next_action") or ""))
+
+        if _valve_wait:
+
+            new_state = patch_state(new_state, {"next_action": _valve_wait})
+
+        else:
+
+            from .router import route_next
 
 
 
-        routed = route_next(new_state, new_board, current_agent=agent)
+            routed = route_next(new_state, new_board, current_agent=agent)
 
-        if routed.get("ok") and routed.get("action") != "saipen continue":
+            if routed.get("ok") and routed.get("action") != "saipen continue":
 
-            new_state = patch_state(new_state, {"next_action": routed["action"]})
+                new_state = patch_state(new_state, {"next_action": routed["action"]})
 
 
 
@@ -5279,7 +5319,63 @@ def transition_phase(
 
         return _baseline
 
-    return apply_plan(Path(project_root), plan)
+    applied = apply_plan(Path(project_root), plan)
+
+    if str(destination).upper() == "DONE" and applied.ok:
+
+        subject = ticket_id or plan.semantic_request.get("ticket")
+
+        _t2049_settlement_checkpoint(
+            Path(project_root), agent, subject, getattr(plan, "op_id", None)
+        )
+
+    return applied
+
+
+def _t2049_settlement_checkpoint(
+    root: Path, agent: str, ticket: str | None, settlement_id: str | None
+) -> None:
+    """T-2049 / T-2059: the ONE post-commit settlement route, run AFTER the ledger.
+
+    Both public closure routes -- a committed ``ticket done`` and a real
+    ``transition DONE`` -- funnel through this and nowhere else, so there is no
+    second trigger to drift out of sync. A committed closure is durable, so
+    settlement runs as its own step AFTER the journaled commit, never inside
+    the mutation that closed the ticket and never rewrites it: the collector's
+    own output surface is GC_STATE and `.saipen/gc`, so a corrupt counter, an
+    unwritable journal, a seat the policy refuses or an unexpected exception
+    becomes DURABLE maintenance debt, never a reason to reopen a committed
+    closure.
+
+    Exactly-once accounting: the distinct closure identity is deduplicated by
+    the settlement ledger, so an overlapping `ticket done` and `transition
+    DONE` for one ticket settles exactly one maintenance run, and no closure is
+    counted before its commit is durable. A refused or dry-run closure never
+    reaches here, because only an APPLIED plan does.
+    """
+
+    try:
+
+        from . import gc as _gc
+
+        subject = ticket or _gc.state_task(root)
+
+        _gc.settle_ticket_completion(root, subject, agent, settlement_id=settlement_id)
+
+    except Exception as exc:
+        # Silent loss replaced by a durable, visible maintenance-failure
+        # report; a failure to record THAT is still swallowed, because it must
+        # never be able to rewrite an already committed closure.
+        try:
+
+            from . import gc as _gc
+
+            _gc.record_maintenance_failure(root, agent, exc)
+
+        except Exception:
+
+            return
+
 
 
 
@@ -6694,8 +6790,7 @@ def _ticket_targets(
             )
 
         current_blocker = str(ticket.get("fields", {}).get("blocker", "")).upper()
-        blocked_tokens = ("WAIT_USER", "OPERATOR_REQUIRED", "VENDOR_ACCEPTANCE", "LIVE_VENDOR")
-        if any(tok in current_blocker for tok in blocked_tokens):
+        if unblock_requires_operator(current_blocker):
             # DRIFT-001/002: unblock requires operator provenance or live proof
             from . import operator_task
 
@@ -6712,7 +6807,8 @@ def _ticket_targets(
             )
             has_proof = any(tok in payload.lower() for tok in proof_tokens)
             if not has_operator and not has_proof:
-                is_vendor = "VENDOR" in current_blocker or "LIVE" in current_blocker
+                head = current_blocker.strip().split(" -- ", 1)[0].strip()
+                is_vendor = "VENDOR" in head or "LIVE" in head
                 code = "VENDOR_ACCEPTANCE_BLOCKED" if is_vendor else "WAIT_USER_DECISION"
                 detail = (
                     f"{ticket_id} is blocked on {current_blocker}; "
@@ -8838,6 +8934,8 @@ def _plan_finish_ticket(
 
     # proposed state.
 
+    _valve_wait = _tripped_consumer_valve_wait(root, state, str(state.get("next_action") or ""))
+
     if resume_parent is None:
 
         owned = {
@@ -8846,7 +8944,7 @@ def _plan_finish_ticket(
 
             "task": "none",
 
-            "next_action": "saipen continue",
+            "next_action": _valve_wait or "saipen continue",
 
             "transition_from": closure_from,
 
@@ -8896,9 +8994,51 @@ def _plan_finish_ticket(
 
         routed = route_next(new_state, new_board, current_agent=agent)
 
-        if routed.get("ok") and routed.get("action") != "saipen continue":
+        candidate = str(routed.get("action") or "") if routed.get("ok") else ""
 
-            new_state = patch_state(new_state, {"next_action": routed["action"]})
+        reason = str(routed.get("reason") or "")
+
+        if not candidate or candidate == "saipen continue":
+
+            candidate = "saipen continue"
+
+            reason = "maintain"
+
+            wait = _CONVERGE_CONTINUE_WAIT
+
+        else:
+
+            wait = _CONVERGE_CREW_WAIT if reason == "crew-converge" else _CONVERGE_CONTINUE_WAIT
+
+        # A closure lands on DONE/none, where the persisted action is a route a
+
+        # host re-dispatches. Store the gate chain's answer, never the raw one
+
+        # (T-2083): a named repair replaces a refused route, and a terminal
+
+        # refusal becomes a typed stop.
+
+        projected = _project_route(
+
+            root,
+
+            {"ok": True, "action": candidate, "reason": reason},
+
+            agent,
+
+            fallback=candidate,
+
+            wait=wait,
+
+        )
+
+        if _valve_wait:
+
+            new_state = patch_state(new_state, {"next_action": _valve_wait})
+
+        elif projected != "saipen continue":
+
+            new_state = patch_state(new_state, {"next_action": projected})
 
 
 
@@ -9290,7 +9430,15 @@ def finish_ticket(
 
         return _render_plan(plan)
 
-    return apply_plan(root, plan)
+    applied = apply_plan(root, plan)
+
+    if applied.ok:
+
+        # T-2059: both public closure routes use one post-commit hook.
+
+        _t2049_settlement_checkpoint(root, agent, ticket_id, plan.op_id)
+
+    return applied
 
 
 
@@ -13885,42 +14033,6 @@ def _retire_targets(
 
             )
 
-        elif state.get("phase") == "DONE" and state.get("transition_from") in (
-
-            "SCOUT",
-
-            "BUILD",
-
-            "VERIFY",
-
-            "REVIEW",
-
-            "SHIP",
-
-        ):
-
-            # The row being retired may BE the evidence for the one deliberate
-
-            # non-DFA pair: `transition_from: SCOUT -> phase: DONE` is legal
-
-            # only as the canonical active-ticket park, and that proof is the
-
-            # retired ticket still sitting in BOARD.BLOCKED. Retirement removes
-
-            # it in this same transaction, so the park it justified is gone by
-
-            # the time the proposal is validated -- the operation erased its
-
-            # own premise and then failed against it. `ticket_move` and
-
-            # `finish_ticket` already record the actual DONE -> DONE
-
-            # self-transition at exactly this point; retirement is the third
-
-            # writer of a neutral state and was the one that never did.
-
-            owned["transition_from"] = "DONE"
-
     new_state = patch_state(docs["state"].text_norm, owned)
 
     if parent_id is None:
@@ -17894,14 +18006,17 @@ def cohort_status(project_root: Path | str, cohort_id: str) -> Result:
 @_state_guard
 
 def cohort_ship(
+
     project_root: Path | str,
+
     cohort_id: str,
+
     agent: str,
+
     dry_run: bool = False,
+
     current_capability: str | None = None,
-    isolated: bool = False,
-    remote: str = "origin",
-    branch: str = "main",
+
 ) -> Result:
 
     """Publish ONE cohort batch through the EXISTING release machinery.
@@ -18044,50 +18159,6 @@ def cohort_ship(
 
     }
 
-    if isolated:
-        from .isolated_release import execute_isolated_release
-        try:
-            outcome = execute_isolated_release(
-                root,
-                "cohort-ship",
-                remote=remote,
-                branch=branch,
-                cohort_carrier=carrier,
-                current_capability=current_capability,
-                current_agent=agent,
-                dry_run=dry_run,
-            )
-        except Exception as exc:
-            return _refuse(getattr(exc, "code", "ISOLATED_RELEASE_FAILED"), str(exc), cohort=cohort_id)
-        if dry_run or not outcome.get("ok"):
-            if not outcome.get("ok"):
-                return _refuse(
-                    outcome.get("code", "RELEASE_FAILED"),
-                    str(outcome.get("detail") or outcome.get("message") or "cohort publication failed"),
-                    cohort=cohort_id,
-                )
-            return Result(
-                True,
-                "PLAN",
-                message="cohort " + cohort_id + " would publish one batch scope (isolated)",
-                data=outcome,
-            )
-        return Result(
-            True,
-            "COHORT_SHIPPED",
-            message="cohort " + cohort_id + " published as one batch (isolated)",
-            data={
-                "cohort": cohort_id,
-                "members": members,
-                "scope": sorted(scope),
-                "release_op_id": outcome.get("op_id", ""),
-                "version": outcome.get("version", ""),
-                "tag": outcome.get("tag", ""),
-                "mode": outcome.get("mode", ""),
-                "remote_head_after": outcome.get("remote_head_after", ""),
-                "github_sync_verified": outcome.get("github_sync_verified", False),
-            },
-        )
     try:
 
         plan = plan_release(
@@ -18107,13 +18178,15 @@ def cohort_ship(
         )
 
     except (ReleaseRefusal, ValueError) as exc:
-        next_cmd = getattr(exc, "next_command", None)
+
         return _refuse(
+
             getattr(exc, "code", "VALIDATION_FAILED"),
+
             getattr(exc, "detail", str(exc)),
+
             cohort=cohort_id,
-            next_command=next_cmd,
-            canonical_next_command=next_cmd,
+
         )
 
     if dry_run:
@@ -18196,6 +18269,31 @@ def cohort_ship(
 
 
 
+
+
+def unblock_requires_operator(blocker: str) -> bool:
+
+    """Whether a blocker OPENS with an operator-gated class token (T-2077).
+
+    The unblock gate used to scan the WHOLE prose for these tokens, so a
+    dependency hold whose explanatory tail mentioned a neighbouring operator
+    gate could never be lifted by any canonical route: measured on T-2062,
+    whose head is ACTIVE_DEPENDENCY:T-2059 while only the tail names
+    WAIT_USER_DECISION, and whose refusal was WAIT_USER_DECISION with zero
+    writes. The class is the HEAD, exactly as board.blocker_class documents:
+    a substring mention inside free prose is not a class. A blocker that
+    genuinely OPENS with one of these tokens stays armed.
+    """
+
+    head = str(blocker or "").strip().upper().split(" -- ", 1)[0].strip()
+
+    return any(
+
+        token in head
+
+        for token in ("WAIT_USER", "OPERATOR_REQUIRED", "VENDOR_ACCEPTANCE", "LIVE_VENDOR")
+
+    )
 
 
 @_state_guard
@@ -19755,6 +19853,123 @@ def goal_entry(
 
 
 
+_CONVERGE_CREW_WAIT = (
+
+    "WAIT: blocked -- crew entry is refused by the conformance gate on the "
+
+    "current receipt; run the remediation that saipen status names and "
+
+    "refresh the receipt"
+
+)
+
+_CONVERGE_CONTINUE_WAIT = (
+
+    "WAIT: blocked -- continuation is refused by the unaccepted conformance "
+
+    "red on the current receipt; run the remediation that saipen status "
+
+    "names and refresh the receipt"
+
+)
+
+
+
+def _tripped_consumer_valve_wait(root: Path, state: dict, prior_action: str) -> str | None:
+
+    """Return canonical WAIT text when a bounded non-persistent goal valve is tripped."""
+
+    from .goal_authority import budget_exhausted, persistent, protocol_home
+
+    from .state import parse_wait, safety_valve_wait_text
+
+
+
+    if state.get("execution_intent") != "goal":
+
+        return None
+
+    if persistent(state) or protocol_home(root):
+
+        return None
+
+    prior_wait = (
+
+        prior_action
+
+        if (prior_action.startswith("WAIT:") and parse_wait(prior_action) == "safety valve")
+
+        else None
+
+    )
+
+    if budget_exhausted(state):
+
+        return prior_wait or safety_valve_wait_text(state)
+
+    return prior_wait
+
+
+def _project_route(
+
+    root: Path,
+
+    routed: dict,
+
+    agent: str,
+
+    *,
+
+    fallback: str,
+
+    wait: str,
+
+) -> str:
+
+    """The gated form of a persisted DONE/none route (T-2082, T-2083).
+
+
+
+    The writer and every read surface must agree on ONE executable action. The
+
+    gate chain is the authority: when it rewrites the route it also names the
+
+    action that route needs (a STALE_FAIL crew route names `saipen validate`),
+
+    so the writer stores that action -- never the command the gate refused.
+
+    A refusal with no executable action is a typed stop under the closed WAIT
+
+    grammar. A route the gates do not rewrite stands unchanged.
+
+    """
+
+    action = str(routed.get("action") or "") if routed.get("ok") else ""
+
+    if not action:
+
+        return fallback
+
+    from .router import gate_route as _gate_route
+
+
+
+    rewritten = _gate_route(root, routed, agent=agent)
+
+    if rewritten is None:
+
+        return action
+
+    command = str(rewritten.get("action") or "").strip()
+
+    if rewritten.get("ok"):
+
+        return command or action
+
+    return command or wait
+
+
+
 @_state_guard
 
 def set_converge_intent(
@@ -19843,7 +20058,19 @@ def set_converge_intent(
 
         elif target == "crew":
 
-            next_action = "saipen crew"
+            next_action = _project_route(
+
+                root,
+
+                {"ok": True, "action": "saipen crew", "reason": "crew-converge"},
+
+                agent,
+
+                fallback="saipen crew",
+
+                wait=_CONVERGE_CREW_WAIT,
+
+            )
 
         else:
 
@@ -19867,9 +20094,19 @@ def set_converge_intent(
 
             _routed = _route_next(transitioned, _docs["board"].text_norm, current_agent=agent)
 
-            if _routed.get("ok") and _routed.get("action"):
+            next_action = _project_route(
 
-                next_action = _routed["action"]
+                root,
+
+                _routed,
+
+                agent,
+
+                fallback=next_action,
+
+                wait=_CONVERGE_CONTINUE_WAIT,
+
+            )
 
         return patch_state(
 
@@ -20369,6 +20606,24 @@ def finalize_converge_intent(
 
         transitioned = transition_execution_intent(text, "normal")
 
+        # The pre-write state is DONE/none with a normal intent, which the
+        # shared router answers as the idle continuation; project that route
+        # so a refused continuation is never persisted as a dispatchable
+        # command (T-2082).
+        next_action = _project_route(
+
+            root,
+
+            {"ok": True, "action": "saipen continue", "reason": "maintain"},
+
+            agent,
+
+            fallback="saipen continue",
+
+            wait=_CONVERGE_CONTINUE_WAIT,
+
+        )
+
         return patch_state(
 
             transitioned,
@@ -20379,7 +20634,7 @@ def finalize_converge_intent(
 
                 "task": "none",
 
-                "next_action": "saipen continue",
+                "next_action": next_action,
 
                 "blocker": "",
 
@@ -21705,13 +21960,15 @@ def scrub_board(project_root: Path | str, agent: str, dry_run: bool = False) -> 
 
     dependency, so a receipt that started naming a pruned record between PLAN
 
-    and APPLY refuses the scrub instead of orphaning itself.
+    and APPLY refuses the scrub instead of orphaning itself. The promoted-gate
+
+    ledger is bound the same way (T-2096): a gate that started pinning a row
+
+    during the plan refuses it rather than losing the slice it resolves.
 
     """
 
-    from .intake import active_receipt_works
-
-    from .journal import hash_tree_dependency
+    from .journal import hash_file_dependency, hash_tree_dependency
 
 
 
@@ -21720,6 +21977,8 @@ def scrub_board(project_root: Path | str, agent: str, dry_run: bool = False) -> 
     now, utc = _now(), _utc_iso()
 
     intake_binding = hash_tree_dependency(root / ".saipen" / "intake")
+
+    gate_binding = hash_file_dependency(root / board_scrub.FUTURE_INDEX)
 
     docs, state, board, log_tail = _read(root)
 
@@ -21751,7 +22010,7 @@ def scrub_board(project_root: Path | str, agent: str, dry_run: bool = False) -> 
 
     try:
 
-        active_receipts, receipt_works = active_receipt_works(root)
+        scrub_inputs = board_scrub.collect_inputs(root)
 
     except (OSError, ValueError) as exc:
 
@@ -21759,7 +22018,9 @@ def scrub_board(project_root: Path | str, agent: str, dry_run: bool = False) -> 
 
             "VALIDATION_FAILED",
 
-            f"the source receipts cannot be read, so what they hold is unknown: {exc}",
+            "the scrub retention inputs cannot be read, so what they pin is unknown: "
+
+            f"{exc}",
 
         )
 
@@ -21767,9 +22028,25 @@ def scrub_board(project_root: Path | str, agent: str, dry_run: bool = False) -> 
 
         return _refuse("STALE_STATE", "the source intake changed while the scrub was planned")
 
+    if hash_file_dependency(root / board_scrub.FUTURE_INDEX) != gate_binding:
+
+        return _refuse(
+
+            "STALE_STATE", "the future-gate ledger changed while the scrub was planned"
+
+        )
+
     selection = board_scrub.select(
 
-        tickets, docs["_history"].events, active_receipts, receipt_works
+        tickets,
+
+        docs["_history"].events,
+
+        scrub_inputs.active_receipts,
+
+        scrub_inputs.receipt_works,
+
+        scrub_inputs.gated,
 
     )
 
@@ -21928,6 +22205,8 @@ def scrub_board(project_root: Path | str, agent: str, dry_run: bool = False) -> 
     preconditions = _docs_preconditions(docs, "state", "board", "log")
 
     preconditions[".saipen/intake"] = intake_binding
+
+    preconditions[board_scrub.FUTURE_INDEX] = gate_binding
 
     preconditions[evidence] = ""
 
@@ -23348,7 +23627,17 @@ def reauthorize_valve(
 
                 key: authority[key]
 
-                for key in ("operator_action", "required_ingress", "canonical_next_command")
+                for key in (
+
+                    "operator_action",
+
+                    "required_ingress",
+
+                    "canonical_next_command",
+
+                    "host_capability",
+
+                )
 
                 if key in authority
 
@@ -25662,6 +25951,122 @@ def _plan_defer_for_crew(
 
 
 
+    # CORE-002 parity (TEST-29-F1): DEFER is a closure, so it carries the
+
+    # SAME admission rule `_plan_finish_ticket` applies -- a DONE whose
+
+    # producing candidate attempt closed after the last VERIFY boundary is
+
+    # a producer claim admitted without independent verification. The
+
+    # fast checker forces exactly that close before task:none, so without
+
+    # this gate every fully-prescribed crew defer lands in CURRENT_FAIL.
+
+    try:
+
+        from . import attempt as _attempt_mod
+
+        _att_records, _att_errors = _attempt_mod.build_attempts(docs["_history"].events)
+
+        if _att_errors:
+
+            return _refuse(
+
+                "VALIDATION_FAILED",
+
+                "LOG carries malformed attempt history; run tools/validate.py: "
+
+                + "; ".join(_att_errors[:3]),
+
+                ticket=ticket_id,
+
+            )
+
+        _adm_err = _attempt_mod.ticket_admission_error(
+
+            ticket_id, _att_records, docs["_history"].events
+
+        )
+
+        if _adm_err:
+
+            return _refuse("INCOMPLETE_TICKET", _adm_err, ticket=ticket_id)
+
+    except Exception:
+
+        return _refuse(
+
+            "VALIDATION_FAILED",
+
+            f"cannot derive attempt admission for {ticket_id}; run "
+
+            "tools/validate.py before deferring",
+
+            ticket=ticket_id,
+
+        )
+
+
+
+    # T-1379 parity (TEST-29-F1 source half): the request's own clause is
+
+    # discharged by the Work's own verification evidence at the one moment
+
+    # both exist -- the same rule `_plan_finish_ticket` applies. Without it
+
+    # a one-clause request receipt the ordinary finish settles automatically
+
+    # stays UNKNOWN on a DONE Work and the validator answers
+
+    # source_receipt_unresolved_work for the defer the engine itself wrote.
+
+    from .intake import discharge_request_clauses, work_closure_gate
+
+    _source_gate = work_closure_gate(root, ticket_id)
+
+    if not _source_gate.get("ok") and _source_gate.get("code") == "SOURCE_UNRESOLVED":
+
+        from .log import verification_evidence
+
+        _proven, _reason = verification_evidence(ticket_id, docs["_history"].events)
+
+        if _proven:
+
+            discharge_request_clauses(
+
+                root,
+
+                ticket_id,
+
+                evidence=f"{ticket_id} deferred with verification evidence in LOG: {_reason[:400]}",
+
+                verification=(
+
+                    f"the Work this request created reached its own verification gate; "
+
+                    f"see the {ticket_id} VERIFY cycle in .saipen/LOG.md"
+
+                ),
+
+            )
+
+            _source_gate = work_closure_gate(root, ticket_id)
+
+    if not _source_gate.get("ok") and _source_gate.get("code") == "SOURCE_UNRESOLVED":
+
+        return _refuse(
+
+            _source_refusal_code(_source_gate, "SOURCE_UNRESOLVED"),
+
+            str(_source_gate),
+
+            ticket=ticket_id,
+
+        )
+
+
+
     # Closure targets (same cross-file transaction as a real ship closure).
 
     # T-1015: the PLAN CAS token is derived from the ALREADY-SAMPLED
@@ -26344,6 +26749,270 @@ def record_crew_run(
 
 
 
+def _plan_producer_integration(
+
+    root: Path,
+
+    agent: str,
+
+    *,
+
+    crew_epoch: str,
+
+    producer: str,
+
+    package_identity: str,
+
+    input_source: str,
+
+    input_source_fingerprint: str,
+
+    resulting_source: str,
+
+    resulting_source_fingerprint: str,
+
+    core_ticket: str | None = None,
+
+    now: str = "",
+
+    utc: str = "",
+
+) -> OperationPlan | Result:
+
+    """PLAN a structured producer INTEGRATION EDGE (T-1003 findings 11/12).
+
+
+
+    The package was prepared against S0 (input_source) and its payload was
+
+    APPLIED, making the source S1 (resulting_source). The package truthfully
+
+    stays bound to S0 -- it is never rewritten to claim S1. SC-8/9 consume
+
+    this edge; the edge is the integration proof, and the natural staleness of
+
+    the S0 package against later sources is exactly what detects whether a
+
+    rerun is required."""
+
+    op_id = "producer-integration-" + uuid4_hex()
+
+    docs, _state, _board, log_tail = _read(root)
+
+    event, line = _event_line(
+
+        docs,
+
+        log_tail,
+
+        "DEC",
+
+        core_ticket,
+
+        producer,
+
+        f"producer integration -- {producer} {input_source[:12]} -> {resulting_source[:12]}",
+
+        now,
+
+        op_id,
+
+    )
+
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+
+    new_state = patch_state(
+
+        docs["state"].text_norm,
+
+        {
+
+            "last_event": event,
+
+            "updated": utc,
+
+            "agent": agent,
+
+        },
+
+    )
+
+    errors = validate_texts(
+
+        new_state,
+
+        docs["board"].text_norm,
+
+        new_log,
+
+        current_agent=agent,
+
+        sealed_events=docs["_history"],
+
+    )
+
+    if errors:
+
+        return _refuse(
+
+            "VALIDATION_FAILED",
+
+            "proposed integration state fails fast validation: " + "; ".join(errors[:5]),
+
+        )
+
+    targets = [
+
+        *_log_targets(docs, new_log),
+
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+
+    ]
+
+    receipt_metadata = {
+
+        "operation": "producer_integration",
+
+        "status": "COMMITTED",
+
+        "crew_epoch": crew_epoch,
+
+        "producer": producer,
+
+        "package_identity": package_identity,
+
+        "input_source": input_source,
+
+        "input_source_fingerprint": input_source_fingerprint,
+
+        "resulting_source": resulting_source,
+
+        "resulting_source_fingerprint": resulting_source_fingerprint,
+
+        "core_ticket": core_ticket,
+
+        "project_identity": _identity(root),
+
+        "event_id": f"E-{event}",
+
+    }
+
+    return build_plan(
+
+        "producer_integration",
+
+        agent,
+
+        _identity(root),
+
+        {"operation": "producer_integration", "producer": producer},
+
+        _docs_preconditions(docs, "state", "board", "log"),
+
+        targets,
+
+        {
+
+            "ok": True,
+
+            "code": "INTEGRATION_RECORDED",
+
+            "producer": producer,
+
+            "crew_epoch": crew_epoch,
+
+            "event_id": f"E-{event}",
+
+        },
+
+        op_id=op_id,
+
+        receipt_metadata=receipt_metadata,
+
+    )
+
+
+
+
+
+@_state_guard
+
+def record_producer_integration(
+
+    project_root: Path | str,
+
+    agent: str,
+
+    *,
+
+    crew_epoch: str,
+
+    producer: str,
+
+    package_identity: str,
+
+    input_source: str,
+
+    input_source_fingerprint: str,
+
+    resulting_source: str,
+
+    resulting_source_fingerprint: str,
+
+    core_ticket: str | None = None,
+
+    dry_run: bool = False,
+
+) -> Result:
+
+    """Commit a structured producer integration edge (item 11)."""
+
+    root = Path(project_root)
+
+    now, utc = _now(), _utc_iso()
+
+    plan = _plan_producer_integration(
+
+        root,
+
+        agent,
+
+        crew_epoch=crew_epoch,
+
+        producer=producer,
+
+        package_identity=package_identity,
+
+        input_source=input_source,
+
+        input_source_fingerprint=input_source_fingerprint,
+
+        resulting_source=resulting_source,
+
+        resulting_source_fingerprint=resulting_source_fingerprint,
+
+        core_ticket=core_ticket,
+
+        now=now,
+
+        utc=utc,
+
+    )
+
+    if isinstance(plan, Result):
+
+        return plan
+
+    if dry_run:
+
+        return _render_plan(plan)
+
+    return apply_plan(root, plan)
+
+
+
+
+
 def _plan_convergence_stage(
 
     root: Path,
@@ -26759,3 +27428,453 @@ def _render_plan(plan: OperationPlan) -> Result:
         changed_files=plan.changed_files,
 
     )
+
+@_state_guard
+def restore_board_rows(project_root: Path | str, agent: str, dry_run: bool = False) -> Result:
+    """Put back the pruned closed records an ACTIVE receipt still names (T-2050).
+
+    The validator FAILed `active receipt SRC-x references missing Work T-y` on
+    rows an earlier scrub moved, and nothing could act on it: the row was gone
+    from the BOARD, `source recover` reported the receipts as clean, and no verb
+    could re-add a record. A scrub moves whole physical lines into
+    `SCRUB_EVIDENCE_ROOT`, so the row an ACTIVE receipt still pins is recoverable
+    by identity -- this re-inserts exactly those lines and nothing else.
+
+    Eligibility is not a judgement call: a row comes back only when a receipt
+    that is ACTIVE right now names its ticket, or a PROMOTED future gate still
+    resolves it as a slice (T-2071). A row nothing pins stays pruned, which
+    keeps this a repair of a broken link rather than a reversal of the scrub. No receipt is retired, no body is edited and no field is
+    reconstructed: the bytes are the ones the BOARD held.
+    """
+    from .intake import dangling_linked_work
+    from .journal import hash_tree_dependency
+
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    intake_binding = hash_tree_dependency(root / ".saipen" / "intake")
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+        )
+    try:
+        dangling = dangling_linked_work(root)
+    except (OSError, ValueError) as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"the source receipts cannot be read, so what they pin is unknown: {exc}",
+        )
+    # T-2071: a PROMOTED future gate resolves its slice tickets on the BOARD,
+    # so a row the gate still names is pinned exactly like a receipt's Work.
+    # Without this half the retention guard could keep such a row and a row
+    # already pruned before the guard existed stayed unrecoverable.
+    gated = board_scrub.gated_tickets(root)
+    gated_missing = sorted(gated - set(board["tickets"]))
+    missing = sorted(set(dangling.values()) | set(gated_missing))
+    if not missing:
+        return Result(
+            ok=True,
+            code="NOTHING_TO_RESTORE",
+            data={
+                "ok": True,
+                "code": "NOTHING_TO_RESTORE",
+                "detail": "every record an ACTIVE source receipt or a PROMOTED future gate "
+                "names is on the BOARD",
+                "restored": [],
+            },
+        )
+    try:
+        recoverable = board_scrub.pruned_rows(root, missing)
+    except (OSError, ValueError) as exc:
+        return _refuse("VALIDATION_FAILED", f"the scrub evidence cannot be read: {exc}")
+    unrecoverable = [tid for tid in missing if tid not in recoverable]
+    missing = [tid for tid in missing if tid in recoverable]
+    if not missing:
+        return _refuse(
+            "ROWS_UNRECOVERABLE",
+            f"none of the {len(unrecoverable)} pinned record(s) has a pruned copy to restore: "
+            + ", ".join(unrecoverable[:8])
+            + (" ..." if len(unrecoverable) > 8 else ""),
+            missing=unrecoverable,
+        )
+    board_doc = docs["board"]
+    if hash_bytes(board_doc.bom + board_doc.text.encode(board_doc.encoding)) != board_doc.raw_hash:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "the BOARD does not re-encode to the bytes that were read; a restore inserts whole "
+            "physical lines and refuses to rewrite anything else",
+        )
+    try:
+        new_board_text = board_scrub.restored_board_text(
+            board_doc.text, [recoverable[tid][0] for tid in missing]
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc))
+    # A restored record keeps its own edges: the BOARD validator resolves
+    # `needs:` and the scalar reference fields on the rows that stay, so every
+    # record a restored row still names has to come back with it or the restore
+    # would re-create the orphan it exists to fix. The closure is the same one
+    # the retention rule follows, read off the parsed rows that will exist.
+    from .board import parse_board
+
+    selected = list(missing)
+    settled = False
+    for _ in range(12):
+        parsed = parse_board(
+            board_scrub.restored_board_text(
+                board_doc.text, [recoverable[tid][0] for tid in selected]
+            )
+        )
+        named = {
+            ref
+            for ticket in (parsed.get("tickets") or {}).values()
+            for ref in board_scrub._references(ticket, {})
+            if ref not in (parsed.get("tickets") or {})
+        }
+        fresh = sorted(ref for ref in named if ref not in selected)
+        if not fresh:
+            settled = True
+            break
+        recoverable.update(board_scrub.pruned_rows(root, fresh))
+        added = [ref for ref in fresh if ref in recoverable]
+        unrecoverable.extend(
+            ref for ref in fresh if ref not in recoverable and ref not in unrecoverable
+        )
+        if not added:
+            settled = True
+            break
+        selected.extend(added)
+    if not settled:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "the reference closure of the restored records did not settle; nothing is restored",
+        )
+    missing = sorted(selected)
+    rows = [recoverable[tid][0] for tid in missing]
+    evidence_paths = sorted({recoverable[tid][1] for tid in missing})
+    new_board_text = board_scrub.restored_board_text(board_doc.text, rows)
+    new_board_bytes = board_doc.bom + new_board_text.encode(board_doc.encoding)
+    new_board_norm = new_board_text.replace("\r\n", "\n").replace("\r", "\n")
+    restored_bytes = len(new_board_bytes) - len(
+        board_doc.bom + board_doc.text.encode(board_doc.encoding)
+    )
+    op_id = "board-restore-" + uuid4_hex()
+    event, line = _event_line(
+        docs,
+        log_tail,
+        "DEC",
+        None,
+        agent,
+        _actor_provenance(
+            state,
+            agent,
+            f"BOARD rows restored -- {len(missing)} pruned closed record(s) still named by "
+            f"an ACTIVE source receipt or a PROMOTED future gate re-inserted verbatim "
+            f"({restored_bytes} bytes) from "
+            + ", ".join(evidence_paths[:3])
+            + (" ..." if len(evidence_paths) > 3 else ""),
+        ),
+        now,
+        op_id,
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    new_state = patch_state(
+        docs["state"].text_norm,
+        {
+            "last_event": event,
+            "updated": utc,
+            "agent": _seat_agent(state, board_doc.text_norm, agent),
+        },
+    )
+    errors = validate_texts(
+        new_state,
+        new_board_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed BOARD restore fails fast validation: " + "; ".join(errors[:5]),
+        )
+    preconditions = _docs_preconditions(docs, "state", "board", "log")
+    preconditions[".saipen/intake"] = intake_binding
+    if gated:
+        # The promotion ledger is now one of the inputs that admitted these
+        # rows; a plan must never apply against a different gate set.
+        preconditions[board_scrub.FUTURE_INDEX] = hash_bytes(
+            (root / board_scrub.FUTURE_INDEX).read_bytes()
+        )
+    for path in evidence_paths:
+        preconditions[path] = hash_bytes((root / path).read_bytes())
+    plan = build_plan(
+        "restore_board_rows",
+        agent,
+        _identity(root),
+        {"operation": "restore_board_rows", "agent": agent},
+        preconditions,
+        [
+            *_log_targets(docs, new_log),
+            TargetPlan(
+                ".saipen/BOARD.md",
+                "board",
+                new_board_bytes,
+                board_doc.raw_hash,
+                hash_bytes(new_board_bytes),
+            ),
+            _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+        ],
+        {
+            "ok": True,
+            "code": "BOARD_ROWS_RESTORED",
+            "event_id": f"E-{event}",
+            "restored": list(missing),
+            "restored_records": len(missing),
+            "unrecoverable": unrecoverable,
+            "restored_bytes": restored_bytes,
+            "evidence_paths": evidence_paths,
+            "board_bytes_before": len(new_board_bytes) - restored_bytes,
+            "board_bytes_after": len(new_board_bytes),
+        },
+        op_id=op_id,
+    )
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+def reconcile_source_index(project_root: Path | str, agent: str, receipt_ids=None, dry_run: bool = False) -> Result:
+    """Re-register intake-index authority from archived bundles on disk (T-2051).
+
+    The validator FAILed `BOARD Work T-x references missing source receipt
+    SRC-y` for receipts whose complete bundle still sat in
+    `.saipen/archive/source/`. The index had lost the entry; the evidence had
+    not. `source recover` cannot help (no row moved), a retirement cannot help
+    (the receipt is not retired, it is archived and closed), and the finding
+    therefore sat at ENGINEERING_REQUIRED forever.
+
+    Eligibility is proof, not judgement: an id is re-registered only when the
+    canonical reader can verify the whole bundle and derive the tombstone from
+    it. Ids without a proven bundle stay unresolved and are reported with the
+    exact missing carrier, which is the terminal blocker the evidence deserves.
+    """
+    import json as _json
+
+    from . import source_reindex
+    from .journal import hash_tree_dependency
+
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    intake_binding = hash_tree_dependency(root / ".saipen" / "intake")
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+        )
+    report = source_reindex.plan(root)
+    if not report.get("ok"):
+        return _refuse("VALIDATION_FAILED", report.get("detail") or "the plan is unreadable")
+    recoverable = {
+        entry["receipt_id"]: entry
+        for entry in report.get("entries") or ()
+        if entry.get("state") in source_reindex.RECOVERABLE_STATES
+    }
+    no_evidence = {
+        entry["receipt_id"]: entry
+        for entry in report.get("entries") or ()
+        if entry.get("state") not in source_reindex.RECOVERABLE_STATES
+    }
+    if receipt_ids:
+        requested_ids = sorted({str(item) for item in receipt_ids})
+        rejected = [item for item in requested_ids if item not in recoverable]
+        if rejected:
+            return _refuse(
+                "SOURCE_INDEX_UNRECOVERABLE",
+                "no proven archived bundle for "
+                + ", ".join(rejected[:6])
+                + (" ..." if len(rejected) > 6 else "")
+                + ": "
+                + "; ".join(
+                    f"{item}: {no_evidence[item]['missing_proof']}"
+                    for item in rejected[:3]
+                    if item in no_evidence
+                ),
+                unrecoverable=rejected,
+            )
+    else:
+        requested_ids = sorted(recoverable)
+    if not requested_ids:
+        return Result(
+            ok=True,
+            code="NOTHING_TO_RECONCILE",
+            data={
+                "ok": True,
+                "code": "NOTHING_TO_RECONCILE",
+                "detail": "every BOARD-named receipt is already resolvable from the index",
+                "reconciled": [],
+                "no_evidence": {
+                    item: entry["missing_proof"] for item, entry in no_evidence.items()
+                },
+            },
+        )
+    index_rel = ".saipen/intake/index.json"
+    try:
+        current = (root / index_rel).read_bytes()
+        index = _json.loads(current.decode("utf-8-sig"))
+    except (OSError, ValueError) as exc:
+        return _refuse("VALIDATION_FAILED", f"the intake index cannot be read: {exc}")
+    canonical = (
+        _json.dumps(index, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    ).encode("utf-8")
+    if canonical != current:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "the intake index does not round-trip to the bytes on disk, so adding a record "
+            "would rewrite unrelated ones; nothing is written",
+        )
+    tombstones = index.get("tombstones")
+    if not isinstance(tombstones, dict):
+        return _refuse("VALIDATION_FAILED", "the intake index has no tombstone surface")
+    active = index.get("active") or {}
+    resumed: list[str] = []
+    for receipt_id in requested_ids:
+        if receipt_id in active:
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"{receipt_id} is ACTIVE, not an index gap; nothing is written",
+            )
+        if receipt_id in tombstones:
+            # Resumable: a previous run registered the projection but not its
+            # carrier, so the same bundle finishes the pair instead of the run
+            # refusing a state it produced itself. Drift is the other half-state:
+            # the carrier survived close-time and the projection did not, and the
+            # planner only marks that when the carrier itself was verified.
+            if tombstones[receipt_id] != recoverable[receipt_id]["tombstone"]:
+                if not recoverable[receipt_id].get("carrier_present"):
+                    return _refuse(
+                        "VALIDATION_FAILED",
+                        f"{receipt_id} is already registered and disagrees with its archived "
+                        "bundle; nothing is written",
+                    )
+                resumed.append(receipt_id)
+                tombstones[receipt_id] = recoverable[receipt_id]["tombstone"]
+                continue
+            resumed.append(receipt_id)
+            continue
+        tombstones[receipt_id] = recoverable[receipt_id]["tombstone"]
+    new_bytes = (
+        _json.dumps(index, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    ).encode("utf-8")
+    op_id = "source-reindex-" + uuid4_hex()
+    event, line = _event_line(
+        docs,
+        log_tail,
+        "DEC",
+        None,
+        agent,
+        _actor_provenance(
+            state,
+            agent,
+            f"source index reconciled -- {len(requested_ids)} archived bundle(s) re-registered "
+            f"as closed tombstones from bytes on disk ({', '.join(requested_ids[:6])}"
+            + (" ..." if len(requested_ids) > 6 else "")
+            + ") after the index lost them",
+        ),
+        now,
+        op_id,
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    new_state = patch_state(
+        docs["state"].text_norm,
+        {
+            "last_event": event,
+            "updated": utc,
+            "agent": _seat_agent(state, docs["board"].text_norm, agent),
+        },
+    )
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed index reconciliation fails fast validation: " + "; ".join(errors[:5]),
+        )
+    preconditions = _docs_preconditions(docs, "state", "board", "log")
+    preconditions[index_rel] = hash_bytes(current)
+    preconditions[".saipen/intake"] = intake_binding
+    # The index projection is not the record: each tombstone also has a carrier
+    # file, and the validator refuses a projection whose carrier disagrees with
+    # it. Both are written in the same plan so a crash cannot leave the pair
+    # half-registered.
+    tombstone_targets: list[TargetPlan] = []
+    for receipt_id in requested_ids:
+        preconditions[f".saipen/archive/source/{receipt_id}.meta.json"] = hash_bytes(
+            (root / ".saipen/archive/source" / f"{receipt_id}.meta.json").read_bytes()
+        )
+        tomb_rel = f".saipen/intake/tombstones/{receipt_id}.json"
+        tomb_bytes = (
+            _json.dumps(
+                recoverable[receipt_id]["tombstone"], indent=2, sort_keys=True, ensure_ascii=False
+            )
+            + "\n"
+        ).encode("utf-8")
+        if (root / tomb_rel).exists():
+            if (root / tomb_rel).read_bytes() != tomb_bytes:
+                return _refuse(
+                    "VALIDATION_FAILED",
+                    f"{tomb_rel} already exists and differs from the derived record; nothing is written",
+                )
+            continue
+        preconditions[tomb_rel] = MISSING_FILE_DEPENDENCY
+        tombstone_targets.append(
+            TargetPlan(tomb_rel, "generic", tomb_bytes, "", hash_bytes(tomb_bytes))
+        )
+    plan = build_plan(
+        "reconcile_source_index",
+        agent,
+        _identity(root),
+        {"operation": "reconcile_source_index", "agent": agent, "receipts": list(requested_ids)},
+        preconditions,
+        [
+            *_log_targets(docs, new_log),
+            *(
+                [
+                    TargetPlan(
+                        index_rel,
+                        "generic",
+                        new_bytes,
+                        hash_bytes(current),
+                        hash_bytes(new_bytes),
+                    )
+                ]
+                if new_bytes != current
+                else []
+            ),
+            *tombstone_targets,
+            _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+        ],
+        {
+            "ok": True,
+            "code": "SOURCE_INDEX_RECONCILED",
+            "event_id": f"E-{event}",
+            "reconciled": list(requested_ids),
+            "reconciled_count": len(requested_ids),
+            "resumed": resumed,
+            "carriers_written": [target.path for target in tombstone_targets],
+            "no_evidence": {
+                item: entry["missing_proof"] for item, entry in no_evidence.items()
+            },
+            "index_bytes_before": len(current),
+            "index_bytes_after": len(new_bytes),
+        },
+        op_id=op_id,
+    )
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)

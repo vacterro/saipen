@@ -1,0 +1,61 @@
+{
+ "at": "2026-11-04T02:35:15Z",
+ "chain": [
+  "python.exe",
+  "python.exe",
+  "python.exe",
+  "bash.exe",
+  "bash.exe",
+  "bash.exe",
+  "zaicode.exe",
+  "zaicode.exe"
+ ],
+ "code": "BROKER_CLIENT_NOT_AUTHENTICATED",
+ "event": "client_refused",
+ "host": "zaicode",
+ "op": "issue-origin",
+ "pid": 21824,
+ "step": "HOOK_NOT_FOUND"
+}
+-----
+{
+ "at": "2026-11-04T02:35:16Z",
+ "chain": [
+  "python.exe",
+  "python.exe",
+  "python.exe",
+  "bash.exe",
+  "bash.exe",
+  "bash.exe",
+  "zaicode.exe",
+  "zaicode.exe"
+ ],
+ "code": "BROKER_CLIENT_NOT_AUTHENTICATED",
+ "event": "client_refused",
+ "host": "zaicode",
+ "op": "issue-origin",
+ "pid": 1540,
+ "step": "HOOK_NOT_FOUND"
+}
+-----
+{
+ "at": "2026-11-04T07:10:08Z",
+ "chain": [
+  "python.exe",
+  "python.exe",
+  "bash.exe",
+  "bash.exe",
+  "bash.exe",
+  "zaicode.exe",
+  "zaicode.exe",
+  "zaicode.exe"
+ ],
+ "code": "BROKER_CLIENT_NOT_AUTHENTICATED",
+ "event": "client_refused",
+ "host": "zaicode",
+ "op": "issue-origin",
+ "pid": 51404,
+ "step": "HOOK_CHAIN_UNRECOGNIZED"
+}
+-----
+keys seen: ['at', 'capped', 'chain', 'code', 'event', 'host', 'op', 'pid', 'step']

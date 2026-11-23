@@ -1,0 +1,53 @@
+test_source_and_flattened_installs_use_the_same_owner (test_response_surface_contract.DiagnosisTests.test_source_and_flattened_installs_use_the_same_owner) ... 
+  test_source_and_flattened_installs_use_the_same_owner (test_response_surface_contract.DiagnosisTests.test_source_and_flattened_installs_use_the_same_owner) (layout='flat') ... FAIL
+test_deep_json_refuses_instead_of_crashing (test_response_surface_contract.DiagnosisTests.test_deep_json_refuses_instead_of_crashing) ... ERROR
+
+======================================================================
+ERROR: test_deep_json_refuses_instead_of_crashing (test_response_surface_contract.DiagnosisTests.test_deep_json_refuses_instead_of_crashing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_surface_contract.py", line 833, in test_deep_json_refuses_instead_of_crashing
+    self.assertRejected("[" * 1100 + "0" + "]" * 1100)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_surface_contract.py", line 676, in assertRejected
+    klass, errors = self.check(text)
+                    ^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_surface_contract.py", line 635, in check
+    return RS.classify_final_response(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1693-response-diagnosis\pre-layout-response_surface.py", line 1620, in classify_final_response
+    errors = _diagnosis_errors(text, human_request, diagnosis_root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1693-response-diagnosis\pre-layout-response_surface.py", line 551, in _diagnosis_errors
+    packet = json.loads(str(rendered))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\json\decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+RecursionError: maximum recursion depth exceeded while decoding a JSON array from a unicode string
+
+======================================================================
+FAIL: test_source_and_flattened_installs_use_the_same_owner (test_response_surface_contract.DiagnosisTests.test_source_and_flattened_installs_use_the_same_owner) (layout='flat')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_surface_contract.py", line 828, in test_source_and_flattened_installs_use_the_same_owner
+    self.assertEqual(
+AssertionError: Tuples differ: ('INVALID_OPERATIONAL_PROSE', ['diagnosis o[35 chars]ed']) != ('ORDINARY_CHAT', [])
+
+First differing element 0:
+'INVALID_OPERATIONAL_PROSE'
+'ORDINARY_CHAT'
+
++ ('ORDINARY_CHAT', [])
+- ('INVALID_OPERATIONAL_PROSE',
+-  ['diagnosis owner or host capability is unverified'])
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.034s
+
+FAILED (failures=1, errors=1)

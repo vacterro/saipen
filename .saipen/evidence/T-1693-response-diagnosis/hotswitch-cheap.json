@@ -1,0 +1,78 @@
+[
+  {
+    "label": "focused",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "test_response_surface_contract",
+      "test_refusal_registry",
+      "test_canonical_command_reachability",
+      "test_subprocess_utf8"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+    "exit_code": 0,
+    "ran": 75,
+    "output": "hotswitch-focused.out.txt",
+    "output_sha256": "d500a7c5bed4f53497bbe6015762d18b684e5800bf1f7a343fcae323416c23cb",
+    "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+    "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+    "subject_sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8"
+  },
+  {
+    "label": "lint",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "ruff",
+      "check",
+      "tools/",
+      "tests/"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit_code": 0,
+    "ran": null,
+    "output": "hotswitch-lint.out.txt",
+    "output_sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+    "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+    "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+    "subject_sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8"
+  },
+  {
+    "label": "whitespace",
+    "command": [
+      "git",
+      "-c",
+      "core.safecrlf=false",
+      "diff",
+      "--check"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit_code": 0,
+    "ran": null,
+    "output": "hotswitch-whitespace.out.txt",
+    "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+    "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+    "subject_sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8"
+  },
+  {
+    "label": "core",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "tools/validate.py",
+      "--gate",
+      "core"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit_code": 0,
+    "ran": null,
+    "output": "hotswitch-core.out.txt",
+    "output_sha256": "aea3fa6ce7df782108e7d588cf18c25b16a0701b6228ad97a24bb3988f15818e",
+    "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+    "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+    "subject_sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8"
+  }
+]

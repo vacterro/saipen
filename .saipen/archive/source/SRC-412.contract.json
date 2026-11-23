@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-412:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "P1: Paranda kohe audit/SAIHANDOFF_SAIPEN_HOME_AUDIT_BZDECOMP_20261113.md punktis 5 kirjeldatud freshness-viga. See on parandust\u00f6\u00f6, mitte ainult audit. Toeta korrektseid Git directory/nested-repository kirjeid deterministliku sisufingerprintiga; s\u00e4ilita ohtlike radade t\u00f5kestamine. \u00c4ra kustuta ega peida kasutaja repositooriumi. T\u00f5esta sama regressiooniga pre-fix FAIL ja post-fix PASS, uuenda ametlik runtime ning kontrolli _BZDECOMP projektis saipen validate --json. Raporteeri tegelik tulemus ja allesj\u00e4\u00e4nud t\u00f5kked."
+    }
+  },
+  "derived_at": "2026-11-17T14:55:08Z",
+  "derived_from": "SRC-412",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "8b2fba9f6cd44e21e5a7837fb863767d7f1844a35849ae644905070cf8bc4165"
+}

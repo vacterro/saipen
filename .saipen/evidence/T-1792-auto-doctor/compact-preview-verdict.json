@@ -1,0 +1,12 @@
+{
+  "checker": "tools/protocol_budget.py check/load_profiles, unchanged",
+  "live_source_edited": false,
+  "before_errors": [
+    "command_resolution 56204 > 55296"
+  ],
+  "after_errors": [],
+  "before_command_resolution": 56204,
+  "after_command_resolution": 55281,
+  "budgets_unchanged": true,
+  "budget": 55296
+}

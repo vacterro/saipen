@@ -1,0 +1,27 @@
+[
+  {
+    "path": ".saipen\\improve\\imp-_sairelay-20261013-1\\MANIFEST.md",
+    "sha256": "e7677661ab83b002538197990f35466eaeace08c0949b416077e38838528d961",
+    "bytes": 450
+  },
+  {
+    "path": ".saipen\\improve\\imp-_sairelay-20261013-1\\SWEEP.md",
+    "sha256": "b6713dd061065c07fca51fdb45f9c5b5f343c73598d3f36d801030b7e9610938",
+    "bytes": 94
+  },
+  {
+    "path": ".saipen\\improve\\imp-_sairelay-20261013-1\\saipen-cli-01\\saipen_improve_SAIPEN.md",
+    "sha256": "22e7bc7edf0e6baa7dcf22c1abf248f8edb9c4460a87d7fca541b8230c899883",
+    "bytes": 6380
+  },
+  {
+    "path": ".saipen\\improve\\imp-_sairelay-20261013-1\\saipen-cli-02\\saipen_improve_SAIPEN.md",
+    "sha256": "c7231c056635fd720b885f9efb8b662e66c86f3070657d9cba075be446dc11a1",
+    "bytes": 7142
+  },
+  {
+    "path": ".saipen\\improve\\imp-_sairelay-20261013-1\\saipen-cli-03\\saipen_improve_SAIPEN.md",
+    "sha256": "50105b770ebe2973aef9b76d94c923d7e7a60c02d709bc62bcefe5a03c7f1967",
+    "bytes": 4162
+  }
+]

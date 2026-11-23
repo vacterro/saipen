@@ -1,0 +1,896 @@
+{
+  "board_sha256": "d7dddb2392f4bca9b70fc787c31a6b856a81f5aacd41f0ffdb5256b485f65be6",
+  "blocked": 54,
+  "rows": [
+    {
+      "ticket": "T-1450",
+      "fields": {
+        "verify": "cc all is complete and the repository-declared verification harness passes",
+        "owner": "astra",
+        "claim_time": "2026-09-21T21:42:41Z",
+        "blocker": "UNSATISFIED VERIFY CONJUNCT (closure-independent of every drain and repair ticket), restated 02.10.26 after T-1598 closed and the seat handed back: 'cc all is complete' is false -- canonical next_action is 'PHASE SCOUT T-1510' and two runnable ## TODO rows remain open (T-1464, T-1494); T-1510 is now ## DOING, so the earlier parenthetical listing it as open TODO is retired. This row still cannot be claimed in addition: T-1507 holds the seat reservation on T-1510 (saipen claim T-1450 --explicit -> REFUSE CONTINUATION_RESERVED), and T-1507 resumes only when T-1510 closes. The harness conjunct of the same verify IS satisfied: declared core-unit family PASS, 4728 ran, red 0, new_red 0, record .saipen/evidence/core-unit/99c70a68c796e27b-20261002T210212Z.json, commit 65aab95b, canonical validate VALID/CURRENT_PASS. This row is a duplicate ingress of T-1449's goal and reads identically by construction. Class: REAL -- an incomplete backlog, not a stale premise.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1449",
+      "fields": {
+        "verify": "cc all is complete and the repository-declared verification harness passes",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-02T19:21:56Z",
+        "blocker": "UNSATISFIED VERIFY CONJUNCT (closure-independent of every drain and repair ticket), restated 02.10.26 after T-1598 closed and the seat handed back: 'cc all is complete' is false -- canonical next_action is 'PHASE SCOUT T-1510' and two runnable ## TODO rows remain open (T-1464, T-1494); T-1510 is now ## DOING, so the earlier parenthetical listing it as open TODO is retired. The harness conjunct of the same verify IS satisfied: declared core-unit family PASS, 4728 ran, red 0, new_red 0, record .saipen/evidence/core-unit/99c70a68c796e27b-20261002T210212Z.json, commit 65aab95b, canonical validate VALID/CURRENT_PASS. Closure route attempted and refused canonically: saipen ticket done T-1449 --closure-mode own_patch -> REFUSE ILLEGAL_PHASE; no other closure mode is reachable without fabricating publication authority. Class: REAL -- an incomplete backlog, not a stale premise.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1099",
+      "fields": {
+        "verify": "board-soft-cap owned",
+        "blocker": "FUTURE/STRATEGIC HOLD -- CLEAN-phase remediation, restated 02.10.26 under T-1596. NOT permanent: measured today, BOARD.md is 188.7 KB against the ~16 KB soft cap (validate.py:2766-2780 warns 'board-soft-cap'), of which 143.4 KB is 225 closed-ticket lines. The declared mechanism is the CLEAN board scrub (phases/clean.md step 1), which may prune a DONE entry only when permanent LOG evidence exists AND no live ticket names it in needs: AND no ACTIVE source receipt references it -- a scrub that ignores those gates produced ten 'active receipt references missing Work' failures in a previous pass (IMP-002). Removing DONE text alone still leaves ~45 KB, so this is a real hygiene project, not a one-line prune. Class: FUTURE/STRATEGIC HOLD, not a stale blocker.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1564",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-141",
+        "blocker": "SUPERSEDED WORK (restated 02.10.26 under T-1596): T-1563 owns this repair, SRC-142 appends SRC-140, SRC-141 is preserved as historical START input. The canonical route 'saipen ticket supersede T-1564 --by T-1563' is closed on three gates: this Work carries Source receipts (SRC-141) so the route refuses source migration, successor T-1563 is BLOCKED rather than DONE, and no ACTIVE operator receipt grants T-1564 - T-1563. Manufacturing that grant is not authorized. Class: SUPERSEDED/RETIRED WORK plus ACTIVE_DEPENDENCY:T-1563.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1306",
+      "fields": {
+        "verify": "Evidence-backed acceptance reconciliation: a completion claim becomes traceable to structured evidence bound to the criterion that was promised, with narrative prose demoted to data is complete and the repository-declared verification harness passes",
+        "owner": "workbuddy",
+        "claim_time": "2026-09-02T15:33:17Z",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596 and unchanged in truth: the ticket text and its verify clause are the same sentence, so no evidence can ever satisfy it and any DONE claim would be a restatement of its own description. No canonical route retires a Work row, and supersede needs an ACTIVE operator receipt granting the exact pair, which does not exist and must not be manufactured. Class: INVALID_OR_AMBIGUOUS -- an unsatisfiable verify clause, not a real blocker.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1321",
+      "fields": {
+        "verify": "--help is complete and the repository-declared verification harness passes",
+        "owner": "codex",
+        "claim_time": "2026-09-13T18:51:03Z",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596. Not Work: 'saipen goal --help' was parsed as goal text; superseded by the production-hardening objective. No canonical route retires a Work row (done/supersede only), and supersede would need an ACTIVE operator receipt granting the exact pair against a DONE successor that is still on the board. Class: INVALID_OR_AMBIGUOUS.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1195",
+      "fields": {
+        "verify": "Implement, verify, ship is complete and the repository-declared verification harness passes",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596. Not Work: the row text is the tail of a goal command parsed as its own ticket, created in the same BOARD write as T-1194 at b23019f4 (ship v7.231.11); T-1194 is compacted off the board. No canonical route retires a Work row, and supersede would need an ACTIVE operator receipt granting the exact pair. Class: INVALID_OR_AMBIGUOUS.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1172",
+      "fields": {
+        "verify": "--help is complete and the repository-declared verification harness passes",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, restated 02.10.26 under T-1596. Not Work: 'saipen goal --help' was parsed as goal text; superseded by T-1173, which is compacted off the board. No canonical route retires a Work row: supersede refuses a compacted successor (operations.py:4219-4231) and demands an ACTIVE operator receipt granting the exact pair, which does not exist and must not be manufactured. Class: INVALID_OR_AMBIGUOUS.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1155",
+      "fields": {
+        "verify": "--help is complete and the repository-declared verification harness passes",
+        "owner": "saipen-cli",
+        "claim_time": "2026-08-24T16:09:23Z",
+        "blocker": "INVALID OR AMBIGUOUS BLOCKER, unchanged in truth and restated 02.10.26 under T-1596. This row is not Work: an accidental 'saipen goal --help' usage probe was parsed as goal text and became a ticket, superseded by the real FF/XX/VV/ZZ mission. No canonical route retires a Work row -- 'saipen ticket' offers done and supersede only; supersede needs an ACTIVE operator receipt granting T-1155 - <successor>, a successor that is DONE and still on the board, and an OLD Work with no Source receipts (operations.py:4219-4260). None of those exists and none may be manufactured. Class: INVALID_OR_AMBIGUOUS, not a real blocker of any repair.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1348",
+      "fields": {
+        "needs": "",
+        "verify": "a guard test proves no file under tools/ has two live module objects in the canonical discover run, red-controlled by importing one module both ways; either the flat spelling is removed from test imports without breaking 'python tools/x.py', or the duplication is made impossible by construction; tools/saipen.py module-level mutable state is named in the fix",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1348/T-1348-e1ff6b2978caca2096f3fc56.json",
+        "owner": "claude",
+        "claim_time": "2026-09-15T18:34:46Z",
+        "blocker": "SUPERSEDED WORK, no canonical route left (revalidated 02.10.26 under T-1596). Its verify clause asked for a removal that measurement showed is the wrong trade; the declared alias finder replaced it under T-1353, which is compacted off the board, so 'saipen ticket supersede T-1348 --by T-1353' refuses SUPERSESSION_SUCCESSOR_NOT_FOUND, and no ACTIVE operator receipt grants T-1348 - T-1353. The engineering decision stands and is not revisited. Class: SUPERSEDED/RETIRED WORK.",
+        "blocker_scope": "ticket"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1348/T-1348-e1ff6b2978caca2096f3fc56.BOARD.md",
+          "sha256": "e1ff6b2978caca2096f3fc5647ca3cf20212785a18433d54c4d027ab418972b4"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1341",
+      "fields": {
+        "verify": "entry-point-parity-six-green-hostile-shadow-refused",
+        "blocker": "SUPERSEDED WORK, no canonical route left (revalidated 02.10.26 under T-1596). The single-dedicated-owner repair landed in T-1340, which is compacted off the board, so 'saipen ticket supersede T-1341 --by T-1340' refuses SUPERSESSION_SUCCESSOR_NOT_FOUND (operations.py:4219-4231), and no ACTIVE operator receipt grants T-1341 - T-1340 either. Nothing about the repair is outstanding; only its retirement is, and manufacturing that authority is not authorized. Class: SUPERSEDED/RETIRED WORK.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1597",
+      "fields": {
+        "regression": "required",
+        "verify": "python -B -m unittest test_t1505_core_unit_sandbox_reclaim.HeldSandboxTests passes 4/4 in isolation; fails only inside the --jobs 6 family run (evidence .saipen/evidence/core-unit/4644b8dc16e3fd6f-20261002T174000Z.json)",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-02T18:32:20Z",
+        "blocker": "PUBLICATION ONLY: the defect is repaired (committed 5839da87), the module is 16/16 green and the declared family PASSed after the repair (4723 ran, red 0, new_red 0, record .saipen/evidence/core-unit/686f892d5de6e1ba-20261002T182551Z.json). What remains is release: the operator declined publication, so no committed release evidence names T-1597 and own_patch closure would be a claim without proof. Nothing about the repair itself is outstanding.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1566",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-144",
+        "blocker": "SUPERSEDED WORK, not settleable locally (restated 02.10.26 under T-1596). SRC-144 corrects the T-1563/T-1565 stabilization chain; graph reconciliation and containment are preserved in E-10859..E-10862. The canonical retirement route is 'saipen ticket supersede T-1566 --by T-1563', and every gate it names is closed here: this Work carries Source receipts (SRC-144) so the route refuses source migration; successor T-1563 is BLOCKED, not DONE; and no ACTIVE operator receipt grants T-1566 - T-1563. Manufacturing that grant is not authorized. Remaining class: EXTERNAL HUMAN AUTHORITY plus ACTIVE_DEPENDENCY:T-1563.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1515",
+      "fields": {
+        "verify": "host entry run from an MSYS/Cygwin shell on Windows (MSYSTEM or a POSIX SHELL in the environment) names the proven POSIX launcher bin/saipen as argv_prefix and command_form, cmd.exe and PowerShell hosts keep bin\\saipen.cmd; a red control shows HEAD naming the .cmd under MSYSTEM; the POSIX launcher is proven by the same prove_launcher bytes check",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-02T18:06:56Z",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1515/T-1515-37ee6b2345206c28e9096d4e.json",
+        "blocker": "PUBLICATION ONLY: the fix is committed (423dfed4) and proved by the declared family (4722 ran, red 0, new_red 0, record .saipen/evidence/core-unit/de085204f01b1920-20261002T180445Z.json) and by canonical validate (VALID, 0 FAIL). What is missing is release: the operator declined publication, so no committed release evidence names T-1515 and own_patch closure cannot be honest. Nothing about the change itself remains.",
+        "blocker_scope": "ticket"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1515/T-1515-37ee6b2345206c28e9096d4e.BOARD.md",
+          "sha256": "37ee6b2345206c28e9096d4e1747ba23d919f4a3d55e211830d6518264ca7617"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1446",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it [detail_ref: .saipen/recovery/board-compaction/T-1446/T-1446-757c49a80530e954a607771f.json]",
+        "user_explicit": "true",
+        "source_receipts": "SRC-100, SRC-105, SRC-106",
+        "needs": "T-1447, T-1448, T-1302, T-1457, T-1458, T-1453, T-1452, T-1456, T-1455, T-1454, T-1461, T-1460, T-1463, T-1467, T-1468, T-1469, T-1470, T-1500, T-1501, T-1520",
+        "owner": "astra",
+        "claim_time": "2026-09-26T11:41:45Z",
+        "blocker": "STALE SEAT CLAIM REMOVED, live measurement still outstanding (02.10.26 under T-1596). FALSE, proved today: 'the soak rerun is a long-running live 24H measurement ... PID 24736' -- tasklist reports no PID 24736, no python process carries a soak command line, and the only soak evidence on disk (.saipen/evidence/T-1446-field-soak-20260922/report.json) was written 25.09.26 with elapsed_seconds 4244.6 against wall_bound_seconds 3600. Nothing is holding the interactive seat and nothing is being contaminated. TRUE: the Work itself is a live 24H measurement of resident continue on the 9router model pool, and every child listed in needs: is DONE; a fresh bounded run is required and the pool run is a long-lived measurement no single interactive turn can own. This is the seat T-1428, T-1426, T-1425, T-1429, T-1494, T-1464, T-1515 and T-1327 sequence behind. No human action is required to START the rerun; what the drain did not do is launch an unattended 24H provider measurement on the operator's pool.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1446/T-1446-757c49a80530e954a607771f.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1446/T-1446-757c49a80530e954a607771f.BOARD.md",
+          "sha256": "757c49a80530e954a607771f8181935459223a2e838c753aa95a4205a92ed8bd"
+        }
+      ],
+      "dependencies": {
+        "T-1447": "## DONE",
+        "T-1448": "## DONE",
+        "T-1302": "## DONE",
+        "T-1457": "## DONE",
+        "T-1458": "## DONE",
+        "T-1453": "## DONE",
+        "T-1452": "## DONE",
+        "T-1456": "## DONE",
+        "T-1455": "## DONE",
+        "T-1454": "## DONE",
+        "T-1461": "## DONE",
+        "T-1460": "## DONE",
+        "T-1463": "## DONE",
+        "T-1467": "## DONE",
+        "T-1468": "## DONE",
+        "T-1469": "## DONE",
+        "T-1470": "## DONE",
+        "T-1500": "## DONE",
+        "T-1501": "## DONE",
+        "T-1520": "## DONE"
+      }
+    },
+    {
+      "ticket": "T-1314",
+      "fields": {
+        "verify": "a retention or settlement rule exists for saiwiki READY/ (settle superseded packages on publish, or prune beyond newest, or document READY/ as append-only archive with the OUTBOX as sole truth); after one publish the count rule is mechanical, not discretionary; red control proves a stale READY snapshot is never collectable; unittest and ruff PASS",
+        "blocker": "RESOLVED IN FACT, closure provenance is what remains (re-blocked 02.10.26 under T-1596 after the stale 'unvetted audit ... not markhunt's move' blocker was proven false on live evidence). The finding itself no longer exists; measured on this tree, resolve_implementation_source returns False for every local-only Work and True only for release:v8.0.1, which did not implement this repair, so neither inherited_verified nor own_patch can close a ticket with no attributable delta. Closure needs the same operator publication authorization as T-1283 and T-1565. Row stays truthfully blocked rather than runnable-but-unclosable.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1314/T-1314-e35ed585b41e2b57cd9da964.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1314/T-1314-e35ed585b41e2b57cd9da964.BOARD.md",
+          "sha256": "e35ed585b41e2b57cd9da964a612be48440be7d553a2d38cc225440e63331e1f"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1314/T-1314-006fc4ef0593e9aa1f0d64ed.BOARD.md",
+          "sha256": "006fc4ef0593e9aa1f0d64ed1a851484eb6b6a2925c469db20f4d324114d97bb"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1312",
+      "fields": {
+        "verify": "the mirror directory is either committed by decision or retired by decision (T-1307 owns the which), and MANIFEST.md's advertisement matches what git actually tracks; a validator check (or checklist rule) FAILs any MANIFEST.md-advertised sub whose tracked file count is 0; red control proves a tracked sub passes and an advertised-untracked sub fails; unittest and ruff PASS",
+        "blocker": "RESOLVED IN FACT, closure provenance is what remains (re-blocked 02.10.26 under T-1596 after the stale 'unvetted audit ... not markhunt's move' blocker was proven false on live evidence). The finding itself no longer exists; measured on this tree, resolve_implementation_source returns False for every local-only Work and True only for release:v8.0.1, which did not implement this repair, so neither inherited_verified nor own_patch can close a ticket with no attributable delta. Closure needs the same operator publication authorization as T-1283 and T-1565. Row stays truthfully blocked rather than runnable-but-unclosable.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1312/T-1312-97114551db3a7f71db4e84a4.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1312/T-1312-97114551db3a7f71db4e84a4.BOARD.md",
+          "sha256": "97114551db3a7f71db4e84a4232506366835ae408c0db5ec1a403cca9c668fab"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1312/T-1312-de0d0ebdebac190ca43a17ea.BOARD.md",
+          "sha256": "de0d0ebdebac190ca43a17ea6ada503ea34ae48d26c23558f32ab8af3ddf1813"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1311",
+      "fields": {
+        "verify": "the untracked-manifest finding names its entry source (explicit files entry vs copy tree src), so the remediation is actionable per case; explicit-entry and copy-tree-swept untracked files are distinguishable in validator output; red control with an untracked file outside any copy tree still FAILs identically; unittest and ruff PASS",
+        "blocker": "RESOLVED IN FACT, closure provenance is what remains (re-blocked 02.10.26 under T-1596 after the stale 'unvetted audit ... not markhunt's move' blocker was proven false on live evidence). The finding itself no longer exists; measured on this tree, resolve_implementation_source returns False for every local-only Work and True only for release:v8.0.1, which did not implement this repair, so neither inherited_verified nor own_patch can close a ticket with no attributable delta. Closure needs the same operator publication authorization as T-1283 and T-1565. Row stays truthfully blocked rather than runnable-but-unclosable.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1311/T-1311-69098c5ba2b6f84319a293c4.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1311/T-1311-69098c5ba2b6f84319a293c4.BOARD.md",
+          "sha256": "69098c5ba2b6f84319a293c44f795b46bd873006b41d10c712eca3942f268961"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1311/T-1311-b5a0cf1a9e9e05da9e613ad6.BOARD.md",
+          "sha256": "b5a0cf1a9e9e05da9e613ad6389ec13eed286eff11f2cd2f90bd4d86af351184"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1310",
+      "fields": {
+        "verify": "removing the staged active-surface files of a tombstoned receipt (or the named reverse reconciliation) returns validate_project to zero ORPHAN_RECEIPT; a gate distinguishes staged-add resurrection of a tombstoned receipt from a legitimate active receipt and names the receipt id and the contradicting index state; red control proves a genuinely missing active body still FAILs; unittest and ruff PASS",
+        "blocker": "RESOLVED IN FACT, closure provenance is what remains (re-blocked 02.10.26 under T-1596 after the stale 'unvetted audit ... not markhunt's move' blocker was proven false). The finding is gone on live evidence. This ticket owns no implementation delta, so the only closure modes available are inherited_verified (which needs an implementation source) or own_patch (which needs a per-ticket diff); measured on this tree, resolve_implementation_source returns False for every local-only Work ('DONE is an evidence claim, never proof of publication') and True for exactly one token, release:v8.0.1, which did not implement this repair. Closing therefore requires the same operator publication authorization as T-1283 and T-1565, and the drain does not manufacture it. Row stays truthfully blocked rather than runnable-but-unclosable.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1310/T-1310-04b681ab5a3446a98102f94f.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1310/T-1310-04b681ab5a3446a98102f94f.BOARD.md",
+          "sha256": "04b681ab5a3446a98102f94fa6e103d514a2b933d2b3b7167e9752e08361fe41"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1310/T-1310-af9be30548a3df75851bd003.BOARD.md",
+          "sha256": "af9be30548a3df75851bd00348a93a389fa98167d4fff981e6274f0f6553f174"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1309",
+      "fields": {
+        "verify": "locale_readme_paths (and every kitchen glob consumer) excludes non-locale directories by closed rule (dunder dirs, .translation-cache, no README_<NAME>.md convention match), so a __pycache__ beside locales changes nothing; a real locale directory without its README still reports as before; red control proves the exclusion is a closed list rather than broad stat ignore; unittest and ruff PASS",
+        "blocker": "RESOLVED IN FACT, closure provenance is what remains (re-blocked 02.10.26 under T-1596 after the stale 'unvetted audit ... not markhunt's move' blocker was proven false). The finding is gone on live evidence. This ticket owns no implementation delta, so the only closure modes available are inherited_verified (which needs an implementation source) or own_patch (which needs a per-ticket diff); measured on this tree, resolve_implementation_source returns False for every local-only Work ('DONE is an evidence claim, never proof of publication') and True for exactly one token, release:v8.0.1, which did not implement this repair. Closing therefore requires the same operator publication authorization as T-1283 and T-1565, and the drain does not manufacture it. Row stays truthfully blocked rather than runnable-but-unclosable.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1309/T-1309-9206e39fc2e9e04ccb4610c3.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1309/T-1309-9206e39fc2e9e04ccb4610c3.BOARD.md",
+          "sha256": "9206e39fc2e9e04ccb4610c3e790f2537dde03b6487814f08dc00179f40be5ba"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1308",
+      "fields": {
+        "verify": "a ready package whose declared read_set hashes all still match the live tree is collectable under the documented COMPATIBLE_DRIFT path even when the global triple moved, while any moved declared read dependency or write target still refuses; the collect gate prints which dependencies moved rather than only the global fingerprint; zero content-drift rebins stop being mandatory; unittest and ruff PASS",
+        "blocker": "STILL TRUE, restated 02.10.26 under T-1596: classify_integration (tools/saipen_engine/producer.py:775) and its COMPATIBLE_DRIFT class (producer.py:215) are still called ONLY from producer.py internals (lines 1844, 2013) and from tools/test_v7_producer_parallelism.py; tools/validate.py contains no reference to classify_integration or COMPATIBLE_DRIFT, so the gate that reports a stale package cannot classify the drift it just measured. The live symptom is unchanged and visible in the current --gate core output: WARN [producer-package-stale] for .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-014] plus 8 more, each saying 'package is stale and MUST NOT be collected', and --gate collect:saitranslate FAILs on the same class for SAIT-032. The remedy (let the gate classify the drift through COMPATIBLE_DRIFT instead of only refusing) is real Work and has no owner; the drain records it, it does not silently clear it.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1308/T-1308-8681ca8965dd5ff9460a2cca.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1308/T-1308-8681ca8965dd5ff9460a2cca.BOARD.md",
+          "sha256": "8681ca8965dd5ff9460a2ccadd5947759d930ffe4830530187132665c4be0189"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1308/T-1308-cbdd9fe2e10b9c3fa8f7c492.BOARD.md",
+          "sha256": "cbdd9fe2e10b9c3fa8f7c492d2f9acf60dd725a583a17ea093e3246d82904606"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1307",
+      "fields": {
+        "verify": "exactly ONE STATE/BOARD/LOG/OUTBOX surface answers for saitranslate: either extensions/subs/saitranslate/ is retired (MANIFEST entry removed, mirror OUTBOX deleted, canonical kitchen gains STATE/BOARD/LOG per crew.py:1084) or the canonical path is re-pointed and every special-case (subs.py:165, crew.py:249/1084, producer.py:1772, validate.py:4131, _producer_of) updated to one convention; a validation gate fails when the mirror and canonical OUTBOXes disagree on the newest ready package; unittest and ruff PASS",
+        "blocker": "STILL TRUE, restated from current evidence 02.10.26 under T-1596 (the old text was 'unvetted audit -- validate.py:4130-4133 dual outbox loop; live collect:saitranslate FAIL 09.09.26 03:38 from the superseded mirror entry'). What is GONE: the mirror half -- .saipen/extensions/subs/saitranslate/ no longer exists, so the FAIL no longer comes from a superseded mirror entry. What is TRUE: tools/validate.py --gate collect:saitranslate still FAILs (3 problems) and the remaining package failure is the live OUTBOX entry .saipen/saitranslate/kitchen/OUTBOX.md [SAIT-032], whose source_head a1e9c09f and source_tree_fingerprint 4c6fd9b3 no longer match the tree; together with the current --gate core WARN [producer-package-stale] (HUNT-014, 9 more) there are two live outbox surfaces carrying stale packages. The remediation is producer-owned refresh of those packages (the gate already refuses to collect them); what is missing is an owner seat, and the drain does not manufacture one. Not markhunt's move was true on 09.09.26; the finding is still real today.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1307/T-1307-11f601595f184d158d6280de.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1307/T-1307-11f601595f184d158d6280de.BOARD.md",
+          "sha256": "11f601595f184d158d6280de25d96db26293e761042e511c0b3557ddc4094754"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1307/T-1307-9c8aac3c34192135076c6023.BOARD.md",
+          "sha256": "9c8aac3c34192135076c60236c3578a90556f9e1ee692b04000e319df4b5b598"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1313",
+      "fields": {
+        "verify": "CHANGELOG overflow (entries beyond the declared ~10) moved verbatim to CHANGELOG_ARCHIVE.md and the warning stops emitting, or a live owner ticket exists naming the slug; the T-1245 descending-order red-control stays green after the move; validator output shows the warning count drop; unittest and ruff PASS",
+        "blocker": "PUBLICATION ONLY (re-blocked 02.10.26 under T-1596, replacing the false 'unvetted audit, observed live 09.09.26' blocker). The finding is fixed: CHANGELOG_ARCHIVE.md is tracked (caa96f69), CHANGELOG.md carries 11 version headings against its own ~10 header, and the current tools/validate.py --gate core run emits no changelog-unarchived warning. What remains is closure provenance only: inherited_verified resolution of T-1434 returns False ('T-1434 is DONE but no committed release evidence names it'), and the only green implementation source on this machine is release:v8.0.1, because every local-only Work fails the same check. Closing T-1313 therefore needs the same operator publish authorization as T-1283 and T-1565; until then the row is truthfully blocked, not runnable.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1313/T-1313-5c6c7f602356736d006ab94d.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1313/T-1313-5c6c7f602356736d006ab94d.BOARD.md",
+          "sha256": "5c6c7f602356736d006ab94da20636c313bbf17615886d46fd6e6d4bcd61619d"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1565",
+      "fields": {
+        "verify": "Foreign-tail quarantine repair preserved: retired zero-write raw appender, checkpointed last_event cut proof, no higher event cut, immutable prefix validation, original bytes and canonical repair event, public recover route, durable byte-bound evidence; current focused controls and coherent-tree full family new_red=0 required before closure",
+        "user_explicit": "true",
+        "source_receipts": "SRC-143",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-02T16:45:58Z",
+        "blocker": "PUBLICATION ONLY, and this is a DIFFERENT blocker from the VALIDATION_FAILED one retired at E-11754. The old validation conditions are resolved: the prose-budget red is gone (live cap 301*1024 = 308224 at tools/test_protocol_registry.py:207 against 308036 measured, tools.test_protocol_registry 16/16 OK) and the new-red is gone (family record .saipen/evidence/core-unit/17b0d2aa50036e70-20261002T162906Z.json, ran 4717, red [], new_red [], fingerprint equal to the live tree). Every clause of the verify: line is measured green and banked in E-11756: the zero-write raw appender is retired with no raw_append/_append_raw/zero_write symbol left in log.py, foreign_tail_cut at log.py:911 is the checkpointed last_event cut proof, structural_event_prefix at log.py:279 is the immutable prefix validation, _foreign_tail_route at reconcile.py:1996 is the public recover route, and the canonical repair events E-10859..E-10867 are durable in LOG; focused controls are 33 green (test_log_tail_quarantine 16, test_foreign_observation_authority 13, test_foreign_owner_terminal_route 4). The implementation delta is ALREADY COMMITTED, not outstanding: foreign_tail_cut arrived in fb91135a, that commit is an ancestor of HEAD, and git status is clean for log.py, reconcile.py, operations.py and runtime_namespace.py, so there is no build work and no uncommitted bytes. What is missing is publication: fb91135a sits on a local HEAD that is 48 commits ahead of and 2 behind origin/main, so the repair is not on the remote. Same operator authorization as T-1283: publishing to the public origin is outward-facing and was not authorized in this session. Resuming needs no re-measurement, only the publish decision, and the full evidence is in E-11754 and E-11756.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1565/T-1565-79c37929db94a8d6fa403439.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1565/T-1565-79c37929db94a8d6fa403439.BOARD.md",
+          "sha256": "79c37929db94a8d6fa403439fc2e4e2b531a4e776dfdc0d74853d5f01f0a3d94"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1283",
+      "fields": {
+        "verify": "AC-01 a settlement leaves a settled index that validates on the next read, proven by a test that goes red against the current sequencing; AC-02 an operation-specific query consults the index or segment offsets and does not construct a full semantic snapshot, proven by counting decodes rather than by timing; AC-03 latest_receipt validates its locator against a compact lineage generation and the per-receipt content-hash count stops scaling with the population, proven by the PERF-004 measurement control already in place; AC-04 an append inside the active segment does not re-hash sealed segments; AC-05 exact-byte receipt evidence stays authoritative and a deep leaf-by-leaf audit remains reachable from the explicit validation path; AC-06 red controls prove each new bound can go red; unittest, audit_checks and ruff PASS",
+        "needs": "T-1519",
+        "owner": "saipen-cli",
+        "claim_time": "2026-10-02T16:40:22Z",
+        "blocker": "AWAITING_OPERATOR_AUTHORIZATION: T-1283 code is complete and green through REVIEW (DEC: SHIP, E-11749; declared core-unit family 4717 ran with new_red 0, record .saipen/evidence/core-unit/17b0d2aa50036e70-20261002T162906Z.json bound to this tree by fingerprint; focused 12/12 and pre-existing lineage suite 21/21 re-run independently at REVIEW; red control 10/12 pre-fix vs 12/12 post-fix). The only remaining step is publication and it was NOT executed: the plan is 'ship v8.0.2' on branch accepted-debt-rebind, which would commit the 2 reviewed files, push them plus the release surface (VERSION, README.md and 34 locale mirrors, CHANGELOG.md) and create tag v8.0.2 on the public origin. An external publish to a public remote is outward-facing and was not authorized in this session; origin/main additionally carries 2 commits this branch does not have, and a concurrent session is actively editing the same working tree. Release scope is already recorded at .saipen/kitchen/release_scope/T-1283.json (E-11752), so an authorized ship needs no further preparation.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1283/T-1283-17804ebaaadf061cca2b25df.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1283/T-1283-17804ebaaadf061cca2b25df.BOARD.md",
+          "sha256": "17804ebaaadf061cca2b25dff18ffd2c289f6ca7614097a37d1ee8adc8aec194"
+        },
+        {
+          "path": ".saipen/recovery/board-compaction/T-1283/T-1283-431559f37496f73e4c00bd16.BOARD.md",
+          "sha256": "431559f37496f73e4c00bd16d5ca440f1fe7ffb2150c70da1c6687dce099a1e8"
+        }
+      ],
+      "dependencies": {
+        "T-1519": "## DONE"
+      }
+    },
+    {
+      "ticket": "T-1563",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-140,SRC-142,SRC-143,SRC-144",
+        "owner": "saipen-cli",
+        "claim_time": "2026-09-30T11:46:15Z",
+        "blocker": "BLOCKED_EXTERNAL -- CAPABILITY_UNAVAILABLE: no separated production host authority; containment and negative controls preserved; SRC-140 R007/R008/R009/R012 positive acceptance unresolved; tests use explicit downstream-only doubles, ten real positives unavailable; no fake HARD or DONE",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1562",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-139",
+        "owner": "saipen-cli",
+        "claim_time": "2026-09-29T13:57:28Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1563 -- PAUSED by user request SRC-140: explicit new task T-1563 takes the seat; resumes at SCOUT when T-1563 closes",
+        "blocker_scope": "ticket",
+        "needs": "T-1563",
+        "blocked_on": "T-1563",
+        "resume_phase": "SCOUT",
+        "resume_transition_from": "DONE"
+      },
+      "details": [],
+      "dependencies": {
+        "T-1563": "## BLOCKED"
+      }
+    },
+    {
+      "ticket": "T-1558",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-137,SRC-138",
+        "owner": "saipen-cli",
+        "claim_time": "2026-09-29T11:54:39Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1562 -- PAUSED by user request SRC-139: explicit new task T-1562 takes the seat; resumes at BUILD when T-1562 closes",
+        "blocker_scope": "ticket",
+        "needs": "T-1562",
+        "blocked_on": "T-1562",
+        "resume_phase": "BUILD",
+        "resume_transition_from": "VERIFY"
+      },
+      "details": [],
+      "dependencies": {
+        "T-1562": "## BLOCKED"
+      }
+    },
+    {
+      "ticket": "T-1551",
+      "fields": {
+        "verify": "A registry-backed Codex hook observes an operational turn final message, blocks invalid EXEC-RESPONSE-01 text and autonomous handback, permits a valid status boundary and ordinary non-operational chat, survives cold start and current install; focused tests and a real trusted host proof or exact trust blocker are recorded",
+        "owner": "saipen-cli",
+        "claim_time": "2026-09-28T12:25:30Z",
+        "blocker": "HOST_EXECUTION_UNAVAILABLE -- live Codex negative probe failed helper_sandbox_lock_failed / SetNamedSecurityInfoW 5, so REFUSED_EFFECT_PROVED is absent. Deterministic preflight found DUAL_HOOK_REPRESENTATION (hooks.json plus config.toml) and HOOK_TRUST_UNPROVEN; direct canonical checker reachable, host checker execution unproven. Keep user hooks intact. Resume VERIFY only after genuine host trust and successful real negative/positive controls; current-tree full core new_red=0 also owed.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1548",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-131,SRC-132,SRC-133",
+        "needs": "T-1549,T-1551",
+        "owner": "saipen-cli",
+        "claim_time": "2026-09-28T09:14:20Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1551 -- EXEC_RESPONSE_HOST_GAP -- Codex has a documented Stop hook but SAIPEN has no installed final-response guard for that supported executor; T-1551 owns the runtime binding and proof",
+        "blocker_scope": "ticket",
+        "blocked_on": "T-1551",
+        "resume_phase": "VERIFY",
+        "resume_transition_from": "BUILD"
+      },
+      "details": [],
+      "dependencies": {
+        "T-1549": "## DONE",
+        "T-1551": "## BLOCKED"
+      }
+    },
+    {
+      "ticket": "T-1541",
+      "fields": {
+        "regression": "required",
+        "verify": "test_optional_explicit_launch_is_checked_and_does_not_leak observes OWNERSHIP_CONFLICT for the explicit actor, records actor launch-seat, and confirms no foreign write; bare launch control stays valid.",
+        "owner": "saipen-cli",
+        "claim_time": "2026-09-27T18:45:17Z",
+        "blocker": "ORACLE_CHANGED -- hidden-runner stdout assertion was invalid for OpenCode; refusal reaches the provider transcript, and current tree only changes that verifier. No same-verifier pre/post implementation pair; preserve until canonical regression authority is resolved.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1532",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it [detail_ref: .saipen/recovery/board-compaction/T-1532/T-1532-3fa08c5e08c92683b6805025.json]",
+        "user_explicit": "true",
+        "source_receipts": "SRC-121",
+        "owner": "astra",
+        "claim_time": "2026-09-27T02:56:27Z",
+        "blocker": "CONTRACT_CONFLICT -- the requested behavior is forbidden by a declared contract this implementation cannot change unilaterally. SRC-121 asks for '/goal cc all'. The delivered shape (route a gg objective to the converge intent) contradicts saipen/CORE.md:494 'New objective pivots; bare continuation resumes and never replaces it', the COMMANDS.md gg row 'New goal; payload is the objective', and hardening control 6 bare-gg-not-continuation (tools/hardening_controls.json:7, anchored in saipen/CORE.md, mutation-checked at tools/audit_checks.py:2949), which requires the gg note to say 'NEW GOAL ONLY' and 'never a continuation alias' (enforced tools/validate.py:10458). It also made the new route MORE privileged than the real cc: saipen.py:3873 gates set_converge_intent on required_source_intent=normal so canonical cc refuses to replace a live execution_intent: goal, whereas the goal-route replaced it and wiped the goal counters -- the same 'naming the contract destroys Work in flight' defect this ticket exists to kill, relocated from BOARD to STATE. REVERTED in full: diff preserved at .saipen/kitchen/failed/T-1532.patch, test at .saipen/kitchen/failed/T-1532-test.py, operations.py restored, tree measures GOAL_SET for 'gg cc all' exactly as before. The choice below is a HUMAN one because both arms change declared protocol law, and this agent may not make it: (A) keep gg NEW GOAL ONLY, and satisfy '/goal cc all' at the OPERATOR surface instead -- the operator types 'saipen cc' (already the declared convergence entry, no code change, nothing to build) and the '/goal' framing is a host/session directive, not a saipen command; or (B) amend the contract first, under its own ticket: rewrite the gg row and CORE.md:494, supersede hardening control 6, and state the precedence between a continuation directive and a live goal -- then implement. Recommend (A): it delivers the user's intent with zero contract change. Note the residual defect is real but belongs elsewhere and is NOT fixed by this ticket: a bare 'cc all' objective still mints an echo ticket; the contract-clean place to catch that is a goal-objective VALIDATION refusal (refuse an objective that names a declared continue row, naming the canonical command), not a silent route.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1532/T-1532-3fa08c5e08c92683b6805025.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1532/T-1532-3fa08c5e08c92683b6805025.BOARD.md",
+          "sha256": "3fa08c5e08c92683b680502500a6ff08845457b79cab154d293e905b8446e27c"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1509",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-117",
+        "needs": "T-1506",
+        "owner": "astra",
+        "claim_time": "2026-09-24T21:03:52Z",
+        "blocker": "SEQUENCED_AFTER:T-1507 -- T-1506 DONE 34c32202 (XPATCH survival now reports XP-000001 intake.py + test_source_receipts.py). Next child is T-1507 (restore receipt-range normalization from XP-000001), paused under T-1510 which resumes after the T-1521 post-soak batch. No human action.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {
+        "T-1506": "## DONE"
+      }
+    },
+    {
+      "ticket": "T-1507",
+      "fields": {
+        "verify": "port onto current intake with its XP tests green; dry-run zero writes; red control on a BOARD with a structured range",
+        "owner": "astra",
+        "claim_time": "2026-09-24T09:25:09Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1510 -- PAUSED by user request SRC-118: explicit new task T-1510 takes the seat; resumes at SCOUT when T-1510 closes",
+        "blocker_scope": "ticket",
+        "needs": "T-1510",
+        "blocked_on": "T-1510",
+        "resume_phase": "SCOUT",
+        "resume_transition_from": "DONE"
+      },
+      "details": [],
+      "dependencies": {
+        "T-1510": "## DOING"
+      }
+    },
+    {
+      "ticket": "T-1327",
+      "fields": {
+        "needs": "T-1326",
+        "verify": "saipen runtime --prelaunch --adapter <id> reports RUNTIME_CURRENT with zero mutation on a current install and RUNTIME_RESYNCED after verifying engine, guard hook, launcher surface and provenance marker; a failed resync leaves the known-good install intact; the supported launch refuses to start a host on any non-green code; live OpenCode acceptance bootstraps an empty host home and reaches BOUND_VALID with no operator shell",
+        "owner": "astra",
+        "claim_time": "2026-09-24T06:52:30Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1446 -- acceptance resyncs the installed OpenCode runtime the live 24H soak worker executes, and needs live OpenCode runs on the same model pool. Resume SCOUT after T-1446 DONE; no human action.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {
+        "T-1326": "## DONE"
+      }
+    },
+    {
+      "ticket": "T-1429",
+      "fields": {
+        "verify": "a blocked ticket can declare one canonical due-time surface that status and explain-next project as deferred before its due instant and operator-actionable after it; a red control proves a due time written only as prose is never reported operator-actionable; T-1426 carries the first live use",
+        "source_receipts": "SRC-101",
+        "owner": "astra",
+        "claim_time": "2026-09-24T06:51:04Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1426 -- clauses 1-2 implemented (E-8114); clause 3 needs T-1426 live use of retry_not_before, and T-1426 resumes only after T-1428 -> T-1446. Resume VERIFY then; no human action.",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1429/T-1429-5009a0ab2ae8ca38d4ea6b8e.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1429/T-1429-5009a0ab2ae8ca38d4ea6b8e.BOARD.md",
+          "sha256": "5009a0ab2ae8ca38d4ea6b8e527195cafd19df26f3157d2b1cfe94666e8bf790"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1375",
+      "fields": {
+        "verify": "a fixture whose LOG quotes another project memory-root evidence path packs COMPLETE while a fixture citing its own absent proof still packs PROTOCOL_INCOMPLETE; SAIPEN own snapshot stays COMPLETE with that sentence restored verbatim",
+        "owner": "astra",
+        "claim_time": "2026-09-23T19:36:02Z",
+        "blocker": "WAIT_USER_DECISION -- the quoted foreign path is lexically identical to a local claim (.saipen/evidence/PERF-001_WINDOWS_EVIDENCE.md) and the COMPLETE verdict is made by AUDAPACK's consumer in another repository; pick the rule: A qualified foreign quotes, B git-provenance for bare absent citations, or C coverage prose demoted to optional (options at E-8913). Operator reply: T-1375 A|B|C",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1375/T-1375-034d4e11a94f628522fcb07d.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1375/T-1375-034d4e11a94f628522fcb07d.BOARD.md",
+          "sha256": "034d4e11a94f628522fcb07dbe67aa572a176ebadd3f4d60711de816026595df"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1431",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-084",
+        "needs": "T-1344,T-1476,T-1482,T-1481,T-1484,T-1485,T-1472,T-1383,T-1445,T-1474,T-1401,T-1402,T-1478,T-1489,T-1488,T-1465,T-1466,T-1442,T-1490,T-1491,T-1387,T-1496,T-1495,T-1430,T-1374,T-1375",
+        "owner": "astra",
+        "claim_time": "2026-09-23T19:35:56Z",
+        "blocker": "ACTIVE_DEPENDENCY:T-1375 -- SRC-084 phase F: T-1375 next; T-1431 resumes at SCOUT after it",
+        "blocker_scope": "ticket",
+        "blocked_on": "T-1375",
+        "resume_phase": "SCOUT",
+        "resume_transition_from": "DONE"
+      },
+      "details": [],
+      "dependencies": {
+        "T-1344": "## DONE",
+        "T-1476": "## DONE",
+        "T-1482": "## DONE",
+        "T-1481": "## DONE",
+        "T-1484": "## DONE",
+        "T-1485": "## DONE",
+        "T-1472": "## DONE",
+        "T-1383": "## DONE",
+        "T-1445": "## DONE",
+        "T-1474": "## DONE",
+        "T-1401": "## DONE",
+        "T-1402": "## DONE",
+        "T-1478": "## DONE",
+        "T-1489": "## DONE",
+        "T-1488": "## DONE",
+        "T-1465": "## DONE",
+        "T-1466": "## DONE",
+        "T-1442": "## DONE",
+        "T-1490": "## DONE",
+        "T-1491": "## DONE",
+        "T-1387": "## DONE",
+        "T-1496": "## DONE",
+        "T-1495": "## DONE",
+        "T-1430": "## DONE",
+        "T-1374": "## DONE",
+        "T-1375": "## BLOCKED"
+      }
+    },
+    {
+      "ticket": "T-1493",
+      "fields": {
+        "needs": "",
+        "verify": "red-then-green: at 20/20 the finishing operation checkpoints next_action WAIT: safety valve reached (N waves / M tickets) -- run cc to continue; an agent-run saipen continue on that state returns the WAIT and leaves both counters; only an operator-provenance cc (or explicit operator decision) writes DEC goal reauthorized; validate --gate core green at the cap",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1493/T-1493-512f449eef31f98abbe1d1c3.json",
+        "source_receipts": "SRC-112",
+        "blocker": "SUPERSEDED_PENDING:T-1494 -- operator note SRC-112 (captured 2026-09-23): the current verify clause (an agent-run continue must leave the WAIT) would degrade the autonomy an explicit /goal grants; the defect is the missing machine distinction between persistent /goal authority and fresh cc authority, owned by T-1494. Formal ticket supersede T-1493 --by T-1494 --authority SRC-112 once T-1494 is DONE",
+        "blocker_scope": "ticket"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1493/T-1493-512f449eef31f98abbe1d1c3.BOARD.md",
+          "sha256": "512f449eef31f98abbe1d1c335c25e95cf47670ae27f1e07c50938a5e69a9edf"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1428",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-083",
+        "owner": "astra",
+        "claim_time": "2026-09-21T20:36:32Z",
+        "claim_session": "973332d5b6502aed0ab65e43ff8e09a1",
+        "needs": "T-1427,T-1420,T-1361,T-1346,T-1345,T-1446",
+        "blocker": "ACTIVE_DEPENDENCY:T-1446 -- PAUSED by user request SRC-100: explicit new task T-1446 takes the seat; resumes at BUILD when T-1446 closes",
+        "blocker_scope": "ticket",
+        "blocked_on": "T-1446",
+        "resume_phase": "BUILD",
+        "resume_transition_from": "SCOUT"
+      },
+      "details": [],
+      "dependencies": {
+        "T-1427": "## DONE",
+        "T-1420": "## DONE",
+        "T-1361": "## DONE",
+        "T-1346": "## DONE",
+        "T-1345": "## DONE",
+        "T-1446": "## BLOCKED"
+      }
+    },
+    {
+      "ticket": "T-1425",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-079,SRC-080",
+        "owner": "glm-5.3-max",
+        "claim_time": "2026-09-20T16:31:17Z",
+        "claim_session": "58f9a7c59fcb66ddd6166c4e8f42d736",
+        "blocker": "ACTIVE_DEPENDENCY:T-1426 -- T-1425 is the superseded umbrella of the T-1424 mission (SRC-079/SRC-080); its technical repairs 1-5 and 7 are implemented and preserved under T-1426; T-1426 owns the unresolved live FreeBuff Desktop cc first-turn acceptance (SRC-081); this umbrella stays truthfully blocked on that manual result -- never reopened, never duplicated, and never falsely closed by deterministic green",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1426",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-081,SRC-082",
+        "owner": "glm-5.3-max",
+        "claim_time": "2026-09-20T16:55:09Z",
+        "claim_session": "ee3cbdb7033140fb08128456aca56e84",
+        "blocker": "ACTIVE_DEPENDENCY:T-1428 -- PAUSED by user request SRC-083: explicit new task T-1428 takes the seat; resumes at VERIFY when T-1428 closes",
+        "blocker_scope": "ticket",
+        "needs": "T-1428",
+        "blocked_on": "T-1428",
+        "resume_phase": "VERIFY",
+        "resume_transition_from": "BUILD"
+      },
+      "details": [],
+      "dependencies": {
+        "T-1428": "## BLOCKED"
+      }
+    },
+    {
+      "ticket": "T-1408",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-070",
+        "owner": "glm-5.3-max",
+        "claim_time": "2026-09-19T13:33:49Z",
+        "claim_session": "b1e97e0b7949c174805d31a946d9c328",
+        "blocker": "closure provenance refuses inherited_verified: implementation-source T-1406 does not resolve because T-1406 is DONE at local-only commit 376d7c78 and no committed release evidence names it; measured verdicts False for T-1406, T-1400, SRC-070 and release:376d7c78, while only pre-fix public releases such as 8.0.1 resolve and would be false attribution; the SRC-039 no-publish pause makes a durable release record impossible; T-1408 verify evidence is complete at E-7270/E-7271/E-7272 and SRC-070:R001 stays VERIFIED; unblock requires a durable no-publish release record naming T-1406 or T-1400, or an operator re-scope of this vehicle",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1323",
+      "fields": {
+        "verify": "public-release-polish-installer-certification-canonical-ship is complete and the repository-declared verification harness passes",
+        "owner": "codex",
+        "claim_time": "2026-09-13T20:54:50Z",
+        "blocker": "PAUSED by operator interrupt SRC-039 -- public ship/polish is explicitly paused; the P0 recovery-reachability wave takes the seat",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1317",
+      "fields": {
+        "verify": "the requested change is present and demonstrated against the user own description of it",
+        "user_explicit": "true",
+        "source_receipts": "SRC-028,SRC-029,SRC-030,SRC-031,SRC-032,SRC-033,SRC-034,SRC-035",
+        "owner": "codex",
+        "claim_time": "2026-09-13T16:26:17Z",
+        "needs": "T-1318",
+        "blocker": "BLOCKED_EXTERNAL -- SRC-028:R010 is an unconditional Kiro blocking-adapter requirement; current read-only registry probe found no kiro command and no declared ~/.kiro home, and no real host refused-effect proof exists. Source coverage is BLOCKED, not waived; do not install Kiro to manufacture closure.",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {
+        "T-1318": "## DONE"
+      }
+    },
+    {
+      "ticket": "T-1316",
+      "fields": {
+        "verify": "Three-way classifier centralized with unit matrix; ProTrail-shaped fixture converges with zero target rewrites, second recovery no-op, exact retry idempotent, conformance PASS after recovery and non-green before; partial prefix fixture proves targets 1-2 not rewritten and exactly target 3 applied; hostile third-state fixture returns RECOVERY_CONFLICT with zero mutations; 9-window crash fault-injection matrix restarts from disk deterministically; recover idempotent at every recoverable state; settlement-failure keeps committed authority; full unittest discover green plus ruff clean; fixture fails on pre-fix implementation",
+        "owner": "astra2",
+        "claim_time": "2026-09-11T23:01:58Z",
+        "blocker": "ship blocked pre-publication: SRC-027:R014 is DEFERRED and DEFERRED is not terminal, so coverage_complete(SRC-027)=False (14 VERIFIED, unresolved=[SRC-027:R014]) and release_gate refuses; independently SRC-026 (ACTIVE, owned by the operator-paused T-1304) has 8 UNKNOWN actionable requirements, so release_gate returns SOURCE_UNRESOLVED for a receipt this ticket does not own and must not adjudicate. No honest terminal disposition exists for either until the 6 foreign discover reds clear and T-1304's source coverage is resumed",
+        "blocker_scope": "ticket",
+        "source_receipts": "SRC-027",
+        "detail_ref": ".saipen/recovery/board-compaction/T-1316/T-1316-1546c8cc265ec44e3aeb7af0.json"
+      },
+      "details": [
+        {
+          "path": ".saipen/recovery/board-compaction/T-1316/T-1316-1546c8cc265ec44e3aeb7af0.BOARD.md",
+          "sha256": "1546c8cc265ec44e3aeb7af0592ca70489ac4a5e7eb9dc04a290e2a45cdda525"
+        }
+      ],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1304",
+      "fields": {
+        "verify": "every actionable clause of SRC-026 is terminal with evidence; linked Work DONE; source closure succeeds; audit/16.md consumed by the journaled audit inbox cleanup; source_receipt=SRC-026",
+        "source_receipts": "SRC-026",
+        "owner": "astra2",
+        "claim_time": "2026-09-11T01:03:26Z",
+        "blocker": "PAUSED by operator interrupt SRC-027: P0 journal recovery reconciliation takes the seat; resume R004 baseline-in-transition BUILD work after T-1316 closes; last state E-6006 BUILD R004",
+        "blocker_scope": "ticket"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-1257",
+      "fields": {
+        "needs": "T-473",
+        "verify": "direct apply performs zero target-source writes when target lineage changed, intent malformed, any before-hash moved, path escaped declared scope, target path was already dirty, receipt namespace unsafe or the effect is irreversible, and degrades to TARGET_DRIFT mode=proposal writes=0; the CAS guard is proven to be the shared T-473 stale-write detector rather than a private second mechanism; the implementation names why it is bounded interoperability and not v8 Concurrent Mode",
+        "blocker": "HELD -- unmet dependency T-473; not schedulable until the concurrent whole-file clobber guard exists"
+      },
+      "details": [],
+      "dependencies": {
+        "T-473": "## BLOCKED"
+      }
+    },
+    {
+      "ticket": "T-1119",
+      "fields": {
+        "verify": "log-soft-cap owned",
+        "blocker": "PERMANENT_WARNING_OWNER -- the condition can never be met and immutable history is why. LOG.md carries 125 pre-date sealed entries; new entries are FAILed, so the warning emits forever and no work closes it"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-473",
+      "fields": {
+        "needs": "T-442",
+        "verify": "a read-then-foreign-write-then-write sequence is refused; an unchanged file writes normally; the guard stays a detector and never becomes a scope or locking scheme",
+        "blocker": "HELD -- unmet dependency; not schedulable until concurrent-mode gate completes"
+      },
+      "details": [],
+      "dependencies": {
+        "T-442": "## BLOCKED"
+      }
+    },
+    {
+      "ticket": "T-407",
+      "fields": {
+        "verify": "validator PASS while this ticket is live and names the slug; closing it while the warning emits fails the ownership check (T-401)",
+        "blocker": "PERMANENT_WARNING_OWNER -- the condition can never be met and immutable history is why. E-1659 logged a `DEC: goal reauthorized` under the caps, `LOG.md` is append-only, so the warning emits forever and no work closes it. Same trap as T-406: in `## TODO` the Pick Rule was obliged to select a ticket whose own `verify:` says closing it FAILs"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-406",
+      "fields": {
+        "verify": "validator PASS while this ticket is live and names the slug; closing it while the warning emits fails the ownership check (T-401)",
+        "blocker": "PERMANENT_WARNING_OWNER -- the condition can never be met and immutable history is why. `MANIFEST.md` advertises saipython live until its board opens, so the warning emits every validation; this ticket exists to own it, and its own `verify:` says closing it while the warning emits FAILs the ownership check. Sitting in `## TODO` it was a ticket the Pick Rule MUST take and no agent can finish. It leaves `## BLOCKED` when saipython actually runs or is de-advertised -- a real event, not work anyone can pick"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-442",
+      "fields": {
+        "verify": "the unblock decision names the closed defect classes, current green evidence and the exact sequential release used as the stability checkpoint; no Crew implementation exists before this ticket reaches DONE",
+        "blocker": "HELD -- sequential stability gate; unblocks when the v8 prerequisites are proven"
+      },
+      "details": [],
+      "dependencies": {}
+    },
+    {
+      "ticket": "T-575",
+      "fields": {
+        "verify": "the unblock decision names each prerequisite with fresh evidence including the completed v8 soak and a green post-release v8 stability checkpoint; every copied/adapted unit is recorded in saipen/runtime/UPSTREAM.json and THIRD_PARTY_NOTICES.md; the 30 red controls in V9_RUNTIME.md are listed before any V9-M1 implementation",
+        "blocker": "HELD -- until actual v8 Concurrent Mode exists and is stable"
+      },
+      "details": [],
+      "dependencies": {}
+    }
+  ]
+}

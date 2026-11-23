@@ -1,0 +1,6 @@
+STATUS: VERIFY T-1757
+RESULT: Peatatud operaatori soovil; 77 blokeeritud (BLOCKED_EXTERNAL 11, MARKHUNT_TRIAGE_REQUIRED 8, HELD 4)
+NEXT EXACT ACTION: PHASE VERIFY T-1757
+VALIDATION: STALE_FAIL
+
+Kasutuslimiit on täis. Tehtud: T-1747 ja T-1751. Pooleli: T-1757 testiperekonna jooks. Ootel: kuus ettevalmistatud paika kaustas `.saipen/evidence` (T-1753, T-1756, T-1752, T-1749, T-1750, T-1758).

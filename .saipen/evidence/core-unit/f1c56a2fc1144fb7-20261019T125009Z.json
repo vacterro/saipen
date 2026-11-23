@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "family": "unit",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "fingerprint": "f1c56a2fc1144fb7fc736ec3f0e89ce82624e12c6ef30dad98f6d26da6fff7f1",
+  "fingerprint_excludes": [
+    ".git",
+    ".saipen",
+    "audit"
+  ],
+  "baseline_sha256": "81516ef194be0dcb17a85f38a290d9f166d7b2ebd4f55dd41e484a690b501244",
+  "head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "finished_utc": "2026-10-19T12:50:09Z",
+  "status": "FAIL",
+  "exit_code": 1,
+  "ran": 6925,
+  "duration_s": 5116.9,
+  "timeout_s": 5400,
+  "headers": 6,
+  "unparsed": 0,
+  "tallied": 6,
+  "red": [
+    "test_t1627_operator_question.QuestionAuthorityTests.test_cold_real_project_route_wins_over_an_absent_provider_session",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_real_claude_pretool_question_is_refused_before_ui_delivery",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_real_opencode_question_hook_is_refused_before_ui_delivery",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_real_wait_projection_admits_only_its_owned_operator_action",
+    "test_t1645_zero_hunt.PathMissColdStartTests.test_git_bash_runs_the_posix_launcher_with_forward_slashes",
+    "test_t1645_zero_hunt.PathMissColdStartTests.test_the_state_read_resolves_the_home_launcher"
+  ],
+  "red_sections": {
+    "test_t1627_operator_question.QuestionAuthorityTests.test_cold_real_project_route_wins_over_an_absent_provider_session": "FAIL: test_cold_real_project_route_wins_over_an_absent_provider_session (test_t1627_operator_question.QuestionAuthorityTests.test_cold_real_project_route_wins_over_an_absent_provider_session)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\_TEMP_\\saipen-core-unit-xb2lo7i6\\project\\tools\\test_t1627_operator_question.py\", line 241, in test_cold_real_project_route_wins_over_an_absent_provider_session\n    self.assertEqual(status[\"automation\"][\"disposition\"], \"CONTINUE\")\nAssertionError: 'BLOCKED' != 'CONTINUE'\n- BLOCKED\n+ CONTINUE",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_real_claude_pretool_question_is_refused_before_ui_delivery": "FAIL: test_real_claude_pretool_question_is_refused_before_ui_delivery (test_t1627_operator_question.QuestionAuthorityTests.test_real_claude_pretool_question_is_refused_before_ui_delivery)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\_TEMP_\\saipen-core-unit-xb2lo7i6\\project\\tools\\test_t1627_operator_question.py\", line 203, in test_real_claude_pretool_question_is_refused_before_ui_delivery\n    self.assertIn(\"AUTONOMOUS_HANDBACK\", str(answer))\nAssertionError: 'AUTONOMOUS_HANDBACK' not found in \"{'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason': 'INVALID_OPERATIONAL_PROSE -- OPERATOR-QUESTION-01: no canonical operator decision is due; use saipen status --json'}}\"",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_real_opencode_question_hook_is_refused_before_ui_delivery": "FAIL: test_real_opencode_question_hook_is_refused_before_ui_delivery (test_t1627_operator_question.QuestionAuthorityTests.test_real_opencode_question_hook_is_refused_before_ui_delivery)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\_TEMP_\\saipen-core-unit-xb2lo7i6\\project\\tools\\test_t1627_operator_question.py\", line 220, in test_real_opencode_question_hook_is_refused_before_ui_delivery\n    self.assertIn(\"AUTONOMOUS_HANDBACK\", result[\"message\"])\nAssertionError: 'AUTONOMOUS_HANDBACK' not found in \"SAIPEN_GUARD_REFUSAL: VALIDATION_FAILED: the saipen guard refused tool 'question'; the host tool did not execute (INVALID_OPERATIONAL_PROSE; OPERATOR-QUESTION-01) next: saipen status --json\"",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_real_wait_projection_admits_only_its_owned_operator_action": "FAIL: test_real_wait_projection_admits_only_its_owned_operator_action (test_t1627_operator_question.QuestionAuthorityTests.test_real_wait_projection_admits_only_its_owned_operator_action)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\_TEMP_\\saipen-core-unit-xb2lo7i6\\project\\tools\\test_t1627_operator_question.py\", line 255, in test_real_wait_projection_admits_only_its_owned_operator_action\n    self.assertTrue(status[\"automation\"][\"operator_action_due\"])\nAssertionError: False is not true",
+    "test_t1645_zero_hunt.PathMissColdStartTests.test_git_bash_runs_the_posix_launcher_with_forward_slashes": "FAIL: test_git_bash_runs_the_posix_launcher_with_forward_slashes (test_t1645_zero_hunt.PathMissColdStartTests.test_git_bash_runs_the_posix_launcher_with_forward_slashes)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\_TEMP_\\saipen-core-unit-xb2lo7i6\\project\\tools\\test_t1645_zero_hunt.py\", line 193, in test_git_bash_runs_the_posix_launcher_with_forward_slashes\n    self._check([sh, str(posix).replace(\"\\\\\", \"/\")])\n  File \"V:\\_TEMP_\\saipen-core-unit-xb2lo7i6\\project\\tools\\test_t1645_zero_hunt.py\", line 171, in _check\n    self.assertEqual(payload.get(\"ticket\"), self.tid, proc.stdout + proc.stderr)\nAssertionError: None != 'T-1' : {\n  \"ok\": false,\n  \"code\": \"VALIDATION_FAILED\",\n  \"detail\": \"home-dead: home-divergent: the RUNNING install is V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN (fingerprint: install-v1:4a73a9345d56a8b43df3c614f68fbaf057e94b7ab057f8f803dd5e2fcd9cfe5d) but STATE.saipen_home names V:\\\\_TEMP_\\\\saipen-core-unit-xb2lo7i6\\\\project (fingerprint: install-v1:594c271782f03d9cb8e76a2f049838acdacc1e918c5bd8a5f1b3681012f6a49f) -- the installs carry different protocol or engine bytes. Evidence produced now is attributable to the running engine, not the named one. Run saipen through the install STATE names, or converge with `saipen rebind-home --auto`. -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)\",\n  \"telegrams\": {\n    \"state\": \"OK\",\n    \"unread\": 0,\n    \"on_current_work\": 0,\n    \"complete\": true,\n    \"read_command\": \"saimail-local saipen brief --project-root V:\\\\_TEMP_\\\\saipen-t1614-bxgcyejk\\\\project --workspace C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\saipen\\\\saimail --seat tester\",\n    \"detail\": \"counts only; nothing was opened and nothing here is an instruction\"\n  }\n}",
+    "test_t1645_zero_hunt.PathMissColdStartTests.test_the_state_read_resolves_the_home_launcher": "FAIL: test_the_state_read_resolves_the_home_launcher (test_t1645_zero_hunt.PathMissColdStartTests.test_the_state_read_resolves_the_home_launcher)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\_TEMP_\\saipen-core-unit-xb2lo7i6\\project\\tools\\test_t1645_zero_hunt.py\", line 185, in test_the_state_read_resolves_the_home_launcher\n    self._check([\"cmd\", \"/c\", str(native)] if os.name == \"nt\" else [str(native)])\n  File \"V:\\_TEMP_\\saipen-core-unit-xb2lo7i6\\project\\tools\\test_t1645_zero_hunt.py\", line 171, in _check\n    self.assertEqual(payload.get(\"ticket\"), self.tid, proc.stdout + proc.stderr)\nAssertionError: None != 'T-1' : {\n  \"ok\": false,\n  \"code\": \"VALIDATION_FAILED\",\n  \"detail\": \"home-dead: home-divergent: the RUNNING install is V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN (fingerprint: install-v1:4a73a9345d56a8b43df3c614f68fbaf057e94b7ab057f8f803dd5e2fcd9cfe5d) but STATE.saipen_home names V:\\\\_TEMP_\\\\saipen-core-unit-xb2lo7i6\\\\project (fingerprint: install-v1:594c271782f03d9cb8e76a2f049838acdacc1e918c5bd8a5f1b3681012f6a49f) -- the installs carry different protocol or engine bytes. Evidence produced now is attributable to the running engine, not the named one. Run saipen through the install STATE names, or converge with `saipen rebind-home --auto`. -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)\",\n  \"telegrams\": {\n    \"state\": \"OK\",\n    \"unread\": 0,\n    \"on_current_work\": 0,\n    \"complete\": true,\n    \"read_command\": \"saimail-local saipen brief --project-root V:\\\\_TEMP_\\\\saipen-t1614-51e0wjqb\\\\project --workspace C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\saipen\\\\saimail --seat tester\",\n    \"detail\": \"counts only; nothing was opened and nothing here is an instruction\"\n  }\n}"
+  },
+  "processes_leaked": [
+    26856
+  ],
+  "jobs": 1,
+  "verdict": "FAIL",
+  "new_red": [
+    "test_t1627_operator_question.QuestionAuthorityTests.test_cold_real_project_route_wins_over_an_absent_provider_session",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_real_claude_pretool_question_is_refused_before_ui_delivery",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_real_opencode_question_hook_is_refused_before_ui_delivery",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_real_wait_projection_admits_only_its_owned_operator_action",
+    "test_t1645_zero_hunt.PathMissColdStartTests.test_git_bash_runs_the_posix_launcher_with_forward_slashes",
+    "test_t1645_zero_hunt.PathMissColdStartTests.test_the_state_read_resolves_the_home_launcher"
+  ],
+  "fixed": [],
+  "problems": [
+    "6 new red outside the baseline"
+  ]
+}

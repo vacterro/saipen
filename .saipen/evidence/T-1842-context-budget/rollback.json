@@ -1,0 +1,11 @@
+{
+  "checks": {
+    "saipen/COMMANDS.md": true,
+    "saipen/phases/verify.md": true,
+    "saipen/phases/ship.md": true,
+    "staged_entries_unchanged": true
+  },
+  "saved_attempt": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1842-context-budget\\failed-attempt",
+  "patch": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\kitchen\\failed\\T-1842.patch",
+  "reason": "Two-cycle guard; restore only this Work own preimages, not HEAD or inherited staging."
+}

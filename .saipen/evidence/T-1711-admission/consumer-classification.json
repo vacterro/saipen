@@ -1,0 +1,81 @@
+{
+  "state_task": "T-31",
+  "state_phase": "VERIFY",
+  "tail": 356,
+  "verification": [
+    false,
+    "lifecycle blocker: regression gate wants machine-recorded FAIL-PASS pair, but run and declare are unimplemented and work reverify run refuses active tickets; same-verifier FAIL plus PASS checkpoints recorded from genuine red and green runs in-cycle, REVIEW still refused; fix and evidence preserved, no fabrication"
+  ],
+  "regression": [
+    false,
+    "NO_REGRESSION_EVIDENCE: no FAIL half of a regression pair was recorded in this VERIFY cycle. A ticket declaring `regression: required` owes both: the SAME verifier red against the pre-fix subject and green against the post-fix one"
+  ],
+  "candidate_evidence": [
+    {
+      "date": "09.10.26 08:15",
+      "event": 335,
+      "parent": 334,
+      "ticket": "T-31",
+      "agent": "saipen",
+      "op_id": "checkpoint-3bee032b52c842198b7e5847ecb0f2af",
+      "taxonomy": "RUN",
+      "text": "verify PASS [target: T-31] conf: high -- support 10 pass, content-features 29 pass, doctor HEALTHY"
+    },
+    {
+      "date": "09.10.26 08:16",
+      "event": 336,
+      "parent": 335,
+      "ticket": "T-31",
+      "agent": "saipen",
+      "op_id": "checkpoint-f18a8a0fcddd438faa5e0a70e9d729c5",
+      "taxonomy": "RUN",
+      "text": "verify PASS [target: T-31] conf: high -- regression pair: denied and missing clipboard tests FAIL on pre-fix build, all support 10 pass plus content-features 29 pass on fixed build"
+    },
+    {
+      "date": "09.10.26 08:17",
+      "event": 341,
+      "parent": 340,
+      "ticket": "T-31",
+      "agent": "saipen",
+      "op_id": "checkpoint-e39954b376644fd8864308103df058ed",
+      "taxonomy": "RUN",
+      "text": "verify PASS [target: T-31] conf: high -- clipboard-failure-tests: 2 failed pre-fix, all support 10 pass post-fix"
+    },
+    {
+      "date": "09.10.26 08:19",
+      "event": 344,
+      "parent": 343,
+      "ticket": "T-31",
+      "agent": "saipen",
+      "op_id": "checkpoint-e95ee81be6854e2ab11f66a6a57ecff3",
+      "taxonomy": "RUN",
+      "text": "verify PASS [target: T-31] conf: high -- support-clipboard: 10 passed post-fix"
+    },
+    {
+      "date": "09.10.26 09:47",
+      "event": 350,
+      "parent": 349,
+      "ticket": "T-31",
+      "agent": "saipen",
+      "op_id": "checkpoint-e9f90b0b64cf48168570db6f5d82762c",
+      "taxonomy": "RUN",
+      "text": "verify PASS target T-31 conf high -- node --test release-checklist suite: 41 pass 0 fail; playwright support plus content-features suites: all pass on current tree; attempt A-006 closed candidate"
+    }
+  ],
+  "root": "V:\\___VAC\\__K\\__CODE\\_HTML\\_SAI_WEBSITE",
+  "before": {
+    "STATE.md": "b3a716d43d39dd88771f8654fc2951ac7814cbb1b659be5fd50a205240b74e37",
+    "BOARD.md": "a3f06b495ac028eac6e486f0f1f6c402a6cec1fdd821535808ef7ca84e3d6bcc",
+    "LOG.md": "695b0d16ff062bc8bea0e717e2a055e2d2216da7dde7471a805ef4d82685d039",
+    "IDENTITY.md": "38e1497fea50bbed7615c7f13e6140e8e4181bb345b32283b591fe94f721fa08"
+  },
+  "after": {
+    "STATE.md": "b3a716d43d39dd88771f8654fc2951ac7814cbb1b659be5fd50a205240b74e37",
+    "BOARD.md": "a3f06b495ac028eac6e486f0f1f6c402a6cec1fdd821535808ef7ca84e3d6bcc",
+    "LOG.md": "695b0d16ff062bc8bea0e717e2a055e2d2216da7dde7471a805ef4d82685d039",
+    "IDENTITY.md": "38e1497fea50bbed7615c7f13e6140e8e4181bb345b32283b591fe94f721fa08"
+  },
+  "canonical_bytes_unchanged": true,
+  "mutations": 0,
+  "limit": "Current source classifier; no foreign transition or evidence admission attempted"
+}

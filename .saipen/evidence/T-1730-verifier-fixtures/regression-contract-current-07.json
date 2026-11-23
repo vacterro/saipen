@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t158[16]_*.py"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "extensions",
+    "bootstrap",
+    "bin",
+    "tests",
+    ".github",
+    "VERSION",
+    "README.md",
+    "README.ee.md",
+    "README.ded.md",
+    "README.ja.md",
+    "CHANGELOG.md",
+    "CHANGELOG_ARCHIVE.md",
+    "GUIDE.md",
+    "ruff.toml",
+    ".gitignore",
+    ".gitattributes"
+  ],
+  "oracle_files": [
+    "tools/test_t1586_scenario_inputs.py",
+    "tools/test_t1581_phase_rename_knowledge.py",
+    "tools/test_fixture_support.py",
+    "bootstrap/install_ownership.py",
+    "tests/scenarios/resume-after-crash/.saipen/STATE.md",
+    "tests/scenarios/resume-after-crash/.saipen/BOARD.md",
+    "tests/scenarios/resume-after-crash/.saipen/LOG.md",
+    "tools/release_ledger_baseline.json",
+    "README.md",
+    "CHANGELOG_ARCHIVE.md",
+    "GUIDE.md"
+  ],
+  "subject_files": [
+    "tools/run_scenarios.py",
+    "tools/audit_checks.py",
+    "tools/validate.py"
+  ],
+  "before": {
+    "tools/run_scenarios.py": ".saipen/evidence/T-1730-verifier-fixtures/before/run_scenarios.py",
+    "tools/audit_checks.py": ".saipen/evidence/T-1730-verifier-fixtures/before/audit_checks.py",
+    "tools/validate.py": ".saipen/evidence/T-1730-verifier-fixtures/before/validate.py"
+  },
+  "timeout": 300
+}

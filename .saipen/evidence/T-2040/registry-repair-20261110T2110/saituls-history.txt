@@ -1,0 +1,27 @@
+
+$ git rev-parse HEAD
+rc 0
+555911ff03a7cca969f0b143c3370e12ba043abf
+
+ERR 
+
+$ git log --format=%H %ad %s --date=short -8 -- Scripts/accounts/SaiAccounts.cs
+rc 0
+d93b212f2c27763a62b00fc2641755a43a6f4004 2026-10-29 accounts: carry the readiness-separation implementation into history
+041f00ed1bc0b4b4841ca3edbb5912dd39461349 2026-10-20 sync: current SAITULS tree to GitLab (T-304 + accumulated project work)
+
+ERR 
+
+$ git status --porcelain -- Scripts/accounts/SaiAccounts.cs
+rc 0
+ M Scripts/accounts/SaiAccounts.cs
+
+ERR 
+
+$ git rev-parse HEAD:Scripts/accounts/SaiAccounts.cs
+rc 0
+0eac11caef25dd4308af881ed99281a7501af8f8
+
+ERR 
+HEAD blob sha 0eac11caef25dd4308af881ed99281a7501af8f8
+worktree sha 0bae50f9359deff6a189d1b666957114e3d71f3a7e07ac8b643e1e92b65a257f

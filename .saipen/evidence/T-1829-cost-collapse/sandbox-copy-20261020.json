@@ -1,0 +1,61 @@
+{
+  "scope": "full-state copy and discovery observation; not verification acceptance",
+  "executed_suite": false,
+  "runtime": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "platform": "win32",
+  "stages": {
+    "first_copy_wall_s": 61.436365,
+    "private_worker_clone_wall_s": 58.300301,
+    "discovery_probe_wall_s": 4.042258
+  },
+  "cleanup": [
+    {
+      "path": "V:\\_TEMP_\\saipen-core-unit-8ggkow51",
+      "removed": true,
+      "wall_s": 16.203462
+    },
+    {
+      "path": "V:\\_TEMP_\\saipen-core-unit-8fhzcz60",
+      "removed": true,
+      "wall_s": 15.616347
+    }
+  ],
+  "copy_metrics": {
+    "subject_copy_s": 17.828,
+    "canonical_copy_s": 43.203,
+    "canonical_copy_attempts": 1
+  },
+  "input_inventory": {
+    "files_or_links": 126343,
+    "bytes": 1619873072,
+    "sha256": "b894f55d54e31006d8ff1e293d7f16506382e7c1c25f48a312358f33114252fb",
+    "inventory_wall_s": 21.438027
+  },
+  "source_fingerprint": "d23c49152ef1f81d04ae62a34a7eaaac2fb36fc512618946f3dbae3cba5aa24d",
+  "private_worker_inventory": {
+    "files_or_links": 126343,
+    "bytes": 1619873072,
+    "sha256": "b894f55d54e31006d8ff1e293d7f16506382e7c1c25f48a312358f33114252fb",
+    "inventory_wall_s": 19.204345
+  },
+  "private_clone_exact": true,
+  "hardlink_witness": {
+    "supported": true,
+    "source_before": "original",
+    "source_after": "worker mutation",
+    "worker_after": "worker mutation",
+    "source_changed": true,
+    "decision": "reject shared mutable hardlinks; original was modified"
+  },
+  "discovery": {
+    "purpose": "full real discovery, select only import failures; no suite acceptance",
+    "status": "PASS",
+    "exit_code": 0,
+    "discovered_occurrences": 7076,
+    "discovery_wall_s": 3.742825,
+    "inventory_sha256": "a6ca2c9a90f79269cd9ca847f9f4384cd6db2609a43b2a0556723eb241864a04",
+    "import_error_indices": [],
+    "ran_import_error_cases": 0,
+    "red": []
+  }
+}

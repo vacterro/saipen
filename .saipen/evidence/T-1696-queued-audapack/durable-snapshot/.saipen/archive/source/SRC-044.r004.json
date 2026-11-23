@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-044:R1": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[CORE-001] add red-first tests that (1) ingest Core, overwrite latest with different bytes while leaving the path present, duplicate identical content, and require either canonical repair followed by hash equality or a non-200 durability failure; (2) verify_only on the corrupted existing file must return `files_intact=false` with explicit corrupt/hash-mismatch evidence; (3) complete Quick3, delete `__00_AUDIT_ALL_3.md`, verify_only must report it non-durable; (4) duplicate/materialize repair must restore the final artifact when appropriate; (5) corrupt history/latest/final independently and assert no green durability state until byte verification passes."
+    },
+    "SRC-044:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[CORE-002] snapshot project config bytes and the existence/tree of the audit root before verify_only. Test an intact project, deleted project directory, missing history directory, and legacy run with no project_id/unknown project. After every verify_only response assert config bytes unchanged, registry count unchanged, no directory/file created, no run-state/materialization receipt changed, while missing paths are still reported accurately."
+    },
+    "SRC-044:R3": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[CORE-003] add materialize + verify_only regressions using the same alias cases already accepted by test_run_bound_to_project_id_and_alias_accepted, including `SAIPEN` vs `s a i p e n`; both must return 200 and resolve project id `saipen`. Preserve the existing foreign-project test: `OTHER` must remain 409 with zero writes."
+    },
+    "SRC-044:R4": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[CORE-004] expand W6-002 retry tests into a table over immutable-semantic and externally-repairable codes. For every immutable code assert Retry all returns skipped, preserves `permanent=true`, errorCode/body/run/profile/project unchanged and records manual_retry_refused. For auth/offline/order-dependent cases assert requeue still works. Include project_identity_conflict generated from a real mismatched handoff and campaign_profile_conflict from a run bound to another profile, then prove repeated Retry all cannot cycle either job."
+    }
+  },
+  "derived_at": "2026-09-11T23:16:19Z",
+  "derived_from": "SRC-044",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "4db0ccc75f8b0a1e4e3c7892ab0e1f67eb19bb53c50dd288b47a0fcd34666b0d"
+}

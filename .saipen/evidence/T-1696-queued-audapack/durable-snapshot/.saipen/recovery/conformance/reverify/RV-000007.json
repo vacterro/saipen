@@ -1,0 +1,30 @@
+{
+  "agent": "opencode",
+  "created_at": "2026-09-09T11:00:06Z",
+  "findings_digest": "3bff90de0e50616a6317cc22bd716417e1e5427bbbfe162507c8e7493aa90a4c",
+  "gate": "core",
+  "integrity_digest": "e92f491e51c1b8ef",
+  "journal_op_id": "reverify.db8cec4beb0e",
+  "own_problem_keys": [
+    "ff368d8fe872fa17"
+  ],
+  "problem_count": 87,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000007",
+  "ruleset_fingerprint": "35251f00fa567709f75dae23144f35571c8a9854b5c167344995a27657e87713",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:17ed80fda5e0fcf370469da5fe3456a513f1428ace07651c0f6d61ab1e4911ac",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "python -m pytest -q tests/ui_qt/test_state_columns.py tests/ui_qt/test_project_row_density.py tests/ui_qt/test_project_room_model.py tests/ui_qt/test_launcher_focus_reuse.py",
+      "detail": "pending below",
+      "result": "PASS"
+    }
+  ],
+  "warning_count": 117,
+  "work": "T-164"
+}

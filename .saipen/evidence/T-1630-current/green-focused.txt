@@ -1,0 +1,19 @@
+=== GREEN FOCUSED (post-fix, ruff-clean) ===
+ebc6091b796868e8e4c580f5d058491129f98fa1f6440cdc3bab56cdef54d286 *extensions/adapters/codex/saipen-guard.py
+404231fb1780838554f2d42a578fd4ca77603de67b208aa90acb70dcff7372b9 *tools/install_host_guard.py
+66afce73ba2666e10e0bb0be39ac59032df443fd4ee21a46d643ce2c2a3d37db *tools/test_codex_stop_hook.py
+--- test_codex_stop_hook ---
+----------------------------------------------------------------------
+Ran 40 tests in 34.636s
+
+OK
+--- test_claude_stop_hook ---
+----------------------------------------------------------------------
+Ran 34 tests in 32.419s
+
+OK (skipped=1)
+--- test_native_host_guard ---
+----------------------------------------------------------------------
+Ran 3 tests in 5.266s
+
+OK

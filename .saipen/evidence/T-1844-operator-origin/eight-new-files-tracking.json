@@ -1,0 +1,16 @@
+{
+  "added_paths": [
+    "tools/saipen_engine/operator_origin.py",
+    "tools/test_operator_origin_support.py",
+    "tools/test_t1844_authority_preview.py",
+    "tools/test_t1844_goal_turns.py",
+    "tools/test_t1844_operator_origin.py",
+    "tools/test_t1844_origin_broker.py",
+    "tools/test_t1844_source_event.py",
+    "tools/test_t1847_fixture_contract.py"
+  ],
+  "pre_existing_index_entries": 5262,
+  "preserved_index_entries": 5262,
+  "pre_existing_entry_differences": [],
+  "staged_paths": 202
+}

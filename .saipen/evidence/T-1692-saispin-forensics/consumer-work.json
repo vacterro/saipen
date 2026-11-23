@@ -1,0 +1,139 @@
+[
+  {
+    "id": "T-271",
+    "section": "## DOING",
+    "line_no": 24,
+    "checkbox": "/",
+    "needs": [
+      "T-248",
+      "T-272"
+    ],
+    "fields": {
+      "verify": "the requested change is present and demonstrated against the user own description of it",
+      "request_witness": "model_supplied",
+      "source_receipts": "SRC-086,SRC-088,SRC-089,SRC-091",
+      "needs": "T-248,T-272",
+      "owner": "saipen-cli",
+      "claim_time": "2026-10-08T03:18:07Z"
+    },
+    "raw": "- [/] T-271 [P2] V:\\\\_TEMP_\\\\fastprompter_drag\\\\SAITULS_20261008_0244.md \u0438 V:\\\\_TEMP_\\\\fastprompter_drag\\\\SAITULS_20261008_0244_2.md /goal cc all | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-086,SRC-088,SRC-089,SRC-091 | needs: T-248,T-272 | owner: saipen-cli | claim_time: 2026-10-08T03:18:07Z",
+    "description": "[P2] V:\\_TEMP_\\fastprompter_drag\\SAITULS_20261008_0244.md \u0438 V:\\_TEMP_\\fastprompter_drag\\SAITULS_20261008_0244_2.md /goal cc all"
+  },
+  {
+    "id": "T-273",
+    "section": "## DOING",
+    "line_no": 25,
+    "checkbox": "/",
+    "needs": [],
+    "fields": {
+      "verify": "tests/test_saispin.py, Scripts/saispin_watch.ps1 -SelfTest, tests/test_saispin_settings.ps1, tests/test_saispin_task.ps1 all green; controlled kill and safety acceptance pass",
+      "request_witness": "model_supplied",
+      "source_receipts": "SRC-092",
+      "owner": "saipen-cli",
+      "claim_time": "2026-10-08T20:25:00Z"
+    },
+    "raw": "- [/] T-273 [P1] SAISPIN startup watchdog repair and extension per SAITULS_20261008_2302_3.md | verify: tests/test_saispin.py, Scripts/saispin_watch.ps1 -SelfTest, tests/test_saispin_settings.ps1, tests/test_saispin_task.ps1 all green; controlled kill and safety acceptance pass | request_witness: model_supplied | source_receipts: SRC-092 | owner: saipen-cli | claim_time: 2026-10-08T20:25:00Z",
+    "description": "[P1] SAISPIN startup watchdog repair and extension per SAITULS_20261008_2302_3.md"
+  },
+  {
+    "id": "T-163",
+    "section": "## DONE",
+    "line_no": 109,
+    "checkbox": "x",
+    "needs": [],
+    "fields": {
+      "source_receipts": "SRC-015",
+      "verify": "Python policy regressions; PowerShell GUI shape and config round-trip; real disposable task cadence replacement; Test Sweep proves zero kills",
+      "owner": "opencode",
+      "claim_time": "2026-09-23T15:47:09Z",
+      "claim_session": "447ba0ba3f23ffde85fd3f9013223c2d",
+      "closure_mode": "own_patch"
+    },
+    "raw": "- [x] T-163 [P1] SAISPIN settings: centralized policy, safe per-process overrides, compact GUI, transactional scheduled-task integration | source_receipts: SRC-015 | verify: Python policy regressions; PowerShell GUI shape and config round-trip; real disposable task cadence replacement; Test Sweep proves zero kills | owner: opencode | claim_time: 2026-09-23T15:47:09Z | claim_session: 447ba0ba3f23ffde85fd3f9013223c2d | closure_mode: own_patch",
+    "description": "[P1] SAISPIN settings: centralized policy, safe per-process overrides, compact GUI, transactional scheduled-task integration"
+  },
+  {
+    "id": "T-135",
+    "section": "## DONE",
+    "line_no": 136,
+    "checkbox": "x",
+    "needs": [],
+    "fields": {
+      "verify": "tests/test_saispin_task.ps1 24/24 on real Windows Task Scheduler (\\T135TEST\\ disposable namespace): 5min PASS, 5->15min tamper FAILs printing expected 00:05:00 / observed 00:15:00, missing-engine replacement failure restores action/trigger/principal/settings/cadence/description, fresh-install failure leaves no half-registration, -Remove cleans up",
+      "owner": "opencode",
+      "claim_time": "2026-09-06T21:40:00Z"
+    },
+    "raw": "- [x] T-135 [P1] Scripts/Install-SaispinTask.ps1 transactional replacement and real cadence verification (SRC-009 R013 W2-004, R017 W2-008): prior task definition captured before the destructive unregister and restored on any replacement failure; Assert-SaispinTask normalises the ISO-8601 interval via XmlConvert and compares cadence exactly | verify: tests/test_saispin_task.ps1 24/24 on real Windows Task Scheduler (\\T135TEST\\ disposable namespace): 5min PASS, 5->15min tamper FAILs printing expected 00:05:00 / observed 00:15:00, missing-engine replacement failure restores action/trigger/principal/settings/cadence/description, fresh-install failure leaves no half-registration, -Remove cleans up | owner: opencode | claim_time: 2026-09-06T21:40:00Z",
+    "description": "[P1] Scripts/Install-SaispinTask.ps1 transactional replacement and real cadence verification (SRC-009 R013 W2-004, R017 W2-008): prior task definition captured before the destructive unregister and restored on any replacement failure; Assert-SaispinTask normalises the ISO-8601 interval via XmlConvert and compares cadence exactly"
+  },
+  {
+    "id": "T-131",
+    "section": "## DONE",
+    "line_no": 139,
+    "checkbox": "x",
+    "needs": [],
+    "fields": {
+      "verify": "python tests/test_saispin.py exit 0 AND Scripts/saispin_watch.ps1 -SelfTest exit 0 on both PS5.1 and pwsh; the watcher SelfTest is the durability authority and carries the host-level injected cases (locked state file => KILL REFUSED/ALERT only, unwritable pre-kill audit => zero termination, rotation failure => zero termination, rename-based bounded rotation with newest PRE-KILL+outcome surviving)",
+      "owner": "opencode",
+      "claim_time": "2026-09-06T20:14:00Z"
+    },
+    "raw": "- [x] T-131 [P1] SAISPIN durable state before destructive action plus bounded log retention (SRC-009 R010 W2-001, R022 PERF-005): Write-SaispinState must report success or throw, KILL only from durably committed history, a pre-kill audit record with fail-closed behaviour when the sink is unwritable, and saispin.log gains rename-based rotation that never discards the pre-kill record | verify: python tests/test_saispin.py exit 0 AND Scripts/saispin_watch.ps1 -SelfTest exit 0 on both PS5.1 and pwsh; the watcher SelfTest is the durability authority and carries the host-level injected cases (locked state file => KILL REFUSED/ALERT only, unwritable pre-kill audit => zero termination, rotation failure => zero termination, rename-based bounded rotation with newest PRE-KILL+outcome surviving) | owner: opencode | claim_time: 2026-09-06T20:14:00Z",
+    "description": "[P1] SAISPIN durable state before destructive action plus bounded log retention (SRC-009 R010 W2-001, R022 PERF-005): Write-SaispinState must report success or throw, KILL only from durably committed history, a pre-kill audit record with fail-closed behaviour when the sink is unwritable, and saispin.log gains rename-based rotation that never discards the pre-kill record"
+  },
+  {
+    "id": "T-136",
+    "section": "## DONE",
+    "line_no": 140,
+    "checkbox": "x",
+    "needs": [],
+    "fields": {
+      "verify": "a clean windows-latest run of .github/workflows/test.yml executes all 16 tests/ harnesses plus both documented csc compiles with zero failures and no network access to third-party providers; removing the stub directory must make the dependent harnesses fail loudly rather than skip",
+      "owner": "codex",
+      "claim_time": "2026-09-06T15:17:43Z"
+    },
+    "raw": "- [x] T-136 [P1] CI hermetic prerequisites and full behavioural suite on windows-latest (SRC-009 R007 CORE-007): provision local stubs for the external agent CLIs and the Vintage skill, and gate test_workers.py, test_saispin.py plus the locale generation, codex menu preflight and problip sound harnesses in .github/workflows/test.yml with no live external services | verify: a clean windows-latest run of .github/workflows/test.yml executes all 16 tests/ harnesses plus both documented csc compiles with zero failures and no network access to third-party providers; removing the stub directory must make the dependent harnesses fail loudly rather than skip | owner: codex | claim_time: 2026-09-06T15:17:43Z",
+    "description": "[P1] CI hermetic prerequisites and full behavioural suite on windows-latest (SRC-009 R007 CORE-007): provision local stubs for the external agent CLIs and the Vintage skill, and gate test_workers.py, test_saispin.py plus the locale generation, codex menu preflight and problip sound harnesses in .github/workflows/test.yml with no live external services"
+  },
+  {
+    "id": "T-139",
+    "section": "## DONE",
+    "line_no": 146,
+    "checkbox": "x",
+    "needs": [],
+    "fields": {
+      "verify": "a synthetic harness builds 10, 100, 1000 and 10000 process records without CIM and asserts structural equality with the current shape plus near-linear time; twelve consecutive unchanged post-threshold sweeps must log twelve decisions but deliver notifications per the first-alert and reminder policy, sweep wall time must not grow by 1.2 seconds per unchanged process, and cold-to-hot recurrence, PID reuse, KILL transition and kill failure must each notify immediately; python tests/test_saispin.py exit 0",
+      "owner": "saiui",
+      "claim_time": "2026-09-05T13:37:33Z"
+    },
+    "raw": "- [x] T-139 [P2] Scripts/saispin_watch.ps1 sweep cost: linear sample construction and alert cooldown (SRC-009 R021 PERF-004, R024 PERF-007): build the sample collection without repeated array copying, and replace the per-decision 1.2 second notification pump with first-alert plus bounded reminder semantics keyed on PID and StartTime, batching new alerts per sweep while never suppressing first detection, KILL transition or kill outcome | verify: a synthetic harness builds 10, 100, 1000 and 10000 process records without CIM and asserts structural equality with the current shape plus near-linear time; twelve consecutive unchanged post-threshold sweeps must log twelve decisions but deliver notifications per the first-alert and reminder policy, sweep wall time must not grow by 1.2 seconds per unchanged process, and cold-to-hot recurrence, PID reuse, KILL transition and kill failure must each notify immediately; python tests/test_saispin.py exit 0 | owner: saiui | claim_time: 2026-09-05T13:37:33Z",
+    "description": "[P2] Scripts/saispin_watch.ps1 sweep cost: linear sample construction and alert cooldown (SRC-009 R021 PERF-004, R024 PERF-007): build the sample collection without repeated array copying, and replace the per-decision 1.2 second notification pump with first-alert plus bounded reminder semantics keyed on PID and StartTime, batching new alerts per sweep while never suppressing first detection, KILL transition or kill outcome"
+  },
+  {
+    "id": "T-106",
+    "section": "## DONE",
+    "line_no": 173,
+    "checkbox": "x",
+    "needs": [],
+    "fields": {
+      "verify": "agent FIT/impact pass recorded; normal SCOUT, BUILD, VERIFY, REVIEW and SHIP/DONE gates pass",
+      "owner": "saiui",
+      "claim_time": "2026-09-03T21:41:27Z"
+    },
+    "raw": "- [x] T-106 [P0] CUT user directive: Remove LIMISAW: the agent-quota tray monitor, extracted to its own repository at V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_LIMISAW; preserve: ['SAITULS itself: 14 Explorer commands, Registry/, i18n/, Installers/, Wiki/, Bin/ wrappers', 'Problip in full, including its pixel-icon pipeline and Scripts/make_pixel_ico.py', 'SAISPIN in full (Scripts/saispin_logic.py, saispin_watch.ps1, Install-SaispinTask.ps1, tests/test_saispin.py)', 'every non-LIMISAW check in tests/test_regs.py', 'CHANGELOG history verbatim -- the extraction is a NEW entry, never a rewrite']; approved plan CUT-DF0477C9487E [CUT-DF0477C9487E] | verify: agent FIT/impact pass recorded; normal SCOUT, BUILD, VERIFY, REVIEW and SHIP/DONE gates pass | owner: saiui | claim_time: 2026-09-03T21:41:27Z",
+    "description": "[P0] CUT user directive: Remove LIMISAW: the agent-quota tray monitor, extracted to its own repository at V:\\___VAC\\__K\\__CODE\\_PY\\_LIMISAW; preserve: ['SAITULS itself: 14 Explorer commands, Registry/, i18n/, Installers/, Wiki/, Bin/ wrappers', 'Problip in full, including its pixel-icon pipeline and Scripts/make_pixel_ico.py', 'SAISPIN in full (Scripts/saispin_logic.py, saispin_watch.ps1, Install-SaispinTask.ps1, tests/test_saispin.py)', 'every non-LIMISAW check in tests/test_regs.py', 'CHANGELOG history verbatim -- the extraction is a NEW entry, never a rewrite']; approved plan CUT-DF0477C9487E [CUT-DF0477C9487E]"
+  },
+  {
+    "id": "T-105",
+    "section": "## DONE",
+    "line_no": 174,
+    "checkbox": "x",
+    "needs": [],
+    "fields": {
+      "verify": "SAISPIN orphan CPU watchdog (SRC-005): pure decision engine + PowerShell watcher + Scheduled Task installer + stdlib tests, dry-run by default is complete and the repository-declared verification harness passes",
+      "owner": "saiui",
+      "claim_time": "2026-09-03T20:25:18Z"
+    },
+    "raw": "- [x] T-105 [P1] SAISPIN orphan CPU watchdog (SRC-005): pure decision engine + PowerShell watcher + Scheduled Task installer + stdlib tests, dry-run by default | verify: SAISPIN orphan CPU watchdog (SRC-005): pure decision engine + PowerShell watcher + Scheduled Task installer + stdlib tests, dry-run by default is complete and the repository-declared verification harness passes | owner: saiui | claim_time: 2026-09-03T20:25:18Z",
+    "description": "[P1] SAISPIN orphan CPU watchdog (SRC-005): pure decision engine + PowerShell watcher + Scheduled Task installer + stdlib tests, dry-run by default"
+  }
+]

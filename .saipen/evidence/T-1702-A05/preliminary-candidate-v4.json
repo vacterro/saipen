@@ -1,0 +1,22 @@
+{
+  "stage": "candidate-v4",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "V:\\_TEMP_\\saipen-a05-candidate-do218qeg\\project\\tools\\test_reconcile_history_ledger_blocked.py"
+  ],
+  "project": "V:\\_TEMP_\\saipen-a05-candidate-do218qeg\\project",
+  "exit_code": 0,
+  "oracle_sha256": "cb0230e48c249200780713593994638169d6c4db83b1773212ad9820f44c33f7",
+  "subject_files": {
+    "tools/saipen_engine/reconcile.py": "3874c43ecfb5d9f8649607f183e4b6f7c598221286852c00aa98af5a994d598e",
+    "tools/saipen.py": "d0040f5ee0c53c328894de8006194dcdf83134af1ccf3ce3f46c22cb101d57ae"
+  },
+  "stdout": "",
+  "stderr": "............\r\n----------------------------------------------------------------------\r\nRan 12 tests in 16.423s\r\n\r\nOK\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "4a3d1cda97686cec20d0d8c5c541df9cf36b777855cd4e2e1c0f0f02a1a5893b",
+  "live_fingerprint": "55f06a7fce4aa11ff0de0126e1e44a6118807f51927a80787cb5a0b99fbb2ec4",
+  "live_source_unchanged": true,
+  "limits": "Preliminary scratch proof while T-1713 owns VERIFY; not T-1714 phase evidence."
+}

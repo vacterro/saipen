@@ -1,0 +1,25 @@
+{
+  "cmd": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "tools/test_t2040_iteration_truth.py"
+  ],
+  "oracle_sha256": "8341ee450118a1f8d62b779bfe5f4548bab02fa28b0f2ea274afaf67e00d1ea7",
+  "runs": {
+    "before": {
+      "exit_code": 1,
+      "log": "paired-before.log",
+      "log_sha256": "08f0b9c214cad4cd24a36ef19ce3da2a05f06d661dc269ba664ca3bb10b5bffc"
+    },
+    "after": {
+      "exit_code": 0,
+      "log": "paired-after.log",
+      "log_sha256": "362601b3e554ad6309bd2b5d3d1c3167f2622b9143abe875a201c96705f57c99"
+    }
+  },
+  "oracle_sha256_after": "8341ee450118a1f8d62b779bfe5f4548bab02fa28b0f2ea274afaf67e00d1ea7"
+}

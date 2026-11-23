@@ -1,0 +1,24 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-v",
+    "--tb=short",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_t2040_iteration_truth.py",
+    "tools/test_release_reconciliation.py",
+    "-k",
+    "not live"
+  ],
+  "exit_code": 0,
+  "oracle_changed": true,
+  "reason": "Wrap only added lines to repository length rule; assertions unchanged. Older pairs do not serve as current native admission; VERIFY will execute both lanes using these final bytes.",
+  "hashes": {
+    "tools/test_t2040_iteration_truth.py": "41115d91a412173544a48a2b1c64f091edfcb96e14ec50fbd4f0226ccf4ecd6b",
+    "tools/test_release_reconciliation.py": "95f8225b814fe87d93c3c4bf21eadf78966ee31b326d5586b08769fa0615d6cc"
+  }
+}

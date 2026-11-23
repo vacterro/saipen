@@ -1,0 +1,156 @@
+{
+  "tests": 48,
+  "failures": 9,
+  "errors": 0,
+  "observations": {
+    "test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p1_04_genuine_new_item_evidence_still_reopens": {
+      "parse_errors": [
+        "BOARD.md:8 ticket T-11 has unrecognized field 'candidate: G-LIN-FUN_1'",
+        "BOARD.md:8 ticket T-11 has unrecognized field 'evidence_fp: sha256:c92ca74e5f8c523c'"
+      ],
+      "semantic_errors": [
+        "T-11 sits under ## DONE with no | verify: evidence -- ## DONE is a claim that the ticket's own verify condition was met"
+      ],
+      "replenishment": {
+        "ok": false,
+        "replenished": false,
+        "status": "BOARD_INVALID",
+        "detail": "BOARD parse error(s): BOARD.md:8 ticket T-11 has unrecognized field 'candidate: G-LIN-FUN_1'; BOARD.md:8 ticket T-11 has unrecognized field 'evidence_fp: sha256:c92ca74e5f8c523c'"
+      }
+    },
+    "test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p1_04_unrelated_change_does_not_reopen_done_item": {
+      "parse_errors": [
+        "BOARD.md:8 ticket T-11 has unrecognized field 'goal: G-LIN'",
+        "BOARD.md:8 ticket T-11 has unrecognized field 'candidate: G-LIN-FUN_1'",
+        "BOARD.md:8 ticket T-11 has unrecognized field 'evidence_fp: sha256:c92ca74e5f8c523c'"
+      ],
+      "semantic_errors": [
+        "T-11 sits under ## DONE with no | verify: evidence -- ## DONE is a claim that the ticket's own verify condition was met"
+      ],
+      "replenishment": {
+        "ok": false,
+        "replenished": false,
+        "status": "BOARD_INVALID",
+        "detail": "BOARD parse error(s): BOARD.md:8 ticket T-11 has unrecognized field 'goal: G-LIN'; BOARD.md:8 ticket T-11 has unrecognized field 'candidate: G-LIN-FUN_1'; BOARD.md:8 ticket T-11 has unrecognized field 'evidence_fp: sha256:c92ca74e5f8c523c'"
+      }
+    },
+    "test_persistent_goal_engine.PersistentGoalEngineTests.test_case04_repeat_same_command_no_duplicate": {
+      "parse_errors": [
+        "BOARD.md:5 ticket T-100 has unrecognized field 'goal: g-dup'",
+        "BOARD.md:5 ticket T-100 has unrecognized field 'candidate: g-dup-proc_101'"
+      ],
+      "semantic_errors": [
+        "T-100 has an open [ ] checkbox under ## DOING -- open boxes belong under ## TODO or ## BLOCKED"
+      ],
+      "replenishment": {
+        "ok": false,
+        "replenished": false,
+        "status": "BOARD_INVALID",
+        "detail": "BOARD parse error(s): BOARD.md:5 ticket T-100 has unrecognized field 'goal: g-dup'; BOARD.md:5 ticket T-100 has unrecognized field 'candidate: g-dup-proc_101'"
+      }
+    },
+    "test_persistent_goal_engine.PersistentGoalEngineTests.test_case06_previous_ticket_completed_successor_admitted": {
+      "parse_errors": [],
+      "semantic_errors": [
+        "T-100 sits under ## DONE with no | verify: evidence -- ## DONE is a claim that the ticket's own verify condition was met"
+      ],
+      "replenishment": {
+        "ok": true,
+        "replenished": true,
+        "dry_run": true,
+        "status": "TASK_REPLENISHED",
+        "goal_id": "g-seq",
+        "candidate": {
+          "candidate_id": "g-seq-proc_101",
+          "goal_id": "g-seq",
+          "title": "Investigate semantics of ProcessPacket [g-seq]",
+          "priority": "P2",
+          "description": "Investigate and document semantics for unresolved item proc_101",
+          "scope": "item:proc_101",
+          "target_locator": "proc_101",
+          "evidence_source": ".saipen/evidence/coverage.json",
+          "verification": "unresolved item proc_101 is documented and semantics verified",
+          "needs": [],
+          "risk": "low",
+          "metadata": {
+            "item_id": "proc_101",
+            "goal_id": "g-seq",
+            "rva": "",
+            "va": "",
+            "bytes": null,
+            "module": null,
+            "capture_sha256": "",
+            "capture_path": ""
+          },
+          "evidence_fingerprint": "sha256:f0db3643f892e123"
+        },
+        "planned_ticket": "T-PLANNED",
+        "detail": "would admit g-seq-proc_101 for goal g-seq"
+      }
+    },
+    "test_persistent_goal_engine.PersistentGoalEngineTests.test_case11_all_candidates_blocked": {
+      "parse_errors": [
+        "BOARD.md:10 ticket T-110 has unrecognized field 'candidate: g-blk-proc_101'"
+      ],
+      "semantic_errors": [
+        "T-110 sits under ## BLOCKED without a non-empty | blocker: field"
+      ],
+      "replenishment": {
+        "ok": false,
+        "replenished": false,
+        "status": "BOARD_INVALID",
+        "detail": "BOARD parse error(s): BOARD.md:10 ticket T-110 has unrecognized field 'candidate: g-blk-proc_101'"
+      }
+    },
+    "test_persistent_goal_engine.PersistentGoalEngineTests.test_case16_crash_after_ticket_admission_no_duplicate": {
+      "parse_errors": [
+        "BOARD.md:6 ticket T-200 has unrecognized field 'candidate: g-crash2-proc_101'"
+      ],
+      "semantic_errors": [],
+      "replenishment": {
+        "ok": false,
+        "replenished": false,
+        "status": "BOARD_INVALID",
+        "detail": "BOARD parse error(s): BOARD.md:6 ticket T-200 has unrecognized field 'candidate: g-crash2-proc_101'"
+      }
+    },
+    "test_persistent_goal_engine.PersistentGoalEngineTests.test_case17_crash_after_ticket_closure_evaluates_next": {
+      "parse_errors": [
+        "BOARD.md:8 ticket T-200 has unrecognized field 'candidate: g-next-proc_101'"
+      ],
+      "semantic_errors": [
+        "T-200 sits under ## DONE with no | verify: evidence -- ## DONE is a claim that the ticket's own verify condition was met"
+      ],
+      "replenishment": {
+        "ok": false,
+        "replenished": false,
+        "status": "BOARD_INVALID",
+        "detail": "BOARD parse error(s): BOARD.md:8 ticket T-200 has unrecognized field 'candidate: g-next-proc_101'"
+      }
+    },
+    "test_persistent_goal_engine.PersistentGoalEngineTests.test_case21_completed_ticket_invalid_no_silent_reopening": {
+      "parse_errors": [],
+      "semantic_errors": [
+        "T-50 sits under ## DONE with no | verify: evidence -- ## DONE is a claim that the ticket's own verify condition was met"
+      ],
+      "duplicate_result": [
+        false,
+        null
+      ]
+    },
+    "test_persistent_goal_engine.PersistentGoalEngineTests.test_case24_one_task_blocked_independent_continues": {
+      "parse_errors": [
+        "BOARD.md:10 ticket T-300 has unrecognized field 'candidate: g-ind-proc_101'"
+      ],
+      "semantic_errors": [
+        "T-300 sits under ## BLOCKED without a non-empty | blocker: field"
+      ],
+      "replenishment": {
+        "ok": false,
+        "replenished": false,
+        "status": "BOARD_INVALID",
+        "detail": "BOARD parse error(s): BOARD.md:10 ticket T-300 has unrecognized field 'candidate: g-ind-proc_101'"
+      }
+    }
+  }
+}

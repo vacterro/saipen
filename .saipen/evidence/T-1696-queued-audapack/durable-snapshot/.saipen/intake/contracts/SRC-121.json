@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-121:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Federate AUDAPACK account-backed launchers onto the canonical SAI Accounts registry: one effective launch inventory, canonical account ids, no static Codex/Claude/Antigravity authority, additive migration, live refresh, operator machine reconciliation"
+    }
+  },
+  "derived_at": "2026-10-06T02:13:08Z",
+  "derived_from": "SRC-121",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "86c15a94dd63107a5ea5519476e2aa360bee236839115f6d54962e06db956d06"
+}

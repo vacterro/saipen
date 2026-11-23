@@ -1,0 +1,7 @@
+test_diagnostic_carrier_changes_neither_environment_nor_real_child (test_t1834_tool_call_identity.ToolCallIdentity.test_diagnostic_carrier_changes_neither_environment_nor_real_child) ... ok
+test_new_tool_call_reuses_evidence_but_semantic_changes_invalidate_it (test_t1834_tool_call_identity.ToolCallIdentity.test_new_tool_call_reuses_evidence_but_semantic_changes_invalidate_it) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.279s
+
+OK

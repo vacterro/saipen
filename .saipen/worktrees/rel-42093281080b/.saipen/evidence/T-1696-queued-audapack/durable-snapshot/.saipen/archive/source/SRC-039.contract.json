@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-039:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A checkbox-driven automatic periodic PACK ALL of all archives, configurable interval, hourly default, enabled by default -- implemented as PackingConfig.auto_pack_all_enabled (default True) and auto_pack_all_interval_minutes (default 60, normalized 5..1440), Packing Settings controls wired into the touched-field autosave, one MainWindow auto_pack_timer reconfigured during init and on every Settings save before the audit-fingerprint early return, periodic ticks reusing the manual PACK ALL eligibility and _start_sequential_pack_queue under the AUTO PACK ALL label, skipping an occurrence while any packing work is busy, never packing at startup"
+    }
+  },
+  "derived_at": "2026-09-07T01:36:44Z",
+  "derived_from": "SRC-039",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "9f96daa99bb8ef065844e7267fd373b395e15764cf9d5ad5cd1182ffe938dcf8"
+}

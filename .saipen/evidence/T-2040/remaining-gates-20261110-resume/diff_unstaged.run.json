@@ -1,0 +1,14 @@
+{
+  "gate": "diff_unstaged",
+  "command": [
+    "git",
+    "diff",
+    "--check"
+  ],
+  "started_at": "2026-11-10T17:48:18.122498+00:00",
+  "pid": 15588,
+  "exit_code": 0,
+  "status": "PASS",
+  "duration_s": 0.141,
+  "finished_at": "2026-11-10T17:48:18.266020+00:00"
+}

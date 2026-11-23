@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-432:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "diagnose why the SAIPEN launcher does not answer within 15000ms and fix it"
+    }
+  },
+  "derived_at": "2026-11-22T01:31:43Z",
+  "derived_from": "SRC-432",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "16a1c97177ccd65055e07603eb33766430170bb14df6a409418c218071d655c6"
+}

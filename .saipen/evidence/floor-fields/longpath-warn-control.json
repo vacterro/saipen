@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "error": null,
+  "verification_configuration": "process-local core.longpaths=true",
+  "probe": "unchanged audit_checks.warn_ownership_probe"
+}

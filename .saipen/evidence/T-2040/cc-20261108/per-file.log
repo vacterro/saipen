@@ -1,0 +1,322 @@
+=== tools/test_t2040_bounded_discovery_resume.py
+...............                          [100%]
+15 passed, 32 subtests passed in 8.93s
+EXIT:0 tools/test_t2040_bounded_discovery_resume.py
+=== tools/test_t2040_continuation_truth.py
+F..........                                                        [100%]
+================================== FAILURES ===================================
+_ ContinuationTruthTests.test_assessment_reports_invalid_evidence_override_without_throwing _
+
+self = <test_t2040_continuation_truth.ContinuationTruthTests testMethod=test_assessment_reports_invalid_evidence_override_without_throwing>
+
+    def test_assessment_reports_invalid_evidence_override_without_throwing(self):
+        result = CA.assess_continuation(self.root, source_evidence=42)
+>       self.assertEqual(result["classification"], CA.INCOMPLETE_DISCOVERY, result)
+E       AssertionError: 'INVALID_RUNTIME' != 'INCOMPLETE_DISCOVERY'
+E       - INVALID_RUNTIME
+E       + INCOMPLETE_DISCOVERY
+E        : {'classification': 'INVALID_RUNTIME', 'actionable': False, 'executable_work': None, 'action': 'saipen status', 'reason': 'discovery-invalid', 'detail': 'supplied source_evidence must be an object', 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {}, 'raw_route': {}, 'continuous_maintenance_proven': False, 'continuous_maintenance_claimed': False, 'operator_work': []}
+
+tools\test_t2040_continuation_truth.py:250: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_continuation_truth.py::ContinuationTruthTests::test_assessment_reports_invalid_evidence_override_without_throwing
+1 failed, 10 passed, 6 subtests passed in 1.33s
+EXIT:1 tools/test_t2040_continuation_truth.py
+=== tools/test_t2040_discovery_owners.py
+......................                                              [100%]
+22 passed, 5 subtests passed in 1.44s
+EXIT:0 tools/test_t2040_discovery_owners.py
+=== tools/test_t2040_exhaustion_evidence.py
+....................                                                     [100%]
+20 passed in 0.91s
+EXIT:0 tools/test_t2040_exhaustion_evidence.py
+=== tools/test_t2040_finish_plan_guards.py
+.......                                                             [100%]
+7 passed, 5 subtests passed in 45.67s
+EXIT:0 tools/test_t2040_finish_plan_guards.py
+=== tools/test_t2040_maintenance_authority.py
+.......................                                                  [100%]
+23 passed in 52.51s
+EXIT:0 tools/test_t2040_maintenance_authority.py
+=== tools/test_t2040_publication_truth.py
+...........................FF.FF...F.F.F                    [100%]
+================================== FAILURES ===================================
+_ PublicationTruthTests.test_wave_d_canonical_full_closure_has_explicit_publication_flag _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_wave_d_canonical_full_closure_has_explicit_publication_flag>
+
+    def test_wave_d_canonical_full_closure_has_explicit_publication_flag(self):
+        from saipen_engine import closure
+        self.full_receipt()
+        verdict = closure.resolve_implementation_source(self.root, "T-1")
+        self.assertTrue(verdict.ok, verdict.to_dict())
+>       self.assertTrue(verdict.published, verdict.to_dict())
+                        ^^^^^^^^^^^^^^^^^
+E       AttributeError: 'SourceVerdict' object has no attribute 'published'
+
+tools\test_t2040_publication_truth.py:433: AttributeError
+_ PublicationTruthTests.test_wave_d_context_captures_publication_and_source_identity_once _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_wave_d_context_captures_publication_and_source_identity_once>
+
+    def test_wave_d_context_captures_publication_and_source_identity_once(self):
+        from freshness import compute_source_identity
+        from saipen_engine import context
+        (self.root / ".saipen/LOG.md").write_text("# Log\n", encoding="utf-8")
+        evidence, identity = self.evidence(), compute_source_identity(self.root)
+        with mock.patch.object(outcome_truth, "read_publication_evidence", return_value=evidence) as publication, \
+             mock.patch("freshness.compute_source_identity", return_value=identity) as source:
+            inputs = context._load_context_inputs(self.root)
+>       self.assertEqual(publication.call_count, 1)
+E       AssertionError: 0 != 1
+
+tools\test_t2040_publication_truth.py:520: AssertionError
+_ PublicationTruthTests.test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result (command='context_cold') _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result>
+
+    def test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result(self):
+        from freshness import compute_source_identity
+        from saipen_engine import context, router
+        (self.root / ".saipen/LOG.md").write_text("# Log\n", encoding="utf-8")
+        inputs = context._load_context_inputs(self.root)
+        carrier = self.evidence()
+        identity = compute_source_identity(self.root)
+        inputs.update(publication_evidence=carrier, source_identity=identity)
+        discovery_result = {"persistent_goals": [], "source_evidence": {},
+                            "continuous_maintenance_authorized": False,
+                            "source_generation": "fixture", "discovery_dispatch": None}
+    
+        class Routed(Exception):
+            pass
+    
+        for command in (context.context_cold, context.context_hot, context.context_audit):
+            with self.subTest(command=command.__name__), \
+                 mock.patch.object(context, "_load_inputs_checked", return_value=inputs), \
+                 mock.patch.object(context, "discovery_evidence", return_value=discovery_result) as discovery, \
+                 mock.patch.object(router, "route_next", side_effect=Routed) as route, \
+                 mock.patch.object(router, "queued_source_projection", return_value=None), \
+                 mock.patch.object(router, "pending_append_projection", return_value=None), \
+                 mock.patch("saipen_engine.capability.negotiate_capability", return_value="read-only"):
+                with self.assertRaises(Routed):
+                    command(self.root)
+>               self.assertIs(discovery.call_args.kwargs.get("publication_evidence"), carrier)
+E               AssertionError: None is not PublicationEvidence(project_root='V:\\_TEMP_\\saipen-publication-truth-s6ep16dt\\project', project_lineage='lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project_identity='v:\\_temp_\\saipen-publication-truth-s6ep16dt\\project', ticket_snapshot='d2919c16ff49b8fe27dc6437b901856184dc8ebedf8fa3d2e1ac1b6f84e98108', receipt_digest='ops-receipt-sha256:0eb03c99ae9a06966b61f242ae018fe735c024928e7509773e5e5f4b734aea81', tickets=(('T-1', 'pending', (), 'no canonical ticket-bound release receipt'),), diagnostics=())
+
+tools\test_t2040_publication_truth.py:551: AssertionError
+_ PublicationTruthTests.test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result (command='context_hot') _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result>
+
+    def test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result(self):
+        from freshness import compute_source_identity
+        from saipen_engine import context, router
+        (self.root / ".saipen/LOG.md").write_text("# Log\n", encoding="utf-8")
+        inputs = context._load_context_inputs(self.root)
+        carrier = self.evidence()
+        identity = compute_source_identity(self.root)
+        inputs.update(publication_evidence=carrier, source_identity=identity)
+        discovery_result = {"persistent_goals": [], "source_evidence": {},
+                            "continuous_maintenance_authorized": False,
+                            "source_generation": "fixture", "discovery_dispatch": None}
+    
+        class Routed(Exception):
+            pass
+    
+        for command in (context.context_cold, context.context_hot, context.context_audit):
+            with self.subTest(command=command.__name__), \
+                 mock.patch.object(context, "_load_inputs_checked", return_value=inputs), \
+                 mock.patch.object(context, "discovery_evidence", return_value=discovery_result) as discovery, \
+                 mock.patch.object(router, "route_next", side_effect=Routed) as route, \
+                 mock.patch.object(router, "queued_source_projection", return_value=None), \
+                 mock.patch.object(router, "pending_append_projection", return_value=None), \
+                 mock.patch("saipen_engine.capability.negotiate_capability", return_value="read-only"):
+                with self.assertRaises(Routed):
+                    command(self.root)
+>               self.assertIs(discovery.call_args.kwargs.get("publication_evidence"), carrier)
+E               AssertionError: None is not PublicationEvidence(project_root='V:\\_TEMP_\\saipen-publication-truth-s6ep16dt\\project', project_lineage='lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project_identity='v:\\_temp_\\saipen-publication-truth-s6ep16dt\\project', ticket_snapshot='d2919c16ff49b8fe27dc6437b901856184dc8ebedf8fa3d2e1ac1b6f84e98108', receipt_digest='ops-receipt-sha256:0eb03c99ae9a06966b61f242ae018fe735c024928e7509773e5e5f4b734aea81', tickets=(('T-1', 'pending', (), 'no canonical ticket-bound release receipt'),), diagnostics=())
+
+tools\test_t2040_publication_truth.py:551: AssertionError
+_ PublicationTruthTests.test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result (command='context_audit') _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result>
+
+    def test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result(self):
+        from freshness import compute_source_identity
+        from saipen_engine import context, router
+        (self.root / ".saipen/LOG.md").write_text("# Log\n", encoding="utf-8")
+        inputs = context._load_context_inputs(self.root)
+        carrier = self.evidence()
+        identity = compute_source_identity(self.root)
+        inputs.update(publication_evidence=carrier, source_identity=identity)
+        discovery_result = {"persistent_goals": [], "source_evidence": {},
+                            "continuous_maintenance_authorized": False,
+                            "source_generation": "fixture", "discovery_dispatch": None}
+    
+        class Routed(Exception):
+            pass
+    
+        for command in (context.context_cold, context.context_hot, context.context_audit):
+            with self.subTest(command=command.__name__), \
+                 mock.patch.object(context, "_load_inputs_checked", return_value=inputs), \
+                 mock.patch.object(context, "discovery_evidence", return_value=discovery_result) as discovery, \
+                 mock.patch.object(router, "route_next", side_effect=Routed) as route, \
+                 mock.patch.object(router, "queued_source_projection", return_value=None), \
+                 mock.patch.object(router, "pending_append_projection", return_value=None), \
+                 mock.patch("saipen_engine.capability.negotiate_capability", return_value="read-only"):
+                with self.assertRaises(Routed):
+                    command(self.root)
+>               self.assertIs(discovery.call_args.kwargs.get("publication_evidence"), carrier)
+E               AssertionError: None is not PublicationEvidence(project_root='V:\\_TEMP_\\saipen-publication-truth-s6ep16dt\\project', project_lineage='lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', project_identity='v:\\_temp_\\saipen-publication-truth-s6ep16dt\\project', ticket_snapshot='d2919c16ff49b8fe27dc6437b901856184dc8ebedf8fa3d2e1ac1b6f84e98108', receipt_digest='ops-receipt-sha256:0eb03c99ae9a06966b61f242ae018fe735c024928e7509773e5e5f4b734aea81', tickets=(('T-1', 'pending', (), 'no canonical ticket-bound release receipt'),), diagnostics=())
+
+tools\test_t2040_publication_truth.py:551: AssertionError
+_ PublicationTruthTests.test_wave_d_corrupt_receipt_cannot_borrow_kitchen_publication _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_wave_d_corrupt_receipt_cannot_borrow_kitchen_publication>
+
+    def test_wave_d_corrupt_receipt_cannot_borrow_kitchen_publication(self):
+        from saipen_engine import closure
+        record = self.full_receipt()
+        kitchen = self.root / ".saipen/kitchen/release_receipt.json"
+        kitchen.parent.mkdir(parents=True)
+        kitchen.write_text(json.dumps({**record, "commit": record["closure_commit"]}), encoding="utf-8")
+        self.write_receipt({"op_id": "release-corrupt"}).write_text("{", encoding="utf-8")
+>       self.assertEqual(closure.publication_state(self.root, "T-1"), "pending")
+E       AssertionError: 'published' != 'pending'
+E       - published
+E       + pending
+
+tools\test_t2040_publication_truth.py:451: AssertionError
+_ PublicationTruthTests.test_wave_d_duplicate_terminal_operations_cannot_publish _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_wave_d_duplicate_terminal_operations_cannot_publish>
+
+    def test_wave_d_duplicate_terminal_operations_cannot_publish(self):
+        from saipen_engine import closure
+        record = self.full_receipt()
+        record["op_id"] = "release-" + "b" * 32
+        self.write_receipt(record)
+>       self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:441: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:116: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_PUBLISHED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_PUBLISHED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_PUBLISHED', 'publication_details': {'tickets': [{'ticket_id': 'T-1', 'status': 'published', 'receipt_ids': ['release-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'release-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'], 'reason': 'canonical release independently verified'}], 'diagnostics': [], 'project_root': 'V:\\_TEMP_\\saipen-publication-truth-yc8gu9af\\project', 'project_lineage': 'lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'receipt_digest': 'ops-receipt-sha256:378bd608dd389a39d7e58f42cb1aedf6e22f7e27d063e17eb23691b5ba2b9746'}, 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PUBLISHED', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PUBLISHED', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PUBLISHED'}
+_ PublicationTruthTests.test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication (artifact={'commit': 'c0ffee', 'version': '1.0.0', 'op_id': 'release-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}) _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication>
+
+    def test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication(self):
+        from saipen_engine import closure
+        path = self.root / ".saipen/kitchen/release_receipt.json"
+        path.parent.mkdir(parents=True)
+        for artifact in ({"commit": "c0ffee", "version": "1.0.0", "op_id": OP_ID},
+                         {"mode": "no-publish", "op_id": OP_ID}):
+            with self.subTest(artifact=artifact):
+                path.write_text(json.dumps({"ticket_id": "T-1", **artifact}), encoding="utf-8")
+>               self.assertEqual(closure.publication_state(self.root, "T-1"), "pending")
+E               AssertionError: 'published' != 'pending'
+E               - published
+E               + pending
+
+tools\test_t2040_publication_truth.py:423: AssertionError
+_ PublicationTruthTests.test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication (artifact={'mode': 'no-publish', 'op_id': 'release-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}) _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication>
+
+    def test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication(self):
+        from saipen_engine import closure
+        path = self.root / ".saipen/kitchen/release_receipt.json"
+        path.parent.mkdir(parents=True)
+        for artifact in ({"commit": "c0ffee", "version": "1.0.0", "op_id": OP_ID},
+                         {"mode": "no-publish", "op_id": OP_ID}):
+            with self.subTest(artifact=artifact):
+                path.write_text(json.dumps({"ticket_id": "T-1", **artifact}), encoding="utf-8")
+>               self.assertEqual(closure.publication_state(self.root, "T-1"), "pending")
+E               AssertionError: 'published' != 'pending'
+E               - published
+E               + pending
+
+tools\test_t2040_publication_truth.py:423: AssertionError
+_ PublicationTruthTests.test_wave_d_local_finish_stale_payload_rejected_at_explicit_root _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_wave_d_local_finish_stale_payload_rejected_at_explicit_root>
+
+    def test_wave_d_local_finish_stale_payload_rejected_at_explicit_root(self):
+        _producer, _finish, payload = self.zero_delta_finish()
+        evidence = self.evidence()
+        payload.write_bytes(b"changed bytes\n")
+>       self.assert_publication(self.truth(self.root, publication_evidence=evidence), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:470: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:116: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_PENDING' != 'RELEASE_UNKNOWN'
+E   - RELEASE_PENDING
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_PENDING', 'publication_details': {'tickets': [{'ticket_id': 'T-1', 'status': 'pending', 'receipt_ids': [], 'reason': 'no canonical ticket-bound release receipt'}], 'diagnostics': [], 'project_root': 'V:\\_TEMP_\\saipen-publication-truth-vt0hwmou\\project', 'project_lineage': 'lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'receipt_digest': 'ops-receipt-sha256:e67af3052f6ce9babd38f56d2a450c0470475e06d5e25b50f54916394ff2a681'}, 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PENDING'}
+_ PublicationTruthTests.test_wave_d_no_publish_closure_is_compatible_but_not_publication _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_wave_d_no_publish_closure_is_compatible_but_not_publication>
+
+    def test_wave_d_no_publish_closure_is_compatible_but_not_publication(self):
+        from saipen_engine import closure
+        self.local_receipt()
+>       self.assertEqual(closure.publication_state(self.root, "T-1"), "pending")
+E       AssertionError: 'published' != 'pending'
+E       - published
+E       + pending
+
+tools\test_t2040_publication_truth.py:409: AssertionError
+_ PublicationTruthTests.test_wave_d_verified_ignored_zero_delta_finish_is_local_only _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_wave_d_verified_ignored_zero_delta_finish_is_local_only>
+
+    def test_wave_d_verified_ignored_zero_delta_finish_is_local_only(self):
+        self.zero_delta_finish()
+        evidence = self.evidence()
+>       self.assert_publication(self.truth(publication_evidence=evidence), "LOCAL_NO_PUBLISH", "LOCAL_NO_PUBLISH")
+
+tools\test_t2040_publication_truth.py:457: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:116: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_PENDING' != 'LOCAL_NO_PUBLISH'
+E   - RELEASE_PENDING
+E   + LOCAL_NO_PUBLISH
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_PENDING', 'publication_details': {'tickets': [{'ticket_id': 'T-1', 'status': 'pending', 'receipt_ids': [], 'reason': 'no canonical ticket-bound release receipt'}], 'diagnostics': [], 'project_root': 'V:\\_TEMP_\\saipen-publication-truth-gt07p0v2\\project', 'project_lineage': 'lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'receipt_digest': 'ops-receipt-sha256:fa6c9c47c24c1e97739caae3add017c5f6b46a2f0d4fee820d98eff3fcea386c'}, 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PENDING'}
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_canonical_full_closure_has_explicit_publication_flag
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_context_captures_publication_and_source_identity_once
+SUBFAILED(command='context_cold') tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result
+SUBFAILED(command='context_hot') tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result
+SUBFAILED(command='context_audit') tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_context_explicitly_forwards_same_carrier_outside_discovery_result
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_corrupt_receipt_cannot_borrow_kitchen_publication
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_duplicate_terminal_operations_cannot_publish
+SUBFAILED(artifact={'commit': 'c0ffee', 'version': '1.0.0', 'op_id': 'release-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}) tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication
+SUBFAILED(artifact={'mode': 'no-publish', 'op_id': 'release-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}) tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_legacy_commit_and_no_publish_op_id_are_not_publication
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_local_finish_stale_payload_rejected_at_explicit_root
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_no_publish_closure_is_compatible_but_not_publication
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_wave_d_verified_ignored_zero_delta_finish_is_local_only
+12 failed, 33 passed, 8 subtests passed in 13.77s
+EXIT:1 tools/test_t2040_publication_truth.py
+=== tools/test_t2040_replenishment_recovery.py
+.......................                               [100%]
+23 passed, 19 subtests passed in 32.99s
+EXIT:0 tools/test_t2040_replenishment_recovery.py
+=== tools/test_t2040_review_proof_binding.py
+..FEXIT:124 tools/test_t2040_review_proof_binding.py
+=== tools/test_t2040_terminal_consumer_guards.py
+...........................                                                 [100%]
+27 passed, 69 subtests passed in 5.69s
+EXIT:0 tools/test_t2040_terminal_consumer_guards.py
+=== tools/test_t2040_terminal_consumer_supplementary.py
+.                                                                        [100%]
+1 passed in 0.63s
+EXIT:0 tools/test_t2040_terminal_consumer_supplementary.py
+DONE

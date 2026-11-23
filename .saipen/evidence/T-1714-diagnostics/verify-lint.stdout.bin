@@ -1,0 +1,33 @@
+E501 Line too long (102 > 100)
+    --> tools\saipen.py:1750:101
+     |
+1748 |         )
+1749 |         if diagnostic is not None:
+1750 |             _emit({**diagnostic, "cold_route": _cold_route(project_root, state, state_text)}, as_json)
+     |                                                                                                     ^^
+1751 |             return 1
+1752 |         _emit(
+     |
+
+E501 Line too long (102 > 100)
+   --> tools\test_reconcile_history_ledger_blocked.py:321:101
+    |
+319 |         before = self.bytes(self.project)
+320 |         with mock.patch("saipen_engine.audit_manifest.ensure", return_value=unavailable):
+321 |             self.assertEqual(reconcile.reconcile_protocol_state(self.project, "tester", dry_run=True),
+    |                                                                                                     ^^
+322 |                              unavailable)
+323 |             self.assertIsNone(diagnostic(self.project, {"ok": False, "reason": "checkpoint-invalid"}))
+    |
+
+E501 Line too long (102 > 100)
+   --> tools\test_reconcile_history_ledger_blocked.py:323:101
+    |
+321 |             self.assertEqual(reconcile.reconcile_protocol_state(self.project, "tester", dry_run=True),
+322 |                              unavailable)
+323 |             self.assertIsNone(diagnostic(self.project, {"ok": False, "reason": "checkpoint-invalid"}))
+    |                                                                                                     ^^
+324 |         self.assertEqual(self.bytes(self.project), before)
+    |
+
+Found 3 errors.

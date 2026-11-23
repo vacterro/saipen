@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-010:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Deliver the documented operator target: one START AUDIT click, one understandable run, durable AUDIT READY, and up to six visible independent runs without exposing worker internals in normal UI."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:09Z",
+  "derived_from": "SRC-010",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "de38bdec7b44fe614751ee78494c67967bf418e67c07c09ec0b0fc6b55f87429"
+}

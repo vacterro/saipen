@@ -1,0 +1,105 @@
+{
+  "pair_ok": true,
+  "actual_bug_observed": true,
+  "historical_commit": "17c61f732ce32bccee3dcc27905377433600a5d5",
+  "historical_init_sha256": "8946f77f08e92589bfe27ea824d25abfcfc2768727231cd7c83d554d2fb59096",
+  "live_init_unchanged": true,
+  "temp_root": "V:\\_TEMP_\\saipen-evidence-t1341-build-h4yo0ur9",
+  "driver_sha256": "06ea8972e51fc1680f4e623a9a9daccc15b8893365fedb5de429f2167e05cb83",
+  "records": [
+    {
+      "label": "original",
+      "result": "FAIL",
+      "verifier": "a48302f9a9e3df8d75172e0b4cf580605e4ce5d801ed401f347c3c711983f1d0",
+      "verifier_identity": {
+        "commands": [
+          [
+            "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-B",
+            "tools/saipen.py",
+            "--help"
+          ],
+          [
+            "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-B",
+            "-m",
+            "tools.saipen",
+            "--help"
+          ]
+        ],
+        "timeout": 90,
+        "fixture_sha256": "7c8692011b45f54cd5f6b226e122a053853d77b25466c519fa07baf78c16e8c4",
+        "rules": "both exit0; usage:saipen stdout equal; foreign execution sentinel absent",
+        "environment": "same owned shadow first on PYTHONPATH; same sentinel path"
+      },
+      "subject": "8946f77f08e92589bfe27ea824d25abfcfc2768727231cd7c83d554d2fb59096",
+      "cases": [
+        {
+          "entry": "script",
+          "exit_code": 0,
+          "foreign_executed": false,
+          "stdout_sha256": "8691b0e3c6cff7886e188a91f05c0d4de1b03a5d04a42b852be0816c07358e27",
+          "output_sha256": "8691b0e3c6cff7886e188a91f05c0d4de1b03a5d04a42b852be0816c07358e27",
+          "has_usage": true,
+          "has_foreign_error": false
+        },
+        {
+          "entry": "module",
+          "exit_code": 1,
+          "foreign_executed": true,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "output_sha256": "760f01cab85a2fae2c4376f1f8bd8473220356ead641b790e4e15a3e65e5c92d",
+          "has_usage": false,
+          "has_foreign_error": true
+        }
+      ]
+    },
+    {
+      "label": "current",
+      "result": "PASS",
+      "verifier": "a48302f9a9e3df8d75172e0b4cf580605e4ce5d801ed401f347c3c711983f1d0",
+      "verifier_identity": {
+        "commands": [
+          [
+            "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-B",
+            "tools/saipen.py",
+            "--help"
+          ],
+          [
+            "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-B",
+            "-m",
+            "tools.saipen",
+            "--help"
+          ]
+        ],
+        "timeout": 90,
+        "fixture_sha256": "7c8692011b45f54cd5f6b226e122a053853d77b25466c519fa07baf78c16e8c4",
+        "rules": "both exit0; usage:saipen stdout equal; foreign execution sentinel absent",
+        "environment": "same owned shadow first on PYTHONPATH; same sentinel path"
+      },
+      "subject": "3e652fdf2d80d073138cd1b1b8d37caaf772f5652dfa9ac21db104e6494ceb88",
+      "cases": [
+        {
+          "entry": "script",
+          "exit_code": 0,
+          "foreign_executed": false,
+          "stdout_sha256": "8691b0e3c6cff7886e188a91f05c0d4de1b03a5d04a42b852be0816c07358e27",
+          "output_sha256": "8691b0e3c6cff7886e188a91f05c0d4de1b03a5d04a42b852be0816c07358e27",
+          "has_usage": true,
+          "has_foreign_error": false
+        },
+        {
+          "entry": "module",
+          "exit_code": 0,
+          "foreign_executed": false,
+          "stdout_sha256": "8691b0e3c6cff7886e188a91f05c0d4de1b03a5d04a42b852be0816c07358e27",
+          "output_sha256": "8691b0e3c6cff7886e188a91f05c0d4de1b03a5d04a42b852be0816c07358e27",
+          "has_usage": true,
+          "has_foreign_error": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "prefix",
+    "command": [
+      "/usr/bin/python3",
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools",
+      "-p",
+      "test_t1832_single_flight.py",
+      "-k",
+      "test_three_compatible_consumers",
+      "-v"
+    ],
+    "exit_code": 1,
+    "oracle_sha256": "f0f5ffbe35a635f9bddbc96ca7489a703085e1887d6fcd3cbf582fa08ef7e90a",
+    "subject_sha256": "9b5424b5e6c0ded441a20d22a0a9076969eef4845936b0322d67bce5de0b21f2"
+  },
+  {
+    "name": "postfix",
+    "command": [
+      "/usr/bin/python3",
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools",
+      "-p",
+      "test_t1832_single_flight.py",
+      "-k",
+      "test_three_compatible_consumers",
+      "-v"
+    ],
+    "exit_code": 0,
+    "oracle_sha256": "f0f5ffbe35a635f9bddbc96ca7489a703085e1887d6fcd3cbf582fa08ef7e90a",
+    "subject_sha256": "24aca431614c7a204797402073d584f18511562d495d3d4aafb25b6edb750c39"
+  }
+]

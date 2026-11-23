@@ -1,0 +1,3 @@
+seed 1656: 600 fact carriers, 2870 digests checked, 130 silent, 600 walls, 0 broken
+seed 7: 600 fact carriers, 2873 digests checked, 127 silent, 600 walls, 0 broken
+seed 20261007: 600 fact carriers, 2874 digests checked, 126 silent, 600 walls, 0 broken

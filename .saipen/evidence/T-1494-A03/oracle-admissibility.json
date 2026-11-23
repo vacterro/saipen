@@ -1,0 +1,24 @@
+{
+  "primary": {
+    "code": "ADMISSIBLE",
+    "admissible": true,
+    "reason": "the same verifier failed against the pre-fix subject and passed against the post-fix subject, so the implementation is what changed",
+    "rule_id": "VERIFY-ORACLE-01"
+  },
+  "a02_verifier_hash": "3f6991c4ea98b2ad",
+  "a02_command": "python -B -m unittest test_command_routing.CommandSemanticsTests.test_bare_continue_cc_identical_on_tripped_goal_valve test_command_routing.CommandSemanticsTests.test_tripped_goal_valve_cc_reauthorizes_keeps_objective test_hostile_wave_regressions.Wave2ObeyTests.test_safety_valve_cc_reauthorizes -v",
+  "a02_oracle_paths": [
+    "tools/test_command_routing.py",
+    "tools/test_hostile_wave_regressions.py",
+    "tools/test_fixture_support.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "a02": {
+    "code": "ADMISSIBLE",
+    "admissible": true,
+    "reason": "the same verifier failed against the pre-fix subject and passed against the post-fix subject, so the implementation is what changed",
+    "rule_id": "VERIFY-ORACLE-01"
+  },
+  "primary_sha256": "c31e968253889bb883dc66fb7fd6e7b90ab60ba0cb23a6984f7af56a2e20b5d8",
+  "fixtures_sha256": "22f064476a0d012d71c40e73b98f90be31898f4b6c2ba01a052dc1b3a57d2561"
+}

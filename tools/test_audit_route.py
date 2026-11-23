@@ -25,6 +25,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from saipen_engine.audit_route import (  # noqa: E402
     audit_route_owns,
+    linked_work_is_done,
     live_continuation,
     route_applies,
     route_violation,
@@ -238,6 +239,63 @@ class AuditRouteWorkabilityTests(unittest.TestCase):
         )
         self.assertIsNotNone(why)
         self.assertIn("PHASE SCOUT T-900", why)
+
+
+# ---------------------------------------------------------------------------
+# AC-07 -- the deletion route may not claim Work that has not closed
+# ---------------------------------------------------------------------------
+
+
+class IngestRouteRequiresDoneWorkTests(unittest.TestCase):
+    """`saipen audit ingest` DELETES transport bytes; its own gate refuses a
+    layer whose linked Work is still open. Claiming continuation for it while
+    that Work is open orders an action the gate then refuses -- the dead end
+    this module exists to detect, reached from the deletion side (measured on
+    this repository: SRC-386/T-2016 routed ingest while T-2016 sat in TODO
+    BLOCKED_EXTERNAL, and the ingest answered SOURCE_UNRESOLVED)."""
+
+    def setUp(self) -> None:
+        self.ingest = {
+            "action": "saipen audit ingest",
+            "layer": 3,
+            "path": "audit/3.md",
+            "receipt": "SRC-900",
+            "work": "T-900",
+        }
+
+    def test_done_work_owns_the_ingest_route(self) -> None:
+        tickets = {"T-900": {"id": "T-900", "section": "## DONE", "checkbox": "x", "fields": {}}}
+        self.assertTrue(audit_route_owns(self.ingest, tickets=tickets))
+
+    def test_open_work_does_not_own_the_ingest_route(self) -> None:
+        tickets = {"T-900": {"id": "T-900", "section": "## TODO", "checkbox": " ", "fields": {}}}
+        self.assertFalse(audit_route_owns(self.ingest, tickets=tickets))
+
+    def test_blocked_external_work_does_not_own_the_ingest_route(self) -> None:
+        tickets = {
+            "T-900": {
+                "id": "T-900",
+                "section": "## TODO",
+                "checkbox": " ",
+                "fields": {"blocker": "BLOCKED_EXTERNAL: owned by another project"},
+            }
+        }
+        self.assertFalse(audit_route_owns(self.ingest, tickets=tickets))
+
+    def test_a_layer_with_no_linked_work_still_owns_the_route(self) -> None:
+        # Capture work (no Work named yet) is a different stage from deletion;
+        # the DONE requirement belongs to the deletion half only.
+        projection = {**self.ingest, "work": None}
+        tickets = {"T-900": {"id": "T-900", "section": "## TODO", "checkbox": " ", "fields": {}}}
+        self.assertTrue(audit_route_owns(projection, tickets=tickets))
+
+    def test_open_ingest_work_does_not_trip_route_violation(self) -> None:
+        tickets = {"T-900": {"id": "T-900", "section": "## TODO", "checkbox": " ", "fields": {}}}
+        # The router falls through to the Pick Rule; the validator must agree.
+        why = route_violation(
+            self.ingest, "PHASE SCOUT T-901", [], WAIT_CATEGORIES, tickets=tickets
+        )
+        self.assertIsNone(why)
 
 
 # ---------------------------------------------------------------------------

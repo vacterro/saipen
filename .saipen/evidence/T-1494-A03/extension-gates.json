@@ -1,0 +1,12 @@
+{
+  ".saipen/extensions/security": false,
+  "extensions/security": true,
+  ".saipen/extensions/performance": false,
+  "extensions/performance": true,
+  "read_documents": {
+    "extensions/security/README.md": "577b29ec155eca223f7e563c9e66a6c4b0a4fa8428e02500082709986be20ba6",
+    "extensions/performance/README.md": "a9517d45610180f9a905a9cc6b1118f72811ed46d2fd11a76c35aa549c548718"
+  },
+  "classification": "installed extension examples only; both say EXAMPLE and nothing reads this copy automatically; project .saipen/extensions hooks absent",
+  "additional_mandatory_commands": []
+}

@@ -327,6 +327,11 @@ class EmittedLiteralScanTests(unittest.TestCase):
             "improve report": "repair: saipen improve reconcile imp-x-1 --json",
             "source receipts": "retire with saipen source retire SRC-007 --reason",
             "source coverage": "route: saipen source recover",
+            # T-2050: the closed-row restore is its own registered shape, so it
+            # needs its own exercised sample beside the unconfirmed form.
+            "source coverage:pruned-work-row": (
+                "restore the pruned rows with saipen source recover --confirm"
+            ),
         }
         for spec in remediation.REMEDIATIONS:
             if spec.kind != "command" or not spec.extract:

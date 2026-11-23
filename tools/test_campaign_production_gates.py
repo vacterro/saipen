@@ -64,6 +64,15 @@ def _seat_state(text: str, **fields) -> str:
         else:
             close = text.index("\n---", 3)
             text = text[:close] + "\n" + line + text[close:]
+    # Execution-intent families are exclusive (state.state_contract_errors):
+    # seating one intent over a live canonical STATE that still carries the
+    # other family's field makes the strict reader refuse the whole fixture,
+    # so drop the family this intent forbids before the fixture is parsed.
+    seated_intent = str(fields.get("execution_intent") or "").strip()
+    if seated_intent == "goal":
+        text = re.sub(r"(?m)^converge_target:.*\r?\n?", "", text)
+    elif seated_intent == "converge":
+        text = re.sub(r"(?m)^(goal_waves|goal_tickets):.*\r?\n?", "", text)
     return text
 
 
@@ -245,7 +254,7 @@ class TestProductionAcceptanceGates(unittest.TestCase):
             "root_cause": "Verified gate reproduction defect",
             "rule_ids": ["GATE-RULE-1"],
             "change_target": "ENGINE",
-            "qualification_receipt": write_qualification_artifact(root, "QUAL-REC-GATE-01", "PAL-GATE-01"),
+            "qualification_receipt": write_qualification_artifact(root, "QUAL-REC-GATE-01"),
             "audit_body": body,
             "artifact_digest": digest,
         }
@@ -551,7 +560,7 @@ class TestCampaignNegativeControls(unittest.TestCase):
         no_dig = {
             "finding_id": "PAL-NO-DIG",
             "state": "QUALIFIED",
-            "qualification_receipt": write_qualification_artifact(root, "QUAL-1", "PAL-NO-DIG"),
+            "qualification_receipt": write_qualification_artifact(root, "QUAL-1"),
             "audit_body": "# Body",
         }
         r2 = adapter.deliver_finding_to_audit_inbox(root, no_dig, publication_authorized=True)
@@ -576,7 +585,7 @@ class TestCampaignNegativeControls(unittest.TestCase):
         mismatch = {
             "finding_id": "PAL-MISMATCH",
             "state": "QUALIFIED",
-            "qualification_receipt": write_qualification_artifact(root, "QUAL-2", "PAL-MISMATCH"),
+            "qualification_receipt": write_qualification_artifact(root, "QUAL-2"),
             "audit_body": "# Body",
             "artifact_digest": "deadbeef" * 8,
         }

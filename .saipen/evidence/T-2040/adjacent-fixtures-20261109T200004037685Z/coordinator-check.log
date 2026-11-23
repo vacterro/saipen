@@ -1,0 +1,14 @@
+................FF..........................                             [100%]
+================================== FAILURES ===================================
+_ DependencyRouteBudgetTests.test_many_foreign_owners_do_not_expand_the_route_again _
+tools\test_t1790_dependency_route_budget.py:81: in test_many_foreign_owners_do_not_expand_the_route_again
+    self.assertIn("33 other owners", route)
+E   AssertionError: '33 other owners' not found in 'saipen ticket block T-2 "ACTIVE_DEPENDENCY:T-100 -- SRC-001: 35 open clauses (SRC-001:R001 SRC-001:R002 SRC-001:R003 +32 more) owner: T-100 (+34 other owners)"'
+_ DependencyRouteBudgetTests.test_single_clause_is_counted_without_hiding_its_identity _
+tools\test_t1790_dependency_route_budget.py:66: in test_single_clause_is_counted_without_hiding_its_identity
+    self.assertIn("1 open clause", route)
+E   AssertionError: '1 open clause' not found in 'saipen ticket block T-2 "ACTIVE_DEPENDENCY:T-1 -- SRC-001: 2 open clauses (SRC-001:R001 SRC-001:R002) owner: T-1"'
+=========================== short test summary info ===========================
+FAILED tools/test_t1790_dependency_route_budget.py::DependencyRouteBudgetTests::test_many_foreign_owners_do_not_expand_the_route_again
+FAILED tools/test_t1790_dependency_route_budget.py::DependencyRouteBudgetTests::test_single_clause_is_counted_without_hiding_its_identity
+2 failed, 42 passed in 25.35s

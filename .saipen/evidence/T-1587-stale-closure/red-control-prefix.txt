@@ -1,0 +1,128 @@
+FFFFF.F.EEE.F...FFF...F
+======================================================================
+ERROR: test_after_the_repair_the_project_converges (test_t1587_stale_closure_recovery.IncidentRouteTests.test_after_the_repair_the_project_converges)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 378, in test_after_the_repair_the_project_converges
+    route = self.cli("recover")["canonical_next_command"].split()[1:]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'split'
+
+======================================================================
+ERROR: test_apply_repairs_exactly_the_stale_field (test_t1587_stale_closure_recovery.IncidentRouteTests.test_apply_repairs_exactly_the_stale_field)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 360, in test_apply_repairs_exactly_the_stale_field
+    route = self.cli("recover")["canonical_next_command"].split()[1:]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'split'
+
+======================================================================
+ERROR: test_matrix_k_replay_is_refused_and_repair_is_idempotent (test_t1587_stale_closure_recovery.IncidentRouteTests.test_matrix_k_replay_is_refused_and_repair_is_idempotent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 390, in test_matrix_k_replay_is_refused_and_repair_is_idempotent
+    route = self.cli("recover")["canonical_next_command"].split()[1:]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'split'
+
+======================================================================
+FAIL: test_every_closure_field_is_classified_outside_done (test_t1587_stale_closure_recovery.DetectionMatrixTests.test_every_closure_field_is_classified_outside_done)
+The class covers the whole board.py vocabulary, not one field.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 270, in test_every_closure_field_is_classified_outside_done
+    self.assertIsNotNone(atom, name)
+AssertionError: unexpectedly None : closure_mode
+
+======================================================================
+FAIL: test_matrix_A_todo_row_is_repairable (test_t1587_stale_closure_recovery.DetectionMatrixTests.test_matrix_A_todo_row_is_repairable)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 208, in test_matrix_A_todo_row_is_repairable
+    self.assertIsNotNone(atom)
+AssertionError: unexpectedly None
+
+======================================================================
+FAIL: test_matrix_B_doing_row_keeps_the_claim_pair (test_t1587_stale_closure_recovery.DetectionMatrixTests.test_matrix_B_doing_row_keeps_the_claim_pair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 217, in test_matrix_B_doing_row_keeps_the_claim_pair
+    self.assertIsNotNone(atom)
+AssertionError: unexpectedly None
+
+======================================================================
+FAIL: test_matrix_C_blocked_row_keeps_blocker_metadata (test_t1587_stale_closure_recovery.DetectionMatrixTests.test_matrix_C_blocked_row_keeps_blocker_metadata)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 228, in test_matrix_C_blocked_row_keeps_blocker_metadata
+    self.assertIsNotNone(atom)
+AssertionError: unexpectedly None
+
+======================================================================
+FAIL: test_matrix_D_cohort_pair_removed_coherently (test_t1587_stale_closure_recovery.DetectionMatrixTests.test_matrix_D_cohort_pair_removed_coherently)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 237, in test_matrix_D_cohort_pair_removed_coherently
+    self.assertIsNotNone(atom)
+AssertionError: unexpectedly None
+
+======================================================================
+FAIL: test_matrix_F_duplicated_field_refuses_rather_than_choosing (test_t1587_stale_closure_recovery.DetectionMatrixTests.test_matrix_F_duplicated_field_refuses_rather_than_choosing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 248, in test_matrix_F_duplicated_field_refuses_rather_than_choosing
+    self.assertIsNotNone(atom, "the class is still IDENTIFIED")
+AssertionError: unexpectedly None : the class is still IDENTIFIED
+
+======================================================================
+FAIL: test_recover_names_the_approved_repair_route (test_t1587_stale_closure_recovery.IncidentRouteTests.test_recover_names_the_approved_repair_route)
+Acceptance 3/4/5: detection, plan, one executable canonical route.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 338, in test_recover_names_the_approved_repair_route
+    self.assertTrue(route, f"recover named no route: {answer}")
+AssertionError: None is not true : recover named no route: {'ok': False, 'code': 'RESIDUAL_DEFECTS', 'detail': 'reconciliation has no repair left to make and the project is still invalid: BOARD proposed T-1371 carries closure metadata (closure_mode) under ## TODO -- closure provenance describes a COMPLETED ticket', 'changed': [], 'residual_defects': ['BOARD proposed T-1371 carries closure metadata (closure_mode) under ## TODO -- closure provenance describes a COMPLETED ticket'], 'strict_state_error': None, 'dry_run': False, 'needs_local_mutation': False, 'safe_auto_repair_available': False, 'operator_decision_available': False, 'canonical_next_command': None, 'read_only': True, 'terminal_disposition': 'RECOVERY_BLOCKED', 'blocking_surface': None, 'blocking_field': None, 'evidence_reference': '.saipen/BOARD.md', 'diagnosis': 'READ_ONLY_DIAGNOSIS_ONLY', 'read_only_diagnosis_only': True, 'instruction': 'READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth', 'forbidden_probes': ['saipen stop', 'saipen transition', 'saipen goal', 'saipen ticket', 'Bash', 'Edit', 'Write'], 'reason_code': 'RESIDUAL_DEFECTS', 'operator_decision': None, 'audit_manifest': {'ok': True, 'code': 'AUDIT_MANIFEST_WRITTEN', 'path': 'V:/_TEMP_/saipen-t1587-o57rbp1c/FASTPROMPTER/.saipen/MANIFEST.json', 'contract_version': 3, 'changed': True, 'layout': 'CURRENT', 'dry_run': False, 'declared': 'ABSENT', 'manifest_present': True, 'manifest_current': True, 'detail': ''}}
+
+======================================================================
+FAIL: test_matrix_b_doing_carrier_keeps_owner_and_claim_time (test_t1587_stale_closure_recovery.SectionCarrierTests.test_matrix_b_doing_carrier_keeps_owner_and_claim_time)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 436, in test_matrix_b_doing_carrier_keeps_owner_and_claim_time
+    self._converged(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 412, in _converged
+    self.assertTrue(route, f"recover named no route: {answer}")
+AssertionError: None is not true : recover named no route: {'ok': False, 'code': 'RESIDUAL_DEFECTS', 'detail': 'reconciliation has no repair left to make and the project is still invalid: BOARD proposed T-1371 carries closure metadata (closure_mode) under ## DOING -- closure provenance describes a COMPLETED ticket', 'changed': [], 'residual_defects': ['BOARD proposed T-1371 carries closure metadata (closure_mode) under ## DOING -- closure provenance describes a COMPLETED ticket'], 'strict_state_error': None, 'dry_run': False, 'needs_local_mutation': False, 'safe_auto_repair_available': False, 'operator_decision_available': False, 'canonical_next_command': None, 'read_only': True, 'terminal_disposition': 'RECOVERY_BLOCKED', 'blocking_surface': None, 'blocking_field': None, 'evidence_reference': '.saipen/BOARD.md', 'diagnosis': 'READ_ONLY_DIAGNOSIS_ONLY', 'read_only_diagnosis_only': True, 'instruction': 'READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth', 'forbidden_probes': ['saipen stop', 'saipen transition', 'saipen goal', 'saipen ticket', 'Bash', 'Edit', 'Write'], 'reason_code': 'RESIDUAL_DEFECTS', 'operator_decision': None, 'audit_manifest': {'ok': True, 'code': 'AUDIT_MANIFEST_WRITTEN', 'path': 'V:/_TEMP_/saipen-t1587-47g3wctr/FASTPROMPTER/.saipen/MANIFEST.json', 'contract_version': 3, 'changed': True, 'layout': 'CURRENT', 'dry_run': False, 'declared': 'ABSENT', 'manifest_present': True, 'manifest_current': True, 'detail': ''}}
+
+======================================================================
+FAIL: test_matrix_c_blocked_carrier_keeps_blocker_metadata (test_t1587_stale_closure_recovery.SectionCarrierTests.test_matrix_c_blocked_carrier_keeps_blocker_metadata)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 456, in test_matrix_c_blocked_carrier_keeps_blocker_metadata
+    self._converged(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 412, in _converged
+    self.assertTrue(route, f"recover named no route: {answer}")
+AssertionError: None is not true : recover named no route: {'ok': False, 'code': 'RESIDUAL_DEFECTS', 'detail': 'reconciliation has no repair left to make and the project is still invalid: BOARD proposed T-1371 carries closure metadata (closure_mode) under ## BLOCKED -- closure provenance describes a COMPLETED ticket', 'changed': [], 'residual_defects': ['BOARD proposed T-1371 carries closure metadata (closure_mode) under ## BLOCKED -- closure provenance describes a COMPLETED ticket'], 'strict_state_error': None, 'dry_run': False, 'needs_local_mutation': False, 'safe_auto_repair_available': False, 'operator_decision_available': False, 'canonical_next_command': None, 'read_only': True, 'terminal_disposition': 'RECOVERY_BLOCKED', 'blocking_surface': None, 'blocking_field': None, 'evidence_reference': '.saipen/BOARD.md', 'diagnosis': 'READ_ONLY_DIAGNOSIS_ONLY', 'read_only_diagnosis_only': True, 'instruction': 'READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth', 'forbidden_probes': ['saipen stop', 'saipen transition', 'saipen goal', 'saipen ticket', 'Bash', 'Edit', 'Write'], 'reason_code': 'RESIDUAL_DEFECTS', 'operator_decision': None, 'audit_manifest': {'ok': True, 'code': 'AUDIT_MANIFEST_WRITTEN', 'path': 'V:/_TEMP_/saipen-t1587-xqru099q/FASTPROMPTER/.saipen/MANIFEST.json', 'contract_version': 3, 'changed': True, 'layout': 'CURRENT', 'dry_run': False, 'declared': 'ABSENT', 'manifest_present': True, 'manifest_current': True, 'detail': ''}}
+
+======================================================================
+FAIL: test_matrix_d_cohort_pair_removed_coherently (test_t1587_stale_closure_recovery.SectionCarrierTests.test_matrix_d_cohort_pair_removed_coherently)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 468, in test_matrix_d_cohort_pair_removed_coherently
+    self._converged(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 412, in _converged
+    self.assertTrue(route, f"recover named no route: {answer}")
+AssertionError: None is not true : recover named no route: {'ok': False, 'code': 'RESIDUAL_DEFECTS', 'detail': 'reconciliation has no repair left to make and the project is still invalid: BOARD proposed T-1371 carries closure metadata (closure_mode, closure_cohort) under ## TODO -- closure provenance describes a COMPLETED ticket', 'changed': [], 'residual_defects': ['BOARD proposed T-1371 carries closure metadata (closure_mode, closure_cohort) under ## TODO -- closure provenance describes a COMPLETED ticket'], 'strict_state_error': None, 'dry_run': False, 'needs_local_mutation': False, 'safe_auto_repair_available': False, 'operator_decision_available': False, 'canonical_next_command': None, 'read_only': True, 'terminal_disposition': 'RECOVERY_BLOCKED', 'blocking_surface': None, 'blocking_field': None, 'evidence_reference': '.saipen/BOARD.md', 'diagnosis': 'READ_ONLY_DIAGNOSIS_ONLY', 'read_only_diagnosis_only': True, 'instruction': 'READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth', 'forbidden_probes': ['saipen stop', 'saipen transition', 'saipen goal', 'saipen ticket', 'Bash', 'Edit', 'Write'], 'reason_code': 'RESIDUAL_DEFECTS', 'operator_decision': None, 'audit_manifest': {'ok': True, 'code': 'AUDIT_MANIFEST_WRITTEN', 'path': 'V:/_TEMP_/saipen-t1587-kxh6pm4t/FASTPROMPTER/.saipen/MANIFEST.json', 'contract_version': 3, 'changed': True, 'layout': 'CURRENT', 'dry_run': False, 'declared': 'ABSENT', 'manifest_present': True, 'manifest_current': True, 'detail': ''}}
+
+======================================================================
+FAIL: test_matrix_j_no_false_clean_over_an_independent_error (test_t1587_stale_closure_recovery.SectionCarrierTests.test_matrix_j_no_false_clean_over_an_independent_error)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1587_stale_closure_recovery.py", line 564, in test_matrix_j_no_false_clean_over_an_independent_error
+    self.assertTrue(route, answer)
+AssertionError: None is not true : {'ok': False, 'code': 'RESIDUAL_DEFECTS', 'detail': "reconciliation has no repair left to make and the project is still invalid: BOARD: BOARD.md:5 ticket T-1372 has unrecognized field 'legacy_note: hand-written'; BOARD proposed T-1371 carries closure metadata (closure_mode) under ## TODO -- closure provenance describes a COMPLETED ticket", 'changed': [], 'residual_defects': ["BOARD: BOARD.md:5 ticket T-1372 has unrecognized field 'legacy_note: hand-written'", 'BOARD proposed T-1371 carries closure metadata (closure_mode) under ## TODO -- closure provenance describes a COMPLETED ticket'], 'strict_state_error': None, 'dry_run': False, 'needs_local_mutation': False, 'safe_auto_repair_available': False, 'operator_decision_available': False, 'canonical_next_command': None, 'read_only': True, 'terminal_disposition': 'RECOVERY_BLOCKED', 'blocking_surface': None, 'blocking_field': None, 'evidence_reference': '.saipen/BOARD.md', 'diagnosis': 'READ_ONLY_DIAGNOSIS_ONLY', 'read_only_diagnosis_only': True, 'instruction': 'READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth', 'forbidden_probes': ['saipen stop', 'saipen transition', 'saipen goal', 'saipen ticket', 'Bash', 'Edit', 'Write'], 'reason_code': 'RESIDUAL_DEFECTS', 'operator_decision': None, 'audit_manifest': {'ok': True, 'code': 'AUDIT_MANIFEST_WRITTEN', 'path': 'V:/_TEMP_/saipen-t1587-ujdn9xja/FASTPROMPTER/.saipen/MANIFEST.json', 'contract_version': 3, 'changed': True, 'layout': 'CURRENT', 'dry_run': False, 'declared': 'ABSENT', 'manifest_present': True, 'manifest_current': True, 'detail': ''}}
+
+----------------------------------------------------------------------
+Ran 23 tests in 4.498s
+
+FAILED (failures=11, errors=3)

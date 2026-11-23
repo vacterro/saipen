@@ -1,0 +1,7 @@
+{
+  "requirement": "SRC-258:R005",
+  "shared_home_refusal": null,
+  "ordinary_mutation_code": "HOME_REQUIRED",
+  "ordinary_mutation_refused": true,
+  "gates_agree": false
+}

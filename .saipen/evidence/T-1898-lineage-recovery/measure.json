@@ -1,0 +1,25 @@
+{
+  "subject": "tools/saipen_engine/conformance_lineage.py + conformance.py (T-1898)",
+  "workload": "conformance.latest_receipt('.', 'core') on the live 3937-receipt namespace",
+  "namespace": {
+    "receipt_files": 3937,
+    "receipt_bytes": 8595690,
+    "index_subtree_files": 38
+  },
+  "head": {
+    "present": true,
+    "receipt_count": 3937,
+    "stale": false
+  },
+  "timings_seconds": {
+    "full_content_inventory_fallback": 1.4943,
+    "bounded_lookup_current_head": 0.0018,
+    "latest_receipt_total": 0.002
+  },
+  "mutation_probe": {
+    "read_path_latest_receipt_writes": 0,
+    "writer_path_append_repairs_stale_head": true,
+    "current_head_repair_cost_seconds": 0.0004
+  },
+  "verdict": "bounded path restored; the 1.49s full-namespace hash is paid only when no v2 lineage exists"
+}

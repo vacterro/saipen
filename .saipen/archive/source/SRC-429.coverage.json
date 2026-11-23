@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-429:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2096 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:56 record:.saipen/evidence/focused-unit/a0581f36c1ebcd85-20261118T173911186033Z.json sha256:70e4dd4dadde4363fd5eb25ed94c92d498018585f82417af87170f2b08afe75e",
+      "text": "W1 board scrub eligibility parity: validator must pass promoted gate tickets to board_scrub.select so validator and canonical scrub share one retention decision, then resolve T-2095 board-soft-cap",
+      "verification": "the Work this request created reached its own verification gate; see the T-2096 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2096"
+    }
+  },
+  "schema_version": 1
+}

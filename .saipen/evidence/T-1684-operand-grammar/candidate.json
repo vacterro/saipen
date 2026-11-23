@@ -1,0 +1,7 @@
+{
+  "tools/saipen.py": "91ffee401f369dbc8b7db7e2d897de91a182260b08c890df0029dcf766dabcc8",
+  "tools/saipen_engine/commands.py": "0e16f0f17e3a089641549f83795c8c8a77f41773172931530529df43a94adbe9",
+  "tools/saipen_engine/command_effects.py": "9490006dc14315bb0f0eeffcfa0c777a0e35d4b1ace8115bcae9e66cdd2c534d",
+  "tools/saipen_engine/cli_grammar.py": "7e49b9d0c7add85b0baa7424b2ee2796382147fc5c3aa216d464f68dad7d7e17",
+  "tools/test_t1684_operand_grammar.py": "46384e17d5ccef46639169c9c2b5b1d6d80bc33ef824bfc8b0f9b4c61a2fea16"
+}

@@ -1,0 +1,21 @@
+# T-1373 VERIFY (current bytes, 2026-09-17) AUDAPACK focused consumer family
+command: python -m pytest tests/test_saipen_evidence.py -q -p no:cacheprovider
+.........................F........................                       [100%]
+================================== FAILURES ===================================
+___ TestArchiveProvenance.test_incomplete_snapshot_does_not_claim_authority ___
+
+self = <test_saipen_evidence.TestArchiveProvenance testMethod=test_incomplete_snapshot_does_not_claim_authority>
+
+    def test_incomplete_snapshot_does_not_claim_authority(self):
+        sp = self.write_saipen()
+        (sp / "STATE.md").unlink()
+        self.ignore(".saipen/*")
+        self.commit()
+        result = self._pack()
+>       self.assertTrue(result.success, result.error_message)
+E       AssertionError: False is not true : SAIPEN audit-manifest precondition failed (AUDIT_MANIFEST_STALE_REGENERATION_FAILED): manifest is stale (declared mandatory evidence no longer matches disk: declared=['.saipen/BOARD.md', '.saipen/IDENTITY.md', '.saipen/LOG.md', '.saipen/STATE.md'] on_disk=['.saipen/BOARD.md', '.saipen/IDENTITY.md', '.saipen/LOG.md']); regeneration failed: saipen.cmd: executable not found. Run `saipen audit manifest --write` in the project (or repair the owning SAIPEN protocol component) and repack; no archive was produced.
+
+tests\test_saipen_evidence.py:518: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_saipen_evidence.py::TestArchiveProvenance::test_incomplete_snapshot_does_not_claim_authority
+1 failed, 49 passed in 12.17s

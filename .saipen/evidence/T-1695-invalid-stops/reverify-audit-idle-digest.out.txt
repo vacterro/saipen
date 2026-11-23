@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "code": "RESPONSE_RENDERED",
+  "text": "STATUS: DONE\nRESULT: Töö säilitatud\nBLOCKER: AUDIT_INBOX_INVALID -- unreadable audit layer\nNEXT EXACT ACTION: NONE\nVALIDATION: NOT_RUN",
+  "reason": "final",
+  "emit": true
+}

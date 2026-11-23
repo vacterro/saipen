@@ -1,0 +1,13 @@
+{
+  "ticket": "T-1851",
+  "phase": "VERIFY",
+  "command": "python -B tools/core_unit.py evidence T-1851",
+  "host_session_id": 77697,
+  "process_id": 12244,
+  "process_created": 1792632981.6272984,
+  "started_utc": "2026-10-22T01:36:24Z",
+  "flight": ".saipen/cache/verification-flights/ac06cbfc54b8b72919f16bff1ef9299013c4593de6aaa5d850b507794cf3418e.json",
+  "fingerprint": "ce7fb7fc2e8c58a6457a5184e77c27f3baae49e0ffcdc9bee960789712a5812c",
+  "jobs": 6,
+  "instruction": "Poll this live host session or inspect its actual process and flight readers; do not restart for a polling timeout. Source outside .saipen stays frozen while live. After the gate finishes, inspect the full actual result, fix any confirmed failures canonically, then independently rerun ticket verification in REVIEW before closure. No full PASS, DONE or goal completion has been claimed."
+}

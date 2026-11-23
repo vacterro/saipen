@@ -1,0 +1,626 @@
+{
+  "requirements": {
+    "SRC-442:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "**Verification execution:** \u0441\u043a\u043e\u043b\u044c\u043a\u043e \u0437\u0430\u043d\u0438\u043c\u0430\u0435\u0442 \u043d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u0430\u044f \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "**Verification economics:** \u0441\u043a\u043e\u043b\u044c\u043a\u043e \u043f\u0440\u043e\u0432\u0435\u0440\u043e\u043a \u043f\u0440\u0438\u0445\u043e\u0434\u0438\u0442\u0441\u044f \u0432\u044b\u043f\u043e\u043b\u043d\u044f\u0442\u044c \u0434\u043b\u044f \u043e\u0434\u043d\u043e\u0433\u043e \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u043e\u0433\u043e \u0438\u0441\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "**Autonomous throughput:** \u0441\u043a\u043e\u043b\u044c\u043a\u043e \u043f\u043e\u043b\u0435\u0437\u043d\u043e\u0439 \u0438\u043d\u0436\u0435\u043d\u0435\u0440\u043d\u043e\u0439 \u0440\u0430\u0431\u043e\u0442\u044b \u0430\u0433\u0435\u043d\u0442 \u0437\u0430\u0432\u0435\u0440\u0448\u0430\u0435\u0442 \u0437\u0430 \u0447\u0430\u0441. \u0413\u043b\u0430\u0432\u043d\u0430\u044f \u043f\u0440\u043e\u0431\u043b\u0435\u043c\u0430 \u0443\u0436\u0435 \u043d\u0435 \u0432 \u043e\u0434\u043d\u043e\u043c \u043c\u0435\u0434\u043b\u0435\u043d\u043d\u043e\u043c regex \u0438\u043b\u0438 \u043a\u043e\u043d\u043a\u0440\u0435\u0442\u043d\u043e\u043c sandbox. \u041f\u0440\u043e\u0431\u043b\u0435\u043c\u0430 \u0432 \u0441\u043e\u0432\u043e\u043a\u0443\u043f\u043d\u043e\u0439 \u0441\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u0438 \u043f\u043e\u043b\u043d\u043e\u0433\u043e \u0438\u043d\u0436\u0435\u043d\u0435\u0440\u043d\u043e\u0433\u043e \u0446\u0438\u043a\u043b\u0430. **\u0426\u0435\u043b\u044c: \u043c\u0435\u043d\u044c\u0448\u0435 \u043d\u0435\u043d\u0443\u0436\u043d\u044b\u0445 \u0437\u0430\u043f\u0443\u0441\u043a\u043e\u0432, \u043c\u0435\u043d\u044c\u0448\u0435 \u043e\u0436\u0438\u0434\u0430\u043d\u0438\u044f, \u0431\u043e\u043b\u044c\u0448\u0435 \u0440\u0435\u0430\u043b\u044c\u043d\u044b\u0445 \u0438\u0441\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0439.** \u041d\u0435 \u043e\u0442\u043a\u043b\u044e\u0447\u0430\u0442\u044c \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u0435 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438. \u041d\u0435 \u043f\u0440\u0438\u043d\u0438\u043c\u0430\u0442\u044c \u043d\u0435\u043f\u043e\u0434\u0445\u043e\u0434\u044f\u0449\u0438\u0435 evidence \u0440\u0430\u0434\u0438 \u0443\u0441\u043a\u043e\u0440\u0435\u043d\u0438\u044f. \u041d\u0435 \u0441\u043d\u0438\u0436\u0430\u0442\u044c test coverage. \u041d\u0435 \u0441\u043e\u0437\u0434\u0430\u0432\u0430\u0442\u044c \u043f\u0430\u0440\u0430\u043b\u043b\u0435\u043b\u044c\u043d\u044b\u0439 verification protocol. --- # 2. FORENSIC BASELINE ## Archive integrity \u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 ZIP \u043f\u0440\u043e\u0432\u0435\u0440\u0435\u043d. - 18 261 ZIP entries. - CRC PASS. - 31 \u043d\u043e\u0432\u044b\u0439 entry \u043e\u0442\u043d\u043e\u0441\u0438\u0442\u0435\u043b\u044c\u043d\u043e \u043f\u0440\u0435\u0434\u044b\u0434\u0443\u0449\u0435\u0433\u043e snapshot. - 9 \u0438\u0437\u043c\u0435\u043d\u0451\u043d\u043d\u044b\u0445. - 0 \u0438\u0441\u0447\u0435\u0437\u043d\u0443\u0432\u0448\u0438\u0445. - Git HEAD `f0380fab8`. - Git dirty: false. \u0415\u0434\u0438\u043d\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0439 \u0438\u0437\u043c\u0435\u043d\u0451\u043d\u043d\u044b\u0439 production-adjacent configuration file: `tools/sandbox_scope.json` \u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439 \u0441\u0430\u043c\u043e\u0433\u043e Python engine \u043c\u0435\u0436\u0434\u0443 \u0434\u0432\u0443\u043c\u044f \u0441\u043d\u0438\u043c\u043a\u0430\u043c\u0438 \u043d\u0435 \u043e\u0431\u043d\u0430\u0440\u0443\u0436\u0435\u043d\u043e. AUDAPACK \u043e\u0441\u0442\u0430\u0451\u0442\u0441\u044f \u043d\u0435\u043f\u043e\u043b\u043d\u044b\u043c \u043f\u0440\u0435\u0434\u0441\u0442\u0430\u0432\u043b\u0435\u043d\u0438\u0435\u043c \u0436\u0438\u0432\u043e\u0439 \u043c\u0430\u0448\u0438\u043d\u044b: `PROTOCOL_INCOMPLETE / authoritative_state: false` \u041f\u043e\u044d\u0442\u043e\u043c\u0443 \u043f\u0435\u0440\u0435\u0434 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044f\u043c\u0438 \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044f \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c live HEAD, STATE, installed runtime \u0438 canonical permissions. ## Current STATE ```text phase: DONE task: none next_action: saipen validate last_event: E-23055 execution_intent: converge converge_target: crew ``` BOARD: - DONE: 157. - BLOCKED: 143. - DOING: 0. - TODO: 0. \u041d\u0435 \u0441\u0447\u0438\u0442\u0430\u0442\u044c \u043a\u043e\u043b\u0438\u0447\u0435\u0441\u0442\u0432\u043e BLOCKED \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0435\u043b\u0435\u043c \u0442\u043e\u0433\u043e, \u0447\u0442\u043e \u0432\u0441\u0435 \u043e\u043d\u0438 \u044f\u0432\u043b\u044f\u044e\u0442\u0441\u044f \u043d\u043e\u0432\u044b\u043c\u0438 \u0442\u0435\u0445\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u043c\u0438 \u043f\u0440\u043e\u0431\u043b\u0435\u043c\u0430\u043c\u0438. \u041f\u0440\u043e\u0432\u0435\u0440\u044f\u0442\u044c ownership \u0438 \u0443\u0441\u043b\u043e\u0432\u0438\u044f \u043a\u043e\u043d\u043a\u0440\u0435\u0442\u043d\u043e\u0433\u043e Work. --- # 3. CONFIRMED CAMPAIGN XI RESULT ## T-2162 DONE \u041f\u0440\u0435\u0434\u044b\u0434\u0443\u0449\u0430\u044f \u0437\u0430\u0434\u0430\u0447\u0430 \u0437\u0430\u043a\u0440\u044b\u0442\u0430 \u043f\u043e\u043b\u043d\u044b\u043c canonical lifecycle. \u0418\u0441\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435: `tools/sandbox_scope.json` \u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u044b \u0442\u043e\u043b\u044c\u043a\u043e \u0434\u0432\u0435 \u0434\u0435\u043a\u043b\u0430\u0440\u0430\u0446\u0438\u0438: ```json \"test_outbox_write_time_bar.py\": [], \"test_sub_dispose_after_collect.py\": [] ``` \u0412 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u043c manifest \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043f\u0440\u0438\u043d\u044f\u0442\u0443\u044e \u0441\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u0443 schema, \u043f\u043e\u0440\u044f\u0434\u043e\u043a \u0438 \u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0435 \u0437\u043d\u0430\u0447\u0435\u043d\u0438\u044f. \u041e\u0431\u0449\u0435\u0435 \u043a\u043e\u043b\u0438\u0447\u0435\u0441\u0442\u0432\u043e declared modules \u0432\u044b\u0440\u043e\u0441\u043b\u043e \u0441\u043e 154 \u0434\u043e 156. \u0414\u0440\u0443\u0433\u0438\u0445 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439 \u0432 existing scopes \u043d\u0435 \u043e\u0431\u043d\u0430\u0440\u0443\u0436\u0435\u043d\u043e. ## Measured improvement | Metric | Before | After | |---|---:|---:| | Focused suite | 105.83 s | 23.58\u201325.11 s | | Sandbox copy | 67.86 s | 0.58\u20130.66 s | | Cleanup | 17.23 s | 0.11\u20130.14 s | | Executed tests | 23 | 23 | | Scope mode | FULL | DECLARED | | Undeclared modules | 2 | 0 | | New skips | 0 | 0 | \u0422\u0440\u0438 \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u044b\u0445 narrowed runs: - 25.109 s, PASS. - 23.656 s, PASS. - 23.578 s, PASS. \u0414\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u0430\u044f machinery battery: - 46 tests, PASS. - T-1889 negative controls preserved. - INV-20 replay guard preserved. - Missing-subtree refusals preserved. - Subject-protection checks preserved. **\u042d\u0442\u043e \u0437\u0430\u043a\u043e\u043d\u0447\u0435\u043d\u043d\u043e\u0435 performance improvement. \u041d\u0435 \u043f\u043e\u0432\u0442\u043e\u0440\u044f\u0442\u044c T-2162.** Publication \u043e\u0441\u0442\u0430\u0451\u0442\u0441\u044f \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u044b\u043c lifecycle state. \u041d\u0435 \u043e\u0431\u044a\u044f\u0432\u043b\u044f\u0442\u044c installed consumer acceptance \u0442\u043e\u043b\u044c\u043a\u043e \u043f\u043e source tests. --- # 4. CRITICAL SYSTEMIC FINDING: FOUR FULL-FAMILY RUNS \u041f\u043e\u0441\u043b\u0435 \u0434\u0432\u0443\u0445\u0441\u0442\u0440\u043e\u0447\u043d\u043e\u0433\u043e \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f manifest \u0431\u044b\u043b\u043e \u0432\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u043e \u0447\u0435\u0442\u044b\u0440\u0435 \u043f\u043e\u043b\u043d\u044b\u0445 core-unit \u0437\u0430\u043f\u0443\u0441\u043a\u0430 \u043d\u0430 \u043e\u0434\u043d\u043e\u043c subject fingerprint: `63c8a2c81a81cbf4\u2026` | Run | Wall | New red | Relative verdict | |---|---:|---:|---| | 10:37 UTC | 2 589.0 s | 1 | FAIL | | 11:16 UTC | 2 227.0 s | 0 | PASS | | 11:56 UTC | 2 234.0 s | 0 | PASS | | 12:33 UTC | 2 141.4 s | 0 | PASS | **\u041e\u0431\u0449\u0430\u044f \u0434\u043b\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 9 191.4 \u0441\u0435\u043a\u0443\u043d\u0434\u044b, \u0438\u043b\u0438 \u043f\u0440\u0438\u043c\u0435\u0440\u043d\u043e 2 \u0447\u0430\u0441\u0430 33 \u043c\u0438\u043d\u0443\u0442\u044b.** \u042d\u0442\u043e \u0441\u0443\u043c\u043c\u0430\u0440\u043d\u043e\u0435 \u0432\u0440\u0435\u043c\u044f \u0447\u0435\u0442\u044b\u0440\u0451\u0445 \u0437\u0430\u043f\u0443\u0441\u043a\u043e\u0432, \u0430 \u043d\u0435 \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u043e \u0442\u043e\u0447\u043d\u043e\u0435 \u043a\u0430\u043b\u0435\u043d\u0434\u0430\u0440\u043d\u043e\u0435 \u0432\u0440\u0435\u043c\u044f \u0432\u0441\u0435\u0445 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0439 \u0430\u0433\u0435\u043d\u0442\u0430. \u0412\u0441\u0435 \u0447\u0435\u0442\u044b\u0440\u0435: - Same tree fingerprint. - 8 911 tests executed. - 6 workers. - Source-level change limited to sandbox manifest. - Same baseline-relative evaluation family. \u041f\u0435\u0440\u0432\u044b\u0435 \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442\u044b \u0440\u0430\u0441\u0445\u043e\u0434\u0438\u043b\u0438\u0441\u044c \u0438\u0437-\u0437\u0430 \u043e\u0434\u043d\u043e\u0433\u043e \u043d\u043e\u0432\u043e\u0433\u043e red. \u041f\u043e\u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0438\u0435 \u0442\u0440\u0438 \u0438\u043c\u0435\u043b\u0438: - 104 inherited red. - 0 new red. - 1 fixed relative to baseline. - Baseline-relative PASS. - Raw family status FAIL. ## Important conclusion \u041d\u0435\u043b\u044c\u0437\u044f \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438 \u043d\u0430\u0437\u0432\u0430\u0442\u044c \u0432\u0441\u0435 \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u044b\u0435 runs \u043d\u0435\u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u043c\u0438. \u041f\u0435\u0440\u0432\u044b\u0439 \u043f\u0440\u043e\u0432\u0430\u043b \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u043e\u0433\u043e \u0440\u0430\u0441\u0441\u043b\u0435\u0434\u043e\u0432\u0430\u043d\u0438\u044f. \u041e\u0434\u043d\u0430\u043a\u043e \u0434\u0432\u0430 \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0445 PASS \u043f\u043e\u0441\u043b\u0435 \u0443\u0436\u0435 \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u043d\u043e\u0433\u043e \u0441\u043e\u0432\u043c\u0435\u0441\u0442\u0438\u043c\u043e\u0433\u043e PASS \u0442\u0440\u0435\u0431\u0443\u044e\u0442 \u0442\u043e\u0447\u043d\u043e\u0439 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438 \u043f\u0440\u0438\u0447\u0438\u043d\u044b. \u0418\u0441\u0442\u043e\u0440\u0438\u0447\u0435\u0441\u043a\u0438\u0435 checkpoints E-23050, E-23051 \u0438 E-23053 \u043e\u043f\u0438\u0441\u044b\u0432\u0430\u044e\u0442 \u043d\u0435\u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0435 environment identity \u043c\u0435\u0436\u0434\u0443 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u043e\u0439 \u0438 SHIP evaluator. \u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u0437\u0430\u043f\u0443\u0441\u043a \u0431\u044b\u043b \u0432\u044b\u043f\u043e\u043b\u043d\u0435\u043d \u0432 \u0442\u043e\u043c \u0436\u0435 process tree, \u0433\u0434\u0435 \u043f\u0440\u043e\u0432\u043e\u0434\u0438\u043b\u0430\u0441\u044c evaluation. \u042d\u0442\u043e \u0441\u0438\u043b\u044c\u043d\u044b\u0439 \u043a\u0430\u043d\u0434\u0438\u0434\u0430\u0442 \u043d\u0430 \u0443\u0441\u0442\u0440\u0430\u043d\u0435\u043d\u0438\u0435 \u0434\u043e\u0440\u043e\u0433\u043e\u0441\u0442\u043e\u044f\u0449\u0435\u0433\u043e \u0434\u0443\u0431\u043b\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u044f. **\u0413\u043b\u0430\u0432\u043d\u0430\u044f \u0437\u0430\u0434\u0430\u0447\u0430 Campaign XII: \u043d\u0435 \u0434\u0430\u0442\u044c \u043d\u0435\u0441\u043e\u0433\u043b\u0430\u0441\u043e\u0432\u0430\u043d\u043d\u043e\u0441\u0442\u0438 \u043e\u043a\u0440\u0443\u0436\u0435\u043d\u0438\u044f \u0441\u043d\u043e\u0432\u0430 \u043f\u0440\u0435\u0432\u0440\u0430\u0442\u0438\u0442\u044c \u043e\u0434\u0438\u043d required full-family run \u0432 \u0442\u0440\u0438 \u043b\u0438\u0448\u043d\u0438\u0445.** --- # 5. WAVE A \u2014 VERIFICATION ENVIRONMENT PREFLIGHT **Priority: P1 / potentially very high savings** Relevant source: ```text tools/saipen_engine/verification_cache.py tools/saipen_engine/core_unit.py tools/saipen_engine/verification_bootstrap.py ``` Existing mechanisms: ```text compatible() incompatibility() reusable_record() capture() ship_gate() ``` ## Current problem `verification_cache.incompatibility()` \u0443\u0436\u0435 \u043e\u0431\u044a\u044f\u0441\u043d\u044f\u0435\u0442 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0435 identity \u0438 \u0443\u0441\u0442\u0430\u0440\u0435\u0432\u0448\u0443\u044e \u0432\u0435\u0440\u0441\u0438\u044e identity rule. \u041d\u043e \u0434\u043b\u044f \u043c\u043d\u043e\u0433\u0438\u0445 \u043d\u0435\u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439 \u0432\u043d\u0443\u0442\u0440\u0438 \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044e\u0449\u0435\u0439 \u0441\u0445\u0435\u043c\u044b \u0434\u0438\u0430\u0433\u043d\u043e\u0441\u0442\u0438\u043a\u0430 \u043d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u043a\u043e\u043d\u043a\u0440\u0435\u0442\u043d\u0430. \u0412 \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442\u0435 \u0430\u0433\u0435\u043d\u0442 \u043c\u043e\u0436\u0435\u0442 \u043f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435 \u043e\u0431 incompatible verification environment \u0438 \u0437\u0430\u043f\u0443\u0441\u0442\u0438\u0442\u044c \u043f\u043e\u043b\u043d\u044b\u0439 suite \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u043e, \u0445\u043e\u0442\u044f \u043d\u0430\u0441\u0442\u043e\u044f\u0449\u0430\u044f \u043f\u0440\u0438\u0447\u0438\u043d\u0430 \u0437\u0430\u043a\u043b\u044e\u0447\u0430\u0435\u0442\u0441\u044f \u0432 environment evaluator. ## Required engineering work \u041f\u043e\u0441\u0442\u0440\u043e\u0438\u0442\u044c \u0442\u043e\u0447\u043d\u0443\u044e \u043a\u043b\u0430\u0441\u0441\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u044e \u043d\u0435\u0441\u043e\u0432\u043c\u0435\u0441\u0442\u0438\u043c\u043e\u0441\u0442\u0438. \u0420\u0430\u0437\u043b\u0438\u0447\u0430\u0442\u044c: - Source fingerprint mismatch. - Baseline digest mismatch. - Test membership mismatch. - Test configuration mismatch. - Python executable mismatch. - Python runtime mismatch. - Host environment class mismatch. - Toolchain identity mismatch. - Verifier implementation mismatch. - Missing runtime dependency. - Unsupported identity rule. - Corrupt evidence. - Actual mandatory freshness requirement. \u0414\u043e\u043b\u0436\u0435\u043d \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u043e\u0432\u0430\u0442\u044c read-only preflight, \u043f\u043e\u0437\u0432\u043e\u043b\u044f\u044e\u0449\u0438\u0439 \u0437\u0430\u0440\u0430\u043d\u0435\u0435 \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0441\u043e\u0432\u043c\u0435\u0441\u0442\u0438\u043c\u043e\u0441\u0442\u044c \u043e\u0436\u0438\u0434\u0430\u0435\u043c\u043e\u0433\u043e evidence creator environment \u0441 \u043e\u0436\u0438\u0434\u0430\u0435\u043c\u044b\u043c SHIP evaluator environment. ### Important requirement **\u041d\u0435 \u043c\u0435\u043d\u044f\u0442\u044c \u0434\u043e\u043a\u0430\u0437\u0430\u0442\u0435\u043b\u044c\u0441\u0442\u0432\u0430 \u0442\u0430\u043a, \u0447\u0442\u043e\u0431\u044b \u043d\u0435\u0441\u043e\u0432\u043c\u0435\u0441\u0442\u0438\u043c\u044b\u0435 environments \u0441\u0442\u0430\u043b\u0438 \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438 \u0441\u043e\u0432\u043c\u0435\u0441\u0442\u0438\u043c\u044b\u043c\u0438.** \u041d\u0435 \u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c identity \u0447\u0443\u0436\u043e\u0439 \u0441\u0435\u0441\u0441\u0438\u0438. \u041d\u0435 \u0438\u0433\u043d\u043e\u0440\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0440\u0430\u0437\u043b\u0438\u0447\u0438\u044f PATH, Python, toolchain \u0438\u043b\u0438 host. \u041d\u0435 \u043f\u043e\u0434\u0441\u0442\u0430\u0432\u043b\u044f\u0442\u044c \u0444\u0430\u043b\u044c\u0448\u0438\u0432\u044b\u0435 environment hashes. \u041f\u0440\u0438 \u043d\u0430\u0441\u0442\u043e\u044f\u0449\u0435\u0439 \u043d\u0435\u0441\u043e\u0432\u043c\u0435\u0441\u0442\u0438\u043c\u043e\u0441\u0442\u0438 gate \u0434\u043e\u043b\u0436\u0435\u043d \u043f\u0440\u043e\u0434\u043e\u043b\u0436\u0430\u0442\u044c \u043e\u0442\u043a\u0430\u0437\u044b\u0432\u0430\u0442\u044c. ## Preferred design Before expensive verification: ```text CAPTURE EXPECTED VERIFICATION ENVIRONMENT \u2193 CAPTURE EXPECTED EVALUATOR ENVIRONMENT \u2193 COMPARE CONTRACT-RELEVANT IDENTITIES \u2193 IF COMPATIBLE: EXECUTE REQUIRED VERIFICATION RETAIN EXACT EVIDENCE ELSE: REPORT EXACT MISMATCH SELECT SUPPORTED CANONICAL ROUTE ``` \u041f\u043e\u0441\u043b\u0435 \u0432\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u044f: ```text EVIDENCE \u2193 VERIFY ACTUAL EXECUTION IDENTITY \u2193 CHECK REUSABILITY \u2193 SHIP GATE ``` ## Required negative tests",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Identical environment \u2192 compatible.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Different Python executable \u2192 correctly classified.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Changed relevant environment variable \u2192 correct refusal.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Different toolchain \u2192 correct refusal.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Modified source \u2192 no reuse.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Modified baseline \u2192 no reuse.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Older identity rule \u2192 refusal.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Corrupt record \u2192 refusal.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Current valid record + wrong evaluator \u2192 actionable diagnostic.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Same process tree \u2192 compatible when all identities genuinely match.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Incompatible FAIL cannot become reused PASS.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Newer conflicting evidence cannot be hidden by older PASS. ## Acceptance A valid current-family record must not trigger an unnecessary full rerun merely because the caller used the wrong evaluation environment. The system must identify the mismatch before the next expensive execution whenever technically possible. **Target: zero full-family reruns caused solely by incorrect environment-routing advice.** --- # 6. WAVE B \u2014 INVESTIGATE THE NONDETERMINISTIC TEST **Priority: P1 / reliability and execution economics** Affected test: ```text test_portable_floor_fields.PortableNeedsFields. test_description_and_blocker_prose_do_not_create_dependencies ``` First full run: - This test became new_red. - Family verdict FAIL. - Module duration approximately 72.4 seconds. Standalone observation reported: - Approximately 4.7 seconds. Three later same-fingerprint full runs: - Test did not appear in new_red. - Baseline-relative verdict PASS. ## Test responsibility The test verifies that prose containing strings like `needs: T-999` does not accidentally create real dependency edges. It exercises actual validator/floor runners against a disposable project. The contract is meaningful and must be preserved. ## Hypotheses to test - subprocess startup contention; - temporary directory contention; - PowerShell startup delay; - filesystem pressure; - global interpreter/module state; - per-shard scheduling; - changed environment between runs; - timeout-induced partial output; - nondeterministic floor runner; - shared external resources. \u041d\u0435 \u043e\u0431\u044a\u044f\u0432\u043b\u044f\u0442\u044c \u043f\u0440\u043e\u0431\u043b\u0435\u043c\u0443 \u0440\u0435\u0448\u0451\u043d\u043d\u043e\u0439 \u0442\u043e\u043b\u044c\u043a\u043e \u043f\u043e\u0442\u043e\u043c\u0443, \u0447\u0442\u043e \u0442\u0440\u0438 \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0438\u0445 \u043f\u0440\u043e\u0433\u043e\u043d\u0430 \u043f\u0440\u043e\u0448\u043b\u0438. ## Required instrumentation \u0418\u0437\u043c\u0435\u0440\u0438\u0442\u044c \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e:",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Fixture creation.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Test subprocess spawn.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R018": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Validator execution.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Floor runner execution.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R020": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Stdout/stderr capture.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Assertion execution.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Process termination.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R023": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Temporary directory cleanup. \u0412\u044b\u043f\u043e\u043b\u043d\u0438\u0442\u044c bounded repetitions: - isolated; - contended; - single-worker; - parallel-shard; - with controlled filesystem pressure. \u041d\u0435 \u0437\u0430\u043f\u0443\u0441\u043a\u0430\u0442\u044c \u0431\u0435\u0441\u043a\u043e\u043d\u0435\u0447\u043d\u044b\u0435 \u043f\u043e\u0432\u0442\u043e\u0440\u0435\u043d\u0438\u044f \u0440\u0430\u0434\u0438 \u0441\u043b\u0443\u0447\u0430\u0439\u043d\u043e\u0433\u043e \u0432\u043e\u0441\u043f\u0440\u043e\u0438\u0437\u0432\u0435\u0434\u0435\u043d\u0438\u044f. ## RED/GREEN \u0415\u0441\u043b\u0438 \u043f\u0440\u043e\u0431\u043b\u0435\u043c\u0430 \u043d\u0430\u0445\u043e\u0434\u0438\u0442\u0441\u044f \u0432 timeout handling \u0438\u043b\u0438 subprocess execution, \u0441\u043e\u0437\u0434\u0430\u0442\u044c \u043a\u043e\u043d\u043a\u0440\u0435\u0442\u043d\u044b\u0439 regression test. \u0418\u0441\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u043f\u0440\u0438\u0447\u0438\u043d\u043d\u044b\u0439 \u0434\u0435\u0444\u0435\u043a\u0442. \u041d\u0435 \u0443\u0432\u0435\u043b\u0438\u0447\u0438\u0432\u0430\u0442\u044c \u0432\u0441\u0435 timeout values \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438. \u041d\u0435 \u043e\u0431\u044a\u044f\u0432\u043b\u044f\u0442\u044c \u0444\u043b\u0435\u0439\u043a harmless, \u0435\u0441\u043b\u0438 \u043e\u043d \u0441\u043f\u043e\u0441\u043e\u0431\u0435\u043d \u0441\u043a\u0440\u044b\u0432\u0430\u0442\u044c \u0441\u0435\u0440\u044c\u0451\u0437\u043d\u044b\u0439 validator failure. ## Acceptance - Deterministic expected result on representative workloads. - Correct subprocess exit handling. - No ignored failures. - No false PASS. - Actual latency distribution. - No new red. - No unnecessary full-suite rerun caused by the same unresolved instability. --- # 7. WAVE C \u2014 OPTIMIZE THE FULL-SUITE CRITICAL PATH **Priority: P1** \u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u043f\u043e\u043b\u043d\u044b\u0439 family record: ```text .saipen/evidence/core-unit/ 63c8a2c81a81cbf4-20261122T123353564211Z.json ``` Result: | Metric | Value | |---|---:| | Wall | 2 141.4 s | | Execution wall | 1 777.1 s | | Copy wall | 103.1 s | | Shard copy wall | 195.8 s | | Cleanup wall | 62.5 s | | Test count | 8 911 | | Inherited red | 104 | | New red | 0 | | Baseline-relative verdict | PASS | Historical earlier low: - 1 803.2 s. \u041d\u0435 \u0441\u0447\u0438\u0442\u0430\u0442\u044c \u0440\u0430\u0437\u043d\u0438\u0446\u0443 \u0434\u043e\u043a\u0430\u0437\u0430\u043d\u043d\u043e\u0439 \u0440\u0435\u0433\u0440\u0435\u0441\u0441\u0438\u0435\u0439 \u0431\u0435\u0437 \u0441\u0440\u0430\u0432\u043d\u0438\u043c\u044b\u0445 \u0443\u0441\u043b\u043e\u0432\u0438\u0439. ## Latest top modules | Module | Last run | |---|---:| | `test_t1613_publication_convergence` | 300.2 s | | `test_validator_layout_parity` | 288.6 s | | `test_t1553_mid_session_activation` | 231.6 s | | `test_t1474_start_goal_entry` | 183.5 s | | `test_t1647_machine_runtime` | 167.3 s | | `test_protocol_admission` | 162.6 s | | `test_t1888_object_store` | 160.5 s | | `test_t1944_perf_wave` | 159.7 s | These durations vary significantly between runs. The optimization agent must distinguish deterministic cost from machine contention. ## First target: publication convergence Source: `tools/test_t1613_publication_convergence.py` Seven test cases. The suite uses Windows publication and consumer-convergence behavior. ### Required measurements - Per-test wall. - PowerShell startup. - Python startup. - Git initialization/commits. - Installer execution. - Runtime copy. - File-lock waits. - Retry delays. - Cleanup. ### Optimization principles Preserve actual Windows integration coverage. Do not replace real sharing-conflict checks with mocks. Avoid duplicate immutable fixture preparation. Avoid repeated subprocess initialization when the integration contract permits reuse. Do not weaken publication correctness. ### Acceptance Measurable per-test improvements on the same workload, no missing scenarios, no altered expected failures. --- # 8. WAVE D \u2014 VALIDATOR LAYOUT PARITY Source: `tools/test_validator_layout_parity.py` Recent durations: - Approximately 159 seconds in one earlier run. - Approximately 254 seconds in a later run. - Approximately 281 seconds. - Approximately 289 seconds in the latest run. Variation is substantial. ## Previous disproved approach T-2137 established that removing evidence/worktrees/archive from the copied project changes validation findings. This pruning is unsafe. **Do not repeat it.** ## Required next investigation Profile real operations: - copying source layout; - building flattened layout; - metadata scanning; - validator subprocess startup; - actual validation; - normalization of findings; - source/flattened comparison. Look for duplicate work that can be safely shared. Possible candidates: - request-local immutable metadata; - repeated manifest decoding; - duplicated validator startup; - repeated normalized findings construction; - unnecessary rebuild of identical immutable layouts. Preserve exact validation behavior and negative controls. If no safe improvement is found, record the refuted hypothesis and proceed. --- # 9. WAVE E \u2014 MID-SESSION ACTIVATION Source: `tools/test_t1553_mid_session_activation.py` Current duration around 232 seconds. Inspect: - Node startup; - Python startup; - Windows launcher invocations; - adapter materialization; - repeated fixture initialization; - process cleanup. Maintain native host acceptance. Do not turn real launcher tests into mock-only tests. Measure the benefit of sharing immutable resources while keeping session state isolated. --- # 10. WAVE F \u2014 REVISIT THE SCHEDULER ONLY IF NECESSARY The latest six shard execution durations: ```text",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Analyze each module independently.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R025": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Identify mandatory filesystem structures.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R026": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Execute full baseline.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R027": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Construct narrowed candidate.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R028": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Run all negative controls.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R029": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Compare membership and assertions.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R030": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Confirm that tests still exercise actual sandbox protection.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R031": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Admit scope only through T-1889 machinery. If the modules need FULL for meaningful coverage, preserve FULL. Do not force every module into `[]` to make performance numbers attractive. --- # 12. WAVE H \u2014 STOP REPEATED VERIFICATION LOOPS Introduce an evidence-backed read-only explanation of why each expensive verification is required. Use existing records and verification identity. Do not create a second verification source of truth. ## Required decision categories ```text REUSABLE_EXACT_RECORD NEW_SOURCE_VERIFICATION_REQUIRED NEW_BASELINE_VERIFICATION_REQUIRED NEW_ENVIRONMENT_VERIFICATION_REQUIRED MANDATORY_FRESH_RUN PREVIOUS_FAILURE_REQUIRES_TRIAGE EVALUATOR_ENVIRONMENT_MISMATCH INVALID_OR_CORRUPT_RECORD ``` Each decision must identify the applicable evidence and required next action. ## Preflight contract Before any expensive family execution: - exact source identity; - exact baseline identity; - test discovery membership; - candidate environment; - evaluator environment; - current reusable evidence; - newer incompatible failures; - freshness requirements; - applicable gate. If valid reusable evidence exists, use it where permitted. If a fresh run is mandatory, execute it. If the environment is wrong, correct the invocation route before running again. If a failure is flaky, investigate focused scenarios before repeating thousands of tests, unless the canonical contract specifically requires an immediate full rerun. ## Critical prohibition Never make incompatible evidence compatible by changing identity metadata. Never inherit PASS from another source generation. Never suppress a new red automatically. Never rewrite historical records. --- # 13. WAVE I \u2014 IMPROVE AUTONOMOUS ENGINEERING THROUGHPUT The performance problem extends beyond test execution. Measure the full lifecycle: ```text USER INSTRUCTION \u2193 NATIVE ADMISSION \u2193 CANONICAL ROUTE \u2193 WORK CLAIM \u2193 IMPLEMENTATION \u2193 FOCUSED VERIFICATION \u2193 FULL VERIFICATION IF REQUIRED \u2193 REVIEW \u2193 SHIP \u2193 DURABLE CONTINUATION ``` Metrics: - total cycle wall; - useful coding time; - mandatory verification time; - avoidable verification time; - subprocess count; - repeated status calls; - repeated context loads; - model-visible tokens; - time spent waiting for unchanged blockers; - completed verified Work per hour. ## Candidate optimizations - Avoid repeated identical status projections. - Reduce full BOARD/LOG context loading. - Avoid redundant Git subprocesses. - Reduce request-local repeated journal parsing. - Use correct source/runtime identity without unnecessary recapture. - Batch independent read-only diagnostics when safe. - Avoid long polling where process completion events exist. - Preserve deferred user append and recovery semantics. No speculative daemon rewrite. No v8 Concurrent Mode implementation while its foundational gate remains HELD. No bypass of operator authority. --- # 14. RECOMMENDED PRIORITY ORDER **P0 \u2014 Truthful current state** Refresh current native STATE, Git HEAD, runtime and existing Work owners. Do not claim T-2162 requires additional implementation. **P1-A \u2014 Verification environment preflight** Prevent full reruns caused by evaluator/environment mismatch. **P1-B \u2014 Flaky floor test** Reproduce the one-new-red behavior and identify its actual cause. **P1-C \u2014 Publication convergence** Profile and optimize the current highest-duration module. **P1-D \u2014 Validator layout parity** Find safe optimizations without refuted evidence pruning. **P1-E \u2014 Mid-session activation** Reduce redundant native launcher and adapter setup. **P1-F \u2014 Focused machinery costs** Investigate remaining FULL-scoped test infrastructure. **P2 \u2014 Whole system** Optimize lifecycle, source identity, context and long-run execution costs. **P2 \u2014 Scheduler** Revisit only after measurements show significant unresolved load imbalance. Do not promote another general security review ahead of performance without a newly verified critical defect. --- # 15. VALIDATION STRATEGY Development should not follow: ```text SMALL PATCH \u2192 FULL FAMILY \u2192 SMALL PATCH \u2192 FULL FAMILY \u2192 REVIEW \u2192 FULL FAMILY \u2192 SHIP \u2192 FULL FAMILY ``` Instead: ```text MEASURE \u2192 TARGETED RED \u2192 MINIMAL PATCH \u2192 TARGETED GREEN \u2192 ADJACENT TESTS \u2192 SOURCE FREEZE \u2192 VERIFICATION PREFLIGHT \u2192 REQUIRED FULL FAMILY \u2192 VALID REVIEW / SHIP ``` If the canonical contract requires independent fresh verification, preserve it. If a second full run is needed because the first failed, record the reason. If another full run is proposed because of environment mismatch, investigate the environment before wasting execution time. **Verification completeness stays mandatory. Duplicate preparation and avoidable misrouting do not.** --- # 16. PERFORMANCE TARGETS These are targets, not fabricated results. | Metric | Current measured | Next target | |---|---:|---:| | Full family | 35\u201343 min in latest runs | Under 25 min | | Stretch full family | 35\u201343 min | 15\u201320 min | | Previously optimized focused corridor | 23.6\u201325.1 s | Preserve | | Unnecessary full reruns | Requires classification | 0 confirmed unnecessary | | Publication convergence | ~300 s | Under 180 s | | Validator layout parity | ~289 s | Under 180 s | | Mid-session activation | ~232 s | Under 120 s | | New red | 0 in latest accepted record | 0 | | Verified test membership | 8 911 | Preserve all applicable tests | Do not force targets by disabling tests or changing baseline policy. Use repeated, comparable measurements under controlled conditions. --- # 17. AUTONOMOUS MODE 2 REQUIREMENTS The agent must continue through multiple implementation waves. For each:",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R032": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Identify an existing Work owner.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R033": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Measure actual cost.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R034": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Establish correctness invariants.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R035": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Produce a meaningful RED control.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R036": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Implement minimal repair.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R037": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Obtain GREEN.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R038": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Verify security/recovery parity.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R039": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Measure performance delta.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R040": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Execute authorized lifecycle.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R041": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Record durable evidence.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R042": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Continue with the next measured bottleneck. No duplicate tickets. No blanket commits. No destructive WIP cleanup. No baseline absorption of new red. No fabricated operator permissions. No silent test skips. No substitution of mocked tests for required native integration. No repeated full-family execution without an explicit supported reason. If publication remains pending, continue independent work. Do not let an unrelated waiting-on-user ticket stop every safe engineering task. --- # 18. REQUIRED PERFORMANCE SCOREBOARD Maintain one evidence-derived campaign scoreboard. For each accepted change: ```text WORK: SOURCE HEAD: ACTUAL PATCH: ROOT CAUSE: BEFORE: full wall: module wall: focused wall: copy wall: cleanup wall: execution wall: CPU: memory: process count: discovered tests: new red: AFTER: same metrics CORRECTNESS: focused result: adjacent result: family result: negative controls: EVIDENCE REUSE: compatible record: environment match: rerun necessary: reason: PUBLICATION: source: committed: installed: native verified: NEXT BOTTLENECK: ``` Derive values from canonical verification records. Do not maintain a separate manually edited performance truth database. --- # 19. ACCEPTANCE CRITERIA Campaign XII is successful when:",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R043": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "T-2162 remains correctly completed.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R044": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The four full-family executions are classified by actual necessity.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R045": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Environment mismatches become actionable before causing another expensive run.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R046": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The intermittent `test_portable_floor_fields` failure is investigated and reproducibly classified.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R047": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "At least one major remaining execution bottleneck receives a justified implementation improvement, if profiling identifies a safe fix.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R048": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "No test is silently removed or skipped.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R049": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Core-unit raw failures remain distinguishable from baseline-relative PASS.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R050": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Existing verification identities and freshness semantics are preserved.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R051": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The fast focused corridor remains correct.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R052": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "No new security/authority or recovery regression appears.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R053": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Performance deltas are measured under comparable conditions.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R054": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "A next independent optimization is durably recorded. **Do not close the campaign after only implementing a new diagnostic message if large measured execution costs remain.** Equally, do not change production code when profiling disproves the suspected cause. --- # 20. FIRST EXACT ACTION NOW",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R055": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Obtain the current native SAIPEN route and establish exact HEAD/runtime identity.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R056": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Confirm T-2162 DONE and verify its two manifest declarations remain present.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R057": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Inspect the four family records for fingerprint `63c8a2c81a81cbf4`.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R058": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Reconstruct why the third and fourth family executions occurred after a compatible PASS.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R059": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Reproduce the evaluator/environment mismatch on a disposable project.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R060": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Add RED tests for actionable mismatch classification and correct preflight.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R061": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Implement a minimal fail-closed diagnostic/preflight improvement.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R062": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Verify that existing valid evidence becomes discoverable through the proper canonical route without falsifying identity.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R063": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Investigate the single intermittent `test_portable_floor_fields` red using focused controlled repetitions.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R064": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Profile all seven tests of `test_t1613_publication_convergence`.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R065": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Implement the highest-value safe measured optimization.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R066": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Continue with `test_validator_layout_parity` and `test_t1553_mid_session_activation`.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R067": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Run the canonical full family at the justified release boundary, using valid evidence reuse where allowed.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R068": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Record actual saved verification time and module speedups.",
+      "verification": null,
+      "work": null
+    },
+    "SRC-442:R069": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Continue to the next measured bottleneck. ## FINAL DIRECTIVE **The next performance breakthrough must come from reducing the cost of verification decisions and expensive integration execution, not merely increasing the number of test runs.** SAIPEN must know when a full test is required, when valid evidence already exists, when the caller environment is wrong and when a failure requires targeted investigation. Correctness stays strict. Autonomy stays productive. **CAMPAIGN XII: PREFLIGHT \u2192 FIX FLAKINESS \u2192 OPTIMIZE INTEGRATION \u2192 MEASURE \u2192 CONTINUE.** **MODE 2 ACTIVE.** *J\u00f5udlus (\u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c) is the priority. \u691c\u8a3c (\u3051\u3093\u3057\u3087\u3046, \u043a\u044d\u043d\u0441\u0451:, \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430) remains mandatory.*",
+      "verification": null,
+      "work": null
+    }
+  },
+  "schema_version": 1
+}

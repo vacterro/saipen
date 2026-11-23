@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "tools/test_t1750_release_boundary.py"],
+  "format": "unittest",
+  "context": ["tools", "saipen", "extensions", "tests", "bootstrap", "VERSION"],
+  "oracle_files": ["tools/test_t1750_release_boundary.py"],
+  "subject_files": ["tools/saipen_engine/release.py"],
+  "before": {
+    "tools/saipen_engine/release.py": ".saipen/evidence/T-1963-release-selection-note/pre-fix-release.py"
+  },
+  "timeout": 300
+}

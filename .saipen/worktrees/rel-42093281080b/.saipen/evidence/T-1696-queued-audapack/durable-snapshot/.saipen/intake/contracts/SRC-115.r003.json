@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-115:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SRC-115: the widget release ledger must be reconciled so the recorded release identity matches the shipped userscript bytes, with no stale 0.0.94-era record left standing as the installed browser's believed build."
+    },
+    "SRC-115:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SRC-115: the live widget probe must read the expected widget build from canonical runtime truth rather than a literal baked into the probe, so it cannot go stale on the next widget release."
+    },
+    "SRC-115:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SRC-115: T-25's recorded state must not be stale relative to its final live re-verification evidence."
+    }
+  },
+  "derived_at": "2026-10-04T20:51:20Z",
+  "derived_from": "SRC-115",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "ca37aa69925566c6226e134ee7a05aa8164fc48b91d98d34079f280f521e91c8"
+}

@@ -1,0 +1,13 @@
+s1_route None work T-2016
+s1_owns_with_tickets False
+s1_violation_vs_crew None
+s2_installed_counts 2 11
+s2_repo_counts 29 16
+s3_plan_equal True state_log_stable True
+s4_code STALE_PACKAGE exit 1 stable True
+Traceback (most recent call last):
+  File "<stdin>", line 47, in <module>
+ValueError: too many values to unpack (expected 2)
+s5_occurrences 2
+s5_parses True
+s5_production_dry_run False HOME_REQUIRED

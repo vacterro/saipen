@@ -1,0 +1,10 @@
+{
+  "subject_name": "current",
+  "subject": "c1ba0cf1a22e35c8bb14f65a9773f4825342e770efb548ee913b116d7ac70e0c",
+  "verifier": "f69693107ae648e708f326da20bf1f6cde76dae4eeb355f7136efbfff4de03c4",
+  "exit_code": 0,
+  "ran": 4,
+  "verdict": "PASS",
+  "stdout": "",
+  "stderr": "....\n----------------------------------------------------------------------\nRan 4 tests in 1.575s\n\nOK\n"
+}

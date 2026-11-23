@@ -1,0 +1,506 @@
+{
+  "all_pass": false,
+  "outcomes": {},
+  "failure": "Traceback (most recent call last):\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\controls.py\", line 236, in <module>\n    outcomes = run_controls()\n               ^^^^^^^^^^^^^^\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\controls.py\", line 187, in run_controls\n    assert assessment[\"status\"] == \"UNAUTHORIZED\", assessment\n           ~~~~~~~~~~^^^^^^^^^^\nKeyError: 'status'\n",
+  "commands": [
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\A-fresh",
+        "--agent",
+        "buffy",
+        "init",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\A-fresh",
+      "exit_code": 0,
+      "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"INIT_COMPLETED\",\r\n  \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\A-fresh\",\r\n  \"identity\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\A-fresh\\\\.saipen\\\\IDENTITY.md\",\r\n  \"state\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\A-fresh\\\\.saipen\\\\STATE.md\",\r\n  \"board\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\A-fresh\\\\.saipen\\\\BOARD.md\",\r\n  \"log\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\A-fresh\\\\.saipen\\\\LOG.md\",\r\n  \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n  \"route\": \"saipen start '<the first goal>'\",\r\n  \"mailbox\": {\r\n    \"ok\": false,\r\n    \"code\": \"MAILBOX_ATTACH_SKIPPED\",\r\n    \"detail\": \"a mailbox is already bound or SAIMAIL is not installed\"\r\n  }\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": true,
+        "code": "INIT_COMPLETED",
+        "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\A-fresh",
+        "identity": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\A-fresh\\.saipen\\IDENTITY.md",
+        "state": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\A-fresh\\.saipen\\STATE.md",
+        "board": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\A-fresh\\.saipen\\BOARD.md",
+        "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\A-fresh\\.saipen\\LOG.md",
+        "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+        "route": "saipen start '<the first goal>'",
+        "mailbox": {
+          "ok": false,
+          "code": "MAILBOX_ATTACH_SKIPPED",
+          "detail": "a mailbox is already bound or SAIMAIL is not installed"
+        }
+      }
+    },
+    {
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\A-fresh",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "exit_code": 0,
+      "stdout": "saipen conformance validation starting (tools/validate.py)...\r\nProject root: V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\A-fresh (explicit)\r\nProject lineage: lineage-caf8b8e69cd847528680d64259bb53ca\r\nPASS: state.schema.json and the engine STATE contract constants agree\r\nPASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)\r\nPASS: STATE.md schema valid (checked against state.schema.json)\r\nPASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-caf8b8e69cd847528680d64259bb53ca)\r\nPASS: BOARD.md has all required section headings\r\nPASS: BOARD.md no duplicate tickets\r\nPASS: BOARD.md no dangling needs: references\r\nPASS: BOARD.md acyclic\r\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\r\nPASS: BOARD.md claimed tickets have their needs: satisfied\r\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\r\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\r\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\r\nPASS: append targets end on a line boundary (3 checked)\r\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\r\nPASS: cross-doc sets agree (required fields, phase enum, from-any-phase, read-only bans, next_action prefixes, WAIT categories, command surface, ticket fields; no stale re-listing in shipped docs)\r\nWARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\r\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\r\nValidation complete. Agent is conformant. (2 warning(s))\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\A-fresh",
+        "--agent",
+        "buffy",
+        "init",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\A-fresh",
+      "exit_code": 1,
+      "stdout": "{\r\n  \"ok\": false,\r\n  \"code\": \"INIT_REFUSED\",\r\n  \"detail\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\A-fresh\\\\.saipen already exists; INIT does not overwrite a project\"\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": false,
+        "code": "INIT_REFUSED",
+        "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\A-fresh\\.saipen already exists; INIT does not overwrite a project"
+      }
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\C-bindings",
+        "--agent",
+        "buffy",
+        "init",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\C-bindings",
+      "exit_code": 0,
+      "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"INIT_COMPLETED\",\r\n  \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\C-bindings\",\r\n  \"identity\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\C-bindings\\\\.saipen\\\\IDENTITY.md\",\r\n  \"state\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\C-bindings\\\\.saipen\\\\STATE.md\",\r\n  \"board\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\C-bindings\\\\.saipen\\\\BOARD.md\",\r\n  \"log\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\C-bindings\\\\.saipen\\\\LOG.md\",\r\n  \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n  \"route\": \"saipen start '<the first goal>'\",\r\n  \"mailbox\": {\r\n    \"ok\": false,\r\n    \"code\": \"MAILBOX_ATTACH_SKIPPED\",\r\n    \"detail\": \"a mailbox is already bound or SAIMAIL is not installed\"\r\n  }\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": true,
+        "code": "INIT_COMPLETED",
+        "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\C-bindings",
+        "identity": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\C-bindings\\.saipen\\IDENTITY.md",
+        "state": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\C-bindings\\.saipen\\STATE.md",
+        "board": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\C-bindings\\.saipen\\BOARD.md",
+        "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\C-bindings\\.saipen\\LOG.md",
+        "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+        "route": "saipen start '<the first goal>'",
+        "mailbox": {
+          "ok": false,
+          "code": "MAILBOX_ATTACH_SKIPPED",
+          "detail": "a mailbox is already bound or SAIMAIL is not installed"
+        }
+      }
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\C-bindings",
+        "--agent",
+        "buffy",
+        "checkpoint",
+        "RUN",
+        "none",
+        "foreign binding probe",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\C-bindings",
+      "exit_code": 3,
+      "stdout": "{\r\n  \"ok\": false,\r\n  \"code\": \"PROJECT_LINEAGE_MISMATCH\",\r\n  \"detail\": \"explicit project lineage 'lineage-073cdc5f7ba947c1b8f2cc82430fd91f' does not match expected 'lineage-caf8b8e69cd847528680d64259bb53ca': V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\C-bindings\"\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": false,
+        "code": "PROJECT_LINEAGE_MISMATCH",
+        "detail": "explicit project lineage 'lineage-073cdc5f7ba947c1b8f2cc82430fd91f' does not match expected 'lineage-caf8b8e69cd847528680d64259bb53ca': V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\C-bindings"
+      }
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--agent",
+        "buffy",
+        "checkpoint",
+        "RUN",
+        "none",
+        "stale binding probe",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\C-bindings",
+      "exit_code": 3,
+      "stdout": "{\r\n  \"ok\": false,\r\n  \"code\": \"PROJECT_BINDING_INVALID\",\r\n  \"detail\": \"SAIPEN_PROJECT_ROOT is not an existing directory: V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\absent-root\"\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": false,
+        "code": "PROJECT_BINDING_INVALID",
+        "detail": "SAIPEN_PROJECT_ROOT is not an existing directory: V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\absent-root"
+      }
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history",
+        "--agent",
+        "buffy",
+        "init",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history",
+      "exit_code": 0,
+      "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"INIT_COMPLETED\",\r\n  \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\D-corrupt-history\",\r\n  \"identity\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\D-corrupt-history\\\\.saipen\\\\IDENTITY.md\",\r\n  \"state\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\D-corrupt-history\\\\.saipen\\\\STATE.md\",\r\n  \"board\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\D-corrupt-history\\\\.saipen\\\\BOARD.md\",\r\n  \"log\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\D-corrupt-history\\\\.saipen\\\\LOG.md\",\r\n  \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n  \"route\": \"saipen start '<the first goal>'\",\r\n  \"mailbox\": {\r\n    \"ok\": false,\r\n    \"code\": \"MAILBOX_ATTACH_SKIPPED\",\r\n    \"detail\": \"a mailbox is already bound or SAIMAIL is not installed\"\r\n  }\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": true,
+        "code": "INIT_COMPLETED",
+        "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history",
+        "identity": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history\\.saipen\\IDENTITY.md",
+        "state": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history\\.saipen\\STATE.md",
+        "board": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history\\.saipen\\BOARD.md",
+        "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history\\.saipen\\LOG.md",
+        "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+        "route": "saipen start '<the first goal>'",
+        "mailbox": {
+          "ok": false,
+          "code": "MAILBOX_ATTACH_SKIPPED",
+          "detail": "a mailbox is already bound or SAIMAIL is not installed"
+        }
+      }
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history",
+        "--agent",
+        "buffy",
+        "start",
+        "--file",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history\\control-request.txt",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history",
+      "exit_code": 0,
+      "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"STARTED\",\r\n  \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\D-corrupt-history\",\r\n  \"actor\": \"buffy\",\r\n  \"actor_source\": \"explicit\",\r\n  \"receipt\": \"SRC-001\",\r\n  \"ticket\": \"T-1\",\r\n  \"valve_reauthorized\": false,\r\n  \"preserved_decisions\": [],\r\n  \"ingress_authority\": {\r\n    \"witness\": \"model_supplied\",\r\n    \"capture\": true,\r\n    \"local_work\": true,\r\n    \"user_explicit\": false,\r\n    \"preempt_active_work\": false,\r\n    \"goal_pivot\": false,\r\n    \"reset_bounded_authority\": false,\r\n    \"detailed_response\": false,\r\n    \"external_action\": false\r\n  },\r\n  \"resumed\": false,\r\n  \"phase\": \"SCOUT\",\r\n  \"action\": \"PHASE SCOUT T-1\",\r\n  \"next_action\": \"PHASE SCOUT T-1\",\r\n  \"event_id\": \"E-2\",\r\n  \"parked\": null,\r\n  \"cold_route\": {\r\n    \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\D-corrupt-history\",\r\n    \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n    \"protocol_dir\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\",\r\n    \"phase\": \"SCOUT\",\r\n    \"phase_module\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\phases\\\\scout.md\",\r\n    \"boot\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\BOOT.md\",\r\n    \"style\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\STYLE.md\",\r\n    \"documents\": {\r\n      \"STYLE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\STYLE.md\",\r\n      \"BOOT.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\BOOT.md\",\r\n      \"INDEX.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\INDEX.md\",\r\n      \"COMMANDS.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\COMMANDS.md\",\r\n      \"OPS.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\OPS.md\",\r\n      \"SOURCES.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\SOURCES.md\",\r\n      \"EXECUTION.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\EXECUTION.md\",\r\n      \"MAINTENANCE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\MAINTENANCE.md\",\r\n      \"CORE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\CORE.md\",\r\n      \"RUNTIME.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\RUNTIME.md\"\r\n    },\r\n    \"project_memory\": {\r\n      \"STATE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\D-corrupt-history\\\\.saipen\\\\STATE.md\",\r\n      \"BOARD.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\D-corrupt-history\\\\.saipen\\\\BOARD.md\",\r\n      \"LOG.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\D-corrupt-history\\\\.saipen\\\\LOG.md\"\r\n    },\r\n    \"search_required\": false\r\n  },\r\n  \"load_path\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\phases\\\\scout.md\",\r\n  \"load\": \"saipen/phases/scout.md\",\r\n  \"execution_instruction\": \"The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first.\"\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": true,
+        "code": "STARTED",
+        "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history",
+        "actor": "buffy",
+        "actor_source": "explicit",
+        "receipt": "SRC-001",
+        "ticket": "T-1",
+        "valve_reauthorized": false,
+        "preserved_decisions": [],
+        "ingress_authority": {
+          "witness": "model_supplied",
+          "capture": true,
+          "local_work": true,
+          "user_explicit": false,
+          "preempt_active_work": false,
+          "goal_pivot": false,
+          "reset_bounded_authority": false,
+          "detailed_response": false,
+          "external_action": false
+        },
+        "resumed": false,
+        "phase": "SCOUT",
+        "action": "PHASE SCOUT T-1",
+        "next_action": "PHASE SCOUT T-1",
+        "event_id": "E-2",
+        "parked": null,
+        "cold_route": {
+          "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history",
+          "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+          "phase": "SCOUT",
+          "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\scout.md",
+          "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+          "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+          "documents": {
+            "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+            "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+            "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+            "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+            "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+            "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+            "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+            "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+            "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+            "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+          },
+          "project_memory": {
+            "STATE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history\\.saipen\\STATE.md",
+            "BOARD.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history\\.saipen\\BOARD.md",
+            "LOG.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history\\.saipen\\LOG.md"
+          },
+          "search_required": false
+        },
+        "load_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\scout.md",
+        "load": "saipen/phases/scout.md",
+        "execution_instruction": "The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first."
+      }
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history",
+        "--agent",
+        "buffy",
+        "init",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history",
+      "exit_code": 1,
+      "stdout": "{\r\n  \"ok\": false,\r\n  \"code\": \"INIT_REFUSED\",\r\n  \"detail\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\D-corrupt-history\\\\.saipen already exists; INIT does not overwrite a project\"\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": false,
+        "code": "INIT_REFUSED",
+        "detail": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history\\.saipen already exists; INIT does not overwrite a project"
+      }
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history",
+        "--agent",
+        "buffy",
+        "checkpoint",
+        "RUN",
+        "T-1",
+        "corrupt ledger probe",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history",
+      "exit_code": 1,
+      "stdout": "{\r\n  \"ok\": false,\r\n  \"code\": \"HISTORY_LEDGER_CORRUPT\",\r\n  \"op_id\": null,\r\n  \"changed_files\": [],\r\n  \"recovery_required\": false,\r\n  \"message\": \"history-void: complete LOG history fails the immutable-ledger contract -- E-2 parent E-999999 does not exist in the ledger\",\r\n  \"detail\": \"history-void: complete LOG history fails the immutable-ledger contract -- E-2 parent E-999999 does not exist in the ledger\"\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": false,
+        "code": "HISTORY_LEDGER_CORRUPT",
+        "op_id": null,
+        "changed_files": [],
+        "recovery_required": false,
+        "message": "history-void: complete LOG history fails the immutable-ledger contract -- E-2 parent E-999999 does not exist in the ledger",
+        "detail": "history-void: complete LOG history fails the immutable-ledger contract -- E-2 parent E-999999 does not exist in the ledger"
+      }
+    },
+    {
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "exit_code": 1,
+      "stdout": "saipen conformance validation starting (tools/validate.py)...\r\nProject root: V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\D-corrupt-history (explicit)\r\nProject lineage: lineage-4b5475a6bebf45e7929091d33d0d1700\r\nPASS: state.schema.json and the engine STATE contract constants agree\r\nPASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)\r\nPASS: STATE.md schema valid (checked against state.schema.json)\r\nPASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-4b5475a6bebf45e7929091d33d0d1700)\r\nPASS: BOARD.md has all required section headings\r\nPASS: BOARD.md no duplicate tickets\r\nPASS: BOARD.md no dangling needs: references\r\nPASS: BOARD.md acyclic\r\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\r\nPASS: BOARD.md claimed tickets have their needs: satisfied\r\nPASS: BOARD.md at most one ## DOING ticket (1 claimed)\r\nFAIL: .saipen/LOG.md:3 parent E-999999 doesn't exist earlier in the sequence -- dangling parent breaks the graph Recovery depends on (RFC § 1.2)\r\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\r\nPASS: append targets end on a line boundary (3 checked)\r\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\r\nWARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\r\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\r\nValidation FAILED: 1 problem(s), 2 warning(s)\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE",
+        "--agent",
+        "buffy",
+        "init",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE",
+      "exit_code": 0,
+      "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"INIT_COMPLETED\",\r\n  \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\",\r\n  \"identity\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\\\\.saipen\\\\IDENTITY.md\",\r\n  \"state\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\\\\.saipen\\\\STATE.md\",\r\n  \"board\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\\\\.saipen\\\\BOARD.md\",\r\n  \"log\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\\\\.saipen\\\\LOG.md\",\r\n  \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n  \"route\": \"saipen start '<the first goal>'\",\r\n  \"mailbox\": {\r\n    \"ok\": false,\r\n    \"code\": \"MAILBOX_ATTACH_SKIPPED\",\r\n    \"detail\": \"a mailbox is already bound or SAIMAIL is not installed\"\r\n  }\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": true,
+        "code": "INIT_COMPLETED",
+        "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE",
+        "identity": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE\\.saipen\\IDENTITY.md",
+        "state": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE\\.saipen\\STATE.md",
+        "board": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE\\.saipen\\BOARD.md",
+        "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE\\.saipen\\LOG.md",
+        "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+        "route": "saipen start '<the first goal>'",
+        "mailbox": {
+          "ok": false,
+          "code": "MAILBOX_ATTACH_SKIPPED",
+          "detail": "a mailbox is already bound or SAIMAIL is not installed"
+        }
+      }
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE",
+        "--agent",
+        "buffy",
+        "start",
+        "--file",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE\\control-request.txt",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE",
+      "exit_code": 0,
+      "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"STARTED\",\r\n  \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\",\r\n  \"actor\": \"buffy\",\r\n  \"actor_source\": \"explicit\",\r\n  \"receipt\": \"SRC-001\",\r\n  \"ticket\": \"T-1\",\r\n  \"valve_reauthorized\": false,\r\n  \"preserved_decisions\": [],\r\n  \"ingress_authority\": {\r\n    \"witness\": \"model_supplied\",\r\n    \"capture\": true,\r\n    \"local_work\": true,\r\n    \"user_explicit\": false,\r\n    \"preempt_active_work\": false,\r\n    \"goal_pivot\": false,\r\n    \"reset_bounded_authority\": false,\r\n    \"detailed_response\": false,\r\n    \"external_action\": false\r\n  },\r\n  \"resumed\": false,\r\n  \"phase\": \"SCOUT\",\r\n  \"action\": \"PHASE SCOUT T-1\",\r\n  \"next_action\": \"PHASE SCOUT T-1\",\r\n  \"event_id\": \"E-2\",\r\n  \"parked\": null,\r\n  \"cold_route\": {\r\n    \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\",\r\n    \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n    \"protocol_dir\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\",\r\n    \"phase\": \"SCOUT\",\r\n    \"phase_module\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\phases\\\\scout.md\",\r\n    \"boot\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\BOOT.md\",\r\n    \"style\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\STYLE.md\",\r\n    \"documents\": {\r\n      \"STYLE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\STYLE.md\",\r\n      \"BOOT.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\BOOT.md\",\r\n      \"INDEX.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\INDEX.md\",\r\n      \"COMMANDS.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\COMMANDS.md\",\r\n      \"OPS.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\OPS.md\",\r\n      \"SOURCES.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\SOURCES.md\",\r\n      \"EXECUTION.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\EXECUTION.md\",\r\n      \"MAINTENANCE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\MAINTENANCE.md\",\r\n      \"CORE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\CORE.md\",\r\n      \"RUNTIME.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\RUNTIME.md\"\r\n    },\r\n    \"project_memory\": {\r\n      \"STATE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\\\\.saipen\\\\STATE.md\",\r\n      \"BOARD.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\\\\.saipen\\\\BOARD.md\",\r\n      \"LOG.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\\\\.saipen\\\\LOG.md\"\r\n    },\r\n    \"search_required\": false\r\n  },\r\n  \"load_path\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\phases\\\\scout.md\",\r\n  \"load\": \"saipen/phases/scout.md\",\r\n  \"execution_instruction\": \"The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first.\"\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": true,
+        "code": "STARTED",
+        "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE",
+        "actor": "buffy",
+        "actor_source": "explicit",
+        "receipt": "SRC-001",
+        "ticket": "T-1",
+        "valve_reauthorized": false,
+        "preserved_decisions": [],
+        "ingress_authority": {
+          "witness": "model_supplied",
+          "capture": true,
+          "local_work": true,
+          "user_explicit": false,
+          "preempt_active_work": false,
+          "goal_pivot": false,
+          "reset_bounded_authority": false,
+          "detailed_response": false,
+          "external_action": false
+        },
+        "resumed": false,
+        "phase": "SCOUT",
+        "action": "PHASE SCOUT T-1",
+        "next_action": "PHASE SCOUT T-1",
+        "event_id": "E-2",
+        "parked": null,
+        "cold_route": {
+          "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE",
+          "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+          "phase": "SCOUT",
+          "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\scout.md",
+          "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+          "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+          "documents": {
+            "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+            "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+            "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+            "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+            "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+            "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+            "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+            "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+            "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+            "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+          },
+          "project_memory": {
+            "STATE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE\\.saipen\\STATE.md",
+            "BOARD.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE\\.saipen\\BOARD.md",
+            "LOG.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE\\.saipen\\LOG.md"
+          },
+          "search_required": false
+        },
+        "load_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\scout.md",
+        "load": "saipen/phases/scout.md",
+        "execution_instruction": "The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first."
+      }
+    },
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE",
+        "--agent",
+        "buffy",
+        "status",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE",
+      "exit_code": 1,
+      "stdout": "{\r\n  \"ok\": false,\r\n  \"code\": \"UNAUTHORIZED_LIFECYCLE_WRITE\",\r\n  \"action\": \"saipen recover\",\r\n  \"reason\": \"UNAUTHORIZED_LIFECYCLE_WRITE\",\r\n  \"detail\": \"lifecycle-authority: UNAUTHORIZED_LIFECYCLE_WRITE -- STATE.last_event is E-5, above E-2, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand; T-1 sits under ## DONE on the word of E-3, E-4, E-5, written above E-2 with no operation record, and no closure operation stands behind it -- the completion was typed, not run -- canonical lifecycle state exists only through an operation; `saipen recover` names the journaled repair that reopens what no operation closed\",\r\n  \"lifecycle_authority\": {\r\n    \"floor\": 2,\r\n    \"head\": [\r\n      3,\r\n      4,\r\n      5\r\n    ],\r\n    \"findings\": [\r\n      {\r\n        \"rule\": \"state-ahead-of-journal\",\r\n        \"last_event\": 5,\r\n        \"floor\": 2\r\n      },\r\n      {\r\n        \"rule\": \"terminal-without-operation\",\r\n        \"ticket\": \"T-1\",\r\n        \"events\": [\r\n          3,\r\n          4,\r\n          5\r\n        ],\r\n        \"floor\": 2\r\n      }\r\n    ]\r\n  },\r\n  \"cold_route\": {\r\n    \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\",\r\n    \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n    \"protocol_dir\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\",\r\n    \"phase\": \"DONE\",\r\n    \"phase_module\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\phases\\\\done.md\",\r\n    \"boot\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\BOOT.md\",\r\n    \"style\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\STYLE.md\",\r\n    \"documents\": {\r\n      \"STYLE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\STYLE.md\",\r\n      \"BOOT.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\BOOT.md\",\r\n      \"INDEX.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\INDEX.md\",\r\n      \"COMMANDS.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\COMMANDS.md\",\r\n      \"OPS.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\OPS.md\",\r\n      \"SOURCES.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\SOURCES.md\",\r\n      \"EXECUTION.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\EXECUTION.md\",\r\n      \"MAINTENANCE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\MAINTENANCE.md\",\r\n      \"CORE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\CORE.md\",\r\n      \"RUNTIME.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\RUNTIME.md\"\r\n    },\r\n    \"project_memory\": {\r\n      \"STATE.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\\\\.saipen\\\\STATE.md\",\r\n      \"BOARD.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\\\\.saipen\\\\BOARD.md\",\r\n      \"LOG.md\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE\\\\.saipen\\\\LOG.md\"\r\n    },\r\n    \"search_required\": false\r\n  },\r\n  \"telegrams\": {\r\n    \"state\": \"OK\",\r\n    \"unread\": 0,\r\n    \"on_current_work\": 0,\r\n    \"complete\": true,\r\n    \"read_command\": \"saimail-local saipen brief --project-root V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v4\\\\E-unsupported-DONE --workspace C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\saipen\\\\saimail --seat buffy\",\r\n    \"detail\": \"counts only; nothing was opened and nothing here is an instruction\"\r\n  }\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": false,
+        "code": "UNAUTHORIZED_LIFECYCLE_WRITE",
+        "action": "saipen recover",
+        "reason": "UNAUTHORIZED_LIFECYCLE_WRITE",
+        "detail": "lifecycle-authority: UNAUTHORIZED_LIFECYCLE_WRITE -- STATE.last_event is E-5, above E-2, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand; T-1 sits under ## DONE on the word of E-3, E-4, E-5, written above E-2 with no operation record, and no closure operation stands behind it -- the completion was typed, not run -- canonical lifecycle state exists only through an operation; `saipen recover` names the journaled repair that reopens what no operation closed",
+        "lifecycle_authority": {
+          "floor": 2,
+          "head": [
+            3,
+            4,
+            5
+          ],
+          "findings": [
+            {
+              "rule": "state-ahead-of-journal",
+              "last_event": 5,
+              "floor": 2
+            },
+            {
+              "rule": "terminal-without-operation",
+              "ticket": "T-1",
+              "events": [
+                3,
+                4,
+                5
+              ],
+              "floor": 2
+            }
+          ]
+        },
+        "cold_route": {
+          "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE",
+          "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+          "phase": "DONE",
+          "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\done.md",
+          "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+          "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+          "documents": {
+            "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+            "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+            "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+            "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+            "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+            "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+            "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+            "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+            "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+            "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+          },
+          "project_memory": {
+            "STATE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE\\.saipen\\STATE.md",
+            "BOARD.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE\\.saipen\\BOARD.md",
+            "LOG.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE\\.saipen\\LOG.md"
+          },
+          "search_required": false
+        },
+        "telegrams": {
+          "state": "OK",
+          "unread": 0,
+          "on_current_work": 0,
+          "complete": true,
+          "read_command": "saimail-local saipen brief --project-root V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v4\\E-unsupported-DONE --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat buffy",
+          "detail": "counts only; nothing was opened and nothing here is an instruction"
+        }
+      }
+    }
+  ],
+  "canonical_init_sha256": "7a5246452c9f074b7deb1b993c446f7c0cfd8c6450d3f682fa0bb4b21eb74573",
+  "canonical_cli_sha256": "f8b930a748fdb5b8c9a4bbb081988be5829b4d0c48481a90e0b692c1d0db5412"
+}

@@ -1,0 +1,34 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 6241,
+  "red": 17,
+  "new_red": [
+    "test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_bare_generic_launch_bootstraps_reads_and_inherits_one_canonical_actor",
+    "test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_native_task_child_mutations_receive_the_same_guard",
+    "test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_optional_explicit_launch_is_checked_and_does_not_leak",
+    "test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_real_installed_global_plugin_accepts_bare_canonical_continuation",
+    "test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_shell_workdir_cannot_hide_a_canonical_append",
+    "test_opencode_host_smoke.OpenCodeHostSmoke.test_2_the_runtime_discovers_and_loads_the_installed_artifact",
+    "test_opencode_host_smoke.OpenCodeRealInstalledGeneration.test_fresh_process_loads_the_installed_generation_from_one_origin",
+    "test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry",
+    "test_response_surface_contract.BudgetTests.test_context_budget_remains_green_with_execution_in_cold",
+    "test_t1326_board_compaction.CanonicalLogProducerTests.test_no_engine_module_calls_the_capped_builder_directly",
+    "test_t1465_budget_line_ends.LineEndTests.test_every_budget_holds",
+    "test_t1670_route_budgets.RouteBudgetTests.test_one_enormous_document_fails_even_where_no_route_loads_it",
+    "test_t1670_route_budgets.RouteBudgetTests.test_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate",
+    "test_t1670_route_budgets.RouteBudgetTests.test_the_command_line_summary_exits_by_the_route_verdict",
+    "test_t1670_route_budgets.RouteBudgetTests.test_the_summary_is_one_line_per_route_and_names_the_total_informational",
+    "test_t1670_route_budgets.RouteBudgetTests.test_unrelated_growth_raises_the_total_and_moves_no_route",
+    "test_t1676_lifecycle_code.RegisteredCodeTests.test_every_route_budget_still_passes"
+  ],
+  "fixed": [],
+  "problems": [
+    "17 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/41247edf69d91ef3-20261011T162650Z.json",
+  "reused": false,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

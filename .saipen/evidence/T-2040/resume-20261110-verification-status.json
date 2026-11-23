@@ -1,0 +1,485 @@
+{
+  "gates": [
+    {
+      "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\current-gates-20261110\\validate.run.json",
+      "data": {
+        "gate": "validate",
+        "command": [
+          "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "tools/validate.py"
+        ],
+        "exit_code": 1,
+        "status": "FAIL",
+        "started_at": "2026-11-10T17:35:05.588227+00:00",
+        "finished_at": "2026-11-10T17:35:25.481916+00:00",
+        "duration_s": 19.89
+      }
+    }
+  ],
+  "gate_files": [
+    {
+      "name": "audit_checks.stderr.log",
+      "size": 0
+    },
+    {
+      "name": "audit_checks.stdout.log",
+      "size": 0
+    },
+    {
+      "name": "validate.run.json",
+      "size": 339
+    },
+    {
+      "name": "validate.stderr.log",
+      "size": 0
+    },
+    {
+      "name": "validate.stdout.log",
+      "size": 8337
+    }
+  ],
+  "native": [
+    {
+      "name": "ancestry.result",
+      "result": {
+        "ok": true,
+        "code": "CHECKPOINTED",
+        "op_id": "regression-execution-8523f6d7d07546bdb706826f9112a820",
+        "changed_files": [
+          ".saipen/evidence/regression/regression-execution-8523f6d7d07546bdb706826f9112a820.json",
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "record": ".saipen/evidence/regression/regression-execution-8523f6d7d07546bdb706826f9112a820.json",
+        "evidence_class": "executed",
+        "event_id": "E-20847"
+      },
+      "verify_boundary": 20831,
+      "before": {
+        "result": "FAIL",
+        "subject": "e37d707a39fa70a15d7ccc77e2d13af3f1aee0241c133072aff3f261aef5ed69",
+        "verifier": "8fc7dc50ff712694ae657fa98e15e0b064435a9faac1ac666a1e336fbe5f8c37"
+      },
+      "after": {
+        "result": "PASS",
+        "subject": "edadf8b9b3e5144f880fd2a12f3adaedc4d80692b5408dc1f8c91d597885bf3d",
+        "verifier": "8fc7dc50ff712694ae657fa98e15e0b064435a9faac1ac666a1e336fbe5f8c37"
+      },
+      "runs": [
+        {
+          "exit_code": 1,
+          "failed": 18,
+          "finished_utc": "2026-11-10T17:36:30.776518+00:00",
+          "ran": 23,
+          "skipped": 0,
+          "stage": "before",
+          "started_utc": "2026-11-10T17:36:24.970776+00:00"
+        },
+        {
+          "exit_code": 0,
+          "failed": 0,
+          "finished_utc": "2026-11-10T17:36:37.180940+00:00",
+          "ran": 8,
+          "skipped": 0,
+          "stage": "after",
+          "started_utc": "2026-11-10T17:36:31.744090+00:00"
+        }
+      ]
+    },
+    {
+      "name": "exhaustion.result",
+      "result": {
+        "ok": true,
+        "code": "CHECKPOINTED",
+        "op_id": "regression-execution-354b0a93145f43a69dc5b3b5f681cd2e",
+        "changed_files": [
+          ".saipen/evidence/regression/regression-execution-354b0a93145f43a69dc5b3b5f681cd2e.json",
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "record": ".saipen/evidence/regression/regression-execution-354b0a93145f43a69dc5b3b5f681cd2e.json",
+        "evidence_class": "executed",
+        "event_id": "E-20837"
+      },
+      "verify_boundary": 20831,
+      "before": {
+        "result": "FAIL",
+        "subject": "a44182341067e18319f70279b592282b20bf43219e55b453e11fca730c34d9b3",
+        "verifier": "ebda5c2177daa06ced2161d00a2c37e285f42b528d0d79ced20cfac6e595d5f8"
+      },
+      "after": {
+        "result": "PASS",
+        "subject": "5ec663b22f7e1359e558615948a1d820c3af799f1eb625905b0499edd80df90c",
+        "verifier": "ebda5c2177daa06ced2161d00a2c37e285f42b528d0d79ced20cfac6e595d5f8"
+      },
+      "runs": [
+        {
+          "exit_code": 1,
+          "failed": 45,
+          "finished_utc": "2026-11-10T17:33:15.745021+00:00",
+          "ran": 47,
+          "skipped": 0,
+          "stage": "before",
+          "started_utc": "2026-11-10T17:33:13.750086+00:00"
+        },
+        {
+          "exit_code": 0,
+          "failed": 0,
+          "finished_utc": "2026-11-10T17:33:18.375025+00:00",
+          "ran": 42,
+          "skipped": 0,
+          "stage": "after",
+          "started_utc": "2026-11-10T17:33:16.399032+00:00"
+        }
+      ]
+    },
+    {
+      "name": "iteration.result",
+      "result": {
+        "ok": true,
+        "code": "CHECKPOINTED",
+        "op_id": "regression-execution-aacd2e657ad94b7894b3570d2a099f6a",
+        "changed_files": [
+          ".saipen/evidence/regression/regression-execution-aacd2e657ad94b7894b3570d2a099f6a.json",
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "record": ".saipen/evidence/regression/regression-execution-aacd2e657ad94b7894b3570d2a099f6a.json",
+        "evidence_class": "executed",
+        "event_id": "E-20835"
+      },
+      "verify_boundary": 20831,
+      "before": {
+        "result": "FAIL",
+        "subject": "690d72319853905ca9efc39c6232a95209e761328281872b555ae30a7809dcd5",
+        "verifier": "50506deaa14fa258da748ea39e08aeefadbe4890d472f064ca3aac3cd37534c7"
+      },
+      "after": {
+        "result": "PASS",
+        "subject": "464e5cf484d94a10565ab411109cd811628724bec004e104683d42eaa11eaf09",
+        "verifier": "50506deaa14fa258da748ea39e08aeefadbe4890d472f064ca3aac3cd37534c7"
+      },
+      "runs": [
+        {
+          "exit_code": 1,
+          "failed": 10,
+          "finished_utc": "2026-11-10T17:33:04.284341+00:00",
+          "ran": 15,
+          "skipped": 0,
+          "stage": "before",
+          "started_utc": "2026-11-10T17:33:00.584998+00:00"
+        },
+        {
+          "exit_code": 0,
+          "failed": 0,
+          "finished_utc": "2026-11-10T17:33:07.135205+00:00",
+          "ran": 10,
+          "skipped": 0,
+          "stage": "after",
+          "started_utc": "2026-11-10T17:33:04.969205+00:00"
+        }
+      ]
+    },
+    {
+      "name": "lifecycle.result",
+      "result": {
+        "ok": true,
+        "code": "CHECKPOINTED",
+        "op_id": "regression-execution-f26fcfca6ba34685b926620f357a9559",
+        "changed_files": [
+          ".saipen/evidence/regression/regression-execution-f26fcfca6ba34685b926620f357a9559.json",
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "record": ".saipen/evidence/regression/regression-execution-f26fcfca6ba34685b926620f357a9559.json",
+        "evidence_class": "executed",
+        "event_id": "E-20851"
+      },
+      "verify_boundary": 20831,
+      "before": {
+        "result": "FAIL",
+        "subject": "29227666fcd11634ee19043b4a7f4188a8efa3c4137876c853ad2652c08a217a",
+        "verifier": "160ee9e6a55dd3ca70539d487d893a8b2f96e5a7d0db32ebde1a54a6147b6f20"
+      },
+      "after": {
+        "result": "PASS",
+        "subject": "9a0f6bc881e5251bf7bc083c87da323572cfcae8813b1f0b0a5572866d6befbe",
+        "verifier": "160ee9e6a55dd3ca70539d487d893a8b2f96e5a7d0db32ebde1a54a6147b6f20"
+      },
+      "runs": [
+        {
+          "exit_code": 1,
+          "failed": 3,
+          "finished_utc": "2026-11-10T17:37:25.443971+00:00",
+          "ran": 19,
+          "skipped": 0,
+          "stage": "before",
+          "started_utc": "2026-11-10T17:37:18.290185+00:00"
+        },
+        {
+          "exit_code": 0,
+          "failed": 0,
+          "finished_utc": "2026-11-10T17:37:40.879420+00:00",
+          "ran": 19,
+          "skipped": 0,
+          "stage": "after",
+          "started_utc": "2026-11-10T17:37:26.369918+00:00"
+        }
+      ]
+    },
+    {
+      "name": "maintenance.result",
+      "result": {
+        "ok": true,
+        "code": "CHECKPOINTED",
+        "op_id": "regression-execution-2a6aad66c9824c7f8af03fc46c74d016",
+        "changed_files": [
+          ".saipen/evidence/regression/regression-execution-2a6aad66c9824c7f8af03fc46c74d016.json",
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "record": ".saipen/evidence/regression/regression-execution-2a6aad66c9824c7f8af03fc46c74d016.json",
+        "evidence_class": "executed",
+        "event_id": "E-20839"
+      },
+      "verify_boundary": 20831,
+      "before": {
+        "result": "FAIL",
+        "subject": "d7d0478dbea1a35ed54f484ce7d2a4324571986ee4408baeca1411d4b3bee936",
+        "verifier": "d52248b055073abedaf640a7f6f84fb3a02d5f8d49d081a1eacbde21cb551f32"
+      },
+      "after": {
+        "result": "PASS",
+        "subject": "950d91985643c68a054a56a5b0ba079843dfcdcfca976b4a9fdac72036c5dbac",
+        "verifier": "d52248b055073abedaf640a7f6f84fb3a02d5f8d49d081a1eacbde21cb551f32"
+      },
+      "runs": [
+        {
+          "exit_code": 1,
+          "failed": 26,
+          "finished_utc": "2026-11-10T17:34:05.544578+00:00",
+          "ran": 58,
+          "skipped": 0,
+          "stage": "before",
+          "started_utc": "2026-11-10T17:33:25.016592+00:00"
+        },
+        {
+          "exit_code": 0,
+          "failed": 0,
+          "finished_utc": "2026-11-10T17:34:53.709772+00:00",
+          "ran": 46,
+          "skipped": 0,
+          "stage": "after",
+          "started_utc": "2026-11-10T17:34:06.264631+00:00"
+        }
+      ]
+    },
+    {
+      "name": "publication.result",
+      "result": {
+        "ok": true,
+        "code": "CHECKPOINTED",
+        "op_id": "regression-execution-de2b828bd4fc4fd88ad8e96328b3e3c5",
+        "changed_files": [
+          ".saipen/evidence/regression/regression-execution-de2b828bd4fc4fd88ad8e96328b3e3c5.json",
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "record": ".saipen/evidence/regression/regression-execution-de2b828bd4fc4fd88ad8e96328b3e3c5.json",
+        "evidence_class": "executed",
+        "event_id": "E-20841"
+      },
+      "verify_boundary": 20831,
+      "before": {
+        "result": "FAIL",
+        "subject": "fdab44cda3cd4410ef9833b23cac60fccdfe0a495a7bd27337d562fb742a7638",
+        "verifier": "0ca8677a4e04b2f00b9adf644a1eab225eeaa21b63b8f6edf6e70c8b1243e052"
+      },
+      "after": {
+        "result": "PASS",
+        "subject": "c6371b7c90318a33f60b5d24b4fd854884c34cda83730d1669a13f18af3a5c42",
+        "verifier": "0ca8677a4e04b2f00b9adf644a1eab225eeaa21b63b8f6edf6e70c8b1243e052"
+      },
+      "runs": [
+        {
+          "exit_code": 1,
+          "failed": 13,
+          "finished_utc": "2026-11-10T17:35:07.699632+00:00",
+          "ran": 45,
+          "skipped": 0,
+          "stage": "before",
+          "started_utc": "2026-11-10T17:35:00.745393+00:00"
+        },
+        {
+          "exit_code": 0,
+          "failed": 0,
+          "finished_utc": "2026-11-10T17:35:14.934232+00:00",
+          "ran": 40,
+          "skipped": 0,
+          "stage": "after",
+          "started_utc": "2026-11-10T17:35:08.419642+00:00"
+        }
+      ]
+    },
+    {
+      "name": "release-completion.result",
+      "result": {
+        "ok": true,
+        "code": "CHECKPOINTED",
+        "op_id": "regression-execution-448035965ebd4455b102090538b8604b",
+        "changed_files": [
+          ".saipen/evidence/regression/regression-execution-448035965ebd4455b102090538b8604b.json",
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "record": ".saipen/evidence/regression/regression-execution-448035965ebd4455b102090538b8604b.json",
+        "evidence_class": "executed",
+        "event_id": "E-20849"
+      },
+      "verify_boundary": 20831,
+      "before": {
+        "result": "FAIL",
+        "subject": "63973762d5795b857425a6475405d9488f40484a7cf2add32cdd5505e1dab978",
+        "verifier": "e70cc60425b63f4c32b0f5ed461f025695b8020610f888ec816bdfb3a670e52d"
+      },
+      "after": {
+        "result": "PASS",
+        "subject": "edadf8b9b3e5144f880fd2a12f3adaedc4d80692b5408dc1f8c91d597885bf3d",
+        "verifier": "e70cc60425b63f4c32b0f5ed461f025695b8020610f888ec816bdfb3a670e52d"
+      },
+      "runs": [
+        {
+          "exit_code": 1,
+          "failed": 2,
+          "finished_utc": "2026-11-10T17:36:56.633460+00:00",
+          "ran": 16,
+          "skipped": 0,
+          "stage": "before",
+          "started_utc": "2026-11-10T17:36:44.762978+00:00"
+        },
+        {
+          "exit_code": 0,
+          "failed": 0,
+          "finished_utc": "2026-11-10T17:37:10.171674+00:00",
+          "ran": 16,
+          "skipped": 0,
+          "stage": "after",
+          "started_utc": "2026-11-10T17:36:57.491149+00:00"
+        }
+      ]
+    },
+    {
+      "name": "review-authority.result",
+      "result": {
+        "ok": true,
+        "code": "CHECKPOINTED",
+        "op_id": "regression-execution-dc321bfa69a64e9db02a23eed6a46b02",
+        "changed_files": [
+          ".saipen/evidence/regression/regression-execution-dc321bfa69a64e9db02a23eed6a46b02.json",
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "record": ".saipen/evidence/regression/regression-execution-dc321bfa69a64e9db02a23eed6a46b02.json",
+        "evidence_class": "executed",
+        "event_id": "E-20843"
+      },
+      "verify_boundary": 20831,
+      "before": {
+        "result": "FAIL",
+        "subject": "d27787b4bb0121131fe8d909011d6d409c345d2880d28a2e5f04c38510c53cf0",
+        "verifier": "1f6bad2853da3311190d72b2b870093d082da8b40c3af4f0ad8ad3af1c51306a"
+      },
+      "after": {
+        "result": "PASS",
+        "subject": "f9bf7fcc7371480f91907ff50b33f5a23776997304a62bea394d9018e35c831d",
+        "verifier": "1f6bad2853da3311190d72b2b870093d082da8b40c3af4f0ad8ad3af1c51306a"
+      },
+      "runs": [
+        {
+          "exit_code": 1,
+          "failed": 26,
+          "finished_utc": "2026-11-10T17:35:43.813967+00:00",
+          "ran": 9,
+          "skipped": 0,
+          "stage": "before",
+          "started_utc": "2026-11-10T17:35:22.408494+00:00"
+        },
+        {
+          "exit_code": 0,
+          "failed": 0,
+          "finished_utc": "2026-11-10T17:36:07.224502+00:00",
+          "ran": 9,
+          "skipped": 0,
+          "stage": "after",
+          "started_utc": "2026-11-10T17:35:44.588555+00:00"
+        }
+      ]
+    },
+    {
+      "name": "review-boundaries.result",
+      "result": {
+        "ok": true,
+        "code": "CHECKPOINTED",
+        "op_id": "regression-execution-7730f6b59eb44908b99dbdd0aba5b71a",
+        "changed_files": [
+          ".saipen/evidence/regression/regression-execution-7730f6b59eb44908b99dbdd0aba5b71a.json",
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "record": ".saipen/evidence/regression/regression-execution-7730f6b59eb44908b99dbdd0aba5b71a.json",
+        "evidence_class": "executed",
+        "event_id": "E-20845"
+      },
+      "verify_boundary": 20831,
+      "before": {
+        "result": "FAIL",
+        "subject": "a2b1ce60ea77c2dffedaf4576004a486bf11b99cd48ca64a478099f1e27c21b2",
+        "verifier": "d08fa2383a639514de92fb73d5537a2f496451c255d056f5dd6119d91dcdf6e3"
+      },
+      "after": {
+        "result": "PASS",
+        "subject": "e8489610485f71b8ea61eb1c5691607703867188e954707b797d1045ecaeb279",
+        "verifier": "d08fa2383a639514de92fb73d5537a2f496451c255d056f5dd6119d91dcdf6e3"
+      },
+      "runs": [
+        {
+          "exit_code": 1,
+          "failed": 14,
+          "finished_utc": "2026-11-10T17:36:15.763126+00:00",
+          "ran": 4,
+          "skipped": 0,
+          "stage": "before",
+          "started_utc": "2026-11-10T17:36:15.438390+00:00"
+        },
+        {
+          "exit_code": 0,
+          "failed": 0,
+          "finished_utc": "2026-11-10T17:36:17.003884+00:00",
+          "ran": 4,
+          "skipped": 0,
+          "stage": "after",
+          "started_utc": "2026-11-10T17:36:16.624817+00:00"
+        }
+      ]
+    }
+  ]
+}

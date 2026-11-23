@@ -1,0 +1,126 @@
+FF..FF...
+======================================================================
+FAIL: test_a_goal_starts_the_run_over (test_t1659_run_window.RunWindowTests.test_a_goal_starts_the_run_over) [goal]
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1659\red\tools\test_t1659_run_window.py", line 100, in test_a_goal_starts_the_run_over
+    self.assertEqual(self.facts()["completed"], ["T-2"])
+AssertionError: Lists differ: ['T-1', 'T-2'] != ['T-2']
+
+First differing element 0:
+'T-1'
+'T-2'
+
+First list contains 1 additional elements.
+First extra element 1:
+'T-2'
+
+- ['T-1', 'T-2']
++ ['T-2']
+
+======================================================================
+FAIL: test_a_goal_starts_the_run_over (test_t1659_run_window.RunWindowTests.test_a_goal_starts_the_run_over) [goal-entry]
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1659\red\tools\test_t1659_run_window.py", line 100, in test_a_goal_starts_the_run_over
+    self.assertEqual(self.facts()["completed"], ["T-2"])
+AssertionError: Lists differ: ['T-1', 'T-2'] != ['T-2']
+
+First differing element 0:
+'T-1'
+'T-2'
+
+First list contains 1 additional elements.
+First extra element 1:
+'T-2'
+
+- ['T-1', 'T-2']
++ ['T-2']
+
+======================================================================
+FAIL: test_an_operator_request_starts_the_run_over (test_t1659_run_window.RunWindowTests.test_an_operator_request_starts_the_run_over)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1659\red\tools\test_t1659_run_window.py", line 91, in test_an_operator_request_starts_the_run_over
+    self.assertEqual(self.facts()["completed"], ["T-2"])
+AssertionError: Lists differ: ['T-1', 'T-2'] != ['T-2']
+
+First differing element 0:
+'T-1'
+'T-2'
+
+First list contains 1 additional elements.
+First extra element 1:
+'T-2'
+
+- ['T-1', 'T-2']
++ ['T-2']
+
+======================================================================
+FAIL: test_the_checkpoint_names_the_one_ticket_of_this_run (test_t1659_run_window.RunWindowTests.test_the_checkpoint_names_the_one_ticket_of_this_run)
+The measured shape: a long history that was never stopped, one
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1659\red\tools\test_t1659_run_window.py", line 135, in test_the_checkpoint_names_the_one_ticket_of_this_run
+    self.assertEqual(facts["completed"], ["T-41"])
+AssertionError: Lists differ: ['T-1', 'T-10', 'T-11', 'T-12', 'T-13', 'T-14[269 chars]T-9'] != ['T-41']
+
+First differing element 0:
+'T-1'
+'T-41'
+
+First list contains 40 additional elements.
+First extra element 1:
+'T-10'
+
+- ['T-1',
+?       ^
+
++ ['T-41']
+?     +  ^
+
+-  'T-10',
+-  'T-11',
+-  'T-12',
+-  'T-13',
+-  'T-14',
+-  'T-15',
+-  'T-16',
+-  'T-17',
+-  'T-18',
+-  'T-19',
+-  'T-2',
+-  'T-20',
+-  'T-21',
+-  'T-22',
+-  'T-23',
+-  'T-24',
+-  'T-25',
+-  'T-26',
+-  'T-27',
+-  'T-28',
+-  'T-29',
+-  'T-3',
+-  'T-30',
+-  'T-31',
+-  'T-32',
+-  'T-33',
+-  'T-34',
+-  'T-35',
+-  'T-36',
+-  'T-37',
+-  'T-38',
+-  'T-39',
+-  'T-4',
+-  'T-40',
+-  'T-41',
+-  'T-5',
+-  'T-6',
+-  'T-7',
+-  'T-8',
+-  'T-9']
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.435s
+
+FAILED (failures=4)

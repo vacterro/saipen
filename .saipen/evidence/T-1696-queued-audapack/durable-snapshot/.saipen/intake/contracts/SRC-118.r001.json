@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-118:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-268 residual TARGET D: same-origin nested git child must package even when outer .gitignore hides it; add red fixture, decouple component ingestion from outer untracked enumeration, real _ZAICODE pack acceptance"
+    }
+  },
+  "derived_at": "2026-10-05T16:50:21Z",
+  "derived_from": "SRC-118",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "c28022059b0eea432591433ed8fefaca2dc93c0d1305bf25c0d9fa50039e9c18"
+}

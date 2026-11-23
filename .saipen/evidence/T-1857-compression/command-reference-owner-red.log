@@ -1,0 +1,118 @@
+test_inventory_location_is_registry_owned (test_protocol_registry.CommandReferenceTests.test_inventory_location_is_registry_owned) ... FAIL
+test_legacy_registry_keeps_original_inventory (test_protocol_registry.CommandReferenceTests.test_legacy_registry_keeps_original_inventory) ... FAIL
+test_missing_declared_inventory_never_uses_legacy_prose (test_protocol_registry.CommandReferenceTests.test_missing_declared_inventory_never_uses_legacy_prose) ... FAIL
+test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) ... 
+  test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name='../outside.md') ... FAIL
+  test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name='x/y.md') ... FAIL
+  test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name='x\\y.md') ... FAIL
+  test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name='/absolute.md') ... FAIL
+  test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name='C:drive.md') ... FAIL
+  test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name='') ... FAIL
+  test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name=None) ... FAIL
+
+======================================================================
+FAIL: test_inventory_location_is_registry_owned (test_protocol_registry.CommandReferenceTests.test_inventory_location_is_registry_owned)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 51, in test_inventory_location_is_registry_owned
+    self.assertEqual(self.reference(PROTOCOL), PROTOCOL / "COMMANDS_REFERENCE.md")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 33, in reference
+    self.assertIsNotNone(owner, "the conditional inventory has no machine-owned locator")
+AssertionError: unexpectedly None : the conditional inventory has no machine-owned locator
+
+======================================================================
+FAIL: test_legacy_registry_keeps_original_inventory (test_protocol_registry.CommandReferenceTests.test_legacy_registry_keeps_original_inventory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 55, in test_legacy_registry_keeps_original_inventory
+    self.assertEqual(self.reference(root), root / "COMMANDS.md")
+                     ^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 33, in reference
+    self.assertIsNotNone(owner, "the conditional inventory has no machine-owned locator")
+AssertionError: unexpectedly None : the conditional inventory has no machine-owned locator
+
+======================================================================
+FAIL: test_missing_declared_inventory_never_uses_legacy_prose (test_protocol_registry.CommandReferenceTests.test_missing_declared_inventory_never_uses_legacy_prose)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 60, in test_missing_declared_inventory_never_uses_legacy_prose
+    self.reference(root)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 33, in reference
+    self.assertIsNotNone(owner, "the conditional inventory has no machine-owned locator")
+AssertionError: unexpectedly None : the conditional inventory has no machine-owned locator
+
+======================================================================
+FAIL: test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name='../outside.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 67, in test_unbounded_or_non_filename_inventory_refuses
+    self.reference(root)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 33, in reference
+    self.assertIsNotNone(owner, "the conditional inventory has no machine-owned locator")
+AssertionError: unexpectedly None : the conditional inventory has no machine-owned locator
+
+======================================================================
+FAIL: test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name='x/y.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 67, in test_unbounded_or_non_filename_inventory_refuses
+    self.reference(root)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 33, in reference
+    self.assertIsNotNone(owner, "the conditional inventory has no machine-owned locator")
+AssertionError: unexpectedly None : the conditional inventory has no machine-owned locator
+
+======================================================================
+FAIL: test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name='x\\y.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 67, in test_unbounded_or_non_filename_inventory_refuses
+    self.reference(root)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 33, in reference
+    self.assertIsNotNone(owner, "the conditional inventory has no machine-owned locator")
+AssertionError: unexpectedly None : the conditional inventory has no machine-owned locator
+
+======================================================================
+FAIL: test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name='/absolute.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 67, in test_unbounded_or_non_filename_inventory_refuses
+    self.reference(root)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 33, in reference
+    self.assertIsNotNone(owner, "the conditional inventory has no machine-owned locator")
+AssertionError: unexpectedly None : the conditional inventory has no machine-owned locator
+
+======================================================================
+FAIL: test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name='C:drive.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 67, in test_unbounded_or_non_filename_inventory_refuses
+    self.reference(root)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 33, in reference
+    self.assertIsNotNone(owner, "the conditional inventory has no machine-owned locator")
+AssertionError: unexpectedly None : the conditional inventory has no machine-owned locator
+
+======================================================================
+FAIL: test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name='')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 67, in test_unbounded_or_non_filename_inventory_refuses
+    self.reference(root)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 33, in reference
+    self.assertIsNotNone(owner, "the conditional inventory has no machine-owned locator")
+AssertionError: unexpectedly None : the conditional inventory has no machine-owned locator
+
+======================================================================
+FAIL: test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) (name=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 67, in test_unbounded_or_non_filename_inventory_refuses
+    self.reference(root)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 33, in reference
+    self.assertIsNotNone(owner, "the conditional inventory has no machine-owned locator")
+AssertionError: unexpectedly None : the conditional inventory has no machine-owned locator
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.013s
+
+FAILED (failures=10)

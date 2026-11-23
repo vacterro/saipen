@@ -1,0 +1,401 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "9f1e7ffe79114bba8da7460d699f4bbf0e21ac5a9aee497cdf56bb04c395eeb8",
+  "verdict": "PASS",
+  "patterns": [
+    "test_canonical_command_reachability.py",
+    "test_host_authority_broker.py",
+    "test_t1844_origin_broker.py",
+    "test_t1864_autonomous_valve.py",
+    "test_t1931_saipal_boundary.py",
+    "test_t2050_pruned_row_restore.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_canonical_command_reachability.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_canonical_command_reachability.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        16780
+      ],
+      "duration_s": 7.391,
+      "process_create_s": 0.047,
+      "ran": 11,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_following_flag_is_not_swallowed_into_the_decision (test_canonical_command_reachability.BlockerDecisionParsingTests.test_a_following_flag_is_not_swallowed_into_the_decision) ... ok\r\ntest_a_missing_decision_still_refuses (test_canonical_command_reachability.BlockerDecisionParsingTests.test_a_missing_decision_still_refuses) ... ok\r\ntest_a_multi_word_decision_needs_no_quotes (test_canonical_command_reachability.BlockerDecisionParsingTests.test_a_multi_word_decision_needs_no_quotes) ... ok\r\ntest_a_literal_is_harvested_whole (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_a_literal_is_harvested_whole)\r\nT-1383: the harvest read a literal only up to its first quote of ... ok\r\ntest_a_modifier_never_carries_an_ingress_payload_past_its_own_grammar (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_a_modifier_never_carries_an_ingress_payload_past_its_own_grammar)\r\nstart/user-request payloads are judged by the ingress grammar only ... ok\r\ntest_a_quoted_payload_is_data_under_its_verb (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_a_quoted_payload_is_data_under_its_verb) ... ok\r\ntest_a_shortcut_is_the_command_it_routes_to (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_a_shortcut_is_the_command_it_routes_to)\r\nThe CLI resolves a registry shortcut before any dispatch, and so ... ok\r\ntest_every_printed_command_classifies_as_canonical (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_every_printed_command_classifies_as_canonical) ... ok\r\ntest_shell_syntax_outside_a_payload_still_disqualifies_the_line (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_shell_syntax_outside_a_payload_still_disqualifies_the_line)\r\nT-1386 moved ONE thing: a single quoted literal payload of a canonical ... ok\r\ntest_the_blocker_decision_is_reachable_with_real_words (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_the_blocker_decision_is_reachable_with_real_words)\r\nThe field shape: a multi-word decision, and the flag it combines with. ... ok\r\ntest_the_harvest_actually_finds_commands (test_canonical_command_reachability.CanonicalCommandReachabilityTests.test_the_harvest_actually_finds_commands)\r\nGuard: an empty harvest would pass this file silently. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 11 tests in 7.148s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_host_authority_broker.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_host_authority_broker.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        24944
+      ],
+      "duration_s": 26.343,
+      "process_create_s": 0.047,
+      "ran": 38,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_capability_from_another_broker_generation_is_refused (test_host_authority_broker.CapabilityTests.test_a_capability_from_another_broker_generation_is_refused) ... ok\r\ntest_a_capability_is_bound_to_the_project_it_was_minted_for (test_host_authority_broker.CapabilityTests.test_a_capability_is_bound_to_the_project_it_was_minted_for) ... ok\r\ntest_a_capability_transplanted_to_another_session_or_model_is_refused (test_host_authority_broker.CapabilityTests.test_a_capability_transplanted_to_another_session_or_model_is_refused) ... ok\r\ntest_a_current_session_is_not_charged_a_second_delivery (test_host_authority_broker.CapabilityTests.test_a_current_session_is_not_charged_a_second_delivery) ... ok\r\ntest_a_host_client_is_admitted_and_gets_a_session_bound_capability (test_host_authority_broker.CapabilityTests.test_a_host_client_is_admitted_and_gets_a_session_bound_capability) ... ok\r\ntest_a_sha256_shaped_capability_forges_nothing (test_host_authority_broker.CapabilityTests.test_a_sha256_shaped_capability_forges_nothing) ... ok\r\ntest_an_expired_capability_is_refused (test_host_authority_broker.CapabilityTests.test_an_expired_capability_is_refused) ... ok\r\ntest_a_host_restart_admits_the_new_session_automatically (test_host_authority_broker.ClaudeHostPathTests.test_a_host_restart_admits_the_new_session_automatically) ... ok\r\ntest_a_killed_service_costs_one_re_delivery_and_never_a_refusal (test_host_authority_broker.ClaudeHostPathTests.test_a_killed_service_costs_one_re_delivery_and_never_a_refusal) ... ok\r\ntest_a_shell_tool_call_under_the_host_is_refused_by_the_real_service (test_host_authority_broker.ClaudeHostPathTests.test_a_shell_tool_call_under_the_host_is_refused_by_the_real_service) ... ok\r\ntest_a_tool_call_under_the_host_never_starts_the_service (test_host_authority_broker.ClaudeHostPathTests.test_a_tool_call_under_the_host_never_starts_the_service) ... ok\r\ntest_an_absent_service_is_started_by_the_hook_and_the_shipped_policy_is_enforced (test_host_authority_broker.ClaudeHostPathTests.test_an_absent_service_is_started_by_the_hook_and_the_shipped_policy_is_enforced) ... ok\r\ntest_the_normal_host_path_is_admitted_without_a_magic_phrase (test_host_authority_broker.ClaudeHostPathTests.test_the_normal_host_path_is_admitted_without_a_magic_phrase) ... ok\r\ntest_a_missing_authority_document_degrades_and_names_the_repair (test_host_authority_broker.DiagnosticTests.test_a_missing_authority_document_degrades_and_names_the_repair) ... ok\r\ntest_an_absent_broker_names_the_failure_the_recovery_and_one_action (test_host_authority_broker.DiagnosticTests.test_an_absent_broker_names_the_failure_the_recovery_and_one_action) ... ok\r\ntest_degraded_permits_the_prompt_claims_nothing_and_writes_no_record (test_host_authority_broker.DiagnosticTests.test_degraded_permits_the_prompt_claims_nothing_and_writes_no_record) ... ok\r\ntest_no_environment_variable_and_no_prompt_text_changes_the_answer (test_host_authority_broker.DiagnosticTests.test_no_environment_variable_and_no_prompt_text_changes_the_answer) ... ok\r\ntest_the_policy_file_decides_and_only_a_recognized_value_is_obeyed (test_host_authority_broker.DiagnosticTests.test_the_policy_file_decides_and_only_a_recognized_value_is_obeyed) ... ok\r\ntest_a_client_that_merely_imports_the_hook_gains_nothing (test_host_authority_broker.IdentityTests.test_a_client_that_merely_imports_the_hook_gains_nothing) ... ok\r\ntest_an_arbitrary_same_user_python_client_is_refused (test_host_authority_broker.IdentityTests.test_an_arbitrary_same_user_python_client_is_refused) ... ok\r\ntest_an_ordinary_process_is_not_a_hook_invocation_and_starts_nothing (test_host_authority_broker.IdentityTests.test_an_ordinary_process_is_not_a_hook_invocation_and_starts_nothing) ... ok\r\ntest_every_write_op_requires_the_proof_and_reads_do_not (test_host_authority_broker.IdentityTests.test_every_write_op_requires_the_proof_and_reads_do_not) ... ok\r\ntest_health_is_answerable_without_disclosing_an_identity (test_host_authority_broker.IdentityTests.test_health_is_answerable_without_disclosing_an_identity) ... ok\r\ntest_stopping_the_service_is_not_a_trust_decision (test_host_authority_broker.IdentityTests.test_stopping_the_service_is_not_a_trust_decision) ... ok\r\ntest_the_shipped_policy_names_host_images_and_their_code_signer (test_host_authority_broker.IdentityTests.test_the_shipped_policy_names_host_images_and_their_code_signer) ... ok\r\ntest_an_edited_record_fails_the_broker_provenance_too (test_host_authority_broker.LedgerTests.test_an_edited_record_fails_the_broker_provenance_too) ... ok\r\ntest_invalidation_through_the_broker_removes_the_record (test_host_authority_broker.LedgerTests.test_invalidation_through_the_broker_removes_the_record) ... ok\r\ntest_the_ledger_write_is_still_refused_for_an_ordinary_caller (test_host_authority_broker.LedgerTests.test_the_ledger_write_is_still_refused_for_an_ordinary_caller) ... ok\r\ntest_the_owner_reads_the_broker_record_and_refuses_a_hand_built_one (test_host_authority_broker.LedgerTests.test_the_owner_reads_the_broker_record_and_refuses_a_hand_built_one) ... ok\r\ntest_a_broker_crash_leaves_no_reusable_admission (test_host_authority_broker.OwnerLifecycleTests.test_a_broker_crash_leaves_no_reusable_admission) ... ok\r\ntest_a_broker_restart_readmits_the_same_session_automatically (test_host_authority_broker.OwnerLifecycleTests.test_a_broker_restart_readmits_the_same_session_automatically) ... ok\r\ntest_a_duplicate_broker_launch_is_refused_and_the_owner_keeps_serving (test_host_authority_broker.OwnerLifecycleTests.test_a_duplicate_broker_launch_is_refused_and_the_owner_keeps_serving) ... ok\r\ntest_a_model_or_provider_switch_invalidates_the_session (test_host_authority_broker.OwnerLifecycleTests.test_a_model_or_provider_switch_invalidates_the_session) ... ok\r\ntest_a_new_session_admits_fresh_and_never_reuses_the_old_record (test_host_authority_broker.OwnerLifecycleTests.test_a_new_session_admits_fresh_and_never_reuses_the_old_record) ... ok\r\ntest_a_shutdown_request_ends_the_service_and_retires_its_key (test_host_authority_broker.OwnerLifecycleTests.test_a_shutdown_request_ends_the_service_and_retires_its_key) ... ok\r\ntest_a_stale_lock_is_reclaimed_after_a_kill (test_host_authority_broker.OwnerLifecycleTests.test_a_stale_lock_is_reclaimed_after_a_kill) ... ok\r\ntest_authority_bytes_changing_makes_the_session_stale_and_redelivers (test_host_authority_broker.OwnerLifecycleTests.test_authority_bytes_changing_makes_the_session_stale_and_redelivers) ... ok\r\ntest_project_switch_admits_the_new_project_and_leaves_the_old_one_alone (test_host_authority_broker.OwnerLifecycleTests.test_project_switch_admits_the_new_project_and_leaves_the_old_one_alone) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 38 tests in 25.940s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1844_origin_broker.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1844_origin_broker.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        11684
+      ],
+      "duration_s": 4.047,
+      "process_create_s": 0.032,
+      "ran": 48,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": ".OriginKernelWithSimulatedNativeIdentity.test_committed_goal_refuses_copied_source_wrong_worker_revocation_and_issuer_loss) ... ok\r\ntest_consumed_delivery_retries_only_through_its_exact_live_source (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_consumed_delivery_retries_only_through_its_exact_live_source) ... ok\r\ntest_continue_capability_can_be_rechecked_in_its_unchanged_scope (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_continue_capability_can_be_rechecked_in_its_unchanged_scope) ... ok\r\ntest_existing_goal_authorization_keeps_its_source_and_valid_scoped_continuation (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_existing_goal_authorization_keeps_its_source_and_valid_scoped_continuation) ... ok\r\ntest_existing_only_source_check_never_creates_a_binding (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_existing_only_source_check_never_creates_a_binding) ... ok\r\ntest_expired_bound_source_cannot_mint_privileges (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_expired_bound_source_cannot_mint_privileges) ... ok\r\ntest_expiry_revocation_and_issuer_loss_refuse (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_expiry_revocation_and_issuer_loss_refuse) ... ok\r\ntest_explicit_native_gate_action_can_resolve_its_exact_gate (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_explicit_native_gate_action_can_resolve_its_exact_gate) ... ok\r\ntest_goal_journal_relabeling_is_detected_and_original_remains_valid (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_goal_journal_relabeling_is_detected_and_original_remains_valid) ... ok\r\ntest_goal_pipeline_retains_only_its_committed_scoped_continuation (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_goal_pipeline_retains_only_its_committed_scoped_continuation) ... ok\r\ntest_goal_reservation_survives_a_refused_apply_without_another_effect (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_goal_reservation_survives_a_refused_apply_without_another_effect) ... ok\r\ntest_historical_model_supplied_is_not_promoted_by_a_later_valid_proof (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_historical_model_supplied_is_not_promoted_by_a_later_valid_proof) ... ok\r\ntest_malformed_native_action_is_a_refusal_not_an_exception (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_malformed_native_action_is_a_refusal_not_an_exception) ... ok\r\ntest_malformed_proof_is_a_refusal_not_a_service_exception (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_malformed_proof_is_a_refusal_not_a_service_exception) ... ok\r\ntest_matching_file_transport_still_requires_and_can_use_the_native_event (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_matching_file_transport_still_requires_and_can_use_the_native_event) ... ok\r\ntest_matching_session_env_cannot_replace_registered_os_worker (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_matching_session_env_cannot_replace_registered_os_worker) ... ok\r\ntest_native_event_redelivery_is_idempotent_but_changed_text_refuses (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_native_event_redelivery_is_idempotent_but_changed_text_refuses) ... ok\r\ntest_native_host_birth_change_cannot_reissue_an_older_event (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_native_host_birth_change_cannot_reissue_an_older_event) ... ok\r\ntest_native_host_process_is_never_a_shared_model_worker (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_native_host_process_is_never_a_shared_model_worker) ... ok\r\ntest_native_issue_then_registered_nested_worker_can_verify (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_native_issue_then_registered_nested_worker_can_verify) ... ok\r\ntest_native_replacement_worker_can_continue_a_committed_goal_after_delivery_expiry (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_native_replacement_worker_can_continue_a_committed_goal_after_delivery_expiry) ... ok\r\ntest_native_retirement_action_can_authorize_its_exact_capsule (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_native_retirement_action_can_authorize_its_exact_capsule) ... ok\r\ntest_native_revocation_allows_the_worker_to_receive_a_new_human_event (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_native_revocation_allows_the_worker_to_receive_a_new_human_event) ... ok\r\ntest_pid_reuse_and_broken_ancestry_refuse (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_pid_reuse_and_broken_ancestry_refuse) ... ok\r\ntest_received_origin_verdict_cannot_be_used_as_current_operator_authority (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_received_origin_verdict_cannot_be_used_as_current_operator_authority) ... ok\r\ntest_received_source_evidence_preserves_origin_without_restoring_delivery_privilege (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_received_source_evidence_preserves_origin_without_restoring_delivery_privilege) ... ok\r\ntest_received_source_read_cannot_accept_an_unbound_record (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_received_source_read_cannot_accept_an_unbound_record) ... ok\r\ntest_report_action_cannot_be_substituted_for_a_gate_decision (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_report_action_cannot_be_substituted_for_a_gate_decision) ... ok\r\ntest_report_event_cannot_be_substituted_for_retirement_authority (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_report_event_cannot_be_substituted_for_retirement_authority) ... ok\r\ntest_response_and_decision_callers_require_the_authenticated_action_and_root (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_response_and_decision_callers_require_the_authenticated_action_and_root) ... ok\r\ntest_revoked_origin_refusal_remains_a_registered_native_code (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_revoked_origin_refusal_remains_a_registered_native_code) ... ok\r\ntest_source_binding_preserves_the_accepted_origin_and_refuses_a_second_source (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_source_binding_preserves_the_accepted_origin_and_refuses_a_second_source) ... ok\r\ntest_source_bound_goal_authorization_can_retry_a_refused_apply (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_source_bound_goal_authorization_can_retry_a_refused_apply) ... ok\r\ntest_start_pipeline_binds_the_real_captured_source_before_privileged_projection (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_start_pipeline_binds_the_real_captured_source_before_privileged_projection) ... ok\r\ntest_tampering_different_content_and_other_project_refuse (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_tampering_different_content_and_other_project_refuse) ... ok\r\ntest_task_and_continue_budget_epoch_cannot_be_replayed (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_task_and_continue_budget_epoch_cannot_be_replayed) ... ok\r\ntest_transport_retirement_is_write_free_and_cannot_change_its_original_source (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_transport_retirement_is_write_free_and_cannot_change_its_original_source) ... ok\r\ntest_work_supersession_requires_a_native_supersession_event (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_work_supersession_requires_a_native_supersession_event) ... ok\r\ntest_worker_registration_itself_requires_native_identity (test_t1844_origin_broker.OriginKernelWithSimulatedNativeIdentity.test_worker_registration_itself_requires_native_identity) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 48 tests in 3.720s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1864_autonomous_valve.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1864_autonomous_valve.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        27468
+      ],
+      "duration_s": 1.75,
+      "process_create_s": 0.032,
+      "ran": 15,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_consumer_bounded_grant_still_waits_for_its_operator (test_t1864_autonomous_valve.AutonomousValveTests.test_a_consumer_bounded_grant_still_waits_for_its_operator)\r\nTHE red control: the cap is authority when the budget IS the authority. ... ok\r\ntest_the_budget_still_marks_itself_as_reached (test_t1864_autonomous_valve.AutonomousValveTests.test_the_budget_still_marks_itself_as_reached)\r\nAutonomy must not silently delete the periodic look at the work. ... ok\r\ntest_the_checkpoint_agrees_with_the_counters_recovery_rebuilds (test_t1864_autonomous_valve.AutonomousValveTests.test_the_checkpoint_agrees_with_the_counters_recovery_rebuilds)\r\nA marker whose reset disagrees with STATE opens a permanent heal loop. ... ok\r\ntest_the_fix_does_not_touch_the_twentieth_ticket_count_itself (test_t1864_autonomous_valve.AutonomousValveTests.test_the_fix_does_not_touch_the_twentieth_ticket_count_itself)\r\nBoth polarities count the work; only the response to the cap differs. ... ok\r\ntest_the_result_payload_reports_the_committed_counters (test_t1864_autonomous_valve.AutonomousValveTests.test_the_result_payload_reports_the_committed_counters)\r\nT-1669's rule, at the ticket counter: the Result must not lie. ... ok\r\ntest_the_resumed_route_is_the_transition_not_a_generic_continue (test_t1864_autonomous_valve.AutonomousValveTests.test_the_resumed_route_is_the_transition_not_a_generic_continue)\r\nA mid-flight transition knows its destination; `continue` does not. ... ok\r\ntest_the_same_checkpoint_clears_the_wave_budget (test_t1864_autonomous_valve.AutonomousValveTests.test_the_same_checkpoint_clears_the_wave_budget)\r\nThe HUNT -> ADD trip site is the symmetric half of the same fix. ... ok\r\ntest_the_tripping_transition_keeps_working_in_the_same_operation (test_t1864_autonomous_valve.AutonomousValveTests.test_the_tripping_transition_keeps_working_in_the_same_operation)\r\nThe twentieth ticket clears the budget instead of ending the turn. ... ok\r\ntest_the_untripped_count_still_reports_the_increment (test_t1864_autonomous_valve.AutonomousValveTests.test_the_untripped_count_still_reports_the_increment)\r\nThe same payload field, below the cap, still reports pre + 1. ... ok\r\ntest_a_non_goal_intent_is_never_a_budget_question (test_t1864_autonomous_valve.TripCheckpointOwnerTests.test_a_non_goal_intent_is_never_a_budget_question) ... ok\r\ntest_a_proven_persistent_grant_clears_itself (test_t1864_autonomous_valve.TripCheckpointOwnerTests.test_a_proven_persistent_grant_clears_itself)\r\nThe grant already declares `safety_valve_mode: checkpoint`. ... ok\r\ntest_an_unproven_persistent_grant_still_waits (test_t1864_autonomous_valve.TripCheckpointOwnerTests.test_an_unproven_persistent_grant_still_waits)\r\nA claim of persistence that cannot be proved is not authority. ... ok\r\ntest_an_unreadable_grant_journal_degrades_to_the_human_boundary (test_t1864_autonomous_valve.TripCheckpointOwnerTests.test_an_unreadable_grant_journal_degrades_to_the_human_boundary)\r\nA crash here would kill the transition that tripped the cap. ... ok\r\ntest_an_untripped_budget_gets_no_answer (test_t1864_autonomous_valve.TripCheckpointOwnerTests.test_an_untripped_budget_gets_no_answer)\r\nNo cap, no decision: this must never pre-clear a budget. ... ok\r\ntest_the_owner_names_the_authority_it_renews (test_t1864_autonomous_valve.TripCheckpointOwnerTests.test_the_owner_names_the_authority_it_renews) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 15 tests in 1.404s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1931_saipal_boundary.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1931_saipal_boundary.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        15568
+      ],
+      "duration_s": 4.407,
+      "process_create_s": 0.032,
+      "ran": 22,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_backend_operation_refusals_remain_failures (test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures) ... ok\r\ntest_bad_record_types_and_unreadable_logs_are_not_empty_success (test_t1931_saipal_boundary.SaipalBoundaryTests.test_bad_record_types_and_unreadable_logs_are_not_empty_success) ... ok\r\ntest_command_specific_shapes_are_validated (test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated) ... ok\r\ntest_complete_history_preserves_all_records (test_t1931_saipal_boundary.SaipalBoundaryTests.test_complete_history_preserves_all_records) ... ok\r\ntest_concurrent_append_is_truncated_until_newline_commits (test_t1931_saipal_boundary.SaipalBoundaryTests.test_concurrent_append_is_truncated_until_newline_commits) ... ok\r\ntest_concurrent_disposition_writes_are_serialized_or_explicitly_busy (test_t1931_saipal_boundary.SaipalBoundaryTests.test_concurrent_disposition_writes_are_serialized_or_explicitly_busy) ... ok\r\ntest_corrupt_history_refuses_new_dispositions_without_touching_evidence (test_t1931_saipal_boundary.SaipalBoundaryTests.test_corrupt_history_refuses_new_dispositions_without_touching_evidence) ... ok\r\ntest_corrupt_result_is_explicit_and_not_a_legacy_partial_list (test_t1931_saipal_boundary.SaipalBoundaryTests.test_corrupt_result_is_explicit_and_not_a_legacy_partial_list) ... ok\r\ntest_deadline_preserves_uncertain_outcome (test_t1931_saipal_boundary.SaipalBoundaryTests.test_deadline_preserves_uncertain_outcome) ... ok\r\ntest_discovery_does_not_swallow_status_or_analysis_failures (test_t1931_saipal_boundary.SaipalBoundaryTests.test_discovery_does_not_swallow_status_or_analysis_failures) ... ok\r\ntest_failed_collection_is_not_an_empty_list (test_t1931_saipal_boundary.SaipalBoundaryTests.test_failed_collection_is_not_an_empty_list) ... ok\r\ntest_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) ... ok\r\ntest_invalid_json_encoding_constants_and_duplicate_fields_are_typed (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_json_encoding_constants_and_duplicate_fields_are_typed) ... ok\r\ntest_large_stdout_and_stderr_are_resource_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_large_stdout_and_stderr_are_resource_errors) ... ok\r\ntest_middle_corruption_preserves_prefix_and_original_bytes (test_t1931_saipal_boundary.SaipalBoundaryTests.test_middle_corruption_preserves_prefix_and_original_bytes) ... ok\r\ntest_missing_and_valid_empty_logs_are_distinct (test_t1931_saipal_boundary.SaipalBoundaryTests.test_missing_and_valid_empty_logs_are_distinct) ... ok\r\ntest_torn_final_record_is_never_a_complete_history (test_t1931_saipal_boundary.SaipalBoundaryTests.test_torn_final_record_is_never_a_complete_history) ... ok\r\ntest_transport_failure_remains_distinct (test_t1931_saipal_boundary.SaipalBoundaryTests.test_transport_failure_remains_distinct) ... ok\r\ntest_unreadable_discovery_watermark_does_not_reset_to_clean_evidence (test_t1931_saipal_boundary.SaipalBoundaryTests.test_unreadable_discovery_watermark_does_not_reset_to_clean_evidence) ... ok\r\ntest_unsafe_history_node_is_refused_even_when_target_looks_absent (test_t1931_saipal_boundary.SaipalBoundaryTests.test_unsafe_history_node_is_refused_even_when_target_looks_absent) ... ok\r\ntest_valid_empty_discovery_report_is_no_new_evidence (test_t1931_saipal_boundary.SaipalBoundaryTests.test_valid_empty_discovery_report_is_no_new_evidence) ... ok\r\ntest_valid_report_preserves_utf8_under_narrow_locale (test_t1931_saipal_boundary.SaipalBoundaryTests.test_valid_report_preserves_utf8_under_narrow_locale) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 22 tests in 4.071s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t2050_pruned_row_restore.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t2050_pruned_row_restore.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        31504
+      ],
+      "duration_s": 0.171,
+      "process_create_s": 0.046,
+      "ran": 14,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_absent_ticket_is_not_invented (test_t2050_pruned_row_restore.PrunedRowsTest.test_absent_ticket_is_not_invented) ... ok\r\ntest_malformed_ids_never_scan_for_a_prefix (test_t2050_pruned_row_restore.PrunedRowsTest.test_malformed_ids_never_scan_for_a_prefix) ... ok\r\ntest_newest_scrub_wins (test_t2050_pruned_row_restore.PrunedRowsTest.test_newest_scrub_wins) ... ok\r\ntest_only_rows_opening_with_the_ticket_are_matched (test_t2050_pruned_row_restore.PrunedRowsTest.test_only_rows_opening_with_the_ticket_are_matched) ... ok\r\ntest_returns_the_bytes_the_board_held (test_t2050_pruned_row_restore.PrunedRowsTest.test_returns_the_bytes_the_board_held) ... ok\r\ntest_the_finding_message_yields_an_executable_repair (test_t2050_pruned_row_restore.RemediationRegisterTest.test_the_finding_message_yields_an_executable_repair) ... ok\r\ntest_the_plain_survey_form_still_resolves (test_t2050_pruned_row_restore.RemediationRegisterTest.test_the_plain_survey_form_still_resolves) ... ok\r\ntest_the_repair_resolves_to_a_registered_verb (test_t2050_pruned_row_restore.RemediationRegisterTest.test_the_repair_resolves_to_a_registered_verb) ... ok\r\ntest_crlf_is_kept (test_t2050_pruned_row_restore.RestoredBoardTextTest.test_crlf_is_kept) ... ok\r\ntest_every_other_byte_is_preserved (test_t2050_pruned_row_restore.RestoredBoardTextTest.test_every_other_byte_is_preserved) ... ok\r\ntest_inserts_at_the_head_of_done (test_t2050_pruned_row_restore.RestoredBoardTextTest.test_inserts_at_the_head_of_done) ... ok\r\ntest_nothing_to_insert_returns_the_document (test_t2050_pruned_row_restore.RestoredBoardTextTest.test_nothing_to_insert_returns_the_document) ... ok\r\ntest_refuses_without_a_closed_section (test_t2050_pruned_row_restore.RestoredBoardTextTest.test_refuses_without_a_closed_section) ... ok\r\ntest_restored_edges_resolve_on_the_parsed_board (test_t2050_pruned_row_restore.RestoredBoardTextTest.test_restored_edges_resolve_on_the_parsed_board) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 14 tests in 0.007s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 148,
+  "duration_s": 45.0,
+  "timings_s": {
+    "execution_wall_s": 44.109,
+    "environment_identity_wall_s": 0.032,
+    "copy_wall_s": 0.563,
+    "hash_wall_s": 0.156,
+    "cleanup_wall_s": 0.11
+  },
+  "copy_metrics": {
+    "subject_copy_s": 0.532,
+    "canonical_copy_s": 0.031,
+    "canonical_copy_attempts": 1,
+    "trees": []
+  },
+  "sandbox_scope": {
+    "mode": "DECLARED",
+    "trees": [],
+    "undeclared": [],
+    "selected": [
+      "test_canonical_command_reachability.py",
+      "test_host_authority_broker.py",
+      "test_t1844_origin_broker.py",
+      "test_t1864_autonomous_valve.py",
+      "test_t1931_saipal_boundary.py",
+      "test_t2050_pruned_row_restore.py"
+    ],
+    "declared_by": {
+      "test_canonical_command_reachability.py": [],
+      "test_host_authority_broker.py": [],
+      "test_t1844_origin_broker.py": [],
+      "test_t1864_autonomous_valve.py": [],
+      "test_t1931_saipal_boundary.py": [],
+      "test_t2050_pruned_row_restore.py": []
+    },
+    "manifest_sha256": "7e00ef6771254f78299856d2748152c8d86034a23e04046ff72bf337366e6ab1"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_canonical_command_reachability.py",
+        "test_host_authority_broker.py",
+        "test_t1844_origin_broker.py",
+        "test_t1864_autonomous_valve.py",
+        "test_t1931_saipal_boundary.py",
+        "test_t2050_pruned_row_restore.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "DECLARED",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "a7c96ea055dfd4913b850b6f50a9b57fc263f8d5d13f44d35a54b3571a44454a",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "2271ca5434892f15f981f28ed5ded00314be23f853d23c8db56c527f302b0463"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "6d51bf6ca978727f654fdccf6cd249534c0adb29e53fca7facedc0fb8d83150c"
+      },
+      "core_unit_shard.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "1a22bac5140eeaf33be64413027a22c474420dbe7e3c6134af9b5e6f90942c9d"
+      },
+      "test_runner.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "11eca655a72d976476797e3c1333714fc1e99c7c7b64dbf44d6865889d599456"
+      },
+      "verification_cache.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "70188f394bb84cc78fe2417daecf5b38b6abcd3be73956194baf1ef1911413ba"
+      },
+      "process_tree.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "798e6663a85d1906533203fe961472ad8eb8b7e645aa3961a694c1192ca5efcb"
+      },
+      "verification_bootstrap.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "8fa1c333bec82156f70bb66e7df786e99265d0b4c5f3da362a830bfc9198ab24"
+      },
+      "verification_impact.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "d2829c9de720e9b84d9dfa4056786c533bf9cff86913c5ed0546fe63e19f5a83"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "f008508f0f88d1c6a74f95d7e541a411a685b375404d7dd1ea49035ff7a5064c"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

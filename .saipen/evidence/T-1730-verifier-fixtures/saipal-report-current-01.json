@@ -1,0 +1,6 @@
+{
+  "code": "NO_HOME",
+  "message": "no .saipal/ found in V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN or any ancestor; read-only commands never create one",
+  "next_action": "saipal continue",
+  "ok": false
+}

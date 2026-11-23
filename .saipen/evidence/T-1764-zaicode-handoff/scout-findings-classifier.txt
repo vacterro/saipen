@@ -1,0 +1,8 @@
+findings.classify('problem', message) -- rule_id, subject, detail, detail_hash
+the handoff's line:
+    rule_id=cross_doc_drift subject_id=None detail='T-1446' hash=49964bf8d888df2d
+same rule, no id-shaped filename:
+    rule_id=cross_doc_drift subject_id=None detail='cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does' hash=630f90a493d0f9ad
+another subtype of the same rule:
+    rule_id=cross_doc_drift subject_id=None detail='cross-doc drift [markhunt-no-git] -- phases/markhunt.md must say no-git means git cannot b' hash=3cbda6552f369fb3
+two different drifts that share one incidental id get the same detail_hash: True

@@ -1,0 +1,19 @@
+{
+  "event_id": "E-1931",
+  "externalization_event": {
+    "operation_id": "checkpoint-229cb79493ad48b497043685f6762220",
+    "reason": "new LOG event exceeds the live cap; canonical detail externalization"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/log-detail/E-1931-3ff8185df513cc4cfde4bf20.json",
+  "operation": "log_event_externalization",
+  "original_event_bytes": 1445,
+  "original_event_path": ".saipen/recovery/log-detail/E-1931-3ff8185df513cc4cfde4bf20.LOG.md",
+  "original_event_sha256": "3ff8185df513cc4cfde4bf20d1db780ed424fe8509262604bb6fd99e2c4238e0",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "schema_version": 1,
+  "source": ".saipen/LOG.md",
+  "status": "COMMITTED",
+  "ticket_id": "T-239"
+}

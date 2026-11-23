@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}", "-B", "tools/test_t1729_operator_gate.py",
+    "ScopedOperatorDecision.test_limitation_acceptance_preserves_a_computed_budget_stop",
+    "ScopedOperatorDecision.test_requested_resume_cannot_override_a_computed_budget_stop"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools", "saipen", "bootstrap", "extensions", "tests", "KNOWLEDGE",
+    ".gitattributes", ".gitignore"
+  ],
+  "oracle_files": [
+    "tools/test_t1729_operator_gate.py", "tools/test_recovery_reachability.py",
+    "tools/test_fixture_support.py", "tools/test_hermetic_env.py"
+  ],
+  "subject_files": ["tools/saipen_engine/gate_decision.py"],
+  "before": {
+    "tools/saipen_engine/gate_decision.py": ".saipen/evidence/T-1729-gate-decision-20261016/before-budget/gate_decision.py"
+  },
+  "timeout": 120
+}

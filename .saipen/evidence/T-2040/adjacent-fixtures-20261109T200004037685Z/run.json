@@ -1,0 +1,61 @@
+{
+  "evidence": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\adjacent-fixtures-20261109T200004037685Z",
+  "python": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "python_version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "preimages": {
+    "test_t2022_protocol_home_maintenance_distinction.py": "b20a508bb35f6ad8ec5e34e072fdcba50d5fc9234134acc76aebbab1d2598ea0",
+    "test_t1790_dependency_route_budget.py": "7c430776d1d64803d30c4835da2bbea6e5c45e72557bbc12ba9ec2ef03055739",
+    "test_t1577_op_id_provenance.py": "8477c8cd44e8336646d51efcfa7fdeb0790a3ac8c479233b557315fd9bd20e7d"
+  },
+  "before": {
+    "test_t2022_protocol_home_maintenance_distinction": {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+        "-p",
+        "test_t2022_protocol_home_maintenance_distinction.py",
+        "-v"
+      ],
+      "exit_code": 1,
+      "duration_s": 0.921
+    },
+    "test_t1790_dependency_route_budget": {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+        "-p",
+        "test_t1790_dependency_route_budget.py",
+        "-v"
+      ],
+      "exit_code": 1,
+      "duration_s": 13.797
+    },
+    "test_t1577_op_id_provenance": {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+        "-p",
+        "test_t1577_op_id_provenance.py",
+        "-v"
+      ],
+      "exit_code": 1,
+      "duration_s": 8.266
+    }
+  }
+}

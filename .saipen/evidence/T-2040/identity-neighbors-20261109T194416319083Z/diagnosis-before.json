@@ -1,0 +1,454 @@
+{
+  "test_e2e_bz_rea_sequential_lifecycle_and_distinct_successor": {
+    "assertion": "False is not true",
+    "board_errors": [
+      "BOARD.md:8 ticket T-49 has unrecognized field 'candidate: bzcc_procedure_semantics-sub_41B200'"
+    ],
+    "replenishment": {
+      "ok": false,
+      "replenished": false,
+      "status": "BOARD_INVALID",
+      "detail": "BOARD parse error(s): BOARD.md:8 ticket T-49 has unrecognized field 'candidate: bzcc_procedure_semantics-sub_41B200'"
+    }
+  },
+  "test_11_one_verified_gap_closes_different_gap_automatically_selected": {
+    "assertion": "'BZ-G-FUN_0' != 'BZ-G-FUN_10'\n- BZ-G-FUN_0\n+ BZ-G-FUN_10\n?          +\n",
+    "board_errors": [],
+    "replenishment": {
+      "ok": true,
+      "replenished": true,
+      "dry_run": true,
+      "status": "TASK_REPLENISHED",
+      "goal_id": "BZ-G",
+      "candidate": {
+        "candidate_id": "BZ-G-FUN_0",
+        "goal_id": "BZ-G",
+        "title": "Investigate semantics of FUN_0 [BZ-G]",
+        "priority": "P2",
+        "description": "Reverse engineer and document semantics for procedure FUN_0 at RVA 0x03e8 (None bytes, capture sha256:)",
+        "scope": "rva:0x03e8",
+        "target_locator": "0x03e8",
+        "evidence_source": ".saipen/evidence/coverage.json",
+        "verification": "Procedure FUN_0 (RVA 0x03e8) documented with decompiled semantic behavior, caller/callee evidence, and verified decompilation against capture ",
+        "needs": [],
+        "risk": "low",
+        "metadata": {
+          "item_id": "FUN_0",
+          "goal_id": "BZ-G",
+          "rva": "0x03e8",
+          "va": "",
+          "bytes": null,
+          "module": null,
+          "capture_sha256": "",
+          "capture_path": ""
+        },
+        "evidence_fingerprint": "sha256:a3339bec288ec4e4"
+      },
+      "planned_ticket": "T-PLANNED",
+      "detail": "would admit BZ-G-FUN_0 for goal BZ-G"
+    }
+  },
+  "test_20_genuine_exhausted_work_produces_quiet_waiting": {
+    "assertion": "'INCOMPLETE_DISCOVERY' != 'QUIESCENT'\n- INCOMPLETE_DISCOVERY\n+ QUIESCENT\n",
+    "board_errors": [],
+    "assessment": {
+      "classification": "INCOMPLETE_DISCOVERY",
+      "actionable": false,
+      "executable_work": null,
+      "action": "saipen status",
+      "reason": "maintain",
+      "detail": "executable queue is empty; complete discovery and goal verification are not proven",
+      "ticket": null,
+      "requires_human": false,
+      "quiescent": false,
+      "effective_route": {
+        "ok": true,
+        "action": "saipen status",
+        "reason": "maintain",
+        "stop_reason": "INCOMPLETE_DISCOVERY",
+        "terminal_classification": "INCOMPLETE_DISCOVERY",
+        "idle_classification": "INCOMPLETE_DISCOVERY",
+        "primary_blocker": null,
+        "unresolved_audit_count": 0,
+        "next_exact_action": "saipen status",
+        "externally_blocked": [],
+        "operator_required": [],
+        "future_gated": [],
+        "detail": "executable queue is empty; complete discovery and goal verification are not proven",
+        "work_exhaustion": {
+          "schema_version": 2,
+          "status": "INCOMPLETE_DISCOVERY",
+          "legacy_status": "INCOMPLETE_DISCOVERY",
+          "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+          "sources": [
+            {
+              "source_name": "active_work",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            },
+            {
+              "source_name": "canonical_recovery",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            },
+            {
+              "source_name": "actionable_todo",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            },
+            {
+              "source_name": "unresolved_source",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            },
+            {
+              "source_name": "unconsumed_audit_inbox",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": null,
+              "eligibility_result": "NOT_CHECKED",
+              "authorized_actions": [],
+              "exact_blocker": "provider result not supplied",
+              "next_recheck_condition": "provider supplies current evidence",
+              "checked": false
+            },
+            {
+              "source_name": "release_obligations",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            },
+            {
+              "source_name": "future_gates",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            },
+            {
+              "source_name": "hunt_findings",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": null,
+              "eligibility_result": "NOT_CHECKED",
+              "authorized_actions": [],
+              "exact_blocker": "HUNT has no current Git HEAD",
+              "next_recheck_condition": "provider supplies current evidence",
+              "checked": false
+            },
+            {
+              "source_name": "improve_candidates",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": null,
+              "eligibility_result": "BLOCKED_AUTHORITY",
+              "authorized_actions": [],
+              "exact_blocker": "current continuous maintenance grant is not proven",
+              "next_recheck_condition": "authenticated grant restored within its scope",
+              "checked": false
+            },
+            {
+              "source_name": "external_forensics",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": null,
+              "eligibility_result": "NOT_CHECKED",
+              "authorized_actions": [],
+              "exact_blocker": "external direct execution contract is DISABLED",
+              "next_recheck_condition": "provider supplies current evidence",
+              "checked": false
+            },
+            {
+              "source_name": "conformance_debt",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": null,
+              "eligibility_result": "NOT_CHECKED",
+              "authorized_actions": [],
+              "exact_blocker": "no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS",
+              "next_recheck_condition": "provider supplies current evidence",
+              "checked": false
+            },
+            {
+              "source_name": "persistent_goals",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            }
+          ],
+          "exhausted": false,
+          "verified_exhausted": false,
+          "no_work_available": true,
+          "all_checked": false,
+          "blocked_sources": [
+            "improve_candidates"
+          ],
+          "blocked_obligations": [],
+          "certificate_errors": []
+        },
+        "outcome_truth": {
+          "queue_status": "QUEUE_DRAINED",
+          "campaign_status": "CAMPAIGN_WAIT_AUTHORITY",
+          "objective_status": "OBJECTIVE_UNVERIFIED",
+          "publication_status": "RELEASE_PENDING",
+          "publication_details": {
+            "tickets": [],
+            "diagnostics": []
+          },
+          "verification_status": "NOT_CHECKED",
+          "next_eligible_action": "saipen status",
+          "next_wake_condition": "operator grants renewed campaign authority or continued objective",
+          "lanes": {
+            "RELEASE_LANE": "CLEAR",
+            "IMPLEMENTATION_LANE": "NO_WORK",
+            "DISCOVERY_LANE": "AUTHORITY_REQUIRED",
+            "PUBLICATION_LANE": "PENDING",
+            "CAMPAIGN": "WAIT_AUTHORITY"
+          },
+          "release_lane": "CLEAR",
+          "implementation_lane": "NO_WORK",
+          "discovery_lane": "AUTHORITY_REQUIRED",
+          "publication_lane": "PENDING",
+          "campaign_lane": "WAIT_AUTHORITY",
+          "summary": "QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PENDING"
+        },
+        "queue_status": "QUEUE_DRAINED",
+        "campaign_status": "CAMPAIGN_WAIT_AUTHORITY",
+        "objective_status": "OBJECTIVE_UNVERIFIED"
+      },
+      "raw_route": {
+        "ok": true,
+        "action": "saipen status",
+        "reason": "maintain",
+        "stop_reason": "INCOMPLETE_DISCOVERY",
+        "terminal_classification": "INCOMPLETE_DISCOVERY",
+        "idle_classification": "INCOMPLETE_DISCOVERY",
+        "primary_blocker": null,
+        "unresolved_audit_count": 0,
+        "next_exact_action": "saipen status",
+        "externally_blocked": [],
+        "operator_required": [],
+        "future_gated": [],
+        "detail": "executable queue is empty; complete discovery and goal verification are not proven",
+        "work_exhaustion": {
+          "schema_version": 2,
+          "status": "INCOMPLETE_DISCOVERY",
+          "legacy_status": "INCOMPLETE_DISCOVERY",
+          "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+          "sources": [
+            {
+              "source_name": "active_work",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            },
+            {
+              "source_name": "canonical_recovery",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            },
+            {
+              "source_name": "actionable_todo",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            },
+            {
+              "source_name": "unresolved_source",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            },
+            {
+              "source_name": "unconsumed_audit_inbox",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": null,
+              "eligibility_result": "NOT_CHECKED",
+              "authorized_actions": [],
+              "exact_blocker": "provider result not supplied",
+              "next_recheck_condition": "provider supplies current evidence",
+              "checked": false
+            },
+            {
+              "source_name": "release_obligations",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            },
+            {
+              "source_name": "future_gates",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            },
+            {
+              "source_name": "hunt_findings",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": null,
+              "eligibility_result": "NOT_CHECKED",
+              "authorized_actions": [],
+              "exact_blocker": "HUNT has no current Git HEAD",
+              "next_recheck_condition": "provider supplies current evidence",
+              "checked": false
+            },
+            {
+              "source_name": "improve_candidates",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": null,
+              "eligibility_result": "BLOCKED_AUTHORITY",
+              "authorized_actions": [],
+              "exact_blocker": "current continuous maintenance grant is not proven",
+              "next_recheck_condition": "authenticated grant restored within its scope",
+              "checked": false
+            },
+            {
+              "source_name": "external_forensics",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": null,
+              "eligibility_result": "NOT_CHECKED",
+              "authorized_actions": [],
+              "exact_blocker": "external direct execution contract is DISABLED",
+              "next_recheck_condition": "provider supplies current evidence",
+              "checked": false
+            },
+            {
+              "source_name": "conformance_debt",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": null,
+              "eligibility_result": "NOT_CHECKED",
+              "authorized_actions": [],
+              "exact_blocker": "no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS",
+              "next_recheck_condition": "provider supplies current evidence",
+              "checked": false
+            },
+            {
+              "source_name": "persistent_goals",
+              "source_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "last_checked_generation": "no-git+no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+              "eligibility_result": "CLEAN_VERIFIED",
+              "authorized_actions": [],
+              "exact_blocker": null,
+              "next_recheck_condition": "new evidence arrives",
+              "checked": true
+            }
+          ],
+          "exhausted": false,
+          "verified_exhausted": false,
+          "no_work_available": true,
+          "all_checked": false,
+          "blocked_sources": [
+            "improve_candidates"
+          ],
+          "blocked_obligations": [],
+          "certificate_errors": []
+        },
+        "outcome_truth": {
+          "queue_status": "QUEUE_DRAINED",
+          "campaign_status": "CAMPAIGN_WAIT_AUTHORITY",
+          "objective_status": "OBJECTIVE_UNVERIFIED",
+          "publication_status": "RELEASE_PENDING",
+          "publication_details": {
+            "tickets": [],
+            "diagnostics": []
+          },
+          "verification_status": "NOT_CHECKED",
+          "next_eligible_action": "saipen status",
+          "next_wake_condition": "operator grants renewed campaign authority or continued objective",
+          "lanes": {
+            "RELEASE_LANE": "CLEAR",
+            "IMPLEMENTATION_LANE": "NO_WORK",
+            "DISCOVERY_LANE": "AUTHORITY_REQUIRED",
+            "PUBLICATION_LANE": "PENDING",
+            "CAMPAIGN": "WAIT_AUTHORITY"
+          },
+          "release_lane": "CLEAR",
+          "implementation_lane": "NO_WORK",
+          "discovery_lane": "AUTHORITY_REQUIRED",
+          "publication_lane": "PENDING",
+          "campaign_lane": "WAIT_AUTHORITY",
+          "summary": "QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PENDING"
+        },
+        "queue_status": "QUEUE_DRAINED",
+        "campaign_status": "CAMPAIGN_WAIT_AUTHORITY",
+        "objective_status": "OBJECTIVE_UNVERIFIED"
+      },
+      "continuous_maintenance_proven": false,
+      "continuous_maintenance_claimed": false,
+      "operator_work": []
+    }
+  },
+  "test_blocked_first_candidate_selects_second_candidate": {
+    "assertion": "False is not true",
+    "board_errors": [
+      "BOARD.md:10 ticket-ish line doesn't match RFC section 1.2 shape `- [ ] T-### description`"
+    ],
+    "replenishment": {
+      "ok": false,
+      "replenished": false,
+      "status": "BOARD_INVALID",
+      "detail": "BOARD parse error(s): BOARD.md:10 ticket-ish line doesn't match RFC section 1.2 shape `- [ ] T-### description`"
+    }
+  },
+  "test_10_candidate_deduplication_preserves_new_evidence_generations": {
+    "projected_description": "Investigate FUN_1 [G1] candidate: G1-FUN_1 | evidence_fp: sha256:gen1",
+    "candidate_markers": [
+      "G1-FUN_1"
+    ],
+    "matches": false,
+    "duplicate": [
+      false,
+      null
+    ]
+  }
+}

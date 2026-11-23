@@ -1,0 +1,27 @@
+Ran 15 tests in 7.234s
+
+OK
+=== gate_decision matrix exit above ===
+Ran 20 tests in 7.131s
+
+OK
+=== operator gate exit above ===
+Ran 84 tests in 38.931s
+
+OK
+=== reachability exit above ===
+Ran 3 tests in 0.000s
+
+FAILED (errors=3)
+=== declared triple exit above ===
+=== fixture support exit above ===
+Ran 3 tests in 0.047s
+
+OK
+=== hermetic env exit above ===
+### declared triple, correct class
+----------------------------------------------------------------------
+Ran 3 tests in 2.809s
+
+OK
+### fixture_support alone

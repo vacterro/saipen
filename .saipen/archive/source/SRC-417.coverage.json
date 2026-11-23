@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-417:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-21234",
+      "text": "Repair ZAICODE authenticated operator ingress (SRC-415/T-2060): host_authority_client effective per-host settings, broker max_shells/max_bridges zero handling, Windows process ancestry + signature measurement, operator_origin sealing for cc, negative security regression",
+      "verification": "python -m pytest tools/test_t2066_zaicode_host_policy.py -> PASS; record: .saipen/evidence/regression/regression-execution-7778d2ffb36647c0a0bb633191e26789.json",
+      "work": "T-2066"
+    }
+  },
+  "schema_version": 1
+}

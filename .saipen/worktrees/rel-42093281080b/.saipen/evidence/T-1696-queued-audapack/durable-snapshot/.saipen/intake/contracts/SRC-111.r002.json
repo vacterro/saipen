@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-111:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-35 is implemented and verified against the pre-fix red control"
+    },
+    "SRC-111:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "the red control at project_room_model.py:367 still fails without the fix and passes with it"
+    }
+  },
+  "derived_at": "2026-10-04T14:58:11Z",
+  "derived_from": "SRC-111",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "14aca2767a2fc977f05df34e04d1e27e59ed3eba3ff896b844dadafb92f1619a"
+}

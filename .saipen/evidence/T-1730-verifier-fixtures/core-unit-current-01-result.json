@@ -1,0 +1,16 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "tools\\core_unit.py",
+    "evidence",
+    "T-1730"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "started_utc": "2026-10-12T19:11:33.573409+00:00",
+  "runner_pid": 13008,
+  "child_pid": 15252,
+  "exit_code": 1,
+  "elapsed_s": 1600.203,
+  "finished_utc": "2026-10-12T19:38:13.775161+00:00"
+}

@@ -1,0 +1,21 @@
+{
+  "label": "verify-full-family",
+  "phase": "VERIFY",
+  "command": [
+    "C:/ProgramData/SAI/SAIPEN/python/3.11.9-64/python.exe",
+    "-B",
+    "tools/core_unit.py",
+    "evidence",
+    "T-1718"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 1,
+  "duration_s": 1486.828,
+  "fingerprint": "41247edf69d91ef36f1e0857104ee548c76119cb6fc9761a9d43cdbe3d0fd3e9",
+  "stdout": "{\r\n  \"ok\": false,\r\n  \"verdict\": \"FAIL\",\r\n  \"ran\": 6241,\r\n  \"red\": 17,\r\n  \"new_red\": [\r\n    \"test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_bare_generic_launch_bootstraps_reads_and_inherits_one_canonical_actor\",\r\n    \"test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_native_task_child_mutations_receive_the_same_guard\",\r\n    \"test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_optional_explicit_launch_is_checked_and_does_not_leak\",\r\n    \"test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_real_installed_global_plugin_accepts_bare_canonical_continuation\",\r\n    \"test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_shell_workdir_cannot_hide_a_canonical_append\",\r\n    \"test_opencode_host_smoke.OpenCodeHostSmoke.test_2_the_runtime_discovers_and_loads_the_installed_artifact\",\r\n    \"test_opencode_host_smoke.OpenCodeRealInstalledGeneration.test_fresh_process_loads_the_installed_generation_from_one_origin\",\r\n    \"test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry\",\r\n    \"test_response_surface_contract.BudgetTests.test_context_budget_remains_green_with_execution_in_cold\",\r\n    \"test_t1326_board_compaction.CanonicalLogProducerTests.test_no_engine_module_calls_the_capped_builder_directly\",\r\n    \"test_t1465_budget_line_ends.LineEndTests.test_every_budget_holds\",\r\n    \"test_t1670_route_budgets.RouteBudgetTests.test_one_enormous_document_fails_even_where_no_route_loads_it\",\r\n    \"test_t1670_route_budgets.RouteBudgetTests.test_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate\",\r\n    \"test_t1670_route_budgets.RouteBudgetTests.test_the_command_line_summary_exits_by_the_route_verdict\",\r\n    \"test_t1670_route_budgets.RouteBudgetTests.test_the_summary_is_one_line_per_route_and_names_the_total_informational\",\r\n    \"test_t1670_route_budgets.RouteBudgetTests.test_unrelated_growth_raises_the_total_and_moves_no_route\",\r\n    \"test_t1676_lifecycle_code.RegisteredCodeTests.test_every_route_budget_still_passes\"\r\n  ],\r\n  \"fixed\": [],\r\n  \"problems\": [\r\n    \"17 new red outside the baseline\"\r\n  ],\r\n  \"record\": \".saipen/evidence/core-unit/41247edf69d91ef3-20261011T162650Z.json\",\r\n  \"reused\": false,\r\n  \"checkpoint\": \"CHECKPOINTED\",\r\n  \"checkpoint_detail\": null,\r\n  \"sandboxes_leaked\": []\r\n}\r\n",
+  "stderr": "",
+  "stdout_sha256": "6bb036affd899f4758488dbb5e2eda9efb3a959d23cdf8b996ff7858c52caaf9",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t1839_cohort_reconciliation.py", "-k", "test_real_reconciliation_preserves_history_and_owes_publication", "-v"],
+  "format": "unittest",
+  "context": ["tools", "saipen", "extensions", "tests/scenarios/stale-state-reconciliation/.saipen", "VERSION"],
+  "oracle_files": ["tools/test_t1839_cohort_reconciliation.py", "tools/test_orchestration_repair.py", "tools/test_closure_provenance.py", "tools/test_hermetic_env.py", "tools/test_fixture_support.py"],
+  "subject_files": ["tools/saipen_engine/cohort_reconcile.py", "tools/saipen_engine/operations.py", "tools/saipen_engine/closure.py", "tools/saipen.py"],
+  "before": {
+    "tools/saipen_engine/cohort_reconcile.py": null,
+    "tools/saipen_engine/operations.py": ".saipen/evidence/T-1839-cohort-reconcile/prefix/operations.py",
+    "tools/saipen_engine/closure.py": ".saipen/evidence/T-1839-cohort-reconcile/prefix/closure.py",
+    "tools/saipen.py": ".saipen/evidence/T-1839-cohort-reconcile/prefix/saipen.py"
+  },
+  "timeout": 180
+}

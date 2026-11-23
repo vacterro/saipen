@@ -1,0 +1,6 @@
+STATUS: DONE
+RESULT: Vajab operaatori otsust; 133 lõpetatud; 1 blokeeritud
+OPERATOR ACTION: Anna puuduva otsuse volitus.
+NEXT EXACT ACTION: NONE
+VALIDATION: CURRENT_FAIL
+DETAILS: E-4515, E-4520

@@ -1,0 +1,9 @@
+projection_action saipen audit ingest
+projection_layer None
+projection_work T-2016
+linked_work_section ## BLOCKED
+next_action saipen crew
+owns_with_tickets False
+route_violation_vs_next None
+route_violation_bare the audit inbox routes 'saipen audit ingest' (layer None, audit/SAIHANDOFF_BZ_REA_AGENT_DRIFT_RECOVERY.md) but next_action is 'saipen crew', which is neither that action nor a live-ticket continuation
+board_tickets 272

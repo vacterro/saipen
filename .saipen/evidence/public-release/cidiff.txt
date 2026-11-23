@@ -1,0 +1,42 @@
+diff --git a/.gitattributes b/.gitattributes
+index 8e5fb4a3..cafb9f68 100644
+--- a/.gitattributes
++++ b/.gitattributes
+@@ -1,5 +1,7 @@
+ * text=auto
+ *.sh text eol=lf
++# Project memory contains digests of exact bytes; checkout must preserve them.
++.saipen/** -text
+ .saipen/intake/** -text
+ .saipen/archive/source/** -text
+ .saipen/archive/retired/** -text
+diff --git a/.github/workflows/release.yml b/.github/workflows/release.yml
+index 40950faf..2b3ebfe5 100644
+--- a/.github/workflows/release.yml
++++ b/.github/workflows/release.yml
+@@ -7,6 +7,7 @@ jobs:
+     runs-on: ubuntu-latest
+     permissions:
+       contents: write
++      actions: read
+     steps:
+       # fetch-depth: 0 fetches tags. The default shallow checkout has none,
+       # and both jobs read the tag list: the validator treats tags as half
+@@ -17,6 +18,17 @@ jobs:
+       - uses: actions/checkout@v4
+         with:
+           fetch-depth: 0
++      # A tag must not publish bytes that never passed the complete workflow.
++      - name: Require green validation on this exact commit
++        env:
++          GH_TOKEN: ${{ github.token }}
++        run: |
++          sha="$(git rev-parse HEAD)"
++          verdict="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/validate.yml/runs?head_sha=$sha&per_page=100" --jq '.workflow_runs | map(select(.status == "completed")) | sort_by(.run_number) | last | .conclusion // "missing"')"
++          if [ "$verdict" != "success" ]; then
++            echo "::error::commit $sha has no successful current validation run ($verdict)"
++            exit 1
++          fi
+       # A tag whose VERSION file disagrees with it must not become a release.
+       # v7.99.0 was published from a commit that still said 7.98.0, carrying
+       # v7.98.0's notes and a VERSION asset reading 7.98.0 -- the tag had been

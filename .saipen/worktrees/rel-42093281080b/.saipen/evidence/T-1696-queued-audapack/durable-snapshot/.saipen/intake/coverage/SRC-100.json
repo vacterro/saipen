@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-100:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-254 closed with verification evidence in LOG: verify -> PASS [target: T-254] conf: high -- inherits T-253: non-git inventory modes now apply the reserved archive-control discipline, a source-owned .audapack/manifest.json fails closed as FAILED_INVENTORY/TRACKED_RESERVED_ARCHIVE_NAME_CONFLICT instead of the opaque FAILED_VERIFY, a generated control is superseded leaving one member, and the writer refuses a duplicate reserved member. Evidence: ",
+      "text": "fix Wintage PACK FAILED_VERIFY duplicate .audapack/manifest.json archive member ownership",
+      "verification": "the Work this request created reached its own verification gate; see the T-254 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-254"
+    }
+  },
+  "schema_version": 1
+}

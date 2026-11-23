@@ -1,0 +1,26 @@
+{
+ "before (sequential)": {
+  "runs": [
+   1.005,
+   0.934,
+   1.06,
+   0.97,
+   0.894
+  ],
+  "min": 0.894,
+  "median": 0.97,
+  "fp": "git-delta-v1:150f35c4876f45ccbaeebc7e1864644f7790ec2d1a40916b529c3533a463eb81"
+ },
+ "after (8 workers)": {
+  "runs": [
+   0.793,
+   0.859,
+   0.821,
+   0.779,
+   0.768
+  ],
+  "min": 0.768,
+  "median": 0.793,
+  "fp": "git-delta-v1:150f35c4876f45ccbaeebc7e1864644f7790ec2d1a40916b529c3533a463eb81"
+ }
+}

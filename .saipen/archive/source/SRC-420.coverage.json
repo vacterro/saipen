@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-420:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2081 closed with verification evidence in LOG: PASS conf: high -- executed probe twice on the installed 8.1.0 modules. Fixed point: raw crew-converge rewritten by gate_route to CONFORMANCE_UNHEALTHY; automation BLOCKED/conformance-remediation/next_command null (repo-generation receipt 29 findings), re-measured after checkpoint as BLOCKED/null (installed receipt-6cc6b218, 1 finding FG-0046). Known-good control: post-claim SCOUT state gives auto",
+      "text": "MODE2 companion: audit no-work fixed point automation projection (status/continue/crew dry-run), reproduce crew loop defect before any code change",
+      "verification": "the Work this request created reached its own verification gate; see the T-2081 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2081"
+    }
+  },
+  "schema_version": 1
+}

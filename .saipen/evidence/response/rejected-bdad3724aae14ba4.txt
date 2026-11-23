@@ -1,0 +1,5 @@
+STATUS: BLOCKED
+RESULT: `cc all` jätkatud; eesmärk jääb aktiivseks.
+BLOCKER: 7 auditit blokeeritud; avaldamist takistavad 206 varem lavastatud faili. T-1738 vajab välist tõendit.
+VALIDATION: CURRENT_FAIL — 17 probleemi, 26 hoiatust.
+NEXT EXACT ACTION: NONE — lubatud käivitatavat tööd ei leitud.

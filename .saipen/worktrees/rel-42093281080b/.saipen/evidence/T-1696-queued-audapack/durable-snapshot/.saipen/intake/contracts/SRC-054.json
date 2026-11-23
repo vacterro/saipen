@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-054:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-188 production acceptance gate per V:\\_TEMP_\\fastprompter_drag\\AUDAPACK_20260918_1353.md"
+    }
+  },
+  "derived_at": "2026-09-19T19:26:08Z",
+  "derived_from": "SRC-054",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "a78760790dcded9286b228851b835da5f6b71154aaa41ea3b274c76c64563882"
+}

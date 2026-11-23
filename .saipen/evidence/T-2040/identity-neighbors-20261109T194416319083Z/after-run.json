@@ -1,0 +1,19 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "tools.test_bz_rea_acceptance_fixture",
+    "tools.test_bzcc_overnight_autonomy",
+    "tools.test_persistent_autonomy_recovery"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "started_at": "2026-11-09T20:05:23.901073+00:00",
+  "finished_at": "2026-11-09T20:05:24.715019+00:00",
+  "elapsed_s": 0.812,
+  "returncode": 0,
+  "environment": "test_hermetic_env.hermetic_env; PYTHONDONTWRITEBYTECODE=1; GIT_OPTIONAL_LOCKS=0",
+  "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\identity-neighbors-20261109T194416319083Z\\after.log"
+}

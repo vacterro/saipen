@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": [
+      {
+        "field": "style_contract",
+        "from": "ded-4ae736e4",
+        "to": "ded-069a4c52",
+        "surface": "state",
+        "reason": "voice marker must equal the installed STYLE.md boot marker"
+      },
+      {
+        "field": "goal_tickets",
+        "from": 12,
+        "to": 0,
+        "surface": "state",
+        "reason": "goal counter ahead of the section 1.5 rebuild but under the safety cap -- reconciled down to canonical evidence (CORE-001)"
+      },
+      {
+        "field": "last_event",
+        "from": 208,
+        "to": 207,
+        "surface": "state",
+        "_class": "unauthorized-lifecycle-write",
+        "reason": "UNAUTHORIZED_LIFECYCLE_WRITE: STATE.last_event sits above E-207, the newest event an operation record stands behind; this reconciliation's own journaled event becomes the marker"
+      }
+    ]
+  },
+  "adopted": [
+    "T-171",
+    "T-181",
+    "T-196",
+    "T-197"
+  ],
+  "lifecycle": [],
+  "repair_id": "6a49a81f0ac8390bef03b441742f6e82b033bb1371fa45960365b02ca564c0dc",
+  "targets": [
+    ".saipen/recovery/terminal-gap/reconcile-20261013111604616443.STATE.md",
+    ".saipen/recovery/terminal-gap/reconcile-20261013111604616443.BOARD.md",
+    ".saipen/recovery/terminal-gap/reconcile-20261013111604616443.LOG.md",
+    ".saipen/LOG.md",
+    ".saipen/STATE.md"
+  ],
+  "event": "E-240",
+  "agent": "workbuddy",
+  "strict_state_error": null,
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_UPGRADED",
+    "path": "V:/___VAC/__K/__CODE/_PY/_SMART_VAC_CLEANER/.saipen/MANIFEST.json",
+    "contract_version": 3,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "STALE",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": "an older or drifted declaration of a supported contract; rewritten deterministically from the current contract"
+  }
+}

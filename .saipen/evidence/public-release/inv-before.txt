@@ -1,0 +1,2 @@
+FAIL: ADDED fail site 95800e9ef7d07dee at tools/validate.py:7989 in <module> ('cross-doc drift [root-file-set] -- file(s) at the repository root that') -- a new check needs a CASE in tools/audit_checks.py, or a recorded reason it has none. Regenerate tools/validator_fail_sites.json in the same change
+FAIL: REMOVED fail site 9233fc0f93466bb8 last seen in <module> ('cross-doc drift [root-file-set] -- file(s) at the repository root that') -- a deleted check leaves its control testing nothing. Drop the CASE and regenerate tools/validator_fail_sites.json in the same change

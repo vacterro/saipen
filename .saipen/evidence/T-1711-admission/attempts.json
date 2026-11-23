@@ -1,0 +1,113 @@
+{
+  "operations": [
+    {
+      "ok": true,
+      "code": "ATTEMPT_OPENED",
+      "op_id": "attempt-open-2bebd56b1b0f446bb6c984f17d6a61cf",
+      "changed_files": [
+        ".saipen/LOG.md",
+        ".saipen/STATE.md"
+      ],
+      "recovery_required": false,
+      "attempt": "A-001",
+      "ticket": "T-7",
+      "supersedes": null,
+      "event_id": "E-4",
+      "runtime_provenance": {
+        "benchmark_evidence": "incomplete",
+        "executor_identity": "tester",
+        "missing_fields": [
+          "runtime_provider",
+          "runtime_model",
+          "runtime_effort"
+        ],
+        "provenance_source": "unavailable",
+        "provenance_status": "unavailable",
+        "reason_code": "host_context_missing",
+        "runtime_effort": null,
+        "runtime_model": null,
+        "runtime_provider": null,
+        "schema_version": 1,
+        "integrity_digest": "024e5633cd22251894eb3add0c61ededc4b2e7bae108bf6192d2f6ca391fb6cf"
+      }
+    },
+    {
+      "ok": true,
+      "code": "ATTEMPT_CLOSED",
+      "op_id": "attempt-close-3e337dee01764b6b81da6d7de8a32e33",
+      "changed_files": [
+        ".saipen/LOG.md",
+        ".saipen/STATE.md"
+      ],
+      "recovery_required": false,
+      "attempt": "A-001",
+      "ticket": "T-7",
+      "result": "failed",
+      "stop": "validation_failure",
+      "event_id": "E-6"
+    },
+    {
+      "ok": true,
+      "code": "ATTEMPT_OPENED",
+      "op_id": "attempt-open-40ca3a2b103f4c5da1dceaf385e46c45",
+      "changed_files": [
+        ".saipen/LOG.md",
+        ".saipen/STATE.md"
+      ],
+      "recovery_required": false,
+      "attempt": "A-002",
+      "ticket": "T-7",
+      "supersedes": "A-001",
+      "event_id": "E-7",
+      "runtime_provenance": {
+        "benchmark_evidence": "incomplete",
+        "executor_identity": "tester",
+        "missing_fields": [
+          "runtime_provider",
+          "runtime_model",
+          "runtime_effort"
+        ],
+        "provenance_source": "unavailable",
+        "provenance_status": "unavailable",
+        "reason_code": "host_context_missing",
+        "runtime_effort": null,
+        "runtime_model": null,
+        "runtime_provider": null,
+        "schema_version": 1,
+        "integrity_digest": "024e5633cd22251894eb3add0c61ededc4b2e7bae108bf6192d2f6ca391fb6cf"
+      }
+    },
+    {
+      "ok": true,
+      "code": "ATTEMPT_CLOSED",
+      "op_id": "attempt-close-73b23ccf901a4f10b9df443f0a4f80c7",
+      "changed_files": [
+        ".saipen/LOG.md",
+        ".saipen/STATE.md"
+      ],
+      "recovery_required": false,
+      "attempt": "A-002",
+      "ticket": "T-7",
+      "result": "yielded",
+      "stop": "deliberate_handoff",
+      "event_id": "E-9"
+    }
+  ],
+  "review": {
+    "ok": true,
+    "code": "TRANSITIONED",
+    "op_id": "transition-0bc38e2989cf46ada329635daf47d388",
+    "changed_files": [
+      ".saipen/LOG.md",
+      ".saipen/BOARD.md",
+      ".saipen/STATE.md"
+    ],
+    "recovery_required": false,
+    "phase": "REVIEW",
+    "next_action": "PHASE REVIEW T-7",
+    "event_id": "E-11",
+    "ticket": "T-7"
+  },
+  "zero_writes_on_refusal": null,
+  "scope": "FAIL and PASS belong to distinct real attempts on one current VERIFY Work"
+}

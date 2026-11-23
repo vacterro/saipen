@@ -1,0 +1,26 @@
+{
+  "op_id": "debt.snapshot-71a38ee006b7",
+  "operation": "debt.snapshot",
+  "created_at": "2026-10-05T06:34:46Z",
+  "agent": "buffy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "eb233c23a0db4f98",
+  "preconditions": {
+    ".saipen/recovery/conformance/debt/DEBT-000112.json": ""
+  },
+  "read_preconditions": {},
+  "verification_policy": "none",
+  "status": "COMMITTED",
+  "progress_index": 1,
+  "targets": [
+    {
+      "path": ".saipen/recovery/conformance/debt/DEBT-000112.json",
+      "role": "report",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "0a0bfc8dd8f9524c",
+      "applied": true
+    }
+  ]
+}

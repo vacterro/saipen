@@ -1,0 +1,8 @@
+test_an_unknown_flag_is_refused (test_recovery_reachability.OperatorBlockerCliTests.test_an_unknown_flag_is_refused) ... ok
+test_recover_resolves_the_gate_with_recorded_authority (test_recovery_reachability.OperatorBlockerCliTests.test_recover_resolves_the_gate_with_recorded_authority) ... ok
+test_the_closed_grammar_refuses_a_missing_decision (test_recovery_reachability.OperatorBlockerCliTests.test_the_closed_grammar_refuses_a_missing_decision) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.855s
+
+OK

@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "code": "RESPONSE_VALID",
+  "class": "VALID_BOUNDARY",
+  "layer": "NONE",
+  "layers": {
+    "admission": "NOT_CONSULTED",
+    "exec_response": "PASS",
+    "chat_style": "PASS"
+  },
+  "errors": [],
+  "detail_mode": "NONE",
+  "turn_decision": "ORDINARY",
+  "detail": null,
+  "diagnostic": null,
+  "delivery": "STATUS: DONE\nRESULT: Töö säilitatud\nBLOCKER: AUDIT_INBOX_INVALID -- unreadable audit layer\nNEXT EXACT ACTION: NONE\nVALIDATION: NOT_RUN",
+  "overflow": null,
+  "contract": null
+}

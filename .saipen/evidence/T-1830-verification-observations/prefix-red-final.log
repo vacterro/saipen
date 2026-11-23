@@ -1,0 +1,14 @@
+test_equal_counts_cannot_hide_a_duplicate_and_an_omission (test_t1830_verification_observations.ExactMembershipTests.test_equal_counts_cannot_hide_a_duplicate_and_an_omission) ... FAIL
+
+======================================================================
+FAIL: test_equal_counts_cannot_hide_a_duplicate_and_an_omission (test_t1830_verification_observations.ExactMembershipTests.test_equal_counts_cannot_hide_a_duplicate_and_an_omission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1830_verification_observations.py", line 30, in test_equal_counts_cannot_hide_a_duplicate_and_an_omission
+    self.assertIsNotNone(merged["partition_error"])
+AssertionError: unexpectedly None
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (failures=1)

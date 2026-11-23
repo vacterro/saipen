@@ -1,0 +1,28 @@
+utc: 2026-10-08T06:17:27Z  RED CONTROL: published under HEAD's .gitignore (pre-fix)
+published 10698 paths; clone at V:\_TEMP_\t1668f\clone
+BOARD detail_refs: 58 cited, 0 resolve, 58 do not
+  missing: .saipen/recovery/board-compaction/T-1307/T-1307-4885f97f4117d1549cd892b3.json
+  missing: .saipen/recovery/board-compaction/T-1308/T-1308-0094b92e3f12112aa09f01b2.json
+  missing: .saipen/recovery/board-compaction/T-1309/T-1309-a6239a182de2f5e025c78f49.json
+  missing: .saipen/recovery/board-compaction/T-1310/T-1310-3100c7e47185e6818ee69399.json
+  missing: .saipen/recovery/board-compaction/T-1311/T-1311-4e7f72fb44aecb68a63d8ec2.json
+  missing: .saipen/recovery/board-compaction/T-1312/T-1312-d177ae6ee670bb9814b94abf.json
+  missing: .saipen/recovery/board-compaction/T-1313/T-1313-f19d136a050017ea25d9e5b3.json
+  missing: .saipen/recovery/board-compaction/T-1314/T-1314-0f9d99a49679569e902a1eef.json
+  missing: .saipen/recovery/board-compaction/T-1316/T-1316-1546c8cc265ec44e3aeb7af0.json
+  missing: .saipen/recovery/board-compaction/T-1318/T-1318-dcd45766ed8cc2342676244b.json
+validate --gate core in the clone: exit 1, FAIL 59
+  FAIL: BOARD.md:2 ticket T-1668 detail_ref does not resolve: .saipen/recovery/board-compaction/T-1668/T-1668-bdb49292b10c34ff1ff4b366.json -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)
+  FAIL: BOARD.md:10 ticket T-1665 detail_ref does not resolve: .saipen/recovery/board-compaction/T-1665/T-1665-0aa85236043d3e65245c1479.json -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)
+  FAIL: BOARD.md:11 ticket T-1636 detail_ref does not resolve: .saipen/recovery/board-compaction/T-1636/T-1636-1fd78afa60d01dab64361500.json -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)
+  FAIL: BOARD.md:12 ticket T-1635 detail_ref does not resolve: .saipen/recovery/board-compaction/T-1635/T-1635-a9fb79edf7d34ba8b18bcb01.json -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)
+  FAIL: BOARD.md:19 ticket T-1494 detail_ref does not resolve: .saipen/recovery/board-compaction/T-1494/T-1494-81852cf1d70fc9395f76bfd5.json -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)
+  FAIL: BOARD.md:27 ticket T-1669 detail_ref does not resolve: .saipen/recovery/board-compaction/T-1669/T-1669-99f995b2b5c78bb80db8ca5a.json -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)
+  FAIL: BOARD.md:45 ticket T-1316 detail_ref does not resolve: .saipen/recovery/board-compaction/T-1316/T-1316-1546c8cc265ec44e3aeb7af0.json -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)
+  FAIL: BOARD.md:46 ticket T-1565 detail_ref does not resolve: .saipen/recovery/board-compaction/T-1565/T-1565-79c37929db94a8d6fa403439.json -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)
+  FAIL: BOARD.md:50 ticket T-1600 detail_ref does not resolve: .saipen/recovery/board-compaction/T-1600/T-1600-645d76680db98e8641397a27.json -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)
+  FAIL: BOARD.md:51 ticket T-1598 detail_ref does not resolve: .saipen/recovery/board-compaction/T-1598/T-1598-b5813a7f663e16143b2c4be0.json -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)
+  FAIL: BOARD.md:58 ticket T-1587 detail_ref does not resolve: .saipen/recovery/board-compaction/T-1587/T-1587-539606f4f66bdc9c14fe5b54.json -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)
+  FAIL: BOARD.md:60 ticket T-1589 detail_ref does not resolve: .saipen/recovery/board-compaction/T-1589/T-1589-5c5edcc78bcbea12bd155ea3.json -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)
+Validation FAILED: 59 problem(s), 7 warning(s)
+--- exit: 1 ---

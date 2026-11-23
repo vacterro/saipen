@@ -1,0 +1,30 @@
+======================================================================
+FAIL: test_dotted_first_reuses_the_mutable_cli_object (test_tool_module_identity.ToolModuleIdentityTests.test_dotted_first_reuses_the_mutable_cli_object)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-evidence-t1348-build-pair-np4f15zi\earlier\tools\test_tool_module_identity.py", line 58, in test_dotted_first_reuses_the_mutable_cli_object
+    self.probe("""
+  File "V:\_TEMP_\saipen-evidence-t1348-build-pair-np4f15zi\earlier\tools\test_tool_module_identity.py", line 24, in probe
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<string>", line 12, in <module>
+AssertionError: reload suppressed CLI source execution
+
+
+======================================================================
+FAIL: test_reload_reexecutes_owned_source_once (test_tool_module_identity.ToolModuleIdentityTests.test_reload_reexecutes_owned_source_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-evidence-t1348-build-pair-np4f15zi\earlier\tools\test_tool_module_identity.py", line 215, in test_reload_reexecutes_owned_source_once
+    self.probe('''
+  File "V:\_TEMP_\saipen-evidence-t1348-build-pair-np4f15zi\earlier\tools\test_tool_module_identity.py", line 24, in probe
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<string>", line 8, in <module>
+AssertionError: reload must execute source exactly once
+
+
+----------------------------------------------------------------------
+Ran 35 tests in 6.076s
+
+FAILED (failures=2)

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import datetime
-import fnmatch
 import json
 import re
 import sys
@@ -97,12 +96,15 @@ def record_problem(root: Path, record: dict, *, verification_identity=None) -> s
         if issue := manifest_problem(selection, runs[0]):
             return issue
     from .verification_cache import compatible, incompatibility
+    from .verification_cache import incompatibility_detail
 
     if verification_identity is not None:
         if record.get("verification_identity") != verification_identity:
             return "focused check used a different verification configuration or environment"
     elif not compatible(root, record.get("verification_identity")):
         reason = incompatibility(record.get("verification_identity"))
+        if reason is None:
+            reason = incompatibility_detail(root, record.get("verification_identity"))
         return "focused check has missing or incompatible verification environment identity" + (
             f" ({reason})" if reason else ""
         )
@@ -146,6 +148,119 @@ def ship_gate(root: Path, ticket: str, events: list[dict]) -> tuple[bool, str | 
             return True, f"focused record unreadable: {exc}"
         return True, record_problem(root, record)
     return False, None
+
+
+#: T-2122 (SRC-440 wave B): the CLOSED vocabulary of ``red_owners``
+#: dispositions. An attribution outside this set must never become
+#: permission to publish.
+_OWNER_DISPOSITIONS = frozenset({"undecided", "resolved"})
+
+_OWNER_TICKET_RE = re.compile(r"^T-\d+$")
+
+
+def _red_owners_attribution_problem(
+    baseline: dict, record: dict, root: Path | str
+) -> str | None:
+    """Absorbed reds authorize publication only with an owner disposition.
+
+    Fail-closed everywhere (T-2118 + the T-2122 regression): an OPTIONAL
+    ``red_owners`` map may carry ``{name: {"ticket": "T-###", "disposition":
+    ...}}``. A baseline WITHOUT the field stays permissive (the documented
+    pre-attribution back-compat). With the field present:
+
+    - a non-dict ``red_owners`` value is malformed and REFUSES (it is never
+      silently read as "absent" -- the pre-T-2122 fail-open hole);
+    - every entry must be a dict with a well-formed ``ticket`` id;
+    - ``disposition`` is mandatory, a string, and inside the CLOSED set
+      ``{undecided, resolved}`` -- unknown or empty values refuse instead of
+      passing as resolved (the measured WHATEVER/""-admits hole);
+    - ``undecided`` refuses for any red the record carries (INV iv-2);
+    - ``resolved`` additionally requires the owning ticket to be WITNESSED in
+      the project journal (``[T-###]`` in ``.saipen/LOG.md``) so a fabricated
+      resolution cannot authorize the bytes; a missing journal fails closed.
+
+    The adversarial corpora live in ``tools/test_t2118_baseline_admission.py``
+    and ``tools/test_t2122_red_owner_fail_closed.py``.
+    """
+    if "red_owners" not in baseline:
+        return None
+    owners = baseline.get("red_owners")
+    if not isinstance(owners, dict):
+        return "baseline red_owners is malformed (must be an object of owner entries)"
+    carried = {name for name in (record.get("red") or [])}
+    # T-2132 (Campaign VII P0-A): ``resolved`` needs a TERMINAL owner, proven
+    # from BOTH canonical projections -- a closing operation event for the
+    # owner ticket in ONE consistent history snapshot, and the owner row
+    # projected into ``## DONE`` on the BOARD. A journal mention only proves
+    # that something happened, not that the right thing happened: the
+    # substring witness admitted a live DOING owner with a single RUN
+    # checkpoint mention (reproduced live on 713f49c76). Both surfaces are
+    # parsed at most ONCE per gate evaluation -- never re-read per owner --
+    # so many resolved owners cost one snapshot, not one LOG read each.
+    terminal_events: set[str] | None = None
+    done_on_board: set[str] | None = None
+
+    def _owner_terminal_projections() -> tuple[set[str], set[str]]:
+        nonlocal terminal_events, done_on_board
+        if terminal_events is None:
+            from . import codec
+            from .board import parse_board
+            from .board_scrub import CLOSING_OP_CLASSES
+            from .log import read_history_snapshot
+
+            events = read_history_snapshot(root, lean=True).events
+            terminal_events = {
+                str(event.get("ticket"))
+                for event in events
+                if str(event.get("op_id") or "").startswith(CLOSING_OP_CLASSES)
+            }
+            board_path = Path(root) / ".saipen" / "BOARD.md"
+            raw = board_path.read_bytes()
+            document = codec.read_document(board_path, raw=raw)
+            board = parse_board(document.text_norm)
+            done_on_board = {
+                str(tid)
+                for tid, row in (board.get("tickets") or {}).items()
+                if row.get("section") == "## DONE"
+            }
+        return terminal_events, done_on_board
+
+    undecided: list[str] = []
+    for name, owner in sorted(owners.items()):
+        if not isinstance(name, str) or not isinstance(owner, dict):
+            return f"baseline red_owners entry for {name!r} is malformed"
+        ticket = owner.get("ticket")
+        if not isinstance(ticket, str) or not _OWNER_TICKET_RE.match(ticket):
+            return f"baseline red_owners entry for {name!r} is malformed (ticket)"
+        disposition = owner.get("disposition")
+        if not isinstance(disposition, str) or disposition not in _OWNER_DISPOSITIONS:
+            return (
+                f"baseline red_owners disposition for {name!r} is not in the "
+                f"closed vocabulary {sorted(_OWNER_DISPOSITIONS)}; unknown or "
+                "empty dispositions never authorize publication"
+            )
+        if disposition == "undecided":
+            if name in carried:
+                undecided.append(name)
+            continue
+        closing_events, done_rows = _owner_terminal_projections()
+        if ticket not in closing_events or ticket not in done_rows:
+            return (
+                f"baseline red_owners entry for {name!r} claims a resolved owner "
+                f"({ticket}) that is not terminal in the canonical projections: "
+                f"journal closing-op event={'present' if ticket in closing_events else 'MISSING'}, "
+                f"BOARD ## DONE row={'present' if ticket in done_rows else 'MISSING'}; "
+                "an unresolved owner never authorizes publication (a journal "
+                "mention is not a resolution proof -- T-2132)"
+            )
+    if undecided:
+        return (
+            "full core-unit run carries inherited red(s) with an undecided "
+            "owner: " + "; ".join(undecided)
+            + "; resolve the owning WIP decision or record its accepted "
+            "disposition in the baseline before publishing (T-2118, SRC-437 P0)"
+        )
+    return None
 
 
 def publication_gate(root: Path | str) -> str | None:
@@ -193,6 +308,9 @@ def publication_gate(root: Path | str) -> str | None:
         verdict = core_unit.judge(record, baseline["red"])
         if verdict["verdict"] != "PASS":
             return "full core-unit run is not admissible: " + "; ".join(verdict["problems"])
+        owner_problem = _red_owners_attribution_problem(baseline, record, root)
+        if owner_problem:
+            return owner_problem
         return None
     return (
         "publication requires one full core-unit run of the final batch; "
@@ -233,10 +351,12 @@ def run_focused(root: Path, patterns: list[str], *, timeout: int = MAX_SECONDS,
         raise ValueError(
             f"focused timeout must be 1..{MAX_SECONDS} seconds; use full evidence for a broad run"
         )
-    filenames = [p.name for p in (root / "tools").iterdir() if p.is_file()]
-    for pattern in patterns:
-        if selection is None and not any(fnmatch.fnmatchcase(name, pattern) for name in filenames):
-            raise ValueError(f"pattern {pattern!r} selects no test files")
+    if selection is None:
+        from .sandbox_scope import select_modules
+
+        _, unmatched = select_modules(root, patterns)
+        if unmatched:
+            raise ValueError(f"pattern {unmatched[0]!r} selects no test files")
     temporary = core_unit.new_sandbox_root(root)
     runs = []
     timings = {"execution_wall_s": 0.0,
@@ -286,6 +406,33 @@ def run_focused(root: Path, patterns: list[str], *, timeout: int = MAX_SECONDS,
         mark = time.monotonic()
         reclaimed = core_unit.reclaim(temporary)
         timings["cleanup_wall_s"] = round(time.monotonic() - mark, 6)
+    infrastructure = None
+    if not runs:
+        # T-2163 (Campaign XIII, Wave E): with no run at all the failure is
+        # an infrastructure outcome -- the budget gates only execution, so
+        # preparation alone consumed it -- and the record must name WHICH
+        # stage ate the budget, not merely that no pattern produced a
+        # verdict: the measured 1029 s FAIL said "does not cover its
+        # selected patterns" and named nothing, twice, at identical cost.
+        infrastructure = {
+            "stage": "preparation",
+            "reason": "PREPARATION_EXHAUSTED_EXECUTION_BUDGET",
+            "budget_s": timeout,
+            "identity_wall_s": round(identity_wall_s, 3),
+            "copy_wall_s": timings["copy_wall_s"],
+            "hash_wall_s": timings["hash_wall_s"],
+            "cleanup_wall_s": timings.get("cleanup_wall_s"),
+            "detail": (
+                "no test could start: preparation consumed "
+                f"{identity_wall_s:.1f} s identity capture plus "
+                f"{timings['copy_wall_s']:.1f} s copy (subject "
+                f"{copy_metrics['subject_copy_s']:.1f} s, canonical "
+                f"{copy_metrics['canonical_copy_s']:.1f} s) plus "
+                f"{timings['hash_wall_s']:.1f} s tree hash against the "
+                f"{timeout} s focused budget; zero executed tests is a "
+                "preparation outcome, never a subject verdict"
+            ),
+        }
     record = {
         "schema": 1, "family": "focused-unit", "fingerprint": fingerprint, "verdict": "PASS",
         "patterns": patterns, "runs": runs, "ran": sum(run.get("ran") or 0 for run in runs),
@@ -298,7 +445,14 @@ def run_focused(root: Path, patterns: list[str], *, timeout: int = MAX_SECONDS,
     }
     if selection is not None:
         record.update(verification_tier="IMPACT", impact_selection=selection)
+    if infrastructure is not None:
+        record["infrastructure"] = infrastructure
     problem = record_problem(root, record)
+    if problem and infrastructure is not None:
+        # T-2163 (Campaign XIII, Wave E): the coverage complaint alone is the
+        # ambiguously-attributed failure the audit flagged; the measured stage
+        # split is what the next decision actually needs.
+        problem = f"{problem} (infrastructure: {infrastructure['detail']})"
     verdict = "FAIL" if problem else "PASS"
     return {**record, "verdict": verdict, "status": verdict, "problem": problem}
 
@@ -319,13 +473,28 @@ def evidence(root: Path, args) -> int:
 
             if issue := problem(root, selection):
                 raise ValueError(issue)
+        # Night-8 preflight: refuse a request whose budget is already proven
+        # dead on arrival (or whose selection matches no test at all) BEFORE
+        # the sandbox copy is paid for. Every refusal cites measured
+        # evidence of this exact scope; no evidence means proceed.
+        from . import preflight
+
+        for problem in (preflight.selection_problem(root, patterns),
+                        preflight.budget_problem(root, patterns, args.timeout)):
+            if problem is not None:
+                return core_unit._emit({"ok": False, **problem})
+        fingerprint = core_unit.tree_fingerprint(root)
+        # Night-9: measured copy history is an ADVISORY carried on the result,
+        # never an admission gate. It is bound to this selection and this tree.
+        advisory = preflight.timing_advisory(
+            root, patterns, args.timeout, fingerprint=fingerprint
+        )
         state = parse_state((root / ".saipen/STATE.md").read_text(encoding="utf-8"))
         agent = args.agent or state.get("agent") or "unknown"
         board = (root / ".saipen/BOARD.md").read_text(encoding="utf-8")
         refusal = operations._active_claim_refusal(state, board, agent)
         if refusal is not None:
             return core_unit._emit(refusal.to_dict())
-        fingerprint = core_unit.tree_fingerprint(root)
         # T-1889: the reuse decision is part of the identity. A record made from
         # a NARROWED sandbox must never be presented for a manifest that now
         # declares another tree -- that pass describes a copy this run would not
@@ -345,6 +514,36 @@ def evidence(root: Path, args) -> int:
                         and record.get("verification_identity") == expected):
                     if record_problem(root, record, verification_identity=expected) is None:
                         written = (path, record)
+                    elif record.get("ran") == 0 and not record.get("runs"):
+                        # T-2163 (Campaign XIII, Wave E): the newest record of
+                        # THIS exact tree, identity and selection paid for its
+                        # preparation and executed zero tests. Re-running the
+                        # identical request re-pays the identical cost (the
+                        # measured session burned 2 x 1029 s on this shape), so
+                        # an automatic repeat is refused until a condition
+                        # changes; --fresh is the deliberate override.
+                        prior = (record.get("infrastructure") or {}).get("detail") or (
+                            "a prior record of this exact tree, identity and "
+                            "selection executed zero tests"
+                        )
+                        return core_unit._emit({
+                            "ok": False,
+                            "code": "IDENTICAL_INFRASTRUCTURE_FAILURE",
+                            "detail": (
+                                "the previous run of this exact selection, tree "
+                                "and verification identity paid for its "
+                                "preparation and executed zero tests; repeating "
+                                "it with conditions unchanged re-pays the same "
+                                f"cost -- {prior}; change the condition "
+                                "(declare the sandbox scope in "
+                                "tools/sandbox_scope.json, raise the focused "
+                                "budget up to the cap, or quiet the host) or "
+                                "request --fresh"
+                            ),
+                            "prior": path.relative_to(root).as_posix(),
+                            "prior_duration_s": record.get("duration_s"),
+                            "prior_timings_s": record.get("timings_s"),
+                        })
                     break
         identity = {"family": "focused-unit", "fingerprint": fingerprint,
                     "verification_identity": expected}
@@ -383,6 +582,7 @@ def evidence(root: Path, args) -> int:
                                 "reused": reused, "shared": joined,
                                 "request_wall_s": round(time.monotonic() - request_started, 6),
                                 "problem": record.get("problem"),
+                                "advisory": advisory,
                                 "checkpoint": result.code})
     except (OSError, ValueError, TimeoutError) as exc:
         return core_unit._emit({"ok": False, "detail": str(exc)})

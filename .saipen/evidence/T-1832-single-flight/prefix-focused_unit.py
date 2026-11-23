@@ -1,0 +1,249 @@
+"""Bounded ticket checks; complete core-unit evidence remains a publication gate."""
+
+from __future__ import annotations
+
+import datetime
+import fnmatch
+import json
+import re
+import sys
+import time
+from pathlib import Path
+
+from . import core_unit
+
+POLICY_REL = "tools/verification_policy.json"
+POLICY = {"schema": 1, "ticket": "focused", "publication": "full"}
+RECORD_DIR_REL = ".saipen/evidence/focused-unit"
+MARKER = "FOCUSED-UNIT-EVIDENCE"
+MAX_SECONDS = 300
+_CITATION = re.compile(
+    rf"^{MARKER} (?:PASS|FAIL)\b.*?record:(\S+) sha256:([0-9a-f]{{64}})\b"
+)
+
+
+def policy(root: Path) -> tuple[bool, str | None]:
+    """Opt in explicitly. Missing preserves legacy gates; invalid fails closed."""
+    path = root / POLICY_REL
+    try:
+        raw = path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return False, None
+    except OSError as exc:
+        return False, f"verification policy unreadable: {exc}"
+    try:
+        data = json.loads(raw)
+    except ValueError as exc:
+        return False, f"verification policy invalid: {exc}"
+    if data != POLICY or type(data.get("schema")) is not int:
+        return False, f"verification policy must be exactly {POLICY}"
+    return True, None
+
+
+def _patterns(patterns) -> list[str]:
+    if not isinstance(patterns, list) or not patterns:
+        raise ValueError("at least one --pattern test_name.py is required")
+    for pattern in patterns:
+        if (not isinstance(pattern, str) or not pattern.startswith("test_")
+                or not pattern.endswith(".py") or "/" in pattern or "\\" in pattern):
+            raise ValueError("patterns must select test_*.py filenames inside tools/")
+    return sorted(set(patterns))
+
+
+def record_problem(root: Path, record: dict) -> str | None:
+    if not isinstance(record, dict) or record.get("schema") != 1 \
+            or record.get("family") != "focused-unit":
+        return "not a focused-unit record"
+    if record.get("verdict") != "PASS":
+        return "focused record is not passing"
+    try:
+        patterns = _patterns(record.get("patterns"))
+    except ValueError as exc:
+        return str(exc)
+    runs = record.get("runs")
+    if not isinstance(runs, list) or not runs or len(runs) != len(patterns):
+        return "focused record does not cover its selected patterns"
+    if any(not isinstance(run, dict) for run in runs):
+        return "focused record has an invalid run"
+    if [run.get("pattern") for run in runs] != patterns:
+        return "focused record does not cover its selected patterns"
+    for run in runs:
+        if (run.get("status") != "PASS" or run.get("exit_code") != 0
+                or type(run.get("ran")) is not int or run["ran"] < 1):
+            return "focused check failed, timed out, or collected zero tests"
+        verdict = core_unit.judge(run, [])
+        if verdict["verdict"] != "PASS":
+            return "; ".join(verdict["problems"])
+    if record.get("ran") != sum(run["ran"] for run in runs):
+        return "focused record test totals disagree"
+    if record.get("fingerprint") != core_unit.tree_fingerprint(root):
+        return "focused check tested a different tree"
+    return None
+
+
+def ship_gate(root: Path, ticket: str, events: list[dict]) -> tuple[bool, str | None]:
+    """Return (citation present, problem). Full evidence remains a valid fallback."""
+    cycle = core_unit._current_cycle(ticket, events) or []
+    for event in reversed(cycle):
+        if event.get("ticket") != ticket or event.get("taxonomy") != "RUN":
+            continue
+        match = _CITATION.match(str(event.get("text") or "").strip())
+        if match is None:
+            continue
+        relative, digest = match.groups()
+        path = root / relative
+        try:
+            if not path.resolve().is_relative_to((root / RECORD_DIR_REL).resolve()):
+                return True, "focused record is outside its evidence directory"
+            if core_unit._sha256_file(path) != digest:
+                return True, "focused record does not match its sha256"
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            return True, f"focused record unreadable: {exc}"
+        return True, record_problem(root, record)
+    return False, None
+
+
+def publication_gate(root: Path | str) -> str | None:
+    """Batch boundary: a focused result NEVER proves the complete family."""
+    root = Path(root)
+    if not core_unit.declared(root):
+        return None
+    enabled, error = policy(root)
+    if error or not enabled:
+        return error
+    fingerprint = core_unit.tree_fingerprint(root)
+    baseline, error = core_unit.load_baseline(root)
+    if error:
+        return error
+    # Newest exact-tree record wins, including red. An earlier green must not
+    # hide a subsequent failure of the very same subject.
+    paths = (root / core_unit.RECORD_DIR_REL).glob(f"{fingerprint[:16]}-*.json")
+    for path in sorted(paths, reverse=True):
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            return f"full core-unit record unreadable: {exc}"
+        if not isinstance(record, dict):
+            return "invalid full core-unit record"
+        if record.get("fingerprint") != fingerprint:
+            continue
+        if record.get("schema") != core_unit.SCHEMA_VERSION \
+                or record.get("family") != core_unit.FAMILY_NAME:
+            return "publication requires a complete core-unit family record"
+        if record.get("baseline_sha256") != core_unit.baseline_digest(root):
+            return "full core-unit run used a different baseline"
+        if record.get("status") not in {"PASS", "FAIL"} \
+                or record.get("exit_code") not in {0, 1}:
+            return "full core-unit family did not complete"
+        verdict = core_unit.judge(record, baseline["red"])
+        if verdict["verdict"] != "PASS":
+            return "full core-unit run is not admissible: " + "; ".join(verdict["problems"])
+        return None
+    return (
+        "publication requires one full core-unit run of the final batch; "
+        "run python tools/core_unit.py evidence <T-###> after the last content edit"
+    )
+
+
+def run_focused(root: Path, patterns: list[str], *, timeout: int = MAX_SECONDS) -> dict:
+    """Run explicit discovery patterns in one immutable, isolated snapshot."""
+    from .test_runner import TestFamily, _ignore_copy
+
+    patterns = _patterns(patterns)
+    if not 1 <= timeout <= MAX_SECONDS:
+        raise ValueError(
+            f"focused timeout must be 1..{MAX_SECONDS} seconds; use full evidence for a broad run"
+        )
+    filenames = [p.name for p in (root / "tools").iterdir() if p.is_file()]
+    for pattern in patterns:
+        if not any(fnmatch.fnmatchcase(name, pattern) for name in filenames):
+            raise ValueError(f"pattern {pattern!r} selects no test files")
+    started = time.monotonic()
+    temporary = core_unit.new_sandbox_root(root)
+    runs = []
+    timings = {"execution_wall_s": 0.0}
+    try:
+        sandbox = temporary / "project"
+        mark = time.monotonic()
+        copy_metrics = core_unit.copy_tree_consistent(root, sandbox, _ignore_copy)
+        timings["copy_wall_s"] = round(time.monotonic() - mark, 6)
+        mark = time.monotonic()
+        fingerprint = core_unit.tree_fingerprint(sandbox)
+        timings["hash_wall_s"] = round(time.monotonic() - mark, 6)
+        for index, pattern in enumerate(patterns):
+            remaining = int(timeout - (time.monotonic() - started))
+            if remaining < 1:
+                break
+            command = (sys.executable, "-B", "-m", "unittest", "discover",
+                       "-s", "tools", "-p", pattern, "-v")
+            spool = temporary / f"spool-{index}"
+            spool.mkdir()
+            mark = time.monotonic()
+            run = core_unit._run_whole(
+                sandbox, TestFamily("focused-unit", command, remaining), spool
+            )
+            timings["execution_wall_s"] += time.monotonic() - mark
+            runs.append({"pattern": pattern, "command": ["python", *command[1:]], **run})
+            if run["status"] != "PASS" or core_unit.judge(run, [])["verdict"] != "PASS":
+                break
+    finally:
+        mark = time.monotonic()
+        reclaimed = core_unit.reclaim(temporary)
+        timings["cleanup_wall_s"] = round(time.monotonic() - mark, 6)
+    record = {
+        "schema": 1, "family": "focused-unit", "fingerprint": fingerprint, "verdict": "PASS",
+        "patterns": patterns, "runs": runs, "ran": sum(run.get("ran") or 0 for run in runs),
+        "duration_s": round(time.monotonic() - started, 3),
+        "timings_s": {name: round(seconds, 6) for name, seconds in timings.items()},
+        "copy_metrics": copy_metrics,
+        "sandboxes_leaked": [] if reclaimed else [str(temporary)],
+    }
+    problem = record_problem(root, record)
+    verdict = "FAIL" if problem else "PASS"
+    return {**record, "verdict": verdict, "status": verdict, "problem": problem}
+
+
+def evidence(root: Path, args) -> int:
+    from . import operations
+    from .inflight import holding
+    from .state import parse_state
+
+    try:
+        patterns = _patterns(args.pattern)
+        fingerprint = core_unit.tree_fingerprint(root)
+        written = None
+        if not args.fresh:
+            paths = (root / RECORD_DIR_REL).glob(f"{fingerprint[:16]}-*.json")
+            for path in sorted(paths, reverse=True):
+                record = json.loads(path.read_text(encoding="utf-8"))
+                if not isinstance(record, dict):
+                    raise ValueError(f"invalid focused record: {path}")
+                if record.get("patterns") == patterns:
+                    if record_problem(root, record) is None:
+                        written = (path, record)
+                    break
+        reused = written is not None
+        if written is None:
+            with holding(root, args.ticket, "focused-unit evidence"):
+                record = run_focused(root, patterns, timeout=args.timeout)
+                stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+                path = root / RECORD_DIR_REL / f"{record['fingerprint'][:16]}-{stamp}.json"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+                written = (path, record)
+        path, record = written
+        state = parse_state((root / ".saipen/STATE.md").read_text(encoding="utf-8"))
+        relative = path.relative_to(root).as_posix()
+        confidence = "high" if record["verdict"] == "PASS" else "low"
+        line = (f"{MARKER} {record['verdict']} conf: {confidence} ran:{record['ran']} "
+                f"record:{relative} sha256:{core_unit._sha256_file(path)}")
+        result = operations.checkpoint(root, args.agent or state.get("agent") or "unknown",
+                                       "RUN", args.ticket, line)
+        return core_unit._emit({"ok": result.ok and record["verdict"] == "PASS",
+                                "verdict": record["verdict"], "ran": record["ran"],
+                                "duration_s": record["duration_s"], "record": relative,
+                                "reused": reused, "problem": record.get("problem"),
+                                "checkpoint": result.code})
+    except (OSError, ValueError) as exc:
+        return core_unit._emit({"ok": False, "detail": str(exc)})

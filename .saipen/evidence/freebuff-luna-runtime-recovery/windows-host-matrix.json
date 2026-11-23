@@ -1,0 +1,61 @@
+{
+  "runtime": "C:\\Users\\vac34\\AppData\\Local\\Programs\\@codebufffreebuff-desktop\\resources\\bun\\bun.exe",
+  "bundle": {
+    "path": "C:/Users/vac34/AppData/Local/Programs/@codebufffreebuff-desktop/resources/orchestrator/orchestrator.js",
+    "sha256": "0a4cc44933681c9bcb87804c435d96bff331f72dfae0d7c2db4d539abf64b66d"
+  },
+  "exactSDKSections": {
+    "windowsBashSha256": "e2b462cd800d4b20c7e68ed637cdfe9967151dea76b1b7f4386c42cb34e299e6",
+    "terminalSha256": "929e6cb0f688cbbacb3299e59df1fd9959cb4b320c4ecb3c3cac0bebb561611a"
+  },
+  "scope": "Windows harness of installed SDK; this is not a running-host or model receipt",
+  "cases": {
+    "A": {
+      "ok": true,
+      "result": [
+        {
+          "type": "json",
+          "value": {
+            "command": "pwd",
+            "stdout": "/tmp/saipen-freebuff-luna-cold-s5e38tid\n",
+            "exitCode": 0
+          }
+        }
+      ]
+    },
+    "B_discovery": {
+      "configuredPathExists": false,
+      "resolvedBash": "C:\\Program Files\\Git\\bin\\bash.exe"
+    },
+    "C": {
+      "ok": false,
+      "error": "Bash is required but was not found on this Windows system.\n\nInstall Git for Windows, which includes it: https://git-scm.com/download/win\nOr, from a terminal: winget install --id Git.Git --exact --source winget\n\nIf you already have Git installed somewhere unusual and we did not find it, point\nus at it directly by setting CODEBUFF_GIT_BASH_PATH to its bash.exe. Example:\n   set CODEBUFF_GIT_BASH_PATH=C:\\path\\to\\Git\\bin\\bash.exe"
+    },
+    "B_native": {
+      "status": 0,
+      "code": "HOST_BOOTSTRAP_BOUND",
+      "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "launcher": {
+        "ok": true,
+        "discovered": true,
+        "executable": true,
+        "dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin",
+        "posix": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen",
+        "windows": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "transport": "direct_launcher",
+        "why": ""
+      },
+      "command": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "host",
+        "bootstrap",
+        "--host",
+        "freebuff",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+        "--json"
+      ]
+    }
+  },
+  "pass": true
+}

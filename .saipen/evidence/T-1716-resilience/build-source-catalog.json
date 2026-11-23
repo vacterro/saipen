@@ -1,0 +1,19 @@
+{
+  "label": "build-source-catalog",
+  "phase": "BUILD",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    ".saipen/evidence/T-1716-resilience/catalog.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 1.109,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "{\"files\": 43, \"original_events\": 8, \"source_fingerprint\": \"2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa\"}\r\n",
+  "stderr": "",
+  "stdout_sha256": "61fa2ebad612a882040c88c3825ae9eea1fe8d664fc22b5d794056704e7e9627",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

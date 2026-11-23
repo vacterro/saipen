@@ -1,0 +1,553 @@
+........................                                  [100%]
+================================== FAILURES ===================================
+_ ReviewInputBoundaryTests.test_invalid_state_with_explicit_actor_is_structured (state=['invalid']) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_invalid_state_with_explicit_actor_is_structured>
+
+    def test_invalid_state_with_explicit_actor_is_structured(self):
+        for state in (["invalid"], "invalid", 1):
+            with self.subTest(state=state):
+>               result = board.classify_idle_work({}, state=state, current_agent="reviewer")
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_review_input_boundaries.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+tickets = {}, audit_inbox = None, future_gate = None, state = ['invalid']
+now = None, persistent_goals = None, source_evidence = None
+continuous_maintenance_authorized = False, current_agent = 'reviewer'
+source_generation = None, discovery_dispatch = None, publication_evidence = None
+
+    def classify_idle_work(
+        tickets: dict,
+        audit_inbox: dict | None = None,
+        future_gate: dict | None = None,
+        state: dict | None = None,
+        now: datetime.datetime | None = None,
+        persistent_goals: list | dict | None = None,
+        source_evidence: dict | None = None,
+        continuous_maintenance_authorized: bool = False,
+        current_agent: str | None = None,
+        source_generation: str | None = None,
+        discovery_dispatch: dict | None = None,
+        publication_evidence=None,
+    ) -> dict:
+        """Attach complete discovery diagnostics to every pure BOARD idle verdict."""
+        from .persistent_goal import goal_inventory
+        from .work_exhaustion import (
+            INCOMPLETE_DISCOVERY, _ticket_inventory_valid, certificate_diagnostics,
+            certify_work_exhaustion, verified_quiescence,
+        )
+    
+        # Typed envelope gate: the pure classifier must never consume a malformed
+        # owner envelope; fail closed to an INCOMPLETE verdict, never an
+        # empty-queue quiescence derived from invalid input.
+        problem = None
+        if not _ticket_inventory_valid(tickets):
+            problem = "tickets: inventory must be an object of valid ticket objects"
+        elif state is not None and not isinstance(state, dict):
+            problem = "state: envelope must be an object"
+        elif audit_inbox is not None and not isinstance(audit_inbox, dict):
+            problem = "audit_inbox: envelope must be an object"
+        elif future_gate is not None and not isinstance(future_gate, dict):
+            problem = "future_gate: envelope must be an object"
+        elif source_evidence is not None and not isinstance(source_evidence, dict):
+            problem = "source_evidence: envelope must be an object"
+    
+        goals = goal_inventory(persistent_goals)
+>       actor_state = {**(state or {}), "agent": current_agent} if current_agent is not None else state
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'list' object is not a mapping
+
+tools\saipen_engine\board.py:2287: TypeError
+_ ReviewInputBoundaryTests.test_invalid_state_with_explicit_actor_is_structured (state='invalid') _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_invalid_state_with_explicit_actor_is_structured>
+
+    def test_invalid_state_with_explicit_actor_is_structured(self):
+        for state in (["invalid"], "invalid", 1):
+            with self.subTest(state=state):
+>               result = board.classify_idle_work({}, state=state, current_agent="reviewer")
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_review_input_boundaries.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+tickets = {}, audit_inbox = None, future_gate = None, state = 'invalid'
+now = None, persistent_goals = None, source_evidence = None
+continuous_maintenance_authorized = False, current_agent = 'reviewer'
+source_generation = None, discovery_dispatch = None, publication_evidence = None
+
+    def classify_idle_work(
+        tickets: dict,
+        audit_inbox: dict | None = None,
+        future_gate: dict | None = None,
+        state: dict | None = None,
+        now: datetime.datetime | None = None,
+        persistent_goals: list | dict | None = None,
+        source_evidence: dict | None = None,
+        continuous_maintenance_authorized: bool = False,
+        current_agent: str | None = None,
+        source_generation: str | None = None,
+        discovery_dispatch: dict | None = None,
+        publication_evidence=None,
+    ) -> dict:
+        """Attach complete discovery diagnostics to every pure BOARD idle verdict."""
+        from .persistent_goal import goal_inventory
+        from .work_exhaustion import (
+            INCOMPLETE_DISCOVERY, _ticket_inventory_valid, certificate_diagnostics,
+            certify_work_exhaustion, verified_quiescence,
+        )
+    
+        # Typed envelope gate: the pure classifier must never consume a malformed
+        # owner envelope; fail closed to an INCOMPLETE verdict, never an
+        # empty-queue quiescence derived from invalid input.
+        problem = None
+        if not _ticket_inventory_valid(tickets):
+            problem = "tickets: inventory must be an object of valid ticket objects"
+        elif state is not None and not isinstance(state, dict):
+            problem = "state: envelope must be an object"
+        elif audit_inbox is not None and not isinstance(audit_inbox, dict):
+            problem = "audit_inbox: envelope must be an object"
+        elif future_gate is not None and not isinstance(future_gate, dict):
+            problem = "future_gate: envelope must be an object"
+        elif source_evidence is not None and not isinstance(source_evidence, dict):
+            problem = "source_evidence: envelope must be an object"
+    
+        goals = goal_inventory(persistent_goals)
+>       actor_state = {**(state or {}), "agent": current_agent} if current_agent is not None else state
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'str' object is not a mapping
+
+tools\saipen_engine\board.py:2287: TypeError
+_ ReviewInputBoundaryTests.test_invalid_state_with_explicit_actor_is_structured (state=1) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_invalid_state_with_explicit_actor_is_structured>
+
+    def test_invalid_state_with_explicit_actor_is_structured(self):
+        for state in (["invalid"], "invalid", 1):
+            with self.subTest(state=state):
+>               result = board.classify_idle_work({}, state=state, current_agent="reviewer")
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_review_input_boundaries.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+tickets = {}, audit_inbox = None, future_gate = None, state = 1, now = None
+persistent_goals = None, source_evidence = None
+continuous_maintenance_authorized = False, current_agent = 'reviewer'
+source_generation = None, discovery_dispatch = None, publication_evidence = None
+
+    def classify_idle_work(
+        tickets: dict,
+        audit_inbox: dict | None = None,
+        future_gate: dict | None = None,
+        state: dict | None = None,
+        now: datetime.datetime | None = None,
+        persistent_goals: list | dict | None = None,
+        source_evidence: dict | None = None,
+        continuous_maintenance_authorized: bool = False,
+        current_agent: str | None = None,
+        source_generation: str | None = None,
+        discovery_dispatch: dict | None = None,
+        publication_evidence=None,
+    ) -> dict:
+        """Attach complete discovery diagnostics to every pure BOARD idle verdict."""
+        from .persistent_goal import goal_inventory
+        from .work_exhaustion import (
+            INCOMPLETE_DISCOVERY, _ticket_inventory_valid, certificate_diagnostics,
+            certify_work_exhaustion, verified_quiescence,
+        )
+    
+        # Typed envelope gate: the pure classifier must never consume a malformed
+        # owner envelope; fail closed to an INCOMPLETE verdict, never an
+        # empty-queue quiescence derived from invalid input.
+        problem = None
+        if not _ticket_inventory_valid(tickets):
+            problem = "tickets: inventory must be an object of valid ticket objects"
+        elif state is not None and not isinstance(state, dict):
+            problem = "state: envelope must be an object"
+        elif audit_inbox is not None and not isinstance(audit_inbox, dict):
+            problem = "audit_inbox: envelope must be an object"
+        elif future_gate is not None and not isinstance(future_gate, dict):
+            problem = "future_gate: envelope must be an object"
+        elif source_evidence is not None and not isinstance(source_evidence, dict):
+            problem = "source_evidence: envelope must be an object"
+    
+        goals = goal_inventory(persistent_goals)
+>       actor_state = {**(state or {}), "agent": current_agent} if current_agent is not None else state
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'int' object is not a mapping
+
+tools\saipen_engine\board.py:2287: TypeError
+_ ReviewInputBoundaryTests.test_missing_future_inventory_fields_are_not_checked_empty (future={'index_state': 'MISSING'}) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_missing_future_inventory_fields_are_not_checked_empty>
+
+    def test_missing_future_inventory_fields_are_not_checked_empty(self):
+        cases = [
+            {"index_state": "MISSING"},
+            {"index_state": "MISSING", "documents": 0},
+            {"index_state": "MISSING", "refresh_required": False},
+            *({"index_state": "MISSING", "documents": value, "refresh_required": False}
+              for value in (None, False, "", {}, -1)),
+            {"index_state": "MISSING", "documents": 0, "refresh_required": None},
+        ]
+        for future in cases:
+            with self.subTest(future=future):
+                cert = W.certify_work_exhaustion(
+                    None, **ExhaustionEvidenceTests.checked(future_gate=future),
+                )
+                row = next(row for row in cert["sources"] if row["source_name"] == W.FUTURE_GATES)
+>               self.assertFalse(row["checked"], row)
+E               AssertionError: True is not false : {'source_name': 'future_gates', 'source_generation': 'generation-1', 'last_checked_generation': 'generation-1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}
+
+tools\test_t2040_review_input_boundaries.py:58: AssertionError
+_ ReviewInputBoundaryTests.test_missing_future_inventory_fields_are_not_checked_empty (future={'index_state': 'MISSING', 'documents': 0}) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_missing_future_inventory_fields_are_not_checked_empty>
+
+    def test_missing_future_inventory_fields_are_not_checked_empty(self):
+        cases = [
+            {"index_state": "MISSING"},
+            {"index_state": "MISSING", "documents": 0},
+            {"index_state": "MISSING", "refresh_required": False},
+            *({"index_state": "MISSING", "documents": value, "refresh_required": False}
+              for value in (None, False, "", {}, -1)),
+            {"index_state": "MISSING", "documents": 0, "refresh_required": None},
+        ]
+        for future in cases:
+            with self.subTest(future=future):
+                cert = W.certify_work_exhaustion(
+                    None, **ExhaustionEvidenceTests.checked(future_gate=future),
+                )
+                row = next(row for row in cert["sources"] if row["source_name"] == W.FUTURE_GATES)
+>               self.assertFalse(row["checked"], row)
+E               AssertionError: True is not false : {'source_name': 'future_gates', 'source_generation': 'generation-1', 'last_checked_generation': 'generation-1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}
+
+tools\test_t2040_review_input_boundaries.py:58: AssertionError
+_ ReviewInputBoundaryTests.test_missing_future_inventory_fields_are_not_checked_empty (future={'index_state': 'MISSING', 'refresh_required': False}) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_missing_future_inventory_fields_are_not_checked_empty>
+
+    def test_missing_future_inventory_fields_are_not_checked_empty(self):
+        cases = [
+            {"index_state": "MISSING"},
+            {"index_state": "MISSING", "documents": 0},
+            {"index_state": "MISSING", "refresh_required": False},
+            *({"index_state": "MISSING", "documents": value, "refresh_required": False}
+              for value in (None, False, "", {}, -1)),
+            {"index_state": "MISSING", "documents": 0, "refresh_required": None},
+        ]
+        for future in cases:
+            with self.subTest(future=future):
+                cert = W.certify_work_exhaustion(
+                    None, **ExhaustionEvidenceTests.checked(future_gate=future),
+                )
+                row = next(row for row in cert["sources"] if row["source_name"] == W.FUTURE_GATES)
+>               self.assertFalse(row["checked"], row)
+E               AssertionError: True is not false : {'source_name': 'future_gates', 'source_generation': 'generation-1', 'last_checked_generation': 'generation-1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}
+
+tools\test_t2040_review_input_boundaries.py:58: AssertionError
+_ ReviewInputBoundaryTests.test_missing_future_inventory_fields_are_not_checked_empty (future={'index_state': 'MISSING', 'documents': None, 'refresh_required': False}) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_missing_future_inventory_fields_are_not_checked_empty>
+
+    def test_missing_future_inventory_fields_are_not_checked_empty(self):
+        cases = [
+            {"index_state": "MISSING"},
+            {"index_state": "MISSING", "documents": 0},
+            {"index_state": "MISSING", "refresh_required": False},
+            *({"index_state": "MISSING", "documents": value, "refresh_required": False}
+              for value in (None, False, "", {}, -1)),
+            {"index_state": "MISSING", "documents": 0, "refresh_required": None},
+        ]
+        for future in cases:
+            with self.subTest(future=future):
+                cert = W.certify_work_exhaustion(
+                    None, **ExhaustionEvidenceTests.checked(future_gate=future),
+                )
+                row = next(row for row in cert["sources"] if row["source_name"] == W.FUTURE_GATES)
+>               self.assertFalse(row["checked"], row)
+E               AssertionError: True is not false : {'source_name': 'future_gates', 'source_generation': 'generation-1', 'last_checked_generation': 'generation-1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}
+
+tools\test_t2040_review_input_boundaries.py:58: AssertionError
+_ ReviewInputBoundaryTests.test_missing_future_inventory_fields_are_not_checked_empty (future={'index_state': 'MISSING', 'documents': False, 'refresh_required': False}) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_missing_future_inventory_fields_are_not_checked_empty>
+
+    def test_missing_future_inventory_fields_are_not_checked_empty(self):
+        cases = [
+            {"index_state": "MISSING"},
+            {"index_state": "MISSING", "documents": 0},
+            {"index_state": "MISSING", "refresh_required": False},
+            *({"index_state": "MISSING", "documents": value, "refresh_required": False}
+              for value in (None, False, "", {}, -1)),
+            {"index_state": "MISSING", "documents": 0, "refresh_required": None},
+        ]
+        for future in cases:
+            with self.subTest(future=future):
+                cert = W.certify_work_exhaustion(
+                    None, **ExhaustionEvidenceTests.checked(future_gate=future),
+                )
+                row = next(row for row in cert["sources"] if row["source_name"] == W.FUTURE_GATES)
+>               self.assertFalse(row["checked"], row)
+E               AssertionError: True is not false : {'source_name': 'future_gates', 'source_generation': 'generation-1', 'last_checked_generation': 'generation-1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}
+
+tools\test_t2040_review_input_boundaries.py:58: AssertionError
+_ ReviewInputBoundaryTests.test_missing_future_inventory_fields_are_not_checked_empty (future={'index_state': 'MISSING', 'documents': '', 'refresh_required': False}) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_missing_future_inventory_fields_are_not_checked_empty>
+
+    def test_missing_future_inventory_fields_are_not_checked_empty(self):
+        cases = [
+            {"index_state": "MISSING"},
+            {"index_state": "MISSING", "documents": 0},
+            {"index_state": "MISSING", "refresh_required": False},
+            *({"index_state": "MISSING", "documents": value, "refresh_required": False}
+              for value in (None, False, "", {}, -1)),
+            {"index_state": "MISSING", "documents": 0, "refresh_required": None},
+        ]
+        for future in cases:
+            with self.subTest(future=future):
+                cert = W.certify_work_exhaustion(
+                    None, **ExhaustionEvidenceTests.checked(future_gate=future),
+                )
+                row = next(row for row in cert["sources"] if row["source_name"] == W.FUTURE_GATES)
+>               self.assertFalse(row["checked"], row)
+E               AssertionError: True is not false : {'source_name': 'future_gates', 'source_generation': 'generation-1', 'last_checked_generation': 'generation-1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}
+
+tools\test_t2040_review_input_boundaries.py:58: AssertionError
+_ ReviewInputBoundaryTests.test_missing_future_inventory_fields_are_not_checked_empty (future={'index_state': 'MISSING', 'documents': {}, 'refresh_required': False}) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_missing_future_inventory_fields_are_not_checked_empty>
+
+    def test_missing_future_inventory_fields_are_not_checked_empty(self):
+        cases = [
+            {"index_state": "MISSING"},
+            {"index_state": "MISSING", "documents": 0},
+            {"index_state": "MISSING", "refresh_required": False},
+            *({"index_state": "MISSING", "documents": value, "refresh_required": False}
+              for value in (None, False, "", {}, -1)),
+            {"index_state": "MISSING", "documents": 0, "refresh_required": None},
+        ]
+        for future in cases:
+            with self.subTest(future=future):
+                cert = W.certify_work_exhaustion(
+                    None, **ExhaustionEvidenceTests.checked(future_gate=future),
+                )
+                row = next(row for row in cert["sources"] if row["source_name"] == W.FUTURE_GATES)
+>               self.assertFalse(row["checked"], row)
+E               AssertionError: True is not false : {'source_name': 'future_gates', 'source_generation': 'generation-1', 'last_checked_generation': 'generation-1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}
+
+tools\test_t2040_review_input_boundaries.py:58: AssertionError
+_ ReviewInputBoundaryTests.test_missing_future_inventory_fields_are_not_checked_empty (future={'index_state': 'MISSING', 'documents': 0, 'refresh_required': None}) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_missing_future_inventory_fields_are_not_checked_empty>
+
+    def test_missing_future_inventory_fields_are_not_checked_empty(self):
+        cases = [
+            {"index_state": "MISSING"},
+            {"index_state": "MISSING", "documents": 0},
+            {"index_state": "MISSING", "refresh_required": False},
+            *({"index_state": "MISSING", "documents": value, "refresh_required": False}
+              for value in (None, False, "", {}, -1)),
+            {"index_state": "MISSING", "documents": 0, "refresh_required": None},
+        ]
+        for future in cases:
+            with self.subTest(future=future):
+                cert = W.certify_work_exhaustion(
+                    None, **ExhaustionEvidenceTests.checked(future_gate=future),
+                )
+                row = next(row for row in cert["sources"] if row["source_name"] == W.FUTURE_GATES)
+>               self.assertFalse(row["checked"], row)
+E               AssertionError: True is not false : {'source_name': 'future_gates', 'source_generation': 'generation-1', 'last_checked_generation': 'generation-1', 'eligibility_result': 'CLEAN_VERIFIED', 'authorized_actions': [], 'exact_blocker': None, 'next_recheck_condition': 'new evidence arrives', 'checked': True}
+
+tools\test_t2040_review_input_boundaries.py:58: AssertionError
+_ ReviewInputBoundaryTests.test_unhashable_goal_status_is_incomplete_not_an_exception (status=[]) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_unhashable_goal_status_is_incomplete_not_an_exception>
+
+    def test_unhashable_goal_status_is_incomplete_not_an_exception(self):
+        for status in ([], {}, ["SATISFIED"]):
+            with self.subTest(status=status):
+                goals = [{"goal_id": "invalid", "current_status": status}]
+>               report = persistent_goal.goal_inventory(goals)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_review_input_boundaries.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+evidence = [{'goal_id': 'invalid', 'current_status': []}]
+
+    def goal_inventory(evidence: Any) -> dict[str, Any]:
+        """Normalize explicit goal evidence; absence is not a checked empty set."""
+        result: dict[str, Any] = {
+            "goals": [], "unreadable": [], "errors": [],
+            "supplied": evidence is not None, "complete": False,
+        }
+        if evidence is None:
+            return result
+        if isinstance(evidence, dict) and "goals" in evidence:
+            if not isinstance(evidence["goals"], (list, tuple)):
+                result["errors"].append("goal inventory must contain a goal list")
+                return result
+            result["goals"] = list(evidence["goals"])
+            for key in ("unreadable", "errors"):
+                entries = evidence.get(key, [])
+                if not isinstance(entries, (list, tuple)):
+                    result["errors"].append(f"goal inventory {key} must be a list")
+                else:
+                    result[key].extend(str(entry) for entry in entries)
+            result["complete"] = evidence.get("complete") is True
+            if evidence.get("root_available") is False:
+                result["complete"] = False
+        elif isinstance(evidence, (list, tuple)):
+            result["goals"] = list(evidence)
+            result["complete"] = True
+        elif isinstance(evidence, PersistentGoal) or isinstance(evidence, dict) and "goal_id" in evidence:
+            result["goals"] = [evidence]
+            result["complete"] = True
+        else:
+            result["errors"].append(f"unsupported goal evidence {type(evidence).__name__}")
+        valid = []
+        for goal in result["goals"]:
+            if not isinstance(goal, (dict, PersistentGoal)):
+                result["errors"].append("invalid goal inventory member")
+                continue
+            status = goal.get("current_status", STATUS_ACTIVE) if isinstance(goal, dict) else goal.current_status
+>           if status not in GOAL_STATUSES:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: unhashable type: 'list'
+
+tools\saipen_engine\persistent_goal.py:227: TypeError
+_ ReviewInputBoundaryTests.test_unhashable_goal_status_is_incomplete_not_an_exception (status={}) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_unhashable_goal_status_is_incomplete_not_an_exception>
+
+    def test_unhashable_goal_status_is_incomplete_not_an_exception(self):
+        for status in ([], {}, ["SATISFIED"]):
+            with self.subTest(status=status):
+                goals = [{"goal_id": "invalid", "current_status": status}]
+>               report = persistent_goal.goal_inventory(goals)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_review_input_boundaries.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+evidence = [{'goal_id': 'invalid', 'current_status': {}}]
+
+    def goal_inventory(evidence: Any) -> dict[str, Any]:
+        """Normalize explicit goal evidence; absence is not a checked empty set."""
+        result: dict[str, Any] = {
+            "goals": [], "unreadable": [], "errors": [],
+            "supplied": evidence is not None, "complete": False,
+        }
+        if evidence is None:
+            return result
+        if isinstance(evidence, dict) and "goals" in evidence:
+            if not isinstance(evidence["goals"], (list, tuple)):
+                result["errors"].append("goal inventory must contain a goal list")
+                return result
+            result["goals"] = list(evidence["goals"])
+            for key in ("unreadable", "errors"):
+                entries = evidence.get(key, [])
+                if not isinstance(entries, (list, tuple)):
+                    result["errors"].append(f"goal inventory {key} must be a list")
+                else:
+                    result[key].extend(str(entry) for entry in entries)
+            result["complete"] = evidence.get("complete") is True
+            if evidence.get("root_available") is False:
+                result["complete"] = False
+        elif isinstance(evidence, (list, tuple)):
+            result["goals"] = list(evidence)
+            result["complete"] = True
+        elif isinstance(evidence, PersistentGoal) or isinstance(evidence, dict) and "goal_id" in evidence:
+            result["goals"] = [evidence]
+            result["complete"] = True
+        else:
+            result["errors"].append(f"unsupported goal evidence {type(evidence).__name__}")
+        valid = []
+        for goal in result["goals"]:
+            if not isinstance(goal, (dict, PersistentGoal)):
+                result["errors"].append("invalid goal inventory member")
+                continue
+            status = goal.get("current_status", STATUS_ACTIVE) if isinstance(goal, dict) else goal.current_status
+>           if status not in GOAL_STATUSES:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: unhashable type: 'dict'
+
+tools\saipen_engine\persistent_goal.py:227: TypeError
+_ ReviewInputBoundaryTests.test_unhashable_goal_status_is_incomplete_not_an_exception (status=['SATISFIED']) _
+
+self = <test_t2040_review_input_boundaries.ReviewInputBoundaryTests testMethod=test_unhashable_goal_status_is_incomplete_not_an_exception>
+
+    def test_unhashable_goal_status_is_incomplete_not_an_exception(self):
+        for status in ([], {}, ["SATISFIED"]):
+            with self.subTest(status=status):
+                goals = [{"goal_id": "invalid", "current_status": status}]
+>               report = persistent_goal.goal_inventory(goals)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_review_input_boundaries.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+evidence = [{'goal_id': 'invalid', 'current_status': ['SATISFIED']}]
+
+    def goal_inventory(evidence: Any) -> dict[str, Any]:
+        """Normalize explicit goal evidence; absence is not a checked empty set."""
+        result: dict[str, Any] = {
+            "goals": [], "unreadable": [], "errors": [],
+            "supplied": evidence is not None, "complete": False,
+        }
+        if evidence is None:
+            return result
+        if isinstance(evidence, dict) and "goals" in evidence:
+            if not isinstance(evidence["goals"], (list, tuple)):
+                result["errors"].append("goal inventory must contain a goal list")
+                return result
+            result["goals"] = list(evidence["goals"])
+            for key in ("unreadable", "errors"):
+                entries = evidence.get(key, [])
+                if not isinstance(entries, (list, tuple)):
+                    result["errors"].append(f"goal inventory {key} must be a list")
+                else:
+                    result[key].extend(str(entry) for entry in entries)
+            result["complete"] = evidence.get("complete") is True
+            if evidence.get("root_available") is False:
+                result["complete"] = False
+        elif isinstance(evidence, (list, tuple)):
+            result["goals"] = list(evidence)
+            result["complete"] = True
+        elif isinstance(evidence, PersistentGoal) or isinstance(evidence, dict) and "goal_id" in evidence:
+            result["goals"] = [evidence]
+            result["complete"] = True
+        else:
+            result["errors"].append(f"unsupported goal evidence {type(evidence).__name__}")
+        valid = []
+        for goal in result["goals"]:
+            if not isinstance(goal, (dict, PersistentGoal)):
+                result["errors"].append("invalid goal inventory member")
+                continue
+            status = goal.get("current_status", STATUS_ACTIVE) if isinstance(goal, dict) else goal.current_status
+>           if status not in GOAL_STATUSES:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: unhashable type: 'list'
+
+tools\saipen_engine\persistent_goal.py:227: TypeError
+=========================== short test summary info ===========================
+SUBFAILED(state=['invalid']) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_invalid_state_with_explicit_actor_is_structured
+SUBFAILED(state='invalid') tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_invalid_state_with_explicit_actor_is_structured
+SUBFAILED(state=1) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_invalid_state_with_explicit_actor_is_structured
+SUBFAILED(future={'index_state': 'MISSING'}) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_missing_future_inventory_fields_are_not_checked_empty
+SUBFAILED(future={'index_state': 'MISSING', 'documents': 0}) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_missing_future_inventory_fields_are_not_checked_empty
+SUBFAILED(future={'index_state': 'MISSING', 'refresh_required': False}) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_missing_future_inventory_fields_are_not_checked_empty
+SUBFAILED(future={'index_state': 'MISSING', 'documents': None, 'refresh_required': False}) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_missing_future_inventory_fields_are_not_checked_empty
+SUBFAILED(future={'index_state': 'MISSING', 'documents': False, 'refresh_required': False}) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_missing_future_inventory_fields_are_not_checked_empty
+SUBFAILED(future={'index_state': 'MISSING', 'documents': '', 'refresh_required': False}) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_missing_future_inventory_fields_are_not_checked_empty
+SUBFAILED(future={'index_state': 'MISSING', 'documents': {}, 'refresh_required': False}) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_missing_future_inventory_fields_are_not_checked_empty
+SUBFAILED(future={'index_state': 'MISSING', 'documents': 0, 'refresh_required': None}) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_missing_future_inventory_fields_are_not_checked_empty
+SUBFAILED(status=[]) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_unhashable_goal_status_is_incomplete_not_an_exception
+SUBFAILED(status={}) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_unhashable_goal_status_is_incomplete_not_an_exception
+SUBFAILED(status=['SATISFIED']) tools/test_t2040_review_input_boundaries.py::ReviewInputBoundaryTests::test_unhashable_goal_status_is_incomplete_not_an_exception
+14 failed, 24 passed, 1 subtests passed in 0.81s

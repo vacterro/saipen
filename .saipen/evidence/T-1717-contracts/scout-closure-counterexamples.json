@@ -1,0 +1,19 @@
+{
+  "label": "scout-closure-counterexamples",
+  "phase": "SCOUT",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    ".saipen/evidence/T-1717-contracts/closure-counterexamples.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 4.062,
+  "fingerprint": "b5cf50a8d51e1ab2d81b4568ec3eba35f543715c90ddd340de2603fc96c8dcf0",
+  "stdout": "{\"unsafe_admitted\": 3, \"legitimate_admitted\": 1, \"finding\": \"acceptance projection does not gate native REVIEW\"}\r\n",
+  "stderr": "",
+  "stdout_sha256": "a530125d8ec417c83e96c8bb0ab64864b489d8a258acf113018339153dbaad3d",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

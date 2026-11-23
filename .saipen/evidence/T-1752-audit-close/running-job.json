@@ -1,0 +1,18 @@
+{
+  "ticket": "T-1752",
+  "phase": "DONE",
+  "command": "python tools/core_unit.py evidence T-1752",
+  "tool_session_id": 3908,
+  "pid": 12936,
+  "pid_created": 1792082275.5437145,
+  "started_utc": "2026-10-15T16:37:55Z",
+  "marker": ".saipen/cache/inflight/core-unit.json",
+  "fingerprint": "e2192918fc4e2624f71c9f5a1176f4a4f7dbfb47043e422e892514b5b9668424",
+  "regression_record": ".saipen/evidence/regression/regression-execution-7f4bf055c6b6446ca382bd13d18c0dd0.json",
+  "terminal": true,
+  "exit_code": 0,
+  "family_record": ".saipen/evidence/core-unit/e2192918fc4e2624-20261015T170253Z.json",
+  "ticket_completion_event": "E-15927",
+  "parent_resume_event": "E-15928",
+  "resume": "T-1752 canonically DONE after family 6668/0, independent REVIEW and final CURRENT_PASS. Do not rerun or replay its finish. T-1755/SRC-244 has resumed and must independently prove its five clauses. T-1801 remains queued for the verified missing-transport P3. The full cc all goal remains active."
+}

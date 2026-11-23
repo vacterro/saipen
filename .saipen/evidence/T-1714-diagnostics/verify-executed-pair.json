@@ -1,0 +1,23 @@
+{
+  "label": "verify-executed-pair",
+  "phase": "VERIFY",
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "work",
+    "regression",
+    "T-1714",
+    "--file",
+    ".saipen/evidence/T-1714-diagnostics/regression-contract.json",
+    "--json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 42.109,
+  "fingerprint": "7b7ff09dfeee7b1b29d35434872c6994739935b761b8db64d1b489a8de53fedc",
+  "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"CHECKPOINTED\",\r\n  \"op_id\": \"regression-execution-2452db01ed2e47359f0b126be3f766a5\",\r\n  \"changed_files\": [\r\n    \".saipen/evidence/regression/regression-execution-2452db01ed2e47359f0b126be3f766a5.json\",\r\n    \".saipen/LOG.md\",\r\n    \".saipen/BOARD.md\",\r\n    \".saipen/STATE.md\"\r\n  ],\r\n  \"recovery_required\": false,\r\n  \"record\": \".saipen/evidence/regression/regression-execution-2452db01ed2e47359f0b126be3f766a5.json\",\r\n  \"evidence_class\": \"executed\",\r\n  \"event_id\": \"E-14455\"\r\n}\r\n",
+  "stderr": "",
+  "stdout_sha256": "2a41d6186997ef6ec188b4c2ae06001cb511470bb6dd7916d820c9d6ec154a95",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

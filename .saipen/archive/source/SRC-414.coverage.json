@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-414:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2059 closed with verification evidence in LOG: verify -> PASS [target T-2059] conf: high -- python -B -m unittest tools.test_gc 63 tests OK (1 skipped); executed regression pair FAIL 3 / PASS 3; canonical CORE-UNIT-EVIDENCE PASS ran:8617 red:99 new_red:0 E-21199",
+      "text": "P0 repair GC production defects: closure hook on finish_ticket, git guard KeyError, zero-progress budget debt; audit 99-red core-unit baseline; reconcile publication and evidence blockers (T-2049/2052/2054/2055/2057/2058/2044)",
+      "verification": "the Work this request created reached its own verification gate; see the T-2059 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2059"
+    }
+  },
+  "schema_version": 1
+}

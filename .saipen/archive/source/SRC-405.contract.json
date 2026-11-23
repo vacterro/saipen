@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-405:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIPEN durable repository GC engine: automatic reclamation every 20 committed DONE ticket identities, budget-triggered early cleanup, evidence lifecycle with canonical receipts, build/recovery retention, scope-bounded bulk-deletion authority, zero-write dry-run, crash-safe incremental deletion, isolated tests plus live acceptance with measured reclaimed bytes"
+    }
+  },
+  "derived_at": "2026-11-12T05:58:32Z",
+  "derived_from": "SRC-405",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "80c72b88e8a9e69f59be47672f603dd5b525cd213ced1fd59772fab2b96b5ca7"
+}

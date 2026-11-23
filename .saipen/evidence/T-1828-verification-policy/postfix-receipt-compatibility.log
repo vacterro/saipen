@@ -1,0 +1,6 @@
+test_focused_execution_receipt_satisfies_source_coverage (test_t1828_verification_policy.FocusedPolicyTests.test_focused_execution_receipt_satisfies_source_coverage) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.409s
+
+OK

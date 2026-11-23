@@ -1,0 +1,19 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_continue_chain.py::ContinueChainTests::test_one_cc_drives_the_deterministic_chain_to_the_boundary",
+    "tools/test_t1851_debt_authority.py::NativeDecisionTests::test_public_registrar_and_validator_use_the_same_native_authority",
+    "tools/test_t1640_board_scrub.py::ValidatorFindingTests::test_the_finding_names_the_route_and_the_route_clears_it"
+  ],
+  "exit_code": 0,
+  "duration_s": 9.5,
+  "finished_at": "2026-11-10T18:12:24.276110+00:00",
+  "scope": "three exact T-2040 preflight failures after gateway contract repair"
+}

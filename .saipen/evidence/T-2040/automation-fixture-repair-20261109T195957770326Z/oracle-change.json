@@ -1,0 +1,27 @@
+{
+  "ticket": "T-2040",
+  "scope": [
+    "tools/test_automation_block.py",
+    "tools/test_t1739_wait_boundary.py"
+  ],
+  "diagnosis": "Legacy empty-queue routes lack checked discovery and authority evidence. Production correctly returns INCOMPLETE_DISCOVERY and automation BLOCKED. These failures are fixture/oracle drift, not production defects.",
+  "fixture_repair": [
+    "C1-C8 unit controls call the real schema-2 certifier with explicit audit/future/goal inventories, checked_discovery_evidence for the current generation, and a simulated continuous-maintenance owner grant.",
+    "The simulated gate carrier uses the existing bounded saipen hunt action. It does not claim native routing or authenticated grant admission was exercised; terminal-consumer tests own that integration.",
+    "The live-project vocabulary control now supplies an actual workable T-900 TODO and checks PHASE SCOUT T-900.",
+    "The new incomplete-discovery negative control retains the exact former empty-queue input. All C1-C8 conditions pass independently, yet automation must stay BLOCKED with no cc or completion.",
+    "The binding-WAIT test now uses the real WAIT route: WAIT_USER, RESTATE_AND_STOP, no cc, operator action due. Its previous CONTINUE expectation used a mismatched idle route. The direct C1-C8 check separately proves only C8 vetoes closure.",
+    "The stale-convergence control now receives otherwise sufficient discovery evidence, so incomplete discovery cannot mask a missing convergence veto. All existing closure, authority, audit-race and read-only assertions remain, except the explicitly corrected WAIT disposition."
+  ],
+  "oracle_change": "Changed test inputs and one invalid WAIT disposition expectation. This is not a same-oracle production red/green fix. Exact preimages and before.log preserve the original 13 failing assertions.",
+  "runs": {
+    "before": {"tests": 47, "failures": 13, "errors": 0, "skipped": 0, "exit_code": 1, "log": "before.log"},
+    "after": {"tests": 48, "failures": 0, "errors": 0, "skipped": 0, "exit_code": 0, "log": "after.log"},
+    "controlled_red": {
+      "tests": 4, "expected_failures": 4, "errors": 0, "skipped": 0,
+      "log": "controlled-red.log", "runner": "controlled_red.py",
+      "explanation": "Unchanged repaired tests run against process-local mocked owners. Permissive incomplete routing fails the new negative control. Erasing closure vetoes fails audit quiescence, C8 WAIT, and stale convergence controls. Harness exits 0 only when every expected assertion failure occurs. No production bytes changed."
+    }
+  },
+  "limits": "Focused modules only; full suite not claimed. No production/helper/baseline edits. No live STATE/BOARD/LOG mutations. No staging, commit, push, task start, transition, or agent launch."
+}

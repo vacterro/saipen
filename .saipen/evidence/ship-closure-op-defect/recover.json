@@ -1,0 +1,95 @@
+{
+  "ok": false,
+  "code": "RECONCILE_REAUTH_REQUIRED",
+  "detail": "UNAUTHORIZED_LIFECYCLE_WRITE: T-1679 sits under ## DONE on the word of E-13300, E-13301, written above E-13299 with no operation record, and no closure operation stands behind it -- the completion was typed, not run; it returns to ## TODO without closure metadata or claim and the canonical lifecycle re-establishes the completion -- original bytes preserved",
+  "changed": {
+    "board": [],
+    "state": [
+      {
+        "field": "last_event",
+        "from": 13301,
+        "to": 13299,
+        "surface": "state",
+        "_class": "unauthorized-lifecycle-write",
+        "reason": "UNAUTHORIZED_LIFECYCLE_WRITE: STATE.last_event sits above E-13299, the newest event an operation record stands behind; this reconciliation's own journaled event becomes the marker"
+      }
+    ],
+    "lifecycle": [
+      {
+        "field": "board",
+        "surface": "board",
+        "kind": "section-move",
+        "_class": "unauthorized-lifecycle-write",
+        "ticket": "T-1679",
+        "from_section": "## DONE",
+        "to_section": "## TODO",
+        "fields": [
+          "closure_mode",
+          "owner",
+          "claim_time"
+        ],
+        "requires_approval": true,
+        "generation": "current",
+        "reason": "UNAUTHORIZED_LIFECYCLE_WRITE: T-1679 sits under ## DONE on the word of E-13300, E-13301, written above E-13299 with no operation record, and no closure operation stands behind it -- the completion was typed, not run; it returns to ## TODO without closure metadata or claim and the canonical lifecycle re-establishes the completion -- original bytes preserved"
+      }
+    ],
+    "lifecycle_refused": []
+  },
+  "refused": [
+    {
+      "field": "board",
+      "surface": "board",
+      "kind": "section-move",
+      "_class": "unauthorized-lifecycle-write",
+      "ticket": "T-1679",
+      "from_section": "## DONE",
+      "to_section": "## TODO",
+      "fields": [
+        "closure_mode",
+        "owner",
+        "claim_time"
+      ],
+      "requires_approval": true,
+      "generation": "current",
+      "reason": "UNAUTHORIZED_LIFECYCLE_WRITE: T-1679 sits under ## DONE on the word of E-13300, E-13301, written above E-13299 with no operation record, and no closure operation stands behind it -- the completion was typed, not run; it returns to ## TODO without closure metadata or claim and the canonical lifecycle re-establishes the completion -- original bytes preserved"
+    }
+  ],
+  "repair_id": "f859b4b836470313a22e8f8ce0cf3375ce0ffd6892cbdd1042f7c13e505b4246",
+  "strict_state_error": null,
+  "dry_run": false,
+  "needs_local_mutation": false,
+  "safe_auto_repair_available": false,
+  "operator_decision_available": true,
+  "canonical_next_command": "saipen recover --apply-approved-repair f859b4b836470313a22e8f8ce0cf3375ce0ffd6892cbdd1042f7c13e505b4246",
+  "read_only": true,
+  "terminal_disposition": null,
+  "blocking_surface": "board",
+  "blocking_field": "board",
+  "evidence_reference": ".saipen/BOARD.md",
+  "diagnosis": "READ_ONLY_DIAGNOSIS_ONLY",
+  "read_only_diagnosis_only": true,
+  "instruction": "READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; the only sanctioned mutation is `saipen recover --apply-approved-repair f859b4b836470313a22e8f8ce0cf3375ce0ffd6892cbdd1042f7c13e505b4246`",
+  "forbidden_probes": [
+    "saipen stop",
+    "saipen transition",
+    "saipen goal",
+    "saipen ticket",
+    "Bash",
+    "Edit",
+    "Write"
+  ],
+  "reason_code": "RECONCILE_REAUTH_REQUIRED",
+  "remediation": "OPERATOR_DECISION",
+  "safety_valve_tripped": false,
+  "operator_decisions": [
+    {
+      "field": "board",
+      "surface": "board",
+      "tickets": [
+        "T-1679"
+      ],
+      "command": "saipen recover --apply-approved-repair f859b4b836470313a22e8f8ce0cf3375ce0ffd6892cbdd1042f7c13e505b4246",
+      "reason": "UNAUTHORIZED_LIFECYCLE_WRITE: T-1679 sits under ## DONE on the word of E-13300, E-13301, written above E-13299 with no operation record, and no closure operation stands behind it -- the completion was typed, not run; it returns to ## TODO without closure metadata or claim and the canonical lifecycle re-establishes the completion -- original bytes preserved"
+    }
+  ]
+}

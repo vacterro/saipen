@@ -1,0 +1,14 @@
+{
+  "kind": "user-supplied supporting evidence; not operator authority",
+  "work": "T-1858",
+  "source": "SRC-290",
+  "clarified_project": "FastPrompter",
+  "later_screenshot_project_correlated_by_live_state": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_ZAICODE",
+  "screenshots": [
+    "V:/___VAC/_PIC/_PRNTSCREEN/2026-10-23_023620.png",
+    "V:/___VAC/_PIC/_PRNTSCREEN/2026-10-23_023930.png"
+  ],
+  "first_screenshot_text": "Vea kokkuvõte: SAIPEN refuses this continuation and only the operator can clear it: RECONCILE_REAUTH_REQUIRED — bounded run requires a fresh operator cc through authenticated native ingress; WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue — WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue (RECONCILE_REAUTH_REQUIRED)\n\n\nMida tegin\nPalun kirjelda:\n\nOodatud tulemus\nPalun kirjelda:",
+  "later_user_caption": "Да, а то ситуация вообще комичная получается требует cc который не отправляется и всё работа стоит",
+  "transcript": "Ticket\tPhase\tEvidence\nT-414 (P1, primary)\tDONE\tShared packing policy + hook + CSS; real Electron capture 320–1280px both modes, 9/9 geometry (incl. baseline 3→2 rows @640), 14 policy unit tests; lint clean\nT-403 (P2)\tDONE\treconcileAll logs + marks reconcileError; siblings continue; services 338/338 pass incl. new test\nT-404 (P3)\tDONE\tRemoved dead swift-bridge; retired inventory + lockfile; git grep 0 importers\nT-405 (P3)\tDONE\tRemoved stale sticky-class marker; decision note outside render path; sidebar drag 4/4\nHard block: SAIPEN safety valve reached (20 tickets / 0 waves this run). Run cc to lift it and continue canonically eligible work. No further action taken without that.\n\n02:35\n·\n2 min eest\nTöötas 9s\nsaipen continue\n02:36\n·\n1 min eest\n\nTöötas 7s\nHard block — safety valve. SAIPEN's continuation authority budget is exhausted (20 tickets / 0 waves this run). saipen continue returns WAIT: safety valve reached — run 'cc' to continue.\n\nHuman action required: type cc (the shortcut, not the full command) to re-authorize and lift the valve. Until then, no further ticket work can be claimed. All T-414/T-403/T-404/T-405 work is recorded DONE in canonical state.\n\n02:36\n·\n1 min eest\nTöötas 7s\nrecover and restore cc\n02:37\n·\n36 sek eest\n\nTöötas 22s\nState reconciled (saipen recover → CLEAN). The safety valve itself remains — it requires operator re-authorization and cannot be lifted by the agent.\n\nHuman action required: type cc (the bare shortcut) to re-authorize and resume. Everything else is clean and recorded.\n\n02:37\n·\n15 sek eest\nTöötas 22s\n\n1 fail muudetud\n+1 -1\ncontinue\n02:37\n·\n14 sek eest\n\nTöötas 4s\nThe safety valve only lifts on the bare shortcut cc — continue (and saipen continue) keep returning the pause. Type cc to re-authorize and resume.\n\n02:37\n·"
+}

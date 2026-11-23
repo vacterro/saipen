@@ -211,6 +211,59 @@ STALE_REASONS_RECOVERABLE = frozenset(
 )
 
 
+#: The reasons NO validator re-run can settle, because the input the evidence
+#: needs was never computable in the first place. `saipen validate` reads the
+#: same broken input every time, so recommending it again is a loop that cannot
+#: terminate: the agent re-runs, gets the identical STALE_FAIL, and is told the
+#: same thing. These statuses carry a stable `retry_fingerprint`, so a consumer
+#: can recognise "nothing changed" and name the real repair instead.
+UNRECOVERABLE_STALE_REASONS = frozenset({STALE_REASON_SOURCE_IDENTITY_UNAVAILABLE})
+
+
+def blocking_fingerprint(receipt: dict | None, stale_reason: str | None) -> str:
+    """Stable 16-hex identity of the condition holding conformance red.
+
+    Derived only from evidence the receipt already carries -- the sorted
+    ``finding_key``/``detail_hash`` pairs of its blocking findings plus the
+    typed stale reason -- so two runs blocked by the same inputs agree and a
+    changed input does not. A receipt with no readable findings degrades to the
+    reason alone rather than inventing a match it cannot support.
+    """
+    items: list[list[str]] = []
+    findings = (receipt or {}).get("blocking_findings")
+    if isinstance(findings, dict):
+        for finding in findings.get("problems") or ():
+            if isinstance(finding, dict):
+                items.append(
+                    [str(finding.get("finding_key") or ""), str(finding.get("detail_hash") or "")]
+                )
+    items.sort()
+    payload = json.dumps(
+        {"reason": stale_reason or "", "blockers": items},
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def blocker_detail(receipt: dict | None) -> str:
+    """The first blocking finding's own words, or "".
+
+    The detail is the actionable half of a blockage (``add it to the
+    nested_repos list in ...``); the status carries it so the human surface can
+    print the repair instead of a command that cannot perform it.
+    """
+    findings = (receipt or {}).get("blocking_findings")
+    if not isinstance(findings, dict):
+        return ""
+    for finding in findings.get("problems") or ():
+        if isinstance(finding, dict):
+            detail = str(finding.get("detail") or "").strip()
+            if detail:
+                return detail
+    return ""
+
+
 def stale_recoverable(status: dict | None) -> bool:
     """Whether THIS conformance status is a staleness the validator re-run cures.
 
@@ -1518,6 +1571,10 @@ def conformance_status(
     # matching identity. Empty==empty must NOT bind as current -- the receipt
     # cannot be proven bound to THIS project/tree when neither side has a value.
     if not current_head or not current_fp:
+        # Retry-proof: the validator would read the same uncomputable input
+        # again. The fingerprint names the condition, the detail names the
+        # repair, and `retry_blocked` tells every consumer not to recommend the
+        # identical run a second time.
         return {
             "status": STATUS_STALE_FAIL,
             "gate": gate,
@@ -1527,6 +1584,11 @@ def conformance_status(
                 "source_tree_fingerprint) -- the receipt cannot be proven bound "
                 "to the current tree"
             ),
+            "retry_blocked": True,
+            "retry_fingerprint": blocking_fingerprint(
+                receipt, STALE_REASON_SOURCE_IDENTITY_UNAVAILABLE
+            ),
+            "blocker_detail": blocker_detail(receipt),
             "receipt": receipt,
             "validator": info.as_dict(),
         }
@@ -1611,6 +1673,11 @@ def conformance_status(
         # CURRENT_*/NOT_RUN/INVALID verdict, which is not a staleness at all.
         "stale_reason": stale_reason,
         "reason": reason,
+        # Always present, so a consumer never has to infer "is a retry useful?"
+        # from prose: only an unrecoverable staleness blocks the retry, and only
+        # it carries a fingerprint.
+        "retry_blocked": False,
+        "retry_fingerprint": None,
         "receipt": receipt,
         "validator": info.as_dict(),
     }
@@ -1666,6 +1733,149 @@ CONFORMANCE_DISPOSITION_REMEDIATION_REQUIRED = "REMEDIATION_REQUIRED"
 CONFORMANCE_DISPOSITION_UNPROVEN = "UNPROVEN"
 CONFORMANCE_DISPOSITION_INVALID = "INVALID"
 
+#: T-2056: how many blocking findings one decision explains in full. The finding
+#: set is a validator receipt, not a work queue; a bounded head keeps the route
+#: an executable move instead of a second report, and the remainder count travels
+#: beside it so nothing is silently dropped.
+MAX_REPAIR_ACTIONS = 5
+
+
+def _one_line(text: object, limit: int = 120) -> str:
+    """A finding detail that survives being embedded in a shell-ready command."""
+    flat = " ".join(str(text or "").split())
+    # The value is embedded in one double-quoted argument. These characters
+    # expand inside double quotes in at least one supported host shell:
+    # POSIX ($, `, \\), PowerShell ($, `) or cmd.exe (%, !). Replace rather
+    # than escape: no one escape grammar survives all three shells.
+    flat = flat.translate(str.maketrans({char: "'" for char in '"`\\$%!'}))
+    # ASCII only: the command travels through Windows shells and code pages, so
+    # a typographic ellipsis is a mojibake risk in a string an agent must run.
+    flat = flat.encode("ascii", "replace").decode("ascii")
+    if len(flat) > limit:
+        flat = flat[: limit - 3].rstrip() + "..."
+    return flat
+
+
+def _ticket_command(finding: dict) -> str:
+    """One registered Work-creation command for an unowned finding."""
+    subject = str(finding.get("subject_id") or "").strip()
+    rule = str(finding.get("rule_id") or "").strip()
+    label = _one_line(f"{rule} {subject}".strip(), 80)
+    if not label or label == "unclassified":
+        label = _one_line(finding.get("detail") or "unclassified finding", 80)
+    proof = _one_line(finding.get("detail") or finding.get("finding_key") or "", 160)
+    return f'saipen ticket add P1 "{label}" --verify "{proof}"'
+
+
+def _repair_actions(project_root, findings: list[dict]) -> list[dict]:
+    """The ordered EXECUTABLE moves a CURRENT_FAIL offers, one per finding.
+
+    T-2056. `ENGINEERING_REQUIRED` used to end at `action: null`: the operator
+    was told to diagnose the receipt and the agent had nothing it was permitted
+    to run. Both halves of the answer already existed and were never joined --
+    `finding_ownership` says who owns a finding, `finding_route` names the live
+    Work that already owns its subject -- so this projects them into ONE command
+    per finding:
+
+    * a live owner Work -> `saipen claim <T-###>`; never `saipen start`, which is
+      the duplicate-receipt loop SRC-276 F-01 measured;
+    * no live owner (``NO_OWNER`` / ``DONE_ONLY`` / unresolved) ->
+      `saipen ticket add`, so the repair becomes Work instead of an obligation;
+    * an operator-gated class -> no command unless a witnessed decision names the
+      subject, exactly as `finding_ownership` already refuses.
+
+    Derived, never invented: an unreadable BOARD, ticket map or resolver yields
+    the ownership class and NO command, so a projection can never fail the
+    verdict and never fabricates authority.
+    """
+    try:
+        from . import finding_ownership, finding_route
+        from .board import parse_board
+
+        board_text = (Path(project_root) / ".saipen" / "BOARD.md").read_text(
+            encoding="utf-8-sig", errors="ignore"
+        )
+        tickets = parse_board(board_text).get("tickets") or {}
+    except Exception:  # a projection never blocks the verdict
+        tickets = None
+
+    executable: list[dict] = []
+    silent: list[dict] = []
+    seen: set[str] = set()
+    for finding in findings:
+        if not isinstance(finding, dict):
+            continue
+        try:
+            ownership = finding_ownership.safe_next_action(finding)
+        except Exception:
+            continue
+        item = {
+            "finding_key": finding.get("finding_key"),
+            "rule_id": finding.get("rule_id"),
+            "subject_kind": finding.get("subject_kind"),
+            "subject_id": finding.get("subject_id"),
+            "owner_class": ownership.get("owner_class"),
+            "operator_action_due": bool(ownership.get("operator_action_due")),
+            "owner": None,
+            "linkage": None,
+            "route_code": None,
+            "command": None,
+        }
+        if ownership.get("owner_class") == "OPERATOR_DECISION":
+            # Unwitnessed by construction: `safe_next_action` returned a route
+            # only when a witnessed decision named this subject.
+            route = ownership.get("route")
+            item["command"] = route
+            item["route_code"] = "OPERATOR_DECISION" if route else "AWAITING_WITNESS"
+        elif ownership.get("owner_class") == "UNAVAILABLE_EXTERNAL":
+            # External ownership is terminal locally. Creating local Work would
+            # contradict the typed owner; blocking needs an existing Work id,
+            # which this finding may not identify, so expose no fabricated move.
+            item["route_code"] = "EXTERNAL_OWNER"
+        elif tickets is None:
+            item["route_code"] = "BOARD_UNREADABLE"
+        elif ownership.get("owner_class") == "UNKNOWN":
+            # Unknown ownership is diagnostic debt, not operator authority. Make
+            # it Work so CURRENT_FAIL cannot dead-end, but never label it as an
+            # established engine owner.
+            item["route_code"] = "OWNER_UNKNOWN"
+            item["command"] = _ticket_command(finding)
+        elif ownership.get("owner_class") != "ENGINE_INTERNAL":
+            item["route_code"] = "OWNER_UNKNOWN"
+        else:
+            try:
+                resolved = finding_route.resolve(Path(project_root), finding, tickets)
+            except Exception:
+                resolved = {"code": "UNRESOLVED"}
+            item["route_code"] = resolved.get("code")
+            item["owner"] = resolved.get("owner")
+            item["linkage"] = resolved.get("linkage")
+            command = finding_route.route_command(resolved)
+            if command:
+                item["command"] = command
+            elif resolved.get("code") in ("NO_OWNER", "DONE_ONLY"):
+                # Only a genuinely unowned internal finding becomes new Work. A
+                # subject several Works claim (AMBIGUOUS), an unreadable route or
+                # an exception is NOT an invitation to mint a duplicate: the
+                # operator must pick, which is exactly what SRC-276 F-01 caused.
+                item["command"] = _ticket_command(finding)
+        # One command per DISTINCT move: several findings that resolve to the
+        # same owner share one claim. A finding with no command carries nothing
+        # to deduplicate and never occupies an action slot, so five silent
+        # findings cannot crowd out a permitted repair that follows them.
+        if item["command"] is None:
+            silent.append(item)
+            continue
+        key = item["command"]
+        if key in seen:
+            continue
+        seen.add(key)
+        executable.append(item)
+    # The primary action is always executable when any permitted move exists;
+    # silent ownership remains visible after it. Apply one bound to the combined
+    # projection, never one that lets silence crowd out a command.
+    return (executable + silent)[:MAX_REPAIR_ACTIONS]
+
 
 def conformance_disposition(status: str | None) -> str:
     """Map ONE authoritative conformance status onto the closed disposition.
@@ -1717,8 +1927,30 @@ def conformance_decision(
     bounded = (_bounded_remediation_commands(receipt.get("remediation_commands"))
                if kind == STATUS_CURRENT_FAIL else [])
     diagnostic = None
+    retry_blocked = bool(status.get("retry_blocked"))
     if healthy:
         primary, repair_status = None, "HEALTHY"
+    elif retry_blocked:
+        # The evidence input itself is uncomputable, so the canonical validator
+        # would return the identical verdict on every retry. The command stays
+        # advertised (it is the one run that re-reads evidence once the input is
+        # repaired) but the repair status names what is actually required, and
+        # the fingerprinted condition travels so a consumer can tell an unchanged
+        # blockage from a new one instead of looping.
+        primary, repair_status = CONFORMANCE_REMEDIATION_COMMAND, "INPUT_REQUIRED"
+        diagnostic = {
+            "kind": "INPUT_REQUIRED",
+            "owner": "SAIPEN source identity",
+            "stale_reason": status.get("stale_reason"),
+            "retry_fingerprint": status.get("retry_fingerprint"),
+            "detail": str(
+                status.get("blocker_detail") or status.get("reason") or ""
+            ).strip(),
+            "note": (
+                "re-running the canonical validator cannot change this condition; "
+                "repair the named input, then validate once"
+            ),
+        }
     elif kind != STATUS_CURRENT_FAIL:
         primary, repair_status = CONFORMANCE_REMEDIATION_COMMAND, "REFRESH_REQUIRED"
     elif bounded:
@@ -1760,6 +1992,18 @@ def conformance_decision(
                 diagnostic["ownership"] = ownership
                 diagnostic["engine_work_count"] = ownership["engine_work_count"]
                 diagnostic["operator_action_count"] = ownership["operator_action_count"]
+            # T-2056: the obstacle becomes a permitted action. Built from the
+            # same COMPLETE finding set the ownership block partitions, so a
+            # route never names Work for findings nobody read.
+            diagnostic["actions"] = _repair_actions(
+                project_root,
+                [item for item in (blocking.get("problems") or []) if isinstance(item, dict)],
+            )
+            diagnostic["actions_total"] = len(
+                [item for item in (blocking.get("problems") or []) if isinstance(item, dict)]
+            )
+            if diagnostic["actions"]:
+                primary = diagnostic["actions"][0].get("command")
     return {
         "status": kind,
         "gate": status.get("gate", gate),
@@ -1774,7 +2018,20 @@ def conformance_decision(
         "reason": status.get("reason", "") or "",
         "remediation_command": primary,
         "remediation_commands": bounded,
+        # T-2056: when the receipt registers no repair, the decision still hands
+        # back the exact executable moves derived from live ownership, so a
+        # consumer routes work instead of handing the operator an obligation.
+        "repair_actions": (diagnostic or {}).get("actions", [])
+        if isinstance(diagnostic, dict)
+        else [],
+        "primary_action": primary if repair_status == "ENGINEERING_REQUIRED" else None,
         "repair_status": repair_status,
+        # The retry-proof condition, when there is one: `retry_blocked` false and
+        # both detail fields empty for every recoverable status, so a consumer
+        # that ignores them keeps the previous behaviour exactly.
+        "retry_blocked": retry_blocked,
+        "retry_fingerprint": status.get("retry_fingerprint"),
+        "blocker_detail": str(status.get("blocker_detail") or ""),
         "diagnostic": diagnostic,
         "status_block": status,
     }

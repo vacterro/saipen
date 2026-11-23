@@ -1,0 +1,142 @@
+[
+  {
+    "subject": "original in-place fixture",
+    "instrumented_agent_sha256": "98cdb44d5ef4833d1a5eab8b6a6e678cc60ccf89c15c5ea4c6c94d0fd99b63bd",
+    "write_window_reached": true,
+    "state_bytes": 0,
+    "state_text": "",
+    "result": {
+      "gpu_lane": null,
+      "ok": true,
+      "code": "SUPERVISE_STOPPED",
+      "run_id": "run-9d9997c72be4",
+      "stop": "IDLE",
+      "reason": "no executable Work and no claimed Work to recover",
+      "operator_action": null,
+      "counters": {
+        "cycles": 2,
+        "worker_generation_count": 1,
+        "crash_recovery_count": 0,
+        "model_replacement_recovery_count": 0,
+        "backoff_count": 0,
+        "await_count": 0,
+        "stolen_lease_count": 0,
+        "progress_slices": 1,
+        "slow_progress_slices": 1,
+        "manual_continue_count": 0,
+        "unknown_terminal_failure_count": 0,
+        "failures": {}
+      },
+      "maximum_recovery_latency_seconds": 0.0,
+      "model": null,
+      "history": [
+        {
+          "cycle": 1,
+          "verdict": "RUN_WORK",
+          "generation": 1,
+          "model": null,
+          "returncode": 1,
+          "failure": null,
+          "progressed": true,
+          "bounded": true,
+          "output_tail": null,
+          "failure_text_tail": null
+        }
+      ]
+    },
+    "trace": [
+      {
+        "index": 0,
+        "mode": "slow_forever",
+        "pid": 2424,
+        "model": "",
+        "generation": "1",
+        "worker": "run-9d9997c72be4-c1",
+        "start": 1792102667.098686,
+        "end": null
+      }
+    ],
+    "limit": "The write interruption is deliberately widened; this proves a reachable fixture defect, not attribution of the historical failure."
+  },
+  {
+    "subject": "atomic fixture candidate",
+    "instrumented_agent_sha256": "3a7f953caae97ae3ea3195975c8684433b40336efe079c5c928032196a51e17e",
+    "write_window_reached": true,
+    "state_bytes": 214,
+    "state_text": "---\r\nphase: DONE\r\ntask: none\r\nnext_action: \"saipen continue\"\r\nblocker: \"\"\r\ntransition_from: SCOUT\r\nsaipen_version: 7\r\nschema_version: 3\r\nlast_event: 9\r\nstyle_contract: ded-069a4c52\r\nagent: tester\r\nmode: full\r\n---\r\n",
+    "result": {
+      "gpu_lane": null,
+      "ok": true,
+      "code": "SUPERVISE_STOPPED",
+      "run_id": "run-7626db65dbbc",
+      "stop": "IDLE",
+      "reason": "no executable Work and no claimed Work to recover",
+      "operator_action": null,
+      "counters": {
+        "cycles": 3,
+        "worker_generation_count": 2,
+        "crash_recovery_count": 0,
+        "model_replacement_recovery_count": 0,
+        "backoff_count": 0,
+        "await_count": 0,
+        "stolen_lease_count": 0,
+        "progress_slices": 2,
+        "slow_progress_slices": 1,
+        "manual_continue_count": 0,
+        "unknown_terminal_failure_count": 0,
+        "failures": {}
+      },
+      "maximum_recovery_latency_seconds": 0.0,
+      "model": null,
+      "history": [
+        {
+          "cycle": 1,
+          "verdict": "RUN_WORK",
+          "generation": 1,
+          "model": null,
+          "returncode": 1,
+          "failure": null,
+          "progressed": true,
+          "bounded": true,
+          "output_tail": null,
+          "failure_text_tail": null
+        },
+        {
+          "cycle": 2,
+          "verdict": "REPLACE_WORKER",
+          "generation": 2,
+          "model": null,
+          "returncode": 0,
+          "failure": null,
+          "progressed": true,
+          "bounded": false,
+          "output_tail": null,
+          "failure_text_tail": null
+        }
+      ]
+    },
+    "trace": [
+      {
+        "index": 0,
+        "mode": "slow_forever",
+        "pid": 33248,
+        "model": "",
+        "generation": "1",
+        "worker": "run-7626db65dbbc-c1",
+        "start": 1792102667.8107197,
+        "end": null
+      },
+      {
+        "index": 1,
+        "mode": "finish",
+        "pid": 12500,
+        "model": "",
+        "generation": "2",
+        "worker": "run-7626db65dbbc-c2",
+        "start": 1792102668.5372484,
+        "end": 1792102668.5382485
+      }
+    ],
+    "limit": "The write interruption is deliberately widened; this proves a reachable fixture defect, not attribution of the historical failure."
+  }
+]

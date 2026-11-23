@@ -1,0 +1,240 @@
+{
+  "database": "C:\\Users\\vac34\\.config\\freebuff-desktop\\projects\\_AUDAPACK-4f7eebe8-9eeb-44db-bce0-9e7514935b65\\desktop-v2.db",
+  "query_only": true,
+  "messages": [
+    {
+      "seq": 196,
+      "thread": "f267f617-a0f8-47f5-b617-b9393f0e61d2",
+      "role": "assistant",
+      "timestamp_ms": 1791521183573,
+      "parts_path": "message-196-parts.json",
+      "sha256": "cda6fd656ab06968a7c56ed9ae1209929ab1de29b10a035b09d0511e5db07671",
+      "parts": 106
+    },
+    {
+      "seq": 198,
+      "thread": "f267f617-a0f8-47f5-b617-b9393f0e61d2",
+      "role": "assistant",
+      "timestamp_ms": 1791521410700,
+      "parts_path": "message-198-parts.json",
+      "sha256": "845027c0ed0329e9855f15f87ff510d989e24137f4f4849dc927c7d57c524188",
+      "parts": 56
+    }
+  ],
+  "threads": [
+    {
+      "id": "f267f617-a0f8-47f5-b617-b9393f0e61d2",
+      "project_id": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+      "project_path": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+      "title": "AUDAPACK Widget Clock Hardening",
+      "harness_id": "codebuff",
+      "model": "m-ffcbc2bcf3",
+      "execution_mode": "local",
+      "branch": null,
+      "last_seen_head": null
+    }
+  ],
+  "direct_writer_carriers": [
+    {
+      "seq": 196,
+      "part": 37,
+      "thread": "f267f617-a0f8-47f5-b617-b9393f0e61d2",
+      "tool_id": "Hu8wCcsLnSE",
+      "tool": "str_replace",
+      "input": {
+        "path": ".saipen/BOARD.md",
+        "replacements": [
+          {
+            "oldString": "## DOING\r\n\r\n## DONE",
+            "newString": "## DOING\r\n- [ ] T-298 [P1] Corrective Widget clock trust-boundary hardening post T-297: P1-A unverified newer composer attachment overwrites Bridge-confirmed canonical archive (timestamp-only promotion into verified store), P1-B failed manual Send + cleared draft + delayed same-text history fabricates accepted Send (text equality without transaction identity) | baseline: 0.1.05 9c7d40b9595c605e98077d77f81e0ada8e0456ca2cbb689954f780b788e4aa25, w7-016 85/85 | owner: buffy | claim_time: 2026-10-09T02:00:00Z | closure_mode: own_patch\r\n\r\n## DONE",
+            "allowMultiple": false
+          }
+        ]
+      },
+      "status": null,
+      "exitCode": null,
+      "output": null
+    },
+    {
+      "seq": 196,
+      "part": 38,
+      "thread": "f267f617-a0f8-47f5-b617-b9393f0e61d2",
+      "tool_id": "Hu8xHqQOco0",
+      "tool": "str_replace",
+      "input": {
+        "path": ".saipen/STATE.md",
+        "replacements": [
+          {
+            "oldString": "phase: DONE\ntask: T-297\nnext_action: idle",
+            "newString": "phase: DOING\ntask: T-298\nnext_action: implement",
+            "allowMultiple": false
+          },
+          {
+            "oldString": "transition_from: VERIFY\nlast_event: 3142\nupdated: \"2026-10-09T01:09:00Z\"",
+            "newString": "transition_from: CLAIM\nlast_event: 3143\nupdated: \"2026-10-09T02:00:00Z\"",
+            "allowMultiple": false
+          }
+        ]
+      },
+      "status": null,
+      "exitCode": null,
+      "output": null
+    },
+    {
+      "seq": 196,
+      "part": 92,
+      "thread": "f267f617-a0f8-47f5-b617-b9393f0e61d2",
+      "tool_id": "Hvpuz-gxquc",
+      "tool": "str_replace",
+      "input": {
+        "path": ".saipen/BOARD.md",
+        "replacements": [
+          {
+            "oldString": "- [ ] T-298 [P1] Corrective Widget clock trust-boundary hardening post T-297: P1-A unverified newer composer attachment overwrites Bridge-confirmed canonical archive (timestamp-only promotion into verified store), P1-B failed manual Send + cleared draft + delayed same-text history fabricates accepted Send (text equality without transaction identity) | baseline: 0.1.05 9c7d40b9595c605e98077d77f81e0ada8e0456ca2cbb689954f780b788e4aa25, w7-016 85/85 | owner: buffy | claim_time: 2026-10-09T02:00:00Z | closure_mode: own_patch\r\n\r\n## DONE",
+            "newString": "## DONE\r\n- [x] T-298 [P1] Corrective Widget clock trust-boundary hardening post T-297: P1-A unverified newer attachment can no longer enter the verified canonical store (canonical always wins clock, attached stays tooltip-noted, observed-only display + session-local post-detach memory), P1-B failed Send + user-cleared duplicate text + delayed same-text history can no longer fabricate Send (capture-phase input listener poisons intent, corroboration refuses, sync retires) | verify: w7-016 89/89 incl new A11/A12 B15/B16 (4 RED pre-fix with mission signatures), full widget sweep 915/915, w6-006 85/85, w6-001 50/50, test_bridge_project_archive.py 30/30, release contracts 36/36, node --check pass, update_widget_release.py --check OK 0.1.06 5136324da8a12c2f0647cb5ef5d7eceaa854f1cd487fa474068195d642e0d610 | evidence: .saipen/evidence/T-298-widget-trust-boundary.md | owner: buffy | claim_time: 2026-10-09T02:00:00Z | closure_mode: own_patch",
+            "allowMultiple": false
+          }
+        ]
+      },
+      "status": null,
+      "exitCode": null,
+      "output": null
+    },
+    {
+      "seq": 196,
+      "part": 93,
+      "thread": "f267f617-a0f8-47f5-b617-b9393f0e61d2",
+      "tool_id": "HvpwzwgS2Cw",
+      "tool": "str_replace",
+      "input": {
+        "path": ".saipen/STATE.md",
+        "replacements": [
+          {
+            "oldString": "phase: DOING\ntask: T-298\nnext_action: implement",
+            "newString": "phase: DONE\ntask: T-298\nnext_action: idle",
+            "allowMultiple": false
+          },
+          {
+            "oldString": "transition_from: CLAIM\nlast_event: 3143\nupdated: \"2026-10-09T02:00:00Z\"",
+            "newString": "transition_from: VERIFY\nlast_event: 3144\nupdated: \"2026-10-09T02:30:00Z\"",
+            "allowMultiple": false
+          }
+        ]
+      },
+      "status": null,
+      "exitCode": null,
+      "output": null
+    },
+    {
+      "seq": 198,
+      "part": 30,
+      "thread": "f267f617-a0f8-47f5-b617-b9393f0e61d2",
+      "tool_id": "Hv2FiCaDaTc",
+      "tool": "str_replace",
+      "input": {
+        "path": ".saipen/BOARD.md",
+        "replacements": [
+          {
+            "oldString": "## DOING\r\n\r\n## DONE\r\n- [x] T-298",
+            "newString": "## DOING\r\n- [ ] T-299 [P2] Audit-bundle packaging: transient npm-cache blobs under .saipen/kitchen/tmp-control (ctrlv-probe _cacache, ~20.7 MB compressed) ship in every audit bundle; refuse npm cache segments as reproducible machine state (T-274 precedent), keep sources/tests/needed evidence | owner: buffy | claim_time: 2026-10-09T03:00:00Z | closure_mode: own_patch\r\n\r\n## DONE\r\n- [x] T-298",
+            "allowMultiple": false
+          }
+        ]
+      },
+      "status": null,
+      "exitCode": null,
+      "output": null
+    },
+    {
+      "seq": 198,
+      "part": 31,
+      "thread": "f267f617-a0f8-47f5-b617-b9393f0e61d2",
+      "tool_id": "Hv2HSmGZS5E",
+      "tool": "str_replace",
+      "input": {
+        "path": ".saipen/STATE.md",
+        "replacements": [
+          {
+            "oldString": "phase: DONE\ntask: T-298\nnext_action: idle",
+            "newString": "phase: DOING\ntask: T-299\nnext_action: implement",
+            "allowMultiple": false
+          },
+          {
+            "oldString": "transition_from: VERIFY\nlast_event: 3144",
+            "newString": "transition_from: CLAIM\nlast_event: 3145",
+            "allowMultiple": false
+          }
+        ]
+      },
+      "status": null,
+      "exitCode": null,
+      "output": null
+    },
+    {
+      "seq": 198,
+      "part": 36,
+      "thread": "f267f617-a0f8-47f5-b617-b9393f0e61d2",
+      "tool_id": "Hv3CR9-JyaU",
+      "tool": "str_replace",
+      "input": {
+        "path": "tests/test_saipen_evidence.py",
+        "replacements": [
+          {
+            "oldString": "class TestSaipenV3HardSafetyOrdering(TestSaipenContractV3Precedence):",
+            "newString": "class TestNpmCacheBlobsAreNotEvidence(SaipenEvidenceCase):\n    \"\"\"T-299: a probe's npm cache is the machine, not the project.\n\n    `.saipen/kitchen` is an OPTIONAL recursive evidence dir (real manifest),\n    so a `tmp-control/ctrlv-probe` run that pointed `npm_config_cache` at a\n    probe-local directory ships its whole `_cacache` blob store -- ~20.7 MB\n    compressed -- in every audit bundle. The blobs are reproducible by\n    running npm again and say nothing about the project, so they are refused\n    wherever they sit INSIDE the memory root (T-274 precedent), as a NAMED\n    transient omission. Probe notes, sources and tests are unaffected: the\n    ban names cache segments only, and applies inside `.saipen` alone.\n    \"\"\"\n\n    PROBE = \".saipen/kitchen/tmp-control/ctrlv-probe\"\n\n    #: The layout npm actually writes under a cache root.\n    REFUSED_BLOBS = (\n        \"_cacache/content-v2/sha512/ab/cd/blobdata\",\n        \"_cacache/content-v2/sha512/ef/01/moreblobdata\",\n        \"_cacache/index-v5/11/22/entryjson\",\n        \"_cacache/tmp/manifest-fetch-1a2b3c.json\",\n    )\n\n    #: Probe material that must keep shipping.\n    KEPT_NOTES = (\n        \"probe.json\",\n        \"run.log\",\n        \"ctrlv-probe.md\",\n    )\n\n    def _doc(self):\n        doc = TestSaipenContractV3Precedence._v3_contract(None)\n        doc[\"evidence\"][\"optional\"] = [\n            {\"kind\": \"dir\", \"path\": \"kitchen\", \"recursive\": True, \"max_files\": 500},\n        ]\n        return doc\n\n    def _contract(self):\n        return se.read_contract_from_document(self._doc())\n\n    def test_npm_cache_blobs_are_refused_as_transient(self):\n        contract = self._contract()\n        for tail in self.REFUSED_BLOBS:\n            rel = f\"{self.PROBE}/{tail}\"\n            with self.subTest(rel=rel):\n                self.assertEqual(\n                    se.export_decision(rel, contract),\n                    (False, se.EXPORT_RULE_TRANSIENT),\n                )\n                self.assertTrue(se.is_non_exportable(rel, contract))\n\n    def test_probe_notes_sources_and_tests_stay_exportable(self):\n        contract = self._contract()\n        for tail in self.KEPT_NOTES:\n            rel = f\"{self.PROBE}/{tail}\"\n            with self.subTest(rel=rel):\n                exportable, _rule = se.export_decision(rel, contract)\n                self.assertTrue(exportable, rel)\n        for rel in (\n            \".saipen/kitchen/T-158-validation.md\",\n            \".saipen/STATE.md\",\n            \"src/app.py\",\n        ):\n            with self.subTest(rel=rel):\n                exportable, rule = se.export_decision(rel, contract)\n                self.assertTrue(exportable, rel)\n                self.assertIn(rule, (\"\", se.EXPORT_RULE_DURABLE))\n\n    def test_the_ban_is_named_and_the_pack_drops_the_cache(self):\n        sp = self.write_saipen(contract=self._doc())\n        probe = sp / \"kitchen\" / \"tmp-control\" / \"ctrlv-probe\"\n        for tail in self.REFUSED_BLOBS:\n            blob = probe / tail\n            blob.parent.mkdir(parents=True, exist_ok=True)\n            blob.write_bytes(b\"\\x00\" * 4096)\n        for tail in self.KEPT_NOTES:\n            (probe / tail).write_text(\"kept\\n\", encoding=\"utf-8\")\n        (sp / \"kitchen\" / \"T-158-validation.md\").write_text(\"kept\\n\", encoding=\"utf-8\")\n        self.commit()\n\n        blob_rels = [f\"{self.PROBE}/{tail}\" for tail in self.REFUSED_BLOBS]\n        inv = self.inventory()\n        included = self.included(inv)\n        for rel in blob_rels:\n            with self.subTest(rel=rel):\n                self.assertNotIn(rel, included)\n        excluded = {entry.rel: entry for entry in inv.excluded_entries()}\n        for rel in blob_rels:\n            with self.subTest(rel=rel):\n                self.assertEqual(excluded[rel].reason, se.REASON_SAIPEN_NON_EXPORTABLE)\n        for tail in self.KEPT_NOTES:\n            self.assertIn(f\"{self.PROBE}/{tail}\", included)\n        self.assertIn(\".saipen/kitchen/T-158-validation.md\", included)\n\n        result = pack_single(\n            source_path=self.repo,\n            output_dir=self.output,\n            archive_stem=\"Proj\",\n            excludes=set(),\n            delete_old=True,\n            include_timestamp=False,\n            manifest_meta={\"project_name\": \"Proj\"},\n            packing=PackingConfig(),\n        )\n        self.assertTrue(result.success, result.error_message)\n        with zipfile.ZipFile(result.output_path) as zf:\n            names = set(zf.namelist())\n        for rel in blob_rels:\n            with self.subTest(rel=rel):\n                self.assertNotIn(rel, names)\n        for tail in self.KEPT_NOTES:\n            self.assertIn(f\"{self.PROBE}/{tail}\", names)\n\n\nclass TestSaipenV3HardSafetyOrdering(TestSaipenContractV3Precedence):",
+            "allowMultiple": false
+          }
+        ]
+      },
+      "status": null,
+      "exitCode": null,
+      "output": null
+    },
+    {
+      "seq": 198,
+      "part": 47,
+      "thread": "f267f617-a0f8-47f5-b617-b9393f0e61d2",
+      "tool_id": "Hv6ke1z_xtc",
+      "tool": "str_replace",
+      "input": {
+        "path": ".saipen/BOARD.md",
+        "replacements": [
+          {
+            "oldString": "- [ ] T-299 [P2] Audit-bundle packaging: transient npm-cache blobs under .saipen/kitchen/tmp-control (ctrlv-probe _cacache, ~20.7 MB compressed) ship in every audit bundle; refuse npm cache segments as reproducible machine state (T-274 precedent), keep sources/tests/needed evidence | owner: buffy | claim_time: 2026-10-09T03:00:00Z | closure_mode: own_patch\r\n\r\n## DONE",
+            "newString": "## DONE\r\n- [x] T-299 [P2] Audit-bundle packaging: transient npm-cache blobs under .saipen/kitchen/tmp-control (ctrlv-probe _cacache, ~20.7 MB compressed) refused as reproducible machine state via _REPRODUCIBLE_CACHE_SEGMENTS += _cacache/content-v2/index-v5 (T-274 precedent, named transient omission, memory-root-only); probe notes, kitchen docs, sources, tests unaffected | verify: new TestNpmCacheBlobsAreNotEvidence 3/3 (2 RED pre-fix), test_saipen_evidence.py 107 passed + 1 skip, packing/projects/freshness 124 passed + 1 skip, ruff/compileall clean | owner: buffy | claim_time: 2026-10-09T03:00:00Z | closure_mode: own_patch",
+            "allowMultiple": false
+          }
+        ]
+      },
+      "status": null,
+      "exitCode": null,
+      "output": null
+    },
+    {
+      "seq": 198,
+      "part": 48,
+      "thread": "f267f617-a0f8-47f5-b617-b9393f0e61d2",
+      "tool_id": "Hv6l3jOa0ac",
+      "tool": "str_replace",
+      "input": {
+        "path": ".saipen/STATE.md",
+        "replacements": [
+          {
+            "oldString": "phase: DOING\ntask: T-299\nnext_action: implement",
+            "newString": "phase: DONE\ntask: T-299\nnext_action: idle",
+            "allowMultiple": false
+          },
+          {
+            "oldString": "transition_from: CLAIM\nlast_event: 3145",
+            "newString": "transition_from: VERIFY\nlast_event: 3146",
+            "allowMultiple": false
+          }
+        ]
+      },
+      "status": null,
+      "exitCode": null,
+      "output": null
+    }
+  ],
+  "target_mutations": []
+}

@@ -1,0 +1,17 @@
+# T-1579 classify-arity red control (pre-fix)
+
+## RED: omitted CLASS argument
+REFUSE [NOT_SAIPEN_PROJECT]
+reason: store and artifact operations require a SAIPEN project
+
+## RED: extra argument
+REFUSE [NOT_SAIPEN_PROJECT]
+reason: store and artifact operations require a SAIPEN project
+
+## GREEN control: unknown verb answers with usage
+REFUSE [VALIDATION_FAILED]
+reason: saipen storage status|classify <path> <DURABLE|EPHEMERAL|CACHE|EXTERNAL>|durable show|set|add|remove <root>|ephemeral show|add|remove <root>|scratch show|set <root>|unset|store list|declare <name> <class> <path> <lifetime> <owner> <recovery>|verify|promote <id> <source> <store> [--sha256 <hash>]...
+
+## GREEN control: sibling root verb arity
+REFUSE [VALIDATION_FAILED]
+reason: saipen storage status|classify <path> <DURABLE|EPHEMERAL|CACHE|EXTERNAL>|durable show|set|add|remove <root>|ephemeral show|add|remove <root>|scratch show|set <root>|unset|store list|declare <name> <class> <path> <lifetime> <owner> <recovery>|verify|promote <id> <source> <store> [--sha256 <hash>]...

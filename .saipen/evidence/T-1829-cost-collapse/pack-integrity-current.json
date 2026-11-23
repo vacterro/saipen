@@ -1,0 +1,29 @@
+[
+  {
+    "pack": ".git\\objects\\pack\\pack-25aa11994f92824011521de47180037c48a5b413.idx",
+    "index_sha256": "4977bc560df27d8d68febbe61ce1112edfb7bfbdf0af3bcacb40e56a0789463e",
+    "exit_code": 0,
+    "tail": [
+      ".git\\objects\\pack\\pack-25aa11994f92824011521de47180037c48a5b413.pack: ok"
+    ],
+    "stderr": ""
+  },
+  {
+    "pack": ".git\\objects\\pack\\pack-72c0bddcf4e224f10bd06909900932c0074f97e1.idx",
+    "index_sha256": "edd2d74d17524d74379558bdc166f2f2ba2a7276b82b090a922fe1ed578c829b",
+    "exit_code": 0,
+    "tail": [
+      ".git\\objects\\pack\\pack-72c0bddcf4e224f10bd06909900932c0074f97e1.pack: ok"
+    ],
+    "stderr": ""
+  },
+  {
+    "pack": ".git\\objects\\pack\\pack-bba75ab17a360f45057e87fef3a3eec1a450166b.idx",
+    "index_sha256": "fc5bccef1a5c02428ce7e68246ed78856bd9ad4153f1df6ee0cd2b098193b828",
+    "exit_code": 0,
+    "tail": [
+      ".git\\objects\\pack\\pack-bba75ab17a360f45057e87fef3a3eec1a450166b.pack: ok"
+    ],
+    "stderr": ""
+  }
+]

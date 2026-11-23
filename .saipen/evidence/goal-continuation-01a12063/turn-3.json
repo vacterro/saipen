@@ -1,0 +1,126 @@
+{
+  "observed_at_utc": "2026-10-09T13:36:46.029236+00:00",
+  "goal_turn": 3,
+  "previous_goal_turn_classification": "NO_PROGRESS",
+  "current_goal_turn_classification": "NO_PROGRESS",
+  "consecutive_turns_with_same_blocker": 3,
+  "same_blocking_condition_verified": true,
+  "workable_by_canonical_board_owner": [],
+  "board_counts": {
+    "## DONE": 188,
+    "## BLOCKED": 62
+  },
+  "route": {
+    "reason": "audit-inbox-unworkable",
+    "action": "saipen audit status",
+    "load_path": null,
+    "executable_behavior": "RESTATE_AND_STOP",
+    "goal_waves": 0,
+    "goal_tickets": 11
+  },
+  "automation": {
+    "schema_version": 1,
+    "disposition": "BLOCKED",
+    "next_command": null,
+    "operator_action_due": false,
+    "reason_code": "audit-inbox-unworkable",
+    "reason": "audit inbox has no workable ACTIVE or NEW layer; linked Work for the remaining ACTIVE layer(s) is not currently workable",
+    "audit_quiescent": false,
+    "audit_epoch": "audit-epoch-v1:76c7a8be877b63b30f207dd8648346f462b42c2f277dfca0f2efb92b29d088f1",
+    "convergence_current": false,
+    "closure_complete": false,
+    "source_fingerprint": "025bf596c683464788ab698248e8a3c5eb44dfec+git-delta-v1:658607decd348a4db3afc26cadd3b2c805d8c4465cd40bedeb533aa6091c8e33",
+    "completed_at": null
+  },
+  "audit_pending": [
+    {
+      "layer": 23,
+      "path": "audit/23.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-167",
+      "work": "T-1606",
+      "sha256": "e65de1f0c46a5857799fecdccfdd4f18961961805462d7b9cc053489c8e5f01c"
+    }
+  ],
+  "candidate_hash_checks": [
+    {
+      "path": "saipen/REGISTRY.json",
+      "sha256": "cab2bcf6fe8b56cd4f09a57e519fad98e238dd036b4977e0ef55111db2a6381f",
+      "matches_manifest": true
+    },
+    {
+      "path": "saipen/COMMANDS.md",
+      "sha256": "90852ebf4a971692d6f5868c51b21c6ca41895e32457907979ef4c2a64ac4b5d",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen.py",
+      "sha256": "ee18e6c972a7a02ad071dedba7f112fd10be9a205f7060fa1c6b59931d15e742",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/validate.py",
+      "sha256": "8d4b671033ba637d025b3344fe05e372b8d4b2e0c3ea8a2fa7b991e874241e09",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/state.py",
+      "sha256": "2f63ff2dc2c02113470fd2b255e41ebe11630c75065ee8258636873c94c78da7",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/phases.py",
+      "sha256": "88834aedc6cbe4f46f75f02879cf889d6f68be06fb8f5e16fbcd2085aae87e9c",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/fast_check.py",
+      "sha256": "914958fa78105c5ae95a3c3a6e2552ab6694856a7736c4afba3175a4f496fdc9",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/reconcile.py",
+      "sha256": "7637becdffb8d955c84591fc461cab9e6da69008052429efa4f782642389a44d",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/operations.py",
+      "sha256": "b795f364a7de7b82ec77e16c98f0024a80a2a0087342b31ebe0f313df7080317",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/subs.py",
+      "sha256": "1f1bfbec77225b63d41bb12ecca5a920a9a08ab0c0ead543bd979116bf2f422e",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/saipen_engine/router.py",
+      "sha256": "fe1b6a4980c18950d0b2e9c9ff1d074f3a2b996934a411aa406618da8cf11034",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/test_next_action_deadlock.py",
+      "sha256": "2fa15ee02e28debdb39867bc09bead994eb82af0709fe2716a33a66116f3b14c",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/test_refusal_registry.py",
+      "sha256": "0043415ce3d028d631c17a2ef6911a23876ff53db020efda29f72e136b1cff25",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/test_recovery_reachability.py",
+      "sha256": "695ff50bb7b7ba03b11c4b5db4258731241bdf23f213eaf4818d9f941d9f7112",
+      "matches_manifest": true
+    },
+    {
+      "path": "tools/test_next_action_grammar.py",
+      "sha256": "bc9334c3a67961448ce787f7b1b342bc2fb18603e7b2f6ee025ab5ca3afcaca0",
+      "matches_manifest": true
+    }
+  ],
+  "checkpoint_bytes_unchanged_by_reads": true,
+  "root_goal_decision": "BLOCKED audit threshold met; call update_goal(blocked), never complete or reset the original objective.",
+  "required_change": "Materially changed evidence resolving the preserved T-1606 failures, or actual new external/operator authority admitting independent Work; unchanged retry is forbidden. Existing external/publication/triage boundaries remain.",
+  "not_a_verified_wait": "No live handle is being awaited; the prior full family is terminal."
+}

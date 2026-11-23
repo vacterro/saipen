@@ -1,0 +1,128 @@
+{
+  "subjects": {
+    "paths-dbbfad946.py": {
+      "commit": "dbbfad94688515d604b54e2c97dc92aa5fa7eab1",
+      "git_path": "tools/saipen_engine/paths.py",
+      "sha256": "0954686d644fca3ee9db43dc12602eeb7bc660b639d3456c4c3d3da9ab582662"
+    },
+    "manifest-8f91d779.py": {
+      "commit": "8f91d779cc4d65f6e1db952eee58db7fb3b14a78",
+      "git_path": "tools/saipen_engine/audit_manifest.py",
+      "sha256": "66ee10bdd75118966951ed52cfbd321907394862798d6e5b30e3b9b86dbeb33c"
+    },
+    "manifest-c7e25f92.py": {
+      "commit": "c7e25f9281934de8f38da26d2dd599f358c77f79",
+      "git_path": "tools/saipen_engine/audit_manifest.py",
+      "sha256": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b"
+    },
+    "reconcile-b2343541.py": {
+      "commit": "b2343541e3ebe939bc583408a173c54aeb57939b",
+      "git_path": "tools/saipen_engine/reconcile.py",
+      "sha256": "57f4e0ed985d9b7fa43803ca66449f2c051473ff92b6dfd4d9e660457854a474"
+    }
+  },
+  "reproductions": [
+    {
+      "manifest_subject": "manifest-8f91d779.py",
+      "paths_subject": "paths-dbbfad946.py",
+      "scope": "exact committed modules; current stdlib and explicit protocol_dir",
+      "injected_denial": true,
+      "escaped": {
+        "type": "ValueError",
+        "message": "audit manifest ancestor V:\\_TEMP_\\saipen-ag3-history-95y9d18t unreadable: [WinError 5] Access is denied: 'V:\\\\_TEMP_\\\\saipen-ag3-history-95y9d18t'",
+        "windows_error": 5,
+        "frames": [
+          {
+            "function": "main",
+            "line": 78,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\history.py"
+          },
+          {
+            "function": "ensure",
+            "line": 488,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\manifest-8f91d779.py"
+          },
+          {
+            "function": "write",
+            "line": 562,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\manifest-8f91d779.py"
+          },
+          {
+            "function": "safe_atomic_write_bytes",
+            "line": 242,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\paths-dbbfad946.py"
+          },
+          {
+            "function": "prove_owned_dir_chain",
+            "line": 149,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\paths-dbbfad946.py"
+          }
+        ]
+      },
+      "canonical_bytes_unchanged": true
+    },
+    {
+      "manifest_subject": "manifest-c7e25f92.py",
+      "paths_subject": "paths-dbbfad946.py",
+      "scope": "exact committed modules; current stdlib and explicit protocol_dir",
+      "injected_denial": true,
+      "escaped": {
+        "type": "ValueError",
+        "message": "audit manifest ancestor V:\\_TEMP_\\saipen-ag3-history-4kmwcl9w unreadable: [WinError 5] Access is denied: 'V:\\\\_TEMP_\\\\saipen-ag3-history-4kmwcl9w'",
+        "windows_error": 5,
+        "frames": [
+          {
+            "function": "main",
+            "line": 78,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\history.py"
+          },
+          {
+            "function": "ensure",
+            "line": 700,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\manifest-c7e25f92.py"
+          },
+          {
+            "function": "write",
+            "line": 795,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\manifest-c7e25f92.py"
+          },
+          {
+            "function": "safe_atomic_write_bytes",
+            "line": 242,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\paths-dbbfad946.py"
+          },
+          {
+            "function": "prove_owned_dir_chain",
+            "line": 149,
+            "file": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AG3-runtime-20261011\\historical-subjects\\paths-dbbfad946.py"
+          }
+        ]
+      },
+      "canonical_bytes_unchanged": true
+    }
+  ],
+  "history": {
+    "tools/saipen_engine/audit_manifest.py": "c7e25f9281934de8f38da26d2dd599f358c77f79 2026-09-23T22:33:01+03:00 VAC34 fix(audit): exported snapshots carry the LOG detail their detail_ref cites (T-1374)\nb1d7c22ffdd4262e690bdd9a1b8c5580b6c2e508 2026-09-22T18:42:38+03:00 VAC34 feat(runtime): integrate the reviewed runtime delta since d97abdc0 (T-1454)\n2eecc65c00ed9667b7c5f70259c05f97b062ee2d 2026-09-19T16:22:01+03:00 VAC34 feat(source): quarantine receipt bodies from distribution while preserving authority\nd4bb4738a534fe3a7cbbf0bc9a3c4371df1ea83d 2026-09-17T00:27:16+03:00 VAC34 fix(audit): a proof the contract never declared does not survive its own regeneration\n8f91d779cc4d65f6e1db952eee58db7fb3b14a78 2026-09-15T13:36:08+03:00 VAC34 chore(audit-manifest): track cross-repo snapshot contract under T-1328\n",
+    "tools/saipen_engine/paths.py": "fb91135ab9b59520485edcd3a0c73bb395cc663a 2026-10-02T04:06:33+03:00 VAC34 fix(engine): ship the accumulated tools/ code delta as one unit\n8aedb43b4cb602e5bd53aaf4d9e722da55ee3d93 2026-09-24T03:20:30+03:00 VAC34 fix(supervise): a crashed generation's claim continues in its same-run successor (T-1500)\ncaa96f690bbc52fd509cf8cffbb0d50977397ef6 2026-09-21T01:15:34+03:00 VAC34 feat(recovery): T-1434 protocol recovery -- finite closure, external resolution, source retirement, improve reconcile, remediation contract, foreign observation\n14c8675b309872b90be6ee7884a77e4d049423aa 2026-09-18T00:15:04+03:00 VAC34 fix(binding): a leftover carrier is not a host saying where it is\nef654110ab4c2462e1074caaa6982a91efcb66c7 2026-09-15T18:43:04+03:00 VAC34 fix(distribution): freshness proves the executed runtime, not a stamp or a doc tuple\nb2343541e3ebe939bc583408a173c54aeb57939b 2026-09-15T15:25:20+03:00 VAC34 fix(recovery): legacy lifecycle compatibility + reachable allocation-identity stop\nb23019f4aec536eb4902d6aabb39994d39003177 2026-08-31T09:19:52+03:00 VAC34 ship v7.231.11: W4/W5 audit implementation + PERF-006 (T-1208)\ndbbfad94688515d604b54e2c97dc92aa5fa7eab1 2026-08-27T23:33:14+03:00 VAC34 ship v7.231.9\n",
+    "tools/saipen_engine/host_bootstrap.py": "464003066fd9c21789500d1e9d61c80d989a2638 2026-09-20T21:48:37+03:00 VAC34 feat(runtime): commit host bootstrap runtime and its tests\n",
+    "tools/saipen_engine/machine_runtime.py": "",
+    "tools/saipen_engine/protocol_admission.py": "fb91135ab9b59520485edcd3a0c73bb395cc663a 2026-10-02T04:06:33+03:00 VAC34 fix(engine): ship the accumulated tools/ code delta as one unit\n7009c0bee26cbbd4bdc3064eadbe7c1da474423e 2026-10-01T21:33:34+03:00 VAC34 fix(improve): declare the rebind action the CLI already implements\n",
+    "tools/saipen_engine/admission.py": "9975126f6c9d2c806ac5ceb574384a7bf998f28a 2026-10-02T15:56:40+03:00 VAC34 fix(audit): execute the audit/20 layer T-1544 (SRC-128)\nfb91135ab9b59520485edcd3a0c73bb395cc663a 2026-10-02T04:06:33+03:00 VAC34 fix(engine): ship the accumulated tools/ code delta as one unit\n8aedb43b4cb602e5bd53aaf4d9e722da55ee3d93 2026-09-24T03:20:30+03:00 VAC34 fix(supervise): a crashed generation's claim continues in its same-run successor (T-1500)\n0c5ced58be5ba6b90a136c4f2afe0414e84c4725 2026-09-23T21:12:14+03:00 VAC34 fix(guard): one scratch file gets one answer on every surface (T-1387)\n28a6de8e1f6ed048e60d0e1e228a2232e05fa836 2026-09-23T18:31:41+03:00 VAC34 fix(guard): common read-only reporters are admitted, setting forms are not (T-1402)\ncaa96f690bbc52fd509cf8cffbb0d50977397ef6 2026-09-21T01:15:34+03:00 VAC34 feat(recovery): T-1434 protocol recovery -- finite closure, external resolution, source retirement, improve reconcile, remediation contract, foreign observation\nbf8b57f563ca1eafb2c33322f632717f075c9302 2026-09-19T00:00:49+03:00 VAC34 fix(guard): the canonical route lives in the refusal verdict\n8cd798cc5ffa2ea87470fea069bb4da68cdb0e91 2026-09-17T17:55:47+03:00 VAC34 fix(ownership): a name is not a process, so a claim now says which session\n",
+    "tools/saipen_engine/state.py": "da23881f2291fa8b9fd7ba13b1ad1fa2072938c1 2026-10-03T04:47:06+03:00 VAC34 fix(authority): ingress persistence must not escalate to operator preemption\nfb91135ab9b59520485edcd3a0c73bb395cc663a 2026-10-02T04:06:33+03:00 VAC34 fix(engine): ship the accumulated tools/ code delta as one unit\n08505b6b072ee12fc3098b5d575b05bcfaa4542f 2026-09-28T00:43:11+03:00 VAC34 fix(recover): an empty optional intent field is unset, not corruption (T-1173)\nf40952af5a1bd634d58437941ccc493964414caf 2026-09-19T23:35:27+03:00 VAC34 feat(routing): parked operator gate holds Improve discovery\nb5151a905ae141dc5d7681c21dfae734f2d3d23e 2026-09-15T22:31:07+03:00 VAC34 fix(guard): a blocked project stops the work that depends on it, not the agent\nb2343541e3ebe939bc583408a173c54aeb57939b 2026-09-15T15:25:20+03:00 VAC34 fix(recovery): legacy lifecycle compatibility + reachable allocation-identity stop\nb23019f4aec536eb4902d6aabb39994d39003177 2026-08-31T09:19:52+03:00 VAC34 ship v7.231.11: W4/W5 audit implementation + PERF-006 (T-1208)\nca45989396707e314b1414bdca1225b8cdaac00c 2026-08-24T19:01:59+03:00 VAC34 ship v7.226.2\n",
+    "tools/saipen_engine/reconcile.py": "ac12754654c9750503ba0073ee165be645882247 2026-10-05T07:28:23+03:00 VAC34 chore(state): T-1614 DONE, audit route followed, T-1615 projected as SRC-177\n677989b84df3a42d815fe181ceb74f39e921f962 2026-10-03T06:14:31+03:00 VAC34 T-150: bound legacy DONE execution proof to the ticket's own generation\nfb91135ab9b59520485edcd3a0c73bb395cc663a 2026-10-02T04:06:33+03:00 VAC34 fix(engine): ship the accumulated tools/ code delta as one unit\n08505b6b072ee12fc3098b5d575b05bcfaa4542f 2026-09-28T00:43:11+03:00 VAC34 fix(recover): an empty optional intent field is unset, not corruption (T-1173)\n481081bdf3b056a005c021a189b3889d8d804d37 2026-09-22T19:37:57+03:00 VAC34 feat(sources): operational handoff appends are mission state (T-1461, SRC-104)\nb1d7c22ffdd4262e690bdd9a1b8c5580b6c2e508 2026-09-22T18:42:38+03:00 VAC34 feat(runtime): integrate the reviewed runtime delta since d97abdc0 (T-1454)\nd97abdc097db432bafe2316b1e3577e44cd9cc4c 2026-09-21T01:48:13+03:00 VAC34 fix(protocol): dependency resume restores no synthetic live claim; queued user Source wakes (T-1436, SRC-092)\nf40952af5a1bd634d58437941ccc493964414caf 2026-09-19T23:35:27+03:00 VAC34 feat(routing): parked operator gate holds Improve discovery\n"
+  },
+  "T1328_canonical_log": [
+    "- 15.09.26 10:33 [E-6253] [parent: E-6252] [T-1328] [agent: codex] [op: ticket-d16b956ebbf540ffa91f991ef7066f14] DEC: ticket added via SAIOPS",
+    "- 15.09.26 10:33 [E-6254] [parent: E-6253] [T-1328] [agent: codex] [op: claim-4685e2385a334986aa29671812312769] DEC: claimed via SAIOPS -- owner codex",
+    "- 15.09.26 10:34 [E-6255] [parent: E-6254] [T-1328] [agent: codex] [op: transition-7a3efc77d7a744ae9d20b5c936219390] RUN: transition to BUILD -- SCOUT: audit-manifest contract implementation is present in the worktree as tools/saipen_engine/audit_manifest.py plus tools/test_audit_manifest.py, enrolled through reconcile.ensure and exposed as saipen audit manifest. Both files are untracked, so every clone ships an incomplete runtime while this home validates. Owner: this ticket.",
+    "- 15.09.26 10:38 [E-6256] [parent: E-6255] [T-1328] [agent: codex] [op: transition-9d43b5dcbec047439078568ecc0309ec] RUN: transition to VERIFY -- BUILD: no new implementation; the audit-manifest contract was already present and is now canonically owned by T-1328. Committed exactly tools/saipen_engine/audit_manifest.py and tools/test_audit_manifest.py at 8f91d779, which clears both runtime-manifest untracked FAILs in the core gate. VERIFY harness: tools/test_audit_manifest.py.",
+    "- 15.09.26 10:38 [E-6257] [parent: E-6256] [T-1328] [agent: codex] [op: checkpoint-2fd996324d834b3d843e40d75f2e33c8] RUN: VERIFY PASS for T-1328 -- tools/test_audit_manifest.py 33/33 OK with host env cleared; ruff clean on both files; runtime-manifest untracked problems dropped 11 to 9 and the remaining 9 are the pre-existing CORE-003 allocation debt conf: high",
+    "- 15.09.26 10:38 [E-6258] [parent: E-6257] [T-1328] [agent: codex] [op: transition-50a0d275176d4ec593debf476d8b0a9e] RUN: transition to REVIEW -- independent re-run of tools/test_audit_manifest.py 33/33 OK conf: high",
+    "- 15.09.26 10:38 [E-6260] [parent: E-6259] [T-1328] [agent: codex] [op: transition-1f01a8fdd1984af78f451a18e91e480a] RUN: transition to SHIP -- REVIEW verdict SHIP -- the two files are the reviewed scope, committed at 8f91d779; no other implementation in this ticket",
+    "- 15.09.26 10:38 [E-6261] [parent: E-6260] [T-1328] [agent: codex] [op: finish-628a3bb7267844ed92947e814924d4e1] DEC: ticket finished via SAIOPS -- completion (from SHIP)"
+  ],
+  "T1171_committed_board": [
+    "- [/] T-1171 [P1] Implement SAIPEN__00_AUDIT_ALL_3.md to end - complete all 32 tickets | verify: Implement SAIPEN__00_AUDIT_ALL_3.md to end - complete all 32 tickets is complete and the repository-declared verification harness passes | owner: codex | claim_time: 2026-08-27T18:02:50Z | source_receipts: SRC-003"
+  ],
+  "attribution_limit": "Git VAC34 is an author identity, not a model; T1328 codex records ownership of registration and verification, explicitly not original implementation. No verified previous Gemini executor boundary supplied."
+}

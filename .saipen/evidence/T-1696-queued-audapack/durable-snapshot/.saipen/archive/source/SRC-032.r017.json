@@ -1,0 +1,94 @@
+{
+  "clauses": {
+    "SRC-032:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: custom and default Bridge update paths both work; exactly one updateURL and one downloadURL"
+    },
+    "SRC-032:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002: diagnostics redaction satisfies Windows- and POSIX-shaped inputs independently of host"
+    },
+    "SRC-032:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003: the declared Ubuntu/Windows Python CI retry contract is green"
+    },
+    "SRC-032:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-004: component tests pass under pytest AND under direct unittest discovery"
+    },
+    "SRC-032:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-005: installer profile liveness is based on the dedicated profile, not generic audit-lane activity"
+    },
+    "SRC-032:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-006: VERSION, package and widget release identity are synchronized"
+    },
+    "SRC-032:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001: terminal publication has one truthful commit boundary across quick3, super10 and compress"
+    },
+    "SRC-032:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-002: concurrent audit producers cannot overwrite the same canonical layer"
+    },
+    "SRC-032:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-003: INAUDIT archive/restore survives every injected partial move"
+    },
+    "SRC-032:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-004: a recovered Win32 instance preserves the primary single-instance namespace after the zombie exits"
+    },
+    "SRC-032:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-005: the dispatch generation is monotonic across restart recovery and immediately observable by the UI"
+    },
+    "SRC-032:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-006: Bridge supervisor shutdown cannot launch work after stop"
+    },
+    "SRC-032:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-007: auth migration tests are order-independent with no filesystem state leaking between cases"
+    },
+    "SRC-032:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-001: bundled widget build metadata is not reread per worker/status/poll and invalidates on a real build change"
+    },
+    "SRC-032:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-002: authentication no longer rebuilds the full config; rotation and revocation still take effect without restart"
+    },
+    "SRC-032:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-003: the periodic refresh performs one browser-status fetch and no forced audit rescan of unchanged history"
+    },
+    "SRC-032:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-004: freshness reuse only traverses files that could enter the archive"
+    }
+  },
+  "derived_at": "2026-09-04T02:01:11Z",
+  "derived_from": "SRC-032",
+  "interpretation_revision": 17,
+  "schema_version": 1,
+  "source_sha256": "77dc8f3304f05e105c28ae769fa551283b843edb57a5eadad99f0c4276fb5fa0"
+}

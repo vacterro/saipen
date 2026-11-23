@@ -1,0 +1,179 @@
+.EEEEEEE.F.EEE.EEEEE
+======================================================================
+ERROR: test_a_hostile_field_is_bounded_not_trusted (test_t1649_refusal_step.BrokerRefusalLineTests.test_a_hostile_field_is_bounded_not_trusted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 178, in test_a_hostile_field_is_bounded_not_trusted
+    service = self._broker(_refusing(long_step))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 81, in _broker
+    return broker.Broker(
+           ^^^^^^^^^^^^^^
+TypeError: Broker.__init__() got an unexpected keyword argument 'refusal_sink'
+
+======================================================================
+ERROR: test_a_refused_client_leaves_one_line_naming_the_step (test_t1649_refusal_step.BrokerRefusalLineTests.test_a_refused_client_leaves_one_line_naming_the_step)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 96, in test_a_refused_client_leaves_one_line_naming_the_step
+    service = self._broker(_refusing())
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 81, in _broker
+    return broker.Broker(
+           ^^^^^^^^^^^^^^
+TypeError: Broker.__init__() got an unexpected keyword argument 'refusal_sink'
+
+======================================================================
+ERROR: test_an_admitted_client_writes_no_line (test_t1649_refusal_step.BrokerRefusalLineTests.test_an_admitted_client_writes_no_line)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 163, in test_an_admitted_client_writes_no_line
+    service = self._broker(_proven)
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 81, in _broker
+    return broker.Broker(
+           ^^^^^^^^^^^^^^
+TypeError: Broker.__init__() got an unexpected keyword argument 'refusal_sink'
+
+======================================================================
+ERROR: test_every_identity_step_is_named (test_t1649_refusal_step.BrokerRefusalLineTests.test_every_identity_step_is_named)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 127, in test_every_identity_step_is_named
+    self._ask(self._broker(_refusing(step)))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 81, in _broker
+    return broker.Broker(
+           ^^^^^^^^^^^^^^
+TypeError: Broker.__init__() got an unexpected keyword argument 'refusal_sink'
+
+======================================================================
+ERROR: test_the_line_carries_what_was_seen_and_nothing_else (test_t1649_refusal_step.BrokerRefusalLineTests.test_the_line_carries_what_was_seen_and_nothing_else)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 110, in test_the_line_carries_what_was_seen_and_nothing_else
+    service = self._broker(_refusing())
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 81, in _broker
+    return broker.Broker(
+           ^^^^^^^^^^^^^^
+TypeError: Broker.__init__() got an unexpected keyword argument 'refusal_sink'
+
+======================================================================
+ERROR: test_the_lines_are_capped_and_the_counts_go_on (test_t1649_refusal_step.BrokerRefusalLineTests.test_the_lines_are_capped_and_the_counts_go_on)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 168, in test_the_lines_are_capped_and_the_counts_go_on
+    service = self._broker(_refusing())
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 81, in _broker
+    return broker.Broker(
+           ^^^^^^^^^^^^^^
+TypeError: Broker.__init__() got an unexpected keyword argument 'refusal_sink'
+
+======================================================================
+ERROR: test_the_service_sink_is_the_stream_its_log_receives (test_t1649_refusal_step.BrokerRefusalLineTests.test_the_service_sink_is_the_stream_its_log_receives)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 139, in test_the_service_sink_is_the_stream_its_log_receives
+    refusal_sink=broker.service_log_line,
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.host_authority_broker' has no attribute 'service_log_line'
+
+======================================================================
+ERROR: test_a_degraded_prompt_records_the_step (test_t1649_refusal_step.HealthRecordTests.test_a_degraded_prompt_records_the_step)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 264, in test_a_degraded_prompt_records_the_step
+    self.assertEqual(record["step"], STEP)
+                     ~~~~~~^^^^^^^^
+KeyError: 'step'
+
+======================================================================
+ERROR: test_a_refused_prompt_records_the_step (test_t1649_refusal_step.HealthRecordTests.test_a_refused_prompt_records_the_step)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 273, in test_a_refused_prompt_records_the_step
+    self.assertEqual(self._health()["step"], STEP)
+                     ~~~~~~~~~~~~~~^^^^^^^^
+KeyError: 'step'
+
+======================================================================
+ERROR: test_a_session_start_records_the_step (test_t1649_refusal_step.HealthRecordTests.test_a_session_start_records_the_step)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 280, in test_a_session_start_records_the_step
+    self.assertEqual(self._health()["step"], STEP)
+                     ~~~~~~~~~~~~~~^^^^^^^^
+KeyError: 'step'
+
+======================================================================
+ERROR: test_a_refusal_names_the_step (test_t1649_refusal_step.TheStepTravelsTests.test_a_refusal_names_the_step)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 206, in test_a_refusal_names_the_step
+    verdict = admission._refusal(self._problems())
+                                 ^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 189, in _problems
+    return [taxonomy.problem("transport", "AUTHORITY_CLIENT_UNPROVEN", DETAIL, step=step)]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: problem() got an unexpected keyword argument 'step'
+
+======================================================================
+ERROR: test_a_service_that_was_never_started_names_why (test_t1649_refusal_step.TheStepTravelsTests.test_a_service_that_was_never_started_names_why)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 211, in test_a_service_that_was_never_started_names_why
+    self.assertEqual(admission._unstarted_step(declined), STEP)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.protocol_admission' has no attribute '_unstarted_step'
+
+======================================================================
+ERROR: test_a_typed_problem_carries_a_step_only_when_it_is_a_code (test_t1649_refusal_step.TheStepTravelsTests.test_a_typed_problem_carries_a_step_only_when_it_is_a_code)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 192, in test_a_typed_problem_carries_a_step_only_when_it_is_a_code
+    self.assertEqual(self._problems()[0]["step"], STEP)
+                     ^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 189, in _problems
+    return [taxonomy.problem("transport", "AUTHORITY_CLIENT_UNPROVEN", DETAIL, step=step)]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: problem() got an unexpected keyword argument 'step'
+
+======================================================================
+ERROR: test_both_notices_name_the_step (test_t1649_refusal_step.TheStepTravelsTests.test_both_notices_name_the_step)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 222, in test_both_notices_name_the_step
+    full = client.degraded_notice(self._problems())
+                                  ^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 189, in _problems
+    return [taxonomy.problem("transport", "AUTHORITY_CLIENT_UNPROVEN", DETAIL, step=step)]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: problem() got an unexpected keyword argument 'step'
+
+======================================================================
+ERROR: test_the_degraded_verdict_names_the_step (test_t1649_refusal_step.TheStepTravelsTests.test_the_degraded_verdict_names_the_step)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 198, in test_the_degraded_verdict_names_the_step
+    verdict = admission._degraded_verdict(problems=self._problems())
+                                                   ^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 189, in _problems
+    return [taxonomy.problem("transport", "AUTHORITY_CLIENT_UNPROVEN", DETAIL, step=step)]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: problem() got an unexpected keyword argument 'step'
+
+======================================================================
+FAIL: test_the_reason_names_the_step (test_t1649_refusal_step.DoctorReasonTests.test_the_reason_names_the_step)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1649_refusal_step.py", line 301, in test_the_reason_names_the_step
+    self.assertIn("(AUTHORITY_CLIENT_UNPROVEN/" + STEP + ")", self._reason(step=STEP))
+AssertionError: '(AUTHORITY_CLIENT_UNPROVEN/NOT_HOST_DESCENDANT)' not found in "The authority could not prove that this request came from the host's own hook. (AUTHORITY_CLIENT_UNPROVEN)"
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.092s
+
+FAILED (failures=1, errors=15)
+exit=1

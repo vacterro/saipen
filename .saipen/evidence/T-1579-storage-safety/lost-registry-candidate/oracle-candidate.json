@@ -1,0 +1,9 @@
+{
+  "variant": "candidate",
+  "passed": true,
+  "ran": 3,
+  "failures": 0,
+  "errors": 0,
+  "oracle_sha256": "c2f00dec19c600bdfa79ce48a1b44319169c2d6d77534dbb7add531b477bd1f5",
+  "output": "test_first_durable_declaration_still_creates_initial_registry (t1579_lost_registry_oracle.LostRegistryDeclarationTests.test_first_durable_declaration_still_creates_initial_registry) ... ok\ntest_lost_registry_refuses_new_or_existing_store_without_any_write (t1579_lost_registry_oracle.LostRegistryDeclarationTests.test_lost_registry_refuses_new_or_existing_store_without_any_write) ... ok\ntest_machine_policy_declaration_refuses_lost_registry_without_any_write (t1579_lost_registry_oracle.LostRegistryDeclarationTests.test_machine_policy_declaration_refuses_lost_registry_without_any_write) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.256s\n\nOK\n"
+}

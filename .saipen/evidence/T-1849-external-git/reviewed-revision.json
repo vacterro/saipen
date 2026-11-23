@@ -1,0 +1,13 @@
+{
+  "original_entries_preserved": 5271,
+  "added_paths": [
+    "tools/test_t1849_external_git_environment.py"
+  ],
+  "files": {
+    "tools/saipen_engine/external.py": "863f288d41da28c3dc51dd2e3598e2977e0d7ed25780b7b59b0258327a2d5903",
+    "tools/saipen_engine/external_renewal.py": "485e1ef256e1083ce60ac3f156ee265ba1509385540e3bbc616b40b92694493b",
+    "tools/test_t1840_external_renewal.py": "8adfa790de9994901e9503dd24d2e524256154b60218f5fe1ab6feb15b291ae9",
+    "tools/test_t1849_external_git_environment.py": "3f1313e0ea3b54dca1953ee4909e5d9869d5df0d1dc80746533319078cbcb645"
+  },
+  "self_audit": "One focused executing-agent inspection of saved two-file engine delta, new two-repository cases and unchanged renewal contracts. All external Git call sites use the one local-selector projection; caller env is copied, existing exceptions/timeout/lineage/commit/ancestry and predecessor checks retained. No confirmed owned finding; memory promotion NO."
+}

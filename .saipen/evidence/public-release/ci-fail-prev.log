@@ -1,0 +1,659 @@
+conformance	UNKNOWN STEP	﻿2026-09-28T10:10:22.4301361Z Current runner version: '2.337.0'
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4328345Z ##[group]Runner Image Provisioner
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4329478Z Hosted Compute Agent
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4330046Z Version: 20260828.587
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4331507Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4332315Z Build Date: 2026-08-28T16:44:25Z
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4333086Z Worker ID: {19078fe8-4513-4616-978f-e916137ee8fb}
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4333881Z Azure Region: eastus2
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4334454Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4336028Z ##[group]Operating System
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4336691Z Ubuntu
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4337340Z 24.04.5
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4337887Z LTS
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4338424Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4339015Z ##[group]Runner Image
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4339620Z Image: ubuntu-24.04
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4340200Z Version: 20260920.314.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4341759Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260920.314/images/ubuntu/Ubuntu2404-Readme.md
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4343410Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260920.314
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4344409Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4345806Z ##[group]GITHUB_TOKEN Permissions
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4347946Z Contents: read
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4348555Z Metadata: read
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4349272Z Packages: read
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4349828Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4352397Z Secret source: Actions
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4353391Z Cache mode: write
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4354503Z Prepare workflow directory
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4689141Z Prepare all required actions
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.4737959Z Getting action download info
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.7383323Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+conformance	UNKNOWN STEP	2026-09-28T10:10:22.8418316Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.0257516Z Complete job name: conformance
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1080561Z ##[group]Run actions/checkout@v4
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1081695Z with:
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1082124Z   fetch-depth: 0
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1082579Z   repository: vacterro/saipen
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1086600Z   token: ***
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1087021Z   ssh-strict: true
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1087450Z   ssh-user: git
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1087892Z   persist-credentials: true
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1088379Z   clean: true
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1088823Z   sparse-checkout-cone-mode: true
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1089336Z   fetch-tags: false
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1089773Z   show-progress: true
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1090227Z   lfs: false
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1090635Z   submodules: false
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1091245Z   set-safe-directory: true
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1091745Z   allow-unsafe-pr-checkout: false
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.1092513Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2116452Z Syncing repository: vacterro/saipen
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2119388Z ##[group]Getting Git version info
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2120626Z Working directory is '/home/runner/work/saipen/saipen'
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2122510Z [command]/usr/bin/git version
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2189606Z git version 2.55.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2211612Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2226436Z Temporarily overriding HOME='/home/runner/work/_temp/a4dd9e11-50e6-4ee1-a6df-819f7df1464c' before making global git config changes
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2229002Z Adding repository directory to the temporary git global config as a safe directory
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2232025Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/saipen/saipen
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2295771Z Deleting the contents of '/home/runner/work/saipen/saipen'
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2306404Z ##[group]Initializing the repository
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2313195Z [command]/usr/bin/git init /home/runner/work/saipen/saipen
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2416557Z hint: Using 'master' as the name for the initial branch. This default branch name
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2417985Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2419008Z hint: to use in all of your new repositories, which will suppress this warning,
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2420072Z hint: call:
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2420526Z hint:
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2421468Z hint: 	git config --global init.defaultBranch <name>
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2422498Z hint:
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2423636Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2425239Z hint: 'development'. The just-created branch can be renamed via this command:
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2426710Z hint:
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2427512Z hint: 	git branch -m <name>
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2428397Z hint:
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2429565Z hint: Disable this message with "git config set advice.defaultBranchName false"
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2431613Z Initialized empty Git repository in /home/runner/work/saipen/saipen/.git/
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2438977Z [command]/usr/bin/git remote add origin https://github.com/vacterro/saipen
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2486901Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2488030Z ##[group]Disabling automatic garbage collection
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2491808Z [command]/usr/bin/git config --local gc.auto 0
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2525939Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2526978Z ##[group]Setting up auth
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2534472Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2567437Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.2966637Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.3013808Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.3245174Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.3284190Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.3508102Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.3549452Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.3550282Z ##[group]Fetching the repository
+conformance	UNKNOWN STEP	2026-09-28T10:10:23.3559698Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1171360Z From https://github.com/vacterro/saipen
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1173674Z  * [new branch]        main       -> origin/main
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1175408Z  * [new tag]           v1.0.0     -> v1.0.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1177078Z  * [new tag]           v1.0.1     -> v1.0.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1178390Z  * [new tag]           v1.1.0     -> v1.1.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1179838Z  * [new tag]           v1.1.0a    -> v1.1.0a
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1181185Z  * [new tag]           v1.1.1     -> v1.1.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1182293Z  * [new tag]           v1.1.2     -> v1.1.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1183340Z  * [new tag]           v1.1.3     -> v1.1.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1184330Z  * [new tag]           v1.1.4     -> v1.1.4
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1185416Z  * [new tag]           v1.1.4a    -> v1.1.4a
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1186443Z  * [new tag]           v1.1.5     -> v1.1.5
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1187396Z  * [new tag]           v1.2.0     -> v1.2.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1188363Z  * [new tag]           v1.2.1     -> v1.2.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1189441Z  * [new tag]           v1.2.2     -> v1.2.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1190602Z  * [new tag]           v2.0.0     -> v2.0.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1192589Z  * [new tag]           v2.1.0     -> v2.1.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1193875Z  * [new tag]           v2.1.0a    -> v2.1.0a
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1195294Z  * [new tag]           v3.0.0     -> v3.0.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1196561Z  * [new tag]           v3.1.0     -> v3.1.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1197672Z  * [new tag]           v3.1.0a    -> v3.1.0a
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1199215Z  * [new tag]           v3.1.1     -> v3.1.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1200627Z  * [new tag]           v3.1.1a    -> v3.1.1a
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1202787Z  * [new tag]           v3.1.2     -> v3.1.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1204401Z  * [new tag]           v4.0.0     -> v4.0.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1205815Z  * [new tag]           v4.1.0     -> v4.1.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1207221Z  * [new tag]           v5.0.0     -> v5.0.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1208617Z  * [new tag]           v5.0.1     -> v5.0.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1210046Z  * [new tag]           v5.1.0     -> v5.1.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1211812Z  * [new tag]           v5.2.0     -> v5.2.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1213327Z  * [new tag]           v5.3.0     -> v5.3.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1214740Z  * [new tag]           v6.0.0     -> v6.0.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1216321Z  * [new tag]           v6.1.0     -> v6.1.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1217727Z  * [new tag]           v6.2.0     -> v6.2.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1219125Z  * [new tag]           v6.3.0     -> v6.3.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1220551Z  * [new tag]           v7.0.0     -> v7.0.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1222349Z  * [new tag]           v7.1.0     -> v7.1.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1223825Z  * [new tag]           v7.1.1     -> v7.1.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1225300Z  * [new tag]           v7.1.2     -> v7.1.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1226754Z  * [new tag]           v7.10.0    -> v7.10.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1228233Z  * [new tag]           v7.101.0   -> v7.101.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1229727Z  * [new tag]           v7.102.0   -> v7.102.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1231514Z  * [new tag]           v7.103.0   -> v7.103.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1232958Z  * [new tag]           v7.104.0   -> v7.104.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1234395Z  * [new tag]           v7.105.0   -> v7.105.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1235781Z  * [new tag]           v7.106.0   -> v7.106.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1237154Z  * [new tag]           v7.107.0   -> v7.107.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1239094Z  * [new tag]           v7.108.0   -> v7.108.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1240546Z  * [new tag]           v7.109.0   -> v7.109.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1242094Z  * [new tag]           v7.11.0    -> v7.11.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1243507Z  * [new tag]           v7.11.1    -> v7.11.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1244916Z  * [new tag]           v7.11.2    -> v7.11.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1246312Z  * [new tag]           v7.110.0   -> v7.110.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1247719Z  * [new tag]           v7.111.0   -> v7.111.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1249148Z  * [new tag]           v7.112.0   -> v7.112.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1250566Z  * [new tag]           v7.113.0   -> v7.113.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1252111Z  * [new tag]           v7.114.0   -> v7.114.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1253512Z  * [new tag]           v7.115.0   -> v7.115.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1254905Z  * [new tag]           v7.116.0   -> v7.116.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1256329Z  * [new tag]           v7.117.0   -> v7.117.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1257744Z  * [new tag]           v7.118.0   -> v7.118.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1259168Z  * [new tag]           v7.119.0   -> v7.119.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1260582Z  * [new tag]           v7.12.0    -> v7.12.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1262754Z  * [new tag]           v7.120.0   -> v7.120.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1264967Z  * [new tag]           v7.121.0   -> v7.121.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1267208Z  * [new tag]           v7.122.0   -> v7.122.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1269613Z  * [new tag]           v7.123.0   -> v7.123.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1271736Z  * [new tag]           v7.124.0   -> v7.124.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1273823Z  * [new tag]           v7.125.0   -> v7.125.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1275453Z  * [new tag]           v7.126.0   -> v7.126.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1276921Z  * [new tag]           v7.127.0   -> v7.127.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1278331Z  * [new tag]           v7.128.0   -> v7.128.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1279743Z  * [new tag]           v7.129.0   -> v7.129.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1281474Z  * [new tag]           v7.13.0    -> v7.13.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1282908Z  * [new tag]           v7.13.1    -> v7.13.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1284320Z  * [new tag]           v7.130.0   -> v7.130.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1357852Z  * [new tag]           v7.131.0   -> v7.131.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1360591Z  * [new tag]           v7.132.0   -> v7.132.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1363079Z  * [new tag]           v7.133.0   -> v7.133.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1364813Z  * [new tag]           v7.134.0   -> v7.134.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1366311Z  * [new tag]           v7.135.0   -> v7.135.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1368068Z  * [new tag]           v7.136.0   -> v7.136.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1369679Z  * [new tag]           v7.137.0   -> v7.137.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1372132Z  * [new tag]           v7.138.0   -> v7.138.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1374443Z  * [new tag]           v7.139.0   -> v7.139.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1376740Z  * [new tag]           v7.14.0    -> v7.14.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1378881Z  * [new tag]           v7.140.0   -> v7.140.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1381314Z  * [new tag]           v7.141.0   -> v7.141.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1383733Z  * [new tag]           v7.142.0   -> v7.142.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1385845Z  * [new tag]           v7.143.0   -> v7.143.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1387930Z  * [new tag]           v7.144.0   -> v7.144.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1390011Z  * [new tag]           v7.145.0   -> v7.145.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1392660Z  * [new tag]           v7.146.0   -> v7.146.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1394083Z  * [new tag]           v7.147.0   -> v7.147.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1395462Z  * [new tag]           v7.148.0   -> v7.148.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1396851Z  * [new tag]           v7.149.0   -> v7.149.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1398236Z  * [new tag]           v7.15.0    -> v7.15.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1399595Z  * [new tag]           v7.150.0   -> v7.150.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1401654Z  * [new tag]           v7.151.0   -> v7.151.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1403757Z  * [new tag]           v7.152.0   -> v7.152.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1405141Z  * [new tag]           v7.153.0   -> v7.153.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1406489Z  * [new tag]           v7.154.0   -> v7.154.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1408151Z  * [new tag]           v7.155.0   -> v7.155.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1409518Z  * [new tag]           v7.156.0   -> v7.156.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1411188Z  * [new tag]           v7.157.0   -> v7.157.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1412590Z  * [new tag]           v7.158.0   -> v7.158.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1414250Z  * [new tag]           v7.159.0   -> v7.159.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1415871Z  * [new tag]           v7.16.0    -> v7.16.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1418124Z  * [new tag]           v7.16.1    -> v7.16.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1420447Z  * [new tag]           v7.160.0   -> v7.160.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1422887Z  * [new tag]           v7.161.0   -> v7.161.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1425125Z  * [new tag]           v7.162.0   -> v7.162.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1427400Z  * [new tag]           v7.163.0   -> v7.163.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1429527Z  * [new tag]           v7.164.0   -> v7.164.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1431879Z  * [new tag]           v7.165.0   -> v7.165.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1433979Z  * [new tag]           v7.166.0   -> v7.166.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1436012Z  * [new tag]           v7.166.1   -> v7.166.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1437400Z  * [new tag]           v7.166.2   -> v7.166.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1438747Z  * [new tag]           v7.167.0   -> v7.167.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1440077Z  * [new tag]           v7.168.0   -> v7.168.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1441720Z  * [new tag]           v7.169.0   -> v7.169.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1443114Z  * [new tag]           v7.17.0    -> v7.17.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1445270Z  * [new tag]           v7.170.0   -> v7.170.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1446709Z  * [new tag]           v7.171.0   -> v7.171.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1448055Z  * [new tag]           v7.172.0   -> v7.172.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1449370Z  * [new tag]           v7.173.0   -> v7.173.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1450990Z  * [new tag]           v7.174.0   -> v7.174.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1452371Z  * [new tag]           v7.175.0   -> v7.175.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1453713Z  * [new tag]           v7.176.0   -> v7.176.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1455057Z  * [new tag]           v7.177.0   -> v7.177.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1456636Z  * [new tag]           v7.178.0   -> v7.178.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1458105Z  * [new tag]           v7.179.0   -> v7.179.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1459429Z  * [new tag]           v7.18.0    -> v7.18.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1461085Z  * [new tag]           v7.18.1    -> v7.18.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1462465Z  * [new tag]           v7.180.0   -> v7.180.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1463794Z  * [new tag]           v7.181.0   -> v7.181.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1465114Z  * [new tag]           v7.182.0   -> v7.182.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1466427Z  * [new tag]           v7.183.0   -> v7.183.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1467732Z  * [new tag]           v7.184.0   -> v7.184.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1469034Z  * [new tag]           v7.185.0   -> v7.185.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1470335Z  * [new tag]           v7.186.0   -> v7.186.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1471912Z  * [new tag]           v7.187.0   -> v7.187.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1473236Z  * [new tag]           v7.188.0   -> v7.188.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1474560Z  * [new tag]           v7.189.0   -> v7.189.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1475871Z  * [new tag]           v7.19.0    -> v7.19.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1477158Z  * [new tag]           v7.19.1    -> v7.19.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1478447Z  * [new tag]           v7.190.0   -> v7.190.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1479754Z  * [new tag]           v7.191.0   -> v7.191.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1481335Z  * [new tag]           v7.192.0   -> v7.192.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1482682Z  * [new tag]           v7.193.0   -> v7.193.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1484122Z  * [new tag]           v7.194.0   -> v7.194.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1485433Z  * [new tag]           v7.195.0   -> v7.195.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1486739Z  * [new tag]           v7.196.0   -> v7.196.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1488060Z  * [new tag]           v7.197.0   -> v7.197.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1489357Z  * [new tag]           v7.198.0   -> v7.198.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1490876Z  * [new tag]           v7.199.0   -> v7.199.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1492230Z  * [new tag]           v7.2.0     -> v7.2.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1493678Z  * [new tag]           v7.2.1     -> v7.2.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1494990Z  * [new tag]           v7.20.0    -> v7.20.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1496273Z  * [new tag]           v7.200.0   -> v7.200.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1497590Z  * [new tag]           v7.201.0   -> v7.201.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1498920Z  * [new tag]           v7.202.0   -> v7.202.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1500236Z  * [new tag]           v7.203.0   -> v7.203.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1501794Z  * [new tag]           v7.204.0   -> v7.204.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1503123Z  * [new tag]           v7.204.1   -> v7.204.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1504437Z  * [new tag]           v7.205.0   -> v7.205.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1505743Z  * [new tag]           v7.205.1   -> v7.205.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1507054Z  * [new tag]           v7.205.2   -> v7.205.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1508392Z  * [new tag]           v7.206.0   -> v7.206.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1509709Z  * [new tag]           v7.206.1   -> v7.206.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1511338Z  * [new tag]           v7.206.2   -> v7.206.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1512727Z  * [new tag]           v7.206.3   -> v7.206.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1514057Z  * [new tag]           v7.206.4   -> v7.206.4
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1515382Z  * [new tag]           v7.206.5   -> v7.206.5
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1516699Z  * [new tag]           v7.206.6   -> v7.206.6
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1518024Z  * [new tag]           v7.206.7   -> v7.206.7
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1519350Z  * [new tag]           v7.206.8   -> v7.206.8
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1520933Z  * [new tag]           v7.206.9   -> v7.206.9
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1522272Z  * [new tag]           v7.207.0   -> v7.207.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1523609Z  * [new tag]           v7.208.0   -> v7.208.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1524927Z  * [new tag]           v7.209.0   -> v7.209.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1526228Z  * [new tag]           v7.21.0    -> v7.21.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1527527Z  * [new tag]           v7.210.0   -> v7.210.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1528830Z  * [new tag]           v7.211.0   -> v7.211.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1530148Z  * [new tag]           v7.212.0   -> v7.212.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1531930Z  * [new tag]           v7.213.0   -> v7.213.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1533276Z  * [new tag]           v7.214.0   -> v7.214.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1534598Z  * [new tag]           v7.215.0   -> v7.215.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1535902Z  * [new tag]           v7.216.0   -> v7.216.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1537214Z  * [new tag]           v7.217.0   -> v7.217.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1538528Z  * [new tag]           v7.218.0   -> v7.218.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1539842Z  * [new tag]           v7.219.0   -> v7.219.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1541378Z  * [new tag]           v7.22.0    -> v7.22.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1542846Z  * [new tag]           v7.22.1    -> v7.22.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1544170Z  * [new tag]           v7.22.2    -> v7.22.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1545497Z  * [new tag]           v7.22.3    -> v7.22.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1546793Z  * [new tag]           v7.220.0   -> v7.220.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1548085Z  * [new tag]           v7.221.0   -> v7.221.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1549396Z  * [new tag]           v7.222.0   -> v7.222.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1550991Z  * [new tag]           v7.223.0   -> v7.223.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1552323Z  * [new tag]           v7.223.1   -> v7.223.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1553630Z  * [new tag]           v7.223.10  -> v7.223.10
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1554937Z  * [new tag]           v7.223.11  -> v7.223.11
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1556248Z  * [new tag]           v7.223.12  -> v7.223.12
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1557552Z  * [new tag]           v7.223.13  -> v7.223.13
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1558874Z  * [new tag]           v7.223.14  -> v7.223.14
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1560188Z  * [new tag]           v7.223.15  -> v7.223.15
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1561781Z  * [new tag]           v7.223.16  -> v7.223.16
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1563092Z  * [new tag]           v7.223.2   -> v7.223.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1564398Z  * [new tag]           v7.223.3   -> v7.223.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1565689Z  * [new tag]           v7.223.4   -> v7.223.4
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1567168Z  * [new tag]           v7.223.5   -> v7.223.5
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1568501Z  * [new tag]           v7.223.6   -> v7.223.6
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1569792Z  * [new tag]           v7.223.7   -> v7.223.7
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1571345Z  * [new tag]           v7.223.8   -> v7.223.8
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1572637Z  * [new tag]           v7.223.9   -> v7.223.9
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1573926Z  * [new tag]           v7.224.0   -> v7.224.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1575201Z  * [new tag]           v7.224.1   -> v7.224.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1576472Z  * [new tag]           v7.224.2   -> v7.224.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1577752Z  * [new tag]           v7.224.3   -> v7.224.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1579018Z  * [new tag]           v7.224.4   -> v7.224.4
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1580290Z  * [new tag]           v7.225.0   -> v7.225.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1581796Z  * [new tag]           v7.226.0   -> v7.226.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1583080Z  * [new tag]           v7.226.1   -> v7.226.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1584357Z  * [new tag]           v7.226.2   -> v7.226.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1585634Z  * [new tag]           v7.226.3   -> v7.226.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1586918Z  * [new tag]           v7.227.0   -> v7.227.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1588188Z  * [new tag]           v7.227.1   -> v7.227.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1589453Z  * [new tag]           v7.227.2   -> v7.227.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1590945Z  * [new tag]           v7.228.0   -> v7.228.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1592260Z  * [new tag]           v7.229.0   -> v7.229.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1593524Z  * [new tag]           v7.23.0    -> v7.23.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1594795Z  * [new tag]           v7.230.0   -> v7.230.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1596087Z  * [new tag]           v7.231.0   -> v7.231.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1597386Z  * [new tag]           v7.231.1   -> v7.231.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1598699Z  * [new tag]           v7.231.10  -> v7.231.10
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1600005Z  * [new tag]           v7.231.11  -> v7.231.11
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1601605Z  * [new tag]           v7.231.2   -> v7.231.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1602915Z  * [new tag]           v7.231.3   -> v7.231.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1604213Z  * [new tag]           v7.231.4   -> v7.231.4
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1605710Z  * [new tag]           v7.231.5   -> v7.231.5
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1607002Z  * [new tag]           v7.231.6   -> v7.231.6
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1608278Z  * [new tag]           v7.231.7   -> v7.231.7
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1609576Z  * [new tag]           v7.231.8   -> v7.231.8
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1611134Z  * [new tag]           v7.231.9   -> v7.231.9
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1612491Z  * [new tag]           v7.232.0   -> v7.232.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1613803Z  * [new tag]           v7.233.0   -> v7.233.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1615113Z  * [new tag]           v7.233.1   -> v7.233.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1616417Z  * [new tag]           v7.233.2   -> v7.233.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1617724Z  * [new tag]           v7.233.3   -> v7.233.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1619045Z  * [new tag]           v7.233.4   -> v7.233.4
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1620386Z  * [new tag]           v7.234.0   -> v7.234.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1621912Z  * [new tag]           v7.234.1   -> v7.234.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1623239Z  * [new tag]           v7.234.2   -> v7.234.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1624563Z  * [new tag]           v7.234.3   -> v7.234.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1625857Z  * [new tag]           v7.235.0   -> v7.235.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1627191Z  * [new tag]           v7.235.1   -> v7.235.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1628502Z  * [new tag]           v7.236.0   -> v7.236.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1629813Z  * [new tag]           v7.237.0   -> v7.237.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1631363Z  * [new tag]           v7.238.0   -> v7.238.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1632685Z  * [new tag]           v7.238.1   -> v7.238.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1633985Z  * [new tag]           v7.238.2   -> v7.238.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1635303Z  * [new tag]           v7.238.3   -> v7.238.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1636601Z  * [new tag]           v7.239.0   -> v7.239.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1637911Z  * [new tag]           v7.239.1   -> v7.239.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1639214Z  * [new tag]           v7.239.2   -> v7.239.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1640992Z  * [new tag]           v7.239.3   -> v7.239.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1642409Z  * [new tag]           v7.24.0    -> v7.24.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1643711Z  * [new tag]           v7.240.0   -> v7.240.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1645024Z  * [new tag]           v7.240.1   -> v7.240.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1646329Z  * [new tag]           v7.240.2   -> v7.240.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1647647Z  * [new tag]           v7.241.0   -> v7.241.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1648954Z  * [new tag]           v7.241.1   -> v7.241.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1650267Z  * [new tag]           v7.242.0   -> v7.242.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1651874Z  * [new tag]           v7.243.0   -> v7.243.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1653173Z  * [new tag]           v7.244.0   -> v7.244.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1654472Z  * [new tag]           v7.245.0   -> v7.245.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1655762Z  * [new tag]           v7.246.0   -> v7.246.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1657061Z  * [new tag]           v7.246.1   -> v7.246.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1658362Z  * [new tag]           v7.247.0   -> v7.247.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1659659Z  * [new tag]           v7.248.0   -> v7.248.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1661175Z  * [new tag]           v7.249.0   -> v7.249.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1662485Z  * [new tag]           v7.25.0    -> v7.25.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1663774Z  * [new tag]           v7.250.0   -> v7.250.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1665082Z  * [new tag]           v7.251.0   -> v7.251.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1666373Z  * [new tag]           v7.252.0   -> v7.252.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1667657Z  * [new tag]           v7.253.0   -> v7.253.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1668943Z  * [new tag]           v7.254.0   -> v7.254.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1670229Z  * [new tag]           v7.255.0   -> v7.255.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1671764Z  * [new tag]           v7.256.0   -> v7.256.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1673077Z  * [new tag]           v7.256.1   -> v7.256.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1674365Z  * [new tag]           v7.257.0   -> v7.257.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1675654Z  * [new tag]           v7.26.0    -> v7.26.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1676933Z  * [new tag]           v7.27.0    -> v7.27.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1678382Z  * [new tag]           v7.28.0    -> v7.28.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1679660Z  * [new tag]           v7.28.1    -> v7.28.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1681206Z  * [new tag]           v7.29.0    -> v7.29.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1682524Z  * [new tag]           v7.3.0     -> v7.3.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1683782Z  * [new tag]           v7.3.1     -> v7.3.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1685046Z  * [new tag]           v7.3.2     -> v7.3.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1686305Z  * [new tag]           v7.3.3     -> v7.3.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1687577Z  * [new tag]           v7.30.0    -> v7.30.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1688882Z  * [new tag]           v7.30.1    -> v7.30.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1690160Z  * [new tag]           v7.31.0    -> v7.31.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1691685Z  * [new tag]           v7.31.1    -> v7.31.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1692968Z  * [new tag]           v7.31.2    -> v7.31.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1694241Z  * [new tag]           v7.32.0    -> v7.32.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1695519Z  * [new tag]           v7.32.1    -> v7.32.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1696792Z  * [new tag]           v7.33.0    -> v7.33.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1698057Z  * [new tag]           v7.33.1    -> v7.33.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1699325Z  * [new tag]           v7.33.2    -> v7.33.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1700622Z  * [new tag]           v7.33.3    -> v7.33.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1702122Z  * [new tag]           v7.33.4    -> v7.33.4
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1703390Z  * [new tag]           v7.34.0    -> v7.34.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1704670Z  * [new tag]           v7.34.1    -> v7.34.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1705936Z  * [new tag]           v7.35.0    -> v7.35.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1707207Z  * [new tag]           v7.35.1    -> v7.35.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1709004Z  * [new tag]           v7.36.0    -> v7.36.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1711180Z  * [new tag]           v7.37.0    -> v7.37.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1713261Z  * [new tag]           v7.38.0    -> v7.38.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1715286Z  * [new tag]           v7.39.0    -> v7.39.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1717517Z  * [new tag]           v7.4.0     -> v7.4.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1719712Z  * [new tag]           v7.4.1     -> v7.4.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1722264Z  * [new tag]           v7.4.2     -> v7.4.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1724448Z  * [new tag]           v7.4.3     -> v7.4.3
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1726563Z  * [new tag]           v7.4.4     -> v7.4.4
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1728854Z  * [new tag]           v7.4.5     -> v7.4.5
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1731089Z  * [new tag]           v7.4.6     -> v7.4.6
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1732445Z  * [new tag]           v7.40.0    -> v7.40.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1733738Z  * [new tag]           v7.41.0    -> v7.41.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1735030Z  * [new tag]           v7.42.0    -> v7.42.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1736318Z  * [new tag]           v7.43.0    -> v7.43.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1737602Z  * [new tag]           v7.44.0    -> v7.44.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1738884Z  * [new tag]           v7.45.0    -> v7.45.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1740165Z  * [new tag]           v7.46.0    -> v7.46.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1741753Z  * [new tag]           v7.47.0    -> v7.47.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1743043Z  * [new tag]           v7.48.0    -> v7.48.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1744317Z  * [new tag]           v7.49.0    -> v7.49.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1745591Z  * [new tag]           v7.5.0     -> v7.5.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1746833Z  * [new tag]           v7.5.1     -> v7.5.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1748070Z  * [new tag]           v7.5.2     -> v7.5.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1749324Z  * [new tag]           v7.50.0    -> v7.50.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1750580Z  * [new tag]           v7.51.0    -> v7.51.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1752119Z  * [new tag]           v7.52.0    -> v7.52.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1753380Z  * [new tag]           v7.53.0    -> v7.53.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1754627Z  * [new tag]           v7.54.0    -> v7.54.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1755864Z  * [new tag]           v7.55.0    -> v7.55.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1757105Z  * [new tag]           v7.56.0    -> v7.56.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1758348Z  * [new tag]           v7.57.0    -> v7.57.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1759597Z  * [new tag]           v7.58.0    -> v7.58.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1761206Z  * [new tag]           v7.59.0    -> v7.59.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1762449Z  * [new tag]           v7.6.0     -> v7.6.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1763666Z  * [new tag]           v7.6.1     -> v7.6.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1764884Z  * [new tag]           v7.60.0    -> v7.60.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1766119Z  * [new tag]           v7.61.0    -> v7.61.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1767365Z  * [new tag]           v7.62.0    -> v7.62.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1768612Z  * [new tag]           v7.63.0    -> v7.63.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1769864Z  * [new tag]           v7.64.0    -> v7.64.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1771434Z  * [new tag]           v7.65.0    -> v7.65.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1772701Z  * [new tag]           v7.66.0    -> v7.66.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1773971Z  * [new tag]           v7.67.0    -> v7.67.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1775231Z  * [new tag]           v7.68.0    -> v7.68.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1776461Z  * [new tag]           v7.69.0    -> v7.69.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1777705Z  * [new tag]           v7.7.0     -> v7.7.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1778926Z  * [new tag]           v7.7.1     -> v7.7.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1780139Z  * [new tag]           v7.7.2     -> v7.7.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1781521Z  * [new tag]           v7.70.0    -> v7.70.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1782776Z  * [new tag]           v7.71.0    -> v7.71.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1784018Z  * [new tag]           v7.71.1    -> v7.71.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1785260Z  * [new tag]           v7.72.0    -> v7.72.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1786503Z  * [new tag]           v7.72.1    -> v7.72.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1787729Z  * [new tag]           v7.73.0    -> v7.73.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1788969Z  * [new tag]           v7.74.0    -> v7.74.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1790209Z  * [new tag]           v7.75.0    -> v7.75.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1791566Z  * [new tag]           v7.76.0    -> v7.76.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1792821Z  * [new tag]           v7.77.0    -> v7.77.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1794227Z  * [new tag]           v7.78.0    -> v7.78.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1795487Z  * [new tag]           v7.79.0    -> v7.79.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1796720Z  * [new tag]           v7.8.0     -> v7.8.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1797930Z  * [new tag]           v7.8.1     -> v7.8.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1799140Z  * [new tag]           v7.8.2     -> v7.8.2
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1800363Z  * [new tag]           v7.80.0    -> v7.80.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1801743Z  * [new tag]           v7.81.0    -> v7.81.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1802969Z  * [new tag]           v7.82.0    -> v7.82.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1804195Z  * [new tag]           v7.83.0    -> v7.83.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1805423Z  * [new tag]           v7.9.0     -> v7.9.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1806641Z  * [new tag]           v7.92.0    -> v7.92.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1807880Z  * [new tag]           v7.93.0    -> v7.93.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1809099Z  * [new tag]           v7.94.0    -> v7.94.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1810319Z  * [new tag]           v7.95.0    -> v7.95.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1811896Z  * [new tag]           v7.96.0    -> v7.96.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1813149Z  * [new tag]           v7.97.0    -> v7.97.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1814378Z  * [new tag]           v7.98.0    -> v7.98.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1815600Z  * [new tag]           v7.99.0    -> v7.99.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1816826Z  * [new tag]           v8.0.0     -> v8.0.0
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1818047Z  * [new tag]           v8.0.1     -> v8.0.1
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1821333Z [command]/usr/bin/git branch --list --remote origin/main
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1822809Z   origin/main
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1825116Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1826574Z 5aa83dccbba0ad4379f52a1527bb0b88be6da5c5
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1829491Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1831125Z ##[group]Determining the checkout info
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1832846Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1833827Z [command]/usr/bin/git sparse-checkout disable
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1836683Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1840048Z ##[group]Checking out the ref
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.1841987Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3596066Z Switched to a new branch 'main'
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3602384Z branch 'main' set up to track 'origin/main'.
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3616854Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3674871Z [command]/usr/bin/git log -1 --format=%H
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3707010Z 5aa83dccbba0ad4379f52a1527bb0b88be6da5c5
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3972410Z ##[group]Run actions/setup-python@v5
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3972798Z with:
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3973060Z   python-version: 3.x
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3973347Z   check-latest: false
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3976208Z   token: ***
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3976479Z   update-environment: true
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3976793Z   allow-prereleases: false
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3977090Z   freethreaded: false
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.3977356Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5284825Z ##[group]Installed versions
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5371802Z (node:2230) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5372880Z (Use `node --trace-deprecation ...` to show where the warning was created)
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5373793Z Successfully set up CPython (3.14.7)
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5374743Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5540342Z ##[group]Run python -c "import py_compile, pathlib, sys; [py_compile.compile(str(p), doraise=True) for p in pathlib.Path('tools').rglob('*.py')]; print('py_compile PASS')"
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5541952Z ^[[36;1mpython -c "import py_compile, pathlib, sys; [py_compile.compile(str(p), doraise=True) for p in pathlib.Path('tools').rglob('*.py')]; print('py_compile PASS')"^[[0m
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5542818Z ^[[36;1mpython -B tools/test_runner.py --family unit^[[0m
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5854710Z shell: /usr/bin/bash -e {0}
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5855080Z env:
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5855424Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.7/x64
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5855963Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.7/x64/lib/pkgconfig
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5856504Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.7/x64
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5856974Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.7/x64
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5857485Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.7/x64
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5857962Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.7/x64/lib
+conformance	UNKNOWN STEP	2026-09-28T10:10:25.5858359Z ##[endgroup]
+conformance	UNKNOWN STEP	2026-09-28T10:10:26.3449774Z tools/run_scenarios.py:1767: SyntaxWarning: "\e" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\e"? A raw string is also an option.
+conformance	UNKNOWN STEP	2026-09-28T10:10:26.3451149Z   "</Arguments>", " //E:vbscript C:\evil.vbs</Arguments>", 1
+conformance	UNKNOWN STEP	2026-09-28T10:10:27.3300122Z tools/saipen_engine/guard_events.py:1258: SyntaxWarning: "\`" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\`"? A raw string is also an option.
+conformance	UNKNOWN STEP	2026-09-28T10:10:27.3301992Z   """Tokens of a canonical line whose ONLY metacharacter is a literal `\`.
+conformance	UNKNOWN STEP	2026-09-28T10:10:28.0511258Z py_compile PASS
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5782042Z unit: FAIL
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5782865Z ne/runtime_surface.py", line 321, in require_runtime_generation_identity
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5783647Z     return _digest_items(runtime_surface_items(root))
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5784233Z                          ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5792128Z   File "/tmp/saipen-test-szozlih_/project/tools/saipen_engine/runtime_surface.py", line 197, in runtime_surface_items
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5793210Z     raise RuntimeSurfaceError(f"runtime root is not a directory: {base}")
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5794307Z saipen_engine.runtime_surface.RuntimeSurfaceError: runtime root is not a directory: /tmp/saipen-pwsh-inject-pmxvgwpf/home\.agents\skills\saipen
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5795079Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5795089Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5795264Z ======================================================================
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5796328Z FAIL: test_control_c_d_cohort_cli_and_publication (test_public_closure_cli.PublicClosureCliTests.test_control_c_d_cohort_cli_and_publication)
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5797709Z CONTROL C/D: two overlapping members join C-001 through the public
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5798284Z ----------------------------------------------------------------------
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5798758Z Traceback (most recent call last):
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5799531Z   File "/tmp/saipen-test-szozlih_/project/tools/test_public_closure_cli.py", line 268, in test_control_c_d_cohort_cli_and_publication
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5800156Z     self.to_ship(project, "T-7")
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5800412Z     ~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5801348Z   File "/tmp/saipen-test-szozlih_/project/tools/test_orchestration_repair.py", line 143, in to_ship
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5801914Z     self.assertTrue(result.ok, result.to_dict())
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5802233Z     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5803927Z AssertionError: False is not true : {'ok': False, 'code': 'INCOMPLETE_TICKET', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': '-> SHIP: the current VERIFY cycle of T-7 names no run of the declared core-unit family (-B -m unittest discover -s tools -p test_*.py -v)', 'phase': 'SHIP', 'ticket': 'T-7', 'canonical_next_command': 'python tools/core_unit.py evidence T-7'}
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5805263Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5805389Z ======================================================================
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5806199Z FAIL: test_internal_debt_code_in_a_refusal_exception_is_normalized (test_t1304_r004_transition.BaselineFailureTests.test_internal_debt_code_in_a_refusal_exception_is_normalized)
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5807089Z ----------------------------------------------------------------------
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5807445Z Traceback (most recent call last):
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5808207Z   File "/tmp/saipen-test-szozlih_/project/tools/test_t1304_r004_transition.py", line 377, in test_internal_debt_code_in_a_refusal_exception_is_normalized
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5808945Z     self.assertEqual(result.code, "VALIDATION_FAILED")
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5809340Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5809740Z AssertionError: 'FINDINGS_CAPTURE_FAILED' != 'VALIDATION_FAILED'
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5810119Z - FINDINGS_CAPTURE_FAILED
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5810357Z + VALIDATION_FAILED
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5810486Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5810496Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5810650Z ======================================================================
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5811723Z FAIL: test_internal_debt_code_is_normalized_not_a_crash (test_t1304_r004_transition.BaselineFailureTests.test_internal_debt_code_is_normalized_not_a_crash)
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5812740Z T-1322 W2-003: the baseline primitive may return its OWN internal
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5813407Z ----------------------------------------------------------------------
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5813991Z Traceback (most recent call last):
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5814927Z   File "/tmp/saipen-test-szozlih_/project/tools/test_t1304_r004_transition.py", line 357, in test_internal_debt_code_is_normalized_not_a_crash
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5815644Z     self.assertEqual(result.code, "VALIDATION_FAILED")
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5815998Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5816416Z AssertionError: 'FINDINGS_CAPTURE_FAILED' != 'VALIDATION_FAILED'
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5816784Z - FINDINGS_CAPTURE_FAILED
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5817020Z + VALIDATION_FAILED
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5817144Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5817156Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5817305Z ======================================================================
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5818091Z FAIL: test_D_ps1_injector_marks_the_agents_skill_surface (test_t1389_foreign_delta_adoption.AgentsSurfaceTests.test_D_ps1_injector_marks_the_agents_skill_surface)
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5818866Z ----------------------------------------------------------------------
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5819218Z Traceback (most recent call last):
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5819957Z   File "/tmp/saipen-test-szozlih_/project/tools/test_t1389_foreign_delta_adoption.py", line 199, in test_D_ps1_injector_marks_the_agents_skill_surface
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5821237Z     self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5821680Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5822000Z AssertionError: 1 != 0 : 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5822382Z saipen injector report (source: /tmp/saipen-test-szozlih_/project/saipen)
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5822830Z ------------------------------------------------------------
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5823213Z ~/.agents skills             copied (re-run after updates)
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5823946Z ~/.agents provenance         FAILED: provenance write/validate: runtime identity unprovable for /tmp/tmpq2te1l1d/home\.agents\skills\saipen (exit 1)
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5824603Z FreeBuff ~/.knowledge.md     file created
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5824907Z FreeBuff ~/.AGENTS.md        file created
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5825246Z ------------------------------------------------------------
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5825604Z FAILED. Fix reported errors and re-run.
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5825898Z Traceback (most recent call last):
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5826220Z   File "<string>", line 1, in <module>
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5827651Z     import json,sys;sys.path.insert(0,sys.argv[1]);from saipen_engine.runtime_bootstrap import GENERATION;from saipen_engine.runtime_surface import require_runtime_generation_identity as identity;print(json.dumps({'installer_generation':GENERATION,'runtime_fingerprint':identity(sys.argv[2])}))
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5829232Z                                                                                                                                                                                                                                                                               ~~~~~~~~^^^^^^^^^^^^^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5830203Z   File "/tmp/saipen-test-szozlih_/project/tools/saipen_engine/runtime_surface.py", line 321, in require_runtime_generation_identity
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5831145Z     return _digest_items(runtime_surface_items(root))
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5831483Z                          ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5832132Z   File "/tmp/saipen-test-szozlih_/project/tools/saipen_engine/runtime_surface.py", line 197, in runtime_surface_items
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5832844Z     raise RuntimeSurfaceError(f"runtime root is not a directory: {base}")
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5833579Z saipen_engine.runtime_surface.RuntimeSurfaceError: runtime root is not a directory: /tmp/tmpq2te1l1d/home\.agents\skills\saipen
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5834065Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5834080Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5834223Z ======================================================================
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5835056Z FAIL: test_live_shapes_keep_their_evidence (test_t1434_cross_shape_index.CrossShapeIndexTests.test_live_shapes_keep_their_evidence) (shape='project using shared SAIPEN engine')
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5835860Z ----------------------------------------------------------------------
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5836225Z Traceback (most recent call last):
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5836902Z   File "/tmp/saipen-test-szozlih_/project/tools/test_t1434_cross_shape_index.py", line 139, in test_live_shapes_keep_their_evidence
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5837493Z     self.assertTrue(
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5837706Z     ~~~~~~~~~~~~~~~^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5837937Z         (ROOT / relative).is_file(),
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5838201Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5838496Z         f"{shape}: evidence {relative} is missing",
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5838816Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5839077Z     )
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5839251Z     ^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5839882Z AssertionError: False is not true : project using shared SAIPEN engine: evidence .saipen/evidence/T-1434-limisaw-problem-20260920/M7-REPORT.md is missing
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5840451Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5840597Z ======================================================================
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5841821Z FAIL: test_a_sharded_run_leaves_no_sandbox (test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_a_sharded_run_leaves_no_sandbox)
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5842547Z ----------------------------------------------------------------------
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5842925Z Traceback (most recent call last):
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5843657Z   File "/tmp/saipen-test-szozlih_/project/tools/test_t1505_core_unit_sandbox_reclaim.py", line 200, in test_a_sharded_run_leaves_no_sandbox
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5844330Z     self.assertEqual(run["status"], "PASS", run)
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5844664Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5844969Z AssertionError: 'FAIL' != 'PASS'
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5845212Z - FAIL
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5845391Z + PASS
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5848019Z  : {'status': 'FAIL', 'exit_code': 5, 'ran': 3, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': None, 'sections': {}, 'discovered': 3, 'partition_error': None, 'shards': [{'status': 'PASS', 'exit_code': 0, 'ran': 3, 'selected': 3, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': 0, 'duration_s': 0.2}, {'status': 'FAIL', 'exit_code': 5, 'ran': 0, 'selected': 0, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': None, 'duration_s': 0.2}], 'module_durations_s': {'test_hermetic_env': 0.0}, 'sandboxes_swept': [], 'sandboxes_leaked': [], 'fingerprint': 'ccf7bd04f21a6e117602ede9091c307f217c6ba2286bddac83250ec653c4ae5e', 'jobs': 2, 'duration_s': 1.1, 'timeout_s': 600, 'command': ['python', '-B', '-m', 'unittest', 'discover', '-s', 'tools', '-p', 'test_hermetic_env.py', '-v']}
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5850265Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5850433Z ----------------------------------------------------------------------
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5851117Z Ran 3777 tests in 1230.929s
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5851288Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5851401Z FAILED (failures=26, skipped=41)
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5851575Z 
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.5906866Z ##[error]Process completed with exit code 1.
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.6131689Z Post job cleanup.
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7081904Z [command]/usr/bin/git version
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7141595Z git version 2.55.0
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7213023Z Temporarily overriding HOME='/home/runner/work/_temp/21cd4723-1031-40d5-bb04-ef4e3d776a75' before making global git config changes
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7214905Z Adding repository directory to the temporary git global config as a safe directory
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7217046Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/saipen/saipen
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7227257Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7275995Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7559769Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7590038Z http.https://github.com/.extraheader
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7601871Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7668334Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7941311Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.7980998Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.8617753Z Cleaning up orphan processes
+conformance	UNKNOWN STEP	2026-09-28T10:31:03.9046234Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

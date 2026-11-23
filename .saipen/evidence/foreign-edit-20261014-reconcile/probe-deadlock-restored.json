@@ -1,0 +1,56 @@
+{
+  "1 recover": {
+    "ok": false,
+    "code": "OPERATOR_DECISION_REQUIRED",
+    "next_action": null,
+    "action": null,
+    "detail": "a BOARD repair cannot be aimed through an unaddressable record: BOARD.md:5 duplicate ticket ID T-050",
+    "duplicate_id_decision": {
+      "ticket": "T-050",
+      "choices": [
+        "saipen recover --resolve-duplicate-id T-050 --keep 049b273939d843e625443b112d53ba44c4a0b2089b3b41bcab476f130b8fce35 --reassign 299bbef84dc9adbe7636b2408b62238e0d9344f454a18c871d6c789f24a4a3e3",
+        "saipen recover --resolve-duplicate-id T-050 --keep 299bbef84dc9adbe7636b2408b62238e0d9344f454a18c871d6c789f24a4a3e3 --reassign 049b273939d843e625443b112d53ba44c4a0b2089b3b41bcab476f130b8fce35"
+      ]
+    },
+    "canonical_bytes_changed": []
+  },
+  "2 duplicate-id decision": {
+    "ok": false,
+    "code": "UNAUTHORIZED_LIFECYCLE_WRITE",
+    "next_action": null,
+    "action": null,
+    "detail": "lifecycle-authority: UNAUTHORIZED_LIFECYCLE_WRITE -- STATE.last_event is E-8, above E-5, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand; T-001 sits under ## DONE on the word of E-6, E-7,",
+    "canonical_bytes_changed": []
+  },
+  "3 recover again": {
+    "ok": false,
+    "code": "OPERATOR_DECISION_REQUIRED",
+    "next_action": null,
+    "action": null,
+    "detail": "a BOARD repair cannot be aimed through an unaddressable record: BOARD.md:5 duplicate ticket ID T-050",
+    "duplicate_id_decision": {
+      "ticket": "T-050",
+      "choices": [
+        "saipen recover --resolve-duplicate-id T-050 --keep 049b273939d843e625443b112d53ba44c4a0b2089b3b41bcab476f130b8fce35 --reassign 299bbef84dc9adbe7636b2408b62238e0d9344f454a18c871d6c789f24a4a3e3",
+        "saipen recover --resolve-duplicate-id T-050 --keep 299bbef84dc9adbe7636b2408b62238e0d9344f454a18c871d6c789f24a4a3e3 --reassign 049b273939d843e625443b112d53ba44c4a0b2089b3b41bcab476f130b8fce35"
+      ]
+    },
+    "canonical_bytes_changed": []
+  },
+  "4 continue": {
+    "ok": false,
+    "code": "OPERATOR_DECISION_REQUIRED",
+    "next_action": null,
+    "action": null,
+    "detail": "a BOARD repair cannot be aimed through an unaddressable record: BOARD.md:5 duplicate ticket ID T-050",
+    "duplicate_id_decision": {
+      "ticket": "T-050",
+      "choices": [
+        "saipen recover --resolve-duplicate-id T-050 --keep 049b273939d843e625443b112d53ba44c4a0b2089b3b41bcab476f130b8fce35 --reassign 299bbef84dc9adbe7636b2408b62238e0d9344f454a18c871d6c789f24a4a3e3",
+        "saipen recover --resolve-duplicate-id T-050 --keep 299bbef84dc9adbe7636b2408b62238e0d9344f454a18c871d6c789f24a4a3e3 --reassign 049b273939d843e625443b112d53ba44c4a0b2089b3b41bcab476f130b8fce35"
+      ]
+    },
+    "canonical_bytes_changed": []
+  },
+  "validator lifecycle FAIL lines at the end": 1
+}

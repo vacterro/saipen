@@ -1,0 +1,36 @@
+{
+  "CORE-009": {
+    "self_asserted_progress": {
+      "made_progress": true,
+      "journal_advanced": false,
+      "state_mutated": false
+    }
+  },
+  "CORE-004": {
+    "unverified_host_missing_lineage_and_digest": [
+      true,
+      "HOST_ACCEPTED",
+      ""
+    ]
+  },
+  "CORE-006": {
+    "forged_qualification_accepted": true,
+    "enqueue_call_count": 1
+  },
+  "CORE-011": {
+    "caller_assertion_disposition": "DISPOSITION_RECORDED",
+    "accepted": true
+  },
+  "W2-006": {
+    "invalid_list_envelope": {
+      "ok": true,
+      "data": []
+    }
+  },
+  "scope": "local counterexamples; callbacks mocked, no production enqueue or external infrastructure contacted",
+  "source_hashes": {
+    "tools\\saipen_engine\\campaign.py": "ba8b701af7eedbe45c0deb50352f8c9014cf601b97fe0af055c2999ad377f5ae",
+    "tools\\saipen_engine\\host_dispatch.py": "0b864170c6c383146927736556a6c0fcd5b1ba805cf4a5e4f7307302d0f9f0b5",
+    "tools\\saipen_engine\\saipal_adapter.py": "91e4fe5945f52dc0e1ac08c2a019148c9f54bd957923c533cc8becb49477c207"
+  }
+}

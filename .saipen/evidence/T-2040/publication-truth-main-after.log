@@ -1,0 +1,22 @@
+F..........................                                          [100%]
+================================== FAILURES ===================================
+______ PublicationTruthTests.test_bound_no_publish_receipt_is_local_only ______
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_bound_no_publish_receipt_is_local_only>
+
+    def test_bound_no_publish_receipt_is_local_only(self):
+        self.local_receipt()
+        result = self.truth(publication_evidence=self.evidence())
+>       self.assert_publication(result, "LOCAL_NO_PUBLISH", "LOCAL_NO_PUBLISH")
+
+tools\test_t2040_publication_truth.py:284: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_UNKNOWN' != 'LOCAL_NO_PUBLISH'
+E   - RELEASE_UNKNOWN
+E   + LOCAL_NO_PUBLISH
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_UNKNOWN', 'publication_details': {'tickets': [{'ticket_id': 'T-1', 'status': 'unknown', 'receipt_ids': ['release-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'], 'reason': 'local closure truth absent: Core not at DONE / task none'}], 'diagnostics': [], 'project_root': 'V:\\_TEMP_\\saipen-publication-truth-yboygnmn\\project', 'project_lineage': 'lineage-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'receipt_digest': 'ops-receipt-sha256:63129f5287aebbee690a7b6515048964a039d24eb67251e2de348473dea8f718'}, 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'UNKNOWN', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'UNKNOWN', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_UNKNOWN'}
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_bound_no_publish_receipt_is_local_only
+1 failed, 26 passed, 4 subtests passed in 6.07s

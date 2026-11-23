@@ -1,0 +1,44 @@
+{
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "checkpoint",
+    "RUN",
+    "T-1494",
+    "review -> PASS; conf: high; review_passes: 1; correction_cycles: 0. Own verifier rerun 18/18, exit 0; unchanged primary verifier detects authentic pre-fix 9 failures/2 API errors and accepted subject 18 PASS; A02 3 RED/3 GREEN and original automation checks 2 RED/2 GREEN with identical fixtures. Core exit 0, nine baseline warnings; full core-unit current source 5981/new_red 0. P0/P1 and unresolved P2/P3: none. Journal/provenance, scoped test witnesses, mutation CASEs, foreign hunks and 248 unchanged foreign BOARD rows audited. Evidence: .saipen/evidence/T-1494-A03/review.json and review-oracle-pair.json. Memory promotion: NO. Closure mode own_patch; publication forbidden.",
+    "--json"
+  ],
+  "exit_code": 0,
+  "session_capability": "no-publish",
+  "result": {
+    "ok": true,
+    "code": "CHECKPOINTED",
+    "op_id": "checkpoint-4b26f3ea7da74571a2b1dc81c8dc039c",
+    "changed_files": [
+      ".saipen/LOG.md",
+      ".saipen/BOARD.md",
+      ".saipen/STATE.md"
+    ],
+    "recovery_required": false,
+    "event_id": "E-13965"
+  },
+  "committed_operation": {
+    "path": ".saipen\\recovery\\settled\\checkpoint-4b26f3ea7da74571a2b1dc81c8dc039c\\operation.json",
+    "status": "COMMITTED",
+    "operation": "checkpoint",
+    "progress_index": 3,
+    "targets": [
+      {
+        "path": ".saipen/LOG.md",
+        "applied": true
+      },
+      {
+        "path": ".saipen/BOARD.md",
+        "applied": true
+      },
+      {
+        "path": ".saipen/STATE.md",
+        "applied": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,2 @@
+rc 0 len 70297
+tail: '71ms)\n✔ T-269: the lineage tool agrees the Core is recognized, not lost (448.5275ms)\n✔ T-269: an ordinary non-audit generation still reads BUSY (453.2587ms)\nℹ tests 808\nℹ suites 0\nℹ pass 808\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 224951.337\n'

@@ -1,0 +1,15 @@
+test_declared_nested_repository_keeps_its_own_saipen_boundary (test_t1900_git_listing_boundary.TestGitListingAsksForItsBoundary.test_declared_nested_repository_keeps_its_own_saipen_boundary)
+AC-05: the pathspec also reaches the nested binding, on purpose. ... ok
+test_surviving_listing_is_identical_to_an_unpathspeced_listing (test_t1900_git_listing_boundary.TestGitListingAsksForItsBoundary.test_surviving_listing_is_identical_to_an_unpathspeced_listing)
+AC-02: the exclusion is a cost change, never a semantic one. ... ok
+test_the_exclusion_draws_exactly_the_saipen_boundary (test_t1900_git_listing_boundary.TestGitListingAsksForItsBoundary.test_the_exclusion_draws_exactly_the_saipen_boundary)
+AC-01: `.saipen/` is excluded; lookalike names are ordinary source. ... ok
+test_the_exclusion_neither_narrows_nor_widens_scope (test_t1900_git_listing_boundary.TestGitListingAsksForItsBoundary.test_the_exclusion_neither_narrows_nor_widens_scope)
+AC-03: exclusion-only keeps Git's default selection, exactly. ... ok
+test_the_fingerprint_is_unchanged_by_the_pathspec (test_t1900_git_listing_boundary.TestGitListingAsksForItsBoundary.test_the_fingerprint_is_unchanged_by_the_pathspec)
+AC-04: an .saipen-only change never moves the identity, before or after. ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.766s
+
+OK

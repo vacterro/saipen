@@ -1,0 +1,21 @@
+{"subject": "good", "repeat": 1, "exit_code": 1, "ran": 0, "failures": [], "errors": ["setUpClass (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests)"]}
+{"subject": "bad", "repeat": 1, "exit_code": 1, "ran": 0, "failures": [], "errors": ["setUpClass (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests)"]}
+{"subject": "bad", "repeat": 2, "exit_code": 1, "ran": 0, "failures": [], "errors": ["setUpClass (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests)"]}
+{"subject": "restored", "repeat": 1, "exit_code": 1, "ran": 0, "failures": [], "errors": ["setUpClass (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests)"]}
+{"subject": "restored", "repeat": 2, "exit_code": 1, "ran": 0, "failures": [], "errors": ["setUpClass (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests)"]}
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1706-hot-switch\regression_control.py", line 107, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1706-hot-switch\regression_control.py", line 103, in main
+    shutil.rmtree(target)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 787, in rmtree
+    return _rmtree_unsafe(path, onerror)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 629, in _rmtree_unsafe
+    _rmtree_unsafe(fullname, onerror)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 638, in _rmtree_unsafe
+    onerror(os.rmdir, path, sys.exc_info())
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\shutil.py", line 636, in _rmtree_unsafe
+    os.rmdir(path)
+PermissionError: [WinError 5] Access is denied: 'V:\\_TEMP_\\saipen-t1706-oracle-x_3tsn3o\\project'

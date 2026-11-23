@@ -1,0 +1,119 @@
+{
+  "work": "T-2163",
+  "source_head_at_start": "f0380fab8a6b9860257c88b948feb69eeeb4dbb2",
+  "before": {
+    "measured_baseline_family": {
+      "fingerprint": "63c8a2c81a81cbf4...",
+      "runs": {
+        "103719": {
+          "wall_s": 2589.0,
+          "ran": 8911,
+          "verdict": "FAIL",
+          "new_red": [
+            "test_portable_floor_fields.PortableNeedsFields.test_description_and_blocker_prose_do_not_create_dependencies"
+          ]
+        },
+        "111623": {
+          "wall_s": 2227.0,
+          "ran": 8911,
+          "verdict": "PASS",
+          "new_red": []
+        },
+        "115616": {
+          "wall_s": 2234.0,
+          "ran": 8911,
+          "verdict": "PASS",
+          "new_red": []
+        },
+        "123353": {
+          "wall_s": 2141.4,
+          "ran": 8911,
+          "verdict": "PASS",
+          "new_red": []
+        }
+      },
+      "four_run_total_s": 9191.4,
+      "duplicate_runs_3_4_s": 4461.0,
+      "cause": "verifier ROUTE identity mismatch (run3 repo V: paths, sha256 equal; gate message carried no reason)"
+    },
+    "flaky_floor": {
+      "family_module_wall_s": 72.4,
+      "standalone_s": 4.7,
+      "cause": "bash/MSYS floor p50 30.7s vs 30s fixed window; kill held by orphaned grandchildren (330s sample)"
+    }
+  },
+  "after": {
+    "wave_A": "dimension_mismatches + incompatibility_detail + core_unit.preflight CLI; gates keep T-1865 rule line",
+    "wave_B": "tree-kill + remeasure + named skip; live: OK skipped=3 vs 5 TimeoutExpired errors pre-repair",
+    "wave_C": "publication battery: class-level prepared source (git init/add/commit 6x->1x per class run)",
+    "waves_p1d": "REFUTED for this session: parity contract bundles validator-per-layout (irreducible); manifest-walk dedup = marginal + cross-module cache hazard; T-2137 pruning already refuted",
+    "wave_p1e": "structural finding recorded; real launcher/node carriers are the contract (mock-only prohibited); deferred",
+    "focused_records": {
+      "5f6a19d06e6cb029-20261122T130736076176Z": {
+        "verdict": "PASS",
+        "ran": 65,
+        "scope": "FULL",
+        "copy_wall_s": 116.953,
+        "duration_s": 238.015
+      },
+      "5f6a19d06e6cb029-20261122T133746689207Z": {
+        "verdict": "PASS",
+        "ran": 23,
+        "scope": "DECLARED",
+        "copy_wall_s": 2.39,
+        "duration_s": 65.703
+      },
+      "5f6a19d06e6cb029-20261122T133914567395Z": {
+        "verdict": "PASS",
+        "ran": 12,
+        "scope": "DECLARED",
+        "copy_wall_s": 2.375,
+        "duration_s": 26.906
+      },
+      "7dd1184202342a54-20261122T144631016201Z": {
+        "verdict": "PASS",
+        "ran": 4,
+        "scope": "DECLARED",
+        "copy_wall_s": 3.141,
+        "duration_s": 88.562
+      },
+      "5f6a19d06e6cb029-20261122T133104115616Z": {
+        "verdict": "FAIL",
+        "ran": 0,
+        "scope": "FULL",
+        "copy_wall_s": 824.172,
+        "duration_s": 1029.031
+      }
+    },
+    "regression_pair": {
+      "op": "regression-execution-2e9f04f1",
+      "verifier": "4bf61442870bdfd3488ce42fedde3759fe4c3514756630ce889cf0adf3475401",
+      "before_subject": "f2e610c569c7c6f1",
+      "before_result": "FAIL",
+      "after_subject": "f9c7d8c5d00ec5da",
+      "after_result": "PASS"
+    }
+  },
+  "sources": [
+    "tools/saipen_engine/verification_cache.py",
+    "tools/saipen_engine/core_unit.py",
+    "tools/saipen_engine/focused_unit.py",
+    "tools/test_t2163_verification_preflight.py",
+    "tools/test_t2163_floor_timeout_remeasure.py",
+    "tools/test_portable_floor_fields.py",
+    "tools/test_t1613_publication_convergence.py",
+    "tools/sandbox_scope.json"
+  ],
+  "campaign_xiii": {
+    "source_receipt": "SRC-443",
+    "p0_a_floor_verdict_policy": "subject run_floor/run_floors carry VERIFIED_PASS/VERIFIED_FAIL/UNAVAILABLE_PLATFORM/INCONCLUSIVE_TIMEOUT; mandatory native floor per host (ps1@nt / sh@posix); INCONCLUSIVE fails closed, no skip laundering; memory bytes compared before any verdict and before the fail-closed refusal",
+    "p0_b_owned_tree": "floor children run inside ProcessTree (POSIX session leader / Windows Job Object); window expiry ends the pipe holders; wall bound = window + FLOOR_CLEANUP_ALLOWANCE_S(10s) reap; grandchild control measured 0.6s and 1.0s against 0.5s/1.0s windows (the POSIX repro was 5.691 s against a 1.0 s window)",
+    "p0_c_causal_regression_pair": "regression-execution-8d685dc5be0442d4955d58c3ee6d8414: BEFORE(pre subject f2e610c5) 5 FAIL = 4x genuine subprocess.TimeoutExpired at the stock 30s window (stall31/hang91/grandchild/stallbad controlled runners) + 1x missing-mandatory-policy; AFTER(repaired subject 19bd5a9a) 9/9 PASS 0 skipped; E-23073/E-23074; no missing-file red, no harness difference",
+    "p0_d_route_sentence": "_verifier_reasons route diagnostic finished; names the recorded route's canonical saipen transport; route choice never converts the record into a compatible one; preflight battery green",
+    "wave_e_infrastructure_reason": "focused record 8500f102ea8ce98b-20261122T164958297433Z: FAIL ran:0 carries infrastructure PREPARATION_EXHAUSTED_EXECUTION_BUDGET with identity 2.7s + copy 129.9s (subject 30.4s, canonical 98.9s) + hash 0.2s against the 1s budget; second identical request refused IDENTICAL_INFRASTRUCTURE_FAILURE citing the prior record and timings, re-paying only identity capture (~3s), not the copy",
+    "wave_e_copy_measured": "FULL scope: subject 44,707 files / 523.5 MB / 30.4s; canonical .saipen 118,556 files / 2.22 GB / 98.9s; cleanup 18.2s; hash 0.17s. The canonical .saipen copy dominates and is what a DECLARED scope avoids",
+    "wave_e_scope_admission": "test_sandbox_work_surface.py + test_t1505_core_unit_sandbox_reclaim.py declared [] (158->160) per the manifest's own admission rule: 3 fresh narrowed runs of exactly these modules all PASS ran 28 (10.641/10.953/10.437 s) at mode DECLARED, undeclared [], scope copy 0.6s (1,424 files subject + 91 canonical files, 34 MB total) vs FULL's 2.22 GB; machinery battery GREEN after admission (t1889 battery covers the manifest refusal set)",
+    "wave_f_pending": "publication fixture consolidation A/B not yet measured in a controlled window; XII claim remains git-process-count structural (6x->1x)",
+    "wave_g_pending": "preflight native acceptance pending"
+  }
+}

@@ -1,0 +1,786 @@
+[
+  {
+    "oid": "d5d16191bae13207ead8680618ba58ad565a64bc",
+    "mode": "40000",
+    "parent_tree": "c96aabb09dc034dff835de5fae267459340f772d",
+    "parent_path": ".saipen/kitchen/t1567-response-candidate-20260930",
+    "name": ".github"
+  },
+  {
+    "oid": "11b4746e0cdc963c9b844a5e9971f712ab73e790",
+    "mode": "40000",
+    "parent_tree": "64d2de14169eca9e530fe77b167f3b40b69460c2",
+    "parent_path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine",
+    "name": "runtime"
+  },
+  {
+    "oid": "f92ed7d320b4847a6d9d3b57ee2c466cc6f39270",
+    "mode": "40000",
+    "parent_tree": "75e8abf7f5546bbceccb0cdc56ec40c2de9b0ee3",
+    "parent_path": ".saipen/kitchen",
+    "name": "handoff"
+  },
+  {
+    "oid": "2bde01ea22ba38e8ac8222369dc96752478ae93a",
+    "mode": "100644",
+    "parent_tree": "4aa72d6b18da8b8a86ac899b4385ceb693f34ca4",
+    "parent_path": "",
+    "name": ".gitattributes"
+  },
+  {
+    "oid": "4867db2b80efecc2650c644291a818360e318860",
+    "mode": "100644",
+    "parent_tree": "4aa72d6b18da8b8a86ac899b4385ceb693f34ca4",
+    "parent_path": "",
+    "name": ".gitignore"
+  },
+  {
+    "oid": "53412866ff4fb0f481759a2b9df5c9e5c977ac4a",
+    "mode": "40000",
+    "parent_tree": "4aa72d6b18da8b8a86ac899b4385ceb693f34ca4",
+    "parent_path": "",
+    "name": ".saipen"
+  },
+  {
+    "oid": "43f41f2fe79dbbc912d3e83a1e8013f0c65853d0",
+    "mode": "100644",
+    "parent_tree": "4aa72d6b18da8b8a86ac899b4385ceb693f34ca4",
+    "parent_path": "",
+    "name": "CHANGELOG.md"
+  },
+  {
+    "oid": "c5367b5dbd049fc5714cdceab183e746582eb36b",
+    "mode": "100644",
+    "parent_tree": "4aa72d6b18da8b8a86ac899b4385ceb693f34ca4",
+    "parent_path": "",
+    "name": "CHANGELOG_ARCHIVE.md"
+  },
+  {
+    "oid": "482b3e1118d41535fea3e674aca9dcf0fb894de3",
+    "mode": "40000",
+    "parent_tree": "4aa72d6b18da8b8a86ac899b4385ceb693f34ca4",
+    "parent_path": "",
+    "name": "KNOWLEDGE"
+  },
+  {
+    "oid": "32e548adeee6ab3c15265240f78fb0a38107c173",
+    "mode": "100644",
+    "parent_tree": "4aa72d6b18da8b8a86ac899b4385ceb693f34ca4",
+    "parent_path": "",
+    "name": "SPEC.md"
+  },
+  {
+    "oid": "6c228962e1fbd7fce68d8c1fff24a9998bb7dedd",
+    "mode": "40000",
+    "parent_tree": "4aa72d6b18da8b8a86ac899b4385ceb693f34ca4",
+    "parent_path": "",
+    "name": "bootstrap"
+  },
+  {
+    "oid": "d7410e2118bf7689a3e7408bd0f85ca6c36b1630",
+    "mode": "40000",
+    "parent_tree": "4aa72d6b18da8b8a86ac899b4385ceb693f34ca4",
+    "parent_path": "",
+    "name": "extensions"
+  },
+  {
+    "oid": "d278069252895015a865f6ed31be2d9ddd4f7c15",
+    "mode": "40000",
+    "parent_tree": "4aa72d6b18da8b8a86ac899b4385ceb693f34ca4",
+    "parent_path": "",
+    "name": "saipen"
+  },
+  {
+    "oid": "25bc1f621576de009b0bff26161a0833c7a6bf47",
+    "mode": "40000",
+    "parent_tree": "4aa72d6b18da8b8a86ac899b4385ceb693f34ca4",
+    "parent_path": "",
+    "name": "tests"
+  },
+  {
+    "oid": "f0bc06f075285f8da6f00e578c60540e2155cc34",
+    "mode": "100644",
+    "parent_tree": "d04fbf3f3e37fdfef30a578211d47e3d79e0fe14",
+    "parent_path": "tools",
+    "name": "saipen.py"
+  },
+  {
+    "oid": "5aee34335b26a6f602ed61eef4cdd125f2d2fefc",
+    "mode": "100644",
+    "parent_tree": "d04fbf3f3e37fdfef30a578211d47e3d79e0fe14",
+    "parent_path": "tools",
+    "name": "test_conformance_lineage.py"
+  },
+  {
+    "oid": "5190eedbe9df095895d74c0c7441c1a762180278",
+    "mode": "100644",
+    "parent_tree": "d04fbf3f3e37fdfef30a578211d47e3d79e0fe14",
+    "parent_path": "tools",
+    "name": "test_source_receipts.py"
+  },
+  {
+    "oid": "7f736fd1f1f50bb2d96a913d53475f830d60c3c4",
+    "mode": "100644",
+    "parent_tree": "f7ab04a870fdaa0d3fbee478885bd288a24b9f02",
+    "parent_path": "tools/saipen_engine",
+    "name": "conformance.py"
+  },
+  {
+    "oid": "1f16c8dd5be9d3421e86f77e281e9398a2fa8446",
+    "mode": "100644",
+    "parent_tree": "f7ab04a870fdaa0d3fbee478885bd288a24b9f02",
+    "parent_path": "tools/saipen_engine",
+    "name": "controls.py"
+  },
+  {
+    "oid": "87b0a51dffa93ee6810e8513dfcb461e8ec6038a",
+    "mode": "100644",
+    "parent_tree": "f7ab04a870fdaa0d3fbee478885bd288a24b9f02",
+    "parent_path": "tools/saipen_engine",
+    "name": "release.py"
+  },
+  {
+    "oid": "a9f17b2db56bb85d25a97653b8a9870dfce8a87b",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "install_host_guard.py"
+  },
+  {
+    "oid": "8421c56710e86d3a719e0351cff077d700b8aafa",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_actor_binding_lifecycle.py"
+  },
+  {
+    "oid": "5ae1f8388d659270768fe516c9e66c72e383b108",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_adapter_parity.py"
+  },
+  {
+    "oid": "1e615de4019b558991b96466f48ca62e54c2c705",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_boot_locator.py"
+  },
+  {
+    "oid": "ac24a41e4f41a90323531f45c1f522e5f24fa61a",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_closure_provenance.py"
+  },
+  {
+    "oid": "bc1483228dfbb772cb88a9680b85e9a3a875af14",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_cold_agent_truth.py"
+  },
+  {
+    "oid": "2fcec90ec79c75fefb43d0d1251c701d71fa71eb",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_continue_entry.py"
+  },
+  {
+    "oid": "cdfb151e5321ffe8c08af53216c9239bdc06d88a",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_core_ownership_routing.py"
+  },
+  {
+    "oid": "9cf51e2d645603d6e4e6eebfa0ababf9657c208d",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_guard_events.py"
+  },
+  {
+    "oid": "a897429acaa901008fabbae99c1e83c66d33a026",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_opencode_adapter.py"
+  },
+  {
+    "oid": "c34d2184bc77351d581f68c84ca1f9e60848c621",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_opencode_bound_launch_smoke.py"
+  },
+  {
+    "oid": "68039e5718b09e61ddb762d64e49cafa0ab47942",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_opencode_host_smoke.py"
+  },
+  {
+    "oid": "1cef6514c7d311e154670fb3b01cb40c66a7e31a",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_opencode_live_session.py"
+  },
+  {
+    "oid": "3a7501118fd794db2e7f6038a23aa423ffdeb451",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_public_closure_cli.py"
+  },
+  {
+    "oid": "5f3c59f5fa5e46ea425d58b77c330a3187836ca9",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_reconcile_legacy_output_field.py"
+  },
+  {
+    "oid": "456d43aa3e4f0ec9428090741247d48ea42c0b08",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_runtime_bootstrap.py"
+  },
+  {
+    "oid": "a88897ea3c9817884373ac642a56d00d055220ef",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_search_transport.py"
+  },
+  {
+    "oid": "048da8dd66f3cd938280f11c494e40eb22ed508e",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_t1304_r004_dry_run_purity.py"
+  },
+  {
+    "oid": "67dff7f2c203bd592de4443dea7d21c55c6e6137",
+    "mode": "100644",
+    "parent_tree": "f3b76f8eb875b12fa2c91ef62f9940e41620e018",
+    "parent_path": "tools",
+    "name": "test_t1304_review_p0_repair.py"
+  },
+  {
+    "oid": "75dd432c9ac428f832495c75cb9776ca85d9cfc4",
+    "mode": "100644",
+    "parent_tree": "476e8879dd413302c11b7aba205d53a467748f9d",
+    "parent_path": "tools/saipen_engine",
+    "name": "closure.py"
+  },
+  {
+    "oid": "a0ffccdff4c2274ad4246694fd463579a9addf31",
+    "mode": "100644",
+    "parent_tree": "476e8879dd413302c11b7aba205d53a467748f9d",
+    "parent_path": "tools/saipen_engine",
+    "name": "debt.py"
+  },
+  {
+    "oid": "cd4919cda820734c0a991752474cc1b11e3705bb",
+    "mode": "100644",
+    "parent_tree": "476e8879dd413302c11b7aba205d53a467748f9d",
+    "parent_path": "tools/saipen_engine",
+    "name": "guard_events.py"
+  },
+  {
+    "oid": "5cfd732970b75f25a760fc2f039ca6574ebeba8e",
+    "mode": "100644",
+    "parent_tree": "476e8879dd413302c11b7aba205d53a467748f9d",
+    "parent_path": "tools/saipen_engine",
+    "name": "log_compaction.py"
+  },
+  {
+    "oid": "7d8df1b2c328f815ffd613600a2215f3a3ad6725",
+    "mode": "100644",
+    "parent_tree": "476e8879dd413302c11b7aba205d53a467748f9d",
+    "parent_path": "tools/saipen_engine",
+    "name": "ownership.py"
+  },
+  {
+    "oid": "fa3fcb3bea3d3d1614295ca58579a9f81e4090b5",
+    "mode": "100644",
+    "parent_tree": "dbb0323928f01b6220eec228e44eead6257e3490",
+    "parent_path": "tests",
+    "name": "protocol_semantic_golden.json"
+  },
+  {
+    "oid": "ca52e3348956f8d01c7c149b10ffa85e096b295e",
+    "mode": "40000",
+    "parent_tree": "f0befe05fc94b2a42892ffcc46d243fe1949db75",
+    "parent_path": "tests/scenarios",
+    "name": "active-task-not-claimed"
+  },
+  {
+    "oid": "5249c23866a3f66b70eb21b6cd533a2fdc146027",
+    "mode": "40000",
+    "parent_tree": "f0befe05fc94b2a42892ffcc46d243fe1949db75",
+    "parent_path": "tests/scenarios",
+    "name": "hr-bad-updated"
+  },
+  {
+    "oid": "5b4b38f6b75ab9a420b4217af2b1861edd8bafdd",
+    "mode": "40000",
+    "parent_tree": "f0befe05fc94b2a42892ffcc46d243fe1949db75",
+    "parent_path": "tests/scenarios",
+    "name": "hr-claim-foreign-doing"
+  },
+  {
+    "oid": "2b3c79e95e4c1bd61622df48e6767d61574aa39f",
+    "mode": "40000",
+    "parent_tree": "f0befe05fc94b2a42892ffcc46d243fe1949db75",
+    "parent_path": "tests/scenarios",
+    "name": "hr-claim-half-pair"
+  },
+  {
+    "oid": "b94c2096e92cf5f09dc4564ab2deb4c7f786765a",
+    "mode": "40000",
+    "parent_tree": "f0befe05fc94b2a42892ffcc46d243fe1949db75",
+    "parent_path": "tests/scenarios",
+    "name": "hr-illegal-transition-pair"
+  },
+  {
+    "oid": "57c4d14c02ae28a00ea384f8d1b1f2f3169734cb",
+    "mode": "40000",
+    "parent_tree": "f0befe05fc94b2a42892ffcc46d243fe1949db75",
+    "parent_path": "tests/scenarios",
+    "name": "hr-malformed-wait"
+  },
+  {
+    "oid": "7839633fc6b8830629725bd1da9d8be4849e6a1d",
+    "mode": "40000",
+    "parent_tree": "f0befe05fc94b2a42892ffcc46d243fe1949db75",
+    "parent_path": "tests/scenarios",
+    "name": "hr-missing-transition_from"
+  },
+  {
+    "oid": "efbb78b99f8a2d109f486fa07f239e9cd5883f43",
+    "mode": "40000",
+    "parent_tree": "f0befe05fc94b2a42892ffcc46d243fe1949db75",
+    "parent_path": "tests/scenarios",
+    "name": "hr-wait-grammar"
+  },
+  {
+    "oid": "5d4bc6d61d00773168ce58adcca6bb12777b94a8",
+    "mode": "40000",
+    "parent_tree": "f0befe05fc94b2a42892ffcc46d243fe1949db75",
+    "parent_path": "tests/scenarios",
+    "name": "saiui-adoption"
+  },
+  {
+    "oid": "eb2bfa2ea2ed02f50680f3c7d2d1feacd720acd7",
+    "mode": "40000",
+    "parent_tree": "f0befe05fc94b2a42892ffcc46d243fe1949db75",
+    "parent_path": "tests/scenarios",
+    "name": "state-behind-board-self-claim"
+  },
+  {
+    "oid": "7affba65adb59be4b75a2319dbb6a4f4a55320da",
+    "mode": "40000",
+    "parent_tree": "f0befe05fc94b2a42892ffcc46d243fe1949db75",
+    "parent_path": "tests/scenarios",
+    "name": "userperson-malformed"
+  },
+  {
+    "oid": "08632eb27d67d8211575d156daf574c8233a8178",
+    "mode": "40000",
+    "parent_tree": "f0befe05fc94b2a42892ffcc46d243fe1949db75",
+    "parent_path": "tests/scenarios",
+    "name": "userperson-valid"
+  },
+  {
+    "oid": "417be9db90e6a7e130a52e3b9b6af47053bdbaea",
+    "mode": "100644",
+    "parent_tree": "f4da0a9f2fc1c47f4d924e4b535e4c594cd2b764",
+    "parent_path": "saipen",
+    "name": "ACTIVATION_BLOCK.md"
+  },
+  {
+    "oid": "7f984fe703d4fa602b146d3391221097c6730fc5",
+    "mode": "40000",
+    "parent_tree": "6b0dd21aa44e5d76e79a100bcad0f9268daa5eec",
+    "parent_path": "extensions",
+    "name": "subs"
+  },
+  {
+    "oid": "4bd5c4c331f64421798d2c81331ca16c56467e41",
+    "mode": "100644",
+    "parent_tree": "cae1ef5908a4ffacd2ca7ec17c6c4d6d15b989a8",
+    "parent_path": "bootstrap",
+    "name": "export.ps1"
+  },
+  {
+    "oid": "d7b4aeb575f7bc033ac09775bb87bb1f21445713",
+    "mode": "40000",
+    "parent_tree": "4835583e5808a73c20caff750d754055e1c369fb",
+    "parent_path": ".saipen",
+    "name": "KNOWLEDGE"
+  },
+  {
+    "oid": "10ccca7e38cb6304fabb1ffc3ca1e93a0b799780",
+    "mode": "40000",
+    "parent_tree": "4835583e5808a73c20caff750d754055e1c369fb",
+    "parent_path": ".saipen",
+    "name": "improve"
+  },
+  {
+    "oid": "bb98e0701c6681c5c2bf85f63e86e5d1aeb20041",
+    "mode": "40000",
+    "parent_tree": "4835583e5808a73c20caff750d754055e1c369fb",
+    "parent_path": ".saipen",
+    "name": "logs"
+  },
+  {
+    "oid": "1dcaddb1dd20b29c978659bbce5691912dee2115",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "ar"
+  },
+  {
+    "oid": "f602d663b954148cbd84b3f4c633153ede8fd28f",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "bg"
+  },
+  {
+    "oid": "42b5d82718e14f3e5439bc5168953bc659b6147e",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "cs"
+  },
+  {
+    "oid": "d6757a38e04d9545e9369dd77fbbc42a7a50c077",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "da"
+  },
+  {
+    "oid": "afed18ac4b0df394609a677b1dce8ecc2ba59c95",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "de"
+  },
+  {
+    "oid": "52b63d32654fe6373e5bc5ca9a92b0c4e10fea05",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "ded"
+  },
+  {
+    "oid": "5cd5a21455dc676d18f1a343de26ee2ff66c93c9",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "el"
+  },
+  {
+    "oid": "3481923306b7f5af0fc2fe5c7464498cfb4b78df",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "es"
+  },
+  {
+    "oid": "0ffc92316029d67468ebb22542a8531869edaedc",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "et"
+  },
+  {
+    "oid": "013aef0fa0398204565a7d71b37f178eb602ae17",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "fi"
+  },
+  {
+    "oid": "22b948897b8dbc82ef0095e412bb2b319e76eee0",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "fr"
+  },
+  {
+    "oid": "af64a06f1c18a79414003add716a02de915a47fa",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "he"
+  },
+  {
+    "oid": "3f280754e634ddbdf1ac8267dba23eb983425d88",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "hi"
+  },
+  {
+    "oid": "6533c1e32ff537a8786897491c0a499612406822",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "hr"
+  },
+  {
+    "oid": "d6554157955dcc5eb959cc7593681dfdaa84f331",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "hu"
+  },
+  {
+    "oid": "df0178514e34cb15ce4fac6532beb759ed8f7009",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "id"
+  },
+  {
+    "oid": "d418062bd49ea580afd1ab19d2c4830ee4075576",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "it"
+  },
+  {
+    "oid": "0b354156df0c588a23d4f1b781f2969ff0155725",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "ja"
+  },
+  {
+    "oid": "d4401f03e972b1c9f732dbdeadc79ed4c1805fc0",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "ko"
+  },
+  {
+    "oid": "7111f2cc529bef1cbd36ad512a1883791542903a",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "nl"
+  },
+  {
+    "oid": "3b7a798d757af63020af33b7907405087e6a62db",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "no"
+  },
+  {
+    "oid": "5663a50968aeb350781a32e996a2e382d6fd5437",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "pl"
+  },
+  {
+    "oid": "1f4bcfe7d75b4fd6c6266761693cb4c3cb70fe04",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "pt"
+  },
+  {
+    "oid": "73b52f9e29a0ee372bcfa366dd1c977a68f97d3c",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "ro"
+  },
+  {
+    "oid": "f0428bfc22b61e04a6575b094a53a21715d616a2",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "ru"
+  },
+  {
+    "oid": "ced5236aeb0a040dbeaafa5949c84935ec1a3b76",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "sk"
+  },
+  {
+    "oid": "3a5f0ade85a092ad94d139c76757742d7bacc54d",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "sv"
+  },
+  {
+    "oid": "511b12c97c9c3f6dc547371d44a3a187027aed47",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "th"
+  },
+  {
+    "oid": "9c3543fb2b659b21b6c3c6be4931de02452439ea",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "tr"
+  },
+  {
+    "oid": "7f2382da74893b59ed527336f10b0de0ed7e06f3",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "uk"
+  },
+  {
+    "oid": "a82fac42a54273e496a13dbf2ba8f0bc1d3ddc12",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "vi"
+  },
+  {
+    "oid": "e6d522758af439fd0e512a68e60ca1fd42d9a221",
+    "mode": "40000",
+    "parent_tree": "a212df30a5a0df33dd92c08815a85c50fc33605a",
+    "parent_path": ".saipen/saitranslate/kitchen",
+    "name": "zh"
+  },
+  {
+    "oid": "cfb98abe841f736a44d2c4f39e203635719c90a5",
+    "mode": "40000",
+    "parent_tree": "52f9661a86bd08262da82462c6a8152ee70163df",
+    "parent_path": ".saipen/kitchen",
+    "name": "release_scope"
+  },
+  {
+    "oid": "0b131455caee48e1a31f5882b9342e08f92ff6c5",
+    "mode": "40000",
+    "parent_tree": "1c5dd1a95f60547015b5cfd7aacc39c4df64e241",
+    "parent_path": ".saipen/intake",
+    "name": "active"
+  },
+  {
+    "oid": "e88e2b3fb3ae06e920b5aea0b7d0fafadb8b1218",
+    "mode": "40000",
+    "parent_tree": "1c5dd1a95f60547015b5cfd7aacc39c4df64e241",
+    "parent_path": ".saipen/intake",
+    "name": "tombstones"
+  },
+  {
+    "oid": "feb9303b0fa59c6e17cfd2292b4f667894d7f56a",
+    "mode": "100644",
+    "parent_tree": "b0014d970e4522aa97eb4835c468d929e9bec33a",
+    "parent_path": ".saipen/extensions/subs",
+    "name": "MANIFEST.md"
+  },
+  {
+    "oid": "58cc894a8e217ce82428cd672303939567a035a9",
+    "mode": "40000",
+    "parent_tree": "b0014d970e4522aa97eb4835c468d929e9bec33a",
+    "parent_path": ".saipen/extensions/subs",
+    "name": "saihunt"
+  },
+  {
+    "oid": "f1c65f33623e25b5d66b86fa744f54720499dacb",
+    "mode": "40000",
+    "parent_tree": "b0014d970e4522aa97eb4835c468d929e9bec33a",
+    "parent_path": ".saipen/extensions/subs",
+    "name": "saipython"
+  },
+  {
+    "oid": "a12a8b5d0a50a6ca66f7b49fb2b6ffeefbfe2655",
+    "mode": "40000",
+    "parent_tree": "b0014d970e4522aa97eb4835c468d929e9bec33a",
+    "parent_path": ".saipen/extensions/subs",
+    "name": "saitest"
+  },
+  {
+    "oid": "18d314f587e87dd2d2989fb40a552daaaaffd630",
+    "mode": "40000",
+    "parent_tree": "b0014d970e4522aa97eb4835c468d929e9bec33a",
+    "parent_path": ".saipen/extensions/subs",
+    "name": "saiui"
+  },
+  {
+    "oid": "e924810cad706e5f3877d8905badc110728a64d6",
+    "mode": "100644",
+    "parent_tree": "a1474e7743a5e8a6a6cbfec9db93fc8d73d94863",
+    "parent_path": ".saipen/extensions/subs/saitest",
+    "name": "BOARD.md"
+  },
+  {
+    "oid": "2f6c080dde6b61799ac52785eed1ef167a04e3f4",
+    "mode": "100644",
+    "parent_tree": "a1474e7743a5e8a6a6cbfec9db93fc8d73d94863",
+    "parent_path": ".saipen/extensions/subs/saitest",
+    "name": "LOG.md"
+  },
+  {
+    "oid": "8a5a89256ce998d4c771d7d0f6e599fa08142774",
+    "mode": "100644",
+    "parent_tree": "a1474e7743a5e8a6a6cbfec9db93fc8d73d94863",
+    "parent_path": ".saipen/extensions/subs/saitest",
+    "name": "STATE.md"
+  },
+  {
+    "oid": "23be7e5e0fcfb7ae594ce048ebefbc848e849f26",
+    "mode": "100644",
+    "parent_tree": "6ab2f9835c3009cef7872be2620b10099e902179",
+    "parent_path": ".saipen/extensions/subs/saipython",
+    "name": "BOARD.md"
+  },
+  {
+    "oid": "2811a6b4764dcbc0f1aadbcbbea0644968ec8db3",
+    "mode": "100644",
+    "parent_tree": "6ab2f9835c3009cef7872be2620b10099e902179",
+    "parent_path": ".saipen/extensions/subs/saipython",
+    "name": "LOG.md"
+  },
+  {
+    "oid": "9b91de37297939afbc10d93191da14d69f91ce1a",
+    "mode": "100644",
+    "parent_tree": "6ab2f9835c3009cef7872be2620b10099e902179",
+    "parent_path": ".saipen/extensions/subs/saipython",
+    "name": "STATE.md"
+  },
+  {
+    "oid": "37d39bc144059c85778d22d3da933dfbe48c540a",
+    "mode": "100644",
+    "parent_tree": "39ba6d64251fabf7cee04c8ba9290c9ca7d44372",
+    "parent_path": ".saipen/extensions/subs/saihunt",
+    "name": "STATE.md"
+  },
+  {
+    "oid": "fba5f52281b5a229a42e726565ebbb9e085ea2ed",
+    "mode": "100644",
+    "parent_tree": "bb7293432a1b0ae38880c5a71e57908d39dddb7d",
+    "parent_path": ".saipen/KNOWLEDGE",
+    "name": "INDEX.md"
+  },
+  {
+    "oid": "cc37b0e775440e59817ee5541f2e9b046f10a033",
+    "mode": "40000",
+    "parent_tree": "bb7293432a1b0ae38880c5a71e57908d39dddb7d",
+    "parent_path": ".saipen/KNOWLEDGE",
+    "name": "cards"
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "ticket": "T-2045",
+  "ownership": "claimed existing Work; pre-existing two untracked candidate files preserved, no staging or installed ingress",
+  "files": [
+    {
+      "path": "tools/saipen_operator_gateway.py",
+      "sha256": "4472ab484834fe0babeb7708644dc5ff593d9afadd60849adf771f457fd9ecb8",
+      "preimage": ".saipen/evidence/T-2045/gateway-boundary-20261110/pre/tools/saipen_operator_gateway.py"
+    },
+    {
+      "path": "extensions/adapters/FREEBUFF_INGRESS_CONTRACT.md",
+      "sha256": "c67afe5bfbcfba7ae6d4e1bd888882fa4a27ebfbc8baeb209f6c3014c9b7c460",
+      "preimage": ".saipen/evidence/T-2045/gateway-boundary-20261110/pre/extensions/adapters/FREEBUFF_INGRESS_CONTRACT.md"
+    }
+  ]
+}

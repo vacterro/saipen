@@ -1,0 +1,47 @@
+{
+  "finding": "Named invalid summaries cannot associate each rejection reason with its relative path because all use layer:null and omit path. Per-file inspect still exposes the reason; invalid inputs remain refused.",
+  "classification": "P2 diagnostic reliability; no lifecycle admission or unsafe deletion",
+  "status_invalid": [
+    {
+      "layer": null,
+      "reason": "empty"
+    },
+    {
+      "layer": null,
+      "reason": "not-utf8"
+    }
+  ],
+  "pending": [
+    {
+      "layer": null,
+      "path": "audit/a-empty.md",
+      "state": "INVALID",
+      "receipt": null,
+      "work": null,
+      "sha256": null
+    },
+    {
+      "layer": null,
+      "path": "audit/b-encoding.txt",
+      "state": "INVALID",
+      "receipt": null,
+      "work": null,
+      "sha256": null
+    }
+  ],
+  "projection_invalid": [
+    {
+      "layer": null,
+      "reason": "empty"
+    },
+    {
+      "layer": null,
+      "reason": "not-utf8"
+    }
+  ],
+  "source_scope": [
+    "tools/saipen_engine/audit_inbox.py:projection",
+    "tools/saipen_engine/audit_inbox.py:status"
+  ],
+  "next": "Create bounded follow-up at REVIEW; do not alter frozen T-1697 source."
+}

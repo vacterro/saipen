@@ -1,0 +1,25 @@
+{
+  "attribution": "unknown concurrent actor; worker production/test edits absent",
+  "files": {
+    "tools/saipen_engine/subs.py": {
+      "sha256": "69a9e12d75098165ddd74f0f28f55a95d99e7aae52930a20d77eaeef96a0fdc7",
+      "bytes": 218639
+    },
+    "tools/saipen_engine/crew.py": {
+      "sha256": "de2f8ad1a1172b4c1171280c647f40ea243cb0ea919ebf30f7adfc2091a61e81",
+      "bytes": 133664
+    },
+    "tools/saipen_engine/journal.py": {
+      "sha256": "80a411e6484eb24ac155701c67fef779fa694e65bb4356856468c1c821ebae93",
+      "bytes": 264473
+    },
+    "tools/test_sub_dispose_after_collect.py": {
+      "sha256": "96cd8e21751a6c3059c01bbd0750a12665743fc5212a1131205351a5512bcb9d",
+      "bytes": 18898
+    },
+    "tools/test_t925_sub_terminal_durability.py": {
+      "sha256": "f236252bf12a2bbe305db43deb7f2f25ab8bfc6daa91da67b6ad73ea00e85b19",
+      "bytes": 2739
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "format": "unittest",
+  "timeout": 600,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools",
+              "-p", "test_t1866_publication_state.py", "-v"],
+  "context": ["tools", "saipen", "bootstrap", "extensions", "tests/scenarios",
+              "tests/fixtures", "VERSION"],
+  "oracle_files": ["tools/test_t1866_publication_state.py"],
+  "subject_files": ["tools/saipen_engine/closure.py", "tools/saipen_engine/operations.py",
+                    "tools/saipen_engine/board.py", "tools/saipen_engine/board_compaction.py",
+                    "extensions/schemas/board.schema.json", "saipen/REGISTRY.json"],
+  "before": {
+    "tools/saipen_engine/closure.py": ".saipen/evidence/T-1866-publication-state/before/tools/saipen_engine/closure.py",
+    "tools/saipen_engine/operations.py": ".saipen/evidence/T-1866-publication-state/before/tools/saipen_engine/operations.py",
+    "tools/saipen_engine/board.py": ".saipen/evidence/T-1866-publication-state/before/tools/saipen_engine/board.py",
+    "tools/saipen_engine/board_compaction.py": ".saipen/evidence/T-1866-publication-state/before/tools/saipen_engine/board_compaction.py",
+    "extensions/schemas/board.schema.json": ".saipen/evidence/T-1866-publication-state/before/extensions/schemas/board.schema.json",
+    "saipen/REGISTRY.json": ".saipen/evidence/T-1866-publication-state/before/saipen/REGISTRY.json"
+  }
+}

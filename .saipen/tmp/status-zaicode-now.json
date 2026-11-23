@@ -1,0 +1,1818 @@
+{
+  "ok": true,
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_zaicode",
+  "protocol_version": "8.1.0",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "saipen continue",
+  "computed_next_action": "saipen start --receipt SRC-421",
+  "computed_reason": "queued-source",
+  "blocker": "none",
+  "execution_intent": "goal",
+  "continuation_authority": "operator_required",
+  "authority_source": "E-8724",
+  "authority_until": "budget",
+  "safety_valve_mode": "hard_wait",
+  "claimed_ticket": null,
+  "top_workable_ticket": null,
+  "log_tail_event": 9173,
+  "head": "2380d51e",
+  "board_errors": [],
+  "recovery_pending": false,
+  "recovery_conflict": false,
+  "pending_ops": [],
+  "conflict_ops": [],
+  "blocker_projection": {
+    "schema_version": 1,
+    "groups": [
+      {
+        "shared_blocker_id": "work:T-144",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED: SRC-110:R003 -- all T-144 engineering is VERIFIED, but first-time-user acceptance needs a genuinely clean Windows machine (VM, Windows Sandbox or dedicated profile) with no Git,...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-144"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-187",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED: continuation audits are complete; the only remaining gate is T-166 live Antigravity acceptance, which needs a signed-in account, a paid request and a real vendor 5h roll. Operator must supply that before this seat continues the board/release audit. No agent-side file missing.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-187"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-216",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED: verifying needs a real paid subscription the vendor has exhausted; that costs the operator money and wall-clock time. No agent can produce it. Operator must supply an exhausted paid account and run the scheduled worker to real vendor limit exhaustion. Product fix exists (T-190 family); no agent-side file missing.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-216"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-166",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED: signing in to the live Antigravity account and spending a paid request cannot be done by an agent. Verify needs a real vendor wall-clock roll of a supported auto-rolled 5h plan;...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-166"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-262",
+        "blocker_class": "SRC",
+        "cause": "src",
+        "root_cause": "SRC-169_SHARED_RECEIPT_EXTERNAL: T-262 own clauses R001/R002/R007 VERIFIED and published e5389320, but shared receipt requires all 11 clauses terminal. R003/R005 (T-263) require native atomic edit admission/CAS and owned credential/settings continuity; R004 (T-264) requires packaged UI/publication gate. All six closure modes and UNAVAILABLE_ENVIRONMENT refused by canonical source gate. Human action: resolve T-263/T-264 external blockers and terminalise SRC-169, then resume T-262 at SHIP.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-262"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-261",
+        "blocker_class": "ACTIVE_DEPENDENCY",
+        "cause": "active_dependency",
+        "root_cause": "ACTIVE_DEPENDENCY:SRC-169_SHARED_RECEIPT_EXTERNAL -- T-261's own detector/maintainer scope is DONE and verified (zaicodeRouterMaintainer.ts, 24/24 maintainer+setup tests, QuickStart Add...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-261"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-263",
+        "blocker_class": "UPSTREAM_NATIVE_CAS_AND_OWNED_CREDENTIAL_CONTRACT_REQUIRED",
+        "cause": "upstream_native_cas_and_owned_credential_contract_required",
+        "root_cause": "UPSTREAM_NATIVE_CAS_AND_OWNED_CREDENTIAL_CONTRACT_REQUIRED: completion audit (DEC E-9033) confirms the unresolved SRC-169 clauses are externally owned and not agent-resolvable. R003 (drag order...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-263"
+        ],
+        "dependent_tickets": [
+          "T-265"
+        ],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-561",
+        "blocker_class": "VERIFY",
+        "cause": "verify",
+        "root_cause": "VERIFY leftovers need a packaged Windows run on a disposable profile plus live-host latency measurement; both need operator authorization (SRC-389 precedent for packaged smoke). Source change + unit evidence are complete and green; unblock resumes at VERIFY.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-561"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-521",
+        "blocker_class": "ACCEPTANCE_RUN_UNAVAILABLE",
+        "cause": "acceptance_run_unavailable",
+        "root_cause": "ACCEPTANCE_RUN_UNAVAILABLE: the Host execution lifecycle is implemented, wired to the authoritative task-realtime boundary (Host run-lease acquire/release, terminal stream batch, executor exit) and verified at recorder/bus level with a real RED control, plus packaged boot, race and corrupt-state durability gates on dist-accept-t523. What is missing is the acceptance run itself: observing one real failing session end to end (Host run lease -> terminal stream batch -> lease settlement) on a packaged app needs an authorized provider credential or a failing-session fixture that this host does not have, and the provider fixture only exercises the transport boundary, not the app's executor. Blocked without inventing a PASS.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-521"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-509",
+        "blocker_class": "PACKAGED_WINDOWS_ACCEPTANCE_UNAVAILABLE",
+        "cause": "packaged_windows_acceptance_unavailable",
+        "root_cause": "PACKAGED_WINDOWS_ACCEPTANCE_UNAVAILABLE: SRC-357 handoff section 17 and its final DONE line require a disposable packaged Windows client that receives a real initial snapshot and preserves...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-509"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-507",
+        "blocker_class": "PACKAGED_WINDOWS_ACCEPTANCE_UNAVAILABLE",
+        "cause": "packaged_windows_acceptance_unavailable",
+        "root_cause": "PACKAGED_WINDOWS_ACCEPTANCE_UNAVAILABLE: SRC-361 R043-R050 need a fresh production artifact plus an installed-runtime subscription driven with a disposable profile; no artifact was built and driving the packaged app would steal foreground focus / disturb production sessions (R049). R006 semantic evidence validation is engine-owned (tools/saipen_engine/intake.py:2327/3202/3741) and not editable here (T-504 precedent). Source-level repair demonstrated 18/18 + tsc 0 errors: .saipen/evidence/T-507/SRC356-RECONCILIATION.md",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-507"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-264",
+        "blocker_class": "PUBLICATION_CORE_GATE",
+        "cause": "publication_core_gate",
+        "root_cause": "PUBLICATION_CORE_GATE: code BUILD+VERIFY+REVIEW all green (16/16, red control proven, full ui 1603/1610 with 3 foreign failures), but saipen ship refused VALIDATION_FAILED on release-version parity: README.ee/.ded/.ja and saitranslate kitchen prep must carry v0.0.3 exactly once. Scope recorded (5 zcode paths). Publication blocked by inherited repo release/translation surfaces owned outside this ticket (same gate class as T-265/T-268); no commit/push performed. Evidence .saipen/evidence/T-264-verify.md. Resume at SHIP after release-version parity repair (T-215/T-113 release authority).",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-264"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-272",
+        "blocker_class": "OTHER_LOGON_EXECUTION_UNAVAILABLE",
+        "cause": "other_logon_execution_unavailable",
+        "root_cause": "OTHER_LOGON_EXECUTION_UNAVAILABLE: local quota pool admission and bounded requests verified; shared metrics-only Antigravity accounts have no generation command in the current ZAICODE adapter to execute inside their own Windows logon context. Local CLI would use the wrong credential identity. No safe complete fix using the present public contract; preserve partial implementation and disclose this remaining requirement.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-272"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-220",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-220"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-215",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED: this ticket records a decision only the operator can take -- how to resolve T-144's stale 29-path release scope (.saipen/kitchen/release_scope/T-144.json, stale in at least 8 paths) that makes stage SOURCE_COVERAGE refuse every saipen ship. There is no agent-side work here that would not be release authority exercised on someone else's behalf. Options put to the operator: (a) review those 8 files and re-bind T-144's scope to current content, (b) retire or retarget SRC-110..113 so the release train stops naming T-144, (c) accept that no local ship completes until a committed release receipt exists. Until one is recorded, T-215 cannot enter SCOUT.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-215"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-176",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED after PHASE 0 isolation proof (.saipen/evidence/T-176-phase0.md). The installed Antigravity CLI 1.2.14 holds exactly ONE credential per Windows logon context: cmdkey /list shows...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-176"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      },
+      {
+        "shared_blocker_id": "work:T-154",
+        "blocker_class": "DESTRUCTIVE_ON_THE_HOST",
+        "cause": "destructive_on_the_host",
+        "root_cause": "DESTRUCTIVE_ON_THE_HOST: the two engines are V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN (the one bin/saipen.cmd runs, confirmed by reading the shim) and...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-154"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization"
+      }
+    ],
+    "items": {
+      "T-144": {
+        "shared_blocker_id": "work:T-144",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED: SRC-110:R003 -- all T-144 engineering is VERIFIED, but first-time-user acceptance needs a genuinely clean Windows machine (VM, Windows Sandbox or dedicated profile) with no Git,...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-144"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-144",
+        "shared_blocker_ids": [
+          "work:T-144"
+        ],
+        "needs": [
+          "T-146",
+          "T-137",
+          "T-141"
+        ]
+      },
+      "T-187": {
+        "shared_blocker_id": "work:T-187",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED: continuation audits are complete; the only remaining gate is T-166 live Antigravity acceptance, which needs a signed-in account, a paid request and a real vendor 5h roll. Operator must supply that before this seat continues the board/release audit. No agent-side file missing.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-187"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-187",
+        "shared_blocker_ids": [
+          "work:T-187"
+        ],
+        "needs": []
+      },
+      "T-216": {
+        "shared_blocker_id": "work:T-216",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED: verifying needs a real paid subscription the vendor has exhausted; that costs the operator money and wall-clock time. No agent can produce it. Operator must supply an exhausted paid account and run the scheduled worker to real vendor limit exhaustion. Product fix exists (T-190 family); no agent-side file missing.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-216"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-216",
+        "shared_blocker_ids": [
+          "work:T-216"
+        ],
+        "needs": []
+      },
+      "T-166": {
+        "shared_blocker_id": "work:T-166",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED: signing in to the live Antigravity account and spending a paid request cannot be done by an agent. Verify needs a real vendor wall-clock roll of a supported auto-rolled 5h plan;...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-166"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-166",
+        "shared_blocker_ids": [
+          "work:T-166"
+        ],
+        "needs": [
+          "T-188"
+        ]
+      },
+      "T-262": {
+        "shared_blocker_id": "work:T-262",
+        "blocker_class": "SRC",
+        "cause": "src",
+        "root_cause": "SRC-169_SHARED_RECEIPT_EXTERNAL: T-262 own clauses R001/R002/R007 VERIFIED and published e5389320, but shared receipt requires all 11 clauses terminal. R003/R005 (T-263) require native atomic edit admission/CAS and owned credential/settings continuity; R004 (T-264) requires packaged UI/publication gate. All six closure modes and UNAVAILABLE_ENVIRONMENT refused by canonical source gate. Human action: resolve T-263/T-264 external blockers and terminalise SRC-169, then resume T-262 at SHIP.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-262"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-262",
+        "shared_blocker_ids": [
+          "work:T-262"
+        ],
+        "needs": []
+      },
+      "T-261": {
+        "shared_blocker_id": "work:T-261",
+        "blocker_class": "ACTIVE_DEPENDENCY",
+        "cause": "active_dependency",
+        "root_cause": "ACTIVE_DEPENDENCY:SRC-169_SHARED_RECEIPT_EXTERNAL -- T-261's own detector/maintainer scope is DONE and verified (zaicodeRouterMaintainer.ts, 24/24 maintainer+setup tests, QuickStart Add...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-261"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-261",
+        "shared_blocker_ids": [
+          "work:T-261"
+        ],
+        "needs": []
+      },
+      "T-263": {
+        "shared_blocker_id": "work:T-263",
+        "blocker_class": "UPSTREAM_NATIVE_CAS_AND_OWNED_CREDENTIAL_CONTRACT_REQUIRED",
+        "cause": "upstream_native_cas_and_owned_credential_contract_required",
+        "root_cause": "UPSTREAM_NATIVE_CAS_AND_OWNED_CREDENTIAL_CONTRACT_REQUIRED: completion audit (DEC E-9033) confirms the unresolved SRC-169 clauses are externally owned and not agent-resolvable. R003 (drag order...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-263"
+        ],
+        "dependent_tickets": [
+          "T-265"
+        ],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-263",
+        "shared_blocker_ids": [
+          "work:T-263"
+        ],
+        "needs": [
+          "T-267"
+        ]
+      },
+      "T-561": {
+        "shared_blocker_id": "work:T-561",
+        "blocker_class": "VERIFY",
+        "cause": "verify",
+        "root_cause": "VERIFY leftovers need a packaged Windows run on a disposable profile plus live-host latency measurement; both need operator authorization (SRC-389 precedent for packaged smoke). Source change + unit evidence are complete and green; unblock resumes at VERIFY.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-561"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-561",
+        "shared_blocker_ids": [
+          "work:T-561"
+        ],
+        "needs": []
+      },
+      "T-521": {
+        "shared_blocker_id": "work:T-521",
+        "blocker_class": "ACCEPTANCE_RUN_UNAVAILABLE",
+        "cause": "acceptance_run_unavailable",
+        "root_cause": "ACCEPTANCE_RUN_UNAVAILABLE: the Host execution lifecycle is implemented, wired to the authoritative task-realtime boundary (Host run-lease acquire/release, terminal stream batch, executor exit) and verified at recorder/bus level with a real RED control, plus packaged boot, race and corrupt-state durability gates on dist-accept-t523. What is missing is the acceptance run itself: observing one real failing session end to end (Host run lease -> terminal stream batch -> lease settlement) on a packaged app needs an authorized provider credential or a failing-session fixture that this host does not have, and the provider fixture only exercises the transport boundary, not the app's executor. Blocked without inventing a PASS.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-521"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-521",
+        "shared_blocker_ids": [
+          "work:T-521"
+        ],
+        "needs": []
+      },
+      "T-509": {
+        "shared_blocker_id": "work:T-509",
+        "blocker_class": "PACKAGED_WINDOWS_ACCEPTANCE_UNAVAILABLE",
+        "cause": "packaged_windows_acceptance_unavailable",
+        "root_cause": "PACKAGED_WINDOWS_ACCEPTANCE_UNAVAILABLE: SRC-357 handoff section 17 and its final DONE line require a disposable packaged Windows client that receives a real initial snapshot and preserves...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-509"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-509",
+        "shared_blocker_ids": [
+          "work:T-509"
+        ],
+        "needs": []
+      },
+      "T-507": {
+        "shared_blocker_id": "work:T-507",
+        "blocker_class": "PACKAGED_WINDOWS_ACCEPTANCE_UNAVAILABLE",
+        "cause": "packaged_windows_acceptance_unavailable",
+        "root_cause": "PACKAGED_WINDOWS_ACCEPTANCE_UNAVAILABLE: SRC-361 R043-R050 need a fresh production artifact plus an installed-runtime subscription driven with a disposable profile; no artifact was built and driving the packaged app would steal foreground focus / disturb production sessions (R049). R006 semantic evidence validation is engine-owned (tools/saipen_engine/intake.py:2327/3202/3741) and not editable here (T-504 precedent). Source-level repair demonstrated 18/18 + tsc 0 errors: .saipen/evidence/T-507/SRC356-RECONCILIATION.md",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-507"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-507",
+        "shared_blocker_ids": [
+          "work:T-507"
+        ],
+        "needs": []
+      },
+      "T-265": {
+        "shared_blocker_id": "work:T-263",
+        "blocker_class": "UPSTREAM_NATIVE_CAS_AND_OWNED_CREDENTIAL_CONTRACT_REQUIRED",
+        "cause": "upstream_native_cas_and_owned_credential_contract_required",
+        "root_cause": "UPSTREAM_NATIVE_CAS_AND_OWNED_CREDENTIAL_CONTRACT_REQUIRED: completion audit (DEC E-9033) confirms the unresolved SRC-169 clauses are externally owned and not agent-resolvable. R003 (drag order...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-263"
+        ],
+        "dependent_tickets": [
+          "T-265"
+        ],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-265",
+        "shared_blocker_ids": [
+          "work:T-263"
+        ],
+        "needs": []
+      },
+      "T-264": {
+        "shared_blocker_id": "work:T-264",
+        "blocker_class": "PUBLICATION_CORE_GATE",
+        "cause": "publication_core_gate",
+        "root_cause": "PUBLICATION_CORE_GATE: code BUILD+VERIFY+REVIEW all green (16/16, red control proven, full ui 1603/1610 with 3 foreign failures), but saipen ship refused VALIDATION_FAILED on release-version parity: README.ee/.ded/.ja and saitranslate kitchen prep must carry v0.0.3 exactly once. Scope recorded (5 zcode paths). Publication blocked by inherited repo release/translation surfaces owned outside this ticket (same gate class as T-265/T-268); no commit/push performed. Evidence .saipen/evidence/T-264-verify.md. Resume at SHIP after release-version parity repair (T-215/T-113 release authority).",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-264"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-264",
+        "shared_blocker_ids": [
+          "work:T-264"
+        ],
+        "needs": []
+      },
+      "T-272": {
+        "shared_blocker_id": "work:T-272",
+        "blocker_class": "OTHER_LOGON_EXECUTION_UNAVAILABLE",
+        "cause": "other_logon_execution_unavailable",
+        "root_cause": "OTHER_LOGON_EXECUTION_UNAVAILABLE: local quota pool admission and bounded requests verified; shared metrics-only Antigravity accounts have no generation command in the current ZAICODE adapter to execute inside their own Windows logon context. Local CLI would use the wrong credential identity. No safe complete fix using the present public contract; preserve partial implementation and disclose this remaining requirement.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-272"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-272",
+        "shared_blocker_ids": [
+          "work:T-272"
+        ],
+        "needs": []
+      },
+      "T-220": {
+        "shared_blocker_id": "work:T-220",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-220"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-220",
+        "shared_blocker_ids": [
+          "work:T-220"
+        ],
+        "needs": []
+      },
+      "T-215": {
+        "shared_blocker_id": "work:T-215",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED: this ticket records a decision only the operator can take -- how to resolve T-144's stale 29-path release scope (.saipen/kitchen/release_scope/T-144.json, stale in at least 8 paths) that makes stage SOURCE_COVERAGE refuse every saipen ship. There is no agent-side work here that would not be release authority exercised on someone else's behalf. Options put to the operator: (a) review those 8 files and re-bind T-144's scope to current content, (b) retire or retarget SRC-110..113 so the release train stops naming T-144, (c) accept that no local ship completes until a committed release receipt exists. Until one is recorded, T-215 cannot enter SCOUT.",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-215"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-215",
+        "shared_blocker_ids": [
+          "work:T-215"
+        ],
+        "needs": []
+      },
+      "T-176": {
+        "shared_blocker_id": "work:T-176",
+        "blocker_class": "OPERATOR_REQUIRED",
+        "cause": "operator_required",
+        "root_cause": "OPERATOR_REQUIRED after PHASE 0 isolation proof (.saipen/evidence/T-176-phase0.md). The installed Antigravity CLI 1.2.14 holds exactly ONE credential per Windows logon context: cmdkey /list shows...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-176"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-176",
+        "shared_blocker_ids": [
+          "work:T-176"
+        ],
+        "needs": []
+      },
+      "T-154": {
+        "shared_blocker_id": "work:T-154",
+        "blocker_class": "DESTRUCTIVE_ON_THE_HOST",
+        "cause": "destructive_on_the_host",
+        "root_cause": "DESTRUCTIVE_ON_THE_HOST: the two engines are V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN (the one bin/saipen.cmd runs, confirmed by reading the shim) and...",
+        "owner": "tools/saipen_engine/board.py",
+        "root_tickets": [
+          "T-154"
+        ],
+        "dependent_tickets": [],
+        "recovery_internally_authorized": false,
+        "external_input_required": true,
+        "read_only_work_may_proceed": true,
+        "recovery_operation": {
+          "command": null,
+          "operator_action": "Supply the root owner's missing evidence or decision."
+        },
+        "resumption_preconditions": [
+          "The root owner supplies verified evidence or authority",
+          "Canonical dependency and resumption gates pass"
+        ],
+        "basis": "recorded-blocker; not a live recovery authorization",
+        "ticket": "T-154",
+        "shared_blocker_ids": [
+          "work:T-154"
+        ],
+        "needs": []
+      }
+    }
+  },
+  "goal_authority": {
+    "state": "bounded",
+    "detail": "Bounded authority requires operator",
+    "original_event": "E-8724",
+    "checkpoint_due": true
+  },
+  "milestone": {
+    "current": null,
+    "label": null,
+    "parent": null,
+    "undo_available": false,
+    "valid": true
+  },
+  "cold_route": {
+    "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE",
+    "saipen_home": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source",
+    "protocol_dir": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen",
+    "phase": "DONE",
+    "phase_module": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\phases\\done.md",
+    "boot": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\BOOT.md",
+    "style": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\STYLE.md",
+    "documents": {
+      "STYLE.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\STYLE.md",
+      "BOOT.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\BOOT.md",
+      "INDEX.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\INDEX.md",
+      "COMMANDS.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\COMMANDS.md",
+      "OPS.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\OPS.md",
+      "SOURCES.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\SOURCES.md",
+      "EXECUTION.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\EXECUTION.md",
+      "MAINTENANCE.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\MAINTENANCE.md",
+      "CORE.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\CORE.md",
+      "RUNTIME.md": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\saipen\\RUNTIME.md"
+    },
+    "project_memory": {
+      "STATE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  },
+  "audit_inbox": {
+    "pending": 1,
+    "active_layer": 2,
+    "bound_receipt": "SRC-329",
+    "bound_work": "T-444",
+    "closed_pending_delete": 0,
+    "invalid": 0,
+    "residue": 0,
+    "clean": false,
+    "last_allocated_id": 2,
+    "inbox_state": null,
+    "error_state": null
+  },
+  "readiness": {
+    "schema_version": 1,
+    "rule_id": "T-1862",
+    "status": "AUDIT_OUTSTANDING",
+    "headline": "an audit layer is waiting to be consumed",
+    "accepted": false,
+    "ready": false,
+    "reasons": [
+      "1 audit layer(s) not consumed"
+    ],
+    "execution": {
+      "phase": "DONE",
+      "task": "none",
+      "terminal_phase": true,
+      "claimed_ticket": "none"
+    },
+    "dimensions": {
+      "work": {
+        "counts": {
+          "doing": 0,
+          "todo": 0,
+          "done": 227,
+          "blocked": 18
+        },
+        "open": 18,
+        "runnable": 0,
+        "claimed": 0,
+        "work_available": false,
+        "top_workable": null,
+        "blocked": 18,
+        "blocked_external": 0
+      },
+      "audit": {
+        "known": true,
+        "pending": 1,
+        "invalid": 0,
+        "closed_pending_delete": 0,
+        "residue": 0,
+        "clean": false,
+        "error_state": null,
+        "inbox_state": null
+      },
+      "source": {
+        "active_receipts": 31,
+        "requirements": 173,
+        "outstanding": 81,
+        "terminal": 92,
+        "archived": {
+          "receipts": 373,
+          "unresolved_at_closure": 0
+        },
+        "receipts_known": true
+      },
+      "integrity": {
+        "known": true,
+        "orphans": 0,
+        "items": []
+      },
+      "authority": {
+        "continuation_authority": "operator_required",
+        "authority_source": "E-8724",
+        "authority_until": "budget",
+        "safety_valve_mode": "hard_wait",
+        "execution_intent": "goal",
+        "waiting": false,
+        "next_action": "saipen continue",
+        "goal_authority": {
+          "state": "bounded",
+          "detail": "Bounded authority requires operator",
+          "original_event": "E-8724",
+          "checkpoint_due": true
+        }
+      }
+    },
+    "grants_authority": false,
+    "authority_unchanged": true
+  },
+  "distribution": {
+    "installed": 7,
+    "stale": 7,
+    "unknown": 2,
+    "fresh": false,
+    "source_head": null,
+    "newest_installed_head": "7857dbf21567bc387d14b556d3826eeb544ed2a6",
+    "last_run": {
+      "status": "skipped",
+      "skip": "DIRTY_SOURCE",
+      "rc": 2,
+      "dirty": [
+        "M VERSION",
+        "M saipen/REGISTRY.json",
+        "M tools/core_unit_baseline.json",
+        "M tools/freshness.py",
+        "M tools/release_ledger_baseline.json"
+      ],
+      "at": "2026-11-19 06:31:01",
+      "head": null,
+      "in_flight": false
+    },
+    "blocker": {
+      "condition": "SOURCE_NOT_A_GIT_WORKTREE",
+      "blocked": true,
+      "detail": "git could not report the injected surface's status",
+      "paths": [],
+      "path_count": 0,
+      "canonical_next_command": "git -C <source> status --porcelain"
+    },
+    "published_head": null,
+    "publication": null,
+    "consumer_convergence": "CURRENT",
+    "pending_consumers": [],
+    "consumers_converged": false,
+    "requires_human": false,
+    "summary": "distribution: 7 of 7 home(s) stale -- newest installed head 7857dbf21567 -- source head unknown -- 2 home(s) carry no head -- last scheduled injection: skipped DIRTY_SOURCE at 2026-11-19 06:31:01 -- BLOCKED SOURCE_NOT_A_GIT_WORKTREE: git could not report the injected surface's status -- clears with: git -C <source> status --porcelain"
+  },
+  "parked_work": [
+    "T-144 blocked: OPERATOR_REQUIRED: SRC-110:R003 -- all T-144 engineering is VERIFIED, but first-time-user acceptance needs a genuinely clean Windows machine (VM, Windows Sandbox or dedicated profile) with no Git,...",
+    "T-187 blocked: OPERATOR_REQUIRED: continuation audits are complete; the only remaining gate is T-166 live Antigravity acceptance, which needs a signed-in account, a paid request and a real vendor 5h roll. Operator must supply that before this seat continues the board/release audit. No agent-side file missing.",
+    "T-216 blocked: OPERATOR_REQUIRED: verifying needs a real paid subscription the vendor has exhausted; that costs the operator money and wall-clock time. No agent can produce it. Operator must supply an exhausted paid account and run the scheduled worker to real vendor limit exhaustion. Product fix exists (T-190 family); no agent-side file missing.",
+    "T-166 blocked: OPERATOR_REQUIRED: signing in to the live Antigravity account and spending a paid request cannot be done by an agent. Verify needs a real vendor wall-clock roll of a supported auto-rolled 5h plan;...",
+    "T-262 blocked: SRC-169_SHARED_RECEIPT_EXTERNAL: T-262 own clauses R001/R002/R007 VERIFIED and published e5389320, but shared receipt requires all 11 clauses terminal. R003/R005 (T-263) require native atomic edit admission/CAS and owned credential/settings continuity; R004 (T-264) requires packaged UI/publication gate. All six closure modes and UNAVAILABLE_ENVIRONMENT refused by canonical source gate. Human action: resolve T-263/T-264 external blockers and terminalise SRC-169, then resume T-262 at SHIP.",
+    "T-261 blocked: ACTIVE_DEPENDENCY:SRC-169_SHARED_RECEIPT_EXTERNAL -- T-261's own detector/maintainer scope is DONE and verified (zaicodeRouterMaintainer.ts, 24/24 maintainer+setup tests, QuickStart Add...",
+    "T-263 blocked: UPSTREAM_NATIVE_CAS_AND_OWNED_CREDENTIAL_CONTRACT_REQUIRED: completion audit (DEC E-9033) confirms the unresolved SRC-169 clauses are externally owned and not agent-resolvable. R003 (drag order...",
+    "T-561 blocked: VERIFY leftovers need a packaged Windows run on a disposable profile plus live-host latency measurement; both need operator authorization (SRC-389 precedent for packaged smoke). Source change + unit evidence are complete and green; unblock resumes at VERIFY.",
+    "T-521 blocked: ACCEPTANCE_RUN_UNAVAILABLE: the Host execution lifecycle is implemented, wired to the authoritative task-realtime boundary (Host run-lease acquire/release, terminal stream batch, executor exit) and verified at recorder/bus level with a real RED control, plus packaged boot, race and corrupt-state durability gates on dist-accept-t523. What is missing is the acceptance run itself: observing one real failing session end to end (Host run lease -> terminal stream batch -> lease settlement) on a packaged app needs an authorized provider credential or a failing-session fixture that this host does not have, and the provider fixture only exercises the transport boundary, not the app's executor. Blocked without inventing a PASS.",
+    "T-509 blocked: PACKAGED_WINDOWS_ACCEPTANCE_UNAVAILABLE: SRC-357 handoff section 17 and its final DONE line require a disposable packaged Windows client that receives a real initial snapshot and preserves...",
+    "T-507 blocked: PACKAGED_WINDOWS_ACCEPTANCE_UNAVAILABLE: SRC-361 R043-R050 need a fresh production artifact plus an installed-runtime subscription driven with a disposable profile; no artifact was built and driving the packaged app would steal foreground focus / disturb production sessions (R049). R006 semantic evidence validation is engine-owned (tools/saipen_engine/intake.py:2327/3202/3741) and not editable here (T-504 precedent). Source-level repair demonstrated 18/18 + tsc 0 errors: .saipen/evidence/T-507/SRC356-RECONCILIATION.md",
+    "T-265 blocked: ACTIVE_DEPENDENCY:T-263 -- Current local R008-R011 verification is complete, but canonical closure correctly requires all SRC-169 clauses; R003/R005 still lack upstream atomic admission and R004 representative provider OAuth. Preserve E-5643 and result.md, do not claim source closure. Parent night-shift audit must continue independently.",
+    "T-264 blocked: PUBLICATION_CORE_GATE: code BUILD+VERIFY+REVIEW all green (16/16, red control proven, full ui 1603/1610 with 3 foreign failures), but saipen ship refused VALIDATION_FAILED on release-version parity: README.ee/.ded/.ja and saitranslate kitchen prep must carry v0.0.3 exactly once. Scope recorded (5 zcode paths). Publication blocked by inherited repo release/translation surfaces owned outside this ticket (same gate class as T-265/T-268); no commit/push performed. Evidence .saipen/evidence/T-264-verify.md. Resume at SHIP after release-version parity repair (T-215/T-113 release authority).",
+    "T-272 blocked: OTHER_LOGON_EXECUTION_UNAVAILABLE: local quota pool admission and bounded requests verified; shared metrics-only Antigravity accounts have no generation command in the current ZAICODE adapter to execute inside their own Windows logon context. Local CLI would use the wrong credential identity. No safe complete fix using the present public contract; preserve partial implementation and disclose this remaining requirement.",
+    "T-220 blocked: OPERATOR_REQUIRED",
+    "T-215 blocked: OPERATOR_REQUIRED: this ticket records a decision only the operator can take -- how to resolve T-144's stale 29-path release scope (.saipen/kitchen/release_scope/T-144.json, stale in at least 8 paths) that makes stage SOURCE_COVERAGE refuse every saipen ship. There is no agent-side work here that would not be release authority exercised on someone else's behalf. Options put to the operator: (a) review those 8 files and re-bind T-144's scope to current content, (b) retire or retarget SRC-110..113 so the release train stops naming T-144, (c) accept that no local ship completes until a committed release receipt exists. Until one is recorded, T-215 cannot enter SCOUT.",
+    "T-176 blocked: OPERATOR_REQUIRED after PHASE 0 isolation proof (.saipen/evidence/T-176-phase0.md). The installed Antigravity CLI 1.2.14 holds exactly ONE credential per Windows logon context: cmdkey /list shows...",
+    "T-154 blocked: DESTRUCTIVE_ON_THE_HOST: the two engines are V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN (the one bin/saipen.cmd runs, confirmed by reading the shim) and..."
+  ],
+  "appends": [
+    {
+      "source": "SRC-005",
+      "appends": 1,
+      "latest_append": "SRC-006",
+      "latest_class": "SUPERSEDE",
+      "unprojected": [],
+      "active_requirements": 0,
+      "superseded_requirements": 0,
+      "affected_work": [
+        "T-12"
+      ],
+      "next_action": "saipen continue --json",
+      "error": null
+    },
+    {
+      "source": "SRC-045",
+      "appends": 1,
+      "latest_append": "SRC-046",
+      "latest_class": "APPEND",
+      "unprojected": [],
+      "active_requirements": 0,
+      "superseded_requirements": 0,
+      "affected_work": [
+        "T-60"
+      ],
+      "next_action": "saipen continue --json",
+      "error": null
+    },
+    {
+      "source": "SRC-076",
+      "appends": 2,
+      "latest_append": "SRC-078",
+      "latest_class": "APPEND",
+      "unprojected": [],
+      "active_requirements": 0,
+      "superseded_requirements": 0,
+      "affected_work": [
+        "T-114"
+      ],
+      "next_action": "saipen continue --json",
+      "error": null
+    },
+    {
+      "source": "SRC-098",
+      "appends": 2,
+      "latest_append": "SRC-101",
+      "latest_class": "CLARIFICATION",
+      "unprojected": [],
+      "active_requirements": 0,
+      "superseded_requirements": 0,
+      "affected_work": [
+        "T-135"
+      ],
+      "next_action": "saipen continue --json",
+      "error": null
+    },
+    {
+      "source": "SRC-100",
+      "appends": 2,
+      "latest_append": "SRC-103",
+      "latest_class": "CLARIFICATION",
+      "unprojected": [],
+      "active_requirements": 0,
+      "superseded_requirements": 0,
+      "affected_work": [
+        "T-136"
+      ],
+      "next_action": "saipen continue --json",
+      "error": null
+    },
+    {
+      "source": "SRC-110",
+      "appends": 3,
+      "latest_append": "SRC-113",
+      "latest_class": "APPEND",
+      "unprojected": [],
+      "active_requirements": 3,
+      "superseded_requirements": 0,
+      "affected_work": [
+        "T-144"
+      ],
+      "next_action": "saipen continue --json",
+      "error": null
+    },
+    {
+      "source": "SRC-234",
+      "appends": 1,
+      "latest_append": "SRC-235",
+      "latest_class": "CLARIFICATION",
+      "unprojected": [],
+      "active_requirements": 0,
+      "superseded_requirements": 0,
+      "affected_work": [
+        "T-324"
+      ],
+      "next_action": "saipen continue --json",
+      "error": null
+    }
+  ],
+  "claimed_but_unproven": [
+    "T-145",
+    "T-143"
+  ],
+  "conformance_history": "PASS (18.11.26 17:16)",
+  "staleness": "10h ago",
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "stale_reason": null,
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 9,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "source receipts -- active receipt SRC-327 references missing Work T-435",
+            "detail_hash": "524feae6c8a81674",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "source receipts -- active receipt SRC-328 references missing Work T-435",
+            "detail_hash": "50eed9bb5b1e2f05",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "source receipts -- active receipt SRC-329 references missing Work T-444",
+            "detail_hash": "962f2f91056a6dd9",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "source receipts -- active receipt SRC-353 references missing Work T-500",
+            "detail_hash": "d0351ef49485cb09",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "SRC-420,T-287",
+            "detail_hash": "9f38d053c67ee8a7",
+            "finding_key": "198d2eb70e457906",
+            "rule_id": "source_receipt_unresolved_work",
+            "severity": "problem",
+            "subject_id": "T-287",
+            "subject_kind": "work",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "execution_intent: goal with goal_waves=0/goal_tickets=30 is the tripped safety valve (caps 3/20), but next_action='PHASE SCOUT T-9' -- RFC § 2.4 requires next_action: WAIT: safety valve reached (N wav",
+            "detail_hash": "8a3fd199d214a043",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "tripped goal safety valve must name the canonical resume key -- the § 1.2 safety-valve form under execution_intent: goal ends `-- run 'cc' to continue`; `saipen goal` is the create/pivot command, neve",
+            "detail_hash": "db725c30a4d7d2ec",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "closure provenance does not resolve: EX-000004 was verified against installed engine generation sha256ad93c79d4ee9e... but the running engine is sha256:df039ef6c46770a9... -- the dependency moved (rollback or upgrade): re-resolve truthfully instead of inheriting a stale green -- a DONE line may record HOW it closed, never that something was published when it was not (CORE-003)",
+            "detail_hash": "6304329c0413248f",
+            "finding_key": "322699ed00189ba0",
+            "rule_id": "closure_provenance_drift",
+            "severity": "problem",
+            "subject_id": "EX-000004",
+            "subject_kind": "event",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "LOG.md records a clean hunt against commit(s) that sit on no remote branch: .saipen/LOG.md:260 @17f91e02 -- a hunt mark is durable, so the commit it names must be durable too: a commit that only exist",
+            "detail_hash": "44ea19695a524aa0",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": ".saipen/LOG.md:260"
+          }
+        ],
+        "ruleset_fingerprint": "9a47d608ed3f3a833348aaeeca5cd9e9076f3bf53b1ef92b6ade46958e3e3fec",
+        "ruleset_version": 2,
+        "status": "complete",
+        "warning_count": 11
+      },
+      "board_hash": "4392f081a86d8583",
+      "canonical_next_command": null,
+      "content_hash": "87b558c8bac67f3b",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:a00090465b14c0426710ee2ecfa24a00af5499d3d19f064c86de8afb87f3f2fb",
+      "install_home": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source",
+      "kind": "conformance_receipt",
+      "log_hash": "ca42b1ad9760af76",
+      "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_zaicode",
+      "receipt_id": "receipt-35f98a64a00f",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "2380d51e3968d605c620efdfa025d0f5101de465",
+      "source_tree_fingerprint": "git-delta-v1:b3a4a4a0b5dbedb43e41dd91c4ad3adec071ace2960ab893fd78995f74d3c9a9",
+      "state_hash": "f1dfd17cab92a175",
+      "timestamp_utc": "2026-11-18T18:07:40.012458Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "2380d51e3968d605c620efdfa025d0f5101de465",
+      "source_tree_fingerprint": "git-delta-v1:b3a4a4a0b5dbedb43e41dd91c4ad3adec071ace2960ab893fd78995f74d3c9a9"
+    },
+    "disposition": "REMEDIATION_REQUIRED",
+    "remediation_command": null,
+    "repair_status": "ENGINEERING_REQUIRED",
+    "diagnostic": {
+      "kind": "ENGINEERING_REQUIRED",
+      "owner": "SAIPEN conformance/remediation",
+      "receipt_id": "receipt-35f98a64a00f",
+      "findings_status": "complete",
+      "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair.",
+      "ownership": {
+        "groups": {
+          "ENGINE_INTERNAL": [
+            {
+              "rule_id": "source_receipt_unresolved_work",
+              "subject_kind": "work",
+              "subject_id": "T-287",
+              "finding_key": "198d2eb70e457906",
+              "owner_class": "ENGINE_INTERNAL",
+              "route": "saipen continue",
+              "operator_action_due": false,
+              "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+              "severity": "problem"
+            },
+            {
+              "rule_id": "closure_provenance_drift",
+              "subject_kind": "event",
+              "subject_id": "EX-000004",
+              "finding_key": "322699ed00189ba0",
+              "owner_class": "ENGINE_INTERNAL",
+              "route": "saipen continue",
+              "operator_action_due": false,
+              "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+              "severity": "problem"
+            }
+          ],
+          "OPERATOR_DECISION": [],
+          "UNAVAILABLE_EXTERNAL": [],
+          "UNKNOWN": [
+            {
+              "rule_id": "unclassified",
+              "subject_kind": "global",
+              "subject_id": null,
+              "finding_key": "76b48f23558dce11",
+              "owner_class": "UNKNOWN",
+              "route": null,
+              "operator_action_due": false,
+              "detail": "ownership was not established from a known rule; treat as blocking and diagnose, never as engine-ownable or as a human action",
+              "severity": "problem"
+            },
+            {
+              "rule_id": "unclassified",
+              "subject_kind": "global",
+              "subject_id": null,
+              "finding_key": "76b48f23558dce11",
+              "owner_class": "UNKNOWN",
+              "route": null,
+              "operator_action_due": false,
+              "detail": "ownership was not established from a known rule; treat as blocking and diagnose, never as engine-ownable or as a human action",
+              "severity": "problem"
+            },
+            {
+              "rule_id": "unclassified",
+              "subject_kind": "global",
+              "subject_id": null,
+              "finding_key": "76b48f23558dce11",
+              "owner_class": "UNKNOWN",
+              "route": null,
+              "operator_action_due": false,
+              "detail": "ownership was not established from a known rule; treat as blocking and diagnose, never as engine-ownable or as a human action",
+              "severity": "problem"
+            },
+            {
+              "rule_id": "unclassified",
+              "subject_kind": "global",
+              "subject_id": null,
+              "finding_key": "76b48f23558dce11",
+              "owner_class": "UNKNOWN",
+              "route": null,
+              "operator_action_due": false,
+              "detail": "ownership was not established from a known rule; treat as blocking and diagnose, never as engine-ownable or as a human action",
+              "severity": "problem"
+            },
+            {
+              "rule_id": "unclassified",
+              "subject_kind": "global",
+              "subject_id": null,
+              "finding_key": "76b48f23558dce11",
+              "owner_class": "UNKNOWN",
+              "route": null,
+              "operator_action_due": false,
+              "detail": "ownership was not established from a known rule; treat as blocking and diagnose, never as engine-ownable or as a human action",
+              "severity": "problem"
+            },
+            {
+              "rule_id": "unclassified",
+              "subject_kind": "global",
+              "subject_id": null,
+              "finding_key": "76b48f23558dce11",
+              "owner_class": "UNKNOWN",
+              "route": null,
+              "operator_action_due": false,
+              "detail": "ownership was not established from a known rule; treat as blocking and diagnose, never as engine-ownable or as a human action",
+              "severity": "problem"
+            },
+            {
+              "rule_id": "unclassified",
+              "subject_kind": "global",
+              "subject_id": null,
+              "finding_key": "76b48f23558dce11",
+              "owner_class": "UNKNOWN",
+              "route": null,
+              "operator_action_due": false,
+              "detail": "ownership was not established from a known rule; treat as blocking and diagnose, never as engine-ownable or as a human action",
+              "severity": "problem"
+            }
+          ]
+        },
+        "operator_action_count": 0,
+        "engine_work_count": 2,
+        "external_count": 0,
+        "unknown_count": 7
+      },
+      "engine_work_count": 2,
+      "operator_action_count": 0
+    }
+  },
+  "closed_contracts": {
+    "ok": true,
+    "status": "OBSERVED",
+    "advisory": true,
+    "blocks_unrelated_work": false,
+    "total": 227,
+    "counts": {
+      "UNVERIFIED": 184,
+      "REGRESSION_SUSPECT": 34,
+      "UNCHANGED_SCOPE": 9
+    },
+    "rows": [
+      {
+        "work": "T-9",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-94",
+        "status": "REGRESSION_SUSPECT",
+        "changed_paths": [
+          "zcode/packages/ui/src/TaskListItem.tsx",
+          "zcode/packages/ui/src/WorkspaceHeaderSections.tsx",
+          "zcode/packages/ui/src/WorkspaceSidebar.tsx",
+          "zcode/packages/ui/src/WorkspaceSidebarItem.tsx",
+          "zcode/packages/ui/src/components/ai-elements/chat-loading.tsx",
+          "zcode/packages/ui/src/prompt-editor/ZaicodeSaipenCompact.tsx",
+          "zcode/packages/ui/src/prompt-editor/ZaicodeSaipenControls.tsx",
+          "zcode/packages/ui/src/settings/ZaicodeLightsSettings.tsx",
+          "zcode/packages/ui/src/settings/ZaicodeWorkingIconSettings.tsx",
+          "zcode/packages/ui/src/v4/ConversationTurnGroup.tsx",
+          "zcode/packages/ui/src/workspace-grouped-tasks/task-row.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeComposerWorkingFor.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeModelAppearanceSettings.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeProjectFolderParts.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeProjectMainGlyph.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeSidebarSectionSettings.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeWorkingIcon.tsx",
+          "zcode/packages/ui/src/zaicode/useZaicodeModelHighlight.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeBevels.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeHighlights.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeModelAppearance.ts",
+          "zcode/packages/ui/src/zaicode/zaicodePixelSnap.ts",
+          "zcode/packages/ui/test/zaicodeSrc81Sidebar.test.ts",
+          "zcode/packages/ui/test/zaicodeSrc83Folders.test.ts",
+          "zcode/packages/ui/test/zaicodeT142Appearance.test.ts",
+          "zcode/packages/ui/test/zaicodeT142Sidebar.test.ts",
+          "zcode/packages/ui/test/zaicodeT142Start.test.ts",
+          "zcode/specs/zaicode-t142-appearance-sidebar.md"
+        ],
+        "reason": "SCOPE_ONLY_NO_BEHAVIORAL_PROOF"
+      },
+      {
+        "work": "T-95",
+        "status": "UNVERIFIED",
+        "reason": "DEPENDENCY_BINDING_MISSING"
+      },
+      {
+        "work": "T-137",
+        "status": "REGRESSION_SUSPECT",
+        "changed_paths": [
+          ".saipen/saitranslate/kitchen/audit.json",
+          ".saipen/saitranslate/kitchen/cli/README_CLI.md",
+          ".saipen/saitranslate/kitchen/docs/README_DOCS.md",
+          ".saipen/saitranslate/kitchen/drafts/README_DRAFTS.md",
+          ".saipen/saitranslate/kitchen/drafts/ar-SA.json",
+          ".saipen/saitranslate/kitchen/drafts/bg-BG.json",
+          ".saipen/saitranslate/kitchen/drafts/cs-CZ.json",
+          ".saipen/saitranslate/kitchen/drafts/da-DK.json",
+          ".saipen/saitranslate/kitchen/drafts/de-DE.json",
+          ".saipen/saitranslate/kitchen/drafts/ded.json",
+          ".saipen/saitranslate/kitchen/drafts/el-GR.json",
+          ".saipen/saitranslate/kitchen/drafts/es-ES.json",
+          ".saipen/saitranslate/kitchen/drafts/et-EE.json",
+          ".saipen/saitranslate/kitchen/drafts/fi-FI.json",
+          ".saipen/saitranslate/kitchen/drafts/fr-FR.json",
+          ".saipen/saitranslate/kitchen/drafts/he-IL.json",
+          ".saipen/saitranslate/kitchen/drafts/hi-IN.json",
+          ".saipen/saitranslate/kitchen/drafts/hr-HR.json",
+          ".saipen/saitranslate/kitchen/drafts/hu-HU.json",
+          ".saipen/saitranslate/kitchen/drafts/id-ID.json",
+          ".saipen/saitranslate/kitchen/drafts/it-IT.json",
+          ".saipen/saitranslate/kitchen/drafts/ja-JP.json",
+          ".saipen/saitranslate/kitchen/drafts/ko-KR.json",
+          ".saipen/saitranslate/kitchen/drafts/nb-NO.json",
+          ".saipen/saitranslate/kitchen/drafts/nl-NL.json",
+          ".saipen/saitranslate/kitchen/drafts/pl-PL.json",
+          ".saipen/saitranslate/kitchen/drafts/pt-BR.json",
+          ".saipen/saitranslate/kitchen/drafts/ro-RO.json",
+          ".saipen/saitranslate/kitchen/drafts/ru-RU.json",
+          ".saipen/saitranslate/kitchen/drafts/sk-SK.json",
+          ".saipen/saitranslate/kitchen/drafts/sv-SE.json",
+          ".saipen/saitranslate/kitchen/drafts/th-TH.json",
+          ".saipen/saitranslate/kitchen/drafts/tr-TR.json",
+          ".saipen/saitranslate/kitchen/drafts/uk-UA.json",
+          ".saipen/saitranslate/kitchen/drafts/vi-VN.json",
+          ".saipen/saitranslate/kitchen/extras/README_EXTRAS.md",
+          ".saipen/saitranslate/kitchen/integration-workspace/README_INTEGRATION-WORKSPACE.md",
+          ".saipen/saitranslate/kitchen/integration/README_INTEGRATION.md",
+          ".saipen/saitranslate/kitchen/outbox/README_OUTBOX.md",
+          ".saipen/saitranslate/kitchen/payload/README_PAYLOAD.md",
+          "README.ded.md",
+          "README.ee.md",
+          "README.ja.md",
+          "docs/locales/ar-SA/README.md",
+          "docs/locales/ar-SA/ZAICODE_INSTALL.md",
+          "docs/locales/bg-BG/README.md",
+          "docs/locales/bg-BG/ZAICODE_INSTALL.md",
+          "docs/locales/cs-CZ/README.md",
+          "docs/locales/cs-CZ/ZAICODE_INSTALL.md",
+          "docs/locales/da-DK/README.md",
+          "docs/locales/da-DK/ZAICODE_INSTALL.md",
+          "docs/locales/de-DE/README.md",
+          "docs/locales/de-DE/ZAICODE_INSTALL.md",
+          "docs/locales/ded/README.md",
+          "docs/locales/ded/ZAICODE_INSTALL.md",
+          "docs/locales/el-GR/README.md",
+          "docs/locales/el-GR/ZAICODE_INSTALL.md",
+          "docs/locales/es-ES/README.md",
+          "docs/locales/es-ES/ZAICODE_INSTALL.md",
+          "docs/locales/et-EE/README.md",
+          "docs/locales/et-EE/ZAICODE_INSTALL.md",
+          "docs/locales/fi-FI/README.md",
+          "docs/locales/fi-FI/ZAICODE_INSTALL.md",
+          "docs/locales/fr-FR/README.md",
+          "docs/locales/fr-FR/ZAICODE_INSTALL.md",
+          "docs/locales/he-IL/README.md",
+          "docs/locales/he-IL/ZAICODE_INSTALL.md",
+          "docs/locales/hi-IN/README.md",
+          "docs/locales/hi-IN/ZAICODE_INSTALL.md",
+          "docs/locales/hr-HR/README.md",
+          "docs/locales/hr-HR/ZAICODE_INSTALL.md",
+          "docs/locales/hu-HU/README.md",
+          "docs/locales/hu-HU/ZAICODE_INSTALL.md",
+          "docs/locales/id-ID/README.md",
+          "docs/locales/id-ID/ZAICODE_INSTALL.md",
+          "docs/locales/it-IT/README.md",
+          "docs/locales/it-IT/ZAICODE_INSTALL.md",
+          "docs/locales/ja-JP/README.md",
+          "docs/locales/ja-JP/ZAICODE_INSTALL.md",
+          "docs/locales/ko-KR/README.md",
+          "docs/locales/ko-KR/ZAICODE_INSTALL.md",
+          "docs/locales/nb-NO/README.md",
+          "docs/locales/nb-NO/ZAICODE_INSTALL.md",
+          "docs/locales/nl-NL/README.md",
+          "docs/locales/nl-NL/ZAICODE_INSTALL.md",
+          "docs/locales/pl-PL/README.md",
+          "docs/locales/pl-PL/ZAICODE_INSTALL.md",
+          "docs/locales/pt-BR/README.md",
+          "docs/locales/pt-BR/ZAICODE_INSTALL.md",
+          "docs/locales/ro-RO/README.md",
+          "docs/locales/ro-RO/ZAICODE_INSTALL.md",
+          "docs/locales/ru-RU/README.md",
+          "docs/locales/ru-RU/ZAICODE_INSTALL.md",
+          "docs/locales/sk-SK/README.md",
+          "docs/locales/sk-SK/ZAICODE_INSTALL.md",
+          "docs/locales/sv-SE/README.md",
+          "docs/locales/sv-SE/ZAICODE_INSTALL.md",
+          "docs/locales/th-TH/README.md",
+          "docs/locales/th-TH/ZAICODE_INSTALL.md",
+          "docs/locales/tr-TR/README.md",
+          "docs/locales/tr-TR/ZAICODE_INSTALL.md",
+          "docs/locales/uk-UA/README.md",
+          "docs/locales/uk-UA/ZAICODE_INSTALL.md",
+          "docs/locales/vi-VN/README.md",
+          "docs/locales/vi-VN/ZAICODE_INSTALL.md",
+          "docs/locales/zh-CN/README.md",
+          "docs/locales/zh-CN/ZAICODE_INSTALL.md"
+        ],
+        "reason": "SCOPE_ONLY_NO_BEHAVIORAL_PROOF"
+      },
+      {
+        "work": "T-141",
+        "status": "REGRESSION_SUSPECT",
+        "changed_paths": [
+          ".saipen/saitranslate/kitchen/cli/README_CLI.md",
+          ".saipen/saitranslate/kitchen/docs/README_DOCS.md",
+          ".saipen/saitranslate/kitchen/drafts/README_DRAFTS.md",
+          ".saipen/saitranslate/kitchen/extras/README_EXTRAS.md",
+          ".saipen/saitranslate/kitchen/integration-workspace/README_INTEGRATION-WORKSPACE.md",
+          ".saipen/saitranslate/kitchen/integration/README_INTEGRATION.md",
+          ".saipen/saitranslate/kitchen/outbox/README_OUTBOX.md",
+          ".saipen/saitranslate/kitchen/payload/README_PAYLOAD.md",
+          "CHANGELOG.md",
+          "README.md",
+          "VERSION",
+          "zcode/packages/desktop/scripts/verify-zaicode-boot.cjs",
+          "zcode/packages/desktop/scripts/verify-zaicode-workflows.cjs",
+          "zcode/packages/desktop/src/main/zaicodeEngines.ts",
+          "zcode/packages/provider/src/config/manual-model-config.ts",
+          "zcode/packages/provider/src/config/model-config.ts",
+          "zcode/packages/services/src/zaicode/zaicodeAuditService.ts",
+          "zcode/packages/services/src/zaicode/zaicodeAudits.ts",
+          "zcode/packages/services/src/zaicode/zaicodeJobCancellation.ts",
+          "zcode/packages/services/src/zaicode/zaicodeJobRepo.ts",
+          "zcode/packages/services/src/zaicode/zaicodeJobService.ts",
+          "zcode/packages/services/test/zaicodeAudits.test.ts",
+          "zcode/packages/services/test/zaicodeJobs.test.ts",
+          "zcode/packages/shared/src/model-config.ts",
+          "zcode/packages/shared/src/zaicode-audits.ts",
+          "zcode/packages/shared/src/zaicode-engines.ts",
+          "zcode/packages/shared/src/zaicode-subscription-models.ts",
+          "zcode/packages/ui/src/SettingsPage.tsx",
+          "zcode/packages/ui/src/WorkspaceSidebarItem.tsx",
+          "zcode/packages/ui/src/app-shell/AnimatedSidePanePanel.tsx",
+          "zcode/packages/ui/src/app-shell/WorkspaceShellLayout.tsx",
+          "zcode/packages/ui/src/i18n/locales/en-US.ts",
+          "zcode/packages/ui/src/i18n/locales/zh-CN.ts",
+          "zcode/packages/ui/src/lib/modelSelectionGroups.ts",
+          "zcode/packages/ui/src/lib/settingsNavigation.ts",
+          "zcode/packages/ui/src/settings/ZaicodeSidebarSettings.tsx",
+          "zcode/packages/ui/src/settings/ZaicodeSoundOverlapSettings.tsx",
+          "zcode/packages/ui/src/settings/model-provider-section/InlineEditableProviderCard.tsx",
+          "zcode/packages/ui/src/settings/model-provider-section/ProviderCardSections.tsx",
+          "zcode/packages/ui/src/settings/model-provider-section/ProviderFormControls.tsx",
+          "zcode/packages/ui/src/settings/model-provider-section/ProviderModelDraftState.ts",
+          "zcode/packages/ui/src/settings/model-provider-section/ProviderModelMetadata.ts",
+          "zcode/packages/ui/src/settings/model-provider-section/ProviderModelMetadataDialog.tsx",
+          "zcode/packages/ui/src/settings/model-provider-section/providerSaveGenerations.ts",
+          "zcode/packages/ui/src/settings/settingsPageConfig.ts",
+          "zcode/packages/ui/src/v4/SessionPane.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeAuditCampaignCard.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeAuditPanel.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeEngineBar.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeEngineModelRow.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeInspector.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodePoolPicker.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeProjectRail.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeWorkspace.tsx",
+          "zcode/packages/ui/src/zaicode/ZaicodeWorkspaceBar.tsx",
+          "zcode/packages/ui/src/zaicode/zaicodeAuditStore.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeDefaultModel.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeEngineBarPrefs.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeRoutingModel.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeSidebarPrefs.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeSidebarWidth.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeSoundBus.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeSoundEvents.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeSoundPolicy.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeSoundSettingsModel.ts",
+          "zcode/packages/ui/src/zaicode/zaicodeSubscriptionSelection.ts",
+          "zcode/packages/ui/test/zaicodeEngineBarPrefs.test.ts",
+          "zcode/packages/ui/test/zaicodeLocaleParity.test.ts",
+          "zcode/packages/ui/test/zaicodeSoundOverlap.test.ts",
+          "zcode/packages/ui/test/zaicodeSrc62Sounds.test.ts",
+          "zcode/packages/ui/test/zaicodeT141ModelNames.test.ts",
+          "zcode/packages/ui/test/zaicodeT141Quota.test.ts",
+          "zcode/packages/ui/test/zaicodeT141Saves.test.ts",
+          "zcode/packages/ui/test/zaicodeT141Selection.test.ts",
+          "zcode/packages/ui/test/zaicodeT141Sidebar.test.ts",
+          "zcode/packages/ui/test/zaicodeT141SoundsShortcuts.test.ts",
+          "zcode/specs/zaicode-t141-workflows.md"
+        ],
+        "reason": "SCOPE_ONLY_NO_BEHAVIORAL_PROOF"
+      }
+    ],
+    "has_more": true,
+    "offset": 0,
+    "limit": 5,
+    "errors": [],
+    "paths_read": 533,
+    "bytes_read": 39702348
+  },
+  "automation": {
+    "schema_version": 1,
+    "disposition": "CONTINUE",
+    "next_command": "cc",
+    "operator_action_due": false,
+    "reason_code": "queued-source",
+    "reason": "queued explicit user request SRC-421 is durable and unprojected; this is the canonical ingress that projects and claims it",
+    "audit_quiescent": false,
+    "audit_epoch": "audit-epoch-v1:9b9d221d38a9a9e141dc09f42f3d21c3f9607e15886a223b04d4aaee89bf3845",
+    "convergence_current": false,
+    "closure_complete": false,
+    "source_fingerprint": "2380d51e3968d605c620efdfa025d0f5101de465+git-delta-v1:b3a4a4a0b5dbedb43e41dd91c4ad3adec071ace2960ab893fd78995f74d3c9a9",
+    "completed_at": null
+  },
+  "conditional_efficiency_kpi": {
+    "scope": "ticket",
+    "ticket": "T-9",
+    "percent": 100,
+    "approximate": true,
+    "confidence": "LOW",
+    "formula_version": 1,
+    "components": {
+      "progress": 100,
+      "rework": 100,
+      "autonomy": 92,
+      "human": null
+    },
+    "notes": {
+      "human": "no machine signal separates avoidable operator cost from a legitimate authorization boundary",
+      "autonomy": "coarse: LOG agent ids are CLI identities shared across sessions"
+    },
+    "preliminary": true,
+    "withheld": null
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE --workspace V:\\___VAC\\__K\\__STORE\\_PERSONAL\\_SAIMAILBOX_ --seat saipen-cli",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

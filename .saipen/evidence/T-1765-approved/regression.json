@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t1765_finding_subtypes.py", "-v"],
+  "format": "unittest",
+  "context": ["tools", "saipen", "tests", "extensions", "VERSION", "bootstrap"],
+  "oracle_files": [
+    "tools/test_t1765_finding_subtypes.py",
+    "tools/test_debt_gate.py",
+    "tools/test_fixture_support.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "subject_files": ["tools/saipen_engine/findings.py"],
+  "before": {"tools/saipen_engine/findings.py": ".saipen/evidence/T-1765-approved/before/findings.py"},
+  "timeout": 900
+}

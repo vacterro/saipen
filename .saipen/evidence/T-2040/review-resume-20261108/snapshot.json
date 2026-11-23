@@ -1,0 +1,29 @@
+{
+  "root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\review-resume-20261108",
+  "files": {
+    "tools/saipen_engine/subs.py": {
+      "sha256": "9488271c1875b45a6132e43a07bb4ea3f61070f5094b5a49070d90faff2b4ceb",
+      "bytes": 219154
+    },
+    "tools/saipen_engine/crew.py": {
+      "sha256": "de2f8ad1a1172b4c1171280c647f40ea243cb0ea919ebf30f7adfc2091a61e81",
+      "bytes": 133664
+    },
+    "tools/saipen_engine/journal.py": {
+      "sha256": "80a411e6484eb24ac155701c67fef779fa694e65bb4356856468c1c821ebae93",
+      "bytes": 264473
+    },
+    "tools/test_sub_dispose_after_collect.py": {
+      "sha256": "2beb950d5f5e16b66027235b9c8cdbceeda978f3d9e5d6b4cb96dca0578f012f",
+      "bytes": 18236
+    },
+    "tools/test_t925_sub_terminal_durability.py": {
+      "sha256": "f236252bf12a2bbe305db43deb7f2f25ab8bfc6daa91da67b6ad73ea00e85b19",
+      "bytes": 2739
+    }
+  },
+  "absent": [
+    "tools/test_t2040_review_proof_binding.py"
+  ]
+}

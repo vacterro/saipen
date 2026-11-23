@@ -1,0 +1,19 @@
+PASS: a real root `nul` entry is excluded from audit snapshots
+UNPROVEN: symlink-restore -- host cannot create a symlink, so the red control was never constructed: [WinError 1314] A required privilege is not held by the client: 'V:\\_TEMP_\\audit_checks_3u_y82c3\\probe-symlink-restore\\symlink-restore-probe\\external.md' -> 'V:\\_TEMP_\\audit_checks_3u_y82c3\\probe-symlink-restore\\symlink-restore-probe\\IDENTITY.md'
+PASS: audit-tags missing-Git skip plus enumeration, nonzero, malformed, truncated, and surplus fail-closed controls behave
+PASS: every producer-OUTBOX control runs at a gate where its finding is hard
+PASS: a known-good copy of this repository is built for the mutation controls
+PASS: release-ledger clean/new-tag/new-changelog/stale-baseline controls behave distinctly
+PASS: tools/validate.py declares exactly the adjudicated fail sites, and added, removed and same-count SWAPPED sites are each named
+NOTE: 341 fail site(s) recorded by identity in tools/validator_fail_sites.json
+NOTE: known limitation -- identity binds WHICH fail sites tools/validate.py declares, so an added, removed or same-count swapped site is named -- but a BASELINE record is inherited surface that was never individually adjudicated, which is recorded per site and is NOT detected here as missing coverage
+PASS: aged unowned WARN slug fails; identical aged slug with a live naming ticket passes; baseline data, never validator wording
+PASS: consistent SCOUT->SCOUTX rename stays green across the DFA, RFC table, schema enum and phase doc -- edge gates catch drift, not deliberate renames
+PASS: release-ledger tag query is observed once; duplicate-query and invalid-validator controls both go red
+PASS: the unmodified copy validates clean, so every expectation below is absent before its mutation
+PASS: callable no-op mutations are rejected before validation
+PASS: every canonical mutation has its target, so the denominator holds still
+UNPROVEN: mutation-sweep -- portable project identity becomes an external symlink: this host cannot create a symlink, so the case was never constructed (a host capability, not a missing file): [WinError 1314] A required privilege is not held by the client: 'V:\\_TEMP_\\audit_checks_3u_y82c3\\probe-mutation-sweep\\audit-external-identity.md' -> 'V:\\_TEMP_\\audit_checks_3u_y82c3\\probe-mutation-sweep\\cases-02\\.saipen\\IDENTITY.md'
+SKIP: portable project identity becomes an external symlink -- this host cannot create a symlink, so the case was never constructed (a host capability, not a missing file): [WinError 1314] A required privilege is not held by the client: 'V:\\_TEMP_\\audit_checks_3u_y82c3\\probe-mutation-sweep\\audit-external-identity.md' -> 'V:\\_TEMP_\\audit_checks_3u_y82c3\\probe-mutation-sweep\\cases-02\\.saipen\\IDENTITY.md'
+PROVEN: 246 of 247 mutation controls; host capability unproven: 1; broken: 0
+AUDIT: 12 of 14 probes passed; failed: none; skipped: none; unproven (host capability): mutation-sweep, symlink-restore

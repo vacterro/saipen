@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-048:R001": {
+      "class": "requirement",
+      "text": "Repair AUDAPACK's OpenCode launch boundary so SAIPEN-managed projects are launched through the canonical SAIPEN host launcher with bound actor, root, and lineage; preserve ordinary non-SAIPEN project direct launch; route compatible custom templates through SAIPEN and refuse unbound; preserve instance monitor attribution, focus reuse, and multi-instance Shift+click; ensure clean interactive TTY without stderr redirection; disable OpenCode dynamic title updates via OPENCODE_DISABLE_TERMINAL_TITLE=true; ensure durable managed console title and asynchronous non-blocking startup observation; verify on real Windows.",
+      "actionable": true,
+      "disposition": "IMPLEMENTED",
+      "evidence": "audapack/opencode_launch.py canonical admission and preflight; audapack/instances.py untrack_launch, correlation token matching, and focus candidates; audapack/ui_qt/main_window.py _launch_bound_opencode with clean interactive TTY (no 2> redirection), OPENCODE_DISABLE_TERMINAL_TITLE=true, single [Console]::Title setup (no titleGuard timer), and asynchronous non-blocking QTimer startup observation (_start_opencode_startup_observation, _handle_opencode_exit); installed .agents/skills/saipen/.saipen_runtime.json pointing to canonical source root",
+      "verification": "69/69 pytest PASS in tests/test_opencode_launch_policy.py, tests/ui_qt/test_opencode_startup_liveness.py, tests/ui_qt/test_launcher_focus_reuse.py; ruff clean; compileall clean; real Windows integration harness (scratch/real_windows_acceptance.py) PASS proving live OpenCode execution >10s, durable console title without mutation, Shift+click multi-instance distinct hwnd, and focus switching",
+      "work": "T-192"
+    }
+  },
+  "schema_version": 1
+}

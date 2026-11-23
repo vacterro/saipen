@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "C:\\Users\\vac34\\.local\\bin\\claude.EXE",
+    "--print",
+    "--output-format",
+    "json",
+    "--no-session-persistence",
+    "--permission-mode",
+    "plan",
+    "--permission-prompts",
+    "none",
+    "--tools",
+    "Read,Glob,Grep",
+    "--model",
+    "opus"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\claude-replacement",
+  "model": "opus",
+  "parent_interlock": null,
+  "profile_id": "claude:.claude",
+  "provider": "claude",
+  "role": "audit",
+  "shell": false,
+  "timeout_seconds": 120
+}

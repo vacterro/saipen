@@ -1,0 +1,14 @@
+{
+  "scope": "one current amnesty mutation against the real validator; not the full audit",
+  "verdicts": {
+    "pristine-fixture": "PASS",
+    "validator-baseline": "PASS",
+    "owned-amnesty-case": "PASS"
+  },
+  "output": [
+    "PASS: a known-good copy of this repository is built for the mutation controls",
+    "PASS: the unmodified copy validates clean, so every expectation below is absent before its mutation",
+    "PASS: owned amnesty case proven",
+    "SCOPED: the 1 selected control(s) each went red on their own condition. This proves nothing about the 246 control(s) that were not run, and is not audit_checks evidence for a checkpoint or a release."
+  ]
+}

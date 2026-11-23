@@ -11,11 +11,26 @@ from pathlib import Path
 from . import regression_execution as execution
 from .board import parse_board
 from .journal import hash_bytes, semantic_receipts_for_operation_safe
-from .paths import history_bound_here, prove_owned_dir_chain, prove_owned_regular
+from .paths import (
+    history_bound_here,
+    prove_owned_dir_chain,
+    prove_owned_regular,
+    read_bound_regular_bytes,
+)
 
 MAX_RECORDS = 4096
 MAX_PATHS = 100000
 MAX_TOTAL_BYTES = 256 * 1024 * 1024
+_ORIG_EXECUTION_READ = execution._read
+
+
+def _read_in_proven_dir(root: Path, path: Path, relative: str) -> bytes:
+    """Read an owned JSON file inside a directory already proven by `_files`."""
+    if execution._read is not _ORIG_EXECUTION_READ:
+        return execution._read(root, relative)
+    execution._relative(relative)
+    info = prove_owned_regular(path, kind="regression input")
+    return read_bound_regular_bytes(path, info, max_bytes=execution.MAX_BYTES)
 
 
 def projection(observation):
@@ -76,7 +91,7 @@ def _records(root, work=None):
     result = []
     for path in reversed(paths):
         relative = path.relative_to(root).as_posix()
-        raw = execution._read(root, relative)
+        raw = _read_in_proven_dir(root, path, relative)
         if relative not in marked_paths and b'"closed_contract"' not in raw:
             continue
         record = json.loads(raw.decode("utf-8"), object_pairs_hook=execution._unique)
@@ -299,7 +314,7 @@ def inspect(root, work=None, *, limit=50, offset=0, include_scopes=True):
                     continue
                 try:
                     relative = path.relative_to(root).as_posix()
-                    raw = execution._read(root, relative)
+                    raw = _read_in_proven_dir(root, path, relative)
                     scope = json.loads(raw.decode("utf-8-sig"), object_pairs_hook=execution._unique)
                     _bound(root, raw, relative, scope, journal, "op_id")
                     if scope.get("ticket") != ticket_id or not isinstance(scope.get("paths"), dict):

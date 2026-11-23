@@ -1,0 +1,19 @@
+{
+  "status": "PASS_TERMINAL",
+  "command": "python tools/core_unit.py evidence T-1749 --timeout 5400",
+  "exec_session_id": 14692,
+  "controller_pid": 7912,
+  "controller_started_utc": "2026-10-14T23:07:11.068493Z",
+  "root": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+  "pair_record": ".saipen/evidence/regression/regression-execution-905ab17ed10f423b80f6e8a27459f9f3.json",
+  "pair_pass_event": "E-15743",
+  "neighbor_tests": "33 validator/layout/conformance/Auto-Doctor PASS; 21 whole-source contracts PASS; lint PASS",
+  "instructions": "Revalidate session 14692 or matching OS process before waiting; this file alone is not liveness. Do not restart on an observation timeout. Keep tested source frozen. After PASS, REVIEW T-1749 and finish locally under existing no-publish policy. That resumes T-1792 at VERIFY, requiring an explicit claim before mutation. Re-execute its original native pair with the unchanged contract, then cite the identical final-tree family record and complete its lifecycle. Parent T-1791/SRC-253 and the full cc all queue remain open. Global core signal remains separately CURRENT_FAIL on publication/closure debts; never claim overall conformance or publish without the existing policy decision.",
+  "terminal": {
+    "ran": 6609,
+    "exit_code": 0,
+    "record": ".saipen/evidence/core-unit/c408b3c8678817c4-20261014T233138Z.json",
+    "event": "E-15745",
+    "red": 0
+  }
+}

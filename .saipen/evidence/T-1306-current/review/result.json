@@ -1,0 +1,817 @@
+{
+  "fixture_only": true,
+  "grants_authority": false,
+  "ticket": "T-1",
+  "projections": {
+    "empty": {
+      "ok": true,
+      "code": "ACCEPTANCE",
+      "ticket": "T-1",
+      "criteria": [
+        {
+          "ac": "AC-01",
+          "text": "fixture marker binding",
+          "minimum_witness": "UNIT",
+          "minimum_witness_explicit": true,
+          "state": "UNVERIFIED",
+          "evidence": [],
+          "escaped_defects": [],
+          "previously_accepted": false
+        },
+        {
+          "ac": "AC-02",
+          "text": "fixture broader witness",
+          "minimum_witness": "EFFECT_PATH",
+          "minimum_witness_explicit": true,
+          "state": "UNVERIFIED",
+          "evidence": [],
+          "escaped_defects": [],
+          "previously_accepted": false
+        }
+      ],
+      "undeclared_evidence": [],
+      "undeclared_escaped_defects": [],
+      "build_boundary": 3,
+      "counts": {
+        "UNVERIFIED": 2
+      },
+      "declared": 2
+    },
+    "prose": {
+      "ok": true,
+      "code": "ACCEPTANCE",
+      "ticket": "T-1",
+      "criteria": [
+        {
+          "ac": "AC-01",
+          "text": "fixture marker binding",
+          "minimum_witness": "UNIT",
+          "minimum_witness_explicit": true,
+          "state": "UNVERIFIED",
+          "evidence": [],
+          "escaped_defects": [],
+          "previously_accepted": false
+        },
+        {
+          "ac": "AC-02",
+          "text": "fixture broader witness",
+          "minimum_witness": "EFFECT_PATH",
+          "minimum_witness_explicit": true,
+          "state": "UNVERIFIED",
+          "evidence": [],
+          "escaped_defects": [],
+          "previously_accepted": false
+        }
+      ],
+      "undeclared_evidence": [],
+      "undeclared_escaped_defects": [],
+      "build_boundary": 3,
+      "counts": {
+        "UNVERIFIED": 2
+      },
+      "declared": 2
+    },
+    "quoted": {
+      "ok": true,
+      "code": "ACCEPTANCE",
+      "ticket": "T-1",
+      "criteria": [
+        {
+          "ac": "AC-01",
+          "text": "fixture marker binding",
+          "minimum_witness": "UNIT",
+          "minimum_witness_explicit": true,
+          "state": "UNVERIFIED",
+          "evidence": [],
+          "escaped_defects": [],
+          "previously_accepted": false
+        },
+        {
+          "ac": "AC-02",
+          "text": "fixture broader witness",
+          "minimum_witness": "EFFECT_PATH",
+          "minimum_witness_explicit": true,
+          "state": "UNVERIFIED",
+          "evidence": [],
+          "escaped_defects": [],
+          "previously_accepted": false
+        }
+      ],
+      "undeclared_evidence": [],
+      "undeclared_escaped_defects": [],
+      "build_boundary": 3,
+      "counts": {
+        "UNVERIFIED": 2
+      },
+      "declared": 2
+    },
+    "invalid_class": {
+      "ok": true,
+      "code": "ACCEPTANCE",
+      "ticket": "T-1",
+      "criteria": [
+        {
+          "ac": "AC-01",
+          "text": "fixture marker binding",
+          "minimum_witness": "UNIT",
+          "minimum_witness_explicit": true,
+          "state": "UNVERIFIED",
+          "evidence": [],
+          "escaped_defects": [],
+          "previously_accepted": false
+        },
+        {
+          "ac": "AC-02",
+          "text": "fixture broader witness",
+          "minimum_witness": "EFFECT_PATH",
+          "minimum_witness_explicit": true,
+          "state": "UNVERIFIED",
+          "evidence": [],
+          "escaped_defects": [],
+          "previously_accepted": false
+        }
+      ],
+      "undeclared_evidence": [],
+      "undeclared_escaped_defects": [],
+      "build_boundary": 3,
+      "counts": {
+        "UNVERIFIED": 2
+      },
+      "declared": 2
+    },
+    "bound": {
+      "ok": true,
+      "code": "ACCEPTANCE",
+      "ticket": "T-1",
+      "criteria": [
+        {
+          "ac": "AC-01",
+          "text": "fixture marker binding",
+          "minimum_witness": "UNIT",
+          "minimum_witness_explicit": true,
+          "state": "SATISFIED",
+          "evidence": [
+            {
+              "ac": "AC-01",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "controlled marker",
+              "event": 7,
+              "stale": false,
+              "scope_sufficient": true
+            }
+          ],
+          "escaped_defects": [],
+          "previously_accepted": false
+        },
+        {
+          "ac": "AC-02",
+          "text": "fixture broader witness",
+          "minimum_witness": "EFFECT_PATH",
+          "minimum_witness_explicit": true,
+          "state": "UNVERIFIED",
+          "evidence": [],
+          "escaped_defects": [],
+          "previously_accepted": false
+        }
+      ],
+      "undeclared_evidence": [],
+      "undeclared_escaped_defects": [],
+      "build_boundary": 3,
+      "counts": {
+        "SATISFIED": 1,
+        "UNVERIFIED": 1
+      },
+      "declared": 2
+    },
+    "too_weak": {
+      "ok": true,
+      "code": "ACCEPTANCE",
+      "ticket": "T-1",
+      "criteria": [
+        {
+          "ac": "AC-01",
+          "text": "fixture marker binding",
+          "minimum_witness": "UNIT",
+          "minimum_witness_explicit": true,
+          "state": "SATISFIED",
+          "evidence": [
+            {
+              "ac": "AC-01",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "controlled marker",
+              "event": 7,
+              "stale": false,
+              "scope_sufficient": true
+            }
+          ],
+          "escaped_defects": [],
+          "previously_accepted": false
+        },
+        {
+          "ac": "AC-02",
+          "text": "fixture broader witness",
+          "minimum_witness": "EFFECT_PATH",
+          "minimum_witness_explicit": true,
+          "state": "EVIDENCE_SCOPE_TOO_WEAK",
+          "evidence": [
+            {
+              "ac": "AC-02",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "narrower fixture witness",
+              "event": 8,
+              "stale": false,
+              "scope_sufficient": false
+            }
+          ],
+          "escaped_defects": [],
+          "previously_accepted": false
+        }
+      ],
+      "undeclared_evidence": [],
+      "undeclared_escaped_defects": [],
+      "build_boundary": 3,
+      "counts": {
+        "SATISFIED": 1,
+        "EVIDENCE_SCOPE_TOO_WEAK": 1
+      },
+      "declared": 2
+    },
+    "broader_marker": {
+      "ok": true,
+      "code": "ACCEPTANCE",
+      "ticket": "T-1",
+      "criteria": [
+        {
+          "ac": "AC-01",
+          "text": "fixture marker binding",
+          "minimum_witness": "UNIT",
+          "minimum_witness_explicit": true,
+          "state": "SATISFIED",
+          "evidence": [
+            {
+              "ac": "AC-01",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "controlled marker",
+              "event": 7,
+              "stale": false,
+              "scope_sufficient": true
+            }
+          ],
+          "escaped_defects": [],
+          "previously_accepted": false
+        },
+        {
+          "ac": "AC-02",
+          "text": "fixture broader witness",
+          "minimum_witness": "EFFECT_PATH",
+          "minimum_witness_explicit": true,
+          "state": "SATISFIED",
+          "evidence": [
+            {
+              "ac": "AC-02",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "narrower fixture witness",
+              "event": 8,
+              "stale": false,
+              "scope_sufficient": false
+            },
+            {
+              "ac": "AC-02",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "EFFECT_PATH",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "fixture marker only",
+              "event": 9,
+              "stale": false,
+              "scope_sufficient": true
+            }
+          ],
+          "escaped_defects": [],
+          "previously_accepted": false
+        }
+      ],
+      "undeclared_evidence": [],
+      "undeclared_escaped_defects": [],
+      "build_boundary": 3,
+      "counts": {
+        "SATISFIED": 2
+      },
+      "declared": 2
+    },
+    "conflict": {
+      "ok": true,
+      "code": "ACCEPTANCE",
+      "ticket": "T-1",
+      "criteria": [
+        {
+          "ac": "AC-01",
+          "text": "fixture marker binding",
+          "minimum_witness": "UNIT",
+          "minimum_witness_explicit": true,
+          "state": "CONTESTED",
+          "evidence": [
+            {
+              "ac": "AC-01",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "controlled marker",
+              "event": 7,
+              "stale": false,
+              "scope_sufficient": true
+            },
+            {
+              "ac": "AC-01",
+              "result": "FAIL",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": false,
+              "observed_surface": "legacy-unspecified",
+              "detail": "controlled contradictory fixture marker",
+              "event": 10,
+              "stale": false,
+              "scope_sufficient": true
+            }
+          ],
+          "escaped_defects": [],
+          "previously_accepted": false
+        },
+        {
+          "ac": "AC-02",
+          "text": "fixture broader witness",
+          "minimum_witness": "EFFECT_PATH",
+          "minimum_witness_explicit": true,
+          "state": "SATISFIED",
+          "evidence": [
+            {
+              "ac": "AC-02",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "narrower fixture witness",
+              "event": 8,
+              "stale": false,
+              "scope_sufficient": false
+            },
+            {
+              "ac": "AC-02",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "EFFECT_PATH",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "fixture marker only",
+              "event": 9,
+              "stale": false,
+              "scope_sufficient": true
+            }
+          ],
+          "escaped_defects": [],
+          "previously_accepted": false
+        }
+      ],
+      "undeclared_evidence": [],
+      "undeclared_escaped_defects": [],
+      "build_boundary": 3,
+      "counts": {
+        "CONTESTED": 1,
+        "SATISFIED": 1
+      },
+      "declared": 2
+    },
+    "undeclared": {
+      "ok": true,
+      "code": "ACCEPTANCE",
+      "ticket": "T-1",
+      "criteria": [
+        {
+          "ac": "AC-01",
+          "text": "fixture marker binding",
+          "minimum_witness": "UNIT",
+          "minimum_witness_explicit": true,
+          "state": "CONTESTED",
+          "evidence": [
+            {
+              "ac": "AC-01",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "controlled marker",
+              "event": 7,
+              "stale": false,
+              "scope_sufficient": true
+            },
+            {
+              "ac": "AC-01",
+              "result": "FAIL",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": false,
+              "observed_surface": "legacy-unspecified",
+              "detail": "controlled contradictory fixture marker",
+              "event": 10,
+              "stale": false,
+              "scope_sufficient": true
+            }
+          ],
+          "escaped_defects": [],
+          "previously_accepted": false
+        },
+        {
+          "ac": "AC-02",
+          "text": "fixture broader witness",
+          "minimum_witness": "EFFECT_PATH",
+          "minimum_witness_explicit": true,
+          "state": "SATISFIED",
+          "evidence": [
+            {
+              "ac": "AC-02",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "narrower fixture witness",
+              "event": 8,
+              "stale": false,
+              "scope_sufficient": false
+            },
+            {
+              "ac": "AC-02",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "EFFECT_PATH",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "fixture marker only",
+              "event": 9,
+              "stale": false,
+              "scope_sufficient": true
+            }
+          ],
+          "escaped_defects": [],
+          "previously_accepted": false
+        }
+      ],
+      "undeclared_evidence": [
+        "AC-07"
+      ],
+      "undeclared_escaped_defects": [],
+      "build_boundary": 3,
+      "counts": {
+        "CONTESTED": 1,
+        "SATISFIED": 1
+      },
+      "declared": 2
+    },
+    "escaped": {
+      "ok": true,
+      "code": "ACCEPTANCE",
+      "ticket": "T-1",
+      "criteria": [
+        {
+          "ac": "AC-01",
+          "text": "fixture marker binding",
+          "minimum_witness": "UNIT",
+          "minimum_witness_explicit": true,
+          "state": "CONTESTED",
+          "evidence": [
+            {
+              "ac": "AC-01",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "controlled marker",
+              "event": 7,
+              "stale": false,
+              "scope_sufficient": true
+            },
+            {
+              "ac": "AC-01",
+              "result": "FAIL",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": false,
+              "observed_surface": "legacy-unspecified",
+              "detail": "controlled contradictory fixture marker",
+              "event": 10,
+              "stale": false,
+              "scope_sufficient": true
+            }
+          ],
+          "escaped_defects": [],
+          "previously_accepted": false
+        },
+        {
+          "ac": "AC-02",
+          "text": "fixture broader witness",
+          "minimum_witness": "EFFECT_PATH",
+          "minimum_witness_explicit": true,
+          "state": "CONTESTED",
+          "evidence": [
+            {
+              "ac": "AC-02",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "UNIT",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "narrower fixture witness",
+              "event": 8,
+              "stale": false,
+              "scope_sufficient": false
+            },
+            {
+              "ac": "AC-02",
+              "result": "PASS",
+              "kind": "behavioral",
+              "witness": "EFFECT_PATH",
+              "witness_explicit": true,
+              "observed_surface": "fixture-calibration",
+              "detail": "fixture marker only",
+              "event": 9,
+              "stale": false,
+              "scope_sufficient": true
+            }
+          ],
+          "escaped_defects": [
+            {
+              "ac": "AC-02",
+              "event": 12,
+              "previous_event": 9,
+              "class": "NOT_COVERED",
+              "detail": "controlled fixture contradiction"
+            }
+          ],
+          "previously_accepted": true
+        }
+      ],
+      "undeclared_evidence": [
+        "AC-07"
+      ],
+      "undeclared_escaped_defects": [],
+      "build_boundary": 3,
+      "counts": {
+        "CONTESTED": 2
+      },
+      "declared": 2
+    }
+  },
+  "readonly_checks": 10,
+  "commands": [
+    {
+      "args": [
+        "ticket",
+        "add",
+        "P2",
+        "T-1306 isolated criterion calibration fixture",
+        "--verify",
+        "AC-01 [UNIT] fixture marker binding; AC-02 [EFFECT_PATH] fixture broader witness"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"TICKET_ADDED\",\n  \"op_id\": \"ticket-3bd574a8b3984b7fbe817db828f04871\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"ticket\": \"T-1\",\n  \"event_id\": \"E-1\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "claim",
+        "T-1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"CLAIMED\",\n  \"op_id\": \"claim-c2d313a5059c4c048f46b9821d684149\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"ticket\": \"T-1\",\n  \"event_id\": \"E-2\",\n  \"phase\": \"SCOUT\",\n  \"next_action\": \"PHASE SCOUT T-1\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "transition",
+        "BUILD",
+        "T-1",
+        "controlled fixture build epoch"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"TRANSITIONED\",\n  \"op_id\": \"transition-07a74989c0044e0c97743b20cd847856\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"phase\": \"BUILD\",\n  \"next_action\": \"PHASE BUILD T-1\",\n  \"event_id\": \"E-3\",\n  \"ticket\": \"T-1\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "acceptance",
+        "T-1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"ACCEPTANCE\",\n  \"ticket\": \"T-1\",\n  \"criteria\": [\n    {\n      \"ac\": \"AC-01\",\n      \"text\": \"fixture marker binding\",\n      \"minimum_witness\": \"UNIT\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"UNVERIFIED\",\n      \"evidence\": [],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    },\n    {\n      \"ac\": \"AC-02\",\n      \"text\": \"fixture broader witness\",\n      \"minimum_witness\": \"EFFECT_PATH\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"UNVERIFIED\",\n      \"evidence\": [],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    }\n  ],\n  \"undeclared_evidence\": [],\n  \"undeclared_escaped_defects\": [],\n  \"build_boundary\": 3,\n  \"counts\": {\n    \"UNVERIFIED\": 2\n  },\n  \"declared\": 2\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "checkpoint",
+        "RUN",
+        "T-1",
+        "PASS conf: high -- fixture claims both criteria complete"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"CHECKPOINTED\",\n  \"op_id\": \"checkpoint-536645d6fc6f4797906d224221a5e7aa\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"event_id\": \"E-4\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "acceptance",
+        "T-1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"ACCEPTANCE\",\n  \"ticket\": \"T-1\",\n  \"criteria\": [\n    {\n      \"ac\": \"AC-01\",\n      \"text\": \"fixture marker binding\",\n      \"minimum_witness\": \"UNIT\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"UNVERIFIED\",\n      \"evidence\": [],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    },\n    {\n      \"ac\": \"AC-02\",\n      \"text\": \"fixture broader witness\",\n      \"minimum_witness\": \"EFFECT_PATH\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"UNVERIFIED\",\n      \"evidence\": [],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    }\n  ],\n  \"undeclared_evidence\": [],\n  \"undeclared_escaped_defects\": [],\n  \"build_boundary\": 3,\n  \"counts\": {\n    \"UNVERIFIED\": 2\n  },\n  \"declared\": 2\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "checkpoint",
+        "RUN",
+        "T-1",
+        "quoted fixture AC-EVIDENCE AC-01 PASS behavioral"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"CHECKPOINTED\",\n  \"op_id\": \"checkpoint-35e959bc367d4b369b4166602c6fdbc4\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"event_id\": \"E-5\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "acceptance",
+        "T-1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"ACCEPTANCE\",\n  \"ticket\": \"T-1\",\n  \"criteria\": [\n    {\n      \"ac\": \"AC-01\",\n      \"text\": \"fixture marker binding\",\n      \"minimum_witness\": \"UNIT\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"UNVERIFIED\",\n      \"evidence\": [],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    },\n    {\n      \"ac\": \"AC-02\",\n      \"text\": \"fixture broader witness\",\n      \"minimum_witness\": \"EFFECT_PATH\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"UNVERIFIED\",\n      \"evidence\": [],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    }\n  ],\n  \"undeclared_evidence\": [],\n  \"undeclared_escaped_defects\": [],\n  \"build_boundary\": 3,\n  \"counts\": {\n    \"UNVERIFIED\": 2\n  },\n  \"declared\": 2\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "checkpoint",
+        "RUN",
+        "T-1",
+        "AC-EVIDENCE AC-01 PASS claim -- intentionally invalid fixture class"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"CHECKPOINTED\",\n  \"op_id\": \"checkpoint-dfaa396f88634a4cb1ccce9e3ea72ea0\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"event_id\": \"E-6\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "acceptance",
+        "T-1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"ACCEPTANCE\",\n  \"ticket\": \"T-1\",\n  \"criteria\": [\n    {\n      \"ac\": \"AC-01\",\n      \"text\": \"fixture marker binding\",\n      \"minimum_witness\": \"UNIT\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"UNVERIFIED\",\n      \"evidence\": [],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    },\n    {\n      \"ac\": \"AC-02\",\n      \"text\": \"fixture broader witness\",\n      \"minimum_witness\": \"EFFECT_PATH\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"UNVERIFIED\",\n      \"evidence\": [],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    }\n  ],\n  \"undeclared_evidence\": [],\n  \"undeclared_escaped_defects\": [],\n  \"build_boundary\": 3,\n  \"counts\": {\n    \"UNVERIFIED\": 2\n  },\n  \"declared\": 2\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "checkpoint",
+        "RUN",
+        "T-1",
+        "AC-EVIDENCE AC-01 PASS behavioral witness=UNIT surface=fixture-calibration -- controlled marker"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"CHECKPOINTED\",\n  \"op_id\": \"checkpoint-53d6f4cc554848e9ab83746299210430\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"event_id\": \"E-7\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "acceptance",
+        "T-1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"ACCEPTANCE\",\n  \"ticket\": \"T-1\",\n  \"criteria\": [\n    {\n      \"ac\": \"AC-01\",\n      \"text\": \"fixture marker binding\",\n      \"minimum_witness\": \"UNIT\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"SATISFIED\",\n      \"evidence\": [\n        {\n          \"ac\": \"AC-01\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"controlled marker\",\n          \"event\": 7,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        }\n      ],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    },\n    {\n      \"ac\": \"AC-02\",\n      \"text\": \"fixture broader witness\",\n      \"minimum_witness\": \"EFFECT_PATH\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"UNVERIFIED\",\n      \"evidence\": [],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    }\n  ],\n  \"undeclared_evidence\": [],\n  \"undeclared_escaped_defects\": [],\n  \"build_boundary\": 3,\n  \"counts\": {\n    \"SATISFIED\": 1,\n    \"UNVERIFIED\": 1\n  },\n  \"declared\": 2\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "checkpoint",
+        "RUN",
+        "T-1",
+        "AC-EVIDENCE AC-02 PASS behavioral witness=UNIT surface=fixture-calibration -- narrower fixture witness"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"CHECKPOINTED\",\n  \"op_id\": \"checkpoint-7c746d5712f643c082ffd43bf37eb7e0\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"event_id\": \"E-8\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "acceptance",
+        "T-1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"ACCEPTANCE\",\n  \"ticket\": \"T-1\",\n  \"criteria\": [\n    {\n      \"ac\": \"AC-01\",\n      \"text\": \"fixture marker binding\",\n      \"minimum_witness\": \"UNIT\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"SATISFIED\",\n      \"evidence\": [\n        {\n          \"ac\": \"AC-01\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"controlled marker\",\n          \"event\": 7,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        }\n      ],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    },\n    {\n      \"ac\": \"AC-02\",\n      \"text\": \"fixture broader witness\",\n      \"minimum_witness\": \"EFFECT_PATH\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"EVIDENCE_SCOPE_TOO_WEAK\",\n      \"evidence\": [\n        {\n          \"ac\": \"AC-02\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"narrower fixture witness\",\n          \"event\": 8,\n          \"stale\": false,\n          \"scope_sufficient\": false\n        }\n      ],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    }\n  ],\n  \"undeclared_evidence\": [],\n  \"undeclared_escaped_defects\": [],\n  \"build_boundary\": 3,\n  \"counts\": {\n    \"SATISFIED\": 1,\n    \"EVIDENCE_SCOPE_TOO_WEAK\": 1\n  },\n  \"declared\": 2\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "checkpoint",
+        "RUN",
+        "T-1",
+        "AC-EVIDENCE AC-02 PASS behavioral witness=EFFECT_PATH surface=fixture-calibration -- fixture marker only"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"CHECKPOINTED\",\n  \"op_id\": \"checkpoint-8fedfc494ca44d6990e15fedd550cd53\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"event_id\": \"E-9\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "acceptance",
+        "T-1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"ACCEPTANCE\",\n  \"ticket\": \"T-1\",\n  \"criteria\": [\n    {\n      \"ac\": \"AC-01\",\n      \"text\": \"fixture marker binding\",\n      \"minimum_witness\": \"UNIT\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"SATISFIED\",\n      \"evidence\": [\n        {\n          \"ac\": \"AC-01\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"controlled marker\",\n          \"event\": 7,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        }\n      ],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    },\n    {\n      \"ac\": \"AC-02\",\n      \"text\": \"fixture broader witness\",\n      \"minimum_witness\": \"EFFECT_PATH\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"SATISFIED\",\n      \"evidence\": [\n        {\n          \"ac\": \"AC-02\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"narrower fixture witness\",\n          \"event\": 8,\n          \"stale\": false,\n          \"scope_sufficient\": false\n        },\n        {\n          \"ac\": \"AC-02\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"EFFECT_PATH\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"fixture marker only\",\n          \"event\": 9,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        }\n      ],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    }\n  ],\n  \"undeclared_evidence\": [],\n  \"undeclared_escaped_defects\": [],\n  \"build_boundary\": 3,\n  \"counts\": {\n    \"SATISFIED\": 2\n  },\n  \"declared\": 2\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "checkpoint",
+        "RUN",
+        "T-1",
+        "AC-EVIDENCE AC-01 FAIL behavioral -- controlled contradictory fixture marker"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"CHECKPOINTED\",\n  \"op_id\": \"checkpoint-adaac82a490643b0b884d90b8933cd51\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"event_id\": \"E-10\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "acceptance",
+        "T-1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"ACCEPTANCE\",\n  \"ticket\": \"T-1\",\n  \"criteria\": [\n    {\n      \"ac\": \"AC-01\",\n      \"text\": \"fixture marker binding\",\n      \"minimum_witness\": \"UNIT\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"CONTESTED\",\n      \"evidence\": [\n        {\n          \"ac\": \"AC-01\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"controlled marker\",\n          \"event\": 7,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        },\n        {\n          \"ac\": \"AC-01\",\n          \"result\": \"FAIL\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": false,\n          \"observed_surface\": \"legacy-unspecified\",\n          \"detail\": \"controlled contradictory fixture marker\",\n          \"event\": 10,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        }\n      ],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    },\n    {\n      \"ac\": \"AC-02\",\n      \"text\": \"fixture broader witness\",\n      \"minimum_witness\": \"EFFECT_PATH\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"SATISFIED\",\n      \"evidence\": [\n        {\n          \"ac\": \"AC-02\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"narrower fixture witness\",\n          \"event\": 8,\n          \"stale\": false,\n          \"scope_sufficient\": false\n        },\n        {\n          \"ac\": \"AC-02\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"EFFECT_PATH\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"fixture marker only\",\n          \"event\": 9,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        }\n      ],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    }\n  ],\n  \"undeclared_evidence\": [],\n  \"undeclared_escaped_defects\": [],\n  \"build_boundary\": 3,\n  \"counts\": {\n    \"CONTESTED\": 1,\n    \"SATISFIED\": 1\n  },\n  \"declared\": 2\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "checkpoint",
+        "RUN",
+        "T-1",
+        "AC-EVIDENCE AC-07 PASS static -- undeclared fixture criterion"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"CHECKPOINTED\",\n  \"op_id\": \"checkpoint-444d7557e7284dabb18ff243b20a948e\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"event_id\": \"E-11\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "acceptance",
+        "T-1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"ACCEPTANCE\",\n  \"ticket\": \"T-1\",\n  \"criteria\": [\n    {\n      \"ac\": \"AC-01\",\n      \"text\": \"fixture marker binding\",\n      \"minimum_witness\": \"UNIT\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"CONTESTED\",\n      \"evidence\": [\n        {\n          \"ac\": \"AC-01\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"controlled marker\",\n          \"event\": 7,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        },\n        {\n          \"ac\": \"AC-01\",\n          \"result\": \"FAIL\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": false,\n          \"observed_surface\": \"legacy-unspecified\",\n          \"detail\": \"controlled contradictory fixture marker\",\n          \"event\": 10,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        }\n      ],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    },\n    {\n      \"ac\": \"AC-02\",\n      \"text\": \"fixture broader witness\",\n      \"minimum_witness\": \"EFFECT_PATH\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"SATISFIED\",\n      \"evidence\": [\n        {\n          \"ac\": \"AC-02\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"narrower fixture witness\",\n          \"event\": 8,\n          \"stale\": false,\n          \"scope_sufficient\": false\n        },\n        {\n          \"ac\": \"AC-02\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"EFFECT_PATH\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"fixture marker only\",\n          \"event\": 9,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        }\n      ],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    }\n  ],\n  \"undeclared_evidence\": [\n    \"AC-07\"\n  ],\n  \"undeclared_escaped_defects\": [],\n  \"build_boundary\": 3,\n  \"counts\": {\n    \"CONTESTED\": 1,\n    \"SATISFIED\": 1\n  },\n  \"declared\": 2\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "checkpoint",
+        "RUN",
+        "T-1",
+        "AC-ESCAPED AC-02 E-9 NOT_COVERED -- controlled fixture contradiction"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"CHECKPOINTED\",\n  \"op_id\": \"checkpoint-1c42cd08ef894c48a156ab439f0e714b\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"event_id\": \"E-12\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "acceptance",
+        "T-1"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"ok\": true,\n  \"code\": \"ACCEPTANCE\",\n  \"ticket\": \"T-1\",\n  \"criteria\": [\n    {\n      \"ac\": \"AC-01\",\n      \"text\": \"fixture marker binding\",\n      \"minimum_witness\": \"UNIT\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"CONTESTED\",\n      \"evidence\": [\n        {\n          \"ac\": \"AC-01\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"controlled marker\",\n          \"event\": 7,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        },\n        {\n          \"ac\": \"AC-01\",\n          \"result\": \"FAIL\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": false,\n          \"observed_surface\": \"legacy-unspecified\",\n          \"detail\": \"controlled contradictory fixture marker\",\n          \"event\": 10,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        }\n      ],\n      \"escaped_defects\": [],\n      \"previously_accepted\": false\n    },\n    {\n      \"ac\": \"AC-02\",\n      \"text\": \"fixture broader witness\",\n      \"minimum_witness\": \"EFFECT_PATH\",\n      \"minimum_witness_explicit\": true,\n      \"state\": \"CONTESTED\",\n      \"evidence\": [\n        {\n          \"ac\": \"AC-02\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"UNIT\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"narrower fixture witness\",\n          \"event\": 8,\n          \"stale\": false,\n          \"scope_sufficient\": false\n        },\n        {\n          \"ac\": \"AC-02\",\n          \"result\": \"PASS\",\n          \"kind\": \"behavioral\",\n          \"witness\": \"EFFECT_PATH\",\n          \"witness_explicit\": true,\n          \"observed_surface\": \"fixture-calibration\",\n          \"detail\": \"fixture marker only\",\n          \"event\": 9,\n          \"stale\": false,\n          \"scope_sufficient\": true\n        }\n      ],\n      \"escaped_defects\": [\n        {\n          \"ac\": \"AC-02\",\n          \"event\": 12,\n          \"previous_event\": 9,\n          \"class\": \"NOT_COVERED\",\n          \"detail\": \"controlled fixture contradiction\"\n        }\n      ],\n      \"previously_accepted\": true\n    }\n  ],\n  \"undeclared_evidence\": [\n    \"AC-07\"\n  ],\n  \"undeclared_escaped_defects\": [],\n  \"build_boundary\": 3,\n  \"counts\": {\n    \"CONTESTED\": 2\n  },\n  \"declared\": 2\n}\n",
+      "stderr": ""
+    }
+  ],
+  "driver_sha256": "2f3d94bbd34abeccfa83954a0877ca41a89b60bf0962d50e96d4e58ffca64978",
+  "temp_root": "V:\\_TEMP_\\saipen-evidence-t1306-review-n_bqeb_m"
+}

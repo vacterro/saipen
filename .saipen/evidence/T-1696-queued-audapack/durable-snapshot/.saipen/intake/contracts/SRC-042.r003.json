@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-042:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Canonical display title is exactly PROJECT_NAME +  \u2014  + SAIHANDOFF +  \u2014  + TOPIC; project first; no timestamp, model name, role name, brackets, SAIHANDOFF_BEGIN, [SAIPEN_HANDOFF] or HTML comment marker"
+    },
+    "SRC-042:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "TOPIC is the canonical field; TARGET is never reintroduced as a synonym; TARGET_POLICY remains a separate routing field"
+    },
+    "SRC-042:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audapack/saihandoff.py owns canonical_handoff_title(project_name, topic), parse_canonical_handoff_title(text), canonicalize_handoff_body(text), handoff_content_sha256(body), parse_saihandoff_v1(text), validate_saihandoff_v1(record) and nothing else"
+    }
+  },
+  "derived_at": "2026-09-10T18:53:14Z",
+  "derived_from": "SRC-042",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "db81366a626ea28c39e8102096208d3a5c66a6caec65c72ae0ea8306ad8381b1"
+}

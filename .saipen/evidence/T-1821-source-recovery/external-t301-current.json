@@ -1,0 +1,13 @@
+{
+  "observed_utc": "2026-10-21T00:16:50.845512+00:00",
+  "external_root": "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+  "read_only": true,
+  "state_sha256": "eba3548b1ed8c258db7f7943856bdc9b5850cb232a1323bee8980c08de8bc3bd",
+  "board_sha256": "31d4ccef0c7e7ff8abea28fa5e1b552f78c8661ab058164fa2c44d95f17b6f46",
+  "identity_sha256": "dcaaf3956076e8404014b1eddabe695e2679aa57cda017563ac2b5885857a854",
+  "rows": [
+    "- [ ] T-302 [P2] T-301 real-vendor acceptance: authorize one disposable, test-owned Antigravity vendor session so the composer Copy/Paste can be proven with normal operator-e... | needs: T-301 | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-112",
+    "- [ ] T-301 [P2] Correct managed Antigravity console Copy/Paste acceptance: fix ScopedConsoleController input-mode restore, input bridge shortcut ownership, and false-positiv... | verify: the requested change is present and demonstrated against the user own description of it [detail_ref: .saipen/recovery/board-compaction/T-301/T-301-a0c1bd8da560f346006dc34a.json] | request_witness: model_supplied | source_receipts: SRC-110, SRC-111 | owner: saipen-cli | claim_time: 2026-10-19T21:31:20Z | blocker: REAL VENDOR ACCEPTANCE BLOCKED (VENDOR_ACCEPTANCE_BLOCKED): the Antigravity composer copy/paste can only be proven in a newly launched, explicitly authorized, test-owned vendor session. The probe... | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-301/T-301-a0c1bd8da560f346006dc34a.json"
+  ],
+  "conclusion": "Existing SAITULS T-301 is still blocked on real vendor acceptance; T-302 is existing approval-dependent Work. Root SAIPEN rendering tests do not discharge that external acceptance. No new session, input injection, deployment, foreign patch or authority was created."
+}

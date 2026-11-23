@@ -1,0 +1,58 @@
+T-290 acceptance record -- real ZAICODE project, live config, Windows/PySide6 machine
+Run: 07.10.26 05:2x-05:3x local. Command: python .t290_acceptance.py (scratch driver, removed after the run)
+
+What this proves, in order: the toggle persists through the real registry transaction and
+survives a fresh load_config (restart); a real pack of the live zaicode project writes a ZIP
+carrying zcode/packages/{ui,desktop,services}/ with zero reproducible bulk; both manifests
+declare archive_scope=complete_source, large_archive_authorized=true and ONE shared policy
+fingerprint; the nested zcode component is included with authority=same_origin (honest: the
+child shares the root origin, so a different authority string would be a lie); source review
+is ready over non-zero files/bytes; worktree SHA-256 matches ZIP bytes; and neither scope's
+archive is ever reused for the other scope (the toggle invalidates policy-wise, not by size).
+The post-pack hot-reuse leg records the honest contract for a tree under continuous agent
+writes: 16 watch events fired during the pack, so no hot proof may be taken and the freshness
+gate re-packs fail-closed rather than reusing an archive it could not prove.
+Kept artifact beside the backup: V:\_TEMP_	290-accept-mtgbkrvl\_ZAICODE_07.10.26-T05-31-59.zip
+(46,406,793 bytes, 12,423 members). Re-read from that ZIP alone: legacy and inventory manifests both
+say archive_scope=complete_source, large_archive_authorized=true and fingerprint
+d2dc255ff15fef9861d60deda76032b2; zcode/packages members ui=2149 desktop=1554 services=340 with
+zero .git/node_modules/dist offenders; nested_git_components zcode included=true
+authority=same_origin files=8302 bytes=78738193; source_review_ready=true. The pre-run live config
+backup is config.json.before-t290 in that same directory; the previous run's scratch directory was
+removed after the fix, so only this one remains.
+
+---- driver output ----
+scratch output dir: V:\_TEMP_\t290-accept-mtgbkrvl
+live config backed up to: V:\_TEMP_\t290-accept-mtgbkrvl\config.json.before-t290
+PASS  toggle persisted complete_source through the registry transaction
+PASS  a fresh config load (restart) still reports complete_source
+PASS  pack succeeded (ok)
+PASS  archive written: _ZAICODE_07.10.26-T05-29-22.zip (46406781 bytes)
+PASS  zcode/packages/ui/ present (2149 members)
+PASS  zcode/packages/desktop/ present (1554 members)
+PASS  zcode/packages/services/ present (340 members)
+PASS  no reproducible bulk under zcode/ (0 offenders)
+PASS  legacy manifest archive_scope='complete_source'
+PASS  inventory manifest archive_scope='complete_source'
+PASS  legacy large_archive_authorized=True
+PASS  inventory large_archive_authorized=True
+PASS  both manifests carry ONE policy fingerprint
+PASS  nested component zcode included=True
+PASS  nested component authority='same_origin'
+PASS  nested component files=8302 bytes=78738193
+PASS  source_review_ready is True
+PASS  source review non-zero (files=12421 bytes=161496956)
+PASS  SHA-256 zcode/package.json matches the worktree
+PASS  SHA-256 zcode/README.md matches the worktree
+PASS  compared 2 worktree files against ZIP bytes
+      live source mutated during the pack; ensure repacked (probe=101838ms)
+PASS  no hot proof on a mutating tree: the gate repacked (fail-closed)
+PASS  the fail-closed repack kept the complete_source policy
+PASS  complete_source archive NOT reused under AUTO (new=_ZAICODE_07.10.26-T05-31-41.zip)
+PASS  AUTO archive declares archive_scope='auto'
+PASS  AUTO archive NOT reused under complete_source
+PASS  restored archive declares archive_scope='complete_source'
+PASS  live config left at complete_source (fresh load)
+
+scratch dir kept for inspection: V:\_TEMP_\t290-accept-mtgbkrvl
+ACCEPTANCE 28/28 checks passed

@@ -1,0 +1,18 @@
+SCOPED: 13 of 275 control(s) selected by --changed (3 path(s)). This is NOT the full sweep.
+SCOPED: known limitation -- selection reads each control's DECLARED target file only. A control whose target is untouched but whose check reads a changed file indirectly -- a cross-document rule, a manifest, a schema another file is validated against -- is NOT selected and is NOT proven by this run
+SCOPED: known limitation -- the always-on probes still run; only the per-control sweep is narrowed
+PASS: a real root `nul` entry is excluded from audit snapshots
+UNPROVEN: symlink-restore -- host cannot create a symlink, so the red control was never constructed: [WinError 1314] A required privilege is not held by the client: 'V:\\_TEMP_\\audit_checks_ajwd4woy\\probe-symlink-restore\\symlink-restore-probe\\external.md' -> 'V:\\_TEMP_\\audit_checks_ajwd4woy\\probe-symlink-restore\\symlink-restore-probe\\IDENTITY.md'
+PASS: audit-tags missing-Git skip plus enumeration, nonzero, malformed, truncated, and surplus fail-closed controls behave
+PASS: every producer-OUTBOX control runs at a gate where its finding is hard
+PASS: a known-good copy of this repository is built for the mutation controls
+FAIL: release-ledger -- clean synthetic ledger is not clean: FAIL: closure provenance does not resolve: external verifier context/runtime/argv changed since the receipt -- a DONE line may record HOW it closed, never that something was published when it was not (CORE-003)
+FAIL: validator-check-inventory -- ADDED fail site 2a3e0e9689b5a398 at tools/validate.py:6932 in <module> ('core-unit publication -- ') -- a new check needs a CASE in tools/audit_checks.py, or a recorded reason it has none. Regenerate tools/validator_fail_sites.json in the same change
+PASS: aged unowned WARN slug fails; identical aged slug with a live naming ticket passes; baseline data, never validator wording
+PASS: consistent SCOUT->SCOUTX rename stays green across the DFA, RFC table, schema enum and phase doc -- edge gates catch drift, not deliberate renames
+PASS: release-ledger tag query is observed once; duplicate-query and invalid-validator controls both go red
+FAIL: validator-baseline -- the validator rejects an unmodified copy -- fix the known-good control before trusting mutation results: FAIL: closure provenance does not resolve: external verifier context/runtime/argv changed since the receipt -- a DONE line may record HOW it closed, never that something was published when it was not (CORE-003)
+PASS: callable no-op mutations are rejected before validation
+SKIP: case-availability because prerequisite validator-baseline failed
+SKIP: mutation-sweep because prerequisite validator-baseline failed
+AUDIT: 8 of 14 probes passed; failed: release-ledger, validator-baseline, validator-check-inventory; skipped: case-availability, mutation-sweep; unproven (host capability): symlink-restore

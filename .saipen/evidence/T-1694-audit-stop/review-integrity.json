@@ -1,0 +1,21 @@
+{
+  "scope_hashes_unchanged": true,
+  "test_function_preservation": [
+    {
+      "path": "tools/test_automation_block.py",
+      "pre_functions_unchanged": 43,
+      "added_functions": [
+        "WaitOwnership.test_unworkable_audit_has_truthful_final_facts",
+        "WaitOwnership.test_unworkable_audit_stops_without_inventing_operator_authority",
+        "WaitOwnership.test_workable_ticket_outranks_unworkable_audit"
+      ]
+    },
+    {
+      "path": "tools/test_response_surface_contract.py",
+      "pre_functions_unchanged": 58,
+      "added_functions": [
+        "AutonomyTests.test_blocked_automation_is_a_handback_not_project_completion"
+      ]
+    }
+  ]
+}

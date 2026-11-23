@@ -1,0 +1,14 @@
+test_diagnostic_carriers_leave_child_and_verifier_unchanged (test_t1840_external_renewal.ExternalRenewalTests.test_diagnostic_carriers_leave_child_and_verifier_unchanged) ... FAIL
+
+======================================================================
+FAIL: test_diagnostic_carriers_leave_child_and_verifier_unchanged (test_t1840_external_renewal.ExternalRenewalTests.test_diagnostic_carriers_leave_child_and_verifier_unchanged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1840_external_renewal.py", line 228, in test_diagnostic_carriers_leave_child_and_verifier_unchanged
+    self.assertTrue(first.ok, first.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'EXTERNAL_VERIFICATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'local verification of the claimed external implementation did not pass; FAIL receipt recorded, T-100 lifecycle stays unchanged', 'ticket': 'T-100', 'receipt_id': 'EX-000002', 'verdict': 'FAIL', 'applied': 'EXTERNAL_VERIFICATION_FAILED'}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.987s
+
+FAILED (failures=1)

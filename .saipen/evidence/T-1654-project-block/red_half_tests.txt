@@ -1,0 +1,527 @@
+FFFEFEEFEEEEEEEEEF.EsEEEEEEEEEEEEEEEEEEEEEEEEEEE
+======================================================================
+ERROR: test_the_command_every_session_runs_names_the_stale_block (test_t1654_project_block.CommandSurfaceTests.test_the_command_every_session_runs_names_the_stale_block)
+`status` and `continue` carry the cold route; a block of another
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 593, in test_the_command_every_session_runs_names_the_stale_block
+    hint = before["cold_route"]["instructions"]
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'instructions'
+
+======================================================================
+ERROR: test_the_embedded_verdict_cannot_stop_the_command_that_carries_it (test_t1654_project_block.CommandSurfaceTests.test_the_embedded_verdict_cannot_stop_the_command_that_carries_it)
+The cold route rides `continue` and `start`. Whatever goes wrong
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 606, in test_the_embedded_verdict_cannot_stop_the_command_that_carries_it
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_the_first_command_of_a_new_task_names_the_kernel (test_t1654_project_block.CommandSurfaceTests.test_the_first_command_of_a_new_task_names_the_kernel)
+What the block promises of `saipen start`: its answer carries the
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 624, in test_the_first_command_of_a_new_task_names_the_kernel
+    boot = started["cold_route"]["boot"]
+           ~~~~~~~^^^^^^^^^^^^^^
+KeyError: 'cold_route'
+
+======================================================================
+ERROR: test_the_project_diagnostic_carries_the_same_verdict (test_t1654_project_block.CommandSurfaceTests.test_the_project_diagnostic_carries_the_same_verdict)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 634, in test_the_project_diagnostic_carries_the_same_verdict
+    self.assertEqual(bound["instructions"]["code"], "PROJECT_BLOCK_STALE")
+                     ~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'instructions'
+
+======================================================================
+ERROR: test_it_is_ascii_so_no_file_encoding_can_break_it (test_t1654_project_block.CurrentBlockTests.test_it_is_ascii_so_no_file_encoding_can_break_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 502, in test_it_is_ascii_so_no_file_encoding_can_break_it
+    block_owner().current_block(b"\r\n").decode("ascii")
+    ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_it_is_one_marker_pair (test_t1654_project_block.CurrentBlockTests.test_it_is_one_marker_pair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 436, in test_it_is_one_marker_pair
+    block = block_owner().current_block(b"\n")
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_it_is_relocatable (test_t1654_project_block.CurrentBlockTests.test_it_is_relocatable)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 457, in test_it_is_relocatable
+    text = self.text()
+           ^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 433, in text
+    return block_owner().current_block(b"\n").decode("ascii")
+           ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_it_names_the_first_command_and_where_the_kernel_is (test_t1654_project_block.CurrentBlockTests.test_it_names_the_first_command_and_where_the_kernel_is)
+A host with no block of its own has only this one: it must say what
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 486, in test_it_names_the_first_command_and_where_the_kernel_is
+    text = " ".join(self.text().split())
+                    ^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 433, in text
+    return block_owner().current_block(b"\n").decode("ascii")
+           ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_it_names_the_launcher_order (test_t1654_project_block.CurrentBlockTests.test_it_names_the_launcher_order)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 476, in test_it_names_the_launcher_order
+    text = " ".join(self.text().split())
+                    ^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 433, in text
+    return block_owner().current_block(b"\n").decode("ascii")
+           ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_it_never_tells_the_agent_to_clone (test_t1654_project_block.CurrentBlockTests.test_it_never_tells_the_agent_to_clone)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 468, in test_it_never_tells_the_agent_to_clone
+    for sentence in re.split(r"(?<=[.;])\s+", " ".join(self.text().split()))
+                                                       ^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 433, in text
+    return block_owner().current_block(b"\n").decode("ascii")
+           ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_the_machine_launcher_it_names_is_the_one_the_runtime_installs (test_t1654_project_block.CurrentBlockTests.test_the_machine_launcher_it_names_is_the_one_the_runtime_installs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 499, in test_the_machine_launcher_it_names_is_the_one_the_runtime_installs
+    self.assertIn(launcher, self.text())
+                            ^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 433, in text
+    return block_owner().current_block(b"\n").decode("ascii")
+           ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_the_revision_moves_with_the_text (test_t1654_project_block.CurrentBlockTests.test_the_revision_moves_with_the_text)
+Change the text, raise the revision, then pin the new pair here. A
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 448, in test_the_revision_moves_with_the_text
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_dry_run_names_the_write_and_makes_none (test_t1654_project_block.RepairTests.test_a_dry_run_names_the_write_and_makes_none)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 342, in test_a_dry_run_names_the_write_and_makes_none
+    planned = block_owner().repair(self.project, dry_run=True)
+              ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_node_the_system_answers_as_a_link_is_left_alone (test_t1654_project_block.RepairTests.test_a_node_the_system_answers_as_a_link_is_left_alone)
+The same rule where this account may not create a link: the answer
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 418, in test_a_node_the_system_answers_as_a_link_is_left_alone
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_refused_write_leaves_the_file_and_names_what_must_change (test_t1654_project_block.RepairTests.test_a_refused_write_leaves_the_file_and_names_what_must_change)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 381, in test_a_refused_write_leaves_the_file_and_names_what_must_change
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_second_repair_writes_nothing (test_t1654_project_block.RepairTests.test_a_second_repair_writes_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 329, in test_a_second_repair_writes_nothing
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_stale_file_is_repaired_beside_a_malformed_one (test_t1654_project_block.RepairTests.test_a_stale_file_is_repaired_beside_a_malformed_one)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 368, in test_a_stale_file_is_repaired_beside_a_malformed_one
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_markers_that_are_not_one_pair_are_refused_and_left_alone (test_t1654_project_block.RepairTests.test_markers_that_are_not_one_pair_are_refused_and_left_alone)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 348, in test_markers_that_are_not_one_pair_are_refused_and_left_alone
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_only_the_bytes_between_the_markers_change (test_t1654_project_block.RepairTests.test_only_the_bytes_between_the_markers_change)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 299, in test_only_the_bytes_between_the_markers_change
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_red_then_green_on_the_measured_block (test_t1654_project_block.RepairTests.test_red_then_green_on_the_measured_block)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 287, in test_red_then_green_on_the_measured_block
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_the_repaired_file_keeps_the_access_it_had (test_t1654_project_block.RepairTests.test_the_repaired_file_keeps_the_access_it_had)
+The replacement is a new file the writer creates owner-only. The
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 317, in test_the_repaired_file_keeps_the_access_it_had
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_block_of_a_newer_revision_is_left_alone (test_t1654_project_block.ReportTests.test_a_block_of_a_newer_revision_is_left_alone)
+Two installs of different generations reach one project. The older
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 162, in test_a_block_of_a_newer_revision_is_left_alone
+    body = b"intro\n" + self.newer() + b"\n"
+                        ^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 148, in newer
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it (test_t1654_project_block.ReportTests.test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it) [b'Path missing (new machine)? clone github.com/vacterro/saipen.']
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 228, in test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it
+    report = block_owner().status(self.project)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it (test_t1654_project_block.ReportTests.test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it) [b'No install? clone github.com/vacterro/saipen']
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 228, in test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it
+    report = block_owner().status(self.project)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it (test_t1654_project_block.ReportTests.test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it) [b'Never guess. Then clone github.com/vacterro/saipen']
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 228, in test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it
+    report = block_owner().status(self.project)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it (test_t1654_project_block.ReportTests.test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it) [b'never clone it by hand; clone github.com/vacterro/saipen instead']
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 228, in test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it
+    report = block_owner().status(self.project)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it (test_t1654_project_block.ReportTests.test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it) [b'never clone or copy it, never clone saipen at all']
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 228, in test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it
+    report = block_owner().status(self.project)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it (test_t1654_project_block.ReportTests.test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it) [b'never clone or download a copy of saipen']
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 228, in test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it
+    report = block_owner().status(self.project)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it (test_t1654_project_block.ReportTests.test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it) [b'do not search for SAIPEN or clone it']
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 228, in test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it
+    report = block_owner().status(self.project)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it (test_t1654_project_block.ReportTests.test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it) [b'nothing about copies here, saipen']
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 228, in test_a_clone_is_an_instruction_unless_the_same_clause_forbids_it
+    report = block_owner().status(self.project)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_directory_without_project_memory_is_not_judged (test_t1654_project_block.ReportTests.test_a_directory_without_project_memory_is_not_judged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 199, in test_a_directory_without_project_memory_is_not_judged
+    report = block_owner().status(bare)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_higher_number_does_not_excuse_a_clone_or_a_private_path (test_t1654_project_block.ReportTests.test_a_higher_number_does_not_excuse_a_clone_or_a_private_path)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 175, in test_a_higher_number_does_not_excuse_a_clone_or_a_private_path
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_host_level_instruction_file_belongs_to_the_installer (test_t1654_project_block.ReportTests.test_a_host_level_instruction_file_belongs_to_the_installer)
+The same markers delimit the host-level block in a host's own
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 242, in test_a_host_level_instruction_file_belongs_to_the_installer
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_a_project_without_a_block_has_nothing_to_repair (test_t1654_project_block.ReportTests.test_a_project_without_a_block_has_nothing_to_repair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 128, in test_a_project_without_a_block_has_nothing_to_repair
+    report = block_owner().status(self.project)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_an_unreadable_instruction_file_names_one_action (test_t1654_project_block.ReportTests.test_an_unreadable_instruction_file_names_one_action)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 255, in test_an_unreadable_instruction_file_names_one_action
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_every_project_instruction_file_is_read (test_t1654_project_block.ReportTests.test_every_project_instruction_file_is_read)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 209, in test_every_project_instruction_file_is_read
+    report = block_owner().status(self.project)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_text_outside_the_markers_is_reported_and_is_the_operators (test_t1654_project_block.ReportTests.test_text_outside_the_markers_is_reported_and_is_the_operators)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 271, in test_text_outside_the_markers_is_reported_and_is_the_operators
+    report = block_owner().status(self.project)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_the_current_block_reads_current_in_either_line_ending (test_t1654_project_block.ReportTests.test_the_current_block_reads_current_in_either_line_ending)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 139, in test_the_current_block_reads_current_in_either_line_ending
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_the_measured_block_is_reported_as_another_generation (test_t1654_project_block.ReportTests.test_the_measured_block_is_reported_as_another_generation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 117, in test_the_measured_block_is_reported_as_another_generation
+    report = block_owner().status(self.project)
+             ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+ERROR: test_the_same_revision_with_other_text_is_another_generation (test_t1654_project_block.ReportTests.test_the_same_revision_with_other_text_is_another_generation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 190, in test_the_same_revision_with_other_text_is_another_generation
+    owner = block_owner()
+            ^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 63, in block_owner
+    from saipen_engine import project_block
+ImportError: cannot import name 'project_block' from 'saipen_engine' (V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\saipen_engine\__init__.py)
+
+======================================================================
+FAIL: test_a_read_only_session_reports_and_may_not_repair (test_t1654_project_block.CommandSurfaceTests.test_a_read_only_session_reports_and_may_not_repair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 563, in test_a_read_only_session_reports_and_may_not_repair
+    self.assertEqual((rc, report["code"]), (1, "PROJECT_BLOCK_STALE"))
+AssertionError: Tuples differ: (2, 'VALIDATION_FAILED') != (1, 'PROJECT_BLOCK_STALE')
+
+First differing element 0:
+2
+1
+
+- (2, 'VALIDATION_FAILED')
++ (1, 'PROJECT_BLOCK_STALE')
+
+======================================================================
+FAIL: test_an_unknown_action_or_option_is_refused (test_t1654_project_block.CommandSurfaceTests.test_an_unknown_action_or_option_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 579, in test_an_unknown_action_or_option_is_refused
+    self.assertIn(owned, answer["detail"])
+AssertionError: 'host instructions accepts status|repair' not found in 'unknown command: host'
+
+======================================================================
+FAIL: test_one_command_reports_and_one_repairs (test_t1654_project_block.CommandSurfaceTests.test_one_command_reports_and_one_repairs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 537, in test_one_command_reports_and_one_repairs
+    self.assertEqual(report["code"], "PROJECT_BLOCK_STALE", report)
+AssertionError: 'VALIDATION_FAILED' != 'PROJECT_BLOCK_STALE'
+- VALIDATION_FAILED
++ PROJECT_BLOCK_STALE
+ : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': 'unknown command: host'}
+
+======================================================================
+FAIL: test_the_effect_table_knows_which_action_writes (test_t1654_project_block.CommandSurfaceTests.test_the_effect_table_knows_which_action_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 646, in test_the_effect_table_knows_which_action_writes
+    self.assertEqual(CE.classify_invocation("host", ["instructions", "repair"]), CE.RECOVERY)
+AssertionError: 'DIAGNOSTIC' != 'RECOVERY'
+- DIAGNOSTIC
++ RECOVERY
+
+
+======================================================================
+FAIL: test_the_global_dry_run_flag_writes_nothing (test_t1654_project_block.CommandSurfaceTests.test_the_global_dry_run_flag_writes_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 554, in test_the_global_dry_run_flag_writes_nothing
+    self.assertEqual(rc, 1, "the block is still of another generation")
+AssertionError: 2 != 1 : the block is still of another generation
+
+======================================================================
+FAIL: test_the_command_row_states_the_command_and_its_two_limits (test_t1654_project_block.LawTextTests.test_the_command_row_states_the_command_and_its_two_limits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair\red\tools\test_t1654_project_block.py", line 656, in test_the_command_row_states_the_command_and_its_two_limits
+    self.assertEqual(len(rows), 1, "one row owns the command")
+AssertionError: 0 != 1 : one row owns the command
+
+----------------------------------------------------------------------
+Ran 41 tests in 4.191s
+
+FAILED (failures=6, errors=40, skipped=1)

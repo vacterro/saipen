@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-067:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Close stranded T-218: audit/10 SRC-044 consumed, layer terminal, inbox clean per T-222 evidence"
+    }
+  },
+  "derived_at": "2026-09-20T20:07:25Z",
+  "derived_from": "SRC-067",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "01079ff83504d527171711e35e2b426b64b8b6e7257840afcdf751a7eb71b580"
+}

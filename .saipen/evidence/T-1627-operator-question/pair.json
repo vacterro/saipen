@@ -1,0 +1,26 @@
+{
+  "ticket": "T-1627",
+  "command": "python -B -m unittest test_t1627_operator_question -v",
+  "cwd": "tools",
+  "verifier_sha256": "752b03655dc7d02230e29f44b6e16dec7712b5a06d69029cbcea9aef745294a5",
+  "pre_subject_sha256": "4edf196f4b401c9a0a012bf981d96e3c653aa48cd2d5f36afe03113e269e4498",
+  "post_subject_sha256": "773a2ae2b1d0a0df8d1264a4c5a72e281fb4ba3d71c48ff3df228743117267e7",
+  "pre_exit_code": 1,
+  "post_exit_code": 0,
+  "ran": 16,
+  "oracle_unchanged": true,
+  "subject_paths": [
+    "tools/saipen.py",
+    "tools/saipen_engine/guard_events.py",
+    "tools/saipen_engine/response_surface.py",
+    "tools/install_host_guard.py",
+    "extensions/adapters/opencode/saipen-guard.js",
+    "extensions/adapters/claude/saipen-guard.py",
+    "extensions/adapters/registry.json",
+    "saipen/EXECUTION.md",
+    "saipen/COMMANDS.md",
+    "saipen/REGISTRY.json"
+  ],
+  "note": "Fixed 16-case verifier unchanged. Same original subject remains red; final candidate adds its semantic registry fact. Legacy strict-plugin fixture independently corrected from SRC-185; no regression oracle weakened.",
+  "subject_digest": "SHA256 of UTF-8 json.dumps(path-to-file-SHA256, sort_keys=True)"
+}

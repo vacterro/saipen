@@ -1556,7 +1556,31 @@ def _plan_repair_id(
     return hashlib.sha256(blob).hexdigest()
 
 
-def _state_counter_repairs(state: dict, events) -> list[dict]:
+def _safety_valve_repair_fields(state: dict, project_root: Path | str | None) -> dict:
+    """Shared reauthorization authority metadata for SAFETY_VALVE_TRIPPED repairs."""
+    auth: dict | None = None
+    if project_root is not None:
+        from .goal_authority import reset_authority
+
+        auth = reset_authority(Path(project_root), state)
+    can_cc = auth is None or auth.get("mode") != "wait"
+    fields: dict = {
+        "canonical_next_command": (
+            "saipen continue" if can_cc else auth.get("canonical_next_command")
+        ),
+        "remediation": SAFETY_VALVE_TRIPPED,
+    }
+    if not can_cc and auth is not None:
+        fields["required_ingress"] = auth.get("required_ingress")
+        fields["operator_action"] = auth.get("operator_action")
+        if "host_capability" in auth:
+            fields["host_capability"] = auth["host_capability"]
+    return fields
+
+
+def _state_counter_repairs(
+    state: dict, events, *, project_root: Path | str | None = None
+) -> list[dict]:
     """Repairs for the goal counters, owned only while the intent is `goal`.
 
     CORE-001 (audit-all3): the representation is the truth, and any non-equal
@@ -1638,8 +1662,7 @@ def _state_counter_repairs(state: dict, events) -> list[dict]:
                     "re-authorization (CORE section 2.4)",
                     "refuse": True,
                     "operator_decision_available": True,
-                    "canonical_next_command": "saipen continue",
-                    "remediation": SAFETY_VALVE_TRIPPED,
+                    **_safety_valve_repair_fields(state, project_root),
                 }
             )
             continue
@@ -1656,7 +1679,11 @@ def _state_counter_repairs(state: dict, events) -> list[dict]:
     return repairs
 
 
-def _tripped_valve_repairs(state: dict) -> list[dict]:
+def _tripped_valve_repairs(
+    state: dict,
+    *,
+    project_root: Path | str | None = None,
+) -> list[dict]:
     """The tripped valve is an invariant, not a side effect of counter drift.
 
     `_state_counter_repairs` only notices a valve while the counter DISAGREES
@@ -1721,8 +1748,7 @@ def _tripped_valve_repairs(state: dict) -> list[dict]:
             ),
             "refuse": True,
             "operator_decision_available": True,
-            "canonical_next_command": "saipen continue",
-            "remediation": SAFETY_VALVE_TRIPPED,
+            **_safety_valve_repair_fields(state, project_root),
         }
     ]
 
@@ -2463,6 +2489,13 @@ def _blocked_recovery_fields(
                 for item in decisions
             ]
         )
+        if valve and command is None:
+            for item in repairs:
+                if item.get("remediation") == SAFETY_VALVE_TRIPPED:
+                    for key in ("required_ingress", "operator_action", "host_capability"):
+                        if item.get(key) is not None and key not in result:
+                            result[key] = item[key]
+                    break
     return result
 
 
@@ -2805,8 +2838,8 @@ def reconcile_protocol_state(
         _state_output_field_repairs(state)
         + _stale_improve_gate_repairs(state, _board)
         + _state_marker_repairs(state, log_tail)
-        + _state_counter_repairs(state, events)
-        + _tripped_valve_repairs(state)
+        + _state_counter_repairs(state, events, project_root=project_root)
+        + _tripped_valve_repairs(state, project_root=project_root)
         + phase_repairs
         + _state_blocker_repairs(state, _board, resolve_blocker)
         + ([] if gap or authority["idle"] else _state_next_action_repairs(

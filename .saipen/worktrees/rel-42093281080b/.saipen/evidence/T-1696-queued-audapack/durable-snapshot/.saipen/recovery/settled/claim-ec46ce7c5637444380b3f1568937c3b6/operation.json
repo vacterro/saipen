@@ -1,0 +1,30 @@
+{
+  "op_id": "claim-ec46ce7c5637444380b3f1568937c3b6",
+  "operation": "claim",
+  "created_at": "2026-08-30T14:34:48Z",
+  "agent": "opencode",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "4bb1f198fcc65ec1",
+  "preconditions": {
+    ".saipen/BOARD.md": "06466935bc645a73"
+  },
+  "read_preconditions": {
+    ".saipen/STATE.md": "d0f3ea6a71e0b49e",
+    ".saipen/LOG.md": "08fcc2d2ce1deac8",
+    ".saipen/logs": "delete-tree-sha256:ccffe3625544839b1a2f22c985260a3a13612d7b0a0b80fe6cd23b76cdbe5841"
+  },
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 1,
+  "targets": [
+    {
+      "path": ".saipen/BOARD.md",
+      "role": "board",
+      "action": "write",
+      "before_hash": "06466935bc645a73",
+      "after_hash": "60a57bb1dc12622a",
+      "applied": true
+    }
+  ]
+}

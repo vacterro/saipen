@@ -1,0 +1,31 @@
+{
+  "label": "verify-owner-tests",
+  "phase": "VERIFY",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "test_guard_admission",
+    "test_recovery_reachability",
+    "test_t1494_continuation_authority",
+    "test_actor_binding_lifecycle",
+    "test_t1575_parallel_lane",
+    "test_t1711_regression_execution",
+    "test_t1712_manifest_runtime",
+    "test_t1709_audit_starvation",
+    "test_conformance_repair_boundary",
+    "test_dependency_resume_liveness",
+    "test_t1458_queue_reservation"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+  "exit_code": 0,
+  "duration_s": 117.672,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "",
+  "stderr": "............................................................................................................................................................................................................................................\r\n----------------------------------------------------------------------\r\nRan 236 tests in 117.059s\r\n\r\nOK\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "ff93066d600d3680d9e835ae3327a3c2af698172d7e50e3281f7a83448be134f",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

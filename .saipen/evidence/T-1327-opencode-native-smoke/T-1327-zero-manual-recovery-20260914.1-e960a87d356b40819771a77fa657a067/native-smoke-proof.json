@@ -1,0 +1,95 @@
+{
+ "passed_methods": [
+  1,
+  4
+ ],
+ "install_rc": 0,
+ "generation": null,
+ "case_outcomes": [
+  {
+   "id": "read",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "admitted_write",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: BOARD_DETAIL_UNRESOLVABLE: the host tool did not execute (BOUND_RECOVERY_REQUIRED_BLOCKED: compacted BOARD record has no reachable detail authority -- T-185: "
+  },
+  {
+   "id": "question",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "ordinary_shell",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: BOARD_DETAIL_UNRESOLVABLE: the host tool did not execute (BOUND_RECOVERY_REQUIRED_BLOCKED: compacted BOARD record has no reachable detail authority -- T-185: "
+  },
+  {
+   "id": "source_shell",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: BOARD_DETAIL_UNRESOLVABLE: the host tool did not execute (BOUND_RECOVERY_REQUIRED_BLOCKED: compacted BOARD record has no reachable detail authority -- T-185: "
+  },
+  {
+   "id": "protected_shell_state",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "protected_shell_board",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "protected_shell_windows",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "protected_shell_traversal",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "protected_write",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "unknown_tool",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: TARGET_UNRESOLVED: the host tool did not execute"
+  },
+  {
+   "id": "board_patch",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "compound_recover",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "exact_recover",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "bare_canonical_actor",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: BOARD_DETAIL_UNRESOLVABLE: the host tool did not execute (BOUND_RECOVERY_REQUIRED_BLOCKED: compacted BOARD record has no reachable detail authority -- T-185: "
+  },
+  {
+   "id": "wrong_actor",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: BOARD_DETAIL_UNRESOLVABLE: the host tool did not execute (BOUND_RECOVERY_REQUIRED_BLOCKED: compacted BOARD record has no reachable detail authority -- T-185: "
+  },
+  {
+   "id": "explicit_owner",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: BOARD_DETAIL_UNRESOLVABLE: the host tool did not execute (BOUND_RECOVERY_REQUIRED_BLOCKED: compacted BOARD record has no reachable detail authority -- T-185: "
+  }
+ ]
+}

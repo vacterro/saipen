@@ -1,0 +1,30 @@
+{
+  "scope": "next-Work scratch preparation only; no native lifecycle proof",
+  "before_sha256": "537ff4fdaaf99b4d253c3abedb2f40a21f61fd1410eeb5108613151741de669c",
+  "after_sha256": "c562356e119a82bcac39f9a7544c876f934b2b33b2c3c77dc1d7da3a21e5f8d1",
+  "oracle_sha256": "f30ccd67e85901157fdfec0fbdf3c8654df34cdc680bd61eef7bfa6e84a77aef",
+  "runs": {
+    "prefix": {
+      "log_sha256": "3eac2b0ca94a4f97c51ce4abdf8601dd592f4bca2c6fc06740c0a0e5fd4e7b68",
+      "ran": 11,
+      "summary": "FAILED (failures=10)"
+    },
+    "postfix": {
+      "log_sha256": "5f6739b41a272a28e66c93a0045eca930a3fa9e5d176fae7c67d1dc1e7259320",
+      "ran": 11,
+      "summary": "OK"
+    },
+    "compatibility": {
+      "log_sha256": "4e4906af047a110cd39d1ebba24223009deb223a64ca9e6241d572d4565d1abb",
+      "ran": 170,
+      "summary": "OK"
+    },
+    "archive-controls": {
+      "log_sha256": "c73defe98545a9d8fa5d6b8fc956eb3572b19e60f6f0dfc8db69156d40ec7406",
+      "ran": 11,
+      "summary": "OK"
+    }
+  },
+  "root_intake_unchanged": true,
+  "all_11_T1851_reviewed_files_unchanged": true
+}

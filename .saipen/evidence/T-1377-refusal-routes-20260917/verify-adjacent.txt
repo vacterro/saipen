@@ -1,0 +1,7 @@
+# T-1377 VERIFY: focused + adjacent transition/checkpoint/closure/guard families
+command: python -m unittest tools.test_refusal_routes tools.test_request_clause_closure tools.test_pending_ingress tools.test_guard_events tools.test_t1363_zero_manual_entry tools.test_public_closure_cli tools.test_closure_provenance tools.test_core_ownership_routing tools.test_protocol_registry
+.......................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 231 tests in 66.688s
+
+OK

@@ -1,0 +1,55 @@
+{
+ "producer": "t1348-build-pair",
+ "ticket": "T-1348",
+ "created": "2026-10-03T16:24:03Z",
+ "verdict": "PASS",
+ "temp_root": "V:\\_TEMP_\\saipen-evidence-t1348-build-pair-np4f15zi",
+ "durable_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1348-current\\build-pair",
+ "retained": [
+  {
+   "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1348-current\\build-pair\\ownership.json",
+   "bytes": 127,
+   "sha256": "ea8115ef2fc42e5416c7d6c279b4c2aeae9a825c53f5eff379f06fce7d10d1bb",
+   "class": "DURABLE_REQUIRED",
+   "large_evidence_required": null
+  }
+ ],
+ "discarded_ephemeral": [
+  {
+   "path": "V:\\_TEMP_\\saipen-evidence-t1348-build-pair-np4f15zi\\original",
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "reason": "registered run-owned runtime data"
+  },
+  {
+   "path": "V:\\_TEMP_\\saipen-evidence-t1348-build-pair-np4f15zi\\earlier",
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "reason": "registered run-owned runtime data"
+  },
+  {
+   "path": "V:\\_TEMP_\\saipen-evidence-t1348-build-pair-np4f15zi\\corrected",
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "reason": "registered run-owned runtime data"
+  },
+  {
+   "path": "V:\\_TEMP_\\saipen-evidence-t1348-build-pair-np4f15zi\\ownership.json",
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "reason": "registered run-owned runtime data"
+  },
+  {
+   "path": "V:\\_TEMP_\\saipen-evidence-t1348-build-pair-np4f15zi",
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "reason": "exact run-owned temporary root"
+  }
+ ],
+ "retained_bytes": 20733,
+ "limits": {
+  "max_artifact_bytes": 26214400,
+  "warn_bytes_per_ticket": 104857600,
+  "hard_bytes_per_ticket": 262144000
+ },
+ "thresholds": {
+  "warning": false,
+  "hard_exceeded": false
+ },
+ "pair_ok": true
+}

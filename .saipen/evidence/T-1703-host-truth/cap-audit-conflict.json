@@ -1,0 +1,42 @@
+{
+  "source_sha256": "13c3b7cb8be06742d36a7a37c54b2e7eb73e29df70a4e6a306fb8eba03303f42",
+  "actual_checkpoint": {
+    "phase": "REVIEW",
+    "task": "T-1703",
+    "next_action": "WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
+    "doing": [
+      "T-1703"
+    ]
+  },
+  "pending_projection": {
+    "rule_id": "SOURCE-AUDIT-INBOX-01",
+    "pending": [
+      "audit/SAIPEN_ENFORCEMENT_ROADMAP_20261009.md",
+      "audit/SAIPEN_fastprompter1.md",
+      "audit/SAIPEN_WEAK_MODEL_SLICE_PROTOCOL_20261009.md"
+    ],
+    "closed_pending_delete": [],
+    "invalid": [],
+    "residue": [],
+    "residue_count": 0,
+    "unworkable_active": [
+      {
+        "layer": null,
+        "work": "T-1702",
+        "reason": "linked Work is not currently workable"
+      }
+    ],
+    "idle_only": true,
+    "action": "saipen audit ingest",
+    "layer": null,
+    "path": "audit/SAIPEN_fastprompter1.md",
+    "detail": "audit/SAIPEN_fastprompter1.md is an unconsumed audit generation"
+  },
+  "pure_check_actual_violation": "the audit inbox routes 'saipen audit ingest' (layer None, audit/SAIPEN_fastprompter1.md) but next_action is \"WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue\", which is neither that action nor a live-ticket continuation. WAIT is a closed set of 7 categories (manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init) and scope selection is not among them, so asking which findings to fix has no legal form",
+  "phase_continuation_control": null,
+  "illegal_scope_wait_control": "the audit inbox routes 'saipen audit ingest' (layer None, audit/SAIPEN_fastprompter1.md) but next_action is 'WAIT: scope selection -- choose an audit', which is neither that action nor a live-ticket continuation. WAIT is a closed set of 7 categories (manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init) and scope selection is not among them, so asking which findings to fix has no legal form",
+  "current_fail_receipt": "receipt-3ad0245c89c2",
+  "canonical_bytes_unchanged": true,
+  "code_change": false,
+  "disposition": "Unadmitted follow-up defect; budget boundary preserved, not repaired or waived."
+}

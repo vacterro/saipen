@@ -1,0 +1,21 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 7207,
+  "red": 2,
+  "new_red": [
+    "test_opencode_host_smoke.OpenCodeRealInstalledGeneration.test_fresh_process_loads_the_installed_generation_from_one_origin",
+    "test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_r_host_adapter_and_installed_plugin_match"
+  ],
+  "fixed": [],
+  "problems": [
+    "2 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/b6dc79950e870846-20261021T141547438363Z.json",
+  "reused": false,
+  "shared": false,
+  "request_wall_s": 1440.375,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "code": "RESPONSE_RENDERED",
+  "text": "STATUS: DONE\nRESULT: Töö säilitatud; T-1695 lõpetatud; 62 blokeeritud (BLOCKED_EXTERNAL 9, MARKHUNT_TRIAGE_REQUIRED 8, HELD 4)\nBLOCKER: AUDIT_INBOX_UNWORKABLE -- ACTIVE audit\nNEXT EXACT ACTION: NONE\nVALIDATION: CURRENT_PASS | full core 6013 | red 0 | new_red 0 | tõendid säilitatud\nDETAILS: E-14036, E-14045",
+  "reason": "final",
+  "emit": true
+}

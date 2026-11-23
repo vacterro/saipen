@@ -1,0 +1,71 @@
+{
+ "source": "SRC-351",
+ "derived_by": "agent semantic extraction per SOURCES.md (deterministic deriver yields only the 4 SS11 invariants)",
+ "clauses": [
+  {
+   "rid": "R001",
+   "class": "requirement",
+   "text": "A foreign protocol command is refused with a typed FOREIGN_PROTOCOL_COMMAND that names the protocol owner, the full invocation and the route to run instead, and is never refused as a bare unknown command."
+  },
+  {
+   "rid": "R002",
+   "class": "requirement",
+   "text": "The refusal names the owning protocol, the exact requested command, and carries next_action guidance, so the caller cannot read it as a typo."
+  },
+  {
+   "rid": "R003",
+   "class": "invariant",
+   "text": "SAIPEN verbs and shortcuts (cc, continue, next, status) remain SAIPEN-owned and unaffected by foreign-protocol routing."
+  },
+  {
+   "rid": "R004",
+   "class": "invariant",
+   "text": "A malformed or absent exact_namespace block degrades to the old refusal without inventing an owner."
+  },
+  {
+   "rid": "R005",
+   "class": "requirement",
+   "text": "The router and registry suites are unaffected by the exact-namespace declaration."
+  },
+  {
+   "rid": "R006",
+   "class": "invariant",
+   "text": "Never present a foreign protocol as a candidate for an explicit SAIPEN command; an explicit /saipen <cmd> must never be dispatched to a skill whose name merely resembles it, and exact namespace ownership is decided before semantic skill matching."
+  },
+  {
+   "rid": "R007",
+   "class": "invariant",
+   "text": "A NO_HOME or similar refusal from a foreign protocol must not trigger a working-directory change into another protocol repository, a sibling-repo search, or the creation of that protocol home."
+  },
+  {
+   "rid": "R008",
+   "class": "acceptance-criterion",
+   "text": "Re-read the installed skills directory on session start so a stale inventory cannot map a namespace to the wrong owner."
+  },
+  {
+   "rid": "R009",
+   "class": "requirement",
+   "text": "The FreeBuff host stops offering a substitute protocol for an explicit SAIPEN command."
+  },
+  {
+   "rid": "R010",
+   "class": "acceptance-criterion",
+   "text": "A live /saipen continue in _BZ_REA on FreeBuff executes the SAIPEN route end to end."
+  },
+  {
+   "rid": "R011",
+   "class": "requirement",
+   "text": "Foreign-protocol side effects are reconciled by their owner through canonical append-only operations, preserving chronology and provenance, with no rewrite and no deletion."
+  },
+  {
+   "rid": "R012",
+   "class": "requirement",
+   "text": "No native pre-render interception is claimed for a host that declares response enforcement ADVISORY and pre-output interception NONE."
+  },
+  {
+   "rid": "R013",
+   "class": "invariant",
+   "text": "SAIPAL recognition is not authorization: a model-supplied witness is never upgraded to an authenticated operator-origin event."
+  }
+ ]
+}

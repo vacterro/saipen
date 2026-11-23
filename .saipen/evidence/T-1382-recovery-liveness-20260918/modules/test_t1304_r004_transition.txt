@@ -1,0 +1,17 @@
+test_baseline_debt_refusal_is_structured (tools.test_t1304_r004_transition.BaselineFailureTests.test_baseline_debt_refusal_is_structured) ... ok
+test_baseline_refusal_leaves_phase_state_board_log_untouched (tools.test_t1304_r004_transition.BaselineFailureTests.test_baseline_refusal_leaves_phase_state_board_log_untouched) ... ok
+test_internal_debt_code_in_a_refusal_exception_is_normalized (tools.test_t1304_r004_transition.BaselineFailureTests.test_internal_debt_code_in_a_refusal_exception_is_normalized) ... ok
+test_internal_debt_code_is_normalized_not_a_crash (tools.test_t1304_r004_transition.BaselineFailureTests.test_internal_debt_code_is_normalized_not_a_crash)
+T-1322 W2-003: the baseline primitive may return its OWN internal ... ok
+test_dry_run_transition_is_byte_and_path_pure (tools.test_t1304_r004_transition.DryRunTransitionPurityTests.test_dry_run_transition_is_byte_and_path_pure) ... ok
+test_apply_failure_after_baseline_leaves_recoverable_midpoint (tools.test_t1304_r004_transition.MidpointRecoveryTests.test_apply_failure_after_baseline_leaves_recoverable_midpoint) ... ok
+test_non_scout_transitions_do_not_call_baseline (tools.test_t1304_r004_transition.ProductionWiringTests.test_non_scout_transitions_do_not_call_baseline) ... ok
+test_real_transition_calls_ensure_debt_baseline (tools.test_t1304_r004_transition.ProductionWiringTests.test_real_transition_calls_ensure_debt_baseline) ... ok
+test_real_transition_creates_one_checkpoint_bound_baseline (tools.test_t1304_r004_transition.SuccessfulTransitionTests.test_real_transition_creates_one_checkpoint_bound_baseline) ... ok
+test_replay_reuses_baseline_without_duplicates (tools.test_t1304_r004_transition.SuccessfulTransitionTests.test_replay_reuses_baseline_without_duplicates)
+Control E: replaying the successful operation converges. ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 3.170s
+
+OK

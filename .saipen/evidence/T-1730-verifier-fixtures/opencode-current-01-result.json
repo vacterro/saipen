@@ -1,0 +1,20 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_opencode_host_smoke.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "started_utc": "2026-10-12T19:10:16.172658+00:00",
+  "runner_pid": 6588,
+  "child_pid": 20944,
+  "exit_code": 0,
+  "elapsed_s": 65.969,
+  "finished_utc": "2026-10-12T19:11:22.155196+00:00"
+}

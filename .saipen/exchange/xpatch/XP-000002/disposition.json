@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "patch_id": "XP-000002",
+  "verdict": "VERIFIED",
+  "recorded_at": "2026-09-07T21:16:00Z",
+  "paths": {
+    "tools/saipen_engine/debt.py": "ad32d814a457ea36a7743899ce68ad68f5f0b41a6cae37f1c44b01964af73c39",
+    "tools/saipen_engine/findings.py": "fa06d43401ffacb7b26c667dcc036f51e3eae116c16571ef57d922b3af204208",
+    "tools/test_debt_gate.py": "4c6b3d7b9045c293d1a09284be5924f5d7a46bcdeb57860566f9ea29472341a0",
+    "tools/validate.py": "4fc662663bb728220c6bb8b8a25601c716643c203610bd6ed64af42c60854d58",
+    "tools/saipen.py": "788e277b8e8cd63871ed3f882f5b4aa799067c1d01ba685c9e38f756a9eacd0e",
+    "tools/saipen_engine/operations.py": "370e9ac411ce44216d2804824bc75e3d341af7bbc33ab30c29ad96811755ba49",
+    "saipen/COMMANDS.md": "d0c94dd0b9d63194f65af4269050b1a3bc4ec9b7ab0ccd3d2180725798e3a470"
+  },
+  "note": "Applied and verified by the implementing cross-repo session (opencode, AUDAPACK T-172): focused debt matrix 30/30 OK, full unittest discover -s tools 1505 OK 2 skipped, ruff 0.16.0 clean on all seven patched paths. SAIPEN child Work T-1301 remains unclaimable while T-1298 holds the DOING seat (ALREADY_CLAIMED); closure there pending a free seat. Live proof on AUDAPACK: strict core 85p/120w unchanged, work_delta(T-158, legacy E-816) = 82 CARRIED / 3 post-claim BLOCKING (T-160 E-842, T-164 E-886, T-165 E-887) / 0 NEW / 0 WORSENED, release stays BLOCKED."
+}

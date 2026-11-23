@@ -1,0 +1,47 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-10-03T04:39:13Z",
+  "evidence_class": "executed",
+  "findings_digest": "ab587441ba5861dc591923094bb31936373daec796cff17cdc1036db09bddea9",
+  "gate": "core",
+  "integrity_digest": "c01fae1f329953fa",
+  "journal_op_id": "reverify.6897d6728acb",
+  "original_closure": {
+    "owner": "claude"
+  },
+  "own_problem_keys": [
+    "2188db8abb3d0305"
+  ],
+  "problem_count": 59,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000261",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:3d240e983a6652dfde8e972181a3b2503a499c642e88858546e1e7f58b9169cd",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "node --test --test-concurrency=4 tests/widget/w3-002-fresh-archive-autostart.test.js",
+      "duration_ms": 7787,
+      "executed": true,
+      "exit_code": 0,
+      "output_bytes": 1359,
+      "output_digest": "473c5cf1b1c5d98e",
+      "result": "PASS"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "node --test --test-concurrency=4 tests/widget/w3-002-fresh-archive-autostart.test.js"
+    ],
+    "findings_digest": "ab587441ba5861dc591923094bb31936373daec796cff17cdc1036db09bddea9",
+    "gate": "core"
+  },
+  "verification_contract_digest": "36d33df9a7bc0d96",
+  "verifier": "buffy",
+  "warning_count": 94,
+  "work": "T-58"
+}

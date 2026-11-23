@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "goal_thread": "01a14427-e483-7013-b056-ac9a057fe2fc",
+  "consecutive_blocked_goal_turns": 3,
+  "previous_turn_classification": "no_progress",
+  "current_turn_classification": "no_progress",
+  "verified_wait": false,
+  "canonical_route": {
+    "action": "saipen audit status",
+    "reason": "audit-inbox-unworkable",
+    "behavior": "RESTATE_AND_STOP",
+    "reconciliation": "CLEAN"
+  },
+  "executed_action": "saipen audit status",
+  "parked_work": 95,
+  "claimed_work": null,
+  "workable_work": null,
+  "automation_disposition": "BLOCKED",
+  "closure_complete": false,
+  "conformance": "CURRENT_PASS",
+  "unworkable_active_only": true,
+  "blocked_audits": [
+    {
+      "receipt": "SRC-236",
+      "work": "T-1738",
+      "state": "ACTIVE"
+    },
+    {
+      "receipt": "SRC-245",
+      "work": "T-1764",
+      "state": "ACTIVE"
+    },
+    {
+      "receipt": "SRC-246",
+      "work": "T-1766",
+      "state": "ACTIVE"
+    },
+    {
+      "receipt": "SRC-247",
+      "work": "T-1768",
+      "state": "ACTIVE"
+    },
+    {
+      "receipt": "SRC-248",
+      "work": "T-1769",
+      "state": "ACTIVE"
+    },
+    {
+      "receipt": "SRC-253",
+      "work": "T-1791",
+      "state": "ACTIVE"
+    },
+    {
+      "receipt": "SRC-259",
+      "work": "T-1800",
+      "state": "ACTIVE"
+    }
+  ],
+  "source_requirement": "SRC-228:R019: original independent operator witness and native disposable-project acceptance remain absent",
+  "fixture": {
+    "root": "V:\\_TEMP_\\t1324-blocker-42_ghqn4",
+    "phase": "SCOUT",
+    "blocker": "WAIT_USER_CONFIRMATION -- fixture limitation",
+    "last_event": 2
+  },
+  "scope_preserved": true,
+  "decision": "Three-turn blocked threshold met; goal must be marked blocked, never complete, pending operator input or external-state change."
+}

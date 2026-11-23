@@ -1,0 +1,12 @@
+{
+  "scope": "audit/23 preparation; no claim or live project mutation",
+  "stage": "current",
+  "verifier": "895cb46be74dab33efc22399a84b6dc45334d3d367f98b42f1a7fa7b050b2dab",
+  "subject": "c2b771b3c2502b791b3ce9d3afabc993333254ac3be9131a7b47f8d6de36e1a9",
+  "ran": 10,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "passed": true,
+  "transcript": "test_actual_entry_wait_has_no_unregistered_marker (__main__.GrammarControls.test_actual_entry_wait_has_no_unregistered_marker) ... ok\ntest_existing_valid_forms_are_preserved (__main__.GrammarControls.test_existing_valid_forms_are_preserved) ... ok\ntest_strict_reader_refuses_legacy_operator_value (__main__.GrammarControls.test_strict_reader_refuses_legacy_operator_value) ... ok\ntest_valid_wait_round_trips (__main__.GrammarControls.test_valid_wait_round_trips) ... ok\ntest_wait_is_a_binding_brake (__main__.GrammarControls.test_wait_is_a_binding_brake) ... ok\ntest_wait_operator_is_registered (__main__.GrammarControls.test_wait_operator_is_registered) ... ok\ntest_writer_refuses_empty_run (__main__.GrammarControls.test_writer_refuses_empty_run) ... ok\ntest_writer_refuses_freeform_operator_value (__main__.GrammarControls.test_writer_refuses_freeform_operator_value) ... ok\ntest_writer_refuses_malformed_phase (__main__.GrammarControls.test_writer_refuses_malformed_phase) ... ok\ntest_writer_refuses_malformed_resume (__main__.GrammarControls.test_writer_refuses_malformed_resume) ... ok\n\n----------------------------------------------------------------------\nRan 10 tests in 0.010s\n\nOK\n"
+}

@@ -1,0 +1,137 @@
+======================================================================
+ERROR: test_capsule_edit_cannot_borrow_an_unchanged_origin_proof (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_capsule_edit_cannot_borrow_an_unchanged_origin_proof)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 160, in test_capsule_edit_cannot_borrow_an_unchanged_origin_proof
+    self.assertFalse(self.verify(path, campaign.EXTERNAL_AUDIT_PUBLICATION,
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 106, in verify
+    return campaign.verify_operator_grant(self.root, str(path), scope,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: verify_operator_grant() got an unexpected keyword argument 'admission'
+
+======================================================================
+ERROR: test_consumption_is_one_campaign_and_exact_retry_is_idempotent (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_consumption_is_one_campaign_and_exact_retry_is_idempotent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 172, in test_consumption_is_one_campaign_and_exact_retry_is_idempotent
+    self.assertTrue(self.verify(path, admission=self.admission, consume=True)["valid"])
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 106, in verify
+    return campaign.verify_operator_grant(self.root, str(path), scope,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: verify_operator_grant() got an unexpected keyword argument 'admission'
+
+======================================================================
+ERROR: test_controller_admission_and_revalidation_use_the_bound_budget (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_controller_admission_and_revalidation_use_the_bound_budget)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 208, in test_controller_admission_and_revalidation_use_the_bound_budget
+    self.assertTrue(result["admitted"], result)
+                    ~~~~~~^^^^^^^^^^^^
+KeyError: 'admitted'
+
+======================================================================
+ERROR: test_exact_native_capsule_grants_only_declared_scopes (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_exact_native_capsule_grants_only_declared_scopes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 136, in test_exact_native_capsule_grants_only_declared_scopes
+    result = self.verify(path, campaign.CAMPAIGN_EXECUTION, admission=self.admission, consume=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 106, in verify
+    return campaign.verify_operator_grant(self.root, str(path), scope,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: verify_operator_grant() got an unexpected keyword argument 'admission'
+
+======================================================================
+ERROR: test_foreign_goal_epoch_and_capsule_target_refuse (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_foreign_goal_epoch_and_capsule_target_refuse)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 199, in test_foreign_goal_epoch_and_capsule_target_refuse
+    self.assertTrue(self.verify(path, admission=self.admission, consume=True)["valid"])
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 106, in verify
+    return campaign.verify_operator_grant(self.root, str(path), scope,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: verify_operator_grant() got an unexpected keyword argument 'admission'
+
+======================================================================
+ERROR: test_native_capsule_source_can_use_the_same_canonical_verifier (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_native_capsule_source_can_use_the_same_canonical_verifier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 149, in test_native_capsule_source_can_use_the_same_canonical_verifier
+    result = self.verify(source["receipt"], campaign.CAMPAIGN_EXECUTION,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 106, in verify
+    return campaign.verify_operator_grant(self.root, str(path), scope,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: verify_operator_grant() got an unexpected keyword argument 'admission'
+
+======================================================================
+ERROR: test_original_carrier_bytes_are_pinned_after_admission (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_original_carrier_bytes_are_pinned_after_admission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 165, in test_original_carrier_bytes_are_pinned_after_admission
+    self.assertTrue(self.verify(path, admission=self.admission, consume=True)["valid"])
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 106, in verify
+    return campaign.verify_operator_grant(self.root, str(path), scope,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: verify_operator_grant() got an unexpected keyword argument 'admission'
+
+======================================================================
+ERROR: test_resource_limits_and_goal_binding_are_independently_bound (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_resource_limits_and_goal_binding_are_independently_bound) (changes={'resource_budget': {'max_generations': 5, 'max_cycles': 999, 'max_wall_seconds': 300}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 181, in test_resource_limits_and_goal_binding_are_independently_bound
+    self.assertFalse(self.verify(path, admission={**self.admission, **changes},
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 106, in verify
+    return campaign.verify_operator_grant(self.root, str(path), scope,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: verify_operator_grant() got an unexpected keyword argument 'admission'
+
+======================================================================
+ERROR: test_resource_limits_and_goal_binding_are_independently_bound (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_resource_limits_and_goal_binding_are_independently_bound) (changes={'goal_binding': {'goal_ingress': 'other', 'authority_source': 'E-1'}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 181, in test_resource_limits_and_goal_binding_are_independently_bound
+    self.assertFalse(self.verify(path, admission={**self.admission, **changes},
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 106, in verify
+    return campaign.verify_operator_grant(self.root, str(path), scope,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: verify_operator_grant() got an unexpected keyword argument 'admission'
+
+======================================================================
+ERROR: test_revocation_expiry_foreign_lineage_and_unregistered_worker_refuse (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_revocation_expiry_foreign_lineage_and_unregistered_worker_refuse)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 187, in test_revocation_expiry_foreign_lineage_and_unregistered_worker_refuse
+    self.assertFalse(self.verify(path, admission=self.admission, consume=True)["valid"])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 106, in verify
+    return campaign.verify_operator_grant(self.root, str(path), scope,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: verify_operator_grant() got an unexpected keyword argument 'admission'
+
+======================================================================
+FAIL: test_real_goal_source_does_not_implicitly_authorize_publication (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_real_goal_source_does_not_implicitly_authorize_publication)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 131, in test_real_goal_source_does_not_implicitly_authorize_publication
+    self.assertFalse(campaign.verify_operator_grant(
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_real_origin_for_innocent_text_cannot_sign_caller_selected_scopes (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_real_origin_for_innocent_text_cannot_sign_caller_selected_scopes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 119, in test_real_origin_for_innocent_text_cannot_sign_caller_selected_scopes
+    self.assertFalse(result["valid"], result)
+AssertionError: True is not false : {'valid': True, 'status': 'VALID_GRANT', 'grant': {'issuer': 'operator_broker', 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'operator_origin': {'schema': 1, 'kind': 'operator-origin', 'project': 'v:\\_temp_\\saipen-campaign-authority-wzcdcsh6\\project', 'lineage': 'lineage-0123456789abcdef0123456789abcdef', 'task': 'T-1', 'goal': 'goal-1', 'budget': 'E-1', 'session': 'session-A', 'host': 'claude', 'model': '', 'provider': '', 'event_id': 'event-1', 'nonce': '47f274f4fcecce365b4d10e53a1a148a', 'action': 'start', 'request_digest': '7e470e820c67af9927b68674ff22b77d6b4fb9325724b341eb057183abd2ff10', 'issued': 100.0, 'expires': 160.0, 'host_pid': 10, 'host_birth': 1, 'provenance': {'kid': 'broker-619a9bdbb7b6b1d3ab6f32fc', 'alg': 'hmac-sha256', 'mac': '360c1bd483fb803c456a4ad4c67058b92121c93e482d02e327352a87699e338d'}}, 'request_digest': '7e470e820c67af9927b68674ff22b77d6b4fb9325724b341eb057183abd2ff10', 'authorized_scopes': ['SAIPEN_AUDIT_INGESTION', 'EXTERNAL_AUDIT_PUBLICATION', 'AUDIT_STAGING', 'PROTOCOL_REPAIR', 'CAMPAIGN_EXECUTION', 'continuous_maintenance', 'FORENSIC_ANALYSIS']}, 'authorized_scopes': {'EXTERNAL_AUDIT_PUBLICATION', 'AUDIT_STAGING', 'CAMPAIGN_EXECUTION', 'continuous_maintenance', 'SAIPEN_AUDIT_INGESTION', 'PROTOCOL_REPAIR', 'FORENSIC_ANALYSIS'}, 'grant_digest': 'e8761cb077a936f6693301306e2c3dd803448080b70e27d2b7fcb677dd0aceda'}
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.149s
+
+FAILED (failures=2, errors=10)

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-017:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement and verify every required change and test in T03 COMPOSITE AUDIT RUN SNAPSHOT."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:10Z",
+  "derived_from": "SRC-017",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "938d29a3fd7709677bc28c5cc4e1c6087d1c449ef7931fd2adbcd62fb03d9a20"
+}

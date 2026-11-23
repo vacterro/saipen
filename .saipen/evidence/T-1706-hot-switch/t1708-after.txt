@@ -1,0 +1,18 @@
+test_declaration_preserves_contract_sources_seat_phase_and_goal (test_t1708_regression_declaration.DeclarationTests.test_declaration_preserves_contract_sources_seat_phase_and_goal) ... ok
+test_done_history_is_refused_without_writes (test_t1708_regression_declaration.DeclarationTests.test_done_history_is_refused_without_writes) ... ok
+test_dry_run_writes_no_canonical_bytes (test_t1708_regression_declaration.DeclarationTests.test_dry_run_writes_no_canonical_bytes) ... ok
+test_existing_verify_updater_keeps_the_preimage_and_declared_gate (test_t1708_regression_declaration.DeclarationTests.test_existing_verify_updater_keeps_the_preimage_and_declared_gate) ... ok
+test_invalid_values_cannot_remove_or_relax_the_gate (test_t1708_regression_declaration.DeclarationTests.test_invalid_values_cannot_remove_or_relax_the_gate) ... ok
+test_missing_ticket_is_refused_without_writes (test_t1708_regression_declaration.DeclarationTests.test_missing_ticket_is_refused_without_writes) ... ok
+test_native_cli_dry_run_is_write_free (test_t1708_regression_declaration.DeclarationTests.test_native_cli_dry_run_is_write_free) ... ok
+test_native_cli_read_only_cannot_declare_the_field (test_t1708_regression_declaration.DeclarationTests.test_native_cli_read_only_cannot_declare_the_field) ... ok
+test_native_cli_refuses_invalid_value_and_extra_operands (test_t1708_regression_declaration.DeclarationTests.test_native_cli_refuses_invalid_value_and_extra_operands) ... ok
+test_native_cli_updates_only_the_declared_field (test_t1708_regression_declaration.DeclarationTests.test_native_cli_updates_only_the_declared_field) ... ok
+test_oversized_original_contract_is_preserved_losslessly (test_t1708_regression_declaration.DeclarationTests.test_oversized_original_contract_is_preserved_losslessly) ... ok
+test_declaring_required_activates_the_current_cycle_gate (test_t1708_regression_declaration.DeclaredGateTests.test_declaring_required_activates_the_current_cycle_gate) ... ok
+test_without_declaration_the_existing_unrequired_gate_is_unchanged (test_t1708_regression_declaration.DeclaredGateTests.test_without_declaration_the_existing_unrequired_gate_is_unchanged) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 2.745s
+
+OK

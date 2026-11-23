@@ -1,0 +1,38 @@
+[
+  {
+    "subject": "pre",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1695-invalid-stops\\verify.py",
+      "run"
+    ],
+    "exit_code": 1,
+    "verifier_sha256": "778aa77d7117475164911f75e0b7e3286db971e132a7e724d5c38cce65efb0a1",
+    "subject_sha256": "1d4f6f1963716db562b22841804d309bd187ee8e67456d78190fa198284afde2",
+    "subject_paths": [
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1695-invalid-stops\\pre-automation.py",
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1695-invalid-stops\\pre-response_surface.py"
+    ],
+    "output": "verify-pre.out.txt",
+    "output_sha256": "128b6222f5aee94353134a67058e00e515696e68b997dc7ec3e3dfba8a862735"
+  },
+  {
+    "subject": "current",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1695-invalid-stops\\verify.py",
+      "run"
+    ],
+    "exit_code": 0,
+    "verifier_sha256": "778aa77d7117475164911f75e0b7e3286db971e132a7e724d5c38cce65efb0a1",
+    "subject_sha256": "bf6467946b56f9cfb3a4f06867489e7d0a29e1be38b965b8b89f01aedecd543c",
+    "subject_paths": [
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\automation.py",
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py"
+    ],
+    "output": "verify-current.out.txt",
+    "output_sha256": "d2a7b8757aaa9936eff788e1495f72b4fcbbf9961e340fbf6e899c61beaac7a9"
+  }
+]

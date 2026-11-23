@@ -1,0 +1,16 @@
+F..........
+======================================================================
+FAIL: test_assessment_reports_invalid_evidence_override_without_throwing (__main__.ContinuationTruthTests.test_assessment_reports_invalid_evidence_override_without_throwing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_continuation_truth.py", line 250, in test_assessment_reports_invalid_evidence_override_without_throwing
+    self.assertEqual(result["classification"], CA.INCOMPLETE_DISCOVERY, result)
+AssertionError: 'INVALID_RUNTIME' != 'INCOMPLETE_DISCOVERY'
+- INVALID_RUNTIME
++ INCOMPLETE_DISCOVERY
+ : {'classification': 'INVALID_RUNTIME', 'actionable': False, 'executable_work': None, 'action': 'saipen status', 'reason': 'discovery-invalid', 'detail': 'supplied source_evidence must be an object', 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {}, 'raw_route': {}, 'continuous_maintenance_proven': False, 'continuous_maintenance_claimed': False, 'operator_work': []}
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.287s
+
+FAILED (failures=1)

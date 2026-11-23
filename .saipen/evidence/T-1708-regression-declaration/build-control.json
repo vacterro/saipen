@@ -1,0 +1,46 @@
+{
+  "verdict": "FAIL",
+  "live_subject_unchanged": true,
+  "live": {
+    "tools/saipen_engine/operations.py": "9a44a8061261716261759ff80b83ce1858192cfec9c6b07dfbf7f776f037af06",
+    "tools/saipen.py": "f8b930a748fdb5b8c9a4bbb081988be5829b4d0c48481a90e0b692c1d0db5412",
+    "tools/test_t1708_regression_declaration.py": "e9b27215cf9fa9017c573298a37bf90e930dc876000feb904dd746b78b4e375e"
+  },
+  "runs": [
+    {
+      "subject": "current",
+      "repeat": 1,
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "tools.test_t1708_regression_declaration",
+        "-q"
+      ],
+      "exit_code": 1,
+      "ran": 13,
+      "failures": [
+        "test_declaration_preserves_contract_sources_seat_phase_and_goal (test_t1708_regression_declaration.DeclarationTests.test_declaration_preserves_contract_sources_seat_phase_and_goal)",
+        "test_declaring_required_activates_the_current_cycle_gate (test_t1708_regression_declaration.DeclaredGateTests.test_declaring_required_activates_the_current_cycle_gate)",
+        "test_done_history_is_refused_without_writes (test_t1708_regression_declaration.DeclarationTests.test_done_history_is_refused_without_writes)",
+        "test_dry_run_writes_no_canonical_bytes (test_t1708_regression_declaration.DeclarationTests.test_dry_run_writes_no_canonical_bytes)",
+        "test_existing_verify_updater_keeps_the_preimage_and_declared_gate (test_t1708_regression_declaration.DeclarationTests.test_existing_verify_updater_keeps_the_preimage_and_declared_gate)",
+        "test_invalid_values_cannot_remove_or_relax_the_gate (test_t1708_regression_declaration.DeclarationTests.test_invalid_values_cannot_remove_or_relax_the_gate)",
+        "test_missing_ticket_is_refused_without_writes (test_t1708_regression_declaration.DeclarationTests.test_missing_ticket_is_refused_without_writes)",
+        "test_native_cli_dry_run_is_write_free (test_t1708_regression_declaration.DeclarationTests.test_native_cli_dry_run_is_write_free)",
+        "test_native_cli_updates_only_the_declared_field (test_t1708_regression_declaration.DeclarationTests.test_native_cli_updates_only_the_declared_field)",
+        "test_oversized_original_contract_is_preserved_losslessly (test_t1708_regression_declaration.DeclarationTests.test_oversized_original_contract_is_preserved_losslessly)",
+        "test_without_declaration_the_existing_unrequired_gate_is_unchanged (test_t1708_regression_declaration.DeclaredGateTests.test_without_declaration_the_existing_unrequired_gate_is_unchanged)"
+      ],
+      "errors": [],
+      "verifier_sha256": "e9b27215cf9fa9017c573298a37bf90e930dc876000feb904dd746b78b4e375e",
+      "implementation": {
+        "tools/saipen_engine/operations.py": "9a44a8061261716261759ff80b83ce1858192cfec9c6b07dfbf7f776f037af06",
+        "tools/saipen.py": "f8b930a748fdb5b8c9a4bbb081988be5829b4d0c48481a90e0b692c1d0db5412"
+      },
+      "output": ".saipen/evidence/T-1708-regression-declaration/build-control-current-1.txt",
+      "output_sha256": "af205c06f60c3b8be3b66e8ba0b7bdca27ddf39fd6498ebe7174fd17cb52a66c"
+    }
+  ]
+}

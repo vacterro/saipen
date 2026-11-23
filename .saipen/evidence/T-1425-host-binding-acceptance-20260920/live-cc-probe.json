@@ -1,0 +1,17 @@
+{
+  "probe": "freebuff-live-cc",
+  "freebuff": "C:\\Users\\vac34\\.config\\manicode\\freebuff.exe",
+  "project": "V:\\_TEMP_\\t1425-cc-fixture-3qjqryng",
+  "argv": [
+    "C:\\Users\\vac34\\.config\\manicode\\freebuff.exe",
+    "--cwd",
+    "V:\\_TEMP_\\t1425-cc-fixture-3qjqryng"
+  ],
+  "stdin": "cc\\n",
+  "timeout_seconds": 240,
+  "elapsed_seconds": 240.1,
+  "returncode": "TIMEOUT",
+  "stdout_bytes": 3447,
+  "stderr_bytes": 0,
+  "screen_note": "Full-screen TUI opened (recommendation/model banner: 'Start coding for free', 'DeepSeek V4 Flash - Smart & Fast'); piped `cc` was never consumed as a prompt. Raw ANSI frames preserved at V:\\_TEMP_\\opencode\\t1425-freebuff-live\\freebuff-stdout.bin (transient) and summarized in EVIDENCE.md section 4."
+}

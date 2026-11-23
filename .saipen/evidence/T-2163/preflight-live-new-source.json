@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "decision": "NEW_SOURCE_VERIFICATION_REQUIRED",
+  "fingerprint": "5d9317a5f78d9c0572dad86777687c40f9ef0d639593dfe6100490178d7a1999",
+  "baseline_sha256": "d36149fe9fc90ec260b8826b51531d7315857f5c6710388f267ed0c2d23233c4",
+  "evaluator": {
+    "identity_rule": "canonical-child-2",
+    "verifiers_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine"
+  },
+  "records": [],
+  "reusable_record": null,
+  "reasons": [
+    "no core-unit record exists for this tree fingerprint -- a full family run at this boundary is new source verification"
+  ]
+}

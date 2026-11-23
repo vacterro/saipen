@@ -1,0 +1,27 @@
+{
+  "captured_utc": "2026-11-08T09:23:08.379468+00:00",
+  "owned": [
+    {
+      "path": "tools/saipen_engine/subs.py",
+      "exists": true,
+      "sha256": "67c825377015298b7043149fbc51f2b60bb2ab49bef1a1f116f0733d4294cb65",
+      "bytes": 218583
+    },
+    {
+      "path": "tools/saipen_engine/crew.py",
+      "exists": true,
+      "sha256": "de2f8ad1a1172b4c1171280c647f40ea243cb0ea919ebf30f7adfc2091a61e81",
+      "bytes": 133664
+    },
+    {
+      "path": "tools/test_sub_dispose_after_collect.py",
+      "exists": true,
+      "sha256": "40962a543529aeacb9f90ae3f6ca599209785f365789560e734a01a22ddc1129",
+      "bytes": 24633
+    },
+    {
+      "path": "tools/test_t2040_review_proof_binding.py",
+      "exists": false
+    }
+  ]
+}

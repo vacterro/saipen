@@ -1,0 +1,8 @@
+log._claims_failure on the engine as it stands (True = read as a current failure)
+True | verify -> PASS [target: T-33] conf: high -- pre-fix 4 failed (red control), post-fix 0 failed
+True | verify -> PASS conf: high -- red control: 4 failed, post-fix green
+True | verify -> PASS conf: high -- pre-fix 3 failures, post-fix none
+False | verify -> PASS conf: high -- pair red then green
+True | verify -> FAIL: 2 FAIL in the family
+True | verify -> PASS conf: high -- 2 FAIL remain beside the red control: 4 failed
+True | verify -> PASS conf: high -- failures=2

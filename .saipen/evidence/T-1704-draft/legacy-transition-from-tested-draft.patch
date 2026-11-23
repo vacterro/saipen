@@ -1,0 +1,991 @@
+--- a/tools/saipen_engine/goal_authority.py
++++ b/tools/saipen_engine/goal_authority.py
+@@ -6,6 +6,8 @@
+ 
+ from __future__ import annotations
+ 
++import hashlib
++import json
+ import re
+ from pathlib import Path
+ 
+@@ -46,6 +48,170 @@
+     return state.get("continuation_authority") == "operator_persistent" and not shape_errors(state)
+ 
+ 
++def _pin_record(root: Path, record: dict, dependencies: dict) -> None:
++    from .journal import Journal, hash_file_dependency
++
++    journal = Journal(root, record["op_id"])
++    before = hash_file_dependency(journal.manifest)
++    live = journal.read()
++    if live != record or before != hash_file_dependency(journal.manifest):
++        raise ValueError("continuation journal changed while being read")
++    dependencies[journal.manifest.relative_to(root).as_posix()] = before
++
++
++def current_binding(root: Path | str, state: dict, history_events, dependencies: dict) -> dict:
++    """Bind a prospective grant to an existing, committed goal, never rename it."""
++    from .journal import Journal, hash_file_dependency
++    from .cold_recovery import goal_ingress_identity
++    from .paths import project_lineage_identity
++
++    root = Path(root)
++    if state.get("execution_intent") != "goal":
++        raise ValueError("an existing active goal is required")
++    identity_path = root / ".saipen/IDENTITY.md"
++    before = hash_file_dependency(identity_path)
++    lineage = project_lineage_identity(root)
++    if not lineage or before != hash_file_dependency(identity_path):
++        raise ValueError("canonical project lineage is absent or changed")
++    dependencies[".saipen/IDENTITY.md"] = before
++    pivots = [
++        e
++        for e in history_events
++        if e.get("taxonomy") == "DEC"
++        and str(e.get("text") or "").startswith("goal pivot -- ")
++        and int(e.get("event") or 0) <= int(state.get("last_event") or 0)
++    ]
++    if not pivots:
++        raise ValueError("the original goal objective cannot be recovered")
++    pivot = pivots[-1]
++    original = Journal(root, str(pivot.get("op_id") or "")).read()
++    if (
++        original.get("status") != "COMMITTED"
++        or original.get("operation") not in {"goal", "goal_entry"}
++        or original.get("project_lineage") != lineage
++    ):
++        raise ValueError("the original goal has no committed journal in this project lineage")
++    _pin_record(root, original, dependencies)
++    event = {
++        k: pivot.get(k)
++        for k in ("date", "event", "parent", "ticket", "agent", "op_id", "taxonomy", "text")
++    }
++    digest = hashlib.sha256(
++        json.dumps(event, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
++    ).hexdigest()
++    original_grant = (original.get("receipt_metadata") or {}).get("goal_authority")
++    if original_grant is not None and not isinstance(original_grant, dict):
++        raise ValueError("the original goal authority metadata is malformed")
++    original_grant = original_grant or {}
++    ingress = original_grant.get("goal_ingress") or goal_ingress_identity(digest, lineage)
++    if not re.fullmatch(r"goal-[0-9a-f]{16}", str(ingress)):
++        raise ValueError("the original goal ingress binding is invalid")
++    return {
++        "kind": "saipen-goal-continuation",
++        "project_lineage": lineage,
++        **grant_fields(f"E-{pivot['event']}"),
++        "goal_objective": pivot["text"][len("goal pivot -- ") :],
++        "goal_event_sha256": digest,
++        "goal_ingress": ingress,
++    }
++
++
++def parse_capsule(text: str) -> dict:
++    def unique(pairs):
++        value = {}
++        for key, item in pairs:
++            if key in value:
++                raise ValueError("duplicate authorization field")
++            value[key] = item
++        return value
++
++    value = json.loads(text, object_pairs_hook=unique)
++    if not isinstance(value, dict):
++        raise ValueError("goal authorization must be an explicit JSON capsule")
++    return value
++
++
++def source_proof(root: Path | str, receipt: str, binding: dict, dependencies: dict) -> dict:
++    """Use SRC-164's immutable origin; a later carrier cannot promote a source."""
++    from . import intake, operator_task
++    from .distribution import distribution_record_rel, quarantine_body_rel
++    from .journal import hash_file_dependency
++    from .retirement import RETIRED_DIR
++
++    root = Path(root)
++    if not re.fullmatch(r"SRC-[0-9]+", str(receipt)):
++        raise ValueError("goal authorization requires its ingress receipt")
++    paths = [
++        f"{prefix}/{receipt}{suffix}"
++        for prefix in (".saipen/intake/active", ".saipen/archive/source", RETIRED_DIR)
++        for suffix in (".md", ".meta.json")
++    ]
++    paths.extend((distribution_record_rel(receipt), quarantine_body_rel(receipt)))
++    pins = {p: hash_file_dependency(root / p) for p in paths}
++    found = intake.read_body(root, receipt)
++    meta = found.get("meta") or {}
++    if (
++        not found.get("ok")
++        or found.get("location") not in {"active", "archive"}
++        or meta.get("source_kind") != "user_instruction"
++        or meta.get("status") not in {intake.ACTIVE_STATUS, intake.CLOSED_STATUS}
++        or meta.get("projection_policy") != intake.PROJECTION_AUTHORITY_ONLY
++        or (found.get("distribution") or {}).get("state") != intake.DISTRIBUTABLE
++        or not operator_task.authority_for_receipt(root, receipt)["goal_pivot"]
++        or parse_capsule(found.get("body") or "") != binding
++    ):
++        raise ValueError("goal authorization source is invalid, revoked or not operator-backed")
++    if pins != {p: hash_file_dependency(root / p) for p in paths}:
++        raise ValueError("goal authorization source changed while being read")
++    dependencies.update(pins)
++    return {
++        "receipt": receipt,
++        "source_sha256": meta["source_sha256"],
++        "request_provenance": meta["request_provenance"],
++    }
++
++
++def transition_grant(
++    root: Path | str, state: dict, history_events, dependencies: dict
++) -> dict | None:
++    from .journal import semantic_receipts_for_operation_safe
++
++    root = Path(root)
++    records, errors = semantic_receipts_for_operation_safe(root, "goal_authorize")
++    if errors:
++        raise ValueError("continuation transition journal is corrupt: " + "; ".join(errors[:2]))
++    binding = current_binding(root, state, history_events, dependencies)
++    for record in records:
++        grant = (record.get("receipt_metadata") or {}).get("goal_authority_transition")
++        if not isinstance(grant, dict) or grant.get("binding") != binding:
++            continue
++        if (
++            record.get("status") != "COMMITTED"
++            or record.get("project_lineage") != binding["project_lineage"]
++            or grant.get("goal_ingress") != state.get("goal_ingress")
++            or any(binding[key] != state.get(key) for key in FIELDS)
++        ):
++            continue
++        events = [
++            e
++            for e in history_events
++            if e.get("op_id") == record["op_id"]
++            and e.get("event") == grant.get("transition_event")
++            and e.get("taxonomy") == "DEC"
++            and str(e.get("text") or "").startswith("goal authority transition -- ")
++            and int(e.get("event") or 0) <= int(state.get("last_event") or 0)
++        ]
++        if len(events) != 1:
++            continue
++        source = source_proof(root, grant.get("authorization_receipt"), binding, dependencies)
++        if source["source_sha256"] != grant.get("authorization_sha256") or source[
++            "request_provenance"
++        ] != grant.get("request_provenance"):
++            raise ValueError("continuation grant disagrees with its original ingress")
++        _pin_record(root, record, dependencies)
++        return record
++    return None
++
+ def prove(root: Path | str, state: dict, *, history_events=None, dependencies=None) -> list[str]:
+     """Verify the original grant, not a stronger carrier supplied on a retry."""
+     errors = shape_errors(state)
+@@ -93,8 +259,42 @@
+                     return ["continuation grant changed while being read"]
+                 dependencies[journal.manifest.relative_to(Path(root)).as_posix()] = before
+             return []
++    try:
++        if transition_grant(root, state, history_events,
++                            dependencies if dependencies is not None else {}):
++            return []
++    except (OSError, ValueError, KeyError, TypeError) as exc:
++        return ["continuation authority transition is invalid: " + str(exc)]
+     return ["persistent authority has no committed operator grant for this goal"]
+ 
++
++def describe(root: Path | str, state: dict, *, history_events=None) -> dict:
++    """Explain existing proof; status never captures or upgrades authority."""
++    due = state.get("execution_intent") == "goal" and (
++        (state.get("goal_waves") or 0) >= 3 or (state.get("goal_tickets") or 0) >= 20
++    )
++    errors = prove(root, state, history_events=history_events)
++    if errors:
++        return {
++            "state": "invalid",
++            "detail": "Persistent authority invalid or revoked: " + "; ".join(errors),
++            "original_event": state.get("authority_source"),
++            "checkpoint_due": due,
++        }
++    if persistent(state):
++        return {
++            "state": "persistent_verified",
++            "detail": "Persistent operator authority verified"
++            + ("; goal checkpoint reached" if due else ""),
++            "original_event": state["authority_source"],
++            "checkpoint_due": due,
++        }
++    return {
++        "state": "bounded" if state.get("execution_intent") == "goal" else "inactive",
++        "detail": "Bounded authority requires operator" if due else "No persistent grant",
++        "original_event": state.get("authority_source"),
++        "checkpoint_due": due,
++    }
+ 
+ def fresh_cc_provenance() -> dict | None:
+     """A declared operator carrier for the resume key, not CLI spelling."""
+--- a/tools/saipen_engine/operations.py
++++ b/tools/saipen_engine/operations.py
+@@ -8319,6 +8319,131 @@
+     return apply_plan(root, plan)
+ 
+ 
++@_state_guard
++def authorize_goal_continuation(
++    project_root: Path | str, agent: str, text: str, dry_run: bool = False
++) -> Result:
++    """Prospective SRC-112 grant; preserve the original goal and all active Work."""
++    from . import goal_authority, intake, operator_task
++
++    root = Path(project_root)
++    snapshot = _read(root)
++    docs, current, board, _ = snapshot
++    if board["errors"]:
++        return _refuse(
++            "VALIDATION_FAILED", "BOARD parse error(s): " + "; ".join(board["errors"][:3])
++        )
++    guard = _active_claim_refusal(current, docs["board"].text_norm, agent)
++    if guard is not None:
++        return guard
++    dependencies = {}
++    try:
++        binding = goal_authority.current_binding(
++            root, current, docs["_history"].events, dependencies
++        )
++        if goal_authority.parse_capsule(text) != binding:
++            return _refuse(
++                "VALIDATION_FAILED", "authorization does not name this exact existing goal"
++            )
++        if current.get("goal_ingress") not in (None, binding["goal_ingress"]):
++            return _refuse("VALIDATION_FAILED", "the existing ingress is not bound to this goal")
++        if goal_authority.persistent(current):
++            old = goal_authority.transition_grant(
++                root, current, docs["_history"].events, dependencies
++            )
++            if (
++                old
++                and (old.get("receipt_metadata") or {})
++                .get("goal_authority_transition", {})
++                .get("authorization_sha256")
++                == hashlib.sha256(text.encode("utf-8")).hexdigest()
++            ):
++                return Result(
++                    True,
++                    "GOAL_AUTHORITY_ALREADY_SET",
++                    op_id=old["op_id"],
++                    data={"authority_source": current["authority_source"]},
++                )
++            return _refuse("VALIDATION_FAILED", "the goal already has a different persistent grant")
++    except (OSError, ValueError, KeyError, TypeError) as exc:
++        return _refuse("VALIDATION_FAILED", str(exc))
++    provenance = operator_task.witness(text)
++    if provenance.get("code"):
++        return _refuse(provenance["code"], provenance.get("detail", "invalid operator carrier"))
++    if not operator_task.authority_for_provenance(provenance)["goal_pivot"]:
++        return _refuse(
++            "VALIDATION_FAILED", "a fresh externally witnessed operator authorization is required"
++        )
++    if dry_run:
++        return Result(True, "GOAL_AUTHORITY_PREVIEW", data={"binding": binding})
++    captured = intake.capture(
++        root,
++        text,
++        source_kind="user_instruction",
++        request_provenance=provenance,
++        projection_policy=intake.PROJECTION_AUTHORITY_ONLY,
++    )
++    if not captured.get("ok"):
++        return _refuse(
++            captured.get("code", "VALIDATION_FAILED"), captured.get("detail", "capture refused")
++        )
++    receipt = captured["receipt"]
++    try:
++        source = goal_authority.source_proof(root, receipt, binding, dependencies)
++    except (OSError, ValueError, KeyError, TypeError) as exc:
++        return _refuse("VALIDATION_FAILED", str(exc))
++    # Capture is its own immutable ingress operation. Lifecycle APPLY still
++    # uses the original frozen snapshot/CAS; a concurrent writer cannot turn
++    # an authorization for that goal into a grant for a later one.
++    ingress = binding["goal_ingress"]
++    # Committed replay is resolved by the proven original receipt above.
++    # An unapplied PREPARED attempt may be ABORTED by Recovery; a later fresh
++    # authorization must not reuse that terminal operation identity.
++    op_id = "goal-authorize-" + uuid4_hex()
++    metadata = {
++        "binding": binding,
++        "goal_ingress": ingress,
++        "authorization_receipt": receipt,
++        "authorization_sha256": source["source_sha256"],
++        "request_provenance": source["request_provenance"],
++    }
++    now, utc = _now(), _utc_iso()
++
++    def mutate(raw, event):
++        metadata["transition_event"] = event
++        return patch_state(
++            raw,
++            {
++                **goal_authority.grant_fields(binding["authority_source"]),
++                "goal_ingress": ingress,
++                "last_event": event,
++                "updated": utc,
++            },
++        )
++
++    plan = _state_only_plan(
++        root,
++        "goal_authorize",
++        agent,
++        mutate,
++        ("goal authority transition -- bounded->operator_persistent; "
++         f"{binding['authority_source']}; {receipt}"),
++        {
++            "ok": True,
++            "code": "GOAL_AUTHORIZED",
++            "authority_source": binding["authority_source"],
++            "authorization_receipt": receipt,
++        },
++        now,
++        utc,
++        {*goal_authority.FIELDS, "goal_ingress"},
++        read_once=snapshot,
++        op_id=op_id,
++        evidence_preconditions=dependencies,
++        receipt_metadata={"goal_authority_transition": metadata},
++    )
++    return plan if isinstance(plan, Result) else apply_plan(root, plan)
++
+ def _validate_goal_objective(objective: str | None) -> tuple[str, str | None]:
+     """W2-004: ONE shared goal-pivot objective validator.
+ 
+--- a/tools/saipen_engine/journal.py
++++ b/tools/saipen_engine/journal.py
+@@ -471,6 +471,7 @@
+             "convergence-",
+             "crew-closure-",
+             "goal-entry-",
++            "goal-authorize-",
+             "handover-",
+             "improve-hold-",
+             "improve-unhold-",
+@@ -2869,6 +2870,7 @@
+         # Finalizer-owned derived keys (resulting_*) are excluded because
+         # they are generated only after apply.
+         _REQUEST_METADATA_KEYS = (
++            "goal_authority_transition",
+             "crew_epoch",
+             "ticket_id",
+             "producer",
+--- a/tools/saipen.py
++++ b/tools/saipen.py
+@@ -1970,6 +1970,11 @@
+             if event_text.startswith("clean -> done @"):
+                 completed = True
+         payload["clean_execution"] = "COMPLETED" if completed else "UNPROVEN"
++    from saipen_engine.goal_authority import describe as describe_goal_authority
++
++    payload["goal_authority"] = describe_goal_authority(
++        project_root, state, history_events=snap.history_events
++    )
+     # Restore Milestones are a separate, optional authority domain.  Status
+     # reads bounded metadata only; full payload integrity belongs to create,
+     # undo and validate, never the common `sss` hot path.
+@@ -3223,9 +3228,14 @@
+             "execute_in_current_agent": True,
+         }
+     verdict = classify_carrier(carrier)
++    from saipen_engine.goal_authority import describe as describe_goal_authority
++
+     payload = {
+         "ok": True,
+         "code": "EXPLAIN_NEXT",
++        "goal_authority": describe_goal_authority(
++            project_root, state, history_events=snap.history_events
++        ),
+         "state": {
+             "phase": state.get("phase"),
+             "task": state.get("task"),
+@@ -13292,6 +13302,29 @@
+     if command == "cohort":
+         return _cohort(project_root, args[1:], as_json, dry_run)
+     if command in ("goal", "gg"):
++        if len(args) > 1 and args[1] == "authorize":
++            if len(args) != 4 or args[2] != "--file":
++                _emit({"ok": False, "code": "VALIDATION_FAILED",
++                       "detail": "Use: saipen goal authorize --file <exact operator capsule>"},
++                      as_json)
++                return 2
++            try:
++                capsule_bytes = Path(args[3]).read_bytes()
++                if len(capsule_bytes) > 65536:
++                    raise ValueError("goal authorization capsule exceeds 65536 bytes")
++                capsule = capsule_bytes.decode("utf-8")
++            except (OSError, ValueError) as exc:
++                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
++                return 1
++            if not dry_run and _negotiate_capability(project_root) == "read-only":
++                return _capability_refusal(as_json)
++            from saipen_engine.operations import authorize_goal_continuation
++
++            result = authorize_goal_continuation(
++                project_root, _agent_for(project_root), capsule, dry_run=dry_run
++            )
++            _emit(result.to_dict(), as_json)
++            return 0 if result.ok else 1
+         if len(args) < 2 or not args[1].strip():
+             # CORE-005: bare `goal`/`gg` is zero-write and emits exactly
+             # `Use: gg <objective text>` (CORE § 1.10).
+--- a/saipen/MAINTENANCE.md
++++ b/saipen/MAINTENANCE.md
+@@ -121,6 +121,40 @@
+ Absent quartet means bounded (`operator_required`, budget, hard_wait); a fresh
+ operator resume records that complete bounded tuple. Goal exit clears it.
+ 
++**Prospective authorization of a legacy goal (SRC-112).**
++`saipen goal authorize --file <operator-capsule.json>` authorizes the exact
++existing objective without a new Entry, roadmap, claim or counter reset.
++The closed JSON capsule contains `kind: saipen-goal-continuation`, canonical
++`project_lineage`, the same four persistent fields above, `goal_objective`
++(the exact current pivot text after `goal pivot -- `), and
++`goal_event_sha256`, and `goal_ingress`. The ingress must match the original
++Entry journal or, for legacy absence, the prospective event/lineage binding
++below. A leftover ingress from another goal refuses. The event digest is
++SHA256 over UTF-8 JSON of the pivot's
++`date,event,parent,ticket,agent,op_id,taxonomy,text` fields, with sorted keys,
++compact separators and unescaped Unicode. Extra/duplicate fields refuse.
++The host must witness the exact instruction through the existing operator
++ingress mechanism. A model-written capsule or environment declaration is not
++operator provenance; a stronger later carrier cannot promote a model/imported
++receipt. No project path, agent role or maintenance label grants an exception.
++
++The existing source intake preserves that fresh instruction as an
++`authority_only` receipt. The separate committed `goal_authorize` journal
++binds its digest and original provenance to the canonical project lineage,
++committed original pivot/objective and `goal_ingress`. An absent legacy
++ingress binding is established prospectively from the original event digest
++and lineage. Old Entry receipts remain unchanged. One explicit authority
++transition DEC and the quartet commit together, preserving active Work,
++phase, owner, BOARD, counters and pending audits. Proof requires both journals,
++the transition event and intact operator source. Missing, revoked, corrupt,
++foreign-project or changed-goal proof refuses. An identical committed replay
++returns the original operation without another grant/event. Recovery follows
++OPS: an unapplied prepared attempt can abort without granting authority;
++partial application replays the exact prepared bytes. A fresh attempt after an
++abort has its own operation identity. Status exposes bounded, verified or
++invalid authority and its original event. Ordinary checkpoints spend the
++existing grant; they never create another operator authorization.
++
+ **A resume resets the counters only when the valve tripped.** Untripped counts
+ carry over. A fresh operator reset leaves
+ `DEC: goal reauthorized -- goal_waves N->0, goal_tickets M->0`;
+--- a/saipen/OPS.md
++++ b/saipen/OPS.md
+@@ -188,6 +188,17 @@
+ dry-run write nothing. This operation creates no publication authority grant.
+ 
+ ## 4. Idempotency
++
++Legacy goal authority uses the same PLAN/APPLY and Recovery owners.
++`goal authorize --file` validates a fresh exact operator capsule against one
++frozen current-goal snapshot, captures its immutable authority-only Source,
++then commits only LOG/STATE. Its read dependencies pin the original goal
++journal, project lineage, source body/metadata, BOARD and full history.
++Source capture alone grants nothing. The committed transition is proved by
++SRC-112, never by CLI spelling or the presence of four fields. Replay returns
++the original committed operation; an aborted zero-write attempt is preserved
++and requires a fresh witnessed attempt. No counter reset or Work admission
++belongs to this operation.
+ 
+ Every mutating operation carries an op_id owned by its journal. A retry after
+ client/model/process failure must not duplicate ticket movement, LOG events, or
+--- a/tools/test_t1704_legacy_goal_authority.py
++++ b/tools/test_t1704_legacy_goal_authority.py
+@@ -0,0 +1,489 @@
++"""A prospective grant for an existing goal never rewrites its history.
++
++All operator carriers and legacy records below are explicit fixture doubles.
++No test grants authority to the maintainer's live project.
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import sys
++import unittest
++from pathlib import Path
++from unittest.mock import patch
++
++TOOLS = Path(__file__).resolve().parent
++sys.path.insert(0, str(TOOLS))
++
++from saipen_engine import codec, goal_authority, intake, operations, state  # noqa: E402
++from saipen_engine.journal import Journal, semantic_receipts_for_operation_safe  # noqa: E402
++from saipen_engine.lock import project_writer_lock  # noqa: E402
++from saipen_engine.log import read_history_snapshot  # noqa: E402
++from saipen_engine.paths import project_lineage_identity  # noqa: E402
++from saipen_engine.cold_recovery import goal_ingress_identity  # noqa: E402
++from saipen_engine.iteration_verdict import project_iteration_verdict  # noqa: E402
++from saipen_engine.reconcile import _derived_goal_counters  # noqa: E402
++from test_hermetic_env import isolate_host_session  # noqa: E402
++from test_t1363_zero_manual_entry import _allocation_log, _stamp, cli, project  # noqa: E402
++
++OBJECTIVE = "Maintain the protocol under its existing roadmap until completion"
++
++
++def setUpModule():
++    isolate_host_session()
++
++
++class LegacyGoalAuthorityTests(unittest.TestCase):
++    def current(self, root):
++        return state.parse_state(codec.read_doc(root / ".saipen/STATE.md"))
++
++    def snapshot(self, root):
++        return tuple(
++            (root / ".saipen" / name).read_bytes() for name in ("STATE.md", "BOARD.md", "LOG.md")
++        )
++
++    def patch_state(self, root, fields):
++        p = root / ".saipen/STATE.md"
++        p.write_text(state.patch_state(codec.read_doc(p), fields), encoding="utf-8")
++
++    def legacy(self, *, tickets=0, waves=0):
++        board = (
++            "## DOING\n- [/] T-1703 [P2] interrupted evidence slice | verify: independent review "
++            f"| owner: test-agent | claim_time: {_stamp(-1)}\n"
++            "## TODO\n## DONE\n## BLOCKED\n"
++        )
++        root = project(
++            self,
++            board=board,
++            log=_allocation_log("T-1703"),
++            phase="REVIEW",
++            transition_from="VERIFY",
++            task="T-1703",
++            next_action="PHASE REVIEW T-1703",
++        )
++        self.patch_state(root, {"saipen_home": str(TOOLS.parent)})
++        entered = operations.set_goal_intent(root, "test-agent", OBJECTIVE)
++        self.assertTrue(entered.ok, entered.to_dict())
++        for key, desired in (("goal_waves", waves), ("goal_tickets", tickets)):
++            for value in range(desired):
++                counted = operations.checkpoint(
++                    root, "test-agent", "DEC", None, f"{key} {value}->{value + 1}"
++                )
++                self.assertTrue(counted.ok, counted.to_dict())
++        fields = {"goal_waves": waves, "goal_tickets": tickets}
++        if tickets >= 20 or waves >= 3:
++            fields["next_action"] = (
++                f"WAIT: safety valve reached ({waves} waves / {tickets} tickets) "
++                "-- run 'cc' to continue"
++            )
++        self.patch_state(root, fields)
++        return root
++
++    def capsule(self, root, **changes):
++        history = read_history_snapshot(root).events
++        pivot = [
++            e for e in history if e["taxonomy"] == "DEC" and e["text"].startswith("goal pivot --")
++        ][-1]
++        identity = project_lineage_identity(root)
++        event_bytes = json.dumps(
++            {
++                k: pivot.get(k)
++                for k in ("date", "event", "parent", "ticket", "agent", "op_id", "taxonomy", "text")
++            },
++            sort_keys=True,
++            separators=(",", ":"),
++            ensure_ascii=False,
++        ).encode()
++        value = {
++            "kind": "saipen-goal-continuation",
++            "project_lineage": identity,
++            **goal_authority.grant_fields(f"E-{pivot['event']}"),
++            "goal_objective": pivot["text"][len("goal pivot -- ") :],
++            "goal_event_sha256": hashlib.sha256(event_bytes).hexdigest(),
++            "goal_ingress": goal_ingress_identity(
++                hashlib.sha256(event_bytes).hexdigest(), identity
++            ),
++        }
++        value.update(changes)
++        return json.dumps(value, sort_keys=True, ensure_ascii=False)
++
++    def upgrade(self, root, body=None, *, witnessed=True, dry_run=False):
++        body = self.capsule(root) if body is None else body
++        carrier = (
++            {"SAIPEN_TASK_SHA256": hashlib.sha256(body.encode()).hexdigest()} if witnessed else {}
++        )
++        with patch.dict(os.environ, carrier):
++            return operations.authorize_goal_continuation(root, "test-agent", body, dry_run=dry_run)
++
++    def test_fresh_grant_preserves_review_work_counters_board_and_original_journal(self):
++        root = self.legacy(tickets=20)
++        before = self.current(root)
++        board = self.snapshot(root)[1]
++        records, _ = semantic_receipts_for_operation_safe(root, "goal")
++        old = Journal(root, records[-1]["op_id"]).manifest.read_bytes()
++        result = self.upgrade(root)
++        self.assertTrue(result.ok, result.to_dict())
++        after = self.current(root)
++        for key in (
++            "phase",
++            "task",
++            "agent",
++            "transition_from",
++            "goal_waves",
++            "goal_tickets",
++            "next_action",
++        ):
++            self.assertEqual(after[key], before[key], key)
++        self.assertEqual(self.snapshot(root)[1], board)
++        self.assertEqual(Journal(root, records[-1]["op_id"]).manifest.read_bytes(), old)
++        self.assertEqual(goal_authority.prove(root, after), [])
++        self.assertEqual(after["continuation_authority"], "operator_persistent")
++
++    def test_ticket_checkpoint_resumes_exact_active_review_after_restart(self):
++        root = self.legacy(tickets=20)
++        self.assertTrue(self.upgrade(root).ok)
++        code, payload, output = cli(root, "continue", "--json")
++        self.assertEqual(code, 0, output)
++        current = self.current(root)
++        self.assertEqual(
++            (current["phase"], current["task"], current["goal_tickets"]), ("REVIEW", "T-1703", 0)
++        )
++        self.assertIn("goal checkpoint --", codec.read_doc(root / ".saipen/LOG.md"))
++        self.assertNotEqual(payload.get("code"), "RECONCILE_REAUTH_REQUIRED")
++
++    def test_wave_checkpoint_uses_the_same_grant(self):
++        root = self.legacy(waves=3)
++        self.assertTrue(self.upgrade(root).ok)
++        code, _, output = cli(root, "continue", "--json")
++        self.assertEqual(code, 0, output)
++        self.assertEqual(
++            (self.current(root)["goal_waves"], self.current(root)["phase"]), (0, "REVIEW")
++        )
++
++    def test_model_origin_is_refused_before_capture(self):
++        root = self.legacy()
++        before = self.snapshot(root)
++        result = self.upgrade(root, witnessed=False)
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(self.snapshot(root), before)
++        self.assertFalse((root / ".saipen/intake").exists())
++
++    def test_wrong_carrier_digest_is_refused(self):
++        root = self.legacy()
++        before = self.snapshot(root)
++        with patch.dict(os.environ, {"SAIPEN_TASK_SHA256": "f" * 64}):
++            result = operations.authorize_goal_continuation(root, "test-agent", self.capsule(root))
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_capsule_must_name_exact_goal_objective_event_and_project(self):
++        for changes in (
++            {"project_lineage": "lineage-" + "f" * 32},
++            {"authority_source": "E-9999"},
++            {"goal_objective": "replace the roadmap"},
++            {"goal_event_sha256": "0" * 64},
++            {"authority_until": "forever"},
++            {"goal_ingress": "goal-" + "0" * 16},
++        ):
++            root = self.legacy()
++            before = self.snapshot(root)
++            result = self.upgrade(root, self.capsule(root, **changes))
++            self.assertFalse(result.ok, (changes, result.to_dict()))
++            self.assertEqual(self.snapshot(root), before)
++
++    def test_existing_model_source_cannot_be_promoted_by_later_carrier(self):
++        root = self.legacy()
++        body = self.capsule(root)
++        captured = intake.capture(root, body, projection_policy=intake.PROJECTION_AUTHORITY_ONLY)
++        self.assertTrue(captured["ok"], captured)
++        before = self.snapshot(root)
++        result = self.upgrade(root, body)
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(self.snapshot(root), before)
++        self.assertFalse(
++            intake.read_body(root, captured["receipt"])["meta"]["request_provenance"]["witness"]
++            == "operator_carrier"
++        )
++
++    def test_preview_writes_no_source_or_lifecycle_bytes(self):
++        root = self.legacy()
++        before = self.snapshot(root)
++        result = self.upgrade(root, dry_run=True)
++        self.assertTrue(result.ok, result.to_dict())
++        self.assertEqual(self.snapshot(root), before)
++        self.assertFalse((root / ".saipen/intake").exists())
++
++    def test_identical_replay_reuses_grant_and_event_without_carrier(self):
++        root = self.legacy()
++        body = self.capsule(root)
++        first = self.upgrade(root, body)
++        self.assertTrue(first.ok, first.to_dict())
++        before = self.snapshot(root)
++        second = self.upgrade(root, body, witnessed=False)
++        self.assertTrue(second.ok, second.to_dict())
++        self.assertEqual(second.op_id, first.op_id)
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_missing_original_goal_journal_refuses(self):
++        root = self.legacy()
++        body = self.capsule(root)
++        records, _ = semantic_receipts_for_operation_safe(root, "goal")
++        # Delete one exact fixture manifest, never a live project directory.
++        manifest = Journal(root, records[-1]["op_id"]).manifest
++        self.assertTrue(manifest.resolve().is_relative_to(root.resolve()))
++        manifest.unlink()
++        before = self.snapshot(root)
++        self.assertFalse(self.upgrade(root, body).ok)
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_missing_grant_journal_cannot_reset_checkpoint(self):
++        root = self.legacy(tickets=20)
++        result = self.upgrade(root)
++        self.assertTrue(result.ok, result.to_dict())
++        manifest = Journal(root, result.op_id).manifest
++        self.assertTrue(manifest.resolve().is_relative_to(root.resolve()))
++        manifest.unlink()
++        before = self.snapshot(root)
++        code, _, _ = cli(root, "continue", "--json")
++        self.assertNotEqual(code, 0)
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_concurrent_writer_cannot_create_a_grant(self):
++        root = self.legacy()
++        before = self.snapshot(root)
++        with project_writer_lock(root):
++            result = self.upgrade(root)
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_user_brake_survives_grant_and_continuation(self):
++        root = self.legacy(tickets=20)
++        self.patch_state(root, {"next_action": "WAIT: user brake -- explicit STOP"})
++        self.assertTrue(self.upgrade(root).ok)
++        before = self.snapshot(root)
++        cli(root, "continue", "--json")
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_imported_source_cannot_be_promoted_by_an_operator_carrier(self):
++        root = self.legacy()
++        body = self.capsule(root)
++        with patch.dict(
++            os.environ, {"SAIPEN_TASK_SHA256": hashlib.sha256(body.encode()).hexdigest()}
++        ):
++            captured = intake.capture(
++                root,
++                body,
++                source_kind="external_audit",
++                request_provenance={"witness": "model_supplied"},
++                projection_policy=intake.PROJECTION_AUTHORITY_ONLY,
++            )
++        self.assertTrue(captured["ok"], captured)
++        before = self.snapshot(root)
++        self.assertFalse(self.upgrade(root, body).ok)
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_replayed_capsule_cannot_authorize_another_project(self):
++        first = self.legacy()
++        body = self.capsule(first)
++        self.assertTrue(self.upgrade(first, body).ok)
++        other = self.legacy()
++        before = self.snapshot(other)
++        self.assertFalse(self.upgrade(other, body).ok)
++        self.assertEqual(self.snapshot(other), before)
++        self.assertNotIn("continuation_authority", self.current(other))
++
++    def test_goal_replacement_does_not_inherit_a_previous_grant(self):
++        root = self.legacy()
++        old = self.capsule(root)
++        self.assertTrue(self.upgrade(root, old).ok)
++        replaced = operations.set_goal_intent(root, "test-agent", "A separate objective")
++        self.assertTrue(replaced.ok, replaced.to_dict())
++        before = self.snapshot(root)
++        self.assertFalse(self.upgrade(root, old).ok)
++        self.assertEqual(self.snapshot(root), before)
++        self.assertNotIn("continuation_authority", self.current(root))
++
++    def test_replacement_cannot_reuse_an_ingress_from_a_different_goal(self):
++        root = self.legacy()
++        self.assertTrue(self.upgrade(root).ok)
++        previous = self.current(root)["goal_ingress"]
++        self.assertTrue(operations.set_goal_intent(root, "test-agent", "Different objective").ok)
++        self.assertEqual(self.current(root)["goal_ingress"], previous)
++        before = self.snapshot(root)
++        result = self.upgrade(root)
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_corrupted_or_revoked_source_refuses_continuation(self):
++        for field, value in (
++            ("request_provenance", {"witness": "model_supplied"}),
++            ("status", "RETIRED"),
++        ):
++            root = self.legacy(tickets=20)
++            result = self.upgrade(root)
++            self.assertTrue(result.ok, result.to_dict())
++            path = root / f".saipen/intake/active/{result['authorization_receipt']}.meta.json"
++            meta = json.loads(path.read_text())
++            meta[field] = value
++            path.write_text(json.dumps(meta), encoding="utf-8")
++            before = self.snapshot(root)
++            self.assertTrue(goal_authority.prove(root, self.current(root)))
++            code, _, text = cli(root, "continue", "--json")
++            self.assertNotEqual(code, 0, text)
++            self.assertEqual(self.snapshot(root), before)
++
++    def test_corrupt_transition_manifest_refuses_continuation(self):
++        root = self.legacy(tickets=20)
++        result = self.upgrade(root)
++        self.assertTrue(result.ok, result.to_dict())
++        Journal(root, result.op_id).manifest.write_bytes(b"{not-json")
++        before = self.snapshot(root)
++        code, _, text = cli(root, "continue", "--json")
++        self.assertNotEqual(code, 0, text)
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_crashed_transition_recovers_exact_prepared_bytes_without_a_new_grant(self):
++        for boundary in ("PREPARE", "LOG", "STATE", "VERIFIED"):
++            root = self.legacy(tickets=20)
++            body = self.capsule(root)
++            crash_env = {f"NITRO_CRASH_AFTER_{boundary}": "1"}
++            with patch.dict(os.environ, crash_env), self.assertRaises(SystemExit) as crash:
++                self.upgrade(root, body)
++            self.assertEqual(crash.exception.code, 87)
++            code, _, text = cli(root, "recover", "--json")
++            self.assertEqual(code, 0, (boundary, text))
++            if boundary == "PREPARE":
++                records, errors = semantic_receipts_for_operation_safe(root, "goal_authorize")
++                self.assertFalse(errors, errors)
++                self.assertEqual(records[-1]["status"], "ABORTED")
++                self.assertNotIn("continuation_authority", self.current(root))
++                self.assertFalse(self.upgrade(root, body, witnessed=False).ok)
++                # The aborted attempt remains evidence. Only a fresh carrier
++                # can authorize a new attempt after a zero-write rollback.
++                self.assertTrue(self.upgrade(root, body).ok)
++            self.assertEqual(goal_authority.prove(root, self.current(root)), [], (boundary, text))
++            self.assertEqual(
++                (self.current(root)["phase"], self.current(root)["goal_tickets"]), ("REVIEW", 20)
++            )
++            before = self.snapshot(root)
++            replay = self.upgrade(root, body, witnessed=False)
++            self.assertTrue(replay.ok, replay.to_dict())
++            self.assertEqual(self.snapshot(root), before)
++            log = codec.read_doc(root / ".saipen/LOG.md")
++            self.assertEqual(log.count("DEC: goal authority transition --"), 1)
++
++    def test_native_router_iteration_and_reconstructed_counts_agree(self):
++        root = self.legacy(tickets=20)
++        audit = root / "audit/1.md"
++        audit.parent.mkdir()
++        audit.write_text("# Independent audit\n\nKeep this queued.\n", encoding="utf-8")
++        self.assertTrue(self.upgrade(root).ok)
++        code, _, text = cli(root, "validate", "--json")
++        self.assertEqual(code, 0, text)
++        verdict = project_iteration_verdict(root)
++        self.assertEqual(verdict["decision"], "AUTO_KICK", verdict)
++        self.assertFalse(verdict["requires_human"], verdict)
++        code, status, text = cli(root, "status", "--json")
++        self.assertEqual(code, 0, text)
++        self.assertEqual(status["goal_authority"]["state"], "persistent_verified", text)
++        code, _, text = cli(root, "continue", "--json")
++        self.assertEqual(code, 0, text)
++        self.assertTrue(audit.exists())
++        self.assertEqual(
++            _derived_goal_counters(read_history_snapshot(root).events),
++            {"goal_waves": 0, "goal_tickets": 0},
++        )
++        code, _, text = cli(root, "validate", "--json")
++        self.assertEqual(code, 0, text)
++
++    def test_foreign_claim_cannot_receive_a_grant(self):
++        root = self.legacy()
++        before = self.snapshot(root)
++        body = self.capsule(root)
++        with patch.dict(
++            os.environ, {"SAIPEN_TASK_SHA256": hashlib.sha256(body.encode()).hexdigest()}
++        ):
++            result = operations.authorize_goal_continuation(root, "another-agent", body)
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_genuine_external_blocker_prevents_automatic_checkpoint(self):
++        root = self.legacy(tickets=20)
++        self.patch_state(root, {"blocker": "BLOCKED_EXTERNAL -- account login required"})
++        self.assertTrue(self.upgrade(root).ok)
++        before = self.snapshot(root)
++        cli(root, "continue", "--json")
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_cli_consumes_exact_capsule_and_does_not_replan(self):
++        root = self.legacy()
++        body = self.capsule(root)
++        path = root / "operator-capsule.json"
++        path.write_text(body, encoding="utf-8", newline="")
++        board = self.snapshot(root)[1]
++        code, payload, text = cli(
++            root, "goal", "authorize", "--file", str(path), "--json", operator_text=body
++        )
++        self.assertEqual(code, 0, text)
++        self.assertEqual(payload["code"], "GOAL_AUTHORIZED", text)
++        self.assertEqual(self.snapshot(root)[1], board)
++
++    def test_source_change_after_proof_is_rejected_by_apply_cas(self):
++        root = self.legacy()
++        before = self.snapshot(root)
++        real_apply = operations.apply_plan
++
++        def raced(subject, plan):
++            grant = plan.receipt_metadata["goal_authority_transition"]
++            path = root / f".saipen/intake/active/{grant['authorization_receipt']}.md"
++            path.write_text("forged replacement", encoding="utf-8")
++            return real_apply(subject, plan)
++
++        with patch.object(operations, "apply_plan", side_effect=raced):
++            result = self.upgrade(root)
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(result.code, "STALE_STATE", result.to_dict())
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_committed_proof_pins_both_journals_project_and_source(self):
++        root = self.legacy()
++        result = self.upgrade(root)
++        self.assertTrue(result.ok, result.to_dict())
++        dependencies = {}
++        self.assertEqual(
++            goal_authority.prove(root, self.current(root), dependencies=dependencies), []
++        )
++        self.assertIn(".saipen/IDENTITY.md", dependencies)
++        self.assertIn(f".saipen/intake/active/{result['authorization_receipt']}.md", dependencies)
++        self.assertIn(
++            f".saipen/intake/distribution/{result['authorization_receipt']}.json", dependencies
++        )
++        self.assertEqual(len([p for p in dependencies if p.endswith("operation.json")]), 2)
++
++    def test_duplicate_capsule_keys_refuse_with_no_write(self):
++        root = self.legacy()
++        body = self.capsule(root)
++        repeated = '{"kind":"saipen-goal-continuation",' + body[1:]
++        before = self.snapshot(root)
++        result = self.upgrade(root, repeated)
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(self.snapshot(root), before)
++
++    def test_malformed_original_authority_metadata_refuses_without_traceback(self):
++        root = self.legacy()
++        body = self.capsule(root)
++        records, _ = semantic_receipts_for_operation_safe(root, "goal")
++        path = Journal(root, records[-1]["op_id"]).manifest
++        record = json.loads(path.read_text())
++        record["receipt_metadata"] = {"goal_authority": ["forged"]}
++        path.write_text(json.dumps(record), encoding="utf-8")
++        before = self.snapshot(root)
++        result = self.upgrade(root, body)
++        self.assertFalse(result.ok, result.to_dict())
++        self.assertEqual(self.snapshot(root), before)
++
++
++if __name__ == "__main__":
++    unittest.main()

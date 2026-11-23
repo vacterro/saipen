@@ -1,0 +1,53 @@
+{
+  "name": "saituls",
+  "root": "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+  "started_utc": "2026-10-15T23:19:21.873748+00:00",
+  "finished_utc": "2026-10-15T23:19:29.074656+00:00",
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "--project-root",
+    "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+    "status",
+    "--json"
+  ],
+  "exit_code": 0,
+  "head": "5f0dc0c6abe1f9a0a34487d87f56fb129410cb7f",
+  "phase": "DONE",
+  "task": "none",
+  "next_action": "saipen work reverify T-231",
+  "code": null,
+  "detail": null,
+  "automation": {
+    "schema_version": 1,
+    "disposition": "BLOCKED",
+    "next_command": null,
+    "operator_action_due": false,
+    "reason_code": "conformance-remediation",
+    "reason": "idle continuation is owned by the unaccepted conformance red gate (CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint); run 'saipen work reverify T-231' before continuing",
+    "audit_quiescent": false,
+    "audit_epoch": "audit-epoch-v1:ce05b92484cf36c6a58d96bafa987d1e364da13d0e31f26b5a4a7a17ec1ed4ff",
+    "convergence_current": false,
+    "closure_complete": false,
+    "source_fingerprint": "5f0dc0c6abe1f9a0a34487d87f56fb129410cb7f+git-delta-v1:b4265fc3024c9d3e966c5c791037d912f15c2feef94bd5f012deab040b41b60c",
+    "completed_at": null,
+    "remediation_command": "saipen work reverify T-231",
+    "diagnostic": null
+  },
+  "conformance": null,
+  "before_hashes": {
+    ".saipen/STATE.md": "37c1021c5c04deda520ed8e041e6e70e1b67470b3eb9039acaf0cee18db95b8d",
+    ".saipen/BOARD.md": "6054ba4255bbcd351cc88d0b61bef767d7f69610074c47d0074d8a94a5c87f01",
+    ".saipen/LOG.md": "c675c9a982d62be3387b30d680f0d0c2ea588a77065e75b6b0fd02c05307fecd",
+    ".saipen/IDENTITY.md": "dcaaf3956076e8404014b1eddabe695e2679aa57cda017563ac2b5885857a854",
+    ".git/index": "eb999357cb8264673e8bdbe3a03984d2e5b4f9bebf410de53ce1e006d1fa3206"
+  },
+  "after_hashes": {
+    ".saipen/STATE.md": "37c1021c5c04deda520ed8e041e6e70e1b67470b3eb9039acaf0cee18db95b8d",
+    ".saipen/BOARD.md": "6054ba4255bbcd351cc88d0b61bef767d7f69610074c47d0074d8a94a5c87f01",
+    ".saipen/LOG.md": "c675c9a982d62be3387b30d680f0d0c2ea588a77065e75b6b0fd02c05307fecd",
+    ".saipen/IDENTITY.md": "dcaaf3956076e8404014b1eddabe695e2679aa57cda017563ac2b5885857a854",
+    ".git/index": "eb999357cb8264673e8bdbe3a03984d2e5b4f9bebf410de53ce1e006d1fa3206"
+  },
+  "observed_inputs_unchanged": true,
+  "limit": "This collector writes only its own SAIPEN evidence; concurrent target edits are not excluded."
+}

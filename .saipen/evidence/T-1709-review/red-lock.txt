@@ -1,0 +1,20 @@
+.F............
+======================================================================
+FAIL: test_binding_cannot_clobber_concurrent_named_observations (__main__.AuditStarvationOracleTests.test_binding_cannot_clobber_concurrent_named_observations)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1709-review\subject-red-lock\tools\test_t1709_audit_starvation.py", line 256, in test_binding_cannot_clobber_concurrent_named_observations
+    self.assertEqual(refused, [True], "binding must serialize with chronology writes")
+AssertionError: Lists differ: [] != [True]
+
+Second list contains 1 additional elements.
+First extra element 0:
+True
+
+- []
++ [True] : binding must serialize with chronology writes
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.236s
+
+FAILED (failures=1)

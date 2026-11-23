@@ -1,0 +1,103 @@
+{
+  "case": "2-unadmitted-done",
+  "exit_code": 1,
+  "verdict": {
+    "ok": false,
+    "code": "CONFORMANCE_UNHEALTHY",
+    "structural_gate": "pass",
+    "validator": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "launched": true,
+      "exit_code": 1,
+      "summary": "t)\nFAIL: BOARD.md: T-2 has no [T-###] allocation event in the complete history (CORE-003 / SRC-026:R003)\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: every DONE closure provenance satisfies its declared closure contract\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nFAIL: lifecycle authority [saio] -- canonical lifecycle state stands on no operation: T-2 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it -- the completion was typed, not run -- run `saipen recover`; it names the journaled repair (T-1671)\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [half-claim]: BOARD.md:6 ticket T-2 carries owner but no claim_time -- \u00a7 1.4 decides liveness from the pair, so one alone cannot be judged live or stale\nWARN [legacy-closure-evidence]: ticket T-2 predates the current closure-evidence contract; original evidence was not recorded under the modern schema and cannot be reconstructed\nWARN [no-conformance-record]: no LOG line records a conformance run in \u00a7 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so \u00a7 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nValidation FAILED: 2 problem(s), 4 warning(s)"
+    },
+    "conformance_status": {
+      "status": "CURRENT_FAIL",
+      "gate": "core",
+      "reason": "canonical validator reports FAIL for the current checkpoint",
+      "receipt": {
+        "blocking_findings": {
+          "problem_count": 2,
+          "problems": [
+            {
+              "category": null,
+              "credential": false,
+              "detail": "BOARD.md: T-2 has no [T-###] allocation event in the complete history (CORE-003 / SRC-026:R003)",
+              "detail_hash": "8c4bbcfbae977af2",
+              "finding_key": "76b48f23558dce11",
+              "rule_id": "unclassified",
+              "severity": "problem",
+              "subject_id": null,
+              "subject_kind": "global",
+              "subject_ref": null
+            },
+            {
+              "category": null,
+              "credential": false,
+              "detail": "lifecycle authority [saio] -- canonical lifecycle state stands on no operation: T-2 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it --",
+              "detail_hash": "f4e268e2f5cf60f1",
+              "finding_key": "76b48f23558dce11",
+              "rule_id": "unclassified",
+              "severity": "problem",
+              "subject_id": null,
+              "subject_kind": "global",
+              "subject_ref": null
+            }
+          ],
+          "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+          "ruleset_version": 1,
+          "status": "complete",
+          "warning_count": 4
+        },
+        "board_hash": "14141c7a9b3afda5",
+        "canonical_next_command": null,
+        "content_hash": "c6f546ed98a9a85e",
+        "exit_code": 1,
+        "external_actions": [],
+        "gate": "core",
+        "install_fingerprint": "install-v1:b3be846b6db91606a036700ae2aa1e8c7efbef34fc38b700f74aaed205cae5f6",
+        "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+        "kind": "conformance_receipt",
+        "log_hash": "3004be611ca48856",
+        "project_identity": "v:\\_temp_\\saipen-audit-inbox-i1w3cqow\\project",
+        "receipt_id": "receipt-3708caf47139",
+        "remediation_commands": [],
+        "schema_version": 2,
+        "source_head": "no-git",
+        "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+        "state_hash": "ab7cf9c648e85ff2",
+        "timestamp_utc": "2026-10-10T01:27:10.534459Z",
+        "validator_protocol_version": "1",
+        "verdict": "FAIL"
+      },
+      "validator": {
+        "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "validator_protocol_version": "1",
+        "project_protocol_version": "7",
+        "gate": "core",
+        "source_head": "no-git",
+        "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4"
+      }
+    },
+    "install_identity": {
+      "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "install_fingerprint": "install-v1:b3be846b6db91606a036700ae2aa1e8c7efbef34fc38b700f74aaed205cae5f6",
+      "mismatch": null
+    },
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+    "canonical_next_command": null,
+    "repair_status": "ENGINEERING_REQUIRED",
+    "diagnostic": {
+      "kind": "ENGINEERING_REQUIRED",
+      "owner": "SAIPEN conformance/remediation",
+      "receipt_id": "receipt-3708caf47139",
+      "findings_status": "complete",
+      "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+    },
+    "terminal": true
+  },
+  "fast_errors": [],
+  "ledger_errors": [],
+  "canonical_docs_unchanged": true
+}

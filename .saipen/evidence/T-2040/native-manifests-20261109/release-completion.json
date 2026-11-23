@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "pytest",
+    "-v",
+    "--tb=short",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_release_completion.py"
+  ],
+  "format": "pytest",
+  "context": [
+    ".cbmignore",
+    ".claude",
+    ".freebuff",
+    ".gitattributes",
+    ".github",
+    ".gitignore",
+    ".mcp.json",
+    "BROCHURE_DED.md",
+    "BROCHURE_EN.md",
+    "BROCHURE_ET.md",
+    "BROCHURE_JA.md",
+    "BROCHURE_RU.md",
+    "CHANGELOG.md",
+    "CHANGELOG_ARCHIVE.md",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "GUIDE.md",
+    "KNOWLEDGE",
+    "LICENSE",
+    "README.ded.md",
+    "README.ee.md",
+    "README.ja.md",
+    "README.md",
+    "RECOVER_ROADMAP",
+    "SECURITY.md",
+    "SPEC.md",
+    "SUPPORT.md",
+    "THIRD_PARTY_NOTICES.md",
+    "VERSION",
+    "assets",
+    "audit",
+    "bin",
+    "bootstrap",
+    "desktop.ini",
+    "docs",
+    "evidence",
+    "extensions",
+    "future_gate",
+    "guides",
+    "provable",
+    "ruff.toml",
+    "saipen",
+    "src",
+    "tests",
+    "tools"
+  ],
+  "oracle_files": [
+    "tools/test_release_completion.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/isolated_release.py"
+  ],
+  "before": {
+    "tools/saipen_engine/isolated_release.py": ".saipen/evidence/T-2040/release-completion-fixture-20261108/isolated_release.py.before"
+  },
+  "timeout": 360
+}

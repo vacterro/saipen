@@ -1,0 +1,61 @@
+{
+  "scope": "DISPOSABLE COPY ONLY",
+  "valid_control": {
+    "retrospective": true,
+    "cycle_id": "imp-t1803-20261016-1",
+    "status": "archived",
+    "seats": [
+      {
+        "seat_id": "probe-01",
+        "role": "core",
+        "report_path": "saipen_improve_PROBE.md",
+        "report_status": "draft",
+        "availability": "expected",
+        "has_content": true,
+        "retire_reason": "",
+        "findings": [
+          "probe-01/saipen_improve_PROBE.md#RUN-1/IMP-001",
+          "probe-01/saipen_improve_PROBE.md#RUN-1/IMP-002"
+        ]
+      },
+      {
+        "seat_id": "probe-02",
+        "role": "core",
+        "report_path": "saipen_improve_PROBE.md",
+        "report_status": "draft",
+        "availability": "expected",
+        "has_content": false,
+        "retire_reason": "",
+        "findings": []
+      }
+    ],
+    "pending_findings": [
+      {
+        "seat_id": "probe-01",
+        "report": "probe-01/saipen_improve_PROBE.md",
+        "finding_ref": "RUN-1/IMP-002",
+        "severity": "P2",
+        "class": "LOGIC_ERROR",
+        "expected": "finding 2 remains accounted",
+        "actual": "finding 2 needs a disposition",
+        "evidence": "T-1434 M4 fixture finding 2",
+        "disposition": null
+      }
+    ],
+    "pending_findings_known": true,
+    "blocked": false,
+    "stale": true,
+    "settled": false,
+    "canonical_next_command": "saipen improve sweep-queue imp-t1803-20261016-1",
+    "reconciliation": {
+      "record": ".saipen/improve-reconciliation/imp-t1803-20261016-1.jsonl",
+      "events": 1,
+      "sealed": false,
+      "outcome": null
+    }
+  },
+  "exception": {
+    "type": "AttributeError",
+    "message": "'list' object has no attribute 'items'"
+  }
+}

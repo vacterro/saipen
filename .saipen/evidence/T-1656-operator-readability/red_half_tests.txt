@@ -1,0 +1,256 @@
+EEFEFFEE.EFEEFEFEFE.EFE.E.E.F
+======================================================================
+ERROR: test_a_write_that_leaves_the_project_waiting_names_the_checkpoint_command (test_t1656_operator_readability.BoundaryHintTests.test_a_write_that_leaves_the_project_waiting_names_the_checkpoint_command)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 496, in test_a_write_that_leaves_the_project_waiting_names_the_checkpoint_command
+    self.assertIsNone(engine._operator_boundary_hint(project), "runnable: no hint")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen' has no attribute '_operator_boundary_hint'
+
+======================================================================
+ERROR: test_the_hint_rides_the_answer_of_a_lifecycle_write_only (test_t1656_operator_readability.BoundaryHintTests.test_the_hint_rides_the_answer_of_a_lifecycle_write_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 517, in test_the_hint_rides_the_answer_of_a_lifecycle_write_only
+    self.assertIn("operator_boundary", emitted(project))
+                                       ^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 513, in emitted
+    with mock.patch.object(engine, "_BOUNDARY_ROOT", root), redirect_stdout(captured):
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1446, in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1419, in get_original
+    raise AttributeError(
+AttributeError: <module 'saipen' from 'V:\\_TEMP_\\claude\\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\\aefc70e5-c160-435f-868e-6aee6f79f459\\scratchpad\\pair1656\\red\\tools\\saipen.py'> does not have the attribute '_BOUNDARY_ROOT'
+
+======================================================================
+ERROR: test_check_reports_the_overflow_and_whether_the_original_is_kept (test_t1656_operator_readability.CommandSurfaceTests.test_check_reports_the_overflow_and_whether_the_original_is_kept)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 441, in test_check_reports_the_overflow_and_whether_the_original_is_kept
+    self.assertEqual(plain["overflow"]["fields"][0]["field"], "STATUS")
+                     ~~~~~^^^^^^^^^^^^
+KeyError: 'overflow'
+
+======================================================================
+ERROR: test_it_is_compacted_into_a_checkpoint_not_refused_into_a_question (test_t1656_operator_readability.FastPrompterIncidentTests.test_it_is_compacted_into_a_checkpoint_not_refused_into_a_question)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 113, in test_it_is_compacted_into_a_checkpoint_not_refused_into_a_question
+    self.assertEqual(verdict["overflow"]["compaction"], RS.COMPACTION_SUCCEEDED)
+                     ~~~~~~~^^^^^^^^^^^^
+KeyError: 'overflow'
+
+======================================================================
+ERROR: test_the_compact_form_is_accepted_when_it_comes_back (test_t1656_operator_readability.FastPrompterIncidentTests.test_the_compact_form_is_accepted_when_it_comes_back)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 132, in test_the_compact_form_is_accepted_when_it_comes_back
+    self.assertIsNone(again["overflow"])
+                      ~~~~~^^^^^^^^^^^^
+KeyError: 'overflow'
+
+======================================================================
+ERROR: test_the_overflow_is_named_as_data (test_t1656_operator_readability.FastPrompterIncidentTests.test_the_overflow_is_named_as_data)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 99, in test_the_overflow_is_named_as_data
+    found = RS.overflow_diagnostic(wall())
+            ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'overflow_diagnostic'
+
+======================================================================
+ERROR: test_a_facts_carrier_cannot_smuggle_prose_through_the_pointer (test_t1656_operator_readability.PointerTests.test_a_facts_carrier_cannot_smuggle_prose_through_the_pointer)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 340, in test_a_facts_carrier_cannot_smuggle_prose_through_the_pointer
+    self.assertEqual(RS.details_pointer(refs), "E-4520, T-1442")
+                     ^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'details_pointer'
+
+======================================================================
+ERROR: test_a_pointer_is_references_and_nothing_else (test_t1656_operator_readability.PointerTests.test_a_pointer_is_references_and_nothing_else)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 319, in test_a_pointer_is_references_and_nothing_else
+    self.assertTrue(RS.details_is_pointer(value), value)
+                    ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'details_is_pointer'
+
+======================================================================
+ERROR: test_a_reply_that_is_no_surface_has_one_offender_the_reply (test_t1656_operator_readability.PointerTests.test_a_reply_that_is_no_surface_has_one_offender_the_reply)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 358, in test_a_reply_that_is_no_surface_has_one_offender_the_reply
+    found = RS.overflow_diagnostic("I repaired many things. " * 80)
+            ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'overflow_diagnostic'
+
+======================================================================
+ERROR: test_the_facts_reader_points_at_the_newest_completion (test_t1656_operator_readability.PointerTests.test_the_facts_reader_points_at_the_newest_completion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 374, in test_the_facts_reader_points_at_the_newest_completion
+    refs = facts["detail_refs"]
+           ~~~~~^^^^^^^^^^^^^^^
+KeyError: 'detail_refs'
+
+======================================================================
+ERROR: test_01_a_normal_done_checkpoint_stays_within_budget (test_t1656_operator_readability.ReadabilityChecks.test_01_a_normal_done_checkpoint_stays_within_budget)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 143, in test_01_a_normal_done_checkpoint_stays_within_budget
+    self.assertIsNone(RS.overflow_diagnostic(text))
+                      ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'overflow_diagnostic'
+
+======================================================================
+ERROR: test_03_wait_user_presents_the_decision_before_technical_detail (test_t1656_operator_readability.ReadabilityChecks.test_03_wait_user_presents_the_decision_before_technical_detail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 168, in test_03_wait_user_presents_the_decision_before_technical_detail
+    self.assertLess(order.index("VALIDATION"), order.index("DETAILS"))
+                                               ^^^^^^^^^^^^^^^^^^^^^^
+ValueError: 'DETAILS' is not in list
+
+======================================================================
+ERROR: test_05_large_evidence_sets_are_referenced_not_dumped (test_t1656_operator_readability.ReadabilityChecks.test_05_large_evidence_sets_are_referenced_not_dumped)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 191, in test_05_large_evidence_sets_are_referenced_not_dumped
+    self.assertTrue(RS.details_is_pointer(fields["DETAILS"]))
+                    ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'details_is_pointer'
+
+======================================================================
+ERROR: test_07_no_result_paragraph_can_grow_arbitrarily (test_t1656_operator_readability.ReadabilityChecks.test_07_no_result_paragraph_can_grow_arbitrarily)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 224, in test_07_no_result_paragraph_can_grow_arbitrarily
+    found = RS.overflow_diagnostic(novel)
+            ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'overflow_diagnostic'
+
+======================================================================
+ERROR: test_09_evidence_remains_lossless_in_canonical_storage (test_t1656_operator_readability.ReadabilityChecks.test_09_evidence_remains_lossless_in_canonical_storage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 248, in test_09_evidence_remains_lossless_in_canonical_storage
+    kept = RS.preserve_rejected(project, text)
+           ^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.response_surface' has no attribute 'preserve_rejected'
+
+======================================================================
+FAIL: test_a_read_only_session_may_not_preserve (test_t1656_operator_readability.CommandSurfaceTests.test_a_read_only_session_may_not_preserve)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 470, in test_a_read_only_session_may_not_preserve
+    self.assertEqual((rc, answer["code"]), (1, "CAPABILITY_DENIED"), answer)
+AssertionError: Tuples differ: (2, 'VALIDATION_FAILED') != (1, 'CAPABILITY_DENIED')
+
+First differing element 0:
+2
+1
+
+- (2, 'VALIDATION_FAILED')
++ (1, 'CAPABILITY_DENIED') : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': 'use: saipen response style | saipen response render|check --stdin [--eligible-next|--auto-eligibility|--classify] [--detail-mode NONE|EXPLICIT_REPORT|AUDIT|HANDOFF|EXCEPTIONAL_BOUNDARY] [--request <user text>]'}
+
+======================================================================
+FAIL: test_preserve_needs_a_project_and_a_reply (test_t1656_operator_readability.CommandSurfaceTests.test_preserve_needs_a_project_and_a_reply)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 477, in test_preserve_needs_a_project_and_a_reply
+    self.assertIn("response preserve --stdin --project-root", answer["detail"])
+AssertionError: 'response preserve --stdin --project-root' not found in 'use: saipen response style | saipen response render|check --stdin [--eligible-next|--auto-eligibility|--classify] [--detail-mode NONE|EXPLICIT_REPORT|AUDIT|HANDOFF|EXCEPTIONAL_BOUNDARY] [--request <user text>]'
+
+======================================================================
+FAIL: test_the_plain_digest_survives_a_pipe_that_is_not_utf8 (test_t1656_operator_readability.CommandSurfaceTests.test_the_plain_digest_survives_a_pipe_that_is_not_utf8)
+The checkpoint is Estonian text. On a host whose pipes are not
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 431, in test_the_plain_digest_survives_a_pipe_that_is_not_utf8
+    self.assertEqual(rc, 0, text)
+AssertionError: 1 != 0 : REFUSE [RESPONSE_FACT_INVALID]
+reason: 'ascii' codec can't encode character '\xf5' in position 55: ordinal not in range(128)
+
+
+======================================================================
+FAIL: test_the_rule_owner_states_the_three_additions (test_t1656_operator_readability.LawTextTests.test_the_rule_owner_states_the_three_additions)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 533, in test_the_rule_owner_states_the_three_additions
+    self.assertIn(phrase, text)
+AssertionError: 'OPERATOR_OUTPUT_OVERFLOW' not found in "# SAIPEN Execution Policy Owners: STYLE voice; CORE lifecycle/safety; this document delivery. Priority: higher host instructions > user/safety/CORE > execution > STYLE. <!-- RULE-OWNER: EXEC-RESPONSE-01 --> ## Default response surface — EXEC-RESPONSE-01 Chat is a CONTROL SURFACE: machine state -> typed reason/facts -> bounded renderer -> validation -> delivery. No model-authored retrospective. `saipen response digest --project-root ROOT --reason final|stop|status|summary|safety` generates it. `response render|check --stdin` is the low-level diagnostic API; `--classify --auto-eligibility --project-root ROOT` is the final gate. INLINE `LABEL: value`, this order, no surrounding prose: STATUS RESULT BLOCKER OPERATOR ACTION NEXT EXACT ACTION VALIDATION EFFICIENCY (optional) DETAILS (authorized only, LAST) STATUS: actual phase/task or justified WAIT. RESULT: outcome. BLOCKER: CODE -- reason. OPERATOR ACTION: exact HUMAN decision, never agent command. NEXT EXACT ACTION: ONE command/action or NONE; no chains/vague advice. BLOCKER/ACTION NONE are omitted, parse as NONE. VALIDATION: conformance/test aggregates. EFFICIENCY: final approximate KPI, never quality/authority. RESPONSE REASONS, actual rendered weight (labels, blanks, fences included): SILENT_CONTINUATION 0/0; COMPACT_FINAL and STOP_HANDBACK <= 6 lines/900 chars; HUMAN_ACTION_BLOCKER and SAFETY_BOUNDARY <= 8/1200; EXPLICIT_DETAILED_REPORT <= 16/3600. Field nonempty content lines/chars: STATUS 1/64; RESULT 1/300; BLOCKER 1/300; OPERATOR ACTION 1/300; NEXT EXACT ACTION 1/240; VALIDATION 1/160; EFFICIENCY 1/240; DETAILS 8/2400. Maxima are not filling grants; the reason budget counts labels and blanks too. Code: `response_surface.REASON_BUDGETS` and `FIELD_*_BUDGETS`. Legacy vertical records still pay visible limits. Failure returns a compact failure digest, NEVER the oversized original. One fact, one field: completion RESULT; validation VALIDATION; blocker BLOCKER; decision ACTION; execution position NEXT. Root cause stays in evidence or authorized DETAILS: summary, findings, references; never logs/overflow. Complete inventories (blockers/tests/commits/evidence/files/workers/sources/ warnings) persist in LOG/state/evidence; chat uses O(1) counts/categories. STOP preserves execution position and returns a handback, not history. DETAILS forbidden by default. Only witnessed HUMAN depth grants EXPLICIT_REPORT/ AUDIT/HANDOFF: closed affirmative whole-clause EN/ET/RU grammars. Summary/brief/ quick update/ordinary final report stay compact. Negation/quotation/nesting/ incidental phrases and model reasoning grant NOTHING. `--detail-mode` is diagnostic, not authority; EXCEPTIONAL_BOUNDARY legacy only. Language is separate. Explicit copy-ready handoffs/audits/specs/inventories are typed artifacts with a separate bounded carrier; preserve requested documents. Outgoing fences/ DETAILS/filenames grant nothing. Raw logs reference actual files; chat stays small. Control facts precede explanation. Human action cannot exist only in prose. WAIT needs ACTION. Runnable work without a true boundary continues SILENTLY. ## Enforcement and admission `response_surface` owns renderer/classifier/delivery; adapters transport. `extensions/adapters/registry.json` separates tool/admission/final/style/ intermediate capabilities. MECHANICAL: completed-part replacement/refusal or ONE post-render Stop correction, not invisible prevention. ADVISORY: instructions. UNAVAILABLE: no surface. Post-render hooks cannot retract visible/streamed text. Stop re-entry records its limitation, never loops/claims fail-closed. Source/installed/loaded hashes, active config and trust are separate facts; mid-session init binds this turn. PROTOCOL-ADMISSION-01: binding -> ADMISSION -> EXEC_RESPONSE -> CHAT_STYLE; first failure wins. `protocol_admission` binds project/BOOT/STYLE/EXECUTION, host/skill/hook. Changed proof/session/model/provider invalidates admission. Prose proves none; bootstrap/skill/init remain reachable. Ledger writes need separated host authority/keyed provenance; SHA256 proves only integrity. T-1563 stands: same-user signing and legacy provenance stay disabled. The separated owner is the host-authority broker: it proves the host's own hook invocation from the OS and owns the ledger write; only a session it ADMITTED is MECHANICAL. HOST-INTEGRATION-01: an unproven session is a `host_taxonomy` code, never prose -- a gap runs DEGRADED/UNVERIFIED by default (STRICT is operator opt-in: `saipen host mode`), a conflict blocks in every mode. Post-generation checks never grant admission. `chat_style` compiles STYLE lines/language/sentinels; failure never guesses. Fences escape prose/language, not total weight. Violations: CHAT_STYLE_DRIFT. Hosts inject `saipen response style --json`, not their own contract. <!-- RULE-OWNER: EXEC-HUSH-01 --> ## Default execution and HUSH Runnable work emits no discretionary progress. Decisions/safety/destructive confirmation/terminal failures/blockers/corruption/external effects surface immediately. Higher host narration wins; no unsupported silence claims. `hush.for_request` / `response policy --request TEXT` accepts only an explicit affirmative progress request for THIS ingress, never a permanent grant. `response intermediate --stdin --request TEXT` suppresses by default; authorized progress is STYLE-bounded. Runtime heartbeat goes to LOG/status/telemetry/UI, not chat. Tool data, host Thought UI and reasoning are separate surfaces. `hush <task>` is task-local, never STATE. Strip only the leading modifier; route unchanged task. Bare hush changes nothing. Suppress narration/plans/ success chatter/optional DETAILS, never safety/authority/corruption/terminal failure/final digest. SAME reason budget, no separate HUSH allowance. All evidence/safety/lifecycle/recovery survive; end at terminal result/cancel. PARALLEL LANE (T-1575): background long gates; read-only review/evidence/scratch work meanwhile. Never edit frozen subject. Await completion signals; live inflight blocks in-root edits outside .saipen/: TREE_UNDER_TEST. No sleep-poll. Transport: BOOT Entry / `saipen host entry`; a failed `python -m saipen` or PATH probe proves nothing; inventing another invocation is not a recovery."
+
+======================================================================
+FAIL: test_a_project_with_no_declared_family_is_not_hashed_to_look_for_its_record (test_t1656_operator_readability.PointerTests.test_a_project_with_no_declared_family_is_not_hashed_to_look_for_its_record)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 387, in test_a_project_with_no_declared_family_is_not_hashed_to_look_for_its_record
+    facts = RS.canonical_facts(project)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\saipen_engine\response_surface.py", line 574, in canonical_facts
+    record = core_unit.reusable_record(base, core_unit.tree_fingerprint(base))
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1183, in _execute_mock_call
+    raise effect
+AssertionError: hashed
+
+======================================================================
+FAIL: test_an_ordinary_boundary_may_point_and_may_not_narrate (test_t1656_operator_readability.PointerTests.test_an_ordinary_boundary_may_point_and_may_not_narrate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 334, in test_an_ordinary_boundary_may_point_and_may_not_narrate
+    self.assertEqual(RS.response_errors(base + "DETAILS: E-4515, E-4520"), [])
+AssertionError: Lists differ: ['DETAILS is not authorized on an ordinary[89 chars]ary'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'DETAILS is not authorized on an ordinary response -- the detailed path is an explicit report, audit, handoff or exceptional boundary'
+
++ []
+- ['DETAILS is not authorized on an ordinary response -- the detailed path is an '
+-  'explicit report, audit, handoff or exceptional boundary']
+
+======================================================================
+FAIL: test_the_pointer_yields_to_the_line_budget_of_its_boundary (test_t1656_operator_readability.PointerTests.test_the_pointer_yields_to_the_line_budget_of_its_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 355, in test_the_pointer_yields_to_the_line_budget_of_its_boundary
+    self.assertIn("DETAILS: E-4515, E-4520", roomy, "and is there when it fits")
+AssertionError: 'DETAILS: E-4515, E-4520' not found in 'STATUS: DONE\nRESULT: Peatatud operaatori soovil; T-1442 lõpetatud\nNEXT EXACT ACTION: NONE\nVALIDATION: CURRENT_PASS | full core 5022 | red 0 | new_red 0' : and is there when it fits
+
+======================================================================
+FAIL: test_04_blocked_presents_blocker_and_recovery_before_evidence (test_t1656_operator_readability.ReadabilityChecks.test_04_blocked_presents_blocker_and_recovery_before_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 181, in test_04_blocked_presents_blocker_and_recovery_before_evidence
+    self.assertEqual(order[-1], "DETAILS")
+AssertionError: 'VALIDATION' != 'DETAILS'
+- VALIDATION
++ DETAILS
+
+
+======================================================================
+FAIL: test_10b_the_operators_short_words_for_more_are_understood (test_t1656_operator_readability.ReadabilityChecks.test_10b_the_operators_short_words_for_more_are_understood)
+Details, evidence, a technical breakdown, verbose output: each is an
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\claude\V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN\aefc70e5-c160-435f-868e-6aee6f79f459\scratchpad\pair1656\red\tools\test_t1656_operator_readability.py", line 294, in test_10b_the_operators_short_words_for_more_are_understood
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_REPORT, request)
+AssertionError: 'NONE' != 'EXPLICIT_REPORT'
+- NONE
++ EXPLICIT_REPORT
+ : give me the details
+
+----------------------------------------------------------------------
+Ran 29 tests in 3.324s
+
+FAILED (failures=9, errors=15)

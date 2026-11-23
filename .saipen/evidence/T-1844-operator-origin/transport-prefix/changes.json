@@ -1,0 +1,30 @@
+{
+  "tools/test_t1293_valve_resume_audit_route.py": {
+    "before": "0671bf03c1fabf8b117aac476e55d0146ef6c9c7ca4c6d2669c51aec403bb684",
+    "after": "9da8940973860337df93a433bfc61c8d2f7a78e82fc4cb1540f867685d69fb82"
+  },
+  "tools/test_intent_audit_fixes.py": {
+    "before": "ccefa87cd97dabaa23d3338476097e370b74bb18e2fa709c02624008324e15b0",
+    "after": "ba4ba469a20acaaa23633f30f5145273e9a9d508f74848b0e720437f45885c87"
+  },
+  "tools/test_public_closure_cli.py": {
+    "before": "b1863294423d31a1ce0810d26c225afbb66ba03047dcfde8f79f1e596cee86d5",
+    "after": "52b29195f1cd103e595a184fedd17e5b030f671fb582582d832c7f4f2263bcf5"
+  },
+  "tools/test_t1501_entry_resolver.py": {
+    "before": "857cabf96e38beee55765d3a57a49fbd1847ea16ecc922240999e12bada1d1e3",
+    "after": "dec8b7b3beecb10ecbe77d0d64454d97024e60a584719a922c1e14754b744250"
+  },
+  "tools/test_recovery_reachability.py": {
+    "before": "589e67b68c2ffbf39f622c5070491c7531cd92e260b40d71c2ed54c49bf19e08",
+    "after": "22310eb8618324592dbe5e6cd2d3dc7c0a85be952dc7cfbcadb24a64035b8817"
+  },
+  "tools/test_t1474_start_goal_entry.py": {
+    "before": "9a1d83e791d0c9d2605b164c866e0fdc6f3809cfc151827d715cfd60030f6fbb",
+    "after": "cd0f605e47230b54028c161d6fdf6c1c94308a7d3f6bb40b6123f99ec625a3a6"
+  },
+  "tools/test_t1553_mid_session_activation.py": {
+    "before": "100950de039cad344436aba5bd1f3c14d3bcc9eb9a28ec9a4694c3d1d16a6414",
+    "after": "83a3c861ef2f6f8019e9cba9453983bf5f5d2998a9884794352b8dd5a9211cc8"
+  }
+}

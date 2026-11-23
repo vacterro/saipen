@@ -1,0 +1,37 @@
+PASS: nitro-m3 -- plan_claim returns a dry-run plan with no refusal
+PASS: nitro-m3 -- plan writes zero canonical bytes
+PASS: nitro-m3 -- apply_claim commits the claim
+PASS: nitro-m3 -- claim moves exactly one ticket to DOING with / checkbox
+PASS: nitro-m3 -- claim sets STATE to SCOUT/T-777 with a new event
+PASS: nitro-m3 -- claim appends exactly one LOG event with a real taxonomy
+PASS: nitro-m3 -- a same-agent re-claim refreshes the lease in place (no duplicate)
+PASS: nitro-m3 -- a live foreign claim cannot be taken over (TICKET_NOT_WORKABLE)
+PASS: nitro-m3 -- an illegal transition is refused with ILLEGAL_TRANSITION
+PASS: nitro-m3 -- transition dry-run writes zero canonical bytes
+PASS: nitro-m3 -- SCOUT->BUILD transition commits with a new event
+PASS: nitro-m3 -- checkpoint appends exactly one event with an allocated E-ID
+PASS: nitro-m3 -- checkpoint bumps STATE last_event to the new event
+PASS: nitro-m3 -- next_ticket_id ignores prose T-NNN mentions (structured-only)
+PASS: nitro-m3 -- next_ticket_id ignores LOG prose T-NNN mentions
+PASS: nitro-m3 -- ticket_add creates a canonical ticket
+PASS: nitro-m3 -- done on a TODO ticket is refused (IL_LEGAL_TICKET_LIFECYCLE)
+PASS: nitro-m3 -- refused done writes zero canonical bytes
+PASS: nitro-m3 -- done on the active DOING ticket succeeds and moves it to DONE
+PASS: nitro-m3 -- claim of the topmost workable ticket succeeds
+PASS: nitro-m3 -- legal DOING->DONE lifecycle succeeds
+PASS: nitro-m3 -- reauthorize_valve refuses a valve that has not tripped
+PASS: nitro-m3 -- set_goal_intent pivots to goal with counters from 0
+PASS: nitro-m3 -- set_goal_intent preserves phase/task (not a claim)
+PASS: nitro-m3 -- stop_checkpoint writes a resumable next_action
+PASS: nitro-m3 -- goal_entry precondition: active DOING ticket T-1 at BUILD
+PASS: nitro-m3 -- goal_entry succeeds with GOAL_SET
+PASS: nitro-m3 -- goal_entry sets execution_intent to goal
+PASS: nitro-m3 -- goal_entry sets task to first plan ticket
+PASS: nitro-m3 -- goal_entry demotes active DOING ticket to TODO
+PASS: nitro-m3 -- goal_entry logs a pivot DEC event
+PASS: nitro-m3 -- goal_entry logs the recoverable Entry PLAN wave bump
+PASS: nitro-m3 -- goal_entry cold-start routes to the plan ticket
+PASS: nitro-m3 -- no-active precondition: task is none
+PASS: nitro-m3 -- goal_entry with no active ticket still sets goal intent
+PASS: nitro-m3 -- goal_entry redacts ghp_ credentials in LOG
+{"problems": [], "checked": 36}

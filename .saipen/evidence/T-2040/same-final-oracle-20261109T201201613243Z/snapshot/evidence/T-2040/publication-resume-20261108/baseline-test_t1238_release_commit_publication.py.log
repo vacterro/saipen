@@ -1,0 +1,10 @@
+test_a_bare_commit_field_still_works (test_t1238_release_commit_publication.ReleaseCommitPublicationTests.test_a_bare_commit_field_still_works) ... ok
+test_a_receipt_with_no_commit_is_still_in_flight (test_t1238_release_commit_publication.ReleaseCommitPublicationTests.test_a_receipt_with_no_commit_is_still_in_flight)
+The guard this fix touches is 'no commit, no publication'. ... ok
+test_a_receipt_with_release_commit_is_publication_evidence (test_t1238_release_commit_publication.ReleaseCommitPublicationTests.test_a_receipt_with_release_commit_is_publication_evidence) ... ok
+test_an_unknown_version_still_refuses (test_t1238_release_commit_publication.ReleaseCommitPublicationTests.test_an_unknown_version_still_refuses) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.038s
+
+OK

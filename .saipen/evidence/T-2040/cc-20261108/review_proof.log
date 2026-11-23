@@ -1,0 +1,791 @@
+....FFFF.F                                  [100%]
+================================== FAILURES ===================================
+_ ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata (field='record', value='wrong-record') _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_collect_verifier_requires_exact_disposition_record_metadata>
+
+    def test_collect_verifier_requires_exact_disposition_record_metadata(self):
+        f = self.fixture
+        metadata = self._reviewed_metadata()
+        manifest = f.root / subs.MANIFEST_REL
+        manifest.write_text(subs._manifest_with_collects(
+            manifest.read_text(encoding="utf-8"),
+            {original.ROLE: f.identity + "@2026-11-08T00:00:00Z"}), encoding="utf-8")
+        board = f.root / ".saipen/BOARD.md"
+        board.write_text(board.read_text(encoding="utf-8").replace(
+            "Core review", "Core review " + f.identity), encoding="utf-8")
+        disposition = {"op_id": "sub-disposition-00000009", "operation": "sub_disposition",
+            "status": "COMMITTED", "receipt_metadata": metadata,
+            "targets": [{"path": rel, "applied": True} for rel in (
+                ".saipen/LOG.md", ".saipen/STATE.md", f.outbox.relative_to(f.root).as_posix())]}
+        targets = [{"path": rel} for rel in (
+            ".saipen/LOG.md", ".saipen/BOARD.md", ".saipen/STATE.md", subs.MANIFEST_REL)]
+        with mock.patch("saipen_engine.fast_check.validate_project", return_value=[]), \
+                mock.patch.object(journal, "semantic_receipt_snapshot", side_effect=lambda _root:
+                                  (tuple([*f.records, disposition]), ())):
+            def check():
+                return journal.verify_sub_collect(f.root, targets,
+                                                   {"producers": [original.ROLE]})
+            self.assertEqual(check(), [])
+            for key in ("record", "record_sha256"):
+                legacy = dict(metadata)
+                legacy.pop(key)
+                disposition["receipt_metadata"] = legacy
+                self.assertEqual(check(), [])
+                for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                    disposition["receipt_metadata"] = {**metadata, key: value}
+                    with self.subTest(field=key, value=value):
+>                       self.assertTrue(check(), "collect verifier laundered unbound disposition")
+E                       AssertionError: [] is not true : collect verifier laundered unbound disposition
+
+tools\test_t2040_review_proof_binding.py:165: AssertionError
+_ ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata (field='record', value=None) _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_collect_verifier_requires_exact_disposition_record_metadata>
+
+    def test_collect_verifier_requires_exact_disposition_record_metadata(self):
+        f = self.fixture
+        metadata = self._reviewed_metadata()
+        manifest = f.root / subs.MANIFEST_REL
+        manifest.write_text(subs._manifest_with_collects(
+            manifest.read_text(encoding="utf-8"),
+            {original.ROLE: f.identity + "@2026-11-08T00:00:00Z"}), encoding="utf-8")
+        board = f.root / ".saipen/BOARD.md"
+        board.write_text(board.read_text(encoding="utf-8").replace(
+            "Core review", "Core review " + f.identity), encoding="utf-8")
+        disposition = {"op_id": "sub-disposition-00000009", "operation": "sub_disposition",
+            "status": "COMMITTED", "receipt_metadata": metadata,
+            "targets": [{"path": rel, "applied": True} for rel in (
+                ".saipen/LOG.md", ".saipen/STATE.md", f.outbox.relative_to(f.root).as_posix())]}
+        targets = [{"path": rel} for rel in (
+            ".saipen/LOG.md", ".saipen/BOARD.md", ".saipen/STATE.md", subs.MANIFEST_REL)]
+        with mock.patch("saipen_engine.fast_check.validate_project", return_value=[]), \
+                mock.patch.object(journal, "semantic_receipt_snapshot", side_effect=lambda _root:
+                                  (tuple([*f.records, disposition]), ())):
+            def check():
+                return journal.verify_sub_collect(f.root, targets,
+                                                   {"producers": [original.ROLE]})
+            self.assertEqual(check(), [])
+            for key in ("record", "record_sha256"):
+                legacy = dict(metadata)
+                legacy.pop(key)
+                disposition["receipt_metadata"] = legacy
+                self.assertEqual(check(), [])
+                for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                    disposition["receipt_metadata"] = {**metadata, key: value}
+                    with self.subTest(field=key, value=value):
+>                       self.assertTrue(check(), "collect verifier laundered unbound disposition")
+E                       AssertionError: [] is not true : collect verifier laundered unbound disposition
+
+tools\test_t2040_review_proof_binding.py:165: AssertionError
+_ ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata (field='record', value=7) _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_collect_verifier_requires_exact_disposition_record_metadata>
+
+    def test_collect_verifier_requires_exact_disposition_record_metadata(self):
+        f = self.fixture
+        metadata = self._reviewed_metadata()
+        manifest = f.root / subs.MANIFEST_REL
+        manifest.write_text(subs._manifest_with_collects(
+            manifest.read_text(encoding="utf-8"),
+            {original.ROLE: f.identity + "@2026-11-08T00:00:00Z"}), encoding="utf-8")
+        board = f.root / ".saipen/BOARD.md"
+        board.write_text(board.read_text(encoding="utf-8").replace(
+            "Core review", "Core review " + f.identity), encoding="utf-8")
+        disposition = {"op_id": "sub-disposition-00000009", "operation": "sub_disposition",
+            "status": "COMMITTED", "receipt_metadata": metadata,
+            "targets": [{"path": rel, "applied": True} for rel in (
+                ".saipen/LOG.md", ".saipen/STATE.md", f.outbox.relative_to(f.root).as_posix())]}
+        targets = [{"path": rel} for rel in (
+            ".saipen/LOG.md", ".saipen/BOARD.md", ".saipen/STATE.md", subs.MANIFEST_REL)]
+        with mock.patch("saipen_engine.fast_check.validate_project", return_value=[]), \
+                mock.patch.object(journal, "semantic_receipt_snapshot", side_effect=lambda _root:
+                                  (tuple([*f.records, disposition]), ())):
+            def check():
+                return journal.verify_sub_collect(f.root, targets,
+                                                   {"producers": [original.ROLE]})
+            self.assertEqual(check(), [])
+            for key in ("record", "record_sha256"):
+                legacy = dict(metadata)
+                legacy.pop(key)
+                disposition["receipt_metadata"] = legacy
+                self.assertEqual(check(), [])
+                for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                    disposition["receipt_metadata"] = {**metadata, key: value}
+                    with self.subTest(field=key, value=value):
+>                       self.assertTrue(check(), "collect verifier laundered unbound disposition")
+E                       AssertionError: [] is not true : collect verifier laundered unbound disposition
+
+tools\test_t2040_review_proof_binding.py:165: AssertionError
+_ ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata (field='record', value=[]) _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_collect_verifier_requires_exact_disposition_record_metadata>
+
+    def test_collect_verifier_requires_exact_disposition_record_metadata(self):
+        f = self.fixture
+        metadata = self._reviewed_metadata()
+        manifest = f.root / subs.MANIFEST_REL
+        manifest.write_text(subs._manifest_with_collects(
+            manifest.read_text(encoding="utf-8"),
+            {original.ROLE: f.identity + "@2026-11-08T00:00:00Z"}), encoding="utf-8")
+        board = f.root / ".saipen/BOARD.md"
+        board.write_text(board.read_text(encoding="utf-8").replace(
+            "Core review", "Core review " + f.identity), encoding="utf-8")
+        disposition = {"op_id": "sub-disposition-00000009", "operation": "sub_disposition",
+            "status": "COMMITTED", "receipt_metadata": metadata,
+            "targets": [{"path": rel, "applied": True} for rel in (
+                ".saipen/LOG.md", ".saipen/STATE.md", f.outbox.relative_to(f.root).as_posix())]}
+        targets = [{"path": rel} for rel in (
+            ".saipen/LOG.md", ".saipen/BOARD.md", ".saipen/STATE.md", subs.MANIFEST_REL)]
+        with mock.patch("saipen_engine.fast_check.validate_project", return_value=[]), \
+                mock.patch.object(journal, "semantic_receipt_snapshot", side_effect=lambda _root:
+                                  (tuple([*f.records, disposition]), ())):
+            def check():
+                return journal.verify_sub_collect(f.root, targets,
+                                                   {"producers": [original.ROLE]})
+            self.assertEqual(check(), [])
+            for key in ("record", "record_sha256"):
+                legacy = dict(metadata)
+                legacy.pop(key)
+                disposition["receipt_metadata"] = legacy
+                self.assertEqual(check(), [])
+                for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                    disposition["receipt_metadata"] = {**metadata, key: value}
+                    with self.subTest(field=key, value=value):
+>                       self.assertTrue(check(), "collect verifier laundered unbound disposition")
+E                       AssertionError: [] is not true : collect verifier laundered unbound disposition
+
+tools\test_t2040_review_proof_binding.py:165: AssertionError
+_ ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata (field='record_sha256', value='0000000000000000000000000000000000000000000000000000000000000000') _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_collect_verifier_requires_exact_disposition_record_metadata>
+
+    def test_collect_verifier_requires_exact_disposition_record_metadata(self):
+        f = self.fixture
+        metadata = self._reviewed_metadata()
+        manifest = f.root / subs.MANIFEST_REL
+        manifest.write_text(subs._manifest_with_collects(
+            manifest.read_text(encoding="utf-8"),
+            {original.ROLE: f.identity + "@2026-11-08T00:00:00Z"}), encoding="utf-8")
+        board = f.root / ".saipen/BOARD.md"
+        board.write_text(board.read_text(encoding="utf-8").replace(
+            "Core review", "Core review " + f.identity), encoding="utf-8")
+        disposition = {"op_id": "sub-disposition-00000009", "operation": "sub_disposition",
+            "status": "COMMITTED", "receipt_metadata": metadata,
+            "targets": [{"path": rel, "applied": True} for rel in (
+                ".saipen/LOG.md", ".saipen/STATE.md", f.outbox.relative_to(f.root).as_posix())]}
+        targets = [{"path": rel} for rel in (
+            ".saipen/LOG.md", ".saipen/BOARD.md", ".saipen/STATE.md", subs.MANIFEST_REL)]
+        with mock.patch("saipen_engine.fast_check.validate_project", return_value=[]), \
+                mock.patch.object(journal, "semantic_receipt_snapshot", side_effect=lambda _root:
+                                  (tuple([*f.records, disposition]), ())):
+            def check():
+                return journal.verify_sub_collect(f.root, targets,
+                                                   {"producers": [original.ROLE]})
+            self.assertEqual(check(), [])
+            for key in ("record", "record_sha256"):
+                legacy = dict(metadata)
+                legacy.pop(key)
+                disposition["receipt_metadata"] = legacy
+                self.assertEqual(check(), [])
+                for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                    disposition["receipt_metadata"] = {**metadata, key: value}
+                    with self.subTest(field=key, value=value):
+>                       self.assertTrue(check(), "collect verifier laundered unbound disposition")
+E                       AssertionError: [] is not true : collect verifier laundered unbound disposition
+
+tools\test_t2040_review_proof_binding.py:165: AssertionError
+_ ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata (field='record_sha256', value=None) _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_collect_verifier_requires_exact_disposition_record_metadata>
+
+    def test_collect_verifier_requires_exact_disposition_record_metadata(self):
+        f = self.fixture
+        metadata = self._reviewed_metadata()
+        manifest = f.root / subs.MANIFEST_REL
+        manifest.write_text(subs._manifest_with_collects(
+            manifest.read_text(encoding="utf-8"),
+            {original.ROLE: f.identity + "@2026-11-08T00:00:00Z"}), encoding="utf-8")
+        board = f.root / ".saipen/BOARD.md"
+        board.write_text(board.read_text(encoding="utf-8").replace(
+            "Core review", "Core review " + f.identity), encoding="utf-8")
+        disposition = {"op_id": "sub-disposition-00000009", "operation": "sub_disposition",
+            "status": "COMMITTED", "receipt_metadata": metadata,
+            "targets": [{"path": rel, "applied": True} for rel in (
+                ".saipen/LOG.md", ".saipen/STATE.md", f.outbox.relative_to(f.root).as_posix())]}
+        targets = [{"path": rel} for rel in (
+            ".saipen/LOG.md", ".saipen/BOARD.md", ".saipen/STATE.md", subs.MANIFEST_REL)]
+        with mock.patch("saipen_engine.fast_check.validate_project", return_value=[]), \
+                mock.patch.object(journal, "semantic_receipt_snapshot", side_effect=lambda _root:
+                                  (tuple([*f.records, disposition]), ())):
+            def check():
+                return journal.verify_sub_collect(f.root, targets,
+                                                   {"producers": [original.ROLE]})
+            self.assertEqual(check(), [])
+            for key in ("record", "record_sha256"):
+                legacy = dict(metadata)
+                legacy.pop(key)
+                disposition["receipt_metadata"] = legacy
+                self.assertEqual(check(), [])
+                for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                    disposition["receipt_metadata"] = {**metadata, key: value}
+                    with self.subTest(field=key, value=value):
+>                       self.assertTrue(check(), "collect verifier laundered unbound disposition")
+E                       AssertionError: [] is not true : collect verifier laundered unbound disposition
+
+tools\test_t2040_review_proof_binding.py:165: AssertionError
+_ ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata (field='record_sha256', value=7) _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_collect_verifier_requires_exact_disposition_record_metadata>
+
+    def test_collect_verifier_requires_exact_disposition_record_metadata(self):
+        f = self.fixture
+        metadata = self._reviewed_metadata()
+        manifest = f.root / subs.MANIFEST_REL
+        manifest.write_text(subs._manifest_with_collects(
+            manifest.read_text(encoding="utf-8"),
+            {original.ROLE: f.identity + "@2026-11-08T00:00:00Z"}), encoding="utf-8")
+        board = f.root / ".saipen/BOARD.md"
+        board.write_text(board.read_text(encoding="utf-8").replace(
+            "Core review", "Core review " + f.identity), encoding="utf-8")
+        disposition = {"op_id": "sub-disposition-00000009", "operation": "sub_disposition",
+            "status": "COMMITTED", "receipt_metadata": metadata,
+            "targets": [{"path": rel, "applied": True} for rel in (
+                ".saipen/LOG.md", ".saipen/STATE.md", f.outbox.relative_to(f.root).as_posix())]}
+        targets = [{"path": rel} for rel in (
+            ".saipen/LOG.md", ".saipen/BOARD.md", ".saipen/STATE.md", subs.MANIFEST_REL)]
+        with mock.patch("saipen_engine.fast_check.validate_project", return_value=[]), \
+                mock.patch.object(journal, "semantic_receipt_snapshot", side_effect=lambda _root:
+                                  (tuple([*f.records, disposition]), ())):
+            def check():
+                return journal.verify_sub_collect(f.root, targets,
+                                                   {"producers": [original.ROLE]})
+            self.assertEqual(check(), [])
+            for key in ("record", "record_sha256"):
+                legacy = dict(metadata)
+                legacy.pop(key)
+                disposition["receipt_metadata"] = legacy
+                self.assertEqual(check(), [])
+                for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                    disposition["receipt_metadata"] = {**metadata, key: value}
+                    with self.subTest(field=key, value=value):
+>                       self.assertTrue(check(), "collect verifier laundered unbound disposition")
+E                       AssertionError: [] is not true : collect verifier laundered unbound disposition
+
+tools\test_t2040_review_proof_binding.py:165: AssertionError
+_ ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata (field='record_sha256', value=[]) _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_collect_verifier_requires_exact_disposition_record_metadata>
+
+    def test_collect_verifier_requires_exact_disposition_record_metadata(self):
+        f = self.fixture
+        metadata = self._reviewed_metadata()
+        manifest = f.root / subs.MANIFEST_REL
+        manifest.write_text(subs._manifest_with_collects(
+            manifest.read_text(encoding="utf-8"),
+            {original.ROLE: f.identity + "@2026-11-08T00:00:00Z"}), encoding="utf-8")
+        board = f.root / ".saipen/BOARD.md"
+        board.write_text(board.read_text(encoding="utf-8").replace(
+            "Core review", "Core review " + f.identity), encoding="utf-8")
+        disposition = {"op_id": "sub-disposition-00000009", "operation": "sub_disposition",
+            "status": "COMMITTED", "receipt_metadata": metadata,
+            "targets": [{"path": rel, "applied": True} for rel in (
+                ".saipen/LOG.md", ".saipen/STATE.md", f.outbox.relative_to(f.root).as_posix())]}
+        targets = [{"path": rel} for rel in (
+            ".saipen/LOG.md", ".saipen/BOARD.md", ".saipen/STATE.md", subs.MANIFEST_REL)]
+        with mock.patch("saipen_engine.fast_check.validate_project", return_value=[]), \
+                mock.patch.object(journal, "semantic_receipt_snapshot", side_effect=lambda _root:
+                                  (tuple([*f.records, disposition]), ())):
+            def check():
+                return journal.verify_sub_collect(f.root, targets,
+                                                   {"producers": [original.ROLE]})
+            self.assertEqual(check(), [])
+            for key in ("record", "record_sha256"):
+                legacy = dict(metadata)
+                legacy.pop(key)
+                disposition["receipt_metadata"] = legacy
+                self.assertEqual(check(), [])
+                for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                    disposition["receipt_metadata"] = {**metadata, key: value}
+                    with self.subTest(field=key, value=value):
+>                       self.assertTrue(check(), "collect verifier laundered unbound disposition")
+E                       AssertionError: [] is not true : collect verifier laundered unbound disposition
+
+tools\test_t2040_review_proof_binding.py:165: AssertionError
+_ ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata (field='record', value='wrong-record') _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_disposition_verifier_requires_exact_executed_record_metadata>
+
+    def test_disposition_verifier_requires_exact_executed_record_metadata(self):
+        metadata = self._reviewed_metadata()
+        self.assertEqual(self.fixture._postcondition(metadata), [])
+        for key in ("record", "record_sha256"):
+            legacy = dict(metadata)
+            legacy.pop(key)
+            self.assertEqual(self.fixture._postcondition(legacy), [])
+            for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                changed = {**metadata, key: value}
+                with self.subTest(field=key, value=value):
+>                   self.assertTrue(self.fixture._postcondition(changed),
+                                    "unbound executed record satisfied disposition verifier")
+E                   AssertionError: [] is not true : unbound executed record satisfied disposition verifier
+
+tools\test_t2040_review_proof_binding.py:131: AssertionError
+_ ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata (field='record', value=None) _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_disposition_verifier_requires_exact_executed_record_metadata>
+
+    def test_disposition_verifier_requires_exact_executed_record_metadata(self):
+        metadata = self._reviewed_metadata()
+        self.assertEqual(self.fixture._postcondition(metadata), [])
+        for key in ("record", "record_sha256"):
+            legacy = dict(metadata)
+            legacy.pop(key)
+            self.assertEqual(self.fixture._postcondition(legacy), [])
+            for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                changed = {**metadata, key: value}
+                with self.subTest(field=key, value=value):
+>                   self.assertTrue(self.fixture._postcondition(changed),
+                                    "unbound executed record satisfied disposition verifier")
+E                   AssertionError: [] is not true : unbound executed record satisfied disposition verifier
+
+tools\test_t2040_review_proof_binding.py:131: AssertionError
+_ ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata (field='record', value=7) _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_disposition_verifier_requires_exact_executed_record_metadata>
+
+    def test_disposition_verifier_requires_exact_executed_record_metadata(self):
+        metadata = self._reviewed_metadata()
+        self.assertEqual(self.fixture._postcondition(metadata), [])
+        for key in ("record", "record_sha256"):
+            legacy = dict(metadata)
+            legacy.pop(key)
+            self.assertEqual(self.fixture._postcondition(legacy), [])
+            for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                changed = {**metadata, key: value}
+                with self.subTest(field=key, value=value):
+>                   self.assertTrue(self.fixture._postcondition(changed),
+                                    "unbound executed record satisfied disposition verifier")
+E                   AssertionError: [] is not true : unbound executed record satisfied disposition verifier
+
+tools\test_t2040_review_proof_binding.py:131: AssertionError
+_ ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata (field='record', value=[]) _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_disposition_verifier_requires_exact_executed_record_metadata>
+
+    def test_disposition_verifier_requires_exact_executed_record_metadata(self):
+        metadata = self._reviewed_metadata()
+        self.assertEqual(self.fixture._postcondition(metadata), [])
+        for key in ("record", "record_sha256"):
+            legacy = dict(metadata)
+            legacy.pop(key)
+            self.assertEqual(self.fixture._postcondition(legacy), [])
+            for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                changed = {**metadata, key: value}
+                with self.subTest(field=key, value=value):
+>                   self.assertTrue(self.fixture._postcondition(changed),
+                                    "unbound executed record satisfied disposition verifier")
+E                   AssertionError: [] is not true : unbound executed record satisfied disposition verifier
+
+tools\test_t2040_review_proof_binding.py:131: AssertionError
+_ ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata (field='record_sha256', value='0000000000000000000000000000000000000000000000000000000000000000') _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_disposition_verifier_requires_exact_executed_record_metadata>
+
+    def test_disposition_verifier_requires_exact_executed_record_metadata(self):
+        metadata = self._reviewed_metadata()
+        self.assertEqual(self.fixture._postcondition(metadata), [])
+        for key in ("record", "record_sha256"):
+            legacy = dict(metadata)
+            legacy.pop(key)
+            self.assertEqual(self.fixture._postcondition(legacy), [])
+            for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                changed = {**metadata, key: value}
+                with self.subTest(field=key, value=value):
+>                   self.assertTrue(self.fixture._postcondition(changed),
+                                    "unbound executed record satisfied disposition verifier")
+E                   AssertionError: [] is not true : unbound executed record satisfied disposition verifier
+
+tools\test_t2040_review_proof_binding.py:131: AssertionError
+_ ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata (field='record_sha256', value=None) _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_disposition_verifier_requires_exact_executed_record_metadata>
+
+    def test_disposition_verifier_requires_exact_executed_record_metadata(self):
+        metadata = self._reviewed_metadata()
+        self.assertEqual(self.fixture._postcondition(metadata), [])
+        for key in ("record", "record_sha256"):
+            legacy = dict(metadata)
+            legacy.pop(key)
+            self.assertEqual(self.fixture._postcondition(legacy), [])
+            for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                changed = {**metadata, key: value}
+                with self.subTest(field=key, value=value):
+>                   self.assertTrue(self.fixture._postcondition(changed),
+                                    "unbound executed record satisfied disposition verifier")
+E                   AssertionError: [] is not true : unbound executed record satisfied disposition verifier
+
+tools\test_t2040_review_proof_binding.py:131: AssertionError
+_ ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata (field='record_sha256', value=7) _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_disposition_verifier_requires_exact_executed_record_metadata>
+
+    def test_disposition_verifier_requires_exact_executed_record_metadata(self):
+        metadata = self._reviewed_metadata()
+        self.assertEqual(self.fixture._postcondition(metadata), [])
+        for key in ("record", "record_sha256"):
+            legacy = dict(metadata)
+            legacy.pop(key)
+            self.assertEqual(self.fixture._postcondition(legacy), [])
+            for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                changed = {**metadata, key: value}
+                with self.subTest(field=key, value=value):
+>                   self.assertTrue(self.fixture._postcondition(changed),
+                                    "unbound executed record satisfied disposition verifier")
+E                   AssertionError: [] is not true : unbound executed record satisfied disposition verifier
+
+tools\test_t2040_review_proof_binding.py:131: AssertionError
+_ ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata (field='record_sha256', value=[]) _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_disposition_verifier_requires_exact_executed_record_metadata>
+
+    def test_disposition_verifier_requires_exact_executed_record_metadata(self):
+        metadata = self._reviewed_metadata()
+        self.assertEqual(self.fixture._postcondition(metadata), [])
+        for key in ("record", "record_sha256"):
+            legacy = dict(metadata)
+            legacy.pop(key)
+            self.assertEqual(self.fixture._postcondition(legacy), [])
+            for value in ("wrong-record" if key == "record" else "0" * 64, None, 7, []):
+                changed = {**metadata, key: value}
+                with self.subTest(field=key, value=value):
+>                   self.assertTrue(self.fixture._postcondition(changed),
+                                    "unbound executed record satisfied disposition verifier")
+E                   AssertionError: [] is not true : unbound executed record satisfied disposition verifier
+
+tools\test_t2040_review_proof_binding.py:131: AssertionError
+__ ExactReviewBindingTests.test_duplicate_collect_owner_cannot_prove_review ___
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_duplicate_collect_owner_cannot_prove_review>
+
+    def test_duplicate_collect_owner_cannot_prove_review(self):
+        f = self.fixture
+        f._review()
+        f.records.append(copy.deepcopy(f.records[0]))
+>       self.assertIsNone(self._proof()[0])
+E       AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': 'e8cf09a450f480558533c13ef570926ce66e73dd73de82de50f40d148b0e0446'} is not None
+
+tools\test_t2040_review_proof_binding.py:104: AssertionError
+_ ExactReviewBindingTests.test_producer_cannot_supply_its_own_independent_core_review _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_producer_cannot_supply_its_own_independent_core_review>
+
+    def test_producer_cannot_supply_its_own_independent_core_review(self):
+        f = self.fixture
+        f._review()
+        f.log_path.write_text(f.log_path.read_text(encoding="utf-8").replace(
+            "agent: core-reviewer", "agent: " + original.ROLE), encoding="utf-8")
+        for record in f.records:
+            record["agent"] = original.ROLE
+>       self.assertIsNone(self._proof()[0])
+E       AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '80b147b12b0f4378bbd10616f426cd5930df47ad448a0cba9ea57f416e5aca56'} is not None
+
+tools\test_t2040_review_proof_binding.py:113: AssertionError
+_ ExactReviewBindingTests.test_resolved_collect_deduplicates_but_is_not_committed_review_authority _
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_resolved_collect_deduplicates_but_is_not_committed_review_authority>
+
+    def test_resolved_collect_deduplicates_but_is_not_committed_review_authority(self):
+        f = self.fixture
+        f._review()
+        self.assertIsNotNone(self._proof()[0])
+        collect = f.records[0]
+        collect.update(status="RESOLVED", resolution="accept_live",
+            resolution_applied_targets=[target["path"] for target in collect["targets"]],
+            resolution_skipped_targets=[])
+        collect["receipt_metadata"].update(operation="sub_collect", status="COMMITTED")
+        self.assertTrue(subs._durable_collect_witness(
+            f.root, f.identity, f.identity, tuple(f.records), f.package))
+>       self.assertIsNone(self._proof()[0], "RESOLVED receipt became COMMITTED review authority")
+E       AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '5e3a5b074451f35000cde1fa7e248604c6af9d691fb704146ae29bf5847a0d0d'} is not None : RESOLVED receipt became COMMITTED review authority
+
+tools\test_t2040_review_proof_binding.py:74: AssertionError
+__ ExactReviewBindingTests.test_shared_proof_returns_entire_receipt_binding ___
+
+self = <test_t2040_review_proof_binding.ExactReviewBindingTests testMethod=test_shared_proof_returns_entire_receipt_binding>
+
+    def test_shared_proof_returns_entire_receipt_binding(self):
+        metadata = self._reviewed_metadata()
+        proof, problem = self._proof()
+        self.assertIsNotNone(proof, problem)
+>       self.assertEqual(proof, metadata)
+E       AssertionError: {'collect_op': 'sub-collect-00000001', 'rev[164 chars]2e0'} != {'package_identity': 'sha256:039dd108848704[580 chars]2e0'}
+E       Diff is 741 characters long. Set self.maxDiff to None to see it.
+
+tools\test_t2040_review_proof_binding.py:119: AssertionError
+_ IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source (field='input_source', missing=True) _
+
+self = <test_t2040_review_proof_binding.IntegrationSourceBindingTests testMethod=test_settled_integration_requires_exact_input_source>
+
+    def test_settled_integration_requires_exact_input_source(self):
+        with tempfile.TemporaryDirectory(prefix="t2040-integration-") as directory:
+            root = Path(directory)
+            role = SimpleNamespace(name="saiwiki", outbox_path=
+                subs.SUBS_REL + "/saiwiki/kitchen/OUTBOX.md")
+            package = ProducerPackage(producer=role.name, role_revision="sha256:" + "a" * 64,
+                base_source_head="b" * 40, base_source_tree_fingerprint="git-delta-v1:" + "c" * 64,
+                base_discovery_model="fixture-discovery", scope="wiki", status="ready")
+            path = producer_namespace(root, role.name) / SETTLED_DIRNAME / "package.json"
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps({**package.to_dict(), "payload_hashes": {},
+                                        "payload_bytes": {}}), encoding="utf-8")
+            metadata = {"producer": role.name, "crew_epoch": "crew-epoch-00000001",
+                "package_identity": package.package_identity,
+                "input_source": package.base_source_head,
+                "input_source_fingerprint": package.base_source_tree_fingerprint,
+                "resulting_source": "d" * 40,
+                "resulting_source_fingerprint": "git-delta-v1:" + "e" * 64}
+            record = {"operation": "producer_integration", "status": "COMMITTED",
+                "op_id": "producer-integration-00000001", "created_at": "2026-11-08T00:00:00Z",
+                "receipt_metadata": metadata}
+            snapshot = SimpleNamespace(root=root, epoch=SimpleNamespace(op_id=metadata["crew_epoch"]),
+                source_id=SimpleNamespace(source_head=metadata["resulting_source"],
+                    source_tree_fingerprint=metadata["resulting_source_fingerprint"]),
+                op_records=(record,))
+            self.assertIsNotNone(crew._producer_integration_edge(snapshot, role))
+            for key in ("input_source", "input_source_fingerprint"):
+                expected = metadata.pop(key)
+                with self.subTest(field=key, missing=True):
+>                   self.assertIsNone(crew._producer_integration_edge(snapshot, role))
+E                   AssertionError: {'op_id': 'producer-integration-00000001', 'package_identity': 'sha256:341e9f9710ca5dd005ca11ac55233f3513f6c1af73b69515f105345add224a0f', 'input_source': None, 'resulting_source': 'dddddddddddddddddddddddddddddddddddddddd', 'resulting_source_fingerprint': 'git-delta-v1:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'} is not None
+
+tools\test_t2040_review_proof_binding.py:198: AssertionError
+_ IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source (field='input_source', mismatch=True) _
+
+self = <test_t2040_review_proof_binding.IntegrationSourceBindingTests testMethod=test_settled_integration_requires_exact_input_source>
+
+    def test_settled_integration_requires_exact_input_source(self):
+        with tempfile.TemporaryDirectory(prefix="t2040-integration-") as directory:
+            root = Path(directory)
+            role = SimpleNamespace(name="saiwiki", outbox_path=
+                subs.SUBS_REL + "/saiwiki/kitchen/OUTBOX.md")
+            package = ProducerPackage(producer=role.name, role_revision="sha256:" + "a" * 64,
+                base_source_head="b" * 40, base_source_tree_fingerprint="git-delta-v1:" + "c" * 64,
+                base_discovery_model="fixture-discovery", scope="wiki", status="ready")
+            path = producer_namespace(root, role.name) / SETTLED_DIRNAME / "package.json"
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps({**package.to_dict(), "payload_hashes": {},
+                                        "payload_bytes": {}}), encoding="utf-8")
+            metadata = {"producer": role.name, "crew_epoch": "crew-epoch-00000001",
+                "package_identity": package.package_identity,
+                "input_source": package.base_source_head,
+                "input_source_fingerprint": package.base_source_tree_fingerprint,
+                "resulting_source": "d" * 40,
+                "resulting_source_fingerprint": "git-delta-v1:" + "e" * 64}
+            record = {"operation": "producer_integration", "status": "COMMITTED",
+                "op_id": "producer-integration-00000001", "created_at": "2026-11-08T00:00:00Z",
+                "receipt_metadata": metadata}
+            snapshot = SimpleNamespace(root=root, epoch=SimpleNamespace(op_id=metadata["crew_epoch"]),
+                source_id=SimpleNamespace(source_head=metadata["resulting_source"],
+                    source_tree_fingerprint=metadata["resulting_source_fingerprint"]),
+                op_records=(record,))
+            self.assertIsNotNone(crew._producer_integration_edge(snapshot, role))
+            for key in ("input_source", "input_source_fingerprint"):
+                expected = metadata.pop(key)
+                with self.subTest(field=key, missing=True):
+                    self.assertIsNone(crew._producer_integration_edge(snapshot, role))
+                metadata[key] = "wrong-source"
+                with self.subTest(field=key, mismatch=True):
+>                   self.assertIsNone(crew._producer_integration_edge(snapshot, role))
+E                   AssertionError: {'op_id': 'producer-integration-00000001', 'package_identity': 'sha256:341e9f9710ca5dd005ca11ac55233f3513f6c1af73b69515f105345add224a0f', 'input_source': 'wrong-source', 'resulting_source': 'dddddddddddddddddddddddddddddddddddddddd', 'resulting_source_fingerprint': 'git-delta-v1:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'} is not None
+
+tools\test_t2040_review_proof_binding.py:201: AssertionError
+_ IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source (field='input_source_fingerprint', missing=True) _
+
+self = <test_t2040_review_proof_binding.IntegrationSourceBindingTests testMethod=test_settled_integration_requires_exact_input_source>
+
+    def test_settled_integration_requires_exact_input_source(self):
+        with tempfile.TemporaryDirectory(prefix="t2040-integration-") as directory:
+            root = Path(directory)
+            role = SimpleNamespace(name="saiwiki", outbox_path=
+                subs.SUBS_REL + "/saiwiki/kitchen/OUTBOX.md")
+            package = ProducerPackage(producer=role.name, role_revision="sha256:" + "a" * 64,
+                base_source_head="b" * 40, base_source_tree_fingerprint="git-delta-v1:" + "c" * 64,
+                base_discovery_model="fixture-discovery", scope="wiki", status="ready")
+            path = producer_namespace(root, role.name) / SETTLED_DIRNAME / "package.json"
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps({**package.to_dict(), "payload_hashes": {},
+                                        "payload_bytes": {}}), encoding="utf-8")
+            metadata = {"producer": role.name, "crew_epoch": "crew-epoch-00000001",
+                "package_identity": package.package_identity,
+                "input_source": package.base_source_head,
+                "input_source_fingerprint": package.base_source_tree_fingerprint,
+                "resulting_source": "d" * 40,
+                "resulting_source_fingerprint": "git-delta-v1:" + "e" * 64}
+            record = {"operation": "producer_integration", "status": "COMMITTED",
+                "op_id": "producer-integration-00000001", "created_at": "2026-11-08T00:00:00Z",
+                "receipt_metadata": metadata}
+            snapshot = SimpleNamespace(root=root, epoch=SimpleNamespace(op_id=metadata["crew_epoch"]),
+                source_id=SimpleNamespace(source_head=metadata["resulting_source"],
+                    source_tree_fingerprint=metadata["resulting_source_fingerprint"]),
+                op_records=(record,))
+            self.assertIsNotNone(crew._producer_integration_edge(snapshot, role))
+            for key in ("input_source", "input_source_fingerprint"):
+                expected = metadata.pop(key)
+                with self.subTest(field=key, missing=True):
+>                   self.assertIsNone(crew._producer_integration_edge(snapshot, role))
+E                   AssertionError: {'op_id': 'producer-integration-00000001', 'package_identity': 'sha256:341e9f9710ca5dd005ca11ac55233f3513f6c1af73b69515f105345add224a0f', 'input_source': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'resulting_source': 'dddddddddddddddddddddddddddddddddddddddd', 'resulting_source_fingerprint': 'git-delta-v1:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'} is not None
+
+tools\test_t2040_review_proof_binding.py:198: AssertionError
+_ IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source (field='input_source_fingerprint', mismatch=True) _
+
+self = <test_t2040_review_proof_binding.IntegrationSourceBindingTests testMethod=test_settled_integration_requires_exact_input_source>
+
+    def test_settled_integration_requires_exact_input_source(self):
+        with tempfile.TemporaryDirectory(prefix="t2040-integration-") as directory:
+            root = Path(directory)
+            role = SimpleNamespace(name="saiwiki", outbox_path=
+                subs.SUBS_REL + "/saiwiki/kitchen/OUTBOX.md")
+            package = ProducerPackage(producer=role.name, role_revision="sha256:" + "a" * 64,
+                base_source_head="b" * 40, base_source_tree_fingerprint="git-delta-v1:" + "c" * 64,
+                base_discovery_model="fixture-discovery", scope="wiki", status="ready")
+            path = producer_namespace(root, role.name) / SETTLED_DIRNAME / "package.json"
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps({**package.to_dict(), "payload_hashes": {},
+                                        "payload_bytes": {}}), encoding="utf-8")
+            metadata = {"producer": role.name, "crew_epoch": "crew-epoch-00000001",
+                "package_identity": package.package_identity,
+                "input_source": package.base_source_head,
+                "input_source_fingerprint": package.base_source_tree_fingerprint,
+                "resulting_source": "d" * 40,
+                "resulting_source_fingerprint": "git-delta-v1:" + "e" * 64}
+            record = {"operation": "producer_integration", "status": "COMMITTED",
+                "op_id": "producer-integration-00000001", "created_at": "2026-11-08T00:00:00Z",
+                "receipt_metadata": metadata}
+            snapshot = SimpleNamespace(root=root, epoch=SimpleNamespace(op_id=metadata["crew_epoch"]),
+                source_id=SimpleNamespace(source_head=metadata["resulting_source"],
+                    source_tree_fingerprint=metadata["resulting_source_fingerprint"]),
+                op_records=(record,))
+            self.assertIsNotNone(crew._producer_integration_edge(snapshot, role))
+            for key in ("input_source", "input_source_fingerprint"):
+                expected = metadata.pop(key)
+                with self.subTest(field=key, missing=True):
+                    self.assertIsNone(crew._producer_integration_edge(snapshot, role))
+                metadata[key] = "wrong-source"
+                with self.subTest(field=key, mismatch=True):
+>                   self.assertIsNone(crew._producer_integration_edge(snapshot, role))
+E                   AssertionError: {'op_id': 'producer-integration-00000001', 'package_identity': 'sha256:341e9f9710ca5dd005ca11ac55233f3513f6c1af73b69515f105345add224a0f', 'input_source': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'resulting_source': 'dddddddddddddddddddddddddddddddddddddddd', 'resulting_source_fingerprint': 'git-delta-v1:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'} is not None
+
+tools\test_t2040_review_proof_binding.py:201: AssertionError
+_ NativeNoPatchRoundtripTests.test_actual_core_disproof_closes_but_generic_negative_finding_does_not _
+
+self = <test_t2040_review_proof_binding.NativeNoPatchRoundtripTests testMethod=test_actual_core_disproof_closes_but_generic_negative_finding_does_not>
+
+    def test_actual_core_disproof_closes_but_generic_negative_finding_does_not(self):
+        from freshness import compute_source_identity
+        from saipen_engine.board import parse_board
+        from saipen_engine.log import read_history_snapshot
+        from test_t1363_zero_manual_entry import healthy
+    
+        root = healthy(self)
+        (root / "tools").mkdir()
+        (root / "tools/test_review.py").write_text(
+            "import unittest\nclass Review(unittest.TestCase):\n"
+            "    def test_premise(self): self.assertEqual(2 + 2, 4)\n", encoding="utf-8")
+        self.assertTrue(subs.sub_spawn(root, original.ROLE, str(TOOLS.parent),
+                                       agent="test-agent").ok)
+        source = compute_source_identity(root)
+        revision = subs.current_local_role_revision(root, original.ROLE, str(TOOLS.parent))
+        outbox = root / subs.SUBS_REL / original.ROLE / "kitchen/OUTBOX.md"
+        outbox.write_text(
+            "# OUTBOX\n\n## UI-001: hypothesis claims two plus two differs from four\n"
+            "- **status:** ready\n- **summary:** Independently test the arithmetic premise\n"
+            "- **main_project_refs:** [tools/test_review.py]\n- **critical:** false\n"
+            f"- **severity:** P3\n- **producer:** {original.ROLE}\n"
+            f"- **source_head:** {source.source_head}\n"
+            f"- **source_tree_fingerprint:** {source.source_tree_fingerprint}\n"
+            f"- **role_revision:** {revision}\n- **coverage:** tools/test_review.py\n"
+            "- **payload:** []\n- **verified:** PASS -- producer report only\n"
+            "- **instructions:** Core independently rejects the arithmetic premise\n",
+            encoding="utf-8")
+        package = subs.parse_outbox(outbox.read_text(encoding="utf-8"), original.ROLE).packages[0]
+        collected = subs.sub_collect(root, original.ROLE, agent="test-agent")
+        self.assertTrue(collected.ok, collected.to_dict())
+        ticket = collected.data["tickets"][0]["ticket"]
+        self.assertTrue(operations.apply_claim(root, ticket, "test-agent").ok)
+        for phase in ("BUILD", "VERIFY"):
+            self.assertTrue(operations.transition_phase(root, phase, "test-agent", ticket).ok)
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            exit_code = focused_unit.evidence(root, SimpleNamespace(pattern=["test_review.py"],
+                timeout=30, fresh=True, agent="test-agent", ticket=ticket))
+        evidence = json.loads(output.getvalue())
+        self.assertEqual(exit_code, 0, evidence)
+        self.assertTrue(evidence["ok"], evidence)
+        relative = evidence["record"]
+        digest = hashlib.sha256((root / relative).read_bytes()).hexdigest()
+        binding_text = "; ".join(f"{key}={value}" for key, value in
+                                subs._package_review_bindings(package, collected.op_id).items())
+        citation = f"record:{relative} sha256:{digest}"
+    
+        def review(description):
+            result = operations.checkpoint(root, "test-agent", "RUN", ticket,
+                "review -> PASS conf: high -- " + description + "; " + binding_text + "; " + citation)
+            self.assertTrue(result.ok, result.to_dict())
+            proof, problem = subs._independent_core_review(root, package, ticket,
+                collected.op_id, tuple(subs._iter_operation_records(root)))
+            self.assertIsNotNone(proof, problem)
+            return proof
+    
+        generic_proof = review("independent bounded negative finding; no defects reproduced")
+        for phase in ("REVIEW", "SHIP"):
+            self.assertTrue(operations.transition_phase(root, phase, "test-agent", ticket).ok)
+        before = {path: path.read_bytes() for path in root.rglob("*") if path.is_file()}
+        refused = operations.finish_ticket(root, ticket, "test-agent",
+            closure_mode="finding_invalidated", invalidation_evidence=generic_proof["review_event"])
+        self.assertFalse(refused.ok, refused.to_dict())
+        self.assertEqual(refused.code, "PREMISE_NOT_DISPROVEN", refused.to_dict())
+        self.assertEqual(before, {path: path.read_bytes() for path in root.rglob("*") if path.is_file()})
+        proof = review("premise disproven: actual independent arithmetic test proves two plus two equals four")
+        finished = operations.finish_ticket(root, ticket, "test-agent",
+            closure_mode="finding_invalidated", invalidation_evidence=proof["review_event"])
+        self.assertTrue(finished.ok, finished.to_dict())
+        fields = parse_board((root / ".saipen/BOARD.md").read_text(encoding="utf-8"))["tickets"][ticket]["fields"]
+        self.assertEqual(fields["closure_mode"], "finding_invalidated")
+        self.assertEqual(fields["implementation_delta"], "none")
+        disposed = subs.sub_disposition(root, original.ROLE, package.package_id, agent="test-agent")
+        self.assertTrue(disposed.ok, disposed.to_dict())
+        receipt = journal.Journal(root, disposed.op_id).read()
+        for key, value in proof.items():
+>           self.assertEqual(receipt["receipt_metadata"].get(key), value, key)
+E           AssertionError: None != '.saipen/evidence/focused-unit/c6a0046caee3836b-20261108T200303730311Z.json' : record
+
+tools\test_t2040_review_proof_binding.py:283: AssertionError
+=========================== short test summary info ===========================
+SUBFAILED(field='record', value='wrong-record') tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_collect_verifier_requires_exact_disposition_record_metadata
+SUBFAILED(field='record', value=None) tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_collect_verifier_requires_exact_disposition_record_metadata
+SUBFAILED(field='record', value=7) tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_collect_verifier_requires_exact_disposition_record_metadata
+SUBFAILED(field='record', value=[]) tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_collect_verifier_requires_exact_disposition_record_metadata
+SUBFAILED(field='record_sha256', value='0000000000000000000000000000000000000000000000000000000000000000') tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_collect_verifier_requires_exact_disposition_record_metadata
+SUBFAILED(field='record_sha256', value=None) tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_collect_verifier_requires_exact_disposition_record_metadata
+SUBFAILED(field='record_sha256', value=7) tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_collect_verifier_requires_exact_disposition_record_metadata
+SUBFAILED(field='record_sha256', value=[]) tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_collect_verifier_requires_exact_disposition_record_metadata
+SUBFAILED(field='record', value='wrong-record') tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_disposition_verifier_requires_exact_executed_record_metadata
+SUBFAILED(field='record', value=None) tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_disposition_verifier_requires_exact_executed_record_metadata
+SUBFAILED(field='record', value=7) tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_disposition_verifier_requires_exact_executed_record_metadata
+SUBFAILED(field='record', value=[]) tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_disposition_verifier_requires_exact_executed_record_metadata
+SUBFAILED(field='record_sha256', value='0000000000000000000000000000000000000000000000000000000000000000') tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_disposition_verifier_requires_exact_executed_record_metadata
+SUBFAILED(field='record_sha256', value=None) tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_disposition_verifier_requires_exact_executed_record_metadata
+SUBFAILED(field='record_sha256', value=7) tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_disposition_verifier_requires_exact_executed_record_metadata
+SUBFAILED(field='record_sha256', value=[]) tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_disposition_verifier_requires_exact_executed_record_metadata
+FAILED tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_duplicate_collect_owner_cannot_prove_review
+FAILED tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_producer_cannot_supply_its_own_independent_core_review
+FAILED tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_resolved_collect_deduplicates_but_is_not_committed_review_authority
+FAILED tools/test_t2040_review_proof_binding.py::ExactReviewBindingTests::test_shared_proof_returns_entire_receipt_binding
+SUBFAILED(field='input_source', missing=True) tools/test_t2040_review_proof_binding.py::IntegrationSourceBindingTests::test_settled_integration_requires_exact_input_source
+SUBFAILED(field='input_source', mismatch=True) tools/test_t2040_review_proof_binding.py::IntegrationSourceBindingTests::test_settled_integration_requires_exact_input_source
+SUBFAILED(field='input_source_fingerprint', missing=True) tools/test_t2040_review_proof_binding.py::IntegrationSourceBindingTests::test_settled_integration_requires_exact_input_source
+SUBFAILED(field='input_source_fingerprint', mismatch=True) tools/test_t2040_review_proof_binding.py::IntegrationSourceBindingTests::test_settled_integration_requires_exact_input_source
+FAILED tools/test_t2040_review_proof_binding.py::NativeNoPatchRoundtripTests::test_actual_core_disproof_closes_but_generic_negative_finding_does_not
+25 failed, 5 passed, 9 subtests passed in 306.25s (0:05:06)
+EXIT:1

@@ -1,0 +1,25 @@
+{
+  "root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "files": {
+    "tools/saipen_engine/outcome_truth.py": {
+      "sha256": "8ad47a8498aa591b635f48f4ee3a10aaba75d6b9e2113ef67c3246b7837085d1",
+      "size": 19798
+    },
+    "tools/saipen_engine/closure.py": {
+      "sha256": "e4120bbefa5b96c695318b42f7322bcaa7e1d35f4cbc3497890d797568036b50",
+      "size": 33114
+    },
+    "tools/saipen_engine/context.py": {
+      "sha256": "c3a6cb8f06108d7b696501234f3e759f4e3aab266d32f5aeb416cfa69d963909",
+      "size": 48271
+    },
+    "tools/test_t2040_publication_truth.py": {
+      "sha256": "0d7ab5ceee6d3e390be3df901f76e2f83672056fd3d7f52882ebd1d666288c82",
+      "size": 16226
+    },
+    "tools/test_release_completion.py": {
+      "sha256": "77feabf9abb2db82762fe9d80776025d219f6d719d09f98a6f5eefa8f5525368",
+      "size": 24481
+    }
+  }
+}

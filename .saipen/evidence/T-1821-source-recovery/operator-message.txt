@@ -1,0 +1,357 @@
+SAITULS
+
+SAIHANDOFF — T-301 LIVE INPUT ACCEPTANCE AND READABLE REPORTING
+
+EXECUTOR: SAITULS agent
+TARGET: Existing T-301
+PRIORITY: P1
+SCOPE: Windows console input, live acceptance and reporting
+MODE: Bounded corrective continuation
+
+MISSION
+
+Resolve the remaining T-301 acceptance blockers and stop
+emitting unreadable single-paragraph technical reports.
+
+Do not restart the completed implementation.
+
+Do not manufacture PASS.
+
+Do not deploy a binary without verified authorization.
+
+============================================================
+1. CURRENT EVIDENCE
+============================================================
+
+The latest report shows:
+
+AUTHORITY:
+Bounded operator reauthorization E-3366.
+
+VERIFY:
+E-3367.
+
+REVIEW:
+E-3368.
+
+STATE:
+REVIEW -> BLOCKED.
+
+INPUT ABI:
+PASS.
+
+CONSOLE WINDOW OWNERSHIP:
+Hardened.
+
+WINDOWS LIVE ACCEPTANCE:
+BLOCKED_ENVIRONMENT, seven cases.
+
+COPY:
+Not proven.
+
+PASTE:
+Not proven.
+
+CTRL+A:
+Not proven.
+
+UNICODE:
+Not proven.
+
+STAGED AND INSTALLED BINARY:
+Different SHA256 hashes.
+
+DEPLOYMENT AUTHORIZATION:
+Unverified.
+
+These are independent acceptance conditions.
+
+A correct x64 ABI is not proof of physical input delivery.
+
+============================================================
+2. ROOT CAUSE — INTERACTIVE DESKTOP
+============================================================
+
+Investigate why the live acceptance harness reports:
+
+BLOCKED_ENVIRONMENT
+interactive desktop unavailable
+
+A visible GUI on the operator's desktop does not imply
+that the agent's worker process shares that desktop.
+
+Inspect the real test process:
+
+- Windows user SID.
+- Process session ID.
+- Active console session ID.
+- Window station.
+- Thread desktop.
+- Foreground window visibility.
+- Desktop access rights.
+- Parent launcher identity.
+- Actual target console HWND and owning PID.
+
+Do not use GetFocus() alone to determine whether an
+interactive desktop exists.
+
+Distinguish:
+
+A. Actual noninteractive worker/session.
+
+B. Wrong desktop or window station.
+
+C. False-negative interactive desktop detector.
+
+D. Invalid console ownership binding.
+
+E. Input rejected by Windows security boundaries.
+
+F. Installed runtime generation mismatch.
+
+Record direct evidence for the classification.
+
+Do not bypass Windows input isolation.
+
+============================================================
+3. REAL INPUT ACCEPTANCE
+============================================================
+
+First use a disposable, operator-approved interactive
+test window.
+
+Do not inject keyboard events into an arbitrary active
+window or a real running game without appropriate scope.
+
+Verify separately:
+
+- Correct INPUT structures and offsets.
+- Correct key-down and key-up sequences.
+- SendInput return count.
+- GetLastError when relevant.
+- Foreground target ownership.
+- Actual clipboard copy.
+- Actual clipboard paste.
+- Ctrl+A selection effect.
+- Ctrl+C behavior without unintended console SIGINT.
+- Ctrl+V text delivery.
+- Unicode input.
+- Controller-disabled negative behavior.
+
+A successful SendInput return value alone is not sufficient.
+
+Read back the actual effect from the intended test target.
+
+If the current worker cannot access the interactive
+desktop, use the existing trusted interactive-host route
+if available and authorized.
+
+Do not introduce an unrestricted input-injection service.
+
+If no authorized interactive route exists, leave live
+acceptance BLOCKED_ENVIRONMENT and document the exact
+missing prerequisite.
+
+============================================================
+4. STAGED VS INSTALLED BINARY
+============================================================
+
+Inspect the exact staged and installed binary generations.
+
+Verify:
+
+- Source commit.
+- Build generation.
+- Binary SHA256.
+- Installed path.
+- Running process executable paths.
+- Existing broker/agent processes.
+- Deployment authority.
+- Rollback strategy.
+
+Do not test the old installed binary and attribute the
+result to the new staged implementation.
+
+Prefer safe controlled acceptance of the staged binary
+without modifying the live installation, if supported.
+
+Do not silently replace binaries used by active agents.
+
+Do not manufacture deployment authorization.
+
+If an operator decision is genuinely required, produce
+one concise, correctly scoped request through the
+existing canonical authorization channel.
+
+============================================================
+5. ROOT CAUSE — UNREADABLE REPORT PRESENTATION
+============================================================
+
+The operator-facing response currently concatenates:
+
+STATUS, AUTHORITY, TICKET, INPUT ABI, DESKTOP PROBE,
+WINDOW OWNERSHIP, SENDINPUT, COPY, PASTE, CTRL+A,
+UNICODE, NEGATIVE CONTROLS, WINDOWS ACCEPTANCE,
+HASHES, VERIFY, BLOCKERS and NEXT ACTION
+
+into one enormous paragraph.
+
+This presentation is unacceptable.
+
+Diagnose the actual text boundary.
+
+Compare:
+
+A. Raw agent response before transport.
+
+B. Canonical SAIPEN response rendering.
+
+C. Stored host message payload.
+
+D. Text displayed by the application.
+
+Determine exactly where line breaks are lost.
+
+If the model generates a single paragraph, correct the
+canonical response construction at the actual owner.
+
+If SAIPEN's response renderer flattens sections,
+prepare a separate SAIPEN-owned corrective.
+
+If the raw message contains line breaks but ZAICODE
+removes them, prepare a separate ZAICODE-owned corrective.
+
+Do not patch foreign repositories from SAITULS.
+
+Do not assume a UI renderer defect without examining
+the raw message.
+
+============================================================
+6. REQUIRED REPORT FORMAT
+============================================================
+
+Use short, readable sections.
+
+Example:
+
+STATUS: BLOCKED
+TICKET: T-301
+
+COMPLETED
+- Input ABI: PASS
+- Console ownership: PASS
+
+NOT VERIFIED
+- Copy: live test blocked
+- Paste: live test blocked
+- Ctrl+A: live test blocked
+- Unicode: live test blocked
+
+BLOCKERS
+- Interactive desktop unavailable to test process
+- Staged binary differs from installed binary
+- Deployment authorization unverified
+
+NEXT EXACT ACTION
+- Identify an authorized interactive acceptance route
+
+NEED USER
+- Only the genuinely required authorization, if any
+
+Every section must appear on separate lines.
+
+Use blank lines between major sections.
+
+Avoid giant paragraphs, repeated labels, excessive
+hashes and duplicated technical explanations.
+
+Keep full logs, hashes, low-level diagnostics and test
+matrices in durable evidence.
+
+The normal response should contain only the summary
+and a reference to that evidence.
+
+Honor the existing SAIPEN operational-response schema.
+Use its canonical renderer/checker.
+
+Do not bypass CORE-RESPONSE checks to improve formatting.
+
+The preferred permanent solution is deterministic
+readable rendering from existing structured result data,
+not reliance on repeated model prompt reminders.
+
+============================================================
+7. REGRESSION
+============================================================
+
+Test:
+
+A. Raw multiline response remains multiline in the UI.
+
+B. Structured result fields are not concatenated.
+
+C. Canonical response checks still pass.
+
+D. Invalid input acceptance cannot become PASS.
+
+E. Noninteractive desktop is reported accurately.
+
+F. False desktop-unavailable detection is rejected.
+
+G. Wrong console PID/HWND is rejected.
+
+H. Stale installed binary is reported accurately.
+
+I. No unauthorized deployment occurs.
+
+J. No uncontrolled input is sent to an unrelated window.
+
+K. Existing keyboard, clipboard and console tests pass.
+
+L. Technical details are preserved in evidence without
+   flooding the operator-facing response.
+
+============================================================
+8. COMPLETION
+============================================================
+
+Preserve existing T-301 implementation and journal.
+
+Perform safe diagnostics under valid authority.
+
+Do not claim completion until required real Windows
+acceptance has passed.
+
+If a genuine protected blocker remains, report it
+concisely and stop without repeated retries.
+
+Do not create duplicate tickets or broaden permissions.
+
+Keep Future Gates closed.
+
+FINAL REPORT
+
+STATUS:
+TICKET:
+IMPLEMENTED:
+LIVE VERIFIED:
+STILL BLOCKED:
+BINARY GENERATION:
+REGRESSION:
+RESPONSE FORMAT:
+NEED USER:
+NEXT EXACT ACTION:
+
+Use actual line breaks and concise content.
+
+SUCCESS
+
+T-301 reports real acceptance truth.
+
+The live interactive input path is correctly diagnosed.
+
+Deployment authority is respected.
+
+Operator-facing reports are readable without opening
+an enormous technical evidence dump.
+/goal cc all

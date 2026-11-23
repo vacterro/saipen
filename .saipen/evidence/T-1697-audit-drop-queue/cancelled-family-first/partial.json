@@ -1,0 +1,22 @@
+{
+  "status": "INCOMPLETE; cancellation requested after two budget controls failed",
+  "owner": {
+    "schema": 1,
+    "kind": "core-unit",
+    "ticket": "T-1697",
+    "command": "core_unit evidence",
+    "pid": 15076,
+    "pid_created": 1791590310.0501041,
+    "started": 1791590310.2767854,
+    "started_utc": "2026-10-09T23:58:30Z"
+  },
+  "spools": [
+    "saipen-core-unit-255fnqjq",
+    "saipen-core-unit-apryq617",
+    "saipen-core-unit-e1lyrr5x",
+    "saipen-core-unit-f3l428p_",
+    "saipen-core-unit-md6ss5j8",
+    "saipen-core-unit-xy1e_3je"
+  ],
+  "completion_evidence": false
+}

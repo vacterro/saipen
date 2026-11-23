@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-016:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "T02 coordinator extracted from Qt: audapack/services/audit_run_service.py:725 AuditRunCoordinator owns start workflow; Qt only requests/renders; extensively testable without QMainWindow (whole services suite is QMainWindow-free)",
+      "text": "Implement and verify every required change and test in T02 AUDIT RUN COORDINATOR.",
+      "verification": "tests/services/test_audit_run_service.py 60+ tests green; coordinator constructor injection (intents/dispatcher/supervisor)",
+      "work": "T-52"
+    }
+  },
+  "schema_version": 1
+}

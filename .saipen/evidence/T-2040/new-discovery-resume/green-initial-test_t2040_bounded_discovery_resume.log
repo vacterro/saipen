@@ -1,0 +1,20 @@
+test_duplicate_missing_stale_and_malformed_rows_refused (__main__.CertificateDispatchTests.test_duplicate_missing_stale_and_malformed_rows_refused) ... ok
+test_exact_native_allowlist (__main__.CertificateDispatchTests.test_exact_native_allowlist) ... ok
+test_hint_must_name_exact_unchecked_row_and_generation (__main__.CertificateDispatchTests.test_hint_must_name_exact_unchecked_row_and_generation) ... ok
+test_same_bounded_hint_not_work_or_exhaustion (__main__.CertificateDispatchTests.test_same_bounded_hint_not_work_or_exhaustion) ... ok
+test_total_diagnostics_on_hostile_envelopes (__main__.CertificateDispatchTests.test_total_diagnostics_on_hostile_envelopes) ... ok
+test_reused_work_keeps_actual_ticket_and_receipt_fields (__main__.ContinuationAdmissionTests.test_reused_work_keeps_actual_ticket_and_receipt_fields) ... ok
+test_structured_admission_failures_never_fall_through_improve (__main__.ContinuationAdmissionTests.test_structured_admission_failures_never_fall_through_improve) ... ok
+test_actual_canonical_hunt_clean_current_head (__main__.NativeObservationTests.test_actual_canonical_hunt_clean_current_head) ... ok
+test_complete_improve_cannot_restamp_any_identity_dimension (__main__.NativeObservationTests.test_complete_improve_cannot_restamp_any_identity_dimension) ... ok
+test_current_complete_improve_uses_shared_bound_bar (__main__.NativeObservationTests.test_current_complete_improve_uses_shared_bound_bar) ... ok
+test_dirty_missing_unreadable_and_prose_hunt_never_clean (__main__.NativeObservationTests.test_dirty_missing_unreadable_and_prose_hunt_never_clean) ... ok
+test_discovery_keys_same_generation_no_publication_copy (__main__.NativeObservationTests.test_discovery_keys_same_generation_no_publication_copy) ... ok
+test_grant_recovery_and_owned_work_gate_one_analysis_hint (__main__.NativeObservationTests.test_grant_recovery_and_owned_work_gate_one_analysis_hint) ... ok
+test_header_cannot_mix_head_and_tree_from_different_runs (__main__.NativeObservationTests.test_header_cannot_mix_head_and_tree_from_different_runs) ... ok
+test_source_change_marker_is_not_completed_analysis (__main__.NativeObservationTests.test_source_change_marker_is_not_completed_analysis) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 6.585s
+
+OK

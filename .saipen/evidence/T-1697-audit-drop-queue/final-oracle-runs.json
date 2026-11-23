@@ -1,0 +1,16 @@
+[
+  {
+    "subject": "final-pre",
+    "exit_code": 1,
+    "tests": 10,
+    "failures": 7,
+    "skips": 1
+  },
+  {
+    "subject": "final-post",
+    "exit_code": 0,
+    "tests": 10,
+    "failures": 0,
+    "skips": 1
+  }
+]

@@ -1,0 +1,13 @@
+test_duplicate_and_contradictory_generations_fail_closed (__main__.CollectHypothesisTests.test_duplicate_and_contradictory_generations_fail_closed) ... ok
+test_nested_null_numeric_and_missing_values_are_invalid (__main__.CollectHypothesisTests.test_nested_null_numeric_and_missing_values_are_invalid) ... ok
+test_valid_and_absent_legacy_hypotheses_still_bind (__main__.CollectHypothesisTests.test_valid_and_absent_legacy_hypotheses_still_bind) ... ok
+test_malformed_goal_inventory_never_binds_authority (__main__.MaintenanceObservationTests.test_malformed_goal_inventory_never_binds_authority) ... ok
+test_native_admission_preserves_grant_identity_and_restart (__main__.MaintenanceObservationTests.test_native_admission_preserves_grant_identity_and_restart) ... ok
+test_observation_statuses_do_not_revoke_an_unchanged_grant (__main__.MaintenanceObservationTests.test_observation_statuses_do_not_revoke_an_unchanged_grant) ... ok
+test_policy_change_and_pause_still_refuse (__main__.MaintenanceObservationTests.test_policy_change_and_pause_still_refuse) ... ok
+test_ungranted_or_revoked_observation_never_admits (__main__.MaintenanceObservationTests.test_ungranted_or_revoked_observation_never_admits) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 21.778s
+
+OK

@@ -1,0 +1,15 @@
+6c6d841df24e5c5d91870def931af99f0af4c81f 2026-10-09T13:08:02+03:00 VAC34 fix(widget): P1-A/P1-B trust-boundary hardening in 0.1.07
+d66d9f63ef2fee4a5a5701136bf26169c7511d8c 2026-10-06T12:01:47+03:00 VAC34 chore(saipen): record the T-286 repository recovery
+db396923f9f28ccc27f90b90e8d8551a0e87d9da 2026-10-06T11:59:04+03:00 VAC34 chore(recovery): capture verified AUDAPACK source of truth
+a37250f700ec4b93c81d36ec563675bab1c1d9d2 2026-10-05T20:11:59+03:00 VAC34 fix: decouple nested git component ingestion
+38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1 2026-09-06T23:17:27+03:00 VAC34 chore(saipen): close SRC-038 and T-160 on the board
+fee27d2df45296f8c192d2f4685317f7c9d4c611 2026-09-06T23:11:54+03:00 VAC34 fix(bridge): name-only audit completion cannot cross-close a foreign lane (T-160)
+b8eac7b8af829e3c986b4cf9954b9f2e1bba45bb 2026-09-05T04:13:55+03:00 VAC34 chore(saipen): close SRC-035 and T-151 on the board
+24e930f0014c4db0dd8dac2ab0883b3874f7e199 2026-09-05T04:10:29+03:00 VAC34 feat(inaudit): truthful room badge, rename and routing actions (T-151)
+0520b9c4da51ecf00084493c4b7158d0de26925b 2026-09-05T02:58:59+03:00 VAC34 chore(saipen): ingest audit layer 5 as SRC-035, open T-151
+c99fdd25c5cbbbd2cd171ea59002970d42cee55b 2026-09-05T02:54:19+03:00 VAC34 chore(saipen): close T-147 on the board
+81fffac12084abacf1ee0397473266a7ff634e3a 2026-09-05T02:49:15+03:00 VAC34 feat(packing): audit fidelity profiles with a truthful manifest (T-147, T-146)
+ea4e3f82b6a5c22be66878861ffa23efa107e8a5 2026-09-04T21:20:25+03:00 VAC34 perf(bridge): one INAUDIT store per Bridge lifetime, not per request (PERF-002)
+f82e4a2205a77ae36f436fe089c722567e8b35ee 2026-09-04T21:12:24+03:00 VAC34 perf(project-room): data() stops enumerating the audit directory (PERF-001)
+c8cd23fa3c494a74f92b8f2b0f0e0eee428ac387 2026-09-04T20:46:11+03:00 VAC34 fix(bridge): PID ownership is atomic, fail-closed and bound to its target (W2-004)
+772aeb7b3cc8ac58b3971cf38c76f64f7fea35ff 2026-09-04T20:18:22+03:00 VAC34 chore(saipen): T-143/T-144/T-145 closed; temp-file hardening adopted as owner

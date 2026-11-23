@@ -1,0 +1,7 @@
+{
+  "reclaimed_before_primary_thread_started": true,
+  "child_ready": true,
+  "reclaimed_after_ready": false,
+  "resume_previous_suspend_count": 1,
+  "only_owned_disposable_process_and_directory": true
+}

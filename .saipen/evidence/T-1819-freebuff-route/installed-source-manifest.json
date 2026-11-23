@@ -1,0 +1,28 @@
+{
+  "archive": "C:\\Users\\vac34\\AppData\\Local\\Programs\\@codebufffreebuff-desktop\\resources\\app.asar",
+  "archive_sha256": "ef8563ad25eb9b71ef29952fd2b97546687c517a6c0573fd576637e41bb943f8",
+  "source_version": "0.0.182",
+  "installed_files_read_only": true,
+  "files": {
+    "electron/main.cjs": {
+      "size": 102007,
+      "sha256": "d380c10b8795edfd18e5be9331ac84e5c212ace3bf92a7d1b7e9eba91689a01c"
+    },
+    "electron/preload.cjs": {
+      "size": 11769,
+      "sha256": "f070e01d2083ceee6a6ed9691f82825c579bf02395625102ac2fcada3eb69f6b"
+    },
+    "electron/ipc-sender.cjs": {
+      "size": 1474,
+      "sha256": "5a689331b17834638335a012e05bb017609613a3fdebb64726872bdcc9950327"
+    },
+    "electron/orchestrator-request.cjs": {
+      "size": 3066,
+      "sha256": "ff5a1f482408409c730f608d6c3be653f450c2768631bc0695b1448cebf3307b"
+    },
+    "electron/launch-bootstrap.cjs": {
+      "size": 1618,
+      "sha256": "e7b2390dbc95f2ae62aac07ccee3d125d98413ff899e667e4801699c5215e6fc"
+    }
+  }
+}

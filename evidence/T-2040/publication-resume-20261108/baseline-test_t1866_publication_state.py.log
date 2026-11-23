@@ -1,0 +1,17 @@
+test_a_published_own_patch_closure_says_published (test_t1866_publication_state.OwnPatchStatesItsPublicationTruth.test_a_published_own_patch_closure_says_published)
+Publication evidence is read, not asserted: a real receipt flips it. ... ok
+test_an_inherited_closure_claims_no_patch_state (test_t1866_publication_state.OwnPatchStatesItsPublicationTruth.test_an_inherited_closure_claims_no_patch_state)
+`inherited_verified` adds no code, so it has no publication of its own. ... ok
+test_an_unpublished_own_patch_closure_says_pending (test_t1866_publication_state.OwnPatchStatesItsPublicationTruth.test_an_unpublished_own_patch_closure_says_pending)
+The F-03 shape: the delta is real, the release does not exist yet. ... ok
+test_pending_is_derived_from_evidence_not_from_the_request (test_t1866_publication_state.OwnPatchStatesItsPublicationTruth.test_pending_is_derived_from_evidence_not_from_the_request)
+No caller can CLAIM published: the resolver decides, in this same run. ... ok
+test_the_no_delta_refusal_is_untouched (test_t1866_publication_state.OwnPatchStatesItsPublicationTruth.test_the_no_delta_refusal_is_untouched)
+T-37 still wins: no delta at all is a false claim, not a pending one. ... ok
+test_the_pending_state_names_its_own_publish_route (test_t1866_publication_state.OwnPatchStatesItsPublicationTruth.test_the_pending_state_names_its_own_publish_route)
+A state with no route is a dead end; the route is the next canonical act. ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.544s
+
+OK

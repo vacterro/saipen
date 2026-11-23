@@ -1,0 +1,32 @@
+{
+  "ok": false,
+  "code": "TICKET_NOT_WORKABLE",
+  "op_id": null,
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "T-9001 is actively claimed by another agent (test-agent); a live foreign claim cannot be mutated by session <Mock name='mock.agent' id='1978780782928'>",
+  "ticket": "T-9001"
+}
+test_diagnostic_fixture_executes_its_real_single_failure (test_t1847_fixture_contract.FixtureContract.test_diagnostic_fixture_executes_its_real_single_failure) ... FAIL
+test_marker_fixture_reaches_and_releases_the_real_owned_gate (test_t1847_fixture_contract.FixtureContract.test_marker_fixture_reaches_and_releases_the_real_owned_gate) ... FAIL
+
+======================================================================
+FAIL: test_diagnostic_fixture_executes_its_real_single_failure (test_t1847_fixture_contract.FixtureContract.test_diagnostic_fixture_executes_its_real_single_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_t1847_fixture_contract.py", line 35, in test_diagnostic_fixture_executes_its_real_single_failure
+    self.assertEqual(run["ran"], 1, run)
+AssertionError: None != 1 : {'status': 'FAIL', 'exit_code': None, 'processes_leaked': [], 'duration_s': None, 'process_create_s': None, 'ran': None, 'red': [], 'headers': 0, 'unparsed': 0, 'tallied': None, 'sections': {}, 'stdout': '', 'stderr': 'test family launch failed: verification reader ownership could not be recorded'}
+
+======================================================================
+FAIL: test_marker_fixture_reaches_and_releases_the_real_owned_gate (test_t1847_fixture_contract.FixtureContract.test_marker_fixture_reaches_and_releases_the_real_owned_gate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_t1847_fixture_contract.py", line 54, in test_marker_fixture_reaches_and_releases_the_real_owned_gate
+    self.assertEqual(len(observed), 1)
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.069s
+
+FAILED (failures=2)

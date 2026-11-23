@@ -1,0 +1,15 @@
+test_control_detects_a_deleted_block (__main__.RegistryImportCouplingTests.test_control_detects_a_deleted_block)
+Red control: remove a required block and the check must report it. ... ok
+test_control_detects_a_deleted_top_level_block (__main__.RegistryImportCouplingTests.test_control_detects_a_deleted_top_level_block)
+Second control: a whole top-level block removal is also detected. ... ok
+test_every_import_time_requirement_is_present (__main__.RegistryImportCouplingTests.test_every_import_time_requirement_is_present) ... ok
+test_scan_finds_the_known_requirement (__main__.RegistryImportCouplingTests.test_scan_finds_the_known_requirement)
+The scanner must see goal_authority.limits -- the block that crashed. ... ok
+test_scan_is_not_vacuous (__main__.RegistryImportCouplingTests.test_scan_is_not_vacuous) ... ok
+test_the_reported_command_path_imports (__main__.RegistryImportCouplingTests.test_the_reported_command_path_imports)
+The exact entry point the operator reported must import cleanly. ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 4.823s
+
+OK

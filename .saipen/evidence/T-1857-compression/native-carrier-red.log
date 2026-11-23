@@ -1,0 +1,21 @@
+test_actual_created_worker_is_bound_before_any_packet (__main__.DeliveryTests.test_actual_created_worker_is_bound_before_any_packet) ... ok
+test_fresh_native_input_does_not_inherit_an_old_task_carrier (__main__.DeliveryTests.test_fresh_native_input_does_not_inherit_an_old_task_carrier) ... FAIL
+test_issuer_refusal_and_malformed_reply_never_spawn (__main__.DeliveryTests.test_issuer_refusal_and_malformed_reply_never_spawn) ... ok
+test_kernel_refusal_after_valid_test_ingress_is_preserved (__main__.DeliveryTests.test_kernel_refusal_after_valid_test_ingress_is_preserved) ... ok
+test_malformed_native_event_never_issues_or_spawns (__main__.DeliveryTests.test_malformed_native_event_never_issues_or_spawns) ... ok
+test_registration_failure_sends_nothing_and_revokes_unconsumed_proof (__main__.DeliveryTests.test_registration_failure_sends_nothing_and_revokes_unconsumed_proof) ... ok
+test_worker_reverifies_before_any_ingress_or_continuation (__main__.DeliveryTests.test_worker_reverifies_before_any_ingress_or_continuation) ... ok
+test_wrong_event_action_and_project_refuse_even_with_positive_test_verifier (__main__.DeliveryTests.test_wrong_event_action_and_project_refuse_even_with_positive_test_verifier) ... ok
+
+======================================================================
+FAIL: test_fresh_native_input_does_not_inherit_an_old_task_carrier (__main__.DeliveryTests.test_fresh_native_input_does_not_inherit_an_old_task_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1857-compression\test_native_delivery_candidate.py", line 108, in test_fresh_native_input_does_not_inherit_an_old_task_carrier
+    self.assertEqual(environment.get("SAIPEN_TASK_SHA256"), candidate.ingress_digest("cc"))
+AssertionError: None != '355b1bbfc96725cdce8f4a2708fda310a80e6d13315aec4e5eed2a75fe8032ce'
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.015s
+
+FAILED (failures=1)

@@ -1,0 +1,17 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.exe
+PySide6 6.11.1 -- Qt runtime 6.11.1 -- Qt compiled 6.11.1
+rootdir: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+plugins: anyio-4.15.1, langsmith-0.14.12, asyncio-1.4.0, cov-7.1.0, docker-3.2.5, mock-3.15.1, qt-4.5.0, timeout-2.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 7 items
+
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c01_empty_board_with_proven_maintenance_continues PASSED [ 14%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c02_empty_board_no_maintenance_authority_remains_idle PASSED [ 28%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c03_doing_work_resumes_before_discovery PASSED [ 42%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c04_independent_work_proceeds_beside_blocked_work PASSED [ 57%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds PASSED [ 71%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c13_forged_persistent_grant_refused PASSED [ 85%]
+tools/test_campaign_continuation_assessment.py::ContinuationAssessmentSuite::test_c14_due_operator_gate_enforced PASSED [100%]
+
+============================== 7 passed in 1.02s ==============================

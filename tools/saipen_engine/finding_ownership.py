@@ -62,6 +62,7 @@ _RULE_OWNERS: dict[str, str] = {
     "work_closure_evidence": "ENGINE_INTERNAL",
     "legacy_closure_evidence": "ENGINE_INTERNAL",
     "half_claim": "ENGINE_INTERNAL",
+    "attempt_admission": "ENGINE_INTERNAL",
     "log_provenance_marker": "ENGINE_INTERNAL",
     "log_ticket_ref": "ENGINE_INTERNAL",
     "log_timestamp_inversion": "ENGINE_INTERNAL",

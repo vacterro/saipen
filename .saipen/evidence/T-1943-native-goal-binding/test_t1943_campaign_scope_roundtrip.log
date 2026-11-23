@@ -1,0 +1,17 @@
+test_goal_complete_is_not_continuous_maintenance (__main__.AReducedScopeIsNotACampaign.test_goal_complete_is_not_continuous_maintenance) ... ok
+test_a_bounded_grant_cannot_carry_the_campaign_scope (__main__.NothingWasWidened.test_a_bounded_grant_cannot_carry_the_campaign_scope) ... ok
+test_a_persistent_grant_still_needs_its_goal_ingress (__main__.NothingWasWidened.test_a_persistent_grant_still_needs_its_goal_ingress) ... ok
+test_an_invented_scope_is_still_refused (__main__.NothingWasWidened.test_an_invented_scope_is_still_refused) ... ok
+test_grant_fields_still_collapses_an_invented_scope (__main__.NothingWasWidened.test_grant_fields_still_collapses_an_invented_scope) ... ok
+test_every_grant_scope_is_declared_by_the_registry (__main__.TheClosedSetIsDeclaredInOnePlace.test_every_grant_scope_is_declared_by_the_registry)
+The registry may also carry `budget`, never FEWER members than grants. ... ok
+test_every_grant_scope_is_legal_in_the_state_schema (__main__.TheClosedSetIsDeclaredInOnePlace.test_every_grant_scope_is_legal_in_the_state_schema) ... ok
+test_a_campaign_grant_reads_back_as_written (__main__.TheWriterAndTheReaderAgree.test_a_campaign_grant_reads_back_as_written) ... ok
+test_the_parsed_state_can_be_proved (__main__.TheWriterAndTheReaderAgree.test_the_parsed_state_can_be_proved)
+Round trip into the predicate the routing actually consumes. ... ok
+test_the_written_state_survives_the_full_contract (__main__.TheWriterAndTheReaderAgree.test_the_written_state_survives_the_full_contract) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.010s
+
+OK

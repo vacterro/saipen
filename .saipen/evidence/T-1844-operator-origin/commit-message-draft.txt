@@ -1,0 +1,7 @@
+fix: authenticate exact operator origins
+
+Model-written carriers prove integrity, not operator identity.
+Bind privileged actions to broker-verified native events, worker birth,
+canonical Sources and the original goal/budget epoch.
+
+Refs T-1844

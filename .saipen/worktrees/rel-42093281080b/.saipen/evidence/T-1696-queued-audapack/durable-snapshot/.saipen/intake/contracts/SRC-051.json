@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-051:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUDAPACK P0/P1 closure defect: Widget source changed without userscript version bump (targets A-I), reopen T-194, fix delivery identity, bump version once, verify Bridge-served bytes, real Tampermonkey + real ChatGPT acceptance, T-195 OpenCode smoke-check, then resume T-188"
+    }
+  },
+  "derived_at": "2026-09-29T10:37:10Z",
+  "derived_from": "SRC-051",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "f920c44fc35dc9b0e5866a0f749b314a2a323143baf11af8b3718a27f95dd66f"
+}

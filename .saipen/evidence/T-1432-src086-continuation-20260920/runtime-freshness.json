@@ -1,0 +1,7 @@
+{
+  "ok": false,
+  "code": "CANONICAL_RUNTIME_SOURCE_UNPROVEN",
+  "detail": "no installer provenance marker at V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen_runtime.json; run the canonical injector once (LEGACY_BOOTSTRAP_MIGRATION)",
+  "current_host": null,
+  "fleet": []
+}

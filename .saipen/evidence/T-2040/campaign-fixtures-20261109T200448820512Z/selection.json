@@ -1,0 +1,54 @@
+{
+  "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "evidence": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\campaign-fixtures-20261109T200448820512Z",
+  "created_utc": "20261109T200448820512Z",
+  "owned_files": [
+    "tools/test_campaign_matrix.py",
+    "tools/test_campaign_production_gates.py",
+    "tools/test_t1945_analysis_progress.py",
+    "tools/test_t1945_campaign_driver.py",
+    "tools/test_aut31_production_autonomy.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/campaign.py",
+    "tools/saipen_engine/continuation_assessment.py",
+    "tools/saipen_engine/work_exhaustion.py",
+    "tools/saipen_engine/paths.py",
+    "tools/saipen_engine/journal.py",
+    "tools/campaign_test_support.py",
+    "tools/test_fixture_support.py",
+    "tools/test_t2040_terminal_consumer_guards.py"
+  ],
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_aut31_production_autonomy.py::Aut31ProductionAutonomyControlsTests::test_control_01_five_real_successive_model_turns",
+    "tools/test_aut31_production_autonomy.py::Aut31ProductionAutonomyControlsTests::test_control_03_actual_implementation_task_verified_and_closed",
+    "tools/test_campaign_matrix.py::TestCampaignMatrix::test_c35_c36_all_work_complete_legitimately_quiescent",
+    "tools/test_campaign_production_gates.py::TestCampaignNegativeControls::test_neg_camp_005_and_009_executor_missing_and_supersession",
+    "tools/test_campaign_production_gates.py::TestProductionAcceptanceGates::test_gate_i_quiescence_and_wake",
+    "tools/test_t1945_analysis_progress.py::AnalysisProgressStaysSchedulableTest::test_a_completed_objective_may_still_quiesce",
+    "tools/test_t1945_campaign_driver.py::DriverStopsOnBlockingStatesTest::test_it_does_not_spin_while_waiting_for_an_operator"
+  ],
+  "hashes_before": {
+    "tools/test_campaign_matrix.py": "5a6421c0db3d6f8c76d9d2e6622b39ea6552b59ed0500c0d50afbe3e9f6b4a7a",
+    "tools/test_campaign_production_gates.py": "3885b36699724d275dc5faa0593ab7f5772e12b2bdd61632200b5dfe1c635c6f",
+    "tools/test_t1945_analysis_progress.py": "ab1fd7505e2dc3290d98f301e295d0ce35528b975543b7af2b9c194f81b3a3ef",
+    "tools/test_t1945_campaign_driver.py": "ffb04f4ba875144affce63fbdebdb9a016943c0ae4961f9960cbd42cb28d68ae",
+    "tools/test_aut31_production_autonomy.py": "0560676cbac2e5385a0a291f29d8b1830e409157382156cf145291358abc7d81",
+    "tools/saipen_engine/campaign.py": "fbb09c5f1f16246ef9b73c80221216ae23972afe20aacb86649d9fb8d6e167af",
+    "tools/saipen_engine/continuation_assessment.py": "e0db3c2a18ed9606f5ce442e19779b3549bd1f04afaf174eebfc60acfe8c8428",
+    "tools/saipen_engine/work_exhaustion.py": "888d765f999eac92d1591108f43ca0ce7bec84b074d1577533c2e1a989791761",
+    "tools/saipen_engine/paths.py": "69a03aeacaa4d550938261f478f99b44a1f884893444edbcfb276c3f102a2b9e",
+    "tools/saipen_engine/journal.py": "96bbbe379fa16e09319b2bf7c75f4bd37e0f0452b328a719a09b915e02d5c2ac",
+    "tools/campaign_test_support.py": "ec8e8bbeaa64b8ce4d8c4518cb367cb3ced4a63a66fb51da70d085119dcbe6e4",
+    "tools/test_fixture_support.py": "6641bb9a805bdf3de0964fdad95ec9fef292f4b73b959d61aa3154e981f2dff0",
+    "tools/test_t2040_terminal_consumer_guards.py": "a1c63c38ea768668e3ab202a56e85641b54b3062190118d3ec7a46f0f1e97dc9"
+  }
+}

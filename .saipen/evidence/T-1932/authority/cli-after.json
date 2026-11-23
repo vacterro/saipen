@@ -1,0 +1,15 @@
+{
+  "before": {
+    ".saipen/STATE.md": "7a15e78d41715dd1d440889f7798b99824a3c9e2f5ed39c91515571b33896cc3",
+    ".saipen/BOARD.md": "4ea801ac68b9a0830600d7466288939527179b6a0e4b8dbdc0caad84878f740c",
+    ".saipen/LOG.md": "8c5723ebb172b03001ea59ae2f3af9351b0a355a48da49ddcc02c4ba7d8d4ef1",
+    ".saipen/campaign/state.json": null
+  },
+  "after": {
+    ".saipen/STATE.md": "7a15e78d41715dd1d440889f7798b99824a3c9e2f5ed39c91515571b33896cc3",
+    ".saipen/BOARD.md": "4ea801ac68b9a0830600d7466288939527179b6a0e4b8dbdc0caad84878f740c",
+    ".saipen/LOG.md": "8c5723ebb172b03001ea59ae2f3af9351b0a355a48da49ddcc02c4ba7d8d4ef1",
+    ".saipen/campaign/state.json": null
+  },
+  "unchanged": true
+}

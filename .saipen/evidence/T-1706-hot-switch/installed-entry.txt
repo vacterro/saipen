@@ -1,0 +1,65 @@
+{
+  "ok": true,
+  "code": "PATH_LAUNCHER",
+  "transport": "PATH_LAUNCHER",
+  "argv_prefix": [
+    "C:\\Users\\vac34\\bin\\saipen.CMD"
+  ],
+  "exec_prefix": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py"
+  ],
+  "command_form": "saipen",
+  "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "runtime_identity": {
+    "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+    "proven_by": "state-saipen-home",
+    "proof": "activation contract and engine present in the home's own bytes",
+    "version": "8.1.0",
+    "installer_provenance": null
+  },
+  "host_admission": {
+    "host": null,
+    "known": false,
+    "mutation_admitted": true
+  },
+  "requested_command": null,
+  "command_effect": null,
+  "command_allowed": true,
+  "binding": {
+    "persisted_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "persisted_home_dead": false,
+    "reason": null
+  },
+  "degraded": [],
+  "diagnostics": [],
+  "attempted": [
+    {
+      "source": "path",
+      "path": "C:\\Users\\vac34\\bin\\saipen.CMD",
+      "ok": true
+    },
+    {
+      "source": "state-saipen-home",
+      "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "ok": true,
+      "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+      "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py"
+    },
+    {
+      "source": "executing-engine",
+      "home": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+      "ok": true,
+      "protocol_dir": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+      "engine": "C:\\Users\\vac34\\.agents\\skills\\saipen\\tools\\saipen.py"
+    }
+  ],
+  "next_action": null,
+  "bootstrap_code": "HOST_BOOTSTRAP_BOUND",
+  "module_invocation": "unsupported",
+  "host_shell": "windows"
+}

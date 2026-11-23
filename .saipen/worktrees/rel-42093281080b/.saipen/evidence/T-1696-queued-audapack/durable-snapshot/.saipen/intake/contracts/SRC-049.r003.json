@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-049:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Manual project ZIP control decoupled from Auto Audit: compact titlebar control available in ordinary ChatGPT chats, project popover fed by GET /v1/projects (select, change, clear binding, refresh list), explicit state labels (CHECK/PACK/GET/ATTACH/ZIP check/ZIP bang), no Auto enabled or campaign or START required (SRC-049 TARGET A, C, P)."
+    },
+    "SRC-049:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Conversation-to-project binding persisted per ChatGPT conversation key with explicit user selection authoritative, change and clear supported without touching project files, temporary draft identity migrated only through the existing canonical conversation identity transition, and no binding leaking between conversations (SRC-049 TARGET B, N)."
+    },
+    "SRC-049:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Idempotent duplicate protection: canonical identity is project_id plus archive SHA-256 plus byte size, filename alone is never equality proof; ensureProjectArchive is reused without repack or archive churn when unchanged; an already proven attached canonical archive returns ALREADY_ATTACHED with zero GET, File construction, injection or DOM replacement (SRC-049 TARGET D, E, F, G, J)."
+    }
+  },
+  "derived_at": "2026-09-16T17:01:19Z",
+  "derived_from": "SRC-049",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "80dee69f3744af8e037255b5e22fede832243bc4f4b6353d5735030e3b1dc967"
+}

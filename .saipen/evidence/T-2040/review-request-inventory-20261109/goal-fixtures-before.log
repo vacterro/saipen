@@ -1,0 +1,258 @@
+FF...FFFF..F..F...F.FFF....FFF                             [100%]
+================================== FAILURES ===================================
+_________ E2E01PrematureHandback.test_auto_kick_and_no_completion_ui __________
+
+self = <test_t1619_iteration_boundary.E2E01PrematureHandback testMethod=test_auto_kick_and_no_completion_ui>
+
+    def test_auto_kick_and_no_completion_ui(self):
+        root = make_project(build_state(), BUILD_BOARD)
+        verdict = IV.project_iteration_verdict(root)
+>       self.assertEqual(verdict["decision"], iteration.AUTO_KICK)
+E       AssertionError: 'RUNTIME_PAUSED' != 'AUTO_KICK'
+E       - RUNTIME_PAUSED
+E       + AUTO_KICK
+
+tools\test_t1619_iteration_boundary.py:129: AssertionError
+_______________ E2E02TrueTerminal.test_terminal_once_then_stop ________________
+
+self = <test_t1619_iteration_boundary.E2E02TrueTerminal testMethod=test_terminal_once_then_stop>
+
+    def test_terminal_once_then_stop(self):
+        root = make_project(terminal_state(), TERMINAL_BOARD)
+        verdict = IV.project_iteration_verdict(root)
+>       self.assertEqual(verdict["decision"], iteration.VALID_TERMINAL)
+E       AssertionError: 'RUNTIME_PAUSED' != 'VALID_TERMINAL'
+E       - RUNTIME_PAUSED
+E       + VALID_TERMINAL
+
+tools\test_t1619_iteration_boundary.py:145: AssertionError
+____________ E2E06AllRoutesIncompatible.test_pause_preserves_work _____________
+
+self = <test_t1619_iteration_boundary.E2E06AllRoutesIncompatible testMethod=test_pause_preserves_work>
+
+    def test_pause_preserves_work(self):
+        required = IV.required_for_state(["filesystem", "git", "python"])
+        ctrl = HI.HostIterationController(required)
+        selected, pause = ctrl.admit_candidates([("saiopp", SAIOPP_CAPS)])
+        self.assertIsNone(selected)
+        self.assertIsNotNone(pause)
+        self.assertEqual(pause["code"], iteration.RUNTIME_PAUSED)
+        self.assertFalse(pause["project_blocked"])
+        self.assertFalse(pause["requires_human"])
+        root = make_project(build_state(), BUILD_BOARD)
+        verdict = IV.project_iteration_verdict(
+            root, executor_caps=SAIOPP_CAPS, all_candidates_exhausted=True
+        )
+        self.assertEqual(verdict["decision"], iteration.RUNTIME_PAUSED)
+>       self.assertEqual(verdict["canonical_task"], "T-1618")
+E       AssertionError: 'none' != 'T-1618'
+E       - none
+E       + T-1618
+
+tools\test_t1619_iteration_boundary.py:223: AssertionError
+____________ E2E07SafetyValve.test_valve_tripped_is_operator_wait _____________
+
+self = <test_t1619_iteration_boundary.E2E07SafetyValve testMethod=test_valve_tripped_is_operator_wait>
+
+    def test_valve_tripped_is_operator_wait(self):
+        root = make_project(build_state(goal_tickets=20), BUILD_BOARD)
+        verdict = IV.project_iteration_verdict(root)
+>       self.assertTrue(verdict["valve_tripped"])
+E       AssertionError: False is not true
+
+tools\test_t1619_iteration_boundary.py:234: AssertionError
+______________ E2E08RealOperatorAction.test_binding_brake_stops _______________
+
+self = <test_t1619_iteration_boundary.E2E08RealOperatorAction testMethod=test_binding_brake_stops>
+
+    def test_binding_brake_stops(self):
+        text = re.sub(r"(?m)^blocker:.*$", "blocker: OPERATOR_WAIT fixture", build_state())
+        root = make_project(text, BUILD_BOARD)
+        verdict = IV.project_iteration_verdict(root)
+>       self.assertEqual(verdict["decision"], iteration.OPERATOR_WAIT)
+E       AssertionError: 'RUNTIME_PAUSED' != 'OPERATOR_WAIT'
+E       - RUNTIME_PAUSED
+E       + OPERATOR_WAIT
+
+tools\test_t1619_iteration_boundary.py:248: AssertionError
+________ E2E09PublicDecisionCommand.test_cli_decision_matches_library _________
+
+self = <test_t1619_iteration_boundary.E2E09PublicDecisionCommand testMethod=test_cli_decision_matches_library>
+
+    def test_cli_decision_matches_library(self):
+        root = make_project(build_state(), BUILD_BOARD)
+        expected = IV.project_iteration_verdict(root)
+        proc = subprocess.run(
+            [sys.executable, str(TOOLS / "saipen.py"), "iteration", "--json",
+             "--project-root", str(root)],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+        payload = json.loads(proc.stdout)
+        self.assertTrue(payload["ok"])
+        for key in ("decision", "goal_complete", "canonical_task", "phase",
+                    "next_action", "operator_due", "valve_tripped", "requires_human"):
+            self.assertEqual(payload[key], expected[key], key)
+>       self.assertEqual(payload["decision"], iteration.AUTO_KICK)
+E       AssertionError: 'RUNTIME_PAUSED' != 'AUTO_KICK'
+E       - RUNTIME_PAUSED
+E       + AUTO_KICK
+
+tools\test_t1619_iteration_boundary.py:273: AssertionError
+_ QuestionAuthorityTests.test_a_true_wait_allows_the_exact_canonical_operator_question _
+
+self = <test_t1627_operator_question.QuestionAuthorityTests testMethod=test_a_true_wait_allows_the_exact_canonical_operator_question>
+
+    def test_a_true_wait_allows_the_exact_canonical_operator_question(self):
+        verdict = self._guard(status=self._wait(), questions={"questions": [{
+            "question": CANONICAL_ACTION, "header": "SAIPEN", "options": [],
+        }]})
+>       self.assertTrue(verdict["admitted"], verdict)
+E       AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'admitted': False, 'applicable': True, 'project_root': 'V:\\_TEMP_\\saipen-t1627-fqqliuzf\\project', 'target': None, 'targets': [], 'action': 'read', 'effect': 'read', 'provenance': 'ancestor', 'project_lineage': None, 'detail': 'INVALID_OPERATIONAL_PROSE -- OPERATOR-QUESTION-01: present canonical_surface only; no improvised question or choices; use saipen status --json', 'duration_ms': 0.987, 'operator_question': {'schema_version': 1, 'rule': 'OPERATOR-QUESTION-01', 'class': 'INVALID_OPERATIONAL_PROSE', 'eligible': True, 'admitted': False, 'disposition': 'WAIT_USER', 'next_action': 'PHASE BUILD T-1624', 'canonical_next_command': 'saipen status --json', 'detail': 'INVALID_OPERATIONAL_PROSE -- OPERATOR-QUESTION-01: present canonical_surface only; no improvised question or choices; use saipen status --json', 'canonical_surface': 'STATUS: CORRUPT  \nRESULT: Vajab operaatori otsust  \nOPERATOR ACTION: Anna puuduva otsuse volitus.  \nNEXT EXACT ACTION: NONE  \nVALIDATION: NOT_RUN'}, 'canonical_next_command': 'saipen status --json', 'event': {'event': 'before_tool', 'host': 'freebuff', 'cwd': 'V:\\_TEMP_\\saipen-t1627-fqqliuzf\\project', 'tool_name': 'question', 'action': 'read', 'command_class': 'DIAGNOSTIC', 'fleet_preflight': False, 'target_path': None, 'target_paths': [], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': None, 'saipen_verb': None, 'detail': '', 'session_id': 'missing-transcript-session'}, 'strength': {'host': 'freebuff', 'effective': 'ADVISORY', 'reason': 'host has no verified before-tool blocking surface'}}
+
+tools\test_t1627_operator_question.py:161: AssertionError
+_ QuestionAuthorityTests.test_cold_real_project_route_wins_over_an_absent_provider_session _
+
+self = <test_t1627_operator_question.QuestionAuthorityTests testMethod=test_cold_real_project_route_wins_over_an_absent_provider_session>
+
+    def test_cold_real_project_route_wins_over_an_absent_provider_session(self):
+        session = self.root / "unreadable-session.jsonl"
+        session.mkdir()
+        rc, status = self._cli("status")
+>       self.assertEqual(rc, 0, status)
+E       AssertionError: 1 != 0 : {'ok': False, 'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'state-malformed', 'detail': 'state-malformed: execution_intent goal with converge_target', 'cold_route': {'project_root': 'V:\\_TEMP_\\saipen-t1627-5z_xlu8g\\project', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'protocol_dir': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen', 'phase': 'BUILD', 'phase_module': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\build.md', 'boot': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md', 'style': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md', 'documents': {'STYLE.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md', 'BOOT.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md', 'INDEX.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md', 'COMMANDS.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md', 'OPS.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md', 'SOURCES.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md', 'EXECUTION.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md', 'MAINTENANCE.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md', 'CORE.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md', 'RUNTIME.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md'}, 'project_memory': {'STATE.md': 'V:\\_TEMP_\\saipen-t1627-5z_xlu8g\\project\\.saipen\\STATE.md', 'BOARD.md': 'V:\\_TEMP_\\saipen-t1627-5z_xlu8g\\project\\.saipen\\BOARD.md', 'LOG.md': 'V:\\_TEMP_\\saipen-t1627-5z_xlu8g\\project\\.saipen\\LOG.md'}, 'search_required': False}, 'telegrams': {'state': 'OK', 'unread': 0, 'on_current_work': 0, 'complete': True, 'read_command': 'saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-t1627-5z_xlu8g\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat saipen-cli', 'detail': 'counts only; nothing was opened and nothing here is an instruction'}}
+
+tools\test_t1627_operator_question.py:240: AssertionError
+_ QuestionAuthorityTests.test_incompatible_executor_uses_existing_failover_and_keeps_work _
+
+self = <test_t1627_operator_question.QuestionAuthorityTests testMethod=test_incompatible_executor_uses_existing_failover_and_keeps_work>
+
+    def test_incompatible_executor_uses_existing_failover_and_keeps_work(self):
+        verdict = iteration_verdict.project_iteration_verdict(
+            self.root, executor_caps={"read_tabular": True},
+        )
+>       self.assertEqual(verdict["decision"], iteration.EXECUTOR_CAPABILITY_MISMATCH)
+E       AssertionError: 'RUNTIME_PAUSED' != 'EXECUTOR_CAPABILITY_MISMATCH'
+E       - RUNTIME_PAUSED
+E       + EXECUTOR_CAPABILITY_MISMATCH
+
+tools\test_t1627_operator_question.py:179: AssertionError
+_ QuestionAuthorityTests.test_real_claude_pretool_question_is_refused_before_ui_delivery _
+
+self = <test_t1627_operator_question.QuestionAuthorityTests testMethod=test_real_claude_pretool_question_is_refused_before_ui_delivery>
+
+    def test_real_claude_pretool_question_is_refused_before_ui_delivery(self):
+        payload = {
+            "hook_event_name": "PreToolUse", "tool_name": "AskUserQuestion",
+            "tool_input": MENU, "cwd": str(self.root), "session_id": "claude-question",
+        }
+        proc = subprocess.run(
+            [sys.executable, "-B", str(ROOT / "extensions/adapters/claude/saipen-guard.py"),
+             "--host", "claude", "--saipen-root", str(ROOT)],
+            input=json.dumps(payload).encode("utf-8"), capture_output=True,
+            timeout=60, cwd=str(self.root), env=dict(os.environ),
+        )
+        answer = json.loads(proc.stdout.decode("utf-8", errors="replace") or "{}")
+        self.assertEqual(answer.get("hookSpecificOutput", {}).get("permissionDecision"), "deny")
+>       self.assertIn("AUTONOMOUS_HANDBACK", str(answer))
+E       AssertionError: 'AUTONOMOUS_HANDBACK' not found in "{'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason': 'INVALID_OPERATIONAL_PROSE -- OPERATOR-QUESTION-01: canonical question authority unavailable; use saipen status --json'}}"
+
+tools\test_t1627_operator_question.py:203: AssertionError
+_ QuestionAuthorityTests.test_real_opencode_question_hook_is_refused_before_ui_delivery _
+
+self = <test_t1627_operator_question.QuestionAuthorityTests testMethod=test_real_opencode_question_hook_is_refused_before_ui_delivery>
+
+    @unittest.skipUnless(shutil.which("node"), "node runtime unavailable")
+    def test_real_opencode_question_hook_is_refused_before_ui_delivery(self):
+        from test_opencode_adapter import PLUGIN, run_cases
+    
+        home = Path(self.temporary.name) / "profile"
+        (home / ".saipen").mkdir(parents=True)
+        (home / ".saipen/authority.json").write_text('{"mode":"degraded"}', encoding="utf-8")
+        result = run_cases(PLUGIN, [{
+            "id": "question", "project": str(self.root),
+            "env": {"SAIPEN_SKILL_ROOT": str(ROOT), "SAIPEN_PYTHON": sys.executable,
+                    "HOME": str(home), "USERPROFILE": str(home), "SAIPEN_AGENT": "test-agent"},
+            "input": {"tool": "question", "sessionID": "opencode-question"},
+            "output": {"args": copy.deepcopy(MENU)},
+        }], Path(self.temporary.name) / "node-driver")[0]
+        self.assertEqual(result["outcome"], "blocked", result)
+>       self.assertIn("AUTONOMOUS_HANDBACK", result["message"])
+E       AssertionError: 'AUTONOMOUS_HANDBACK' not found in "SAIPEN_GUARD_REFUSAL: VALIDATION_FAILED: the saipen guard refused tool 'question'; the host tool did not execute (INVALID_OPERATIONAL_PROSE; OPERATOR-QUESTION-01) next: saipen status --json"
+
+tools\test_t1627_operator_question.py:220: AssertionError
+_ QuestionAuthorityTests.test_real_wait_projection_admits_only_its_owned_operator_action _
+
+self = <test_t1627_operator_question.QuestionAuthorityTests testMethod=test_real_wait_projection_admits_only_its_owned_operator_action>
+
+    def test_real_wait_projection_admits_only_its_owned_operator_action(self):
+        self._wait()
+        rc, status = self._cli("status")
+>       self.assertEqual(rc, 0, status)
+E       AssertionError: 1 != 0 : {'ok': False, 'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'state-malformed', 'detail': 'state-malformed: execution_intent goal with converge_target', 'cold_route': {'project_root': 'V:\\_TEMP_\\saipen-t1627-q92ebash\\project', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'protocol_dir': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen', 'phase': 'BUILD', 'phase_module': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\build.md', 'boot': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md', 'style': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md', 'documents': {'STYLE.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md', 'BOOT.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md', 'INDEX.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md', 'COMMANDS.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md', 'OPS.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md', 'SOURCES.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md', 'EXECUTION.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md', 'MAINTENANCE.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md', 'CORE.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md', 'RUNTIME.md': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md'}, 'project_memory': {'STATE.md': 'V:\\_TEMP_\\saipen-t1627-q92ebash\\project\\.saipen\\STATE.md', 'BOARD.md': 'V:\\_TEMP_\\saipen-t1627-q92ebash\\project\\.saipen\\BOARD.md', 'LOG.md': 'V:\\_TEMP_\\saipen-t1627-q92ebash\\project\\.saipen\\LOG.md'}, 'search_required': False}, 'telegrams': {'state': 'OK', 'unread': 0, 'on_current_work': 0, 'complete': True, 'read_command': 'saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-t1627-q92ebash\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat saipen-cli', 'detail': 'counts only; nothing was opened and nothing here is an instruction'}}
+
+tools\test_t1627_operator_question.py:254: AssertionError
+_ PhaseShortcutKeepsAnEarnedWaitTests.test_a_plain_continue_is_not_treated_as_a_brake _
+
+self = <test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests testMethod=test_a_plain_continue_is_not_treated_as_a_brake>
+
+    def test_a_plain_continue_is_not_treated_as_a_brake(self):
+        """Only `WAIT:` is a hard stop; an ordinary route is not preserved."""
+        self._project("saipen continue")
+>       state = self._transition_to_hunt()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t1880_wait_survives_phase_shortcut.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t1880_wait_survives_phase_shortcut.py:82: in _transition_to_hunt
+    self.assertTrue(
+E   AssertionError: False is not true : transition refused before the invariant could be observed: {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'state-malformed: execution_intent goal with converge_target'}
+_ PhaseShortcutKeepsAnEarnedWaitTests.test_an_ordinary_transition_still_writes_the_destination_route _
+
+self = <test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests testMethod=test_an_ordinary_transition_still_writes_the_destination_route>
+
+    def test_an_ordinary_transition_still_writes_the_destination_route(self):
+        """The control: without a WAIT the phase move routes as it always did."""
+        self._project("PHASE DONE")
+>       state = self._transition_to_hunt()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t1880_wait_survives_phase_shortcut.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t1880_wait_survives_phase_shortcut.py:82: in _transition_to_hunt
+    self.assertTrue(
+E   AssertionError: False is not true : transition refused before the invariant could be observed: {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'state-malformed: execution_intent goal with converge_target'}
+_ PhaseShortcutKeepsAnEarnedWaitTests.test_the_tripped_valve_wait_survives_the_phase_shortcut _
+
+self = <test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests testMethod=test_the_tripped_valve_wait_survives_the_phase_shortcut>
+
+    def test_the_tripped_valve_wait_survives_the_phase_shortcut(self):
+        """The measured defect: `hh` replaced the brake with `PHASE HUNT`."""
+        self._project(VALVE_WAIT)
+>       state = self._transition_to_hunt()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t1880_wait_survives_phase_shortcut.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t1880_wait_survives_phase_shortcut.py:82: in _transition_to_hunt
+    self.assertTrue(
+E   AssertionError: False is not true : transition refused before the invariant could be observed: {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'state-malformed: execution_intent goal with converge_target'}
+=========================== short test summary info ===========================
+FAILED tools/test_t1619_iteration_boundary.py::E2E01PrematureHandback::test_auto_kick_and_no_completion_ui
+FAILED tools/test_t1619_iteration_boundary.py::E2E02TrueTerminal::test_terminal_once_then_stop
+FAILED tools/test_t1619_iteration_boundary.py::E2E06AllRoutesIncompatible::test_pause_preserves_work
+FAILED tools/test_t1619_iteration_boundary.py::E2E07SafetyValve::test_valve_tripped_is_operator_wait
+FAILED tools/test_t1619_iteration_boundary.py::E2E08RealOperatorAction::test_binding_brake_stops
+FAILED tools/test_t1619_iteration_boundary.py::E2E09PublicDecisionCommand::test_cli_decision_matches_library
+FAILED tools/test_t1627_operator_question.py::QuestionAuthorityTests::test_a_true_wait_allows_the_exact_canonical_operator_question
+FAILED tools/test_t1627_operator_question.py::QuestionAuthorityTests::test_cold_real_project_route_wins_over_an_absent_provider_session
+FAILED tools/test_t1627_operator_question.py::QuestionAuthorityTests::test_incompatible_executor_uses_existing_failover_and_keeps_work
+FAILED tools/test_t1627_operator_question.py::QuestionAuthorityTests::test_real_claude_pretool_question_is_refused_before_ui_delivery
+FAILED tools/test_t1627_operator_question.py::QuestionAuthorityTests::test_real_opencode_question_hook_is_refused_before_ui_delivery
+FAILED tools/test_t1627_operator_question.py::QuestionAuthorityTests::test_real_wait_projection_admits_only_its_owned_operator_action
+FAILED tools/test_t1880_wait_survives_phase_shortcut.py::PhaseShortcutKeepsAnEarnedWaitTests::test_a_plain_continue_is_not_treated_as_a_brake
+FAILED tools/test_t1880_wait_survives_phase_shortcut.py::PhaseShortcutKeepsAnEarnedWaitTests::test_an_ordinary_transition_still_writes_the_destination_route
+FAILED tools/test_t1880_wait_survives_phase_shortcut.py::PhaseShortcutKeepsAnEarnedWaitTests::test_the_tripped_valve_wait_survives_the_phase_shortcut
+15 failed, 15 passed, 14 subtests passed in 4.34s

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-417:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repair ZAICODE authenticated operator ingress (SRC-415/T-2060): host_authority_client effective per-host settings, broker max_shells/max_bridges zero handling, Windows process ancestry + signature measurement, operator_origin sealing for cc, negative security regression"
+    }
+  },
+  "derived_at": "2026-11-16T09:12:32Z",
+  "derived_from": "SRC-417",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "eb280f058808a8e03617fd1751db5072d104c90248c3491e5ff6d82bb486f009"
+}

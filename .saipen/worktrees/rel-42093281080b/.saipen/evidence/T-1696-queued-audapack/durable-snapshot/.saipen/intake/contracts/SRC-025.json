@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-025:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement and verify the durable pre-dispatch start-intent journal and restart recovery in T11."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:12Z",
+  "derived_from": "SRC-025",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "2eb889d9db559ce202b71ebf22291bfc72ff949fc506dbc78f153f6ac6a9f502"
+}

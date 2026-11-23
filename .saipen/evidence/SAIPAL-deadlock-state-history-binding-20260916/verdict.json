@@ -1,0 +1,118 @@
+{
+  "report_id": "SAIPAL-DEADLOCK-20260916",
+  "date": "2026-09-16",
+  "reporter": {
+    "agent": "buffy",
+    "host": "opencode",
+    "task": "SRC-006 processing (requested in V:\\_TEMP_\\fastprompter_drag\\SAIPAL_20260916_2323.md)"
+  },
+  "subject_project": {
+    "root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPAL",
+    "lineage": "lineage-780971aac07b4e56b81530d28f253b64",
+    "phase": "DONE",
+    "task": "T-125",
+    "transition_from": "VERIFY",
+    "last_event": 951,
+    "board_doing": 0,
+    "t125_section": "## DONE",
+    "t126_section": "## TODO"
+  },
+  "protocol": {
+    "installed_version": "8.0.1",
+    "installed_engine_operations_sha256": "F68BB0F05D8BC1F86115B84E45208C69D270F4CE48D6721B42063AE8073CAA93",
+    "installed_engine_fast_check_sha256": "23DA6E5FA0D1CF4094D7BC59CEC3A8DA6737572A2F824F5F6EEDF50CC0236A3C",
+    "source_clone_head": "e7ab966fe4f23f7d00a28a06a70ddf38c70bdb09",
+    "release_commit": "71455482",
+    "head_matches_install": true,
+    "commits_past_release": 28
+  },
+  "defect": {
+    "class": "PROTOCOL_DEFECT",
+    "name": "state-history-binding read deadlock",
+    "code": "VALIDATION_FAILED",
+    "detail": "state-history-binding: invalid phase transition: VERIFY -> DONE (RFC 1.6). The block-parked shape requires the latest phase-changing event through STATE.last_event to be the canonical active-block DEC for the exact ticket still in BOARD.BLOCKED",
+    "sites": [
+      "tools/saipen_engine/operations.py:320-322 (_read raises unconditionally)",
+      "tools/saipen_engine/fast_check.py:170 (block_parked_evidence_error predicate)",
+      "tools/saipen_engine/reconcile.py:1671 (reconcile calls the same _read, so cannot repair)"
+    ],
+    "missing_escape_hatch": "allow_parked_evidence (does not exist in install or HEAD)",
+    "trigger": "phase DONE + transition_from VERIFY with no canonical active-block DEC at/before LAST_EVENT",
+    "trigger_evidence": [
+      "E-950 has op_id null (no [op: ...] marker)",
+      "E-951 has op_id null",
+      "E-949 is 'ticket added via SAIOPS', not a block",
+      "no T-125 in BOARD ## BLOCKED"
+    ]
+  },
+  "guard_layer": {
+    "blocked_codes": {
+      "NO_ACTIVE_WORK": "every non-saipen consequential tool; admission.py:758 (exactly one DOING required)",
+      "PROTECTED_CANONICAL_NAMESPACE": "direct write/delete of .saipen/STATE.md; admission.py:63"
+    },
+    "admitted": [
+      "builtin read-only tools",
+      "provably read-only shell probes (_READ_ONLY_SHELL_VERBS)",
+      "canonical saipen <verb> (action==saipen_op exempt, admission.py:1363)",
+      "INGRESS: start, user-request"
+    ]
+  },
+  "deadlock_proof": {
+    "same_error_on_all_verbs": [
+      "status", "next", "continue", "recover", "recover --dry-run",
+      "recover normalize-log", "recover --migrate-generation",
+      "recover --attest-legacy-done", "recover resolve-next-action",
+      "transition", "claim", "checkpoint", "ticket compact", "ticket unblock",
+      "hunt", "markhunt", "attempt open", "stop"
+    ],
+    "fleet_prepare": {
+      "classification": "BOUND_RECOVERY_REQUIRED_BLOCKED",
+      "canonical_next_command": "saipen recover",
+      "recovery_eligible": false,
+      "safe_auto_repair_available": false,
+      "operator_decision_available": true
+    },
+    "start_receipt_loop": "saipen start --receipt SRC-006 refuses naming its own resume command",
+    "validate_error_count": 4
+  },
+  "source_mission_blocked": {
+    "src": "SRC-006",
+    "status": "ACTIVE",
+    "linked_work": null,
+    "coverage_requirements": 0,
+    "contract_clauses": 0,
+    "blocked_step": "materialize SRC-006 into corrective Work via SAIOPS",
+    "reason": "no canonical write path can run while the checkpoint is unreadable"
+  },
+  "recommended_fix": {
+    "preferred": {
+      "kind": "engine change",
+      "steps": [
+        "add allow_parked_evidence: bool = False to _read (operations.py ~207)",
+        "guard the raise at operations.py:320-322 with it",
+        "enable it only in reconcile.reconcile_protocol_state (reconcile.py:1671)",
+        "repaired proposal still passes validate_texts before any write (reconcile.py:2068)",
+        "reinstall via bootstrap/inject.ps1; run saipen recover"
+      ]
+    },
+    "alternative": "record VERIFY -> SHIP, task -> none, next_action -> saipen continue through the canonical operation layer"
+  },
+  "side_effects": {
+    "receipts_captured_without_work": ["SRC-007", "SRC-008"],
+    "intake_next_id": 8,
+    "improve_cycle": {
+      "cycle_id": "imp-vacterro-saipal-20260916-1",
+      "seat_id": "buffy-02",
+      "op_id": "improve-admit-44212f9f2d3f496bd78227f637d3331",
+      "report_path": ".saipen/improve/imp-vacterro-saipal-20260916-1/buffy-02/saipen_improve_SAIPAL.md"
+    },
+    "residue": [".saipen/evidence/_probe.txt (in SAIPEN home; delete refused by guard)"]
+  },
+  "invariants_preserved": {
+    "t125_history_rewritten": false,
+    "t126_parked": true,
+    "work_fabricated": false,
+    "evidence_fabricated": false,
+    "checkpoint_created": false
+  }
+}

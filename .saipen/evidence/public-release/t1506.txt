@@ -1,0 +1,14 @@
+test_applied_verified_bytes_without_a_commit_are_reported (test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_applied_verified_bytes_without_a_commit_are_reported) ... ok
+test_applied_without_disposition_is_still_inspected (test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_applied_without_disposition_is_still_inspected) ... ok
+test_bytes_reachable_only_from_a_stash_are_reported (test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_bytes_reachable_only_from_a_stash_are_reported) ... ok
+test_commit_at_applied_instant_qualifies (test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_commit_at_applied_instant_qualifies) ... ok
+test_crlf_bytes_committed_under_text_auto_are_not_reported (test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_crlf_bytes_committed_under_text_auto_are_not_reported) ... ok
+test_qualifying_commit_clears_the_finding (test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_qualifying_commit_clears_the_finding) ... ok
+test_supersession_is_per_path (test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_supersession_is_per_path) ... ok
+test_the_crlf_verdict_does_not_depend_on_the_host_eol_config (test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_the_crlf_verdict_does_not_depend_on_the_host_eol_config) ... ok
+test_uncommitted_crlf_and_lf_bytes_are_still_reported (test_t1506_xpatch_survival.XPatchCommitSurvivalTests.test_uncommitted_crlf_and_lf_bytes_are_still_reported) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 3.358s
+
+OK

@@ -1,0 +1,274 @@
+{
+  "clauses": {
+    "SRC-081:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not redo the work."
+    },
+    "SRC-081:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not falsify provenance by pretending they were present in the immutable audit/11 source document or SRC-080 source bytes."
+    },
+    "SRC-081:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not block productive implementation merely because append support itself is incomplete."
+    },
+    "SRC-081:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not manually rewrite immutable historical receipts or LOG entries."
+    },
+    "SRC-081:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "They must behave like real AUDAPACK launchers, not decorative custom entries."
+    },
+    "SRC-081:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not throw it away."
+    },
+    "SRC-081:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not collapse Claude 1 and Claude 2 into one launcher identity."
+    },
+    "SRC-081:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A normal click on Claude 1 must never focus Claude 2."
+    },
+    "SRC-081:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A normal click on Claude 2 must never focus Claude 1."
+    },
+    "SRC-081:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not silently launch a GUI product when a functional CLI/TUI path exists."
+    },
+    "SRC-081:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not perform network installation automatically."
+    },
+    "SRC-081:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent credentials."
+    },
+    "SRC-081:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not copy authentication state between accounts."
+    },
+    "SRC-081:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not overwrite provider configuration merely to make discovery easier."
+    },
+    "SRC-081:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Claude 1 and Claude 2 must be real distinct launch targets."
+    },
+    "SRC-081:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The implementation must discover and use the machine's existing profile/account isolation mechanism."
+    },
+    "SRC-081:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not assume that two invocations of a generic `claude` command automatically represent two accounts."
+    },
+    "SRC-081:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent a fake second-account mechanism."
+    },
+    "SRC-081:R019": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not mutate or duplicate authentication secrets."
+    },
+    "SRC-081:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Claude 2 must not silently launch the same account while being labelled Claude 2"
+    },
+    "SRC-081:R021": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not assume that the presence of Antigravity-related local data proves a particular executable name."
+    },
+    "SRC-081:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The launcher must:"
+    },
+    "SRC-081:R023": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Existing generic ZCode title recognition must remain compatible with windows launched outside AUDAPACK."
+    },
+    "SRC-081:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUDAPACK-launched ZCode sessions must use the exact configured launcher ID `zcode`."
+    },
+    "SRC-081:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not allow the fallback detector to create duplicate or conflicting identities for the same registered process."
+    },
+    "SRC-081:R026": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not silently replace it with the built-in command."
+    },
+    "SRC-081:R027": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not append the same built-ins on every application start."
+    },
+    "SRC-081:R028": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not resurrect unrelated launchers the operator deliberately removed in later-schema configurations."
+    },
+    "SRC-081:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not simply change:"
+    },
+    "SRC-081:R030": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The layout must derive from actual configured enabled launchers where practical."
+    },
+    "SRC-081:R031": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Paint and hit-testing must remain based on the same geometry."
+    },
+    "SRC-081:R032": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "The project name, state columns, layer buttons, info button and launcher buttons must not overlap."
+    },
+    "SRC-081:R033": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A narrow window must degrade deliberately rather than painting controls on top of one another."
+    },
+    "SRC-081:R034": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Avoid duplicating launcher label truth across multiple hard-coded maps."
+    },
+    "SRC-081:R035": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not reuse C1/C2 because those already identify Codex 1 / Codex 2."
+    },
+    "SRC-081:R036": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The exact two-character labels may be adjusted if a cleaner consistent scheme already exists, but they must remain visually unambiguous."
+    },
+    "SRC-081:R037": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "If longer labels are supported, button geometry must derive from actual label width instead of clipping silently."
+    },
+    "SRC-081:R038": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "The current Ctrl+1..6 implementation must not remain a hidden six-launcher limit."
+    },
+    "SRC-081:R039": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make the tenth launcher clickable but unreachable from the same keyboard model without documenting the decision."
+    },
+    "SRC-081:R040": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Launcher reordering must continue to define positional shortcut order."
+    },
+    "SRC-081:R041": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Claude 1 and Claude 2 remain distinct"
+    },
+    "SRC-081:R042": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Antigravity remains distinct"
+    },
+    "SRC-081:R043": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "ZCode remains distinct"
+    },
+    "SRC-081:R044": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "normal click focuses the exact existing project + launcher combination"
+    },
+    "SRC-081:R045": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Shift+click may request another instance subject to configured limits"
+    },
+    "SRC-081:R046": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "launch records preserve exact launcher ID"
+    },
+    "SRC-081:R047": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "process cleanup removes only the intended record"
+    },
+    "SRC-081:R048": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "project A never focuses project B"
+    },
+    "SRC-081:R049": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Claude 1 never satisfies Claude 2"
+    },
+    "SRC-081:R050": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Codex family behavior must not accidentally spread to Claude launchers."
+    },
+    "SRC-081:R051": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "project"
+    },
+    "SRC-081:R052": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "launcher"
+    },
+    "SRC-081:R053": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "project path or other existing canonical project discriminator."
+    }
+  },
+  "derived_at": "2026-09-22T22:16:28Z",
+  "derived_from": "SRC-081",
+  "interpretation_revision": 53,
+  "schema_version": 1,
+  "source_sha256": "8ac9ca336e80fed27d62fde40b5b255a9c384887833fda1387997803c2f4fa27"
+}

@@ -1,0 +1,7 @@
+# Affected-surface neighbour: python -B tools/test_cli_compound_entry.py
+........
+----------------------------------------------------------------------
+Ran 8 tests in 19.930s
+
+OK
+EXIT=0

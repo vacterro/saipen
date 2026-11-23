@@ -1,0 +1,70 @@
+{
+  "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE",
+  "project_lineage": "lineage-b0732ed2f98947b9a3c97bfe71427eca",
+  "target_head": "a308593121453b1d713533fcfd0ec565c10c438e",
+  "source_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "machine_registration": {
+    "generation": "gen-sha256:5b10b65725983c48a81c426ca62d0239237e57cd5bbe0d9550ada67e35fe5170",
+    "installed_at": "2026-10-12T15:27:57Z",
+    "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002",
+    "kind": "saipen-machine-runtime",
+    "launcher": {
+      "posix": "bin/saipen",
+      "windows": "bin/saipen.cmd"
+    },
+    "previous": {
+      "generation": "gen-sha256:2bd10cc421aacf6a65253322d366939d9328f65080bce0bc6bd029d2a8223b9f",
+      "runtime": "runtime/2bd10cc421aacf6a",
+      "saipen_version": "8.1.0"
+    },
+    "python": "python/3.11.9-64/python.exe",
+    "python_bundled": true,
+    "runtime": "runtime/5b10b65725983c48",
+    "saipen_version": "8.1.0",
+    "schema": 1,
+    "source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "state_schema": 3
+  },
+  "launchers": [
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+      "sha256": "62bdc398814a1d1d8cdff8bb2b37ab22714681637b53e626e3c20b8689f527d4",
+      "content": "@echo off\n\"C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe\" \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py\" %*\n"
+    },
+    {
+      "path": "C:\\Users\\vac34\\bin\\saipen.cmd",
+      "sha256": "f57fd06de34a9ed277a600bd053bcbbda4bc2044524814ded47e271ddeefdb43",
+      "content": "@echo off\n\"C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE\" \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py\" %*\n"
+    },
+    {
+      "path": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+      "sha256": "56593236b1e282ab4b1aec1569a50c5fe063908060e44c8209f650710554689c",
+      "content": "@echo off\n\"%~dp0..\\python\\3.11.9-64\\python.exe\" \"%~dp0..\\runtime\\5b10b65725983c48\\tools\\saipen.py\" %*\n"
+    }
+  ],
+  "pending_operations": [],
+  "conflicts": [],
+  "board_parse_errors": [],
+  "active_claims": [],
+  "ambient_current_inspector_binding": {
+    "SAIPEN_PROJECT_ROOT": null,
+    "SAIPEN_PROJECT_LINEAGE": null,
+    "SAIPEN_AGENT": null
+  },
+  "failing_host_session": "not supplied or identified; current inspector bindings are not historical authority",
+  "writer_ownership": "no claim inferred from a lock file; OS writer owner not independently established",
+  "recovery_authorization": "none: user handoff grants read-only forensics, not target mutation or continuation",
+  "before_sha256": {
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\STATE.md": "9db4b4f5fe5c8639984bea1179526f42a4149d171fef47be2a156b18fa925def",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\IDENTITY.md": "917348f1d49a8d9f3f3aa4bbb7b5843c7bd6e73ea1ffba292b7ea7d5be79a779",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\MANIFEST.json": "17f37f77c5ee3c719712e5e88af3b4e902a1a5d47d2eb6c481c6d0da3e81d3f2",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\BOARD.md": "82c312d60932d472c1a0a032b44b132a1384fbe8bc30312751165e305f12fa88"
+  },
+  "after_sha256": {
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\STATE.md": "9db4b4f5fe5c8639984bea1179526f42a4149d171fef47be2a156b18fa925def",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\IDENTITY.md": "917348f1d49a8d9f3f3aa4bbb7b5843c7bd6e73ea1ffba292b7ea7d5be79a779",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\MANIFEST.json": "17f37f77c5ee3c719712e5e88af3b4e902a1a5d47d2eb6c481c6d0da3e81d3f2",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.saipen\\BOARD.md": "82c312d60932d472c1a0a032b44b132a1384fbe8bc30312751165e305f12fa88"
+  }
+}

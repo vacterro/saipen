@@ -1,0 +1,19 @@
+T-1152-pre-refresh           ignored=True  tracked_files=0
+board-compaction             ignored=True  tracked_files=0
+closure-binding              ignored=True  tracked_files=0
+conformance                  ignored=True  tracked_files=0
+log-detail                   ignored=False tracked_files=526
+log-foreign-tail             ignored=True  tracked_files=0
+ops                          ignored=True  tracked_files=0
+settled                      ignored=True  tracked_files=0
+settled-index                ignored=True  tracked_files=0
+state-legacy-output          ignored=True  tracked_files=0
+subs                         ignored=True  tracked_files=0
+subs-mis-spawn-saitranslate-20260919 ignored=True  tracked_files=0
+t312-handoff                 ignored=True  tracked_files=0
+timestamp-repair             ignored=True  tracked_files=0
+moved aside in the copy: ['board-compaction']
+validator before: 0 7 findings; after: 0 7
+BOARD rows citing a detail_ref: 56; unresolvable after the move: 56
+first: T-1665: BOARD detail metadata is missing or not a regular file: .saipen/recovery/board-compaction/T-1665/T-1665-0aa85236043d3e65245c1479.json
+restored in the copy

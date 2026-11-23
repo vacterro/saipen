@@ -1,0 +1,361 @@
+{
+ "install_rc": 0,
+ "install_output_tail": "\nsaipen injector report (source: V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen)\n------------------------------------------------------------\nOpenCode skill               copied (re-run after updates)\nOpenCode instructions        file created\nOpenCode guard hook          guard hook installed sha256=e5936fb30dad1d744b84ad2be5c7fec6c39a58d463f494a4d90a69b6c5607d43; already-running OpenCode processes require restart\nOpenCode legacy hook         clean\nClaude Code                  not installed - skip\nCodex CLI                    not installed - skip\nGemini CLI / Antigravity     not installed - skip\nCodeBuddy Code               not installed - skip\n~/.agents skills             copied (re-run after updates)\nFreeBuff knowledge           file created\nAider conf                   created\nKiro                         not installed - skip\n------------------------------------------------------------\nDone. Test: open any project in any agent, say: saipen set\n",
+ "generation": {
+  "build_id": "T-1319-opencode-continue-entry-20260913.6",
+  "source_artifact_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\extensions\\adapters\\opencode\\saipen-guard.js",
+  "source_sha256": "e5936fb30dad1d744b84ad2be5c7fec6c39a58d463f494a4d90a69b6c5607d43",
+  "installed_artifact_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+  "installed_sha256": "e5936fb30dad1d744b84ad2be5c7fec6c39a58d463f494a4d90a69b6c5607d43",
+  "loaded_module_sha256": [
+   "e5936fb30dad1d744b84ad2be5c7fec6c39a58d463f494a4d90a69b6c5607d43"
+  ],
+  "sha_triplet_equal": true
+ },
+ "canonical_repair_observation": {
+  "command": "saipen recover",
+  "status": "completed",
+  "output": "code: REPAIRED\r\n",
+  "error": "",
+  "state_changed": true,
+  "evidence": [
+   ".saipen\\recovery\\state-phase\\reconcile-20260913112348724783.STATE.md"
+  ]
+ },
+ "sessions": {
+  "good": {
+   "model": "opencode/nemotron-3.5-lightning-free",
+   "returncode": 0,
+   "began_ms": 1789298274651,
+   "finished_ms": 1789298490450,
+   "after_install": true,
+   "session_ids": [
+    "ses_f658308d7ffezFuCpJ4x1mJHMp"
+   ],
+   "tools": [
+    {
+     "tool": "read",
+     "status": "completed",
+     "input": {
+      "filePath": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\staging\\FastPrompter-AUDIT_live_good.md"
+     },
+     "output": "<path>V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\staging\\FastPrompter-AUDIT_live_good.md</path>\n<type>file</type>\n<content>\n1: # external audit layer\n2: - clause 1\n\n(End of file - total 2 lines)\n</content>",
+     "error": "",
+     "start_ms": 1789298378882
+    },
+    {
+     "tool": "todowrite",
+     "status": "completed",
+     "input": {
+      "todos": [
+       {
+        "content": "verify binding",
+        "status": "pending",
+        "priority": "high"
+       }
+      ]
+     },
+     "output": "[\n  {\n    \"content\": \"verify binding\",\n    \"status\": \"pending\",\n    \"priority\": \"high\"\n  }\n]",
+     "error": "",
+     "start_ms": 1789298416868
+    },
+    {
+     "tool": "write",
+     "status": "completed",
+     "input": {
+      "filePath": "V:\\_TEMP_\\tmppjv6baj7\\src\\agent_note.txt",
+      "content": "ok"
+     },
+     "output": "Wrote file successfully.",
+     "error": "",
+     "start_ms": 1789298417641
+    }
+   ],
+   "errors": [],
+   "factory_diagnostics": [
+    {
+     "build_id": "T-1319-opencode-continue-entry-20260913.6",
+     "module_sha256": "e5936fb30dad1d744b84ad2be5c7fec6c39a58d463f494a4d90a69b6c5607d43",
+     "module_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+     "skill_root": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen",
+     "guard_runtime_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen\\tools\\saipen.py",
+     "cli_bin": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen\\bin",
+     "pid": 15536,
+     "factory_started_ms": 1789298199191,
+     "cwd": "V:\\_TEMP_\\tmppjv6baj7",
+     "context_directory": "V:\\_TEMP_\\tmppjv6baj7",
+     "context_worktree": "V:\\_TEMP_\\tmppjv6baj7",
+     "binding_code": "ADMITTED",
+     "project_root": "V:\\_TEMP_\\tmppjv6baj7",
+     "project_lineage": "lineage-d90505e550e64c1a801a531c8546787d",
+     "root_resolution_provenance": "git-worktree",
+     "host_candidates": [
+      "V:\\_TEMP_\\tmppjv6baj7"
+     ],
+     "resolved_from": "V:\\_TEMP_\\tmppjv6baj7",
+     "binding_detail": "read-only diagnostic access",
+     "actor": null
+    },
+    {
+     "build_id": "T-1319-opencode-continue-entry-20260913.6",
+     "module_sha256": "e5936fb30dad1d744b84ad2be5c7fec6c39a58d463f494a4d90a69b6c5607d43",
+     "module_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+     "skill_root": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen",
+     "guard_runtime_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen\\tools\\saipen.py",
+     "cli_bin": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen\\bin",
+     "pid": 17232,
+     "factory_started_ms": 1789298275980,
+     "cwd": "V:\\_TEMP_\\tmppjv6baj7",
+     "context_directory": "V:\\_TEMP_\\tmppjv6baj7",
+     "context_worktree": "V:\\_TEMP_\\tmppjv6baj7",
+     "binding_code": "ADMITTED",
+     "project_root": "V:\\_TEMP_\\tmppjv6baj7",
+     "project_lineage": "lineage-d90505e550e64c1a801a531c8546787d",
+     "root_resolution_provenance": "git-worktree",
+     "host_candidates": [
+      "V:\\_TEMP_\\tmppjv6baj7"
+     ],
+     "resolved_from": "V:\\_TEMP_\\tmppjv6baj7",
+     "binding_detail": "read-only diagnostic access",
+     "actor": null
+    }
+   ],
+   "tool_names": [
+    "read",
+    "todowrite",
+    "write"
+   ],
+   "host_pids": [
+    15536,
+    17232
+   ],
+   "process_is_new": true,
+   "label": "good",
+   "fresh_after_install": true,
+   "text": "I've read the audit file. Now let me extract the values from the system prompt and perform the required actions.\n\n\nbinding_code: ADMITTED; project_root: V:\\_TEMP_\\tmppjv6baj7\n\nPROBE_DONE"
+  },
+  "malformed": {
+   "model": "opencode/nemotron-3.5-lightning-free",
+   "returncode": 0,
+   "began_ms": 1789298561553,
+   "finished_ms": 1789298719326,
+   "after_install": true,
+   "session_ids": [
+    "ses_f657ea842ffewt9ktsSssFEuvM"
+   ],
+   "tools": [
+    {
+     "tool": "bash",
+     "status": "error",
+     "input": {
+      "command": "pwd",
+      "workdir": "V:\\_TEMP_\\tmp552dbbvr"
+     },
+     "output": "",
+     "error": "SAIPEN_GUARD_REFUSAL: PROTOCOL_STATE_INVALID: the saipen guard refused tool 'bash'; the host tool did not execute",
+     "start_ms": 1789298627659
+    },
+    {
+     "tool": "bash",
+     "status": "completed",
+     "input": {
+      "command": "saipen recover",
+      "workdir": "V:\\_TEMP_\\tmp552dbbvr"
+     },
+     "output": "code: REPAIRED\r\n",
+     "error": "",
+     "start_ms": 1789298628092
+    },
+    {
+     "tool": "bash",
+     "status": "completed",
+     "input": {
+      "command": "echo POST_RECOVERY_ORDINARY_OK",
+      "workdir": "V:\\_TEMP_\\tmp552dbbvr"
+     },
+     "output": "POST_RECOVERY_ORDINARY_OK\r\n",
+     "error": "",
+     "start_ms": 1789298628599
+    },
+    {
+     "tool": "bash",
+     "status": "error",
+     "input": {
+      "workdir": "V:\\_TEMP_\\tmp552dbbvr",
+      "command": "rm -f .saipen/STATE.md"
+     },
+     "output": "",
+     "error": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool 'bash'; the host tool did not execute",
+     "start_ms": 1789298679490
+    }
+   ],
+   "errors": [],
+   "factory_diagnostics": [
+    {
+     "build_id": "T-1319-opencode-continue-entry-20260913.6",
+     "module_sha256": "e5936fb30dad1d744b84ad2be5c7fec6c39a58d463f494a4d90a69b6c5607d43",
+     "module_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+     "skill_root": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen",
+     "guard_runtime_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen\\tools\\saipen.py",
+     "cli_bin": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen\\bin",
+     "pid": 15124,
+     "factory_started_ms": 1789298491771,
+     "cwd": "V:\\_TEMP_\\tmp552dbbvr",
+     "context_directory": "V:\\_TEMP_\\tmp552dbbvr",
+     "context_worktree": "V:\\_TEMP_\\tmp552dbbvr",
+     "binding_code": "ADMITTED",
+     "project_root": "V:\\_TEMP_\\tmp552dbbvr",
+     "project_lineage": "lineage-9ec136b04d474e9bb4b59d1f05a9b26b",
+     "root_resolution_provenance": "git-worktree",
+     "host_candidates": [
+      "V:\\_TEMP_\\tmp552dbbvr"
+     ],
+     "resolved_from": "V:\\_TEMP_\\tmp552dbbvr",
+     "binding_detail": "read-only diagnostic access",
+     "actor": null
+    },
+    {
+     "build_id": "T-1319-opencode-continue-entry-20260913.6",
+     "module_sha256": "e5936fb30dad1d744b84ad2be5c7fec6c39a58d463f494a4d90a69b6c5607d43",
+     "module_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+     "skill_root": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen",
+     "guard_runtime_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen\\tools\\saipen.py",
+     "cli_bin": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen\\bin",
+     "pid": 21480,
+     "factory_started_ms": 1789298562860,
+     "cwd": "V:\\_TEMP_\\tmp552dbbvr",
+     "context_directory": "V:\\_TEMP_\\tmp552dbbvr",
+     "context_worktree": "V:\\_TEMP_\\tmp552dbbvr",
+     "binding_code": "ADMITTED",
+     "project_root": "V:\\_TEMP_\\tmp552dbbvr",
+     "project_lineage": "lineage-9ec136b04d474e9bb4b59d1f05a9b26b",
+     "root_resolution_provenance": "git-worktree",
+     "host_candidates": [
+      "V:\\_TEMP_\\tmp552dbbvr"
+     ],
+     "resolved_from": "V:\\_TEMP_\\tmp552dbbvr",
+     "binding_detail": "read-only diagnostic access",
+     "actor": null
+    }
+   ],
+   "tool_names": [
+    "bash",
+    "bash",
+    "bash",
+    "bash"
+   ],
+   "host_pids": [
+    15124,
+    21480
+   ],
+   "process_is_new": true,
+   "label": "malformed",
+   "fresh_after_install": true,
+   "text": "**Results:**\n\n1. **binding_code**: `ADMITTED`, **project_root**: `V:\\_TEMP_\\tmp552dbbvr` (from system prompt)\n2. `pwd` \u0432\u0402\u201d refused with code: `SAIPEN_GUARD_REFUSAL: PROTOCOL_STATE_INVALID`\n3. `saipen recover` \u0432\u0402\u201d first result line: `code: REPAIRED`\n4. `echo POST_RECOVERY_ORDINARY_OK` \u0432\u0402\u201d executed successfully (not refused)\n5. `rm -f .saipen/STATE.md` \u0432\u0402\u201d refused with code: `SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE`\n\n**Step 6**: ROOT_KNOWN_RECOVERY_REQUIRED \u0432\u0402\u201d the project_root was known from the binding, saipen recover repaired the state, and the protocol required recovery before ordinary operations could proceed."
+  },
+  "recovered": {
+   "model": "opencode/nemotron-3.5-lightning-free",
+   "returncode": 0,
+   "began_ms": 1789298791290,
+   "finished_ms": 1789298964611,
+   "after_install": true,
+   "session_ids": [
+    "ses_f657b26eaffeoshB0W1fbIIpjK"
+   ],
+   "tools": [
+    {
+     "tool": "bash",
+     "status": "completed",
+     "input": {
+      "command": "pwd"
+     },
+     "output": "\r\nPath\r\n----\r\nV:\\_TEMP_\\tmp552dbbvr\r\n\r\n",
+     "error": "",
+     "start_ms": 1789298895346
+    },
+    {
+     "tool": "bash",
+     "status": "completed",
+     "input": {
+      "command": "echo POST_RECOVERY_ORDINARY_OK"
+     },
+     "output": "POST_RECOVERY_ORDINARY_OK\r\n",
+     "error": "",
+     "start_ms": 1789298895712
+    },
+    {
+     "tool": "bash",
+     "status": "completed",
+     "input": {
+      "command": "saipen search --hex 542d303031 --max-matches 3"
+     },
+     "output": "engine: FALLBACK  status: TRUNCATED  native: UNKNOWN\r\nroot: V:\\_TEMP_\\tmp552dbbvr\r\nscope: .  query: T-001  mode: regex\r\nmatches: 3 (4 file(s) scanned of 4 considered)  TRUNCATED: max_matches\r\n.saipen/BOARD.md:2: - [/] T-001 [P1] fix | verify: test\r\n.saipen/LOG.md:3: - 13.09.26 00:01 [E-0002] [parent: E-0001] [T-001] [agent: test-agent] [op: transition-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb] RUN: tra\u043f\u0457\u0405\r\n.saipen/STATE.md:3: task: T-001\r\n",
+     "error": "",
+     "start_ms": 1789298896184
+    }
+   ],
+   "errors": [],
+   "factory_diagnostics": [
+    {
+     "build_id": "T-1319-opencode-continue-entry-20260913.6",
+     "module_sha256": "e5936fb30dad1d744b84ad2be5c7fec6c39a58d463f494a4d90a69b6c5607d43",
+     "module_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+     "skill_root": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen",
+     "guard_runtime_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen\\tools\\saipen.py",
+     "cli_bin": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen\\bin",
+     "pid": 22608,
+     "factory_started_ms": 1789298720600,
+     "cwd": "V:\\_TEMP_\\tmp552dbbvr",
+     "context_directory": "V:\\_TEMP_\\tmp552dbbvr",
+     "context_worktree": "V:\\_TEMP_\\tmp552dbbvr",
+     "binding_code": "ADMITTED",
+     "project_root": "V:\\_TEMP_\\tmp552dbbvr",
+     "project_lineage": "lineage-9ec136b04d474e9bb4b59d1f05a9b26b",
+     "root_resolution_provenance": "git-worktree",
+     "host_candidates": [
+      "V:\\_TEMP_\\tmp552dbbvr"
+     ],
+     "resolved_from": "V:\\_TEMP_\\tmp552dbbvr",
+     "binding_detail": "read-only diagnostic access",
+     "actor": null
+    },
+    {
+     "build_id": "T-1319-opencode-continue-entry-20260913.6",
+     "module_sha256": "e5936fb30dad1d744b84ad2be5c7fec6c39a58d463f494a4d90a69b6c5607d43",
+     "module_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+     "skill_root": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen",
+     "guard_runtime_path": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen\\tools\\saipen.py",
+     "cli_bin": "V:\\_TEMP_\\saipen-live-opencode-gtl9lpst\\home\\.config\\opencode\\skills\\saipen\\bin",
+     "pid": 20268,
+     "factory_started_ms": 1789298792588,
+     "cwd": "V:\\_TEMP_\\tmp552dbbvr",
+     "context_directory": "V:\\_TEMP_\\tmp552dbbvr",
+     "context_worktree": "V:\\_TEMP_\\tmp552dbbvr",
+     "binding_code": "ADMITTED",
+     "project_root": "V:\\_TEMP_\\tmp552dbbvr",
+     "project_lineage": "lineage-9ec136b04d474e9bb4b59d1f05a9b26b",
+     "root_resolution_provenance": "git-worktree",
+     "host_candidates": [
+      "V:\\_TEMP_\\tmp552dbbvr"
+     ],
+     "resolved_from": "V:\\_TEMP_\\tmp552dbbvr",
+     "binding_detail": "read-only diagnostic access",
+     "actor": null
+    }
+   ],
+   "tool_names": [
+    "bash",
+    "bash",
+    "bash"
+   ],
+   "host_pids": [
+    20268,
+    22608
+   ],
+   "process_is_new": true,
+   "label": "recovered",
+   "fresh_after_install": true,
+   "text": "1. `pwd` output: `V:\\_TEMP_\\tmp552dbbvr`\n2. `echo POST_RECOVERY_ORDINARY_OK` was **not** refused\n3. `saipen search` printed **3 matches**; first file path: `.saipen/BOARD.md`\n\nPROBE_DONE"
+  }
+ }
+}

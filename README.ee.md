@@ -27,7 +27,7 @@ Claude Code’i esimene päring käivitab kohaliku abiprotsessi, mis sulgub, kui
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
 [![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
 
-**v8.1.0** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [Tuumik](saipen/CORE.md) | [Hooldus](saipen/MAINTENANCE.md) | [Stiil](saipen/STYLE.md) | [Kasutajaliides](saipen/UI.md) | [Kohasus](saipen/CONFORMANCE.md) |MIT
+**v8.1.1** | [Spetsifikatsioon](SPEC.md) | [Juhend](GUIDE.md) | [Tuumik](saipen/CORE.md) | [Hooldus](saipen/MAINTENANCE.md) | [Stiil](saipen/STYLE.md) | [Kasutajaliides](saipen/UI.md) | [Kohasus](saipen/CONFORMANCE.md) |MIT
 
 **Kiirklahvid:** `cc` viib projekti konvergentsini (jätkab käimasolevat eesmärki, kui see on seatud), `sss` näitab olekut koodi puudutamata ja `st` salvestab kontrollpunkti ning peatub. [Vaata täielikku 19 kiirklahvi kaarti](saipen/RFC.md#110-command-surface). Kirillitsa kaksikud töötavad ka: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`. `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
 

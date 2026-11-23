@@ -1,0 +1,4 @@
+PREFIX   {'manifest_keys_40': False, 'manifest_named': False, 'manifest_subject': False, 'coverage_named': False, 'provenance_named': False, 'provenance_subject': False, 'legit_still_work': True}
+NOW      {'manifest_keys_40': True, 'manifest_named': True, 'manifest_subject': True, 'coverage_named': True, 'provenance_named': True, 'provenance_subject': True, 'legit_still_work': True}
+CONTROL  OK
+VERDICT  RED->GREEN

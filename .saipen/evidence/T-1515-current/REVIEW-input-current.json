@@ -1,0 +1,10 @@
+{
+  "kind": "posix",
+  "version": "current",
+  "subject": "9b500b2be67cdc63fbdf02d123ad276cdf71959e64e25b848d11032d7233a1a2",
+  "verifier": "6f40117e693ec19c08914e75b47d1af3d41209fb953ee8e149ca80404e83ca1f",
+  "exit_code": 0,
+  "verdict": "PASS",
+  "stdout": "",
+  "stderr": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.457s\n\nOK\n"
+}

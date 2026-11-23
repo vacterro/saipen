@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "code": "INCOMPLETE_TICKET",
+  "op_id": null,
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "VERIFY -> REVIEW requires explicit verification evidence for ticket T-1714 (got: Continuation evidence audit found STALE_REGRESSION_EVIDENCE on the prior executed pair although current source fingerprint remains 2df2566be72aeb7b. The preserved failed audit is verify-evidence-current.json; no production or historical evidence bytes changed. Remeasure the unchanged current oracle and original pre-fix subjects through work regression in the current runtime/environment before REVIEW. Existing full-family record is exact-generation evidence, not authority to bypass the stale regression gate.)",
+  "phase": "REVIEW",
+  "ticket": "T-1714",
+  "canonical_next_command": "saipen checkpoint RUN T-1714 \"verify -> PASS [target: T-1714] conf: high -- <the command that ran and what it reported>\"",
+  "detail": "VERIFY -> REVIEW requires explicit verification evidence for ticket T-1714 (got: Continuation evidence audit found STALE_REGRESSION_EVIDENCE on the prior executed pair although current source fingerprint remains 2df2566be72aeb7b. The preserved failed audit is verify-evidence-current.json; no production or historical evidence bytes changed. Remeasure the unchanged current oracle and original pre-fix subjects through work regression in the current runtime/environment before REVIEW. Existing full-family record is exact-generation evidence, not authority to bypass the stale regression gate.)"
+}

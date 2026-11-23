@@ -1,0 +1,18 @@
+SCOPED: 13 of 275 control(s) selected by --changed (3 path(s)). This is NOT the full sweep.
+SCOPED: known limitation -- selection reads each control's DECLARED target file only. A control whose target is untouched but whose check reads a changed file indirectly -- a cross-document rule, a manifest, a schema another file is validated against -- is NOT selected and is NOT proven by this run
+SCOPED: known limitation -- the always-on probes still run; only the per-control sweep is narrowed
+PASS: a real root `nul` entry is excluded from audit snapshots
+UNPROVEN: symlink-restore -- host cannot create a symlink, so the red control was never constructed: [WinError 1314] A required privilege is not held by the client: 'V:\\_TEMP_\\audit_checks_pjb5v6a8\\probe-symlink-restore\\symlink-restore-probe\\external.md' -> 'V:\\_TEMP_\\audit_checks_pjb5v6a8\\probe-symlink-restore\\symlink-restore-probe\\IDENTITY.md'
+PASS: audit-tags missing-Git skip plus enumeration, nonzero, malformed, truncated, and surplus fail-closed controls behave
+PASS: every producer-OUTBOX control runs at a gate where its finding is hard
+FAIL: pristine-fixture -- Error: [('V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\locks\\verification-executor.lock', 'V:\\_TEMP_\\audit_checks_pjb5v6a8\\pristine\\.saipen\\locks\\verification-executor.lock', '[Errno 13] Permission denied'), ('V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\locks\\verification-f61b15ddbdbb359875a8140786f750cae914f8ccdd98bed10915b57e86b65971.lock', 'V:\\_TEMP_\\audit_checks_pjb5v6a8\\pristine\\.saipen\\locks\\verification-f61b15ddbdbb359875a8140786f750cae914f8ccdd98bed10915b57e86b65971.lock', '[Errno 13] Permission denied')]
+SKIP: release-ledger because prerequisite pristine-fixture failed
+SKIP: validator-check-inventory because prerequisite pristine-fixture failed
+SKIP: warn-slug-ownership because prerequisite pristine-fixture failed
+SKIP: phase-rename because prerequisite pristine-fixture failed
+SKIP: release-ledger-runtime-query because prerequisite pristine-fixture failed
+SKIP: validator-baseline because prerequisite pristine-fixture failed
+SKIP: callable-no-op-mutation because prerequisite pristine-fixture failed
+SKIP: case-availability because prerequisite pristine-fixture failed
+SKIP: mutation-sweep because prerequisite pristine-fixture failed
+AUDIT: 3 of 14 probes passed; failed: pristine-fixture; skipped: callable-no-op-mutation, case-availability, mutation-sweep, phase-rename, release-ledger, release-ledger-runtime-query, validator-baseline, validator-check-inventory, warn-slug-ownership; unproven (host capability): symlink-restore

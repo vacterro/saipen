@@ -1,0 +1,12 @@
+Review preparation (not a lifecycle verdict):
+- Owned changes are compared with the exact pre-task copies; pre-existing changes are retained.
+- Doctor observes the default directory, environment, registered launcher directory and sibling profiles as independent rows.
+- Explicit repair routes one selected profile to the canonical injector. Its runtime and hook are checked against that profile.
+- Installation and uninstall preserve another profile's settings/hooks and selected-profile credentials in sandbox tests.
+- Hook identity is checked against CLAUDE_CONFIG_DIR observed from the host process, not the client's claimed payload or service environment.
+- Actual two-profile fixture reaches ADMITTED through one real authority service, and a current foreign-profile hook is refused.
+- Windows process environment is observed with a bounded OS read. Missing or unreadable identity stays unknown.
+- The PowerShell injector installs the selected runtime; a separate Bash probe executes the shipped expansion function.
+- The strengthened verifier has a new complete pre-fix/current pair, with an unmutated copy as known-good control.
+- No source edits follow the latest pair. A fresh REVIEW run remains required after whole-family evidence.
+- Memory promotion: NO; the general lessons about observed authority, scoped changes and independent branch checks already have owners.

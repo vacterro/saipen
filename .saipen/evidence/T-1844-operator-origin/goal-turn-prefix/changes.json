@@ -1,0 +1,34 @@
+{
+  "tools/saipen_engine/operator_origin.py": {
+    "before": "998554e76e37da96051074529e810ab7d5616e8be2cb11376691ea117a7023ab",
+    "after": "dce8b7d513959edcddec1c39b7257282a0b7b86e398c973b83ce6b47951dc945"
+  },
+  "tools/test_t1844_goal_turns.py": {
+    "before": null,
+    "after": "f2deb80bbb0be961be86f65fee02eed2a048ba99e890881d2d927861b6fc1c60"
+  },
+  "tools/test_operator_origin_support.py": {
+    "before": "98264174b718bd03ac1714cb09c26de1652a2555d2e9bd579b7edea9b745dd72",
+    "after": "969bdad7ef0d4e0c46a3b1972f9c663e2652b3ffaf7c9a594f65b0a52b86d91f"
+  },
+  "tools/test_chat_style.py": {
+    "before": "d64e068abb51c062bb1c0a488553ca5fdcbb19f7d3867c9138643cb3e6617373",
+    "after": "a320cc0d3c2e7e21a518ebc15588ed36b39fb21e574eee1d39d88f9156a259b1"
+  },
+  "tools/test_closure_provenance.py": {
+    "before": "6a8674cdc4d89efff9fd6518863a0029bfc740aad8718d85d942f8cbc8fb0cbe",
+    "after": "1d7739d37df2a629e7f8d0b90cef481406239c911f60f817c424ba9209bdfcba"
+  },
+  "tools/test_claude_stop_hook.py": {
+    "before": "fbaa047a61a1c31d877b50953f595926498cd67cbe33b775c2d959a17f6104c0",
+    "after": "8cea2ca0cca97cf2c98e0426972c03e048f231ca7f518bee02b980709e7441f8"
+  },
+  "tools/test_response_digest.py": {
+    "before": "fd9c07b786ea0e8233a0dabf89f4614de03a504698298e2e23cbe39beb3ec2c5",
+    "after": "2886b749c7c53ca1f69893ec6050e549067fb23ca46ea0f0ae9b6e4b05a03e1d"
+  },
+  "tools/test_t1729_gate_decision_lifecycle.py": {
+    "before": "e2557359dcf8f3d8b554ea9ce75e381e9f120c500a8672c6fb294e5c223df7b9",
+    "after": "f03e73652748dd7e024dfd29b1d6bdc9edcdcbc816d20de1593ad4bc4ed536b9"
+  }
+}

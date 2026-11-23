@@ -1,0 +1,4 @@
+S1 probe: unregistered_code marks on the seven codes: 0 | canary mark present: True
+S1 verdict: NOT_REPRODUCED -- tried Refuse for each of the seven registry additions plus the unknown-code canary; no production code carries the mark, the canary does
+S2 probe: canonical byte equality: True
+S2 verdict: NOT_REPRODUCED -- the t1465 shape contract holds at this identity; no byte drift found

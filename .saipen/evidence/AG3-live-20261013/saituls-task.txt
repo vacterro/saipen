@@ -1,0 +1,70 @@
+SAITULS -- SAI Accounts Control Plane integration (operator mission CROSS-USER AUTONOMY RECOVERY, section 5, verbatim)
+
+SAI Accounts does not yet establish independent SAIPEN machine-runtime readiness as part of managed-account readiness.
+
+THE REQUIRED PRODUCT BEHAVIOR:
+
+For each managed account, independently evaluate:
+
+1. Windows account availability.
+2. Provider authentication readiness.
+3. Assigned project access.
+4. SAIPEN machine-runtime readiness.
+5. Effective host launch capability.
+6. Canonical project admission.
+
+Expose these as separate facts.
+
+Do not report the complete agent as READY simply because provider authentication succeeded.
+
+Use the existing SAIPEN machine runtime contract:
+
+saipen host machine status --json
+
+Consume:
+
+saipen_runtime_ready
+
+If the machine runtime needs repair or installation, route that through an already trusted, authorized updater.
+
+Do not silently execute privileged installation from an untrusted account session.
+
+ACCOUNT CREATION ACCEPTANCE:
+
+A newly created isolated account must receive a supported runtime readiness check before being offered SAIPEN-managed Work.
+
+ACCOUNT REPAIR ACCEPTANCE:
+
+An existing account with a stale or missing runtime must receive a reproducible repair path.
+
+HOST LAUNCH ACCEPTANCE:
+
+A launch must verify its actual effective user and target project binding before reporting READY.
+
+ACCESS FAILURE ACCEPTANCE:
+
+The UI must distinguish:
+
+- Runtime unavailable.
+- Runtime stale.
+- Project access denied.
+- Account credentials unavailable.
+- Broker unavailable.
+- Project lifecycle denied.
+
+The operator must not be told merely to retry cc without a relevant environmental change.
+
+IMPORTANT:
+
+SAITULS currently contains completed transaction-journal security work.
+
+Do not rewrite that system.
+
+T-282 is DONE.
+T-286 has a provenance-related closure blocker.
+T-285 remains queued.
+T-260 retains an operator pause.
+
+Do not clear these states merely because runtime integration is requested.
+
+Operator addendum (same session): SAIPEN must turn obstacles into permitted actions, not into operator obligations. We need a protocol that safely does everything possible so the agent can work.

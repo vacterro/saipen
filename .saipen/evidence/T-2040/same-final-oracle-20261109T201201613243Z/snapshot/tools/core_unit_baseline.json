@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "family": "unit",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "recorded_at": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+  "ran": 8485,
+  "grown_because": "3 test_t1816_provenance_inventory reds are external drift: AUDAPACK commit c4c7045 (2026-10-30) restored E-3133/E-3136/E-3145 into its own committed LOG, falsifying this project's oracle that asserts those ids are absent. Present in record 628f1912 (10:12Z) before any T-1966 edit; not caused by T-1966. See DEC checkpoint on T-1966.",
+  "red": [
+    "test_t1816_provenance_inventory.ProvenanceInventoryTests.test_committed_ledger_cites_the_missing_ids_as_parents",
+    "test_t1816_provenance_inventory.ProvenanceInventoryTests.test_committed_ledger_still_misses_exactly_the_cited_events",
+    "test_t1816_provenance_inventory.ProvenanceInventoryTests.test_working_tree_renumbers_committed_ids_instead_of_repairing"
+  ]
+}

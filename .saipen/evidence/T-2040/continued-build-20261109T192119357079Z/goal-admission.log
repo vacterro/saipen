@@ -1,0 +1,297 @@
+...............FF....F.F....F....FF...F..F......                         [100%]
+================================== FAILURES ===================================
+_ EvidenceGapLedgerLineageTests.test_p1_04_genuine_new_item_evidence_still_reopens _
+
+self = <test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests testMethod=test_p1_04_genuine_new_item_evidence_still_reopens>
+
+    def test_p1_04_genuine_new_item_evidence_still_reopens(self) -> None:
+        """Per-item bytes changed under the SAME ledger path is a new generation."""
+        self._two_item_ledger("gen-1", first_bytes=40)
+        goal = self._goal()
+        save_goal(self.tmp, goal)
+        cands = {c.candidate_id: c.evidence_fingerprint for c in self.provider.evaluate(self.tmp, goal).actionable_candidates}
+        fp1 = cands["G-LIN-FUN_1"]
+        (self.saipen_dir / "BOARD.md").write_text(
+            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n"
+            f"- [x] T-11 Investigate semantics of FUN_1 | candidate: G-LIN-FUN_1 | evidence_fp: {fp1}\n"
+            "\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        self._two_item_ledger("gen-1", first_bytes=4111)
+        rep = replenish_from_goals(self.tmp, "test-agent", dry_run=True)
+>       self.assertTrue(rep["ok"])
+E       AssertionError: False is not true
+
+tools\test_evidence_gap_ledger_lineage.py:289: AssertionError
+_ EvidenceGapLedgerLineageTests.test_p1_04_unrelated_change_does_not_reopen_done_item _
+
+self = <test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests testMethod=test_p1_04_unrelated_change_does_not_reopen_done_item>
+
+    def test_p1_04_unrelated_change_does_not_reopen_done_item(self) -> None:
+        """End to end: a DONE item stays suppressed after an unrelated ledger edit."""
+        self._two_item_ledger("gen-1")
+        goal = self._goal()
+        save_goal(self.tmp, goal)
+        cands = {c.candidate_id: c.evidence_fingerprint for c in self.provider.evaluate(self.tmp, goal).actionable_candidates}
+        fp1 = cands["G-LIN-FUN_1"]
+        (self.saipen_dir / "BOARD.md").write_text(
+            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n"
+            f"- [x] T-11 Investigate semantics of FUN_1 | goal: G-LIN | candidate: G-LIN-FUN_1 | evidence_fp: {fp1}\n"
+            "\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        self._two_item_ledger("gen-2")
+        rep = replenish_from_goals(self.tmp, "test-agent", dry_run=True)
+>       self.assertTrue(rep["ok"])
+E       AssertionError: False is not true
+
+tools\test_evidence_gap_ledger_lineage.py:269: AssertionError
+___ PersistentGoalEngineTests.test_case04_repeat_same_command_no_duplicate ____
+
+self = <test_persistent_goal_engine.PersistentGoalEngineTests testMethod=test_case04_repeat_same_command_no_duplicate>
+
+    def test_case04_repeat_same_command_no_duplicate(self) -> None:
+        """CASE 04: Running replenishment when candidate is already on BOARD -> no duplicate ticket."""
+        board_content = (
+            "# Board\n\n## DOING\n\n"
+            "- [ ] T-100 Investigate semantics of ProcessPacket [g-dup] | goal: g-dup | candidate: g-dup-proc_101\n\n"
+            "## TODO\n\n## DONE\n\n## BLOCKED\n"
+        )
+        self.board_file.write_text(board_content, encoding="utf-8")
+    
+        ledger_path = self.saipen_dir / "evidence" / "coverage.json"
+        ledger_path.write_text(
+            json.dumps({
+                "total": 1,
+                "resolved": 0,
+                "gaps": [{"id": "proc_101", "name": "ProcessPacket"}],
+            }),
+            encoding="utf-8",
+        )
+        goal = PersistentGoal(
+            goal_id="g-dup",
+            project_id="test",
+            title="Deduplication Goal",
+            objective="Check deduplication",
+            evidence_provider="evidence_gap_ledger",
+            research_or_work_backlog_source=".saipen/evidence/coverage.json",
+        )
+        save_goal(self.tmp, goal)
+    
+        res = replenish_from_goals(self.tmp, "test-agent")
+>       self.assertTrue(res["ok"])
+E       AssertionError: False is not true
+
+tools\test_persistent_goal_engine.py:208: AssertionError
+_ PersistentGoalEngineTests.test_case06_previous_ticket_completed_successor_admitted _
+
+self = <test_persistent_goal_engine.PersistentGoalEngineTests testMethod=test_case06_previous_ticket_completed_successor_admitted>
+
+    def test_case06_previous_ticket_completed_successor_admitted(self) -> None:
+        """CASE 06: Previous ticket in DONE, new independent gap admitted as successor."""
+        self.board_file.write_text(
+            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n"
+            "- [x] T-100 ProcessPacket [g-seq] candidate: g-seq-proc_101\n\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        ledger_path = self.saipen_dir / "evidence" / "coverage.json"
+        ledger_path.write_text(
+            json.dumps({
+                "total": 2,
+                "resolved": 1,
+                "gaps": [
+                    {"id": "proc_101", "name": "ProcessPacket"},
+                    {"id": "proc_102", "name": "HandleDisconnect"},
+                ],
+            }),
+            encoding="utf-8",
+        )
+        goal = PersistentGoal(
+            goal_id="g-seq",
+            project_id="test",
+            title="Sequential Goal",
+            objective="Seq",
+            evidence_provider="evidence_gap_ledger",
+            research_or_work_backlog_source=".saipen/evidence/coverage.json",
+        )
+        save_goal(self.tmp, goal)
+    
+        res = replenish_from_goals(self.tmp, "test-agent", dry_run=True)
+        self.assertTrue(res["ok"])
+        self.assertTrue(res["replenished"])
+>       self.assertEqual(res["candidate"]["candidate_id"], "g-seq-proc_102")
+E       AssertionError: 'g-seq-proc_101' != 'g-seq-proc_102'
+E       - g-seq-proc_101
+E       ?              ^
+E       + g-seq-proc_102
+E       ?              ^
+
+tools\test_persistent_goal_engine.py:255: AssertionError
+________ PersistentGoalEngineTests.test_case11_all_candidates_blocked _________
+
+self = <test_persistent_goal_engine.PersistentGoalEngineTests testMethod=test_case11_all_candidates_blocked>
+
+    def test_case11_all_candidates_blocked(self) -> None:
+        """CASE 11: All candidates blocked on BOARD -> honest ALL_CANDIDATES_BLOCKED."""
+        self.board_file.write_text(
+            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+            "- [ ] T-110 Candidate proc_101 blocked | candidate: g-blk-proc_101\n",
+            encoding="utf-8",
+        )
+        ledger_path = self.saipen_dir / "evidence" / "coverage.json"
+        ledger_path.write_text(
+            json.dumps({"total": 1, "resolved": 0, "gaps": [{"id": "proc_101", "name": "Proc"}]}),
+            encoding="utf-8",
+        )
+        goal = PersistentGoal(
+            goal_id="g-blk",
+            project_id="test",
+            title="Blocked",
+            objective="Blocked",
+            evidence_provider="evidence_gap_ledger",
+            research_or_work_backlog_source=".saipen/evidence/coverage.json",
+        )
+        save_goal(self.tmp, goal)
+        res = replenish_from_goals(self.tmp, "test-agent")
+        self.assertFalse(res["replenished"])
+>       self.assertIn(res["status"], ("ALL_CANDIDATES_BLOCKED", "NO_ADMISSIBLE_WORK"))
+E       AssertionError: 'BOARD_INVALID' not found in ('ALL_CANDIDATES_BLOCKED', 'NO_ADMISSIBLE_WORK')
+
+tools\test_persistent_goal_engine.py:349: AssertionError
+_ PersistentGoalEngineTests.test_case16_crash_after_ticket_admission_no_duplicate _
+
+self = <test_persistent_goal_engine.PersistentGoalEngineTests testMethod=test_case16_crash_after_ticket_admission_no_duplicate>
+
+    def test_case16_crash_after_ticket_admission_no_duplicate(self) -> None:
+        """CASE 16: Ticket already committed on BOARD -> restart does not create duplicate."""
+        self.board_file.write_text(
+            "# Board\n\n## DOING\n\n## TODO\n"
+            "- [ ] T-200 Candidate proc_101 | candidate: g-crash2-proc_101\n\n## DONE\n\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        ledger_path = self.saipen_dir / "evidence" / "coverage.json"
+        ledger_path.write_text(
+            json.dumps({"total": 1, "resolved": 0, "gaps": [{"id": "proc_101", "name": "Proc"}]}),
+            encoding="utf-8",
+        )
+        goal = PersistentGoal(
+            goal_id="g-crash2",
+            project_id="test",
+            title="Crash2",
+            objective="Crash2",
+            evidence_provider="evidence_gap_ledger",
+            research_or_work_backlog_source=".saipen/evidence/coverage.json",
+        )
+        save_goal(self.tmp, goal)
+        res = replenish_from_goals(self.tmp, "test-agent")
+        self.assertFalse(res["replenished"])
+>       self.assertEqual(res["status"], "TODO_AVAILABLE")
+E       AssertionError: 'BOARD_INVALID' != 'TODO_AVAILABLE'
+E       - BOARD_INVALID
+E       + TODO_AVAILABLE
+
+tools\test_persistent_goal_engine.py:437: AssertionError
+_ PersistentGoalEngineTests.test_case17_crash_after_ticket_closure_evaluates_next _
+
+self = <test_persistent_goal_engine.PersistentGoalEngineTests testMethod=test_case17_crash_after_ticket_closure_evaluates_next>
+
+    def test_case17_crash_after_ticket_closure_evaluates_next(self) -> None:
+        """CASE 17: Ticket closed in DONE -> evaluates remaining goal and selects next gap."""
+        self.board_file.write_text(
+            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n"
+            "- [x] T-200 Candidate proc_101 | candidate: g-next-proc_101\n\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        ledger_path = self.saipen_dir / "evidence" / "coverage.json"
+        ledger_path.write_text(
+            json.dumps({
+                "total": 2,
+                "resolved": 1,
+                "gaps": [
+                    {"id": "proc_101", "name": "Proc 1"},
+                    {"id": "proc_102", "name": "Proc 2"},
+                ],
+            }),
+            encoding="utf-8",
+        )
+        goal = PersistentGoal(
+            goal_id="g-next",
+            project_id="test",
+            title="Next",
+            objective="Next",
+            evidence_provider="evidence_gap_ledger",
+            research_or_work_backlog_source=".saipen/evidence/coverage.json",
+        )
+        save_goal(self.tmp, goal)
+        res = replenish_from_goals(self.tmp, "test-agent", dry_run=True)
+>       self.assertTrue(res["replenished"])
+E       AssertionError: False is not true
+
+tools\test_persistent_goal_engine.py:468: AssertionError
+_ PersistentGoalEngineTests.test_case21_completed_ticket_invalid_no_silent_reopening _
+
+self = <test_persistent_goal_engine.PersistentGoalEngineTests testMethod=test_case21_completed_ticket_invalid_no_silent_reopening>
+
+    def test_case21_completed_ticket_invalid_no_silent_reopening(self) -> None:
+        """CASE 21: An already completed ticket in DONE is never silently reopened; remains DONE."""
+        self.board_file.write_text(
+            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n- [x] T-50 Proc A [g-inv]\n\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        board = _parse_board_tickets(self.tmp)
+        self.assertEqual(len(board["done"]), 1)
+        self.assertEqual(board["done"][0]["id"], "T-50")
+        cand = CandidateTask(candidate_id="g-inv-proca", goal_id="g-inv", title="Proc A")
+        is_dup, reason = _is_candidate_duplicate(cand, board)
+>       self.assertTrue(is_dup)
+E       AssertionError: False is not true
+
+tools\test_persistent_goal_engine.py:542: AssertionError
+_ PersistentGoalEngineTests.test_case24_one_task_blocked_independent_continues _
+
+self = <test_persistent_goal_engine.PersistentGoalEngineTests testMethod=test_case24_one_task_blocked_independent_continues>
+
+    def test_case24_one_task_blocked_independent_continues(self) -> None:
+        """CASE 24: One candidate task blocked, independent candidate admitted."""
+        self.board_file.write_text(
+            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+            "- [ ] T-300 Candidate proc_101 blocked | candidate: g-ind-proc_101\n",
+            encoding="utf-8",
+        )
+        ledger_path = self.saipen_dir / "evidence" / "coverage.json"
+        ledger_path.write_text(
+            json.dumps({
+                "total": 2,
+                "resolved": 0,
+                "gaps": [
+                    {"id": "proc_101", "name": "Proc 101"},
+                    {"id": "proc_102", "name": "Proc 102"},
+                ],
+            }),
+            encoding="utf-8",
+        )
+        goal = PersistentGoal(
+            goal_id="g-ind",
+            project_id="test",
+            title="Independent",
+            objective="Independent",
+            evidence_provider="evidence_gap_ledger",
+            research_or_work_backlog_source=".saipen/evidence/coverage.json",
+        )
+        save_goal(self.tmp, goal)
+        res = replenish_from_goals(self.tmp, "test-agent", dry_run=True)
+>       self.assertTrue(res["replenished"])
+E       AssertionError: False is not true
+
+tools\test_persistent_goal_engine.py:607: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_evidence_gap_ledger_lineage.py::EvidenceGapLedgerLineageTests::test_p1_04_genuine_new_item_evidence_still_reopens
+FAILED tools/test_evidence_gap_ledger_lineage.py::EvidenceGapLedgerLineageTests::test_p1_04_unrelated_change_does_not_reopen_done_item
+FAILED tools/test_persistent_goal_engine.py::PersistentGoalEngineTests::test_case04_repeat_same_command_no_duplicate
+FAILED tools/test_persistent_goal_engine.py::PersistentGoalEngineTests::test_case06_previous_ticket_completed_successor_admitted
+FAILED tools/test_persistent_goal_engine.py::PersistentGoalEngineTests::test_case11_all_candidates_blocked
+FAILED tools/test_persistent_goal_engine.py::PersistentGoalEngineTests::test_case16_crash_after_ticket_admission_no_duplicate
+FAILED tools/test_persistent_goal_engine.py::PersistentGoalEngineTests::test_case17_crash_after_ticket_closure_evaluates_next
+FAILED tools/test_persistent_goal_engine.py::PersistentGoalEngineTests::test_case21_completed_ticket_invalid_no_silent_reopening
+FAILED tools/test_persistent_goal_engine.py::PersistentGoalEngineTests::test_case24_one_task_blocked_independent_continues
+9 failed, 39 passed in 0.74s

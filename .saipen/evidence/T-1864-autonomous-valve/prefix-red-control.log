@@ -1,0 +1,150 @@
+test_a_consumer_bounded_grant_still_waits_for_its_operator (__main__.AutonomousValveTests.test_a_consumer_bounded_grant_still_waits_for_its_operator)
+THE red control: the cap is authority when the budget IS the authority. ... ok
+test_the_budget_still_marks_itself_as_reached (__main__.AutonomousValveTests.test_the_budget_still_marks_itself_as_reached)
+Autonomy must not silently delete the periodic look at the work. ... FAIL
+test_the_checkpoint_agrees_with_the_counters_recovery_rebuilds (__main__.AutonomousValveTests.test_the_checkpoint_agrees_with_the_counters_recovery_rebuilds)
+A marker whose reset disagrees with STATE opens a permanent heal loop. ... ok
+test_the_fix_does_not_touch_the_twentieth_ticket_count_itself (__main__.AutonomousValveTests.test_the_fix_does_not_touch_the_twentieth_ticket_count_itself)
+Both polarities count the work; only the response to the cap differs. ... ok
+test_the_result_payload_reports_the_committed_counters (__main__.AutonomousValveTests.test_the_result_payload_reports_the_committed_counters)
+T-1669's rule, at the ticket counter: the Result must not lie. ... ok
+test_the_resumed_route_is_the_transition_not_a_generic_continue (__main__.AutonomousValveTests.test_the_resumed_route_is_the_transition_not_a_generic_continue)
+A mid-flight transition knows its destination; `continue` does not. ... FAIL
+test_the_same_checkpoint_clears_the_wave_budget (__main__.AutonomousValveTests.test_the_same_checkpoint_clears_the_wave_budget)
+The HUNT -> ADD trip site is the symmetric half of the same fix. ... FAIL
+test_the_tripping_transition_keeps_working_in_the_same_operation (__main__.AutonomousValveTests.test_the_tripping_transition_keeps_working_in_the_same_operation)
+The twentieth ticket clears the budget instead of ending the turn. ... FAIL
+test_the_untripped_count_still_reports_the_increment (__main__.AutonomousValveTests.test_the_untripped_count_still_reports_the_increment)
+The same payload field, below the cap, still reports pre + 1. ... ok
+test_a_non_goal_intent_is_never_a_budget_question (__main__.TripCheckpointOwnerTests.test_a_non_goal_intent_is_never_a_budget_question) ... ERROR
+test_a_proven_persistent_grant_clears_itself (__main__.TripCheckpointOwnerTests.test_a_proven_persistent_grant_clears_itself)
+The grant already declares `safety_valve_mode: checkpoint`. ... ERROR
+test_an_unproven_persistent_grant_still_waits (__main__.TripCheckpointOwnerTests.test_an_unproven_persistent_grant_still_waits)
+A claim of persistence that cannot be proved is not authority. ... ERROR
+test_an_unreadable_grant_journal_degrades_to_the_human_boundary (__main__.TripCheckpointOwnerTests.test_an_unreadable_grant_journal_degrades_to_the_human_boundary)
+A crash here would kill the transition that tripped the cap. ... ERROR
+test_an_untripped_budget_gets_no_answer (__main__.TripCheckpointOwnerTests.test_an_untripped_budget_gets_no_answer)
+No cap, no decision: this must never pre-clear a budget. ... ERROR
+test_the_owner_names_the_authority_it_renews (__main__.TripCheckpointOwnerTests.test_the_owner_names_the_authority_it_renews) ... ERROR
+
+======================================================================
+ERROR: test_a_non_goal_intent_is_never_a_budget_question (__main__.TripCheckpointOwnerTests.test_a_non_goal_intent_is_never_a_budget_question)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1864-red-xqr5889v\tools\test_t1864_autonomous_valve.py", line 290, in test_a_non_goal_intent_is_never_a_budget_question
+    goal_authority.trip_checkpoint(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.goal_authority' has no attribute 'trip_checkpoint'
+
+======================================================================
+ERROR: test_a_proven_persistent_grant_clears_itself (__main__.TripCheckpointOwnerTests.test_a_proven_persistent_grant_clears_itself)
+The grant already declares `safety_valve_mode: checkpoint`.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1864-red-xqr5889v\tools\test_t1864_autonomous_valve.py", line 329, in test_a_proven_persistent_grant_clears_itself
+    goal_authority.trip_checkpoint(Path("unused"), state),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.goal_authority' has no attribute 'trip_checkpoint'
+
+======================================================================
+ERROR: test_an_unproven_persistent_grant_still_waits (__main__.TripCheckpointOwnerTests.test_an_unproven_persistent_grant_still_waits)
+A claim of persistence that cannot be proved is not authority.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1864-red-xqr5889v\tools\test_t1864_autonomous_valve.py", line 338, in test_an_unproven_persistent_grant_still_waits
+    self.assertIsNone(goal_authority.trip_checkpoint(Path("unused"), state))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.goal_authority' has no attribute 'trip_checkpoint'
+
+======================================================================
+ERROR: test_an_unreadable_grant_journal_degrades_to_the_human_boundary (__main__.TripCheckpointOwnerTests.test_an_unreadable_grant_journal_degrades_to_the_human_boundary)
+A crash here would kill the transition that tripped the cap.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1864-red-xqr5889v\tools\test_t1864_autonomous_valve.py", line 345, in test_an_unreadable_grant_journal_degrades_to_the_human_boundary
+    self.assertIsNone(goal_authority.trip_checkpoint(Path("unused"), state))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.goal_authority' has no attribute 'trip_checkpoint'
+
+======================================================================
+ERROR: test_an_untripped_budget_gets_no_answer (__main__.TripCheckpointOwnerTests.test_an_untripped_budget_gets_no_answer)
+No cap, no decision: this must never pre-clear a budget.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1864-red-xqr5889v\tools\test_t1864_autonomous_valve.py", line 282, in test_an_untripped_budget_gets_no_answer
+    goal_authority.trip_checkpoint(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.goal_authority' has no attribute 'trip_checkpoint'
+
+======================================================================
+ERROR: test_the_owner_names_the_authority_it_renews (__main__.TripCheckpointOwnerTests.test_the_owner_names_the_authority_it_renews)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1864-red-xqr5889v\tools\test_t1864_autonomous_valve.py", line 298, in test_the_owner_names_the_authority_it_renews
+    decision = goal_authority.trip_checkpoint(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.goal_authority' has no attribute 'trip_checkpoint'
+
+======================================================================
+FAIL: test_the_budget_still_marks_itself_as_reached (__main__.AutonomousValveTests.test_the_budget_still_marks_itself_as_reached)
+Autonomy must not silently delete the periodic look at the work.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1864-red-xqr5889v\tools\test_t1864_autonomous_valve.py", line 198, in test_the_budget_still_marks_itself_as_reached
+    self.assertIn("budget reached, continuing under the same grant", log)
+AssertionError: 'budget reached, continuing under the same grant' not found in '# Log\n- 01.01.20 00:00 [E-001] [T-010] [agent: aleks] RUN: transition to VERIFY\n- 01.01.20 00:01 [E-002] [T-010] [agent: aleks] RUN: verify -> PASS [target: T-010] conf: high -- probe\n- 01.01.20 00:02 [E-003] [agent: aleks] DEC: goal_tickets 0->1\n- 01.01.20 00:02 [E-004] [agent: aleks] DEC: goal_tickets 1->2\n- 01.01.20 00:02 [E-005] [agent: aleks] DEC: goal_tickets 2->3\n- 01.01.20 00:02 [E-006] [agent: aleks] DEC: goal_tickets 3->4\n- 01.01.20 00:02 [E-007] [agent: aleks] DEC: goal_tickets 4->5\n- 01.01.20 00:02 [E-008] [agent: aleks] DEC: goal_tickets 5->6\n- 01.01.20 00:02 [E-009] [agent: aleks] DEC: goal_tickets 6->7\n- 01.01.20 00:02 [E-010] [agent: aleks] DEC: goal_tickets 7->8\n- 01.01.20 00:02 [E-011] [agent: aleks] DEC: goal_tickets 8->9\n- 01.01.20 00:02 [E-012] [agent: aleks] DEC: goal_tickets 9->10\n- 01.01.20 00:02 [E-013] [agent: aleks] DEC: goal_tickets 10->11\n- 01.01.20 00:02 [E-014] [agent: aleks] DEC: goal_tickets 11->12\n- 01.01.20 00:02 [E-015] [agent: aleks] DEC: goal_tickets 12->13\n- 01.01.20 00:02 [E-016] [agent: aleks] DEC: goal_tickets 13->14\n- 01.01.20 00:02 [E-017] [agent: aleks] DEC: goal_tickets 14->15\n- 01.01.20 00:02 [E-018] [agent: aleks] DEC: goal_tickets 15->16\n- 01.01.20 00:02 [E-019] [agent: aleks] DEC: goal_tickets 16->17\n- 01.01.20 00:02 [E-020] [agent: aleks] DEC: goal_tickets 17->18\n- 01.01.20 00:02 [E-021] [agent: aleks] DEC: goal_tickets 18->19\n- 23.10.26 16:30 [E-22] [parent: E-21] [T-010] [agent: aleks] [op: transition-30e26f9b79fb44a7bcd17f1497ce3d69] RUN: transition to REVIEW\n- 23.10.26 16:30 [E-23] [parent: E-22] [agent: aleks] [op: transition-30e26f9b79fb44a7bcd17f1497ce3d69] DEC: goal_tickets 19->20\n'
+
+======================================================================
+FAIL: test_the_resumed_route_is_the_transition_not_a_generic_continue (__main__.AutonomousValveTests.test_the_resumed_route_is_the_transition_not_a_generic_continue)
+A mid-flight transition knows its destination; `continue` does not.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1864-red-xqr5889v\tools\test_t1864_autonomous_valve.py", line 204, in test_the_resumed_route_is_the_transition_not_a_generic_continue
+    self.assertEqual(project.read()["next_action"], "PHASE REVIEW T-010")
+AssertionError: "WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue" != 'PHASE REVIEW T-010'
+- WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue
++ PHASE REVIEW T-010
+
+
+======================================================================
+FAIL: test_the_same_checkpoint_clears_the_wave_budget (__main__.AutonomousValveTests.test_the_same_checkpoint_clears_the_wave_budget)
+The HUNT -> ADD trip site is the symmetric half of the same fix.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1864-red-xqr5889v\tools\test_t1864_autonomous_valve.py", line 242, in test_the_same_checkpoint_clears_the_wave_budget
+    self.assertEqual((current["goal_waves"], current["goal_tickets"]), (0, 0))
+AssertionError: Tuples differ: (3, 0) != (0, 0)
+
+First differing element 0:
+3
+0
+
+- (3, 0)
+?  ^
+
++ (0, 0)
+?  ^
+
+
+======================================================================
+FAIL: test_the_tripping_transition_keeps_working_in_the_same_operation (__main__.AutonomousValveTests.test_the_tripping_transition_keeps_working_in_the_same_operation)
+The twentieth ticket clears the budget instead of ending the turn.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1864-red-xqr5889v\tools\test_t1864_autonomous_valve.py", line 171, in test_the_tripping_transition_keeps_working_in_the_same_operation
+    self.assertEqual((current["goal_waves"], current["goal_tickets"]), (0, 0))
+AssertionError: Tuples differ: (0, 20) != (0, 0)
+
+First differing element 1:
+20
+0
+
+- (0, 20)
+?     -
+
++ (0, 0)
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.657s
+
+FAILED (failures=4, errors=6)

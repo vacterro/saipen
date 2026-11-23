@@ -1,0 +1,26 @@
+{
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "source",
+    "disp",
+    "SRC-112",
+    "R001",
+    "SUPERSEDED",
+    "--work",
+    "T-1494",
+    "--evidence",
+    "E-13961",
+    "--verification",
+    "Original bounded-only wording re-scoped into T-1494 per SRC-112 and the existing verify contract; T-1493 is preserved, not closed. E-13959/E-13960 authentic authority red/green controls; attribution.json.",
+    "--json"
+  ],
+  "exit_code": 0,
+  "session_capability": "no-publish",
+  "result": {
+    "ok": true,
+    "code": "COVERAGE_UPDATED",
+    "receipt": "SRC-112",
+    "rid": "SRC-112:R001",
+    "disposition": "SUPERSEDED"
+  }
+}

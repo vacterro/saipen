@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-098:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repair managed A3 ownership reconciliation: no CHAT while Bridge holds active A3 dispatch; red-first split-brain fixture then disarm-path trace"
+    }
+  },
+  "derived_at": "2026-09-29T09:15:04Z",
+  "derived_from": "SRC-098",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "80b21b010320ef44a8a8a9a7ab77c71cd915fa71c441d7aa3b42d23c8b7d360e"
+}

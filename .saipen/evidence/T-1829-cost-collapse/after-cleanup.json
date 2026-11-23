@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "kind": "scoped-real-platform-benchmark",
+  "started_utc": "2026-10-20T14:58:50.820044+00:00",
+  "finished_utc": "2026-10-20T14:58:57.400430+00:00",
+  "duration_s": 6.5779999999999745,
+  "ran": 21,
+  "status": "PASS",
+  "family_runs": [
+    {
+      "status": "PASS",
+      "ran": 3,
+      "jobs": 1,
+      "duration_s": 0.3,
+      "timings_s": {
+        "shard_copy_wall_s": 0.0,
+        "sweep_wall_s": 0.016,
+        "copy_wall_s": 0.063,
+        "hash_wall_s": 0.015,
+        "execution_wall_s": 0.219,
+        "cleanup_wall_s": 0.016
+      },
+      "copy_metrics": {
+        "subject_copy_s": 0.063,
+        "canonical_copy_s": 0.0,
+        "canonical_copy_attempts": 1
+      },
+      "sandboxes_leaked": []
+    },
+    {
+      "status": "PASS",
+      "ran": 3,
+      "jobs": 1,
+      "duration_s": 0.3,
+      "timings_s": {
+        "shard_copy_wall_s": 0.0,
+        "sweep_wall_s": 0.016,
+        "copy_wall_s": 0.047,
+        "hash_wall_s": 0.015,
+        "execution_wall_s": 0.235,
+        "cleanup_wall_s": 0.015
+      },
+      "copy_metrics": {
+        "subject_copy_s": 0.047,
+        "canonical_copy_s": 0.0,
+        "canonical_copy_attempts": 1
+      },
+      "sandboxes_leaked": []
+    }
+  ],
+  "scope": "test_t1505_core_unit_sandbox_reclaim.py"
+}

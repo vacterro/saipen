@@ -1,0 +1,3 @@
+REFUSE [CONFORMANCE_UNHEALTHY]
+reason: conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint
+conformance: CURRENT_FAIL

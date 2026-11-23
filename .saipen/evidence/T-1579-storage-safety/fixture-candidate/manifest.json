@@ -1,0 +1,12 @@
+[
+  {
+    "path": "tools/test_storage_policy.py",
+    "before_sha256": "a3b8d908f670dda2438fbfcc5e249d95f70d3a58d87aea7077787c6b628bb429",
+    "candidate": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1579-storage-safety\\fixture-candidate\\test_storage_policy.py"
+  },
+  {
+    "path": "tools/test_storage_artifacts.py",
+    "before_sha256": "62e23927279a7155366e52f06ae81a04f423de472ec8a915f8408c840290bf99",
+    "candidate": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1579-storage-safety\\fixture-candidate\\test_storage_artifacts.py"
+  }
+]

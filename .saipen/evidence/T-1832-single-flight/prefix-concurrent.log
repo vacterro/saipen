@@ -1,0 +1,18 @@
+test_three_compatible_consumers_share_one_real_execution (test_t1832_single_flight.RealConcurrentCliTests.test_three_compatible_consumers_share_one_real_execution) ... FAIL
+
+======================================================================
+FAIL: test_three_compatible_consumers_share_one_real_execution (test_t1832_single_flight.RealConcurrentCliTests.test_three_compatible_consumers_share_one_real_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/t1832-concurrent-pair-t1ixxe78/tools/test_t1832_single_flight.py", line 361, in test_three_compatible_consumers_share_one_real_execution
+    self.concurrent()
+  File "/tmp/t1832-concurrent-pair-t1ixxe78/tools/test_t1832_single_flight.py", line 339, in concurrent
+    wait_for(lambda: len(list(observations.glob("*.json"))) == 3)
+  File "/tmp/t1832-concurrent-pair-t1ixxe78/tools/test_t1832_single_flight.py", line 35, in wait_for
+    raise AssertionError("owned verification barrier did not become ready")
+AssertionError: owned verification barrier did not become ready
+
+----------------------------------------------------------------------
+Ran 1 test in 16.631s
+
+FAILED (failures=1)

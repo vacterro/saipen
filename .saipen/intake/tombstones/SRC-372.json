@@ -1,0 +1,16 @@
+{
+  "actionable": 6,
+  "archive_ref": ".saipen/archive/source/SRC-372.md",
+  "closed_at": "2026-11-01T23:12:27Z",
+  "closure_event": null,
+  "linked_work": "T-1998",
+  "linked_works": [
+    "T-1998"
+  ],
+  "receipt_id": "SRC-372",
+  "requirements": 6,
+  "schema_version": 1,
+  "source_sha256": "bd28d96312e0e3cb6408bbdd48f03947384d4df121f53cc075b1fc6edcadd47e",
+  "status": "CLOSED",
+  "unresolved": 0
+}

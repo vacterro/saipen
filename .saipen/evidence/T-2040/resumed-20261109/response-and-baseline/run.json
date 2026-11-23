@@ -1,0 +1,42 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-v",
+    "--tb=short",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_response_fact_binding.py::CanonicalResponseFacts::test_public_checker_binds_unverified_done_project_to_blocked_display",
+    "tools/test_response_fact_binding.py::CanonicalResponseFacts::test_public_wait_uses_canonical_human_obligation_with_a_binding_blocker",
+    "tools/test_response_fact_binding.py::CanonicalResponseFacts::test_public_checker_requires_current_blocker_identity",
+    "tools/test_t1576_efficiency_kpi.py::Exposure::test_render_fills_auto_from_the_owner",
+    "tools/test_t1684_operand_grammar.py::RealCLIValues::test_response_request_spelling_dry_run_reaches_real_checker",
+    "tools/test_t1816_provenance_inventory.py"
+  ],
+  "selectors": [
+    "tools/test_response_fact_binding.py::CanonicalResponseFacts::test_public_checker_binds_unverified_done_project_to_blocked_display",
+    "tools/test_response_fact_binding.py::CanonicalResponseFacts::test_public_wait_uses_canonical_human_obligation_with_a_binding_blocker",
+    "tools/test_response_fact_binding.py::CanonicalResponseFacts::test_public_checker_requires_current_blocker_identity",
+    "tools/test_t1576_efficiency_kpi.py::Exposure::test_render_fills_auto_from_the_owner",
+    "tools/test_t1684_operand_grammar.py::RealCLIValues::test_response_request_spelling_dry_run_reaches_real_checker",
+    "tools/test_t1816_provenance_inventory.py"
+  ],
+  "historical_renamed_selector": {
+    "old": "test_public_checker_binds_completed_project_phase",
+    "current": "test_public_checker_binds_unverified_done_project_to_blocked_display",
+    "reason": "unverified discovery must not be displayed as DONE"
+  },
+  "runtime_sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec",
+  "oracle_sha256": {
+    "tools/test_t1684_operand_grammar.py": "2edf10cddac37760ce8470ae40fccbee484d768fe5f60355ac09554205eec7f0",
+    "tools/test_response_fact_binding.py": "3d1c27b195a9868baa9f9962f5c7759640453f52579f7e2d25f9b8b2610fa2c0",
+    "tools/test_t1576_efficiency_kpi.py": "3d4c6c9cc185b0794c441c818cc1eb4e7c8db8caa819a454623f7157d75da210",
+    "tools/test_t1816_provenance_inventory.py": "e16d7dd117f063401cf06d3db701e6fd2bf8a8aff9002159e586ff15e6eb6604"
+  },
+  "started_at": "2026-11-09T21:42:41.849751+00:00",
+  "exit_code": 1,
+  "duration_s": 29.2
+}

@@ -1,0 +1,6 @@
+test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass (test_t1718_acceptance_contract.NativeEscapeRegressionTests.test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.308s
+
+OK

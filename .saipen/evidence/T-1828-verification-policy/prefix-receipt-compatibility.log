@@ -1,0 +1,14 @@
+test_focused_execution_receipt_satisfies_source_coverage (test_t1828_verification_policy.FocusedPolicyTests.test_focused_execution_receipt_satisfies_source_coverage) ... FAIL
+
+======================================================================
+FAIL: test_focused_execution_receipt_satisfies_source_coverage (test_t1828_verification_policy.FocusedPolicyTests.test_focused_execution_receipt_satisfies_source_coverage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1828_verification_policy.py", line 163, in test_focused_execution_receipt_satisfies_source_coverage
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'EVIDENCE_EXECUTION_FAILED', 'detail': 'execution receipt recorded None, expected PASS'}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.427s
+
+FAILED (failures=1)

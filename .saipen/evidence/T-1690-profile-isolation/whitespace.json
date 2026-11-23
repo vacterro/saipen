@@ -1,0 +1,43 @@
+{
+  "default": {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 2,
+    "finding_count": 882,
+    "sample": [
+      ".saipen/BOARD.md:2: trailing whitespace.",
+      ".saipen/BOARD.md:4: trailing whitespace.",
+      ".saipen/BOARD.md:5: trailing whitespace.",
+      ".saipen/BOARD.md:6: trailing whitespace.",
+      ".saipen/BOARD.md:7: trailing whitespace.",
+      ".saipen/BOARD.md:8: trailing whitespace.",
+      ".saipen/BOARD.md:11: trailing whitespace.",
+      ".saipen/BOARD.md:12: trailing whitespace."
+    ]
+  },
+  "crlf": {
+    "command": [
+      "git",
+      "-c",
+      "core.whitespace=cr-at-eol",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "finding_count": 0,
+    "sample": []
+  },
+  "controls": {
+    "valid_crlf": {
+      "exit_code": 0,
+      "stdout": ""
+    },
+    "trailing_space": {
+      "exit_code": 2,
+      "stdout": "memory.md:1: trailing whitespace.\n+after \r\n"
+    }
+  }
+}

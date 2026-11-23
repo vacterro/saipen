@@ -1,0 +1,139 @@
+test_a_saipen_verb_is_never_foreign (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_a_saipen_verb_is_never_foreign) ... ERROR
+test_an_unknown_token_has_no_owner (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_an_unknown_token_has_no_owner) ... ERROR
+test_case_and_whitespace_do_not_evade_ownership (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_case_and_whitespace_do_not_evade_ownership) ... ERROR
+test_declared_alias_is_owned (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_declared_alias_is_owned)
+`pal` is SAIPAL's own advertised shortcut, so it must resolve too. ... ERROR
+test_declared_protocol_name_is_owned (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_declared_protocol_name_is_owned) ... ERROR
+test_a_damaged_registry_degrades_to_the_old_refusal (test_t1968_foreign_protocol_route.NegativeControlTests.test_a_damaged_registry_degrades_to_the_old_refusal)
+Fail toward the previous behaviour, never toward a guessed owner. ... ERROR
+test_a_real_typo_keeps_the_ordinary_refusal (test_t1968_foreign_protocol_route.NegativeControlTests.test_a_real_typo_keeps_the_ordinary_refusal) ... FAIL
+test_continue_is_still_a_saipen_command (test_t1968_foreign_protocol_route.NegativeControlTests.test_continue_is_still_a_saipen_command) ... ok
+test_declared_saipen_shortcuts_still_resolve (test_t1968_foreign_protocol_route.NegativeControlTests.test_declared_saipen_shortcuts_still_resolve)
+`cc` must stay SAIPEN's own; the repair may not shadow a real row. ... ok
+test_every_declared_alias_is_refused_the_same_way (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_every_declared_alias_is_refused_the_same_way) ... FAIL
+test_foreign_command_is_not_a_bare_unknown_command (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_foreign_command_is_not_a_bare_unknown_command) ... FAIL
+test_human_readable_refusal_is_also_typed (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_human_readable_refusal_is_also_typed)
+A non-JSON caller must not get only `unknown command` either. ... FAIL
+test_the_full_invocation_is_reported_not_just_the_first_token (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_the_full_invocation_is_reported_not_just_the_first_token) ... FAIL
+test_the_refusal_carries_the_no_home_rule (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_the_refusal_carries_the_no_home_rule)
+The exact error that made the agent move repositories. ... FAIL
+test_the_refusal_names_the_saipen_route_to_use_instead (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_the_refusal_names_the_saipen_route_to_use_instead) ... FAIL
+
+======================================================================
+ERROR: test_a_saipen_verb_is_never_foreign (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_a_saipen_verb_is_never_foreign)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 98, in test_a_saipen_verb_is_never_foreign
+    commands.foreign_protocol_owner(verb),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.commands' has no attribute 'foreign_protocol_owner'
+
+======================================================================
+ERROR: test_an_unknown_token_has_no_owner (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_an_unknown_token_has_no_owner)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 103, in test_an_unknown_token_has_no_owner
+    self.assertIsNone(commands.foreign_protocol_owner("bogusxyz"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.commands' has no attribute 'foreign_protocol_owner'
+
+======================================================================
+ERROR: test_case_and_whitespace_do_not_evade_ownership (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_case_and_whitespace_do_not_evade_ownership)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 92, in test_case_and_whitespace_do_not_evade_ownership
+    self.assertIsNotNone(commands.foreign_protocol_owner("  SAIPAL "))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.commands' has no attribute 'foreign_protocol_owner'
+
+======================================================================
+ERROR: test_declared_alias_is_owned (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_declared_alias_is_owned)
+`pal` is SAIPAL's own advertised shortcut, so it must resolve too.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 87, in test_declared_alias_is_owned
+    owner = commands.foreign_protocol_owner("pal")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.commands' has no attribute 'foreign_protocol_owner'
+
+======================================================================
+ERROR: test_declared_protocol_name_is_owned (test_t1968_foreign_protocol_route.ForeignOwnerResolutionTests.test_declared_protocol_name_is_owned)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 81, in test_declared_protocol_name_is_owned
+    owner = commands.foreign_protocol_owner("saipal")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.commands' has no attribute 'foreign_protocol_owner'
+
+======================================================================
+ERROR: test_a_damaged_registry_degrades_to_the_old_refusal (test_t1968_foreign_protocol_route.NegativeControlTests.test_a_damaged_registry_degrades_to_the_old_refusal)
+Fail toward the previous behaviour, never toward a guessed owner.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 186, in test_a_damaged_registry_degrades_to_the_old_refusal
+    self.assertIsNone(commands.foreign_protocol_owner("saipal"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.commands' has no attribute 'foreign_protocol_owner'
+
+======================================================================
+FAIL: test_a_real_typo_keeps_the_ordinary_refusal (test_t1968_foreign_protocol_route.NegativeControlTests.test_a_real_typo_keeps_the_ordinary_refusal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 157, in test_a_real_typo_keeps_the_ordinary_refusal
+    self.assertEqual(code, 2)
+AssertionError: 3 != 2
+
+======================================================================
+FAIL: test_every_declared_alias_is_refused_the_same_way (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_every_declared_alias_is_refused_the_same_way)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 147, in test_every_declared_alias_is_refused_the_same_way
+    self.assertEqual(code, 2, token)
+AssertionError: 3 != 2 : saipal
+
+======================================================================
+FAIL: test_foreign_command_is_not_a_bare_unknown_command (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_foreign_command_is_not_a_bare_unknown_command)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 112, in test_foreign_command_is_not_a_bare_unknown_command
+    self.assertEqual(code, 2)
+AssertionError: 3 != 2
+
+======================================================================
+FAIL: test_human_readable_refusal_is_also_typed (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_human_readable_refusal_is_also_typed)
+A non-JSON caller must not get only `unknown command` either.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 140, in test_human_readable_refusal_is_also_typed
+    self.assertEqual(code, 2)
+AssertionError: 3 != 2
+
+======================================================================
+FAIL: test_the_full_invocation_is_reported_not_just_the_first_token (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_the_full_invocation_is_reported_not_just_the_first_token)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 122, in test_the_full_invocation_is_reported_not_just_the_first_token
+    self.assertEqual(emitted(out).get("requested_command"), "saipal continue")
+AssertionError: None != 'saipal continue'
+
+======================================================================
+FAIL: test_the_refusal_carries_the_no_home_rule (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_the_refusal_carries_the_no_home_rule)
+The exact error that made the agent move repositories.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 128, in test_the_refusal_carries_the_no_home_rule
+    self.assertIn("NO_HOME", rule)
+AssertionError: 'NO_HOME' not found in ''
+
+======================================================================
+FAIL: test_the_refusal_names_the_saipen_route_to_use_instead (test_t1968_foreign_protocol_route.RefusalIsTypedTests.test_the_refusal_names_the_saipen_route_to_use_instead)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1968-prefix-cwrsmx34\tools\test_t1968_foreign_protocol_route.py", line 135, in test_the_refusal_names_the_saipen_route_to_use_instead
+    self.assertIn("saipen continue", str(emitted(out).get("next_action") or ""))
+AssertionError: 'saipen continue' not found in ''
+
+----------------------------------------------------------------------
+Ran 15 tests in 3.436s
+
+FAILED (failures=7, errors=6)

@@ -1,0 +1,35 @@
+test_fingerprint_is_deterministic_and_bundles_required_inputs (test_t2022_protocol_home_maintenance_distinction.BlockerFingerprint.test_fingerprint_is_deterministic_and_bundles_required_inputs) ... ok
+test_fingerprint_moves_when_authority_kind_changes (test_t2022_protocol_home_maintenance_distinction.BlockerFingerprint.test_fingerprint_moves_when_authority_kind_changes) ... ok
+test_missing_mandatory_field_is_still_refused (test_t2022_protocol_home_maintenance_distinction.CoverageAdmitsEvidenceFitnessFields.test_missing_mandatory_field_is_still_refused) ... ok
+test_optional_evidence_fields_are_admitted (test_t2022_protocol_home_maintenance_distinction.CoverageAdmitsEvidenceFitnessFields.test_optional_evidence_fields_are_admitted) ... ok
+test_unknown_field_is_still_refused (test_t2022_protocol_home_maintenance_distinction.CoverageAdmitsEvidenceFitnessFields.test_unknown_field_is_still_refused) ... ok
+test_derives_from_canonical_binding (test_t2022_protocol_home_maintenance_distinction.ProposeCapsule.test_derives_from_canonical_binding)
+Never invent: the proposal IS what current_binding returns. ... ok
+test_out_of_set_scope_refused (test_t2022_protocol_home_maintenance_distinction.ProposeCapsule.test_out_of_set_scope_refused) ... ok
+test_proposal_is_not_authority (test_t2022_protocol_home_maintenance_distinction.ProposeCapsule.test_proposal_is_not_authority)
+Proposing must never mutate: it returns bytes, it does not authorize. ... ok
+test_unavailable_binding_is_reported_not_faked (test_t2022_protocol_home_maintenance_distinction.ProposeCapsule.test_unavailable_binding_is_reported_not_faked) ... ok
+test_non_home_unproven_reports_none (test_t2022_protocol_home_maintenance_distinction.ProtocolHomeIsNotMaintenanceGrant.test_non_home_unproven_reports_none) ... ok
+test_protocol_home_is_never_authorized_mutation (test_t2022_protocol_home_maintenance_distinction.ProtocolHomeIsNotMaintenanceGrant.test_protocol_home_is_never_authorized_mutation)
+R001: lineage alone must not authorize new maintenance work. ... ok
+test_proven_grant_is_authorized (test_t2022_protocol_home_maintenance_distinction.ProtocolHomeIsNotMaintenanceGrant.test_proven_grant_is_authorized)
+The one authority that permits admission of new work. ... FAIL
+test_automation_block_copies_fingerprint (test_t2022_protocol_home_maintenance_distinction.WaitCarriesFingerprint.test_automation_block_copies_fingerprint)
+The second carrier of the same WAIT must not drop the digest. ... ok
+test_route_payload_forwards_fingerprint (test_t2022_protocol_home_maintenance_distinction.WaitCarriesFingerprint.test_route_payload_forwards_fingerprint)
+The third carrier: `continue`'s public projection must forward it. ... ok
+test_router_gate_propagates_blocker_fingerprint (test_t2022_protocol_home_maintenance_distinction.WaitCarriesFingerprint.test_router_gate_propagates_blocker_fingerprint) ... ok
+
+======================================================================
+FAIL: test_proven_grant_is_authorized (test_t2022_protocol_home_maintenance_distinction.ProtocolHomeIsNotMaintenanceGrant.test_proven_grant_is_authorized)
+The one authority that permits admission of new work.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2022_protocol_home_maintenance_distinction.py", line 95, in test_proven_grant_is_authorized
+    self.assertTrue(result["authorized"])
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.785s
+
+FAILED (failures=1)

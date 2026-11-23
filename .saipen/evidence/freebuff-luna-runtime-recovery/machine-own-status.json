@@ -1,0 +1,64 @@
+{
+  "ok": true,
+  "code": "MACHINE_RUNTIME_READY",
+  "root": "C:\\ProgramData\\SAI\\SAIPEN",
+  "saipen_runtime_ready": true,
+  "reasons": [],
+  "action": null,
+  "registration": {
+    "generation": "gen-sha256:675374e0145ae375e020de41a3b2571fca98faebb9a63a600cd2dab1ba52128f",
+    "installed_at": "2026-10-13T18:16:07Z",
+    "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002",
+    "kind": "saipen-machine-runtime",
+    "launcher": {
+      "posix": "bin/saipen",
+      "windows": "bin/saipen.cmd"
+    },
+    "previous": {
+      "generation": "gen-sha256:1c7df0911e9ba2c1a66a479099724cbf2c83a7409e524b1c20a04815ed2758c7",
+      "runtime": "runtime/1c7df0911e9ba2c1",
+      "saipen_version": "8.1.0"
+    },
+    "projected_homes": [
+      "C:\\Users\\vac34\\.agents\\skills\\saipen",
+      "C:\\Users\\vac34\\.claude\\skills\\saipen",
+      "C:\\Users\\vac34\\.codebuddy\\skills\\saipen",
+      "C:\\Users\\vac34\\.codex\\skills\\saipen",
+      "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+      "C:\\Users\\vac34\\.gemini\\skills\\saipen",
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode\\skills\\saipen"
+    ],
+    "python": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "python_bundled": false,
+    "runtime": "runtime/675374e0145ae375",
+    "saipen_version": "8.1.0",
+    "schema": 1,
+    "source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "state_schema": 3
+  },
+  "home": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\675374e0145ae375",
+  "generation": "gen-sha256:675374e0145ae375e020de41a3b2571fca98faebb9a63a600cd2dab1ba52128f",
+  "generation_proven": true,
+  "saipen_version": "8.1.0",
+  "state_schema": 3,
+  "launcher": {
+    "windows": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+    "posix": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen",
+    "ok": true,
+    "problems": []
+  },
+  "python": {
+    "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "bundled": false,
+    "ok": true
+  },
+  "acl": {
+    "checked": true,
+    "writable_by": [],
+    "foreign_owners": [],
+    "installed_by": "S-1-5-21-6247072-3065140091-1424061869-1002"
+  },
+  "source": "MACHINE_RUNTIME",
+  "canonical_generation": "gen-sha256:675374e0145ae375e020de41a3b2571fca98faebb9a63a600cd2dab1ba52128f",
+  "current": true
+}

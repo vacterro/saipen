@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-22539",
+    "operation_id": "claim-46775fef6e694e8baddd1d0c459f0e4c",
+    "reason": "existing/proposed oversized BOARD record requires canonical claim update"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-2145/T-2145-586c0b2e3bfbf8924e160e08.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 1316,
+  "original_record_path": ".saipen/recovery/board-compaction/T-2145/T-2145-586c0b2e3bfbf8924e160e08.BOARD.md",
+  "original_record_sha256": "586c0b2e3bfbf8924e160e083225d4996e3dbead29a0ce96a7447ed1a6ca9e28",
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": "",
+  "ticket_id": "T-2145"
+}

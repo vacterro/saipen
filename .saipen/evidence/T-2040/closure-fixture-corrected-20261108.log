@@ -1,0 +1,13 @@
+test_a_derived_clause_is_never_settled_from_here (test_request_clause_closure.NothingIsSettledWithoutTheWorksOwnProofTests.test_a_derived_clause_is_never_settled_from_here)
+An agent's own clause is an agent's own claim. ... ok
+test_a_ticket_without_verification_evidence_still_refuses (test_request_clause_closure.NothingIsSettledWithoutTheWorksOwnProofTests.test_a_ticket_without_verification_evidence_still_refuses) ... ok
+test_a_body_without_a_request_section_yields_nothing (test_request_clause_closure.RequestClauseIdentityTests.test_a_body_without_a_request_section_yields_nothing) ... ok
+test_ensure_is_idempotent_and_refuses_a_foreign_receipt (test_request_clause_closure.RequestClauseIdentityTests.test_ensure_is_idempotent_and_refuses_a_foreign_receipt) ... ok
+test_request_clause_text_reads_the_request_section (test_request_clause_closure.RequestClauseIdentityTests.test_request_clause_text_reads_the_request_section) ... ok
+test_start_work_verify_and_finish (test_request_clause_closure.TheEntryCommandsTicketClosesTests.test_start_work_verify_and_finish) ... ok
+test_the_seeded_clause_is_the_operator_text_not_a_summary (test_request_clause_closure.TheEntryCommandsTicketClosesTests.test_the_seeded_clause_is_the_operator_text_not_a_summary) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 14.786s
+
+OK

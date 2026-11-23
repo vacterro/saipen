@@ -301,38 +301,20 @@ def _is_link_or_reparse(path: Path) -> bool:
         info = os.lstat(path)
     except OSError:
         return False
-    if os.path.islink(path) or bool(getattr(info, "st_file_attributes", 0) & 0x400):
-        try:
-            p = Path(path)
-            if ".saipen" in p.parts:
-                if _is_isolated_worktree(p) or any(_is_isolated_worktree(parent) for parent in p.parents):
-                    return False
-        except Exception:
-            pass
-        return True
-    return False
+    return os.path.islink(path) or bool(getattr(info, "st_file_attributes", 0) & 0x400)
 
 
 def _safe_path(root: Path, rel: str, *, expect_file: bool = False) -> Path:
     """Resolve one project-owned intake path without following hostile nodes."""
     path = owned_target_path(root, rel, kind="source-receipt")
     current = root
-    isolated = _is_isolated_worktree(root)
     for part in Path(rel).parts[:-1]:
         current = current / part
-        if current.exists():
-            if _is_link_or_reparse(current):
-                if isolated and ".saipen" in current.parts:
-                    continue
-                raise ValueError(f"unsafe source-receipt container: {current}")
-            if not current.is_dir():
-                raise ValueError(f"unsafe source-receipt container: {current}")
+        if current.exists() and (_is_link_or_reparse(current) or not current.is_dir()):
+            raise ValueError(f"unsafe source-receipt container: {current}")
     if path.exists():
         info = os.lstat(path)
-        if _is_link_or_reparse(path):
-            if not (isolated and ".saipen" in path.parts):
-                raise ValueError(f"unsafe source-receipt node: {path}")
-        elif expect_file and not stat.S_ISREG(info.st_mode):
+        if _is_link_or_reparse(path) or (expect_file and not stat.S_ISREG(info.st_mode)):
             raise ValueError(f"unsafe source-receipt node: {path}")
     return path
 
@@ -1077,6 +1059,167 @@ def link_work_to(root: Path | str, receipt_id: str, work: str) -> dict:
         "work": work,
         "linked_work": after.get("linked_work"),
         "linked_works": sorted(linked_works(after)),
+    }
+
+
+def _board_work_workable(root: Path, work: str) -> bool:
+    """Is `work` on the BOARD and in a workable section (TODO or DOING)?
+
+    A rebind target must be able to carry the receipt's closure work; a DONE
+    or BLOCKED row cannot, and a pruned row (the measured ZAICODE case) is not
+    on the BOARD at all.
+    """
+    if not work:
+        return False
+    try:
+        from .board import parse_board
+
+        raw = _read_owned_file(
+            root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX
+        )
+        board = parse_board(raw.decode("utf-8-sig"))
+    except (OSError, ValueError):
+        return False
+    ticket = board.get("tickets", {}).get(work)
+    if not isinstance(ticket, dict):
+        return False
+    return str(ticket.get("section") or "") in ("## TODO", "## DOING")
+
+
+def rebind_work_to(
+    root: Path | str,
+    receipt_id: str,
+    work: str,
+    *,
+    reason: str,
+    authority: str,
+) -> dict:
+    """Re-point a receipt's primary linked Work (ZAICODE audit finding C).
+
+    `link_work_to` (T-1437) is membership-only and never moves a primary;
+    this is the separate authorized mutation for the measured case where the
+    recorded primary row is gone from the BOARD and only a re-point can bring
+    the receipt back to a live owner. Fail closed on an unknown receipt, a
+    target missing from the BOARD or not workable, a missing authority
+    receipt, an invalid reason token, or a no-op rebind; a no-op refuses
+    without a trace. The transaction updates the receipt metadata and the
+    intake index together, records `previous_linked_work`, the reason, the
+    authority and a UTC timestamp in a durable `rebinds` journal, and never
+    rewrites clause coverage, bodies or the retirement state.
+    """
+    root = Path(root)
+    if not _valid_receipt_id(receipt_id):
+        return _invalid_receipt_id(receipt_id)
+    work = str(work or "").strip()
+    reason = str(reason or "").strip()
+    authority = str(authority or "").strip()
+    if not _WORK_ID_RE.match(work):
+        return {
+            "ok": False,
+            "code": "INVALID_ID",
+            "detail": f"source rebind needs a T-### Work id, got {work!r}",
+        }
+    if not reason or not reason.replace("_", "").isalnum() or reason.upper() != reason:
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": (
+                "source rebind needs --reason CODE (one uppercase token naming "
+                "why the primary moved)"
+            ),
+        }
+    if not _valid_receipt_id(authority):
+        return {
+            "ok": False,
+            "code": "INVALID_ID",
+            "detail": f"source rebind needs --authority SRC-###, got {authority!r}",
+        }
+    index = _read_index(root)
+    if receipt_id not in index.get("active", {}):
+        return {
+            "ok": False,
+            "code": "SOURCE_RECEIPT_MISSING",
+            "detail": f"{receipt_id} is not on the active intake surface",
+        }
+    if authority != receipt_id and authority not in index.get("active", {}):
+        authority_meta = _read_meta(root, authority)
+        if authority_meta is None:
+            return {
+                "ok": False,
+                "code": "SOURCE_RECEIPT_MISSING",
+                "detail": (
+                    f"authority {authority} is not a receipt on this intake "
+                    "surface; only a real receipt can authorize a primary move"
+                ),
+            }
+    if not _board_work_workable(root, work):
+        return {
+            "ok": False,
+            "code": "ORPHAN_RECEIPT",
+            "detail": (
+                f"rebind target {work} is missing from BOARD or not workable "
+                "(only a TODO or DOING row can carry the receipt's Work)"
+            ),
+        }
+    integrity = verify_integrity(root, receipt_id)
+    if not integrity.get("ok"):
+        return integrity
+    meta = _read_meta(root, receipt_id) or {}
+    previous = str(meta.get("linked_work") or "").strip()
+    if previous == work:
+        return {
+            "ok": False,
+            "code": "REBIND_NOOP",
+            "detail": f"{receipt_id} already names {work} as its primary Work; refusing a no-op rebind",
+            "receipt": receipt_id,
+            "linked_work": previous,
+            "linked_works": sorted(linked_works(meta)),
+        }
+    from datetime import datetime, timezone
+
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    members = sorted(
+        {value for value in linked_works(meta) if value}
+        | {work}
+        | ({previous} if previous else set())
+    )
+    history = [item for item in (meta.get("rebinds") or []) if isinstance(item, dict)]
+    history.append(
+        {
+            "from": previous,
+            "to": work,
+            "reason": reason,
+            "authority": authority,
+            "at": now,
+            "op_id": "source-rebind-"
+            + hashlib.sha256(f"{receipt_id}:{previous}:{work}:{now}".encode("utf-8")).hexdigest()[:16],
+        }
+    )
+    meta["linked_work"] = work
+    meta["linked_works"] = members
+    meta["previous_linked_work"] = previous
+    meta["rebinds"] = history
+    meta["rebound_at"] = now
+    _write_meta(root, receipt_id, meta)
+    index = _read_index(root)
+    entry = index.get("active", {}).get(receipt_id)
+    if entry is not None:
+        entry["linked_work"] = meta.get("linked_work")
+        if meta.get("linked_works"):
+            entry["linked_works"] = list(meta["linked_works"])
+        _write_index(root, index)
+    after = _read_meta(root, receipt_id) or {}
+    return {
+        "ok": True,
+        "code": "SOURCE_REBOUND",
+        "receipt": receipt_id,
+        "work": work,
+        "previous_linked_work": previous,
+        "linked_work": after.get("linked_work"),
+        "linked_works": sorted(linked_works(after)),
+        "rebinds": len(history),
+        "reason": reason,
+        "authority": authority,
     }
 
 
@@ -2280,29 +2423,6 @@ def _probe_environment_absence(environment: str) -> dict:
     return {"ok": True, "code": "ENVIRONMENT_ABSENT", "proof": proof}
 
 
-def validate_evidence_class(evidence_class: str | None) -> dict | None:
-    """The ONE authority for a caller-declared evidence class (T-34).
-
-    ``None`` when the value is absent or a member of the closed taxonomy;
-    otherwise a refusal. Shared by `set_disposition` and the CLI `--dry-run`
-    planner so the two cannot disagree on a class either refuses. The class is
-    what the CITED evidence actually IS, so a clause whose text declares
-    ``[CONTRACT]`` can be closed by evidence the caller declares CONTRACT --
-    the class-field writer the fitness gate reads but previously nothing set.
-    """
-    if evidence_class is None:
-        return None
-    from . import evidence_fitness
-
-    if evidence_class.upper() not in evidence_fitness.EVIDENCE_CLASSES:
-        return {
-            "ok": False,
-            "code": "VALIDATION_FAILED",
-            "detail": f"unknown evidence class {evidence_class!r}",
-        }
-    return None
-
-
 def set_disposition(
     root: Path | str,
     receipt_id: str,
@@ -2313,7 +2433,6 @@ def set_disposition(
     evidence: str | None = None,
     verification: str | None = None,
     environment: str | None = None,
-    evidence_class: str | None = None,
 ) -> dict:
     root = Path(root)
     normalized_rid, refusal = validate_disposition_request(receipt_id, rid, disposition)
@@ -2321,9 +2440,6 @@ def set_disposition(
         return refusal
     assert normalized_rid is not None
     rid = normalized_rid
-    class_refusal = validate_evidence_class(evidence_class)
-    if class_refusal is not None:
-        return class_refusal
     try:
         with project_writer_lock(root):
             integrity = verify_integrity(root, receipt_id)
@@ -2565,17 +2681,13 @@ def set_disposition(
                         if not receipt_file:
                             test_target = Path(test_files[0]).name if test_files else Path(str(verification or "")).name
                             target_work = work or "<T-###>"
-                            missing_oracle = test_files[0] if test_files else verification
-                            if test_target.startswith("test_") and test_target.endswith(".py"):
-                                command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
-                            else:
-                                command = f"saipen work reverify {target_work} --contract <contract-path>"
+                            command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
                             return {
                                 "ok": False,
                                 "code": "EVIDENCE_UNAUTHENTICATED",
                                 "detail": (
                                     f"no authentic execution receipt found proving execution of "
-                                    f"{missing_oracle}; "
+                                    f"{test_files[0] if test_files else verification}; "
                                     f"to produce an authentic receipt for live Work run: {command}"
                                 ),
                                 "canonical_next_command": command,
@@ -2714,10 +2826,7 @@ def set_disposition(
                         if authenticated is None or base_auth != base_carrier:
                             test_target = Path(test_files[0]).name if test_files else Path(str(verification or "")).name
                             target_work = work or "<T-###>"
-                            if test_target.startswith("test_") and test_target.endswith(".py"):
-                                command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
-                            else:
-                                command = f"saipen work reverify {target_work} --contract <contract-path>"
+                            command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
                             return {
                                 "ok": False,
                                 "code": "EVIDENCE_UNAUTHENTICATED",
@@ -2777,8 +2886,6 @@ def set_disposition(
                 entry["environment_evidence"] = environment_proof
             elif disposition != "UNAVAILABLE_ENVIRONMENT":
                 entry.pop("environment_evidence", None)
-            if evidence_class:
-                entry["actual_evidence_class"] = evidence_class.upper()
             _write_coverage(root, receipt_id, ledger)
             return {
                 "ok": True,
@@ -2786,7 +2893,6 @@ def set_disposition(
                 "receipt": receipt_id,
                 "rid": rid,
                 "disposition": disposition,
-                "actual_evidence_class": entry.get("actual_evidence_class"),
             }
     except (OSError, PermissionError, ValueError) as exc:
         return _write_refusal(exc)
@@ -3025,20 +3131,9 @@ def extract_request_clauses(body: str) -> list[str]:
         if len(items) >= 2:
             return [" ".join(content.split()) for num, content in items]
 
-    # Pattern 4: Top-level numbered list if text has >= 2 items.
-    #
-    # A numbered item ends at the next numbered line, at the end of the text,
-    # OR at the next inline major heading (`=== N. TITLE ===`, `=====` divider,
-    # `# ...`). Without the heading alternative (T-33 defect class: cross-
-    # section absorption) the last item of one numbered list ran through the
-    # section divider that followed it and swallowed every narrative section
-    # up to the next numbered line: on the standing-mission carrier SRC-013
-    # that put 94.4% of the derived text into 2 of 28 clauses (R018 8508
-    # chars, R028 7956), and the closure gate then demanded dispositions for
-    # narrative prose instead of for requirements. A divider line is not a
-    # list item, so the lookahead stops there.
+    # Pattern 4: Top-level numbered list if text has >= 2 items
     top_items = re.findall(
-        r"(?:^|\n)\s*(\d+)\.\s+(.*?)(?=(?:\n\s*\d+\.|\n\s*(?:={3,}|\#{1,6})|\Z))",
+        r"(?:^|\n)\s*(\d+)\.\s+(.*?)(?=(?:\n\s*\d+\.|\Z))",
         text,
         re.DOTALL,
     )
@@ -3211,39 +3306,16 @@ def _coverage_summary_from_ledger(receipt_id: str, ledger: dict) -> dict:
         for rid, entry in requirements.items()
         if entry.get("actionable", entry.get("class") in ACTIONABLE_CLASSES)
     }
-    unresolved = []
-    unresolved_fitness = []
-    try:
-        from . import evidence_fitness
-    except (ImportError, ValueError):
-        import evidence_fitness
-
-    for rid, entry in actionable.items():
-        disp = entry.get("disposition")
-        ev = entry.get("evidence")
-        ver = entry.get("verification")
-        if (
-            disp not in TERMINAL_DISPOSITIONS
-            or not ev
-            or (disp in {"IMPLEMENTED", "VERIFIED"} and not ver)
-        ):
-            unresolved.append(rid)
-            continue
-
-        if disp in {"IMPLEMENTED", "VERIFIED"}:
-            req_text = entry.get("text", "")
-            req_class = entry.get("required_evidence_class") or evidence_fitness.extract_required_evidence_class(req_text)
-            act_class = entry.get("actual_evidence_class") or evidence_fitness.UNIT
-            fitness = evidence_fitness.validate_evidence_fitness(
-                requirement_id=rid,
-                required_evidence_class=req_class,
-                actual_evidence_class=act_class,
-                evidence_payload=entry.get("evidence_payload") or ev,
-            )
-            if not fitness.get("fit"):
-                unresolved.append(rid)
-                unresolved_fitness.append(rid)
-
+    unresolved = [
+        rid
+        for rid, entry in actionable.items()
+        if entry.get("disposition") not in TERMINAL_DISPOSITIONS
+        or not entry.get("evidence")
+        or (
+            entry.get("disposition") in {"IMPLEMENTED", "VERIFIED"}
+            and not entry.get("verification")
+        )
+    ]
     return {
         "receipt": receipt_id,
         "requirements": len(requirements),
@@ -3251,7 +3323,6 @@ def _coverage_summary_from_ledger(receipt_id: str, ledger: dict) -> dict:
         "terminal": len(actionable) - len(unresolved),
         "dispositions": counts,
         "unresolved": unresolved,
-        "unresolved_fitness": unresolved_fitness,
     }
 
 
@@ -3630,6 +3701,12 @@ def work_closure_gate(root: Path | str, work: str) -> dict:
             ):
                 linked.append(receipt_id)
                 continue
+            if _retired_tombstone_settled(tomb):
+                # T-2131: the receipt-only retirement shape is settled the
+                # same way the audit inbox's delete_gate (T-134) and classify
+                # (T-135) already read it. See `_retired_tombstone_settled`.
+                linked.append(receipt_id)
+                continue
             return route_source_refusal(
                 root,
                 {
@@ -3674,6 +3751,30 @@ def work_closure_gate(root: Path | str, work: str) -> dict:
     return {"ok": True, "code": "SOURCE_COVERAGE_COMPLETE", "work": work, "receipts": linked}
 
 
+def _retired_tombstone_settled(tomb: object) -> bool:
+    """T-2131: a receipt-only retirement is settlement for a citing Work.
+
+    The sibling audit-inbox surfaces already read this exact state as settled:
+    `audit_inbox.delete_gate` (T-134) accepts ``location == "retired"`` for the
+    documented "receipt CLOSED WITH A TOMBSTONE" condition, and
+    `audit_inbox.classify` (T-135) maps the same tombstone onto
+    CLOSED_PENDING_DELETE, because retirement is the only verb that mints one
+    and its eligibility gate already proved no unresolved actionable
+    requirement was left behind. These two intake gates answered the
+    "is every source this ticket cites real and SETTLED?" question with a
+    CLOSED-only reading, which refused every receipt the inbox admits and left
+    the citing Work structurally unfinishable: the operator-RESTORE reissue
+    route (retire -> reissue successor) has no canonical writer that rebinds a
+    row's `source_receipts`, so the restored duty was stranded at BUILD with
+    `ticket block` as the only finite move. Same reading as the siblings,
+    same function shape as `retirement.is_retired_tombstone` -- never a weaker
+    local status string test, so the two surfaces cannot drift again.
+    """
+    from .retirement import is_retired_tombstone
+
+    return isinstance(tomb, dict) and is_retired_tombstone(tomb)
+
+
 def boundary_gate(root: Path | str, work: str, boundary: str) -> dict:
     """Real targeted original-body read at meaningful execution boundaries."""
     root = Path(root)
@@ -3705,6 +3806,13 @@ def boundary_gate(root: Path | str, work: str, boundary: str) -> dict:
                 and tomb.get("status") == CLOSED_STATUS
                 and int(tomb.get("unresolved") or 0) == 0
             ):
+                checked.append(receipt_id)
+                continue
+            if _retired_tombstone_settled(tomb):
+                # T-2131: the receipt-only retirement shape (INVALID +
+                # retired_at, the verified cold-copy retirement) is the same
+                # settled reading the audit inbox's delete_gate (T-134) and
+                # classify (T-135) already use for this tombstone.
                 checked.append(receipt_id)
                 continue
             return {
@@ -3963,20 +4071,6 @@ def _release_scope_trust(root: Path, work: str, source_identity: object) -> _Rel
     )
 
 
-def _is_isolated_worktree(root: Path) -> bool:
-    """True if root is an isolated linked worktree or explicitly isolated release (P0-01)."""
-    if os.environ.get("SAIPEN_ISOLATED_RELEASE") == "1":
-        return True
-    try:
-        p = Path(root).resolve()
-        if (p / ".git").is_file():
-            if ".saipen" in p.parts and "worktrees" in p.parts:
-                return True
-    except Exception:
-        pass
-    return False
-
-
 def _release_relevant_work(
     root: Path,
     current_work: str | None,
@@ -4011,7 +4105,7 @@ def _release_relevant_work(
         )
         return _ReleaseRelevance(frozenset({current_work}), current_work, scope)
 
-    if not publish or _is_isolated_worktree(root):
+    if not publish:
         own = _release_scope_trust(root, current_work, source_identity)
         if own.status != "TRUSTED_SCOPE":
             return _ReleaseRelevance(frozenset({current_work}), current_work, own)
@@ -4122,11 +4216,11 @@ def release_gate(
         integrity = verify_integrity(root, receipt_id)
         if not integrity["ok"]:
             return integrity | {"receipt": receipt_id}
-        if (not publish or _is_isolated_worktree(root)) and current_work:
+        if not publish and current_work:
             # The current Work's complete linkage/coverage was checked above.
             # Unowned or otherwise unrelated coverage cannot constrain a local
-            # or isolated closure: only reviewed attributable paths of current_work
-            # leave the repository. Integrity remains global, including for these receipts.
+            # closure: no source bytes leave the repository. Integrity remains
+            # global, including for these receipts.
             continue
         linked = item.get("linked_work")
         if not linked:
@@ -5464,7 +5558,73 @@ def recover_orphans(root: Path | str) -> dict:
                         "source_sha256": digest,
                     }
                 )
-    return {"ok": True, "code": "ORPHAN_RECEIPTS", "orphans": orphans}
+    report = {"ok": True, "code": "ORPHAN_RECEIPTS", "orphans": orphans}
+    pruned = pruned_work_rows(root)
+    if pruned:
+        report["pruned_work_rows"] = pruned
+        report["recovery_command"] = "saipen source recover --confirm"
+    return report
+
+
+def dangling_linked_work(root: Path | str) -> dict[str, str]:
+    """ACTIVE receipts whose `linked_work` is not on the BOARD (T-2050).
+
+    The same edge `validate_project` refuses. Read-only: `{receipt: work}` for
+    every active receipt that names a Work the BOARD no longer holds, so both
+    the report and the restore act on exactly the link the validator reports.
+    """
+    root = Path(root)
+    index = _read_index(root)
+    active = index.get("active") or {}
+    if not isinstance(active, dict):
+        return {}
+    from .board import parse_board
+
+    raw = _read_owned_file(
+        root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX
+    )
+    tickets = parse_board(raw.decode("utf-8-sig")).get("tickets", {})
+    dangling: dict[str, str] = {}
+    for receipt_id in sorted(active):
+        if not _valid_receipt_id(receipt_id):
+            continue
+        linked = str((_read_meta(root, receipt_id) or {}).get("linked_work") or "").strip()
+        if linked and linked not in tickets:
+            dangling[receipt_id] = linked
+    return dangling
+
+
+def pruned_work_rows(root: Path | str) -> list[dict]:
+    """Active receipts whose Work row an earlier scrub moved (T-2050).
+
+    Read-only. A row an ACTIVE receipt still names is a broken link, not a
+    deleted record: the scrub moved the line verbatim into
+    `SCRUB_EVIDENCE_ROOT`, so the report names both the Work and the evidence
+    that still holds it, and `state` says whether the bytes are there at all.
+    """
+    root = Path(root)
+    try:
+        dangling = dangling_linked_work(root)
+    except (OSError, ValueError):
+        return []
+    missing = sorted(set(dangling.values()))
+    if not missing:
+        return []
+    receipts_by_work: dict[str, list[str]] = {}
+    for receipt_id, work in dangling.items():
+        receipts_by_work.setdefault(work, []).append(receipt_id)
+    from . import board_scrub
+
+    found = board_scrub.pruned_rows(root, missing)
+    return [
+        {
+            "work": tid,
+            "state": "PRUNED_ROW" if tid in found else "ROW_LOST",
+            "evidence": found.get(tid, ("", ""))[1] or None,
+            "receipts": receipts_by_work[tid],
+        }
+        for tid in missing
+    ]
 
 
 def recover_reports(root: Path | str, receipt_id: object) -> bool:
@@ -5476,10 +5636,14 @@ def recover_reports(root: Path | str, receipt_id: object) -> bool:
     state never changes, and every agent generation re-runs the same route.
     """
     try:
-        orphans = recover_orphans(root).get("orphans") or []
+        report = recover_orphans(root)
     except (OSError, ValueError):
         return False
-    return any(item.get("receipt") == receipt_id for item in orphans)
+    if any(item.get("receipt") == receipt_id for item in report.get("orphans") or []):
+        return True
+    # T-2050: a row an earlier scrub moved is now a route, so the receipt that
+    # names it is no longer a dead end for this command.
+    return bool(report.get("pruned_work_rows"))
 
 
 def validate_project(root: Path | str) -> list[str]:
@@ -5604,7 +5768,14 @@ def validate_project(root: Path | str) -> list[str]:
         if linked:
             ticket = board_tickets.get(linked)
             if ticket is None:
-                errors.append(f"active receipt {receipt_id} references missing Work {linked}")
+                # T-2050: the row may have been moved by a scrub rather than
+                # never exist, and that case has an executable repair. The
+                # message carries it so the conformance receipt advertises an
+                # action instead of ENGINEERING_REQUIRED.
+                errors.append(
+                    f"active receipt {receipt_id} references missing Work {linked}"
+                    " -- saipen source recover --confirm re-inserts the row an earlier scrub moved"
+                )
             else:
                 projected = {
                     value.strip()

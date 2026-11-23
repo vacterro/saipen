@@ -1,0 +1,4 @@
+active LOG carries a UTF-8 BOM: returned 6 error(s): ['.saipen/LOG.md is utf-8-sig, not plain UTF-8 -- every SAIPEN tool reads it byte-wise and will fail differently; rewrite as UTF-8 without a BOM (KNOWLEDGE/traps.md)', 'LOG: LOG.md:1 not a legal event line']
+    through the journal's boundary: ['.saipen/LOG.md is utf-8-sig, not plain UTF-8 -- every SAIPEN tool reads it byte-wise and will fail differently; rewrite as UTF-8 without a BOM (KNOWLEDGE/traps.md)']
+logs container is a regular file: returned 1 error(s): ['LOG: complete history unreadable, so the ledger contract cannot be proved -- HistoryOwnershipError: .saipen/logs exists but is not a directory; refusing to read history through it']
+    through the journal's boundary: ['LOG: complete history unreadable, so the ledger contract cannot be proved -- HistoryOwnershipError: .saipen/logs exists but is not a directory; refusing to read history through it']

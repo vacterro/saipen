@@ -1,0 +1,5 @@
+{
+  "ticket": "T-1624",
+  "subject": "the Claude Code hook as committed at 025bf596 (T-1563 generation): it blocks the prompt whenever admission cannot be established or its engine cannot be run",
+  "sha256": "cbfc6607e53e81572576e5a755ac4d12385c8fd41cf853e53c90a8cd36180f23"
+}

@@ -1,0 +1,12 @@
+utc: 2026-10-08T00:14:02Z
+command: python -B -m unittest test_debt_gate test_t1304_r004_transition test_conformance_lineage test_t1283_lineage_legacy_ingest test_producer_gate_policy test_refusal_registry test_canonical_command_reachability test_subprocess_utf8 test_protocol_registry (cwd tools/)
+..................................................................................................................................
+----------------------------------------------------------------------
+Ran 130 tests in 91.760s
+
+OK
+--- exit: 0 ---
+command: python -m ruff check tools/ tests/
+    |
+
+Found 2 errors.

@@ -1,0 +1,77 @@
+{
+  "ok": true,
+  "code": "HOST_BOOTSTRAP_BOUND",
+  "host": "freebuff",
+  "host_record": {
+    "host": "freebuff",
+    "known": true,
+    "blocking_capability": false,
+    "declared_strength": "ADVISORY",
+    "install": {
+      "home": "~/.agents",
+      "skill": "~/.agents/skills/saipen",
+      "bespoke": "freebuff-backstop"
+    }
+  },
+  "host_supported": true,
+  "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+  "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+  "launcher": {
+    "ok": true,
+    "discovered": true,
+    "executable": true,
+    "dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin",
+    "posix": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen",
+    "windows": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "transport": "direct_launcher",
+    "why": ""
+  },
+  "bridge": {
+    "required": false,
+    "transport": "path",
+    "cross_boundary": false,
+    "why": ""
+  },
+  "binding": {
+    "persisted_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "persisted_home_dead": false,
+    "persisted_home_inaccessible": false,
+    "reason": null
+  },
+  "runtime_discovered": true,
+  "python": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+  "attempted": [
+    {
+      "source": "path",
+      "path": "C:\\Users\\vac34\\bin\\saipen.CMD",
+      "ok": true
+    },
+    {
+      "source": "state-saipen-home",
+      "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "ok": true,
+      "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+      "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py"
+    },
+    {
+      "source": "executing-engine",
+      "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "ok": true,
+      "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+      "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py"
+    }
+  ],
+  "boundary": null,
+  "remediation": "canonical SAIPEN runtime reachable",
+  "fingerprint": "5ef062f6860927cab1c941d473617b65eea44816c77e2e9c532541f6c5939fc0",
+  "instructions": {
+    "code": "PROJECT_BLOCK_ABSENT",
+    "action": null,
+    "detail": null,
+    "files": []
+  },
+  "bridge_required": false
+}

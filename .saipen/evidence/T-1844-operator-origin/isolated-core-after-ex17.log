@@ -1,0 +1,78 @@
+saipen conformance validation starting (tools/validate.py)...
+Project root: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN (git-worktree)
+Project lineage: lineage-b512942bac884a8691f6c98afcd6ddb9
+PASS: state.schema.json and the engine STATE contract constants agree
+PASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)
+PASS: STATE.md schema valid (checked against state.schema.json)
+PASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-b512942bac884a8691f6c98afcd6ddb9)
+PASS: goal execution_intent counters present
+PASS: subSaipen STATE.md shape valid (7 checked, live + shipped library)
+PASS: .saipen/extensions/subs/MANIFEST.md parses strictly (5 entries)
+PASS: extensions/subs/MANIFEST.md parses strictly (4 entries)
+PASS: BOARD.md has all required section headings
+PASS: BOARD.md no duplicate tickets
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md Work supersession relations are terminal, existing and acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+PASS: BOARD.md at most one ## DOING ticket (1 claimed)
+PASS: every DONE closure provenance satisfies its declared closure contract
+PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 19 segment(s))
+PASS: history: 89 event(s) carry an off-grammar `[op: ...]` id no writer emits, exempt as sealed, at or below the resolved floor, or backed by a real operation record (first .saipen/logs/LOG-012.md:125 E-2882; T-1577)
+PASS: improve seat report schema valid (20 report(s) scanned)
+PASS: core sweep linkage valid: every disposition resolves to a real finding/ticket, no unverified or INVALID/ALREADY_FIXED finding produced a ticket, source_reports resolve exactly
+PASS: subsaipen write boundary continuous: no sub artifact targets a main-project canonical file (red control 7)
+PASS: history: 24 sealed hunt mark(s) name commits this repository does not have or that never reached the remote (earliest .saipen/logs/LOG-001.md:114 @ab71e87); immutable by append-only, and new marks are FAILed (T-1642)
+PASS: hunt skip marks resolve to real commits on the remote (24 checked)
+PASS: history: 1 sealed `DEC: goal reauthorized` line(s) cleared counters under the caps (first in .saipen/logs/LOG-006.md); immutable by append-only, and a new one in the active log warns
+PASS: history: 125 sealed LOG entr(y/ies) predate the mandatory DATE (earliest .saipen/logs/LOG-001.md:3); immutable by append-only, and the active log is FAILed for it
+PASS: saiui charter integrity verified (references UI.md, no second palette, write ban enforced, fixer contract present, UI- prefix documented, bootstrap includes charters)
+PASS: 6 shipped sai*.md charter(s) declare the full metadata block (8 keys, closed enums)
+PASS: freshness hardening command/cleanup/worker contracts intact
+PASS: T-549 hard barrier blocks the T-551..T-561 improve wave
+PASS: convergence contract intact (13 stages in order, closure bar and post-K ordering rule present)
+PASS: SAIUI SAISENT mission labels findings as hypotheses to verify
+PASS: KNOWLEDGE/ clean
+PASS: KNOWLEDGE/ structured surface valid (25 card(s), 25 active, index fresh)
+PASS: FUTURE GATE deferred-authority surface valid (51 document(s); 37 DEFERRED, 1 ELIGIBLE, 2 INELIGIBLE, 11 NEEDS_REVIEW)
+PASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 51 document(s) non-normative, 46 reviewed record(s) canonical)
+PASS: .saipen/USERPERSON.md is a well-formed optional USERPERSON profile
+PASS: README.md badge matches VERSION
+PASS: conformance corpus schema + IDs valid (257 rows, exactly 1..257)
+PASS: CONFORMANCE.md matches the generated corpus index
+PASS: no stray control characters in shipped text (616 files swept)
+PASS: core docs text lint clean (no U+FFFD/split keywords/fence drift)
+PASS: phase enum <-> phases/ docs in sync (16 phases)
+PASS: INDEX.md phase list matches enum + files (16 phases)
+PASS: CORE / IMPROVE / CLI Improve action sets match exactly
+FAIL: runtime manifest names a file git does not track: tools/saipen_engine/operator_origin.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_operator_origin_support.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t1844_authority_preview.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t1844_goal_turns.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t1844_operator_origin.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t1844_origin_broker.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t1844_source_event.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_t1847_fixture_contract.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+PASS: adapter cross-references valid (checking saipen/ paths in all 10 adapters)
+PASS: no adapter or injector treats RFC.md as normative (13 checked, RFC stub is redirect-only)
+PASS: 32 locale README badge(s) match VERSION (8.1.0)
+PASS: shortcut callouts aligned across 32 locale sources, 3 mirrors, 33 locale guides, and both root entry docs
+PASS: append targets end on a line boundary (40 checked)
+PASS: lint parity [T-628] -- harness.md and validate.yml agree on `python -m ruff check tools/ tests/` with ruff==0.16.0
+PASS: doc coverage accounted for (469 shipped documents, 27 checked patterns, 37 exempt)
+PASS: warn slug ownership verified for 4 tracked slug(s)
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [board-soft-cap]: BOARD.md is 271 KB, of which 68 KB is 109 closed record(s) nothing pins (soft cap 16 KB of such text) -- `saipen transition CLEAN` scrubs them into .saipen/recovery/board-scrub/ (phases/clean.md step 1)
+WARN [log-soft-cap]: .saipen/LOG.md is 3937 lines / 1323 KB, past the 300 line / 64 KB cap -- `saipen transition CLEAN` seals it into the next .saipen/logs/LOG-<NNN>.md (phases/clean.md step 4)
+WARN [producer-package-stale]: .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-015] carries source_tree_fingerprint 'git-delta-v1:177b9b9d5f524377258c331f5c11b006511a77f4271b29048d032cb46b3a9024' but the current tree computes 'git-delta-v1:a31c90be63928ac3376a338281720824c3e2897c028316f12ab67f39459d2946' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else
+WARN [producer-package-stale]: .saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md [W-051] carries source_tree_fingerprint 'git-delta-v1:f6e0d3683fdd49081fb91414517c6da180255dc0af9c762a9570fd6ca474418f' but the current tree computes 'git-delta-v1:a31c90be63928ac3376a338281720824c3e2897c028316f12ab67f39459d2946' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else
+WARN [manifest-untracked-orphan]: untracked manifest file tools/saipen_engine/operator_origin.py imports runtime that HEAD does not carry: module .goal_authority -- do NOT commit it alone; it will fail in every clone. Ship the runtime it depends on first
+WARN [manifest-untracked-orphan]: untracked manifest file tools/test_operator_origin_support.py imports runtime that HEAD does not carry: saipen_engine.HB, saipen_engine.HC, saipen_engine.HP, saipen_engine.HT, saipen_engine.OT, saipen_engine.as, saipen_engine.host_authority_broker, saipen_engine.host_authority_client, saipen_engine.host_authority_process, saipen_engine.host_authority_transport, saipen_engine.intake, saipen_engine.operator_task -- do NOT commit it alone; it will fail in every clone. Ship the runtime it depends on first
+WARN [manifest-untracked-orphan]: ... and 6 more like the above
+WARN [subsaipen-uncollected]: 2 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)
+WARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this
+WARN [release-ledger]: 2 release(s) have a CHANGELOG entry but no git tag: v8.0.2, v8.1.0
+WARN [xpatch-survival]: XP-000001 tools/saipen_engine/intake.py: Git history unreadable: fatal: bad object refs/codex/turn-diffs/captures/1785165795234/fb80dcb4-2cd2-4789-9618-a9409baff787/base
+WARN [xpatch-survival]: XP-000001 tools/test_source_receipts.py: Git history unreadable: fatal: bad object refs/codex/turn-diffs/captures/1785165795234/fb80dcb4-2cd2-4789-9618-a9409baff787/base
+WARN [xpatch-survival]: ... and 7 more like the above
+Validation FAILED: 8 problem(s), 24 warning(s)

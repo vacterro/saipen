@@ -1,0 +1,14 @@
+test_a_corrupt_checkpoint_is_ignored_not_trusted (test_worker_turnover.ColdTurnoverTests.test_a_corrupt_checkpoint_is_ignored_not_trusted) ... ok
+test_a_fenced_generation_cannot_finish_its_own_slice (test_worker_turnover.ColdTurnoverTests.test_a_fenced_generation_cannot_finish_its_own_slice) ... ok
+test_a_second_worker_cannot_run_against_a_live_generation (test_worker_turnover.ColdTurnoverTests.test_a_second_worker_cannot_run_against_a_live_generation) ... ok
+test_a_supervisor_restart_from_zero_ram_reconstructs_the_picture (test_worker_turnover.ColdTurnoverTests.test_a_supervisor_restart_from_zero_ram_reconstructs_the_picture) ... ok
+test_a_worker_refuses_to_run_under_ambiguous_authority (test_worker_turnover.ColdTurnoverTests.test_a_worker_refuses_to_run_under_ambiguous_authority) ... ok
+test_every_work_blocked_is_an_answer_not_a_crash (test_worker_turnover.ColdTurnoverTests.test_every_work_blocked_is_an_answer_not_a_crash) ... ok
+test_the_checkpoint_is_derived_runtime_state_not_canonical_truth (test_worker_turnover.ColdTurnoverTests.test_the_checkpoint_is_derived_runtime_state_not_canonical_truth) ... ok
+test_the_same_worker_resumes_its_own_generation (test_worker_turnover.ColdTurnoverTests.test_the_same_worker_resumes_its_own_generation) ... ok
+test_three_real_generations_recover_the_exact_next_work (test_worker_turnover.ColdTurnoverTests.test_three_real_generations_recover_the_exact_next_work) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 2.451s
+
+OK

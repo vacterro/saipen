@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-082:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1863",
+      "text": "Process compact evidence from fastprompter_drag/AUDAPACK_20260923_0302.md: CLI launcher fixes (PATH split, profile distinctness, admit fallback), widget release progression",
+      "verification": "tests/test_cli_launchers.py 23/23 PASS; Windows CLI smoke GREEN Claude1/Claude2/Antigravity/ZCode distinct; widget 0.0.64 ledger coherent:PASS",
+      "work": "T-235"
+    }
+  },
+  "schema_version": 1
+}

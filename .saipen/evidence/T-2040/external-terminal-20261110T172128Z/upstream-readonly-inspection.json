@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "code": "EXTERNAL_IMPLEMENTATION_VERIFIED",
+  "authority": "lineage-ded945ae8243480ab1bfee73baeb29c6",
+  "implementation": "T-289@d93b212f2c27763a62b00fc2641755a43a6f4004",
+  "external_work": "T-289",
+  "external_commit": "d93b212f2c27763a62b00fc2641755a43a6f4004",
+  "external_root": "V:\\___VAC\\__K\\__CODE\\__SAITULS",
+  "external_head": "555911ff03a7cca969f0b143c3370e12ba043abf"
+}

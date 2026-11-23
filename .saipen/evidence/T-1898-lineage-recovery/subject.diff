@@ -1,0 +1,223 @@
+diff --git a/tools/saipen_engine/conformance.py b/tools/saipen_engine/conformance.py
+index 730642f3..5b25c7ec 100644
+--- a/tools/saipen_engine/conformance.py
++++ b/tools/saipen_engine/conformance.py
+@@ -863,13 +863,14 @@ def _update_receipt_index(
+     (prior_receipt_dir_mtime_ns), delegate to the bounded conformance lineage
+     advance. On bounded success the v2 lineage head and per-gate locators are
+     written by the lineage module and this v1 index pass returns without
+-    touching them. On refusal with a live v2 head the v1 index pass also
+-    returns without touching anything: the lineage authority already exists,
+-    the refusal means the head no longer represents the namespace the caller
+-    saw (crash between receipt write and head publish, or an out-of-band
+-    sibling), and the only honest recovery is the canonical deep rebuild --
+-    this legacy writer must never clobber the v2 head/locator pair with a v1
+-    bootstrap document (zero mutation on refusal).
++    touching them. On refusal with a live v2 head the lineage authority already
++    exists and the refusal means the head no longer represents the namespace
++    the caller saw (crash between receipt write and head publish, or an
++    out-of-band sibling). This legacy writer still never clobbers the v2
++    head/locator pair with a v1 bootstrap document; instead it runs the one
++    canonical deep rebuild (T-1898), which is the only honest recovery and the
++    only thing that gets later readers back onto the bounded path. If that
++    rebuild cannot publish, nothing is written at all.
+     """
+     root = Path(root)
+     if prior_receipt_dir_mtime_ns is not None:
+@@ -885,6 +886,23 @@ def _update_receipt_index(
+         ):
+             return
+         if _cl._read_head(root) is not None:
++            # T-1898: the bounded fold refused because the head no longer
++            # describes the namespace -- a crash between the receipt write and
++            # the head publish, or an out-of-band sibling. Returning here left
++            # that head stale FOREVER: every later bounded lookup discarded
++            # itself, so `conformance.latest_receipt` fell back to
++            # `_receipt_content_inventory` and hashed the whole receipt
++            # namespace (measured on this repository: 3937 files / 8.6 MB /
++            # 1.49 s) on every `saipen status`, and no field reported it.
++            #
++            # This IS a write path (it is about to publish projection
++            # documents), and the canonical deep rebuild is exactly the
++            # "honest recovery" the docstring above names. Run it so the NEXT
++            # reader gets the bounded path back. It folds actual bytes; a
++            # corrupt sibling makes it refuse and publish nothing, and a head
++            # that is already current costs one stat.
++            if _cl.repair_stale_head(root):
++                return
+             return
+     appended = _receipt_matches_append(root, gate, receipt_id, timestamp, receipt_path)
+     proof = _load_lineage_index(root)
+diff --git a/tools/saipen_engine/conformance_lineage.py b/tools/saipen_engine/conformance_lineage.py
+index 8ecad6ec..5e34897d 100644
+--- a/tools/saipen_engine/conformance_lineage.py
++++ b/tools/saipen_engine/conformance_lineage.py
+@@ -705,6 +705,64 @@ def _verify_receipt_bytes(root: Path, receipt_path: str, expected_sha256: str):
+     return record
+ 
+ 
++def repair_stale_head(root: Path) -> bool:
++    """Give a writer the ONE honest recovery for a stale lineage head (T-1898).
++
++    `advance_append`'s refusal is deliberate and stays: a receipt the lineage
++    was never told about must never ride in on a bounded guess. What was
++    missing is that the refusal had no recovery, so the fast path stayed dead
++    for the remaining life of the project.
++
++    This runs the canonical deep rebuild, which re-establishes the chain from
++    ACTUAL receipt bytes. It never invents a verdict, and malformed evidence
++    makes it refuse rather than publish.
++
++    CALLER CONTRACT -- this mutates, so only a WRITER may call it. `status` is
++    documented read-only, and `latest_receipt_bounded` stays read-only: it
++    refuses and the caller degrades to the strict scan, exactly as before. The
++    canonical receipt append (`conformance._update_receipt_index`) is the
++    writer that repairs, so the NEXT reader gets the bounded path back.
++
++    `rebuild_lineage` requires the project writer lock, so it is taken here.
++    The lock is NOT reentrant, but a same-process second acquisition refuses
++    at once instead of blocking, so a caller that already holds it gets
++    `WriterBusy` -- treated as "cannot repair now" (False), never as a
++    deadlock. The receipt is already durable by then; the next append repairs.
++
++    Returns True when a live v2 head exists after the call -- either it already
++    described the namespace (nothing to do), or the rebuild republished it for
++    the CURRENT one. False means no v2 authority can be established, and the
++    caller must leave the v1 bootstrap documents untouched.
++    """
++    from .lock import WriterBusy, project_writer_lock
++
++    head = _read_head(root)
++    if head is None:
++        return False
++    current = _receipt_dir_mtime_ns(root)
++    if current is not None and head[0].get("receipt_dir_mtime_ns") == current:
++        # The head already represents the namespace, so the refusal came from
++        # something else (an unreadable receipt, a corrupt generation). The
++        # authority is live; a rebuild would only cost a deep scan.
++        return True
++    try:
++        with project_writer_lock(root):
++            result = rebuild_lineage(root)
++    except WriterBusy:
++        return False
++    except (OSError, ValueError):
++        return False
++    if not result.get("ok"):
++        return False
++    head = _read_head(root)
++    current = _receipt_dir_mtime_ns(root)
++    return (
++        head is not None
++        and current is not None
++        and head[0].get("receipt_dir_mtime_ns") == current
++    )
++
++
+ def latest_receipt_bounded(root: Path, gate: str):
+     """The bounded authenticated latest lookup.
+ 
+@@ -736,6 +794,14 @@ def latest_receipt_bounded(root: Path, gate: str):
+     if mtime is None or mtime != payload.get("receipt_dir_mtime_ns"):
+         # Directory changed after the head was published: the locator may
+         # lag a newer receipt. Degrade to the strict scan.
++        #
++        # T-1898: this refusal is right and stays -- a bounded fold must never
++        # adopt a receipt the lineage was not told about -- but it must not be
++        # the END of the story. What was missing is the recovery, and it belongs
++        # to a WRITER: `status` is documented read-only and must not republish
++        # projection state. `conformance._update_receipt_index` is that writer;
++        # it calls `repair_stale_head`, which takes the project writer lock and
++        # rebuilds from actual bytes.
+         return True, None
+     locator = _read_locator(root, gate)
+     if locator is None:
+diff --git a/tools/test_conformance_lineage.py b/tools/test_conformance_lineage.py
+index 14a3a2ff..afdc047a 100644
+--- a/tools/test_conformance_lineage.py
++++ b/tools/test_conformance_lineage.py
+@@ -8,6 +8,7 @@ validation still walks everything and exact receipt bytes stay the authority.
+ 
+ from __future__ import annotations
+ 
++import contextlib
+ import hashlib
+ import json
+ import shutil
+@@ -420,6 +421,35 @@ class ConformanceLineageTests(unittest.TestCase):
+         self.assertLess(receipt_hashes["n"], CL.GEN_BOUND)
+         self.assertGreater(receipt_hashes["n"], 0)
+ 
++    def test_production_consumer_reads_the_bounded_lineage_not_the_legacy_scan(self) -> None:
++        """R010/PERF-002: the PRODUCTION consumer must obtain the answer through
++        the authenticated bounded lineage. Proving `latest_receipt_bounded` in
++        isolation never proves `conformance.latest_receipt` is still wired to
++        it, so every legacy fallback below is armed to explode: a healthy
++        current lineage that reaches one is the failure."""
++        for index in range(5):
++            gate = "core" if index % 2 else "crew"
++            _write_and_append(self.root, f"r{index}", gate, f"2026-01-01T00:00:0{index}Z")
++
++        def _legacy_scan_reached(*_args, **_kwargs):
++            raise AssertionError(
++                "conformance.latest_receipt left the bounded lineage for the legacy path"
++            )
++
++        legacy_paths = (
++            "_lookup_receipt_index",
++            "_read_indexed_receipt",
++            "_iter_receipts",
++            "_receipt_inventory",
++            "_receipt_content_inventory",
++        )
++        with contextlib.ExitStack() as armed:
++            for name in legacy_paths:
++                armed.enter_context(mock.patch.object(conformance, name, _legacy_scan_reached))
++            latest = conformance.latest_receipt(self.root, "core")
++        self.assertIsNotNone(latest)
++        self.assertEqual(latest["receipt_id"], "r3")
++
+     def test_rebuild_then_bounded_latest_per_gate(self) -> None:
+         for index in range(5):
+             gate = "core" if index % 2 else "crew"
+@@ -515,19 +545,35 @@ class ConformanceLineageTests(unittest.TestCase):
+         head = CL._read_head(self.root)
+         self.assertEqual(head[0]["sealed_count"], 1)
+ 
+-    def test_out_of_band_sibling_refuses_advance_and_never_becomes_indexed(self) -> None:
++    def test_out_of_band_sibling_is_folded_truthfully_by_the_writer_rebuild(self) -> None:
++        """T-1898: the refusal still never ADVANCES the writer's own receipt to
++        latest, and the authority now recovers instead of freezing forever.
++
++        Before T-1898 this asserted zero mutation, which is what left the head
++        permanently stale: every later lookup degraded to the full-namespace
++        scan. The safety property was never "nothing is written" -- it is "the
++        out-of-band receipt is answered truthfully and the writer's own receipt
++        is never laundered into `latest`". A writer-side deep rebuild folds the
++        ACTUAL bytes of both, so the locator names the true latest
++        (`out-of-band`) and `r3` stays an ordinary member.
++        """
+         for index in range(3):
+             _write_and_append(self.root, f"r{index}", "core", f"2026-01-01T00:00:0{index}Z")
+-        locator_before = CL._read_locator(self.root, "core")
+-        head_before = CL._read_head(self.root)
+         # A foreign writer lands a newer receipt WITHOUT telling the lineage.
+         _write_receipt(self.root, "out-of-band", "core", "2026-01-01T00:00:59Z")
+         _write_and_append(self.root, "r3", "core", "2026-01-01T00:00:04Z")
+         locator_after = CL._read_locator(self.root, "core")
+-        self.assertEqual(locator_after, locator_before)
+-        self.assertEqual(CL._read_head(self.root), head_before)
++        self.assertEqual(
++            locator_after["receipt_id"],
++            "out-of-band",
++            "the writer advertised its OWN receipt as latest across a foreign sibling",
++        )
++        self.assertEqual(CL._read_head(self.root)[0]["receipt_count"], 5)
+         latest = conformance.latest_receipt(self.root, "core")
+         self.assertEqual(latest["receipt_id"], "out-of-band")
++        handled, record = CL.latest_receipt_bounded(self.root, "core")
++        self.assertTrue(handled)
++        self.assertEqual(record["receipt_id"], "out-of-band")
+ 
+     def test_tampered_referenced_receipt_refuses_bounded_trust(self) -> None:
+         path = _write_and_append(self.root, "r1", "core", "2026-01-01T00:00:00Z")

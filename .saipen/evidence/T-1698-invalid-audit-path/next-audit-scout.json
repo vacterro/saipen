@@ -1,0 +1,42 @@
+{
+  "observed_at": "2026-10-10T02:50:27.159028+00:00",
+  "target": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "changed_originals": {},
+  "git": [
+    {
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "sha256": "c56b4cfa1368c502bda88f185d5c5e482123e64b61a71a8245c1143bb602c994",
+      "head": "6c6d841df24e5c5d91870def931af99f0af4c81f"
+    },
+    {
+      "args": [
+        "status",
+        "--porcelain=v1",
+        "-uall"
+      ],
+      "sha256": "f1582a451085690e24a8f895658d3ce8f2bf0882da61940df32835c44f45e279",
+      "head": null
+    },
+    {
+      "args": [
+        "diff",
+        "--binary"
+      ],
+      "sha256": "8e6dac0e903b347eb7c41fec8de918b4222340101e60d07197e2b623b6634aaa",
+      "head": null
+    },
+    {
+      "args": [
+        "diff",
+        "--cached",
+        "--binary"
+      ],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "head": null
+    }
+  ],
+  "scope": "read-only scout, no canonical target commands, no target writes, no new lifecycle verdict"
+}

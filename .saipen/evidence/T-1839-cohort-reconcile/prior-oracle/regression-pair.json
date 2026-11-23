@@ -1,0 +1,32 @@
+[
+  {
+    "subject": "prefix",
+    "exit_code": 1,
+    "oracle_sha256": "bdd21b0a92a3dbbc475a9bb885c278136fcb3d33550ac4387d0152d08b5f09e3",
+    "context_sha256": "ff339b976b34215c0a53291906a953b2f4f23020c3cd36ea5be141bb40f2ccbd",
+    "subject_sha256": "e74b7c5874c6e6afc91487d915d5cf9e0c88b5f25a4ec7ec73e3857fcc34e517",
+    "command": [
+      "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+      "-B",
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1839-cohort-reconcile\\check_pair.py",
+      "prefix"
+    ],
+    "runtime": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "scope": "controlled operations module; adjacent current infrastructure identical"
+  },
+  {
+    "subject": "current",
+    "exit_code": 0,
+    "oracle_sha256": "bdd21b0a92a3dbbc475a9bb885c278136fcb3d33550ac4387d0152d08b5f09e3",
+    "context_sha256": "ff339b976b34215c0a53291906a953b2f4f23020c3cd36ea5be141bb40f2ccbd",
+    "subject_sha256": "e0f1e0bcff5ec6a1b2f522dbe2778e0e4fd802c73ee6e4463b564a128edc9114",
+    "command": [
+      "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+      "-B",
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1839-cohort-reconcile\\check_pair.py",
+      "current"
+    ],
+    "runtime": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "scope": "controlled operations module; adjacent current infrastructure identical"
+  }
+]

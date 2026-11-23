@@ -1,0 +1,9 @@
+control: ran 10, red 0 -- as expected
+the engine before this Work: ran 10, red 8 -- as expected
+reads past the head and carries nothing: ran 10, red 4 -- as expected
+the carry is written and never read back: ran 10, red 4 -- as expected
+a record renamed under DONE is not carried: ran 10, red 2 -- as expected
+a record behind a live id is not a row: ran 10, red 2 -- as expected
+any verdict has rows to carry: ran 10, red 1 -- as expected
+mutations: 6, repetitions each: 3, problems: 0
+exit=0

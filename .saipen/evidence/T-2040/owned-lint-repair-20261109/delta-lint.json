@@ -1,0 +1,21 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "ruff",
+    "check",
+    "tools/saipen_engine/continue_fallback.py",
+    "tools/saipen_engine/iteration_verdict.py",
+    "tools/improve.py",
+    "tools/campaign_test_support.py",
+    "tools/saipen_engine/discovery_providers.py",
+    "tools/saipen_engine/outcome_truth.py",
+    "--output-format",
+    "json"
+  ],
+  "exit_code": 1,
+  "owned_changed_line_findings": [],
+  "total_scope_findings": 81,
+  "scope_ceiling": "pre-existing findings retained; changed-line attribution is not global PASS"
+}

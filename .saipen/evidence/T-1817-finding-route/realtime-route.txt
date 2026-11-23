@@ -1,0 +1,52 @@
+== target SMART_VAC_MEDIA_COMPRESSOR: SRC-003 closed archive invalid
+{
+ "ok": true,
+ "code": "DONE_ONLY",
+ "owner": null,
+ "linkage": null,
+ "done": [
+  "T-47",
+  "T-48",
+  "T-49",
+  "T-50"
+ ],
+ "subject": "SRC-003",
+ "rule_id": "source_receipt_closed_archive_invalid",
+ "candidates": [
+  {
+   "work": "T-47",
+   "linkage": "linked-source-work"
+  },
+  {
+   "work": "T-48",
+   "linkage": "declared-receipt-work"
+  },
+  {
+   "work": "T-49",
+   "linkage": "declared-receipt-work"
+  },
+  {
+   "work": "T-50",
+   "linkage": "declared-receipt-work"
+  }
+ ],
+ "route": null
+}
+
+== this project: SRC-276 closed archive invalid
+{
+ "ok": true,
+ "code": "ROUTED_TO_OWNER",
+ "owner": "T-1817",
+ "linkage": "linked-source-work",
+ "subject": "SRC-276",
+ "rule_id": "source_receipt_closed_archive_invalid",
+ "candidates": [
+  {
+   "work": "T-1817",
+   "linkage": "linked-source-work"
+  }
+ ],
+ "route": "saipen ticket claim T-1817"
+}
+

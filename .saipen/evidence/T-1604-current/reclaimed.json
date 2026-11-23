@@ -1,0 +1,31 @@
+{
+  "records": [
+    {
+      "original_allocation": "V:\\_TEMP_\\saipen-evidence-t1603-full-scenarios-jo3mhdg_",
+      "removed": true,
+      "durable_proof_unchanged": true,
+      "proof_sha256": {
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\scenario-oracles\\full-current\\binding.json": "e072a8fc29b4a5a3416c16774e01c780a7fc5f7a13efb6b8556da6c1da9ea669",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\scenario-oracles\\full-current\\result.json": "523e404985fb05ea2396148b9a99175c5d5163e094ea003cd33216773537e96c",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\scenario-oracles\\full-current\\verify-scenarios.txt": "85b695fddcdf9b87ceef4ed3d5453b8793ef853f09f08e229c8e9fa954fb3a31"
+      },
+      "mechanism": "existing core_unit.reclaim after exact ownership/link preflight",
+      "native_gate_rerun": false
+    },
+    {
+      "original_allocation": "V:\\_TEMP_\\saipen-evidence-t1603-full-scenarios-xa77qg2_",
+      "removed": true,
+      "durable_proof_unchanged": true,
+      "proof_sha256": {
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\scenario-review\\full-current\\binding.json": "140d531d9bd2cd1f4d1597a20f78eb559dc2bde4d51eae6343ba00e8e57a41f7",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\scenario-review\\full-current\\result.json": "0789682eb71854b1fa330d06937455ec98f0f9e27a76a59fbebf5b13667993d0",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\scenario-review\\full-current\\verify-scenarios.txt": "f62b185252a5864e2d43654f53032325c0d3051fb8d1e9156ee67483886d025d"
+      },
+      "mechanism": "existing core_unit.reclaim after exact ownership/link preflight",
+      "native_gate_rerun": false
+    }
+  ],
+  "failed_empty_allocation_removed": true,
+  "failed_move_owner_proof": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1604-current\\cleanup-saipen-evidence-t1603-full-scenarios-jo3mhdg_\\ownership.json",
+  "failed_move_owner_proof_sha256": "42ef119fb1b58556622bc3805779e8ce434d1a744c3fb7f6999bc0f5bbf38d0a"
+}

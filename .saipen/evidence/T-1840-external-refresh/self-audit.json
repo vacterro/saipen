@@ -1,0 +1,38 @@
+{
+  "kind": "executing-agent source self-audit",
+  "revision": {
+    "tools/saipen.py": "3c1c4b8863b897b36e410cef7761666a4c43f2ae531bf71372d594816d2c06e0",
+    "tools/saipen_engine/operations.py": "bda0ea40e51a469f41f94e0a83e07ff19f9ceef67e8ab72ed21a84877ec85c97",
+    "tools/saipen_engine/external.py": "e57ad57d4dcbb596e099b976baad4e9936fcf8fbad620c336071d1984383653e",
+    "tools/saipen_engine/external_renewal.py": "82da1d331575d2650d8e92487641ecf81484339060967beb08eef808aa89d563",
+    "tools/saipen_engine/regression_execution.py": "659719ad5f971a64815a5f115b034b69f6a553eeb7bf1843768998c9d13e3d75",
+    "tools/test_t1840_external_renewal.py": "e9e793f311abba6f8088ba7ebb332f68f490808686b2e6b36117856a409681a8",
+    "tools/test_external_revalidation.py": "1092d9a00fcf5a8e9ea27dc9c79aa85fc87c4eea50b91b86d69cecbda6158254",
+    "tools/verify_accounts_readiness.py": "2c71057a1530dd8f2daf8e1f74291710c87264ec41174884d87d4d383f24b19f",
+    "saipen/COMMANDS.md": "29631c5042a290c025c7958605851ffe1cfae3f612e3aeef14704eba26788622",
+    "saipen/COMMAND_EFFECTS.json": "0f63f7460519d20f2cbb0571bbb9a5229dfe32337cd81cacf9eced06da0027a2",
+    "saipen/OPS.md": "cf65745da9135e21b0be3ad75a6f808fa39c7d42f1962ac32396a32b39092f6e",
+    "tools/saipen_engine/test_runner.py": "4fbf4ea850cf5db3706dfc12c7ee88afbebf72f9df94cc4af252bd3c90ec3ecb"
+  },
+  "scope": [
+    "CLI value parsing and read-only admission",
+    "renewal.plan owner/contract/lineage/ancestry/journal/source/operator gates and preconditions",
+    "receipt integrity, immediate predecessor and external/native snapshots",
+    "receipt_plan owned context/runtime and exact argv checks, Windows samefile aliases",
+    "execution_entry unskipped summary and process cleanup",
+    "verifier digest retains environment binding",
+    "truthful failed apply refusal propagation",
+    "actual readiness oracle and temporary grant revoke/cleanup",
+    "shared fixture STATE counter equals actual E-001 LOG",
+    "command/effect/OPS consistency",
+    "shared established diagnostic key set used in actual regression/external child environment",
+    "real separate host calls preserve executed regression gate and external renewal idempotence"
+  ],
+  "source_fallback": "MCP graph and coverage tools unavailable; exact paths and source/diffs inspected",
+  "reviewer": "same executing agent; no independent agent or human review claimed",
+  "findings": [],
+  "validation_limit": "Final expanded 132-test focused record PASS, independently reused in REVIEW (7.89 s). Whole publication acceptance and inherited full Ruff debt T-1841 remain due.",
+  "focused_record": ".saipen/evidence/focused-unit/460a240d98bb8ea8-20261020T221149838659Z.json",
+  "focused_ran": 132,
+  "result": "PASS for exact inspected local delta; no unresolved findings"
+}

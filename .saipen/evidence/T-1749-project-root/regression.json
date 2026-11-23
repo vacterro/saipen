@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1749_project_root_subject.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap",
+    "bin",
+    "assets",
+    "docs",
+    "guides",
+    "KNOWLEDGE",
+    "src",
+    ".github",
+    ".gitignore",
+    ".gitattributes",
+    "ruff.toml",
+    "README.md",
+    "README.ded.md",
+    "README.ee.md",
+    "README.ja.md",
+    "SPEC.md",
+    "LICENSE",
+    "GUIDE.md",
+    "CHANGELOG.md",
+    "CHANGELOG_ARCHIVE.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
+    "SECURITY.md",
+    "THIRD_PARTY_NOTICES.md",
+    "BROCHURE_DED.md",
+    "BROCHURE_EN.md",
+    "BROCHURE_ET.md",
+    "BROCHURE_JA.md",
+    "BROCHURE_RU.md"
+  ],
+  "oracle_files": [
+    "tools/test_t1749_project_root_subject.py",
+    "tools/test_validator_layout_parity.py",
+    "tools/test_hermetic_env.py",
+    "tools/test_fixture_support.py"
+  ],
+  "subject_files": [
+    "tools/validate.py"
+  ],
+  "before": {
+    "tools/validate.py": ".saipen/evidence/T-1749-project-root/pre/validate.py"
+  },
+  "timeout": 900
+}

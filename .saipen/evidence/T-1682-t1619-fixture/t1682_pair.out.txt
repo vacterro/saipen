@@ -1,0 +1,18 @@
+command: python -B -m unittest test_t1619_iteration_boundary (per seat)
+verifier:1c1f235913910786  (this driver)
+FAIL subject:78a316cc5bf10411
+  SCOUT from DONE    exit 1  red 5: test_auto_kick_and_no_completion_ui, test_binding_brake_stops, test_cli_decision_matches_library, test_pause_preserves_work, test_valve_tripped_is_operator_wait
+  BUILD from SCOUT   exit 0  red 0: 
+  VERIFY from BUILD  exit 0  red 0: 
+  REVIEW from VERIFY exit 0  red 0: 
+  SHIP from REVIEW   exit 0  red 0: 
+  DONE from SHIP     exit 0  red 0: 
+PASS subject:fece8d4ddb8ca0d7
+  SCOUT from DONE    exit 0  red 0: 
+  BUILD from SCOUT   exit 0  red 0: 
+  VERIFY from BUILD  exit 0  red 0: 
+  REVIEW from VERIFY exit 0  red 0: 
+  SHIP from REVIEW   exit 0  red 0: 
+  DONE from SHIP     exit 0  red 0: 
+held: True
+rc=0

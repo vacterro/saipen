@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-2086",
+    "operation_id": "ticket-reasoning-017868cc1b534b0db786cf183ed1334c",
+    "reason": "existing/proposed oversized BOARD record requires canonical reasoning update"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-219/T-219-a7d8dcf060329d257e4a7fb2.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 1304,
+  "original_record_path": ".saipen/recovery/board-compaction/T-219/T-219-a7d8dcf060329d257e4a7fb2.BOARD.md",
+  "original_record_sha256": "a7d8dcf060329d257e4a7fb2d2bf7b098828c4858951808ceb9ac7851843d65f",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": ".saipen/recovery/board-compaction/T-219/T-219-b59ede0e0446358260d41d2d.json",
+  "ticket_id": "T-219"
+}

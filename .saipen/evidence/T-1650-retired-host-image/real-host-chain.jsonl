@@ -1,0 +1,5 @@
+# a real authority service (authority_service.py serve, detached, throwaway profile) asked by a process whose ancestor is this session real host: pid 21156, image claude.exe.old.1791313812470.21156 (the host updated itself at 2026-10-06 19:10:12Z).
+{"tree": "pre-fix (measured at T-1649, e2e-service.jsonl)", "step": "NOT_HOST_DESCENDANT"}
+{"tree": "this tree after T-1650", "step": "HOOK_NOT_FOUND", "identify_self": {"ok": true, "host_image": "claude.exe.old.1791313812470.21156", "host_pid": 21156}}
+254858400 Oct 6 22:10 claude.exe
+253042848 Oct 6 07:22 claude.exe.old.1791313812470.21156

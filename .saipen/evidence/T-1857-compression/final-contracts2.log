@@ -1,0 +1,164 @@
+test_inventory_location_is_registry_owned (test_protocol_registry.CommandReferenceTests.test_inventory_location_is_registry_owned) ... ok
+test_legacy_registry_keeps_original_inventory (test_protocol_registry.CommandReferenceTests.test_legacy_registry_keeps_original_inventory) ... ok
+test_missing_declared_inventory_never_uses_legacy_prose (test_protocol_registry.CommandReferenceTests.test_missing_declared_inventory_never_uses_legacy_prose) ... ok
+test_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) ... ok
+test_all_16_phase_documents_exist (test_protocol_registry.ProtocolRegistryTests.test_all_16_phase_documents_exist) ... ok
+test_every_declared_load_budget_is_measured_from_registry (test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry) ... ok
+test_golden_command_and_chain_snapshots (test_protocol_registry.ProtocolRegistryTests.test_golden_command_and_chain_snapshots) ... ok
+test_missing_registry_phase_fails_instead_of_disappearing (test_protocol_registry.ProtocolRegistryTests.test_missing_registry_phase_fails_instead_of_disappearing) ... ok
+test_one_rule_one_owner (test_protocol_registry.ProtocolRegistryTests.test_one_rule_one_owner) ... ok
+test_phase_max_median_and_tie_break_are_deterministic (test_protocol_registry.ProtocolRegistryTests.test_phase_max_median_and_tie_break_are_deterministic) ... ok
+test_phase_metrics_do_not_change_load_profile_measurement (test_protocol_registry.ProtocolRegistryTests.test_phase_metrics_do_not_change_load_profile_measurement) ... ok
+test_phase_metrics_measure_all_registry_phases_and_actual_bytes (test_protocol_registry.ProtocolRegistryTests.test_phase_metrics_measure_all_registry_phases_and_actual_bytes) ... ok
+test_phase_preferences_are_registry_owned_and_not_hard_failures (test_protocol_registry.ProtocolRegistryTests.test_phase_preferences_are_registry_owned_and_not_hard_failures) ... ok
+test_prose_rewrite_cannot_change_shortcut_behavior (test_protocol_registry.ProtocolRegistryTests.test_prose_rewrite_cannot_change_shortcut_behavior) ... ok
+test_registry_absent_fails_closed (test_protocol_registry.ProtocolRegistryTests.test_registry_absent_fails_closed) ... ok
+test_registry_confusable_fixture_drives_normalizer (test_protocol_registry.ProtocolRegistryTests.test_registry_confusable_fixture_drives_normalizer) ... ok
+test_registry_fixture_drives_resolver (test_protocol_registry.ProtocolRegistryTests.test_registry_fixture_drives_resolver) ... ok
+test_registry_malformed_fails_closed (test_protocol_registry.ProtocolRegistryTests.test_registry_malformed_fails_closed) ... ok
+test_runtime_closed_sets_derive_from_registry (test_protocol_registry.ProtocolRegistryTests.test_runtime_closed_sets_derive_from_registry) ... ok
+test_semantic_facts_name_owner_and_test (test_protocol_registry.ProtocolRegistryTests.test_semantic_facts_name_owner_and_test) ... ok
+test_102_blocked_and_three_todo_never_mean_all_complete (test_t1857_shared_blockers.SharedBlockerTests.test_102_blocked_and_three_todo_never_mean_all_complete) ... ok
+test_audit_uses_project_wide_shared_blocker_owner (test_t1857_shared_blockers.SharedBlockerTests.test_audit_uses_project_wide_shared_blocker_owner) ... ok
+test_dependency_cycle_is_not_recoverable_or_complete (test_t1857_shared_blockers.SharedBlockerTests.test_dependency_cycle_is_not_recoverable_or_complete) ... ok
+test_done_phase_alone_cannot_claim_campaign_completion (test_t1857_shared_blockers.SharedBlockerTests.test_done_phase_alone_cannot_claim_campaign_completion) ... ok
+test_each_blocked_item_has_one_complete_diagnostic (test_t1857_shared_blockers.SharedBlockerTests.test_each_blocked_item_has_one_complete_diagnostic) ... ok
+test_human_status_cannot_look_complete_while_automation_is_blocked (test_t1857_shared_blockers.SharedBlockerTests.test_human_status_cannot_look_complete_while_automation_is_blocked) ... ok
+test_idle_projection_cannot_waive_an_active_phase_or_claim_done (test_t1857_shared_blockers.SharedBlockerTests.test_idle_projection_cannot_waive_an_active_phase_or_claim_done) ... ok
+test_idle_verdict_round_trips_through_the_authoritative_checker (test_t1857_shared_blockers.SharedBlockerTests.test_idle_verdict_round_trips_through_the_authoritative_checker) ... ok
+test_incidental_words_do_not_grant_staging_recovery_authority (test_t1857_shared_blockers.SharedBlockerTests.test_incidental_words_do_not_grant_staging_recovery_authority) ... ok
+test_independent_work_still_runs_before_blocker_diagnostics (test_t1857_shared_blockers.SharedBlockerTests.test_independent_work_still_runs_before_blocker_diagnostics) ... ok
+test_multiple_dependency_roots_are_retained (test_t1857_shared_blockers.SharedBlockerTests.test_multiple_dependency_roots_are_retained) ... ok
+test_projection_groups_roots_and_transitive_todo_without_mutation (test_t1857_shared_blockers.SharedBlockerTests.test_projection_groups_roots_and_transitive_todo_without_mutation) ... ok
+test_publication_aliases_use_existing_operator_class (test_t1857_shared_blockers.SharedBlockerTests.test_publication_aliases_use_existing_operator_class) ... ok
+test_router_carries_the_actionable_blocker_with_no_synthetic_progress (test_t1857_shared_blockers.SharedBlockerTests.test_router_carries_the_actionable_blocker_with_no_synthetic_progress) ... ok
+test_shared_release_obstruction_is_prioritized_over_older_external_work (test_t1857_shared_blockers.SharedBlockerTests.test_shared_release_obstruction_is_prioritized_over_older_external_work) ... ok
+test_all_modifier_cannot_supply_operator_authority (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_cannot_supply_operator_authority) ... ok
+test_all_modifier_resumes_the_existing_goal_with_real_origin (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_resumes_the_existing_goal_with_real_origin) ... ok
+test_automation_keeps_hard_wait_and_exposes_the_missing_input (test_t1858_valve_guidance.ValveGuidanceTests.test_automation_keeps_hard_wait_and_exposes_the_missing_input) ... ok
+test_bounded_reset_refusal_names_missing_native_ingress (test_t1858_valve_guidance.ValveGuidanceTests.test_bounded_reset_refusal_names_missing_native_ingress) ... ok
+test_declared_resume_twins_do_not_invent_other_shortcuts (test_t1858_valve_guidance.ValveGuidanceTests.test_declared_resume_twins_do_not_invent_other_shortcuts) ... ok
+test_native_resume_spellings_are_equivalent_without_weakening_hard_wait (test_t1858_valve_guidance.ValveGuidanceTests.test_native_resume_spellings_are_equivalent_without_weakening_hard_wait) ... ok
+test_overshot_28_ticket_budget_still_requires_native_authority (test_t1858_valve_guidance.ValveGuidanceTests.test_overshot_28_ticket_budget_still_requires_native_authority) ... ok
+test_queue_length_does_not_consume_the_completed_ticket_budget (test_t1858_valve_guidance.ValveGuidanceTests.test_queue_length_does_not_consume_the_completed_ticket_budget) ... ok
+test_resume_policy_rejects_malformed_argument_shapes (test_t1858_valve_guidance.ValveGuidanceTests.test_resume_policy_rejects_malformed_argument_shapes) ... ok
+test_both_failure_classes_have_a_case (test_check_inventory.CasePresenceTests.test_both_failure_classes_have_a_case) ... ok
+test_the_card_target_selects_exactly_these_controls (test_check_inventory.CasePresenceTests.test_the_card_target_selects_exactly_these_controls) ... ok
+test_the_mutated_card_is_a_real_tracked_file (test_check_inventory.CasePresenceTests.test_the_mutated_card_is_a_real_tracked_file) ... ok
+test_the_sweep_total_counts_them (test_check_inventory.CasePresenceTests.test_the_sweep_total_counts_them) ... ok
+test_the_two_cases_are_not_one_condition_twice (test_check_inventory.CasePresenceTests.test_the_two_cases_are_not_one_condition_twice) ... ok
+test_a_removed_site_drops_exactly_one_identity (test_check_inventory.FailSiteIdentityTests.test_a_removed_site_drops_exactly_one_identity) ... ok
+test_a_same_count_swap_moves_the_identity_set (test_check_inventory.FailSiteIdentityTests.test_a_same_count_swap_moves_the_identity_set) ... ok
+test_an_added_site_adds_exactly_one_identity (test_check_inventory.FailSiteIdentityTests.test_an_added_site_adds_exactly_one_identity) ... ok
+test_an_unparsable_validator_raises_rather_than_counting_zero (test_check_inventory.FailSiteIdentityTests.test_an_unparsable_validator_raises_rather_than_counting_zero) ... ok
+test_identical_calls_in_one_function_stay_distinct (test_check_inventory.FailSiteIdentityTests.test_identical_calls_in_one_function_stay_distinct) ... ok
+test_moving_a_check_between_functions_renames_it (test_check_inventory.FailSiteIdentityTests.test_moving_a_check_between_functions_renames_it) ... ok
+test_one_check_spelled_two_ways_is_one_site (test_check_inventory.FailSiteIdentityTests.test_one_check_spelled_two_ways_is_one_site)
+An f-string and a concatenation declare the same check. ... ok
+test_the_identity_is_deterministic (test_check_inventory.FailSiteIdentityTests.test_the_identity_is_deterministic) ... ok
+test_the_identity_is_not_the_interpreter_pretty_printer (test_check_inventory.FailSiteIdentityTests.test_the_identity_is_not_the_interpreter_pretty_printer)
+The control that was missing, and the whole reason CI was red. ... ok
+test_the_line_number_is_report_metadata_only (test_check_inventory.FailSiteIdentityTests.test_the_line_number_is_report_metadata_only) ... ok
+test_unrelated_line_insertion_renames_nothing (test_check_inventory.FailSiteIdentityTests.test_unrelated_line_insertion_renames_nothing) ... ok
+test_every_python_child_is_launched_with_that_env (test_check_inventory.HermeticProbeChildrenTests.test_every_python_child_is_launched_with_that_env) ... ok
+test_the_child_env_strips_every_host_session_carrier (test_check_inventory.HermeticProbeChildrenTests.test_the_child_env_strips_every_host_session_carrier) ... ok
+test_a_covered_record_must_name_a_live_case (test_check_inventory.InventoryGateTests.test_a_covered_record_must_name_a_live_case) ... ok
+test_a_missing_ledger_is_reported (test_check_inventory.InventoryGateTests.test_a_missing_ledger_is_reported) ... ok
+test_a_removed_fail_site_is_named_too (test_check_inventory.InventoryGateTests.test_a_removed_fail_site_is_named_too) ... ok
+test_an_added_fail_site_is_named (test_check_inventory.InventoryGateTests.test_an_added_fail_site_is_named) ... ok
+test_an_unadjudicated_record_keeps_the_gate_red (test_check_inventory.InventoryGateTests.test_an_unadjudicated_record_keeps_the_gate_red) ... ok
+test_an_unparsable_validator_is_reported_not_counted (test_check_inventory.InventoryGateTests.test_an_unparsable_validator_is_reported_not_counted) ... ok
+test_every_covered_record_names_a_case_that_exists (test_check_inventory.InventoryGateTests.test_every_covered_record_names_a_case_that_exists) ... ok
+test_every_disposition_is_in_the_closed_set (test_check_inventory.InventoryGateTests.test_every_disposition_is_in_the_closed_set) ... ok
+test_regeneration_keeps_an_adjudicated_verdict (test_check_inventory.InventoryGateTests.test_regeneration_keeps_an_adjudicated_verdict) ... FAIL
+test_regeneration_never_mints_a_baseline (test_check_inventory.InventoryGateTests.test_regeneration_never_mints_a_baseline) ... FAIL
+test_the_bound_is_stated_rather_than_trusted (test_check_inventory.InventoryGateTests.test_the_bound_is_stated_rather_than_trusted) ... ok
+test_the_e6743_delta_is_adjudicated (test_check_inventory.InventoryGateTests.test_the_e6743_delta_is_adjudicated) ... ok
+test_the_live_repository_agrees_with_its_ledger (test_check_inventory.InventoryGateTests.test_the_live_repository_agrees_with_its_ledger) ... FAIL
+test_the_probe_passes_on_the_real_repository (test_check_inventory.InventoryGateTests.test_the_probe_passes_on_the_real_repository) ... FAIL
+test_the_same_count_swap_names_BOTH_halves (test_check_inventory.InventoryGateTests.test_the_same_count_swap_names_BOTH_halves) ... ok
+test_unrelated_line_insertion_is_accepted (test_check_inventory.InventoryGateTests.test_unrelated_line_insertion_is_accepted) ... FAIL
+test_each_mutation_goes_red_then_green_again (test_check_inventory.MutationEfficacyTests.test_each_mutation_goes_red_then_green_again) ... ok
+test_neither_expected_string_is_printed_by_the_clean_fixture (test_check_inventory.MutationEfficacyTests.test_neither_expected_string_is_printed_by_the_clean_fixture) ... ok
+test_the_fixture_starts_green (test_check_inventory.MutationEfficacyTests.test_the_fixture_starts_green) ... ok
+test_the_stale_mutation_does_not_rely_on_prose_wording (test_check_inventory.MutationEfficacyTests.test_the_stale_mutation_does_not_rely_on_prose_wording) ... ok
+test_a_dependent_probe_skips_out_loud_naming_its_prerequisite (test_check_inventory.ProbeIsolationTests.test_a_dependent_probe_skips_out_loud_naming_its_prerequisite) ... ok
+test_a_probe_that_raises_is_a_failed_probe_not_a_dead_run (test_check_inventory.ProbeIsolationTests.test_a_probe_that_raises_is_a_failed_probe_not_a_dead_run) ... ok
+test_each_probe_owns_its_sandbox_even_when_it_fails (test_check_inventory.ProbeIsolationTests.test_each_probe_owns_its_sandbox_even_when_it_fails) ... ok
+test_every_probe_is_judged_in_one_invocation (test_check_inventory.ProbeIsolationTests.test_every_probe_is_judged_in_one_invocation) ... ok
+test_main_carries_no_early_return (test_check_inventory.ProbeIsolationTests.test_main_carries_no_early_return) ... ok
+test_restoring_both_returns_the_same_runner_to_green (test_check_inventory.ProbeIsolationTests.test_restoring_both_returns_the_same_runner_to_green) ... ok
+test_the_independent_probes_declare_no_prerequisite (test_check_inventory.ProbeIsolationTests.test_the_independent_probes_declare_no_prerequisite) ... ok
+test_two_independent_failures_are_BOTH_reported (test_check_inventory.ProbeIsolationTests.test_two_independent_failures_are_BOTH_reported) ... ok
+
+======================================================================
+FAIL: test_regeneration_keeps_an_adjudicated_verdict (test_check_inventory.InventoryGateTests.test_regeneration_keeps_an_adjudicated_verdict)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_check_inventory.py", line 331, in test_regeneration_keeps_an_adjudicated_verdict
+    self.assertEqual(I.inventory_errors(root), [])
+AssertionError: Lists differ: ["fail site aa503466c2a036e3 in <module> ([520 chars]ead"] != []
+
+First list contains 2 additional elements.
+First extra element 0:
+"fail site aa503466c2a036e3 in <module> ('FUTURE-OWNER: `saipen future ` is implemented and declared but never p') is still UNADJUDICATED -- give it a CASE in tools/audit_checks.py and record COVERED, or record INTENTIONALLY_NO_MUTATION_CASE with a reason that names what proves the invariant instead"
+
++ []
+- ["fail site aa503466c2a036e3 in <module> ('FUTURE-OWNER: `saipen future ` is "
+-  "implemented and declared but never p') is still UNADJUDICATED -- give it a "
+-  'CASE in tools/audit_checks.py and record COVERED, or record '
+-  'INTENTIONALLY_NO_MUTATION_CASE with a reason that names what proves the '
+-  'invariant instead',
+-  "fail site c58b658ae331e343 in <module> ('Command reference unavailable: ') "
+-  'is still UNADJUDICATED -- give it a CASE in tools/audit_checks.py and record '
+-  'COVERED, or record INTENTIONALLY_NO_MUTATION_CASE with a reason that names '
+-  'what proves the invariant instead']
+
+======================================================================
+FAIL: test_regeneration_never_mints_a_baseline (test_check_inventory.InventoryGateTests.test_regeneration_never_mints_a_baseline)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_check_inventory.py", line 319, in test_regeneration_never_mints_a_baseline
+    self.assertEqual(len(fresh), 1, "a new site was silently adjudicated")
+AssertionError: 3 != 1 : a new site was silently adjudicated
+
+======================================================================
+FAIL: test_the_live_repository_agrees_with_its_ledger (test_check_inventory.InventoryGateTests.test_the_live_repository_agrees_with_its_ledger)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_check_inventory.py", line 274, in test_the_live_repository_agrees_with_its_ledger
+    self.assertEqual(I.inventory_errors(ROOT), [])
+AssertionError: Lists differ: ["ADDED fail site aa503466c2a036e3 at tool[782 chars]nge"] != []
+
+First list contains 3 additional elements.
+First extra element 0:
+"ADDED fail site aa503466c2a036e3 at tools/validate.py:5975 in <module> ('FUTURE-OWNER: `saipen future ` is implemented and declared but never p') -- a new check needs a CASE in tools/audit_checks.py, or a recorded reason it has none. Regenerate tools/validator_fail_sites.json in the same change"
+
+Diff is 897 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_the_probe_passes_on_the_real_repository (test_check_inventory.InventoryGateTests.test_the_probe_passes_on_the_real_repository)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_check_inventory.py", line 277, in test_the_probe_passes_on_the_real_repository
+    self.assertIsNone(A.check_inventory_probe(ROOT, self.workdir))
+AssertionError: "ADDED fail site aa503466c2a036e3 at tools/validate.py:5975 in <module> ('FUTURE-OWNER: `saipen future ` is implemented and declared but never p') -- a new check needs a CASE in tools/audit_checks.py, or a recorded reason it has none. Regenerate tools/validator_fail_sites.json in the same change; ADDED fail site c58b658ae331e343 at tools/validate.py:5927 in <module> ('Command reference unavailable: ') -- a new check needs a CASE in tools/audit_checks.py, or a recorded reason it has none. Regenerate tools/validator_fail_sites.json in the same change; REMOVED fail site e736f31b20f2d116 last seen in <module> ('FUTURE-OWNER: `saipen future ` is implemented and declared but never p') -- a deleted check leaves its control testing nothing. Drop the CASE and regenerate tools/validator_fail_sites.json in the same change" is not None
+
+======================================================================
+FAIL: test_unrelated_line_insertion_is_accepted (test_check_inventory.InventoryGateTests.test_unrelated_line_insertion_is_accepted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_check_inventory.py", line 299, in test_unrelated_line_insertion_is_accepted
+    self.assertEqual(I.inventory_errors(padded), [])
+AssertionError: Lists differ: ["ADDED fail site aa503466c2a036e3 at tool[782 chars]nge"] != []
+
+First list contains 3 additional elements.
+First extra element 0:
+"ADDED fail site aa503466c2a036e3 at tools/validate.py:5977 in <module> ('FUTURE-OWNER: `saipen future ` is implemented and declared but never p') -- a new check needs a CASE in tools/audit_checks.py, or a recorded reason it has none. Regenerate tools/validator_fail_sites.json in the same change"
+
+Diff is 897 characters long. Set self.maxDiff to None to see it.
+
+----------------------------------------------------------------------
+Ran 90 tests in 9.233s
+
+FAILED (failures=5)

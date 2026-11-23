@@ -1,0 +1,437 @@
+.F.FFFF.....F..F..F.FFFF
+======================================================================
+FAIL: test_blocked_phase_outranks_pending_ingestion (test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_blocked_phase_outranks_pending_ingestion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1704-draft-43c_1k2f\subject\tools\test_t1704_goal_checkpoint_priority.py", line 130, in test_blocked_phase_outranks_pending_ingestion
+    self.assertIsNone(violation(self.current))
+AssertionError: "the audit inbox routes 'saipen audit ingest' (layer None, audit/SAIPEN_fastprompter1.md) but next_action is 'saipen status', which is neither that action nor a live-ticket continuation" is not None
+
+======================================================================
+FAIL: test_captured_t1703_review_valve_is_a_legal_audit_diversion (test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_captured_t1703_review_valve_is_a_legal_audit_diversion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1704-draft-43c_1k2f\subject\tools\test_t1704_goal_checkpoint_priority.py", line 57, in test_captured_t1703_review_valve_is_a_legal_audit_diversion
+    self.assertIsNone(violation(self.current, counters=self.counts))
+AssertionError: 'the audit inbox routes \'saipen audit ingest\' (layer None, audit/SAIPEN_fastprompter1.md) but next_action is "WAIT: safety valve reached (0 waves / 20 tickets) -- run \'cc\' to continue", which is neither that action nor a live-ticket continuation' is not None
+
+======================================================================
+FAIL: test_counter_overrun_is_preserved_and_still_requires_a_checkpoint (test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_counter_overrun_is_preserved_and_still_requires_a_checkpoint)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1704-draft-43c_1k2f\subject\tools\test_t1704_goal_checkpoint_priority.py", line 72, in test_counter_overrun_is_preserved_and_still_requires_a_checkpoint
+    self.assertIsNone(violation(self.current, counters={"goal_waves": 0, "goal_tickets": 21}))
+AssertionError: 'the audit inbox routes \'saipen audit ingest\' (layer None, audit/SAIPEN_fastprompter1.md) but next_action is "WAIT: safety valve reached (0 waves / 21 tickets) -- run \'cc\' to continue", which is neither that action nor a live-ticket continuation' is not None
+
+======================================================================
+FAIL: test_destructive_operation_gate_outranks_pending_ingestion (test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_destructive_operation_gate_outranks_pending_ingestion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1704-draft-43c_1k2f\subject\tools\test_t1704_goal_checkpoint_priority.py", line 120, in test_destructive_operation_gate_outranks_pending_ingestion
+    self.assertIsNone(violation(self.current))
+AssertionError: "the audit inbox routes 'saipen audit ingest' (layer None, audit/SAIPEN_fastprompter1.md) but next_action is 'WAIT: destructive-op -- delete the database', which is neither that action nor a live-ticket continuation" is not None
+
+======================================================================
+FAIL: test_external_state_blocker_outranks_pending_ingestion (test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_external_state_blocker_outranks_pending_ingestion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1704-draft-43c_1k2f\subject\tools\test_t1704_goal_checkpoint_priority.py", line 126, in test_external_state_blocker_outranks_pending_ingestion
+    self.assertIsNone(violation(self.current))
+AssertionError: "the audit inbox routes 'saipen audit ingest' (layer None, audit/SAIPEN_fastprompter1.md) but next_action is 'saipen status', which is neither that action nor a live-ticket continuation" is not None
+
+======================================================================
+FAIL: test_three_wave_valve_is_a_legal_audit_diversion (test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_three_wave_valve_is_a_legal_audit_diversion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1704-draft-43c_1k2f\subject\tools\test_t1704_goal_checkpoint_priority.py", line 65, in test_three_wave_valve_is_a_legal_audit_diversion
+    self.assertIsNone(violation(self.current, counters={"goal_waves": 3, "goal_tickets": 0}))
+AssertionError: 'the audit inbox routes \'saipen audit ingest\' (layer None, audit/SAIPEN_fastprompter1.md) but next_action is "WAIT: safety valve reached (3 waves / 0 tickets) -- run \'cc\' to continue", which is neither that action nor a live-ticket continuation' is not None
+
+======================================================================
+FAIL: test_user_brake_outranks_pending_ingestion (test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_user_brake_outranks_pending_ingestion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1704-draft-43c_1k2f\subject\tools\test_t1704_goal_checkpoint_priority.py", line 116, in test_user_brake_outranks_pending_ingestion
+    self.assertIsNone(violation(self.current))
+AssertionError: "the audit inbox routes 'saipen audit ingest' (layer None, audit/SAIPEN_fastprompter1.md) but next_action is 'WAIT: user brake -- stop here', which is neither that action nor a live-ticket continuation" is not None
+
+======================================================================
+FAIL: test_bounded_native_validator_accepts_proved_cap_with_pending_audit (test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_bounded_native_validator_accepts_proved_cap_with_pending_audit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1704-draft-43c_1k2f\subject\tools\test_t1704_goal_checkpoint_priority.py", line 163, in test_bounded_native_validator_accepts_proved_cap_with_pending_audit
+    self.assertEqual(code, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "tract constants agree\nPASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-a5d46fe872ef4c83854d1278fa8db274)\nPASS: goal execution_intent counters present\nPASS: safety-valve pause names the cc resume key\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\nFAIL: STATE.md audit route not followed -- the audit inbox routes 'saipen audit ingest' (layer 1, audit/1.md) but next_action is \"WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue\", which is neither that action nor a live-ticket continuation. WAIT is a closed set of 7 categories (manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init) and scope selection is not among them, so asking which findings to fix has no legal form (SOURCE-AUDIT-INBOX-01)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [no-conformance-record]: no LOG line records a conformance run in \xa7 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so \xa7 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nValidation FAILED: 1 problem(s), 1 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 1,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "STATE.md audit route not followed -- the audit inbox routes 'saipen audit ingest' (layer 1, audit/1.md) but next_action is \"WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue\", ",
+            "detail_hash": "19c5748039a669dc",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 1
+      },
+      "board_hash": "71e8a5a3b2153d61",
+      "canonical_next_command": null,
+      "content_hash": "61f43f861d044534",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:72b97de2cec9e14738590d072b864aea4894dacec06caa61125c10d15e74b518",
+      "install_home": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+      "kind": "conformance_receipt",
+      "log_hash": "83dffd29121c2f9f",
+      "project_identity": "v:\\_temp_\\t1363-z1p55lr2",
+      "receipt_id": "receipt-d5ee1c07c40f",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:3dd8adea5c8e65bed7b3fc5c62fc5f0941d6033a153deec84756a21aea1092bb",
+      "state_hash": "e443db28bc6d1fa8",
+      "timestamp_utc": "2026-10-10T08:43:18.875499Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:3dd8adea5c8e65bed7b3fc5c62fc5f0941d6033a153deec84756a21aea1092bb"
+    }
+  },
+  "install_identity": {
+    "running_home": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+    "install_fingerprint": "install-v1:72b97de2cec9e14738590d072b864aea4894dacec06caa61125c10d15e74b518",
+    "mismatch": null
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-d5ee1c07c40f",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+  },
+  "terminal": true
+}
+
+
+======================================================================
+FAIL: test_persistent_checkpoint_rejects_unearned_state_counters (test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_persistent_checkpoint_rejects_unearned_state_counters)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1704-draft-43c_1k2f\subject\tools\test_t1704_goal_checkpoint_priority.py", line 212, in test_persistent_checkpoint_rejects_unearned_state_counters
+    self.assertIsNotNone(goal_checkpoint_gate(root, routed))
+AssertionError: unexpectedly None
+
+======================================================================
+FAIL: test_persistent_three_wave_checkpoint_has_the_same_priority (test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_persistent_three_wave_checkpoint_has_the_same_priority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1704-draft-43c_1k2f\subject\tools\test_t1704_goal_checkpoint_priority.py", line 192, in test_persistent_three_wave_checkpoint_has_the_same_priority
+    self.assertEqual(code, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "ntract constants agree\nPASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-302d96bbb395444784ddd8bfd2d93ecb)\nPASS: goal execution_intent counters present\nPASS: safety-valve pause names the cc resume key\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (1 claimed)\nFAIL: STATE.md audit route not followed -- the audit inbox routes 'saipen audit ingest' (layer 1, audit/1.md) but next_action is \"WAIT: safety valve reached (3 waves / 0 tickets) -- run 'cc' to continue\", which is neither that action nor a live-ticket continuation. WAIT is a closed set of 7 categories (manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init) and scope selection is not among them, so asking which findings to fix has no legal form (SOURCE-AUDIT-INBOX-01)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [no-conformance-record]: no LOG line records a conformance run in \xa7 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so \xa7 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nValidation FAILED: 1 problem(s), 1 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 1,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "STATE.md audit route not followed -- the audit inbox routes 'saipen audit ingest' (layer 1, audit/1.md) but next_action is \"WAIT: safety valve reached (3 waves / 0 tickets) -- run 'cc' to continue\", w",
+            "detail_hash": "dc9a920b78c44539",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 1
+      },
+      "board_hash": "12576045a133c28e",
+      "canonical_next_command": null,
+      "content_hash": "e99cdc9525e44aa2",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:72b97de2cec9e14738590d072b864aea4894dacec06caa61125c10d15e74b518",
+      "install_home": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+      "kind": "conformance_receipt",
+      "log_hash": "8098e0faae588c43",
+      "project_identity": "v:\\_temp_\\t1363-xld_yaex",
+      "receipt_id": "receipt-fb23c91b6931",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:3dd8adea5c8e65bed7b3fc5c62fc5f0941d6033a153deec84756a21aea1092bb",
+      "state_hash": "0a797de8f4914a17",
+      "timestamp_utc": "2026-10-10T08:43:21.904526Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:3dd8adea5c8e65bed7b3fc5c62fc5f0941d6033a153deec84756a21aea1092bb"
+    }
+  },
+  "install_identity": {
+    "running_home": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+    "install_fingerprint": "install-v1:72b97de2cec9e14738590d072b864aea4894dacec06caa61125c10d15e74b518",
+    "mismatch": null
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-fb23c91b6931",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+  },
+  "terminal": true
+}
+
+
+======================================================================
+FAIL: test_persistent_twenty_ticket_checkpoint_continues_and_native_agrees (test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_persistent_twenty_ticket_checkpoint_continues_and_native_agrees)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1704-draft-43c_1k2f\subject\tools\test_t1704_goal_checkpoint_priority.py", line 179, in test_persistent_twenty_ticket_checkpoint_continues_and_native_agrees
+    self.assertEqual(code, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "tract constants agree\nPASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-75220a1f4b8c4412b10972673e0edac3)\nPASS: goal execution_intent counters present\nPASS: safety-valve pause names the cc resume key\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (1 claimed)\nFAIL: STATE.md audit route not followed -- the audit inbox routes 'saipen audit ingest' (layer 1, audit/1.md) but next_action is \"WAIT: safety valve reached (1 waves / 20 tickets) -- run 'cc' to continue\", which is neither that action nor a live-ticket continuation. WAIT is a closed set of 7 categories (manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init) and scope selection is not among them, so asking which findings to fix has no legal form (SOURCE-AUDIT-INBOX-01)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [no-conformance-record]: no LOG line records a conformance run in \xa7 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so \xa7 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nValidation FAILED: 1 problem(s), 1 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 1,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "STATE.md audit route not followed -- the audit inbox routes 'saipen audit ingest' (layer 1, audit/1.md) but next_action is \"WAIT: safety valve reached (1 waves / 20 tickets) -- run 'cc' to continue\", ",
+            "detail_hash": "c2b93e147f27cb5c",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 1
+      },
+      "board_hash": "05c0ba47320edc42",
+      "canonical_next_command": null,
+      "content_hash": "c18f57e7aaf5caad",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:72b97de2cec9e14738590d072b864aea4894dacec06caa61125c10d15e74b518",
+      "install_home": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+      "kind": "conformance_receipt",
+      "log_hash": "c6bff3bcc7736edd",
+      "project_identity": "v:\\_temp_\\t1363-ki54xx24",
+      "receipt_id": "receipt-6f01afc11dd7",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:3dd8adea5c8e65bed7b3fc5c62fc5f0941d6033a153deec84756a21aea1092bb",
+      "state_hash": "1ba739393437dadf",
+      "timestamp_utc": "2026-10-10T08:43:23.760283Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:3dd8adea5c8e65bed7b3fc5c62fc5f0941d6033a153deec84756a21aea1092bb"
+    }
+  },
+  "install_identity": {
+    "running_home": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+    "install_fingerprint": "install-v1:72b97de2cec9e14738590d072b864aea4894dacec06caa61125c10d15e74b518",
+    "mismatch": null
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-6f01afc11dd7",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+  },
+  "terminal": true
+}
+
+
+======================================================================
+FAIL: test_review_ticket_and_phase_survive_the_bounded_native_check (test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_review_ticket_and_phase_survive_the_bounded_native_check)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1704-draft-43c_1k2f\subject\tools\test_t1704_goal_checkpoint_priority.py", line 262, in test_review_ticket_and_phase_survive_the_bounded_native_check
+    self.assertEqual(code, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "tract constants agree\nPASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-522460537d6f4e80b0aada6ed06adb9a)\nPASS: goal execution_intent counters present\nPASS: safety-valve pause names the cc resume key\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (1 claimed)\nFAIL: STATE.md audit route not followed -- the audit inbox routes 'saipen audit ingest' (layer 1, audit/1.md) but next_action is \"WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue\", which is neither that action nor a live-ticket continuation. WAIT is a closed set of 7 categories (manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init) and scope selection is not among them, so asking which findings to fix has no legal form (SOURCE-AUDIT-INBOX-01)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [no-conformance-record]: no LOG line records a conformance run in \xa7 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so \xa7 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nValidation FAILED: 1 problem(s), 1 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 1,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "STATE.md audit route not followed -- the audit inbox routes 'saipen audit ingest' (layer 1, audit/1.md) but next_action is \"WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue\", ",
+            "detail_hash": "19c5748039a669dc",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 1
+      },
+      "board_hash": "5c7242c18d9619ce",
+      "canonical_next_command": null,
+      "content_hash": "9c3677c031e1c281",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:72b97de2cec9e14738590d072b864aea4894dacec06caa61125c10d15e74b518",
+      "install_home": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+      "kind": "conformance_receipt",
+      "log_hash": "bdea59f0f1e77b7a",
+      "project_identity": "v:\\_temp_\\t1363-e6ou69yb",
+      "receipt_id": "receipt-2011d7a53d73",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:3dd8adea5c8e65bed7b3fc5c62fc5f0941d6033a153deec84756a21aea1092bb",
+      "state_hash": "6fa562f14116935b",
+      "timestamp_utc": "2026-10-10T08:43:24.454115Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:3dd8adea5c8e65bed7b3fc5c62fc5f0941d6033a153deec84756a21aea1092bb"
+    }
+  },
+  "install_identity": {
+    "running_home": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+    "install_fingerprint": "install-v1:72b97de2cec9e14738590d072b864aea4894dacec06caa61125c10d15e74b518",
+    "mismatch": null
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-2011d7a53d73",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+  },
+  "terminal": true
+}
+
+
+----------------------------------------------------------------------
+Ran 24 tests in 6.888s
+
+FAILED (failures=12)

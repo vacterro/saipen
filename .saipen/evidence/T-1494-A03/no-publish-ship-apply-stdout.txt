@@ -1,0 +1,6 @@
+{
+  "ok": false,
+  "code": "RELEASE_FAILED",
+  "stage": "NO_PUBLISH",
+  "detail": "closure finish could not be planned: finish requires explicit verification evidence for ticket T-1494 (got: review -> PASS; conf: high; review_passes: 1; correction_cycles: 0. Own verifier rerun 18/18, exit 0; unchanged primary verifier detects authentic pre-fix 9 failures/2 API errors and accepted subject 18 PASS; A02 3 RED/3 GREEN and original automation checks 2 RED/2 GREEN with identical fixtures. Core exit 0, nine baseline warnings; full core-unit current source 5981/new_red 0. P0/P1 and unresolved P2/P3: none. Journal/provenance, scoped test witnesses, mutation CASEs, foreign hunks and 248 unchanged foreign BOARD rows audited. Evidence: .saipen/evidence/T-1494-A03/review.json and review-oracle-pair.json. Memory promotion: NO. Closure mode own_patch; publication forbidden.)"
+}

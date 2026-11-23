@@ -1,0 +1,9 @@
+Talkative AI ja veerev vrakk on valmis (`b2336a7`, `e9066d7`, lokaalselt). Vraki füüsikat pole mängus veel keegi näinud. Pakett `dist/VRV.zip` sha256 `38057db9`.
+
+- **Talkative AI:** vaikimisi Off. Kast, mis sul ette jäi, on arvuti-meeskondade taunt'id, näiteks "Computer Team : Ready......FIGHT!". Mängul endal on selleks juba lüliti Esc > Play all, nime all "DM/IA/MPI Taunts". VRV nimetab selle ümber "Talkative AI (computer taunts)" ja hoiab sinu valiku meeles. Sinu enda VRV-preferences failis seda väärtust polnud, nii et ka sinul on nüüd Off.
+- **Veerev vrakk:** iga hoveri jaoks (VSR-i ja pakkide peal 306 tükki) teeb VRV vraki-objekti sama mudeliga. Hävimisel visatakse vrakk välja lennuki enda kiiruse, löögi üles ja pöörlemisega. Siis see kukub, põrkab ja libiseb mööda maad ning plahvatab 4 s pärast. Mootori enda crash on nende lennukite puhul välja lülitatud. Vrakki ei saa üles korjata ja see pole radaril, aga seda saab maha lasta.
+- **Mis võib olla vale:** vrakk on tehniliselt powerup ilma hõljumise ja püstihoidmiseta. Kas see põrkab või ainult libiseb, selgub alles mängus. Sellepärast kirjutavad mängu kolm esimest vrakki `VRV.log`-i ridu `Wreck: ...` (kõrgus maast, kiirus ja pöörlemine kaks korda sekundis). Pärast sinu mängu loen need läbi ja häälestan.
+- **MPI-s** võib mootor olla lennukite prototüübid enne projektsiooni vahemällu pannud. Siis võib seal ilmuda kaks vrakki: mootori oma ja VRV oma.
+- **Testid:** 33-st skriptist 32 PASS. `Test-Release` kukub endiselt, sest otsib vana installi-zipi.
+
+Proovi `vrv_latest_start.bat`-iga ja ütle, kuidas vrakk liigub. Siis loen logi.

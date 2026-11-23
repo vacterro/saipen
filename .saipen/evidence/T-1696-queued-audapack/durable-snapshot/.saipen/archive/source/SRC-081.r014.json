@@ -1,0 +1,79 @@
+{
+  "clauses": {
+    "SRC-081:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not redo the work."
+    },
+    "SRC-081:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not falsify provenance by pretending they were present in the immutable audit/11 source document or SRC-080 source bytes."
+    },
+    "SRC-081:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not block productive implementation merely because append support itself is incomplete."
+    },
+    "SRC-081:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not manually rewrite immutable historical receipts or LOG entries."
+    },
+    "SRC-081:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "They must behave like real AUDAPACK launchers, not decorative custom entries."
+    },
+    "SRC-081:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not throw it away."
+    },
+    "SRC-081:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not collapse Claude 1 and Claude 2 into one launcher identity."
+    },
+    "SRC-081:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A normal click on Claude 1 must never focus Claude 2."
+    },
+    "SRC-081:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A normal click on Claude 2 must never focus Claude 1."
+    },
+    "SRC-081:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not silently launch a GUI product when a functional CLI/TUI path exists."
+    },
+    "SRC-081:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not perform network installation automatically."
+    },
+    "SRC-081:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent credentials."
+    },
+    "SRC-081:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not copy authentication state between accounts."
+    },
+    "SRC-081:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not overwrite provider configuration merely to make discovery easier."
+    }
+  },
+  "derived_at": "2026-09-22T22:16:17Z",
+  "derived_from": "SRC-081",
+  "interpretation_revision": 14,
+  "schema_version": 1,
+  "source_sha256": "8ac9ca336e80fed27d62fde40b5b255a9c384887833fda1387997803c2f4fa27"
+}

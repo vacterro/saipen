@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-053:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-196 REOPEN/CLOSURE CORRECTION: enforce monotonic release identity in scripts/update_widget_release.py (refuse same-version changed-bytes ledger rewrite), add recorder transition regression tests, prove red-control, complete production/operator acceptance record, then resume T-188"
+    }
+  },
+  "derived_at": "2026-09-17T21:04:19Z",
+  "derived_from": "SRC-053",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "a3f2a51f3a2f54260f2bdb274ab6896cd6d630370feff8696637ab7cbb38fda5"
+}

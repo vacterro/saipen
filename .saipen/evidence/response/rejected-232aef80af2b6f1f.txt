@@ -1,0 +1,10 @@
+VRV 0.3.11 on GitLabis: `main` 6c09757 ja tag `v0.3.11`, push läks fast-forwardiga läbi, force'i polnud.
+
+- **Splashid:** 16-19 tegi valmis eelmine sessioon. Kontrollisin uuesti: 17 ja 19 on terve laiusega, mustad ribad üleval ja all, midagi pole ära lõigatud. 16 ja 18 on 16:9 ja täidavad ekraani.
+- **0.3.11:** CHANGELOG-is on kõik pärast 0.3.10 lisatud kirjed (29) nüüd 0.3.11 all. Uuendasin versiooni, README-d, Esc-menüü pealkirjad, release notes'i ja Steami tekstid en/ru. Inglise tekstid on ASCII ja alla 8000 märgi.
+- **Testid:** 32 skripti 33-st PASS. `Test-Release` FAIL: see otsib vana installi-zipi `dist\VRV-0.3.11.zip`, mida ühe-paketi reegli tõttu ei ehitata.
+- **Pakett:** `dist/VRV.zip` sha256 `babfd712`, DLL-ides on versioon 0.3.11, 20 splashi, 33 heli.
+- **Gitis:** `sound/` (sinu sõnul osa modist) ja 18 splashi on nüüd repos. `SplashScreen8.png` jäi välja, sest see on VSR-i oma intro ja repo on avalik.
+- **GitLab esmane:** `remote.pushDefault` on GitLab kõigis 12 repos, mille eelmine sessioon GitHubile pööras. Enne/pärast väärtused on failis `.saipen/evidence/T-183-gitlab-primary/`. Reegel on kirjas `docs/DEVELOPMENT.md`-s, SAIPEN USERPERSON-is ja mälus.
+
+Sinu teha: mängu-test `vrv_latest_start.bat`-iga ja upload BZ2 Uploaderiga. Mängus pole veel kontrollitud tornide ehitust, uusi vaikeväärtusi ega heli. Splash 8 jaoks on vaja VSR-i luba, enne kui item avalikuks läheb. Splash 19 allikapildi paremas alanurgas on video-mängija nupud (pildi viga, mitte ehitusviga).

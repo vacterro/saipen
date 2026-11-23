@@ -1,0 +1,33 @@
+{
+  "ticket": "T-1695",
+  "paths": [
+    "tools/saipen_engine/automation.py",
+    "tools/saipen_engine/response_surface.py",
+    "tools/test_automation_block.py"
+  ],
+  "pre_sha256": {
+    "tools/saipen_engine/automation.py": "83982bf9e33a7bdf3e3791d0490885a83d90cb37ffa45c144274545ef9e17c86",
+    "tools/saipen_engine/response_surface.py": "5d6bd6dcbe09232116b686b4ecf6addace30322bb43451600fd66b298d320544",
+    "tools/test_automation_block.py": "502ab93eb3b8bd5bd8d6c1f87d79f292ba450cbb294e3c4532130e10508bb2b4"
+  },
+  "staged_delta_sha256": "8103c569fa19a7a2daf96e968de7d2375f51a875261a6e08ad385720d05cd1a2",
+  "staged_delta_bytes": 3152233,
+  "graph_tier": 2,
+  "graph_generation": "2026-09-01T13:16:39Z",
+  "coverage": "tools excluded by design; exact current source fallback",
+  "authority": "local reversible edits only; no staging or publishing",
+  "rollback": "restore only owned delta from preserved pre-subjects; preserve inherited changes",
+  "current_sha256": {
+    "tools/saipen_engine/automation.py": "1c9393d82a7b55710685c8e42844fd62c77f61736495d9a911b77496dc01bf8a",
+    "tools/saipen_engine/response_surface.py": "08ee26601d9ed962891a186b8b72b619a8d3f977fa2986d4f8116048c97c4a55",
+    "tools/test_automation_block.py": "662ff5fd5a66ed93ec114c21daaa71f90fd81ee4c159cf0213ff1ac8be8bd67e"
+  },
+  "added_test_cases": [
+    "InvalidDataStops.test_active_work_outranks_invalid_data",
+    "InvalidDataStops.test_independent_workable_ticket_outranks_invalid_audit",
+    "InvalidDataStops.test_invalid_audit_has_a_visible_diagnostic_without_cc",
+    "InvalidDataStops.test_invalid_audit_is_not_a_continuation",
+    "InvalidDataStops.test_invalid_queue_cannot_be_completed_by_clean_closure_evidence",
+    "InvalidDataStops.test_invalid_queue_has_a_visible_diagnostic_without_cc"
+  ]
+}

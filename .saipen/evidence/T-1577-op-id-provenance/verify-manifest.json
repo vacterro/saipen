@@ -1,0 +1,25 @@
+{
+  "verifier": "2b0bdf98fc0ebcb7",
+  "command": "python -B -m unittest -v test_t1577_op_id_provenance",
+  "oracle": [
+    "tools/test_t1577_op_id_provenance.py"
+  ],
+  "runs": [
+    {
+      "label": "red",
+      "subject": "661feaf86e32c94e",
+      "returncode": 1,
+      "verdict": "FAILED (failures=7)",
+      "errors": 0,
+      "failures": 7
+    },
+    {
+      "label": "green",
+      "subject": "ea8ac081840cfafe",
+      "returncode": 0,
+      "verdict": "OK",
+      "errors": 0,
+      "failures": 0
+    }
+  ]
+}

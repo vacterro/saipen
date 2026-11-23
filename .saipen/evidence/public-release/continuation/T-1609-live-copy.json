@@ -1,0 +1,101 @@
+{
+  "scope": "full authority/recovery copy excluding kitchen,tmp,cache,locks scratch",
+  "live_hashes": {
+    "STATE.md": "a21881ae60a2f56a4ba4d5eb48ce6796345529807eac92490682f5f4a51dd93d",
+    "BOARD.md": "7df4f691ef5386043318f91d8638e42360ef532d4797d6ee8f840505f756c176",
+    "LOG.md": "21020ac9f97589661493611bafc6b1507f735f836ab3b97107f5df015bf8ab3f"
+  },
+  "live_state": "---\nphase: VERIFY\ntask: T-239\nnext_action: \"PHASE VERIFY T-239\"\nblocker: none\nagent: saipen-cli\nsaipen_version: 7\nschema_version: 3\nstyle_contract: ded-069a4c52\nsaipen_home: \"V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN\"\nmode: no-publish\ntransition_from: BUILD\nlast_event: 2385\nupdated: \"2026-10-04T13:46:29Z\"\nexecution_intent: goal\ngoal_waves: 0\ngoal_tickets: 8\n---",
+  "probes": [
+    {
+      "args": [
+        "recover",
+        "--dry-run"
+      ],
+      "rc": 0,
+      "answer": {
+        "ok": true,
+        "code": "CLEAN",
+        "changed": [],
+        "strict_state_error": null,
+        "dry_run": true
+      },
+      "stderr": ""
+    },
+    {
+      "args": [
+        "continue"
+      ],
+      "rc": 0,
+      "answer": {
+        "ok": true,
+        "action": "PHASE VERIFY T-239",
+        "ticket": "T-239",
+        "reason": "finish",
+        "detail": null,
+        "executable_behavior": null,
+        "load": "saipen/phases/verify.md",
+        "load_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\verify.md",
+        "cold_route": {
+          "project_root": "V:\\_TEMP_\\saipen-t1609-live-copy-q3ht4j9m\\subject",
+          "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "protocol_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen",
+          "phase": "VERIFY",
+          "phase_module": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\verify.md",
+          "boot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+          "style": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+          "documents": {
+            "STYLE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\STYLE.md",
+            "BOOT.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+            "INDEX.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\INDEX.md",
+            "COMMANDS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md",
+            "OPS.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\OPS.md",
+            "SOURCES.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\SOURCES.md",
+            "EXECUTION.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md",
+            "MAINTENANCE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\MAINTENANCE.md",
+            "CORE.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md",
+            "RUNTIME.md": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\RUNTIME.md"
+          },
+          "project_memory": {
+            "STATE.md": "V:\\_TEMP_\\saipen-t1609-live-copy-q3ht4j9m\\subject\\.saipen\\STATE.md",
+            "BOARD.md": "V:\\_TEMP_\\saipen-t1609-live-copy-q3ht4j9m\\subject\\.saipen\\BOARD.md",
+            "LOG.md": "V:\\_TEMP_\\saipen-t1609-live-copy-q3ht4j9m\\subject\\.saipen\\LOG.md"
+          },
+          "search_required": false
+        },
+        "execution_instruction": "Routing is not completion evidence. Read load_path when present, then execute action under its owner in this turn; respect WAIT and actual refusals. If --dry-run was requested, this is a preview only.",
+        "execution_intent": "goal",
+        "converge_target": null,
+        "goal_waves": 0,
+        "goal_tickets": 8,
+        "recovery_pending": false,
+        "recovery_conflict": false,
+        "pending_ops": [],
+        "parked_work": [
+          "T-233 blocked: Only the GUI observation is left, shared with T-234: click SIGN IN on the AG2 row in V:\\___VAC\\__K\\__CODE\\__SAITULS\\SAITULS.exe and confirm the visible outcome. Everything the button drives is already proven live -- AG2 AUTHENTICATED on a credential distinct from AG1's, and the exact project directory launching under AG2's managed SID with a real cross-identity write oracle passing.",
+          "T-220 blocked: T220_RESIDUE_FOUR_CLAUSES 2026-10-03 (final state; supersedes both earlier blocker texts, including the withdrawn 'artifact unobtainable' claim). The exact recorded 1.18.29 baseline was always on...",
+          "T-143 blocked: CLOSURE_BLOCKED_PROTOCOL_STATE: DEL JUNK implementation complete + all 4 automatable gates green (depth 26/26, all-disks ready, busy-recovery, identity 12 OK), but ticket done refuses because (1)...",
+          "T-144 blocked: AWAITING_USER_LIVE_RETEST + SOURCE_LINKAGE_PURGED: all automatable 2.5.2 gates green (node 166/166, native history 8/8, test_saipatch 0 failures incl live-hash-unchanged/no-plugin-file); closure blocked on two user-gated facts: (1) real OpenCode 1.18.29/1.18.30 live retest not automatable here, (2) SRC-013 body purged in a prior session leaving 18 actionable clauses whose disposition cannot be re-derived -- ticket done refuses SOURCE_LINKAGE_MISSING",
+          "T-167 blocked: T167_PACKAGE_AUTHORITY_AND_GUI_PROOF_PENDING -> package-authority half GREEN (SRC-021 clean assembly proven); remaining sole gate: real Windows GUI evidence list (launch SAITULS; FFmpeg actions..."
+        ],
+        "reconciliation": {
+          "ok": true,
+          "code": "CLEAN",
+          "changed": [],
+          "strict_state_error": null,
+          "dry_run": false
+        },
+        "telegrams": {
+          "state": "OK",
+          "unread": 0,
+          "on_current_work": 0,
+          "complete": true,
+          "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-t1609-live-copy-q3ht4j9m\\subject --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat saipen-cli",
+          "detail": "counts only; nothing was opened and nothing here is an instruction"
+        }
+      },
+      "stderr": ""
+    }
+  ],
+  "live_core_bytes_unchanged": true
+}

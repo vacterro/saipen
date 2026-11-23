@@ -1,0 +1,78 @@
+[
+  {
+    "label": "focused",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "test_response_surface_contract",
+      "test_refusal_registry",
+      "test_canonical_command_reachability",
+      "test_subprocess_utf8"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+    "exit_code": 0,
+    "ran": 75,
+    "output": "review-focused.out.txt",
+    "output_sha256": "0caca6850a53d94ed2343b642a5cb501194bcb501b6d981a9742316bf4faf45d",
+    "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+    "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+    "subject_sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8"
+  },
+  {
+    "label": "lint",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "ruff",
+      "check",
+      "tools/",
+      "tests/"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit_code": 0,
+    "ran": null,
+    "output": "review-lint.out.txt",
+    "output_sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+    "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+    "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+    "subject_sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8"
+  },
+  {
+    "label": "whitespace",
+    "command": [
+      "git",
+      "-c",
+      "core.safecrlf=false",
+      "diff",
+      "--check"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit_code": 0,
+    "ran": null,
+    "output": "review-whitespace.out.txt",
+    "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+    "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+    "subject_sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8"
+  },
+  {
+    "label": "core",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "tools/validate.py",
+      "--gate",
+      "core"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit_code": 0,
+    "ran": null,
+    "output": "review-core.out.txt",
+    "output_sha256": "178e661de5bcc89e5ee27d7eb67b5aea96ce896b2755e1ee70f109bd99e9a81a",
+    "verifier_sha256": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+    "subject": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\response_surface.py",
+    "subject_sha256": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8"
+  }
+]

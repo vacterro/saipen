@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-005:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "P0 browser audit delivery repair: no flashing console, no random ATTACH identities, Audit Core reliably starts, one-click happy path usable."
+    }
+  },
+  "derived_at": "2026-08-31T05:47:21Z",
+  "derived_from": "SRC-005",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "85a76c527802b80416d82b01f622ee492f3d7eb988e00a0fdb1c7dc64b809e3c"
+}

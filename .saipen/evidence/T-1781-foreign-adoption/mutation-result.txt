@@ -1,0 +1,7 @@
+control: ran 21, red 0 -- as expected
+the engine before the foreign edits: ran 21, red 17 -- as expected
+the foreign guard reads every BUILD: ran 21, red 1 -- as expected
+the first BUILD decides: ran 21, red 2 -- as expected
+the liveness is not wired into continue: ran 21, red 1 -- as expected
+the usage hides the taxonomy again: ran 21, red 3 -- as expected
+mutations: 5, repetitions each: 3, problems: 0

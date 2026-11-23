@@ -1,0 +1,51 @@
+test_existing_event_is_not_a_decision (test_t1851_debt_authority.AuthorityNegativeTests.test_existing_event_is_not_a_decision) ... ok
+test_existing_model_source_is_not_a_decision (test_t1851_debt_authority.AuthorityNegativeTests.test_existing_model_source_is_not_a_decision) ... ok
+test_forged_operator_label_does_not_authenticate_capsule (test_t1851_debt_authority.AuthorityNegativeTests.test_forged_operator_label_does_not_authenticate_capsule) ... ok
+test_integrity_and_receipt_shape_do_not_authenticate_legacy_record (test_t1851_debt_authority.AuthorityNegativeTests.test_integrity_and_receipt_shape_do_not_authenticate_legacy_record) ... ok
+test_missing_source_reference_grants_no_acceptance (test_t1851_debt_authority.AuthorityNegativeTests.test_missing_source_reference_grants_no_acceptance) ... ok
+test_project_lineage_is_not_operator_permission (test_t1851_debt_authority.AuthorityNegativeTests.test_project_lineage_is_not_operator_permission) ... ok
+test_accepted_scope_survives_delivery_expiry_and_task_churn (test_t1851_debt_authority.NativeDecisionTests.test_accepted_scope_survives_delivery_expiry_and_task_churn) ... ok
+test_changed_committed_target_claim_cannot_replace_the_reserved_digest (test_t1851_debt_authority.NativeDecisionTests.test_changed_committed_target_claim_cannot_replace_the_reserved_digest) ... ok
+test_changed_history_after_approval_does_not_mutate_registration (test_t1851_debt_authority.NativeDecisionTests.test_changed_history_after_approval_does_not_mutate_registration) ... ok
+test_changed_legacy_predecessor_invalidates_the_scoped_replacement (test_t1851_debt_authority.NativeDecisionTests.test_changed_legacy_predecessor_invalidates_the_scoped_replacement) ... ok
+test_changed_source_after_crash_refuses_before_writing_the_acceptance (test_t1851_debt_authority.NativeDecisionTests.test_changed_source_after_crash_refuses_before_writing_the_acceptance) ... ok
+test_committed_operation_does_not_report_a_missing_target_repaired (test_t1851_debt_authority.NativeDecisionTests.test_committed_operation_does_not_report_a_missing_target_repaired) ... FAIL
+test_expired_approval_never_reserves_a_new_effect (test_t1851_debt_authority.NativeDecisionTests.test_expired_approval_never_reserves_a_new_effect) ... ok
+test_fresh_native_capture_does_not_promote_an_old_model_source (test_t1851_debt_authority.NativeDecisionTests.test_fresh_native_capture_does_not_promote_an_old_model_source) ... ok
+test_fresh_scoped_decision_appends_instead_of_promoting_legacy_authority (test_t1851_debt_authority.NativeDecisionTests.test_fresh_scoped_decision_appends_instead_of_promoting_legacy_authority) ... ok
+test_issuer_reservation_loss_never_inherits_a_journal_claim (test_t1851_debt_authority.NativeDecisionTests.test_issuer_reservation_loss_never_inherits_a_journal_claim) ... ok
+test_malformed_broker_registration_does_not_reserve_permission (test_t1851_debt_authority.NativeDecisionTests.test_malformed_broker_registration_does_not_reserve_permission) ... ok
+test_model_written_real_journal_cannot_replace_a_native_effect_reservation (test_t1851_debt_authority.NativeDecisionTests.test_model_written_real_journal_cannot_replace_a_native_effect_reservation) ... ok
+test_modified_native_proof_in_source_metadata_is_not_authority (test_t1851_debt_authority.NativeDecisionTests.test_modified_native_proof_in_source_metadata_is_not_authority) ... ok
+test_native_decision_cannot_widen_approved_event_set (test_t1851_debt_authority.NativeDecisionTests.test_native_decision_cannot_widen_approved_event_set) ... ok
+test_native_decision_for_another_lineage_is_refused (test_t1851_debt_authority.NativeDecisionTests.test_native_decision_for_another_lineage_is_refused) ... ok
+test_prepared_crash_recovers_the_reserved_artifact_without_new_approval (test_t1851_debt_authority.NativeDecisionTests.test_prepared_crash_recovers_the_reserved_artifact_without_new_approval) ... ok
+test_preview_is_read_only_and_grants_nothing (test_t1851_debt_authority.NativeDecisionTests.test_preview_is_read_only_and_grants_nothing) ... ok
+test_public_registrar_and_validator_use_the_same_native_authority (test_t1851_debt_authority.NativeDecisionTests.test_public_registrar_and_validator_use_the_same_native_authority) ... ok
+test_read_only_capability_still_forbids_an_authorized_mutation (test_t1851_debt_authority.NativeDecisionTests.test_read_only_capability_still_forbids_an_authorized_mutation) ... ok
+test_real_kernel_accepts_exact_scoped_native_decision (test_t1851_debt_authority.NativeDecisionTests.test_real_kernel_accepts_exact_scoped_native_decision) ... ok
+test_reserved_effect_retry_reuses_its_original_bytes (test_t1851_debt_authority.NativeDecisionTests.test_reserved_effect_retry_reuses_its_original_bytes) ... ok
+test_revocation_after_written_crash_remains_a_visible_recovery_conflict (test_t1851_debt_authority.NativeDecisionTests.test_revocation_after_written_crash_remains_a_visible_recovery_conflict) ... ok
+test_revoked_accepted_decision_becomes_unknown_without_rewriting_history (test_t1851_debt_authority.NativeDecisionTests.test_revoked_accepted_decision_becomes_unknown_without_rewriting_history) ... ok
+test_revoked_native_decision_is_refused (test_t1851_debt_authority.NativeDecisionTests.test_revoked_native_decision_is_refused) ... ok
+test_revoked_pending_decision_never_recovers_as_accepted (test_t1851_debt_authority.NativeDecisionTests.test_revoked_pending_decision_never_recovers_as_accepted) ... ok
+test_same_scoped_source_repeat_writes_nothing (test_t1851_debt_authority.NativeDecisionTests.test_same_scoped_source_repeat_writes_nothing) ... ok
+test_stale_locations_need_rebind_instead_of_false_idempotent_success (test_t1851_debt_authority.NativeDecisionTests.test_stale_locations_need_rebind_instead_of_false_idempotent_success) ... ok
+test_unregistered_worker_cannot_spend_a_readable_proof (test_t1851_debt_authority.NativeDecisionTests.test_unregistered_worker_cannot_spend_a_readable_proof) ... ok
+test_unrelated_native_report_does_not_grant_decision_b (test_t1851_debt_authority.NativeDecisionTests.test_unrelated_native_report_does_not_grant_decision_b) ... ok
+test_unverified_legacy_record_cannot_be_laundered_by_rebind (test_t1851_debt_authority.NativeDecisionTests.test_unverified_legacy_record_cannot_be_laundered_by_rebind) ... ok
+test_verified_acceptance_survives_actual_lineage_preserving_move (test_t1851_debt_authority.NativeDecisionTests.test_verified_acceptance_survives_actual_lineage_preserving_move) ... ok
+test_verified_crash_rechecks_and_commits_the_actual_approved_artifact (test_t1851_debt_authority.NativeDecisionTests.test_verified_crash_rechecks_and_commits_the_actual_approved_artifact) ... ok
+
+======================================================================
+FAIL: test_committed_operation_does_not_report_a_missing_target_repaired (test_t1851_debt_authority.NativeDecisionTests.test_committed_operation_does_not_report_a_missing_target_repaired)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1851_debt_authority.py", line 461, in test_committed_operation_does_not_report_a_missing_target_repaired
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'code': 'ACCEPTED_DEBT_REGISTERED', 'record_id': 'AD-000001', 'events': ['E-3', 'E-4'], 'journal_op_id': 'accepted_debt.register-d57a602d16fe', 'authority': 'SRC-001', 'authority_status': 'KNOWN'}
+
+----------------------------------------------------------------------
+Ran 38 tests in 6.705s
+
+FAILED (failures=1)

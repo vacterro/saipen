@@ -1,0 +1,53 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-376.md",
+  "linked_work": "T-2002",
+  "receipt_id": "SRC-376",
+  "received_at": "2026-11-02T00:50:21Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "065f3ed0be3c21e4c04a8ae5cf26433b0c4a03b691b899168e2c14ab808e2da9",
+    "sanitized_sha256": "065f3ed0be3c21e4c04a8ae5cf26433b0c4a03b691b899168e2c14ab808e2da9"
+  },
+  "request_provenance": {
+    "compared_digest": "a330395cc0a53ad1207736546afff4735940937564bbf75ce1edad40780d9139",
+    "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+    "witness": "model_supplied"
+  },
+  "retirement": {
+    "authority_grant": "system:INVALID_INVOCATION",
+    "authority_receipt": null,
+    "authority_sha256": null,
+    "board_record": "- [ ] T-2002 [P2] list | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-376 | owner: saipen-cli | claim_time: 2026-11-02T00:50:25Z | blocker: INVALID_INVOCATION -- accidental CLI token parse; no work owed | blocker_scope: ticket",
+    "board_record_sha256": "ed4f7c788265a177d49c57feb9f5c50e555dd9c7c2434e038094719a8d90bf7f",
+    "discovery_event": null,
+    "evidence": {
+      "kind": "event",
+      "ref": "E-21640"
+    },
+    "evidence_bound_event": "E-21641",
+    "evidence_note": "accidental CLI token parse: the ticket text is the bare word 'list'; no user description of a change exists, SRC-376 is model_supplied with empty contract/coverage, and the row owes no implementation",
+    "reason": "INVALID_INVOCATION",
+    "retired_at": "2026-11-17T16:32:15Z",
+    "retired_by": "saipen-cli",
+    "retired_work": "T-2002",
+    "retirement_event": "E-21641",
+    "schema_version": 2
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "065f3ed0be3c21e4c04a8ae5cf26433b0c4a03b691b899168e2c14ab808e2da9",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "065f3ed0be3c21e4c04a8ae5cf26433b0c4a03b691b899168e2c14ab808e2da9",
+  "status": "INVALID",
+  "storage_status": "ARCHIVED",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

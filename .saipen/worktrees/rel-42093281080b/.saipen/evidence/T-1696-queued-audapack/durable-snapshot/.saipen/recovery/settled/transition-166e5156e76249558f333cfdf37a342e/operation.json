@@ -1,0 +1,62 @@
+{
+  "op_id": "transition-166e5156e76249558f333cfdf37a342e",
+  "operation": "transition",
+  "created_at": "2026-10-06T03:28:43Z",
+  "agent": "buffy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "75292d63383c05a4",
+  "preconditions": {
+    ".saipen/STATE.md": "c6c43040e03f099e",
+    ".saipen/BOARD.md": "e2bcc5975614f6ec",
+    ".saipen/LOG.md": "218af19653c76bd1"
+  },
+  "read_preconditions": {
+    ".saipen/logs": "delete-tree-sha256:937337c45728d38258704cc0ec14fd144d30502172e4407ac6357b501f37a2f3"
+  },
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 5,
+  "targets": [
+    {
+      "path": ".saipen/recovery/log-detail/E-3013-88fe04963191e23ac132de6a.LOG.md",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "88fe04963191e23a",
+      "applied": true
+    },
+    {
+      "path": ".saipen/recovery/log-detail/E-3013-88fe04963191e23ac132de6a.json",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "a998aae746c1ee25",
+      "applied": true
+    },
+    {
+      "path": ".saipen/LOG.md",
+      "role": "log",
+      "action": "write",
+      "before_hash": "218af19653c76bd1",
+      "after_hash": "cb67e6b1f53e7d8e",
+      "applied": true
+    },
+    {
+      "path": ".saipen/BOARD.md",
+      "role": "board",
+      "action": "write",
+      "before_hash": "e2bcc5975614f6ec",
+      "after_hash": "d89a72206b08c452",
+      "applied": true
+    },
+    {
+      "path": ".saipen/STATE.md",
+      "role": "state",
+      "action": "write",
+      "before_hash": "c6c43040e03f099e",
+      "after_hash": "825cbe38e4014716",
+      "applied": true
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "task": "T-2040",
+  "scope": [
+    "tools/test_evidence_gap_ledger_lineage.py",
+    "tools/test_persistent_goal_engine.py"
+  ],
+  "preimages": {
+    "tools/test_evidence_gap_ledger_lineage.py": {
+      "sha256": "355fbd5dd810e9b3b8953ff18664bf8c2bac04757a53a680ea58ae8c74a567cb",
+      "bytes": 16551
+    },
+    "tools/test_persistent_goal_engine.py": {
+      "sha256": "79d55edfdddaf7473694f87c27afb3326bbf83b12f22a15e858c2fb9de260e0d",
+      "bytes": 31356
+    }
+  },
+  "fixture_reasons": {
+    "test_p1_04_genuine_new_item_evidence_still_reopens": "Unescaped candidate/evidence_fp atoms are unknown BOARD fields. Keep provider-derived item fingerprint; serialize identity inside the description, add priority and DONE verification.",
+    "test_p1_04_unrelated_change_does_not_reopen_done_item": "Unescaped goal/candidate/evidence_fp atoms are unknown BOARD fields. Preserve the old per-item fingerprint and the independent FUN_2 selection oracle; add canonical priority and DONE verification.",
+    "test_case04_repeat_same_command_no_duplicate": "Unescaped goal/candidate atoms make BOARD_INVALID before the active-work gate. Escape description separators, use [/] for DOING, add priority and verification.",
+    "test_case06_previous_ticket_completed_successor_admitted": "Candidate atom follows a legacy goal tag without the required pipe boundary. Use an exact description identity; retain conservative DONE suppression without a newer fingerprint and the proc_102 successor oracle.",
+    "test_case11_all_candidates_blocked": "Unescaped candidate atom is an unknown field. Use escaped goal/candidate identity, priority, explicit external blocker and verification; keep blocked/no-admissible outcome, never satisfaction.",
+    "test_case16_crash_after_ticket_admission_no_duplicate": "Unescaped candidate atom prevents parsing the persisted TODO row. Use escaped exact identity, priority and verification; keep TODO_AVAILABLE rather than admitting another ticket.",
+    "test_case17_crash_after_ticket_closure_evaluates_next": "Unescaped candidate atom prevents parsing DONE. Use escaped exact identity, priority and prior verification; retain conservative DONE suppression and the independent proc_102 oracle.",
+    "test_case21_completed_ticket_invalid_no_silent_reopening": "Title-only matching is prohibited. Supply explicit goal/candidate identity and a same-generation fingerprint; keep DONE unchanged, permit new evidence, reject title-only, prefix and foreign-goal false duplicates.",
+    "test_case24_one_task_blocked_independent_continues": "Unescaped candidate atom makes the whole board invalid. Use escaped exact identity, priority and external blocker/verification; keep proc_102 independent admission."
+  },
+  "additional_control": "Keep unescaped description identity fields rejected as BOARD_INVALID; never relax production parsing.",
+  "observed_read_only_sha256": {
+    "tools/saipen_engine/replenishment.py": "2c4a25b3f88b07c95bd67ec4981e4dbc26ea15035cd6b407ac07ca02cbc178c5",
+    "tools/saipen_engine/board.py": "751767d2aa4761c537f9c098130ea178c33292b8b6b04c781787a5f54eae8f0a",
+    "tools/saipen_engine/discovery_providers.py": "b82412d9491b8743a55bee4d9f2f91329593f69b26c8ee2dabb82aacc7276a1f",
+    ".saipen/STATE.md": "6e07b5247e7d0d7ab91079c7986ca08655230d9ec9b05e68df38a4ca9b23792e",
+    ".saipen/BOARD.md": "36740c536dee4a974f682c7fde2caa2c5ea3122f5538585fe50b6a51b153195e",
+    ".saipen/LOG.md": "57c26374fd9b69efed485e2f656e7f2dbc43e28d39fafc51e31941fe275556c7"
+  }
+}

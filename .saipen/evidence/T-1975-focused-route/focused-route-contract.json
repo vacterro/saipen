@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "tools.test_t1975_focused_route",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "extensions/adapters/registry.json"
+  ],
+  "oracle_files": [
+    "tools/test_t1975_focused_route.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/intake.py"
+  ],
+  "before": {
+    "tools/saipen_engine/intake.py": ".saipen/evidence/T-1975-focused-route/prefix-intake.py"
+  },
+  "timeout": 300
+}

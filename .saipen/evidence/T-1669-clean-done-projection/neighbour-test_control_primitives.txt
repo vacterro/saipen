@@ -1,0 +1,69 @@
+# Required neighbour: python -B tools/test_control_primitives.py
+test_active_work_is_not_laundered_through_illegal_dfa_edge (__main__.BuildAndCutTests.test_active_work_is_not_laundered_through_illegal_dfa_edge) ... ok
+test_build_starts_at_scout_and_preserves_goal (__main__.BuildAndCutTests.test_build_starts_at_scout_and_preserves_goal) ... ok
+test_confirmed_cut_creates_anchor_before_normal_work (__main__.BuildAndCutTests.test_confirmed_cut_creates_anchor_before_normal_work) ... ok
+test_control_mutation_cannot_handover_foreign_open_attempt (__main__.BuildAndCutTests.test_control_mutation_cannot_handover_foreign_open_attempt) ... ok
+test_cut_anchor_resume_refuses_changed_source (__main__.BuildAndCutTests.test_cut_anchor_resume_refuses_changed_source) ... ok
+test_cut_id_authenticates_exact_impact_plan (__main__.BuildAndCutTests.test_cut_id_authenticates_exact_impact_plan) ... ok
+test_cut_preview_is_stable_zero_write_and_stales (__main__.BuildAndCutTests.test_cut_preview_is_stable_zero_write_and_stales) ... ok
+test_cut_retry_after_anchor_is_idempotent (__main__.BuildAndCutTests.test_cut_retry_after_anchor_is_idempotent) ... ok
+test_empty_build_and_preview_confirm_errors_write_nothing (__main__.BuildAndCutTests.test_empty_build_and_preview_confirm_errors_write_nothing) ... ok
+test_in_place_cold_adoption_preserves_active_phase (__main__.BuildAndCutTests.test_in_place_cold_adoption_preserves_active_phase) ... ok
+test_public_cli_cut_confirmation_transports_exact_plan (__main__.BuildAndCutTests.test_public_cli_cut_confirmation_transports_exact_plan) ... ok
+test_aliases_route_and_payload_clean_is_opaque (__main__.CliClassifierTests.test_aliases_route_and_payload_clean_is_opaque) ... ok
+test_mutation_classifier (__main__.CliClassifierTests.test_mutation_classifier) ... ok
+test_absent_concept_and_git_unavailable_are_truthful (__main__.FocusTests.test_absent_concept_and_git_unavailable_are_truthful) ... ok
+test_bare_active_and_expression_are_zero_write (__main__.FocusTests.test_bare_active_and_expression_are_zero_write) ... ok
+test_focus_does_not_follow_external_symlink (__main__.FocusTests.test_focus_does_not_follow_external_symlink) ... skipped "symlink unavailable: [WinError 1314] A required privilege is not held by the client: 'V:\\\\_TEMP_\\\\saipen-controls-hotgby3e\\\\outside-focus-secret.txt' -> 'V:\\\\_TEMP_\\\\saipen-controls-hotgby3e\\\\project\\\\linked.txt'"
+test_focus_build_focus_cut_cancel_then_cold_undo (__main__.IntegratedAcceptanceTests.test_focus_build_focus_cut_cancel_then_cold_undo) ... ok
+test_blob_dedup_status_is_metadata_only_and_git_index_untouched (__main__.MilestoneUndoTests.test_blob_dedup_status_is_metadata_only_and_git_index_untouched) ... warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_corrupt_payload_and_path_escape_refuse (__main__.MilestoneUndoTests.test_corrupt_payload_and_path_escape_refuse) ... ok
+test_crashed_milestone_is_not_selectable_and_recovers (__main__.MilestoneUndoTests.test_crashed_milestone_is_not_selectable_and_recovers) ... ok
+test_crashed_restore_recovers_exact_delete_and_log (__main__.MilestoneUndoTests.test_crashed_restore_recovers_exact_delete_and_log) ... ok
+test_crlf_payload_survives_git_clone_byte_exact (__main__.MilestoneUndoTests.test_crlf_payload_survives_git_clone_byte_exact) ... warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/milestones/CP-001/manifest.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/milestones/current.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/602dfa2fa3967252.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/milestone-b35a3f1694113800/operation.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_deleted_and_new_files_restore (__main__.MilestoneUndoTests.test_deleted_and_new_files_restore) ... ok
+test_exact_binary_restore_append_only_and_branch_sequence (__main__.MilestoneUndoTests.test_exact_binary_restore_append_only_and_branch_sequence) ... ok
+test_first_baseline_can_capture_sparse_git_parent_without_touching_index (__main__.MilestoneUndoTests.test_first_baseline_can_capture_sparse_git_parent_without_touching_index) ... warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/head.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/loc/f2c0ba471864c2e2.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled-index/rec/active.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_foreign_overlap_refuses_without_touching_bytes (__main__.MilestoneUndoTests.test_foreign_overlap_refuses_without_touching_bytes) ... ok
+test_milestone_identity_survives_project_move (__main__.MilestoneUndoTests.test_milestone_identity_survives_project_move) ... ok
+test_milestone_plan_refuses_scope_race (__main__.MilestoneUndoTests.test_milestone_plan_refuses_scope_race) ... ok
+test_no_milestones_and_missing_reason_are_read_only (__main__.MilestoneUndoTests.test_no_milestones_and_missing_reason_are_read_only) ... ok
+test_published_dirty_work_creates_forward_revert (__main__.MilestoneUndoTests.test_published_dirty_work_creates_forward_revert) ... ok
+test_published_milestone_creates_forward_work_not_git_rewrite (__main__.MilestoneUndoTests.test_published_milestone_creates_forward_work_not_git_rewrite) ... ok
+test_reviewed_dirty_work_returns_to_current_milestone (__main__.MilestoneUndoTests.test_reviewed_dirty_work_returns_to_current_milestone) ... ok
+test_symlink_escape_and_external_effect_refuse (__main__.MilestoneUndoTests.test_symlink_escape_and_external_effect_refuse) ... ok
+test_unicode_bom_crlf_and_parent_cycle (__main__.MilestoneUndoTests.test_unicode_bom_crlf_and_parent_cycle) ... ok
+
+----------------------------------------------------------------------
+Ran 34 tests in 23.409s
+
+OK (skipped=1)
+EXIT=0

@@ -1,0 +1,200 @@
+{
+  "verdict": "PASS",
+  "live_subject_unchanged": true,
+  "unchanged_verifier": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+  "red_names_repeat_identically": true,
+  "runs": [
+    {
+      "subject": "good",
+      "repeat": 1,
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "tools.test_t1705_lifecycle_write_preflight",
+        "-q"
+      ],
+      "exit_code": 0,
+      "ran": 20,
+      "failures": [],
+      "errors": [],
+      "verifier_sha256": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+      "implementation": {
+        "tools/saipen_engine/guard_events.py": "d800ed9425c3d5450eb4d024fceb7e60587b57ec8bc989502c2116c9fc17be42",
+        "tools/saipen_engine/admission.py": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+        "extensions/adapters/opencode/saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2"
+      },
+      "output": ".saipen/evidence/T-1706-hot-switch/regression-v2-good-1.txt",
+      "output_sha256": "05faeadc30f14556c3263f1c0f88d9919455a417ff1115f872cf40eecfcacf98"
+    },
+    {
+      "subject": "bad",
+      "repeat": 1,
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "tools.test_t1705_lifecycle_write_preflight",
+        "-q"
+      ],
+      "exit_code": 1,
+      "ran": 20,
+      "failures": [
+        "test_both_relative_move_endpoints_use_the_host_cwd (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_both_relative_move_endpoints_use_the_host_cwd) (source='LOG.md', destination='scratch.txt')",
+        "test_both_relative_move_endpoints_use_the_host_cwd (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_both_relative_move_endpoints_use_the_host_cwd) (source='scratch.txt', destination='STATE.md')",
+        "test_cli_refuses_before_a_host_could_apply_the_edit (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_cli_refuses_before_a_host_could_apply_the_edit)",
+        "test_computed_output_target_is_not_assumed_safe (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_computed_output_target_is_not_assumed_safe)",
+        "test_execution_cwd_is_separate_from_project_binding_cwd (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_execution_cwd_is_separate_from_project_binding_cwd) (tool='bash')",
+        "test_execution_cwd_is_separate_from_project_binding_cwd (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_execution_cwd_is_separate_from_project_binding_cwd) (tool='write')",
+        "test_guard_decision_does_not_fabricate_a_freebuff_blocking_hook (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_guard_decision_does_not_fabricate_a_freebuff_blocking_hook)",
+        "test_invalid_execution_cwd_carrier_is_not_silently_ignored (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_invalid_execution_cwd_carrier_is_not_silently_ignored) (value='')",
+        "test_invalid_execution_cwd_carrier_is_not_silently_ignored (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_invalid_execution_cwd_carrier_is_not_silently_ignored) (value=7)",
+        "test_invalid_execution_cwd_carrier_is_not_silently_ignored (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_invalid_execution_cwd_carrier_is_not_silently_ignored) (value=None)",
+        "test_invalid_execution_cwd_carrier_is_not_silently_ignored (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_invalid_execution_cwd_carrier_is_not_silently_ignored) (value=[])",
+        "test_named_shell_writers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_named_shell_writers_are_refused) (command='Add-Content LOG.md x')",
+        "test_named_shell_writers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_named_shell_writers_are_refused) (command='Set-Content -Value x -LiteralPath LOG.md')",
+        "test_named_shell_writers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_named_shell_writers_are_refused) (command='Write-Output x | Out-File LOG.md')",
+        "test_named_shell_writers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_named_shell_writers_are_refused) (command='printf x | tee -a LOG.md')",
+        "test_opencode_transport_preserves_execution_directory_and_workdir (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_opencode_transport_preserves_execution_directory_and_workdir) (case='file-from-memory-directory')",
+        "test_opencode_transport_preserves_execution_directory_and_workdir (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_opencode_transport_preserves_execution_directory_and_workdir) (case='shell-workdir')",
+        "test_relative_file_targets_from_canonical_cwd_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_file_targets_from_canonical_cwd_are_refused) (name='BOARD.md')",
+        "test_relative_file_targets_from_canonical_cwd_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_file_targets_from_canonical_cwd_are_refused) (name='LOG.md')",
+        "test_relative_file_targets_from_canonical_cwd_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_file_targets_from_canonical_cwd_are_refused) (name='STATE.md')",
+        "test_relative_parent_path_resolves_from_a_source_subdirectory (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_parent_path_resolves_from_a_source_subdirectory)",
+        "test_relative_patch_batch_cannot_hide_a_canonical_target (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_patch_batch_cannot_hide_a_canonical_target)",
+        "test_relative_shell_redirection_from_canonical_cwd_is_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_shell_redirection_from_canonical_cwd_is_refused)",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command=\"bash -c 'printf x >> LOG.md'\")",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command=\"printf x >> L'OG'.md\")",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='cmd /c \"echo x >> LOG.md\"')",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='powershell -Command \"Write-Output x >> LOG.md\"')",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='printf x &>LOG.md')",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='printf x 2>>\"LOG.md\"')",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='printf x >&LOG.md')",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='printf x>LOG.md')",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='pushd ..; popd; printf x >> LOG.md')",
+        "test_unknown_relative_host_cwd_does_not_grant_a_target_base (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_unknown_relative_host_cwd_does_not_grant_a_target_base)",
+        "test_unreadable_named_writer_is_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_unreadable_named_writer_is_refused) (command='Set-Content \\\\\"LOG.md\\\\\" x')",
+        "test_unreadable_named_writer_is_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_unreadable_named_writer_is_refused) (command='timeout 5 tee LOG.md')"
+      ],
+      "errors": [],
+      "verifier_sha256": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+      "implementation": {
+        "tools/saipen_engine/guard_events.py": "403ba384450a9cdb4f484fc56a98a444dedfff9f80a717fb81c6749043223a2d",
+        "tools/saipen_engine/admission.py": "6c682c7149545ce8474d830a525de66adc48fd5a1e357e840e9fb0a80330957b",
+        "extensions/adapters/opencode/saipen-guard.js": "eb30a498ae86ecef6234f18b956403bf1fbc64dab0be8056ae52f7e8973e32e8"
+      },
+      "output": ".saipen/evidence/T-1706-hot-switch/regression-v2-bad-1.txt",
+      "output_sha256": "6c92fec9cda65cd45c8024f92fa8d3c4450d80be7366dbabe16de5d24408d0b1"
+    },
+    {
+      "subject": "bad",
+      "repeat": 2,
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "tools.test_t1705_lifecycle_write_preflight",
+        "-q"
+      ],
+      "exit_code": 1,
+      "ran": 20,
+      "failures": [
+        "test_both_relative_move_endpoints_use_the_host_cwd (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_both_relative_move_endpoints_use_the_host_cwd) (source='LOG.md', destination='scratch.txt')",
+        "test_both_relative_move_endpoints_use_the_host_cwd (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_both_relative_move_endpoints_use_the_host_cwd) (source='scratch.txt', destination='STATE.md')",
+        "test_cli_refuses_before_a_host_could_apply_the_edit (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_cli_refuses_before_a_host_could_apply_the_edit)",
+        "test_computed_output_target_is_not_assumed_safe (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_computed_output_target_is_not_assumed_safe)",
+        "test_execution_cwd_is_separate_from_project_binding_cwd (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_execution_cwd_is_separate_from_project_binding_cwd) (tool='bash')",
+        "test_execution_cwd_is_separate_from_project_binding_cwd (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_execution_cwd_is_separate_from_project_binding_cwd) (tool='write')",
+        "test_guard_decision_does_not_fabricate_a_freebuff_blocking_hook (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_guard_decision_does_not_fabricate_a_freebuff_blocking_hook)",
+        "test_invalid_execution_cwd_carrier_is_not_silently_ignored (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_invalid_execution_cwd_carrier_is_not_silently_ignored) (value='')",
+        "test_invalid_execution_cwd_carrier_is_not_silently_ignored (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_invalid_execution_cwd_carrier_is_not_silently_ignored) (value=7)",
+        "test_invalid_execution_cwd_carrier_is_not_silently_ignored (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_invalid_execution_cwd_carrier_is_not_silently_ignored) (value=None)",
+        "test_invalid_execution_cwd_carrier_is_not_silently_ignored (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_invalid_execution_cwd_carrier_is_not_silently_ignored) (value=[])",
+        "test_named_shell_writers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_named_shell_writers_are_refused) (command='Add-Content LOG.md x')",
+        "test_named_shell_writers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_named_shell_writers_are_refused) (command='Set-Content -Value x -LiteralPath LOG.md')",
+        "test_named_shell_writers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_named_shell_writers_are_refused) (command='Write-Output x | Out-File LOG.md')",
+        "test_named_shell_writers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_named_shell_writers_are_refused) (command='printf x | tee -a LOG.md')",
+        "test_opencode_transport_preserves_execution_directory_and_workdir (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_opencode_transport_preserves_execution_directory_and_workdir) (case='file-from-memory-directory')",
+        "test_opencode_transport_preserves_execution_directory_and_workdir (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_opencode_transport_preserves_execution_directory_and_workdir) (case='shell-workdir')",
+        "test_relative_file_targets_from_canonical_cwd_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_file_targets_from_canonical_cwd_are_refused) (name='BOARD.md')",
+        "test_relative_file_targets_from_canonical_cwd_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_file_targets_from_canonical_cwd_are_refused) (name='LOG.md')",
+        "test_relative_file_targets_from_canonical_cwd_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_file_targets_from_canonical_cwd_are_refused) (name='STATE.md')",
+        "test_relative_parent_path_resolves_from_a_source_subdirectory (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_parent_path_resolves_from_a_source_subdirectory)",
+        "test_relative_patch_batch_cannot_hide_a_canonical_target (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_patch_batch_cannot_hide_a_canonical_target)",
+        "test_relative_shell_redirection_from_canonical_cwd_is_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_shell_redirection_from_canonical_cwd_is_refused)",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command=\"bash -c 'printf x >> LOG.md'\")",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command=\"printf x >> L'OG'.md\")",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='cmd /c \"echo x >> LOG.md\"')",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='powershell -Command \"Write-Output x >> LOG.md\"')",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='printf x &>LOG.md')",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='printf x 2>>\"LOG.md\"')",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='printf x >&LOG.md')",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='printf x>LOG.md')",
+        "test_shell_redirection_spellings_and_wrappers_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_shell_redirection_spellings_and_wrappers_are_refused) (command='pushd ..; popd; printf x >> LOG.md')",
+        "test_unknown_relative_host_cwd_does_not_grant_a_target_base (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_unknown_relative_host_cwd_does_not_grant_a_target_base)",
+        "test_unreadable_named_writer_is_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_unreadable_named_writer_is_refused) (command='Set-Content \\\\\"LOG.md\\\\\" x')",
+        "test_unreadable_named_writer_is_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_unreadable_named_writer_is_refused) (command='timeout 5 tee LOG.md')"
+      ],
+      "errors": [],
+      "verifier_sha256": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+      "implementation": {
+        "tools/saipen_engine/guard_events.py": "403ba384450a9cdb4f484fc56a98a444dedfff9f80a717fb81c6749043223a2d",
+        "tools/saipen_engine/admission.py": "6c682c7149545ce8474d830a525de66adc48fd5a1e357e840e9fb0a80330957b",
+        "extensions/adapters/opencode/saipen-guard.js": "eb30a498ae86ecef6234f18b956403bf1fbc64dab0be8056ae52f7e8973e32e8"
+      },
+      "output": ".saipen/evidence/T-1706-hot-switch/regression-v2-bad-2.txt",
+      "output_sha256": "56c006fc9fef762ccea3d223c5aa9eb2148e6271db72a105eafbe6e6dd020838"
+    },
+    {
+      "subject": "restored",
+      "repeat": 1,
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "tools.test_t1705_lifecycle_write_preflight",
+        "-q"
+      ],
+      "exit_code": 0,
+      "ran": 20,
+      "failures": [],
+      "errors": [],
+      "verifier_sha256": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+      "implementation": {
+        "tools/saipen_engine/guard_events.py": "d800ed9425c3d5450eb4d024fceb7e60587b57ec8bc989502c2116c9fc17be42",
+        "tools/saipen_engine/admission.py": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+        "extensions/adapters/opencode/saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2"
+      },
+      "output": ".saipen/evidence/T-1706-hot-switch/regression-v2-restored-1.txt",
+      "output_sha256": "afc7f124871f4e7fcb4c821de0a64f8cd4b39c50bfc48232d82cf3fabfe82531"
+    },
+    {
+      "subject": "restored",
+      "repeat": 2,
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "tools.test_t1705_lifecycle_write_preflight",
+        "-q"
+      ],
+      "exit_code": 0,
+      "ran": 20,
+      "failures": [],
+      "errors": [],
+      "verifier_sha256": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+      "implementation": {
+        "tools/saipen_engine/guard_events.py": "d800ed9425c3d5450eb4d024fceb7e60587b57ec8bc989502c2116c9fc17be42",
+        "tools/saipen_engine/admission.py": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+        "extensions/adapters/opencode/saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2"
+      },
+      "output": ".saipen/evidence/T-1706-hot-switch/regression-v2-restored-2.txt",
+      "output_sha256": "ed1d69305506f821099fd703bfe82173aa4ef5c8f8266ad0e37699c7bd65cc92"
+    }
+  ]
+}

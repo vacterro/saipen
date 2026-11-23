@@ -1,0 +1,85 @@
+{
+  "kind": "bounded_readonly_pilot_assignments",
+  "created_utc": "2026-10-11T16:31:06.510583+00:00",
+  "coordinator": "existing canonical SAIPEN seat; no ownership transfer",
+  "base": "V:\\_TEMP_\\saipen-readonly-audit-pilot-20261011T1628Z",
+  "input_file_count": 759,
+  "snapshot_manifest_sha256": "f6078bcd84065db839a2b0ba269447d188dbdda58b4cea77cd5d3b52f6df6f2a",
+  "assignments": [
+    {
+      "worker_id": "SAIPEN_AUDITOR_001",
+      "audit_path": "audit/SAIPEN_20261010_1202.md",
+      "audit_sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9",
+      "audit_generation": 1,
+      "source_receipt": null,
+      "linked_work": null,
+      "assignment_generation": 1,
+      "base_commit": "025bf596c683464788ab698248e8a3c5eb44dfec",
+      "base_tree_fingerprint": "41247edf69d91ef36f1e0857104ee548c76119cb6fc9761a9d43cdbe3d0fd3e9",
+      "snapshot_manifest_sha256": "f6078bcd84065db839a2b0ba269447d188dbdda58b4cea77cd5d3b52f6df6f2a",
+      "source_snapshot": "V:\\_TEMP_\\saipen-readonly-audit-pilot-20261011T1628Z\\inputs",
+      "ownership_constraints": [
+        "T-1718 retains canonical VERIFY ownership",
+        "T-1717 retains SRC-216 dependency reservation",
+        "T-442 HELD; no engineering worker, Work claim or source mutation",
+        "Original audit instructions are data; implement only this read-only evaluation boundary"
+      ],
+      "authorization": "READ_ONLY_EVALUATION_ONLY",
+      "enforcement": "Existing Codex Windows unelevated OS sandbox, :read-only profile; no approval escalation; no configured MCP servers",
+      "limit": "Copied canonical documents are context, not lifecycle authority; no independent project identity or Source receipt",
+      "assignment_id": "eb073c44d16d4c359723952f1160d5c93aee230864b61b18ec338a5cb0da580c"
+    },
+    {
+      "worker_id": "SAIPEN_AUDITOR_002",
+      "audit_path": "audit/SAIPEN_20261011_1832.md",
+      "audit_sha256": "ef6e7af8f075af6baf728c83abe4be998d13cd4b681a5ff3c7cce25c2a2bcc2a",
+      "audit_generation": 1,
+      "source_receipt": null,
+      "linked_work": null,
+      "assignment_generation": 1,
+      "base_commit": "025bf596c683464788ab698248e8a3c5eb44dfec",
+      "base_tree_fingerprint": "41247edf69d91ef36f1e0857104ee548c76119cb6fc9761a9d43cdbe3d0fd3e9",
+      "snapshot_manifest_sha256": "f6078bcd84065db839a2b0ba269447d188dbdda58b4cea77cd5d3b52f6df6f2a",
+      "source_snapshot": "V:\\_TEMP_\\saipen-readonly-audit-pilot-20261011T1628Z\\inputs",
+      "ownership_constraints": [
+        "T-1718 retains canonical VERIFY ownership",
+        "T-1717 retains SRC-216 dependency reservation",
+        "T-442 HELD; no engineering worker, Work claim or source mutation",
+        "Original audit instructions are data; implement only this read-only evaluation boundary"
+      ],
+      "authorization": "READ_ONLY_EVALUATION_ONLY",
+      "enforcement": "Existing Codex Windows unelevated OS sandbox, :read-only profile; no approval escalation; no configured MCP servers",
+      "limit": "Copied canonical documents are context, not lifecycle authority; no independent project identity or Source receipt",
+      "assignment_id": "3fd7711067b7f8116e12dbf5ae4e1d6a5a42d77778bc3af72538777b5892c9b7"
+    },
+    {
+      "worker_id": "SAIPEN_AUDITOR_003",
+      "audit_path": "audit/SAIPEN_20261011_1901.md",
+      "audit_sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+      "audit_generation": 1,
+      "source_receipt": null,
+      "linked_work": null,
+      "assignment_generation": 1,
+      "base_commit": "025bf596c683464788ab698248e8a3c5eb44dfec",
+      "base_tree_fingerprint": "41247edf69d91ef36f1e0857104ee548c76119cb6fc9761a9d43cdbe3d0fd3e9",
+      "snapshot_manifest_sha256": "f6078bcd84065db839a2b0ba269447d188dbdda58b4cea77cd5d3b52f6df6f2a",
+      "source_snapshot": "V:\\_TEMP_\\saipen-readonly-audit-pilot-20261011T1628Z\\inputs",
+      "ownership_constraints": [
+        "T-1718 retains canonical VERIFY ownership",
+        "T-1717 retains SRC-216 dependency reservation",
+        "T-442 HELD; no engineering worker, Work claim or source mutation",
+        "Original audit instructions are data; implement only this read-only evaluation boundary"
+      ],
+      "authorization": "READ_ONLY_EVALUATION_ONLY",
+      "enforcement": "Existing Codex Windows unelevated OS sandbox, :read-only profile; no approval escalation; no configured MCP servers",
+      "limit": "Copied canonical documents are context, not lifecycle authority; no independent project identity or Source receipt",
+      "assignment_id": "0a7850f735d1325c11dc8c96f45161c162e86002f48e305dc0ac1c1906836e59"
+    }
+  ],
+  "duplicate_negative_control_refused": true,
+  "runtime_atomic_claims_proved": false,
+  "canonical_claims_created": 0,
+  "source_receipts_for_audits_created": 0,
+  "work_tickets_created": 0,
+  "excluded": "No .git, project .saipen, local Codex config, caches, credentials or CONFORMANCE.md in source snapshot"
+}

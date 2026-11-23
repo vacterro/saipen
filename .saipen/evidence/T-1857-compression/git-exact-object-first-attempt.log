@@ -1,0 +1,3 @@
+fatal: You are attempting to fetch 4e2718c1d18d2ef5790733bd4e6b26b56b25fe77, which is in the commit graph file but not in the object database.
+This is probably due to repo corruption.
+If you are attempting to repair this repo corruption by refetching the missing object, use 'git fetch --refetch' with the missing object.

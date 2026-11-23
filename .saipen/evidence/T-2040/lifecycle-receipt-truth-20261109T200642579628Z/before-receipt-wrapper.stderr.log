@@ -1,0 +1,41 @@
+test_second_wave_receipt_probe (test_t1893_probe_wrappers.LegacyProbeTests.test_second_wave_receipt_probe) ... FAIL
+
+======================================================================
+FAIL: test_second_wave_receipt_probe (test_t1893_probe_wrappers.LegacyProbeTests.test_second_wave_receipt_probe)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1893_probe_wrappers.py", line 94, in test_second_wave_receipt_probe
+    self._run(*PROBES[1])
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1893_probe_wrappers.py", line 79, in _run
+    self.assertEqual(
+AssertionError: 1 != 0 : regression_second_wave_receipt_fixes.py exited 1; its own verdict was:
+PASS  2026 CORE-002 object ticket_id remains corrupt 
+PASS  2026 CORE-002 list ticket_id remains corrupt 
+PASS  2026 CORE-002 no-ticket ship/crew transitions and finalizers succeed 
+PASS  2026 CORE-002 new semantic receipts omit absent ticket_id 
+PASS  2026 CORE-002 metadata finalizer remains dict-only 
+PASS  W2-001 crash-stale conformance index cannot hide newer FAIL 
+PASS  W2-002 settled release receipt discovered 
+PASS  W2-002 ops release receipt still discovered 
+PASS  W2-002 settled sub_sync discovered 
+PASS  W2-002 sub_sync path is the actual settled path 
+PASS  W2-002 ops sub_sync still discovered 
+FAIL collect accept_live with every target applied is durable intake -- collected={'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'} links={}
+PASS  collect partial accept_live is never durable intake 
+PASS  W2-003 fully committed release returns ALREADY_APPLIED 
+PASS  W2-003 partial release is NOT ALREADY_APPLIED 
+PASS  W2-003 partial release returns RELEASE_STAGE_INCOMPLETE 
+PASS  W2-005 staged payload removed on success 
+PASS  W2-005 cleanup marker cleared on success 
+PASS  W2-005 entry reported compacted 
+PASS  W2-005 failed unlink retains staged payload 
+PASS  W2-005 failed unlink retains cleanup marker 
+PASS  W2-005 entry reported skipped (debt) 
+PASS  W2-005 entry NOT compacted while in debt 
+
+32/33 SECOND-WAVE receipt regressions passed
+
+----------------------------------------------------------------------
+Ran 1 test in 1.017s
+
+FAILED (failures=1)

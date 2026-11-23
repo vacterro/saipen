@@ -1514,33 +1514,32 @@ def record_slice(
 # ---------------------------------------------------------------- validation
 
 
-def _pruned_closed(history_events, board_tickets: dict | None, gate_ids) -> set[str]:
-    """Gate slice tickets that left the BOARD because CLEAN scrubbed them.
+def _closed_in_history(root: Path | str, ticket_ids) -> set[str]:
+    """Which of `ticket_ids` the complete LOG ledger proves closed.
 
-    `phases/clean.md` step 1 moves a closed row to `SCRUB_EVIDENCE_ROOT`, and
-    the LOG closing event is then the only record that the Work closed at all
-    -- the same fact `subs._terminal_tickets` reads under T-925. A slice
-    ticket is resolved here by that durable proof, so the sanctioned hygiene
-    step cannot turn a green validator red.
-
-    Fail-closed in every direction: no history means nothing is proven, and an
-    id the history never closed stays an error below.
+    The standard `board_scrub` already applies before a canonical scrub may
+    move a closed record off the live BOARD: a closing operation's event for
+    that ticket. Reading it here instead of re-deriving it keeps ONE rule for
+    "this Work closed", so a pruned row and a live row are answered by the
+    same fact. History unreadable means nothing is proven -- never everything
+    is, because then rule 6 could not fail at all.
     """
-    if history_events is None or board_tickets is None:
+    wanted = {str(tid) for tid in ticket_ids if tid}
+    if not wanted:
         return set()
-    from .board_scrub import closed_in_history
+    try:
+        from .log import read_history_events
 
-    missing = [tid for tid in gate_ids if tid not in board_tickets]
-    if not missing:
+        events = read_history_events(root)
+    except (OSError, ValueError):
         return set()
-    return closed_in_history(history_events, missing)
+    from . import board_scrub
+
+    return {tid for tid in wanted if tid in board_scrub.closed_in_history(events, wanted)}
 
 
 def validate_future_gate(
-    root: Path | str,
-    board_tickets: dict | None = None,
-    *,
-    history_events=None,
+    root: Path | str, board_tickets: dict | None = None
 ) -> dict:
     """Check the future-gate surface against FUTURE.md; returns findings.
 
@@ -1649,6 +1648,18 @@ def validate_future_gate(
                 f"future gate document {doc.path} is on disk but absent from the index"
             )
 
+    # 6: a slice ticket absent from the live BOARD is answered against the
+    # ledger ONCE, before the per-record rules run. Reading history inside the
+    # loop would re-read the whole ledger for every gate that names one.
+    absent_slice_tickets = {
+        str(slice_record.get("ticket") or "")
+        for gate in raw_gates
+        for slice_record in gate.slices
+        if board_tickets is not None
+        and str(slice_record.get("ticket") or "") not in board_tickets
+    }
+    closed_elsewhere = _closed_in_history(root, absent_slice_tickets)
+
     for gate in raw_gates:
         # 4: a record's state must agree with what it proves.
         if gate.state not in STATES:
@@ -1677,21 +1688,25 @@ def validate_future_gate(
             if not gate.machine_readable:
                 continue
         # 6: implementation authority follows promotion.
-    _slice_ids = [
-        str(slice_record.get("ticket") or "")
-        for gate in raw_gates
-        for slice_record in gate.slices
-    ]
-    _pruned = _pruned_closed(history_events, board_tickets, _slice_ids)
-    for gate in raw_gates:
         for slice_record in gate.slices:
             tid = str(slice_record.get("ticket") or "")
             if not tid:
                 errors.append(f"future gate {gate.id} records a slice with no ticket")
-            elif board_tickets is not None and tid not in board_tickets and tid not in _pruned:
-                errors.append(
-                    f"future gate {gate.id} names slice ticket {tid}, which is not on BOARD"
-                )
+            elif board_tickets is not None and tid not in board_tickets:
+                # A canonical scrub may move a closed record off the live BOARD
+                # (`board_scrub`): the row is never dropped, and its closure
+                # stays provable from the closing event the operation requires
+                # in the ledger before it may go. Rule 6 asks whether the slice
+                # links Work that EXISTS, and that ledger event is exactly the
+                # existence proof the BOARD row carries -- so a ticket missing
+                # from the BOARD is only an error when history cannot close it
+                # either (T-2052 measured FG-0046 failing precisely here: its
+                # slice ticket T-1936 finished at E-18545 and its row was
+                # pruned, so a satisfied slice reported a broken link).
+                if tid not in closed_elsewhere:
+                    errors.append(
+                        f"future gate {gate.id} names slice ticket {tid}, which is not on BOARD"
+                    )
     if board_tickets:
         held: dict[str, list[str]] = {}
         for gate in raw_gates:

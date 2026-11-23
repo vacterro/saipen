@@ -1,0 +1,31 @@
+--- .saipen/evidence/T-1788-verifier-env/pre/regression_execution.py	2026-10-14 23:04:19.118701500 +0300
++++ tools/saipen_engine/regression_execution.py	2026-10-14 23:05:01.175937500 +0300
+@@ -38,6 +38,15 @@
+ FIELDS = frozenset(
+     {"schema", "command", "format", "context", "oracle_files", "subject_files", "before", "timeout"}
+ )
++#: T-1788: keys that name the invoking shell or host session, not the
++#: verifier's environment. Digested, they staled an unchanged receipt on a
++#: wrapper (`timeout` rewrites `_`), a shell change (`OLDPWD`, `PROMPT`,
++#: T-1714) or a new session (`/clear`, `CLAUDE_CODE_SESSION_ID`). They are
++#: neither digested nor passed to the verifier.
++SESSION_ONLY_KEYS = frozenset(
++    {"_", "OLDPWD", "PWD", "SHLVL", "PROMPT", "WT_SESSION", "TERM_SESSION_ID"}
++)
++SESSION_ONLY_PREFIXES = ("SAIPEN_", "CLAUDE")
+ 
+ 
+ def _sha(raw):
+@@ -169,7 +178,11 @@
+     update_digest_regular_bytes(executable, info, digest)
+     runtime = {"path": str(executable), "sha256": digest.hexdigest()}
+     argv = [str(executable), *command[1:]]
+-    environment = {key: item for key, item in os.environ.items() if not key.startswith("SAIPEN_")}
++    environment = {
++        key: item
++        for key, item in os.environ.items()
++        if key not in SESSION_ONLY_KEYS and not key.startswith(SESSION_ONLY_PREFIXES)
++    }
+     environment["PYTHONDONTWRITEBYTECODE"] = "1"
+     environment["SAIPEN_CAPABILITY"] = "no-publish"
+     return runtime, argv, environment

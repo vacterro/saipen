@@ -1,0 +1,105 @@
+[
+  {
+    "command": "['git', 'rev-parse', '--show-toplevel']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', 'rev-parse', '--git-common-dir']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', 'rev-parse', '--show-toplevel']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'rev-parse', '--short', 'HEAD']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', 'rev-parse', 'HEAD']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'status', '--porcelain=v1', '--untracked-files=all', '--', 'VERSION', 'bootstrap', 'bootstrap/inject.ps1', 'bootstrap/inject.sh', 'extensions/adapters', 'extensions/adapters/registry.json', 'extensions/schemas', 'extensions/schemas/state.schema.json', 'extensions/subs', 'extensions/templates', 'extensions/templates/BOARD.md', 'extensions/templates/LOG.md', 'extensions/templates/STATE.md', 'saipen/ACTIVATION_BLOCK.md', 'saipen/BOOT.md', 'saipen/COMMANDS.md', 'saipen/COMMANDS_REFERENCE.md', 'saipen/COMMAND_EFFECTS.json', 'saipen/COMPOUND_RESPONSE_POLICY.json', 'saipen/CONFORMANCE.md', 'saipen/CONTROLS.md', 'saipen/CONVERGE.md', 'saipen/CORE.md', 'saipen/EXECUTION.md', 'saipen/FUTURE.md', 'saipen/HABITS.md', 'saipen/IMPROVE.md', 'saipen/INDEX.md', 'saipen/MAINTENANCE.md', 'saipen/MANIFEST.json', 'saipen/OPS.md', 'saipen/REGISTRY.json', 'saipen/RFC.md', 'saipen/RUNTIME.md', 'saipen/SAICRITIC.md', 'saipen/SAIPEN_ENTRY.json', 'saipen/SKILL.md', 'saipen/SOURCES.md', 'saipen/STORAGE.md', 'saipen/STYLE.md', 'saipen/UI.md', 'saipen/phases', 'tests/validate.ps1', 'tests/validate.sh', 'tools', 'tools/audit_floor.py', 'tools/ci_status.py', 'tools/freshness.py', 'tools/hardening_controls.json', 'tools/improve.py', 'tools/install_hook.py', 'tools/perf_wave_regressions.py', 'tools/release_ledger_baseline.json', 'tools/run_scenarios.py', 'tools/sub_clean.py', 'tools/uninstall_hook.py', 'tools/userperson.py', 'tools/validate.py']",
+    "index_changed": true,
+    "stack": [
+      "  File \"<stdin>\", line 13, in <module>\n",
+      "  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py\", line 13076, in main\n    return _status(project_root, as_json)\n",
+      "  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py\", line 2363, in _status\n    _dist = distribution_report() if has_installed_targets() else None\n",
+      "  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\autoinject.py\", line 957, in distribution_report\n    \"blocker\": injection_blockers(),\n",
+      "  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\autoinject.py\", line 1043, in injection_blockers\n    rc, out = _run(\n",
+      "  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\autoinject.py\", line 222, in _run\n    r = subprocess.run(cmd, cwd=cwd, **kwargs)\n",
+      "  File \"<stdin>\", line 10, in run\n"
+    ]
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'rev-parse', '--is-inside-work-tree']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'rev-parse', '--show-toplevel']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'diff', '--raw', '-z', '--no-renames', '--no-ext-diff', '--ignore-submodules=none', 'HEAD', '--', ':(exclude).saipen']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'ls-files', '-z', '--others', '--exclude-standard', '--', ':(exclude).saipen']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'rev-parse', '--verify', 'HEAD']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'diff', '--raw', '-z', '--no-renames', '--no-ext-diff', '--ignore-submodules=none', 'HEAD', '--', ':(exclude).saipen']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'ls-files', '-z', '--others', '--exclude-standard', '--', ':(exclude).saipen']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'diff', '--raw', '-z', '--no-renames', '--no-ext-diff', '--ignore-submodules=none', 'HEAD', '--', ':(exclude).saipen']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'ls-files', '-z', '--others', '--exclude-standard', '--', ':(exclude).saipen']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'diff', '--raw', '-z', '--no-renames', '--no-ext-diff', '--ignore-submodules=none', 'HEAD', '--', ':(exclude).saipen']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'ls-files', '-z', '--others', '--exclude-standard', '--', ':(exclude).saipen']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['git', '-C', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN', 'rev-parse', '--verify', 'HEAD']",
+    "index_changed": false,
+    "stack": []
+  },
+  {
+    "command": "['c:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\Scripts\\\\saimail-local.EXE', '--json', 'saipen', 'telegrams', '--workspace', 'C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\saipen\\\\saimail', '--scan-budget', '200']",
+    "index_changed": false,
+    "stack": []
+  }
+]

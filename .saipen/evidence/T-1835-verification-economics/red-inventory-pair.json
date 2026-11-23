@@ -1,0 +1,14 @@
+[
+  {
+    "name": "prefix",
+    "exit_code": 1,
+    "oracle_sha256": "b11ce39d83b3c7e5cb96bc08e4a0214bab5ba3d67e28183faf544ad545ed91a8",
+    "subject_sha256": "1b673ee104062482575c68ee60e5eeef692ad848b5cd10bdf1294842509fe988"
+  },
+  {
+    "name": "postfix",
+    "exit_code": 0,
+    "oracle_sha256": "b11ce39d83b3c7e5cb96bc08e4a0214bab5ba3d67e28183faf544ad545ed91a8",
+    "subject_sha256": "3efcdaa26e6486f7315e88ee2b16aa28415d10d3f4bc68ae343c058d6a0869d6"
+  }
+]

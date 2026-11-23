@@ -1,0 +1,120 @@
+221     names = {norm_path(item).rsplit("/", 1)[-1] for item in wanted if str(item).strip()}
+222     for fact in facts:
+223         name = _basename(getattr(fact, "image", None))
+224         if any(name.startswith(known + ".") for known in names if known):
+225             if not _host_matches(fact, wanted):
+226                 return name
+227     return None
+228 
+229 
+230 def _not_host(detail: str, facts: Sequence, wanted: Sequence[str]) -> str:
+231     renamed = _renamed_host(facts, wanted)
+232     if renamed is None:
+233         return detail
+234     return (
+235         f"{detail}; a renamed copy of the host image is running ({renamed}): the host "
+236         "application was updated while running -- restart it"
+237     )
+238 
+239 
+240 def _same_token(left: str, right: str, *, executable: bool = False) -> bool:
+241     """Two command tokens name the same thing. Flags compare exactly; anything
+242     path-like compares by normalized path; an executable given without a
+243     directory compares by name, because the shell resolved it through PATH."""
+244     if left == right:
+245         return True
+246     a, b = norm_path(left), norm_path(right)
+247     if a == b:
+248         return True
+249     if executable and ("/" not in a or "/" not in b):
+250         return _stem(a.rsplit("/", 1)[-1]) == _stem(b.rsplit("/", 1)[-1])
+251     return False
+252 
+253 
+254 def _same_argv(payload: Sequence[str], argv: Sequence[str]) -> bool:
+255     if len(payload) != len(argv) or not argv:
+256         return False
+257     if not _same_token(payload[0], argv[0], executable=True):
+258         return False
+259     return all(_same_token(a, b) for a, b in zip(payload[1:], argv[1:]))
+260 
+261 
+262 def _payload_tokens(payload: str) -> list[list[str]]:
+263     """Every way a shell could have split its command string."""
+264     found: list[list[str]] = []
+265     for posix in (True, False):
+266         try:
+267             tokens = shlex.split(payload, posix=posix)
+268         except ValueError:
+269             continue
+270         if not posix:
+271             tokens = [token.strip("\"'") for token in tokens]
+272         if tokens and tokens not in found:
+273             found.append(tokens)
+274     return found
+275 
+276 
+277 def _flag(argv: Sequence[str], name: str) -> str | None:
+278     for index, token in enumerate(argv):
+279         if token == name and index + 1 < len(argv):
+280             return argv[index + 1]
+281         if token.startswith(name + "="):
+282             return token.split("=", 1)[1]
+283     return None
+284 
+285 
+286 def hook_script(argv: Sequence[str] | None) -> str | None:
+287     """The script an interpreter command line runs, or None.
+288 
+289     Strict on purpose. Two spellings exist and nothing else is a script: the
+290     FIRST argument (the engine, and hooks installed before the bootstrap), or
+291     the argument after `-c` and EXACTLY the installer's `HOOK_BOOTSTRAP`.
+292     Reading past any other option would let `-X <hook path> other.py` pass an
+293     option value off as the script being run, and accepting any other `-c`
+294     program would let arbitrary code name the hook as its "script".
+295     """
+296     if not argv or len(argv) < 2:
+297         return None
+298     token = argv[1]
+299     if token == "-c":
+300         if len(argv) >= 4 and argv[2] == HOOK_BOOTSTRAP and not argv[3].startswith("-"):
+301             return argv[3]
+302         return None
+303     return None if token.startswith("-") else token
+304 
+305 
+306 _script = hook_script
+307 
+308 
+309 #: The flag after which a shell's command line carries the command to run.
+310 _COMMAND_FLAGS = ("-c", "/c", "-command", "-encodedcommand")
+311 
+312 
+313 def _shell_payloads(argv: Sequence[str]) -> list[list[str]]:
+314     """Every reading of "the command this shell was started to run"."""
+315     readings: list[list[str]] = []
+316     if len(argv) >= 3:
+317         readings.extend(_payload_tokens(argv[-1]))
+318     for index, token in enumerate(argv[1:], start=1):
+319         if token.lower() in _COMMAND_FLAGS:
+320             tail = list(argv[index + 1 :])
+321             if len(tail) > 1 and tail not in readings:
+322                 readings.append(tail)
+323             break
+324     return readings
+325 
+326 
+327 def _view(fact) -> dict:
+328     argv = list(getattr(fact, "argv", None) or [])
+329     return {
+330         "pid": fact.pid,
+331         "ppid": fact.ppid,
+332         "image": fact.image,
+333         "name": fact.name,
+334         "argv": [token[:160] for token in argv[:8]],
+335     }
+336 
+337 
+338 def prove_hook_invocation(
+339     chain: Sequence,
+340     policy: IdentityPolicy,

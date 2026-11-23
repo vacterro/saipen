@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-018:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement and verify every required change and test in T04 WAVE PROGRESS TELEMETRY."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:11Z",
+  "derived_from": "SRC-018",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7a1d1c42e4c47497b70f746e122074b46ff17fd2f55008a945566a2b941f0d09"
+}

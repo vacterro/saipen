@@ -1,0 +1,19 @@
+{
+  "job_pid": 12172,
+  "status": "stopped",
+  "completed": [
+    "T1695-currentness-08",
+    "conformance-current-08",
+    "core-unit-current-08",
+    "floor-current-08",
+    "order-current-08",
+    "tags-current-08",
+    "audit-current-08"
+  ],
+  "started_utc": "2026-10-12T22:31:10.405169+00:00",
+  "current_gate": "audit-current-08",
+  "focused_receipt": "RV-000045",
+  "resumed_from": "current-07 terminal evidence",
+  "reason": "RuntimeError: the original VERIFY T-1730 boundary changed",
+  "finished_utc": "2026-10-12T23:16:48.001308+00:00"
+}

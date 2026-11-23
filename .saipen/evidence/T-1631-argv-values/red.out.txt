@@ -1,0 +1,1031 @@
+.FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE
+======================================================================
+ERROR: test_response_check_receives_the_request_and_original_binding (test_t1631_argv_values.PublicValueOwnership.test_response_check_receives_the_request_and_original_binding) (value='--')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 67, in test_response_check_receives_the_request_and_original_binding
+    payload = json.loads(result.stdout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--session', value='--project-root=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--session'] != ['admission', 'status', '--session', '--project-root=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--project-root=foreign'
+
+- ['admission', 'status', '--session']
++ ['admission', 'status', '--session', '--project-root=foreign']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--session', value='--agent=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--session'] != ['admission', 'status', '--session', '--agent=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--agent=foreign'
+
+- ['admission', 'status', '--session']
++ ['admission', 'status', '--session', '--agent=foreign']
+?                                    +++++++++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--session', value='--runtime-info=missing.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--session'] != ['admission', 'status', '--session', '--runtime-info=missing.json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--runtime-info=missing.json'
+
+- ['admission', 'status', '--session']
++ ['admission', 'status', '--session', '--runtime-info=missing.json']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--session', value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--session'] != ['admission', 'status', '--session', '--dry-run']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--dry-run'
+
+- ['admission', 'status', '--session']
++ ['admission', 'status', '--session', '--dry-run']
+?                                    +++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--session', value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--session'] != ['admission', 'status', '--session', '--json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--json'
+
+- ['admission', 'status', '--session']
++ ['admission', 'status', '--session', '--json']
+?                                    ++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--admission-session', value='--project-root=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--admission-session'] != ['admission', 'status', '--admission-session', '--project-root=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--project-root=foreign'
+
+- ['admission', 'status', '--admission-session']
++ ['admission', 'status', '--admission-session', '--project-root=foreign']
+?                                              ++++++++++++++++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--admission-session', value='--agent=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--admission-session'] != ['admission', 'status', '--admission-session', '--agent=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--agent=foreign'
+
+- ['admission', 'status', '--admission-session']
++ ['admission', 'status', '--admission-session', '--agent=foreign']
+?                                              +++++++++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--admission-session', value='--runtime-info=missing.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--admission-session'] != ['admission', 'status', '--admission-session', '--runtime-info=missing.json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--runtime-info=missing.json'
+
+- ['admission', 'status', '--admission-session']
++ ['admission', 'status', '--admission-session', '--runtime-info=missing.json']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--admission-session', value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--admission-session'] != ['admission', 'status', '--admission-session', '--dry-run']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--dry-run'
+
+- ['admission', 'status', '--admission-session']
++ ['admission', 'status', '--admission-session', '--dry-run']
+?                                              +++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--admission-session', value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--admission-session'] != ['admission', 'status', '--admission-session', '--json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--json'
+
+- ['admission', 'status', '--admission-session']
++ ['admission', 'status', '--admission-session', '--json']
+?                                              ++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--host', value='--project-root=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--host'] != ['admission', 'status', '--host', '--project-root=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--project-root=foreign'
+
+- ['admission', 'status', '--host']
++ ['admission', 'status', '--host', '--project-root=foreign']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--host', value='--agent=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--host'] != ['admission', 'status', '--host', '--agent=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--agent=foreign'
+
+- ['admission', 'status', '--host']
++ ['admission', 'status', '--host', '--agent=foreign']
+?                                 +++++++++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--host', value='--runtime-info=missing.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--host'] != ['admission', 'status', '--host', '--runtime-info=missing.json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--runtime-info=missing.json'
+
+- ['admission', 'status', '--host']
++ ['admission', 'status', '--host', '--runtime-info=missing.json']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--host', value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--host'] != ['admission', 'status', '--host', '--dry-run']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--dry-run'
+
+- ['admission', 'status', '--host']
++ ['admission', 'status', '--host', '--dry-run']
+?                                 +++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--host', value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--host'] != ['admission', 'status', '--host', '--json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--json'
+
+- ['admission', 'status', '--host']
++ ['admission', 'status', '--host', '--json']
+?                                 ++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--model', value='--project-root=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--model'] != ['admission', 'status', '--model', '--project-root=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--project-root=foreign'
+
+- ['admission', 'status', '--model']
++ ['admission', 'status', '--model', '--project-root=foreign']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--model', value='--agent=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--model'] != ['admission', 'status', '--model', '--agent=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--agent=foreign'
+
+- ['admission', 'status', '--model']
++ ['admission', 'status', '--model', '--agent=foreign']
+?                                  +++++++++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--model', value='--runtime-info=missing.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--model'] != ['admission', 'status', '--model', '--runtime-info=missing.json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--runtime-info=missing.json'
+
+- ['admission', 'status', '--model']
++ ['admission', 'status', '--model', '--runtime-info=missing.json']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--model', value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--model'] != ['admission', 'status', '--model', '--dry-run']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--dry-run'
+
+- ['admission', 'status', '--model']
++ ['admission', 'status', '--model', '--dry-run']
+?                                  +++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--model', value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--model'] != ['admission', 'status', '--model', '--json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--json'
+
+- ['admission', 'status', '--model']
++ ['admission', 'status', '--model', '--json']
+?                                  ++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--provider', value='--project-root=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--provider'] != ['admission', 'status', '--provider', '--project-root=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--project-root=foreign'
+
+- ['admission', 'status', '--provider']
++ ['admission', 'status', '--provider', '--project-root=foreign']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--provider', value='--agent=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--provider'] != ['admission', 'status', '--provider', '--agent=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--agent=foreign'
+
+- ['admission', 'status', '--provider']
++ ['admission', 'status', '--provider', '--agent=foreign']
+?                                     +++++++++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--provider', value='--runtime-info=missing.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--provider'] != ['admission', 'status', '--provider', '--runtime-info=missing.json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--runtime-info=missing.json'
+
+- ['admission', 'status', '--provider']
++ ['admission', 'status', '--provider', '--runtime-info=missing.json']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--provider', value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--provider'] != ['admission', 'status', '--provider', '--dry-run']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--dry-run'
+
+- ['admission', 'status', '--provider']
++ ['admission', 'status', '--provider', '--dry-run']
+?                                     +++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--provider', value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--provider'] != ['admission', 'status', '--provider', '--json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--json'
+
+- ['admission', 'status', '--provider']
++ ['admission', 'status', '--provider', '--json']
+?                                     ++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--authority-root', value='--project-root=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--authority-root'] != ['admission', 'status', '--authority-root', '--project-root=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--project-root=foreign'
+
+- ['admission', 'status', '--authority-root']
++ ['admission', 'status', '--authority-root', '--project-root=foreign']
+?                                           ++++++++++++++++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--authority-root', value='--agent=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--authority-root'] != ['admission', 'status', '--authority-root', '--agent=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--agent=foreign'
+
+- ['admission', 'status', '--authority-root']
++ ['admission', 'status', '--authority-root', '--agent=foreign']
+?                                           +++++++++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--authority-root', value='--runtime-info=missing.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--authority-root'] != ['admission', 'status', '--authority-root', '--runtime-info=missing.json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--runtime-info=missing.json'
+
+- ['admission', 'status', '--authority-root']
++ ['admission', 'status', '--authority-root', '--runtime-info=missing.json']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--authority-root', value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--authority-root'] != ['admission', 'status', '--authority-root', '--dry-run']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--dry-run'
+
+- ['admission', 'status', '--authority-root']
++ ['admission', 'status', '--authority-root', '--dry-run']
+?                                           +++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--authority-root', value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--authority-root'] != ['admission', 'status', '--authority-root', '--json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--json'
+
+- ['admission', 'status', '--authority-root']
++ ['admission', 'status', '--authority-root', '--json']
+?                                           ++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--home', value='--project-root=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--home'] != ['admission', 'status', '--home', '--project-root=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--project-root=foreign'
+
+- ['admission', 'status', '--home']
++ ['admission', 'status', '--home', '--project-root=foreign']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--home', value='--agent=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--home'] != ['admission', 'status', '--home', '--agent=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--agent=foreign'
+
+- ['admission', 'status', '--home']
++ ['admission', 'status', '--home', '--agent=foreign']
+?                                 +++++++++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--home', value='--runtime-info=missing.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--home'] != ['admission', 'status', '--home', '--runtime-info=missing.json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--runtime-info=missing.json'
+
+- ['admission', 'status', '--home']
++ ['admission', 'status', '--home', '--runtime-info=missing.json']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--home', value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--home'] != ['admission', 'status', '--home', '--dry-run']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--dry-run'
+
+- ['admission', 'status', '--home']
++ ['admission', 'status', '--home', '--dry-run']
+?                                 +++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--home', value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--home'] != ['admission', 'status', '--home', '--json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--json'
+
+- ['admission', 'status', '--home']
++ ['admission', 'status', '--home', '--json']
+?                                 ++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--event-cwd', value='--project-root=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--event-cwd'] != ['admission', 'status', '--event-cwd', '--project-root=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--project-root=foreign'
+
+- ['admission', 'status', '--event-cwd']
++ ['admission', 'status', '--event-cwd', '--project-root=foreign']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--event-cwd', value='--agent=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--event-cwd'] != ['admission', 'status', '--event-cwd', '--agent=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--agent=foreign'
+
+- ['admission', 'status', '--event-cwd']
++ ['admission', 'status', '--event-cwd', '--agent=foreign']
+?                                      +++++++++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--event-cwd', value='--runtime-info=missing.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--event-cwd'] != ['admission', 'status', '--event-cwd', '--runtime-info=missing.json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--runtime-info=missing.json'
+
+- ['admission', 'status', '--event-cwd']
++ ['admission', 'status', '--event-cwd', '--runtime-info=missing.json']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--event-cwd', value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--event-cwd'] != ['admission', 'status', '--event-cwd', '--dry-run']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--dry-run'
+
+- ['admission', 'status', '--event-cwd']
++ ['admission', 'status', '--event-cwd', '--dry-run']
+?                                      +++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--event-cwd', value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--event-cwd'] != ['admission', 'status', '--event-cwd', '--json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--json'
+
+- ['admission', 'status', '--event-cwd']
++ ['admission', 'status', '--event-cwd', '--json']
+?                                      ++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--runtime', value='--project-root=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--runtime'] != ['admission', 'status', '--runtime', '--project-root=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--project-root=foreign'
+
+- ['admission', 'status', '--runtime']
++ ['admission', 'status', '--runtime', '--project-root=foreign']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--runtime', value='--agent=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--runtime'] != ['admission', 'status', '--runtime', '--agent=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--agent=foreign'
+
+- ['admission', 'status', '--runtime']
++ ['admission', 'status', '--runtime', '--agent=foreign']
+?                                    +++++++++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--runtime', value='--runtime-info=missing.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--runtime'] != ['admission', 'status', '--runtime', '--runtime-info=missing.json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--runtime-info=missing.json'
+
+- ['admission', 'status', '--runtime']
++ ['admission', 'status', '--runtime', '--runtime-info=missing.json']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--runtime', value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--runtime'] != ['admission', 'status', '--runtime', '--dry-run']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--dry-run'
+
+- ['admission', 'status', '--runtime']
++ ['admission', 'status', '--runtime', '--dry-run']
+?                                    +++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--runtime', value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--runtime'] != ['admission', 'status', '--runtime', '--json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--json'
+
+- ['admission', 'status', '--runtime']
++ ['admission', 'status', '--runtime', '--json']
+?                                    ++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--reason', value='--project-root=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--reason'] != ['admission', 'status', '--reason', '--project-root=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--project-root=foreign'
+
+- ['admission', 'status', '--reason']
++ ['admission', 'status', '--reason', '--project-root=foreign']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--reason', value='--agent=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--reason'] != ['admission', 'status', '--reason', '--agent=foreign']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--agent=foreign'
+
+- ['admission', 'status', '--reason']
++ ['admission', 'status', '--reason', '--agent=foreign']
+?                                   +++++++++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--reason', value='--runtime-info=missing.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--reason'] != ['admission', 'status', '--reason', '--runtime-info=missing.json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--runtime-info=missing.json'
+
+- ['admission', 'status', '--reason']
++ ['admission', 'status', '--reason', '--runtime-info=missing.json']
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--reason', value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--reason'] != ['admission', 'status', '--reason', '--dry-run']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--dry-run'
+
+- ['admission', 'status', '--reason']
++ ['admission', 'status', '--reason', '--dry-run']
+?                                   +++++++++++++
+
+
+======================================================================
+FAIL: test_every_host_fact_keeps_global_shaped_values_opaque (test_t1631_argv_values.DispatchValueOwnership.test_every_host_fact_keeps_global_shaped_values_opaque) (flag='--reason', value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 112, in test_every_host_fact_keeps_global_shaped_values_opaque
+    self.assertEqual(local, ["admission", "status", flag, value])
+AssertionError: Lists differ: ['admission', 'status', '--reason'] != ['admission', 'status', '--reason', '--json']
+
+Second list contains 1 additional elements.
+First extra element 3:
+'--json'
+
+- ['admission', 'status', '--reason']
++ ['admission', 'status', '--reason', '--json']
+?                                   ++++++++++
+
+
+======================================================================
+FAIL: test_real_global_flags_after_values_still_work (test_t1631_argv_values.DispatchValueOwnership.test_real_global_flags_after_values_still_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 135, in test_real_global_flags_after_values_still_work
+    self.assertEqual(local, ["admission", "status", "--fresh", "--model",
+AssertionError: Lists differ: ['admission', 'status', '--fresh', '--model'] != ['admission', 'status', '--fresh', '--model', '--project-root=foreign']
+
+Second list contains 1 additional elements.
+First extra element 4:
+'--project-root=foreign'
+
+- ['admission', 'status', '--fresh', '--model']
++ ['admission', 'status', '--fresh', '--model', '--project-root=foreign']
+?                                             ++++++++++++++++++++++++++
+
+
+======================================================================
+FAIL: test_request_cannot_activate_global_transport_or_mode (test_t1631_argv_values.DispatchValueOwnership.test_request_cannot_activate_global_transport_or_mode) (value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 125, in test_request_cannot_activate_global_transport_or_mode
+    self.assertEqual(local[-2:], ["--request", value])
+AssertionError: Lists differ: ['policy', '--request'] != ['--request', '--json']
+
+First differing element 0:
+'policy'
+'--request'
+
+- ['policy', '--request']
++ ['--request', '--json']
+
+======================================================================
+FAIL: test_request_cannot_activate_global_transport_or_mode (test_t1631_argv_values.DispatchValueOwnership.test_request_cannot_activate_global_transport_or_mode) (value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 125, in test_request_cannot_activate_global_transport_or_mode
+    self.assertEqual(local[-2:], ["--request", value])
+AssertionError: Lists differ: ['policy', '--request'] != ['--request', '--dry-run']
+
+First differing element 0:
+'policy'
+'--request'
+
+- ['policy', '--request']
++ ['--request', '--dry-run']
+
+======================================================================
+FAIL: test_request_cannot_activate_global_transport_or_mode (test_t1631_argv_values.DispatchValueOwnership.test_request_cannot_activate_global_transport_or_mode) (value='--project-root=foreign')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 125, in test_request_cannot_activate_global_transport_or_mode
+    self.assertEqual(local[-2:], ["--request", value])
+AssertionError: Lists differ: ['policy', '--request'] != ['--request', '--project-root=foreign']
+
+First differing element 0:
+'policy'
+'--request'
+
+- ['policy', '--request']
++ ['--request', '--project-root=foreign']
+
+======================================================================
+FAIL: test_an_enqueue_text_body_owns_all_its_words (test_t1631_argv_values.PublicValueOwnership.test_an_enqueue_text_body_owns_all_its_words)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 78, in test_an_enqueue_text_body_owns_all_its_words
+    self.assertEqual(rc, 0, output)
+AssertionError: 3 != 0 : {
+  "ok": false,
+  "code": "PROJECT_BINDING_INVALID",
+  "detail": "explicit --project-root is not a directory: V:\\_TEMP_\\saipen-t1631-draft-9oe1rb5u\\project\\tools\\missing-project"
+}
+
+
+======================================================================
+FAIL: test_model_value_cannot_turn_a_bound_project_into_unbound (test_t1631_argv_values.PublicValueOwnership.test_model_value_cannot_turn_a_bound_project_into_unbound) (mode='degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 42, in test_model_value_cannot_turn_a_bound_project_into_unbound
+    self.assertTrue(payload.get("applies"), text)
+AssertionError: False is not true : {
+  "ok": true,
+  "state": "UNBOUND",
+  "permitted": true,
+  "verified": true,
+  "applies": false,
+  "problems": [],
+  "stale": [],
+  "warnings": [],
+  "unobserved": [],
+  "delivery": "",
+  "mode": "degraded",
+  "code": "ADMISSION_CURRENT",
+  "diagnostic": null,
+  "contract": null
+}
+
+
+======================================================================
+FAIL: test_model_value_cannot_turn_a_bound_project_into_unbound (test_t1631_argv_values.PublicValueOwnership.test_model_value_cannot_turn_a_bound_project_into_unbound) (mode='strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 42, in test_model_value_cannot_turn_a_bound_project_into_unbound
+    self.assertTrue(payload.get("applies"), text)
+AssertionError: False is not true : {
+  "ok": true,
+  "state": "UNBOUND",
+  "permitted": true,
+  "verified": true,
+  "applies": false,
+  "problems": [],
+  "stale": [],
+  "warnings": [],
+  "unobserved": [],
+  "delivery": "",
+  "mode": "strict",
+  "code": "ADMISSION_CURRENT",
+  "diagnostic": null,
+  "contract": null
+}
+
+
+======================================================================
+FAIL: test_request_values_are_carried_verbatim_through_the_real_cli (test_t1631_argv_values.PublicValueOwnership.test_request_values_are_carried_verbatim_through_the_real_cli) (value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 52, in test_request_values_are_carried_verbatim_through_the_real_cli
+    self.assertEqual(rc, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "--request needs a value"
+}
+
+
+======================================================================
+FAIL: test_request_values_are_carried_verbatim_through_the_real_cli (test_t1631_argv_values.PublicValueOwnership.test_request_values_are_carried_verbatim_through_the_real_cli) (value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 52, in test_request_values_are_carried_verbatim_through_the_real_cli
+    self.assertEqual(rc, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "--request needs a value"
+}
+
+
+======================================================================
+FAIL: test_request_values_are_carried_verbatim_through_the_real_cli (test_t1631_argv_values.PublicValueOwnership.test_request_values_are_carried_verbatim_through_the_real_cli) (value='--project-root=missing-project')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 52, in test_request_values_are_carried_verbatim_through_the_real_cli
+    self.assertEqual(rc, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "--request needs a value"
+}
+
+
+======================================================================
+FAIL: test_request_values_are_carried_verbatim_through_the_real_cli (test_t1631_argv_values.PublicValueOwnership.test_request_values_are_carried_verbatim_through_the_real_cli) (value='--')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 53, in test_request_values_are_carried_verbatim_through_the_real_cli
+    self.assertEqual(payload.get("code"), "EXECUTION_POLICY", text)
+AssertionError: None != 'EXECUTION_POLICY' : code: EXECUTION_POLICY
+
+
+======================================================================
+FAIL: test_response_check_receives_the_request_and_original_binding (test_t1631_argv_values.PublicValueOwnership.test_response_check_receives_the_request_and_original_binding) (value='--dry-run')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 70, in test_response_check_receives_the_request_and_original_binding
+    self.assertIn("errors", payload, "checker never reached its response oracle")
+AssertionError: 'errors' not found in {'ok': False, 'code': 'EXEC_RESPONSE_INVALID', 'detail': "--request needs the human's request text"} : checker never reached its response oracle
+
+======================================================================
+FAIL: test_response_check_receives_the_request_and_original_binding (test_t1631_argv_values.PublicValueOwnership.test_response_check_receives_the_request_and_original_binding) (value='--json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 70, in test_response_check_receives_the_request_and_original_binding
+    self.assertIn("errors", payload, "checker never reached its response oracle")
+AssertionError: 'errors' not found in {'ok': False, 'code': 'EXEC_RESPONSE_INVALID', 'detail': "--request needs the human's request text"} : checker never reached its response oracle
+
+======================================================================
+FAIL: test_response_check_receives_the_request_and_original_binding (test_t1631_argv_values.PublicValueOwnership.test_response_check_receives_the_request_and_original_binding) (value='--project-root=missing-project')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-draft-9oe1rb5u\project\tools\test_t1631_argv_values.py", line 70, in test_response_check_receives_the_request_and_original_binding
+    self.assertIn("errors", payload, "checker never reached its response oracle")
+AssertionError: 'errors' not found in {'ok': False, 'code': 'EXEC_RESPONSE_INVALID', 'detail': "--request needs the human's request text"} : checker never reached its response oracle
+
+----------------------------------------------------------------------
+Ran 8 tests in 5.228s
+
+FAILED (failures=64, errors=1)

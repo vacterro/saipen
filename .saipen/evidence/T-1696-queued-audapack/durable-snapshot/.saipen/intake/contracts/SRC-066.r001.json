@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-066:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Close T-218: verify the stranded audit/10 SRC-044 layer is now terminal and the inbox clean; T-218 closure per T-220 evidence; T-221 externalize to SAIPEN owner"
+    }
+  },
+  "derived_at": "2026-09-20T20:07:06Z",
+  "derived_from": "SRC-066",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "8e38f54d575ce7abf6b03eedd4b8225e10c923768c29f440b3cff76c40a8b1ba"
+}

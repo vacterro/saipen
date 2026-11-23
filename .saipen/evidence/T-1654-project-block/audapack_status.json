@@ -1,0 +1,32 @@
+{
+  "ok": false,
+  "code": "PROJECT_BLOCK_STALE",
+  "project_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "files": [
+    {
+      "file": "AGENTS.md",
+      "status": "STALE",
+      "reasons": [
+        "tells the agent to clone a repository",
+        "names an absolute path (C:\\Users\\vac34\\.agents\\skills\\saipen\\BOOT.md)",
+        "is not the current project block"
+      ],
+      "sha256": "2d11864072803d72",
+      "bytes": 385,
+      "newline": "LF"
+    },
+    {
+      "file": "CLAUDE.md",
+      "status": "ABSENT",
+      "reasons": []
+    },
+    {
+      "file": "GEMINI.md",
+      "status": "ABSENT",
+      "reasons": []
+    }
+  ],
+  "outside_block": [],
+  "action": "saipen host instructions repair",
+  "detail": "AGENTS.md carries a SAIPEN block of another generation: tells the agent to clone a repository; names an absolute path (C:\\Users\\vac34\\.agents\\skills\\saipen\\BOOT.md)"
+}

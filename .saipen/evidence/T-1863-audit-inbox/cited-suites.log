@@ -1,0 +1,7 @@
+test_ingress_authority             Ran 13 tests in 8.379s OK 
+test_operator_ingress_matrix       Ran 19 tests in 0.863s OK 
+test_closure_provenance            Ran 57 tests in 12.632s OK 
+test_response_digest               Ran 10 tests in 0.113s OK 
+test_operator_task_witness         Ran 17 tests in 5.681s OK 
+test_cold_agent_truth              Ran 21 tests in 0.282s OK 
+test_t1864_autonomous_valve        Ran 15 tests in 0.575s OK 

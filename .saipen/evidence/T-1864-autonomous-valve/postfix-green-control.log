@@ -1,0 +1,33 @@
+test_a_consumer_bounded_grant_still_waits_for_its_operator (__main__.AutonomousValveTests.test_a_consumer_bounded_grant_still_waits_for_its_operator)
+THE red control: the cap is authority when the budget IS the authority. ... ok
+test_the_budget_still_marks_itself_as_reached (__main__.AutonomousValveTests.test_the_budget_still_marks_itself_as_reached)
+Autonomy must not silently delete the periodic look at the work. ... ok
+test_the_checkpoint_agrees_with_the_counters_recovery_rebuilds (__main__.AutonomousValveTests.test_the_checkpoint_agrees_with_the_counters_recovery_rebuilds)
+A marker whose reset disagrees with STATE opens a permanent heal loop. ... ok
+test_the_fix_does_not_touch_the_twentieth_ticket_count_itself (__main__.AutonomousValveTests.test_the_fix_does_not_touch_the_twentieth_ticket_count_itself)
+Both polarities count the work; only the response to the cap differs. ... ok
+test_the_result_payload_reports_the_committed_counters (__main__.AutonomousValveTests.test_the_result_payload_reports_the_committed_counters)
+T-1669's rule, at the ticket counter: the Result must not lie. ... ok
+test_the_resumed_route_is_the_transition_not_a_generic_continue (__main__.AutonomousValveTests.test_the_resumed_route_is_the_transition_not_a_generic_continue)
+A mid-flight transition knows its destination; `continue` does not. ... ok
+test_the_same_checkpoint_clears_the_wave_budget (__main__.AutonomousValveTests.test_the_same_checkpoint_clears_the_wave_budget)
+The HUNT -> ADD trip site is the symmetric half of the same fix. ... ok
+test_the_tripping_transition_keeps_working_in_the_same_operation (__main__.AutonomousValveTests.test_the_tripping_transition_keeps_working_in_the_same_operation)
+The twentieth ticket clears the budget instead of ending the turn. ... ok
+test_the_untripped_count_still_reports_the_increment (__main__.AutonomousValveTests.test_the_untripped_count_still_reports_the_increment)
+The same payload field, below the cap, still reports pre + 1. ... ok
+test_a_non_goal_intent_is_never_a_budget_question (__main__.TripCheckpointOwnerTests.test_a_non_goal_intent_is_never_a_budget_question) ... ok
+test_a_proven_persistent_grant_clears_itself (__main__.TripCheckpointOwnerTests.test_a_proven_persistent_grant_clears_itself)
+The grant already declares `safety_valve_mode: checkpoint`. ... ok
+test_an_unproven_persistent_grant_still_waits (__main__.TripCheckpointOwnerTests.test_an_unproven_persistent_grant_still_waits)
+A claim of persistence that cannot be proved is not authority. ... ok
+test_an_unreadable_grant_journal_degrades_to_the_human_boundary (__main__.TripCheckpointOwnerTests.test_an_unreadable_grant_journal_degrades_to_the_human_boundary)
+A crash here would kill the transition that tripped the cap. ... ok
+test_an_untripped_budget_gets_no_answer (__main__.TripCheckpointOwnerTests.test_an_untripped_budget_gets_no_answer)
+No cap, no decision: this must never pre-clear a budget. ... ok
+test_the_owner_names_the_authority_it_renews (__main__.TripCheckpointOwnerTests.test_the_owner_names_the_authority_it_renews) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.575s
+
+OK

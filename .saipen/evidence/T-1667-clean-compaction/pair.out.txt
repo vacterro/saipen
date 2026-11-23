@@ -1,0 +1,7 @@
+CONTROL unmutated copy: exit 0, Ran 6 tests
+command: python -B -m unittest test_t1667_clean_compaction (cwd tools/)
+verifier:7d327a8f7fecd54c  (tools/test_t1667_clean_compaction.py, byte-identical in both trees)
+FAIL subject:c83f7d6d882b1cf8  exit 1  red 1: test_t1667_clean_compaction
+PASS subject:55cd758ad970746b  exit 0  Ran 6 tests
+held: True
+rc=0

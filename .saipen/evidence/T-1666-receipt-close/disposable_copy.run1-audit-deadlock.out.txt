@@ -1,0 +1,8 @@
+validate before: 0 FAIL []
+measured before: {"active_receipts": 150, "closable": 98, "board_bytes": 162782, "done_rows": 166}
+park T-1666: True BLOCK
+enter CLEAN: True TRANSITIONED | closed 98 refused {} | scrub True BOARD_SCRUBBED pruned 86
+measured after:  {"active_receipts": 52, "closable": 0, "board_bytes": 115288, "done_rows": 80}
+validate after: 1 FAIL ["FAIL: STATE.md audit route not followed -- the audit inbox routes 'saipen audit ingest' (layer 24, audit/24.md) but next_action is 'PHASE CLEAN', which is neither that action nor a live-ticket continuation (SOURCE-AUDIT-INBOX-01)"]
+rc=0
+then: saipen audit ingest on the copy (audit/24.md belonged to SRC-177, which the CLEAN entry closed) -> validate --gate core: 1 FAIL

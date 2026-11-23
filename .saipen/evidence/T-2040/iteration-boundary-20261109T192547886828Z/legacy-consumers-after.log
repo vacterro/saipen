@@ -1,0 +1,12 @@
+........F............................................. [ 72%]
+....................                           [100%]
+================================== FAILURES ===================================
+_______________ E2E02TrueTerminal.test_terminal_once_then_stop ________________
+tools\test_t1619_iteration_boundary.py:156: in test_terminal_once_then_stop
+    self.assertEqual(ctrl.on_model_turn_finished(paused), HI.STOP_TRUTHFULLY)
+E   AssertionError: 'report_runtime_paused' != 'stop_truthfully'
+E   - report_runtime_paused
+E   + stop_truthfully
+=========================== short test summary info ===========================
+FAILED tools/test_t1619_iteration_boundary.py::E2E02TrueTerminal::test_terminal_once_then_stop
+1 failed, 73 passed, 44 subtests passed in 4.72s

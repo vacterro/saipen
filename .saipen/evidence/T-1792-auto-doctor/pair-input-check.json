@@ -1,0 +1,31 @@
+{
+  "status": "MATERIAL_VALIDATED_ONLY",
+  "pair_executed": false,
+  "contract_path": ".saipen/evidence/T-1792-auto-doctor/regression.json",
+  "context_files": 1026,
+  "context_bytes": 19359669,
+  "subject_files": [
+    "tools/saipen.py"
+  ],
+  "oracle_files": [
+    "tools/test_t1792_auto_doctor.py",
+    "tools/test_t1412_conformance_truth.py",
+    "tools/test_continue_chain.py",
+    "tools/test_hermetic_env.py",
+    "tools/test_fixture_support.py"
+  ],
+  "verifier": "5f95117e336f1947958d7cfcf91171f483cc3ebbe2b969e48ec9b95449bd1603",
+  "argv": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1792_auto_doctor.py",
+    "-v"
+  ],
+  "next": "After T-1793 finishes, resume T-1792 and enter VERIFY; only native work regression executes and records the pair."
+}

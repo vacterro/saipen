@@ -1,0 +1,544 @@
+--- a/saipen/REGISTRY.json
++++ b/saipen/REGISTRY.json
+@@ -1,7 +1,7 @@
+ {
+  "schema_version": 1,
+  "kind": "saipen-machine-registry",
+- "purpose": "Sole machine authority for closed executable protocol facts. Prose explains or references these facts; it is never parsed as data (SRC-010:R0004/R0005).",
++ "purpose": "Sole authority for closed executable facts; prose is never data (SRC-010:R0004/R0005).",
+  "semantic_baseline": {
+   "frozen_at": "2026-08-30",
+   "golden": "tests/protocol_semantic_golden.json",
+@@ -1328,5 +1328,6 @@
+    "host repair",
+    "host mode"
+   ]
+- }
++ },
++ "cli_option_values": {"table":"CLI_OPTION_VALUES.json"}
+ }
+--- a/saipen/CLI_OPTION_VALUES.json
++++ b/saipen/CLI_OPTION_VALUES.json
+@@ -0,0 +1,107 @@
++{
++ "kind": "saipen-cli-option-values",
++ "schema_version": 1,
++ "value_arity": {
++  "--action": 1,
++  "--adapter": 1,
++  "--admission-session": 1,
++  "--adopt-legacy": 1,
++  "--agent": 1,
++  "--amends": 1,
++  "--apply-approved-repair": 1,
++  "--attempted-condition": 1,
++  "--attest-legacy-done": 1,
++  "--authority": 1,
++  "--authority-root": 1,
++  "--body": 1,
++  "--budget": 1,
++  "--by": 1,
++  "--cap": 1,
++  "--caps-file": 1,
++  "--carrier-hex": 1,
++  "--carrier-json": 1,
++  "--category": 1,
++  "--closure-cohort": 1,
++  "--closure-mode": 1,
++  "--cohort": 1,
++  "--contract": 1,
++  "--cwd": 1,
++  "--days": 1,
++  "--detail-mode": 1,
++  "--discovery-event": 1,
++  "--environment": 1,
++  "--event-cwd": 1,
++  "--event-json": 1,
++  "--evidence": 1,
++  "--executor": 1,
++  "--field": 1,
++  "--file": 1,
++  "--fixed-by": 1,
++  "--gate": 1,
++  "--handoff": 1,
++  "--helper-reason": 1,
++  "--hex": 1,
++  "--home": 1,
++  "--host": 1,
++  "--host-lineage": 1,
++  "--host-root": 1,
++  "--implementation": 1,
++  "--implementation-source": 1,
++  "--include-hex": 1,
++  "--invalidated-by": 1,
++  "--item-id": 1,
++  "--k": 1,
++  "--keep": 1,
++  "--kind": 1,
++  "--max-files": 1,
++  "--max-matches": 1,
++  "--model": 1,
++  "--needs": 1,
++  "--note": 1,
++  "--operation-id": 1,
++  "--package": 1,
++  "--paths": 1,
++  "--priority": 1,
++  "--producer": 1,
++  "--profile": 1,
++  "--project-root": 1,
++  "--provider": 1,
++  "--python": 1,
++  "--reason": 1,
++  "--reassign": 1,
++  "--rebuild-command": 1,
++  "--receipt": 1,
++  "--recurrence": 1,
++  "--regression": 1,
++  "--replacement": 1,
++  "--report": 1,
++  "--reproduced": 1,
++  "--request": 1,
++  "--resolution": 1,
++  "--resolve-duplicate-id": 1,
++  "--retry_not_before": 1,
++  "--role": 1,
++  "--root": 1,
++  "--run": 1,
++  "--runtime": 1,
++  "--runtime-info": 1,
++  "--scope": 1,
++  "--scope-hex": 1,
++  "--session": 1,
++  "--sha256": 1,
++  "--slice": 1,
++  "--successor": 1,
++  "--task-class": 1,
++  "--text": 1,
++  "--ticket": 1,
++  "--timeout": 1,
++  "--to": 1,
++  "--unknown": 1,
++  "--verification": 1,
++  "--verify": 1,
++  "--weak-model": 1,
++  "--when-environment": 1,
++  "--work": 1,
++  "--workspace": 1
++ }
++}
+--- a/tools/saipen.py
++++ b/tools/saipen.py
+@@ -11393,6 +11393,9 @@
+     # command only; never let a previous shortcut label a later direct verb.
+     _ROUTE_ECHO = None
+     raw_args = list(argv if argv is not None else sys.argv[1:])
++    from saipen_engine.commands import cli_has_option, cli_value_positions
++
++    value_positions = cli_value_positions(raw_args)
+     # T-1513: judged on the raw words, before anything reads them -- a damaged
+     # text can carry a split `--` that would end option parsing below.
+     damaged = unconsumed_quote_span(raw_args)
+@@ -11412,18 +11415,19 @@
+                     "names the proven transport."
+                 ),
+             },
+-            "--json" in raw_args,
++            cli_has_option(raw_args, {"--json"}),
+         )
+         return 2
+-    if "--" in raw_args:
+-        dd_idx = raw_args.index("--")
++    dd_idx = next((index for index, token in enumerate(raw_args)
++                   if token == "--" and index not in value_positions), None)
++    if dd_idx is not None:
+         before_dashdash = raw_args[:dd_idx]
+         after_dashdash = raw_args[dd_idx + 1 :]
+     else:
+         before_dashdash = raw_args
+         after_dashdash = []
+ 
+-    as_json = "--json" in before_dashdash
++    as_json = cli_has_option(before_dashdash, {"--json"})
+     if as_json and hasattr(sys.stdout, "reconfigure"):
+         # Windows shells frequently inherit an ANSI code page. JSON is UTF-8;
+         # a read-only focus result containing a Unicode filename must not die
+@@ -11442,7 +11446,7 @@
+     if _capability_problem is not None:
+         _emit(_capability_problem, as_json)
+         return 2
+-    dry_run = "--dry-run" in before_dashdash
++    dry_run = cli_has_option(before_dashdash, {"--dry-run"})
+     project_root_opt: str | None = None
+     runtime_info_opt: str | None = None
+     option_error: str | None = None
+@@ -11452,7 +11456,10 @@
+     agent_opt: str | None = None
+     while i < len(before_dashdash):
+         arg = before_dashdash[i]
+-        if arg in ("--json", "--dry-run"):
++        if i in value_positions:
++            clean_before.append(arg)
++            i += 1
++        elif arg in ("--json", "--dry-run"):
+             i += 1
+         elif arg == "--agent" and i + 1 < len(before_dashdash):
+             agent_opt = before_dashdash[i + 1]
+@@ -11488,7 +11495,7 @@
+             clean_before.append(arg)
+             i += 1
+ 
+-    args = clean_before + (["--", *after_dashdash] if "--" in raw_args else [])
++    args = clean_before + (["--", *after_dashdash] if dd_idx is not None else [])
+ 
+     # T-1006: an explicit `--agent <id>` names the ACTING ACTOR for this
+     # invocation (CORE-001, SRC-026:R001): it does not by itself transfer the
+@@ -11532,7 +11539,7 @@
+     # once became a goal named "--help" (T-1321) and `saipen user-request
+     # --help` a refusal. It exits 0: a usage probe that "fails" teaches a weak
+     # model the tool is broken.
+-    if (args and args[0] == "help") or any(token in ("-h", "--help") for token in clean_before):
++    if (args and args[0] == "help") or cli_has_option(clean_before, {"-h", "--help"}):
+         usage_msg = (
+             "usage: saipen (init|"
+             "start '<task in one line>' [--file PATH] [--hex HEX] "
+--- a/tools/saipen_engine/commands.py
++++ b/tools/saipen_engine/commands.py
+@@ -34,15 +34,45 @@
+ 
+ from __future__ import annotations
+ 
++import json
++from collections.abc import Collection, Sequence
+ from pathlib import Path
+ 
+ from .registry import RegistryError
+ from .registry import load_registry as _load_registry
+-from .registry import require_mapping, require_string_list
++from .registry import registry_path, require_mapping, require_string_list
+ 
+ # REGISTRY.json is the sole machine authority. Import-time consumers derive
+ # immutable constants from it; no English-prose fallback exists.
+ _REGISTRY = _load_registry()
++
++
++def _load_cli_option_arity() -> dict[str, int]:
++    pointer = require_mapping(_REGISTRY, "cli_option_values")
++    name = pointer.get("table")
++    if not isinstance(name, str) or "/" in name or "\\" in name or not name.endswith(".json"):
++        raise RegistryError("REGISTRY.json cli_option_values.table must name a sibling .json file")
++    path = registry_path().parent / name
++    try:
++        table = json.loads(path.read_text(encoding="utf-8-sig"))
++    except (OSError, UnicodeDecodeError, ValueError) as exc:
++        raise RegistryError(f"cannot load {path}: {exc}") from exc
++    if (
++        not isinstance(table, dict)
++        or table.get("kind") != "saipen-cli-option-values"
++        or table.get("schema_version") != 1
++    ):
++        raise RegistryError(f"{path} has unsupported identity/schema")
++    arities = dict(require_mapping(table, "value_arity"))
++    if any(
++        not isinstance(option, str) or not option.startswith("--")
++        or type(arity) is not int or arity < 1
++        for option, arity in arities.items()
++    ):
++        raise RegistryError(f"{path} must declare positive integer option arities")
++    return arities
++
++
+ CYRILLIC_CONFUSABLE_MAP = {
+     str(key): str(value)
+     for key, value in require_mapping(_REGISTRY, "cyrillic_confusables").items()
+@@ -208,6 +238,38 @@
+     return segments
+ 
+ 
++def cli_value_positions(argv: Sequence[str]) -> frozenset[int]:
++    """Opaque operand positions, before the real `--` transport boundary.
++
++    Arity is declared data. A value spelling `--json`, `--`, or `+` is still
++    its option's value; only an unconsumed token can change CLI structure.
++    """
++    arities = _load_cli_option_arity()
++    positions = set()
++    remaining = 0
++    for index, token in enumerate(argv):
++        if remaining:
++            positions.add(index)
++            remaining -= 1
++        elif token == "--":
++            break
++        else:
++            remaining = arities.get(token, 0)
++    return frozenset(positions)
++
++
++def cli_has_option(argv: Sequence[str], options: Collection[str]) -> bool:
++    values = cli_value_positions(argv)
++    for index, token in enumerate(argv):
++        if index in values:
++            continue
++        if token == "--":
++            break
++        if token in options:
++            return True
++    return False
++
++
+ def split_cli_compound_argv(argv: list[str]) -> list[list[str]]:
+     r"""Split shell-decoded CLI arguments without rebuilding a command line.
+ 
+@@ -221,7 +283,11 @@
+         return [[]]
+     segments: list[list[str]] = [[]]
+     opaque = False
+-    for arg in argv:
++    values = cli_value_positions(argv)
++    for index, arg in enumerate(argv):
++        if index in values:
++            segments[-1].append(arg)
++            continue
+         if arg == "--":
+             opaque = True
+         if arg == "+" and not opaque:
+--- a/tools/saipen_engine/command_effects.py
++++ b/tools/saipen_engine/command_effects.py
+@@ -32,7 +32,7 @@
+ import re
+ from collections.abc import Sequence
+ 
+-from .commands import load_shortcut_table, resolve_shortcut
++from .commands import cli_has_option, cli_value_positions, load_shortcut_table, resolve_shortcut
+ from .registry import (
+     RegistryError,
+     load_registry,
+@@ -120,19 +120,25 @@
+ def _operands(tokens: Sequence[str]) -> list[str]:
+     """The invocation's own words, with the CLI's global options removed."""
+     out: list[str] = []
+-    skip = False
+-    for token in tokens:
+-        if skip:
+-            skip = False
++    values = cli_value_positions(tokens)
++    index = 0
++    while index < len(tokens):
++        token = tokens[index]
++        if index in values:
++            out.append(token)
++        elif token == "--":
++            out.extend(tokens[index:])
++            break
++        elif token in _GLOBAL_FLAGS:
++            pass
++        elif token in _GLOBAL_VALUE_OPTIONS:
++            index += 2
+             continue
+-        if token in _GLOBAL_FLAGS:
+-            continue
+-        if token in _GLOBAL_VALUE_OPTIONS:
+-            skip = True
+-            continue
+-        if any(token.startswith(option + "=") for option in _GLOBAL_VALUE_OPTIONS):
+-            continue
+-        out.append(token)
++        elif any(token.startswith(option + "=") for option in _GLOBAL_VALUE_OPTIONS):
++            pass
++        else:
++            out.append(token)
++        index += 1
+     return out
+ 
+ 
+@@ -166,19 +172,22 @@
+     """The effect class of `saipen <verb> <rest...>`.
+ 
+     `verb=None` is bare `saipen`, which the CLI resolves to `continue`. A help
+-    token anywhere before `--` makes the whole invocation DIAGNOSTIC: the CLI
++    option before `--` makes the whole invocation DIAGNOSTIC: the CLI
+     answers it with usage and writes nothing, so a help probe must never be
+     judged -- or refused -- as the command it is asking about.
+     """
+     words = _operands(list(rest))
+-    if verb == "host" and words[:1] == ["entry"] and "--" in words:
++    values = cli_value_positions(words)
++    boundary = next((index for index, word in enumerate(words)
++                     if word == "--" and index not in values), None)
++    if verb == "host" and words[:1] == ["entry"] and boundary is not None:
+         # The transport runner has the effect of the command it launches: a
+         # wrapped `ticket done` must never be judged DIAGNOSTIC (T-1501).
+-        inner = words[words.index("--") + 1 :]
++        inner = words[boundary + 1 :]
+         return classify_invocation(inner[0], inner[1:]) if inner else DIAGNOSTIC
+-    if "--" in words:
+-        words = words[: words.index("--")]
+-    if verb in HELP_TOKENS or any(word in HELP_TOKENS - {"help"} for word in words):
++    if boundary is not None:
++        words = words[:boundary]
++    if verb in HELP_TOKENS or cli_has_option(words, HELP_TOKENS - {"help"}):
+         return DIAGNOSTIC
+     if verb == _MODIFIER and not words:
+         # A bare modifier modifies nothing and is REPORTED (EXECUTION.md). A
+--- a/tools/test_t1631_option_values.py
++++ b/tools/test_t1631_option_values.py
+@@ -0,0 +1,158 @@
++"""T-1631: shell-decoded option operands cannot become CLI control tokens."""
++
++from __future__ import annotations
++
++import json
++import os
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++TOOLS = Path(__file__).resolve().parent
++ROOT = TOOLS.parent
++if str(TOOLS) not in sys.path:
++    sys.path.insert(0, str(TOOLS))
++
++from saipen_engine import command_effects as effects  # noqa: E402
++from saipen_engine import commands, response_surface as response  # noqa: E402
++from saipen_engine.host_authority_client import set_authority_mode  # noqa: E402
++from saipen_engine.process_tree import run as run_owned  # noqa: E402
++from test_guard_hostile_matrix import fresh_project  # noqa: E402
++from test_hermetic_env import isolate_host_session  # noqa: E402
++
++
++def setUpModule() -> None:
++    isolate_host_session()
++
++
++class RealCLIValues(unittest.TestCase):
++    def setUp(self) -> None:
++        self.temporary = tempfile.TemporaryDirectory(prefix="saipen-t1631-values-")
++        self.addCleanup(self.temporary.cleanup)
++        self.home = Path(self.temporary.name) / "home"
++        self.home.mkdir()
++        set_authority_mode("strict", self.home)
++        self.project = fresh_project()
++        self.env = {
++            key: value for key, value in os.environ.items()
++            if not key.startswith("SAIPEN_") and key != "CLAUDE_CONFIG_DIR"
++        }
++        # --home describes admission; Path.home() also selects the service
++        # endpoint. Both must name this fixture, including on Windows.
++        self.env.update(HOME=str(self.home), USERPROFILE=str(self.home),
++                        HOMEDRIVE="", HOMEPATH="", CLAUDE_CONFIG_DIR="")
++
++    def invoke(self, *args: str, source: str | None = None, json_output: bool = True):
++        return run_owned(
++            [sys.executable, "-B", str(TOOLS / "saipen.py"),
++             "--project-root", str(self.project), *(["--json"] if json_output else []), *args],
++            cwd=ROOT, env=self.env, input=source, capture_output=True,
++            text=True, encoding="utf-8", errors="replace", timeout=45,
++        )
++
++    def admit(self, value: str, *, flag: str = "--model"):
++        observed = {"--session": "fixture-session", "--model": "ordinary-model",
++                    "--event-cwd": str(self.project)}
++        observed[flag] = value
++        proc = self.invoke(
++            "admission", "establish", "--host", "claude", "--session", observed["--session"],
++            "--model", observed["--model"], "--home", str(self.home),
++            "--runtime", str(self.home / "unserved-runtime"),
++            "--authority-root", str(ROOT), "--event-cwd", observed["--event-cwd"],
++        )
++        self.assertTrue(proc.stdout.lstrip().startswith("{"), proc.stdout + proc.stderr)
++        payload = json.loads(proc.stdout)
++        self.assertEqual(proc.returncode, 1, payload)
++        self.assertIn("state", payload)
++        self.assertNotEqual(payload.get("state"), "UNBOUND", payload)
++        self.assertFalse(payload.get("permitted"), payload)
++        return payload
++
++    def test_model_spelling_project_root_keeps_strict_binding(self):
++        ordinary = self.admit("ordinary-model")
++        literal = self.admit("--project-root=" + str(self.home / "missing-project"))
++        self.assertEqual((literal["state"], literal["code"]),
++                         (ordinary["state"], ordinary["code"]))
++
++    def test_model_spelling_json_flag_is_a_value(self):
++        self.admit("--json")
++
++    def test_json_value_does_not_enable_json_output(self):
++        proc = self.invoke(
++            "admission", "establish", "--session", "fixture-session", "--host", "claude",
++            "--model", "--json", "--home", str(self.home),
++            "--runtime", str(self.home / "unserved-runtime"),
++            "--authority-root", str(ROOT), "--event-cwd", str(self.project),
++            json_output=False,
++        )
++        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
++        self.assertFalse(proc.stdout.lstrip().startswith("{"), proc.stdout)
++
++    def test_verify_value_does_not_enable_dry_run(self):
++        proc = self.invoke("ticket", "add", "P3", "Option value probe", "--verify", "--dry-run")
++        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
++        board = (self.project / ".saipen/BOARD.md").read_text(encoding="utf-8")
++        self.assertIn("Option value probe", board)
++        self.assertIn("verify: --dry-run", board)
++
++    def test_model_spelling_help_flag_is_a_value(self):
++        self.admit("--help")
++
++    def test_model_spelling_agent_flag_is_a_value(self):
++        self.admit("--agent=unrelated-seat")
++
++    def test_model_spelling_boundary_is_a_value(self):
++        self.admit("--")
++
++    def test_model_spelling_compound_separator_is_a_value(self):
++        self.admit("+")
++
++    def test_session_spelling_project_root_keeps_strict_binding(self):
++        self.admit("--project-root=" + str(self.home / "missing-project"), flag="--session")
++
++    def test_event_cwd_spelling_project_root_does_not_hide_project(self):
++        self.admit("--project-root=" + str(self.home / "missing-project"), flag="--event-cwd")
++
++    def test_response_request_spelling_dry_run_reaches_real_checker(self):
++        status = self.invoke("status")
++        self.assertEqual(status.returncode, 0, status.stdout + status.stderr)
++        facts = json.loads(status.stdout)
++        digest = response.render_boundary(
++            response.OperationalBoundary(
++                facts["phase"], "Kontroll tehtud.", "NONE", "NONE", "NONE",
++                facts["conformance_status"]["status"],
++            )
++        )
++        ordinary = self.invoke("response", "check", "--stdin", "--request",
++                               "ordinary request", source=digest)
++        literal = self.invoke("response", "check", "--stdin", "--request",
++                              "--dry-run", source=digest)
++        self.assertEqual(ordinary.returncode, 0, ordinary.stdout + ordinary.stderr)
++        self.assertEqual(literal.returncode, 0, literal.stdout + literal.stderr)
++        self.assertEqual(json.loads(literal.stdout), json.loads(ordinary.stdout))
++
++
++class StructuralValues(unittest.TestCase):
++    def test_compound_separator_and_boundary_operands_stay_literal(self):
++        self.assertEqual(commands.split_cli_compound_argv(
++            ["response", "check", "--request", "+", "+", "status"]),
++            [["response", "check", "--request", "+"], ["status"]])
++        self.assertEqual(commands.split_cli_compound_argv(
++            ["response", "check", "--request", "--", "+", "status"]),
++            [["response", "check", "--request", "--"], ["status"]])
++
++    def test_help_value_does_not_change_execution_effect(self):
++        self.assertEqual(effects.classify_invocation(
++            "admission", ["establish", "--model", "--help"]), effects.EXECUTION)
++        self.assertEqual(effects.classify_invocation(
++            "admission", ["establish", "--model", "ordinary", "--help"]), effects.DIAGNOSTIC)
++
++    def test_wrapped_command_starts_after_actual_boundary(self):
++        self.assertEqual(effects.classify_invocation(
++            "host", ["entry", "--host", "--", "--", "ticket", "done", "T-1"]),
++            effects.EXECUTION)
++
++
++if __name__ == "__main__":
++    unittest.main()

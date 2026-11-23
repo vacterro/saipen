@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "code": "RESPONSE_VALID",
+  "class": "VALID_BOUNDARY",
+  "layer": "NONE",
+  "layers": {
+    "admission": "NOT_CONSULTED",
+    "exec_response": "PASS",
+    "chat_style": "PASS"
+  },
+  "errors": [],
+  "detail_mode": "NONE",
+  "turn_decision": "ORDINARY",
+  "detail": null,
+  "diagnostic": null,
+  "delivery": "STATUS: WAIT  \nRESULT: Vajab operaatori otsust; T-2021 lõpetatud; 114 blokeeritud (BLOCKED_EXTERNAL 20, WAIT_USER_DECISION 9, MARKHUNT_TRIAGE_REQUIRED 8)  \nOPERATOR ACTION: Operaator kinnitab selle projekti ja eesmärgi kohaliku hoolduse kapsli ning rakendab saipen goal authorize --file <UTF8_FILE>.  \nNEXT EXACT ACTION: saipen continue  \nVALIDATION: CURRENT_FAIL  \nDETAILS: E-20529",
+  "overflow": null,
+  "contract": null
+}

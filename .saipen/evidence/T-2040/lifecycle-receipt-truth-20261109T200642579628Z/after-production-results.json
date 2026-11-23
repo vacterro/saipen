@@ -1,0 +1,87 @@
+[
+  {
+    "label": "stranded",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_recovery_reachability.StrandedClaimTests"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 0,
+    "elapsed_seconds": 7.891
+  },
+  {
+    "label": "lost-active",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_lost_active_ticket_recovery"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 0,
+    "elapsed_seconds": 0.969
+  },
+  {
+    "label": "debt",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_t1851_debt_authority.NativeDecisionTests.test_committed_operation_does_not_report_a_missing_target_repaired"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 0,
+    "elapsed_seconds": 0.437
+  },
+  {
+    "label": "debt-full",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_t1851_debt_authority"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 0,
+    "elapsed_seconds": 6.891
+  },
+  {
+    "label": "journal",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_t1316_recovery_already_applied",
+      "test_audit_2026_08_28_all3.JournalAuditTests",
+      "test_journal_nested_targets",
+      "test_recovery_noop_targets"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 0,
+    "elapsed_seconds": 8.109
+  },
+  {
+    "label": "debt-replay",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\lifecycle-receipt-truth-20261109T200642579628Z\\probe_debt_replay.py",
+      "after"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 0,
+    "elapsed_seconds": 0.453
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "scope": "actual whole-tree phase rename probe, not the full audit",
+  "verdicts": {
+    "pristine-fixture": "PASS",
+    "phase-rename": "PASS"
+  },
+  "output": [
+    "PASS: a known-good copy of this repository is built for the mutation controls",
+    "PASS: consistent SCOUT->SCOUTX rename stays green across the DFA, RFC table, schema enum and phase doc -- edge gates catch drift, not deliberate renames"
+  ],
+  "live_retirement_proof_sha256": "7475459e4b9b07ef8e257946aa312a70b646eb9d87bc61d4163fedee2d8eda25"
+}

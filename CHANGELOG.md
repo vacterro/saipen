@@ -1,6 +1,13 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 8.1.1 -- 2026-11-16 -- Gate-pinned rows and the ingest route (T-2070, T-2071)
+
+- Keep a closed BOARD record that a PROMOTED future gate resolves as a slice under a `gate` retention guard, and admit such a record to the journaled row restore, so a scrub can no longer remove the implementation link a promoted gate reads. A gate record outlives the row it names; without this half a satisfied slice failed the core gate and no verb could put the row back.
+- Accept a slice ticket absent from the live BOARD when the complete LOG holds a closing event for it, because the canonical scrub already requires that event before a closed row may leave. An unreadable ledger keeps the rule failing, and a live row still needs no ledger lookup.
+- Stop the Audit Inbox route from owning `saipen audit ingest` for a layer whose linked Work is not DONE. The executor consumes CLOSED_PENDING_DELETE first and refuses with `SOURCE_UNRESOLVED`, so the route only handed out a command guaranteed to refuse while the validator blamed the honest next action.
+- Pin all three repairs with focused tests, including red controls that disable the fix and observe the original failure.
+
 ## 8.1.0 -- 2026-10-04 -- Public installation and removal
 
 - Make the documented install, set, cold continue, validate, uninstall, and reinstall lifecycle executable through the installed launchers on Windows, macOS, Linux, and Git Bash.

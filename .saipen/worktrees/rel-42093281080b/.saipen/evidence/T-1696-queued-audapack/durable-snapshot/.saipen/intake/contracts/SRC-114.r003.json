@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-114:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Observe the live one-worker FastPrompter A3 lineage with the widget classifyLiveAuditLineage and name the layer that actually breaks"
+    },
+    "SRC-114:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Fix only the layer the live observation proves broken, and change nothing else"
+    },
+    "SRC-114:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Land a red fixture that fails on the unfixed widget"
+    }
+  },
+  "derived_at": "2026-10-04T14:49:02Z",
+  "derived_from": "SRC-114",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "1da5bfab269fae371c93c1cfae4ba461d939c1f871aacba6f942857d01c86c66"
+}

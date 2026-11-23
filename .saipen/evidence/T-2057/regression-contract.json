@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "tools/test_t2057_carrier_restore.py"],
+  "format": "unittest",
+  "context": [
+    "tools/test_t2057_carrier_restore.py",
+    "tools/saipen_engine",
+    "tools/_module_identity.py",
+    "tools/__init__.py",
+    "saipen"
+  ],
+  "oracle_files": ["tools/test_t2057_carrier_restore.py"],
+  "subject_files": ["tools/saipen_engine/regression_execution.py"],
+  "before": {"tools/saipen_engine/regression_execution.py": ".saipen/evidence/T-2057/regression_execution.before.py"},
+  "timeout": 300
+}

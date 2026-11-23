@@ -1,0 +1,168 @@
+--- a/README.md
++++ b/README.md
+@@ -20,7 +20,8 @@
+ **One command to resume. Plain-file state. Machine-checked contracts.**
+ 
+ The repository validates itself on every push; install, state, checks, and
+-uninstall are all local — no cloud service, no daemon, no database.
++uninstall are all local — no cloud service or database.
++For Claude Code, a local helper starts on the first prompt and exits when idle with no host running.
+ 
+ [![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+ [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+@@ -75,7 +76,7 @@
+ ## Quick start
+ 
+ Requires **Git, Python 3.11 or newer**, and a coding agent. No `pip` install,
+-account, server, or daemon is needed. Keep the clone until you uninstall;
++SAIPEN account or manually managed server is needed. Keep the clone until you uninstall;
+ the installed agent instructions and update checks refer to its location.
+ 
+ **1. Clone once:**
+--- a/README.ee.md
++++ b/README.ee.md
+@@ -20,7 +20,8 @@
+ **Üks käsk jätkamiseks. Lihtfaili olek. Masina kontrollitud lepingud.**
+ 
+ Repo valideerib ise iga pushiga; install, olek, kontrollid ja
+-eemaldamine on kohaline — ei ole ühtegi pilveteenust, ei daemoni, ei andmebaasi.
++eemaldamine on kohalikud — pilveteenust ega andmebaasi pole vaja.
++Claude Code’i esimene päring käivitab kohaliku abiprotsessi, mis sulgub, kui see on jõude ja ükski host enam ei tööta.
+ 
+ [![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+ [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+@@ -84,7 +85,7 @@
+ failid, mida sul juba on(`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+ `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`)— kopeerimine igaühele`.bak`esimese —
+ ja kopeerib protokollide failid vastavate oskustega kataloogidesse. Midagi väljaspool neid
+-teed, ei deemoni, ei võrguühendusi.</sub>
++teed, ei võrguühendusi.</sub>
+ 
+ **2. Alusta projektiga**— avage oma kataloogis agent, sisestage:
+ 
+--- a/README.ded.md
++++ b/README.ded.md
+@@ -20,7 +20,8 @@
+ **Один комманд для возобновления. Состояние в обычных файлах. Проверенные контракты.**
+ 
+ Репозиторий проверяет себя при каждом push; установка, состояние, проверки и
+-удаление — всё локальное — никакой облачной службы, никакого демона, никакой базы данных.
++удаление — всё локальное, без облачного сервиса и базы данных.
++Первый запрос Claude Code запускает местный помощник; без работающего хоста он завершается в простое.
+ 
+ [![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+ [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+@@ -81,7 +82,7 @@
+ `<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->` блок к инструкционным
+ файлам агента, которые у вас уже есть (`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+ `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`) — сначала создавая резервные копии в `.bak`] —
+-и копирует протокол в соответствующие папки навыков. Ничего вне этих путей, никакого демона, никаких сетевых вызовов.</sub>
++и копирует протокол в соответствующие папки навыков. Ничего вне этих путей, никаких сетевых вызовов.</sub>
+ 
+ **2. Запустите проект** — откройте агента в вашей папке, введите:
+ 
+--- a/README.ja.md
++++ b/README.ja.md
+@@ -20,7 +20,8 @@
+ **リポジトリはプッシュされるたびに自分自身を検証します; インストール、状態、チェック、および**
+ 
+ 
+-アンインストールはすべてローカルです — クラウドサービスもデーモンもデータベースもありません。
++アンインストールはすべてローカルで、クラウドサービスやデータベースは不要です。
++Claude Codeでは最初のプロンプトでローカル補助プロセスが起動し、動作中のホストがなく、アイドル状態になると終了します。
+ 
+ [![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+ [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+@@ -84,7 +85,7 @@
+ すでに持っているファイル(`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+ `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`)— それぞれをバックアップして`.bak`まず —
+ そしてプロトコルを対応するスキルフォルダにコピーします。それらの外には何もありません
+-パス、デーモンなし、ネットワークコールなし。</sub>
++パス、ネットワークコールなし。</sub>
+ 
+ **2. プロジェクトを開始**— フォルダ内のエージェントを開き、次を入力:
+ 
+--- a/.saipen/saitranslate/kitchen/et/README_ET.md
++++ b/.saipen/saitranslate/kitchen/et/README_ET.md
+@@ -20,7 +20,8 @@
+ **Üks käsk jätkamiseks. Lihtfaili olek. Masina kontrollitud lepingud.**
+ 
+ Repo valideerib ise iga pushiga; install, olek, kontrollid ja
+-eemaldamine on kohaline — ei ole ühtegi pilveteenust, ei daemoni, ei andmebaasi.
++eemaldamine on kohalikud — pilveteenust ega andmebaasi pole vaja.
++Claude Code’i esimene päring käivitab kohaliku abiprotsessi, mis sulgub, kui see on jõude ja ükski host enam ei tööta.
+ 
+ [![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+ [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+@@ -84,7 +85,7 @@
+ failid, mida sul juba on(`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+ `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`)— kopeerimine igaühele`.bak`esimese —
+ ja kopeerib protokollide failid vastavate oskustega kataloogidesse. Midagi väljaspool neid
+-teed, ei deemoni, ei võrguühendusi.</sub>
++teed, ei võrguühendusi.</sub>
+ 
+ **2. Alusta projektiga**— avage oma kataloogis agent, sisestage:
+ 
+--- a/.saipen/saitranslate/kitchen/ru/README_RU.md
++++ b/.saipen/saitranslate/kitchen/ru/README_RU.md
+@@ -20,7 +20,8 @@
+ **Один командный запрос для возобновления. Состояние в обычных файлах. Проверенные контракты машиной.**
+ 
+ Репозиторий проверяет себя при каждом push; установка, состояние, проверки и
+-от uninstall — всё локальное — никакой облачной службы, никакого демона, никакой базы данных.
++удаление — всё локальное, без облачного сервиса и базы данных.
++Первый запрос Claude Code запускает локальный вспомогательный процесс, который завершается в простое, когда ни один хост больше не работает.
+ 
+ [![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+ [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+@@ -84,7 +85,7 @@
+ файлы, которые у вас уже есть(`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+ `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`)— создавая резервную копию каждого из них в`.bak`первым делом —
+ и копирует протокол в соответствующие папки навыков. Ничего за пределами этих
+-пути, без демона, без сетевых вызовов.</sub>
++пути, без сетевых вызовов.</sub>
+ 
+ **2. Начать проект**— откройте агента в своей папке, введите:
+ 
+--- a/.saipen/saitranslate/kitchen/ded/README_DED.md
++++ b/.saipen/saitranslate/kitchen/ded/README_DED.md
+@@ -20,7 +20,8 @@
+ **Один комманд для возобновления. Состояние в обычных файлах. Проверенные контракты.**
+ 
+ Репозиторий проверяет себя при каждом push; установка, состояние, проверки и
+-удаление — всё локальное — никакой облачной службы, никакого демона, никакой базы данных.
++удаление — всё локальное, без облачного сервиса и базы данных.
++Первый запрос Claude Code запускает местный помощник; без работающего хоста он завершается в простое.
+ 
+ [![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+ [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+@@ -81,7 +82,7 @@
+ `<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->` блок к инструкционным
+ файлам агента, которые у вас уже есть (`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+ `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`) — сначала создавая резервные копии в `.bak`] —
+-и копирует протокол в соответствующие папки навыков. Ничего вне этих путей, никакого демона, никаких сетевых вызовов.</sub>
++и копирует протокол в соответствующие папки навыков. Ничего вне этих путей, никаких сетевых вызовов.</sub>
+ 
+ **2. Запустите проект** — откройте агента в вашей папке, введите:
+ 
+--- a/.saipen/saitranslate/kitchen/ja/README_JA.md
++++ b/.saipen/saitranslate/kitchen/ja/README_JA.md
+@@ -20,7 +20,8 @@
+ **リポジトリはプッシュされるたびに自分自身を検証します; インストール、状態、チェック、および**
+ 
+ 
+-アンインストールはすべてローカルです — クラウドサービスもデーモンもデータベースもありません。
++アンインストールはすべてローカルで、クラウドサービスやデータベースは不要です。
++Claude Codeでは最初のプロンプトでローカル補助プロセスが起動し、動作中のホストがなく、アイドル状態になると終了します。
+ 
+ [![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+ [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
+@@ -84,7 +85,7 @@
+ すでに持っているファイル(`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
+ `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`)— それぞれをバックアップして`.bak`まず —
+ そしてプロトコルを対応するスキルフォルダにコピーします。それらの外には何もありません
+-パス、デーモンなし、ネットワークコールなし。</sub>
++パス、ネットワークコールなし。</sub>
+ 
+ **2. プロジェクトを開始**— フォルダ内のエージェントを開き、次を入力:
+ 

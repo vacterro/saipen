@@ -1,0 +1,432 @@
+{
+  "measurement": "scoped engineering measurements, not lifecycle or native-host acceptance",
+  "source_files": {
+    "tools/saipen_engine/board.py": {
+      "before": {
+        "lf_bytes": 88127,
+        "physical_lines": 2006,
+        "functions": 59,
+        "branch_sites": 229
+      },
+      "after": {
+        "lf_bytes": 92711,
+        "physical_lines": 2097,
+        "functions": 62,
+        "branch_sites": 244
+      }
+    },
+    "tools/saipen_engine/router.py": {
+      "before": {
+        "lf_bytes": 69699,
+        "physical_lines": 1509,
+        "functions": 18,
+        "branch_sites": 114
+      },
+      "after": {
+        "lf_bytes": 69826,
+        "physical_lines": 1511,
+        "functions": 18,
+        "branch_sites": 114
+      }
+    },
+    "tools/saipen_engine/audit_inbox.py": {
+      "before": {
+        "lf_bytes": 63660,
+        "physical_lines": 1610,
+        "functions": 39,
+        "branch_sites": 169
+      },
+      "after": {
+        "lf_bytes": 63180,
+        "physical_lines": 1598,
+        "functions": 39,
+        "branch_sites": 168
+      }
+    },
+    "tools/saipen_engine/response_surface.py": {
+      "before": {
+        "lf_bytes": 86400,
+        "physical_lines": 1988,
+        "functions": 37,
+        "branch_sites": 253
+      },
+      "after": {
+        "lf_bytes": 87561,
+        "physical_lines": 2012,
+        "functions": 37,
+        "branch_sites": 258
+      }
+    },
+    "tools/saipen_engine/automation.py": {
+      "before": {
+        "lf_bytes": 26080,
+        "physical_lines": 608,
+        "functions": 10,
+        "branch_sites": 62
+      },
+      "after": {
+        "lf_bytes": 26671,
+        "physical_lines": 620,
+        "functions": 10,
+        "branch_sites": 66
+      }
+    },
+    "tools/saipen_engine/goal_authority.py": {
+      "before": {
+        "lf_bytes": 18467,
+        "physical_lines": 427,
+        "functions": 16,
+        "branch_sites": 61
+      },
+      "after": {
+        "lf_bytes": 19029,
+        "physical_lines": 442,
+        "functions": 17,
+        "branch_sites": 61
+      }
+    },
+    "tools/saipen_engine/operations.py": {
+      "before": {
+        "lf_bytes": 529942,
+        "physical_lines": 13018,
+        "functions": 177,
+        "branch_sites": 1143
+      },
+      "after": {
+        "lf_bytes": 530138,
+        "physical_lines": 13023,
+        "functions": 177,
+        "branch_sites": 1143
+      }
+    },
+    "tools/saipen.py": {
+      "before": {
+        "lf_bytes": 609312,
+        "physical_lines": 14814,
+        "functions": 129,
+        "branch_sites": 1940
+      },
+      "after": {
+        "lf_bytes": 609473,
+        "physical_lines": 14818,
+        "functions": 129,
+        "branch_sites": 1941
+      }
+    }
+  },
+  "branch_site_definition": "If, IfExp, For, While, ExceptHandler, Match AST nodes; not formal cyclomatic complexity",
+  "idle_fixture": {
+    "origin": "current BOARD with campaign-only T-1857/T-1858 excluded IN MEMORY",
+    "counts": {
+      "## DOING": 0,
+      "## TODO": 3,
+      "## DONE": 307,
+      "## BLOCKED": 102
+    },
+    "before": {
+      "disposition": "IDLE_BLOCKED_EXTERNAL",
+      "next_exact_action": "saipen ticket resolve-external T-1317",
+      "all_requirements_complete": false
+    },
+    "after": {
+      "disposition": "IDLE_OPERATOR_REQUIRED",
+      "next_exact_action": "saipen status",
+      "all_requirements_complete": false
+    },
+    "primary_blocker": {
+      "shared_blocker_id": "release:shared-index",
+      "blocker_class": "WAIT_USER_DECISION",
+      "cause": "publication-staging",
+      "root_cause": "publication blocked: 206 foreign pre-existing staged paths would enter the release (the operator's in-flight staged batch); stage the release scope explicitly or leave it untouched",
+      "owner": "tools/saipen_engine/release.py",
+      "root_tickets": [
+        "T-1815",
+        "T-1856",
+        "T-1816",
+        "T-1817"
+      ],
+      "dependent_tickets": [
+        "T-1855",
+        "T-1854",
+        "T-1853"
+      ],
+      "recovery_internally_authorized": false,
+      "external_input_required": true,
+      "read_only_work_may_proceed": true,
+      "recovery_operation": {
+        "command": null,
+        "operator_action": "Resolve foreign staged-batch ownership, or authorize a verified canonical isolated release; preserve the live index."
+      },
+      "resumption_preconditions": [
+        "Foreign staging ownership is resolved or canonical isolation is verified",
+        "Live index and foreign staged entries remain protected",
+        "Exact reviewed scope and current verification pass release preflight"
+      ],
+      "basis": "recorded-blocker; not a live recovery authorization"
+    },
+    "before_timing": {
+      "samples": 50,
+      "median_ms": 0.9619,
+      "min_ms": 0.9268,
+      "max_ms": 1.8744
+    },
+    "after_timing": {
+      "samples": 50,
+      "median_ms": 1.3684,
+      "min_ms": 1.3278,
+      "max_ms": 3.6715
+    }
+  },
+  "context": {
+    "cold": 27641,
+    "ordinary_continue": 34570,
+    "command_resolution": 56305,
+    "ordinary_phase": 40943,
+    "ship_improve": 55625,
+    "single_doc": 49935,
+    "profiles": {
+      "cold": [
+        {
+          "name": "cold",
+          "bytes": 27641,
+          "must": {
+            "BOOT.md": 10276,
+            "STYLE.md": 7279,
+            "EXECUTION.md": 7848,
+            "INDEX.md": 2238
+          },
+          "transitive": [],
+          "conditional": {},
+          "exclude": [
+            "CONFORMANCE.md",
+            "CHANGELOG.md",
+            "phases/*.md"
+          ]
+        }
+      ],
+      "ordinary_continue": [
+        {
+          "name": "done-to-next",
+          "bytes": 34570,
+          "must": {
+            "CORE.md": 32117,
+            "phases/done.md": 2453
+          },
+          "transitive": [],
+          "conditional": {
+            "SOURCES.md": 25845,
+            "RUNTIME.md": 20143,
+            "@active_phase_max": 8826
+          },
+          "exclude": [
+            "CONFORMANCE.md",
+            "CHANGELOG.md"
+          ]
+        }
+      ],
+      "command_resolution": [
+        {
+          "name": "command-router",
+          "bytes": 56305,
+          "must": {
+            "REGISTRY.json": 32918,
+            "COMMANDS.md": 23387
+          },
+          "transitive": [],
+          "conditional": {
+            "CONTROLS.md": 10744,
+            "EXECUTION.md": 7848,
+            "IMPROVE.md": 39789
+          },
+          "exclude": [
+            "CORE.md",
+            "CONFORMANCE.md",
+            "phases/*.md"
+          ]
+        }
+      ],
+      "ordinary_phase": [
+        {
+          "name": "largest-active-phase",
+          "bytes": 40943,
+          "must": {
+            "CORE.md": 32117,
+            "@active_phase_max": 8826
+          },
+          "transitive": [],
+          "conditional": {
+            "SOURCES.md": 25845,
+            "RUNTIME.md": 20143
+          },
+          "exclude": [
+            "CONFORMANCE.md",
+            "CHANGELOG.md",
+            "inactive phases"
+          ]
+        }
+      ],
+      "ship_improve": [
+        {
+          "name": "ship-delta",
+          "bytes": 55625,
+          "must": {
+            "phases/ship.md": 5690,
+            "OPS.md": 49935
+          },
+          "transitive": [],
+          "conditional": {
+            "SOURCES.md": 25845,
+            "RUNTIME.md": 20143
+          },
+          "exclude": [
+            "CONFORMANCE.md",
+            "inactive phases"
+          ]
+        },
+        {
+          "name": "improve-delta",
+          "bytes": 42222,
+          "must": {
+            "IMPROVE.md": 39789,
+            "SAICRITIC.md": 2433
+          },
+          "transitive": [],
+          "conditional": {
+            "RUNTIME.md": 20143
+          },
+          "exclude": [
+            "CONFORMANCE.md",
+            "phases/*.md"
+          ]
+        }
+      ],
+      "single_doc": [
+        {
+          "name": "largest-routine-document",
+          "bytes": 49935,
+          "must": {
+            "@routine_doc_max": 49935
+          },
+          "transitive": [],
+          "conditional": {},
+          "exclude": [
+            "CONFORMANCE.md",
+            "CHANGELOG.md"
+          ]
+        }
+      ]
+    },
+    "budgets": {
+      "cold": 27648,
+      "ordinary_continue": 35840,
+      "command_resolution": 56320,
+      "ordinary_phase": 40960,
+      "ship_improve": 56320,
+      "single_doc": 51200
+    },
+    "basis": "Each budget measures the non-cumulative routed surface named by one route. Conditional documents are reported separately and become mandatory only after routing into their owning profile.",
+    "core": 32117,
+    "boot": 10276,
+    "bytes_by_phase": {
+      "INIT": 1677,
+      "PLAN": 1827,
+      "SCOUT": 1028,
+      "BUILD": 1414,
+      "VERIFY": 8826,
+      "REVIEW": 5325,
+      "SHIP": 5690,
+      "DONE": 2453,
+      "BLOCKED": 684,
+      "VALIDATE": 1731,
+      "HUNT": 4069,
+      "MARKHUNT": 3212,
+      "ADD": 3136,
+      "CLEAN": 4719,
+      "TRANSLATE": 4679,
+      "PREPARE": 2991
+    },
+    "phases_count": 16,
+    "phases_total": 53461,
+    "phases_median": 3063.5,
+    "phases_max": 8826,
+    "largest_phase": "VERIFY",
+    "preferred_phase_bands": {
+      "VERIFY": {
+        "min": 6144,
+        "max": 7168
+      },
+      "ADD": {
+        "min": 5120,
+        "max": 5632
+      },
+      "HUNT": {
+        "min": 4608,
+        "max": 5632
+      },
+      "PREPARE": {
+        "min": 3584,
+        "max": 4608
+      },
+      "SHIP": {
+        "min": 8192,
+        "max": 9216
+      },
+      "TRANSLATE": {
+        "min": 7168,
+        "max": 8192
+      },
+      "MARKHUNT": {
+        "min": 8192,
+        "max": 9216
+      },
+      "CLEAN": {
+        "min": 7680,
+        "max": 8704
+      }
+    },
+    "documents": {
+      "ACTIVATION_BLOCK.md": 3983,
+      "BOOT.md": 10276,
+      "COMMANDS.md": 23387,
+      "CONFORMANCE.md": 2465,
+      "CONTROLS.md": 10744,
+      "CONVERGE.md": 8697,
+      "CORE.md": 32117,
+      "EXECUTION.md": 7848,
+      "FUTURE.md": 12279,
+      "HABITS.md": 1577,
+      "IMPROVE.md": 39789,
+      "INDEX.md": 2238,
+      "MAINTENANCE.md": 15111,
+      "OPS.md": 49935,
+      "phases/add.md": 3136,
+      "phases/blocked.md": 684,
+      "phases/build.md": 1414,
+      "phases/clean.md": 4719,
+      "phases/done.md": 2453,
+      "phases/hunt.md": 4069,
+      "phases/init.md": 1677,
+      "phases/markhunt.md": 3212,
+      "phases/plan.md": 1827,
+      "phases/prepare.md": 2991,
+      "phases/review.md": 5325,
+      "phases/scout.md": 1028,
+      "phases/ship.md": 5690,
+      "phases/translate.md": 4679,
+      "phases/validate.md": 1731,
+      "phases/verify.md": 8826,
+      "RFC.md": 260,
+      "RUNTIME.md": 20143,
+      "SAICRITIC.md": 2433,
+      "SKILL.md": 5035,
+      "SOURCES.md": 25845,
+      "STORAGE.md": 5129,
+      "STYLE.md": 7279,
+      "UI.md": 18366
+    },
+    "human_markdown_total": 358397,
+    "informational": [
+      "human_markdown_total"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-111:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-35 is implemented and verified against the pre-fix red control"
+    }
+  },
+  "derived_at": "2026-10-04T14:58:10Z",
+  "derived_from": "SRC-111",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "14aca2767a2fc977f05df34e04d1e27e59ed3eba3ff896b844dadafb92f1619a"
+}

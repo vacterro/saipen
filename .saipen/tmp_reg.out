@@ -1,0 +1,37 @@
+{
+ "id": "zaicode",
+ "name": "ZAICODE",
+ "home_variable": "ZAICODE_HOME",
+ "home_note": "ZAICODE runs with an isolated HOME (<workspace>/.zaicode/home) and never shares ~/.zcode with a production ZCode; ZAICODE_HOME names that HOME, and an unset variable means ZAICODE is not configured on this machine.",
+ "instruction_surfaces": [
+  "$ZAICODE_HOME/.zcode/AGENTS.md"
+ ],
+ "skill_surfaces": [
+  "$ZAICODE_HOME/.zcode/skills/saipen"
+ ],
+ "blocking_capability": false,
+ "hook_install_surface": "~/.zcode/hooks/saipen-guard.py",
+ "hook_artifact": "extensions/adapters/zaicode/saipen-guard.py",
+ "hook_installer": "tools/install_host_guard.py",
+ "hook_surface_note": "ZAICODE loads this process hook from ~/.zcode/cli/config.json and runs it as argv with shell:false, which is why the installer writes it with HOOK_BOOTSTRAP and the broker's max_shells:0 policy. The SKILL and instruction surfaces stay inside ZAICODE_HOME (the isolated home); the hook config is the operator profile's ~/.zcode because that is the file the running host reads. Without this declaration the canonical injector skipped the hook step entirely and runtime_bootstrap.hook_problems answered [] at any drift, so a repaired artifact never reached the operator (T-1934/T-1935).",
+ "freshness_surfaces": [
+  "skill",
+  "instruction",
+  "hook"
+ ],
+ "declared_strength": "ADVISORY",
+ "response_enforcement": "ADVISORY",
+ "response_hook": null,
+ "response_enforcement_note": "No final-response hook surface is installed for this host.",
+ "artifact_version": null,
+ "install": {
+  "home": "$ZAICODE_HOME/.zcode",
+  "skill": "$ZAICODE_HOME/.zcode/skills/saipen",
+  "instruction": "$ZAICODE_HOME/.zcode/AGENTS.md",
+  "hook": "~/.zcode/hooks/saipen-guard.py"
+ },
+ "pre_output_interception": "NONE",
+ "stop_output_interception": "NONE",
+ "admission_enforcement": "ADVISORY",
+ "style_enforcement": "ADVISORY",
+ "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat

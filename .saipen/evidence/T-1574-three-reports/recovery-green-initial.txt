@@ -1,0 +1,200 @@
+test_every_crash_prefix_is_deterministically_recoverable (test_t1572_ticket_scoped_recovery.GapCrashPrefixTests.test_every_crash_prefix_is_deterministically_recoverable) ... 
+  test_every_crash_prefix_is_deterministically_recoverable (test_t1572_ticket_scoped_recovery.GapCrashPrefixTests.test_every_crash_prefix_is_deterministically_recoverable) (stage='PREPARED') ... FAIL
+  test_every_crash_prefix_is_deterministically_recoverable (test_t1572_ticket_scoped_recovery.GapCrashPrefixTests.test_every_crash_prefix_is_deterministically_recoverable) (stage='LOG') ... ERROR
+  test_every_crash_prefix_is_deterministically_recoverable (test_t1572_ticket_scoped_recovery.GapCrashPrefixTests.test_every_crash_prefix_is_deterministically_recoverable) (stage='BOARD') ... ERROR
+  test_every_crash_prefix_is_deterministically_recoverable (test_t1572_ticket_scoped_recovery.GapCrashPrefixTests.test_every_crash_prefix_is_deterministically_recoverable) (stage='STATE') ... ERROR
+test_matrix_CKL_the_route_converges_and_replay_is_refused (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_matrix_CKL_the_route_converges_and_replay_is_refused) ... FAIL
+test_matrix_C_recover_names_one_approval_route_from_every_verb (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_matrix_C_recover_names_one_approval_route_from_every_verb) ... ok
+test_matrix_J_resolve_next_action_cannot_mask_the_gap (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_matrix_J_resolve_next_action_cannot_mask_the_gap)
+A legacy next_action must not become the advertised exit. ... ok
+test_no_history_is_fabricated_by_the_recovery (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_no_history_is_fabricated_by_the_recovery)
+Acceptance 4: the LOG gains the DEC, nothing else. ... FAIL
+test_the_original_state_and_board_bytes_survive_as_evidence (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_the_original_state_and_board_bytes_survive_as_evidence)
+Acceptance 6: the replaced bytes are preserved, both surfaces. ... ok
+test_a_finish_event_for_the_ticket_closes_the_gap_class (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_a_finish_event_for_the_ticket_closes_the_gap_class)
+A ticket whose finish event EXISTS is not a journal gap. ... ok
+test_a_ticket_bound_state_with_no_tagged_history_refuses (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_a_ticket_bound_state_with_no_tagged_history_refuses)
+No fabrication: a task whose own events prove nothing blocks. ... ok
+test_matrix_A_unrelated_ticket_never_supplies_phase_evidence (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_matrix_A_unrelated_ticket_never_supplies_phase_evidence)
+THE hostile carrier (report S10): pre-fix this is RED. ... ok
+test_matrix_G_a_legal_ship_done_pair_is_never_touched (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_matrix_G_a_legal_ship_done_pair_is_never_touched)
+T-260's own terminal state is not this defect class. ... ok
+test_matrix_H_the_unscoped_t1318_repair_still_works (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_matrix_H_the_unscoped_t1318_repair_still_works)
+A taskless STATE keeps the T-1318 global-chain derivation. ... ok
+test_the_binding_is_exactly_the_tagged_events (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_the_binding_is_exactly_the_tagged_events)
+Matrix B / report S1: one definition, tested as its own contract. ... ok
+test_the_gap_owns_next_action_with_the_canonical_projection (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_the_gap_owns_next_action_with_the_canonical_projection) ... ok
+
+======================================================================
+ERROR: test_every_crash_prefix_is_deterministically_recoverable (test_t1572_ticket_scoped_recovery.GapCrashPrefixTests.test_every_crash_prefix_is_deterministically_recoverable) (stage='LOG')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1572_ticket_scoped_recovery.py", line 531, in test_every_crash_prefix_is_deterministically_recoverable
+    if "--apply-approved-repair" in step:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: argument of type 'NoneType' is not iterable
+
+======================================================================
+ERROR: test_every_crash_prefix_is_deterministically_recoverable (test_t1572_ticket_scoped_recovery.GapCrashPrefixTests.test_every_crash_prefix_is_deterministically_recoverable) (stage='BOARD')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1572_ticket_scoped_recovery.py", line 531, in test_every_crash_prefix_is_deterministically_recoverable
+    if "--apply-approved-repair" in step:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: argument of type 'NoneType' is not iterable
+
+======================================================================
+ERROR: test_every_crash_prefix_is_deterministically_recoverable (test_t1572_ticket_scoped_recovery.GapCrashPrefixTests.test_every_crash_prefix_is_deterministically_recoverable) (stage='STATE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1572_ticket_scoped_recovery.py", line 531, in test_every_crash_prefix_is_deterministically_recoverable
+    if "--apply-approved-repair" in step:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: argument of type 'NoneType' is not iterable
+
+======================================================================
+FAIL: test_every_crash_prefix_is_deterministically_recoverable (test_t1572_ticket_scoped_recovery.GapCrashPrefixTests.test_every_crash_prefix_is_deterministically_recoverable) (stage='PREPARED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1572_ticket_scoped_recovery.py", line 520, in test_every_crash_prefix_is_deterministically_recoverable
+    self.assertNotEqual(crashed.returncode, 0,
+AssertionError: 0 == 0 : {
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": [
+      {
+        "field": "phase",
+        "from": "DONE",
+        "to": "VERIFY",
+        "surface": "state",
+        "_class": "current-done-journal-gap",
+        "gap": {
+          "ticket": "T-261",
+          "last_event": 9,
+          "last_proven": "VERIFY",
+          "source": "BUILD"
+        },
+        "reason": "phase 'DONE' cannot be reconciled: the journal proves T-261 at most VERIFY (E-9), no finish event for this lifecycle, while STATE claims DONE -- the current-done-journal-gap is repaired to the ticket's own last proven lifecycle phase and completion is re-established by the canonical lifecycle, never by a fabricated event (T-1572)"
+      },
+      {
+        "field": "transition_from",
+        "from": "VERIFY",
+        "to": "BUILD",
+        "surface": "state",
+        "_class": "current-done-journal-gap",
+        "gap": {
+          "ticket": "T-261",
+          "last_event": 9,
+          "last_proven": "VERIFY",
+          "source": "BUILD"
+        },
+        "reason": "transition_from 'VERIFY' does not reach VERIFY; the ticket's own chain proves the pair BUILD -> VERIFY (T-1572)"
+      },
+      {
+        "field": "next_action",
+        "from": "saipen continue",
+        "to": "PHASE VERIFY T-261",
+        "surface": "state",
+        "_class": "current-done-journal-gap",
+        "gap": {
+          "ticket": "T-261",
+          "last_event": 9,
+          "last_proven": "VERIFY",
+          "source": "BUILD"
+        },
+        "reason": "next_action must point at the restored lifecycle: the shared router projects 'PHASE VERIFY T-261' from the proven phase/task pair (the journal proves T-261 at most VERIFY (E-9), no finish event for this lifecycle, while STATE claims DONE -- the current-done-journal-gap is repaired to the ticket's own last proven lifecycle phase and completion is re-established by the canonical lifecycle, never by a fabricated event (T-1572))"
+      }
+    ]
+  },
+  "adopted": [],
+  "lifecycle": [
+    {
+      "field": "board",
+      "surface": "board",
+      "kind": "section-move",
+      "_class": "current-done-journal-gap",
+      "ticket": "T-261",
+      "from_section": "## DONE",
+      "to_section": "## DOING",
+      "fields": [
+        "closure_mode",
+        "implementation_source",
+        "blocker",
+        "blocker_scope",
+        "blocked_on",
+        "claim_session",
+        "claim_run",
+        "claim_generation"
+      ],
+      "requires_approval": true,
+      "generation": "current",
+      "reason": "CURRENT_DONE_JOURNAL_GAP: restore T-261 to its own proven VERIFY lifecycle; preserve original bytes"
+    }
+  ],
+  "repair_id": "fb5d67be873943a6e5619d424404b78af761461590c3b81c62622fc1bae8a451",
+  "targets": [
+    ".saipen/recovery/terminal-gap/reconcile-20260930171430675908.STATE.md",
+    ".saipen/recovery/terminal-gap/reconcile-20260930171430675908.BOARD.md",
+    ".saipen/recovery/terminal-gap/reconcile-20260930171430675908.LOG.md",
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md",
+    ".saipen/recovery/state-phase/reconcile-20260930171430675908.STATE.md"
+  ],
+  "event": "E-14",
+  "agent": "auda",
+  "strict_state_error": null,
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-t1572-fr7hm1k5/AUDAPACK/.saipen/MANIFEST.json",
+    "contract_version": 3,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  }
+}
+
+
+======================================================================
+FAIL: test_matrix_CKL_the_route_converges_and_replay_is_refused (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_matrix_CKL_the_route_converges_and_replay_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1572_ticket_scoped_recovery.py", line 399, in test_matrix_CKL_the_route_converges_and_replay_is_refused
+    self.assertEqual(verdict.get("structural_gate"), "pass", verdict)
+AssertionError: None != 'pass' : {'ok': False, 'code': 'VALIDATION_FAILED', 'error_count': 1, 'errors': ["BOARD proposed T-260 sits under ## DONE with no | verify: evidence -- ## DONE is a claim that the ticket's own verify condition was met"], 'detail': "BOARD proposed T-260 sits under ## DONE with no | verify: evidence -- ## DONE is a claim that the ticket's own verify condition was met", 'conformance_status': {'status': 'NOT_RUN', 'gate': 'core', 'reason': 'no canonical validator receipt on record -- conformance is UNKNOWN, never assumed PASS', 'validator': {'validator_path': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py', 'validator_protocol_version': '1', 'project_protocol_version': '8', 'gate': 'core', 'source_head': '', 'source_tree_fingerprint': ''}}}
+
+======================================================================
+FAIL: test_no_history_is_fabricated_by_the_recovery (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_no_history_is_fabricated_by_the_recovery)
+Acceptance 4: the LOG gains the DEC, nothing else.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1572_ticket_scoped_recovery.py", line 412, in test_no_history_is_fabricated_by_the_recovery
+    self.assertEqual(log.count("[E-0"), 14, log)
+AssertionError: 13 != 14 : - 29.09.26 08:00 [E-001] [T-260] [agent: auda] [op: claim-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] DEC: claimed via SAIOPS -- owner auda
+- 29.09.26 08:01 [E-002] [parent: E-001] [T-260] [agent: auda] [op: transition-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb] RUN: transition to SCOUT -- the generator swap
+- 29.09.26 08:02 [E-003] [parent: E-002] [T-260] [agent: auda] [op: transition-cccccccccccccccccccccccccccccccc] RUN: transition to BUILD -- the generator swap
+- 29.09.26 08:03 [E-004] [parent: E-003] [T-260] [agent: auda] [op: transition-dddddddddddddddddddddddddddddddd] RUN: transition to VERIFY -- the generator swap
+- 29.09.26 08:04 [E-005] [parent: E-004] [T-260] [agent: auda] [op: checkpoint-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee] RUN: VERIFY -- the generator swap gates green
+- 29.09.26 09:00 [E-006] [parent: E-005] [T-261] [agent: auda] [op: claim-ffffffffffffffffffffffffffffffff] DEC: claimed via SAIOPS -- owner auda
+- 29.09.26 09:01 [E-007] [parent: E-006] [T-261] [agent: auda] [op: transition-gggggggggggggggggggggggggggggggg] RUN: transition to SCOUT -- the parser rewrite
+- 29.09.26 09:02 [E-008] [parent: E-007] [T-261] [agent: auda] [op: transition-hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh] RUN: transition to BUILD -- the parser rewrite
+- 29.09.26 09:03 [E-009] [parent: E-008] [T-261] [agent: auda] [op: transition-iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii] RUN: transition to VERIFY -- the parser rewrite
+- 29.09.26 09:04 [E-010] [parent: E-009] [T-261] [agent: auda] [op: checkpoint-jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj] RUN: VERIFY -- the parser rewrite gates green
+- 29.09.26 10:00 [E-011] [parent: E-010] [T-260] [agent: auda] [op: transition-kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk] RUN: transition to REVIEW -- the generator swap
+- 29.09.26 10:01 [E-012] [parent: E-011] [T-260] [agent: auda] [op: transition-llllllllllllllllllllllllllllllll] RUN: transition to SHIP -- the generator swap
+- 29.09.26 10:02 [E-013] [parent: E-012] [T-260] [agent: auda] [op: finish-mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 30.09.26 17:14 [E-14] [parent: E-13] [agent: auda] [op: reconcile-20260930171436135640] DEC: reconcile protocol state -- phase 'DONE'->'VERIFY'; transition_from 'VERIFY'->'BUILD'; next_action 'saipen continue'->'PHASE VERIFY T-261'; board lifecycle T-261:section-move->## DOING
+
+
+----------------------------------------------------------------------
+Ran 13 tests in 6.488s
+
+FAILED (failures=3, errors=3)

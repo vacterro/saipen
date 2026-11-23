@@ -1,0 +1,28 @@
+{
+  "pid": 17964,
+  "commands": [
+    {
+      "label": "T1695-warn-reverify",
+      "exit_code": 0,
+      "output": "T1695-warn-reverify-current-05.txt"
+    },
+    {
+      "label": "T1695-warn-currentness",
+      "exit_code": 0,
+      "output": "T1695-warn-currentness-current-05.txt"
+    }
+  ],
+  "validator_calls": [
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\_TEMP_\\saipen-warn-native-control-r24ei941\\warn-ownership\\tools\\validate.py"
+      ],
+      "exit_code": 1,
+      "elapsed_s": 17.235,
+      "output": "warn-validator-01-current-05.txt"
+    }
+  ],
+  "problem": "control copy with calibrated warn_slugs is not clean: , da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nValidation FAILED: 2 problem(s), 5 warning(s)",
+  "status": "observed"
+}

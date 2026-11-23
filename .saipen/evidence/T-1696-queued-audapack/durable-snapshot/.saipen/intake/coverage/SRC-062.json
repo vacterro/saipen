@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-062:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-216 closed with verification evidence in LOG: verify -> PASS [target: T-216] conf: high -- python -m pytest -q tests/ui_qt/test_gui_thread_native_discovery.py tests/test_title_guardian.py tests/test_instances.py -> 74 passed; python -m pytest -q -> 1941 passed 5 skipped; ruff check . clean; compileall clean. Red controls: heartbeat with restored _resolve_for produced 100/100 desktop scans (gate expects 0); synchronous GUI-thread 0.4s scan pro",
+      "text": "P0 escaped regression: AUDAPACK Project Room GUI freezes / Not Responding after managed launch because the Qt GUI thread performs blocking native discovery (EnumWindows, process metadata, Fleet preflight); move all native work off the GUI thread. Full spec V:\\_TEMP_\\fastprompter_drag\\AUDAPACK_20260920_1620.md",
+      "verification": "the Work this request created reached its own verification gate; see the T-216 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-216"
+    }
+  },
+  "schema_version": 1
+}

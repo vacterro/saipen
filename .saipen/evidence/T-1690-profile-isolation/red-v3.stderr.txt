@@ -1,0 +1,217 @@
+test_a_borrowed_failure_is_returned_to_the_caller (test_t1690_profile_isolation.BorrowTests.test_a_borrowed_failure_is_returned_to_the_caller) ... FAIL
+test_borrow_preserves_module_cleanup_and_runs_test_fixtures (test_t1690_profile_isolation.BorrowTests.test_borrow_preserves_module_cleanup_and_runs_test_fixtures) ... FAIL
+test_class_fixtures_are_refused_before_the_test_runs (test_t1690_profile_isolation.BorrowTests.test_class_fixtures_are_refused_before_the_test_runs) ... FAIL
+test_nested_context_restores_cleanup_order_after_an_exception (test_t1690_profile_isolation.BorrowTests.test_nested_context_restores_cleanup_order_after_an_exception) ... FAIL
+test_a_foreign_home_install_never_follows_the_carrier (test_t1690_profile_isolation.InstallerFixtureTests.test_a_foreign_home_install_never_follows_the_carrier) ... FAIL
+test_a_foreign_home_rollback_restores_its_kept_generation (test_t1690_profile_isolation.InstallerFixtureTests.test_a_foreign_home_rollback_restores_its_kept_generation) ... FAIL
+test_a_foreign_home_uninstall_removes_only_its_installed_guard (test_t1690_profile_isolation.InstallerFixtureTests.test_a_foreign_home_uninstall_removes_only_its_installed_guard) ... FAIL
+test_an_explicit_profile_still_wins_for_a_foreign_home (test_t1690_profile_isolation.InstallerFixtureTests.test_an_explicit_profile_still_wins_for_a_foreign_home) ... ok
+test_the_operator_home_still_installs_into_its_launch_profile (test_t1690_profile_isolation.InstallerFixtureTests.test_the_operator_home_still_installs_into_its_launch_profile) ... ok
+test_the_world_fixture_names_its_profile_without_module_isolation (test_t1690_profile_isolation.InstallerFixtureTests.test_the_world_fixture_names_its_profile_without_module_isolation) ... FAIL
+test_a_supported_nested_run_keeps_every_outer_isolation_until_module_end (test_t1690_profile_isolation.NestedRunTests.test_a_supported_nested_run_keeps_every_outer_isolation_until_module_end) ... FAIL
+test_the_bare_nested_suite_reproduces_the_cleanup_hazard (test_t1690_profile_isolation.NestedRunTests.test_the_bare_nested_suite_reproduces_the_cleanup_hazard) ... ok
+test_an_uncomparable_home_cannot_inherit_the_carrier (test_t1690_profile_isolation.ProfileSelectionTests.test_an_uncomparable_home_cannot_inherit_the_carrier) ... FAIL
+test_explicit_profiles_win_and_empty_profiles_select_the_default (test_t1690_profile_isolation.ProfileSelectionTests.test_explicit_profiles_win_and_empty_profiles_select_the_default) ... 
+  test_explicit_profiles_win_and_empty_profiles_select_the_default (test_t1690_profile_isolation.ProfileSelectionTests.test_explicit_profiles_win_and_empty_profiles_select_the_default) (home=None) ... FAIL
+  test_explicit_profiles_win_and_empty_profiles_select_the_default (test_t1690_profile_isolation.ProfileSelectionTests.test_explicit_profiles_win_and_empty_profiles_select_the_default) (home=WindowsPath('V:/_TEMP_/saipen-t1690-tkw5pi2n/operator')) ... FAIL
+  test_explicit_profiles_win_and_empty_profiles_select_the_default (test_t1690_profile_isolation.ProfileSelectionTests.test_explicit_profiles_win_and_empty_profiles_select_the_default) (home=WindowsPath('V:/_TEMP_/saipen-t1690-tkw5pi2n/fixture-home')) ... FAIL
+test_explicit_profiles_win_and_empty_profiles_select_the_default (test_t1690_profile_isolation.ProfileSelectionTests.test_explicit_profiles_win_and_empty_profiles_select_the_default) ... FAIL
+test_observation_keeps_the_hosts_carrier_for_an_explicit_home (test_t1690_profile_isolation.ProfileSelectionTests.test_observation_keeps_the_hosts_carrier_for_an_explicit_home) ... ok
+test_only_the_operator_home_inherits_the_carrier_for_writes (test_t1690_profile_isolation.ProfileSelectionTests.test_only_the_operator_home_inherits_the_carrier_for_writes) ... FAIL
+test_repair_does_not_select_the_ambient_foreign_profile (test_t1690_profile_isolation.ProfileSelectionTests.test_repair_does_not_select_the_ambient_foreign_profile) ... FAIL
+test_repair_names_a_foreign_homes_profile_even_without_a_carrier (test_t1690_profile_isolation.ProfileSelectionTests.test_repair_names_a_foreign_homes_profile_even_without_a_carrier) ... FAIL
+
+======================================================================
+FAIL: test_a_borrowed_failure_is_returned_to_the_caller (test_t1690_profile_isolation.BorrowTests.test_a_borrowed_failure_is_returned_to_the_caller)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 308, in test_a_borrowed_failure_is_returned_to_the_caller
+    result = self.borrow(Red())
+             ^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 277, in borrow
+    self.assertTrue(callable(helper), "a borrowed test must not run a top-level suite")
+AssertionError: False is not true : a borrowed test must not run a top-level suite
+
+======================================================================
+FAIL: test_borrow_preserves_module_cleanup_and_runs_test_fixtures (test_t1690_profile_isolation.BorrowTests.test_borrow_preserves_module_cleanup_and_runs_test_fixtures)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 296, in test_borrow_preserves_module_cleanup_and_runs_test_fixtures
+    result = self.borrow(Inner())
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 277, in borrow
+    self.assertTrue(callable(helper), "a borrowed test must not run a top-level suite")
+AssertionError: False is not true : a borrowed test must not run a top-level suite
+
+======================================================================
+FAIL: test_class_fixtures_are_refused_before_the_test_runs (test_t1690_profile_isolation.BorrowTests.test_class_fixtures_are_refused_before_the_test_runs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 314, in test_class_fixtures_are_refused_before_the_test_runs
+    self.assertTrue(callable(helper))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_nested_context_restores_cleanup_order_after_an_exception (test_t1690_profile_isolation.BorrowTests.test_nested_context_restores_cleanup_order_after_an_exception)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 259, in test_nested_context_restores_cleanup_order_after_an_exception
+    self.assertTrue(callable(helper))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_a_foreign_home_install_never_follows_the_carrier (test_t1690_profile_isolation.InstallerFixtureTests.test_a_foreign_home_install_never_follows_the_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 68, in test_a_foreign_home_install_never_follows_the_carrier
+    self.assert_standin_unchanged()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 62, in assert_standin_unchanged
+    self.assertEqual(contents(self.standin), self.before)
+AssertionError: {'ope[34 chars]lone', 'settings.json': b'{\n  "hooks": {\n   [43694 chars]e\n'} != {'ope[34 chars]lone'}
+Diff is 71720 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_a_foreign_home_rollback_restores_its_kept_generation (test_t1690_profile_isolation.InstallerFixtureTests.test_a_foreign_home_rollback_restores_its_kept_generation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 91, in test_a_foreign_home_rollback_restores_its_kept_generation
+    self.assertTrue(result["rolled_back"], result)
+AssertionError: False is not true : {'host': 'claude', 'rolled_back': False, 'detail': 'no previous hook generation is kept'}
+
+======================================================================
+FAIL: test_a_foreign_home_uninstall_removes_only_its_installed_guard (test_t1690_profile_isolation.InstallerFixtureTests.test_a_foreign_home_uninstall_removes_only_its_installed_guard)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 77, in test_a_foreign_home_uninstall_removes_only_its_installed_guard
+    self.assertTrue(removed["artifact_removed"], removed)
+AssertionError: False is not true : {'host': 'claude', 'removed_hooks': 0, 'artifact_removed': False, 'artifact_retired': False}
+
+======================================================================
+FAIL: test_the_world_fixture_names_its_profile_without_module_isolation (test_t1690_profile_isolation.InstallerFixtureTests.test_the_world_fixture_names_its_profile_without_module_isolation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 105, in test_the_world_fixture_names_its_profile_without_module_isolation
+    self.assert_standin_unchanged()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 62, in assert_standin_unchanged
+    self.assertEqual(contents(self.standin), self.before)
+AssertionError: {'ope[34 chars]lone', 'settings.json': b'{\n  "hooks": {\n   [43694 chars]e\n'} != {'ope[34 chars]lone'}
+Diff is 71720 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_a_supported_nested_run_keeps_every_outer_isolation_until_module_end (test_t1690_profile_isolation.NestedRunTests.test_a_supported_nested_run_keeps_every_outer_isolation_until_module_end)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 248, in test_a_supported_nested_run_keeps_every_outer_isolation_until_module_end
+    report = self.nested("helper")
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 237, in nested
+    self.assertEqual(result.returncode, 0, result.stderr[-2000:])
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1690-o2cfalci\nested.py", line 24, in <module>
+    with hermetic.nested_run():
+         ^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'test_hermetic_env' has no attribute 'nested_run'
+
+
+======================================================================
+FAIL: test_an_uncomparable_home_cannot_inherit_the_carrier (test_t1690_profile_isolation.ProfileSelectionTests.test_an_uncomparable_home_cannot_inherit_the_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 146, in test_an_uncomparable_home_cannot_inherit_the_carrier
+    self.assertEqual(self.writer(self.fixture), self.fixture / ".claude")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 124, in writer
+    self.assertTrue(callable(selector), "writers need their own profile selection boundary")
+AssertionError: False is not true : writers need their own profile selection boundary
+
+======================================================================
+FAIL: test_explicit_profiles_win_and_empty_profiles_select_the_default (test_t1690_profile_isolation.ProfileSelectionTests.test_explicit_profiles_win_and_empty_profiles_select_the_default) (home=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 141, in test_explicit_profiles_win_and_empty_profiles_select_the_default
+    self.assertEqual(self.writer(home, chosen), chosen)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 124, in writer
+    self.assertTrue(callable(selector), "writers need their own profile selection boundary")
+AssertionError: False is not true : writers need their own profile selection boundary
+
+======================================================================
+FAIL: test_explicit_profiles_win_and_empty_profiles_select_the_default (test_t1690_profile_isolation.ProfileSelectionTests.test_explicit_profiles_win_and_empty_profiles_select_the_default) (home=WindowsPath('V:/_TEMP_/saipen-t1690-tkw5pi2n/operator'))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 141, in test_explicit_profiles_win_and_empty_profiles_select_the_default
+    self.assertEqual(self.writer(home, chosen), chosen)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 124, in writer
+    self.assertTrue(callable(selector), "writers need their own profile selection boundary")
+AssertionError: False is not true : writers need their own profile selection boundary
+
+======================================================================
+FAIL: test_explicit_profiles_win_and_empty_profiles_select_the_default (test_t1690_profile_isolation.ProfileSelectionTests.test_explicit_profiles_win_and_empty_profiles_select_the_default) (home=WindowsPath('V:/_TEMP_/saipen-t1690-tkw5pi2n/fixture-home'))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 141, in test_explicit_profiles_win_and_empty_profiles_select_the_default
+    self.assertEqual(self.writer(home, chosen), chosen)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 124, in writer
+    self.assertTrue(callable(selector), "writers need their own profile selection boundary")
+AssertionError: False is not true : writers need their own profile selection boundary
+
+======================================================================
+FAIL: test_explicit_profiles_win_and_empty_profiles_select_the_default (test_t1690_profile_isolation.ProfileSelectionTests.test_explicit_profiles_win_and_empty_profiles_select_the_default)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 142, in test_explicit_profiles_win_and_empty_profiles_select_the_default
+    self.assertEqual(self.writer(self.fixture, ""), self.fixture / ".claude")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 124, in writer
+    self.assertTrue(callable(selector), "writers need their own profile selection boundary")
+AssertionError: False is not true : writers need their own profile selection boundary
+
+======================================================================
+FAIL: test_only_the_operator_home_inherits_the_carrier_for_writes (test_t1690_profile_isolation.ProfileSelectionTests.test_only_the_operator_home_inherits_the_carrier_for_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 133, in test_only_the_operator_home_inherits_the_carrier_for_writes
+    self.assertEqual(self.writer(), self.standin)
+                     ^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 124, in writer
+    self.assertTrue(callable(selector), "writers need their own profile selection boundary")
+AssertionError: False is not true : writers need their own profile selection boundary
+
+======================================================================
+FAIL: test_repair_does_not_select_the_ambient_foreign_profile (test_t1690_profile_isolation.ProfileSelectionTests.test_repair_does_not_select_the_ambient_foreign_profile)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 162, in test_repair_does_not_select_the_ambient_foreign_profile
+    invoke.assert_not_called()
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 900, in assert_not_called
+    raise AssertionError(msg)
+AssertionError: Expected '_invoke_installer' to not have been called. Called 1 times.
+Calls: [call(WindowsPath('V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1690-profile-isolation/subjects-v3/pre-fix'), 'claude', profile=WindowsPath('V:/_TEMP_/saipen-t1690-4f88d67i/standin/.claude')),
+ call().stdout.__bool__(),
+ call().stdout.splitlines(),
+ call().stdout.splitlines().__getitem__(slice(-6, None, None)),
+ call().stdout.splitlines().__getitem__().__iter__(),
+ call().returncode.__eq__(0),
+ call().returncode.__eq__(0)].
+
+======================================================================
+FAIL: test_repair_names_a_foreign_homes_profile_even_without_a_carrier (test_t1690_profile_isolation.ProfileSelectionTests.test_repair_names_a_foreign_homes_profile_even_without_a_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1690-profile-isolation\subjects-v3\pre-fix\tools\test_t1690_profile_isolation.py", line 185, in test_repair_names_a_foreign_homes_profile_even_without_a_carrier
+    invoke.assert_called_once_with(ROOT, "claude", profile=selected)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 951, in assert_called_once_with
+    return self.assert_called_with(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 939, in assert_called_with
+    raise AssertionError(_error_message()) from cause
+AssertionError: expected call not found.
+Expected: _invoke_installer(WindowsPath('V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1690-profile-isolation/subjects-v3/pre-fix'), 'claude', profile=WindowsPath('V:/_TEMP_/saipen-t1690-obyuug0q/fixture-home/.claude'))
+  Actual: _invoke_installer(WindowsPath('V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1690-profile-isolation/subjects-v3/pre-fix'), 'claude')
+
+----------------------------------------------------------------------
+Ran 18 tests in 1.295s
+
+FAILED (failures=17)

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-407:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "run saihunt at current epoch"
+    }
+  },
+  "derived_at": "2026-11-12T12:00:30Z",
+  "derived_from": "SRC-407",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "1a2d12488df20add0c5e27a27dcb3a63406e2b6e0211be51c9493cf7d64be2c7"
+}

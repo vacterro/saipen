@@ -1,0 +1,23 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-055.md",
+  "authority_grant": "T-199 / SRC-055",
+  "authority_receipt": "SRC-061",
+  "authority_sha256": "7a314daad892bcc1b291f65560a79d1c5b6c5f54b24825b936e805f52812118e",
+  "discovery_event": null,
+  "evidence": {
+    "kind": "event",
+    "ref": "E-1602"
+  },
+  "evidence_bound_event": "E-1623",
+  "evidence_note": null,
+  "linked_work": "T-199",
+  "reason": "MISROUTED_PROJECT_BINDING",
+  "receipt_id": "SRC-055",
+  "retired_at": "2026-09-19T23:20:48Z",
+  "retired_by": "buffy",
+  "retirement_event": "E-1623",
+  "schema_version": 2,
+  "source_sha256": "a791f19e974b0ea895fd8c0a168f66c1e60d585fd61e5c1abf6a87da21ef6061",
+  "status": "INVALID",
+  "ticket_ref": ".saipen/archive/retired/T-199.json"
+}

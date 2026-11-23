@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-009:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Execute the complete audit roadmap in numeric order, preserve the named dispatcher/campaign invariants, and do not claim six-run readiness without real Windows six-run proof."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:09Z",
+  "derived_from": "SRC-009",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "403b923877fa5a3f936dc49f08b95e7bd659bc39719a63c2e25182546d5c5f66"
+}

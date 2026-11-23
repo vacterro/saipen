@@ -1,0 +1,37 @@
+PASS  W2-001 malformed receipt surfaced as error 
+PASS  W2-001 malformed receipt not selected as evidence 
+PASS  W2-001 equivalent duplicate collapses to one 
+PASS  W2-001 non-equivalent duplicate reported corrupt 
+PASS  W2-001 non-equivalent duplicate not selected 
+PASS  W2-004 operation mismatch makes terminal duplicate corrupt 
+PASS  W2-005 malformed receipt_metadata is omitted with structured error 
+PASS  W2-007 corrupt twin cannot remain positive release evidence 
+PASS  2026 CORE-002 nullable legacy ticket_id decodes as absence 
+PASS  2026 CORE-002 number ticket_id remains corrupt 
+PASS  2026 CORE-002 object ticket_id remains corrupt 
+PASS  2026 CORE-002 list ticket_id remains corrupt 
+PASS  2026 CORE-002 no-ticket ship/crew transitions and finalizers succeed 
+PASS  2026 CORE-002 new semantic receipts omit absent ticket_id 
+PASS  2026 CORE-002 metadata finalizer remains dict-only 
+PASS  W2-001 crash-stale conformance index cannot hide newer FAIL 
+PASS  W2-002 settled release receipt discovered 
+PASS  W2-002 ops release receipt still discovered 
+PASS  W2-002 settled sub_sync discovered 
+PASS  W2-002 sub_sync path is the actual settled path 
+PASS  W2-002 ops sub_sync still discovered 
+PASS  collect accept_live with every target applied is durable intake 
+PASS  collect partial accept_live is never durable intake 
+PASS  collect missing Core targets deduplicates without ticket authority 
+PASS  collect noncanonical op id deduplicates without ticket authority 
+PASS  W2-003 fully committed release returns ALREADY_APPLIED 
+PASS  W2-003 partial release is NOT ALREADY_APPLIED 
+PASS  W2-003 partial release returns RELEASE_STAGE_INCOMPLETE 
+PASS  W2-005 staged payload removed on success 
+PASS  W2-005 cleanup marker cleared on success 
+PASS  W2-005 entry reported compacted 
+PASS  W2-005 failed unlink retains staged payload 
+PASS  W2-005 failed unlink retains cleanup marker 
+PASS  W2-005 entry reported skipped (debt) 
+PASS  W2-005 entry NOT compacted while in debt 
+
+35/35 SECOND-WAVE receipt regressions passed

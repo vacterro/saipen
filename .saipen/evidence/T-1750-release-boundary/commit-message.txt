@@ -1,0 +1,7 @@
+fix(release): settle untouched local refusals
+
+Bind validation to the running home. A project-local validator must not
+replace protocol authority.
+
+Abort only untouched no-publish attempts. Preserve recovery for partial
+writes, missing progress markers and conflicting bytes.

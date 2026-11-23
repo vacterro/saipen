@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "source": "SRC-215",
+  "source_sha256": "8d54708e5daccb690cc464918d4c81d7f1d2d4ed0f036a62a6e0c2f5ab0c2ce6",
+  "scope": "Audit delivery, not completion of proposed implementation",
+  "clauses": {
+    "R001": {
+      "sections": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "evidence": [
+        "controls.json",
+        "source-catalog.json"
+      ]
+    },
+    "R002": {
+      "sections": [
+        2,
+        3,
+        5,
+        16
+      ],
+      "evidence": [
+        "consumer-current.json",
+        "../T-1711-admission/REPORT-FINAL-GENERATION.md"
+      ]
+    },
+    "R003": {
+      "sections": [
+        3,
+        5
+      ],
+      "evidence": [
+        "source-catalog.json",
+        "consumer-current.json",
+        "controls.json"
+      ]
+    },
+    "R004": {
+      "sections": [
+        8
+      ],
+      "evidence": [
+        "source-catalog.json",
+        "controls.json"
+      ]
+    },
+    "R005": {
+      "sections": [
+        6,
+        7,
+        8
+      ],
+      "evidence": [
+        "source-catalog.json",
+        "controls.json"
+      ]
+    },
+    "R006": {
+      "sections": [
+        5,
+        8
+      ],
+      "evidence": [
+        "source-catalog.json",
+        "controls.json"
+      ]
+    },
+    "R007": {
+      "sections": [
+        2,
+        6,
+        10,
+        14
+      ],
+      "evidence": [
+        "build-root-status.json",
+        "scout-runtime.json",
+        "source-catalog.json"
+      ]
+    },
+    "R008": {
+      "sections": [
+        2,
+        9,
+        14
+      ],
+      "evidence": [
+        "../T-1711-admission/REPORT-FINAL-GENERATION.md",
+        "../T-1714-diagnostics/FINAL-ACCEPTANCE.md",
+        "source-catalog.json"
+      ]
+    },
+    "R009": {
+      "sections": [
+        11
+      ],
+      "evidence": [
+        "source-catalog.json"
+      ]
+    },
+    "R010": {
+      "sections": [
+        12
+      ],
+      "evidence": [
+        "build-root-status.json"
+      ]
+    },
+    "R011": {
+      "sections": [
+        1,
+        4,
+        6,
+        13,
+        16
+      ],
+      "evidence": [
+        "source-catalog.json",
+        "controls.json"
+      ]
+    },
+    "R012": {
+      "sections": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "evidence": [
+        "REPORT.md"
+      ]
+    },
+    "R013": {
+      "sections": [
+        2
+      ],
+      "evidence": [
+        "REPORT.md",
+        "controls.json",
+        "consumer-current.json"
+      ]
+    },
+    "R014": {
+      "sections": [
+        13,
+        14,
+        16
+      ],
+      "evidence": [
+        "ROADMAP.md",
+        "../T-1714-diagnostics/dependency-reservation-followup.md"
+      ]
+    },
+    "R015": {
+      "sections": [
+        15
+      ],
+      "evidence": [
+        "controls.json",
+        "consumer-current.json",
+        "source-catalog.json"
+      ]
+    },
+    "R016": {
+      "sections": [
+        16
+      ],
+      "evidence": [
+        "ROADMAP.md",
+        "REPORT.md"
+      ]
+    }
+  }
+}

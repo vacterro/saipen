@@ -1,0 +1,32 @@
+(self, *, saipen_root: 'Path | None' = None, runtime: 'Path | None' = None, config: 'dict | None' = None, max_requests: 'int | None' = None, clock=<function _now at 0x000001A9B59B5EE0>, authenticator=None, refusal_sink=None) -> 'None'
+    def __init__(
+        self,
+        *,
+        saipen_root: Path | None = None,
+        runtime: Path | None = None,
+        config: dict | None = None,
+        max_requests: int | None = None,
+        clock=_now,
+        authenticator=None,
+        refusal_sink=None,
+    ) -> None:
+        #: A caller that CONSTRUCTS a broker in its own process may supply the
+        #: client authenticator. The shipped service never does (`run_service`
+        #: passes nothing), so this is not a way into a running authority: it
+        #: is how the capability, ledger and lifecycle logic is exercised
+        #: without a host, while `identify` itself is proven on real processes.
+        self._authenticator = authenticator
+        #: Where a refused client leaves its one line (T-1649). The shipped
+        #: service passes `service_log_line`; a broker constructed in another
+        #: process writes nothing unless it is given a sink, so a test or a
+        #: diagnostic never prints into its caller's stream.
+        self._refusal_sink = refusal_sink
+        self._refusal_lines = 0
+        self.config = dict(config) if config is not None else settings()
+        for key, value in DEFAULT_SETTINGS.items():
+            self.config.setdefault(key, list(value) if isinstance(value, list) else value)
+        self.authority = Authority(
+            ttl_seconds=int(self.config.get("capability_ttl_seconds") or DEFAULT_TTL_SECONDS),
+            clock=clock,
+        )
+        self.ledger = Ledger(se

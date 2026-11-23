@@ -1,0 +1,8 @@
+VRV 0.3.12 on GitLabis: `main` 64ca5bd ja tag `v0.3.12`, push läks fast-forwardiga, force'i polnud.
+
+- **Base call:** vaikimisi on nüüd recycler 65 %, factory 50 % ja muud hooned 35 %. Sinu eelistuste failis jäi recycler 65 alles. Kuna seal olid veel vanad vaikeväärtused, muutub factory 30 → 50 ja muud hooned 0 → 35, ainult üks kord. Kui hiljem ise teise väärtuse valid, see jääb.
+- **0.3.12 sees on:** see base call, kohe autonoomne algvägi ja CPU baasi hooned recycleri taga. Versioon, CHANGELOG ja Steami tekstid en/ru on uuendatud. Vanimad change notes'id (0.3.7) võtsin välja, et 8000 märgi piiri sisse jääda.
+- **Testid:** 33-st skriptist 32 PASS. `Test-Release` kukub, sest otsib vana installi-zipi, mida enam ei ehitata.
+- **Pakett:** `dist/VRV.zip` sha256 `5b9c2595`, versioon 0.3.12.
+
+Sinu teha: mängu-test `vrv_latest_start.bat`-iga ja Workshopi upload. Mängus pole ükski neist kolmest muudatusest veel nähtud.

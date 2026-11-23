@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "code": "EXPLAIN_NEXT",
+  "state": {
+    "phase": "DONE",
+    "task": "none",
+    "execution_intent": "goal",
+    "converge_target": null
+  },
+  "carrier": {
+    "ok": true,
+    "code": "ROUTED",
+    "action": "saipen continue",
+    "reason": "maintain",
+    "next_action": "saipen continue",
+    "terminal": false,
+    "requires_human": false,
+    "execute_in_current_agent": true
+  },
+  "disposition": "EXECUTE_SELF",
+  "owner": "agent",
+  "human_required": false,
+  "why": "executable next action; internal alternatives do not create a human decision",
+  "selected_action": "saipen continue",
+  "parked_work": [
+    "T-214 blocked: BLOCKED_EXTERNAL -- premise OBSOLETE, not a live defect: T-206/T-208 already released the lingering handle, so the canonical directory-glob gate terminates on Node v24.15.0 (568 pass 0 fail 0...",
+    "T-215 blocked: BLOCKED_EXTERNAL -- owned by canonical SAIPEN router/status: the machine-readable status advertises continue/CONTINUE while the same block reports conformance CURRENT_FAIL, so T-211's deliberate carried-debt decision is invisible to a reader who consults only next_action. Reproduction preserved in improve cycle imp-vacterro-audapack-20260920-1 seat buffy-01 IMP-004. SAIPEN must make one truth explicit: route to the red gate, or expose an accepted-carried-debt state. Do not redefine SAIPEN routing locally",
+    "T-213 blocked: BLOCKED_EXTERNAL -- owned by canonical SAIPEN: guard refuses bounded read-only runtime probes (node/python version) with NO_ACTIVE_WORK in an idle DONE project, so an improve seat cannot establish GATE proof. Same class already carried on the canonical SAIPEN board as T-1402/T-1401. Reproduction preserved in improve cycle imp-vacterro-audapack-20260920-1 seat buffy-01 IMP-001. Route to the SAIPEN protocol owner",
+    "T-212 blocked: BLOCKED_EXTERNAL -- owned by canonical SAIPEN: improve.py append_run accepts run_text that duplicates its own RUN heading, committing an uncompletable report (only abort exits). Reproduction preserved in improve cycle imp-vacterro-audapack-20260920-1 seat buffy-01 IMP-002. Route to SAIPEN project owner; do not fork improve.py",
+    "T-183 blocked: PREEMPTED again by the operator-authorized T-184 follow-up batch (persistence-truth residue: duplicate acknowledgement claims unverified files, permanent semantic conflicts loop on Retry all, no disk verification, diagnostics lack durability counts, legacy classification unjournaled, materialize skips handoff project cross-check). T-183 is still at PHASE SCOUT T-183 with claim lineage and verify clause untouched and no SCOUT evidence written. Unblock path: close the follow-up ticket, unblock T-183, resume PHASE SCOUT T-183.",
+    "T-158 blocked: CURRENT blocker set (work delta re-run 2026-09-07 22:5x after real re-verification of the post-claim family; strict core 85 problems / 120 warnings): work_delta(T-158, claim boundary E-816) = FAIL...",
+    "T-27 blocked: requires live Windows GUI verification (headless agent session cannot reliably reproduce the WS_VISIBLE failure mode or validate a Qt platform/Windows-shell fix); user pivoted to layout work; revisit after T-26. Unblock path: reproduce on a real desktop session with a Qt-aware debugger, or switch the Qt entry to a minimal platform-independent test harness that forces ShowWindow(SW_SHOWNORMAL) on the top-level.",
+    "T-012 blocked: Real Windows end-to-end production acceptance requires live operator interaction this headless agent session cannot perform: Tkinter GUI project moves (Scenario D/E), Scheduled Task manual trigger...",
+    "T-009 blocked: Requires live Tampermonkey cross-userscript storage verification in a real browser -- not executable from this headless agent session (browser automation prohibited here; spec sections 11/24 forbid claiming migration success from unverified GM_getValue behavior or fabricating browser results). Clean tree preserved: zero code changes made. Unblock path: operator runs a manual export/import probe in Tampermonkey (old AICHATBUTTONS vs AUDAPACK_WIDGET identity sandbox) and reports GM storage visibility, then a fresh session implements the smallest verified strategy."
+  ],
+  "note": "internal sequencing alternatives never create a human decision; WAIT_USER requires human-owned information or authority"
+}

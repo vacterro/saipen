@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-106:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-259 closed with verification evidence in LOG: verify -> PASS [target: T-259] conf: high -- node --test tests/widget/*.test.js: 746 tests, 746 pass, 0 fail, 0 cancelled; python -m pytest -q: 2316 passed, 16 skipped; ruff check audapack tests scripts: clean; python -m compileall -q audapack: clean; scripts/update_widget_release.py --check: OK 0.0.86 45219758a90617967cd86e4ee40a7c91a3bdcb948fb41f5c8b0c3147980a0b45. Live evidence: chatgpt.com cap",
+      "text": "Fix false-negative generation detection: real live ChatGPT Stop control yields READY in widget",
+      "verification": "the Work this request created reached its own verification gate; see the T-259 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-259"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,27 @@
+{
+  "authority_grant": "system:FALSE_AUTHORITY_PROJECTION",
+  "authority_receipt": null,
+  "authority_sha256": null,
+  "board_record": "- [/] T-1599 [P1] test1 | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-164 | owner: saipen-cli | claim_time: 2026-10-02T22:19:51Z",
+  "board_record_sha256": "4b5d89288c28bc5f9e4045f40e002e84fe783994639a09fd71ede56b78e61246",
+  "discovery_event": null,
+  "evidence": {
+    "kind": "artifact",
+    "ref": ".saipen/evidence/response-authority/authority-red.txt",
+    "sha256": "129fc79918ae509923632b74535d9fd2c23041c59b46a0cdecf7f27f2bd0ec86"
+  },
+  "evidence_bound_event": "E-11885",
+  "evidence_note": "SRC-164 model_supplied; zero clauses and requirements; revoke false operator projection, not implementation completion",
+  "reason": "FALSE_AUTHORITY_PROJECTION",
+  "restored_parent": "T-1510",
+  "restored_parent_owner": "saipen-cli",
+  "retired_at": "2026-10-02T22:20:01Z",
+  "retired_by": "saipen-cli",
+  "retirement_event": "E-11885",
+  "schema_version": 2,
+  "section": "## DOING",
+  "source_receipts": [
+    "SRC-164"
+  ],
+  "ticket": "T-1599"
+}

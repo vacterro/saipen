@@ -1,0 +1,32 @@
+{
+  "audapack/saipen_evidence.py": {
+    "sha256": "de572653fa3746a6215a00f6238332578b38d3e3240cbe877d55935a0d745e65",
+    "size": 85380,
+    "classification": "preserved original; no new engineering test claim"
+  },
+  "tests/test_saipen_evidence.py": {
+    "sha256": "8e568ae31412812de34fb27a7ac4512b1a6930de41178ea51f3fd9caa4259837",
+    "size": 120203,
+    "classification": "preserved original; no new engineering test claim"
+  },
+  "resources/AUDAPACK_WIDGET.user.js": {
+    "sha256": "5efa3a49fee7bdef83f63ecfa3324e2746eb12b874baad4e1bba03edd03a09fa",
+    "size": 1327850,
+    "classification": "preserved original; no new engineering test claim"
+  },
+  ".saipen/evidence/T-298-widget-trust-boundary.md": {
+    "sha256": "b06e38935e6761155f757926bd7acd63c30cd0d72dbe8662111894039a88ba83",
+    "size": 3443,
+    "classification": "preserved original; no new engineering test claim"
+  },
+  ".saipen/saip.py": {
+    "sha256": "ab2373b903df5549200684d77949847363d5465db0bc0b7a8a7cc1a6cb880b1c",
+    "size": 624,
+    "classification": "preserved original; no new engineering test claim"
+  },
+  ".zcode/plans/plan-sess_c329cfaf-c7cd-4128-b005-faea70844c7a.md": {
+    "sha256": "66bcc48be94777b77d35ee68cd0121506044979174a4cbf5f159807acaec5993",
+    "size": 2891,
+    "classification": "preserved original; no new engineering test claim"
+  }
+}

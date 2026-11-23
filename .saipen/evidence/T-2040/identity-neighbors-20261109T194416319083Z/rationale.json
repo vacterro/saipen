@@ -1,0 +1,70 @@
+{
+  "task": "T-2040 BUILD goal fixture repair",
+  "scope": [
+    "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/test_bz_rea_acceptance_fixture.py",
+    "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/test_bzcc_overnight_autonomy.py",
+    "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/test_persistent_autonomy_recovery.py"
+  ],
+  "classification": "Five stale fixture failures; no production defect demonstrated by these signatures.",
+  "corrections": [
+    {
+      "test": "test_bz_rea_acceptance_fixture.BzReaAcceptanceFixtureTests.test_e2e_bz_rea_sequential_lifecycle_and_distinct_successor",
+      "before": "BOARD_INVALID: unescaped candidate pseudo-field is rejected by the canonical BOARD parser.",
+      "repair": "Represent goal/candidate/current evidence fingerprint in the escaped description, with canonical priority and verify field. Preserve successor/title assertions; add exact first/successor IDs and unchanged BOARD bytes.",
+      "expected_identity": "bzcc_procedure_semantics-sub_41B200 then bzcc_procedure_semantics-sub_430050"
+    },
+    {
+      "test": "test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_10_candidate_deduplication_preserves_new_evidence_generations",
+      "before": "A candidate marker embedded directly after a goal-tagged title is prose, not the required delimited identity atom.",
+      "repair": "Use the already-parsed description form: goal and exact candidate atoms separated by literal pipes. Physical BOARD escaping does not belong in this in-memory projection. Same-generation duplicate and new-generation nonduplicate assertions remain unchanged."
+    },
+    {
+      "test": "test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_11_one_verified_gap_closes_different_gap_automatically_selected",
+      "before": "Ten DONE descriptions have candidate markers in title prose, so no exact duplicate identity matches; FUN_0 is selected instead of FUN_10.",
+      "repair": "Put exact goal/candidate atoms in escaped canonical descriptions; supply priority and verify fields. Preserve all 11 inventory entries, limit 10, and exact FUN_10 assertion. Removing the first ten inventory items would conceal the original starvation regression and was not done."
+    },
+    {
+      "test": "test_persistent_autonomy_recovery.CandidateDeduplicationAndIndependentSelectionTests.test_blocked_first_candidate_selects_second_candidate",
+      "before": "BOARD_INVALID: [-] is outside canonical [ x/] checkbox grammar. Unescaped goal/candidate pseudo-fields would remain invalid after checkbox repair alone.",
+      "repair": "Use [ ] in BLOCKED, exact escaped goal/candidate identity, P1 priority, actual BLOCKED_EXTERNAL reason and verify field. Preserve independent lower-priority candidate g-pool-c2 assertion."
+    },
+    {
+      "test_before": "test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_20_genuine_exhausted_work_produces_quiet_waiting",
+      "test_after": "test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_20_empty_project_does_not_prove_exhaustion",
+      "before": "Empty disposable project plus stored SATISFIED goal supplies no HUNT receipt, conformance receipt, external-discovery check, or maintenance grant. The real schema2 assessment correctly reports INCOMPLETE_DISCOVERY, not QUIESCENT.",
+      "repair": "Rename the inaccurate premise; assert INCOMPLETE_DISCOVERY, no executable work, non-quiescence, status-only action, schema2 validity and exactly twelve surfaces. Assert missing analysis/external/conformance checks, absent maintenance authority, checked satisfied-goal row, no_work_available but not exhausted/all_checked, and byte-identical fixture files. No cleanliness mocks, certificate fabrication or production return-value changes.",
+      "positive_control": "Existing test_t2040_exhaustion_evidence.ExhaustionEvidenceTests.test_checked_absence_is_quiescent was run unchanged alongside test_not_checked_cannot_certify_exhaustion. Fully checked absence still proves quiescence; empty inventory alone never does."
+    }
+  ],
+  "production_authorities_read_only": [
+    "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/board.py::parse_board",
+    "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/replenishment.py::_matches_candidate",
+    "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/replenishment.py::_is_candidate_duplicate",
+    "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/discovery_providers.py::EvidenceGapLedgerProvider.evaluate",
+    "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/work_exhaustion.py::discovery_evidence",
+    "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/work_exhaustion.py::certificate_diagnostics",
+    "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/continuation_assessment.py::_classify_effective_route"
+  ],
+  "verification": {
+    "before": {"tests": 44, "passed": 39, "failed": 5, "log": "before.log"},
+    "after": {"tests": 44, "passed": 44, "failed": 0, "log": "after.log"},
+    "unchanged_prior_modules_and_schema2_controls": {"tests": 52, "passed": 52, "failed": 0, "log": "controls.log"},
+    "commands_and_exit_codes": ["before-run.json", "after-run.json", "controls-run.json"],
+    "diff_check": "PASS; diff-check.log",
+    "runtime": "Python 3.11.9; existing stdlib unittest and hermetic child environment",
+    "limitations": "Unit/disposable-fixture evidence only; no installed-host or full-core-suite acceptance claim."
+  },
+  "preserved_negative_controls": [
+    "same exact candidate/generation stays DONE; genuine new evidence generation remains selectable",
+    "title-only, candidate-prefix, foreign-goal and prose-marker false identities remain rejected",
+    "unescaped goal/candidate/evidence_fp pseudo-fields remain BOARD_INVALID",
+    "path confinement, zero-denominator, truncated inventory, inconsistent metrics and dry-run purity controls remain unchanged",
+    "wrong patch/capture, generated citations, native receipt validation, host-offline and host-acceptance controls remain unchanged"
+  ],
+  "write_boundary": {
+    "worker_edits": "Only three assigned repository test modules plus this unique evidence directory. Disposable test fixtures use temporary directories.",
+    "forbidden_operations": "No production edits, project STATE/BOARD/LOG writes, git index commands, commit, push, saipen start or saipen continue by this worker.",
+    "prior_fixed_modules": "Read and rerun unchanged; both hashes match manifest-before.json.",
+    "shared_tree_drift": "Post-run hash comparison observed STATE.md, BOARD.md, LOG.md, operations.py and .git/index drift. Coordinator explicitly attributes operations.py to operations.stop_checkpoint repair; STATE/BOARD/LOG changes to canonical DEC E-20812 and claim_time refresh. Index drift remains unattributed: coordinator and worker issued no stage/commit/push or index writes. Exact before/after hashes retained in manifest-after.json. No foreign changes rewritten/restored; no globally unchanged protected-file claim."
+  }
+}

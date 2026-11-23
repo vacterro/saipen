@@ -1,0 +1,413 @@
+{
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "ommit it alone; it will fail in every clone. Ship the runtime it depends on first\nWARN [manifest-untracked-orphan]: ... and 6 more like the above\nWARN [subsaipen-uncollected]: 1 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)\nWARN [cross-doc-drift]: cross-doc drift [borrowed-invariants] -- BOOT.md must say `next_action` is the previous session's pre-computed pick and is confirmed against BOARD.md where the validator cannot re-derive it -- the portable floor does not, since a grep cannot walk a needs: graph\nWARN [cross-doc-drift]: cross-doc drift [command-outranks-pick] -- BOOT.md step 7 must say the user's own message outranks `next_action` and defer to § 1.11's OBEY priority. Read as unconditional it is the half a cold agent reaches first, which is exactly how the command the user typed gets dropped\nWARN [cross-doc-drift]: ... and 6 more like the above\nWARN [changelog-unarchived]: CHANGELOG.md carries 13 version entries while it states it keeps the most recent ~10 -- the overflow belongs in CHANGELOG_ARCHIVE.md, moved verbatim the way LOG segments are sealed, so the top of the file stays the part anyone actually reads\nWARN [translation-stale]: 29 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, el, es, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nWARN [release-ledger]: 2 release(s) have a CHANGELOG entry but no git tag: v8.0.2, v8.2.0\nWARN [xpatch-survival]: XP-000001 applied bytes never reached a commit: tools/saipen_engine/intake.py\nWARN [xpatch-survival]: XP-000002 applied bytes never reached a commit: tools/saipen.py, tools/saipen_engine/operations.py\nValidation FAILED: 14 problem(s), 24 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "stale_reason": null,
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 14,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "closure provenance does not resolve: EX-000049 was verified against installed engine generation sha256a257ab180bb037e... but the running engine is sha256:c6819eff239d8b9c... -- the dependency moved (rollback or upgrade): re-resolve truthfully instead of inheriting a stale green -- a DONE line may record HOW it closed, never that something was published when it was not (CORE-003)",
+            "detail_hash": "66b976370def374a",
+            "finding_key": "da5ae27e917800f2",
+            "rule_id": "closure_provenance_drift",
+            "severity": "problem",
+            "subject_id": "EX-000049",
+            "subject_kind": "event",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/_t2040_experiment.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "94cb1a34143d84cc",
+            "finding_key": "d09644f751d87e4f",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/_t2040_experiment.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_lost_active_ticket_recovery.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "016f17a341a0465f",
+            "finding_key": "a77878ff9186104c",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_lost_active_ticket_recovery.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t2040_bounded_discovery_resume.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "84fcc267137827f5",
+            "finding_key": "9530b78af74cc252",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_t2040_bounded_discovery_resume.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t2040_continuation_truth.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "7fe7b42f3deab794",
+            "finding_key": "fb80265336adb2ab",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_t2040_continuation_truth.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t2040_discovery_owners.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "149e75855006d755",
+            "finding_key": "e9e4abb9e6e6cdcb",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_t2040_discovery_owners.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t2040_exhaustion_evidence.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "5221d1ccb6a5e6c1",
+            "finding_key": "81dae99b96ddf8f5",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_t2040_exhaustion_evidence.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t2040_finish_plan_guards.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "ca9d89b868331d7d",
+            "finding_key": "9ba01c6574412f69",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_t2040_finish_plan_guards.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t2040_maintenance_authority.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "93f724b14eddd922",
+            "finding_key": "4669d2f3203de3aa",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_t2040_maintenance_authority.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t2040_publication_truth.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "4d3b9e6f4ad37641",
+            "finding_key": "2782b0fd1853ee2f",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_t2040_publication_truth.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t2040_replenishment_recovery.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "a57a98dd873752f7",
+            "finding_key": "9603590ac455de78",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_t2040_replenishment_recovery.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t2040_review_proof_binding.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "1644ebde5d2cc495",
+            "finding_key": "090bdca94e1bab3c",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_t2040_review_proof_binding.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t2040_terminal_consumer_guards.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "5d62bd086b037381",
+            "finding_key": "a8040ee5b407d57d",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_t2040_terminal_consumer_guards.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t2040_terminal_consumer_supplementary.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+            "detail_hash": "eb84f48b71ebb861",
+            "finding_key": "aa4dd1bf753c722a",
+            "rule_id": "runtime_manifest_untracked",
+            "severity": "problem",
+            "subject_id": "tools/test_t2040_terminal_consumer_supplementary.py",
+            "subject_kind": "path",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "9a47d608ed3f3a833348aaeeca5cd9e9076f3bf53b1ef92b6ade46958e3e3fec",
+        "ruleset_version": 2,
+        "status": "complete",
+        "warning_count": 24
+      },
+      "board_hash": "6effe8815e65aa60",
+      "canonical_next_command": null,
+      "content_hash": "18738afc420a9ad7",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:04cf3c1ccda20906569c0580762e0a5df4e067c79675bfe15586fb0715f944e1",
+      "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "kind": "conformance_receipt",
+      "log_hash": "f2766a88871e02e1",
+      "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+      "receipt_id": "receipt-e3fa6779554f",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+      "source_tree_fingerprint": "git-delta-v1:0d3e2b8948c467e0f93a63192ee118e62f227a978a304c1ebbc27a21fd6c27b5",
+      "state_hash": "020858bfc7076fe6",
+      "timestamp_utc": "2026-11-08T23:56:15.539410Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+      "source_tree_fingerprint": "git-delta-v1:0d3e2b8948c467e0f93a63192ee118e62f227a978a304c1ebbc27a21fd6c27b5"
+    }
+  },
+  "install_identity": {
+    "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "persisted_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "install_fingerprint": "install-v1:04cf3c1ccda20906569c0580762e0a5df4e067c79675bfe15586fb0715f944e1",
+    "persisted_fingerprint": "install-v1:04cf3c1ccda20906569c0580762e0a5df4e067c79675bfe15586fb0715f944e1",
+    "status": "MATCH",
+    "mismatch": null
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-e3fa6779554f",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair.",
+    "ownership": {
+      "groups": {
+        "ENGINE_INTERNAL": [
+          {
+            "rule_id": "closure_provenance_drift",
+            "subject_kind": "event",
+            "subject_id": "EX-000049",
+            "finding_key": "da5ae27e917800f2",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/_t2040_experiment.py",
+            "finding_key": "d09644f751d87e4f",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_lost_active_ticket_recovery.py",
+            "finding_key": "a77878ff9186104c",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_t2040_bounded_discovery_resume.py",
+            "finding_key": "9530b78af74cc252",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_t2040_continuation_truth.py",
+            "finding_key": "fb80265336adb2ab",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_t2040_discovery_owners.py",
+            "finding_key": "e9e4abb9e6e6cdcb",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_t2040_exhaustion_evidence.py",
+            "finding_key": "81dae99b96ddf8f5",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_t2040_finish_plan_guards.py",
+            "finding_key": "9ba01c6574412f69",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_t2040_maintenance_authority.py",
+            "finding_key": "4669d2f3203de3aa",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_t2040_publication_truth.py",
+            "finding_key": "2782b0fd1853ee2f",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_t2040_replenishment_recovery.py",
+            "finding_key": "9603590ac455de78",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_t2040_review_proof_binding.py",
+            "finding_key": "090bdca94e1bab3c",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_t2040_terminal_consumer_guards.py",
+            "finding_key": "a8040ee5b407d57d",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          },
+          {
+            "rule_id": "runtime_manifest_untracked",
+            "subject_kind": "path",
+            "subject_id": "tools/test_t2040_terminal_consumer_supplementary.py",
+            "finding_key": "aa4dd1bf753c722a",
+            "owner_class": "ENGINE_INTERNAL",
+            "route": "saipen continue",
+            "operator_action_due": false,
+            "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+            "severity": "problem"
+          }
+        ],
+        "OPERATOR_DECISION": [],
+        "UNAVAILABLE_EXTERNAL": [],
+        "UNKNOWN": []
+      },
+      "operator_action_count": 0,
+      "engine_work_count": 14,
+      "external_count": 0,
+      "unknown_count": 0
+    },
+    "engine_work_count": 14,
+    "operator_action_count": 0
+  },
+  "terminal": true
+}

@@ -1,0 +1,40 @@
+test_interrupted_spawn_stamp_keeps_complete_ownership (test_t1833_verification_owner.LaunchResources.test_interrupted_spawn_stamp_keeps_complete_ownership) ... ERROR
+test_popen_failure_closes_both_guard_pipe_descriptors (test_t1833_verification_owner.LaunchResources.test_popen_failure_closes_both_guard_pipe_descriptors) ... FAIL
+test_failed_registration_never_executes_the_verifier (test_t1833_verification_owner.PosixVerificationOwner.test_failed_registration_never_executes_the_verifier) ... ok
+test_guardian_holds_neither_output_nor_user_pipe (test_t1833_verification_owner.PosixVerificationOwner.test_guardian_holds_neither_output_nor_user_pipe) ... ok
+test_owner_death_before_registration_never_starts_verifier (test_t1833_verification_owner.PosixVerificationOwner.test_owner_death_before_registration_never_starts_verifier) ... ok
+test_owner_death_reaps_verifier_and_descendants (test_t1833_verification_owner.PosixVerificationOwner.test_owner_death_reaps_verifier_and_descendants) ... ok
+test_single_flight_recovers_an_actual_orphaned_reader (test_t1833_verification_owner.PosixVerificationOwner.test_single_flight_recovers_an_actual_orphaned_reader) ... ok
+test_verifier_cannot_execute_before_reader_registration (test_t1833_verification_owner.PosixVerificationOwner.test_verifier_cannot_execute_before_reader_registration) ... ok
+
+======================================================================
+ERROR: test_interrupted_spawn_stamp_keeps_complete_ownership (test_t1833_verification_owner.LaunchResources.test_interrupted_spawn_stamp_keeps_complete_ownership)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/t1833-pair-t9z_ccfm/test_t1833_verification_owner.py", line 50, in test_interrupted_spawn_stamp_keeps_complete_ownership
+    owner = json.loads(stamp.read_text())
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 354, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Unterminated string starting at: line 1 column 2 (char 1)
+
+======================================================================
+FAIL: test_popen_failure_closes_both_guard_pipe_descriptors (test_t1833_verification_owner.LaunchResources.test_popen_failure_closes_both_guard_pipe_descriptors)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/t1833-pair-t9z_ccfm/test_t1833_verification_owner.py", line 72, in test_popen_failure_closes_both_guard_pipe_descriptors
+    with self.assertRaises(OSError, msg=f"descriptor {descriptor} leaked"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: OSError not raised : descriptor 3 leaked
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.784s
+
+FAILED (failures=1, errors=1)

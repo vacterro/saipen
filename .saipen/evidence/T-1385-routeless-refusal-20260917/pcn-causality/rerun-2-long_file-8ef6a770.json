@@ -1,0 +1,42 @@
+[
+ {
+  "label": "T-1385 slice 2 rerun 2 gen-sha256:8ef6a770 long_file_task",
+  "fixture": "V:/_TEMP_/t1363-u10tl71f",
+  "fixture_log_events": [
+   "- 14.09.26 00:00 [E-0001] [agent: test-agent] [op: transition-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] RUN: transition to SCOUT",
+   "- 17.09.26 16:09 [E-2] [parent: E-1] [T-1] [agent: test-agent] [op: userreq-78acf78d47f74a28b00dc794d3100e79] DEC: user request SRC-001 projected as T-1 (user_explicit)",
+   "- 17.09.26 16:09 [E-3] [parent: E-2] [T-1] [agent: test-agent] [op: claim-b83f2231552c40329cbfc754af75e581] DEC: claimed via SAIOPS -- owner test-agent",
+   "- 17.09.26 16:10 [E-4] [parent: E-3] [T-1] [agent: test-agent] [op: checkpoint-5f0424595c174ee780479133a79ef368] RUN: edit -> added docstring to src/app.py",
+   "- 17.09.26 16:11 [E-5] [parent: E-4] [T-1] [agent: test-agent] [op: transition-b95f01ffc1e745589a4e78800ee65362] RUN: transition to BUILD -- docstring edit already applied",
+   "- 17.09.26 16:11 [E-6] [parent: E-5] [T-1] [agent: test-agent] [op: transition-c8d041064bd847a08a5781cdfa1b100c] RUN: transition to VERIFY -- verify docstring",
+   "- 17.09.26 16:11 [E-7] [parent: E-6] [T-1] [agent: test-agent] [op: checkpoint-c62877521c2c46499a13651f41f25a41] RUN: RUN: verify -> src/app.py:1 module docstring present; ast.get_docstring == 'Application entry point.', one paragraph, plain; conf: high (prose criterion, strongest harness=parse+docstring introspection)",
+   "- 17.09.26 16:11 [E-8] [parent: E-7] [T-1] [agent: test-agent] [op: checkpoint-ee5d7b556d6640058503a3588b3ad2c2] RUN: verify -> PASS [target: T-1] conf: high -- python ast.get_docstring(src/app.py)=='Application entry point.', one paragraph, plain wording; asserts passed; harness: parse+docstring introspection (no test framework in repo)",
+   "- 17.09.26 16:11 [E-9] [parent: E-8] [T-1] [agent: test-agent] [op: transition-a3b2734801f94830bbaf4a751ea0eda6] RUN: transition to REVIEW -- independent re-verify",
+   "- 17.09.26 16:11 [E-10] [parent: E-9] [T-1] [agent: test-agent] [op: checkpoint-b0ebde6ced474ff4afb81858732f84ea] RUN: review -> PASS [target: T-1] conf: high -- independent re-run of ticket verify: python ast.get_docstring(src/app.py) -> 'Application entry point.', src/app.py:1, one paragraph, plain; verdict DEC: SHIP",
+   "- 17.09.26 16:11 [E-11] [parent: E-10] [T-1] [agent: test-agent] [op: transition-c2f302ac30dd4d84a80f63157678a637] RUN: transition to SHIP -- publish reviewed docstring",
+   "- 17.09.26 16:12 [E-12] [parent: E-11] [T-1] [agent: test-agent] [op: finish-2f44948abb9d428fae8227893431b704] DEC: ticket finished via SAIOPS -- completion (from SHIP)"
+  ],
+  "tool_calls": 62,
+  "occurrences": [
+   {
+    "tool_index": 37,
+    "session_id": "ses_f4fdef7f4fferCxhOVEgHo4ash",
+    "message_id": "msg_0b022753a001Q47sdRLbtNk9cO",
+    "call_id": "call_00_hUd3rV82vgpkekyjPeSr4978",
+    "tool": "bash",
+    "effect_fingerprint": "625e49655335f5bf",
+    "operation": "git -C \"V:\\_TEMP_\\t1363-u10tl71f\" remote -v; Write-Output \"---branches---\"; git -C \"V:\\_TEMP_\\t1363-u10tl71f\" branch -a; Write-Output \"---validate---\"; Test-Path \"V:\\_TEMP_\\t1363-u10tl71f\\tools\\validate.py\"; Write-Output \"---files---\"; Get-ChildItem -LiteralPath \"V:\\_TEMP_\\t1363-u10tl71f\" -Force -Recurse -File | Where-Object { $_.FullName -notmatch \"\\\\\\.git\\\\|\\\\\\.saipen\\\\\" } | Select-Object FullName",
+    "attempted": "git -C \"V:\\_TEMP_\\t1363-u10tl71f\" remote -v; Write-Output \"---branches---\"; git -C \"V:\\_TEMP_\\t1363-u10tl71f\" branch -a; Write-Output \"---validate---\"; Test-Path \"V:\\_TEMP_\\t1363-u10tl71f\\tools\\validate.py\"; Write-Output \"---files---\"; Get-",
+    "call_start_ms": 1789661449716,
+    "refusal_end_ms": 1789661449946,
+    "assistant_step_created_ms": 1789661443386,
+    "assistant_step_completed_ms": 1789661450120,
+    "parent_message_id": "msg_0b021084a001xWokJDbs335nnh",
+    "canonical_successes_before": 4,
+    "host_error_text": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool 'bash'; the host tool did not execute attempted: git -C \"V:\\_TEMP_\\t1363-u10tl71f\" remote -v; Write-Output \"---branches---\"; git -C \"V:\\_TEMP_\\t1363-u10tl71f\" branch -a; Write-Output \"---validate---\"; Test-Pat next: saipen next --json",
+    "route_delivered": true
+   }
+  ],
+  "pairs": []
+ }
+]

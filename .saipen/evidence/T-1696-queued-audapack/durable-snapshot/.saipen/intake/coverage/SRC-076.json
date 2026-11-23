@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-076:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-231 closed with verification evidence in LOG: PASS -- close instruction discharged: T-230 reached DONE with the operator live acceptance recorded at E-1805 and its full phase chain SCOUT/BUILD/VERIFY/REVIEW/SHIP journaled (E-1801..E-1811). Re-read BOARD: T-230 sits under ## DONE, SRC-076's requested change is present. conf: high",
+      "text": "T-230 operator LIVE ACCEPTANCE PASS on real Windows: real schema-4 config migrated 4->5 FreeBuff max_instances 1->0 Unlimited confirmed; Project A normal launch PASS; Project A Shift+click second instance PASS; Project B normal launch PASS; Project B Shift+click second instance PASS; all FreeBuff instances alive concurrently PASS; Instance Manager lists all instances independently PASS; normal click focuses existing instance PASS; Shift+click creates another instance PASS; no default limit-1 refusal PASS. Close T-230 canonically with this acceptance evidence.",
+      "verification": "the Work this request created reached its own verification gate; see the T-231 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-231"
+    }
+  },
+  "schema_version": 1
+}

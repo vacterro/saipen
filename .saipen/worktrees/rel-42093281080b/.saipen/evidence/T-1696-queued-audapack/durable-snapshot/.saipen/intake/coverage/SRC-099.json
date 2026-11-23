@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-099:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-252 closed with verification evidence in LOG: verify -> PASS [target: T-252] conf: high -- docs/release truth audited: resources/AUDAPACK_WIDGET.release.json declares 0.0.84 sha256 a0fa7f25 and update_widget_release.py --check reports OK, so the ledger matches the shipped bytes; CHANGELOG.md documents 0.0.80 through 0.0.84 contiguously with 0.0.83 named inside the 0.0.84 entry; python -m pytest -q tests/test_docs_consistency.py tests/test_bri",
+      "text": "Finish 0.0.83 managed A3 ownership repair: operator OFF -> canonical Bridge stop transition, SRC-098 ticket, docs/release truth",
+      "verification": "the Work this request created reached its own verification gate; see the T-252 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-252"
+    }
+  },
+  "schema_version": 1
+}

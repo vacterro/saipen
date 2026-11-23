@@ -1,0 +1,14 @@
+[
+  {
+    "name": "pre_guard_predicate",
+    "exit_code": 1,
+    "oracle_sha256": "73835e794c4dad47cf85768c9a279bec9a111f1d6d8bd5c4739c67c200da6632",
+    "subject_sha256": "cd12312c1fdb353a62b42c5da22cde6821391d7dbef821ec6969620245daca4e"
+  },
+  {
+    "name": "corrected",
+    "exit_code": 0,
+    "oracle_sha256": "73835e794c4dad47cf85768c9a279bec9a111f1d6d8bd5c4739c67c200da6632",
+    "subject_sha256": "222a2398bb19f508e94407969eae499d0af534d3ba4d313e1f01dade5312ccbf"
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-070:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Claim stranded audit/10 T-218 into DOING and finish it: layer already consumed per T-222, SRC-044 CLOSED 15/15 VERIFIED, inbox clean"
+    }
+  },
+  "derived_at": "2026-09-20T20:10:19Z",
+  "derived_from": "SRC-070",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "960b99bc488d623c8284e28898b2b56f28924380e99441f42e96933d08a09cb2"
+}

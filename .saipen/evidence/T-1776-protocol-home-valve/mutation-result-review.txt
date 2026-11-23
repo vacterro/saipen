@@ -1,0 +1,10 @@
+control: ran 5, red 0 -- as expected
+the engine before this Work: ran 5, red 4 -- as expected
+protocol_home is never true: ran 5, red 4 -- as expected
+protocol_home ignores the lineage: ran 5, red 4 -- as expected
+reset_authority loses its home branch: ran 5, red 1 -- as expected
+describe loses its home branch: ran 5, red 1 -- as expected
+the iteration verdict ignores the home checkpoint: ran 5, red 1 -- as expected
+the automation block keeps the valve a human wait: ran 5, red 1 -- as expected
+auto recall treats the home valve as a wait: ran 5, red 1 -- as expected
+mutations: 8, repetitions each: 3, problems: 0

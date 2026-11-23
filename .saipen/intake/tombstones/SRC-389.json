@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-389.md",
+  "closed_at": "2026-11-04T03:31:16Z",
+  "closure_event": null,
+  "linked_work": "T-2019",
+  "linked_works": [
+    "T-2019"
+  ],
+  "receipt_id": "SRC-389",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "227eb6b3709eadc1f1f32456a124f405a1f63b6279129ec5950fe9f87c34b217",
+  "status": "CLOSED",
+  "unresolved": 0
+}

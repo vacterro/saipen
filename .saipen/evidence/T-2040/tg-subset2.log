@@ -1,0 +1,21 @@
+...F........              [100%]
+================================== FAILURES ===================================
+_ TerminalConsumerGuards.test_authoritative_external_stop_outranks_stale_workable_board _
+
+self = <test_t2040_terminal_consumer_guards.TerminalConsumerGuards testMethod=test_authoritative_external_stop_outranks_stale_workable_board>
+
+    def test_authoritative_external_stop_outranks_stale_workable_board(self):
+        self.write_state(blocker="BLOCKED_EXTERNAL -- current external boundary")
+        (self.root / ".saipen/BOARD.md").write_text(
+            "## DOING\n## TODO\n- [ ] T-1 [P1] stale work | verify: local test\n## DONE\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        picture = supervisor.observe(self.root, now=T0)
+        self.assertEqual(picture["continuation_classification"], CA.WAIT_EXTERNAL)
+>       self.assertIsNone(picture["executable_work"], picture)
+E       AssertionError: 'T-1' is not None : {'autonomy_run_id': '', 'observed_at': '2026-10-25T12:00:00Z', 'phase': 'DONE', 'active_work': None, 'next_action': 'saipen continue', 'last_event': '100', 'state_blocker': 'BLOCKED_EXTERNAL -- current external boundary', 'worker_id': None, 'worker_generation': None, 'lease_generation': None, 'lease_state': 'UNKNOWN', 'lease_reason': 'missing_or_corrupt_runtime_state', 'heartbeat_at': None, 'heartbeat_age_seconds': None, 'workable_work': ['T-1'], 'executable_work': 'T-1', 'continuation_classification': 'WAIT_EXTERNAL', 'continuation_actionable': False, 'continuation_reason': 'unblock', 'continuation_detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'continuation_assessment': {'classification': 'WAIT_EXTERNAL', 'actionable': False, 'executable_work': None, 'action': 'saipen status', 'reason': 'unblock', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'", 'ticket': None, 'requires_human': False, 'quiescent': False, 'effective_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'raw_route': {'ok': True, 'action': 'saipen status', 'reason': 'unblock', 'executable_behavior': 'RESTATE_AND_STOP', 'detail': "binding WAIT/BLOCKED state: blocker='BLOCKED_EXTERNAL -- current external boundary' next_action='saipen continue'"}, 'continuous_maintenance_proven': False, 'continuous_maintenance_claimed': False, 'operator_work': []}, 'operator_work': [], 'operator_gates': [], 'due_operator_actions': [], 'deferred_operator_gates': [], 'board_errors': [], 'no_progress_count': 0, 'progress_verdict': 'RUNNING', 'durable_checkpoint': None, 'last_progress_at': ''}
+
+tools\test_t2040_terminal_consumer_guards.py:212: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_terminal_consumer_guards.py::TerminalConsumerGuards::test_authoritative_external_stop_outranks_stale_workable_board
+1 failed, 11 passed, 15 deselected, 47 subtests passed in 0.59s

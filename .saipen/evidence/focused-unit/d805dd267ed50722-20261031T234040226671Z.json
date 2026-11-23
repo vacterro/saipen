@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "d805dd267ed50722f57a58974ca1a8dfec38a0dd99f504aa14db3841cc5fbfbc",
+  "verdict": "PASS",
+  "patterns": [
+    "test_premature_victory_prevention.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_premature_victory_prevention.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_premature_victory_prevention.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        36208
+      ],
+      "duration_s": 0.407,
+      "process_create_s": 0.047,
+      "ran": 24,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_pv01_no_admissible_work_not_all_work_complete (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv01_no_admissible_work_not_all_work_complete) ... ok\r\ntest_pv02_empty_runnable_queue_unmeasured_user_outcome (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv02_empty_runnable_queue_unmeasured_user_outcome) ... ok\r\ntest_pv03_synthetic_benchmark_dictionary_rejected (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv03_synthetic_benchmark_dictionary_rejected) ... ok\r\ntest_pv04_shared_unit_receipt_insufficient_for_non_unit_requirements (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv04_shared_unit_receipt_insufficient_for_non_unit_requirements) ... ok\r\ntest_pv05_shared_unit_receipt_accepted_for_matching_unit_requirements (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv05_shared_unit_receipt_accepted_for_matching_unit_requirements) ... ok\r\ntest_pv06_unauthorized_continuous_maintenance_refuses_auto_writes (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv06_unauthorized_continuous_maintenance_refuses_auto_writes) ... ok\r\ntest_pv07_authentic_continuous_maintenance_allows_discovery_at_idle (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv07_authentic_continuous_maintenance_allows_discovery_at_idle) ... ok\r\ntest_pv08_external_release_blocker_does_not_suppress_independent_work (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv08_external_release_blocker_does_not_suppress_independent_work) ... ok\r\ntest_pv09_stale_repeated_status_no_hot_polling (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv09_stale_repeated_status_no_hot_polling) ... ok\r\ntest_pv10_hunt_not_checked_source_generation_no_clean_claim (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv10_hunt_not_checked_source_generation_no_clean_claim) ... ok\r\ntest_pv11_hunt_unchanged_generation_quiescent_not_busywork (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv11_hunt_unchanged_generation_quiescent_not_busywork) ... ok\r\ntest_pv12_new_evidence_wakes_quiescent_campaign (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv12_new_evidence_wakes_quiescent_campaign) ... ok\r\ntest_pv13_saipal_unfinished_slices_schedulable (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv13_saipal_unfinished_slices_schedulable) ... ok\r\ntest_pv14_local_tests_pass_without_installed_host_acceptance (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv14_local_tests_pass_without_installed_host_acceptance) ... ok\r\ntest_pv15_local_done_pending_publication_not_published (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv15_local_done_pending_publication_not_published) ... ok\r\ntest_pv16_single_external_blocked_prevents_blanket_product_complete (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv16_single_external_blocked_prevents_blanket_product_complete) ... ok\r\ntest_pv17_model_turn_end_does_not_close_authorized_campaign (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv17_model_turn_end_does_not_close_authorized_campaign) ... ok\r\ntest_pv18_expired_campaign_reports_wait_authority (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv18_expired_campaign_reports_wait_authority) ... ok\r\ntest_pv19_intentionally_held_architecture_gate_preserved (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv19_intentionally_held_architecture_gate_preserved) ... ok\r\ntest_pv20_false_done_corrected_without_rewriting_history (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv20_false_done_corrected_without_rewriting_history) ... ok\r\ntest_pv21_operator_bounded_grant_executes_within_scope (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv21_operator_bounded_grant_executes_within_scope) ... ok\r\ntest_pv22_all_sources_exhausted_event_driven_quiescent_wait (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv22_all_sources_exhausted_event_driven_quiescent_wait) ... ok\r\ntest_pv23_real_user_workflow_improvement_verified (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv23_real_user_workflow_improvement_verified) ... ok\r\ntest_pv24_user_workflow_slower_fails_optimization_objective (test_premature_victory_prevention.PrematureVictoryPreventionTests.test_pv24_user_workflow_slower_fails_optimization_objective) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 24 tests in 0.065s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 24,
+  "duration_s": 78.187,
+  "timings_s": {
+    "execution_wall_s": 0.407,
+    "environment_identity_wall_s": 0.047,
+    "copy_wall_s": 59.782,
+    "hash_wall_s": 0.171,
+    "cleanup_wall_s": 17.765
+  },
+  "copy_metrics": {
+    "subject_copy_s": 15.407,
+    "canonical_copy_s": 44.078,
+    "canonical_copy_attempts": 1,
+    "trees": null,
+    "pointers": {
+      "rewritten": [
+        "bin/saipen.cmd",
+        "bin/saipen",
+        ".saipen/STATE.md"
+      ],
+      "home": "C:/temp/saipen-core-unit-bzefo68_/project"
+    }
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_premature_victory_prevention.py"
+    ],
+    "manifest_sha256": "3074253aa569fc7009f08347adf22f8bb6ea529b6d775987fc1d90b7b8dd76a4"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_premature_victory_prevention.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "968d5ded79d733a9cea01faf7a3db4ef56c8c7fa1ffea684e2aee6795f1f5103",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "2271ca5434892f15f981f28ed5ded00314be23f853d23c8db56c527f302b0463"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\8dbaa014b0796701\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "a33efbdd6d62e6f21dd18093a566ca561ab99384cc747de564b848fb209145f2"
+      },
+      "core_unit_shard.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\8dbaa014b0796701\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "b31bafde4ad2f78069e8f5ef839e26c59a4cbb38c9bcc4a19ad3e7acee7b6be0"
+      },
+      "test_runner.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\8dbaa014b0796701\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\8dbaa014b0796701\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "07a8109e808f10bb5268ac12f0da981db4b1fad2ec97a58da84f13b0509a1e81"
+      },
+      "verification_cache.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\8dbaa014b0796701\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "8e7d43527554403147454d440d3b86d460ad166a21226fdfda2fd1a6384f5c5b"
+      },
+      "process_tree.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\8dbaa014b0796701\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "e5f07f80d2a6802d95c3ccbebe4ca5f66cdbbcbb25b13450123baa896d8e8356"
+      },
+      "verification_bootstrap.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\8dbaa014b0796701\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "df9bdce3388bf2511ce13a5a4329219810096ac58be0323675afd78b48cb605e"
+      },
+      "verification_impact.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\8dbaa014b0796701\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "cf5c146ee2931cc1baa2765fa00e8bb9129d3370cb8bb8a2b7eb020dd8bba455"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "2d091fe11e7e6cf4002e34bc6c69f0104a53378e6980e906842eeeb973ffcade"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

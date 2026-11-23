@@ -1,0 +1,3159 @@
+{
+  "checks": {
+    "head_unchanged": true,
+    "refs_unchanged": true,
+    "index_bytes_unchanged": true,
+    "index_entries_unchanged": true
+  },
+  "restored_blobs": [
+    {
+      "oid": "d759a236600f962f7840553d67514cd2f48ab2e0",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/.ded_source_digest",
+      "variant": "lf",
+      "sha256": "82386c2567c48508462b1f589f00d101b2d6e5659a67d09c2cbdd7941eda91ea",
+      "size": 98
+    },
+    {
+      "oid": "50f6e0dc9eff647d21b0c0722a03ad43a2130060",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/_refresh_readmes.py",
+      "variant": "lf",
+      "sha256": "8e91942634f72d26aab0177eea0dee839e6040a44bbaf83a5c5368fcfd131f30",
+      "size": 17127
+    },
+    {
+      "oid": "4adafdc71ad70f316d3e642a214ab0ca32f5cc5d",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/_translate_all_locales.py",
+      "variant": "lf",
+      "sha256": "85674ade29b381908eee4d4c01ad19dd2b011517a54244975d6123240a12a351",
+      "size": 7636
+    },
+    {
+      "oid": "548709698ae2b7dfb67e973004bc6a8b853c63f6",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/_translate_all_v2.py",
+      "variant": "lf",
+      "sha256": "e06d5ca844cbcd96f54b7519f10bd16fef33a8336a37cbaf248ca3d3010ae22f",
+      "size": 5106
+    },
+    {
+      "oid": "b3c94f5db2b0acb1ffdb808a72a8646e88c6341e",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/_translate_remaining.py",
+      "variant": "lf",
+      "sha256": "c54ca77db83b2e624683b3a1e02b1fee682f7412ead318a21eba7cf7cf3fe247",
+      "size": 4476
+    },
+    {
+      "oid": "0ea9f3473182c9e619004b6b4b2ae2642f327bd8",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/_translate_spec_api.py",
+      "variant": "lf",
+      "sha256": "a5672cec18d6a3fdb45512912e2540ed1efccdaac9b3a1573248fded53583cd4",
+      "size": 4231
+    },
+    {
+      "oid": "b28b9ea9294a24367c01cdccbbd0f44e35295319",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/_translate_spec_sections.py",
+      "variant": "lf",
+      "sha256": "e3fddb7fcc44d29411fe44fa363761feca05fa9cb4bfc6ebf60bf089cc8ac7ea",
+      "size": 9762
+    },
+    {
+      "oid": "151a3390c19381f3556a7aa5c2ac70deaacbce20",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/_translate_spec_v2.py",
+      "variant": "lf",
+      "sha256": "ef0c7bfbdff5f14628e087c491a23c411d028b2730fac1bd774e9c534e0070be",
+      "size": 4211
+    },
+    {
+      "oid": "fe3306a9e82965d5668aeac6fbfb65b3f75ac71a",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/zh/CODE_OF_CONDUCT_ZH.md",
+      "variant": "lf",
+      "sha256": "93dec0a28b39e6c343527a571bac0b7002fc29608d7efd9871b277713c759dca",
+      "size": 2063
+    },
+    {
+      "oid": "e20daa860f8c9e855eefb2035d23f18ec53d83b0",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/zh/CONTRIBUTING_ZH.md",
+      "variant": "lf",
+      "sha256": "2b84df6778ebea9366f3659f8bd17920a9573820ed117df10936e89ca68f8c82",
+      "size": 3746
+    },
+    {
+      "oid": "a7776b514221748ed4928c26f7be6d912ec71c4e",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/zh/GUIDE_ZH.md",
+      "variant": "lf",
+      "sha256": "0bc63fcb9aefb5c6a29235e214700d8f850197479e2efe80edb0342184ca96ab",
+      "size": 1467
+    },
+    {
+      "oid": "2a66b14534dc3eded4306cdede7a76ef37a96103",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/zh/SECURITY_ZH.md",
+      "variant": "lf",
+      "sha256": "cb2b3a22b6acd9a2f78791bd031ace2c0d818fc59f160e24b5f85957100e713e",
+      "size": 2738
+    },
+    {
+      "oid": "76fcfd17656b904aa7b3073ee51fdbe8bd0df9a7",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/zh/SPEC_ZH.md",
+      "variant": "lf",
+      "sha256": "56d8af182649357af35d576427bd42dcfd210e159ffc49b0f890bde10d1e9710",
+      "size": 8031
+    },
+    {
+      "oid": "348a959e017559a9222c076b2204ed2db39d04a1",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/vi/CODE_OF_CONDUCT_VI.md",
+      "variant": "lf",
+      "sha256": "60b65a18ae2b6ab6163b99a529d95fd60d72086f659496eb16e722bf20d19ef9",
+      "size": 3447
+    },
+    {
+      "oid": "3a8e53898de63b22e73ac937d3411d6e6f358715",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/vi/CONTRIBUTING_VI.md",
+      "variant": "lf",
+      "sha256": "ba752dce28ec1bb427aacf1e26a4ec00fa6d49b48871b70a97f6e77a75e95fe8",
+      "size": 5235
+    },
+    {
+      "oid": "fe3adda850cf0467afb2854c181afa3e288ea276",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/vi/GUIDE_VI.md",
+      "variant": "lf",
+      "sha256": "4907d22aab4f2e4a6873f2ca128593090bd72150a32dce0aef48b897fddd076b",
+      "size": 1577
+    },
+    {
+      "oid": "756b4c45a0abf6260d586a98237025dd61cb8913",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/vi/SECURITY_VI.md",
+      "variant": "lf",
+      "sha256": "c84de1195adbf5337787648eefdb6f18d530bd66c6c409864b4471d4202d8862",
+      "size": 3925
+    },
+    {
+      "oid": "c01324a10a6e05e0531dfc0707e5c2393550258b",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/vi/SPEC_VI.md",
+      "variant": "lf",
+      "sha256": "7c4bee752f840f46fd3718e78c30dfc6986afc82d36fc8a884ba5e068b4080c5",
+      "size": 10593
+    },
+    {
+      "oid": "a956c43cf5a3cd6675640a47d7a2ffe27fe60e08",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/uk/CODE_OF_CONDUCT_UK.md",
+      "variant": "lf",
+      "sha256": "bb98f654fcfc338d98839781b0a1a4492a34990d9a85d7a821eaef0ea9963e89",
+      "size": 4537
+    },
+    {
+      "oid": "a2a35a160a251a2d5e7393bd1e3217eef95aa918",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/uk/CONTRIBUTING_UK.md",
+      "variant": "lf",
+      "sha256": "9b0b206b47bedd79f26ffac371e4bbf8db5bd9b45ce412123ef25656896c9dd1",
+      "size": 6203
+    },
+    {
+      "oid": "584ed8dc871ffda47d7d501dc443d809db4b775f",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/uk/GUIDE_UK.md",
+      "variant": "lf",
+      "sha256": "54a7dc953b0633e3e09c6dfb88d415e4a43fc45aeafab2f34377c00c177a416a",
+      "size": 1872
+    },
+    {
+      "oid": "173fc27d5e4c689a792c838f79cde25dad65e033",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/uk/SECURITY_UK.md",
+      "variant": "lf",
+      "sha256": "d92870127d42c0905663cafeff2786ffb018edee25fd87776f6eb4d424a4e953",
+      "size": 4759
+    },
+    {
+      "oid": "b8aaeb4a8e928608f3484f91dc6c26c29d23d1c2",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/uk/SPEC_UK.md",
+      "variant": "lf",
+      "sha256": "285e8922a3f0375c75e0e88d31a30a84e14ac6f51c7930d579d40f5379cde136",
+      "size": 13610
+    },
+    {
+      "oid": "daada50472f50aeb62fcb88caee7b3967488494d",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/tr/CODE_OF_CONDUCT_TR.md",
+      "variant": "lf",
+      "sha256": "2aff3335520d8bc332d9cb549e7c441a1f20676984705a211cee0bf692d79337",
+      "size": 2466
+    },
+    {
+      "oid": "0ffce92bc9daf77cf16f6d25f97409e0d1ed63bd",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/tr/CONTRIBUTING_TR.md",
+      "variant": "lf",
+      "sha256": "b4699e7d69836cdedd63c8de2cb2356a34e4476bd444135cf9e55ac26e9a2a49",
+      "size": 3761
+    },
+    {
+      "oid": "f503b329f1bc4b51dacde987f5720183758d7f38",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/tr/GUIDE_TR.md",
+      "variant": "lf",
+      "sha256": "e66330bc1a320bd65c792978d77024940da6a91cd8acf5ef9211f0d836e28b9c",
+      "size": 1597
+    },
+    {
+      "oid": "8ca9ed032229ed5312bb5402a8dc84dd4a6e7caa",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/tr/SECURITY_TR.md",
+      "variant": "lf",
+      "sha256": "35ee2fceda97d56503b072542a2fc50e44e1af043aa0cbe8da2109d13e44edd7",
+      "size": 3039
+    },
+    {
+      "oid": "40ca394c6269de7f2af3c77cdead1b6ebe1dc163",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/tr/SPEC_TR.md",
+      "variant": "lf",
+      "sha256": "bd83e9bdbb979e97c0411032566cc6366f9d75f25ceffe1a7b363bb888de4492",
+      "size": 8021
+    },
+    {
+      "oid": "8b6afb31fc7b47bc319ed735c79efabca14a308a",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/th/CODE_OF_CONDUCT_TH.md",
+      "variant": "lf",
+      "sha256": "67c9b8dfd3054a8c456fe26b972599e4b274369fe76724cf1494b66f1db180af",
+      "size": 6486
+    },
+    {
+      "oid": "286cb4222a887788713d4a354cc8e1d23c3aa9e3",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/th/CONTRIBUTING_TH.md",
+      "variant": "lf",
+      "sha256": "e908bbc68e0bd8eb96fa3b6759357c48c75cfab89a25a98b2420f8a4d9fa617c",
+      "size": 9496
+    },
+    {
+      "oid": "42271db63765ae13f1645609090963077f8be866",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/th/GUIDE_TH.md",
+      "variant": "lf",
+      "sha256": "7ddea2a4b05ca8843fc3beb087bb9ceb169c7818390e8b53d2e5ae7b28bdfff2",
+      "size": 2242
+    },
+    {
+      "oid": "c6a9b788866710a6ae22cba1c6ebf8f3b026ac6e",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/th/SECURITY_TH.md",
+      "variant": "lf",
+      "sha256": "d7d35fa2b012658b6dd95c4aca2cd603dd4abca31b64f1a74025a1a015807b68",
+      "size": 7251
+    },
+    {
+      "oid": "f9db89e2a0231ffce7008e187f73b81539ad197b",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/th/SPEC_TH.md",
+      "variant": "lf",
+      "sha256": "a658fda37279042e8cb13b8390c095e2ba7f635a341a9dc857f57526d8ac8d89",
+      "size": 18508
+    },
+    {
+      "oid": "ee33d5ee8ff518bec560d0aef0ab230c34909c55",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/sv/CODE_OF_CONDUCT_SV.md",
+      "variant": "lf",
+      "sha256": "19c72a26ed06cdd751b0ffe840e58109995f498319efc1b1abfb3b7a0125721b",
+      "size": 2561
+    },
+    {
+      "oid": "12d7b34061f82e848d33bf7d304b8c9b5a82a360",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/sv/CONTRIBUTING_SV.md",
+      "variant": "lf",
+      "sha256": "459133e6e475fd38ba6be2665824315ef4bf3224a02b62ea312307c3d3055bf4",
+      "size": 3860
+    },
+    {
+      "oid": "ed23df7cd9fd11103709c67e64d4737c0798e1ec",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/sv/GUIDE_SV.md",
+      "variant": "lf",
+      "sha256": "b5d5b2ff591c1849122d1197ed2133cb797fe2f320ac55de18888314cbfbb0fd",
+      "size": 1407
+    },
+    {
+      "oid": "88f6481ac12524ac9eb8a2b54da1a9c8a73d47cf",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/sv/SECURITY_SV.md",
+      "variant": "lf",
+      "sha256": "1d27e5dfa1ebff820f3de096a3b21979fb63760212cb83cfadec1332fcbf0d51",
+      "size": 3032
+    },
+    {
+      "oid": "2c92380138b75ffca9c4a076b85e2f658202b6b0",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/sv/SPEC_SV.md",
+      "variant": "lf",
+      "sha256": "2596172272f1cadded136b9f0005c4bb7b984929dae63ce184d2182b2b7de51b",
+      "size": 8473
+    },
+    {
+      "oid": "7690c77582ab3ac835ea3991274b255c51ca5322",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/sk/CODE_OF_CONDUCT_SK.md",
+      "variant": "lf",
+      "sha256": "d47c3944785dbdc270fc62c174be62cadd600694156756ade00d4823f4625026",
+      "size": 2466
+    },
+    {
+      "oid": "fa7ea89224290cce67017f5528c23c00f90ef6a9",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/sk/CONTRIBUTING_SK.md",
+      "variant": "lf",
+      "sha256": "2b8871752f4499b4484b60011f792492d91e621e10c48ba383954dcee94123bf",
+      "size": 3682
+    },
+    {
+      "oid": "1ea2086ea47eb3b9e8b5574ce0301caa75a87e84",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/sk/GUIDE_SK.md",
+      "variant": "lf",
+      "sha256": "31c9c921a2e2468c79896af6802f98e6d4471bd25634981cf79912eea2909e7a",
+      "size": 1535
+    },
+    {
+      "oid": "bfe77681287cb863047583c96b0cf26c2ce0fd34",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/sk/SECURITY_SK.md",
+      "variant": "lf",
+      "sha256": "30df101fbaf164282008a767a81822e9fec1aff18f90a06d2f4499da359e6b99",
+      "size": 3044
+    },
+    {
+      "oid": "089002e0a03462e49a08030bcf722c53eaa85f07",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/sk/SPEC_SK.md",
+      "variant": "lf",
+      "sha256": "04ad4cab6bffe31e7e95cc82c78d41c70f2745cb2fcf180b7fc13cbc97ffe708",
+      "size": 8021
+    },
+    {
+      "oid": "07038f4d0c8eb80876d81ff5e18cfe46872a84f5",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ru/CODE_OF_CONDUCT_RU.md",
+      "variant": "lf",
+      "sha256": "c91d6488136a756e725fff2c5057ad17c43d47d233583a926d58a9b4de9ea421",
+      "size": 4815
+    },
+    {
+      "oid": "cce3f0d03277aa48c768bb8cb4363ef496ed1aa9",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ru/CONTRIBUTING_RU.md",
+      "variant": "lf",
+      "sha256": "3b411fc05a96ce114a2b7763ae75de1e9ee76f54d5bc327aa1909ea9811be1c2",
+      "size": 6607
+    },
+    {
+      "oid": "fb28c49bcd1672fc7f007000d5bd997f15d34390",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ru/SECURITY_RU.md",
+      "variant": "lf",
+      "sha256": "55b49daed9889f82eb4bb9515720345baf354132a04474d487cc4c2cfc3def3c",
+      "size": 5002
+    },
+    {
+      "oid": "54dc38215997d7c2eb745ac775343fa7110fe911",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ru/SPEC_RU.md",
+      "variant": "lf",
+      "sha256": "2c37d4ad78fc9744540dedb7ef9c1d04e5aa6b13b53f42ba68d5f004e5268b13",
+      "size": 13891
+    },
+    {
+      "oid": "9756765f81a16019c8f66ae18a7ef56fb53f1f26",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ro/CODE_OF_CONDUCT_RO.md",
+      "variant": "lf",
+      "sha256": "622daca7e446a6fc79f9c5060a987b06870ebeb511ac553bf47868cd5b4c5835",
+      "size": 2466
+    },
+    {
+      "oid": "9924af2186168f2f1398e0ec97c65a5e92ebe32f",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ro/CONTRIBUTING_RO.md",
+      "variant": "lf",
+      "sha256": "7ffd25e75280c60d8079e4b723754b42c2152d0586ddf3c43f906c2259d98a68",
+      "size": 3640
+    },
+    {
+      "oid": "01e3daa617339f3bb9aae71037fe323484f0fd56",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ro/GUIDE_RO.md",
+      "variant": "lf",
+      "sha256": "5f7ece1ba7f1222a5dad8fc51c4211d81a0c745483554139899152846f8880fc",
+      "size": 1526
+    },
+    {
+      "oid": "ad3389b15e88a5a1c3051f0f41aa403f73b58ce0",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ro/SECURITY_RO.md",
+      "variant": "lf",
+      "sha256": "8c4a89f9ba061b899fd7e58d766960b227ee3bd1ef4acfd6e1c43d37042d62d0",
+      "size": 3218
+    },
+    {
+      "oid": "0ba9d483b1a945f6073c4c50a2a72b2317e46b19",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ro/SPEC_RO.md",
+      "variant": "lf",
+      "sha256": "08d2dcf64966a662799cc678de47c6da523e63c5805a6e4d5280f01a74f1c9f5",
+      "size": 8195
+    },
+    {
+      "oid": "6ea7b6f56a9845a9ae537ce6ccaa83ce8dbf8c6e",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/pt/CODE_OF_CONDUCT_PT.md",
+      "variant": "lf",
+      "sha256": "2aa6d6514dd45317ed0c44058257d71fa21d4c9c41544c30da71b313fe1aefcc",
+      "size": 2689
+    },
+    {
+      "oid": "05841d0dd5b32e2ae4928a8f50e6e0ec3317121b",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/pt/CONTRIBUTING_PT.md",
+      "variant": "lf",
+      "sha256": "100f48ae997095412723fdb0530082cab832f2ab91e5ea8c586d51089693c8c6",
+      "size": 4095
+    },
+    {
+      "oid": "1de67d4c729527027e9bb05c8a9fc52b7170c0c1",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/pt/GUIDE_PT.md",
+      "variant": "lf",
+      "sha256": "3b4f749dce3c0ca81ec1d746b0f0b614f930dc21636109221253a225aae3ff31",
+      "size": 1447
+    },
+    {
+      "oid": "ca72117f035dedfcf23b731a3d9d8096c32657d2",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/pt/SECURITY_PT.md",
+      "variant": "lf",
+      "sha256": "3cea69f304976818214af3e9bb64aba0af7f84fb3370428e31c3f82b069a0299",
+      "size": 3246
+    },
+    {
+      "oid": "04b6dd922610b28e8b7925ed882f9a4160210580",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/pt/SPEC_PT.md",
+      "variant": "lf",
+      "sha256": "f35de59ae9321c5fb72d3a133f67a6611f3aa1b1a68c9c3a250663fbc17223a2",
+      "size": 9014
+    },
+    {
+      "oid": "21c3b0d76aaa1198c03a65a485350900dbaba2f8",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/pl/CODE_OF_CONDUCT_PL.md",
+      "variant": "lf",
+      "sha256": "21112ed86846d79d765c8369a231ad8442d5fd7ead560bbc013ad3223bfc595b",
+      "size": 2824
+    },
+    {
+      "oid": "8cab87c318f253421951b3d979d261e3bb3b2874",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/pl/CONTRIBUTING_PL.md",
+      "variant": "lf",
+      "sha256": "4636243da35737ea64ecf59ae3af2e5689ce0a4cb8100aa4906907aa95cc6082",
+      "size": 4143
+    },
+    {
+      "oid": "1ddf5691cecd0b4d7b393feb5aebeeef9ed7570d",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/pl/GUIDE_PL.md",
+      "variant": "lf",
+      "sha256": "b90585d0696431910ecef6e2f9280c9a286060e2898c6a99fa020645364b4a4a",
+      "size": 1439
+    },
+    {
+      "oid": "0a9b2690d1e43f0add1c3ab251cd595c7b374e05",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/pl/SECURITY_PL.md",
+      "variant": "lf",
+      "sha256": "7bcf8f2a58c86569fff5719998f3f57d484a6bfec023bf5fea97967523776bac",
+      "size": 3251
+    },
+    {
+      "oid": "1e794a05acf14758fbdcd582230e9bc9e082b702",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/pl/SPEC_PL.md",
+      "variant": "lf",
+      "sha256": "c642fb19416253da2357e1b911e434085b6f996239304bb669088a7dfd768e65",
+      "size": 8988
+    },
+    {
+      "oid": "9c4136f46db5f803d5e6afed1b26e770b6c08749",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/no/CODE_OF_CONDUCT_NO.md",
+      "variant": "lf",
+      "sha256": "33e2e84a09dca0c5031f1682a13db86ee23cb7d027354f705954779af7ed6e53",
+      "size": 2521
+    },
+    {
+      "oid": "d7a9f0f5f3cc3dc5059d84553e1556272e5ba135",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/no/CONTRIBUTING_NO.md",
+      "variant": "lf",
+      "sha256": "f16b0c2e849d26b31f23d84e091e762f2441ef1d743614591b32bd7accd7eaf3",
+      "size": 3817
+    },
+    {
+      "oid": "8b904d6928fec60ce141145823866c3af587bf8d",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/no/GUIDE_NO.md",
+      "variant": "lf",
+      "sha256": "0d505479f283d1a80241a7605772a3e52828a48f5fe994734e0ba2f919e7168d",
+      "size": 1415
+    },
+    {
+      "oid": "78685f5c2ef32d02c7ba6323bc9985b379fd35fa",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/no/SECURITY_NO.md",
+      "variant": "lf",
+      "sha256": "fdb7aa620a146b4394dd1b4bb8a8479a92d4217ab3bdf651af1adedc0f39f5b9",
+      "size": 3030
+    },
+    {
+      "oid": "263ae57ac492278e53e7b9f9e13004b40b2bcd7d",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/no/SPEC_NO.md",
+      "variant": "lf",
+      "sha256": "113fb237924e8b7a49b73e99aee6fbedc29f0d23dbf2b8da5b5afcd05636c487",
+      "size": 8298
+    },
+    {
+      "oid": "a2891c0f0fafa7b3ae4d3bdaea3aa12d5ca04581",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/nl/CODE_OF_CONDUCT_NL.md",
+      "variant": "lf",
+      "sha256": "4f5516597c78a554f29f8bd154e0691beb6d79208982b8203ff17566299f87ae",
+      "size": 2639
+    },
+    {
+      "oid": "eea0f738d9d3766b2109ee79b0c13c724a025332",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/nl/CONTRIBUTING_NL.md",
+      "variant": "lf",
+      "sha256": "58fcc7f1615c52ce008df74396919267c304ad45535624110966edc4c1c0c369",
+      "size": 4094
+    },
+    {
+      "oid": "4edd2e329e3a624ba3be529b23e88d75eb0aeaa9",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/nl/GUIDE_NL.md",
+      "variant": "lf",
+      "sha256": "16cd2e4c9e2ad2eab987f2879de1cda9d4812a6db2fe7ed9f3380852e90c095a",
+      "size": 1433
+    },
+    {
+      "oid": "977731e2e84ffda8583bd7bce958b91cc13650ee",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/nl/SECURITY_NL.md",
+      "variant": "lf",
+      "sha256": "9fa463bc00d4299e33addbfcb1f5b17c1df3542ea9dfdad0efc792079898a840",
+      "size": 3220
+    },
+    {
+      "oid": "82410eac0ffb6bb74a2897a01b44440fb0e12857",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/nl/SPEC_NL.md",
+      "variant": "lf",
+      "sha256": "f47d4a29c6dccf903fea772434a38b0827be1f839a45179c1658b1f301c136ba",
+      "size": 8448
+    },
+    {
+      "oid": "54f9f9d407380f75451f01f439db94266fcde76b",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ko/CODE_OF_CONDUCT_KO.md",
+      "variant": "lf",
+      "sha256": "0332543f0da7e0f77494cef38d5373129e73ecd91d44f843ccff0bfc790b8674",
+      "size": 2672
+    },
+    {
+      "oid": "37f0365191a5f1dc6a7624af2cb121356b3d7560",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ko/CONTRIBUTING_KO.md",
+      "variant": "lf",
+      "sha256": "79e452f44fce403f5fef5626a1ef239333a85a429246f8be92246cf23de10b8a",
+      "size": 4845
+    },
+    {
+      "oid": "e446c270f24830efd219d59810566a59981831c7",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ko/GUIDE_KO.md",
+      "variant": "lf",
+      "sha256": "348859ae3ebb373bcfc2026d0c9dea74fb781bf7b1076e98cd6a41cd1481a53d",
+      "size": 1643
+    },
+    {
+      "oid": "7fbba43730b4e003a57d0ad7bfe4a7b6f4bf1258",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ko/SECURITY_KO.md",
+      "variant": "lf",
+      "sha256": "8886bde0c5be30dbda8ac40f8f197585a8b8bde65cc5e783007ea9ff8d37bb79",
+      "size": 3501
+    },
+    {
+      "oid": "ebc5bb4de8a092557a387391d72e4467a4f90e78",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ko/SPEC_KO.md",
+      "variant": "lf",
+      "sha256": "f69bb81f7869299b2e170e916c5e4b3da05b7bdcf9b15c6321cca54ed3aad7b7",
+      "size": 9768
+    },
+    {
+      "oid": "0ddc8baf90ec611b12157ef873424130f2143ea1",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ja/CODE_OF_CONDUCT_JA.md",
+      "variant": "lf",
+      "sha256": "a5cf196430aed65bd5150d7b760c9b9543297ee22481d656a1baf7d68e9bf835",
+      "size": 2938
+    },
+    {
+      "oid": "3961c99416c178541eb7ecbac1b2fd117e15398a",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ja/CONTRIBUTING_JA.md",
+      "variant": "lf",
+      "sha256": "3d1043774adc82b4f3a08f8905ec3ee83fa5c789b3f12849ed9d81eac7b4bef2",
+      "size": 5495
+    },
+    {
+      "oid": "de4227c3b460ce07b86f9f6bbe0b429164c100fc",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ja/GUIDE_JA.md",
+      "variant": "lf",
+      "sha256": "b67325b740491e9d1560581a1eb70bcaaf9f2e9eebd4a27799a5195b6d36b7de",
+      "size": 1680
+    },
+    {
+      "oid": "7fb68bcda977517f55f7ef92f30ee4fc9591e497",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ja/SECURITY_JA.md",
+      "variant": "lf",
+      "sha256": "0ebf79b65f40f6dfca22d4f2654a2a6d0350c37b668a228aa8bb8bb14ffb5c5f",
+      "size": 4165
+    },
+    {
+      "oid": "2fc43a81b09e83a57c43a6ab77c5045be1ef5aca",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ja/SPEC_JA.md",
+      "variant": "lf",
+      "sha256": "dca5621781483bc07c8a325367facf3ab6dcbda8f7f5f5eb121cbaa14b04e6f9",
+      "size": 10777
+    },
+    {
+      "oid": "a33deba77a5f2a36350ef94f19adb68ff0825192",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/it/CODE_OF_CONDUCT_IT.md",
+      "variant": "lf",
+      "sha256": "661ed0cbe52720eaefacf30f3370196faec0a215ab27b18f1cf3a324f5e2f325",
+      "size": 2704
+    },
+    {
+      "oid": "3266069f277a39176ae351adf8133f7c37958e81",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/it/CONTRIBUTING_IT.md",
+      "variant": "lf",
+      "sha256": "b457e5de679844f2eeb29f0d423d5010428b68f9ea711d21baceb5b8fea67971",
+      "size": 4082
+    },
+    {
+      "oid": "5d9f8e60e0a7efbd8b73e0282f27bbce7b5219ff",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/it/GUIDE_IT.md",
+      "variant": "lf",
+      "sha256": "f0243d527ac22d4f10dc76174be6582c935ae730f5f9e4844f77a15efe252e56",
+      "size": 1430
+    },
+    {
+      "oid": "6f2f88312ddced529b51c6196eb986f45ad2fec4",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/it/SECURITY_IT.md",
+      "variant": "lf",
+      "sha256": "1fa3ea3af8da7c43cefa0168fbc650ded1d44edeadf9aac2383285282d8e8584",
+      "size": 3175
+    },
+    {
+      "oid": "c25076ce48d0c05a6b9dcd743458845307446a92",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/it/SPEC_IT.md",
+      "variant": "lf",
+      "sha256": "c84c6b1464efb6bcacd16abb86dce26cdbc87624f075e57d6ad654113c3c3c92",
+      "size": 8762
+    },
+    {
+      "oid": "023ebb3e00a4d39870e39879868b41b31f435aff",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/id/CODE_OF_CONDUCT_ID.md",
+      "variant": "lf",
+      "sha256": "ab87777f6831dfa86e251e241d191f358ad19ab6cde6dff004f114bdef213707",
+      "size": 2466
+    },
+    {
+      "oid": "1306874fccaa83a6586876249cda7983512991e2",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/id/CONTRIBUTING_ID.md",
+      "variant": "lf",
+      "sha256": "f575baf1cab539a80b3609caec5f1fe2ee13258bf665c444f081f205e60e54a9",
+      "size": 3640
+    },
+    {
+      "oid": "731a77d21aaca9e85cde2c2ba91146e0ea3125ab",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/id/GUIDE_ID.md",
+      "variant": "lf",
+      "sha256": "4b06051430aca46021d325790cdbc8903a65caae83bf36e25e4a0fc8b94f4057",
+      "size": 1539
+    },
+    {
+      "oid": "cbe33dbae91914cfc532b616b778d721fe478e06",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/id/SECURITY_ID.md",
+      "variant": "lf",
+      "sha256": "62bce482b1b514e2f05bd4cb82a5e00bd8308f484e2cec1a5d45d8865f07cc7d",
+      "size": 2821
+    },
+    {
+      "oid": "f161d9ea133af798bcbe0e1e851171932abdaf8e",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/id/SPEC_ID.md",
+      "variant": "lf",
+      "sha256": "d0629551ecbfef738e9b938f9fd3ca32f11feebca817b72c04abf33adc0f9378",
+      "size": 8021
+    },
+    {
+      "oid": "934810f5978895153f2dfd6ca15c2fbbfb98d3c5",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hu/CODE_OF_CONDUCT_HU.md",
+      "variant": "lf",
+      "sha256": "687c5b47a633d422730c471d467f8639a815e34a4258d66c8969359f8299064c",
+      "size": 2466
+    },
+    {
+      "oid": "32bf2c016e1f0ee0b5b2da296e05bbc581c68451",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hu/CONTRIBUTING_HU.md",
+      "variant": "lf",
+      "sha256": "393a146f9ebd60612984cfe89189eb625f7a7fac7c47f818b691678da6669e63",
+      "size": 3640
+    },
+    {
+      "oid": "6e1b546d2443ceeacf1ad2fafbcc9b6bf5b1a69a",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hu/GUIDE_HU.md",
+      "variant": "lf",
+      "sha256": "0dcab3e81b752a8227369fe029707a5b8f9c12376c63aa4dc804842e2fbef415",
+      "size": 1582
+    },
+    {
+      "oid": "0345e4a4f19810a5eb66e2d9d8e9810f54792be7",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hu/SECURITY_HU.md",
+      "variant": "lf",
+      "sha256": "b76c5c6d39573bde48ef4190139756c22b005b59e5dd24c0f8cc53081b725cb4",
+      "size": 2821
+    },
+    {
+      "oid": "fb7c874b9683522f0086685a6bc96f89fead2c4a",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hu/SPEC_HU.md",
+      "variant": "lf",
+      "sha256": "22a5c2bb08d154a99613d48e96fb179c8fe57397610fd13905f25d7fde93f14d",
+      "size": 8021
+    },
+    {
+      "oid": "7ab09c288022aa60a4e69c780f93bf7f406b595b",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hr/CODE_OF_CONDUCT_HR.md",
+      "variant": "lf",
+      "sha256": "cbe7f5d533f0d2cc3a14add319756b0113d14a3ec5a3ac29eda108cb1b0927ae",
+      "size": 2466
+    },
+    {
+      "oid": "531c5fdf8ddfe151dfce42928c18ecca6f27ef02",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hr/CONTRIBUTING_HR.md",
+      "variant": "lf",
+      "sha256": "be5cdd1e01a73fb637b66c8a675614f991a8853bee88b9dfadb51b9015dae8a6",
+      "size": 3640
+    },
+    {
+      "oid": "c9232609bca7c4cf5c38f6667ce6f69178928c1d",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hr/GUIDE_HR.md",
+      "variant": "lf",
+      "sha256": "5a2c3cadbb31a9d4a7f52de9ff7739a4246c5760f7c682a43671f6d87a3f48d5",
+      "size": 1472
+    },
+    {
+      "oid": "cb52008cedfd6a5248e297dc855df178ab20b0be",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hr/SECURITY_HR.md",
+      "variant": "lf",
+      "sha256": "2baaabbfc569aa55c69772c73294efc560ae6d05b01e6f4cdc9acef8f22a6a61",
+      "size": 2821
+    },
+    {
+      "oid": "cd0067a217978854e5be8c9992575225fab00331",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hr/SPEC_HR.md",
+      "variant": "lf",
+      "sha256": "e9a6b8d793437cae70d335542ce9acfb90be6691a5cf457ae9282a280485d1ae",
+      "size": 8021
+    },
+    {
+      "oid": "615c545c3a200602c3d92645bc449bc2600baca1",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hi/CODE_OF_CONDUCT_HI.md",
+      "variant": "lf",
+      "sha256": "12aec82999749b655c753dfe2ea1a6ec9812f3fc80e5502ec3a72584c2d525ac",
+      "size": 5995
+    },
+    {
+      "oid": "794ab523832ef466113dd0e9cdad74ccbc4ecc95",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hi/CONTRIBUTING_HI.md",
+      "variant": "lf",
+      "sha256": "2d3c5d7f11cb4766d57d6a15918e80f5f407bf9968411521d7720ac55c6712d0",
+      "size": 7766
+    },
+    {
+      "oid": "b3de6d762d47414c2921ec37dc854a4bac455c69",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hi/GUIDE_HI.md",
+      "variant": "lf",
+      "sha256": "f595adc8364c7d27910d34a79181d596505c5cd9db5781e1de255d998fbfaef9",
+      "size": 2424
+    },
+    {
+      "oid": "24395f52e14f12a6c91b0cfa21d3b6adae76a208",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hi/SECURITY_HI.md",
+      "variant": "lf",
+      "sha256": "1ff6e7cf267adde4ea9fcb6a344aea2539d8918dd9b4e4cbe903480e03163be1",
+      "size": 6750
+    },
+    {
+      "oid": "a1158f1d140cdb7646e6856b52033a12db233f40",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/hi/SPEC_HI.md",
+      "variant": "lf",
+      "sha256": "81fbc651f556ba8feb1c3b604843e56978a3796cac9025271e331895ff81ceb7",
+      "size": 12689
+    },
+    {
+      "oid": "fcc0d817cbcd269419a541c137712f197976b0b5",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/he/CODE_OF_CONDUCT_HE.md",
+      "variant": "lf",
+      "sha256": "7f0cc9198fdf216a810b83a7dae4233b7655ef7fa547ac1577eb205a3f0463bc",
+      "size": 3016
+    },
+    {
+      "oid": "7dd979dc1dba3cc577de0c8392d1d8fe16561af3",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/he/CONTRIBUTING_HE.md",
+      "variant": "lf",
+      "sha256": "aaea5b924877d89ac593e0ebdabddecb8f6dffec0c41439701884b6c5cb69223",
+      "size": 4912
+    },
+    {
+      "oid": "a45d4ebad84beb80ecc3f4e793953d7d2cc8d0ba",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/he/GUIDE_HE.md",
+      "variant": "lf",
+      "sha256": "88afebc68dac516fb8c2b1f157b86ff8d0e8896b14643d10d178c68e3570c1f6",
+      "size": 1612
+    },
+    {
+      "oid": "dd9357897d66e0d5ceefe67030784ea3a19e253a",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/he/SECURITY_HE.md",
+      "variant": "lf",
+      "sha256": "85bc492a0241693a0b6c9255ddb26f04348ca584b9490cece12eab86d8a628b8",
+      "size": 3709
+    },
+    {
+      "oid": "cd81ecd7190048548d47f599d71f63d08d4990cd",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/he/SPEC_HE.md",
+      "variant": "lf",
+      "sha256": "47c61e02d42c903233602ffd47a604a885992a59017e7411617d263d69143855",
+      "size": 10590
+    },
+    {
+      "oid": "c63587b25afddf79773c62ab418d7ac5ba839b3b",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/fr/CODE_OF_CONDUCT_FR.md",
+      "variant": "lf",
+      "sha256": "38c59a1849a15578ee332f6a7463a90b2eff086b3340ea003a69fa9f4b027494",
+      "size": 2866
+    },
+    {
+      "oid": "f94b3bf73ab30edf2d68e22536152a2e855a1f30",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/fr/CONTRIBUTING_FR.md",
+      "variant": "lf",
+      "sha256": "5647e9ad2c4d0873eee8ef6cde0c753cac5d81c57f72fee234b672cd4c2bc6fd",
+      "size": 4331
+    },
+    {
+      "oid": "a763b74e7b8902b48646fa9592df916dafcfe073",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/fr/GUIDE_FR.md",
+      "variant": "lf",
+      "sha256": "110b5a3808daef045bb2b8c349935d0587bda9ba0d74074e803fb77beac1ea63",
+      "size": 1591
+    },
+    {
+      "oid": "28e35302acdeb081c734eb7ebeef99794a9d88d5",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/fr/SECURITY_FR.md",
+      "variant": "lf",
+      "sha256": "ac0f97747f239741f52957fbc95ecacd9e31d0b6b009c6b8b7f5138e250b6263",
+      "size": 3393
+    },
+    {
+      "oid": "eb55636decf4f7cec34a77909e05ef87d1a5243c",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/fr/SPEC_FR.md",
+      "variant": "lf",
+      "sha256": "d776ab97026540cd5f24315370d939832faa0175c0d14d03383eb9a96ffc7a68",
+      "size": 9392
+    },
+    {
+      "oid": "bdfc171ab96a60cbedbad9227b7b1a53ff7133a1",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/fi/CODE_OF_CONDUCT_FI.md",
+      "variant": "lf",
+      "sha256": "8b864840ab964f4a3554d320ed3a88544b81be736eb4951a75d9dcbd004c9268",
+      "size": 2835
+    },
+    {
+      "oid": "d58b008be93a1dd3800c4dec5a26a498d92012a5",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/fi/CONTRIBUTING_FI.md",
+      "variant": "lf",
+      "sha256": "e3a3f87f44c8460cd6fa60e3ad2f350e45716ad9c0936179d538ed2f81a4e182",
+      "size": 4189
+    },
+    {
+      "oid": "508e698f6f923194011ad5d11a1776b6949d31ed",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/fi/GUIDE_FI.md",
+      "variant": "lf",
+      "sha256": "4c320fa1a238f5df16370653284c1da0e6b73335d6393a5c35d2f8bf22f4557f",
+      "size": 1452
+    },
+    {
+      "oid": "c21c0ebf27db558047d8194d2e37b9668c715b36",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/fi/SECURITY_FI.md",
+      "variant": "lf",
+      "sha256": "773495ac8fb2d4667d4faf13fb8f3369dd0643e145d3c52b004d97154bbfcb02",
+      "size": 3220
+    },
+    {
+      "oid": "30632a4b4f4b3e345ae9a2d6cc182ba8d8af62ed",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/fi/SPEC_FI.md",
+      "variant": "lf",
+      "sha256": "99ab8dfd619ad8d1421322836c601103d403b2acd49d0936d1778e0033a0c2bc",
+      "size": 8983
+    },
+    {
+      "oid": "1391122967e64092c10e2497524aa315683d6744",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/et/CODE_OF_CONDUCT_ET.md",
+      "variant": "lf",
+      "sha256": "0266c9fc93730461de4861f3129789c34ca7193b7a15086804de014cafe9e251",
+      "size": 2633
+    },
+    {
+      "oid": "a7c27fe8b8a02a8b3a72fcb7561f93bf4bc9402d",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/et/CONTRIBUTING_ET.md",
+      "variant": "lf",
+      "sha256": "717696cacc10b8cbeeca210f685e3f9f9ac7c10e26d6d96e01d061960edb326e",
+      "size": 3916
+    },
+    {
+      "oid": "6407e9af7852ca2a3407db4c73a1497e9c2723b9",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/et/SECURITY_ET.md",
+      "variant": "lf",
+      "sha256": "f9e95d3a14768d122c120e28314b90683a768dcacf6a5d77feade06cc5b820ae",
+      "size": 3051
+    },
+    {
+      "oid": "732ed061ac975ab8651beb5d469c53a457e29712",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/et/SPEC_ET.md",
+      "variant": "lf",
+      "sha256": "1a3811b899ac176c15023ec95c77c8c7686f7d231df2678e426156776e48f4db",
+      "size": 8493
+    },
+    {
+      "oid": "37190dd04033ab6a9ce87c4dc632aaa8eed4f15d",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/es/CODE_OF_CONDUCT_ES.md",
+      "variant": "lf",
+      "sha256": "adb08bd062a83ee1f61f276d6176502e45e759b99419c7c35867bcbe5bd7e264",
+      "size": 2734
+    },
+    {
+      "oid": "29c3c488d86a5b776595aaac7745d7bc4f8fa361",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/es/CONTRIBUTING_ES.md",
+      "variant": "lf",
+      "sha256": "d5d29ea0c7f3eaf3b1746150557107863e07c9cd771fea38c79585c63a1e727e",
+      "size": 4047
+    },
+    {
+      "oid": "9a4a5a7b94813939115f36e28b8388966a8b41d4",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/es/GUIDE_ES.md",
+      "variant": "lf",
+      "sha256": "437583765e357086aa6ce40d034c1a2b31ee7882db8c75868024180af012bc1f",
+      "size": 1538
+    },
+    {
+      "oid": "e21307e60283135ac0930a3d55e2dba1910935a3",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/es/SECURITY_ES.md",
+      "variant": "lf",
+      "sha256": "01346a86288e64084d07cb1fc5c57fa28ff95ad62ec654538779294e88492c96",
+      "size": 3231
+    },
+    {
+      "oid": "7cf1fedcb9f31757b2df0d6f84184cd580a4d4a2",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/es/SPEC_ES.md",
+      "variant": "lf",
+      "sha256": "b4e983a8bcaae263d3ec3fa263b4241963859604921f8e4a1d656b0234d45337",
+      "size": 8911
+    },
+    {
+      "oid": "0eee838f4f56599038fde92efe6999c24a1fadc3",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/el/CODE_OF_CONDUCT_EL.md",
+      "variant": "lf",
+      "sha256": "5d5fd33279636dd5cdcc2a93aa027a1cb956e4c1660f649b0de468e24c674780",
+      "size": 2466
+    },
+    {
+      "oid": "02c67cf6a8e43fec1f69efa0ce5edede423362fb",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/el/CONTRIBUTING_EL.md",
+      "variant": "lf",
+      "sha256": "16d195ffd2262d6be5c290447b4ea89ca38487e65c016c0851164c7822578bc6",
+      "size": 4243
+    },
+    {
+      "oid": "c7fc869d6ee9c0e29479ad550cadc1c7ff3d4cf1",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/el/GUIDE_EL.md",
+      "variant": "lf",
+      "sha256": "152682ec7781338e61d79a4467c3dcb5f5a926b17a25e5a64817ee85f66e6977",
+      "size": 2084
+    },
+    {
+      "oid": "ae6b02166c9e2c53f4d60c8e11db567349ce6465",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/el/SECURITY_EL.md",
+      "variant": "lf",
+      "sha256": "d68c355e31fb449750d72a5fabb7a1a2f5693437c72aa8dd34e4f4165d6b590b",
+      "size": 2821
+    },
+    {
+      "oid": "bea0003e46ba886585537c9b1d9afa557d624001",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/el/SPEC_EL.md",
+      "variant": "lf",
+      "sha256": "bcc691a750b17361365ee4f5b29084d7fc7b2874a657c61b44fa588833eacaca",
+      "size": 7807
+    },
+    {
+      "oid": "14197f547c56feb6eae0923c9b57545f5ddd4f8a",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ded/CODE_OF_CONDUCT_DED.md",
+      "variant": "lf",
+      "sha256": "11c6dd8088006554347336dbf902a64f08100943d9c340c0f0020c49a16f4086",
+      "size": 2535
+    },
+    {
+      "oid": "97fe7a3c9f51bf430f92675552da5a6dd55e0967",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ded/CONTRIBUTING_DED.md",
+      "variant": "lf",
+      "sha256": "9fc63805393f38feff0c627cc40e1ed0ebc27cca3807a60d87e1c2fcac10db89",
+      "size": 5686
+    },
+    {
+      "oid": "83805727a6798d4acd1f514cab90a1ed12f2abc7",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ded/SECURITY_DED.md",
+      "variant": "lf",
+      "sha256": "1f9a0d3958109e5dcfeeffa4697dbf3fa2896a26c12e273ea6bc292c24abd128",
+      "size": 4421
+    },
+    {
+      "oid": "020d0ea7d76c49c6cbd8061bc3a572c19e9ca7a9",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ded/SPEC_DED.md",
+      "variant": "lf",
+      "sha256": "112d6b03722aec058d311bce8950afcbde7ab1994651504677307298affdfebc",
+      "size": 12366
+    },
+    {
+      "oid": "75c95311b8ae1af363d88b09a4368fb310983a05",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/de/CODE_OF_CONDUCT_DE.md",
+      "variant": "lf",
+      "sha256": "582558f86ca2ac244b3662e36e2f32de0258079ec760c62e81fbbf44770fdae4",
+      "size": 2865
+    },
+    {
+      "oid": "1b01b5f716903b250ba6b5d3770596030be14f3b",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/de/CONTRIBUTING_DE.md",
+      "variant": "lf",
+      "sha256": "ce5ba30efe4b6a066354a1f9d1e31047f7d8a995684912ce95f7a5809542f21f",
+      "size": 4352
+    },
+    {
+      "oid": "5deac272159f2c5ddeee57780a768503f01423e5",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/de/GUIDE_DE.md",
+      "variant": "lf",
+      "sha256": "76970b75a07fb5ee003f78118aab3ecf3751e5e7a25541a329f09b210c73d114",
+      "size": 1540
+    },
+    {
+      "oid": "7ef4016582814275573699bfc7fb8582c271bff9",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/de/SECURITY_DE.md",
+      "variant": "lf",
+      "sha256": "d3b9193e8644e561a709db51d12a3a2954a212a09c5626d1ef046efa18aa1213",
+      "size": 3377
+    },
+    {
+      "oid": "a726542cc444c7e16a708ac465e426eb3d30eaa5",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/de/SPEC_DE.md",
+      "variant": "lf",
+      "sha256": "fe44b553e46727bd8ef111102b08a9f7c913102f489b5558b9c5a9cd615f28fd",
+      "size": 8974
+    },
+    {
+      "oid": "b267af5e9c3c3d160361f0f82254224e751e1464",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/da/CODE_OF_CONDUCT_DA.md",
+      "variant": "lf",
+      "sha256": "7fe2a0e1dc3f59f19efc0e3dbbd7a095c2440425f7940832add821a4cab1d15e",
+      "size": 2518
+    },
+    {
+      "oid": "e29da670e0c946d483313980c23d18c22bfcbe99",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/da/CONTRIBUTING_DA.md",
+      "variant": "lf",
+      "sha256": "04b61e9d032d367b9f504f4350757194cb813fabcfdd16a817051462f9eecd77",
+      "size": 3853
+    },
+    {
+      "oid": "167e946ead4ca22ea0191ed846edacc93c53e42b",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/da/GUIDE_DA.md",
+      "variant": "lf",
+      "sha256": "8209994fa0ffbea6928f6d268e7d8ebdb7c4c48b7578dfa87b446048ad145ed8",
+      "size": 1419
+    },
+    {
+      "oid": "a81e1cf3c4cbe31ac5c9347000aad1da3093acc8",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/da/SECURITY_DA.md",
+      "variant": "lf",
+      "sha256": "5a33dff4706bb4405fe014b2849ef3ef3b175f302acb11a337624ee13d4e859f",
+      "size": 2985
+    },
+    {
+      "oid": "88f3d69761a18ca808f97569d633c0f892a4d5dd",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/da/SPEC_DA.md",
+      "variant": "lf",
+      "sha256": "8e3fd8e04a374a37dcbc14acfd92c54fc6a539da22906675685f5a31535a1215",
+      "size": 8173
+    },
+    {
+      "oid": "d1dadfc1588f9e922d3a9d88017859e8a5201552",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/cs/CODE_OF_CONDUCT_CS.md",
+      "variant": "lf",
+      "sha256": "084f1f9c53887bd7d668823c7bdc30e93cab8d8bc726c9ee56967ee01ff7b055",
+      "size": 2466
+    },
+    {
+      "oid": "e0d0dff0a4062b694f42a00458069a112f351917",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/cs/CONTRIBUTING_CS.md",
+      "variant": "lf",
+      "sha256": "4fab20a78c486562d3dc88c2a5e499298fddd6aa75a0faf3a837b9406a4c4668",
+      "size": 3673
+    },
+    {
+      "oid": "0a10b4ab777e586a77d1536f53eb5dd446f0fd1c",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/cs/GUIDE_CS.md",
+      "variant": "lf",
+      "sha256": "060466b261630b5df0b036cf25848048bee2fa489a634bf2463bc0796a06eda6",
+      "size": 1534
+    },
+    {
+      "oid": "69a55fdc946a00bc57cef2f0c4444584e5be1292",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/cs/SECURITY_CS.md",
+      "variant": "lf",
+      "sha256": "dcbdd228c6d53029fc7993e8b6cb70dea9eee66f3bd6e9759fe5c82ee6f7b289",
+      "size": 2821
+    },
+    {
+      "oid": "78abb723c6d830b5eab5cd31b6863209cdb7eabf",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/cs/SPEC_CS.md",
+      "variant": "lf",
+      "sha256": "9250d58145942ff744995527a56bc5a1e31e2fd882a9a415be82014babedcf97",
+      "size": 7807
+    },
+    {
+      "oid": "7017f61b86e2157fc90bbe20b64da77408407090",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/bg/CODE_OF_CONDUCT_BG.md",
+      "variant": "lf",
+      "sha256": "8f6c715fda34b74eb0372e504a116706fb4ce21a1ccb4a77c620a05ecdb83153",
+      "size": 2466
+    },
+    {
+      "oid": "c390fefdf31de910599ba3bed2e03173fa5fd0bc",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/bg/CONTRIBUTING_BG.md",
+      "variant": "lf",
+      "sha256": "f96b2841bed40fb2eeb58eca5a36130e0cc5a077c0f7d388e840d090ce6770d2",
+      "size": 4088
+    },
+    {
+      "oid": "bfeaab35faade18f7e32ee40b4aca5180346a570",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/bg/GUIDE_BG.md",
+      "variant": "lf",
+      "sha256": "96eaa0e8c0d6fb44b77b9eba8e8fa7013f57908c9822421c0f2066ebcf0c5395",
+      "size": 1948
+    },
+    {
+      "oid": "9d454039699557044c2af9531b242089db0910ba",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/bg/SECURITY_BG.md",
+      "variant": "lf",
+      "sha256": "68329d5e309b00a4cca5033be47e4d40bfed1865d8d499c1b5b9aeb214c63a19",
+      "size": 2821
+    },
+    {
+      "oid": "0cb3fce4e1504291f5d02e46f0f63f9827b030c5",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/bg/SPEC_BG.md",
+      "variant": "lf",
+      "sha256": "8309f61d8ea52207e7f630f10c2221c0ce91b79753887a36c40c5b3688015827",
+      "size": 7807
+    },
+    {
+      "oid": "fda8eca8c418ac84406694be2d390df3f916a283",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ar/CODE_OF_CONDUCT_AR.md",
+      "variant": "lf",
+      "sha256": "289d3c550485c5e05621cd7d0798ab5e38e0d1fc883faad1477bc71abb17618d",
+      "size": 3384
+    },
+    {
+      "oid": "84b0e794aef874903a65486bb15240794ad0c576",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ar/CONTRIBUTING_AR.md",
+      "variant": "lf",
+      "sha256": "9718a9b13bddd9c4ace8dd5c93e820723b3275e5563edf29c1ea223fed9d98d3",
+      "size": 4969
+    },
+    {
+      "oid": "a1c99f87ba4e79354d9385c6aa16889310211455",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ar/GUIDE_AR.md",
+      "variant": "lf",
+      "sha256": "50fda911b4c5e58ebb4c8e433949e095f1b79089f07ad69cb798b364f12b9ccb",
+      "size": 1691
+    },
+    {
+      "oid": "17c82fa879b9897160251b21ea13a77054c8f750",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ar/SECURITY_AR.md",
+      "variant": "lf",
+      "sha256": "a7a13f0c81adf3ff67c0a99444c3002242be53872260e00f0977bae2c9daf9eb",
+      "size": 4069
+    },
+    {
+      "oid": "08b63b1903263de4bd01ead89516cbd5cb2414ce",
+      "type": "blob",
+      "path": ".saipen/saitranslate/kitchen/ar/SPEC_AR.md",
+      "variant": "lf",
+      "sha256": "88a67d1203640fb0551dcf6f8d0560b146664635c5c980b262e268bd10a6757f",
+      "size": 11303
+    },
+    {
+      "oid": "c43f5165b31d6b5368a3a354dbf9cad959b6d649",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/README.ded.md",
+      "variant": "lf",
+      "sha256": "328ee759f841a6a4ef9403eb7e29c7bbf309169d89421bb18082da86b0aa4106",
+      "size": 26650
+    },
+    {
+      "oid": "a7bf1b81d6c9fa783e152fead8055fc54685dab2",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/README.ee.md",
+      "variant": "lf",
+      "sha256": "486827c7b094852b263229f634d88da1b7b900c02456cf1281610a63ee897d6c",
+      "size": 17638
+    },
+    {
+      "oid": "efbf3b86eae312e05d0ca8c4a0478ba6a202d00e",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/README.ja.md",
+      "variant": "lf",
+      "sha256": "64432e793d8d65450b7665e3625207724a3fcfbe9d54fd9e34ec853c819e352d",
+      "size": 21581
+    },
+    {
+      "oid": "a049405835559ec47013aa4182ea5b0e28d7257d",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/zh/README_ZH.md",
+      "variant": "lf",
+      "sha256": "e68a81b36eb343a7569da80f9cbdc484c7687294d36f39e686ceb629dc2b68aa",
+      "size": 16946
+    },
+    {
+      "oid": "a5d9d4872bcecb4511f74a2706f838763ff36b9c",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/vi/README_VI.md",
+      "variant": "lf",
+      "sha256": "b046c64641e63c51b9b2d2c966573f5f219d2328d1f2edf727ade6a2c496a0f7",
+      "size": 22015
+    },
+    {
+      "oid": "bfb4b53debb5ff7ae8091c0e02fd4a1d14c9922c",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/uk/README_UK.md",
+      "variant": "lf",
+      "sha256": "c42e22aa789195ef77dbc801f51869ea55cc5f450d584391174d966413ccc79a",
+      "size": 26147
+    },
+    {
+      "oid": "561ee17693879c7fbf3e7d98627dc54fa5b35e00",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/tr/README_TR.md",
+      "variant": "lf",
+      "sha256": "49f71e981e375b8a998754d11472a924ace461fc115fd9b5179be4356857548f",
+      "size": 18462
+    },
+    {
+      "oid": "8dd25b74550f83eb613e53b1aa85c827c7dc88b3",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/th/README_TH.md",
+      "variant": "lf",
+      "sha256": "230acab7633e36557aa1b314c13cc1c20de0f8bbc42287ea17f831d47878c077",
+      "size": 35841
+    },
+    {
+      "oid": "3175fac9bafa78df41720cf59ecc2ca0a7fe57b9",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/sv/README_SV.md",
+      "variant": "lf",
+      "sha256": "c00c76a40b1bb2f54ee4f3c11add839e4a8fb0d22dd849b79adeb631b67ee38c",
+      "size": 17687
+    },
+    {
+      "oid": "92fe0e5b0f419a02bb1ac0e24b58529db5209141",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/sk/README_SK.md",
+      "variant": "lf",
+      "sha256": "087294374a6c64c3c53b4d800cb4c070015c90822e0394e245e62a51487ffbb9",
+      "size": 18201
+    },
+    {
+      "oid": "96cad7495439e2e59359c1f90482f040acb8aa32",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/ru/README_RU.md",
+      "variant": "lf",
+      "sha256": "6d4a869b6e347fe65185137677a2e605c5f83786bd22c66e6788c74d0fd1c478",
+      "size": 27181
+    },
+    {
+      "oid": "956ea03811f36117656ff3ebee09dbb6aefee94d",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/ro/README_RO.md",
+      "variant": "lf",
+      "sha256": "22abe06826f213c2b9131d3f95412d155d4ff2d61927a1147ec05c5582aaa19a",
+      "size": 18814
+    },
+    {
+      "oid": "cb1f24053eae9634a4350cdfda7cccbab1ed8fca",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/pt/README_PT.md",
+      "variant": "lf",
+      "sha256": "290ca39da54f9b258a37db7f4ca5d7103895f08addc8211daace6f4ebd259ac7",
+      "size": 18717
+    },
+    {
+      "oid": "c9282d9b3068101e8a2eee29ede19ae2f266b300",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/pl/README_PL.md",
+      "variant": "lf",
+      "sha256": "172baedb1246d1068cf01156ce89ea4c6ad9cf7719809a852f696c17d1215d0d",
+      "size": 18444
+    },
+    {
+      "oid": "b6f3c49ba93d1226d74d6d9e34f6a51d47ab4391",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/no/README_NO.md",
+      "variant": "lf",
+      "sha256": "5b591094ec91bfaacbcc42ea1dc4453afcb3adccc62e0687a71475b108ddc024",
+      "size": 17493
+    },
+    {
+      "oid": "62eff752b87f79919b5581d24a8f9bc765515967",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/nl/README_NL.md",
+      "variant": "lf",
+      "sha256": "0811601670d408edcb3cea85ba83486f60a5993be7d9b4d8320d21039356e4f4",
+      "size": 17839
+    },
+    {
+      "oid": "a3d265559af23ae3281cbaf0d6783ca799be6ef6",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/ko/README_KO.md",
+      "variant": "lf",
+      "sha256": "ed3c3959e4a35f6698550f3ee99a7838c4f22e26ef040922a5faacb3b4adee12",
+      "size": 19566
+    },
+    {
+      "oid": "b8e5aae71a32939e01f51bd0ea4f9c6288f8f88a",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/it/README_IT.md",
+      "variant": "lf",
+      "sha256": "f79b0266c907300a9b9f4a9567d6f967839c2dfb55e51760c93d279dc5af8646",
+      "size": 18811
+    },
+    {
+      "oid": "b6303d0efecfe437787716d08729e73e7e4997eb",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/id/README_ID.md",
+      "variant": "lf",
+      "sha256": "6acbab377eb8e575b204b3263b93475db6af9c91090a81d3b18cc9767ef7402b",
+      "size": 18161
+    },
+    {
+      "oid": "e871a4a16ab15b19adce69c1c7fa3479935e5eda",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/hu/README_HU.md",
+      "variant": "lf",
+      "sha256": "32ae7f3e393cd6bed9c6263925453b30241f20dd45bf13a6c73d7fbf2b3b15ff",
+      "size": 19184
+    },
+    {
+      "oid": "7779ceac339d68b1096adee23958a88c61bb6975",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/hr/README_HR.md",
+      "variant": "lf",
+      "sha256": "5905aa63fa9135ec2cbb19116543522d131dc9d397b15b247a69ccaeac70e588",
+      "size": 17859
+    },
+    {
+      "oid": "2452fbedae6ec9f90934a5e3e6bb3fc2c3f0705f",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/hi/README_HI.md",
+      "variant": "lf",
+      "sha256": "5191c5d9be00669fe6addc7c196bee59fa195a7f1ade1ebab3ca7c9805b94e15",
+      "size": 32980
+    },
+    {
+      "oid": "35784fac90eaa583d568bf1be99ef6156fd6f5c2",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/he/README_HE.md",
+      "variant": "lf",
+      "sha256": "cc515d74ee690584e1e40e6f2712e9b16f6fb6f2ec59cc8b5e1478650328cb10",
+      "size": 20932
+    },
+    {
+      "oid": "8e283c2b1b98cf98e3e2e3df3c4d4dcf345e6abf",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/fr/README_FR.md",
+      "variant": "lf",
+      "sha256": "aec032ab8bb77229041c641da7bd5bc63ce9e955612047a4e75837ad59f35feb",
+      "size": 19457
+    },
+    {
+      "oid": "6e297e030740419f9676796c50bff93839f00158",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/fi/README_FI.md",
+      "variant": "lf",
+      "sha256": "3fb05b34f8a562f57165c321866dcbb58619e40e2f83dd160e56e58a5ff132b1",
+      "size": 18274
+    },
+    {
+      "oid": "83cdbd3f6d135dff1ee9d49a0943d7d62f9d2a68",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/es/README_ES.md",
+      "variant": "lf",
+      "sha256": "eb0501dcbe5799a3f00eeb5f48145edfc63b832110f38d5079160a6a65512e73",
+      "size": 18860
+    },
+    {
+      "oid": "335ca5c4edf04bbc1229d37996e675b77b36afcb",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/el/README_EL.md",
+      "variant": "lf",
+      "sha256": "c43e0f59c82a2053b3454943acfb5dc697fe2bc942b9ce03bb0e7d5736dae0a0",
+      "size": 28879
+    },
+    {
+      "oid": "d968a70affd9ca0e48b0ed353a266a3992d03565",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/de/README_DE.md",
+      "variant": "lf",
+      "sha256": "c6c7ab5c371ea8effb8b353fc61d0b6005535033014a5a0354e6f706794d94fb",
+      "size": 18577
+    },
+    {
+      "oid": "645e9316588ed68c6f210aa3b0f3e3fff6e22044",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/da/README_DA.md",
+      "variant": "lf",
+      "sha256": "a97e42434a2ebfb95fb020ca5e73aba9b14a7e6089a99f9929d83a06c8e03e04",
+      "size": 17542
+    },
+    {
+      "oid": "07066e28679084ca26070217eff974f21262bdc7",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/cs/README_CS.md",
+      "variant": "lf",
+      "sha256": "3d344e86992631446f324d3ee396d6e87a64f325ea489f90394823fa99306d97",
+      "size": 18173
+    },
+    {
+      "oid": "3ee04211f26d95060f38d2fa1fd8b87947f259db",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/bg/README_BG.md",
+      "variant": "lf",
+      "sha256": "352e019980f6b183e8a4673bf2878ecdc8a0036807df3b5ffaa3471c48ad49b2",
+      "size": 26357
+    },
+    {
+      "oid": "6db7fc342de14285fd5b439d6133b9795a1fa5b9",
+      "type": "blob",
+      "path": ".saipen/saitranslate/.prepare-staging/d3c28e8f87404b118dc88187b112952c/payload/.saipen/saitranslate/kitchen/ar/README_AR.md",
+      "variant": "lf",
+      "sha256": "a0031c084dbe06ea2420f34687738804db0e22120c0678c7cefe7769e28a65e2",
+      "size": 23332
+    },
+    {
+      "oid": "88f4ff9fe65660e8b0b9fe4d3cd650bac7250428",
+      "type": "blob",
+      "path": ".saipen/kitchen/astra2-validator-before-integration.py",
+      "variant": "lf",
+      "sha256": "b5fd254a05686afec71336675bdac7e71d97a666e70fac0ba2dc5f3b788d04a1",
+      "size": 520411
+    },
+    {
+      "oid": "d5fa0b399dc2531e85eb87cd1ff52b80053160cf",
+      "type": "blob",
+      "path": ".saipen/kitchen/audit_parity_cache.json",
+      "variant": "raw",
+      "sha256": "861b20154884954b80ecf7b0272c849e2c4feae4143b019a2816ff376c22876a",
+      "size": 41
+    },
+    {
+      "oid": "60c415ce4ff29b28e38709c9c557b9df0fc56058",
+      "type": "blob",
+      "path": ".saipen/kitchen/PROTOCOL_AUDIT_2026-08-07.md",
+      "variant": "raw",
+      "sha256": "05e041d1a3142dedd4fd0641ca77a078be75f2438a62bf082aa505102865fb4a",
+      "size": 8832
+    },
+    {
+      "oid": "9ab6fcf3fbe9b075281f1d3fa5a341a7bab931b7",
+      "type": "blob",
+      "path": ".saipen/kitchen/ROSARY_AUDIT.md",
+      "variant": "raw",
+      "sha256": "3f46267494dce035d0777cace151ea01aed54fab901a56e4207f5bcc8629d3fc",
+      "size": 17404
+    },
+    {
+      "oid": "38541c6842e1b0170cb4b3ac0ece93d11d484936",
+      "type": "blob",
+      "path": ".saipen/kitchen/SAIUI_SAISENT_MISSION.md",
+      "variant": "raw",
+      "sha256": "2003a41fd8c928ac33aa488ef787866cf5771c7c015805b995f7de3983bd1416",
+      "size": 4544
+    },
+    {
+      "oid": "09ecc5e6901049cf2b103f1054bd5976e24dbc5d",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1291-review.md",
+      "variant": "raw",
+      "sha256": "415f929f68a1d9143ac72c81db8d9c989dc4037bfacd32d676da40c990892743",
+      "size": 5643
+    },
+    {
+      "oid": "cd1d2e94f31d7c63aa19967c2627230038786a10",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/VERSION",
+      "variant": "lf",
+      "sha256": "319095c4c2691f083478e17bfee6df58022bc5f23aca4e08b5dcb06dc24ce6c6",
+      "size": 6
+    },
+    {
+      "oid": "2dd99a91d7346e208a3ca59ff72212451b44932a",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/tools/test_audit_scope.py",
+      "variant": "lf",
+      "sha256": "fa624899421f9f77bb3a62160fbeaa0dce0f88cdcecc53045c90c9fc4ace1085",
+      "size": 10394
+    },
+    {
+      "oid": "9fff60eb58b9f2074868c489a3703001aeee93f2",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/tools/test_evidence_hygiene.py",
+      "variant": "raw",
+      "sha256": "9917e297e5060fa8e7ea8b7efa616f1bcfd5e6fa2d6555003e9887d138085e30",
+      "size": 14991
+    },
+    {
+      "oid": "63fe1654f95f609d08cfd270af03c06669b26adc",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/tools/test_hush_runtime.py",
+      "variant": "raw",
+      "sha256": "6c9d367e8f7c31c6cc62fa6df2f08b0082dd59580daeff6aad1d588961ecd65c",
+      "size": 6506
+    },
+    {
+      "oid": "c2412a6dd9ec66565251f75adace0df5f676071c",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/tools/test_knowledge.py",
+      "variant": "raw",
+      "sha256": "a448327b49a529b57872fe66b938e15cfcca9376068b8a24c562c5c731f53014",
+      "size": 17835
+    },
+    {
+      "oid": "152d601df519fbc450a0e57637a4350831c6c55a",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/tools/test_t1316_recovery_already_applied.py",
+      "variant": "raw",
+      "sha256": "9088dde89e3dbdb9db5e886ec28ee4c06cce11d5ead541aec00358ecea0f8599",
+      "size": 50380
+    },
+    {
+      "oid": "94d4315f5a1657a099eb26bf7f94dc36c9f2e3c2",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/tools/saipen_engine/conformance_lineage.py",
+      "variant": "lf",
+      "sha256": "f7fa92b38021e07b31b512cdb9635d79613648978bfa81e6768caa4bfd5461b4",
+      "size": 38753
+    },
+    {
+      "oid": "58661b4b7999b3887bd66d22a25034e297fb0f40",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/tools/saipen_engine/evidence.py",
+      "variant": "raw",
+      "sha256": "b928417bf1092f6ddbf5baf07532fb7dec00af873c3bf9cf19ed2580d7153ab0",
+      "size": 23436
+    },
+    {
+      "oid": "44e1ad76cf2d0861ae9bdfa189c91efc19ec3dba",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/tools/saipen_engine/knowledge.py",
+      "variant": "raw",
+      "sha256": "67b3362f306df4cf315c7582ac2ed73c14a267acd7f13abf70d0123eb3e083cf",
+      "size": 24382
+    },
+    {
+      "oid": "a7dddfe547eb9e7ae25fae03ffa9365c81f73a90",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/tests/validate.ps1",
+      "variant": "raw",
+      "sha256": "005ac491515e95541baa8f5b6990a09b3c4182a4340d29a488bfd5b6a3740b12",
+      "size": 10755
+    },
+    {
+      "oid": "7b49b217606f4123325aa886c2867fe6e2c608ee",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/tests/validate.sh",
+      "variant": "raw",
+      "sha256": "3fc4d3deed047f3171a7d2a7c898adf1e43bece368a9c6a3466f2c17e596d83e",
+      "size": 11043
+    },
+    {
+      "oid": "ea444169a6f20691811b7e299f7763291d941a2b",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/saipen/phases/clean.md",
+      "variant": "raw",
+      "sha256": "75aacc58e4b68728f7b26b5eb6a2fcc2398e8f6f65401191eae6eba6644cdd22",
+      "size": 4032
+    },
+    {
+      "oid": "3d48e5d93997b91e40ebe5c917b2238b724d8ab3",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1570-no-publish-scope-20260930/bootstrap/schedule-run.ps1",
+      "variant": "raw",
+      "sha256": "d26a5a766520e5fc7d8f06f5918985a57feed7837391191b030a8df1d122e4c6",
+      "size": 10278
+    },
+    {
+      "oid": "52c342839607e46a8062be8a35e5942165b9118a",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1569-response-facts-20260930/README.ded.md",
+      "variant": "lf",
+      "sha256": "15f83b46662dfecaac0c67e467f311a2e6bcf5de30f4ef926efb72b66acba36f",
+      "size": 26755
+    },
+    {
+      "oid": "95f8b44b79e2a59b40829716a63bb2f08ce2cc6f",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1569-response-facts-20260930/README.ee.md",
+      "variant": "lf",
+      "sha256": "1e74ff442ca7d7d22400af7d717b5bbf637ea91f2108844bb278c245afd9c67c",
+      "size": 17705
+    },
+    {
+      "oid": "fdf7a45f004a12959cd7a47a98d95a198bcc1d2f",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1569-response-facts-20260930/README.ja.md",
+      "variant": "lf",
+      "sha256": "2e5c8c031f22dcf058537856ea9ef3e9d82cd2cee97a318b0f3bea1dd10e8427",
+      "size": 21648
+    },
+    {
+      "oid": "a2efb96c9f5ba4056e3f315feb324a305a8f91be",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1569-response-facts-20260930/README.md",
+      "variant": "lf",
+      "sha256": "975678041b9bcf0ae1dce1f9cc92d2e37004e7fd1c86e6628c901471e64d575d",
+      "size": 17270
+    },
+    {
+      "oid": "8bda6f5da53ff93c501a0a9fc68ceb785b55a5c6",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1567-response-candidate-20260930/tools/_log_append.py",
+      "variant": "raw",
+      "sha256": "8d812ea6c9ffda3f76100c52910d50f87e5658886d973c2acfdb80564baae49b",
+      "size": 5400
+    },
+    {
+      "oid": "fc65955f14925275ef42c35928ef17660fe9db2f",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1567-response-candidate-20260930/.github/workflows/validate.yml",
+      "variant": "lf",
+      "sha256": "ea8847a8516c4e7b85fae39cc9d45febf29da341b574f91c956070fb0a0b15b6",
+      "size": 11022
+    },
+    {
+      "oid": "09e464d50816f5870b79749386f88bccaaf90b17",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1302-preserved/t1298-pure__tools__saipen_engine__operations.py",
+      "variant": "lf",
+      "sha256": "e34195d6353749a3340275bce7cabad042b739fbb7e39d406a43b554cc3c1740",
+      "size": 196296
+    },
+    {
+      "oid": "84efc7c3660d6ab2a1bf385c050cc572860db36d",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1302-preserved/tools__test_orchestration_repair.py",
+      "variant": "lf",
+      "sha256": "0d88912314af67dbbbb2a1d9f062ec8d0e4c8ecc8073f35cb5205207c788fcdb",
+      "size": 19653
+    },
+    {
+      "oid": "261471919a0b2faf4c747d6c59bea209dfa6bf0e",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/audit_checks.py",
+      "variant": "lf",
+      "sha256": "433ef9ac59d4f704790f40017988795c0862783a93f7af753c74722259720fd8",
+      "size": 180772
+    },
+    {
+      "oid": "9160f620331970738bb7d51193b1f3c45b6d0f58",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/autoinject.py",
+      "variant": "lf",
+      "sha256": "271778c476b7cce436b046a4aa617a56b30ad659ad9c64ecc30400ca91e961ee",
+      "size": 26674
+    },
+    {
+      "oid": "9dd6250a7982a76955d264fb3d9f34c7b6ae083b",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/build_handoff_archive.py",
+      "variant": "lf",
+      "sha256": "0dd8ebf004adfc68afffe0d1c76e031b6a9c0c592761af07c25f39efd7fda872",
+      "size": 19764
+    },
+    {
+      "oid": "5272f936b99b89af532dd2234b7ca0f0b86834d6",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/continuity_probes.py",
+      "variant": "lf",
+      "sha256": "588949c32425809824bef0298ca2e65958ec37670f1dee0b8a6c54f6f5ea64da",
+      "size": 32989
+    },
+    {
+      "oid": "f6659f424e06c2a492262c96eefa5357bde4761b",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/freshness.py",
+      "variant": "lf",
+      "sha256": "12713dd7c0542a9bc96cf435f2cde2e7fa437bec88f78bf5839941411421e754",
+      "size": 34199
+    },
+    {
+      "oid": "c4c9838c4ad27a99af15dae4a8b8d5c0fae835ab",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/improve.py",
+      "variant": "lf",
+      "sha256": "ec93600c214614c48eef5343b0eab13ccdcb2bce2a9d40b059cc502ea895d583",
+      "size": 131282
+    },
+    {
+      "oid": "0247323ad790084f2537ee8e15155420f30fe0d5",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/nitro_integrity_repro.py",
+      "variant": "lf",
+      "sha256": "0f9508cde3e8f7a9c81b6428ae66d0a6c82741ba51aff3cce0dd047250f15f99",
+      "size": 14370
+    },
+    {
+      "oid": "f0c24169ecfa0c7d958ca0d7b380152f36c86c53",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/protocol_budget.py",
+      "variant": "lf",
+      "sha256": "e0888fe708aad5f38c570a0ca9469829e981fc00815cf0744fb4bd6e29972fcb",
+      "size": 7377
+    },
+    {
+      "oid": "ea38aab1dfe11f3ab108764af053791ebfffa502",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/run_scenarios.py",
+      "variant": "lf",
+      "sha256": "85f4e2a8a5231c068852601aaddf5129ed4ffce6f1f5457ba15992831c13fd13",
+      "size": 790097
+    },
+    {
+      "oid": "17b93bdee16824f95131a8b668b78fe5688b6d2f",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_metrics.py",
+      "variant": "lf",
+      "sha256": "bd1f0cea4a990b60d8a66ef7a78e938539335ee7389726c6fa54d9c4442282b0",
+      "size": 38292
+    },
+    {
+      "oid": "be34a76437b3746bf8e1f46366f03def04273de2",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_acceptance.py",
+      "variant": "lf",
+      "sha256": "14183b7417d5823624a43f7e00df2138591515612f44a568e3005fbb57ec5453",
+      "size": 9187
+    },
+    {
+      "oid": "b9adf6d57ccc2ebd9c506efe9cfb44862bca595e",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_adaptive_runtime.py",
+      "variant": "lf",
+      "sha256": "b00c41f09f714fcf37342f3680c716e9268f72a25af9e35701c0f08d8c569fab",
+      "size": 10396
+    },
+    {
+      "oid": "426fde73294ce43ef7144f0ef50b74a7ede8e824",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_audit_2026_08_28_all3.py",
+      "variant": "lf",
+      "sha256": "48b5955e1c1fe548e2d21a785d87569164b16831edfe9e753d3d5737a275ed4d",
+      "size": 104100
+    },
+    {
+      "oid": "1c7f0d28b51ef3ab7d939ed9b8b3a4be7f202a91",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_audit_2026_08_29_all3_impl.py",
+      "variant": "lf",
+      "sha256": "f0d0d7d5fcccd73a6be390b6a01ba056c02644b51d9b77d45696ad72270f5268",
+      "size": 16681
+    },
+    {
+      "oid": "7c3b77466093e21afdbec2b34ee2ae81650f6cda",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_audit_2026_08_30_all3_impl.py",
+      "variant": "lf",
+      "sha256": "f7d9a1fcd02e5dd8df8e6088e6d07a531dbaa4ec140b4b30bf647bf2317dd6c0",
+      "size": 16627
+    },
+    {
+      "oid": "d77c8a6563cfd7e10d97532ab0e46eca8629b1c2",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_audit_dogfood.py",
+      "variant": "lf",
+      "sha256": "75aa000dc9bc1dfec22a9618ea14f1c23fa5e7aff28f3d5e97a7d2b4d9c2ce85",
+      "size": 11039
+    },
+    {
+      "oid": "7676ac5084300976bc428f7ee7cc1b55894749c9",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_audit_enqueue.py",
+      "variant": "lf",
+      "sha256": "efff77c0bc553f6eaf868efbd72ce9327cc46ef602312eaefc71f3c3889f7a75",
+      "size": 23602
+    },
+    {
+      "oid": "0411325e1a0569977adbc89f1d938be8b1788880",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_audit_envelope.py",
+      "variant": "lf",
+      "sha256": "48f456cdb5717e38f22e67b8c1147f229b2b3da01524fdb1a70436e9df380b8d",
+      "size": 5702
+    },
+    {
+      "oid": "f6223bc8c8ef9fb351162c37117774fa44039045",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_audit_inbox.py",
+      "variant": "lf",
+      "sha256": "8ce77b9ae475a8eb122deb12b20a7233605d32684a4e878b77240fe48a7a4bc2",
+      "size": 44962
+    },
+    {
+      "oid": "eb959232f267d2e370bc560b5db758c085d72d24",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_audit_provenance.py",
+      "variant": "lf",
+      "sha256": "5be6881dc1b8aba2256d5f9a1591f4a478bfadfbd765e15b5d0364c8df4ff534",
+      "size": 6582
+    },
+    {
+      "oid": "26b6e835a9f28cce66814228ce4fde50dc22d9b4",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_audit_route.py",
+      "variant": "lf",
+      "sha256": "79ebf0fee38c52f051a2174c9a391ea069b84958eb0dcb10413b94beba3c36ad",
+      "size": 8646
+    },
+    {
+      "oid": "37597703db89d5b63da810792022f67f35ef7bcd",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_audit_transport_loop.py",
+      "variant": "lf",
+      "sha256": "4d942c77b945d86fc629d420bd6088bd85455a29b770c012d6162a7ce24fe11c",
+      "size": 9450
+    },
+    {
+      "oid": "3520e8dee24b640084763fa2bf9cd36f6fca2bf2",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_automation_block.py",
+      "variant": "lf",
+      "sha256": "d716cedc81cd6164369a158bf27554d56772de280c8c3c995a15861211f5fe15",
+      "size": 27692
+    },
+    {
+      "oid": "388536d13c63a26ddd4d1f4a1c2fb32d5ea1a817",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_check_inventory.py",
+      "variant": "lf",
+      "sha256": "9ccd59fe09650945598de8b71fb3ed5618b954b9be7fbc388a5a4bff98fb0817",
+      "size": 9229
+    },
+    {
+      "oid": "c3e7ece4534e7dcfd0d077d426d3a358bd18b1f5",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_command_routing.py",
+      "variant": "lf",
+      "sha256": "08f7bdf3f41c2e93e4f9cc1a267b0efa1e61f27fceb0fde7effd390dda6679cf",
+      "size": 55888
+    },
+    {
+      "oid": "7392326b342000e09c9b4d0a043c3d26916b85f6",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_concurrency_independence.py",
+      "variant": "lf",
+      "sha256": "e7e4e16f017f9a9b61f06577e1779ccdc5fdfb328828796e5e12437135301b10",
+      "size": 10089
+    },
+    {
+      "oid": "805b3d5dd85a34d02a6792ffce3932d6ee3623f2",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_continue_improve_fallthrough.py",
+      "variant": "lf",
+      "sha256": "d5f2380cc8acd2638dd6476bf869048b8495536d46037224c5e3c274f04a4ae8",
+      "size": 14495
+    },
+    {
+      "oid": "8c24d36c36754a91b9ed53eb9605d65dc901aebc",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_control_primitives.py",
+      "variant": "lf",
+      "sha256": "50290a1d9d880bd46c0cec5b7c4cde3ab994e326991246c6325d1e4d83e8d669",
+      "size": 43677
+    },
+    {
+      "oid": "185a791974e64aab0bbee7055fa5b0a6caeaa8ea",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_distribution_report.py",
+      "variant": "lf",
+      "sha256": "d2b11b0a270e27b8798f9ed2cc03e31b9e1f91e61f8f00a1380a24e17fb23881",
+      "size": 10964
+    },
+    {
+      "oid": "a654f04f173e98b0c58f7ec6987feb06e3d86b12",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_explicit_claim.py",
+      "variant": "lf",
+      "sha256": "40ae64ce4527345d4a437a7c87f36ecb8e5311007a3410805e47d188ed04647b",
+      "size": 7671
+    },
+    {
+      "oid": "6062507acfad405eda3a92695e4f28268e186448",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_hostile_wave_regressions.py",
+      "variant": "lf",
+      "sha256": "fa6ebec81e7e3e5a8629a74a5bb1ed1f070140db226faa02fd9fe1c7e8f3695d",
+      "size": 11464
+    },
+    {
+      "oid": "63cae317a32242defa3d3778637c7124445296fe",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_inject_digest.py",
+      "variant": "lf",
+      "sha256": "5b06c01e5dd572df47e6751871d8d0e8725e54d3477750a640bfeb729b3ada83",
+      "size": 9810
+    },
+    {
+      "oid": "91688dc9d40d3f251b5e7f7ef269169aeb138164",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_install_drift.py",
+      "variant": "lf",
+      "sha256": "ea5f0628425af21f282243ca673631a4a48f7d4c446973e77aee71f10addc34e",
+      "size": 6043
+    },
+    {
+      "oid": "28971e7a9f7152bb7d73305e4467b31f3213719a",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_intent_audit_fixes.py",
+      "variant": "lf",
+      "sha256": "f459613c1a77b9f55d11c8fac03393706c6b06e85fcf3206fe5dea46f6b721fc",
+      "size": 48742
+    },
+    {
+      "oid": "32e820ac980856668a4f186ec1be3ed6bfd798b5",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_ledger_gap.py",
+      "variant": "lf",
+      "sha256": "37e3c4d4bb006c4f7ffcadaccce9c1a0e89fe89c7d87f021bd6c511e8a3802a0",
+      "size": 9348
+    },
+    {
+      "oid": "e7fabeb65d52fd1f189b4e0fcdabd16f1b2880f6",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_log_stamp_guard.py",
+      "variant": "lf",
+      "sha256": "3bd4ad05607218d744bf6d2ceafde355247e00304079b8e5b099a301c6d087f5",
+      "size": 5549
+    },
+    {
+      "oid": "d87918f19dd1e5112c63fcb12a3f75e92e64254e",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_metrics_acceptance.py",
+      "variant": "lf",
+      "sha256": "1be4bb861a54bb9ea574d4b4587d397721da035aebca71235b885c0ac17c8b82",
+      "size": 14603
+    },
+    {
+      "oid": "a6636343a5059e08c366ef4ab60fec786481896c",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_protocol_registry.py",
+      "variant": "lf",
+      "sha256": "ea8285a0690ee18da536f7b5ce8786da6815b18fa95d91d48a4897674d011206",
+      "size": 12755
+    },
+    {
+      "oid": "78c9abf7a51df24965ec5daf52c8236c07e804bd",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_reconcile_valve.py",
+      "variant": "lf",
+      "sha256": "bbe291cb09f98d494119e8020fd2469f9eebad5d8b2e2e42c155ac1ef5b75dc8",
+      "size": 6266
+    },
+    {
+      "oid": "813b85698a03c19a8dc3c3e2f6a4ffafddab8317",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_regression_gate.py",
+      "variant": "lf",
+      "sha256": "e974a1813be54307455b9efe1ce1f4dce4f0455343cfdf2f0afffcfc13eb5f86",
+      "size": 11952
+    },
+    {
+      "oid": "5c42d4a50b93068d3343578388f781f7ea9f03e9",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_source_receipts.py",
+      "variant": "lf",
+      "sha256": "55d52f50cb51bf221f2ea84dcf94c45b598347e7e74896b891acdb4b0388b605",
+      "size": 21769
+    },
+    {
+      "oid": "0b6e4fc90fb5f2b068f3aff54d529f6a6cc73123",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/test_userperson_global.py",
+      "variant": "lf",
+      "sha256": "2abe4a70c1ec3ce8db00cab18fa8927b757f3ba2d79c667ac611c1b19f27056e",
+      "size": 25018
+    },
+    {
+      "oid": "337d1f525e6a5e1b5189bc74e78060466a214937",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/verify_handoff_archive.py",
+      "variant": "lf",
+      "sha256": "ff2717f156d6737dba000128666f8aea9e6c672a3c57e68ef66f0f1d608007bb",
+      "size": 19270
+    },
+    {
+      "oid": "5546975cb714a171701b287cf6623a0a277a5697",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/acceptance.py",
+      "variant": "lf",
+      "sha256": "1e35631480ecd5996e6c1e0faeb3b52ac4b01ed7686f26febb16901df1cfd725",
+      "size": 8855
+    },
+    {
+      "oid": "138adf3f2459d08bcf7554841419b89207bb1f42",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/audit_inbox.py",
+      "variant": "lf",
+      "sha256": "951274d019349c546130dbee346e72d35461d7bbdfca4d3b4ec992e028f6b211",
+      "size": 49122
+    },
+    {
+      "oid": "b39ea999963b00af8e1c4337795c18f75bd4b532",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/audit_route.py",
+      "variant": "lf",
+      "sha256": "9d97ae934045db7550a291a083a02090a974eae64dd2636a3c2abf123051d478",
+      "size": 3833
+    },
+    {
+      "oid": "db173cb28bc01854ae173c5054abe4cbdd2fbe02",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/automation.py",
+      "variant": "lf",
+      "sha256": "322ba6c8b19072ee30f3cafd27c9ace35aa3b8df40da8eb05fe52c6e80a7aa4d",
+      "size": 21443
+    },
+    {
+      "oid": "850b42ca87eb12807368a3b8f4c1a2bc5cc7a9f9",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/board.py",
+      "variant": "lf",
+      "sha256": "216a07b09ff4cd40d7edcaddaedc13399713cfab708384c5aff2694920df9794",
+      "size": 24868
+    },
+    {
+      "oid": "d848b68c02320f819849efecc3db5dfda47cbc56",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/commands.py",
+      "variant": "lf",
+      "sha256": "08243956850c377a3e3136d3420952ee340a1bd41335d05adabcee10ca80ee12",
+      "size": 15298
+    },
+    {
+      "oid": "7f827e3b24aad4dbbc046ad03f6ac0aab0e5b587",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/context.py",
+      "variant": "lf",
+      "sha256": "1294db88c9b72cb1a3b8f0311f6e93cef992e1f139ae0685e40567bcb47807c9",
+      "size": 41470
+    },
+    {
+      "oid": "6e062ebc812930396d210359b024e8ec48363317",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/continue_fallback.py",
+      "variant": "lf",
+      "sha256": "4c7cc22ffa451da8dbed052283870d9d19f96b5e8cb6d10981e1e5d77493e0bb",
+      "size": 3045
+    },
+    {
+      "oid": "d239963b4e85db7143c5f6f6b29e8b2de6e793b9",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/controls.py",
+      "variant": "lf",
+      "sha256": "1f1c861474d644e99a3c4c121d7a33439d50569c2276dc0fdc8a2be42cc2f62b",
+      "size": 74092
+    },
+    {
+      "oid": "d8f805981f134fef89a3be2b670679d3620d60bd",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/convergence.py",
+      "variant": "lf",
+      "sha256": "07e41ae5f9d5252283cf014cec249a84e825c2dc2315bc841421b6ae02a6bea5",
+      "size": 28936
+    },
+    {
+      "oid": "f8bf53b8ca991167fa0b32f557c9d311765b1ebf",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/crew.py",
+      "variant": "lf",
+      "sha256": "17ab5fdb2920ee34d5f88ec39ea747ec46be47ee7886e30bb636efcd45a15436",
+      "size": 122675
+    },
+    {
+      "oid": "64b3a96d5caec2e25d58342f51837aaf1a002c2d",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/fast_check.py",
+      "variant": "lf",
+      "sha256": "5c45dd254ea2157eccbccc9083f19919a42d037bd5c5b341c1b6b79500df06a2",
+      "size": 35602
+    },
+    {
+      "oid": "e782853382265efb3182a9c8f9f91cbbb1beeac1",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/hush.py",
+      "variant": "lf",
+      "sha256": "2c6769c7d795d9859594a4df9715990caad291531f80ba20a4a55f49e98c69d0",
+      "size": 5019
+    },
+    {
+      "oid": "cb99b8aedf24d88c6ee78bf3fab5e6971aaa1df2",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/intake.py",
+      "variant": "lf",
+      "sha256": "9d21ab85c6dcfa16334178ce4c6a77ec4c317c34ac02379f44de2b6146e08d41",
+      "size": 119373
+    },
+    {
+      "oid": "d78edffcf04a22eb9fa11b0539d45a65e307b34b",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/journal.py",
+      "variant": "lf",
+      "sha256": "b67d4c830d8ab0545dc1a2f317c8962fccdb5ec2fae381cce8d38dd862a6bc89",
+      "size": 205977
+    },
+    {
+      "oid": "4c90cbb64701162d3e07eba3a8787f8503ba467c",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/log.py",
+      "variant": "lf",
+      "sha256": "87a58257568bedfc05025fc3b4bcaad6581b6304a0724d442e6895e57e61338f",
+      "size": 38354
+    },
+    {
+      "oid": "382b63ec3090d7719244bbd44055c58871e0cbe7",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/manifest.py",
+      "variant": "lf",
+      "sha256": "7dad39fd2cc22d0c740617e6b6d7e80ab21f76fe0a3af72b862c44a74d231732",
+      "size": 4195
+    },
+    {
+      "oid": "6e455bb21889f87b23fda34847ccce613f8b1bff",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/paths.py",
+      "variant": "lf",
+      "sha256": "c9d32401a7664d7a390bbab07722eb030259cd39f4622b6404dd7209be6cab56",
+      "size": 24674
+    },
+    {
+      "oid": "a1dfbb5ed1b76b3947142529d554b38ab35acf0d",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/phases.py",
+      "variant": "lf",
+      "sha256": "b66872b25e809869574d0c2df9f614a1ac42da17317921648e03841e423261f9",
+      "size": 4656
+    },
+    {
+      "oid": "5b5db667c70eb25ca476141c01d7829408aeff34",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/plan.py",
+      "variant": "lf",
+      "sha256": "2ce1bcb0302cb27f4222f2f3d7a766532e1580786929c32fe8acaa13e7275dd5",
+      "size": 7229
+    },
+    {
+      "oid": "e6e415873812a9dfd6693983a143575dcf8d6ae4",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/reconcile.py",
+      "variant": "lf",
+      "sha256": "cafb13ab76d818cb7e6b7f0b27c1b14107b4a8801a161a70228e1a686c71bd9e",
+      "size": 21650
+    },
+    {
+      "oid": "c24af6afc08731b4d26a5e84645739d1eb2e4e75",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/release.py",
+      "variant": "lf",
+      "sha256": "c7feb689b65974f9b33b0f12ff9e984970f0c6b991b3a654bfd019bba6cfcdb9",
+      "size": 189487
+    },
+    {
+      "oid": "ab3ba098b161950d1d2f2e089df13021a4f184f8",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/release_contract.py",
+      "variant": "lf",
+      "sha256": "718c50040291d62636216fdb4d4eb752ab3c7c9aeccccc6fa6e280a61dd13799",
+      "size": 4952
+    },
+    {
+      "oid": "6dadbd7924fe755749a4d07be17c289095e56cd1",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/result.py",
+      "variant": "lf",
+      "sha256": "a562397f7e8e98253bb94d50d2c11ca6ef029fa0338d931a852a68fadaad7aa4",
+      "size": 2180
+    },
+    {
+      "oid": "bd4ed2db1dbc6f6e4c3ec207c62884ce396abb66",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/router.py",
+      "variant": "lf",
+      "sha256": "db4dcf514c9c67b4e7d07b2aaa2ab56596a2e3cb86d86b98994000d24be3b9b9",
+      "size": 30378
+    },
+    {
+      "oid": "afeaa1a81b6b46a2203742d356b06109d448c01e",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/state.py",
+      "variant": "lf",
+      "sha256": "37cfd252e5ad4a5df52feb488abfad8bdfc409215032239eec2563b1cc2ccec3",
+      "size": 42323
+    },
+    {
+      "oid": "189ca10205f546635b74d7c92feda3374a0abf27",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/subs.py",
+      "variant": "lf",
+      "sha256": "0c0014baf1197673050d071825c4fbf1d74c48dcab73a0f8759de1bf54fb6e63",
+      "size": 172755
+    },
+    {
+      "oid": "9619213016e0a86f28ab73069ba694c5b8e9b6e3",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/test_runner.py",
+      "variant": "lf",
+      "sha256": "fadc040ffb13c9a014531ac7634c34ff00b02c7e4ed802814ed558a7cdef6636",
+      "size": 11217
+    },
+    {
+      "oid": "355935d02a7464b986b7fb4b4e25dda3eddf09fc",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/tools/saipen_engine/xpatch.py",
+      "variant": "lf",
+      "sha256": "50d32e04601618b3c8fae92bc26376151de551b03ed182f75118923eb22bc068",
+      "size": 35368
+    },
+    {
+      "oid": "9c6f0b56337e005d401a0bcbb4c1f3014b8c4930",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/BOOT.md",
+      "variant": "lf",
+      "sha256": "15d06f3f64ab5c84fde2691b4057b452e0d3066060edbc94844c82c98cd31ccd",
+      "size": 5213
+    },
+    {
+      "oid": "2386e8c01906040981b9af4d62e1ada04118076b",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/EXECUTION.md",
+      "variant": "lf",
+      "sha256": "6b2c9ec13fc0eb1dce09da9d3c8f98072fbd3273157ee474e193a1bf0be3bd07",
+      "size": 2679
+    },
+    {
+      "oid": "d9f6767704e1b1c0f70e51366187c35cde21431c",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/HABITS.md",
+      "variant": "lf",
+      "sha256": "2931aa5020a0b63fa2f3227bc02fd12778c5c58ed6a8dc9891695236ac4ae93f",
+      "size": 4077
+    },
+    {
+      "oid": "ada6ae6082b62ab883abfb587ad017f30ca74d44",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/IMPROVE.md",
+      "variant": "lf",
+      "sha256": "75e1a527b7ffdb47f6e8c7038a3a4945e1b3e2f60954fb1ea0f9d4c467cbf51b",
+      "size": 22245
+    },
+    {
+      "oid": "c945950ef376aee70be20ea370134a08dc3d17ef",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/INDEX.md",
+      "variant": "lf",
+      "sha256": "2535ac565c323fe083582d0ecf5eeb783d8e7e3c6bfeab69691ba51df78c5a8c",
+      "size": 2350
+    },
+    {
+      "oid": "07ce67abc15e3afa672d5b245982ff8e4babc2ac",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/MAINTENANCE.md",
+      "variant": "lf",
+      "sha256": "4c7f8b4d3882911aeadd3be150f322436fe23310976f06dade6376a600a0b1b1",
+      "size": 14647
+    },
+    {
+      "oid": "5619230941e9bd8b0eca7d7fdf0376cf21e202d5",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/MANIFEST.json",
+      "variant": "lf",
+      "sha256": "ac2b919f4331f661d118820473cea57532cab0c2d0c254ef7833c3406f0146f0",
+      "size": 3435
+    },
+    {
+      "oid": "27236ad1c6562a28a460ee312b8dee25c7dfefe4",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/OPS.md",
+      "variant": "lf",
+      "sha256": "818a6a9db371eea1f88b8cb06f91f6f47943f3f6e6956769a97483a3c56c72f9",
+      "size": 19279
+    },
+    {
+      "oid": "8bdd0418df852f33e415844155105f5c5cabc769",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/RUNTIME.md",
+      "variant": "lf",
+      "sha256": "18ea8d67e04f588079829f216ca1279779152b34c8a6121a4d613ed14d6dd31a",
+      "size": 2677
+    },
+    {
+      "oid": "273ae52683759c5481b5be7fdb5c6ffaad81418b",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/SAICRITIC.md",
+      "variant": "lf",
+      "sha256": "f0460581e9dca92b25c8214400cb07614f946131df15cfc8aec19e350af7d01e",
+      "size": 3606
+    },
+    {
+      "oid": "96345b2614c9fcfc7c81f303e604a2e7e09beb56",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/SKILL.md",
+      "variant": "lf",
+      "sha256": "9c14b9ddac172b4d39e35164b79a708825221085d37a934c6cc807006d13004a",
+      "size": 3268
+    },
+    {
+      "oid": "a52a4b1e3b089b0fe2f399789bafea3165a94542",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/SOURCES.md",
+      "variant": "lf",
+      "sha256": "bcca558803a40d767e30d51847c6ecc9dea2259035741415030e6635b772a718",
+      "size": 10764
+    },
+    {
+      "oid": "84501b9501ebd7a5f5aee81afbee22cf08316119",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/STYLE.md",
+      "variant": "lf",
+      "sha256": "ecfd9ceb19ff59073dff4717570646622ab11655495f770795925d692968e124",
+      "size": 8465
+    },
+    {
+      "oid": "b8f5f81166e1f3ef2e5df3d4d38939d954d86a20",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-recovery/worktree/saipen/UI.md",
+      "variant": "lf",
+      "sha256": "7a1d2ecea98613ccd5e3607665ab676095af0309cacb8a2d6294e494f5332507",
+      "size": 18226
+    },
+    {
+      "oid": "f59fc6fa0d202371148a7d8d3085616d04e98d70",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-e5961-preserve/files/tools/test_debt_gate.py",
+      "variant": "lf",
+      "sha256": "b4728645cec801089664a634b1e3f986faf00ea9292e04c0eef4dfa2a2243cbf",
+      "size": 28310
+    },
+    {
+      "oid": "988e0e506eb75d135a019dcc42f15e508100a61b",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1298-e5961-preserve/files/tools/test_reverify.py",
+      "variant": "lf",
+      "sha256": "ac8839fbe83a9606dff127222bbcd84834f5086d654c3406c0d38a231860e9fd",
+      "size": 11432
+    },
+    {
+      "oid": "9e1e5cc3f07ecc13be88a2bff93dc0d91f82bdd0",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1297-repair/preserved-unrelated/.saipen/extensions/subs/crew.md",
+      "variant": "lf",
+      "sha256": "a350f7cfe641fd4f36de31314d1fc73be7417d907333d2a6a2a4bf59dfccc323",
+      "size": 16666
+    },
+    {
+      "oid": "3da4b08f986d086a62b02ae7025c1abdfea392aa",
+      "type": "blob",
+      "path": ".saipen/kitchen/t1297-repair/preserved-unrelated/.saipen/extensions/subs/PROTOCOL.md",
+      "variant": "lf",
+      "sha256": "749583280118a0b2a1cf39b4db9c96bf98115e1db866444b4c95a4bec9b94eeb",
+      "size": 46168
+    },
+    {
+      "oid": "e563ddc6f17b274e4edfbd91946beded85686a25",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1000.json",
+      "variant": "raw",
+      "sha256": "860b84d6b505af1c7786da4cca986408eacc11ef216e5e677bff050fead7aac8",
+      "size": 438
+    },
+    {
+      "oid": "2c6b77e973a76acc3b977f3254cd0593f4bf5705",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1001.json",
+      "variant": "raw",
+      "sha256": "76abc78d9d0b2c35a8abf735cf9231ef2225726dd38d1a99b0cc6bf341ed037a",
+      "size": 543
+    },
+    {
+      "oid": "144cae7d9610d709c30bffa6d29432cfbddb4bbf",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1002.json",
+      "variant": "raw",
+      "sha256": "aacf1280c90c3780270e66d9acd19a11cf44ce4f75e13572a17cef56ca2d7071",
+      "size": 543
+    },
+    {
+      "oid": "c139ba01bc900ade5aa10f4fa177be3c32599642",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1003.json",
+      "variant": "raw",
+      "sha256": "e5c6fb5d3ca17a82165ad31dc4d330b51ba2f546ec179c0d1f4b5678e42cb6a0",
+      "size": 1721
+    },
+    {
+      "oid": "d3e19380c41cced7264b714796d249bc81575f08",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1150.json",
+      "variant": "raw",
+      "sha256": "843fd115be1a1ee3a0f3d52b45bac89135fe68dea2e41ccd0233c07a42656ddd",
+      "size": 516
+    },
+    {
+      "oid": "ca5b525979118f70a231c94cd22b1d929db50d76",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1152.json",
+      "variant": "raw",
+      "sha256": "91482739ab1dcd6f7edc662e31c9192152d048b46ef648d56eb4ff8728479dd1",
+      "size": 962
+    },
+    {
+      "oid": "05884a1d6140374f3c1681cceeb9c1ff27e11314",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1153.json",
+      "variant": "raw",
+      "sha256": "5a3dd2c80a2ad3b93e6096a8a45e71f01be8ddcb0bff2fcac2b128ea65f94aae",
+      "size": 1339
+    },
+    {
+      "oid": "49174ead9f08f8ff1f3e1d3bb6dbcadff5e882bf",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1154.json",
+      "variant": "raw",
+      "sha256": "979075f5f66201e10ca251e15d1cea0a8d8e6e69ce8adb2f07ad07d2aeafaf3c",
+      "size": 531
+    },
+    {
+      "oid": "474092946845015d46e69cc6df4d5514c2d3f3bf",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1156.json",
+      "variant": "raw",
+      "sha256": "f8ebb15e7a5a000472f7d22cdd6091bb93abecac5644e28b424bf07a824caab4",
+      "size": 25128
+    },
+    {
+      "oid": "d7fa0206324d59466ed68138b49a3585c3a4fa6e",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1157.json",
+      "variant": "raw",
+      "sha256": "c54a5557d075d66a8a35bd42a1c57a913fc2655420968ed615b979e13017b2fa",
+      "size": 3129
+    },
+    {
+      "oid": "3ac669c771f1c7012182e4d629dc7432c44b5291",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1158.json",
+      "variant": "raw",
+      "sha256": "8d5debb4bb12eb64ca5acefd00c7941b23ab14e7d24b57e287f5aa98c890a80d",
+      "size": 823
+    },
+    {
+      "oid": "1fb52ada554e0b7f54fd4fd4c1e26dc966af4d94",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1159.json",
+      "variant": "raw",
+      "sha256": "47546a7e0b0bb1858b845344931563abeb8765522afee75cf835dd816c1dd37d",
+      "size": 964
+    },
+    {
+      "oid": "28078c75546decc68396a0c9dc05f3a2d35f4c8f",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1160.json",
+      "variant": "raw",
+      "sha256": "0741f572a0ca6bf17e9c28712e64612bb8f837ac58ffa9aa73d3f5247aaff3b6",
+      "size": 950
+    },
+    {
+      "oid": "7ed0edbdd0e6aeea684c3588d4835f74ff3d438a",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1161.json",
+      "variant": "raw",
+      "sha256": "8e5d6d834fe03e4e41ff53dc5f582820c81ad9e818ce71529314fde4fac73e2a",
+      "size": 954
+    },
+    {
+      "oid": "6e63235fecc15aad7294aad6fcfda45c466063a6",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1162.json",
+      "variant": "raw",
+      "sha256": "89866256af0633f5815eedc4bf805799d2cb5289facf1efdf9c135f78569ead7",
+      "size": 2237
+    },
+    {
+      "oid": "1ee4178affd72ffc59fec8e3dc0a9918a604c363",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1163.json",
+      "variant": "raw",
+      "sha256": "b5b0299729cf7c9ab5ac7b8db6b5f30e4e736c2f5618d278891dc6324b168d9d",
+      "size": 810
+    },
+    {
+      "oid": "abbd34a633b8c51e9486748532ac8fe9714dc6fd",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1164.json",
+      "variant": "raw",
+      "sha256": "1d9e919dd3ac35738aad38e85e45c65061aee124e3618f7c24350da94f5ca272",
+      "size": 3189
+    },
+    {
+      "oid": "84bf9a95aa9a00f3393a1b1f73c4df9d999e7b4a",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1165.json",
+      "variant": "raw",
+      "sha256": "b9687b2aa3cec4e2d6bf75ae916fc6e01b8edcc6e6080ea94768075ce6573274",
+      "size": 3058
+    },
+    {
+      "oid": "b8c331b99a6897ffab938495a51b0ea6db244437",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1166.json",
+      "variant": "raw",
+      "sha256": "88d00c430f3f88192f32bc18510f30240731a172b02b0c585a00f302b05c0dfb",
+      "size": 520
+    },
+    {
+      "oid": "8a787f890f237cc779eec056fa58fbd6b3fec358",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1167.json",
+      "variant": "raw",
+      "sha256": "d742fbf74388fb5dec9e59fe7281402463df7a9efe8e933deda764afd3143594",
+      "size": 587
+    },
+    {
+      "oid": "5662f009f9bb83e5ef993704747d3f60e4baab74",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1168.json",
+      "variant": "raw",
+      "sha256": "adb8cbe5a876d3ae693fb12b2c3267cc0af1bfd8236147716824e2981ddaa993",
+      "size": 519
+    },
+    {
+      "oid": "a6d20a7d7537d4b9a957bf9820c94c8aa1d3e2c7",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1169.json",
+      "variant": "raw",
+      "sha256": "8f49757ac4264256d2abee221466b6eb3e647b457884b88dd1f9163c8505eb72",
+      "size": 527
+    },
+    {
+      "oid": "7b24a31167630fa98c5d1fafcb4890a4ee8fec14",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1170.json",
+      "variant": "raw",
+      "sha256": "178cb43c0eac954af60bcbce74daca4a7da85584c3f7b893b48293a6165bc083",
+      "size": 524
+    },
+    {
+      "oid": "92f8b9d41da5cbb3d7bf4f604463d8a818d8d720",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1181.json",
+      "variant": "raw",
+      "sha256": "7b6d887389cc81c1c633729b38407d2925716e619a03f33246b4c2f98143062b",
+      "size": 3127
+    },
+    {
+      "oid": "f78aaa575e2e5142ed366a7c42f9c5ea4eedf0fa",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1229.json",
+      "variant": "raw",
+      "sha256": "09cee2c75c5fb88debbd3e8b4507b3a427508c6cf7c16e55429189aaf23b9128",
+      "size": 2831
+    },
+    {
+      "oid": "3da6ce0cae24043a90d30cc513dc9f717a9f3ce8",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1239.json",
+      "variant": "raw",
+      "sha256": "b086501d2c95ea7e6516a6a94b3b441a9041a4ed18874a8bd389817af43f3b64",
+      "size": 20134
+    },
+    {
+      "oid": "d0a53f8c237149d38b7093106eafe169428957b8",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1242.json",
+      "variant": "raw",
+      "sha256": "50f5ae7425d63eadd85e87ed4bfb7ff3b022f60bdba13104b20b2c4f05260fe3",
+      "size": 3112
+    },
+    {
+      "oid": "73e64cc7b33f6d7127930cf0e30392efcf152514",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1243.json",
+      "variant": "raw",
+      "sha256": "653836e05372ec3b46f25893c1404d56dbe64f43bab0c39c4cf3a627a5e22393",
+      "size": 3224
+    },
+    {
+      "oid": "18a07fcad51f680bdd3edf18c9f9ca12d44f7652",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1244.json",
+      "variant": "raw",
+      "sha256": "623f5b055ba7e6d991700eb15a20168ee88640c7c99a33c0111a9169e34b471e",
+      "size": 3129
+    },
+    {
+      "oid": "c812eb39eaeb64b6923191c50e0820a1d3e570c6",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1245.json",
+      "variant": "raw",
+      "sha256": "f3e3b978faf4e5550db4d4e3c2ee2b1560a8c6a8f25444a037f1fdd1bc440a7c",
+      "size": 3059
+    },
+    {
+      "oid": "9002cca9c83f2e5aa5dfb247b42e932e17e5ca9e",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1246.json",
+      "variant": "raw",
+      "sha256": "abf56309c01d6225b9e3a63f4c34ce36023bd31f0d62b7c955eafcdaf66f6e2b",
+      "size": 3060
+    },
+    {
+      "oid": "95e9494fb0646bc7d5feeea6108d1382844a0334",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1248.json",
+      "variant": "raw",
+      "sha256": "f60f3845c2f5c09e2b93458a9f03d1404d7f94a3cb7c21111fc1825404f2d336",
+      "size": 3060
+    },
+    {
+      "oid": "2facc8c85cf1885b96747135e72776c24a5224ab",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1249.json",
+      "variant": "raw",
+      "sha256": "347d921c64e55fce82c93d6a17fb9c83f56b3b264f5324ad23f5f9d20a3f1df0",
+      "size": 3155
+    },
+    {
+      "oid": "083e591d617c72c53b00fff2c2b1529b63c588c0",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1250.json",
+      "variant": "raw",
+      "sha256": "bf4189dd02006e0bc9766af09c217703b793336aea9953fc73a9d9e3050b71d3",
+      "size": 3110
+    },
+    {
+      "oid": "f341740628655bcd9c2b9f7266549536efab8d93",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1251.json",
+      "variant": "raw",
+      "sha256": "5705ef1841e47f8b13849e592f34db97264d15a0c962cba83d623816a2a3c5b1",
+      "size": 3114
+    },
+    {
+      "oid": "840305902f4b66a35c1ecfe569eec23ea1a6e087",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1252.json",
+      "variant": "raw",
+      "sha256": "b70ecd6e0374090c3dfff5a465efdfbce240589c749909c02fdf4d5636c694f9",
+      "size": 3161
+    },
+    {
+      "oid": "adcfd58fc1fa741d51d297aedb14fff8b2e89ca8",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1253.json",
+      "variant": "raw",
+      "sha256": "582b018b5f9423411986058713197dbd0d04d3af634b03237e2d079cda49384f",
+      "size": 3112
+    },
+    {
+      "oid": "c48ca0c06628120743a508d397c5a548e54cfb60",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1254.json",
+      "variant": "raw",
+      "sha256": "2d5f97ae0d8b0dac10f14385443ed9edb10bb66d4a46b6481949ac9e6c4275eb",
+      "size": 3171
+    },
+    {
+      "oid": "be19333f0a10ac7ed875c395f5253c204d5c436c",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1255.json",
+      "variant": "raw",
+      "sha256": "23c189bf7d86abf9ec8a5f05b87a25d69ea0894757b6839fe8d2a7ae1aa65c29",
+      "size": 3216
+    },
+    {
+      "oid": "4889bff7fe2f2c6bac5711ad7eaba8ada62b6669",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1256.json",
+      "variant": "raw",
+      "sha256": "d29edce2f5349df45257455ccb95d3790655da7ce6bd2449894133a84679dee9",
+      "size": 850
+    },
+    {
+      "oid": "8a0f2d0ac4972209bb168427f45ef2bd47ae5fed",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1260.json",
+      "variant": "raw",
+      "sha256": "445ebbc69982fda051d40545749a582e3596adfb69213c7f39f80cbc4c12fa9b",
+      "size": 3117
+    },
+    {
+      "oid": "1145e1145e9a1b76896d559a790f94e1aa120f1b",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1261.json",
+      "variant": "raw",
+      "sha256": "e0b18b3065223ff74a2ea74c8c74de4cae1999f7098a63b62fb94e84d7eaa041",
+      "size": 3263
+    },
+    {
+      "oid": "e298b53edccc6a356481bc8285d2e7976b5992fe",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1262.json",
+      "variant": "raw",
+      "sha256": "e08005bd13624b51b578a3549459780a233eeb6fd486d31dd6110b29ef8636d8",
+      "size": 3050
+    },
+    {
+      "oid": "a1853f60058fa74559bab4647852158e45e58ba4",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1263.json",
+      "variant": "raw",
+      "sha256": "c12da0af101a19fab75c90016d05d437722cab3d43cafcafc7a8063746c20c49",
+      "size": 3117
+    },
+    {
+      "oid": "046d8820b0878a44885fc78b489b9ee05c8bcd69",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1264.json",
+      "variant": "raw",
+      "sha256": "09792c6427aed21788f99c84bf52ce7cb3c4f86cb4825425614054e9b0050111",
+      "size": 3225
+    },
+    {
+      "oid": "dc3f0c385b7bec4455c1718257be8a9da4e3dd0d",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1265.json",
+      "variant": "raw",
+      "sha256": "11f30cfccd5086467c154da13bfe1b7518fe194c36b0317c39f1781388ed92a1",
+      "size": 3117
+    },
+    {
+      "oid": "15f36dfc51cf499564d494e68459678c98eec838",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1267.json",
+      "variant": "raw",
+      "sha256": "7f7fe148ee1862a4b70e0296bbf301293fe5360a8c175374f26318fdebe85e99",
+      "size": 3260
+    },
+    {
+      "oid": "9154232772f4f9d12cca7fb7e8fd373ec075e2ec",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1268.json",
+      "variant": "raw",
+      "sha256": "f68ce046b3bca59d98bb8d405970dce48e61abc8be4e170ef682db82f3cc8507",
+      "size": 3273
+    },
+    {
+      "oid": "b71a92b34aeeada8fdbcaedec1d2f5e66eb28edc",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1269.json",
+      "variant": "raw",
+      "sha256": "8477dd27b23b88d63ecbbf1fb59668dae1cbd58bb05a4b81a0ea01ebfa78c86a",
+      "size": 582
+    },
+    {
+      "oid": "bfa1d17698b8960eabec670129db3e4d3faeb57f",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1270.json",
+      "variant": "raw",
+      "sha256": "c997f77a910477736e3474125f44fe8bdd7d32a30a63a69c5c998739ac853fc4",
+      "size": 755
+    },
+    {
+      "oid": "aa28c974708928f6d518e2a67aabbc945bf9f304",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1271.json",
+      "variant": "raw",
+      "sha256": "7d3c51ac2f20dbbe9770bd8566637695efffd04ca0070057fe0495499695ddf2",
+      "size": 697
+    },
+    {
+      "oid": "139dd65a11eaf07bf22daa068d6605b265e636d0",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1272.json",
+      "variant": "raw",
+      "sha256": "de3cb3df1c5a67199b812450012b0f1535f96b9183c06e81b500e1ce3e70fbfb",
+      "size": 546
+    },
+    {
+      "oid": "58c3bbde5c9df9b3c086b8f9be0a31c380676450",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1273.json",
+      "variant": "raw",
+      "sha256": "f72b5a4d42c901193337a9658e3e975e30293981626738804e8f3e59f01106c3",
+      "size": 648
+    },
+    {
+      "oid": "e0ac7a2358e1792dae8b1758dea295eaa3d34b65",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1274.json",
+      "variant": "raw",
+      "sha256": "5b4dba9a6d095c862443e3cbbe261ac4a0bd655e540fac3cac33f40149ecd193",
+      "size": 825
+    },
+    {
+      "oid": "b7c8458c33db79795e5f65e866a27c6c2f507758",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1275.json",
+      "variant": "raw",
+      "sha256": "2bfb06a972618f289eeaf1722be8cbc203e44b12d8a3e0280338cf36a309073f",
+      "size": 673
+    },
+    {
+      "oid": "d393051c99e145accc0613221fbce8f48358ec1f",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1276.json",
+      "variant": "raw",
+      "sha256": "77e42cf0d416d5e17f69098632782b9603d79c98ba44b2f30ecafdb5eeb99ce5",
+      "size": 1025
+    },
+    {
+      "oid": "f7a6b7230fa3ba031ee6901f6ac9d781e20bce90",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1280.json",
+      "variant": "raw",
+      "sha256": "db7dc819df8c4431b3a3a04725b9dc5d75523c7390e8c360b35d631beb32e23d",
+      "size": 1888
+    },
+    {
+      "oid": "f0dcfec2074b15b4c8c813727e31413f8248bf82",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1285.json",
+      "variant": "raw",
+      "sha256": "cf28cce47d0ed45d788a93d3ace76548f86742cfd23a10fdbf197597b4cd9276",
+      "size": 700
+    },
+    {
+      "oid": "7b0657b3e5703f0f4b9bed46c0c19c4487cbb473",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1288.json",
+      "variant": "raw",
+      "sha256": "82189efd60904c3e5ae332be8a4d3ff292b52035bc1f0227eee7db7120cf78a3",
+      "size": 985
+    },
+    {
+      "oid": "1011487760672e46a7284eb1850214a293e65d52",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1291.json",
+      "variant": "raw",
+      "sha256": "266cc72c896db96d13af794bbe9170159d6aca4c1cca7e992bfc2570b54f8711",
+      "size": 1481
+    },
+    {
+      "oid": "52fee3f33b1a6fc45a659bc9bc5028a41e8b8492",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1292.json",
+      "variant": "raw",
+      "sha256": "134b1ed8692c1842715cf23a53e65214370e6f44612f8b5385c843b734557fdc",
+      "size": 633
+    },
+    {
+      "oid": "a26c55d84c7f92c617784877027c596ff53c1c03",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1294.json",
+      "variant": "raw",
+      "sha256": "4a34e2d8d13759808c17a8afada915f9ee3005a4bb5c6bfcd91609a35584f3d7",
+      "size": 3172
+    },
+    {
+      "oid": "688d67ff577865161946cd0b2ada32119906d726",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1295.json",
+      "variant": "raw",
+      "sha256": "bf0e3ef2cf9b0bd92466c40083afa0b457602d6cf264e9787b4fb6a53a21fc06",
+      "size": 2852
+    },
+    {
+      "oid": "435be300a7d21377938ce429086ea98131277e2e",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1296.json",
+      "variant": "raw",
+      "sha256": "e980af0c401d7e379a277c891f1a591530bd629ef21f9b14ddfb777cdcf9353e",
+      "size": 3262
+    },
+    {
+      "oid": "ec3bdf6981bacef5e3284dd13ce49dc106b9baa3",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1297.json",
+      "variant": "raw",
+      "sha256": "63600d9ae5401c20b420a849b55dc61f44100b16693e3fe539f883445182931a",
+      "size": 5223
+    },
+    {
+      "oid": "29ae3213203825e6574385a8fb3fbc65e5ea7a79",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-1298.json",
+      "variant": "lf",
+      "sha256": "a7863e8ec91e9fc8a4674a7589989a086d1c274727be305c0906fa8e6673e2f6",
+      "size": 2085
+    },
+    {
+      "oid": "ace0592db4dd569242840a8813eb7bd45e3b91c2",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-994.json",
+      "variant": "raw",
+      "sha256": "3bd168e8500f686e4de93c8622fc44bfb48096f682c0e75c9e6609b629305109",
+      "size": 1013
+    },
+    {
+      "oid": "a7b59cd2f232064def841e3e8b4709bd251ad899",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-996.json",
+      "variant": "raw",
+      "sha256": "bcbf8e64f8937edcf3da82ab7c637467fe094951c3dbbfe839e0a8261080d037",
+      "size": 442
+    },
+    {
+      "oid": "4b4a4016ac4c299c0ff5fd4cb401f1616b2d9d2d",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-997.json",
+      "variant": "raw",
+      "sha256": "a182159b7b4fc4adbafd7b6ee0e2edd4ed8e11a33e68fbf23c2fcc8d44b1fd01",
+      "size": 440
+    },
+    {
+      "oid": "06c25fadf4a6b1d0aa4fd9e181d13da89ac03e15",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-998.json",
+      "variant": "raw",
+      "sha256": "34773af73f6f78ad8c02d2d70ae634223f8742d92925a879e4f0e18f43fe7cb4",
+      "size": 679
+    },
+    {
+      "oid": "ca25e0998ab4b270d5db6023cf8fdc873b3c0746",
+      "type": "blob",
+      "path": ".saipen/kitchen/release_scope/T-999.json",
+      "variant": "raw",
+      "sha256": "d7d1a57f6b593ca5150e9e9cfb1cb8a41e9c7c79facd52948b6e048a6f628b90",
+      "size": 2797
+    },
+    {
+      "oid": "86c355eff82c83b4abcc81787848b21f7393fad2",
+      "type": "blob",
+      "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/ruff.toml",
+      "variant": "lf",
+      "sha256": "f76cb0eebbdaf17ea1ab58ee899a5ac8c90cc9d34052a53a56d15d8bb6ba67fe",
+      "size": 2335
+    },
+    {
+      "oid": "afebe2f4c047a5a96240a718a21130371fe78bac",
+      "type": "blob",
+      "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/extensions/subs/saitranslate.md",
+      "variant": "lf",
+      "sha256": "7fdd78edab6d44ebdc4f1040206fa5444a14e65f28a8ced5b38b259eb6eda8b3",
+      "size": 3023
+    },
+    {
+      "oid": "7ad4b7ab21bbc42598021490fff6f4dd04eeb594",
+      "type": "blob",
+      "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/extensions/adapters/claude.md",
+      "variant": "lf",
+      "sha256": "9151dabff5d34ea00d607e13ebaaadb26399a8da8c420c7524c7015fabd0b392",
+      "size": 568
+    },
+    {
+      "oid": "7a1c9ff33db70dd4ef6dfa4a86a40a75ccd662af",
+      "type": "blob",
+      "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/extensions/adapters/codex.md",
+      "variant": "lf",
+      "sha256": "00308c82f6fe261f9b74f415782184374dae36364b5d36c93256893f13d32e98",
+      "size": 576
+    },
+    {
+      "oid": "166e8436e915c32dea83772e37178c88ac572356",
+      "type": "blob",
+      "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/bootstrap/export.sh",
+      "variant": "raw",
+      "sha256": "835c34a5ebb9d57e1c83185d3fb66f7635d938788231459b9f1a6801faf80236",
+      "size": 3819
+    },
+    {
+      "oid": "899c4391eb7cb533365980d0048460b70ab228ac",
+      "type": "blob",
+      "path": ".saipen/extensions/subs/saipython/kitchen/pen/verify-current-2/bootstrap/saipen_crew.sh",
+      "variant": "raw",
+      "sha256": "ae35667664e15570d85cb1b7561fd77bdf6b7e4178d2002c0e84552b08ca7b2f",
+      "size": 2485
+    },
+    {
+      "oid": "d4836e6fec310d57bbfc6400b8fdf6a11de61b1b",
+      "type": "blob",
+      "path": ".saipen/evidence/AG3-runtime-20261011/historical-subjects/manifest-8f91d779.py",
+      "variant": "raw",
+      "sha256": "66ee10bdd75118966951ed52cfbd321907394862798d6e5b30e3b9b86dbeb33c",
+      "size": 24161
+    },
+    {
+      "oid": "6dacb88018095300a353f4f29a200d5f48404d03",
+      "type": "blob",
+      "path": ".saipen/evidence/AG3-runtime-20261011/historical-subjects/test_audit_manifest-8f91d779.py",
+      "variant": "raw",
+      "sha256": "3625103cbe0f67b249b2da10b5330ed321389a8998c8f5800a67275f7178f9de",
+      "size": 25123
+    }
+  ],
+  "declined_changed_preimages": [],
+  "restored_trees": [],
+  "candidate_root": "7eb1115df5d997c588e524f65e287270d2846500",
+  "source": "exact local Git object preimages; no inferred/fabricated payload",
+  "remaining_history": "must be measured again; no complete-recovery claim"
+}

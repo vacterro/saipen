@@ -1,0 +1,179 @@
+{
+  "captured_utc": "2026-10-12T11:09:24.8889343Z",
+  "observer": {
+    "account": "DESKTOP-TTH0L52\\vac34",
+    "sid": "S-1-5-21-6247072-3065140091-1424061869-1002"
+  },
+  "reported_ag3_account": {
+    "enabled": true,
+    "last_logon": "2026-10-12T14:07:56.1404543+03:00",
+    "sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+    "name": "SAIAG_9fabb0d5"
+  },
+  "project_grants": [
+    {
+      "target_sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+      "workdir": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER",
+      "created": true,
+      "last_seen": "2026-10-11T05:09:07.1782112Z"
+    },
+    {
+      "target_sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+      "workdir": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER",
+      "created": true,
+      "last_seen": "2026-10-12T08:17:48.4572114Z"
+    }
+  ],
+  "paths": [
+    {
+      "path": "V:\\",
+      "attributes": "Hidden, System, Directory",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "protected": false,
+      "sddl": "O:SYG:SYD:(A;OICIIO;SDGXGWGR;;;AU)(A;;0x1301bf;;;AU)(A;;FA;;;SY)(A;OICIIO;GA;;;SY)(A;OICIIO;GA;;;BA)(A;;FA;;;BA)(A;;0x1200a9;;;BU)(A;OICIIO;GXGR;;;BU)",
+      "relevant_aces": [
+        {
+          "sid": "S-1-5-11",
+          "type": "Allow",
+          "rights": "-536805376",
+          "inherited": false,
+          "inheritance": "ContainerInherit, ObjectInherit",
+          "propagation": "InheritOnly"
+        },
+        {
+          "sid": "S-1-5-11",
+          "type": "Allow",
+          "rights": "Modify, Synchronize",
+          "inherited": false,
+          "inheritance": "None",
+          "propagation": "None"
+        },
+        {
+          "sid": "S-1-5-32-545",
+          "type": "Allow",
+          "rights": "ReadAndExecute, Synchronize",
+          "inherited": false,
+          "inheritance": "None",
+          "propagation": "None"
+        },
+        {
+          "sid": "S-1-5-32-545",
+          "type": "Allow",
+          "rights": "-1610612736",
+          "inherited": false,
+          "inheritance": "ContainerInherit, ObjectInherit",
+          "propagation": "InheritOnly"
+        }
+      ]
+    },
+    {
+      "path": "V:\\___VAC",
+      "attributes": "ReadOnly, Directory",
+      "owner": "DESKTOP-TTH0L52\\vac34",
+      "protected": true,
+      "sddl": "O:S-1-5-21-6247072-3065140091-1424061869-1002G:S-1-5-21-758816932-2647220382-3794187505-513D:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;FA;;;BA)(A;OICI;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)(A;OICI;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICI;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)",
+      "relevant_aces": []
+    },
+    {
+      "path": "V:\\___VAC\\__K",
+      "attributes": "ReadOnly, Directory, NotContentIndexed",
+      "owner": "DESKTOP-TTH0L52\\vac34",
+      "protected": false,
+      "sddl": "O:S-1-5-21-6247072-3065140091-1424061869-1002G:S-1-5-21-6247072-3065140091-1424061869-513D:AI(A;;FA;;;BA)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)(A;OICIID;FA;;;BA)(A;OICIID;FA;;;SY)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICIID;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)",
+      "relevant_aces": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE",
+      "attributes": "ReadOnly, Directory, NotContentIndexed",
+      "owner": "DESKTOP-TTH0L52\\vac34",
+      "protected": false,
+      "sddl": "O:S-1-5-21-6247072-3065140091-1424061869-1002G:S-1-5-21-6247072-3065140091-1424061869-513D:AI(A;;FA;;;BA)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)(A;OICIID;FA;;;BA)(A;OICIID;FA;;;SY)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICIID;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)",
+      "relevant_aces": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_PY",
+      "attributes": "ReadOnly, Directory, NotContentIndexed",
+      "owner": "DESKTOP-TTH0L52\\vac34",
+      "protected": false,
+      "sddl": "O:S-1-5-21-6247072-3065140091-1424061869-1002G:S-1-5-21-6247072-3065140091-1424061869-513D:AI(A;;FA;;;BA)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)(A;OICIID;FA;;;BA)(A;OICIID;FA;;;SY)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICIID;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)",
+      "relevant_aces": []
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY",
+      "attributes": "ReadOnly, Directory, NotContentIndexed",
+      "owner": "BUILTIN\\Administrators",
+      "protected": false,
+      "sddl": "O:BAG:S-1-5-21-6247072-3065140091-1424061869-513D:AI(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)(A;OICIID;FA;;;BA)(A;OICIID;FA;;;SY)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICIID;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)",
+      "relevant_aces": []
+    },
+    {
+      "path": "C:\\ProgramData\\SAI\\SAIPEN",
+      "attributes": "Directory, NotContentIndexed",
+      "owner": "DESKTOP-TTH0L52\\vac34",
+      "protected": true,
+      "sddl": "O:S-1-5-21-6247072-3065140091-1424061869-1002G:S-1-5-21-6247072-3065140091-1424061869-513D:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;0x1200a9;;;BU)(A;OICI;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)",
+      "relevant_aces": [
+        {
+          "sid": "S-1-5-32-545",
+          "type": "Allow",
+          "rights": "ReadAndExecute, Synchronize",
+          "inherited": false,
+          "inheritance": "ContainerInherit, ObjectInherit",
+          "propagation": "None"
+        }
+      ]
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER",
+      "attributes": "ReadOnly, Directory, NotContentIndexed",
+      "owner": "DESKTOP-TTH0L52\\vac34",
+      "protected": false,
+      "sddl": "O:S-1-5-21-6247072-3065140091-1424061869-1002G:S-1-5-21-6247072-3065140091-1424061869-513D:AI(A;;FA;;;BA)(A;OICI;0x1301bf;;;S-1-5-21-6247072-3065140091-1424061869-1008)(A;OICI;0x1301bf;;;S-1-5-21-6247072-3065140091-1424061869-1019)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)(A;OICIID;FA;;;BA)(A;OICIID;FA;;;SY)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICIID;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)",
+      "relevant_aces": [
+        {
+          "sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+          "type": "Allow",
+          "rights": "Modify, Synchronize",
+          "inherited": false,
+          "inheritance": "ContainerInherit, ObjectInherit",
+          "propagation": "None"
+        }
+      ]
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER",
+      "attributes": "ReadOnly, Directory, NotContentIndexed",
+      "owner": "BUILTIN\\Administrators",
+      "protected": false,
+      "sddl": "O:BAG:S-1-5-21-6247072-3065140091-1424061869-513D:AI(A;OICI;0x1301bf;;;S-1-5-21-6247072-3065140091-1424061869-1008)(A;OICI;0x1301bf;;;S-1-5-21-6247072-3065140091-1424061869-1019)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-1001)(A;OICIID;FA;;;BA)(A;OICIID;FA;;;SY)(A;OICIID;FA;;;S-1-5-21-43949718-1808209547-1565744564-501)(A;OICIID;FA;;;S-1-5-21-6247072-3065140091-1424061869-1002)",
+      "relevant_aces": [
+        {
+          "sid": "S-1-5-21-6247072-3065140091-1424061869-1019",
+          "type": "Allow",
+          "rights": "Modify, Synchronize",
+          "inherited": false,
+          "inheritance": "ContainerInherit, ObjectInherit",
+          "propagation": "None"
+        }
+      ]
+    }
+  ],
+  "antigravity_name_filter_processes": [],
+  "canonical_hashes": {
+    "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER\\.saipen\\BOARD.md": "ef1f28cb4367ede8b2b8e0cbd7648677c979f1bcdc837cd93eb2d50121397167",
+    "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER\\.saipen\\IDENTITY.md": "d69712a396f0bf8481f5f4ba885cf7f6cc8652e90d5937d8e29b2de80f060bef",
+    "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER\\.saipen\\BOARD.md": "ab63abf32103de952db83f99b42fc8d2b759a3da4081f60a6bfd697eb7808a6e",
+    "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER\\.saipen\\MANIFEST.json": "b1628f6afb5f8f63870f4dc99ad9f2627a6fdf902732cb11c01dfa8bb1cb53f7",
+    "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER\\.saipen\\LOG.md": "6bff61d59c4cfc9831806f715279d296d164ee76591f86b7b0e7e539b7282f73",
+    "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER\\.saipen\\IDENTITY.md": "523125b90af60622302bf93324566888353a6df6e2079efacaa831a0f31f7b02",
+    "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER\\.saipen\\STATE.md": "3430cf0c9e49b8dfbd5ae181a912b0dcf20562b98b4ec033e066e6b3afc562d2",
+    "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER\\.saipen\\LOG.md": "1a89d1e18828c151e49f982e129bb4a3386fe451e5e08d97c0aea8bf9da18578",
+    "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER\\.saipen\\STATE.md": "776ece0c3b302cfcd7332843c0500d338698a4eaa3a6d6d2cc57ee6f4d293c6c",
+    "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_CLEANER\\.saipen\\MANIFEST.json": "d92db5b76b33463f63044d7a5b3b15837148ce82ce5189f1c2292d8950171050"
+  },
+  "canonical_unchanged": true,
+  "acl_mutations": 0,
+  "impersonation": false,
+  "real_ag3_execution": false,
+  "limit": "Operator-token metadata only. An enabled account or grant is not effective access proof; an empty executable-name filter is not proof all host channels are unavailable."
+}

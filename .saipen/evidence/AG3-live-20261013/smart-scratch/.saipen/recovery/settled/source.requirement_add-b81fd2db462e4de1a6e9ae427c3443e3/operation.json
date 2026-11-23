@@ -1,0 +1,44 @@
+{
+  "op_id": "source.requirement_add-b81fd2db462e4de1a6e9ae427c3443e3",
+  "operation": "source.requirement_add",
+  "created_at": "2026-09-09T15:26:27Z",
+  "agent": "workbuddy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_smart_vac_cleaner",
+  "project_lineage": "lineage-05afdade62f34ea2ab30cb3740a7ad17",
+  "semantic_payload_hash": "f56b06c700ec890b",
+  "preconditions": {
+    ".saipen/intake/contracts/SRC-001.json": "18803a834ae10e20",
+    ".saipen/intake/contracts/SRC-001.r005.json": "",
+    ".saipen/intake/coverage/SRC-001.json": "89b9171bdf981017"
+  },
+  "read_preconditions": {},
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 3,
+  "targets": [
+    {
+      "path": ".saipen/intake/contracts/SRC-001.json",
+      "role": "contract",
+      "action": "write",
+      "before_hash": "18803a834ae10e20",
+      "after_hash": "0e82415fc3c453d1",
+      "applied": true
+    },
+    {
+      "path": ".saipen/intake/contracts/SRC-001.r005.json",
+      "role": "contract_revision",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "0e82415fc3c453d1",
+      "applied": true
+    },
+    {
+      "path": ".saipen/intake/coverage/SRC-001.json",
+      "role": "coverage",
+      "action": "write",
+      "before_hash": "89b9171bdf981017",
+      "after_hash": "c9c1a9a95bfb99cc",
+      "applied": true
+    }
+  ]
+}

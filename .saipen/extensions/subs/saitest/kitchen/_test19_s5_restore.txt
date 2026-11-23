@@ -1,0 +1,10 @@
+occurrences_before 1
+occurrences_after 2
+present_row_duplicated True
+absent_row_inserted 1
+absent_row_section_ok ['BOARD.md required heading ## DOING appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash', 'BOARD.md required heading ## BLOCKED appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash']
+dangling_work_count 0
+gated_tickets ['T-1936']
+missing_pinned_rows ['T-1936']
+nothing_to_restore False
+pruned_recoverable {'T-1936': True}

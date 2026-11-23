@@ -1,0 +1,34 @@
+{
+  "clauses": {
+    "SRC-080:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: existing-but-corrupt durable audit generation state must fail closed, never infer generation 0, and never publish a generation <= prior durable N; Bridge, browser-dispatch and INAUDIT channels share one coherent semantics; missing file may bootstrap at 1; pending INAUDIT notification stays owed on publish failure; consumers adopt an explicit recovery/reset baseline lower than last observed generation."
+    },
+    "SRC-080:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002: one explicit cross-process ProjectRegistry refresh primitive acquires the canonical registry lock, loads latest config, synchronizes the existing AppConfig/project collection IN PLACE (preserving object identity) and rebuilds ID indexes; invoked at external Bridge generation consumption and explicit Refresh All so a Bridge-created project is resolvable by AuditService and visible in ProjectRoomModel without restart; no disk I/O on paint/data lookup paths."
+    },
+    "SRC-080:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003: v3 campaign artifacts require non-empty CAMPAIGN_PROFILE, CAMPAIGN_PROFILE_VERSION and CAMPAIGN_MANIFEST_SHA256; profile id and version must match the selected profile; manifest hash must be exact unless an explicit proven compatibility ledger maps it; manifest_hash_is_compatible rejects missing/arbitrary mismatches by default; parser, resolver and Bridge server agree and never launder an absent/untrusted identity into the current canonical identity after acceptance."
+    },
+    "SRC-080:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001: AuditStartIntentStore owns an atomic pre-dispatch fencing claim (opaque claim token / monotonic fencing generation); exactly one caller may advance PREPARING/PACKING/SUBMITTING for one intent; stale/interrupted owners take over through a fenced claim; every mutation validates the expected claim; a loser never packs again, submits again, mutates state, or attaches FAILED after winner progress; one pack, one submit, one intent, one stable dispatch identity under a deterministic concurrent release."
+    },
+    "SRC-080:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-002: the Win32 kernel named mutex is authoritative for single-instance admission; an existing launcher probes with real owned-mutex semantics (WaitForSingleObject) and stands down on WAIT_TIMEOUT even before owner.json/window exists; missing/unreadable owner.json and lack of a visible window never authorize a second GUI; abandoned/dead ownership recovers safely with namespace continuity and third-launcher exclusion; clean shutdown releases ownership; owner.json is diagnostic only."
+    }
+  },
+  "derived_at": "2026-09-22T10:41:50Z",
+  "derived_from": "SRC-080",
+  "interpretation_revision": 5,
+  "schema_version": 1,
+  "source_sha256": "1a65c43e12ee4453d6036de7216e131b95a6fb83d3d596b77ece69bdb35ef3da"
+}

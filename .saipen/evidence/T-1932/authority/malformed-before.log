@@ -1,0 +1,156 @@
+======================================================================
+ERROR: test_malformed_issuer_reply_fails_closed_without_traceback (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_malformed_issuer_reply_fails_closed_without_traceback) (reply=['unrelated'])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 306, in test_malformed_issuer_reply_fails_closed_without_traceback
+    self.assertFalse(self.verify(path, admission=self.admission, consume=True)["valid"])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 141, in verify
+    return campaign.verify_operator_grant(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 322, in verify_operator_grant
+    return campaign_authority.verify_grant(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign_authority.py", line 259, in verify_grant
+    "error": (verdict or {}).get(
+             ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'get'
+
+======================================================================
+ERROR: test_malformed_issuer_reply_fails_closed_without_traceback (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_malformed_issuer_reply_fails_closed_without_traceback) (reply='unrelated')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 306, in test_malformed_issuer_reply_fails_closed_without_traceback
+    self.assertFalse(self.verify(path, admission=self.admission, consume=True)["valid"])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 141, in verify
+    return campaign.verify_operator_grant(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 322, in verify_operator_grant
+    return campaign_authority.verify_grant(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign_authority.py", line 259, in verify_grant
+    "error": (verdict or {}).get(
+             ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'get'
+
+======================================================================
+ERROR: test_malformed_issuer_reply_fails_closed_without_traceback (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_malformed_issuer_reply_fails_closed_without_traceback) (reply=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 306, in test_malformed_issuer_reply_fails_closed_without_traceback
+    self.assertFalse(self.verify(path, admission=self.admission, consume=True)["valid"])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 141, in verify
+    return campaign.verify_operator_grant(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 322, in verify_operator_grant
+    return campaign_authority.verify_grant(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign_authority.py", line 259, in verify_grant
+    "error": (verdict or {}).get(
+             ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'bool' object has no attribute 'get'
+
+======================================================================
+ERROR: test_malformed_issuer_reply_fails_closed_without_traceback (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_malformed_issuer_reply_fails_closed_without_traceback) (reply=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 306, in test_malformed_issuer_reply_fails_closed_without_traceback
+    self.assertFalse(self.verify(path, admission=self.admission, consume=True)["valid"])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 141, in verify
+    return campaign.verify_operator_grant(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 322, in verify_operator_grant
+    return campaign_authority.verify_grant(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign_authority.py", line 259, in verify_grant
+    "error": (verdict or {}).get(
+             ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'get'
+
+======================================================================
+ERROR: test_structurally_invalid_resource_or_expiry_does_not_mint_authority (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_structurally_invalid_resource_or_expiry_does_not_mint_authority) (changes={'expires_at': 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 316, in test_structurally_invalid_resource_or_expiry_does_not_mint_authority
+    self.assertFalse(self.verify(path, admission=self.admission, consume=True)["valid"])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 141, in verify
+    return campaign.verify_operator_grant(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign.py", line 322, in verify_operator_grant
+    return campaign_authority.verify_grant(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign_authority.py", line 225, in verify_grant
+    carrier = read_carrier(root, reference)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign_authority.py", line 198, in read_carrier
+    authorization = parse_capsule(text)
+                    ^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\campaign_authority.py", line 126, in parse_capsule
+    or not math.isfinite(expires)
+           ^^^^^^^^^^^^^^^^^^^^^^
+OverflowError: int too large to convert to float
+
+======================================================================
+FAIL: test_structurally_invalid_resource_or_expiry_does_not_mint_authority (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_structurally_invalid_resource_or_expiry_does_not_mint_authority) (changes={'expires_at': True})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 315, in test_structurally_invalid_resource_or_expiry_does_not_mint_authority
+    path = self.carrier(authorization={**self.authorization, **changes}, event=f"invalid-{number}")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 129, in carrier
+    self.proof = self.issue(text, event=event)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 123, in issue
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'HOST_PROVENANCE_UNAVAILABLE', 'detail': 'a live worker cannot be rebound to a different operator event'}
+
+======================================================================
+FAIL: test_structurally_invalid_resource_or_expiry_does_not_mint_authority (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_structurally_invalid_resource_or_expiry_does_not_mint_authority) (changes={'expires_at': nan})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 315, in test_structurally_invalid_resource_or_expiry_does_not_mint_authority
+    path = self.carrier(authorization={**self.authorization, **changes}, event=f"invalid-{number}")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 129, in carrier
+    self.proof = self.issue(text, event=event)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 123, in issue
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'HOST_PROVENANCE_UNAVAILABLE', 'detail': 'a live worker cannot be rebound to a different operator event'}
+
+======================================================================
+FAIL: test_structurally_invalid_resource_or_expiry_does_not_mint_authority (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_structurally_invalid_resource_or_expiry_does_not_mint_authority) (changes={'resource_budget': {'max_generations': True, 'max_cycles': 10, 'max_wall_seconds': 300}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 315, in test_structurally_invalid_resource_or_expiry_does_not_mint_authority
+    path = self.carrier(authorization={**self.authorization, **changes}, event=f"invalid-{number}")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 129, in carrier
+    self.proof = self.issue(text, event=event)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 123, in issue
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'HOST_PROVENANCE_UNAVAILABLE', 'detail': 'a live worker cannot be rebound to a different operator event'}
+
+======================================================================
+FAIL: test_structurally_invalid_resource_or_expiry_does_not_mint_authority (test_t1932_campaign_authority.CampaignAuthorityKernelTests.test_structurally_invalid_resource_or_expiry_does_not_mint_authority) (changes={'authorized_scopes': ['CAMPAIGN_EXECUTION', 'CAMPAIGN_EXECUTION']})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 315, in test_structurally_invalid_resource_or_expiry_does_not_mint_authority
+    path = self.carrier(authorization={**self.authorization, **changes}, event=f"invalid-{number}")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 129, in carrier
+    self.proof = self.issue(text, event=event)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1932_campaign_authority.py", line 123, in issue
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'HOST_PROVENANCE_UNAVAILABLE', 'detail': 'a live worker cannot be rebound to a different operator event'}
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.033s
+
+FAILED (failures=4, errors=5)

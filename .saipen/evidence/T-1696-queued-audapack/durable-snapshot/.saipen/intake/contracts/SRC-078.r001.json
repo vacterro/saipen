@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-078:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUDAPACKT-229 live acceptance: close canonically if every normal ZIP transaction yields exactly one user turn with zero manual Send clicks; else keep open and record exact failing transaction + terminal widget state. No new improve cycle; no widget byte changes without demonstrated live failure."
+    }
+  },
+  "derived_at": "2026-09-29T10:37:53Z",
+  "derived_from": "SRC-078",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "a9656b151197d1fbf7304c274aa4b2afbb968ff72d54e1ca7274e23f9b9406f0"
+}

@@ -1,0 +1,335 @@
+--- a/tools/saipen.py
++++ b/tools/saipen.py
+@@ -11386,7 +11386,54 @@
+         return finish({"ok": False, "code": "STORAGE_OPERATION_FAILED", "detail": str(exc)})
+ 
+ 
+-def main(argv: list[str] | None = None) -> int:
++# Options whose next argv token is data, including a token shaped like a global
++# switch. Boolean verb options stay outside this set so real trailing globals
++# keep their established spelling and placement.
++_VALUE_OPTIONS = frozenset({
++    "--action", "--adapter", "--admission-session", "--adopt-legacy", "--agent",
++    "--amends", "--apply-approved-repair", "--attempted-condition",
++    "--attest-legacy-done", "--authority", "--authority-root", "--body",
++    "--budget", "--by", "--cap", "--caps-file", "--carrier-hex", "--carrier-json",
++    "--category", "--class", "--closure-cohort", "--closure-mode", "--cohort",
++    "--contract", "--cwd", "--days", "--delta", "--detail-mode", "--discovery-event",
++    "--environment", "--event-cwd", "--event-json", "--evidence", "--executor",
++    "--field", "--file", "--fixed-by", "--gate", "--handoff", "--helper-reason",
++    "--hex", "--home", "--host", "--host-lineage", "--host-root", "--implementation",
++    "--implementation-source", "--include-hex", "--invalidated-by", "--item-id",
++    "--k", "--keep", "--kind", "--label", "--max-files", "--max-matches", "--model",
++    "--needs", "--note", "--operation-id", "--package", "--paths", "--priority",
++    "--producer", "--profile", "--project-root", "--provider", "--python",
++    "--reason", "--reassign", "--rebuild-command", "--receipt", "--recurrence",
++    "--regression", "--replacement", "--report", "--reproduced", "--request",
++    "--resolution", "--resolve-duplicate-id", "--retry_not_before", "--role",
++    "--root", "--run", "--runtime", "--runtime-info", "--scope", "--scope-hex",
++    "--session", "--sha256", "--slice", "--successor", "--supersedes", "--task-class",
++    "--ticket", "--timeout", "--to", "--unknown", "--verification", "--verify",
++    "--weak-model", "--when-environment", "--work", "--workspace",
++})
++
++
++def _option_value_positions(argv: list[str]) -> set[int]:
++    """Locate opaque operands before interpreting any global option or `--`."""
++    positions: set[int] = set()
++    index = 0
++    while index < len(argv):
++        if argv[index] == "--":
++            break
++        if argv[index] == "--text":
++            # audit enqueue owns the complete remaining body, not just one
++            # word; its grammar does not interpret later switches either.
++            positions.update(range(index + 1, len(argv)))
++            break
++        if argv[index] in _VALUE_OPTIONS and index + 1 < len(argv):
++            positions.add(index + 1)
++            index += 2
++        else:
++            index += 1
++    return positions
++
++
++def main(argv: list[str] | None = None) -> int:
+     global _ROUTE_ECHO  # noqa: PLW0603
+     # ``main`` is normally one process/one invocation, but tests and embedded
+     # callers may invoke it repeatedly. Route evidence belongs to THIS raw
+@@ -11415,15 +11462,18 @@
+             "--json" in raw_args,
+         )
+         return 2
+-    if "--" in raw_args:
+-        dd_idx = raw_args.index("--")
++    value_positions = _option_value_positions(raw_args)
++    dd_idx = next((index for index, token in enumerate(raw_args)
++                   if token == "--" and index not in value_positions), None)
++    if dd_idx is not None:
+         before_dashdash = raw_args[:dd_idx]
+         after_dashdash = raw_args[dd_idx + 1 :]
+     else:
+         before_dashdash = raw_args
+         after_dashdash = []
+ 
+-    as_json = "--json" in before_dashdash
++    as_json = any(token == "--json" and index not in value_positions
++                  for index, token in enumerate(before_dashdash))
+     if as_json and hasattr(sys.stdout, "reconfigure"):
+         # Windows shells frequently inherit an ANSI code page. JSON is UTF-8;
+         # a read-only focus result containing a Unicode filename must not die
+@@ -11442,7 +11492,8 @@
+     if _capability_problem is not None:
+         _emit(_capability_problem, as_json)
+         return 2
+-    dry_run = "--dry-run" in before_dashdash
++    dry_run = any(token == "--dry-run" and index not in value_positions
++                  for index, token in enumerate(before_dashdash))
+     project_root_opt: str | None = None
+     runtime_info_opt: str | None = None
+     option_error: str | None = None
+@@ -11452,7 +11503,10 @@
+     agent_opt: str | None = None
+     while i < len(before_dashdash):
+         arg = before_dashdash[i]
+-        if arg in ("--json", "--dry-run"):
++        if i in value_positions:
++            clean_before.append(arg)
++            i += 1
++        elif arg in ("--json", "--dry-run"):
+             i += 1
+         elif arg == "--agent" and i + 1 < len(before_dashdash):
+             agent_opt = before_dashdash[i + 1]
+@@ -11488,7 +11542,7 @@
+             clean_before.append(arg)
+             i += 1
+ 
+-    args = clean_before + (["--", *after_dashdash] if "--" in raw_args else [])
++    args = clean_before + (["--", *after_dashdash] if dd_idx is not None else [])
+ 
+     # T-1006: an explicit `--agent <id>` names the ACTING ACTOR for this
+     # invocation (CORE-001, SRC-026:R001): it does not by itself transfer the
+--- a/tools/test_t1631_argv_values.py
++++ b/tools/test_t1631_argv_values.py
+@@ -0,0 +1,153 @@
++"""T-1631: option values cannot replace binding or activate global switches."""
++
++from __future__ import annotations
++
++import json
++import os
++import subprocess
++import sys
++import unittest
++from pathlib import Path
++from unittest import mock
++
++TOOLS = Path(__file__).resolve().parent
++if str(TOOLS) not in sys.path:
++    sys.path.insert(0, str(TOOLS))
++
++import saipen as cli  # noqa: E402
++from test_t1412_conformance_truth import T1412Base  # noqa: E402
++
++
++class PublicValueOwnership(T1412Base):
++    def setUp(self):
++        super().setUp()
++        self.root = self.make_project("t1631")
++
++    def test_model_value_cannot_turn_a_bound_project_into_unbound(self):
++        for mode in ("degraded", "strict"):
++            with self.subTest(mode=mode):
++                profile = self.base / mode
++                (profile / ".saipen").mkdir(parents=True)
++                (profile / ".saipen" / "authority.json").write_text(
++                    json.dumps({"mode": mode}), encoding="utf-8",
++                )
++                rc, payload, text = self.run_cli(
++                    self.root, "admission", "establish", "--session", "t1631-session",
++                    "--host", "claude", "--model", "--project-root=missing-project",
++                    "--home", str(profile),
++                    "--authority-root", str(self.base / "authority"),
++                    "--runtime", str(self.base / "runtime"),
++                )
++                self.assertIn(rc, (0, 1), text)
++                self.assertTrue(payload.get("applies"), text)
++                self.assertNotEqual(payload.get("state"), "UNBOUND", text)
++                self.assertEqual(payload.get("permitted"), mode == "degraded", text)
++
++    def test_request_values_are_carried_verbatim_through_the_real_cli(self):
++        for value in ("--dry-run", "--json", "--project-root=missing-project", "--"):
++            with self.subTest(value=value):
++                rc, payload, text = self.run_cli(
++                    self.root, "response", "policy", "--request", value,
++                )
++                self.assertEqual(rc, 0, text)
++                self.assertEqual(payload.get("code"), "EXECUTION_POLICY", text)
++
++    def test_response_check_receives_the_request_and_original_binding(self):
++        environment = {key: value for key, value in os.environ.items()
++                       if not key.startswith("SAIPEN_")}
++        for value in ("--dry-run", "--json", "--project-root=missing-project", "--"):
++            with self.subTest(value=value):
++                result = subprocess.run(
++                    [sys.executable, "-B", str(TOOLS / "saipen.py"),
++                     "--project-root", str(self.root), "response", "check", "--stdin",
++                     "--request", value, "--json"],
++                    input="", capture_output=True, text=True, encoding="utf-8",
++                    errors="replace", env=environment, timeout=120,
++                )
++                payload = json.loads(result.stdout)
++                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
++                self.assertEqual(payload.get("code"), "EXEC_RESPONSE_INVALID", payload)
++                self.assertIn("errors", payload, "checker never reached its response oracle")
++
++    def test_an_enqueue_text_body_owns_all_its_words(self):
++        body = ("--project-root=missing-project", "--json", "--dry-run", "--", "tail")
++        rc, _, output = self.run_cli(
++            self.root, "--json", "audit", "enqueue", "--producer", "t1631",
++            "--operation-id", "opaque-body", "--text", *body, json_output=False,
++        )
++        self.assertEqual(rc, 0, output)
++        layers = list((self.root / "audit").glob("[0-9]*.md"))
++        self.assertEqual(len(layers), 1, output)
++        self.assertEqual(layers[0].read_text(encoding="utf-8"), " ".join(body) + "\n")
++
++
++class DispatchValueOwnership(unittest.TestCase):
++    def setUp(self):
++        for name in ("_AGENT_OVERRIDE", "_RUNTIME_INFO_OVERRIDE", "_ROUTE_ECHO"):
++            patcher = mock.patch.object(cli, name, getattr(cli, name))
++            patcher.start()
++            self.addCleanup(patcher.stop)
++
++    def invoke(self, arguments, handler):
++        with mock.patch.object(cli, handler, return_value=0) as dispatch:
++            self.assertEqual(cli.main(arguments), 0)
++        return dispatch.call_args.args
++
++    def test_every_host_fact_keeps_global_shaped_values_opaque(self):
++        value_flags = (
++            "--session", "--admission-session", "--host", "--model", "--provider",
++            "--authority-root", "--home", "--event-cwd", "--runtime", "--reason",
++        )
++        values = (
++            "--project-root=foreign", "--agent=foreign", "--runtime-info=missing.json",
++            "--dry-run", "--json", "--",
++        )
++        for flag in value_flags:
++            for value in values:
++                with self.subTest(flag=flag, value=value):
++                    local, as_json, root = self.invoke(
++                        ["--project-root", "intended", "admission", "status", flag, value],
++                        "_admission_cli",
++                    )
++                    self.assertEqual(local, ["admission", "status", flag, value])
++                    self.assertFalse(as_json)
++                    self.assertEqual(root, "intended")
++                    self.assertIsNone(cli._AGENT_OVERRIDE)
++                    self.assertIsNone(cli._RUNTIME_INFO_OVERRIDE)
++
++    def test_request_cannot_activate_global_transport_or_mode(self):
++        for value in ("--json", "--dry-run", "--project-root=foreign"):
++            with self.subTest(value=value):
++                local, as_json, root = self.invoke(
++                    ["--project-root", "intended", "response", "policy", "--request", value],
++                    "_response_cli",
++                )
++                self.assertEqual(local[-2:], ["--request", value])
++                self.assertFalse(as_json)
++                self.assertEqual(root, "intended")
++
++    def test_real_global_flags_after_values_still_work(self):
++        local, as_json, root = self.invoke(
++            ["admission", "status", "--fresh", "--model", "--project-root=foreign",
++             "--project-root", "intended", "--agent", "operator", "--json"],
++            "_admission_cli",
++        )
++        self.assertEqual(local, ["admission", "status", "--fresh", "--model",
++                                 "--project-root=foreign"])
++        self.assertTrue(as_json)
++        self.assertEqual(root, "intended")
++        self.assertEqual(cli._AGENT_OVERRIDE, "operator")
++
++    def test_actual_delimiter_still_ends_global_option_scanning(self):
++        local, as_json, root = self.invoke(
++            ["--project-root", "intended", "response", "policy", "--",
++             "--project-root=foreign", "--json"],
++            "_response_cli",
++        )
++        self.assertEqual(local, ["response", "policy", "--", "--project-root=foreign", "--json"])
++        self.assertFalse(as_json)
++        self.assertEqual(root, "intended")
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/tools/test_adaptive_runtime.py
++++ b/tools/test_adaptive_runtime.py
+@@ -92,10 +92,10 @@
+             [
+                 sys.executable,
+                 str(TOOLS / "saipen.py"),
+-                "--project-root",
+-                str(self.project),
+-                *args,
+-                "--json",
++                "--project-root",
++                str(self.project),
++                "--json",
++                *args,
+             ],
+             capture_output=True,
+             text=True,
+--- a/tools/test_intent_audit_fixes.py
++++ b/tools/test_intent_audit_fixes.py
+@@ -121,9 +121,11 @@
+ 
+     @staticmethod
+     def _invoke_cli(root: Path, *args: str, as_json: bool = True):
+-        argv = [*args, "--project-root", str(root)]
+-        if as_json:
+-            argv.append("--json")
++        # Formatting and binding are real globals, not the missing operand
++        # in the malformed command this fixture is about (T-1631).
++        argv = ["--project-root", str(root), *args]
++        if as_json:
++            argv.insert(0, "--json")
+         output = io.StringIO()
+         with contextlib.redirect_stdout(output):
+             rc = CLI.main(argv)
+--- a/tools/test_t1327_zero_manual_recovery.py
++++ b/tools/test_t1327_zero_manual_recovery.py
+@@ -465,7 +465,7 @@
+ 
+     def _run(self, *args: str, cwd: Path | None = None) -> tuple[int, dict]:
+         proc = subprocess.run(
+-            [sys.executable, str(CLI), "fleet", *args, "--json"],
++            [sys.executable, str(CLI), "--json", "fleet", *args],
+             capture_output=True, text=True, cwd=str(cwd or REPO), timeout=180, check=False,
+         )
+         self.assertTrue(proc.stdout.strip(), f"empty stdout; stderr={proc.stderr[-800:]}")
+--- a/tools/test_t1557_mail_binding.py
++++ b/tools/test_t1557_mail_binding.py
+@@ -230,7 +230,7 @@
+             code, payload, text = cli(project, "mail", "explode", "--json")
+             self.assertEqual(code, 2, text)
+             self.assertFalse(payload["ok"], payload)
+-            code, payload, text = cli(project, "mail", "init", "--workspace", "--json")
++            code, payload, text = cli(project, "--json", "mail", "init", "--workspace")
+             self.assertEqual(code, 2, text)
+             self.assertFalse(payload["ok"], payload)
+             code, payload, text = cli(project, "mail", "init", "extra", "--json")
+--- a/tools/test_t1363_zero_manual_entry.py
++++ b/tools/test_t1363_zero_manual_entry.py
+@@ -317,7 +317,8 @@
+ 
+         env.update(operator_request_env(operator_text))
+     proc = subprocess.run(
+-        [PYTHON, str(CLI), *args, "--project-root", str(root), "--agent", agent],
++        [PYTHON, str(CLI), "--project-root", str(root), "--agent", agent, *args],
++        cwd=root,
+         capture_output=True,
+         text=True,
+         timeout=timeout,

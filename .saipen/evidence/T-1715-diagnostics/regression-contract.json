@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "tools/test_t1715_block_for_parent_guard.py"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "extensions",
+    "tests",
+    "bootstrap",
+    "VERSION"
+  ],
+  "oracle_files": [
+    "tools/test_t1715_block_for_parent_guard.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/operations.py"
+  ],
+  "before": {
+    "tools/saipen_engine/operations.py": ".saipen/evidence/T-1715-diagnostics/pre-fix-operations.py"
+  },
+  "timeout": 300
+}

@@ -1,0 +1,14 @@
+oc.platform_supported(), "chain": []},
+                },
+            )
+        signers = tuple(host_cfg.get("host_signers") or ()) if proc.signing_supported() else ()
+        policy = identity_proof.IdentityPolicy(
+            host=str(host or ""),
+            host_images=tuple(host_cfg.get("host_images") or ()),
+            hook_artifacts=self._hook_artifacts(str(host or ""), home),
+            host_signers=signers,
+            shells=tuple(host_cfg.get("hook_shells") or identity_proof.DEFAULT_SHELLS),
+            bridge_images=tuple(host_cfg.get("bridge_images") or ()),
+            max_shells=_policy_int(host_cfg, "max_shells", 4),
+            max_bridges=_policy_int(host_cfg, "max_bridge
+=====

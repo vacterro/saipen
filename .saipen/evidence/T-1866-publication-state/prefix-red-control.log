@@ -1,0 +1,64 @@
+$ C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.exe -B tools/core_unit.py focused T-1866 --pattern test_t1866_publication_state.py --timeout 120
+# before the T-1866 hunks (subject.diff 'a/' side)
+# exit=1
+
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 6,
+  "duration_s": 64.25,
+  "record": ".saipen/evidence/focused-unit/32eb9ef386e1f74b-20261023T182119347566Z.json",
+  "reused": false,
+  "shared": false,
+  "request_wall_s": 69.718,
+  "problem": "focused check failed, timed out, or collected zero tests",
+  "checkpoint": "CHECKPOINTED"
+}
+
+# direct unittest detail against the same 'a/' bytes
+# exit=1
+
+test_a_published_own_patch_closure_says_published (__main__.OwnPatchStatesItsPublicationTruth.test_a_published_own_patch_closure_says_published)
+Publication evidence is read, not asserted: a real receipt flips it. ... FAIL
+test_an_inherited_closure_claims_no_patch_state (__main__.OwnPatchStatesItsPublicationTruth.test_an_inherited_closure_claims_no_patch_state)
+`inherited_verified` adds no code, so it has no publication of its own. ... ok
+test_an_unpublished_own_patch_closure_says_pending (__main__.OwnPatchStatesItsPublicationTruth.test_an_unpublished_own_patch_closure_says_pending)
+The F-03 shape: the delta is real, the release does not exist yet. ... FAIL
+test_pending_is_derived_from_evidence_not_from_the_request (__main__.OwnPatchStatesItsPublicationTruth.test_pending_is_derived_from_evidence_not_from_the_request)
+No caller can CLAIM published: the resolver decides, in this same run. ... ok
+test_the_no_delta_refusal_is_untouched (__main__.OwnPatchStatesItsPublicationTruth.test_the_no_delta_refusal_is_untouched)
+T-37 still wins: no delta at all is a false claim, not a pending one. ... ok
+test_the_pending_state_names_its_own_publish_route (__main__.OwnPatchStatesItsPublicationTruth.test_the_pending_state_names_its_own_publish_route)
+A state with no route is a dead end; the route is the next canonical act. ... FAIL
+
+======================================================================
+FAIL: test_a_published_own_patch_closure_says_published (__main__.OwnPatchStatesItsPublicationTruth.test_a_published_own_patch_closure_says_published)
+Publication evidence is read, not asserted: a real receipt flips it.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1866_publication_state.py", line 112, in test_a_published_own_patch_closure_says_published
+    self.assertIn("publication_state: published", _done_row(project))
+AssertionError: 'publication_state: published' not found in '- [x] T-7 [P1] Existing Work | verify: existing proof | owner: tester | claim_time: 2026-10-14T00:00:00Z | closure_mode: own_patch'
+
+======================================================================
+FAIL: test_an_unpublished_own_patch_closure_says_pending (__main__.OwnPatchStatesItsPublicationTruth.test_an_unpublished_own_patch_closure_says_pending)
+The F-03 shape: the delta is real, the release does not exist yet.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1866_publication_state.py", line 98, in test_an_unpublished_own_patch_closure_says_pending
+    self.assertIn("publication_state: pending", row)
+AssertionError: 'publication_state: pending' not found in '- [x] T-7 [P1] Existing Work | verify: existing proof | owner: tester | claim_time: 2026-10-14T00:00:00Z | closure_mode: own_patch'
+
+======================================================================
+FAIL: test_the_pending_state_names_its_own_publish_route (__main__.OwnPatchStatesItsPublicationTruth.test_the_pending_state_names_its_own_publish_route)
+A state with no route is a dead end; the route is the next canonical act.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1866_publication_state.py", line 120, in test_the_pending_state_names_its_own_publish_route
+    self.assertIn("publication_state pending", log)
+AssertionError: 'publication_state pending' not found in '- 24.08.26 00:00 [E-001] [agent: tester] RUN: fixture -> start\n- 24.08.26 00:02 [E-002] [T-7] [agent: tester] RUN: build -> src/app.ts and tests/app.test.ts changed\n- 24.08.26 00:03 [E-003] [T-7] [agent: tester] RUN: transition to VERIFY\n- 24.08.26 00:04 [E-004] [T-7] [agent: tester] RUN: verify -> PASS [target: T-7] conf: high -- hermetic suite green\n- 24.08.26 00:05 [E-005] [T-7] [agent: tester] RUN: transition to SHIP\n- 23.10.26 18:22 [E-6] [parent: E-5] [T-7] [agent: tester] [op: finish-22e247542bd5405481218b3db1e6ff31] DEC: ticket finished via SAIOPS -- completion (from SHIP)\n'
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.517s
+
+FAILED (failures=3)

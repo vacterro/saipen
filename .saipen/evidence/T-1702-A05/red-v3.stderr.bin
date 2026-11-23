@@ -1,0 +1,163 @@
+....FFFF.FFFFFFFFF.FFF
+======================================================================
+FAIL: test_duplicate_event_routes_are_terminal_and_write_nothing (__main__.PublicLedgerDiagnosticTests.test_duplicate_event_routes_are_terminal_and_write_nothing) (command=('status',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 220, in assert_terminal_parity
+    self.assertEqual(value["code"], "HISTORY_LEDGER_CORRUPT", value)
+AssertionError: 'VALIDATION_FAILED' != 'HISTORY_LEDGER_CORRUPT'
+- VALIDATION_FAILED
++ HISTORY_LEDGER_CORRUPT
+ : {'ok': False, 'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'detail': 'checkpoint invalid: LOG: duplicate E-ID(s) in complete history: E-1; LOG: E-1 is not greater than preceding E-1 (out of order)', 'board_errors': [], 'recovery_pending': False, 'recovery_conflict': False, 'conflict_ops': [], 'pending_ops': [], 'telegrams': {'state': 'OK', 'unread': 0, 'on_current_work': 0, 'complete': True, 'read_command': 'saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-regression-gate-r1wp_786\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat tester', 'detail': 'counts only; nothing was opened and nothing here is an instruction'}}
+
+======================================================================
+FAIL: test_duplicate_event_routes_are_terminal_and_write_nothing (__main__.PublicLedgerDiagnosticTests.test_duplicate_event_routes_are_terminal_and_write_nothing) (command=('next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 220, in assert_terminal_parity
+    self.assertEqual(value["code"], "HISTORY_LEDGER_CORRUPT", value)
+AssertionError: 'VALIDATION_FAILED' != 'HISTORY_LEDGER_CORRUPT'
+- VALIDATION_FAILED
++ HISTORY_LEDGER_CORRUPT
+ : {'ok': False, 'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'detail': 'checkpoint invalid: LOG: duplicate E-ID(s) in complete history: E-1; LOG: E-1 is not greater than preceding E-1 (out of order)', 'recovery_pending': False, 'recovery_conflict': False, 'conflict_ops': [], 'pending_ops': [], 'parked_work': None}
+
+======================================================================
+FAIL: test_duplicate_event_routes_are_terminal_and_write_nothing (__main__.PublicLedgerDiagnosticTests.test_duplicate_event_routes_are_terminal_and_write_nothing) (command=('explain-next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 218, in assert_terminal_parity
+    self.assertEqual(rc, 1, value)
+AssertionError: 0 != 1 : {'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'next_action': 'saipen recover', 'recovery_pending': False, 'terminal': False}
+
+======================================================================
+FAIL: test_healthy_route_requires_no_additional_strict_history_read (__main__.PublicLedgerDiagnosticTests.test_healthy_route_requires_no_additional_strict_history_read)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 308, in test_healthy_route_requires_no_additional_strict_history_read
+    self.assertIsNotNone(diagnostic, "shared recovery diagnostic is absent")
+AssertionError: unexpectedly None : shared recovery diagnostic is absent
+
+======================================================================
+FAIL: test_missing_parent_routes_are_terminal_and_write_nothing (__main__.PublicLedgerDiagnosticTests.test_missing_parent_routes_are_terminal_and_write_nothing) (command=('status',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 220, in assert_terminal_parity
+    self.assertEqual(value["code"], "HISTORY_LEDGER_CORRUPT", value)
+AssertionError: 'VALIDATION_FAILED' != 'HISTORY_LEDGER_CORRUPT'
+- VALIDATION_FAILED
++ HISTORY_LEDGER_CORRUPT
+ : {'ok': False, 'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'detail': 'checkpoint invalid: LOG: E-4 parent E-3133 does not exist in the ledger; STATE proposed last_event 3 != LOG tail 4', 'board_errors': [], 'recovery_pending': False, 'recovery_conflict': False, 'conflict_ops': [], 'pending_ops': [], 'telegrams': {'state': 'OK', 'unread': 0, 'on_current_work': 0, 'complete': True, 'read_command': 'saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-regression-gate-1wp_zubz\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat tester', 'detail': 'counts only; nothing was opened and nothing here is an instruction'}}
+
+======================================================================
+FAIL: test_missing_parent_routes_are_terminal_and_write_nothing (__main__.PublicLedgerDiagnosticTests.test_missing_parent_routes_are_terminal_and_write_nothing) (command=('next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 220, in assert_terminal_parity
+    self.assertEqual(value["code"], "HISTORY_LEDGER_CORRUPT", value)
+AssertionError: 'VALIDATION_FAILED' != 'HISTORY_LEDGER_CORRUPT'
+- VALIDATION_FAILED
++ HISTORY_LEDGER_CORRUPT
+ : {'ok': False, 'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'detail': 'checkpoint invalid: LOG: E-4 parent E-3133 does not exist in the ledger; STATE proposed last_event 3 != LOG tail 4', 'recovery_pending': False, 'recovery_conflict': False, 'conflict_ops': [], 'pending_ops': [], 'parked_work': None}
+
+======================================================================
+FAIL: test_missing_parent_routes_are_terminal_and_write_nothing (__main__.PublicLedgerDiagnosticTests.test_missing_parent_routes_are_terminal_and_write_nothing) (command=('explain-next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 218, in assert_terminal_parity
+    self.assertEqual(rc, 1, value)
+AssertionError: 0 != 1 : {'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'next_action': 'saipen recover', 'recovery_pending': False, 'terminal': False}
+
+======================================================================
+FAIL: test_out_of_order_history_routes_are_terminal_and_write_nothing (__main__.PublicLedgerDiagnosticTests.test_out_of_order_history_routes_are_terminal_and_write_nothing) (command=('status',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 220, in assert_terminal_parity
+    self.assertEqual(value["code"], "HISTORY_LEDGER_CORRUPT", value)
+AssertionError: 'VALIDATION_FAILED' != 'HISTORY_LEDGER_CORRUPT'
+- VALIDATION_FAILED
++ HISTORY_LEDGER_CORRUPT
+ : {'ok': False, 'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'detail': 'checkpoint invalid: LOG: E-2 is not greater than preceding E-3 (out of order)', 'board_errors': [], 'recovery_pending': False, 'recovery_conflict': False, 'conflict_ops': [], 'pending_ops': [], 'telegrams': {'state': 'OK', 'unread': 0, 'on_current_work': 0, 'complete': True, 'read_command': 'saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-regression-gate-71efe72v\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat tester', 'detail': 'counts only; nothing was opened and nothing here is an instruction'}}
+
+======================================================================
+FAIL: test_out_of_order_history_routes_are_terminal_and_write_nothing (__main__.PublicLedgerDiagnosticTests.test_out_of_order_history_routes_are_terminal_and_write_nothing) (command=('next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 220, in assert_terminal_parity
+    self.assertEqual(value["code"], "HISTORY_LEDGER_CORRUPT", value)
+AssertionError: 'VALIDATION_FAILED' != 'HISTORY_LEDGER_CORRUPT'
+- VALIDATION_FAILED
++ HISTORY_LEDGER_CORRUPT
+ : {'ok': False, 'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'detail': 'checkpoint invalid: LOG: E-2 is not greater than preceding E-3 (out of order)', 'recovery_pending': False, 'recovery_conflict': False, 'conflict_ops': [], 'pending_ops': [], 'parked_work': None}
+
+======================================================================
+FAIL: test_out_of_order_history_routes_are_terminal_and_write_nothing (__main__.PublicLedgerDiagnosticTests.test_out_of_order_history_routes_are_terminal_and_write_nothing) (command=('explain-next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 218, in assert_terminal_parity
+    self.assertEqual(rc, 1, value)
+AssertionError: 0 != 1 : {'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'next_action': 'saipen recover', 'recovery_pending': False, 'terminal': False}
+
+======================================================================
+FAIL: test_proven_foreign_tail_keeps_the_same_executable_quarantine_route (__main__.PublicLedgerDiagnosticTests.test_proven_foreign_tail_keeps_the_same_executable_quarantine_route) (command=('status',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 298, in test_proven_foreign_tail_keeps_the_same_executable_quarantine_route
+    self.assertEqual(value["code"], "HISTORY_LEDGER_CORRUPT", value)
+AssertionError: 'VALIDATION_FAILED' != 'HISTORY_LEDGER_CORRUPT'
+- VALIDATION_FAILED
++ HISTORY_LEDGER_CORRUPT
+ : {'ok': False, 'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'detail': "checkpoint invalid: LOG: LOG.md:4: not a legal LOG event: '--help'; LOG: duplicate E-ID(s) in complete history: E-1301, E-1302; LOG: E-1301 is not greater than preceding E-1302 (out of order)", 'board_errors': [], 'recovery_pending': False, 'recovery_conflict': False, 'conflict_ops': [], 'pending_ops': [], 'telegrams': {'state': 'OK', 'unread': 0, 'on_current_work': 0, 'complete': True, 'read_command': 'saimail-local saipen brief --project-root V:\\_TEMP_\\a05-proven-quarantine-u9_jlc8t\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat test-agent', 'detail': 'counts only; nothing was opened and nothing here is an instruction'}}
+
+======================================================================
+FAIL: test_proven_foreign_tail_keeps_the_same_executable_quarantine_route (__main__.PublicLedgerDiagnosticTests.test_proven_foreign_tail_keeps_the_same_executable_quarantine_route) (command=('next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 298, in test_proven_foreign_tail_keeps_the_same_executable_quarantine_route
+    self.assertEqual(value["code"], "HISTORY_LEDGER_CORRUPT", value)
+AssertionError: 'VALIDATION_FAILED' != 'HISTORY_LEDGER_CORRUPT'
+- VALIDATION_FAILED
++ HISTORY_LEDGER_CORRUPT
+ : {'ok': False, 'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'detail': "checkpoint invalid: LOG: LOG.md:4: not a legal LOG event: '--help'; LOG: duplicate E-ID(s) in complete history: E-1301, E-1302; LOG: E-1301 is not greater than preceding E-1302 (out of order)", 'recovery_pending': False, 'recovery_conflict': False, 'conflict_ops': [], 'pending_ops': [], 'parked_work': None}
+
+======================================================================
+FAIL: test_proven_foreign_tail_keeps_the_same_executable_quarantine_route (__main__.PublicLedgerDiagnosticTests.test_proven_foreign_tail_keeps_the_same_executable_quarantine_route) (command=('explain-next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 297, in test_proven_foreign_tail_keeps_the_same_executable_quarantine_route
+    self.assertEqual(rc, 1, value)
+AssertionError: 0 != 1 : {'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'next_action': 'saipen recover', 'recovery_pending': False, 'terminal': False}
+
+======================================================================
+FAIL: test_unbacked_head_does_not_hide_the_precise_ledger_owner (__main__.PublicLedgerDiagnosticTests.test_unbacked_head_does_not_hide_the_precise_ledger_owner) (command=('status',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 220, in assert_terminal_parity
+    self.assertEqual(value["code"], "HISTORY_LEDGER_CORRUPT", value)
+AssertionError: 'VALIDATION_FAILED' != 'HISTORY_LEDGER_CORRUPT'
+- VALIDATION_FAILED
++ HISTORY_LEDGER_CORRUPT
+ : {'ok': False, 'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'detail': "checkpoint invalid: STATE proposed next_action 'SCOUT: next workable ticket' does not start with WAIT:/saipen /PHASE /RUN:/RESUME:; STATE proposed invalid phase transition: BUILD -> DONE (RFC § 1.6). The block-parked shape requires the latest phase-changing event through STATE.last_event to be the canonical active-block DEC for the exact ticket still in BOARD.BLOCKED; LOG: E-4 parent E-3133 does not exist in the ledger", 'board_errors': [], 'recovery_pending': False, 'recovery_conflict': False, 'conflict_ops': [], 'pending_ops': [], 'telegrams': {'state': 'OK', 'unread': 0, 'on_current_work': 0, 'complete': True, 'read_command': 'saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-regression-gate-6fej06ra\\project --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat tester', 'detail': 'counts only; nothing was opened and nothing here is an instruction'}}
+
+======================================================================
+FAIL: test_unbacked_head_does_not_hide_the_precise_ledger_owner (__main__.PublicLedgerDiagnosticTests.test_unbacked_head_does_not_hide_the_precise_ledger_owner) (command=('next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 220, in assert_terminal_parity
+    self.assertEqual(value["code"], "HISTORY_LEDGER_CORRUPT", value)
+AssertionError: 'VALIDATION_FAILED' != 'HISTORY_LEDGER_CORRUPT'
+- VALIDATION_FAILED
++ HISTORY_LEDGER_CORRUPT
+ : {'ok': False, 'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'detail': "checkpoint invalid: STATE proposed next_action 'SCOUT: next workable ticket' does not start with WAIT:/saipen /PHASE /RUN:/RESUME:; STATE proposed invalid phase transition: BUILD -> DONE (RFC § 1.6). The block-parked shape requires the latest phase-changing event through STATE.last_event to be the canonical active-block DEC for the exact ticket still in BOARD.BLOCKED; LOG: E-4 parent E-3133 does not exist in the ledger", 'recovery_pending': False, 'recovery_conflict': False, 'conflict_ops': [], 'pending_ops': [], 'parked_work': None}
+
+======================================================================
+FAIL: test_unbacked_head_does_not_hide_the_precise_ledger_owner (__main__.PublicLedgerDiagnosticTests.test_unbacked_head_does_not_hide_the_precise_ledger_owner) (command=('explain-next',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-a05-candidate-do218qeg\project\tools\test_reconcile_history_ledger_blocked.py", line 218, in assert_terminal_parity
+    self.assertEqual(rc, 1, value)
+AssertionError: 0 != 1 : {'code': 'VALIDATION_FAILED', 'action': 'saipen recover', 'reason': 'checkpoint-invalid', 'next_action': 'saipen recover', 'recovery_pending': False, 'terminal': False}
+
+----------------------------------------------------------------------
+Ran 12 tests in 17.590s
+
+FAILED (failures=16)

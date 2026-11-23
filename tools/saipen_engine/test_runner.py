@@ -405,7 +405,22 @@ SHELL_BOOKKEEPING_ENV = frozenset({"_"})
 #: `python tools/saipen.py transition SHIP T-1862` accepted it on identical
 #: bytes. A verification gate that depends on which launcher asked is a gate
 #: on the wrong subject.
+# T-1865's narrow launcher list stays EXACTLY SHELL (pinned by
+# test_t1865_launcher_identity.NarrowListTests): a grandchild may consult
+# $SHELL, so the name stays in the child but not in the digest.
 LAUNCHER_ONLY_ENV = frozenset({"SHELL"})
+
+#: T-2165: per-invocation launcher and shell BOOKKEEPING values describe HOW
+#: this process was started, never what the family verifies. They change on
+#: every agent turn even on an unchanged host, so a PASS from one turn could
+#: not be cited by the next. Separate from LAUNCHER_ONLY_ENV to preserve that
+#: contract: these names are absent from the digest, not from the child.
+IDENTITY_PER_INVOCATION_ENV = frozenset({
+    "CODEBUFF_LAUNCHER_PID",
+    "SHLVL",
+    "OLDPWD",
+    "_",
+})
 
 
 def family_environment(family: TestFamily) -> dict:
@@ -414,7 +429,8 @@ def family_environment(family: TestFamily) -> dict:
 
     env = unbound_environment(os.environ.copy(), SAIPEN_AGENT=None)
     for key in ("SAIMAIL_WORKSPACE", "ZAICODE_HOME", "CLAUDE_CONFIG_DIR", "PYTHONPATH",
-                *VERIFIER_DIAGNOSTIC_ENV, *SHELL_BOOKKEEPING_ENV):
+                *VERIFIER_DIAGNOSTIC_ENV, *SHELL_BOOKKEEPING_ENV,
+                *IDENTITY_PER_INVOCATION_ENV):
         env.pop(key, None)
     py_dirs = [str(Path(sys.executable).parent)]
     if family.command:
@@ -442,7 +458,8 @@ def identity_environment(env: dict) -> dict:
     (T-1865); every other name still decides compatibility, so a real
     environment change keeps invalidating evidence (T-1856's red control).
     """
-    return {key: value for key, value in env.items() if key not in LAUNCHER_ONLY_ENV}
+    excluded = LAUNCHER_ONLY_ENV | IDENTITY_PER_INVOCATION_ENV
+    return {key: value for key, value in env.items() if key not in excluded}
 
 
 def _run_family(

@@ -1,0 +1,74 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+    "validate",
+    "--project-root",
+    "V:\\_TEMP_\\saipen-orchestration-u7pmezxe\\project",
+    "--json"
+  ],
+  "returncode": 0,
+  "fixture": "OrchestrationFixture.make_project(active=False)",
+  "outside_worktree": true,
+  "result": {
+    "ok": true,
+    "code": "VALID",
+    "structural_gate": "pass",
+    "validator": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "launched": true,
+      "exit_code": 0,
+      "summary": "EMP_\\saipen-orchestration-u7pmezxe\\project (explicit)\nProject lineage: lineage-8cd124b05cd0407188bf67b2d7cc5286\nPASS: state.schema.json and the engine STATE contract constants agree\nPASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-8cd124b05cd0407188bf67b2d7cc5286)\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [no-conformance-record]: no LOG line records a conformance run in \u00a7 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so \u00a7 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up\nWARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- RFC \u00a7 1.10 must state that answering a row from recall is the same failure as inventing a command, not a lesser one\nWARN [cross-doc-drift]: ... and 10 more like the above\nValidation complete. Agent is conformant. (13 warning(s))"
+    },
+    "conformance_status": {
+      "status": "CURRENT_PASS",
+      "gate": "core",
+      "reason": "",
+      "receipt": {
+        "blocking_findings": {
+          "problem_count": 0,
+          "problems": [],
+          "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+          "ruleset_version": 1,
+          "status": "complete",
+          "warning_count": 13
+        },
+        "board_hash": "71e8a5a3b2153d61",
+        "canonical_next_command": null,
+        "content_hash": "7d9d0040b57a9452",
+        "exit_code": 0,
+        "external_actions": [],
+        "gate": "core",
+        "install_fingerprint": "install-v1:be8b8aba99d53b6bf7944bf6b27d8f23b4a87832ab21c3538b32024579fe1b77",
+        "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+        "kind": "conformance_receipt",
+        "log_hash": "6bd2851624635b04",
+        "project_identity": "v:\\_temp_\\saipen-orchestration-u7pmezxe\\project",
+        "receipt_id": "receipt-009b7920c8d8",
+        "remediation_commands": [],
+        "schema_version": 2,
+        "source_head": "no-git",
+        "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4",
+        "state_hash": "b57bdfc4ba0ece69",
+        "timestamp_utc": "2026-10-03T19:42:28.519179Z",
+        "validator_protocol_version": "1",
+        "verdict": "PASS"
+      },
+      "validator": {
+        "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "validator_protocol_version": "1",
+        "project_protocol_version": "7",
+        "gate": "core",
+        "source_head": "no-git",
+        "source_tree_fingerprint": "no-git-tree-v1:1bad7c4bb8902d56305eb7b9d8ebd77f24ad293fa2a5de7deab5e7f0a67fdfd4"
+      }
+    },
+    "install_identity": {
+      "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "install_fingerprint": "install-v1:be8b8aba99d53b6bf7944bf6b27d8f23b4a87832ab21c3538b32024579fe1b77",
+      "mismatch": null
+    },
+    "detail": "canonical STATE/BOARD/LOG pass the structural gate and the canonical validator minted a CURRENT_PASS conformance receipt"
+  }
+}

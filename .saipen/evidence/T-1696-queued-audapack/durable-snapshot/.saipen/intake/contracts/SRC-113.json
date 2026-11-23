@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-113:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Recover the T-25 launcher windowless-owner state so the managed browser lane is claimable again"
+    },
+    "SRC-113:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Debug the T-261 live A3 lineage on exactly one FastPrompter worker"
+    },
+    "SRC-113:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "the lineage defect is named from live evidence, not inferred"
+    }
+  },
+  "derived_at": "2026-10-04T14:55:40Z",
+  "derived_from": "SRC-113",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "a577473dd48b595ca6e6e47ee92c0c2517847905ef54e893665fdceb979a6a7d"
+}

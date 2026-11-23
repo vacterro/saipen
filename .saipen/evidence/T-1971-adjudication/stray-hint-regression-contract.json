@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "tools.test_t1971_stray_hint_authorship", "-v"],
+  "format": "unittest",
+  "context": ["tools", "saipen"],
+  "oracle_files": ["tools/test_t1971_stray_hint_authorship.py"],
+  "subject_files": ["tools/saipen_engine/host_hooks.py"],
+  "before": {"tools/saipen_engine/host_hooks.py": ".saipen/evidence/T-1971-adjudication/prefix-host-hooks.py"},
+  "timeout": 120
+}

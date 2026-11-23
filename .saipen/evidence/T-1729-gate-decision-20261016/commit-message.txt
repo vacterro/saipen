@@ -1,0 +1,6 @@
+fix(authority): preserve scoped gate decisions
+
+Require the original operator witness for each scoped decision. Preserve
+independent WAIT and budget stops when publishing its state transition.
+
+Refs T-1729

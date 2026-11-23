@@ -1,0 +1,10 @@
+{
+  "verifier": "b6c189c9ce4dac25",
+  "pre_subject": "29cf00ce85175440",
+  "post_subject": "3f2a94b05a78a013",
+  "pre_rc": 1,
+  "post_rc": 0,
+  "control_rc": 0,
+  "held": true,
+  "command": "python -B -m unittest test_t1633_process_tree"
+}

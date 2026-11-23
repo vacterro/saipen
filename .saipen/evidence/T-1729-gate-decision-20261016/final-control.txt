@@ -1,0 +1,6 @@
+STATUS: DONE
+RESULT: PARTIAL -- eesmärk blokeeritud; T-1729 parandus kontrollitud, 20/21 nõuet tõendatud.
+BLOCKER: AUDIT_INBOX_UNWORKABLE -- 95 blokeeritud; R019 vajab sõltumatut operaatoritõendit.
+NEXT EXACT ACTION: NONE
+VALIDATION: CURRENT_PASS | full core 6756 | red 0 | new_red 0
+DETAILS: .saipen/evidence/T-1729.md

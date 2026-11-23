@@ -1,0 +1,22 @@
+utc: 2026-10-08T01:45:55Z
+--- before: saipen host entry --host freebuff --json
+{"code": "DIRECT_LAUNCHER", "transport": "DIRECT_LAUNCHER", "command_form": "\"V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/bin/saipen\"", "degraded": ["no_canonical_path_launcher"]}
+['missing_path_launcher', 'direct_launcher_available']
+--- before: cmd.exe where saipen
+INFO: Could not find files for the given pattern(s).
+--- installed: byte-identical copies of bin/saipen and bin/saipen.cmd in C:\Users\vac34\bin (already on the user PATH; holds the operator's other command shims)
+--- after: cmd.exe where saipen
+C:\Users\vac34\bin\saipen
+C:\Users\vac34\bin\saipen.cmd
+--- after: bash which saipen
+/c/Users/vac34/bin/saipen
+--- after: saipen host entry --host freebuff --json (run through PATH from another project)
+{"code": "PATH_LAUNCHER", "transport": "PATH_LAUNCHER", "command_form": "\"C:/Users/vac34/bin/saipen\"", "degraded": []}
+[]
+--- with the PATH launcher installed: python -B -m unittest test_host_bootstrap test_instruction_loader_contracts test_t1501_entry_resolver test_t1515_posix_shell_entry test_t1553_mid_session_activation test_t1645_zero_hunt 
+...........................................................................................................................................
+----------------------------------------------------------------------
+Ran 139 tests in 164.725s
+
+OK
+--- exit: 0 ---

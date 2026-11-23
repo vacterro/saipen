@@ -1,0 +1,12 @@
+{
+  "original_allocation": "V:\\_TEMP_\\saipen-evidence-t1603-full-scenarios-jo3mhdg_",
+  "new_allocation": "V:\\_TEMP_\\saipen-evidence-completed-scenario-cleanup-opr_zsc6",
+  "registered_destination": "V:\\_TEMP_\\saipen-evidence-completed-scenario-cleanup-opr_zsc6\\old-allocation",
+  "proof_sha256": {
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\scenario-oracles\\full-current\\binding.json": "e072a8fc29b4a5a3416c16774e01c780a7fc5f7a13efb6b8556da6c1da9ea669",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\scenario-oracles\\full-current\\result.json": "523e404985fb05ea2396148b9a99175c5d5163e094ea003cd33216773537e96c",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\scenario-oracles\\full-current\\verify-scenarios.txt": "85b695fddcdf9b87ceef4ed3d5453b8793ef853f09f08e229c8e9fa954fb3a31"
+  },
+  "native_gate_rerun": false,
+  "mechanism": "move proven terminal allocation into fresh owned EvidenceRun; finalize with repaired producer"
+}

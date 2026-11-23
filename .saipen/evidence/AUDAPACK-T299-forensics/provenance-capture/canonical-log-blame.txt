@@ -1,0 +1,52 @@
+c498723c18f1ee0c3dc6d6dc843ee9044c986ce7 1 1 1
+author VAC34
+author-mail <vac34@example.com>
+author-time 1787784840
+author-tz +0300
+committer VAC34
+committer-mail <vac34@example.com>
+committer-time 1787784840
+committer-tz +0300
+summary feat(release): v0.1.0 AUDAPACK release
+boundary
+filename .saipen/LOG.md
+	# Log
+6c6d841df24e5c5d91870def931af99f0af4c81f 2 2 1
+author VAC34
+author-mail <vac34@example.com>
+author-time 1791540482
+author-tz +0300
+committer VAC34
+committer-mail <vac34@example.com>
+committer-time 1791540482
+committer-tz +0300
+summary fix(widget): P1-A/P1-B trust-boundary hardening in 0.1.07
+previous d66d9f63ef2fee4a5a5701136bf26169c7511d8c .saipen/LOG.md
+filename .saipen/LOG.md
+	- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no longer writes canonical store (setVerifiedProjectArchive removed from manualArchiveRecordSent; receipt calls only recordSendObservation + bounded background refreshProjectArchiveMetadata); P1-B failed attachment-only Send + manual tile removal + delayed history no longer fabricates accepted Send (noteComposerAttachmentRemoved + capture-phase click/keydown listeners + tile-count check in retireStaleManualSendIntent for React remount). RED tests C1-C10 (P1-A) and D1-D11 (P1-B) proven RED pre-fix, GREEN after. Full widget suite 772/772 PASS. Targeted gates: w6-006 85/85, w6-001 50/50, w3-002 14/14, w7-011 7/7, test_bridge_project_archive.py 30/30. Release ledger 0.1.07 sha 5efa3a49fee7bdef83f63ecfa3324e2746eb12b874baad4e1bba03edd03a09fa. Evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md
+db396923f9f28ccc27f90b90e8d8551a0e87d9da 2 3 2
+author VAC34
+author-mail <vac34@example.com>
+author-time 1791277144
+author-tz +0300
+committer VAC34
+committer-mail <vac34@example.com>
+committer-time 1791277144
+committer-tz +0300
+summary chore(recovery): capture verified AUDAPACK source of truth
+previous a37250f700ec4b93c81d36ec563675bab1c1d9d2 .saipen/LOG.md
+filename .saipen/LOG.md
+	- 27.09.26 16:06 [E-2416] [parent: E-2415] [T-248] [agent: buffy] [op: userreq-4bb328a9793a4d68bdf75f88ac2ab2a9] DEC: user request SRC-095 projected as T-248 (user_explicit)
+db396923f9f28ccc27f90b90e8d8551a0e87d9da 3 4
+author VAC34
+author-mail <vac34@example.com>
+author-time 1791277144
+author-tz +0300
+committer VAC34
+committer-mail <vac34@example.com>
+committer-time 1791277144
+committer-tz +0300
+summary chore(recovery): capture verified AUDAPACK source of truth
+previous a37250f700ec4b93c81d36ec563675bab1c1d9d2 .saipen/LOG.md
+filename .saipen/LOG.md
+	- 27.09.26 16:06 [E-2417] [parent: E-2416] [agent: buffy] [op: goal-53a528a520c04641bec73db3b08076d4] DEC: goal pivot -- T-248 (SRC-095): Fix live A3 pre-start regression: 6 runs BLOCKED PRE-START, no ZIP attachment, no START sent

@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "scope": "T-1721 only; inherited foreign deltas preserved",
+  "graph": "Tier 2 requested; index_status and coverage unavailable: Transport closed. Exact source fallback used. No graph completeness claim.",
+  "inputs": {
+    "tools/saipen_engine/acceptance_contract.py": "e22d7e5e584a38cdfe2e90fa0b8553eac6da19d3d4007e83a3e9f5753e40e57f",
+    "tools/saipen_engine/operations.py": "8c529c86d91b8a9a742dd5690177281857f3830443ff160dee38eab083b02139",
+    "tools/saipen.py": "7cfcca42a2fe532c1f96b9a287dc1a8675ee2dc082fb6116c34cfedfdb15abfb",
+    "tools/test_t1721_acceptance_compaction.py": "2d8cc50118e3cbaaaaf83f238514209cd30dd454023a754e87d609b2d798af53"
+  },
+  "review_evidence_status": "source reviewed; independent REVIEW-phase run and complete native family remain due"
+}

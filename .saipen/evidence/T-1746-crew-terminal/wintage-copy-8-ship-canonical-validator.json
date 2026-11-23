@@ -1,0 +1,24 @@
+{
+  "planned": true,
+  "op_id": "release-9f18e1f77e7049979a6cc1afc110d9bd",
+  "mode": "no-publish",
+  "version": "",
+  "tag": "",
+  "ticket_id": "",
+  "crew_epoch": "converge_intent-967059ce454a40fbb0a13bd4e3835ee8",
+  "scope_paths": [
+    ".gitignore",
+    "FINAL_REPORT-T-938.md",
+    "tests/Run-Tests.ps1",
+    "tools/bench-idle-cpu.js",
+    "tools/test-shadow-registry-lifecycle.js",
+    "tools/test-stylesheet-census.js",
+    "wintage.user.js"
+  ],
+  "result": {
+    "ok": false,
+    "code": "RELEASE_FAILED",
+    "stage": "NO_PUBLISH",
+    "detail": "no-publish local validation failed: FAIL: cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['str']. Both orphans removed alongside this check arrived that way, on a `git add -A` in a commit about something else, and neither was referenced by any document or tool -- so no other check here could ever see them. A deliberate new root file is a one-line addition to ROOT_ALLOWED in tools/validate.py; a scratch file belongs in .gitignore, which this check honours"
+  }
+}

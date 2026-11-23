@@ -1,0 +1,24 @@
+{
+  "subject": "preserved 39-case candidate, with the final expanded oracle",
+  "verifier": "2a13fba70e8fa5a133b6384778a4067cd5f10dd8b85b901610e6f734d6bec501",
+  "oracle_files": {
+    "tools/test_t1711_regression_execution.py": "5641369e5e2a8a4be73fe401091a43d35dddfae86ec811afdb18309c8aabd6ef",
+    "tools/test_regression_gate.py": "78f8c8161c70238df53891812709f9e1994011831a326791d662ba1aae46d5c1",
+    "tools/test_fixture_support.py": "10831ae72daf5a4c80fd54a8f337228c682adfe70b95f9a08f89fef865f9ce36",
+    "tools/test_hermetic_env.py": "b39d8c6e04e15368d7c1753147c596eb521a3af1659da15590928e4b38dfc717"
+  },
+  "candidate_paths": {
+    "tools/saipen_engine/regression_execution.py": {
+      "live_before_sha256": "c83509b46e0f403edbbc58775ce5060ac7afe7888d8947e2909591539e1f45fe",
+      "scratch_sha256": "e08177cb2e61d37347015e93cbd20ec2cb8415262b4f24de6d674046b80e29d4"
+    },
+    "tools/test_t1711_regression_execution.py": {
+      "live_before_sha256": "bcdfa50d84f80f16f16fd1cf2f85a7366a1679064de4d299c5e599a024c940da",
+      "scratch_sha256": "5641369e5e2a8a4be73fe401091a43d35dddfae86ec811afdb18309c8aabd6ef"
+    }
+  },
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "................F.................FF......\n======================================================================\nFAIL: test_changed_input_contract_cannot_spend_the_measured_pair (__main__.ExecutionControls.test_changed_input_contract_cannot_spend_the_measured_pair)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\_TEMP_\\saipen-t1711-prior-red-vt4s7udv\\project\\tools\\test_t1711_regression_execution.py\", line 301, in test_changed_input_contract_cannot_spend_the_measured_pair\n    self.assertFalse(self.to_review().ok)\nAssertionError: True is not false\n\n======================================================================\nFAIL: test_preserved_prior_input_changes_invalidate_execution (__main__.ExecutionControls.test_preserved_prior_input_changes_invalidate_execution)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\_TEMP_\\saipen-t1711-prior-red-vt4s7udv\\project\\tools\\test_t1711_regression_execution.py\", line 289, in test_preserved_prior_input_changes_invalidate_execution\n    self.assertFalse(self.to_review().ok)\nAssertionError: True is not false\n\n======================================================================\nFAIL: test_prior_material_changed_before_commit_refuses_without_canonical_writes (__main__.ExecutionControls.test_prior_material_changed_before_commit_refuses_without_canonical_writes)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\_TEMP_\\saipen-t1711-prior-red-vt4s7udv\\project\\tools\\test_t1711_regression_execution.py\", line 319, in test_prior_material_changed_before_commit_refuses_without_canonical_writes\n    self.assert_refused_without_canonical_writes()\n  File \"V:\\_TEMP_\\saipen-t1711-prior-red-vt4s7udv\\project\\tools\\test_t1711_regression_execution.py\", line 147, in assert_refused_without_canonical_writes\n    self.assertFalse(result.ok, result.to_dict())\nAssertionError: True is not false : {'ok': True, 'code': 'CHECKPOINTED', 'op_id': 'regression-execution-3aa2f7c8c8a5435c808850517afe92b2', 'changed_files': ['.saipen/evidence/regression/regression-execution-3aa2f7c8c8a5435c808850517afe92b2.json', '.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'], 'recovery_required': False, 'record': '.saipen/evidence/regression/regression-execution-3aa2f7c8c8a5435c808850517afe92b2.json', 'evidence_class': 'executed', 'event_id': 'E-5'}\n\n----------------------------------------------------------------------\nRan 42 tests in 49.227s\n\nFAILED (failures=3)\n",
+  "scope": "disposable clone; live production and canonical state unchanged"
+}

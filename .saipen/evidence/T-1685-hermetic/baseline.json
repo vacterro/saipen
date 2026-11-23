@@ -1,0 +1,8 @@
+{
+  "tools/test_hermetic_env.py": "7065baddc7f5a9e827ba6969a105d55744686c5a2dac92e3252802719562366c",
+  "tools/saipen_engine/test_runner.py": "7a26ea50f99e5609648dd64e8da52dd9e3e397d9e5585b2b49c4540eaba62625",
+  "tools/test_t1649_refusal_step.py": "3896c6d5053c475ef846859692c14c1683036f19ab79db9f398652675920ace5",
+  "tools/test_t1635_claude_profiles.py": "e34ed9b5225c4271460d0e1fb57b90620e015ba9e28270bbec3020c99004f28c",
+  "tools/test_host_authority_broker.py": "b0134e7e1e5b3406396e05cf72ce16df6088c494762db52aa3b267fc0d1c8bde",
+  "tools/test_t1685_profile_carrier.py": null
+}

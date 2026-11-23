@@ -1,0 +1,27 @@
+{
+  "ok": false,
+  "code": "RECONCILE_REAUTH_REQUIRED",
+  "op_id": null,
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "bounded run requires a fresh operator cc; WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
+  "next_action": "WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
+  "operator_action_due": true,
+  "dry_run": false,
+  "reconciliation": {
+    "ok": true,
+    "code": "CLEAN",
+    "changed": [],
+    "strict_state_error": null,
+    "dry_run": false
+  },
+  "detail": "bounded run requires a fresh operator cc; WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat saipen-cli",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  }
+}

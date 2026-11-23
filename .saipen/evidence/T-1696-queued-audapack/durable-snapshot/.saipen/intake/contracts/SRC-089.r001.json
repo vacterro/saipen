@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-089:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PACK FAILED (_ZAICODE): [FAILED_INVENTORY] [SOURCE_INVENTORY_INCONSISTENT] source traversal incomplete; the frozen inventory cannot be trusted -- fix packing"
+    }
+  },
+  "derived_at": "2026-09-24T08:11:27Z",
+  "derived_from": "SRC-089",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "5009b024b9f505ee99a2e2e54139128689b8b7da6068e7e8c971fd4a5302e667"
+}

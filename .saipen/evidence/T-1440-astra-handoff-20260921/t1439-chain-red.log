@@ -1,0 +1,14 @@
+test_failure_after_completed_chain_keeps_its_refusal_and_diagnostic (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_failure_after_completed_chain_keeps_its_refusal_and_diagnostic) ... FAIL
+
+======================================================================
+FAIL: test_failure_after_completed_chain_keeps_its_refusal_and_diagnostic (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_failure_after_completed_chain_keeps_its_refusal_and_diagnostic)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_conformance_repair_boundary.py", line 65, in test_failure_after_completed_chain_keeps_its_refusal_and_diagnostic
+    self.assertEqual(rc, 1)
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+Ran 1 test in 2.254s
+
+FAILED (failures=1)

@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-086:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rewrite or merge historical source receipts."
+    },
+    "SRC-086:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent a dependency on T-236 merely because this feature can reuse code implemented during T-236."
+    },
+    "SRC-086:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make the operator complete T-236 browser acceptance before beginning this feature."
+    },
+    "SRC-086:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "The operator must not need to:"
+    }
+  },
+  "derived_at": "2026-09-23T03:58:49Z",
+  "derived_from": "SRC-086",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "002b591c238663c159091f82fcad252951bcbae8c3c1398b23d0aed8dfdee3db"
+}

@@ -1,0 +1,12 @@
+test_another_open_work_prevents_source_closure (test_t1752_audit_auto_close.AuditSourceAutoClosureTests.test_another_open_work_prevents_source_closure) ... ok
+test_changed_generation_cannot_be_deleted_after_source_closure (test_t1752_audit_auto_close.AuditSourceAutoClosureTests.test_changed_generation_cannot_be_deleted_after_source_closure) ... ok
+test_clean_retains_the_pending_work_and_releases_it_after_consumption (test_t1752_audit_auto_close.AuditSourceAutoClosureTests.test_clean_retains_the_pending_work_and_releases_it_after_consumption) ... ok
+test_continue_finish_uses_the_same_automatic_source_closure (test_t1752_audit_auto_close.AuditSourceAutoClosureTests.test_continue_finish_uses_the_same_automatic_source_closure) ... ok
+test_corrupt_binding_does_not_reopen_a_source_or_allow_pruning (test_t1752_audit_auto_close.AuditSourceAutoClosureTests.test_corrupt_binding_does_not_reopen_a_source_or_allow_pruning) ... ok
+test_ticket_done_closes_before_ingest_consumes_and_before_a_new_capture (test_t1752_audit_auto_close.AuditSourceAutoClosureTests.test_ticket_done_closes_before_ingest_consumes_and_before_a_new_capture) ... ok
+test_unresolved_coverage_keeps_the_source_and_layer (test_t1752_audit_auto_close.AuditSourceAutoClosureTests.test_unresolved_coverage_keeps_the_source_and_layer) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 18.869s
+
+OK

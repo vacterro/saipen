@@ -1,0 +1,16 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "test_t1316_recovery_already_applied",
+    "test_audit_2026_08_28_all3.JournalAuditTests",
+    "test_journal_nested_targets",
+    "test_recovery_noop_targets"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "returncode": 0,
+  "elapsed_seconds": 8.562
+}

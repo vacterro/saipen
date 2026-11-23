@@ -1,0 +1,683 @@
+{
+  "commits": {
+    "dbbfad946": "dbbfad94688515d604b54e2c97dc92aa5fa7eab1\n2026-08-27T23:33:14+03:00\nVAC34\nvac34@example.com\nship v7.231.9\n\nT-1171: SRC-003 Audit All-3 repair wave. 28/28 audit clauses VERIFIED.\nWave 1 (CORE-001..004): journaled stop/ss, claim-safe stop_checkpoint,\nnon-recursive tt orchestrator, atomic ccc entry marker.\nWave 2 (W2-001..017): journal/liveness/producer/lock no-follow ownership,\ncrash-recoverable source close/archive/purge, Git index.lock ownership,\ncanonical convergence chronology, one coherent ProjectSnapshot, structured\nattribution claims, portable lineage binding, non-fatal settlement, SubSaipen\ncorruption contract, source-identity APPLY CAS, truthful cleanup_pending.\nWave 3 (PERF-001..007): call-scoped intake validation, bounded duplicate\nlookup, disposable scenario fixtures, bounded semantic receipt decode,\npurpose-specific LOG history retention, process-tree cancellation, temp cleanup.\n\nruff clean; unittest 350/350 PASS; perf_wave 41/41 PASS; validate PASS.\n\n",
+    "8f91d779": "8f91d779cc4d65f6e1db952eee58db7fb3b14a78\n2026-09-15T13:36:08+03:00\nVAC34\nvac34@example.com\nchore(audit-manifest): track cross-repo snapshot contract under T-1328\n\ntools/saipen_engine/audit_manifest.py and tools/test_audit_manifest.py were implemented and enrolled in the runtime manifest without an owning ticket, so they were untracked and every clone shipped an incomplete runtime. Bind them to T-1328 and commit the exact files.\n\n",
+    "b2343541": "b2343541e3ebe939bc583408a173c54aeb57939b\n2026-09-15T15:25:20+03:00\nVAC34\nvac34@example.com\nfix(recovery): legacy lifecycle compatibility + reachable allocation-identity stop\n\nT-1334 (P0) Approved lifecycle recovery misclassified legacy records under\nnewer invariants. A DONE record was judged by the closure contract\n(closure_mode, claim_time, the VERIFY-boundary + conf:high grammar) even when\nit was created before those invariants existed, so a missing FUTURE field read\nas proof the completion was fabricated. Production reproducer: the AUDAPACK\nFleet plan proposed 66 destructive claim-clear atoms against terminal records\nand 15 DONE -> TODO reopenings of real completions.\n\n  - saipen_engine/log.py: bulk_legacy_completion_evidence, the pre-closure\n    execution grammar; legacy_done_attestation_text.\n  - saipen_engine/reconcile.py: _closure_contract_frontier (lowest BOARD id\n    carrying closure_mode), _mechanized_ticket_ids ([op: ...] fallback),\n    _is_legacy_generation (undecidable resolves to LEGACY). No wall clock.\n    The half-claim repair is scoped to CLAIMABLE Work, so terminal owner\n    attribution survives. A legacy DONE proven under its own generation keeps\n    DONE with no atom; an ambiguous one reports OPERATOR_DECISION_REQUIRED.\n  - saipen.py: recover --attest-legacy-done writes one NOW-dated DEC and\n    fabricates no closure_mode.\n\nT-1335 (P1) The validator layout-parity oracle was environment-sensitive: it\ncompared a source capture from the live checkout against a flattened temp\nhome, so a packager's _AUDAPACK_MANIFEST.json at the home root produced a\nsource-only root-file-set finding. Both homes are now built by the test from\nthe declared manifest surface; the closed-set check stays armed, not silenced.\n\nT-1336 (P0) The allocation-identity stop was unreachable outside TODO/DOING.\nvalidate.py arms CORE-003 over every section; _board_adoption_repairs scanned\ntwo. Nine parked records here produced a red validator, a CLEAN recover, an\n--adopt-legacy that could not name them, and a pre-commit gate that refused\nevery commit -- needs_local_mutation true with all local repairs refused, the\ncombination T-1324 closed as forbidden. Downstream it held the source dirty\nand left all six installed agent homes stale. The repair now scans exactly the\nrecord set the validator judges.\n\nRegressions: test_legacy_lifecycle_compat (25), test_adoption_section_parity\n(7), test_validator_layout_parity (4, green from a live repo and from an\nAUDAPACK-shaped snapshot), test_recover_approved_repair (5),\ntest_t1326_board_compaction (93), test_core_ownership_routing (28),\ntest_recovery_reachability (63), test_cold_agent_truth (17),\ntest_guard_hostile_matrix (43), test_opencode_adapter (21), fleet smoke PASS.\nruff clean. validate.py: conformant.\n\nNo release, no tag, no push.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n",
+    "c7e25f92": "c7e25f9281934de8f38da26d2dd599f358c77f79\n2026-09-23T22:33:01+03:00\nVAC34\nvac34@example.com\nfix(audit): exported snapshots carry the LOG detail their detail_ref cites (T-1374)\n\nAn event over the live LOG cap keeps its full text under\n.saipen/recovery/log-detail/ and LOG cites it as `detail_ref: ...`. The audit\ncontract declared recovery/ non-exportable and named only `evidence` as a\ncitation surface, so archives carried dangling detail_ref pointers while\nreporting COMPLETE (SAIPEN: 141 log-detail pointers today).\n\nrecovery/log-detail is now a declared durable directory, outranking the\nrecovery/ prefix exactly as T-1452 did for recovery/board-compaction, and\nboth detail stores are citation surfaces: a contract-faithful consumer packs\nthe cited detail or reports the snapshot incomplete naming it. Settled\noperation records stay private. Both stores embed the machine-local\nproject_identity; this keeps T-1452's carve-out decision rather than\nrelocating the files.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n\n",
+    "c138bfd8": "c138bfd8aa89ec82728587dd7c9ae43e9a69b7c3\n2026-09-28T23:34:31+03:00\nVAC34\nvac34@example.com\nchore(runtime): track the 34 declared runtime files git was not carrying\n\nThe runtime manifest names these files, and the conformance gate says it\nplainly: they exist here and in no clone, so this home ships complete while\nevery checkout of it does not. They are not scratch work -- they are the host\nhook surface, the init carrier, the mailbox, the provenance recorder, the\nopencode and codex guards, the T-1553 prefix artifact that the red control\npoints at, and the test family that covers all of it. The core-unit family\nalready runs green over them.\n\nAttribution, since they accumulated uncommitted across several tickets: the\nguards, host_hooks and init_project carry T-1553/T-1556; mailbox, provenance\nand the autonomy sentinels carry T-1557; the rest are the per-ticket controls\nof the same work. One message is the honest record of how they reached the\ntree -- inventing four commits would be a claim the history cannot support.\n\n",
+    "HEAD": "025bf596c683464788ab698248e8a3c5eb44dfec\n2026-10-05T11:32:30+03:00\nVAC34\nvac34@example.com\nchore(t1601): record T-1601 DONE\n\n"
+  },
+  "tracked_predecessor_comparison": {
+    "tools/saipen_engine/audit_manifest.py": {
+      "tracked_HEAD_sha256": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b",
+      "pre_fix_sha256": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b",
+      "pre_fix_identical_to_HEAD": true,
+      "tracked_HEAD_is_not_asserted_last_verified_predecessor": true
+    },
+    "tools/saipen_engine/paths.py": {
+      "tracked_HEAD_sha256": "6a513043eb294217dc4bc21826a7c67348d89e7a9ef8ebee300d4f16e31d74b5",
+      "pre_fix_sha256": "055fcc3f9c94eca57f3494e636b8ee31a830b67969958d3d62ca2bbf3a0f93fc",
+      "pre_fix_identical_to_HEAD": false,
+      "tracked_HEAD_is_not_asserted_last_verified_predecessor": true
+    },
+    "tools/saipen_engine/host_bootstrap.py": {
+      "tracked_HEAD_sha256": "faf80853a339c03391a9422513e33c801ac884cfda5fcc98d6d16c9341f8dd27",
+      "pre_fix_sha256": "785a93b2dd44f76f883c0bf97cce9346c60a2a68c4ac1d927fb5e0d67d4ef27a",
+      "pre_fix_identical_to_HEAD": false,
+      "tracked_HEAD_is_not_asserted_last_verified_predecessor": true
+    },
+    "tools/saipen_engine/reconcile.py": {
+      "tracked_HEAD_sha256": "4f3a80e0a1db157e6a0bdef9f452c81dc983597efc988d784a487d0c7ea7c836",
+      "pre_fix_sha256": "fa7555a02d98ef3b6330a6a81ff954e56a556f49ea45a9fae647b7e223521b85",
+      "pre_fix_identical_to_HEAD": false,
+      "tracked_HEAD_is_not_asserted_last_verified_predecessor": true
+    },
+    "tools/saipen_engine/init_project.py": {
+      "tracked_HEAD_sha256": "7a5246452c9f074b7deb1b993c446f7c0cfd8c6450d3f682fa0bb4b21eb74573",
+      "pre_fix_sha256": "7a5246452c9f074b7deb1b993c446f7c0cfd8c6450d3f682fa0bb4b21eb74573",
+      "pre_fix_identical_to_HEAD": true,
+      "tracked_HEAD_is_not_asserted_last_verified_predecessor": true
+    }
+  },
+  "canonical_owner_and_verification_rows": {
+    "T-1553": [
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3589,
+        "event": "- 28.09.26 13:30 [E-10626] [parent: E-10625] [T-1553] [agent: saipen-cli] [op: ticket-f44a017351ed4d869b7b8fdb78be9cef] DEC: ticket added via SAIOPS"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3590,
+        "event": "- 28.09.26 13:31 [E-10627] [parent: E-10626] [T-1553] [agent: saipen-cli] [op: checkpoint-7f815837f04c4b21ad6a45ebd25be4ee] RUN: detail_ref: .saipen/recovery/log-detail/E-10627-951d31cd92f50c03f3ca24af.json"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3591,
+        "event": "- 28.09.26 13:32 [E-10628] [parent: E-10627] [T-1553] [agent: saipen-cli] [op: checkpoint-3a8d81f40a6f44769d080eb67083c502] DEC: T-1553 state: repair landed in the working tree (extensions/adapters/opencode/saipen-guard.js, unstaged, riding the seat WIP as before), verifier tools/test_t1553_mid_session_activation.py added and STAGED because the runtime-manifest gate FAILs a new tools/test_*.py that git does not track (validate: runtime manifest names a file git does not track); conformance after that is VALID CURRENT_PASS. C/D/E/F remain open on this ticket and must be landed through the publication of the uncommitted response_surface.py/saipen/EXECUTION.md/tools/saipen.py bytes. T-1550 still sits at SHIP with publication withheld."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3592,
+        "event": "- 28.09.26 13:33 [E-10629] [parent: E-10628] [T-1553] [agent: saipen-cli] [op: checkpoint-db96d0bd97df4b8da02b29de5f64f525] DEC: T-1553 F evidence recorded: .saipen/evidence/T-1553-host-enforcement-matrix/MATRIX.md holds the measured per-host matrix (opencode BLOCKING, codex/gemini/claude/zaicode/codebuddy/freebuff/aider/antigravity/deepseek/openai/qwen ADVISORY, kiro/generic ENFORCEMENT_GAP) with the registry as sole owner of declared strength and admission.effective_strength as the runtime owner, so no host is presented fail-closed without proof; the ONE claim T-1553 changed is named exactly -- the OpenCode BLOCKING claim was true only for sessions that started inside a project until the pre-repair artifact admitted a free-form completion after saipen init, and it now holds for the mid-session-init session too; Codex keeps CODEX_STOP_REENTRY_NO_FAIL_CLOSED and CODEX_STOP_TEXT_CLASSIFICATION as separate evidence and stays ADVISORY. No host strength was upgraded by prose. C/D/E remain open on this ticket."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3594,
+        "event": "- 28.09.26 13:35 [E-10631] [parent: E-10630] [T-1553] [agent: saipen-cli] [op: checkpoint-00fd94c7d6d94976b8993c9c234a5d7a] RUN: detail_ref: .saipen/recovery/log-detail/E-10631-bd7b6f1d138633a5927c9fe9.json"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3595,
+        "event": "- 28.09.26 13:35 [E-10632] [parent: E-10631] [T-1553] [agent: saipen-cli] [op: claim-2426401edd294ac291110230f18e86a7] DEC: claimed via SAIOPS -- owner saipen-cli"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3596,
+        "event": "- 28.09.26 13:35 [E-10633] [parent: E-10632] [T-1553] [agent: saipen-cli] [op: transition-11e263aead4144da84ae87bdf4383625] RUN: transition to SCOUT -- SCOUT for T-1553 C/D/E; scout findings already recorded at the previous checkpoint"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3597,
+        "event": "- 28.09.26 13:35 [E-10634] [parent: E-10633] [T-1553] [agent: saipen-cli] [op: transition-10200f3c70bb470a8f7b89bc60964d30] RUN: transition to BUILD -- SCOUT complete: one checker, one renderer, one authorization entry point, one schema owner; carrier and pre-fix control shape reusable; C/D bytes are another seat WIP so land through their publication"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3598,
+        "event": "- 28.09.26 13:55 [E-10635] [parent: E-10634] [T-1553] [agent: saipen-cli] [op: checkpoint-3870861490334663b8105c12b7e2c077] RUN: detail_ref: .saipen/recovery/log-detail/E-10635-957f7ff5b1eebd5265b49b9d.json"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3599,
+        "event": "- 28.09.26 14:14 [E-10636] [parent: E-10635] [T-1553] [agent: saipen-cli] [op: checkpoint-b15c21287dd74ec4979646f219f4a092] RUN: RUN: build -> adapter admits the project-creating init in a non-SAIPEN cwd; canonical checker stops demanding a blocker code for the none sentinel; one-operation requests are response boundaries; registry declares per-host response_enforcement; EXECUTION owns COMPACTNESS BUDGET"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3600,
+        "event": "- 28.09.26 14:50 [E-10637] [parent: E-10636] [T-1553] [agent: saipen-cli] [op: checkpoint-894f7b2c3679426fbd30d65cea1e2564] RUN: RUN: build -> response contract active in the init turn; canonical blocker sentinel fix; per-host response_enforcement declared in the registry and reported by status; EXECUTION COMPACTNESS BUDGET owns the cap"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3601,
+        "event": "- 28.09.26 15:00 [E-10638] [parent: E-10637] [T-1553] [agent: saipen-cli] [op: checkpoint-67f408c9d4f04346a5e6392710cc0193] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4077 red:4 new_red:2 fixed:3 fingerprint:88da3146582a0d28 record:.saipen/evidence/core-unit/88da3146582a0d28-20260928T150038Z.json sha256:2951115cbdeda146ac64c5a4ebb598a0250d29a236c6fd233a2d609cc3223d2c"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3603,
+        "event": "- 28.09.26 15:07 [E-10640] [parent: E-10639] [T-1553] [agent: saipen-cli] [op: checkpoint-924b34d0446849248fcfda67cd806b19] RUN: build -> REAL_INIT_SAME_TURN_PROVED via the real `saipen init` verb (tools/saipen_engine/init_project.py, dispatched before root resolution) + adapter init-turn operational marking; C mechanical compactness FIELD_LINE_BUDGETS with the 6-line RESULT / 20-line DETAILS hostile control; D STYLE defers COMPACTNESS BUDGET to EXECUTION with a coherence regression and cold-budget headroom reclaimed; E hostile matrix A-L; F measured per-host matrix (opencode effective ENFORCEMENT_GAP, codex UNKNOWN) with a declared-vs-effective regression"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3604,
+        "event": "- 28.09.26 15:13 [E-10641] [parent: E-10640] [T-1553] [agent: saipen-cli] [op: checkpoint-a5d5e33387b94624aa0959a1a8472102] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4077 red:3 new_red:1 fixed:3 fingerprint:67ab2b2cc25423de record:.saipen/evidence/core-unit/67ab2b2cc25423de-20260928T151338Z.json sha256:2d2b1b62eac8f6912534fa2f78f8906b00e00272b80be991e1bd932a75140c8e"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3606,
+        "event": "- 28.09.26 15:15 [E-10643] [parent: E-10642] [T-1553] [agent: saipen-cli] [op: checkpoint-44569c56238849fe86b95c723a60656e] RUN: RUN: verify -> 36 controls green; pre-fix artifact FAILS the same 6; conformance CURRENT_PASS; core gate new_red=1 owned by the concurrent seat's untracked saihunt HUNT-014 (stale role revision), not this ticket"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3607,
+        "event": "- 28.09.26 15:15 [E-10644] [parent: E-10643] [T-1553] [agent: saipen-cli] [op: transition-1eca1ac7d696447d83f0da404f47c86d] RUN: transition to VERIFY -- BUILD complete: response contract active in the init turn, compactness budget owned by EXECUTION, per-host response_enforcement declared. 36 controls green; the pre-fix adapter artifact FAILS the identical 6. Residual, NOT this ticket and NOT mine to touch: the untracked .saipen/extensions/subs/saihunt/kitchen/HUNT-014.md (another seat's in-flight package) makes test_crew_applicability report 'stale role revision: saihunt', the single new_red in the core gate -- re-run the gate after that seat lands or clears it"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3608,
+        "event": "- 28.09.26 15:16 [E-10645] [parent: E-10644] [T-1553] [agent: saipen-cli] [op: checkpoint-70f2c5a7d7f345acbef17599937586c0] RUN: RUN: verify -> entered VERIFY; re-run tools/core_unit.py evidence T-1553 and tools/test_t1553_mid_session_activation, then saipen validate for CURRENT_PASS"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3609,
+        "event": "- 28.09.26 15:18 [E-10646] [parent: E-10645] [T-1553] [agent: saipen-cli] [op: checkpoint-aa98aa64f8b84035aa5c8a1eb49c61ea] RUN: RUN: verify -> 37 controls green including the live per-host response projection; conformance CURRENT_PASS"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3610,
+        "event": "- 28.09.26 15:27 [E-10647] [parent: E-10646] [T-1553] [agent: saipen-cli] [op: checkpoint-efacc9d8bfaf406283c126a668e9840e] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4078 red:3 new_red:1 fixed:3 fingerprint:5995a0a2a81ac9be record:.saipen/evidence/core-unit/5995a0a2a81ac9be-20260928T152728Z.json sha256:365ef2cb99833c6875f0e19618e3360caab76f9f587743ee4c9bd0a937e97d19"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3611,
+        "event": "- 28.09.26 15:28 [E-10648] [parent: E-10647] [T-1553] [agent: saipen-cli] [op: transition-b8d139716c4348339789aed9b4f95cc1] RUN: transition to VERIFY"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3612,
+        "event": "- 28.09.26 15:29 [E-10649] [parent: E-10648] [T-1553] [agent: saipen-cli] [op: checkpoint-305f19cd95ff45e68ebd41baecdec565] RUN: verify -> REAL_INIT_SAME_TURN_PROVED: the real `saipen init` verb is admitted through tool.execute.before, the host executes the canonical INIT effect, and the same turn's free-form completion is refused EXEC_RESPONSE_INVALID while a canonical surface passes; MATERIALIZATION_REBIND_PROVED kept separately and never quoted for it. Pre-fix control: SAIPEN_OPENCODE_PLUGIN_UNDER_TEST=.saipen/kitchen/t1553-prefix/saipen-guard.js fails the identical fixture/oracle (6 carrier tests). Focused 154 passed; conformance CURRENT_PASS; protocol budget BUDGET PASS; core new_red=0 for T-1553 with one inherited red filed as T-1554"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3613,
+        "event": "- 28.09.26 15:29 [E-10650] [parent: E-10649] [T-1553] [agent: saipen-cli] [op: checkpoint-146afda60d4c4ec2a642e7d4b9cab05b] RUN: verify -> PASS [target: T-1553] conf: high -- python -m pytest tools/test_t1553_mid_session_activation.py tools/test_response_surface_contract.py tools/test_guard_execution_reachability.py tools/test_cli_compound_entry.py tools/test_hostile_wave_regressions.py tools/test_fixture_style_authority.py tools/test_cold_recovery.py -> 154 passed; saipen validate --json -> conformance CURRENT_PASS; tools/protocol_budget.py -> BUDGET PASS; core_unit evidence T-1553 --fresh -> 4078 ran, T-1553 new_red=0 (one inherited crew red filed as T-1554); pre-fix control SAIPEN_OPENCODE_PLUGIN_UNDER_TEST=.saipen/kitchen/t1553-prefix/saipen-guard.js -> 6 carrier tests FAIL on the identical oracle"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3614,
+        "event": "- 28.09.26 15:29 [E-10651] [parent: E-10650] [T-1553] [agent: saipen-cli] [op: transition-58b8ce46d14b414f9d08fcbcace965f6] RUN: transition to REVIEW -- independent review of the exact owned diff: the init turn is gated, C/D/E/F carriers and regressions are green, pre-fix subject fails the same oracle"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3618,
+        "event": "- 28.09.26 15:39 [E-10655] [parent: E-10654] [T-1553] [agent: saipen-cli] [op: ticket-cd8fc032778042899031d96b8bc37736] DEC: ticket block via SAIOPS (active) -- dependency T-1556 -- PAUSED by user request SRC-134: explicit new task T-1556 takes the seat; resumes at REVIEW when T-1556 closes"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3623,
+        "event": "- 28.09.26 16:35 [E-10660] [parent: E-10659] [T-1553] [agent: saipen-cli] [op: checkpoint-d3af0c254f8b4742995e7befca838855] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4111 red:5 new_red:3 fixed:3 fingerprint:7ba3c29590d13bc6 record:.saipen/evidence/core-unit/7ba3c29590d13bc6-20260928T163513Z.json sha256:692f9e88417e45e9c99f75ec351445f959870c0f981f519d3fba10cfc42515be"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3625,
+        "event": "- 28.09.26 16:51 [E-10662] [parent: E-10661] [T-1553] [agent: saipen-cli] [op: checkpoint-0ed678e6122a434d8ca15e09c65d61e5] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4111 red:3 new_red:1 fixed:3 fingerprint:7ba3c29590d13bc6 record:.saipen/evidence/core-unit/7ba3c29590d13bc6-20260928T165120Z.json sha256:5abf3da249a1bfe762cc3f402faa24a7296931bfb961a2d1e4ac1ef5be02d35a"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3626,
+        "event": "- 28.09.26 16:51 [E-10663] [parent: E-10662] [T-1553] [agent: saipen-cli] [op: checkpoint-d0c374c3b1ec4feca2f10813ee9bb78c] RUN: verify -> PASS [target: T-1553] conf: high -- focused 188 passed; saipen validate --json conformance CURRENT_PASS; tools/protocol_budget.py BUDGET PASS; ruff clean on the owned files; core_unit evidence T-1553 --fresh -> 4111 ran, T-1553 new_red=0, the single remaining red is the inherited crew defect filed as T-1554; pre-fix control SAIPEN_OPENCODE_PLUGIN_UNDER_TEST=.saipen/kitchen/t1553-prefix/saipen-guard.js -> 7 carrier tests FAIL on the identical oracle; REVIEW found and fixed 4 real defects (anchored init exemption, classify/checker disagreement, render field names, unproven operator-due path) each now mutation-killed"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3682,
+        "event": "- 28.09.26 20:49 [E-10718] [parent: E-10717] [T-1553] [agent: saipen-cli] [op: finish-5cac10f3189b4ecf9372362293f43a07] DEC: blocked parent resumed after dependency T-1556 reached DONE; dependency completion is not a claim event -- no live claim restored; previous owner saipen-cli is historical attribution only and the seat must be claimed explicitly"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3683,
+        "event": "- 28.09.26 20:49 [E-10719] [parent: E-10718] [T-1553] [agent: saipen-cli] [op: claim-292eed10ddfa40d6ac0047ffb1131edc] DEC: claimed via SAIOPS -- owner saipen-cli"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3684,
+        "event": "- 28.09.26 20:53 [E-10720] [parent: E-10719] [T-1553] [agent: saipen-cli] [op: ticket-118f42097fb74e3bab106a32c896f18a] DEC: ticket block via SAIOPS (active) -- CONCURRENT_SEAT_FILE_RACE -- the zcode seat is actively landing tools/test_outbox_write_time_bar.py (mtime 20:49Z) untracked, which reds validate's runtime-manifest gate mid-close; T-1553 itself is REVIEW-green (113 owner tests, validate was CURRENT_PASS at 20:47Z core run db9904ecad590862 new_red 0); resume SHIP when the concurrent seat indexes or withdraws its file"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3727,
+        "event": "- 28.09.26 23:11 [E-10763] [parent: E-10762] [T-1553] [agent: saipen-cli] [op: ticket-13ef2d227b5f4ab180d858b8830e073f] DEC: ticket unblock via SAIOPS -- concurrent seat file race resolved: afef553c integrated and indexed tools/test_outbox_write_time_bar.py, the runtime-manifest gate no longer reds on it"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3728,
+        "event": "- 28.09.26 23:11 [E-10764] [parent: E-10763] [T-1553] [agent: saipen-cli] [op: claim-a7a39483253e41ea9580eb74ebb6fbfb] DEC: claimed via SAIOPS -- owner saipen-cli"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3729,
+        "event": "- 28.09.26 23:14 [E-10765] [parent: E-10764] [T-1553] [agent: saipen-cli] [op: checkpoint-865335069b814865a319d6458a76ff2d] RUN: SCOUT -- resumed after the concurrent-race unblock: implementation present in tree (init-turn response enforcement, 37-control carrier set, per-host enforcement projection), owners green 135 just now; the pre-fix control and mutation kills recorded in the earlier cycle (E-10649/E-10663)"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3730,
+        "event": "- 28.09.26 23:14 [E-10766] [parent: E-10765] [T-1553] [agent: saipen-cli] [op: transition-ec6ffda89ecd46cfb93732e1850eda6d] RUN: transition to BUILD -- no new delta owed; implementation present and green"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3731,
+        "event": "- 28.09.26 23:14 [E-10767] [parent: E-10766] [T-1553] [agent: saipen-cli] [op: checkpoint-9293c684c9bf47419cb825d78a836340] RUN: build -> no additional delta this cycle: the mid-session activation implementation and its regressions are present and green (135 owners just rerun); pre-fix control artifact fails the identical oracle per the earlier cycle's red evidence"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3732,
+        "event": "- 28.09.26 23:14 [E-10768] [parent: E-10767] [T-1553] [agent: saipen-cli] [op: transition-8e1c92b03ded4c2eb2704f11147c4155] RUN: transition to VERIFY -- delta complete"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3733,
+        "event": "- 28.09.26 23:15 [E-10769] [parent: E-10768] [T-1553] [agent: saipen-cli] [op: checkpoint-d96474e4af5840cfaea419c9d4f38326] RUN: verify -> PASS [target: T-1553] conf: high -- 188 owners green across both tranches (135 + 53: mid-session activation, response surface, guard reachability, cli compound, hostile waves, fixture style authority, cold recovery); saipen validate CURRENT_PASS; pre-fix control evidence from the original cycle: SAIPEN_OPENCODE_PLUGIN_UNDER_TEST prefix fixture reds 6-7 carrier tests on the identical oracle, four review defects each mutation-killed (E-10663); ruff clean on owners"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3734,
+        "event": "- 28.09.26 23:16 [E-10770] [parent: E-10769] [T-1553] [agent: saipen-cli] [op: transition-a0977b6b7ef0436b84744dc452072d72] RUN: transition to REVIEW -- VERIFY PASS conf: high"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3736,
+        "event": "- 28.09.26 23:17 [E-10772] [parent: E-10771] [T-1553] [agent: saipen-cli] [op: checkpoint-f3874d2b6ec54bec82e761d0e5347b4a] RUN: review -> independent re-run green (70 mid-session activation owners), validate CURRENT_PASS restated at REVIEW entry; oracle untouched since the original REVIEW (E-10651..E-10663); no P0/P1; memory promotion none"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3737,
+        "event": "- 28.09.26 23:17 [E-10773] [parent: E-10772] [T-1553] [agent: saipen-cli] [op: checkpoint-c78da78e02164633b86cfbcdce729bf9] DEC: SHIP"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3738,
+        "event": "- 28.09.26 23:48 [E-10774] [parent: E-10773] [T-1553] [agent: saipen-cli] [op: checkpoint-29267aa42acf470d9f4c21920f313cc4] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4174 red:18 new_red:16 fixed:3 fingerprint:b9dd6f00c8ec7e69 record:.saipen/evidence/core-unit/b9dd6f00c8ec7e69-20260928T234825Z.json sha256:5e3c417f49a9833bc0a7f0bf19a01b4a0ae3111c8ca1fff824fb89ccf071b0b3"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3739,
+        "event": "- 28.09.26 23:49 [E-10775] [parent: E-10774] [T-1553] [agent: saipen-cli] [op: ticket-bf43baa81c834d728218a30086ca974e] DEC: ticket block via SAIOPS (active) -- CONCURRENT_SEAT_FAMILY_RED -- the sibling saipen-cli window is mid-flight on a release/debt wave (commits da632cbd bf70d2eb, working-tree engine edits, LOG active at 02:48 local) and the shared declared family is red through no delta of this ticket: 16 new reds across debt_gate/refusal_routes/closure owners reproduce standalone; T-1553 itself is REVIEW-green with DEC SHIP and 188 owners green twice; resume SHIP when the sibling wave lands green and validate CURRENT_PASS holds"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3740,
+        "event": "- 28.09.26 23:49 [E-10776] [parent: E-10775] [T-1553] [agent: saipen-cli] [op: checkpoint-21fd9321a04947a4b87e769a9c9fb4cc] DEC: seat yielded again to the sibling mid-flight wave; handover: T-1553 needs only one green in-cycle core run then the no-publish close -- owners 188 green twice, DEC SHIP recorded; do not rerun the family while the sibling's engine edits are uncommitted"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3741,
+        "event": "- 28.09.26 23:51 [E-10777] [parent: E-10776] [T-1553] [agent: saipen-cli] [op: checkpoint-793bf6c39d6c461c82f80418a3876eb6] DEC: standard engineering choice recorded: this seat makes NO tree edits while the sibling wave is mid-flight (its RFC->CORE doc migration shifted cross-doc anchors and downgraded debt-gate fixture problems to warnings); resolution = poll for the wave to land green, then one in-cycle core run and the no-publish close; no parallel edits, no weakening of the debt controls"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3742,
+        "event": "- 29.09.26 06:47 [E-10778] [parent: E-10777] [T-1553] [agent: saipen-cli] [op: ticket-323cb1fd85e1482b922e960f51c00dde] DEC: ticket unblock via SAIOPS -- CONCURRENT_SEAT_FAMILY_RED lifted: the sibling wave's 16 family reds are cured on this tree (central vacuous-coverage law for REQUEST_KINDS, audit-kind derivation debt, request-clause seeding at capture; 225 owner tests green, validate CURRENT_PASS)"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3743,
+        "event": "- 29.09.26 06:47 [E-10779] [parent: E-10778] [T-1553] [agent: saipen-cli] [op: claim-134b904580804c409cce1ccf055236e1] DEC: claimed via SAIOPS -- owner saipen-cli"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3744,
+        "event": "- 29.09.26 06:59 [E-10780] [parent: E-10779] [T-1553] [agent: saipen-cli] [op: checkpoint-fd118d2db22d46a3ada194ce308e7c99] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4174 red:4 new_red:2 fixed:3 fingerprint:ebd5d06a7ee45c3c record:.saipen/evidence/core-unit/ebd5d06a7ee45c3c-20260929T065940Z.json sha256:81fe4553d0635d06a25bc0d4226709b44dd0557ba879f08fd14c607045a26a11"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3745,
+        "event": "- 29.09.26 07:06 [E-10781] [parent: E-10780] [T-1553] [agent: saipen-cli] [op: checkpoint-81ccdb446ec444b4b6288525f4ba4641] RUN: SCOUT -- no new scope: the mid-session activation implementation and regressions are present; this cycle closes the ticket after the family-red blocker lifted (sibling wave cured: vacuous-coverage law, audit-kind derivation debt, request-clause lazy discharge; 287 owner tests green)"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3746,
+        "event": "- 29.09.26 07:06 [E-10782] [parent: E-10781] [T-1553] [agent: saipen-cli] [op: transition-2fb606b5604040dc8281777663dbbe01] RUN: transition to BUILD -- no new delta owed; implementation present and green"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3747,
+        "event": "- 29.09.26 07:06 [E-10783] [parent: E-10782] [T-1553] [agent: saipen-cli] [op: checkpoint-11001c2c3ec94424aad29c76d22fd644] RUN: build -> no additional delta this cycle"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3748,
+        "event": "- 29.09.26 07:06 [E-10784] [parent: E-10783] [T-1553] [agent: saipen-cli] [op: transition-6eb8cd3ad9c348e3ac19e3057ebc69bb] RUN: transition to VERIFY -- delta complete"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3749,
+        "event": "- 29.09.26 07:18 [E-10785] [parent: E-10784] [T-1553] [agent: saipen-cli] [op: checkpoint-c3bc40af0da34465b4043cc7b50d6e0e] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4174 red:3 new_red:1 fixed:3 fingerprint:5120b8f55f9cc0b1 record:.saipen/evidence/core-unit/5120b8f55f9cc0b1-20260929T071816Z.json sha256:43dda081dd20fce364f8687f64c77627604c2fecd3e12775e9aa20626d037da2"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3750,
+        "event": "- 29.09.26 07:31 [E-10786] [parent: E-10785] [T-1553] [agent: saipen-cli] [op: checkpoint-2d67104d9229430b9cb3b173054d7894] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4174 red:3 new_red:1 fixed:3 fingerprint:5120b8f55f9cc0b1 record:.saipen/evidence/core-unit/5120b8f55f9cc0b1-20260929T073135Z.json sha256:54a2d7e4a96df668241b38bc233d3e28d00e66c36884af16fefa71c2043f1d01"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3751,
+        "event": "- 29.09.26 07:56 [E-10787] [parent: E-10786] [T-1553] [agent: saipen-cli] [op: checkpoint-1a31c50780ba44928c78a2f0d4afb073] RUN: CORE-UNIT-EVIDENCE PASS family:unit ran:4174 red:2 new_red:0 fixed:3 fingerprint:735e6620f692d26c record:.saipen/evidence/core-unit/735e6620f692d26c-20260929T075614Z.json sha256:c197e8a9ff335afbc82218c2228ab080c08687ecfebeda020b322c46c1d5dd65"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3752,
+        "event": "- 29.09.26 07:56 [E-10788] [parent: E-10787] [T-1553] [agent: saipen-cli] [op: checkpoint-63b4cc113a544187b535882139acd3b2] RUN: verify -> PASS [target: T-1553] conf: high -- 188 owners green across both tranches (mid-session activation, response surface); validate CURRENT_PASS; ruff clean; core_unit 735e6620f692d26c ran 4174 new_red 0 with only the two inherited baseline reds; the wave's cures verified: 287 owner tests across the twelve formerly red files, layout-parity hermeticity frozen"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3753,
+        "event": "- 29.09.26 07:56 [E-10789] [parent: E-10788] [T-1553] [agent: saipen-cli] [op: transition-a2c79841111b4e968ae78008ab78c7ec] RUN: transition to REVIEW -- VERIFY PASS conf: high"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3755,
+        "event": "- 29.09.26 07:58 [E-10791] [parent: E-10790] [T-1553] [agent: saipen-cli] [op: checkpoint-cade37290e014b0da6a9b4fd3bc95ed3] RUN: review -> independent re-run 70 green (mid-session activation owners); validate CURRENT_PASS restated at REVIEW; oracles unchanged; no P0/P1; memory promotion none owed"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3756,
+        "event": "- 29.09.26 07:58 [E-10792] [parent: E-10791] [T-1553] [agent: saipen-cli] [op: checkpoint-fca0be4bcd7a44cdbc911e37c364452d] DEC: SHIP"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3757,
+        "event": "- 29.09.26 07:58 [E-10793] [parent: E-10792] [T-1553] [agent: saipen-cli] [op: transition-5b649567cad3448e864680faef6cb67b] RUN: transition to SHIP -- REVIEW clean; core admissible new_red 0"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3758,
+        "event": "- 29.09.26 07:58 [E-10794] [parent: E-10793] [T-1553] [agent: saipen-cli] [op: checkpoint-823cda5b4a3644bc9772ea9825899261] RUN: ship v8.0.1 -> skipped publish (no-publish: policy); SRC-039 forbids commit/tag/push/release. Scope: extensions/adapters/opencode/saipen-guard.js mid-session activation, response_surface carriers, EXECUTION compactness ownership, t1553 tests; the sibling wave's family cures ride the same tree. No Git index/tag/branch/remote writes. Digest refreshed; core validation CURRENT_PASS."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3759,
+        "event": "- 29.09.26 07:58 [E-10795] [parent: E-10794] [T-1553] [agent: saipen-cli] [op: finish-0ff8c266384a458a943abe90e74573e5] DEC: ticket finished via SAIOPS -- completion (from SHIP)"
+      }
+    ],
+    "T-1556": [
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3616,
+        "event": "- 28.09.26 15:39 [E-10653] [parent: E-10652] [T-1556] [agent: saipen-cli] [op: userreq-f0cb5c6506414c85a2cadaad53dc1a72] DEC: user request SRC-134 projected as T-1556 (user_explicit)"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3619,
+        "event": "- 28.09.26 15:39 [E-10656] [parent: E-10655] [T-1556] [agent: saipen-cli] [op: claim-63c500fd75f0408088a115117a545840] DEC: claimed via SAIOPS -- owner saipen-cli"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3620,
+        "event": "- 28.09.26 15:49 [E-10657] [parent: E-10656] [T-1556] [agent: saipen-cli] [op: checkpoint-3cab678967e246c4a5a1b8d488751fe0] RUN: detail_ref: .saipen/recovery/log-detail/E-10657-7c450c50d5a6aa2b36f9e1ae.json"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3621,
+        "event": "- 28.09.26 15:49 [E-10658] [parent: E-10657] [T-1556] [agent: saipen-cli] [op: transition-95dd32c736044a12836ffc80292a10ea] RUN: transition to BUILD -- implement review repairs in the one canonical owner: detail_mode authorization (default DETAILS_FORBIDDEN), FIELD_CHAR_BUDGETS + total ordinary ceiling, single NEXT EXACT ACTION through the canonical recognizer, and a real launcher end-to-end init carrier"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3622,
+        "event": "- 28.09.26 16:24 [E-10659] [parent: E-10658] [T-1556] [agent: saipen-cli] [op: checkpoint-16ee2271e33d495c8b46fcf56f660de5] RUN: detail_ref: .saipen/recovery/log-detail/E-10659-ae827777af5095b462aa0bd3.json"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3624,
+        "event": "- 28.09.26 16:39 [E-10661] [parent: E-10660] [T-1556] [agent: saipen-cli] [op: checkpoint-fb8460826f3d4868816909e00991f131] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4111 red:4 new_red:2 fixed:3 fingerprint:7ba3c29590d13bc6 record:.saipen/evidence/core-unit/7ba3c29590d13bc6-20260928T163917Z.json sha256:64c6f948c3ba34bb17f2ee47cffadc8ab00177aae95c351d3e4bfcbf03663ef6"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3627,
+        "event": "- 28.09.26 16:52 [E-10664] [parent: E-10663] [T-1556] [agent: saipen-cli] [op: checkpoint-b6919801a7eb49c282c39dc1d4808770] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4111 red:3 new_red:1 fixed:3 fingerprint:7ba3c29590d13bc6 record:.saipen/evidence/core-unit/7ba3c29590d13bc6-20260928T165246Z.json sha256:a86e85e1c85d9836fca5378c4d9ad2139a2d2224ce8c3e690e6b17aba2705df3"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3628,
+        "event": "- 28.09.26 16:53 [E-10665] [parent: E-10664] [T-1556] [agent: saipen-cli] [op: transition-90bc39ef26354be498f8e157f302b399] RUN: transition to VERIFY -- verify the four repairs against the review's own acceptance list: hostile controls, red control, coherence with EXECUTION, adapter-copy absence, focused suite, budget, lint, conformance, core gate"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3629,
+        "event": "- 28.09.26 16:53 [E-10666] [parent: E-10665] [T-1556] [agent: saipen-cli] [op: checkpoint-d6f2e52752044291a15952bea3298456] RUN: detail_ref: .saipen/recovery/log-detail/E-10666-f5dc02ef5588a4c41b6bcdfc.json"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3630,
+        "event": "- 28.09.26 16:53 [E-10667] [parent: E-10666] [T-1556] [agent: saipen-cli] [op: checkpoint-1983243d7a3c4054b1c722f195c58bb2] RUN: detail_ref: .saipen/recovery/log-detail/E-10667-a77f167dfcd73f557fe7cb6a.json"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3631,
+        "event": "- 28.09.26 16:53 [E-10668] [parent: E-10667] [T-1556] [agent: saipen-cli] [op: transition-ac53e797cd1044f490f324e7ecfe91a7] RUN: transition to REVIEW -- T-1553 review findings repaired in the one canonical owner; 9 of 10 acceptance items hold, item 9 except for the T-1554 inherited red this ticket unblocks"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3635,
+        "event": "- 28.09.26 16:58 [E-10672] [parent: E-10671] [T-1556] [agent: saipen-cli] [op: ticket-36347e5410954540ac0880e2e5d890b6] DEC: ticket block via SAIOPS (active) -- dependency T-1557 -- PAUSED by user request SRC-135: explicit new task T-1557 takes the seat; resumes at REVIEW when T-1557 closes"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3661,
+        "event": "- 28.09.26 19:16 [E-10698] [parent: E-10697] [T-1556] [agent: saipen-cli] [op: finish-3be086e75b8c4adb9042ed01b148b99c] DEC: blocked parent resumed after dependency T-1557 reached DONE; dependency completion is not a claim event -- no live claim restored; previous owner saipen-cli is historical attribution only and the seat must be claimed explicitly"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3662,
+        "event": "- 28.09.26 19:17 [E-10699] [parent: E-10698] [T-1556] [agent: saipen-cli] [op: claim-edcf3fdd24944a888721cb4e38449455] DEC: claimed via SAIOPS -- owner saipen-cli"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3663,
+        "event": "- 28.09.26 19:19 [E-10700] [parent: E-10699] [T-1556] [agent: saipen-cli] [op: checkpoint-29e93f43e2604beca24d5005a32fe5e7] RUN: review -> independent re-run on the resumed seat: all 10 acceptance items now hold -- focused 188 green (hostile controls, red control, EXECUTION coherence, adapter-copy absence), validate CURRENT_PASS, ruff clean, and item 9's inherited crew red is cured by the T-1557 sub style_contract stamp (crew_applicability green in core run 39783e9fa2527063-20260928T191628Z); no P0/P1; oracle unchanged since VERIFY; memory promotion none owed"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3664,
+        "event": "- 28.09.26 19:19 [E-10701] [parent: E-10700] [T-1556] [agent: saipen-cli] [op: checkpoint-f6704023aa214a468d0d5beb00163ce7] DEC: SHIP"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3669,
+        "event": "- 28.09.26 19:44 [E-10705] [parent: E-10704] [T-1556] [agent: saipen-cli] [op: checkpoint-d057a66fcba240a6ba8013808934cd53] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4135 red:3 new_red:1 fixed:3 fingerprint:da2e9c81fdb8ad44 record:.saipen/evidence/core-unit/da2e9c81fdb8ad44-20260928T194414Z.json sha256:7fddf0e7b1bee3f03546e7b97577a509baf1ef22746cde68bb51c5b5dd1b3829"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3670,
+        "event": "- 28.09.26 19:57 [E-10706] [parent: E-10705] [T-1556] [agent: saipen-cli] [op: checkpoint-d71c548a29754dde9cd38930bb3f9de3] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4135 red:3 new_red:1 fixed:3 fingerprint:da2e9c81fdb8ad44 record:.saipen/evidence/core-unit/da2e9c81fdb8ad44-20260928T195745Z.json sha256:10ceb17a00b82fb9d78df24b5cdd1014e302a29a7ca95c376c7948c4f8f6a177"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3671,
+        "event": "- 28.09.26 19:58 [E-10707] [parent: E-10706] [T-1556] [agent: saipen-cli] [op: checkpoint-de9b63ea03034e22901fab29872f8014] RUN: verify -> PASS [target: T-1556] conf: high -- acceptance suite 188 green (test_t1553_mid_session_activation, response_surface, guard_execution_reachability, cli_compound_entry, hostile_wave_regressions, fixture_style_authority, cold_recovery); validate CURRENT_PASS; ruff clean on owners; the four SRC-134 repairs present: DETAILS authorization default FORBIDDEN, FIELD_CHAR_BUDGETS + ceilings, single NEXT EXACT ACTION via canonical recognizer, true launcher init carrier; item 9 inherited crew red cured by T-1557"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3672,
+        "event": "- 28.09.26 19:58 [E-10708] [parent: E-10707] [T-1556] [agent: saipen-cli] [op: transition-ed46689fe91d47cf817ccfd22732cac4] RUN: transition to REVIEW -- VERIFY PASS conf: high on the resumed seat"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3674,
+        "event": "- 28.09.26 20:17 [E-10710] [parent: E-10709] [T-1556] [agent: saipen-cli] [op: checkpoint-a3af36496e7741dd8126b64fff153e52] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4135 red:4 new_red:2 fixed:3 fingerprint:da2e9c81fdb8ad44 record:.saipen/evidence/core-unit/da2e9c81fdb8ad44-20260928T201704Z.json sha256:b77b4928f534df2b5d0da453155aeaf9a1cf60a6c2564f597795d2f11b1bcf69"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3675,
+        "event": "- 28.09.26 20:19 [E-10711] [parent: E-10710] [T-1556] [agent: saipen-cli] [op: checkpoint-bb1a0f1f4a324b129c04a7bb87cbe72e] RUN: CORE-UNIT-EVIDENCE FAIL family:unit ran:4135 red:4 new_red:2 fixed:3 fingerprint:da2e9c81fdb8ad44 record:.saipen/evidence/core-unit/da2e9c81fdb8ad44-20260928T201945Z.json sha256:8e470c24b59fd01af36ebf24e0a70e77d3179fb5530809f3fc8fc12184fef4ea"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3676,
+        "event": "- 28.09.26 20:21 [E-10712] [parent: E-10711] [T-1556] [agent: saipen-cli] [op: checkpoint-12e2c739735147eab36719f35a2cb0a1] RUN: review -> independent re-run: 70/70 on the repaired opencode guard through the real node runtime; the identical fixture pointed at the un-repaired prefix artifact (SAIPEN_OPENCODE_PLUGIN_UNDER_TEST=.saipen/kitchen/t1553-prefix/saipen-guard.js) FAILs 9 of 70 on the same oracle, so the red control still reds; ruff clean on tools/ and tests/; saipen validate CURRENT_PASS. SHIP is NOT available to this ticket: core_unit evidence da2e9c81fdb8ad44 recorded 2 new reds outside the baseline, both test_t1446_supervise.QualityOverTimeTests, which belong to uncommitted T-1446 work in this tree and are not this ticket's to absorb or baseline away"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3677,
+        "event": "- 28.09.26 20:47 [E-10713] [parent: E-10712] [T-1556] [agent: saipen-cli] [op: checkpoint-4eab20d0f35b4fdeae3ac85cda218c32] RUN: CORE-UNIT-EVIDENCE PASS family:unit ran:4135 red:2 new_red:0 fixed:3 fingerprint:db9904ecad590862 record:.saipen/evidence/core-unit/db9904ecad590862-20260928T204742Z.json sha256:355f5eae5ea19da36cb4f5475b5f1b35a5fdd58525d5812fc3abb08be4370328"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3678,
+        "event": "- 28.09.26 20:47 [E-10714] [parent: E-10713] [T-1556] [agent: saipen-cli] [op: transition-199ad2dddf964d99969c5965983fb127] RUN: transition to SHIP -- REVIEW complete; core admissible"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3679,
+        "event": "- 28.09.26 20:48 [E-10715] [parent: E-10714] [T-1556] [agent: saipen-cli] [op: checkpoint-608b6dd8538f4933ab180b17d880111b] RUN: ship v8.0.1 -> skipped publish (no-publish: policy); SRC-039 forbids commit/tag/push/release. Scope: response_surface.py DETAILS authorization + FIELD_CHAR_BUDGETS, single NEXT EXACT ACTION, init carrier; tests test_t1553_mid_session_activation.py + response/cli/hostile/fixture owners; EXECUTION.md budgets. No Git index/tag/branch/remote writes. Digest refreshed; core validation CURRENT_PASS."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3680,
+        "event": "- 28.09.26 20:49 [E-10716] [parent: E-10715] [T-1556] [agent: saipen-cli] [op: checkpoint-ff9aa44fb4914875858d6ee2f12bb7a4] RUN: verify -> PASS [target: T-1556] conf: high -- SHIP-cycle confirmation: core_unit db9904ecad590862 ran 4135, only the two inherited baseline reds remain, new_red 0; acceptance 188 green; validate CURRENT_PASS; the earlier family flakes (t1446_supervise timing, t1505 nested-shard reclaim) never reproduced standalone and are load artifacts of the concurrent soak workload"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-018.md",
+        "line": 3681,
+        "event": "- 28.09.26 20:49 [E-10717] [parent: E-10716] [T-1556] [agent: saipen-cli] [op: finish-5cac10f3189b4ecf9372362293f43a07] DEC: ticket finished via SAIOPS -- completion (from SHIP)"
+      }
+    ],
+    "T-1334": [
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1330,
+        "event": "- 15.09.26 12:12 [E-6306] [parent: E-6305] [T-1334] [agent: codex] [op: ticket-24e6708a3d37478a9d5d200bcdcfdad1] DEC: ticket added via SAIOPS"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1331,
+        "event": "- 15.09.26 12:12 [E-6307] [parent: E-6306] [T-1334] [agent: codex] [op: claim-af7a1299442f448eaa64388d9c82d6de] DEC: claimed via SAIOPS -- owner codex"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1332,
+        "event": "- 15.09.26 12:12 [E-6308] [parent: E-6307] [T-1334] [agent: codex] [op: transition-8021c4dabcc446cb98506690067e02fc] RUN: transition to SCOUT -- SCOUT: locate the generation boundary. Durable markers available in-record: the lowest BOARD ticket id carrying closure_mode (the field the canonical finish writes) and the [op: verb-id] mechanized event grammar. Wall-clock and mtime are excluded by contract."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1333,
+        "event": "- 15.09.26 12:12 [E-6309] [parent: E-6308] [T-1334] [agent: codex] [op: transition-1e94a2e01e174fb7acad73d908116d03] RUN: detail_ref: .saipen/recovery/log-detail/E-6309-bae7d351a9d1d3a1766aefcf.json"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1334,
+        "event": "- 15.09.26 12:12 [E-6310] [parent: E-6309] [T-1334] [agent: codex] [op: transition-50643d71eb29488c9c5572f3fb8e4043] RUN: transition to VERIFY -- Enter VERIFY: run the new compatibility matrix plus every regression that owns the surfaces this touched."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1335,
+        "event": "- 15.09.26 12:14 [E-6311] [parent: E-6310] [T-1334] [agent: codex] [op: checkpoint-2c5eaa13501747a98479d1fcd55c34b6] RUN: detail_ref: .saipen/recovery/log-detail/E-6311-caef64383a1a59974355229e.json"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1336,
+        "event": "- 15.09.26 12:14 [E-6312] [parent: E-6311] [T-1334] [agent: codex] [op: checkpoint-50f63d181d7e4bf4ba41127b8c4196e6] RUN: detail_ref: .saipen/recovery/log-detail/E-6312-20996c1e4e9ffd4106f0471f.json"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1337,
+        "event": "- 15.09.26 12:14 [E-6313] [parent: E-6312] [T-1334] [agent: codex] [op: checkpoint-775e88308f7a48af8d782e2fe4a65d45] RUN: VERIFY PASS -- full evidence at E-6312; test_legacy_lifecycle_compat 25 OK, recover_approved_repair 5 OK, t1326_board_compaction 93 OK, core_ownership_routing 28 OK, validator_layout_parity 4 OK, recovery_reachability 63 OK, cold_agent_truth 17 OK, fleet smoke PASS, ruff clean, compileall OK; PATCH_OWNED 0 UNKNOWN 0. conf: high"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1338,
+        "event": "- 15.09.26 12:14 [E-6314] [parent: E-6313] [T-1334] [agent: codex] [op: transition-e80b6d96df3541c1998d6eb303864cf1] RUN: transition to REVIEW -- VERIFY PASS recorded. Enter REVIEW: independently re-run the ticket verify on the same tree and recompute the real AUDAPACK plan read-only."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1340,
+        "event": "- 15.09.26 12:15 [E-6316] [parent: E-6315] [T-1334] [agent: codex] [op: checkpoint-5f2c59d1020a416ea8ce183a517e0008] RUN: REVIEW: independent re-run on the same tree, not reading the VERIFY claim -- legacy_lifecycle_compat + recover_approved_repair + core_ownership_routing Ran 58 OK; no test, fixture or oracle moved between VERIFY and REVIEW. Read-only AUDAPACK recompute: new repair_id 308736e217d3bd50b3be7fb17f578ad9416effcc97400460a62b4e386f27e079, board 0 state 0 adoption 0 lifecycle mutation atoms 0, one legacy-done-review operator decision (T-126), zero DONE reopened, zero attribution removed, T-192 untouched, AUDAPACK canonical digests unchanged. Verdict: DEC SHIP -- internal Work acceptance only, operator forbids release/tag/push. conf: high"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1341,
+        "event": "- 15.09.26 12:15 [E-6317] [parent: E-6316] [T-1334] [agent: codex] [op: transition-c42e964907cd4543948e9bc63201e6ab] RUN: transition to SHIP -- REVIEW verdict SHIP (E-6316). Scope owned by T-1334: tools/saipen_engine/log.py, tools/saipen_engine/reconcile.py, tools/saipen.py, tools/test_legacy_lifecycle_compat.py. Internal Work acceptance only; no release, tag or push."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1342,
+        "event": "- 15.09.26 12:15 [E-6318] [parent: E-6317] [T-1334] [agent: codex] [op: finish-d915a47c538d4dd7b3a66ac4cb6abb7c] DEC: ticket finished via SAIOPS -- completion (from SHIP)"
+      }
+    ],
+    "T-1335": [
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1343,
+        "event": "- 15.09.26 12:15 [E-6319] [parent: E-6318] [T-1335] [agent: codex] [op: ticket-f87dcb07f3184b268bc28d4c805175b6] DEC: ticket added via SAIOPS"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1344,
+        "event": "- 15.09.26 12:15 [E-6320] [parent: E-6319] [T-1335] [agent: codex] [op: claim-3291a45a33204dd4bbb83d3d91f35594] DEC: claimed via SAIOPS -- owner codex"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1345,
+        "event": "- 15.09.26 12:15 [E-6321] [parent: E-6320] [T-1335] [agent: codex] [op: transition-fddba89407d941e093212f85bc48517e] RUN: transition to SCOUT -- SCOUT: the asymmetric input is the validator HOME root, not the project root, so a neutral project fixture alone would not seal it. Both homes must come from the declared manifest surface."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1346,
+        "event": "- 15.09.26 12:15 [E-6322] [parent: E-6321] [T-1335] [agent: codex] [op: transition-644abf2eec604625ab2ec938f8179f3b] RUN: transition to BUILD -- BUILD: tools/test_validator_layout_parity.py rewritten to option B (complete validator parity over declared inputs). _manifest_members derives every shipped file from saipen/MANIFEST.json; _build_home materializes the source layout and the flattened layout from that SAME member list, so install layout is the only variable and no packaging-only root file exists in either home. _neutral_project builds a minimal project whose root carries nothing but .saipen/. Four tests: flattened protocol-document resolution, layout parity on the neutral project, layout parity on the live repository, and an explicit hermetic-seal test proving _AUDAPACK_MANIFEST.json is not a manifest member while the source layout still presents saipen/RFC.md so the closed-set check stays armed."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1347,
+        "event": "- 15.09.26 12:15 [E-6323] [parent: E-6322] [T-1335] [agent: codex] [op: transition-50405f71a09f4986a30c357ce0c67512] RUN: transition to VERIFY -- Enter VERIFY: run the suite from the live repository and from an AUDAPACK-shaped source snapshot."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1348,
+        "event": "- 15.09.26 12:16 [E-6324] [parent: E-6323] [T-1335] [agent: codex] [op: checkpoint-f6988c4cb77b44fb82433aa4c4e38b8c] RUN: VERIFY PASS -- tools.test_validator_layout_parity Ran 4 OK from the live repository AND Ran 4 OK from an AUDAPACK-shaped source snapshot carrying _AUDAPACK_MANIFEST.json at its root. The red condition is real and still detectable there: validate.py run with that snapshot as an uncontrolled home reports cross-doc drift [root-file-set] naming _AUDAPACK_MANIFEST.json, so the check is sealed out of the oracle, not silenced. Ruleset fingerprints identical across layouts; complete finding set identical on neutral and live projects; flattened capture shows no FileNotFoundError and no FINDINGS_CAPTURE_FAILED. ruff clean. conf: high"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1349,
+        "event": "- 15.09.26 12:16 [E-6325] [parent: E-6324] [T-1335] [agent: codex] [op: transition-72bbce3810ff4f00a4b0034899800343] RUN: transition to REVIEW -- VERIFY PASS. Enter REVIEW: independently re-run the suite in both contexts."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1351,
+        "event": "- 15.09.26 12:16 [E-6327] [parent: E-6326] [T-1335] [agent: codex] [op: checkpoint-d86ce7f6192c4ae58fc3be08f85c6252] RUN: REVIEW: independent re-run in both contexts, not reading the VERIFY claim -- live Ran 4 OK, AUDAPACK-shaped snapshot Ran 4 OK. No fixture or oracle moved between VERIFY and REVIEW. Verdict: DEC SHIP -- internal Work acceptance only, no release, tag or push. conf: high"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1352,
+        "event": "- 15.09.26 12:16 [E-6328] [parent: E-6327] [T-1335] [agent: codex] [op: transition-cad7a65ddb134d3d9fba84923065be24] RUN: transition to SHIP -- REVIEW verdict SHIP. Scope owned by T-1335: tools/test_validator_layout_parity.py only. T-1332 stays BLOCKED on installed-runtime parity, which this ticket does not touch."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1353,
+        "event": "- 15.09.26 12:16 [E-6329] [parent: E-6328] [T-1335] [agent: codex] [op: finish-ced4dd6e398345e99bc21de6fff54008] DEC: ticket finished via SAIOPS -- completion (from SHIP)"
+      }
+    ],
+    "T-1336": [
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1354,
+        "event": "- 15.09.26 12:20 [E-6330] [parent: E-6329] [T-1336] [agent: codex] [op: ticket-1f13d6dd2b9b43a294a14069db91b020] DEC: ticket added via SAIOPS"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1355,
+        "event": "- 15.09.26 12:20 [E-6331] [parent: E-6330] [T-1336] [agent: codex] [op: claim-10461c6083c5477a9d20fc4f942dac1a] DEC: claimed via SAIOPS -- owner codex"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1356,
+        "event": "- 15.09.26 12:20 [E-6332] [parent: E-6331] [T-1336] [agent: codex] [op: transition-7938c6143f794bfba2f32b35770216ea] RUN: transition to SCOUT -- SCOUT: validate.py:2629 iterates every ticket in any section; reconcile.py _board_adoption_repairs filters section not in (## TODO, ## DOING). The two must judge the SAME record set or the gate has no reachable repair."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1357,
+        "event": "- 15.09.26 12:23 [E-6333] [parent: E-6332] [T-1336] [agent: codex] [op: transition-53736a8512bc49d58d4e1b7993f2f785] RUN: transition to BUILD -- BUILD: reconcile.py _board_adoption_repairs now scans the record set the validator judges -- the section filter is gone, only an already-attested id is skipped. New regression tools/test_adoption_section_parity.py pins the parity property from both sides. tools/test_recovery_reachability.py test_a_parked_record_owns_no_adoption is replaced by test_a_parked_record_is_reachable_too: it asserted the defect as law."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1358,
+        "event": "- 15.09.26 12:23 [E-6334] [parent: E-6333] [T-1336] [agent: codex] [op: transition-766ceb9373304969822b14e148b2b636] RUN: transition to VERIFY -- Enter VERIFY: run the new parity matrix plus every suite that owns the adoption and recovery surfaces."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1359,
+        "event": "- 15.09.26 12:23 [E-6335] [parent: E-6334] [T-1336] [agent: codex] [op: checkpoint-8dabf9ca98054c56b1a140efd579eedf] RUN: VERIFY PASS -- adoption_section_parity 7 OK, recovery_reachability 63 OK, legacy_lifecycle_compat 25 OK, recover_approved_repair 5 OK, core_ownership_routing 28 OK, t1326_board_compaction 93 OK, validator_layout_parity 4 OK, guard_hostile_matrix 43 OK, opencode_adapter 21 OK, cold_agent_truth 17 OK, fleet smoke PASS FRESH, ruff clean. conf: high"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1360,
+        "event": "- 15.09.26 12:23 [E-6336] [parent: E-6335] [T-1336] [agent: codex] [op: transition-45f0df82d94f498c94fd78ad60254d15] RUN: transition to REVIEW -- VERIFY PASS. Enter REVIEW: independently re-run the ticket verify and confirm the real nine-record stop is now reachable."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1362,
+        "event": "- 15.09.26 12:23 [E-6338] [parent: E-6337] [T-1336] [agent: codex] [op: checkpoint-9abc7a3ae0f84746aa80ef09aad8d039] RUN: REVIEW: independent re-run on the same tree -- adoption_section_parity 7 OK, recovery_reachability 63 OK. The real stop is now reachable: saipen recover --dry-run reports RECONCILE_REAUTH_REQUIRED and names saipen recover --adopt-legacy T-1099,T-1257,T-1306,T-1309,T-1313,T-406,T-407,T-442,T-575 instead of certifying CLEAN over a red validator. Verdict: DEC SHIP. conf: high"
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1363,
+        "event": "- 15.09.26 12:23 [E-6339] [parent: E-6338] [T-1336] [agent: codex] [op: transition-eb5f8350ef0748488cb2511a198c90b3] RUN: transition to SHIP -- REVIEW verdict SHIP. Scope owned by T-1336: tools/saipen_engine/reconcile.py, tools/test_adoption_section_parity.py, tools/test_recovery_reachability.py. No release, tag or push."
+      },
+      {
+        "path": ".saipen\\logs\\LOG-017.md",
+        "line": 1364,
+        "event": "- 15.09.26 12:23 [E-6340] [parent: E-6339] [T-1336] [agent: codex] [op: finish-e62e0e8bb93b4aed9d9ef80287505603] DEC: ticket finished via SAIOPS -- completion (from SHIP)"
+      }
+    ]
+  },
+  "sealed_log_hashes": {
+    "LOG-001.md": "e86fc37508e79fa6f215dd280ca31386c0aa3bd636db613c515ce608f95c892c",
+    "LOG-002.md": "e50def4a7d73dcd3afc4010c6b075f55a81331094360b17a208ffaa2e2ca1915",
+    "LOG-003.md": "f588e05df2f6bf1caffcb21fb41c16cacf235724f21cac36d21f1133539d3b40",
+    "LOG-004.md": "ee4a099e7a86a098b0d708b2d2fad43d70e6fb7857c3318130fb3b12a40762d9",
+    "LOG-005.md": "cf21df0a6c8466c5045a2e8a308baa0231d769dacdfa24cf7134937ec19aec38",
+    "LOG-006.md": "9bbc60b3876195a0ab99f96e9ca3b3a9881ee794bcebbba1d238f9ea8f8648e4",
+    "LOG-007.md": "c5707e64c08c341354373dc88452d7d81536650cfb7000f2c6352d7e0cc01b9f",
+    "LOG-008.md": "904bac7c3d360bb53b99b57e6e45681c54b14c500c22d3d1099d4c0277645aa6",
+    "LOG-009.md": "7f12087dc2e7d7695a84daf2644920377bd13d833f29363285b98136450f0949",
+    "LOG-010.md": "dda04504759ff929d2366fe6740741f51e195bf437b87592cdc1d137d15f12e5",
+    "LOG-011.md": "d361b95c56dd1a7fdfcee8db6cb741dec5fc9d4d54e86af854c5a58abeffc115",
+    "LOG-012.md": "54e652cf571225de82f4a0ba462020f6b59d8f3d4c95abfa2b3e9b4931871390",
+    "LOG-013.md": "866836a8c89d508f49500e581dd319b4f985ed55cae1e7481e662c6d6398fec4",
+    "LOG-014.md": "e981819ba8a4ce26cc3d45694e739132459af7f5993dc375492531f57094b22a",
+    "LOG-015.md": "67d3b654da64b5dcc6a9a9f5f41fc3f8b88c4bd521773f762825b862e0fb5e02",
+    "LOG-016.md": "7657dce0a96a5ccc53e299bd6621f60619d3706a69b2fbeb4fa49449e157b9a0",
+    "LOG-017.md": "6c64a8b072e9cea9d088b27011b1c3c526f61637808f52d3b09459fdd284e00d",
+    "LOG-018.md": "c4b0f972689d0168c71cf5dc091e970b9acc99979397f245a04c1a5ad819b101"
+  },
+  "original_manifest_test_sha256": "3625103cbe0f67b249b2da10b5330ed321389a8998c8f5800a67275f7178f9de",
+  "original_manifest_test_count": 33,
+  "original_permission_error_literals_present": false,
+  "attribution_limit": "Owner labels and Git author/trailers do not authenticate a model. HEAD is a tracked predecessor, not proof of the last verified predecessor. No model-bound previous-Gemini change set is inferred."
+}

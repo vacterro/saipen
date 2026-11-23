@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-083:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1874",
+      "text": "Auto-catch finished SAIHANDOFF blocks and file them ready-to-use (FastPrompter-style path), plus GET-phase latency instrumentation for widget ZIP delivery",
+      "verification": "node --test tests/widget 0 fail; handoff/timing/probe pytest 105 PASS; handoff_drop.py Python/JS parity 0 diffs; widget 0.0.72 shipped:PASS",
+      "work": "T-236"
+    }
+  },
+  "schema_version": 1
+}

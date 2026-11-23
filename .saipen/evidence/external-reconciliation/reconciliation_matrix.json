@@ -1,0 +1,276 @@
+{
+  "candidates_qualified": 0,
+  "categories": [
+    "VERIFIED_ABSENT",
+    "VERIFIED_PRESENT_BUT_UNSATISFIED",
+    "INSUFFICIENT_EVIDENCE",
+    "UNAVAILABLE_INSPECTION",
+    "PROTECTED_OPERATOR_GATE"
+  ],
+  "generated_at": "2026-10-18T03:22:48.290360+00:00",
+  "receipt": "SRC-271",
+  "records": [
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "VERIFIED_ABSENT",
+      "external_system": "Kiro",
+      "live_disk_state": "No kiro executable found; ~/.kiro absent; read-only registry probe shows zero installation",
+      "refusal_code": "CAPABILITY_UNAVAILABLE",
+      "required_authority": "Declared ~/.kiro home, kiro CLI command on PATH, real host refused-effect proof",
+      "resolution": "NONE",
+      "source_receipts": [
+        "SRC-028",
+        "SRC-029",
+        "SRC-030",
+        "SRC-031",
+        "SRC-032",
+        "SRC-033",
+        "SRC-034",
+        "SRC-035"
+      ],
+      "ticket_id": "T-1317",
+      "trust_boundary_evaluation": "Installing mock kiro or faking CLI responses violates containment and protocol truth"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "UNAVAILABLE_INSPECTION",
+      "external_system": "ZAICODE",
+      "live_disk_state": "Separated production broker daemon absent; downstream doubles only; ten real positives unavailable",
+      "refusal_code": "HOST_AUTHORITY_UNAVAILABLE",
+      "required_authority": "Separated host authority broker; genuine positive acceptance on SRC-140 (R007/R008/R009/R012)",
+      "resolution": "NONE",
+      "source_receipts": [
+        "SRC-140",
+        "SRC-142",
+        "SRC-143",
+        "SRC-144"
+      ],
+      "ticket_id": "T-1563",
+      "trust_boundary_evaluation": "Cannot forge host authority or downgrade positive acceptance to fake HARD/DONE"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "INSUFFICIENT_EVIDENCE",
+      "external_system": "LIMISAW",
+      "live_disk_state": "Portable parity cannot construct external-identity authority without upstream release commit",
+      "refusal_code": "UPSTREAM_LINEAGE_ABSENT",
+      "required_authority": "Canonical upstream fix from LIMISAW repository (E-14562)",
+      "resolution": "NONE",
+      "source_receipts": [],
+      "ticket_id": "T-1602",
+      "trust_boundary_evaluation": "Local modification cannot fabricate external upstream commit lineage"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "UNAVAILABLE_INSPECTION",
+      "external_system": "ZAICODE",
+      "live_disk_state": "Engine delta verified (core unit green); real ZAICODE production installation absent",
+      "refusal_code": "PRODUCTION_DEPLOYMENT_ABSENT",
+      "required_authority": "Real ZAICODE production installation for downstream live acceptance (SRC-178:R002)",
+      "resolution": "NONE",
+      "source_receipts": [
+        "SRC-178"
+      ],
+      "ticket_id": "T-1647",
+      "trust_boundary_evaluation": "Synthesizing live daemon response without real deployment violates trust boundary"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "INSUFFICIENT_EVIDENCE",
+      "external_system": "SAITULS",
+      "live_disk_state": "Ticket requires delta is built and verified; SAITULS-044 binary absent from PATH",
+      "refusal_code": "EXTERNAL_RUNNER_UNAVAILABLE",
+      "required_authority": "Real SAITULS-044 CLI runner for SRC-188:R003",
+      "resolution": "NONE",
+      "source_receipts": [
+        "SRC-188"
+      ],
+      "ticket_id": "T-1663",
+      "trust_boundary_evaluation": "Mocking external CLI invocation does not constitute downstream integration proof"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "UNAVAILABLE_INSPECTION",
+      "external_system": "ZAICODE / SAIRouter",
+      "live_disk_state": "Local engine has no execution or mutation authority over foreign iteration engines",
+      "refusal_code": "FOREIGN_REPOSITORY_BOUNDARY",
+      "required_authority": "Native iteration controllers in ZAICODE and SAIRouter",
+      "resolution": "NONE",
+      "source_receipts": [],
+      "ticket_id": "T-1664",
+      "trust_boundary_evaluation": "Cannot execute or verify across foreign repository boundaries without upstream delivery"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "UNAVAILABLE_INSPECTION",
+      "external_system": "SMARTVAC",
+      "live_disk_state": "Engine delta verified; external transport broker absent",
+      "refusal_code": "TRANSPORT_BROKER_UNAVAILABLE",
+      "required_authority": "Real SMARTVAC-003 handoff transport deployment (SRC-193:R004)",
+      "resolution": "NONE",
+      "source_receipts": [
+        "SRC-193"
+      ],
+      "ticket_id": "T-1672",
+      "trust_boundary_evaluation": "Fabricating transport handshake violates contract boundary"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "UNAVAILABLE_INSPECTION",
+      "external_system": "FreeBuff / SAITULS / ZAICODE",
+      "live_disk_state": "Local engine has no launcher deployment authority in foreign trees",
+      "refusal_code": "FOREIGN_DEPLOYMENT_AUTHORITY",
+      "required_authority": "Launchers that hand a project to FreeBuff deployed in foreign repositories",
+      "resolution": "NONE",
+      "source_receipts": [],
+      "ticket_id": "T-1677",
+      "trust_boundary_evaluation": "Out-of-tree launcher changes cannot be claimed or simulated locally"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "PROTECTED_OPERATOR_GATE",
+      "external_system": "Operator Verification",
+      "live_disk_state": "Engine correction automated gates pass (6756+ tests); operator witness unapproved in OPERATOR-ACCEPTANCE.md",
+      "refusal_code": "OPERATOR_WITNESS_REQUIRED",
+      "required_authority": "Genuine original operator witness and native disposable-project acceptance for SRC-228:R019",
+      "resolution": "NONE",
+      "source_receipts": [
+        "SRC-228"
+      ],
+      "ticket_id": "T-1729",
+      "trust_boundary_evaluation": "Model cannot supply synthetic witness to bypass human operator gate"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "VERIFIED_PRESENT_BUT_UNSATISFIED",
+      "external_system": "SAITULS",
+      "live_disk_state": "Actual SAITULS core is CURRENT_FAIL; external test suite remains broken upstream",
+      "refusal_code": "UPSTREAM_SUITE_FAILING",
+      "required_authority": "SAITULS core test suite green pass for R008/R011/R012",
+      "resolution": "NONE",
+      "source_receipts": [
+        "SRC-236"
+      ],
+      "ticket_id": "T-1738",
+      "trust_boundary_evaluation": "Local engine cannot sign off on broken upstream dependency"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "UNAVAILABLE_INSPECTION",
+      "external_system": "SMARTVAC",
+      "live_disk_state": "Canonical ZAICODE ledger valid locally; remote broker deployment absent",
+      "refusal_code": "REMOTE_BROKER_ABSENT",
+      "required_authority": "SMARTVAC-005 broker deployment for remote mailbox sync",
+      "resolution": "NONE",
+      "source_receipts": [],
+      "ticket_id": "T-1740",
+      "trust_boundary_evaluation": "Remote mailbox sync cannot be verified without live broker service"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "UNAVAILABLE_INSPECTION",
+      "external_system": "ZAICODE",
+      "live_disk_state": "Signing oracle service absent locally",
+      "refusal_code": "SIGNING_ORACLE_ABSENT",
+      "required_authority": "Real AG3-token authentication protocol signing oracle (ZAICODE-025 for SRC-243:R009)",
+      "resolution": "NONE",
+      "source_receipts": [
+        "SRC-243"
+      ],
+      "ticket_id": "T-1754",
+      "trust_boundary_evaluation": "Protocol signing requires private key oracle; cannot manufacture signature"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "UNAVAILABLE_INSPECTION",
+      "external_system": "ZAICODE",
+      "live_disk_state": "Foreign sync unavailable in hermetic environment",
+      "refusal_code": "FOREIGN_SYNC_UNAVAILABLE",
+      "required_authority": "Live foreign repository sync for ZAICODE-028 audit layer (11 open clauses)",
+      "resolution": "NONE",
+      "source_receipts": [
+        "SRC-245"
+      ],
+      "ticket_id": "T-1764",
+      "trust_boundary_evaluation": "Multi-clause foreign audit cannot be closed without external sync"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "UNAVAILABLE_INSPECTION",
+      "external_system": "_SAIRELAY",
+      "live_disk_state": "Core sweep runs inside _SAIRELAY; authorized seat audit uncommitted",
+      "refusal_code": "AUTHORIZED_SEAT_AUDIT_ABSENT",
+      "required_authority": "Fresh replacement audit from authorized SAIRELAY seat for Core sweep",
+      "resolution": "NONE",
+      "source_receipts": [],
+      "ticket_id": "T-1783",
+      "trust_boundary_evaluation": "Local engine cannot generate external audit findings on behalf of foreign seat"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "UNAVAILABLE_INSPECTION",
+      "external_system": "SMARTVAC / ZAICODE",
+      "live_disk_state": "Aggregator unavailable locally",
+      "refusal_code": "TELEMETRY_PIPELINE_UNAVAILABLE",
+      "required_authority": "Freebuff Desktop CWD normalization in ZAICODE + SMARTVAC-008 telemetry aggregator",
+      "resolution": "NONE",
+      "source_receipts": [
+        "SRC-254"
+      ],
+      "ticket_id": "T-1794",
+      "trust_boundary_evaluation": "Telemetry aggregation requires live pipeline"
+    },
+    {
+      "blocker_code": "BLOCKED_EXTERNAL",
+      "candidate_qualified": false,
+      "disposition": "RETAIN_BLOCKED",
+      "evidence_classification": "PROTECTED_OPERATOR_GATE",
+      "external_system": "SAIRELAY",
+      "live_disk_state": "Five unswept stale findings; canonical validation CURRENT_FAIL; operator lift absent",
+      "refusal_code": "OPERATOR_LIFT_ABSENT",
+      "required_authority": "Explicit operator lift; authorized SAIRELAY seat captures A-F scope replacement audit",
+      "resolution": "NONE",
+      "source_receipts": [
+        "SRC-259"
+      ],
+      "ticket_id": "T-1800",
+      "trust_boundary_evaluation": "Reconcile fails closed; cannot unblock without operator lift and replacement audit"
+    }
+  ],
+  "resolutions_recorded": 0,
+  "schema_version": 2,
+  "ticket": "T-1812",
+  "total_historical_external_blockers": 16,
+  "total_unblocked": 0,
+  "truthful_zero_confirmed": true
+}

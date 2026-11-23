@@ -1,0 +1,15 @@
+Pending cumulative-batch reconciliation (T-1839) stops a later reviewed wave
+stranding earlier pending cohorts on obsolete shared-file hashes.
+`saipen cohort reconcile C-FINAL --from C-OLD[,C-OLD] --review-work T-N` reuses
+PLAN/APPLY, ownership, Source, verification and release owners. Every cohort must
+be pending and locally complete under its original owner; T-N must be finished,
+verified, a C-FINAL member and own its whole scope with inherited paths. Old
+hashes, BOARD rows and finishes stay unchanged. One journal-bound immutable
+receipt names the original cohorts and reviewed target; the old cohorts name it
+as publication successor and all membership freezes. Missing coverage,
+stale/unreviewed bytes, foreign owners, existing/nested links, shipped cohorts,
+corruption and conflicting retries refuse without writes; exact retry and dry-run
+write nothing. Inherited publication resolves only once the target holds a
+matching terminal release receipt; the ordinary final-generation evidence,
+staging and release gates still own publication.
+

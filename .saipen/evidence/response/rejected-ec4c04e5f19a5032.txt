@@ -1,0 +1,9 @@
+Mõlemad muudatused on tehtud ja testitud, aga mängus pole neid veel nähtud. Commitid on ainult lokaalselt, GitLabi pole pushinud.
+
+- **Algvägi kohe autonoomne** (`ffcfbc2`): mängu alguses saavad kõik sinu masinad, turretid, artillery ja service truckid sama töö, mis äsja ehitatud üksus. Erand on scavengerid, kes juba lähevad ise. Masin, millele annad esimestel sekunditel käsu, jääb sinu käsu peale. Sinu teha jääb ainult recycleri deploy. Test PASS.
+- **Baasi ehitus** (`34db0ec`): screenshotil on CPU ISDF baas. Selle power plantid on AIP-i omad ja nende kohti valib VRV ise. Plaan arvutatakse iga 10 s ümber ja iga valmis plant lükkas järgmise koha edasi: kuni 180 m külje peale, siis recycleri joonele, üks satuti ette. Nüüd lähevad olulised hooned recycleri taha lähimale vabale kohale 60 m sammuga ja ei satu kunagi recycleri joonest ettepoole. Baasi suund arvutatakse vaenlase recycleri järgi, mitte lendava mängija järgi. Taktika enda plantid ja bunkrid jäävad vaenlasest eemale jäävale küljele. Uued testid kukuvad vana koodiga ja läbivad uuega.
+- **Testid:** 33-st skriptist 32 PASS. `Test-Release` kukub, sest otsib vana installi-zipi, mida enam ei ehitata.
+- **Pakett:** `dist/VRV.zip` sha256 `de2ff709`. Proovi `vrv_latest_start.bat`-iga uues mängus: praegu jooksev mäng kasutab vanu DLL-e ja juba ehitatud hooned paigast ei liigu.
+- Logi põhjuse leidmiseks kopeerisin `VRV.log` ühe korra ajal, mil mäng oli pausil.
+
+Otsus sinu käes: pakett kannab praegu versiooni 0.3.11, aga GitLabi tag `v0.3.11` neid kahte commiti ei sisalda. Kas teen sellest 0.3.12 ja pushin GitLabi?

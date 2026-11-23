@@ -1,0 +1,36 @@
+{
+  "observed_utc": "2026-10-03T03:39:56.9484502Z",
+  "work": "T-1600",
+  "durable_proof": ".saipen/evidence/response-authority",
+  "fixtures": [
+    {
+      "path": "V:\\_TEMP_\\tmpbzro68zr",
+      "exists": false,
+      "classification": "EPHEMERAL_REPRODUCIBLE",
+      "owner": "installed synthetic controls",
+      "cleanup": "TemporaryDirectory process-exit cleanup"
+    },
+    {
+      "path": "V:\\_TEMP_\\tmpjfx71ecx",
+      "exists": false,
+      "classification": "EPHEMERAL_REPRODUCIBLE",
+      "owner": "installed synthetic controls",
+      "cleanup": "TemporaryDirectory process-exit cleanup"
+    },
+    {
+      "path": "V:\\_TEMP_\\tmppz5i0bjv",
+      "exists": false,
+      "classification": "EPHEMERAL_REPRODUCIBLE",
+      "owner": "installed synthetic controls",
+      "cleanup": "TemporaryDirectory process-exit cleanup"
+    },
+    {
+      "path": "V:\\_TEMP_\\tmpbacvqbux",
+      "exists": false,
+      "classification": "EPHEMERAL_REPRODUCIBLE",
+      "owner": "installed synthetic controls",
+      "cleanup": "TemporaryDirectory process-exit cleanup"
+    }
+  ],
+  "canonical_files_deleted": false
+}

@@ -1,0 +1,7 @@
+test_public_recovery_same_damage_preserves_bytes_and_resumes (test_log_tail_quarantine.QuarantineLogTailTests.test_public_recovery_same_damage_preserves_bytes_and_resumes)
+Same oracle reaches the old runtime, not an absent-API import. ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 1.236s
+
+OK

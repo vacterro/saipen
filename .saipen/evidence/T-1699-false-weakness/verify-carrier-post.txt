@@ -1,0 +1,9 @@
+test_heading_commentary_is_a_legal_control (__main__.CarrierContractTests.test_heading_commentary_is_a_legal_control) ... ok
+test_hostile_frame_is_present_without_a_heading (__main__.CarrierContractTests.test_hostile_frame_is_present_without_a_heading) ... ok
+test_readers_preserve_canonical_fixture_bytes (__main__.CarrierContractTests.test_readers_preserve_canonical_fixture_bytes) ... ok
+test_real_validator_rejects_the_injected_frame (__main__.CarrierContractTests.test_real_validator_rejects_the_injected_frame) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 4.997s
+
+OK

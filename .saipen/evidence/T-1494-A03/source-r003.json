@@ -1,0 +1,26 @@
+{
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "source",
+    "disp",
+    "SRC-112",
+    "R003",
+    "VERIFIED",
+    "--work",
+    "T-1494",
+    "--evidence",
+    "E-13961",
+    "--verification",
+    "Persistent 20/20 checkpoint continues with the same committed grant; test_t1494_continuation_authority -> 18 PASS; authentic pre-production RED/current GREEN with identical verifier and fixtures: verify-oracle-pair.json, safety-matrix.json.",
+    "--json"
+  ],
+  "exit_code": 0,
+  "session_capability": "no-publish",
+  "result": {
+    "ok": true,
+    "code": "COVERAGE_UPDATED",
+    "receipt": "SRC-112",
+    "rid": "SRC-112:R003",
+    "disposition": "VERIFIED"
+  }
+}

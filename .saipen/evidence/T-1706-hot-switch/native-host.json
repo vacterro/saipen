@@ -1,0 +1,36 @@
+{
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "tools.test_opencode_bound_launch_smoke",
+    "-v"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "started_utc": "2026-10-10T12:17:04.480076+00:00",
+  "finished_utc": "2026-10-10T12:18:38.926711+00:00",
+  "duration_s": 94.453,
+  "exit_code": 0,
+  "output": ".saipen/evidence/T-1706-hot-switch/native-host.txt",
+  "output_sha256": "d008f7a5af63fcf5756a3a5f4ff0e642daee7604bd66a9f4485394a44324b180",
+  "subject_before": {
+    "tools/saipen_engine/guard_events.py": "d800ed9425c3d5450eb4d024fceb7e60587b57ec8bc989502c2116c9fc17be42",
+    "tools/saipen_engine/admission.py": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+    "tools/test_t1705_lifecycle_write_preflight.py": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+    "tools/test_opencode_bound_launch_smoke.py": "4fe8bc30def8c6c0dc1daebef73ca8f575dd633a80d1093a161929ddd6a580f0",
+    "extensions/adapters/opencode/saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+    "saipen/CORE.md": "67852506019f05e6417d07de9915fab5337780052105dfb46497734b58555455",
+    "saipen/OPS.md": "1156215ad5d755a8ec6a3def14227fa5695c7ecc762bca86de2fae5654c22099"
+  },
+  "subject_after": {
+    "tools/saipen_engine/guard_events.py": "d800ed9425c3d5450eb4d024fceb7e60587b57ec8bc989502c2116c9fc17be42",
+    "tools/saipen_engine/admission.py": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+    "tools/test_t1705_lifecycle_write_preflight.py": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+    "tools/test_opencode_bound_launch_smoke.py": "4fe8bc30def8c6c0dc1daebef73ca8f575dd633a80d1093a161929ddd6a580f0",
+    "extensions/adapters/opencode/saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2",
+    "saipen/CORE.md": "67852506019f05e6417d07de9915fab5337780052105dfb46497734b58555455",
+    "saipen/OPS.md": "1156215ad5d755a8ec6a3def14227fa5695c7ecc762bca86de2fae5654c22099"
+  },
+  "subject_unchanged": true
+}

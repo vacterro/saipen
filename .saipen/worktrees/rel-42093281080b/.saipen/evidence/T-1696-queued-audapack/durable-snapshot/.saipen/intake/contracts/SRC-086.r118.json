@@ -1,0 +1,599 @@
+{
+  "clauses": {
+    "SRC-086:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rewrite or merge historical source receipts."
+    },
+    "SRC-086:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent a dependency on T-236 merely because this feature can reuse code implemented during T-236."
+    },
+    "SRC-086:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make the operator complete T-236 browser acceptance before beginning this feature."
+    },
+    "SRC-086:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "The operator must not need to:"
+    },
+    "SRC-086:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not hard-code a universal assumption that every provider has exactly one 5-hour limit."
+    },
+    "SRC-086:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Routine limit observation must not waste model quota."
+    },
+    "SRC-086:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never accidentally consume quota merely to check whether quota exists."
+    },
+    "SRC-086:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A trigger must never turn into two agents, two prompts, or two audits because the UI restarted or two processes observed the same due time."
+    },
+    "SRC-086:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not fabricate availability."
+    },
+    "SRC-086:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "But a stale optional limit source must not brick unrelated launchers or unrelated prepared jobs."
+    },
+    "SRC-086:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The operator must always be able to see:"
+    },
+    "SRC-086:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not treat launcher ids as the final account model."
+    },
+    "SRC-086:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Account identity must remain stable across application restarts."
+    },
+    "SRC-086:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not use display name alone as identity."
+    },
+    "SRC-086:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not include credentials in account ids."
+    },
+    "SRC-086:R016": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not persist tokens."
+    },
+    "SRC-086:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not hash secrets merely to use the hash as identity."
+    },
+    "SRC-086:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT recursively scan the whole user profile or disks."
+    },
+    "SRC-086:R019": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not parse credential values."
+    },
+    "SRC-086:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not display tokens."
+    },
+    "SRC-086:R021": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not store full auth files."
+    },
+    "SRC-086:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Discovery must be idempotent."
+    },
+    "SRC-086:R023": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not silently guess between multiple plausible launchers."
+    },
+    "SRC-086:R024": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not scatter provider-specific quota parsing through Qt widgets or launch code."
+    },
+    "SRC-086:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never invent percentages from incomplete information."
+    },
+    "SRC-086:R026": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Availability must consider all relevant hard windows."
+    },
+    "SRC-086:R027": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Detailed tooltip must display all known windows."
+    },
+    "SRC-086:R028": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not use model prompts as normal polling."
+    },
+    "SRC-086:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not modify the other applications state."
+    },
+    "SRC-086:R030": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create a hard dependency."
+    },
+    "SRC-086:R031": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not scrape screenshots or UI pixels."
+    },
+    "SRC-086:R032": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not probe more frequently merely because a timer exists."
+    },
+    "SRC-086:R033": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not run a minute-by-minute network poll for hours."
+    },
+    "SRC-086:R034": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not permanently switch the account to one-minute polling."
+    },
+    "SRC-086:R035": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repeated probe errors must back off."
+    },
+    "SRC-086:R036": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "One provider failure must not stop other account probes."
+    },
+    "SRC-086:R037": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not copy UI code blindly."
+    },
+    "SRC-086:R038": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make project rows dramatically taller."
+    },
+    "SRC-086:R039": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not turn ten launcher buttons into unreadable Christmas lights."
+    },
+    "SRC-086:R040": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "ERROR must not look identical to exhausted quota."
+    },
+    "SRC-086:R041": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not expose tokens or credential paths unnecessarily."
+    },
+    "SRC-086:R042": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not overload Settings with all runtime scheduling state."
+    },
+    "SRC-086:R043": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A prepared launch must be a real persistent scheduled entity."
+    },
+    "SRC-086:R044": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not store runtime state only in Qt widgets."
+    },
+    "SRC-086:R045": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not simply choose the newest .md in the folder."
+    },
+    "SRC-086:R046": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Project identity must match."
+    },
+    "SRC-086:R047": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not mutate the captured original."
+    },
+    "SRC-086:R048": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not log the entire command in general diagnostic logs."
+    },
+    "SRC-086:R049": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create a second audit dispatch implementation."
+    },
+    "SRC-086:R050": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not blindly pass Claude flags to Codex or Codex flags to ZCode."
+    },
+    "SRC-086:R051": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not depend forever on parsing --help on every launch."
+    },
+    "SRC-086:R052": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not hard-code a supposedly permanent model catalog."
+    },
+    "SRC-086:R053": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not guess arguments from internet memory."
+    },
+    "SRC-086:R054": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Prepared scheduling must not duplicate launcher implementation."
+    },
+    "SRC-086:R055": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "must go through the same authoritative launcher logic for:"
+    },
+    "SRC-086:R056": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create:"
+    },
+    "SRC-086:R057": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "After launch, prepared content must enter the agent reliably."
+    },
+    "SRC-086:R058": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT default to fragile keyboard simulation or SendKeys."
+    },
+    "SRC-086:R059": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not pretend a launched empty terminal executed the prepared work."
+    },
+    "SRC-086:R060": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A reset event must have a stable identity."
+    },
+    "SRC-086:R061": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A recurring ON RESET job must execute at most once for one reset event."
+    },
+    "SRC-086:R062": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A process restart at reset+30s must not create a second execution."
+    },
+    "SRC-086:R063": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not keep firing against the obsolete time."
+    },
+    "SRC-086:R064": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not store only a locale-formatted string."
+    },
+    "SRC-086:R065": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not silently forget it."
+    },
+    "SRC-086:R066": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "DO NOT ASSUME RESET SEMANTICS"
+    },
+    "SRC-086:R067": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The scheduler must know whether synchronization by first use is meaningful."
+    },
+    "SRC-086:R068": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not tell the user two accounts were synchronized when the provider uses a fixed independent schedule."
+    },
+    "SRC-086:R069": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not promise zero milliseconds."
+    },
+    "SRC-086:R070": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not lie about successful synchronization."
+    },
+    "SRC-086:R071": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "must avoid consuming model quota."
+    },
+    "SRC-086:R072": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never mix them."
+    },
+    "SRC-086:R073": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not assume using a \"cheap model\" starts the same 5h timer as the expensive model."
+    },
+    "SRC-086:R074": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not burn usage experimentally without explicit operator action."
+    },
+    "SRC-086:R075": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The prime action must:"
+    },
+    "SRC-086:R076": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent exact command flags."
+    },
+    "SRC-086:R077": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not optimize cost by starting the wrong timer."
+    },
+    "SRC-086:R078": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "It must never repeat merely because AUDAPACK restarted."
+    },
+    "SRC-086:R079": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "State transitions must be explicit."
+    },
+    "SRC-086:R080": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not infer scheduling state only from timestamps."
+    },
+    "SRC-086:R081": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A stale worker must not:"
+    },
+    "SRC-086:R082": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not depend on a Qt widget timer as the sole authority."
+    },
+    "SRC-086:R083": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create two independent schedulers in GUI and Bridge."
+    },
+    "SRC-086:R084": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not write runtime state into repository source files."
+    },
+    "SRC-086:R085": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not place provider auth tokens into scheduler JSON."
+    },
+    "SRC-086:R086": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not allow endless growth."
+    },
+    "SRC-086:R087": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not present inferred time with the same confidence as provider-supplied time."
+    },
+    "SRC-086:R088": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not build one giant form containing every option simultaneously."
+    },
+    "SRC-086:R089": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRY RUN must prove:"
+    },
+    "SRC-086:R090": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "It must create a normal execution receipt."
+    },
+    "SRC-086:R091": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not bypass exactly-once bookkeeping."
+    },
+    "SRC-086:R092": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prepared scheduling must build a project-aware handoff index."
+    },
+    "SRC-086:R093": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never select a handoff only because its filename happens to sort last."
+    },
+    "SRC-086:R094": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "must be treated as exact operator payload."
+    },
+    "SRC-086:R095": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not expand or reinterpret it inside AUDAPACK."
+    },
+    "SRC-086:R096": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create an archive hours in advance unless deliberately requested."
+    },
+    "SRC-086:R097": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not randomly pick."
+    },
+    "SRC-086:R098": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Avoid two due jobs simultaneously selecting the same sole available account."
+    },
+    "SRC-086:R099": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create hard quota reservations hours in advance unless configured."
+    },
+    "SRC-086:R100": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "It must never be presented as provider-enforced quota."
+    },
+    "SRC-086:R101": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not overbuild calendar recurrence if not required."
+    },
+    "SRC-086:R102": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not continue claiming \"synced\" forever."
+    },
+    "SRC-086:R103": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not use huge blocking popups."
+    },
+    "SRC-086:R104": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not encode meaning solely by color."
+    },
+    "SRC-086:R105": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not wait 15 minutes just because the periodic interval has not elapsed."
+    },
+    "SRC-086:R106": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not launch a second Claude 1 accidentally because scheduler did not know Project Room already launched one."
+    },
+    "SRC-086:R107": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not assume all models share the same quota."
+    },
+    "SRC-086:R108": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "the prepared model must map to the correct availability window."
+    },
+    "SRC-086:R109": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not execute PRIME specifically to align a quota bucket that is not proven."
+    },
+    "SRC-086:R110": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not fire twice because the clock moved backward."
+    },
+    "SRC-086:R111": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not silently launch a job six hours late unless policy permits it."
+    },
+    "SRC-086:R112": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not repeat a successful prime because final logging failed."
+    },
+    "SRC-086:R113": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not resend a prompt merely because the GUI did not receive the success notification."
+    },
+    "SRC-086:R114": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not kill an already-running provider process unless the operator explicitly requests it."
+    },
+    "SRC-086:R115": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Editing an armed job must invalidate/recompute:"
+    },
+    "SRC-086:R116": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not mutate an execution already CLAIMED."
+    },
+    "SRC-086:R117": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never persist:"
+    },
+    "SRC-086:R118": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not place them in:"
+    }
+  },
+  "derived_at": "2026-09-23T03:59:22Z",
+  "derived_from": "SRC-086",
+  "interpretation_revision": 118,
+  "schema_version": 1,
+  "source_sha256": "002b591c238663c159091f82fcad252951bcbae8c3c1398b23d0aed8dfdee3db"
+}

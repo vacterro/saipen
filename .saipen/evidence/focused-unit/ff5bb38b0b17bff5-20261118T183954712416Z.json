@@ -1,0 +1,401 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "ff5bb38b0b17bff5f45420fca11816ca826ed32006798a16cc2358326528687e",
+  "verdict": "PASS",
+  "patterns": [
+    "test_audit_route.py",
+    "test_command_routing.py",
+    "test_external_revalidation.py",
+    "test_protocol_registry.py",
+    "test_t1875_maintenance_wiring.py",
+    "test_t1931_campaign_lifecycle.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_audit_route.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_audit_route.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        22596
+      ],
+      "duration_s": 0.391,
+      "process_create_s": 0.031,
+      "ran": 32,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_blocked_audit_work_does_not_trip_route_violation (test_audit_route.AuditRouteWorkabilityTests.test_blocked_audit_work_does_not_trip_route_violation) ... ok\r\ntest_blocked_ticket_does_not_own_continuation (test_audit_route.AuditRouteWorkabilityTests.test_blocked_ticket_does_not_own_continuation) ... ok\r\ntest_missing_ticket_does_not_own_continuation (test_audit_route.AuditRouteWorkabilityTests.test_missing_ticket_does_not_own_continuation) ... ok\r\ntest_workable_audit_work_trips_route_violation_when_wandering (test_audit_route.AuditRouteWorkabilityTests.test_workable_audit_work_trips_route_violation_when_wandering) ... ok\r\ntest_workable_ticket_owns_continuation (test_audit_route.AuditRouteWorkabilityTests.test_workable_ticket_owns_continuation) ... ok\r\ntest_a_residue_only_inbox_never_trips_the_check (test_audit_route.DiagnosticsDoNotTripTests.test_a_residue_only_inbox_never_trips_the_check) ... ok\r\ntest_a_workable_layer_does_apply (test_audit_route.DiagnosticsDoNotTripTests.test_a_workable_layer_does_apply) ... ok\r\ntest_an_absent_inbox_never_trips_the_check (test_audit_route.DiagnosticsDoNotTripTests.test_an_absent_inbox_never_trips_the_check) ... ok\r\ntest_an_invalid_only_inbox_never_trips_the_check (test_audit_route.DiagnosticsDoNotTripTests.test_an_invalid_only_inbox_never_trips_the_check) ... ok\r\ntest_a_layer_with_no_linked_work_still_owns_the_route (test_audit_route.IngestRouteRequiresDoneWorkTests.test_a_layer_with_no_linked_work_still_owns_the_route) ... ok\r\ntest_blocked_external_work_does_not_own_the_ingest_route (test_audit_route.IngestRouteRequiresDoneWorkTests.test_blocked_external_work_does_not_own_the_ingest_route) ... ok\r\ntest_done_work_owns_the_ingest_route (test_audit_route.IngestRouteRequiresDoneWorkTests.test_done_work_owns_the_ingest_route) ... ok\r\ntest_open_ingest_work_does_not_trip_route_violation (test_audit_route.IngestRouteRequiresDoneWorkTests.test_open_ingest_work_does_not_trip_route_violation) ... ok\r\ntest_open_work_does_not_own_the_ingest_route (test_audit_route.IngestRouteRequiresDoneWorkTests.test_open_work_does_not_own_the_ingest_route) ... ok\r\ntest_a_continuation_naming_an_unclaimed_ticket_does_not_silence_it (test_audit_route.LiveTicketKeepsContinuationTests.test_a_continuation_naming_an_unclaimed_ticket_does_not_silence_it) ... ok\r\ntest_a_doing_ticket_alone_does_not_silence_the_check (test_audit_route.LiveTicketKeepsContinuationTests.test_a_doing_ticket_alone_does_not_silence_the_check) ... ok\r\ntest_a_live_phase_continuation_stays_quiet (test_audit_route.LiveTicketKeepsContinuationTests.test_a_live_phase_continuation_stays_quiet) ... ok\r\ntest_every_phase_name_counts_as_a_continuation (test_audit_route.LiveTicketKeepsContinuationTests.test_every_phase_name_counts_as_a_continuation) ... ok\r\ntest_live_continuation_returns_the_ticket_it_matched (test_audit_route.LiveTicketKeepsContinuationTests.test_live_continuation_returns_the_ticket_it_matched) ... ok\r\ntest_that_control_declares_both_files_its_condition_needs (test_audit_route.RedControlIsDeclaredTests.test_that_control_declares_both_files_its_condition_needs) ... ok\r\ntest_the_mutation_suite_carries_an_audit_route_control (test_audit_route.RedControlIsDeclaredTests.test_the_mutation_suite_carries_an_audit_route_control) ... ok\r\ntest_a_phase_route_is_matched_exactly (test_audit_route.UnfollowedRouteTests.test_a_phase_route_is_matched_exactly) ... ok\r\ntest_an_empty_next_action_goes_red_and_says_so (test_audit_route.UnfollowedRouteTests.test_an_empty_next_action_goes_red_and_says_so) ... ok\r\ntest_an_unrelated_next_action_goes_red (test_audit_route.UnfollowedRouteTests.test_an_unrelated_next_action_goes_red) ... ok\r\ntest_following_the_route_is_quiet (test_audit_route.UnfollowedRouteTests.test_following_the_route_is_quiet) ... ok\r\ntest_surrounding_whitespace_is_not_a_violation (test_audit_route.UnfollowedRouteTests.test_surrounding_whitespace_is_not_a_violation) ... ok\r\ntest_the_diagnostic_names_the_routed_action (test_audit_route.UnfollowedRouteTests.test_the_diagnostic_names_the_routed_action) ... ok\r\ntest_a_non_wait_violation_does_not_lecture_about_wait (test_audit_route.WaitHasNoScopeCategoryTests.test_a_non_wait_violation_does_not_lecture_about_wait) ... ok\r\ntest_a_scope_wait_goes_red (test_audit_route.WaitHasNoScopeCategoryTests.test_a_scope_wait_goes_red) ... ok\r\ntest_the_citation_is_skipped_when_no_category_set_is_supplied (test_audit_route.WaitHasNoScopeCategoryTests.test_the_citation_is_skipped_when_no_category_set_is_supplied) ... ok\r\ntest_the_diagnostic_cites_the_closed_set_as_the_reason (test_audit_route.WaitHasNoScopeCategoryTests.test_the_diagnostic_cites_the_closed_set_as_the_reason) ... ok\r\ntest_the_registry_wait_set_is_closed_and_has_no_scope_category (test_audit_route.WaitHasNoScopeCategoryTests.test_the_registry_wait_set_is_closed_and_has_no_scope_category) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 32 tests in 0.217s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_command_routing.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_command_routing.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        31644
+      ],
+      "duration_s": 60.359,
+      "process_create_s": 0.047,
+      "ran": 69,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "ation) ... ok\r\ntest_twin_inside_compound_command_resolves (test_command_routing.CliShortcutRoutingTests.test_twin_inside_compound_command_resolves) ... ok\r\ntest_undeclared_lookalikes_fail_closed_in_resolver (test_command_routing.CliShortcutRoutingTests.test_undeclared_lookalikes_fail_closed_in_resolver) ... ok\r\ntest_activation_template_declares_shortcut_gate (test_command_routing.CommandRoutingTests.test_activation_template_declares_shortcut_gate)\r\nThe ONE activation template carries the shortcut gate. ... ok\r\ntest_already_satisfied_terminology (test_command_routing.CommandRoutingTests.test_already_satisfied_terminology) ... ok\r\ntest_bare_sc_shortcut_resolves (test_command_routing.CommandRoutingTests.test_bare_sc_shortcut_resolves) ... ok\r\ntest_bare_shortcuts_from_live_table (test_command_routing.CommandRoutingTests.test_bare_shortcuts_from_live_table) ... ok\r\ntest_boot_declares_compound_first (test_command_routing.CommandRoutingTests.test_boot_declares_compound_first) ... ok\r\ntest_both_injectors_render_the_one_activation_template (test_command_routing.CommandRoutingTests.test_both_injectors_render_the_one_activation_template)\r\nBoth injectors must render the template, never embed a copy. ... ok\r\ntest_chain_continue_when_independent (test_command_routing.CommandRoutingTests.test_chain_continue_when_independent) ... ok\r\ntest_chain_not_run_after_blocked (test_command_routing.CommandRoutingTests.test_chain_not_run_after_blocked) ... ok\r\ntest_chain_stop_on_failure_default (test_command_routing.CommandRoutingTests.test_chain_stop_on_failure_default) ... ok\r\ntest_compound_newline_separated (test_command_routing.CommandRoutingTests.test_compound_newline_separated) ... ok\r\ntest_compound_shortcut_inside (test_command_routing.CommandRoutingTests.test_compound_shortcut_inside) ... ok\r\ntest_compound_two_segments (test_command_routing.CommandRoutingTests.test_compound_two_segments) ... ok\r\ntest_control_shortcut_payload_is_opaque_inside_compound (test_command_routing.CommandRoutingTests.test_control_shortcut_payload_is_opaque_inside_compound) ... ok\r\ntest_control_shortcuts_require_whole_first_token (test_command_routing.CommandRoutingTests.test_control_shortcuts_require_whole_first_token) ... ok\r\ntest_cut_confirmation_blocks_later_mutator_by_chain_policy (test_command_routing.CommandRoutingTests.test_cut_confirmation_blocks_later_mutator_by_chain_policy) ... ok\r\ntest_cyrillic_twin_shortcut (test_command_routing.CommandRoutingTests.test_cyrillic_twin_shortcut) ... ok\r\ntest_leading_shortcut_payload_routing (test_command_routing.CommandRoutingTests.test_leading_shortcut_payload_routing) ... ok\r\ntest_multiple_shortcuts (test_command_routing.CommandRoutingTests.test_multiple_shortcuts) ... ok\r\ntest_normal_mode_not_shortcut (test_command_routing.CommandRoutingTests.test_normal_mode_not_shortcut) ... ok\r\ntest_registry_owns_compound_and_truthfulness (test_command_routing.CommandRoutingTests.test_registry_owns_compound_and_truthfulness) ... ok\r\ntest_sc_not_stop_caveman (test_command_routing.CommandRoutingTests.test_sc_not_stop_caveman) ... ok\r\ntest_shortcut_nested_in_compound (test_command_routing.CommandRoutingTests.test_shortcut_nested_in_compound) ... ok\r\ntest_unknown_token_in_compound (test_command_routing.CommandRoutingTests.test_unknown_token_in_compound) ... ok\r\ntest_unknown_token_not_shortcut (test_command_routing.CommandRoutingTests.test_unknown_token_not_shortcut) ... ok\r\ntest_bare_continue_cc_are_identical_canonical_path (test_command_routing.CommandSemanticsTests.test_bare_continue_cc_are_identical_canonical_path)\r\nThe three forms hit the SAME deterministic continue handler and the ... ok\r\ntest_bare_continue_cc_identical_on_tripped_goal_valve (test_command_routing.CommandSemanticsTests.test_bare_continue_cc_identical_on_tripped_goal_valve)\r\nAliases share routing semantics; authority comes from the caller. ... ok\r\ntest_cc_never_creates_or_pivots_a_goal (test_command_routing.CommandSemanticsTests.test_cc_never_creates_or_pivots_a_goal) ... ok\r\ntest_cc_resumes_crew_target_not_normal_convergence (test_command_routing.CommandSemanticsTests.test_cc_resumes_crew_target_not_normal_convergence) ... ok\r\ntest_cc_resumes_existing_goal_preserving_objective (test_command_routing.CommandSemanticsTests.test_cc_resumes_existing_goal_preserving_objective) ... ok\r\ntest_empty_board_bare_and_cc_behave_identically (test_command_routing.CommandSemanticsTests.test_empty_board_bare_and_cc_behave_identically) ... ok\r\ntest_gg_bare_is_usage_line_never_resume (test_command_routing.CommandSemanticsTests.test_gg_bare_is_usage_line_never_resume) ... ok\r\ntest_gg_new_goal_is_create_pivot_not_resume (test_command_routing.CommandSemanticsTests.test_gg_new_goal_is_create_pivot_not_resume) ... ok\r\ntest_goal_plan_allocates_each_new_ticket_in_the_committed_history (test_command_routing.CommandSemanticsTests.test_goal_plan_allocates_each_new_ticket_in_the_committed_history) ... ok\r\ntest_normal_cc_enters_converge_never_implicit_add (test_command_routing.CommandSemanticsTests.test_normal_cc_enters_converge_never_implicit_add) ... ok\r\ntest_sc_is_crew_workflow_distinct_from_cc (test_command_routing.CommandSemanticsTests.test_sc_is_crew_workflow_distinct_from_cc) ... ok\r\ntest_tripped_goal_valve_cc_reauthorizes_keeps_objective (test_command_routing.CommandSemanticsTests.test_tripped_goal_valve_cc_reauthorizes_keeps_objective) ... ok\r\ntest_cyrillic_cc_stays_continue_never_stop_or_retired (test_command_routing.RetiredShortcutMigrationTests.test_cyrillic_cc_stays_continue_never_stop_or_retired) ... ok\r\ntest_instrumented_red_control_ss_to_stop_fails_the_instrument (test_command_routing.RetiredShortcutMigrationTests.test_instrumented_red_control_ss_to_stop_fails_the_instrument) ... ok\r\ntest_instrumented_ss_reaches_neither_stop_nor_status_implementation (test_command_routing.RetiredShortcutMigrationTests.test_instrumented_ss_reaches_neither_stop_nor_status_implementation) ... ok\r\ntest_mutation_difference_sss_ss_zero_st_checkpoints (test_command_routing.RetiredShortcutMigrationTests.test_mutation_difference_sss_ss_zero_st_checkpoints) ... ok\r\ntest_red_control_reintroduced_ss_or_sss_to_stop_fails (test_command_routing.RetiredShortcutMigrationTests.test_red_control_reintroduced_ss_or_sss_to_stop_fails) ... ok\r\ntest_registry_holds_st_not_ss (test_command_routing.RetiredShortcutMigrationTests.test_registry_holds_st_not_ss) ... ok\r\ntest_retired_ss_is_zero_mutation_refusal (test_command_routing.RetiredShortcutMigrationTests.test_retired_ss_is_zero_mutation_refusal) ... ok\r\ntest_sss_surplus_retains_refusal (test_command_routing.RetiredShortcutMigrationTests.test_sss_surplus_retains_refusal) ... ok\r\ntest_st_surplus_is_refused_like_stop_surplus (test_command_routing.RetiredShortcutMigrationTests.test_st_surplus_is_refused_like_stop_surplus) ... ok\r\ntest_stop_and_status_shortcuts_are_not_repeated_letter_siblings (test_command_routing.RetiredShortcutMigrationTests.test_stop_and_status_shortcuts_are_not_repeated_letter_siblings) ... ok\r\ntest_a_project_bound_store_verb_still_resolves_its_project (test_command_routing.StorageArityRoutingTests.test_a_project_bound_store_verb_still_resolves_its_project) ... ok\r\ntest_correct_arity_still_classifies (test_command_routing.StorageArityRoutingTests.test_correct_arity_still_classifies) ... ok\r\ntest_extra_argument_is_a_command_error (test_command_routing.StorageArityRoutingTests.test_extra_argument_is_a_command_error) ... ok\r\ntest_missing_class_argument_is_a_command_error (test_command_routing.StorageArityRoutingTests.test_missing_class_argument_is_a_command_error) ... ok\r\ntest_project_less_verbs_still_work_outside_any_project (test_command_routing.StorageArityRoutingTests.test_project_less_verbs_still_work_outside_any_project) ... ok\r\ntest_sibling_root_verbs_keep_their_arity_guard (test_command_routing.StorageArityRoutingTests.test_sibling_root_verbs_keep_their_arity_guard) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 69 tests in 60.121s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_external_revalidation.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_external_revalidation.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        28260
+      ],
+      "duration_s": 12.469,
+      "process_create_s": 0.031,
+      "ran": 36,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_h_audit_description_rejected (test_external_revalidation.TestExternalRevalidation.test_h_audit_description_rejected) ... ok\r\ntest_h_cache_invalidation_on_ext_head_change (test_external_revalidation.TestExternalRevalidation.test_h_cache_invalidation_on_ext_head_change) ... ok\r\ntest_h_commit_not_in_head_ancestry (test_external_revalidation.TestExternalRevalidation.test_h_commit_not_in_head_ancestry) ... ok\r\ntest_h_dangerous_payload_rejected (test_external_revalidation.TestExternalRevalidation.test_h_dangerous_payload_rejected) ... ok\r\ntest_h_dry_run_zero_bytes_and_purity (test_external_revalidation.TestExternalRevalidation.test_h_dry_run_zero_bytes_and_purity) ... ok\r\ntest_h_git_unavailable (test_external_revalidation.TestExternalRevalidation.test_h_git_unavailable) ... ok\r\ntest_h_incomplete_source_coverage_refuses (test_external_revalidation.TestExternalRevalidation.test_h_incomplete_source_coverage_refuses) ... ok\r\ntest_h_pipe_shell_injection_rejected (test_external_revalidation.TestExternalRevalidation.test_h_pipe_shell_injection_rejected) ... ok\r\ntest_h_semicolon_shell_injection_rejected (test_external_revalidation.TestExternalRevalidation.test_h_semicolon_shell_injection_rejected) ... ok\r\ntest_l_a_external_dependency_genuinely_completed (test_external_revalidation.TestExternalRevalidation.test_l_a_external_dependency_genuinely_completed) ... ok\r\ntest_l_b_external_ticket_done_but_commit_absent (test_external_revalidation.TestExternalRevalidation.test_l_b_external_ticket_done_but_commit_absent) ... ok\r\ntest_l_c_correct_commit_incorrect_lineage (test_external_revalidation.TestExternalRevalidation.test_l_c_correct_commit_incorrect_lineage) ... ok\r\ntest_l_d_correct_lineage_incorrect_work_identity (test_external_revalidation.TestExternalRevalidation.test_l_d_correct_lineage_incorrect_work_identity) ... ok\r\ntest_l_f_operator_decision_classification (test_external_revalidation.TestExternalRevalidation.test_l_f_operator_decision_classification) ... ok\r\ntest_l_g_project_inaccessible (test_external_revalidation.TestExternalRevalidation.test_l_g_project_inaccessible) ... ok\r\ntest_l_i_external_ticket_not_done (test_external_revalidation.TestExternalRevalidation.test_l_i_external_ticket_not_done) ... ok\r\ntest_l_j_cache_bypasses_repeated_inspections (test_external_revalidation.TestExternalRevalidation.test_l_j_cache_bypasses_repeated_inspections) ... ok\r\ntest_l_k_multiple_local_tickets_same_external (test_external_revalidation.TestExternalRevalidation.test_l_k_multiple_local_tickets_same_external) ... ok\r\ntest_l_l_one_resolves_another_remains_blocked (test_external_revalidation.TestExternalRevalidation.test_l_l_one_resolves_another_remains_blocked) ... ok\r\ntest_l_o_local_verification_command_fails (test_external_revalidation.TestExternalRevalidation.test_l_o_local_verification_command_fails) ... ok\r\ntest_l_p_zero_workable_to_runnable_parent_resume (test_external_revalidation.TestExternalRevalidation.test_l_p_zero_workable_to_runnable_parent_resume) ... ok\r\ntest_l_x_cli_revalidate_flag (test_external_revalidation.TestExternalRevalidation.test_l_x_cli_revalidate_flag) ... ok\r\ntest_l_y_one_cc_resolves_and_resumes_without_a_second_prompt (test_external_revalidation.TestExternalRevalidation.test_l_y_one_cc_resolves_and_resumes_without_a_second_prompt) ... ok\r\ntest_l_z_wait_user_decision_history_is_never_re_authorized (test_external_revalidation.TestExternalRevalidation.test_l_z_wait_user_decision_history_is_never_re_authorized) ... ok\r\ntest_m_a_legacy_dependency_absent_structured_metadata (test_external_revalidation.TestExternalRevalidation.test_m_a_legacy_dependency_absent_structured_metadata) ... ok\r\ntest_m_b_valid_historical_binding_reconstructed (test_external_revalidation.TestExternalRevalidation.test_m_b_valid_historical_binding_reconstructed) ... ok\r\ntest_m_e_local_verification_contract_missing (test_external_revalidation.TestExternalRevalidation.test_m_e_local_verification_contract_missing) ... ok\r\ntest_m_f_local_verification_contract_tampered (test_external_revalidation.TestExternalRevalidation.test_m_f_local_verification_contract_tampered) ... ok\r\ntest_m_k_missing_audit_transport_preserves_obligations (test_external_revalidation.TestExternalRevalidation.test_m_k_missing_audit_transport_preserves_obligations) ... ok\r\ntest_m_l_repeated_t1653_revalidation_without_relevant_change (test_external_revalidation.TestExternalRevalidation.test_m_l_repeated_t1653_revalidation_without_relevant_change) ... ok\r\ntest_m_m_meaningful_engine_generation_change (test_external_revalidation.TestExternalRevalidation.test_m_m_meaningful_engine_generation_change) ... ok\r\ntest_m_p_invalid_authority_causes_no_persistent_mutation (test_external_revalidation.TestExternalRevalidation.test_m_p_invalid_authority_causes_no_persistent_mutation) ... ok\r\ntest_m_q_repeated_cc_all_reaches_stable_fixed_point (test_external_revalidation.TestExternalRevalidation.test_m_q_repeated_cc_all_reaches_stable_fixed_point) ... ok\r\ntest_m_s_state_consistency_after_verification_failure (test_external_revalidation.TestExternalRevalidation.test_m_s_state_consistency_after_verification_failure) ... ok\r\ntest_one_work_costs_one_resolution_no_matter_how_many_receipts (test_external_revalidation.TestSupersededReceiptsAreNotReResolved.test_one_work_costs_one_resolution_no_matter_how_many_receipts)\r\nAC-01: 12 superseded receipts must not mean 12 resolutions. ... ok\r\ntest_the_cited_receipt_drives_the_resolution_not_the_newest_file (test_external_revalidation.TestSupersededReceiptsAreNotReResolved.test_the_cited_receipt_drives_the_resolution_not_the_newest_file)\r\nAC-02: a superseded receipt's identity must never be re-resolved. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 36 tests in 12.236s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_protocol_registry.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_protocol_registry.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        14756
+      ],
+      "duration_s": 0.344,
+      "process_create_s": 0.047,
+      "ran": 20,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_inventory_location_is_registry_owned (test_protocol_registry.CommandReferenceTests.test_inventory_location_is_registry_owned) ... ok\r\ntest_legacy_registry_keeps_original_inventory (test_protocol_registry.CommandReferenceTests.test_legacy_registry_keeps_original_inventory) ... ok\r\ntest_missing_declared_inventory_never_uses_legacy_prose (test_protocol_registry.CommandReferenceTests.test_missing_declared_inventory_never_uses_legacy_prose) ... ok\r\ntest_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) ... ok\r\ntest_all_16_phase_documents_exist (test_protocol_registry.ProtocolRegistryTests.test_all_16_phase_documents_exist) ... ok\r\ntest_every_declared_load_budget_is_measured_from_registry (test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry) ... ok\r\ntest_golden_command_and_chain_snapshots (test_protocol_registry.ProtocolRegistryTests.test_golden_command_and_chain_snapshots) ... ok\r\ntest_missing_registry_phase_fails_instead_of_disappearing (test_protocol_registry.ProtocolRegistryTests.test_missing_registry_phase_fails_instead_of_disappearing) ... ok\r\ntest_one_rule_one_owner (test_protocol_registry.ProtocolRegistryTests.test_one_rule_one_owner) ... ok\r\ntest_phase_max_median_and_tie_break_are_deterministic (test_protocol_registry.ProtocolRegistryTests.test_phase_max_median_and_tie_break_are_deterministic) ... ok\r\ntest_phase_metrics_do_not_change_load_profile_measurement (test_protocol_registry.ProtocolRegistryTests.test_phase_metrics_do_not_change_load_profile_measurement) ... ok\r\ntest_phase_metrics_measure_all_registry_phases_and_actual_bytes (test_protocol_registry.ProtocolRegistryTests.test_phase_metrics_measure_all_registry_phases_and_actual_bytes) ... ok\r\ntest_phase_preferences_are_registry_owned_and_not_hard_failures (test_protocol_registry.ProtocolRegistryTests.test_phase_preferences_are_registry_owned_and_not_hard_failures) ... ok\r\ntest_prose_rewrite_cannot_change_shortcut_behavior (test_protocol_registry.ProtocolRegistryTests.test_prose_rewrite_cannot_change_shortcut_behavior) ... ok\r\ntest_registry_absent_fails_closed (test_protocol_registry.ProtocolRegistryTests.test_registry_absent_fails_closed) ... ok\r\ntest_registry_confusable_fixture_drives_normalizer (test_protocol_registry.ProtocolRegistryTests.test_registry_confusable_fixture_drives_normalizer) ... ok\r\ntest_registry_fixture_drives_resolver (test_protocol_registry.ProtocolRegistryTests.test_registry_fixture_drives_resolver) ... ok\r\ntest_registry_malformed_fails_closed (test_protocol_registry.ProtocolRegistryTests.test_registry_malformed_fails_closed) ... ok\r\ntest_runtime_closed_sets_derive_from_registry (test_protocol_registry.ProtocolRegistryTests.test_runtime_closed_sets_derive_from_registry) ... ok\r\ntest_semantic_facts_name_owner_and_test (test_protocol_registry.ProtocolRegistryTests.test_semantic_facts_name_owner_and_test) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 20 tests in 0.134s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1875_maintenance_wiring.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1875_maintenance_wiring.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        37116
+      ],
+      "duration_s": 0.296,
+      "process_create_s": 0.046,
+      "ran": 11,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_the_controller_module_has_a_production_caller (test_t1875_maintenance_wiring.ProductionWiringTests.test_the_controller_module_has_a_production_caller)\r\nThe defect T-1871 shipped: a module with zero production callers. ... ok\r\ntest_absent_project_root_never_proves_a_campaign (test_t1875_maintenance_wiring.ProofTests.test_absent_project_root_never_proves_a_campaign) ... ok\r\ntest_shape_alone_is_not_proof (test_t1875_maintenance_wiring.ProofTests.test_shape_alone_is_not_proof)\r\nDefect 2: a well-formed tuple is not an operator grant. ... ok\r\ntest_a_campaign_capsule_is_not_silently_narrowed (test_t1875_maintenance_wiring.ReachabilityTests.test_a_campaign_capsule_is_not_silently_narrowed)\r\nThe granted scope must survive into the binding, not collapse. ... ok\r\ntest_a_capsule_can_request_the_campaign_scope (test_t1875_maintenance_wiring.ReachabilityTests.test_a_capsule_can_request_the_campaign_scope)\r\nDefect 1: `current_binding` hard-wired `goal_complete`. ... ok\r\ntest_bounded_state_does_not_claim_a_campaign (test_t1875_maintenance_wiring.ReachabilityTests.test_bounded_state_does_not_claim_a_campaign) ... ok\r\ntest_unknown_scope_still_collapses_to_the_bounded_scope (test_t1875_maintenance_wiring.ReachabilityTests.test_unknown_scope_still_collapses_to_the_bounded_scope)\r\nThe closed set is not widened: an invented scope is not a campaign. ... ok\r\ntest_external_audit_blocker_still_stops_without_a_campaign (test_t1875_maintenance_wiring.RoutingTests.test_external_audit_blocker_still_stops_without_a_campaign)\r\nH02: the ordinary goal contract keeps its STOP. ... ok\r\ntest_external_audit_blocker_yields_to_a_proven_campaign (test_t1875_maintenance_wiring.RoutingTests.test_external_audit_blocker_yields_to_a_proven_campaign)\r\nDefect 3 (H16): the external blocker must not stop independent work. ... ok\r\ntest_gate_refuses_an_unproven_claim_on_the_idle_boundary (test_t1875_maintenance_wiring.RoutingTests.test_gate_refuses_an_unproven_claim_on_the_idle_boundary)\r\nDefect 4: an unproven claim never buys autonomous discovery. ... ok\r\ntest_non_idle_routes_are_never_rewritten_by_the_gate (test_t1875_maintenance_wiring.RoutingTests.test_non_idle_routes_are_never_rewritten_by_the_gate)\r\nThe gate owns exactly the idle boundary, nothing else. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 11 tests in 0.017s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1931_campaign_lifecycle.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1931_campaign_lifecycle.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        37144
+      ],
+      "duration_s": 1.719,
+      "process_create_s": 0.063,
+      "ran": 27,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_active_campaign_cancel_is_durable_and_once_only (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_active_campaign_cancel_is_durable_and_once_only) ... ok\r\ntest_altered_attempt_receipt_never_becomes_a_success (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_altered_attempt_receipt_never_becomes_a_success) ... ok\r\ntest_cancel_and_parallel_step_while_worker_is_running (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_cancel_and_parallel_step_while_worker_is_running) ... ok\r\ntest_closed_positive_finite_budget_dimensions (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_closed_positive_finite_budget_dimensions) ... ok\r\ntest_completed_and_cancelled_states_are_immutable_under_cancel (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_completed_and_cancelled_states_are_immutable_under_cancel) ... ok\r\ntest_completed_worker_result_recovers_after_commit_lock_contention (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_completed_worker_result_recovers_after_commit_lock_contention) ... ok\r\ntest_corruption_never_becomes_absence (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_corruption_never_becomes_absence) ... ok\r\ntest_directory_at_state_path_is_not_absence (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_directory_at_state_path_is_not_absence) ... ok\r\ntest_durable_intent_precedes_worker_execution (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_durable_intent_precedes_worker_execution) ... ok\r\ntest_existing_valid_campaign_resumes_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_existing_valid_campaign_resumes_without_writes) ... ok\r\ntest_force_new_never_replaces_nonterminal_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_force_new_never_replaces_nonterminal_campaign) ... ok\r\ntest_forensic_backend_failures_never_become_quiescent_success (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_forensic_backend_failures_never_become_quiescent_success) ... ok\r\ntest_incompatible_schemas_never_overwritten (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_incompatible_schemas_never_overwritten) ... ok\r\ntest_incomplete_outcome_envelope_is_a_typed_refusal (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_incomplete_outcome_envelope_is_a_typed_refusal) ... ok\r\ntest_internal_typeerror_does_not_invoke_worker_three_times (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_internal_typeerror_does_not_invoke_worker_three_times) ... ok\r\ntest_interrupted_generation_preserves_identity_across_restart (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_interrupted_generation_preserves_identity_across_restart) ... ok\r\ntest_invalid_horizon_never_throws (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_horizon_never_throws) ... ok\r\ntest_invalid_persisted_counters_and_attempt_shape_refuse_without_writes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_persisted_counters_and_attempt_shape_refuse_without_writes) ... ok\r\ntest_invalid_replacement_grant_changes_nothing (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_invalid_replacement_grant_changes_nothing) ... ok\r\ntest_late_worker_cannot_overwrite_new_campaign (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_late_worker_cannot_overwrite_new_campaign) ... ok\r\ntest_max_cycles_survives_restart_and_is_not_completion (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_max_cycles_survives_restart_and_is_not_completion) ... ok\r\ntest_no_grant_creates_only_proposal (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_no_grant_creates_only_proposal) ... ok\r\ntest_positional_and_root_only_workers_remain_supported (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_positional_and_root_only_workers_remain_supported) ... ok\r\ntest_process_death_preserves_attempt_and_releases_lifecycle_lock (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_process_death_preserves_attempt_and_releases_lifecycle_lock) ... ok\r\ntest_terminal_replacement_retains_exact_original_bytes (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_terminal_replacement_retains_exact_original_bytes) ... ok\r\ntest_unknown_lifecycle_state_is_corrupt (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_unknown_lifecycle_state_is_corrupt) ... ok\r\ntest_worker_exception_is_unknown_outcome_and_never_blindly_retried (test_t1931_campaign_lifecycle.CampaignLifecycleTests.test_worker_exception_is_unknown_outcome_and_never_blindly_retried) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 27 tests in 1.413s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 195,
+  "duration_s": 76.485,
+  "timings_s": {
+    "execution_wall_s": 75.578,
+    "environment_identity_wall_s": 0.031,
+    "copy_wall_s": 0.563,
+    "hash_wall_s": 0.156,
+    "cleanup_wall_s": 0.11
+  },
+  "copy_metrics": {
+    "subject_copy_s": 0.532,
+    "canonical_copy_s": 0.031,
+    "canonical_copy_attempts": 1,
+    "trees": []
+  },
+  "sandbox_scope": {
+    "mode": "DECLARED",
+    "trees": [],
+    "undeclared": [],
+    "selected": [
+      "test_audit_route.py",
+      "test_command_routing.py",
+      "test_external_revalidation.py",
+      "test_protocol_registry.py",
+      "test_t1875_maintenance_wiring.py",
+      "test_t1931_campaign_lifecycle.py"
+    ],
+    "declared_by": {
+      "test_audit_route.py": [],
+      "test_command_routing.py": [],
+      "test_external_revalidation.py": [],
+      "test_protocol_registry.py": [],
+      "test_t1875_maintenance_wiring.py": [],
+      "test_t1931_campaign_lifecycle.py": []
+    },
+    "manifest_sha256": "254af0ff6d7d050c9a6caf7cd81b4997e0577a3ebe5625bf0c4f492aadf43cc0"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_audit_route.py",
+        "test_command_routing.py",
+        "test_external_revalidation.py",
+        "test_protocol_registry.py",
+        "test_t1875_maintenance_wiring.py",
+        "test_t1931_campaign_lifecycle.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "DECLARED",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "a7c96ea055dfd4913b850b6f50a9b57fc263f8d5d13f44d35a54b3571a44454a",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "2271ca5434892f15f981f28ed5ded00314be23f853d23c8db56c527f302b0463"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "6d51bf6ca978727f654fdccf6cd249534c0adb29e53fca7facedc0fb8d83150c"
+      },
+      "core_unit_shard.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "1a22bac5140eeaf33be64413027a22c474420dbe7e3c6134af9b5e6f90942c9d"
+      },
+      "test_runner.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "11eca655a72d976476797e3c1333714fc1e99c7c7b64dbf44d6865889d599456"
+      },
+      "verification_cache.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "70188f394bb84cc78fe2417daecf5b38b6abcd3be73956194baf1ef1911413ba"
+      },
+      "process_tree.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "798e6663a85d1906533203fe961472ad8eb8b7e645aa3961a694c1192ca5efcb"
+      },
+      "verification_bootstrap.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "8fa1c333bec82156f70bb66e7df786e99265d0b4c5f3da362a830bfc9198ab24"
+      },
+      "verification_impact.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "d2829c9de720e9b84d9dfa4056786c533bf9cff86913c5ed0546fe63e19f5a83"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "f008508f0f88d1c6a74f95d7e541a411a685b375404d7dd1ea49035ff7a5064c"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

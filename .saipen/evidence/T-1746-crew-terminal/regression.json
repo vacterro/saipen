@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t1746_crew_terminal_outcome.py", "-v"],
+  "format": "unittest",
+  "context": ["tools", "saipen", "tests", "extensions", "VERSION"],
+  "oracle_files": ["tools/test_t1746_crew_terminal_outcome.py", "tools/test_source_receipts.py"],
+  "subject_files": ["tools/saipen_engine/release.py", "tools/saipen_engine/crew.py", "tools/saipen_engine/operations.py"],
+  "before": {
+    "tools/saipen_engine/release.py": ".saipen/evidence/T-1746-crew-terminal/before/release.py",
+    "tools/saipen_engine/crew.py": ".saipen/evidence/T-1746-crew-terminal/before/crew.py",
+    "tools/saipen_engine/operations.py": ".saipen/evidence/T-1746-crew-terminal/before/operations.py"
+  },
+  "timeout": 300
+}

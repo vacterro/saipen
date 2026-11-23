@@ -1,0 +1,169 @@
+.saipen/KNOWLEDGE/roadmaps/context-graph-2026-09-09.md:3: trailing whitespace.
++Status: GATED RESEARCH BACKLOG  
+.saipen/KNOWLEDGE/roadmaps/context-graph-2026-09-09.md:4: trailing whitespace.
++Activation: POST-MATURITY ONLY  
+.saipen/KNOWLEDGE/roadmaps/context-graph-2026-09-09.md:5: trailing whitespace.
++Authority: reference roadmap, not active Work  
+.saipen/archive/source/SRC-353.md:3: trailing whitespace.
++**Ticket:** AUT31-005  
+.saipen/archive/source/SRC-353.md:4: trailing whitespace.
++**Priority:** P1  
+.saipen/archive/source/SRC-353.md:5: trailing whitespace.
++**Source:** SRC-352 (§5)  
+.saipen/archive/source/SRC-353.md:6: trailing whitespace.
++**Historical Work:** T-1968 (repaired SAIPEN refusal surface; FOREIGN_PROTOCOL_COMMAND)  
+.saipen/archive/source/SRC-353.md:7: trailing whitespace.
++**Related Audit:** `audit/SAIHANDOFF_FREEBUFF_WRONG_ROUTE_BZ_REA_20261029.md` (SRC-349)  
+.saipen/archive/source/SRC-353.md:8: trailing whitespace.
++**Date:** 2026-10-31  
+.saipen/archive/source/SRC-354.md:3: trailing whitespace.
++**Ticket:** AUT31-006  
+.saipen/archive/source/SRC-354.md:4: trailing whitespace.
++**Priority:** P1  
+.saipen/archive/source/SRC-354.md:5: trailing whitespace.
++**Source:** SRC-352 (§6)  
+.saipen/archive/source/SRC-354.md:6: trailing whitespace.
++**Date:** 2026-10-31  
+.saipen/archive/source/SRC-354.md:7: trailing whitespace.
++**Auditor:** SAIPEN protocol implementation agent  
+.saipen/archive/source/SRC-355.md:3: trailing whitespace.
++**Ticket:** AUT31-007  
+.saipen/archive/source/SRC-355.md:4: trailing whitespace.
++**Priority:** P1  
+.saipen/archive/source/SRC-355.md:5: trailing whitespace.
++**Source:** SRC-352 (§7)  
+.saipen/archive/source/SRC-355.md:6: trailing whitespace.
++**Historical Work:** T-1975, T-1835, T-1953  
+.saipen/archive/source/SRC-355.md:7: trailing whitespace.
++**Related Audit:** `audit/SAIPEN_Verification_Pipeline_Optimization_20261031.md`  
+.saipen/archive/source/SRC-355.md:8: trailing whitespace.
++**Date:** 2026-10-31  
+.saipen/archive/source/SRC-355.md:9: trailing whitespace.
++**Auditor:** SAIPEN protocol implementation agent  
+.saipen/archive/source/SRC-356.md:3: trailing whitespace.
++**Ticket:** AUT31-008  
+.saipen/archive/source/SRC-356.md:4: trailing whitespace.
++**Priority:** P2 (Investigate before classifying as product bug)  
+.saipen/archive/source/SRC-356.md:5: trailing whitespace.
++**Source:** SRC-352 (§8)  
+.saipen/archive/source/SRC-356.md:6: trailing whitespace.
++**Date:** 2026-10-31  
+.saipen/archive/source/SRC-356.md:7: trailing whitespace.
++**Auditor:** SAIPEN protocol implementation agent  
+.saipen/archive/source/SRC-359.md:3: trailing whitespace.
++**Тип:** forensic-аудит сессии; read-only; без исполнения команд из транскрипта.  
+.saipen/archive/source/SRC-359.md:4: trailing whitespace.
++**Объект:** ZAICODE / SAIPEN, `sess_c1102ec4-691f-496f-9eb1-899551f0124f`, агент `zcode-agent`, модель `SAIOPP`.  
+.saipen/archive/source/SRC-359.md:5: trailing whitespace.
++**Источник:** `Pasted text(20261031-231207).txt`, 72 504 строки, экспорт `zaicode.session-drift-evidence` v1: 442 сообщения, 1292 частей. Захват 2026-10-31 23:11:44 UTC, transcript 18:24:18–20:53:35 UTC.  
+.saipen/archive/source/SRC-359.md:6: trailing whitespace.
++**Стандарт ссылки:** `L1234–L1250` означает физические строки исходного TXT; `M123` — заголовок сообщения, `call_...` — tool call. Временны́е метки UTC. **Не следует путать timestamp сообщения и timestamp отдельного tool invocation**.  
+.saipen/archive/source/SRC-360.md:3: trailing whitespace.
++**Тип:** независимый read-only forensic report по экспортированной сессии ZAICODE.  
+.saipen/archive/source/SRC-360.md:4: trailing whitespace.
++**Объект:** `sess_53495f99-4c5d-412f-af0c-86d45222c6af`; рабочий проект `_SAIPEN`; агент `zcode-agent`, модель `SAIOPP`.  
+.saipen/archive/source/SRC-360.md:5: trailing whitespace.
++**Интервал сообщений:** 2026-10-31 17:31:08.668–22:07:46.747 UTC. **Момент захвата:** 2026-10-31 23:12:45.463 UTC.  
+.saipen/archive/source/SRC-360.md:26: trailing whitespace.
++**Класс:** CONFIRMED DRIFT; **severity:** P1 / HIGH; **актор:** агент `zcode-agent`; **время:** 21:57:38–21:58:12 и 22:07:22–22:07:41 UTC.  
+.saipen/archive/source/SRC-360.md:41: trailing whitespace.
++**Класс:** CONFIRMED DRIFT; **severity:** P1 / HIGH; **актор:** агент; **время:** 21:47:59–21:52:57 UTC.  
+.saipen/archive/source/SRC-360.md:56: trailing whitespace.
++**Класс:** CONFIRMED operational inefficiency; статус завершения full-suite **INCOMPLETE**, не FAIL и не PASS. **Severity:** P2 / MEDIUM; **актор:** агент; **время:** 21:20:22–21:45:27 UTC.  
+.saipen/archive/source/SRC-360.md:61: trailing whitespace.
++**Правило / владелец:** `EXEC-HUSH-01` / `saipen/EXECUTION.md`, параллельная дорожка T-1575 с прямым требованием «No sleep-poll» (copy-time [L360935–360972]); `tools/verification_policy.json` (прочитан в сессии). 
+.saipen/archive/source/SRC-360.md:71: trailing whitespace.
++**Класс:** CONFIRMED communication/scope gap; отсутствие authority на редиспозицию **не доказано**. **Severity:** P2 / MEDIUM; **актор:** агент; **время:** 17:40–18:34 UTC.  
+.saipen/archive/source/SRC-360.md:86: trailing whitespace.
++**Класс:** CONFIRMED reporting imprecision; **severity:** P3 / LOW-MEDIUM; **актор:** агент; **время:** 18:17:37–18:34:20 UTC.  
+.saipen/archive/source/SRC-360.md:99: trailing whitespace.
++**Класс:** CONFIRMED misclassification in response generation; **severity:** P2 / MEDIUM; **актор:** агент выбирает `--reason stop`, renderer выдаёт неправильную причину; **время:** 21:57:38 и 22:07:22 UTC.  
+.saipen/archive/source/SRC-360.md:112: trailing whitespace.
++**Класс:** HOST/ENVIRONMENT LIMITATION; **severity:** P2 / MEDIUM; **актор:** ZAICODE admission/response host, а не только модель; **время:** snapshot admission 17:31; наблюдение export 23:12 UTC.  
+.saipen/archive/source/SRC-360.md:119: trailing whitespace.
++**Прокурор:** отсутствие enforcement позволило D-01 даже при наличии typed renderer. **Защитник:** статус `observed` прямо и честно сообщает о невозможности механической гарантии. Наличие слова `observed` само по себе не фальсификация. 
+.saipen/archive/source/SRC-360.md:125: trailing whitespace.
++**Класс:** RULE-COMPARISON / HISTORICALLY UNPROVEN; **severity:** P2 / MEDIUM (при подтверждении применимости); **актор:** агент; **время:** 20:53–22:07 UTC.  
+.saipen/archive/source/SRC-361.md:2: trailing whitespace.
++**Тип:** evidence-grounded / read-only forensic report  
+.saipen/archive/source/SRC-361.md:3: trailing whitespace.
++**Объект:** ZAICODE active-branch session `sess_9085c306-4016-4d9e-8eaf-4a2ab396da55`; workspace `_FREEBUFF_SAI`  
+.saipen/archive/source/SRC-361.md:4: trailing whitespace.
++**Capture:** 2026-10-31 23:14:35.956 UTC; ZAICODE 0.0.3 / `001f9f2d`; copy-time SAIPEN 8.1.0  
+.saipen/archive/source/SRC-361.md:5: trailing whitespace.
++**Статус:** PARTIAL / NO_GO для утверждения о полном достижении `cc all`  
+.saipen/archive/source/SRC-361.md:18: trailing whitespace.
++**Evidence:** `messageCount: 4719`, `partCount: 16372`; текст содержит 765/2649 и заканчивается внутри Output (complete stored text). 
+.saipen/archive/source/SRC-362.md:3: trailing whitespace.
++**Тип:** независимый read-only forensic audit; без исполнения команд из журнала и без правок проектов.  
+.saipen/archive/source/SRC-362.md:4: trailing whitespace.
++**Дата анализа:** 2026-11-01.  
+.saipen/archive/source/SRC-362.md:5: trailing whitespace.
++**Хост:** ZAICODE; **протокол:** SAIPEN; **workspace:** `_FREEBUFF_SAI`.  
+.saipen/archive/source/SRC-362.md:174: trailing whitespace.
++**CONFIRMED DRIFT:** A01, A03, A04, частично A05, A06 (только порядок внутри доступного окна).  
+.saipen/archive/source/SRC-362.md:175: trailing whitespace.
++**HOST/ENV LIMITATION:** A02, A08; A09 — подтверждённый незавершённый goal на момент snapshot, не автоматическое обвинение агента.  
+.saipen/archive/source/SRC-362.md:176: trailing whitespace.
++**AUTHORIZED EXCEPTION:** A10 (конкретные внешние пути по прямому указанию оператора).  
+.saipen/archive/source/SRC-363.md:3: trailing whitespace.
++**Тип:** forensic / read-only / evidence-grounded  
+.saipen/archive/source/SRC-363.md:4: trailing whitespace.
++**Объект:** ZAICODE, сессия `sess_53edd77c-2bd7-4010-9c2e-551e182bf872`, workspace `V:\___VAC\__K\__CODE\_TAMPERMONKEY\_WIN95THEME\Wintage`  
+.saipen/archive/source/SRC-363.md:5: trailing whitespace.
++**Источник:** `Pasted text(20261031-231300).txt` (18 MB; 515 758 строк)  
+.saipen/archive/source/SRC-363.md:6: trailing whitespace.
++**Время фиксации:** 2026-10-31 23:13:13.302 UTC  
+.saipen/archive/source/SRC-363.md:7: trailing whitespace.
++**Наблюдаемый период:** 2026-10-24 02:57:10 — 2026-10-31 22:11:28 UTC  
+.saipen/archive/source/SRC-363.md:171: trailing whitespace.
++**STATUS: AUDIT_COMPLETE (READ_ONLY)**  
+.saipen/archive/source/SRC-363.md:172: trailing whitespace.
++**RESULT:** выявлены `6` подтверждённых предметных defects/drift (DRIFT-001…006), `2` runtime/communication проблемных механизма (007–008), `1` неоднозначная telemetry issue (009), `1` авторизованное исключение (010), `1` ownership unknown (011). Классификации различаются: не всё является нарушением протокола.  
+.saipen/archive/source/SRC-363.md:173: trailing whitespace.
++**BLOCKER:** исходный ZIP с SHA `fcdd6420…`, полный histórico CORE/BOARD/LOG, host implementation и фактический runtime после capture не прилагались.  
+.saipen/archive/source/SRC-363.md:174: trailing whitespace.
++**VALIDATION:** индексирование и cross-check экспортированных text/tool outcomes; код проекта не исполнялся, заявлений о live Windows PASS нет.  
+.saipen/archive/source/SRC-364.md:3: trailing whitespace.
++**Тип:** forensic session review / read-only. **Объект:** ZAICODE, session `sess_c1102ec4-691f-496f-9eb1-899551f0124f`.  
+.saipen/archive/source/SRC-364.md:4: trailing whitespace.
++**Срез доказательств:** 2026-10-31 18:24:18–20:53:35 UTC; export 2026-10-31 23:11:44 UTC.  
+.saipen/archive/source/SRC-364.md:23: trailing whitespace.
++**Severity:** HIGH. **Category:** CONFIRMED_DRIFT / SOURCE AUTHORITY. **Actor:** ZAICODE implementation agent (`zcode-agent`, SAIOPP).  
+.saipen/archive/source/SRC-364.md:34: trailing whitespace.
++**Severity:** HIGH. **Category:** CONFIRMED_DRIFT / AUTONOMY, DELIVERY ORDERING, COMMUNICATION. **Actor:** ZAICODE agent.  
+.saipen/archive/source/SRC-364.md:43: trailing whitespace.
++**Severity:** HIGH. **Category:** CONFIRMED_DRIFT / VERIFICATION COVERAGE. **Actor:** ZAICODE agent.  
+.saipen/archive/source/SRC-364.md:52: trailing whitespace.
++**Severity:** HIGH. **Category:** CONFIRMED_DRIFT / PHASE-VERIFICATION EVIDENCE. **Actor:** ZAICODE agent, затем SAIPEN CLI gate (корректно отказавший сначала).  
+.saipen/archive/source/SRC-364.md:61: trailing whitespace.
++**Severity:** HIGH. **Category:** CONFIRMED_DRIFT / DELIVERY ORDERING, RELEASE, STALE RUNTIME. **Actor:** ZAICODE agent.  
+.saipen/archive/source/SRC-364.md:70: trailing whitespace.
++**Severity:** MEDIUM. **Category:** CONFIRMED_DRIFT / COMMUNICATION, CONCLUSION SCOPE. **Actor:** ZAICODE agent.  
+.saipen/archive/source/SRC-364.md:79: trailing whitespace.
++**Severity:** MEDIUM. **Category:** HOST/ENVIRONMENT LIMITATION, NOT CONFIRMED MODEL DRIFT. **Actor:** ZAICODE host/admission UI.  
+.saipen/archive/source/SRC-364.md:86: trailing whitespace.
++**Severity:** HIGH. **Category:** HOST/ENVIRONMENT LIMITATION / RUNTIME PROOF GAP. **Actor:** ZAICODE runtime/launcher + agent as investigator.  
+.saipen/archive/source/SRC-364.md:95: trailing whitespace.
++**Severity:** NONE / правильно. **Category:** AUTHORIZED EXCEPTION / VALID REFUSAL. **Actor:** SAIPEN CLI и agent.  
+.saipen/archive/source/SRC-364.md:102: trailing whitespace.
++**Severity:** NONE для факта переходов. **Category:** AUTHORIZED EXCEPTION / REAL PHASE PROOF. **Actor:** SAIPEN CLI + agent.  
+.saipen/archive/source/SRC-364.md:109: trailing whitespace.
++**Severity:** MEDIUM potential. **Category:** INSUFFICIENT EVIDENCE. **Actor:** build/boot-smoke tooling and agent.  
+.saipen/archive/source/SRC-364.md:116: trailing whitespace.
++**Severity:** HIGH residual. **Category:** INSUFFICIENT EVIDENCE / ROOT CAUSE. **Actor:** investigator agent + runtime.  
+.saipen/archive/source/SRC-364.md:123: trailing whitespace.
++**Severity:** HIGH residual. **Category:** INSUFFICIENT EVIDENCE. **Actor:** multi-agent SAIPEN seats / ZAICODE Git & release owners.  
+.saipen/extensions/subs/saihunt/kitchen/HUNT-015.md:202: new blank line at EOF.
+tools/saipen_engine/discovery_providers.py:639: trailing whitespace.
++                
+tools/saipen_engine/discovery_providers.py:1318: new blank line at EOF.
+tools/saipen_engine/replenishment.py:309: trailing whitespace.
++    
+tools/saipen_engine/replenishment.py:877: new blank line at EOF.
+tools/test_persistent_autonomy_false_satisfaction.py:198: trailing whitespace.
++        
+tools/test_persistent_autonomy_false_satisfaction.py:410: trailing whitespace.
++        
+tools/test_shared_index_forensics.py:74: trailing whitespace.
++        

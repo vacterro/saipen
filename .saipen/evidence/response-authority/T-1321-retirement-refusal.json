@@ -1,0 +1,10 @@
+{
+  "ok": false,
+  "code": "RETIREMENT_AUTHORITY_REQUIRED",
+  "op_id": null,
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "system correction requires an integrity-checked source receipt",
+  "ticket": "T-1321",
+  "detail": "system correction requires an integrity-checked source receipt"
+}

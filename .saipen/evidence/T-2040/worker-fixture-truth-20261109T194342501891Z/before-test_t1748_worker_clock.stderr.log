@@ -1,0 +1,43 @@
+test_a_disabled_host_bound_turns_the_subject_check_red (test_t1748_worker_clock.WorkerClockControls.test_a_disabled_host_bound_turns_the_subject_check_red) ... ok
+test_a_too_early_host_bound_turns_the_subject_check_red (test_t1748_worker_clock.WorkerClockControls.test_a_too_early_host_bound_turns_the_subject_check_red) ... ok
+test_interruption_inside_state_write_preserves_the_successor (test_t1748_worker_clock.WorkerClockControls.test_interruption_inside_state_write_preserves_the_successor) ... FAIL
+test_normal_real_process_control (test_t1748_worker_clock.WorkerClockControls.test_normal_real_process_control) ... FAIL
+test_worker_without_cpu_beyond_old_idle_budget_stays_green (test_t1748_worker_clock.WorkerClockControls.test_worker_without_cpu_beyond_old_idle_budget_stays_green) ... FAIL
+
+======================================================================
+FAIL: test_interruption_inside_state_write_preserves_the_successor (test_t1748_worker_clock.WorkerClockControls.test_interruption_inside_state_write_preserves_the_successor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1748_worker_clock.py", line 101, in test_interruption_inside_state_write_preserves_the_successor
+    self.assertEqual(result.returncode, 0, result.stderr)
+AssertionError: 1 != 0 : AssertionError: {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-08b3c96528b4', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 3, 'worker_generation_count': 2, 'crash_recovery_count': 0, 'model_replacement_recovery_count': 0, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 2, 'slow_progress_slices': 1, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {}}, 'maximum_recovery_latency_seconds': 0.0, 'model': None, 'history': [{'cycle': 1, 'verdict': 'RUN_WORK', 'generation': 1, 'model': None, 'returncode': 1, 'failure': None, 'progressed': True, 'bounded': True, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 2, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+
+======================================================================
+FAIL: test_normal_real_process_control (test_t1748_worker_clock.WorkerClockControls.test_normal_real_process_control)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1748_worker_clock.py", line 93, in test_normal_real_process_control
+    self.assertEqual(result.returncode, 0, result.stderr)
+AssertionError: 1 != 0 : AssertionError: 'INCOMPLETE_DISCOVERY' != 'IDLE'
+- INCOMPLETE_DISCOVERY
++ IDLE
+ : {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-8adfa7194057', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 3, 'worker_generation_count': 2, 'crash_recovery_count': 0, 'model_replacement_recovery_count': 0, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 2, 'slow_progress_slices': 1, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {}}, 'maximum_recovery_latency_seconds': 0.0, 'model': None, 'history': [{'cycle': 1, 'verdict': 'RUN_WORK', 'generation': 1, 'model': None, 'returncode': 1, 'failure': None, 'progressed': True, 'bounded': True, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 2, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+
+======================================================================
+FAIL: test_worker_without_cpu_beyond_old_idle_budget_stays_green (test_t1748_worker_clock.WorkerClockControls.test_worker_without_cpu_beyond_old_idle_budget_stays_green)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1748_worker_clock.py", line 97, in test_worker_without_cpu_beyond_old_idle_budget_stays_green
+    self.assertEqual(result.returncode, 0, result.stderr)
+AssertionError: 1 != 0 : AssertionError: 'INCOMPLETE_DISCOVERY' != 'IDLE'
+- INCOMPLETE_DISCOVERY
++ IDLE
+ : {'gpu_lane': None, 'ok': False, 'code': 'SUPERVISE_STOPPED', 'run_id': 'run-4b898a90d5b5', 'stop': 'INCOMPLETE_DISCOVERY', 'reason': 'executable queue is empty; complete discovery and goal verification are not proven', 'operator_action': None, 'counters': {'cycles': 3, 'worker_generation_count': 2, 'crash_recovery_count': 0, 'model_replacement_recovery_count': 0, 'backoff_count': 0, 'await_count': 0, 'stolen_lease_count': 0, 'progress_slices': 2, 'slow_progress_slices': 1, 'manual_continue_count': 0, 'unknown_terminal_failure_count': 0, 'failures': {}}, 'maximum_recovery_latency_seconds': 0.0, 'model': None, 'history': [{'cycle': 1, 'verdict': 'RUN_WORK', 'generation': 1, 'model': None, 'returncode': 1, 'failure': None, 'progressed': True, 'bounded': True, 'output_tail': None, 'failure_text_tail': None}, {'cycle': 2, 'verdict': 'REPLACE_WORKER', 'generation': 2, 'model': None, 'returncode': 0, 'failure': None, 'progressed': True, 'bounded': False, 'output_tail': None, 'failure_text_tail': None}]}
+
+
+----------------------------------------------------------------------
+Ran 5 tests in 7.024s
+
+FAILED (failures=3)

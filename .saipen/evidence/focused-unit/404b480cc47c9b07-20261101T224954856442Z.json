@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "404b480cc47c9b074e93336b27df71058efce173e819a3e605423dc1ac6ddead",
+  "verdict": "PASS",
+  "patterns": [
+    "test_persistent_autonomy_false_satisfaction.py",
+    "test_shared_index_forensics.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_persistent_autonomy_false_satisfaction.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_persistent_autonomy_false_satisfaction.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        26852
+      ],
+      "duration_s": 0.453,
+      "process_create_s": 0.047,
+      "ran": 24,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_r001_hash_prefixed_reverse_filename_sort_does_not_select_old_pass (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r001_hash_prefixed_reverse_filename_sort_does_not_select_old_pass)\r\nR001: Reverse filename sort would pick 'fcff...' (old PASS); execution-time selects '45bd...' (new FAIL). ... ok\r\ntest_r002_older_pass_and_newer_fail_selects_fail (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r002_older_pass_and_newer_fail_selects_fail)\r\nR002: Newer FAIL takes precedence over older PASS. ... ok\r\ntest_r003_focused_pass_does_not_clear_full_family_fail (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r003_focused_pass_does_not_clear_full_family_fail)\r\nR003: A focused test run or partial scope cannot satisfy a full-family goal. ... ok\r\ntest_r004_pass_for_unrelated_fingerprint_is_stale (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r004_pass_for_unrelated_fingerprint_is_stale)\r\nR004: PASS for an unrelated source fingerprint must be classified as STALE_PASS. ... ok\r\ntest_r005_source_modified_after_pass_invalidates_freshness (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r005_source_modified_after_pass_invalidates_freshness)\r\nR005: Source modified after an otherwise valid PASS makes evidence stale. ... ok\r\ntest_r006_complete_pass_with_current_identity_is_satisfied (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r006_complete_pass_with_current_identity_is_satisfied)\r\nR006: Complete PASS on current tree with matching fingerprint is SATISFIED. ... ok\r\ntest_r007_failed_evidence_with_red_and_no_legacy_failures_field (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r007_failed_evidence_with_red_and_no_legacy_failures_field)\r\nR007: Provider correctly extracts failures from 'red' when 'failures' is absent. ... ok\r\ntest_r008_baseline_fail_with_no_new_red_is_baseline_blocked (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r008_baseline_fail_with_no_new_red_is_baseline_blocked)\r\nR008: Baseline failures with zero new-red items must not be falsely SATISFIED. ... ok\r\ntest_r009_invalid_or_corrupted_evidence_record_rejected (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r009_invalid_or_corrupted_evidence_record_rejected)\r\nR009: Corrupted JSON or record missing schema fields rejected as INVALID_EVIDENCE. ... ok\r\ntest_r010_missing_matching_evidence_handled_honestly (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r010_missing_matching_evidence_handled_honestly)\r\nR010: Empty evidence directory returns honest MISSING_EVIDENCE. ... ok\r\ntest_r011_registered_goal_persists_and_recovers_from_canonical_path (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r011_registered_goal_persists_and_recovers_from_canonical_path)\r\nR011: Goal stored at canonical .saipen/goals/ path is recoverable directly. ... ok\r\ntest_r012_duplicate_registered_goal_refused (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r012_duplicate_registered_goal_refused)\r\nR012: Registering a goal that already exists raises DuplicateGoalError. ... ok\r\ntest_r013_goal_registered_does_not_grant_authority (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r013_goal_registered_does_not_grant_authority)\r\nR013: A registered goal JSON grants zero authorization without an operator grant. ... ok\r\ntest_r014_legacy_capsule_supplied_to_campaign_admission_rejected (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r014_legacy_capsule_supplied_to_campaign_admission_rejected)\r\nR014: Legacy goal continuation capsule is rejected by campaign_authority. ... ok\r\ntest_r015_campaign_capsule_supplied_to_legacy_goal_authorization_rejected (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r015_campaign_capsule_supplied_to_legacy_goal_authorization_rejected)\r\nR015: Campaign authorization capsule is rejected by goal_authority. ... ok\r\ntest_r016_campaign_capsule_wrong_target_project_or_host_rejected (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r016_campaign_capsule_wrong_target_project_or_host_rejected)\r\nR016: Campaign capsule with missing/empty host or target_project rejected. ... ok\r\ntest_r017_campaign_capsule_expired_or_invalid_budget_rejected (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r017_campaign_capsule_expired_or_invalid_budget_rejected)\r\nR017: Campaign capsule with non-positive budget or expired timestamp rejected. ... ok\r\ntest_r018_campaign_capsule_correctly_authenticated (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r018_campaign_capsule_correctly_authenticated)\r\nR018: Valid campaign capsule with correct fields and budget parses cleanly. ... ok\r\ntest_r019_zero_new_defects_unchanged_generation_is_pure (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r019_zero_new_defects_unchanged_generation_is_pure)\r\nR019: Evaluating unchanged generation with zero new defects mutates zero bytes. ... ok\r\ntest_r020_newly_arrived_evidence_resumes_from_quiescence (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r020_newly_arrived_evidence_resumes_from_quiescence)\r\nR020: Arrival of new test failure record turns quiescent state into ACTIONABLE_GAPS. ... ok\r\ntest_r021_full_suite_pass_does_not_clear_backlog_gaps (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r021_full_suite_pass_does_not_clear_backlog_gaps)\r\nR021: Comprehensive maintenance provider keeps goal active if backlog has items. ... ok\r\ntest_r022_native_successor_model_turn_execution_interface (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r022_native_successor_model_turn_execution_interface)\r\nR022: Discovery candidates produce valid candidate tasks with actionable runnable commands. ... ok\r\ntest_r023_release_blocked_while_independent_engineering_continues (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r023_release_blocked_while_independent_engineering_continues)\r\nR023: Release gate being blocked does not suppress local goal evaluation. ... ok\r\ntest_r024_no_false_project_completion_from_one_clean_test_family (test_persistent_autonomy_false_satisfaction.FalseSatisfactionRegressionTests.test_r024_no_false_project_completion_from_one_clean_test_family)\r\nR024: One clean test family does not conclude multi-signal project completion. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 24 tests in 0.239s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_shared_index_forensics.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_shared_index_forensics.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        28416
+      ],
+      "duration_s": 4.859,
+      "process_create_s": 0.047,
+      "ran": 17,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_01_historical_count_differs_from_current_index_count (test_shared_index_forensics.SharedIndexForensicsTests.test_01_historical_count_differs_from_current_index_count)\r\nControl 1: Detects discrepancy when staged count differs from historical 206 count. ... ok\r\ntest_02_staged_file_belongs_to_different_ticket (test_shared_index_forensics.SharedIndexForensicsTests.test_02_staged_file_belongs_to_different_ticket)\r\nControl 2: Staged file under .saipen/archive/source/SRC-### is OTHER_TICKET_OR_COHORT. ... ok\r\ntest_03_staged_file_belongs_to_genuine_foreign_owner (test_shared_index_forensics.SharedIndexForensicsTests.test_03_staged_file_belongs_to_genuine_foreign_owner)\r\nControl 3: Foreign project files are identified as FOREIGN_PROJECT_OR_OWNER. ... ok\r\ntest_04_ambiguous_provenance_preserved_rather_than_adopted (test_shared_index_forensics.SharedIndexForensicsTests.test_04_ambiguous_provenance_preserved_rather_than_adopted)\r\nControl 4: Ambiguous files are not adopted into release and marked AMBIGUOUS_PROVENANCE. ... ok\r\ntest_05_staged_rename_deletion_mode_change_and_unmerged_conflict (test_shared_index_forensics.SharedIndexForensicsTests.test_05_staged_rename_deletion_mode_change_and_unmerged_conflict)\r\nControl 5: Accurately parses renames, deletions, mode changes. ... ok\r\ntest_06_traversal_escape_and_windows_path_collision (test_shared_index_forensics.SharedIndexForensicsTests.test_06_traversal_escape_and_windows_path_collision)\r\nControl 6: Traversal paths and escaped paths are rejected by transfer_reviewed_scope. ... ok\r\ntest_07_concurrently_changing_original_index_detected (test_shared_index_forensics.SharedIndexForensicsTests.test_07_concurrently_changing_original_index_detected)\r\nControl 7: Index modification by concurrent writer detected and refused. ... ok\r\ntest_08_isolated_worktree_excludes_every_unreviewed_foreign_entry (test_shared_index_forensics.SharedIndexForensicsTests.test_08_isolated_worktree_excludes_every_unreviewed_foreign_entry)\r\nControl 8: Transferring reviewed scope only copies requested paths. ... ok\r\ntest_09_failed_release_does_not_mutate_or_erase_original_staged_bytes (test_shared_index_forensics.SharedIndexForensicsTests.test_09_failed_release_does_not_mutate_or_erase_original_staged_bytes)\r\nControl 9: Shared index bytes remain byte-for-byte identical after operations. ... ok\r\ntest_10_release_plan_becomes_stale_and_is_safely_rebuilt (test_shared_index_forensics.SharedIndexForensicsTests.test_10_release_plan_becomes_stale_and_is_safely_rebuilt)\r\nControl 10: Stale plan is detected and can be rebuilt cleanly. ... ok\r\ntest_11_previous_cohort_already_synchronized_new_cohort_still_pending (test_shared_index_forensics.SharedIndexForensicsTests.test_11_previous_cohort_already_synchronized_new_cohort_still_pending)\r\nControl 11: Exact commit SHA matching prevents treating older remote SHA as sync proof. ... ok\r\ntest_12_wrong_remote_unsafe_visibility_non_fast_forward_refused (test_shared_index_forensics.SharedIndexForensicsTests.test_12_wrong_remote_unsafe_visibility_non_fast_forward_refused)\r\nControl 12: execute_isolated_release refuses unconfigured remote. ... ok\r\ntest_13_stale_full_suite_evidence_cannot_approve_changed_release_bytes (test_shared_index_forensics.SharedIndexForensicsTests.test_13_stale_full_suite_evidence_cannot_approve_changed_release_bytes)\r\nControl 13: Core-unit evidence checks tree fingerprint; stale runs cannot approve release. ... ok\r\ntest_14_valid_broker_receipt_passes_missing_forged_refuses (test_shared_index_forensics.SharedIndexForensicsTests.test_14_valid_broker_receipt_passes_missing_forged_refuses)\r\nControl 14: Campaign broker grant checks presence of valid signed receipt. ... ok\r\ntest_15_unrelated_authorized_work_continues_while_release_blocked (test_shared_index_forensics.SharedIndexForensicsTests.test_15_unrelated_authorized_work_continues_while_release_blocked)\r\nControl 15: Blocked release lane does not halt independent TODO work. ... ok\r\ntest_16_no_duplicate_commit_tag_or_push_after_crash_or_retry (test_shared_index_forensics.SharedIndexForensicsTests.test_16_no_duplicate_commit_tag_or_push_after_crash_or_retry)\r\nControl 16: Safe idempotency prevents re-creating existing git tags. ... ok\r\ntest_17_verified_remote_commit_matches_expected_exact_sha (test_shared_index_forensics.SharedIndexForensicsTests.test_17_verified_remote_commit_matches_expected_exact_sha)\r\nControl 17: Remote head must equal exact expected commit SHA. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 17 tests in 4.496s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 41,
+  "duration_s": 108.188,
+  "timings_s": {
+    "execution_wall_s": 5.312,
+    "environment_identity_wall_s": 0.031,
+    "copy_wall_s": 84.656,
+    "hash_wall_s": 0.188,
+    "cleanup_wall_s": 17.985
+  },
+  "copy_metrics": {
+    "subject_copy_s": 22.734,
+    "canonical_copy_s": 61.735,
+    "canonical_copy_attempts": 1,
+    "trees": null,
+    "pointers": {
+      "rewritten": [
+        "bin/saipen.cmd",
+        "bin/saipen",
+        ".saipen/STATE.md"
+      ],
+      "home": "C:/temp/saipen-core-unit-qbmlhb3m/project"
+    }
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_persistent_autonomy_false_satisfaction.py",
+      "test_shared_index_forensics.py"
+    ],
+    "manifest_sha256": "3074253aa569fc7009f08347adf22f8bb6ea529b6d775987fc1d90b7b8dd76a4"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_persistent_autonomy_false_satisfaction.py",
+        "test_shared_index_forensics.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "7aa6f721d417765af82be478594118cc39d400b020cf0bea8367446bf3ece957",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "2271ca5434892f15f981f28ed5ded00314be23f853d23c8db56c527f302b0463"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "a47f93dee387b41f3ac6e6755a3bd8083826824b65f31590a35ebc3d061ae5a7"
+      },
+      "core_unit_shard.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "b31bafde4ad2f78069e8f5ef839e26c59a4cbb38c9bcc4a19ad3e7acee7b6be0"
+      },
+      "test_runner.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "07a8109e808f10bb5268ac12f0da981db4b1fad2ec97a58da84f13b0509a1e81"
+      },
+      "verification_cache.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "e3ef0d9f3d48c1d6afa7af2bb383ce2ae57149f0c76bd5bc9efee06443566af7"
+      },
+      "process_tree.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "e5f07f80d2a6802d95c3ccbebe4ca5f66cdbbcbb25b13450123baa896d8e8356"
+      },
+      "verification_bootstrap.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "df9bdce3388bf2511ce13a5a4329219810096ac58be0323675afd78b48cb605e"
+      },
+      "verification_impact.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "cf5c146ee2931cc1baa2765fa00e8bb9129d3370cb8bb8a2b7eb020dd8bba455"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "2d091fe11e7e6cf4002e34bc6c69f0104a53378e6980e906842eeeb973ffcade"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

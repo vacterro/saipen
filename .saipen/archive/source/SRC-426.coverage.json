@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-426:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2092 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:12 record:.saipen/evidence/focused-unit/d1c61c0e4c3520e3-20261118T125705847173Z.json sha256:f2e7d7f4a220590525f268905684d7d9ff17094f758a6d771ee224a5a277928f",
+      "text": "HYPERLEAN NIGHT SHIFT 7 (SAIHANDOFF 2026-11-18): parallel-agent verification isolation, verification cost optimization, T-2090/T-2091 lifecycle recovery, autonomy, release convergence",
+      "verification": "the Work this request created reached its own verification gate; see the T-2092 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2092"
+    }
+  },
+  "schema_version": 1
+}

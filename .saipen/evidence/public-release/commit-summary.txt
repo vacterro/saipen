@@ -1,0 +1,27 @@
+added:21 deleted:6716 modified:54
+deleted under .saipen/kitchen: 4509
+deleted under saitranslate   : 2167
+deleted bin/                : ['bin/saipen', 'bin/saipen.cmd']
+added evidence debris       : []
+added (kept):
+   + .saipen/intake/active/SRC-167.md
+   + .saipen/intake/active/SRC-167.meta.json
+   + .saipen/intake/active/SRC-168.md
+   + .saipen/intake/active/SRC-168.meta.json
+   + .saipen/intake/active/SRC-169.md
+   + .saipen/intake/active/SRC-169.meta.json
+   + .saipen/intake/contracts/SRC-118.r001.json
+   + .saipen/intake/contracts/SRC-143.r001.json
+   + .saipen/intake/contracts/SRC-167.json
+   + .saipen/intake/contracts/SRC-167.r001.json
+   + .saipen/intake/contracts/SRC-168.json
+   + .saipen/intake/contracts/SRC-168.r001.json
+   + .saipen/intake/contracts/SRC-169.json
+   + .saipen/intake/coverage/SRC-167.json
+   + .saipen/intake/coverage/SRC-168.json
+   + .saipen/intake/coverage/SRC-169.json
+   + bootstrap/install_ownership.py
+   + tools/_module_identity.py
+   + tools/test_portable_floor_fields.py
+   + tools/test_public_install_lifecycle.py
+   + tools/test_tool_module_identity.py

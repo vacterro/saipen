@@ -1,0 +1,25 @@
+{
+  "label": "verify-neighbors",
+  "phase": "VERIFY",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "test_reconcile_history_ledger_blocked",
+    "test_log_tail_quarantine",
+    "test_t1671_lifecycle_authority",
+    "test_ledger_gap",
+    "test_command_routing"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+  "exit_code": 0,
+  "duration_s": 107.5,
+  "fingerprint": "7b7ff09dfeee7b1b29d35434872c6994739935b761b8db64d1b489a8de53fedc",
+  "stdout": "",
+  "stderr": "..............................................................................................................................\r\n----------------------------------------------------------------------\r\nRan 126 tests in 107.178s\r\n\r\nOK\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "55272a814e84d48bed378b46e5cce7ea4977acc2e45fc66e1924417a37285c8a",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

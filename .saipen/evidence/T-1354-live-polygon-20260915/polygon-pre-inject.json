@@ -1,0 +1,516 @@
+{
+  "installed_plugin": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen\\extensions\\adapters\\opencode\\saipen-guard.js",
+  "matrix": {
+    "_AUDAPACK": {
+      "edit-1": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "edit-2": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "edit-3": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "shell": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "temp": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "protected": {
+        "outcome": "blocked",
+        "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+      }
+    },
+    "Wintage": {
+      "edit-1": {
+        "outcome": "blocked",
+        "message": "SAIPEN_GUARD_REFUSAL: RECOVERY_REQUIRED: the saipen guard refused tool 'edit'; the host tool did not execute"
+      },
+      "edit-2": {
+        "outcome": "blocked",
+        "message": "SAIPEN_GUARD_REFUSAL: RECOVERY_REQUIRED: the saipen guard refused tool 'edit'; the host tool did not execute"
+      },
+      "edit-3": {
+        "outcome": "blocked",
+        "message": "SAIPEN_GUARD_REFUSAL: RECOVERY_REQUIRED: the saipen guard refused tool 'edit'; the host tool did not execute"
+      },
+      "shell": {
+        "outcome": "blocked",
+        "message": "SAIPEN_GUARD_REFUSAL: RECOVERY_REQUIRED: the saipen guard refused tool 'bash'; the host tool did not execute"
+      },
+      "temp": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "protected": {
+        "outcome": "blocked",
+        "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+      }
+    },
+    "_SMART_VAC_DUPLICATE_REMOVER": {
+      "edit-1": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "edit-2": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "edit-3": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "shell": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "temp": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "protected": {
+        "outcome": "blocked",
+        "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+      }
+    },
+    "_SMART_VAC_CLEANER": {
+      "edit-1": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "edit-2": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "edit-3": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "shell": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "temp": {
+        "outcome": "allowed",
+        "message": ""
+      },
+      "protected": {
+        "outcome": "blocked",
+        "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+      }
+    }
+  },
+  "canonical_before": {
+    "_AUDAPACK": {
+      "STATE.md": "338261f24ab6df1a992e1aa8a41bccff9b9bbf9974466e750b8bfbba5c7ff297",
+      "BOARD.md": "85a379064d190a3dd0ebd336cfb6cb59154f73c9f5df8081f8478ec0b73e871c",
+      "LOG.md": "9eb69d71ff17bc4fe8ff046f438f1c259edb8971042448bdf278160bd2ffbee6"
+    },
+    "Wintage": {
+      "STATE.md": "ee62f08a0a169e7fe4b2a355b4a7dd45f9d0b0286a10d5e32f1d480430527502",
+      "BOARD.md": "543c52365d59d97c104a58a4f90c75b958b9b1122a0c0e2528aceccd86b651d4",
+      "LOG.md": "5987e08e77034819bbdc49cb863b5b228cb5dcc781e1e73a3ac914e3c19671ad"
+    },
+    "_SMART_VAC_DUPLICATE_REMOVER": {
+      "STATE.md": "61312c4c1cda355b6f74326263d396c70d0e4ff775e5489c97a91790a2bc48cf",
+      "BOARD.md": "bee1eb1389933cade91df0f5729d97a4a827c6760588da998c0f663ea49e253a",
+      "LOG.md": "1b20548d31dfa346b7261c89cfc91dba7222f9742209bf097ad5b7feecbcbf50"
+    },
+    "_SMART_VAC_CLEANER": {
+      "STATE.md": "0575b32593c0055bcbec3f7e0b50382a05c232c37bf39e31e84cbccdb674c577",
+      "BOARD.md": "3eec5ca0c8862f90d5ea67af078895929fc70256c3e6bc04e87551a8198685d7",
+      "LOG.md": "dd53290dd3c6a56c4d87c2c61ef5af476527a00147369415d3640384c0375bd0"
+    }
+  },
+  "canonical_after": {
+    "_AUDAPACK": {
+      "STATE.md": "338261f24ab6df1a992e1aa8a41bccff9b9bbf9974466e750b8bfbba5c7ff297",
+      "BOARD.md": "85a379064d190a3dd0ebd336cfb6cb59154f73c9f5df8081f8478ec0b73e871c",
+      "LOG.md": "9eb69d71ff17bc4fe8ff046f438f1c259edb8971042448bdf278160bd2ffbee6"
+    },
+    "Wintage": {
+      "STATE.md": "ee62f08a0a169e7fe4b2a355b4a7dd45f9d0b0286a10d5e32f1d480430527502",
+      "BOARD.md": "543c52365d59d97c104a58a4f90c75b958b9b1122a0c0e2528aceccd86b651d4",
+      "LOG.md": "5987e08e77034819bbdc49cb863b5b228cb5dcc781e1e73a3ac914e3c19671ad"
+    },
+    "_SMART_VAC_DUPLICATE_REMOVER": {
+      "STATE.md": "61312c4c1cda355b6f74326263d396c70d0e4ff775e5489c97a91790a2bc48cf",
+      "BOARD.md": "bee1eb1389933cade91df0f5729d97a4a827c6760588da998c0f663ea49e253a",
+      "LOG.md": "1b20548d31dfa346b7261c89cfc91dba7222f9742209bf097ad5b7feecbcbf50"
+    },
+    "_SMART_VAC_CLEANER": {
+      "STATE.md": "0575b32593c0055bcbec3f7e0b50382a05c232c37bf39e31e84cbccdb674c577",
+      "BOARD.md": "3eec5ca0c8862f90d5ea67af078895929fc70256c3e6bc04e87551a8198685d7",
+      "LOG.md": "dd53290dd3c6a56c4d87c2c61ef5af476527a00147369415d3640384c0375bd0"
+    }
+  },
+  "canonical_unchanged": true,
+  "records": [
+    {
+      "id": "_AUDAPACK|edit-1",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK\",\"project_lineage\":\"lineage-79944d6c0334416ebe1001e97de6c1cc\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_AUDAPACK|edit-2",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK\",\"project_lineage\":\"lineage-79944d6c0334416ebe1001e97de6c1cc\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_AUDAPACK|edit-3",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK\",\"project_lineage\":\"lineage-79944d6c0334416ebe1001e97de6c1cc\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_AUDAPACK|shell",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK\",\"project_lineage\":\"lineage-79944d6c0334416ebe1001e97de6c1cc\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_AUDAPACK|temp",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK\",\"project_lineage\":\"lineage-79944d6c0334416ebe1001e97de6c1cc\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_AUDAPACK|protected",
+      "outcome": "blocked",
+      "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_AUDAPACK\",\"project_lineage\":\"lineage-79944d6c0334416ebe1001e97de6c1cc\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "Wintage|edit-1",
+      "outcome": "blocked",
+      "message": "SAIPEN_GUARD_REFUSAL: RECOVERY_REQUIRED: the saipen guard refused tool 'edit'; the host tool did not execute",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_TAMPERMONKEY\\\\_WIN95THEME\\\\Wintage\",\"project_lineage\":\"lineage-30ee844c69d34eb68605a4563cfdb8ff\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "Wintage|edit-2",
+      "outcome": "blocked",
+      "message": "SAIPEN_GUARD_REFUSAL: RECOVERY_REQUIRED: the saipen guard refused tool 'edit'; the host tool did not execute",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_TAMPERMONKEY\\\\_WIN95THEME\\\\Wintage\",\"project_lineage\":\"lineage-30ee844c69d34eb68605a4563cfdb8ff\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "Wintage|edit-3",
+      "outcome": "blocked",
+      "message": "SAIPEN_GUARD_REFUSAL: RECOVERY_REQUIRED: the saipen guard refused tool 'edit'; the host tool did not execute",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_TAMPERMONKEY\\\\_WIN95THEME\\\\Wintage\",\"project_lineage\":\"lineage-30ee844c69d34eb68605a4563cfdb8ff\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "Wintage|shell",
+      "outcome": "blocked",
+      "message": "SAIPEN_GUARD_REFUSAL: RECOVERY_REQUIRED: the saipen guard refused tool 'bash'; the host tool did not execute",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_TAMPERMONKEY\\\\_WIN95THEME\\\\Wintage\",\"project_lineage\":\"lineage-30ee844c69d34eb68605a4563cfdb8ff\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "Wintage|temp",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_TAMPERMONKEY\\\\_WIN95THEME\\\\Wintage\",\"project_lineage\":\"lineage-30ee844c69d34eb68605a4563cfdb8ff\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "Wintage|protected",
+      "outcome": "blocked",
+      "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_TAMPERMONKEY\\\\_WIN95THEME\\\\Wintage\",\"project_lineage\":\"lineage-30ee844c69d34eb68605a4563cfdb8ff\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_SMART_VAC_DUPLICATE_REMOVER|edit-1",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_SMART_VAC_DUPLICATE_REMOVER\",\"project_lineage\":\"lineage-fe35d30149cf4a9aaa92211803371332\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_SMART_VAC_DUPLICATE_REMOVER|edit-2",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_SMART_VAC_DUPLICATE_REMOVER\",\"project_lineage\":\"lineage-fe35d30149cf4a9aaa92211803371332\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_SMART_VAC_DUPLICATE_REMOVER|edit-3",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_SMART_VAC_DUPLICATE_REMOVER\",\"project_lineage\":\"lineage-fe35d30149cf4a9aaa92211803371332\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_SMART_VAC_DUPLICATE_REMOVER|shell",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_SMART_VAC_DUPLICATE_REMOVER\",\"project_lineage\":\"lineage-fe35d30149cf4a9aaa92211803371332\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_SMART_VAC_DUPLICATE_REMOVER|temp",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_SMART_VAC_DUPLICATE_REMOVER\",\"project_lineage\":\"lineage-fe35d30149cf4a9aaa92211803371332\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_SMART_VAC_DUPLICATE_REMOVER|protected",
+      "outcome": "blocked",
+      "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_SMART_VAC_DUPLICATE_REMOVER\",\"project_lineage\":\"lineage-fe35d30149cf4a9aaa92211803371332\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_SMART_VAC_CLEANER|edit-1",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_SMART_VAC_CLEANER\",\"project_lineage\":\"lineage-05afdade62f34ea2ab30cb3740a7ad17\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_SMART_VAC_CLEANER|edit-2",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_SMART_VAC_CLEANER\",\"project_lineage\":\"lineage-05afdade62f34ea2ab30cb3740a7ad17\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_SMART_VAC_CLEANER|edit-3",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_SMART_VAC_CLEANER\",\"project_lineage\":\"lineage-05afdade62f34ea2ab30cb3740a7ad17\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_SMART_VAC_CLEANER|shell",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_SMART_VAC_CLEANER\",\"project_lineage\":\"lineage-05afdade62f34ea2ab30cb3740a7ad17\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_SMART_VAC_CLEANER|temp",
+      "outcome": "allowed",
+      "message": "",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_SMART_VAC_CLEANER\",\"project_lineage\":\"lineage-05afdade62f34ea2ab30cb3740a7ad17\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "id": "_SMART_VAC_CLEANER|protected",
+      "outcome": "blocked",
+      "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+      "hooks": [
+        "experimental.chat.system.transform",
+        "tool.execute.before"
+      ],
+      "system": [
+        "SAIPEN_BOOTSTRAP_BINDING {\"binding_code\":\"ADMITTED\",\"project_root\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_PY\\\\_SMART_VAC_CLEANER\",\"project_lineage\":\"lineage-05afdade62f34ea2ab30cb3740a7ad17\",\"provenance\":\"git-worktree\"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Read BOOT/STYLE and the bound project's .saipen state. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or \u0421\u0403\u0421\u0403, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user."
+      ],
+      "exports": [
+        "default"
+      ]
+    }
+  ]
+}

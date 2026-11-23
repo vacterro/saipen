@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-047:R001": {
+      "class": "requirement",
+      "text": "PACK ALL / AUTO PACK ALL / PACK [group] must pack all eligible projects concurrently instead of one-by-one: replace the MainWindow sequential completion-chain queue with one canonical parallel batch entry point over a dedicated bounded pack-only executor (never the shared TaskRunner), with batch ownership (no duplicate/overlapping batches, individual PACK coalesced for batch-owned projects, unrelated individual packs still allowed), QUEUED->PACKING truthful per-project states, independent completion order, one failure never cancels siblings, aggregate success/failure reporting, periodic busy ticks skip without backlog, same-target archive transaction safety preserved, closeEvent worker-callback safety, and deterministic barrier-based tests proving N jobs start before any finishes; keep timer tests in tests/ui_qt/test_auto_pack_all.py, add tests/ui_qt/test_parallel_pack_batch.py",
+      "actionable": true
+    }
+  },
+  "derived_at": null,
+  "derived_from": "SRC-047",
+  "interpretation_revision": 0,
+  "schema_version": 1,
+  "source_sha256": "d7f38a77fd023c1e9a4b3fe2afca2bb02437e9d1cf5fd15f69bf8352659865ca"
+}

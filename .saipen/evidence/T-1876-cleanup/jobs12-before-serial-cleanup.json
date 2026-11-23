@@ -1,0 +1,39 @@
+{
+  "wall_s": 2066.1,
+  "duration_s": 2066.1,
+  "jobs": 12,
+  "ran": 7546,
+  "tallied": 54,
+  "timings_s": {
+    "shard_copy_wall_s": 441.093,
+    "environment_identity_wall_s": 3.172,
+    "sweep_wall_s": 0.0,
+    "copy_wall_s": 65.578,
+    "hash_wall_s": 0.157,
+    "execution_wall_s": 1269.781,
+    "cleanup_wall_s": 286.281
+  },
+  "copy_metrics": {
+    "subject_copy_s": 17.438,
+    "canonical_copy_s": 47.797,
+    "canonical_copy_attempts": 1
+  },
+  "shard_durations": [
+    1269.8,
+    1187.0,
+    1034.8,
+    1098.3,
+    1092.5,
+    1162.9,
+    1127.7,
+    1065.3,
+    1139.4,
+    1111.9,
+    1043.2,
+    1093.5
+  ],
+  "n_shards": 12,
+  "status": "FAIL",
+  "sandboxes_leaked": []
+}
+DONE

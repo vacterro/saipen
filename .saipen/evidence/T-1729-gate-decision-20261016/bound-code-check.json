@@ -1,0 +1,7 @@
+{
+  "chunk_id": "bb065b",
+  "wall_time_seconds": 0.7896925,
+  "exit_code": 0,
+  "original_token_count": 159,
+  "output": "{\r\n  \"op_id\": \"regression-execution-3d494d7f7c0b4320919fe69bdd194448\",\r\n  \"checked\": [\r\n    \"tools/saipen.py\",\r\n    \"tools/saipen_engine/operations.py\",\r\n    \"tools/saipen_engine/reconcile.py\",\r\n    \"tools/saipen_engine/gate_decision.py\",\r\n    \"tools/saipen_engine/state.py\",\r\n    \"tools/saipen_engine/router.py\",\r\n    \"tools/saipen_engine/operator_task.py\",\r\n    \"tools/saipen_engine/goal_authority.py\",\r\n    \"tools/test_t1729_operator_gate.py\",\r\n    \"tools/test_recovery_reachability.py\",\r\n    \"tools/test_fixture_support.py\",\r\n    \"tools/test_hermetic_env.py\"\r\n  ],\r\n  \"changed\": [],\r\n  \"bounded_code_and_oracle_unchanged\": true\r\n}\r\n"
+}

@@ -1,0 +1,6 @@
+test_context_budget_remains_green_with_execution_in_cold (test_response_surface_contract.BudgetTests.test_context_budget_remains_green_with_execution_in_cold) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.014s
+
+OK

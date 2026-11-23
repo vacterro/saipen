@@ -1,0 +1,31 @@
+tools\test_host_authority_broker.py:90: HI.REASON_NOT_HOST_DESCENDANT,
+tools\test_host_authority_broker.py:91: HI.REASON_HOOK_NOT_FOUND,
+tools\test_release_authority_gap.py:126: self.assertIn(proof.reason, (hai.REASON_NOT_HOST_DESCENDANT, hai.REASON_HOOK_NOT_FOUND))
+tools\test_t1624_host_integration.py:413: self.assert_refused([peer, TOOL_INNER, TOOL_OUTER, HOST], HI.REASON_HOOK_NOT_FOUND)
+tools\test_t1624_host_integration.py:449: self.assert_refused([option, BASH_INNER, BASH_OUTER, HOST], HI.REASON_HOOK_NOT_FOUND)
+tools\test_t1624_host_integration.py:452: [foreign, HOOK_PROC, BASH_INNER, BASH_OUTER, HOST], HI.REASON_HOOK_NOT_FOUND
+tools\test_t1624_host_integration.py:477: self.assert_refused([peer, inner, outer, HOST], HI.REASON_HOOK_NOT_FOUND)
+tools\test_t1624_host_integration.py:487: self.assert_refused([other, shell], HI.REASON_NOT_HOST_DESCENDANT)
+tools\test_t1624_host_integration.py:1971: self.host.hook_path().write_bytes(self.host.hook_path().read_bytes() + b"\n# edited\n")
+tools\test_t1649_refusal_step.py:7: (NOT_HOST_DESCENDANT) existed only in the running service's memory, as its
+tools\test_t1649_refusal_step.py:42: STEP = "NOT_HOST_DESCENDANT"
+tools\test_t1650_retired_host_image.py:7: that session was refused NOT_HOST_DESCENDANT -- 36 admitted before the rename,
+tools\test_t1650_retired_host_image.py:123: self.assert_refused(chain, HI.REASON_NOT_HOST_DESCENDANT)
+tools\test_t1650_retired_host_image.py:130: self.chain(retired_host(image="evil.exe")), HI.REASON_NOT_HOST_DESCENDANT
+tools\test_t1650_retired_host_image.py:154: [cli, T.TOOL_INNER, T.TOOL_OUTER, retired_host()], HI.REASON_HOOK_NOT_FOUND
+tools\test_t1859_zaicode_seal.py:76: return {"ok": False, "code": "BROKER_CLIENT_NOT_AUTHENTICATED", "detail": "proof invalid or host missing"}
+tools\saipen_engine\host_authority_broker.py:109: CODE_NOT_AUTHENTICATED = "BROKER_CLIENT_NOT_AUTHENTICATED"
+tools\saipen_engine\host_authority_broker.py:660: def _hook_artifacts(self, host: str, home: object) -> tuple[str, ...]:
+tools\saipen_engine\host_authority_client.py:282: # declared and this path still answered NOT_HOST_DESCENDANT from the
+tools\saipen_engine\host_authority_identity.py:47: REASON_NOT_HOST_DESCENDANT = "NOT_HOST_DESCENDANT"
+tools\saipen_engine\host_authority_identity.py:48: REASON_HOOK_NOT_FOUND = "HOOK_NOT_FOUND"
+tools\saipen_engine\host_authority_identity.py:392: REASON_NOT_HOST_DESCENDANT,
+tools\saipen_engine\host_authority_identity.py:400: REASON_HOOK_NOT_FOUND,
+tools\saipen_engine\host_authority_identity.py:422: REASON_HOOK_NOT_FOUND,
+tools\saipen_engine\host_authority_identity.py:481: REASON_NOT_HOST_DESCENDANT,
+tools\saipen_engine\host_authority_identity.py:563: "REASON_HOOK_NOT_FOUND",
+tools\saipen_engine\host_authority_identity.py:566: "REASON_NOT_HOST_DESCENDANT",
+tools\saipen_engine\host_taxonomy.py:393: "BROKER_CLIENT_NOT_AUTHENTICATED": "AUTHORITY_CLIENT_UNPROVEN",
+tools\saipen_engine\host_taxonomy.py:434: #: `NOT_HOST_DESCENDANT`. Anything else a reply carries in that place is text
+tools\saipen_engine\host_taxonomy.py:458: "HOOK_NOT_FOUND": "No SAIPEN hook invocation was found above this process.",
+tools\saipen_engine\host_taxonomy.py:460: "NOT_HOST_DESCENDANT": "This process was not started by a registered host application.",

@@ -1,0 +1,22 @@
+{
+  "label": "ship-skipped-record",
+  "phase": "SHIP",
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "checkpoint",
+    "RUN",
+    "T-1714",
+    "ship v8.1.0 -> skipped publish (no-publish: policy) -- Git is available; publication remains explicitly forbidden. Final ship-native-core executes exit 0, zero failures/eight warnings after local metadata. Exact reviewed source generation 2df2566be72aeb7b and 6207/0/0 family evidence remain current; source R005 VERIFIED. No Git index/commit/tag/remote or actual consumer changes. Atomic local own_patch finish is now due.",
+    "--json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 1.203,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"CHECKPOINTED\",\r\n  \"op_id\": \"checkpoint-4b61ee1176544192acd14c00f5b91a9f\",\r\n  \"changed_files\": [\r\n    \".saipen/LOG.md\",\r\n    \".saipen/BOARD.md\",\r\n    \".saipen/STATE.md\"\r\n  ],\r\n  \"recovery_required\": false,\r\n  \"event_id\": \"E-14478\"\r\n}\r\n",
+  "stderr": "",
+  "stdout_sha256": "914053798c18d3c1c6722aa322c61dadf9cda39890f5623de63dd1781f68366d",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

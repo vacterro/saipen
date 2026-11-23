@@ -1,0 +1,19 @@
+{
+  "label": "scout-receipt-evidence-corrected",
+  "phase": "SCOUT",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    ".saipen/evidence/T-1717-contracts/receipt-evidence.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 2.125,
+  "fingerprint": "b5cf50a8d51e1ab2d81b4568ec3eba35f543715c90ddd340de2603fc96c8dcf0",
+  "stdout": "{\"bound_detail_target_hashes\": [\"e58b4717fde5d63b\", \"f56793e5c6d3f937\"], \"regular_files_scanned\": 5930, \"exact_digest_matches\": [], \"current_fingerprint\": \"b5cf50a8d51e1ab2d81b4568ec3eba35f543715c90ddd340de2603fc96c8dcf0\", \"counterfactual_before_authorized_audit_consumption\": \"2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa\"}\r\n",
+  "stderr": "",
+  "stdout_sha256": "ebe40f3489a1cda17b0b0964898d824862446e05aab7a38df9a143a8388f8d11",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

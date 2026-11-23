@@ -1,0 +1,19 @@
+test_the_decision_executes_on_a_head_operations_wrote (test_t1759_single_lifecycle_observer.DuplicateDecisionOnATypedHeadTests.test_the_decision_executes_on_a_head_operations_wrote) ... ok
+test_the_decision_over_a_typed_head_buries_nothing (test_t1759_single_lifecycle_observer.DuplicateDecisionOnATypedHeadTests.test_the_decision_over_a_typed_head_buries_nothing) ... ok
+test_only_repairing_readers_name_the_lifecycle_class (test_t1759_single_lifecycle_observer.LifecycleObserverContractTests.test_only_repairing_readers_name_the_lifecycle_class) ... FAIL
+test_the_detector_sees_an_aliased_name (test_t1759_single_lifecycle_observer.LifecycleObserverContractTests.test_the_detector_sees_an_aliased_name) ... ok
+
+======================================================================
+FAIL: test_only_repairing_readers_name_the_lifecycle_class (test_t1759_single_lifecycle_observer.LifecycleObserverContractTests.test_only_repairing_readers_name_the_lifecycle_class)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1759_single_lifecycle_observer.py", line 160, in test_only_repairing_readers_name_the_lifecycle_class
+    self.assertEqual(_lifecycle_observers(), LIFECYCLE_OBSERVERS)
+AssertionError: Items in the first set but not the second:
+('saipen_engine/operations.py', 'rebind_saipen_home')
+('saipen_engine/operations.py', 'rebind_home_auto')
+
+----------------------------------------------------------------------
+Ran 4 tests in 7.418s
+
+FAILED (failures=1)

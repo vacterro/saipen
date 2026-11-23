@@ -1,0 +1,54 @@
+<p align="center">
+  <img src="assets/SAIPEN_design1.png" alt="SAIPEN Guide Title" width="800"/>
+</p>
+
+# دليل SAIPEN (العربية)
+
+SAIPEN هو دفتر ملاحظات في مجلد .saipen/ لوكلاء الذكاء الاصطناعي.
+
+AI agents have one fatal flaw: they forget. Close the window and everything they learned about your project is gone — what you were building, what failed, which idea died on Tuesday. Every morning you brief a brilliant stranger from scratch. SAIPEN is the fix: a persistent notebook in the .saipen/ folder. The agent reads STATE and BOARD on startup, sees exactly where it left off, and gets back to work without a single repeated word.
+
+**مفاتيح سريعة:** `cc` يواصل سياق المشروع إلى التقارب (يستأنف الهدف النشط إذا كان مضبوطًا)، `sss` يعرض الحالة دون لمس الكود، و`ss` يحفظ نقطة تحقق ويتوقف. [انظر خريطة المفاتيح الكاملة 15](../saipen/RFC.md#110-command-surface). التوائم السيريلية تعمل أيضًا: `сс`, `ссс`, `аа`, `ее`, `еее`, `рр`.
+
+## البداية السريعة
+
+1. **التثبيت مرة واحدة لكل جهاز:**
+```bash
+git clone https://github.com/vacterro/saipen
+cd saipen
+powershell -ExecutionPolicy Bypass -File .\bootstrap\inject.ps1     # Windows
+bash bootstrap/inject.sh                                            # macOS / Linux
+```
+
+2. **بدء المشروع:**
+> `saipen set`
+
+3. **العمل:**
+> `saipen`
+
+## الأوامر
+
+| الأمر | الإجراء |
+|---|---|
+| `saipen set` | تهيئة مجلد الذاكرة `.saipen/` |
+| `saipen continue` | استئناف العمل من الملاحظات |
+| `saipen stop` | حفظ التقدم والتوقف |
+| `saipen status` | قراءة اللوحة والحالة |
+| `saipen goal <text>` | التحول إلى هدف جديد |
+| `saipen clean` | تنظيف عميق للمستودع |
+| `saipen translate` | بناء ترجمة معزول بـ 32 لغة |
+| `saipen markhunt` | تدقيق عميق وغير محدود -- يسجل النتائج فقط دون إصلاح |
+| `saipen prepare` | تجميع العمل لتسليمه إلى الوكيل التالي |
+| `saipen ship` | بدء تدفق الإصدار |
+
+## من الجيد معرفته
+- تغييرات غير مُلتزم بها عند العودة إلى المشروع؟ هذا طبيعي -- SAIPEN يلتزم فقط عند `ship`، وليس في كل خطوة. يتحقق الوكيل أولاً من صاحب هذه التغييرات قبل لمس أي شيء.
+- تريده أن يتذكر قرارًا معماريًا حقيقيًا؟ ضعه في `.saipen/KNOWLEDGE/`، إما كملف `decisions.md` أو كملفات مرقمة `ADR-001.md`.
+- لا يوجد git أو shell على هذا الجهاز؟ يقول الوكيل ذلك بوضوح (`mode`، `WAIT: <category> -- <سؤال>`) بدلاً من التخمين (الفئة هي واحدة من سبع: `manual-verify, destructive-op, first-publish, user brake, blocked, safety valve, init`؛ وتوضح نوع الإجابة المطلوبة لإزالة التعليق)
+- تريد شبكة أمان؟ `python <نسخة-saipen>/tools/install_hook.py` يثبّت فحصًا قبل كل التزام.
+
+---
+
+**Full command list / complete command reference:** [RFC § 1.10](../saipen/RFC.md#110-command-surface) — the authoritative list of every `saipen` command.
+
+

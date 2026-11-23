@@ -1,0 +1,36 @@
+...F....................................F......       [100%]
+================================== FAILURES ===================================
+_ RestoredMaintenanceCandidate.test_compacted_identity_is_read_from_validated_detail _
+
+self = <test_t2040_maintenance_authority.RestoredMaintenanceCandidate testMethod=test_compacted_identity_is_read_from_validated_detail>
+
+    def test_compacted_identity_is_read_from_validated_detail(self):
+        root, _goal, candidate, ticket, _receipt = self.fixture(long=True)
+        self.assertTrue(rows(root)[ticket]["fields"].get("detail_ref"))
+        projected = replenishment._parse_board_tickets(root)["blocked"]
+        row = next(row for row in projected if row["id"] == ticket)
+        self.assertIn(f"candidate: {candidate.candidate_id}", row["text"])
+        result = replenishment.replenish_from_goals(root, "fix", dry_run=True)
+>       self.assertEqual(result.get("admitted_ticket"), ticket, result)
+E       AssertionError: None != 'T-2' : {'ok': True, 'replenished': True, 'dry_run': True, 'status': 'TASK_REPLENISHED', 'goal_id': 'self-maintenance-core', 'candidate': {'candidate_id': 'self-maintenance-core-repair-1', 'goal_id': 'self-maintenance-core', 'title': 'Investigate semantics of Local parser [self-maintenance-core]', 'priority': 'P2', 'description': 'Investigate and document semantics for unresolved item repair-1', 'scope': 'item:repair-1', 'target_locator': 'repair-1', 'evidence_source': '.saipen/evidence/coverage_gap.json', 'verification': 'The exact local regression oracle passes', 'needs': [], 'risk': 'low', 'metadata': {'item_id': 'repair-1', 'goal_id': 'self-maintenance-core', 'rva': '', 'va': '', 'bytes': None, 'module': None, 'capture_sha256': '', 'capture_path': ''}, 'evidence_fingerprint': 'sha256:644bd87a1f512b65'}, 'planned_ticket': 'T-PLANNED', 'detail': 'would admit self-maintenance-core-repair-1 for goal self-maintenance-core'}
+
+tools\test_t2040_maintenance_authority.py:331: AssertionError
+_ RestoredMaintenanceCandidate.test_compacted_identity_is_read_from_validated_detail _
+
+self = <test_t2040_maintenance_authority.RestoredMaintenanceCandidate testMethod=test_compacted_identity_is_read_from_validated_detail>
+
+    def test_compacted_identity_is_read_from_validated_detail(self):
+        root, _goal, candidate, ticket, _receipt = self.fixture(long=True)
+        self.assertTrue(rows(root)[ticket]["fields"].get("detail_ref"))
+        projected = replenishment._parse_board_tickets(root)["blocked"]
+        row = next(row for row in projected if row["id"] == ticket)
+        self.assertIn(f"candidate: {candidate.candidate_id}", row["text"])
+        result = replenishment.replenish_from_goals(root, "fix", dry_run=True)
+>       self.assertEqual(result.get("admitted_ticket"), ticket, result)
+E       AssertionError: None != 'T-2' : {'ok': True, 'replenished': True, 'dry_run': True, 'status': 'TASK_REPLENISHED', 'goal_id': 'self-maintenance-core', 'candidate': {'candidate_id': 'self-maintenance-core-repair-1', 'goal_id': 'self-maintenance-core', 'title': 'Investigate semantics of Local parser [self-maintenance-core]', 'priority': 'P2', 'description': 'Investigate and document semantics for unresolved item repair-1', 'scope': 'item:repair-1', 'target_locator': 'repair-1', 'evidence_source': '.saipen/evidence/coverage_gap.json', 'verification': 'The exact local regression oracle passes', 'needs': [], 'risk': 'low', 'metadata': {'item_id': 'repair-1', 'goal_id': 'self-maintenance-core', 'rva': '', 'va': '', 'bytes': None, 'module': None, 'capture_sha256': '', 'capture_path': ''}, 'evidence_fingerprint': 'sha256:c3cd5f55e3c07f49'}, 'planned_ticket': 'T-PLANNED', 'detail': 'would admit self-maintenance-core-repair-1 for goal self-maintenance-core'}
+
+tools\test_t2040_maintenance_authority.py:331: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_replenishment_recovery.py::RestoredMaintenanceCandidate::test_compacted_identity_is_read_from_validated_detail
+FAILED tools/test_t2040_maintenance_authority.py::RestoredMaintenanceCandidate::test_compacted_identity_is_read_from_validated_detail
+2 failed, 45 passed, 19 subtests passed in 103.96s (0:01:43)

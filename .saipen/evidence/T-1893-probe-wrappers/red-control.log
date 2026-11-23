@@ -1,0 +1,33 @@
+=== GREEN: wrapper over unmutated probes ===
+test_conformance_closure_probe (test_t1893_probe_wrappers.LegacyProbeTests.test_conformance_closure_probe) ... ok
+test_second_wave_probe (test_t1893_probe_wrappers.LegacyProbeTests.test_second_wave_probe) ... ok
+test_second_wave_receipt_probe (test_t1893_probe_wrappers.LegacyProbeTests.test_second_wave_receipt_probe) ... ok
+test_userperson_redaction_probe (test_t1893_probe_wrappers.LegacyProbeTests.test_userperson_redaction_probe) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 7.160s
+
+OK
+exit: 0
+
+=== RED: one real assertion inverted inside a wrapped probe ===
+mutation 42->38 bytes at tools\regression_second_wave_receipt_fixes.py
+ommitted release returns ALREADY_APPLIED 
+PASS  W2-003 partial release is NOT ALREADY_APPLIED 
+PASS  W2-003 partial release returns RELEASE_STAGE_INCOMPLETE 
+PASS  W2-005 staged payload removed on success 
+PASS  W2-005 cleanup marker cleared on success 
+PASS  W2-005 entry reported compacted 
+PASS  W2-005 failed unlink retains staged payload 
+PASS  W2-005 failed unlink retains cleanup marker 
+PASS  W2-005 entry reported skipped (debt) 
+FAIL W2-005 entry NOT compacted while in debt -- {'ok': True, 'compacted': [], 'skipped': ['clean2']}
+
+32/33 SECOND-WAVE receipt regressions passed
+
+----------------------------------------------------------------------
+Ran 1 test in 0.808s
+
+FAILED (failures=1)
+exit: 1
+restored byte-exact: True

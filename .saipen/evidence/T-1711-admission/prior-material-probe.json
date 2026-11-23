@@ -1,0 +1,37 @@
+{
+  "probe": "changed prior input after measured execution",
+  "admitted": {
+    "ok": true,
+    "code": "CHECKPOINTED",
+    "op_id": "regression-execution-a8dd3477f1e044098c52349ae8df2a9f",
+    "changed_files": [
+      ".saipen/evidence/regression/regression-execution-a8dd3477f1e044098c52349ae8df2a9f.json",
+      ".saipen/LOG.md",
+      ".saipen/BOARD.md",
+      ".saipen/STATE.md"
+    ],
+    "recovery_required": false,
+    "record": ".saipen/evidence/regression/regression-execution-a8dd3477f1e044098c52349ae8df2a9f.json",
+    "evidence_class": "executed",
+    "event_id": "E-5"
+  },
+  "prior_sha256": "f7df6e711f10ae6c9e031e6cce6c225289a6d061e130d6dcb0237b26c8eda15b",
+  "changed_prior_sha256": "249976b5f1234a8f153f02a04d082579f26202c9858ecaf5e9a1051398a2bf7d",
+  "review": {
+    "ok": true,
+    "code": "TRANSITIONED",
+    "op_id": "transition-1756fe24ec814604a5c0e0e924785fa9",
+    "changed_files": [
+      ".saipen/LOG.md",
+      ".saipen/BOARD.md",
+      ".saipen/STATE.md"
+    ],
+    "recovery_required": false,
+    "phase": "REVIEW",
+    "next_action": "PHASE REVIEW T-7",
+    "event_id": "E-6",
+    "ticket": "T-7"
+  },
+  "canonical_unchanged_after_refusal": false,
+  "scope": "disposable fixture only; no live source or canonical mutation"
+}

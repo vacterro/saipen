@@ -1,0 +1,48 @@
+.....................F...................F........F..F............. [ 80%]
+......F.F.......                                                   [100%]
+================================== FAILURES ===================================
+__ TestCampaignMatrix.test_c35_c36_all_work_complete_legitimately_quiescent ___
+tools\test_campaign_matrix.py:420: in test_c35_c36_all_work_complete_legitimately_quiescent
+    self.assertTrue(step_res["ok"])
+E   AssertionError: False is not true
+________ TestProductionAcceptanceGates.test_gate_i_quiescence_and_wake ________
+tools\test_campaign_production_gates.py:322: in test_gate_i_quiescence_and_wake
+    self.assertTrue(step_res["ok"])
+E   AssertionError: False is not true
+_ TestCampaignNegativeControls.test_neg_camp_005_and_009_executor_missing_and_supersession _
+tools\test_campaign_production_gates.py:520: in test_neg_camp_005_and_009_executor_missing_and_supersession
+    self.assertFalse(step_res["ok"])
+E   AssertionError: True is not false
+_ AnalysisProgressStaysSchedulableTest.test_a_completed_objective_may_still_quiesce _
+tools\test_t1945_analysis_progress.py:114: in test_a_completed_objective_may_still_quiesce
+    self.assertEqual(state.get("campaign_state"), campaign.QUIESCENT_WAIT)
+E   AssertionError: 'EXTERNAL_BLOCKED' != 'QUIESCENT_WAIT'
+E   - EXTERNAL_BLOCKED
+E   + QUIESCENT_WAIT
+_ DriverStopsOnBlockingStatesTest.test_it_does_not_spin_while_waiting_for_an_operator (state='EXTERNAL_BLOCKED') _
+tools\test_t1945_campaign_driver.py:147: in test_it_does_not_spin_while_waiting_for_an_operator
+    self.assertEqual(result["steps"], [])
+E   AssertionError: Lists differ: [{'ok': True, 'event': 'WORKER_GENERATION_[3843 chars]one}] != []
+E   
+E   First list contains 1 additional elements.
+E   First extra element 0:
+E   {'ok': True, 'event': 'WORKER_GENERATION_EXECUTED', 'worker_generation': 1, 'worker_result': {'ok': True}, 'progress': {'made_progress': False, 'progress_class': 'NO_EFFECT', 'journal_advanced': False, 'state_mutated': False, 'evidence_source': 'controller_observation', 'untrusted_worker_assertion': False, 'injected_test_worker': True, 'proof_identities': []}, 'state': {'authority_grant': {'authorization': {'authorized_scopes': ['AUDIT_STAGING', 'CAMPAIGN_EXECUTION', 'EXTERNAL_AUDIT_PUBLICATION', 'FORENSIC_ANALYSIS', 'PROTOCOL_REPAIR', 'SAIPEN_AUDIT_INGESTION', 'continuous_maintenance'], 'campaign_limit': 1, 'expires_at': 1794454873.3474793, 'goal_binding': {'authority_source': '', 'goal_ingress': ''}, 'host': 'claude', 'kind': 'saipen-campaign-authorization', 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'resource_budget': {'max_cycles': 1000, 'max_generations': 1000, 'max_wall_seconds': 200000}, 'schema_version': 1, 'session': 'contract-session', 'target_project': 'V:\\_TEMP_\\saipen-camp-mat-m2z3jee8'}, 'operator_origin': {'kind': 'operator-origin', 'nonce': 'e661d285ac304c3e9ed242811e93d4ea', 'request_digest': 'c0177eb6ce9b3ab76b0fd0ade24e9a6929d1a72aa4ab753024a7d01c0aea262a'}}, 'authority_grant_digest': '39e209a5d7b409e1e43a598144fc0bae286676d3dda5de5a140754fd69492202', 'authority_proof_reference': '.saipen/authority/grant.json', 'authority_scope': 'continuous_maintenance', 'campaign_id': 'CAMP-AUT006', 'campaign_state': 'RUNNING', 'cancellation_epoch': 0, 'created_at': '2026-11-09T20:07:53Z', 'current_work': None, 'cycle_count': 1, 'goal_binding': {'authority_source': '', 'goal_ingress': ''}, 'last_analysis_generation': 0, 'last_audit_generation': 0, 'last_journal_event': 'none', 'last_productive_progress': '2026-11-09T20:07:53Z', 'last_source_generation': 0, 'last_verified_result': None, 'next_action': 'saipen claim T-100', 'no_progress_count': 1, 'project_lineage': 'lineage-0123456789abcdef0123456789abcdef', 'resource_budget': {'max_cycles': 10, 'max_generations': 5, 'max_wall_seconds': 3600.0}, 'retry_count': 0, 'schema_version': 1, 'state_digest': '063af6594b577d6d6b08449cff31ef8d1d3c24fa18386c2ff0de79806efeb0fa', 'updated_at': '2026-11-09T20:07:53Z', 'wake_condition': None, 'worker_attempt': {'attempt_id': '715d1e44-bdaa-49de-b7d6-acce24c067f4', 'campaign_id': 'CAMP-AUT006', 'cancellation_epoch': 0, 'execution_intent': {'action': 'saipen claim T-100', 'actionable': True, 'classification': 'ACTIVE_WORK', 'continuous_maintenance_claimed': False, 'continuous_maintenance_proven': False, 'detail': "BOARD.DOING T-100 carries no live claim of this session's own (owner 'none', UNCLAIMED); explicit adoption is required before any active-ticket mutation", 'effective_route': {'action': 'saipen claim T-100', 'detail': "BOARD.DOING T-100 carries no live claim of this session's own (owner 'none', UNCLAIMED); explicit adoption is required before any active-ticket mutation", 'load': None, 'ok': True, 'ownership': 'UNCLAIMED', 'reason': 'adopt', 'ticket': 'T-100'}, 'executable_work': 'saipen claim T-100', 'operator_work': [], 'quiescent': False, 'raw_route': {'action': 'saipen claim T-100', 'detail': "BOARD.DOING T-100 carries no live claim of this session's own (owner 'none', UNCLAIMED); explicit adoption is required before any active-ticket mutation", 'load': None, 'ok': True, 'ownership': 'UNCLAIMED', 'reason': 'adopt', 'ticket': 'T-100'}, 'reason': 'adopt', 'requires_human': False, 'ticket': 'T-100'}, 'executor_kind': 'injected_test_worker', 'generation': 1, 'owner_pid': 39568, 'recovery_eligibility': 'reconcile_original_operation', 'result_reference': '.saipen/campaign/attempts/715d1e44-bdaa-49de-b7d6-acce24c067f4.json', 'started_at': '2026-11-09T20:07:53Z', 'status': 'EXECUTION_RESULT_OBSERVED', 'finished_at': '2026-11-09T20:07:53Z', 'result': {'ok': True}}, 'worker_generation': 1}, 'dispatch': None}
+E   
+E   Diff is 12475 characters long. Set self.maxDiff to None to see it.
+_ Aut31ProductionAutonomyControlsTests.test_control_01_five_real_successive_model_turns _
+tools\test_aut31_production_autonomy.py:99: in test_control_01_five_real_successive_model_turns
+    self.assertEqual(len(run_res.get("steps", [])), 5)
+E   AssertionError: 1 != 5
+_ Aut31ProductionAutonomyControlsTests.test_control_03_actual_implementation_task_verified_and_closed _
+tools\test_aut31_production_autonomy.py:177: in test_control_03_actual_implementation_task_verified_and_closed
+    self.assertTrue(res["progress"]["made_progress"])
+E   AssertionError: False is not true
+=========================== short test summary info ===========================
+FAILED tools/test_campaign_matrix.py::TestCampaignMatrix::test_c35_c36_all_work_complete_legitimately_quiescent
+FAILED tools/test_campaign_production_gates.py::TestProductionAcceptanceGates::test_gate_i_quiescence_and_wake
+FAILED tools/test_campaign_production_gates.py::TestCampaignNegativeControls::test_neg_camp_005_and_009_executor_missing_and_supersession
+FAILED tools/test_t1945_analysis_progress.py::AnalysisProgressStaysSchedulableTest::test_a_completed_objective_may_still_quiesce
+SUBFAILED(state='EXTERNAL_BLOCKED') tools/test_t1945_campaign_driver.py::DriverStopsOnBlockingStatesTest::test_it_does_not_spin_while_waiting_for_an_operator
+FAILED tools/test_aut31_production_autonomy.py::Aut31ProductionAutonomyControlsTests::test_control_01_five_real_successive_model_turns
+FAILED tools/test_aut31_production_autonomy.py::Aut31ProductionAutonomyControlsTests::test_control_03_actual_implementation_task_verified_and_closed
+7 failed, 77 passed, 10 subtests passed in 4.25s

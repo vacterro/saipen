@@ -1,0 +1,11 @@
+{
+  "same_unified_diff": true,
+  "authenticated_pre_files": 21,
+  "authentically_absent_pre_path": "tools/saipen_engine/goal_authority.py",
+  "current_post_hashes_equal_recorded": true,
+  "stored_candidate_sha256": "752264b326036228d522c596b694712289cc33e83d1882223be6ee89cb1d6605",
+  "regenerated_patch_sha256": "8eb99708f41263af2477192b70dd161fd9cd568be6ea37a1b0b75a24d30dc891",
+  "new_oracle_sha256": "c31e968253889bb883dc66fb7fd6e7b90ab60ba0cb23a6984f7af56a2e20b5d8",
+  "stored_candidate_normalized_text_sha256": "8eb99708f41263af2477192b70dd161fd9cd568be6ea37a1b0b75a24d30dc891",
+  "diff_comparison_normalization": "Python universal newline reading; source subject digests always hash raw file bytes"
+}

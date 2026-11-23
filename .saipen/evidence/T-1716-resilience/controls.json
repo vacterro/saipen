@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "scope": "T-1716 AUDIT_ONLY",
+  "production_before": {
+    "STATE.md": "ad13f6c46338224e01bcc5e73617d76a63bc65e86a3db641d4c134c61ec13101",
+    "BOARD.md": "81f4be62df3e7c663825b1480308d3bb8e6db6d59d92cca5f2b1d3064b758aa8",
+    "LOG.md": "23baff35becb07f0fb05a8d5a95eaed4a5370d2954fe86cb67cb1f8cdd9fbe2a",
+    "IDENTITY.md": "b49721c7920287213337f18809ce68f92ad118985649fd48f5830d5ff6baf9a4"
+  },
+  "active_handoff": {
+    "active_parent": true,
+    "parent": "T-7",
+    "child": "T-8",
+    "before_phase": "VERIFY",
+    "before_task": "T-7",
+    "after_phase": "DONE",
+    "after_task": "none",
+    "result": {
+      "ok": true,
+      "code": "BLOCKED_FOR",
+      "op_id": "ticket-ab0bc59fffc7478a810e692aef8f8dcc",
+      "changed_files": [
+        ".saipen/LOG.md",
+        ".saipen/BOARD.md",
+        ".saipen/STATE.md"
+      ],
+      "recovery_required": false,
+      "ticket": "T-7",
+      "blocked_on": "T-8",
+      "event_id": "E-5"
+    },
+    "parent_fields": {
+      "verify": "the clamp holds",
+      "regression": "required",
+      "owner": "tester",
+      "claim_time": "2026-10-11T14:31:22Z",
+      "blocker": "ACTIVE_DEPENDENCY:T-8 -- audit dependency",
+      "blocker_scope": "ticket",
+      "needs": "T-8",
+      "blocked_on": "T-8",
+      "resume_phase": "VERIFY",
+      "resume_transition_from": "BUILD"
+    },
+    "self_child_refusal": "VALIDATION_FAILED",
+    "self_child_zero_write": true,
+    "finding": "valid active handoff"
+  },
+  "todo_parent_handoff": {
+    "active_parent": false,
+    "parent": "T-8",
+    "child": "T-9",
+    "before_phase": "VERIFY",
+    "before_task": "T-7",
+    "after_phase": "VERIFY",
+    "after_task": "T-7",
+    "result": {
+      "ok": true,
+      "code": "BLOCKED_FOR",
+      "op_id": "ticket-e12e16162c774aaca9005e07dc20d109",
+      "changed_files": [
+        ".saipen/LOG.md",
+        ".saipen/BOARD.md",
+        ".saipen/STATE.md"
+      ],
+      "recovery_required": false,
+      "ticket": "T-8",
+      "blocked_on": "T-9",
+      "event_id": "E-6"
+    },
+    "parent_fields": {
+      "verify": "audit fixture only",
+      "blocker": "ACTIVE_DEPENDENCY:T-9 -- audit dependency",
+      "blocker_scope": "ticket",
+      "needs": "T-9",
+      "blocked_on": "T-9",
+      "resume_phase": "VERIFY",
+      "resume_transition_from": "BUILD"
+    },
+    "self_child_refusal": "VALIDATION_FAILED",
+    "self_child_zero_write": true,
+    "finding": "unclaimed TODO parent borrowed another ticket's VERIFY resume phase"
+  },
+  "mode_contract": {
+    "live_no_publish_may_mutate": true,
+    "normal": {
+      "ok": true,
+      "code": "ADMITTED",
+      "admitted": true,
+      "applicable": true,
+      "project_root": "V:\\_TEMP_\\saipen-regression-gate-oor1cqsg\\project",
+      "target": "ordinary.py",
+      "targets": [
+        "ordinary.py"
+      ],
+      "action": "write",
+      "effect": "mutating",
+      "provenance": "ancestor",
+      "detail": "protocol state sound",
+      "duration_ms": 4.448
+    },
+    "historical_read_only_mode": {
+      "ok": false,
+      "code": "PROTOCOL_MODE_READONLY",
+      "admitted": false,
+      "project_root": "V:\\_TEMP_\\saipen-regression-gate-oor1cqsg\\project",
+      "target": "V:\\_TEMP_\\saipen-regression-gate-oor1cqsg\\project\\ordinary.py",
+      "targets": [
+        "ordinary.py"
+      ],
+      "action": "write",
+      "effect": "mutating",
+      "detail": "STATE mode is read-only",
+      "canonical_next_command": null,
+      "duration_ms": 3.596
+    },
+    "read": {
+      "ok": true,
+      "code": "ADMITTED",
+      "admitted": true,
+      "applicable": true,
+      "project_root": "V:\\_TEMP_\\saipen-regression-gate-oor1cqsg\\project",
+      "target": "ordinary.py",
+      "targets": [
+        "ordinary.py"
+      ],
+      "action": "read",
+      "effect": "read",
+      "provenance": "ancestor",
+      "project_lineage": "lineage-bb181146d3ff441e8c55c07121b14ebb",
+      "detail": "read-only diagnostic access",
+      "duration_ms": 0.588
+    },
+    "protected_write": {
+      "ok": false,
+      "code": "PROTECTED_CANONICAL_NAMESPACE",
+      "admitted": false,
+      "project_root": "V:\\_TEMP_\\saipen-regression-gate-oor1cqsg\\project",
+      "target": ".saipen/STATE.md",
+      "targets": [
+        ".saipen/STATE.md"
+      ],
+      "action": "write",
+      "effect": "mutating",
+      "protected": true,
+      "provenance": "ancestor",
+      "detail": "direct mutation of protected canonical path '.saipen/STATE.md' is forbidden; mutations must go through canonical saipen commands",
+      "canonical_next_command": "saipen next --json",
+      "duration_ms": 0.424
+    },
+    "restored": {
+      "ok": true,
+      "code": "ADMITTED",
+      "admitted": true,
+      "applicable": true,
+      "project_root": "V:\\_TEMP_\\saipen-regression-gate-oor1cqsg\\project",
+      "target": "ordinary.py",
+      "targets": [
+        "ordinary.py"
+      ],
+      "action": "write",
+      "effect": "mutating",
+      "provenance": "ancestor",
+      "detail": "protocol state sound",
+      "duration_ms": 4.088
+    },
+    "limitation": "synthetic input conflict, not proof of a production incident"
+  },
+  "cc_all": {
+    "exit_code": 2,
+    "result": {
+      "ok": false,
+      "code": "VALIDATION_FAILED",
+      "detail": "Use: gg <objective>",
+      "telegrams": {
+        "state": "OK",
+        "unread": 0,
+        "on_current_work": 0,
+        "complete": true,
+        "read_command": "saimail-local saipen brief --project-root V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat saipen-cli",
+        "detail": "counts only; nothing was opened and nothing here is an instruction"
+      },
+      "route": "cc"
+    }
+  },
+  "production_after": {
+    "STATE.md": "ad13f6c46338224e01bcc5e73617d76a63bc65e86a3db641d4c134c61ec13101",
+    "BOARD.md": "81f4be62df3e7c663825b1480308d3bb8e6db6d59d92cca5f2b1d3064b758aa8",
+    "LOG.md": "23baff35becb07f0fb05a8d5a95eaed4a5370d2954fe86cb67cb1f8cdd9fbe2a",
+    "IDENTITY.md": "b49721c7920287213337f18809ce68f92ad118985649fd48f5830d5ff6baf9a4"
+  },
+  "production_unchanged": true,
+  "passed": true
+}

@@ -1,0 +1,10 @@
+{
+  "status": "fulfilled",
+  "value": {
+    "chunk_id": "536e66",
+    "wall_time_seconds": 0.7867381,
+    "exit_code": 0,
+    "original_token_count": 333,
+    "output": "{\r\n  \"ok\": true,\r\n  \"receipt\": \"SRC-092\",\r\n  \"status\": \"ACTIVE\",\r\n  \"location\": \"active\",\r\n  \"source_kind\": \"user_instruction\",\r\n  \"source_sha256\": \"48cfe5273c97b7501081fd720222bf8db507d650090f81dccd9307343e27c3bf\",\r\n  \"linked_work\": \"T-273\",\r\n  \"linked_works\": [\r\n    \"T-273\"\r\n  ],\r\n  \"amends\": null,\r\n  \"closure_event\": null,\r\n  \"coverage\": {\r\n    \"receipt\": \"SRC-092\",\r\n    \"requirements\": 0,\r\n    \"actionable\": 0,\r\n    \"terminal\": 0,\r\n    \"dispositions\": {},\r\n    \"unresolved\": []\r\n  },\r\n  \"distribution\": {\r\n    \"state\": \"DISTRIBUTABLE\",\r\n    \"receipt_id\": \"SRC-092\",\r\n    \"source_sha256\": \"48cfe5273c97b7501081fd720222bf8db507d650090f81dccd9307343e27c3bf\"\r\n  }\r\n}\r\n5723d53894cc2b279de8dc2a4c3b2dce169f421f\n?? Scripts/saispin_logic.py\n?? Scripts/saispin_settings.ps1\n?? Scripts/saispin_watch.ps1\n?? tests/test_saispin.py\n?? tests/test_saispin_settings.ps1\n?? tests/test_saispin_task.ps1\n---\r\nphase: VERIFY\r\ntask: T-1691\r\nnext_action: \"PHASE VERIFY T-1691\"\r\nblocker: none\r\ntransition_from: BUILD\r\nsaipen_version: 8\r\nschema_version: 3\r\nlast_event: 13868\r\nstyle_contract: ded-069a4c52\r\nsaipen_home: \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\"\r\nagent: saipen-cli\r\nmode: full\r\nupdated: \"2026-10-09T00:05:06Z\"\r\nrequires:\r\n  - filesystem\r\n  - git\r\n  - python\r\nexecution_intent: goal\r\ngoal_waves: 0\r\ngoal_tickets: 4\r\n---\r\n\r\n"
+  }
+}

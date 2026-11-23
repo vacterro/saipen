@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-002:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Detect running agent instances and associate each with launcher, project, process, and native window."
+    },
+    "SRC-002:R0002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Expose accurate instance count, window title, process ID, launcher name, project name, and running state."
+    },
+    "SRC-002:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Clicking a project opens a compact rich instance-management panel for that project."
+    },
+    "SRC-002:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Instance management supports focus, close, refresh, cascade, and tile operations without moving unrelated windows."
+    },
+    "SRC-002:R0005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Enforce launcher-specific capacity globally; FreeBuff allows one running instance and its launch controls are disabled everywhere with a visible reason."
+    },
+    "SRC-002:R0006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Monitoring remains truthful when windows close, processes exit, titles change, or a launcher cannot be identified."
+    }
+  },
+  "derived_at": "2026-08-29T22:57:04Z",
+  "derived_from": "SRC-002",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "6a92cbc51cf919d26bbd1e90a0820de9d00ee17174270828269c4ff5252c7ad2"
+}

@@ -1,0 +1,56 @@
+.....................F.....................F....s......ss........................FFF........................... [ 92%]
+........F                                                                [100%]
+================================== FAILURES ===================================
+_ IntentAuditTests.test_audit_core003_converge_target_controls_resume_without_writes (target='ship') _
+tools\test_intent_audit_fixes.py:484: in test_audit_core003_converge_target_controls_resume_without_writes
+    self.assertEqual(result["action"], expected_action)
+E   AssertionError: 'saipen status' != 'saipen ship'
+E   - saipen status
+E   + saipen ship
+____ IntentAuditTests.test_audit_core003_normal_cc_enters_done_convergence ____
+tools\test_intent_audit_fixes.py:503: in test_audit_core003_normal_cc_enters_done_convergence
+    self.assertEqual(result.get("code"), "IMPROVE_AUDIT_ASSIGNMENT")
+E   AssertionError: None != 'IMPROVE_AUDIT_ASSIGNMENT'
+_ IntentAuditTests.test_core007_targeted_collect_creates_ticket_before_review _
+tools\test_intent_audit_fixes.py:951: in test_core007_targeted_collect_creates_ticket_before_review
+    result = intent.collect_and_ship_producer(
+tools\saipen_engine\intent.py:642: in collect_and_ship_producer
+    eff_id = P.package_effect_identity(package, project_lineage=project_lineage_identity(root))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\producer.py:526: in package_effect_identity
+    digest.update(struct.pack(">Q", len(chunk)))
+                                    ^^^^^^^^^^
+E   TypeError: object of type 'Mock' has no len()
+___ FutureGateMatrixTests.test_G_no_eligible_gate_reproduces_todays_verdict ___
+tools\test_t1614_future_gate.py:332: in test_G_no_eligible_gate_reproduces_todays_verdict
+    self.assertEqual(routed["action"], "saipen continue")
+E   AssertionError: 'saipen status' != 'saipen continue'
+E   - saipen status
+E   + saipen continue
+__ FutureGateMatrixTests.test_H_a_live_operator_gate_outranks_a_future_gate ___
+tools\test_t1614_future_gate.py:349: in test_H_a_live_operator_gate_outranks_a_future_gate
+    self.assertEqual(routed["reason"], "improve-gate")
+E   AssertionError: 'future-gate-promotion' != 'improve-gate'
+E   - future-gate-promotion
+E   + improve-gate
+___ FutureGateMatrixTests.test_I_the_goal_valve_defers_instead_of_bypassing ___
+tools\test_t1614_future_gate.py:358: in test_I_the_goal_valve_defers_instead_of_bypassing
+    self.assertEqual(routed["action"], "saipen continue")
+E   AssertionError: 'saipen status' != 'saipen continue'
+E   - saipen status
+E   + saipen continue
+_ FutureGateAutoDiscoveryTests.test_AUTO16_no_future_documents_leaves_hunt_unchanged _
+tools\test_t1614_future_gate.py:1052: in test_AUTO16_no_future_documents_leaves_hunt_unchanged
+    self.assertEqual(routed["action"], "saipen continue")
+E   AssertionError: 'saipen status' != 'saipen continue'
+E   - saipen status
+E   + saipen continue
+=========================== short test summary info ===========================
+SUBFAILED(target='ship') tools/test_intent_audit_fixes.py::IntentAuditTests::test_audit_core003_converge_target_controls_resume_without_writes
+FAILED tools/test_intent_audit_fixes.py::IntentAuditTests::test_audit_core003_normal_cc_enters_done_convergence
+FAILED tools/test_intent_audit_fixes.py::IntentAuditTests::test_core007_targeted_collect_creates_ticket_before_review
+FAILED tools/test_t1614_future_gate.py::FutureGateMatrixTests::test_G_no_eligible_gate_reproduces_todays_verdict
+FAILED tools/test_t1614_future_gate.py::FutureGateMatrixTests::test_H_a_live_operator_gate_outranks_a_future_gate
+FAILED tools/test_t1614_future_gate.py::FutureGateMatrixTests::test_I_the_goal_valve_defers_instead_of_bypassing
+FAILED tools/test_t1614_future_gate.py::FutureGateAutoDiscoveryTests::test_AUTO16_no_future_documents_leaves_hunt_unchanged
+7 failed, 111 passed, 3 skipped, 32 subtests passed in 122.12s (0:02:02)

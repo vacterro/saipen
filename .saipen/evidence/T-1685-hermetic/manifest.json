@@ -1,0 +1,64 @@
+{
+  "profile": "C:\\Users\\vac34\\.claude-account2",
+  "restored_from": "settings.json.70b51160f43eaf37.bak",
+  "moved": [
+    "settings.json",
+    "settings.json.1190b627590bf08e.bak",
+    "settings.json.55e922e9b28f91e9.bak",
+    "settings.json.7f6fa79d6c083867.bak",
+    "settings.json.fb57deba92dec1ca.bak",
+    "settings.json.uninstalled.bak",
+    "CLAUDE.md",
+    "CLAUDE.md.bak",
+    "CLAUDE.md.uninstalled.bak",
+    "hooks",
+    "skills/saipen",
+    "skills/.saipen-user-backup-009529c670e08001",
+    "skills/.saipen-user-backup-c330dd99bac24cbd",
+    "settings.json.70b51160f43eaf37.bak"
+  ],
+  "digests": {
+    "settings.json": {
+      "file": "fb57deba92dec1ca1a39afa2e900c755599b35f93b26a4203d7ab641ced3848e"
+    },
+    "settings.json.1190b627590bf08e.bak": {
+      "file": "1190b627590bf08e202b3dddf554ee6d2e54fccba86e78cc4ed01ed85fca1baf"
+    },
+    "settings.json.55e922e9b28f91e9.bak": {
+      "file": "55e922e9b28f91e939641607277e02cda3858eb18fa1e2cc306a71b1046c3910"
+    },
+    "settings.json.7f6fa79d6c083867.bak": {
+      "file": "7f6fa79d6c0838672af40515bce20309fc1f107ca2f1892a5b8bbf1d1134696d"
+    },
+    "settings.json.fb57deba92dec1ca.bak": {
+      "file": "fb57deba92dec1ca1a39afa2e900c755599b35f93b26a4203d7ab641ced3848e"
+    },
+    "settings.json.uninstalled.bak": {
+      "file": "fb57deba92dec1ca1a39afa2e900c755599b35f93b26a4203d7ab641ced3848e"
+    },
+    "CLAUDE.md": {
+      "file": "3f318822aa06e8e171539736760928500509a4a2560859fbc4481663e750c5b1"
+    },
+    "CLAUDE.md.bak": {
+      "file": "841196d4c7606d39a91a864cc477898bb9e6cb24a04bc6e50a6796f8298767c3"
+    },
+    "CLAUDE.md.uninstalled.bak": {
+      "file": "26a5dff83ce1595ae99a0c99a5fc66744edb58332406650b68c7587732043d65"
+    },
+    "hooks": {
+      "dir_files": 1
+    },
+    "skills/saipen": {
+      "dir_files": 661
+    },
+    "skills/.saipen-user-backup-009529c670e08001": {
+      "dir_files": 2
+    },
+    "skills/.saipen-user-backup-c330dd99bac24cbd": {
+      "dir_files": 2
+    },
+    "settings.json.70b51160f43eaf37.bak": {
+      "file": "70b51160f43eaf371e6b5cd86e424ee2cfd8ab561815c9ec74a17e1f7643bdab"
+    }
+  }
+}

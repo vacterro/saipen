@@ -1,0 +1,10 @@
+{
+  "ok": false,
+  "code": "STALE_PACKAGE",
+  "op_id": null,
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "TEST-99 is not a current saitest package: it must be ready or reviewed and carry the live source triple and the current role revision",
+  "current": [],
+  "detail": "TEST-99 is not a current saitest package: it must be ready or reviewed and carry the live source triple and the current role revision"
+}

@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "op_id": null,
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "EXTERNAL_TICKET_ABSENT: external ticket T-289 not found on external board",
+  "detail": "EXTERNAL_TICKET_ABSENT: external ticket T-289 not found on external board"
+}

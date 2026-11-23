@@ -1,0 +1,2657 @@
+diff --git a/tools/freshness.py b/tools/freshness.py
+index 38ea76b..97d618a 100644
+--- a/tools/freshness.py
++++ b/tools/freshness.py
+@@ -143,6 +143,7 @@ def _digest(model: str, records: Iterable[_Record]) -> str:
+         h.update(_frame(record))
+     return f"{model}:{h.hexdigest()}"
+ 
++
+ # PERF-001: preserve reference to original _digest for drift probe detection
+ _original_digest = _digest
+ 
+@@ -417,16 +418,13 @@ def _evidence_to_records(root: Path, evidence: list[_Evidence]) -> list[_Record]
+     out: list[_Record] = []
+     for ev in evidence:
+         if ev.kind == b"F":
+-            content = _read_regular_info(
+-                root_path.joinpath(*os.fsdecode(ev.path).split("/"))
+-            )[0]
++            content = _read_regular_info(root_path.joinpath(*os.fsdecode(ev.path).split("/")))[0]
+             out.append(_Record(b"F", ev.path, ev.mode, content))
+         else:
+             out.append(_Record(ev.kind, ev.path, ev.mode, ev.content))
+     return out
+ 
+ 
+-
+ def _iter_no_git(root: Path, *, full: bool):
+     """Iterative deterministic no-Git walk (PERF-006: no Python recursion).
+ 
+@@ -471,7 +469,9 @@ def _iter_no_git(root: Path, *, full: bool):
+                 if full:
+                     out.append(_Record(b"F", raw_path, mode, content))
+                 else:
+-                    out.append(_Evidence(b"F", raw_path, mode, _content_digest(content), len(content)))
++                    out.append(
++                        _Evidence(b"F", raw_path, mode, _content_digest(content), len(content))
++                    )
+             else:
+                 raise FreshnessError(
+                     f"unsupported fingerprint input type at {path}; only regular "
+@@ -652,9 +652,7 @@ def compute_source_identity(project_root: Path | str) -> SourceIdentity:
+     if first != second:
+         raise FreshnessError("no-Git source tree changed while fingerprint inputs were being read")
+     digest = _stream_digest(root, model, second)
+-    token = _RevalidationToken(
+-        os.fspath(root.resolve()), model, "no-git", None, tuple(second)
+-    )
++    token = _RevalidationToken(os.fspath(root.resolve()), model, "no-git", None, tuple(second))
+     return SourceIdentity("no-git", digest, model, token)
+ 
+ 
+@@ -678,15 +676,11 @@ def revalidate_source_identity(
+         if token.model == "git-delta-v1":
+             if token.listing is None:
+                 return False, "Git source revalidation token has no listing"
+-            head_before = _run_git(root, "rev-parse", "--verify", "HEAD").decode(
+-                "ascii"
+-            ).strip()
++            head_before = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
+             listing_before = _git_delta_listing(root)
+             evidence = _parse_git_delta_evidence(root, *listing_before)
+             listing_after = _git_delta_listing(root)
+-            head_after = _run_git(root, "rev-parse", "--verify", "HEAD").decode(
+-                "ascii"
+-            ).strip()
++            head_after = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
+             if not (
+                 head_before == head_after == token.head == identity.source_head
+                 and listing_before == listing_after == token.listing
+diff --git a/tools/improve.py b/tools/improve.py
+index f091783..c4c9838 100644
+--- a/tools/improve.py
++++ b/tools/improve.py
+@@ -1977,12 +1977,17 @@ def prepare_audit_seat(
+         targets.append({"path": report_rel, "role": "report", "content": report_text})
+         preconditions[report_rel] = _hash_file(report)
+         op_id = "improve-admit-" + uuid.uuid4().hex
+-        # fmt: off
+-        committed = run_mutation(root, op_id, "improve_admit", seat, _identity(root),
+-                                 hash_bytes(f"{active_cycle}:{seat}:{selected_role}".encode("utf-8")),
+-                                 targets, preconditions=preconditions, skip_preflight=True,
+-                                 verification_policy="improve_atomic_file",
+-        # fmt: on
++        committed = run_mutation(
++            root,
++            op_id,
++            "improve_admit",
++            seat,
++            _identity(root),
++            hash_bytes(f"{active_cycle}:{seat}:{selected_role}".encode("utf-8")),
++            targets,
++            preconditions=preconditions,
++            skip_preflight=True,
++            verification_policy="improve_atomic_file",
+         )
+         if not committed.get("ok"):
+             return _rv(committed)
+diff --git a/tools/run_scenarios.py b/tools/run_scenarios.py
+index acf1b0f..c190b3f 100644
+--- a/tools/run_scenarios.py
++++ b/tools/run_scenarios.py
+@@ -3451,21 +3451,11 @@ def run_saicrew_probes() -> tuple[list[str], int]:
+             broken_first.to_json(),
+         )
+         broken_op = (
+-            broken_root
+-            / ".saipen"
+-            / "recovery"
+-            / "settled"
+-            / broken_first.op_id
+-            / "operation.json"
++            broken_root / ".saipen" / "recovery" / "settled" / broken_first.op_id / "operation.json"
+         )
+         if not broken_op.is_file():
+             broken_op = (
+-                broken_root
+-                / ".saipen"
+-                / "recovery"
+-                / "ops"
+-                / broken_first.op_id
+-                / "operation.json"
++                broken_root / ".saipen" / "recovery" / "ops" / broken_first.op_id / "operation.json"
+             )
+         broken_record = json.loads(broken_op.read_text(encoding="utf-8"))
+         broken_record["created_at"] = "not-a-timestamp"
+@@ -3546,13 +3536,9 @@ def run_saicrew_probes() -> tuple[list[str], int]:
+             selection (T-1001), exactly as spaced-out real syncs are."""
+             if not op_id:
+                 return
+-            op_file = (
+-                root / ".saipen" / "recovery" / "settled" / op_id / "operation.json"
+-            )
++            op_file = root / ".saipen" / "recovery" / "settled" / op_id / "operation.json"
+             if not op_file.is_file():
+-                op_file = (
+-                    root / ".saipen" / "recovery" / "ops" / op_id / "operation.json"
+-                )
++                op_file = root / ".saipen" / "recovery" / "ops" / op_id / "operation.json"
+             if not op_file.is_file():
+                 return
+             record = json.loads(op_file.read_text(encoding="utf-8"))
+@@ -12682,9 +12668,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
+         r = Path(tempfile.mkdtemp(prefix="saipen-m3-goal-"))
+         s = r / ".saipen"
+         s.mkdir()
+-        (s / "LOG.md").write_text(
+-            "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8"
+-        )
++        (s / "LOG.md").write_text("- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8")
+         (s / "BOARD.md").write_text(
+             "# Board\n## DOING\n## TODO\n"
+             "- [ ] T-1 [P1] top probe | verify: probe\n"
+@@ -12700,7 +12684,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
+             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
+             'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
+             "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+-            f'saipen_home: "{str(HOME)}"\nagent: probe\nrequires:\n  - filesystem\n'
++            f'saipen_home: "{HOME!s}"\nagent: probe\nrequires:\n  - filesystem\n'
+             "  - git\n  - python\nmode: full\nupdated: 2026-08-09T00:00:00Z\n"
+             "---\n",
+             encoding="utf-8",
+@@ -12961,8 +12945,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
+     ge_state_before = parse_state(codec.read_doc(ge_saipen / "STATE.md"))
+     expect(
+         "goal_entry precondition: active DOING ticket T-1 at BUILD",
+-        ge_state_before.get("task") == "T-1"
+-        and ge_state_before.get("phase") == "BUILD",
++        ge_state_before.get("task") == "T-1" and ge_state_before.get("phase") == "BUILD",
+         repr(ge_state_before),
+     )
+     ge_result = goal_entry(ge_root, "probe", "T-1100 goal entry test")
+@@ -13014,8 +12997,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
+     )
+     expect(
+         "goal_entry cold-start routes to the plan ticket",
+-        ge_routed.get("ok")
+-        and ge_routed.get("ticket") is not None,
++        ge_routed.get("ok") and ge_routed.get("ticket") is not None,
+         repr(ge_routed),
+     )
+ 
+@@ -13050,8 +13032,9 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
+ 
+     # ---- T-1100: goal_entry credential redaction ----
+     ge_cred = make_project()
+-    ge_cred_result = goal_entry(
+-        ge_cred, "probe",
++    goal_entry(
++        ge_cred,
++        "probe",
+         "fix the ghp_abcdefghijklmnopqrstuvwxyz0123456789ab token leak",
+     )
+     ge_cred_log = codec.read_doc(ge_cred / ".saipen" / "LOG.md")
+@@ -13102,7 +13085,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
+             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
+             'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
+             "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+-            f'saipen_home: "{str(HOME)}"\nagent: probe\nrequires:\n  - filesystem\n'
++            f'saipen_home: "{HOME!s}"\nagent: probe\nrequires:\n  - filesystem\n'
+             "  - git\n  - python\nmode: full\nupdated: 2026-08-09T00:00:00Z\n"
+             "---\n",
+             encoding="utf-8",
+@@ -16094,9 +16077,7 @@ def run_hostile_journal_probes() -> tuple[list[str], int]:
+         return hashlib.sha256(b).hexdigest()[:16]
+ 
+     def base_targets(content_bytes):
+-        return [
+-            {"path": "x.txt", "role": "generic", "action": "write", "content": content_bytes}
+-        ]
++        return [{"path": "x.txt", "role": "generic", "action": "write", "content": content_bytes}]
+ 
+     # 1. relative root works (was a crash)
+     r = mkrepo()
+diff --git a/tools/saipen.py b/tools/saipen.py
+index f60182e..519988b 100644
+--- a/tools/saipen.py
++++ b/tools/saipen.py
+@@ -145,7 +145,9 @@ def _command_mutates(command: str, rest: list[str]) -> bool:
+     return False
+ 
+ 
+-def _ensure_handover(project_root: Path, as_json: bool, dry_run: bool, allow_dead_home: bool = False) -> int | None:
++def _ensure_handover(
++    project_root: Path, as_json: bool, dry_run: bool, allow_dead_home: bool = False
++) -> int | None:
+     """Deprecated second-wave no-op (W2-001).
+ 
+     The A -> B seat handover is no longer a standalone pre-write: the acting
+@@ -297,7 +299,9 @@ def _status(project_root: Path, as_json: bool) -> int:
+     blocked_tickets = [t for t in board["tickets"].values() if t["section"] == "## BLOCKED"]
+ 
+     top_workable = None
+-    resolved_agent = _AGENT_OVERRIDE if _AGENT_OVERRIDE is not None else (state.get("agent") or AGENT)
++    resolved_agent = (
++        _AGENT_OVERRIDE if _AGENT_OVERRIDE is not None else (state.get("agent") or AGENT)
++    )
+     if not board["errors"]:
+         for ticket in todo:
+             if ticket_is_workable(ticket, board["tickets"], agent=resolved_agent):
+@@ -490,7 +494,9 @@ def _next_action(project_root: Path, as_json: bool) -> int:
+ 
+     # P0#4: the freshly negotiated current-session capability gates routing.
+     # T-1006: routing judges claim truth against the canonical acting seat.
+-    resolved_agent = _AGENT_OVERRIDE if _AGENT_OVERRIDE is not None else (state.get("agent") or AGENT)
++    resolved_agent = (
++        _AGENT_OVERRIDE if _AGENT_OVERRIDE is not None else (state.get("agent") or AGENT)
++    )
+     routed = route_next(
+         state_text,
+         board_text,
+@@ -616,7 +622,14 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
+         from saipen_engine.journal import resolve_conflict
+ 
+         if dry_run:
+-            _emit({"ok": False, "code": "DRY_RUN_UNSUPPORTED", "detail": "dry_run not supported for recovery mutations"}, as_json)
++            _emit(
++                {
++                    "ok": False,
++                    "code": "DRY_RUN_UNSUPPORTED",
++                    "detail": "dry_run not supported for recovery mutations",
++                },
++                as_json,
++            )
+             return 1
+         result = resolve_conflict(project_root, op_id, resolution, agent=_agent_for(project_root))
+         _emit(result, as_json)
+@@ -964,7 +977,7 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
+                 {
+                     "ok": False,
+                     "code": "VALIDATION_FAILED",
+-                    "detail": f"userperson show accepts no arguments; surplus: {' '.join(args[1:])}", # noqa: E501
++                    "detail": f"userperson show accepts no arguments; surplus: {' '.join(args[1:])}",  # noqa: E501
+                 },
+                 as_json,
+             )
+@@ -1006,7 +1019,7 @@ def _userperson(project_root: Path, args: list[str], as_json: bool, dry_run: boo
+                 {
+                     "ok": False,
+                     "code": "VALIDATION_FAILED",
+-                    "detail": f"userperson reset accepts only --confirm; surplus: {' '.join(surplus)}", # noqa: E501
++                    "detail": f"userperson reset accepts only --confirm; surplus: {' '.join(surplus)}",  # noqa: E501
+                 },
+                 as_json,
+             )
+@@ -1919,7 +1932,7 @@ def main(argv: list[str] | None = None) -> int:
+     # bare CLI (override None) inherits the persisted STATE.agent seat. The
+     # mandatory old -> new DEC is written by handover_agent before the first
+     # mutating command below dispatches.
+-    global _AGENT_OVERRIDE # noqa: PLW0603
++    global _AGENT_OVERRIDE  # noqa: PLW0603
+     _AGENT_OVERRIDE = agent_opt.strip() if agent_opt and agent_opt.strip() else None
+ 
+     if not args or args[0] in ("-h", "--help"):
+@@ -2264,7 +2277,7 @@ def main(argv: list[str] | None = None) -> int:
+                 {
+                     "ok": False,
+                     "code": "VALIDATION_FAILED",
+-                    "detail": f"rebind-home takes <candidate-home-path>; surplus: {' '.join(args[2:])}", # noqa: E501
++                    "detail": f"rebind-home takes <candidate-home-path>; surplus: {' '.join(args[2:])}",  # noqa: E501
+                 },
+                 as_json,
+             )
+@@ -2336,7 +2349,6 @@ def main(argv: list[str] | None = None) -> int:
+             return 2
+         from saipen_engine.release import ReleaseRefusal, execute_release, plan_release
+ 
+-            
+         try:
+             # P0#4: inject the freshly negotiated current-session capability so
+             # a read-only session cannot PLAN a release. Second-wave P0: the
+@@ -2364,7 +2376,9 @@ def main(argv: list[str] | None = None) -> int:
+         from saipen_engine.intent import ensure_producer_ready
+ 
+         result = ensure_producer_ready(
+-            project_root, role, dry_run=dry_run,
++            project_root,
++            role,
++            dry_run=dry_run,
+             current_capability=_negotiate_capability(project_root),
+         )
+         _emit(result, as_json)
+@@ -2374,7 +2388,9 @@ def main(argv: list[str] | None = None) -> int:
+         from saipen_engine.intent import ensure_producer_ready
+ 
+         result = ensure_producer_ready(
+-            project_root, role, dry_run=dry_run,
++            project_root,
++            role,
++            dry_run=dry_run,
+             current_capability=_negotiate_capability(project_root),
+         )
+         _emit(result, as_json)
+@@ -2383,7 +2399,9 @@ def main(argv: list[str] | None = None) -> int:
+         from saipen_engine.intent import collect_and_ship_producer
+ 
+         result = collect_and_ship_producer(
+-            project_root, "saiwiki", dry_run=dry_run,
++            project_root,
++            "saiwiki",
++            dry_run=dry_run,
+             current_capability=_negotiate_capability(project_root),
+         )
+         _emit(result, as_json)
+@@ -2392,7 +2410,9 @@ def main(argv: list[str] | None = None) -> int:
+         from saipen_engine.intent import collect_and_ship_producer
+ 
+         result = collect_and_ship_producer(
+-            project_root, "saitranslate", dry_run=dry_run,
++            project_root,
++            "saitranslate",
++            dry_run=dry_run,
+             current_capability=_negotiate_capability(project_root),
+         )
+         _emit(result, as_json)
+@@ -2401,7 +2421,9 @@ def main(argv: list[str] | None = None) -> int:
+         from saipen_engine.intent import autonomous_crew_loop
+ 
+         result = autonomous_crew_loop(
+-            project_root, dry_run=dry_run, as_json=as_json,
++            project_root,
++            dry_run=dry_run,
++            as_json=as_json,
+             current_capability=_negotiate_capability(project_root),
+         )
+         _emit(result, as_json)
+@@ -2410,7 +2432,9 @@ def main(argv: list[str] | None = None) -> int:
+         from saipen_engine.intent import autonomous_crew_loop
+ 
+         result = autonomous_crew_loop(
+-            project_root, dry_run=dry_run, as_json=as_json,
++            project_root,
++            dry_run=dry_run,
++            as_json=as_json,
+             current_capability=_negotiate_capability(project_root),
+         )
+         _emit(result, as_json)
+diff --git a/tools/saipen_engine/autonomy.py b/tools/saipen_engine/autonomy.py
+index c9c093b..55830ca 100644
+--- a/tools/saipen_engine/autonomy.py
++++ b/tools/saipen_engine/autonomy.py
+@@ -20,11 +20,10 @@ Only HUMAN_DECISION_REQUIRED may ask the user a decision question.
+ from __future__ import annotations
+ 
+ import enum
+-import json
+-import sys
++import contextlib
+ from dataclasses import dataclass, field
+ from pathlib import Path
+-from typing import Any, Callable
++from typing import Callable
+ 
+ 
+ class BlockerClass(enum.Enum):
+@@ -79,14 +78,10 @@ class ProgressTracker:
+         self.iterations = 0
+         self.history: list[IterationRecord] = []
+ 
+-    def record(
+-        self, state_hash: str, action: str, reason: str, result_code: str
+-    ) -> bool:
++    def record(self, state_hash: str, action: str, reason: str, result_code: str) -> bool:
+         """Record an iteration. Returns False if loop is stalled."""
+         self.iterations += 1
+-        self.history.append(
+-            IterationRecord(state_hash, action, reason, result_code)
+-        )
++        self.history.append(IterationRecord(state_hash, action, reason, result_code))
+ 
+         if self.iterations >= self.max_iterations:
+             return False
+@@ -94,19 +89,14 @@ class ProgressTracker:
+         # Check for stall: the complete observed transition repeats 3+ times.
+         current = (state_hash, action, reason, result_code)
+         count = sum(
+-            1
+-            for h in self.history
+-            if (h.state_hash, h.action, h.reason, h.result_code) == current
++            1 for h in self.history if (h.state_hash, h.action, h.reason, h.result_code) == current
+         )
+         if count >= 3:
+             return False
+ 
+         # Check for A/B regressions over the complete observed transition, not
+         # merely result codes (successful actions can oscillate forever too).
+-        recent = [
+-            (h.state_hash, h.action, h.reason, h.result_code)
+-            for h in self.history[-6:]
+-        ]
++        recent = [(h.state_hash, h.action, h.reason, h.result_code) for h in self.history[-6:]]
+         if len(recent) >= 6:
+             if (
+                 recent[0] == recent[2] == recent[4]
+@@ -272,10 +262,8 @@ def _state_hash(project_root: Path) -> str:
+         for sub_dir in sorted(subs_dir.iterdir()):
+             outbox = sub_dir / "kitchen" / "OUTBOX.md"
+             if outbox.is_file():
+-                try:
++                with contextlib.suppress(OSError):
+                     h.update(outbox.read_bytes())
+-                except OSError:
+-                    pass
+     return h.hexdigest()[:16]
+ 
+ 
+diff --git a/tools/saipen_engine/capability.py b/tools/saipen_engine/capability.py
+index a1e1813..5999c92 100644
+--- a/tools/saipen_engine/capability.py
++++ b/tools/saipen_engine/capability.py
+@@ -112,7 +112,9 @@ def may_publish(capability: object) -> bool:
+     return capability_error(capability) is None and capability == "full"
+ 
+ 
+-def assert_producer_capability(action: str, *, producer: str | None = None) -> tuple[bool, str, str]:
++def assert_producer_capability(
++    action: str, *, producer: str | None = None
++) -> tuple[bool, str, str]:
+     """The hard producer capability boundary (spec §7).
+ 
+     Returns ``(allowed, code, detail)``. A forbidden action returns
+@@ -176,7 +178,6 @@ def guard_core_mutation(path: str | Path) -> tuple[bool, str]:
+                 )
+             if next_part == "knowledge":
+                 return True, (
+-                    f"path {str(p)!r} resolves to Core KNOWLEDGE tree; "
+-                    "producers may not mutate it"
++                    f"path {str(p)!r} resolves to Core KNOWLEDGE tree; producers may not mutate it"
+                 )
+     return False, ""
+diff --git a/tools/saipen_engine/codec.py b/tools/saipen_engine/codec.py
+index 2df3057..5064269 100644
+--- a/tools/saipen_engine/codec.py
++++ b/tools/saipen_engine/codec.py
+@@ -16,6 +16,7 @@ from __future__ import annotations
+ 
+ import hashlib
+ import os
++import re as _re
+ from dataclasses import dataclass
+ from pathlib import Path
+ 
+@@ -290,8 +291,6 @@ def encode_preserving(path: Path | str, new_text: str) -> bytes:
+ # userperson._redact_credentials and any other isolated copies are replaced
+ # by this single boundary function to make credential exclusion a persistence
+ # invariant rather than a fragmentary per-path concern.
+-import re as _re
+-
+ _CRED_PATTERNS = [
+     (_re.compile(r"ghp_[a-zA-Z0-9]{36}"), "ghp_***"),
+     (_re.compile(r"AKIA[0-9A-Z]{16}"), "AKIA***"),
+diff --git a/tools/saipen_engine/conformance.py b/tools/saipen_engine/conformance.py
+index 4f6a675..a787f34 100644
+--- a/tools/saipen_engine/conformance.py
++++ b/tools/saipen_engine/conformance.py
+@@ -27,6 +27,7 @@ Sections implemented here:
+ from __future__ import annotations
+ 
+ import datetime
++import contextlib
+ import hashlib
+ import json
+ import os
+@@ -115,8 +116,7 @@ def _validate_conformance_containment(root: Path) -> None:
+                 continue
+             if os.path.islink(p):
+                 raise ValueError(
+-                    f"conformance receipt {p.name} is a symlink; "
+-                    "symlinked receipts are forbidden"
++                    f"conformance receipt {p.name} is a symlink; symlinked receipts are forbidden"
+                 )
+             if getattr(info, "st_file_attributes", 0) & 0x400:
+                 raise ValueError(
+@@ -133,21 +133,18 @@ def _atomic_write_receipt(path: Path, body: str) -> None:
+     never a partial file.
+     """
+     parent = path.parent
+-    fd, tmp_path = tempfile.mkstemp(
+-        suffix=".tmp", prefix=path.stem + "-", dir=parent
+-    )
++    fd, tmp_path = tempfile.mkstemp(suffix=".tmp", prefix=path.stem + "-", dir=parent)
+     try:
+         with os.fdopen(fd, "w", encoding="utf-8") as f:
+             f.write(body)
+             f.write("\n")
+         os.replace(tmp_path, path)
+     except BaseException:
+-        try:
++        with contextlib.suppress(OSError):
+             os.unlink(tmp_path)
+-        except OSError:
+-            pass
+         raise
+ 
++
+ # §9: max allowed clock skew (seconds). A receipt timestamp further in the
+ # future than this is treated as fabricated and refused.
+ MAX_CLOCK_SKEW_SECONDS = 300
+@@ -196,14 +193,14 @@ def _safe_filename_component(value: str) -> str:
+     # Characters forbidden on Windows (and problematic on POSIX in filenames)
+     _unsafe = set('/<>:"|?*\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f')
+     # Also forbid colon which is NTFS alternate-data-stream syntax
+-    _unsafe.add(':')
++    _unsafe.add(":")
+     result = []
+     for ch in value:
+         if ch in _unsafe or ord(ch) < 0x20:
+-            result.append('_')
++            result.append("_")
+         else:
+             result.append(ch)
+-    return ''.join(result)
++    return "".join(result)
+ 
+ 
+ def _strict_iso_utc(value) -> str:
+@@ -293,7 +290,8 @@ class ValidatorVersionInfo:
+ 
+ 
+ def validator_version_info(
+-    project_root: Path | str, gate: str = "core",
++    project_root: Path | str,
++    gate: str = "core",
+     # PERF-002: optional pre-computed SourceIdentity to avoid redundant
+     # filesystem/Git subprocess calls. When provided, skips _source_identity.
+     source_identity=None,
+@@ -323,10 +321,7 @@ def validator_version_info(
+     except OSError:
+         pass
+     # PERF-002: use pre-computed identity if available
+-    if source_identity is not None:
+-        ident = source_identity
+-    else:
+-        ident = _source_identity(root)
++    ident = source_identity if source_identity is not None else _source_identity(root)
+     return ValidatorVersionInfo(
+         validator_path=validator_path,
+         validator_protocol_version=CONFORMANCE_PROTOCOL_VERSION,
+@@ -337,14 +332,13 @@ def validator_version_info(
+     )
+ 
+ 
+-def stale_validator(
+-    project_root: Path | str, tool_validator_version: str | None = None
+-) -> bool:
++def stale_validator(project_root: Path | str, tool_validator_version: str | None = None) -> bool:
+     """§1: report STALE_VALIDATOR when a viewer/tool uses a different validator
+     version than the canonical one on disk."""
+-    if tool_validator_version is not None and tool_validator_version != CONFORMANCE_PROTOCOL_VERSION:
+-        return True
+-    return False
++    return bool(
++        tool_validator_version is not None
++        and tool_validator_version != CONFORMANCE_PROTOCOL_VERSION
++    )
+ 
+ 
+ # --------------------------------------------------------------------------- §2
+@@ -597,22 +591,28 @@ def latest_receipt(project_root: Path | str, gate: str | None = None) -> dict |
+     return max(receipts, key=lambda r: (r.get("timestamp_utc", ""), r.get("receipt_id", "")))
+ 
+ 
+-# --------------------------------------------------------------------------- CORE-001 strict receipt validation
++# ---------------------------------------------------------------------------
++# CORE-001 strict receipt validation
+ # Required fields for a receipt to be considered structurally valid.
+ # schema_version 2+ requires receipt_id for W2-005 total ordering.
+-_RECEIPT_REQUIRED_FIELDS_V1 = frozenset({
+-    "schema_version", "kind", "validator_protocol_version",
+-    "gate", "exit_code", "verdict", "timestamp_utc",
+-})
++_RECEIPT_REQUIRED_FIELDS_V1 = frozenset(
++    {
++        "schema_version",
++        "kind",
++        "validator_protocol_version",
++        "gate",
++        "exit_code",
++        "verdict",
++        "timestamp_utc",
++    }
++)
+ _RECEIPT_REQUIRED_FIELDS_V2 = _RECEIPT_REQUIRED_FIELDS_V1 | {"receipt_id"}
+ 
+ # Allowed gate values.
+ _ALLOWED_GATES = ("core", "crew")
+ 
+ 
+-def _strict_validate_receipt(
+-    receipt: dict, gate: str, project_root: Path
+-) -> str | None:
++def _strict_validate_receipt(receipt: dict, gate: str, project_root: Path) -> str | None:
+     """CORE-001: one strict conformance-receipt decoder.
+ 
+     Returns None when the receipt is structurally and cryptographically
+@@ -656,10 +656,7 @@ def _strict_validate_receipt(
+     if verdict not in ("PASS", "FAIL"):
+         return f"receipt verdict is not PASS/FAIL: {verdict!r}"
+     if (exit_code == 0) != (verdict == "PASS"):
+-        return (
+-            f"exit_code/verdict inconsistency: exit_code={exit_code} "
+-            f"but verdict={verdict}"
+-        )
++        return f"exit_code/verdict inconsistency: exit_code={exit_code} but verdict={verdict}"
+ 
+     # 5. content_hash revalidation: recompute from the receipt body
+     #    (every field except content_hash itself)
+@@ -700,23 +697,19 @@ def _checkpoint_hash_mismatch(receipt: dict, root: Path) -> str | None:
+     # (empty stored hash means the receipt was minted without checkpoint
+     # binding, which is a structural weakness but not a mismatch per se)
+     if stored_state and current_state and stored_state != current_state:
+-        return (
+-            f"STATE hash mismatch: receipt={stored_state} current={current_state}"
+-        )
++        return f"STATE hash mismatch: receipt={stored_state} current={current_state}"
+     if stored_board and current_board and stored_board != current_board:
+-        return (
+-            f"BOARD hash mismatch: receipt={stored_board} current={current_board}"
+-        )
++        return f"BOARD hash mismatch: receipt={stored_board} current={current_board}"
+     if stored_log and current_log and stored_log != current_log:
+-        return (
+-            f"LOG hash mismatch: receipt={stored_log} current={current_log}"
+-        )
++        return f"LOG hash mismatch: receipt={stored_log} current={current_log}"
+     return None
+ 
+ 
+ # --------------------------------------------------------------------------- §8
+ def conformance_status(
+-    project_root: Path | str, gate: str = "core", now: datetime.datetime | None = None,
++    project_root: Path | str,
++    gate: str = "core",
++    now: datetime.datetime | None = None,
+     # PERF-002: optional pre-computed SourceIdentity to avoid redundant
+     # filesystem/Git subprocess calls.
+     source_identity=None,
+@@ -792,7 +785,10 @@ def conformance_status(
+         pass
+     if not bound:
+         status = STATUS_STALE_PASS if is_pass else STATUS_STALE_FAIL
+-        reason = "conformance receipt is bound to a different source identity " "than the current checkpoint"
++        reason = (
++            "conformance receipt is bound to a different source identity "
++            "than the current checkpoint"
++        )
+     elif age_seconds > FRESHNESS_WINDOW_SECONDS:
+         status = STATUS_STALE_PASS if is_pass else STATUS_STALE_FAIL
+         reason = (
+@@ -823,8 +819,11 @@ def conformance_status(
+         "validator": info.as_dict(),
+     }
+ 
++
+ def current_conformance_pass(
+-    project_root: Path | str, gate: str = "core", now: datetime.datetime | None = None,
++    project_root: Path | str,
++    gate: str = "core",
++    now: datetime.datetime | None = None,
+     # PERF-002: optional pre-computed SourceIdentity to avoid redundant
+     # filesystem/Git subprocess calls.
+     source_identity=None,
+@@ -832,8 +831,10 @@ def current_conformance_pass(
+     """§4/§7: terminal/crew closure is allowed ONLY on a CURRENT_PASS receipt
+     bound to the current checkpoint. Everything else forbids closure."""
+     return (
+-        conformance_status(project_root, gate=gate, now=now, source_identity=source_identity)
+-        .get("status") == STATUS_CURRENT_PASS
++        conformance_status(project_root, gate=gate, now=now, source_identity=source_identity).get(
++            "status"
++        )
++        == STATUS_CURRENT_PASS
+     )
+ 
+ 
+@@ -933,9 +934,7 @@ def continue_entry_health(
+         )
+     # converge/crew intent without current conformance is not finalizable.
+     if state.get("execution_intent") == "converge" and state.get("converge_target") == "crew":
+-        if not current_conformance_pass(
+-            root, "crew", now=now, source_identity=source_id
+-        ):
++        if not current_conformance_pass(root, "crew", now=now, source_identity=source_id):
+             problems.append(
+                 "converge/crew intent present but canonical crew conformance is "
+                 "not CURRENT_PASS -- crew closure is impossible"
+diff --git a/tools/saipen_engine/context.py b/tools/saipen_engine/context.py
+index 7a8b324..8c428b2 100644
+--- a/tools/saipen_engine/context.py
++++ b/tools/saipen_engine/context.py
+@@ -109,7 +109,9 @@ def _home_present(state: dict) -> str:
+         return "false"
+ 
+ 
+-def _board_map(buckets: dict[str, list[dict]], full_ticket: str | None = None, cap: int = _BOARD_CAP) -> str:
++def _board_map(
++    buckets: dict[str, list[dict]], full_ticket: str | None = None, cap: int = _BOARD_CAP
++) -> str:
+     """Board ORIENTATION projection, TRUTHFULLY bounded (NITRO dogfood IV,
+     T-600).
+ 
+@@ -179,7 +181,6 @@ def _load_context_inputs(root: Path) -> dict:
+     captured world when called through audit; the public APIs still load
+     fresh when called alone. Nothing is retained globally or across calls.
+     """
+-    from .log import read_history_snapshot
+     from .snapshot import ProjectSnapshot
+     from .state import parse_state_or_error
+     from .journal import scan_pending
+@@ -287,12 +288,14 @@ def _fit(
+         return _bytes(body)
+ 
+     _b_memo = {}
++
+     def _b(c):
+         if c not in _b_memo:
+             _b_memo[c] = board_fn(c)
+         return _b_memo[c]
+-        
++
+     _l_memo = {}
++
+     def _l(c):
+         if c not in _l_memo:
+             _l_memo[c] = log_fn(c)
+@@ -354,14 +357,18 @@ def context_cold(
+     # never to persisted STATE.agent.
+     from .capability import negotiate_capability
+ 
+-    routed = _routed if _routed is not None else route_next(
+-        state_text,
+-        board_text,
+-        pending,
+-        conflicts,
+-        current_capability=negotiate_capability(),
+-        current_agent=current_agent,
+-        snap=inputs['snap'],
++    routed = (
++        _routed
++        if _routed is not None
++        else route_next(
++            state_text,
++            board_text,
++            pending,
++            conflicts,
++            current_capability=negotiate_capability(),
++            current_agent=current_agent,
++            snap=inputs["snap"],
++        )
+     )
+     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
+         # A malformed surface must not project a healthy cold start: the
+@@ -489,14 +496,18 @@ def context_hot(
+     # projection above. Second-wave P0: same session-agent claim truth.
+     from .capability import negotiate_capability
+ 
+-    routed = _routed if _routed is not None else route_next(
+-        state_text,
+-        board_text,
+-        pending,
+-        conflicts,
+-        current_capability=negotiate_capability(),
+-        current_agent=current_agent,
+-        snap=inputs['snap'],
++    routed = (
++        _routed
++        if _routed is not None
++        else route_next(
++            state_text,
++            board_text,
++            pending,
++            conflicts,
++            current_capability=negotiate_capability(),
++            current_agent=current_agent,
++            snap=inputs["snap"],
++        )
+     )
+     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
+         return Result(
+@@ -600,9 +611,15 @@ def context_audit(project_root: Path | str) -> Result:
+     # full router (validation + routing) over the same world.
+     from .capability import negotiate_capability
+     from .router import route_next
++
+     routed = route_next(
+-        inputs["state_text"], inputs["board_text"], inputs["pending"], inputs["conflicts"],
+-        current_capability=negotiate_capability(), current_agent=None, snap=inputs["snap"],
++        inputs["state_text"],
++        inputs["board_text"],
++        inputs["pending"],
++        inputs["conflicts"],
++        current_capability=negotiate_capability(),
++        current_agent=None,
++        snap=inputs["snap"],
+     )
+     cold = context_cold(root, _inputs=inputs, _routed=routed)
+     if not cold.ok:
+diff --git a/tools/saipen_engine/fast_check.py b/tools/saipen_engine/fast_check.py
+index c0390f2..fd12e4b 100644
+--- a/tools/saipen_engine/fast_check.py
++++ b/tools/saipen_engine/fast_check.py
+@@ -50,7 +50,6 @@ def _log_errors(log_text: str) -> list[str]:
+     return errors
+ 
+ 
+-
+ def validate_checkpoint_surface(
+     state_text: str,
+     board_text: str,
+@@ -72,6 +71,7 @@ def validate_checkpoint_surface(
+     errors: list[str] = []
+ 
+     from .floor import state_board_floor, board_floor
++
+     floor_errors = state_board_floor(state_text, board_text) + board_floor(board_text)
+     if floor_errors:
+         errors.extend(f"FLOOR: {e}" for e in floor_errors)
+@@ -166,6 +166,7 @@ def validate_checkpoint_surface(
+                 errors.append(f"BOARD proposed {ticket['id']} needs {need} which is not DONE")
+ 
+     from .log import snapshot_contract_errors
++
+     errors.extend(f"LOG: {e}" for e in snapshot_contract_errors(snap.history))
+ 
+     tail = snap.history.tail
+@@ -184,7 +185,6 @@ def validate_checkpoint_surface(
+ 
+     _home = state.get("saipen_home")
+     if _csv is not None and state.get("schema_version") == _csv and _home:
+-        import pathlib
+         if not is_absolute_home(str(_home)):
+             errors.append(f"current-schema STATE requires absolute saipen_home, got {_home!r}")
+ 
+@@ -377,7 +377,6 @@ def validate_texts(
+ 
+     _home = state.get("saipen_home")
+     if _csv is not None and state.get("schema_version") == _csv and _home:
+-        import pathlib
+         if not is_absolute_home(str(_home)):
+             errors.append(f"current-schema STATE requires absolute saipen_home, got {_home!r}")
+ 
+diff --git a/tools/saipen_engine/journal.py b/tools/saipen_engine/journal.py
+index 20b836a..8ca6e53 100644
+--- a/tools/saipen_engine/journal.py
++++ b/tools/saipen_engine/journal.py
+@@ -580,11 +580,22 @@ def decode_operation_record(root: Path | str, op_dir: Path) -> dict:
+         # the single decode boundary so hostile disk bytes cannot escape as an
+         # AttributeError/TypeError later.
+         for key in (
+-            "operation", "status", "event_id", "crew_epoch", "role",
+-            "stage", "verdict", "package_identity", "source_head",
+-            "source_tree_fingerprint", "resulting_source_head",
+-            "resulting_source_tree_fingerprint", "producer", "input_source",
+-            "input_source_fingerprint", "resulting_source",
++            "operation",
++            "status",
++            "event_id",
++            "crew_epoch",
++            "role",
++            "stage",
++            "verdict",
++            "package_identity",
++            "source_head",
++            "source_tree_fingerprint",
++            "resulting_source_head",
++            "resulting_source_tree_fingerprint",
++            "producer",
++            "input_source",
++            "input_source_fingerprint",
++            "resulting_source",
+             "resulting_source_fingerprint",
+         ):
+             if key in receipt_metadata and not isinstance(receipt_metadata[key], str):
+@@ -594,8 +605,10 @@ def decode_operation_record(root: Path | str, op_dir: Path) -> dict:
+             if not isinstance(paths, dict):
+                 return _bad("receipt_metadata.paths", "must be a JSON object")
+             for path, expected in paths.items():
+-                if not isinstance(path, str) or not path or not (
+-                    expected is None or isinstance(expected, str)
++                if (
++                    not isinstance(path, str)
++                    or not path
++                    or not (expected is None or isinstance(expected, str))
+                 ):
+                     return _bad(
+                         "receipt_metadata.paths",
+@@ -687,46 +700,79 @@ def _decode_progress_sidecar(progress_file: Path, n: int, base_status: object) -
+     try:
+         raw = progress_file.read_bytes()
+     except OSError as exc:
+-        return {"ok": False, "code": "RECOVERY_CONFLICT",
+-                "detail": f"progress.json is unreadable: {exc}"}
++        return {
++            "ok": False,
++            "code": "RECOVERY_CONFLICT",
++            "detail": f"progress.json is unreadable: {exc}",
++        }
+     try:
+         data = json.loads(raw.decode("utf-8"))
+     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+-        return {"ok": False, "code": "RECOVERY_CONFLICT",
+-                "detail": f"progress.json is not valid JSON: {exc}"}
++        return {
++            "ok": False,
++            "code": "RECOVERY_CONFLICT",
++            "detail": f"progress.json is not valid JSON: {exc}",
++        }
+     if not isinstance(data, dict):
+-        return {"ok": False, "code": "RECOVERY_CONFLICT",
+-                "detail": "progress.json is not a JSON object"}
++        return {
++            "ok": False,
++            "code": "RECOVERY_CONFLICT",
++            "detail": "progress.json is not a JSON object",
++        }
+     status = data.get("status")
+     if status is not None and status not in STATUS:
+-        return {"ok": False, "code": "VALIDATION_FAILED",
+-                "detail": f"progress.json status {status!r} outside closed status set"}
++        return {
++            "ok": False,
++            "code": "VALIDATION_FAILED",
++            "detail": f"progress.json status {status!r} outside closed status set",
++        }
+     progress_index = data.get("progress_index")
+     if progress_index is not None:
+         if not isinstance(progress_index, int) or isinstance(progress_index, bool):
+-            return {"ok": False, "code": "VALIDATION_FAILED",
+-                    "detail": "progress.json progress_index must be an integer"}
++            return {
++                "ok": False,
++                "code": "VALIDATION_FAILED",
++                "detail": "progress.json progress_index must be an integer",
++            }
+         if progress_index < 0 or progress_index > n:
+-            return {"ok": False, "code": "VALIDATION_FAILED",
+-                    "detail": f"progress.json progress_index {progress_index} out of range [0, {n}]"}
++            return {
++                "ok": False,
++                "code": "VALIDATION_FAILED",
++                "detail": f"progress.json progress_index {progress_index} out of range [0, {n}]",
++            }
+     applied_frontier = data.get("applied_frontier")
+     if applied_frontier is not None:
+         if not isinstance(applied_frontier, int) or isinstance(applied_frontier, bool):
+-            return {"ok": False, "code": "VALIDATION_FAILED",
+-                    "detail": "progress.json applied_frontier must be an integer"}
++            return {
++                "ok": False,
++                "code": "VALIDATION_FAILED",
++                "detail": "progress.json applied_frontier must be an integer",
++            }
+         hi = max(n - 1, -1)
+         if applied_frontier < -1 or applied_frontier > hi:
+-            return {"ok": False, "code": "VALIDATION_FAILED",
+-                    "detail": f"progress.json applied_frontier {applied_frontier} out of range [-1, {hi}]"}
++            return {
++                "ok": False,
++                "code": "VALIDATION_FAILED",
++                "detail": (
++                    f"progress.json applied_frontier {applied_frontier} out of range [-1, {hi}]"
++                ),
++            }
+     # Contradiction: a sidecar claiming a terminal status while the immutable
+     # manifest is still UNRESOLVED means fold_progress did not delete the
+     # sidecar on settlement -- untrustworthy evidence, refuse rather than guess.
+     if status in SETTLED and base_status not in SETTLED:
+-        return {"ok": False, "code": "RECOVERY_CONFLICT",
+-                "detail": f"progress.json claims terminal {status!r} but manifest "
+-                          f"is {base_status!r}; settlement did not fold"}
+-    return {"ok": True, "status": status, "progress_index": progress_index,
+-            "applied_frontier": applied_frontier}
++        return {
++            "ok": False,
++            "code": "RECOVERY_CONFLICT",
++            "detail": f"progress.json claims terminal {status!r} but manifest "
++            f"is {base_status!r}; settlement did not fold",
++        }
++    return {
++        "ok": True,
++        "status": status,
++        "progress_index": progress_index,
++        "applied_frontier": applied_frontier,
++    }
+ 
+ 
+ def _merge_progress_sidecar(op_dir: Path, record: dict) -> dict:
+@@ -1211,17 +1257,15 @@ class Journal:
+         progress_file = self.dir / "progress.json"
+         prog = {}
+         if progress_file.is_file():
+-            try:
++            with contextlib.suppress(Exception):
+                 prog = json.loads(progress_file.read_text(encoding="utf-8"))
+-            except Exception:
+-                pass
+         prog["status"] = status
+         if progress_index is not None:
+             prog["progress_index"] = progress_index
+         if target_index is not None:
+             prog["applied_frontier"] = max(prog.get("applied_frontier", -1), target_index)
+         _atomic_json(progress_file, prog)
+-        
++
+         if status in SETTLED:
+             self.fold_progress()
+             _settle_journal(self)
+@@ -3103,11 +3147,13 @@ def _resolve_conflict_locked(root: Path, op_id: str, resolution: str, agent: str
+     # `except Exception: pass`, swallowed the failure, and returned RESOLVED
+     # while STATE.agent stayed unchanged.
+     from .state import parse_state
++
+     state_path = root / ".saipen" / "STATE.md"
+     if state_path.is_file():
+         state_rec = parse_state(state_path.read_text(encoding="utf-8"))
+         if state_rec.get("agent") != agent:
+             from .operations import handover_agent
++
+             try:
+                 ho = handover_agent(root, agent, allow_dead_home=True)
+             except Exception as exc:  # injected / unexpected handover failure
+@@ -3319,6 +3365,7 @@ def _compact_migrate_ops(
+ # across both, and returns all records through the strict decoder.
+ # ---------------------------------------------------------------------------
+ 
++
+ def _scan_receipt_namespace(
+     root: Path,
+     ns_dir: Path,
+@@ -3441,13 +3488,9 @@ def semantic_receipt_snapshot(
+     digest = hashlib.sha256(b"saipen-op-receipts-v2\0")
+ 
+     # Scan ops first (unresolved/current evidence)
+-    _scan_receipt_namespace(
+-        root, root / OPS_DIR, results, errors, corrupt_op_ids, digest
+-    )
++    _scan_receipt_namespace(root, root / OPS_DIR, results, errors, corrupt_op_ids, digest)
+     # Scan settled second (terminal receipts)
+-    _scan_receipt_namespace(
+-        root, root / SETTLED_DIR, results, errors, corrupt_op_ids, digest
+-    )
++    _scan_receipt_namespace(root, root / SETTLED_DIR, results, errors, corrupt_op_ids, digest)
+ 
+     # Sort by created_at for deterministic ordering
+     records = sorted(
+@@ -3462,9 +3505,7 @@ def semantic_receipt_snapshot(
+     )
+ 
+ 
+-def semantic_receipts_for_operation(
+-    project_root: Path | str, operation: str
+-) -> list[dict]:
++def semantic_receipts_for_operation(project_root: Path | str, operation: str) -> list[dict]:
+     """W2-001: filtered semantic receipts for a specific operation type.
+ 
+     Convenience wrapper that returns all records matching the given
+diff --git a/tools/saipen_engine/log.py b/tools/saipen_engine/log.py
+index 5f01e36..903860f 100644
+--- a/tools/saipen_engine/log.py
++++ b/tools/saipen_engine/log.py
+@@ -81,8 +81,10 @@ def history_paths(project_root: Path | str) -> list[Path]:
+ def _validate_history_ownership(root: Path, logs_dir: Path) -> list[Path]:
+     """lstat every canonical history node and reject symlink/junction/reparse
+     or non-regular files BEFORE any bytes are read (second-wave P1).
+-    
+-    Returns the validated immutable list of paths in numeric order to avoid duplicate stat/enumeration."""
++
++    Returns the validated immutable list of paths in numeric order to avoid
++    duplicate stat/enumeration.
++    """
+     try:
+         logs_info = logs_dir.lstat()
+     except FileNotFoundError:
+@@ -101,17 +103,17 @@ def _validate_history_ownership(root: Path, logs_dir: Path) -> list[Path]:
+             raise HistoryOwnershipError(
+                 ".saipen/logs exists but is not a directory; refusing to read history through it"
+             )
+-            
++
+     sealed = []
+     if logs_info is not None:
+         for p in logs_dir.iterdir():
+             if _segment_number(p) >= 0:
+                 sealed.append(p)
+         sealed.sort(key=_segment_number)
+-        
++
+     active = root / ".saipen" / "LOG.md"
+     paths = [*sealed, active]
+-    
++
+     for p in paths:
+         try:
+             info = p.lstat()
+diff --git a/tools/saipen_engine/operations.py b/tools/saipen_engine/operations.py
+index d7f6a1e..dd886c4 100644
+--- a/tools/saipen_engine/operations.py
++++ b/tools/saipen_engine/operations.py
+@@ -304,6 +304,7 @@ def _iter_operation_records(root: Path):
+     have been moved to recovery/settled remain visible.
+     """
+     from .journal import semantic_receipt_snapshot
++
+     snapshot = semantic_receipt_snapshot(root)
+     if snapshot.errors:
+         return
+@@ -820,7 +821,7 @@ def _plan_transition(
+         if not ok:
+             return _refuse(
+                 "INCOMPLETE_TICKET",
+-                f"VERIFY -> REVIEW requires explicit verification evidence for ticket {subject} (got: {reason})", # noqa: E501
++                f"VERIFY -> REVIEW requires explicit verification evidence for ticket {subject} (got: {reason})",  # noqa: E501
+                 phase=destination,
+                 ticket=subject,
+             )
+@@ -1430,7 +1431,7 @@ def _plan_finish_ticket(
+     if not ok:
+         return _refuse(
+             "INCOMPLETE_TICKET",
+-            f"finish requires explicit verification evidence for ticket {ticket_id} (got: {reason})", # noqa: E501
++            f"finish requires explicit verification evidence for ticket {ticket_id} (got: {reason})",  # noqa: E501
+             ticket=ticket_id,
+         )
+ 
+@@ -1974,14 +1975,7 @@ def goal_entry(
+     wave_event, wave_line = _event_line(
+         docs, pivot_event, "DEC", active_ticket, agent, "goal_waves 0->1", now, op_id
+     )
+-    new_log = (
+-        docs["log"].text_norm.rstrip("\n")
+-        + "\n"
+-        + pivot_line
+-        + "\n"
+-        + wave_line
+-        + "\n"
+-    )
++    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + pivot_line + "\n" + wave_line + "\n"
+ 
+     # --- BOARD: demote active DOING, then plan the new objective above TODO ---
+     new_board_text = docs["board"].text_norm
+@@ -2025,9 +2019,7 @@ def goal_entry(
+         plan_lines.append(f"- [ ] T-{tid} [P1] {desc} | verify: {verify}")
+     if plan_lines:
+         blines = new_board_text.splitlines(keepends=True)
+-        todo_idx = next(
+-            i for i, ln in enumerate(blines) if ln.rstrip("\n").startswith("## TODO")
+-        )
++        todo_idx = next(i for i, ln in enumerate(blines) if ln.rstrip("\n").startswith("## TODO"))
+         # Insert the plan block ABOVE existing TODO; plan_lines order preserved
+         # (first step on top) so the new objective outranks the old backlog.
+         blines.insert(todo_idx + 1, "".join(line + "\n" for line in plan_lines))
+@@ -2054,9 +2046,7 @@ def goal_entry(
+         new_phase = cur_phase
+     if active_ticket and first_id is None:
+         new_phase = "DONE"
+-    next_action = (
+-        f"PHASE SCOUT {first_id}" if first_id is not None else "saipen continue"
+-    )
++    next_action = f"PHASE SCOUT {first_id}" if first_id is not None else "saipen continue"
+     transitioned = transition_execution_intent(
+         docs["state"].text_norm, "goal", goal_waves=1, goal_tickets=0
+     )
+@@ -2082,8 +2072,7 @@ def goal_entry(
+     if errors:
+         return _refuse(
+             "VALIDATION_FAILED",
+-            "proposed goal-entry state fails fast validation: "
+-            + "; ".join(errors[:5]),
++            "proposed goal-entry state fails fast validation: " + "; ".join(errors[:5]),
+         )
+ 
+     targets = [
+@@ -2430,7 +2419,9 @@ def rebind_saipen_home(
+ 
+ 
+ @_state_guard
+-def handover_agent(project_root: Path | str, new_agent: str, dry_run: bool = False, allow_dead_home: bool = False) -> Result:
++def handover_agent(
++    project_root: Path | str, new_agent: str, dry_run: bool = False, allow_dead_home: bool = False
++) -> Result:
+     """The ONE explicit agent-handover operation (T-1006).
+ 
+     CORE.md section 1.4 and BOOT.md: the seat is inherited from STATE.agent,
+@@ -3124,7 +3115,7 @@ def _plan_crew_closure(
+     }
+     new_state = patch_state(docs["state"].text_norm, owned)
+     from .router import route_next
+-    
++
+     new_board = docs["board"].text_norm
+     routed = route_next(new_state, new_board, current_agent=agent)
+     if routed.get("ok") and routed.get("action") != "saipen continue":
+@@ -3174,9 +3165,9 @@ def _plan_crew_closure(
+ 
+ def _is_converge_intent_epoch(value: object) -> bool:
+     """True only for the exact op-id shape minted by set_converge_intent."""
+-    return isinstance(value, str) and re.fullmatch(
+-        r"converge_intent-[0-9a-f]{32}", value
+-    ) is not None
++    return (
++        isinstance(value, str) and re.fullmatch(r"converge_intent-[0-9a-f]{32}", value) is not None
++    )
+ 
+ 
+ def _plan_defer_for_crew(
+diff --git a/tools/saipen_engine/producer.py b/tools/saipen_engine/producer.py
+index 981c3a0..a2a7657 100644
+--- a/tools/saipen_engine/producer.py
++++ b/tools/saipen_engine/producer.py
+@@ -38,15 +38,16 @@ from pathlib import Path
+ from typing import Callable, Iterable, Mapping
+ 
+ # --- local engine imports (no cycle: lock/capability never import producer) ---
+-from .capability import CAPABILITY_DENIED, assert_producer_capability
+ from .lock import ProducerLock, project_writer_lock
+ 
+ 
+ def _utc_now_iso() -> str:
+     """W2-004: microsecond-precision UTC timestamp for dependency binding."""
+     import datetime as _dt
++
+     return _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+ 
++
+ # ---------------------------------------------------------------------------
+ # Constants & closed enums
+ # ---------------------------------------------------------------------------
+@@ -69,6 +70,7 @@ def _ready_filename(package_identity: str) -> str:
+     """
+     return package_identity.replace(":", "_") + ".json"
+ 
++
+ PACKAGE_MAGIC = b"saipen-producer-pkg-v1\0"
+ DEP_MAGIC = b"saipen-producer-dep-v1\0"
+ 
+@@ -139,9 +141,7 @@ def _is_windows_absolute(rel: str) -> bool:
+     if re.match(r"^[A-Za-z]:[\\/]", rel):
+         return True
+     # UNC / POSIX-double-slash share:  \\server\share  or  //server/share
+-    if re.match(r"^[\\/]{2,}", rel):
+-        return True
+-    return False
++    return bool(re.match(r"^[\\/]{2,}", rel))
+ 
+ 
+ def _validate_producer_rel_path(rel: str, *, context: str = "") -> None:
+@@ -158,34 +158,31 @@ def _validate_producer_rel_path(rel: str, *, context: str = "") -> None:
+     # ALSO detect Windows drive/UNC forms by string inspection (CORE-008).
+     if Path(rel).is_absolute() or _is_windows_absolute(rel):
+         raise ProducerError(
+-            f"{context}: absolute path {rel!r} rejected; "
+-            "only producer-relative paths allowed"
++            f"{context}: absolute path {rel!r} rejected; only producer-relative paths allowed"
+         )
+     # Reject parent traversal
+     parts = Path(rel).parts
+     if any(part in ("..", ".") for part in parts):
+         raise ProducerError(
+-            f"{context}: path traversal {rel!r} rejected; "
+-            "only simple relative paths allowed"
++            f"{context}: path traversal {rel!r} rejected; only simple relative paths allowed"
+         )
+     # Reject paths with null bytes or control characters
+     for ch in rel:
+         if ord(ch) < 0x20:
+-            raise ProducerError(
+-                f"{context}: control character in path rejected"
+-            )
++            raise ProducerError(f"{context}: control character in path rejected")
+     # Reject Windows reserved names (CON, PRN, AUX, NUL, COM1-9, LPT1-9)
+     _reserved = {
+-        "CON", "PRN", "AUX", "NUL",
++        "CON",
++        "PRN",
++        "AUX",
++        "NUL",
+         *(f"COM{i}" for i in range(1, 10)),
+         *(f"LPT{i}" for i in range(1, 10)),
+     }
+     for part in parts:
+         stem = part.split(".")[0].upper()
+         if stem in _reserved:
+-            raise ProducerError(
+-                f"{context}: Windows reserved name {part!r} in path rejected"
+-            )
++            raise ProducerError(f"{context}: Windows reserved name {part!r} in path rejected")
+ 
+ 
+ def _safe_rel_hash(root: Path | str, rel: str) -> str:
+@@ -201,15 +198,11 @@ def _safe_rel_hash(root: Path | str, rel: str) -> str:
+     try:
+         root_res = root_path.resolve()
+     except OSError as exc:
+-        raise ProducerError(
+-            f"dependency path {rel!r}: project root unresolvable: {exc}"
+-        ) from exc
++        raise ProducerError(f"dependency path {rel!r}: project root unresolvable: {exc}") from exc
+     try:
+         candidate = (root_path / rel).resolve()
+     except OSError as exc:
+-        raise ProducerError(
+-            f"dependency path {rel!r}: target unresolvable: {exc}"
+-        ) from exc
++        raise ProducerError(f"dependency path {rel!r}: target unresolvable: {exc}") from exc
+     if candidate != root_res and root_res not in candidate.parents:
+         raise ProducerError(
+             f"dependency path {rel!r} resolves outside project root "
+@@ -251,7 +244,8 @@ class SourceKey:
+     This class normalizes both forms so the identical-global-identity
+     fast path works from any caller.
+     """
+-    __slots__ = ("source_head", "source_tree_fingerprint", "discovery_model")
++
++    __slots__ = ("discovery_model", "source_head", "source_tree_fingerprint")
+ 
+     def __init__(self, source_head: str, source_tree_fingerprint: str, discovery_model: str = ""):
+         self.source_head = source_head
+@@ -444,21 +438,35 @@ class ProducerPackage:
+             raise ProducerError("READY package must be a JSON object")
+         if ready_path is not None:
+             ready_schema = {
+-                "producer", "role_revision", "base_source_head",
+-                "base_source_tree_fingerprint", "base_discovery_model", "scope",
+-                "read_set", "write_set", "epoch", "dependency_fp",
+-                "package_identity", "status", "payload_hashes", "payload_bytes",
++                "producer",
++                "role_revision",
++                "base_source_head",
++                "base_source_tree_fingerprint",
++                "base_discovery_model",
++                "scope",
++                "read_set",
++                "write_set",
++                "epoch",
++                "dependency_fp",
++                "package_identity",
++                "status",
++                "payload_hashes",
++                "payload_bytes",
+             }
+             if set(data) != ready_schema:
+                 missing = sorted(ready_schema - set(data))
+                 extra = sorted(set(data) - ready_schema)
+-                raise ProducerError(
+-                    f"READY schema mismatch (missing={missing}, extra={extra})"
+-                )
++                raise ProducerError(f"READY schema mismatch (missing={missing}, extra={extra})")
+         required_strings = (
+-            "producer", "role_revision", "base_source_head",
+-            "base_source_tree_fingerprint", "base_discovery_model", "scope",
+-            "dependency_fp", "package_identity", "status",
++            "producer",
++            "role_revision",
++            "base_source_head",
++            "base_source_tree_fingerprint",
++            "base_discovery_model",
++            "scope",
++            "dependency_fp",
++            "package_identity",
++            "status",
+         )
+         for key in required_strings:
+             if not isinstance(data.get(key), str):
+@@ -606,8 +614,7 @@ def classify_integration(
+         if now != expected:
+             return (
+                 IntegrationClass.STALE,
+-                f"read dependency {rel!r} changed "
+-                f"(expected {expected[:12]}.. got {now[:12]}..)",
++                f"read dependency {rel!r} changed (expected {expected[:12]}.. got {now[:12]}..)",
+             )
+ 
+     for rel, before in write_set.items():
+@@ -654,13 +661,9 @@ def derive_conflicts(a: ProducerPackage, b: ProducerPackage) -> dict:
+             f"{b.producer} both intend to write the same path"
+         )
+     if a_write_b_read:
+-        reasons.append(
+-            f"{a.producer} writes paths {a_write_b_read} that {b.producer} reads"
+-        )
++        reasons.append(f"{a.producer} writes paths {a_write_b_read} that {b.producer} reads")
+     if b_write_a_read:
+-        reasons.append(
+-            f"{b.producer} writes paths {b_write_a_read} that {a.producer} reads"
+-        )
++        reasons.append(f"{b.producer} writes paths {b_write_a_read} that {a.producer} reads")
+ 
+     return {
+         "packages": (a.package_identity, b.package_identity),
+@@ -710,24 +713,18 @@ class ProducerEpoch:
+             raw = path.read_text(encoding="utf-8")
+             data = json.loads(raw)
+         except (OSError, json.JSONDecodeError, ValueError) as exc:
+-            raise ProducerError(
+-                f"producer epoch file is corrupt/unreadable: {exc}"
+-            ) from exc
++            raise ProducerError(f"producer epoch file is corrupt/unreadable: {exc}") from exc
+         if not isinstance(data, dict):
+             raise ProducerError("producer epoch file is not a JSON object")
+         # Accept only recognized keys; unknown fields signal tampering.
+         known = {"epoch", "owner", "claimed_at"}
+         unknown = set(data.keys()) - known
+         if unknown:
+-            raise ProducerError(
+-                f"producer epoch file contains unrecognized fields: {unknown}"
+-            )
++            raise ProducerError(f"producer epoch file contains unrecognized fields: {unknown}")
+         try:
+             return int(data["epoch"])
+         except (KeyError, TypeError, ValueError) as exc:
+-            raise ProducerError(
+-                f"producer epoch file has invalid epoch value: {exc}"
+-            ) from exc
++            raise ProducerError(f"producer epoch file has invalid epoch value: {exc}") from exc
+ 
+     @staticmethod
+     def claim(namespace: Path | str) -> int:
+@@ -758,14 +755,17 @@ class ProducerEpoch:
+             path = ProducerEpoch._path(ns)
+             new_epoch = ProducerEpoch.current(ns) + 1
+             owner = uuid.uuid4().hex
+-            payload = json.dumps(
+-                {
+-                    "epoch": new_epoch,
+-                    "owner": owner,
+-                    "claimed_at": uuid.uuid1().hex,
+-                },
+-                sort_keys=True,
+-            ) + "\n"
++            payload = (
++                json.dumps(
++                    {
++                        "epoch": new_epoch,
++                        "owner": owner,
++                        "claimed_at": uuid.uuid1().hex,
++                    },
++                    sort_keys=True,
++                )
++                + "\n"
++            )
+             tmp = path.with_name(path.name + "." + uuid.uuid4().hex + ".tmp")
+             tmp.write_text(payload, encoding="utf-8")
+             os.replace(tmp, path)
+@@ -881,9 +881,7 @@ class StagingGeneration:
+         except ProducerError:
+             raise
+         except OSError as exc:
+-            raise ProducerError(
+-                f"add_payload: cannot resolve target path: {exc}"
+-            ) from exc
++            raise ProducerError(f"add_payload: cannot resolve target path: {exc}") from exc
+         target.write_bytes(data)
+         self._payloads[rel_path] = data
+ 
+@@ -1061,6 +1059,7 @@ class StagingGeneration:
+             payload_hashes[rel] = h
+             # Store as base64 so the JSON is self-contained binary-safe
+             import base64 as _b64
++
+             payload_bytes[rel] = _b64.b64encode(raw).decode("ascii")
+         data["payload_hashes"] = payload_hashes
+         data["payload_bytes"] = payload_bytes
+@@ -1078,9 +1077,7 @@ class StagingGeneration:
+         return (Path(namespace) / READY_DIRNAME / _ready_filename(package_identity)).is_file()
+ 
+     @classmethod
+-    def ready_package(
+-        cls, namespace: Path | str, package_identity: str
+-    ) -> ProducerPackage | None:
++    def ready_package(cls, namespace: Path | str, package_identity: str) -> ProducerPackage | None:
+         path = Path(namespace) / READY_DIRNAME / _ready_filename(package_identity)
+         if not path.is_file():
+             return None
+@@ -1095,9 +1092,7 @@ class StagingGeneration:
+             return None
+ 
+     @classmethod
+-    def scan_ready(
+-        cls, namespace: Path | str
+-    ) -> tuple[list[ProducerPackage], list[dict]]:
++    def scan_ready(cls, namespace: Path | str) -> tuple[list[ProducerPackage], list[dict]]:
+         """Return valid READY packages plus structured invalid-record errors."""
+         ready_dir = Path(namespace) / READY_DIRNAME
+         if not ready_dir.is_dir():
+@@ -1115,9 +1110,7 @@ class StagingGeneration:
+                     raise ProducerError("READY filename does not match package identity")
+                 out.append(candidate)
+             except (ProducerError, OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+-                errors.append(
+-                    {"code": "INVALID_READY", "path": str(path), "detail": str(exc)}
+-                )
++                errors.append({"code": "INVALID_READY", "path": str(path), "detail": str(exc)})
+         return out, errors
+ 
+     @classmethod
+@@ -1143,9 +1136,13 @@ class StagingGeneration:
+             candidate = candidate.parent
+         raise ProducerError(f"cannot locate project root for producer namespace {ns}")
+ 
+-
+     @classmethod
+-    def recover(cls, namespace: Path | str, project_root: Path | str | None = None, producer: str | None = None) -> dict:
++    def recover(
++        cls,
++        namespace: Path | str,
++        project_root: Path | str | None = None,
++        producer: str | None = None,
++    ) -> dict:
+         """W2-002: Deterministic cleanup of orphaned staging generations.
+ 
+         Acquires the producer-local ProducerLock before classifying or
+@@ -1187,7 +1184,7 @@ class StagingGeneration:
+             return {"removed_staging": [], "false_ready": False, "busy": True}
+         except ProducerError:
+             # Epoch is corrupt -- do not delete anything
+-                return {"removed_staging": [], "false_ready": False, "busy": True}
++            return {"removed_staging": [], "false_ready": False, "busy": True}
+         return {"removed_staging": removed, "false_ready": False, "busy": False}
+ 
+     @classmethod
+@@ -1427,9 +1424,7 @@ def integrate_packages_core(
+                 continue
+ 
+             # write/write collision with an already-integrated package?
+-            collision = next(
+-                (q for q in applied if set(q.write_set) & set(p.write_set)), None
+-            )
++            collision = next((q for q in applied if set(q.write_set) & set(p.write_set)), None)
+             if collision is not None:
+                 results.append(
+                     {
+@@ -1514,14 +1509,10 @@ def integrate_packages_core(
+             from .journal import run_mutation
+             from .paths import project_identity
+ 
+-            def _integration_receipt_metadata(
+-                live_root: Path, metadata: dict
+-            ) -> dict:
++            def _integration_receipt_metadata(live_root: Path, metadata: dict) -> dict:
+                 resulting = _live_source_identity(live_root)
+                 metadata["resulting_source"] = resulting.source_head
+-                metadata["resulting_source_fingerprint"] = (
+-                    resulting.source_tree_fingerprint
+-                )
++                metadata["resulting_source_fingerprint"] = resulting.source_tree_fingerprint
+                 return metadata
+ 
+             op_id = "producer-integrate-" + p.package_identity.split(":", 1)[-1][:32]
+@@ -1578,9 +1569,7 @@ def integrate_packages_core(
+         return {"serialized": True, "results": results}
+ 
+ 
+-def _retire_ready_package(
+-    package: ProducerPackage, *, supersede_older: bool = False
+-) -> None:
++def _retire_ready_package(package: ProducerPackage, *, supersede_older: bool = False) -> None:
+     """Atomically remove terminal package evidence from the READY hot set."""
+     source = package.ready_path
+     if source is None or not source.is_file():
+diff --git a/tools/saipen_engine/router.py b/tools/saipen_engine/router.py
+index 5ad1861..c7a3d01 100644
+--- a/tools/saipen_engine/router.py
++++ b/tools/saipen_engine/router.py
+@@ -35,10 +35,10 @@ def route_next(
+     board_text: str,
+     pending_ops: list | None = None,
+     conflict_ops: list | None = None,
+-    now: datetime.datetime | None = None, # noqa: F821
++    now: datetime.datetime | None = None,  # noqa: F821
+     current_capability: str | None = None,
+     current_agent: str | None = None,
+-    snap = None,
++    snap=None,
+     # PERF-004: optional pre-parsed objects from the caller to avoid
+     # redundant STATE/BOARD parsing. When provided, these take precedence
+     # over parsing state_text/board_text.
+@@ -77,7 +77,7 @@ def route_next(
+     # checkpoint-surface validation and the routing logic below. When the
+     # caller provides pre-parsed objects, skip parsing entirely.
+     from .state import parse_state_or_error
+-    from .board import parse_board
++
+     if _state is not None and _board is not None and _state_error is not None:
+         state, state_error, board = _state, _state_error, _board
+     else:
+@@ -85,9 +85,15 @@ def route_next(
+         board = parse_board(board_text)
+     if snap is not None:
+         from .fast_check import validate_checkpoint_surface
++
+         errors = validate_checkpoint_surface(
+-            state_text, board_text, snap,
+-            current_agent=current_agent, _state=state, _board=board, _state_error=state_error,
++            state_text,
++            board_text,
++            snap,
++            current_agent=current_agent,
++            _state=state,
++            _board=board,
++            _state_error=state_error,
+         )
+         if errors:
+             return {
+@@ -450,7 +456,7 @@ def route_next_result(
+     board_text: str,
+     pending_ops_list: list | None = None,
+     conflict_ops_list: list | None = None,
+-    snap = None,
++    snap=None,
+ ) -> Result:
+     """route_next wrapped in the stable Result shape for status/next/context."""
+     out = route_next(state_text, board_text, pending_ops_list, conflict_ops_list, snap=snap)
+@@ -487,6 +493,7 @@ def route_next_result(
+     ):
+         try:
+             from .conformance import conformance_status, STATUS_CURRENT_PASS
++
+             _cs = conformance_status(project_root, gate="core")
+             if _cs.get("status") not in (STATUS_CURRENT_PASS, "NOT_RUN"):
+                 return Result(
+diff --git a/tools/saipen_engine/snapshot.py b/tools/saipen_engine/snapshot.py
+index 6ceaccf..bea5d90 100644
+--- a/tools/saipen_engine/snapshot.py
++++ b/tools/saipen_engine/snapshot.py
+@@ -12,6 +12,10 @@ import hashlib
+ import subprocess
+ from dataclasses import dataclass
+ from pathlib import Path
++from typing import TYPE_CHECKING
++
++if TYPE_CHECKING:
++    from .log import HistorySnapshot
+ 
+ 
+ def _sha256(path: Path) -> str:
+@@ -36,6 +40,7 @@ def canonical_identity(project_root: Path) -> str:
+ 
+ def git_head(project_root: Path) -> str:
+     from .paths import is_git_project_root
++
+     if not is_git_project_root(project_root):
+         return ""
+     try:
+@@ -65,7 +70,7 @@ class ProjectSnapshot:
+     # derive the ledger verdict, the hash, the tail AND the events from that
+     # single read instead of reopening the complete LOG history per consumer.
+     history_events: tuple = ()
+-    history: "HistorySnapshot" = None
++    history: HistorySnapshot | None = None
+ 
+     @staticmethod
+     def capture(project_root: Path | str) -> "ProjectSnapshot":
+diff --git a/tools/test_conformance_closure.py b/tools/test_conformance_closure.py
+index ad7de26..3362ebb 100644
+--- a/tools/test_conformance_closure.py
++++ b/tools/test_conformance_closure.py
+@@ -48,22 +48,35 @@ def scaffold() -> Path:
+     saipen = root / ".saipen"
+     saipen.mkdir(parents=True, exist_ok=True)
+     (saipen / "STATE.md").write_text(
+-        "phase: BOOT\n"
+-        "execution_intent: explore\n"
+-        "saipen_version: 7.0.0\n"
+-        "next_action: saipen hunt\n",
++        "phase: BOOT\nexecution_intent: explore\nsaipen_version: 7.0.0\nnext_action: saipen hunt\n",
+         encoding="utf-8",
+     )
+     (saipen / "BOARD.md").write_text("# BOARD\n\n## TODO\n\n", encoding="utf-8")
+     (saipen / "LOG.md").write_text("# LOG\n", encoding="utf-8")
+     try:
+-        subprocess.run(["git", "init", "-q"], cwd=str(root), check=False,
+-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
++        subprocess.run(
++            ["git", "init", "-q"],
++            cwd=str(root),
++            check=False,
++            stdout=subprocess.DEVNULL,
++            stderr=subprocess.DEVNULL,
++        )
+         # Commit with inline identity so we don't depend on global git config.
+         subprocess.run(
+-            ["git", "-c", "user.email=test@saipen.local",
+-             "-c", "user.name=saipen-test", "commit", "-q", "-m", "init"],
+-            cwd=str(root), check=False, stdout=subprocess.DEVNULL,
++            [
++                "git",
++                "-c",
++                "user.email=test@saipen.local",
++                "-c",
++                "user.name=saipen-test",
++                "commit",
++                "-q",
++                "-m",
++                "init",
++            ],
++            cwd=str(root),
++            check=False,
++            stdout=subprocess.DEVNULL,
+             stderr=subprocess.DEVNULL,
+         )
+     except Exception:
+@@ -104,6 +117,7 @@ class Src:
+ def _quick_hash(text) -> str:
+     """Mirror C._quick_hash for content_hash computation."""
+     import hashlib
++
+     data = text.encode("utf-8") if isinstance(text, str) else text
+     return hashlib.sha256(data).hexdigest()[:16]
+ 
+@@ -156,13 +170,12 @@ def write_receipt(
+ 
+ def current_ts(offset_hours: float = 0.0) -> str:
+     return _utc_iso(
+-        datetime.datetime.now(datetime.timezone.utc)
+-        + datetime.timedelta(hours=offset_hours)
++        datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=offset_hours)
+     )
+ 
+ 
+ # --------------------------------------------------------------------------- runner
+-_RESULTS: list[tuple[bool, str, str]] = []  # noqa: C0103 (test accumulator)
++_RESULTS: list[tuple[bool, str, str]] = []
+ 
+ 
+ def check(name: str, cond: bool, detail: str = "") -> None:
+@@ -174,78 +187,122 @@ def check(name: str, cond: bool, detail: str = "") -> None:
+ # --------------------------------------------------------------------------- cases
+ def case_a_validator_ownership(root: Path) -> None:
+     info = C.validator_version_info(root, gate="core")
+-    check("A1 validator path is the canonical tools/validate.py",
+-          info.validator_path.endswith("validate.py") and Path(info.validator_path).exists(),
+-          info.validator_path)
+-    check("A2 stale_validator flags a mismatched version only",
+-          C.stale_validator(root, "9") is True
+-          and C.stale_validator(root, CONST) is False
+-          and C.stale_validator(root) is False)
+-    check("A3 info carries the canonical protocol version",
+-          info.validator_protocol_version == CONST, info.validator_protocol_version)
++    check(
++        "A1 validator path is the canonical tools/validate.py",
++        info.validator_path.endswith("validate.py") and Path(info.validator_path).exists(),
++        info.validator_path,
++    )
++    check(
++        "A2 stale_validator flags a mismatched version only",
++        C.stale_validator(root, "9") is True
++        and C.stale_validator(root, CONST) is False
++        and C.stale_validator(root) is False,
++    )
++    check(
++        "A3 info carries the canonical protocol version",
++        info.validator_protocol_version == CONST,
++        info.validator_protocol_version,
++    )
+ 
+ 
+ def case_b_receipt_derivation(root: Path) -> None:
+     rec = C.generate_conformance_receipt(root, gate="core", exit_code=0)
+-    check("B1 exit_code 0 -> PASS receipt written",
+-          rec["verdict"] == "PASS"
+-          and list((root / C.RECEIPT_DIRNAME).glob("*_core_PASS.json")))
++    check(
++        "B1 exit_code 0 -> PASS receipt written",
++        rec["verdict"] == "PASS" and list((root / C.RECEIPT_DIRNAME).glob("*_core_PASS.json")),
++    )
+     rec = C.generate_conformance_receipt(root, gate="core", exit_code=5)
+-    check("B2 exit_code != 0 -> FAIL receipt",
+-          rec["verdict"] == "FAIL" and rec["exit_code"] == 5)
++    check("B2 exit_code != 0 -> FAIL receipt", rec["verdict"] == "FAIL" and rec["exit_code"] == 5)
+     sample = C.latest_receipt(root, "core") or {}
+-    need = ["schema_version", "kind", "exit_code", "verdict",
+-            "timestamp_utc", "content_hash", "source_head",
+-            "source_tree_fingerprint"]
+-    check("B3 receipt carries the required structured fields",
+-          all(k in sample for k in need), str([k for k in need if k not in sample]))
++    need = [
++        "schema_version",
++        "kind",
++        "exit_code",
++        "verdict",
++        "timestamp_utc",
++        "content_hash",
++        "source_head",
++        "source_tree_fingerprint",
++    ]
++    check(
++        "B3 receipt carries the required structured fields",
++        all(k in sample for k in need),
++        str([k for k in need if k not in sample]),
++    )
+ 
+ 
+ def case_c_status(root: Path) -> None:
+-    check("C1 no receipt -> NOT_RUN",
+-          C.conformance_status(root, "core")["status"] == C.STATUS_NOT_RUN)
++    check(
++        "C1 no receipt -> NOT_RUN", C.conformance_status(root, "core")["status"] == C.STATUS_NOT_RUN
++    )
+     r = scaffold()
+     h, f = source_pair(r)
+     write_receipt(r, "core", "PASS", ts=current_ts(), source_head=h, source_tree_fingerprint=f)
+-    check("C2 current PASS -> CURRENT_PASS",
+-          C.conformance_status(r, "core")["status"] == C.STATUS_CURRENT_PASS)
++    check(
++        "C2 current PASS -> CURRENT_PASS",
++        C.conformance_status(r, "core")["status"] == C.STATUS_CURRENT_PASS,
++    )
+     r = scaffold()
+     h, f = source_pair(r)
+     write_receipt(r, "core", "FAIL", ts=current_ts(), source_head=h, source_tree_fingerprint=f)
+-    check("C3 current FAIL -> CURRENT_FAIL",
+-          C.conformance_status(r, "core")["status"] == C.STATUS_CURRENT_FAIL)
++    check(
++        "C3 current FAIL -> CURRENT_FAIL",
++        C.conformance_status(r, "core")["status"] == C.STATUS_CURRENT_FAIL,
++    )
+     r = scaffold()
+     h, f = source_pair(r)
+     write_receipt(r, "core", "PASS", ts=current_ts(-48), source_head=h, source_tree_fingerprint=f)
+-    check("C4 48h-old PASS -> STALE_PASS",
+-          C.conformance_status(r, "core")["status"] == C.STATUS_STALE_PASS)
++    check(
++        "C4 48h-old PASS -> STALE_PASS",
++        C.conformance_status(r, "core")["status"] == C.STATUS_STALE_PASS,
++    )
+     r = scaffold()
+     h, f = source_pair(r)
+     write_receipt(r, "core", "FAIL", ts=current_ts(-48), source_head=h, source_tree_fingerprint=f)
+-    check("C5 48h-old FAIL -> STALE_FAIL",
+-          C.conformance_status(r, "core")["status"] == C.STATUS_STALE_FAIL)
++    check(
++        "C5 48h-old FAIL -> STALE_FAIL",
++        C.conformance_status(r, "core")["status"] == C.STATUS_STALE_FAIL,
++    )
+     r = scaffold()
+     h, f = source_pair(r)
+-    write_receipt(r, "core", "PASS", ts=current_ts(), source_head=h,
+-                  source_tree_fingerprint=f, validator_version="0")
+-    check("C6 wrong validator version -> VALIDATOR_VERSION_MISMATCH",
+-          C.conformance_status(r, "core")["status"] == C.STATUS_VERSION_MISMATCH)
++    write_receipt(
++        r,
++        "core",
++        "PASS",
++        ts=current_ts(),
++        source_head=h,
++        source_tree_fingerprint=f,
++        validator_version="0",
++    )
++    check(
++        "C6 wrong validator version -> VALIDATOR_VERSION_MISMATCH",
++        C.conformance_status(r, "core")["status"] == C.STATUS_VERSION_MISMATCH,
++    )
+     r = scaffold()
+-    write_receipt(r, "core", "PASS", ts=current_ts(),
+-                  source_head="OTHER_HEAD", source_tree_fingerprint="OTHER_FP")
+-    check("C7 PASS bound to a different source identity -> STALE_PASS",
+-          C.conformance_status(r, "core")["status"] == C.STATUS_STALE_PASS)
++    write_receipt(
++        r,
++        "core",
++        "PASS",
++        ts=current_ts(),
++        source_head="OTHER_HEAD",
++        source_tree_fingerprint="OTHER_FP",
++    )
++    check(
++        "C7 PASS bound to a different source identity -> STALE_PASS",
++        C.conformance_status(r, "core")["status"] == C.STATUS_STALE_PASS,
++    )
+ 
+ 
+ def case_d_terminal_closure(root: Path) -> None:
+     r = scaffold()
+-    check("D1 closure impossible on NOT_RUN",
+-          C.current_conformance_pass(r, "core") is False)
++    check("D1 closure impossible on NOT_RUN", C.current_conformance_pass(r, "core") is False)
+     r = scaffold()
+     h, f = source_pair(r)
+     write_receipt(r, "core", "PASS", ts=current_ts(-48), source_head=h, source_tree_fingerprint=f)
+-    check("D2 only CURRENT_PASS permits closure (STALE_PASS -> False)",
+-          C.current_conformance_pass(r, "core") is False)
++    check(
++        "D2 only CURRENT_PASS permits closure (STALE_PASS -> False)",
++        C.current_conformance_pass(r, "core") is False,
++    )
+ 
+ 
+ def case_e_convergence(root: Path) -> None:
+@@ -261,8 +318,11 @@ def case_e_convergence(root: Path) -> None:
+     h, f = source_pair(r)
+     write_receipt(r, "core", "PASS", ts=current_ts(), source_head=h, source_tree_fingerprint=f)
+     ok, why = C.convergence_stage_satisfied(r, "H", Src("OTHER_HEAD", "OTHER_FP"))
+-    check("E4 stage H PASS but source identity mismatch -> UNSATISFIED",
+-          ok is False and "does not match" in why, why)
++    check(
++        "E4 stage H PASS but source identity mismatch -> UNSATISFIED",
++        ok is False and "does not match" in why,
++        why,
++    )
+ 
+ 
+ def case_f_clean_exit(root: Path) -> None:
+@@ -293,26 +353,36 @@ def case_g_entry_health(root: Path) -> None:
+     )
+     board = {"tickets": {"T-1": {"id": "T-1", "section": "## DONE", "fields": {}}}, "errors": []}
+     probs = C.continue_entry_health(r, state={"phase": "DONE"}, board=board)
+-    check("G2 entry health flags the unverified DONE",
+-          any("DONE" in p and "verify" in p for p in probs), str(probs))
++    check(
++        "G2 entry health flags the unverified DONE",
++        any("DONE" in p and "verify" in p for p in probs),
++        str(probs),
++    )
+     # G3: converge/crew intent without current crew conformance.
+     r = scaffold()
+     state = {"phase": "CONVERGE", "execution_intent": "converge", "converge_target": "crew"}
+     probs = C.continue_entry_health(r, state=state, board={"tickets": {}, "errors": []})
+-    check("G3 entry health flags converge/crew without crew conformance",
+-          any("crew" in p for p in probs), str(probs))
++    check(
++        "G3 entry health flags converge/crew without crew conformance",
++        any("crew" in p for p in probs),
++        str(probs),
++    )
+ 
+ 
+ def case_h_crew_gate(root: Path) -> None:
+     r = scaffold()
+-    check("H1 crew closure impossible when crew not run (NOT_RUN)",
+-          C.current_conformance_pass(r, "crew") is False)
++    check(
++        "H1 crew closure impossible when crew not run (NOT_RUN)",
++        C.current_conformance_pass(r, "crew") is False,
++    )
+     r = scaffold()
+     h, f = source_pair(r)
+     write_receipt(r, "crew", "PASS", ts=current_ts(), source_head=h, source_tree_fingerprint=f)
+-    check("H2 crew CURRENT_PASS satisfies the SC-13 final gate",
+-          C.conformance_status(r, "crew")["status"] == C.STATUS_CURRENT_PASS
+-          and C.current_conformance_pass(r, "crew") is True)
++    check(
++        "H2 crew CURRENT_PASS satisfies the SC-13 final gate",
++        C.conformance_status(r, "crew")["status"] == C.STATUS_CURRENT_PASS
++        and C.current_conformance_pass(r, "crew") is True,
++    )
+ 
+ 
+ def case_i_timestamps(root: Path) -> None:
+@@ -320,15 +390,17 @@ def case_i_timestamps(root: Path) -> None:
+     r = scaffold()
+     write_receipt(r, "core", "PASS", ts=current_ts(+10))
+     st = C.conformance_status(r, "core")
+-    check("I1 future-timestamped receipt -> STALE_FAIL (read-time §9)",
+-          st["status"] == C.STATUS_STALE_FAIL, st.get("reason", ""))
++    check(
++        "I1 future-timestamped receipt -> STALE_FAIL (read-time §9)",
++        st["status"] == C.STATUS_STALE_FAIL,
++        st.get("reason", ""),
++    )
+     # I5: SC-13 satisfied on a current crew PASS (the §7 wire).
+     r = scaffold()
+     h, f = source_pair(r)
+     write_receipt(r, "crew", "PASS", ts=current_ts(), source_head=h, source_tree_fingerprint=f)
+     st = C.conformance_status(r, "crew")
+-    check("I5 current crew PASS -> SC-13 may finalize",
+-          st["status"] == C.STATUS_CURRENT_PASS)
++    check("I5 current crew PASS -> SC-13 may finalize", st["status"] == C.STATUS_CURRENT_PASS)
+     # I6: write-time guard refuses a fabricated-future stamp.
+     future = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=10)
+     raised = False
+diff --git a/tools/test_core_audit_fixes.py b/tools/test_core_audit_fixes.py
+index 97d192e..44dcb9d 100644
+--- a/tools/test_core_audit_fixes.py
++++ b/tools/test_core_audit_fixes.py
+@@ -94,9 +94,7 @@ def test_core001() -> None:
+ 
+     # Valid sidecar is merged into the effective record.
+     (op / "progress.json").write_text(
+-        json.dumps(
+-            {"status": "VERIFIED", "progress_index": 1, "applied_frontier": 0}
+-        )
++        json.dumps({"status": "VERIFIED", "progress_index": 1, "applied_frontier": 0})
+     )
+     d = decode_operation_record(root, op)
+     check(
+@@ -159,9 +157,7 @@ def test_core002() -> None:
+         if not isinstance(node, ast.FunctionDef):
+             continue
+         uses = any(
+-            isinstance(n, ast.Name)
+-            and n.id == "candidate_home"
+-            and isinstance(n.ctx, ast.Load)
++            isinstance(n, ast.Name) and n.id == "candidate_home" and isinstance(n.ctx, ast.Load)
+             for n in ast.walk(node)
+         )
+         if uses and node.name not in owners:
+@@ -189,10 +185,14 @@ def test_core003() -> None:
+     ops_mod.build_event = _fake_build
+     try:
+         secret = (
+-            "deploy ghp_" + "a" * 36
+-            + " and AKIA" + "B" * 16
+-            + " and sk-" + "c" * 40
+-            + " and Bearer " + "d" * 32
++            "deploy ghp_"
++            + "a" * 36
++            + " and AKIA"
++            + "B" * 16
++            + " and sk-"
++            + "c" * 40
++            + " and Bearer "
++            + "d" * 32
+         )
+         _event_line({}, None, "DEC", "T-1", "aleks", secret, "2026-08-19T16:00:00Z")
+     finally:
+@@ -200,10 +200,7 @@ def test_core003() -> None:
+ 
+     msg = captured.get("message", "")
+     redacted = (
+-        "ghp_a" not in msg
+-        and "AKIAB" not in msg
+-        and "sk-c" not in msg
+-        and "Bearer d" not in msg
++        "ghp_a" not in msg and "AKIAB" not in msg and "sk-c" not in msg and "Bearer d" not in msg
+     )
+     check(
+         "CORE-003 secrets redacted before LOG bytes are built",
+@@ -223,7 +220,8 @@ def test_core004() -> None:
+         "---\n"
+         "phase: VERIFY\n"
+         "task: none\n"
+-        "next_action: WAIT: safety valve reached (3 waves / 20 tickets) -- run 'saipen goal' to continue\n"
++        "next_action: WAIT: safety valve reached (3 waves / 20 tickets) -- "
++        "run 'saipen goal' to continue\n"
+         "blocker: none\n"
+         "agent: aleks\n"
+         "saipen_version: 7\n"
+@@ -236,9 +234,7 @@ def test_core004() -> None:
+         "---\n"
+     )
+     board_text = (
+-        "# BOARD\n\n"
+-        "## TODO\n- [ ] T-2 more workable ticket\n\n"
+-        "## DOING\n\n## DONE\n\n## BLOCKED\n"
++        "# BOARD\n\n## TODO\n- [ ] T-2 more workable ticket\n\n## DOING\n\n## DONE\n\n## BLOCKED\n"
+     )
+     out = route_next(
+         state_text,
+diff --git a/tools/test_intent_audit_fixes.py b/tools/test_intent_audit_fixes.py
+index eb0cc77..5ce0215 100644
+--- a/tools/test_intent_audit_fixes.py
++++ b/tools/test_intent_audit_fixes.py
+@@ -69,7 +69,9 @@ class IntentAuditTests(unittest.TestCase):
+         res = intent.autonomous_crew_loop(repo_root, dry_run=True, current_capability="full")
+         after = _hash_tree(repo_root)
+         self.assertEqual(before, after, "dry-run mutated the filesystem")
+-        self.assertIn(res["code"], ("CREW_DRY_PLAN", "CREW_COMPLETE", "CREW_IDLE", "CREW_FINALIZED"))
++        self.assertIn(
++            res["code"], ("CREW_DRY_PLAN", "CREW_COMPLETE", "CREW_IDLE", "CREW_FINALIZED")
++        )
+ 
+     # ── CORE-003: no fabricated verified:PASS packages ─────────────────────
+     def test_core003_no_fabrication_sub_role(self):
+@@ -115,10 +117,7 @@ class IntentAuditTests(unittest.TestCase):
+         root = Path(tempfile.mkdtemp())
+         board = root / ".saipen" / "extensions" / "subs" / "saihunt" / "BOARD.md"
+         board.parent.mkdir(parents=True)
+-        original = (
+-            "# BOARD\n## TODO\n- [ ] HUNT-777 preserve this work\n"
+-            "## DONE\n- [x] old work\n"
+-        )
++        original = "# BOARD\n## TODO\n- [ ] HUNT-777 preserve this work\n## DONE\n- [x] old work\n"
+         board.write_text(original, encoding="utf-8")
+         fixed = intent._auto_repair_role(root, "saihunt")
+         self.assertFalse(fixed)
+@@ -222,9 +221,7 @@ class IntentAuditTests(unittest.TestCase):
+         root = Path(tempfile.mkdtemp())
+         (root / "a.txt").write_text("hello", encoding="utf-8")
+         # valid relative path
+-        self.assertEqual(
+-            P.read_set_from(root, ["a.txt"]), {"a.txt": P.file_sha256(root / "a.txt")}
+-        )
++        self.assertEqual(P.read_set_from(root, ["a.txt"]), {"a.txt": P.file_sha256(root / "a.txt")})
+         # POSIX absolute
+         with self.assertRaises(P.ProducerError):
+             P.read_set_from(root, ["/etc/passwd"])
+@@ -285,9 +282,7 @@ class IntentAuditTests(unittest.TestCase):
+         self.assertEqual(alternating.iterations, 6)
+ 
+         unique = ProgressTracker(max_iterations=5)
+-        outcomes = [
+-            unique.record(str(index), "RUN", "advance", "OK") for index in range(5)
+-        ]
++        outcomes = [unique.record(str(index), "RUN", "advance", "OK") for index in range(5)]
+         self.assertEqual(outcomes, [True, True, True, True, False])
+         self.assertEqual(unique.iterations, 5)
+ 
+diff --git a/tools/test_second_wave_audit_fixes.py b/tools/test_second_wave_audit_fixes.py
+index c99b54a..e39d1f6 100644
+--- a/tools/test_second_wave_audit_fixes.py
++++ b/tools/test_second_wave_audit_fixes.py
+@@ -146,7 +146,11 @@ def test_w2001() -> None:
+     rc = _run_cli(root2, "--agent", "boundary-new", "claim", "T-1")
+     st = _state(root2)
+     check("W2-001 valid different-agent claim succeeds", rc == 0, f"rc={rc}")
+-    check("W2-001 valid claim changes seat exactly once", st.get("agent") == "boundary-new", f"agent={st.get('agent')}")
++    check(
++        "W2-001 valid claim changes seat exactly once",
++        st.get("agent") == "boundary-new",
++        f"agent={st.get('agent')}",
++    )
+     # Exactly one new DEC was appended (the claim DEC), no separate handover DEC.
+     new_dec = _log_text(root2).count("DEC")  # legacy-free count: each DEC line has 'DEC'
+     check(
+@@ -202,14 +206,20 @@ def test_w2002() -> None:
+     _write_project(root, "oldagent")
+     res = handover_agent(root, "newseat")
+     check("W2-002 no-active-ticket handover succeeds", res.ok, str(res))
+-    check("W2-002 no-active-ticket: seat changed, board untouched", _state(root).get("agent") == "newseat" and _board_text(root).count("owner:") == 0, str(res))
++    check(
++        "W2-002 no-active-ticket: seat changed, board untouched",
++        _state(root).get("agent") == "newseat" and _board_text(root).count("owner:") == 0,
++        str(res),
++    )
+ 
+     # --- (b) active SELF claim -> atomically transferred -------------------
+     root2 = Path(tempfile.mkdtemp())
+     _write_project(
+         root2,
+         "oldagent",
+-        doing_lines=("- [/] T-1 [P1] active work | owner: oldagent | claim_time: 2026-08-19T16:00:00Z\n",),
++        doing_lines=(
++            "- [/] T-1 [P1] active work | owner: oldagent | claim_time: 2026-08-19T16:00:00Z\n",
++        ),
+         phase="SCOUT",
+         task="T-1",
+     )
+@@ -217,9 +227,16 @@ def test_w2002() -> None:
+     check("W2-002 active SELF claim handover succeeds", res.ok, str(res))
+     bt = _board_text(root2)
+     doing = bt.split("## DOING")[1].split("## DONE")[0]
+-    check("W2-002 active SELF claim transferred to new seat", "owner: newseat" in doing, doing[:160])
++    check(
++        "W2-002 active SELF claim transferred to new seat", "owner: newseat" in doing, doing[:160]
++    )
+     check("W2-002 active SELF: seat + claim stay bound", _state(root2).get("agent") == "newseat")
+-    errs = validate_texts(_state(root2).get("phase") and _read_state_text(root2), bt, _log_text(root2), current_agent="newseat")
++    errs = validate_texts(
++        _state(root2).get("phase") and _read_state_text(root2),
++        bt,
++        _log_text(root2),
++        current_agent="newseat",
++    )
+     check("W2-002 active SELF: post-handover state validates clean", not errs, str(errs))
+ 
+     # --- (c) active FOREIGN_LIVE -> refuse (zero write) --------------------
+@@ -236,7 +253,11 @@ def test_w2002() -> None:
+     )
+     b3 = _snap(root3)
+     res = handover_agent(root3, "newseat")
+-    check("W2-002 active FOREIGN_LIVE refused", (not res.ok) and res.code == "ACTIVE_CLAIM_FOREIGN", str(res))
++    check(
++        "W2-002 active FOREIGN_LIVE refused",
++        (not res.ok) and res.code == "ACTIVE_CLAIM_FOREIGN",
++        str(res),
++    )
+     check("W2-002 active FOREIGN_LIVE is zero-write", _files_unchanged(root3, b3), str(res))
+ 
+     # --- (d) active INVALID claim (half pair) -> refuse --------------------
+@@ -250,7 +271,11 @@ def test_w2002() -> None:
+     )
+     b4 = _snap(root4)
+     res = handover_agent(root4, "newseat")
+-    check("W2-002 active INVALID claim refused", (not res.ok) and res.code == "VALIDATION_FAILED", str(res))
++    check(
++        "W2-002 active INVALID claim refused",
++        (not res.ok) and res.code == "VALIDATION_FAILED",
++        str(res),
++    )
+     check("W2-002 active INVALID is zero-write", _files_unchanged(root4, b4), str(res))
+ 
+     # --- (e) active FOREIGN_STALE -> transferred (lapsed claim) ------------
+@@ -258,14 +283,18 @@ def test_w2002() -> None:
+     _write_project(
+         root5,
+         "oldagent",
+-        doing_lines=("- [/] T-1 [P1] active work | owner: other | claim_time: 2020-01-01T00:00:00Z\n",),
++        doing_lines=(
++            "- [/] T-1 [P1] active work | owner: other | claim_time: 2020-01-01T00:00:00Z\n",
++        ),
+         phase="SCOUT",
+         task="T-1",
+     )
+     res = handover_agent(root5, "newseat")
+     check("W2-002 active FOREIGN_STALE handed over (claim adopted by new seat)", res.ok, str(res))
+     doing5 = _board_text(root5).split("## DOING")[1].split("## DONE")[0]
+-    check("W2-002 FOREIGN_STALE claim now owned by new seat", "owner: newseat" in doing5, doing5[:160])
++    check(
++        "W2-002 FOREIGN_STALE claim now owned by new seat", "owner: newseat" in doing5, doing5[:160]
++    )
+ 
+ 
+ def _read_state_text(root: Path) -> str:
+@@ -283,11 +312,27 @@ def test_w2003() -> None:
+     res = goal_entry(root, "oldagent", "Ship the v8 release to production")
+     check("W2-003 empty board goal entry succeeds", res.ok, str(res))
+     st = _state(root)
+-    check("W2-003 Entry PLAN recorded exactly once (goal_waves==1)", st.get("goal_waves") == 1, f"goal_waves={st.get('goal_waves')}")
+-    check("W2-003 goal_tickets counts VERIFY passes only", st.get("goal_tickets") == 0, f"goal_tickets={st.get('goal_tickets')}")
++    check(
++        "W2-003 Entry PLAN recorded exactly once (goal_waves==1)",
++        st.get("goal_waves") == 1,
++        f"goal_waves={st.get('goal_waves')}",
++    )
++    check(
++        "W2-003 goal_tickets counts VERIFY passes only",
++        st.get("goal_tickets") == 0,
++        f"goal_tickets={st.get('goal_tickets')}",
++    )
+     log = (root / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+-    check("W2-003 Entry PLAN wave bump is recoverable from LOG", "DEC: goal_waves 0->1" in log, log[-300:])
+-    check("W2-003 next_action targets the new objective", str(st.get("next_action", "")).startswith("PHASE SCOUT"), f"na={st.get('next_action')}")
++    check(
++        "W2-003 Entry PLAN wave bump is recoverable from LOG",
++        "DEC: goal_waves 0->1" in log,
++        log[-300:],
++    )
++    check(
++        "W2-003 next_action targets the new objective",
++        str(st.get("next_action", "")).startswith("PHASE SCOUT"),
++        f"na={st.get('next_action')}",
++    )
+ 
+     # --- (b) old TODO backlog -> new plan tickets outrank old -------------
+     root2 = Path(tempfile.mkdtemp())
+@@ -312,7 +357,11 @@ def test_w2003() -> None:
+         doing[:240],
+     )
+     check("W2-003 old backlog preserved in TODO (no deletion)", "T-1" in todo, todo[:200])
+-    check("W2-003 goal_waves==1 with backlog", _state(root2).get("goal_waves") == 1, f"goal_waves={_state(root2).get('goal_waves')}")
++    check(
++        "W2-003 goal_waves==1 with backlog",
++        _state(root2).get("goal_waves") == 1,
++        f"goal_waves={_state(root2).get('goal_waves')}",
++    )
+ 
+     # --- (c) active DOING + old TODO -> checkpointed, planned, bound -------
+     root3 = Path(tempfile.mkdtemp())
+@@ -320,7 +369,9 @@ def test_w2003() -> None:
+         root3,
+         "oldagent",
+         todo_lines=("- [ ] T-2 [P1] old backlog item\n",),
+-        doing_lines=("- [/] T-1 [P1] in-progress | owner: oldagent | claim_time: 2026-08-19T16:00:00Z\n",),
++        doing_lines=(
++            "- [/] T-1 [P1] in-progress | owner: oldagent | claim_time: 2026-08-19T16:00:00Z\n",
++        ),
+         phase="SCOUT",
+         task="T-1",
+     )
+@@ -329,12 +380,26 @@ def test_w2003() -> None:
+     bt3 = _board_text(root3)
+     doing3 = bt3.split("## DOING")[1].split("## DONE")[0]
+     todo3 = bt3.split("## TODO")[1].split("## DOING")[0]
+-    check("W2-003 active DOING checkpointed (no longer in DOING)", "T-1" not in doing3, doing3[:160])
+-    check("W2-003 checkpointed ticket demoted without owner loss of claim fields", "T-1" in todo3 and "owner: oldagent" not in todo3, todo3[:200])
++    check(
++        "W2-003 active DOING checkpointed (no longer in DOING)", "T-1" not in doing3, doing3[:160]
++    )
++    check(
++        "W2-003 checkpointed ticket demoted without owner loss of claim fields",
++        "T-1" in todo3 and "owner: oldagent" not in todo3,
++        todo3[:200],
++    )
+     st3 = _state(root3)
+-    check("W2-003 goal_waves==1 (active DOING case)", st3.get("goal_waves") == 1, f"goal_waves={st3.get('goal_waves')}")
++    check(
++        "W2-003 goal_waves==1 (active DOING case)",
++        st3.get("goal_waves") == 1,
++        f"goal_waves={st3.get('goal_waves')}",
++    )
+     # first plan ticket promoted to DOING, owned by the acting agent
+-    check("W2-003 first plan ticket promoted to DOING bound to agent", "owner: oldagent" in doing3, doing3[:200])
++    check(
++        "W2-003 first plan ticket promoted to DOING bound to agent",
++        "owner: oldagent" in doing3,
++        doing3[:200],
++    )
+ 
+     # --- (d) crash/restart safety: re-run from the SAME checkpoint -> identical
+     # (a crash BEFORE commit leaves the pre-goal files byte-identical, so a
+@@ -380,7 +445,11 @@ def test_w2004() -> None:
+         _write_project(root, "oldagent", todo_lines=("- [ ] T-1 [P1] backlog\n",))
+         b = _snap(root)
+         res = goal_entry(root, "oldagent", obj)
+-        check(f"W2-004 {label} objective refused", (not res.ok) and res.code == "INVALID_GOAL", str(res))
++        check(
++            f"W2-004 {label} objective refused",
++            (not res.ok) and res.code == "INVALID_GOAL",
++            str(res),
++        )
+         check(f"W2-004 {label} objective is zero-write", _files_unchanged(root, b), str(res))
+ 
+     # set_goal_intent primitive also refuses blank.
+@@ -388,7 +457,11 @@ def test_w2004() -> None:
+     _write_project(root_p, "oldagent")
+     b_p = _snap(root_p)
+     res_p = set_goal_intent(root_p, "oldagent", "   ")
+-    check("W2-004 set_goal_intent blank refused", (not res_p.ok) and res_p.code == "INVALID_GOAL", str(res_p))
++    check(
++        "W2-004 set_goal_intent blank refused",
++        (not res_p.ok) and res_p.code == "INVALID_GOAL",
++        str(res_p),
++    )
+     check("W2-004 set_goal_intent blank zero-write", _files_unchanged(root_p, b_p), str(res_p))
+ 
+     # Different --agent + blank goal -> W2-001 fix prevents ownership side effect.
+@@ -406,7 +479,11 @@ def test_w2004() -> None:
+     root_v = Path(tempfile.mkdtemp())
+     _write_project(root_v, "oldagent")
+     res_v = goal_entry(root_v, "oldagent", "Deploy v8 to prod \U0001f680")
+-    check("W2-004 valid objective accepted + planned", res_v.ok and _state(root_v).get("goal_waves") == 1, str(res_v))
++    check(
++        "W2-004 valid objective accepted + planned",
++        res_v.ok and _state(root_v).get("goal_waves") == 1,
++        str(res_v),
++    )
+ 
+ 
+ def main() -> int:
+diff --git a/tools/test_second_wave_receipt_fixes.py b/tools/test_second_wave_receipt_fixes.py
+index b0369ee..4b1b540 100644
+--- a/tools/test_second_wave_receipt_fixes.py
++++ b/tools/test_second_wave_receipt_fixes.py
+@@ -107,7 +107,9 @@ def test_w2001_scanner() -> None:
+     bad.mkdir(parents=True)
+     (bad / "operation.json").write_text("}{ not json")
+     records, errors = semantic_receipt_snapshot(root)
+-    check("W2-001 malformed receipt surfaced as error", any("bad1" in e for e in errors), str(errors))
++    check(
++        "W2-001 malformed receipt surfaced as error", any("bad1" in e for e in errors), str(errors)
++    )
+     check(
+         "W2-001 malformed receipt not selected as evidence",
+         all(r.get("op_id") != "bad1" for r in records),
+@@ -120,12 +122,20 @@ def test_w2001_scanner() -> None:
+     _write_receipt(root2, "dup", "converge_intent", ns="settled", extra=payload)
+     records2, errors2 = semantic_receipt_snapshot(root2)
+     ops = [r for r in records2 if r.get("op_id") == "dup"]
+-    check("W2-001 equivalent duplicate collapses to one", len(ops) == 1, f"count={len(ops)} errors={errors2}")
++    check(
++        "W2-001 equivalent duplicate collapses to one",
++        len(ops) == 1,
++        f"count={len(ops)} errors={errors2}",
++    )
+ 
+     # (c) non-equivalent duplicate -> corrupt evidence, NEITHER selected.
+     root3 = Path(tempfile.mkdtemp())
+-    _write_receipt(root3, "dup2", "converge_intent", ns="ops", extra={"semantic_payload_hash": "h-a"})
+-    _write_receipt(root3, "dup2", "converge_intent", ns="settled", extra={"semantic_payload_hash": "h-b"})
++    _write_receipt(
++        root3, "dup2", "converge_intent", ns="ops", extra={"semantic_payload_hash": "h-a"}
++    )
++    _write_receipt(
++        root3, "dup2", "converge_intent", ns="settled", extra={"semantic_payload_hash": "h-b"}
++    )
+     records3, errors3 = semantic_receipt_snapshot(root3)
+     check(
+         "W2-001 non-equivalent duplicate reported corrupt",
+@@ -188,9 +198,7 @@ def test_w2001_conformance_crash_stale_index() -> None:
+     root = Path(tempfile.mkdtemp())
+     (root / ".saipen").mkdir()
+     now = datetime.datetime.now(datetime.timezone.utc)
+-    older = conformance.generate_conformance_receipt(
+-        root, gate="core", exit_code=0, now=now
+-    )
++    older = conformance.generate_conformance_receipt(root, gate="core", exit_code=0, now=now)
+     try:
+         with mock.patch.object(
+             conformance, "_update_receipt_index", side_effect=RuntimeError("index crash")
+@@ -224,7 +232,11 @@ def test_w2002_ops_settled() -> None:
+         extra={"release_stage": "COMMITTED", "crew_epoch": "EPOCH-1"},
+     )
+     out = _committed_release_receipts(root)
+-    check("W2-002 settled release receipt discovered", any(r.get("op_id") == "rel-1" for r in out), str(out))
++    check(
++        "W2-002 settled release receipt discovered",
++        any(r.get("op_id") == "rel-1" for r in out),
++        str(out),
++    )
+ 
+     # (b) ops release receipt still discovered (no regression).
+     root2 = Path(tempfile.mkdtemp())
+@@ -236,14 +248,28 @@ def test_w2002_ops_settled() -> None:
+         extra={"release_stage": "COMMITTED", "crew_epoch": "EPOCH-2"},
+     )
+     out2 = _committed_release_receipts(root2)
+-    check("W2-002 ops release receipt still discovered", any(r.get("op_id") == "rel-2" for r in out2))
++    check(
++        "W2-002 ops release receipt still discovered", any(r.get("op_id") == "rel-2" for r in out2)
++    )
+ 
+     # (c) settled sub_sync receipt found with the ACTUAL settled path.
+-    inv = [{"path": "TEMPLATE", "kind": "directory", "source_hash": "delete-tree-sha256:" + "0" * 64}]
++    inv = [
++        {"path": "TEMPLATE", "kind": "directory", "source_hash": "delete-tree-sha256:" + "0" * 64}
++    ]
+     root3 = Path(tempfile.mkdtemp())
+-    _write_receipt(root3, "sync-1", "sub_sync", ns="settled", extra={"receipt_metadata": {"owned_source_inventory": inv}})
++    _write_receipt(
++        root3,
++        "sync-1",
++        "sub_sync",
++        ns="settled",
++        extra={"receipt_metadata": {"owned_source_inventory": inv}},
++    )
+     receipt, _inv, lineage = _latest_sub_sync_inventory(root3)
+-    check("W2-002 settled sub_sync discovered", receipt is not None and lineage == "ok", f"lineage={lineage}")
++    check(
++        "W2-002 settled sub_sync discovered",
++        receipt is not None and lineage == "ok",
++        f"lineage={lineage}",
++    )
+     check(
+         "W2-002 sub_sync path is the actual settled path",
+         receipt is not None and receipt.get("_receipt_path", "").startswith(SETTLED_DIR),
+@@ -252,9 +278,19 @@ def test_w2002_ops_settled() -> None:
+ 
+     # (d) ops sub_sync still found (no regression).
+     root4 = Path(tempfile.mkdtemp())
+-    _write_receipt(root4, "sync-2", "sub_sync", ns="ops", extra={"receipt_metadata": {"owned_source_inventory": inv}})
++    _write_receipt(
++        root4,
++        "sync-2",
++        "sub_sync",
++        ns="ops",
++        extra={"receipt_metadata": {"owned_source_inventory": inv}},
++    )
+     receipt4, _inv4, lineage4 = _latest_sub_sync_inventory(root4)
+-    check("W2-002 ops sub_sync still discovered", receipt4 is not None and lineage4 == "ok", f"lineage={lineage4}")
++    check(
++        "W2-002 ops sub_sync still discovered",
++        receipt4 is not None and lineage4 == "ok",
++        f"lineage={lineage4}",
++    )
+ 
+ 
+ def test_w2003_terminalization() -> None:
+@@ -262,14 +298,24 @@ def test_w2003_terminalization() -> None:
+     root = Path(tempfile.mkdtemp())
+     _write_receipt(root, "rel-f", "release", ns="ops", extra={"release_stage": "COMMITTED"})
+     res = recover_release_op(root, "rel-f")
+-    check("W2-003 fully committed release returns ALREADY_APPLIED", res.get("code") == "ALREADY_APPLIED", str(res))
++    check(
++        "W2-003 fully committed release returns ALREADY_APPLIED",
++        res.get("code") == "ALREADY_APPLIED",
++        str(res),
++    )
+ 
+     # (b) split truth (generic COMMITTED, stage not COMMITTED) -> NOT
+     # ALREADY_APPLIED; RELEASE_STAGE_INCOMPLETE instead.
+     root2 = Path(tempfile.mkdtemp())
+-    _write_receipt(root2, "rel-p", "release", ns="ops", extra={"release_stage": "CONTENT_COMMIT_CREATED"})
++    _write_receipt(
++        root2, "rel-p", "release", ns="ops", extra={"release_stage": "CONTENT_COMMIT_CREATED"}
++    )
+     res2 = recover_release_op(root2, "rel-p")
+-    check("W2-003 partial release is NOT ALREADY_APPLIED", res2.get("code") != "ALREADY_APPLIED", str(res2))
++    check(
++        "W2-003 partial release is NOT ALREADY_APPLIED",
++        res2.get("code") != "ALREADY_APPLIED",
++        str(res2),
++    )
+     check(
+         "W2-003 partial release returns RELEASE_STAGE_INCOMPLETE",
+         res2.get("code") == "RELEASE_STAGE_INCOMPLETE",
+@@ -302,7 +348,7 @@ def test_w2005_cleanup_debt() -> None:
+     marker_dir2.mkdir(parents=True)
+     (marker_dir2 / "clean2").write_text("")
+ 
+-    def _boom(self, *a, **k):  # noqa: ANN001
++    def _boom(self, *a, **k):
+         raise OSError("simulated device busy")
+ 
+     with mock.patch.object(Path, "unlink", _boom):
+diff --git a/tools/test_v7_producer_parallelism.py b/tools/test_v7_producer_parallelism.py
+index 1ad1750..e0d8dff 100644
+--- a/tools/test_v7_producer_parallelism.py
++++ b/tools/test_v7_producer_parallelism.py
+@@ -27,7 +27,6 @@ Covers every DONE/matrix case from the spec:
+ from __future__ import annotations
+ 
+ import json
+-import os
+ import shutil
+ import sys
+ import tempfile
+@@ -37,13 +36,13 @@ from pathlib import Path
+ 
+ sys.path.insert(0, str(Path(__file__).resolve().parent))
+ 
+-from saipen_engine import producer as P  # noqa: E402
+-from saipen_engine.capability import (  # noqa: E402
++from saipen_engine import producer as P
++from saipen_engine.capability import (
+     CAPABILITY_DENIED,
+     assert_producer_capability,
+     guard_core_mutation,
+ )
+-from saipen_engine.lock import ProducerLock, project_writer_lock  # noqa: E402
++from saipen_engine.lock import ProducerLock, project_writer_lock
+ 
+ 
+ def wf(root: Path, rel: str, content: str) -> None:
+@@ -103,7 +102,9 @@ class V7Test(unittest.TestCase):
+ 
+     # ------------------------------------------------------------------ A
+     def test_A_concurrent_ee_qq_allowed(self):
+-        with ProducerLock(self.root, "saitranslate") as le, ProducerLock(self.root, "saiwiki") as lq:
++        with ProducerLock(self.root, "saitranslate") as le, ProducerLock(
++            self.root, "saiwiki"
++        ) as lq:
+             self.assertIsNotNone(le)
+             self.assertIsNotNone(lq)
+         # lock files are independent and never touch the canonical main tree
+@@ -143,7 +144,9 @@ class V7Test(unittest.TestCase):
+     def test_E_stale_epoch_cannot_publish(self):
+         ns = self.root / ".saipen/saitranslate"
+         epoch1 = P.ProducerEpoch.claim(ns)
+-        pkg = self._make_pkg("saitranslate", ["src/core.py"], ["translations/ru.md"], "ru", epoch=epoch1)
++        pkg = self._make_pkg(
++            "saitranslate", ["src/core.py"], ["translations/ru.md"], "ru", epoch=epoch1
++        )
+         gen = P.StagingGeneration(ns, "saitranslate").begin()
+         gen.add_payload("translations/ru.md", "complete content")
+         gen.set_package(pkg)
+@@ -159,7 +162,9 @@ class V7Test(unittest.TestCase):
+     def test_F_idempotent_duplicate_prepare(self):
+         ns = self.root / ".saipen/saitranslate"
+         epoch = P.ProducerEpoch.claim(ns)
+-        pkg = self._make_pkg("saitranslate", ["src/core.py"], ["translations/ru.md"], "ru", epoch=epoch)
++        pkg = self._make_pkg(
++            "saitranslate", ["src/core.py"], ["translations/ru.md"], "ru", epoch=epoch
++        )
+         g1 = P.StagingGeneration(ns, "saitranslate").begin()
+         g1.add_payload("translations/ru.md", "content")
+         g1.set_package(pkg)
+@@ -193,8 +198,7 @@ class V7Test(unittest.TestCase):
+             fake_identity("tree:base"),
+             current_identity_provider=lambda: fake_identity("tree:after-ru"),
+             current_hashes_provider=lambda p: {
+-                k: P.file_sha256(self.root / k)
+-                for k in (set(p.read_set) | set(p.write_set))
++                k: P.file_sha256(self.root / k) for k in (set(p.read_set) | set(p.write_set))
+             },
+         )
+         wiki_entry = next(e for e in plan["packages"] if e["producer"] == "saiwiki")
+@@ -203,7 +207,7 @@ class V7Test(unittest.TestCase):
+ 
+     # ------------------------------------------------------------------ H
+     def test_H_translate_changes_wiki_read_dep_stale(self):
+-        translate = self._make_pkg(
++        self._make_pkg(
+             "saitranslate",
+             ["shared/glossary.md"],
+             ["translations/ru.md", "shared/glossary.md"],
+@@ -274,7 +278,7 @@ class V7Test(unittest.TestCase):
+         self.assertTrue(ok)
+ 
+         # guard refuses any producer write that would touch Core canonical truth
+-        blocked, why = guard_core_mutation(self.root / ".saipen/STATE.md")
++        blocked, _why = guard_core_mutation(self.root / ".saipen/STATE.md")
+         self.assertTrue(blocked)
+         # and a denied action performs ZERO canonical writes
+         state_path = self.root / ".saipen/STATE.md"
+@@ -298,7 +302,9 @@ class V7Test(unittest.TestCase):
+         # now a crashed staging generation appears (incomplete, never published)
+         crashed = P.StagingGeneration(ns, "saiwiki").begin()
+         crashed.add_payload("wiki/index.md", "partial")  # never published
+-        crashed.set_package(self._make_pkg("saiwiki", ["src/wiki.md"], ["wiki/index.md"], "crashed", epoch=epoch))
++        crashed.set_package(
++            self._make_pkg("saiwiki", ["src/wiki.md"], ["wiki/index.md"], "crashed", epoch=epoch)
++        )
+         # restart -> deterministic recovery
+         report = P.StagingGeneration.recover(ns)
+         self.assertTrue(report["removed_staging"])
+@@ -315,7 +321,7 @@ class V7Test(unittest.TestCase):
+ 
+         def apply(pkg, root):
+             written.append(pkg.package_identity)
+-            wf(root, list(pkg.write_set)[0], "payload")
++            wf(root, next(iter(pkg.write_set)), "payload")
+ 
+         res = P.integrate_packages_core([a, b], self.root, apply_write=apply)
+         for r in res["results"]:
+@@ -370,9 +376,7 @@ class V7Test(unittest.TestCase):
+ 
+         ns = self.root / ".saipen/saiwiki"
+         epoch = P.ProducerEpoch.claim(ns)
+-        pkg = self._make_pkg(
+-            "saiwiki", ["src/wiki.md"], ["wiki/index.md"], "journaled", epoch
+-        )
++        pkg = self._make_pkg("saiwiki", ["src/wiki.md"], ["wiki/index.md"], "journaled", epoch)
+         gen = P.StagingGeneration(ns, "saiwiki").begin()
+         gen.set_package(pkg)
+         gen.add_payload("wiki/index.md", "# Integrated\n")
+@@ -396,9 +400,7 @@ class V7Test(unittest.TestCase):
+         for index in range(25):
+             epoch = P.ProducerEpoch.claim(ns)
+             rel = f"wiki/history-{index:03d}.md"
+-            pkg = self._make_pkg(
+-                "saiwiki", ["src/wiki.md"], [rel], f"history-{index}", epoch
+-            )
++            pkg = self._make_pkg("saiwiki", ["src/wiki.md"], [rel], f"history-{index}", epoch)
+             gen = P.StagingGeneration(ns, "saiwiki").begin()
+             gen.set_package(pkg)
+             gen.add_payload(rel, f"# Revision {index}\n")

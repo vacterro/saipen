@@ -1,0 +1,53 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-10-05T20:19:51Z",
+  "evidence_class": "attested",
+  "findings_digest": "47af3c8415fe1468aefe5c9eeba5e1621cf3589ea90aa87af684c815d075f2ef",
+  "gate": "core",
+  "integrity_digest": "fca32bf5ff91d435",
+  "journal_op_id": "reverify.9c4ffc55a2c5",
+  "original_closure": {
+    "claim_time": "2026-10-05T19:53:09Z",
+    "closure_mode": "own_patch",
+    "last_ticket_event": "E-2959",
+    "owner": "buffy",
+    "source_receipts": "SRC-119"
+  },
+  "own_problem_keys": [],
+  "problem_count": 92,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000662",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "a37250f700ec4b93c81d36ec563675bab1c1d9d2",
+  "source_tree_fingerprint": "git-delta-v1:e8e921336c4a01dd6f458cd7e038f9c6ee1e04c8a2190607db7253402cb18b1b",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "python -m pytest tests/",
+      "executed": false,
+      "kind": "attested",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m ruff check audapack tests",
+      "executed": false,
+      "kind": "attested",
+      "result": "PASS"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "python -m pytest tests/",
+      "python -m ruff check audapack tests"
+    ],
+    "findings_digest": "47af3c8415fe1468aefe5c9eeba5e1621cf3589ea90aa87af684c815d075f2ef",
+    "gate": "core"
+  },
+  "verification_contract_digest": "3a43ba51157b0c5a",
+  "verifier": "buffy",
+  "warning_count": 86,
+  "work": "T-274"
+}

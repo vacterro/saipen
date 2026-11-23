@@ -1,0 +1,9 @@
+core_001: ok=True status=DELIVERED_PUBLICATION layers=1
+core_002: valid=STATE_VALID digestless=STATE_VALID step_ok=True step_status=COMPLETE
+core_003: EXCEPTION TypeError: grant_fields() got an unexpected keyword argument 'valve'
+core_004: T20_ok=True T20=DISPOSITION_RECORDED fakeauth_ok=True fakeauth=DISPOSITION_RECORDED
+core_005: rc=0 out={
+  "ok": true,
+  "campaign": null,
+  "route": "campaign"
+}

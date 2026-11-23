@@ -1,0 +1,7 @@
+CONTROL unmutated copy: exit 0, Ran 7 tests
+command: python -B -m unittest test_t1636_invalid_carrier (cwd tools/)
+verifier:754a8937374047e2  (tools/test_t1636_invalid_carrier.py, byte-identical in both trees)
+FAIL subject:748c5082472d1d07  exit 1  red 4: test_degraded_proceeds_marked_unverified_with_the_carrier_named, test_strict_blocks_with_the_one_action, test_the_claude_transport, test_the_codex_transport
+PASS subject:060f0465ec2b71d8  exit 0  Ran 7 tests
+held: True
+rc=0

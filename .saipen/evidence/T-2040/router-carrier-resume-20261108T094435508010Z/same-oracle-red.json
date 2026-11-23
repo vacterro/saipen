@@ -1,0 +1,32 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t2040_discovery_owners.py",
+    "-v"
+  ],
+  "exit_code": 1,
+  "duration_s": 0.985,
+  "before": {
+    "tools/test_t2040_discovery_owners.py": "793b5441b002d27547af676eecfee68326f4f67db8fa96ec435418e62200ca62",
+    "tools/saipen_engine/router.py": "feeb90bb4ad4b9ca2f0dfa7854e20ae4ec7cad042fb136f57de44c8c3a889e95",
+    "tools/saipen_engine/board.py": "74cf0a77e64a91edadc8c6c65800aa7366ec7b3fc2f47b8612dbd66fafb80a2b",
+    "tools/saipen_engine/work_exhaustion.py": "0b706e17ffc98f9fce1512b9a0acd72e8eb13fe7e28125fc366c51c322b54938",
+    "tools/test_fixture_support.py": "6641bb9a805bdf3de0964fdad95ec9fef292f4b73b959d61aa3154e981f2dff0",
+    "tools/test_campaign_continuation_assessment.py": "1f6f66debdc9dbc31dc50e8c661ac0d11061733eb9477d4126aec18851de832c"
+  },
+  "after": {
+    "tools/test_t2040_discovery_owners.py": "793b5441b002d27547af676eecfee68326f4f67db8fa96ec435418e62200ca62",
+    "tools/saipen_engine/router.py": "feeb90bb4ad4b9ca2f0dfa7854e20ae4ec7cad042fb136f57de44c8c3a889e95",
+    "tools/saipen_engine/board.py": "74cf0a77e64a91edadc8c6c65800aa7366ec7b3fc2f47b8612dbd66fafb80a2b",
+    "tools/saipen_engine/work_exhaustion.py": "0b706e17ffc98f9fce1512b9a0acd72e8eb13fe7e28125fc366c51c322b54938",
+    "tools/test_fixture_support.py": "6641bb9a805bdf3de0964fdad95ec9fef292f4b73b959d61aa3154e981f2dff0",
+    "tools/test_campaign_continuation_assessment.py": "1f6f66debdc9dbc31dc50e8c661ac0d11061733eb9477d4126aec18851de832c"
+  }
+}

@@ -1,0 +1,163 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.exe
+PySide6 6.11.1 -- Qt runtime 6.11.1 -- Qt compiled 6.11.1
+rootdir: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN
+plugins: anyio-4.15.1, langsmith-0.14.12, asyncio-1.4.0, cov-7.1.0, docker-3.2.5, mock-3.15.1, qt-4.5.0, timeout-2.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 18 items / 9 deselected / 9 selected
+
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip 
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip PASSED [ 11%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero 
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero PASSED [ 22%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_known_graphs_report_measured_counts 
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_known_graphs_report_measured_counts PASSED [ 33%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_live_remotes_ancestry_topology FAILED [ 44%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_measures_push_destination_not_fetch_remote FAILED [ 55%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_missing_local_commit_is_unmeasured FAILED [ 66%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_reconcile_remote_ancestry_detects_merge_base_and_divergence PASSED [ 77%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_refuses_non_fast_forward_push PASSED [ 88%]
+tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_remote_object_absent_locally_is_unknown_not_zero FAILED [100%]
+
+================================== FAILURES ===================================
+_ ReleaseReconciliationTests.test_r003_failed_or_invalid_remote_query_never_uses_cached_tip (rc=128, stdout='') _
+tools\test_release_reconciliation.py:304: in test_r003_failed_or_invalid_remote_query_never_uses_cached_tip
+    self.assertEqual(result["remote_head"], "")
+E   AssertionError: '8f530c934bcda6f07692a75503c33e0da4117271' != ''
+E   - 8f530c934bcda6f07692a75503c33e0da4117271
+E   +
+_ ReleaseReconciliationTests.test_r003_failed_or_invalid_remote_query_never_uses_cached_tip (rc=0, stdout='') _
+tools\test_release_reconciliation.py:304: in test_r003_failed_or_invalid_remote_query_never_uses_cached_tip
+    self.assertEqual(result["remote_head"], "")
+E   AssertionError: '8f530c934bcda6f07692a75503c33e0da4117271' != ''
+E   - 8f530c934bcda6f07692a75503c33e0da4117271
+E   +
+_ ReleaseReconciliationTests.test_r003_failed_or_invalid_remote_query_never_uses_cached_tip (rc=0, stdout='not-a-ref') _
+tools\test_release_reconciliation.py:304: in test_r003_failed_or_invalid_remote_query_never_uses_cached_tip
+    self.assertEqual(result["remote_head"], "")
+E   AssertionError: 'not-a-ref' != ''
+E   - not-a-ref
+E   +
+_ ReleaseReconciliationTests.test_r003_failed_or_invalid_remote_query_never_uses_cached_tip (rc=0, stdout='8f530c934bcda6f07692a75503c33e0da4117271\trefs/heads/other\n') _
+tools\test_release_reconciliation.py:304: in test_r003_failed_or_invalid_remote_query_never_uses_cached_tip
+    self.assertEqual(result["remote_head"], "")
+E   AssertionError: '8f530c934bcda6f07692a75503c33e0da4117271' != ''
+E   - 8f530c934bcda6f07692a75503c33e0da4117271
+E   +
+_ ReleaseReconciliationTests.test_r003_failed_or_invalid_remote_query_never_uses_cached_tip (rc=0, stdout='8f530c934bcda6f07692a75503c33e0da4117271\trefs/heads/main\n8f530c934bcda6f07692a75503c33e0da4117271\trefs/heads/main\n') _
+tools\test_release_reconciliation.py:304: in test_r003_failed_or_invalid_remote_query_never_uses_cached_tip
+    self.assertEqual(result["remote_head"], "")
+E   AssertionError: '8f530c934bcda6f07692a75503c33e0da4117271' != ''
+E   - 8f530c934bcda6f07692a75503c33e0da4117271
+E   +
+_ ReleaseReconciliationTests.test_r003_failed_or_malformed_graph_never_reports_measured_zero (command='merge-base', rc=128, stdout='') _
+tools\test_release_reconciliation.py:323: in test_r003_failed_or_malformed_graph_never_reports_measured_zero
+    self.assert_unknown_graph(result)
+tools\test_release_reconciliation.py:81: in assert_unknown_graph
+    self.assertIsNone(result[field], f"{field} is unmeasured, not zero/false/empty")
+E   AssertionError: '' is not None : merge_base is unmeasured, not zero/false/empty
+_ ReleaseReconciliationTests.test_r003_failed_or_malformed_graph_never_reports_measured_zero (command='rev-list', rc=128, stdout='') _
+tools\test_release_reconciliation.py:323: in test_r003_failed_or_malformed_graph_never_reports_measured_zero
+    self.assert_unknown_graph(result)
+tools\test_release_reconciliation.py:81: in assert_unknown_graph
+    self.assertIsNone(result[field], f"{field} is unmeasured, not zero/false/empty")
+E   AssertionError: 'fe6a81d4d586aa01665ed533e05af2e2463d76aa' is not None : merge_base is unmeasured, not zero/false/empty
+_ ReleaseReconciliationTests.test_r003_failed_or_malformed_graph_never_reports_measured_zero (command='rev-list', rc=0, stdout='not counts') _
+tools\test_release_reconciliation.py:322: in test_r003_failed_or_malformed_graph_never_reports_measured_zero
+    result = reconcile_remote_ancestry(self.root, remote="upstream")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\isolated_release.py:1213: in reconcile_remote_ancestry
+    ahead_count = int(parts[0])
+                  ^^^^^^^^^^^^^
+E   ValueError: invalid literal for int() with base 10: 'not'
+_ ReleaseReconciliationTests.test_r003_failed_or_malformed_graph_never_reports_measured_zero (command='rev-list', rc=0, stdout='-1 0') _
+tools\test_release_reconciliation.py:323: in test_r003_failed_or_malformed_graph_never_reports_measured_zero
+    self.assert_unknown_graph(result)
+tools\test_release_reconciliation.py:81: in assert_unknown_graph
+    self.assertIsNone(result[field], f"{field} is unmeasured, not zero/false/empty")
+E   AssertionError: 'fe6a81d4d586aa01665ed533e05af2e2463d76aa' is not None : merge_base is unmeasured, not zero/false/empty
+_ ReleaseReconciliationTests.test_r003_failed_or_malformed_graph_never_reports_measured_zero (command='rev-list', rc=0, stdout='1 0') _
+tools\test_release_reconciliation.py:323: in test_r003_failed_or_malformed_graph_never_reports_measured_zero
+    self.assert_unknown_graph(result)
+tools\test_release_reconciliation.py:81: in assert_unknown_graph
+    self.assertIsNone(result[field], f"{field} is unmeasured, not zero/false/empty")
+E   AssertionError: 'fe6a81d4d586aa01665ed533e05af2e2463d76aa' is not None : merge_base is unmeasured, not zero/false/empty
+_ ReleaseReconciliationTests.test_r003_failed_or_malformed_graph_never_reports_measured_zero (command='log', rc=128, stdout='') _
+tools\test_release_reconciliation.py:323: in test_r003_failed_or_malformed_graph_never_reports_measured_zero
+    self.assert_unknown_graph(result)
+tools\test_release_reconciliation.py:81: in assert_unknown_graph
+    self.assertIsNone(result[field], f"{field} is unmeasured, not zero/false/empty")
+E   AssertionError: 'fe6a81d4d586aa01665ed533e05af2e2463d76aa' is not None : merge_base is unmeasured, not zero/false/empty
+_ ReleaseReconciliationTests.test_r003_known_graphs_report_measured_counts (ahead=0, behind=0) _
+tools\test_release_reconciliation.py:255: in test_r003_known_graphs_report_measured_counts
+    self.assert_measured_graph(result, merge_base=base, ahead=ahead, behind=behind)
+tools\test_release_reconciliation.py:90: in assert_measured_graph
+    self.assertEqual(result["verification_status"], isolated_release.VERIFIED_COMPLETE)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'verification_status'
+_ ReleaseReconciliationTests.test_r003_known_graphs_report_measured_counts (ahead=1, behind=0) _
+tools\test_release_reconciliation.py:255: in test_r003_known_graphs_report_measured_counts
+    self.assert_measured_graph(result, merge_base=base, ahead=ahead, behind=behind)
+tools\test_release_reconciliation.py:90: in assert_measured_graph
+    self.assertEqual(result["verification_status"], isolated_release.VERIFIED_COMPLETE)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'verification_status'
+_ ReleaseReconciliationTests.test_r003_known_graphs_report_measured_counts (ahead=0, behind=1) _
+tools\test_release_reconciliation.py:255: in test_r003_known_graphs_report_measured_counts
+    self.assert_measured_graph(result, merge_base=base, ahead=ahead, behind=behind)
+tools\test_release_reconciliation.py:90: in assert_measured_graph
+    self.assertEqual(result["verification_status"], isolated_release.VERIFIED_COMPLETE)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'verification_status'
+_ ReleaseReconciliationTests.test_r003_known_graphs_report_measured_counts (ahead=1, behind=1) _
+tools\test_release_reconciliation.py:255: in test_r003_known_graphs_report_measured_counts
+    self.assert_measured_graph(result, merge_base=base, ahead=ahead, behind=behind)
+tools\test_release_reconciliation.py:90: in assert_measured_graph
+    self.assertEqual(result["verification_status"], isolated_release.VERIFIED_COMPLETE)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'verification_status'
+_____ ReleaseReconciliationTests.test_r003_live_remotes_ancestry_topology _____
+tools\test_release_reconciliation.py:489: in test_r003_live_remotes_ancestry_topology
+    self.assert_unknown_graph(res)
+tools\test_release_reconciliation.py:81: in assert_unknown_graph
+    self.assertIsNone(result[field], f"{field} is unmeasured, not zero/false/empty")
+E   AssertionError: '' is not None : merge_base is unmeasured, not zero/false/empty
+_ ReleaseReconciliationTests.test_r003_measures_push_destination_not_fetch_remote _
+tools\test_release_reconciliation.py:271: in test_r003_measures_push_destination_not_fetch_remote
+    self.assertEqual(result["remote_head"], tip)
+E   AssertionError: '93702a815e1d073358e5dc09af86fb2ce38e8407' != '9185517cca95d5379c7a5a95f4184f2515724fab'
+E   - 93702a815e1d073358e5dc09af86fb2ce38e8407
+E   + 9185517cca95d5379c7a5a95f4184f2515724fab
+___ ReleaseReconciliationTests.test_r003_missing_local_commit_is_unmeasured ___
+tools\test_release_reconciliation.py:330: in test_r003_missing_local_commit_is_unmeasured
+    self.assert_unknown_graph(result)
+tools\test_release_reconciliation.py:81: in assert_unknown_graph
+    self.assertIsNone(result[field], f"{field} is unmeasured, not zero/false/empty")
+E   AssertionError: '' is not None : merge_base is unmeasured, not zero/false/empty
+_ ReleaseReconciliationTests.test_r003_remote_object_absent_locally_is_unknown_not_zero _
+tools\test_release_reconciliation.py:286: in test_r003_remote_object_absent_locally_is_unknown_not_zero
+    self.assert_unknown_graph(result)
+tools\test_release_reconciliation.py:81: in assert_unknown_graph
+    self.assertIsNone(result[field], f"{field} is unmeasured, not zero/false/empty")
+E   AssertionError: '' is not None : merge_base is unmeasured, not zero/false/empty
+=========================== short test summary info ===========================
+SUBFAILED(rc=128, stdout='') tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip
+SUBFAILED(rc=0, stdout='') tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip
+SUBFAILED(rc=0, stdout='not-a-ref') tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip
+SUBFAILED(rc=0, stdout='8f530c934bcda6f07692a75503c33e0da4117271\trefs/heads/other\n') tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip
+SUBFAILED(rc=0, stdout='8f530c934bcda6f07692a75503c33e0da4117271\trefs/heads/main\n8f530c934bcda6f07692a75503c33e0da4117271\trefs/heads/main\n') tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_invalid_remote_query_never_uses_cached_tip
+SUBFAILED(command='merge-base', rc=128, stdout='') tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero
+SUBFAILED(command='rev-list', rc=128, stdout='') tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero
+SUBFAILED(command='rev-list', rc=0, stdout='not counts') tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero
+SUBFAILED(command='rev-list', rc=0, stdout='-1 0') tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero
+SUBFAILED(command='rev-list', rc=0, stdout='1 0') tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero
+SUBFAILED(command='log', rc=128, stdout='') tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_failed_or_malformed_graph_never_reports_measured_zero
+SUBFAILED(ahead=0, behind=0) tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_known_graphs_report_measured_counts
+SUBFAILED(ahead=1, behind=0) tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_known_graphs_report_measured_counts
+SUBFAILED(ahead=0, behind=1) tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_known_graphs_report_measured_counts
+SUBFAILED(ahead=1, behind=1) tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_known_graphs_report_measured_counts
+FAILED tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_live_remotes_ancestry_topology
+FAILED tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_measures_push_destination_not_fetch_remote
+FAILED tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_missing_local_commit_is_unmeasured
+FAILED tools/test_release_reconciliation.py::ReleaseReconciliationTests::test_r003_remote_object_absent_locally_is_unknown_not_zero
+================= 19 failed, 5 passed, 9 deselected in 5.27s ==================

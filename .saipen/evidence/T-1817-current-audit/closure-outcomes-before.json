@@ -1,0 +1,126 @@
+{
+  "scope": "existing engine and disposable native fixture; read-only investigation of next parent Work",
+  "cases": [
+    {
+      "missing_archive_artifact": null,
+      "repeat_close": {
+        "ok": true,
+        "code": "SOURCE_CLOSED",
+        "receipt": "SRC-001",
+        "status": "CLOSED",
+        "archive_ref": ".saipen/archive/source/SRC-001.md",
+        "recovered": true,
+        "residue_removed": false
+      },
+      "status_after": {
+        "ok": true,
+        "receipt": "SRC-001",
+        "status": "CLOSED",
+        "location": "archive",
+        "source_kind": "user_audit",
+        "source_sha256": "f3f34c0ff7fd12384854768b21ee1c8b9f93bd636385da08e72afe0db6c0cae5",
+        "linked_work": null,
+        "linked_works": [],
+        "amends": null,
+        "closure_event": "E-9",
+        "coverage": {
+          "receipt": "SRC-001",
+          "requirements": 1,
+          "actionable": 1,
+          "terminal": 1,
+          "dispositions": {
+            "VERIFIED": 1
+          },
+          "unresolved": []
+        },
+        "distribution": {
+          "state": "DISTRIBUTABLE",
+          "receipt_id": "SRC-001",
+          "source_sha256": "f3f34c0ff7fd12384854768b21ee1c8b9f93bd636385da08e72afe0db6c0cae5"
+        }
+      },
+      "validator_findings": [],
+      "repeat_changed_files": []
+    },
+    {
+      "missing_archive_artifact": "meta.json",
+      "repeat_close": {
+        "ok": true,
+        "code": "SOURCE_CLOSED",
+        "receipt": "SRC-001",
+        "status": "CLOSED",
+        "archive_ref": ".saipen/archive/source/SRC-001.md",
+        "recovered": true,
+        "residue_removed": false
+      },
+      "status_after": {
+        "ok": false,
+        "code": "SOURCE_CORRUPTION",
+        "detail": "[WinError 2] The system cannot find the file specified: 'V:\\\\_TEMP_\\\\saipen-source-receipts-kzpiqu7m\\\\project\\\\.saipen\\\\archive\\\\source\\\\SRC-001.meta.json'"
+      },
+      "validator_findings": [
+        "closed receipt SRC-001 archive bundle invalid: [WinError 2] The system cannot find the file specified: 'V:\\\\_TEMP_\\\\saipen-source-receipts-kzpiqu7m\\\\project\\\\.saipen\\\\archive\\\\source\\\\SRC-001.meta.json'"
+      ],
+      "repeat_changed_files": []
+    },
+    {
+      "missing_archive_artifact": "contract.json",
+      "repeat_close": {
+        "ok": true,
+        "code": "SOURCE_CLOSED",
+        "receipt": "SRC-001",
+        "status": "CLOSED",
+        "archive_ref": ".saipen/archive/source/SRC-001.md",
+        "recovered": true,
+        "residue_removed": false
+      },
+      "status_after": {
+        "ok": false,
+        "code": "SOURCE_CORRUPTION",
+        "detail": "[WinError 2] The system cannot find the file specified: 'V:\\\\_TEMP_\\\\saipen-source-receipts-ldknjdvm\\\\project\\\\.saipen\\\\archive\\\\source\\\\SRC-001.contract.json'"
+      },
+      "validator_findings": [
+        "closed receipt SRC-001 archive bundle invalid: [WinError 2] The system cannot find the file specified: 'V:\\\\_TEMP_\\\\saipen-source-receipts-ldknjdvm\\\\project\\\\.saipen\\\\archive\\\\source\\\\SRC-001.contract.json'"
+      ],
+      "repeat_changed_files": []
+    },
+    {
+      "missing_archive_artifact": "coverage.json",
+      "repeat_close": {
+        "ok": true,
+        "code": "SOURCE_CLOSED",
+        "receipt": "SRC-001",
+        "status": "CLOSED",
+        "archive_ref": ".saipen/archive/source/SRC-001.md",
+        "recovered": true,
+        "residue_removed": false
+      },
+      "status_after": {
+        "ok": false,
+        "code": "SOURCE_CORRUPTION",
+        "detail": "[WinError 2] The system cannot find the file specified: 'V:\\\\_TEMP_\\\\saipen-source-receipts-kufmowd_\\\\project\\\\.saipen\\\\archive\\\\source\\\\SRC-001.coverage.json'"
+      },
+      "validator_findings": [
+        "closed receipt SRC-001 archive bundle invalid: [WinError 2] The system cannot find the file specified: 'V:\\\\_TEMP_\\\\saipen-source-receipts-kufmowd_\\\\project\\\\.saipen\\\\archive\\\\source\\\\SRC-001.coverage.json'"
+      ],
+      "repeat_changed_files": []
+    },
+    {
+      "missing_archive_artifact": "md",
+      "repeat_close": {
+        "ok": false,
+        "code": "SOURCE_CORRUPTION",
+        "detail": "[WinError 2] The system cannot find the file specified: 'V:\\\\_TEMP_\\\\saipen-source-receipts-ol08vnc7\\\\project\\\\.saipen\\\\archive\\\\source\\\\SRC-001.md'"
+      },
+      "status_after": {
+        "ok": false,
+        "code": "SOURCE_CORRUPTION",
+        "detail": "[WinError 2] The system cannot find the file specified: 'V:\\\\_TEMP_\\\\saipen-source-receipts-ol08vnc7\\\\project\\\\.saipen\\\\archive\\\\source\\\\SRC-001.md'"
+      },
+      "validator_findings": [
+        "closed receipt SRC-001 archive bundle invalid: [WinError 2] The system cannot find the file specified: 'V:\\\\_TEMP_\\\\saipen-source-receipts-ol08vnc7\\\\project\\\\.saipen\\\\archive\\\\source\\\\SRC-001.md'"
+      ],
+      "repeat_changed_files": []
+    }
+  ]
+}

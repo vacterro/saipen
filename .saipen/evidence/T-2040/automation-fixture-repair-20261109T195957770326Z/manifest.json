@@ -1,0 +1,20 @@
+{
+  "created_at": "20261109T195957770326Z",
+  "workspace": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "preimages": {
+    "tools/test_automation_block.py": {
+      "sha256": "96e25e3d3f265c4fb3b439678eca54c1b69e53a598fda17731ca6a060f3d6b2e",
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\automation-fixture-repair-20261109T195957770326Z\\preimages\\tools\\test_automation_block.py"
+    },
+    "tools/test_t1739_wait_boundary.py": {
+      "sha256": "ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822",
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\automation-fixture-repair-20261109T195957770326Z\\preimages\\tools\\test_t1739_wait_boundary.py"
+    }
+  },
+  "observed_dependencies": {
+    "tools/test_fixture_support.py": "6641bb9a805bdf3de0964fdad95ec9fef292f4b73b959d61aa3154e981f2dff0",
+    "tools/saipen_engine/router.py": "0e3dbaaef901fc1beaa49edea354e0355e6a528e0303a76eaea4605910fd5483",
+    "tools/saipen_engine/automation.py": "dea756fbd980b7f4d75a25ccc073ac7e41fdf3f84307eddeb5c1001a424c6803",
+    "tools/saipen_engine/work_exhaustion.py": "888d765f999eac92d1591108f43ca0ce7bec84b074d1577533c2e1a989791761"
+  }
+}

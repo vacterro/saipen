@@ -1,0 +1,62 @@
+# T-1367 / T-1372 core-unit A/B by TEST IDENTITY
+
+subject A (baseline): worktree at e7ab966f -- before T-1373, T-1372 and today's polygon repairs
+subject B (current) : working tree at aa379242 + the two repairs below
+command: python -m unittest <the six modules that went red in the discover run>
+
+baseline red identities: 33
+current  red identities: 33
+only in current (PATCH_OWNED): 0
+only in baseline (FIXED)     : 0
+
+tools.test_concurrency_independence::test_no_test_module_races_a_concurrent_gate_on_a_constant_timeout
+  red at e7ab966f as well -> BASELINE, not contention from the running matrix.
+
+PATCH_OWNED = 0, UNKNOWN = 0.
+
+## Two reds that WERE mine, found by the discover run and fixed
+
+1. test_protocol_registry::test_one_rule_one_owner -- SOURCES.md declared
+   RULE-OWNER INGRESS-AUTHORITY-01 and REGISTRY.json did not carry it. A rule
+   with no registered owner is exactly what that control exists to catch.
+2. test_pending_ingress::test_pre_fix_engine_admits_the_paraphrase -- the control
+   patched its OWN imported copy of pending_ingress. Under 'unittest discover -s
+   tools' the engine holds saipen_engine.pending_ingress while the test held
+   tools.saipen_engine.pending_ingress, so the revert reverted nothing and the
+   instrument control passed for the wrong reason. It patches entry.pending_ingress
+   now -- the object the engine itself uses.
+
+## Baseline red identities (unchanged by this work)
+ERROR: test_strict_finding_identity_is_unchanged_by_attribution
+FAIL: test_a_live_doing_ticket_still_refuses_with_the_flag
+FAIL: test_a_redundant_flag_writes_no_stepped_over_claim
+FAIL: test_audit_core003_converge_target_controls_resume_without_writes
+FAIL: test_audit_core003_converge_target_controls_resume_without_writes
+FAIL: test_audit_core003_goal_cc_and_continue_route_identically_without_writes
+FAIL: test_audit_core003_normal_cc_enters_done_convergence
+FAIL: test_coverage_count_mismatch_refuses
+FAIL: test_coverage_work_disagrees_with_tombstone_refuses
+FAIL: test_current_tombstone_is_not_byte_identical_to_original
+FAIL: test_explicit_claims_a_ticket_the_pick_rule_would_refuse
+FAIL: test_line_endings_alone_are_not_drift
+FAIL: test_linked_work_not_done_refuses
+FAIL: test_missing_recovery_record_refuses
+FAIL: test_missing_verification_on_implemented_refuses
+FAIL: test_newer_generation_refuses
+FAIL: test_non_requirement_requirement_id_refuses
+FAIL: test_one_unknown_actionable_requirement_refuses
+FAIL: test_positive_fixture_attributes_to_linked_work
+FAIL: test_release_stays_blocked_with_carried_residue
+FAIL: test_requirement_without_linked_work_refuses
+FAIL: test_source_still_active_refuses
+FAIL: test_split_linked_work_refuses
+FAIL: test_the_flag_reaches_the_engine_through_the_cli
+FAIL: test_the_two_transports_agree
+FAIL: test_tombstone_closure_counts_change_refuses
+FAIL: test_tombstone_linked_work_change_refuses
+FAIL: test_tombstone_not_closed_refuses
+FAIL: test_tombstone_source_sha_change_refuses
+FAIL: test_undocumented_tombstone_field_refuses
+FAIL: test_untampered_interrupted_close_settles_idempotently
+FAIL: test_without_the_flag_the_pick_rule_is_unchanged
+FAIL: test_work_delta_carries_residue_through_t160

@@ -1,0 +1,33 @@
+{
+  "subjects": [
+    {
+      "path": "tools/run_scenarios.py",
+      "before_sha256": "ad32dab18f70382dec8dcf65e280f96bb81e9a83d202a93a4e6cf455c29820e4",
+      "after_sha256": "994fce0f94799c7dfb52b3623bd08a01a7cca6229da5a2393f5258816bf6a2d0"
+    },
+    {
+      "path": "tools/perf_wave_regressions.py",
+      "before_sha256": "adaa37b41c67b66f5ef98ca714d2ac2f23b7d28ef011294b42d839a0a7ea140a",
+      "after_sha256": "c186427523a941c6cb37a55b6c2512d0a05b38fafc0f4be85d5882e55a3fc779"
+    }
+  ],
+  "oracle": {
+    "path": "tools/test_t1586_scenario_inputs.py",
+    "sha256": "15389b88442cd01571c8dd112627bf050ecd74dcf3a052c3f6fbbec31072ef2a"
+  },
+  "live_copy_callbacks_wrapped": 11,
+  "runs": {
+    "before": {
+      "ran": 7,
+      "failures": 4,
+      "errors": 0,
+      "ok": false
+    },
+    "candidate": {
+      "ran": 7,
+      "failures": 0,
+      "errors": 0,
+      "ok": true
+    }
+  }
+}

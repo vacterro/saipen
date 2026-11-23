@@ -1,0 +1,75 @@
+{
+  "op_id": "board-compact-dc15d7f748fe4b66ac9484ad14b2d2de",
+  "operation": "board_legacy_compaction",
+  "created_at": "2026-09-15T19:31:42Z",
+  "agent": "workbuddy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_smart_vac_cleaner",
+  "project_lineage": "lineage-05afdade62f34ea2ab30cb3740a7ad17",
+  "semantic_payload_hash": "d2f8f25f9690cdb4",
+  "preconditions": {
+    ".saipen/STATE.md": "325b5594369389ac",
+    ".saipen/BOARD.md": "9401b614d55dc350",
+    ".saipen/LOG.md": "a665c8f0f51519a1"
+  },
+  "read_preconditions": {
+    ".saipen/logs": "tree-missing-v1"
+  },
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 5,
+  "targets": [
+    {
+      "path": ".saipen/recovery/board-compaction/T-195/T-195-36147efc9b05ad5b42526448.BOARD.md",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "36147efc9b05ad5b",
+      "applied": true
+    },
+    {
+      "path": ".saipen/recovery/board-compaction/T-195/T-195-36147efc9b05ad5b42526448.json",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "c8a581f5b0fc66ca",
+      "applied": true
+    },
+    {
+      "path": ".saipen/LOG.md",
+      "role": "log",
+      "action": "write",
+      "before_hash": "a665c8f0f51519a1",
+      "after_hash": "dd53290dd3c6a56c",
+      "applied": true
+    },
+    {
+      "path": ".saipen/BOARD.md",
+      "role": "board",
+      "action": "write",
+      "before_hash": "9401b614d55dc350",
+      "after_hash": "3eec5ca0c8862f90",
+      "applied": true
+    },
+    {
+      "path": ".saipen/STATE.md",
+      "role": "state",
+      "action": "write",
+      "before_hash": "325b5594369389ac",
+      "after_hash": "0575b32593c0055b",
+      "applied": true
+    }
+  ],
+  "receipt_metadata": {
+    "operation": "board_legacy_compaction",
+    "status": "COMMITTED",
+    "ticket": "T-195",
+    "detail_ref": ".saipen/recovery/board-compaction/T-195/T-195-36147efc9b05ad5b42526448.json",
+    "original_record_sha256": "36147efc9b05ad5b425264487ca091673f763412a3b1118922e114c90a32b672",
+    "event_id": "E-207",
+    "reason": "lossless historical BOARD repair",
+    "inherited_findings": [
+      "BOARD: T-196 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)",
+      "BOARD: T-197 has no [T-###] allocation event in the complete history -- ticket identity comes from canonical allocation, never from a record that merely looks like a ticket (CORE-003 / SRC-026:R003)"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+AUT-005 red-before-green pair (SRC-344 / audit/28.md)
+
+Subject: tools/saipen_engine/saipal_adapter.py -- SaipalAdapter.discover().
+
+Defect: discover() called `_run_cmd("report")`, which materialises the ENTIRE
+corpus before a single row is classified. `iter_finding_pages` /
+`iter_new_qualified_findings` were fully implemented and fully tested but had
+no production caller -- the bounded incremental transport was dead code, so
+report memory still scaled with corpus size on the path that actually runs.
+
+Pre-fix tree: V:\_TEMP_\saipen-aut005-prefix-t6__5g3i (tools/ + saipen/ copied,
+.saipen/STATE.md copied; the discover() body restored to the materialising
+_run_cmd("report") form, nothing else changed; py_compile verified).
+
+current tree: rc=0 9 passed in 0.30s
+pre-fix tree: rc=1 9 failed in 0.97s
+
+Red on pre-fix bytes, every one of the nine:
+  test_discovery_does_not_use_the_materialising_report_api  _run_cmd reached
+  test_only_qualified_findings_are_reported                 _run_cmd reached
+  test_an_empty_corpus_is_no_new_evidence                   _run_cmd reached
+  test_a_malformed_corpus_is_a_typed_refusal                _run_cmd reached
+  test_the_bounded_walk_pages_a_large_corpus                _run_cmd reached
+  test_an_unchanged_unqualified_corpus_is_deduplicated      _run_cmd reached
+  test_the_watermark_is_the_corpus_identity_from_the_walk   whole-report sha
+  test_discovery_without_a_project_root_still_pages         _run_cmd reached
+  test_discovery_source_calls_the_incremental_walk          no paged walk
+
+The behavioral tests use the materialising transport as the ruler: they patch
+_run_cmd to raise, so a pre-fix discovery fails immediately and a paged
+discovery never touches it. The structural pin reads code lines only (the
+repaired body names the removed call in a comment).
+
+Green on current bytes: 9 passed.
+
+PROVEN

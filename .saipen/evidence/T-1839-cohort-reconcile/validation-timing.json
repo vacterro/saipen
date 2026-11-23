@@ -1,0 +1,6 @@
+{
+  "observed_utc": "2026-10-20T19:22:57.6414396Z",
+  "exit_code": 1,
+  "wall_s": 34.0079818,
+  "command": "saipen validate --json"
+}

@@ -1,0 +1,11 @@
+test_an_invented_mode_is_refused_not_guessed (test_t1553_mid_session_activation.ResponseCliTransportTests.test_an_invented_mode_is_refused_not_guessed) ... ok
+test_no_adapter_carries_a_second_copy_of_the_rules (test_t1553_mid_session_activation.ResponseCliTransportTests.test_no_adapter_carries_a_second_copy_of_the_rules)
+Review item 10: the budgets and the mode live in ONE module. ... ok
+test_the_default_transport_refuses_details (test_t1553_mid_session_activation.ResponseCliTransportTests.test_the_default_transport_refuses_details) ... ok
+test_the_explicit_authorized_path_passes (test_t1553_mid_session_activation.ResponseCliTransportTests.test_the_explicit_authorized_path_passes) ... ok
+test_the_human_request_is_classified_by_the_canonical_owner (test_t1553_mid_session_activation.ResponseCliTransportTests.test_the_human_request_is_classified_by_the_canonical_owner) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 3.641s
+
+OK

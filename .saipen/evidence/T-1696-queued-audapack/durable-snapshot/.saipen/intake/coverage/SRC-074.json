@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-074:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1783",
+      "text": "Auto-Send fires after canonical ZIP attaches on real ChatGPT despite React composer remount: DOM node identity must not be treated as human intent; semantic composer fence only fences on real content change",
+      "verification": "widget 0.0.72 manualArchiveSnapshotStaleReason semantic fence + live reacquisition; w6-006+w2-*+w4-014 135/135 PASS incl red control COMPOSER_CHANGED_BEFORE_SEND now SENT sendClicks=1:PASS",
+      "work": "T-229"
+    }
+  },
+  "schema_version": 1
+}

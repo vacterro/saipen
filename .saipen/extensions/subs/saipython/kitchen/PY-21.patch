@@ -1,0 +1,62 @@
+--- a/tools/saipen_engine/gc.py
++++ b/tools/saipen_engine/gc.py
+@@ -2166,7 +2166,7 @@
+     return outcome
+ 
+ 
+-def maintenance_checkpoint(root: Path | str, agent: str) -> dict:
++def _maintenance_checkpoint_unserialized(root: Path, agent: str) -> dict:
+     """The safe checkpoint after a committed closure (T-2049 trigger).
+ 
+     Never raises, never touches STATE/BOARD/LOG and never forces an active Work
+@@ -2226,6 +2226,50 @@
+             "receipt": FAILURE_REL,
+             "record": report,
+         }
++
++
++def _acquire_maintenance_lock(root: Path):
++    """Serialize post-closure GC work without nesting the project writer lock."""
++    from .lock import FileLockBusy, FileWriterLock, writer_lock_timeout
++
++    lock = FileWriterLock(
++        root / ".saipen" / "locks" / "gc-maintenance.lock",
++        root,
++    )
++    deadline = time.monotonic() + writer_lock_timeout()
++    while True:
++        try:
++            lock.acquire()
++            return lock
++        except FileLockBusy:
++            remaining = deadline - time.monotonic()
++            if remaining <= 0:
++                raise
++            time.sleep(min(0.02, remaining))
++
++
++def maintenance_checkpoint(root: Path | str, agent: str) -> dict:
++    """Run committed-closure GC checkpoints one writer at a time."""
++    root = Path(root)
++    lock = None
++    try:
++        lock = _acquire_maintenance_lock(root)
++        return _maintenance_checkpoint_unserialized(root, agent)
++    except Exception as exc:
++        # A bounded lock timeout is durable maintenance debt too; never let a
++        # concurrent closure silently lose its checkpoint result.
++        report = record_maintenance_failure(root, agent, exc)
++        return {
++            "ok": False,
++            "code": "GC_MAINTENANCE_FAILED",
++            "detail": f"{type(exc).__name__}: {exc}",
++            "due": False,
++            "receipt": FAILURE_REL,
++            "record": report,
++        }
++    finally:
++        if lock is not None:
++            lock.release()
+ 
+ 
+ # ------------------------------------------------------------------------ repair

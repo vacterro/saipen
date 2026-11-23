@@ -1,0 +1,14 @@
+test_human_status_prints_receipt_truth_not_the_legacy_pass (test_t1412_conformance_truth.StatusSurfaceTests.test_human_status_prints_receipt_truth_not_the_legacy_pass) ... ok
+test_no_second_route_to_a_conformance_verdict (test_t1412_conformance_truth.StatusSurfaceTests.test_no_second_route_to_a_conformance_verdict)
+audit/18.md IMP-003: the payload offers exactly ONE keyable verdict. ... ok
+test_status_matrix_json_and_human_agree_with_authority (test_t1412_conformance_truth.StatusSurfaceTests.test_status_matrix_json_and_human_agree_with_authority) ... ok
+test_moved_source_pass_never_certifies_the_new_source (test_t1412_conformance_truth.ValidateSurfaceTests.test_moved_source_pass_never_certifies_the_new_source) ... ok
+test_receipt_write_failure_cannot_return_valid (test_t1412_conformance_truth.ValidateSurfaceTests.test_receipt_write_failure_cannot_return_valid) ... ok
+test_structural_failure_refuses_before_the_validator_runs (test_t1412_conformance_truth.ValidateSurfaceTests.test_structural_failure_refuses_before_the_validator_runs) ... ok
+test_validate_current_fail_is_non_green (test_t1412_conformance_truth.ValidateSurfaceTests.test_validate_current_fail_is_non_green) ... ok
+test_validate_refreshes_stale_fail_to_current_pass (test_t1412_conformance_truth.ValidateSurfaceTests.test_validate_refreshes_stale_fail_to_current_pass) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 57.005s
+
+OK

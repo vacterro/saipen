@@ -1,0 +1,185 @@
+{
+  "requirements": {
+    "SRC-007:R0001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/inaudit_capture.py+resources/AUDAPACK_WIDGET.user.js",
+      "text": "Keep OUTAUDIT, CAPTURE, INAUDIT layers, and GG/CC execution as separate concepts and state machines.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/inaudit_capture.py",
+      "text": "Provide a transparent filesystem-backed global INAUDIT Inbox with canonical UUID body and metadata pairs and complete provenance fields.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/inaudit_capture.py+tests/test_inaudit_capture_store.py",
+      "text": "A successful capture ACK means the normalized body and metadata are durably and atomically saved; partial pairs are retained as RECOVERY diagnostics.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/bridge/server.py+tests/test_inaudit_capture_api.py",
+      "text": "Expose authenticated loopback capture list/detail/create/assign/archive/delete/restore endpoints with idempotent capture identity and bounded validation.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "resources/AUDAPACK_WIDGET.user.js+tests/widget/w5-001-inaudit-capture.test.js",
+      "text": "Add one-click IA actions for stable whole assistant responses and individual blocks while preserving source text and showing ready/sending/saved/queued/error states.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "resources/AUDAPACK_WIDGET.user.js+C:/tmp/inaudit-smoke.png",
+      "text": "Persist offline browser captures in bounded IndexedDB using the same capture_id, durable transaction completion, capped backoff, and delete only after durable Bridge ACK.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/inaudit_capture.py+tests/test_inaudit_classifier.py",
+      "text": "Classify captures deterministically from registered project paths, names, unique files and symbols, aliases, weak hints, and explicit-assignment conversation affinity.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0008": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/inaudit_capture.py+tests/test_inaudit_classifier.py",
+      "text": "Classification is explainable evidence with STRONG/SUGGESTED/UNASSIGNED thresholds and never auto-writes a project layer.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/inaudit_capture.py",
+      "text": "Generate compact local titles and retain source URL, browser, timestamp, and conversation fingerprint without secrets, cookies, or unrelated conversation data.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/ui_qt/dialogs/inaudit_widget.py+tests/test_inaudit_inbox_ui.py",
+      "text": "Extend Qt INAUDIT into compact Layers and Inbox views with list, detail, confidence evidence, destination preview, actions, counters, and debounced filesystem generation watching.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/inaudit_capture.py+tests/test_inaudit_assignment.py",
+      "text": "Assignment must accept only a registered project, rescan canonical numeric layers, allocate max plus one, never overwrite, atomically publish, verify SHA-256, then update metadata.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0012": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/ui_qt/dialogs/inaudit_widget.py+tests/test_inaudit_assignment.py",
+      "text": "Assign plus GG or CC may copy or invoke only the exact verified canonical assigned path and must not run when assignment fails.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/ui_qt/main_window.py+tests/test_inaudit_inbox_ui.py",
+      "text": "Provide desktop IA+ clipboard capture through the same capture store with only a weak selected-project hint.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/inaudit_capture.py+audapack/ui_qt/dialogs/inaudit_widget.py",
+      "text": "Support duplicate-body marking, explicit archive and delete, recoverable history, status model, source opening, and exact text copy.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/ui_qt/models/project_room_model.py+tests/ui_qt/test_project_room_model.py",
+      "text": "Show compact per-project local layer plus suggested Inbox counts and a global pending plus unassigned Inbox count without disk scanning during paint.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0016": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/inaudit_capture.py+resources/AUDAPACK_WIDGET.user.js",
+      "text": "Reset, restart, GUI close, widget restart, and audit cancel must not erase or couple durable Inbox or offline capture state.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0017": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "resources/AUDAPACK_WIDGET.user.js+tests/widget/w5-001-inaudit-capture.test.js",
+      "text": "Browser capture must be read-only toward ChatGPT and independent of clean-chat eligibility, composer state, Browser Dispatcher leases, dispatch IDs, and campaign run IDs.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0018": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "pytest:359-pass+node:151-pass",
+      "text": "Mandatory capture, classifier, assignment, API, Qt, and Widget IA unit and integration tests pass, including races, recovery, exact text, idempotence, occupied chat, and bounded retry.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    },
+    "SRC-007:R0019": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "Visible Playwright Chromium smoke plus tests/widget/w5-001-inaudit-capture.test.js",
+      "text": "Windows smoke scenarios A through F are covered: normal, unknown, strong suggestion, Bridge offline, GUI closed, and old occupied chat.",
+      "verification": "IA durable ACK and offline QUEUED-to-ACK flow passed in bundled Chromium with exact Markdown and stable lease/composer.",
+      "work": "T-50"
+    },
+    "SRC-007:R0020": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "pytest:359-pass+node:151-pass+visible-chromium-smoke-pass",
+      "text": "Definition of Done holds end to end: durable IA capture, later explicit suggestion and assignment to exact non-overwritten audit N, then canonical GG or CC handoff.",
+      "verification": "pytest:359-pass+node:151-pass+playwright-visible-smoke:pass",
+      "work": "T-50"
+    }
+  },
+  "schema_version": 1
+}

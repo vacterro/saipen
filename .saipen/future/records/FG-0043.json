@@ -1,0 +1,13 @@
+{
+  "declared_status": "ARCHITECTURE SEED",
+  "digest": "18e84ed845f42589c5b66eb7c4a05c5ffcbb8ae8aa7c1a43faffb19a8fe35b3e",
+  "facts": {},
+  "gate": "FG-0043",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/README.md",
+  "reason": "broad architecture record; kept gated until one bounded slice is named",
+  "reviewed": true,
+  "schema": 2,
+  "title": "SAIPEN FUTURE ARCHITECTURE",
+  "verdict": "DEFERRED"
+}

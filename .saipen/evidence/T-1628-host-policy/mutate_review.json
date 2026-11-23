@@ -1,0 +1,80 @@
+{
+  "mutations": [
+    {
+      "name": "strict_ignored",
+      "rc": 1,
+      "red": [
+        "test_bad_policy_uses_strict_and_names_its_policy_repair",
+        "test_policy_change_is_seen_by_the_same_live_factory",
+        "test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action"
+      ]
+    },
+    {
+      "name": "invalid_policy_uses_default",
+      "rc": 1,
+      "red": [
+        "test_bad_policy_uses_strict_and_names_its_policy_repair",
+        "test_native_policy_reads_match_python_including_bom_and_aliases"
+      ]
+    },
+    {
+      "name": "conflict_not_refused_at_tool_gate",
+      "rc": 1,
+      "red": [
+        "test_known_foreign_lineage_blocks_even_a_degradable_stale_plugin",
+        "test_known_lineage_contradiction_blocks_without_guard_or_interpreter",
+        "test_observed_foreign_project_contradiction_blocks_in_both_modes"
+      ]
+    },
+    {
+      "name": "native_observation_off",
+      "rc": 1,
+      "red": [
+        "test_known_lineage_contradiction_blocks_without_guard_or_interpreter",
+        "test_observed_foreign_project_contradiction_blocks_in_both_modes"
+      ]
+    },
+    {
+      "name": "unverified_marker_dropped",
+      "rc": 1,
+      "red": [
+        "test_bad_policy_uses_strict_and_names_its_policy_repair",
+        "test_default_permits_all_three_gaps_with_physical_marker_and_effect",
+        "test_explicit_degraded_permits_the_same_three_gaps",
+        "test_known_lineage_contradiction_blocks_without_guard_or_interpreter",
+        "test_legitimate_carrier_remains_degradable_and_does_not_gain_admission",
+        "test_native_policy_reads_match_python_including_bom_and_aliases",
+        "test_observed_foreign_project_contradiction_blocks_in_both_modes",
+        "test_policy_change_is_seen_by_the_same_live_factory",
+        "test_recognized_aliases_do_not_become_silent_strict_policy",
+        "test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action"
+      ]
+    },
+    {
+      "name": "gap_allowance_before_payload_check",
+      "rc": 1,
+      "red": [
+        "test_unreadable_tool_payload_never_uses_the_gap_allowance"
+      ]
+    },
+    {
+      "name": "stale_plugin_not_a_gap",
+      "rc": 1,
+      "red": [
+        "test_default_permits_all_three_gaps_with_physical_marker_and_effect",
+        "test_explicit_degraded_permits_the_same_three_gaps",
+        "test_native_policy_reads_match_python_including_bom_and_aliases",
+        "test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action"
+      ]
+    }
+  ],
+  "control_before": [
+    0,
+    []
+  ],
+  "control_after": [
+    0,
+    []
+  ],
+  "undetected": []
+}

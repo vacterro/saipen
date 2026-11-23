@@ -1,0 +1,495 @@
+{
+  "canonical_before": {
+    ".saipen/STATE.md": "1b618dc35de0a86b4f424597d51bc171d41c655f25063fd1d189501bda1372e5",
+    ".saipen/BOARD.md": "4ad58f032c924845d43d94a2759a23c6785c66a7b887d3b0df78a1869411353c",
+    ".saipen/LOG.md": "eaca35920f7dab30281e6d45dee8302895c97d981959189c8ed380cd8270d3de"
+  },
+  "state": {
+    "phase": "BUILD",
+    "task": "T-2040",
+    "next_action": "PHASE BUILD T-2040",
+    "blocker": "none",
+    "transition_from": "BUILD",
+    "saipen_version": 8,
+    "schema_version": 3,
+    "last_event": 20759,
+    "style_contract": "ded-069a4c52",
+    "saipen_home": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+    "agent": "saipen-cli",
+    "mode": "full",
+    "updated": "2026-11-08T08:56:43Z",
+    "requires": [
+      "filesystem",
+      "git",
+      "python"
+    ],
+    "execution_intent": "converge",
+    "converge_target": "crew"
+  },
+  "receipt_count": 19238,
+  "receipt_errors": [],
+  "receipt_hash": "ops-receipt-sha256:51e264e180181aba601ba6bfdc2edaac4c3e39dd7c3a53dde4d26ab17a92d090",
+  "history_hash": "e273cbeb0e9212cd",
+  "history_errors": [],
+  "reviews": [
+    {
+      "ticket": "T-2037",
+      "producer": "saihunt",
+      "package": "HUNT-017",
+      "identity": "sha256:4906773024d4b5ba37019c841f9d64515644f02d794851047fc4310ea380a75e",
+      "status": "reviewed",
+      "fields": {
+        "status": "reviewed",
+        "summary": "Bounded re-measure of HUNT-016 claims and sensor state against current source identity (HEAD 66ef622a, tree fingerprint git-delta-v1:ad029851d6daceeff2ec767c44677a1c3a1e66fc4c125cd809e52e8cb749c485). Finding 1 holds: operations.record_crew_run reachable at crew.py:1546 and test_t1430 passes 3/3. Finding 2 retired: orphaned operations.record_producer_integration has been removed from codebase. Finding 3: canonical validate.py reports Agent is conformant (CURRENT_PASS).",
+        "main_project_refs": "[tools/saipen_engine/crew.py, tools/test_t1430_crew_run_receipt.py, tools/validate.py]",
+        "critical": "false",
+        "severity": "P3",
+        "producer": "saihunt",
+        "source_head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+        "source_tree_fingerprint": "git-delta-v1:ad029851d6daceeff2ec767c44677a1c3a1e66fc4c125cd809e52e8cb749c485",
+        "role_revision": "sha256:4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5",
+        "coverage": "sensor sweep over crew receipt reachability, operations caller census and core conformance gate",
+        "payload": "[]",
+        "verified": "PASS -- crew_run reachability passes; caller census 0; validate.py passes with 0 problems",
+        "instructions": "Core review kitchen/HUNT-017.md.",
+        "details": "See kitchen/HUNT-017.md."
+      },
+      "outbox_sha256": "45a6692d57e711ca9695987e57887bf5f0edcb0d465a70dcd68ab319a67d9631",
+      "board": {
+        "id": "T-2037",
+        "section": "## BLOCKED",
+        "line_no": 149,
+        "checkbox": " ",
+        "needs": [],
+        "fields": {
+          "verify": "Independently reproduce or reject hypothesis, record Core disposition, apply no package patch during intake; package_identity=sha256:4906773024d4b5ba37019c841f9d64515644f02d794851047fc4310ea380a75e; producer=saihunt;... [detail_ref: .saipen/recovery/board-compaction/T-2037/T-2037-55d96cf0a8e5d582d5cd60b2.json]",
+          "blocker": "WAIT_USER_DECISION -- SubSaipen hypothesis reviewed: no defects found; awaiting operator confirmation to archive",
+          "blocker_scope": "ticket",
+          "detail_ref": ".saipen/recovery/board-compaction/T-2037/T-2037-55d96cf0a8e5d582d5cd60b2.json"
+        },
+        "raw": "- [ ] T-2037 [P2] Review SubSaipen hypothesis saihunt/HUNT-017: bounded six-signal sensor sweep at 66ef622a; not accepted fact;... | verify: Independently reproduce or reject hypothesis, record Core disposition, apply no package patch during intake; package_identity=sha256:4906773024d4b5ba37019c841f9d64515644f02d794851047fc4310ea380a75e; producer=saihunt;... [detail_ref: .saipen/recovery/board-compaction/T-2037/T-2037-55d96cf0a8e5d582d5cd60b2.json] | blocker: WAIT_USER_DECISION -- SubSaipen hypothesis reviewed: no defects found; awaiting operator confirmation to archive | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-2037/T-2037-55d96cf0a8e5d582d5cd60b2.json",
+        "description": "[P2] Review SubSaipen hypothesis saihunt/HUNT-017: bounded six-signal sensor sweep at 66ef622a; not accepted fact;..."
+      },
+      "collect_binding": [
+        "T-2037",
+        "sub-collect-64e829c3"
+      ],
+      "collect_receipts": [
+        {
+          "op_id": "sub-collect-64e829c3",
+          "status": "COMMITTED",
+          "agent": "saipen-cli",
+          "receipt_metadata": {
+            "operation": "sub_collect",
+            "package_identities": [
+              "sha256:4906773024d4b5ba37019c841f9d64515644f02d794851047fc4310ea380a75e",
+              "sha256:240ab835a13e0b70d82487759fe8a780bf450e74344d5a7e1eb5de748326fcbc",
+              "sha256:a28ec28020e02fab71a67de7660e8d2623b39c43df42c934b1b4364d6477d940"
+            ],
+            "producers": [
+              "saihunt",
+              "saipython",
+              "saitest"
+            ],
+            "status": "COMMITTED",
+            "tickets": [
+              "T-2037",
+              "T-2038",
+              "T-2039"
+            ]
+          },
+          "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+          "targets": [
+            {
+              "path": ".saipen/LOG.md",
+              "applied": true,
+              "before_hash": "588a300e92327802",
+              "after_hash": "b168fbf4f888906f"
+            },
+            {
+              "path": ".saipen/BOARD.md",
+              "applied": true,
+              "before_hash": "f58c41781846afa0",
+              "after_hash": "ddfed5e4678969ed"
+            },
+            {
+              "path": ".saipen/STATE.md",
+              "applied": true,
+              "before_hash": "e23ab206ab9d55b1",
+              "after_hash": "3f736dad75df0b2c"
+            },
+            {
+              "path": ".saipen/extensions/subs/MANIFEST.md",
+              "applied": true,
+              "before_hash": "34d3380842115692",
+              "after_hash": "e29dda1227ae01fd"
+            }
+          ]
+        }
+      ],
+      "dispositions": [
+        {
+          "op_id": "sub-disposition-2c86739d",
+          "status": "COMMITTED",
+          "receipt_metadata": {
+            "operation": "sub_disposition",
+            "package": "HUNT-017",
+            "package_identity": "sha256:4906773024d4b5ba37019c841f9d64515644f02d794851047fc4310ea380a75e",
+            "producer": "saihunt",
+            "source_head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+            "source_tree_fingerprint": "git-delta-v1:ad029851d6daceeff2ec767c44677a1c3a1e66fc4c125cd809e52e8cb749c485",
+            "status": "COMMITTED",
+            "ticket_id": "T-2037"
+          }
+        }
+      ],
+      "events": [
+        {
+          "date": "07.11.26 13:47",
+          "event": 20709,
+          "parent": 20708,
+          "ticket": "T-2037",
+          "agent": "saipen-cli",
+          "op_id": "sub-collect-64e829c3",
+          "taxonomy": "RUN",
+          "text": "collect saihunt/HUNT-017 -> T-2037; package_identity=sha256:4906773024d4b5ba37019c841f9d64515644f02d794851047fc4310ea380a75e; producer=saihunt; package=HUNT-017; source_head=66ef622a43ab59512735ac78ce10d1250e26f9df; source_tree_fingerprint=git-delta-v1:ad029851d6daceeff2ec767c44677a1c3a1e66fc4c125cd809e52e8cb749c485; role_revision=sha256:4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5; outbox=.saipen/extensions/subs/saihunt/kitchen/OUTBOX.md; queued as Core review hypothesis"
+        },
+        {
+          "date": "07.11.26 14:13",
+          "event": 20722,
+          "parent": 20721,
+          "ticket": "T-2037",
+          "agent": "saipen-cli",
+          "op_id": "ticket-63f31ec2f41a42e4a870f8e31e39f85f",
+          "taxonomy": "DEC",
+          "text": "ticket block via SAIOPS -- WAIT_USER_DECISION -- SubSaipen hypothesis reviewed: no defects found; awaiting operator confirmation to archive"
+        }
+      ],
+      "independent_review_proof": null,
+      "missing_proof": "no committed ticket-local VERIFY boundary"
+    },
+    {
+      "ticket": "T-2038",
+      "producer": "saipython",
+      "package": "PY-15",
+      "identity": "sha256:240ab835a13e0b70d82487759fe8a780bf450e74344d5a7e1eb5de748326fcbc",
+      "status": "reviewed",
+      "fields": {
+        "status": "reviewed",
+        "summary": "Python verification and hygiene review against current source identity (HEAD 66ef622a, tree fingerprint git-delta-v1:ad029851d6daceeff2ec767c44677a1c3a1e66fc4c125cd809e52e8cb749c485). Zero open reproductions from saitest (TEST-12 all NOT_REPRODUCED); validate.py reports Agent is conformant (0 problems); rebind repair lifecycle and host doctor suites green. No pen patch required.",
+        "main_project_refs": "[tools/test_rebind_repair_lifecycle.py, tools/test_host_bootstrap.py, tools/validate.py]",
+        "critical": "false",
+        "severity": "P3",
+        "producer": "saipython",
+        "source_head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+        "source_tree_fingerprint": "git-delta-v1:ad029851d6daceeff2ec767c44677a1c3a1e66fc4c125cd809e52e8cb749c485",
+        "role_revision": "sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff",
+        "coverage": "Python code hygiene, test suite regression, rebind repair and validator conformance",
+        "payload": "[]",
+        "verified": "PASS -- no active Python defects or reproductions requiring pen patch; 12/12 rebind tests and 55/55 doctor tests pass; validate.py conformant",
+        "instructions": "Core review kitchen/PY-15.md.",
+        "details": "See kitchen/PY-15.md."
+      },
+      "outbox_sha256": "ab16cd359d4ab5c3c82a3708ac45896f105cea9b07990c7440df6c3726716808",
+      "board": {
+        "id": "T-2038",
+        "section": "## BLOCKED",
+        "line_no": 148,
+        "checkbox": " ",
+        "needs": [],
+        "fields": {
+          "verify": "Independently reproduce or reject hypothesis, record Core disposition, apply no package patch during intake; package_identity=sha256:240ab835a13e0b70d82487759fe8a780bf450e74344d5a7e1eb5de748326fcbc;... [detail_ref: .saipen/recovery/board-compaction/T-2038/T-2038-e1ef5f2ee97f61d999817220.json]",
+          "blocker": "WAIT_USER_DECISION -- SubSaipen hypothesis reviewed: no defects found; awaiting operator confirmation to archive",
+          "blocker_scope": "ticket",
+          "detail_ref": ".saipen/recovery/board-compaction/T-2038/T-2038-e1ef5f2ee97f61d999817220.json"
+        },
+        "raw": "- [ ] T-2038 [P2] Review SubSaipen hypothesis saipython/PY-15: code hygiene and Python verification sweep at 66ef622a; not accepted fact;... | verify: Independently reproduce or reject hypothesis, record Core disposition, apply no package patch during intake; package_identity=sha256:240ab835a13e0b70d82487759fe8a780bf450e74344d5a7e1eb5de748326fcbc;... [detail_ref: .saipen/recovery/board-compaction/T-2038/T-2038-e1ef5f2ee97f61d999817220.json] | blocker: WAIT_USER_DECISION -- SubSaipen hypothesis reviewed: no defects found; awaiting operator confirmation to archive | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-2038/T-2038-e1ef5f2ee97f61d999817220.json",
+        "description": "[P2] Review SubSaipen hypothesis saipython/PY-15: code hygiene and Python verification sweep at 66ef622a; not accepted fact;..."
+      },
+      "collect_binding": [
+        "T-2038",
+        "sub-collect-64e829c3"
+      ],
+      "collect_receipts": [
+        {
+          "op_id": "sub-collect-64e829c3",
+          "status": "COMMITTED",
+          "agent": "saipen-cli",
+          "receipt_metadata": {
+            "operation": "sub_collect",
+            "package_identities": [
+              "sha256:4906773024d4b5ba37019c841f9d64515644f02d794851047fc4310ea380a75e",
+              "sha256:240ab835a13e0b70d82487759fe8a780bf450e74344d5a7e1eb5de748326fcbc",
+              "sha256:a28ec28020e02fab71a67de7660e8d2623b39c43df42c934b1b4364d6477d940"
+            ],
+            "producers": [
+              "saihunt",
+              "saipython",
+              "saitest"
+            ],
+            "status": "COMMITTED",
+            "tickets": [
+              "T-2037",
+              "T-2038",
+              "T-2039"
+            ]
+          },
+          "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+          "targets": [
+            {
+              "path": ".saipen/LOG.md",
+              "applied": true,
+              "before_hash": "588a300e92327802",
+              "after_hash": "b168fbf4f888906f"
+            },
+            {
+              "path": ".saipen/BOARD.md",
+              "applied": true,
+              "before_hash": "f58c41781846afa0",
+              "after_hash": "ddfed5e4678969ed"
+            },
+            {
+              "path": ".saipen/STATE.md",
+              "applied": true,
+              "before_hash": "e23ab206ab9d55b1",
+              "after_hash": "3f736dad75df0b2c"
+            },
+            {
+              "path": ".saipen/extensions/subs/MANIFEST.md",
+              "applied": true,
+              "before_hash": "34d3380842115692",
+              "after_hash": "e29dda1227ae01fd"
+            }
+          ]
+        }
+      ],
+      "dispositions": [
+        {
+          "op_id": "sub-disposition-3da2cee1",
+          "status": "COMMITTED",
+          "receipt_metadata": {
+            "operation": "sub_disposition",
+            "package": "PY-15",
+            "package_identity": "sha256:240ab835a13e0b70d82487759fe8a780bf450e74344d5a7e1eb5de748326fcbc",
+            "producer": "saipython",
+            "source_head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+            "source_tree_fingerprint": "git-delta-v1:ad029851d6daceeff2ec767c44677a1c3a1e66fc4c125cd809e52e8cb749c485",
+            "status": "COMMITTED",
+            "ticket_id": "T-2038"
+          }
+        }
+      ],
+      "events": [
+        {
+          "date": "07.11.26 13:47",
+          "event": 20710,
+          "parent": 20709,
+          "ticket": "T-2038",
+          "agent": "saipen-cli",
+          "op_id": "sub-collect-64e829c3",
+          "taxonomy": "RUN",
+          "text": "collect saipython/PY-15 -> T-2038; package_identity=sha256:240ab835a13e0b70d82487759fe8a780bf450e74344d5a7e1eb5de748326fcbc; producer=saipython; package=PY-15; source_head=66ef622a43ab59512735ac78ce10d1250e26f9df; source_tree_fingerprint=git-delta-v1:ad029851d6daceeff2ec767c44677a1c3a1e66fc4c125cd809e52e8cb749c485; role_revision=sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff; outbox=.saipen/extensions/subs/saipython/kitchen/OUTBOX.md; queued as Core review hypothesis"
+        },
+        {
+          "date": "07.11.26 14:13",
+          "event": 20723,
+          "parent": 20722,
+          "ticket": "T-2038",
+          "agent": "saipen-cli",
+          "op_id": "ticket-487019ec4990422d97ba0c93db7decf6",
+          "taxonomy": "DEC",
+          "text": "ticket block via SAIOPS -- WAIT_USER_DECISION -- SubSaipen hypothesis reviewed: no defects found; awaiting operator confirmation to archive"
+        }
+      ],
+      "independent_review_proof": null,
+      "missing_proof": "no committed ticket-local VERIFY boundary"
+    },
+    {
+      "ticket": "T-2039",
+      "producer": "saitest",
+      "package": "TEST-12",
+      "identity": "sha256:a28ec28020e02fab71a67de7660e8d2623b39c43df42c934b1b4364d6477d940",
+      "status": "reviewed",
+      "fields": {
+        "status": "reviewed",
+        "summary": "Verification sweep over rebind repair lifecycle (12/12 PASS), bootstrap doctor (55/55 PASS) and core conformance gate (conformant, 0 problems). No active regressions reproduced.",
+        "main_project_refs": "[tools/test_rebind_repair_lifecycle.py, tools/test_host_bootstrap.py, tools/validate.py]",
+        "critical": "false",
+        "severity": "P3",
+        "producer": "saitest",
+        "source_head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+        "source_tree_fingerprint": "git-delta-v1:ad029851d6daceeff2ec767c44677a1c3a1e66fc4c125cd809e52e8cb749c485",
+        "role_revision": "sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08",
+        "coverage": "rebind repair, bootstrap host, install identity doctor and validator conformance",
+        "payload": "[]",
+        "verified": "PASS -- 12/12 rebind lifecycle tests pass; 55/55 doctor tests pass; validate.py passes",
+        "instructions": "Core review kitchen/TEST-12.md.",
+        "details": "See kitchen/TEST-12.md."
+      },
+      "outbox_sha256": "faf6383aaaafdfe8153b56789064085818c0eeb81fb51712eb4fdc47f053ba25",
+      "board": {
+        "id": "T-2039",
+        "section": "## BLOCKED",
+        "line_no": 147,
+        "checkbox": " ",
+        "needs": [],
+        "fields": {
+          "verify": "Independently reproduce or reject hypothesis, record Core disposition, apply no package patch during intake; package_identity=sha256:a28ec28020e02fab71a67de7660e8d2623b39c43df42c934b1b4364d6477d940; producer=saitest;... [detail_ref: .saipen/recovery/board-compaction/T-2039/T-2039-68c5b8d7c2a4cfb4c018f754.json]",
+          "blocker": "WAIT_USER_DECISION -- SubSaipen hypothesis reviewed: no defects found; awaiting operator confirmation to archive",
+          "blocker_scope": "ticket",
+          "detail_ref": ".saipen/recovery/board-compaction/T-2039/T-2039-68c5b8d7c2a4cfb4c018f754.json"
+        },
+        "raw": "- [ ] T-2039 [P2] Review SubSaipen hypothesis saitest/TEST-12: adversary and adversarial verification sweep at 66ef622a; not accepted fact;... | verify: Independently reproduce or reject hypothesis, record Core disposition, apply no package patch during intake; package_identity=sha256:a28ec28020e02fab71a67de7660e8d2623b39c43df42c934b1b4364d6477d940; producer=saitest;... [detail_ref: .saipen/recovery/board-compaction/T-2039/T-2039-68c5b8d7c2a4cfb4c018f754.json] | blocker: WAIT_USER_DECISION -- SubSaipen hypothesis reviewed: no defects found; awaiting operator confirmation to archive | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-2039/T-2039-68c5b8d7c2a4cfb4c018f754.json",
+        "description": "[P2] Review SubSaipen hypothesis saitest/TEST-12: adversary and adversarial verification sweep at 66ef622a; not accepted fact;..."
+      },
+      "collect_binding": [
+        "T-2039",
+        "sub-collect-64e829c3"
+      ],
+      "collect_receipts": [
+        {
+          "op_id": "sub-collect-64e829c3",
+          "status": "COMMITTED",
+          "agent": "saipen-cli",
+          "receipt_metadata": {
+            "operation": "sub_collect",
+            "package_identities": [
+              "sha256:4906773024d4b5ba37019c841f9d64515644f02d794851047fc4310ea380a75e",
+              "sha256:240ab835a13e0b70d82487759fe8a780bf450e74344d5a7e1eb5de748326fcbc",
+              "sha256:a28ec28020e02fab71a67de7660e8d2623b39c43df42c934b1b4364d6477d940"
+            ],
+            "producers": [
+              "saihunt",
+              "saipython",
+              "saitest"
+            ],
+            "status": "COMMITTED",
+            "tickets": [
+              "T-2037",
+              "T-2038",
+              "T-2039"
+            ]
+          },
+          "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+          "targets": [
+            {
+              "path": ".saipen/LOG.md",
+              "applied": true,
+              "before_hash": "588a300e92327802",
+              "after_hash": "b168fbf4f888906f"
+            },
+            {
+              "path": ".saipen/BOARD.md",
+              "applied": true,
+              "before_hash": "f58c41781846afa0",
+              "after_hash": "ddfed5e4678969ed"
+            },
+            {
+              "path": ".saipen/STATE.md",
+              "applied": true,
+              "before_hash": "e23ab206ab9d55b1",
+              "after_hash": "3f736dad75df0b2c"
+            },
+            {
+              "path": ".saipen/extensions/subs/MANIFEST.md",
+              "applied": true,
+              "before_hash": "34d3380842115692",
+              "after_hash": "e29dda1227ae01fd"
+            }
+          ]
+        }
+      ],
+      "dispositions": [
+        {
+          "op_id": "sub-disposition-8ace3ad5",
+          "status": "COMMITTED",
+          "receipt_metadata": {
+            "operation": "sub_disposition",
+            "package": "TEST-12",
+            "package_identity": "sha256:a28ec28020e02fab71a67de7660e8d2623b39c43df42c934b1b4364d6477d940",
+            "producer": "saitest",
+            "source_head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+            "source_tree_fingerprint": "git-delta-v1:ad029851d6daceeff2ec767c44677a1c3a1e66fc4c125cd809e52e8cb749c485",
+            "status": "COMMITTED",
+            "ticket_id": "T-2039"
+          }
+        }
+      ],
+      "events": [
+        {
+          "date": "07.11.26 13:47",
+          "event": 20711,
+          "parent": 20710,
+          "ticket": "T-2039",
+          "agent": "saipen-cli",
+          "op_id": "sub-collect-64e829c3",
+          "taxonomy": "RUN",
+          "text": "collect saitest/TEST-12 -> T-2039; package_identity=sha256:a28ec28020e02fab71a67de7660e8d2623b39c43df42c934b1b4364d6477d940; producer=saitest; package=TEST-12; source_head=66ef622a43ab59512735ac78ce10d1250e26f9df; source_tree_fingerprint=git-delta-v1:ad029851d6daceeff2ec767c44677a1c3a1e66fc4c125cd809e52e8cb749c485; role_revision=sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08; outbox=.saipen/extensions/subs/saitest/kitchen/OUTBOX.md; queued as Core review hypothesis"
+        },
+        {
+          "date": "07.11.26 14:13",
+          "event": 20724,
+          "parent": 20723,
+          "ticket": "T-2039",
+          "agent": "saipen-cli",
+          "op_id": "ticket-a523b7c5b5894e40b0cf6ae406507138",
+          "taxonomy": "DEC",
+          "text": "ticket block via SAIOPS -- WAIT_USER_DECISION -- SubSaipen hypothesis reviewed: no defects found; awaiting operator confirmation to archive"
+        }
+      ],
+      "independent_review_proof": null,
+      "missing_proof": "no committed ticket-local VERIFY boundary"
+    }
+  ],
+  "older_tickets": {
+    "T-2034": {
+      "id": "T-2034",
+      "section": "## BLOCKED",
+      "line_no": 152,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "Independently reproduce or reject hypothesis, record Core disposition, apply no package patch during intake; package_identity=sha256:152a2573793798d18c437ae3dd285e5a0a87539edb6be95c10b1fcbc686aada4; producer=saihunt; package=HUNT-017; source_head=66ef622a43ab59512735ac78ce10d1250e26f9df; source_tree_fingerprint=git-delta-v1:a842b8116f88f7c8d7ca04aa1f8ab6ed268d0d7370c738539f4a96ed3ab0e075; role_revision=sha256:4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5; outbox=.saipen/extensions/subs/saihunt/kitchen/OUTBOX.md",
+        "blocker": "WAIT_USER_DECISION -- superseded by live intake T-2037",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-2034 [P2] Review SubSaipen hypothesis saihunt/HUNT-017: bounded six-signal sensor sweep at 66ef622a; not accepted fact; package_identity=sha256:152a2573793798d18c437ae3dd285e5a0a87539edb6be95c10b1fcbc686aada4; producer=saihunt; package=HUNT-017; source_head=66ef622a43ab59512735ac78ce10d1250e26f9df; source_tree_fingerprint=git-delta-v1:a842b8116f88f7c8d7ca04aa1f8ab6ed268d0d7370c738539f4a96ed3ab0e075; role_revision=sha256:4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5; outbox=.saipen/extensions/subs/saihunt/kitchen/OUTBOX.md | verify: Independently reproduce or reject hypothesis, record Core disposition, apply no package patch during intake; package_identity=sha256:152a2573793798d18c437ae3dd285e5a0a87539edb6be95c10b1fcbc686aada4; producer=saihunt; package=HUNT-017; source_head=66ef622a43ab59512735ac78ce10d1250e26f9df; source_tree_fingerprint=git-delta-v1:a842b8116f88f7c8d7ca04aa1f8ab6ed268d0d7370c738539f4a96ed3ab0e075; role_revision=sha256:4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5; outbox=.saipen/extensions/subs/saihunt/kitchen/OUTBOX.md | blocker: WAIT_USER_DECISION -- superseded by live intake T-2037 | blocker_scope: ticket",
+      "description": "[P2] Review SubSaipen hypothesis saihunt/HUNT-017: bounded six-signal sensor sweep at 66ef622a; not accepted fact; package_identity=sha256:152a2573793798d18c437ae3dd285e5a0a87539edb6be95c10b1fcbc686aada4; producer=saihunt; package=HUNT-017; source_head=66ef622a43ab59512735ac78ce10d1250e26f9df; source_tree_fingerprint=git-delta-v1:a842b8116f88f7c8d7ca04aa1f8ab6ed268d0d7370c738539f4a96ed3ab0e075; role_revision=sha256:4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5; outbox=.saipen/extensions/subs/saihunt/kitchen/OUTBOX.md"
+    },
+    "T-2035": {
+      "id": "T-2035",
+      "section": "## BLOCKED",
+      "line_no": 151,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "Independently reproduce or reject hypothesis, record Core disposition, apply no package patch during intake; package_identity=sha256:fe2e219af33d50968e9fb6ede219fd0a49ac3ffb1f7c19797a58ad026976adb4; producer=saitest; package=TEST-12; source_head=66ef622a43ab59512735ac78ce10d1250e26f9df; source_tree_fingerprint=git-delta-v1:a842b8116f88f7c8d7ca04aa1f8ab6ed268d0d7370c738539f4a96ed3ab0e075; role_revision=sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08; outbox=.saipen/extensions/subs/saitest/kitchen/OUTBOX.md",
+        "blocker": "WAIT_USER_DECISION -- superseded by live intake T-2039",
+        "blocker_scope": "ticket"
+      },
+      "raw": "- [ ] T-2035 [P2] Review SubSaipen hypothesis saitest/TEST-12: adversary and adversarial verification sweep at 66ef622a; not accepted fact; package_identity=sha256:fe2e219af33d50968e9fb6ede219fd0a49ac3ffb1f7c19797a58ad026976adb4; producer=saitest; package=TEST-12; source_head=66ef622a43ab59512735ac78ce10d1250e26f9df; source_tree_fingerprint=git-delta-v1:a842b8116f88f7c8d7ca04aa1f8ab6ed268d0d7370c738539f4a96ed3ab0e075; role_revision=sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08; outbox=.saipen/extensions/subs/saitest/kitchen/OUTBOX.md | verify: Independently reproduce or reject hypothesis, record Core disposition, apply no package patch during intake; package_identity=sha256:fe2e219af33d50968e9fb6ede219fd0a49ac3ffb1f7c19797a58ad026976adb4; producer=saitest; package=TEST-12; source_head=66ef622a43ab59512735ac78ce10d1250e26f9df; source_tree_fingerprint=git-delta-v1:a842b8116f88f7c8d7ca04aa1f8ab6ed268d0d7370c738539f4a96ed3ab0e075; role_revision=sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08; outbox=.saipen/extensions/subs/saitest/kitchen/OUTBOX.md | blocker: WAIT_USER_DECISION -- superseded by live intake T-2039 | blocker_scope: ticket",
+      "description": "[P2] Review SubSaipen hypothesis saitest/TEST-12: adversary and adversarial verification sweep at 66ef622a; not accepted fact; package_identity=sha256:fe2e219af33d50968e9fb6ede219fd0a49ac3ffb1f7c19797a58ad026976adb4; producer=saitest; package=TEST-12; source_head=66ef622a43ab59512735ac78ce10d1250e26f9df; source_tree_fingerprint=git-delta-v1:a842b8116f88f7c8d7ca04aa1f8ab6ed268d0d7370c738539f4a96ed3ab0e075; role_revision=sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08; outbox=.saipen/extensions/subs/saitest/kitchen/OUTBOX.md"
+    },
+    "T-2036": {
+      "id": "T-2036",
+      "section": "## BLOCKED",
+      "line_no": 150,
+      "checkbox": " ",
+      "needs": [],
+      "fields": {
+        "verify": "Independently reproduce or reject hypothesis, record Core disposition, apply no package patch during intake; package_identity=sha256:e58660396b1a656a05ae9a5dc677777e724274119c423c4fbb41be8b4e7dddd7;... [detail_ref: .saipen/recovery/board-compaction/T-2036/T-2036-9382123e538a7c60faad77c3.json]",
+        "blocker": "WAIT_USER_DECISION -- superseded by live intake T-2038",
+        "blocker_scope": "ticket",
+        "detail_ref": ".saipen/recovery/board-compaction/T-2036/T-2036-9382123e538a7c60faad77c3.json"
+      },
+      "raw": "- [ ] T-2036 [P2] Review SubSaipen hypothesis saipython/PY-15: code hygiene and Python verification sweep at 66ef622a; not accepted fact;... | verify: Independently reproduce or reject hypothesis, record Core disposition, apply no package patch during intake; package_identity=sha256:e58660396b1a656a05ae9a5dc677777e724274119c423c4fbb41be8b4e7dddd7;... [detail_ref: .saipen/recovery/board-compaction/T-2036/T-2036-9382123e538a7c60faad77c3.json] | blocker: WAIT_USER_DECISION -- superseded by live intake T-2038 | blocker_scope: ticket | detail_ref: .saipen/recovery/board-compaction/T-2036/T-2036-9382123e538a7c60faad77c3.json",
+      "description": "[P2] Review SubSaipen hypothesis saipython/PY-15: code hygiene and Python verification sweep at 66ef622a; not accepted fact;..."
+    }
+  },
+  "canonical_after": {
+    ".saipen/STATE.md": "1b618dc35de0a86b4f424597d51bc171d41c655f25063fd1d189501bda1372e5",
+    ".saipen/BOARD.md": "4ad58f032c924845d43d94a2759a23c6785c66a7b887d3b0df78a1869411353c",
+    ".saipen/LOG.md": "eaca35920f7dab30281e6d45dee8302895c97d981959189c8ed380cd8270d3de"
+  },
+  "canonical_stable": true
+}

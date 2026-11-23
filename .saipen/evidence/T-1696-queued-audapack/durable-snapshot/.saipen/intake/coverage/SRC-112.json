@@ -1,0 +1,23 @@
+{
+  "requirements": {
+    "SRC-112:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-2760",
+      "text": "T-22 is implemented and verified against the real audit signature cache",
+      "verification": "python -m pytest -q tests/test_audit_signature_cache.py -> PASS",
+      "work": "T-264"
+    },
+    "SRC-112:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-2760",
+      "text": "the cache fixture is red-controlled in both directions and green against the real cache",
+      "verification": "python -m pytest -q tests/test_audit_signature_cache.py -> PASS",
+      "work": "T-264"
+    }
+  },
+  "schema_version": 1
+}

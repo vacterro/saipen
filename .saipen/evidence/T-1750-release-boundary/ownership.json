@@ -1,0 +1,16 @@
+{
+  "tools/saipen_engine/release.py": {
+    "before_sha256": "80aaf91c69375feb790383777d48f0fc5059da576f74c99a22f5c28cec45c378",
+    "after_sha256": "5cb4b5618e06b891b86cc07b6446a4a0d40bec8802a65c0c729d76438fc5abee"
+  },
+  "tools/test_t1746_crew_terminal_outcome.py": {
+    "before_sha256": "e0c8341683d7a709f98c4341fe604d974255136c5674eea6f4d0af6f571ef70c",
+    "after_sha256": "2e338fe5544d53e579bf9255ef121f49c84973fa31ba68f8b12d304b53b6b6c6"
+  },
+  "tools/test_t1750_release_boundary.py": {
+    "before_sha256": null,
+    "after_sha256": "db1a418b8fec33044c0110029daa8a8584c0522c4f1a94984c31e750c850f390"
+  },
+  "git_index_entries_sha256": "4115ddefb040705be091985853f63b06d52fc47cd864f3f8f0652ddda0c5a5f4",
+  "git_index_entries_unchanged": true
+}

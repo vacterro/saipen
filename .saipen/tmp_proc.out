@@ -1,0 +1,34 @@
+[
+    {
+        "ProcessId":  47168,
+        "ParentProcessId":  55168,
+        "CommandLine":  "\"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\zcode\\packages\\desktop\\dist\\win-unpacked\\ZAICODE.exe\""
+    },
+    {
+        "ProcessId":  13500,
+        "ParentProcessId":  47168,
+        "CommandLine":  "\"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\zcode\\packages\\desktop\\dist\\win-unpacked\\ZAICODE.exe\" --type=gpu-process --user-data-dir=\"C:\\Users\\vac34\\AppData\\Roaming\\ZAICODE\" --gpu-preferences=SAAAAAAAAADgAAAEAAAAAAAAAAAAAGAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --field-trial-handle=1932,i,13831501744705134014,16319570484940206596,262144 --enable-features=EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1800,i,3991876059016647985,16789196131247316359,4 --trace-process-track-uuid=3190708988185955192 --mojo-platform-channel-handle=1928 /prefetch:2"
+    },
+    {
+        "ProcessId":  31960,
+        "ParentProcessId":  47168,
+        "CommandLine":  "\"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\zcode\\packages\\desktop\\dist\\win-unpacked\\ZAICODE.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --user-data-dir=\"C:\\Users\\vac34\\AppData\\Roaming\\ZAICODE\" --standard-schemes=zcode-media --secure-schemes=zcode-media --cors-schemes=rum-event --fetch-schemes=rum-event --streaming-schemes=zcode-media --field-trial-handle=1932,i,13831501744705134014,16319570484940206596,262144 --enable-features=EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1800,i,3991876059016647985,16789196131247316359,4 --trace-process-track-uuid=3190708989122997041 --mojo-platform-channel-handle=2292 /prefetch:3"
+    },
+    {
+        "ProcessId":  32348,
+        "ParentProcessId":  47168,
+        "CommandLine":  "\"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\zcode\\packages\\desktop\\dist\\win-unpacked\\ZAICODE.exe\" --type=renderer --user-data-dir=\"C:\\Users\\vac34\\AppData\\Roaming\\ZAICODE\" --standard-schemes=zcode-media --secure-schemes=zcode-media --cors-schemes=rum-event --fetch-schemes=rum-event --streaming-schemes=zcode-media --app-user-model-id=dev.zaicode.app --app-path=\"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\zcode\\packages\\desktop\\dist\\win-unpacked\\resources\\app.asar\" --enable-sandbox --force-device-scale-factor=1 --video-capture-use-gpu-memory-buffer --lang=en-US --device-scale-factor=1 --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1793379712386983 --launch-time-ticks=358268234546 --field-trial-handle=1932,i,13831501744705134014,16319570484940206596,262144 --enable-features=EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1800,i,3991876059016647985,16789196131247316359,4 --trace-process-track-uuid=3190708990997080739 --mojo-platform-channel-handle=3828 --device-id=a4b4d409-21f3-4470-96d3-888b32684393 /prefetch:1"
+    },
+    {
+        "ProcessId":  56440,
+        "ParentProcessId":  47168,
+        "CommandLine":  "\"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\zcode\\packages\\desktop\\dist\\win-unpacked\\ZAICODE.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --lang=en-US --service-sandbox-type=audio --video-capture-use-gpu-memory-buffer --user-data-dir=\"C:\\Users\\vac34\\AppData\\Roaming\\ZAICODE\" --standard-schemes=zcode-media --secure-schemes=zcode-media --cors-schemes=rum-event --fetch-schemes=rum-event --streaming-schemes=zcode-media --field-trial-handle=1932,i,13831501744705134014,16319570484940206596,262144 --enable-features=EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1800,i,3991876059016647985,16789196131247316359,4 --trace-process-track-uuid=3190708991934122588 --mojo-platform-channel-handle=4396 /prefetch:8"
+    },
+    {
+        "ProcessId":  14232,
+        "ParentProcessId":  47168,
+        "CommandLine":  "\"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\zcode\\packages\\desktop\\dist\\win-unpacked\\ZAICODE.exe\" --type=utility --utility-sub-type=node.mojom.NodeService --lang=en-US --service-sandbox-type=none --no-warnings --video-capture-use-gpu-memory-buffer --user-data-dir=\"C:\\Users\\vac34\\AppData\\Roaming\\ZAICODE\" --standard-schemes=zcode-media --secure-schemes=zcode-media --cors-schemes=rum-event --fetch-schemes=rum-event --streaming-schemes=zcode-media --field-trial-handle=1932,i,13831501744705134014,16319570484940206596,262144 --enable-features=EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1800,i,3991876059016647985,16789196131247316359,4 --trace-process-track-uuid=3190708992871164437 --mojo-platform-channel-handle=4068 /prefetch:8"
+    },
+    {
+        "Proces
+ERR 

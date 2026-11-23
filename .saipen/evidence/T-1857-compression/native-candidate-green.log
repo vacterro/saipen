@@ -1,0 +1,12 @@
+test_actual_created_worker_is_bound_before_any_packet (__main__.DeliveryTests.test_actual_created_worker_is_bound_before_any_packet) ... ok
+test_issuer_refusal_and_malformed_reply_never_spawn (__main__.DeliveryTests.test_issuer_refusal_and_malformed_reply_never_spawn) ... ok
+test_kernel_refusal_after_valid_test_ingress_is_preserved (__main__.DeliveryTests.test_kernel_refusal_after_valid_test_ingress_is_preserved) ... ok
+test_malformed_native_event_never_issues_or_spawns (__main__.DeliveryTests.test_malformed_native_event_never_issues_or_spawns) ... ok
+test_registration_failure_sends_nothing_and_revokes_unconsumed_proof (__main__.DeliveryTests.test_registration_failure_sends_nothing_and_revokes_unconsumed_proof) ... ok
+test_worker_reverifies_before_any_ingress_or_continuation (__main__.DeliveryTests.test_worker_reverifies_before_any_ingress_or_continuation) ... ok
+test_wrong_event_action_and_project_refuse_even_with_positive_test_verifier (__main__.DeliveryTests.test_wrong_event_action_and_project_refuse_even_with_positive_test_verifier) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.011s
+
+OK

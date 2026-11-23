@@ -1,0 +1,51 @@
+{
+  "pre_validator_sites": 356,
+  "missing_prefixed_sites": [],
+  "added_by_t1494": [
+    "0431d336022873eb",
+    "d6912c3d75fcfd51"
+  ],
+  "prior_added_foreign_sites": [
+    {
+      "site_id": "ee9ad48d80f9083a",
+      "qualname": "_compare",
+      "ordinal": 0,
+      "line": 7412,
+      "message": "cross-doc drift [] -- . CORE.md is normative (\u00a7 1.1); bring  to it, or change CORE deliberately and update both",
+      "disposition": "COVERED",
+      "case": "T-1637 CORE copies the from-any-phase set and drops HUNT"
+    },
+    {
+      "site_id": "b5518b4f219ec849",
+      "qualname": "<module>",
+      "ordinal": 0,
+      "line": 3908,
+      "message": "lifecycle authority [saio] -- canonical lifecycle state stands on no operation:  -- run `saipen recover`; it names the journaled repair (T-1671)",
+      "disposition": "INTENTIONALLY_NO_MUTATION_CASE",
+      "reason": "the condition is a canonical head above the newest journaled operation, and the operation ledger is machine-local recovery state a control copy does not carry, so a file mutation there reads UNAVAILABLE. Proved by tools/test_t1671_lifecycle_authority.py (a hand-written DONE over a real ledger drives this check red; a canonical closure and a ledger-less checkout stay green)"
+    },
+    {
+      "site_id": "bcde8680773be82b",
+      "qualname": "<module>",
+      "ordinal": 0,
+      "line": 2600,
+      "message": "BOARD.md: ticket  detail_ref does not resolve:  -- the row is a compact projection and the full record it cites is not in this checkout (T-1668)",
+      "disposition": "COVERED",
+      "case": "a BOARD row cites a compacted record that is not in the checkout"
+    }
+  ],
+  "removed_head_sites": [
+    {
+      "site_id": "d85efede346fa524",
+      "qualname": "_compare",
+      "ordinal": 0,
+      "line": 7267,
+      "message": "cross-doc drift [] -- . RFC.md is normative (\u00a7 1.1); bring  to it, or change RFC deliberately and update both",
+      "disposition": "BASELINE"
+    }
+  ],
+  "removed_head_sites_already_absent_before_t1494": [
+    "d85efede346fa524"
+  ],
+  "changed_common_prior_adjudications": []
+}

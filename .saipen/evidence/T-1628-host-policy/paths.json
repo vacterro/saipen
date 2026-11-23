@@ -1,0 +1,11 @@
+[
+  "extensions/adapters/opencode/saipen-guard.js",
+  "extensions/adapters/opencode.md",
+  "extensions/adapters/registry.json",
+  "tools/saipen_engine/native_host_policy.py",
+  "tools/test_t1628_opencode_policy.py",
+  "tools/test_opencode_adapter.py",
+  "tools/test_continue_entry.py",
+  "tools/test_t1624_host_integration.py",
+  "tools/test_t1327_zero_manual_recovery.py"
+]

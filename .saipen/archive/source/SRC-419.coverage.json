@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-419:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-21426",
+      "text": "P0 verify EX-000053 installed-generation provenance deadlock, prepare T-2058 + 8.1.1 within authorized scope",
+      "verification": "record: .saipen/evidence/focused-unit/2f5eca2806b533c6-20261117T031717806684Z.json -> PASS (7 tests OK)",
+      "work": "T-2076"
+    }
+  },
+  "schema_version": 1
+}

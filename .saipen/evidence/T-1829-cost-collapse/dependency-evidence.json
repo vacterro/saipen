@@ -1,0 +1,5751 @@
+{
+  "tier": "Verify/source fallback",
+  "mcp_project": null,
+  "mcp_generation": null,
+  "coverage": "MCP graph and coverage tools unavailable; exact listed source files parsed. Static calls do not prove dynamic dependency completeness.",
+  "files": [
+    {
+      "path": "tools/saipen_engine/core_unit.py",
+      "functions": {
+        "declared": {
+          "line": 96,
+          "calls": [
+            "(Path(root) / DECLARATION_REL).is_file",
+            "Path"
+          ]
+        },
+        "family": {
+          "line": 101,
+          "calls": [
+            "LookupError",
+            "_families"
+          ]
+        },
+        "parse_output": {
+          "line": 111,
+          "calls": [
+            "(text or '').replace",
+            "_RAN_RE.findall",
+            "_RED_RE.match",
+            "_TALLY_FIELD_RE.findall",
+            "_TALLY_RE.findall",
+            "body.split",
+            "int",
+            "line.startswith",
+            "match.groups",
+            "red.add",
+            "set",
+            "sorted",
+            "sum",
+            "where.endswith",
+            "zip"
+          ]
+        },
+        "red_sections": {
+          "line": 147,
+          "calls": [
+            "'\\n'.join",
+            "'\\n'.join([line, *body]).strip",
+            "(text or '').replace",
+            "(text or '').replace('\\r\\n', '\\n').split",
+            "_RED_RE.match",
+            "body.append",
+            "enumerate",
+            "follow.startswith",
+            "len",
+            "line.startswith",
+            "match.groups",
+            "sections.setdefault",
+            "where.endswith",
+            "zip"
+          ]
+        },
+        "keep_red_sections": {
+          "line": 177,
+          "calls": [
+            "Path",
+            "directory.mkdir",
+            "json.dumps",
+            "path.relative_to",
+            "path.relative_to(Path(root)).as_posix",
+            "path.write_text"
+          ]
+        },
+        "_sha256_file": {
+          "line": 189,
+          "calls": [
+            "hashlib.sha256",
+            "hashlib.sha256(path.read_bytes()).hexdigest",
+            "path.read_bytes"
+          ]
+        },
+        "tree_fingerprint": {
+          "line": 193,
+          "calls": [
+            "Path",
+            "_ignore_copy",
+            "digest.hexdigest",
+            "digest.update",
+            "files.extend",
+            "hashlib.sha256",
+            "hashlib.sha256(path.read_bytes()).digest",
+            "item.relative_to",
+            "item.relative_to(base).as_posix",
+            "os.walk",
+            "path.is_file",
+            "path.read_bytes",
+            "path.relative_to",
+            "path.relative_to(base).as_posix",
+            "path.relative_to(base).as_posix().encode",
+            "set",
+            "sorted"
+          ]
+        },
+        "load_baseline": {
+          "line": 220,
+          "calls": [
+            "Path",
+            "all",
+            "data.get",
+            "isinstance",
+            "json.loads",
+            "path.read_text"
+          ]
+        },
+        "baseline_digest": {
+          "line": 241,
+          "calls": [
+            "Path",
+            "_sha256_file"
+          ]
+        },
+        "_checkpoint_stamp": {
+          "line": 252,
+          "calls": [
+            "(saipen_dir / name).stat",
+            "stamp.append",
+            "tuple"
+          ]
+        },
+        "_without_locks": {
+          "line": 264,
+          "calls": [
+            "Path",
+            "ignore",
+            "ignored.update",
+            "name.endswith",
+            "set"
+          ]
+        },
+        "_copy_saipen_once": {
+          "line": 277,
+          "calls": [
+            "WriterLock",
+            "_checkpoint_stamp",
+            "_without_locks",
+            "shutil.copytree",
+            "writer.acquire",
+            "writer.release"
+          ]
+        },
+        "copy_tree_consistent": {
+          "line": 307,
+          "calls": [
+            "(source / '.saipen').is_dir",
+            "Path",
+            "RuntimeError",
+            "_copy_saipen_once",
+            "ignore",
+            "ignored.add",
+            "min",
+            "os.replace",
+            "range",
+            "set",
+            "shutil.copytree",
+            "time.sleep"
+          ]
+        },
+        "shardable": {
+          "line": 356,
+          "calls": [
+            "len",
+            "list"
+          ]
+        },
+        "plan_shards": {
+          "line": 367,
+          "calls": [
+            "float",
+            "int",
+            "len",
+            "max",
+            "min",
+            "range",
+            "set",
+            "shards[index].append",
+            "sorted",
+            "sum",
+            "weights.get"
+          ]
+        },
+        "load_durations": {
+          "line": 392,
+          "calls": [
+            "(Path(root) / DURATIONS_REL).read_text",
+            "Path",
+            "data.get",
+            "float",
+            "isinstance",
+            "json.loads",
+            "modules.items",
+            "str"
+          ]
+        },
+        "keep_durations": {
+          "line": 407,
+          "calls": [
+            "Path",
+            "dict",
+            "json.dumps",
+            "load_durations",
+            "merged.items",
+            "path.parent.mkdir",
+            "path.write_text",
+            "sorted"
+          ]
+        },
+        "_modules": {
+          "line": 418,
+          "calls": [
+            "(sandbox / start).iterdir",
+            "fnmatch.fnmatch",
+            "path.is_file",
+            "path.stem.isidentifier",
+            "sorted"
+          ]
+        },
+        "_run_whole": {
+          "line": 433,
+          "calls": [
+            "(spool / 'stderr').read_bytes",
+            "(spool / 'stderr').read_bytes().decode",
+            "_run_family",
+            "parse_output",
+            "red_sections",
+            "report.get"
+          ]
+        },
+        "_run_shard": {
+          "line": 450,
+          "calls": [
+            "(spool / 'stderr').read_bytes",
+            "(spool / 'stderr').read_bytes().decode",
+            "TestFamily",
+            "_run_family",
+            "isinstance",
+            "json.dumps",
+            "json.loads",
+            "manifest_path.read_text",
+            "parse_output",
+            "red_sections",
+            "report.get",
+            "round",
+            "spec_path.write_text",
+            "spool.mkdir",
+            "str",
+            "time.monotonic"
+          ]
+        },
+        "merge_shards": {
+          "line": 489,
+          "calls": [
+            "(manifest.get('modules') or {}).items",
+            "all",
+            "dict",
+            "durations.get",
+            "durations.items",
+            "enumerate",
+            "float",
+            "int",
+            "iter",
+            "len",
+            "manifest.get",
+            "min",
+            "next",
+            "round",
+            "sections.update",
+            "shard.get",
+            "sorted",
+            "sum",
+            "zip"
+          ]
+        },
+        "pid_alive": {
+          "line": 568,
+          "calls": [
+            "ctypes.byref",
+            "ctypes.c_ulong",
+            "isinstance",
+            "kernel32.CloseHandle",
+            "kernel32.GetExitCodeProcess",
+            "kernel32.GetLastError",
+            "kernel32.OpenProcess",
+            "os.kill"
+          ]
+        },
+        "_unlink_writable": {
+          "line": 595,
+          "calls": [
+            "os.chmod",
+            "os.unlink"
+          ]
+        },
+        "reclaim": {
+          "line": 603,
+          "calls": [
+            "Path",
+            "_unlink_writable",
+            "child.is_dir",
+            "child.is_symlink",
+            "contextlib.suppress",
+            "func",
+            "list",
+            "os.chmod",
+            "path.exists",
+            "path.iterdir",
+            "path.rmdir",
+            "range",
+            "shutil.rmtree",
+            "stamp.exists",
+            "stamp.is_file",
+            "stamp.read_bytes",
+            "stamp.write_bytes",
+            "time.sleep"
+          ]
+        },
+        "new_sandbox_root": {
+          "line": 653,
+          "calls": [
+            "(root / SANDBOX_OWNER).write_text",
+            "Path",
+            "Path(project).resolve",
+            "Path(tempfile.mkdtemp(prefix=SANDBOX_PREFIX)).resolve",
+            "json.dumps",
+            "os.getpid",
+            "str",
+            "tempfile.mkdtemp",
+            "time.time"
+          ]
+        },
+        "_owner_pids": {
+          "line": 668,
+          "calls": [
+            "owner.get"
+          ]
+        },
+        "sweep_stale_sandboxes": {
+          "line": 681,
+          "calls": [
+            "(candidate / 'project').is_dir",
+            "(candidate / SANDBOX_OWNER).read_text",
+            "Path",
+            "Path(project).resolve",
+            "Path(temp_root).resolve",
+            "Path(tempfile.gettempdir()).resolve",
+            "_owner_pids",
+            "any",
+            "base.glob",
+            "candidate.is_dir",
+            "candidate.is_symlink",
+            "candidate.stat",
+            "isinstance",
+            "json.loads",
+            "owner.get",
+            "pid_alive",
+            "reclaim",
+            "reclaimed.append",
+            "sorted",
+            "str",
+            "tempfile.gettempdir",
+            "time.time"
+          ]
+        },
+        "run_family": {
+          "line": 734,
+          "calls": [
+            "Path",
+            "Path(root).resolve",
+            "Path(val).resolve",
+            "RuntimeError",
+            "ThreadPoolExecutor",
+            "_modules",
+            "_run_shard",
+            "_run_whole",
+            "any",
+            "copy_tree_consistent",
+            "family",
+            "int",
+            "len",
+            "list",
+            "load_durations",
+            "max",
+            "merge_shards",
+            "min",
+            "new_sandbox_root",
+            "os.environ.get",
+            "plan_shards",
+            "pool.map",
+            "range",
+            "reclaim",
+            "round",
+            "shardable",
+            "shutil.copytree",
+            "sorted",
+            "spool.mkdir",
+            "str",
+            "sweep_stale_sandboxes",
+            "time.monotonic",
+            "tree_fingerprint",
+            "type",
+            "type(declared_family)"
+          ]
+        },
+        "_consistency": {
+          "line": 813,
+          "calls": [
+            "problems.append",
+            "run.get"
+          ]
+        },
+        "judge": {
+          "line": 834,
+          "calls": [
+            "_consistency",
+            "enumerate",
+            "len",
+            "problems.append",
+            "problems.extend",
+            "run.get",
+            "set",
+            "sorted",
+            "str"
+          ]
+        },
+        "_git_head": {
+          "line": 856,
+          "calls": [
+            "out.stdout.strip",
+            "subprocess.run"
+          ]
+        },
+        "write_record": {
+          "line": 877,
+          "calls": [
+            "Path",
+            "ValueError",
+            "_git_head",
+            "_sha256_file",
+            "baseline_digest",
+            "datetime.datetime.now",
+            "directory.mkdir",
+            "json.dumps",
+            "judge",
+            "list",
+            "load_baseline",
+            "now.strftime",
+            "path.relative_to",
+            "path.relative_to(base).as_posix",
+            "path.write_text",
+            "run.get"
+          ]
+        },
+        "reusable_record": {
+          "line": 925,
+          "calls": [
+            "(base / RECORD_DIR_REL).glob",
+            "Path",
+            "_sha256_file",
+            "baseline_digest",
+            "json.loads",
+            "judge",
+            "load_baseline",
+            "path.read_text",
+            "path.relative_to",
+            "path.relative_to(base).as_posix",
+            "record.get",
+            "sorted"
+          ]
+        },
+        "evidence_line": {
+          "line": 955,
+          "calls": [
+            "len"
+          ]
+        },
+        "parse_evidence": {
+          "line": 966,
+          "calls": [
+            "(text or '').strip",
+            "_EVIDENCE_RE.match",
+            "match.groupdict"
+          ]
+        },
+        "_current_cycle": {
+          "line": 972,
+          "calls": [
+            "_is_verify_boundary",
+            "event.get",
+            "len",
+            "range"
+          ]
+        },
+        "evidence_command": {
+          "line": 986,
+          "calls": []
+        },
+        "ship_gate": {
+          "line": 990,
+          "calls": [
+            "' '.join",
+            "', '.join",
+            "'; '.join",
+            "(base / RECORD_DIR_REL).resolve",
+            "Path",
+            "_current_cycle",
+            "_sha256_file",
+            "baseline_digest",
+            "declared",
+            "event.get",
+            "family",
+            "focused_unit.policy",
+            "focused_unit.ship_gate",
+            "json.loads",
+            "judge",
+            "load_baseline",
+            "parse_evidence",
+            "path.read_text",
+            "path.resolve",
+            "path.resolve().is_relative_to",
+            "record.get",
+            "reversed",
+            "tree_fingerprint"
+          ]
+        },
+        "main": {
+          "line": 1052,
+          "calls": [
+            "Path",
+            "Path(args.project_root).resolve",
+            "__doc__.split",
+            "_baseline",
+            "_evidence",
+            "argparse.ArgumentParser",
+            "baseline.add_argument",
+            "evidence.add_argument",
+            "focused.add_argument",
+            "focused_evidence",
+            "parser.add_subparsers",
+            "parser.parse_args",
+            "sub.add_parser"
+          ]
+        },
+        "_emit": {
+          "line": 1108,
+          "calls": [
+            "json.dumps",
+            "print"
+          ]
+        },
+        "_baseline": {
+          "line": 1113,
+          "calls": [
+            "(old or {}).get",
+            "(root / BASELINE_REL).write_text",
+            "(root / args.from_record).read_text",
+            "_emit",
+            "_git_head",
+            "holding",
+            "json.dumps",
+            "json.loads",
+            "keep_durations",
+            "len",
+            "load_baseline",
+            "record.get",
+            "run.get",
+            "run_family",
+            "set",
+            "sorted"
+          ]
+        },
+        "_evidence": {
+          "line": 1145,
+          "calls": [
+            "(root / '.saipen' / 'STATE.md').read_text",
+            "_emit",
+            "evidence_line",
+            "holding",
+            "keep_durations",
+            "keep_red_sections",
+            "len",
+            "load_baseline",
+            "operations.checkpoint",
+            "parse_state",
+            "reusable_record",
+            "run.get",
+            "run_family",
+            "state.get",
+            "tree_fingerprint",
+            "write_record"
+          ]
+        }
+      }
+    },
+    {
+      "path": "tools/saipen_engine/core_unit_shard.py",
+      "functions": {
+        "module_of": {
+          "line": 34,
+          "calls": [
+            "isinstance",
+            "type"
+          ]
+        },
+        "flatten": {
+          "line": 42,
+          "calls": [
+            "flatten",
+            "isinstance"
+          ]
+        },
+        "main": {
+          "line": 50,
+          "calls": [
+            "ShardLoader",
+            "durations.get",
+            "durations.items",
+            "flatten",
+            "json.dump",
+            "json.load",
+            "keep",
+            "len",
+            "list",
+            "module_of",
+            "open",
+            "round",
+            "self.suiteClass",
+            "set",
+            "spec.get",
+            "super",
+            "super().discover",
+            "super().run",
+            "super().startTest",
+            "super().stopTest",
+            "time.perf_counter",
+            "unittest.main",
+            "write_manifest"
+          ]
+        }
+      }
+    },
+    {
+      "path": "tools/saipen_engine/test_runner.py",
+      "functions": {
+        "_python": {
+          "line": 34,
+          "calls": []
+        },
+        "_portable_floor": {
+          "line": 38,
+          "calls": [
+            "shutil.which"
+          ]
+        },
+        "_families": {
+          "line": 55,
+          "calls": [
+            "TestFamily",
+            "_portable_floor",
+            "_python",
+            "families.append",
+            "tuple"
+          ]
+        },
+        "canonical_test_plan": {
+          "line": 113,
+          "calls": [
+            "_families",
+            "bool",
+            "list"
+          ]
+        },
+        "_ignore_copy": {
+          "line": 129,
+          "calls": [
+            "ignored.update",
+            "name.endswith",
+            "name.rstrip",
+            "name.rstrip(' .').split",
+            "name.rstrip(' .').split('.', 1)[0].upper",
+            "range",
+            "reserved.update"
+          ]
+        },
+        "_tail": {
+          "line": 149,
+          "calls": [
+            "len"
+          ]
+        },
+        "_read_failure_roster_from_path": {
+          "line": 155,
+          "calls": [
+            "_FAILURE_HEADER.match",
+            "len",
+            "line.startswith",
+            "match.group",
+            "open",
+            "raw.decode",
+            "raw.decode('utf-8', errors='replace').strip",
+            "roster.append",
+            "seen.add",
+            "set"
+          ]
+        },
+        "_read_failure_causes_from_path": {
+          "line": 193,
+          "calls": [
+            "_BLOCK_END.match",
+            "_FAILURE_HEADER.match",
+            "_RULE.match",
+            "header.group",
+            "len",
+            "line.strip",
+            "open",
+            "raw.decode",
+            "raw.decode('utf-8', errors='replace').rstrip"
+          ]
+        },
+        "_read_tail_from_path": {
+          "line": 234,
+          "calls": [
+            "_tail",
+            "data.decode",
+            "handle.read",
+            "handle.seek",
+            "max",
+            "open",
+            "path.stat"
+          ]
+        },
+        "_install_quiet_child_site": {
+          "line": 247,
+          "calls": [
+            "env.get",
+            "hook.write_text",
+            "os.pathsep.join",
+            "str"
+          ]
+        },
+        "_terminate_process_tree": {
+          "line": 292,
+          "calls": [
+            "os.killpg",
+            "process.kill",
+            "process.terminate",
+            "process.wait",
+            "str",
+            "subprocess.run",
+            "suppress"
+          ]
+        },
+        "_note_live_reader": {
+          "line": 315,
+          "calls": [
+            "Path",
+            "Path(owner).read_text",
+            "Path(owner).write_text",
+            "int",
+            "isinstance",
+            "json.dumps",
+            "json.loads"
+          ]
+        },
+        "_run_family": {
+          "line": 336,
+          "calls": [
+            "Path",
+            "Path(val).resolve",
+            "ProcessTree",
+            "_install_quiet_child_site",
+            "_note_live_reader",
+            "_read_failure_causes_from_path",
+            "_read_failure_causes_from_path(spool).items",
+            "_read_failure_roster_from_path",
+            "_read_tail_from_path",
+            "causes.setdefault",
+            "env.get",
+            "env.pop",
+            "getattr",
+            "nullcontext",
+            "open",
+            "os.environ.copy",
+            "process.poll",
+            "process.stderr.close",
+            "process.stdout.close",
+            "process.wait",
+            "py_dirs.append",
+            "roster.append",
+            "seen_names.add",
+            "set",
+            "str",
+            "subprocess.STARTUPINFO",
+            "suppress",
+            "tempfile.TemporaryDirectory",
+            "tree.pids",
+            "tree.start",
+            "tree.terminate",
+            "unbound_environment"
+          ]
+        },
+        "run_canonical_suite": {
+          "line": 505,
+          "calls": [
+            "Path",
+            "Path(project_root).resolve",
+            "_families",
+            "_run_family",
+            "all",
+            "shutil.copytree",
+            "source.is_dir",
+            "tempfile.TemporaryDirectory"
+          ]
+        },
+        "main": {
+          "line": 529,
+          "calls": [
+            "Path",
+            "Path(args.project_root).resolve",
+            "_families",
+            "_run_family",
+            "all",
+            "argparse.ArgumentParser",
+            "causes.get",
+            "item.get",
+            "json.dumps",
+            "len",
+            "parser.add_argument",
+            "parser.parse_args",
+            "print",
+            "run_canonical_suite",
+            "shutil.copytree",
+            "tempfile.TemporaryDirectory"
+          ]
+        }
+      }
+    },
+    {
+      "path": "tools/saipen_engine/operations.py",
+      "functions": {
+        "_now": {
+          "line": 98,
+          "calls": [
+            "datetime.datetime.now",
+            "datetime.datetime.now(datetime.timezone.utc).strftime"
+          ]
+        },
+        "uuid4_hex": {
+          "line": 102,
+          "calls": [
+            "uuid.uuid4"
+          ]
+        },
+        "_utc_iso": {
+          "line": 106,
+          "calls": [
+            "datetime.datetime.now",
+            "datetime.datetime.now(datetime.timezone.utc).strftime"
+          ]
+        },
+        "_clock_instant": {
+          "line": 139,
+          "calls": [
+            "isinstance"
+          ]
+        },
+        "_state_guard": {
+          "line": 198,
+          "calls": [
+            "_refuse",
+            "detail.startswith",
+            "fn",
+            "functools.wraps",
+            "getattr",
+            "str"
+          ]
+        },
+        "_read": {
+          "line": 281,
+          "calls": [
+            "'; '.join",
+            "CheckpointError",
+            "HomeDeadError",
+            "HomeInaccessibleError",
+            "Path",
+            "Path(str(_home)).resolve",
+            "StateMalformedError",
+            "_journal_floor",
+            "_ledger_errors",
+            "_lifecycle_authority.assess",
+            "_lifecycle_authority.refusal_detail",
+            "block_parked_evidence_error",
+            "codec.read_checkpoint_doc",
+            "foreign_tail_cut",
+            "goal_authority.prove",
+            "home_refusal",
+            "int",
+            "is_absolute_home",
+            "parse_board",
+            "parse_frontmatter",
+            "parse_state_or_error",
+            "read_history_snapshot_and_logs_digest",
+            "running_home",
+            "set",
+            "snapshot_contract_errors",
+            "state.get",
+            "state_doc.text_norm.strip",
+            "str",
+            "str(_home).strip",
+            "str(state.get('last_event')).strip"
+          ]
+        },
+        "_live_before": {
+          "line": 549,
+          "calls": [
+            "(root / rel).exists"
+          ]
+        },
+        "_target": {
+          "line": 563,
+          "calls": [
+            "TargetPlan",
+            "doc.encode",
+            "hash_bytes"
+          ]
+        },
+        "_docs_preconditions": {
+          "line": 571,
+          "calls": [
+            "docs.get",
+            "key.upper",
+            "pc.update"
+          ]
+        },
+        "_actor_provenance": {
+          "line": 584,
+          "calls": [
+            "state.get"
+          ]
+        },
+        "_seat_agent": {
+          "line": 606,
+          "calls": [
+            "OwnershipSplitError",
+            "ownership.classify_active_ownership",
+            "ownership.preexisting_split_error",
+            "state.get"
+          ]
+        },
+        "goal_blocked_now": {
+          "line": 658,
+          "calls": [
+            "any",
+            "goal_blocked_tickets",
+            "parse_board",
+            "ticket.get",
+            "tickets.values",
+            "workable_tickets"
+          ]
+        },
+        "_recompute_free_slot_route": {
+          "line": 678,
+          "calls": [
+            "_settle_stop_reason",
+            "any",
+            "before.get",
+            "parse_board",
+            "parse_board(board_text)['tickets'].values",
+            "patch_state",
+            "route_next",
+            "routed.get",
+            "str",
+            "str(before.get('next_action') or '').startswith",
+            "t.get"
+          ]
+        },
+        "_settle_stop_reason": {
+          "line": 713,
+          "calls": [
+            "_parse_state",
+            "_parse_state(state_text).get",
+            "goal_blocked_now",
+            "patch_state",
+            "remove_state_fields"
+          ]
+        },
+        "_event_line": {
+          "line": 732,
+          "calls": [
+            "ValueError",
+            "docs.get",
+            "docs.setdefault",
+            "docs.setdefault('_log_detail_targets', []).extend",
+            "prepare_bounded_event",
+            "sorted"
+          ]
+        },
+        "_producer_event": {
+          "line": 785,
+          "calls": [
+            "_event_line"
+          ]
+        },
+        "_log_targets": {
+          "line": 807,
+          "calls": [
+            "_target",
+            "docs.get"
+          ]
+        },
+        "_regression_gate": {
+          "line": 822,
+          "calls": [
+            "evidence_gate",
+            "parse_board",
+            "parse_state",
+            "regression_evidence",
+            "regression_required",
+            "ticket.get",
+            "ticket.get('fields', {}).get",
+            "tickets.get"
+          ]
+        },
+        "_acceptance_gate": {
+          "line": 865,
+          "calls": [
+            "docs.setdefault",
+            "docs.setdefault('_authority_preconditions', {}).update",
+            "gate",
+            "parse_board",
+            "parse_board(docs['board'].text_norm)['tickets'].get",
+            "str",
+            "ticket.get",
+            "ticket.get('fields', {}).get"
+          ]
+        },
+        "_refuse": {
+          "line": 879,
+          "calls": [
+            "Result"
+          ]
+        },
+        "_source_refusal_code": {
+          "line": 883,
+          "calls": [
+            "diagnostic.get",
+            "isinstance"
+          ]
+        },
+        "_iter_operation_records": {
+          "line": 899,
+          "calls": [
+            "semantic_receipt_snapshot"
+          ]
+        },
+        "_strict_created_at": {
+          "line": 914,
+          "calls": [
+            "strict_iso_utc"
+          ]
+        },
+        "_convergence_event_number": {
+          "line": 923,
+          "calls": [
+            "int",
+            "match.group",
+            "meta.get",
+            "re.match",
+            "record.get",
+            "str"
+          ]
+        },
+        "_latest_convergence_stage": {
+          "line": 930,
+          "calls": [
+            "_convergence_event_number",
+            "_iter_operation_records",
+            "_strict_created_at",
+            "meta.get",
+            "record.get"
+          ]
+        },
+        "host_session_binding": {
+          "line": 961,
+          "calls": [
+            "claim_session_digest",
+            "os.environ.get",
+            "project_lineage_identity"
+          ]
+        },
+        "_claim_fields_in_place": {
+          "line": 969,
+          "calls": [
+            "''.join",
+            "ValueError",
+            "assert_live_record",
+            "board_text.splitlines",
+            "fields.items",
+            "lines[idx].endswith",
+            "parse_board",
+            "parsed['tickets'].get",
+            "remove_ticket_field",
+            "run_witnesses.items",
+            "set_ticket_field",
+            "ticket.get",
+            "ticket['fields'].get"
+          ]
+        },
+        "_ticket_fields_in_place": {
+          "line": 1023,
+          "calls": [
+            "''.join",
+            "ValueError",
+            "assert_live_record",
+            "board_text.splitlines",
+            "fields.items",
+            "lines[idx].endswith",
+            "parse_board",
+            "parsed['tickets'].get",
+            "remove_ticket_field",
+            "set_ticket_field"
+          ]
+        },
+        "_project_board_mutation": {
+          "line": 1051,
+          "calls": [
+            "CompactionResult",
+            "dict.fromkeys",
+            "prepare_existing",
+            "prepare_expanded",
+            "propose",
+            "tuple"
+          ]
+        },
+        "_active_claim_refusal": {
+          "line": 1089,
+          "calls": [
+            "_clock_instant",
+            "_refuse",
+            "ownership.classify_active_ownership",
+            "parse_board",
+            "state.get",
+            "ticket.get",
+            "ticket['fields'].get",
+            "tickets.get"
+          ]
+        },
+        "_refresh_active_claim": {
+          "line": 1150,
+          "calls": [
+            "_claim_fields_in_place",
+            "host_session_binding",
+            "ownership.classify_active_ownership",
+            "parse_board",
+            "state.get",
+            "ticket.get",
+            "tickets.get"
+          ]
+        },
+        "_audit_route_basis": {
+          "line": 1196,
+          "calls": [
+            "audit_inbox_projection",
+            "audit_route_owns",
+            "isinstance",
+            "projection.get"
+          ]
+        },
+        "_plan_claim": {
+          "line": 1220,
+          "calls": [
+            "'; '.join",
+            "(ticket['fields'].get('claim_time') or '').strip",
+            "(ticket['fields'].get('owner') or '').strip",
+            "_actor_provenance",
+            "_audit_route_basis",
+            "_claim_fields_in_place",
+            "_claim_move",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_project_board_mutation",
+            "_read",
+            "_refuse",
+            "_target",
+            "build_plan",
+            "claim_status",
+            "datetime.datetime.now",
+            "docs['log'].text_norm.rstrip",
+            "host_session_binding",
+            "list",
+            "non_work_event",
+            "owned.update",
+            "ownership.classify_active_ownership",
+            "patch_state",
+            "pick_next_work",
+            "prepare_existing",
+            "reserved_continuation_child",
+            "session_locked_out",
+            "state.get",
+            "str",
+            "ticket['fields'].get",
+            "ticket_has_blocker",
+            "tickets.values",
+            "uuid4_hex",
+            "validate_texts",
+            "watchdog.can_continue_claim",
+            "watchdog.carrier_present",
+            "watchdog.claim_witnesses",
+            "watchdog.current_carrier"
+          ]
+        },
+        "_claim_move": {
+          "line": 1649,
+          "calls": [
+            "''.join",
+            "(run_witnesses or {}).items",
+            "ValueError",
+            "board_text.splitlines",
+            "len",
+            "line.rstrip",
+            "out.append",
+            "out.insert",
+            "remove_ticket_field",
+            "set_ticket_field",
+            "stripped.startswith",
+            "ticket_line.replace",
+            "ticket_line.replace('- [ ] ', '- [/] ', 1).rstrip"
+          ]
+        },
+        "plan_claim": {
+          "line": 1704,
+          "calls": [
+            "Path",
+            "_operation_clock",
+            "_plan_claim",
+            "_render_plan",
+            "isinstance"
+          ]
+        },
+        "apply_claim": {
+          "line": 1732,
+          "calls": [
+            "Path",
+            "_operation_clock",
+            "_plan_claim",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_plan_attempt": {
+          "line": 1758,
+          "calls": [
+            "','.join",
+            "'; '.join",
+            "'|'.join",
+            "(unknown or '').strip",
+            "_active_claim_refusal",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_read",
+            "_refuse",
+            "_target",
+            "_ticket.get",
+            "_tickets.get",
+            "attempt_mod.active_attempts",
+            "attempt_mod.build_attempts",
+            "attempt_mod.next_attempt_id",
+            "build_plan",
+            "capture_runtime_provenance",
+            "docs['log'].text_norm.rstrip",
+            "e.strip",
+            "int",
+            "len",
+            "max",
+            "new_board.replace",
+            "ownership.classify_active_ownership",
+            "parse_board",
+            "parse_runtime_provenance",
+            "patch_state",
+            "re.fullmatch",
+            "rec.get",
+            "records.values",
+            "records[pointer].get",
+            "remove_state_fields",
+            "remove_ticket_field",
+            "seal_runtime_provenance",
+            "state.get",
+            "targets.append",
+            "unknown.strip",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "attempt_lifecycle": {
+          "line": 2132,
+          "calls": [
+            "Path",
+            "_operation_clock",
+            "_plan_attempt",
+            "_refuse",
+            "_render_plan",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_plan_transition": {
+          "line": 2178,
+          "calls": [
+            "', '.join",
+            "'; '.join",
+            "_acceptance_gate",
+            "_active_claim_refusal",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_producer_event",
+            "_read",
+            "_refresh_active_claim",
+            "_refuse",
+            "_regression_gate",
+            "_source_refusal_code",
+            "_target",
+            "_verification_command",
+            "board['tickets'].values",
+            "boundary_gate",
+            "build_plan",
+            "destination.upper",
+            "docs['log'].text_norm.rstrip",
+            "evidence_command",
+            "int",
+            "len",
+            "new_log.rstrip",
+            "non_work_event",
+            "parse_state",
+            "parse_state(new_state).get",
+            "patch_state",
+            "phases.VALID_TRANSITIONS.get",
+            "phases.forward_route",
+            "phases.transition_legal",
+            "route_next",
+            "routed.get",
+            "ship_gate",
+            "source_boundary.get",
+            "state.get",
+            "str",
+            "targets.append",
+            "uuid4_hex",
+            "validate_texts",
+            "verification_evidence"
+          ]
+        },
+        "transition_phase": {
+          "line": 2499,
+          "calls": [
+            "Path",
+            "_establish_pre_build_baseline",
+            "_now",
+            "_plan_transition",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_establish_pre_build_baseline": {
+          "line": 2526,
+          "calls": [
+            "_baseline_refuse",
+            "_refuse",
+            "baseline.get",
+            "ensure_debt_baseline",
+            "load_snapshot",
+            "record.get",
+            "request.get",
+            "str"
+          ]
+        },
+        "_schema_upgrade_owned": {
+          "line": 2608,
+          "calls": [
+            "int",
+            "running_schema_version",
+            "running_style_token",
+            "state.get"
+          ]
+        },
+        "_plan_checkpoint": {
+          "line": 2636,
+          "calls": [
+            "'; '.join",
+            "_active_claim_refusal",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_read",
+            "_refresh_active_claim",
+            "_refuse",
+            "_schema_upgrade_owned",
+            "_target",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "owned.update",
+            "patch_state",
+            "re.fullmatch",
+            "str",
+            "targets.append",
+            "taxonomy.upper",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "checkpoint": {
+          "line": 2734,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_checkpoint",
+            "_refuse",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance",
+            "sorted",
+            "taxonomy.upper"
+          ]
+        },
+        "next_ticket_id": {
+          "line": 2765,
+          "calls": [
+            "_BOARD_TICKET_LINE_RE.match",
+            "board_text.splitlines",
+            "ids.add",
+            "int",
+            "line.strip",
+            "log_text.splitlines",
+            "match.group",
+            "max",
+            "parse_log_line",
+            "re.fullmatch",
+            "set"
+          ]
+        },
+        "_insert_todo": {
+          "line": 2804,
+          "calls": [
+            "''.join",
+            "assert_live_record",
+            "board_text.splitlines",
+            "enumerate",
+            "lines.insert",
+            "ln.startswith",
+            "next"
+          ]
+        },
+        "_plan_handback": {
+          "line": 2812,
+          "calls": [
+            "', '.join",
+            "','.join",
+            "'; '.join",
+            "(holder or {}).get",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_move_ticket",
+            "_project_board_mutation",
+            "_refuse",
+            "_settle_stop_reason",
+            "_target",
+            "_ticket_fields_in_place",
+            "build_plan",
+            "claim.update",
+            "claim_status",
+            "claim_witnesses",
+            "docs['log'].text_norm.rstrip",
+            "fields.get",
+            "holder.get",
+            "host_session_binding",
+            "next_action.startswith",
+            "parked.get",
+            "patch_state",
+            "redact_credentials",
+            "remove.append",
+            "state.get",
+            "str",
+            "str(fields.get('blocked_on', '')).strip",
+            "str(fields.get('blocker', '')).split",
+            "str(fields.get('blocker', '')).split(' -- ', 1)[0].strip",
+            "str(fields.get('owner') or '').strip",
+            "str(fields.get('resume_phase', '')).strip",
+            "str(fields.get('resume_transition_from', '')).strip",
+            "tickets.get",
+            "tickets.get(need, {}).get",
+            "tuple",
+            "validate_texts"
+          ]
+        },
+        "_ticket_targets": {
+          "line": 3041,
+          "calls": [
+            "', '.join",
+            "','.join",
+            "'; '.join",
+            "'|'.join",
+            "(scope or DEFAULT_BLOCKER_SCOPE).strip",
+            "(scope or DEFAULT_BLOCKER_SCOPE).strip().lower",
+            "_active_claim_refusal",
+            "_candidate.strip",
+            "_candidate.strip().split",
+            "_candidate.strip().split(' -- ', 1)[0].strip",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_move_ticket",
+            "_plan_handback",
+            "_project_board_mutation",
+            "_read",
+            "_refuse",
+            "_settle_stop_reason",
+            "_target",
+            "_ticket_fields_in_place",
+            "action.upper",
+            "active_ticket_block_structure",
+            "any",
+            "build_plan",
+            "candidate.get",
+            "candidate.get('fields', {}).get",
+            "child.get",
+            "deferred_operator_class",
+            "docs.get",
+            "docs['log'].text_norm.rstrip",
+            "iso_utc_sort_key",
+            "list",
+            "needs.append",
+            "non_work_event",
+            "parse_board",
+            "parse_board(new_board)['tickets'].values",
+            "patch_state",
+            "payload.strip",
+            "re.fullmatch",
+            "redact_credentials",
+            "route_next",
+            "routed.get",
+            "set",
+            "sorted",
+            "state.get",
+            "str",
+            "str(blocked_on or '').strip",
+            "str(candidate.get('fields', {}).get('blocked_on', '')).strip",
+            "str(retry_not_before or '').strip",
+            "str(state.get('next_action') or '').startswith",
+            "str(ticket.get('fields', {}).get('blocked_on', '')).strip",
+            "strict_iso_utc",
+            "ticket.get",
+            "ticket.get('fields', {}).get",
+            "ticket_is_workable",
+            "tickets.get",
+            "tickets.values",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "_only_request_clauses_await": {
+          "line": 3424,
+          "calls": [
+            "(source_gate.get('coverage') or {}).get",
+            "all",
+            "bool",
+            "ensure_request_clause",
+            "ensure_request_clause(root, receipt).get",
+            "is_request_clause",
+            "list",
+            "source_gate.get"
+          ]
+        },
+        "_verification_command": {
+          "line": 3444,
+          "calls": []
+        },
+        "_evidence_route": {
+          "line": 3463,
+          "calls": [
+            "_verification_command",
+            "phases.forward_route"
+          ]
+        },
+        "closure_request_error": {
+          "line": 3479,
+          "calls": [
+            "'|'.join",
+            "(closure_cohort or '').strip",
+            "(closure_mode or DEFAULT_CLOSURE_MODE).strip",
+            "(implementation_source or '').strip",
+            "(invalidation_evidence or '').strip",
+            "_COHORT_ID_RE.fullmatch",
+            "closure_cohort.strip",
+            "re.fullmatch",
+            "str",
+            "str(x).strip"
+          ]
+        },
+        "no_delta_build_events": {
+          "line": 3582,
+          "calls": [
+            "_NO_DELTA_BUILD_RE.search",
+            "event.get",
+            "found.append",
+            "str",
+            "text.lower"
+          ]
+        },
+        "latest_build_declares_no_delta": {
+          "line": 3596,
+          "calls": [
+            "_NO_DELTA_BUILD_RE.search",
+            "bool",
+            "builds[-1].get",
+            "event.get",
+            "re.match",
+            "str"
+          ]
+        },
+        "_plan_finish_ticket": {
+          "line": 3614,
+          "calls": [
+            "'; '.join",
+            "(_registry.get('cohorts') or {}).get",
+            "(closure_cohort or '').strip",
+            "(closure_mode or DEFAULT_CLOSURE_MODE).strip",
+            "(implementation_source or '').strip",
+            "(invalidation_evidence or '').strip",
+            "(invalidation_evidence or '').strip().upper",
+            "(root / '.saipen' / 'STORAGE_REGISTRY.json').exists",
+            "(root / '.saipen' / 'STORES.json').exists",
+            "(source_gate.get('coverage') or {}).get",
+            "TargetPlan",
+            "_acceptance_gate",
+            "_active_claim_refusal",
+            "_attempt_mod.build_attempts",
+            "_attempt_mod.ticket_admission_error",
+            "_bad.startswith",
+            "_closure.cohort_scope",
+            "_closure.hash_paths",
+            "_closure.read_registry",
+            "_closure.render_registry",
+            "_closure.upsert_member",
+            "_docs_preconditions",
+            "_event_line",
+            "_evidence_route",
+            "_existing.get",
+            "_grammar.split",
+            "_grammar.split('; run: ', 1)[1].strip",
+            "_grammar.split('; run: ', 1)[1].strip().replace",
+            "_identity",
+            "_live_before",
+            "_log_targets",
+            "_move_ticket",
+            "_only_request_clauses_await",
+            "_parent_fields.get",
+            "_producer_event",
+            "_project_board_mutation",
+            "_read",
+            "_refuse",
+            "_registry.get",
+            "_regression_gate",
+            "_set_closure_fields",
+            "_source_refusal_code",
+            "_target",
+            "_ticket_fields_in_place",
+            "build_plan",
+            "closure_readiness",
+            "closure_readiness(root, ticket_id).get",
+            "closure_request_error",
+            "codec.read_document",
+            "compaction_ids.append",
+            "continuation_parent",
+            "digest_doc.encode",
+            "discharge_request_clauses",
+            "docs.get",
+            "docs['log'].text_norm.rstrip",
+            "final_state.get",
+            "hash_bytes",
+            "host_session_binding",
+            "invalidation_error",
+            "latest_build_declares_no_delta",
+            "len",
+            "list",
+            "new_log.rstrip",
+            "non_work_event",
+            "parent_fields.get",
+            "parse_state",
+            "patch_state",
+            "phases.forward_route",
+            "registry_doc.encode",
+            "resolve_implementation_source",
+            "resume_parent.get",
+            "route_next",
+            "routed.get",
+            "source_gate.get",
+            "state.get",
+            "str",
+            "str(_parent_fields.get('claim_session') or '').strip",
+            "str(_parent_fields.get('owner') or '').strip",
+            "str(x).strip",
+            "str(x).strip().replace",
+            "targets.append",
+            "ticket['fields'].get",
+            "tickets.values",
+            "tuple",
+            "uuid4_hex",
+            "validate_storage",
+            "validate_texts",
+            "verification_evidence",
+            "work_closure_gate"
+          ]
+        },
+        "invalidation_error": {
+          "line": 4304,
+          "calls": [
+            "_PREMISE_DISPROOF_RE.search",
+            "event.get",
+            "int",
+            "isinstance",
+            "re.fullmatch",
+            "re.match",
+            "re.search",
+            "str",
+            "str(event.get('taxonomy') or '').strip",
+            "str(event.get('taxonomy') or '').strip().upper",
+            "str(event.get('text') or '').strip",
+            "str(evidence_ref or '').strip",
+            "str(evidence_ref or '').strip().upper"
+          ]
+        },
+        "finish_ticket": {
+          "line": 4363,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_finish_ticket",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_plan_bind_closed_cohort": {
+          "line": 4415,
+          "calls": [
+            "', '.join",
+            "'; '.join",
+            "(existing.get('members') or {}).get",
+            "(json.dumps({'ticket': ticket_id, 'original_row': ticket['raw'], 'original_finish': proof['op_id'], 'original_finish_event': proof['event'], 'cohort': cohort_id, 'paths': hashes}, sort_keys=True, indent=2) + '\\n').encode",
+            "(registry.get('cohorts') or {}).get",
+            "Result",
+            "TargetPlan",
+            "ValueError",
+            "_live_before",
+            "_read",
+            "_refuse",
+            "_set_closure_fields",
+            "_source_refusal_code",
+            "_state_only_plan",
+            "_target",
+            "any",
+            "board['tickets'].get",
+            "checked_paths.append",
+            "closure.cohort_scope",
+            "closure.hash_paths",
+            "closure.read_registry",
+            "closure.registry_path",
+            "closure.render_registry",
+            "closure.resolve_implementation_source",
+            "closure.upsert_member",
+            "closure_request_error",
+            "codec.read_document",
+            "cohort.get",
+            "event.get",
+            "evidence_preconditions.update",
+            "existing.get",
+            "fields.get",
+            "hash_bytes",
+            "hash_file_dependency",
+            "hash_tree_dependency",
+            "json.dumps",
+            "member.get",
+            "next",
+            "ord",
+            "parts[0].lower",
+            "patch_state",
+            "prove_inside",
+            "re.fullmatch",
+            "record.get",
+            "registry.get",
+            "registry.get('cohorts', {}).values",
+            "registry_doc.encode",
+            "rel.split",
+            "rel.startswith",
+            "rel.strip",
+            "resolved.relative_to",
+            "resolved.relative_to(root.resolve()).parts[0].lower",
+            "reversed",
+            "root.resolve",
+            "semantic_receipt_snapshot",
+            "set",
+            "sorted",
+            "source_gate.get",
+            "str",
+            "str(raw).replace",
+            "ticket.get",
+            "uuid4_hex",
+            "verification_evidence",
+            "work_closure_gate"
+          ]
+        },
+        "bind_closed_cohort": {
+          "line": 4538,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_bind_closed_cohort",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_set_closure_fields": {
+          "line": 4549,
+          "calls": [
+            "''.join",
+            "', '.join",
+            "ValueError",
+            "board_text.splitlines",
+            "escape_ticket_description",
+            "lines[idx].endswith",
+            "parse_board",
+            "parsed['tickets'].get",
+            "set_ticket_field",
+            "ticket['raw'].rstrip"
+          ]
+        },
+        "_move_ticket": {
+          "line": 4606,
+          "calls": [
+            "''.join",
+            "ValueError",
+            "assert_live_record",
+            "board_text.splitlines",
+            "escape_ticket_description",
+            "heading_idx.get",
+            "len",
+            "line.rstrip",
+            "marked.rstrip",
+            "out.append",
+            "out.insert",
+            "re.sub",
+            "remove_ticket_field",
+            "set_ticket_field",
+            "str",
+            "str(retry_not_before or '').strip",
+            "str(retry_not_before).strip",
+            "stripped.startswith",
+            "ticket_line.replace"
+          ]
+        },
+        "_plan_supersede_ticket": {
+          "line": 4698,
+          "calls": [
+            "'; '.join",
+            "Result",
+            "_actor_provenance",
+            "_docs_preconditions",
+            "_identity",
+            "_log_targets",
+            "_move_ticket",
+            "_producer_event",
+            "_project_board_mutation",
+            "_read",
+            "_refuse",
+            "_seat_agent",
+            "_settle_stop_reason",
+            "_sup.authority_error",
+            "_sup.cycle_error",
+            "_sup.evidence_error",
+            "_sup.grammar_hint",
+            "_target",
+            "_ticket_fields_in_place",
+            "build_plan",
+            "docs.setdefault",
+            "docs.setdefault('_authority_preconditions', {}).update",
+            "docs['log'].text_norm.rstrip",
+            "fields.get",
+            "old.get",
+            "parse_state",
+            "parse_state(new_state).get",
+            "patch_state",
+            "re.fullmatch",
+            "route_next",
+            "routed.get",
+            "str",
+            "str(authority or '').strip",
+            "str(authority or '').strip().upper",
+            "str(evidence or '').strip",
+            "str(evidence or '').strip().upper",
+            "str(fields.get('source_receipts') or '').strip",
+            "str(old_ticket or '').strip",
+            "str(old_ticket or '').strip().upper",
+            "str(successor_ticket or '').strip",
+            "str(successor_ticket or '').strip().upper",
+            "successor.get",
+            "successor.get('fields', {}).get",
+            "supersession_gate",
+            "ticket_is_workable",
+            "tickets.get",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "supersede_ticket": {
+          "line": 4964,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_supersede_ticket",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_plan_resolve_external_ticket": {
+          "line": 4997,
+          "calls": [
+            "'; '.join",
+            "Result",
+            "TargetPlan",
+            "_actor_provenance",
+            "_docs_preconditions",
+            "_external.authority_error",
+            "_external.build_receipt",
+            "_external.contract_digest",
+            "_external.contract_plan",
+            "_external.execution_entry",
+            "_external.implementation_error",
+            "_external.next_receipt_id",
+            "_external.operator_gate_problem",
+            "_external.reason_error",
+            "_external.resolution_problems",
+            "_identity",
+            "_log_targets",
+            "_move_ticket",
+            "_producer_event",
+            "_project_board_mutation",
+            "_read",
+            "_refuse",
+            "_run_verification_command",
+            "_seat_agent",
+            "_settle_stop_reason",
+            "_target",
+            "_ticket_fields_in_place",
+            "_verification_contract_digest",
+            "all",
+            "build_plan",
+            "compaction_ids.append",
+            "continuation_parent",
+            "docs['log'].text_norm.rstrip",
+            "ensure_project_lineage",
+            "entry.get",
+            "fields.get",
+            "gate.get",
+            "hash_bytes",
+            "isinstance",
+            "json.dumps",
+            "json.dumps(record, indent=2, sort_keys=True).encode",
+            "len",
+            "list",
+            "new_log.rstrip",
+            "parse_state",
+            "parse_state(new_state).get",
+            "patch_state",
+            "plan.get",
+            "prior_blocker.encode",
+            "re.fullmatch",
+            "resume_parent.get",
+            "resume_parent.get('fields', {}).get",
+            "route_next",
+            "routed.get",
+            "str",
+            "str(authority or '').strip",
+            "str(contract).strip",
+            "str(implementation or '').strip",
+            "str(item).strip",
+            "str(resolution_reason or '').strip",
+            "str(work or '').strip",
+            "str(work or '').strip().upper",
+            "ticket.get",
+            "tickets.get",
+            "uuid4_hex",
+            "validate_texts",
+            "work_closure_gate"
+          ]
+        },
+        "resolve_external_ticket": {
+          "line": 5412,
+          "calls": [
+            "Path",
+            "Result",
+            "_now",
+            "_plan_resolve_external_ticket",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "expected.get",
+            "isinstance"
+          ]
+        },
+        "_plan_repair_metadata": {
+          "line": 5480,
+          "calls": [
+            "','.join",
+            "'; '.join",
+            "'|'.join",
+            "Result",
+            "TargetPlan",
+            "_actor_provenance",
+            "_docs_preconditions",
+            "_engine_identity",
+            "_identity",
+            "_log_targets",
+            "_mr.authority_kind",
+            "_mr.authority_problem",
+            "_mr.build_receipt",
+            "_mr.is_canonical_token",
+            "_mr.latest_receipt_for",
+            "_mr.next_receipt_id",
+            "_mr.receipt_exists",
+            "_mr.receipt_tokens",
+            "_mr.target_problem",
+            "_mr.work_membership",
+            "_producer_event",
+            "_project_board_mutation",
+            "_read",
+            "_refuse",
+            "_seat_agent",
+            "_settle_stop_reason",
+            "_target",
+            "_ticket_fields_in_place",
+            "all",
+            "board['tickets'].get",
+            "bool",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "ensure_project_lineage",
+            "fields.get",
+            "hash_bytes",
+            "json.dumps",
+            "json.dumps(record, indent=2, sort_keys=True).encode",
+            "original_value.encode",
+            "parse_state",
+            "parse_state(new_state).get",
+            "patch_state",
+            "prior.get",
+            "re.fullmatch",
+            "route_next",
+            "routed.get",
+            "sorted",
+            "str",
+            "str(authority or '').strip",
+            "str(field or '').strip",
+            "str(to_target or '').strip",
+            "str(to_target or '').strip().upper",
+            "str(work or '').strip",
+            "str(work or '').strip().upper",
+            "ticket.get",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "repair_metadata": {
+          "line": 5792,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_repair_metadata",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "bool",
+            "isinstance",
+            "str"
+          ]
+        },
+        "_plan_retire_source": {
+          "line": 5824,
+          "calls": [
+            "'; '.join",
+            "'|'.join",
+            "(index.get('tombstones') or {}).get",
+            "Result",
+            "_actor_provenance",
+            "_docs_preconditions",
+            "_identity",
+            "_log_targets",
+            "_producer_event",
+            "_read",
+            "_refuse",
+            "_ret.index_target",
+            "_ret.is_retired_tombstone",
+            "_ret.retired_source_ref",
+            "_ret.source_only_retirement_targets",
+            "_ret.source_retirement_errors",
+            "_ret.valid_source_retirement_reason",
+            "_seat_agent",
+            "_settle_stop_reason",
+            "_target",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "existing.get",
+            "first.split",
+            "first.split(marker, 1)[1].split",
+            "first.split(marker, 1)[1].split(',', 1)[0].strip",
+            "index.get",
+            "intake._read_index",
+            "intake._valid_receipt_id",
+            "parse_state",
+            "parse_state(new_state).get",
+            "patch_state",
+            "retirement.get",
+            "route_next",
+            "routed.get",
+            "source_targets.append",
+            "str",
+            "str(note or '').strip",
+            "str(reason or '').strip",
+            "str(reason or '').strip().upper",
+            "str(receipt_id or '').strip",
+            "str(receipt_id or '').strip().upper",
+            "str(successor or '').strip",
+            "str(successor or '').strip().upper",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "retire_source": {
+          "line": 6009,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_retire_source",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_remove_ticket": {
+          "line": 6042,
+          "calls": [
+            "''.join",
+            "ValueError",
+            "board_text.splitlines",
+            "line.rstrip",
+            "out.append",
+            "stripped.startswith"
+          ]
+        },
+        "_retire_targets": {
+          "line": 6078,
+          "calls": [
+            "','.join",
+            "'; '.join",
+            "'|'.join",
+            "Result",
+            "_actor_provenance",
+            "_bind_legacy_retirement",
+            "_docs_preconditions",
+            "_identity",
+            "_intake._read_index",
+            "_intake._read_meta",
+            "_intake.is_linked_to",
+            "_intake.linked_works",
+            "_intake.verify_integrity",
+            "_log_targets",
+            "_move_ticket",
+            "_producer_event",
+            "_read",
+            "_refuse",
+            "_remove_ticket",
+            "_ret.authority_error",
+            "_ret.discovery_error",
+            "_ret.grammar_hint",
+            "_ret.index_target",
+            "_ret.legacy_ticket_record_errors",
+            "_ret.load_ticket_retirement",
+            "_ret.note_error",
+            "_ret.resolve_evidence",
+            "_ret.retired_ticket_ref",
+            "_ret.retirement_message",
+            "_ret.shared_fields",
+            "_ret.source_retirement_targets",
+            "_ret.system_correction_error",
+            "_ret.ticket_retirement_target",
+            "_retirement_event_oversize",
+            "_seat_agent",
+            "_settle_stop_reason",
+            "_target",
+            "_ticket_fields_in_place",
+            "build_plan",
+            "continuation_parent",
+            "discovery_event.strip",
+            "discovery_event.strip().upper",
+            "docs['log'].text_norm.rstrip",
+            "evidence.strip",
+            "index.get",
+            "isinstance",
+            "note.strip",
+            "owned.update",
+            "parent_fields.get",
+            "parse_state",
+            "parse_state(new_state).get",
+            "part.strip",
+            "part.strip().upper",
+            "patch_state",
+            "re.fullmatch",
+            "record.get",
+            "remove.append",
+            "resume_parent.get",
+            "route_next",
+            "routed.get",
+            "sorted",
+            "source_targets.append",
+            "source_targets.extend",
+            "state.get",
+            "str",
+            "str(authority).strip",
+            "str(authority).strip().upper",
+            "str(parent_fields.get('claim_time') or '').strip",
+            "str(parent_fields.get('owner') or '').strip",
+            "str(parse_state(new_state).get('next_action') or '').startswith",
+            "str(ticket.get('fields', {}).get('source_receipts') or '').split",
+            "ticket.get",
+            "ticket.get('fields', {}).get",
+            "tickets.get",
+            "tuple",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "_retirement_event_oversize": {
+          "line": 6519,
+          "calls": [
+            "len",
+            "redact_credentials",
+            "render_event",
+            "rendered.encode"
+          ]
+        },
+        "_bind_legacy_retirement": {
+          "line": 6562,
+          "calls": [
+            "'; '.join",
+            "_actor_provenance",
+            "_docs_preconditions",
+            "_identity",
+            "_intake._read_index",
+            "_log_targets",
+            "_producer_event",
+            "_refuse",
+            "_ret.authority_error",
+            "_ret.binding_message",
+            "_ret.discovery_error",
+            "_ret.is_retired_tombstone",
+            "_ret.legacy_rebind_targets",
+            "_ret.resolve_evidence",
+            "_ret.retired_archive_errors",
+            "_ret.retired_ticket_ref",
+            "_ret.retirement_head",
+            "_ret.shared_fields",
+            "_retirement_event_oversize",
+            "_seat_agent",
+            "_target",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "events.get",
+            "historical.get",
+            "index.get",
+            "index.get('tombstones', {}).get",
+            "int",
+            "list",
+            "patch_state",
+            "record.get",
+            "str",
+            "str(historical.get('op_id') or '').startswith",
+            "tomb.get",
+            "validate_texts"
+          ]
+        },
+        "retire_ticket": {
+          "line": 6783,
+          "calls": [
+            "Path",
+            "_now",
+            "_render_plan",
+            "_retire_targets",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance",
+            "ticket_id.upper"
+          ]
+        },
+        "_is_placeholder_verify": {
+          "line": 6823,
+          "calls": [
+            "(verify or '').strip",
+            "(verify or '').strip().lower",
+            "cleaned.startswith",
+            "len"
+          ]
+        },
+        "_ticket_add_route": {
+          "line": 6840,
+          "calls": [
+            "' '.join",
+            "len",
+            "re.fullmatch",
+            "str",
+            "str(description or '').split",
+            "str(priority or '').strip",
+            "str(priority or '').strip().upper",
+            "str(regression or '').strip",
+            "str(regression or '').strip().lower"
+          ]
+        },
+        "ticket_add": {
+          "line": 6859,
+          "calls": [
+            "', '.join",
+            "'; '.join",
+            "Path",
+            "_actor_provenance",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_insert_todo",
+            "_is_placeholder_verify",
+            "_log_targets",
+            "_now",
+            "_read",
+            "_recompute_free_slot_route",
+            "_refuse",
+            "_render_plan",
+            "_seat_agent",
+            "_target",
+            "_ticket_add_route",
+            "_utc_iso",
+            "apply_plan",
+            "assert_single_record",
+            "build_plan",
+            "description.strip",
+            "docs['log'].text_norm.rstrip",
+            "escape_ticket_description",
+            "getattr",
+            "given.upper",
+            "new_projection.board_text.rstrip",
+            "next_ticket_id",
+            "patch_state",
+            "prepare_new",
+            "re.fullmatch",
+            "redact_credentials",
+            "str",
+            "str(priority or '').strip",
+            "str(regression or '').strip",
+            "str(regression or '').strip().lower",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "_foreign_field_skew": {
+          "line": 7033,
+          "calls": [
+            "(state or {}).get",
+            "int",
+            "running_protocol_major",
+            "str",
+            "str((state or {}).get('saipen_version') or '0').strip"
+          ]
+        },
+        "compact_board": {
+          "line": 7058,
+          "calls": [
+            "''.join",
+            "'; '.join",
+            "Path",
+            "Result",
+            "_docs_preconditions",
+            "_event_line",
+            "_foreign_field_skew",
+            "_identity",
+            "_log_targets",
+            "_now",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_seat_agent",
+            "_target",
+            "_utc_iso",
+            "any",
+            "apply_plan",
+            "board['tickets'].get",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "event_lines.append",
+            "event_numbers.append",
+            "foreign_field_ticket_ids",
+            "len",
+            "oversized_ticket_ids",
+            "patch_state",
+            "prepare_existing",
+            "resolve_detail",
+            "set",
+            "str",
+            "str(ticket.get('fields', {}).get('detail_ref') or '').strip",
+            "ticket.get",
+            "ticket.get('fields', {}).get",
+            "unrecognized_field_ticket",
+            "uuid4_hex",
+            "validate_texts",
+            "zip"
+          ]
+        },
+        "ticket_verify": {
+          "line": 7265,
+          "calls": [
+            "'; '.join",
+            "(board['tickets'][ticket_id].get('fields') or {}).get",
+            "Path",
+            "_active_claim_refusal",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_now",
+            "_prior.strip",
+            "_project_board_mutation",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_seat_agent",
+            "_target",
+            "_ticket_fields_in_place",
+            "_utc_iso",
+            "acceptance_contract._recorded",
+            "acceptance_contract.prepare",
+            "acceptance_contract.protected",
+            "acceptance_contract.resolve",
+            "apply_plan",
+            "assert_single_record",
+            "board['tickets'][ticket_id].get",
+            "board['tickets'][ticket_id].get('fields', {}).get",
+            "build_plan",
+            "docs.setdefault",
+            "docs.setdefault('_authority_preconditions', {}).update",
+            "docs['log'].text_norm.rstrip",
+            "escape_ticket_description",
+            "isinstance",
+            "patch_state",
+            "redact_credentials",
+            "regression.strip",
+            "regression.strip().lower",
+            "str",
+            "uuid4_hex",
+            "validate_texts",
+            "verify.strip"
+          ]
+        },
+        "ticket_requires": {
+          "line": 7458,
+          "calls": [
+            "'; '.join",
+            "(board['tickets'][ticket_id].get('fields') or {}).get",
+            "(value or '').strip",
+            "(value or '').strip().lower",
+            "Path",
+            "Result",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_now",
+            "_project_board_mutation",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_seat_agent",
+            "_target",
+            "_ticket_fields_in_place",
+            "_utc_iso",
+            "apply_plan",
+            "board['tickets'][ticket_id].get",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "format_ticket_requires",
+            "parse_ticket_requires",
+            "patch_state",
+            "sorted",
+            "str",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "_improve_module": {
+          "line": 7599,
+          "calls": [
+            "Path",
+            "Path(__file__).resolve",
+            "importlib.import_module",
+            "str",
+            "sys.path.insert"
+          ]
+        },
+        "_sweep_linkage": {
+          "line": 7619,
+          "calls": [
+            "_improve_module",
+            "improve.sweep_ticket_linkage",
+            "str"
+          ]
+        },
+        "ticket_reasoning": {
+          "line": 7628,
+          "calls": [
+            "'; '.join",
+            "Path",
+            "Result",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_now",
+            "_project_board_mutation",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_seat_agent",
+            "_sweep_linkage",
+            "_target",
+            "_ticket_fields_in_place",
+            "_utc_iso",
+            "apply_plan",
+            "assert_single_record",
+            "board['tickets'][ticket_id].get",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "escape_ticket_description",
+            "fields.get",
+            "len",
+            "linkage.get",
+            "patch_state",
+            "recurrence.strip",
+            "redact_credentials",
+            "str",
+            "uuid4_hex",
+            "validate_texts",
+            "value.strip",
+            "weak_model.strip"
+          ]
+        },
+        "_user_request_body": {
+          "line": 7764,
+          "calls": [
+            "', '.join",
+            "'\\n'.join",
+            "lines.append",
+            "lines.extend",
+            "text.strip"
+          ]
+        },
+        "_request_title": {
+          "line": 7801,
+          "calls": [
+            "first[:limit - 3].rstrip",
+            "len",
+            "ln.strip",
+            "next",
+            "re.sub",
+            "text.splitlines"
+          ]
+        },
+        "user_request": {
+          "line": 7816,
+          "calls": [
+            "(verify or '').strip",
+            "Path",
+            "Result",
+            "_guard_events.shell_control_expression",
+            "_is_placeholder_verify",
+            "_project_user_request",
+            "_read",
+            "_refuse",
+            "_request_title",
+            "_source_refusal_code",
+            "_user_request_body",
+            "assert_single_record",
+            "bool",
+            "captured.get",
+            "codec.read_doc",
+            "continuation_work",
+            "current_state.get",
+            "existing.get",
+            "intake.capture",
+            "intake.find_by_body",
+            "intake.link_work_to",
+            "isinstance",
+            "linked.get",
+            "list",
+            "obligation.get",
+            "operator_task.authority_for_receipt",
+            "operator_task.witness",
+            "owed.pop",
+            "parse_board",
+            "pending_ingress.enforce",
+            "pending_ingress.pending",
+            "projected.data.get",
+            "provenance.pop",
+            "re.fullmatch",
+            "repr",
+            "str",
+            "text.strip"
+          ]
+        },
+        "authority_capture": {
+          "line": 8049,
+          "calls": [
+            "'; '.join",
+            "(existing or {}).get",
+            "Path",
+            "Result",
+            "_gate_capsule.get",
+            "_handoff.grammar_hint",
+            "_handoff.handoff_grants",
+            "_intake.capture",
+            "_intake.find_by_body",
+            "_refuse",
+            "_ret.authority_grants",
+            "_ret.capsule_problem",
+            "_source_refusal_code",
+            "captured.get",
+            "gate_decision.capsule_problem",
+            "goal_authority.parse_capsule",
+            "hashlib.sha256",
+            "hashlib.sha256(text.encode('utf-8')).hexdigest",
+            "isinstance",
+            "operator_task.witness",
+            "str",
+            "str(captured.get('code') or '').startswith",
+            "text.encode",
+            "text.strip"
+          ]
+        },
+        "_project_user_request": {
+          "line": 8154,
+          "calls": [
+            "', '.join",
+            "'; '.join",
+            "_actor_provenance",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_insert_todo",
+            "_log_targets",
+            "_now",
+            "_read",
+            "_recompute_free_slot_route",
+            "_refuse",
+            "_seat_agent",
+            "_target",
+            "_utc_iso",
+            "apply_plan",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "escape_ticket_description",
+            "getattr",
+            "isinstance",
+            "len",
+            "max",
+            "next_ticket_id",
+            "operator_task.authority_for_receipt",
+            "operator_task.projection_priority",
+            "parse_state",
+            "parse_state(new_state).get",
+            "patch_state",
+            "redact_credentials",
+            "render",
+            "shrink",
+            "str",
+            "text[:keep].rstrip",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "cohort_status": {
+          "line": 8334,
+          "calls": [
+            "(registry.get('cohorts') or {}).get",
+            "Path",
+            "Result",
+            "_closure.cohort_readiness",
+            "_closure.read_registry",
+            "_refuse",
+            "cohort.get",
+            "registry.get",
+            "sorted",
+            "str"
+          ]
+        },
+        "cohort_ship": {
+          "line": 8370,
+          "calls": [
+            "'; '.join",
+            "(registry.get('cohorts') or {}).get",
+            "Path",
+            "Result",
+            "_closure.cohort_readiness",
+            "_closure.cohort_scope",
+            "_closure.read_registry",
+            "_refuse",
+            "cohort.get",
+            "execute_release",
+            "getattr",
+            "outcome.get",
+            "plan_release",
+            "registry.get",
+            "sorted",
+            "str"
+          ]
+        },
+        "ticket_move": {
+          "line": 8504,
+          "calls": [
+            "Path",
+            "_now",
+            "_render_plan",
+            "_ticket_targets",
+            "_utc_iso",
+            "apply_plan",
+            "finish_ticket",
+            "isinstance"
+          ]
+        },
+        "_state_only_plan": {
+          "line": 8553,
+          "calls": [
+            "'; '.join",
+            "(root / target.path).exists",
+            "_actor_provenance",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_read",
+            "_refuse",
+            "_seat_agent",
+            "_target",
+            "base_log.rstrip",
+            "build_plan",
+            "defect_delta",
+            "list",
+            "mutate",
+            "patch_state",
+            "preconditions.get",
+            "preconditions.setdefault",
+            "preconditions.update",
+            "str",
+            "targets.extend",
+            "uuid4_hex",
+            "validate_project",
+            "validate_texts"
+          ]
+        },
+        "set_goal_intent": {
+          "line": 8705,
+          "calls": [
+            "Path",
+            "_now",
+            "_refuse",
+            "_render_plan",
+            "_state_only_plan",
+            "_utc_iso",
+            "_validate_goal_objective",
+            "apply_plan",
+            "isinstance",
+            "patch_state",
+            "transition_execution_intent"
+          ]
+        },
+        "authorize_goal_continuation": {
+          "line": 8754,
+          "calls": [
+            "'; '.join",
+            "(old.get('receipt_metadata') or {}).get",
+            "(old.get('receipt_metadata') or {}).get('goal_authority_transition', {}).get",
+            "Path",
+            "Result",
+            "_active_claim_refusal",
+            "_now",
+            "_read",
+            "_refuse",
+            "_state_only_plan",
+            "_utc_iso",
+            "apply_plan",
+            "captured.get",
+            "current.get",
+            "goal_authority.current_binding",
+            "goal_authority.grant_fields",
+            "goal_authority.parse_capsule",
+            "goal_authority.persistent",
+            "goal_authority.source_proof",
+            "goal_authority.transition_grant",
+            "hashlib.sha256",
+            "hashlib.sha256(text.encode('utf-8')).hexdigest",
+            "intake.capture",
+            "isinstance",
+            "old.get",
+            "operator_task.authority_for_provenance",
+            "operator_task.witness",
+            "patch_state",
+            "provenance.get",
+            "str",
+            "text.encode",
+            "uuid4_hex"
+          ]
+        },
+        "_validate_goal_objective": {
+          "line": 8878,
+          "calls": [
+            "objective.strip",
+            "redact_credentials",
+            "redact_credentials(raw).strip"
+          ]
+        },
+        "_goal_plan_steps": {
+          "line": 8898,
+          "calls": [
+            "_re.split",
+            "c.strip",
+            "c.strip().strip",
+            "c.strip().strip('.!?').strip"
+          ]
+        },
+        "_goal_plan_ticket_ids": {
+          "line": 8912,
+          "calls": [
+            "ValueError",
+            "next_ticket_id",
+            "range"
+          ]
+        },
+        "goal_entry": {
+          "line": 8923,
+          "calls": [
+            "''.join",
+            "'; '.join",
+            "Path",
+            "Result",
+            "_claim_move",
+            "_docs_preconditions",
+            "_event_line",
+            "_goal_plan_steps",
+            "_goal_plan_ticket_ids",
+            "_identity",
+            "_log_targets",
+            "_now",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_target",
+            "_utc_iso",
+            "_validate_goal_objective",
+            "any",
+            "apply_plan",
+            "blines.insert",
+            "board['tickets'].values",
+            "bool",
+            "build_plan",
+            "captured.get",
+            "captured.items",
+            "demoted.replace",
+            "demoted.rstrip",
+            "docs['log'].text_norm.rstrip",
+            "enumerate",
+            "escape_ticket_description",
+            "getattr",
+            "goal_authority.grant_fields",
+            "goal_ingress_identity",
+            "host_session_binding",
+            "int",
+            "isinstance",
+            "len",
+            "line.rstrip",
+            "lines.insert",
+            "lines.pop",
+            "ln.rstrip",
+            "ln.rstrip('\\n').startswith",
+            "new_board_text.splitlines",
+            "next",
+            "operator_task.authority_for_provenance",
+            "operator_task.witness",
+            "patch_state",
+            "plan_lines.append",
+            "provenance.get",
+            "re.fullmatch",
+            "remove_ticket_field",
+            "set",
+            "start_work",
+            "state.get",
+            "str",
+            "str(state.get('goal_ingress') or '').strip",
+            "stripped.startswith",
+            "transition_execution_intent",
+            "uuid4_hex",
+            "validate_texts",
+            "zip"
+          ]
+        },
+        "set_converge_intent": {
+          "line": 9229,
+          "calls": [
+            "Path",
+            "_identity",
+            "_now",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_route_next",
+            "_routed.get",
+            "_state_only_plan",
+            "_target",
+            "_utc_iso",
+            "apply_plan",
+            "before.get",
+            "before_state.get",
+            "codec.read_document",
+            "ensure_project_lineage",
+            "hasattr",
+            "isinstance",
+            "json.dumps",
+            "parse_state",
+            "patch_state",
+            "project_lineage_identity",
+            "project_writer_lock",
+            "transition_execution_intent",
+            "uuid4_hex"
+          ]
+        },
+        "enter_ship_convergence": {
+          "line": 9380,
+          "calls": [
+            "'; '.join",
+            "Path",
+            "_active_claim_refusal",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_now",
+            "_read",
+            "_refresh_active_claim",
+            "_refuse",
+            "_render_plan",
+            "_target",
+            "_utc_iso",
+            "apply_plan",
+            "build_plan",
+            "compute_source_identity",
+            "docs['log'].text_norm.rstrip",
+            "patch_state",
+            "source_identity_dependency",
+            "state.get",
+            "targets.append",
+            "transition_execution_intent",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "finalize_converge_intent": {
+          "line": 9509,
+          "calls": [
+            "Path",
+            "_identity",
+            "_now",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_state_only_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance",
+            "patch_state",
+            "state.get",
+            "transition_execution_intent"
+          ]
+        },
+        "_candidate_home_errors": {
+          "line": 9590,
+          "calls": [
+            "_home_layout_errors",
+            "errors.append",
+            "state.get",
+            "str"
+          ]
+        },
+        "_home_layout_errors": {
+          "line": 9616,
+          "calls": [
+            "(home / 'BOOT.md').is_file",
+            "(home / 'extensions' / 'subs' / 'PROTOCOL.md').is_file",
+            "(home / 'saipen' / 'BOOT.md').is_file",
+            "Path",
+            "errors.append",
+            "home.is_dir",
+            "match.group",
+            "re.match",
+            "version_file.is_file",
+            "version_file.read_text",
+            "version_file.read_text(encoding='utf-8-sig', errors='replace').strip"
+          ]
+        },
+        "_normalized_log_lines": {
+          "line": 9658,
+          "calls": [
+            "enumerate",
+            "line.lstrip",
+            "line.lstrip().startswith",
+            "line.strip",
+            "lines.append",
+            "log_text.splitlines",
+            "parse_log_line",
+            "re.search",
+            "refusals.append",
+            "repairs.append"
+          ]
+        },
+        "normalize_log": {
+          "line": 9700,
+          "calls": [
+            "'; '.join",
+            "'\\n'.join",
+            "'\\n'.join(lines).rstrip",
+            "Path",
+            "TargetPlan",
+            "_normalized_log_lines",
+            "_now",
+            "_parse",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_state_only_plan",
+            "_utc_iso",
+            "apply_plan",
+            "docs['log'].encode",
+            "hash_bytes",
+            "isinstance",
+            "len",
+            "max",
+            "normalized.splitlines",
+            "patch_state",
+            "state.get",
+            "task.startswith",
+            "uuid4_hex"
+          ]
+        },
+        "quarantine_log_tail": {
+          "line": 9792,
+          "calls": [
+            "', '.join",
+            "Path",
+            "TargetPlan",
+            "_lifecycle_authority.quarantine_note",
+            "_lifecycle_authority.typed_rows",
+            "_now",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_state_only_plan",
+            "_utc_iso",
+            "apply_plan",
+            "docs.get",
+            "docs['log'].encode",
+            "hash_bytes",
+            "hashlib.sha256",
+            "hashlib.sha256(preserved_bytes).hexdigest",
+            "isinstance",
+            "len",
+            "map",
+            "patch_state",
+            "reason.startswith",
+            "state.get",
+            "task.startswith",
+            "uuid4_hex"
+          ]
+        },
+        "_sealed_segment_bindings": {
+          "line": 9888,
+          "calls": [
+            "Path",
+            "docs.get",
+            "hash_bytes",
+            "hash_tree_dependency",
+            "path.read_bytes",
+            "path.relative_to",
+            "path.relative_to(root).as_posix",
+            "seen.items"
+          ]
+        },
+        "seal_log": {
+          "line": 9921,
+          "calls": [
+            "', '.join",
+            "'; '.join",
+            "'\\n'.join",
+            "(root / segment).exists",
+            "Path",
+            "TargetPlan",
+            "_now",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_sealed_segment_bindings",
+            "_state_only_plan",
+            "_utc_iso",
+            "apply_plan",
+            "board['tickets'].values",
+            "dataclasses.replace",
+            "hash_bytes",
+            "hashlib.sha256",
+            "hashlib.sha256(sealed_bytes).hexdigest",
+            "heading.append",
+            "heading.pop",
+            "heading[-1].strip",
+            "isinstance",
+            "len",
+            "line.lstrip",
+            "line.lstrip().startswith",
+            "line.strip",
+            "log_doc.text.encode",
+            "log_doc.text_norm.splitlines",
+            "map",
+            "next_segment_rel",
+            "patch_state",
+            "plan.preconditions.items",
+            "preconditions.update",
+            "seal_due",
+            "snapshot_contract_errors",
+            "state.get",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "_journal_debt": {
+          "line": 10094,
+          "calls": [
+            "(root / OPS_DIR).is_dir",
+            "(root / OPS_DIR).iterdir",
+            "entry.glob",
+            "len",
+            "p.is_dir",
+            "p.is_file",
+            "p.stat",
+            "queue.is_dir",
+            "queue.iterdir",
+            "sum"
+          ]
+        },
+        "compact_journal": {
+          "line": 10112,
+          "calls": [
+            "(root / LEGACY_SWEEP_MARKER).exists",
+            "Path",
+            "Result",
+            "_journal_debt",
+            "_refuse",
+            "compact_committed",
+            "enqueue_legacy_staged",
+            "len",
+            "list",
+            "outcome.get",
+            "project_writer_lock",
+            "str",
+            "writer_busy_payload"
+          ]
+        },
+        "scrub_board": {
+          "line": 10189,
+          "calls": [
+            "''.join",
+            "''.join((physical[n - 1] for n in sorted(drop))).encode",
+            "', '.join",
+            "'; '.join",
+            "Path",
+            "TargetPlan",
+            "_actor_provenance",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_now",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_seat_agent",
+            "_target",
+            "_utc_iso",
+            "active_receipt_works",
+            "apply_plan",
+            "board_doc.text.encode",
+            "board_doc.text.splitlines",
+            "board_scrub.select",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "enumerate",
+            "hash_bytes",
+            "hash_tree_dependency",
+            "hashlib.sha256",
+            "hashlib.sha256(pruned_bytes).hexdigest",
+            "kept_by.items",
+            "len",
+            "list",
+            "new_board_text.encode",
+            "new_board_text.replace",
+            "new_board_text.replace('\\r\\n', '\\n').replace",
+            "patch_state",
+            "selection.kept_by",
+            "sorted",
+            "state.get",
+            "tickets.values",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "migrate_saipen_generation": {
+          "line": 10356,
+          "calls": [
+            "'; '.join",
+            "Path",
+            "Path(home).resolve",
+            "_home_layout_errors",
+            "_now",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_schema_upgrade_owned",
+            "_state_only_plan",
+            "_utc_iso",
+            "apply_plan",
+            "declared.isdigit",
+            "identity.get",
+            "identity.update",
+            "int",
+            "isinstance",
+            "patch_state",
+            "running_home",
+            "running_style_token",
+            "state.get",
+            "str",
+            "str(state.get('saipen_home') or '').strip"
+          ]
+        },
+        "_commit_rebound_home": {
+          "line": 10477,
+          "calls": [
+            "_now",
+            "_render_plan",
+            "_state_only_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance",
+            "patch_state",
+            "payload.update",
+            "state.get"
+          ]
+        },
+        "rebind_home_auto": {
+          "line": 10536,
+          "calls": [
+            "'; '.join",
+            "Path",
+            "Path(current_home).expanduser",
+            "Path(current_home).expanduser().resolve",
+            "Path(current_home).expanduser().resolve().as_posix",
+            "Path(raw).expanduser",
+            "Path(raw).expanduser().resolve",
+            "Path(raw).expanduser().resolve().as_posix",
+            "Result",
+            "_candidate_home_errors",
+            "_commit_rebound_home",
+            "_read",
+            "_refuse",
+            "candidate.get",
+            "diagnose_install_mismatch",
+            "home_refusal",
+            "host_bootstrap.replacement_candidates",
+            "row.get",
+            "state.get",
+            "str",
+            "str(state.get('saipen_home') or '').strip",
+            "tried.append"
+          ]
+        },
+        "rebind_saipen_home": {
+          "line": 10633,
+          "calls": [
+            "'; '.join",
+            "Path",
+            "Path(candidate_home).expanduser",
+            "Path(candidate_home).expanduser().resolve",
+            "Path(candidate_home).expanduser().resolve().as_posix",
+            "_candidate_home_errors",
+            "_commit_rebound_home",
+            "_read",
+            "_refuse",
+            "persisted_home_access",
+            "state.get",
+            "str"
+          ]
+        },
+        "handover_agent": {
+          "line": 10686,
+          "calls": [
+            "'; '.join",
+            "Path",
+            "_claim_fields_in_place",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_operation_clock",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_target",
+            "active_ticket.get",
+            "active_ticket['fields'].get",
+            "apply_plan",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "host_session_binding",
+            "isinstance",
+            "ownership.classify_active_ownership",
+            "patch_state",
+            "state.get",
+            "targets.append",
+            "tickets.get",
+            "tickets.values",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "handoff_claim": {
+          "line": 10868,
+          "calls": [
+            "Path",
+            "_SEAT_ID_RE.fullmatch",
+            "_handoff.authority_error",
+            "_handoff.grammar_hint",
+            "_read",
+            "_refuse",
+            "authority.strip",
+            "authority.strip().upper",
+            "board['tickets'].get",
+            "handover_agent",
+            "re.fullmatch",
+            "repr",
+            "state.get",
+            "str",
+            "str(ticket['fields'].get('owner') or '').strip",
+            "str(ticket_id or '').strip",
+            "str(ticket_id or '').strip().upper",
+            "str(to_agent or '').strip",
+            "ticket.get",
+            "ticket['fields'].get"
+          ]
+        },
+        "reauthorize_valve": {
+          "line": 10964,
+          "calls": [
+            "Path",
+            "_active_claim_refusal",
+            "_audit_projection",
+            "_derived_goal_counters",
+            "_now",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "_route_next",
+            "_routed.get",
+            "_state_only_plan",
+            "_utc_iso",
+            "apply_plan",
+            "binding_brake",
+            "bool",
+            "goal_authority.reset_authority",
+            "goal_valve_wait_is_proven",
+            "isinstance",
+            "parse_wait",
+            "patch_state",
+            "state.get"
+          ]
+        },
+        "stop_checkpoint": {
+          "line": 11094,
+          "calls": [
+            "'; '.join",
+            "(active_ticket.get('fields', {}).get('blocker') or '').strip",
+            "(json.dumps({'schema': 1, 'reason': STOP_HANDBACK, 'facts': response_facts, 'delivery': delivery, 'event': event}, ensure_ascii=False, indent=2) + '\\n').encode",
+            "Path",
+            "TargetPlan",
+            "_active_claim_refusal",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_live_before",
+            "_log_targets",
+            "_now",
+            "_read",
+            "_refresh_active_claim",
+            "_refuse",
+            "_render_plan",
+            "_target",
+            "_utc_iso",
+            "active_ticket.get",
+            "active_ticket.get('fields', {}).get",
+            "apply_plan",
+            "board['tickets'].get",
+            "build_plan",
+            "canonical_facts",
+            "codec.read_document",
+            "digest_content.rstrip",
+            "digest_content.rstrip('\\n').splitlines",
+            "digest_doc.encode",
+            "digest_from_facts",
+            "docs['log'].text_norm.rstrip",
+            "hash_bytes",
+            "int",
+            "is_legal_wait",
+            "json.dumps",
+            "na[5:].strip",
+            "parse_state",
+            "patch_state",
+            "response_facts.update",
+            "running_style_contract",
+            "state.get",
+            "str",
+            "targets.append",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "release_scope_hash": {
+          "line": 11277,
+          "calls": [
+            "hashlib.sha256",
+            "hashlib.sha256(raw).hexdigest"
+          ]
+        },
+        "release_scope_matches": {
+          "line": 11284,
+          "calls": [
+            "isinstance",
+            "len",
+            "re.fullmatch",
+            "release_scope_hash"
+          ]
+        },
+        "_plan_record_scope": {
+          "line": 11293,
+          "calls": [
+            "'; '.join",
+            "(root / raw).resolve",
+            "TargetPlan",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_read",
+            "_refuse",
+            "_target",
+            "build_plan",
+            "candidate.relative_to",
+            "clean.append",
+            "codec.read_document",
+            "compute_source_identity",
+            "docs['log'].text_norm.rstrip",
+            "fp.exists",
+            "fp.is_file",
+            "fp.read_bytes",
+            "hash_bytes",
+            "json.dumps",
+            "len",
+            "patch_state",
+            "project_lineage_identity",
+            "rel_path.as_posix",
+            "release_scope_hash",
+            "root.resolve",
+            "scope_doc.encode",
+            "set",
+            "sorted",
+            "source_identity_dependency",
+            "state.get",
+            "str",
+            "subprocess.run",
+            "tickets.get",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "record_scope": {
+          "line": 11469,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_record_scope",
+            "_refuse",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "ensure_project_lineage",
+            "hasattr",
+            "isinstance",
+            "project_writer_lock"
+          ]
+        },
+        "_improve_gate_plan": {
+          "line": 11499,
+          "calls": [
+            "'; '.join",
+            "Result",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_now",
+            "_read",
+            "_refuse",
+            "_target",
+            "_utc_iso",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "patch_state",
+            "remove_state_fields",
+            "state.get",
+            "str",
+            "str(state.get('improve_gate') or '').strip",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "hold_improve": {
+          "line": 11600,
+          "calls": [
+            "Path",
+            "_improve_gate_plan",
+            "_read",
+            "_refuse",
+            "_render_plan",
+            "apply_plan",
+            "board['tickets'].get",
+            "isinstance",
+            "re.fullmatch",
+            "str",
+            "str(gate_ticket or '').strip",
+            "str(gate_ticket or '').strip().upper"
+          ]
+        },
+        "release_improve": {
+          "line": 11646,
+          "calls": [
+            "Path",
+            "_improve_gate_plan",
+            "_render_plan",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_sanitize_remote": {
+          "line": 11660,
+          "calls": [
+            "chr",
+            "rest.replace",
+            "rest.split",
+            "url.replace",
+            "url.split",
+            "url.split('@', 1)[-1].replace",
+            "url.strip"
+          ]
+        },
+        "_plan_first_publish_wait": {
+          "line": 11673,
+          "calls": [
+            "'; '.join",
+            "_docs_preconditions",
+            "_identity",
+            "_log_targets",
+            "_producer_event",
+            "_read",
+            "_refuse",
+            "_sanitize_remote",
+            "_target",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "patch_state",
+            "state.get",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "record_first_publish_wait": {
+          "line": 11738,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_first_publish_wait",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_first_publish_wait_journaled": {
+          "line": 11752,
+          "calls": [
+            "event.get",
+            "parse_log_line",
+            "str",
+            "str(event.get('text') or '').startswith"
+          ]
+        },
+        "_plan_first_publish_confirm": {
+          "line": 11785,
+          "calls": [
+            "'; '.join",
+            "_docs_preconditions",
+            "_event_line",
+            "_first_publish_wait_journaled",
+            "_identity",
+            "_log_targets",
+            "_read",
+            "_refuse",
+            "_sanitize_remote",
+            "_target",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "na.startswith",
+            "patch_state",
+            "state.get",
+            "str",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "confirm_first_publish": {
+          "line": 11874,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_first_publish_confirm",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_identity": {
+          "line": 11889,
+          "calls": [
+            "project_identity"
+          ]
+        },
+        "_plan_crew_closure": {
+          "line": 11895,
+          "calls": [
+            "'; '.join",
+            "TargetPlan",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_live_before",
+            "_log_targets",
+            "_producer_event",
+            "_read",
+            "_refuse",
+            "_target",
+            "build_plan",
+            "codec.read_document",
+            "digest_doc.encode",
+            "docs['log'].text_norm.rstrip",
+            "hash_bytes",
+            "patch_state",
+            "route_next",
+            "routed.get",
+            "state.get",
+            "str",
+            "targets.append",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "_is_converge_intent_epoch": {
+          "line": 12012,
+          "calls": [
+            "isinstance",
+            "re.fullmatch"
+          ]
+        },
+        "_plan_defer_for_crew": {
+          "line": 12019,
+          "calls": [
+            "'; '.join",
+            "_active_claim_refusal",
+            "_docs_preconditions",
+            "_identity",
+            "_is_converge_intent_epoch",
+            "_json.loads",
+            "_log_targets",
+            "_move_ticket",
+            "_producer_event",
+            "_read",
+            "_refuse",
+            "_target",
+            "build_plan",
+            "codec.read_document",
+            "compute_source_identity",
+            "dict",
+            "docs['log'].text_norm.rstrip",
+            "hash_bytes",
+            "len",
+            "patch_state",
+            "project_lineage_identity",
+            "route_next",
+            "routed.get",
+            "scope_doc.text_norm.encode",
+            "scope_path.is_file",
+            "scope_record.get",
+            "source_identity_dependency",
+            "state.get",
+            "tickets.values",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "defer_for_crew": {
+          "line": 12261,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_defer_for_crew",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_plan_clear_wait_role": {
+          "line": 12280,
+          "calls": [
+            "'; '.join",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_move_ticket",
+            "_read",
+            "_refuse",
+            "_target",
+            "blocker_class",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "patch_state",
+            "state.get",
+            "ticket.get",
+            "ticket.get('fields', {}).get",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "clear_wait_role": {
+          "line": 12362,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_clear_wait_role",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_plan_crew_run": {
+          "line": 12376,
+          "calls": [
+            "'; '.join",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_read",
+            "_refuse",
+            "_target",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "len",
+            "list",
+            "patch_state",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "record_crew_run": {
+          "line": 12465,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_crew_run",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_plan_producer_integration": {
+          "line": 12499,
+          "calls": [
+            "'; '.join",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_log_targets",
+            "_read",
+            "_refuse",
+            "_target",
+            "build_plan",
+            "docs['log'].text_norm.rstrip",
+            "patch_state",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "record_producer_integration": {
+          "line": 12593,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_producer_integration",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_plan_convergence_stage": {
+          "line": 12631,
+          "calls": [
+            "', '.join",
+            "'; '.join",
+            "(latest_f.get('receipt_metadata') or {}).get",
+            "_docs_preconditions",
+            "_event_line",
+            "_identity",
+            "_latest_convergence_stage",
+            "_log_targets",
+            "_read",
+            "_refuse",
+            "_target",
+            "build_plan",
+            "clean_exit_allowed",
+            "compute_source_identity",
+            "convergence_stage_satisfied",
+            "docs['log'].text_norm.rstrip",
+            "latest_f.get",
+            "list",
+            "patch_state",
+            "source_identity_dependency",
+            "uuid4_hex",
+            "validate_texts"
+          ]
+        },
+        "record_convergence": {
+          "line": 12797,
+          "calls": [
+            "Path",
+            "_now",
+            "_plan_convergence_stage",
+            "_render_plan",
+            "_utc_iso",
+            "apply_plan",
+            "isinstance"
+          ]
+        },
+        "_render_plan": {
+          "line": 12825,
+          "calls": [
+            "Result",
+            "dict",
+            "expected.get"
+          ]
+        }
+      }
+    },
+    {
+      "path": "tools/saipen_engine/focused_unit.py",
+      "functions": {
+        "policy": {
+          "line": 25,
+          "calls": [
+            "data.get",
+            "json.loads",
+            "path.read_text",
+            "type"
+          ]
+        },
+        "_patterns": {
+          "line": 43,
+          "calls": [
+            "ValueError",
+            "isinstance",
+            "pattern.endswith",
+            "pattern.startswith",
+            "set",
+            "sorted"
+          ]
+        },
+        "record_problem": {
+          "line": 53,
+          "calls": [
+            "'; '.join",
+            "_patterns",
+            "any",
+            "core_unit.judge",
+            "core_unit.tree_fingerprint",
+            "isinstance",
+            "len",
+            "record.get",
+            "run.get",
+            "str",
+            "sum",
+            "type"
+          ]
+        },
+        "ship_gate": {
+          "line": 84,
+          "calls": [
+            "(root / RECORD_DIR_REL).resolve",
+            "_CITATION.match",
+            "core_unit._current_cycle",
+            "core_unit._sha256_file",
+            "event.get",
+            "json.loads",
+            "match.groups",
+            "path.read_text",
+            "path.resolve",
+            "path.resolve().is_relative_to",
+            "record_problem",
+            "reversed",
+            "str",
+            "str(event.get('text') or '').strip"
+          ]
+        },
+        "publication_gate": {
+          "line": 107,
+          "calls": [
+            "'; '.join",
+            "(root / core_unit.RECORD_DIR_REL).glob",
+            "Path",
+            "core_unit.baseline_digest",
+            "core_unit.declared",
+            "core_unit.judge",
+            "core_unit.load_baseline",
+            "core_unit.tree_fingerprint",
+            "isinstance",
+            "json.loads",
+            "path.read_text",
+            "policy",
+            "record.get",
+            "sorted"
+          ]
+        },
+        "run_focused": {
+          "line": 149,
+          "calls": [
+            "(root / 'tools').iterdir",
+            "TestFamily",
+            "ValueError",
+            "_patterns",
+            "any",
+            "core_unit._run_whole",
+            "core_unit.copy_tree_consistent",
+            "core_unit.judge",
+            "core_unit.new_sandbox_root",
+            "core_unit.reclaim",
+            "core_unit.tree_fingerprint",
+            "enumerate",
+            "fnmatch.fnmatchcase",
+            "int",
+            "p.is_file",
+            "record_problem",
+            "round",
+            "run.get",
+            "runs.append",
+            "spool.mkdir",
+            "str",
+            "sum",
+            "time.monotonic"
+          ]
+        },
+        "evidence": {
+          "line": 196,
+          "calls": [
+            "(root / '.saipen/STATE.md').read_text",
+            "(root / RECORD_DIR_REL).glob",
+            "ValueError",
+            "_patterns",
+            "core_unit._emit",
+            "core_unit._sha256_file",
+            "core_unit.tree_fingerprint",
+            "datetime.datetime.now",
+            "datetime.datetime.now(datetime.timezone.utc).strftime",
+            "holding",
+            "isinstance",
+            "json.dumps",
+            "json.loads",
+            "operations.checkpoint",
+            "parse_state",
+            "path.parent.mkdir",
+            "path.read_text",
+            "path.relative_to",
+            "path.relative_to(root).as_posix",
+            "path.write_text",
+            "record.get",
+            "record_problem",
+            "run_focused",
+            "sorted",
+            "state.get",
+            "str"
+          ]
+        }
+      }
+    },
+    {
+      "path": "tools/saipen_engine/release.py",
+      "functions": {
+        "_closure_stage_paths": {
+          "line": 137,
+          "calls": [
+            "(root / conditional).is_file",
+            "history_paths",
+            "list",
+            "p.relative_to",
+            "p.relative_to(root).as_posix"
+          ]
+        },
+        "_capture_index_state": {
+          "line": 202,
+          "calls": [
+            "'|'.join",
+            "'|'.join((f'{p}:{m}:{b}' for p, m, b in unique_entries)).encode",
+            "IndexSnapshot",
+            "ValueError",
+            "_exact_index_bytes",
+            "_git",
+            "_git_available",
+            "changes.append",
+            "entries.append",
+            "fields[index].strip",
+            "hashlib.sha256",
+            "hashlib.sha256('|'.join((f'{p}:{m}:{b}' for p, m, b in unique_entries)).encode('utf-8')).hexdigest",
+            "header[0].upper",
+            "index_entries.get",
+            "len",
+            "ls.stdout.split",
+            "meta_text.split",
+            "paths.append",
+            "piece.split",
+            "range",
+            "raw.split",
+            "set",
+            "sorted",
+            "tree.stdout.strip",
+            "tuple"
+          ]
+        },
+        "_exact_index_bytes": {
+          "line": 320,
+          "calls": [
+            "Path",
+            "ValueError",
+            "_git",
+            "base64.b64encode",
+            "base64.b64encode(raw).decode",
+            "hashlib.sha256",
+            "hashlib.sha256(raw).hexdigest",
+            "index_path.is_absolute",
+            "index_path.read_bytes",
+            "index_path.resolve"
+          ]
+        },
+        "_staged_index_drift": {
+          "line": 345,
+          "calls": [
+            "_exact_index_bytes"
+          ]
+        },
+        "_restore_index_bytes": {
+          "line": 366,
+          "calls": [
+            "Path",
+            "ValueError",
+            "_git",
+            "_git_available",
+            "base64.b64decode",
+            "hashlib.sha256",
+            "hashlib.sha256(live).hexdigest",
+            "index_bytes_b64.encode",
+            "index_path.is_absolute",
+            "index_path.read_bytes",
+            "index_path.resolve",
+            "index_path.with_name",
+            "os.replace",
+            "os.unlink",
+            "prove_owned_regular",
+            "safe_create_bytes_exclusive"
+          ]
+        },
+        "_restore_index": {
+          "line": 437,
+          "calls": [
+            "Path",
+            "ValueError",
+            "_exact_index_bytes",
+            "_git",
+            "_restore_index_bytes",
+            "index_path.is_absolute",
+            "index_path.resolve"
+          ]
+        },
+        "_journal_owned_index_sha": {
+          "line": 499,
+          "calls": [
+            "isinstance",
+            "journal.read",
+            "record.get"
+          ]
+        },
+        "_release_failure": {
+          "line": 659,
+          "calls": [
+            "out.update"
+          ]
+        },
+        "_targeted_integration_op": {
+          "line": 676,
+          "calls": [
+            "'; '.join",
+            "ReleaseRefusal",
+            "_TARGETED_PRODUCER_INVOCATIONS.get",
+            "iso_utc_sort_key",
+            "matches.append",
+            "max",
+            "metadata.get",
+            "receipt.get",
+            "semantic_receipts_for_operation"
+          ]
+        },
+        "_crew_terminal_route": {
+          "line": 709,
+          "calls": [
+            "bool",
+            "crew_carrier.get",
+            "state.get"
+          ]
+        },
+        "_crew_carrier_problem": {
+          "line": 725,
+          "calls": [
+            "durable.get",
+            "read_durable_crew_epoch"
+          ]
+        },
+        "plan_release": {
+          "line": 756,
+          "calls": [
+            "', '.join",
+            "(cohort_carrier or {}).get",
+            "IndexSnapshot",
+            "Path",
+            "Path(root).resolve",
+            "ReleasePlan",
+            "ReleaseRefusal",
+            "RemoteSnapshot",
+            "_branch",
+            "_branch_exists",
+            "_capture_index_state",
+            "_check_parity",
+            "_classify_continuation",
+            "_crew_terminal_route",
+            "_find_release_ticket",
+            "_find_ticket",
+            "_git",
+            "_head_relation",
+            "_hex8",
+            "_installed_version",
+            "_local_tag_commit",
+            "_log_hash",
+            "_metadata_paths",
+            "_plan_crew_release",
+            "_project_identity",
+            "_push_endpoint",
+            "_push_urls",
+            "_quick_hash",
+            "_read_board",
+            "_read_confirmation",
+            "_read_mode",
+            "_read_state",
+            "_recovery_preflight",
+            "_release_evidence",
+            "_remote_snapshot",
+            "_sanitize_push_url",
+            "_scope_for",
+            "_scope_paths",
+            "_source_authority_manifest",
+            "_targeted_integration_op",
+            "bool",
+            "compute_source_identity",
+            "crew_release_context",
+            "ctx.get",
+            "hashlib.sha256",
+            "hashlib.sha256(b'no-publish-no-git').hexdigest",
+            "len",
+            "project_lineage_identity",
+            "remote_snapshot.branch_tip",
+            "remote_snapshot.classification",
+            "remote_snapshot.refs.items",
+            "remote_snapshot.tag_commit",
+            "set",
+            "sorted",
+            "source_authority_paths",
+            "state.get",
+            "str",
+            "str(state.get('task', '')).startswith",
+            "tuple"
+          ]
+        },
+        "_plan_crew_release": {
+          "line": 1213,
+          "calls": [
+            "', '.join",
+            "IndexSnapshot",
+            "ReleasePlan",
+            "ReleaseRefusal",
+            "RemoteSnapshot",
+            "_branch",
+            "_branch_exists",
+            "_capture_index_state",
+            "_check_parity",
+            "_closure.member_hash_matches",
+            "_crew_carrier_problem",
+            "_git",
+            "_head_relation",
+            "_hex8",
+            "_local_tag_commit",
+            "_metadata_paths",
+            "_push_endpoint",
+            "_push_urls",
+            "_quick_hash",
+            "_read_confirmation",
+            "_read_mode",
+            "_remote_snapshot",
+            "_sanitize_push_url",
+            "_scope_identity_holds",
+            "_ship_label",
+            "_source_authority_manifest",
+            "bool",
+            "crew_carrier.get",
+            "fp.exists",
+            "fp.is_file",
+            "fp.read_bytes",
+            "hashlib.sha256",
+            "hashlib.sha256(b'no-publish-no-git').hexdigest",
+            "len",
+            "project_lineage_identity",
+            "release_verdict",
+            "remote_snapshot.branch_tip",
+            "remote_snapshot.classification",
+            "remote_snapshot.refs.items",
+            "remote_snapshot.tag_commit",
+            "scope.items",
+            "set",
+            "sorted",
+            "state.get",
+            "tuple"
+          ]
+        },
+        "execute_release": {
+          "line": 1497,
+          "calls": [
+            "Path",
+            "Path(root).resolve",
+            "_apply_dry_run",
+            "_apply_first_publish_wait",
+            "_apply_no_publish",
+            "_apply_release",
+            "_preflight_plan",
+            "list"
+          ]
+        },
+        "_recovery_preflight": {
+          "line": 1542,
+          "calls": [
+            "', '.join",
+            "ReleaseRefusal",
+            "op.get",
+            "scan_pending",
+            "str"
+          ]
+        },
+        "_surface_dirty": {
+          "line": 1577,
+          "calls": [
+            "_git",
+            "cached.stdout.split",
+            "dirty.add",
+            "set",
+            "sorted",
+            "untracked.stdout.split",
+            "work.stdout.split"
+          ]
+        },
+        "_classify_continuation": {
+          "line": 1606,
+          "calls": [
+            "ReleaseRefusal",
+            "_log_has_ship",
+            "_surface_dirty",
+            "_ticket_done"
+          ]
+        },
+        "_ticket_done": {
+          "line": 1697,
+          "calls": [
+            "board['tickets'].get",
+            "bool",
+            "codec.read_doc",
+            "parse_board"
+          ]
+        },
+        "_committed_release_receipts": {
+          "line": 1706,
+          "calls": [
+            "json.loads",
+            "out.append",
+            "published.is_file",
+            "published.read_text",
+            "record.get",
+            "semantic_receipt_snapshot"
+          ]
+        },
+        "_release_evidence": {
+          "line": 1739,
+          "calls": [
+            "_committed_release_receipts",
+            "read_history_snapshot"
+          ]
+        },
+        "_log_has_ship": {
+          "line": 1759,
+          "calls": [
+            "_release_evidence",
+            "any",
+            "ev.get",
+            "record.get",
+            "txt.lower"
+          ]
+        },
+        "_find_release_ticket": {
+          "line": 1789,
+          "calls": [
+            "_release_evidence",
+            "ev.get",
+            "record.get",
+            "reversed",
+            "ticket.startswith",
+            "txt.lower"
+          ]
+        },
+        "_read_confirmation": {
+          "line": 1817,
+          "calls": [
+            "state.get",
+            "str"
+          ]
+        },
+        "_scope_path": {
+          "line": 1826,
+          "calls": []
+        },
+        "_scope_paths": {
+          "line": 1830,
+          "calls": [
+            "_load_scope",
+            "sorted"
+          ]
+        },
+        "_load_scope": {
+          "line": 1834,
+          "calls": [
+            "(root / rel).resolve",
+            "ReleaseRefusal",
+            "_is_ancestor",
+            "_project_identity",
+            "_quick_hash",
+            "_scope_path",
+            "any",
+            "candidate.relative_to",
+            "codec.read_doc",
+            "data.get",
+            "fp.exists",
+            "fp.is_file",
+            "fp.read_bytes",
+            "isinstance",
+            "json.loads",
+            "len",
+            "path.is_file",
+            "paths.items",
+            "project_lineage_identity",
+            "re.fullmatch",
+            "rel.split",
+            "rel.startswith",
+            "release_scope_matches",
+            "root.resolve"
+          ]
+        },
+        "_is_ancestor": {
+          "line": 1989,
+          "calls": [
+            "_git"
+          ]
+        },
+        "_plan_publishes": {
+          "line": 2001,
+          "calls": []
+        },
+        "_scope_identity_holds": {
+          "line": 2012,
+          "calls": [
+            "release_scope_matches"
+          ]
+        },
+        "_gate_window_drift": {
+          "line": 2026,
+          "calls": [
+            "_bounded_source_drift",
+            "_log_hash",
+            "_quick_hash",
+            "_read_board",
+            "_read_state"
+          ]
+        },
+        "_writer_locked_git_bound": {
+          "line": 2067,
+          "calls": [
+            "_LOCKED_GIT_BOUND.reset",
+            "_LOCKED_GIT_BOUND.set"
+          ]
+        },
+        "_bounded_source_drift": {
+          "line": 2075,
+          "calls": [
+            "getattr",
+            "listing_token_unchanged",
+            "revalidate_source_identity"
+          ]
+        },
+        "_source_identity_drift": {
+          "line": 2111,
+          "calls": [
+            "compute_source_identity",
+            "revalidate_source_identity"
+          ]
+        },
+        "_preflight_plan": {
+          "line": 2148,
+          "calls": [
+            "RemoteSnapshot",
+            "_capture_index_state",
+            "_check_source_authority_manifest",
+            "_local_tag_commit",
+            "_log_has_ship",
+            "_log_hash",
+            "_plan_publishes",
+            "_project_identity",
+            "_push_urls",
+            "_quick_hash",
+            "_read_board",
+            "_read_state",
+            "_release_failure",
+            "_remote_snapshot",
+            "_sanitize_push_url",
+            "_scope_for",
+            "_scope_identity_holds",
+            "_source_identity_drift",
+            "_targeted_integration_op",
+            "_ticket_done",
+            "board['tickets'].values",
+            "bool",
+            "fp.exists",
+            "fp.is_file",
+            "fp.read_bytes",
+            "len",
+            "plan.confirmation.split",
+            "project_lineage_identity",
+            "release_gate",
+            "remote_snapshot.branch_tip",
+            "remote_snapshot.classification",
+            "remote_snapshot.tag_commit",
+            "source_gate.get",
+            "state.get",
+            "str"
+          ]
+        },
+        "_scope_for": {
+          "line": 2458,
+          "calls": [
+            "_load_scope"
+          ]
+        },
+        "_apply_dry_run": {
+          "line": 2469,
+          "calls": [
+            "'; '.join",
+            "_capture_index_state",
+            "_git",
+            "_git_object_count",
+            "_release_failure",
+            "_snapshot_all_refs",
+            "_snapshot_worktree",
+            "_verify_zero_writes",
+            "_wait_message",
+            "list",
+            "plan.canonical"
+          ]
+        },
+        "_verify_zero_writes": {
+          "line": 2520,
+          "calls": [
+            "_capture_index_state",
+            "_git",
+            "_git_object_count",
+            "_snapshot_all_refs",
+            "_snapshot_worktree",
+            "post_refs.get",
+            "post_worktree.get",
+            "pre_refs.items",
+            "pre_worktree.items",
+            "violations.append"
+          ]
+        },
+        "_wait_message": {
+          "line": 2564,
+          "calls": [
+            "_remote_name"
+          ]
+        },
+        "_remote_name": {
+          "line": 2569,
+          "calls": []
+        },
+        "_apply_first_publish_wait": {
+          "line": 2575,
+          "calls": [
+            "_release_failure",
+            "_remote_name",
+            "_wait_message",
+            "record_first_publish_wait",
+            "result.data.get"
+          ]
+        },
+        "_agent": {
+          "line": 2606,
+          "calls": [
+            "_read_state",
+            "state.get"
+          ]
+        },
+        "_apply_no_publish": {
+          "line": 2625,
+          "calls": [
+            "_apply_no_publish_locked",
+            "_release_failure",
+            "_release_op_started",
+            "_writer_locked_git_bound",
+            "project_writer_lock",
+            "writer_busy_payload"
+          ]
+        },
+        "_release_op_started": {
+          "line": 2665,
+          "calls": [
+            "Journal",
+            "Journal(root, plan.op_id).exists"
+          ]
+        },
+        "_git_available": {
+          "line": 2675,
+          "calls": [
+            "is_git_project_root"
+          ]
+        },
+        "_apply_no_publish_locked": {
+          "line": 2681,
+          "calls": [
+            "(crew_context or {}).get",
+            "Journal",
+            "_drop_settled_staged",
+            "_maybe_crash",
+            "_no_publish_body",
+            "_no_publish_targets_untouched",
+            "_release_failure",
+            "_try_journal",
+            "crew_context.get",
+            "crew_release_context",
+            "hashlib.sha256",
+            "hashlib.sha256(str(plan.canonical()).encode()).hexdigest",
+            "journal.exists",
+            "journal.read",
+            "list",
+            "plan.canonical",
+            "str",
+            "str(plan.canonical()).encode"
+          ]
+        },
+        "_no_publish_targets_untouched": {
+          "line": 2795,
+          "calls": [
+            "classify_target",
+            "hash_file_dependency",
+            "is_noop_target",
+            "owned_target_path",
+            "record.get",
+            "target.get"
+          ]
+        },
+        "_no_publish_body": {
+          "line": 2822,
+          "calls": [
+            "ReleaseRefusal",
+            "_apply_finish_targets",
+            "_gate_window_drift",
+            "_git_available",
+            "_maybe_crash",
+            "_run_gate",
+            "_ship_label",
+            "_top_todo",
+            "_try_journal",
+            "writer_lock_yielded"
+          ]
+        },
+        "_apply_release": {
+          "line": 2869,
+          "calls": [
+            "_apply_release_locked",
+            "_release_failure",
+            "_release_op_started",
+            "_writer_locked_git_bound",
+            "project_writer_lock",
+            "writer_busy_payload"
+          ]
+        },
+        "_apply_release_locked": {
+          "line": 2895,
+          "calls": [
+            "Journal",
+            "_apply_finish_targets",
+            "_commit_closure",
+            "_create_tag",
+            "_drop_settled_staged",
+            "_git",
+            "_journal_owned_index_sha",
+            "_last_stage",
+            "_local_tag_commit",
+            "_mark_stage",
+            "_maybe_crash",
+            "_publish_branch",
+            "_push_tag",
+            "_release_digest",
+            "_release_failure",
+            "_restore_index",
+            "_stage_and_commit",
+            "_try_journal",
+            "_verify_release",
+            "active_state.get",
+            "codec.read_doc",
+            "commit_result.get",
+            "crew_context.get",
+            "crew_release_context",
+            "hashlib.sha256",
+            "hashlib.sha256(str(plan.canonical()).encode()).hexdigest",
+            "journal.exists",
+            "list",
+            "parse_state",
+            "plan.canonical",
+            "stages.append",
+            "str",
+            "str(plan.canonical()).encode"
+          ]
+        },
+        "_last_stage": {
+          "line": 3114,
+          "calls": []
+        },
+        "_maybe_crash": {
+          "line": 3134,
+          "calls": [
+            "_RELEASE_CRASH_MAP.get",
+            "sys.exit"
+          ]
+        },
+        "_try_journal": {
+          "line": 3146,
+          "calls": [
+            "ReleaseRefusal",
+            "getattr",
+            "getattr(journal, method)"
+          ]
+        },
+        "_mark_stage": {
+          "line": 3156,
+          "calls": [
+            "_try_journal",
+            "getattr",
+            "getattr(journal, 'read')",
+            "getattr(journal, 'read')().get"
+          ]
+        },
+        "_stage_release_content": {
+          "line": 3170,
+          "calls": [
+            "(root / p).exists",
+            "_git",
+            "sorted"
+          ]
+        },
+        "_gate_command": {
+          "line": 3193,
+          "calls": [
+            "Path",
+            "Path(__file__).resolve",
+            "root.resolve",
+            "str"
+          ]
+        },
+        "_run_gate": {
+          "line": 3206,
+          "calls": [
+            "_format_gate_failure",
+            "_gate_command",
+            "publication_gate",
+            "str",
+            "subprocess.run"
+          ]
+        },
+        "_verify_index_after_gate": {
+          "line": 3225,
+          "calls": [
+            "', '.join",
+            "_capture_index_state",
+            "_clean_tracked",
+            "_git",
+            "set",
+            "sorted",
+            "staged_result.stdout.split",
+            "tracked_result.stdout.split",
+            "unstaged_result.stdout.split"
+          ]
+        },
+        "_stage_and_commit": {
+          "line": 3286,
+          "calls": [
+            "_exact_index_bytes",
+            "_gate_window_drift",
+            "_git",
+            "_maybe_crash",
+            "_run_gate",
+            "_stage_release_content",
+            "_staged_index_drift",
+            "_try_journal",
+            "_verify_index_after_gate",
+            "str",
+            "writer_lock_yielded"
+          ]
+        },
+        "_publish_branch": {
+          "line": 3380,
+          "calls": [
+            "ReleaseRefusal",
+            "_git",
+            "_mark_stage",
+            "_remote_snapshot",
+            "_try_journal",
+            "post_snapshot.branch_tip"
+          ]
+        },
+        "_finish_targets": {
+          "line": 3422,
+          "calls": [
+            "ReleaseRefusal",
+            "_plan_crew_closure",
+            "_plan_finish_ticket",
+            "datetime.datetime.now",
+            "datetime.datetime.now(datetime.timezone.utc).strftime",
+            "getattr",
+            "hasattr"
+          ]
+        },
+        "_apply_finish_targets": {
+          "line": 3475,
+          "calls": [
+            "_apply_closure_targets",
+            "_cohort_registry_target",
+            "_finish_targets",
+            "_release_receipt_target",
+            "_try_journal",
+            "targets.append"
+          ]
+        },
+        "_cohort_registry_target": {
+          "line": 3499,
+          "calls": [
+            "(registry.get('cohorts') or {}).get",
+            "ReleaseRefusal",
+            "_closure.read_registry",
+            "_closure.render_registry",
+            "_git",
+            "_quick_hash",
+            "codec.read_document",
+            "dict",
+            "doc.encode",
+            "path.is_file",
+            "registry.get",
+            "sorted"
+          ]
+        },
+        "_release_receipt_target": {
+          "line": 3537,
+          "calls": [
+            "Document",
+            "ReleaseRefusal",
+            "_quick_hash",
+            "codec.read_document",
+            "datetime.datetime.now",
+            "datetime.datetime.now(datetime.timezone.utc).strftime",
+            "doc.encode",
+            "json.dumps",
+            "path.is_file",
+            "project_lineage_identity",
+            "type"
+          ]
+        },
+        "_apply_closure_targets": {
+          "line": 3599,
+          "calls": [
+            "'; '.join",
+            "ReleaseRefusal",
+            "_atomic_write",
+            "_hash_file",
+            "_mark_target",
+            "_try_journal",
+            "classify_target",
+            "enumerate",
+            "journal.read",
+            "len",
+            "owned_target_path",
+            "record.get",
+            "validate_project"
+          ]
+        },
+        "_mark_target": {
+          "line": 3652,
+          "calls": [
+            "_try_journal"
+          ]
+        },
+        "closure_board_contradiction": {
+          "line": 3675,
+          "calls": [
+            "(board.get('tickets') or {}).get",
+            "board.get",
+            "parse_board",
+            "ticket.get"
+          ]
+        },
+        "closure_history_contradictions": {
+          "line": 3692,
+          "calls": [
+            "''.join",
+            "''.join((f'{sha}:.saipen/BOARD.md\\n' for sha, _ticket in commits)).encode",
+            "Path",
+            "_CLOSURE_SUBJECT_RE.match",
+            "_git",
+            "any",
+            "closure_board_contradiction",
+            "commits.append",
+            "found.append",
+            "int",
+            "len",
+            "line.partition",
+            "log.stdout.splitlines",
+            "match.group",
+            "out.index",
+            "out[offset:newline].decode",
+            "out[offset:newline].decode('utf-8', 'replace').split",
+            "out[offset:offset + size].decode",
+            "sha.startswith",
+            "str",
+            "subject.strip",
+            "subprocess.run"
+          ]
+        },
+        "_commit_closure": {
+          "line": 3745,
+          "calls": [
+            "ReleaseRefusal",
+            "_closure_stage_paths",
+            "_git",
+            "_maybe_crash",
+            "_try_journal",
+            "closure_board_contradiction"
+          ]
+        },
+        "_create_tag": {
+          "line": 3791,
+          "calls": [
+            "ReleaseRefusal",
+            "_git"
+          ]
+        },
+        "_push_tag": {
+          "line": 3804,
+          "calls": [
+            "ReleaseRefusal",
+            "_git",
+            "_remote_snapshot",
+            "post_snapshot.tag_commit"
+          ]
+        },
+        "_verify_release": {
+          "line": 3834,
+          "calls": [
+            "_remote_snapshot",
+            "snapshot.branch_tip",
+            "snapshot.tag_commit"
+          ]
+        },
+        "_remote_snapshot": {
+          "line": 3944,
+          "calls": [
+            "RemoteSnapshot",
+            "_git",
+            "len",
+            "line.split",
+            "result.stdout.splitlines"
+          ]
+        },
+        "_push_endpoint": {
+          "line": 3956,
+          "calls": [
+            "_git",
+            "result.stdout.splitlines"
+          ]
+        },
+        "_classify_remote": {
+          "line": 3972,
+          "calls": [
+            "_git",
+            "_remote_snapshot",
+            "_remote_snapshot(root, origin.stdout.splitlines()[0]).classification",
+            "origin.stdout.splitlines"
+          ]
+        },
+        "_remote_branch_tip": {
+          "line": 3990,
+          "calls": [
+            "_remote_snapshot",
+            "_remote_snapshot(root, remote).branch_tip"
+          ]
+        },
+        "_remote_tag_commit": {
+          "line": 4000,
+          "calls": [
+            "_remote_snapshot",
+            "_remote_snapshot(root, remote).tag_commit"
+          ]
+        },
+        "_local_tag_commit": {
+          "line": 4008,
+          "calls": [
+            "_git"
+          ]
+        },
+        "_snapshot_remote_refs": {
+          "line": 4015,
+          "calls": [
+            "_remote_snapshot"
+          ]
+        },
+        "_push_urls": {
+          "line": 4019,
+          "calls": [
+            "_git",
+            "_sanitize_push_url",
+            "result.stdout.splitlines",
+            "u.strip"
+          ]
+        },
+        "_sanitize_push_url": {
+          "line": 4026,
+          "calls": [
+            "chr",
+            "rest.replace",
+            "rest.split",
+            "url.replace",
+            "url.split",
+            "url.split('@', 1)[-1].replace",
+            "url.strip"
+          ]
+        },
+        "_head_relation": {
+          "line": 4037,
+          "calls": [
+            "_git"
+          ]
+        },
+        "_git": {
+          "line": 4057,
+          "calls": [
+            "' '.join",
+            "GitResult",
+            "_LOCKED_GIT_BOUND.get",
+            "result.stderr.strip",
+            "result.stdout.strip",
+            "str",
+            "subprocess.run"
+          ]
+        },
+        "_git_object_count": {
+          "line": 4085,
+          "calls": [
+            "_git",
+            "contextlib.suppress",
+            "int",
+            "key.strip",
+            "line.partition",
+            "result.stdout.splitlines",
+            "value.strip"
+          ]
+        },
+        "_active_work": {
+          "line": 4104,
+          "calls": [
+            "_read_board",
+            "_read_state",
+            "board.get",
+            "board.get('tickets', {}).get",
+            "state.get",
+            "str",
+            "str(state.get('task') or '').strip",
+            "ticket.get"
+          ]
+        },
+        "_installed_version": {
+          "line": 4116,
+          "calls": [
+            "ReleaseRefusal",
+            "_active_work",
+            "version.is_file",
+            "version.read_text",
+            "version.read_text(encoding='utf-8-sig').strip",
+            "version.read_text(encoding='utf-8-sig').strip().split"
+          ]
+        },
+        "_ship_label": {
+          "line": 4140,
+          "calls": []
+        },
+        "_branch": {
+          "line": 4146,
+          "calls": [
+            "ReleaseRefusal",
+            "_git"
+          ]
+        },
+        "_branch_exists": {
+          "line": 4153,
+          "calls": [
+            "_git"
+          ]
+        },
+        "_snapshot_worktree": {
+          "line": 4158,
+          "calls": [
+            "_quick_hash",
+            "fp.is_file",
+            "fp.read_bytes"
+          ]
+        },
+        "_snapshot_all_refs": {
+          "line": 4169,
+          "calls": [
+            "_git",
+            "len",
+            "line.split",
+            "result.stdout.splitlines"
+          ]
+        },
+        "_quick_hash": {
+          "line": 4180,
+          "calls": [
+            "hashlib.sha256",
+            "hashlib.sha256(text).hexdigest",
+            "hashlib.sha256(text.encode('utf-8')).hexdigest",
+            "isinstance",
+            "text.encode"
+          ]
+        },
+        "_hash_file": {
+          "line": 4186,
+          "calls": [
+            "hashlib.sha256",
+            "hashlib.sha256(path.read_bytes()).hexdigest",
+            "path.read_bytes"
+          ]
+        },
+        "_hex8": {
+          "line": 4193,
+          "calls": [
+            "uuid.uuid4"
+          ]
+        },
+        "_format_gate_failure": {
+          "line": 4199,
+          "calls": [
+            "' | '.join",
+            "(stdout + '\\n' + stderr).splitlines",
+            "(stdout + stderr)[-500:].strip",
+            "ln.startswith"
+          ]
+        },
+        "_metadata_paths": {
+          "line": 4213,
+          "calls": [
+            "p.as_posix",
+            "release_metadata_paths"
+          ]
+        },
+        "_source_authority_manifest": {
+          "line": 4228,
+          "calls": [
+            "hashlib.sha256",
+            "hashlib.sha256(target.read_bytes()).hexdigest",
+            "manifest.append",
+            "path.as_posix",
+            "source_authority_paths",
+            "target.is_file",
+            "target.read_bytes",
+            "tuple"
+          ]
+        },
+        "_check_source_authority_manifest": {
+          "line": 4249,
+          "calls": [
+            "_source_authority_manifest",
+            "len",
+            "sorted",
+            "tuple"
+          ]
+        },
+        "_check_parity": {
+          "line": 4260,
+          "calls": [
+            "'\\n- '.join",
+            "Path",
+            "ReleaseRefusal",
+            "_installed_version",
+            "_version_badges",
+            "fp.is_file",
+            "fp.read_text",
+            "len",
+            "path.as_posix",
+            "problems.append",
+            "re.findall",
+            "version_metadata_paths"
+          ]
+        },
+        "_read_mode": {
+          "line": 4301,
+          "calls": [
+            "ReleaseRefusal",
+            "state.get"
+          ]
+        },
+        "_read_state": {
+          "line": 4331,
+          "calls": [
+            "ReleaseRefusal",
+            "codec.read_doc",
+            "parse_state",
+            "state_path.is_file"
+          ]
+        },
+        "_read_board": {
+          "line": 4342,
+          "calls": [
+            "ReleaseRefusal",
+            "board_path.is_file",
+            "codec.read_doc",
+            "parse_board"
+          ]
+        },
+        "_log_hash": {
+          "line": 4353,
+          "calls": [
+            "history_hash"
+          ]
+        },
+        "_find_ticket": {
+          "line": 4359,
+          "calls": [
+            "board.get",
+            "tickets.values"
+          ]
+        },
+        "_top_todo": {
+          "line": 4369,
+          "calls": [
+            "board['tickets'].values",
+            "codec.read_doc",
+            "contextlib.suppress",
+            "parse_board"
+          ]
+        },
+        "_release_digest": {
+          "line": 4382,
+          "calls": [
+            "_top_todo"
+          ]
+        },
+        "recover_release_op": {
+          "line": 4396,
+          "calls": [
+            "Path",
+            "_recover_lock",
+            "_recover_release_op_locked",
+            "writer_busy_payload"
+          ]
+        },
+        "_recover_release_op_locked": {
+          "line": 4422,
+          "calls": [
+            "Journal",
+            "_recover_no_publish",
+            "_recover_release_git",
+            "_try_recovery_journal",
+            "_validate_record",
+            "journal.exists",
+            "journal.read",
+            "record.get"
+          ]
+        },
+        "_validate_record": {
+          "line": 4490,
+          "calls": [
+            "all"
+          ]
+        },
+        "_try_recovery_journal": {
+          "line": 4504,
+          "calls": [
+            "contextlib.suppress",
+            "getattr",
+            "getattr(journal, method)"
+          ]
+        },
+        "_restore_index_from_record": {
+          "line": 4512,
+          "calls": [
+            "Path",
+            "ValueError",
+            "_exact_index_bytes",
+            "_git",
+            "_restore_index_bytes",
+            "b64.encode",
+            "base64.b64decode",
+            "hashlib.sha256",
+            "hashlib.sha256(base64.b64decode(b64.encode('ascii'))).hexdigest",
+            "index_path.is_absolute",
+            "index_path.resolve",
+            "isinstance",
+            "record.get"
+          ]
+        },
+        "_recover_no_publish": {
+          "line": 4557,
+          "calls": [
+            "_drop_settled_staged",
+            "_no_publish_targets_untouched",
+            "_replay_targets",
+            "_try_recovery_journal",
+            "record.get"
+          ]
+        },
+        "_replay_targets": {
+          "line": 4603,
+          "calls": [
+            "_atomic_write",
+            "_hash_file",
+            "_mark_target",
+            "any",
+            "classify_target",
+            "enumerate",
+            "hashlib.sha256",
+            "hashlib.sha256(staged).hexdigest",
+            "journal.staged_content",
+            "len",
+            "owned_target_path",
+            "range",
+            "record.get",
+            "targets[i].get"
+          ]
+        },
+        "_recover_release_git": {
+          "line": 4669,
+          "calls": [
+            "'; '.join",
+            "_PlanShim",
+            "_branch",
+            "_closure_stage_paths",
+            "_conflict",
+            "_create_tag",
+            "_drop_settled_staged",
+            "_git",
+            "_is_ancestor",
+            "_local_tag_commit",
+            "_push_endpoint",
+            "_push_tag",
+            "_read_state",
+            "_remote_branch_tip",
+            "_remote_tag_commit",
+            "_replay_targets",
+            "_restore_index_from_record",
+            "_sanitize_push_url",
+            "_ticket_done",
+            "_try_recovery_journal",
+            "_unavailable",
+            "_verify_release",
+            "any",
+            "record.get",
+            "state.get",
+            "str",
+            "t.get",
+            "validate_project"
+          ]
+        },
+        "_conflict": {
+          "line": 4955,
+          "calls": [
+            "_try_recovery_journal"
+          ]
+        },
+        "_unavailable": {
+          "line": 4966,
+          "calls": [
+            "_try_recovery_journal"
+          ]
+        },
+        "_strict_iso_utc": {
+          "line": 4978,
+          "calls": [
+            "strict_iso_utc"
+          ]
+        },
+        "_is_admissible_terminal_receipt": {
+          "line": 4986,
+          "calls": [
+            "_strict_iso_utc",
+            "isinstance",
+            "record.get",
+            "tuple"
+          ]
+        },
+        "_select_terminal_receipt": {
+          "line": 5028,
+          "calls": [
+            "_ReceiptSelectionError",
+            "c.get",
+            "datetime.datetime.min.replace",
+            "iso_utc_sort_key",
+            "len",
+            "max"
+          ]
+        },
+        "_receipt_evidence": {
+          "line": 5052,
+          "calls": [
+            "dict",
+            "record.get",
+            "tuple"
+          ]
+        },
+        "_verify_receipt": {
+          "line": 5073,
+          "calls": [
+            "_git",
+            "_project_identity",
+            "_push_endpoint",
+            "_receipt_evidence",
+            "_remote_snapshot",
+            "_verify_no_publish_receipt",
+            "gr.stdout.strip",
+            "project_lineage_identity",
+            "record.get",
+            "snapshot.branch_tip",
+            "snapshot.tag_commit"
+          ]
+        },
+        "_verify_no_publish_receipt": {
+          "line": 5188,
+          "calls": [
+            "_read_board",
+            "_read_state",
+            "_receipt_evidence",
+            "board.get",
+            "board.get('tickets', {}).get",
+            "compute_source_identity",
+            "record.get",
+            "state.get"
+          ]
+        },
+        "release_verdict": {
+          "line": 5242,
+          "calls": [
+            "'; '.join",
+            "Path",
+            "_is_admissible_terminal_receipt",
+            "_select_terminal_receipt",
+            "_verify_receipt",
+            "i.get",
+            "invalid.append",
+            "item.get",
+            "raw_records.append",
+            "record.get",
+            "semantic_receipt_snapshot",
+            "str",
+            "valid.append"
+          ]
+        }
+      }
+    },
+    {
+      "path": "tools/saipen_engine/efficiency.py",
+      "functions": {
+        "_round5": {
+          "line": 90,
+          "calls": [
+            "int"
+          ]
+        },
+        "_hand_authored": {
+          "line": 95,
+          "calls": [
+            "event.get",
+            "op_id_provenance"
+          ]
+        },
+        "kpi_for_ticket": {
+          "line": 101,
+          "calls": [
+            "_CLAIM.match",
+            "_FINISH.match",
+            "_GATE.match",
+            "_RESUME.match",
+            "_TRANSITION.match",
+            "_hand_authored",
+            "_round5",
+            "after.get",
+            "before.get",
+            "components.items",
+            "dict.fromkeys",
+            "ev.get",
+            "gate.group",
+            "len",
+            "max",
+            "result.update",
+            "round",
+            "set",
+            "step.group",
+            "str",
+            "sum",
+            "zip"
+          ]
+        },
+        "kpi_for_project": {
+          "line": 198,
+          "calls": [
+            "Path",
+            "kpi_for_ticket",
+            "list",
+            "read_history_events"
+          ]
+        },
+        "render_line": {
+          "line": 205,
+          "calls": [
+            "' | '.join",
+            "kpi.get",
+            "kpi['components'].get",
+            "parts.append",
+            "str",
+            "str(kpi.get('withheld') or INSUFFICIENT).replace"
+          ]
+        },
+        "line_problem": {
+          "line": 219,
+          "calls": [
+            "_LINE.match",
+            "_UNKNOWN_LINE.match",
+            "any",
+            "int",
+            "len",
+            "list",
+            "match.group",
+            "re.findall",
+            "str",
+            "str(value if value is not None else '').strip"
+          ]
+        }
+      }
+    },
+    {
+      "path": "tools/saipen_engine/telemetry.py",
+      "functions": {
+        "_at": {
+          "line": 55,
+          "calls": [
+            "dt.datetime.strptime",
+            "dt.datetime.strptime(raw, '%d.%m.%y %H:%M').replace",
+            "event.get",
+            "str",
+            "str(event.get('date') or '').strip"
+          ]
+        },
+        "_op": {
+          "line": 63,
+          "calls": [
+            "event.get",
+            "str"
+          ]
+        },
+        "is_progress": {
+          "line": 67,
+          "calls": [
+            "_TRANSITION_RE.match",
+            "_op",
+            "event.get",
+            "op.startswith",
+            "str",
+            "text.startswith"
+          ]
+        },
+        "load": {
+          "line": 83,
+          "calls": [
+            "_at",
+            "out.append",
+            "read_history_events"
+          ]
+        },
+        "intervals": {
+          "line": 95,
+          "calls": [
+            "(following['at'] - current['at']).total_seconds",
+            "_RESUME_RE.search",
+            "_TRANSITION_RE.match",
+            "_op",
+            "current.get",
+            "int",
+            "match.group",
+            "max",
+            "op.startswith",
+            "out.append",
+            "resumed.group",
+            "str",
+            "text.startswith",
+            "zip"
+          ]
+        },
+        "_split_by_local_day": {
+          "line": 144,
+          "calls": [
+            "(end - start).total_seconds",
+            "(midnight - start).total_seconds",
+            "dt.datetime.combine",
+            "dt.time",
+            "dt.timedelta",
+            "end.date",
+            "int",
+            "item['end'].astimezone",
+            "item['start'].astimezone",
+            "parts.append",
+            "start.date"
+          ]
+        },
+        "_pace": {
+          "line": 158,
+          "calls": [
+            "(b['at'] - a['at']).total_seconds",
+            "int",
+            "len",
+            "max",
+            "round",
+            "statistics.fmean",
+            "statistics.median",
+            "zip"
+          ]
+        },
+        "day": {
+          "line": 172,
+          "calls": [
+            "_op",
+            "_op(e).startswith",
+            "_pace",
+            "_split_by_local_day",
+            "buckets.items",
+            "buckets.values",
+            "date.isoformat",
+            "e.get",
+            "event['at'].astimezone",
+            "event['at'].astimezone(tz).date",
+            "intervals",
+            "len",
+            "sorted",
+            "str",
+            "str(e.get('text')).startswith",
+            "sum"
+          ]
+        },
+        "work": {
+          "line": 218,
+          "calls": [
+            "(progress['at'] - first).total_seconds",
+            "_op",
+            "_op(event).startswith",
+            "event.get",
+            "first.isoformat",
+            "int",
+            "intervals",
+            "is_progress",
+            "len",
+            "mine[-1]['at'].isoformat",
+            "next",
+            "phases.items",
+            "sorted",
+            "sum"
+          ]
+        },
+        "current": {
+          "line": 249,
+          "calls": [
+            "(now - entered[-1]['at']).total_seconds",
+            "(now - last).total_seconds",
+            "(now - progressed[-1]['at']).total_seconds",
+            "(now - started['at']).total_seconds",
+            "_op",
+            "_op(event).startswith",
+            "bool",
+            "event.get",
+            "int",
+            "is_progress",
+            "state.get",
+            "str",
+            "str(event.get('text')).startswith",
+            "str(state.get('blocker') or '').strip",
+            "str(state.get('next_action') or '').startswith"
+          ]
+        },
+        "stats": {
+          "line": 287,
+          "calls": [
+            "(root / '.saipen' / 'LOG.md').is_file",
+            "Path",
+            "current",
+            "day",
+            "dt.datetime.now",
+            "dt.timedelta",
+            "load",
+            "max",
+            "now.astimezone",
+            "now.astimezone(tz).date",
+            "parse_state_or_error",
+            "range",
+            "read_doc",
+            "str",
+            "work"
+          ]
+        },
+        "_duration": {
+          "line": 329,
+          "calls": [
+            "divmod",
+            "int"
+          ]
+        },
+        "render": {
+          "line": 337,
+          "calls": [
+            "'\\n'.join",
+            "_duration",
+            "f\"  {now['task'] or 'none'} {now['phase'] or ''}\".rstrip",
+            "item.get",
+            "item['by_class_s'].items",
+            "lines.append",
+            "payload.get"
+          ]
+        }
+      }
+    }
+  ]
+}

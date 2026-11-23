@@ -1,0 +1,31 @@
+FF.
+======================================================================
+FAIL: test_bash_names_its_home_with_an_explicit_python_interpreter (test_t1683_launcher_profile.InjectorProfileOwnership.test_bash_names_its_home_with_an_explicit_python_interpreter)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1683_launcher_profile.py", line 89, in test_bash_names_its_home_with_an_explicit_python_interpreter
+    self.run_bash(explicit_python=True)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1683_launcher_profile.py", line 85, in run_bash
+    self.assert_selected_profile_only(result)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1683_launcher_profile.py", line 66, in assert_selected_profile_only
+    self.assertEqual(self.protected_bytes(), self.before,
+AssertionError: {'.sa[126 chars]n": "ed0072563e834719fee5c68dc1f77288b4ccd0dd9[627 chars]r\n'} != {'.sa[126 chars]n": "6d32f8d0f9077909909ba9eacb12303e000c96baf[617 chars]r\n'}
+Diff is 2502 characters long. Set self.maxDiff to None to see it. : injector overwrote the other profile's owned launcher
+
+======================================================================
+FAIL: test_bash_names_its_home_with_the_detected_python_interpreter (test_t1683_launcher_profile.InjectorProfileOwnership.test_bash_names_its_home_with_the_detected_python_interpreter)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1683_launcher_profile.py", line 93, in test_bash_names_its_home_with_the_detected_python_interpreter
+    self.run_bash(explicit_python=False)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1683_launcher_profile.py", line 85, in run_bash
+    self.assert_selected_profile_only(result)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1683_launcher_profile.py", line 66, in assert_selected_profile_only
+    self.assertEqual(self.protected_bytes(), self.before,
+AssertionError: {'.sa[126 chars]n": "ed0072563e834719fee5c68dc1f77288b4ccd0dd9[627 chars]r\n'} != {'.sa[126 chars]n": "33e5f6ddb0b1da578a0cc74ea4d0ce5ee7bff66fa[617 chars]r\n'}
+Diff is 2503 characters long. Set self.maxDiff to None to see it. : injector overwrote the other profile's owned launcher
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.945s
+
+FAILED (failures=2)

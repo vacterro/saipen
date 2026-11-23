@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-050:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-1584",
+      "text": "AUDAPACK T-193 closure correction: live acceptance + cross-chat flight identity present and demonstrated",
+      "verification": "T-194 live operator acceptance recorded E-1584; test_bridge.py cross-chat flight identity PASS:PASS",
+      "work": "T-194"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-390:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Establish current CLI/protocol state and direct evidence; use SAIPEN's canonical workflow; never alter BZDECOMP's .saipen state from the SAIPEN side. BZDECOMP reference is read-only and its T-651 owns suite speed."
+    }
+  },
+  "derived_at": "2026-11-04T04:01:16Z",
+  "derived_from": "SRC-390",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "a50ab374d409e1a33c8a4f2164018fa10dd09c264991df343f7dcb199dbfe029"
+}

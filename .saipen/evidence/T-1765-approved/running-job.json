@@ -1,0 +1,14 @@
+{
+  "ticket": "T-1765",
+  "phase": "VERIFY",
+  "command": "python tools/core_unit.py evidence T-1765",
+  "tool_session_id": 42198,
+  "pid": 17944,
+  "pid_created": 1792088968.2195702,
+  "started_utc": "2026-10-15T18:29:28Z",
+  "marker": ".saipen/cache/inflight/core-unit.json",
+  "fingerprint": "6210f45822e17ba4e4d953b5ed2fd1519729e6c240347e99678c140b42c4498c",
+  "regression_record": ".saipen/evidence/regression/regression-execution-4861f25d857c49da9f3b9b04859e97aa.json",
+  "terminal": false,
+  "resume": "Poll original tool session 42198; do not restart the family or edit product files while it runs. Actual user choice version 2 is implemented, native 11 tests before 8 failures/after 0, focused 84/0, Ruff 0.16.0 and whitespace passed, all 460 old local baseline files byte-identical, real DEBT-000460 refuses BASELINE_RULESET_CHANGED. T-1695 refreshed RV-000059 38/0, canonical CURRENT_PASS 0 problems/9 warnings on ruleset 2. After family: checkpoint VERIFY, independent REVIEW 11, SRC-245 R007 disposition and exact canonical whole-Source dependency route; do not waive other T-1764-owned clauses. Account for actual append Work T-1802/SRC-260 through lawful closure semantics. T-1801 is DONE E-15963; never replay its finished family/session 14999. Full cc all goal remains active."
+}

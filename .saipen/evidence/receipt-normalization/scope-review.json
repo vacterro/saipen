@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "production": [
+    {
+      "path": "tools/saipen_engine/intake.py",
+      "before_sha256": "d30c02061eb74705f6e05265ca4b245f73b2faee9205474551a27200ee2a615a",
+      "after_sha256": "efd88a9935cfddda25839a5c1a2d1a4d3e8ded3607f98f7ffcb7bd1757800a14",
+      "common_definition_changes": [],
+      "added": [
+        "_expand_receipt_range",
+        "_plan_receipt_range_rewrite",
+        "normalize_receipt_ranges"
+      ],
+      "removed": []
+    },
+    {
+      "path": "tools/saipen.py",
+      "before_sha256": "2abac30c4b2a7345bd4b8ac03462531930bbc405f1dc27f4afeb031301b440e3",
+      "after_sha256": "f6c6fe648a0376d17b53de9f83c41381f0b43fe740c1d31d2ec3258a0a14dbf0",
+      "common_definition_changes": [
+        "_source",
+        "main"
+      ],
+      "added": [],
+      "removed": []
+    }
+  ],
+  "effect_delta": "only source.normalize=RECOVERY"
+}

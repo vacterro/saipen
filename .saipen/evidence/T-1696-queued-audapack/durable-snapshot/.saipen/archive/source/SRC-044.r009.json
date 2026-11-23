@@ -1,0 +1,54 @@
+{
+  "clauses": {
+    "SRC-044:R1": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[CORE-001] add red-first tests that (1) ingest Core, overwrite latest with different bytes while leaving the path present, duplicate identical content, and require either canonical repair followed by hash equality or a non-200 durability failure; (2) verify_only on the corrupted existing file must return `files_intact=false` with explicit corrupt/hash-mismatch evidence; (3) complete Quick3, delete `__00_AUDIT_ALL_3.md`, verify_only must report it non-durable; (4) duplicate/materialize repair must restore the final artifact when appropriate; (5) corrupt history/latest/final independently and assert no green durability state until byte verification passes."
+    },
+    "SRC-044:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[CORE-002] snapshot project config bytes and the existence/tree of the audit root before verify_only. Test an intact project, deleted project directory, missing history directory, and legacy run with no project_id/unknown project. After every verify_only response assert config bytes unchanged, registry count unchanged, no directory/file created, no run-state/materialization receipt changed, while missing paths are still reported accurately."
+    },
+    "SRC-044:R3": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[CORE-003] add materialize + verify_only regressions using the same alias cases already accepted by test_run_bound_to_project_id_and_alias_accepted, including `SAIPEN` vs `s a i p e n`; both must return 200 and resolve project id `saipen`. Preserve the existing foreign-project test: `OTHER` must remain 409 with zero writes."
+    },
+    "SRC-044:R4": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[CORE-004] expand W6-002 retry tests into a table over immutable-semantic and externally-repairable codes. For every immutable code assert Retry all returns skipped, preserves `permanent=true`, errorCode/body/run/profile/project unchanged and records manual_retry_refused. For auth/offline/order-dependent cases assert requeue still works. Include project_identity_conflict generated from a real mismatched handoff and campaign_profile_conflict from a run bound to another profile, then prove repeated Retry all cannot cycle either job."
+    },
+    "SRC-044:R5": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[W2-001] extend test_12 with an effect-loss replay: materialize Core using receipt R, delete latest, replay R and require latest canonical bytes restored; repeat for history and final ALL_3 after a complete Quick3 run. Inject a repair write failure and require non-200 with missing evidence preserved. Widget regression: start with `bridgeFilesMissing`, replay an old receipt whose server response cannot prove restored files, and assert missing attention remains; a proven repair may clear it."
+    },
+    "SRC-044:R6": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[W2-002] deterministic clock test: first non-forced verify returns intact; an immediate second call within the freshness window may be suppressed; advance beyond the configured freshness bound, make the Bridge report a missing file, and require a second request plus `durableCount=0`. Also prove a successful materialize invalidates/replaces the prior verification epoch and rapid repeated UI renders do not create request storms."
+    },
+    "SRC-044:R7": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[W2-003] add a table-driven manual-SAVE regression beside the Retry-all tests. Seed permanent `completed_wave_immutable`, `materialize_content_conflict`, `receipt_conflict`, project/profile conflicts, invalid-auth and offline jobs. Assert immutable semantic jobs never POST unchanged ingest and preserve error/attempt evidence; `completed_wave_immutable` follows canonical verify/materialize and becomes durable only on matching server content; auth/offline cases remain recoverable once their external cause changes."
+    },
+    "SRC-044:R8": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[W2-004] ingest a run, advance the maintenance clock past retention, prune it, then verify: latest stays required and intact; history reports retired/non-required; `files_intact` remains true for the canonical durability set. Run normal materialize/SYNC/SAVE and assert the retired history directory is not recreated. Delete latest after pruning and prove verification still fails for that genuine loss."
+    },
+    "SRC-044:R9": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[W2-005] regression identical to the reproduction: ingest in MAIN0, move project to SIDE1, delete/retain combinations of old artifacts, invoke verify/materialize. A successful repair must leave all canonical latest/final/index artifacts in one declared current location with run state pointing there; otherwise it must return a named non-success migration state. Add output-root relocation coverage and assert no write can escape the current configured audit root through stale state paths."
+    }
+  },
+  "derived_at": "2026-09-11T23:16:21Z",
+  "derived_from": "SRC-044",
+  "interpretation_revision": 9,
+  "schema_version": 1,
+  "source_sha256": "4db0ccc75f8b0a1e4e3c7892ab0e1f67eb19bb53c50dd288b47a0fcd34666b0d"
+}

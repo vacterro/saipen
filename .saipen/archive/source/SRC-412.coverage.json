@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-412:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-21598",
+      "text": "P1: Paranda kohe audit/SAIHANDOFF_SAIPEN_HOME_AUDIT_BZDECOMP_20261113.md punktis 5 kirjeldatud freshness-viga. See on parandust\u00f6\u00f6, mitte ainult audit. Toeta korrektseid Git directory/nested-repository kirjeid deterministliku sisufingerprintiga; s\u00e4ilita ohtlike radade t\u00f5kestamine. \u00c4ra kustuta ega peida kasutaja repositooriumi. T\u00f5esta sama regressiooniga pre-fix FAIL ja post-fix PASS, uuenda ametlik runtime ning kontrolli _BZDECOMP projektis saipen validate --json. Raporteeri tegelik tulemus ja allesj\u00e4\u00e4nud t\u00f5kked.",
+      "verification": "python -B -m pytest tools/test_t2055_nested_directory_fingerprint.py tools/test_nested_git_boundaries.py tools/test_nested_source_binding.py tools/test_t1900_git_listing_boundary.py -q -> 57 passed; record:.saipen/evidence/focused-unit/e3be896538c37e12-20261117T145954488499Z.json sha256:53aa5ca2290097322ae0acf9b3c3230b0d0f40fcb6c7f9f0dbfdf6192cb92cbd (16 ran PASS); _BZDECOMP saipen validate --json -> VALID, CURRENT_PASS, receipt-1a55d5757ec1; the official runtime install follows the pending publication and its release route is carried on the DONE line",
+      "work": "T-2055"
+    }
+  },
+  "schema_version": 1
+}

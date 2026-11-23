@@ -1,0 +1,82 @@
+--- before/audit_inbox.py
++++ tools/saipen_engine/audit_inbox.py
+@@ -707,26 +707,41 @@
+ 
+     # Bindings whose transport file is gone. The Source Receipt is already
+     # durable authority: a vanished ACTIVE transport is a DIAGNOSTIC, never a
+-    # reason to lose Work; a vanished closed one is settled cleanup.
++    # reason to lose Work. A vanished closed one still owes journaled binding
++    # settlement unless consumption already recorded DELETED.
+     orphans: list[dict] = []
+     for rel, record in sorted(bound.items()):
+         if rel in seen or not isinstance(record, dict):
+             continue
+         state = record.get("state")
+-        orphans.append(
+-            {
+-                "rel": rel,
+-                "layer": record.get("layer"),
+-                "receipt_id": record.get("receipt_id"),
+-                "linked_work": record.get("linked_work"),
+-                "sha256": record.get("file_sha256"),
+-                "state": (
+-                    DELETED
+-                    if state in (DELETED, CLOSED_PENDING_DELETE)
+-                    else MISSING_AFTER_CAPTURE
+-                ),
+-            }
+-        )
++        item = {
++            "rel": rel,
++            "layer": record.get("layer"),
++            "receipt_id": record.get("receipt_id"),
++            "linked_work": record.get("linked_work"),
++            "sha256": record.get("file_sha256"),
++            "state": (
++                DELETED
++                if state in (DELETED, CLOSED_PENDING_DELETE)
++                else MISSING_AFTER_CAPTURE
++            ),
++        }
++        if state != DELETED:
++            missing = snapshot_layer(root, rel)
++            if missing.get("code") == "AUDIT_LAYER_ABSENT":
++                status = intake.status(root, record.get("receipt_id"))
++                if status.get("ok") and (
++                    status.get("status") == intake.CLOSED_STATUS
++                    or status.get("location") == "retired"
++                ):
++                    item.update(
++                        state=CLOSED_PENDING_DELETE,
++                        already_absent=True,
++                        linked_work=status.get("linked_work") or record.get("linked_work"),
++                    )
++                    layers.append(item)
++                    continue
++        orphans.append(item)
+     return {
+         "ok": True,
+         "binding_state": binding_state,
+@@ -818,7 +833,10 @@
+                 "receipt": item["receipt_id"],
+                 "work": item.get("linked_work"),
+                 "detail": (
+-                    f"{item['rel']} source {item['receipt_id']} is CLOSED and unchanged; "
++                    f"{item['rel']} source {item['receipt_id']} is CLOSED and its "
++                    "transport is already absent; settle the journaled binding"
++                    if item.get("already_absent")
++                    else f"{item['rel']} source {item['receipt_id']} is CLOSED and unchanged; "
+                     "settle the journaled cleanup"
+                 ),
+             }
+@@ -1460,6 +1478,10 @@
+             }
+         )
+         preconditions[rel] = targets[0]["before_hash"]
++    else:
++        # Settlement must not release a reference if a new file arrived after
++        # the absence proof, even though this plan has no delete target.
++        preconditions[rel] = ""
+     binding_before = _binding_precondition(root)
+     targets.append(
+         {

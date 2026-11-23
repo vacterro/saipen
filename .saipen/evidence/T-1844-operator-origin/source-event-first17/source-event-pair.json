@@ -1,0 +1,42 @@
+{
+  "before": {
+    "exit_code": 1,
+    "ran": 17,
+    "errors": 0,
+    "failures": 14,
+    "oracle_sha256": "1a70acc4d5ef4e6d88b85e416625d58772316ddc93cca9c996d9ba775fe34d45",
+    "subjects": {
+      "tools/test_t1844_origin_broker.py": "225eac831f5c1f562e32fcd567feb49413ec3e529827125913368722d6a39675",
+      "tools/saipen_engine/decision_request.py": "c1ff0485f1b08cec0898f296d680a7de345e032d07d8afe6893cd8ed3a6a4af1",
+      "tools/saipen_engine/entry.py": "cba52d83864738f2931f4344506addfc0b0b070c2d8b11148b8fde1febeef720",
+      "tools/saipen_engine/intake.py": "0ba0abed0aaf78c634293a5328b1fdf576a04533911cd042c7fffeb25b5ca40f",
+      "tools/saipen_engine/operations.py": "a6b7710041a1c68f92deaa508d522d652ebbaeeb23463288ffdf4faf2932e40f",
+      "tools/saipen_engine/operator_task.py": "d7aeac177c410c50900e865b56fdb68eb0b4543675ce09e4c22f72e62a8c2fbd",
+      "tools/saipen_engine/response_surface.py": "b375ca7df4ed1c8cf02272d74a93360f8fee9460403fe57b12142a99b0268929",
+      "tools/saipen_engine/retirement.py": "9d500e5a04bfd1d76226ab5ec54dc5cbe3093a77dd9684cc7c753434e8124816",
+      "tools/saipen_engine/source_append.py": "c271b4238fd4194092c7eb279503f0b32c50e31269e66d608501d978ff9874c2"
+    },
+    "log": ".saipen/evidence/T-1844-operator-origin/source-event-before.log"
+  },
+  "after": {
+    "exit_code": 0,
+    "ran": 17,
+    "errors": 0,
+    "failures": 0,
+    "oracle_sha256": "1a70acc4d5ef4e6d88b85e416625d58772316ddc93cca9c996d9ba775fe34d45",
+    "subjects": {
+      "tools/test_t1844_origin_broker.py": "225eac831f5c1f562e32fcd567feb49413ec3e529827125913368722d6a39675",
+      "tools/saipen_engine/decision_request.py": "79378fa3558b063108cb4e7d8a63370c9e8fa507e9d6c9ea989b6961ed8fa888",
+      "tools/saipen_engine/entry.py": "9550830171ed05000338e33319415ace57baeb4958a097c0cdfcdcb98d4316b5",
+      "tools/saipen_engine/intake.py": "3dc6724e8193edb8d94867f0397f71e3b0daf357243ce4208ea974b2d79bd2d2",
+      "tools/saipen_engine/operations.py": "7bf5bf438adcca7278e3cd1ecc987b7d392db93bdda46c855cbb4d535f488511",
+      "tools/saipen_engine/operator_task.py": "d7aeac177c410c50900e865b56fdb68eb0b4543675ce09e4c22f72e62a8c2fbd",
+      "tools/saipen_engine/response_surface.py": "d2b39a11c4bcace08989730a5a1035e10c65bafcad961527b09a53b26bf70ccf",
+      "tools/saipen_engine/retirement.py": "7dd37cd5b28ffb03de4eb44f5a2df07e1b6dbb963feeabf99c4ac4fd1d7607aa",
+      "tools/saipen_engine/source_append.py": "669d6ea61ee728f6268b98376db2891b5fdb3849e6723a5365fb9099c1490a29"
+    },
+    "log": ".saipen/evidence/T-1844-operator-origin/source-event-after.log"
+  },
+  "classification": "diagnostic only; final canonical VERIFY pair remains due",
+  "valid": true
+}

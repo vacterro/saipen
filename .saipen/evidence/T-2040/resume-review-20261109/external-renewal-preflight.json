@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "dry_run": true,
+  "discovered": 1,
+  "inspected": 1,
+  "revalidated": 0,
+  "resolved": [],
+  "predicted_eligible": [],
+  "projected": [],
+  "resumed_parents": [],
+  "projected_parents": [],
+  "still_blocked": [
+    {
+      "ticket": "T-1653",
+      "code": "EXTERNAL_VERIFICATION_UNAUTHENTICATED",
+      "detail": "T-1653's recorded check 'python -B tools/verify_accounts_readiness.py --engine C:/Pro' carries no authenticated argv/runtime identity; re-resolution requires a sealed execution contract"
+    }
+  ],
+  "inaccessible": []
+}

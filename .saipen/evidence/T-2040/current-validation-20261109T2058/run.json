@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    "tools/saipen.py",
+    "validate",
+    "--json"
+  ],
+  "exit_code": 1,
+  "finished_utc": "2026-11-09T20:38:58.514421+00:00"
+}

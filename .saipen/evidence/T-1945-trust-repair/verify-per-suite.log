@@ -1,0 +1,11 @@
+test_t1945_host_trust :: Ran 18 tests in 0.012s  OK 
+test_t1945_analysis_progress :: Ran 8 tests in 0.098s  OK 
+test_t1945_campaign_driver :: Ran 9 tests in 0.137s  OK 
+test_t1945_incremental_discovery :: Ran 9 tests in 0.056s  OK 
+test_t1931_saipal_boundary :: Ran 22 tests in 4.846s  OK 
+test_t1931_campaign_lifecycle :: Ran 27 tests in 0.915s  OK 
+test_t1932_campaign_authority :: Ran 23 tests in 0.432s  OK 
+test_campaign_matrix :: Ran 35 tests in 0.704s  OK 
+test_campaign_production_gates :: Ran 18 tests in 0.326s  OK 
+test_campaign_continuation_assessment :: Ran 7 tests in 0.329s  OK 
+test_host_authority_broker :: Ran 38 tests in 28.457s  OK 

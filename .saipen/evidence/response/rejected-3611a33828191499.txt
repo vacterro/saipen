@@ -1,0 +1,4 @@
+STATUS: VERIFY T-1803  
+RESULT: 30/33 nõuet kinnitatud; [raport parandatud](V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1803-archived-improve/REPORT.md).  
+NEXT EXACT ACTION: jälgin käimasolevat täielikku testijooksu.  
+VALIDATION: RED/GREEN 35/35 PASS; täistestid pooleli. `cc all]` jääb aktiivseks.

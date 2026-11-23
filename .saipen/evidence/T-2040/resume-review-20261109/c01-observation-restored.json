@@ -1,0 +1,18 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-v",
+    "--tb=short",
+    "--color=no",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_campaign_continuation_assessment.py"
+  ],
+  "exit_code": 0,
+  "oracle_changed": true,
+  "reason": "Restore direct observation assertions removed during incomplete-discovery fixture repair; observation preserves incomplete classification, non-actionable work and exact authorized discovery hint. Not a production FAIL/PASS pair.",
+  "test_sha256": "12144a9a866fd3683ed592bf34c3e6421d77b7d337f95280c7de35b099db1659"
+}

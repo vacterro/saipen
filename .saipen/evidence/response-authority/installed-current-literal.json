@@ -1,0 +1,51 @@
+{
+  "opencode": {
+    "status": "current",
+    "delegated_root": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+    "delegated_current": true
+  },
+  "codex": {
+    "host": "codex",
+    "capability": true,
+    "installed": true,
+    "current": true,
+    "configured": true,
+    "saipen_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "root_current": true,
+    "health": null,
+    "effective": "UNKNOWN",
+    "artifact": "C:\\Users\\vac34\\.codex\\hooks\\saipen-guard.py",
+    "config": "C:\\Users\\vac34\\.codex\\hooks.json",
+    "proof_preflight": {
+      "hook_trust": "HOOK_TRUST_UNPROVEN",
+      "hook_representation": "DUAL_HOOK_REPRESENTATION",
+      "inline_events": [
+        "SessionStart",
+        "SubagentStart"
+      ],
+      "config_error": null,
+      "host_execution": "UNPROVEN",
+      "checker_reachability": "UNPROVEN",
+      "refused_effect": "UNPROVEN"
+    }
+  },
+  "claude": {
+    "host": "claude",
+    "capability": true,
+    "installed": true,
+    "current": true,
+    "configured": true,
+    "saipen_root": "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN",
+    "root_current": true,
+    "health": null,
+    "effective": "UNKNOWN",
+    "artifact": "C:\\Users\\vac34\\.claude\\hooks\\saipen-guard.py",
+    "config": "C:\\Users\\vac34\\.claude\\settings.json",
+    "style_hook_conflicts": [
+      {
+        "event": "UserPromptSubmit",
+        "command": "printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"STYLE CHECK: caveman-ded is ON (saipen STYLE.md). Blunt, compressed, fragments fine, short profanity where i"
+      }
+    ]
+  }
+}

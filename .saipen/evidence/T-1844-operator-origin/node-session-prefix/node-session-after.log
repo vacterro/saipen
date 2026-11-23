@@ -1,0 +1,8 @@
+test_a_response_cannot_borrow_another_native_sessions_proof (test_response_delivery.CompletedPartDelivery.test_a_response_cannot_borrow_another_native_sessions_proof) ... ok
+test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing (test_response_delivery.CompletedPartDelivery.test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing) ... ok
+test_real_hook_replaces_three_fresh_oversized_turns (test_response_delivery.CompletedPartDelivery.test_real_hook_replaces_three_fresh_oversized_turns) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 33.150s
+
+OK

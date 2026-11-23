@@ -1,0 +1,47 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-399.md",
+  "linked_work": "T-2033",
+  "receipt_id": "SRC-399",
+  "received_at": "2026-11-06T03:26:47Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "2410d89da09429c62163f54ed4c986c1792bad34f41e80b987d8684130611a68",
+    "sanitized_sha256": "2410d89da09429c62163f54ed4c986c1792bad34f41e80b987d8684130611a68"
+  },
+  "request_provenance": {
+    "compared_digest": "85f3338d0772e9eb7b5f5ac70805f62deacd7ca87d8c5ce50f64bf2c132b12ea",
+    "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+    "witness": "model_supplied"
+  },
+  "retirement": {
+    "digest_mismatch": false,
+    "measured_sha256": "2410d89da09429c62163f54ed4c986c1792bad34f41e80b987d8684130611a68",
+    "note": "",
+    "reason": "ORPHANED_RECEIPT",
+    "receipt_only": true,
+    "recorded_sha256": "2410d89da09429c62163f54ed4c986c1792bad34f41e80b987d8684130611a68",
+    "retired_at": "2026-11-12T13:28:58Z",
+    "retired_by": "saipen-cli",
+    "retirement_event": "E-19348",
+    "schema_version": 2,
+    "source_reason": "ORPHANED_RECEIPT",
+    "successor": ""
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "2410d89da09429c62163f54ed4c986c1792bad34f41e80b987d8684130611a68",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "2410d89da09429c62163f54ed4c986c1792bad34f41e80b987d8684130611a68",
+  "status": "INVALID",
+  "storage_status": "ARCHIVED",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

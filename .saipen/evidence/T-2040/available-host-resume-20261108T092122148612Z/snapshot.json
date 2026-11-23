@@ -1,0 +1,173 @@
+{
+  "captured_at": "20261108T092122148612Z",
+  "files": [
+    {
+      "path": "tools/saipen_engine/intake.py",
+      "sha256": "fafa8cba2fd74fe919b184782a24b09b9e0cfe03fccc74e3b253d67899dbdff5",
+      "bytes": 327885
+    },
+    {
+      "path": "tools/saipen_engine/operations.py",
+      "sha256": "f7b5d795eb3417fc358994a680340463c304a5dd1e204c0dff742431671c0aab",
+      "bytes": 603735
+    },
+    {
+      "path": "tools/saipen_engine/goal_authority.py",
+      "sha256": "d28593c5d83034338e55b16c6c0bc0a8bcd4eda991ec5541155ffd319f9b2e8a",
+      "bytes": 43259
+    },
+    {
+      "path": "tools/saipen_engine/closure_readiness.py",
+      "sha256": "755cf8e7b77f7a7daa4b2e44ddd94d15d31be7cd533daa4b2cbde71814ff991e",
+      "bytes": 10148
+    },
+    {
+      "path": "tools/saipen_engine/plan.py",
+      "sha256": "89d2b3161344e9bf2647438e0b24960dbc4e41e060e8ca4ca9b03146b0581b42",
+      "bytes": 10864
+    },
+    {
+      "path": "tools/saipen_engine/journal.py",
+      "sha256": "80a411e6484eb24ac155701c67fef779fa694e65bb4356856468c1c821ebae93",
+      "bytes": 264473
+    },
+    {
+      "path": "tools/saipen_engine/replenishment.py",
+      "sha256": "3460f8ce2d07605dce940571b51b2c40aa210eca487867fbb2bd062fd13b3707",
+      "bytes": 32223
+    },
+    {
+      "path": "tools/saipen_engine/work_exhaustion.py",
+      "sha256": "e0f08535c7fc7e05e8084e66a0edec52a51ac2de73da82766984ae1d590f10ee",
+      "bytes": 27156
+    },
+    {
+      "path": "tools/saipen_engine/continue_fallback.py",
+      "sha256": "89462a7516166dc1d1500bcbdec5b1906435db9a2e6d46aaf5027828fdd88ca1",
+      "bytes": 18768
+    },
+    {
+      "path": "tools/saipen_engine/discovery_providers.py",
+      "sha256": "5a2dd94922602e091586617866758dd93374eb50619f9264c644cb4dd5f7e574",
+      "bytes": 58792
+    },
+    {
+      "path": "tools/saipen_engine/subs.py",
+      "sha256": "67c825377015298b7043149fbc51f2b60bb2ab49bef1a1f116f0733d4294cb65",
+      "bytes": 218583
+    },
+    {
+      "path": "tools/saipen_engine/crew.py",
+      "sha256": "de2f8ad1a1172b4c1171280c647f40ea243cb0ea919ebf30f7adfc2091a61e81",
+      "bytes": 133664
+    },
+    {
+      "path": "tools/saipen_engine/outcome_truth.py",
+      "sha256": "8ad47a8498aa591b635f48f4ee3a10aaba75d6b9e2113ef67c3246b7837085d1",
+      "bytes": 19798
+    },
+    {
+      "path": "tools/saipen_engine/closure.py",
+      "sha256": "e4120bbefa5b96c695318b42f7322bcaa7e1d35f4cbc3497890d797568036b50",
+      "bytes": 33114
+    },
+    {
+      "path": "tools/saipen_engine/context.py",
+      "sha256": "c3a6cb8f06108d7b696501234f3e759f4e3aab266d32f5aeb416cfa69d963909",
+      "bytes": 48271
+    },
+    {
+      "path": "tools/saipen_engine/board.py",
+      "sha256": "74cf0a77e64a91edadc8c6c65800aa7366ec7b3fc2f47b8612dbd66fafb80a2b",
+      "bytes": 106569
+    },
+    {
+      "path": "tools/saipen_engine/router.py",
+      "sha256": "feeb90bb4ad4b9ca2f0dfa7854e20ae4ec7cad042fb136f57de44c8c3a889e95",
+      "bytes": 82009
+    },
+    {
+      "path": "tools/saipen_engine/continuation_assessment.py",
+      "sha256": "6eae95545c64d77baf149fa4a0ed9d052577a7b1c1c3db9d0da1b42e2df4da49",
+      "bytes": 23873
+    },
+    {
+      "path": "tools/saipen_engine/automation.py",
+      "sha256": "be6a29bd7860b2e89002f4c8ae1ec82fcc8cb95b31aea0a87db41e68609ddff1",
+      "bytes": 28975
+    },
+    {
+      "path": "tools/saipen_engine/campaign.py",
+      "sha256": "6691070541a535468f97ebf013c3862d7d29db19ca2d544a127e2a880a4853ab",
+      "bytes": 134393
+    },
+    {
+      "path": "tools/saipen_engine/supervisor.py",
+      "sha256": "3c6d6e5c8986218486ef2afe97615f65b6d52c7480a3358e777dee5ee746d203",
+      "bytes": 20351
+    },
+    {
+      "path": "tools/saipen_engine/worker.py",
+      "sha256": "49023e87eaa8f788c969c9f58ef9d35bbbdae6f2ac63295b56d3467fee0aa6f1",
+      "bytes": 31040
+    },
+    {
+      "path": "tools/saipen_engine/iteration_verdict.py",
+      "sha256": "30e58aaf0586f30a85420d05c71e60715aeff7e998e65ef2bdce0c51a30e1fb4",
+      "bytes": 27215
+    },
+    {
+      "path": "tools/improve.py",
+      "sha256": "bc8f957001e2e5b04f5f1bfd73e352e400565a69daf73d3874479d06a3b55faa",
+      "bytes": 229427
+    },
+    {
+      "path": "tools/saipen.py",
+      "sha256": "ba58917e11e544c244035eb32f8887989276c94e48a2fd80322326e7eb124541",
+      "bytes": 687698
+    },
+    {
+      "path": "tools/test_t2040_continuation_truth.py",
+      "sha256": "94b7dd9ae3e870bb8e7d9d78b249aee1a1c4de8a2ab1642f70b8f8f40f89ba28",
+      "bytes": 12211
+    },
+    {
+      "path": "tools/test_t2040_discovery_owners.py",
+      "sha256": "6142525d3581f07da0a049084aa8120150589b7355208cb2ffed98f988a613e1",
+      "bytes": 8673
+    },
+    {
+      "path": "tools/test_t2040_exhaustion_evidence.py",
+      "sha256": "7f8a9aaedb16d5cf18f3cd3cee61c99597b98b01ab85cc85a830853f41c9415f",
+      "bytes": 10164
+    },
+    {
+      "path": "tools/test_t2040_finish_plan_guards.py",
+      "sha256": "8ea8a0623482df8b531d62d581e6a53a13eeb43e69aea497186c459bf21fd085",
+      "bytes": 5718
+    },
+    {
+      "path": "tools/test_t2040_maintenance_authority.py",
+      "sha256": "e3db65c922fe1b2f0a394980b4a6bb22a0650940e90f539ce1de3ff1d45185d9",
+      "bytes": 19237
+    },
+    {
+      "path": "tools/test_t2040_publication_truth.py",
+      "sha256": "0d7ab5ceee6d3e390be3df901f76e2f83672056fd3d7f52882ebd1d666288c82",
+      "bytes": 16226
+    },
+    {
+      "path": "tools/test_t2040_replenishment_recovery.py",
+      "sha256": "3c7a7b711d8f17e6184b842b10c34bf87dcaa0e95a7a14d6653208e1f1e953b3",
+      "bytes": 14575
+    },
+    {
+      "path": "tools/test_t2040_terminal_consumer_guards.py",
+      "sha256": "40d465cee2271b3048ff155853cef59c6ae628de95b9c4f65d750db60a112adb",
+      "bytes": 28162
+    }
+  ],
+  "index_entries": 8835,
+  "index_manifest_sha256": "56a54b445cff7d95346edb4c3147b0787e70bd9b35c12cd393fd9be124cab5d5",
+  "cached_diff_sha256": "ff824b2f87db6ac41715af137aaee3bbbd26c15850ee49c76a8668fa8e8dad17"
+}

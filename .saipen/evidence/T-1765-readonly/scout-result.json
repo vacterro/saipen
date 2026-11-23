@@ -1,0 +1,1294 @@
+{
+  "scope": ".saipen\\recovery\\conformance\\debt",
+  "files_read": 456,
+  "errors": [],
+  "ruleset_versions": {
+    "1": 456
+  },
+  "current_ruleset_version": 1,
+  "current_ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "different_subtypes_collide": true,
+  "case_details": [
+    "T-1446",
+    "T-1446"
+  ],
+  "affected_local_snapshots": [
+    {
+      "path": "DEBT-000001.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000002.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000003.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000004.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000005.json",
+      "finding_count": 3
+    },
+    {
+      "path": "DEBT-000006.json",
+      "finding_count": 3
+    },
+    {
+      "path": "DEBT-000007.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000008.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000009.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000010.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000011.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000012.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000013.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000014.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000015.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000016.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000017.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000018.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000019.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000020.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000021.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000022.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000023.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000024.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000025.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000026.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000027.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000028.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000029.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000030.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000031.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000032.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000033.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000034.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000035.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000036.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000037.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000038.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000039.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000040.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000041.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000042.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000043.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000044.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000045.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000046.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000047.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000048.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000049.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000050.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000051.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000052.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000053.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000054.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000055.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000056.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000057.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000058.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000059.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000060.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000061.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000062.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000063.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000064.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000065.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000066.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000067.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000068.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000069.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000070.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000071.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000072.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000073.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000074.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000075.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000076.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000077.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000078.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000079.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000080.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000081.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000082.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000083.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000084.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000085.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000086.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000087.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000088.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000089.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000090.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000091.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000092.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000093.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000094.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000095.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000096.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000097.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000098.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000099.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000100.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000101.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000102.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000103.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000104.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000105.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000106.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000107.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000108.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000109.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000110.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000111.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000112.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000113.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000114.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000115.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000116.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000117.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000118.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000119.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000120.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000121.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000122.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000123.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000124.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000125.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000126.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000127.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000128.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000129.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000130.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000131.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000132.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000133.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000134.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000135.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000136.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000137.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000138.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000139.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000140.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000141.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000142.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000143.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000144.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000145.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000146.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000147.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000148.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000149.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000150.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000151.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000152.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000153.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000154.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000155.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000156.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000157.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000158.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000159.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000160.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000161.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000162.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000163.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000164.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000165.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000166.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000167.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000168.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000169.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000170.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000171.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000172.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000173.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000174.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000175.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000176.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000177.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000178.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000179.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000180.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000181.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000182.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000183.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000184.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000185.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000186.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000187.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000188.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000189.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000190.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000191.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000192.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000193.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000194.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000195.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000196.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000197.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000198.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000199.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000200.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000201.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000202.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000203.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000204.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000205.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000206.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000207.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000208.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000209.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000210.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000211.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000212.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000213.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000214.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000215.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000216.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000217.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000218.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000219.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000220.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000221.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000222.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000223.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000224.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000225.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000226.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000227.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000228.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000229.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000230.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000231.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000232.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000233.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000234.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000235.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000236.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000237.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000238.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000239.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000240.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000241.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000242.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000243.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000244.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000245.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000246.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000247.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000248.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000249.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000250.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000251.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000252.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000253.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000254.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000255.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000256.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000257.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000258.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000259.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000260.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000261.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000262.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000263.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000264.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000265.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000266.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000267.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000268.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000269.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000270.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000271.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000272.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000273.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000274.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000275.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000276.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000277.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000278.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000279.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000280.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000281.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000282.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000283.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000284.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000285.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000286.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000287.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000288.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000289.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000290.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000291.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000292.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000293.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000294.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000295.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000296.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000297.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000298.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000299.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000300.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000301.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000302.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000303.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000304.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000305.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000306.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000307.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000308.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000309.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000310.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000311.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000312.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000313.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000314.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000315.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000316.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000317.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000318.json",
+      "finding_count": 2
+    },
+    {
+      "path": "DEBT-000420.json",
+      "finding_count": 1
+    }
+  ],
+  "limit": "Only this explicit project's stored debt directory was read. No all-project compatibility claim, canonical mutation or operator choice is implied."
+}

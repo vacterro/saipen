@@ -1,0 +1,10 @@
+[
+  {
+    "site_id": "95800e9ef7d07dee",
+    "qualname": "<module>",
+    "ordinal": 0,
+    "line": 7989,
+    "message": "cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: . Both orphans removed alongside this check arrived that wa",
+    "disposition": "UNADJUDICATED"
+  }
+]

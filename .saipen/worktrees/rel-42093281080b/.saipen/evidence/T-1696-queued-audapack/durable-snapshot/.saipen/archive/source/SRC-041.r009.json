@@ -1,0 +1,54 @@
+{
+  "clauses": {
+    "SRC-041:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 [P0]: InauditWidget._on_save must not perform unsafe in-place r+b mutation of the canonical audit/N.md; extract a framework-neutral commit_existing_layer(path, expected_bytes, new_bytes) primitive returning structured COMMITTED/MISSING_OR_CONSUMED/CHANGED_EXTERNALLY/RECOVERY_REQUIRED|IO_FAILED results; guarantee crash/I/O recovery to exact OLD or exact NEW bytes with no partial canonical layer; never resurrect a concurrently consumed/deleted layer; Qt layer translates results into operator messages and keeps the draft dirty on any refusal."
+    },
+    "SRC-041:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002 [P1]: Canonical numbered-layer mutation (create/delete/rename/reorder/managed-assignment) is PRIMARY truth; user-layer tracker bookkeeping is SECONDARY metadata. A tracker/journal persistence failure must never make the caller believe the primary operation failed nor wedge managed delivery. Persist a durable idempotent tracker-repair queue (record/forget/renumber) outside audit/N.md; managed delivery must bind/clear/restore editor and never retry SAIPEN enqueue solely because tracking failed."
+    },
+    "SRC-041:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003 [P1]: reorder_inaudit_layers must be one recoverable transaction under a project mutation lock, using hidden noncanonical scratch names (never numbered .md layers), a durable reorder journal with pre/final-state fingerprints, operation-id idempotency (replay of same op id returns already-committed success, never a second permutation), exact-byte/selection/ownership assertions, and rollback to exact pre-state on any failure or RECOVERY_REQUIRED journal on rollback failure."
+    },
+    "SRC-041:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-004 [P1]: Project Room move persistence must serialize through ONE ordered mutation lane/FIFO (not per-generation unique TaskRunner keys); newer user gestures must win regardless of worker completion order; a durable move intent queue drains sequentially; failures reconcile model from authoritative registry snapshot; final UI/model/registry/restart must agree; do not globally serialize TaskRunner."
+    },
+    "SRC-041:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001 [P1] (DEFERRED this pass): bridge/server.py handle_audit_submission non-final campaign-index failure must rollback unconditionally through _rollback_error for every wave, asserting exact pre-request filesystem/run-state and rollback_incomplete on restore failure."
+    },
+    "SRC-041:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-002 [P1] (DEFERRED this pass): consolidate completed-wave/same-content handling into one idempotent duplicate-repair path with receipt-independent recovery and safe marker-clear semantics."
+    },
+    "SRC-041:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-003 [P1] (DEFERRED this pass): DispatchSupervisor.relaunch_managed_slot / ManagedWorkerSupervisor.launch_slot must enforce the durable RESERVED/LAUNCHING ledger invariant so repeated/concurrent relaunches spawn exactly once."
+    },
+    "SRC-041:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-004 [P2] (DEFERRED this pass): lifecycle check_bridge_health must require an actual supported API-version intersection and fail closed on incompatible/malformed version advertising."
+    },
+    "SRC-041:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-001 [P1] (DEFERRED this pass): userscript INAUDIT capture flush retry scheduling must arm exactly one timer after the in-flight guard clears; earliest-deadline-wins; pending during-flush deadline recorded."
+    }
+  },
+  "derived_at": "2026-09-08T16:10:54Z",
+  "derived_from": "SRC-041",
+  "interpretation_revision": 9,
+  "schema_version": 1,
+  "source_sha256": "1fe31377231e918f2b672e86d6588735249d64c4e91f4285d1cddad8f8417a57"
+}

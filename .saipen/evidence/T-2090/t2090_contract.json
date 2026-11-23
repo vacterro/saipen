@@ -1,0 +1,26 @@
+{
+ "schema": 1,
+ "command": [
+  "{python}",
+  "tools/regression_t2089/t2090_night6_oracle.py"
+ ],
+ "format": "unittest",
+ "context": [
+  "tools",
+  "tools/saipen_engine",
+  "tools/regression_t2089",
+  "saipen"
+ ],
+ "oracle_files": [
+  "tools/regression_t2089/t2090_night6_oracle.py"
+ ],
+ "subject_files": [
+  "tools/saipen.py",
+  "tools/saipen_engine/journal.py"
+ ],
+ "before": {
+  "tools/saipen.py": ".saipen/evidence/T-2090/prefix/t2089_prefix_saipen.py",
+  "tools/saipen_engine/journal.py": ".saipen/evidence/T-2090/prefix/t2089_prefix_journal.py"
+ },
+ "timeout": 300
+}

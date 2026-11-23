@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-431:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2108 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:82 record:.saipen/evidence/focused-unit/22511643bf418504-20261122T012816874323Z.json patterns:test_t1828_verification_policy.py,test_t2118_baseline_admission.py,test_t2119_wa_delta_boundary.py,test_t2122_red_owner_fail_closed.py (DECLARED slim sandbox)",
+      "text": "Autonomous SAIPEN optimization campaign MODE 2: build reproducible performance baseline, find and measure remaining bottlenecks, implement minimal safe optimizations with RED/GREEN oracles and regression gates, waves O0-O7, continue until measured saturation",
+      "verification": "the Work this request created reached its own verification gate; see the T-2108 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2108"
+    }
+  },
+  "schema_version": 1
+}

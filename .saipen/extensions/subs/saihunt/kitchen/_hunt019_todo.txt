@@ -1,0 +1,1530 @@
+tools/audit_checks.py:537:"""The board lines the ownership check reads: DOING, TODO and BLOCKED."""
+tools/audit_checks.py:544:if section in ("## DOING", "## TODO", "## BLOCKED") and line.startswith("- ["):
+tools/audit_checks.py:572:The owning ticket lives under ## BLOCKED, not ## TODO. Ownership reads any
+tools/audit_checks.py:573:live line (DOING/TODO/BLOCKED), but workability is TODO-only -- so a
+tools/audit_checks.py:659:reason it does not test. Heading-aware insertion: an EMPTY ## TODO directly
+tools/audit_checks.py:1580:(## TODO or ## BLOCKED -- the validator treats any non-DONE/non-DOING
+tools/audit_checks.py:1622:`## TODO` ticket ONLY when nothing is claimed -- a `## DOING` ticket IS
+tools/audit_checks.py:1624:arrange the TODO mismatch. Inject two synthetic workable tickets: T-999
+tools/audit_checks.py:1625:at the top of `## TODO` (always the topmost workable) and T-998 at the
+tools/audit_checks.py:1640:todo = re.search(r"^## TODO$\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL)
+tools/audit_checks.py:1657:"""Reproduce T-576's unjournaled BLOCKED -> TODO drift byte-for-byte."""
+tools/audit_checks.py:1666:if line == "## TODO":
+tools/audit_checks.py:1852:under `## TODO` so the reopened-T-549 condition is testable again.
+tools/audit_checks.py:1859:todo_i = next((i for i, ln in enumerate(lines) if ln.strip() == "## TODO"), None)
+tools/audit_checks.py:1891:"""File every `## BLOCKED` record back into `## TODO` as workable Work.
+tools/audit_checks.py:1919:todo = next(i for i, line in enumerate(lines) if line.startswith("## TODO"))
+tools/audit_checks.py:1925:"""Empty `## DOING` by filing its claimed ticket back into `## TODO`.
+tools/audit_checks.py:1934:todo = next(i for i, line in enumerate(lines) if line.startswith("## TODO"))
+tools/audit_checks.py:1949:todo = next(i for i, line in enumerate(lines) if line.startswith("## TODO"))
+tools/audit_checks.py:2109:# T-572 sat in ## TODO -- validator-conformant until this rule. Both
+tools/audit_checks.py:2571:# Rule -- `topmost workable ## TODO` is not what the selector computes
+tools/audit_checks.py:2584:"T-576-style drift moves a blocker ticket under TODO",
+tools/audit_checks.py:2689:replace("FRONT of `## TODO`", "front of the board"),
+tools/audit_checks.py:2690:"at the front of `## TODO`",
+tools/audit_checks.py:2956:# files -- STATE.phase: BLOCKED AND a workable ## TODO ticket -- so this
+tools/audit_checks.py:2970:"\n## TODO\n",
+tools/audit_checks.py:2971:"\n## TODO\n- [ ] T-999 [P3] synthetic red-control workable ticket\n",
+tools/audit_checks.py:3171:"CONVERGE blocks factories while TODO remains",
+tools/audit_checks.py:3173:replace("no workable `## TODO` ticket", "TODO may remain"),
+tools/audit_checks.py:3248:# empty `## TODO` *and* a bogus WAIT, and a case mutates exactly one file,
+tools/audit_checks.py:3573:("duplicate board heading", BOARD, lambda t: t + "\n## TODO\n", "duplicate section heading"),
+tools/audit_checks.py:3583:add_after("## TODO\n", "- [ ] T-803 a | assignee: me\n"),
+tools/audit_checks.py:3589:add_after("## TODO\n", "- [ ] T-804 a | needs: T-9999\n"),
+tools/audit_checks.py:3595:add_after("## TODO\n", "- [ ] T-805 a | needs: T-806\n- [ ] T-806 b | needs: T-805\n"),
+tools/audit_checks.py:3605:"## TODO\n", "## TODO\n- [ ] T-810 b\n", 1
+tools/audit_checks.py:3618:add_after("## TODO\n", "- [ ] T-808 a | review_passes: 4\n"),
+tools/audit_checks.py:3624:add_after("## TODO\n", "- [ ] fix this later\n"),
+tools/audit_checks.py:4434:"T-1637 CORE 1.2 lets a permanent warning owner sit in TODO",
+tools/audit_checks.py:4569:marker = "## TODO\n"
+tools/audit_floor.py:54:GOOD_BOARD = "# Board\n## DOING\n\n## TODO\n- [ ] T-001 a ticket\n\n## DONE\n\n## BLOCKED\n"
+tools/audit_floor.py:176:"# Board\n## DOING\n\n## TODO\n- [ ] T-001 a | needs: T-002\n"
+tools/audit_floor.py:186:"# Board\n## DOING\n\n## TODO\n- [ ] T-001 a\n- [ ] T-001 b\n\n## DONE\n\n## BLOCKED\n",
+tools/audit_floor.py:195:"# Board\n## DOING\n\n## TODO\n- [ ] T-001 a | needs: T-999\n\n## DONE\n\n## BLOCKED\n",
+tools/audit_floor.py:202:lambda s, b, lg: (s, "# Board\n## DOING\n\n## TODO\n\n## DONE\n", lg),
+tools/fixture_t1862_saituls_shape.py:9:7 BLOCKED tickets, 2 TODO tickets
+tools/fixture_t1862_saituls_shape.py:76:lines = ["## DOING", "## TODO"]
+tools/hardening_controls.json:10:{"id": 9, "name": "cc-cannot-reach-factories-with-TODO", "owner": "tools/validate.py", "anchor": "no workable `## TODO` ticket"},
+tools/nitro_integrity_repro.py:39:"# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+tools/nitro_integrity_repro.py:125:"claim_time: 2026-08-09T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools/nitro_integrity_repro.py:152:f"TODO ticket done directly, result={result.get('code')}, "
+tools/nitro_integrity_repro.py:313:text = "# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+tools/nitro_integrity_repro.py:350:("R5 direct TODO -> DONE succeeds", r5_todo_to_done_direct),
+tools/regression_conformance_closure.py:54:(saipen / "BOARD.md").write_text("# BOARD\n\n## TODO\n\n", encoding="utf-8")
+tools/regression_core_audit_fixes.py:268:"# BOARD\n\n## TODO\n- [ ] T-2 more workable ticket\n\n## DOING\n\n## DONE\n\n## BLOCKED\n"
+tools/regression_core_audit_fixes.py:317:(saipen / "BOARD.md").write_text("# BOARD\n\n## TODO\n\n## DOING\n")
+tools/regression_second_wave_audit_fixes.py:62:board += "## TODO\n" + "".join(todo_lines) + "\n"
+tools/regression_second_wave_audit_fixes.py:339:# --- (b) old TODO backlog -> new plan tickets outrank old -------------
+tools/regression_second_wave_audit_fixes.py:346:todo = bt.split("## TODO")[1].split("## DOING")[0]
+tools/regression_second_wave_audit_fixes.py:348:# pre-existing backlog is preserved in TODO (no deletion, outranked by the
+tools/regression_second_wave_audit_fixes.py:350:# TODO line is the old backlog; the new plan ticket lives in DOING.
+tools/regression_second_wave_audit_fixes.py:361:check("W2-003 old backlog preserved in TODO (no deletion)", "T-1" in todo, todo[:200])
+tools/regression_second_wave_audit_fixes.py:368:# --- (c) active DOING + old TODO -> checkpointed, planned, bound -------
+tools/regression_second_wave_audit_fixes.py:384:todo3 = bt3.split("## TODO")[1].split("## DOING")[0]
+tools/regression_second_wave_receipt_fixes.py:219:"## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n",
+tools/regression_second_wave_receipt_fixes.py:358:(root / ".saipen" / "BOARD.md").write_text("# BOARD\n## TODO\n\n", encoding="utf-8")
+tools/run_scenarios.py:3398:"# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools/run_scenarios.py:3437:"# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools/run_scenarios.py:4004:board = parse_sub_board("## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n\n## TODO\n")
+tools/run_scenarios.py:4007:"## DOING\n\n## TODO\n- [ ] H-1 open\n\n## DONE\n\n## BLOCKED\n", ticket_prefix="H"
+tools/run_scenarios.py:4011:"## DOING\n- [x] H-1 wrong checkbox\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+tools/run_scenarios.py:4015:"## DOING\n- [/] H-1 a\n- [/] H-2 b\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+tools/run_scenarios.py:4018:board = parse_sub_board("## DOING\n\n## TODO\n- [ ] T-1 core id\n\n## DONE\n\n## BLOCKED\n")
+tools/run_scenarios.py:4032:f"## DOING\n\n## TODO\n- [ ] {prefix}-1 open\n\n## DONE\n\n## BLOCKED\n",
+tools/run_scenarios.py:4041:"## DOING\n\n## TODO\n- [ ] PY-1 wrong\n\n## DONE\n\n## BLOCKED\n",
+tools/run_scenarios.py:4046:"## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n\n## UNKNOWN\n", expected_role="saihunt"
+tools/run_scenarios.py:4057:"# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+tools/run_scenarios.py:4076:"# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools/run_scenarios.py:4151:"# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools/run_scenarios.py:4188:"complete current collection creates one Core TODO hypothesis",
+tools/run_scenarios.py:4584:"# Board\n## DOING\n## TODO\n- [ ] HUNT-1 open\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/run_scenarios.py:4596:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/run_scenarios.py:4737:"# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n- [ ] HUNT-1 blocked\n",
+tools/run_scenarios.py:4766:"# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools/run_scenarios.py:4925:# Canonical Core closure: no workable TODO, no DOING, no non-exempt
+tools/run_scenarios.py:5465:"| claim_time: 2026-01-01T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n"
+tools/run_scenarios.py:5468:idle_route = route_next(converged, "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n")
+tools/run_scenarios.py:6006:demands. Emptying those two sections is the established fix; TODO/BLOCKED
+tools/run_scenarios.py:6056:# already name. A surviving TODO/BLOCKED record that `needs:` a ticket THIS
+tools/run_scenarios.py:6198:# ticket-less DONE shape), while TODO/BLOCKED survive verbatim -- the
+tools/run_scenarios.py:6216:# TODO/BLOCKED records then had no allocation event, and the probe
+tools/run_scenarios.py:8811:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8", newline="\n"
+tools/run_scenarios.py:8841:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8", newline="\n"
+tools/run_scenarios.py:8852:"# Board\n## DOING\n## TODO\n## DONE\n- [ ] SUB-OLD wrong state\n## BLOCKED\n",
+tools/run_scenarios.py:8862:"# Board\n## DOING\n## TODO\n  - [ ] SUB-HIDDEN indented\n## DONE\n## BLOCKED\n",
+tools/run_scenarios.py:8872:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8", newline="\n"
+tools/run_scenarios.py:8985:"# Board\n## DOING\n## TODO\n- [ ] SUB-001 open\n## DONE\n## BLOCKED\n",
+tools/run_scenarios.py:8990:"open TODO blocks cleanup", sub_clean_blockers(instance), contains="TODO: SUB-001 open"
+tools/run_scenarios.py:8993:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8", newline="\n"
+tools/run_scenarios.py:9530:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/run_scenarios.py:9551:text = text.replace("## TODO\n", f"## TODO\n- [ ] {tid} [P1] probe | verify: probe\n")
+tools/run_scenarios.py:10297:board_lines = ["# Board", "## DOING", "## TODO"]
+tools/run_scenarios.py:10403:_rep_header.replace("report_status: complete", "report_status: complete\n## DOING\n## TODO")
+tools/run_scenarios.py:10832:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/run_scenarios.py:13328:board["headings"] == ["## DOING", "## TODO", "## DONE", "## BLOCKED"],
+tools/run_scenarios.py:13423:board.write_text("# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8")
+tools/run_scenarios.py:13675:"# Board\n## DOING\n## TODO\n"
+tools/run_scenarios.py:13703:"# Board\n## DOING\n## TODO\n- [ ] T-777 [P1] probe ticket | "
+tools/run_scenarios.py:13837:"# Board\n## DOING\n## TODO\n- [ ] T-901 probe\n## DONE\n## BLOCKED\n"
+tools/run_scenarios.py:13843:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools/run_scenarios.py:13854:# Legal lifecycle: done accepts ONLY ## DOING. A TODO ticket cannot skip
+tools/run_scenarios.py:13858:"done on a TODO ticket is refused (IL_LEGAL_TICKET_LIFECYCLE)",
+tools/run_scenarios.py:13865:== "## TODO",
+tools/run_scenarios.py:13980:"goal_entry demotes active DOING ticket to TODO",
+tools/run_scenarios.py:13981:ge_board["tickets"]["T-1"]["section"] == "## TODO"
+tools/run_scenarios.py:14078:and candidate.get("section") == "## TODO",
+tools/run_scenarios.py:14134:"# Board\n## DOING\n## TODO\n"
+tools/run_scenarios.py:14251:# TODO input that a caller passes without running the full validator.
+tools/run_scenarios.py:14267:"normal claim refuses a TODO ticket carrying blocker",
+tools/run_scenarios.py:14284:"router skips malformed TODO+blocker and never emits SCOUT for it",
+tools/run_scenarios.py:14298:"public status refuses structurally invalid TODO+blocker state",
+tools/run_scenarios.py:14312:"public next refuses structurally invalid TODO+blocker state",
+tools/run_scenarios.py:14322:"# Board\n## DOING\n## TODO\n"
+tools/run_scenarios.py:14353:ticket.get("section") == "## TODO"
+tools/run_scenarios.py:14415:"block routes the next_action to the remaining workable TODO",
+tools/run_scenarios.py:14429:"unblock atomically creates TODO without active blocker/history",
+tools/run_scenarios.py:14431:and bd["tickets"]["T-1"]["section"] == "## TODO"
+tools/run_scenarios.py:14687:"# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+tools/run_scenarios.py:14700:"# Board\n## DOING\n## TODO\n"
+tools/run_scenarios.py:14714:"# Board\r\n## DOING\r\n## TODO\r\n"
+tools/run_scenarios.py:14730:"# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+tools/run_scenarios.py:14938:"# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+tools/run_scenarios.py:15526:# Real current shape: 10+ TODO tickets, the top several unworkable (needs
+tools/run_scenarios.py:15536:lines = ["# Board", "## DOING", "## TODO"]
+tools/run_scenarios.py:15574:for section in ("## DOING", "## TODO", "## BLOCKED", "## DONE")
+tools/run_scenarios.py:15579:"12 TODO tickets with cap 2 + protected full T-4)",
+tools/run_scenarios.py:15589:"# Board\n## DOING\n## TODO\n"
+tools/run_scenarios.py:15719:"claim_time: 2026-08-09T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools/run_scenarios.py:15786:"claim_time: 2026-08-09T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools/run_scenarios.py:15839:"claim_time: 2026-08-09T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools/run_scenarios.py:15857:# ---- T-590: shared router -- DONE + workable TODO routes to the ticket.
+tools/run_scenarios.py:15865:"route_next on DONE + workable TODO routes to the ticket",
+tools/run_scenarios.py:16200:"# Board\n## DOING\n## TODO\n"
+tools/run_scenarios.py:16214:"validator FAILs a new TODO ticket with placeholder verify",
+tools/run_scenarios.py:16219:# ---- T-590: >8 TODO tickets with the 9th workable -- cold context must
+tools/run_scenarios.py:16222:lines = ["# Board", "## DOING", "## TODO"]
+tools/run_scenarios.py:16813:"# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+tools/run_scenarios.py:17169:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/run_scenarios.py:17895:"# Board\n## DOING\n## TODO\n"
+tools/run_scenarios.py:18364:"## TODO\n"
+tools/run_scenarios.py:18404:"verify: probe\n## TODO\n## DONE\n## BLOCKED\n"
+tools/run_scenarios.py:18469:At `phase: DONE` with an empty `## TODO`, CORE permits exactly THREE brakes
+tools/run_scenarios.py:18641:# ---- DONE + empty TODO: exactly three brakes bind --------------------
+tools/run_scenarios.py:18694:EMPTY_BOARD = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/run_scenarios.py:18698:"## TODO\n## DONE\n## BLOCKED\n"
+tools/run_scenarios.py:18847:"## TODO\n\n## BLOCKED\n\n## DONE\n",
+tools/run_scenarios.py:19635:+ "## TODO\n"
+tools/run_scenarios.py:19752:"## TODO\n## DONE\n## BLOCKED\n",
+tools/run_scenarios.py:19762:"# Board\n## DOING\n## TODO\n"
+tools/run_scenarios.py:19789:"## TODO\n## DONE\n## BLOCKED\n",
+tools/saipen.py:269:ticket.get("section") == "## TODO" for ticket in board["tickets"].values()
+tools/saipen.py:1909:todo = [t for t in board["tickets"].values() if t["section"] == "## TODO"]
+tools/saipen.py:2571:workable TODO remains.  That verdict -- not a board glance -- is the
+tools/saipen.py:8620:ticket.get("section") == "## TODO" and ticket.get("needs")
+tools/sub_clean.py:87:required = ["DOING", "TODO", "DONE", "BLOCKED"]
+tools/sub_clean.py:99:checkbox_for = {"DOING": "/", "TODO": " ", "DONE": "x", "BLOCKED": " "}
+tools/sub_clean.py:114:if ticket and section == "TODO":
+tools/sub_clean.py:115:blockers.append("TODO: " + line[6:].strip())
+tools/t1320_fleet_native_smoke.py:281:in (root / ".saipen" / "BOARD.md").read_text(encoding="utf-8").split("## TODO")[0],
+tools/t1382_field_probe.py:53:"## TODO\n"
+tools/t1446_field_soak.py:92:if ticket.get("section") in ("## TODO", "## DOING")
+tools/test_adaptive_runtime.py:63:"# Board\n## DOING\n- [/] T-001 fixture\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_admission_auto_doctor.py:72:ticket = {"id": "T-10", "section": "## TODO", "needs": []}
+tools/test_admission_auto_doctor.py:137:"section": "## TODO",
+tools/test_admission_auto_doctor.py:173:"section": "## TODO",
+tools/test_admission_auto_doctor.py:218:"section": "## TODO",
+tools/test_admission_auto_doctor.py:236:"section": "## TODO",
+tools/test_adoption_section_parity.py:8:`saipen recover --adopt-legacy` -- used to scan only `## TODO` and `## DOING`.
+tools/test_adoption_section_parity.py:76:## TODO
+tools/test_adoption_section_parity.py:93:## TODO
+tools/test_adoption_section_parity.py:111:"T-501": "## TODO",
+tools/test_audit_2026_08_28_all3.py:2534:"# Board\n## DOING\n## TODO\n## DONE\n"
+tools/test_audit_2026_08_30_all3_impl.py:67:"## TODO\n"
+tools/test_audit_inbox.py:37:BOARD_EMPTY = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_audit_inbox.py:57:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_audit_inbox.py:316:board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] stale backlog | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+tools/test_audit_inbox.py:323:board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] stale | verify: proof\n- [ ] T-900 [P1] audit work | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+tools/test_audit_inbox.py:335:"# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] backlog | verify: proof\n"
+tools/test_audit_inbox.py:358:board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] backlog | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+tools/test_audit_inbox.py:384:board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] backlog | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+tools/test_audit_inbox.py:405:board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] backlog | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+tools/test_audit_inbox.py:426:board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] backlog | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+tools/test_audit_inbox.py:508:f"## TODO\n## DONE\n## BLOCKED\n{blocked_record}\n",
+tools/test_audit_inbox.py:509:f"## TODO\n{todo}\n## DONE\n## BLOCKED\n",
+tools/test_audit_inbox.py:591:"## TODO\n- [ ] T-777 [P1] audit work | verify: proof\n## DONE\n",
+tools/test_audit_inbox.py:1126:"## TODO\n", "## TODO\n- [ ] T-2 [P1] earlier | verify: proof\n"
+tools/test_audit_ingest_resume.py:161:"## TODO",
+tools/test_audit_ingest_resume.py:162:"## TODO\n"
+tools/test_audit_ingest_resume.py:183:"## TODO",
+tools/test_audit_ingest_resume.py:184:"## TODO\n"
+tools/test_audit_manifest.py:263:"## DOING\n## TODO\n- [ ] T-46 [P1] close the sweep\n## DONE\n## BLOCKED\n",
+tools/test_audit_route.py:183:"section": "## TODO",
+tools/test_audit_route.py:215:"T-901": {"id": "T-901", "section": "## TODO", "checkbox": " ", "fields": {}},
+tools/test_audit_route.py:230:"T-901": {"id": "T-901", "section": "## TODO", "checkbox": " ", "fields": {}},
+tools/test_automation_block.py:35:BOARD_EMPTY = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_automation_block.py:272:f"{now}\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_automation_block.py:319:"## TODO\n", "## TODO\n- [ ] T-900 [P1] runnable | verify: exact control\n"
+tools/test_automation_block.py:443:"## TODO\n", "## TODO\n- [ ] T-900 [P1] runnable | verify: exact control\n"
+tools/test_automation_block.py:498:"# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] stale | verify: proof\n"
+tools/test_board_pseudo_link.py:54:return f"## DOING\n\n{line}\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+tools/test_boot_locator.py:232:"## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_campaign_continuation_assessment.py:101:lines += ["## TODO"]
+tools/test_campaign_matrix.py:82:f"## DOING\n- [/] {task} [P1] Task 100\n## TODO\n## BLOCKED\n## DONE\n",
+tools/test_campaign_matrix.py:337:"## DOING\n## TODO\n## BLOCKED\n## DONE\n- [x] T-100 [P1] Task 100\n",
+tools/test_campaign_matrix.py:416:(root / ".saipen" / "BOARD.md").write_text("## DOING\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8")
+tools/test_campaign_production_gates.py:95:f"## DOING\n- [/] {task} [P1] Production Task\n## TODO\n## BLOCKED\n## DONE\n",
+tools/test_campaign_production_gates.py:285:"## DOING\n## TODO\n## BLOCKED\n## DONE\n- [x] T-200 [P1] Production Task\n",
+tools/test_campaign_production_gates.py:315:(root / ".saipen" / "BOARD.md").write_text("## DOING\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8")
+tools/test_campaign_production_gates.py:332:(root / ".saipen" / "BOARD.md").write_text("## DOING\n- [/] T-201 [P1] New Task\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8")
+tools/test_campaign_production_gates.py:609:"## DOING\n## TODO\n## BLOCKED\n## DONE\n- [x] T-200 Done\n", encoding="utf-8"
+tools/test_closure_provenance.py:11:projected at the head of `## TODO`, while the persisted `next_action`
+tools/test_closure_provenance.py:669:audit/source-bound Work projected at the head of `## TODO`. The
+tools/test_closure_provenance.py:765:"## TODO\n", "## TODO\n- [ ] T-90 [P1] x | verify: p | frobnicate: yes\n"
+tools/test_closure_provenance.py:794:{"id": "T-1", "section": "## TODO", "fields": {"closure_mode": "own_patch"}}
+tools/test_closure_provenance.py:796:self.assertTrue(any("under ## TODO" in p for p in problems), problems)
+tools/test_cold_agent_truth.py:85:board = "# Board\n## DOING\n" + current + "\n## TODO\n## DONE\n"
+tools/test_cold_recovery.py:77:## TODO
+tools/test_cold_recovery.py:175:"## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_cold_recovery.py:204:# when an earlier TODO is dependency-eligible (brief briefly projected
+tools/test_cold_recovery.py:210:"## TODO\n"
+tools/test_cold_recovery.py:376:"## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_cold_recovery.py:494:"## DOING\n## TODO\n"
+tools/test_cold_recovery.py:538:"## DOING\n## TODO\n"
+tools/test_command_routing.py:434:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_command_routing.py:732:"## TODO\n"
+tools/test_command_routing.py:922:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_command_routing.py:1149:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_continue_chain.py:167:"## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_continue_improve_fallthrough.py:155:"## TODO\n"
+tools/test_control_primitives.py:131:f"## DOING\n{doing}## TODO\n## DONE\n## BLOCKED\n",
+tools/test_core_ownership_routing.py:127:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_core_unit_gate.py:100:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_crew_applicability.py:51:BOARD = "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+tools/test_defect_delta_controls.py:155:"## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_dependency_resume_liveness.py:111:"## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_dependency_resume_liveness.py:267:BOARD_EMPTY = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_event_taxonomy_owner.py:56:"# Board\n## DOING\n## TODO\n"
+tools/test_explicit_claim.py:42:"## TODO\n"
+tools/test_explicit_claim.py:134:"# Board\n## DOING\n## TODO\n"
+tools/test_explicit_claim.py:148:"# Board\n## DOING\n## TODO\n"
+tools/test_explicit_claim.py:158:"# Board\n## DOING\n## TODO\n"
+tools/test_explicit_claim.py:212:"# Board\n## DOING\n## TODO\n"
+tools/test_external_authentication_contract.py:87:return "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n" + "\n".join(rows) + "\n"
+tools/test_external_resolution.py:68:lines = ["# Board", "## DOING", "## TODO"]
+tools/test_external_revalidation.py:19:P. Current goal has zero TODO/DOING but external reconciliation resumes parent work.
+tools/test_external_revalidation.py:63:board_lines = ["# Board", "## DOING", "## TODO", "## DONE"]
+tools/test_external_revalidation.py:170:"## TODO\n"
+tools/test_external_revalidation.py:248:"## TODO\n"
+tools/test_external_revalidation.py:315:board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:331:board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:354:board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:371:board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:429:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:450:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:465:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:482:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:665:board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:669:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:773:board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:775:board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:800:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:830:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:845:board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:850:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:939:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:974:board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_external_revalidation.py:977:board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n" + _blocked_row(
+tools/test_external_revalidation.py:1017:board_content="# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_external_revalidation.py:1027:"# Board\n## DOING\n## TODO\n## BLOCKED\n## DONE\n"
+tools/test_field_fixture_isolation.py:98:"## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_finding_invalidated_closure.py:83:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_freebuff_operator_provenance.py:92:"## TODO\n"
+tools/test_generation_migration.py:85:BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_gpu_lane.py:78:"## TODO\n"
+tools/test_guard_admission.py:71:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_guard_admission.py:206:"## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_guard_admission.py:418:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_guard_events.py:662:"## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_guard_execution_reachability.py:100:"## TODO\n" + extra + "## DONE\n## BLOCKED\n"
+tools/test_guard_hostile_matrix.py:75:## TODO
+tools/test_guard_hostile_matrix.py:123:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_guard_hostile_matrix.py:754:("rg TODO src/app.py", "shell"),
+tools/test_guard_surface_parity.py:70:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_handoff_archive_cross_repo.py:64:## TODO
+tools/test_hostile_wave_regressions.py:68:(proj / ".saipen/BOARD.md").write_text("## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8")
+tools/test_hostile_wave_regressions.py:257:(proj / ".saipen/BOARD.md").write_text("## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8")
+tools/test_host_bootstrap.py:161:"\n## TODO\n\n## DONE\n\n## BLOCKED\n",
+tools/test_host_bootstrap.py:765:"## DOING\n\n## TODO\n\n## DONE\n- [x] T-1 [P1] finished\n",
+tools/test_improve_error_boundary.py:60:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_improve_gate.py:125:"## TODO\n"
+tools/test_improve_reconcile.py:60:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_improve_reconcile.py:188:text.replace("## TODO\n", f"## TODO\n- [ ] {ticket} [P1] probe | verify: probe\n"),
+tools/test_ingress_authority.py:225:self.assertNotEqual(board(root)[work]["section"], "## TODO")
+tools/test_install_identity_doctor.py:83:"\n## TODO\n\n## DONE\n\n## BLOCKED\n",
+tools/test_intent_audit_fixes.py:590:original = "# BOARD\n## TODO\n- [ ] HUNT-777 preserve this work\n## DONE\n- [x] old work\n"
+tools/test_intent_audit_fixes.py:597:self.assertIn("## TODO", after)
+tools/test_journal_nested_targets.py:65:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_legacy_lifecycle_compat.py:12:Fleet plan, which proposed 15 ``## DONE -> ## TODO`` reopenings of real
+tools/test_legacy_lifecycle_compat.py:181:## TODO
+tools/test_legacy_lifecycle_compat.py:292:self.assertEqual(found[0]["to_section"], "## TODO")
+tools/test_legacy_lifecycle_compat.py:316:if r.get("kind") == "section-move" and r.get("to_section") == "## TODO"
+tools/test_legacy_lifecycle_compat.py:361:"## TODO\n",
+tools/test_legacy_lifecycle_compat.py:362:"## TODO\n- [ ] T-901 half claimed todo | verify: repaired "
+tools/test_legacy_lifecycle_compat.py:371:self.assertEqual(found[0]["section"], "## TODO")
+tools/test_legacy_lifecycle_compat.py:526:self.assertEqual(section_of(root, "T-195"), "## TODO")
+tools/test_legacy_lifecycle_compat.py:544:"## TODO\n"
+tools/test_log_detail_evidence.py:67:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_log_normalize.py:64:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_log_tail_quarantine.py:58:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_metadata_repair.py:15:C  active TODO/DOING Work                           -> refused, zero writes
+tools/test_metadata_repair.py:83:lines = ["# Board", "## DOING", "## TODO"]
+tools/test_metrics_acceptance.py:25:BOARD_HEADER = "# Board\n## DOING\n## TODO\n"
+tools/test_next_action_deadlock.py:70:BOARD = "## DOING\n## TODO\n- [ ] T-9 [P1] real todo | verify: x\n## DONE\n## BLOCKED\n"
+tools/test_no_publish_source_scope.py:29:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_opencode_adapter.py:241:"T-001", (root / ".saipen" / "BOARD.md").read_text(encoding="utf-8").split("## TODO")[0]
+tools/test_opencode_live_session.py:152:"## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_operator_ingress_matrix.py:71:"## TODO\n"
+tools/test_orchestration_repair.py:87:f"## DOING\n{doing}## TODO\n## DONE\n## BLOCKED\n",
+tools/test_orchestration_repair.py:359:# Planned work filed AFTER the request, above it in TODO order.
+tools/test_orchestration_repair.py:373:self.assertEqual(board["tickets"][new_ticket]["section"], "## TODO")
+tools/test_portable_floor_fields.py:66:## TODO
+tools/test_producer_terminal_consistency.py:80:"## TODO\n"
+tools/test_producer_terminal_consistency.py:125:lines.append("## TODO")
+tools/test_project_root_session_binding.py:84:"# BOARD\n\n## DOING\n\n## TODO\n\n## BLOCKED\n\n## DONE\n",
+tools/test_project_root_session_binding.py:495:"T-001", (root / ".saipen" / "BOARD.md").read_text(encoding="utf-8").split("## TODO")[0]
+tools/test_public_closure_cli.py:464:self.assertEqual(board["tickets"][new_ticket]["section"], "## TODO")
+tools/test_reconcile_history_ledger_blocked.py:84:"## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_reconcile_legacy_output_field.py:69:"## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_reconcile_valve.py:136:"## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_reconcile_valve.py:293:"## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_reconcile_valve.py:431:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_recovery_reachability.py:202:"## TODO\n## DONE\n" + blocked,
+tools/test_recovery_reachability.py:668:allocation authority. T-777 sits in `## TODO` with no such event: the exact
+tools/test_recovery_reachability.py:699:"## TODO\n" + _LEGACY_TICKET_LINE + "## DONE\n## BLOCKED\n",
+tools/test_recovery_reachability.py:711:board = {"tickets": {"T-777": {"section": "## TODO"}}}
+tools/test_recovery_reachability.py:728:board = {"tickets": {"T-777": {"section": "## TODO"}}}
+tools/test_recovery_reachability.py:741:board = {"tickets": {"T-777": {"section": "## TODO"}}}
+tools/test_recovery_reachability.py:1169:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_recovery_reachability.py:1323:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_recovery_reachability.py:1481:"## TODO\n"
+tools/test_recovery_reachability.py:1873:"## DOING\n## TODO\n- [ ] T-188 [P1] the stranded one | verify: it works\n"
+tools/test_recovery_reachability.py:1934:"## TODO\n- [ ] T-188 [P1] the stranded one | verify: it works\n",
+tools/test_recovery_reachability.py:1935:"## TODO\n",
+tools/test_recover_approved_repair.py:70:- [/] T-9002 unstarted doing | verify: returned to TODO
+tools/test_recover_approved_repair.py:71:## TODO
+tools/test_recover_approved_repair.py:185:# Every malformed record normalized into a clean TODO.
+tools/test_recover_approved_repair.py:187:self.assertEqual(_section_of(board, tid), "## TODO", board)
+tools/test_recover_approved_repair.py:215:self.assertEqual(_section_of(_board_text(root), "T-9001"), "## TODO")
+tools/test_regression_gate.py:101:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_retired_source_coverage.py:41:"## TODO\n"
+tools/test_retired_source_coverage.py:130:citing one unconditionally -- T-250 could not even leave TODO, which is why
+tools/test_reverify.py:110:text = text.replace("## DONE\n", "## TODO\n", 1)
+tools/test_runtime_bootstrap.py:267:(saipen / "BOARD.md").write_text("## DOING\n## TODO\n## DONE\n", encoding="utf-8")
+tools/test_runtime_namespace.py:66:BOARD = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_sandbox_work_surface.py:32:## TODO
+tools/test_sandbox_work_surface.py:78:for heading in ("## DOING", "## TODO", "## DONE", "## BLOCKED"):
+tools/test_sandbox_work_surface.py:105:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_search_transport.py:343:"## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_source_contract_derivation.py:153:"## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_source_receipts.py:580:"## TODO\n"
+tools/test_source_receipts.py:1684:"## TODO\n",
+tools/test_source_receipts.py:1685:"## TODO\n- [ ] T-099 [P2] ranged receipt ticket | verify: explicit ids | "
+tools/test_source_receipts.py:1765:"## TODO\n", "## TODO\n- [ ] T-098 bad | source_receipts: SRC-029..SRC-009\n",
+tools/test_source_refusal_routing.py:76:"## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_src085_improve_run_body.py:49:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_state_scalar_quoting.py:109:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_supervisor.py:74:lines = ["## DOING", "## TODO"]
+tools/test_t1278_closure_contradiction.py:34:parts = {"DOING": "", "TODO": "", "BLOCKED": "", "DONE": ""}
+tools/test_t1293_valve_resume_audit_route.py:125:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1293_valve_resume_audit_route.py:136:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1293_valve_resume_audit_route.py:147:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1304_r004_dry_run_purity.py:126:"## TODO\n"
+tools/test_t1304_r004_dry_run_purity.py:175:"## TODO\n"
+tools/test_t1304_r004_transition.py:134:"## TODO\n"
+tools/test_t1304_r004_transition.py:453:"## TODO\n", "## TODO\n- [ ] T-9 [P3] unrelated work | verify: nothing\n"
+tools/test_t1304_review_p0_repair.py:104:"## TODO\n"
+tools/test_t1304_review_p0_repair.py:187:self.assertEqual(tickets["T-1"]["section"], "## TODO")
+tools/test_t1304_review_p0_repair.py:383:"## DOING\n## TODO\n- [ ] T-1 [P2] seeded work | verify: proof it works",
+tools/test_t1304_review_p0_repair.py:384:"## DOING\n- [/] T-1 [P2] active unclaimed | verify: proof it works\n## TODO",
+tools/test_t1304_review_p0_repair.py:511:own = operations._seat_agent({"agent": "tester"}, "## DOING\n## TODO\n", "buffy")
+tools/test_t1304_review_p0_repair.py:515:own = operations._seat_agent({}, "## DOING\n## TODO\n", "tester")
+tools/test_t1316_recovery_already_applied.py:849:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1316_recovery_already_applied.py:957:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1316_recovery_already_applied.py:1083:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1326_board_compaction.py:87:board = "## DOING\n" + line + "## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1326_board_compaction.py:251:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1326_board_compaction.py:305:body = {"## DOING": "", "## TODO": "", "## DONE": done, "## BLOCKED": ""}
+tools/test_t1326_board_compaction.py:308:f"{name}\n{body[name]}" for name in ("## DOING", "## TODO", "## DONE", "## BLOCKED")
+tools/test_t1326_board_compaction.py:657:reparsed = parse_board("## DOING\n## TODO\n" + original + "## DONE\n## BLOCKED\n")
+tools/test_t1326_board_compaction.py:800:A TODO row can be legal before the claim and oversized only AFTER the
+tools/test_t1326_board_compaction.py:810:line, section="## TODO", phase="DONE", task="none", next_action="saipen continue"
+tools/test_t1326_board_compaction.py:838:section="## TODO",
+tools/test_t1326_board_compaction.py:944:"## TODO\n", "## TODO\n" + foreign, 1
+tools/test_t1326_board_compaction.py:981:board = f"## DOING\n{line}## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1326_board_compaction.py:1126:"## TODO\n", "## TODO\n" + self._oversized_refused_row("T-1316"), 1
+tools/test_t1326_board_compaction.py:1169:"## TODO\n", "## TODO\n" + self._oversized_refused_row("T-1317"), 1
+tools/test_t1326_board_compaction.py:1205:"## TODO\n", "## TODO\n" + self._oversized_refused_row("T-1317"), 1
+tools/test_t1326_board_compaction.py:1221:text = text.replace("## TODO\n", "## TODO\n" + duplicate, 1)
+tools/test_t1326_board_compaction.py:1322:"## DOING\n" + row + "## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_t1326_board_compaction.py:1452:text = "## DOING\n" + rows + "## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1327_live_acceptance.py:118:board = "## DOING\n" + _oversized_line("T-158") + "## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1327_zero_manual_recovery.py:87:board = "## DOING\n" + _oversized_line(active) + "## TODO\n"
+tools/test_t1327_zero_manual_recovery.py:486:"claim_time: 2026-09-14T08:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1327_zero_manual_recovery.py:867:"claim_time: 2026-09-14T08:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1363_zero_manual_entry.py:138:_EMPTY_BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1363_zero_manual_entry.py:177:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1363_zero_manual_entry.py:1210:"## DOING\n## TODO\n## DONE\n"
+tools/test_t1411_stale_complete_resolution.py:62:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_t1411_stale_complete_resolution.py:173:text.replace("## TODO\n", f"## TODO\n- [ ] {ticket} [P1] probe | verify: probe\n"),
+tools/test_t1411_stale_complete_resolution.py:799:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_t1412_conformance_truth.py:83:_BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1412_conformance_truth.py:456:"structural", board="## DOING\n## TODO\n## DONE\n"
+tools/test_t1429_deferred_due.py:43:BOARD_PREAMBLE = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1429_deferred_due.py:141:"## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1429_deferred_due.py:182:"## DOING\n## TODO\n"
+tools/test_t1429_deferred_due.py:222:"## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1429_deferred_due.py:265:"## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1430_crew_run_receipt.py:88:"# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools/test_t1430_crew_run_receipt.py:113:"# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools/test_t1446_auto_recall.py:86:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1446_supervise.py:53:"## TODO\n"
+tools/test_t1453_ingress_clause.py:73:"## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_t1461_source_append.py:169:self.assertEqual(self.tickets(project)[created]["section"], "## TODO")
+tools/test_t1473_handback.py:6:failed validation (continuation reservation under TODO), `block-for` refused
+tools/test_t1473_handback.py:7:a blocker that is not workable TODO, and `claim --explicit` refused a ticket
+tools/test_t1473_handback.py:14:holder to the top of TODO unclaimed;
+tools/test_t1473_handback.py:99:self.assertEqual(holder["section"], "## TODO")
+tools/test_t1473_handback.py:102:todo = [tid for tid, t in tickets.items() if t["section"] == "## TODO"]
+tools/test_t1473_handback.py:104:first_todo = board_text.split("## TODO", 1)[1].strip().splitlines()[0]
+tools/test_t1474_start_goal_entry.py:258:self.assertIsNone(continuation_work(state, {"T-1": {"section": "## TODO"}}, "continue"))
+tools/test_t147_generation_exit_behind_style_drift.py:61:BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1484_soak_report_survives.py:39:"## DOING\n## TODO\n## DONE\n", encoding="utf-8"
+tools/test_t1508_byte_bound_attributes.py:69:BOARD = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1511_soak_source_identity.py:61:"## DOING\n## TODO\n## DONE\n", encoding="utf-8"
+tools/test_t1533_terminal_handback.py:13:ticket block T-1528    -> ILLEGAL_TICKET_LIFECYCLE (block takes DOING/TODO)
+tools/test_t1533_terminal_handback.py:29:holder left in ## BLOCKED (NOT resurrected into TODO), LOG honest
+tools/test_t1533_terminal_handback.py:32:RED 3  live DOING holder -> the T-1473 arm still demotes it to TODO
+tools/test_t1533_terminal_handback.py:133:# The terminal holder is NOT resurrected into TODO: it is still blocked
+tools/test_t1533_terminal_handback.py:151:any("checkpointed to TODO" in line and f"[{request}]" in line for line in log),
+tools/test_t1533_terminal_handback.py:152:"a terminal holder must not be logged as demoted to TODO",
+tools/test_t1533_terminal_handback.py:184:self.assertEqual(holder["section"], "## TODO")
+tools/test_t1553_mid_session_activation.py:445:(saipen / "BOARD.md").write_text("## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8")
+tools/test_t1572_ticket_scoped_recovery.py:281:"## TODO\n"
+tools/test_t1572_ticket_scoped_recovery.py:419:todo = lines.index("## TODO")
+tools/test_t1572_ticket_scoped_recovery.py:615:"## TODO\n"
+tools/test_t1578_restore_owner.py:38:"## TODO\n"
+tools/test_t1578_restore_owner.py:129:self.assertTrue(lines.index("## DOING") < lines.index(row[0]) < lines.index("## TODO"),
+tools/test_t1587_stale_closure_recovery.py:4:``## TODO`` carrying ``| closure_mode: own_patch``. The placement rule is
+tools/test_t1587_stale_closure_recovery.py:22:A. TODO + closure_mode            -> repairable, full route, claim reachable
+tools/test_t1587_stale_closure_recovery.py:25:D. TODO + closure_mode + cohort   -> both terminal fields removed coherently
+tools/test_t1587_stale_closure_recovery.py:26:E. TODO + unknown field           -> NOT this class, stays fail-closed
+tools/test_t1587_stale_closure_recovery.py:27:F. TODO + duplicated closure_mode -> strict refusal, no value silently chosen
+tools/test_t1587_stale_closure_recovery.py:31:J. TODO + closure + independent structural error -> no false CLEAN claim
+tools/test_t1587_stale_closure_recovery.py:76:#: ## TODO, which is exactly why its stale closure_mode is residue, not proof.
+tools/test_t1587_stale_closure_recovery.py:103:def _board_text(*, t1371_line: str, section: str = "## TODO",
+tools/test_t1587_stale_closure_recovery.py:106:todo = t1371_line if section == "## TODO" else ""
+tools/test_t1587_stale_closure_recovery.py:111:"## TODO\n" + (todo + "\n" if todo else "") + extra_todo +
+tools/test_t1587_stale_closure_recovery.py:117:#: The incident row exactly as reported: an open TODO record carrying one
+tools/test_t1587_stale_closure_recovery.py:254:"# Board\n## DOING\n## TODO\n## DONE\n"
+tools/test_t1587_stale_closure_recovery.py:535:"# Board\n## DOING\n## TODO\n## DONE\n"
+tools/test_t1598_stale_claim_next_action.py:33:The rule under repair: a persisted pick naming a TODO ticket whose foreign
+tools/test_t1598_stale_claim_next_action.py:87:"""A seat with NO active DOING ticket, whose pick names a TODO ticket.
+tools/test_t1598_stale_claim_next_action.py:119:f"## TODO\n{todo}"
+tools/test_t1598_stale_claim_next_action.py:187:self.assertEqual(picked["section"], "## TODO")
+tools/test_t1609_unproven_done_recovery.py:101:self.assertEqual(row["section"], "## TODO", row)
+tools/test_t1609_unproven_done_recovery.py:196:["tickets"]["T-240"]["section"], "## TODO")
+tools/test_t1612_accidental_success_reproduction.py:82:board += ["## TODO", "## DONE", "## BLOCKED"]
+tools/test_t1614_future_gate.py:47:BOARD_PREAMBLE = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1614_future_gate.py:136:board += "## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1614_future_gate.py:142:board = f"## DOING\n## TODO\n## DONE\n- [x] {ticket_id} [P1] {text} | verify: proof\n"
+tools/test_t1618_future_maturation.py:96:"""M1: needs TODO hides the gate; needs DONE routes it before HUNT."""
+tools/test_t1618_future_maturation.py:290:f"## DOING\n## TODO\n- [ ] {tid} [P1] prerequisite work | verify: verify it\n"
+tools/test_t1619_iteration_boundary.py:109:"## TODO\n"
+tools/test_t1619_iteration_boundary.py:114:TERMINAL_BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1638_future_ingress.py:7:- `saipen future add` wrote `slice: TODO -- name the ONE bounded unit ...` and
+tools/test_t1638_future_ingress.py:13:it had since declared was still TODO).
+tools/test_t1638_future_ingress.py:116:self.assertIn(f"prerequisite {tid} is ## TODO, not DONE", gate.reasons)
+tools/test_t1638_future_ingress.py:150:f"## DOING\n## TODO\n- [ ] {tid} [P1] prerequisite work | verify: verify it\n"
+tools/test_t1640_board_scrub.py:116:board = ["## DOING", "## TODO", *todo, "## DONE", *done, "## BLOCKED", *blocked]
+tools/test_t1640_board_scrub.py:228:tickets["T-30"]["section"] = "## TODO"
+tools/test_t1640_board_scrub.py:414:self.assertEqual(_ids(root, "## TODO"), ["T-40"])
+tools/test_t1640_log_seal.py:289:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1640_log_seal.py:308:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1651_executor_admission.py:109:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1668_durable_stores_ship.py:163:"# Board\n## DOING\n## TODO\n"
+tools/test_t1669_clean_done_projection.py:73:lines.append("## TODO")
+tools/test_t1669_clean_done_projection.py:171:# the layer's linked Work IS the topmost workable TODO, which is
+tools/test_t1669_clean_done_projection.py:228:# No audit layer, no workable TODO: whatever the shared router
+tools/test_t1671_lifecycle_authority.py:169:self.assertEqual(row["section"], "## TODO", row)
+tools/test_t1673_board_only_terminal.py:107:self.assertEqual(row["section"], "## TODO", row)
+tools/test_t1673_board_only_terminal.py:160:lines = ["# Board", "## DOING", "## TODO"]
+tools/test_t1674_typed_closure_mode.py:51:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8", newline="\n"
+tools/test_t1674_typed_closure_mode.py:107:self.assertEqual(row["section"], "## TODO", row)
+tools/test_t1674_typed_closure_mode.py:129:return "# Board\n## DOING\n## TODO\n## DONE\n" + "".join(
+tools/test_t1674_typed_closure_mode.py:144:("section-move", "## DONE", "## TODO"))
+tools/test_t1679_typed_head_quarantine.py:137:self.assertEqual(row["section"], "## TODO", row)
+tools/test_t1704_goal_checkpoint_priority.py:244:f"| owner: test-agent | claim_time: {_stamp()}\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1704_legacy_goal_authority.py:55:"## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1708_regression_declaration.py:131:board.write_text("## DOING\n## TODO\n## DONE\n- [x] T-8 [P1] Historical Work "
+tools/test_t1709_audit_starvation.py:41:"## TODO\n",
+tools/test_t1709_audit_starvation.py:42:"## TODO\n"
+tools/test_t1709_audit_starvation.py:57:"## TODO\n",
+tools/test_t1709_audit_starvation.py:58:"## TODO\n"
+tools/test_t1709_audit_starvation.py:74:+ "\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1712_manifest_runtime.py:330:"## DOING\n## TODO\n- [ ] T-8 [P1] Independent Work | verify: real proof\n"
+tools/test_t1715_block_for_parent_guard.py:4:parent parks behind a workable TODO child. The generic TODO-block path used to
+tools/test_t1715_block_for_parent_guard.py:5:accept ``block-for`` on a merely TODO parent as well and stored STATE's
+tools/test_t1715_block_for_parent_guard.py:10:RED 1  an unopened ## TODO parent refuses with ZERO canonical writes.
+tools/test_t1715_block_for_parent_guard.py:15:GREEN  ordinary legal TODO ``block`` is a different operation and still works.
+tools/test_t1726_closed_contracts.py:369:"## TODO\n", "## TODO\n- [ ] T-010 existing repair | needs: T-001\n"),
+tools/test_t1729_gate_decision_lifecycle.py:198:"## TODO\n", "## TODO\n- [ ] T-900 [P2] held fixture work | verify: fixture\n"
+tools/test_t1734_source_drift.py:52:"# BOARD\n\n## DOING\n\n## TODO\n\n## DONE\n"
+tools/test_t1739_wait_boundary.py:47:"claim_time: 2026-09-06T00:00:00Z\n## TODO\n"
+tools/test_t1739_wait_boundary.py:98:# Two TODO records alone grant nothing when their prerequisite is held.
+tools/test_t1739_wait_boundary.py:162:).replace("## TODO\n", "## TODO\n" + ACTIVE.replace("[/]", "[ ]") + "\n")
+tools/test_t1743_cross_user_dead_ends.py:101:board = "## DOING\n## TODO\n" + row + "## DONE\n## BLOCKED\n"
+tools/test_t1744_fleet_foreign_field_skew.py:35:board = "## DOING\n## TODO\n" + row + "## DONE\n## BLOCKED\n"
+tools/test_t1745_sub_collect_foreign_field.py:74:"## DOING\n## TODO\n" + foreign_row + "## DONE\n## BLOCKED\n",
+tools/test_t1746_crew_terminal_outcome.py:56:"# Board\n## DOING\n## TODO\n## DONE\n"
+tools/test_t1751_reconcile_surfaces.py:72:"## TODO\n"
+tools/test_t1759_single_lifecycle_observer.py:110:self.assertEqual(text.count("## TODO\n"), 1, text)
+tools/test_t1759_single_lifecycle_observer.py:112:text.replace("## TODO\n", "## TODO\n" + DUPLICATE), encoding="utf-8", newline="\n"
+tools/test_t1761_recovery_reaches_a_typed_duplicate.py:74:self.assertEqual(text.count("## TODO\n"), 1, text)
+tools/test_t1761_recovery_reaches_a_typed_duplicate.py:76:text.replace("## TODO\n", "## TODO\n" + DUPLICATE), encoding="utf-8", newline="\n"
+tools/test_t1761_recovery_reaches_a_typed_duplicate.py:133:self.assertEqual(board["tickets"]["T-001"]["section"], "## TODO")
+tools/test_t1761_recovery_reaches_a_typed_duplicate.py:166:self.assertEqual(board["tickets"][renamed[0]]["section"], "## TODO")
+tools/test_t1774_sweep_queue_human.py:61:"# Board\n## DOING\n## TODO\n- [ ] T-900 [P1] probe | verify: probe\n"
+tools/test_t1776_protocol_home_valve.py:73:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1781_t37_latest_build.py:39:"owner: tester | claim_time: 2026-10-14T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1787_parked_brief.py:37:"## TODO\n"
+tools/test_t1789_child_closure_route.py:7:handed the seat back instead, the child returned to the top of TODO and the
+tools/test_t1807_audit_liveness_regression.py:100:"## DOING\n## TODO\n## DONE\n## BLOCKED\n- [ ] T-100 [P1] ext | blocker: "
+tools/test_t1807_audit_liveness_regression.py:132:bd_text = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1807_audit_liveness_regression.py:159:# When linked work is workable TODO, it routes PHASE SCOUT, not ingest
+tools/test_t1807_audit_liveness_regression.py:163:"section": "## TODO",
+tools/test_t1807_audit_liveness_regression.py:281:"section": "## TODO",
+tools/test_t1807_audit_liveness_regression.py:296:"## DOING\n## TODO\n- [ ] T-999 [P1] new task | user_explicit: true\n## "
+tools/test_t1815_header_repair.py:169:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_t1815_stale_work_context.py:87:lines.append("## TODO")
+tools/test_t1815_stale_work_context.py:137:"""TODO work is not current either: existence is not ownership."""
+tools/test_t1816_protected_root_hold.py:128:"""Message 431: Edit rewrote BOARD.md into malformed ## TODO## DOING."""
+tools/test_t1816_run_append_only.py:49:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_t1817_finding_route.py:45:tickets(**{"T-7": ("## TODO", {})}),
+tools/test_t1817_finding_route.py:55:tickets(**{"T-7": ("## TODO", {})}),
+tools/test_t1817_finding_route.py:101:tickets(**{"T-9": ("## BLOCKED", field), "T-10": ("## TODO", dict(field))}),
+tools/test_t1817_finding_route.py:112:tickets(**{"T-9": ("## TODO", dict(field)), "T-10": ("## DONE", dict(field))}),
+tools/test_t1835_verification_economics.py:32:self.write(".saipen/BOARD.md", "## DOING\n## TODO\n## DONE\n"
+tools/test_t1849_external_git_environment.py:46:"## DOING\n## TODO\n## DONE\n"
+tools/test_t1854_runtime_home.py:72:"\n## TODO\n\n## DONE\n\n## BLOCKED\n")
+tools/test_t1856_launcher_identity.py:117:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_t1857_shared_blockers.py:33:items[tid] = ticket(tid, needs=("T-1815",), section="## TODO")
+tools/test_t1857_shared_blockers.py:102:items["T-2000"] = ticket("T-2000", needs=("T-1815", "T-1317"), section="## TODO")
+tools/test_t1857_shared_blockers.py:154:items["T-9999"] = ticket("T-9999", section="## TODO")
+tools/test_t1858_valve_guidance.py:63:items = {f"T-{i}": ticket(f"T-{i}", section="## TODO")
+tools/test_t1862_readiness.py:396:"## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1864_autonomous_valve.py:93:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1864_autonomous_valve.py:129:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_t1865_launcher_identity.py:157:"# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_t1866_publication_state.py:63:"owner: tester | claim_time: 2026-10-14T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t1872_drift_prevention.py:36:"## TODO\n\n## BLOCKED\n\n## DONE\n"
+tools/test_t1872_drift_prevention.py:114:"## TODO\n\n"
+tools/test_t1880_wait_survives_phase_shortcut.py:39:EMPTY_BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1881_authority_brake.py:100:f"# Board\n## DOING\n{doing}\n## TODO\n{todo}## DONE\n## BLOCKED\n",
+tools/test_t1881_publication_prohibition.py:222:# lowest id (T-001), so checking only the owner would miss it. A ## TODO
+tools/test_t1881_publication_prohibition.py:228:"## TODO\n",
+tools/test_t1881_publication_prohibition.py:229:"## TODO\n- [ ] T-002 other batch work | verify: shared "
+tools/test_t1881_publication_prohibition.py:272:"## TODO\n",
+tools/test_t1881_publication_prohibition.py:273:"## TODO\n- [ ] T-002 other batch work | verify: shared "
+tools/test_t1881_publication_prohibition.py:354:for section in ("## DOING", "## TODO", "## DONE", "## BLOCKED"):
+tools/test_t1883_reconcile_causality.py:268:"## TODO\n## DONE\n## BLOCKED\n" + rows,
+tools/test_t1884_transition_blocker_inheritance.py:91:"## TODO\n## DONE\n## BLOCKED\n" + rows,
+tools/test_t1915_terminal_next_action.py:98:return f"## DOING\n{doing}## TODO\n{todo}## DONE\n## BLOCKED\n"
+tools/test_t1915_terminal_next_action.py:237:self.assertEqual(board["tickets"]["T-69"]["section"], "## TODO")
+tools/test_t1916_external_delta.py:67:BOARD = "## DOING\n- [/] T-9 [P1] repair launcher | verify: x\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t1917_premature_handback.py:82:f"## TODO\n{todo_lines}"
+tools/test_t1932_src338_closures.py:55:f"# BOARD\n\n## DOING\n- [/] {task} [P1] work\n\n## TODO\n\n## DONE\n",
+tools/test_t1932_src338_closures.py:552:"# BOARD\n\n## DOING\n- [/] T-1 [P1] work\n\n## TODO\n"
+tools/test_t1937_future_slice_closure.py:19:* a slice whose ticket is still TODO stays `open`;
+tools/test_t1937_future_slice_closure.py:35:## TODO
+tools/test_t1938_invalidated_slice_closure.py:29:## TODO
+tools/test_t1939_needs_detach.py:52:"# Board\n\n## DOING\n\n## TODO\n\n"
+tools/test_t1939_needs_detach.py:107:def _tickets(self, *, recipient_section="## TODO", need_section="## BLOCKED",
+tools/test_t1939_needs_detach.py:110:"""A parent TODO row and its dependency; the dependency's section varies."""
+tools/test_t1939_needs_detach.py:121:"# Board\n\n## DOING\n\n## TODO\n\n"
+tools/test_t1939_needs_detach.py:129:"# Board\n\n## DOING\n\n## TODO\n\n" + parent + child + "\n## BLOCKED\n\n## DONE\n\n"
+tools/test_t1939_needs_detach.py:143:"# Board\n\n## DOING\n\n## TODO\n\n"
+tools/test_t1939_needs_detach.py:206:"# Board\n\n## DOING\n\n## TODO\n\n"
+tools/test_t1939_needs_detach.py:234:"# Board\n\n## DOING\n\n## TODO\n\n"
+tools/test_t1939_needs_detach.py:264:"# Board\n\n## DOING\n\n## TODO\n\n"
+tools/test_t1939_needs_detach.py:293:"# Board\n\n## DOING\n\n## TODO\n\n## BLOCKED\n\n"
+tools/test_t1939_needs_detach.py:305:self.assertIn("only an unstarted TODO row may lose an edge", proof["reason"])
+tools/test_t1939_needs_detach.py:382:"# Board\r\n\r\n## DOING\r\n\r\n## TODO\r\n\r\n"
+tools/test_t1944_core_wave1.py:33:"## DOING\n## TODO\n## BLOCKED\n## DONE\n- [x] T-200 [P1] unrelated ticket\n",
+tools/test_t1944_core_wave1.py:317:"## DOING\n## TODO\n- [ ] T-300 [P1] open\n## BLOCKED\n## DONE\n",
+tools/test_t1944_core_wave1.py:345:"## DOING\n## TODO\n## BLOCKED\n## DONE\n"
+tools/test_t1944_perf_wave.py:42:"## DOING\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8"
+tools/test_t1944_wave2.py:34:"## DOING\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8"
+tools/test_t2040_continuation_truth.py:23:BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t2040_discovery_owners.py:79:"## DOING\n## TODO\n- [ ] T-2 [P2] dependency | needs: T-1\n"
+tools/test_t2040_discovery_owners.py:89:"## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t2040_discovery_owners.py:99:"## DOING\n## TODO\n## DONE\n- [x] T-1 [P2] old work\n"
+tools/test_t2040_discovery_owners.py:153:board_text = "## DOING\n- [/] T-1 [P2] fixture\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t2040_discovery_owners.py:167:_format_state(), "## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t2040_discovery_owners.py:195:_format_state(), "## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools/test_t2040_discovery_owners.py:228:"## DOING\n## TODO\n## DONE\n"
+tools/test_t2040_discovery_owners.py:259:"## DOING\n## TODO\n## DONE\n"
+tools/test_t2040_exhaustion_evidence.py:99:"## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t2040_exhaustion_evidence.py:108:"## DOING\n## TODO\n- [ ] T-2 [P2] dependent | needs: T-1\n"
+tools/test_t2040_exhaustion_evidence.py:141:text = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t2040_maintenance_authority.py:215:self.assertEqual(rows(root)["T-1"]["section"], "## TODO")
+tools/test_t2040_maintenance_authority.py:216:self.assertTrue(any("active T-1 checkpointed to TODO" in e["text"]
+tools/test_t2040_maintenance_authority.py:319:self.assertEqual(rows(root)[ticket]["section"], "## TODO")
+tools/test_t2040_publication_truth.py:92:"# Board\n## DOING\n## TODO\n## DONE\n- [x] T-1 fixture | verify: fixture\n## BLOCKED\n",
+tools/test_t2040_publication_truth.py:179:tickets = {"T-1": {"id": "T-1", "section": "## TODO", "checkbox": " ", "blocked": False}}
+tools/test_t2040_publication_truth.py:214:tickets = {"T-2": {"id": "T-2", "section": "## TODO", "checkbox": " ", "blocked": False}}
+tools/test_t2040_publication_truth.py:366:"# Board\n## DOING\n## TODO\n## DONE\n- [x] T-1 fixture | verify: fixture"
+tools/test_t2040_replenishment_recovery.py:101:for data in (b"", b"## TODO\n", b"\xef\xbb\xbf## DOING\n## TODO\n## DONE\n## BLOCKED\n"):
+tools/test_t2040_replenishment_recovery.py:151:self.assertEqual(rows(root)[ticket]["section"], "## TODO")
+tools/test_t2040_replenishment_recovery.py:271:self.assertEqual(rows(root)[ticket]["section"], "## TODO")
+tools/test_t2040_terminal_consumer_guards.py:31:BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t2040_terminal_consumer_guards.py:207:"## DOING\n## TODO\n- [ ] T-1 [P1] stale work | verify: local test\n## DONE\n## BLOCKED\n",
+tools/test_t2040_terminal_consumer_guards.py:246:{"tickets": {"T-1": {"section": "## TODO", "fields": 42}}},
+tools/test_t2040_terminal_consumer_guards.py:247:{"tickets": {"T-1": {"section": "## TODO", "needs": 42}}},
+tools/test_t2040_terminal_consumer_supplementary.py:20:BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_t2050_pruned_row_restore.py:36:"## TODO\n"
+tools/test_t2051_source_reindex.py:101:lines = ["# BOARD", "", "## TODO", ""]
+tools/test_t925_sub_terminal_durability.py:59:_board(root, "## DOING\n- [/] T-1 [P2] reopened\n## TODO\n## DONE\n## BLOCKED\n")
+tools/test_t925_sub_terminal_durability.py:70:_board(root, "## DOING\n## TODO\n## DONE\n- [x] T-2 [P3] closed\n## BLOCKED\n")
+tools/test_telemetry.py:95:"## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools/test_ticket_retirement.py:15:T-1369 (contamination)  TODO, holding the single DOING seat
+tools/test_ticket_retirement.py:142:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_ticket_retirement.py:971:text.replace("## TODO\n", "## TODO\n" + record["board_record"] + "\n", 1),
+tools/test_ticket_supersession.py:200:"## TODO\n", "## TODO\n" + raw.replace("- [x] ", "- [ ] ") + "\n", 1
+tools/test_ticket_supersession.py:258:heading = "## BLOCKED\n" if blocked else "## TODO\n"
+tools/test_ticket_supersession.py:406:for section in ("## TODO", "## BLOCKED"):
+tools/test_ticket_supersession.py:421:self._relocate_old(project, "## TODO")
+tools/test_ticket_supersession.py:426:self.assertEqual(row["section"], "## TODO")
+tools/test_ticket_verify_preimage.py:72:"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_user_wait_release.py:14:byte-identical, never refreshed or rebound), and the resumed TODO can be
+tools/test_user_wait_release.py:108:self.assertEqual(record["section"], "## TODO")
+tools/test_vacterro_t37_no_delta_closure.py:57:f"## TODO\n## DONE\n## BLOCKED\n",
+tools/test_validator_layout_parity.py:92:## TODO
+tools/test_vocabulary_parity.py:273:"## TODO\n"
+tools/test_vocabulary_parity.py:281:for ticket, name in (("T-1", "DOING"), ("T-2", "TODO"), ("T-3", "DONE"),
+tools/test_warn_ownership_probe.py:34:## TODO
+tools/test_warn_ownership_probe.py:135:"# BOARD\n\n## TODO\n", audit_checks.WARN_PROBE_OWNER_SLUG
+tools/test_worker_turnover.py:52:"## TODO\n"
+tools/test_worker_turnover.py:274:"## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools/test_work_reverify_cli.py:54:"## TODO\n", "## TODO\n- [ ] T-001 DOING task | verify: proof exists\n"
+tools/validate.py:1468:# P1#5): both call sites are exactly DONE + empty ## TODO, where CORE § 1.2
+tools/validate.py:2431:# can never coexist with TODO/DOING/unresolved BLOCKED work -- a worker
+tools/validate.py:2466:_parsed_board["counts"]["TODO"]
+tools/validate.py:2472:"still holds open work (TODO/DOING/BLOCKED) -- a worker "
+tools/validate.py:2616:# NITRO dogfood II (T-590): a TODO/DOING ticket whose verify is a bare
+tools/validate.py:2618:if section in ("## TODO", "## DOING") and "verify" in fields:
+tools/validate.py:2630:f"ticket needs a real DONE proof, not TBD/TODO/empty "
+tools/validate.py:2653:# all-TODO graph is corrupt work state, not 'no workable ticket'.
+tools/validate.py:2694:# moment this is decidable from the board alone: `## TODO` order is advisory
+tools/validate.py:2721:# the front of `## TODO` (§ 1.10's `dd <text>` contract) silently invalidates
+tools/validate.py:2742:f"executable, and § 1.11's Pick Rule selects from ## TODO "
+tools/validate.py:2796:# `## TODO` tickets and a blocker about translating 29 locales -- which is
+tools/validate.py:2809:f"## TODO ticket(s) exist (topmost {min(_blocked_workable)}) -- "
+tools/validate.py:2844:# RFC § 2.1 ZERO-PROMPT AUTO-TRANSITION: DONE + empty TODO + no MARKHUNT
+tools/validate.py:2855:1 for t in tickets.values() if t["section"] == "## TODO" and t["checkbox"] in (" ", "")
+tools/validate.py:2871:f"phase: DONE, empty ## TODO, but "
+tools/validate.py:2981:f"one to ## TODO with a LOG line before claiming another"
+tools/validate.py:2988:# phase while BOARD carried no ## DOING claim and T-572 sat in ## TODO, and
+tools/validate.py:3011:f"phase {phase} -- a TODO/DONE/BLOCKED ticket cannot be the "
+tools/validate.py:3564:# were. Those tickets legitimately leave ## BLOCKED for ## TODO
+tools/validate.py:4275:for h in ("## DOING", "## TODO", "## DONE", "## BLOCKED")
+tools/validate.py:5785:"no workable `## TODO` ticket",
+tools/validate.py:5972:_ladder_rungs = ("workable TODO", "actionable unconsumed audit", "eligible FUTURE GATE", "HUNT", "ADD")
+tools/validate.py:6183:# a ticket still sitting in ## TODO / ## BLOCKED is therefore two
+tools/validate.py:6190:# T-426 while both sat in ## TODO, their code already in the tree,
+tools/validate.py:6206:# `## TODO`, and `## DOING` is capped at one claimed ticket in
+tools/validate.py:8359:"top of `## TODO` when it will not. Ordering alone leaves the "
+tools/validate.py:8614:#       `## BLOCKED`, not `## TODO`. In `## TODO` it is workable by every
+tools/validate.py:8626:"in `## BLOCKED` with the reason, not in `## TODO`. A permanent "
+tools/validate.py:8627:"warning owner in `## TODO` passes every workability test the "
+tools/validate.py:10108:#      `## TODO` -- where the Pick Rule MUST take the topmost workable
+tools/validate.py:10160:if t["section"] in ("## DOING", "## TODO", "## BLOCKED")
+tools/validate.py:10956:if t["section"] in ("## DOING", "## TODO", "## BLOCKED")
+tools/validate.py:10993:if "FRONT of `## TODO`" not in _body:
+tools/validate.py:10997:f"at the front of `## TODO`. Board order is priority "
+tools/validate.py:11010:# `WAIT:` to three fixed forms at `DONE` only when `## TODO` is
+tools/validate.py:11034:"governs `DONE` with an EMPTY `## TODO`, which is not "
+tools/validator_fail_sites.json:475:"message": "STATE.md task  is not the claimed ## DOING ticket () in ticket-bearing phase  -- a TODO/DONE/BLOCKED ticket cannot be the active task; Recovery reconstructs the",
+tools/validator_fail_sites.json:1408:"message": "BOARD.md: ticket  carries a placeholder verify () -- a ticket needs a real DONE proof, not TBD/TODO/empty (NITRO dogfood II, T-590)",
+tools/validator_fail_sites.json:1546:"message": "cross-doc drift [plan-forms] --  does not say that `saipen plan <text>` puts the user's own items at the front of `## TODO`. Board order is priority (§ 1.6), so",
+tools/validator_fail_sites.json:1943:"message": "STATE.md phase: BLOCKED while  workable ## TODO ticket(s) exist (topmost ) -- session-level BLOCKED is reserved for when no ticket anywhere on the board is work",
+tools/validator_fail_sites.json:2154:"message": " is phase DONE but its board still holds open work (TODO/DOING/BLOCKED) -- a worker cannot say DONE while its board says unresolved work (SAICREW H)",
+tools/validator_fail_sites.json:2262:"message": "phase: DONE, empty ## TODO, but next_action= -- RFC § 2.1 says bare command + empty board MUST auto-transition HUNT->ADD. The legal WAITs here are the § 2.4 saf",
+tools/validator_fail_sites.json:2475:"message": "BOARD.md has  tickets in ## DOING () -- RFC § 1.11 allows at most one per agent. Finish, block, or demote one to ## TODO with a LOG line before claiming another",
+tools/validator_fail_sites.json:2603:"message": "STATE.md next_action names , which sits under  -- finished and blocked tickets are not executable, and § 1.11's Pick Rule selects from ## TODO (## BLOCKED is ex",
+tools/_t2040_experiment.py:27:"# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8")
+tools/_t2040_experiment.py:60:"# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8")
+tools/saipen_engine/acceptance_contract.py:134:preserved = parse_board("## TODO\n" + original.decode("utf-8"))["tickets"][work]
+tools/saipen_engine/acceptance_contract.py:136:projected = parse_board("## TODO\n" + compact)["tickets"][work]
+tools/saipen_engine/admission.py:858:# carries the contextual DONE+empty-TODO UNBLOCK exception, so the guard
+tools/saipen_engine/admission.py:861:ticket.get("section") == "## TODO" for ticket in board["tickets"].values()
+tools/saipen_engine/audit_route.py:153:ticket.get("section") == "## TODO" for ticket in tickets.values()
+tools/saipen_engine/automation.py:415:# C7 no workable TODO/DOING/follow-up remains.
+tools/saipen_engine/board.py:11:REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
+tools/saipen_engine/board.py:270:#: (TODO/DOING/DONE): the operator said it before the work started, and the
+tools/saipen_engine/board.py:341:inside a machine-owned section (``## DOING``/``## TODO``/``## DONE``/
+tools/saipen_engine/board.py:641:- open [ ] belongs only under ## TODO / ## BLOCKED
+tools/saipen_engine/board.py:666:"open boxes belong under ## TODO or ## BLOCKED"
+tools/saipen_engine/board.py:749:on a TODO ticket, or `blocker_scope: gaol`, and validate clean while the
+tools/saipen_engine/board.py:1050:router before Pick Rule evaluation. A cyclic all-TODO graph is corrupt work
+tools/saipen_engine/board.py:1236:Workable means: open ## TODO, no blocker (even malformed), every needs:
+tools/saipen_engine/board.py:1244:# left by a block/unblock cycle must not make a TODO non-workable
+tools/saipen_engine/board.py:1252:ticket.get("section") == "## TODO"
+tools/saipen_engine/board.py:1626:Closure means no active work, no currently workable TODO, and no blocker
+tools/saipen_engine/board.py:1650:errors.append("workable TODO: " + ", ".join(workable[:3]))
+tools/saipen_engine/board.py:1906:list(ticket.get("needs") or ()) if ticket.get("section") == "## TODO" else []
+tools/saipen_engine/board.py:1911:if target is None or target.get("section") in ("## BLOCKED", "## TODO"):
+tools/saipen_engine/board.py:1941:if ticket.get("section") not in ("## BLOCKED", "## TODO"):
+tools/saipen_engine/board.py:1944:if ticket.get("section") == "## TODO" and all(root[0] == tid for root in roots):
+tools/saipen_engine/board.py:2025:todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+tools/saipen_engine/board_compaction.py:1011:parsed = parse_board("## DOING\n" + text.rstrip("\n") + "\n## TODO\n## DONE\n## BLOCKED\n")
+tools/saipen_engine/closure.py:494:``T-###``         TODO / DOING / BLOCKED are invalid; a DONE ``own_patch``
+tools/saipen_engine/closure_readiness.py:101:# child returned to TODO and the router picked it again (T-1762,
+tools/saipen_engine/cold_recovery.py:285:elif section == "## TODO":
+tools/saipen_engine/cold_recovery.py:300:# first dependency-eligible TODO become the primary mission.
+tools/saipen_engine/context.py:178:for section in ("## DOING", "## TODO", "## BLOCKED", "## DONE"):
+tools/saipen_engine/context.py:546:buckets = {s: [] for s in ("## DOING", "## TODO", "## BLOCKED", "## DONE")}
+tools/saipen_engine/controls.py:323:# becomes the top foreground TODO.  It is claimed immediately at the next
+tools/saipen_engine/fast_check.py:749:# repository's mutations. Only a record in ## TODO / ## DOING could
+tools/saipen_engine/fast_check.py:752:if t.get("section") in ("## TODO", "## DOING") and tid not in _known:
+tools/saipen_engine/future_gate.py:59:PLACEHOLDER = "TODO --"
+tools/saipen_engine/future_gate.py:1340:is still TODO stays `DEFERRED` with the reason attached -- demoting it to
+tools/saipen_engine/handoff_reconciliation.py:225:_SECTION_RANK = {"## DONE": 0, "## DOING": 1, "## TODO": 2, "## BLOCKED": 3}
+tools/saipen_engine/handoff_reconciliation.py:412:# Active (TODO/DOING) work
+tools/saipen_engine/intent.py:527:# TODO/SCOUT boundary where STATE has no active ticket yet but BOARD holds the
+tools/saipen_engine/intent.py:528:# durably created TODO carrier.
+tools/saipen_engine/intent.py:589:# No active ticket: check for an existing TODO/SCOUT carrier left by a crash
+tools/saipen_engine/intent.py:831:detect exactly one interrupted carrier across TODO/SCOUT/BUILD/VERIFY and
+tools/saipen_engine/intent.py:862:TODO, SCOUT, BUILD, VERIFY.
+tools/saipen_engine/intent.py:864:The targeted qqq/eee flow is three durable steps: ticket_add (TODO),
+tools/saipen_engine/intent.py:895:# STATE is required even for the TODO crash window. A malformed checkpoint
+tools/saipen_engine/intent.py:921:if section == "## TODO":
+tools/saipen_engine/intent.py:925:"detail": f"TODO carrier {ticket_id} conflicts with STATE.task={task}",
+tools/saipen_engine/intent.py:1026:if section == "## TODO":
+tools/saipen_engine/intent.py:1201:# CORE-005: bring TODO/SCOUT carriers to BUILD before integration
+tools/saipen_engine/intent.py:1203:# If still TODO, claim it
+tools/saipen_engine/intent.py:1204:if section == "## TODO":
+tools/saipen_engine/intent.py:1216:if phase == "SCOUT" or (section == "## TODO" and phase is None):
+tools/saipen_engine/intent.py:1698:The previous implementation regex-deleted the worker's ``## TODO`` section
+tools/saipen_engine/iteration_verdict.py:490:empty_todo = not any(t.get("section") == "## TODO" for t in tickets.values())
+tools/saipen_engine/iteration_verdict.py:524:todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+tools/saipen_engine/needs_detach.py:18:* the ticket that would lose the edge is `## TODO` (never a live or
+tools/saipen_engine/needs_detach.py:108:if str(ticket.get("section")) != "## TODO":
+tools/saipen_engine/needs_detach.py:112:f"{ticket_id} is under {ticket.get('section')}; only an unstarted TODO "
+tools/saipen_engine/operations.py:2575:# on a NOT-YET-ACTIVE TODO ticket evaluates one ticket's lease directly --
+tools/saipen_engine/operations.py:2995:if section != "## TODO":
+tools/saipen_engine/operations.py:3007:f"## TODO -- checkbox/section disagreement is malformed "
+tools/saipen_engine/operations.py:3015:# A claim (owner/claim_time) on a TODO is INACTIVE history: CORE's claim
+tools/saipen_engine/operations.py:3323:"""Surgical claim move: target ticket TODO -> DOING with [/] owner.
+tools/saipen_engine/operations.py:3327:T-1384: a fresh TODO -> DOING claim is the OTHER place a seat is taken by
+tools/saipen_engine/operations.py:3331:claim writer does. A TODO line may still carry an old binding from a
+tools/saipen_engine/operations.py:3369:# A claimed-then-blocked/unblocked TODO may still carry a previous
+tools/saipen_engine/operations.py:5980:todo_idx = next(i for i, ln in enumerate(lines) if ln.startswith("## TODO"))
+tools/saipen_engine/operations.py:6028:TODO, `block-for` needs a workable TODO blocker and an explicit claim
+tools/saipen_engine/operations.py:6038:TODO unclaimed, and the parked Work returns to DOING at its saved phase
+tools/saipen_engine/operations.py:6186:f"ticket checkpointed to TODO via SAIOPS -- handback: {holder_id} returns the seat "
+tools/saipen_engine/operations.py:6246:board_text, holder_id, "## TODO", "[ ]", "demote", "", enforce_cap=False
+tools/saipen_engine/operations.py:6638:if ticket["section"] not in ("## DOING", "## TODO"):
+tools/saipen_engine/operations.py:6644:f"{action} accepts DOING or TODO; {ticket_id} is under {ticket['section']}",
+tools/saipen_engine/operations.py:6735:target_section, checkbox = "## TODO", "[ ]"
+tools/saipen_engine/operations.py:6759:# board. Blocking a merely-TODO ticket leaves execution state untouched.
+tools/saipen_engine/operations.py:6765:# exception can never be satisfied by a TODO-ticket block event.
+tools/saipen_engine/operations.py:6771:# generic TODO-block path below accepted block-for on a merely TODO
+tools/saipen_engine/operations.py:6779:# merely TODO, unclaimed or foreign parent is refused with zero writes.
+tools/saipen_engine/operations.py:6801:"merely TODO, unclaimed or foreign parent declares its dependency at "
+tools/saipen_engine/operations.py:6835:if child.get("section") != "## TODO" or not ticket_is_workable(child, tickets, agent=agent):
+tools/saipen_engine/operations.py:6841:f"blocker {child_id} must be a workable ## TODO ticket",
+tools/saipen_engine/operations.py:7109:# Unblock also re-routes, because moving a line back into ## TODO changes
+tools/saipen_engine/operations.py:9765:for heading in ("## DOING", "## TODO", "## DONE", "## BLOCKED"):
+tools/saipen_engine/operations.py:9789:# Terminal supersession closes schedulable TODO/BLOCKED Work in one
+tools/saipen_engine/operations.py:10362:if old.get("section") not in ("## TODO", "## BLOCKED"):
+tools/saipen_engine/operations.py:10368:f"{old_ticket} sits under {old.get('section')}; only schedulable TODO or "
+tools/saipen_engine/operations.py:10376:if old.get("section") == "## TODO" and not ticket_is_workable(old, tickets, agent):
+tools/saipen_engine/operations.py:10382:f"{old_ticket} is TODO but not schedulable",
+tools/saipen_engine/operations.py:13180:for heading in ("## DOING", "## TODO", "## DONE", "## BLOCKED"):
+tools/saipen_engine/operations.py:14840:"the DONE proof (no TBD/TODO/empty)",
+tools/saipen_engine/operations.py:19069:BOARD: checkpoint active DOING ticket -> TODO (demote, clear claim fields);
+tools/saipen_engine/operations.py:19071:generate the new objective's PLAN tickets ABOVE the existing TODO
+tools/saipen_engine/operations.py:19279:pivot_msg += f" (active {active_ticket} checkpointed to TODO)"
+tools/saipen_engine/operations.py:19297:# --- BOARD: demote active DOING, then plan the new objective above TODO ---
+tools/saipen_engine/operations.py:19339:i for i, ln in enumerate(lines) if ln.rstrip("\n").startswith("## TODO")
+tools/saipen_engine/operations.py:19349:# Generate the objective's PLAN tickets (canonical TODO lines, above old
+tools/saipen_engine/operations.py:19351:# TODO) and capture their ids in board order (top first). No deletion of
+tools/saipen_engine/operations.py:19435:todo_idx = next(i for i, ln in enumerate(blines) if ln.rstrip("\n").startswith("## TODO"))
+tools/saipen_engine/operations.py:19437:# Insert the plan block ABOVE existing TODO; plan_lines order preserved
+tools/saipen_engine/readiness.py:13:BOARD: 1 DOING, 2 TODO, 207 DONE, 7 BLOCKED
+tools/saipen_engine/readiness.py:103:function counted only DOING+TODO, so a project whose entire remainder was
+tools/saipen_engine/readiness.py:118:elif section == "## TODO":
+tools/saipen_engine/readiness.py:286:# only DOING+TODO.
+tools/saipen_engine/reconcile.py:51:"## TODO": " ",
+tools/saipen_engine/reconcile.py:735:# record in EVERY section. This repair used to scan only `## TODO` and
+tools/saipen_engine/reconcile.py:884:started and belongs in ``## TODO``.
+tools/saipen_engine/reconcile.py:888:is reopened into ``## TODO``. This class carries ``requires_approval``:
+tools/saipen_engine/reconcile.py:962:# ## TODO / ## DOING / ## BLOCKED that carries terminal residue
+tools/saipen_engine/reconcile.py:969:# own_patch`` under ## TODO froze every verb). Same family as the
+tools/saipen_engine/reconcile.py:1028:# DONE: the row returns to `## TODO` without closure metadata or
+tools/saipen_engine/reconcile.py:1054:"to_section": "## TODO",
+tools/saipen_engine/reconcile.py:1063:"## TODO without closure metadata or claim under ONE "
+tools/saipen_engine/reconcile.py:1120:"to_section": "## TODO",
+tools/saipen_engine/reconcile.py:1124:"to ## TODO (SRC-043)"
+tools/saipen_engine/reconcile.py:1178:"to_section": "## TODO",
+tools/saipen_engine/reconcile.py:1188:"canonical operation, so reopening it into ## TODO "
+tools/saipen_engine/reconcile.py:1294:if isinstance(ticket, dict) and ticket.get("section") == "## TODO":
+tools/saipen_engine/reconcile.py:1915:phase, `restart: TODO` distinguishes CURRENT_DONE_UNPROVEN (T-1609):
+tools/saipen_engine/reconcile.py:1946:gap["restart"] = "TODO"
+tools/saipen_engine/reconcile.py:1971:approval may instead revoke that ticket's closure now and queue TODO for
+tools/saipen_engine/reconcile.py:2051:"explicit approval revokes its unproven closure now and returns it to TODO "
+tools/saipen_engine/reconcile.py:2207:to `## TODO` with its closure metadata and claim dropped, so the
+tools/saipen_engine/reconcile.py:2243:"from_section": origin, "to_section": "## TODO",
+tools/saipen_engine/reconcile.py:2254:"## TODO without closure metadata or claim and the canonical "
+tools/saipen_engine/reconcile.py:2294:"claim no operation wrote; it returns to ## TODO unclaimed",
+tools/saipen_engine/reconcile.py:2839:"revoke its closure now and queue TODO without a claim for a fresh lifecycle"
+tools/saipen_engine/reconcile.py:2847:"from_section": "## DONE", "to_section": "## TODO" if restart else "## DOING",
+tools/saipen_engine/reconcile.py:3197:"no lifecycle phase proven, queued TODO for fresh claim and verification"
+tools/saipen_engine/release.py:4651:if t["section"] == "## TODO":
+tools/saipen_engine/retirement.py:15:* leaving it TODO is a DEADLOCK -- a reserved continuation child holds the
+tools/saipen_engine/retirement.py:206:RETIRABLE_SECTIONS = ("## TODO", "## DOING", "## BLOCKED")
+tools/saipen_engine/router.py:259:# used, so CORE's DONE+empty-TODO UNBLOCK exception is preserved.
+tools/saipen_engine/router.py:260:_empty_todo = not any(t["section"] == "## TODO" for t in board["tickets"].values())
+tools/saipen_engine/router.py:536:# outranks SELECTION of unrelated queued TODO. It sits here on purpose --
+tools/saipen_engine/router.py:566:# START: no DOING + a workable TODO -> the ONE shared Pick Rule chooses.
+tools/saipen_engine/router.py:836:# hard-stop gate above (the narrow DONE+empty-TODO exception), so it is a
+tools/saipen_engine/router.py:877:"no pending recovery, no active ticket, no workable TODO; continue ordinary maintenance"
+tools/saipen_engine/router.py:1171:ticket, no workable TODO; the action is `saipen continue` or an idle
+tools/saipen_engine/source_append.py:525:for section in ("## DOING", "## TODO", "## BLOCKED"):
+tools/saipen_engine/state.py:243:"WAIT: blocked -- untriaged MARKHUNT findings in ## BLOCKED; triage into ## TODO or dismiss"
+tools/saipen_engine/state.py:345:# `## TODO`. Every other category there names a question about work in flight,
+tools/saipen_engine/state.py:363:* `phase: DONE` + empty `## TODO`: exactly the three fixed forms bind
+tools/saipen_engine/state.py:431:(`binding_wait`), preserving CORE's DONE + empty-TODO UNBLOCK
+tools/saipen_engine/subs.py:37:TODO/DOING/unresolved BLOCKED, duplicate headings/IDs fail, at most one
+tools/saipen_engine/subs.py:1158:SUB_HEADINGS = ("## DOING", "## TODO", "## DONE", "## BLOCKED")
+tools/saipen_engine/subs.py:1255:"## TODO": " ",
+tools/saipen_engine/subs.py:1295:5. open TODO/DOING work              -> WORK_PENDING
+tools/saipen_engine/subs.py:1314:if phase == "DONE" and (counts["TODO"] or counts["DOING"] or counts["BLOCKED"]):
+tools/saipen_engine/subs.py:1318:if counts["TODO"] or counts["DOING"]:
+tools/saipen_engine/subs.py:1720:B  DONE + real TODO                      -> DONE_CLAIM_FALSE
+tools/saipen_engine/subs.py:1728:a BLOCKED, which outranks a TODO, because the stronger lifecycle truth is
+tools/saipen_engine/subs.py:1740:todo = sorted(t["id"] for t in tickets.values() if t.get("section") == "## TODO")
+tools/saipen_engine/subs.py:1783:- DONE: task == none; zero TODO, zero DOING, zero unresolved BLOCKED.
+tools/saipen_engine/subs.py:1810:if verdict["todo"] or verdict["blocked"] or counts.get("TODO") or counts.get("BLOCKED"):
+tools/saipen_engine/subs.py:1813:"(TODO/BLOCKED) -- a worker cannot say DONE while "
+tools/saipen_engine/subs.py:4188:The operation validates the package, creates exactly one Core review TODO
+tools/saipen_engine/subs.py:4503:# review hypotheses go at the END of ## TODO, deterministic and
+tools/saipen_engine/__pycache__/acceptance_contract.cpython-311.pyc:165:detail_refz.saipen/IDENTITY.md)expected_ticket_idz$acceptance detail lineage is missingentriesoriginal_record_pathsupersedes_checkpointz## TODO
+tools/saipen_engine/__pycache__/board.cpython-311.pyc:17:load_registryrequire_mappingrequire_string_list)## DOING## TODO## DONE
+tools/saipen_engine/__pycache__/board.cpython-311.pyc:205:inside a machine-owned section (``## DOING``/``## TODO``/``## DONE``/
+tools/saipen_engine/__pycache__/board.cpython-311.pyc:530:- open [ ] belongs only under ## TODO / ## BLOCKED
+tools/saipen_engine/__pycache__/board.cpython-311.pyc:537:   r   z  has an open [ ] checkbox under z1 -- open boxes belong under ## TODO or ## BLOCKEDverifyr$   zs sits under ## DONE with no | verify: evidence -- ## DONE is a claim that the ticket's own verify condition was metr   r   regression_evidenceNexecutedrg   re   z? regression_evidence must be executed with regression: required)
+tools/saipen_engine/__pycache__/board.cpython-311.pyc:678:on a TODO ticket, or `blocker_scope: gaol`, and validate clean while the
+tools/saipen_engine/__pycache__/board.cpython-311.pyc:1264:router before Pick Rule evaluation. A cyclic all-TODO graph is corrupt work
+tools/saipen_engine/__pycache__/board.cpython-311.pyc:1502:Workable means: open ## TODO, no blocker (even malformed), every needs:
+tools/saipen_engine/__pycache__/board.cpython-311.pyc:2017:Closure means no active work, no currently workable TODO, and no blocker
+tools/saipen_engine/__pycache__/board.cpython-311.pyc:2041:  r*   zworkable TODO: r~   r
+tools/saipen_engine/__pycache__/board.cpython-312.pyc:21:load_registryrequire_mappingrequire_string_list)## DOING## TODO## DONE
+tools/saipen_engine/__pycache__/board.cpython-312.pyc:194:inside a machine-owned section (``## DOING``/``## TODO``/``## DONE``/
+tools/saipen_engine/__pycache__/board.cpython-312.pyc:455:- open [ ] belongs only under ## TODO / ## BLOCKED
+tools/saipen_engine/__pycache__/board.cpython-312.pyc:462:   r   z  has an open [ ] checkbox under z1 -- open boxes belong under ## TODO or ## BLOCKEDverifyr   zs sits under ## DONE with no | verify: evidence -- ## DONE is a claim that the ticket's own verify condition was metr   ru   regression_evidenceexecutedra   r_   z? regression_evidence must be executed with regression: required)
+tools/saipen_engine/__pycache__/board.cpython-312.pyc:616:on a TODO ticket, or `blocker_scope: gaol`, and validate clean while the
+tools/saipen_engine/__pycache__/board.cpython-312.pyc:1014:router before Pick Rule evaluation. A cyclic all-TODO graph is corrupt work
+tools/saipen_engine/__pycache__/board.cpython-312.pyc:1198:Workable means: open ## TODO, no blocker (even malformed), every needs:
+tools/saipen_engine/__pycache__/board.cpython-312.pyc:1592:Closure means no active work, no currently workable TODO, and no blocker
+tools/saipen_engine/__pycache__/board.cpython-312.pyc:1604:ry   rw   rq   r   rp   zactive DOING: r   N   )rO  zworkable TODO: r
+tools/saipen_engine/__pycache__/board_compaction.cpython-311.pyc:1079:## TODO
+tools/saipen_engine/__pycache__/board_compaction.cpython-312.pyc:935:## TODO
+tools/saipen_engine/__pycache__/closure.cpython-311.pyc:610:``T-###``         TODO / DOING / BLOCKED are invalid; a DONE ``own_patch``
+tools/saipen_engine/__pycache__/closure.cpython-312.pyc:538:``T-###``         TODO / DOING / BLOCKED are invalid; a DONE ``own_patch``
+tools/saipen_engine/__pycache__/cold_recovery.cpython-311.pyc:398:   zT-\d+needsz## DONEz## TODO## DOINGz
+tools/saipen_engine/__pycache__/context.cpython-311.pyc:224:## DOINGz## TODO
+tools/saipen_engine/__pycache__/future_gate.cpython-311.pyc:46:NEEDS_REVIEWzTODO --CURRENTSTALEMISSINGCORRUPT)measured
+tools/saipen_engine/__pycache__/future_gate.cpython-311.pyc:2010:is still TODO stays `DEFERRED` with the reason attached -- demoting it to
+tools/saipen_engine/__pycache__/future_gate.cpython-312.pyc:46:NEEDS_REVIEWzTODO --CURRENTSTALEMISSINGCORRUPT)measured
+tools/saipen_engine/__pycache__/future_gate.cpython-312.pyc:1723:is still TODO stays `DEFERRED` with the reason attached -- demoting it to
+tools/saipen_engine/__pycache__/handoff_reconciliation.cpython-311.pyc:218:88E??r:      )## DONEz## DOINGz## TODO
+tools/saipen_engine/__pycache__/intent.cpython-311.pyc:1171:detect exactly one interrupted carrier across TODO/SCOUT/BUILD/VERIFY and
+tools/saipen_engine/__pycache__/intent.cpython-311.pyc:1261:TODO, SCOUT, BUILD, VERIFY.
+tools/saipen_engine/__pycache__/intent.cpython-311.pyc:1263:The targeted qqq/eee flow is three durable steps: ticket_add (TODO),
+tools/saipen_engine/__pycache__/intent.cpython-311.pyc:1269:STATE authority is malformed: rA  r@  r^  ## TODO)Nr!   nonez
+tools/saipen_engine/__pycache__/intent.cpython-311.pyc:1270:TODO carrier z conflicts with STATE.task=## DOING)SCOUTr  r   zDOING carrier z is incoherent with STATE.task=z/phase=ztargeted carrier z is in illegal section )r   rA  r^  r   rN   )
+tools/saipen_engine/__pycache__/intent.cpython-311.pyc:2206:The previous implementation regex-deleted the worker's ``## TODO`` section
+tools/saipen_engine/__pycache__/needs_detach.cpython-311.pyc:25:* the ticket that would lose the edge is `## TODO` (never a live or
+tools/saipen_engine/__pycache__/needs_detach.cpython-311.pyc:116:is under zT; only an unstarted TODO row may lose an edge -- a DOING or DONE ordering is historyz
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:1691:PHASE SCOUT DONE)r  r   transition_from.saipen/STATE.md)r  r2  r  r  adoptcontinued_generationE-r   )	rF  r}   r2  r  r  r   adoptedr%  resumed_in_place## TODO
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:1692:is under checkbox) rz   z is [zb] but sits under ## TODO -- checkbox/section disagreement is malformed input and cannot be claimedzG carries an INVALID claim (half owner/claim_time pair or non-UTC stamp)z9 is still open -- close it before claiming different Workneeds## DONEz
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:2143:  Surgical claim move: target ticket TODO -> DOING with [/] owner.
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:2147:T-1384: a fresh TODO -> DOING claim is the OTHER place a seat is taken by
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:2151:claim writer does. A TODO line may still carry an old binding from a
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:3861:TODO, `block-for` needs a workable TODO blocker and an explicit claim
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:3871:TODO unclaimed, and the parked Work returns to DOING at its saved phase
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:3889:still needs r  z6; the seat would go to Work its own dependencies blockrD   z4ticket checkpointed to TODO via SAIOPS -- handback: z returns the seat to z, which was parked on itz
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:4276:is outside r   rn  r  r  r   r  r-  r  r  doneILLEGAL_TICKET_LIFECYCLEzsdone is the atomic finish operation; use finish_ticket or `saipen ticket done` (it closes LOG+BOARD+STATE together)z9block requires the facts/dead ends that justify the blockr0  )r1  r)  z accepts DOING or TODO; r*  )rk  ru  r  r  r   r  zG is INVALID_INVOCATION; removing a blocker does not reclassify non-Workz;unblock requires the decision/evidence that lifts the blockrk  z
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:4283:in phase z. A merely TODO, unclaimed or foreign parent declares its dependency at ticket creation, never by borrowing the active-parent handoffrM  z3block-for requires one child blocker T-### identityzblocker za ticket cannot block on itselfr)  r4  z" must be a workable ## TODO ticketr4  z already resumes parent r3  zblocking DOING ticket z) requires a ticket-bearing source phase (r  z
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:6901:sits under z9; only schedulable TODO or BLOCKED Work may be supersededr)  z
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:6902:is TODO but not schedulable SUPERSESSION_SUCCESSOR_NOT_FOUNDz
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:10367:8          }#|rtS          |#          S tU          ||#          S )9Nr  z/ticket description is required (semantic input)rz   r  rW  r{   	priority z= is not P0-P9; the priority comes first, then the descriptionr,  zeverify is required and cannot be a placeholder: pass --verify with the DONE proof (no TBD/TODO/empty))r~  r  zregression must be z when suppliedrK  r~  rU  r  r  r  r   r  r   r   
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:13499:BOARD: checkpoint active DOING ticket -> TODO (demote, clear claim fields);
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:13501:generate the new objective's PLAN tickets ABOVE the existing TODO
+tools/saipen_engine/__pycache__/operations.cpython-311.pyc:13545:P1Qy\Z5O5OQ5O5O5OrQ   r-  r3  r>  rz  r  r  z8; repair the split before entering goal-driven executionrw  	 (active z checkpointed to TODO)rD   zgoal_waves 0->1r   r  r   r  r  rX  r,  rW  r  r  c              3  p   K   | ]1\  }}|                     d                               d          -|V  2dS r  r)  NrD  r   ra  s      rR   r3  z
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:1529:PHASE SCOUT DONE)r  r   transition_from.saipen/STATE.md)r  r'  r  r  adoptcontinued_generationE-r   )	r:  r{   r'  r  r  r   adoptedr  resumed_in_place## TODO
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:1530:is under checkbox) r   z is [zb] but sits under ## TODO -- checkbox/section disagreement is malformed input and cannot be claimedzG carries an INVALID claim (half owner/claim_time pair or non-UTC stamp)z9 is still open -- close it before claiming different Workneeds## DONEz
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:1874:  Surgical claim move: target ticket TODO -> DOING with [/] owner.
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:1878:T-1384: a fresh TODO -> DOING claim is the OTHER place a seat is taken by
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:1882:claim writer does. A TODO line may still carry an old binding from a
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:3302:TODO, `block-for` needs a workable TODO blocker and an explicit claim
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:3312:TODO unclaimed, and the parked Work returns to DOING at its saved phase
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:3325:still needs r  z6; the seat would go to Work its own dependencies blockrD   z4ticket checkpointed to TODO via SAIOPS -- handback: z returns the seat to z, which was parked on itz
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:3601:is outside r   ri  ry  r  r   r  r!  r  r  doneILLEGAL_TICKET_LIFECYCLEzsdone is the atomic finish operation; use finish_ticket or `saipen ticket done` (it closes LOG+BOARD+STATE together)z9block requires the facts/dead ends that justify the blockr$  )r%  r  z accepts DOING or TODO; r  )rA  rH  rW  r  r   r  zG is INVALID_INVOCATION; removing a blocker does not reclassify non-Workz;unblock requires the decision/evidence that lifts the blockrA  z
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:3613:in phase z. A merely TODO, unclaimed or foreign parent declares its dependency at ticket creation, never by borrowing the active-parent handoffr#  z3block-for requires one child blocker T-### identityzblocker za ticket cannot block on itselfr  r*  z" must be a workable ## TODO ticketr  z already resumes parent r  zblocking DOING ticket z) requires a ticket-bearing source phase (r  z
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:5638:sits under z9; only schedulable TODO or BLOCKED Work may be supersededr  z
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:5639:is TODO but not schedulable SUPERSESSION_SUCCESSOR_NOT_FOUNDz
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:8237:ww xY w)9Nr  z/ticket description is required (semantic input)r   r  r  ry   	priority z= is not P0-P9; the priority comes first, then the descriptionr  zeverify is required and cannot be a placeholder: pass --verify with the DONE proof (no TBD/TODO/empty))ro  r  zregression must be z when suppliedr%  ro  r  re  ry  r  r   r  r   r   
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:10765:BOARD: checkpoint active DOING ticket -> TODO (demote, clear claim fields);
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:10767:generate the new objective's PLAN tickets ABOVE the existing TODO
+tools/saipen_engine/__pycache__/operations.cpython-312.pyc:10804:goal-entry-rz  r8  ry  r  r   r  )goal_ingress_identityr   r  r  r1  r  TGOAL_ALREADY_CAPTUREDz|duplicate goal ingress: this exact objective is already the active goal; no second goal is planned and no work is duplicatedr0  r   )r1  r$  r  r0  r   r!  r$  r%  r  r2  r[  r  r  z8; repair the split before entering goal-driven executionr%  	 (active z checkpointed to TODO)rD   zgoal_waves 0->1r   r  r   r  r  r@  r  r?  r  r  c              3  h   K   | ]*  \  }}|j                  d       j                  d      s'| , ywr  r  Nr+  r   r8  s      rP   r(  z
+tools/saipen_engine/__pycache__/readiness.cpython-311.pyc:29:BOARD: 1 DOING, 2 TODO, 207 DONE, 7 BLOCKED
+tools/saipen_engine/__pycache__/readiness.cpython-311.pyc:89:function counted only DOING+TODO, so a project whose entire remainder was
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:42:GOAL_WAVE_CAPGOAL_TICKET_CAPSAFETY_VALVE_TRIPPEDOPERATOR_DECISION /x)## TODO
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:1004:started and belongs in ``## TODO``.
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:1008:is reopened into ``## TODO``. This class carries ``requires_approval``:
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:1070:section-moveztyped-closure-moder   currentz& sits under ## DONE with closure_mode z1, which no closure operation writes (closed set: |z); the completion was typed, so the row returns to ## TODO without closure metadata or claim under ONE operator approval of the repair plan -- close a duplicate with `saipen ticket supersede`, anything else through its lifecycle)
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:1078:  r(  rk   r   z sits under ## DOING with no owner/claim_time pair; an unclaimed DOING Work was never started, so it returns to ## TODO (SRC-043))rg   r  r!   rj   r9  r:  rk   Nr   r   c                    g | ]n\  }}|                     d           dk    rPrN|                    d          r9|dd                                         r
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:1093:(frontier T-r   z; the completion was never established by a canonical operation, so reopening it into ## TODO requires ONE operator approval of the repair plan (SRC-043))	rg   r  r!   rj   r9  r:  r;  r<  rk   legacy-done-reviewlegacy$saipen recover --attest-legacy-done z) predates this project's closure contractzZ and carries no execution evidence in EITHER the current or its own generation's grammar (z); a missing field that did not exist yet is not proof the completion was fabricated, so this is an operator decision, never an automatic reopen -- run `saipen recover --attest-legacy-done zE` to let the historical completion stand (OPERATOR_DECISION_REQUIRED))
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:2193:phase, `restart: TODO` distinguishes CURRENT_DONE_UNPROVEN (T-1609):
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:2311:approval may instead revoke that ticket's closure now and queue TODO for
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:2325:  r4  r5  z6CURRENT_DONE_JOURNAL_GAP: no complete claim to restorer  ACURRENT_DONE_UNPROVEN: the journal proves no lifecycle phase for a  ; explicit approval revokes its unproven closure now and returns it to TODO without a claim. STATE becomes idle DONE/task:none; a fresh canonical claim and the complete verification lifecycle are required, never a fabricated historical phase or finish (T-1609)c           
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:2593:to `## TODO` with its closure metadata and claim dropped, so the
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:2632:UNAUTHORIZED_LIFECYCLE_WRITE: detailz; it returns to ## TODO without closure metadata or claim and the canonical lifecycle re-establishes the completion -- original bytes preservedr   r   Nc              3  6  K   | ]}|                     d           k    ou|                     d          o`t          |                     d          t                    o8t          |                     d          t                    
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:2653:   r   zS sits under ## DOING on a claim no operation wrote; it returns to ## TODO unclaimedre   z<UNAUTHORIZED_LIFECYCLE_WRITE: STATE.last_event sits above E-zr, the newest event an operation record stands behind; this reconciliation's own journaled event becomes the markerheadE-r   z..E-r   zlifecycle authority: z	 above E-z[ carry no operation record (written by hand); kept as history, nothing stands on their wordr8  c              3  H   K   | ]
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:3417:5U5U5U5U5Ur$   r%   r!   r2  r  r4  r5  r#  r(  r!  zM; revoke its closure now and queue TODO without a claim for a fresh lifecyclez"CURRENT_DONE_JOURNAL_GAP: restore z to its own proven r  z
+tools/saipen_engine/__pycache__/reconcile.cpython-311.pyc:3517:reconcile protocol state -- z; current-done-unproven z^: closure revoked now; no lifecycle phase proven, queued TODO for fresh claim and verificationr8  z
+tools/saipen_engine/__pycache__/replenishment.cpython-311.pyc:82:## TODO
+tools/saipen_engine/__pycache__/replenishment.cpython-311.pyc:829:  r&   r(   TODO_AVAILABLEzworkable ticket z waiting in TODO)r   r   r   
+tools/saipen_engine/__pycache__/retirement.cpython-311.pyc:36:* leaving it TODO is a DEADLOCK -- a reserved continuation child holds the
+tools/saipen_engine/__pycache__/retirement.cpython-312.pyc:36:* leaving it TODO is a DEADLOCK -- a reserved continuation child holds the
+tools/saipen_engine/__pycache__/router.cpython-311.pyc:258:r:   r;   r<   r   r   r   r   r   r   r   r   r   r=   ALL_REQUIREMENTS_COMPLETEALL_WORK_COMPLETEzVno pending recovery, no active ticket, no workable TODO; continue ordinary maintenance)	r:   r;   r<   r   r   r   r   r   r=   )r   r   )(listr   r5   r
+tools/saipen_engine/__pycache__/router.cpython-311.pyc:984:ticket, no workable TODO; the action is `saipen continue` or an idle
+tools/saipen_engine/__pycache__/state.cpython-311.pyc:181:string_fieldsinteger_fieldswait_categorieszN^safety valve reached \((\d+) waves / (\d+) tickets\) -- run 'cc' to continue$zZWAIT: blocked -- untriaged MARKHUNT findings in ## BLOCKED; triage into ## TODO or dismissz\s*\[[^\]]*\]\s*$z\.\s+(?=[A-Z`])nac                    t                               d|                                 t          d          d                                                   S )u?   The § 1.2 sentence of a `WAIT:` string, progress tag stripped.r   WAIT:N)_PROGRESS_TAG_REsubr3   r   rP   s    r   
+tools/saipen_engine/__pycache__/state.cpython-311.pyc:330:* `phase: DONE` + empty `## TODO`: exactly the three fixed forms bind
+tools/saipen_engine/__pycache__/state.cpython-311.pyc:409:(`binding_wait`), preserving CORE's DONE + empty-TODO UNBLOCK
+tools/saipen_engine/__pycache__/state.cpython-312.pyc:157:string_fieldsinteger_fieldswait_categorieszN^safety valve reached \((\d+) waves / (\d+) tickets\) -- run 'cc' to continue$zZWAIT: blocked -- untriaged MARKHUNT findings in ## BLOCKED; triage into ## TODO or dismissz\s*\[[^\]]*\]\s*$z\.\s+(?=[A-Z`])c                ~    t         j                  d| j                         t        d      d j                               S )u?   The § 1.2 sentence of a `WAIT:` string, progress tag stripped.r   WAIT:N)_PROGRESS_TAG_REsubr2   r   nas    r   
+tools/saipen_engine/__pycache__/state.cpython-312.pyc:274:* `phase: DONE` + empty `## TODO`: exactly the three fixed forms bind
+tools/saipen_engine/__pycache__/state.cpython-312.pyc:349:(`binding_wait`), preserving CORE's DONE + empty-TODO UNBLOCK
+tools/saipen_engine/__pycache__/subs.cpython-311.pyc:68:TODO/DOING/unresolved BLOCKED, duplicate headings/IDs fail, at most one
+tools/saipen_engine/__pycache__/subs.cpython-311.pyc:1510:}8++998r(   ## DOING## TODO## DONE
+tools/saipen_engine/__pycache__/subs.cpython-311.pyc:1711:5. open TODO/DOING work              -> WORK_PENDING
+tools/saipen_engine/__pycache__/subs.cpython-311.pyc:1725:phase?r'  rU  DONETODODOINGr   
+tools/saipen_engine/__pycache__/subs.cpython-311.pyc:2373:B  DONE + real TODO                      -> DONE_CLAIM_FALSE
+tools/saipen_engine/__pycache__/subs.cpython-311.pyc:2381:a BLOCKED, which outranks a TODO, because the stronger lifecycle truth is
+tools/saipen_engine/__pycache__/subs.cpython-311.pyc:2458:- DONE: task == none; zero TODO, zero DOING, zero unresolved BLOCKED.
+tools/saipen_engine/__pycache__/subs.cpython-311.pyc:2464:rh  r  r  NrS  rU  c                *    g | ]}|d          dk    |S rK  rQ   rL  s     r&   r  z*validate_sub_lifecycle.<locals>.<listcomp>  rN  r(   rj  r  zphase DONE but task is zG -- Core's terminal invariant requires task none in a DONE worker statera  z8phase DONE but the board still carries a ## DOING ticketr  r;   rk  r   z~phase DONE but the board still holds open work (TODO/BLOCKED) -- a worker cannot say DONE while its board says unresolved workr  r   z"phase BLOCKED but blocker is emptyr   r  z5 does not bind a single ## DOING ticket (board holds z0) -- task and DOING must be one coherent bindingr   rE  z  != the board's ## DOING ticket z0 -- an active-ticket binding split is impossiblez-\d+z
+tools/saipen_engine/__pycache__/subs.cpython-311.pyc:6554:The operation validates the package, creates exactly one Core review TODO
+tools/saipen_engine/__pycache__/subs.cpython-312.pyc:62:TODO/DOING/unresolved BLOCKED, duplicate headings/IDs fail, at most one
+tools/saipen_engine/__pycache__/subs.cpython-312.pyc:1263:8+988r&   ## DOING## TODO## DONE
+tools/saipen_engine/__pycache__/subs.cpython-312.pyc:1449:5. open TODO/DOING work              -> WORK_PENDING
+tools/saipen_engine/__pycache__/subs.cpython-312.pyc:1463:phase?r  r)  DONETODODOINGr   
+tools/saipen_engine/__pycache__/subs.cpython-312.pyc:1988:B  DONE + real TODO                      -> DONE_CLAIM_FALSE
+tools/saipen_engine/__pycache__/subs.cpython-312.pyc:1996:a BLOCKED, which outranks a TODO, because the stronger lifecycle truth is
+tools/saipen_engine/__pycache__/subs.cpython-312.pyc:2082:- DONE: task == none; zero TODO, zero DOING, zero unresolved BLOCKED.
+tools/saipen_engine/__pycache__/subs.cpython-312.pyc:2088:r:  r  r  Nr'  r)  r   r  r<  r  zphase DONE but task is zG -- Core's terminal invariant requires task none in a DONE worker stater7  z8phase DONE but the board still carries a ## DOING ticketr  r9   r=  r   z~phase DONE but the board still holds open work (TODO/BLOCKED) -- a worker cannot say DONE while its board says unresolved workr  r   z"phase BLOCKED but blocker is emptyr   r  z5 does not bind a single ## DOING ticket (board holds z0) -- task and DOING must be one coherent bindingr   r  z  != the board's ## DOING ticket z0 -- an active-ticket binding split is impossiblez-\d+z
+tools/saipen_engine/__pycache__/subs.cpython-312.pyc:5326:The operation validates the package, creates exactly one Core review TODO
+tools/saipen_engine/__pycache__/work_exhaustion.cpython-311.pyc:906:saipen claim z,TODO dependencies or claim are not satisfiedunresolved_audit_countpendingbinding_corruptzaudit binding is corruptunworkable_active_onlyOPERATORidle_classificationzlinked audit work is unworkableinvalidresidue
+tools/__pycache__/audit_checks.cpython-311.pyc:769:board_text	list[str]c                    g }d}|                                  D ]Z}|                    d          r|                                },|dv r*|                    d          r|                    |           [|S )zCThe board lines the ownership check reads: DOING, TODO and BLOCKED.r'   ## )## DOING## TODO
+tools/__pycache__/audit_checks.cpython-311.pyc:821:The owning ticket lives under ## BLOCKED, not ## TODO. Ownership reads any
+tools/__pycache__/audit_checks.cpython-311.pyc:822:live line (DOING/TODO/BLOCKED), but workability is TODO-only -- so a
+tools/__pycache__/audit_checks.cpython-311.pyc:934:reason it does not test. Heading-aware insertion: an EMPTY ## TODO directly
+tools/__pycache__/audit_checks.cpython-311.pyc:2376:(## TODO or ## BLOCKED -- the validator treats any non-DONE/non-DOING
+tools/__pycache__/audit_checks.cpython-311.pyc:2454:`## TODO` ticket ONLY when nothing is claimed -- a `## DOING` ticket IS
+tools/__pycache__/audit_checks.cpython-311.pyc:2456:arrange the TODO mismatch. Inject two synthetic workable tickets: T-999
+tools/__pycache__/audit_checks.cpython-311.pyc:2457:at the top of `## TODO` (always the topmost workable) and T-998 at the
+tools/__pycache__/audit_checks.cpython-311.pyc:2466:^## DOING$\n(.*?)(?=^## |\Z)NrB   rS   c              3  h   K   | ]-}|                                                     d           )|V  .dS r@  Nr*   r  r  s     r.   r  z"demote_the_pick.<locals>.<genexpr>f  s>      ccrbhhjjF[F[\aFbFbcccccccr0   z^## TODO$\n(.*?)(?=^## |\Z)z7- [ ] T-999 [P3] synthetic red-control workable ticket
+tools/__pycache__/audit_checks.cpython-311.pyc:2515:zBReproduce T-576's unjournaled BLOCKED -> TODO drift byte-for-byte.r'   Nr<  r>  r?  - [ ] T-
+tools/__pycache__/audit_checks.cpython-311.pyc:2812:under `## TODO` so the reopened-T-549 condition is testable again.
+tools/__pycache__/audit_checks.cpython-311.pyc:2856:a  File every `## BLOCKED` record back into `## TODO` as workable Work.
+tools/__pycache__/audit_checks.cpython-311.pyc:2926:zEmpty `## DOING` by filing its claimed ticket back into `## TODO`.
+tools/__pycache__/audit_checks.cpython-311.pyc:7295:  s$    !))CGGaKR11 r0   zbackslashes are not escapedz,plan with text loses its front-of-board rulezsaipen/phases/plan.mdzFRONT of `## TODO`zfront of the boardzat the front of `## TODO`z
+tools/__pycache__/audit_checks.cpython-311.pyc:7318:## TODO
+tools/__pycache__/audit_checks.cpython-311.pyc:7320:## TODO
+tools/__pycache__/audit_checks.cpython-311.pyc:7336:**M. FINAL FRESHNESS CHECK.**zconverge-contractz*CONVERGE.md loses the post-K ordering rulez1Nothing that mutates main source may run after K.z5Main source may be mutated whenever it is convenient.zCONVERGE keeps EE before QQz**L. FRESH QQ.**z,CONVERGE blocks factories while TODO remainsz
+tools/__pycache__/audit_checks.cpython-311.pyc:7337:no workable `## TODO` ticketzTODO may remainzclosure evidence driftz-CONVERGE blocks factories after failing testsz%canonical tests PASS against the treez/canonical tests were attempted against the treez4CONVERGE blocks factories on scout or fixer findingsz'no fresh critical scout or fixer OUTBOXz)critical scout or fixer OUTBOX may remainz2CLEAN forces tests and final HUNT before factoriesz0CLEAN completed, or proved nothing safe remainedzCLEAN was consideredz'final HUNT findings return to Core workz-final forced HUNT after CLEAN came back cleanzfinal HUNT was startedz*old hunt marker cannot satisfy forced HUNTz8existing hunt -> clean marker cannot satisfy forced HUNTz,existing hunt marker may satisfy forced HUNTz1a Core-owned callout calls `cc` the Goal Mode keyzguides/GUIDE_EN.mdzY`cc` continues the project context to convergence (resuming a running goal if one is set)z"`cc` keeps active Goal Mode movingzshortcut-calloutsz+the conformance record loses its fixed formc                .    t          j        dd|           S )Nz"(RUN: )validate\.py -> (PASS|FAIL)z\1validate.py \2rt  ra  s    r.   r  r  
+tools/__pycache__/audit_checks.cpython-311.pyc:7377:allows at most one per agentz$ticket field outside the closed list## TODO
+tools/__pycache__/audit_checks.cpython-311.pyc:7387:rB   r  z## TODO
+tools/__pycache__/audit_floor.cpython-311.pyc:70:## TODO
+tools/__pycache__/audit_floor.cpython-311.pyc:245:## TODO
+tools/__pycache__/audit_floor.cpython-311.pyc:263:## TODO
+tools/__pycache__/audit_floor.cpython-311.pyc:281:## TODO
+tools/__pycache__/audit_floor.cpython-311.pyc:293:## TODO
+tools/__pycache__/debug_ca.cpython-311.pyc:40:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:6672:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:6953:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:6959:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:6962:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:6972:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:6981:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:6988:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:6996:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:7007:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:7016:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:7027:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:7073:SUB_COLLECTEDzHlast_collect: (sha256:[0-9a-f]{64})@\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Zz<complete current collection creates one Core TODO hypothesisReview SubSaipen hypothesisznot accepted factz board=z9collection marks MANIFEST last_collect and binds identityz	manifest=z log=z5collect retry deduplicates without second Core ticketALREADY_COLLECTEDzAcollected READY package with open review ticket -> REVIEW_PENDINGc              3   L   K   | ]}|                     d           rd|v |V   dS - [ ] T-rG  Nr  r  s     r]   r   z%run_saicrew_probes.<locals>.<genexpr>  sQ       
+tools/__pycache__/run_scenarios.cpython-311.pyc:7274:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:7280:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:7344:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:7751:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:11580:demands. Emptying those two sections is the established fix; TODO/BLOCKED
+tools/__pycache__/run_scenarios.cpython-311.pyc:17156:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:17162:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:17211:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:17215:zopen TODO blocks cleanupzTODO: SUB-001 openr  zpayload
+tools/__pycache__/run_scenarios.cpython-311.pyc:18872:ticket).r   r"  r  r   N## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:18873:z## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:24274:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:24337:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:24365:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:24374:TICKET_ADDEDr   zT-778rx  z<done on a TODO ticket is refused (IL_LEGAL_TICKET_LIFECYCLE)ILLEGAL_TICKET_LIFECYCLEz(refused done writes zero canonical bytesr
+tools/__pycache__/run_scenarios.cpython-311.pyc:25765:  rE   r"  r   r   z"T-1 [P1] top probe | verify: probezDT-1 [P1] top probe | blocker: WAIT_USER_CONFIRMATION | verify: probe)ra  z3normal claim refuses a TODO ticket carrying blockerr]
+tools/__pycache__/run_scenarios.cpython-311.pyc:25766:  z4explicit claim cannot override blocker authorizationz;refused normal and explicit blocker claims write zero bytesz@router skips malformed TODO+blocker and never emits SCOUT for itr  zPHASE SCOUT T-2rI   r  r  r%  r  r  z=public status refuses structurally invalid TODO+blocker stateFr  r  z;public next refuses structurally invalid TODO+blocker statePHASE SCOUT T-1z# Board
+tools/__pycache__/run_scenarios.cpython-311.pyc:25768:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:25788:  r_	  rj	  blockerzSblock of the active ticket never parks the session in a session-level BLOCKED stateBLOCKEDr  )rY   r  z;block routes the next_action to the remaining workable TODOunblockz5unblock without the lifting decision/evidence refusesz"block cleared by recorded decisionz>unblock atomically creates TODO without active blocker/historyr^	  verify_attemptsr   zCT-1 [P1] top probe | blockr: WAIT_USER_CONFIRMATION | verify: probez2claim refuses a board the parser cannot read wholez;router routes malformed board to inspection, never a ticket
+tools/__pycache__/run_scenarios.cpython-311.pyc:25815:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:25821:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:25828:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:26012:full_ticketcapzpcontext: _board_map omits exactly the right count (+9 more from 12 TODO tickets with cap 2 + protected full T-4)z
+tools/__pycache__/run_scenarios.cpython-311.pyc:26015:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:26034:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:26056:checkpoint(r'z(', 'probe', 'RUN', 'T-1', 'crash probe')r-	  z2subprocess crash after LOG leaves an unresolved opr.	  rZ  z:crash-then-drifted-read-dep recover CONFLICTs in a real opzafter sp crashz8new mutation refuses after the subprocess-crash conflictz7route_next on DONE + workable TODO routes to the ticketr|   zop-x)r0   z-route_next puts recovery ahead of normal workzsaipen recoverzrecovery-pendingzop-c)
+tools/__pycache__/run_scenarios.cpython-311.pyc:26100:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:26104:r  r   rg  z9validator FAILs a new TODO ticket with placeholder verifyzplaceholder verifyrW  z [P1] unworkable z
+tools/__pycache__/run_scenarios.cpython-311.pyc:31274:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:31282:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:32139:At `phase: DONE` with an empty `## TODO`, CORE permits exactly THREE brakes
+tools/__pycache__/run_scenarios.cpython-311.pyc:32228:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:32713:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:34254:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:34274:## TODO
+tools/__pycache__/run_scenarios.cpython-311.pyc:34282:## TODO
+tools/__pycache__/saipen.cpython-311.pyc:2956:workable TODO remains.  That verdict -- not a board glance -- is the
+tools/__pycache__/sub_clean.cpython-311.pyc:153:<listcomp>z%_open_board_items.<locals>.<listcomp>V   s;    MMMTdooe6L6LMQRR  MMM    )DOINGTODODONEBLOCKEDz#malformed BOARD sections: expected z, got c                Z    g | ]'}|                     d           r|d D             v%|(S )z##c                    h | ]}d | S )r7    )r;   names     r   	<setcomp>z/_open_board_items.<locals>.<listcomp>.<setcomp>]   s
+tools/__pycache__/sub_clean.cpython-311.pyc:163:item state: r@   zTODO:    r?   zDOING: )is_filerF   r
+tools/__pycache__/test_adaptive_runtime.cpython-311.pyc:63:## TODO
+tools/__pycache__/test_admission_auto_doctor.cpython-311.pyc:80:goal_ingressticketsT-10## TODOidsectionneedsticketNr   classify_blocked_ticket
+tools/__pycache__/test_adoption_section_parity.cpython-311.pyc:28:`saipen recover --adopt-legacy` -- used to scan only `## TODO` and `## DOING`.
+tools/__pycache__/test_adoption_section_parity.cpython-311.pyc:64:## TODO
+tools/__pycache__/test_adoption_section_parity.cpython-311.pyc:73:## TODO
+tools/__pycache__/test_adoption_section_parity.cpython-311.pyc:79:)T-501T-503T-504z## TODO## DOINGz## DONEz
+tools/__pycache__/test_audit_2026_08_28_all3.cpython-311.pyc:5428:## TODO
+tools/__pycache__/test_audit_2026_08_30_all3_impl.cpython-311.pyc:78:## TODO
+tools/__pycache__/test_audit_inbox.cpython-311.pyc:41:## TODO
+tools/__pycache__/test_audit_inbox.cpython-311.pyc:59:## TODO
+tools/__pycache__/test_audit_inbox.cpython-311.pyc:555:## TODO
+tools/__pycache__/test_audit_inbox.cpython-311.pyc:573:## TODO
+tools/__pycache__/test_audit_inbox.cpython-311.pyc:595:## TODO
+tools/__pycache__/test_audit_inbox.cpython-311.pyc:619:## TODO
+tools/__pycache__/test_audit_inbox.cpython-311.pyc:842:| blocker: SOURCE_UNRESOLVED z## TODO
+tools/__pycache__/test_audit_inbox.cpython-311.pyc:845:ra   ## TODO
+tools/__pycache__/test_audit_inbox.cpython-311.pyc:1067:z<## TODO
+tools/__pycache__/test_audit_inbox.cpython-311.pyc:2075:NrT  z/## TODO
+tools/__pycache__/test_audit_ingest_resume.cpython-311.pyc:242:r   _work_for_source_receiptr   rD   r   r   ## TODOzl## TODO
+tools/__pycache__/test_audit_ingest_resume.cpython-311.pyc:275:r   rv   r   rD   r   r   rx   zz## TODO
+tools/__pycache__/test_audit_manifest.cpython-311.pyc:450:## TODO
+tools/__pycache__/test_aut31_production_autonomy.cpython-311.pyc:306:## TODO
+tools/__pycache__/test_automation_block.cpython-311.pyc:43:## TODO
+tools/__pycache__/test_automation_block.cpython-311.pyc:328:## TODO
+tools/__pycache__/test_automation_block.cpython-311.pyc:412:         d           | 	                    |d                    d S )N## TODO
+tools/__pycache__/test_automation_block.cpython-311.pyc:413::## TODO
+tools/__pycache__/test_automation_block.cpython-311.pyc:722:## TODO
+tools/__pycache__/test_board_pseudo_link.cpython-311.pyc:43:## TODO
+tools/__pycache__/test_bzcc_overnight_autonomy.cpython-311.pyc:139:## TODO
+tools/__pycache__/test_bzcc_overnight_autonomy.cpython-311.pyc:586:## TODO
+tools/__pycache__/test_bz_rea_acceptance_fixture.cpython-311.pyc:22:- Queue is empty (no active tickets in DOING or TODO).
+tools/__pycache__/test_bz_rea_acceptance_fixture.cpython-311.pyc:89:## TODO
+tools/__pycache__/test_bz_rea_acceptance_fixture.cpython-311.pyc:231:## TODO
+tools/__pycache__/test_campaign_matrix.cpython-311.pyc:70:## TODO
+tools/__pycache__/test_campaign_matrix.cpython-311.pyc:530:## TODO
+tools/__pycache__/test_campaign_matrix.cpython-311.pyc:638:## TODO
+tools/__pycache__/test_campaign_production_gates.cpython-311.pyc:91:## TODO
+tools/__pycache__/test_campaign_production_gates.cpython-311.pyc:353:## TODO
+tools/__pycache__/test_campaign_production_gates.cpython-311.pyc:418:## TODO
+tools/__pycache__/test_campaign_production_gates.cpython-311.pyc:426:## TODO
+tools/__pycache__/test_campaign_production_gates.cpython-311.pyc:938:## TODO
+tools/__pycache__/test_closure_provenance.cpython-311.pyc:30:projected at the head of `## TODO`, while the persisted `next_action`
+tools/__pycache__/test_closure_provenance.cpython-311.pyc:1230:audit/source-bound Work projected at the head of `## TODO`. The
+tools/__pycache__/test_closure_provenance.cpython-311.pyc:1391:          d |                     |          d         D                       |                     |          d                    d S )	Nr5   rf   rH   rI   z## TODO
+tools/__pycache__/test_closure_provenance.cpython-311.pyc:1392:z8## TODO
+tools/__pycache__/test_cold_agent_truth.cpython-311.pyc:80:## TODO
+tools/__pycache__/test_cold_recovery.cpython-311.pyc:56:## TODO
+tools/__pycache__/test_cold_recovery.cpython-311.pyc:218:## TODO
+tools/__pycache__/test_cold_recovery.cpython-311.pyc:273:## TODO
+tools/__pycache__/test_cold_recovery.cpython-311.pyc:560:## TODO
+tools/__pycache__/test_cold_recovery.cpython-311.pyc:742:## TODO
+tools/__pycache__/test_cold_recovery.cpython-311.pyc:816:## TODO
+tools/__pycache__/test_command_routing.cpython-311.pyc:654:## TODO
+tools/__pycache__/test_command_routing.cpython-311.pyc:1227:## TODO
+tools/__pycache__/test_command_routing.cpython-311.pyc:1681:## TODO
+tools/__pycache__/test_command_routing.cpython-311.pyc:2144:## TODO
+tools/__pycache__/test_continue_chain.cpython-311.pyc:212:## TODO
+tools/__pycache__/test_continue_improve_fallthrough.cpython-311.pyc:238:z## TODO
+tools/__pycache__/test_control_primitives.cpython-311.pyc:149:z## TODO
+tools/__pycache__/test_core_ownership_routing.cpython-311.pyc:130:## TODO
+tools/__pycache__/test_core_unit_gate.cpython-311.pyc:112:## TODO
+tools/__pycache__/test_crew_applicability.cpython-311.pyc:62:## TODO
+tools/__pycache__/test_defect_delta_controls.cpython-311.pyc:213:## TODO
+tools/__pycache__/test_dependency_resume_liveness.cpython-311.pyc:126:## TODO
+tools/__pycache__/test_event_taxonomy_owner.cpython-311.pyc:54:## TODO
+tools/__pycache__/test_evidence_gap_ledger_lineage.cpython-311.pyc:65:## TODO
+tools/__pycache__/test_evidence_gap_ledger_lineage.cpython-311.pyc:384:## TODO
+tools/__pycache__/test_evidence_gap_ledger_lineage.cpython-311.pyc:433:## TODO
+tools/__pycache__/test_external_authentication_contract.cpython-311.pyc:101:## TODO
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:41:P. Current goal has zero TODO/DOING but external reconciliation resumes parent work.
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:66:IDENTITY.mdutf-8encoding)z# Board## DOINGz## TODO## DONEzx- [x] T-289 [P1] external fix | verify: test | owner: alice | claim_time: 2026-09-20T00:00:00Z | closure_mode: own_patch
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:184:## TODO
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:315:## TODO
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:394:## TODO
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:597:## TODO
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:646:## TODO
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:679:## TODO
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:711:## TODO
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:1245:## TODO
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:1297:## TODO
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:1326:## TODO
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:1499:## TODO
+tools/__pycache__/test_external_revalidation.cpython-311.pyc:1665:## TODO
+tools/__pycache__/test_field_fixture_isolation.cpython-311.pyc:124:## TODO
+tools/__pycache__/test_finding_invalidated_closure.cpython-311.pyc:91:## TODO
+tools/__pycache__/test_freebuff_operator_provenance.cpython-311.pyc:104:## TODO
+tools/__pycache__/test_generation_migration.cpython-311.pyc:76:## TODO
+tools/__pycache__/test_guard_admission.cpython-311.pyc:67:## TODO
+tools/__pycache__/test_guard_admission.cpython-311.pyc:351:## TODO
+tools/__pycache__/test_guard_admission.cpython-311.pyc:776:## TODO
+tools/__pycache__/test_guard_events.cpython-311.pyc:1317:## TODO
+tools/__pycache__/test_guard_execution_reachability.cpython-311.pyc:74:## TODO
+tools/__pycache__/test_guard_hostile_matrix.cpython-311.pyc:46:## TODO
+tools/__pycache__/test_guard_hostile_matrix.cpython-311.pyc:119:## TODO
+tools/__pycache__/test_guard_hostile_matrix.cpython-311.pyc:1061:7r   r{  c                  *    e Zd ZdZd Zd Zd Zd ZdS )ProtectedShellNamespacezKExplicit protected paths in ordinary shell commands are preflight refusals.c           	         t                      }dD ]g\  }}t                              t                              |dd|i                    \  }}|                     ||d         |d         fdd|f|           hd S )N))python --versionr   )zpython -m compileall srcr  )zrg TODO src/app.pyr  r   r   r7   r   r   ADMITTED)rT   rb   rv   r   r   )r   rD   r   expected_actionr7   r   s         r   ,test_normal_development_shell_remains_usablezDProtectedShellNamespace.test_normal_development_shell_remains_usable  s    
+tools/__pycache__/test_guard_surface_parity.cpython-311.pyc:64:## TODO
+tools/__pycache__/test_handoff_archive_cross_repo.cpython-311.pyc:58:## TODO
+tools/__pycache__/test_hostile_wave_regressions.cpython-311.pyc:90:## TODO
+tools/__pycache__/test_host_bootstrap.cpython-311.pyc:185:## TODO
+tools/__pycache__/test_host_bootstrap.cpython-311.pyc:1145:## TODO
+tools/__pycache__/test_improve_error_boundary.cpython-311.pyc:72:## TODO
+tools/__pycache__/test_improve_gate.cpython-311.pyc:137:z## TODO
+tools/__pycache__/test_improve_reconcile.cpython-311.pyc:68:## TODO
+tools/__pycache__/test_improve_reconcile.cpython-311.pyc:247:r.   r3   r   r2   Nz## TODO
+tools/__pycache__/test_improve_reconcile.cpython-311.pyc:248:z## TODO
+tools/__pycache__/test_install_identity_doctor.cpython-311.pyc:118:## TODO
+tools/__pycache__/test_intent_audit_fixes.cpython-311.pyc:1298:## TODO
+tools/__pycache__/test_intent_audit_fixes.cpython-311.pyc:1302:r0   rY   zHUNT-777z## TODO)
+tools/__pycache__/test_isolated_release.cpython-311.pyc:95:## TODO
+tools/__pycache__/test_journal_nested_targets.cpython-311.pyc:59:## TODO
+tools/__pycache__/test_legacy_lifecycle_compat.cpython-311.pyc:30:Fleet plan, which proposed 15 ``## DONE -> ## TODO`` reopenings of real
+tools/__pycache__/test_legacy_lifecycle_compat.cpython-311.pyc:226:## TODO
+tools/__pycache__/test_legacy_lifecycle_compat.cpython-311.pyc:313:to_section## TODOrequires_approval
+tools/__pycache__/test_legacy_lifecycle_compat.cpython-311.pyc:423:         d           d S )Nz## TODO
+tools/__pycache__/test_legacy_lifecycle_compat.cpython-311.pyc:424:z\## TODO
+tools/__pycache__/test_legacy_lifecycle_compat.cpython-311.pyc:725:## TODO
+tools/__pycache__/test_log_detail_evidence.cpython-311.pyc:55:## TODO
+tools/__pycache__/test_log_normalize.cpython-311.pyc:56:## TODO
+tools/__pycache__/test_log_tail_quarantine.cpython-311.pyc:61:## TODO
+tools/__pycache__/test_lost_active_ticket_recovery.cpython-311.pyc:141:## TODO
+tools/__pycache__/test_metadata_repair.cpython-311.pyc:39:C  active TODO/DOING Work                           -> refused, zero writes
+tools/__pycache__/test_metrics_acceptance.cpython-311.pyc:26:## TODO
+tools/__pycache__/test_next_action_deadlock.cpython-311.pyc:64:## TODO
+tools/__pycache__/test_no_publish_source_scope.cpython-311.pyc:47:## TODO
+tools/__pycache__/test_opencode_adapter.cpython-311.pyc:306:task: T-001zT-001zBOARD.mdz## TODO)r	   
+tools/__pycache__/test_opencode_live_session.cpython-311.pyc:134:## TODO
+tools/__pycache__/test_operator_ingress_matrix.cpython-311.pyc:86:## TODO
+tools/__pycache__/test_orchestration_repair.cpython-311.pyc:109:z## TODO
+tools/__pycache__/test_persistent_autonomy_recovery.cpython-311.pyc:411:## TODO
+tools/__pycache__/test_persistent_autonomy_recovery.cpython-311.pyc:504:## TODO
+tools/__pycache__/test_persistent_autonomy_recovery.cpython-311.pyc:546:## TODO
+tools/__pycache__/test_persistent_goal_engine.cpython-311.pyc:88:## TODO
+tools/__pycache__/test_persistent_goal_engine.cpython-311.pyc:243:## TODO
+tools/__pycache__/test_persistent_goal_engine.cpython-311.pyc:288:## TODO
+tools/__pycache__/test_persistent_goal_engine.cpython-311.pyc:322:## TODO
+tools/__pycache__/test_persistent_goal_engine.cpython-311.pyc:468:## TODO
+tools/__pycache__/test_persistent_goal_engine.cpython-311.pyc:600:## TODO
+tools/__pycache__/test_persistent_goal_engine.cpython-311.pyc:654:## TODO
+tools/__pycache__/test_persistent_goal_engine.cpython-311.pyc:784:## TODO
+tools/__pycache__/test_persistent_goal_engine.cpython-311.pyc:870:## TODO
+tools/__pycache__/test_persistent_goal_engine.cpython-311.pyc:934:## TODO
+tools/__pycache__/test_premature_victory_prevention.cpython-311.pyc:269:d                     d S )NT-1816r0   r1   1PUBLICATION_STAGING_BLOCKED: foreign staged pathsr3   T-2000## TODO )r   r   c              3  2   K   | ]}|d          dk    |V  dS )causepublication-stagingNr   r   gs     r   r   zxPrematureVictoryPreventionTests.test_pv08_external_release_blocker_does_not_suppress_independent_work.<locals>.<genexpr>   s1      
+tools/__pycache__/test_premature_victory_prevention.cpython-311.pyc:1341:## TODO
+tools/__pycache__/test_producer_terminal_consistency.cpython-311.pyc:71:## TODO
+tools/__pycache__/test_project_root_session_binding.cpython-311.pyc:69:## TODO
+tools/__pycache__/test_rebind_repair_lifecycle.cpython-311.pyc:135:## TODO
+tools/__pycache__/test_rebind_repair_lifecycle.cpython-311.pyc:504:S )z@Rebind recovery preserves ticket, phase, board DOING/TODO state.rY   rZ   BUILDzT-99)r"   r:   r;   rO   Tr\   r:   r;   tickets   N)
+tools/__pycache__/test_reconcile_history_ledger_blocked.cpython-311.pyc:90:## TODO
+tools/__pycache__/test_reconcile_legacy_output_field.cpython-311.pyc:76:## TODO
+tools/__pycache__/test_reconcile_valve.cpython-311.pyc:175:## TODO
+tools/__pycache__/test_reconcile_valve.cpython-311.pyc:759:## TODO
+tools/__pycache__/test_recovery_reachability.cpython-311.pyc:236:## TODO
+tools/__pycache__/test_recovery_reachability.cpython-311.pyc:1069:allocation authority. T-777 sits in `## TODO` with no such event: the exact
+tools/__pycache__/test_recovery_reachability.cpython-311.pyc:1083:## TODO
+tools/__pycache__/test_recovery_reachability.cpython-311.pyc:1100:Kr   c                   0    e Zd ZdZd Zd Zd Zd Zd ZdS )!LegacyAdoptionClassificationTestsz7The pure closed rule for Target E, independent of disk.c                     dd l }ddddiii}|                    g d          }|                     t          ||d          g            |                     t          |d d          g            d S )Nr   rK   T-777rQ   ## TODOevents
+tools/__pycache__/test_recovery_reachability.cpython-311.pyc:1870:## TODO
+tools/__pycache__/test_recovery_reachability.cpython-311.pyc:2078:## TODO
+tools/__pycache__/test_recovery_reachability.cpython-311.pyc:2313:## TODO
+tools/__pycache__/test_recovery_reachability.cpython-311.pyc:3064:## TODO
+tools/__pycache__/test_recovery_reachability.cpython-311.pyc:3174:          |           dS )z:Two legitimate answers is an operator's call, not a guess.ri   rs   rm   rn   z=## TODO
+tools/__pycache__/test_recovery_reachability.cpython-311.pyc:3176:z## TODO
+tools/__pycache__/test_regression_gate.cpython-311.pyc:117:## TODO
+tools/__pycache__/test_release_completion.cpython-311.pyc:103:## TODO
+tools/__pycache__/test_release_completion.cpython-311.pyc:1097:## TODO
+tools/__pycache__/test_release_reconciliation.cpython-311.pyc:610:## TODO
+tools/__pycache__/test_retired_source_coverage.cpython-311.pyc:38:## TODO
+tools/__pycache__/test_retired_source_coverage.cpython-311.pyc:151:citing one unconditionally -- T-250 could not even leave TODO, which is why
+tools/__pycache__/test_reverify.cpython-311.pyc:204:   z## TODO
+tools/__pycache__/test_runtime_bootstrap.cpython-311.pyc:457:## TODO
+tools/__pycache__/test_shared_index_forensics.cpython-311.pyc:292:zEControl 15: Blocked release lane does not halt independent TODO work.r   )
+tools/__pycache__/test_shared_index_forensics.cpython-311.pyc:296:## TODO
+tools/__pycache__/test_source_audit_inbox_starvation.cpython-311.pyc:128:## TODO
+tools/__pycache__/test_source_audit_inbox_starvation.cpython-311.pyc:158:## TODO
+tools/__pycache__/test_source_audit_inbox_starvation.cpython-311.pyc:185:## TODO
+tools/__pycache__/test_source_audit_inbox_starvation.cpython-311.pyc:218:## TODO
+tools/__pycache__/test_source_audit_inbox_starvation.cpython-311.pyc:259:## TODO
+tools/__pycache__/test_source_audit_inbox_starvation.cpython-311.pyc:307:## TODO
+tools/__pycache__/test_source_audit_inbox_starvation.cpython-311.pyc:331:## TODO
+tools/__pycache__/test_source_audit_inbox_starvation.cpython-311.pyc:341:## TODO
+tools/__pycache__/test_source_audit_inbox_starvation.cpython-311.pyc:373:## TODO
+tools/__pycache__/test_source_audit_inbox_starvation.cpython-311.pyc:572:## TODO
+tools/__pycache__/test_source_audit_inbox_starvation.cpython-311.pyc:703:## TODO
+tools/__pycache__/test_source_contract_derivation.cpython-311.pyc:181:## TODO
+tools/__pycache__/test_source_receipts.cpython-311.pyc:924:## TODO
+tools/__pycache__/test_source_receipts.cpython-311.pyc:3088:  }|                    d          }|                    dd| d          }|                    |d           d S )Nr   r   r   ## TODO
+tools/__pycache__/test_source_receipts.cpython-311.pyc:3089:zY## TODO
+tools/__pycache__/test_source_receipts.cpython-311.pyc:3234:Nrj  r   r   r   rN  z<## TODO
+tools/__pycache__/test_source_refusal_routing.cpython-311.pyc:84:## TODO
+tools/__pycache__/test_src085_improve_run_body.cpython-311.pyc:60:## TODO
+tools/__pycache__/test_state_scalar_quoting.cpython-311.pyc:271:## TODO
+tools/__pycache__/test_sub_dispose_after_collect.cpython-311.pyc:294:                      d                    |          dz   d           d S )N)DOINGTODODONEr   z## r   xr   rz    z^ | closure_mode: finding_invalidated | implementation_delta: none | invalidation_evidence: E-3 z- [z] z; [P2] Core review | verify: independently reject hypothesisrp   r&   r
+tools/__pycache__/test_sub_dispose_after_collect.cpython-311.pyc:502:; package=z; source_head=z; source_tree_fingerprint=r   z## TODO
+tools/__pycache__/test_sub_dispose_after_collect.cpython-311.pyc:822:## TODO
+tools/__pycache__/test_t1278_closure_contradiction.cpython-311.pyc:33: )DOINGTODOBLOCKEDr
+tools/__pycache__/test_t1293_valve_resume_audit_route.cpython-311.pyc:209:## TODO
+tools/__pycache__/test_t1293_valve_resume_audit_route.cpython-311.pyc:242:## TODO
+tools/__pycache__/test_t1304_r004_dry_run_purity.cpython-311.pyc:182:## TODO
+tools/__pycache__/test_t1304_r004_dry_run_purity.cpython-311.pyc:263:## TODO
+tools/__pycache__/test_t1304_r004_transition.cpython-311.pyc:169:## TODO
+tools/__pycache__/test_t1304_r004_transition.cpython-311.pyc:728:z   d           dS t          |          )z>One canonical, semantically unrelated edit to a recorded file.rR   z.saipen/BOARD.mdrO   rP   z## TODO
+tools/__pycache__/test_t1304_r004_transition.cpython-311.pyc:729:z8## TODO
+tools/__pycache__/test_t1304_review_p0_repair.cpython-311.pyc:106:## TODO
+tools/__pycache__/test_t1304_review_p0_repair.cpython-311.pyc:279:a refused scalar wrote bytesticketsT-999T-1sectionz## TODO
+tools/__pycache__/test_t1304_review_p0_repair.cpython-311.pyc:647:## TODO
+tools/__pycache__/test_t1304_review_p0_repair.cpython-311.pyc:893:## TODO
+tools/__pycache__/test_t1316_recovery_already_applied.cpython-311.pyc:1565:## TODO
+tools/__pycache__/test_t1326_board_compaction.cpython-311.pyc:99:## TODO
+tools/__pycache__/test_t1326_board_compaction.cpython-311.pyc:389:## TODO
+tools/__pycache__/test_t1326_board_compaction.cpython-311.pyc:443:          fS )NrB   rC   rD   rE   rF   r   )r   ## TODO## DONErl   c              3  2   K   | ]}| d |          V  dS )
+tools/__pycache__/test_t1326_board_compaction.cpython-311.pyc:974:## TODO
+tools/__pycache__/test_t1326_board_compaction.cpython-311.pyc:1254:A TODO row can be legal before the claim and oversized only AFTER the
+tools/__pycache__/test_t1326_board_compaction.cpython-311.pyc:1491:rO   rP   ## TODO
+tools/__pycache__/test_t1327_zero_manual_recovery.cpython-311.pyc:79:z## TODO
+tools/__pycache__/test_t1327_zero_manual_recovery.cpython-311.pyc:656:## TODO
+tools/__pycache__/test_t1363_zero_manual_entry.cpython-311.pyc:151:## TODO
+tools/__pycache__/test_t1363_zero_manual_entry.cpython-311.pyc:219:## TODO
+tools/__pycache__/test_t1363_zero_manual_entry.cpython-311.pyc:1978:## TODO
+tools/__pycache__/test_t1411_stale_complete_resolution.cpython-311.pyc:71:## TODO
+tools/__pycache__/test_t1411_stale_complete_resolution.cpython-311.pyc:226:  }|                     d          }||v rd S |                    |                    dd| d          d           d S )Nr0   r5   r   r4   z## TODO
+tools/__pycache__/test_t1411_stale_complete_resolution.cpython-311.pyc:227:z## TODO
+tools/__pycache__/test_t1412_conformance_truth.cpython-311.pyc:67:## TODO
+tools/__pycache__/test_t1412_conformance_truth.cpython-311.pyc:697:## TODO
+tools/__pycache__/test_t1429_deferred_due.cpython-311.pyc:37:## TODO
+tools/__pycache__/test_t1429_deferred_due.cpython-311.pyc:269:## TODO
+tools/__pycache__/test_t1429_deferred_due.cpython-311.pyc:341:## TODO
+tools/__pycache__/test_t1429_deferred_due.cpython-311.pyc:402:## TODO
+tools/__pycache__/test_t1429_deferred_due.cpython-311.pyc:471:## TODO
+tools/__pycache__/test_t1430_crew_run_receipt.cpython-311.pyc:105:## TODO
+tools/__pycache__/test_t1453_ingress_clause.cpython-311.pyc:93:## TODO
+tools/__pycache__/test_t1461_source_append.cpython-311.pyc:211:created_worksectionz## TODOnextrB   )r~   r<   r3   r   r   r'   r   r6   rA   r   rM   r   ticketsru   r   r    r4   )	r7   r
+tools/__pycache__/test_t1473_handback.cpython-311.pyc:23:failed validation (continuation reservation under TODO), `block-for` refused
+tools/__pycache__/test_t1473_handback.cpython-311.pyc:24:a blocker that is not workable TODO, and `claim --explicit` refused a ticket
+tools/__pycache__/test_t1473_handback.cpython-311.pyc:31:holder to the top of TODO unclaimed;
+tools/__pycache__/test_t1473_handback.cpython-311.pyc:144:resume_phaseresume_transition_fromneeds## TODO)r&   
+tools/__pycache__/test_t1474_start_goal_entry.cpython-311.pyc:481:idd ifD ]&}|                      |i |||d	                     '|                      ||dddiid	                     ddgiddiddifD ] }|                      |||d	fi |           !d S )Nr   )continuation_workrT   zT-1r   )r>   taskr   r   r   r   r>   converger   BLOCKEDr   z## TODOneedszT-2
+tools/__pycache__/test_t1484_soak_report_survives.cpython-311.pyc:36:## TODO
+tools/__pycache__/test_t1511_soak_source_identity.cpython-311.pyc:87:## TODO
+tools/__pycache__/test_t1553_mid_session_activation.cpython-311.pyc:565:## TODO
+tools/__pycache__/test_t1572_ticket_scoped_recovery.cpython-311.pyc:279:## TODO
+tools/__pycache__/test_t1572_ticket_scoped_recovery.cpython-311.pyc:835:a  ## TODO
+tools/__pycache__/test_t1587_stale_closure_recovery.cpython-311.pyc:28:``## TODO`` carrying ``| closure_mode: own_patch``. The placement rule is
+tools/__pycache__/test_t1587_stale_closure_recovery.cpython-311.pyc:46:A. TODO + closure_mode            -> repairable, full route, claim reachable
+tools/__pycache__/test_t1587_stale_closure_recovery.cpython-311.pyc:49:D. TODO + closure_mode + cohort   -> both terminal fields removed coherently
+tools/__pycache__/test_t1587_stale_closure_recovery.cpython-311.pyc:50:E. TODO + unknown field           -> NOT this class, stays fail-closed
+tools/__pycache__/test_t1587_stale_closure_recovery.cpython-311.pyc:51:F. TODO + duplicated closure_mode -> strict refusal, no value silently chosen
+tools/__pycache__/test_t1587_stale_closure_recovery.cpython-311.pyc:55:J. TODO + closure + independent structural error -> no false CLEAN claim
+tools/__pycache__/test_t1587_stale_closure_recovery.cpython-311.pyc:67:z- [x] T-1370 [P1] the release receipt | owner: fp-crew | claim_time: 2026-09-30T08:01:00Z | closure_mode: own_patch | verify: the receipt gates are green## TODO )section
+tools/__pycache__/test_t1587_stale_closure_recovery.cpython-311.pyc:76:z## TODO
+tools/__pycache__/test_t1587_stale_closure_recovery.cpython-311.pyc:268:## TODO
+tools/__pycache__/test_t1587_stale_closure_recovery.cpython-311.pyc:702:## TODO
+tools/__pycache__/test_t1609_unproven_done_recovery.cpython-311.pyc:201:task: noner   ticketsr   section## TODO>   owner
+tools/__pycache__/test_t1614_future_gate.cpython-311.pyc:41:## TODO
+tools/__pycache__/test_t1614_future_gate.cpython-311.pyc:198:z## TODO
+tools/__pycache__/test_t1614_future_gate.cpython-311.pyc:216:## TODO
+tools/__pycache__/test_t1618_future_maturation.cpython-311.pyc:159:z@M1: needs TODO hides the gate; needs DONE routes it before HUNT.prerequisite workr   eligiblereasonzfuture-gate-promotionactionzsaipen future promote nextN)r]   rX   _addr?   r   r   
+tools/__pycache__/test_t1618_future_maturation.cpython-311.pyc:498:## TODO
+tools/__pycache__/test_t1619_iteration_boundary.cpython-311.pyc:104:## TODO
+tools/__pycache__/test_t1619_iteration_boundary.cpython-311.pyc:108:## TODO
+tools/__pycache__/test_t1638_future_ingress.cpython-311.pyc:21:- `saipen future add` wrote `slice: TODO -- name the ONE bounded unit ...` and
+tools/__pycache__/test_t1638_future_ingress.cpython-311.pyc:27:it had since declared was still TODO).
+tools/__pycache__/test_t1638_future_ingress.cpython-311.pyc:159:prerequisite z is ## TODO, not DONErM   )r@   rK   r.   rE   rH   rP   r   rR   rQ   rS   rX   r=   _addrT   rU   rV   rW   rI   )r4   r   rJ   r   tidrY   s         r   )test_new_bytes_rederive_a_stored_eligiblez<FutureIngressTests.test_new_bytes_rederive_a_stored_eligiblee   sV   **,,KK((	TD'#5666
+tools/__pycache__/test_t1638_future_ingress.cpython-311.pyc:232:## TODO
+tools/__pycache__/test_t1640_board_scrub.cpython-311.pyc:226:next_action.saipenz## DOING## TODO## DONEz
+tools/__pycache__/test_t1640_log_seal.cpython-311.pyc:552:## TODO
+tools/__pycache__/test_t1651_executor_admission.cpython-311.pyc:137:## TODO
+tools/__pycache__/test_t1671_lifecycle_authority.cpython-311.pyc:323:   sectionz## TODO>   owner
+tools/__pycache__/test_t1673_board_only_terminal.cpython-311.pyc:191:   ticketssection## TODO
+tools/__pycache__/test_t1674_typed_closure_mode.cpython-311.pyc:56:## TODO
+tools/__pycache__/test_t1674_typed_closure_mode.cpython-311.pyc:162:   ticketssection## TODO
+tools/__pycache__/test_t1674_typed_closure_mode.cpython-311.pyc:218:## TODO
+tools/__pycache__/test_t1679_typed_head_quarantine.cpython-311.pyc:175:above E-5r*   z[T-001]RECONCILE_REAUTH_REQUIREDchanged    )saipenrr   z--apply-approved-repairrJ   REPAIREDzBOARD.mdticketssectionz## TODO>   owner
+tools/__pycache__/test_t1704_goal_checkpoint_priority.cpython-311.pyc:342:## TODO
+tools/__pycache__/test_t1704_legacy_goal_authority.cpython-311.pyc:108:## TODO
+tools/__pycache__/test_t1708_regression_declaration.cpython-311.pyc:241:## TODO
+tools/__pycache__/test_t1709_audit_starvation.cpython-311.pyc:49:zSSRC-209:R003: nonurgent P2 tickets cannot indefinitely postpone named audit intake.r   ## TODO
+tools/__pycache__/test_t1709_audit_starvation.cpython-311.pyc:50:zn## TODO
+tools/__pycache__/test_t1709_audit_starvation.cpython-311.pyc:74:zKSRC-209:R003: urgent P0/P1 tickets retain priority over named audit intake.r   r#   zj## TODO
+tools/__pycache__/test_t1709_audit_starvation.cpython-311.pyc:105:## TODO
+tools/__pycache__/test_t1712_manifest_runtime.cpython-311.pyc:891:## TODO
+tools/__pycache__/test_t1715_block_for_parent_guard.cpython-311.pyc:17:parent parks behind a workable TODO child. The generic TODO-block path used to
+tools/__pycache__/test_t1715_block_for_parent_guard.cpython-311.pyc:18:accept ``block-for`` on a merely TODO parent as well and stored STATE's
+tools/__pycache__/test_t1715_block_for_parent_guard.cpython-311.pyc:23:RED 1  an unopened ## TODO parent refuses with ZERO canonical writes.
+tools/__pycache__/test_t1715_block_for_parent_guard.cpython-311.pyc:28:GREEN  ordinary legal TODO ``block`` is a different operation and still works.
+tools/__pycache__/test_t1726_closed_contracts.cpython-311.pyc:956:verificationrb   r   r   z## TODO
+tools/__pycache__/test_t1726_closed_contracts.cpython-311.pyc:957:z3## TODO
+tools/__pycache__/test_t1729_gate_decision_lifecycle.cpython-311.pyc:343:                    d           d!|	           d S )"Nra   rb   rc   r*   zLOG.mdz.saipen/BOARD.mdr,   r-   z## TODO
+tools/__pycache__/test_t1729_gate_decision_lifecycle.cpython-311.pyc:344:z=## TODO
+tools/__pycache__/test_t1734_source_drift.cpython-311.pyc:57:## TODO
+tools/__pycache__/test_t1739_wait_boundary.cpython-311.pyc:50:## TODO
+tools/__pycache__/test_t1739_wait_boundary.cpython-311.pyc:302:,r   rQ   r   z## TODO
+tools/__pycache__/test_t1743_cross_user_dead_ends.cpython-311.pyc:91:## TODO
+tools/__pycache__/test_t1744_fleet_foreign_field_skew.cpython-311.pyc:33:## TODO
+tools/__pycache__/test_t1745_sub_collect_foreign_field.cpython-311.pyc:122:## TODO
+tools/__pycache__/test_t1746_crew_terminal_outcome.cpython-311.pyc:67:## TODO
+tools/__pycache__/test_t1751_reconcile_surfaces.cpython-311.pyc:54:## TODO
+tools/__pycache__/test_t1759_single_lifecycle_observer.cpython-311.pyc:103:NT.saipenBOARD.mdr5   r6   z## TODO
+tools/__pycache__/test_t1774_sweep_queue_human.cpython-311.pyc:66:## TODO
+tools/__pycache__/test_t1776_protocol_home_valve.cpython-311.pyc:129:## TODO
+tools/__pycache__/test_t1781_no_delta_latest_build.cpython-311.pyc:40:## TODO
+tools/__pycache__/test_t1781_t37_latest_build.cpython-311.pyc:40:## TODO
+tools/__pycache__/test_t1787_parked_brief.cpython-311.pyc:28:## TODO
+tools/__pycache__/test_t1789_child_closure_route.cpython-311.pyc:21:handed the seat back instead, the child returned to the top of TODO and the
+tools/__pycache__/test_t1807_audit_liveness_regression.cpython-311.pyc:72:## TODO
+tools/__pycache__/test_t1807_audit_liveness_regression.cpython-311.pyc:121:## TODO
+tools/__pycache__/test_t1807_audit_liveness_regression.cpython-311.pyc:162:   r   	unchangedr!   Fr(   ## TODO r3   r4   checkboxr5   r6   r7   rR   zPHASE SCOUT T-100rS   N)r   rB   rC   rG   rF   assertNotEqual)rI   r'   r8   rJ   s       r   3test_control_03_existing_registered_audit_unchangedzQAuditLivenessNegativeControls.test_control_03_existing_registered_audit_unchanged   s    
+tools/__pycache__/test_t1807_audit_liveness_regression.cpython-311.pyc:304:## TODO
+tools/__pycache__/test_t1815_header_repair.cpython-311.pyc:228:## TODO
+tools/__pycache__/test_t1815_stale_work_context.cpython-311.pyc:226:%%e,,,,,r   c                ~    |                      ddt          dd                     |                     d           dS )z<TODO work is not current either: existence is not ownership.rJ   rK   )T-9)r-   rO   r   NrY   r<   r{   rj   s    r   9test_a_checkpoint_for_a_merely_inactive_ticket_is_refusedzQStaleWorkContextFixture.test_a_checkpoint_for_a_merely_inactive_ticket_is_refused   sA    
+tools/__pycache__/test_t1816_protected_root_hold.cpython-311.pyc:129:88888r"   Nr7   )r8   r9   r:   r^   rn   rr   r;   r"   r    rk   rk   q   sF        NNR R R R9 9 9 9 9 9r"   rk   c                  "    e Zd ZdZddZddZdS )Message431BoardTestszBMessage 431: Edit rewrote BOARD.md into malformed ## TODO## DOING.r   r   c                    |                      t                     |                     |                     dg          d         t          j                   d S )Nr	   r6   rm   r
+tools/__pycache__/test_t1816_run_append_only.cpython-311.pyc:65:## TODO
+tools/__pycache__/test_t1817_finding_route.cpython-311.pyc:43:N.work_closure_evidenceT-7## TODOcodeROUTED_TO_OWNERownerlinkager
+tools/__pycache__/test_t1835_verification_economics.cpython-311.pyc:35:## TODO
+tools/__pycache__/test_t1854_runtime_home.cpython-311.pyc:120:## TODO
+tools/__pycache__/test_t1856_launcher_identity.cpython-311.pyc:184:## TODO
+tools/__pycache__/test_t1858_valve_guidance.cpython-311.pyc:133:board_textticket)r5   i  )queuedc                8    i | ]}d |  d | d          S )zT-z## TODO)sectionr   )r   r   rW   s     r   
+tools/__pycache__/test_t1864_autonomous_valve.cpython-311.pyc:86:## TODO
+tools/__pycache__/test_t1864_autonomous_valve.cpython-311.pyc:190:## TODO
+tools/__pycache__/test_t1866_publication_state.cpython-311.pyc:63:## TODO
+tools/__pycache__/test_t1871_continuous_maintenance.cpython-311.pyc:15:- H01: DONE state with no DOING or executable TODO enters authorized maintenance campaign.
+tools/__pycache__/test_t1871_continuous_maintenance.cpython-311.pyc:50:}t	          j        |||          }|                     |t          j                   dS )zMH01: DONE state with no runnable TODO enters authorized maintenance campaign.r
+tools/__pycache__/test_t1872_drift_prevention.cpython-311.pyc:47:## TODO
+tools/__pycache__/test_t1872_drift_prevention.cpython-311.pyc:182:## TODO
+tools/__pycache__/test_t1880_wait_survives_phase_shortcut.cpython-311.pyc:38:## TODO
+tools/__pycache__/test_t1881_authority_brake.cpython-311.pyc:123:## TODO
+tools/__pycache__/test_t1881_publication_prohibition.cpython-311.pyc:323:   r   ## TODO
+tools/__pycache__/test_t1881_publication_prohibition.cpython-311.pyc:324:O## TODO
+tools/__pycache__/test_t1884_transition_blocker_inheritance.cpython-311.pyc:101:## TODO
+tools/__pycache__/test_t1915_terminal_next_action.cpython-311.pyc:91:z## TODO
+tools/__pycache__/test_t1916_external_delta.cpython-311.pyc:58:## TODO
+tools/__pycache__/test_t1917_premature_handback.cpython-311.pyc:86:z## TODO
+tools/__pycache__/test_t1932_src338_closures.cpython-311.pyc:63:## TODO
+tools/__pycache__/test_t1932_src338_closures.cpython-311.pyc:1022:## TODO
+tools/__pycache__/test_t1937_future_slice_closure.cpython-311.pyc:29:* a slice whose ticket is still TODO stays `open`;
+tools/__pycache__/test_t1937_future_slice_closure.cpython-311.pyc:36:## TODO
+tools/__pycache__/test_t1939_needs_detach.cpython-311.pyc:46:## TODO
+tools/__pycache__/test_t1939_needs_detach.cpython-311.pyc:127:r   z## TODO
+tools/__pycache__/test_t1939_needs_detach.cpython-311.pyc:134:zFA parent TODO row and its dependency; the dependency's section varies.z0- [ ] T-1 [P1] parent owns the receipt | needs: z
+tools/__pycache__/test_t1939_needs_detach.cpython-311.pyc:178:## TODO
+tools/__pycache__/test_t1939_needs_detach.cpython-311.pyc:280:## TODO
+tools/__pycache__/test_t1939_needs_detach.cpython-311.pyc:325:## TODO
+tools/__pycache__/test_t1939_needs_detach.cpython-311.pyc:377:## TODO
+tools/__pycache__/test_t1939_needs_detach.cpython-311.pyc:426:## TODO
+tools/__pycache__/test_t1939_needs_detach.cpython-311.pyc:435:r   rl   rM   r	   rY   rZ   z+only an unstarted TODO row may lose an edgerm   )r   r`   r   ra   rD   rc   r{   s       r   @test_a_done_recipient_is_refused_because_ordering_became_historyzVNeedsDetachProofTests.test_a_done_recipient_is_refused_because_ordering_became_history#  s    
+tools/__pycache__/test_t1939_needs_detach.cpython-311.pyc:620:## TODO
+tools/__pycache__/test_t1944_core_wave1.cpython-311.pyc:32:## TODO
+tools/__pycache__/test_t1944_core_wave1.cpython-311.pyc:524:## TODO
+tools/__pycache__/test_t1944_core_wave1.cpython-311.pyc:572:## TODO
+tools/__pycache__/test_t1944_perf_wave.cpython-311.pyc:43:## TODO
+tools/__pycache__/test_t1944_wave2.cpython-311.pyc:36:## TODO
+tools/__pycache__/test_t1973_revalidate_accounting.cpython-311.pyc:83:## TODO
+tools/__pycache__/test_t1973_revalidate_accounting.cpython-311.pyc:173:## TODO
+tools/__pycache__/test_t2010_publication_staging_reconciliation.cpython-311.pyc:228:## TODO
+tools/__pycache__/test_t2011_host_acceptance_stages.cpython-311.pyc:70:## TODO
+tools/__pycache__/test_t2021_false_idle_maintenance.cpython-311.pyc:61:## TODO
+tools/__pycache__/test_t2021_false_idle_maintenance.cpython-311.pyc:380:Nz## TODO
+tools/__pycache__/test_t2021_false_idle_maintenance.cpython-311.pyc:381:z8## TODO
+tools/__pycache__/test_t2023_goal_management_and_maintenance_binding.cpython-311.pyc:53:## TODO
+tools/__pycache__/test_t2023_maintenance_policy_identity.cpython-311.pyc:70:## TODO
+tools/__pycache__/test_t2040_continuation_truth.cpython-311.pyc:22:## TODO
+tools/__pycache__/test_t2040_discovery_owners.cpython-311.pyc:153:## TODO
+tools/__pycache__/test_t2040_discovery_owners.cpython-311.pyc:171:## TODO
+tools/__pycache__/test_t2040_discovery_owners.cpython-311.pyc:194:## TODO
+tools/__pycache__/test_t2040_discovery_owners.cpython-311.pyc:335:## TODO
+tools/__pycache__/test_t2040_discovery_owners.cpython-311.pyc:374:## TODO
+tools/__pycache__/test_t2040_discovery_owners.cpython-311.pyc:509:## TODO
+tools/__pycache__/test_t2040_exhaustion_evidence.cpython-311.pyc:128:## TODO
+tools/__pycache__/test_t2040_exhaustion_evidence.cpython-311.pyc:145:## TODO
+tools/__pycache__/test_t2040_exhaustion_evidence.cpython-311.pyc:202:## TODO
+tools/__pycache__/test_t2040_publication_truth.cpython-311.pyc:180:## TODO
+tools/__pycache__/test_t2040_publication_truth.cpython-311.pyc:316:           d S )Nrh   ## TODO Frn   ro   rp   blockedPLANbudget)r   authority_until)r   r   
+tools/__pycache__/test_t2040_publication_truth.cpython-311.pyc:714:## TODO
+tools/__pycache__/test_t2040_replenishment_recovery.cpython-311.pyc:276:   s   ## TODO
+tools/__pycache__/test_t2040_replenishment_recovery.cpython-311.pyc:278:## TODO
+tools/__pycache__/test_t2040_terminal_consumer_guards.cpython-311.pyc:31:## TODO
+tools/__pycache__/test_t2040_terminal_consumer_guards.cpython-311.pyc:440:## TODO
+tools/__pycache__/test_t2040_terminal_consumer_guards.cpython-311.pyc:604:  r   z## TODO)sectionfields)r'  needsr
+tools/__pycache__/test_t2040_terminal_consumer_supplementary.cpython-311.pyc:22:## TODO
+tools/__pycache__/test_t2050_pruned_row_restore.cpython-311.pyc:33:## TODO
+tools/__pycache__/test_t925_sub_terminal_durability.cpython-311.pyc:59:## TODO
+tools/__pycache__/test_t925_sub_terminal_durability.cpython-311.pyc:69:## TODO
+tools/__pycache__/test_telemetry.cpython-311.pyc:133:## TODO
+tools/__pycache__/test_ticket_retirement.cpython-311.pyc:41:T-1369 (contamination)  TODO, holding the single DOING seat
+tools/__pycache__/test_ticket_retirement.cpython-311.pyc:161:## TODO
+tools/__pycache__/test_ticket_retirement.cpython-311.pyc:1585:NrC   rK   rH   rI   z## TODO
+tools/__pycache__/test_ticket_supersession.cpython-311.pyc:309:r   r   r;   rB   r   rawr2       ## TODO
+tools/__pycache__/test_ticket_verify_preimage.cpython-311.pyc:78:## TODO
+tools/__pycache__/test_user_wait_release.cpython-311.pyc:31:byte-identical, never refreshed or rebound), and the resumed TODO can be
+tools/__pycache__/test_vacterro_t37_no_delta_closure.cpython-311.pyc:53:## TODO
+tools/__pycache__/test_validator_layout_parity.cpython-311.pyc:77:## TODO
+tools/__pycache__/test_vocabulary_parity.cpython-311.pyc:531:## TODO
+tools/__pycache__/test_vocabulary_parity.cpython-311.pyc:538:   r   zoBoardSectionVocabularyTests.test_the_declared_sections_and_checkboxes_agree_with_the_parser.<locals>.<dictcomp>  s"    NNNaAdGQy\NNNr    tickets))zT-1DOING)zT-2TODO)zT-3DONE)zT-4BLOCKED)ticketsectionsz## )rS   r   
+tools/__pycache__/test_worker_turnover.cpython-311.pyc:49:## TODO
+tools/__pycache__/test_worker_turnover.cpython-311.pyc:492:## TODO
+tools/__pycache__/test_work_reverify_cli.cpython-311.pyc:48:z## TODO
+tools/__pycache__/test_work_reverify_cli.cpython-311.pyc:49:z6## TODO
+tools/__pycache__/validate.cpython-311.pyc:2399:(SAICREW H)z& state/board lifecycle is incoherent: zQ (SAICREW H); repair with the producer-owned reconciliation saipen sub reconcile z --authority SRC-###countsTODODOINGz is phase DONE but its board still holds open work (TODO/DOING/BLOCKED) -- a worker cannot say DONE while its board says unresolved work (SAICREW H)zBOARD.md missingphasesz	verify.mdz5Cap: (\d+) dead hypotheses OR (\d+) failed fix cyclesheadingsticketsr   line_nosection
+tools/__pycache__/validate.cpython-311.pyc:2406:half-claimz	 carries zowner but no claim_timezclaim_time but no owneruV    -- § 1.4 decides liveness from the pair, so one alone cannot be judged live or stale)## TODO## DOINGverify)rd  rc  
+tools/__pycache__/validate.cpython-311.pyc:2409:verify: todozverify: verify: tbdzverify: verify:z carries a placeholder verify (zS) -- a ticket needs a real DONE proof, not TBD/TODO/empty (NITRO dogfood II, T-590)z+BOARD.md missing required section heading: c              #   (   K   | ]
+tools/__pycache__/validate.cpython-311.pyc:2456:## BLOCKEDz, which sits under u    -- finished and blocked tickets are not executable, and § 1.11's Pick Rule selects from ## TODO (## BLOCKED is excluded on purpose)z, which carries | blocker: outside ## BLOCKED -- malformed status cannot become executable, even before the board-status failure is repairedc                 v    g | ]6}t                               |i                               d           dk    4|7S )r  r  )r  r   r[   r8  s     rQ   rA  rA  
+tools/__pycache__/validate.cpython-311.pyc:2464:STATE.md phase: BLOCKED while z+ workable ## TODO ticket(s) exist (topmost z) -- session-level BLOCKED is reserved for when no ticket anywhere on the board is workable. A block that belongs to one ticket goes on THAT ticket's line in `## BLOCKED` with its owner named, and Core keeps working the restzSTATE.md carries phase: BLOCKED with execution_intent: goal -- RFC 2.4's Exit list names BLOCKED as an exit, so the goal intent MUST be cleared there. Left set, a resume walks straight back into an autonomous run the block was supposed to stopc              #   .   K   | ]}|d          dk    V  dS )r  r  NrV   r[   r  s     rQ   r]   r]   
+tools/__pycache__/validate.cpython-311.pyc:2470:  sH        q|y'@'@Qz]V_E_E_E_E_E_E_ rS   z,phase: DONE, empty ## TODO, but next_action=u
+tools/__pycache__/validate.cpython-311.pyc:2478:BOARD.md has z tickets in ## DOING (u~   ) -- RFC § 1.11 allows at most one per agent. Finish, block, or demote one to ## TODO with a LOG line before claiming anotherz&BOARD.md at most one ## DOING ticket (z	 claimed)c                     g | ][}t           |         d                              dd          r0t           |         d                              dd          t          k    Y|\S )r   r  r_   )r  r   
+tools/__pycache__/validate.cpython-311.pyc:2493:@rS   r  zSTATE.md task z% is not the claimed ## DOING ticket (r+  z) in ticket-bearing phase u    -- a TODO/DONE/BLOCKED ticket cannot be the active task; Recovery reconstructs the claim from BOARD and the LOG tail (RFC § 1.5, T-573)zRESUME:z	\bT-\d+\bz while task is z in ticket-bearing phase u@    -- the pick must agree with the active task (RFC § 1.2, T-573)z+STATE.md task is none but ## DOING carries uq    claimed by this agent or unclaimed -- STATE is behind BOARD; Recovery adopts the BOARD claim (RFC § 1.5, T-573)r  z	## DOING zc carries an INVALID claim (half owner/claim_time pair or non-UTC stamp) -- repair before validating)goal_blocked_now
+tools/__pycache__/validate.cpython-311.pyc:2865:no workable `## TODO` ticketz%canonical tests PASS against the treez'no fresh critical scout or fixer OUTBOXz0CLEAN completed, or proved nothing safe remainedz-final forced HUNT after CLEAN came back cleanz8existing hunt -> clean marker cannot satisfy forced HUNTc                 $    g | ]
+tools/__pycache__/validate.cpython-311.pyc:3250:never drop it into chat onlyac  cross-doc drift [command-not-dropped] -- CORE.md 1.11's OBEY step must say a command in a multi-command message that cannot execute now is recorded rather than dropped, and name where: `next_action` when it will be legal at the next continue, the top of `## TODO` when it will not. Ordering alone leaves the second command answerable in chat and forgottenz@followed by a bare goal key in the SAME message starts that plana  cross-doc drift [plan-goal-pair] -- CORE.md 1.10 must carve out the plan-then-bare-goal pair in the same message, which starts the plan just written. Without it the shortcut table invites `dd cc`, a combination that cannot complete: `dd` ends at `goal_mode: false` and the next key is not a command there. The carve-out is a PAIR, not a loosening of the bare form -- E-1468 was a lone key mid-run, which is unchangedz
+tools/__pycache__/validate.cpython-311.pyc:3272:6b. **GIT.a  cross-doc drift [no-publish-split] -- phases/ship.md must say `no-publish` is a permission and not an absence of git, must record the real reason in the skipped-publish line rather than a hardcoded `no git`, and must keep the release step split into a LOCAL half and a GIT half. Fused, the block ordered a step that commits and pushes while calling it local, and told a mode that forbids committing to skip only the pushzXA permanently unsatisfiable ticket, or Work owned by an isolated producer, stays BLOCKEDz&This includes permanent warning ownersa  cross-doc drift [permanent-owner-section] -- CORE.md 1.2 must say that a ticket whose completion condition can never be met sits in `## BLOCKED` with the reason, not in `## TODO`. A permanent warning owner in `## TODO` passes every workability test the Pick Rule applies while its own `verify:` says closing it FAILs, and so does a ticket phases/translate.md gives to a dedicated instance while forbidding Core to grind through it
+tools/__pycache__/validate.cpython-311.pyc:3589:[rS   zphases/plan.mdzFRONT of `## TODO`z cross-doc drift [plan-forms] -- u    does not say that `saipen plan <text>` puts the user's own items at the front of `## TODO`. Board order is priority (§ 1.6), so a request filed behind existing work is a request denied politelyzcategory is `user brake`zThere is no parked `PHASE`zDo NOT use a `WAIT:` prefixu  cross-doc drift [proposal-halt] -- phases/plan.md step 4 must name the one legal Proposal-Mode halt, a `WAIT: user brake` naming the choice, and must not forbid a `WAIT:` there. § 1.2's three-form whitelist governs `DONE` with an EMPTY `## TODO`, which is not the state Proposal Mode produces; without the wording the halt is expressible only as one of the four prefixes that mean act now, which a cold agent then acts onz\bsaipen ([a-z]+)z` -> z# names no `saipen <command>` at allzjcross-doc drift [shortcuts] -- COMMANDS.md shortcut(s) do not resolve to a command REGISTRY.json defines: doc_namec           
+tools/__pycache__/_t1885_ab_prefix.cpython-311.pyc:2398:(SAICREW H)z& state/board lifecycle is incoherent: zQ (SAICREW H); repair with the producer-owned reconciliation saipen sub reconcile z --authority SRC-###countsTODODOINGz is phase DONE but its board still holds open work (TODO/DOING/BLOCKED) -- a worker cannot say DONE while its board says unresolved work (SAICREW H)zBOARD.md missingphasesz	verify.mdz5Cap: (\d+) dead hypotheses OR (\d+) failed fix cyclesheadingsticketsr   line_nosection
+tools/__pycache__/_t1885_ab_prefix.cpython-311.pyc:2405:half-claimz	 carries zowner but no claim_timezclaim_time but no owneruV    -- § 1.4 decides liveness from the pair, so one alone cannot be judged live or stale)## TODO## DOINGverify)rd  rc  
+tools/__pycache__/_t1885_ab_prefix.cpython-311.pyc:2408:verify: todozverify: verify: tbdzverify: verify:z carries a placeholder verify (zS) -- a ticket needs a real DONE proof, not TBD/TODO/empty (NITRO dogfood II, T-590)z+BOARD.md missing required section heading: c              #   (   K   | ]
+tools/__pycache__/_t1885_ab_prefix.cpython-311.pyc:2455:## BLOCKEDz, which sits under u    -- finished and blocked tickets are not executable, and § 1.11's Pick Rule selects from ## TODO (## BLOCKED is excluded on purpose)z, which carries | blocker: outside ## BLOCKED -- malformed status cannot become executable, even before the board-status failure is repairedc                 v    g | ]6}t                               |i                               d           dk    4|7S )r  r  )r  r   r[   r8  s     rQ   rA  rA  
+tools/__pycache__/_t1885_ab_prefix.cpython-311.pyc:2463:STATE.md phase: BLOCKED while z+ workable ## TODO ticket(s) exist (topmost z) -- session-level BLOCKED is reserved for when no ticket anywhere on the board is workable. A block that belongs to one ticket goes on THAT ticket's line in `## BLOCKED` with its owner named, and Core keeps working the restzSTATE.md carries phase: BLOCKED with execution_intent: goal -- RFC 2.4's Exit list names BLOCKED as an exit, so the goal intent MUST be cleared there. Left set, a resume walks straight back into an autonomous run the block was supposed to stopc              #   .   K   | ]}|d          dk    V  dS )r  r  NrV   r[   r  s     rQ   r]   r]   
+tools/__pycache__/_t1885_ab_prefix.cpython-311.pyc:2469:  sH        q|y'@'@Qz]V_E_E_E_E_E_E_ rS   z,phase: DONE, empty ## TODO, but next_action=u
+tools/__pycache__/_t1885_ab_prefix.cpython-311.pyc:2477:BOARD.md has z tickets in ## DOING (u~   ) -- RFC § 1.11 allows at most one per agent. Finish, block, or demote one to ## TODO with a LOG line before claiming anotherz&BOARD.md at most one ## DOING ticket (z	 claimed)c                     g | ][}t           |         d                              dd          r0t           |         d                              dd          t          k    Y|\S )r   r  r_   )r  r   
+tools/__pycache__/_t1885_ab_prefix.cpython-311.pyc:2492:@rS   r  zSTATE.md task z% is not the claimed ## DOING ticket (r+  z) in ticket-bearing phase u    -- a TODO/DONE/BLOCKED ticket cannot be the active task; Recovery reconstructs the claim from BOARD and the LOG tail (RFC § 1.5, T-573)zRESUME:z	\bT-\d+\bz while task is z in ticket-bearing phase u@    -- the pick must agree with the active task (RFC § 1.2, T-573)z+STATE.md task is none but ## DOING carries uq    claimed by this agent or unclaimed -- STATE is behind BOARD; Recovery adopts the BOARD claim (RFC § 1.5, T-573)r  z	## DOING zc carries an INVALID claim (half owner/claim_time pair or non-UTC stamp) -- repair before validating)goal_blocked_now
+tools/__pycache__/_t1885_ab_prefix.cpython-311.pyc:2864:no workable `## TODO` ticketz%canonical tests PASS against the treez'no fresh critical scout or fixer OUTBOXz0CLEAN completed, or proved nothing safe remainedz-final forced HUNT after CLEAN came back cleanz8existing hunt -> clean marker cannot satisfy forced HUNTc                 $    g | ]
+tools/__pycache__/_t1885_ab_prefix.cpython-311.pyc:3237:never drop it into chat onlyac  cross-doc drift [command-not-dropped] -- CORE.md 1.11's OBEY step must say a command in a multi-command message that cannot execute now is recorded rather than dropped, and name where: `next_action` when it will be legal at the next continue, the top of `## TODO` when it will not. Ordering alone leaves the second command answerable in chat and forgottenz@followed by a bare goal key in the SAME message starts that plana  cross-doc drift [plan-goal-pair] -- CORE.md 1.10 must carve out the plan-then-bare-goal pair in the same message, which starts the plan just written. Without it the shortcut table invites `dd cc`, a combination that cannot complete: `dd` ends at `goal_mode: false` and the next key is not a command there. The carve-out is a PAIR, not a loosening of the bare form -- E-1468 was a lone key mid-run, which is unchangedz
+tools/__pycache__/_t1885_ab_prefix.cpython-311.pyc:3258:6b. **GIT.a  cross-doc drift [no-publish-split] -- phases/ship.md must say `no-publish` is a permission and not an absence of git, must record the real reason in the skipped-publish line rather than a hardcoded `no git`, and must keep the release step split into a LOCAL half and a GIT half. Fused, the block ordered a step that commits and pushes while calling it local, and told a mode that forbids committing to skip only the pushzXA permanently unsatisfiable ticket, or Work owned by an isolated producer, stays BLOCKEDz&This includes permanent warning ownersa  cross-doc drift [permanent-owner-section] -- CORE.md 1.2 must say that a ticket whose completion condition can never be met sits in `## BLOCKED` with the reason, not in `## TODO`. A permanent warning owner in `## TODO` passes every workability test the Pick Rule applies while its own `verify:` says closing it FAILs, and so does a ticket phases/translate.md gives to a dedicated instance while forbidding Core to grind through it
+tools/__pycache__/_t1885_ab_prefix.cpython-311.pyc:3574:[rS   zphases/plan.mdzFRONT of `## TODO`z cross-doc drift [plan-forms] -- u    does not say that `saipen plan <text>` puts the user's own items at the front of `## TODO`. Board order is priority (§ 1.6), so a request filed behind existing work is a request denied politelyzcategory is `user brake`zThere is no parked `PHASE`zDo NOT use a `WAIT:` prefixu  cross-doc drift [proposal-halt] -- phases/plan.md step 4 must name the one legal Proposal-Mode halt, a `WAIT: user brake` naming the choice, and must not forbid a `WAIT:` there. § 1.2's three-form whitelist governs `DONE` with an EMPTY `## TODO`, which is not the state Proposal Mode produces; without the wording the halt is expressible only as one of the four prefixes that mean act now, which a cold agent then acts onz\bsaipen ([a-z]+)z` -> z# names no `saipen <command>` at allzjcross-doc drift [shortcuts] -- COMMANDS.md shortcut(s) do not resolve to a command REGISTRY.json defines: doc_namec           
+saipen/COMMANDS.md:98:speculative backlog. Audit Inbox (SOURCES.md): numbered layers precede TODO;
+saipen/CONTROLS.md:88:directive is inserted as top TODO and is claimed at the next legal DONE ->
+saipen/CONVERGE.md:43:**C. EXHAUST REAL BOARD WORK.** While a workable `## TODO` ticket exists (the
+saipen/CONVERGE.md:117:- no workable `## TODO` ticket;
+saipen/CORE.md:101:- At DONE with no workable TODO, only the fixed user-brake, safety-valve, and
+saipen/CORE.md:113:BOARD is Work authority. It contains `## DOING`, `## TODO`, `## DONE`, and
+saipen/CORE.md:127:evidence that removed it. TODO/DOING/DONE cannot carry a blocker.
+saipen/CORE.md:135:satisfy. Leaving them TODO poisons PICK-01 with apparently workable Work
+saipen/CORE.md:240:- Claim only the topmost workable TODO ticket. Move it to DOING with `owner`
+saipen/CORE.md:349:- Workable means TODO, all dependencies DONE, no blocker or foreign live claim.
+saipen/CORE.md:477:next continue, otherwise at the top of TODO; never drop it into chat only.
+saipen/CORE.md:482:5. **START** the topmost workable TODO ticket (`PICK-01`).
+saipen/FUTURE.md:15:- A gate that is really a plan for the current ticket is ordinary TODO.
+saipen/FUTURE.md:108:operator asked for enters TODO/Source/BLOCKED, never here. An inferred gate that
+saipen/FUTURE.md:137:operator input → DOING/recovery → workable TODO → actionable unconsumed audit
+saipen/FUTURE.md:155:- **BOARD HALT** — no workable TODO and no DOING.
+saipen/IMPROVE.md:593:section headings (`## DOING` / `## TODO` / `## DONE` / `## BLOCKED`) is
+saipen/MAINTENANCE.md:7:**Halt** means no *workable* `## TODO` ticket AND no `## DOING` ticket, used
+saipen/MAINTENANCE.md:10:permanently unpickable `## TODO`, because a cyclic or dangling `needs:` moves
+saipen/MAINTENANCE.md:12:in `## TODO` as ballast that blocks the halt forever.
+saipen/MAINTENANCE.md:20:operator input > DOING/recovery > workable TODO > actionable unconsumed audit
+saipen/MAINTENANCE.md:21:> eligible FUTURE GATE > HUNT > ADD. A BOARD HALT (no workable TODO, no DOING)
+saipen/MAINTENANCE.md:89:objective. A `DOING` ticket in flight is checkpointed and left `TODO` with a
+saipen/MAINTENANCE.md:90:`DEC` naming the pivot, never abandoned mid-edit. Existing `TODO` tickets are
+saipen/OPS.md:163:closure NOW, queues the row as unclaimed TODO, and clears the active task to
+saipen/OPS.md:258:requires A to be the owned DOING ticket and B to be a workable TODO ticket.
+saipen/OPS.md:282:need of the parked Work DONE; APPLY returns the holder to the top of TODO
+saipen/OPS.md:465:PLAN fails closed unless OLD and NEW are distinct, OLD is schedulable TODO or
+saipen/REGISTRY.json:603:"TODO",
+saipen/REGISTRY.json:609:"TODO": "[ ]",
+saipen/RUNTIME.md:176:a large TODO queue by itself does not exhaust it.
+saipen/phases/blocked.md:9:3. Recheck every TODO. If one is workable, route to SCOUT/BUILD instead.
+saipen/phases/build.md:25:Scope growth or broken neighbors become TODO tickets. UI/interface work also
+saipen/phases/clean.md:44:- Prune TODO/BLOCKED only with cited evidence that it is superseded, already
+saipen/phases/clean.md:46:- Re-evaluate blockers. Resolved -> TODO. A durable undecided item remains
+saipen/phases/done.md:32:1. Workable TODO exists: enter SCOUT for the top pick, or PLAN only when the
+saipen/phases/done.md:34:2. TODO exists but none is workable: enter BLOCKED.
+saipen/phases/done.md:35:3. No TODO exists: enter HUNT immediately. Do not synthesize a user brake;
+saipen/phases/done.md:38:`WAIT: blocked -- untriaged MARKHUNT findings in ## BLOCKED; triage into ## TODO or dismiss`.
+saipen/phases/hunt.md:32:3. stale TODO/FIXME/HACK;
+saipen/phases/init.md:25:- BOARD: exactly `## DOING`, `## TODO`, `## DONE`, `## BLOCKED`, no tickets.
+saipen/phases/markhunt.md:27:`## TODO`, with `blocker: unvetted audit -- <evidence>`. A grouped ticket names
+saipen/phases/markhunt.md:29:Only later explicit human triage may accept one into TODO or dismiss it.
+saipen/phases/plan.md:9:becomes a recognizable, independently verifiable ticket at the **FRONT of `## TODO`**; board order is priority. Reword for cold execution without
+saipen/phases/validate.md:40:an empty TODO, or BLOCKED when no ticket is workable. The canonical checkpoint
+saipen/phases/verify.md:149:Another workable TODO: keep this Work blocked, route to its SCOUT/BUILD.
+extensions/schemas/board.schema.json:11:"TODO",
+extensions/subs/crew.md:211:READY package becomes one ordinary Core TODO review ticket carrying immutable
+extensions/subs/PROTOCOL.md:100:## TODO
+extensions/subs/PROTOCOL.md:289:`## TODO`. The public status/spawn/adopt handoff and serial crew `RUN_ROLE`
+extensions/subs/PROTOCOL.md:366:collected hypotheses are inserted at the END of the main `## TODO` -- board
+extensions/subs/PROTOCOL.md:532:| `saipen sub collect` | Run the Handoff procedure (§ 4) against registry roles whose executable `collect_policy` is `core-review` or `automatic`; skip `explicit` producers, whose named integration stage owns them. Every complete current READY package becomes one ordinary Core TODO review hypothesis with immutable package identity and exact provenance. One journal operation writes Core LOG/BOARD/STATE, marks that package reviewed, and records identity-bound `last_collect`; retry deduplicates. It never applies payload during intake or treats the package as accepted fact. |
+extensions/subs/PROTOCOL.md:533:| `saipen sub clean <name>` | **Actual explicit evidence-gated removal, never an age sweep.** Refuse while any TODO/DOING work, ready/draft/blocked OUTBOX, unacknowledged kitchen artifact, unsafe path/link, or unpreserved recovery evidence exists. A successful journal operation first archives every instance byte and a hash-bound receipt under `.saipen/recovery/subs/<name>/<op-id>/`, then removes exactly its strict MANIFEST entry, files, and directories. Exact before hashes make concurrent mutation `STALE_STATE`; crash recovery resumes the same write/delete plan; retry returns already-clean. `--dry-run` reports exact writes/deletes with zero bytes changed. No HUNT, collect loop, timer, age threshold, or automatic crew path may invoke it. |
+extensions/subs/saihunt.md:26:3. stale TODO/FIXME/HACK;
+extensions/subs/TEMPLATE/BOARD.md:22:## TODO
+extensions/templates/BOARD.md:31:## TODO

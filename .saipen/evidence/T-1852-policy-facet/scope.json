@@ -1,0 +1,10 @@
+{
+  "before_sha256": "8a0c6e6ac8c7ed9bc938037a4d391b460bdfda20ac02aaddaba0f9f793ff0831",
+  "candidate_sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd",
+  "unchanged_oracle_sha256": "0c46f099fa16f2a4d8b8a22b80ca0c13e845a52dc55971d43736d632ed7294a4",
+  "outside_generated_region_unchanged": true,
+  "scratch_prefix": "1 unchanged native test, FAIL",
+  "scratch_postfix": "same unchanged native test, PASS",
+  "scratch_compatibility": "all 16 existing NativePolicyTests PASS",
+  "current_root_edit": false
+}

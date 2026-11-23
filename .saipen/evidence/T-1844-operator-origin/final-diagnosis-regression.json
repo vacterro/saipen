@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "format": "unittest",
+  "timeout": 60,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_response_surface_contract.py",
+    "-k",
+    "DiagnosisTests",
+    "-v"
+  ],
+  "context": [
+    "tools",
+    "saipen",
+    "bootstrap",
+    "extensions",
+    "tests/scenarios",
+    "tests/fixtures"
+  ],
+  "oracle_files": [
+    "tools/test_response_surface_contract.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/response_surface.py"
+  ],
+  "before": {
+    "tools/saipen_engine/response_surface.py": ".saipen/evidence/T-1844-operator-origin/diagnosis-prefix/tools/saipen_engine/response_surface.py"
+  }
+}

@@ -1,0 +1,5 @@
+event 18977: [(18977, 'DEC', "'goal reauthorized -- goal_waves 0->0, goal_tickets 108->0; authority_source protocol_home'")]
+goal_entry records: 23 errs ()
+  goal-entry-b599bc23d6aa422985ec49ddc0006a41 COMMITTED source= None ingress= None
+  goal-entry-87d41ab50efc45ba93217dfde5e25726 COMMITTED source= None ingress= None
+  goal-entry-3c0f7dd7d05a4deeba71d5d20bdc7c9f COMMITTED source= None ingress= None

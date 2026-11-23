@@ -1,0 +1,13 @@
+{
+  "ticket": "T-1741",
+  "unified_exec_session": 50023,
+  "owner_pid": 30380,
+  "owner_started_utc": "2026-10-13T09:09:57Z",
+  "family_pid": 28728,
+  "family_started_utc": "2026-10-13T09:13:11Z",
+  "sandbox": "V:/_TEMP_/saipen-core-unit-bveuxapd",
+  "command": "python tools/core_unit.py evidence T-1741 --jobs 1",
+  "profile": "C:/Program Files/Git/bin prepended to PATH for runnable native Bash",
+  "resumption": "Poll the same session and revalidate OS process birth identity. This artifact alone is not liveness evidence. Never restart on an observation timeout.",
+  "frozen_tree": "Do not edit product files until the owned gate finishes; evidence/scratch work is under .saipen only."
+}

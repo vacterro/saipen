@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-438.md",
+  "closed_at": "2026-11-20T22:14:55Z",
+  "closure_event": null,
+  "linked_work": "T-2120",
+  "linked_works": [
+    "T-2120"
+  ],
+  "receipt_id": "SRC-438",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "7eb543fa32a972f687bb9a8b8aa9d81e564b5ac484f3d5f5e92f921d1f7068ac",
+  "status": "CLOSED",
+  "unresolved": 0
+}

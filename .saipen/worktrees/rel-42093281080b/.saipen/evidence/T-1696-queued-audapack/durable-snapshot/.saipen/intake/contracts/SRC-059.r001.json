@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-059:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Continue T-206 only: fix stale send-acceptance test in tests/widget/w2-002-ownership.test.js then reprove canonical Node widget gate; full spec at V:\\_TEMP_\\fastprompter_drag\\AUDAPACK_20260919_2156.md"
+    }
+  },
+  "derived_at": "2026-09-19T19:09:43Z",
+  "derived_from": "SRC-059",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "df49a5ee8045668f43c391375c8cd55c1dcb7ffe2515537cf4b0c8c9672b0ded"
+}

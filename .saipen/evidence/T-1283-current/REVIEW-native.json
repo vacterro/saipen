@@ -1,0 +1,17 @@
+{
+  "native_command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "test_t1283_lineage_legacy_ingest",
+    "test_conformance_lineage",
+    "test_t1519_settled_index"
+  ],
+  "native_exit_code": 0,
+  "oracle_verifier": "62f42c9aba757080ff896b211173398be9658fdfff5782f948c275e06f153161",
+  "original_exit_code": 1,
+  "current_exit_code": 0,
+  "prior_verify_records_preserved": true
+}

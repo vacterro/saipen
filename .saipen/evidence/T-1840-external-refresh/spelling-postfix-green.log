@@ -1,0 +1,8 @@
+test_receipt_and_repeat_accept_same_executable_with_different_case (test_t1840_external_renewal.ExternalRenewalTests.test_receipt_and_repeat_accept_same_executable_with_different_case) ... ok
+test_runtime_bytes_arguments_and_separate_copy_remain_bound (test_t1840_external_renewal.ExternalRenewalTests.test_runtime_bytes_arguments_and_separate_copy_remain_bound) ... ok
+test_changed_environment_requires_new_execution (test_t1840_external_renewal.ExternalRenewalTests.test_changed_environment_requires_new_execution) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 4.587s
+
+OK

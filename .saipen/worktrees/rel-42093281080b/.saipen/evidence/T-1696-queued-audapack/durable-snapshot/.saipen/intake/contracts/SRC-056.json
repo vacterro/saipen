@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-056:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CLOSURE WAVE - FINISH T-201, THEN CLAIM/VERIFY T-202 (full spec at V:\\_TEMP_\\fastprompter_drag\\AUDAPACK_20260919_1630.md)"
+    }
+  },
+  "derived_at": "2026-09-19T13:37:08Z",
+  "derived_from": "SRC-056",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "15958de0df3b4ca19376fad5d1c3c60b12c1449d62e8d8b2376abfa0087c1b14"
+}

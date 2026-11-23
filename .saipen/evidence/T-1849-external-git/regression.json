@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "format": "unittest",
+  "timeout": 120,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t184[09]_*.py", "-v"],
+  "context": ["tools", "saipen", "bootstrap", "extensions", "tests/scenarios", "tests/fixtures", "VERSION"],
+  "oracle_files": ["tools/test_t1849_external_git_environment.py", "tools/test_t1840_external_renewal.py"],
+  "subject_files": ["tools/saipen_engine/external.py", "tools/saipen_engine/external_renewal.py"],
+  "before": {
+    "tools/saipen_engine/external.py": ".saipen/evidence/T-1849-external-git/before/external.py",
+    "tools/saipen_engine/external_renewal.py": ".saipen/evidence/T-1849-external-git/before/external_renewal.py"
+  }
+}

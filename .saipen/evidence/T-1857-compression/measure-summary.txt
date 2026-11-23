@@ -1,0 +1,72 @@
+{
+  "fixture": {
+    "origin": "current BOARD with campaign-only T-1857/T-1858 excluded IN MEMORY",
+    "counts": {
+      "## DOING": 0,
+      "## TODO": 3,
+      "## DONE": 307,
+      "## BLOCKED": 102
+    },
+    "before": {
+      "disposition": "IDLE_BLOCKED_EXTERNAL",
+      "next_exact_action": "saipen ticket resolve-external T-1317",
+      "all_requirements_complete": false
+    },
+    "after": {
+      "disposition": "IDLE_OPERATOR_REQUIRED",
+      "next_exact_action": "saipen status",
+      "all_requirements_complete": false
+    },
+    "primary_blocker": {
+      "shared_blocker_id": "release:shared-index",
+      "blocker_class": "WAIT_USER_DECISION",
+      "cause": "publication-staging",
+      "root_cause": "publication blocked: 206 foreign pre-existing staged paths would enter the release (the operator's in-flight staged batch); stage the release scope explicitly or leave it untouched",
+      "owner": "tools/saipen_engine/release.py",
+      "root_tickets": [
+        "T-1815",
+        "T-1856",
+        "T-1816",
+        "T-1817"
+      ],
+      "dependent_tickets": [
+        "T-1855",
+        "T-1854",
+        "T-1853"
+      ],
+      "recovery_internally_authorized": false,
+      "external_input_required": true,
+      "read_only_work_may_proceed": true,
+      "recovery_operation": {
+        "command": null,
+        "operator_action": "Resolve foreign staged-batch ownership, or authorize a verified canonical isolated release; preserve the live index."
+      },
+      "resumption_preconditions": [
+        "Foreign staging ownership is resolved or canonical isolation is verified",
+        "Live index and foreign staged entries remain protected",
+        "Exact reviewed scope and current verification pass release preflight"
+      ],
+      "basis": "recorded-blocker; not a live recovery authorization"
+    },
+    "before_timing": {
+      "samples": 50,
+      "median_ms": 0.9619,
+      "min_ms": 0.9268,
+      "max_ms": 1.8744
+    },
+    "after_timing": {
+      "samples": 50,
+      "median_ms": 1.3684,
+      "min_ms": 1.3278,
+      "max_ms": 3.6715
+    }
+  },
+  "profile_bytes": {
+    "cold": 27641,
+    "ordinary_continue": 34570,
+    "command_resolution": 56305,
+    "ordinary_phase": 40943,
+    "ship_improve": 55625,
+    "single_doc": 49935
+  }
+}

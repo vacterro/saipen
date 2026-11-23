@@ -1,0 +1,183 @@
+CURRENT INHERITED SUBJECT; fixture-only scoped controls
+test_case01_no_persistent_goals_empty_queue (test_persistent_goal_engine.PersistentGoalEngineTests.test_case01_no_persistent_goals_empty_queue)
+CASE 01: No persistent goals, empty queue -> normal idle, no new ticket. ... ok
+test_case02_goal_satisfied_empty_queue (test_persistent_goal_engine.PersistentGoalEngineTests.test_case02_goal_satisfied_empty_queue)
+CASE 02: Goal satisfied, empty queue -> no new ticket. ... ok
+test_case03_unsatisfied_goal_actionable_gaps (test_persistent_goal_engine.PersistentGoalEngineTests.test_case03_unsatisfied_goal_actionable_gaps)
+CASE 03: Unsatisfied goal, empty queue, actionable gaps -> admits next bounded ticket. ... ok
+test_case04_repeat_same_command_no_duplicate (test_persistent_goal_engine.PersistentGoalEngineTests.test_case04_repeat_same_command_no_duplicate)
+CASE 04: Running replenishment when candidate is already on BOARD -> no duplicate ticket. ... FAIL
+test_case05_current_ticket_active (test_persistent_goal_engine.PersistentGoalEngineTests.test_case05_current_ticket_active)
+CASE 05: Current relevant ticket already active -> continue existing ticket. ... ok
+test_case06_previous_ticket_completed_successor_admitted (test_persistent_goal_engine.PersistentGoalEngineTests.test_case06_previous_ticket_completed_successor_admitted)
+CASE 06: Previous ticket in DONE, new independent gap admitted as successor. ... ok
+test_case07_source_unchanged_gap_provider_discovers (test_persistent_goal_engine.PersistentGoalEngineTests.test_case07_source_unchanged_gap_provider_discovers)
+CASE 07: Source unchanged but evidence gaps remain -> gap provider can still discover work. ... ok
+test_case08_source_change_discovery_cached (test_persistent_goal_engine.PersistentGoalEngineTests.test_case08_source_change_discovery_cached)
+CASE 08: SourceChangeProvider returns appropriate cached status. ... ok
+test_case09_provider_incomplete_scan_no_false_satisfaction (test_persistent_goal_engine.PersistentGoalEngineTests.test_case09_provider_incomplete_scan_no_false_satisfaction)
+CASE 09: Provider returns no candidates because of unreadable file -> no false satisfaction claim. ... ok
+test_case10_provider_unavailable (test_persistent_goal_engine.PersistentGoalEngineTests.test_case10_provider_unavailable)
+CASE 10: Unknown provider -> explicit blocker, no fake task. ... ok
+test_case11_all_candidates_blocked (test_persistent_goal_engine.PersistentGoalEngineTests.test_case11_all_candidates_blocked)
+CASE 11: All candidates blocked on BOARD -> honest ALL_CANDIDATES_BLOCKED. ... FAIL
+test_case12_operator_required_gate_preserved (test_persistent_goal_engine.PersistentGoalEngineTests.test_case12_operator_required_gate_preserved)
+CASE 12: Candidate requiring DESTRUCTIVE scope -> WAITING_AUTHORITY. ... ok
+test_case13_foreign_owned_git_changes_untouched (test_persistent_goal_engine.PersistentGoalEngineTests.test_case13_foreign_owned_git_changes_untouched)
+CASE 13: Goal evaluation touches only .saipen/ directory and does not alter working tree. ... ok
+test_case14_concurrent_cc_all_one_admission (test_persistent_goal_engine.PersistentGoalEngineTests.test_case14_concurrent_cc_all_one_admission)
+CASE 14: Deduplication logic ensures candidate is admitted at most once. ... FAIL
+test_case15_crash_during_discovery_resumable (test_persistent_goal_engine.PersistentGoalEngineTests.test_case15_crash_during_discovery_resumable)
+CASE 15: Crash during discovery leaves goals and board valid and parseable. ... ok
+test_case16_crash_after_ticket_admission_no_duplicate (test_persistent_goal_engine.PersistentGoalEngineTests.test_case16_crash_after_ticket_admission_no_duplicate)
+CASE 16: Ticket already committed on BOARD -> restart does not create duplicate. ... FAIL
+test_case17_crash_after_ticket_closure_evaluates_next (test_persistent_goal_engine.PersistentGoalEngineTests.test_case17_crash_after_ticket_closure_evaluates_next)
+CASE 17: Ticket closed in DONE -> evaluates remaining goal and selects next gap. ... FAIL
+test_case18_coverage_decreases_recalculation (test_persistent_goal_engine.PersistentGoalEngineTests.test_case18_coverage_decreases_recalculation)
+CASE 18: Coverage recalculates correctly when inventory total increases. ... ok
+test_case19_evidence_categories_overlap (test_persistent_goal_engine.PersistentGoalEngineTests.test_case19_evidence_categories_overlap)
+CASE 19: Categories overlap (e.g. described vs anchored) without percentage arithmetic errors. ... ok
+test_case20_no_progress_bounded_retry (test_persistent_goal_engine.PersistentGoalEngineTests.test_case20_no_progress_bounded_retry)
+CASE 20: No progress across attempts is tracked in goal resume metadata. ... ok
+test_case21_completed_ticket_invalid_no_silent_reopening (test_persistent_goal_engine.PersistentGoalEngineTests.test_case21_completed_ticket_invalid_no_silent_reopening)
+CASE 21: An already completed ticket in DONE is never silently reopened; remains DONE. ... ok
+test_case22_goal_paused_no_automatic_successor (test_persistent_goal_engine.PersistentGoalEngineTests.test_case22_goal_paused_no_automatic_successor)
+CASE 22: Paused goal produces no automatic successor tickets. ... ok
+test_case23_unauthorized_nearby_project_no_cross_task (test_persistent_goal_engine.PersistentGoalEngineTests.test_case23_unauthorized_nearby_project_no_cross_task)
+CASE 23: Nearby directory does not leak goals into target project. ... ok
+test_case24_one_task_blocked_independent_continues (test_persistent_goal_engine.PersistentGoalEngineTests.test_case24_one_task_blocked_independent_continues)
+CASE 24: One candidate task blocked, independent candidate admitted. ... FAIL
+test_case25_execution_budget_exhausted_checkpoint (test_persistent_goal_engine.PersistentGoalEngineTests.test_case25_execution_budget_exhausted_checkpoint)
+CASE 25: Execution budget exhausted preserves goal checkpoint without false completion. ... ok
+test_case26_normal_cc_legacy_behavior (test_persistent_goal_engine.PersistentGoalEngineTests.test_case26_normal_cc_legacy_behavior)
+CASE 26: Project without persistent goals retains normal legacy continue behavior. ... ok
+test_case27_cc_all_with_pending_work (test_persistent_goal_engine.PersistentGoalEngineTests.test_case27_cc_all_with_pending_work)
+CASE 27: cc all with pending work on BOARD does not admit new tickets until queue is drained. ... ok
+test_case28_goal_requires_manual_runtime_acceptance (test_persistent_goal_engine.PersistentGoalEngineTests.test_case28_goal_requires_manual_runtime_acceptance)
+CASE 28: Goal requiring operator authority cannot auto-close from synthetic data. ... ok
+test_case29_truncated_backlog_partial_discovery (test_persistent_goal_engine.PersistentGoalEngineTests.test_case29_truncated_backlog_partial_discovery)
+CASE 29: Truncated backlog marked COMPLETION_TRUNCATED, not full coverage. ... ok
+test_case30_phase_done_conformance_pass_gap_nonzero (test_persistent_goal_engine.PersistentGoalEngineTests.test_case30_phase_done_conformance_pass_gap_nonzero)
+CASE 30: Project phase DONE, conformance CURRENT_PASS, gap nonzero -> admits work. ... ok
+test_evaluate_all_goals_pure_by_default (test_persistent_autonomy_recovery.DryRunIntegrityTests.test_evaluate_all_goals_pure_by_default)
+evaluate_all_goals(commit=False) must NOT change the goal file on disk. ... ok
+test_replenish_from_goals_dry_run_writes_zero_bytes (test_persistent_autonomy_recovery.DryRunIntegrityTests.test_replenish_from_goals_dry_run_writes_zero_bytes)
+replenish_from_goals(dry_run=True) must NOT change goal or board files. ... ok
+test_arbitrary_substring_does_not_deduplicate (test_persistent_autonomy_recovery.CandidateDeduplicationAndIndependentSelectionTests.test_arbitrary_substring_does_not_deduplicate)
+A ticket containing a common word in its title does not deduplicate an unrelated candidate. ... ok
+test_blocked_first_candidate_selects_second_candidate (test_persistent_autonomy_recovery.CandidateDeduplicationAndIndependentSelectionTests.test_blocked_first_candidate_selects_second_candidate)
+If candidate 1 is blocked on the board, replenishment selects candidate 2 from the pool. ... FAIL
+test_p0_01_missing_capture_cannot_satisfy (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p0_01_missing_capture_cannot_satisfy)
+total=described, zero gaps, mandatory capture SHA absent -> not SATISFIED. ... ok
+test_p0_01_self_reported_capture_cannot_satisfy (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p0_01_self_reported_capture_cannot_satisfy)
+A SHA nothing can verify is not authenticated provenance. ... ok
+test_p0_01_verified_capture_may_satisfy (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p0_01_verified_capture_may_satisfy)
+The positive control: bytes on disk derive the declared digest. ... ok
+test_p0_01_wrong_capture_cannot_satisfy (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p0_01_wrong_capture_cannot_satisfy) ... ok
+test_p0_02_absent_required_patch_cannot_produce_actionable_work (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p0_02_absent_required_patch_cannot_produce_actionable_work) ... ok
+test_p0_02_correct_patch_still_produces_candidates (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p0_02_correct_patch_still_produces_candidates) ... ok
+test_p0_02_wrong_patch_cannot_produce_actionable_work (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p0_02_wrong_patch_cannot_produce_actionable_work) ... ok
+test_p0_05_authoritative_independent_tier_is_carried_through (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p0_05_authoritative_independent_tier_is_carried_through) ... ok
+test_p0_05_described_does_not_count_as_independently_verified (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p0_05_described_does_not_count_as_independently_verified) ... ok
+test_p0_05_documentation_count_alone_cannot_satisfy (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p0_05_documentation_count_alone_cannot_satisfy) ... ok
+test_p1_03_complete_enumeration_reports_partial_not_required (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p1_03_complete_enumeration_reports_partial_not_required) ... ok
+test_p1_03_positive_unresolved_with_empty_enumeration_is_incomplete (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p1_03_positive_unresolved_with_empty_enumeration_is_incomplete) ... ok
+test_p1_03_truncated_producer_pagination_is_reported (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p1_03_truncated_producer_pagination_is_reported) ... ok
+test_p1_04_fingerprint_changes_when_the_item_itself_changes (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p1_04_fingerprint_changes_when_the_item_itself_changes) ... ok
+test_p1_04_fingerprint_is_stable_across_unrelated_ledger_change (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p1_04_fingerprint_is_stable_across_unrelated_ledger_change) ... ok
+test_p1_04_genuine_new_item_evidence_still_reopens (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p1_04_genuine_new_item_evidence_still_reopens)
+Per-item bytes changed under the SAME ledger path is a new generation. ... FAIL
+test_p1_04_unrelated_change_does_not_reopen_done_item (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p1_04_unrelated_change_does_not_reopen_done_item)
+End to end: a DONE item stays suppressed after an unrelated ledger edit. ... FAIL
+test_unknown_provider_registry_is_unchanged (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_unknown_provider_registry_is_unchanged)
+Guard: this repair adds no provider and renames none. ... ok
+
+======================================================================
+FAIL: test_case04_repeat_same_command_no_duplicate (test_persistent_goal_engine.PersistentGoalEngineTests.test_case04_repeat_same_command_no_duplicate)
+CASE 04: Running replenishment when candidate is already on BOARD -> no duplicate ticket.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_persistent_goal_engine.py", line 208, in test_case04_repeat_same_command_no_duplicate
+    self.assertTrue(res["ok"])
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_case11_all_candidates_blocked (test_persistent_goal_engine.PersistentGoalEngineTests.test_case11_all_candidates_blocked)
+CASE 11: All candidates blocked on BOARD -> honest ALL_CANDIDATES_BLOCKED.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_persistent_goal_engine.py", line 349, in test_case11_all_candidates_blocked
+    self.assertIn(res["status"], ("ALL_CANDIDATES_BLOCKED", "NO_ADMISSIBLE_WORK"))
+AssertionError: 'BOARD_INVALID' not found in ('ALL_CANDIDATES_BLOCKED', 'NO_ADMISSIBLE_WORK')
+
+======================================================================
+FAIL: test_case14_concurrent_cc_all_one_admission (test_persistent_goal_engine.PersistentGoalEngineTests.test_case14_concurrent_cc_all_one_admission)
+CASE 14: Deduplication logic ensures candidate is admitted at most once.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_persistent_goal_engine.py", line 397, in test_case14_concurrent_cc_all_one_admission
+    self.assertTrue(is_dup_second)
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_case16_crash_after_ticket_admission_no_duplicate (test_persistent_goal_engine.PersistentGoalEngineTests.test_case16_crash_after_ticket_admission_no_duplicate)
+CASE 16: Ticket already committed on BOARD -> restart does not create duplicate.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_persistent_goal_engine.py", line 437, in test_case16_crash_after_ticket_admission_no_duplicate
+    self.assertEqual(res["status"], "TODO_AVAILABLE")
+AssertionError: 'BOARD_INVALID' != 'TODO_AVAILABLE'
+- BOARD_INVALID
++ TODO_AVAILABLE
+
+
+======================================================================
+FAIL: test_case17_crash_after_ticket_closure_evaluates_next (test_persistent_goal_engine.PersistentGoalEngineTests.test_case17_crash_after_ticket_closure_evaluates_next)
+CASE 17: Ticket closed in DONE -> evaluates remaining goal and selects next gap.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_persistent_goal_engine.py", line 468, in test_case17_crash_after_ticket_closure_evaluates_next
+    self.assertTrue(res["replenished"])
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_case24_one_task_blocked_independent_continues (test_persistent_goal_engine.PersistentGoalEngineTests.test_case24_one_task_blocked_independent_continues)
+CASE 24: One candidate task blocked, independent candidate admitted.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_persistent_goal_engine.py", line 607, in test_case24_one_task_blocked_independent_continues
+    self.assertTrue(res["replenished"])
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_blocked_first_candidate_selects_second_candidate (test_persistent_autonomy_recovery.CandidateDeduplicationAndIndependentSelectionTests.test_blocked_first_candidate_selects_second_candidate)
+If candidate 1 is blocked on the board, replenishment selects candidate 2 from the pool.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_persistent_autonomy_recovery.py", line 394, in test_blocked_first_candidate_selects_second_candidate
+    self.assertTrue(res.get("ok"))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_p1_04_genuine_new_item_evidence_still_reopens (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p1_04_genuine_new_item_evidence_still_reopens)
+Per-item bytes changed under the SAME ledger path is a new generation.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_evidence_gap_ledger_lineage.py", line 289, in test_p1_04_genuine_new_item_evidence_still_reopens
+    self.assertTrue(rep["ok"])
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_p1_04_unrelated_change_does_not_reopen_done_item (test_evidence_gap_ledger_lineage.EvidenceGapLedgerLineageTests.test_p1_04_unrelated_change_does_not_reopen_done_item)
+End to end: a DONE item stays suppressed after an unrelated ledger edit.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_evidence_gap_ledger_lineage.py", line 269, in test_p1_04_unrelated_change_does_not_reopen_done_item
+    self.assertTrue(rep["ok"])
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 52 tests in 0.124s
+
+FAILED (failures=9)
+COUNTS ran=52 failed=9 errors=0 skipped=0 passed=43

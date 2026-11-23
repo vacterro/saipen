@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "code": "GOAL_STATUS",
+  "goals": [
+    {
+      "goal_id": "self-maintenance-core",
+      "project_id": "_SAIPEN",
+      "title": "Continuous SAIPEN Self-Maintenance and Defect Elimination",
+      "objective": "Autonomously discover, evaluate, and repair verified regressions, test failures, and maintenance backlog to preserve a healthy repository",
+      "authorization_scope": "MAINTENANCE",
+      "success_criteria": {},
+      "evidence_provider": "failed_tests",
+      "current_progress": {},
+      "target_progress": {},
+      "research_or_work_backlog_source": "",
+      "admission_policy": {},
+      "current_status": "ACTIVE",
+      "last_evaluation": "",
+      "last_successful_work": null,
+      "last_discovery": null,
+      "blockers": [],
+      "completion_evidence": null,
+      "resume_metadata": {},
+      "paused": false
+    }
+  ]
+}

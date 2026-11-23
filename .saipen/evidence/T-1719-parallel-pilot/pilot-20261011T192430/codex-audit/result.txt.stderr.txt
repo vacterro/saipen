@@ -1,0 +1,1 @@
+2026-10-11T19:24:35.765274Z ERROR codex_core::session::session: failed to load skill C:\Users\vac34\.agents\skills\vintage\SKILL.md: missing YAML frontmatter delimited by ---

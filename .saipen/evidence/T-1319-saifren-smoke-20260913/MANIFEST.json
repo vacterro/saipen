@@ -1,0 +1,6 @@
+{
+  "ticket": "T-1319",
+  "kind": "SAIFREN_ROBUSTNESS_SMOKE",
+  "file": "smoke-proof.json",
+  "sha256": "6074018bda8ce06699537bdfdf79dab0c763197e579dcf0baf86a48c7c241f8a"
+}

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-423:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-21682",
+      "text": "Hyperlean refactor night shift 2: live re-measure, W1 source_binding one-pass O(DONE+LOG) fix with parity tests, W2 compact agent status view, W3 lean startup imports; before/after benchmarks, no authority weakened",
+      "verification": "python tools/core_unit.py focused T-2089 --pattern test_t2089_lazy_entrypoints.py --pattern test_t2089_agent_status_view.py --pattern test_t1734_source_drift.py -> PASS ran:23 record:.saipen/evidence/focused-unit/87feb54844494872-20261118T011234137205Z.json",
+      "work": "T-2089"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,20 @@
+{
+  "label": "review-report",
+  "phase": "REVIEW",
+  "command": [
+    "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+    "-B",
+    ".saipen/evidence/T-1716-resilience/verify-report.py",
+    "report-review"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 0.359,
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "stdout": "{\"passed\": true, \"clauses\": 16, \"sections\": 16, \"blocker_classes\": 12, \"metrics\": 7, \"decisions\": 6}\r\n",
+  "stderr": "",
+  "stdout_sha256": "9b056d0fb3a625b6dfa9a25657f245d258523b919a8c77621420d2311b8cd5ee",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

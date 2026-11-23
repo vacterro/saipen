@@ -1,0 +1,21 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 7427,
+  "red": 2,
+  "new_red": [
+    "test_style_contract_chokepoint.StaticChokepointTests.test_evidence_scripts_hardcode_no_marker",
+    "test_validator_layout_parity.InstalledValidatorLayoutParityTests.test_layouts_agree_on_the_live_repository"
+  ],
+  "fixed": [],
+  "problems": [
+    "2 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/b44cbe4a97224743-20261023T064435529208Z.json",
+  "reused": false,
+  "shared": false,
+  "request_wall_s": 2281.0,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

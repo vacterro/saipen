@@ -1,0 +1,214 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"project\":\"saipen\",\"signal\":\"best_effort\",\"indexed_at\":\"2026-09-01T13:16:39Z\",\"metadata\":{\"generation\":\"2026-09-01T13:16:39Z\",\"index_mode\":\"moderate\",\"recorded_at\":\"2026-09-01T13:16:39Z\",\"recording_status\":\"complete\",\"ignored_files_stored\":10,\"ignored_files_total\":10,\"hash_records_complete\":true,\"coverage_version\":3,\"generation_matches\":true},\"paths\":[{\"requested_path\":\".saipen/BOARD.md\",\"path\":\".saipen/BOARD.md\",\"status\":\"no_recorded_issue\",\"freshness\":\"metadata_changed\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[]},{\"requested_path\":\".saipen/STATE.md\",\"path\":\".saipen/STATE.md\",\"status\":\"no_recorded_issue\",\"freshness\":\"metadata_changed\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[]},{\"requested_path\":\".saipen/KNOWLEDGE/crew-v8-backlog.md\",\"path\":\".saipen/KNOWLEDGE/crew-v8-backlog.md\",\"status\":\"no_recorded_issue\",\"freshness\":\"metadata_changed\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[]},{\"requested_path\":\"KNOWLEDGE/ADR-0001-v7-producer-parallelism.md\",\"path\":\"KNOWLEDGE/ADR-0001-v7-producer-parallelism.md\",\"status\":\"no_recorded_issue\",\"freshness\":\"metadata_changed\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[]},{\"requested_path\":\".saipen/KNOWLEDGE/ADR-0001-v7-producer-parallelism.md\",\"path\":\".saipen/KNOWLEDGE/ADR-0001-v7-producer-parallelism.md\",\"status\":\"no_recorded_issue\",\"freshness\":\"missing\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[]},{\"requested_path\":\"future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/07_MULTI_WORK_PER_PROJECT_DEFERRED.md\",\"path\":\"future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/07_MULTI_WORK_PER_PROJECT_DEFERRED.md\",\"status\":\"no_recorded_issue\",\"freshness\":\"not_tracked\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[]},{\"requested_path\":\"future_gate/SAIPEN_FUTURE_WORKER_POOL.md\",\"path\":\"future_gate/SAIPEN_FUTURE_WORKER_POOL.md\",\"status\":\"no_recorded_issue\",\"freshness\":\"not_tracked\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[]},{\"requested_path\":\"tools/saipen_engine/producer.py\",\"path\":\"tools/saipen_engine/producer.py\",\"status\":\"excluded\",\"freshness\":\"not_tracked\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[{\"path\":\"tools\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\",\"match\":\"ancestor\"}]},{\"requested_path\":\"tools/saipen_engine/capability.py\",\"path\":\"tools/saipen_engine/capability.py\",\"status\":\"excluded\",\"freshness\":\"not_tracked\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[{\"path\":\"tools\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\",\"match\":\"ancestor\"}]},{\"requested_path\":\"tools/saipen_engine/lock.py\",\"path\":\"tools/saipen_engine/lock.py\",\"status\":\"excluded\",\"freshness\":\"not_tracked\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[{\"path\":\"tools\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\",\"match\":\"ancestor\"}]},{\"requested_path\":\"tools/saipen_engine/audit_inbox.py\",\"path\":\"tools/saipen_engine/audit_inbox.py\",\"status\":\"excluded\",\"freshness\":\"not_tracked\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[{\"path\":\"tools\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\",\"match\":\"ancestor\"}]},{\"requested_path\":\"tools/saipen_engine/audit_route.py\",\"path\":\"tools/saipen_engine/audit_route.py\",\"status\":\"excluded\",\"freshness\":\"not_tracked\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[{\"path\":\"tools\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\",\"match\":\"ancestor\"}]},{\"requested_path\":\"tools/saipen_engine/audit_enqueue.py\",\"path\":\"tools/saipen_engine/audit_enqueue.py\",\"status\":\"excluded\",\"freshness\":\"not_tracked\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[{\"path\":\"tools\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\",\"match\":\"ancestor\"}]},{\"requested_path\":\"tools/saipen_engine/intake.py\",\"path\":\"tools/saipen_engine/intake.py\",\"status\":\"excluded\",\"freshness\":\"not_tracked\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[{\"path\":\"tools\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\",\"match\":\"ancestor\"}]},{\"requested_path\":\"tools/saipen.py\",\"path\":\"tools/saipen.py\",\"status\":\"excluded\",\"freshness\":\"not_tracked\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[{\"path\":\"tools\",\"kind\":\"not_indexed_dir\",\"detail\":\"excluded subtree\",\"match\":\"ancestor\"}]}],\"scopes\":[{\"requested_scope\":\"audit\",\"scope\":\"audit\",\"total\":0,\"has_more\":false,\"entries\":[],\"status\":\"no_recorded_issue\"}],\"caveat\":\"Best-effort signal only. No recorded issue does not prove graph or source completeness; read flagged source and qualify claims when metadata is changed or unavailable.\"}"
+    }
+  ],
+  "structuredContent": {
+    "project": "saipen",
+    "signal": "best_effort",
+    "indexed_at": "2026-09-01T13:16:39Z",
+    "metadata": {
+      "generation": "2026-09-01T13:16:39Z",
+      "index_mode": "moderate",
+      "recorded_at": "2026-09-01T13:16:39Z",
+      "recording_status": "complete",
+      "ignored_files_stored": 10,
+      "ignored_files_total": 10,
+      "hash_records_complete": true,
+      "coverage_version": 3,
+      "generation_matches": true
+    },
+    "paths": [
+      {
+        "requested_path": ".saipen/BOARD.md",
+        "path": ".saipen/BOARD.md",
+        "status": "no_recorded_issue",
+        "freshness": "metadata_changed",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": []
+      },
+      {
+        "requested_path": ".saipen/STATE.md",
+        "path": ".saipen/STATE.md",
+        "status": "no_recorded_issue",
+        "freshness": "metadata_changed",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": []
+      },
+      {
+        "requested_path": ".saipen/KNOWLEDGE/crew-v8-backlog.md",
+        "path": ".saipen/KNOWLEDGE/crew-v8-backlog.md",
+        "status": "no_recorded_issue",
+        "freshness": "metadata_changed",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": []
+      },
+      {
+        "requested_path": "KNOWLEDGE/ADR-0001-v7-producer-parallelism.md",
+        "path": "KNOWLEDGE/ADR-0001-v7-producer-parallelism.md",
+        "status": "no_recorded_issue",
+        "freshness": "metadata_changed",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": []
+      },
+      {
+        "requested_path": ".saipen/KNOWLEDGE/ADR-0001-v7-producer-parallelism.md",
+        "path": ".saipen/KNOWLEDGE/ADR-0001-v7-producer-parallelism.md",
+        "status": "no_recorded_issue",
+        "freshness": "missing",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": []
+      },
+      {
+        "requested_path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/07_MULTI_WORK_PER_PROJECT_DEFERRED.md",
+        "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/07_MULTI_WORK_PER_PROJECT_DEFERRED.md",
+        "status": "no_recorded_issue",
+        "freshness": "not_tracked",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": []
+      },
+      {
+        "requested_path": "future_gate/SAIPEN_FUTURE_WORKER_POOL.md",
+        "path": "future_gate/SAIPEN_FUTURE_WORKER_POOL.md",
+        "status": "no_recorded_issue",
+        "freshness": "not_tracked",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": []
+      },
+      {
+        "requested_path": "tools/saipen_engine/producer.py",
+        "path": "tools/saipen_engine/producer.py",
+        "status": "excluded",
+        "freshness": "not_tracked",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": [
+          {
+            "path": "tools",
+            "kind": "not_indexed_dir",
+            "detail": "excluded subtree",
+            "match": "ancestor"
+          }
+        ]
+      },
+      {
+        "requested_path": "tools/saipen_engine/capability.py",
+        "path": "tools/saipen_engine/capability.py",
+        "status": "excluded",
+        "freshness": "not_tracked",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": [
+          {
+            "path": "tools",
+            "kind": "not_indexed_dir",
+            "detail": "excluded subtree",
+            "match": "ancestor"
+          }
+        ]
+      },
+      {
+        "requested_path": "tools/saipen_engine/lock.py",
+        "path": "tools/saipen_engine/lock.py",
+        "status": "excluded",
+        "freshness": "not_tracked",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": [
+          {
+            "path": "tools",
+            "kind": "not_indexed_dir",
+            "detail": "excluded subtree",
+            "match": "ancestor"
+          }
+        ]
+      },
+      {
+        "requested_path": "tools/saipen_engine/audit_inbox.py",
+        "path": "tools/saipen_engine/audit_inbox.py",
+        "status": "excluded",
+        "freshness": "not_tracked",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": [
+          {
+            "path": "tools",
+            "kind": "not_indexed_dir",
+            "detail": "excluded subtree",
+            "match": "ancestor"
+          }
+        ]
+      },
+      {
+        "requested_path": "tools/saipen_engine/audit_route.py",
+        "path": "tools/saipen_engine/audit_route.py",
+        "status": "excluded",
+        "freshness": "not_tracked",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": [
+          {
+            "path": "tools",
+            "kind": "not_indexed_dir",
+            "detail": "excluded subtree",
+            "match": "ancestor"
+          }
+        ]
+      },
+      {
+        "requested_path": "tools/saipen_engine/audit_enqueue.py",
+        "path": "tools/saipen_engine/audit_enqueue.py",
+        "status": "excluded",
+        "freshness": "not_tracked",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": [
+          {
+            "path": "tools",
+            "kind": "not_indexed_dir",
+            "detail": "excluded subtree",
+            "match": "ancestor"
+          }
+        ]
+      },
+      {
+        "requested_path": "tools/saipen_engine/intake.py",
+        "path": "tools/saipen_engine/intake.py",
+        "status": "excluded",
+        "freshness": "not_tracked",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": [
+          {
+            "path": "tools",
+            "kind": "not_indexed_dir",
+            "detail": "excluded subtree",
+            "match": "ancestor"
+          }
+        ]
+      },
+      {
+        "requested_path": "tools/saipen.py",
+        "path": "tools/saipen.py",
+        "status": "excluded",
+        "freshness": "not_tracked",
+        "recommended_action": "read_source_and_reindex",
+        "coverage": [
+          {
+            "path": "tools",
+            "kind": "not_indexed_dir",
+            "detail": "excluded subtree",
+            "match": "ancestor"
+          }
+        ]
+      }
+    ],
+    "scopes": [
+      {
+        "requested_scope": "audit",
+        "scope": "audit",
+        "total": 0,
+        "has_more": false,
+        "entries": [],
+        "status": "no_recorded_issue"
+      }
+    ],
+    "caveat": "Best-effort signal only. No recorded issue does not prove graph or source completeness; read flagged source and qualify claims when metadata is changed or unavailable."
+  },
+  "isError": false
+}

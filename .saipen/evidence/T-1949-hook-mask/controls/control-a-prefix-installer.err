@@ -1,0 +1,24 @@
+FF.
+======================================================================
+FAIL: test_a_red_floor_is_not_masked_by_a_green_python_gate (__main__.HookValidatorStatusTests.test_a_red_floor_is_not_masked_by_a_green_python_gate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1949-ctl2\tools\test_t1949_hook_validator_status.py", line 101, in test_a_red_floor_is_not_masked_by_a_green_python_gate
+    self.assertIn("validate.sh", output, "the refusal does not name the failing validator")
+AssertionError: 'validate.sh' not found in 'PY-VALIDATOR-OK\nFLOOR-RED\nsaipen: validation failed -- fix .saipen/ or commit with --no-verify\n' : the refusal does not name the failing validator
+
+======================================================================
+FAIL: test_a_red_python_gate_is_not_masked_by_a_green_floor (__main__.HookValidatorStatusTests.test_a_red_python_gate_is_not_masked_by_a_green_floor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1949-ctl2\tools\test_t1949_hook_validator_status.py", line 92, in test_a_red_python_gate_is_not_masked_by_a_green_floor
+    self.assertNotEqual(code, 0, "a failing validate.py did not block the commit:\n" + output)
+AssertionError: 0 == 0 : a failing validate.py did not block the commit:
+PY-VALIDATOR-RED
+FLOOR-OK
+
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.587s
+
+FAILED (failures=2)

@@ -1,0 +1,13 @@
+{
+  "declared_status": null,
+  "digest": "ac0bf46342fb887d41778b6afe62aea3f7c82f47e0388e10b3d5dc9af2b648fb",
+  "facts": {},
+  "gate": "FG-0042",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/MANIFEST.md",
+  "reason": "broad architecture record; kept gated until one bounded slice is named",
+  "reviewed": true,
+  "schema": 2,
+  "title": "MANIFEST",
+  "verdict": "DEFERRED"
+}

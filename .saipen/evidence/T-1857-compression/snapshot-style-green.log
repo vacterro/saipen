@@ -1,0 +1,10 @@
+test_a_captured_copy_inherits_its_subject_markers_only (test_style_contract_chokepoint.StaticChokepointTests.test_a_captured_copy_inherits_its_subject_markers_only) ... ok
+test_a_hand_written_evidence_probe_still_fails (test_style_contract_chokepoint.StaticChokepointTests.test_a_hand_written_evidence_probe_still_fails) ... ok
+test_evidence_scripts_hardcode_no_marker (test_style_contract_chokepoint.StaticChokepointTests.test_evidence_scripts_hardcode_no_marker) ... ok
+test_scenario_fixtures_carry_no_install_specific_marker (test_style_contract_chokepoint.StaticChokepointTests.test_scenario_fixtures_carry_no_install_specific_marker) ... ok
+test_the_placeholder_is_actually_used_and_the_hostile_pair_stays_wrong (test_style_contract_chokepoint.StaticChokepointTests.test_the_placeholder_is_actually_used_and_the_hostile_pair_stays_wrong) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 4.921s
+
+OK

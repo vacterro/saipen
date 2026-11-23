@@ -1,0 +1,70 @@
+{
+  "shape": "beside",
+  "start": {
+    "lifecycle": "UNAUTHORIZED rows=['T-001']",
+    "board": {
+      "errors": [
+        "BOARD.md:5 duplicate ticket ID T-050"
+      ],
+      "tickets": {
+        "T-001": "## DONE",
+        "T-050": "## TODO"
+      }
+    }
+  },
+  "1 saipen recover": {
+    "code": "OPERATOR_DECISION_REQUIRED",
+    "ok": false,
+    "detail": "a BOARD repair cannot be aimed through an unaddressable record: BOARD.md:5 duplicate ticket ID T-050",
+    "moved": [],
+    "lifecycle": "UNAUTHORIZED rows=['T-001']"
+  },
+  "2 saipen recover --resolve-duplicate-id T-050 --keep 049b273939d843e625443b112d": {
+    "code": "DUPLICATE_ID_RESOLVED",
+    "ok": true,
+    "detail": "",
+    "moved": [
+      "BOARD.md",
+      "LOG.md",
+      "STATE.md"
+    ],
+    "lifecycle": "UNAUTHORIZED rows=['T-001']"
+  },
+  "3 saipen recover": {
+    "code": "RECONCILE_REAUTH_REQUIRED",
+    "ok": false,
+    "detail": "UNAUTHORIZED_LIFECYCLE_WRITE: T-001 sits under ## DONE on the word of a typed head that E-9 carried, and no closure operation stands behind it -- the completion was typed, not run; it returns to ## TO",
+    "moved": [],
+    "lifecycle": "UNAUTHORIZED rows=['T-001']"
+  },
+  "4 saipen recover --apply-approved-repair cdfbb96748e0cec14e7340d2ff884b98b6d4e7": {
+    "code": "REPAIRED",
+    "ok": true,
+    "detail": "",
+    "moved": [
+      "BOARD.md",
+      "LOG.md",
+      "STATE.md"
+    ],
+    "lifecycle": "AUTHORIZED rows=[]"
+  },
+  "5 saipen recover": {
+    "code": "CLEAN",
+    "ok": true,
+    "detail": "",
+    "moved": [],
+    "lifecycle": "AUTHORIZED rows=[]"
+  },
+  "end": {
+    "lifecycle": "AUTHORIZED rows=[]",
+    "board": {
+      "errors": [],
+      "tickets": {
+        "T-001": "## TODO",
+        "T-050": "## TODO",
+        "T-51": "## TODO"
+      }
+    },
+    "validator lifecycle FAIL lines": 0
+  }
+}

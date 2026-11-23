@@ -1,0 +1,253 @@
+{
+  "cold": 27645,
+  "ordinary_continue": 34301,
+  "command_resolution": 55284,
+  "ordinary_phase": 40690,
+  "ship_improve": 55761,
+  "single_doc": 47088,
+  "profiles": {
+    "cold": [
+      {
+        "name": "cold",
+        "bytes": 27645,
+        "must": {
+          "BOOT.md": 10278,
+          "STYLE.md": 7279,
+          "EXECUTION.md": 7850,
+          "INDEX.md": 2238
+        },
+        "transitive": [],
+        "conditional": {},
+        "exclude": [
+          "CONFORMANCE.md",
+          "CHANGELOG.md",
+          "phases/*.md"
+        ]
+      }
+    ],
+    "ordinary_continue": [
+      {
+        "name": "done-to-next",
+        "bytes": 34301,
+        "must": {
+          "CORE.md": 31848,
+          "phases/done.md": 2453
+        },
+        "transitive": [],
+        "conditional": {
+          "SOURCES.md": 25845,
+          "RUNTIME.md": 20143,
+          "@active_phase_max": 8842
+        },
+        "exclude": [
+          "CONFORMANCE.md",
+          "CHANGELOG.md"
+        ]
+      }
+    ],
+    "command_resolution": [
+      {
+        "name": "command-router",
+        "bytes": 55284,
+        "must": {
+          "REGISTRY.json": 32161,
+          "COMMANDS.md": 23123
+        },
+        "transitive": [],
+        "conditional": {
+          "CONTROLS.md": 10744,
+          "EXECUTION.md": 7850,
+          "IMPROVE.md": 34881
+        },
+        "exclude": [
+          "CORE.md",
+          "CONFORMANCE.md",
+          "phases/*.md"
+        ]
+      }
+    ],
+    "ordinary_phase": [
+      {
+        "name": "largest-active-phase",
+        "bytes": 40690,
+        "must": {
+          "CORE.md": 31848,
+          "@active_phase_max": 8842
+        },
+        "transitive": [],
+        "conditional": {
+          "SOURCES.md": 25845,
+          "RUNTIME.md": 20143
+        },
+        "exclude": [
+          "CONFORMANCE.md",
+          "CHANGELOG.md",
+          "inactive phases"
+        ]
+      }
+    ],
+    "ship_improve": [
+      {
+        "name": "ship-delta",
+        "bytes": 55761,
+        "must": {
+          "phases/ship.md": 8673,
+          "OPS.md": 47088
+        },
+        "transitive": [],
+        "conditional": {
+          "SOURCES.md": 25845,
+          "RUNTIME.md": 20143
+        },
+        "exclude": [
+          "CONFORMANCE.md",
+          "inactive phases"
+        ]
+      },
+      {
+        "name": "improve-delta",
+        "bytes": 37314,
+        "must": {
+          "IMPROVE.md": 34881,
+          "SAICRITIC.md": 2433
+        },
+        "transitive": [],
+        "conditional": {
+          "RUNTIME.md": 20143
+        },
+        "exclude": [
+          "CONFORMANCE.md",
+          "phases/*.md"
+        ]
+      }
+    ],
+    "single_doc": [
+      {
+        "name": "largest-routine-document",
+        "bytes": 47088,
+        "must": {
+          "@routine_doc_max": 47088
+        },
+        "transitive": [],
+        "conditional": {},
+        "exclude": [
+          "CONFORMANCE.md",
+          "CHANGELOG.md"
+        ]
+      }
+    ]
+  },
+  "budgets": {
+    "cold": 27648,
+    "ordinary_continue": 35840,
+    "command_resolution": 55296,
+    "ordinary_phase": 40960,
+    "ship_improve": 56320,
+    "single_doc": 51200
+  },
+  "basis": "Each budget measures the non-cumulative routed surface named by one route. Conditional documents are reported separately and become mandatory only after routing into their owning profile.",
+  "core": 31848,
+  "boot": 10278,
+  "bytes_by_phase": {
+    "INIT": 1677,
+    "PLAN": 1827,
+    "SCOUT": 1028,
+    "BUILD": 1414,
+    "VERIFY": 8842,
+    "REVIEW": 2249,
+    "SHIP": 8673,
+    "DONE": 2453,
+    "BLOCKED": 684,
+    "VALIDATE": 1731,
+    "HUNT": 4069,
+    "MARKHUNT": 3212,
+    "ADD": 3136,
+    "CLEAN": 4719,
+    "TRANSLATE": 4679,
+    "PREPARE": 2991
+  },
+  "phases_count": 16,
+  "phases_total": 53384,
+  "phases_median": 2722.0,
+  "phases_max": 8842,
+  "largest_phase": "VERIFY",
+  "preferred_phase_bands": {
+    "VERIFY": {
+      "min": 6144,
+      "max": 7168
+    },
+    "ADD": {
+      "min": 5120,
+      "max": 5632
+    },
+    "HUNT": {
+      "min": 4608,
+      "max": 5632
+    },
+    "PREPARE": {
+      "min": 3584,
+      "max": 4608
+    },
+    "SHIP": {
+      "min": 8192,
+      "max": 9216
+    },
+    "TRANSLATE": {
+      "min": 7168,
+      "max": 8192
+    },
+    "MARKHUNT": {
+      "min": 8192,
+      "max": 9216
+    },
+    "CLEAN": {
+      "min": 7680,
+      "max": 8704
+    }
+  },
+  "documents": {
+    "ACTIVATION_BLOCK.md": 3664,
+    "BOOT.md": 10278,
+    "COMMANDS.md": 23123,
+    "CONFORMANCE.md": 2465,
+    "CONTROLS.md": 10744,
+    "CONVERGE.md": 8697,
+    "CORE.md": 31848,
+    "EXECUTION.md": 7850,
+    "FUTURE.md": 12279,
+    "HABITS.md": 1577,
+    "IMPROVE.md": 34881,
+    "INDEX.md": 2238,
+    "MAINTENANCE.md": 14615,
+    "OPS.md": 47088,
+    "phases/add.md": 3136,
+    "phases/blocked.md": 684,
+    "phases/build.md": 1414,
+    "phases/clean.md": 4719,
+    "phases/done.md": 2453,
+    "phases/hunt.md": 4069,
+    "phases/init.md": 1677,
+    "phases/markhunt.md": 3212,
+    "phases/plan.md": 1827,
+    "phases/prepare.md": 2991,
+    "phases/review.md": 2249,
+    "phases/scout.md": 1028,
+    "phases/ship.md": 8673,
+    "phases/translate.md": 4679,
+    "phases/validate.md": 1731,
+    "phases/verify.md": 8842,
+    "RFC.md": 260,
+    "RUNTIME.md": 20143,
+    "SAICRITIC.md": 2433,
+    "SKILL.md": 5035,
+    "SOURCES.md": 25845,
+    "STORAGE.md": 5129,
+    "STYLE.md": 7279,
+    "UI.md": 18366
+  },
+  "human_markdown_total": 349221,
+  "informational": [
+    "human_markdown_total"
+  ]
+}
+BUDGET PASS

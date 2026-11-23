@@ -1,0 +1,7 @@
+# T-1372 GREEN (final bytes): controls incl. the REVIEW additions
+command: python -m unittest tools.test_pending_ingress
+..............
+----------------------------------------------------------------------
+Ran 14 tests in 2.214s
+
+OK

@@ -1,0 +1,12 @@
+[
+  {
+    "path": "tools/validate.py",
+    "old": "9dce736f06652cd9292de3d4eec5d7b1535fd657825dd088e420ec3262c78ea7",
+    "current": "64355ea00c7953faed7911fe771de2c66da23ef7fec84cba15e19ddf77d0196e"
+  },
+  {
+    "path": "tools/saipen_engine/subs.py",
+    "old": "cb72628d96028255e7088b52ae82ef333d43835f166c196afe9de957012d3b0c",
+    "current": "35934c1540ce2b997cb435bcf94f62827a791080c787aaabbe645b2dfe917cc1"
+  }
+]

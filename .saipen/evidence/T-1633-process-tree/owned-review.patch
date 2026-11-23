@@ -1,0 +1,589 @@
+--- pre/tools/test_opencode_host_smoke.py
++++ post/tools/test_opencode_host_smoke.py
+@@ -30,7 +30,6 @@
+ import os
+ import re
+ import shutil
+-import subprocess
+ import sys
+ import tempfile
+ import time
+@@ -52,6 +51,7 @@
+ )
+ from test_opencode_adapter import PYTHON, run_cases  # noqa: E402
+ from test_reconcile_valve import _t1318_project  # noqa: E402
++from saipen_engine.process_tree import run as run_host  # noqa: E402
+ from saipen_engine.evidence import EvidenceRun, HARD_BYTES_PER_TICKET  # noqa: E402
+ from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
+ 
+@@ -184,7 +184,7 @@
+             legacy = cls.home / LEGACY_RELATIVE
+             legacy.parent.mkdir(parents=True)
+             legacy.write_text("// stale singular copy\n", encoding="utf-8")
+-            proc = subprocess.run(
++            proc = run_host(
+                 [BASH, str(REPO / "bootstrap" / "inject.sh")],
+                 capture_output=True,
+                 text=True,
+@@ -256,7 +256,7 @@
+             env["SAIPEN_GUARD_STARTUP_PROBE"] = str(probe)
+         else:
+             env.pop("SAIPEN_GUARD_STARTUP_PROBE", None)
+-        proc = subprocess.run(
++        proc = run_host(
+             [OPENCODE, "debug", "config"],
+             capture_output=True,
+             text=True,
+@@ -668,7 +668,7 @@
+             legacy.parent.mkdir(parents=True, exist_ok=True)
+             canonical.write_text("// old plural generation\n", encoding="utf-8")
+             legacy.write_text("// old singular generation\n", encoding="utf-8")
+-            proc = subprocess.run(
++            proc = run_host(
+                 [POWERSHELL, "-NoProfile", "-File", str(REPO / "bootstrap" / "inject.ps1")],
+                 capture_output=True, text=True, timeout=600,
+                 env={**os.environ, "USERPROFILE": str(home), "HOME": str(home)},
+@@ -696,7 +696,7 @@
+         with tempfile.TemporaryDirectory(prefix="saipen-real-opencode-gen-") as temp:
+             probe = Path(temp) / "factory.jsonl"
+             started_ms = int(time.time() * 1000)
+-            proc = subprocess.run(
++            proc = run_host(
+                 [OPENCODE, "debug", "config"], cwd=temp,
+                 env={**os.environ, "SAIPEN_GUARD_STARTUP_PROBE": str(probe)},
+                 capture_output=True, text=True, timeout=300,
+--- pre/tools/test_opencode_bound_launch_smoke.py
++++ post/tools/test_opencode_bound_launch_smoke.py
+@@ -21,6 +21,8 @@
+ import unittest
+ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+ from pathlib import Path
++
++from saipen_engine.process_tree import run as run_host
+ 
+ TOOLS = Path(__file__).resolve().parent
+ REPO = TOOLS.parent
+@@ -280,7 +282,7 @@
+                     "--",
+                     *host_args,
+                 ]
+-            proc = subprocess.run(
++            proc = run_host(
+                 command,
+                 cwd=root,
+                 env=env,
+--- pre/tools/test_t1327_live_acceptance.py
++++ post/tools/test_t1327_live_acceptance.py
+@@ -34,6 +34,8 @@
+ import time
+ import unittest
+ from pathlib import Path
++
++from saipen_engine.process_tree import run as run_host
+ from typing import ClassVar
+ 
+ TOOLS = Path(__file__).resolve().parent
+@@ -186,7 +188,7 @@
+     def _session(cls, prompt: str) -> dict:
+         attempts = []
+         for model in MODEL_CANDIDATES:
+-            proc = subprocess.run(
++            proc = run_host(
+                 [OPENCODE, "run", prompt, "--format", "json", "--auto", "--model", model],
+                 cwd=str(cls.project), env=cls._host_env(),
+                 capture_output=True, text=True, timeout=1800,
+--- pre/tools/test_opencode_live_session.py
++++ post/tools/test_opencode_live_session.py
+@@ -45,6 +45,8 @@
+ import time
+ import unittest
+ from pathlib import Path
++
++from saipen_engine.process_tree import run as run_host
+ from typing import ClassVar
+ 
+ TOOLS = Path(__file__).resolve().parent
+@@ -247,7 +249,7 @@
+         # script, and no `saipen` launcher exists on this machine's PATH. The
+         # session must therefore succeed ONLY because the installed adapter
+         # materialises and PATH-injects the launcher itself (T-1318 AC-05).
+-        proc = subprocess.run(
++        proc = run_host(
+             INJECT_COMMAND,
+             capture_output=True, text=True, env=cls._host_env(), timeout=900,
+         )
+@@ -389,7 +391,7 @@
+                 "--model", model,
+             ]
+             began = int(time.time() * 1000)
+-            proc = subprocess.run(
++            proc = run_host(
+                 command, cwd=str(project), env=cls._host_env(),
+                 capture_output=True, text=True, timeout=1800,
+             )
+--- pre/tools/saipen_engine/test_runner.py
++++ post/tools/saipen_engine/test_runner.py
+@@ -336,12 +336,14 @@
+         hidden_startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+         hidden_startup.wShowWindow = subprocess.SW_HIDE
+         creation["startupinfo"] = hidden_startup
++    from .process_tree import ProcessTree
++
+     spool_context = (
+         nullcontext(str(spool))
+         if spool is not None
+         else tempfile.TemporaryDirectory(prefix="saipen-family-")
+     )
+-    with spool_context as spool_name:
++    with spool_context as spool_name, ProcessTree() as tree:
+         spool_dir = Path(spool_name)
+         stdout_path = spool_dir / "stdout"
+         stderr_path = spool_dir / "stderr"
+@@ -351,7 +353,7 @@
+             try:
+                 _install_quiet_child_site(spool_dir, env)
+                 with open(stdout_path, "wb") as out, open(stderr_path, "wb") as err:
+-                    process = subprocess.Popen(
++                    process = tree.start(
+                         family.command,
+                         cwd=root,
+                         env=env,
+@@ -381,8 +383,8 @@
+                 process.wait(timeout=family.timeout)
+             except subprocess.TimeoutExpired:
+                 timed_out = True
+-                _terminate_process_tree(process)
+-                process.wait()
++                tree.terminate()
++                process.wait(timeout=10)
+             if timed_out and process.stdout is not None:
+                 with suppress(OSError):
+                     process.stdout.close()
+@@ -413,6 +415,7 @@
+                     else ("PASS" if process.returncode == 0 else "FAIL")
+                 ),
+                 "exit_code": None if timed_out else process.returncode,
++                "processes_leaked": [pid for pid in tree.pids() if pid != process.pid],
+                 "failures": roster,
+                 "causes": causes,
+                 "stdout": stdout_text,
+@@ -427,7 +430,7 @@
+                 process is not None
+                 and process.poll() is None
+             ):
+-                _terminate_process_tree(process)
++                tree.terminate()
+                 with suppress(subprocess.TimeoutExpired):
+                     process.wait(timeout=5)
+ 
+--- pre/tools/saipen_engine/core_unit.py
++++ post/tools/saipen_engine/core_unit.py
+@@ -425,6 +425,7 @@
+     return {
+         "status": report["status"],
+         "exit_code": report.get("exit_code"),
++        "processes_leaked": report.get("processes_leaked") or [],
+         **parse_output(text),
+         "sections": red_sections(text),
+     }
+@@ -460,6 +461,7 @@
+     return {
+         "status": report["status"],
+         "exit_code": report.get("exit_code"),
++        "processes_leaked": report.get("processes_leaked") or [],
+         **parse_output(text),
+         "sections": red_sections(text),
+         "manifest": manifest if isinstance(manifest, dict) else None,
+@@ -509,6 +511,8 @@
+         "unparsed": sum(int(shard.get("unparsed") or 0) for shard in shards),
+         "tallied": sum(tallies) if None not in tallies else None,
+         "sections": sections,
++        "processes_leaked": sorted({pid for shard in shards
++                                    for pid in shard.get("processes_leaked") or []}),
+         "discovered": next(iter(discovered)) if len(discovered) == 1 else None,
+         "partition_error": partition_error,
+         "shards": [
+@@ -522,6 +526,7 @@
+                 "unparsed": shard.get("unparsed"),
+                 "tallied": shard.get("tallied"),
+                 "duration_s": shard.get("duration_s"),
++                "processes_leaked": shard.get("processes_leaked") or [],
+             }
+             for shard, manifest in zip(shards, manifests)
+         ],
+@@ -836,6 +841,7 @@
+         "unparsed": run.get("unparsed"),
+         "tallied": run.get("tallied"),
+         "red": run["red"],
++        "processes_leaked": run.get("processes_leaked") or [],
+         # T-1472: how the one discovery was executed, and the proof that its
+         # shards covered it. Absent for a whole (single-process) run.
+         **{
+--- pre/tools/saipen_engine/process_tree.py
++++ post/tools/saipen_engine/process_tree.py
+@@ -0,0 +1,230 @@
++"""One owned process group/job, including descendants whose launcher exited."""
++
++from __future__ import annotations
++
++import contextlib
++import os
++import signal
++import subprocess
++from pathlib import Path
++
++
++class _WindowsJob:
++    def __init__(self):
++        import ctypes
++        from ctypes import wintypes
++
++        self.ctypes = ctypes
++        self.api = ctypes.WinDLL("kernel32", use_last_error=True)
++        signatures = {
++            "CreateJobObjectW": ([ctypes.c_void_p, wintypes.LPCWSTR], wintypes.HANDLE),
++            "SetInformationJobObject": ([wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p,
++                                         wintypes.DWORD], wintypes.BOOL),
++            "AssignProcessToJobObject": ([wintypes.HANDLE, wintypes.HANDLE], wintypes.BOOL),
++            "QueryInformationJobObject": ([wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p,
++                                           wintypes.DWORD, ctypes.c_void_p], wintypes.BOOL),
++            "TerminateJobObject": ([wintypes.HANDLE, wintypes.UINT], wintypes.BOOL),
++            "CloseHandle": ([wintypes.HANDLE], wintypes.BOOL),
++            "CreateToolhelp32Snapshot": ([wintypes.DWORD, wintypes.DWORD], wintypes.HANDLE),
++            "Thread32First": ([wintypes.HANDLE, ctypes.c_void_p], wintypes.BOOL),
++            "Thread32Next": ([wintypes.HANDLE, ctypes.c_void_p], wintypes.BOOL),
++            "OpenThread": ([wintypes.DWORD, wintypes.BOOL, wintypes.DWORD], wintypes.HANDLE),
++            "ResumeThread": ([wintypes.HANDLE], wintypes.DWORD),
++        }
++        for name, (arguments, result) in signatures.items():
++            function = getattr(self.api, name)
++            function.argtypes, function.restype = arguments, result
++
++        class Basic(ctypes.Structure):
++            _fields_ = [("process_time", ctypes.c_longlong), ("job_time", ctypes.c_longlong),
++                        ("flags", wintypes.DWORD), ("minimum", ctypes.c_size_t),
++                        ("maximum", ctypes.c_size_t), ("active", wintypes.DWORD),
++                        ("affinity", ctypes.c_size_t), ("priority", wintypes.DWORD),
++                        ("scheduling", wintypes.DWORD)]
++
++        class Extended(ctypes.Structure):
++            _fields_ = [("basic", Basic), ("io", ctypes.c_ulonglong * 6),
++                        ("memory", ctypes.c_size_t * 4)]
++
++        self.handle = self.api.CreateJobObjectW(None, None)
++        if not self.handle:
++            raise ctypes.WinError(ctypes.get_last_error())
++        limits = Extended()
++        limits.basic.flags = 0x2000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
++        if not self.api.SetInformationJobObject(self.handle, 9, ctypes.byref(limits),
++                                                ctypes.sizeof(limits)):
++            error = ctypes.WinError(ctypes.get_last_error())
++            self.close()
++            raise error
++
++    def assign_and_resume(self, process):
++        ctypes = self.ctypes
++        from ctypes import wintypes
++
++        if not self.api.AssignProcessToJobObject(self.handle, int(process._handle)):
++            raise ctypes.WinError(ctypes.get_last_error())
++
++        class Thread(ctypes.Structure):
++            _fields_ = (("size", wintypes.DWORD), ("usage", wintypes.DWORD),
++                        ("tid", wintypes.DWORD), ("pid", wintypes.DWORD),
++                        ("base", wintypes.LONG), ("delta", wintypes.LONG),
++                        ("flags", wintypes.DWORD))
++
++        snapshot = self.api.CreateToolhelp32Snapshot(4, 0)  # TH32CS_SNAPTHREAD
++        if snapshot == ctypes.c_void_p(-1).value:
++            raise ctypes.WinError(ctypes.get_last_error())
++        try:
++            entry = Thread()
++            entry.size = ctypes.sizeof(entry)
++            more = self.api.Thread32First(snapshot, ctypes.byref(entry))
++            while more:
++                if entry.pid == process.pid:
++                    thread = self.api.OpenThread(2, False, entry.tid)  # THREAD_SUSPEND_RESUME
++                    if not thread:
++                        raise ctypes.WinError(ctypes.get_last_error())
++                    try:
++                        previous = self.api.ResumeThread(thread)
++                        if previous == 0xFFFFFFFF:
++                            raise ctypes.WinError(ctypes.get_last_error())
++                        if previous == 1:
++                            return
++                    finally:
++                        self.api.CloseHandle(thread)
++                more = self.api.Thread32Next(snapshot, ctypes.byref(entry))
++            raise OSError("suspended child has no observable initial thread")
++        finally:
++            self.api.CloseHandle(snapshot)
++
++    def pids(self):
++        ctypes = self.ctypes
++        from ctypes import wintypes
++
++        class Processes(ctypes.Structure):
++            _fields_ = (("assigned", wintypes.DWORD), ("count", wintypes.DWORD),
++                        ("ids", ctypes.c_size_t * 4096))
++
++        record = Processes()
++        if not self.api.QueryInformationJobObject(self.handle, 3, ctypes.byref(record),
++                                                  ctypes.sizeof(record), None):
++            raise ctypes.WinError(ctypes.get_last_error())
++        return list(record.ids[:record.count])
++
++    def terminate(self):
++        if self.handle and not self.api.TerminateJobObject(self.handle, 1):
++            raise self.ctypes.WinError(self.ctypes.get_last_error())
++
++    def close(self):
++        if self.handle:
++            self.api.CloseHandle(self.handle)
++            self.handle = None
++
++
++class ProcessTree:
++    """Launch before any descendant can escape ownership; close reaps the group."""
++
++    def __init__(self):
++        self.job = _WindowsJob() if os.name == "nt" else None
++        self.process = None
++
++    def start(self, *args, **kwargs):
++        if self.job:
++            # Assign the suspended root before it can start its shim's children.
++            kwargs["creationflags"] = kwargs.get("creationflags", 0) | 4 | 0x08000000
++        else:
++            kwargs["start_new_session"] = True
++        kwargs.setdefault("stdin", subprocess.DEVNULL)
++        text_flag = kwargs.pop("text", None)
++        universal_flag = kwargs.pop("universal_newlines", None)
++        if (text_flag is not None and universal_flag is not None
++                and bool(text_flag) != bool(universal_flag)):
++            raise subprocess.SubprocessError("text and universal_newlines must agree")
++        text_mode = text_flag or universal_flag
++        encoding = kwargs.pop("encoding", None)
++        errors = kwargs.pop("errors", None)
++        if encoding not in (None, "utf-8", "utf8") or errors not in (None, "replace"):
++            raise ValueError("host text output uses UTF-8 with replacement decoding")
++        options = dict()
++        options.update(kwargs)
++        if text_mode or encoding or errors:
++            self.process = subprocess.Popen(*args, text=True, encoding="utf-8",
++                                            errors="replace", **options)
++        else:
++            self.process = subprocess.Popen(*args, **options)
++        try:
++            if self.job:
++                self.job.assign_and_resume(self.process)
++        except BaseException:
++            self.process.kill()
++            self.process.wait(timeout=10)
++            self.close()
++            raise
++        return self.process
++
++    def pids(self):
++        if self.job:
++            return self.job.pids()
++        if self.process is None:
++            return []
++        if not Path("/proc").is_dir():
++            report = subprocess.run(["ps", "-axo", "pid=,pgid=,stat="],
++                                    stdin=subprocess.DEVNULL, capture_output=True,
++                                    text=True, encoding="utf-8", errors="replace",
++                                    check=True, timeout=10)
++            return [int(parts[0]) for line in report.stdout.splitlines()
++                    if len(parts := line.split()) == 3
++                    and int(parts[1]) == self.process.pid and not parts[2].startswith("Z")]
++        found = []
++        for entry in Path("/proc").iterdir():
++            if not entry.name.isdigit():
++                continue
++            with contextlib.suppress(OSError, ValueError, IndexError):
++                fields = (entry / "stat").read_text().rsplit(")", 1)[1].split()
++                if fields[0] != "Z" and int(fields[2]) == self.process.pid:
++                    found.append(int(entry.name))
++        return found
++
++    def terminate(self):
++        if self.job:
++            self.job.terminate()
++        elif self.process is not None:
++            with contextlib.suppress(ProcessLookupError):
++                os.killpg(self.process.pid, signal.SIGKILL)
++
++    def close(self):
++        if self.job:
++            self.job.close()
++        else:
++            self.terminate()
++        if self.process is not None:
++            with contextlib.suppress(subprocess.TimeoutExpired):
++                self.process.wait(timeout=10)
++
++    def __enter__(self):
++        return self
++
++    def __exit__(self, *_):
++        self.close()
++
++
++def run(*args, timeout=None, check=False, capture_output=False, input=None, **kwargs):
++    """Run a host command with owned cleanup and explicit UTF-8 text output."""
++    if capture_output:
++        if "stdout" in kwargs or "stderr" in kwargs:
++            raise ValueError("capture_output conflicts with stdout/stderr")
++        kwargs.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
++    if input is not None:
++        if "stdin" in kwargs:
++            raise ValueError("input conflicts with stdin")
++        kwargs["stdin"] = subprocess.PIPE
++    with ProcessTree() as tree:
++        process = tree.start(*args, **kwargs)
++        try:
++            stdout, stderr = process.communicate(input, timeout=timeout)
++        except BaseException:
++            tree.terminate()
++            process.communicate(timeout=10)
++            raise
++        if check and process.returncode:
++            raise subprocess.CalledProcessError(process.returncode, process.args,
++                                                output=stdout, stderr=stderr)
++        return subprocess.CompletedProcess(process.args, process.returncode, stdout, stderr)
+--- pre/tools/test_t1633_process_tree.py
++++ post/tools/test_t1633_process_tree.py
+@@ -0,0 +1,132 @@
++"""T-1633: smoke timeouts own the host tree; family records carry orphan PIDs."""
++
++from __future__ import annotations
++
++import json
++import os
++import subprocess
++import sys
++import tempfile
++import time
++import unittest
++from pathlib import Path
++from unittest import mock
++
++import test_opencode_host_smoke as smoke
++from saipen_engine import core_unit
++from saipen_engine.test_runner import TestFamily
++
++
++class ProcessOwnership(unittest.TestCase):
++    def setUp(self):
++        scratch = tempfile.TemporaryDirectory(prefix="t1633-owned-")
++        self.addCleanup(scratch.cleanup)
++        self.root = Path(scratch.name)
++        self.pid_file = self.root / "host.pid"
++        self.host_pid = None
++
++    def cleanup_host(self):
++        if self.pid_file.is_file():
++            self.host_pid = int(self.pid_file.read_text())
++        if self.host_pid and core_unit.pid_alive(self.host_pid):
++            if os.name == "nt":
++                subprocess.run(["taskkill", "/F", "/PID", str(self.host_pid)],
++                               stdin=subprocess.DEVNULL, capture_output=True, check=False)
++            else:
++                os.kill(self.host_pid, 9)
++
++    def shim(self, *, exits=False, inherited=True):
++        child = ("import os,time; from pathlib import Path; "
++                 f"Path({str(self.pid_file)!r}).write_text(str(os.getpid())); time.sleep(15)")
++        output = "" if inherited else ", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL"
++        launcher = (
++            "import subprocess,sys,time; from pathlib import Path; "
++            f"subprocess.Popen([sys.executable,'-c',{child!r}], stdin=subprocess.DEVNULL{output}); "
++            f"marker=Path({str(self.pid_file)!r}); "
++            "\nwhile not marker.exists(): time.sleep(.01)\n"
++            + ("" if exits else "time.sleep(60)\n")
++        )
++        self.addCleanup(self.cleanup_host)
++        return [sys.executable, "-c", launcher]
++
++    def assert_host_gone(self):
++        self.assertTrue(self.pid_file.is_file(), "stand-in host never started")
++        self.host_pid = int(self.pid_file.read_text())
++        deadline = time.monotonic() + 3
++        while core_unit.pid_alive(self.host_pid) and time.monotonic() < deadline:
++            time.sleep(.02)
++        self.assertFalse(core_unit.pid_alive(self.host_pid), "host outlived its smoke launcher")
++
++    def test_timeout_reaps_host_and_keeps_an_unrelated_process_alive(self):
++        foreign = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"],
++                                   stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
++                                   stderr=subprocess.DEVNULL)
++        try:
++            launcher = getattr(smoke, "run_host", subprocess.run)
++            with self.assertRaises(subprocess.TimeoutExpired):
++                launcher(self.shim(inherited=False), capture_output=True, timeout=2)
++            self.assert_host_gone()
++            self.assertIsNone(foreign.poll())
++        finally:
++            foreign.kill()
++            foreign.wait(timeout=10)
++
++    def test_timeout_reaps_a_host_even_after_its_shim_has_exited(self):
++        launcher = getattr(smoke, "run_host", subprocess.run)
++        began = time.monotonic()
++        with self.assertRaises(subprocess.TimeoutExpired):
++            launcher(self.shim(exits=True), capture_output=True, timeout=2)
++        self.assertLess(time.monotonic() - began, 8, "timeout waited for the orphan to exit")
++        self.assert_host_gone()
++
++    def test_successful_shim_cannot_leave_a_detached_host(self):
++        launcher = getattr(smoke, "run_host", subprocess.run)
++        completed = launcher(self.shim(exits=True, inherited=False),
++                             capture_output=True, timeout=10)
++        self.assertEqual(completed.returncode, 0)
++        self.assert_host_gone()
++
++    def test_regular_output_and_check_contract_are_preserved(self):
++        launcher = getattr(smoke, "run_host", subprocess.run)
++        result = launcher([sys.executable, "-c", "print('ordinary')"],
++                          capture_output=True, text=True, timeout=10, check=True)
++        self.assertEqual(result.stdout.strip(), "ordinary")
++        binary = launcher([sys.executable, "-c", "print('binary')"],
++                          capture_output=True, timeout=10, check=True)
++        self.assertEqual(binary.stdout.strip(), b"binary")
++        with self.assertRaises(subprocess.CalledProcessError) as refused:
++            launcher([sys.executable, "-c", "import sys; sys.exit(3)"],
++                     capture_output=True, timeout=10, check=True)
++        self.assertEqual(refused.exception.returncode, 3)
++
++    def test_core_family_reports_and_reaps_a_shards_lingering_host(self):
++        subject = self.root / "subject"
++        subject.mkdir()
++        command = self.shim(exits=True, inherited=False)
++        # A real family root exits green after spawning the lingering host.
++        command[-1] += ("\nprint('Ran 1 test in 0.01s', file=sys.stderr); "
++                        "print('OK', file=sys.stderr)\n")
++        family = TestFamily(core_unit.FAMILY_NAME, tuple(command), 30)
++        with mock.patch.object(core_unit, "family", return_value=family):
++            run = core_unit.run_family(subject)
++        self.assert_host_gone()
++        self.assertIn(self.host_pid, run.get("processes_leaked", []), run)
++        self.assertEqual(run["ran"], 1)
++        self.assertEqual(run["status"], "PASS")
++
++    def test_a_record_preserves_the_reported_process_ids(self):
++        root = self.root / "record"
++        root.mkdir()
++        (root / "tools").mkdir()
++        baseline = Path(__file__).parent / "core_unit_baseline.json"
++        (root / core_unit.BASELINE_REL).write_bytes(baseline.read_bytes())
++        run = {"status": "PASS", "exit_code": 0, "ran": 1, "red": [],
++               "command": ["python", "-m", "unittest"], "duration_s": .01,
++               "tallied": 1, "unparsed": 0, "processes_leaked": [12345]}
++        written = core_unit.write_record(root, run, "1633" * 4)
++        record = json.loads((root / written["path"]).read_text())
++        self.assertEqual(record.get("processes_leaked"), [12345])
++
++
++if __name__ == "__main__":
++    unittest.main()

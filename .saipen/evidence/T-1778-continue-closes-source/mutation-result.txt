@@ -1,0 +1,6 @@
+control: ran 2, red 0 -- as expected
+the CLI before this Work: ran 2, red 1 -- as expected
+the closure never runs: ran 2, red 1 -- as expected
+the closure is not reported: ran 2, red 1 -- as expected
+every receipt is swept, not this Work's: ran 2, red 0 -- as expected
+mutations: 4, repetitions each: 3, problems: 0

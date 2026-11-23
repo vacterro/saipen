@@ -1,0 +1,103 @@
+[
+  {
+    "goal": {
+      "goal_id": "self-maintenance-core",
+      "project_id": "_SAIPEN",
+      "title": "Continuous SAIPEN Self-Maintenance and Defect Elimination",
+      "objective": "Autonomously discover, evaluate, and repair verified regressions, test failures, and maintenance backlog to preserve a healthy repository",
+      "authorization_scope": "MAINTENANCE",
+      "success_criteria": {},
+      "evidence_provider": "failed_tests",
+      "current_progress": {
+        "ran": 8930,
+        "failing_count": 3,
+        "classification": "STALE_FAIL",
+        "current_fingerprint": "396c679a8d41bbf0270aebed07b5fc473e1877382b5e5aa060d571c4e6f91cca",
+        "evidence_fingerprint": "bb783a64ea428ee41d831c716d1988bbe9dd84b3c04868b6d405a120432e793e"
+      },
+      "target_progress": {},
+      "research_or_work_backlog_source": "",
+      "admission_policy": {},
+      "current_status": "ACTIONABLE_GAPS",
+      "last_evaluation": "2026-11-04T05:15:49Z",
+      "last_successful_work": null,
+      "last_discovery": null,
+      "blockers": [],
+      "completion_evidence": null,
+      "resume_metadata": {},
+      "paused": false
+    },
+    "evaluation": {
+      "provider_name": "failed_tests",
+      "provider_kind": "FAILED_TEST_DISCOVERY",
+      "evidence_identity": "sha256:f8d0d4ebc080554f",
+      "evidence_freshness": "STALE",
+      "satisfaction_status": "ACTIONABLE_GAPS",
+      "actionable_candidates": [
+        {
+          "candidate_id": "self-maintenance-core-fix-49c41747",
+          "goal_id": "self-maintenance-core",
+          "title": "Repair failing test test_t1816_provenance_inventory.ProvenanceInventoryTests.test_committed_ledger_cites_the_missing_ids_as_parents",
+          "priority": "P1",
+          "description": "Fix regression in test_t1816_provenance_inventory.ProvenanceInventoryTests.test_committed_ledger_cites_the_missing_ids_as_parents (from prior generation bb783a64ea428ee4)",
+          "scope": "",
+          "target_locator": "",
+          "evidence_source": "",
+          "verification": "python -m unittest test_t1816_provenance_inventory.ProvenanceInventoryTests.test_committed_ledger_cites_the_missing_ids_as_parents",
+          "needs": [],
+          "risk": "low",
+          "metadata": {},
+          "evidence_fingerprint": ""
+        },
+        {
+          "candidate_id": "self-maintenance-core-fix-8c5135e5",
+          "goal_id": "self-maintenance-core",
+          "title": "Repair failing test test_t1816_provenance_inventory.ProvenanceInventoryTests.test_committed_ledger_still_misses_exactly_the_cited_events",
+          "priority": "P1",
+          "description": "Fix regression in test_t1816_provenance_inventory.ProvenanceInventoryTests.test_committed_ledger_still_misses_exactly_the_cited_events (from prior generation bb783a64ea428ee4)",
+          "scope": "",
+          "target_locator": "",
+          "evidence_source": "",
+          "verification": "python -m unittest test_t1816_provenance_inventory.ProvenanceInventoryTests.test_committed_ledger_still_misses_exactly_the_cited_events",
+          "needs": [],
+          "risk": "low",
+          "metadata": {},
+          "evidence_fingerprint": ""
+        },
+        {
+          "candidate_id": "self-maintenance-core-fix-f69ea6be",
+          "goal_id": "self-maintenance-core",
+          "title": "Repair failing test test_t1816_provenance_inventory.ProvenanceInventoryTests.test_working_tree_renumbers_committed_ids_instead_of_repairing",
+          "priority": "P1",
+          "description": "Fix regression in test_t1816_provenance_inventory.ProvenanceInventoryTests.test_working_tree_renumbers_committed_ids_instead_of_repairing (from prior generation bb783a64ea428ee4)",
+          "scope": "",
+          "target_locator": "",
+          "evidence_source": "",
+          "verification": "python -m unittest test_t1816_provenance_inventory.ProvenanceInventoryTests.test_working_tree_renumbers_committed_ids_instead_of_repairing",
+          "needs": [],
+          "risk": "low",
+          "metadata": {},
+          "evidence_fingerprint": ""
+        }
+      ],
+      "candidate_ids": [
+        "self-maintenance-core-fix-49c41747",
+        "self-maintenance-core-fix-8c5135e5",
+        "self-maintenance-core-fix-f69ea6be"
+      ],
+      "priority": "P2",
+      "dependencies": [],
+      "verification_criteria": "",
+      "blockers": [],
+      "completeness_status": "UNKNOWN",
+      "metrics": {
+        "ran": 8930,
+        "failing_count": 3,
+        "classification": "STALE_FAIL",
+        "current_fingerprint": "396c679a8d41bbf0270aebed07b5fc473e1877382b5e5aa060d571c4e6f91cca",
+        "evidence_fingerprint": "bb783a64ea428ee41d831c716d1988bbe9dd84b3c04868b6d405a120432e793e"
+      },
+      "summary": "Evidence is STALE_FAIL: newest record failed (3 failing) on older tree bb783a64ea428ee4"
+    }
+  }
+]

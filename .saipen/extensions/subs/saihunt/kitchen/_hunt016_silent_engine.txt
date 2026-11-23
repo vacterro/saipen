@@ -1,0 +1,3 @@
+tools/saipen_engine/\journal.py:4801:    # `except Exception: pass`, swallowed the failure, and returned RESOLVED
+tools/saipen_engine/\conformance.py:286:    arithmetic inside `except Exception: pass`. A padded stamp therefore
+tools/saipen_engine/\conformance.py:1539:    # used to parse the raw string inside `except Exception: pass`, so a stamp

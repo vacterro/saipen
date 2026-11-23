@@ -1,0 +1,26 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tools/test_release_reconciliation.py",
+    "-k",
+    "r003",
+    "-v",
+    "--tb=short",
+    "--color=no",
+    "-p",
+    "no:cacheprovider"
+  ],
+  "exit_code": 1,
+  "before": {
+    "tools/saipen_engine/isolated_release.py": "45d5ce0b6d45b7bc5836853221ce744c66ae385aa5cb5fdaf199aa3326b050b7",
+    "tools/test_release_reconciliation.py": "ca626aafbf9a9ef3ff3bc80a076c82324636f4de81b86be35093547b81cd30ec"
+  },
+  "after": {
+    "tools/saipen_engine/isolated_release.py": "45d5ce0b6d45b7bc5836853221ce744c66ae385aa5cb5fdaf199aa3326b050b7",
+    "tools/test_release_reconciliation.py": "ca626aafbf9a9ef3ff3bc80a076c82324636f4de81b86be35093547b81cd30ec"
+  },
+  "prior_attempt": "final-oracle-before is invalid as pair: known-good fixture attempted to overwrite read-only existing Git objects. Corrected copy transfers only new commit objects. Added distinct push URL correctness control before production edit."
+}

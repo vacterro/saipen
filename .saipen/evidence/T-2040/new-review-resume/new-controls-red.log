@@ -1,0 +1,253 @@
+test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) ... 
+  test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (field='producer') ... FAIL
+  test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (field='package_id') ... FAIL
+  test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (field='source_head') ... FAIL
+  test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (field='source_tree_fingerprint') ... FAIL
+  test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (field='role_revision') ... FAIL
+  test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (hypotheses=[]) ... FAIL
+  test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (hypotheses='not-an-array') ... FAIL
+  test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (hypotheses=[None]) ... FAIL
+  test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (hypotheses=[{'producer': 'saiui', 'package_id': 'UI-001', 'source_head': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'source_tree_fingerprint': 'git-delta-v1:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc', 'role_revision': 'sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8'}, {'producer': 'saiui', 'package_id': 'UI-001', 'source_head': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'source_tree_fingerprint': 'git-delta-v1:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc', 'role_revision': 'sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8'}]) ... FAIL
+test_collect_verifier_requires_exact_disposition_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata) ... 
+  test_collect_verifier_requires_exact_disposition_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata) (field='record', value=None) ... FAIL
+  test_collect_verifier_requires_exact_disposition_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata) (field='record', value='wrong-record') ... FAIL
+  test_collect_verifier_requires_exact_disposition_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata) (field='record_sha256', value=None) ... FAIL
+  test_collect_verifier_requires_exact_disposition_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata) (field='record_sha256', value='0000000000000000000000000000000000000000000000000000000000000000') ... FAIL
+test_dedup_cannot_substitute_hypothesis_for_exact_digest (test_t2040_review_proof_binding.ExactReviewBindingTests.test_dedup_cannot_substitute_hypothesis_for_exact_digest) ... FAIL
+test_disposition_verifier_requires_exact_executed_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata) ... 
+  test_disposition_verifier_requires_exact_executed_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata) (field='record', value=None) ... FAIL
+  test_disposition_verifier_requires_exact_executed_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata) (field='record', value='wrong-record') ... FAIL
+  test_disposition_verifier_requires_exact_executed_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata) (field='record_sha256', value=None) ... FAIL
+  test_disposition_verifier_requires_exact_executed_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata) (field='record_sha256', value='0000000000000000000000000000000000000000000000000000000000000000') ... FAIL
+test_duplicate_collect_owner_cannot_prove_review (test_t2040_review_proof_binding.ExactReviewBindingTests.test_duplicate_collect_owner_cannot_prove_review) ... FAIL
+test_producer_cannot_supply_its_own_independent_core_review (test_t2040_review_proof_binding.ExactReviewBindingTests.test_producer_cannot_supply_its_own_independent_core_review) ... FAIL
+test_resolved_collect_deduplicates_but_is_not_committed_review_authority (test_t2040_review_proof_binding.ExactReviewBindingTests.test_resolved_collect_deduplicates_but_is_not_committed_review_authority) ... FAIL
+test_shared_proof_returns_entire_receipt_binding (test_t2040_review_proof_binding.ExactReviewBindingTests.test_shared_proof_returns_entire_receipt_binding) ... FAIL
+test_settled_integration_requires_exact_input_source (test_t2040_review_proof_binding.IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source) ... 
+  test_settled_integration_requires_exact_input_source (test_t2040_review_proof_binding.IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source) (field='input_source', missing=True) ... FAIL
+  test_settled_integration_requires_exact_input_source (test_t2040_review_proof_binding.IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source) (field='input_source', mismatch=True) ... FAIL
+  test_settled_integration_requires_exact_input_source (test_t2040_review_proof_binding.IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source) (field='input_source_fingerprint', missing=True) ... FAIL
+  test_settled_integration_requires_exact_input_source (test_t2040_review_proof_binding.IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source) (field='input_source_fingerprint', mismatch=True) ... FAIL
+test_actual_core_disproof_closes_but_generic_negative_finding_does_not (test_t2040_review_proof_binding.NativeNoPatchRoundtripTests.test_actual_core_disproof_closes_but_generic_negative_finding_does_not) ... FAIL
+
+======================================================================
+FAIL: test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (field='producer')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 91, in test_collect_hypotheses_cannot_contradict_exact_generation
+    self.assertIsNone(self._proof()[0])
+AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '4f820edc4dc541d97973da20fbe9725aa3b3b1d6f01a9644b16dcba1be901b29'} is not None
+
+======================================================================
+FAIL: test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (field='package_id')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 91, in test_collect_hypotheses_cannot_contradict_exact_generation
+    self.assertIsNone(self._proof()[0])
+AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '4f820edc4dc541d97973da20fbe9725aa3b3b1d6f01a9644b16dcba1be901b29'} is not None
+
+======================================================================
+FAIL: test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (field='source_head')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 91, in test_collect_hypotheses_cannot_contradict_exact_generation
+    self.assertIsNone(self._proof()[0])
+AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '4f820edc4dc541d97973da20fbe9725aa3b3b1d6f01a9644b16dcba1be901b29'} is not None
+
+======================================================================
+FAIL: test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (field='source_tree_fingerprint')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 91, in test_collect_hypotheses_cannot_contradict_exact_generation
+    self.assertIsNone(self._proof()[0])
+AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '4f820edc4dc541d97973da20fbe9725aa3b3b1d6f01a9644b16dcba1be901b29'} is not None
+
+======================================================================
+FAIL: test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (field='role_revision')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 91, in test_collect_hypotheses_cannot_contradict_exact_generation
+    self.assertIsNone(self._proof()[0])
+AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '4f820edc4dc541d97973da20fbe9725aa3b3b1d6f01a9644b16dcba1be901b29'} is not None
+
+======================================================================
+FAIL: test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (hypotheses=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 96, in test_collect_hypotheses_cannot_contradict_exact_generation
+    self.assertIsNone(self._proof()[0])
+AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '4f820edc4dc541d97973da20fbe9725aa3b3b1d6f01a9644b16dcba1be901b29'} is not None
+
+======================================================================
+FAIL: test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (hypotheses='not-an-array')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 96, in test_collect_hypotheses_cannot_contradict_exact_generation
+    self.assertIsNone(self._proof()[0])
+AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '4f820edc4dc541d97973da20fbe9725aa3b3b1d6f01a9644b16dcba1be901b29'} is not None
+
+======================================================================
+FAIL: test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (hypotheses=[None])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 96, in test_collect_hypotheses_cannot_contradict_exact_generation
+    self.assertIsNone(self._proof()[0])
+AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '4f820edc4dc541d97973da20fbe9725aa3b3b1d6f01a9644b16dcba1be901b29'} is not None
+
+======================================================================
+FAIL: test_collect_hypotheses_cannot_contradict_exact_generation (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_hypotheses_cannot_contradict_exact_generation) (hypotheses=[{'producer': 'saiui', 'package_id': 'UI-001', 'source_head': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'source_tree_fingerprint': 'git-delta-v1:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc', 'role_revision': 'sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8'}, {'producer': 'saiui', 'package_id': 'UI-001', 'source_head': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'source_tree_fingerprint': 'git-delta-v1:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc', 'role_revision': 'sha256:f2e3685b908a3b9837917f12c5414628d847c35fb72567f0306e2c8b19a8dab8'}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 96, in test_collect_hypotheses_cannot_contradict_exact_generation
+    self.assertIsNone(self._proof()[0])
+AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '4f820edc4dc541d97973da20fbe9725aa3b3b1d6f01a9644b16dcba1be901b29'} is not None
+
+======================================================================
+FAIL: test_collect_verifier_requires_exact_disposition_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata) (field='record', value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 167, in test_collect_verifier_requires_exact_disposition_record_metadata
+    self.assertTrue(check(), "collect verifier laundered unbound disposition")
+AssertionError: [] is not true : collect verifier laundered unbound disposition
+
+======================================================================
+FAIL: test_collect_verifier_requires_exact_disposition_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata) (field='record', value='wrong-record')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 167, in test_collect_verifier_requires_exact_disposition_record_metadata
+    self.assertTrue(check(), "collect verifier laundered unbound disposition")
+AssertionError: [] is not true : collect verifier laundered unbound disposition
+
+======================================================================
+FAIL: test_collect_verifier_requires_exact_disposition_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata) (field='record_sha256', value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 167, in test_collect_verifier_requires_exact_disposition_record_metadata
+    self.assertTrue(check(), "collect verifier laundered unbound disposition")
+AssertionError: [] is not true : collect verifier laundered unbound disposition
+
+======================================================================
+FAIL: test_collect_verifier_requires_exact_disposition_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_collect_verifier_requires_exact_disposition_record_metadata) (field='record_sha256', value='0000000000000000000000000000000000000000000000000000000000000000')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 167, in test_collect_verifier_requires_exact_disposition_record_metadata
+    self.assertTrue(check(), "collect verifier laundered unbound disposition")
+AssertionError: [] is not true : collect verifier laundered unbound disposition
+
+======================================================================
+FAIL: test_dedup_cannot_substitute_hypothesis_for_exact_digest (test_t2040_review_proof_binding.ExactReviewBindingTests.test_dedup_cannot_substitute_hypothesis_for_exact_digest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 60, in test_dedup_cannot_substitute_hypothesis_for_exact_digest
+    self.assertFalse(subs._durable_collect_witness(
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_disposition_verifier_requires_exact_executed_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata) (field='record', value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 132, in test_disposition_verifier_requires_exact_executed_record_metadata
+    self.assertTrue(self.fixture._postcondition(changed),
+AssertionError: [] is not true : unbound executed record satisfied disposition verifier
+
+======================================================================
+FAIL: test_disposition_verifier_requires_exact_executed_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata) (field='record', value='wrong-record')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 132, in test_disposition_verifier_requires_exact_executed_record_metadata
+    self.assertTrue(self.fixture._postcondition(changed),
+AssertionError: [] is not true : unbound executed record satisfied disposition verifier
+
+======================================================================
+FAIL: test_disposition_verifier_requires_exact_executed_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata) (field='record_sha256', value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 132, in test_disposition_verifier_requires_exact_executed_record_metadata
+    self.assertTrue(self.fixture._postcondition(changed),
+AssertionError: [] is not true : unbound executed record satisfied disposition verifier
+
+======================================================================
+FAIL: test_disposition_verifier_requires_exact_executed_record_metadata (test_t2040_review_proof_binding.ExactReviewBindingTests.test_disposition_verifier_requires_exact_executed_record_metadata) (field='record_sha256', value='0000000000000000000000000000000000000000000000000000000000000000')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 132, in test_disposition_verifier_requires_exact_executed_record_metadata
+    self.assertTrue(self.fixture._postcondition(changed),
+AssertionError: [] is not true : unbound executed record satisfied disposition verifier
+
+======================================================================
+FAIL: test_duplicate_collect_owner_cannot_prove_review (test_t2040_review_proof_binding.ExactReviewBindingTests.test_duplicate_collect_owner_cannot_prove_review)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 104, in test_duplicate_collect_owner_cannot_prove_review
+    self.assertIsNone(self._proof()[0])
+AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '765e5f513fc8aa32ed5ff88ebd8d1163e1ed4c5149d176b0d635c9cd0fe51ea9'} is not None
+
+======================================================================
+FAIL: test_producer_cannot_supply_its_own_independent_core_review (test_t2040_review_proof_binding.ExactReviewBindingTests.test_producer_cannot_supply_its_own_independent_core_review)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 113, in test_producer_cannot_supply_its_own_independent_core_review
+    self.assertIsNone(self._proof()[0])
+AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': 'f5b825fb13fc7f60bcb6a51db372f5c6241aaf7128915b0c2d375bf4097a8b16'} is not None
+
+======================================================================
+FAIL: test_resolved_collect_deduplicates_but_is_not_committed_review_authority (test_t2040_review_proof_binding.ExactReviewBindingTests.test_resolved_collect_deduplicates_but_is_not_committed_review_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 74, in test_resolved_collect_deduplicates_but_is_not_committed_review_authority
+    self.assertIsNone(self._proof()[0], "RESOLVED receipt became COMMITTED review authority")
+AssertionError: {'collect_op': 'sub-collect-00000001', 'review_event': 'E-4', 'record': '.saipen/evidence/focused-unit/independent-run-4.json', 'record_sha256': '4283d2ac4cb55b8f9f0d2d395ade25f46ed518b3da582ce6ecd4bf0d1b4d5af3'} is not None : RESOLVED receipt became COMMITTED review authority
+
+======================================================================
+FAIL: test_shared_proof_returns_entire_receipt_binding (test_t2040_review_proof_binding.ExactReviewBindingTests.test_shared_proof_returns_entire_receipt_binding)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 119, in test_shared_proof_returns_entire_receipt_binding
+    self.assertEqual(proof, metadata)
+AssertionError: {'collect_op': 'sub-collect-00000001', 'rev[164 chars]8de'} != {'package_identity': 'sha256:039dd108848704[580 chars]8de'}
+Diff is 741 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_settled_integration_requires_exact_input_source (test_t2040_review_proof_binding.IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source) (field='input_source', missing=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 200, in test_settled_integration_requires_exact_input_source
+    self.assertIsNone(crew._producer_integration_edge(snapshot, role))
+AssertionError: {'op_id': 'producer-integration-00000001', 'package_identity': 'sha256:341e9f9710ca5dd005ca11ac55233f3513f6c1af73b69515f105345add224a0f', 'input_source': None, 'resulting_source': 'dddddddddddddddddddddddddddddddddddddddd', 'resulting_source_fingerprint': 'git-delta-v1:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'} is not None
+
+======================================================================
+FAIL: test_settled_integration_requires_exact_input_source (test_t2040_review_proof_binding.IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source) (field='input_source', mismatch=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 203, in test_settled_integration_requires_exact_input_source
+    self.assertIsNone(crew._producer_integration_edge(snapshot, role))
+AssertionError: {'op_id': 'producer-integration-00000001', 'package_identity': 'sha256:341e9f9710ca5dd005ca11ac55233f3513f6c1af73b69515f105345add224a0f', 'input_source': 'wrong-source', 'resulting_source': 'dddddddddddddddddddddddddddddddddddddddd', 'resulting_source_fingerprint': 'git-delta-v1:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'} is not None
+
+======================================================================
+FAIL: test_settled_integration_requires_exact_input_source (test_t2040_review_proof_binding.IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source) (field='input_source_fingerprint', missing=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 200, in test_settled_integration_requires_exact_input_source
+    self.assertIsNone(crew._producer_integration_edge(snapshot, role))
+AssertionError: {'op_id': 'producer-integration-00000001', 'package_identity': 'sha256:341e9f9710ca5dd005ca11ac55233f3513f6c1af73b69515f105345add224a0f', 'input_source': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'resulting_source': 'dddddddddddddddddddddddddddddddddddddddd', 'resulting_source_fingerprint': 'git-delta-v1:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'} is not None
+
+======================================================================
+FAIL: test_settled_integration_requires_exact_input_source (test_t2040_review_proof_binding.IntegrationSourceBindingTests.test_settled_integration_requires_exact_input_source) (field='input_source_fingerprint', mismatch=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 203, in test_settled_integration_requires_exact_input_source
+    self.assertIsNone(crew._producer_integration_edge(snapshot, role))
+AssertionError: {'op_id': 'producer-integration-00000001', 'package_identity': 'sha256:341e9f9710ca5dd005ca11ac55233f3513f6c1af73b69515f105345add224a0f', 'input_source': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'resulting_source': 'dddddddddddddddddddddddddddddddddddddddd', 'resulting_source_fingerprint': 'git-delta-v1:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'} is not None
+
+======================================================================
+FAIL: test_actual_core_disproof_closes_but_generic_negative_finding_does_not (test_t2040_review_proof_binding.NativeNoPatchRoundtripTests.test_actual_core_disproof_closes_but_generic_negative_finding_does_not)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_proof_binding.py", line 285, in test_actual_core_disproof_closes_but_generic_negative_finding_does_not
+    self.assertEqual(receipt["receipt_metadata"].get(key), value, key)
+AssertionError: None != '.saipen/evidence/focused-unit/c6a0046caee3836b-20261108T093931982332Z.json' : record
+
+----------------------------------------------------------------------
+Ran 10 tests in 230.643s
+
+FAILED (failures=27)

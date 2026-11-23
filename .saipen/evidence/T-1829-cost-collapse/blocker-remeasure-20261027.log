@@ -1,0 +1,29 @@
+# T-1829 stale-blocker measurement, 2026-10-27
+
+## named commit
+commit
+cat-file -e exit: 0
+is ancestor of HEAD: yes
+
+## recorded missing inventories
+.saipen/evidence/T-1829-cost-collapse/missing-object-paths.json: recorded=112 absent_now=0
+.saipen/evidence/T-1829-cost-collapse/current-missing-edges.json: recorded=114 absent_now=0
+
+## object store
+count: 3637
+size: 29921
+in-pack: 56373
+packs: 4
+size-pack: 85439
+prune-packable: 1290
+garbage: 0
+size-garbage: 0
+
+## fsck non-dangling lines
+error: refs/codex/turn-diffs/captures/1785165795234/fb80dcb4-2cd2-4789-9618-a9409baff787/base: invalid sha1 pointer 9d3542bdcbde564af2cd22f6237802c2ba924c4f
+dangling count: 2059
+
+## HEAD object graph
+rev-list --objects HEAD: 39119 entries
+
+VERDICT: no reachable object is absent; the recorded corruption blocker is refuted.

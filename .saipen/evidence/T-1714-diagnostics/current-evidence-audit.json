@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "work": "T-1714",
+  "phase": "VERIFY",
+  "fingerprint": "2df2566be72aeb7bde515aadf1891ccb56bd24500385b60c483656fa0259fcaa",
+  "owned_paths": [
+    "tools/saipen_engine/reconcile.py",
+    "tools/saipen.py",
+    "tools/test_reconcile_history_ledger_blocked.py"
+  ],
+  "gate_record_sha256": {
+    "verify-executed-pair-corrected": "a0887ee35a923f69a75488cb40937f619951e94d6aab9cce1d902bab859e699e",
+    "verify-executed-pair-resumed": "2091ae9c6fc707335029824902436745b25dce3fb6041528c64356885a14bb0e",
+    "verify-neighbors-corrected": "d99e2fda32cbb523816d36caf0d05aa43170f0d004e24be6989ee4e417f33033",
+    "verify-source-contracts-corrected": "cecddef848ecacaf12ae0f888ebf2cdb31f028e76aff0f39b666a177a032e8a3",
+    "verify-lint-corrected": "f7a0bc95ec3e595768becffe5d410d142e3a0293ddeeee81d1a1d6bef1ac1b0b",
+    "verify-whitespace-corrected": "66f8e1b077203beb79c266db55f2d3dc5a9eeebfe3cdf8dd4dfcc8e75f64e097",
+    "verify-native-core-corrected": "87e6d9294aaa9701d8e4f59331ad2433fe6faabd77efc2c1eda543d070836307",
+    "verify-current-done-reverify": "a71acaeae73bc0c518a522e4a176040133e883b21864f0e9e4cc73b60af5e5fc"
+  },
+  "family_record": ".saipen\\evidence\\core-unit\\2df2566be72aeb7b-20261011T115749Z.json",
+  "family_ran": 6207,
+  "family_new_red": 0,
+  "current_executed_pair_admissible": true,
+  "source_body_sha256": "f43fe6b191c8e7449266b3d6ab1eb8c26b6247bfc8b8d5b02ab6cf1eef212f97",
+  "limits": "Checks current original records and hashes; adds no regression receipt, family execution or Source disposition. REVIEW and local no-publish finish remain due."
+}

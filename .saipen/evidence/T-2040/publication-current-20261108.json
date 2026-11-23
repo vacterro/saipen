@@ -1,0 +1,203 @@
+{
+  "captured": "2026-11-08T09:35:47.291103+00:00",
+  "boundary": "read-only owner observation; not consent, publication or row reconciliation",
+  "selected": [
+    "T-1866",
+    "T-1992",
+    "T-1994",
+    "T-1995",
+    "T-1996",
+    "T-1997",
+    "T-1998",
+    "T-1999",
+    "T-2000",
+    "T-2001",
+    "T-2003",
+    "T-2004",
+    "T-2007",
+    "T-2009",
+    "T-2013",
+    "T-2015",
+    "T-2017",
+    "T-2019",
+    "T-2020",
+    "T-2021",
+    "T-2023",
+    "T-2025",
+    "T-2027",
+    "T-2030",
+    "T-2031",
+    "T-2032"
+  ],
+  "evidence": {
+    "status": "pending",
+    "checked": true,
+    "tickets": [
+      {
+        "ticket_id": "T-1866",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-1992",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-1994",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-1995",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-1996",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-1997",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-1998",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-1999",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2000",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2001",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2003",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2004",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2007",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2009",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2013",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2015",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2017",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2019",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2020",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2021",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2023",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2025",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2027",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2030",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2031",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      },
+      {
+        "ticket_id": "T-2032",
+        "status": "pending",
+        "receipt_ids": [],
+        "reason": "no canonical ticket-bound release receipt"
+      }
+    ],
+    "diagnostics": [],
+    "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+    "receipt_digest": "ops-receipt-sha256:f06cfca9b716eff37b886f3789199762c9f921d22487bfa19ae8596c74da9842"
+  },
+  "canonical_hashes": {
+    "STATE.md": "1ea5bfd1252d62c56d1bbc950c9dc126410cf876a03d00f90cc8c79becdc6d1f",
+    "BOARD.md": "7dd5868044e942b157fab5b1364d1725e5f02b2b4503fac26365b7bf8cd0e843"
+  },
+  "owner_sha256": "df90b7548856e11872a9b15645c34ac6f5eff1b96d7ec0200a1ecb94d60850b4"
+}

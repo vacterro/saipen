@@ -1,0 +1,50 @@
+{
+  "requirements": {
+    "SRC-045:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "resources/AUDAPACK_WIDGET.user.js chatGPTSurfaceSnapshot: mode only from chatGPTStrongWorkEvidence or Work composer placeholder; workQuotaExhausted/authBlocked/composerAvailable separate; w6-005 T189-03/03b/03c prove proven-Chat+banner stays Chat with quota flag true, banner survives Work->Chat switch",
+      "text": "Work quota exhaustion state is separated from surface identity: only strong structural evidence (selected Work mode control or Work composer placeholder) classifies a surface as Work, a stale quota banner must never turn a proven ordinary Chat composer into Work, and NEW/START in normal Chat stay allowed",
+      "verification": "node --test tests/widget/w6-005-new-chat-start-liveness.test.js 23 PASS",
+      "work": "T-189"
+    },
+    "SRC-045:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "w6-005 T189-10..16: NEW from root/conv Work proven Chat (intent cleared only after chatGPTSurfaceMode()==='chat'), delayed hydration retried inside 12s window, unresolvable Work ends NEW HOLD, a[href=/] never clicked when exact control exists nor alone, repeated press absorbed (dispatchCount 1)",
+      "text": "NEW is directly proven end-to-end through openNewChatFromWidget: one bounded verification transaction, one dispatch, preferred exact New Chat controls over the generic home/root link, positive ordinary-Chat proof before success, named NEW HOLD on unresolvable Work, no navigation loop, no repeated tab creation, no duplicate transaction on repeated presses, bounded retry tolerating hydration delay",
+      "verification": "node --test tests/widget/w6-005-new-chat-start-liveness.test.js 23 PASS",
+      "work": "T-189"
+    },
+    "SRC-045:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "waitForReadyAttachment progress-based (busy tile or changing composerAttachmentSignature extend the wait; stable non-busy fails after 1.8s grace); START phases PRECHECK/WAIT ZIP/LEASE/PREPARE/WAIT SEND/SENDING plus named holds Work/Auth/attachment not ready/lease owned by another tab/Send disabled; w6-005 T189-17b fails fast <4s, T189-17c busy keeps waiting then LEASE, phase history asserted",
+      "text": "START attachment waiting is progress-based and bounded: a stable non-busy non-ready state fails to a named START HOLD within roughly 2s, genuine busy/registering or changing attachments keep waiting, and START paints immediate deterministic phases with named hold reasons",
+      "verification": "node --test tests/widget/w6-005-new-chat-start-liveness.test.js 23 PASS; w4-014-send-ready-attachment 3 PASS",
+      "work": "T-189"
+    },
+    "SRC-045:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "saveAutoRuntime deferRender on the Auto3 stabilization checkpoint; one chatGPTSurfaceSnapshot per renderAutoAuditState render; chatGPTControlName textContent; auth control scan skips widget-owned and caps 60; perf budgets untouched",
+      "text": "PERF-005 returns green with the original read budgets unchanged (completedAssistantCandidate extraction <= 7 and candidate cap <= 18), the hot-path document scanning introduced by the first T-189 pass is removed architecturally rather than by raising thresholds, and the full widget suite has zero failures",
+      "verification": "node --test tests/widget/perf-005-snapshot.test.js 5 PASS (<=7 and <=18 budgets); full node --test tests/widget/*.test.js 493 PASS 0 FAIL",
+      "work": "T-189"
+    },
+    "SRC-045:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "LOG checkpoint corrects the E-1301/E-1303/E-1305/E-1309 'pre-existing' claim: widget 0.0.56 comparison runs perf-005 5 PASS so the failures were introduced by T-189 0.0.57; @version 0.0.58 exactly once, updateURL/downloadURL unchanged; CHANGELOG heading repair documented",
+      "text": "The false 'pre-existing' PERF-005 classification in the verification evidence is corrected, all remaining gates (pytest, ruff, compileall, T-158 regression harness) are green, and the userscript version is incremented exactly once with updateURL/downloadURL unchanged",
+      "verification": "python -m pytest -q 1572 passed 5 skipped + docs suite 14 PASS after changelog heading repair; python -m ruff check audapack tests clean; python -m compileall -q audapack clean; python .saipen/kitchen/regression_t158.py 4 PASS",
+      "work": "T-189"
+    }
+  },
+  "schema_version": 1
+}

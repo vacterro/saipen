@@ -1,0 +1,759 @@
+{
+  "schema_version": 1,
+  "description": "Single declarative host adapter registry (SRC-028:R008). Every consumer -- tools/saipen_engine/admission.py, bootstrap/inject.ps1, bootstrap/inject.sh, tools/autoinject.py, status/freshness reporting and the parity tests -- reads host identity, install surfaces and enforcement capability from THIS file. No consumer may keep a second handwritten host inventory. declared_strength is what the adapter CLAIMS for an installed, current, healthy install; effective enforcement is computed at runtime by admission.effective_strength and is never stronger than the installed state proves. `response_enforcement` is a SEPARATE claim about the FINAL-RESPONSE contract only (EXEC-RESPONSE-01), never derived from `declared_strength`: MECHANICAL means a completed-part hook can replace/refuse model text or a post-render Stop hook can request one correction; it never implies invisible pre-stream prevention, ADVISORY means the contract reaches the model as instructions only, UNAVAILABLE means the host has no final-response surface at all. A host may claim MECHANICAL only with a `response_hook` token its own `hook_artifact` actually contains, and host-level trust evidence stays separate from the capability claim.",
+  "activation_template": "saipen/ACTIVATION_BLOCK.md",
+  "adapters": [
+    {
+      "id": "opencode",
+      "name": "OpenCode",
+      "instruction_surfaces": [
+        "~/.config/opencode/AGENTS.md"
+      ],
+      "skill_surfaces": [
+        "~/.config/opencode/skills/saipen"
+      ],
+      "blocking_capability": true,
+      "hook_install_surface": "~/.config/opencode/plugins/saipen-guard.js",
+      "hook_artifact": "extensions/adapters/opencode/saipen-guard.js",
+      "legacy_hook_surfaces": [
+        "~/.config/opencode/plugin/saipen-guard.js"
+      ],
+      "hook_surface_note": "The supported runtime's global local plugin directory is the PLURAL `plugins/` (OpenCode 1.18.x `opencode debug config` reports a plugin origin for it and instantiates the factory). The singular `plugin/` directory is ALSO discovered by the same runtime, so a stale copy there would load this hook a second time: the injectors remove the legacy surface on install and uninstall removes both. EXEC-RESPONSE-01 checks completed text parts through experimental.text.complete; this V1 hook is not a token-stream gate and has no direct V2 migration equivalent.",
+      "launch_command": "python ~/.config/opencode/skills/saipen/tools/saipen.py --agent <seat> launch opencode -- [arguments]",
+      "launch_requirement": "optional_explicit_actor",
+      "routine_launch": "generic OpenCode launch; no SAIPEN seat required",
+      "launch_implementation": "tools/saipen_engine/host_launch.py",
+      "freshness_surfaces": [
+        "skill",
+        "instruction",
+        "hook"
+      ],
+      "declared_strength": "BLOCKING",
+      "response_enforcement": "MECHANICAL",
+      "response_hook": "experimental.text.complete",
+      "response_enforcement_note": "Default operational completed parts are replaced by the canonical machine digest; oversized model text is not the delivered completed part. This is not a token-stream gate; previously streamed text and intermediate narration cannot be retracted. Explicit witnessed depth/artifacts remain separately gated.",
+      "artifact_version": 1,
+      "install": {
+        "home": "~/.config/opencode",
+        "skill": "~/.config/opencode/skills/saipen",
+        "instruction": "~/.config/opencode/AGENTS.md",
+        "hook": "~/.config/opencode/plugins/saipen-guard.js"
+      },
+      "prelaunch_command": "saipen runtime --prelaunch --adapter opencode --json",
+      "prelaunch_contract": "ok+RUNTIME_CURRENT|RUNTIME_RESYNCED admits a host start; every other code refuses it. The supported launch invokes this before the host process exists (saipen/RUNTIME.md).",
+      "pre_output_interception": "COMPLETED_TEXT_PART",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "ADVISORY",
+      "style_enforcement": "MECHANICAL",
+      "style_hook": "CHAT_STYLE_DRIFT",
+      "admission_enforcement_note": "ADVISORY: the plugin admits tools against the project binding (a different boundary) and gates completed text parts, but it writes no protocol-admission evidence, so admission stays ADVISORY while chat style is measured at the same surface (T-1568: an unreadable or unclassifiable authority is passed, not refused, so this is measurement and never hard admission).",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "MECHANICAL"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": true,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "CHAT_MESSAGE_TEXT_AT_COMPLETED_PART"
+      },
+      "visible_prevention": "COMPLETED_PART_ONLY_NOT_TOKEN_STREAM"
+    },
+    {
+      "id": "claude",
+      "name": "Claude Code",
+      "instruction_surfaces": [
+        "~/.claude/CLAUDE.md"
+      ],
+      "skill_surfaces": [
+        "~/.claude/skills/saipen"
+      ],
+      "blocking_capability": true,
+      "hook_install_surface": "~/.claude/hooks/saipen-guard.py",
+      "hook_artifact": "extensions/adapters/claude/saipen-guard.py",
+      "hook_config_surface": "~/.claude/settings.json",
+      "hook_installer": "tools/install_host_guard.py",
+      "hook_surface_note": "Executable native Claude Code transport for PROTOCOL-ADMISSION-01 and the layered final-response gate (T-1558). ONE artifact dispatches on `hook_event_name`: SessionStart (invalidate, deliver again), UserPromptSubmit (the pre-generation boundary: establish admission and deliver BOTH BOOT/STYLE/EXECUTION and the generated chat contract, or block the prompt with a runtime-written diagnostic), PostToolUse on Bash (a real `saipen init` binds the SAME turn; admission remains refused until separated host authority exists), PostModelSwitch (invalidate), Stop (forward `last_assistant_message` to `tools/saipen.py response check --classify --admission-session`, the SAME authority the Codex and OpenCode gates use, with the human's request read from the transcript so only a genuine report request earns the detailed budget). Enforcement at Stop is one correction continuation (`decision: block`); a stop that is already a continuation (`stop_hook_active`) records CLAUDE_STOP_REENTRY_NO_FAIL_CLOSED. The command is POSIX-spelled (forward slashes) because Claude Code runs hooks through Git Bash on Windows. The installer merges into the operator's shared settings.json, preserves every unrelated hook, and REPORTS (never removes) an operator hook that carries its own voice or language rule (`style_hook_conflicts`).",
+      "freshness_surfaces": [
+        "skill",
+        "instruction",
+        "hook"
+      ],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "MECHANICAL",
+      "response_hook": "last_assistant_message",
+      "response_enforcement_note": "The Stop event supplies the outgoing final message and one correction continuation is enforced for operational boundaries AND for ordinary chat that breaks the measurable STYLE.md contract (CHAT_STYLE_DRIFT). SEPARATE EVIDENCE, not part of this claim: a stop that is already a continuation records CLAUDE_STOP_REENTRY_NO_FAIL_CLOSED rather than closing fail-closed, and the hook is inert until installed (`python tools/install_host_guard.py claude`). POST-RENDER: text already exists and may already be visible; no retraction or hard invisible prevention. Each fresh Stop gets the same canonical gate; re-entry remains one correction, not fail-closed.",
+      "artifact_version": 1,
+      "install": {
+        "home": "~/.claude",
+        "skill": "~/.claude/skills/saipen",
+        "instruction": "~/.claude/CLAUDE.md",
+        "hook": "~/.claude/hooks/saipen-guard.py"
+      },
+      "pre_output_interception": "PROMPT_LEVEL",
+      "stop_output_interception": "MECHANICAL",
+      "admission_enforcement": "UNAVAILABLE",
+      "admission_required": true,
+      "admission_hook": "UserPromptSubmit",
+      "style_enforcement": "MECHANICAL",
+      "style_hook": "CHAT_STYLE_DRIFT",
+      "admission_enforcement_note": "UNAVAILABLE: the hook runs as the same OS principal as ordinary model Python. Project keys and importable signing helpers cannot prove host provenance. T-1563 disables local minting and fails closed until a separated host authority exists. Prompt interception and Stop correction remain separate capabilities; admission_required keeps the admission layer closed.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "MECHANICAL"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": true,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "TRANSCRIPT_USER_TEXT_AT_STOP"
+      },
+      "visible_prevention": "POST_RENDER_ONE_CORRECTION_NO_RETRACTION"
+    },
+    {
+      "id": "codex",
+      "name": "Codex CLI",
+      "instruction_surfaces": [
+        "~/.codex/AGENTS.md"
+      ],
+      "skill_surfaces": [
+        "~/.codex/skills/saipen"
+      ],
+      "blocking_capability": true,
+      "hook_install_surface": "~/.codex/hooks/saipen-guard.py",
+      "hook_artifact": "extensions/adapters/codex/saipen-guard.py",
+      "hook_config_surface": "~/.codex/hooks.json",
+      "hook_installer": "tools/install_host_guard.py",
+      "hook_surface_note": "Executable native Codex Stop transport for the canonical EXEC-RESPONSE-01 gate (T-1551): the hook forwards the Stop event's `last_assistant_message` to `tools/saipen.py response check --classify` -- the SAME renderer/checker OpenCode's text gate uses -- and maps the verdict onto Codex hook output. No response schema lives in the adapter. The Stop gate enforces by requiring a correction continuation; it never retracts rendered text. Re-entry is bounded deliberately: the first invalid stop of a turn requests exactly one correction, and a stop that is already a Stop-hook continuation (`stop_hook_active`) records the exact capability boundary CODEX_STOP_REENTRY_NO_FAIL_CLOSED instead of looping. Trust is an external host boundary: Codex skips non-managed hooks until the operator reviews and trusts the hash-bound definition via /hooks, and installing never marks a hook trusted. CODEX_STOP_TEXT_CLASSIFICATION: the Stop event carries no turn ingress or tool context, so a markerless reply on an idle turn is indistinguishable from ordinary chat and passes.",
+      "freshness_surfaces": [
+        "skill",
+        "instruction",
+        "hook"
+      ],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "MECHANICAL",
+      "response_hook": "last_assistant_message",
+      "response_enforcement_note": "The supported Stop event supplies the outgoing final message and one correction continuation is enforced. SEPARATE EVIDENCE, not part of this claim: the hook requires host trust, and a Stop that is already a continuation records CODEX_STOP_REENTRY_NO_FAIL_CLOSED rather than closing fail-closed. POST-RENDER: text already exists and may already be visible; no retraction or hard invisible prevention. Each fresh Stop gets the same canonical gate; re-entry remains one correction, not fail-closed.",
+      "artifact_version": 1,
+      "install": {
+        "home": "~/.codex",
+        "skill": "~/.codex/skills/saipen",
+        "instruction": "~/.codex/AGENTS.md",
+        "hook": "~/.codex/hooks/saipen-guard.py"
+      },
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "MECHANICAL",
+      "admission_enforcement": "UNAVAILABLE",
+      "style_enforcement": "MECHANICAL",
+      "style_hook": "CHAT_STYLE_DRIFT",
+      "admission_enforcement_note": "UNAVAILABLE: the shipped Codex transport is a Stop hook only. It has no delivery hook and no pre-output boundary, so it cannot observe that authority reached the model and cannot stop a reply before it exists. The admission layer is reported NOT_ENFORCEABLE for this host, never passed as admitted.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "MECHANICAL"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "UNAVAILABLE_AT_STOP_NO_TURN_INGRESS"
+      },
+      "visible_prevention": "POST_RENDER_ONE_CORRECTION_NO_RETRACTION"
+    },
+    {
+      "id": "zaicode",
+      "name": "ZAICODE",
+      "home_variable": "ZAICODE_HOME",
+      "home_note": "ZAICODE runs with an isolated HOME (<workspace>/.zaicode/home) and never shares ~/.zcode with a production ZCode; ZAICODE_HOME names that HOME, and an unset variable means ZAICODE is not configured on this machine.",
+      "instruction_surfaces": [
+        "$ZAICODE_HOME/.zcode/AGENTS.md"
+      ],
+      "skill_surfaces": [
+        "$ZAICODE_HOME/.zcode/skills/saipen"
+      ],
+      "blocking_capability": false,
+      "hook_install_surface": null,
+      "hook_artifact": null,
+      "freshness_surfaces": [
+        "skill",
+        "instruction"
+      ],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "response_hook": null,
+      "response_enforcement_note": "No final-response hook surface is installed for this host.",
+      "artifact_version": null,
+      "install": {
+        "home": "$ZAICODE_HOME/.zcode",
+        "skill": "$ZAICODE_HOME/.zcode/skills/saipen",
+        "instruction": "$ZAICODE_HOME/.zcode/AGENTS.md"
+      },
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "ADVISORY",
+      "style_enforcement": "ADVISORY",
+      "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "ADVISORY"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+    },
+    {
+      "id": "zcode-production",
+      "name": "ZCode (production ~/.zcode home)",
+      "home_note": "The production ZCode desktop app reads the REAL user home ~/.zcode (global AGENTS.md instructions) and the shared ~/.agents skills tree; it never sees $ZAICODE_HOME. Distinct from the isolated 'zaicode' dev entry, which names a variable-guarded HOME.",
+      "instruction_surfaces": [
+        "~/.zcode/AGENTS.md"
+      ],
+      "skill_surfaces": [
+        "~/.agents/skills/saipen"
+      ],
+      "blocking_capability": false,
+      "hook_install_surface": null,
+      "hook_artifact": null,
+      "freshness_surfaces": [
+        "skill",
+        "instruction"
+      ],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "response_hook": null,
+      "response_enforcement_note": "No final-response hook surface exists for this host: the T-1583 incident (a STYLE-breaking reply escaping on the live production host) measured the limit, so ADVISORY states the enforced boundary, not an aspiration.",
+      "artifact_version": null,
+      "install": {
+        "home": "~/.zcode",
+        "skill": "~/.agents/skills/saipen",
+        "instruction": "~/.zcode/AGENTS.md"
+      },
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "ADVISORY",
+      "style_enforcement": "ADVISORY",
+      "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "ADVISORY"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini CLI / Antigravity",
+      "instruction_surfaces": [
+        "~/.gemini/GEMINI.md"
+      ],
+      "skill_surfaces": [
+        "~/.gemini/skills/saipen"
+      ],
+      "blocking_capability": true,
+      "hook_install_surface": "~/.gemini/hooks/saipen-guard.py",
+      "hook_artifact": "tools/host_guard.py",
+      "hook_surface_note": "Executable native transport; install_host_guard.py merges hook configuration idempotently. Real host refused-effect proof is still required; candidate is not verified BLOCKING.",
+      "freshness_surfaces": [
+        "skill",
+        "instruction",
+        "hook"
+      ],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "response_hook": null,
+      "response_enforcement_note": "tools/host_guard.py admits tools; it carries no final-response surface.",
+      "artifact_version": 1,
+      "install": {
+        "home": "~/.gemini",
+        "skill": "~/.gemini/skills/saipen",
+        "instruction": "~/.gemini/GEMINI.md",
+        "hook": "~/.gemini/hooks/saipen-guard.py"
+      },
+      "hook_config_surface": "~/.gemini/settings.json",
+      "hook_installer": "tools/install_host_guard.py",
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "ADVISORY",
+      "style_enforcement": "ADVISORY",
+      "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "ADVISORY"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+    },
+    {
+      "id": "codebuddy",
+      "name": "CodeBuddy Code",
+      "instruction_surfaces": [],
+      "skill_surfaces": [
+        "~/.codebuddy/skills/saipen"
+      ],
+      "blocking_capability": false,
+      "hook_install_surface": null,
+      "hook_artifact": null,
+      "freshness_surfaces": [
+        "skill"
+      ],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "response_hook": null,
+      "response_enforcement_note": "No final-response hook surface is installed for this host.",
+      "artifact_version": null,
+      "install": {
+        "home": "~/.codebuddy",
+        "skill": "~/.codebuddy/skills/saipen"
+      },
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "ADVISORY",
+      "style_enforcement": "ADVISORY",
+      "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "ADVISORY"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+    },
+    {
+      "id": "freebuff",
+      "name": "FreeBuff / generic ~/.agents skills",
+      "instruction_surfaces": [
+        "~/.knowledge.md",
+        "~/.AGENTS.md"
+      ],
+      "instruction_loaders": [
+        {
+          "name": "freebuff CLI",
+          "surfaces": [
+            "~/.knowledge.md",
+            "~/.AGENTS.md",
+            "~/.claude.md"
+          ]
+        },
+        {
+          "name": "FreeBuff Desktop",
+          "surfaces": [
+            "~/.AGENTS.md",
+            "~/.CLAUDE.md"
+          ]
+        }
+      ],
+      "skill_surfaces": [
+        "~/.agents/skills/saipen"
+      ],
+      "blocking_capability": false,
+      "hook_install_surface": null,
+      "hook_artifact": null,
+      "freshness_surfaces": [
+        "skill",
+        "instruction"
+      ],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "response_hook": null,
+      "response_enforcement_note": "No final-response hook surface is installed for this host.",
+      "artifact_version": null,
+      "install": {
+        "home": "~/.agents",
+        "skill": "~/.agents/skills/saipen",
+        "bespoke": "freebuff-backstop"
+      },
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "ADVISORY",
+      "style_enforcement": "ADVISORY",
+      "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "ADVISORY"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+    },
+    {
+      "id": "aider",
+      "name": "Aider",
+      "instruction_surfaces": [
+        "~/.aider.conf.yml"
+      ],
+      "skill_surfaces": [],
+      "blocking_capability": false,
+      "hook_install_surface": null,
+      "hook_artifact": null,
+      "freshness_surfaces": [
+        "instruction"
+      ],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "response_hook": null,
+      "response_enforcement_note": "No final-response hook surface is installed for this host.",
+      "artifact_version": null,
+      "install": {
+        "home": null,
+        "bespoke": "aider-conf"
+      },
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "ADVISORY",
+      "style_enforcement": "ADVISORY",
+      "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "ADVISORY"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+    },
+    {
+      "id": "antigravity",
+      "name": "Antigravity plugins",
+      "instruction_surfaces": [],
+      "skill_surfaces": [
+        "~/.gemini/config/plugins/*/skills/saipen"
+      ],
+      "blocking_capability": false,
+      "hook_install_surface": null,
+      "hook_artifact": null,
+      "freshness_surfaces": [
+        "skill"
+      ],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "response_hook": null,
+      "response_enforcement_note": "No final-response hook surface is installed for this host.",
+      "artifact_version": null,
+      "install": {
+        "home": "~/.gemini/config/plugins",
+        "bespoke": "antigravity-plugins"
+      },
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "ADVISORY",
+      "style_enforcement": "ADVISORY",
+      "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "ADVISORY"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+    },
+    {
+      "id": "kiro",
+      "name": "Kiro",
+      "runtime_commands": [
+        "kiro"
+      ],
+      "instruction_surfaces": [],
+      "skill_surfaces": [
+        "~/.kiro/skills/saipen"
+      ],
+      "blocking_capability": true,
+      "hook_install_surface": "~/.kiro/hooks/saipen-guard.py",
+      "hook_artifact": "tools/host_guard.py",
+      "freshness_surfaces": [
+        "skill",
+        "hook"
+      ],
+      "declared_strength": "ENFORCEMENT_GAP",
+      "response_enforcement": "UNAVAILABLE",
+      "response_hook": null,
+      "response_enforcement_note": "No installed blocking adapter (SRC-028:R010 open) and no final-response surface: neither the tool contract nor EXEC-RESPONSE-01 can be enforced here.",
+      "artifact_version": 1,
+      "install": {
+        "home": "~/.kiro",
+        "skill": "~/.kiro/skills/saipen",
+        "hook": "~/.kiro/hooks/saipen-guard.py"
+      },
+      "gap_reason": "Executable transport exists; no real Kiro runtime blocked-effect evidence. Effective enforcement requires installed current configuration and host health proof.",
+      "hook_config_surface": "~/.kiro/hooks/saipen-guard.json",
+      "hook_installer": "tools/install_host_guard.py",
+      "hook_surface_note": "Executable native transport; install_host_guard.py merges hook configuration idempotently. Real host refused-effect proof is still required; candidate is not verified BLOCKING.",
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "UNAVAILABLE",
+      "style_enforcement": "UNAVAILABLE",
+      "admission_enforcement_note": "This host has no final-response surface at all: nothing can observe or gate admission.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "UNAVAILABLE"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+    },
+    {
+      "id": "deepseek",
+      "name": "DeepSeek",
+      "instruction_surfaces": [],
+      "skill_surfaces": [],
+      "blocking_capability": false,
+      "hook_install_surface": null,
+      "hook_artifact": null,
+      "freshness_surfaces": [],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "response_hook": null,
+      "response_enforcement_note": "No final-response hook surface is installed for this host.",
+      "artifact_version": null,
+      "install": null,
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "ADVISORY",
+      "style_enforcement": "ADVISORY",
+      "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "ADVISORY"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "instruction_surfaces": [],
+      "skill_surfaces": [],
+      "blocking_capability": false,
+      "hook_install_surface": null,
+      "hook_artifact": null,
+      "freshness_surfaces": [],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "response_hook": null,
+      "response_enforcement_note": "No final-response hook surface is installed for this host.",
+      "artifact_version": null,
+      "install": null,
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "ADVISORY",
+      "style_enforcement": "ADVISORY",
+      "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "ADVISORY"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+    },
+    {
+      "id": "qwen",
+      "name": "Qwen",
+      "instruction_surfaces": [],
+      "skill_surfaces": [],
+      "blocking_capability": false,
+      "hook_install_surface": null,
+      "hook_artifact": null,
+      "freshness_surfaces": [],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "response_hook": null,
+      "response_enforcement_note": "No final-response hook surface is installed for this host.",
+      "artifact_version": null,
+      "install": null,
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "ADVISORY",
+      "style_enforcement": "ADVISORY",
+      "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "ADVISORY"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+    },
+    {
+      "id": "generic",
+      "name": "Generic (no interception)",
+      "instruction_surfaces": [],
+      "skill_surfaces": [],
+      "blocking_capability": false,
+      "hook_install_surface": null,
+      "hook_artifact": null,
+      "freshness_surfaces": [],
+      "declared_strength": "ENFORCEMENT_GAP",
+      "response_enforcement": "UNAVAILABLE",
+      "response_hook": null,
+      "response_enforcement_note": "The generic adapter installs no hook at all; EXEC-RESPONSE-01 is delivered as instructions and cannot be enforced.",
+      "artifact_version": null,
+      "install": null,
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "UNAVAILABLE",
+      "style_enforcement": "UNAVAILABLE",
+      "admission_enforcement_note": "This host has no final-response surface at all: nothing can observe or gate admission.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "UNAVAILABLE"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+    }
+  ]
+}

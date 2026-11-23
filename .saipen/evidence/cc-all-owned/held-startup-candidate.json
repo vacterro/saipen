@@ -1,0 +1,14 @@
+{
+  "version": "candidate",
+  "scope": "unclaimed preparation; holder fixture only",
+  "verifier": "03562694cfe74c437cd520c1560759375824ed0aa1b96825becdd0216e90f76f",
+  "subject": "d4dadf5def93eb12c650924c8306a2f35c6aaeabffa8de801528b3c7c06110b1",
+  "ran": 4,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "passed": true,
+  "delayed_real_children": 3,
+  "resume_errors": [],
+  "transcript": "test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone (ccall_held_subject.HeldSandboxTests.test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone) ... ok\ntest_temporary_directory_raises_and_leaves_a_held_sandbox_forever (ccall_held_subject.HeldSandboxTests.test_temporary_directory_raises_and_leaves_a_held_sandbox_forever) ... ok\ntest_waiting_for_a_sweep_never_reclaims_a_live_owner (ccall_held_subject.HeldSandboxTests.test_waiting_for_a_sweep_never_reclaims_a_live_owner)\nThe retry waits for the handle; it must not wait the owner away. ... ok\ntest_holder_is_ready_before_any_destructive_reclaim (__main__.NativeStartupControl.test_holder_is_ready_before_any_destructive_reclaim) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 13.228s\n\nOK\n"
+}

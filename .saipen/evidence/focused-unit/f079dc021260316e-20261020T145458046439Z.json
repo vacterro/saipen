@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "f079dc021260316e1ea8bfd966c1b8232e0f4836bda86edf3689012408e6be21",
+  "verdict": "PASS",
+  "patterns": [
+    "test_t1830_verification_observations.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_t1830_verification_observations.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1830_verification_observations.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        30416
+      ],
+      "duration_s": 0.797,
+      "process_create_s": 0.047,
+      "ran": 8,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    }
+  ],
+  "ran": 8,
+  "duration_s": 63.704,
+  "timings_s": {
+    "execution_wall_s": 0.797,
+    "copy_wall_s": 48.563,
+    "hash_wall_s": 0.125,
+    "cleanup_wall_s": 14.219
+  },
+  "copy_metrics": {
+    "subject_copy_s": 13.797,
+    "canonical_copy_s": 34.407,
+    "canonical_copy_attempts": 1
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

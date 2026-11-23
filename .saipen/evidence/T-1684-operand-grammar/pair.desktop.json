@@ -1,0 +1,10 @@
+{
+  "verifier": "46384e17d5ccef46",
+  "pre_subject": "ef37ed7e1fdb23d1",
+  "post_subject": "ff3dc5125f8dd1bf",
+  "pre_rc": 1,
+  "post_rc": 0,
+  "control_rc": 0,
+  "held": true,
+  "command": "python -B -m unittest test_t1684_operand_grammar"
+}

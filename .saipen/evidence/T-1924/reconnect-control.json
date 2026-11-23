@@ -1,0 +1,31 @@
+{
+  "observed_at": "2026-10-27T03:55:19.520810+00:00",
+  "kind": "isolated_before_after_control",
+  "live_configuration_accessed": false,
+  "live_configuration_written": false,
+  "fixture_audio_claimed_as_original": false,
+  "subject": "V:\\___VAC\\__K\\__CODE\\_PY\\_FastPrompter\\src\\fastprompter\\core\\sound_library.py",
+  "subject_sha256": "222ab67f2a6275c101ca451e9b60cae3183d5b2a01602eb9a1a62ae343a15f63",
+  "personal_mode": true,
+  "red_arm": {
+    "initial": "bundled",
+    "after_personal_appears": false,
+    "selected_path_after": "V:\\_TEMP_\\fp-audio-control-l2fgjlcj\\builtin\\reconnect.wav",
+    "defect_reproduced": true
+  },
+  "green_arm": {
+    "initial": "bundled",
+    "after_personal_appears": "personal",
+    "selected_path_after": "V:\\_TEMP_\\fp-audio-control-l2fgjlcj\\addon\\reconnect.wav",
+    "defect_reproduced": false
+  },
+  "discriminating_variable": "_RESOLVE_CACHE cleared before 2nd resolve",
+  "cache_isolates_cause": true,
+  "cache_key_shape": [
+    "reconnect.wav",
+    "V:\\_TEMP_\\fp-audio-control-l2fgjlcj\\builtin",
+    "V:\\_TEMP_\\fp-audio-control-l2fgjlcj\\managed",
+    "V:\\_TEMP_\\fp-audio-control-l2fgjlcj\\addon"
+  ],
+  "cache_key_carries_personal_mode": false
+}

@@ -1,0 +1,6 @@
+test_fresh_process_loads_the_installed_generation_from_one_origin (test_opencode_host_smoke.OpenCodeRealInstalledGeneration.test_fresh_process_loads_the_installed_generation_from_one_origin) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.388s
+
+OK

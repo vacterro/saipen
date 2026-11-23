@@ -1,0 +1,22 @@
+{
+  "copy": "V:\\_TEMP_\\audit_checks_4cs74xie\\pristine",
+  "current_fingerprint": "dc28de5cca2f15970a760262ef7a80e10a8fc10c40ad37c6294587b7feed08b3",
+  "copy_fingerprint": "9747c42162d8bbafbd995ff72379397231867749a022057cfa76172ca3f90c72",
+  "differences": [
+    {
+      "path": ".freebuff/project-id",
+      "current": "e523bb8539014c45a8be1a9bf83c09c84db8af0d413f77d0aa649c8435c5034a",
+      "copy": null
+    },
+    {
+      "path": "tools/freshness.py",
+      "current": "6d257f413addc0d074cbb2192df975c622449162e04b3a47b310952dbde6285c",
+      "copy": "469372a94be487903baf24743a50dd1996119677d90477764b67e89d5dee558d"
+    },
+    {
+      "path": "tools/test_concurrency_independence.py",
+      "current": "04bb221f3d08ba25fbdd87fff3d3717a9325a474d124a1c5be8bf4d9bac50131",
+      "copy": "d4e513a89ae832dd43cb96dcb91cc0a3ff53b9bdd57d70958958f4220032c75a"
+    }
+  ]
+}

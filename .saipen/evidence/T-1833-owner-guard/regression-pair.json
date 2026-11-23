@@ -1,0 +1,50 @@
+[
+  {
+    "name": "prefix",
+    "oracle_sha256": "d0b1753d64d3d2842b6f74fda2ecf7d0f4f2a54bdd161e87f517bccd753e980a",
+    "subject_sha256": "4178264165408d110cb654fe01001c3f5ab801978c12f94101c0ad2035c148f7",
+    "subjects": {
+      "process_tree.py": "4178264165408d110cb654fe01001c3f5ab801978c12f94101c0ad2035c148f7",
+      "test_runner.py": "935ddf7dd20ebad0119d1208ec90ea3a55198d9d0490074d66da3f8bee3d1fd1",
+      "verification_bootstrap.py": "00dcaa6a3b542aa8b530622792b6881ef6aa8e9a1d726f51438ff8bd990133b6"
+    },
+    "command": [
+      "/usr/bin/python3",
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      ".",
+      "-p",
+      "test_t1833_verification_owner.py",
+      "-v"
+    ],
+    "exit_code": 1,
+    "log": "prefix-final-oracle-linux.log"
+  },
+  {
+    "name": "postfix",
+    "oracle_sha256": "d0b1753d64d3d2842b6f74fda2ecf7d0f4f2a54bdd161e87f517bccd753e980a",
+    "subject_sha256": "e5f07f80d2a6802d95c3ccbebe4ca5f66cdbbcbb25b13450123baa896d8e8356",
+    "subjects": {
+      "process_tree.py": "e5f07f80d2a6802d95c3ccbebe4ca5f66cdbbcbb25b13450123baa896d8e8356",
+      "test_runner.py": "e2a410f69faca766ef0a1ed1f79939d74a9f6c9cbd5a9e99b5d30e87cacf6b52",
+      "verification_bootstrap.py": "00dcaa6a3b542aa8b530622792b6881ef6aa8e9a1d726f51438ff8bd990133b6"
+    },
+    "command": [
+      "/usr/bin/python3",
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      ".",
+      "-p",
+      "test_t1833_verification_owner.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "log": "postfix-final-oracle-linux.log"
+  }
+]

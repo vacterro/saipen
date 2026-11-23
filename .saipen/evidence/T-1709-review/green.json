@@ -1,0 +1,25 @@
+{
+  "stage": "green",
+  "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1709-review\\subject-green",
+  "exit_code": 0,
+  "verifier": "eafe82f00cd5ff367f83a556a17481ae840fb0d05e8d89fe1c6e861eb6ffce22",
+  "subject": "a36ad45b4c17b6fe62d51bd9dedb486dc5af674781aa6580af541850dc15e858",
+  "subject_files": {
+    "tools/saipen_engine/audit_inbox.py": "5d0a337a8b6b890b6dca70843ec80cc771f7095b0ce0f12e06835cee5cd22f76",
+    "tools/saipen_engine/audit_route.py": "30209e6881a4f4105502da77e89105d7cb3325d3a2c9aefe5766e0ae509589b8",
+    "tools/saipen_engine/router.py": "7f9926bb6a38b80b67df1c69c3a5914daff80b89b258e6a8c961b9b3bd88d674",
+    "tools/saipen.py": "f550ebd4d320ce2c0f3f9fe7c5c487030ad3d5ad1b1fb4c2655faeadb5a4c3f3"
+  },
+  "verifier_files": {
+    "tools/test_t1709_audit_starvation.py": "954cb65603d4162ba4afefb1cf0aa7cf309ca20fdd69e199047d5fb08fa0ff88",
+    "tools/test_audit_inbox.py": "e702c8403074fb1584048c582bc234efd342a7bd0dabca8b3e7aa54740bb3a2e",
+    "tools/test_fixture_support.py": "10831ae72daf5a4c80fd54a8f337228c682adfe70b95f9a08f89fef865f9ce36"
+  },
+  "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "command": [
+    "python",
+    "-B",
+    "tools/test_t1709_audit_starvation.py"
+  ],
+  "output": "green.txt"
+}

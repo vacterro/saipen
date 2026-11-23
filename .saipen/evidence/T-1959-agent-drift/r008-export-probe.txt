@@ -1,0 +1,34 @@
+T-1959 / SRC-348 R008 export-completeness probe
+Measured 2026-10-29. Read-only; nothing created outside this evidence directory.
+
+DECLARED by the audit: 5096 messages, 18168 parts, original handoff 70777 bytes.
+ACTUAL audit bytes: 9486 bytes, 78 lines.
+ACTUAL transcript content present: messages 1-384 only, ending mid-tool-output at
+  2026-10-25T09:23:21Z. The 70777-byte SAIHANDOFF appears only as a preview/reference.
+
+Search 1: any file of exactly 70777 bytes under the project tree (excluding .git):
+  (none)
+
+Search 2: any file of exactly 70777 bytes under the host application-data tree:
+  (none)
+
+Search 3: host blob store file count:
+  0 files
+
+Search 4: literal substring '18168' under the project tree was attempted and REJECTED
+  as evidence: every hit is coincidental numeric noise, not a reference to the export.
+  Verified samples: a git blob-hash fragment ('...c05fd70218168ce2c68a4') and a SAIPEN
+  event identifier ('E-18168'). No file is a copy of, or an index into, the 18168-part
+  export. This search is recorded as FAILED TO LOCATE, not as proof of absence of the
+  export itself -- it simply adds no positive evidence either way.
+
+CONCLUSION: the complete untruncated export and the original 70777-byte handoff
+bytes are NOT obtainable from any surface available to this session.
+Therefore full historical verification is NOT claimed. This audit's outcome is
+PARTIAL by construction, exactly as its STOP CONDITION requires:
+  'Missing complete evidence => PARTIAL, never fabricated forensic completeness.'
+
+The declared-versus-actual comparison IS performed above (5096/18168 declared,
+384 messages actual), and no missing record is read as proof that an action did
+not happen: F-01..F-07 are each judged on the evidence that DOES exist, and
+F-08/F-09 carry the audit's own UNPROVEN mark rather than an inferred defect.

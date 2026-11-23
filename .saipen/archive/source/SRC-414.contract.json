@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-414:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "P0 repair GC production defects: closure hook on finish_ticket, git guard KeyError, zero-progress budget debt; audit 99-red core-unit baseline; reconcile publication and evidence blockers (T-2049/2052/2054/2055/2057/2058/2044)"
+    }
+  },
+  "derived_at": "2026-11-15T22:08:37Z",
+  "derived_from": "SRC-414",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "3bed65fa468a20faffe759fae22a9ef87708cb4691db7706fcf3c9c2d216b3e2"
+}

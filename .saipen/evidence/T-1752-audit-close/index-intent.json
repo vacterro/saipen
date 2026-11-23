@@ -1,0 +1,8 @@
+{
+  "path": "tools/test_t1752_audit_auto_close.py",
+  "action": "intent-to-add only",
+  "foreign_index_entries_unchanged": 5212,
+  "fingerprint": "e2192918fc4e2624f71c9f5a1176f4a4f7dbfb47043e422e892514b5b9668424",
+  "product_bytes_unchanged": true,
+  "published": false
+}

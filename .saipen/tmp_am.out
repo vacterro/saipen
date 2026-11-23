@@ -1,0 +1,7 @@
+33 that need the platform (`signer_of`, `artifact_current`), so every branch is
+51 REASON_HOOK_ARTIFACT_MISMATCH = "HOOK_ARTIFACT_MISMATCH"
+343 artifact_current: Callable[[str], bool] | None = None,
+507 return refuse(REASON_HOOK_ARTIFACT_MISMATCH,
+530 current = artifact_current(script) if artifact_current else True
+535 REASON_HOOK_ARTIFACT_MISMATCH,
+560 "REASON_HOOK_ARTIFACT_MISMATCH",

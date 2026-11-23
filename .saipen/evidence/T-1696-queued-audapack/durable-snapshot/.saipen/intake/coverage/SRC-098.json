@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-098:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-251 closed with verification evidence in LOG: verify -> PASS [target: T-251] conf: high -- node --test tests/widget/w5-002-managed-a3-chat-unreachable.test.js reported 4 pass 0 fail; RED CONTROL replacing the managed ladder with a bare CHAT turns 4/4 RED and reports 18 violating cases; node --test tests/widget/*.test.js reported 721 pass 0 fail 0 cancelled exit 0 (was 717, +4 new, no duration regression: 70s); python -m pytest -q reported 229",
+      "text": "Repair managed A3 ownership reconciliation: no CHAT while Bridge holds active A3 dispatch; red-first split-brain fixture then disarm-path trace",
+      "verification": "the Work this request created reached its own verification gate; see the T-251 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-251"
+    }
+  },
+  "schema_version": 1
+}

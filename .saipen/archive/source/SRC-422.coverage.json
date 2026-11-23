@@ -1,0 +1,23 @@
+{
+  "requirements": {
+    "SRC-422:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "clause text is a clipboard-render artifact of the 41MB capture export (context carrier; the quoted 'Record the assignment' fragment belongs to the export's agent-tool JSON, not the operator handoff), no such requirement exists in the mission body; see .saipen/evidence/T-2087-drift-matrix/DRIFT_MATRIX.md",
+      "text": "Record the assignment without starting new work.\\\"},{\\\"url\\\":\\\"https://developers.openai.com/codex/concepts/sandboxing\\\"},{\\\"max_skill_file_read_bytes\\\":269484032,\\\"max_archive_read_bytes\\\":838860800,\\\"max_file_bytes\\\":268435456,\\\"max_skill_upload_bytes\\\":817889280,\\\"max_visual_editor_archive_bytes\\\":104857600,\\\"max_skill_total_uncompressed_bytes\\\":838860800,\\\"max_skill_bundle_read_bytes\\\":838860\u2026",
+      "verification": null,
+      "work": "T-2088"
+    },
+    "SRC-422:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "clause text is a clipboard-render artifact of the 41MB capture export (context carrier), not a requirement of this mission; no such instruction exists in the operator handoff body; see .saipen/evidence/T-2087-drift-matrix/DRIFT_MATRIX.md",
+      "text": "Do not mention, suggest, or imply that this is a revision, improvement, or result of feedback.",
+      "verification": null,
+      "work": "T-2088"
+    }
+  },
+  "schema_version": 1
+}

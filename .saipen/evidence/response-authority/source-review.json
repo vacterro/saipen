@@ -1,0 +1,77 @@
+{
+  "SRC-164": {
+    "ok": true,
+    "status": "INVALID",
+    "location": "retired",
+    "source_sha256": "4c86d94aaa3166ae687ff84210d5753292e78df2016b14dae75cb2de4cf0ce92",
+    "linked_work": "T-1599",
+    "reason": "FALSE_AUTHORITY_PROJECTION",
+    "retirement_event": "E-11885"
+  },
+  "SRC-146": {
+    "ok": true,
+    "status": "ACTIVE",
+    "location": "active",
+    "source_sha256": "58ea598a87aa4e5ad3148ff7ee8bead5fab2daab6a3869f63bf4a9d6fe5a581b",
+    "linked_work": "T-1573",
+    "coverage": {
+      "receipt": "SRC-146",
+      "requirements": 1,
+      "actionable": 1,
+      "terminal": 1,
+      "dispositions": {
+        "VERIFIED": 1
+      },
+      "unresolved": []
+    }
+  },
+  "SRC-165": {
+    "ok": true,
+    "status": "ACTIVE",
+    "location": "active",
+    "source_sha256": "e1240a14786a1a49850d89d73c70f53fdf49aeba638465670d5cf59f9a395f97",
+    "linked_work": "T-1600",
+    "coverage": {
+      "receipt": "SRC-165",
+      "requirements": 36,
+      "actionable": 36,
+      "terminal": 36,
+      "dispositions": {
+        "VERIFIED": 36
+      },
+      "unresolved": []
+    }
+  },
+  "SRC-166": {
+    "ok": true,
+    "status": "ACTIVE",
+    "location": "active",
+    "source_sha256": "03239595f76bb4618ab71aa7c24f889ad11273e24aa0edf70accd42e01c5737c",
+    "linked_work": "T-1601",
+    "coverage": {
+      "receipt": "SRC-166",
+      "requirements": 5,
+      "actionable": 2,
+      "terminal": 2,
+      "dispositions": {
+        "VERIFIED": 5
+      },
+      "unresolved": []
+    }
+  },
+  "SRC-118": {
+    "ok": true,
+    "status": "ACTIVE",
+    "location": "active",
+    "source_sha256": "3a479e7cfcd39cd90046660c343eb25d81842a34da64624f195f074cf9c91915",
+    "linked_work": "T-1510",
+    "coverage": {
+      "receipt": "SRC-118",
+      "requirements": 0,
+      "actionable": 0,
+      "terminal": 0,
+      "dispositions": {},
+      "unresolved": []
+    }
+  }
+}

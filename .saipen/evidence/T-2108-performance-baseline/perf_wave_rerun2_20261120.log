@@ -1,0 +1,44 @@
+PASS: T-1019 capture launches <= 10 git subprocesses (was 12)
+PASS: T-1019 capture runs exactly three delta listings (was four)
+PASS: T-1019 identity is git-delta-v1
+PASS: AUDIT PERF-003 bounded source revalidation stays within six Git calls
+PASS: T-1019 stable fixture preserves exact git-delta-v1 identity
+PASS: T-1019 oracle durability: committed impl reproduces the live impl
+PASS: T-1019 oracle independence: golden differs from the committed impl
+PASS: T-1019 deliberate fingerprint drift still makes parity red
+INFO: T-1019 same-fixture timing diagnostic -- golden=153.9ms new=141.9ms ratio=0.922
+PASS: T-1019 HEAD movement between capture stages fails closed
+PASS: T-1019 listing movement between capture stages fails closed
+PASS: T-1019 untracked content movement fails closed
+PASS: T-1007 same-size mtime-restored replacement fails closed (Git model)
+PASS: T-1007 same-size mtime-restored replacement fails closed (no-Git model)
+PASS: PERF-001 final confirmation re-read is validated against confirmed evidence
+PASS: T-1019 all monkeypatches restored (post-run bindings == originals)
+PASS: T-1020 committed mutation returns COMMITTED
+PASS: T-1020 engine moves the settled op to SETTLED_DIR on COMMITTED
+PASS: T-1020 committed op is not pending
+PASS: T-1020 committed retry still returns ALREADY_APPLIED
+PASS: T-1008 move failure returns truthful COMMITTED semantics
+PASS: T-1008 committed op with failed move stays non-pending (strict decode owns truth)
+PASS: T-1008 one unresolved op remains exactly visible
+PASS: T-1008 PREPARED manifest in ops/ blocks
+PASS: T-1021 bulk verdict == single-ticket verdict on mixed histories
+PASS: T-1021 bulk evidence is one-pass linear (sub-50ms at 1000/6000)
+PASS: PERF-002 _sc13_conformance_check reuses snapshot.source_id
+PASS: PERF-002 continue_entry_health captures SourceIdentity once for both gates
+PASS: PERF-003 _verify_receipt fires exactly ONE ls-remote
+PASS: PERF-003 _verify_receipt still verifies closure==branch==tag
+PASS: PERF-003 remote timeout degrades to unknown (never PASS/crash)
+PASS: PERF-004 index lookup avoids the receipt iterators
+PASS: PERF-004 index lookup hashes at most one token per receipt (MEASURED, not constant -- see PERF-002)
+PASS: PERF-004 index lookup returns the latest receipt
+PASS: PERF-004 corrupted index falls back to full scan (still correct)
+PASS: AUDIT PERF-002 120-path index capture uses bounded Git calls
+PASS: AUDIT PERF-002 120-path post-gate verification uses bounded Git calls
+PASS: PERF-005 lightweight stability digest equals full-decode digest
+PASS: AUDIT PERF-004 convergence/release reuse one canonical receipt decode
+PASS: T-1022 nitro probes leave the live HOME tree byte-identical
+PASS: T-1022 third-wave ONLY runner exits 0
+PASS: T-1022 third-wave ONLY runner prints a scoped PASS/FAIL summary
+PASS: T-1022 third-wave ONLY runner reports zero failures
+perf wave: 42/42 checks passed, 0 failed

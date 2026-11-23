@@ -1,0 +1,1 @@
+{"good": 12, "restored_good": 12, "bad_tool": 3, "bad_admission": 1, "red_names_repeat": true, "production_edits": 0}

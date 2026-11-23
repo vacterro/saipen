@@ -1,0 +1,51 @@
+utc: 2026-10-08T00:56:45Z
+command: python -B .saipen/evidence/T-1671-lifecycle-authority/live_copies.py . <scratch> _PY/_AUDAPACK _PY/_FastPrompter __MAIN__/ProTrail
+=== _AUDAPACK
+  status before  : {"ok": false, "code": "VALIDATION_FAILED", "reason": "state-malformed", "action": "saipen recover"}
+  validator      : FAIL: lifecycle authority [saio] -- canonical lifecycle state stands on no operation: STATE.last_event is E-3134, above E-3131, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand; T-292 sits under ## DONE on the word of E-3132, E-3133, written above E-3131 with no operation record, and no closure operation stands behind it -- the completion was typ
+  recover        : {"ok": false, "code": "RECONCILE_REAUTH_REQUIRED", "canonical_next_command": "saipen recover --apply-approved-repair c6c8aadd64230c1a685525f0985bc4ea3e9b739a8a5559be80b3e3227973abda"}
+      board  T-292: ## DONE -> ## TODO dropping ['closure_mode', 'owner', 'claim_time']
+      board  T-293: ## DOING -> ## TODO dropping ['owner', 'claim_time']
+      state  phase: 'REPAIR' -> 'DONE'
+      state  task: 'T-293' -> 'none'
+      state  next_action: 'STAGE 1 RED TESTS' -> 'saipen continue'
+      state  last_event: 3134 -> 3131
+  approved plan  : {"ok": true, "code": "REPAIRED", "event": "E-3135"}
+  LOG append-only: bytes False | lines (line ends folded) True
+      + - 08.10.26 00:58 [E-3134] [parent: E-3133] [T-293] [agent: saipen-cli] [op: reconcile-20261008005809417736] DEC: LEGACY_ADOPTED T-293 -- no canonical allocation event is available in the complete history; adopted now by explicit operator decision, original ticket id/title/bytes preserved, no historical allocation or actor fabric
+      + - 08.10.26 00:58 [E-3135] [parent: E-3134] [agent: saipen-cli] [op: reconcile-20261008005809417736] DEC: reconcile protocol state -- phase 'REPAIR'->'DONE'; task 'T-293'->'none'; next_action 'STAGE 1 RED TESTS'->'saipen continue'; last_event 3134->3131; lifecycle authority: E-3132..E-3133 above E-3131 carry no operation record (
+  original bytes kept under recovery/terminal-gap: True
+  status after   : {"ok": false, "code": "VALIDATION_FAILED", "reason": "checkpoint-invalid", "action": "saipen recover"}
+      detail: checkpoint invalid: BOARD proposed T-282 declares closure_mode 'duplicate_reconciled', outside own_patch|inherited_verified|cohort|superseded_verified|external_implementation|finding_invalidated
+  validator after: no lifecycle-authority FAIL
+  live project untouched by this run: True
+=== _FastPrompter
+  status before  : {"ok": false, "code": "PROTOCOL_STATE_INVALID", "reason": "UNAUTHORIZED_LIFECYCLE_WRITE", "action": "saipen recover", "floor": 4553, "head": [4554, 4555, 4556, 4557, 4558, 4559, 4560, 4561, 4562, 4563, 4564], "findings": [["state-ahead-of-journal", 4564], ["terminal-without-operation", "T-1447"]]}
+  validator      : FAIL: lifecycle authority [saio] -- canonical lifecycle state stands on no operation: STATE.last_event is E-4564, above E-4553, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand; T-1447 sits under ## DONE on the word of E-4554, E-4555, E-4556, E-4557, written above E-4553 with no operation record, and no closure operation stands behind it -- the c
+  recover        : {"ok": false, "code": "RECONCILE_REAUTH_REQUIRED", "canonical_next_command": "saipen recover --apply-approved-repair e3a02c1d193b7edbe1222fb3665bce5791042d635a2b03a737b9db2f91a74a12"}
+      board  T-1447: ## DONE -> ## TODO dropping ['closure_mode', 'owner', 'claim_time']
+      state  last_event: 4564 -> 4553
+  approved plan  : {"ok": true, "code": "REPAIRED", "event": "E-4565"}
+  LOG append-only: bytes False | lines (line ends folded) True
+      + - 08.10.26 01:00 [E-4565] [parent: E-4564] [agent: saipen-cli] [op: reconcile-20261008010004219601] DEC: reconcile protocol state -- last_event 4564->4553; lifecycle authority: E-4554..E-4564 above E-4553 carry no operation record (written by hand); kept as history, nothing stands on their word; reopened T-1447; board lifecycle 
+  original bytes kept under recovery/terminal-gap: True
+  status after   : {"ok": true, "phase": "DONE", "task": "none"}
+  validator after: no lifecycle-authority FAIL
+  live project untouched by this run: True
+=== ProTrail
+  status before  : {"ok": false, "code": "PROTOCOL_STATE_INVALID", "reason": "UNAUTHORIZED_LIFECYCLE_WRITE", "action": "saipen recover", "floor": 1203, "head": [1204], "findings": [["state-ahead-of-journal", 1204]]}
+  validator      : FAIL: lifecycle authority [saio] -- canonical lifecycle state stands on no operation: STATE.last_event is E-1204, above E-1203, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand -- run `saipen recover`; it names the journaled repair (T-1671)
+  recover        : {"ok": false, "code": "RECONCILE_REAUTH_REQUIRED", "canonical_next_command": "saipen recover --apply-approved-repair b4862f57d29881445fc7b971afe6df2820f873530d153c8d88011165fe16dc97 resolve-next-action <next-action>"}
+      state  style_contract: 'ded-4ae736e4' -> 'ded-069a4c52'
+      state  next_action: 'package build_topmost\\Release\\protrail.exe into artifacts\\protrail.exe (overwrite) -- the always-on-top z-order fix is implemented and live-verified, but artifacts\\protrail.exe still runs the pre-fix build' -> None
+      state  last_event: 1204 -> 1203
+  operator value : next_action answered on the copy as 'saipen continue'
+  approved plan  : {"ok": true, "code": "REPAIRED", "event": "E-1205"}
+  LOG append-only: bytes False | lines (line ends folded) True
+      + - 08.10.26 01:00 [E-1205] [parent: E-1204] [agent: antigravity] [op: reconcile-20261008010043695805] DEC: reconcile protocol state -- style_contract 'ded-4ae736e4'->'ded-069a4c52'; next_action 'package build_topmost\\Release\\protrail.exe into artifacts\\protrail.exe (overwrite) -- the always-on-top z-order fix is implemented an
+  original bytes kept under recovery/terminal-gap: True
+  status after   : {"ok": true, "phase": "DONE", "task": "none"}
+  validator after: no lifecycle-authority FAIL
+  live project untouched by this run: True
+copies still unauthorized after recovery: 0
+--- exit: 0 ---

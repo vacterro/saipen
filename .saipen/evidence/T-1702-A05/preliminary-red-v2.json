@@ -1,0 +1,20 @@
+{
+  "stage": "red-v2",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "V:\\_TEMP_\\saipen-a05-candidate-do218qeg\\project\\tools\\test_reconcile_history_ledger_blocked.py"
+  ],
+  "project": "V:\\_TEMP_\\saipen-a05-candidate-do218qeg\\project",
+  "exit_code": 1,
+  "oracle_sha256": "cb0230e48c249200780713593994638169d6c4db83b1773212ad9820f44c33f7",
+  "subject_files": {
+    "tools/saipen_engine/reconcile.py": "4611839620eb199b747d0aac8eaea848760c2fd8dfd71ad3b672a3107d0feefb",
+    "tools/saipen.py": "467988d4404860c83e5fd25f059106049b1b00cc706b92269146fce61cddb935"
+  },
+  "stdout": "",
+  "stderr": null,
+  "live_fingerprint": "55f06a7fce4aa11ff0de0126e1e44a6118807f51927a80787cb5a0b99fbb2ec4",
+  "live_source_unchanged": true,
+  "limits": "Preliminary scratch proof while T-1713 owns VERIFY; not T-1714 phase evidence."
+}

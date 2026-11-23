@@ -1,0 +1,12 @@
+{
+  "original_equals_consumer_append": true,
+  "append_sha256": "b2001ebab6a8da415d929baafe23bab371ce3564bf23951067b8a34eacdd0502",
+  "append_bytes": 15837,
+  "authority_unchanged": {
+    "STATE.md": true,
+    "BOARD.md": true,
+    "LOG.md": true
+  },
+  "finding_admission": "PENDING_ADMISSION",
+  "consumer_work_created": 0
+}

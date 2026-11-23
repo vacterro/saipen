@@ -1,0 +1,3 @@
+FAIL: tools/validate.py rejects an UNMODIFIED copy (exit 1) -- every number below would be measuring that instead of the floor's coverage. What it said:
+    FAIL: closure provenance does not resolve: EX-000050 was verified against installed engine generation sha256:c6819eff239d8b9c... but the running engine is sha25
+    FAIL: cross-doc drift [adapters] -- 1 adapter(s) never name BOOT.md and point a cold agent straight at the constitution: FREEBUFF_INGRESS_CONTRACT.md

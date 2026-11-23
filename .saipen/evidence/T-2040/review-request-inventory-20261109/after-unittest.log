@@ -1,0 +1,6 @@
+test_malformed_inventory_refuses_ingress_without_losing_request_or_seat (__main__.MaintenanceObservationTests.test_malformed_inventory_refuses_ingress_without_losing_request_or_seat) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.525s
+
+OK

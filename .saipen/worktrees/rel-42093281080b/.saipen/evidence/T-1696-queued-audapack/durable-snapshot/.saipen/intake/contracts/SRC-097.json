@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-097:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SRC-097.md: '# User request / priority: P1 / verify: the requested change is present and demonstrated against the user own description of it / ## Request / T-249 close hydration/reconciliation hole: characterData-only audit turn recovery before READY' -> T-250"
+    },
+    "SRC-097:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Before an audit turn is READY, a hydration that changes only characterData (no new node, no click, no Resume) must still re-arm reconcileEnabledIdleAuditRuntime so an enabled+idle+generating runtime adopts wait-<wave> for a Core and for a non-Core wave alike."
+    },
+    "SRC-097:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "The recovery window must be BOUNDED (AUTO_HYDRATION_RECOVERY_WINDOW_MS, 120s) and must not become a second state machine: it opens only while enabled+idle+generating+no-lineage, collapses to the cheap childList-only 'turns' observer on generation end / adoption / auth / cap, ordinary generation rides it harmlessly (BUSY, never adopted), and reconcileEnabledIdleAuditRuntime() / resumeRuntimeFromAuditTurn() remain the sole runtime-adoption authority."
+    }
+  },
+  "derived_at": "2026-10-04T19:05:22Z",
+  "derived_from": "SRC-097",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "ce701cca918bb71282f12d7a435e0fbc48f08241302f6d7d236873d1fd4e3e4a"
+}

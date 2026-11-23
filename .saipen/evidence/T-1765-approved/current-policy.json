@@ -1,0 +1,23 @@
+{
+  "ruleset_version": 2,
+  "ruleset_fingerprint": "d682e4a0e542976ddfe3e5518a2b4f8bc81d7eea1e4bbdcd8642a8d5c7fefc5c",
+  "tree_fingerprint": "6210f45822e17ba4e4d953b5ed2fd1519729e6c240347e99678c140b42c4498c",
+  "legacy_id": "DEBT-000460",
+  "legacy_sha256": "c13b4360d9301b4c9d3c0041b3d64df050b5fc1d8e582c739153999bd8cf572f",
+  "handoff": {
+    "severity": "problem",
+    "rule_id": "cross_doc_drift",
+    "subject_kind": "global",
+    "subject_id": null,
+    "credential": false,
+    "subject_ref": null,
+    "finding_key": "4141c15153e33942",
+    "detail_hash": "8ea3ea8de410dc65",
+    "detail": "cross-doc drift [root-file-set] -- unexpected root files: ['T-1446', 'tuple[bool']",
+    "category": null
+  },
+  "legacy_refusal": {
+    "code": "BASELINE_RULESET_CHANGED",
+    "detail": "DEBT-000460 was captured under ruleset 1 (82e5e183ae8f); finding identity semantics changed, comparison would be silent guesswork"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-385:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIPEN host acceptance truth (append 0dbcd270): bind each TURN_STARTED/TURN_COMPLETED lifecycle pair to one campaign/project/goal/operation, split SINGLE_TURN_COMPLETED / SUCCESSOR_TURN_STARTED / MULTI_TURN_CONTINUATION_VERIFIED / OVERNIGHT_PRODUCTION_ACCEPTANCE verdicts, make authority presence not authorization (canonical grant verification), replace the fixed staged-count oracle with before/after live index identity"
+    }
+  },
+  "derived_at": "2026-11-03T08:14:14Z",
+  "derived_from": "SRC-385",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "5a09388e5cbd026bf0b3fb78465c336b5d2e603179c64c4a7dde1aba0795f40b"
+}

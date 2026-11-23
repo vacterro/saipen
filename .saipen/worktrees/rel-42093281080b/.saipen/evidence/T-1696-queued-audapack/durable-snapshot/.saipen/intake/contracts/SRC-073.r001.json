@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-073:R1": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "[PERF-004] the passive inbox freshness budget must exceed the active dashboard cadence (MainWindow.BRIDGE_POLL_ACTIVE_MS=4000) by a meaningful margin so a normal 4-second repaint is served from zero-I/O passive state; the freshness age must default to time.monotonic(); expiry must perform exactly one physical probe; invalidate_inbox_cache/force must remain immediate; regressions must pin the real 4.0s cadence, timer jitter, 20s/100-root bounded scan ratio, and monotonic-vs-wall-clock isolation"
+    }
+  },
+  "derived_at": "2026-09-20T20:50:03Z",
+  "derived_from": "SRC-073",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "88ecb9cdaa6313a08d8dd91b57e57e47ef9dcb0097a13f8254f4287b6ed82bfc"
+}

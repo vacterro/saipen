@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-387:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2017 closed with verification evidence in LOG: verify -> PASS [target: T-2017] conf: high -- python tools/core_unit.py focused T-2017 reported PASS ran:47 record .saipen/evidence/focused-unit/bb783a64ea428ee4-20261104T015849789378Z.json; tools/t2017_red_control_lifecycle.py reported RED CONTROL PASSED for cases A B C; saipen work regression T-2017 recorded the pair before-red 11 of 43 and after-green 0 of 43 in regression-execution-7655ba6953f",
+      "text": "SAIPEN native turn lifecycle forensic repair: fix installed_host_acceptance.py lifecycle pairing, wrapper/receipt status binding, ledger starvation, historical-vs-current readiness separation",
+      "verification": "the Work this request created reached its own verification gate; see the T-2017 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2017"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,10 @@
+{
+  "authoritative_body_exported": false,
+  "body_ref": ".saipen/quarantine/source/SRC-422.md",
+  "quarantined_at": "2026-11-17T23:19:46Z",
+  "reason": "CREDENTIAL_PATTERN",
+  "receipt_id": "SRC-422",
+  "schema_version": 1,
+  "source_sha256": "0600cee65ae041b603e0f67940d207cd13b7829cfbfd607362c51a3240eb9ce0",
+  "state": "QUARANTINED"
+}

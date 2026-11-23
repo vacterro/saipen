@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-007:R0001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Keep OUTAUDIT, CAPTURE, INAUDIT layers, and GG/CC execution as separate concepts and state machines."
+    },
+    "SRC-007:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Provide a transparent filesystem-backed global INAUDIT Inbox with canonical UUID body and metadata pairs and complete provenance fields."
+    },
+    "SRC-007:R0003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A successful capture ACK means the normalized body and metadata are durably and atomically saved; partial pairs are retained as RECOVERY diagnostics."
+    },
+    "SRC-007:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Expose authenticated loopback capture list/detail/create/assign/archive/delete/restore endpoints with idempotent capture identity and bounded validation."
+    },
+    "SRC-007:R0005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Add one-click IA actions for stable whole assistant responses and individual blocks while preserving source text and showing ready/sending/saved/queued/error states."
+    },
+    "SRC-007:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Persist offline browser captures in bounded IndexedDB using the same capture_id, durable transaction completion, capped backoff, and delete only after durable Bridge ACK."
+    },
+    "SRC-007:R0007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Classify captures deterministically from registered project paths, names, unique files and symbols, aliases, weak hints, and explicit-assignment conversation affinity."
+    },
+    "SRC-007:R0008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Classification is explainable evidence with STRONG/SUGGESTED/UNASSIGNED thresholds and never auto-writes a project layer."
+    },
+    "SRC-007:R0009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Generate compact local titles and retain source URL, browser, timestamp, and conversation fingerprint without secrets, cookies, or unrelated conversation data."
+    },
+    "SRC-007:R0010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Extend Qt INAUDIT into compact Layers and Inbox views with list, detail, confidence evidence, destination preview, actions, counters, and debounced filesystem generation watching."
+    },
+    "SRC-007:R0011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Assignment must accept only a registered project, rescan canonical numeric layers, allocate max plus one, never overwrite, atomically publish, verify SHA-256, then update metadata."
+    }
+  },
+  "derived_at": "2026-08-31T02:36:16Z",
+  "derived_from": "SRC-007",
+  "interpretation_revision": 11,
+  "schema_version": 1,
+  "source_sha256": "9d4634e519e651c61e5366bd1efb06a5b190a98ab343542e6fe7c6a67ddfa6b1"
+}

@@ -1,0 +1,442 @@
+diff --git a/tools/saipen_engine/core_unit.py b/tools/saipen_engine/core_unit.py
+index d5f89526..a6b94a43 100644
+--- a/tools/saipen_engine/core_unit.py
++++ b/tools/saipen_engine/core_unit.py
+@@ -24,12 +24,14 @@ This module is that tie, in three parts:
+ 
+ from __future__ import annotations
+ 
++import contextlib
+ import datetime
+ import hashlib
+ import json
+ import os
+ import re
+ import shutil
++import stat
+ import subprocess
+ import tempfile
+ import time
+@@ -514,6 +516,152 @@ def merge_shards(shards: list[dict]) -> dict:
+     }
+ 
+ 
++#: T-1505. A run's sandboxes are stamped with their owner, reclaimed in its own
++#: `finally`, and swept by a later run when the owner died first. Measured
++#: 2026-09-24: 24 `saipen-core-unit-*` directories (4 runs x 6 shards, about
++#: 40 MB each, every one a full copy of `.saipen`) had accumulated in %TEMP%;
++#: what survived in each was the read-only object store of the copied saiwiki
++#: kitchen clone, which a plain `shutil.rmtree` cannot remove on Windows.
++SANDBOX_PREFIX = "saipen-core-unit-"
++SANDBOX_OWNER = "owner.json"
++#: A sandbox without an owner stamp predates T-1505; reclaim it only this old.
++LEGACY_SANDBOX_AGE_S = 12 * 3600
++#: A just-exited shard can hold a handle for a moment on Windows.
++RECLAIM_ATTEMPTS = 5
++
++
++def pid_alive(pid: int) -> bool:
++    """Whether a process with this id is running (never raises)."""
++    if not isinstance(pid, int) or pid <= 0:
++        return False
++    if os.name == "nt":
++        import ctypes
++
++        kernel32 = ctypes.windll.kernel32
++        handle = kernel32.OpenProcess(0x1000, False, pid)  # QUERY_LIMITED_INFORMATION
++        if not handle:
++            return kernel32.GetLastError() == 5  # ACCESS_DENIED: exists, not ours
++        try:
++            code = ctypes.c_ulong()
++            if not kernel32.GetExitCodeProcess(handle, ctypes.byref(code)):
++                return True
++            return code.value == 259  # STILL_ACTIVE
++        finally:
++            kernel32.CloseHandle(handle)
++    try:
++        os.kill(pid, 0)
++    except ProcessLookupError:
++        return False
++    except PermissionError:
++        return True
++    return True
++
++
++def _unlink_writable(target: Path) -> None:
++    try:
++        os.unlink(target)
++    except PermissionError:
++        os.chmod(target, stat.S_IWRITE | stat.S_IREAD)
++        os.unlink(target)
++
++
++def reclaim(path: Path) -> bool:
++    """Remove one sandbox tree, read-only files included; True when it is gone.
++
++    `shutil.rmtree` stops at the first read-only file on Windows (WinError 5),
++    which is exactly what a copied git object store contains, and a handle a
++    lingering process holds (WinError 32) cannot be removed at all until that
++    process exits. Read-only entries are made writable and retried; a held
++    tree gets a few short retries and is then reported. The owner stamp goes
++    last and is put back if the directory itself cannot be removed, so a
++    later `sweep_stale_sandboxes` still recognises the tree as a sandbox.
++    """
++    path = Path(path)
++    stamp = path / SANDBOX_OWNER
++
++    def writable_retry(func, target, _exc):
++        try:
++            os.chmod(target, stat.S_IWRITE | stat.S_IREAD)
++            func(target)
++        except FileNotFoundError:
++            pass
++
++    for attempt in range(RECLAIM_ATTEMPTS):
++        if not path.exists():
++            return True
++        try:
++            saved = stamp.read_bytes() if stamp.is_file() else None
++        except OSError:
++            saved = None
++        with contextlib.suppress(OSError):
++            for child in list(path.iterdir()):
++                if child.name == SANDBOX_OWNER:
++                    continue
++                if child.is_dir() and not child.is_symlink():
++                    shutil.rmtree(child, onerror=writable_retry)
++                else:
++                    _unlink_writable(child)
++            if saved is not None:
++                _unlink_writable(stamp)
++            try:
++                path.rmdir()
++            except OSError:
++                if saved is not None and not stamp.exists():
++                    stamp.write_bytes(saved)
++                raise
++        if not path.exists():
++            return True
++        time.sleep(0.2 * (attempt + 1))
++    return not path.exists()
++
++
++def new_sandbox_root() -> Path:
++    """One owner-stamped `saipen-core-unit-*` directory under the temp root."""
++    root = Path(tempfile.mkdtemp(prefix=SANDBOX_PREFIX))
++    (root / SANDBOX_OWNER).write_text(
++        json.dumps({"pid": os.getpid(), "created": time.time()}), encoding="utf-8"
++    )
++    return root
++
++
++def sweep_stale_sandboxes(temp_root: Path | None = None, now: float | None = None) -> list[str]:
++    """Reclaim sandboxes whose owning run is gone; returns the names reclaimed.
++
++    Only direct children of the temp root named `saipen-core-unit-*` are
++    considered. A stamped one is stale when its owner pid is not running; an
++    unstamped one (pre-T-1505) only when it holds a `project/` sandbox and is
++    older than LEGACY_SANDBOX_AGE_S. Nothing outside those trees is touched.
++    """
++    base = Path(temp_root) if temp_root is not None else Path(tempfile.gettempdir())
++    now = time.time() if now is None else now
++    reclaimed: list[str] = []
++    try:
++        candidates = sorted(base.glob(SANDBOX_PREFIX + "*"))
++    except OSError:
++        return reclaimed
++    for candidate in candidates:
++        if not candidate.is_dir() or candidate.is_symlink():
++            continue
++        stale = False
++        try:
++            owner = json.loads((candidate / SANDBOX_OWNER).read_text(encoding="utf-8"))
++        except FileNotFoundError:
++            owner = None
++        except (OSError, ValueError):
++            continue
++        if isinstance(owner, dict):
++            stale = not pid_alive(owner.get("pid"))
++        elif owner is None:
++            try:
++                age = now - candidate.stat().st_mtime
++            except OSError:
++                continue
++            stale = (candidate / "project").is_dir() and age > LEGACY_SANDBOX_AGE_S
++        if stale and reclaim(candidate):
++            reclaimed.append(candidate.name)
++    return reclaimed
++
++
+ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -> dict:
+     """Run the declared family in a disposable copy; parse the COMPLETE output.
+ 
+@@ -521,7 +669,6 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
+     discovery runs as that many concurrent shards, each in its own copy of the
+     one consistent snapshot, and every copy must carry the tested fingerprint.
+     """
+-    import contextlib
+     from concurrent.futures import ThreadPoolExecutor
+ 
+     from .test_runner import _ignore_copy
+@@ -535,13 +682,12 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
+     shape = shardable(declared_family.command) if int(jobs) > 1 else None
+     count = int(jobs) if shape else 1
+     started = time.monotonic()
+-    with contextlib.ExitStack() as stack:
++    swept = sweep_stale_sandboxes()
++    tmps: list[Path] = []
++    try:
+         # Each shard lives where the sequential run lives -- its own
+         # `saipen-core-unit-*/project` -- so no test sees a longer path.
+-        tmps = [
+-            Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="saipen-core-unit-")))
+-            for _ in range(count)
+-        ]
++        tmps = [new_sandbox_root() for _ in range(count)]
+         sandboxes = [tmp / "project" for tmp in tmps]
+         copy_tree_consistent(source, sandboxes[0], _ignore_copy)
+         # The subject is what was copied, fingerprinted where it was tested:
+@@ -570,8 +716,12 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
+                     range(count),
+                 ))
+             run = merge_shards(shards)
++    finally:
++        leaked = [str(tmp) for tmp in tmps if not reclaim(tmp)]
+     return {
+         **run,
++        "sandboxes_swept": swept,
++        "sandboxes_leaked": leaked,
+         "fingerprint": tested,
+         "jobs": count,
+         "duration_s": round(time.monotonic() - started, 1),
+@@ -885,8 +1035,10 @@ def _evidence(root: Path, args) -> int:
+     fingerprint = tree_fingerprint(root)
+     written = None if args.fresh else reusable_record(root, fingerprint)
+     reused = written is not None
++    leaked: list[str] = []
+     if written is None:
+         run = run_family(root, timeout=args.timeout, jobs=args.jobs)
++        leaked = run.get("sandboxes_leaked") or []
+         keep_durations(root, run.get("module_durations_s") or {})
+         # The record is the truth about the copy that ran, so it is kept either
+         # way; a tree that drifted since the copy only loses the citation.
+@@ -923,5 +1075,7 @@ def _evidence(root: Path, args) -> int:
+             "reused": reused,
+             "checkpoint": result.code,
+             "checkpoint_detail": result.message or None,
++            # T-1505: a sandbox a process still held; a later run sweeps it.
++            "sandboxes_leaked": leaked,
+         }
+     )
+diff --git a/tools/test_t1505_core_unit_sandbox_reclaim.py b/tools/test_t1505_core_unit_sandbox_reclaim.py
+new file mode 100644
+index 00000000..1be04857
+--- /dev/null
++++ b/tools/test_t1505_core_unit_sandbox_reclaim.py
+@@ -0,0 +1,206 @@
++"""T-1505: core-unit sandboxes do not accumulate in the temp directory.
++
++Measured 2026-09-24: 24 `saipen-core-unit-*` directories -- four sharded runs
++of six shards, about 40 MB each, every one a full copy of `.saipen` -- sat in
++%TEMP%. What survived in each was the read-only object store of the copied
++saiwiki kitchen clone. These controls hold the three parts of the repair:
++
++* `reclaim` removes a tree with read-only files, where `shutil.rmtree`
++  stops at the first one on Windows;
++* `sweep_stale_sandboxes` reclaims a sandbox whose owning run is gone and
++  never touches a live run's sandbox or anything not named like one;
++* `run_family` leaves no sandbox of its own behind.
++"""
++
++from __future__ import annotations
++
++import json
++import os
++import shutil
++import stat
++import subprocess
++import sys
++import tempfile
++import time
++import unittest
++from pathlib import Path
++
++TOOLS = Path(__file__).resolve().parent
++if str(TOOLS) not in sys.path:
++    sys.path.insert(0, str(TOOLS))
++
++from saipen_engine import core_unit  # noqa: E402
++from saipen_engine.test_runner import TestFamily  # noqa: E402
++
++
++def read_only_tree(root: Path) -> Path:
++    """A small tree shaped like a copied git object store: read-only files."""
++    objects = root / "project" / ".saipen" / "kitchen" / ".git" / "objects" / "01"
++    objects.mkdir(parents=True)
++    for name in ("af3d38", "0caaad"):
++        blob = objects / name
++        blob.write_bytes(b"x")
++        os.chmod(blob, stat.S_IREAD)
++    return root
++
++
++def dead_pid() -> int:
++    """A process id that has just exited."""
++    proc = subprocess.Popen([sys.executable, "-c", "pass"])
++    proc.wait()
++    return proc.pid
++
++
++class ReclaimTests(unittest.TestCase):
++    def setUp(self):
++        self.base = Path(tempfile.mkdtemp(prefix="t1505-"))
++        self.addCleanup(core_unit.reclaim, self.base)
++
++    @unittest.skipUnless(os.name == "nt", "read-only files only block deletion on Windows")
++    def test_plain_rmtree_cannot_remove_a_read_only_store(self):
++        tree = read_only_tree(self.base / "plain")
++        with self.assertRaises(PermissionError):
++            shutil.rmtree(tree)
++        self.assertTrue(tree.exists())
++
++    def test_reclaim_removes_a_read_only_store(self):
++        tree = read_only_tree(self.base / "reclaimed")
++        self.assertTrue(core_unit.reclaim(tree))
++        self.assertFalse(tree.exists())
++
++    def test_reclaim_of_a_missing_tree_is_done(self):
++        self.assertTrue(core_unit.reclaim(self.base / "never-made"))
++
++
++class SweepTests(unittest.TestCase):
++    def setUp(self):
++        self.temp = Path(tempfile.mkdtemp(prefix="t1505-sweep-"))
++        self.addCleanup(core_unit.reclaim, self.temp)
++
++    def sandbox(self, name: str, owner: dict | None) -> Path:
++        root = read_only_tree(self.temp / name)
++        if owner is not None:
++            (root / core_unit.SANDBOX_OWNER).write_text(json.dumps(owner), encoding="utf-8")
++        return root
++
++    def test_a_dead_owners_sandbox_is_reclaimed(self):
++        stale = self.sandbox(core_unit.SANDBOX_PREFIX + "dead", {"pid": dead_pid()})
++        swept = core_unit.sweep_stale_sandboxes(self.temp)
++        self.assertEqual(swept, [stale.name])
++        self.assertFalse(stale.exists())
++
++    def test_a_live_owners_sandbox_is_kept(self):
++        live = self.sandbox(core_unit.SANDBOX_PREFIX + "live", {"pid": os.getpid()})
++        self.assertEqual(core_unit.sweep_stale_sandboxes(self.temp), [])
++        self.assertTrue(live.exists())
++
++    def test_an_unstamped_sandbox_waits_for_the_legacy_age(self):
++        legacy = self.sandbox(core_unit.SANDBOX_PREFIX + "legacy", None)
++        self.assertEqual(core_unit.sweep_stale_sandboxes(self.temp), [])
++        self.assertTrue(legacy.exists())
++        later = time.time() + core_unit.LEGACY_SANDBOX_AGE_S + 60
++        self.assertEqual(core_unit.sweep_stale_sandboxes(self.temp, now=later), [legacy.name])
++        self.assertFalse(legacy.exists())
++
++    def test_nothing_outside_the_prefix_is_touched(self):
++        foreign = self.sandbox("someone-elses-dir", {"pid": dead_pid()})
++        not_a_sandbox = self.temp / (core_unit.SANDBOX_PREFIX + "no-project")
++        not_a_sandbox.mkdir()
++        later = time.time() + core_unit.LEGACY_SANDBOX_AGE_S + 60
++        self.assertEqual(core_unit.sweep_stale_sandboxes(self.temp, now=later), [])
++        self.assertTrue(foreign.exists())
++        self.assertTrue(not_a_sandbox.exists())
++
++    def test_a_corrupt_stamp_is_left_alone(self):
++        odd = self.sandbox(core_unit.SANDBOX_PREFIX + "odd", None)
++        (odd / core_unit.SANDBOX_OWNER).write_text("{not json", encoding="utf-8")
++        self.assertEqual(core_unit.sweep_stale_sandboxes(self.temp), [])
++        self.assertTrue(odd.exists())
++
++    def test_liveness_of_self_and_of_nothing(self):
++        self.assertTrue(core_unit.pid_alive(os.getpid()))
++        self.assertFalse(core_unit.pid_alive(dead_pid()))
++        self.assertFalse(core_unit.pid_alive(0))
++
++
++@unittest.skipUnless(os.name == "nt", "an open handle blocks deletion only on Windows")
++class HeldSandboxTests(unittest.TestCase):
++    """The measured failure: a process a test started still holds the sandbox."""
++
++    HOLD = "import time; time.sleep(float(__import__('sys').argv[1]))"
++
++    def hold(self, cwd: Path, seconds: float = 30.0) -> subprocess.Popen:
++        holder = subprocess.Popen([sys.executable, "-c", self.HOLD, str(seconds)], cwd=cwd)
++        self.addCleanup(holder.wait)
++        self.addCleanup(holder.kill)
++        time.sleep(0.5)
++        return holder
++
++    def test_temporary_directory_raises_and_leaves_a_held_sandbox_forever(self):
++        left = None
++        raised = False
++        try:
++            with tempfile.TemporaryDirectory(prefix="t1505-old-") as tmp:
++                left = Path(tmp)
++                holder = self.hold(left)
++        except PermissionError:
++            raised = True
++        self.assertTrue(raised, "TemporaryDirectory cleanup raises on a held tree")
++        self.addCleanup(core_unit.reclaim, left)
++        holder.kill()
++        holder.wait()
++        self.assertTrue(left.exists(), "nothing ever reclaims it after the holder exits")
++
++    def test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone(self):
++        temp = Path(tempfile.mkdtemp(prefix="t1505-held-"))
++        self.addCleanup(core_unit.reclaim, temp)
++        sandbox = temp / (core_unit.SANDBOX_PREFIX + "held")
++        sandbox.mkdir()
++        (sandbox / core_unit.SANDBOX_OWNER).write_text(
++            json.dumps({"pid": dead_pid()}), encoding="utf-8"
++        )
++        holder = self.hold(sandbox)
++        self.assertFalse(core_unit.reclaim(sandbox), "a held tree is reported, not raised")
++        self.assertTrue(sandbox.exists())
++        holder.kill()
++        holder.wait()
++        self.assertEqual(core_unit.sweep_stale_sandboxes(temp), [sandbox.name])
++        self.assertFalse(sandbox.exists())
++
++
++class RunFamilyLeavesNothingTests(unittest.TestCase):
++    """A real (small) run through `run_family`, whole and sharded."""
++
++    def run_small(self, jobs: int) -> tuple[dict, list[str]]:
++        temp = Path(tempfile.gettempdir())
++        before = {p.name for p in temp.glob(core_unit.SANDBOX_PREFIX + "*")}
++        small = TestFamily(
++            core_unit.FAMILY_NAME,
++            (sys.executable, "-B", "-m", "unittest", "discover", "-s", "tools",
++             "-p", "test_hermetic_env.py", "-v"),
++            600,
++        )
++        original = core_unit.family
++        core_unit.family = lambda: small
++        try:
++            run = core_unit.run_family(TOOLS.parent, jobs=jobs)
++        finally:
++            core_unit.family = original
++        after = {p.name for p in temp.glob(core_unit.SANDBOX_PREFIX + "*")}
++        return run, sorted(after - before)
++
++    def test_a_whole_run_leaves_no_sandbox(self):
++        run, left = self.run_small(1)
++        self.assertEqual(run["status"], "PASS", run)
++        self.assertEqual(left, [])
++        self.assertEqual(run["sandboxes_leaked"], [])
++
++    def test_a_sharded_run_leaves_no_sandbox(self):
++        run, left = self.run_small(2)
++        self.assertEqual(run["status"], "PASS", run)
++        self.assertEqual(left, [])
++        self.assertEqual(run["sandboxes_leaked"], [])
++
++
++if __name__ == "__main__":
++    unittest.main()

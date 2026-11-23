@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "tools/test_t2040_review_authority_hypotheses.py"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "extensions",
+    "bin",
+    "VERSION",
+    "README.md",
+    "tests/scenarios/saiui-adoption"
+  ],
+  "oracle_files": [
+    "tools/test_adoption_section_parity.py",
+    "tools/test_fixture_support.py",
+    "tools/test_guard_hostile_matrix.py",
+    "tools/test_hermetic_env.py",
+    "tools/test_legacy_lifecycle_compat.py",
+    "tools/test_opencode_adapter.py",
+    "tools/test_operator_origin_support.py",
+    "tools/test_reconcile_valve.py",
+    "tools/test_recover_approved_repair.py",
+    "tools/test_recovery_reachability.py",
+    "tools/test_refusal_registry.py",
+    "tools/test_request_clause_closure.py",
+    "tools/test_sub_dispose_after_collect.py",
+    "tools/test_t1363_zero_manual_entry.py",
+    "tools/test_t1729_operator_gate.py",
+    "tools/test_t1844_origin_broker.py",
+    "tools/test_t2023_goal_management_and_maintenance_binding.py",
+    "tools/test_t2040_maintenance_authority.py",
+    "tools/test_t2040_review_authority_hypotheses.py",
+    "tools/test_ticket_retirement.py",
+    "tests/scenarios/saiui-adoption/.saipen/BOARD.md",
+    "tests/scenarios/saiui-adoption/.saipen/extensions/subs/_shared/inbox.md",
+    "tests/scenarios/saiui-adoption/.saipen/extensions/subs/MANIFEST.md",
+    "tests/scenarios/saiui-adoption/.saipen/extensions/subs/saiui/BOARD.md",
+    "tests/scenarios/saiui-adoption/.saipen/extensions/subs/saiui/kitchen/OUTBOX.md",
+    "tests/scenarios/saiui-adoption/.saipen/extensions/subs/saiui/LOG.md",
+    "tests/scenarios/saiui-adoption/.saipen/extensions/subs/saiui/STATE.md",
+    "tests/scenarios/saiui-adoption/.saipen/LOG.md",
+    "tests/scenarios/saiui-adoption/.saipen/STATE.md"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/goal_authority.py",
+    "tools/saipen_engine/subs.py",
+    "tools/saipen_engine/operations.py",
+    "saipen/REGISTRY.json"
+  ],
+  "before": {
+    "tools/saipen_engine/goal_authority.py": ".saipen/evidence/T-2040/review-authority-hypotheses-20261109/tools/saipen_engine/goal_authority.py",
+    "tools/saipen_engine/subs.py": ".saipen/evidence/T-2040/review-authority-hypotheses-20261109/tools/saipen_engine/subs.py",
+    "tools/saipen_engine/operations.py": ".saipen/evidence/T-2040/review-request-inventory-20261109/tools/saipen_engine/operations.py",
+    "saipen/REGISTRY.json": ".saipen/evidence/T-2040/review-request-inventory-20261109/saipen/REGISTRY.json"
+  },
+  "timeout": 180
+}

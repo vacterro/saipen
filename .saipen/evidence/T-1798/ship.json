@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "code": "NO_PUBLISH_MODE",
+  "stage": "COMMITTED",
+  "stages_reached": [
+    "NO_PUBLISH_MODE"
+  ],
+  "op_id": "release-01bff205f60b4fae81695a1c10c0b621",
+  "tag": "v8.1.0",
+  "terminal_outcome": "LOCAL_NO_PUBLISH",
+  "publication": "NOT_PERFORMED",
+  "detail": "no-publish: local validation passed, skipped-publish event recorded, ticket closed; zero git writes"
+}

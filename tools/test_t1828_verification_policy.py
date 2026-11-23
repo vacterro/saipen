@@ -60,8 +60,9 @@ class FocusedPolicyTests(CoreUnitFixture):
         )
         return path
 
-    def test_focused_current_tree_enters_ship_without_a_full_family_run(self):
+    def test_focused_current_tree_enters_ship_with_a_corridor_proof(self):
         self.assertTrue(self.to("VERIFY").ok)
+        self.corridor_proof()
         self.focused_record()
         self.assertTrue(self.to("REVIEW").ok)
         result = self.to("SHIP")
@@ -71,11 +72,25 @@ class FocusedPolicyTests(CoreUnitFixture):
         self.reach_review()
         self.assertFalse(self.to("SHIP").ok)
 
+    def corridor_proof(self):
+        """Campaign VIII (T-2133 activation): the focused corridor's key.
+
+        A legacy fixture cycle carries no minted BUILD identity, so the
+        corridor opens only with the independent no-delta proof -- a
+        full-family record of the CURRENT tree and baseline. These tests'
+        subject is the focused-layer machinery; the proof enters each flow
+        right where a real project would already have one.
+        """
+        return core_unit.write_record(
+            self.project, _run([]), core_unit.tree_fingerprint(self.project)
+        )
+
     def test_changed_tree_refuses_focused_evidence(self):
         self.assertTrue(self.to("VERIFY").ok)
         self.focused_record()
         self.assertTrue(self.to("REVIEW").ok)
         (self.project / "tools/test_focus.py").write_text("# changed\n", encoding="utf-8")
+        self.corridor_proof()
         result = self.to("SHIP")
         self.assertFalse(result.ok)
         self.assertIn("different tree", result.message)
@@ -83,6 +98,7 @@ class FocusedPolicyTests(CoreUnitFixture):
     def test_tampered_record_refuses(self):
         self.assertTrue(self.to("VERIFY").ok)
         path = self.focused_record()
+        self.corridor_proof()
         self.assertTrue(self.to("REVIEW").ok)
         path.write_text("{}", encoding="utf-8")
         self.assertIn("sha256", self.to("SHIP").message)
@@ -141,6 +157,7 @@ class FocusedPolicyTests(CoreUnitFixture):
             self.assertEqual(focused_unit.evidence(self.project, args), 0)
         runner.assert_not_called()
         self.assertTrue(json.loads(output.getvalue())["reused"])
+        self.corridor_proof()
         self.assertTrue(self.to("REVIEW").ok)
         self.assertTrue(self.to("SHIP").ok)
 

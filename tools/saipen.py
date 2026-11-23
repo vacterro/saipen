@@ -18,6 +18,7 @@ import json
 import os
 import re
 import sys
+import time
 from contextlib import redirect_stdout, suppress
 from io import StringIO
 from pathlib import Path
@@ -34,31 +35,89 @@ from saipen_engine.commands import (
     resolve_shortcut,
     split_cli_compound_argv,
 )
-from saipen_engine.journal import auto_recover_pending
-from saipen_engine.operations import (
-    _ticket_add_route,
-    apply_claim,
-    bind_closed_cohort,
-    checkpoint,
-    compact_board,
-    compact_journal,
-    detach_needs,
-    finish_ticket,
-    plan_claim,
-    repair_metadata,
-    resolve_external_ticket,
-    scrub_board,
-    seal_log,
-    supersede_ticket,
-    ticket_add,
-    ticket_move,
-    ticket_reasoning,
-    ticket_requires,
-    ticket_verify,
-    transition_phase,
-)
 from saipen_engine.paths import resolve_project_root, resolve_protocol_dir, resolve_tool_root
 from saipen_engine.state import parse_state, parse_state_or_error
+
+# T-2089 lean startup: the 22 write-planner entrypoints (and the journal
+# recovery walker) cost ~100 ms of import time on every invocation, and every
+# read-only turn (`--help`, `status`, `response`) paid it before reaching the
+# dispatcher. They resolve lazily through module __getattr__ now: the first
+# attribute access imports `saipen_engine.operations` once, exactly as the
+# eager import did, and the names stay importable/patchable from this module
+# as before. `from saipen import finish_ticket` keeps working; nothing about
+# the write path changed, only WHEN the module loads.
+_LAZY_OPERATIONS = (
+    "_ticket_add_route",
+    "apply_claim",
+    "bind_closed_cohort",
+    "checkpoint",
+    "compact_board",
+    "compact_journal",
+    "detach_needs",
+    "finish_ticket",
+    "plan_claim",
+    "repair_metadata",
+    "resolve_external_ticket",
+    "reconcile_source_index",
+    "restore_board_rows",
+    "scrub_board",
+    "seal_log",
+    "supersede_ticket",
+    "ticket_add",
+    "ticket_move",
+    "ticket_reasoning",
+    "ticket_requires",
+    "ticket_verify",
+    "transition_phase",
+)
+_LAZY_JOURNAL = ("auto_recover_pending",)
+
+
+def _load_operations_module():
+    import saipen_engine.operations as _operations
+
+    return _operations
+
+
+def _load_journal_module():
+    import saipen_engine.journal as _journal
+
+    return _journal
+
+
+class _LazyOperation:
+    """A real module global that imports the write planner on first CALL.
+
+    PEP 562 `__getattr__` never fires for plain name lookup inside this
+    module's functions, so a missing global broke every mutating route
+    (`NameError: checkpoint`) while `--help` stayed green and hid it. This
+    proxy is a genuine callable in `globals()`: `from saipen import X` yields
+    it, function-level calls resolve it through LOAD_GLOBAL, and the first
+    call imports the real entrypoint, rebinds the module global to it, and
+    forwards. `isinstance`/signature inspection still see a plain object,
+    which is all the engine entrypoints ever require.
+    """
+
+    __slots__ = ("_name", "_owner")
+
+    def __init__(self, name: str, owner):
+        self._name = name
+        self._owner = owner
+
+    def __call__(self, *args, **kwargs):
+        target = getattr(self._owner(), self._name)
+        globals()[self._name] = target
+        return target(*args, **kwargs)
+
+    def __repr__(self) -> str:  # pragma: no cover - diagnostic nicety
+        return f"<lazy saipen_engine entrypoint {self._name}>"
+
+
+for _lazy_name in _LAZY_OPERATIONS:
+    globals()[_lazy_name] = _LazyOperation(_lazy_name, _load_operations_module)
+for _lazy_name in _LAZY_JOURNAL:
+    globals()[_lazy_name] = _LazyOperation(_lazy_name, _load_journal_module)
+del _lazy_name
 
 AGENT = "saipen-cli"
 
@@ -956,6 +1015,38 @@ def _hex_decode(text: str) -> str | None:
 _CANONICAL_VALIDATOR_TIMEOUT_SECONDS = 1800
 _VALIDATOR_OUTPUT_TAIL_CHARS = 2000
 
+#: T-2109: the host's continuation boundary is BOUNDED -- the ZAICODE adapter
+#: kills `saipen continue --json` at 15 s (SAIPEN_CONTINUE_TIMEOUT_MS) and
+#: reports an unavailable launcher when it is still running. `continue` routes;
+#: the action it returns is executed by the agent in its own turn. So inline
+#: self-repair (the Auto-Doctor's validator/reverify work) must fit inside a
+#: budget that leaves the host room for process start, protocol load and the
+#: route computation -- or be DEFERRED to the returned action. An unbounded
+#: remediation started inside the boundary is what turned `cc` into minutes.
+_HOST_CONTINUE_INLINE_BUDGET_SECONDS = 6.0
+_DOCTOR_MIN_INLINE_STEP_SECONDS = 2.0
+_ENV_CONTINUE_INLINE_BUDGET = "SAIPEN_CONTINUE_INLINE_BUDGET_SECONDS"
+
+
+def _continue_inline_budget_seconds() -> float:
+    """The wall-clock budget for self-repair work inside one `continue`.
+
+    Operator-tunable so a host with a different kill window can lower or raise
+    it; an unusable value falls back to the product default rather than
+    disabling the bound.
+    """
+    raw = os.environ.get(_ENV_CONTINUE_INLINE_BUDGET, "").strip()
+    if raw:
+        try:
+            value = float(raw)
+        except ValueError:
+            return _HOST_CONTINUE_INLINE_BUDGET_SECONDS
+        # A bound only a non-finite value could lift is not a bound; NaN
+        # compares false to every limit and infinity would disable the guard.
+        if value > 0 and value == value and value != float("inf"):
+            return value
+    return _HOST_CONTINUE_INLINE_BUDGET_SECONDS
+
 
 def _bounded_validator_output(completed) -> str:
     """Tail-bounded validator output. NEVER a PASS/FAIL verdict source."""
@@ -1003,12 +1094,19 @@ class _ValidatorRun:
         self.error = error
 
 
-def _run_canonical_validator(project_root: Path) -> _ValidatorRun:
+def _run_canonical_validator(
+    project_root: Path, timeout: float | None = None
+) -> _ValidatorRun:
     """Execute the canonical Core validator through an INTERNAL argv path.
 
     No shell, no command string, no `shell=True`. The exit code and the receipt
     the validator writes are the only inputs; free-form stdout is summarized
     for the operator and never parsed for a PASS/FAIL verdict (T-1412).
+
+    `timeout` (T-2109) is the INLINE budget the caller has left. The validator
+    is read-only, so a run cut at that bound writes nothing and the caller
+    reports the deferral; the command's own default stays the full capture
+    budget.
     """
     import subprocess
 
@@ -1016,6 +1114,9 @@ def _run_canonical_validator(project_root: Path) -> _ValidatorRun:
         validator = _canonical_validator_path()
     except Exception as exc:
         return _ValidatorRun(None, False, error=f"{type(exc).__name__}: {exc}")
+    budget = _CANONICAL_VALIDATOR_TIMEOUT_SECONDS
+    if timeout is not None:
+        budget = max(1.0, min(float(timeout), float(_CANONICAL_VALIDATOR_TIMEOUT_SECONDS)))
     command = [
         sys.executable,
         str(validator),
@@ -1031,7 +1132,7 @@ def _run_canonical_validator(project_root: Path) -> _ValidatorRun:
             text=True,
             encoding="utf-8",
             errors="replace",
-            timeout=_CANONICAL_VALIDATOR_TIMEOUT_SECONDS,
+            timeout=budget,
         )
     except Exception as exc:
         return _ValidatorRun(validator, False, error=f"{type(exc).__name__}: {exc}")
@@ -1055,7 +1156,9 @@ def _validator_run_block(run: _ValidatorRun) -> dict:
     return block
 
 
-def _validate(project_root: Path, as_json: bool) -> int:
+def _validate(
+    project_root: Path, as_json: bool, *, doctor_timeout: float | None = None
+) -> int:
     """The canonical Core-conformance front door (T-1412). EVIDENCE-WRITE.
 
     T-1357 gave a blocked operator a read-only fast-gate report under this verb;
@@ -1076,6 +1179,10 @@ def _validate(project_root: Path, as_json: bool) -> int:
     durable CURRENT_PASS receipt for the final source is not proof. The receipt
     is the command's ONLY write: product files, BOARD Work, STATE phase, source
     intake and Improve cycles are untouched.
+
+    `doctor_timeout` (T-2109) is set only when the Auto-Doctor runs this inside
+    a bounded host continuation: the validator then gets what is left of that
+    budget instead of its own full capture timeout.
     """
     from saipen_engine import codec
     from saipen_engine.conformance import (
@@ -1161,7 +1268,7 @@ def _validate(project_root: Path, as_json: bool) -> int:
         )
         return 1
 
-    run = _run_canonical_validator(project_root)
+    run = _run_canonical_validator(project_root, timeout=doctor_timeout)
     try:
         decision = conformance_decision(project_root, gate="core")
     except Exception as exc:
@@ -1829,7 +1936,14 @@ def _malformed_route(state_text: str, board_text: str, state_error: str) -> dict
     return route_next(state_text, board_text, _state_error=state_error)
 
 
-def _status(project_root: Path, as_json: bool) -> int:
+def _status(project_root: Path, as_json: bool, view: str | None = None) -> int:
+    from saipen_engine.runtime_surface import identity_session
+
+    with identity_session():
+        return _status_inner(project_root, as_json, view=view)
+
+
+def _status_inner(project_root: Path, as_json: bool, view: str | None = None) -> int:
     state_path = _state_path(project_root)
     if not state_path.is_file():
         _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT"}, as_json)
@@ -2480,7 +2594,9 @@ def _status(project_root: Path, as_json: bool) -> int:
     try:
         from saipen_engine.source_binding import advisory as _source_binding
 
-        _drift = _source_binding(project_root)
+        # T-2089: the snapshot already parsed the complete history once; the
+        # advisory reuses those events instead of walking the ledger again.
+        _drift = _source_binding(project_root, events=history_events)
     except Exception as exc:
         payload["source_drift_error"] = f"{type(exc).__name__}: {exc}"
     else:
@@ -2557,8 +2673,758 @@ def _status(project_root: Path, as_json: bool) -> int:
             "withheld": f"kpi derivation failed: {type(exc).__name__}",
         }
 
+    # T-2089: `--view agent` renders the SAME computed payload through the
+    # bounded envelope AFTER every gate above has run -- no projection,
+    # authority or evidence step is skipped on the agent route.
+    if view == "agent":
+        _emit(_agent_view_payload(payload), as_json)
+        return 0
     _emit(payload, as_json)
     return 0
+
+
+def _agent_view_payload(payload: dict) -> dict:
+    """T-2089 / night-4: the bounded envelope a model turn routes on.
+
+    The full projection stays the only authority-bearing rendering; this view
+    is computed AFTER every canonical gate has run, from the same payload --
+    no gate is skipped, no verdict re-derived. The envelope is built as a
+    fresh bounded structure, never a deep copy of the input:
+
+    * no whole-value serialization of megabyte strings -- every string is
+      streamed in bounded chunks, so projection cost stays proportional to
+      the OUTPUT budget, not the input size;
+    * no truncated-JSON round-trips -- a long root ID can never raise;
+    * a hard global UTF-8 budget: keys are charged their exact serialized
+      bytes against one shared pool, so nested megabyte values inside
+      `distribution`, `convergence`, `receipt` extras or blocker ids cannot
+      bypass the bound while `truncated` stays false;
+    * authority-critical string fields (`next_action`, `code`, verdicts)
+      stay PLAIN strings under any input -- an over-budget one keeps its str
+      type as a prefix and logs the dropped-tail digest in
+      `authority_text_truncation`, never becoming a marker dict a downstream
+      consumer could mistake for an executable value;
+    * every cap is explicit: exact total counts, an unambiguous
+      length-framed sha256 of the dropped content (newline joins cannot
+      collide two different element splits), and the full view named as the
+      detail route -- capped content is addressable, never silently gone.
+    """
+
+    import hashlib
+
+    view: dict = {
+        "view": "agent",
+        "detail_ref": "saipen status --json",
+    }
+    keep = (
+        "ok",
+        "code",
+        "project_identity",
+        "protocol_version",
+        "phase",
+        "task",
+        "next_action",
+        "computed_next_action",
+        "computed_reason",
+        "blocker",
+        "execution_intent",
+        "continuation_authority",
+        "authority_source",
+        "authority_until",
+        "safety_valve_mode",
+        "claimed_ticket",
+        "top_workable_ticket",
+        "log_tail_event",
+        "head",
+        "board_errors",
+        "recovery_pending",
+        "recovery_conflict",
+        "pending_ops",
+        "conflict_ops",
+        "milestone",
+        "conformance_status",
+        "conformance_history",
+        "claimed_but_unproven",
+        "staleness",
+        "clean_execution",
+        "goal_authority",
+        "cold_route",
+        "protocol_copy",
+        "audit_inbox",
+        "readiness",
+        "operator_gates",
+        "waiting_on_you",
+        "pending_ingress",
+        "appends",
+        "appends_error",
+        "closed_contracts",
+        "source_drift",
+        "source_drift_error",
+        "convergence",
+        "distribution",
+        "automation",
+        "telegrams",
+    )
+    # These fields carry the decision a downstream consumer executes. They
+    # must stay plain strings even when adversarial input forces a cut.
+    plain_string_keys = frozenset({
+        "code",
+        "project_identity",
+        "protocol_version",
+        "phase",
+        "task",
+        "next_action",
+        "computed_next_action",
+        "computed_reason",
+        "blocker",
+        "execution_intent",
+        "continuation_authority",
+        "authority_source",
+        "authority_until",
+        "safety_valve_mode",
+        "claimed_ticket",
+        "top_workable_ticket",
+        "log_tail_event",
+        "head",
+        "milestone",
+        "staleness",
+        "appends_error",
+        "source_drift_error",
+    })
+
+    CHUNK = 32768
+    AUTHORITY_TEXT_BYTES = 512
+    DIAGNOSTIC_KEY_BYTES = 8192
+    ROOTS_BUDGET = 1024
+    HARD_BUDGET_BYTES = 32 * 1024
+    ENVELOPE_RESERVE = 3072
+    GROUPS_CAP = 10240
+    DIGEST_ITEM_CHAR_CAP = 65536
+    DIGEST_MAX_ITEMS = 64
+    DEPTH_LIMIT = 6
+    _cause_reserve = 96
+
+    def max_rows_cap(src_groups) -> int:
+        # 16 full rows by default; the row loop's byte charging decides
+        # the REAL stop, this only restores the historical row ceiling.
+        return 16
+
+    remaining = HARD_BUDGET_BYTES - ENVELOPE_RESERVE
+    cut_anywhere = False
+    authority_cuts: list = []
+
+    def _feed(h, text: str) -> None:
+        for i in range(0, len(text), CHUNK):
+            h.update(text[i:i + CHUNK].encode("utf-8"))
+
+    def _digest_items(values, salt: str):
+        """Unambiguous length-framed sha256 over the ORIGINAL values.
+
+        Framing: per item, the char count (8-byte big-endian), a one-byte tag
+        (S = raw string, J = canonical JSON) and the item bytes -- two
+        different element lists can never collide into one byte stream, so
+        ["a\\nb", "c"] and ["a", "b\\nc"] hash differently. Digest WORK is
+        bounded too: at most DIGEST_MAX_ITEMS items and DIGEST_ITEM_CHAR_CAP
+        chars per item feed the hash; `capped` reports an early stop.
+        """
+        h = hashlib.sha256(salt.encode("utf-8"))
+        capped = False
+        count = 0
+        for v in values:
+            if count >= DIGEST_MAX_ITEMS:
+                capped = True
+                break
+            if isinstance(v, str):
+                if len(v) > DIGEST_ITEM_CHAR_CAP:
+                    v = v[:DIGEST_ITEM_CHAR_CAP]
+                    capped = True
+                h.update(len(v).to_bytes(8, "big"))
+                h.update(b"S")
+                _feed(h, v)
+            else:
+                try:
+                    blob = json.dumps(v, ensure_ascii=False, sort_keys=True)
+                except (TypeError, ValueError):
+                    blob = repr(v)
+                if len(blob) > DIGEST_ITEM_CHAR_CAP:
+                    blob = blob[:DIGEST_ITEM_CHAR_CAP]
+                    capped = True
+                h.update(len(blob).to_bytes(8, "big"))
+                h.update(b"J")
+                _feed(h, blob)
+            count += 1
+        return h.hexdigest(), capped
+
+    def _bound_string(value: str, budget: int):
+        """(prefix_text, marker|None); streams in CHUNKs, never allocates
+        more than budget + one chunk regardless of the input length.
+
+        Night-6 P0-A: every dropped byte feeds the tail digest in
+        ORIGINAL byte order. The kept prefix ends at a VALID UTF-8
+        boundary; bytes past that boundary (a straddled code point) are
+        DROPPED bytes and open the tail, so `dropped_tail_sha256` is
+        exactly sha256(original_utf8_bytes[kept_utf8_bytes:]).
+
+        The boundary resolves the moment the kept buffer fills (or the
+        input ends): the straddle flushes first, the same chunk's tail
+        remainder follows, and every later chunk streams straight into
+        the hash in order. A held-back chunk therefore never survives
+        the iteration that produced it, so the previous
+        `later_chunks + first_tail` misordering cannot recur.
+        """
+        n = len(value)
+        if n <= budget and value.isascii():
+            return value, None
+        kept = bytearray()
+        kept_text: str | None = None
+        kept_valid = b""
+        tail_h = hashlib.sha256()
+        tail_bytes = 0
+        total = 0
+        for i in range(0, n, CHUNK):
+            chunk = value[i:i + CHUNK].encode("utf-8")
+            total += len(chunk)
+            if kept_text is None and len(kept) < budget:
+                room = budget - len(kept)
+                kept += chunk[:room]
+                chunk = chunk[room:]
+                if len(kept) >= budget or i + CHUNK >= n:
+                    kept_text = bytes(kept).decode("utf-8", "ignore")
+                    kept_valid = kept_text.encode("utf-8")
+                    straddled = bytes(kept)[len(kept_valid):]
+                    if straddled:
+                        tail_h.update(straddled)
+                        tail_bytes += len(straddled)
+            if chunk:
+                if kept_text is None:
+                    # Degenerate zero budget: nothing resolves the
+                    # boundary, so the tail starts with this chunk.
+                    kept_text = ""
+                    kept_valid = b""
+                tail_h.update(chunk)
+                tail_bytes += len(chunk)
+        if total <= budget:
+            return value, None
+        text = kept_text if kept_text is not None else ""
+        return text, {
+            "byte_budget_exceeded": True,
+            "original_utf8_bytes": total,
+            "kept_utf8_bytes": len(kept_valid),
+            "dropped_tail_bytes": tail_bytes,
+            "dropped_tail_sha256": tail_h.hexdigest(),
+            "full_value_ref": "saipen status --json",
+        }
+
+    def _sample_text(value, cap: int = 120) -> str:
+        if isinstance(value, str):
+            text, _info = _bound_string(value, cap)
+            return text if isinstance(text, str) else ""
+        if isinstance(value, (dict, list)):
+            return f"<{type(value).__name__} len={len(value)}>"
+        return str(value)[:cap]
+
+    def _bound_value(value, budget: int, depth: int = 0):
+        """Fresh bounded copy; never aliases a mutable input node."""
+        if value is None or isinstance(value, (bool, int, float)):
+            return value, False
+        if isinstance(value, str):
+            text, info = _bound_string(value, max(32, budget))
+            if info is None:
+                return value, False
+            return {**info, "text": text}, True
+        if isinstance(value, dict):
+            if depth >= DEPTH_LIMIT:
+                digest, capped = _digest_items([value], "depth")
+                return (
+                    {
+                        "depth_exceeded": True,
+                        "value_sha256": digest,
+                        "digest_capped": capped,
+                        "full_value_ref": "saipen status --json",
+                    },
+                    True,
+                )
+            max_items = max(1, budget // 96)
+            cut = len(value) > max_items
+            out: dict = {}
+            items = sorted(value.items(), key=lambda kv: str(kv[0]))[:max_items]
+            share = max(32, budget // max(1, len(items)))
+            for k, v in items:
+                key_text = (
+                    k
+                    if isinstance(k, str)
+                    else json.dumps(k, ensure_ascii=False, sort_keys=True)
+                )
+                if len(key_text) > 96:
+                    key_text, _info = _bound_string(key_text, 96)
+                    cut = True
+                bounded, c = _bound_value(
+                    v, max(32, share - len(key_text) - 8), depth + 1
+                )
+                out[key_text] = bounded
+                cut = cut or c
+            if len(value) > max_items:
+                digest, capped = _digest_items(
+                    [k for k in value][max_items:], "dict-overflow-keys"
+                )
+                out["__overflow__"] = {
+                    "overflow_count": len(value) - max_items,
+                    "overflow_sha256": digest,
+                    "overflow_digest_capped": capped,
+                    "full_value_ref": "saipen status --json",
+                }
+            return out, cut
+        if isinstance(value, list):
+            if depth >= DEPTH_LIMIT:
+                digest, capped = _digest_items([value], "depth")
+                return (
+                    {
+                        "depth_exceeded": True,
+                        "value_sha256": digest,
+                        "digest_capped": capped,
+                        "full_value_ref": "saipen status --json",
+                    },
+                    True,
+                )
+            max_items = max(1, budget // 96)
+            cut = len(value) > max_items
+            out = []
+            share = max(32, budget // max_items)
+            for v in value[:max_items]:
+                bounded, c = _bound_value(v, share, depth + 1)
+                out.append(bounded)
+                cut = cut or c
+            if len(value) > max_items:
+                digest, capped = _digest_items(value[max_items:], "list-overflow")
+                out.append(
+                    {
+                        "overflow_count": len(value) - max_items,
+                        "overflow_sha256": digest,
+                        "overflow_digest_capped": capped,
+                        "overflow_sample_first": [
+                            _sample_text(v) for v in value[max_items:max_items + 4]
+                        ],
+                        "full_value_ref": "saipen status --json",
+                    }
+                )
+            return out, cut
+        # Non-JSON engine value: name the type, bind identity by digest,
+        # never crash the envelope on it.
+        digest, capped = _digest_items([value], "non-json")
+        return (
+            {
+                "non_json_type": type(value).__name__,
+                "value_sha256": digest,
+                "digest_capped": capped,
+                "full_value_ref": "saipen status --json",
+            },
+            True,
+        )
+
+    def _charge(key: str, bounded) -> int:
+        return len(key) + 4 + len(json.dumps(bounded, ensure_ascii=False))
+
+    def _emit_waits(waits: list) -> None:
+        nonlocal cut_anywhere
+        budget = min(3072, max(256, remaining - 256))
+        max_rows = max(1, min(12, budget // 96))
+        bounded_rows = []
+        cut = len(waits) > max_rows
+        share = max(32, budget // max_rows)
+        for row in waits[:max_rows]:
+            if (
+                isinstance(row, dict)
+                and isinstance(row.get("text"), str)
+                and "byte_budget_exceeded" in row
+            ):
+                # Already-bounded marker row (a prior projection's own
+                # output): pass through unchanged. Re-bounding a marker
+                # strips its text and buries it under __overflow__.
+                bounded_rows.append(row)
+                continue
+            if isinstance(row, str):
+                text, info = _bound_string(row, min(240, share))
+                bounded_rows.append(text if info is None else {**info, "text": text})
+                if info:
+                    cut = True
+            else:
+                bounded, c = _bound_value(row, share)
+                bounded_rows.append(bounded)
+                cut = cut or c
+        view["waiting_on_you"] = bounded_rows
+        if len(waits) > max_rows:
+            digest, capped = _digest_items(waits[max_rows:], "waiting_on_you")
+            view["waiting_on_you_truncation"] = {
+                "overflow_count": len(waits) - max_rows,
+                "overflow_sha256": digest,
+                "overflow_digest_capped": capped,
+                "overflow_sample_first": [
+                    _sample_text(r) for r in waits[max_rows:max_rows + 4]
+                ],
+            }
+        cut_anywhere = cut_anywhere or cut
+
+    def _emit_appends(appends: list) -> None:
+        nonlocal cut_anywhere
+        budget = min(4096, max(256, remaining - 256))
+        max_kept = max(1, min(4, budget // 512))
+        per_append = min(2048, max(64, budget // max_kept))
+        bounded_appends = []
+        for append in appends[:max_kept]:
+            if isinstance(append, (dict, list, str)):
+                bounded, c = _bound_value(append, per_append)
+                if c:
+                    digest, capped = _digest_items([append], "append")
+                    bounded_appends.append(
+                        {
+                            "append_budget_exceeded": True,
+                            "serialized_sha256": digest,
+                            "digest_capped": capped,
+                            "full_value_ref": "saipen status --json",
+                        }
+                    )
+                else:
+                    bounded_appends.append(bounded)
+            else:
+                bounded_appends.append(append)
+        view["appends"] = bounded_appends
+        # Night-5 P0-B: `cut` must reflect CONTENT loss, not only the row
+        # count -- a single shortened append is still a truncated view.
+        cut = False
+        for bounded in bounded_appends:
+            if isinstance(bounded, dict) and "append_budget_exceeded" in bounded:
+                cut = True
+                break
+        cut = cut or len(appends) > max_kept
+        if cut:
+            digest, capped = _digest_items(appends[max_kept:], "appends")
+            view["appends_truncation"] = {
+                "overflow_count": len(appends) - max_kept,
+                "overflow_sha256": digest,
+                "overflow_digest_capped": capped,
+                "overflow_sample_first": [
+                    _sample_text(a) for a in appends[max_kept:max_kept + 4]
+                ],
+            }
+        cut_anywhere = cut_anywhere or cut
+
+    def _emit_conformance(conformance: dict) -> None:
+        nonlocal cut_anywhere
+        budget = min(2048, max(256, remaining - 256))
+        out: dict = {}
+        cut = False
+        receipt = conformance.get("receipt")
+        if isinstance(receipt, dict):
+            slim_receipt = {
+                k: receipt.get(k)
+                for k in ("status", "validator", "disposition", "blocking_findings")
+                if k in receipt
+            }
+            blocking = slim_receipt.get("blocking_findings")
+            if isinstance(blocking, dict):
+                slim_receipt["blocking_findings"] = {
+                    "problem_count": blocking.get("problem_count"),
+                }
+                # Collapsing the full findings to a count is loss-bearing.
+                cut = True
+            if len(slim_receipt) < len(receipt):
+                # Night-5 P0-B: a receipt field dropped by the slim filter
+                # must mark the view truncated -- the consumer must not
+                # read the slim receipt as the complete one.
+                cut = True
+                dropped = [
+                    k for k in receipt
+                    if isinstance(k, str) and k not in slim_receipt
+                ]
+                digest, capped = _digest_items(dropped, "receipt-fields")
+                out["receipt_fields_omitted"] = {
+                    "omitted_count": len(receipt) - len(slim_receipt),
+                    "keys_sha256": digest,
+                    "digest_capped": capped,
+                    "keys_sample": sorted(dropped)[:4],
+                }
+            bounded, c = _bound_value(slim_receipt, max(128, budget // 2))
+            out["receipt"] = bounded
+            cut = cut or c
+        share = max(32, budget // max(1, len(conformance)))
+        for k, v in sorted(conformance.items(), key=lambda kv: str(kv[0])):
+            if k == "receipt":
+                continue
+            bounded, c = _bound_value(v, share)
+            out[k if isinstance(k, str) else str(k)] = bounded
+            cut = cut or c
+        view["conformance_status"] = out
+        cut_anywhere = cut_anywhere or cut
+
+    present = [key for key in keep if payload.get(key) is not None]
+    for idx, key in enumerate(present):
+        value = payload.get(key)
+        keys_left = max(1, len(present) - idx)
+        share = min(DIAGNOSTIC_KEY_BYTES, max(0, remaining) // keys_left)
+        if key == "waiting_on_you" and isinstance(value, list):
+            _emit_waits(value)
+            remaining -= _charge("waiting_on_you", view.get("waiting_on_you_truncation", view.get("waiting_on_you")))
+            continue
+        if key == "appends" and isinstance(value, list):
+            _emit_appends(value)
+            remaining -= _charge("appends", view.get("appends_truncation", view.get("appends")))
+            continue
+        if key == "conformance_status" and isinstance(value, dict):
+            _emit_conformance(value)
+            remaining -= _charge("conformance_status", view.get("conformance_status"))
+            continue
+        if not isinstance(value, (dict, list, str)):
+            view[key] = value
+            remaining -= len(key) + 24
+            continue
+        if key in plain_string_keys and isinstance(value, str):
+            text, info = _bound_string(value, min(AUTHORITY_TEXT_BYTES, max(32, share)))
+            view[key] = text
+            if info:
+                authority_cuts.append(
+                    {
+                        "key": key,
+                        **{f: info[f] for f in info if f != "text"},
+                    }
+                )
+                remaining -= _charge(key, {**info, "text": text})
+            else:
+                remaining -= _charge(key, text)
+            continue
+        if share <= 0:
+            digest, capped = _digest_items([value], "key-exhausted")
+            view[key] = {
+                "key_budget_exhausted": True,
+                "value_sha256": digest,
+                "digest_capped": capped,
+                "full_value_ref": "saipen status --json",
+            }
+            cut_anywhere = True
+            remaining -= len(key) + 220
+            continue
+        bounded, cut = _bound_value(value, share)
+        view[key] = bounded
+        cut_anywhere = cut_anywhere or cut
+        remaining -= _charge(key, bounded)
+
+    if authority_cuts:
+        if len(authority_cuts) > 4:
+            digest, capped = _digest_items(authority_cuts[4:], "authority-cuts")
+            view["authority_text_truncation"] = {
+                "cuts": authority_cuts[:4],
+                "further_cut_count": len(authority_cuts) - 4,
+                "further_cuts_sha256": digest,
+            }
+        else:
+            view["authority_text_truncation"] = {"cuts": authority_cuts}
+
+    projection = payload.get("blocker_projection")
+    if isinstance(projection, dict):
+        src_groups = projection.get("groups") or ()
+        max_full_groups = 4
+        groups_floor = 2
+        # Night-5 P0-A: blocker groups charge the SAME shared budget as
+        # every other key. The build is row-serial and stops (or folds to
+        # id-only rows) when the group budget is spent, so 16 saturated
+        # groups can never serialize past the global limit.
+        groups_budget = max(256, min(GROUPS_CAP, remaining - 256))
+        rows: list = []
+        cut = False
+        row_overhead = 24
+        charged = 0
+        for i, group in enumerate(src_groups):
+            if charged >= groups_budget or len(rows) >= max_rows_cap(src_groups):
+                cut = True
+                break
+            if not isinstance(group, dict):
+                digest, capped = _digest_items([group], "group")
+                rows.append(
+                    {
+                        "group_budget_exceeded": True,
+                        "value_sha256": digest,
+                        "digest_capped": capped,
+                        "full_value_ref": "saipen status --json",
+                    }
+                )
+                cut = True
+                charged += 220
+                continue
+            row: dict = {}
+            # Every emitted row carries the exact counts (count parity is
+            # pinned by the stress suite): the id-only fallback below
+            # keeps root_ticket_count/dependent_count even when the group
+            # budget is exhausted.
+            count = len(group.get("root_tickets") or ())
+            deps = len(group.get("dependent_tickets") or ())
+            full = i < max_full_groups and (
+                charged + row_overhead
+                < groups_budget - _cause_reserve
+            )
+            caps = (
+                ("shared_blocker_id", 120),
+                ("blocker_class", 96),
+                ("cause", 512 if full else 96),
+                ("owner", 96),
+            )
+            row_bytes = row_overhead
+            for field, cap in caps:
+                v = group.get(field)
+                if isinstance(v, str):
+                    text, info = _bound_string(v, cap)
+                    row[field] = text if info is None else {**info, "text": text}
+                    if info:
+                        cut = True
+                    row_bytes += len(field) + 8 + len(text)
+                elif v is not None:
+                    row[field] = v
+                    row_bytes += len(field) + 24
+            if full:
+                roots = group.get("root_tickets") or ()
+                # Same per-row ceiling the historical build used: a quick
+                # (verbatim) root list must stay a genuinely small row.
+                quick_ceiling = min(
+                    ROOTS_BUDGET, max(64, (groups_budget - 400) // 16)
+                )
+                quick = (
+                    count <= 64
+                    and isinstance(roots, (list, tuple))
+                    and all(
+                        e is None or isinstance(e, (str, bool, int, float))
+                        for e in roots
+                    )
+                    and sum(
+                        min(len(e), 256) if isinstance(e, str) else 8 for e in roots
+                    )
+                    + 16 * count
+                    <= quick_ceiling
+                )
+                if quick:
+                    # Strings/numbers are immutable: a new list of the same
+                    # elements aliases nothing mutable from the payload.
+                    row["root_tickets"] = [e for e in roots]
+                    row_bytes += sum(
+                        min(len(e), 256) if isinstance(e, str) else 8
+                        for e in roots
+                    ) + 16 * count
+                else:
+                    cut = True
+                    kept_roots = []
+                    root_budget = max(96, min(240, groups_budget - charged - row_bytes))
+                    for e in roots[:8]:
+                        if isinstance(e, str):
+                            text, info = _bound_string(e, min(240, root_budget))
+                            kept_roots.append(
+                                text if info is None else {**info, "text": text}
+                            )
+                            if info:
+                                cut = True
+                        else:
+                            bounded, c = _bound_value(e, 240)
+                            kept_roots.append(bounded)
+                            cut = cut or c
+                    if len(roots) > 8:
+                        digest, capped = _digest_items(list(roots[8:]), "root-tickets")
+                        kept_roots.append(
+                            {
+                                "overflow_count": len(roots) - 8,
+                                "overflow_sha256": digest,
+                                "overflow_digest_capped": capped,
+                            }
+                        )
+                    row["root_tickets"] = kept_roots
+                    row_bytes += len(json.dumps(kept_roots, ensure_ascii=False))
+                # The count is measured on the source list and stays exact
+                # for every row -- a bounded or collapsed group still reports
+                # its true root count.
+                row["root_ticket_count"] = count
+                row["dependent_count"] = len(group.get("dependent_tickets") or ())
+                row_bytes += 64
+                for flag in (
+                    "recovery_internally_authorized",
+                    "external_input_required",
+                    "read_only_work_may_proceed",
+                ):
+                    v = group.get(flag)
+                    if v is not None:
+                        row[flag] = v
+                        row_bytes += len(flag) + 8
+            else:
+                # Budget-exhausted row: keep id + exact counts (parity),
+                # mark the loss.
+                cut = True
+                row["root_ticket_count"] = count
+                row["dependent_count"] = deps
+                row_bytes += 48
+            charged += row_bytes
+            rows.append(row)
+        view["blocker_groups"] = rows
+        view["blocker_group_count"] = len(src_groups)
+        if len(rows) < len(src_groups):
+            # Groups never emitted at all: fold to an explicit overflow
+            # marker so the count stays honest and the loss is named.
+            cut = True
+            digest, capped = _digest_items(
+                [
+                    g.get("shared_blocker_id") if isinstance(g, dict) else g
+                    for g in src_groups[len(rows):]
+                ],
+                "blocker_group_ids",
+            )
+            view["blocker_group_truncation"] = {
+                "overflow_count": len(src_groups) - len(rows),
+                "overflow_sha256": digest,
+                "overflow_digest_capped": capped,
+                "overflow_sample_first": [
+                    _sample_text(
+                        g.get("shared_blocker_id") if isinstance(g, dict) else g
+                    )
+                    for g in src_groups[len(rows):len(rows) + 4]
+                ],
+            }
+        view["blocker_ticket_count"] = len(projection.get("items") or ())
+        cut_anywhere = cut_anywhere or cut
+
+    view["truncated"] = bool(cut_anywhere or authority_cuts)
+    # Final hard guard: the bounded build must never emit past 32 KiB even
+    # if per-key estimates drift (marker overhead, escaping). Collapse the
+    # largest diagnostic keys to digest markers until the budget holds.
+    # Night-5 P0-A: blocker_groups is collapsible too -- the mandatory
+    # numeric/authority fields (counts) are hoisted out first and survive
+    # every collapse, so the guard can always drive the view under budget.
+    if len(json.dumps(view, ensure_ascii=False).encode("utf-8")) > HARD_BUDGET_BYTES:
+        protected = {
+            "view",
+            "detail_ref",
+            "truncated",
+            "ok",
+        }
+        hoisted = {
+            k: view[k]
+            for k in ("blocker_group_count", "blocker_ticket_count")
+            if k in view
+        }
+        for key in sorted(
+            (k for k in view if k not in plain_string_keys),
+            key=lambda k: len(json.dumps(view[k], ensure_ascii=False)),
+            reverse=True,
+        ):
+            if key in protected:
+                continue
+            digest, capped = _digest_items([view[key]], "final-collapse")
+            view[key] = {
+                "final_budget_collapse": True,
+                "value_sha256": digest,
+                "digest_capped": capped,
+                "full_value_ref": "saipen status --json",
+            }
+            view.update(hoisted)
+            view["truncated"] = True
+            if (
+                len(json.dumps(view, ensure_ascii=False).encode("utf-8"))
+                <= HARD_BUDGET_BYTES
+            ):
+                break
+    return view
 
 
 def _is_idle_maintain_route(routed: dict, board: dict) -> bool:
@@ -3177,6 +4043,7 @@ def _continue_chain(
     external_budget: dict | None = None,
     external_cache: dict | None = None,
     external_trace: list[dict] | None = None,
+    deadline: float | None = None,
 ) -> int:
     """Drive deterministic canonical operations until a real boundary (T-1416).
 
@@ -3186,6 +4053,10 @@ def _continue_chain(
     a hard iteration budget plus a fixed-point witness. The loop holds no
     authority of its own: each step is the same journaled canonical operation
     the model would have run.
+
+    `deadline` (T-2109) is the host continuation's inline wall-clock bound; the
+    chain's own doctor call inherits it so a repair this chain triggers is
+    deferred rather than started past the boundary.
     """
     from saipen_engine import continue_loop
     from saipen_engine.operations import apply_claim, finish_ticket
@@ -3375,7 +4246,8 @@ def _continue_chain(
                 # the receipt the next route needs; the same one revalidation
                 # per cc applies here.
                 after_route = _auto_doctor(
-                    project_root, after_route, reconciliation, doctor_budget
+                    project_root, after_route, reconciliation, doctor_budget,
+                    deadline=deadline,
                 )
             trace.append(
                 {
@@ -3520,6 +4392,7 @@ def _auto_doctor(
     budget: dict,
     *,
     dry_run: bool = False,
+    deadline: float | None = None,
 ) -> dict:
     """Self-healing continuation, stage 3 (T-1792, SRC-253, T-1818): ONE revalidation.
 
@@ -3530,12 +4403,38 @@ def _auto_doctor(
     -- re-reads the decision through a fresh route from current bytes, and
     resumes the original continuation. Bounded: one revalidation per cc
     (`budget`); a receipt that is stale again right after it, a validator
-    that does not reach CURRENT_PASS, a status outside `_DOCTOR_REVALIDATE` or
+    that does not reach CURRENT_PASS, a status outside _DOCTOR_REVALIDATE or
     a read-only session stops with the gate's own refusal and a `doctor`
     record naming why. It writes nothing else: a LOG line after the receipt
     would make the receipt stale again.
+
+    T-2109: when the caller is a HOST continuation (`deadline` set), the
+    inline repair is also bounded in wall-clock time. An operation whose own
+    budget cannot fit that window -- `saipen work reverify`, whose verification
+    command may run for the engine's full capture budget -- is DEFERRED: the
+    route's canonical command is returned as the action for this turn instead
+    of being executed inside the launcher call the host kills.
     """
     emitted = route.get("emitted") or {}
+
+    def _remaining() -> float | None:
+        if deadline is None:
+            return None
+        return deadline - time.monotonic()
+
+    def _defer(record: dict, canonical_cmd: str, operation: str) -> dict:
+        record["stage"] = "DEFERRED"
+        record["ok"] = False
+        record["operation"] = operation
+        record["why_stopped"] = (
+            "the host continuation boundary is bounded: "
+            f"'{canonical_cmd}' does not fit the inline budget, so it is the "
+            "action to execute in this turn, never work inside this routing call"
+        )
+        deferred = dict(route)
+        deferred["emitted"] = {**emitted, "doctor": record}
+        return deferred
+
     status = emitted.get("conformance_status")
     can_revalidate = status in _DOCTOR_REVALIDATE
     if not can_revalidate and status == "STALE_FAIL":
@@ -3601,6 +4500,22 @@ def _auto_doctor(
         route = dict(route)
         route["emitted"] = {**emitted, "doctor": record}
         return route
+
+    # T-2109: a bounded host continuation never starts work it cannot finish.
+    # `work reverify` runs the project's own verification command under the
+    # engine's full capture budget (VALIDATOR_CAPTURE_TIMEOUT), and a cut-off
+    # verification would write an honest FAIL receipt for work that may pass --
+    # so it is never truncated, only deferred to the route's action.
+    if is_reverify and deadline is not None:
+        return _defer(
+            record, canonical_cmd, "work-reverify"
+        )
+    remaining = _remaining()
+    if (
+        remaining is not None
+        and remaining < _DOCTOR_MIN_INLINE_STEP_SECONDS
+    ):
+        return _defer(record, canonical_cmd, "validate")
     budget["left"] = budget.get("left", 0) - 1
 
     if is_reverify:
@@ -3655,13 +4570,29 @@ def _auto_doctor(
 
     buffer = StringIO()
     with redirect_stdout(buffer):
-        rc = _validate(project_root, True)
+        if deadline is None:
+            rc = _validate(project_root, True)
+        else:
+            rc = _validate(
+                project_root,
+                True,
+                doctor_timeout=_remaining(),
+            )
     try:
         validated = json.loads(buffer.getvalue())
     except ValueError:
         validated = {"ok": False, "code": "VALIDATION_UNAVAILABLE"}
     record["result"] = validated.get("code")
     record["validator_ok"] = bool(validated.get("ok")) and rc == 0
+    # A validator cut by the inline budget proves nothing: report the deferral
+    # instead of dressing a killed run up as a measured conformance verdict.
+    _run_error = str((validated.get("validator") or {}).get("error") or "")
+    if (
+        deadline is not None
+        and not record["validator_ok"]
+        and "timed out" in _run_error.lower()
+    ):
+        return _defer(record, canonical_cmd, "validate")
     after = _route_once(project_root, reconciled=reconciliation)
     # A different next route can stop requiring the crew gate. Its absence
     # must never turn failed validation, or an aged receipt, into CURRENT_PASS.
@@ -3719,7 +4650,10 @@ def _auto_doctor(
     if is_reverify and budget.get("left", 0) > 0:
         next_cmd = str(stopped.get("canonical_next_command") or "").strip()
         if next_cmd.startswith("saipen work reverify "):
-            return _auto_doctor(project_root, after_route, reconciliation, budget, dry_run=dry_run)
+            return _auto_doctor(
+                project_root, after_route, reconciliation, budget,
+                dry_run=dry_run, deadline=deadline,
+            )
     return after_route
 
 
@@ -3731,11 +4665,15 @@ def _next_action(
     fallthrough_to_improve: bool = False,
     dry_run: bool = False,
 ) -> int:
+    # T-2109: the host boundary answers in bounded time. The clock starts
+    # BEFORE routing so the projection is charged to the budget too.
+    deadline = time.monotonic() + _continue_inline_budget_seconds()
     route = _route_once(project_root, reconciled=reconciliation)
     doctor_budget = {"left": 5}
     if route["emitted"] is not None and fallthrough_to_improve:
         route = _auto_doctor(
-            project_root, route, reconciliation, doctor_budget, dry_run=dry_run
+            project_root, route, reconciliation, doctor_budget, dry_run=dry_run,
+            deadline=deadline,
         )
     if route["emitted"] is not None:
         _emit(route["emitted"], as_json)
@@ -3794,6 +4732,7 @@ def _next_action(
             external_budget=external_budget,
             external_cache=external_cache,
             external_trace=external_trace,
+            deadline=deadline,
         )
     if fallthrough_to_improve and not dry_run and kind == continue_loop.IDLE_MAINTAIN:
         return _continue_improve_fallthrough(
@@ -6092,30 +7031,6 @@ def _parse_value_options(tokens: list[str], spec: dict[str, str]) -> tuple[dict,
     return values, positionals, ""
 
 
-def _ticket_and_text(rest: list[str]) -> tuple[str | None, str]:
-    """Split positional args into ``(ticket, text)`` for checkpoint/transition.
-
-    T-31: the ticket id is a WHOLE argv token and may be written before OR
-    after the text. The historical parse read only ``rest[0]``, so
-    ``checkpoint RUN "<text>" T-27`` silently journaled a ticketless RUN and
-    folded the stray id into the text. A ``T-27`` mentioned inside quoted prose
-    is one argv element and can never satisfy the whole-token test, so lifting
-    the token here cannot misread prose. With no whole-token ticket the text is
-    passed through unchanged and the ticket is None.
-    """
-    ticket = None
-    parts: list[str] = []
-    for token in rest:
-        if ticket is None and re.fullmatch(r"T-\d+", token, re.IGNORECASE):
-            ticket = token.upper()
-        else:
-            parts.append(token)
-    if ticket is None and rest and re.match(r"^T-\d+", rest[0], re.IGNORECASE):
-        ticket = rest[0]
-        parts = rest[1:]
-    return ticket, " ".join(parts)
-
-
 def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """`saipen cohort status|reconcile|ship C-###` -- batch publication (CORE-003).
 
@@ -6153,7 +7068,7 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             review_work=options.get("review_work", ""), dry_run=dry_run)
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
-    if len(args) > 2 and action != "ship":
+    if len(args) > 2:
         _emit(
             {
                 "ok": False,
@@ -6229,43 +7144,6 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             as_json,
         )
         return 2
-    isolated = False
-    remote = "origin"
-    branch = "main"
-    extra = args[2:]
-    idx = 0
-    while idx < len(extra):
-        tok = extra[idx]
-        if tok == "--isolated":
-            isolated = True
-            idx += 1
-        elif tok == "--remote":
-            if idx + 1 < len(extra) and not extra[idx + 1].startswith("--"):
-                remote = extra[idx + 1]
-                idx += 2
-            else:
-                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--remote requires a remote name"}, as_json)
-                return 2
-        elif tok.startswith("--remote="):
-            remote = tok.split("=", 1)[1]
-            idx += 1
-        elif tok == "--branch":
-            if idx + 1 < len(extra) and not extra[idx + 1].startswith("--"):
-                branch = extra[idx + 1]
-                idx += 2
-            else:
-                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--branch requires a branch name"}, as_json)
-                return 2
-        elif tok.startswith("--branch="):
-            branch = tok.split("=", 1)[1]
-            idx += 1
-        elif tok.startswith("--"):
-            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown option {tok}"}, as_json)
-            return 2
-        else:
-            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"cohort ship takes exactly one C-### id; surplus: {' '.join(extra[idx:])}"}, as_json)
-            return 2
-
     if not dry_run and _negotiate_capability(project_root) == "read-only":
         return _capability_refusal(as_json)
     from saipen_engine.operations import cohort_ship
@@ -6276,9 +7154,6 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
         _agent_for(project_root),
         dry_run=dry_run,
         current_capability=_negotiate_capability(project_root),
-        isolated=isolated,
-        remote=remote,
-        branch=branch,
     )
     payload = result.to_dict()
     if not dry_run:
@@ -6464,12 +7339,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
       recover           read-only orphan-receipt crash diagnostic
       req <SRC> <RID> <class> [--when-environment HOST] <text...>
       disp <SRC> <RID> <DISPOSITION> [--work T-x] [--evidence E-y]
-           [--verification 'cmd -> PASS'] [--environment HOST]
-           [--evidence-class CLASS]
-                        CLASS (UNIT|CONTRACT|INTEGRATION|INSTALLED_RUNTIME|
-                        LIVE_END_TO_END|PERFORMANCE_BENCHMARK|REAL_SOAK|
-                        PUBLICATION_RECEIPT) declares what the cited evidence
-                        IS, so a [CLASS]-tagged clause can satisfy its class
+           [--environment HOST]
       quarantine <SRC> [--reason CODE]
                         retain exact local authority; exclude body from export
       close <SRC>       close ONLY when coverage is terminal (mutating)
@@ -6617,6 +7487,96 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             )
             return 0
         resolved = _intake_mod.link_work_to(project_root, receipt_id, work_id)
+        _emit(resolved, as_json)
+        return 0 if resolved.get("ok") else 1
+    if action == "rebind":
+        # ZAICODE audit finding C (T-2139): the authorized primary re-point.
+        # `source link` (above) stays membership-only; this verb exists for the
+        # measured case where the recorded primary row is gone from BOARD and
+        # only a re-pointed live owner can carry the receipt's closure work.
+        _opts, _pos, _opt_err = _parse_value_options(
+            rest[1:],
+            {"--work": "work", "--reason": "reason", "--authority": "authority"},
+        )
+        _rebind_usage = (
+            "source rebind needs <SRC-###> --work T-### --reason CODE "
+            "--authority SRC-### (re-points the receipt's primary Work)"
+        )
+        if not rest or not re.fullmatch(r"SRC-\d+", rest[0], re.IGNORECASE):
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _rebind_usage}, as_json)
+            return 2
+        if _opt_err:
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _opt_err}, as_json)
+            return 2
+        if _pos:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"source rebind takes <SRC-###>; surplus: {' '.join(_pos)}",
+                },
+                as_json,
+            )
+            return 2
+        _rebind_work = str(_opts.get("work") or "").strip()
+        _rebind_reason = str(_opts.get("reason") or "").strip()
+        _rebind_authority = str(_opts.get("authority") or "").strip()
+        if not (_rebind_work and _rebind_reason and _rebind_authority):
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _rebind_usage}, as_json)
+            return 2
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        _ho = _ensure_handover(project_root, as_json, dry_run)
+        if _ho is not None:
+            return _ho
+        from saipen_engine import intake as _intake_mod
+
+        if dry_run:
+            receipt_id = rest[0].upper()
+            if not _intake_mod._valid_receipt_id(receipt_id):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "INVALID_ID",
+                        "detail": f"source rebind needs <SRC-###>, got {receipt_id!r}",
+                    },
+                    as_json,
+                )
+                return 2
+            meta = _intake_mod._read_meta(project_root, receipt_id)
+            if meta is None:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "SOURCE_RECEIPT_MISSING",
+                        "detail": f"{receipt_id} is not on the active intake surface",
+                    },
+                    as_json,
+                )
+                return 1
+            _emit(
+                {
+                    "ok": True,
+                    "code": "DRY_RUN_PLAN",
+                    "receipt": receipt_id,
+                    "work": _rebind_work,
+                    "linked_work": meta.get("linked_work"),
+                    "linked_works": sorted(_intake_mod.linked_works(meta)),
+                    "would_rebind": str(meta.get("linked_work") or "").strip() != _rebind_work,
+                    "reason": _rebind_reason,
+                    "authority": _rebind_authority,
+                    "writes": 0,
+                },
+                as_json,
+            )
+            return 0
+        resolved = _intake_mod.rebind_work_to(
+            project_root,
+            rest[0].upper(),
+            _rebind_work,
+            reason=_rebind_reason,
+            authority=_rebind_authority,
+        )
         _emit(resolved, as_json)
         return 0 if resolved.get("ok") else 1
     # CORE-002 (audit fdc73e06): dry-run is one semantic PLAN path, not a
@@ -6813,18 +7773,63 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
         return 0 if result.get("ok") else 1
 
     if action == "recover":
+        # T-2050: the survey alone was a dead end for a row an earlier scrub
+        # moved while an ACTIVE receipt still names it. `--confirm` performs the
+        # one journaled restore of exactly those rows; the plain form stays the
+        # read-only report, and a dry-run always degrades to it.
+        confirm = "--confirm" in rest
+        rest = [token for token in rest if token != "--confirm"]
         if rest:
             _emit(
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": "source recover accepts no arguments",
+                    "detail": "source recover accepts only [--confirm]",
                 },
                 as_json,
             )
             return 2
-        _emit(intake.recover_orphans(project_root), as_json)
-        return 0
+        if not confirm or dry_run:
+            _emit(intake.recover_orphans(project_root), as_json)
+            return 0
+        if _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        outcome = restore_board_rows(project_root, _agent_for(project_root)).to_dict()
+        _emit(outcome, as_json)
+        return 0 if outcome.get("ok") else 1
+
+    if action == "reconcile-index":
+        # T-2051: the index lost the entries for receipts whose byte-exact
+        # bundles never left `.saipen/archive/source/`, so the validator's
+        # `BOARD Work T-x references missing source receipt SRC-y` named a
+        # break no verb could close. The plan is read-only and names, per id,
+        # whether a proven bundle backs it or which carrier is missing;
+        # `--confirm` re-registers only the proven ones, transactionally.
+        confirm = "--confirm" in rest
+        rest = [token for token in rest if token != "--confirm"]
+        if any(not re.fullmatch(r"SRC-\d{3,}", token) for token in rest):
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source reconcile-index takes [SRC-### ...] [--confirm]",
+                },
+                as_json,
+            )
+            return 2
+        from saipen_engine import source_reindex
+
+        if not confirm or dry_run:
+            report = source_reindex.plan(project_root)
+            _emit(report, as_json)
+            return 0 if report.get("ok") else 1
+        if _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        outcome = reconcile_source_index(
+            project_root, _agent_for(project_root), rest or None
+        ).to_dict()
+        _emit(outcome, as_json)
+        return 0 if outcome.get("ok") else 1
 
     if action == "show":
         if len(rest) != 1:
@@ -6924,7 +7929,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             )
             return 2
         receipt_id, rid, disposition = rest[0], rest[1], rest[2]
-        work = evidence = verification = environment = evidence_class = None
+        work = evidence = verification = environment = None
         i = 3
         while i < len(rest):
             if rest[i] == "--work" and i + 1 < len(rest):
@@ -6938,9 +7943,6 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
                 i += 2
             elif rest[i] == "--environment" and i + 1 < len(rest):
                 environment = rest[i + 1]
-                i += 2
-            elif rest[i] == "--evidence-class" and i + 1 < len(rest):
-                evidence_class = rest[i + 1]
                 i += 2
             else:
                 _emit(
@@ -6961,7 +7963,6 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             evidence=evidence,
             verification=verification,
             environment=environment,
-            evidence_class=evidence_class,
         )
         if result.get("ok"):
             _close_finished_receipts(project_root, result, receipts=[receipt_id])
@@ -7158,10 +8159,10 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
             )
             return 2
         receipt_id, rid, disposition = rest[0], rest[1], rest[2]
-        work = evidence = verification = environment = evidence_class = None
+        work = evidence = verification = environment = None
         i = 3
         while i < len(rest):
-            if rest[i] in ("--work", "--evidence", "--verification", "--environment", "--evidence-class"):
+            if rest[i] in ("--work", "--evidence", "--verification", "--environment"):
                 if i + 1 >= len(rest):
                     _emit(
                         {
@@ -7179,8 +8180,6 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
                     evidence = value
                 elif rest[i] == "--verification":
                     verification = value
-                elif rest[i] == "--evidence-class":
-                    evidence_class = value
                 else:
                     environment = value
                 i += 2
@@ -7199,12 +8198,6 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
         normalized_rid, refusal = intake.validate_disposition_request(receipt_id, rid, disposition)
         if refusal is not None:
             _emit(refusal, as_json)
-            return 1
-        # T-34: the same evidence-class authority the mutator uses, so an
-        # unknown --evidence-class refuses identically with and without --dry-run.
-        class_refusal = intake.validate_evidence_class(evidence_class)
-        if class_refusal is not None:
-            _emit(class_refusal, as_json)
             return 1
         assert normalized_rid is not None
         # T-1531: mirror the apply path's read-only STATE check. set_disposition
@@ -9437,7 +10430,22 @@ def _emit(payload: dict, as_json: bool) -> None:
             parent_label = milestone.get("parent_label") or ""
             print(f"PARENT: {milestone['parent']}  {parent_label}".rstrip())
     if payload.get("waiting_on_you"):
-        print(f"Waiting on you: {'; '.join(payload['waiting_on_you'])}")
+        # Night-6: the bounded agent view replaces over-long wait rows
+        # with truncation markers ({...digest fields..., "text": ...}).
+        # The human surface renders the marker's TEXT (the bounded row
+        # the operator can read), never a raw dict that would crash the
+        # join; a marker without text degrades to compact JSON.
+        _wait_texts = []
+        for _row in payload["waiting_on_you"]:
+            if isinstance(_row, str):
+                _wait_texts.append(_row)
+            elif isinstance(_row, dict) and isinstance(_row.get("text"), str):
+                _wait_texts.append(_row["text"])
+            else:
+                _wait_texts.append(
+                    json.dumps(_row, ensure_ascii=False, sort_keys=True)
+                )
+        print(f"Waiting on you: {'; '.join(_wait_texts)}")
     if payload.get("claimed_but_unproven"):
         print(f"Claimed but unproven: {', '.join(payload['claimed_but_unproven'])}")
     # T-1412: the receipt-derived `conformance_status` is the operator's PRIMARY
@@ -9455,7 +10463,21 @@ def _emit(payload: dict, as_json: bool) -> None:
             _reason = str(_conformance.get("reason") or "").strip()
             if _reason:
                 print(f"Reason: {_reason}")
-            print("Remediation: saipen validate")
+            if _conformance.get("retry_blocked"):
+                # An unrecoverable staleness: `saipen validate` re-reads the
+                # same broken input and returns the identical STALE_FAIL, so
+                # recommending it again is the loop itself. Name the repair the
+                # evidence carries and the condition's fingerprint instead.
+                _detail = str(_conformance.get("blocker_detail") or "").strip()
+                if _detail:
+                    print(f"Blocked: {_detail}")
+                _fp = str(_conformance.get("retry_fingerprint") or "").strip()
+                print(
+                    "Remediation: none -- re-running 'saipen validate' cannot change this"
+                    + (f" (blocker {_fp})" if _fp else "")
+                )
+            else:
+                print("Remediation: saipen validate")
     elif payload.get("conformance_history"):
         print("Conformance: UNKNOWN (authoritative receipt status unavailable)")
     if payload.get("conformance_history"):
@@ -12642,6 +13664,7 @@ def main(argv: list[str] | None = None) -> int:
             "[--timeout SECONDS] [--contract FILE]|source retire <SRC-###> --reason <CLASS> "
             "[--successor SRC-###]|source quarantine <SRC-###> [--reason CODE]|"
             "source recover|source reconcile <SRC-###> [--confirm]|source normalize [--dry-run]|"
+            "source rebind <SRC-###> --work T-### --reason CODE --authority SRC-###|"
             "cohort status <C-###>|cohort reconcile <C-###> --from C-###[,C-###] "
             "--review-work T-###|cohort ship "
             "<C-###>|improve|improve hold <T-###> [reason]|improve unhold|improve "
@@ -12829,6 +13852,75 @@ def main(argv: list[str] | None = None) -> int:
     if command == "storage":
         return _storage_command(project_root, args[1:], as_json, dry_run)
 
+    if command == "gc":
+        # T-2049: the collector's read-only verbs surface the plan and the
+        # durable counter; the destructive verb is named `run`, needs --confirm
+        # AND an executable seat, and a bare `gc run` degrades to the same
+        # zero-write plan the plain verbs produce. Nothing here writes the
+        # ledger: the engine's own journal and `.saipen/GC_STATE.json` are its
+        # whole output surface.
+        from saipen_engine import gc as gc_engine
+
+        action = args[1] if len(args) > 1 else ""
+        if action in ("", "status"):
+            _emit(gc_engine.status(project_root), as_json)
+            return 0
+        if action == "audit":
+            _emit(gc_engine.audit(project_root), as_json)
+            return 0
+        if action == "assess":
+            _emit(gc_engine.assess(project_root), as_json)
+            return 0
+        if action == "inventory":
+            _emit(gc_engine.inventory(project_root), as_json)
+            return 0
+        if action == "plan":
+            report = gc_engine.plan(project_root)
+            if dry_run:
+                report["dry_run"] = True
+                report["refused"] = "an explicit --dry-run filters nothing out of the zero-write plan"
+            _emit(report, as_json)
+            return 0
+        if action == "run" and dry_run:
+            report = gc_engine.plan(project_root)
+            report["dry_run"] = True
+            report["refused"] = "an explicit --dry-run never collects; this is the zero-write plan"
+            _emit(report, as_json)
+            return 0
+        if action == "run":
+            confirm = "--confirm" in args[2:]
+            if not confirm:
+                report = gc_engine.plan(project_root)
+                report["dry_run"] = False
+                report["refused"] = "a collection runs only with --confirm; this is the zero-write plan"
+                _emit(report, as_json)
+                return 1
+            if _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            outcome = gc_engine.execute(project_root, _agent_for(project_root))
+            _emit(outcome, as_json)
+            return 0 if outcome.get("ok") else 1
+        if action == "maintenance":
+            if _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            _emit(gc_engine.maintenance_checkpoint(project_root, _agent_for(project_root)), as_json)
+            return 0
+        if action == "repair":
+            if _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            _emit(gc_engine.repair(project_root, _agent_for(project_root)), as_json)
+            return 0
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "gc takes status|audit|assess|inventory|plan|run|--confirm|maintenance|repair",
+            },
+            as_json,
+        )
+        return 2
+
+
     if _RUNTIME_INFO_OVERRIDE is not None and command != "runtime":
         _emit(
             {
@@ -12960,18 +14052,48 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     if command == "status":
-        if len(args) > 1:
+        # T-2089: `--view agent` opts into the bounded envelope; the default
+        # route stays byte-compatible with every existing external consumer.
+        view = None
+        rest: list[str] = list(args[1:])
+        if "--view" in rest:
+            view_index = rest.index("--view")
+            if view_index + 1 >= len(rest):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "--view requires its value: --view agent",
+                        "canonical_next_command": "saipen status --view agent --json",
+                    },
+                    as_json,
+                )
+                return 2
+            view = rest[view_index + 1]
+            del rest[view_index : view_index + 2]
+        if view is not None and view != "agent":
             _emit(
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": f"status accepts no arguments; surplus: {' '.join(args[1:])}",
+                    "detail": f"status --view accepts only 'agent'; got: {view}",
+                    "canonical_next_command": "saipen status --view agent --json",
+                },
+                as_json,
+            )
+            return 2
+        if rest:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"status accepts no arguments; surplus: {' '.join(rest)}",
                     "canonical_next_command": "saipen status",
                 },
                 as_json,
             )
             return 2
-        return _status(project_root, as_json)
+        return _status(project_root, as_json, view=view)
     if command == "search":
         return _search(project_root, args, as_json)
     if command == "validate":
@@ -13384,7 +14506,8 @@ def main(argv: list[str] | None = None) -> int:
                 as_json,
             )
             return 2
-        ticket, text = _ticket_and_text(args[2:])
+        ticket = args[2] if len(args) > 2 and args[2].upper().startswith("T-") else None
+        text = " ".join(args[3:] if ticket else args[2:])
         if not dry_run and _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
         _ho = _ensure_handover(project_root, as_json, dry_run)
@@ -13409,7 +14532,8 @@ def main(argv: list[str] | None = None) -> int:
                 as_json,
             )
             return 2
-        ticket, text = _ticket_and_text(args[2:])
+        ticket = args[2] if len(args) > 2 and args[2].upper().startswith("T-") else None
+        text = " ".join(args[3:] if ticket else args[2:])
         if not dry_run and _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
         _ho = _ensure_handover(project_root, as_json, dry_run)
@@ -14868,62 +15992,16 @@ def main(argv: list[str] | None = None) -> int:
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if command in ("ship", "push"):
-        isolated = False
-        remote = "origin"
-        branch = "main"
-        reconcile_remote_head = None
-        surplus = []
-        i = 1
-        while i < len(args):
-            arg = args[i]
-            if arg == "--isolated":
-                isolated = True
-                i += 1
-            elif arg == "--remote":
-                if i + 1 < len(args) and not args[i+1].startswith("--"):
-                    remote = args[i+1]
-                    i += 2
-                else:
-                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--remote requires a remote name"}, as_json)
-                    return 2
-            elif arg.startswith("--remote="):
-                remote = arg.split("=", 1)[1]
-                i += 1
-            elif arg == "--branch":
-                if i + 1 < len(args) and not args[i+1].startswith("--"):
-                    branch = args[i+1]
-                    i += 2
-                else:
-                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--branch requires a branch name"}, as_json)
-                    return 2
-            elif arg.startswith("--branch="):
-                branch = arg.split("=", 1)[1]
-                i += 1
-            elif arg == "--reconcile-remote-head":
-                if i + 1 < len(args) and not args[i+1].startswith("--"):
-                    reconcile_remote_head = args[i+1]
-                    i += 2
-                else:
-                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--reconcile-remote-head requires a SHA"}, as_json)
-                    return 2
-            elif arg.startswith("--reconcile-remote-head="):
-                reconcile_remote_head = arg.split("=", 1)[1]
-                i += 1
-            elif arg.startswith("--"):
-                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown option {arg}"}, as_json)
-                return 2
-            else:
-                surplus.append(arg)
-                i += 1
-
-        if surplus:
+        surplus = [a for a in args[1:] if not a.startswith("--")]
+        unknown_flags = [a for a in args[1:] if a.startswith("--")]
+        if surplus or unknown_flags:
             _emit(
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": (
-                        f"{command} accepts no positional arguments; surplus: "
-                        f"{' '.join(surplus)}"
+                        f"{command} accepts no arguments; surplus: "
+                        f"{' '.join(surplus + unknown_flags)}"
                     ),
                 },
                 as_json,
@@ -14962,49 +16040,6 @@ def main(argv: list[str] | None = None) -> int:
                 # saying so is a lie (release_attempt's own contract). The
                 # release verdict itself is untouched.
                 verdict["attempt_record_error"] = logged.get("error", "unknown")
-
-        if isolated:
-            from saipen_engine.isolated_release import execute_isolated_release
-            try:
-                result = execute_isolated_release(
-                    project_root,
-                    command,
-                    remote=remote,
-                    branch=branch,
-                    current_capability=_negotiate_capability(project_root),
-                    current_agent=_agent_for(project_root),
-                    dry_run=dry_run,
-                    reconcile_remote_head=reconcile_remote_head,
-                )
-            except ReleaseRefusal as exc:
-                refusal = {
-                    "ok": False,
-                    "code": exc.code,
-                    "detail": exc.detail,
-                    "canonical_next_command": getattr(exc, "next_command", None),
-                }
-                _record_attempt(refusal, ticket=str(getattr(exc, "forbidden_ticket", "") or ""))
-                _emit(refusal, as_json)
-                return 1
-            except Exception as exc:
-                refusal = {
-                    "ok": False,
-                    "code": getattr(exc, "code", "ISOLATED_RELEASE_FAILED"),
-                    "detail": str(exc),
-                }
-                _record_attempt(refusal)
-                _emit(refusal, as_json)
-                return 1
-
-            _record_attempt(
-                result,
-                ticket=str(result.get("ticket_id") or ""),
-                mode=str(result.get("mode") or ""),
-            )
-            if result.get("ok") and result.get("ticket_id"):
-                _close_finished_receipts(project_root, result, works=[result["ticket_id"]])
-            _emit(result, as_json)
-            return 0 if result.get("ok") else 1
 
         try:
             # P0#4: inject the freshly negotiated current-session capability so

@@ -1,0 +1,63 @@
+FFFF.FF
+======================================================================
+FAIL: test_candidate_checkout_accepts_the_verified_installed_generation (__main__.InstalledGenerationBindingTests.test_candidate_checkout_accepts_the_verified_installed_generation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2076_installed_generation_binding.py", line 259, in test_candidate_checkout_accepts_the_verified_installed_generation
+    self.assertEqual(_problems(root), [])
+AssertionError: Lists differ: ['EX-000001 was verified against installed[200 chars]een'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'EX-000001 was verified against installed engine generation sha256:041b09e0dbe054d7... but the running engine is sha256:740124ec36ff2e1f... -- the dependency moved (rollback or upgrade): re-resolve truthfully instead of inheriting a stale green'
+
++ []
+- ['EX-000001 was verified against installed engine generation '
+-  'sha256:041b09e0dbe054d7... but the running engine is '
+-  'sha256:740124ec36ff2e1f... -- the dependency moved (rollback or upgrade): '
+-  're-resolve truthfully instead of inheriting a stale green']
+
+======================================================================
+FAIL: test_closure_resolver_and_validator_share_the_verdict (__main__.InstalledGenerationBindingTests.test_closure_resolver_and_validator_share_the_verdict)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2076_installed_generation_binding.py", line 341, in test_closure_resolver_and_validator_share_the_verdict
+    self.assertTrue(verdict.ok, verdict.detail)
+AssertionError: False is not true : T-030 closed external_implementation but the resolution is not current: EX-000001 was verified against installed engine generation sha256:041b09e0dbe054d7... but the running engine is sha256:740124ec36ff2e1f... -- the dependency moved (rollback or upgrade): re-resolve truthfully instead of inheriting a stale green
+
+======================================================================
+FAIL: test_incoherent_recorded_home_fails_closed (__main__.InstalledGenerationBindingTests.test_incoherent_recorded_home_fails_closed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2076_installed_generation_binding.py", line 305, in test_incoherent_recorded_home_fails_closed
+    self.assertIn("does not prove a coherent shipped runtime generation", problems[0])
+AssertionError: 'does not prove a coherent shipped runtime generation' not found in 'EX-000001 was verified against installed engine generation sha256:041b09e0dbe054d7... but the running engine is sha256:740124ec36ff2e1f... -- the dependency moved (rollback or upgrade): re-resolve truthfully instead of inheriting a stale green'
+
+======================================================================
+FAIL: test_installed_generation_move_turns_the_same_receipt_stale (__main__.InstalledGenerationBindingTests.test_installed_generation_move_turns_the_same_receipt_stale)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2076_installed_generation_binding.py", line 273, in test_installed_generation_move_turns_the_same_receipt_stale
+    self.assertIn("installed generation", problems[0])
+AssertionError: 'installed generation' not found in 'EX-000001 was verified against installed engine generation sha256:041b09e0dbe054d7... but the running engine is sha256:740124ec36ff2e1f... -- the dependency moved (rollback or upgrade): re-resolve truthfully instead of inheriting a stale green'
+
+======================================================================
+FAIL: test_missing_recorded_home_fails_closed (__main__.InstalledGenerationBindingTests.test_missing_recorded_home_fails_closed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2076_installed_generation_binding.py", line 287, in test_missing_recorded_home_fails_closed
+    self.assertIn("cannot be authenticated", problems[0])
+AssertionError: 'cannot be authenticated' not found in 'EX-000001 was verified against installed engine generation sha256:041b09e0dbe054d7... but the running engine is sha256:740124ec36ff2e1f... -- the dependency moved (rollback or upgrade): re-resolve truthfully instead of inheriting a stale green'
+
+======================================================================
+FAIL: test_standard_installed_run_is_unchanged (__main__.InstalledGenerationBindingTests.test_standard_installed_run_is_unchanged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2076_installed_generation_binding.py", line 317, in test_standard_installed_run_is_unchanged
+    self.assertEqual(len(problems), 1, problems)
+AssertionError: 0 != 1 : []
+
+----------------------------------------------------------------------
+Ran 7 tests in 2.340s
+
+FAILED (failures=6)

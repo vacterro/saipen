@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-116:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TARGET A / P0-1: A selected live audit must be stoppable from the Audit Runs panel. Pre-START reads CANCEL, live post-START reads STOP, post-START BLOCKED keeps FORCE UNBLOCK, terminal runs have no stop action. STOP routes through AuditRunCoordinator.abandon(dispatch_id, 'operator stopped active audit from Audit Runs panel'), ends terminal FAILED/operator_abandoned, frees the lane, never re-leases the dispatch, starts no fresh audit and no further waves, and refreshes immediately with visible success. The race fix: abandon() honours the terminal state returned by the bridge and never rewrites an already-COMPLETE intent to FAILED. cancel_job() is not weakened. A post-STOP run is never labelled CANCELLED."
+    },
+    "SRC-116:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TARGET B / P0-2: INAUDIT Save must never be an enabled-but-silent no-op. With a project selected, no physical layer and non-empty editor text, Save means 'create the first canonical internal audit': the managed path adopts or creates the managed draft identity without destroying typed text (CaptureStore -> assign -> SAIPEN enqueue, preserving the T-175 stable capture UUID and retry); the unmanaged path allocates the next legal layer via the canonical allocator, binds the editor and commits the exact text with the existing durable commit primitive, then refreshes. Empty text with no layer mutates nothing and shows 'Nothing to save'. Every early refusal in _on_save() sets a visible status. On a layer-read failure there is no phantom bound layer, the error is surfaced, and Save can never overwrite an unknown target."
+    },
+    "SRC-116:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TARGET C / P1-4: AUDIT GROUP press must skip every project that already has at least one pending canonical INAUDIT layer and report the skipped work visibly, e.g. 'AUDIT GROUP MAIN0: 3 queued, 2 skipped (INAUDIT pending), 1 already active'. The policy is GROUP-press only; a manual single-project START stays an explicit operator override. _audit_start_pending, _audit_start_inflight and active non-terminal dispatches stay suppressed. One small eligibility helper. If every project is skipped, nothing is dispatched, no browser capacity is provisioned, and the reason is reported. A project skipped for one layer becomes eligible again once that layer is consumed or deleted."
+    },
+    "SRC-116:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TARGET D / P0-3: pack same-product nested Git source without packing the machine. Generic detection: the primary root is a git worktree, bounded direct-child discovery finds children with their own .git, root/branch/HEAD/origin are resolved through Git, origin identity is normalised, equal origin means a canonical same-product component and a different origin keeps the existing safe omission. SourceInventory gains component metadata while retaining mode='git'; archive members stay rooted under their real project path (for example zcode/packages/ui/src/zaicode/ZaicodeAuditPanel.tsx) and are never flattened. A detected same-origin component that cannot be inventoried reliably fails closed with the named error NESTED_GIT_COMPONENT_INVENTORY_FAILED; a different-origin omission is named in the manifest. The manifest section nested_git_components is backward compatible. git_head and git_dirty semantics do not change."
+    }
+  },
+  "derived_at": "2026-10-04T16:37:34Z",
+  "derived_from": "SRC-116",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "312c18ade7969b65b392a2c07627337cf235178fe6374eb96b48deaa58d68b83"
+}

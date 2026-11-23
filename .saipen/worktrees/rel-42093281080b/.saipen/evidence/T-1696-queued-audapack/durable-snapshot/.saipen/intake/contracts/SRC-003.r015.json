@@ -1,0 +1,84 @@
+{
+  "clauses": {
+    "SRC-003:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Provide one-click SEND AUDIT for the selected project, asynchronously reuse only a provably fresh ZIP or coalesce/reuse the canonical PackingService operation, then enqueue automatically."
+    },
+    "SRC-003:R0002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Use the authenticated localhost Bridge as a pull-based broker; do not use SendKeys, clipboard, mouse/focus/HWND automation, Selenium, Playwright, DevTools remote debugging, external WebSockets, or native window titles as transport."
+    },
+    "SRC-003:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Maintain an ephemeral authoritative Widget worker registry with heartbeat TTL and accept at most six active browser workers; never create or dispatch to a seventh worker."
+    },
+    "SRC-003:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Combine heartbeat and atomic claim in bounded 15-25 second long polling with immediate wakeup for work, bounded exponential failure backoff, and best-effort offline release."
+    },
+    "SRC-003:R0005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A Widget may report FREE only when ChatGPT is usable and authenticated with no generation, manual draft, attachments, active audit/start/action, unresolved START receipt, or other dispatch lease."
+    },
+    "SRC-003:R0006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Keep dispatch_id strictly separate from the canonical campaign run_id; the existing audit engine remains the single campaign run-id owner and reports it after establishment."
+    },
+    "SRC-003:R0007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Claim jobs atomically under a Bridge lock, issue unique leases, require dispatch_id/worker_id/lease_id for mutations and artifact access, reject stale or expired ownership, and preserve FIFO uniqueness and worker fairness."
+    },
+    "SRC-003:R0008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Before START_PREPARED an expired lease may safely requeue; at or after START_PREPARED never reassign automatically, preserve the exact Widget START receipt and same-worker reconciliation so lost HTTP acknowledgements cannot duplicate Audit Core."
+    },
+    "SRC-003:R0009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Stream the server-owned packed ZIP through an authenticated loopback artifact endpoint with ownership checks, safe filename, length/type headers, and missing/changed archive rejection; never accept a browser-supplied arbitrary path."
+    },
+    "SRC-003:R0010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Reuse setNativeFileList and generalized attachment readiness verification, then invoke only startAuditCoreFromReadyAttachment and the existing START receipt/Auto lease/Auto3-SUPER10 machinery."
+    },
+    "SRC-003:R0011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Schedule oldest queued jobs automatically when a safe worker becomes FREE, keep work queued while all six are busy, and distribute assignments deterministically without monitor/title coupling."
+    },
+    "SRC-003:R0012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Persist a bounded human-readable JSON dispatch queue with atomic replace and mutation locking; reconcile restart states safely while keeping browser workers ephemeral and retaining bounded terminal history."
+    },
+    "SRC-003:R0013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Expose compact truthful browser worker/job status to the Qt Project Room, including packing, queue, upload/start/auditing wave progress, completion/failure, and profile-derived wave counts."
+    },
+    "SRC-003:R0014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Preserve /health, /v1/status, /v1/projects, /v1/audits, Bridge save queue, campaign persistence, and strict payload run_id versus CAMPAIGN_RUN_ID validation."
+    },
+    "SRC-003:R0015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Keep browser dispatch domain/persistence/scheduling in browser_dispatch.py, HTTP adaptation in server.py, GUI facade in BridgeService, worker logic in Widget, thin action wiring in MainWindow, and packaging authority in PackingService."
+    }
+  },
+  "derived_at": "2026-08-30T13:09:24Z",
+  "derived_from": "SRC-003",
+  "interpretation_revision": 15,
+  "schema_version": 1,
+  "source_sha256": "9f5237353cce66a3cf10f0025310b11182a15f8bb750ccaf0a5287deb7c650a9"
+}

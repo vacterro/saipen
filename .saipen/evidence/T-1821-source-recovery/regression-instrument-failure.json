@@ -1,0 +1,12 @@
+{
+  "status": "INSTRUMENT_UNAVAILABLE",
+  "canonical_code": "INCOMPLETE_TICKET",
+  "detail": "REGRESSION_PAIR_FAILED: measured runs do not prove FAIL then PASS",
+  "before_exit": 1,
+  "after_exit": 1,
+  "both_failed_import": true,
+  "decisive_error": "ValueError: SAIPEN installation has no BOOT.md",
+  "cause": "The first sandbox contract copied REGISTRY.json without the BOOT.md installation marker required by paths.resolve_protocol_dir.",
+  "correction": "Copy the complete unchanged saipen directory, matching the existing repository regression pattern; oracle and subject bytes stay unchanged.",
+  "claim": "Neither failed import is evidence of the rendering defect or a failed correction cycle."
+}

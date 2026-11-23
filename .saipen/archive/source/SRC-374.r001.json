@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-374:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Check the separated authority broker; if inactive, repair it using the canonical supported mechanism without treating broker startup as an authorization grant."
+    },
+    "SRC-374:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inspect the exact prepared approval packet and its capsule schema to determine whether it is an executable operator authorization capsule or only a decision proposal."
+    },
+    "SRC-374:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inspect existing Antigravity native hook support to determine whether it can provide authenticated operator approval independently of model-generated shell commands."
+    },
+    "SRC-374:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "If Antigravity native hook cannot provide authenticated operator approval, identify and implement a supported standalone operator-controlled approval surface within the existing trusted broker model without fabricating keys, signatures, provenance, or broker receipts."
+    },
+    "SRC-374:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify the exact release candidate SHA and mandatory publication verification, ensuring focused tests are not mislabeled as a full gate."
+    },
+    "SRC-374:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Publish through the isolated non-force mechanism and verify the remote commit only when valid approval and all gates pass, otherwise surface the exact blocker and single operator action."
+    },
+    "SRC-374:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Preserve the shared Git index, persistent maintenance authority, and independent engineering work."
+    }
+  },
+  "derived_at": "2026-11-01T23:44:13Z",
+  "derived_from": "SRC-374",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "6c422fd29cada5828e39aa29f39d89043ac6260cd7d89ef2258e9471beb1afa1"
+}

@@ -1,0 +1,9 @@
+A  .saipen/IDENTITY.md
+ M _SMART_VAC_CLEANER.py
+ M _fs_helpers.py
+ M build_exe.ps1
+ M test_cleaner.py
+ M test_package_install.py
+?? .workbuddy-ai/
+?? SmartVACCleaner.exe
+?? run.bat

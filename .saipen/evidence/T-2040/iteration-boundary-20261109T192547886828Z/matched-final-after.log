@@ -1,0 +1,25 @@
+..F.......                                                     [100%]
+================================== FAILURES ===================================
+_ IterationTruthTests.test_foreign_external_ticket_cannot_hide_authorized_discovery _
+tools\test_t2040_iteration_truth.py:131: in test_foreign_external_ticket_cannot_hide_authorized_discovery
+    self.assertEqual(assessment["action"], "saipen hunt")
+E   AssertionError: 'saipen status' != 'saipen hunt'
+E   - saipen status
+E   + saipen hunt
+_ IterationTruthTests.test_native_no_blocker_spellings_keep_bounded_discovery_available (blocker='""') _
+tools\test_t2040_iteration_truth.py:110: in test_native_no_blocker_spellings_keep_bounded_discovery_available
+    self.assertEqual(assessment.get("action"), "saipen hunt")
+E   AssertionError: 'saipen status' != 'saipen hunt'
+E   - saipen status
+E   + saipen hunt
+_ IterationTruthTests.test_native_no_blocker_spellings_keep_bounded_discovery_available (blocker='none') _
+tools\test_t2040_iteration_truth.py:110: in test_native_no_blocker_spellings_keep_bounded_discovery_available
+    self.assertEqual(assessment.get("action"), "saipen hunt")
+E   AssertionError: 'saipen status' != 'saipen hunt'
+E   - saipen status
+E   + saipen hunt
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_iteration_truth.py::IterationTruthTests::test_foreign_external_ticket_cannot_hide_authorized_discovery
+SUBFAILED(blocker='""') tools/test_t2040_iteration_truth.py::IterationTruthTests::test_native_no_blocker_spellings_keep_bounded_discovery_available
+SUBFAILED(blocker='none') tools/test_t2040_iteration_truth.py::IterationTruthTests::test_native_no_blocker_spellings_keep_bounded_discovery_available
+3 failed, 9 passed, 8 subtests passed in 1.30s

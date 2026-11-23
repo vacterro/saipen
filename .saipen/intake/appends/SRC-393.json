@@ -1,0 +1,73 @@
+{
+  "appends": [
+    {
+      "class": "CLARIFICATION",
+      "created_work": "T-2024",
+      "delta": "context",
+      "derived_clauses": [
+        "SRC-394:R001",
+        "SRC-394:R002",
+        "SRC-394:R003",
+        "SRC-394:R004",
+        "SRC-394:R005",
+        "SRC-394:R006",
+        "SRC-394:R007",
+        "SRC-394:R008",
+        "SRC-394:R009",
+        "SRC-394:R010",
+        "SRC-394:R011",
+        "SRC-394:R012",
+        "SRC-394:R013",
+        "SRC-394:R014",
+        "SRC-394:R015",
+        "SRC-394:R016",
+        "SRC-394:R017",
+        "SRC-394:R018",
+        "SRC-394:R019",
+        "SRC-394:R020",
+        "SRC-394:R021",
+        "SRC-394:R022",
+        "SRC-394:R023",
+        "SRC-394:R024",
+        "SRC-394:R025",
+        "SRC-394:R026",
+        "SRC-394:R027",
+        "SRC-394:R028",
+        "SRC-394:R029",
+        "SRC-394:R030",
+        "SRC-394:R031",
+        "SRC-394:R032",
+        "SRC-394:R033",
+        "SRC-394:R034",
+        "SRC-394:R035",
+        "SRC-394:R036",
+        "SRC-394:R037",
+        "SRC-394:R038",
+        "SRC-394:R039",
+        "SRC-394:R040",
+        "SRC-394:R041"
+      ],
+      "label": "FULL_HANDOFF_BODY",
+      "projected_at": "2026-11-04T20:00:46Z",
+      "receipt": "SRC-394",
+      "received_at": "2026-11-04T11:34:40Z",
+      "request_witness": "model_supplied",
+      "rewind": null,
+      "seq": 1,
+      "source_sha256": "609bbc4c2df4af5ffe1494b8140234812ed6a1a60eaef5974325c89d65b148f8",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-2024"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source": "SRC-393"
+}

@@ -1,0 +1,907 @@
+{
+  "observed_at": "2026-10-10T13:03:49.849907+00:00",
+  "source": {
+    "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "kind": "source-checkout",
+    "adapter": null,
+    "canonical": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+    "proven": true,
+    "detail": null,
+    "version": "8.1.0"
+  },
+  "registry_sha256": "c6761729fe04e0ded5da68780ef5e2a471dff47cc3fcfbc4aded9913e8bb4818",
+  "doctor_exit_code": 1,
+  "doctor_ok": false,
+  "broken_hosts": [
+    "zaicode"
+  ],
+  "machine_runtime": {
+    "code": "MACHINE_RUNTIME_STALE",
+    "root": "C:\\ProgramData\\SAI\\SAIPEN",
+    "saipen_runtime_ready": false,
+    "generation": "gen-sha256:2bd10cc421aacf6a65253322d366939d9328f65080bce0bc6bd029d2a8223b9f",
+    "current": false,
+    "saipen_version": "8.1.0",
+    "state_schema": 3,
+    "launcher": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+    "python_bundled": true,
+    "source": "MACHINE_RUNTIME",
+    "reasons": [
+      "the machine runtime is not the generation of the canonical source"
+    ],
+    "action": "saipen host machine install"
+  },
+  "authority_running": false,
+  "path_launcher": {
+    "code": "PATH_LAUNCHER_READY",
+    "directory": "C:\\Users\\vac34\\bin",
+    "files": {
+      "saipen.cmd": "owned",
+      "saipen": "owned"
+    },
+    "reasons": []
+  },
+  "rows": [
+    {
+      "host": "opencode",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "BLOCKING",
+        "ADMISSION": "ADVISORY",
+        "QUESTION": "MECHANICAL",
+        "FINAL_RESPONSE": "MECHANICAL"
+      },
+      "installed": {
+        "state": "STALE_RUNTIME",
+        "runtime": "stale",
+        "hook": "stale",
+        "hook_path": "C:\\Users\\vac34\\.config\\opencode\\plugins\\saipen-guard.js",
+        "runtime_facts": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:0fee90ffb5c8e3420a90dcce1e06892557a79a51a288d0a024c58e5169dcf98d",
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": false,
+          "diff": [
+            "extensions/adapters/claude/saipen-guard.py",
+            "extensions/adapters/opencode.md",
+            "extensions/adapters/opencode/saipen-guard.js",
+            "extensions/adapters/registry.json",
+            "extensions/schemas/state.schema.json",
+            "saipen/COMMANDS.md"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen\\.saipen_runtime.json"
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "opencode",
+          "effective": "ENFORCEMENT_GAP",
+          "reason": "installed hook digest does not match the shipped adapter artifact"
+        },
+        "admission": "ADVISORY",
+        "final_response": "INACTIVE"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": "saipen host repair"
+    },
+    {
+      "host": "claude",
+      "profile": "C:\\Users\\vac34\\.claude",
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "MECHANICAL",
+        "QUESTION": "MECHANICAL",
+        "FINAL_RESPONSE": "MECHANICAL"
+      },
+      "installed": {
+        "state": "STALE_RUNTIME",
+        "runtime": "stale",
+        "hook": "stale",
+        "hook_path": "C:\\Users\\vac34\\.claude\\hooks\\saipen-guard.py",
+        "runtime_facts": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.claude\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:fef421924e2238a270578e841876a2d8363f3ac1e520309c45e57b71d015d6a5",
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": false,
+          "diff": [
+            "bootstrap/inject.ps1",
+            "bootstrap/inject.sh",
+            "bootstrap/install_ownership.py",
+            "bootstrap/uninstall.ps1",
+            "bootstrap/uninstall.sh",
+            "extensions/adapters/claude.md"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.claude\\skills\\saipen\\.saipen_runtime.json"
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "claude",
+          "effective": "ENFORCEMENT_GAP",
+          "reason": "installed hook digest does not match the shipped adapter artifact"
+        },
+        "admission": "DEGRADED_UNVERIFIED",
+        "final_response": "INACTIVE"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": {
+        "host": "claude",
+        "event": "UserPromptSubmit",
+        "state": "ADMITTED",
+        "at": 1791495286.1574516,
+        "elapsed_ms": 496,
+        "saipen_root": "C:\\Users\\vac34\\.claude\\skills\\saipen",
+        "hook": "C:\\Users\\vac34\\.claude\\hooks\\saipen-guard.py"
+      },
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": "saipen host repair"
+    },
+    {
+      "host": "claude",
+      "profile": "C:\\Users\\vac34\\.claude-account2",
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "MECHANICAL",
+        "QUESTION": "MECHANICAL",
+        "FINAL_RESPONSE": "MECHANICAL"
+      },
+      "installed": {
+        "state": "UNINSTALLED",
+        "runtime": "absent",
+        "hook": "absent",
+        "hook_path": "C:\\Users\\vac34\\.claude-account2\\hooks\\saipen-guard.py",
+        "runtime_facts": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.claude-account2\\skills\\saipen",
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "claude",
+          "effective": "ENFORCEMENT_GAP",
+          "reason": "blocking-capable host but the SAIPEN hook is not installed"
+        },
+        "admission": "NONE",
+        "final_response": "NONE"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": {
+        "host": "claude",
+        "event": "UserPromptSubmit",
+        "state": "DEGRADED",
+        "at": 1791483607.330106,
+        "elapsed_ms": 508,
+        "saipen_root": "C:\\Users\\vac34\\.claude-account2\\skills\\saipen",
+        "hook": "C:\\Users\\vac34\\.claude-account2\\hooks\\saipen-guard.py",
+        "code": "AUTHORITY_CLIENT_UNPROVEN",
+        "step": "HOOK_NOT_FOUND"
+      },
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": "saipen host repair --host claude --profile \"C:\\Users\\vac34\\.claude-account2\""
+    },
+    {
+      "host": "codex",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "UNAVAILABLE",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "MECHANICAL"
+      },
+      "installed": {
+        "state": "STALE_RUNTIME",
+        "runtime": "stale",
+        "hook": "current",
+        "hook_path": "C:\\Users\\vac34\\.codex\\hooks\\saipen-guard.py",
+        "runtime_facts": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.codex\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:fef421924e2238a270578e841876a2d8363f3ac1e520309c45e57b71d015d6a5",
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": false,
+          "diff": [
+            "bootstrap/inject.ps1",
+            "bootstrap/inject.sh",
+            "bootstrap/install_ownership.py",
+            "bootstrap/uninstall.ps1",
+            "bootstrap/uninstall.sh",
+            "extensions/adapters/claude.md"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.codex\\skills\\saipen\\.saipen_runtime.json"
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "codex",
+          "effective": "ENFORCEMENT_GAP",
+          "reason": "installed hook digest does not match the shipped adapter artifact"
+        },
+        "admission": "UNAVAILABLE",
+        "final_response": "MECHANICAL"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": "saipen host repair"
+    },
+    {
+      "host": "zaicode",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "ADVISORY",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "ADVISORY"
+      },
+      "installed": {
+        "state": "BROKEN",
+        "runtime": "stale",
+        "hook": "not-applicable",
+        "hook_path": null,
+        "runtime_facts": {
+          "declared": true,
+          "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode\\skills\\saipen",
+          "installed": true,
+          "generation": null,
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": false,
+          "diff": [
+            "candidate-runtime-surface-unproven: no runtime manifest under V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\.zaicode\\home\\.zcode\\skills\\saipen",
+            "VERSION",
+            "bootstrap/cli_launcher.py",
+            "bootstrap/export.ps1",
+            "bootstrap/export.sh",
+            "bootstrap/inject.ps1"
+          ],
+          "launcher_problems": [
+            "missing:bin/saipen",
+            "missing:bin/saipen.cmd"
+          ],
+          "provenance_problems": [
+            "marker-missing"
+          ],
+          "source": null,
+          "staging": [],
+          "marker": null
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "zaicode",
+          "effective": "ADVISORY",
+          "reason": "host has no verified before-tool blocking surface"
+        },
+        "admission": "ADVISORY",
+        "final_response": "ADVISORY"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": "saipen host repair"
+    },
+    {
+      "host": "zcode-production",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "ADVISORY",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "ADVISORY"
+      },
+      "installed": {
+        "state": "STALE_RUNTIME",
+        "runtime": "stale",
+        "hook": "not-applicable",
+        "hook_path": null,
+        "runtime_facts": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:fef421924e2238a270578e841876a2d8363f3ac1e520309c45e57b71d015d6a5",
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": false,
+          "diff": [
+            "bootstrap/inject.ps1",
+            "bootstrap/inject.sh",
+            "bootstrap/install_ownership.py",
+            "bootstrap/uninstall.ps1",
+            "bootstrap/uninstall.sh",
+            "extensions/adapters/claude.md"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.agents\\skills\\saipen\\.saipen_runtime.json"
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "zcode-production",
+          "effective": "ADVISORY",
+          "reason": "host has no verified before-tool blocking surface"
+        },
+        "admission": "ADVISORY",
+        "final_response": "ADVISORY"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": "saipen host repair"
+    },
+    {
+      "host": "gemini",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "ADVISORY",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "ADVISORY"
+      },
+      "installed": {
+        "state": "STALE_RUNTIME",
+        "runtime": "stale",
+        "hook": "current",
+        "hook_path": "C:\\Users\\vac34\\.gemini\\hooks\\saipen-guard.py",
+        "runtime_facts": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.gemini\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:fef421924e2238a270578e841876a2d8363f3ac1e520309c45e57b71d015d6a5",
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": false,
+          "diff": [
+            "bootstrap/inject.ps1",
+            "bootstrap/inject.sh",
+            "bootstrap/install_ownership.py",
+            "bootstrap/uninstall.ps1",
+            "bootstrap/uninstall.sh",
+            "extensions/adapters/claude.md"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.gemini\\skills\\saipen\\.saipen_runtime.json"
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "gemini",
+          "capability": true,
+          "installed": true,
+          "current": true,
+          "health": null,
+          "effective": "UNKNOWN",
+          "reason": "current hook exists but guard reachability or host health is unobserved"
+        },
+        "admission": "ADVISORY",
+        "final_response": "ADVISORY"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": "saipen host repair"
+    },
+    {
+      "host": "codebuddy",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "ADVISORY",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "ADVISORY"
+      },
+      "installed": {
+        "state": "STALE_RUNTIME",
+        "runtime": "stale",
+        "hook": "not-applicable",
+        "hook_path": null,
+        "runtime_facts": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.codebuddy\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:fef421924e2238a270578e841876a2d8363f3ac1e520309c45e57b71d015d6a5",
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": false,
+          "diff": [
+            "bootstrap/inject.ps1",
+            "bootstrap/inject.sh",
+            "bootstrap/install_ownership.py",
+            "bootstrap/uninstall.ps1",
+            "bootstrap/uninstall.sh",
+            "extensions/adapters/claude.md"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.codebuddy\\skills\\saipen\\.saipen_runtime.json"
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "codebuddy",
+          "effective": "ADVISORY",
+          "reason": "host has no verified before-tool blocking surface"
+        },
+        "admission": "ADVISORY",
+        "final_response": "ADVISORY"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": "saipen host repair"
+    },
+    {
+      "host": "freebuff",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "ADVISORY",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "ADVISORY"
+      },
+      "installed": {
+        "state": "STALE_RUNTIME",
+        "runtime": "stale",
+        "hook": "not-applicable",
+        "hook_path": null,
+        "runtime_facts": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:fef421924e2238a270578e841876a2d8363f3ac1e520309c45e57b71d015d6a5",
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": false,
+          "diff": [
+            "bootstrap/inject.ps1",
+            "bootstrap/inject.sh",
+            "bootstrap/install_ownership.py",
+            "bootstrap/uninstall.ps1",
+            "bootstrap/uninstall.sh",
+            "extensions/adapters/claude.md"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.agents\\skills\\saipen\\.saipen_runtime.json"
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "freebuff",
+          "effective": "ADVISORY",
+          "reason": "host has no verified before-tool blocking surface"
+        },
+        "admission": "ADVISORY",
+        "final_response": "ADVISORY"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": "saipen host repair"
+    },
+    {
+      "host": "aider",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "ADVISORY",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "ADVISORY"
+      },
+      "installed": {
+        "state": "UNINSTALLED",
+        "runtime": "absent",
+        "hook": "not-applicable",
+        "hook_path": null,
+        "runtime_facts": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "aider",
+          "effective": "ADVISORY",
+          "reason": "host has no verified before-tool blocking surface"
+        },
+        "admission": "NONE",
+        "final_response": "NONE"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": null
+    },
+    {
+      "host": "antigravity",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "ADVISORY",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "ADVISORY"
+      },
+      "installed": {
+        "state": "INSTALLED_UNVERIFIED",
+        "runtime": "absent",
+        "hook": "not-applicable",
+        "hook_path": null,
+        "runtime_facts": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "antigravity",
+          "effective": "ADVISORY",
+          "reason": "host has no verified before-tool blocking surface"
+        },
+        "admission": "ADVISORY",
+        "final_response": "ADVISORY"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": null
+    },
+    {
+      "host": "kiro",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ENFORCEMENT_GAP",
+        "ADMISSION": "UNAVAILABLE",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "UNAVAILABLE"
+      },
+      "installed": {
+        "state": "UNINSTALLED",
+        "runtime": "absent",
+        "hook": "absent",
+        "hook_path": "C:\\Users\\vac34\\.kiro\\hooks\\saipen-guard.py",
+        "runtime_facts": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.kiro\\skills\\saipen",
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "kiro",
+          "effective": "ENFORCEMENT_GAP",
+          "reason": "blocking-capable host but the SAIPEN hook is not installed"
+        },
+        "admission": "NONE",
+        "final_response": "NONE"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": null
+    },
+    {
+      "host": "deepseek",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "ADVISORY",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "ADVISORY"
+      },
+      "installed": {
+        "state": "UNINSTALLED",
+        "runtime": "absent",
+        "hook": "not-applicable",
+        "hook_path": null,
+        "runtime_facts": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "deepseek",
+          "effective": "ADVISORY",
+          "reason": "host has no verified before-tool blocking surface"
+        },
+        "admission": "NONE",
+        "final_response": "NONE"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": null
+    },
+    {
+      "host": "openai",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "ADVISORY",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "ADVISORY"
+      },
+      "installed": {
+        "state": "UNINSTALLED",
+        "runtime": "absent",
+        "hook": "not-applicable",
+        "hook_path": null,
+        "runtime_facts": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "openai",
+          "effective": "ADVISORY",
+          "reason": "host has no verified before-tool blocking surface"
+        },
+        "admission": "NONE",
+        "final_response": "NONE"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": null
+    },
+    {
+      "host": "qwen",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ADVISORY",
+        "ADMISSION": "ADVISORY",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "ADVISORY"
+      },
+      "installed": {
+        "state": "UNINSTALLED",
+        "runtime": "absent",
+        "hook": "not-applicable",
+        "hook_path": null,
+        "runtime_facts": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "qwen",
+          "effective": "ADVISORY",
+          "reason": "host has no verified before-tool blocking surface"
+        },
+        "admission": "NONE",
+        "final_response": "NONE"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": null
+    },
+    {
+      "host": "generic",
+      "profile": null,
+      "declared": {
+        "TOOL_BLOCK": "ENFORCEMENT_GAP",
+        "ADMISSION": "UNAVAILABLE",
+        "QUESTION": "ADVISORY",
+        "FINAL_RESPONSE": "UNAVAILABLE"
+      },
+      "installed": {
+        "state": "UNINSTALLED",
+        "runtime": "absent",
+        "hook": "not-applicable",
+        "hook_path": null,
+        "runtime_facts": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "generation": null,
+          "expected_generation": "gen-sha256:73dc564a8efa04793f8d9afc3fa11da8ed5660aad242fd0a3e95de97e7ac05f3",
+          "current": null,
+          "diff": [],
+          "launcher_problems": [],
+          "provenance_problems": [],
+          "source": null,
+          "staging": []
+        }
+      },
+      "owner_projections": {
+        "tool_strength_without_positive_probe": {
+          "host": "generic",
+          "effective": "ENFORCEMENT_GAP",
+          "reason": "host has no verified before-tool blocking surface"
+        },
+        "admission": "NONE",
+        "final_response": "NONE"
+      },
+      "actual_host_boundary_probes": {
+        "TOOL_BLOCK": "NOT_PROBED",
+        "ADMISSION": "NOT_PROBED",
+        "QUESTION": "NOT_PROBED",
+        "FINAL_RESPONSE": "NOT_PROBED"
+      },
+      "retained_prior_health": null,
+      "health_limit": "Prior prompt health is not a new tool/question/final-response execution probe.",
+      "action": null
+    }
+  ],
+  "live_writes": 0,
+  "host_processes_started": 0,
+  "boundary": "Read-only source evidence; installed/declared is not a proven live host interception."
+}

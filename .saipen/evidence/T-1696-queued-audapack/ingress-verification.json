@@ -1,0 +1,10 @@
+{
+  "receipt_container_sha256": "f25aded896d2f2d1d3645a15647fec056dd1bdc99582bef35d79e95636bfb148",
+  "request_section_sha256": "8ad7dfe613a6369bbe31218a9d9a50333cccc1dd50201d8970fb38cd25600b1c",
+  "transport_sha256": "8ad7dfe613a6369bbe31218a9d9a50333cccc1dd50201d8970fb38cd25600b1c",
+  "request_section_byte_equal": true,
+  "request_normalized_equal": true,
+  "request_bytes": 6273,
+  "transport_bytes": 6273,
+  "explanation": "The canonical user-request Source wraps the original ingress in a header. Comparing the whole receipt container to the ingress is expected to differ."
+}

@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-19622",
+    "operation_id": "ticket-2c34d916434449898ee232211a2e5908",
+    "reason": "new BOARD record exceeds the live cap; canonical writer externalized detail"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-1973/T-1973-efa66c966efd4a81a195469e.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 1227,
+  "original_record_path": ".saipen/recovery/board-compaction/T-1973/T-1973-efa66c966efd4a81a195469e.BOARD.md",
+  "original_record_sha256": "efa66c966efd4a81a195469e5f1a60707e7ee1fc0a141d72ac67e924e91c2582",
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": "",
+  "ticket_id": "T-1973"
+}

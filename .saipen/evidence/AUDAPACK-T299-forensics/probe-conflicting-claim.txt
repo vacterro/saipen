@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "code": "TICKET_NOT_WORKABLE",
+  "op_id": null,
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "T-001 is actively claimed by another agent (buffy); a live foreign claim cannot be taken over. An operator-ordered switch is a handoff the owner or an operator receipt grants",
+  "ticket": "T-001",
+  "canonical_next_command": "saipen handoff T-001 --to forensic-other --authority <SRC-###>",
+  "detail": "T-001 is actively claimed by another agent (buffy); a live foreign claim cannot be taken over. An operator-ordered switch is a handoff the owner or an operator receipt grants"
+}

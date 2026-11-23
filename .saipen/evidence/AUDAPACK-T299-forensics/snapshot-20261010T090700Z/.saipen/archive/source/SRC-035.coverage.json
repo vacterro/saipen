@@ -1,0 +1,41 @@
+{
+  "requirements": {
+    "SRC-035:R1": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "audapack/ui_qt/models/project_room_model.py:146-165,594-600 inaudit_label role plus pin-aware pending count; audapack/ui_qt/models/project_delegate.py:625-634 badge always drawn after the project name",
+      "text": "Project room shows each project INAUDIT item count so the operator does not open every inbox to find pending audits",
+      "verification": "tests/ui_qt/test_inaudit_room_badge.py 3 PASS (pinned-capture case red before the fix, green after)",
+      "work": "T-151"
+    },
+    "SRC-035:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "audapack/ui_qt/main_window.py:2682-2714 _on_tree_double_clicked routes a project row to _show_project_inbox",
+      "text": "Double-click on a project row opens that project INAUDIT inbox",
+      "verification": "tests/test_instances.py:335-343 PASS",
+      "work": "T-151"
+    },
+    "SRC-035:R3": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "audapack/inaudit.py:208-274 rename_inaudit_layer (exclusive create, never overwrites); audapack/inaudit_capture.py:666-690 capture title rename; audapack/ui_qt/dialogs/inaudit_widget.py:125-127,224-226 Rename buttons on both Layers and Inbox",
+      "text": "INAUDIT supports renaming everywhere it presents named items",
+      "verification": "tests/test_inaudit_inbox_ui.py:275-335 PASS (capture title, renumber, taken-number refusal); tests/test_inaudit_capture_store.py:234 PASS",
+      "work": "T-151"
+    },
+    "SRC-035:R4": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "audapack/ui_qt/dialogs/inaudit_widget.py:197-205 Assign-to-project combo, :505-523 Pin project, :450-468 Assign; audapack/inaudit_capture.py:691-723 set_target_project rejects unregistered and already-assigned captures",
+      "text": "In the INAUDIT inbox the operator can manually assign which project an incoming suspected audit belongs to",
+      "verification": "tests/test_inaudit_inbox_ui.py:224-273,337-369 PASS; tests/test_inaudit_assignment.py PASS; tests/test_inaudit_capture_store.py:265-335 PASS",
+      "work": "T-151"
+    }
+  },
+  "schema_version": 1
+}

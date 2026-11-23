@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "code": "AUDIT_INGESTED",
+  "migrated": null,
+  "layer": 1,
+  "path": "audit/1.md",
+  "receipt": "SRC-001",
+  "work": "T-1",
+  "binding": "exact",
+  "file_sha256": "5eeaca7fad72200b62e1db7eaa2b4a24b9ff61d1d488edb4a20afe2e99173e17",
+  "source_sha256": "5eeaca7fad72200b62e1db7eaa2b4a24b9ff61d1d488edb4a20afe2e99173e17",
+  "action": "PHASE SCOUT T-1",
+  "detail": "audit captured as durable source authority; normalize its requirements through `saipen source req` before execution"
+}

@@ -1,0 +1,20 @@
+# T-1669 focused regression -- GREEN, against the repaired producer.
+# Command: python -B tools/test_t1669_clean_done_projection.py
+
+test_clean_to_done_commits_the_routed_scout_before_any_claim (__main__.CleanExitProjectsTheRouter.test_clean_to_done_commits_the_routed_scout_before_any_claim) ... ok
+test_clean_to_done_without_routed_work_matches_the_router (__main__.NoRoutedWorkStaysRouterConsistent.test_clean_to_done_without_routed_work_matches_the_router) ... ok
+test_a_non_ticket_destination_keeps_its_plain_phase_route (__main__.NonDoneTransitionsKeepTheirContract.test_a_non_ticket_destination_keeps_its_plain_phase_route) ... ok
+test_a_nonterminal_phase_keeps_its_phase_route (__main__.NonDoneTransitionsKeepTheirContract.test_a_nonterminal_phase_keeps_its_phase_route) ... ok
+test_a_ticket_bearing_transition_still_names_the_ticket (__main__.NonDoneTransitionsKeepTheirContract.test_a_ticket_bearing_transition_still_names_the_ticket) ... ok
+test_the_pre_fix_value_fails_the_same_fixture (__main__.PreFixProjectionIsRed.test_the_pre_fix_value_fails_the_same_fixture) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 3.376s
+
+OK
+EXIT=0
+
+# md5 of tools/saipen_engine/operations.py (repaired):
+1f9c5e884212449afeea5361bc6ca232 *tools/saipen_engine/operations.py
+# md5 of the pre-fix reconstruction:
+8afacd87ebbcb2521b3c2a07f1e71dc3 *V:/_TEMP_/ops_prefix.py

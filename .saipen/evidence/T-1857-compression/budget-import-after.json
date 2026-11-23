@@ -1,0 +1,1 @@
+{"proof": true, "writer_engine_loaded": false, "module_count": 8, "represented_source_bytes": 254294, "elapsed_seconds": 0.02499190001981333, "modules": ["saipen_engine.board", "saipen_engine.goal_authority", "saipen_engine.manifest", "saipen_engine.paths", "saipen_engine.phases", "saipen_engine.registry", "saipen_engine.runtime_surface", "saipen_engine.state"]}

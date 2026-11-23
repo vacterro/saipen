@@ -1,0 +1,19 @@
+{
+  "utc": "2026-11-09T19:44:57.394267+00:00",
+  "head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+  "files": {
+    "tools/saipen_engine/iteration.py": "456dacdfc4928dccfe226eca12988d68aa8b1e3d43994517392f2366c0e6c2b7",
+    "tools/saipen_engine/iteration_verdict.py": "060703ac55a8c51ad6f317f4cc1ae3072bfb187ff0a266dca1228fa9d3cd9637",
+    "tools/saipen_engine/supervisor.py": "8e17f004634249ad838381c66f7320b432c72e0064f0934c4212fbd85001e533",
+    "tools/saipen_engine/work_exhaustion.py": "888d765f999eac92d1591108f43ca0ce7bec84b074d1577533c2e1a989791761",
+    "tools/saipen_engine/continuation_assessment.py": "e0db3c2a18ed9606f5ce442e19779b3549bd1f04afaf174eebfc60acfe8c8428",
+    "tools/saipen_engine/router.py": "0e3dbaaef901fc1beaa49edea354e0355e6a528e0303a76eaea4605910fd5483",
+    "tools/saipen_engine/continue_fallback.py": "d1c6219b139f5de084b4c89cc74cc169b8ed91759ac7d49ed4118017299fde41",
+    "tools/saipen.py": "b50a6c01dc0e0cb0c59b937ecef63e06e493aa0431cc29a6b108be5ad01b1416",
+    "tools/test_continue_improve_fallthrough.py": "8a7872b804c6bf3791e48c2b09be53b1f9ccc5005e4744682d29813880474c51",
+    "tools/test_t1775_continue_never_admits_a_seat.py": "f2f2d247ebcbc1d89c97b2554418cbc4a371dc0fef3ff8661de850ee78b7b241",
+    "tools/test_intent_audit_fixes.py": "ba4ba469a20acaaa23633f30f5145273e9a9d508f74848b0e720437f45885c87",
+    "tools/test_improve_gate.py": "f1f2523a2a263e5074c3e7bb97b31a99b65cd410b1bdc740044757baa5b1e2d4",
+    "tools/test_t1614_future_gate.py": "40c530bc9a880f5537f0b4ef7af145140d94b61b69e3e1c41e5aa20ecf720895"
+  }
+}

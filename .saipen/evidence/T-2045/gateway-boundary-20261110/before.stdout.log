@@ -1,0 +1,82 @@
+F.FFFFF.FFF.FF.                                                     [100%]
+================================== FAILURES ===================================
+__________ GatewayTests.test_budget_is_counts_not_a_source_reference __________
+tools\test_t2045_operator_gateway.py:67: in test_budget_is_counts_not_a_source_reference
+    self.assertEqual(result["budget"], {"goal_tickets": 7, "goal_waves": 2})
+E   AssertionError: None != {'goal_tickets': 7, 'goal_waves': 2}
+__________________ GatewayTests.test_directory_state_refuses __________________
+tools\test_t2045_operator_gateway.py:126: in test_directory_state_refuses
+    self.assertEqual(json.loads(process.stdout)["code"], "STATE_INVALID")
+E   AssertionError: 'PROJECT_UNBOUND' != 'STATE_INVALID'
+E   - PROJECT_UNBOUND
+E   + STATE_INVALID
+__________________ GatewayTests.test_duplicate_fields_refuse __________________
+tools\test_t2045_operator_gateway.py:81: in test_duplicate_fields_refuse
+    self.assertFalse(result["ok"], result)
+E   AssertionError: True is not false : {'ok': True, 'code': 'GATEWAY_STATUS', 'project': 'V:\\_TEMP_\\tmph2ujeadg', 'task': None, 'phase': 'CORRUPT', 'goal': None, 'budget': None, 'authority': 'READ_ONLY', 'real_approval_requires': 'trusted host hook authenticated by the SAIPEN broker', 'note': 'This gateway does not mint or renew authority.'}
+____________________ GatewayTests.test_empty_state_refuses ____________________
+tools\test_t2045_operator_gateway.py:97: in test_empty_state_refuses
+    self.assertFalse(result["ok"], result)
+E   AssertionError: True is not false : {'ok': True, 'code': 'GATEWAY_STATUS', 'project': 'V:\\_TEMP_\\tmp27f03lzk', 'task': None, 'phase': None, 'goal': None, 'budget': None, 'authority': 'READ_ONLY', 'real_approval_requires': 'trusted host hook authenticated by the SAIPEN broker', 'note': 'This gateway does not mint or renew authority.'}
+_____ GatewayTests.test_freebuff_contract_preserves_uninstalled_boundary ______
+tools\test_t2045_operator_gateway.py:166: in test_freebuff_contract_preserves_uninstalled_boundary
+    self.assertIn("BOOT.md", text)
+E   AssertionError: 'BOOT.md' not found in '# Freebuff Native Operator Ingress Contract\n\nStatus: NOT_INSTALLED / BLOCKED for T-1822 until a real host-side event source exists.\n\n## Required upstream event\n\nEVENT: `user_message_submitted`\n\nThe native Freebuff host must deliver this event to the existing SAIPEN\nhost-authority broker. A model-writable file, environment variable, MCP tool,\nor CLI argument is not sufficient proof.\n\nRequired fields:\n\n- `host_identity`: authenticated native Freebuff Desktop identity (name, version,\n  executable, code signer where available)\n- `host_session_id`: stable Freebuff session identifier\n- `event_id`: unique message/event identifier\n- `message_digest`: exact SHA-256 digest of the original user message\n- `canonical_project`: canonical SAIPEN project identity\n- `project_lineage`: SAIPEN project lineage identity\n- `operator_action`: one of the broker\'s bounded actions\n  (`start`, `continue`, `goal`, `authorize-goal`, `append`, `handoff`,\n  `report`, `resolve-gate`, `retire`, `supersede`)\n- `issuer_evidence`: trusted process ancestry / hook evidence\n- `freshness`: issued timestamp and expiry\n- `replay_key`: unique replay-prevention key\n- `consumption`: one-time consumption state recorded by the broker\n\n## Broker requirements\n\nThe broker must independently derive and verify:\n\n- project identity and lineage\n- session binding\n- exact request digest\n- current task/budget epoch\n- host process ancestry\n- expiry and replay state\n- one-time consumption\n- canonical Source binding where a Source is used\n\n## Explicit non-goals\n\n- Do not advertise `supported_carrier_mechanisms` until real installed-host\n  acceptance passes.\n- Do not treat byte equality of a staged file as human-origin authentication.\n- Do not let a model-controlled process invoke the trusted ingress route.\n- Do not confuse an MCP tool callable by the model with an authenticated\n  human-message hook.\n\n## Current registry state\n\n`extensions/adapters/registry.json` keeps Freebuff as:\n\n- `host_prompt_available: false`\n- `prompt_to_work_binding: NOT_INSTALLED`\n- `supported_carrier_mechanisms: []`\n\nThis must remain unchanged until Freebuff Desktop implements and passes the\ncontract above.\n" '
+________ GatewayTests.test_invalid_utf8_refuses_without_cli_traceback _________
+tools\test_t2045_operator_gateway.py:105: in test_invalid_utf8_refuses_without_cli_traceback
+    self.assertEqual(json.loads(process.stdout)["code"], "STATE_INVALID")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\json\__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\json\decoder.py:337: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\json\decoder.py:355: in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+E   json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+__________ GatewayTests.test_linked_parent_refuses_before_following ___________
+tools\test_t2045_operator_gateway.py:141: in test_linked_parent_refuses_before_following
+    self.assertFalse(result["ok"], result)
+E   AssertionError: True is not false : {'ok': True, 'code': 'GATEWAY_STATUS', 'project': 'V:\\_TEMP_\\tmpthqsk2yh', 'task': 'T-1', 'phase': 'BUILD', 'goal': None, 'budget': None, 'authority': 'READ_ONLY', 'real_approval_requires': 'trusted host hook authenticated by the SAIPEN broker', 'note': 'This gateway does not mint or renew authority.'}
+___________ GatewayTests.test_linked_state_refuses_before_following ___________
+tools\test_t2045_operator_gateway.py:133: in test_linked_state_refuses_before_following
+    self.assertFalse(result["ok"], result)
+E   AssertionError: True is not false : {'ok': True, 'code': 'GATEWAY_STATUS', 'project': 'V:\\_TEMP_\\tmpnfm4p6xi', 'task': 'T-1', 'phase': 'BUILD', 'goal': None, 'budget': None, 'authority': 'READ_ONLY', 'real_approval_requires': 'trusted host hook authenticated by the SAIPEN broker', 'note': 'This gateway does not mint or renew authority.'}
+____________ GatewayTests.test_missing_budget_is_unknown_not_zero _____________
+tools\test_t2045_operator_gateway.py:71: in test_missing_budget_is_unknown_not_zero
+    self.assertEqual(gateway.status(self.root)["budget"],
+E   AssertionError: None != {'goal_tickets': None, 'goal_waves': None}
+__________ GatewayTests.test_unknown_field_does_not_claim_authority ___________
+tools\test_t2045_operator_gateway.py:91: in test_unknown_field_does_not_claim_authority
+    self.assertFalse(result["ok"], result)
+E   AssertionError: True is not false : {'ok': True, 'code': 'GATEWAY_STATUS', 'project': 'V:\\_TEMP_\\tmpn9iwhpag', 'task': None, 'phase': 'CORRUPT', 'goal': None, 'budget': None, 'authority': 'READ_ONLY', 'real_approval_requires': 'trusted host hook authenticated by the SAIPEN broker', 'note': 'This gateway does not mint or renew authority.'}
+_________________ GatewayTests.test_unreadable_state_refuses __________________
+tools\test_t2045_operator_gateway.py:117: in test_unreadable_state_refuses
+    result = gateway.status(self.root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_operator_gateway.py:31: in status
+    state = _load_state(root)
+            ^^^^^^^^^^^^^^^^^
+C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1124: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1128: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1183: in _execute_mock_call
+    raise effect
+E   PermissionError: denied
+=========================== short test summary info ===========================
+FAILED tools/test_t2045_operator_gateway.py::GatewayTests::test_budget_is_counts_not_a_source_reference
+FAILED tools/test_t2045_operator_gateway.py::GatewayTests::test_directory_state_refuses
+FAILED tools/test_t2045_operator_gateway.py::GatewayTests::test_duplicate_fields_refuse
+FAILED tools/test_t2045_operator_gateway.py::GatewayTests::test_empty_state_refuses
+FAILED tools/test_t2045_operator_gateway.py::GatewayTests::test_freebuff_contract_preserves_uninstalled_boundary
+FAILED tools/test_t2045_operator_gateway.py::GatewayTests::test_invalid_utf8_refuses_without_cli_traceback
+FAILED tools/test_t2045_operator_gateway.py::GatewayTests::test_linked_parent_refuses_before_following
+FAILED tools/test_t2045_operator_gateway.py::GatewayTests::test_linked_state_refuses_before_following
+FAILED tools/test_t2045_operator_gateway.py::GatewayTests::test_missing_budget_is_unknown_not_zero
+FAILED tools/test_t2045_operator_gateway.py::GatewayTests::test_unknown_field_does_not_claim_authority
+FAILED tools/test_t2045_operator_gateway.py::GatewayTests::test_unreadable_state_refuses
+11 failed, 4 passed, 5 subtests passed in 1.21s

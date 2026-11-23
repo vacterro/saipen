@@ -1,0 +1,44 @@
+{
+  "argv": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.EXE",
+    "-B",
+    "-m",
+    "unittest",
+    "tools.test_t1704_goal_checkpoint_priority"
+  ],
+  "cwd": "V:\\_TEMP_\\saipen-t1704-draft-43c_1k2f\\subject",
+  "exit_code": 1,
+  "elapsed_seconds": 7.147219181060791,
+  "fingerprint_before": "6b76af2a39d8a11eed511c88d917a20b84d66ec10a056178abbc0d2c480b8bc1",
+  "fingerprint_after": "6b76af2a39d8a11eed511c88d917a20b84d66ec10a056178abbc0d2c480b8bc1",
+  "counts": {
+    "ran": 24,
+    "red": [
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_blocked_phase_outranks_pending_ingestion",
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_captured_t1703_review_valve_is_a_legal_audit_diversion",
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_counter_overrun_is_preserved_and_still_requires_a_checkpoint",
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_destructive_operation_gate_outranks_pending_ingestion",
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_external_state_blocker_outranks_pending_ingestion",
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_three_wave_valve_is_a_legal_audit_diversion",
+      "test_t1704_goal_checkpoint_priority.BrakePriorityTests.test_user_brake_outranks_pending_ingestion",
+      "test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_bounded_native_validator_accepts_proved_cap_with_pending_audit",
+      "test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_persistent_checkpoint_rejects_unearned_state_counters",
+      "test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_persistent_three_wave_checkpoint_has_the_same_priority",
+      "test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_persistent_twenty_ticket_checkpoint_continues_and_native_agrees",
+      "test_t1704_goal_checkpoint_priority.NativeCheckpointTests.test_review_ticket_and_phase_survive_the_bounded_native_check"
+    ],
+    "headers": 12,
+    "unparsed": 0,
+    "tallied": 12
+  },
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "604d19a8dba31992831c42c39a2109e76010285e05164792c8a005215c254615",
+  "live_source_fingerprint": "314699cb53e099686709efa1c2d33f1dbcd632a9c684b4d9e25283d207d94705",
+  "live_canonical_sha256": {
+    ".saipen/STATE.md": "0cfacabbf0b407da6dae3bc6475d6b1495fec0e1b0b2edd3654715cd8f5b1df5",
+    ".saipen/BOARD.md": "31bda677b83527bf373d586d2d9f6c8e4a49f6bb5195b4ab83ada0c4abeb3eb3",
+    ".saipen/LOG.md": "a4efa66dd7c6340faa33274fca581079bd4ce51734a7e6183a178764696b182d"
+  },
+  "live_root_modified": true,
+  "live_persistent_grant": false
+}

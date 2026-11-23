@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-398:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PRESERVE VERIFIED REPAIRS The recent release security repair established transaction binding, stale packet rejection, PTY impersonation refusal and immutable commit resolution. Keep them. Do not repeatedly audit or reopen them without a new, reproducible regression. Keep release publication separate from maintenance authority."
+    },
+    "SRC-398:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "REPAIR THE INSTALLED ZAICODE RUNTIME Investigate MACHINE_RUNTIME_STALE and mismatched generations. Verify the actual installed ZAICODE native hook, operator-message ingress, worker process ancestry, broker and session binding. Use the canonical supported installation/repair workflow. Do not assume a source-only repair is installed. If the host-owned scheduler is available, register its actual successor-turn transport with SAIPEN. If the required ZAICODE API is absent, identify the precise host-owned implementation dependency rather than falsely claiming that SAIPEN can execute the next turn."
+    },
+    "SRC-398:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "REPAIR THE OPERATOR APPROVAL EXPERIENCE The registered maintenance objective and old goal pivot differ. Do not create a fresh goal pivot from model-authored shell text. Do not reuse the historical test objective or stale capsule. Verify that the operator-controlled ZAICODE ingress can attest a genuine human goal entry. Present the exact current self-maintenance objective and policy v2 scope, then provide a safe, minimal approval interaction. Only the real operator may approve it. Use the existing broker, native-origin proof, bounded standing grant and revocation contracts. Do not silently self-authorize or broaden maintenance authority."
+    },
+    "SRC-398:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "RESUME AUTONOMOUS MAINTENANCE After a genuine grant is committed and the scheduler is available: - verify the grant against the active persistent goal; - discover legitimate independent work; - execute and verify one task; - select the next eligible task automatically; - observe real authenticated successor model turns; - preserve cancellation, budget and host ownership; - continue without another human cc. If the host remains unavailable, preserve the unfinished campaign and report the exact dependency, not DONE."
+    },
+    "SRC-398:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "RECONCILE BOARD COUNTS The last agent report says 77 blocked tickets, while the supplied BOARD snapshot contains 118 BLOCKED rows. Explain the actual filtering and scope. Do not report selected-row counts as the complete Board total. Do not reclassify genuinely external tasks as executable merely to manufacture work."
+    },
+    "SRC-398:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AVOID REPEATED WAIT LOOPS Use the existing blocker fingerprint. When nothing relevant changes, do not repeat diagnostics, create duplicate Work or count status checks as progress. New genuine evidence must trigger reevaluation. FINAL REPORT INSTALLED_RUNTIME_GENERATION: ZAICODE_NATIVE_INGRESS: BROKER_HEALTH: SCHEDULER_TRANSPORT: CURRENT_MAINTENANCE_GOAL: GOAL_PIVOT_MATCH: GENUINE_OPERATOR_APPROVAL: STANDING_GRANT_PROOF: REAL_SUCCESSOR_TURNS: NEXT_ELIGIBLE_MAINTENANCE_WORK: BOARD_COUNT_RECONCILIATION: RELEASE_SECURITY_NONREGRESSION: SHARED_INDEX_PRESERVED: ONE_EXACT_OPERATOR_ACTION: TRUE_STOP_REASON: NEXT_WAKE_CONDITION: Success is real autonomous execution with genuine authority, not another ticket marked DONE after a mocked test. END SAIHANDOFF"
+    }
+  },
+  "derived_at": "2026-11-05T14:52:38Z",
+  "derived_from": "SRC-398",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "78cc177c83cfaa751978f2c5a3d2101ebc937edf4adaf81fbb4f8380d0da0421"
+}

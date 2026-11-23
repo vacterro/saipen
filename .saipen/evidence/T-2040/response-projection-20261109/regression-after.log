@@ -1,0 +1,9 @@
+...                                                                   [100%]
+================================== FAILURES ===================================
+_ RepeatedStateDigest.test_stop_delivery_matches_the_current_route_without_inventing_human_work (next_action='WAIT: manual-verify -- supply the verification verdict') _
+tools\test_response_delivery.py:163: in test_stop_delivery_matches_the_current_route_without_inventing_human_work
+    self.assertEqual(report["facts"]["operator_due"], expected_due)
+E   AssertionError: False != True
+=========================== short test summary info ===========================
+SUBFAILED(next_action='WAIT: manual-verify -- supply the verification verdict') tools/test_response_delivery.py::RepeatedStateDigest::test_stop_delivery_matches_the_current_route_without_inventing_human_work
+1 failed, 3 passed, 2 subtests passed in 8.14s

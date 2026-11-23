@@ -1,0 +1,44 @@
+======================================================================
+FAIL: test_relative_file_targets_from_canonical_cwd_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_file_targets_from_canonical_cwd_are_refused) (name='STATE.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 54, in test_relative_file_targets_from_canonical_cwd_are_refused
+    self.assert_protected(self.event(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 47, in assert_protected
+    self.assertFalse(answer["admitted"], answer)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\t1671-nspdsrju', 'target': 'STATE.md', 'targets': ['STATE.md'], 'action': 'write', 'effect': 'mutating', 'provenance': 'git-worktree', 'detail': 'protocol state sound', 'duration_ms': 49.832, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'V:\\_TEMP_\\t1671-nspdsrju\\.saipen', 'tool_name': 'str_replace', 'action': 'write', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': 'STATE.md', 'target_paths': ['STATE.md'], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': 'buffy', 'saipen_verb': None, 'detail': ''}, 'strength': {'host': 'opencode', 'capability': True, 'installed': True, 'current': True, 'health': None, 'effective': 'UNKNOWN', 'reason': 'current hook exists but guard reachability or host health is unobserved'}}
+
+======================================================================
+FAIL: test_relative_file_targets_from_canonical_cwd_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_file_targets_from_canonical_cwd_are_refused) (name='BOARD.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 54, in test_relative_file_targets_from_canonical_cwd_are_refused
+    self.assert_protected(self.event(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 47, in assert_protected
+    self.assertFalse(answer["admitted"], answer)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\t1671-nspdsrju', 'target': 'BOARD.md', 'targets': ['BOARD.md'], 'action': 'write', 'effect': 'mutating', 'provenance': 'git-worktree', 'detail': 'protocol state sound', 'duration_ms': 2.175, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'V:\\_TEMP_\\t1671-nspdsrju\\.saipen', 'tool_name': 'str_replace', 'action': 'write', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': 'BOARD.md', 'target_paths': ['BOARD.md'], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': 'buffy', 'saipen_verb': None, 'detail': ''}, 'strength': {'host': 'opencode', 'capability': True, 'installed': True, 'current': True, 'health': None, 'effective': 'UNKNOWN', 'reason': 'current hook exists but guard reachability or host health is unobserved'}}
+
+======================================================================
+FAIL: test_relative_file_targets_from_canonical_cwd_are_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_file_targets_from_canonical_cwd_are_refused) (name='LOG.md')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 54, in test_relative_file_targets_from_canonical_cwd_are_refused
+    self.assert_protected(self.event(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 47, in assert_protected
+    self.assertFalse(answer["admitted"], answer)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\t1671-nspdsrju', 'target': 'LOG.md', 'targets': ['LOG.md'], 'action': 'write', 'effect': 'mutating', 'provenance': 'git-worktree', 'detail': 'protocol state sound', 'duration_ms': 1.885, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'V:\\_TEMP_\\t1671-nspdsrju\\.saipen', 'tool_name': 'str_replace', 'action': 'write', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': 'LOG.md', 'target_paths': ['LOG.md'], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': 'buffy', 'saipen_verb': None, 'detail': ''}, 'strength': {'host': 'opencode', 'capability': True, 'installed': True, 'current': True, 'health': None, 'effective': 'UNKNOWN', 'reason': 'current hook exists but guard reachability or host health is unobserved'}}
+
+======================================================================
+FAIL: test_relative_shell_redirection_from_canonical_cwd_is_refused (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests.test_relative_shell_redirection_from_canonical_cwd_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 60, in test_relative_shell_redirection_from_canonical_cwd_is_refused
+    self.assert_protected(self.event(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1705_lifecycle_write_preflight.py", line 47, in assert_protected
+    self.assertFalse(answer["admitted"], answer)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\t1671-nspdsrju', 'target': None, 'targets': [], 'action': 'shell', 'effect': 'mutating', 'provenance': 'git-worktree', 'detail': 'protocol state sound', 'duration_ms': 1.747, 'event': {'event': 'before_tool', 'host': 'opencode', 'cwd': 'V:\\_TEMP_\\t1671-nspdsrju\\.saipen', 'tool_name': 'bash', 'action': 'shell', 'command_class': 'EXECUTION', 'fleet_preflight': True, 'target_path': None, 'target_paths': [], 'targets_unresolved': False, 'shell_protected_namespace': False, 'shell_effects': [], 'shell_effects_unresolved': None, 'actor': 'buffy', 'saipen_verb': None, 'detail': ''}, 'strength': {'host': 'opencode', 'capability': True, 'installed': True, 'current': True, 'health': None, 'effective': 'UNKNOWN', 'reason': 'current hook exists but guard reachability or host health is unobserved'}}
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.092s
+
+FAILED (failures=4)

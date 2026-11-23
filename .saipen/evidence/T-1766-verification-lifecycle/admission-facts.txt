@@ -1,0 +1,33 @@
+== SAIPEN: host entry
+{'code': 'PATH_LAUNCHER', 'transport': 'PATH_LAUNCHER', 'project_root': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN', 'saipen_home': 'V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN'}
+runtime_identity: {'version': '8.1.0', 'proven_by': 'state-saipen-home'}
+host_admission: {'host': None, 'known': False, 'mutation_admitted': True}
+== SAIPEN: host doctor (dry run)
+policy: {'mode': 'degraded', 'label': 'DEGRADED_ALLOWED', 'source': 'operator', 'path': 'C:\\Users\\vac34\\.saipen\\authority.json'}
+authority: {'running': True, 'saipen_root': 'C:\\Users\\vac34\\.claude\\skills\\saipen', 'mode_label': 'DEGRADED_ALLOWED', 'generation_current': True}
+machine_runtime: {'code': 'MACHINE_RUNTIME_STALE', 'current': False, 'reasons': ['the machine runtime is not the generation of the canonical source']}
+needs_action: ['opencode', 'claude', 'claude', 'codex', 'zaicode', 'zcode-production', 'gemini', 'codebuddy', 'freebuff']
+next_action: saipen host repair
+== SAIPEN: STATE
+2:phase: SCOUT
+3:task: T-1766
+12:agent: saipen-cli
+13:mode: full
+19:execution_intent: goal
+21:goal_tickets: 17
+22:continuation_authority: operator_required
+23:authority_source: E-14872
+24:authority_until: budget
+25:safety_valve_mode: hard_wait
+== SAI_WEBSITE: STATE, read-only
+2:phase: VERIFY
+3:task: T-35
+4:next_action: "PHASE VERIFY T-35"
+5:blocker: none
+6:agent: saipen
+10:saipen_home: "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN"
+11:mode: full
+14:last_event: 481
+15:execution_intent: converge
+== SAI_WEBSITE: DOING rows, read-only
+- [/] T-35 [P2] Unblock SAI_WEBSITE T-31 by restoring a legitimate machine-verifiable VERIFY-to-REVIEW lifecycle path | verify: the requested change i

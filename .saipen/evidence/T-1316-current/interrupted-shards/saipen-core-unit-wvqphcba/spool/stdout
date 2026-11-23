@@ -1,0 +1,34 @@
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "action": "saipen recover",
+  "reason": "state-malformed",
+  "detail": "state-malformed: unknown STATE field 'parked_work' -- state.schema.json does not define it (retired or misspelled?)",
+  "cold_route": {
+    "project_root": "V:\\_TEMP_\\t1363-e_lolvpj",
+    "saipen_home": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project",
+    "protocol_dir": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen",
+    "phase": "DONE",
+    "phase_module": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\phases\\done.md",
+    "boot": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\BOOT.md",
+    "style": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\STYLE.md",
+    "documents": {
+      "STYLE.md": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\STYLE.md",
+      "BOOT.md": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\BOOT.md",
+      "INDEX.md": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\INDEX.md",
+      "COMMANDS.md": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\COMMANDS.md",
+      "OPS.md": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\OPS.md",
+      "SOURCES.md": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\SOURCES.md",
+      "EXECUTION.md": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\EXECUTION.md",
+      "MAINTENANCE.md": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\MAINTENANCE.md",
+      "CORE.md": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\CORE.md",
+      "RUNTIME.md": "V:\\_TEMP_\\saipen-core-unit-wvqphcba\\project\\saipen\\RUNTIME.md"
+    },
+    "project_memory": {
+      "STATE.md": "V:\\_TEMP_\\t1363-e_lolvpj\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\_TEMP_\\t1363-e_lolvpj\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\_TEMP_\\t1363-e_lolvpj\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  }
+}

@@ -1,0 +1,6 @@
+=== broker.json ===
+{"ok": true, "pid": 5264, "instance": "broker-5cebdbd2db29bf3e5f095b63", "generation": "svc-285ee3e47ebd8f1a89f247cb", "started": 1793686102.5105748, "runtime_root": "C:\\Users\\vac34\\.saipen\\authority", "saipen_root": "C:\\Users\\vac34\\.claude\\skills\\saipen", "log": "C:\\Users\\vac34\\.saipen\\authority\\broker.log"}
+=== policy.json locations ===
+MISSING  C:\Users\vac34\.saipen\authority\policy.json
+MISSING  C:\Users\vac34\.saipen\policy.json
+MISSING  C:\Users\vac34\.claude\skills\saipen\.saipen\authority\policy.json

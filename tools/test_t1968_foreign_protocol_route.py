@@ -40,7 +40,17 @@ from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 REPO = TOOLS.parent
-ENGINE = TOOLS / "saipen.py"
+# The refusal must be measured through the runtime this project actually binds
+# (STATE.saipen_home). Running the checkout's own saipen.py while STATE names a
+# different install yields RUNTIME_DRIFT before command resolution, which is a
+# different contract and hides the foreign-protocol gate under test.
+from saipen_engine.state import parse_state
+
+_PERSISTED_HOME = parse_state((REPO / ".saipen" / "STATE.md").read_text(encoding="utf-8")).get(
+    "saipen_home"
+)
+_HOME_ROOT = Path(_PERSISTED_HOME) if _PERSISTED_HOME else REPO
+ENGINE = _HOME_ROOT / "tools" / "saipen.py"
 
 sys.path.insert(0, str(TOOLS))
 

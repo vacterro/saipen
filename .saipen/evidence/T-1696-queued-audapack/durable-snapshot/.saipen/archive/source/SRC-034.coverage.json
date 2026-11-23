@@ -1,0 +1,158 @@
+{
+  "requirements": {
+    "SRC-034:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/3.md CORE-003: ca967d8 applies the normalized mandatory+configured matcher to the single-file branch and refuses loudly",
+      "text": "CORE-001: the single-file pack branch enforces the mandatory secret exclusions",
+      "verification": "tests/test_packing.py::TestSingleFileSecretBoundary 5 regressions, 3 red pre-fix incl. the CLI run_pack_path; SRC-033:R003 VERIFIED",
+      "work": "T-146"
+    },
+    "SRC-034:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/3.md CORE-004: ca967d8 moved cross-wave run-id equality into prepare, before registration and directory creation",
+      "text": "CORE-002: rejected ingest leaves no registry or filesystem side effect",
+      "verification": "tests/test_ingest.py 3 new: unknown project with conflicting ids leaves config byte-identical and no ghost directory, 1 red pre-fix; SRC-033:R004 VERIFIED",
+      "work": "T-146"
+    },
+    "SRC-034:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/3.md CORE-005: ca967d8 resolves find_archive_for_project as ordered phases archive_name -> display -> id, blank contributes no alias",
+      "text": "CORE-003: canonical archive resolution honors ordered alias precedence without a synthetic Archive",
+      "verification": "tests/test_packing.py::TestCanonicalArchiveIdentity 5 regressions, 2 red pre-fix; SRC-033:R005 VERIFIED",
+      "work": "T-146"
+    },
+    "SRC-034:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/3.md CORE-006: ca967d8 _redact_diagnostic_text strips credentials and reduces both path grammars to basenames, before truncation",
+      "text": "CORE-004: diagnostics redact every free-text field before persistence",
+      "verification": "tests/services/test_audit_run_service.py 4 new, 3 red pre-fix; SRC-033:R006 VERIFIED",
+      "work": "T-146"
+    },
+    "SRC-034:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/3.md CORE-007: 5c4bb66 _widget_source_for_endpoint rewrites both directives from the serving endpoint, loopback-only; exactly one pair",
+      "text": "CORE-005: widget update metadata derives from one authoritative port contract",
+      "verification": "tests/test_bridge.py 4 regressions red pre-fix; SRC-033:R007 VERIFIED",
+      "work": "T-146"
+    },
+    "SRC-034:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/2.md CORE-005: 5c4bb66 answers _worker_profile_is_live from the dedicated profile's --user-data-dir via find_profile_windows, never dispatch.active_workers; manager.py carries the repair comment",
+      "text": "CORE-006: managed-profile liveness is answered from dedicated-profile identity, not aggregate workers",
+      "verification": "component installation tests exercise the real predicate, no monkeypatching of it; SRC-032:R005 VERIFIED",
+      "work": "T-146"
+    },
+    "SRC-034:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "one terminal authority: ca967d8 removed the proofless direct-complete path; the working delta keeps the legacy AUDITING->COMPLETE pair only for older workers while complete_for_run demands an existing handoff file and digest and compares campaign_status to STATUS_CAMPAIGN_COMPLETE (the imported constant, not a second literal)",
+      "text": "W2-001: browser dispatch holds one durable terminal-completion authority with the canonical campaign status",
+      "verification": "tests/test_browser_dispatch.py + mandatory regressions red pre-fix: canonical-writer campaign accepted, empty-payload transition cannot fabricate COMPLETE, same-project re-enqueue waits for proven terminal state",
+      "work": "T-146"
+    },
+    "SRC-034:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/3.md W2-005: 669118c writes a durable RESERVED row before the spawn and quarantines corrupt journals instead of resetting to an empty generation-1 pool",
+      "text": "W2-002: worker launch intent is durable before any browser spawn and corrupt launch state fails closed",
+      "verification": "tests/services/test_audit_run_service.py 4 new, 3 red pre-fix; SRC-033:R014 VERIFIED",
+      "work": "T-146"
+    },
+    "SRC-034:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/2.md W2-004: 8500157 recovery takes over the primary namespace and keeps the canonical handle for the replacement's lifetime, so a third launcher is refused after the stale owner exits",
+      "text": "W2-003: Win32 recovery transfers canonical single-instance ownership across the stale owner's exit",
+      "verification": "Win32 three-process ownership continuity coverage; SRC-032:R010 VERIFIED",
+      "work": "T-146"
+    },
+    "SRC-034:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "c8cd23f: bridge.pid publication is staged-fsync-replace under a cross-process lock; deletion requires every supplied expected field present and equal and fails closed on unreadable identity; stop_bridge captures the target from a live /health (pid + instance nonce) before shutdown and cleans against that captured identity",
+      "text": "W2-004: Bridge PID publication/deletion is atomic and bound to the exact daemon being stopped",
+      "verification": "nine new regressions red pre-fix where the module allows; lifecycle + test_bridge W2-004 (audit/4.md) coverage",
+      "work": "T-146"
+    },
+    "SRC-034:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "c8cd23f: _process_is_alive is total over every parsed integer -- garbage fails closed to alive, huge/out-of-range values read as not-ours -- and a held POSIX flock is the authoritative ownership fact, with no Win32-style takeover from a contradictory owner record",
+      "text": "W2-005: liveness probes are total over PID values and model each platform's real ownership primitive",
+      "verification": "tests/test_single_instance.py W2-005 (audit/4.md) regression red pre-fix; the probe never raises for 0/negatives/huge/malformed values",
+      "work": "T-146"
+    },
+    "SRC-034:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/3.md W2-009: 1130336 makes runtime isolation per-test, so no test observes a marker written by an unrelated case in either order",
+      "text": "W2-006: auth regression results do not depend on test collection order",
+      "verification": "the named auth pair passes in both orders repeatedly in one process; SRC-033:R018 VERIFIED",
+      "work": "T-146"
+    },
+    "SRC-034:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "f82e4a2: every data() role is a pure in-memory lookup -- INAUDIT count/label/hover read a per-project snapshot rebuilt by refresh_inaudit/_reload -- and an archive-fresh cache miss returns a cheap stat placeholder instead of running the bounded source walk on the GUI thread",
+      "text": "PERF-001: Project Room data()/paint/timer paths do no project-tree filesystem walks on the GUI thread",
+      "verification": "project-room regressions incl. a zero-enumeration paint pass; full python + widget suites green",
+      "work": "T-146"
+    },
+    "SRC-034:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "ea4e3f8: the Bridge retains one InauditCaptureStore per runtime root for its whole lifetime; full crash recovery runs once at first use instead of per endpoint call; the cross-process lock and authoritative filesystem records are unchanged",
+      "text": "PERF-002: steady-state INAUDIT requests do not reconstruct or re-hash the capture corpus",
+      "verification": "store-lifecycle regressions red pre-fix: a 400-record / 25 MiB corpus measured ~40 ms per construction collapses to once per Bridge lifetime",
+      "work": "T-146"
+    },
+    "SRC-034:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "working delta: updateBridgeJobIndex rewrites the membership array only on create/delete; markBridgeJobPermanent compacts invalid_auth too when bridgeCanonicalProofHolds (canonical text + run-id + profile/wave identity); retryAll and reset share reconstructBridgeJobContent for byte-identical token-replacement recovery; pruneBridgePermanentJobs bounds permanent metadata at 400 oldest-first and only evicts contentOmitted jobs whose canonical proof still holds, so sole copies survive",
+      "text": "PERF-003: permanent Bridge-job storage is bounded and compacted with byte-identical invalid-auth recovery and membership-only index writes",
+      "verification": "tests/widget/perf-007-bridge-job-bounds.test.js 6 regressions red pre-fix; 271/271 widget incl. w4-003 updated to the compacted invalid_auth contract",
+      "work": "T-146"
+    },
+    "SRC-034:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "already repaired as audit/2.md PERF-004: 5c4bb66 ensure_fresh_archive enters pack_project immediately when no canonical archive exists and runs a threshold walk over eligible files that stops at the first source newer than the archive; packing_service.py carries the repair comment",
+      "text": "PERF-004: first-pack freshness performs no recursive preflight and stale scans short-circuit",
+      "verification": "tests/test_packing.py 5 new, 4 red pre-fix; SRC-032:R017 VERIFIED",
+      "work": "T-146"
+    },
+    "SRC-034:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "working delta: _stamp_agent_state takes a request-local memo keyed (root, binding) that refresh_runs passes once per composite refresh, so N retained records of one project cost one inbox fingerprint; audit_run_service.py carries the repair comment",
+      "text": "PERF-005: agent-inbox enrichment runs at most one filesystem fingerprint per represented project per refresh",
+      "verification": "tests/services/test_audit_run_service.py regressions red pre-fix: 100 repeated snapshots of one unchanged project execute one fingerprint per refresh",
+      "work": "T-146"
+    }
+  },
+  "schema_version": 1
+}

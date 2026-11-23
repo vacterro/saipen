@@ -1,0 +1,1689 @@
+.........F....FFFF..F.F.........FFFFFFFFFFFFFFFFFFFFFFFF   [100%]
+================================== FAILURES ===================================
+___ SurfaceBehaviourTests.test_autonomous_repair_is_not_a_response_boundary ___
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_autonomous_repair_is_not_a_response_boundary>
+
+    def test_autonomous_repair_is_not_a_response_boundary(self):
+>       rendered = RS.render_boundary(
+            RS.OperationalBoundary(
+                "VERIFY failure",
+                "Repairable debt found",
+                "NONE",
+                "NONE",
+                "saipen continue",
+                "CURRENT_FAIL",
+            )
+        )
+
+tools\test_response_surface_contract.py:220: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\saipen_engine\response_surface.py:1368: in render_boundary
+    errors = response_errors(
+tools\saipen_engine\response_surface.py:1409: in response_errors
+    if not _action_is_single(next_action):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\response_surface.py:1274: in _action_is_single
+    from .guard_events import saipen_line_problem
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_ SurfaceBehaviourTests.test_opencode_command_enforces_autonomy_on_its_followup_response _
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_opencode_command_enforces_autonomy_on_its_followup_response>
+
+    @unittest.skipUnless(shutil.which("node"), "Node runtime unavailable")
+    def test_opencode_command_enforces_autonomy_on_its_followup_response(self):
+>       from test_guard_hostile_matrix import active_project
+
+tools\test_response_surface_contract.py:446: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_ SurfaceBehaviourTests.test_opencode_explicit_status_request_keeps_the_control_surface _
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_opencode_explicit_status_request_keeps_the_control_surface>
+
+    @unittest.skipUnless(shutil.which("node"), "Node runtime unavailable")
+    def test_opencode_explicit_status_request_keeps_the_control_surface(self):
+>       from test_guard_hostile_matrix import active_project
+
+tools\test_response_surface_contract.py:509: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+__ SurfaceBehaviourTests.test_opencode_output_hook_rejects_operational_prose __
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_opencode_output_hook_rejects_operational_prose>
+
+    @unittest.skipUnless(shutil.which("node"), "Node runtime unavailable")
+    def test_opencode_output_hook_rejects_operational_prose(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:359: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_ SurfaceBehaviourTests.test_operator_action_rejects_agent_commands_but_accepts_human_decisions (action='saipen validate') _
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_operator_action_rejects_agent_commands_but_accepts_human_decisions>
+
+    def test_operator_action_rejects_agent_commands_but_accepts_human_decisions(self):
+        for action in (
+            "saipen validate",
+            "Run `saipen validate`",
+            "python tools/saipen.py validate",
+            "Run the next internal phase",
+            "Continue processing",
+            "Execute a command the agent can execute itself",
+        ):
+            with self.subTest(action=action):
+                boundary = RS.OperationalBoundary(
+                    "BLOCKED",
+                    "Work is paused",
+                    "HUMAN_DECISION -- choose disposition",
+                    action,
+                    "saipen continue",
+                    "CURRENT_FAIL",
+                )
+                rendered = "\n".join(f"{key}\n{value}" for key, value in boundary.fields().items())
+>               errors = RS.response_errors(rendered)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_response_surface_contract.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\saipen_engine\response_surface.py:1409: in response_errors
+    if not _action_is_single(next_action):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\response_surface.py:1274: in _action_is_single
+    from .guard_events import saipen_line_problem
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_ SurfaceBehaviourTests.test_operator_action_rejects_agent_commands_but_accepts_human_decisions (action='Run `saipen validate`') _
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_operator_action_rejects_agent_commands_but_accepts_human_decisions>
+
+    def test_operator_action_rejects_agent_commands_but_accepts_human_decisions(self):
+        for action in (
+            "saipen validate",
+            "Run `saipen validate`",
+            "python tools/saipen.py validate",
+            "Run the next internal phase",
+            "Continue processing",
+            "Execute a command the agent can execute itself",
+        ):
+            with self.subTest(action=action):
+                boundary = RS.OperationalBoundary(
+                    "BLOCKED",
+                    "Work is paused",
+                    "HUMAN_DECISION -- choose disposition",
+                    action,
+                    "saipen continue",
+                    "CURRENT_FAIL",
+                )
+                rendered = "\n".join(f"{key}\n{value}" for key, value in boundary.fields().items())
+>               errors = RS.response_errors(rendered)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_response_surface_contract.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\saipen_engine\response_surface.py:1409: in response_errors
+    if not _action_is_single(next_action):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\response_surface.py:1274: in _action_is_single
+    from .guard_events import saipen_line_problem
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_ SurfaceBehaviourTests.test_operator_action_rejects_agent_commands_but_accepts_human_decisions (action='python tools/saipen.py validate') _
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_operator_action_rejects_agent_commands_but_accepts_human_decisions>
+
+    def test_operator_action_rejects_agent_commands_but_accepts_human_decisions(self):
+        for action in (
+            "saipen validate",
+            "Run `saipen validate`",
+            "python tools/saipen.py validate",
+            "Run the next internal phase",
+            "Continue processing",
+            "Execute a command the agent can execute itself",
+        ):
+            with self.subTest(action=action):
+                boundary = RS.OperationalBoundary(
+                    "BLOCKED",
+                    "Work is paused",
+                    "HUMAN_DECISION -- choose disposition",
+                    action,
+                    "saipen continue",
+                    "CURRENT_FAIL",
+                )
+                rendered = "\n".join(f"{key}\n{value}" for key, value in boundary.fields().items())
+>               errors = RS.response_errors(rendered)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_response_surface_contract.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\saipen_engine\response_surface.py:1409: in response_errors
+    if not _action_is_single(next_action):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\response_surface.py:1274: in _action_is_single
+    from .guard_events import saipen_line_problem
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_ SurfaceBehaviourTests.test_operator_action_rejects_agent_commands_but_accepts_human_decisions (action='Run the next internal phase') _
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_operator_action_rejects_agent_commands_but_accepts_human_decisions>
+
+    def test_operator_action_rejects_agent_commands_but_accepts_human_decisions(self):
+        for action in (
+            "saipen validate",
+            "Run `saipen validate`",
+            "python tools/saipen.py validate",
+            "Run the next internal phase",
+            "Continue processing",
+            "Execute a command the agent can execute itself",
+        ):
+            with self.subTest(action=action):
+                boundary = RS.OperationalBoundary(
+                    "BLOCKED",
+                    "Work is paused",
+                    "HUMAN_DECISION -- choose disposition",
+                    action,
+                    "saipen continue",
+                    "CURRENT_FAIL",
+                )
+                rendered = "\n".join(f"{key}\n{value}" for key, value in boundary.fields().items())
+>               errors = RS.response_errors(rendered)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_response_surface_contract.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\saipen_engine\response_surface.py:1409: in response_errors
+    if not _action_is_single(next_action):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\response_surface.py:1274: in _action_is_single
+    from .guard_events import saipen_line_problem
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_ SurfaceBehaviourTests.test_operator_action_rejects_agent_commands_but_accepts_human_decisions (action='Continue processing') _
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_operator_action_rejects_agent_commands_but_accepts_human_decisions>
+
+    def test_operator_action_rejects_agent_commands_but_accepts_human_decisions(self):
+        for action in (
+            "saipen validate",
+            "Run `saipen validate`",
+            "python tools/saipen.py validate",
+            "Run the next internal phase",
+            "Continue processing",
+            "Execute a command the agent can execute itself",
+        ):
+            with self.subTest(action=action):
+                boundary = RS.OperationalBoundary(
+                    "BLOCKED",
+                    "Work is paused",
+                    "HUMAN_DECISION -- choose disposition",
+                    action,
+                    "saipen continue",
+                    "CURRENT_FAIL",
+                )
+                rendered = "\n".join(f"{key}\n{value}" for key, value in boundary.fields().items())
+>               errors = RS.response_errors(rendered)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_response_surface_contract.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\saipen_engine\response_surface.py:1409: in response_errors
+    if not _action_is_single(next_action):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\response_surface.py:1274: in _action_is_single
+    from .guard_events import saipen_line_problem
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_ SurfaceBehaviourTests.test_operator_action_rejects_agent_commands_but_accepts_human_decisions (action='Execute a command the agent can execute itself') _
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_operator_action_rejects_agent_commands_but_accepts_human_decisions>
+
+    def test_operator_action_rejects_agent_commands_but_accepts_human_decisions(self):
+        for action in (
+            "saipen validate",
+            "Run `saipen validate`",
+            "python tools/saipen.py validate",
+            "Run the next internal phase",
+            "Continue processing",
+            "Execute a command the agent can execute itself",
+        ):
+            with self.subTest(action=action):
+                boundary = RS.OperationalBoundary(
+                    "BLOCKED",
+                    "Work is paused",
+                    "HUMAN_DECISION -- choose disposition",
+                    action,
+                    "saipen continue",
+                    "CURRENT_FAIL",
+                )
+                rendered = "\n".join(f"{key}\n{value}" for key, value in boundary.fields().items())
+>               errors = RS.response_errors(rendered)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_response_surface_contract.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\saipen_engine\response_surface.py:1409: in response_errors
+    if not _action_is_single(next_action):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\response_surface.py:1274: in _action_is_single
+    from .guard_events import saipen_line_problem
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_ SurfaceBehaviourTests.test_operator_action_rejects_agent_commands_but_accepts_human_decisions _
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_operator_action_rejects_agent_commands_but_accepts_human_decisions>
+
+    def test_operator_action_rejects_agent_commands_but_accepts_human_decisions(self):
+        for action in (
+            "saipen validate",
+            "Run `saipen validate`",
+            "python tools/saipen.py validate",
+            "Run the next internal phase",
+            "Continue processing",
+            "Execute a command the agent can execute itself",
+        ):
+            with self.subTest(action=action):
+                boundary = RS.OperationalBoundary(
+                    "BLOCKED",
+                    "Work is paused",
+                    "HUMAN_DECISION -- choose disposition",
+                    action,
+                    "saipen continue",
+                    "CURRENT_FAIL",
+                )
+                rendered = "\n".join(f"{key}\n{value}" for key, value in boundary.fields().items())
+                errors = RS.response_errors(rendered)
+                self.assertTrue(any("agent command" in error for error in errors), errors)
+        boundary = RS.OperationalBoundary(
+            "BLOCKED",
+            "Work is paused",
+            "HUMAN_DECISION -- choose disposition",
+            "Approve deletion of the retained ignored scripts",
+            "saipen continue",
+            "CURRENT_FAIL",
+        )
+        rendered = "\n".join(f"{key}: {value}" for key, value in boundary.fields().items())
+>       self.assertEqual(RS.response_errors(rendered), [])
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_response_surface_contract.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\saipen_engine\response_surface.py:1409: in response_errors
+    if not _action_is_single(next_action):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\response_surface.py:1274: in _action_is_single
+    from .guard_events import saipen_line_problem
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+---------------------------- Captured stdout call -----------------------------
+uuuuuu
+_____ SurfaceBehaviourTests.test_public_autonomy_gate_reads_current_route _____
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_public_autonomy_gate_reads_current_route>
+
+    def test_public_autonomy_gate_reads_current_route(self):
+>       from test_guard_hostile_matrix import active_project
+
+tools\test_response_surface_contract.py:321: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+___ SurfaceBehaviourTests.test_rendered_boundary_is_checked_after_assembly ____
+
+self = <test_response_surface_contract.SurfaceBehaviourTests testMethod=test_rendered_boundary_is_checked_after_assembly>
+
+    def test_rendered_boundary_is_checked_after_assembly(self):
+        boundary = RS.OperationalBoundary(
+            status="CLEAN completed; current conformance is failing",
+            result="Scratch cleanup completed; closure evidence remains unresolved",
+            blocker="CONFORMANCE_UNHEALTHY -- 46 work_closure_evidence findings",
+            operator_action="Decide whether to retain the ignored scripts",
+            next_exact_action="saipen validate",
+            validation="CURRENT_FAIL",
+        )
+>       rendered = RS.render_boundary(boundary)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_response_surface_contract.py:160: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\saipen_engine\response_surface.py:1368: in render_boundary
+    errors = response_errors(
+tools\saipen_engine\response_surface.py:1409: in response_errors
+    if not _action_is_single(next_action):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\response_surface.py:1274: in _action_is_single
+    from .guard_events import saipen_line_problem
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+____ BudgetTests.test_context_budget_remains_green_with_execution_in_cold _____
+
+self = <test_response_surface_contract.BudgetTests testMethod=test_context_budget_remains_green_with_execution_in_cold>
+
+    def test_context_budget_remains_green_with_execution_in_cold(self):
+        import protocol_budget
+    
+        errors = protocol_budget.check(PROTOCOL)
+>       self.assertEqual(errors, [], errors)
+E       AssertionError: Lists differ: ['ship_improve 56621 > 56320'] != []
+E       
+E       First list contains 1 additional elements.
+E       First extra element 0:
+E       'ship_improve 56621 > 56320'
+E       
+E       - ['ship_improve 56621 > 56320']
+E       + [] : ['ship_improve 56621 > 56320']
+
+tools\test_response_surface_contract.py:650: AssertionError
+__________ DiagnosisTests.test_a_inventory_cannot_replace_diagnosis ___________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_a_inventory_cannot_replace_diagnosis>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_______ DiagnosisTests.test_b_generic_handoff_cannot_replace_diagnosis ________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_b_generic_handoff_cannot_replace_diagnosis>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+__________ DiagnosisTests.test_c_rule_needs_owner_and_bound_evidence __________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_c_rule_needs_owner_and_bound_evidence>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+___ DiagnosisTests.test_changed_quote_digest_path_and_request_are_rejected ____
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_changed_quote_digest_path_and_request_are_rejected>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_________ DiagnosisTests.test_correction_is_not_an_execution_receipt __________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_correction_is_not_an_execution_receipt>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+__________ DiagnosisTests.test_d_hidden_motive_is_not_observed_cause __________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_d_hidden_motive_is_not_observed_cause>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+__________ DiagnosisTests.test_deep_json_refuses_instead_of_crashing __________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_deep_json_refuses_instead_of_crashing>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+________ DiagnosisTests.test_e_successful_recovery_cannot_be_invented _________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_e_successful_recovery_cannot_be_invented>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_____ DiagnosisTests.test_f_freebuff_cannot_claim_mechanical_enforcement ______
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_f_freebuff_cannot_claim_mechanical_enforcement>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_______ DiagnosisTests.test_g_cited_diagnosis_with_bounded_uncertainty ________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_g_cited_diagnosis_with_bounded_uncertainty>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+__________ DiagnosisTests.test_h_truthful_refusal_is_not_misconduct ___________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_h_truthful_refusal_is_not_misconduct>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_____ DiagnosisTests.test_i_implementation_handoff_keeps_its_own_contract _____
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_i_implementation_handoff_keeps_its_own_contract>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+____________ DiagnosisTests.test_j_compact_status_is_not_diagnosis ____________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_j_compact_status_is_not_diagnosis>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_____ DiagnosisTests.test_k_witnessed_detailed_artifact_is_still_allowed ______
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_k_witnessed_detailed_artifact_is_still_allowed>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+________ DiagnosisTests.test_l_unverified_host_is_reported_truthfully _________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_l_unverified_host_is_reported_truthfully>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_ DiagnosisTests.test_layered_gate_discloses_semantic_limit_and_preserves_admission _
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_layered_gate_discloses_semantic_limit_and_preserves_admission>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_______ DiagnosisTests.test_malformed_values_refuse_instead_of_crashing _______
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_malformed_values_refuse_instead_of_crashing>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+____ DiagnosisTests.test_model_supplied_request_cannot_authorize_artifact _____
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_model_supplied_request_cannot_authorize_artifact>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_____________ DiagnosisTests.test_no_caller_root_is_not_evidence ______________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_no_caller_root_is_not_evidence>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+____ DiagnosisTests.test_quoted_or_negated_request_never_grants_diagnosis _____
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_quoted_or_negated_request_never_grants_diagnosis>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+____________ DiagnosisTests.test_request_classes_come_from_ingress ____________
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_request_classes_come_from_ingress>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+____ DiagnosisTests.test_source_and_flattened_installs_use_the_same_owner _____
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_source_and_flattened_installs_use_the_same_owner>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+_ DiagnosisTests.test_unverified_diagnosis_never_falls_back_to_unchecked_chat _
+
+self = <test_response_surface_contract.DiagnosisTests testMethod=test_unverified_diagnosis_never_falls_back_to_unchecked_chat>
+
+    def setUp(self):
+>       from test_guard_hostile_matrix import fresh_project
+
+tools\test_response_surface_contract.py:672: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:690: in _load_unlocked
+    ???
+tools\_module_identity.py:48: in exec_module
+    self.original.exec_module(module)
+tools\test_guard_hostile_matrix.py:27: in <module>
+    from saipen_engine import guard_events  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\saipen_engine\guard_events.py:47: in <module>
+    from .admission import normalize_action
+tools\saipen_engine\admission.py:152: in <module>
+    ADAPTER_REGISTRY: dict[str, dict] = _load_registry()
+                                        ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _load_registry() -> dict[str, dict]:
+        """Load the one declarative host adapter authority (SRC-028:R008).
+    
+        The registry is shipped data (`extensions/adapters/registry.json`); the
+        Python runtime, both injectors, autoinject and the tests all read the same
+        file. A missing or malformed registry is a bootstrap failure, never a
+        silent empty inventory.
+        """
+        try:
+            raw = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+>           raise RuntimeError(f"host adapter registry unreadable: {_REGISTRY_PATH}: {exc}") from None
+E           RuntimeError: host adapter registry unreadable: V:\_TEMP_\t1942-pair-kisjkd14\PROJECT\extensions\adapters\registry.json: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t1942-pair-kisjkd14\\PROJECT\\extensions\\adapters\\registry.json'
+
+tools\saipen_engine\admission.py:137: RuntimeError
+=========================== short test summary info ===========================
+FAILED tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_autonomous_repair_is_not_a_response_boundary
+FAILED tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_opencode_command_enforces_autonomy_on_its_followup_response
+FAILED tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_opencode_explicit_status_request_keeps_the_control_surface
+FAILED tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_opencode_output_hook_rejects_operational_prose
+SUBFAILED(action='saipen validate') tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_operator_action_rejects_agent_commands_but_accepts_human_decisions
+SUBFAILED(action='Run `saipen validate`') tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_operator_action_rejects_agent_commands_but_accepts_human_decisions
+SUBFAILED(action='python tools/saipen.py validate') tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_operator_action_rejects_agent_commands_but_accepts_human_decisions
+SUBFAILED(action='Run the next internal phase') tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_operator_action_rejects_agent_commands_but_accepts_human_decisions
+SUBFAILED(action='Continue processing') tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_operator_action_rejects_agent_commands_but_accepts_human_decisions
+SUBFAILED(action='Execute a command the agent can execute itself') tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_operator_action_rejects_agent_commands_but_accepts_human_decisions
+FAILED tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_operator_action_rejects_agent_commands_but_accepts_human_decisions
+FAILED tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_public_autonomy_gate_reads_current_route
+FAILED tools/test_response_surface_contract.py::SurfaceBehaviourTests::test_rendered_boundary_is_checked_after_assembly
+FAILED tools/test_response_surface_contract.py::BudgetTests::test_context_budget_remains_green_with_execution_in_cold
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_a_inventory_cannot_replace_diagnosis
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_b_generic_handoff_cannot_replace_diagnosis
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_c_rule_needs_owner_and_bound_evidence
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_changed_quote_digest_path_and_request_are_rejected
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_correction_is_not_an_execution_receipt
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_d_hidden_motive_is_not_observed_cause
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_deep_json_refuses_instead_of_crashing
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_e_successful_recovery_cannot_be_invented
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_f_freebuff_cannot_claim_mechanical_enforcement
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_g_cited_diagnosis_with_bounded_uncertainty
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_h_truthful_refusal_is_not_misconduct
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_i_implementation_handoff_keeps_its_own_contract
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_j_compact_status_is_not_diagnosis
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_k_witnessed_detailed_artifact_is_still_allowed
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_l_unverified_host_is_reported_truthfully
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_layered_gate_discloses_semantic_limit_and_preserves_admission
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_malformed_values_refuse_instead_of_crashing
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_model_supplied_request_cannot_authorize_artifact
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_no_caller_root_is_not_evidence
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_quoted_or_negated_request_never_grants_diagnosis
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_request_classes_come_from_ingress
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_source_and_flattened_installs_use_the_same_owner
+FAILED tools/test_response_surface_contract.py::DiagnosisTests::test_unverified_diagnosis_never_falls_back_to_unchecked_chat
+37 failed, 25 passed, 8 subtests passed in 4.12s

@@ -1,0 +1,5 @@
+{
+  "kind": "scoped audit, not full sweep",
+  "trace": "V:\\_TEMP_\\saipen-T1842-scoped-3d414367d9064277b69b796f7590fd3d.log",
+  "command": "canonical Python tools/audit_checks.py --changed saipen/COMMANDS.md --changed saipen/phases/verify.md --changed saipen/phases/ship.md"
+}

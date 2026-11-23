@@ -1,0 +1,9 @@
+test_an_unchanged_committed_finding_is_still_suppressed (test_t1969_finding_revision_identity.ChangedFindingUnderSameIdTests.test_an_unchanged_committed_finding_is_still_suppressed) ... ok
+test_changed_bytes_under_a_committed_id_are_still_yielded (test_t1969_finding_revision_identity.ChangedFindingUnderSameIdTests.test_changed_bytes_under_a_committed_id_are_still_yielded) ... ok
+test_a_legacy_row_does_not_suppress_a_different_corpus (test_t1969_finding_revision_identity.LegacyAckScopingTests.test_a_legacy_row_does_not_suppress_a_different_corpus) ... ok
+test_a_scoped_row_still_suppresses_its_own_corpus (test_t1969_finding_revision_identity.LegacyAckScopingTests.test_a_scoped_row_still_suppresses_its_own_corpus) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.061s
+
+OK

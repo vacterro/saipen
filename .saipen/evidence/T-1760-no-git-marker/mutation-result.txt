@@ -1,0 +1,9 @@
+control: ran 7, red [] -- as expected
+validator pre-fix: ran 7, red ['test_a_package_prepared_before_any_ship_still_fails', 'test_a_project_inside_another_repository_is_no_git_too', 'test_the_engines_own_marker_is_a_marker_without_git'] -- as expected
+the foreign variant (no-git admitted everywhere): ran 7, red ['test_a_git_project_still_owes_a_commit_id', 'test_a_skipped_publish_is_the_ship_boundary_without_git'] -- as expected
+git's own answer decides, not the identity owner: ran 7, red ['test_a_project_inside_another_repository_is_no_git_too'] -- as expected
+the owner is never asked: ran 7, red ['test_a_git_project_still_owes_a_commit_id'] -- as expected
+a skipped publish is never a boundary: ran 7, red ['test_a_skipped_publish_is_the_ship_boundary_without_git'] -- as expected
+a skipped publish is a boundary everywhere: ran 7, red ['test_a_skipped_publish_is_no_boundary_where_a_push_can_exist'] -- as expected
+mutations: 6, repetitions each: 3, problems: 0
+exit=0

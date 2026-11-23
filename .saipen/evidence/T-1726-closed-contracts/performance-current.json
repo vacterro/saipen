@@ -1,0 +1,85 @@
+{
+  "actual_project": {
+    "samples_ms": [
+      518.2980000099633,
+      466.00559999933466,
+      453.3233999973163,
+      466.3050999806728,
+      459.5651999989059
+    ],
+    "median_ms": 466.00559999933466,
+    "ok": true,
+    "total": 208,
+    "counts": {
+      "UNVERIFIED": 146,
+      "REGRESSION_SUSPECT": 52,
+      "UNCHANGED_SCOPE": 10
+    },
+    "paths_read": 799,
+    "bytes_read": 18555857,
+    "errors": [],
+    "blocks_unrelated_work": false
+  },
+  "synthetic": [
+    {
+      "unrelated_files": 0,
+      "samples_ms": [
+        4.048200004035607,
+        4.586900002323091,
+        3.9031000051181763,
+        3.864900005282834,
+        3.77660000231117
+      ],
+      "median_ms": 3.9031000051181763,
+      "ok": true,
+      "total": 1,
+      "counts": {
+        "CURRENT_PASS": 1
+      },
+      "paths_read": 3,
+      "bytes_read": 404,
+      "errors": [],
+      "blocks_unrelated_work": false
+    },
+    {
+      "unrelated_files": 1000,
+      "samples_ms": [
+        4.207599995424971,
+        3.85509998886846,
+        4.493799991905689,
+        3.8096999924164265,
+        3.793400013819337
+      ],
+      "median_ms": 3.85509998886846,
+      "ok": true,
+      "total": 1,
+      "counts": {
+        "CURRENT_PASS": 1
+      },
+      "paths_read": 3,
+      "bytes_read": 404,
+      "errors": [],
+      "blocks_unrelated_work": false
+    },
+    {
+      "unrelated_files": 10000,
+      "samples_ms": [
+        4.210399987641722,
+        4.064500011736527,
+        3.813799994532019,
+        3.8705999904777855,
+        4.0862000023480505
+      ],
+      "median_ms": 4.064500011736527,
+      "ok": true,
+      "total": 1,
+      "counts": {
+        "CURRENT_PASS": 1
+      },
+      "paths_read": 3,
+      "bytes_read": 404,
+      "errors": [],
+      "blocks_unrelated_work": false
+    }
+  ]
+}

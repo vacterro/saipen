@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "kind": "saipen-entry-contract",
+  "authority": "descriptive; the runtime is proven by `host entry`, never by this file",
+  "project_binding": "required",
+  "entry_resolution": "host entry --json",
+  "entry_runner": "host entry -- <logical command>",
+  "launcher_surface": {
+    "windows": "bin/saipen.cmd",
+    "posix": "bin/saipen"
+  },
+  "engine_surface": "tools/saipen.py",
+  "surfaces_relative_to": "the SAIPEN home root: the folder holding bin/ and tools/ (the parent of saipen/ in a clone, the folder holding BOOT.md in a flattened install)",
+  "transports": [
+    "PATH_LAUNCHER",
+    "DIRECT_LAUNCHER",
+    "DIRECT_ENGINE"
+  ],
+  "allow_module_invocation": false,
+  "not_transports": [
+    "python -m saipen",
+    "py -m saipen",
+    "where saipen",
+    "which saipen",
+    "a hand-built interpreter path"
+  ]
+}

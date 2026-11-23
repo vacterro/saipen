@@ -1,0 +1,40 @@
+{
+  "current_fingerprint": "41247edf69d91ef36f1e0857104ee548c76119cb6fc9761a9d43cdbe3d0fd3e9",
+  "new_inbox_path": "audit/SAIPEN_20261011_1901.md",
+  "new_inbox_sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+  "counterfactual_without_new_inbox": "797cc04ad9f3eccd59737e8a9c408cfb1398acb48655e245daaeb0bc838f0bd6",
+  "prior_expected": "797cc04ad9f3eccd59737e8a9c408cfb1398acb48655e245daaeb0bc838f0bd6",
+  "full_family_copies": [
+    {
+      "sandbox": "V:\\_TEMP_\\saipen-core-unit-0kcc8ng1",
+      "audit_sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+      "matches_current": true
+    },
+    {
+      "sandbox": "V:\\_TEMP_\\saipen-core-unit-9h38yjhc",
+      "audit_sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+      "matches_current": true
+    },
+    {
+      "sandbox": "V:\\_TEMP_\\saipen-core-unit-frgc_hr2",
+      "audit_sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+      "matches_current": true
+    },
+    {
+      "sandbox": "V:\\_TEMP_\\saipen-core-unit-ghzbhrl5",
+      "audit_sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+      "matches_current": true
+    },
+    {
+      "sandbox": "V:\\_TEMP_\\saipen-core-unit-h_aq9vxx",
+      "audit_sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+      "matches_current": true
+    },
+    {
+      "sandbox": "V:\\_TEMP_\\saipen-core-unit-kivfrrqp",
+      "audit_sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+      "matches_current": true
+    }
+  ],
+  "claim": "The new audit arrived after paired execution and was already present in every full-family sandbox; no owned production or oracle edit."
+}

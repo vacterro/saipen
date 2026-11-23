@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-122:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-279 final envelope consistency: optional provider_id/workdir in the plane launch envelope must not contradict the requested launch (LAUNCH_PROVIDER_MISMATCH / LAUNCH_WORKDIR_MISMATCH), and reconcile the T-279 evidence+LOG with the latest closure-hardening truth"
+    }
+  },
+  "derived_at": "2026-10-06T06:51:26Z",
+  "derived_from": "SRC-122",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "608dd74515a0b8672a892f1bd7ce13789f420def0305b5dfd60fc652990296c8"
+}

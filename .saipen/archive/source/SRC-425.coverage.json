@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-425:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2091 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:82 record:.saipen/evidence/focused-unit/22511643bf418504-20261122T014505724383Z.json patterns:test_t1828_verification_policy.py,test_t2118_baseline_admission.py,test_t2119_wa_delta_boundary.py,test_t2122_red_owner_fail_closed.py (DECLARED slim sandbox)",
+      "text": "Night shift 5: continue T-2090 \u2014 repair five independently reproduced P0 defects (agent-view 32KiB overrun, false truncated flags, UTF-8 tail digest, journal short read, receipt vanish race) with RED/GREEN proofs",
+      "verification": "the Work this request created reached its own verification gate; see the T-2091 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2091"
+    }
+  },
+  "schema_version": 1
+}

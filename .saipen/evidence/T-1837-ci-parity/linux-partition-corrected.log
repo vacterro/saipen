@@ -1,0 +1,20 @@
+test_installed_engine_uses_same_interface_from_an_unrelated_directory (test_t1837_ci_family_parity.ActualCliTests.test_installed_engine_uses_same_interface_from_an_unrelated_directory) ... ok
+test_real_import_failure_remains_visible (test_t1837_ci_family_parity.ActualCliTests.test_real_import_failure_remains_visible) ... ok
+test_real_sequential_and_sharded_discovery_preserve_imported_occurrences (test_t1837_ci_family_parity.ActualCliTests.test_real_sequential_and_sharded_discovery_preserve_imported_occurrences) ... ok
+test_real_sharded_red_and_error_keep_names_causes_despite_baseline (test_t1837_ci_family_parity.ActualCliTests.test_real_sharded_red_and_error_keep_names_causes_despite_baseline) ... ok
+test_ci_never_consults_an_inherited_red_allowance (test_t1837_ci_family_parity.DispatchTests.test_ci_never_consults_an_inherited_red_allowance) ... ok
+test_engine_failure_is_a_named_failed_family (test_t1837_ci_family_parity.DispatchTests.test_engine_failure_is_a_named_failed_family) ... ok
+test_historical_preclose_descendant_observation_is_preserved (test_t1837_ci_family_parity.DispatchTests.test_historical_preclose_descendant_observation_is_preserved) ... ok
+test_incomplete_timeout_partition_and_scoped_output_cannot_pass (test_t1837_ci_family_parity.DispatchTests.test_incomplete_timeout_partition_and_scoped_output_cannot_pass) ... ok
+test_invalid_job_counts_refuse_before_any_execution (test_t1837_ci_family_parity.DispatchTests.test_invalid_job_counts_refuse_before_any_execution) ... ok
+test_unit_cli_uses_existing_full_engine_without_a_lifecycle_citation (test_t1837_ci_family_parity.DispatchTests.test_unit_cli_uses_existing_full_engine_without_a_lifecycle_citation) ... ok
+test_unknown_family_does_not_execute_the_unit_engine (test_t1837_ci_family_parity.DispatchTests.test_unknown_family_does_not_execute_the_unit_engine) ... ok
+test_whole_suite_uses_same_engine_and_keeps_other_families (test_t1837_ci_family_parity.DispatchTests.test_whole_suite_uses_same_engine_and_keeps_other_families) ... ok
+test_an_empty_whole_family_is_never_a_valid_partition (test_t1837_ci_family_parity.EmptyPartitionTests.test_an_empty_whole_family_is_never_a_valid_partition) ... ok
+test_missing_mismatched_duplicate_and_error_members_still_refuse (test_t1837_ci_family_parity.EmptyPartitionTests.test_missing_mismatched_duplicate_and_error_members_still_refuse) ... ok
+test_only_proved_empty_worker_is_neutral_and_raw_result_stays_visible (test_t1837_ci_family_parity.EmptyPartitionTests.test_only_proved_empty_worker_is_neutral_and_raw_result_stays_visible) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 2.049s
+
+OK

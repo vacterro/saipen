@@ -1,0 +1,29 @@
+
+HEAD (committed) generation
+  code demands limits      : False
+  registry goal_authority  : None
+  -> code never reads limits, cannot crash on it
+
+INDEX (staged) generation
+  code demands limits      : False
+  registry goal_authority  : ['continuation', 'until', 'valve']
+  -> code never reads limits, cannot crash on it
+
+RED CONTROL: worktree code + staged registry (the operator's drift state)
+  code demands limits      : True
+  registry goal_authority  : ['continuation', 'until', 'valve']
+  -> CRASH RegistryError: REGISTRY.json `limits` must be an object
+  -> exact reported message: True
+
+GREEN CONTROL: worktree code + worktree registry
+  code demands limits      : True
+  registry goal_authority  : ['continuation', 'limits', 'until', 'valve']
+  -> clean import
+
+====================================================================
+PASS  HEAD generation
+PASS  staged generation
+PASS  drift red control
+PASS  worktree generation
+====================================================================
+CONTROL HOLDS: drift reproduces the report; no publishable generation carries it

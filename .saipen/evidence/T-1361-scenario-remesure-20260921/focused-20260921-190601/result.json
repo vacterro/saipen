@@ -1,0 +1,18 @@
+{
+  "command": "focused.py run_release_executor_probes",
+  "head": "d97abdc097db432bafe2316b1e3577e44cd9cc4c",
+  "harness_sha256": "39598678ee1a46e6280a6139f7ebe1a9bcec787e686a5284c906df18bf1421cd",
+  "results": [
+    {
+      "function": "run_release_executor_probes",
+      "elapsed": 571.9369999999763,
+      "checked": 96,
+      "skipped": 0,
+      "failures": [
+        "release executor 8r. retry recognizes ALREADY_APPLIED from full evidence: code=RELEASE_FAILED already_applied=None",
+        "release executor 9b. fresh-clone continuation publishes only the missing tag: code=RELEASE_FAILED detail=source receipt blocks ship: {'ok': False, 'code': 'STALE_PLAN', 'detail': 'reviewed source_head cced9c101f4c != current HEAD e30c15c33b5c; the reviewed scope is stale, re-record it', 'work': 'T-9000', 'scope_status': 'STALE_SCOPE'}",
+        "release executor 9b. tag now matches the closure tip (non-empty): tag=(none) tip=e30c15c33b5c"
+      ]
+    }
+  ]
+}

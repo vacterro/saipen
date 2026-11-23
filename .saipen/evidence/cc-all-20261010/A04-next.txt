@@ -1,0 +1,15 @@
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "action": "saipen recover",
+  "reason": "checkpoint-invalid",
+  "detail": "checkpoint invalid: FLOOR: STATE.task=T-299 but BOARD has no DOING section at the raw floor; STATE proposed next_action 'idle' does not start with WAIT:/saipen /PHASE /RUN:/RESUME:; BOARD: BOARD.md:5 ticket T-299 has unrecognized field 'evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md'",
+  "recovery_pending": false,
+  "recovery_conflict": false,
+  "conflict_ops": [],
+  "pending_ops": [],
+  "parked_work": [
+    "T-265 blocked: OPERATOR_REQUIRED: PHASE 0 proved the installed Antigravity CLI cannot hold two independent Pro accounts inside one Windows logon context, so the second account needs a second Windows user, which SRC-109 forbids creating without explicit operator consent. Awaiting operator decision: provision a second Windows user and sign the second Google account in interactively via the Antigravity Plugins Manager, or supply a GEMINI_API_KEY-backed billing context instead.",
+    "T-012 blocked: Real Windows end-to-end production acceptance requires live operator interaction this headless agent session cannot perform: Tkinter GUI project moves (Scenario D/E), Scheduled Task manual trigger..."
+  ]
+}

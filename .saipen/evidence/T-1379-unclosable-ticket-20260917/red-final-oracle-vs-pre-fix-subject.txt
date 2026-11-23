@@ -1,0 +1,57 @@
+oracle   sha256 ddbbcc44221a8ca9 (identical copy: True)
+subject  5e7b3938f7ebb079 -> b2477578d25da97b (discharge_request_clauses reverted)
+--- pre-fix subject run ---
+======================================
+ERROR: test_the_seeded_clause_is_the_operator_text_not_a_summary (tools.test_request_clause_closure.TheEntryCommandsTicketClosesTests.test_the_seeded_clause_is_the_operator_text_not_a_summary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1379-red-iy899uy4\subject\tools\test_request_clause_closure.py", line 108, in test_the_seeded_clause_is_the_operator_text_not_a_summary
+    self.assertEqual(contract["clauses"][f"{receipt}:R001"]["text"], TASK)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+KeyError: 'SRC-001:R001'
+
+======================================================================
+FAIL: test_a_derived_clause_is_never_settled_from_here (tools.test_request_clause_closure.NothingIsSettledWithoutTheWorksOwnProofTests.test_a_derived_clause_is_never_settled_from_here)
+An agent's own clause is an agent's own claim.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1379-red-iy899uy4\subject\tools\test_request_clause_closure.py", line 148, in test_a_derived_clause_is_never_settled_from_here
+    self.assertEqual(summary["unresolved"], [f"{receipt}:R002"], summary)
+AssertionError: Lists differ: ['SRC-001:R001', 'SRC-001:R002'] != ['SRC-001:R002']
+
+First differing element 0:
+'SRC-001:R001'
+'SRC-001:R002'
+
+First list contains 1 additional elements.
+First extra element 1:
+'SRC-001:R002'
+
+- ['SRC-001:R001', 'SRC-001:R002']
++ ['SRC-001:R002'] : {'receipt': 'SRC-001', 'requirements': 2, 'actionable': 2, 'terminal': 0, 'dispositions': {'UNKNOWN': 2}, 'unresolved': ['SRC-001:R001', 'SRC-001:R002']}
+
+======================================================================
+FAIL: test_start_work_verify_and_finish (tools.test_request_clause_closure.TheEntryCommandsTicketClosesTests.test_start_work_verify_and_finish)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1379-red-iy899uy4\subject\tools\test_request_clause_closure.py", line 80, in test_start_work_verify_and_finish
+    self.assertEqual(code, 0, text)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "SOURCE_UNRESOLVED",
+  "op_id": null,
+  "changed_files": [],
+  "recovery_required": false,
+  "message": "source coverage gate for T-1: {'ok': False, 'code': 'SOURCE_UNRESOLVED', 'receipt': 'SRC-001', 'work': 'T-1', 'coverage': {'receipt': 'SRC-001', 'requirements': 0, 'actionable': 0, 'terminal': 0, 'dispositions': {}, 'unresolved': []}}",
+  "receipt": "SRC-001",
+  "detail": "source coverage gate for T-1: {'ok': False, 'code': 'SOURCE_UNRESOLVED', 'receipt': 'SRC-001', 'work': 'T-1', 'coverage': {'receipt': 'SRC-001', 'requirements': 0, 'actionable': 0, 'terminal': 0, 'dispositions': {}, 'unresolved': []}}"
+}
+
+
+----------------------------------------------------------------------
+Ran 7 tests in 9.278s
+
+FAILED (failures=2, errors=1)
+
+classes red against the pre-fix subject: ['NothingIsSettledWithoutTheWorksOwnProofTests', 'TheEntryCommandsTicketClosesTests']
+RED CONTROL OK: the closure controls fail against the reverted discharge

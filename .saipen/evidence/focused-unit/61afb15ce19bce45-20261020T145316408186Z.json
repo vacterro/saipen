@@ -1,0 +1,256 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "61afb15ce19bce45941f7bd5a57711a9458eddd194277fe8866a99715787fb16",
+  "verdict": "PASS",
+  "patterns": [
+    "test_canonical_command_reachability.py",
+    "test_core_unit_gate.py",
+    "test_refusal_registry.py",
+    "test_runner_failure_roster.py",
+    "test_subprocess_utf8.py",
+    "test_t1472_core_unit_shards.py",
+    "test_t1479_core_unit_consistent_copy.py",
+    "test_t1830_verification_observations.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_canonical_command_reachability.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_canonical_command_reachability.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        29968
+      ],
+      "duration_s": 8.563,
+      "process_create_s": 0.031,
+      "ran": 11,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_core_unit_gate.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_core_unit_gate.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "duration_s": 7.375,
+      "process_create_s": 0.046,
+      "ran": 28,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_refusal_registry.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_refusal_registry.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        25760
+      ],
+      "duration_s": 3.125,
+      "process_create_s": 0.031,
+      "ran": 4,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_runner_failure_roster.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_runner_failure_roster.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        28840
+      ],
+      "duration_s": 0.156,
+      "process_create_s": 0.031,
+      "ran": 5,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_subprocess_utf8.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_subprocess_utf8.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        28280
+      ],
+      "duration_s": 24.187,
+      "process_create_s": 0.031,
+      "ran": 6,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_t1472_core_unit_shards.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1472_core_unit_shards.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        29928
+      ],
+      "duration_s": 1.641,
+      "process_create_s": 0.032,
+      "ran": 14,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_t1479_core_unit_consistent_copy.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1479_core_unit_consistent_copy.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        28436
+      ],
+      "duration_s": 0.391,
+      "process_create_s": 0.031,
+      "ran": 4,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    },
+    {
+      "pattern": "test_t1830_verification_observations.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1830_verification_observations.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        21736
+      ],
+      "duration_s": 0.734,
+      "process_create_s": 0.031,
+      "ran": 7,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {}
+    }
+  ],
+  "ran": 79,
+  "duration_s": 111.734,
+  "timings_s": {
+    "execution_wall_s": 46.172,
+    "copy_wall_s": 51.547,
+    "hash_wall_s": 0.156,
+    "cleanup_wall_s": 13.859
+  },
+  "copy_metrics": {
+    "subject_copy_s": 13.937,
+    "canonical_copy_s": 37.157,
+    "canonical_copy_attempts": 1
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

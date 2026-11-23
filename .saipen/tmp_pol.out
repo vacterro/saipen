@@ -1,0 +1,10 @@
+156 "max_shells": 4,
+166 "max_shells",
+177 `config.get(key) or default` would turn a declared `max_shells: 0` back
+305 def hook_artifacts(host: str, home: object = None) -> tuple[str, ...]:
+317 surface = str((entry or {}).get("hook_install_surface") or "")
+660 def _hook_artifacts(self, host: str, home: object) -> tuple[str, ...]:
+661 return hook_artifacts(host, home)
+719 hook_artifacts=self._hook_artifacts(str(host or ""), home),
+723 max_shells=_policy_int(host_cfg, "max_shells", 4),
+1576 "hook_artifacts",

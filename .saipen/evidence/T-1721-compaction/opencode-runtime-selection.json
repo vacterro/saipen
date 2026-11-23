@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "classification": "VERIFIER_UNAVAILABLE_WITH_DEFAULT_NPM_ENTRY",
+  "machine": "AMD64",
+  "default_selected": {
+    "path": "C:\\nodejs\\node_modules\\opencode-ai\\bin\\opencode.exe",
+    "bytes": 479,
+    "sha256": "21c366f53283d5b5e1cdbbec2aafc98286b4c1075a4c3d5afd5ce1f5c9bf46dd"
+  },
+  "native_selected": {
+    "path": "C:\\nodejs\\node_modules\\opencode-windows-x64\\bin\\opencode.exe",
+    "bytes": 180133928,
+    "sha256": "cf664aa1da32b788f9b2699b84a9bb9be30b7e025693b90f9b85829d5fe4e252"
+  },
+  "native_version": "1.18.32",
+  "change": "Child verification PATH only; existing installation, source, test oracle and baseline unchanged",
+  "knowledge_card": ".saipen/KNOWLEDGE/cards/opencode-shim-is-not-the-native-payload.md",
+  "official_install_reference": "https://docs.opencode.ai/docs/"
+}

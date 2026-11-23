@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-387.md",
+  "closed_at": "2026-11-04T02:46:30Z",
+  "closure_event": null,
+  "linked_work": "T-2017",
+  "linked_works": [
+    "T-2017"
+  ],
+  "receipt_id": "SRC-387",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "b5fdba327e1fb7dd9f4d7c90fefdb2ba4186c5bb4f3fe7dfadbd64a93b5363d1",
+  "status": "CLOSED",
+  "unresolved": 0
+}

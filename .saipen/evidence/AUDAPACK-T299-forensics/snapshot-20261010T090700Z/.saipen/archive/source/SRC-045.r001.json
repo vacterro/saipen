@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-045:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Work quota exhaustion state is separated from surface identity: only strong structural evidence (selected Work mode control or Work composer placeholder) classifies a surface as Work, a stale quota banner must never turn a proven ordinary Chat composer into Work, and NEW/START in normal Chat stay allowed"
+    }
+  },
+  "derived_at": "2026-09-12T03:54:43Z",
+  "derived_from": "SRC-045",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0ef7f97e97958c88e47c7ca482a6ee33bf05bea2d76a76b342ce0fdd503c1747"
+}

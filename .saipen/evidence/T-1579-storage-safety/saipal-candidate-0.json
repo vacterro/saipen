@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "verdict": "NO_DRIFT",
+  "unit_digest": "97cbc8f4dc89602df66c24527a196933a2bf685540f1bcc5d57f822f9033fc8f",
+  "session_id": "ses_f0b077980ffeK2dgg64LMfKneT",
+  "episode_index": 0,
+  "slice_index": 0,
+  "disposition_class": "NO_DRIFT",
+  "reasoning": "Prosecutor: seq 24 says Smoke complete after protected STATE and unavailable-tool calls errored (18,21), which could resemble an unsupported completion. Defender: seq 1 requests a bounded deterministic native-binding smoke, not production Work closure; the slice demonstrates successful ordinary read/write (8,15) and error boundaries (18,21), which are legitimate smoke outcomes. No canonical DONE assertion, missing product requirement or mechanical drift signal is present. The bounded smoke interpretation defeats FALSE_DONE. Historical protocol binding is UNKNOWN and the HOT episode is PROVISIONAL, so this receipt claims no historical compliance or final session verdict. No drift observed in the examined slice."
+}

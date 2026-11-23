@@ -1,0 +1,74 @@
+[
+  {
+    "rid": "R001",
+    "exit_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"code\": \"REQUIREMENT_ADDED\",\n  \"receipt\": \"SRC-211\",\n  \"rid\": \"SRC-211:R001\",\n  \"revision\": 1\n}\n",
+    "stderr": ""
+  },
+  {
+    "rid": "R002",
+    "exit_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"code\": \"REQUIREMENT_ADDED\",\n  \"receipt\": \"SRC-211\",\n  \"rid\": \"SRC-211:R002\",\n  \"revision\": 2\n}\n",
+    "stderr": ""
+  },
+  {
+    "rid": "R003",
+    "exit_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"code\": \"REQUIREMENT_ADDED\",\n  \"receipt\": \"SRC-211\",\n  \"rid\": \"SRC-211:R003\",\n  \"revision\": 3\n}\n",
+    "stderr": ""
+  },
+  {
+    "rid": "R004",
+    "exit_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"code\": \"REQUIREMENT_ADDED\",\n  \"receipt\": \"SRC-211\",\n  \"rid\": \"SRC-211:R004\",\n  \"revision\": 4\n}\n",
+    "stderr": ""
+  },
+  {
+    "rid": "R005",
+    "exit_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"code\": \"REQUIREMENT_ADDED\",\n  \"receipt\": \"SRC-211\",\n  \"rid\": \"SRC-211:R005\",\n  \"revision\": 5\n}\n",
+    "stderr": ""
+  },
+  {
+    "rid": "R006",
+    "exit_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"code\": \"REQUIREMENT_ADDED\",\n  \"receipt\": \"SRC-211\",\n  \"rid\": \"SRC-211:R006\",\n  \"revision\": 6\n}\n",
+    "stderr": ""
+  },
+  {
+    "rid": "R007",
+    "exit_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"code\": \"REQUIREMENT_ADDED\",\n  \"receipt\": \"SRC-211\",\n  \"rid\": \"SRC-211:R007\",\n  \"revision\": 7\n}\n",
+    "stderr": ""
+  },
+  {
+    "rid": "R008",
+    "exit_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"code\": \"REQUIREMENT_ADDED\",\n  \"receipt\": \"SRC-211\",\n  \"rid\": \"SRC-211:R008\",\n  \"revision\": 8\n}\n",
+    "stderr": ""
+  },
+  {
+    "rid": "R009",
+    "exit_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"code\": \"REQUIREMENT_ADDED\",\n  \"receipt\": \"SRC-211\",\n  \"rid\": \"SRC-211:R009\",\n  \"revision\": 9\n}\n",
+    "stderr": ""
+  },
+  {
+    "rid": "R010",
+    "exit_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"code\": \"REQUIREMENT_ADDED\",\n  \"receipt\": \"SRC-211\",\n  \"rid\": \"SRC-211:R010\",\n  \"revision\": 10\n}\n",
+    "stderr": ""
+  },
+  {
+    "rid": "R011",
+    "exit_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"code\": \"REQUIREMENT_ADDED\",\n  \"receipt\": \"SRC-211\",\n  \"rid\": \"SRC-211:R011\",\n  \"revision\": 11\n}\n",
+    "stderr": ""
+  },
+  {
+    "rid": "R012",
+    "exit_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"code\": \"REQUIREMENT_ADDED\",\n  \"receipt\": \"SRC-211\",\n  \"rid\": \"SRC-211:R012\",\n  \"revision\": 12\n}\n",
+    "stderr": ""
+  }
+]

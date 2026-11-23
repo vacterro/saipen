@@ -1,0 +1,974 @@
+tools\t1446_field_soak.py:92:        if ticket.get("section") in ("## TODO", "## DOING")
+tools\regression_second_wave_audit_fixes.py:62:    board += "## TODO\n" + "".join(todo_lines) + "\n"
+tools\regression_second_wave_audit_fixes.py:339:    # --- (b) old TODO backlog -> new plan tickets outrank old -------------
+tools\regression_second_wave_audit_fixes.py:346:    todo = bt.split("## TODO")[1].split("## DOING")[0]
+tools\regression_second_wave_audit_fixes.py:348:    # pre-existing backlog is preserved in TODO (no deletion, outranked by the
+tools\regression_second_wave_audit_fixes.py:350:    # TODO line is the old backlog; the new plan ticket lives in DOING.
+tools\regression_second_wave_audit_fixes.py:361:    check("W2-003 old backlog preserved in TODO (no deletion)", "T-1" in todo, todo[:200])
+tools\regression_second_wave_audit_fixes.py:368:    # --- (c) active DOING + old TODO -> checkpointed, planned, bound -------
+tools\regression_second_wave_audit_fixes.py:384:    todo3 = bt3.split("## TODO")[1].split("## DOING")[0]
+tools\audit_floor.py:54:GOOD_BOARD = "# Board\n## DOING\n\n## TODO\n- [ ] T-001 a ticket\n\n## DONE\n\n## BLOCKED\n"
+tools\audit_floor.py:176:            "# Board\n## DOING\n\n## TODO\n- [ ] T-001 a | needs: T-002\n"
+tools\audit_floor.py:186:            "# Board\n## DOING\n\n## TODO\n- [ ] T-001 a\n- [ ] T-001 b\n\n## DONE\n\n## BLOCKED\n",
+tools\audit_floor.py:195:            "# Board\n## DOING\n\n## TODO\n- [ ] T-001 a | needs: T-999\n\n## DONE\n\n## BLOCKED\n",
+tools\audit_floor.py:202:        lambda s, b, lg: (s, "# Board\n## DOING\n\n## TODO\n\n## DONE\n", lg),
+tools\t1382_field_probe.py:53:    "## TODO\n"
+tools\audit_checks.py:537:    """The board lines the ownership check reads: DOING, TODO and BLOCKED."""
+tools\audit_checks.py:544:        if section in ("## DOING", "## TODO", "## BLOCKED") and line.startswith("- ["):
+tools\audit_checks.py:572:    The owning ticket lives under ## BLOCKED, not ## TODO. Ownership reads any
+tools\audit_checks.py:573:    live line (DOING/TODO/BLOCKED), but workability is TODO-only -- so a
+tools\audit_checks.py:659:    reason it does not test. Heading-aware insertion: an EMPTY ## TODO directly
+tools\audit_checks.py:1580:    (## TODO or ## BLOCKED -- the validator treats any non-DONE/non-DOING
+tools\audit_checks.py:1622:    `## TODO` ticket ONLY when nothing is claimed -- a `## DOING` ticket IS
+tools\audit_checks.py:1624:    arrange the TODO mismatch. Inject two synthetic workable tickets: T-999
+tools\audit_checks.py:1625:    at the top of `## TODO` (always the topmost workable) and T-998 at the
+tools\audit_checks.py:1640:    todo = re.search(r"^## TODO$\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL)
+tools\audit_checks.py:1641:    if todo is None:
+tools\audit_checks.py:1646:        text[: todo.start(1)]
+tools\audit_checks.py:1648:        + todo.group(1).rstrip(nl)
+tools\audit_checks.py:1652:        + text[todo.end(1) :]
+tools\audit_checks.py:1657:    """Reproduce T-576's unjournaled BLOCKED -> TODO drift byte-for-byte."""
+tools\audit_checks.py:1666:            if line == "## TODO":
+tools\audit_checks.py:1852:    under `## TODO` so the reopened-T-549 condition is testable again.
+tools\audit_checks.py:1859:    todo_i = next((i for i, ln in enumerate(lines) if ln.strip() == "## TODO"), None)
+tools\audit_checks.py:1891:    """File every `## BLOCKED` record back into `## TODO` as workable Work.
+tools\audit_checks.py:1919:    todo = next(i for i, line in enumerate(lines) if line.startswith("## TODO"))
+tools\audit_checks.py:1920:    lines[todo + 1 : todo + 1] = moved
+tools\audit_checks.py:1925:    """Empty `## DOING` by filing its claimed ticket back into `## TODO`.
+tools\audit_checks.py:1934:        todo = next(i for i, line in enumerate(lines) if line.startswith("## TODO"))
+tools\audit_checks.py:1937:    claimed = [i for i in range(doing + 1, todo) if lines[i].startswith("- [")]
+tools\audit_checks.py:1949:    todo = next(i for i, line in enumerate(lines) if line.startswith("## TODO"))
+tools\audit_checks.py:1950:    lines[todo + 1 : todo + 1] = moved
+tools\audit_checks.py:2109:    # T-572 sat in ## TODO -- validator-conformant until this rule. Both
+tools\audit_checks.py:2571:        # Rule -- `topmost workable ## TODO` is not what the selector computes
+tools\audit_checks.py:2584:        "T-576-style drift moves a blocker ticket under TODO",
+tools\audit_checks.py:2689:        replace("FRONT of `## TODO`", "front of the board"),
+tools\audit_checks.py:2690:        "at the front of `## TODO`",
+tools\audit_checks.py:2956:    # files -- STATE.phase: BLOCKED AND a workable ## TODO ticket -- so this
+tools\audit_checks.py:2970:                        "\n## TODO\n",
+tools\audit_checks.py:2971:                        "\n## TODO\n- [ ] T-999 [P3] synthetic red-control workable ticket\n",
+tools\audit_checks.py:3171:        "CONVERGE blocks factories while TODO remains",
+tools\audit_checks.py:3173:        replace("no workable `## TODO` ticket", "TODO may remain"),
+tools\audit_checks.py:3248:    # empty `## TODO` *and* a bogus WAIT, and a case mutates exactly one file,
+tools\audit_checks.py:3573:    ("duplicate board heading", BOARD, lambda t: t + "\n## TODO\n", "duplicate section heading"),
+tools\audit_checks.py:3583:        add_after("## TODO\n", "- [ ] T-803 a | assignee: me\n"),
+tools\audit_checks.py:3589:        add_after("## TODO\n", "- [ ] T-804 a | needs: T-9999\n"),
+tools\audit_checks.py:3595:        add_after("## TODO\n", "- [ ] T-805 a | needs: T-806\n- [ ] T-806 b | needs: T-805\n"),
+tools\audit_checks.py:3605:            "## TODO\n", "## TODO\n- [ ] T-810 b\n", 1
+tools\audit_checks.py:3618:        add_after("## TODO\n", "- [ ] T-808 a | review_passes: 4\n"),
+tools\audit_checks.py:3624:        add_after("## TODO\n", "- [ ] fix this later\n"),
+tools\audit_checks.py:4434:            "T-1637 CORE 1.2 lets a permanent warning owner sit in TODO",
+tools\audit_checks.py:4569:    marker = "## TODO\n"
+tools\regression_core_audit_fixes.py:268:        "# BOARD\n\n## TODO\n- [ ] T-2 more workable ticket\n\n## DOING\n\n## DONE\n\n## BLOCKED\n"
+tools\regression_core_audit_fixes.py:317:        (saipen / "BOARD.md").write_text("# BOARD\n\n## TODO\n\n## DOING\n")
+tools\test_audit_route.py:183:            "section": "## TODO",
+tools\test_audit_route.py:215:            "T-901": {"id": "T-901", "section": "## TODO", "checkbox": " ", "fields": {}},
+tools\test_audit_route.py:230:            "T-901": {"id": "T-901", "section": "## TODO", "checkbox": " ", "fields": {}},
+tools\t1320_fleet_native_smoke.py:281:            in (root / ".saipen" / "BOARD.md").read_text(encoding="utf-8").split("## TODO")[0],
+tools\fixture_t1862_saituls_shape.py:9:    7 BLOCKED tickets, 2 TODO tickets
+tools\fixture_t1862_saituls_shape.py:76:    lines = ["## DOING", "## TODO"]
+tools\nitro_integrity_repro.py:39:    "# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+tools\nitro_integrity_repro.py:125:        "claim_time: 2026-08-09T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools\nitro_integrity_repro.py:152:        f"TODO ticket done directly, result={result.get('code')}, "
+tools\nitro_integrity_repro.py:313:    text = "# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+tools\nitro_integrity_repro.py:350:    ("R5 direct TODO -> DONE succeeds", r5_todo_to_done_direct),
+tools\regression_conformance_closure.py:54:    (saipen / "BOARD.md").write_text("# BOARD\n\n## TODO\n\n", encoding="utf-8")
+tools\test_audit_manifest.py:263:        "## DOING\n## TODO\n- [ ] T-46 [P1] close the sweep\n## DONE\n## BLOCKED\n",
+tools\sub_clean.py:87:    required = ["DOING", "TODO", "DONE", "BLOCKED"]
+tools\sub_clean.py:99:    checkbox_for = {"DOING": "/", "TODO": " ", "DONE": "x", "BLOCKED": " "}
+tools\sub_clean.py:114:        if ticket and section == "TODO":
+tools\sub_clean.py:115:            blockers.append("TODO: " + line[6:].strip())
+tools\regression_second_wave_receipt_fixes.py:219:        "## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n",
+tools\regression_second_wave_receipt_fixes.py:358:    (root / ".saipen" / "BOARD.md").write_text("# BOARD\n## TODO\n\n", encoding="utf-8")
+tools\test_audit_ingest_resume.py:161:                "## TODO",
+tools\test_audit_ingest_resume.py:162:                "## TODO\n"
+tools\test_audit_ingest_resume.py:183:                "## TODO",
+tools\test_audit_ingest_resume.py:184:                "## TODO\n"
+tools\test_audit_2026_08_30_all3_impl.py:67:            "## TODO\n"
+tools\test_adoption_section_parity.py:8:`saipen recover --adopt-legacy` -- used to scan only `## TODO` and `## DOING`.
+tools\test_adoption_section_parity.py:76:## TODO
+tools\test_adoption_section_parity.py:77:- [ ] T-501 detached todo | verify: adopted or refused
+tools\test_adoption_section_parity.py:93:## TODO
+tools\test_adoption_section_parity.py:111:    "T-501": "## TODO",
+tools\test_audit_inbox.py:37:BOARD_EMPTY = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_audit_inbox.py:57:    "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_audit_inbox.py:316:        board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] stale backlog | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+tools\test_audit_inbox.py:323:        board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] stale | verify: proof\n- [ ] T-900 [P1] audit work | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+tools\test_audit_inbox.py:335:            "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] backlog | verify: proof\n"
+tools\test_audit_inbox.py:358:        board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] backlog | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+tools\test_audit_inbox.py:384:        board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] backlog | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+tools\test_audit_inbox.py:405:        board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] backlog | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+tools\test_audit_inbox.py:426:        board = "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] backlog | verify: proof\n## DONE\n## BLOCKED\n"  # noqa: E501
+tools\test_audit_inbox.py:505:        todo = blocked_record.replace(" | blocker: SOURCE_UNRESOLVED", "")
+tools\test_audit_inbox.py:506:        self.assertNotEqual(blocked_record, todo)
+tools\test_audit_inbox.py:508:            f"## TODO\n## DONE\n## BLOCKED\n{blocked_record}\n",
+tools\test_audit_inbox.py:509:            f"## TODO\n{todo}\n## DONE\n## BLOCKED\n",
+tools\test_audit_inbox.py:591:                "## TODO\n- [ ] T-777 [P1] audit work | verify: proof\n## DONE\n",
+tools\test_audit_inbox.py:1126:            "## TODO\n", "## TODO\n- [ ] T-2 [P1] earlier | verify: proof\n"
+tools\test_admission_auto_doctor.py:72:        ticket = {"id": "T-10", "section": "## TODO", "needs": []}
+tools\test_admission_auto_doctor.py:137:            "section": "## TODO",
+tools\test_admission_auto_doctor.py:173:            "section": "## TODO",
+tools\test_admission_auto_doctor.py:218:            "section": "## TODO",
+tools\test_admission_auto_doctor.py:236:            "section": "## TODO",
+tools\saipen.py:269:        ticket.get("section") == "## TODO" for ticket in board["tickets"].values()
+tools\saipen.py:1909:    todo = [t for t in board["tickets"].values() if t["section"] == "## TODO"]
+tools\saipen.py:1918:        for ticket in todo:
+tools\saipen.py:2571:    workable TODO remains.  That verdict -- not a board glance -- is the
+tools\saipen.py:8620:                    ticket.get("section") == "## TODO" and ticket.get("needs")
+tools\test_adaptive_runtime.py:63:            "# Board\n## DOING\n- [/] T-001 fixture\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_audit_2026_08_28_all3.py:2534:            "# Board\n## DOING\n## TODO\n## DONE\n"
+tools\test_continue_entry.py:51:                            todo="- [ ] T-001 [P1] queued | verify: test\n"
+tools\test_continue_entry.py:71:                todo="- [ ] T-001 [P1] queued | verify: test\n"
+tools\test_crew_applicability.py:51:BOARD = "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+tools\test_continue_chain.py:167:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_command_routing.py:434:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_command_routing.py:732:            "## TODO\n"
+tools\test_command_routing.py:922:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_command_routing.py:1149:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_core_unit_gate.py:100:        "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_cold_recovery.py:77:## TODO
+tools\test_cold_recovery.py:175:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_cold_recovery.py:204:        # when an earlier TODO is dependency-eligible (brief briefly projected
+tools\test_cold_recovery.py:210:            "## TODO\n"
+tools\test_cold_recovery.py:376:        "## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_cold_recovery.py:494:            "## DOING\n## TODO\n"
+tools\test_cold_recovery.py:538:            "## DOING\n## TODO\n"
+tools\test_dependency_resume_liveness.py:111:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_dependency_resume_liveness.py:267:    BOARD_EMPTY = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_core_ownership_routing.py:127:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_cold_agent_truth.py:85:        board = "# Board\n## DOING\n" + current + "\n## TODO\n## DONE\n"
+tools\test_defect_delta_controls.py:155:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_control_primitives.py:131:            f"## DOING\n{doing}## TODO\n## DONE\n## BLOCKED\n",
+tools\test_campaign_production_gates.py:95:        f"## DOING\n- [/] {task} [P1] Production Task\n## TODO\n## BLOCKED\n## DONE\n",
+tools\test_campaign_production_gates.py:285:            "## DOING\n## TODO\n## BLOCKED\n## DONE\n- [x] T-200 [P1] Production Task\n",
+tools\test_campaign_production_gates.py:315:        (root / ".saipen" / "BOARD.md").write_text("## DOING\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8")
+tools\test_campaign_production_gates.py:332:        (root / ".saipen" / "BOARD.md").write_text("## DOING\n- [/] T-201 [P1] New Task\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8")
+tools\test_campaign_production_gates.py:609:            "## DOING\n## TODO\n## BLOCKED\n## DONE\n- [x] T-200 Done\n", encoding="utf-8"
+tools\test_closure_provenance.py:11:    projected at the head of `## TODO`, while the persisted `next_action`
+tools\test_closure_provenance.py:114:        todo = self.add(project, "unstarted work")
+tools\test_closure_provenance.py:115:        verdict = closure.resolve_implementation_source(project, todo)
+tools\test_closure_provenance.py:119:        result = self.close_inherited(project, "T-7", todo)
+tools\test_closure_provenance.py:669:        audit/source-bound Work projected at the head of `## TODO`. The
+tools\test_closure_provenance.py:765:                "## TODO\n", "## TODO\n- [ ] T-90 [P1] x | verify: p | frobnicate: yes\n"
+tools\test_closure_provenance.py:794:            {"id": "T-1", "section": "## TODO", "fields": {"closure_mode": "own_patch"}}
+tools\test_closure_provenance.py:796:        self.assertTrue(any("under ## TODO" in p for p in problems), problems)
+tools\test_continue_improve_fallthrough.py:151:    def _board(*, doing: str = "", todo: str = "") -> str:
+tools\test_continue_improve_fallthrough.py:155:            "## TODO\n"
+tools\test_continue_improve_fallthrough.py:156:            f"{todo}"
+tools\test_continue_improve_fallthrough.py:166:            board=self._board(todo="- [ ] T-001 [P1] queued | verify: test\n"),
+tools\test_explicit_claim.py:42:    "## TODO\n"
+tools\test_explicit_claim.py:134:            "# Board\n## DOING\n## TODO\n"
+tools\test_explicit_claim.py:148:            "# Board\n## DOING\n## TODO\n"
+tools\test_explicit_claim.py:158:            "# Board\n## DOING\n## TODO\n"
+tools\test_explicit_claim.py:212:            "# Board\n## DOING\n## TODO\n"
+tools\test_finding_invalidated_closure.py:83:        "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_external_resolution.py:67:def _board(*, blocked=True, todo=False, done=False) -> str:
+tools\test_external_resolution.py:68:    lines = ["# Board", "## DOING", "## TODO"]
+tools\test_external_resolution.py:69:    if todo:
+tools\test_external_resolution.py:341:            Path(self.tmp.name) / "todo", board=_board(blocked=False, todo=True)
+tools\test_campaign_matrix.py:82:        f"## DOING\n- [/] {task} [P1] Task 100\n## TODO\n## BLOCKED\n## DONE\n",
+tools\test_campaign_matrix.py:337:            "## DOING\n## TODO\n## BLOCKED\n## DONE\n- [x] T-100 [P1] Task 100\n",
+tools\test_campaign_matrix.py:416:        (root / ".saipen" / "BOARD.md").write_text("## DOING\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8")
+tools\run_scenarios.py:3398:            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools\run_scenarios.py:3437:                "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools\run_scenarios.py:4004:        board = parse_sub_board("## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n\n## TODO\n")
+tools\run_scenarios.py:4007:            "## DOING\n\n## TODO\n- [ ] H-1 open\n\n## DONE\n\n## BLOCKED\n", ticket_prefix="H"
+tools\run_scenarios.py:4011:            "## DOING\n- [x] H-1 wrong checkbox\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+tools\run_scenarios.py:4015:            "## DOING\n- [/] H-1 a\n- [/] H-2 b\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+tools\run_scenarios.py:4018:        board = parse_sub_board("## DOING\n\n## TODO\n- [ ] T-1 core id\n\n## DONE\n\n## BLOCKED\n")
+tools\run_scenarios.py:4032:                f"## DOING\n\n## TODO\n- [ ] {prefix}-1 open\n\n## DONE\n\n## BLOCKED\n",
+tools\run_scenarios.py:4041:            "## DOING\n\n## TODO\n- [ ] PY-1 wrong\n\n## DONE\n\n## BLOCKED\n",
+tools\run_scenarios.py:4046:            "## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n\n## UNKNOWN\n", expected_role="saihunt"
+tools\run_scenarios.py:4057:            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+tools\run_scenarios.py:4076:            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools\run_scenarios.py:4151:            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools\run_scenarios.py:4188:            "complete current collection creates one Core TODO hypothesis",
+tools\run_scenarios.py:4584:            "# Board\n## DOING\n## TODO\n- [ ] HUNT-1 open\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\run_scenarios.py:4596:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\run_scenarios.py:4737:            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n- [ ] HUNT-1 blocked\n",
+tools\run_scenarios.py:4766:                "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools\run_scenarios.py:4925:        # Canonical Core closure: no workable TODO, no DOING, no non-exempt
+tools\run_scenarios.py:5465:            "| claim_time: 2026-01-01T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n"
+tools\run_scenarios.py:5468:        idle_route = route_next(converged, "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n")
+tools\run_scenarios.py:6006:    demands. Emptying those two sections is the established fix; TODO/BLOCKED
+tools\run_scenarios.py:6056:    # already name. A surviving TODO/BLOCKED record that `needs:` a ticket THIS
+tools\run_scenarios.py:6198:        # ticket-less DONE shape), while TODO/BLOCKED survive verbatim -- the
+tools\run_scenarios.py:6216:        # TODO/BLOCKED records then had no allocation event, and the probe
+tools\run_scenarios.py:8811:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8", newline="\n"
+tools\run_scenarios.py:8841:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8", newline="\n"
+tools\run_scenarios.py:8852:            "# Board\n## DOING\n## TODO\n## DONE\n- [ ] SUB-OLD wrong state\n## BLOCKED\n",
+tools\run_scenarios.py:8862:            "# Board\n## DOING\n## TODO\n  - [ ] SUB-HIDDEN indented\n## DONE\n## BLOCKED\n",
+tools\run_scenarios.py:8872:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8", newline="\n"
+tools\run_scenarios.py:8985:            "# Board\n## DOING\n## TODO\n- [ ] SUB-001 open\n## DONE\n## BLOCKED\n",
+tools\run_scenarios.py:8990:            "open TODO blocks cleanup", sub_clean_blockers(instance), contains="TODO: SUB-001 open"
+tools\run_scenarios.py:8993:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8", newline="\n"
+tools\run_scenarios.py:9530:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\run_scenarios.py:9551:        text = text.replace("## TODO\n", f"## TODO\n- [ ] {tid} [P1] probe | verify: probe\n")
+tools\run_scenarios.py:10297:        board_lines = ["# Board", "## DOING", "## TODO"]
+tools\run_scenarios.py:10403:        _rep_header.replace("report_status: complete", "report_status: complete\n## DOING\n## TODO")
+tools\run_scenarios.py:10832:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\run_scenarios.py:13328:        board["headings"] == ["## DOING", "## TODO", "## DONE", "## BLOCKED"],
+tools\run_scenarios.py:13423:    board.write_text("# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8")
+tools\run_scenarios.py:13675:            "# Board\n## DOING\n## TODO\n"
+tools\run_scenarios.py:13703:        "# Board\n## DOING\n## TODO\n- [ ] T-777 [P1] probe ticket | "
+tools\run_scenarios.py:13837:        "# Board\n## DOING\n## TODO\n- [ ] T-901 probe\n## DONE\n## BLOCKED\n"
+tools\run_scenarios.py:13843:        "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools\run_scenarios.py:13854:    # Legal lifecycle: done accepts ONLY ## DOING. A TODO ticket cannot skip
+tools\run_scenarios.py:13858:        "done on a TODO ticket is refused (IL_LEGAL_TICKET_LIFECYCLE)",
+tools\run_scenarios.py:13865:        == "## TODO",
+tools\run_scenarios.py:13980:        "goal_entry demotes active DOING ticket to TODO",
+tools\run_scenarios.py:13981:        ge_board["tickets"]["T-1"]["section"] == "## TODO"
+tools\run_scenarios.py:14078:        and candidate.get("section") == "## TODO",
+tools\run_scenarios.py:14134:            "# Board\n## DOING\n## TODO\n"
+tools\run_scenarios.py:14251:    # TODO input that a caller passes without running the full validator.
+tools\run_scenarios.py:14267:        "normal claim refuses a TODO ticket carrying blocker",
+tools\run_scenarios.py:14284:        "router skips malformed TODO+blocker and never emits SCOUT for it",
+tools\run_scenarios.py:14298:        "public status refuses structurally invalid TODO+blocker state",
+tools\run_scenarios.py:14312:        "public next refuses structurally invalid TODO+blocker state",
+tools\run_scenarios.py:14322:        "# Board\n## DOING\n## TODO\n"
+tools\run_scenarios.py:14353:            ticket.get("section") == "## TODO"
+tools\run_scenarios.py:14415:        "block routes the next_action to the remaining workable TODO",
+tools\run_scenarios.py:14429:        "unblock atomically creates TODO without active blocker/history",
+tools\run_scenarios.py:14431:        and bd["tickets"]["T-1"]["section"] == "## TODO"
+tools\run_scenarios.py:14687:        "# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+tools\run_scenarios.py:14700:        "# Board\n## DOING\n## TODO\n"
+tools\run_scenarios.py:14714:        "# Board\r\n## DOING\r\n## TODO\r\n"
+tools\run_scenarios.py:14730:        "# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+tools\run_scenarios.py:14938:        "# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+tools\run_scenarios.py:15526:    # Real current shape: 10+ TODO tickets, the top several unworkable (needs
+tools\run_scenarios.py:15536:    lines = ["# Board", "## DOING", "## TODO"]
+tools\run_scenarios.py:15574:        for section in ("## DOING", "## TODO", "## BLOCKED", "## DONE")
+tools\run_scenarios.py:15579:        "12 TODO tickets with cap 2 + protected full T-4)",
+tools\run_scenarios.py:15589:        "# Board\n## DOING\n## TODO\n"
+tools\run_scenarios.py:15719:        "claim_time: 2026-08-09T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools\run_scenarios.py:15786:        "claim_time: 2026-08-09T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools\run_scenarios.py:15839:        "claim_time: 2026-08-09T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools\run_scenarios.py:15857:    # ---- T-590: shared router -- DONE + workable TODO routes to the ticket.
+tools\run_scenarios.py:15865:        "route_next on DONE + workable TODO routes to the ticket",
+tools\run_scenarios.py:16200:        "# Board\n## DOING\n## TODO\n"
+tools\run_scenarios.py:16214:        "validator FAILs a new TODO ticket with placeholder verify",
+tools\run_scenarios.py:16219:    # ---- T-590: >8 TODO tickets with the 9th workable -- cold context must
+tools\run_scenarios.py:16222:    lines = ["# Board", "## DOING", "## TODO"]
+tools\run_scenarios.py:16813:        "# Board\n## DOING\n## TODO\n- [ ] T-1 [P1] probe | verify: probe\n## DONE\n## BLOCKED\n"
+tools\run_scenarios.py:17169:        "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\run_scenarios.py:17895:            "# Board\n## DOING\n## TODO\n"
+tools\run_scenarios.py:18364:        "## TODO\n"
+tools\run_scenarios.py:18404:        "verify: probe\n## TODO\n## DONE\n## BLOCKED\n"
+tools\run_scenarios.py:18469:    At `phase: DONE` with an empty `## TODO`, CORE permits exactly THREE brakes
+tools\run_scenarios.py:18641:    # ---- DONE + empty TODO: exactly three brakes bind --------------------
+tools\run_scenarios.py:18694:    EMPTY_BOARD = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\run_scenarios.py:18698:        "## TODO\n## DONE\n## BLOCKED\n"
+tools\run_scenarios.py:18847:        "## TODO\n\n## BLOCKED\n\n## DONE\n",
+tools\run_scenarios.py:19635:                    + "## TODO\n"
+tools\run_scenarios.py:19752:                        "## TODO\n## DONE\n## BLOCKED\n",
+tools\run_scenarios.py:19762:                "# Board\n## DOING\n## TODO\n"
+tools\run_scenarios.py:19789:                "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_external_authentication_contract.py:87:    return "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n" + "\n".join(rows) + "\n"
+tools\test_field_fixture_isolation.py:98:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_event_taxonomy_owner.py:56:        "# Board\n## DOING\n## TODO\n"
+tools\test_campaign_continuation_assessment.py:98:    def write_board(self, doing=(), todo=(), blocked=()):
+tools\test_campaign_continuation_assessment.py:101:        lines += ["## TODO"]
+tools\test_campaign_continuation_assessment.py:102:        lines += [f"- [ ] {row}" for row in todo]
+tools\test_campaign_continuation_assessment.py:112:        self.write_board(doing=(), todo=(), blocked=())
+tools\test_campaign_continuation_assessment.py:145:        self.write_board(doing=(), todo=(), blocked=())
+tools\test_campaign_continuation_assessment.py:193:            todo=("T-10 [P1] Independent workable ticket",),
+tools\test_campaign_continuation_assessment.py:217:            todo=(),
+tools\test_campaign_continuation_assessment.py:247:        self.write_board(todo=(), blocked=())
+tools\test_campaign_continuation_assessment.py:277:            todo=(),
+tools\test_automation_block.py:35:BOARD_EMPTY = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_automation_block.py:272:            f"{now}\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_automation_block.py:319:            "## TODO\n", "## TODO\n- [ ] T-900 [P1] runnable | verify: exact control\n"
+tools\test_automation_block.py:443:            "## TODO\n", "## TODO\n- [ ] T-900 [P1] runnable | verify: exact control\n"
+tools\test_automation_block.py:498:            "# Board\n## DOING\n## TODO\n- [ ] T-500 [P1] stale | verify: proof\n"
+tools\test_guard_events.py:662:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_external_revalidation.py:19:P. Current goal has zero TODO/DOING but external reconciliation resumes parent work.
+tools\test_external_revalidation.py:63:    board_lines = ["# Board", "## DOING", "## TODO", "## DONE"]
+tools\test_external_revalidation.py:170:            "## TODO\n"
+tools\test_external_revalidation.py:248:            "## TODO\n"
+tools\test_external_revalidation.py:315:        board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:331:        board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:354:        board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:371:        board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:429:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:450:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:465:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:482:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:665:        board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:669:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:773:        board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:775:        board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:800:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:830:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:845:        board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:850:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:939:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:974:        board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_external_revalidation.py:977:        board_text = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n" + _blocked_row(
+tools\test_external_revalidation.py:1017:            board_content="# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_external_revalidation.py:1027:            "# Board\n## DOING\n## TODO\n## BLOCKED\n## DONE\n"
+tools\test_handoff_archive_cross_repo.py:64:## TODO
+tools\test_boot_locator.py:232:            "## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_freebuff_operator_provenance.py:92:            "## TODO\n"
+tools\test_guard_admission.py:71:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_guard_admission.py:206:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_guard_admission.py:418:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_board_pseudo_link.py:54:    return f"## DOING\n\n{line}\n\n## TODO\n\n## DONE\n\n## BLOCKED\n"
+tools\test_gpu_lane.py:78:    "## TODO\n"
+tools\test_guard_surface_parity.py:70:    "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_generation_migration.py:85:BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_guard_hostile_matrix.py:75:## TODO
+tools\test_guard_hostile_matrix.py:123:        "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_guard_hostile_matrix.py:754:            ("rg TODO src/app.py", "shell"),
+tools\test_guard_execution_reachability.py:100:        "## TODO\n" + extra + "## DONE\n## BLOCKED\n"
+tools\test_improve_reconcile.py:60:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_improve_reconcile.py:188:            text.replace("## TODO\n", f"## TODO\n- [ ] {ticket} [P1] probe | verify: probe\n"),
+tools\test_improve_error_boundary.py:60:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_ingress_authority.py:225:        self.assertNotEqual(board(root)[work]["section"], "## TODO")
+tools\test_install_identity_doctor.py:83:            "\n## TODO\n\n## DONE\n\n## BLOCKED\n",
+tools\test_improve_gate.py:121:def _board(*, doing: str = "", todo: str = "", blocked: str = "", done: str = "") -> str:
+tools\test_improve_gate.py:125:        "## TODO\n"
+tools\test_improve_gate.py:126:        f"{todo}"
+tools\test_improve_gate.py:203:            _board(todo="- [ ] T-001 [P1] queued | verify: test\n", blocked=GATE_BLOCKED_ROW),
+tools\saipen_engine\automation.py:415:        # C7 no workable TODO/DOING/follow-up remains.
+tools\test_host_bootstrap.py:161:        "\n## TODO\n\n## DONE\n\n## BLOCKED\n",
+tools\test_host_bootstrap.py:765:            "## DOING\n\n## TODO\n\n## DONE\n- [x] T-1 [P1] finished\n",
+tools\saipen_engine\audit_route.py:153:            ticket.get("section") == "## TODO" for ticket in tickets.values()
+tools\saipen_engine\admission.py:858:    # carries the contextual DONE+empty-TODO UNBLOCK exception, so the guard
+tools\saipen_engine\admission.py:861:        ticket.get("section") == "## TODO" for ticket in board["tickets"].values()
+tools\saipen_engine\acceptance_contract.py:134:        preserved = parse_board("## TODO\n" + original.decode("utf-8"))["tickets"][work]
+tools\saipen_engine\acceptance_contract.py:136:        projected = parse_board("## TODO\n" + compact)["tickets"][work]
+tools\test_intent_audit_fixes.py:590:        original = "# BOARD\n## TODO\n- [ ] HUNT-777 preserve this work\n## DONE\n- [x] old work\n"
+tools\test_intent_audit_fixes.py:597:        self.assertIn("## TODO", after)
+tools\test_hostile_wave_regressions.py:68:    (proj / ".saipen/BOARD.md").write_text("## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8")
+tools\test_hostile_wave_regressions.py:257:        (proj / ".saipen/BOARD.md").write_text("## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8")
+tools\test_journal_nested_targets.py:65:    "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_legacy_lifecycle_compat.py:12:Fleet plan, which proposed 15 ``## DONE -> ## TODO`` reopenings of real
+tools\test_legacy_lifecycle_compat.py:181:## TODO
+tools\test_legacy_lifecycle_compat.py:292:        self.assertEqual(found[0]["to_section"], "## TODO")
+tools\test_legacy_lifecycle_compat.py:316:            if r.get("kind") == "section-move" and r.get("to_section") == "## TODO"
+tools\test_legacy_lifecycle_compat.py:361:            "## TODO\n",
+tools\test_legacy_lifecycle_compat.py:362:            "## TODO\n- [ ] T-901 half claimed todo | verify: repaired "
+tools\test_legacy_lifecycle_compat.py:371:        self.assertEqual(found[0]["section"], "## TODO")
+tools\test_legacy_lifecycle_compat.py:526:        self.assertEqual(section_of(root, "T-195"), "## TODO")
+tools\test_legacy_lifecycle_compat.py:544:            "## TODO\n"
+tools\test_log_detail_evidence.py:67:    "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_log_normalize.py:64:    "## TODO\n## DONE\n## BLOCKED\n"
+tools\saipen_engine\board_compaction.py:1011:    parsed = parse_board("## DOING\n" + text.rstrip("\n") + "\n## TODO\n## DONE\n## BLOCKED\n")
+tools\saipen_engine\cold_recovery.py:285:        elif section == "## TODO":
+tools\saipen_engine\cold_recovery.py:300:    # first dependency-eligible TODO become the primary mission.
+tools\saipen_engine\closure_readiness.py:101:        # child returned to TODO and the router picked it again (T-1762,
+tools\saipen_engine\board.py:11:REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
+tools\saipen_engine\board.py:270:#: (TODO/DOING/DONE): the operator said it before the work started, and the
+tools\saipen_engine\board.py:341:    inside a machine-owned section (``## DOING``/``## TODO``/``## DONE``/
+tools\saipen_engine\board.py:641:      - open [ ] belongs only under ## TODO / ## BLOCKED
+tools\saipen_engine\board.py:666:            "open boxes belong under ## TODO or ## BLOCKED"
+tools\saipen_engine\board.py:749:    on a TODO ticket, or `blocker_scope: gaol`, and validate clean while the
+tools\saipen_engine\board.py:1050:    router before Pick Rule evaluation. A cyclic all-TODO graph is corrupt work
+tools\saipen_engine\board.py:1236:    Workable means: open ## TODO, no blocker (even malformed), every needs:
+tools\saipen_engine\board.py:1244:    # left by a block/unblock cycle must not make a TODO non-workable
+tools\saipen_engine\board.py:1252:        ticket.get("section") == "## TODO"
+tools\saipen_engine\board.py:1626:    Closure means no active work, no currently workable TODO, and no blocker
+tools\saipen_engine\board.py:1650:        errors.append("workable TODO: " + ", ".join(workable[:3]))
+tools\saipen_engine\board.py:1906:        list(ticket.get("needs") or ()) if ticket.get("section") == "## TODO" else []
+tools\saipen_engine\board.py:1911:        if target is None or target.get("section") in ("## BLOCKED", "## TODO"):
+tools\saipen_engine\board.py:1941:        if ticket.get("section") not in ("## BLOCKED", "## TODO"):
+tools\saipen_engine\board.py:1944:        if ticket.get("section") == "## TODO" and all(root[0] == tid for root in roots):
+tools\saipen_engine\board.py:2025:    todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+tools\saipen_engine\board.py:2040:        and not todo
+tools\saipen_engine\closure.py:494:    ``T-###``         TODO / DOING / BLOCKED are invalid; a DONE ``own_patch``
+tools\test_log_tail_quarantine.py:58:    "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_metrics_acceptance.py:25:BOARD_HEADER = "# Board\n## DOING\n## TODO\n"
+tools\test_no_publish_source_scope.py:29:            "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_next_action_deadlock.py:70:BOARD = "## DOING\n## TODO\n- [ ] T-9 [P1] real todo | verify: x\n## DONE\n## BLOCKED\n"
+tools\test_opencode_adapter.py:241:            "T-001", (root / ".saipen" / "BOARD.md").read_text(encoding="utf-8").split("## TODO")[0]
+tools\test_metadata_repair.py:15:  C  active TODO/DOING Work                           -> refused, zero writes
+tools\test_metadata_repair.py:83:    lines = ["# Board", "## DOING", "## TODO"]
+tools\test_opencode_live_session.py:152:    "## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_opencode_live_session.py:288:            "Step 3: call the todowrite tool exactly once with a single todo item, "
+tools\test_operator_ingress_matrix.py:71:            "## TODO\n"
+tools\test_orchestration_repair.py:87:            f"## DOING\n{doing}## TODO\n## DONE\n## BLOCKED\n",
+tools\test_orchestration_repair.py:359:        # Planned work filed AFTER the request, above it in TODO order.
+tools\test_orchestration_repair.py:373:        self.assertEqual(board["tickets"][new_ticket]["section"], "## TODO")
+tools\saipen_engine\controls.py:323:    # becomes the top foreground TODO.  It is claimed immediately at the next
+tools\test_portable_floor_fields.py:66:## TODO
+tools\saipen_engine\fast_check.py:749:        # repository's mutations. Only a record in ## TODO / ## DOING could
+tools\saipen_engine\fast_check.py:752:            if t.get("section") in ("## TODO", "## DOING") and tid not in _known:
+tools\test_project_root_session_binding.py:84:        "# BOARD\n\n## DOING\n\n## TODO\n\n## BLOCKED\n\n## DONE\n",
+tools\test_project_root_session_binding.py:495:            "T-001", (root / ".saipen" / "BOARD.md").read_text(encoding="utf-8").split("## TODO")[0]
+tools\saipen_engine\context.py:178:    for section in ("## DOING", "## TODO", "## BLOCKED", "## DONE"):
+tools\saipen_engine\context.py:546:    buckets = {s: [] for s in ("## DOING", "## TODO", "## BLOCKED", "## DONE")}
+tools\test_producer_terminal_consistency.py:80:    "## TODO\n"
+tools\test_producer_terminal_consistency.py:121:def _sub_board(doing: str = "", todo: str = "", blocked: str = "") -> str:
+tools\test_producer_terminal_consistency.py:125:    lines.append("## TODO")
+tools\test_producer_terminal_consistency.py:126:    if todo:
+tools\test_producer_terminal_consistency.py:127:        lines.append(todo)
+tools\test_producer_terminal_consistency.py:158:            _state(task="W-001 legacy task"), _parsed(_sub_board(todo="- [ ] W-002 pending work"))
+tools\test_producer_terminal_consistency.py:161:        self.assertEqual(verdict["todo"], ["W-002"])
+tools\test_producer_terminal_consistency.py:204:                _sub_board(todo="- [ ] W-002 pending work"),
+tools\test_producer_terminal_consistency.py:321:            board=_sub_board(todo="- [ ] W-002 pending work"),
+tools\test_reconcile_history_ledger_blocked.py:84:            "## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_public_closure_cli.py:464:        self.assertEqual(board["tickets"][new_ticket]["section"], "## TODO")
+tools\test_reconcile_legacy_output_field.py:69:            "## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_reconcile_valve.py:136:            "## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_reconcile_valve.py:293:        "## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_reconcile_valve.py:431:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_recovery_reachability.py:202:        "## TODO\n## DONE\n" + blocked,
+tools\test_recovery_reachability.py:668:    allocation authority. T-777 sits in `## TODO` with no such event: the exact
+tools\test_recovery_reachability.py:699:        "## TODO\n" + _LEGACY_TICKET_LINE + "## DONE\n## BLOCKED\n",
+tools\test_recovery_reachability.py:711:        board = {"tickets": {"T-777": {"section": "## TODO"}}}
+tools\test_recovery_reachability.py:728:        board = {"tickets": {"T-777": {"section": "## TODO"}}}
+tools\test_recovery_reachability.py:741:        board = {"tickets": {"T-777": {"section": "## TODO"}}}
+tools\test_recovery_reachability.py:1169:            "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_recovery_reachability.py:1323:        "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_recovery_reachability.py:1481:    "## TODO\n"
+tools\test_recovery_reachability.py:1873:            "## DOING\n## TODO\n- [ ] T-188 [P1] the stranded one | verify: it works\n"
+tools\test_recovery_reachability.py:1934:                "## TODO\n- [ ] T-188 [P1] the stranded one | verify: it works\n",
+tools\test_recovery_reachability.py:1935:                "## TODO\n",
+tools\saipen_engine\future_gate.py:59:PLACEHOLDER = "TODO --"
+tools\saipen_engine\future_gate.py:1340:    is still TODO stays `DEFERRED` with the reason attached -- demoting it to
+tools\test_regression_gate.py:101:        "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_recover_approved_repair.py:70:- [/] T-9002 unstarted doing | verify: returned to TODO
+tools\test_recover_approved_repair.py:71:## TODO
+tools\test_recover_approved_repair.py:185:        # Every malformed record normalized into a clean TODO.
+tools\test_recover_approved_repair.py:187:            self.assertEqual(_section_of(board, tid), "## TODO", board)
+tools\test_recover_approved_repair.py:215:        self.assertEqual(_section_of(_board_text(root), "T-9001"), "## TODO")
+tools\saipen_engine\gpu.py:429:    todo = []
+tools\saipen_engine\gpu.py:433:            todo.append((key, item, digest))
+tools\saipen_engine\gpu.py:436:    for start in range(0, len(todo), batch):
+tools\saipen_engine\gpu.py:451:        chunk = todo[start : start + batch]
+tools\saipen_engine\gpu.py:478:        "pending": max(len(todo) - embedded, 0),
+tools\saipen_engine\guard_events.py:1753:        # Verified OpenCode builtin: updates host/session-local Todo state in
+tools\saipen_engine\guard_events.py:1755:        # Exact host + exact identity only; namespaced/lookalike Todo tools
+tools\saipen_engine\guard_events.py:1758:        detail = "exact OpenCode session-local Todo update; no project effect"
+tools\saipen_engine\handoff_reconciliation.py:225:_SECTION_RANK = {"## DONE": 0, "## DOING": 1, "## TODO": 2, "## BLOCKED": 3}
+tools\saipen_engine\handoff_reconciliation.py:412:            # Active (TODO/DOING) work
+tools\test_reverify.py:110:        text = text.replace("## DONE\n", "## TODO\n", 1)
+tools\test_retired_source_coverage.py:41:    "## TODO\n"
+tools\test_retired_source_coverage.py:130:    citing one unconditionally -- T-250 could not even leave TODO, which is why
+tools\test_runtime_bootstrap.py:267:    (saipen / "BOARD.md").write_text("## DOING\n## TODO\n## DONE\n", encoding="utf-8")
+tools\saipen_engine\intent.py:527:    # TODO/SCOUT boundary where STATE has no active ticket yet but BOARD holds the
+tools\saipen_engine\intent.py:528:    # durably created TODO carrier.
+tools\saipen_engine\intent.py:589:    # No active ticket: check for an existing TODO/SCOUT carrier left by a crash
+tools\saipen_engine\intent.py:831:    detect exactly one interrupted carrier across TODO/SCOUT/BUILD/VERIFY and
+tools\saipen_engine\intent.py:862:    TODO, SCOUT, BUILD, VERIFY.
+tools\saipen_engine\intent.py:864:    The targeted qqq/eee flow is three durable steps: ticket_add (TODO),
+tools\saipen_engine\intent.py:895:    # STATE is required even for the TODO crash window. A malformed checkpoint
+tools\saipen_engine\intent.py:921:    if section == "## TODO":
+tools\saipen_engine\intent.py:925:                "detail": f"TODO carrier {ticket_id} conflicts with STATE.task={task}",
+tools\saipen_engine\intent.py:1026:        if section == "## TODO":
+tools\saipen_engine\intent.py:1201:    # CORE-005: bring TODO/SCOUT carriers to BUILD before integration
+tools\saipen_engine\intent.py:1203:    # If still TODO, claim it
+tools\saipen_engine\intent.py:1204:    if section == "## TODO":
+tools\saipen_engine\intent.py:1216:    if phase == "SCOUT" or (section == "## TODO" and phase is None):
+tools\saipen_engine\intent.py:1698:    The previous implementation regex-deleted the worker's ``## TODO`` section
+tools\test_runtime_namespace.py:66:BOARD = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_search_transport.py:343:            "## DOING\n- [/] T-001 [P1] fix | verify: test\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_sandbox_work_surface.py:32:## TODO
+tools\test_sandbox_work_surface.py:78:        for heading in ("## DOING", "## TODO", "## DONE", "## BLOCKED"):
+tools\test_sandbox_work_surface.py:105:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_source_contract_derivation.py:153:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_source_refusal_routing.py:76:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_source_receipts.py:580:            "## TODO\n"
+tools\test_source_receipts.py:1684:            "## TODO\n",
+tools\test_source_receipts.py:1685:            "## TODO\n- [ ] T-099 [P2] ranged receipt ticket | verify: explicit ids | "
+tools\test_source_receipts.py:1765:            "## TODO\n", "## TODO\n- [ ] T-098 bad | source_receipts: SRC-029..SRC-009\n",
+tools\test_state_scalar_quoting.py:109:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_src085_improve_run_body.py:49:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_supervisor.py:73:    def write_board(self, todo=("T-1 [P1] real work | verify: a passing test",), blocked=()):
+tools\test_supervisor.py:74:        lines = ["## DOING", "## TODO"]
+tools\test_supervisor.py:75:        lines += [f"- [ ] {row}" for row in todo]
+tools\test_supervisor.py:198:            todo=(),
+tools\test_supervisor.py:211:            todo=("T-1 [P1] real work | verify: a passing test",),
+tools\test_supervisor.py:223:            todo=(),
+tools\test_supervisor.py:237:            todo=(),
+tools\test_supervisor.py:249:            todo=(),
+tools\test_supervisor.py:285:            todo=(),
+tools\test_t1278_closure_contradiction.py:34:    parts = {"DOING": "", "TODO": "", "BLOCKED": "", "DONE": ""}
+tools\test_t1293_valve_resume_audit_route.py:125:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t1293_valve_resume_audit_route.py:136:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t1293_valve_resume_audit_route.py:147:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t1304_r004_dry_run_purity.py:126:            "## TODO\n"
+tools\test_t1304_r004_dry_run_purity.py:175:            "## TODO\n"
+tools\test_t1304_r004_transition.py:134:            "## TODO\n"
+tools\test_t1304_r004_transition.py:453:                    "## TODO\n", "## TODO\n- [ ] T-9 [P3] unrelated work | verify: nothing\n"
+tools\saipen_engine\iteration_verdict.py:85:#: ``system_todo_write`` deliberately grant nothing: tabular reads plus todo
+tools\saipen_engine\iteration_verdict.py:490:    empty_todo = not any(t.get("section") == "## TODO" for t in tickets.values())
+tools\saipen_engine\iteration_verdict.py:524:    todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+tools\saipen_engine\iteration_verdict.py:530:        and not todo
+tools\test_t1316_recovery_already_applied.py:849:            "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1316_recovery_already_applied.py:957:            "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1316_recovery_already_applied.py:1083:                "## TODO\n## DONE\n## BLOCKED\n",
+tools\saipen_engine\reconcile.py:51:    "## TODO": " ",
+tools\saipen_engine\reconcile.py:735:        # record in EVERY section. This repair used to scan only `## TODO` and
+tools\saipen_engine\reconcile.py:884:        started and belongs in ``## TODO``.
+tools\saipen_engine\reconcile.py:888:        is reopened into ``## TODO``. This class carries ``requires_approval``:
+tools\saipen_engine\reconcile.py:962:        # ## TODO / ## DOING / ## BLOCKED that carries terminal residue
+tools\saipen_engine\reconcile.py:969:        # own_patch`` under ## TODO froze every verb). Same family as the
+tools\saipen_engine\reconcile.py:1028:        # DONE: the row returns to `## TODO` without closure metadata or
+tools\saipen_engine\reconcile.py:1054:                    "to_section": "## TODO",
+tools\saipen_engine\reconcile.py:1063:                        "## TODO without closure metadata or claim under ONE "
+tools\saipen_engine\reconcile.py:1120:                    "to_section": "## TODO",
+tools\saipen_engine\reconcile.py:1124:                        "to ## TODO (SRC-043)"
+tools\saipen_engine\reconcile.py:1178:                        "to_section": "## TODO",
+tools\saipen_engine\reconcile.py:1188:                            "canonical operation, so reopening it into ## TODO "
+tools\saipen_engine\reconcile.py:1294:        if isinstance(ticket, dict) and ticket.get("section") == "## TODO":
+tools\saipen_engine\reconcile.py:1915:    phase, `restart: TODO` distinguishes CURRENT_DONE_UNPROVEN (T-1609):
+tools\saipen_engine\reconcile.py:1946:        gap["restart"] = "TODO"
+tools\saipen_engine\reconcile.py:1971:    approval may instead revoke that ticket's closure now and queue TODO for
+tools\saipen_engine\reconcile.py:2051:                "explicit approval revokes its unproven closure now and returns it to TODO "
+tools\saipen_engine\reconcile.py:2207:        to `## TODO` with its closure metadata and claim dropped, so the
+tools\saipen_engine\reconcile.py:2243:            "from_section": origin, "to_section": "## TODO",
+tools\saipen_engine\reconcile.py:2254:            "## TODO without closure metadata or claim and the canonical "
+tools\saipen_engine\reconcile.py:2294:                "claim no operation wrote; it returns to ## TODO unclaimed",
+tools\saipen_engine\reconcile.py:2839:            "revoke its closure now and queue TODO without a claim for a fresh lifecycle"
+tools\saipen_engine\reconcile.py:2847:            "from_section": "## DONE", "to_section": "## TODO" if restart else "## DOING",
+tools\saipen_engine\reconcile.py:3197:            "no lifecycle phase proven, queued TODO for fresh claim and verification"
+tools\test_t1304_review_p0_repair.py:104:            "## TODO\n"
+tools\test_t1304_review_p0_repair.py:187:        self.assertEqual(tickets["T-1"]["section"], "## TODO")
+tools\test_t1304_review_p0_repair.py:383:                "## DOING\n## TODO\n- [ ] T-1 [P2] seeded work | verify: proof it works",
+tools\test_t1304_review_p0_repair.py:384:                "## DOING\n- [/] T-1 [P2] active unclaimed | verify: proof it works\n## TODO",
+tools\test_t1304_review_p0_repair.py:511:        own = operations._seat_agent({"agent": "tester"}, "## DOING\n## TODO\n", "buffy")
+tools\test_t1304_review_p0_repair.py:515:        own = operations._seat_agent({}, "## DOING\n## TODO\n", "tester")
+tools\test_t1327_zero_manual_recovery.py:87:    board = "## DOING\n" + _oversized_line(active) + "## TODO\n"
+tools\test_t1327_zero_manual_recovery.py:486:            "claim_time: 2026-09-14T08:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t1327_zero_manual_recovery.py:867:            "claim_time: 2026-09-14T08:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools\saipen_engine\readiness.py:13:    BOARD: 1 DOING, 2 TODO, 207 DONE, 7 BLOCKED
+tools\saipen_engine\readiness.py:103:    function counted only DOING+TODO, so a project whose entire remainder was
+tools\saipen_engine\readiness.py:112:    counts = {"doing": 0, "todo": 0, "done": 0, "blocked": 0}
+tools\saipen_engine\readiness.py:118:        elif section == "## TODO":
+tools\saipen_engine\readiness.py:119:            counts["todo"] += 1
+tools\saipen_engine\readiness.py:129:        "open": counts["doing"] + counts["todo"] + counts["blocked"],
+tools\saipen_engine\readiness.py:130:        "runnable": counts["todo"],
+tools\saipen_engine\readiness.py:286:        # only DOING+TODO.
+tools\test_t1327_live_acceptance.py:118:        board = "## DOING\n" + _oversized_line("T-158") + "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1363_zero_manual_entry.py:138:_EMPTY_BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1363_zero_manual_entry.py:177:        "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1363_zero_manual_entry.py:1210:            "## DOING\n## TODO\n## DONE\n"
+tools\saipen_engine\release.py:4691:            if t["section"] == "## TODO":
+tools\test_t1326_board_compaction.py:87:    board = "## DOING\n" + line + "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1326_board_compaction.py:251:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t1326_board_compaction.py:305:    body = {"## DOING": "", "## TODO": "", "## DONE": done, "## BLOCKED": ""}
+tools\test_t1326_board_compaction.py:308:        f"{name}\n{body[name]}" for name in ("## DOING", "## TODO", "## DONE", "## BLOCKED")
+tools\test_t1326_board_compaction.py:657:        reparsed = parse_board("## DOING\n## TODO\n" + original + "## DONE\n## BLOCKED\n")
+tools\test_t1326_board_compaction.py:800:        A TODO row can be legal before the claim and oversized only AFTER the
+tools\test_t1326_board_compaction.py:810:            line, section="## TODO", phase="DONE", task="none", next_action="saipen continue"
+tools\test_t1326_board_compaction.py:838:            section="## TODO",
+tools\test_t1326_board_compaction.py:944:            "## TODO\n", "## TODO\n" + foreign, 1
+tools\test_t1326_board_compaction.py:981:        board = f"## DOING\n{line}## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1326_board_compaction.py:1126:            "## TODO\n", "## TODO\n" + self._oversized_refused_row("T-1316"), 1
+tools\test_t1326_board_compaction.py:1169:            "## TODO\n", "## TODO\n" + self._oversized_refused_row("T-1317"), 1
+tools\test_t1326_board_compaction.py:1205:            "## TODO\n", "## TODO\n" + self._oversized_refused_row("T-1317"), 1
+tools\test_t1326_board_compaction.py:1221:        text = text.replace("## TODO\n", "## TODO\n" + duplicate, 1)
+tools\test_t1326_board_compaction.py:1322:            "## DOING\n" + row + "## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_t1326_board_compaction.py:1452:        text = "## DOING\n" + rows + "## TODO\n## DONE\n## BLOCKED\n"
+tools\saipen_engine\router.py:259:    # used, so CORE's DONE+empty-TODO UNBLOCK exception is preserved.
+tools\saipen_engine\router.py:260:    _empty_todo = not any(t["section"] == "## TODO" for t in board["tickets"].values())
+tools\saipen_engine\router.py:536:    # outranks SELECTION of unrelated queued TODO. It sits here on purpose --
+tools\saipen_engine\router.py:566:    # START: no DOING + a workable TODO -> the ONE shared Pick Rule chooses.
+tools\saipen_engine\router.py:836:    # hard-stop gate above (the narrow DONE+empty-TODO exception), so it is a
+tools\saipen_engine\router.py:877:            "no pending recovery, no active ticket, no workable TODO; continue ordinary maintenance"
+tools\saipen_engine\router.py:1171:    ticket, no workable TODO; the action is `saipen continue` or an idle
+tools\saipen_engine\outcome_truth.py:94:    todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+tools\saipen_engine\outcome_truth.py:96:    workable = [t for t in todo if not t.get("blocked")]
+tools\saipen_engine\outcome_truth.py:151:    elif not blocked and not todo and not doing:
+tools\saipen_engine\outcome_truth.py:185:    todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+tools\saipen_engine\outcome_truth.py:187:    workable = [t for t in todo if not t.get("blocked")]
+tools\saipen_engine\retirement.py:15:* leaving it TODO is a DEADLOCK -- a reserved continuation child holds the
+tools\saipen_engine\retirement.py:206:RETIRABLE_SECTIONS = ("## TODO", "## DOING", "## BLOCKED")
+tools\test_t1411_stale_complete_resolution.py:62:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_t1411_stale_complete_resolution.py:173:            text.replace("## TODO\n", f"## TODO\n- [ ] {ticket} [P1] probe | verify: probe\n"),
+tools\test_t1411_stale_complete_resolution.py:799:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_t1412_conformance_truth.py:83:_BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1412_conformance_truth.py:456:            "structural", board="## DOING\n## TODO\n## DONE\n"
+tools\test_t1429_deferred_due.py:43:BOARD_PREAMBLE = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1429_deferred_due.py:141:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1429_deferred_due.py:182:            "## DOING\n## TODO\n"
+tools\test_t1429_deferred_due.py:183:            "- [ ] T-1 [P1] todo Work | verify: x | retry_not_before: 2026-09-20T21:00:00Z\n"
+tools\test_t1429_deferred_due.py:222:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1429_deferred_due.py:265:        "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1430_crew_run_receipt.py:88:        "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools\test_t1430_crew_run_receipt.py:113:            "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8"
+tools\saipen_engine\needs_detach.py:18:  * the ticket that would lose the edge is `## TODO` (never a live or
+tools\saipen_engine\needs_detach.py:108:    if str(ticket.get("section")) != "## TODO":
+tools\saipen_engine\needs_detach.py:112:                f"{ticket_id} is under {ticket.get('section')}; only an unstarted TODO "
+tools\saipen_engine\source_append.py:525:    for section in ("## DOING", "## TODO", "## BLOCKED"):
+tools\test_t1446_auto_recall.py:86:        "## TODO\n## DONE\n## BLOCKED\n",
+tools\saipen_engine\state.py:243:    "WAIT: blocked -- untriaged MARKHUNT findings in ## BLOCKED; triage into ## TODO or dismiss"
+tools\saipen_engine\state.py:345:# `## TODO`. Every other category there names a question about work in flight,
+tools\saipen_engine\state.py:363:      * `phase: DONE` + empty `## TODO`: exactly the three fixed forms bind
+tools\saipen_engine\state.py:431:        (`binding_wait`), preserving CORE's DONE + empty-TODO UNBLOCK
+tools\test_t1446_supervise.py:53:    "## TODO\n"
+tools\test_t1453_ingress_clause.py:73:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_t1461_source_append.py:169:        self.assertEqual(self.tickets(project)[created]["section"], "## TODO")
+tools\test_t1473_handback.py:6:failed validation (continuation reservation under TODO), `block-for` refused
+tools\test_t1473_handback.py:7:a blocker that is not workable TODO, and `claim --explicit` refused a ticket
+tools\test_t1473_handback.py:14:         holder to the top of TODO unclaimed;
+tools\test_t1473_handback.py:99:        self.assertEqual(holder["section"], "## TODO")
+tools\test_t1473_handback.py:102:        todo = [tid for tid, t in tickets.items() if t["section"] == "## TODO"]
+tools\test_t1473_handback.py:104:        first_todo = board_text.split("## TODO", 1)[1].strip().splitlines()[0]
+tools\test_t1473_handback.py:105:        self.assertIn(request, todo)
+tools\test_t1474_start_goal_entry.py:258:        self.assertIsNone(continuation_work(state, {"T-1": {"section": "## TODO"}}, "continue"))
+tools\saipen_engine\subs.py:37:  TODO/DOING/unresolved BLOCKED, duplicate headings/IDs fail, at most one
+tools\saipen_engine\subs.py:1158:SUB_HEADINGS = ("## DOING", "## TODO", "## DONE", "## BLOCKED")
+tools\saipen_engine\subs.py:1255:                "## TODO": " ",
+tools\saipen_engine\subs.py:1295:    5. open TODO/DOING work              -> WORK_PENDING
+tools\saipen_engine\subs.py:1314:    if phase == "DONE" and (counts["TODO"] or counts["DOING"] or counts["BLOCKED"]):
+tools\saipen_engine\subs.py:1318:    if counts["TODO"] or counts["DOING"]:
+tools\saipen_engine\subs.py:1720:      B  DONE + real TODO                      -> DONE_CLAIM_FALSE
+tools\saipen_engine\subs.py:1728:    a BLOCKED, which outranks a TODO, because the stronger lifecycle truth is
+tools\saipen_engine\subs.py:1740:    todo = sorted(t["id"] for t in tickets.values() if t.get("section") == "## TODO")
+tools\saipen_engine\subs.py:1748:        "todo": todo,
+tools\saipen_engine\subs.py:1766:    elif todo:
+tools\saipen_engine\subs.py:1783:    - DONE: task == none; zero TODO, zero DOING, zero unresolved BLOCKED.
+tools\saipen_engine\subs.py:1810:        if verdict["todo"] or verdict["blocked"] or counts.get("TODO") or counts.get("BLOCKED"):
+tools\saipen_engine\subs.py:1813:                "(TODO/BLOCKED) -- a worker cannot say DONE while "
+tools\saipen_engine\subs.py:3298:        "todo": verdict["todo"],
+tools\saipen_engine\subs.py:4188:    The operation validates the package, creates exactly one Core review TODO
+tools\saipen_engine\subs.py:4503:        # review hypotheses go at the END of ## TODO, deterministic and
+tools\test_t147_generation_exit_behind_style_drift.py:61:BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1484_soak_report_survives.py:39:            "## DOING\n## TODO\n## DONE\n", encoding="utf-8"
+tools\test_t1508_byte_bound_attributes.py:69:BOARD = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\saipen_engine\operations.py:2575:    # on a NOT-YET-ACTIVE TODO ticket evaluates one ticket's lease directly --
+tools\saipen_engine\operations.py:2995:    if section != "## TODO":
+tools\saipen_engine\operations.py:3007:            f"## TODO -- checkbox/section disagreement is malformed "
+tools\saipen_engine\operations.py:3015:    # A claim (owner/claim_time) on a TODO is INACTIVE history: CORE's claim
+tools\saipen_engine\operations.py:3323:    """Surgical claim move: target ticket TODO -> DOING with [/] owner.
+tools\saipen_engine\operations.py:3327:    T-1384: a fresh TODO -> DOING claim is the OTHER place a seat is taken by
+tools\saipen_engine\operations.py:3331:    claim writer does. A TODO line may still carry an old binding from a
+tools\saipen_engine\operations.py:3369:    # A claimed-then-blocked/unblocked TODO may still carry a previous
+tools\saipen_engine\operations.py:6036:    todo_idx = next(i for i, ln in enumerate(lines) if ln.startswith("## TODO"))
+tools\saipen_engine\operations.py:6084:    TODO, `block-for` needs a workable TODO blocker and an explicit claim
+tools\saipen_engine\operations.py:6094:    TODO unclaimed, and the parked Work returns to DOING at its saved phase
+tools\saipen_engine\operations.py:6242:            f"ticket checkpointed to TODO via SAIOPS -- handback: {holder_id} returns the seat "
+tools\saipen_engine\operations.py:6302:                board_text, holder_id, "## TODO", "[ ]", "demote", "", enforce_cap=False
+tools\saipen_engine\operations.py:6694:        if ticket["section"] not in ("## DOING", "## TODO"):
+tools\saipen_engine\operations.py:6700:                f"{action} accepts DOING or TODO; {ticket_id} is under {ticket['section']}",
+tools\saipen_engine\operations.py:6791:        target_section, checkbox = "## TODO", "[ ]"
+tools\saipen_engine\operations.py:6815:    # board. Blocking a merely-TODO ticket leaves execution state untouched.
+tools\saipen_engine\operations.py:6821:    # exception can never be satisfied by a TODO-ticket block event.
+tools\saipen_engine\operations.py:6827:    # generic TODO-block path below accepted block-for on a merely TODO
+tools\saipen_engine\operations.py:6835:    # merely TODO, unclaimed or foreign parent is refused with zero writes.
+tools\saipen_engine\operations.py:6857:            "merely TODO, unclaimed or foreign parent declares its dependency at "
+tools\saipen_engine\operations.py:6891:        if child.get("section") != "## TODO" or not ticket_is_workable(child, tickets, agent=agent):
+tools\saipen_engine\operations.py:6897:                f"blocker {child_id} must be a workable ## TODO ticket",
+tools\saipen_engine\operations.py:7165:    # Unblock also re-routes, because moving a line back into ## TODO changes
+tools\saipen_engine\operations.py:9829:        for heading in ("## DOING", "## TODO", "## DONE", "## BLOCKED"):
+tools\saipen_engine\operations.py:9853:        # Terminal supersession closes schedulable TODO/BLOCKED Work in one
+tools\saipen_engine\operations.py:10426:    if old.get("section") not in ("## TODO", "## BLOCKED"):
+tools\saipen_engine\operations.py:10432:            f"{old_ticket} sits under {old.get('section')}; only schedulable TODO or "
+tools\saipen_engine\operations.py:10440:    if old.get("section") == "## TODO" and not ticket_is_workable(old, tickets, agent):
+tools\saipen_engine\operations.py:10446:            f"{old_ticket} is TODO but not schedulable",
+tools\saipen_engine\operations.py:13244:        for heading in ("## DOING", "## TODO", "## DONE", "## BLOCKED"):
+tools\saipen_engine\operations.py:14784:        in ("tbd", "todo", "verify: tbd", "verify: todo", "tbd -", "todo -", "placeholder")
+tools\saipen_engine\operations.py:14904:            "the DONE proof (no TBD/TODO/empty)",
+tools\saipen_engine\operations.py:19133:    BOARD: checkpoint active DOING ticket -> TODO (demote, clear claim fields);
+tools\saipen_engine\operations.py:19135:           generate the new objective's PLAN tickets ABOVE the existing TODO
+tools\saipen_engine\operations.py:19343:        pivot_msg += f" (active {active_ticket} checkpointed to TODO)"
+tools\saipen_engine\operations.py:19361:    # --- BOARD: demote active DOING, then plan the new objective above TODO ---
+tools\saipen_engine\operations.py:19403:                i for i, ln in enumerate(lines) if ln.rstrip("\n").startswith("## TODO")
+tools\saipen_engine\operations.py:19413:    # Generate the objective's PLAN tickets (canonical TODO lines, above old
+tools\saipen_engine\operations.py:19415:    # TODO) and capture their ids in board order (top first). No deletion of
+tools\saipen_engine\operations.py:19499:        todo_idx = next(i for i, ln in enumerate(blines) if ln.rstrip("\n").startswith("## TODO"))
+tools\saipen_engine\operations.py:19501:        # Insert the plan block ABOVE existing TODO; plan_lines order preserved
+tools\test_t1511_soak_source_identity.py:61:            "## DOING\n## TODO\n## DONE\n", encoding="utf-8"
+tools\test_t1533_terminal_handback.py:13:    ticket block T-1528    -> ILLEGAL_TICKET_LIFECYCLE (block takes DOING/TODO)
+tools\test_t1533_terminal_handback.py:29:         holder left in ## BLOCKED (NOT resurrected into TODO), LOG honest
+tools\test_t1533_terminal_handback.py:32:  RED 3  live DOING holder -> the T-1473 arm still demotes it to TODO
+tools\test_t1533_terminal_handback.py:133:        # The terminal holder is NOT resurrected into TODO: it is still blocked
+tools\test_t1533_terminal_handback.py:151:            any("checkpointed to TODO" in line and f"[{request}]" in line for line in log),
+tools\test_t1533_terminal_handback.py:152:            "a terminal holder must not be logged as demoted to TODO",
+tools\test_t1533_terminal_handback.py:184:        self.assertEqual(holder["section"], "## TODO")
+tools\test_t1553_mid_session_activation.py:445:    (saipen / "BOARD.md").write_text("## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8")
+tools\test_t1587_stale_closure_recovery.py:4:``## TODO`` carrying ``| closure_mode: own_patch``. The placement rule is
+tools\test_t1587_stale_closure_recovery.py:22:  A. TODO + closure_mode            -> repairable, full route, claim reachable
+tools\test_t1587_stale_closure_recovery.py:25:  D. TODO + closure_mode + cohort   -> both terminal fields removed coherently
+tools\test_t1587_stale_closure_recovery.py:26:  E. TODO + unknown field           -> NOT this class, stays fail-closed
+tools\test_t1587_stale_closure_recovery.py:27:  F. TODO + duplicated closure_mode -> strict refusal, no value silently chosen
+tools\test_t1587_stale_closure_recovery.py:31:  J. TODO + closure + independent structural error -> no false CLEAN claim
+tools\test_t1587_stale_closure_recovery.py:76:#: ## TODO, which is exactly why its stale closure_mode is residue, not proof.
+tools\test_t1587_stale_closure_recovery.py:103:def _board_text(*, t1371_line: str, section: str = "## TODO",
+tools\test_t1587_stale_closure_recovery.py:106:    todo = t1371_line if section == "## TODO" else ""
+tools\test_t1587_stale_closure_recovery.py:111:        "## TODO\n" + (todo + "\n" if todo else "") + extra_todo +
+tools\test_t1587_stale_closure_recovery.py:117:#: The incident row exactly as reported: an open TODO record carrying one
+tools\test_t1587_stale_closure_recovery.py:254:            "# Board\n## DOING\n## TODO\n## DONE\n"
+tools\test_t1587_stale_closure_recovery.py:535:            "# Board\n## DOING\n## TODO\n## DONE\n"
+tools\test_t1572_ticket_scoped_recovery.py:281:    "## TODO\n"
+tools\test_t1572_ticket_scoped_recovery.py:419:        todo = lines.index("## TODO")
+tools\test_t1572_ticket_scoped_recovery.py:420:        self.assertTrue(doing < lines.index(t261[0]) < todo, board)
+tools\test_t1572_ticket_scoped_recovery.py:615:    "## TODO\n"
+tools\test_t1578_restore_owner.py:38:    "## TODO\n"
+tools\test_t1578_restore_owner.py:129:        self.assertTrue(lines.index("## DOING") < lines.index(row[0]) < lines.index("## TODO"),
+tools\test_t1614_future_gate.py:47:BOARD_PREAMBLE = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1614_future_gate.py:136:    board += "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1614_future_gate.py:142:    board = f"## DOING\n## TODO\n## DONE\n- [x] {ticket_id} [P1] {text} | verify: proof\n"
+tools\test_t1614_future_gate.py:315:        tid = _add(project, "workable todo")
+tools\test_t1609_unproven_done_recovery.py:101:        self.assertEqual(row["section"], "## TODO", row)
+tools\test_t1609_unproven_done_recovery.py:196:                                 ["tickets"]["T-240"]["section"], "## TODO")
+tools\test_t1612_accidental_success_reproduction.py:82:    board += ["## TODO", "## DONE", "## BLOCKED"]
+tools\test_t1598_stale_claim_next_action.py:33:The rule under repair: a persisted pick naming a TODO ticket whose foreign
+tools\test_t1598_stale_claim_next_action.py:87:    """A seat with NO active DOING ticket, whose pick names a TODO ticket.
+tools\test_t1598_stale_claim_next_action.py:112:        todo = (
+tools\test_t1598_stale_claim_next_action.py:119:            f"## TODO\n{todo}"
+tools\test_t1598_stale_claim_next_action.py:187:        self.assertEqual(picked["section"], "## TODO")
+tools\test_t1619_goal_terminality.py:32:# What SAIOPP advertised: tabular reads and todo writes, no shell, no
+tools\test_t1618_future_maturation.py:96:        """M1: needs TODO hides the gate; needs DONE routes it before HUNT."""
+tools\test_t1618_future_maturation.py:290:            f"## DOING\n## TODO\n- [ ] {tid} [P1] prerequisite work | verify: verify it\n"
+tools\test_t1619_iteration_boundary.py:64:# SAIOPP live shape: tabular reads + todo writes, no repository execution.
+tools\test_t1619_iteration_boundary.py:109:    "## TODO\n"
+tools\test_t1619_iteration_boundary.py:114:TERMINAL_BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1638_future_ingress.py:7:- `saipen future add` wrote `slice: TODO -- name the ONE bounded unit ...` and
+tools\test_t1638_future_ingress.py:13:  it had since declared was still TODO).
+tools\test_t1638_future_ingress.py:116:        self.assertIn(f"prerequisite {tid} is ## TODO, not DONE", gate.reasons)
+tools\test_t1638_future_ingress.py:150:            f"## DOING\n## TODO\n- [ ] {tid} [P1] prerequisite work | verify: verify it\n"
+tools\test_t1640_log_seal.py:289:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t1640_log_seal.py:308:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t1640_board_scrub.py:101:    todo: tuple[str, ...] = (),
+tools\test_t1640_board_scrub.py:116:    board = ["## DOING", "## TODO", *todo, "## DONE", *done, "## BLOCKED", *blocked]
+tools\test_t1640_board_scrub.py:120:    for line in (*todo, *blocked, *done):
+tools\test_t1640_board_scrub.py:177:            todo=("- [ ] T-40 [P2] open work | verify: proof | needs: T-7",),
+tools\test_t1640_board_scrub.py:189:        root = _project(done, todo=("- [ ] T-40 [P2] open work | verify: proof | needs: T-7",))
+tools\test_t1640_board_scrub.py:228:        tickets["T-30"]["section"] = "## TODO"
+tools\test_t1640_board_scrub.py:385:                    todo=("- [ ] T-40 [P2] open work | verify: proof | needs: T-7",),
+tools\test_t1640_board_scrub.py:414:                self.assertEqual(_ids(root, "## TODO"), ["T-40"])
+tools\test_t1640_board_scrub.py:580:                    done, todo=("- [ ] T-40 [P2] open work | verify: proof | needs: T-7",)
+tools\test_t1651_executor_admission.py:109:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t1668_durable_stores_ship.py:163:            "# Board\n## DOING\n## TODO\n"
+tools\test_t1671_lifecycle_authority.py:169:                self.assertEqual(row["section"], "## TODO", row)
+tools\test_t1669_clean_done_projection.py:69:def _board(*, doing: str = "", todo: str = "") -> str:
+tools\test_t1669_clean_done_projection.py:73:    lines.append("## TODO")
+tools\test_t1669_clean_done_projection.py:74:    if todo:
+tools\test_t1669_clean_done_projection.py:75:        lines.append(todo)
+tools\test_t1669_clean_done_projection.py:138:        _board(todo=f"- [ ] {TICKET} [P2] runnable once CLEAN exits | verify: proof"),
+tools\test_t1669_clean_done_projection.py:171:        # the layer's linked Work IS the topmost workable TODO, which is
+tools\test_t1669_clean_done_projection.py:228:        # No audit layer, no workable TODO: whatever the shared router
+tools\test_t1679_typed_head_quarantine.py:137:                self.assertEqual(row["section"], "## TODO", row)
+tools\test_t1674_typed_closure_mode.py:51:        "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8", newline="\n"
+tools\test_t1674_typed_closure_mode.py:107:        self.assertEqual(row["section"], "## TODO", row)
+tools\test_t1674_typed_closure_mode.py:129:        return "# Board\n## DOING\n## TODO\n## DONE\n" + "".join(
+tools\test_t1674_typed_closure_mode.py:144:                         ("section-move", "## DONE", "## TODO"))
+tools\test_t1673_board_only_terminal.py:107:        self.assertEqual(row["section"], "## TODO", row)
+tools\test_t1673_board_only_terminal.py:159:    def write_board(self, done: list[str], todo: list[str]) -> dict:
+tools\test_t1673_board_only_terminal.py:160:        lines = ["# Board", "## DOING", "## TODO"]
+tools\test_t1673_board_only_terminal.py:161:        lines += [f"- [ ] {tid} work | verify: v" for tid in todo]
+tools\test_t1673_board_only_terminal.py:173:        board = self.write_board(done=["T-2"], todo=[])
+tools\test_t1673_board_only_terminal.py:177:        self.write_board(done=[], todo=["T-1", "T-2"])
+tools\test_t1673_board_only_terminal.py:179:        board = self.write_board(done=["T-1", "T-2"], todo=[])
+tools\test_t1673_board_only_terminal.py:184:        board = self.write_board(done=["T-2"], todo=[])
+tools\test_t1673_board_only_terminal.py:189:        self.write_board(done=[], todo=["T-2"])
+tools\test_t1673_board_only_terminal.py:192:        board = self.write_board(done=["T-2"], todo=[])
+tools\test_t1709_audit_starvation.py:41:            "## TODO\n",
+tools\test_t1709_audit_starvation.py:42:            "## TODO\n"
+tools\test_t1709_audit_starvation.py:57:            "## TODO\n",
+tools\test_t1709_audit_starvation.py:58:            "## TODO\n"
+tools\test_t1709_audit_starvation.py:74:            + "\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1704_goal_checkpoint_priority.py:244:            f"| owner: test-agent | claim_time: {_stamp()}\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1704_legacy_goal_authority.py:55:            "## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1708_regression_declaration.py:131:        board.write_text("## DOING\n## TODO\n## DONE\n- [x] T-8 [P1] Historical Work "
+tools\test_t1715_block_for_parent_guard.py:4:parent parks behind a workable TODO child. The generic TODO-block path used to
+tools\test_t1715_block_for_parent_guard.py:5:accept ``block-for`` on a merely TODO parent as well and stored STATE's
+tools\test_t1715_block_for_parent_guard.py:10:  RED 1  an unopened ## TODO parent refuses with ZERO canonical writes.
+tools\test_t1715_block_for_parent_guard.py:15:  GREEN  ordinary legal TODO ``block`` is a different operation and still works.
+tools\test_t1715_block_for_parent_guard.py:57:        todo_parent = self.add(project, "unopened todo parent")
+tools\test_t1715_block_for_parent_guard.py:58:        todo_child = self.add(project, "unopened todo child")
+tools\test_t1729_gate_decision_lifecycle.py:198:            "## TODO\n", "## TODO\n- [ ] T-900 [P2] held fixture work | verify: fixture\n"
+tools\test_t1726_closed_contracts.py:369:            "## TODO\n", "## TODO\n- [ ] T-010 existing repair | needs: T-001\n"),
+tools\test_t1712_manifest_runtime.py:330:            "## DOING\n## TODO\n- [ ] T-8 [P1] Independent Work | verify: real proof\n"
+tools\test_t1735_tool_failure_boundaries.py:11:   - Synthetic reminders (e.g. <system-reminder>, todo reminders) are separated
+tools\test_t1739_wait_boundary.py:47:        "claim_time: 2026-09-06T00:00:00Z\n## TODO\n"
+tools\test_t1739_wait_boundary.py:98:        # Two TODO records alone grant nothing when their prerequisite is held.
+tools\test_t1739_wait_boundary.py:162:        ).replace("## TODO\n", "## TODO\n" + ACTIVE.replace("[/]", "[ ]") + "\n")
+tools\test_t1734_source_drift.py:52:        "# BOARD\n\n## DOING\n\n## TODO\n\n## DONE\n"
+tools\test_t1744_fleet_foreign_field_skew.py:35:    board = "## DOING\n## TODO\n" + row + "## DONE\n## BLOCKED\n"
+tools\test_t1745_sub_collect_foreign_field.py:74:            "## DOING\n## TODO\n" + foreign_row + "## DONE\n## BLOCKED\n",
+tools\test_t1746_crew_terminal_outcome.py:56:            "# Board\n## DOING\n## TODO\n## DONE\n"
+tools\test_t1743_cross_user_dead_ends.py:101:    board = "## DOING\n## TODO\n" + row + "## DONE\n## BLOCKED\n"
+tools\test_t1751_reconcile_surfaces.py:72:    "## TODO\n"
+tools\test_t1759_single_lifecycle_observer.py:110:        self.assertEqual(text.count("## TODO\n"), 1, text)
+tools\test_t1759_single_lifecycle_observer.py:112:            text.replace("## TODO\n", "## TODO\n" + DUPLICATE), encoding="utf-8", newline="\n"
+tools\test_t1761_recovery_reaches_a_typed_duplicate.py:74:        self.assertEqual(text.count("## TODO\n"), 1, text)
+tools\test_t1761_recovery_reaches_a_typed_duplicate.py:76:            text.replace("## TODO\n", "## TODO\n" + DUPLICATE), encoding="utf-8", newline="\n"
+tools\test_t1761_recovery_reaches_a_typed_duplicate.py:133:        self.assertEqual(board["tickets"]["T-001"]["section"], "## TODO")
+tools\test_t1761_recovery_reaches_a_typed_duplicate.py:166:        self.assertEqual(board["tickets"][renamed[0]]["section"], "## TODO")
+tools\test_t1789_child_closure_route.py:7:handed the seat back instead, the child returned to the top of TODO and the
+tools\test_t1787_parked_brief.py:37:        "## TODO\n"
+tools\test_t1781_t37_latest_build.py:39:        "owner: tester | claim_time: 2026-10-14T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t1776_protocol_home_valve.py:73:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t1774_sweep_queue_human.py:61:            "# Board\n## DOING\n## TODO\n- [ ] T-900 [P1] probe | verify: probe\n"
+tools\test_t1817_finding_route.py:45:            tickets(**{"T-7": ("## TODO", {})}),
+tools\test_t1817_finding_route.py:55:            tickets(**{"T-7": ("## TODO", {})}),
+tools\test_t1817_finding_route.py:101:            tickets(**{"T-9": ("## BLOCKED", field), "T-10": ("## TODO", dict(field))}),
+tools\test_t1817_finding_route.py:112:            tickets(**{"T-9": ("## TODO", dict(field)), "T-10": ("## DONE", dict(field))}),
+tools\test_t1815_header_repair.py:169:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_t1816_protected_root_hold.py:128:    """Message 431: Edit rewrote BOARD.md into malformed ## TODO## DOING."""
+tools\test_t1815_stale_work_context.py:79:def _board(doing: str, done: tuple[str, ...] = (), todo: tuple[str, ...] = ()) -> str:
+tools\test_t1815_stale_work_context.py:87:    lines.append("## TODO")
+tools\test_t1815_stale_work_context.py:88:    lines.extend(f"- [ ] {tid} [P2] todo fixture | verify: it holds" for tid in todo)
+tools\test_t1815_stale_work_context.py:137:        """TODO work is not current either: existence is not ownership."""
+tools\test_t1815_stale_work_context.py:138:        self.write(task="T-7", phase="BUILD", board=_board("T-7", todo=("T-9",)))
+tools\test_t1807_audit_liveness_regression.py:100:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n- [ ] T-100 [P1] ext | blocker: "
+tools\test_t1807_audit_liveness_regression.py:132:        bd_text = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1807_audit_liveness_regression.py:159:        # When linked work is workable TODO, it routes PHASE SCOUT, not ingest
+tools\test_t1807_audit_liveness_regression.py:163:                "section": "## TODO",
+tools\test_t1807_audit_liveness_regression.py:281:            "section": "## TODO",
+tools\test_t1807_audit_liveness_regression.py:296:            "## DOING\n## TODO\n- [ ] T-999 [P1] new task | user_explicit: true\n## "
+tools\test_t1835_verification_economics.py:32:        self.write(".saipen/BOARD.md", "## DOING\n## TODO\n## DONE\n"
+tools\test_t1816_run_append_only.py:49:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_t1858_valve_guidance.py:63:                items = {f"T-{i}": ticket(f"T-{i}", section="## TODO")
+tools\test_t1856_launcher_identity.py:117:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_t1857_shared_blockers.py:33:        items[tid] = ticket(tid, needs=("T-1815",), section="## TODO")
+tools\test_t1857_shared_blockers.py:102:        items["T-2000"] = ticket("T-2000", needs=("T-1815", "T-1317"), section="## TODO")
+tools\test_t1857_shared_blockers.py:154:        items["T-9999"] = ticket("T-9999", section="## TODO")
+tools\test_t1849_external_git_environment.py:46:            "## DOING\n## TODO\n## DONE\n"
+tools\test_t1854_runtime_home.py:72:           "\n## TODO\n\n## DONE\n\n## BLOCKED\n")
+tools\test_t1865_launcher_identity.py:157:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_t1862_readiness.py:396:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1866_publication_state.py:63:        "owner: tester | claim_time: 2026-10-14T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t1872_drift_prevention.py:36:        "## TODO\n\n## BLOCKED\n\n## DONE\n"
+tools\test_t1872_drift_prevention.py:114:                "## TODO\n\n"
+tools\test_t1875_maintenance_wiring.py:137:            busy = {"ok": True, "action": "PHASE SCOUT T-1", "reason": "next-todo"}
+tools\test_t1864_autonomous_valve.py:93:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t1864_autonomous_valve.py:129:            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_t1880_wait_survives_phase_shortcut.py:39:EMPTY_BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1881_publication_prohibition.py:222:        # lowest id (T-001), so checking only the owner would miss it. A ## TODO
+tools\test_t1881_publication_prohibition.py:228:            "## TODO\n",
+tools\test_t1881_publication_prohibition.py:229:            "## TODO\n- [ ] T-002 other batch work | verify: shared "
+tools\test_t1881_publication_prohibition.py:272:            "## TODO\n",
+tools\test_t1881_publication_prohibition.py:273:            "## TODO\n- [ ] T-002 other batch work | verify: shared "
+tools\test_t1881_publication_prohibition.py:354:        for section in ("## DOING", "## TODO", "## DONE", "## BLOCKED"):
+tools\test_t1881_authority_brake.py:78:             doing: str = DOING, todo: str = "", phase: str | None = None) -> Path:
+tools\test_t1881_authority_brake.py:100:        f"# Board\n## DOING\n{doing}\n## TODO\n{todo}## DONE\n## BLOCKED\n",
+tools\test_t1881_authority_brake.py:149:            "claim", "T-011", "--explicit", task="none", doing="", todo=PENDING
+tools\test_t1881_authority_brake.py:173:            task="none", doing="", todo=PENDING,
+tools\test_t1881_authority_brake.py:307:            self.tmp / str(self._n), brake=None, task="none", doing="", todo=PENDING,
+tools\test_t1883_reconcile_causality.py:268:        "## TODO\n## DONE\n## BLOCKED\n" + rows,
+tools\test_t1884_transition_blocker_inheritance.py:91:        "## TODO\n## DONE\n## BLOCKED\n" + rows,
+tools\test_t1915_terminal_next_action.py:97:def _board(*, doing: str = "", todo: str = "") -> str:
+tools\test_t1915_terminal_next_action.py:98:    return f"## DOING\n{doing}## TODO\n{todo}## DONE\n## BLOCKED\n"
+tools\test_t1915_terminal_next_action.py:101:def project(base: Path, *, doing: str = "", todo: str = TODO_ROW) -> Path:
+tools\test_t1915_terminal_next_action.py:106:    (saipen / "BOARD.md").write_text(_board(doing=doing, todo=todo), encoding="utf-8")
+tools\test_t1915_terminal_next_action.py:175:        root = project(self.base, doing=DOING_UNPROVEN, todo="")
+tools\test_t1915_terminal_next_action.py:211:        root = project(self.base, doing=DOING_UNPROVEN, todo="")
+tools\test_t1915_terminal_next_action.py:237:        self.assertEqual(board["tickets"]["T-69"]["section"], "## TODO")
+tools\test_t1915_terminal_next_action.py:240:        root = project(self.base, doing=doing_foreign(), todo="")
+tools\test_t1917_premature_handback.py:82:        f"## TODO\n{todo_lines}"
+tools\test_t1916_external_delta.py:67:BOARD = "## DOING\n- [/] T-9 [P1] repair launcher | verify: x\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1932_src338_closures.py:55:        f"# BOARD\n\n## DOING\n- [/] {task} [P1] work\n\n## TODO\n\n## DONE\n",
+tools\test_t1932_src338_closures.py:552:            "# BOARD\n\n## DOING\n- [/] T-1 [P1] work\n\n## TODO\n"
+tools\test_t1944_perf_wave.py:42:        "## DOING\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8"
+tools\test_t1944_core_wave1.py:33:        "## DOING\n## TODO\n## BLOCKED\n## DONE\n- [x] T-200 [P1] unrelated ticket\n",
+tools\test_t1944_core_wave1.py:317:            "## DOING\n## TODO\n- [ ] T-300 [P1] open\n## BLOCKED\n## DONE\n",
+tools\test_t1944_core_wave1.py:345:            "## DOING\n## TODO\n## BLOCKED\n## DONE\n"
+tools\test_t1939_needs_detach.py:52:        "# Board\n\n## DOING\n\n## TODO\n\n"
+tools\test_t1939_needs_detach.py:107:    def _tickets(self, *, recipient_section="## TODO", need_section="## BLOCKED",
+tools\test_t1939_needs_detach.py:110:        """A parent TODO row and its dependency; the dependency's section varies."""
+tools\test_t1939_needs_detach.py:121:                "# Board\n\n## DOING\n\n## TODO\n\n"
+tools\test_t1939_needs_detach.py:129:                "# Board\n\n## DOING\n\n## TODO\n\n" + parent + child + "\n## BLOCKED\n\n## DONE\n\n"
+tools\test_t1939_needs_detach.py:143:            "# Board\n\n## DOING\n\n## TODO\n\n"
+tools\test_t1939_needs_detach.py:206:            "# Board\n\n## DOING\n\n## TODO\n\n"
+tools\test_t1939_needs_detach.py:234:            "# Board\n\n## DOING\n\n## TODO\n\n"
+tools\test_t1939_needs_detach.py:264:            "# Board\n\n## DOING\n\n## TODO\n\n"
+tools\test_t1939_needs_detach.py:293:            "# Board\n\n## DOING\n\n## TODO\n\n## BLOCKED\n\n"
+tools\test_t1939_needs_detach.py:305:        self.assertIn("only an unstarted TODO row may lose an edge", proof["reason"])
+tools\test_t1939_needs_detach.py:382:                "# Board\r\n\r\n## DOING\r\n\r\n## TODO\r\n\r\n"
+tools\test_t1938_invalidated_slice_closure.py:29:## TODO
+tools\test_t1937_future_slice_closure.py:19:* a slice whose ticket is still TODO stays `open`;
+tools\test_t1937_future_slice_closure.py:35:## TODO
+tools\test_t2040_replenishment_recovery.py:101:            for data in (b"", b"## TODO\n", b"\xef\xbb\xbf## DOING\n## TODO\n## DONE\n## BLOCKED\n"):
+tools\test_t2040_replenishment_recovery.py:151:        self.assertEqual(rows(root)[ticket]["section"], "## TODO")
+tools\test_t2040_replenishment_recovery.py:271:        self.assertEqual(rows(root)[ticket]["section"], "## TODO")
+tools\test_t2040_publication_truth.py:92:            "# Board\n## DOING\n## TODO\n## DONE\n- [x] T-1 fixture | verify: fixture\n## BLOCKED\n",
+tools\test_t2040_publication_truth.py:179:        tickets = {"T-1": {"id": "T-1", "section": "## TODO", "checkbox": " ", "blocked": False}}
+tools\test_t2040_publication_truth.py:214:        tickets = {"T-2": {"id": "T-2", "section": "## TODO", "checkbox": " ", "blocked": False}}
+tools\test_t2040_publication_truth.py:366:            "# Board\n## DOING\n## TODO\n## DONE\n- [x] T-1 fixture | verify: fixture"
+tools\test_t2040_maintenance_authority.py:215:        self.assertEqual(rows(root)["T-1"]["section"], "## TODO")
+tools\test_t2040_maintenance_authority.py:216:        self.assertTrue(any("active T-1 checkpointed to TODO" in e["text"]
+tools\test_t2040_maintenance_authority.py:319:        self.assertEqual(rows(root)[ticket]["section"], "## TODO")
+tools\test_t2040_exhaustion_evidence.py:99:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t2040_exhaustion_evidence.py:108:            "## DOING\n## TODO\n- [ ] T-2 [P2] dependent | needs: T-1\n"
+tools\test_t2040_exhaustion_evidence.py:141:        text = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t2040_discovery_owners.py:79:            "## DOING\n## TODO\n- [ ] T-2 [P2] dependency | needs: T-1\n"
+tools\test_t2040_discovery_owners.py:89:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t2040_discovery_owners.py:99:            "## DOING\n## TODO\n## DONE\n- [x] T-1 [P2] old work\n"
+tools\test_t2040_discovery_owners.py:153:        board_text = "## DOING\n- [/] T-1 [P2] fixture\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t2040_discovery_owners.py:167:                _format_state(), "## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t2040_discovery_owners.py:195:            _format_state(), "## DOING\n## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t2040_discovery_owners.py:228:            "## DOING\n## TODO\n## DONE\n"
+tools\test_t2040_discovery_owners.py:259:            "## DOING\n## TODO\n## DONE\n"
+tools\test_t2040_continuation_truth.py:23:BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t2023_goal_management_and_maintenance_binding.py:63:    "claim_time: 2026-11-04T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t1944_wave2.py:34:        "## DOING\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8"
+tools\test_t2051_source_reindex.py:101:    lines = ["# BOARD", "", "## TODO", ""]
+tools\test_t2040_terminal_consumer_supplementary.py:20:BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t2040_terminal_consumer_guards.py:31:BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\test_t2040_terminal_consumer_guards.py:207:            "## DOING\n## TODO\n- [ ] T-1 [P1] stale work | verify: local test\n## DONE\n## BLOCKED\n",
+tools\test_t2040_terminal_consumer_guards.py:246:            {"tickets": {"T-1": {"section": "## TODO", "fields": 42}}},
+tools\test_t2040_terminal_consumer_guards.py:247:            {"tickets": {"T-1": {"section": "## TODO", "needs": 42}}},
+tools\test_validator_layout_parity.py:92:## TODO
+tools\test_t2050_pruned_row_restore.py:36:    "## TODO\n"
+tools\test_ticket_verify_preimage.py:72:        "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_vacterro_t37_no_delta_closure.py:57:        f"## TODO\n## DONE\n## BLOCKED\n",
+tools\test_t2056_obstacle_actions.py:46:## TODO
+tools\test_t2056_obstacle_actions.py:59:## TODO
+tools\test_telemetry.py:95:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+tools\test_t925_sub_terminal_durability.py:59:        _board(root, "## DOING\n- [/] T-1 [P2] reopened\n## TODO\n## DONE\n## BLOCKED\n")
+tools\test_t925_sub_terminal_durability.py:70:        _board(root, "## DOING\n## TODO\n## DONE\n- [x] T-2 [P3] closed\n## BLOCKED\n")
+tools\test_ticket_retirement.py:15:    T-1369 (contamination)  TODO, holding the single DOING seat
+tools\test_ticket_retirement.py:142:            "## TODO\n## DONE\n## BLOCKED\n",
+tools\test_ticket_retirement.py:971:            text.replace("## TODO\n", "## TODO\n" + record["board_record"] + "\n", 1),
+tools\test_ticket_supersession.py:200:                "## TODO\n", "## TODO\n" + raw.replace("- [x] ", "- [ ] ") + "\n", 1
+tools\test_ticket_supersession.py:258:                heading = "## BLOCKED\n" if blocked else "## TODO\n"
+tools\test_ticket_supersession.py:406:        for section in ("## TODO", "## BLOCKED"):
+tools\test_ticket_supersession.py:421:        self._relocate_old(project, "## TODO")
+tools\test_ticket_supersession.py:426:        self.assertEqual(row["section"], "## TODO")
+tools\test_user_wait_release.py:14:     byte-identical, never refreshed or rebound), and the resumed TODO can be
+tools\test_user_wait_release.py:108:        self.assertEqual(record["section"], "## TODO")
+tools\test_warn_ownership_probe.py:34:## TODO
+tools\test_warn_ownership_probe.py:135:                "# BOARD\n\n## TODO\n", audit_checks.WARN_PROBE_OWNER_SLUG
+tools\_t2040_experiment.py:27:    "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8")
+tools\_t2040_experiment.py:60:    "# Board\n\n## DOING\n\n## TODO\n\n## DONE\n\n## BLOCKED\n", encoding="utf-8")
+tools\test_vocabulary_parity.py:273:            "## TODO\n"
+tools\test_vocabulary_parity.py:274:            "- [ ] T-2 [P1] todo | verify: x\n"
+tools\test_vocabulary_parity.py:281:        for ticket, name in (("T-1", "DOING"), ("T-2", "TODO"), ("T-3", "DONE"),
+tools\test_work_reverify_cli.py:54:            "## TODO\n", "## TODO\n- [ ] T-001 DOING task | verify: proof exists\n"
+tools\test_work_reverify_cli.py:289:        todo_root = _make_project(Path(self.tmp.name) / "todo", done=False)
+tools\test_worker_turnover.py:52:    "## TODO\n"
+tools\test_worker_turnover.py:274:            "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+tools\validate.py:1468:    # P1#5): both call sites are exactly DONE + empty ## TODO, where CORE § 1.2
+tools\validate.py:1991:    "todo",
+tools\validate.py:2431:# can never coexist with TODO/DOING/unresolved BLOCKED work -- a worker
+tools\validate.py:2466:                _parsed_board["counts"]["TODO"]
+tools\validate.py:2472:                    "still holds open work (TODO/DOING/BLOCKED) -- a worker "
+tools\validate.py:2616:    # NITRO dogfood II (T-590): a TODO/DOING ticket whose verify is a bare
+tools\validate.py:2618:    if section in ("## TODO", "## DOING") and "verify" in fields:
+tools\validate.py:2623:            in ("tbd", "todo", "placeholder", "verify: tbd", "verify: todo", "verify: verify: tbd")
+tools\validate.py:2630:                f"ticket needs a real DONE proof, not TBD/TODO/empty "
+tools\validate.py:2653:# all-TODO graph is corrupt work state, not 'no workable ticket'.
+tools\validate.py:2694:# moment this is decidable from the board alone: `## TODO` order is advisory
+tools\validate.py:2721:# the front of `## TODO` (§ 1.10's `dd <text>` contract) silently invalidates
+tools\validate.py:2742:            f"executable, and § 1.11's Pick Rule selects from ## TODO "
+tools\validate.py:2796:# `## TODO` tickets and a blocker about translating 29 locales -- which is
+tools\validate.py:2809:        f"## TODO ticket(s) exist (topmost {min(_blocked_workable)}) -- "
+tools\validate.py:2844:# RFC § 2.1 ZERO-PROMPT AUTO-TRANSITION: DONE + empty TODO + no MARKHUNT
+tools\validate.py:2855:        1 for t in tickets.values() if t["section"] == "## TODO" and t["checkbox"] in (" ", "")
+tools\validate.py:2871:                f"phase: DONE, empty ## TODO, but "
+tools\validate.py:2981:        f"one to ## TODO with a LOG line before claiming another"
+tools\validate.py:2988:# phase while BOARD carried no ## DOING claim and T-572 sat in ## TODO, and
+tools\validate.py:3011:                f"phase {phase} -- a TODO/DONE/BLOCKED ticket cannot be the "
+tools\validate.py:3564:            # were. Those tickets legitimately leave ## BLOCKED for ## TODO
+tools\validate.py:4275:                    for h in ("## DOING", "## TODO", "## DONE", "## BLOCKED")
+tools\validate.py:5785:            "no workable `## TODO` ticket",
+tools\validate.py:5972:    _ladder_rungs = ("workable TODO", "actionable unconsumed audit", "eligible FUTURE GATE", "HUNT", "ADD")
+tools\validate.py:6183:            # a ticket still sitting in ## TODO / ## BLOCKED is therefore two
+tools\validate.py:6190:            # T-426 while both sat in ## TODO, their code already in the tree,
+tools\validate.py:6206:            # `## TODO`, and `## DOING` is capped at one claimed ticket in
+tools\validate.py:8359:            "top of `## TODO` when it will not. Ordering alone leaves the "
+tools\validate.py:8614:    #       `## BLOCKED`, not `## TODO`. In `## TODO` it is workable by every
+tools\validate.py:8626:            "in `## BLOCKED` with the reason, not in `## TODO`. A permanent "
+tools\validate.py:8627:            "warning owner in `## TODO` passes every workability test the "
+tools\validate.py:10108:        #      `## TODO` -- where the Pick Rule MUST take the topmost workable
+tools\validate.py:10160:                    if t["section"] in ("## DOING", "## TODO", "## BLOCKED")
+tools\validate.py:10956:                if t["section"] in ("## DOING", "## TODO", "## BLOCKED")
+tools\validate.py:10993:                if "FRONT of `## TODO`" not in _body:
+tools\validate.py:10997:                        f"at the front of `## TODO`. Board order is priority "
+tools\validate.py:11010:            # `WAIT:` to three fixed forms at `DONE` only when `## TODO` is
+tools\validate.py:11034:                        "governs `DONE` with an EMPTY `## TODO`, which is not "

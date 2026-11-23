@@ -1,0 +1,354 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "e9aae44843ca23929451ed79ef498b3832a8cb1443fb00fcac1068455d42aa70",
+  "verdict": "PASS",
+  "patterns": [
+    "test_t1326_board_compaction.py",
+    "test_t1586_scenario_inputs.py",
+    "test_t1614_future_gate.py",
+    "test_t1827_writer_lock_contract.py",
+    "test_warn_ownership_probe.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_t1326_board_compaction.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1326_board_compaction.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "duration_s": 84.422,
+      "process_create_s": 0.032,
+      "ran": 95,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "sed (test_t1326_board_compaction.SupersessionChainIntegrityTests.test_predecessor_hash_mismatch_fails_closed) ... ok\r\ntest_successor_names_predecessor_and_full_chain_resolves (test_t1326_board_compaction.SupersessionChainIntegrityTests.test_successor_names_predecessor_and_full_chain_resolves) ... ok\r\ntest_supersession_cycle_fails_closed (test_t1326_board_compaction.SupersessionChainIntegrityTests.test_supersession_cycle_fails_closed) ... ok\r\ntest_a_first_generation_cannot_claim_an_edge_it_never_carried (test_t1326_board_compaction.SupersessionMetadataFalsificationTests.test_a_first_generation_cannot_claim_an_edge_it_never_carried) ... ok\r\ntest_a_first_generation_without_a_predecessor_still_resolves (test_t1326_board_compaction.SupersessionMetadataFalsificationTests.test_a_first_generation_without_a_predecessor_still_resolves) ... ok\r\ntest_a_substituted_predecessor_artifact_fails_closed (test_t1326_board_compaction.SupersessionMetadataFalsificationTests.test_a_substituted_predecessor_artifact_fails_closed) ... ok\r\ntest_a_successor_that_removed_its_carried_edge_fails_closed (test_t1326_board_compaction.SupersessionMetadataFalsificationTests.test_a_successor_that_removed_its_carried_edge_fails_closed) ... ok\r\ntest_a_wrongly_typed_edge_fails_closed (test_t1326_board_compaction.SupersessionMetadataFalsificationTests.test_a_wrongly_typed_edge_fails_closed) ... ok\r\ntest_blanking_the_claim_alone_fails_closed (test_t1326_board_compaction.SupersessionMetadataFalsificationTests.test_blanking_the_claim_alone_fails_closed) ... ok\r\ntest_blanking_the_claim_and_deleting_the_predecessor_fails_closed (test_t1326_board_compaction.SupersessionMetadataFalsificationTests.test_blanking_the_claim_and_deleting_the_predecessor_fails_closed) ... ok\r\ntest_deleting_the_predecessor_after_repointing_fails_closed (test_t1326_board_compaction.SupersessionMetadataFalsificationTests.test_deleting_the_predecessor_after_repointing_fails_closed) ... ok\r\ntest_the_writer_always_declares_the_edge_its_original_row_carried (test_t1326_board_compaction.SupersessionMetadataFalsificationTests.test_the_writer_always_declares_the_edge_its_original_row_carried) ... ok\r\ntest_escaped_pipe_verify_compacts_losslessly (test_t1326_board_compaction.TargetALegacyEscapedVerifyTests.test_escaped_pipe_verify_compacts_losslessly) ... ok\r\ntest_oversized_blocker_keeps_its_class_prefix (test_t1326_board_compaction.TargetAOversizedLifecycleFieldsTests.test_oversized_blocker_keeps_its_class_prefix) ... ok\r\ntest_oversized_implementation_delta_is_projected_within_the_cap (test_t1326_board_compaction.TargetAOversizedLifecycleFieldsTests.test_oversized_implementation_delta_is_projected_within_the_cap) ... ok\r\ntest_oversized_source_reports_and_closure_paths_keep_their_tokens (test_t1326_board_compaction.TargetAOversizedLifecycleFieldsTests.test_oversized_source_reports_and_closure_paths_keep_their_tokens) ... ok\r\ntest_blocker_and_active_parent_resume_fields_survive_compaction (test_t1326_board_compaction.TargetBLifecycleFieldTests.test_blocker_and_active_parent_resume_fields_survive_compaction) ... ok\r\ntest_every_known_field_has_an_explicit_compaction_disposition (test_t1326_board_compaction.TargetBLifecycleFieldTests.test_every_known_field_has_an_explicit_compaction_disposition)\r\nA future KNOWN_FIELDS addition must not silently fall through. ... ok\r\ntest_execution_and_provenance_fields_survive_compaction (test_t1326_board_compaction.TargetBLifecycleFieldTests.test_execution_and_provenance_fields_survive_compaction) ... ok\r\ntest_review_passes_survives_compaction (test_t1326_board_compaction.TargetBLifecycleFieldTests.test_review_passes_survives_compaction) ... ok\r\ntest_verify_attempts_survives_compaction (test_t1326_board_compaction.TargetBLifecycleFieldTests.test_verify_attempts_survives_compaction) ... ok\r\ntest_blocking_an_oversized_todo_row_externalizes_instead_of_refusing (test_t1326_board_compaction.TargetBNoDeadEndTests.test_blocking_an_oversized_todo_row_externalizes_instead_of_refusing) ... ok\r\ntest_claiming_a_row_that_crosses_the_cap_externalizes_instead_of_refusing (test_t1326_board_compaction.TargetBNoDeadEndTests.test_claiming_a_row_that_crosses_the_cap_externalizes_instead_of_refusing)\r\nThe frozen-seat dead end: the CLAIM payload is what crosses the cap. ... ok\r\ntest_normal_verify_mutation_externalizes_an_oversized_row (test_t1326_board_compaction.TargetBNoDeadEndTests.test_normal_verify_mutation_externalizes_an_oversized_row) ... ok\r\ntest_finish_with_a_large_cohort_externalizes_the_grown_row (test_t1326_board_compaction.TargetCClosureGrowthTests.test_finish_with_a_large_cohort_externalizes_the_grown_row) ... ok\r\ntest_a_lineage_less_project_stays_bound_to_its_path (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_a_lineage_less_project_stays_bound_to_its_path) ... ok\r\ntest_a_path_identity_alone_is_provenance_not_authority (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_a_path_identity_alone_is_provenance_not_authority) ... ok\r\ntest_broken_detail_edge_is_surfaced_by_read_only_diagnosis (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_broken_detail_edge_is_surfaced_by_read_only_diagnosis)\r\nThe operator must not have to guess `ticket compact` to see this. ... ok\r\ntest_healthy_compacted_row_still_accepts_canonical_mutation (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_healthy_compacted_row_still_accepts_canonical_mutation) ... ok\r\ntest_lossless_false_fails_closed (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_lossless_false_fails_closed) ... ok\r\ntest_malformed_metadata_fails_closed (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_malformed_metadata_fails_closed) ... ok\r\ntest_metadata_for_another_ticket_fails_closed (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_metadata_for_another_ticket_fails_closed) ... ok\r\ntest_missing_metadata_fails_closed (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_missing_metadata_fails_closed) ... ok\r\ntest_missing_original_record_fails_closed (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_missing_original_record_fails_closed) ... ok\r\ntest_no_bytes_are_fabricated_from_the_compact_projection (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_no_bytes_are_fabricated_from_the_compact_projection) ... ok\r\ntest_original_byte_count_mismatch_fails_closed (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_original_byte_count_mismatch_fails_closed) ... ok\r\ntest_original_hash_mismatch_fails_closed (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_original_hash_mismatch_fails_closed) ... ok\r\ntest_unsupported_operation_fails_closed (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_unsupported_operation_fails_closed) ... ok\r\ntest_unsupported_schema_fails_closed (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_unsupported_schema_fails_closed) ... ok\r\ntest_unsupported_status_fails_closed (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_unsupported_status_fails_closed) ... ok\r\ntest_wrong_lineage_fails_closed (test_t1326_board_compaction.TargetCDetailIntegrityTests.test_wrong_lineage_fails_closed) ... ok\r\ntest_new_oversized_ticket_semantic_round_trip_is_exact (test_t1326_board_compaction.TargetDNewOversizedRoundTripTests.test_new_oversized_ticket_semantic_round_trip_is_exact) ... ok\r\ntest_prose_is_reduced_before_any_machine_token (test_t1326_board_compaction.TokenBoundaryCompactionTests.test_prose_is_reduced_before_any_machine_token) ... ok\r\ntest_sixty_source_receipts_survive_without_a_partial_token (test_t1326_board_compaction.TokenBoundaryCompactionTests.test_sixty_source_receipts_survive_without_a_partial_token) ... ok\r\ntest_thirty_dependencies_survive_without_a_partial_token (test_t1326_board_compaction.TokenBoundaryCompactionTests.test_thirty_dependencies_survive_without_a_partial_token) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 95 tests in 83.792s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1586_scenario_inputs.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1586_scenario_inputs.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        18732
+      ],
+      "duration_s": 31.86,
+      "process_create_s": 0.016,
+      "ran": 12,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "PASS: ownership oracle -- manifest-complete install replaced stale dirs, ran validate.py, and uninstalled config + Aider byte-exact\r\n",
+      "stderr": "test_preserving_unowned_bytes_is_a_valid_uninstall (test_t1586_scenario_inputs.InstallerPreservationOracleTests.test_preserving_unowned_bytes_is_a_valid_uninstall) ... ok\r\ntest_unowned_data_loss_still_reddens_the_oracle (test_t1586_scenario_inputs.InstallerPreservationOracleTests.test_unowned_data_loss_still_reddens_the_oracle) ... ok\r\ntest_crlf_fixture_policy_still_rejects_actual_trailing_spaces (test_t1586_scenario_inputs.NativeReleaseFixtureTests.test_crlf_fixture_policy_still_rejects_actual_trailing_spaces) ... ok\r\ntest_declaring_core_family_still_requires_executed_evidence (test_t1586_scenario_inputs.NativeReleaseFixtureTests.test_declaring_core_family_still_requires_executed_evidence) ... ok\r\ntest_real_release_fixture_reaches_ship_with_backed_history (test_t1586_scenario_inputs.NativeReleaseFixtureTests.test_real_release_fixture_reaches_ship_with_backed_history) ... ok\r\ntest_actual_copy_callbacks_skip_held_locks_but_preserve_durable_and_foreign_names (test_t1586_scenario_inputs.ScenarioInputTests.test_actual_copy_callbacks_skip_held_locks_but_preserve_durable_and_foreign_names) ... ok\r\ntest_actual_goal_fixture_admits_claim_and_build_with_current_style (test_t1586_scenario_inputs.ScenarioInputTests.test_actual_goal_fixture_admits_claim_and_build_with_current_style) ... ok\r\ntest_generic_known_bad_revision_still_fails_a_stuck_current_instrument (test_t1586_scenario_inputs.ScenarioInputTests.test_generic_known_bad_revision_still_fails_a_stuck_current_instrument) ... ok\r\ntest_generic_probe_uses_its_actual_freshness_authority (test_t1586_scenario_inputs.ScenarioInputTests.test_generic_probe_uses_its_actual_freshness_authority) ... ok\r\ntest_missing_style_control_still_refuses_the_same_canonical_writer (test_t1586_scenario_inputs.ScenarioInputTests.test_missing_style_control_still_refuses_the_same_canonical_writer) ... ok\r\ntest_purity_snapshot_excludes_runtime_but_retains_durable_nested_names (test_t1586_scenario_inputs.ScenarioInputTests.test_purity_snapshot_excludes_runtime_but_retains_durable_nested_names) ... ok\r\ntest_purity_snapshot_still_refuses_unreadable_durable_evidence (test_t1586_scenario_inputs.ScenarioInputTests.test_purity_snapshot_still_refuses_unreadable_durable_evidence) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 12 tests in 31.386s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1614_future_gate.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1614_future_gate.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "duration_s": 41.14,
+      "process_create_s": 0.031,
+      "ran": 48,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "projection (test_t1614_future_gate.FutureGateAutoDiscoveryTests.test_AUTO12_live_work_outranks_a_stale_projection)\r\nAUTO-12: ordinary Work wins and the Future layer may stay unrefreshed. ... ok\r\ntest_AUTO13_an_actionable_audit_outranks_a_stale_projection (test_t1614_future_gate.FutureGateAutoDiscoveryTests.test_AUTO13_an_actionable_audit_outranks_a_stale_projection)\r\nAUTO-13: the audit layer is consumed before the Future layer. ... ok\r\ntest_AUTO14_the_live_corpus_migrates_without_touching_an_original (test_t1614_future_gate.FutureGateAutoDiscoveryTests.test_AUTO14_the_live_corpus_migrates_without_touching_an_original)\r\nAUTO-14: every real document is indexed and classified, none rewritten. ... ok\r\ntest_AUTO15_repeating_the_route_is_idempotent (test_t1614_future_gate.FutureGateAutoDiscoveryTests.test_AUTO15_repeating_the_route_is_idempotent)\r\nAUTO-15: an exact retry creates no duplicate identity and no ticket. ... ok\r\ntest_AUTO16_no_future_documents_leaves_hunt_unchanged (test_t1614_future_gate.FutureGateAutoDiscoveryTests.test_AUTO16_no_future_documents_leaves_hunt_unchanged)\r\nAUTO-16: with no corpus at all, the ladder below is byte-identical. ... ok\r\ntest_A_operator_statement_records_a_gate_not_a_ticket (test_t1614_future_gate.FutureGateMatrixTests.test_A_operator_statement_records_a_gate_not_a_ticket)\r\nA: an explicit operator statement records a deferred candidate. ... ok\r\ntest_B_an_explicit_refresh_reconciles_a_new_document (test_t1614_future_gate.FutureGateMatrixTests.test_B_an_explicit_refresh_reconciles_a_new_document)\r\nB: an explicit refresh rebuilds the projection over a new file. ... ok\r\ntest_C2_an_undeclared_gate_is_reconciled_by_digest (test_t1614_future_gate.FutureGateMatrixTests.test_C2_an_undeclared_gate_is_reconciled_by_digest)\r\nC: with no declared id, CONTENT carries identity across a rename. ... ok\r\ntest_C_identity_survives_a_rename (test_t1614_future_gate.FutureGateMatrixTests.test_C_identity_survives_a_rename)\r\nC: identity is the record, never the filename. ... ok\r\ntest_D2_the_continue_chain_classifies_the_promotion (test_t1614_future_gate.FutureGateMatrixTests.test_D2_the_continue_chain_classifies_the_promotion)\r\nD: the idle promotion is a typed kind, never prose to remember. ... ok\r\ntest_D3_the_public_payload_names_the_gate_mechanically (test_t1614_future_gate.FutureGateMatrixTests.test_D3_the_public_payload_names_the_gate_mechanically)\r\nD: `saipen continue --json` carries the kind and the gate id. ... ok\r\ntest_D_an_eligible_gate_beats_idle_maintenance (test_t1614_future_gate.FutureGateMatrixTests.test_D_an_eligible_gate_beats_idle_maintenance)\r\nD: the idle fixture wins over the HUNT -> ADD fallthrough. ... ok\r\ntest_E_a_gate_never_preempts_active_work (test_t1614_future_gate.FutureGateMatrixTests.test_E_a_gate_never_preempts_active_work)\r\nE: one DOING ticket outranks every gate. ... ok\r\ntest_F_a_gate_never_outranks_workable_todo (test_t1614_future_gate.FutureGateMatrixTests.test_F_a_gate_never_outranks_workable_todo)\r\nF: the BOARD Pick Rule outranks an eligible gate. ... ok\r\ntest_G_no_eligible_gate_reproduces_todays_verdict (test_t1614_future_gate.FutureGateMatrixTests.test_G_no_eligible_gate_reproduces_todays_verdict)\r\nG: with no eligible gate the MAINTAIN halt verdict is unchanged. ... ok\r\ntest_H_a_live_operator_gate_outranks_a_future_gate (test_t1614_future_gate.FutureGateMatrixTests.test_H_a_live_operator_gate_outranks_a_future_gate)\r\nH: STATE.improve_gate holds the idle fallthrough, gates included. ... ok\r\ntest_I_the_goal_valve_defers_instead_of_bypassing (test_t1614_future_gate.FutureGateMatrixTests.test_I_the_goal_valve_defers_instead_of_bypassing)\r\nI: goal mode never spends past the safety valve. ... ok\r\ntest_J_goal_mode_below_the_cap_still_promotes (test_t1614_future_gate.FutureGateMatrixTests.test_J_goal_mode_below_the_cap_still_promotes)\r\nJ: a closed valve is the only thing that defers a gate. ... ok\r\ntest_K_an_unmet_prerequisite_is_not_eligible (test_t1614_future_gate.FutureGateMatrixTests.test_K_an_unmet_prerequisite_is_not_eligible)\r\nK: readiness is mechanical, and it names the failing condition. ... ok\r\ntest_L_a_done_prerequisite_unblocks_the_gate (test_t1614_future_gate.FutureGateMatrixTests.test_L_a_done_prerequisite_unblocks_the_gate)\r\nL: prerequisite-unblocked gate becomes the deterministic next. ... ok\r\ntest_M_missing_evidence_is_ineligible (test_t1614_future_gate.FutureGateMatrixTests.test_M_missing_evidence_is_ineligible)\r\nM: a gate that points at a path that does not exist never routes. ... ok\r\ntest_N_a_historical_document_is_never_ready_by_guess (test_t1614_future_gate.FutureGateMatrixTests.test_N_a_historical_document_is_never_ready_by_guess)\r\nN: the corpus's unmarked documents classify as NEEDS_REVIEW. ... ok\r\ntest_O_live_work_owning_a_gate_blocks_a_second_ticket (test_t1614_future_gate.FutureGateMatrixTests.test_O_live_work_owning_a_gate_blocks_a_second_ticket)\r\nO: no duplicate Work for the same gate root cause. ... ok\r\ntest_P_explicit_priority_outranks_selection_order (test_t1614_future_gate.FutureGateMatrixTests.test_P_explicit_priority_outranks_selection_order)\r\nP: the selection ladder is deterministic and precedence-ordered. ... ok\r\ntest_Q_measured_beats_speculative_and_small_beats_large (test_t1614_future_gate.FutureGateMatrixTests.test_Q_measured_beats_speculative_and_small_beats_large)\r\nQ: basis then slice size break a priority tie. ... ok\r\ntest_R_only_one_gate_is_ever_selected (test_t1614_future_gate.FutureGateMatrixTests.test_R_only_one_gate_is_ever_selected)\r\nR: selection returns exactly one candidate, never a batch. ... ok\r\ntest_S_promotion_binds_one_slice_and_links_the_work (test_t1614_future_gate.FutureGateMatrixTests.test_S_promotion_binds_one_slice_and_links_the_work)\r\nS: promotion goes through the ordinary Source/Work ingress. ... ok\r\ntest_T_promotion_is_idempotent_for_the_same_slice (test_t1614_future_gate.FutureGateMatrixTests.test_T_promotion_is_idempotent_for_the_same_slice)\r\nT: re-running the promotion for one slice does not double-file. ... ok\r\ntest_U_a_gate_closes_only_when_every_slice_resolves (test_t1614_future_gate.FutureGateMatrixTests.test_U_a_gate_closes_only_when_every_slice_resolves)\r\nU: partial promotion keeps the gate open; closure is explicit. ... ok\r\ntest_V_an_ineligible_gate_refuses_with_the_named_reason (test_t1614_future_gate.FutureGateMatrixTests.test_V_an_ineligible_gate_refuses_with_the_named_reason)\r\nV: promotion names WHY, and creates nothing. ... ok\r\ntest_W_a_corrupt_index_never_fabricates_readiness (test_t1614_future_gate.FutureGateMatrixTests.test_W_a_corrupt_index_never_fabricates_readiness)\r\nW: unreadable is not empty. ... ok\r\ntest_X_a_missing_index_is_unindexed_not_empty (test_t1614_future_gate.FutureGateMatrixTests.test_X_a_missing_index_is_unindexed_not_empty)\r\nX: a project with gates but no index says so, and never claims ready. ... ok\r\ntest_Y_an_empty_corpus_over_a_written_index_is_current (test_t1614_future_gate.FutureGateMatrixTests.test_Y_an_empty_corpus_over_a_written_index_is_current)\r\nY: zero documents is a fact, not schema drift. ... ok\r\ntest_read_only_mode_lists_but_never_mutates (test_t1614_future_gate.FutureGateMatrixTests.test_read_only_mode_lists_but_never_mutates)\r\nA read-only session evaluates every gate and promotes none of them. ... ok\r\ntest_the_idle_ladder_is_published_in_maintenance (test_t1614_future_gate.FutureGateMatrixTests.test_the_idle_ladder_is_published_in_maintenance)\r\nMAINTENANCE owns the ORDER; FUTURE.md owns the eligibility rules. ... ok\r\ntest_the_index_is_machine_owned_json_with_a_stable_shape (test_t1614_future_gate.FutureGateMatrixTests.test_the_index_is_machine_owned_json_with_a_stable_shape) ... ok\r\ntest_the_normative_owner_publishes_the_lifecycle (test_t1614_future_gate.FutureGateMatrixTests.test_the_normative_owner_publishes_the_lifecycle)\r\nThe rules the matrix above enforces live in saipen/FUTURE.md. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 48 tests in 40.828s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1827_writer_lock_contract.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1827_writer_lock_contract.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "duration_s": 14.594,
+      "process_create_s": 0.016,
+      "ran": 19,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_capture_overtaken_by_a_mutation_is_retried_outside_the_lock (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_capture_overtaken_by_a_mutation_is_retried_outside_the_lock)\r\nR009: the remedy is a fresh capture outside the mutex, never a retry ... ok\r\ntest_a_long_external_capture_does_not_block_a_short_mutation (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_long_external_capture_does_not_block_a_short_mutation)\r\nR001/R003/R006: the measured 240 s hold was the capture, and the ... ok\r\ntest_a_short_hold_is_waited_out_and_acquired (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_a_short_hold_is_waited_out_and_acquired) ... ok\r\ntest_an_unbounded_holder_is_refused_within_the_declared_budget (test_t1827_writer_lock_contract.BoundedAcquisitionTests.test_an_unbounded_holder_is_refused_within_the_declared_budget) ... ok\r\ntest_acquire_docstring_states_the_bounded_wait (test_t1827_writer_lock_contract.ContractAgreementTests.test_acquire_docstring_states_the_bounded_wait) ... ok\r\ntest_core_contract_states_the_budget_override_and_refusal (test_t1827_writer_lock_contract.ContractAgreementTests.test_core_contract_states_the_budget_override_and_refusal) ... ok\r\ntest_the_remediation_names_the_orphan_procedure_not_file_deletion (test_t1827_writer_lock_contract.ContractAgreementTests.test_the_remediation_names_the_orphan_procedure_not_file_deletion) ... ok\r\ntest_a_saipen_holder_is_named_by_pid_and_command (test_t1827_writer_lock_contract.HolderIdentityTests.test_a_saipen_holder_is_named_by_pid_and_command) ... ok\r\ntest_an_unreadable_holder_record_says_the_holder_is_unknown (test_t1827_writer_lock_contract.HolderIdentityTests.test_an_unreadable_holder_record_says_the_holder_is_unknown) ... ok\r\ntest_the_status_projection_names_the_live_holder (test_t1827_writer_lock_contract.HolderIdentityTests.test_the_status_projection_names_the_live_holder) ... ok\r\ntest_a_record_rewritten_by_a_successor_is_not_withdrawn (test_t1827_writer_lock_contract.ProcessDeathAndRecordTests.test_a_record_rewritten_by_a_successor_is_not_withdrawn)\r\nOnly the releaser's own bytes are removed, never a successor's. ... ok\r\ntest_a_stale_holder_record_never_blocks_acquisition (test_t1827_writer_lock_contract.ProcessDeathAndRecordTests.test_a_stale_holder_record_never_blocks_acquisition) ... ok\r\ntest_process_death_releases_the_lock (test_t1827_writer_lock_contract.ProcessDeathAndRecordTests.test_process_death_releases_the_lock) ... ok\r\ntest_the_holder_record_is_withdrawn_on_release (test_t1827_writer_lock_contract.ProcessDeathAndRecordTests.test_the_holder_record_is_withdrawn_on_release)\r\nR005: no holder record may outlive its holder. ... ok\r\ntest_the_lock_file_stays_a_permanent_zero_byte_carrier (test_t1827_writer_lock_contract.ProcessDeathAndRecordTests.test_the_lock_file_stays_a_permanent_zero_byte_carrier)\r\nR008: never delete the lock file to cure a hold. ... ok\r\ntest_the_ship_gate_runs_outside_the_writer_lock (test_t1827_writer_lock_contract.ReleaseGateWindowTests.test_the_ship_gate_runs_outside_the_writer_lock) ... ok\r\ntest_a_yielded_lock_is_retaken_and_a_lost_race_refuses (test_t1827_writer_lock_contract.StatusAndYieldTests.test_a_yielded_lock_is_retaken_and_a_lost_race_refuses) ... ok\r\ntest_lock_status_never_acquires_the_lock (test_t1827_writer_lock_contract.StatusAndYieldTests.test_lock_status_never_acquires_the_lock) ... ok\r\ntest_saipen_status_answers_while_another_writer_holds_the_lock (test_t1827_writer_lock_contract.StatusAndYieldTests.test_saipen_status_answers_while_another_writer_holds_the_lock) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 19 tests in 14.229s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_warn_ownership_probe.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_warn_ownership_probe.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        11248
+      ],
+      "duration_s": 0.313,
+      "process_create_s": 0.015,
+      "ran": 6,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_board_without_blocked_section_is_reported_not_guessed (test_warn_ownership_probe.WarnProbeBoardSize.test_board_without_blocked_section_is_reported_not_guessed) ... ok\r\ntest_every_leg_measures_the_same_board_size_just_under_the_cap (test_warn_ownership_probe.WarnProbeBoardSize.test_every_leg_measures_the_same_board_size_just_under_the_cap)\r\nThe failing case: a board one ticket line short of the soft cap. ... ok\r\ntest_neutral_and_owner_tickets_are_the_same_length (test_warn_ownership_probe.WarnProbeBoardSize.test_neutral_and_owner_tickets_are_the_same_length) ... ok\r\ntest_neutral_slug_is_not_a_tracked_warn_slug (test_warn_ownership_probe.WarnProbeBoardSize.test_neutral_slug_is_not_a_tracked_warn_slug)\r\nThe neutral line must own nothing. ... ok\r\ntest_owner_slug_appears_only_in_the_owning_line (test_warn_ownership_probe.WarnProbeBoardSize.test_owner_slug_appears_only_in_the_owning_line) ... ok\r\ntest_owning_line_is_filed_at_the_end_of_blocked (test_warn_ownership_probe.WarnProbeBoardSize.test_owning_line_is_filed_at_the_end_of_blocked) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 6 tests in 0.002s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 180,
+  "duration_s": 173.093,
+  "timings_s": {
+    "execution_wall_s": 172.329,
+    "environment_identity_wall_s": 0.031,
+    "copy_wall_s": 0.469,
+    "hash_wall_s": 0.14,
+    "cleanup_wall_s": 0.093
+  },
+  "copy_metrics": {
+    "subject_copy_s": 0.438,
+    "canonical_copy_s": 0.031,
+    "canonical_copy_attempts": 1,
+    "trees": []
+  },
+  "sandbox_scope": {
+    "mode": "DECLARED",
+    "trees": [],
+    "undeclared": [],
+    "declared_by": {
+      "test_t1326_board_compaction.py": [],
+      "test_t1586_scenario_inputs.py": [],
+      "test_t1614_future_gate.py": [],
+      "test_t1827_writer_lock_contract.py": [],
+      "test_warn_ownership_probe.py": []
+    },
+    "manifest_sha256": "6c43816bc6ea79df1e3f3cce5086c10665c4a681afd091a4a9efb077884064e5"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_t1326_board_compaction.py",
+        "test_t1586_scenario_inputs.py",
+        "test_t1614_future_gate.py",
+        "test_t1827_writer_lock_contract.py",
+        "test_warn_ownership_probe.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "DECLARED",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "30888f8c2c9bd2385eb22056d39994ebfee110f946b67c87fa72278685e984a6",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "2271ca5434892f15f981f28ed5ded00314be23f853d23c8db56c527f302b0463"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "86d04f8a8d42dd8b365b33a29ca7b3cc1eacae9ddcfc2ae1b9bdbf3ee1e5e32f"
+      },
+      "core_unit_shard.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "1a22bac5140eeaf33be64413027a22c474420dbe7e3c6134af9b5e6f90942c9d"
+      },
+      "test_runner.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "e8d4d18e93abd3843f0d911071bc729c15ad767502b72c567be436e6f17545ed"
+      },
+      "verification_cache.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "70188f394bb84cc78fe2417daecf5b38b6abcd3be73956194baf1ef1911413ba"
+      },
+      "process_tree.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "798e6663a85d1906533203fe961472ad8eb8b7e645aa3961a694c1192ca5efcb"
+      },
+      "verification_bootstrap.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "8fa1c333bec82156f70bb66e7df786e99265d0b4c5f3da362a830bfc9198ab24"
+      },
+      "verification_impact.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "d2829c9de720e9b84d9dfa4056786c533bf9cff86913c5ed0546fe63e19f5a83"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "f008508f0f88d1c6a74f95d7e541a411a685b375404d7dd1ea49035ff7a5064c"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

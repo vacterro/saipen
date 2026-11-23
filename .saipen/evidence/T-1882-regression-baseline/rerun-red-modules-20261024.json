@@ -1,0 +1,880 @@
+{
+ "schema": 1,
+ "source_record": ".saipen\\evidence\\core-unit\\9b10e579a60f9c79-20261024T100757701402Z.json",
+ "invocation": "python -B -m unittest discover -s tools -p <module>.py -v",
+ "modules": [
+  {
+   "module": "test_accepted_debt",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 13,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 11.594,
+   "reported_red": 2
+  },
+  {
+   "module": "test_check_inventory",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 46,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 7.406,
+   "reported_red": 5
+  },
+  {
+   "module": "test_continue_chain",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 6,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 18.891,
+   "reported_red": 1
+  },
+  {
+   "module": "test_debt_gate",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 36,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 14.031,
+   "reported_red": 1
+  },
+  {
+   "module": "test_intent_audit_fixes",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 41,
+   "failures": [],
+   "tail": [
+    "OK (skipped=3)"
+   ],
+   "duration_s": 47.781,
+   "reported_red": 1
+  },
+  {
+   "module": "test_log_normalize",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 12,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 3.11,
+   "reported_red": 1
+  },
+  {
+   "module": "test_log_tail_quarantine",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 16,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 4.265,
+   "reported_red": 3
+  },
+  {
+   "module": "test_next_action_deadlock",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 8,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 3.329,
+   "reported_red": 1
+  },
+  {
+   "module": "test_public_closure_cli",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 11,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 26.859,
+   "reported_red": 1
+  },
+  {
+   "module": "test_public_install_lifecycle",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 2,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 105.344,
+   "reported_red": 2
+  },
+  {
+   "module": "test_remediation_self_consistency",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 15,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 3.922,
+   "reported_red": 1
+  },
+  {
+   "module": "test_source_contract_derivation",
+   "status": "FAIL",
+   "exit_code": 1,
+   "ran": 13,
+   "failures": [
+    "test_regression_f_generic_core_unit_evidence_cannot_satisfy_real_host_acceptance"
+   ],
+   "tail": [
+    "FAILED (failures=1)"
+   ],
+   "duration_s": 3.656,
+   "reported_red": 1
+  },
+  {
+   "module": "test_source_quarantine_route",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 9,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 5.344,
+   "reported_red": 1
+  },
+  {
+   "module": "test_style_contract_chokepoint",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 7,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 9.609,
+   "reported_red": 1
+  },
+  {
+   "module": "test_t1304_r004_dry_run_purity",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 14,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 9.266,
+   "reported_red": 1
+  },
+  {
+   "module": "test_t1304_r004_transition",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 12,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 12.843,
+   "reported_red": 1
+  },
+  {
+   "module": "test_t1411_stale_complete_resolution",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 21,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 43.844,
+   "reported_red": 1
+  },
+  {
+   "module": "test_t1412_conformance_truth",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 11,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 61.938,
+   "reported_red": 4
+  },
+  {
+   "module": "test_t1494_continuation_authority",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 19,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 52.156,
+   "reported_red": 1
+  },
+  {
+   "module": "test_t1516_portable_receipts",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 10,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 4.515,
+   "reported_red": 1
+  },
+  {
+   "module": "test_t1581_phase_rename_knowledge",
+   "status": "FAIL",
+   "exit_code": 1,
+   "ran": 24,
+   "failures": [
+    "test_real_rename_preserves_read_only_history_outside_fresh_authority",
+    "test_real_tag_query_control_is_not_masked_by_copied_historical_work",
+    "test_real_warn_ownership_control_is_not_masked_by_copied_historical_work"
+   ],
+   "tail": [
+    "FAILED (failures=3)"
+   ],
+   "duration_s": 25.579,
+   "reported_red": 3
+  },
+  {
+   "module": "test_t1586_scenario_inputs",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 12,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 24.359,
+   "reported_red": 3
+  },
+  {
+   "module": "test_t1598_stale_claim_next_action",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 5,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 6.781,
+   "reported_red": 1
+  },
+  {
+   "module": "test_t1612_accidental_success_reproduction",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 11,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 76.516,
+   "reported_red": 5
+  },
+  {
+   "module": "test_t1640_board_scrub",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 30,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 4.75,
+   "reported_red": 1
+  },
+  {
+   "module": "test_t1640_log_seal",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 27,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 5.297,
+   "reported_red": 1
+  },
+  {
+   "module": "test_t1669_clean_done_projection",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 6,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 2.375,
+   "reported_red": 2
+  },
+  {
+   "module": "test_t1681_release_closure_op",
+   "status": "FAIL",
+   "exit_code": 1,
+   "ran": 5,
+   "failures": [
+    "test_a_no_publish_ship_closes_under_an_id_the_ledger_resolves",
+    "test_a_recovered_ship_closes_under_an_id_the_ledger_resolves",
+    "test_the_full_publish_closure_records_the_same_id"
+   ],
+   "tail": [
+    "FAILED (failures=3)"
+   ],
+   "duration_s": 6.343,
+   "reported_red": 3
+  },
+  {
+   "module": "test_t1704_goal_checkpoint_priority",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 24,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 10.532,
+   "reported_red": 4
+  },
+  {
+   "module": "test_t1704_legacy_goal_authority",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 28,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 30.0,
+   "reported_red": 1
+  },
+  {
+   "module": "test_t1746_crew_terminal_outcome",
+   "status": "FAIL",
+   "exit_code": 1,
+   "ran": 45,
+   "failures": [
+    "test_a_carrier_naming_a_ticket_the_epoch_does_not_own_is_refused",
+    "test_a_carrier_naming_another_epoch_is_refused",
+    "test_a_closure_that_died_before_its_body_is_aborted_not_committed",
+    "test_a_foreign_source_change_between_plan_and_apply_writes_nothing",
+    "test_a_forged_sibling_receipt_never_becomes_a_pass",
+    "test_a_git_project_sees_zero_git_mutation",
+    "test_a_managed_project_is_judged_by_the_runtimes_validator",
+    "test_a_read_only_session_plans_and_certifies_nothing",
+    "test_a_receipt_missing_a_roles_evidence_cannot_certify",
+    "test_a_receipt_of_another_epoch_is_not_this_epochs_release",
+    "test_a_refused_local_validation_does_not_poison_the_epoch",
+    "test_a_scope_deferred_with_full_identities_is_not_read_as_changed",
+    "test_a_second_closure_of_a_verified_epoch_is_refused",
+    "test_a_source_that_moved_after_the_closure_stales_the_receipt",
+    "test_a_source_tree_keeps_validating_itself",
+    "test_a_ticket_that_appears_between_plan_and_apply_writes_nothing",
+    "test_a_ticketless_epoch_cannot_publish_and_is_told_why",
+    "test_a_ticketless_epoch_of_a_versioned_project_keeps_its_version",
+    "test_a_versionless_epoch_that_owns_a_ticket_closes_under_that_ticket",
+    "test_admission_of_a_ticketless_receipt_needs_a_local_epoch_closure",
+    "test_an_empty_deferred_scope_refuses",
+    "test_an_epoch_carrier_of_another_lineage_is_refused",
+    "test_an_interrupted_closure_recovers_and_the_retry_changes_nothing",
+    "test_an_operator_owned_ticket_without_a_source_does_not_block",
+    "test_an_unresolved_sibling_still_makes_the_lineage_unclean",
+    "test_an_unresolved_source_of_other_work_still_blocks",
+    "test_another_project_lineage_does_not_inherit_the_receipt",
+    "test_authorization_lost_between_plan_and_apply_writes_nothing",
+    "test_historical_receipts_keep_their_meaning_without_a_rewrite",
+    "test_no_plan_without_crew_authorization",
+    "test_no_receipt_is_neither_outcome",
+    "test_scope_bytes_changed_after_the_review_refuse_the_plan",
+    "test_scope_bytes_changed_between_plan_and_apply_write_nothing",
+    "test_the_verdict_names_a_local_closure_under_a_persisted_full_mode",
+    "test_versionless_ticketless_epoch_closes_locally"
+   ],
+   "tail": [
+    "FAILED (failures=8, errors=27)"
+   ],
+   "duration_s": 1.437,
+   "reported_red": 35
+  },
+  {
+   "module": "test_t1750_release_boundary",
+   "status": "FAIL",
+   "exit_code": 1,
+   "ran": 11,
+   "failures": [
+    "test_a_marked_noop_does_not_turn_an_untouched_refusal_into_recovery",
+    "test_closure_planning_refusal_aborts_without_changing_canonical_bytes",
+    "test_downstream_validator_cannot_replace_the_runtime_gate",
+    "test_failed_gate_aborts_and_two_retries_need_no_recovery",
+    "test_foreign_bytes_preserve_the_operation_and_refuse_recovery",
+    "test_landed_bytes_without_a_progress_marker_keep_recovery",
+    "test_missing_runtime_validator_cannot_fall_back_to_downstream_code",
+    "test_process_death_before_body_still_requires_canonical_recovery",
+    "test_refusal_after_a_marked_target_keeps_recovery_and_replays",
+    "test_registered_but_untouched_targets_abort",
+    "test_running_home_keeps_self_validation"
+   ],
+   "tail": [
+    "FAILED (errors=11)"
+   ],
+   "duration_s": 0.281,
+   "reported_red": 11
+  },
+  {
+   "module": "test_t1792_auto_doctor",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 20,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 21.36,
+   "reported_red": 4
+  },
+  {
+   "module": "test_t1827_writer_lock_contract",
+   "status": "FAIL",
+   "exit_code": 1,
+   "ran": 19,
+   "failures": [
+    "test_the_ship_gate_runs_outside_the_writer_lock"
+   ],
+   "tail": [
+    "FAILED (errors=1)"
+   ],
+   "duration_s": 14.125,
+   "reported_red": 1
+  },
+  {
+   "module": "test_t1828_verification_policy",
+   "status": "FAIL",
+   "exit_code": 1,
+   "ran": 14,
+   "failures": [
+    "test_release_executor_refuses_before_external_validator"
+   ],
+   "tail": [
+    "FAILED (failures=1)"
+   ],
+   "duration_s": 3.64,
+   "reported_red": 1
+  },
+  {
+   "module": "test_t1851_debt_authority",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 38,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 6.032,
+   "reported_red": 1
+  },
+  {
+   "module": "test_work_reverify_cli",
+   "status": "PASS",
+   "exit_code": 0,
+   "ran": 15,
+   "failures": [],
+   "tail": [
+    "OK"
+   ],
+   "duration_s": 11.343,
+   "reported_red": 2
+  }
+ ],
+ "green_modules": [
+  "test_accepted_debt",
+  "test_check_inventory",
+  "test_continue_chain",
+  "test_debt_gate",
+  "test_intent_audit_fixes",
+  "test_log_normalize",
+  "test_log_tail_quarantine",
+  "test_next_action_deadlock",
+  "test_public_closure_cli",
+  "test_public_install_lifecycle",
+  "test_remediation_self_consistency",
+  "test_source_quarantine_route",
+  "test_style_contract_chokepoint",
+  "test_t1304_r004_dry_run_purity",
+  "test_t1304_r004_transition",
+  "test_t1411_stale_complete_resolution",
+  "test_t1412_conformance_truth",
+  "test_t1494_continuation_authority",
+  "test_t1516_portable_receipts",
+  "test_t1586_scenario_inputs",
+  "test_t1598_stale_claim_next_action",
+  "test_t1612_accidental_success_reproduction",
+  "test_t1640_board_scrub",
+  "test_t1640_log_seal",
+  "test_t1669_clean_done_projection",
+  "test_t1704_goal_checkpoint_priority",
+  "test_t1704_legacy_goal_authority",
+  "test_t1792_auto_doctor",
+  "test_t1851_debt_authority",
+  "test_work_reverify_cli"
+ ],
+ "reported_red_total": 110,
+ "now_pass": 55,
+ "still_fail": [
+  {
+   "test_id": "test_source_contract_derivation.SourceContractDerivationTests.test_regression_f_generic_core_unit_evidence_cannot_satisfy_real_host_acceptance",
+   "module": "test_source_contract_derivation",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1581_phase_rename_knowledge.NativeHistoryFixtureTests.test_real_rename_preserves_read_only_history_outside_fresh_authority",
+   "module": "test_t1581_phase_rename_knowledge",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1581_phase_rename_knowledge.NativeHistoryFixtureTests.test_real_tag_query_control_is_not_masked_by_copied_historical_work",
+   "module": "test_t1581_phase_rename_knowledge",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1581_phase_rename_knowledge.NativeHistoryFixtureTests.test_real_warn_ownership_control_is_not_masked_by_copied_historical_work",
+   "module": "test_t1581_phase_rename_knowledge",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1681_release_closure_op.ReleaseClosureOpTests.test_a_no_publish_ship_closes_under_an_id_the_ledger_resolves",
+   "module": "test_t1681_release_closure_op",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1681_release_closure_op.ReleaseClosureOpTests.test_a_recovered_ship_closes_under_an_id_the_ledger_resolves",
+   "module": "test_t1681_release_closure_op",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1681_release_closure_op.ReleaseClosureOpTests.test_the_full_publish_closure_records_the_same_id",
+   "module": "test_t1681_release_closure_op",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.ConvergenceEvidence.test_a_receipt_missing_a_roles_evidence_cannot_certify",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.ConvergenceEvidence.test_authorization_lost_between_plan_and_apply_writes_nothing",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.ConvergenceEvidence.test_no_plan_without_crew_authorization",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.ConvergenceEvidence.test_no_receipt_is_neither_outcome",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.IdentityIsNeverBorrowed.test_a_carrier_naming_a_ticket_the_epoch_does_not_own_is_refused",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.IdentityIsNeverBorrowed.test_a_carrier_naming_another_epoch_is_refused",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.IdentityIsNeverBorrowed.test_a_receipt_of_another_epoch_is_not_this_epochs_release",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.IdentityIsNeverBorrowed.test_a_ticket_that_appears_between_plan_and_apply_writes_nothing",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.IdentityIsNeverBorrowed.test_an_epoch_carrier_of_another_lineage_is_refused",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.IdentityIsNeverBorrowed.test_another_project_lineage_does_not_inherit_the_receipt",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_a_git_project_sees_zero_git_mutation",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_a_scope_deferred_with_full_identities_is_not_read_as_changed",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_a_ticketless_epoch_of_a_versioned_project_keeps_its_version",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_a_versionless_epoch_that_owns_a_ticket_closes_under_that_ticket",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_an_operator_owned_ticket_without_a_source_does_not_block",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_the_verdict_names_a_local_closure_under_a_persisted_full_mode",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.LocalTerminalClosure.test_versionless_ticketless_epoch_closes_locally",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.ManagedProjectGate.test_a_managed_project_is_judged_by_the_runtimes_validator",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.ManagedProjectGate.test_a_source_tree_keeps_validating_itself",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.PublicationKeepsItsGates.test_a_read_only_session_plans_and_certifies_nothing",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.PublicationKeepsItsGates.test_a_ticketless_epoch_cannot_publish_and_is_told_why",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_a_closure_that_died_before_its_body_is_aborted_not_committed",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_a_forged_sibling_receipt_never_becomes_a_pass",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_a_refused_local_validation_does_not_poison_the_epoch",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_a_second_closure_of_a_verified_epoch_is_refused",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_admission_of_a_ticketless_receipt_needs_a_local_epoch_closure",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_an_interrupted_closure_recovers_and_the_retry_changes_nothing",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_an_unresolved_sibling_still_makes_the_lineage_unclean",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.RecoveryAndReceipts.test_historical_receipts_keep_their_meaning_without_a_rewrite",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.ScopeAndSource.test_a_foreign_source_change_between_plan_and_apply_writes_nothing",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.ScopeAndSource.test_a_source_that_moved_after_the_closure_stales_the_receipt",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.ScopeAndSource.test_an_empty_deferred_scope_refuses",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.ScopeAndSource.test_an_unresolved_source_of_other_work_still_blocks",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.ScopeAndSource.test_scope_bytes_changed_after_the_review_refuse_the_plan",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1746_crew_terminal_outcome.ScopeAndSource.test_scope_bytes_changed_between_plan_and_apply_write_nothing",
+   "module": "test_t1746_crew_terminal_outcome",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1750_release_boundary.RefusedLocalReleaseTests.test_a_marked_noop_does_not_turn_an_untouched_refusal_into_recovery",
+   "module": "test_t1750_release_boundary",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1750_release_boundary.RefusedLocalReleaseTests.test_closure_planning_refusal_aborts_without_changing_canonical_bytes",
+   "module": "test_t1750_release_boundary",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1750_release_boundary.RefusedLocalReleaseTests.test_failed_gate_aborts_and_two_retries_need_no_recovery",
+   "module": "test_t1750_release_boundary",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1750_release_boundary.RefusedLocalReleaseTests.test_foreign_bytes_preserve_the_operation_and_refuse_recovery",
+   "module": "test_t1750_release_boundary",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1750_release_boundary.RefusedLocalReleaseTests.test_landed_bytes_without_a_progress_marker_keep_recovery",
+   "module": "test_t1750_release_boundary",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1750_release_boundary.RefusedLocalReleaseTests.test_process_death_before_body_still_requires_canonical_recovery",
+   "module": "test_t1750_release_boundary",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1750_release_boundary.RefusedLocalReleaseTests.test_refusal_after_a_marked_target_keeps_recovery_and_replays",
+   "module": "test_t1750_release_boundary",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1750_release_boundary.RefusedLocalReleaseTests.test_registered_but_untouched_targets_abort",
+   "module": "test_t1750_release_boundary",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1750_release_boundary.RuntimeValidatorTests.test_downstream_validator_cannot_replace_the_runtime_gate",
+   "module": "test_t1750_release_boundary",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1750_release_boundary.RuntimeValidatorTests.test_missing_runtime_validator_cannot_fall_back_to_downstream_code",
+   "module": "test_t1750_release_boundary",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1750_release_boundary.RuntimeValidatorTests.test_running_home_keeps_self_validation",
+   "module": "test_t1750_release_boundary",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1827_writer_lock_contract.ReleaseGateWindowTests.test_the_ship_gate_runs_outside_the_writer_lock",
+   "module": "test_t1827_writer_lock_contract",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  },
+  {
+   "test_id": "test_t1828_verification_policy.PublicationWiringTests.test_release_executor_refuses_before_external_validator",
+   "module": "test_t1828_verification_policy",
+   "module_status": "FAIL",
+   "disposition": "MODULE_RED_TEST_NOT_REPORTED"
+  }
+ ],
+ "wall_s": 700.45
+}

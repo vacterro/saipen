@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-2040\lifecycle-receipt-truth-20261109T200642579628Z\probe_debt_replay.py", line 83, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-2040\lifecycle-receipt-truth-20261109T200642579628Z\probe_debt_replay.py", line 73, in main
+    assert not second["ok"], second
+           ^^^^^^^^^^^^^^^^
+AssertionError: {'ok': True, 'code': 'ACCEPTED_DEBT_REGISTERED', 'record_id': 'AD-000001', 'events': ['E-3', 'E-4'], 'journal_op_id': 'accepted_debt.register-37cff199c445', 'authority': 'SRC-001', 'authority_status': 'KNOWN'}

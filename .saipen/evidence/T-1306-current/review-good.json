@@ -1,0 +1,19 @@
+{
+  "checker_sha256": "7dbb44b865f3178434c464d9e80e49f27c8abf87fddc36b31025cbddb4964177",
+  "receipt": ".saipen\\evidence\\T-1306-current\\review\\result.json",
+  "prose_input": "prose",
+  "checks": {
+    "nonempty actual public commands": true,
+    "prose stays unverified": true,
+    "quoted marker stays unverified": true,
+    "unknown evidence class stays unverified": true,
+    "bound criterion and event identity": true,
+    "narrow witness cannot prove broader criterion": true,
+    "disagreement remains contested": true,
+    "undeclared criterion stays visible": true,
+    "escaped defect preserves relation": true,
+    "fixture readonly coverage and owned cleanup": true
+  },
+  "passed": 10,
+  "failed": 0
+}

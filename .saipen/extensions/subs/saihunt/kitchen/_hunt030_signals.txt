@@ -1,0 +1,7 @@
+# HUNT-030 signal census (read-only at the 975477b04 identity)
+# captured: 2026-11-22T03:10:30Z
+
+S2: 2 of the last 25 whole commit hashes cited in .saipen/LOG.md
+S4: bare except sites: 0
+S6: untracked/dirty tools/ paths: 0
+S3: raw TODO lines over engine+top tools: 1124 (same historic vocabulary class)

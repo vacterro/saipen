@@ -1,0 +1,65 @@
+{
+  "scope": "full-state copy and discovery observation; not verification acceptance",
+  "executed_suite": false,
+  "runtime": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "platform": "win32",
+  "stages": {
+    "first_copy_wall_s": 65.116581,
+    "private_worker_clone_wall_s": 51.78088,
+    "discovery_probe_wall_s": 3.46425
+  },
+  "cleanup": [
+    {
+      "path": "V:\\_TEMP_\\saipen-core-unit-804ikj8r",
+      "removed": true,
+      "wall_s": 13.452927
+    },
+    {
+      "path": "V:\\_TEMP_\\saipen-core-unit-f9ax2h73",
+      "removed": true,
+      "wall_s": 15.204021
+    }
+  ],
+  "copy_metrics": {
+    "subject_copy_s": 21.047,
+    "canonical_copy_s": 43.671,
+    "canonical_copy_attempts": 1
+  },
+  "input_inventory": {
+    "files_or_links": 126346,
+    "bytes": 1621107848,
+    "sha256": "ca9b82ab58c8ae700316599e87d7ee6042b4cabf8e05953b0901f66086e35554",
+    "inventory_wall_s": 18.759117
+  },
+  "source_fingerprint": "d23c49152ef1f81d04ae62a34a7eaaac2fb36fc512618946f3dbae3cba5aa24d",
+  "private_worker_inventory": {
+    "files_or_links": 126346,
+    "bytes": 1621107848,
+    "sha256": "ca9b82ab58c8ae700316599e87d7ee6042b4cabf8e05953b0901f66086e35554",
+    "inventory_wall_s": 17.303974
+  },
+  "private_clone_exact": true,
+  "hardlink_witness": {
+    "supported": true,
+    "source_before": "original",
+    "source_after": "worker mutation",
+    "worker_after": "worker mutation",
+    "source_changed": true,
+    "decision": "reject shared mutable hardlinks; original was modified"
+  },
+  "discovery": {
+    "purpose": "full real discovery, select only import failures; no suite acceptance",
+    "status": "PASS",
+    "exit_code": 0,
+    "discovered_occurrences": 7076,
+    "discovery_wall_s": 3.186586,
+    "inventory_sha256": "a6ca2c9a90f79269cd9ca847f9f4384cd6db2609a43b2a0556723eb241864a04",
+    "import_error_indices": [],
+    "ran_import_error_cases": 0,
+    "red": []
+  },
+  "experiment_error": {
+    "type": "CalledProcessError",
+    "detail": "Command '['wsl.exe', '-d', 'saipen-ubuntu', '--', 'wslpath', '-u', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\T-1829-cost-collapse\\\\measure_sandbox.py']' returned non-zero exit status 1."
+  }
+}

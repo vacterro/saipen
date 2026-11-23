@@ -1,0 +1,27 @@
+{
+  "source_hashes": {
+    "tools/saipen.py": "8e43b4749f0dca94853056e90b84e0730b2f678dd5e3082b96435165bddab148",
+    "tools/improve.py": "c2b095e0b7a804a1c3fb5365c9a0d3cda9564394a43a7b0e2826374867332761",
+    "tools/validate.py": "64355ea00c7953faed7911fe771de2c66da23ef7fec84cba15e19ddf77d0196e",
+    "tools/saipen_engine/subs.py": "649687ffdf8bcbee7d56ef19aa66837047dde0d121c86f49fb575c37cbc0dde4",
+    "tools/saipen_engine/conformance.py": "295f512e8be21682aef9e6b62395cc0a90422644a9b3ff0201df6f74bfd50408"
+  },
+  "inherited_index_sha256": "92db57dac53653ca2ea2bfc9c0b1c3995bd186cf6f552b88bae7f11acd722ca4",
+  "foreign_head": "64f15a1d50b5f9d98d151c8d82c4435c62bc5ebf",
+  "foreign_core": {
+    "STATE.md": "cf6ca7f3c42c25c3276a3b939ef8e239492f5c968c71f7f84effedc678326eb4",
+    "BOARD.md": "17deb65ded3f8f85528751452f11dca96274f9c35094ca78eca0147c78cc30a6",
+    "LOG.md": "a9d4c6a42ba750279e0b0236af4c0cd4ae8d4ed5055e5e70a3bd0f4aae457bef",
+    "IDENTITY.md": "96906f5d90f015403d73ab3fc74f64c4d5cc1ac56dfc4b0c779e8b9849149042"
+  },
+  "foreign_cycle": {
+    "MANIFEST.md": "68ee57c880090a573ebd16198d1ab6faf8e7f8abe7985a7bd283fbb62594fdda",
+    "opencode-01/saipen_improve_SAIPEN.md": "ef96e58acf587db4cf93f86cefb7b9a52c3099bbe0cf2450b31c9cb518bffcab",
+    "opencode-02/saipen_improve_SAIPEN.md": "ffe61644e0c9fb37e8fc53164bffd8a75490b487e81dff6ea3d08ef812b2baf6",
+    "opencode-03/saipen_improve_SAIPEN.md": "e467982a4e7593fdd0d6c4b5a535af28d107a9848a70ab84fa4cdb9b3867f439",
+    "opencode-04/saipen_improve_SAIPEN.md": "3a134e32299786b1a00aa074100188c00cbd5b7a3b69d1f5f79798d7ce85d765",
+    "opencode-05/saipen_improve_SAIPEN.md": "dd0445a6f522bb272848ad1081c64fa0726eb1a7b316a57ccffd29aeb2c114d5",
+    "opencode-06/saipen_improve_SAIPEN.md": "529555e4a28a3ff327a15a4c1822f37b511049f7c448944ec250799b57851bda",
+    "SWEEP.md": "55ca6bb770eab267ae00606e238a18c12d4ff12a9e32f34afc971e767518d48b"
+  }
+}

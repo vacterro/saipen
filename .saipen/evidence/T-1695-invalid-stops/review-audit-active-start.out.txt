@@ -1,0 +1,47 @@
+{
+  "ok": true,
+  "code": "STARTED",
+  "project_root": "V:\\_TEMP_\\saipen-t1695-685c5tnz\\audit-active",
+  "actor": "probe",
+  "actor_source": "inherited",
+  "receipt": "SRC-001",
+  "ticket": "T-1",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "ingress_authority": {
+    "witness": "model_supplied",
+    "capture": true,
+    "local_work": true,
+    "user_explicit": false,
+    "preempt_active_work": false,
+    "goal_pivot": false,
+    "reset_bounded_authority": false,
+    "detailed_response": false,
+    "external_action": false
+  },
+  "resumed": false,
+  "phase": "SCOUT",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "event_id": "E-3",
+  "parked": null,
+  "cold_route": {
+    "project_root": "V:\\_TEMP_\\saipen-t1695-685c5tnz\\audit-active",
+    "saipen_home": null,
+    "protocol_dir": null,
+    "phase": "SCOUT",
+    "phase_module": null,
+    "boot": null,
+    "style": null,
+    "documents": {},
+    "project_memory": {
+      "STATE.md": "V:\\_TEMP_\\saipen-t1695-685c5tnz\\audit-active\\.saipen\\STATE.md",
+      "BOARD.md": "V:\\_TEMP_\\saipen-t1695-685c5tnz\\audit-active\\.saipen\\BOARD.md",
+      "LOG.md": "V:\\_TEMP_\\saipen-t1695-685c5tnz\\audit-active\\.saipen\\LOG.md"
+    },
+    "search_required": false
+  },
+  "load_path": null,
+  "load": null,
+  "execution_instruction": "The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first."
+}

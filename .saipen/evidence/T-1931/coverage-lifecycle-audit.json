@@ -1,0 +1,343 @@
+[
+  {
+    "rid": "SRC-337:R001",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R001",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R002",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R002",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R003",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R003",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R004",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R004",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R005",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R005",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R006",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R006",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R007",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R007",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R008",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R008",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R009",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R009",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R010",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R010",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R011",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R011",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R012",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R012",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R013",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R013",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R014",
+    "disposition": "VERIFIED",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R014",
+      "disposition": "VERIFIED"
+    }
+  },
+  {
+    "rid": "SRC-337:R015",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R015",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R016",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R016",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R017",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R017",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R018",
+    "disposition": "VERIFIED",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R018",
+      "disposition": "VERIFIED"
+    }
+  },
+  {
+    "rid": "SRC-337:R019",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R019",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R020",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R020",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R021",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R021",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R022",
+    "disposition": "VERIFIED",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R022",
+      "disposition": "VERIFIED"
+    }
+  },
+  {
+    "rid": "SRC-337:R023",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R023",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R024",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R024",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R025",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R025",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R026",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R026",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R027",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R027",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R028",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R028",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R029",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R029",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R030",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R030",
+      "disposition": "UNKNOWN"
+    }
+  },
+  {
+    "rid": "SRC-337:R031",
+    "disposition": "UNKNOWN",
+    "result": {
+      "ok": true,
+      "code": "COVERAGE_UPDATED",
+      "receipt": "SRC-337",
+      "rid": "SRC-337:R031",
+      "disposition": "UNKNOWN"
+    }
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-376.md",
+  "authority_grant": "system:INVALID_INVOCATION",
+  "authority_receipt": null,
+  "authority_sha256": null,
+  "discovery_event": null,
+  "evidence": {
+    "kind": "event",
+    "ref": "E-21640"
+  },
+  "evidence_bound_event": "E-21641",
+  "evidence_note": "accidental CLI token parse: the ticket text is the bare word 'list'; no user description of a change exists, SRC-376 is model_supplied with empty contract/coverage, and the row owes no implementation",
+  "linked_work": "T-2002",
+  "reason": "INVALID_INVOCATION",
+  "receipt_id": "SRC-376",
+  "retired_at": "2026-11-17T16:32:15Z",
+  "retired_by": "saipen-cli",
+  "retirement_event": "E-21641",
+  "schema_version": 2,
+  "source_sha256": "065f3ed0be3c21e4c04a8ae5cf26433b0c4a03b691b899168e2c14ab808e2da9",
+  "status": "INVALID",
+  "ticket_ref": ".saipen/archive/retired/T-2002.json"
+}

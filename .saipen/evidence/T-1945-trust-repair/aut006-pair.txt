@@ -1,0 +1,33 @@
+AUT-006 red-before-green pair (SRC-344 / audit/28.md)
+
+Subject: tools/saipen_engine/campaign.py -- CampaignController.run(), and
+tools/saipen.py -- the `campaign run --steps N` subcommand that calls it.
+
+Defect: step() executes exactly one generation and its only caller was
+`saipen campaign step`. Nothing advanced generation N to N+1, so a campaign
+admitted for MULTI_HOUR needed a human per slice.
+
+Pre-fix tree: V:\_TEMP_\saipen-aut006-prefix-ntwouifl (tools/ + saipen/ copied,
+.saipen/STATE.md copied; run() deleted from campaign.py and the `run`
+subcommand deleted from saipen.py, nothing else changed).
+
+current tree: rc=0 9 passed, 11 subtests passed in 0.52s
+pre-fix tree: rc=1 17 failed, 3 passed in 0.65s
+
+Red on pre-fix bytes (the defect):
+  DriverIsBoundedTest.test_rejects_a_non_positive_bound          no run() at all
+  DriverIsBoundedTest.test_takes_exactly_the_declared_number...  no run() at all
+  DriverIsBoundedTest.test_a_step_failure_stops_the_loop         no run() at all
+  DriverStopsOnBlockingStatesTest (2 methods, 6 subcases)        no run() at all
+  DriverRespectsUnproductiveWorkTest (2 methods)                 no run() at all
+  ProductionCallerTest.test_campaign_run_is_a_cli_subcommand     no `campaign run`
+
+Green on pre-fix bytes by design (controls, not the repair):
+  the three passes are setUp-level assertions that admission still works,
+  which is true on both trees and is not what AUT-006 is about.
+
+Green on current bytes: 9 passed, 11 subtests passed. All 17 product
+assertions fail when the driver is removed and none of them fail for an
+unrelated reason.
+
+PROVEN

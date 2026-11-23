@@ -1,0 +1,32 @@
+test_large_route_executes_and_preserves_every_unresolved_clause (test_t1790_dependency_route_budget.DependencyRouteBudgetTests.test_large_route_executes_and_preserves_every_unresolved_clause) ... FAIL
+test_many_foreign_owners_do_not_expand_the_route_again (test_t1790_dependency_route_budget.DependencyRouteBudgetTests.test_many_foreign_owners_do_not_expand_the_route_again) ... FAIL
+test_single_clause_is_counted_without_hiding_its_identity (test_t1790_dependency_route_budget.DependencyRouteBudgetTests.test_single_clause_is_counted_without_hiding_its_identity) ... FAIL
+
+======================================================================
+FAIL: test_large_route_executes_and_preserves_every_unresolved_clause (test_t1790_dependency_route_budget.DependencyRouteBudgetTests.test_large_route_executes_and_preserves_every_unresolved_clause)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1790_dependency_route_budget.py", line 48, in test_large_route_executes_and_preserves_every_unresolved_clause
+    self.assertIn("34 open clauses", route)
+AssertionError: '34 open clauses' not found in 'saipen ticket block T-2 "ACTIVE_DEPENDENCY:T-1 -- SRC-001: 35 open clauses (SRC-001:R001 SRC-001:R002 SRC-001:R003 +32 more) owner: T-1"'
+
+======================================================================
+FAIL: test_many_foreign_owners_do_not_expand_the_route_again (test_t1790_dependency_route_budget.DependencyRouteBudgetTests.test_many_foreign_owners_do_not_expand_the_route_again)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1790_dependency_route_budget.py", line 80, in test_many_foreign_owners_do_not_expand_the_route_again
+    self.assertIn("34 open clauses", route)
+AssertionError: '34 open clauses' not found in 'saipen ticket block T-2 "ACTIVE_DEPENDENCY:T-100 -- SRC-001: 35 open clauses (SRC-001:R001 SRC-001:R002 SRC-001:R003 +32 more) owner: T-100 (+33 other owners)"'
+
+======================================================================
+FAIL: test_single_clause_is_counted_without_hiding_its_identity (test_t1790_dependency_route_budget.DependencyRouteBudgetTests.test_single_clause_is_counted_without_hiding_its_identity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1790_dependency_route_budget.py", line 66, in test_single_clause_is_counted_without_hiding_its_identity
+    self.assertIn("1 open clause", route)
+AssertionError: '1 open clause' not found in 'saipen ticket block T-2 "ACTIVE_DEPENDENCY:T-1 -- SRC-001: 2 open clauses (SRC-001:R001 SRC-001:R002) owner: T-1"'
+
+----------------------------------------------------------------------
+Ran 3 tests in 13.634s
+
+FAILED (failures=3)

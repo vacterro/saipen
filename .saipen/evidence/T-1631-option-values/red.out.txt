@@ -1,0 +1,152 @@
+FF..F..FFFFEF.
+======================================================================
+ERROR: test_compound_separator_and_boundary_operands_stay_literal (test_t1631_option_values.StructuralValues.test_compound_separator_and_boundary_operands_stay_literal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 138, in test_compound_separator_and_boundary_operands_stay_literal
+    self.assertEqual(commands.split_cli_compound_argv(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\saipen_engine\commands.py", line 229, in split_cli_compound_argv
+    raise ValueError("compound command has an empty segment")
+ValueError: compound command has an empty segment
+
+======================================================================
+FAIL: test_event_cwd_spelling_project_root_does_not_hide_project (test_t1631_option_values.RealCLIValues.test_event_cwd_spelling_project_root_does_not_hide_project)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 115, in test_event_cwd_spelling_project_root_does_not_hide_project
+    self.admit("--project-root=" + str(self.home / "missing-project"), flag="--event-cwd")
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 66, in admit
+    self.assertEqual(proc.returncode, 1, payload)
+AssertionError: 2 != 1 : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': '--event-cwd needs a value'}
+
+======================================================================
+FAIL: test_json_value_does_not_enable_json_output (test_t1631_option_values.RealCLIValues.test_json_value_does_not_enable_json_output)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 90, in test_json_value_does_not_enable_json_output
+    self.assertFalse(proc.stdout.lstrip().startswith("{"), proc.stdout)
+AssertionError: True is not false : {
+  "ok": false,
+  "state": "REFUSED",
+  "permitted": false,
+  "verified": false,
+  "applies": true,
+  "problems": [
+    {
+      "component": "transport",
+      "code": "AUTHORITY_UNREACHABLE",
+      "reason": "HOST_AUTHORITY_UNAVAILABLE: the separated SAIPEN host-authority broker did not establish admission for this session component SAIPEN host-authority broker recovery-attempted [connect] state unanswered -- The SAIPEN authority service did not answer. (log V:\\_TEMP_\\saipen-t1631-values-0wd7l_bv\\home\\.saipen\\authority\\broker.log)"
+    },
+    {
+      "component": "agents",
+      "code": "ACTIVATION_BLOCK_ABSENT",
+      "reason": "host claude delivers no SAIPEN activation block"
+    },
+    {
+      "component": "host",
+      "code": "HOOK_STALE",
+      "reason": "host claude hook is not installed and current"
+    }
+  ],
+  "stale": [],
+  "warnings": [
+    "skill 'caveman' is unresolvable (not critical)"
+  ],
+  "unobserved": [],
+  "failure": "AUTHORITY_UNREACHABLE",
+  "failure_step": null,
+  "delivery": "",
+  "recovery": {
+    "component": "SAIPEN host-authority broker",
+    "attempted": [
+      "connect"
+    ],
+    "started": false,
+    "state": "unanswered",
+    "log": "V:\\_TEMP_\\saipen-t1631-values-0wd7l_bv\\home\\.saipen\\authority\\broker.log",
+    "identity": null,
+    "detail": null
+  },
+  "actions": [
+    "saipen host repair"
+  ],
+  "mode": "strict",
+  "code": "PROTOCOL_ADMISSION_TRANSPORT_REQUIRED",
+  "diagnostic": "SAIPEN PROTOCOL ADMISSION REFUSED -- The SAIPEN authority service did not answer. [AUTHORITY_UNREACHABLE] -- HOST_AUTHORITY_UNAVAILABLE: the separated SAIPEN host-authority broker did not establish admission for this session component SAIPEN host-authority broker recovery-attempted [connect] state unanswered -- The SAIPEN authority service did not answer. (log V:\\_TE -- automatic recovery attempted [connect]; state unanswered -- Do this: saipen host repair",
+  "contract": null
+}
+
+
+======================================================================
+FAIL: test_model_spelling_compound_separator_is_a_value (test_t1631_option_values.RealCLIValues.test_model_spelling_compound_separator_is_a_value)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 109, in test_model_spelling_compound_separator_is_a_value
+    self.admit("+")
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 66, in admit
+    self.assertEqual(proc.returncode, 1, payload)
+AssertionError: 2 != 1 : {'ok': False, 'code': 'COMPOUND_RESULT', 'segments': [{'index': 0, 'command': 'admission', 'disposition': 'FAILED', 'exit_code': 2, 'result': {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': '--model needs a value'}}, {'index': 1, 'command': '--home', 'disposition': 'NOT_RUN'}]}
+
+======================================================================
+FAIL: test_model_spelling_project_root_keeps_strict_binding (test_t1631_option_values.RealCLIValues.test_model_spelling_project_root_keeps_strict_binding)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 74, in test_model_spelling_project_root_keeps_strict_binding
+    literal = self.admit("--project-root=" + str(self.home / "missing-project"))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 66, in admit
+    self.assertEqual(proc.returncode, 1, payload)
+AssertionError: 0 != 1 : {'ok': True, 'state': 'UNBOUND', 'permitted': True, 'verified': True, 'applies': False, 'problems': [], 'stale': [], 'warnings': [], 'unobserved': [], 'delivery': '', 'mode': 'strict', 'code': 'ADMISSION_CURRENT', 'diagnostic': None, 'contract': None}
+
+======================================================================
+FAIL: test_response_request_spelling_dry_run_reaches_real_checker (test_t1631_option_values.RealCLIValues.test_response_request_spelling_dry_run_reaches_real_checker)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 132, in test_response_request_spelling_dry_run_reaches_real_checker
+    self.assertEqual(literal.returncode, 0, literal.stdout + literal.stderr)
+AssertionError: 1 != 0 : {
+  "ok": false,
+  "code": "EXEC_RESPONSE_INVALID",
+  "detail": "--request needs the human's request text"
+}
+
+
+======================================================================
+FAIL: test_session_spelling_project_root_keeps_strict_binding (test_t1631_option_values.RealCLIValues.test_session_spelling_project_root_keeps_strict_binding)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 112, in test_session_spelling_project_root_keeps_strict_binding
+    self.admit("--project-root=" + str(self.home / "missing-project"), flag="--session")
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 66, in admit
+    self.assertEqual(proc.returncode, 1, payload)
+AssertionError: 0 != 1 : {'ok': True, 'state': 'UNBOUND', 'permitted': True, 'verified': True, 'applies': False, 'problems': [], 'stale': [], 'warnings': [], 'unobserved': [], 'delivery': '', 'mode': 'strict', 'code': 'ADMISSION_CURRENT', 'diagnostic': None, 'contract': None}
+
+======================================================================
+FAIL: test_verify_value_does_not_enable_dry_run (test_t1631_option_values.RealCLIValues.test_verify_value_does_not_enable_dry_run)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 94, in test_verify_value_does_not_enable_dry_run
+    self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+AssertionError: 2 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "dangling --verify option"
+}
+
+
+======================================================================
+FAIL: test_help_value_does_not_change_execution_effect (test_t1631_option_values.StructuralValues.test_help_value_does_not_change_execution_effect)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1631-pair-pc_nc4iu\project\tools\test_t1631_option_values.py", line 146, in test_help_value_does_not_change_execution_effect
+    self.assertEqual(effects.classify_invocation(
+AssertionError: 'DIAGNOSTIC' != 'EXECUTION'
+- DIAGNOSTIC
++ EXECUTION
+
+
+----------------------------------------------------------------------
+Ran 14 tests in 7.392s
+
+FAILED (failures=8, errors=1)

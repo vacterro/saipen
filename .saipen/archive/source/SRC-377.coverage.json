@@ -1,0 +1,230 @@
+{
+  "requirements": {
+    "SRC-377:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "MISSION: Repair SAIPEN so an authenticated long-term research objective continues without the operator repeatedly typing cc or cc all. The BZCC public 2.0.185 research objective is maximal independently verified engine semantic, architectural, behavioral and modding coverage. An empty Board, a closed ticket, a passing documentation verifier, or a finished model turn must NEVER imply that a long-term research objective has been satisfied. Use existing SAIPEN components. Do not build a competing runtime.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 1: Exact cc all is continuation rather than a new ticket.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 2: Explicit new-goal intent remains separate.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 3: Empty Board with unresolved research gaps cannot satisfy goal.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 4: A missing authenticated goal cannot create false completion.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 5: Native nested coverage schema produces genuine candidates.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 6: Schema mismatch does not silently become zero gaps.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 7: Green documentation consistency checks do not imply 100% RE.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 8: Generated citations do not count as verified semantics.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 9: Current patch-specific evidence cannot be borrowed from another patch.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 10: Candidate deduplication preserves real new evidence generations.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 11: One verified gap closes; a different gap is automatically selected.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 12: _BZDECOMP's active Work is preserved.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 13: Cross-project ownership is respected.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 14: CLI one-step completion does not imply multi-turn autonomy.",
+      "verification": "python tools/core_unit.py focused T-2003 --pattern test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 15: Persisted dispatch without host acceptance is not TURN_STARTED.",
+      "verification": "tools/test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 16: Several genuine successor native turns execute without user cc.",
+      "verification": "tools/test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R018": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 17: Interrupted campaigns resume without duplicate side effects.",
+      "verification": "tools/test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 18: Expired, revoked and wrong-scope grants refuse mutation.",
+      "verification": "tools/test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R020": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 19: Host offline produces RUNTIME_PAUSED, not success.",
+      "verification": "tools/test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 20: Genuine exhausted work produces quiet waiting, not fake tasks.",
+      "verification": "tools/test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 21: A failed SAIPEN command piped through head remains failed.",
+      "verification": "tools/test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R023": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 22: Work progress cannot be inferred solely from journal counters.",
+      "verification": "tools/test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 23: Routine Windows tests do not capture mouse, focus or keyboard.",
+      "verification": "tools/test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    },
+    "SRC-377:R025": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/493c85252ba9478c-20261102T033551450309Z.json",
+      "text": "TEST 24: Mock-only passing tests never prove installed-host acceptance.",
+      "verification": "tools/test_bzcc_overnight_autonomy.py",
+      "work": "T-2003"
+    }
+  },
+  "schema_version": 1
+}

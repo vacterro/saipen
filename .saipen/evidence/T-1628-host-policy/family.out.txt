@@ -1,0 +1,19 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 5910,
+  "red": 2,
+  "new_red": [
+    "test_host_authority_broker.IdentityTests.test_an_arbitrary_same_user_python_client_is_refused",
+    "test_host_authority_broker.IdentityTests.test_an_ordinary_process_is_not_a_hook_invocation_and_starts_nothing"
+  ],
+  "fixed": [],
+  "problems": [
+    "2 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/27ba71acc5e97102-20261008T200123Z.json",
+  "reused": false,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

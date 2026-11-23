@@ -1,0 +1,76 @@
+{
+  "isolated_root": "V:\\_TEMP_\\t2040-review-baseline-complete-sjgwi62q\\project",
+  "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "runs": [
+    {
+      "name": "saved-original",
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_sub_dispose_after_collect",
+        "test_t925_sub_terminal_durability"
+      ],
+      "cwd": "V:\\_TEMP_\\t2040-review-baseline-complete-sjgwi62q\\project\\tools",
+      "owned_sha256": {
+        "tools/saipen_engine/subs.py": "9488271c1875b45a6132e43a07bb4ea3f61070f5094b5a49070d90faff2b4ceb",
+        "tools/saipen_engine/crew.py": "de2f8ad1a1172b4c1171280c647f40ea243cb0ea919ebf30f7adfc2091a61e81",
+        "tools/saipen_engine/journal.py": "80a411e6484eb24ac155701c67fef779fa694e65bb4356856468c1c821ebae93",
+        "tools/test_sub_dispose_after_collect.py": "2beb950d5f5e16b66027235b9c8cdbceeda978f3d9e5d6b4cb96dca0578f012f",
+        "tools/test_t925_sub_terminal_durability.py": "f236252bf12a2bbe305db43deb7f2f25ab8bfc6daa91da67b6ad73ea00e85b19"
+      },
+      "owned_stable": true,
+      "exit": 0,
+      "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\review-resume-20261108\\saved-original-complete-frozen-before.log"
+    },
+    {
+      "name": "current-original",
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_sub_dispose_after_collect",
+        "test_t925_sub_terminal_durability"
+      ],
+      "cwd": "V:\\_TEMP_\\t2040-review-baseline-complete-sjgwi62q\\project\\tools",
+      "owned_sha256": {
+        "tools/saipen_engine/subs.py": "69a9e12d75098165ddd74f0f28f55a95d99e7aae52930a20d77eaeef96a0fdc7",
+        "tools/saipen_engine/crew.py": "de2f8ad1a1172b4c1171280c647f40ea243cb0ea919ebf30f7adfc2091a61e81",
+        "tools/saipen_engine/journal.py": "80a411e6484eb24ac155701c67fef779fa694e65bb4356856468c1c821ebae93",
+        "tools/test_sub_dispose_after_collect.py": "2beb950d5f5e16b66027235b9c8cdbceeda978f3d9e5d6b4cb96dca0578f012f",
+        "tools/test_t925_sub_terminal_durability.py": "f236252bf12a2bbe305db43deb7f2f25ab8bfc6daa91da67b6ad73ea00e85b19"
+      },
+      "owned_stable": true,
+      "exit": 0,
+      "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\review-resume-20261108\\current-original-complete-frozen-before.log"
+    },
+    {
+      "name": "current-affected",
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_sub_dispose_after_collect",
+        "test_t925_sub_terminal_durability"
+      ],
+      "cwd": "V:\\_TEMP_\\t2040-review-baseline-complete-sjgwi62q\\project\\tools",
+      "owned_sha256": {
+        "tools/saipen_engine/subs.py": "69a9e12d75098165ddd74f0f28f55a95d99e7aae52930a20d77eaeef96a0fdc7",
+        "tools/saipen_engine/crew.py": "de2f8ad1a1172b4c1171280c647f40ea243cb0ea919ebf30f7adfc2091a61e81",
+        "tools/saipen_engine/journal.py": "80a411e6484eb24ac155701c67fef779fa694e65bb4356856468c1c821ebae93",
+        "tools/test_sub_dispose_after_collect.py": "15d951f865bae45aee9187fac6ce4e71ad9768531df74a89502c24dea65bfa92",
+        "tools/test_t925_sub_terminal_durability.py": "f236252bf12a2bbe305db43deb7f2f25ab8bfc6daa91da67b6ad73ea00e85b19"
+      },
+      "owned_stable": true,
+      "exit": 1,
+      "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\review-resume-20261108\\current-affected-complete-frozen-before.log"
+    }
+  ],
+  "previous_attempt": "missing extensions/adapters/registry.json; no tests executed"
+}

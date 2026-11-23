@@ -1,0 +1,53 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\vac34\AppData\Local\Programs\Python\Python311\python.exe
+PySide6 6.11.1 -- Qt runtime 6.11.1 -- Qt compiled 6.11.1
+rootdir: V:\_TEMP_\saipen-regression-ht12sha2
+plugins: anyio-4.15.1, langsmith-0.14.12, asyncio-1.4.0, cov-7.1.0, docker-3.2.5, mock-3.15.1, qt-4.5.0, timeout-2.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 3 items
+
+tools/test_response_delivery.py::RepeatedStateDigest::test_stop_delivery_matches_the_current_route_without_inventing_human_work 
+tools/test_response_delivery.py::RepeatedStateDigest::test_stop_delivery_matches_the_current_route_without_inventing_human_work PASSED [ 33%]
+tools/test_codex_stop_hook.py::CanonicalClassifierTests::test_a_valid_boundary_passes FAILED [ 66%]
+tools/test_codex_stop_hook.py::CodexStopHookTests::test_a_valid_boundary_passes_untouched FAILED [100%]
+
+================================== FAILURES ===================================
+_ RepeatedStateDigest.test_stop_delivery_matches_the_current_route_without_inventing_human_work (next_action='saipen continue') _
+tools\test_response_delivery.py:175: in test_stop_delivery_matches_the_current_route_without_inventing_human_work
+    self.assertEqual(result.data["delivery"], RS.digest_from_facts(facts, reason="stop"))
+E   AssertionError: 'STATUS: DONE  \nRESULT: Peatatud operaatori soovi[58 chars]_RUN' != 'STATUS: BLOCKED  \nRESULT: Peatatud operaatori so[61 chars]_RUN'
+E   - STATUS: DONE  
+E   + STATUS: BLOCKED  
+E     RESULT: Peatatud operaatori soovil  
+E     NEXT EXACT ACTION: saipen continue  
+E     VALIDATION: NOT_RUN
+_ RepeatedStateDigest.test_stop_delivery_matches_the_current_route_without_inventing_human_work (next_action='WAIT: blocked -- upstream evidence missing') _
+tools\test_response_delivery.py:166: in test_stop_delivery_matches_the_current_route_without_inventing_human_work
+    self.assertEqual(report["facts"]["operator_due"], expected_due)
+E   AssertionError: True != False
+_ RepeatedStateDigest.test_stop_delivery_matches_the_current_route_without_inventing_human_work (next_action='WAIT: manual-verify -- supply the verification verdict') _
+tools\test_response_delivery.py:175: in test_stop_delivery_matches_the_current_route_without_inventing_human_work
+    self.assertEqual(result.data["delivery"], RS.digest_from_facts(facts, reason="stop"))
+E   AssertionError: 'STATUS: DONE  \nRESULT: Peatatud operaatori soovi[168 chars]_RUN' != 'STATUS: BLOCKED  \nRESULT: Peatatud operaatori so[171 chars]_RUN'
+E   - STATUS: DONE  
+E   + STATUS: BLOCKED  
+E     RESULT: Peatatud operaatori soovil  
+E     BLOCKER: HUMAN_DECISION -- verification required  
+E     OPERATOR ACTION: manual-verify -- supply the verification verdict  
+E     NEXT EXACT ACTION: NONE  
+E     VALIDATION: NOT_RUN
+____________ CanonicalClassifierTests.test_a_valid_boundary_passes ____________
+tools\test_codex_stop_hook.py:162: in test_a_valid_boundary_passes
+    self.assertEqual(rc, 0, out)
+E   AssertionError: 1 != 0 : {'ok': False, 'code': 'EXEC_RESPONSE_INVALID', 'class': 'INVALID_OPERATIONAL_PROSE', 'layer': 'EXEC_RESPONSE', 'layers': {'admission': 'NOT_CONSULTED', 'exec_response': 'FAIL', 'chat_style': 'NOT_REACHED'}, 'errors': ['STATUS must name current phase DONE'], 'detail_mode': 'NONE', 'turn_decision': 'ORDINARY', 'detail': 'STATUS must name current phase DONE', 'diagnostic': None, 'delivery': 'STATUS: BLOCKED  \nRESULT: Peatatud operaatori soovil  \nNEXT EXACT ACTION: saipen continue  \nVALIDATION: NOT_RUN', 'overflow': None, 'contract': "SAIPEN chat contract, generated from STYLE.md (ded-069a4c52). Reply language is pinned to Estonian (et) by STYLE.md: answer in it on every reply, whatever language the user wrote in. Voice: caveman-ded, blunt and compressed. Higher-priority host instructions retain precedence. Chat prose is at most 8 lines (target 5) and 900 characters unless witnessed human ingress explicitly requests depth or a typed artifact. Summary, brief and ordinary final report stay compact. Fences never escape the total budget. Never open with: Sure, Certainly, Okay, Here is, I will, Let me, Based on my analysis, I'd be happy to. Never close with: Hope this helps, Let me know if you need anything else, Feel free to ask. Never apologize with: Sorry, My apologies, I made a mistake. Commands, PASS/FAIL, file:line, error strings and code stay exact. An operational boundary is the EXEC-RESPONSE-01 control surface generated from machine facts (`saipen response digest --project-root ROOT --reason final|stop|status`), never a model retrospective. The low-level diagnostic renderer is `saipen response render --stdin`. Completed-part gates replace default operational output. Post-render Stop gates request one correction; they cannot retract visible text. Runnable work continues silently. Evidence remains durable, not narrated."}
+__________ CodexStopHookTests.test_a_valid_boundary_passes_untouched __________
+tools\test_codex_stop_hook.py:273: in test_a_valid_boundary_passes_untouched
+    self.assertIsNone(out)
+E   AssertionError: {'decision': 'block', 'reason': 'SAIPEN canonical delivery (INVALID_OPERATIONAL_PROSE; do not add prose):\nSTATUS: BLOCKED  \nRESULT: Peatatud operaatori soovil  \nNEXT EXACT ACTION: saipen continue  \nVALIDATION: NOT_RUN'} is not None
+=========================== short test summary info ===========================
+SUBFAILED(next_action='saipen continue') tools/test_response_delivery.py::RepeatedStateDigest::test_stop_delivery_matches_the_current_route_without_inventing_human_work
+SUBFAILED(next_action='WAIT: blocked -- upstream evidence missing') tools/test_response_delivery.py::RepeatedStateDigest::test_stop_delivery_matches_the_current_route_without_inventing_human_work
+SUBFAILED(next_action='WAIT: manual-verify -- supply the verification verdict') tools/test_response_delivery.py::RepeatedStateDigest::test_stop_delivery_matches_the_current_route_without_inventing_human_work
+FAILED tools/test_codex_stop_hook.py::CanonicalClassifierTests::test_a_valid_boundary_passes
+FAILED tools/test_codex_stop_hook.py::CodexStopHookTests::test_a_valid_boundary_passes_untouched
+======================== 5 failed, 1 passed in 10.16s =========================

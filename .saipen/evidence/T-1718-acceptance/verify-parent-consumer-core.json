@@ -1,0 +1,19 @@
+{
+  "label": "verify-parent-consumer-core",
+  "phase": "VERIFY",
+  "command": [
+    "C:/ProgramData/SAI/SAIPEN/python/3.11.9-64/python.exe",
+    "-B",
+    ".saipen/evidence/T-1717-contracts/consumer-protocol.py"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 4.828,
+  "fingerprint": "41247edf69d91ef36f1e0857104ee548c76119cb6fc9761a9d43cdbe3d0fd3e9",
+  "stdout": "{\"exit_code\": 1, \"canonical_unchanged\": true, \"history_unchanged\": true, \"state\": {\"phase\": \"DONE\", \"task\": \"none\", \"next_action\": \"saipen crew\", \"blocker\": \"none\", \"agent\": \"saipen-cli\", \"saipen_version\": 7, \"schema_version\": 3, \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\", \"mode\": \"full\", \"last_event\": 3648, \"style_contract\": \"ded-069a4c52\", \"updated\": \"2026-10-11T15:19:55Z\", \"transition_from\": \"SHIP\", \"execution_intent\": \"converge\", \"converge_target\": \"crew\"}, \"absence\": {\".json\": true, \".LOG.md\": true}}\r\nFAIL: closure-evidence -- ticket T-243 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt); an unproven closure is never protocol-green -- run saipen work reverify T-243 --run '<executable check for this Work>' to record ONE immutable current-tree re-verification receipt with EXECUTED evidence (an attested-only --verification contract is recorded evidence, never closure proof), or re-verify with real evidence before DONE\r\nFAIL: closure-evidence -- ticket T-244 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt); an unproven closure is never protocol-green -- run saipen work reverify T-244 --run '<executable check for this Work>' to record ONE immutable current-tree re-verification receipt with EXECUTED evidence (an attested-only --verification contract is recorded evidence, never closure proof), or re-verify with real evidence before DONE\r\nFAIL: closure-evidence -- ticket T-245 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt); an unproven closure is never protocol-green -- run saipen work reverify T-245 --run '<executable check for this Work>' to record ONE immutable current-tree re-verification receipt with EXECUTED evidence (an attested-only --verification contract is recorded evidence, never closure proof), or re-verify with real evidence before DONE\r\nFAIL: closure-evidence -- ticket T-357 is ## DONE but carries no current-cycle verification evidence (classifier: no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt); an unproven closure is never protocol-green -- run saipen work reverify T-357 --run '<executable check for this Work>' to record ONE immutable current-tree re-verification receipt with EXECUTED evidence (an attested-only --verification contract is recorded evidence, never closure proof), or re-verify with real evidence before DONE\r\nValidation FAILED: 4 problem(s), 57 warning(s)\r\n",
+  "stderr": "",
+  "stdout_sha256": "accaba7463f58c2852206ec00745f7b7cf928dfdb96316ff1318dced6a817865",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

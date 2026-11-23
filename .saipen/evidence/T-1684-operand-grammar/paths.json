@@ -1,0 +1,7 @@
+[
+  "tools/saipen.py",
+  "tools/saipen_engine/commands.py",
+  "tools/saipen_engine/command_effects.py",
+  "tools/saipen_engine/cli_grammar.py",
+  "tools/test_t1684_operand_grammar.py"
+]

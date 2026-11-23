@@ -1,0 +1,1117 @@
+--- a/extensions/adapters/opencode/saipen-guard.js
++++ b/extensions/adapters/opencode/saipen-guard.js
+@@ -21,7 +21,8 @@
+ //   allowed action            -> host tool proceeds (guard exit 0)
+ //   guard refusal             -> host tool does not execute (thrown error)
+ //   guard failure / invalid
+-//   output / unreachable      -> fail closed for consequential mutations
++//   declared integration gap  -> operator policy; allowed work is UNVERIFIED
++//   invalid output / payload  -> consequential tool does not execute
+ //   verified built-in reads   -> never consequential; no guard round trip
+ //
+ // This file TRANSLATES only: it forwards one bounded JSON event
+@@ -53,6 +54,442 @@
+ const FLEET_TIMEOUT_MS = 120000;
+ const BUILD_ID = "T-1327-zero-manual-recovery-20260914.1";
+ const MAX_DIAGNOSTIC_BYTES = 4096;
++
++// BEGIN GENERATED HOST-INTEGRATION-01 POLICY
++const HOST_INTEGRATION_POLICY = {
++  "version": 1,
++  "default_mode": "degraded",
++  "strict_mode": "strict",
++  "aliases": {
++    "strict": "strict",
++    "degraded": "degraded",
++    "degraded_allowed": "degraded",
++    "degraded-allowed": "degraded"
++  },
++  "labels": {
++    "strict": "STRICT",
++    "degraded": "DEGRADED_ALLOWED"
++  },
++  "gap_codes": {
++    "SAIPEN_GUARD_UNINSTALLED": "ENGINE_UNREACHABLE",
++    "SAIPEN_GUARD_UNREACHABLE": "ENGINE_UNREACHABLE",
++    "PLUGIN_RESTART_REQUIRED": "PLUGIN_RESTART_REQUIRED"
++  },
++  "identity_observation": {
++    "root_env": "SAIPEN_PROJECT_ROOT",
++    "lineage_env": "SAIPEN_PROJECT_LINEAGE",
++    "memory_dir": ".saipen",
++    "identity_file": "IDENTITY.md",
++    "canonical_pattern": "^\\-\\-\\-\\r?\\nproject_lineage:\\ (lineage-[0-9a-f]{32})\\r?\\n\\-\\-\\-\\r?\\n$",
++    "max_bytes": 4096
++  },
++  "failures": {
++    "AUTHORITY_UNREACHABLE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "AUTHORITY_FAULT": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "AUTHORITY_GENERATION_MISMATCH": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "AUTHORITY_IMPOSTOR": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host doctor"
++    },
++    "AUTHORITY_CLIENT_UNPROVEN": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host doctor"
++    },
++    "AUTHORITY_IDENTITY_UNSUPPORTED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host doctor"
++    },
++    "HOST_AUTHORITY_UNAVAILABLE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "CAPABILITY_FORGED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "BLOCK"
++      },
++      "operator_action": "remove SAIPEN_ADMISSION_TRANSPORT from the host environment and restart the host"
++    },
++    "CAPABILITY_REPLAYED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "BLOCK"
++      },
++      "operator_action": "remove SAIPEN_ADMISSION_TRANSPORT from the host environment and restart the host"
++    },
++    "CAPABILITY_EXPIRED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "BLOCK"
++      },
++      "operator_action": "remove SAIPEN_ADMISSION_TRANSPORT from the host environment and restart the host"
++    },
++    "CAPABILITY_BINDING_MISMATCH": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "BLOCK"
++      },
++      "operator_action": "remove SAIPEN_ADMISSION_TRANSPORT from the host environment and restart the host"
++    },
++    "HOST_EVIDENCE_UNAVAILABLE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host doctor"
++    },
++    "PROTOCOL_ADMISSION_REQUIRED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "BLOCK"
++      },
++      "operator_action": "send the prompt again"
++    },
++    "PROTOCOL_ADMISSION_TRANSPORT_REQUIRED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "BLOCK"
++      },
++      "operator_action": "send a prompt through the host; the hook establishes admission"
++    },
++    "BINDING_FOREIGN_PROJECT": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "BLOCK"
++      },
++      "operator_action": "start the host in the intended project, or clear SAIPEN_PROJECT_ROOT and SAIPEN_PROJECT_LINEAGE"
++    },
++    "BINDING_CONFLICT": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "BLOCK"
++      },
++      "operator_action": "start the host in the intended project, or clear SAIPEN_PROJECT_ROOT and SAIPEN_PROJECT_LINEAGE"
++    },
++    "BINDING_CARRIER_INVALID": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "clear SAIPEN_PROJECT_ROOT and SAIPEN_PROJECT_LINEAGE, or start the host in the project"
++    },
++    "PROJECT_IDENTITY_UNREADABLE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen recover"
++    },
++    "ENGINE_UNREACHABLE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "AUTHORITY_DOCUMENT_UNREADABLE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "AUTHORITY_DOCUMENT_INVALID": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "ACTIVATION_BLOCK_ABSENT": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "HOST_UNREGISTERED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "HOOK_UNOBSERVABLE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "SKILL_UNRESOLVED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "CANONICAL_RUNTIME_SOURCE_UNPROVEN": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "HOST_UNIDENTIFIED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "name the host: saipen runtime --prelaunch --adapter <id>"
++    },
++    "INSTALL_PREFLIGHT_FAILED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "POLICY_INVALID": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host mode degraded"
++    },
++    "HOOK_STALE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "ACTIVATION_BLOCK_STALE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "HOST_RUNTIME_STALE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "RUNTIME_STALE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "PLUGIN_RESTART_REQUIRED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "restart the host application"
++    },
++    "HOST_LAUNCH_REFUSED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "start the host application normally"
++    },
++    "CLAUDE_STOP_GATE_UNAVAILABLE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host doctor"
++    },
++    "CLAUDE_STOP_REENTRY_NO_FAIL_CLOSED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "none"
++    },
++    "RUNTIME_RESYNC_FAILED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "BOOTSTRAP_INSTALL_FAILED": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "BOOTSTRAP_INCOMPLETE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "BOOTSTRAP_PROVENANCE_INVALID": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host repair"
++    },
++    "REPAIR_INCOMPLETE": {
++      "decisions": {
++        "strict": "BLOCK",
++        "degraded": "ALLOW_DEGRADED"
++      },
++      "operator_action": "saipen host doctor"
++    }
++  }
++};
++// END GENERATED HOST-INTEGRATION-01 POLICY
++
++// The native policy reader mirrors host_authority_client.policy: a missing
++// file uses the product default; unreadable bytes or an unknown mode use
++// STRICT. Only the canonical generated table decides whether a gap degrades.
++function admissionPolicy() {
++  const policyPath = path.join(os.homedir(), ".saipen", "authority.json");
++  const invalid = { mode: HOST_INTEGRATION_POLICY.strict_mode, source: "invalid" };
++  let bytes;
++  try { bytes = fs.readFileSync(policyPath); } catch (error) {
++    return error && error.code === "ENOENT"
++      ? { mode: HOST_INTEGRATION_POLICY.default_mode, source: "default" }
++      : invalid;
++  }
++  try {
++    const payload = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
++    const spelling = payload && typeof payload.mode === "string"
++      ? payload.mode.trim().toLowerCase().replaceAll(" ", "_") : "";
++    const mode = HOST_INTEGRATION_POLICY.aliases[spelling];
++    return typeof mode === "string" ? { mode, source: "operator" } : invalid;
++  } catch (_error) { return invalid; }
++}
++
++function integrationDecision(adapterCode, bindingConflict = null) {
++  const policy = admissionPolicy();
++  const code = bindingConflict ? "BINDING_CONFLICT" : HOST_INTEGRATION_POLICY.gap_codes[adapterCode];
++  const row = HOST_INTEGRATION_POLICY.failures[code];
++  const actionRow = policy.source === "invalid"
++    ? HOST_INTEGRATION_POLICY.failures.POLICY_INVALID : row;
++  return {
++    status: "UNVERIFIED",
++    adapter_code: adapterCode,
++    binding_conflict: bindingConflict,
++    failure_code: code || "UNCLASSIFIED",
++    decision: row ? row.decisions[policy.mode] : "BLOCK",
++    policy: HOST_INTEGRATION_POLICY.labels[policy.mode],
++    policy_source: policy.source,
++    operator_action: actionRow ? actionRow.operator_action : "saipen host doctor",
++  };
++}
++
++function integrationSystemMessage(gap) {
++  return `SAIPEN_HOST_INTEGRATION ${JSON.stringify(gap)}\n` +
++    (gap.decision === "ALLOW_DEGRADED"
++      ? "Ordinary work may proceed under the selected host policy. SAIPEN could not " +
++        "verify consequential tools; retain the UNVERIFIED status and claim no validation."
++      : "The selected host policy blocks consequential tools while this integration " +
++        "gap remains. Exact built-in diagnostic tools remain available.");
++}
++
++const TERMINAL_GUARD_CODES = new Set([
++  "PROTECTED_CANONICAL_NAMESPACE", "PATH_ESCAPES_PROJECT", "TARGET_UNRESOLVED",
++  "PROJECT_BINDING_INVALID", "PROJECT_LINEAGE_MISMATCH", "PROJECT_BINDING_AMBIGUOUS",
++  "OWNERSHIP_CONFLICT",
++]);
++
++// A negative observation only, never a resolver or an admission. During an
++// interpreter gap the host may still present two mechanically contradictory
++// identities. Read only a direct canonical, bounded, ordinary identity file;
++// unknown/changed/link bytes prove nothing and confer no project authority.
++// The recognized canonical byte grammar comes from paths.identity_file_content.
++function observedLineage(root) {
++  if (typeof root !== "string" || !path.isAbsolute(root)) return null;
++  const spec = HOST_INTEGRATION_POLICY.identity_observation;
++  const memory = path.join(root, spec.memory_dir);
++  const identity = path.join(memory, spec.identity_file);
++  let descriptor;
++  const same = (left, right) => left.dev === right.dev && left.ino === right.ino &&
++    left.size === right.size && left.mtimeMs === right.mtimeMs;
++  try {
++    const directoryBefore = fs.lstatSync(memory);
++    const before = fs.lstatSync(identity);
++    if (!directoryBefore.isDirectory() || directoryBefore.isSymbolicLink() ||
++        !before.isFile() || before.isSymbolicLink() || before.size > spec.max_bytes) return null;
++    descriptor = fs.openSync(identity, "r");
++    if (!same(before, fs.fstatSync(descriptor))) return null;
++    const bytes = fs.readFileSync(descriptor);
++    const after = fs.lstatSync(identity);
++    const directoryAfter = fs.lstatSync(memory);
++    if (bytes.length > spec.max_bytes || !same(before, after) ||
++        !same(directoryBefore, directoryAfter) || after.isSymbolicLink() ||
++        directoryAfter.isSymbolicLink() || bytes.subarray(0, 3).equals(Buffer.from([239, 187, 191]))) {
++      return null;
++    }
++    const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
++    const match = new RegExp(spec.canonical_pattern).exec(text);
++    return match ? match[1] : null;
++  } catch (_error) { return null; }
++  finally {
++    if (descriptor !== undefined) {
++      try { fs.closeSync(descriptor); } catch (_error) { /* observation only */ }
++    }
++  }
++}
++
++function observedBindingConflict(context) {
++  const spec = HOST_INTEGRATION_POLICY.identity_observation;
++  const root = process.env[spec.root_env];
++  const expected = process.env[spec.lineage_env];
++  const asserted = observedLineage(root);
++  if (asserted && expected && asserted !== expected.trim()) return "PROJECT_LINEAGE_MISMATCH";
++  for (const candidate of contextCandidates(context)) {
++    const local = observedLineage(candidate);
++    if (!local) continue;
++    if (asserted && asserted !== local) return "PROJECT_BINDING_AMBIGUOUS";
++    if (!root && expected && local !== expected.trim()) return "PROJECT_LINEAGE_MISMATCH";
++    break;
++  }
++  return null;
++}
+ 
+ // P0-1 (SRC-028:R012): system authority carries ONLY bounded machine facts.
+ // The model-visible bootstrap payload is a closed record -- binding code,
+@@ -498,6 +935,11 @@
+ // is a fixed string chosen by the guard's bounded code, never composed from
+ // project content.
+ function bindingInstruction(binding) {
++  if (binding.code === "GUARD_UNREACHABLE") {
++    return "The canonical SAIPEN resolver could not be consulted. The separate " +
++      "SAIPEN_HOST_INTEGRATION record states the selected gap policy; no project " +
++      "binding or validation is claimed. Do not adopt an ambient project.";
++  }
+   if (binding.project_root) {
+     return "Binding was resolved mechanically by the canonical SAIPEN resolver before tool " +
+       "admission. Use project_root directly; do not run generic shell root discovery and " +
+@@ -945,6 +1387,21 @@
+     return liveBinding;
+   }
+   let attemptedCondition = null;
++  function knownBindingConflict(gap) {
++    if (TERMINAL_GUARD_CODES.has(liveBinding.code)) return liveBinding.code;
++    return gap ? observedBindingConflict(context) : null;
++  }
++  function integrationGap() {
++    let installedSha256;
++    try { installedSha256 = sha256(fs.readFileSync(MODULE_PATH)); } catch (_error) {
++      installedSha256 = "missing";
++    }
++    if (installedSha256 !== LOADED_SHA256) return "PLUGIN_RESTART_REQUIRED";
++    if (!guardInstalled) return "SAIPEN_GUARD_UNINSTALLED";
++    if (!pythonBin) return "SAIPEN_GUARD_UNREACHABLE";
++    return null;
++  }
++
+ 
+   return {
+     "experimental.chat.system.transform": async (input, output) => {
+@@ -952,14 +1409,19 @@
+       const binding = await currentBinding({
+         rateLimitMs: BINDING_RECHECK_MS, sessionId: input && input.sessionID,
+       });
+-      output.system.push(bindingSystemMessage(binding));
++      const gap = integrationGap();
++      const conflict = knownBindingConflict(gap);
++      output.system.push(bindingSystemMessage(conflict ? { ...binding, code: conflict } : binding));
++      if (gap) {
++        output.system.push(integrationSystemMessage(integrationDecision(gap, conflict)));
++      }
+       // T-1446 AUTO_RECALL / AUTO_KICK. This hook runs before EVERY model
+       // request -- including the first request a replacement model serves
+       // after a router swaps providers mid-work (SAIFREN, SRC-105). The
+       // canonical execution is recomputed here from project state on each
+       // request, so the successor receives the decision instead of needing a
+       // memory it does not have.
+-      if (binding.code !== "ADMITTED" || !binding.project_root) return;
++      if (conflict || binding.code !== "ADMITTED" || !binding.project_root) return;
+       const sessionID = input && input.sessionID;
+       const memory = sessionMemory(sessionID);
+       const recall = runRecall(
+@@ -1032,19 +1494,6 @@
+       const toolName =
+         input && typeof input.tool === "string" && input.tool.trim() ? input.tool : "unknown";
+       if (isBuiltinNonProject(toolName)) return;
+-      // A running host keeps its imported module after an on-disk overwrite.
+-      // Report that generation mismatch before consequential admission.
+-      let installedSha256;
+-      try { installedSha256 = sha256(fs.readFileSync(MODULE_PATH)); } catch (_error) {
+-        installedSha256 = "missing";
+-      }
+-      if (installedSha256 !== LOADED_SHA256) {
+-        throw new Error(
+-          `SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=${BUILD_ID} ` +
+-            `sha256=${LOADED_SHA256}; installed sha256=${installedSha256}; ` +
+-            `restart OpenCode; the host tool did not execute`,
+-        );
+-      }
+       // Tool name comes from the real hook INPUT; arguments come from the
+       // real mutable hook OUTPUT. No adapter-local alternative schema.
+       const args = output ? output.args : undefined;
+@@ -1056,18 +1505,19 @@
+         );
+       }
+ 
+-      if (!guardInstalled) {
++      // A known binding/ownership conflict is a refusal in every policy,
++      // including when this loaded plugin has subsequently become stale.
++      const gap = integrationGap();
++      const conflict = knownBindingConflict(gap);
++      if (conflict) {
++        throw guardRefusal({ block: true, code: conflict }, null, toolName, args);
++      }
++      if (gap) {
++        const decision = integrationDecision(gap);
++        if (decision.decision === "ALLOW_DEGRADED") return;
+         throw new Error(
+-          `SAIPEN_GUARD_UNINSTALLED: no saipen guard at '${saipenPy}'; ` +
+-            `the saipen guard could not be consulted for tool '${toolName}' ` +
+-            `(consequential mutations fail closed)`,
+-        );
+-      }
+-      if (!pythonBin) {
+-        throw new Error(
+-          `SAIPEN_GUARD_UNREACHABLE: no Python runtime found; ` +
+-            `the saipen guard could not be consulted for tool '${toolName}' ` +
+-            `(consequential mutations fail closed)`,
++          `SAIPEN_GUARD_REFUSAL: ${gap}: UNVERIFIED ${decision.policy}; ` +
++          `next: ${decision.operator_action}; the host tool did not execute`,
+         );
+       }
+ 
+@@ -1102,11 +1552,7 @@
+       const guardPayload = parseGuardPayload(result);
+       // Intrinsically forbidden effects and asserted binding conflicts keep
+       // their exact guard refusal. Recovery cannot make such payloads safe.
+-      const terminalGuardCodes = new Set([
+-        "PROTECTED_CANONICAL_NAMESPACE", "PATH_ESCAPES_PROJECT", "TARGET_UNRESOLVED",
+-        "PROJECT_BINDING_INVALID", "PROJECT_LINEAGE_MISMATCH", "OWNERSHIP_CONFLICT",
+-      ]);
+-      if (verdict.block && terminalGuardCodes.has(verdict.code)) {
++      if (verdict.block && TERMINAL_GUARD_CODES.has(verdict.code)) {
+         throw guardRefusal(verdict, guardPayload, toolName, args);
+       }
+       // Fleet owns classification and the single canonical recovery attempt.
+--- a/extensions/adapters/opencode.md
++++ b/extensions/adapters/opencode.md
+@@ -19,9 +19,17 @@
+   `python <skill>/tools/saipen.py guard --event-json - --json`:
+   - exit 0 -> the tool proceeds;
+   - nonzero exit -> the plugin throws, so the tool does not execute;
+-  - guard failure, invalid output, unreadable `output.args` or no Python
+-    runtime -> fail closed for consequential mutations (verified built-in
+-    read-only tools skip the round trip and stay usable).
++  - a missing guard, no Python or a replaced loaded plugin -> the operator's
++    `~/.saipen/authority.json` policy. The default DEGRADED_ALLOWED permits
++    the tool with an `UNVERIFIED` system record; STRICT refuses with one
++    taxonomy action. An unreadable or invalid policy selects STRICT.
++  - invalid guard output or unreadable `output.args` -> the tool is refused.
++    Known binding conflicts remain refused in every policy. Verified built-in
++    read-only tools skip the round trip and stay usable.
++  The self-contained native policy facet is generated from HOST-INTEGRATION-01
++  by `python -m saipen_engine.native_host_policy --write` in `tools/`; its
++  regression requires exact parity with the canonical table. The plugin reads
++  policy and marks the gap before each model request without claiming a binding.
+    Actor identity: an OpenCode session id is diagnostic only and is never a
+    SAIPEN actor. `SAIPEN_AGENT` is an optional explicit actor/provenance carrier,
+    not authentication. When it exists, the plugin forwards it and Core checks it
+--- a/extensions/adapters/registry.json
++++ b/extensions/adapters/registry.json
+@@ -67,8 +67,8 @@
+       "visible_prevention": "COMPLETED_PART_ONLY_NOT_TOKEN_STREAM",
+       "launch_executable": "opencode",
+       "auto_recovery": "PRELAUNCH_RESYNC",
+-      "degraded_mode": "FAIL_CLOSED_TOOL_GATE",
+-      "degraded_mode_note": "No prompt-level admission hook exists, so no prompt is ever blocked. The tool gate is different in kind: when the installed guard cannot be consulted (no interpreter, guard missing, plugin bytes replaced under a running host) consequential mutations are refused and reads proceed. That is a recorded difference from the Claude policy (T-1624 parity audit), not parity: the DEGRADED_ALLOWED decision table is not applied to this tool gate."
++      "degraded_mode": "DEGRADED_ALLOWED_DEFAULT",
++      "degraded_mode_note": "No prompt-level admission hook exists. The consequential tool gate applies the operator policy for a missing guard, unavailable interpreter or replaced loaded plugin: DEGRADED_ALLOWED permits the tool with a bounded UNVERIFIED system record; STRICT refuses with the taxonomy action. Missing policy uses the canonical default, invalid policy uses STRICT. Known forged or foreign binding and normal guard refusals still block in every mode. Decisions are compiled from HOST-INTEGRATION-01 and checked against its owner."
+     },
+     {
+       "id": "claude",
+--- a/tools/saipen_engine/native_host_policy.py
++++ b/tools/saipen_engine/native_host_policy.py
+@@ -0,0 +1,94 @@
++"""Compile the canonical host taxonomy into the self-contained native plugin.
++
++The installed OpenCode plugin must still decide an integration gap when Python
++or the skill runtime is missing. This checked facet contains decisions computed
++by host_taxonomy; it is not a second policy owner. Regenerate with
++`python -m saipen_engine.native_host_policy --write` from tools/.
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++import re
++from pathlib import Path
++
++from . import host_taxonomy as taxonomy
++from . import paths
++
++BEGIN = "// BEGIN GENERATED HOST-INTEGRATION-01 POLICY"
++END = "// END GENERATED HOST-INTEGRATION-01 POLICY"
++GAP_CODES = {
++    "SAIPEN_GUARD_UNINSTALLED": "ENGINE_UNREACHABLE",
++    "SAIPEN_GUARD_UNREACHABLE": "ENGINE_UNREACHABLE",
++    "PLUGIN_RESTART_REQUIRED": "PLUGIN_RESTART_REQUIRED",
++}
++
++
++def facet() -> dict:
++    """Closed data read by the native transport without an interpreter."""
++    placeholder = "lineage-" + "f" * 32
++    canonical_identity = re.escape(paths.identity_file_content(placeholder))
++    canonical_identity = canonical_identity.replace(
++        re.escape(placeholder), "(lineage-[0-9a-f]{32})"
++    )
++    canonical_identity = canonical_identity.replace("\\\n", "\\r?\\n")
++    return {
++        "version": 1,
++        "default_mode": taxonomy.DEFAULT_MODE,
++        "strict_mode": taxonomy.MODE_STRICT,
++        "aliases": taxonomy.MODE_ALIASES,
++        "labels": taxonomy.MODE_LABELS,
++        "gap_codes": GAP_CODES,
++        "identity_observation": {
++            "root_env": paths.ENV_PROJECT_ROOT,
++            "lineage_env": paths.ENV_PROJECT_LINEAGE,
++            "memory_dir": paths.SAIPEN_DIR,
++            "identity_file": paths.IDENTITY_NAME,
++            "canonical_pattern": "^" + canonical_identity + "$",
++            "max_bytes": 4096,
++        },
++        "failures": {
++            code: {
++                "decisions": {
++                    mode: taxonomy.decide(mode, [{"code": code}])
++                    for mode in taxonomy.MODES
++                },
++                "operator_action": taxonomy.get(code).operator_action,
++            }
++            for code in taxonomy.codes()
++        },
++    }
++
++
++def fragment() -> str:
++    return (
++        BEGIN + "\nconst HOST_INTEGRATION_POLICY = "
++        + json.dumps(facet(), indent=2, ensure_ascii=False)
++        + ";\n" + END
++    )
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--write", action="store_true")
++    parser.add_argument("--plugin", type=Path)
++    args = parser.parse_args()
++    plugin = args.plugin or (
++        Path(__file__).resolve().parents[2]
++        / "extensions/adapters/opencode/saipen-guard.js"
++    )
++    text = plugin.read_text(encoding="utf-8")
++    first = text.index(BEGIN)
++    last = text.index(END, first) + len(END)
++    expected = fragment()
++    matches = text[first:last] == expected
++    if args.write and not matches:
++        plugin.write_text(text[:first] + expected + text[last:], encoding="utf-8")
++        matches = True
++    print(json.dumps({"ok": matches, "plugin": str(plugin)}))
++    return 0 if matches else 1
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+--- a/tools/test_t1628_opencode_policy.py
++++ b/tools/test_t1628_opencode_policy.py
+@@ -0,0 +1,311 @@
++"""Real native OpenCode gap admission with explicit policy and conflict controls."""
++
++from __future__ import annotations
++
++import json
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++
++TOOLS = Path(__file__).resolve().parent
++ROOT = TOOLS.parent
++if str(TOOLS) not in sys.path:
++    sys.path.insert(0, str(TOOLS))
++
++from saipen_engine import host_authority_client, host_taxonomy  # noqa: E402
++from saipen_engine.paths import project_lineage_identity  # noqa: E402
++from test_guard_hostile_matrix import active_project  # noqa: E402
++from test_hermetic_env import HOST_SESSION_VARIABLES, isolate_host_session  # noqa: E402
++
++NODE = shutil.which("node")
++PLUGIN = ROOT / "extensions/adapters/opencode/saipen-guard.js"
++
++
++def setUpModule() -> None:
++    isolate_host_session()
++
++
++DRIVER = r'''
++import fs from "node:fs";
++import { pathToFileURL } from "node:url";
++const request = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
++const results = [];
++for (const item of request.cases) {
++  const saved = {};
++  for (const [key, value] of Object.entries(item.env)) {
++    saved[key] = process.env[key];
++    if (value === null) delete process.env[key];
++    else process.env[key] = String(value);
++  }
++  const { default: factory } = await import(pathToFileURL(item.plugin).href);
++  const hooks = await factory({ worktree: item.project, directory: item.project });
++  if (item.stale) fs.appendFileSync(item.plugin, "\n// next installed generation\n");
++  const before = { system: [] };
++  await hooks["experimental.chat.system.transform"]({ sessionID: item.id }, before);
++  if (item.policy_change) fs.writeFileSync(item.policy_path, item.policy_change);
++  const result = { id: item.id, outcome: "allowed", message: "", before: before.system };
++  try {
++    await hooks["tool.execute.before"](
++      { tool: item.tool || "write", sessionID: item.id }, item.output,
++    );
++    if (item.effect) fs.writeFileSync(item.effect, "HOST_TOOL_EXECUTED");
++  } catch (error) {
++    result.outcome = "blocked";
++    result.message = String(error.message || error);
++  }
++  const after = { system: [] };
++  await hooks["experimental.chat.system.transform"]({ sessionID: item.id }, after);
++  result.after = after.system;
++  results.push(result);
++  for (const [key, value] of Object.entries(saved)) {
++    if (value === undefined) delete process.env[key];
++    else process.env[key] = value;
++  }
++}
++process.stdout.write(JSON.stringify(results));
++'''
++
++
++@unittest.skipUnless(NODE, "native Node runtime unavailable")
++class NativePolicyTests(unittest.TestCase):
++    @classmethod
++    def setUpClass(cls) -> None:
++        cls.temporary = tempfile.TemporaryDirectory(prefix="saipen-t1628-policy-")
++        cls.tmp = Path(cls.temporary.name)
++        cls.project = active_project()
++        cls.foreign = active_project()
++        cls.snapshot = {
++            str(path.relative_to(cls.project)): path.read_bytes()
++            for path in (cls.project / ".saipen").rglob("*") if path.is_file()
++        }
++        cases = []
++        cls.effects = {}
++        cls.policy_expectations = {}
++
++        def case(identifier, gap, mode=None, *, tool="write", invalid=None,
++                 foreign=False, malformed=False, change=False, ambient=False, legitimate=False):
++            profile = cls.tmp / identifier / "profile"
++            (profile / ".saipen").mkdir(parents=True)
++            policy = profile / ".saipen/authority.json"
++            if mode is not None:
++                policy.write_text(json.dumps({"mode": mode}), encoding="utf-8-sig")
++            if invalid == "bytes":
++                policy.write_bytes(b'\xff{"mode":"degraded"}')
++            elif invalid == "json":
++                policy.write_text("{bad", encoding="utf-8")
++            elif invalid == "mode":
++                policy.write_text('{"mode":"unchecked"}', encoding="utf-8")
++            elif invalid == "directory":
++                policy.mkdir()
++            cls.policy_expectations[identifier] = host_authority_client.policy(profile)
++            plugin = profile.parent / "saipen-guard.mjs"
++            shutil.copyfile(PLUGIN, plugin)
++            effect = cls.project / "src" / (identifier + ".txt")
++            cls.effects[identifier] = effect
++            env = {name: None for name in HOST_SESSION_VARIABLES}
++            env.update({
++                "SAIPEN_SKILL_ROOT": str(ROOT if gap != "missing" else profile / "absent"),
++                "SAIPEN_PYTHON": sys.executable,
++                "USERPROFILE": str(profile), "HOME": str(profile),
++            })
++            if gap == "python":
++                env.update({"SAIPEN_PYTHON": "saipen-missing-python", "PATH": ""})
++            if foreign:
++                env.update({"SAIPEN_PROJECT_ROOT": str(cls.project),
++                            "SAIPEN_PROJECT_LINEAGE": "lineage-" + "0" * 32})
++            if ambient:
++                env.update({"SAIPEN_PROJECT_ROOT": str(cls.foreign),
++                            "SAIPEN_PROJECT_LINEAGE": project_lineage_identity(cls.foreign)})
++            if legitimate:
++                env.update({"SAIPEN_PROJECT_ROOT": str(cls.project),
++                            "SAIPEN_PROJECT_LINEAGE": project_lineage_identity(cls.project)})
++            cases.append({
++                "id": identifier, "project": str(cls.project), "plugin": str(plugin),
++                "env": env, "stale": gap == "stale", "tool": tool,
++                "output": {} if malformed else {
++                    "args": {"filePath": str(effect), "content": "HOST_TOOL_EXECUTED"}},
++                "effect": str(effect) if tool == "write" else None,
++                "policy_path": str(policy),
++                "policy_change": '{"mode":"strict"}' if change else None,
++            })
++
++        for gap in ("missing", "python", "stale"):
++            for mode in (None, "degraded", "strict"):
++                case(f"{gap}-{mode or 'default'}", gap, mode)
++            case(f"{gap}-read", gap, "strict", tool="read")
++        for invalid in ("bytes", "json", "mode", "directory"):
++            case("invalid-" + invalid, "missing", invalid=invalid)
++        for index, alias in enumerate(("DEGRADED ALLOWED", "degraded-allowed")):
++            case(f"alias-{index}", "missing", alias)
++        case("live-policy", "missing", change=True)
++        for mode in ("degraded", "strict"):
++            case("foreign-stale-" + mode, "stale", mode, foreign=True)
++            case("foreign-healthy-" + mode, "healthy", mode, foreign=True)
++            case("malformed-" + mode, "missing", mode, malformed=True)
++            for gap in ("missing", "python"):
++                case("foreign-" + gap + "-" + mode, gap, mode, foreign=True)
++                case("ambient-" + gap + "-" + mode, gap, mode, ambient=True)
++        for gap in ("missing", "python"):
++            case("legitimate-" + gap, gap, legitimate=True)
++        driver = cls.tmp / "driver.mjs"
++        driver.write_text(DRIVER, encoding="utf-8")
++        request = cls.tmp / "request.json"
++        request.write_text(json.dumps({"cases": cases}), encoding="utf-8")
++        env = dict(os.environ)
++        for name in HOST_SESSION_VARIABLES:
++            env.pop(name, None)
++        result = subprocess.run(
++            [NODE, str(driver), str(request)], cwd=cls.project, env=env,
++            capture_output=True, text=True, encoding="utf-8", timeout=240,
++        )
++        if result.returncode:
++            cls.temporary.cleanup()
++            raise AssertionError(result.stderr)
++        cls.results = {item["id"]: item for item in json.loads(result.stdout)}
++
++    @classmethod
++    def tearDownClass(cls) -> None:
++        cls.temporary.cleanup()
++
++    def gap(self, identifier, stage="before") -> dict:
++        messages = self.results[identifier][stage]
++        found = [message for message in messages if message.startswith("SAIPEN_HOST_INTEGRATION ")]
++        self.assertEqual(len(found), 1, messages)
++        return json.loads(found[0].splitlines()[0].split(" ", 1)[1])
++
++    def allowed(self, identifier) -> None:
++        record = self.results[identifier]
++        self.assertEqual(record["outcome"], "allowed", record)
++        self.assertEqual(self.effects[identifier].read_text(), "HOST_TOOL_EXECUTED")
++        marker = self.gap(identifier)
++        self.assertEqual(marker["status"], "UNVERIFIED")
++        self.assertEqual(marker["decision"], "ALLOW_DEGRADED")
++
++    def blocked(self, identifier) -> dict:
++        record = self.results[identifier]
++        self.assertEqual(record["outcome"], "blocked", record)
++        self.assertFalse(self.effects[identifier].exists(), record)
++        return record
++
++    def test_default_permits_all_three_gaps_with_physical_marker_and_effect(self):
++        for gap in ("missing", "python", "stale"):
++            with self.subTest(gap=gap):
++                self.allowed(gap + "-default")
++                self.assertEqual(self.gap(gap + "-default")["policy_source"], "default")
++
++    def test_explicit_degraded_permits_the_same_three_gaps(self):
++        for gap in ("missing", "python", "stale"):
++            with self.subTest(gap=gap):
++                self.allowed(gap + "-degraded")
++                self.assertEqual(self.gap(gap + "-degraded")["policy_source"], "operator")
++
++    def test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action(self):
++        for gap in ("missing", "python", "stale"):
++            identifier = gap + "-strict"
++            with self.subTest(gap=gap):
++                record = self.blocked(identifier)
++                marker = self.gap(identifier)
++                self.assertEqual(marker["decision"], "BLOCK")
++                self.assertEqual(record["message"].count("next:"), 1)
++                expected = host_taxonomy.get(marker["failure_code"]).operator_action
++                self.assertEqual(marker["operator_action"], expected)
++                self.assertIn("next: " + expected, record["message"])
++
++    def test_bad_policy_uses_strict_and_names_its_policy_repair(self):
++        for kind in ("bytes", "json", "mode", "directory"):
++            identifier = "invalid-" + kind
++            with self.subTest(kind=kind):
++                record = self.blocked(identifier)
++                marker = self.gap(identifier)
++                self.assertEqual(marker["policy"], "STRICT")
++                self.assertEqual(marker["policy_source"], "invalid")
++                self.assertIn("next: saipen host mode degraded", record["message"])
++
++    def test_native_policy_reads_match_python_including_bom_and_aliases(self):
++        for identifier, expected in self.policy_expectations.items():
++            if identifier.startswith("foreign-healthy"):
++                continue
++            with self.subTest(case=identifier):
++                marker = self.gap(identifier)
++                self.assertEqual(marker["policy"], host_taxonomy.MODE_LABELS[expected["mode"]])
++                self.assertEqual(marker["policy_source"], expected["source"])
++
++    def test_recognized_aliases_do_not_become_silent_strict_policy(self):
++        for identifier in ("alias-0", "alias-1"):
++            self.allowed(identifier)
++
++    def test_policy_change_is_seen_by_the_same_live_factory(self):
++        record = self.blocked("live-policy")
++        self.assertEqual(self.gap("live-policy")["decision"], "ALLOW_DEGRADED")
++        self.assertEqual(self.gap("live-policy", "after")["decision"], "BLOCK")
++        self.assertIn("saipen host repair", record["message"])
++
++    def test_known_foreign_lineage_blocks_even_a_degradable_stale_plugin(self):
++        for mode in ("degraded", "strict"):
++            record = self.blocked("foreign-stale-" + mode)
++            self.assertIn("PROJECT_LINEAGE_MISMATCH", record["message"])
++
++    def test_foreign_lineage_still_blocks_the_healthy_guard(self):
++        for mode in ("degraded", "strict"):
++            record = self.blocked("foreign-healthy-" + mode)
++            self.assertIn("PROJECT_LINEAGE_MISMATCH", record["message"])
++
++    def test_known_lineage_contradiction_blocks_without_guard_or_interpreter(self):
++        for gap in ("missing", "python"):
++            for mode in ("degraded", "strict"):
++                identifier = "foreign-" + gap + "-" + mode
++                with self.subTest(case=identifier):
++                    record = self.blocked(identifier)
++                    self.assertIn("PROJECT_LINEAGE_MISMATCH", record["message"])
++                    self.assertEqual(self.gap(identifier)["decision"], "BLOCK")
++
++    def test_observed_foreign_project_contradiction_blocks_in_both_modes(self):
++        for gap in ("missing", "python"):
++            for mode in ("degraded", "strict"):
++                identifier = "ambient-" + gap + "-" + mode
++                with self.subTest(case=identifier):
++                    record = self.blocked(identifier)
++                    self.assertIn("PROJECT_BINDING_AMBIGUOUS", record["message"])
++                    self.assertEqual(self.gap(identifier)["failure_code"], "BINDING_CONFLICT")
++
++    def test_legitimate_carrier_remains_degradable_and_does_not_gain_admission(self):
++        for gap in ("missing", "python"):
++            identifier = "legitimate-" + gap
++            self.allowed(identifier)
++            message = self.results[identifier]["before"][0]
++            binding = json.loads(message.splitlines()[0].split(" ", 1)[1])
++            self.assertEqual(binding["binding_code"], "GUARD_UNREACHABLE")
++            self.assertIsNone(binding.get("project_root"))
++
++    def test_unreadable_tool_payload_never_uses_the_gap_allowance(self):
++        for mode in ("degraded", "strict"):
++            record = self.blocked("malformed-" + mode)
++            self.assertIn("SAIPEN_GUARD_PAYLOAD_INVALID", record["message"])
++
++    def test_exact_diagnostics_remain_usable_under_strict(self):
++        for gap in ("missing", "python", "stale"):
++            record = self.results[gap + "-read"]
++            self.assertEqual(record["outcome"], "allowed", record)
++
++    def test_native_execution_does_not_write_project_control_memory(self):
++        current = {
++            str(path.relative_to(self.project)): path.read_bytes()
++            for path in (self.project / ".saipen").rglob("*") if path.is_file()
++        }
++        self.assertEqual(current, self.snapshot)
++
++    def test_compiled_facet_is_exactly_the_current_canonical_decision_table(self):
++        from saipen_engine.native_host_policy import BEGIN, END, fragment
++
++        text = PLUGIN.read_text(encoding="utf-8")
++        first = text.index(BEGIN)
++        last = text.index(END, first) + len(END)
++        self.assertEqual(text[first:last], fragment())
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/tools/test_opencode_adapter.py
++++ b/tools/test_opencode_adapter.py
+@@ -189,6 +189,11 @@
+             encoding="utf-8",
+         )
+         cls.tmp = Path(tempfile.mkdtemp(prefix="saipen-opencode-adapter-"))
++        cls.policy_home = cls.tmp / "strict-profile"
++        (cls.policy_home / ".saipen").mkdir(parents=True)
++        (cls.policy_home / ".saipen/authority.json").write_text(
++            '{"mode":"strict"}', encoding="utf-8"
++        )
+         cls.staging = cls.tmp / "fastprompter_drag"
+         cls.staging.mkdir()
+         cls.non_saipen = cls.tmp / "ordinary-project"
+@@ -271,10 +276,12 @@
+             state = (root / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+             self.assertIn("phase: BUILD", state)
+ 
+-    @staticmethod
+-    def _env(**overrides):
++    @classmethod
++    def _env(cls, **overrides):
+         env = {
+             "SAIPEN_SKILL_ROOT": str(REPO),
++            "USERPROFILE": str(cls.policy_home),
++            "HOME": str(cls.policy_home),
+             "SAIPEN_PYTHON": PYTHON,
+             "SAIPEN_GUARD_STARTUP_PROBE": None,
+         }
+@@ -746,11 +753,17 @@
+   process.stdout.write(String(error.message));
+ }
+ """
++            policy_home = Path(temp) / "strict-profile"
++            (policy_home / ".saipen").mkdir(parents=True)
++            (policy_home / ".saipen/authority.json").write_text(
++                '{"mode":"strict"}', encoding="utf-8"
++            )
++            env = {**os.environ, "USERPROFILE": str(policy_home), "HOME": str(policy_home)}
+             proc = subprocess.run(
+                 [NODE, "--input-type=module", "-e", script, str(plugin)],
+                 capture_output=True,
+                 text=True,
+-                timeout=30,
++                timeout=30, env=env,
+             )
+             self.assertEqual(proc.returncode, 0, proc.stderr)
+             self.assertIn("PLUGIN_RESTART_REQUIRED", proc.stdout)
+--- a/tools/test_continue_entry.py
++++ b/tools/test_continue_entry.py
+@@ -114,7 +114,11 @@
+             old_posix = competing / "saipen"
+             old_posix.write_text("#!/bin/sh\necho STALE_CLI\n", encoding="utf-8")
+             old_posix.chmod(0o755)
+-            env = {**os.environ, "SAIPEN_SKILL_ROOT": str(skill), "SAIPEN_PYTHON": sys.executable}
++            profile = root / "strict-profile"
++            (profile / ".saipen").mkdir(parents=True)
++            (profile / ".saipen/authority.json").write_text('{"mode":"strict"}', encoding="utf-8")
++            env = {**os.environ, "SAIPEN_SKILL_ROOT": str(skill), "SAIPEN_PYTHON": sys.executable,
++                   "USERPROFILE": str(profile), "HOME": str(profile)}
+             for key in ("SAIPEN_PROJECT_ROOT", "SAIPEN_PROJECT_LINEAGE", "SAIPEN_AGENT",
+                         "SAIPEN_GUARD_STARTUP_PROBE"):
+                 env.pop(key, None)
+--- a/tools/test_t1624_host_integration.py
++++ b/tools/test_t1624_host_integration.py
+@@ -1636,9 +1636,15 @@
+                     self.assertTrue((ROOT / contract["host_authority_source"]).is_file())
+                     self.assertTrue(contract["prompt_blocking"])
+                     self.assertEqual(contract["auto_recovery"], HG.RECOVERY_AUTHORITY)
+-                # A prompt-blocking host is exactly a host with the degraded default.
++                # Policy applies at each physical interception boundary:
++                # Claude prompts and the proven native OpenCode tool gate.
+                 self.assertEqual(
+-                    contract["prompt_blocking"], contract["degraded_mode"] == HG.DEGRADED_DEFAULT
++                    contract["prompt_blocking"]
++                    or (
++                        adapter["id"] == "opencode"
++                        and contract["tool_interception"] == "BLOCKING"
++                    ),
++                    contract["degraded_mode"] == HG.DEGRADED_DEFAULT,
+                 )
+                 if contract["auto_recovery"] == HG.RECOVERY_AUTHORITY:
+                     self.assertTrue((ROOT / adapter["admission_recovery"]).is_file())
+@@ -1658,9 +1664,8 @@
+             self.assertEqual(self.matrix[host]["prompt_interception"], "NONE")
+             self.assertEqual(self.matrix[host]["admission_enforcement"], "ADVISORY")
+             self.assertEqual(self.matrix[host]["degraded_mode"], HG.DEGRADED_NOT_APPLICABLE)
+-        # OpenCode gates TOOLS, not prompts, and that gate fails closed: stated,
+-        # not passed off as parity with the Claude policy.
+-        self.assertEqual(self.matrix["opencode"]["degraded_mode"], "FAIL_CLOSED_TOOL_GATE")
++        # OpenCode shares gap policy; interception is still at the tool gate.
++        self.assertEqual(self.matrix["opencode"]["degraded_mode"], HG.DEGRADED_DEFAULT)
+         self.assertFalse(self.matrix["opencode"]["prompt_blocking"])
+         self.assertEqual(self.matrix["codex"]["admission_enforcement"], "UNAVAILABLE")
+ 

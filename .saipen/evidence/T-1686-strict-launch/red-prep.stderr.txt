@@ -1,0 +1,69 @@
+test_a_proven_runtime_reaches_the_spawn_interlock_under_strict (__main__.StrictLaunch.test_a_proven_runtime_reaches_the_spawn_interlock_under_strict) ... ok
+test_explicit_degraded_policy_retains_the_warning_and_spawn_boundary (__main__.StrictLaunch.test_explicit_degraded_policy_retains_the_warning_and_spawn_boundary) ... ok
+test_malformed_policy_is_strict_at_the_launch_boundary (__main__.StrictLaunch.test_malformed_policy_is_strict_at_the_launch_boundary) ... 
+  test_malformed_policy_is_strict_at_the_launch_boundary (__main__.StrictLaunch.test_malformed_policy_is_strict_at_the_launch_boundary) (host='opencode') ... FAIL
+  test_malformed_policy_is_strict_at_the_launch_boundary (__main__.StrictLaunch.test_malformed_policy_is_strict_at_the_launch_boundary) (host='claude') ... FAIL
+test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag (__main__.StrictLaunch.test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag) ... 
+  test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag (__main__.StrictLaunch.test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag) (host='opencode') ... FAIL
+  test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag (__main__.StrictLaunch.test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag) (host='claude') ... FAIL
+test_strict_refuses_every_degrading_host_before_executable_selection (__main__.StrictLaunch.test_strict_refuses_every_degrading_host_before_executable_selection) ... 
+  test_strict_refuses_every_degrading_host_before_executable_selection (__main__.StrictLaunch.test_strict_refuses_every_degrading_host_before_executable_selection) (host='opencode') ... FAIL
+  test_strict_refuses_every_degrading_host_before_executable_selection (__main__.StrictLaunch.test_strict_refuses_every_degrading_host_before_executable_selection) (host='claude') ... FAIL
+test_the_missing_policy_retains_the_default_warning_and_spawn_boundary (__main__.StrictLaunch.test_the_missing_policy_retains_the_default_warning_and_spawn_boundary) ... ok
+
+======================================================================
+FAIL: test_malformed_policy_is_strict_at_the_launch_boundary (__main__.StrictLaunch.test_malformed_policy_is_strict_at_the_launch_boundary) (host='opencode')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1686-strict-launch\oracle.py", line 93, in test_malformed_policy_is_strict_at_the_launch_boundary
+    self.assertFalse(launch.launch_degrades(host))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_malformed_policy_is_strict_at_the_launch_boundary (__main__.StrictLaunch.test_malformed_policy_is_strict_at_the_launch_boundary) (host='claude')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1686-strict-launch\oracle.py", line 93, in test_malformed_policy_is_strict_at_the_launch_boundary
+    self.assertFalse(launch.launch_degrades(host))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag (__main__.StrictLaunch.test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag) (host='opencode')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1686-strict-launch\oracle.py", line 84, in test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag
+    proof.assert_called_once_with(host)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 950, in assert_called_once_with
+    raise AssertionError(msg)
+AssertionError: Expected 'prelaunch_runtime' to be called once. Called 0 times.
+
+======================================================================
+FAIL: test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag (__main__.StrictLaunch.test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag) (host='claude')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1686-strict-launch\oracle.py", line 84, in test_strict_cannot_skip_the_proof_with_the_legacy_prelaunch_flag
+    proof.assert_called_once_with(host)
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 950, in assert_called_once_with
+    raise AssertionError(msg)
+AssertionError: Expected 'prelaunch_runtime' to be called once. Called 0 times.
+
+======================================================================
+FAIL: test_strict_refuses_every_degrading_host_before_executable_selection (__main__.StrictLaunch.test_strict_refuses_every_degrading_host_before_executable_selection) (host='opencode')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1686-strict-launch\oracle.py", line 71, in test_strict_refuses_every_degrading_host_before_executable_selection
+    self.assertFalse(launch.launch_degrades(host))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_strict_refuses_every_degrading_host_before_executable_selection (__main__.StrictLaunch.test_strict_refuses_every_degrading_host_before_executable_selection) (host='claude')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1686-strict-launch\oracle.py", line 71, in test_strict_refuses_every_degrading_host_before_executable_selection
+    self.assertFalse(launch.launch_degrades(host))
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.042s
+
+FAILED (failures=6)

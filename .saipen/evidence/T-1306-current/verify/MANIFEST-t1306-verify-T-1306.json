@@ -1,0 +1,33 @@
+{
+ "producer": "t1306-verify",
+ "ticket": "T-1306",
+ "created": "2026-10-03T17:32:36Z",
+ "verdict": "PASS",
+ "temp_root": "V:\\_TEMP_\\saipen-evidence-t1306-verify-zn0desl_",
+ "durable_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1306-current\\verify",
+ "retained": [],
+ "discarded_ephemeral": [
+  {
+   "path": "V:\\_TEMP_\\saipen-evidence-t1306-verify-zn0desl_\\project",
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "reason": "registered run-owned runtime data"
+  },
+  {
+   "path": "V:\\_TEMP_\\saipen-evidence-t1306-verify-zn0desl_",
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "reason": "exact run-owned temporary root"
+  }
+ ],
+ "retained_bytes": 42825,
+ "limits": {
+  "max_artifact_bytes": 26214400,
+  "warn_bytes_per_ticket": 104857600,
+  "hard_bytes_per_ticket": 262144000
+ },
+ "thresholds": {
+  "warning": false,
+  "hard_exceeded": false
+ },
+ "readonly_checks": 10,
+ "fixture_only": true
+}

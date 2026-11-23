@@ -1,0 +1,7 @@
+test_the_red_control_anchor_still_exists (__main__.RedControlTests.test_the_red_control_anchor_still_exists) ... ok
+test_without_the_fix_the_intent_only_state_reads_green (__main__.RedControlTests.test_without_the_fix_the_intent_only_state_reads_green) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 5.697s
+
+OK

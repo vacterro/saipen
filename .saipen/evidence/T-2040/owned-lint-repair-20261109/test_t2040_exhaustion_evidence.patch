@@ -1,0 +1,108 @@
+--- pre/tools/test_t2040_exhaustion_evidence.py
++++ tools/test_t2040_exhaustion_evidence.py
+@@ -68,7 +68,9 @@
+         self.assertEqual({row["source_name"] for row in cert["sources"]}, set(W.ALL_WORK_SOURCES))
+ 
+     def test_missing_root_is_not_a_readable_empty_inventory(self):
+-        cert = W.certify_work_exhaustion(self.root / "missing", **self.checked(persistent_goals=None))
++        cert = W.certify_work_exhaustion(
++            self.root / "missing", **self.checked(persistent_goals=None)
++        )
+         self.assertEqual(self.source(cert, W.PERSISTENT_GOALS)["eligibility_result"], W.NOT_CHECKED)
+         self.assertFalse(cert["exhausted"])
+         self.assertTrue(cert["certificate_errors"])
+@@ -90,7 +92,9 @@
+         self.assertEqual(cert["status"], W.WORK_ELIGIBLE)
+ 
+     def test_authority_blocker_is_not_verified_quiescence(self):
+-        cert = W.certify_work_exhaustion(None, **self.checked(continuous_maintenance_authorized=False))
++        cert = W.certify_work_exhaustion(
++            None, **self.checked(continuous_maintenance_authorized=False)
++        )
+         self.assertEqual(cert["status"], W.BLOCKED_AUTHORITY)
+         self.assertFalse(cert["exhausted"])
+ 
+@@ -109,19 +113,27 @@
+             "## DONE\n## BLOCKED\n- [ ] T-1 [P2] dependency | blocker: BLOCKED_EXTERNAL\n"
+         )["tickets"]
+         cert = W.certify_work_exhaustion(None, **self.checked(tickets=tickets))
+-        self.assertNotEqual(self.source(cert, W.ACTIONABLE_TODO)["eligibility_result"], W.WORK_AVAILABLE)
++        self.assertNotEqual(
++            self.source(cert, W.ACTIONABLE_TODO)["eligibility_result"], W.WORK_AVAILABLE
++        )
+ 
+     def test_pending_publication_is_not_a_clean_release_inventory(self):
+-        tickets = {"T-1": {"id": "T-1", "section": "## DONE", "fields": {"publication_state": "pending"}}}
++        tickets = {
++            "T-1": {"id": "T-1", "section": "## DONE", "fields": {"publication_state": "pending"}}
++        }
+         cert = W.certify_work_exhaustion(None, **self.checked(tickets=tickets))
+-        self.assertNotEqual(self.source(cert, W.RELEASE_OBLIGATIONS)["eligibility_result"], W.CLEAN_VERIFIED)
++        self.assertNotEqual(
++            self.source(cert, W.RELEASE_OBLIGATIONS)["eligibility_result"], W.CLEAN_VERIFIED
++        )
+         self.assertFalse(cert["exhausted"])
+ 
+     def test_unworkable_audit_is_not_available_ingest(self):
+         audit = {"unresolved_audit_count": 1, "unworkable_active_only": True,
+                  "idle_classification": "IDLE_OPERATOR_REQUIRED"}
+         cert = W.certify_work_exhaustion(None, **self.checked(audit_inbox=audit))
+-        self.assertEqual(self.source(cert, W.UNCONSUMED_AUDIT_INBOX)["eligibility_result"], W.BLOCKED_OPERATOR)
++        self.assertEqual(
++            self.source(cert, W.UNCONSUMED_AUDIT_INBOX)["eligibility_result"], W.BLOCKED_OPERATOR
++        )
+ 
+     def test_current_hunt_with_open_findings_is_not_unchanged(self):
+         cert = W.certify_work_exhaustion(None, **self.checked(
+@@ -139,9 +151,9 @@
+         (self.root / ".saipen/goals/broken.json").write_text("{", encoding="utf-8")
+         state = _valid_state_text()
+         text = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
+-        with mock.patch.object(router, "queued_source_projection", return_value=None), mock.patch.object(
+-            router, "pending_append_projection", return_value=None
+-        ):
++        with mock.patch.object(
++            router, "queued_source_projection", return_value=None
++        ), mock.patch.object(router, "pending_append_projection", return_value=None):
+             result = router.route_next(
+                 state, text, project_root=self.root,
+                 **W.discovery_evidence(self.root, state={}, tickets={}),
+@@ -158,13 +170,19 @@
+         self.assertNotEqual(truth["campaign_status"], outcome_truth.CAMPAIGN_QUIESCENT)
+ 
+     def test_standalone_lane_cannot_certify_omitted_discovery(self):
+-        lanes = outcome_truth.compute_lane_statuses(None, tickets={}, has_continuous_maintenance=True)
++        lanes = outcome_truth.compute_lane_statuses(
++            None, tickets={}, has_continuous_maintenance=True
++        )
+         self.assertNotEqual(lanes["CAMPAIGN"], "QUIESCENT")
+ 
+     def test_continuation_unknown_discovery_is_not_quiescent(self):
+         route = {"ok": True, "reason": "maintain", "action": "saipen continue",
+                  "terminal_classification": "INCOMPLETE_DISCOVERY"}
+-        with mock.patch.object(continuation_assessment.goal_authority, "continuous_maintenance_proven", return_value=False):
++        with mock.patch.object(
++            continuation_assessment.goal_authority,
++            "continuous_maintenance_proven",
++            return_value=False,
++        ):
+             result = continuation_assessment._classify_effective_route(
+                 self.root, route, route, {}, {"tickets": {}},
+             )
+@@ -195,9 +213,13 @@
+         cert = W.certify_work_exhaustion(None, **inputs)
+         self.assertTrue(cert["exhausted"])
+         result = board.classify_idle_work(
+-            {}, persistent_goals=inputs["persistent_goals"], source_evidence=inputs["source_evidence"],
+-            audit_inbox=inputs["audit_inbox"], future_gate=inputs["future_gate"],
+-            state={"last_event": "generation-1"}, continuous_maintenance_authorized=True,
++            {},
++            persistent_goals=inputs["persistent_goals"],
++            source_evidence=inputs["source_evidence"],
++            audit_inbox=inputs["audit_inbox"],
++            future_gate=inputs["future_gate"],
++            state={"last_event": "generation-1"},
++            continuous_maintenance_authorized=True,
+         )
+         self.assertFalse(result["all_requirements_complete"])
+ 

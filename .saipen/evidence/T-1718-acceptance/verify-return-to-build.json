@@ -1,0 +1,22 @@
+{
+  "label": "verify-return-to-build",
+  "phase": "VERIFY",
+  "command": [
+    "bin/saipen.cmd",
+    "transition",
+    "BUILD",
+    "T-1718",
+    "Mandatory full family 6241/17 red: declared route budget exceeds 40960, new capsule field collides with existing LOG-producer structural guard, and installed OpenCode launcher is a non-PE postinstall placeholder; preserve failures and repair owned gates before retry",
+    "--json"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 1,
+  "duration_s": 0.156,
+  "fingerprint": "41247edf69d91ef36f1e0857104ee548c76119cb6fc9761a9d43cdbe3d0fd3e9",
+  "stdout": "",
+  "stderr": "'bin' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "57c1a0f9d07c0cf25c29bee108ad807b5520613d79320e4f5243f4e5e526e93f",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

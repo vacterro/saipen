@@ -1,0 +1,132 @@
+[
+  {
+    "path": ".saipen\\evidence\\regression-hardening-20261014\\README.md",
+    "sha256": "ef60d9b7d1205e5444bf7a6cc0b94c31360ab31a477853c5b1eff3aea31f6d0c",
+    "bytes": 5399
+  },
+  {
+    "path": ".saipen\\evidence\\regression-hardening-20261014\\RED-GREEN.txt",
+    "sha256": "e7bb47994dc4aaa1cb10ad55ad25e67171d2b7a54017702668f9730c19649a46",
+    "bytes": 1251
+  },
+  {
+    "path": ".saipen\\evidence\\regression-hardening-20261014\\repro.py",
+    "sha256": "f185957ca04196d7f563d7509781f61228ada8054c6c0920a3a750e21415ea65",
+    "bytes": 7141
+  },
+  {
+    "path": ".saipen\\evidence\\regression-hardening-20261014\\prefix\\sairelay\\__init__.py",
+    "sha256": "f023978fa140b8b04eb5b5739decdd5e0542184aa2b01e2ff624ab9570548e53",
+    "bytes": 463
+  },
+  {
+    "path": ".saipen\\evidence\\regression-hardening-20261014\\prefix\\sairelay\\__main__.py",
+    "sha256": "307299fda7b77d22c64cb51430ec75e5f59d78e9c948786afb3b2544fe45e4b7",
+    "bytes": 79
+  },
+  {
+    "path": ".saipen\\evidence\\regression-hardening-20261014\\prefix\\sairelay\\adapters.py",
+    "sha256": "5676b11eb1a34f3f4eff2984ab548449f2c7a379bd9a1d75376c4060113bf842",
+    "bytes": 3220
+  },
+  {
+    "path": ".saipen\\evidence\\regression-hardening-20261014\\prefix\\sairelay\\cli.py",
+    "sha256": "f00cb06e0f4146b288aedc524823db12ea7998194eaa083a6cff5dccf992d17f",
+    "bytes": 9505
+  },
+  {
+    "path": ".saipen\\evidence\\regression-hardening-20261014\\prefix\\sairelay\\errors.py",
+    "sha256": "56d921658f21a0d34243b162f7bcac05b8b76249b6e44e1521e21fe8fb129c36",
+    "bytes": 644
+  },
+  {
+    "path": ".saipen\\evidence\\regression-hardening-20261014\\prefix\\sairelay\\ids.py",
+    "sha256": "12a92d00fbba5b0c8bf0a127f1e906c9c362bb552aee2bac49296fc070cf8a24",
+    "bytes": 4122
+  },
+  {
+    "path": ".saipen\\evidence\\regression-hardening-20261014\\prefix\\sairelay\\model.py",
+    "sha256": "0d0917b098cf09a6b37cd5b3a364883ab83e4c18c55dd4db7c132364f585a623",
+    "bytes": 14105
+  },
+  {
+    "path": ".saipen\\evidence\\regression-hardening-20261014\\prefix\\sairelay\\service.py",
+    "sha256": "d2045da16253e21b3b83bd154606c2d22744ad440cf68c4e4afcecd851f62f30",
+    "bytes": 30455
+  },
+  {
+    "path": ".saipen\\evidence\\regression-hardening-20261014\\prefix\\sairelay\\store.py",
+    "sha256": "b872d52cc3c6438f1ce40a1106d902f1cd7cdb1cfe84cd63180097be24c578d6",
+    "bytes": 12897
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\build_prefix.py",
+    "sha256": "ddbe988d11780767da61f4bfe3a87573aa7db0881a86f4c9a30ee10e0248640d",
+    "bytes": 7662
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\README.md",
+    "sha256": "3e0efd60f45d4efccc29440cca4672c7bf4e84865bad070b0ed02e4fb11f1d40",
+    "bytes": 9645
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\RED-GREEN.txt",
+    "sha256": "1c6c3505ed4fd856cc4adba63e9f9841a51fc72d55463b8f0322df88019029e3",
+    "bytes": 4097
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\repro.py",
+    "sha256": "09ca516ac172a946cd4aee8ad613c2b55c3fa4dfb3de20a160c6c59520554ee3",
+    "bytes": 11057
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\prefix\\sairelay\\__init__.py",
+    "sha256": "f023978fa140b8b04eb5b5739decdd5e0542184aa2b01e2ff624ab9570548e53",
+    "bytes": 463
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\prefix\\sairelay\\__main__.py",
+    "sha256": "307299fda7b77d22c64cb51430ec75e5f59d78e9c948786afb3b2544fe45e4b7",
+    "bytes": 79
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\prefix\\sairelay\\adapters.py",
+    "sha256": "669cb362c34cbbf235ef0237d038bac261c15f3e3f450720e359ecbac7d233ee",
+    "bytes": 4352
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\prefix\\sairelay\\cli.py",
+    "sha256": "5844b14400e7652039a66446e7d028d21153b54fa797ce3d08bf493c9ab5b1e1",
+    "bytes": 10122
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\prefix\\sairelay\\errors.py",
+    "sha256": "56d921658f21a0d34243b162f7bcac05b8b76249b6e44e1521e21fe8fb129c36",
+    "bytes": 644
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\prefix\\sairelay\\ids.py",
+    "sha256": "12a92d00fbba5b0c8bf0a127f1e906c9c362bb552aee2bac49296fc070cf8a24",
+    "bytes": 4122
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\prefix\\sairelay\\model.py",
+    "sha256": "79b87b5413ff503cf5d9fbfbf0f11e63dcab0491217b0a51b961029fbffc5d21",
+    "bytes": 16705
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\prefix\\sairelay\\service.py",
+    "sha256": "b219c7ff52e719ddfb9955d20b8e97ada8fe29e3e26128ae62b4199afd0ab194",
+    "bytes": 43967
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\prefix\\sairelay\\store.py",
+    "sha256": "b872d52cc3c6438f1ce40a1106d902f1cd7cdb1cfe84cd63180097be24c578d6",
+    "bytes": 12897
+  },
+  {
+    "path": ".saipen\\evidence\\continuity-readiness-20261014\\shim\\saimail.py",
+    "sha256": "3bf87a47b40859e0281c1620365be2ca5ee4e8a0060a121b55d951bb759dc966",
+    "bytes": 150
+  }
+]

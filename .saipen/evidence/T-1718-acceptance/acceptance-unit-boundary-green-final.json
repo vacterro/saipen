@@ -1,0 +1,20 @@
+{
+  "label": "acceptance-unit-boundary-green-final",
+  "phase": "BUILD",
+  "command": [
+    "python",
+    "-B",
+    ".saipen/evidence/T-1718-acceptance/acceptance-unit-boundary-replay.py",
+    "after"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "exit_code": 0,
+  "duration_s": 0.593,
+  "fingerprint": "148afe823921b9bb0b249dbd1d47341aa6593220565820882d34dda34248cbd8",
+  "stdout": "oracle_sha256 7df4959c2cb2e92c9dedeec34b7e5deb311e09d5e86d4ca8a9a887405b0aaf19\r\nsubject_sha256 c7e4cec411975c2157df82730e18d3d15e6ec4e9f45123bcf9ff7519368315f9\r\n",
+  "stderr": "test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass (test_t1718_acceptance_contract.NativeEscapeRegressionTests.test_redefined_unit_outcome_cannot_spend_an_old_id_only_pass) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 1 test in 0.295s\r\n\r\nOK\r\n",
+  "stdout_sha256": "b9a2fb3e07702a9f83571764a0d05a971bd1eb35f7e588fbb2844139251f5f6d",
+  "stderr_sha256": "6e88d024a237ecd30382e374a558294146798d611ffb621979dd2d34af749e43",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

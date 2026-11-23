@@ -1,0 +1,15 @@
+== SRC-380
+   SRC-380:R001 VERIFIED | work= T-2006 | ev= E-20244 E-20225: SCOUT reconciled live active Work (T-2005 blocked SEQUENCED_AFTER:T-2006 is the set
+   SRC-380:R002 VERIFIED | work= T-2006 | ev= 18 independent red controls in tools/test_evidence_gap_ledger_lineage.py plus 4 in tools/test_instal
+   SRC-380:R003 VERIFIED | work= T-2006 | ev= discovery_providers.EvidenceGapLedgerProvider.evaluate restructured: lineage/capture/patch validatio
+   SRC-380:R004 VERIFIED | work= T-2006 | ev= evaluate() now separates enumerated vs unresolved: a positive unresolved count with an empty enumera
+   SRC-380:R005 VERIFIED | work= T-2006 | ev= candidate evidence_fingerprint is now _item_evidence_generation keyed on module|rva|item_id plus exa
+   SRC-380:R006 VERIFIED | work= T-2006 | ev= Ran the real BZ_REA producer tools/coverage_ledger.py against the installed capture _BZDECOMP/.freeb
+   SRC-380:R007 VERIFIED | work= T-2006 | ev= Real-data multi-batch probe (.saipen/evidence/T-2006-realdata/real_multibatch_probe.py) on the actua
+   SRC-380:R008 VERIFIED | work= T-2006 | ev= E-20263 full declared family PASS on the current tree: ran 8874, red 3 (baseline), new_red 0, record
+   SRC-380:R009 BLOCKED | work= T-2006 | ev= Installed Antigravity host is present but stale, and the native acceptance probe returned HOST_DISPA
+   SRC-380:R010 BLOCKED | work= T-2006 | ev= No real research item completed: fixed provider generates candidates from real BZ_REA inventory, but
+   SRC-380:R011 BLOCKED | work= T-2006 | ev= No actual automatic selection across native turns: host probe reports HOST_DISPATCH_UNAVAILABLE; no 
+   SRC-380:R012 BLOCKED | work= T-2006 | ev= Restart recovery, idempotent native side effects, cancellation, and budget-expiry were not accepted 
+   SRC-380:R013 VERIFIED | work= T-2006 | ev= E-20247 records the exact stop boundary: all independent local repairs completed; do not return to g
+== SRC-379

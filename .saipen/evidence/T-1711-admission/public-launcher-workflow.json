@@ -1,0 +1,241 @@
+{
+  "ok": true,
+  "cases": [
+    {
+      "format": "unittest",
+      "admission": {
+        "command": [
+          "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+          "--project-root",
+          "V:\\_TEMP_\\saipen-regression-gate-bpap3mfy\\project",
+          "--agent",
+          "tester",
+          "work",
+          "regression",
+          "T-7",
+          "--file",
+          "V:\\_TEMP_\\saipen-regression-gate-bpap3mfy\\project\\.saipen\\evidence\\contract.json",
+          "--json"
+        ],
+        "exit_code": 0,
+        "result": {
+          "ok": true,
+          "code": "CHECKPOINTED",
+          "op_id": "regression-execution-b36b4bec20d0476c889a0597a6927218",
+          "changed_files": [
+            ".saipen/evidence/regression/regression-execution-b36b4bec20d0476c889a0597a6927218.json",
+            ".saipen/LOG.md",
+            ".saipen/BOARD.md",
+            ".saipen/STATE.md"
+          ],
+          "recovery_required": false,
+          "record": ".saipen/evidence/regression/regression-execution-b36b4bec20d0476c889a0597a6927218.json",
+          "evidence_class": "executed",
+          "event_id": "E-5"
+        },
+        "stderr": ""
+      },
+      "exact_replay": {
+        "command": [
+          "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+          "--project-root",
+          "V:\\_TEMP_\\saipen-regression-gate-bpap3mfy\\project",
+          "--agent",
+          "tester",
+          "work",
+          "regression",
+          "T-7",
+          "--file",
+          "V:\\_TEMP_\\saipen-regression-gate-bpap3mfy\\project\\.saipen\\evidence\\contract.json",
+          "--json"
+        ],
+        "exit_code": 0,
+        "result": {
+          "ok": true,
+          "code": "ALREADY_APPLIED",
+          "op_id": null,
+          "changed_files": [],
+          "recovery_required": false,
+          "record": ".saipen/evidence/regression/regression-execution-b36b4bec20d0476c889a0597a6927218.json",
+          "evidence_class": "executed"
+        },
+        "stderr": ""
+      },
+      "changed_prior_refusal": {
+        "command": [
+          "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+          "--project-root",
+          "V:\\_TEMP_\\saipen-regression-gate-bpap3mfy\\project",
+          "--agent",
+          "tester",
+          "transition",
+          "REVIEW",
+          "--json"
+        ],
+        "exit_code": 1,
+        "result": {
+          "ok": false,
+          "code": "INCOMPLETE_TICKET",
+          "op_id": null,
+          "changed_files": [],
+          "recovery_required": false,
+          "message": "VERIFY -> REVIEW: STALE_REGRESSION_EVIDENCE: verifier or subject bytes changed",
+          "phase": "REVIEW",
+          "ticket": "T-7",
+          "detail": "VERIFY -> REVIEW: STALE_REGRESSION_EVIDENCE: verifier or subject bytes changed"
+        },
+        "stderr": ""
+      },
+      "restored_prior_review": {
+        "command": [
+          "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+          "--project-root",
+          "V:\\_TEMP_\\saipen-regression-gate-bpap3mfy\\project",
+          "--agent",
+          "tester",
+          "transition",
+          "REVIEW",
+          "--json"
+        ],
+        "exit_code": 0,
+        "result": {
+          "ok": true,
+          "code": "TRANSITIONED",
+          "op_id": "transition-706b87ee2a2d4ab781e12abae9de6cdd",
+          "changed_files": [
+            ".saipen/LOG.md",
+            ".saipen/BOARD.md",
+            ".saipen/STATE.md"
+          ],
+          "recovery_required": false,
+          "phase": "REVIEW",
+          "next_action": "PHASE REVIEW T-7",
+          "event_id": "E-6",
+          "ticket": "T-7"
+        },
+        "stderr": ""
+      }
+    },
+    {
+      "format": "tap",
+      "admission": {
+        "command": [
+          "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+          "--project-root",
+          "V:\\_TEMP_\\saipen-regression-gate-v_ms29c2\\project",
+          "--agent",
+          "tester",
+          "work",
+          "regression",
+          "T-7",
+          "--file",
+          "V:\\_TEMP_\\saipen-regression-gate-v_ms29c2\\project\\.saipen\\evidence\\contract.json",
+          "--json"
+        ],
+        "exit_code": 0,
+        "result": {
+          "ok": true,
+          "code": "CHECKPOINTED",
+          "op_id": "regression-execution-854be27785324ad8aca84cca52823c19",
+          "changed_files": [
+            ".saipen/evidence/regression/regression-execution-854be27785324ad8aca84cca52823c19.json",
+            ".saipen/LOG.md",
+            ".saipen/BOARD.md",
+            ".saipen/STATE.md"
+          ],
+          "recovery_required": false,
+          "record": ".saipen/evidence/regression/regression-execution-854be27785324ad8aca84cca52823c19.json",
+          "evidence_class": "executed",
+          "event_id": "E-5"
+        },
+        "stderr": ""
+      },
+      "exact_replay": {
+        "command": [
+          "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+          "--project-root",
+          "V:\\_TEMP_\\saipen-regression-gate-v_ms29c2\\project",
+          "--agent",
+          "tester",
+          "work",
+          "regression",
+          "T-7",
+          "--file",
+          "V:\\_TEMP_\\saipen-regression-gate-v_ms29c2\\project\\.saipen\\evidence\\contract.json",
+          "--json"
+        ],
+        "exit_code": 0,
+        "result": {
+          "ok": true,
+          "code": "ALREADY_APPLIED",
+          "op_id": null,
+          "changed_files": [],
+          "recovery_required": false,
+          "record": ".saipen/evidence/regression/regression-execution-854be27785324ad8aca84cca52823c19.json",
+          "evidence_class": "executed"
+        },
+        "stderr": ""
+      },
+      "changed_prior_refusal": {
+        "command": [
+          "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+          "--project-root",
+          "V:\\_TEMP_\\saipen-regression-gate-v_ms29c2\\project",
+          "--agent",
+          "tester",
+          "transition",
+          "REVIEW",
+          "--json"
+        ],
+        "exit_code": 1,
+        "result": {
+          "ok": false,
+          "code": "INCOMPLETE_TICKET",
+          "op_id": null,
+          "changed_files": [],
+          "recovery_required": false,
+          "message": "VERIFY -> REVIEW: STALE_REGRESSION_EVIDENCE: verifier or subject bytes changed",
+          "phase": "REVIEW",
+          "ticket": "T-7",
+          "detail": "VERIFY -> REVIEW: STALE_REGRESSION_EVIDENCE: verifier or subject bytes changed"
+        },
+        "stderr": ""
+      },
+      "restored_prior_review": {
+        "command": [
+          "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+          "--project-root",
+          "V:\\_TEMP_\\saipen-regression-gate-v_ms29c2\\project",
+          "--agent",
+          "tester",
+          "transition",
+          "REVIEW",
+          "--json"
+        ],
+        "exit_code": 0,
+        "result": {
+          "ok": true,
+          "code": "TRANSITIONED",
+          "op_id": "transition-6afe85be23dd4c6cb0ecbe21096ce0ba",
+          "changed_files": [
+            ".saipen/LOG.md",
+            ".saipen/BOARD.md",
+            ".saipen/STATE.md"
+          ],
+          "recovery_required": false,
+          "phase": "REVIEW",
+          "next_action": "PHASE REVIEW T-7",
+          "event_id": "E-6",
+          "ticket": "T-7"
+        },
+        "stderr": ""
+      }
+    }
+  ],
+  "live_canonical_unchanged": {
+    "STATE.md": "f7215f8be32100105be68e0a8b6116e7f8b3bb0d6872177c9e36b9a88e911045",
+    "BOARD.md": "d1994adf8c8843cbbdfe5ecb95ed9f27702a07561c57d5a1db17b7d41c7e67e3",
+    "LOG.md": "39be425d4df376f7afb4360eb184f0ae58c235e78df9eba2d394cf755773b68c"
+  },
+  "scope": "actual documented bin/saipen.cmd; disposable Python/Node fixtures; no live consumer or product mutation"
+}

@@ -1,0 +1,6 @@
+{
+  "argv": ["bin/saipen.cmd", "response", "digest", "--project-root", "V:/___VAC/__K/__CODE/_PY/_AUDAPACK", "--reason", "safety", "--json"],
+  "exit_code": 1,
+  "result": {"ok": false, "code": "RESPONSE_FACT_INVALID", "detail": "canonical status unavailable"},
+  "purpose": "Read-only delivery diagnostic; no healthy digest fabricated"
+}

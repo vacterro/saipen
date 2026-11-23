@@ -1,0 +1,61 @@
+{
+  "linked_work": null,
+  "projection_policy": "authority_only",
+  "receipt_id": "SRC-001",
+  "received_at": "2026-11-09T20:29:09Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "9f0c437ec49ec5000982ca1067feb9f9beea87a4f117d5b0710ac15e64307d4b",
+    "sanitized_sha256": "9f0c437ec49ec5000982ca1067feb9f9beea87a4f117d5b0710ac15e64307d4b"
+  },
+  "request_provenance": {
+    "compared_digest": "9f0c437ec49ec5000982ca1067feb9f9beea87a4f117d5b0710ac15e64307d4b",
+    "declared_by": "host_ingress",
+    "ingress_id": "ing-b107c3ec115f37e2",
+    "message_id": "6b04dbf775c2433782894b8d0187838e",
+    "operator_origin": {
+      "action": "resolve-gate",
+      "budget": "",
+      "event_id": "6b04dbf775c2433782894b8d0187838e",
+      "expires": 160.0,
+      "goal": "",
+      "host": "claude",
+      "host_birth": 1,
+      "host_pid": 10,
+      "issued": 100.0,
+      "kind": "operator-origin",
+      "lineage": "lineage-13484440f8fc4b4ba70239008748bfde",
+      "model": "",
+      "nonce": "d162a09d1ed53e5d49896b4226537037",
+      "project": "v:\\_temp_\\saipen-accepted-debt-q15lgqcx\\project",
+      "provenance": {
+        "alg": "hmac-sha256",
+        "kid": "broker-081a85fa901b29c784b7ade0",
+        "mac": "f8849dcad94aee6a5478a797a6dc8ba2209b834744ca42d4b65e5e25a308e82d"
+      },
+      "provider": "",
+      "request_digest": "9f0c437ec49ec5000982ca1067feb9f9beea87a4f117d5b0710ac15e64307d4b",
+      "schema": 1,
+      "session": "simulated-native-c1a53632984c4e8dae9a7d4731ec640f",
+      "task": "none"
+    },
+    "session_id": "simulated-native-c1a53632984c4e8dae9a7d4731ec640f",
+    "witness": "operator_carrier"
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "9f0c437ec49ec5000982ca1067feb9f9beea87a4f117d5b0710ac15e64307d4b",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "9f0c437ec49ec5000982ca1067feb9f9beea87a4f117d5b0710ac15e64307d4b",
+  "status": "ACTIVE",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

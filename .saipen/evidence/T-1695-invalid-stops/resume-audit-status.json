@@ -1,0 +1,222 @@
+{
+  "ok": true,
+  "code": "AUDIT_INBOX_STATUS",
+  "rule_id": "SOURCE-AUDIT-INBOX-01",
+  "directory": "audit",
+  "pending": [
+    {
+      "layer": 23,
+      "path": "audit/23.md",
+      "state": "ACTIVE",
+      "receipt": "SRC-167",
+      "work": "T-1606",
+      "sha256": "e65de1f0c46a5857799fecdccfdd4f18961961805462d7b9cc053489c8e5f01c"
+    }
+  ],
+  "closed_pending_delete": [],
+  "invalid": [],
+  "orphans": [
+    {
+      "rel": "audit/1.md",
+      "layer": 1,
+      "receipt_id": "SRC-012",
+      "linked_work": "T-1222",
+      "sha256": "22ecac8c887ecc46ec574d31459e742aa2ad704fdf8126bf1b9db0b3b0baaccb",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/10.md",
+      "layer": 10,
+      "receipt_id": "SRC-023",
+      "linked_work": "T-1296",
+      "sha256": "a9b3965ee0679f92d5eea164ee89a27ac3d46bdbef298d6ffcd38c2c07102a45",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/11.md",
+      "layer": 11,
+      "receipt_id": "SRC-024",
+      "linked_work": "T-1297",
+      "sha256": "29382825df1167091bc5ca10c1983b5b3a4da608f6ddf28bdb247cf752b6be8c",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/12.md",
+      "layer": 12,
+      "receipt_id": "SRC-025",
+      "linked_work": "T-1298",
+      "sha256": "27efc70fdac11489d24b336758fe1adef00de6bb6144517276f127e17ced68ef",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/16.md",
+      "layer": 16,
+      "receipt_id": "SRC-026",
+      "linked_work": "T-1304",
+      "sha256": "a3e683b3247f15098436bd9cc3431223308a6c0ae7088ea73dc1113b02ab0cca",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/17.md",
+      "layer": 17,
+      "receipt_id": "SRC-123",
+      "linked_work": "T-1537",
+      "sha256": "6d1ee46d9e8557da38b4ae294fb2cb296864014f01b732f4efb9585c83d015f1",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/18.md",
+      "layer": 18,
+      "receipt_id": "SRC-126",
+      "linked_work": "T-1542",
+      "sha256": "1b24b8f049528928d6f7275bc024e1e23fc1dee9e24840d1b0387e3bd4023e46",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/19.md",
+      "layer": 19,
+      "receipt_id": "SRC-127",
+      "linked_work": "T-1543",
+      "sha256": "3dab14dd575b38f6d2afb7d21f10600b78bd43d30f9844a9bb6e3f3cc021ff53",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/2.md",
+      "layer": 2,
+      "receipt_id": "SRC-013",
+      "linked_work": "T-1223",
+      "sha256": "4264b5489fbbe4f40338cdb868f915b97ed4eac483bf4a16b68084f060a1eeb2",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/20.md",
+      "layer": 20,
+      "receipt_id": "SRC-128",
+      "linked_work": "T-1544",
+      "sha256": "a567d89ad4b12a9de07b8abaf4a7241e2271e8e64d36f03af792a73072570cd1",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/21.md",
+      "layer": 21,
+      "receipt_id": "SRC-129",
+      "linked_work": "T-1545",
+      "sha256": "cc23e599db5a531fbace40a24319125b481b8b3d013c4e4f3befa6705758975d",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/22.md",
+      "layer": 22,
+      "receipt_id": "SRC-129",
+      "linked_work": "T-1545",
+      "sha256": "cc23e599db5a531fbace40a24319125b481b8b3d013c4e4f3befa6705758975d",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/24.md",
+      "layer": 24,
+      "receipt_id": "SRC-177",
+      "linked_work": "T-1615",
+      "sha256": "02465cc1bfbd3422c152a5bb1b911364a365aa1bae26cea5a08f9d8d880f3ebf",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/3.md",
+      "layer": 3,
+      "receipt_id": "SRC-014",
+      "linked_work": "T-1224",
+      "sha256": "28e6b5d038cc19e3c854b3f3b0f1b35d6183ac4a959cd2f3df524365f85ce5d5",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/5.md",
+      "layer": 5,
+      "receipt_id": "SRC-018",
+      "linked_work": "T-1280",
+      "sha256": "2b22e539570b9c3aa9993d9dc215f9983b5dc5e8459e3ff234df8b3f99760cb7",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/6.md",
+      "layer": 6,
+      "receipt_id": "SRC-019",
+      "linked_work": "T-1288",
+      "sha256": "8b6783f72c34f7254a81d398c1afcc308a77cd07f60e7626df5cc0281c9e15d8",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/7.md",
+      "layer": 7,
+      "receipt_id": "SRC-020",
+      "linked_work": "T-1291",
+      "sha256": "c2bcebc0f31642d20985021d7f6076dc46a31a110b61fff54f0632fed6a00121",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/8.md",
+      "layer": 8,
+      "receipt_id": "SRC-021",
+      "linked_work": "T-1294",
+      "sha256": "9d0193bc5f3758ee6410a0d04a4d2266a8b8937bb4ffb8ee1c6f6909ec5927ce",
+      "state": "DELETED"
+    },
+    {
+      "rel": "audit/9.md",
+      "layer": 9,
+      "receipt_id": "SRC-022",
+      "linked_work": "T-1295",
+      "sha256": "2fafdcbcbf7e5b653028d39f67856b81b25dc5313357402918a89219a4d30a9e",
+      "state": "DELETED"
+    }
+  ],
+  "residue": [
+    {
+      "name": "HANDOFF-20260919.md",
+      "rel": "audit/HANDOFF-20260919.md",
+      "kind": "file"
+    },
+    {
+      "name": "SAIHANDOFF_AGENT_PROTOCOL_DRIFT_AUDIT.md",
+      "rel": "audit/SAIHANDOFF_AGENT_PROTOCOL_DRIFT_AUDIT.md",
+      "kind": "file"
+    },
+    {
+      "name": "SAIPEN_ENFORCEMENT_ROADMAP_20261009.md",
+      "rel": "audit/SAIPEN_ENFORCEMENT_ROADMAP_20261009.md",
+      "kind": "file"
+    },
+    {
+      "name": "SAIPEN_WEAK_MODEL_SLICE_PROTOCOL_20261009.md",
+      "rel": "audit/SAIPEN_WEAK_MODEL_SLICE_PROTOCOL_20261009.md",
+      "kind": "file"
+    }
+  ],
+  "residue_count": 4,
+  "clean": false,
+  "next": {
+    "rule_id": "SOURCE-AUDIT-INBOX-01",
+    "pending": [
+      23
+    ],
+    "closed_pending_delete": [],
+    "invalid": [],
+    "residue": [
+      "audit/HANDOFF-20260919.md",
+      "audit/SAIHANDOFF_AGENT_PROTOCOL_DRIFT_AUDIT.md",
+      "audit/SAIPEN_ENFORCEMENT_ROADMAP_20261009.md",
+      "audit/SAIPEN_WEAK_MODEL_SLICE_PROTOCOL_20261009.md"
+    ],
+    "residue_count": 4,
+    "unworkable_active": [
+      {
+        "layer": 23,
+        "work": "T-1606",
+        "reason": "linked Work is not currently workable"
+      }
+    ],
+    "action": "saipen audit status",
+    "unworkable_active_only": true,
+    "detail": "audit inbox has no workable ACTIVE or NEW layer; linked Work for the remaining ACTIVE layer(s) is not currently workable"
+  },
+  "last_allocated_id": 24
+}

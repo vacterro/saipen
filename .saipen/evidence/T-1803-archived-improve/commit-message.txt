@@ -1,0 +1,4 @@
+fix(improve): reconcile archived findings
+
+Bind append-only corrections to immutable cycle history and native writer
+receipts. Keep unresolved findings visible without stale retry loops.

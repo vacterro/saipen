@@ -1,0 +1,87 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "worker_id": {
+      "type": "string"
+    },
+    "assignment_id": {
+      "type": "string"
+    },
+    "audit_sha256": {
+      "type": "string"
+    },
+    "boundary_probe": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "confirmed_root_causes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_symbols": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reproduction": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "suggested_correction": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "negative_controls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "uncertainty": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "potential_overlap": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "worker_id",
+    "assignment_id",
+    "audit_sha256",
+    "boundary_probe",
+    "findings",
+    "confirmed_root_causes",
+    "source_symbols",
+    "reproduction",
+    "suggested_correction",
+    "negative_controls",
+    "evidence",
+    "uncertainty",
+    "potential_overlap"
+  ]
+}

@@ -1,0 +1,42 @@
+tools\saipen_engine\gc.py:456:101: E501 Line too long (104 > 100)
+tools\saipen_engine\gc.py:654:101: E501 Line too long (107 > 100)
+tools\saipen_engine\gc.py:658:101: E501 Line too long (106 > 100)
+tools\saipen_engine\gc.py:1093:101: E501 Line too long (102 > 100)
+tools\saipen_engine\gc.py:1101:101: E501 Line too long (121 > 100)
+tools\saipen_engine\gc.py:1103:101: E501 Line too long (107 > 100)
+tools\saipen_engine\gc.py:1165:101: E501 Line too long (101 > 100)
+tools\saipen_engine\gc.py:1178:101: E501 Line too long (115 > 100)
+tools\saipen_engine\gc.py:1196:101: E501 Line too long (110 > 100)
+tools\saipen_engine\gc.py:1245:101: E501 Line too long (135 > 100)
+tools\saipen_engine\gc.py:1264:24: RUF059 Unpacked variable `build_kept` is never used
+tools\saipen_engine\gc.py:1292:101: E501 Line too long (103 > 100)
+tools\saipen_engine\gc.py:1339:101: E501 Line too long (103 > 100)
+tools\saipen_engine\gc.py:1340:101: E501 Line too long (120 > 100)
+tools\saipen_engine\gc.py:1431:13: PLW2901 `for` loop variable `line` overwritten by assignment target
+tools\saipen_engine\gc.py:1495:101: E501 Line too long (102 > 100)
+tools\saipen_engine\gc.py:1503:9: SIM105 Use `contextlib.suppress(OSError)` instead of `try`-`except`-`pass`
+tools\saipen_engine\gc.py:1599:13: SIM105 Use `contextlib.suppress(OSError)` instead of `try`-`except`-`pass`
+tools\saipen_engine\gc.py:1683:101: E501 Line too long (119 > 100)
+tools\saipen_engine\gc.py:1687:101: E501 Line too long (142 > 100)
+tools\saipen_engine\gc.py:1690:101: E501 Line too long (135 > 100)
+tools\saipen_engine\gc.py:1736:9: SIM105 Use `contextlib.suppress(OSError)` instead of `try`-`except`-`pass`
+tools\saipen_engine\gc.py:1856:9: PLW2901 `for` loop variable `line` overwritten by assignment target
+tools\saipen_engine\gc.py:2050:101: E501 Line too long (102 > 100)
+tools\saipen_engine\gc.py:2187:9: F841 Local variable `sync` is assigned to but never used
+tools\saipen_engine\gc.py:2247:101: E501 Line too long (113 > 100)
+tools\saipen_engine\gc.py:2314:101: E501 Line too long (103 > 100)
+tools\saipen_engine\gc.py:2337:101: E501 Line too long (103 > 100)
+tools\saipen_engine\gc.py:2353:101: E501 Line too long (103 > 100)
+tools\saipen_engine\gc.py:2356:5: F841 Local variable `evidence` is assigned to but never used
+tools\saipen_engine\gc.py:2427:101: E501 Line too long (105 > 100)
+tools\saipen_engine\operations.py:12584:11: RUF059 Unpacked variable `state` is never used
+tools\saipen_engine\operations.py:12627:101: E501 Line too long (115 > 100)
+tools\saipen_engine\operations.py:27216:101: E501 Line too long (116 > 100)
+tools\saipen_engine\operations.py:27401:101: E501 Line too long (105 > 100)
+tools\saipen_engine\release.py:2852:23: F401 [*] `.lock.WriterBusy` imported but unused
+tools\saipen_engine\release.py:2856:9: SIM117 [*] Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\saipen_engine\release.py:3088:23: F401 [*] `.lock.WriterBusy` imported but unused
+tools\saipen_engine\release.py:3091:9: SIM117 [*] Use a single `with` statement with multiple contexts instead of nested `with` statements
+tools\saipen_engine\release.py:3437:12: RUF005 Consider `[*command, "--gate", gate]` instead of concatenation
+Found 40 errors.
+[*] 4 fixable with the `--fix` option (8 hidden fixes can be enabled with the `--unsafe-fixes` option).

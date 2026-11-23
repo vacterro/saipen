@@ -1,0 +1,12 @@
+test_native_floor_failure_names_the_runner_that_failed (test_portable_floor_fields.NativeParityTransport.test_native_floor_failure_names_the_runner_that_failed) ... ok
+test_posix_runtime_keeps_the_bash_floor (test_portable_floor_fields.NativeParityTransport.test_posix_runtime_keeps_the_bash_floor) ... ok
+test_win32_runtime_uses_powershell_without_changing_the_timeout (test_portable_floor_fields.NativeParityTransport.test_win32_runtime_uses_powershell_without_changing_the_timeout) ... ok
+test_description_and_blocker_prose_do_not_create_dependencies (test_portable_floor_fields.PortableNeedsFields.test_description_and_blocker_prose_do_not_create_dependencies) ... ok
+test_narrative_self_reference_does_not_create_a_cycle (test_portable_floor_fields.PortableNeedsFields.test_narrative_self_reference_does_not_create_a_cycle) ... ok
+test_real_cycle_still_fails (test_portable_floor_fields.PortableNeedsFields.test_real_cycle_still_fails) ... ok
+test_real_dangling_field_still_fails (test_portable_floor_fields.PortableNeedsFields.test_real_dangling_field_still_fails) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 5.669s
+
+OK

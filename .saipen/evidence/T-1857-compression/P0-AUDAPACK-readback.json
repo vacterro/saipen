@@ -1,0 +1,23 @@
+{
+  "project": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+  "preview_exit": 1,
+  "code": "RECONCILE_REAUTH_REQUIRED",
+  "action": null,
+  "detail": "bounded run requires a fresh operator cc through authenticated native ingress; WAIT: safety valve reached (0 waves / 28 tickets) -- run 'cc' to continue",
+  "operator_action": "Send fresh cc through authenticated native host ingress; an agent CLI replay cannot renew this budget. Restore the host ingress bridge if it is unavailable.",
+  "next": null,
+  "goal_tickets": null,
+  "goal_waves": null,
+  "authority": null,
+  "before": {
+    "LOG.md": "D0ABCBFB609BBBD1B9A057448756EFF7B4C4149DE8A4E0A5FC20EA805BBC7A4C",
+    "STATE.md": "05AEAE1C694AC8768085B7DF0760002B25B701206DB773630DED17907E5F7046",
+    "BOARD.md": "F2F7C20A9CE5DD7E5C37544895EDFC00A52BD43589547B33DF93E2CBCE063285"
+  },
+  "after": {
+    "LOG.md": "D0ABCBFB609BBBD1B9A057448756EFF7B4C4149DE8A4E0A5FC20EA805BBC7A4C",
+    "STATE.md": "05AEAE1C694AC8768085B7DF0760002B25B701206DB773630DED17907E5F7046",
+    "BOARD.md": "F2F7C20A9CE5DD7E5C37544895EDFC00A52BD43589547B33DF93E2CBCE063285"
+  },
+  "state_unchanged": true
+}

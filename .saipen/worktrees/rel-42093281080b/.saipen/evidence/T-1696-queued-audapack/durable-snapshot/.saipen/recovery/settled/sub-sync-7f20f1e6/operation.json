@@ -1,0 +1,110 @@
+{
+  "op_id": "sub-sync-7f20f1e6",
+  "operation": "sub_sync",
+  "created_at": "2026-09-28T08:16:09Z",
+  "agent": "buffy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "9858a091d2bf6f6e",
+  "preconditions": {
+    ".saipen/extensions/subs/crew.md": "a350f7cfe641fd4f"
+  },
+  "read_preconditions": {
+    "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/extensions/subs": "tree-sha256:6b83d525efb890d7de8f16aea7e50058b18f9488a358ab2b87802b63614c1076",
+    "V:/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/extensions/subs/crew.md": "0644415b524b33ff"
+  },
+  "verification_policy": "sub_sync",
+  "status": "COMMITTED",
+  "progress_index": 1,
+  "targets": [
+    {
+      "path": ".saipen/extensions/subs/crew.md",
+      "role": "manifest",
+      "action": "write",
+      "before_hash": "a350f7cfe641fd4f",
+      "after_hash": "0644415b524b33ff",
+      "applied": true
+    }
+  ],
+  "receipt_metadata": {
+    "owned_source_inventory": [
+      {
+        "path": "PROTOCOL.md",
+        "kind": "file",
+        "source_hash": "9f9ec1aea31c7195"
+      },
+      {
+        "path": "README.md",
+        "kind": "file",
+        "source_hash": "e4ff42445be7ea6d"
+      },
+      {
+        "path": "TEMPLATE",
+        "kind": "directory",
+        "source_hash": "delete-tree-sha256:6aa4ff1dca5f0f082f1422a8a056a6a23b7627e31e56960b4e2429bb212fb960"
+      },
+      {
+        "path": "TEMPLATE/BOARD.md",
+        "kind": "file",
+        "source_hash": "2f404b252fd85214"
+      },
+      {
+        "path": "TEMPLATE/LOG.md",
+        "kind": "file",
+        "source_hash": "c99f90eaabc29aee"
+      },
+      {
+        "path": "TEMPLATE/STATE.md",
+        "kind": "file",
+        "source_hash": "3c9f0f2f2e6a2549"
+      },
+      {
+        "path": "TEMPLATE/kitchen",
+        "kind": "directory",
+        "source_hash": "delete-tree-sha256:b7c61b05ebe14243d75f7e847a0517bc9f44adb29ede835ca07620d00453e8a2"
+      },
+      {
+        "path": "TEMPLATE/kitchen/OUTBOX.md",
+        "kind": "file",
+        "source_hash": "02feec7cb8582577"
+      },
+      {
+        "path": "crew.md",
+        "kind": "file",
+        "source_hash": "0644415b524b33ff"
+      },
+      {
+        "path": "saihunt.md",
+        "kind": "file",
+        "source_hash": "5927e8c0ace9d76b"
+      },
+      {
+        "path": "saipython.md",
+        "kind": "file",
+        "source_hash": "d77dcb3b84f293ca"
+      },
+      {
+        "path": "saitest.md",
+        "kind": "file",
+        "source_hash": "c96ebff8c7c36eed"
+      },
+      {
+        "path": "saitranslate.md",
+        "kind": "file",
+        "source_hash": "5f2b5af1358def6c"
+      },
+      {
+        "path": "saiui.md",
+        "kind": "file",
+        "source_hash": "75b31ee6f18d3d7e"
+      },
+      {
+        "path": "saiwiki.md",
+        "kind": "file",
+        "source_hash": "a10b94acf2356fc9"
+      }
+    ],
+    "obsolete_reconciliation": [],
+    "previous_sub_sync_op_id": "sub-sync-4850a350"
+  }
+}

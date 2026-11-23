@@ -1,0 +1,52 @@
+[
+  {
+    "name": "ancestry.result",
+    "record": ".saipen/evidence/regression/regression-execution-8523f6d7d07546bdb706826f9112a820.json",
+    "current_authenticated": false
+  },
+  {
+    "name": "exhaustion.result",
+    "record": ".saipen/evidence/regression/regression-execution-354b0a93145f43a69dc5b3b5f681cd2e.json",
+    "current_authenticated": false
+  },
+  {
+    "name": "external-terminal",
+    "record": ".saipen/evidence/regression/regression-execution-6208f8f5c23a4f3cafe2a3a5397cafa5.json",
+    "current_authenticated": false
+  },
+  {
+    "name": "iteration.result",
+    "record": ".saipen/evidence/regression/regression-execution-aacd2e657ad94b7894b3570d2a099f6a.json",
+    "current_authenticated": false
+  },
+  {
+    "name": "lifecycle.result",
+    "record": ".saipen/evidence/regression/regression-execution-f26fcfca6ba34685b926620f357a9559.json",
+    "current_authenticated": false
+  },
+  {
+    "name": "maintenance.result",
+    "record": ".saipen/evidence/regression/regression-execution-2a6aad66c9824c7f8af03fc46c74d016.json",
+    "current_authenticated": false
+  },
+  {
+    "name": "publication.result",
+    "record": ".saipen/evidence/regression/regression-execution-de2b828bd4fc4fd88ad8e96328b3e3c5.json",
+    "current_authenticated": false
+  },
+  {
+    "name": "release-completion.result",
+    "record": ".saipen/evidence/regression/regression-execution-448035965ebd4455b102090538b8604b.json",
+    "current_authenticated": false
+  },
+  {
+    "name": "review-authority.result",
+    "record": ".saipen/evidence/regression/regression-execution-dc321bfa69a64e9db02a23eed6a46b02.json",
+    "current_authenticated": false
+  },
+  {
+    "name": "review-boundaries.result",
+    "record": ".saipen/evidence/regression/regression-execution-7730f6b59eb44908b99dbdd0aba5b71a.json",
+    "current_authenticated": false
+  }
+]

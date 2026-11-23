@@ -1,0 +1,16 @@
+{
+  "ticket": "T-1686",
+  "command": "python -B -m unittest test_t1686_launch_policy -v",
+  "cwd": "tools",
+  "verifier_sha256": "54a3aa82124d87893400c5ec5054e4012b681187042e961fd7cbfd6c32a1cc1e",
+  "pre_subject_sha256": "cf92f0278e6c3093032081393c777a7b35c51075629ed0535835aeee6257c66f",
+  "post_subject_sha256": "b48cd85306c8c6a8996d668a5aa137f2da8d68ad682ec02e5f552a9e69be1134",
+  "pre_exit_code": 1,
+  "post_exit_code": 0,
+  "ran": 7,
+  "pre_failures": 6,
+  "post_failures": 0,
+  "spawn_interlock": "SAIPEN_FORBID_HOST_SPAWN=1",
+  "oracle_unchanged": true,
+  "note": "The pre-fix implementation was restored after the first green. The final verifier uses Python 3.8 compatible context-manager syntax; its final pre/post pair changes only host_launch.py. Existing T-1327 degraded-policy control is isolated from the operator's real policy."
+}

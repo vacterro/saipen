@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-425:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Night shift 5: continue T-2090 \u2014 repair five independently reproduced P0 defects (agent-view 32KiB overrun, false truncated flags, UTF-8 tail digest, journal short read, receipt vanish race) with RED/GREEN proofs"
+    }
+  },
+  "derived_at": "2026-11-22T01:45:20Z",
+  "derived_from": "SRC-425",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0c54fb1783c75730084e64aaf601b60e786f850cf90831899f066e59b45f0665"
+}

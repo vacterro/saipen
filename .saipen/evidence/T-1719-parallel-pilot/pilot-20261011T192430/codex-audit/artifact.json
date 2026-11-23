@@ -1,0 +1,40 @@
+{
+  "after_hashes": {},
+  "after_index_modes": {},
+  "after_modes": {},
+  "base_commit": "0269896e66c034a4b4f67bc12176b1f66f17be04",
+  "base_tree": "d420a43ebf8ec144926c6037d85436852f7230c7",
+  "before_hashes": {},
+  "before_index_modes": {},
+  "before_modes": {},
+  "changed_paths": [],
+  "created_at": "2026-10-11T19:25:21.061139Z",
+  "evidence": [],
+  "job_id": "codex-audit",
+  "kind": "saipen-parallel-artifact",
+  "objective": "Read-only audit of arithmetic.py",
+  "packet_sha256": "6c017ec19ab99e3c8222f9bc6d483b1b6328a228815bfe869cf2abc93e9bdbac",
+  "patch_rel": ".saipen/evidence/parallel/pilot-20261011T192430/codex-audit/changes.patch",
+  "patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "project_lineage": "lineage-94ea5bd7e0204216aef2b49f1944167d",
+  "read_all": true,
+  "read_hashes": {
+    "arithmetic.py": "d582c4f30488436f42ab3cfd58b4d4892dcba9bb24c4fd7a36cbf6afc3fc8701"
+  },
+  "read_index_modes": {
+    "arithmetic.py": "100644"
+  },
+  "read_modes": {
+    "arithmetic.py": "100644"
+  },
+  "read_paths": [
+    "arithmetic.py"
+  ],
+  "result_tree": "d420a43ebf8ec144926c6037d85436852f7230c7",
+  "role": "audit",
+  "root_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen\\.saipen\\cache\\parallel-pilot\\pilot-20261011t192430\\project",
+  "run_id": "pilot-20261011T192430",
+  "schema_version": 1,
+  "worker_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\cache\\parallel-pilot\\pilot-20261011T192430\\project\\.saipen\\cache\\parallel\\pilot-20261011T192430\\worktrees\\codex-audit",
+  "write_paths": []
+}

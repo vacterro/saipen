@@ -1,0 +1,18 @@
+{
+  "audit_sha256": "df983dc9ba85b05cba06672a3ae516f4d553aad0874a79bbd99fb6525f35cfa9",
+  "audit_bytes": 5505,
+  "audit_equals_receipt_and_snapshot": true,
+  "request_clause_equals_original_request": true,
+  "contract_digests_match_sources": true,
+  "consumer_files": {
+    "consumer-STATE.md": {
+      "unchanged": true,
+      "snapshot_sha256": "3571c0e15e9173db7a94ed2b0120ae7f7a17f97e6d788f494e312dc22a8e79aa"
+    },
+    "consumer-BOARD.md": {
+      "unchanged": true,
+      "snapshot_sha256": "0f2390009322dec46a0499c8d5b4ce58a538fc2a97c1e771f17284ed97a19bc2"
+    }
+  },
+  "scope": "read and record; no consumer repair, ACL mutation or host acceptance"
+}

@@ -1,6 +1,6 @@
 {
   "archive_ref": ".saipen/archive/source/SRC-066.md",
-  "closed_at": "2026-10-30T02:41:57Z",
+  "closed_at": "2026-11-14T22:52:18Z",
   "closure_event": null,
   "linked_work": "T-1396",
   "receipt_id": "SRC-066",
@@ -15,7 +15,7 @@
     "compared_digest": "3cb226e34e2d7066e1f4e4da7e0eea21c348643802bbe44db746d8b584e32136",
     "witness": "transport_obligation"
   },
-  "reread_at": "2026-10-30T02:41:57Z",
+  "reread_at": "2026-11-14T22:52:18Z",
   "schema_version": 1,
   "sensitive": false,
   "source_authority": {

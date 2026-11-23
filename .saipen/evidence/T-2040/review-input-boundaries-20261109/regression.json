@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "tools/test_t2040_review_input_boundaries.py", "ReviewInputBoundaryTests"],
+  "format": "unittest",
+  "context": ["tools", "saipen", "extensions", "bin", "VERSION", "README.md"],
+  "oracle_files": ["tools/test_t2040_review_input_boundaries.py", "tools/test_t2040_exhaustion_evidence.py", "tools/test_hermetic_env.py", "tools/test_t1807_audit_liveness_regression.py", "tools/test_fixture_support.py"],
+  "subject_files": ["tools/saipen_engine/board.py", "tools/saipen_engine/work_exhaustion.py", "tools/saipen_engine/persistent_goal.py"],
+  "before": {
+    "tools/saipen_engine/board.py": ".saipen/evidence/T-2040/review-input-boundaries-20261109/tools/saipen_engine/board.py",
+    "tools/saipen_engine/work_exhaustion.py": ".saipen/evidence/T-2040/review-input-boundaries-20261109/tools/saipen_engine/work_exhaustion.py",
+    "tools/saipen_engine/persistent_goal.py": ".saipen/evidence/T-2040/review-input-boundaries-20261109/tools/saipen_engine/persistent_goal.py"
+  },
+  "timeout": 120
+}

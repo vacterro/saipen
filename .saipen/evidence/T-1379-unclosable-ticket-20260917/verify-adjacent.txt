@@ -1,0 +1,7 @@
+# T-1379 VERIFY: focused + adjacent intake/source/closure families
+command: python -m unittest tools.test_request_clause_closure tools.test_source_receipts tools.test_closure_provenance tools.test_protocol_registry tools.test_pending_ingress tools.test_t1363_zero_manual_entry tools.test_public_closure_cli tools.test_ticket_retirement
+...................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 243 tests in 89.027s
+
+OK

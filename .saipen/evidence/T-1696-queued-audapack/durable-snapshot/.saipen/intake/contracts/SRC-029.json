@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-029:R0001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Complete T15 release gates, user-first documentation, coherent versioning, and recorded ship evidence only after T14 passes."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:13Z",
+  "derived_from": "SRC-029",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "c03be530f47dda8d0df80c122f83971342ab078666a2f1298a7f501acb846e1a"
+}

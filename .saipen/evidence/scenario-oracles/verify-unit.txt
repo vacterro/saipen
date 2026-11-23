@@ -1,0 +1,18 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 4855,
+  "red": 1,
+  "new_red": [
+    "test_style_contract_chokepoint.StaticChokepointTests.test_evidence_scripts_hardcode_no_marker"
+  ],
+  "fixed": [],
+  "problems": [
+    "1 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/54ad859af386ae71-20261003T112208Z.json",
+  "reused": false,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

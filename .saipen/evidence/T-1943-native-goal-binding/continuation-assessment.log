@@ -1,0 +1,38 @@
+F...FF.
+======================================================================
+FAIL: test_c01_empty_board_with_proven_maintenance_continues (__main__.ContinuationAssessmentSuite.test_c01_empty_board_with_proven_maintenance_continues)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_campaign_continuation_assessment.py", line 125, in test_c01_empty_board_with_proven_maintenance_continues
+    self.assertEqual(assessment["classification"], CA.MAINTENANCE_AVAILABLE)
+AssertionError: 'INVALID_RUNTIME' != 'MAINTENANCE_AVAILABLE'
+- INVALID_RUNTIME
++ MAINTENANCE_AVAILABLE
+
+
+======================================================================
+FAIL: test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds (__main__.ContinuationAssessmentSuite.test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_campaign_continuation_assessment.py", line 232, in test_c12_foreign_blocked_ticket_with_proven_maintenance_proceeds
+    self.assertEqual(assessment["classification"], CA.MAINTENANCE_AVAILABLE)
+AssertionError: 'INVALID_RUNTIME' != 'MAINTENANCE_AVAILABLE'
+- INVALID_RUNTIME
++ MAINTENANCE_AVAILABLE
+
+
+======================================================================
+FAIL: test_c13_forged_persistent_grant_refused (__main__.ContinuationAssessmentSuite.test_c13_forged_persistent_grant_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_campaign_continuation_assessment.py", line 261, in test_c13_forged_persistent_grant_refused
+    self.assertEqual(assessment["classification"], CA.WAIT_AUTHORITY)
+AssertionError: 'INVALID_RUNTIME' != 'WAIT_AUTHORITY'
+- INVALID_RUNTIME
++ WAIT_AUTHORITY
+
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.167s
+
+FAILED (failures=3)

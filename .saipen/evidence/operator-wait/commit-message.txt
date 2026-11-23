@@ -1,0 +1,4 @@
+fix(state): preserve operator WAIT boundaries
+
+Share action validation at STATE construction and recovery. Encode explicit
+legacy repairs as bounded UTF-8 hex without granting work authority.

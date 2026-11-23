@@ -1,0 +1,8 @@
+current tree git-delta-v1:0c125360ae483b4e7f1a84912ec4202fab48973a7d3607ce53407bd10e5901bb
+54 to run, 33 already executed
+OK T-111 RV-000481 count=808
+OK T-112 RV-000482 count=808
+OK T-130 RV-000483 count=808
+OK T-165 RV-000484 count=423
+OK T-194 RV-000485 count=225
+OK T-195 RV-000486 count=225

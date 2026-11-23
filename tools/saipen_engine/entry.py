@@ -1056,6 +1056,44 @@ def start_work(
 
     # 5. Claim into SCOUT. The request is the basis, never a bare override
     # (T-1757): OBEY outranks START, and the DEC says so.
+    # Campaign XVII (T-2170): when a non-work phase owns the session, the
+    # durable Work/receipt has ALREADY been written above. apply_claim then
+    # refuses CLEAN -> SCOUT, which used to surface as a misleading failed
+    # start and invited a second START that duplicated the ticket. The Work
+    # is honestly QUEUED instead: name the phase that owns execution and the
+    # legal forward edge that must complete first. No phase is changed and
+    # no claim is fabricated. The DFA stays the single authority.
+    from . import phases as _phases
+
+    _phase = str((state or {}).get("phase") or "")
+    # ONLY maintenance phases own the session in a way that forbids START
+    # from claiming and has no independent refusal path of its own. BUILD's
+    # blocker/valve path (t1363 P0-7) and INIT's bootstrap route keep their
+    # existing behavior; widening the guard there changed tested contracts.
+    _MAINTENANCE_PHASES = frozenset({"CLEAN", "MARKHUNT"})
+    if _phase in _MAINTENANCE_PHASES and not _phases.transition_legal(_phase, "SCOUT"):
+        # Name the phase that owns execution: its own document carries the
+        # ordered obligations and its exit gate decides DONE vs BLOCKED.
+        _forward = f"PHASE {_phase}" if _phase else "saipen status"
+        return {
+            "ok": True,
+            "code": "USER_REQUEST_QUEUED",
+            **base,
+            "work_claimed": False,
+            "current_phase": _phase,
+            "next_action": _forward,
+            "action": _forward,
+            "ownership_boundary": (
+                f"Work {ticket} is durably queued; active {_phase} owns execution"
+            ),
+            "detail": (
+                f"request recorded as {ticket} ({captured_receipt}); the DFA "
+                f"forbids {_phase or 'INIT'} -> SCOUT, so the Work stays in "
+                f"TODO until {_forward} completes"
+            ),
+            "parked": None,
+            "preempted": False,
+        }
     claimed = _call(
         apply_claim,
         root,

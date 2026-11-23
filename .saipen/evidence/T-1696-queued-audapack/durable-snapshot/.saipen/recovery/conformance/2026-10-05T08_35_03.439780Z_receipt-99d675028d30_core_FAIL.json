@@ -1,0 +1,132 @@
+{
+  "blocking_findings": {
+    "problem_count": 8,
+    "problems": [
+      {
+        "category": null,
+        "credential": false,
+        "detail": "SRC-014,T-52",
+        "detail_hash": "ad65aeb76358a62e",
+        "finding_key": "5c37a274e978dcd4",
+        "rule_id": "source_receipt_unresolved_work",
+        "severity": "problem",
+        "subject_id": "T-52",
+        "subject_kind": "work",
+        "subject_ref": null
+      },
+      {
+        "category": null,
+        "credential": false,
+        "detail": "SRC-028,T-52",
+        "detail_hash": "bf845f49018f0f2b",
+        "finding_key": "5c37a274e978dcd4",
+        "rule_id": "source_receipt_unresolved_work",
+        "severity": "problem",
+        "subject_id": "T-52",
+        "subject_kind": "work",
+        "subject_ref": null
+      },
+      {
+        "category": null,
+        "credential": false,
+        "detail": "SRC-029,T-52",
+        "detail_hash": "b2e2251e0ddb32a3",
+        "finding_key": "5c37a274e978dcd4",
+        "rule_id": "source_receipt_unresolved_work",
+        "severity": "problem",
+        "subject_id": "T-52",
+        "subject_kind": "work",
+        "subject_ref": null
+      },
+      {
+        "category": null,
+        "credential": false,
+        "detail": "structural-event-missing-op-marker",
+        "detail_hash": "11d63d3fa6b4dd33",
+        "finding_key": "00a0b489dc0a6af6",
+        "rule_id": "log_provenance_marker",
+        "severity": "problem",
+        "subject_id": "E-2429",
+        "subject_kind": "event",
+        "subject_ref": ".saipen/logs/LOG-002.md:410"
+      },
+      {
+        "category": null,
+        "credential": false,
+        "detail": "no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt",
+        "detail_hash": "186e51123c0cc004",
+        "finding_key": "73b031a84b58ffc4",
+        "rule_id": "work_closure_evidence",
+        "severity": "problem",
+        "subject_id": "T-97",
+        "subject_kind": "work",
+        "subject_ref": null
+      },
+      {
+        "category": null,
+        "credential": false,
+        "detail": "no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt",
+        "detail_hash": "186e51123c0cc004",
+        "finding_key": "996e149e68b7c3a4",
+        "rule_id": "work_closure_evidence",
+        "severity": "problem",
+        "subject_id": "T-98",
+        "subject_kind": "work",
+        "subject_ref": null
+      },
+      {
+        "category": null,
+        "credential": false,
+        "detail": "no current-cycle VERIFY boundary; reverify: no current-tree PASS re-verification receipt",
+        "detail_hash": "186e51123c0cc004",
+        "finding_key": "d139d7dec319f946",
+        "rule_id": "work_closure_evidence",
+        "severity": "problem",
+        "subject_id": "T-99",
+        "subject_kind": "work",
+        "subject_ref": null
+      },
+      {
+        "category": null,
+        "credential": false,
+        "detail": "improve report [improve-report] -- .saipen\\improve\\imp-vacterro-audapack-20260927-1\\buffy-01\\saipen_improve_SAIPEN.md: report saipen_version '8.0.1' != installed SAIPEN version '8.1.0'; .saipen\\improv",
+        "detail_hash": "041192b53a62b048",
+        "finding_key": "76b48f23558dce11",
+        "rule_id": "unclassified",
+        "severity": "problem",
+        "subject_id": null,
+        "subject_kind": "global",
+        "subject_ref": null
+      }
+    ],
+    "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+    "ruleset_version": 1,
+    "status": "complete",
+    "warning_count": 90
+  },
+  "board_hash": "1132201243d391a3",
+  "canonical_next_command": "saipen work reverify T-97",
+  "content_hash": "3df021ec28c3aa09",
+  "exit_code": 1,
+  "external_actions": [],
+  "gate": "core",
+  "install_fingerprint": "install-v1:63e98c6435700d92ee05e99a8d91af59bfe5f8a9a0d5ea88288a709db75ba6b8",
+  "install_home": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+  "kind": "conformance_receipt",
+  "log_hash": "fbed7aae1fccbe16",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "receipt_id": "receipt-99d675028d30",
+  "remediation_commands": [
+    "saipen work reverify T-97",
+    "saipen work reverify T-98",
+    "saipen work reverify T-99",
+    "saipen improve reconcile imp-vacterro-audapack-20260927-1"
+  ],
+  "schema_version": 2,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:5487353c03b3c0f61be074ae6d668c621e31a7cc3b4e18a33937d20475866c35",
+  "state_hash": "cb1375fa5500847d",
+  "timestamp_utc": "2026-10-05T08:35:03.439780Z",
+  "validator_protocol_version": "1",
+  "verdict": "FAIL"
+}

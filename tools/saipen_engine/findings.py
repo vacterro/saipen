@@ -236,6 +236,12 @@ _RULES: tuple[Rule, ...] = (
         subject_pattern=r"T-\d+",
     ),
     Rule(
+        "attempt_admission",
+        r"attempt-admission -- ticket (T-\d+) is DONE but its candidate",
+        "work",
+        subject_pattern=r"T-\d+",
+    ),
+    Rule(
         "translation_stale",
         r"locale README",
         "global",

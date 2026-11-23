@@ -1,0 +1,14 @@
+test_blocked_claimed_ticket_cannot_grant_execution (test_t1739_wait_boundary.WaitBoundary.test_blocked_claimed_ticket_cannot_grant_execution) ... ok
+test_contradictory_authority_tuple_fails_closed (test_t1739_wait_boundary.WaitBoundary.test_contradictory_authority_tuple_fails_closed) ... ok
+test_genuine_complete_requires_all_current_closure_conditions (test_t1739_wait_boundary.WaitBoundary.test_genuine_complete_requires_all_current_closure_conditions) ... ok
+test_independent_candidate_is_eligible_only_after_session_brake_absent (test_t1739_wait_boundary.WaitBoundary.test_independent_candidate_is_eligible_only_after_session_brake_absent) ... ok
+test_native_status_and_continue_use_same_snapshot_without_writes (test_t1739_wait_boundary.WaitBoundary.test_native_status_and_continue_use_same_snapshot_without_writes) ... ok
+test_no_executable_work_is_not_completion (test_t1739_wait_boundary.WaitBoundary.test_no_executable_work_is_not_completion) ... ok
+test_operator_required_wait_dominates_two_candidates_and_eight_blocked (test_t1739_wait_boundary.WaitBoundary.test_operator_required_wait_dominates_two_candidates_and_eight_blocked) ... ok
+test_safety_gates_and_existing_schema_remain_intact (test_t1739_wait_boundary.WaitBoundary.test_safety_gates_and_existing_schema_remain_intact) ... ok
+test_stale_projection_cannot_certify_current_completion (test_t1739_wait_boundary.WaitBoundary.test_stale_projection_cannot_certify_current_completion) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 2.140s
+
+OK

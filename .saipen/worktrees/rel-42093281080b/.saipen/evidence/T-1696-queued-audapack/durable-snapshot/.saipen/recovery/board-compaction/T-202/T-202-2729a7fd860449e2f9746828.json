@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-1507",
+    "operation_id": "finish-7c34248ad774489d9815235461f70cea",
+    "reason": "existing/proposed oversized BOARD record requires canonical ticket completion update"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-202/T-202-2729a7fd860449e2f9746828.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 1214,
+  "original_record_path": ".saipen/recovery/board-compaction/T-202/T-202-2729a7fd860449e2f9746828.BOARD.md",
+  "original_record_sha256": "2729a7fd860449e2f9746828ad2ed4e9a0bb135ccff9e24205367cca7c8ca811",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": "",
+  "ticket_id": "T-202"
+}

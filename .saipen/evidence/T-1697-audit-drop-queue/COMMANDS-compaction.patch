@@ -1,0 +1,28 @@
+--- before/saipen/COMMANDS.md
++++ saipen/COMMANDS.md
+@@ -106,7 +106,7 @@
+ | `saipen source normalize [--dry-run]` | RECOVERY: journal BOARD ranges as explicit receipt IDs; malformed ranges refuse; preview writes zero | CMD-ROUTING-01 |
+ | `saipen source quarantine <SRC-###> [--reason CODE]` | EXECUTION: preserve the exact active or archived body locally and exclude it from release/export; `--dry-run` previews without writing; does not close Work or waive coverage (SOURCES.md) | CMD-ROUTING-01 |
+ | `saipen authority capture --file <UTF8_FILE>\|--hex <UTF8_HEX>` | persist ONE operator-authority Source from exact bytes; never projects Work | CMD-ROUTING-01 |
+-| `saipen audit [status\|inspect\|trace\|ingest\|enqueue\|manifest]` | intake transport for every bound project's `audit/`; `inspect`/`trace` accept a legacy number or filename. `status`/`inspect`/`trace` are DIAGNOSTIC, `ingest`/`enqueue`/`manifest [--write [--force]]` are EXECUTION; `manifest` is read-only unless `--write` is passed (SOURCES.md) | CMD-CONTINUE-01 |
++| `saipen audit [status\|inspect\|trace\|ingest\|enqueue\|manifest]` | intake; `inspect`/`trace` accept N or filename. DIAGNOSTIC: `status`/`inspect`/`trace`/`manifest`; EXECUTION: `ingest`/`enqueue`/`manifest --write [--force]` (SOURCES.md) | CMD-CONTINUE-01 |
+ | `saipen userperson [show\|add\|remove\|reset]` | meta; direction is DEFAULT not ORDER (CORE.md), `reset` deletes the profile and needs `--confirm`, and `show --effective` is read-only (CORE.md) | CMD-ROUTING-01 |
+ | `saipen sub [spawn\|adopt\|sync\|pause\|resume\|clean\|collect\|dispose\|reconcile] <name>` | sub; `sync`/`spawn`/`adopt`/`pause`/`resume`/`clean`/`collect`/`dispose` are EXECUTION and `reconcile` is RECOVERY (CONVERGE.md, COMMANDS.md below) | CMD-ROUTING-01 |
+ | `saipen undo confirm` | EXECUTION: the confirmation leg of the `zz` milestone restore; without it the restore is a preview (CONTROLS.md) | CMD-ROUTING-01 |
+@@ -175,12 +175,10 @@
+ while the seat was busy is started through `saipen start --receipt SRC-###` by
+ the next canonical poll after the seat frees -- an operator never retypes the
+ command, and the queued request outranks persisted converge intent and
+-speculative backlog. The Audit Inbox stage checks the canonical `audit/` layers
+-(`SOURCE-AUDIT-INBOX-01`, SOURCES.md): legacy numbered layers retain their
+-selection precedence, while fresh named handoffs wait until BOARD has no
+-workable ticket. Neither preempts active Work; a project holding a workable
+-handoff is never idle. Layer identity is the path and file digest, so a
+-changed audit at a path already worked is a NEW generation and is read again.
++speculative backlog. Audit Inbox (`SOURCE-AUDIT-INBOX-01`, SOURCES.md):
++numbered layers precede TODO; fresh named files follow workable BOARD.
++Neither preempts active Work; a workable inbox forbids idle/Improve.
++Path + digest identifies a generation; changed bytes are NEW.
+ 
+ Every `continue`/`cc`/`status` JSON answer carries `telegrams`: the acting
+ seat's unread SAIMAIL telegram COUNTS when a mailbox is bound and

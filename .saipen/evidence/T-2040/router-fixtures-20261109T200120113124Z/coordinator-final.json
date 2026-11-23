@@ -1,0 +1,37 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tools/test_continue_improve_fallthrough.py",
+    "tools/test_improve_gate.py",
+    "tools/test_t1775_continue_never_admits_a_seat.py",
+    "tools/test_intent_audit_fixes.py",
+    "tools/test_t1614_future_gate.py",
+    "-q",
+    "--tb=short"
+  ],
+  "exit_code": 0,
+  "before": {
+    "tools/test_continue_improve_fallthrough.py": "e79f9fdaa8f709bcae8ae6ab339728e85d73afd5d04af03ec801ca8667605091",
+    "tools/test_improve_gate.py": "cd58f4dd528722b8c12cae52b1f46aa8913db92722a48328a732bab7c23f00a6",
+    "tools/test_t1775_continue_never_admits_a_seat.py": "a898229318074b1ced1c33571f2c0e9f350af31f18483e945cb904013382df20",
+    "tools/test_intent_audit_fixes.py": "a752d1fa2d625b9f56d8ae6ed0fd40261c830099e830273664409773fad6db79",
+    "tools/test_t1614_future_gate.py": "5a2d3e34a2533516d9377e6b09d2c412fa157f5d61b7f7beac92bf091818ff20"
+  },
+  "after": {
+    "tools/test_continue_improve_fallthrough.py": "e79f9fdaa8f709bcae8ae6ab339728e85d73afd5d04af03ec801ca8667605091",
+    "tools/test_improve_gate.py": "cd58f4dd528722b8c12cae52b1f46aa8913db92722a48328a732bab7c23f00a6",
+    "tools/test_t1775_continue_never_admits_a_seat.py": "a898229318074b1ced1c33571f2c0e9f350af31f18483e945cb904013382df20",
+    "tools/test_intent_audit_fixes.py": "a752d1fa2d625b9f56d8ae6ed0fd40261c830099e830273664409773fad6db79",
+    "tools/test_t1614_future_gate.py": "5a2d3e34a2533516d9377e6b09d2c412fa157f5d61b7f7beac92bf091818ff20"
+  },
+  "rationale": {
+    "hold": "Canonical block changed next_action to saipen status; fixture replace did not insert improve_gate (hold-noop-probe.json). patch_state inserts actual hold; precedence test expectation unchanged.",
+    "converge": "Converge/ship is intent, not current publication proof or exhaustive discovery. Retain target/no-write/crew-executable controls; idle unproven discovery stays nonterminal.",
+    "collect": "Replace unconstrained Mock with canonical real READY payload and genuine missing target. Ticket-bound review flow assertions unchanged.",
+    "future": "Absent future corpus is not complete discovery; exhausted valve must not promote. Below-cap positive unchanged."
+  },
+  "evidence_class": "Changed fixture oracle; not a production unchanged-oracle regression pair"
+}

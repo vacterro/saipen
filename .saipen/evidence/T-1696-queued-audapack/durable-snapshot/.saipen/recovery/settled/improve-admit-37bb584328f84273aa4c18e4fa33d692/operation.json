@@ -1,0 +1,35 @@
+{
+  "op_id": "improve-admit-37bb584328f84273aa4c18e4fa33d692",
+  "operation": "improve_admit",
+  "created_at": "2026-09-20T18:41:51Z",
+  "agent": "buffy-01",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "51bce88cfd115506",
+  "preconditions": {
+    ".saipen/improve/imp-vacterro-audapack-20260920-2/MANIFEST.md": "",
+    ".saipen/improve/imp-vacterro-audapack-20260920-2/buffy-01/saipen_improve_SAIPEN.md": ""
+  },
+  "read_preconditions": {},
+  "verification_policy": "improve_atomic_file",
+  "status": "COMMITTED",
+  "progress_index": 2,
+  "targets": [
+    {
+      "path": ".saipen/improve/imp-vacterro-audapack-20260920-2/MANIFEST.md",
+      "role": "manifest",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "7979fffbd0167e99",
+      "applied": true
+    },
+    {
+      "path": ".saipen/improve/imp-vacterro-audapack-20260920-2/buffy-01/saipen_improve_SAIPEN.md",
+      "role": "report",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "591122b49be1f16a",
+      "applied": true
+    }
+  ]
+}

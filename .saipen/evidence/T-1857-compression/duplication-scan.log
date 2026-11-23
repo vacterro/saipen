@@ -1,0 +1,34 @@
+scanned 23 documents
+
+== exact duplicate sentences across documents: 0
+
+== near-duplicate paragraph pairs (jaccard>=0.62): 0
+
+== repeated lines within one document
+   UI.md: 1
+      x2 border-color: var(--borderDark) var(--bevelLight) var(--bevelLight) var(--borderDark);
+
+== document sizes
+   OPS.md                       49935 B
+   IMPROVE.md                   39789 B
+   CORE.md                      32117 B
+   SOURCES.md                   25845 B
+   RUNTIME.md                   23050 B
+   COMMANDS_REFERENCE.md        18386 B
+   UI.md                        18366 B
+   MAINTENANCE.md               15111 B
+   FUTURE.md                    12279 B
+   CONTROLS.md                  10744 B
+   CONVERGE.md                   8697 B
+   EXECUTION.md                  7780 B
+   STYLE.md                      7279 B
+   COMMANDS.md                   6134 B
+   STORAGE.md                    5129 B
+   SKILL.md                      5035 B
+   BOOT.md                       4092 B
+   ACTIVATION_BLOCK.md           3983 B
+   CONFORMANCE.md                2465 B
+   SAICRITIC.md                  2433 B
+   INDEX.md                      2238 B
+   HABITS.md                     1577 B
+   RFC.md                         260 B

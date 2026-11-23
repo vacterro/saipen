@@ -1,0 +1,91 @@
+{
+  "control": "mutation: declaration ignored",
+  "mutated_module": "tools/saipen_engine/sandbox_scope.py",
+  "changed_bytes": 78,
+  "mutation_applied": true,
+  "resolver_helpers_intact": true,
+  "test_module_present": true
+}
+--- stdout+stderr ---
+
+test_a_declared_history_reader_still_sees_evidence (test_t1889_sandbox_scope.SandboxScopeTests.test_a_declared_history_reader_still_sees_evidence) ... FAIL
+test_a_declared_module_copies_no_history (test_t1889_sandbox_scope.SandboxScopeTests.test_a_declared_module_copies_no_history) ... FAIL
+test_a_malformed_manifest_is_a_refusal (test_t1889_sandbox_scope.SandboxScopeTests.test_a_malformed_manifest_is_a_refusal) ... ok
+test_a_pre_t1889_record_is_refused_once_a_manifest_narrows (test_t1889_sandbox_scope.SandboxScopeTests.test_a_pre_t1889_record_is_refused_once_a_manifest_narrows) ... ok
+test_a_record_from_a_narrower_copy_is_not_reused_after_a_new_declaration (test_t1889_sandbox_scope.SandboxScopeTests.test_a_record_from_a_narrower_copy_is_not_reused_after_a_new_declaration) ... ERROR
+test_an_entry_naming_a_missing_subtree_is_refused (test_t1889_sandbox_scope.SandboxScopeTests.test_an_entry_naming_a_missing_subtree_is_refused) ... ok
+test_an_entry_that_would_drop_the_subject_is_refused (test_t1889_sandbox_scope.SandboxScopeTests.test_an_entry_that_would_drop_the_subject_is_refused) ... ok
+test_an_undeclared_module_copies_everything (test_t1889_sandbox_scope.SandboxScopeTests.test_an_undeclared_module_copies_everything) ... ok
+test_one_undeclared_pattern_makes_the_whole_run_full (test_t1889_sandbox_scope.SandboxScopeTests.test_one_undeclared_pattern_makes_the_whole_run_full) ... ok
+test_the_decision_is_in_the_evidence_record (test_t1889_sandbox_scope.SandboxScopeTests.test_the_decision_is_in_the_evidence_record) ... FAIL
+test_the_declaration_is_load_bearing_for_a_real_reader (test_t1889_sandbox_scope.SandboxScopeTests.test_the_declaration_is_load_bearing_for_a_real_reader)
+The same module passes when declared and FAILS when it is not. ... FAIL
+test_the_identity_ignores_unrelated_manifest_edits (test_t1889_sandbox_scope.SandboxScopeTests.test_the_identity_ignores_unrelated_manifest_edits) ... ok
+
+======================================================================
+ERROR: test_a_record_from_a_narrower_copy_is_not_reused_after_a_new_declaration (test_t1889_sandbox_scope.SandboxScopeTests.test_a_record_from_a_narrower_copy_is_not_reused_after_a_new_declaration)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1889-red-a5h5zjg6\project\tools\test_t1889_sandbox_scope.py", line 210, in test_a_record_from_a_narrower_copy_is_not_reused_after_a_new_declaration
+    self.assertIn("sandbox scope", sandbox_scope.is_current(
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\case.py", line 1137, in assertIn
+    if member not in container:
+       ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: argument of type 'NoneType' is not iterable
+
+======================================================================
+FAIL: test_a_declared_history_reader_still_sees_evidence (test_t1889_sandbox_scope.SandboxScopeTests.test_a_declared_history_reader_still_sees_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1889-red-a5h5zjg6\project\tools\test_t1889_sandbox_scope.py", line 115, in test_a_declared_history_reader_still_sees_evidence
+    self.assertFalse((sandbox / ".saipen/recovery").exists(),
+AssertionError: True is not false : an UNDECLARED subtree must not arrive with it
+
+======================================================================
+FAIL: test_a_declared_module_copies_no_history (test_t1889_sandbox_scope.SandboxScopeTests.test_a_declared_module_copies_no_history)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1889-red-a5h5zjg6\project\tools\test_t1889_sandbox_scope.py", line 92, in test_a_declared_module_copies_no_history
+    self.assertEqual(scope["mode"], sandbox_scope.DECLARED)
+AssertionError: 'FULL' != 'DECLARED'
+- FULL
++ DECLARED
+
+
+======================================================================
+FAIL: test_the_decision_is_in_the_evidence_record (test_t1889_sandbox_scope.SandboxScopeTests.test_the_decision_is_in_the_evidence_record)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1889-red-a5h5zjg6\project\tools\test_t1889_sandbox_scope.py", line 176, in test_the_decision_is_in_the_evidence_record
+    self.assertEqual(record["sandbox_scope"]["mode"], sandbox_scope.DECLARED)
+AssertionError: 'FULL' != 'DECLARED'
+- FULL
++ DECLARED
+
+
+======================================================================
+FAIL: test_the_declaration_is_load_bearing_for_a_real_reader (test_t1889_sandbox_scope.SandboxScopeTests.test_the_declaration_is_load_bearing_for_a_real_reader)
+The same module passes when declared and FAILS when it is not.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1889-red-a5h5zjg6\project\tools\test_t1889_sandbox_scope.py", line 132, in test_the_declaration_is_load_bearing_for_a_real_reader
+    self.assertEqual(served["sandbox_scope"]["trees"], [".saipen/evidence"])
+AssertionError: Lists differ: [] != ['.saipen/evidence']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'.saipen/evidence'
+
+- []
++ ['.saipen/evidence']
+
+----------------------------------------------------------------------
+Ran 12 tests in 1.553s
+
+FAILED (failures=4, errors=1)
+
+--- verdict ---
+{
+  "returncode": 1,
+  "verdict": "RED (declaration ignored, as required)"
+}

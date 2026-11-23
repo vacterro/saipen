@@ -1,0 +1,104 @@
+FF                                                                       [100%]
+================================== FAILURES ===================================
+_ TestSupersededReceiptsAreNotReResolved.test_one_work_costs_one_resolution_no_matter_how_many_receipts _
+
+self = <test_external_revalidation.TestSupersededReceiptsAreNotReResolved testMethod=test_one_work_costs_one_resolution_no_matter_how_many_receipts>
+
+    def test_one_work_costs_one_resolution_no_matter_how_many_receipts(self) -> None:
+        """AC-01: 12 superseded receipts must not mean 12 resolutions."""
+        records = [
+            self._receipt(f"EX-{n:06d}", f"T-289@aaaaaaa{n}", "UPSTREAM_FIX_VERIFIED")
+            for n in range(1, 13)
+        ]
+        loc_repo = self._done_with_history(records)
+        calls: list[str] = []
+        real = ext_mod.resolution_problems
+    
+        def counting(root_arg, work, ticket):
+            calls.append(work)
+            return real(root_arg, work, ticket)
+    
+        with patch.object(ext_mod, "resolution_problems", counting):
+            ext_mod.revalidate_external_dependencies(loc_repo, "tester", dry_run=True)
+    
+>       self.assertEqual(calls, ["T-100"], f"resolved {len(calls)} times for one Work")
+E       AssertionError: Lists differ: ['T-100', 'T-100', 'T-100', 'T-100', 'T-100', 'T-[54 chars]100'] != ['T-100']
+E       
+E       First list contains 11 additional elements.
+E       First extra element 1:
+E       'T-100'
+E       
+E       - ['T-100',
+E       ?         ^
+E       
+E       + ['T-100']
+E       ?         ^
+E       
+E       -  'T-100',
+E       -  'T-100',
+E       -  'T-100',
+E       -  'T-100',
+E       -  'T-100',
+E       -  'T-100',
+E       -  'T-100',
+E       -  'T-100',
+E       -  'T-100',
+E       -  'T-100',
+E       -  'T-100'] : resolved 12 times for one Work
+
+tools\test_external_revalidation.py:1077: AssertionError
+_ TestSupersededReceiptsAreNotReResolved.test_the_cited_receipt_drives_the_resolution_not_the_newest_file _
+
+self = <test_external_revalidation.TestSupersededReceiptsAreNotReResolved testMethod=test_the_cited_receipt_drives_the_resolution_not_the_newest_file>
+
+    def test_the_cited_receipt_drives_the_resolution_not_the_newest_file(self) -> None:
+        """AC-02: a superseded receipt's identity must never be re-resolved.
+    
+        The history names two implementations; the BOARD cites the OLDER
+        receipt. Re-resolution must carry the CITED record's implementation,
+        never the file the loop happened to reach last.
+        """
+        records = [
+            self._receipt("EX-000001", "T-289@cited00", "UPSTREAM_FIX_VERIFIED"),
+            self._receipt("EX-000002", "T-289@stale00", "DEPENDENCY_UPGRADE_VERIFIED"),
+        ]
+        loc_repo = self._done_with_history(records, cite="EX-000001")
+        parsed = parse_board((loc_repo / ".saipen/BOARD.md").read_text(encoding="utf-8"))
+        self.assertEqual(parsed["tickets"]["T-100"]["section"], "## DONE")
+        self.assertEqual(
+            ext_mod.load_receipt(loc_repo, "EX-000001")["external_implementation"],
+            "T-289@cited00",
+        )
+        # The revalidator must load the CITED receipt, so the record it would
+        # carry into a resolution is EX-000001's identity -- not EX-000002's.
+        # `resolution_problems` loads the cited receipt again to answer about
+        # it, so the count is 2; what the fix pins is WHICH id is asked.
+        loaded: list[str] = []
+        real = ext_mod.load_receipt
+    
+        def counting_load(root_arg, receipt_id):
+            loaded.append(receipt_id)
+            return real(root_arg, receipt_id)
+    
+        with patch.object(ext_mod, "load_receipt", counting_load):
+            ext_mod.revalidate_external_dependencies(loc_repo, "tester", dry_run=True)
+    
+>       self.assertEqual(
+            sorted(set(loaded)),
+            ["EX-000001"],
+            f"asked about {sorted(set(loaded))}; a superseded receipt must never be re-resolved",
+        )
+E       AssertionError: Lists differ: ['EX-000001', 'EX-000002'] != ['EX-000001']
+E       
+E       First list contains 1 additional elements.
+E       First extra element 1:
+E       'EX-000002'
+E       
+E       - ['EX-000001', 'EX-000002']
+E       + ['EX-000001'] : asked about ['EX-000001', 'EX-000002']; a superseded receipt must never be re-resolved
+
+tools\test_external_revalidation.py:1112: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_external_revalidation.py::TestSupersededReceiptsAreNotReResolved::test_one_work_costs_one_resolution_no_matter_how_many_receipts
+FAILED tools/test_external_revalidation.py::TestSupersededReceiptsAreNotReResolved::test_the_cited_receipt_drives_the_resolution_not_the_newest_file
+2 failed, 34 deselected in 1.11s

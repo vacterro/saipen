@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-079:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-243 closed with verification evidence in LOG: verify -> PASS conf: high -- correction adoption 8/8: E-1834/E-1836 immutable and superseded by E-1844; T-233/T-229 both BLOCKED AWAITING_OPERATOR_LIVE_ACCEPTANCE; final correction and credential-route reports present; diff-check clean; no product bytes",
+      "text": "adopt evidence-integrity correction state",
+      "verification": "the Work this request created reached its own verification gate; see the T-243 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-243"
+    }
+  },
+  "schema_version": 1
+}

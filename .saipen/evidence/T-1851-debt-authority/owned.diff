@@ -1,0 +1,851 @@
+--- T-1851/before/tools/accept_legacy_debt.py
++++ tools/accept_legacy_debt.py
+@@ -9,10 +9,20 @@
+ blocking. Sealed history is never edited.
+ 
+     python tools/accept_legacy_debt.py --project-root <path> \
+-        --events E-964,E-981,E-1007,E-1114,E-1117,E-1124 \
+-        --authority SRC-047 --reason "operator Decision B ..." [--agent NAME]
++        --events E-964,E-981 --preview
+ 
+-Exit 0 only on ACCEPTED_DEBT_REGISTERED. Stdlib only.
++The native host presents the exact preview scope for operator approval, captures
++its completed Decision B capsule through the existing authority-only ingress,
++and supplies that original Source to registration:
++
++    python tools/accept_legacy_debt.py --project-root <path> \
++        --events E-964,E-981 --authority SRC-123 --reason "approved sealed debt"
++
++A preview, event/lineage token, model-written Source or journal grants nothing.
++UNKNOWN historical approval remains unaccepted. A new scoped decision appends
++a new record; rebind only relocates evidence of an already verified acceptance.
++
++Exit 0 only for a successful preview, registration, exact repeat or rebind. Stdlib only.
+ """
+ 
+ from __future__ import annotations
+@@ -22,7 +32,7 @@
+ import sys
+ from pathlib import Path
+ 
+-from saipen_engine.accepted_debt import rebind, register
++from saipen_engine.accepted_debt import preview, rebind, register
+ from saipen_engine.state import parse_state
+ 
+ 
+@@ -45,9 +55,11 @@
+     parser.add_argument(
+         "--authority",
+         default=None,
+-        help="canonical authority token: SRC-### | E-### | lineage-<32hex>",
++        help="original independently witnessed Decision B Source SRC-###",
+     )
+-    parser.add_argument("--reason", required=True, help="why this debt is accepted immutable")
++    parser.add_argument("--reason", help="why this debt is accepted immutable")
++    parser.add_argument("--preview", action="store_true",
++                        help="read-only exact Decision B capsule for native operator approval")
+     parser.add_argument(
+         "--rebind",
+         metavar="AD-######",
+@@ -68,9 +80,17 @@
+     if not args.rebind:
+         if not args.events:
+             parser.error("--events is required unless --rebind is used")
+-        if not args.authority:
++        if not args.authority and not args.preview:
+             parser.error("--authority is required unless --rebind is used")
+     root = Path(args.project_root).resolve()
++    if args.preview:
++        if args.rebind or args.authority:
++            parser.error("--preview uses --events, not --rebind or --authority")
++        result = preview(root, [part.strip() for part in args.events.split(",") if part.strip()])
++        print(json.dumps(result, indent=2, sort_keys=True))
++        return 0 if result.get("ok") else 1
++    if not args.reason:
++        parser.error("--reason is required for a mutation")
+     if args.rebind:
+         if args.events:
+             parser.error("--events and --rebind are mutually exclusive: a rebind never "
+--- T-1851/before/tools/saipen_engine/accepted_debt.py
++++ tools/saipen_engine/accepted_debt.py
+@@ -25,6 +25,12 @@
+   * record binds CHECK_VERSION -- a semantic change to the consuming check
+     forces conscious re-registration;
+   * the record itself carries an integrity digest over its own body.
++
++T-1851: syntax/integrity is not permission. New registrations require an
++authority-only native Decision B Source and an exact reservation at the existing
++separated event owner. Readers classify unproved historical origin UNKNOWN and
++retain FAIL. Preview and scope live in debt_authority; native reservations bind
++the operation independently of model-writable journals. No new signer is used.
+ 
+ Storage: `<project>/.saipen/recovery/conformance/accepted_debt/AD-NNNNNN.json`,
+ written through the canonical journal (run_mutation) only -- never by hand.
+@@ -212,6 +218,7 @@
+             "record_id": None,
+             "reason": "duplicate event ids in missing set",
+         }
++    unknown = None
+     for path in files:
+         try:
+             record = load_record(root, path.stem)
+@@ -229,6 +236,12 @@
+                 "reason": f"{path.stem} accepted_missing_events malformed",
+             }
+         if set(accepted_events) != wanted or len(accepted_events) != len(wanted):
++            continue
++        from . import debt_authority
++
++        authority = debt_authority.status(root, record)
++        if authority["authority_status"] != "KNOWN":
++            unknown = authority["authority_reason"]
+             continue
+         evidence = record.get("evidence")
+         if not isinstance(evidence, list):
+@@ -264,14 +277,16 @@
+             return {
+                 "accepted": True,
+                 "record_id": path.stem,
+-                "reason": "exact missing set and line evidence verified",
++                "reason": "exact missing set and line evidence verified; authority KNOWN",
++                "authority_status": "KNOWN",
+             }
+         return {
+             "accepted": False,
+             "record_id": None,
+             "reason": f"{path.stem} does not cover the exact missing set/line evidence",
+         }
+-    return {"accepted": False, "record_id": None, "reason": "no covering accepted-debt record"}
++    return {"accepted": False, "record_id": None,
++            "reason": unknown or "no covering accepted-debt record", "authority_status": "UNKNOWN"}
+ 
+ 
+ def _iter_history(root: Path):
+@@ -302,218 +317,169 @@
+             yield rel_str, line_no, raw, parsed
+ 
+ 
+-def register(
+-    root: Path | str,
+-    *,
+-    agent: str,
+-    events: list[str],
+-    reason: str,
+-    authority: str,
+-) -> dict:
+-    """Register ONE exact sealed historical missing-set as accepted legacy debt.
+-
+-    Fail-closed validation before any write: every event must exist, lack an
+-    `[op: ...]` marker, and sit at/after the self-established provenance
+-    boundary; no overlap with an existing record; authority must name a
+-    canonical SRC/E/lineage token. The record is journaled through the
+-    canonical operation layer (run_mutation) -- never a bare file write.
+-    """
+-    root = Path(root)
+-    normalized = []
+-    for event in events:
+-        canonical = canonical_event_id(event)
+-        if canonical is None:
+-            return {
+-                "ok": False,
+-                "code": "VALIDATION_FAILED",
+-                "detail": f"invalid event id {event!r} (expected E-###)",
+-            }
+-        if canonical not in normalized:
+-            normalized.append(canonical)
+-    if not normalized:
+-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": "no events supplied"}
++def _event_material(root, events):
++    """Resolve eligible immutable lines once and pin their canonical carriers."""
++    from .journal import hash_file_dependency, hash_tree_dependency
++    from .log import history_paths
++
++    def pins():
++        return {".saipen/IDENTITY.md": hash_file_dependency(root / ".saipen/IDENTITY.md"),
++                ".saipen/logs": hash_tree_dependency(root / ".saipen/logs"),
++                **{p.relative_to(root.resolve()).as_posix(): hash_file_dependency(p)
++                   for p in history_paths(root)}}
++
++    before = pins()
++    normalized = sorted({canonical_event_id(e) for e in events} - {None},
++                        key=lambda e: int(e[2:]))
++    if not normalized or any(canonical_event_id(e) is None for e in events):
++        raise AcceptedDebtRefusal("VALIDATION_FAILED",
++                                  "invalid or empty event set (expected E-###)")
++    found, first_op = {}, None
++    for file, line, raw, parsed in _iter_history(root):
++        if parsed.get("op_id") and first_op is None:
++            first_op = parsed["event"]
++        event = f"E-{parsed['event']}"
++        if event in normalized:
++            if event in found:
++                raise AcceptedDebtRefusal("VALIDATION_FAILED", f"ambiguous history event {event}")
++            found[event] = (file, line, raw, parsed)
++    absent = set(normalized) - set(found)
++    if absent:
++        raise AcceptedDebtRefusal(
++            "VALIDATION_FAILED",
++            "events not found in canonical history: " + ", ".join(sorted(absent)))
++    if first_op is None:
++        raise AcceptedDebtRefusal("VALIDATION_FAILED",
++                                  "project history carries no provenance boundary")
++    marked = [e for e in normalized if found[e][3].get("op_id")]
++    if marked:
++        raise AcceptedDebtRefusal("VALIDATION_FAILED", "events already carry [op:] provenance: "
++                                  + ", ".join(marked))
++    if any(found[e][3]["event"] < first_op for e in normalized):
++        raise AcceptedDebtRefusal("VALIDATION_FAILED", "events predate the provenance boundary")
++    evidence = [{"event": e, "file": found[e][0], "line_number": found[e][1],
++                 "line_sha256": _line_sha256(found[e][2])} for e in normalized]
++    if before != pins():
++        raise AcceptedDebtRefusal("STALE_PRECONDITION",
++                                  "historical carriers changed while being read")
++    return normalized, evidence, before
++
++
++def preview(root, events):
++    """Read-only exact Decision B capsule; the host supplies a real approval."""
++    from . import debt_authority
++
++    root = Path(root).resolve()
++    try:
++        normalized, evidence, _pins = _event_material(root, events)
++        lineage = project_lineage_identity(root)
++        if not lineage:
++            raise ValueError("a canonical project lineage is required")
++        capsule = {"kind": debt_authority.KIND, "schema": 1, "project_lineage": lineage,
++                   "check_id": RULE_ID, "check_version": CHECK_VERSION, "events": normalized,
++                   "event_hashes": {e["event"]: e["line_sha256"] for e in evidence},
++                   "decision": "ACCEPT_LEGACY_DEBT", "statement": "", "expires_at": ""}
++        candidates = []
++        for path in _record_files(root):
++            record = load_record(root, path.stem)
++            if (record.get("accepted_missing_events") == normalized
++                    and debt_authority.status(root, record)["authority_status"] == "UNKNOWN"):
++                candidates.append({"record_id": path.stem,
++                                   "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
++        if len(candidates) > 1:
++            raise ValueError("multiple unverified covering records require explicit reconciliation")
++        if candidates:
++            capsule["supersedes"] = candidates[0]
++        return {"ok": True, "code": "PLAN", "capsule": capsule, "read_only": True,
++                "authority_status": "UNKNOWN"}
++    except (OSError, ValueError, TypeError, AcceptedDebtRefusal) as exc:
++        return {"ok": False, "code": getattr(exc, "code", "VALIDATION_FAILED"), "detail": str(exc)}
++
++
++def register(root: Path | str, *, agent: str, events: list[str],
++             reason: str, authority: str) -> dict:
++    """Accept only one independently witnessed, exact historical Decision B."""
++    from . import debt_authority
++    from .capability import may_mutate, negotiate_capability
++    from .journal import hash_file_dependency, run_mutation, verify_accepted_debt
++
++    root = Path(root).resolve()
++    if not may_mutate(negotiate_capability()):
++        return {"ok": False, "code": "CAPABILITY_READ_ONLY", "detail": "registration is a mutation"}
+     if not str(reason or "").strip():
+         return {"ok": False, "code": "VALIDATION_FAILED", "detail": "reason is required"}
+     authority = str(authority or "").strip()
+-    if not AUTHORITY_RE.match(authority):
+-        return {
+-            "ok": False,
+-            "code": "VALIDATION_FAILED",
+-            "detail": "authority must be SRC-###, E-### or lineage-<32hex>",
+-        }
+-
+-    wanted = set(normalized)
+-    found: dict[str, tuple[str, int, str]] = {}
+-    first_op: int | None = None
+-    numbers: dict[str, int] = {}
+-    for rel_str, line_no, raw, parsed in _iter_history(root):
+-        event_id = f"E-{parsed['event']}"
+-        if parsed.get("op_id") and first_op is None:
+-            first_op = parsed["event"]
+-        if event_id in wanted:
+-            found[event_id] = (rel_str, line_no, raw)
+-            numbers[event_id] = parsed["event"]
+-    missing_ids = sorted(wanted - set(found))
+-    if missing_ids:
+-        return {
+-            "ok": False,
+-            "code": "VALIDATION_FAILED",
+-            "detail": "events not found in canonical history: " + ", ".join(missing_ids),
+-        }
+-    if first_op is None:
+-        return {
+-            "ok": False,
+-            "code": "VALIDATION_FAILED",
+-            "detail": "project history carries no provenance boundary; nothing to accept",
+-        }
+-    with_marker = []
+-    pre_boundary = []
+-    from .log import parse_log_line
+-
+-    for event_id in normalized:
+-        rel_str, line_no, raw = found[event_id]
+-        # An event that already carries [op: ...] is mechanized, not debt.
+-        parsed = parse_log_line(raw)
+-        if parsed is None:
+-            return {
+-                "ok": False,
+-                "code": "VALIDATION_FAILED",
+-                "detail": f"{event_id} no longer parses as a LOG line",
+-            }
+-        if parsed.get("op_id"):
+-            with_marker.append(event_id)
+-        elif numbers[event_id] < first_op:
+-            pre_boundary.append(event_id)
+-    if with_marker:
+-        return {
+-            "ok": False,
+-            "code": "VALIDATION_FAILED",
+-            "detail": "events already carry [op: ...] provenance: " + ", ".join(with_marker),
+-        }
+-    if pre_boundary:
+-        return {
+-            "ok": False,
+-            "code": "VALIDATION_FAILED",
+-            "detail": "events predate the provenance boundary and are already exempt: "
+-            + ", ".join(pre_boundary),
+-        }
+-
+-    # No conflicting claims against an existing record for this check. A
+-    # BROADER registration may subsume an earlier narrower one (the earlier
+-    # exact-set record can never match the live set again anyway); a subset,
+-    # identical or partial-overlap registration is refused so one event is
+-    # never claimed by two conflicting records.
+-    for path in _record_files(root):
+-        try:
++    if not AUTHORITY_RE.fullmatch(authority):
++        return {"ok": False, "code": "VALIDATION_FAILED",
++                "detail": "authority must be SRC-###, E-### or lineage-<32hex>",
++                "authority_status": "UNKNOWN"}
++    try:
++        normalized, evidence, dependencies = _event_material(root, events)
++        lineage = project_lineage_identity(root)
++        if not lineage:
++            raise ValueError("authority UNKNOWN: a canonical project lineage is required")
++        record = {"schema_version": SCHEMA_VERSION, "kind": "accepted_legacy_debt",
++                  "record_id": next_record_id(root), "created_at": _utc(), "agent": str(agent),
++                  "project_identity": _project_identity(root), "project_lineage": lineage,
++                  "check_id": RULE_ID, "check_version": CHECK_VERSION, "authority": authority,
++                  "reason": str(reason), "accepted_missing_events": normalized,
++                  "evidence": evidence}
++        auth = debt_authority.source_shape(root, record, dependencies)
++        wanted = set(normalized)
++        for path in _record_files(root):
+             existing = load_record(root, path.stem)
+-        except AcceptedDebtRefusal:
+-            continue
+-        existing_set = set(existing.get("accepted_missing_events") or [])
+-        intersection = wanted & existing_set
+-        if not intersection:
+-            continue
+-        if existing_set == wanted:
+-            return {
+-                "ok": False,
+-                "code": "ACCEPTED_DEBT_EXISTS",
+-                "detail": f"{path.stem} already accepts exactly this set",
+-            }
+-        if not existing_set <= wanted:
+-            return {
+-                "ok": False,
+-                "code": "ACCEPTED_DEBT_EXISTS",
+-                "detail": f"{path.stem} already accepts: "
+-                + ", ".join(sorted(existing_set & wanted)),
+-            }
+-
+-    from .journal import ensure_project_lineage, run_mutation
+-
+-    lineage = ensure_project_lineage(root)
+-    record = {
+-        "schema_version": SCHEMA_VERSION,
+-        "kind": "accepted_legacy_debt",
+-        "record_id": next_record_id(root),
+-        "created_at": _utc(),
+-        "agent": str(agent or "unknown"),
+-        "project_identity": _project_identity(root),
+-        "project_lineage": lineage,
+-        "check_id": RULE_ID,
+-        "check_version": CHECK_VERSION,
+-        "authority": authority,
+-        "reason": str(reason),
+-        "accepted_missing_events": sorted(
+-            normalized, key=lambda e: int(EVENT_INPUT_RE.match(e).group(1))
+-        ),
+-        "evidence": [
+-            {
+-                "event": event_id,
+-                "file": found[event_id][0],
+-                "line_number": found[event_id][1],
+-                "line_sha256": _line_sha256(found[event_id][2]),
+-            }
+-            for event_id in sorted(
+-                normalized, key=lambda e: int(EVENT_INPUT_RE.match(e).group(1))
+-            )
+-        ],
+-        "journal_op_id": None,
+-    }
+-    op_id = (
+-        "accepted_debt.register-"
+-        + hashlib.sha256(
+-            f"{lineage}|{record['record_id']}|{record['accepted_missing_events']}".encode(
+-                "utf-8"
+-            )
+-        ).hexdigest()[:12]
+-    )
+-    record["journal_op_id"] = op_id
+-    record["integrity_digest"] = _integrity_digest(
+-        {k: v for k, v in record.items() if k != "integrity_digest"}
+-    )
+-    content = json.dumps(record, indent=2, sort_keys=True).encode("utf-8")
+-    rel = f"{ACCEPTED_DEBT_DIR}/{record['record_id']}.json"
+-    committed = run_mutation(
+-        root,
+-        op_id=op_id,
+-        operation="accepted_debt.register",
+-        agent=str(agent or "unknown"),
+-        project_identity=record["project_identity"],
+-        semantic_payload_hash=hashlib.sha256(
+-            json.dumps(
+-                {
+-                    "record": record["record_id"],
+-                    "events": record["accepted_missing_events"],
+-                    "authority": authority,
+-                },
+-                sort_keys=True,
+-            ).encode("utf-8")
+-        ).hexdigest(),
+-        targets=[
+-            {
+-                "path": rel,
+-                "role": "report",
+-                "action": "write",
+-                "content": content,
+-                "before_hash": "",
+-                "after_hash": hashlib.sha256(content).hexdigest(),
+-            }
+-        ],
+-        preconditions={rel: ""},
+-        verification_policy="none",
+-    )
+-    if not committed.get("ok"):
+-        return {
+-            "ok": False,
+-            "code": committed.get("code", "VALIDATION_FAILED"),
+-            "detail": committed.get("detail", committed.get("message", "journal apply failed")),
+-        }
+-    return {
+-        "ok": True,
+-        "code": "ACCEPTED_DEBT_REGISTERED",
+-        "record_id": record["record_id"],
+-        "events": record["accepted_missing_events"],
+-        "journal_op_id": op_id,
+-        "authority": authority,
+-    }
++            prior = set(existing.get("accepted_missing_events") or [])
++            overlap = wanted & prior
++            if not overlap:
++                continue
++            if prior == wanted:
++                prior_authority = debt_authority.status(root, existing)
++                if (prior_authority["authority_status"] == "KNOWN"
++                        and existing.get("authority") == authority
++                        and existing.get("authorization") == auth):
++                    problems = verify_accepted_debt(
++                        root, [{"path": path.relative_to(root).as_posix()}])
++                    if problems:
++                        raise ValueError("existing acceptance is not current: "
++                                         + "; ".join(problems))
++                    return {"ok": True, "code": "ALREADY_APPLIED", "record_id": path.stem,
++                            "events": normalized, "authority_status": "KNOWN"}
++                replacement = auth["binding"].get("supersedes")
++                expected = {"record_id": path.stem,
++                            "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
++                if (replacement != expected
++                        or prior_authority["authority_status"] != "UNKNOWN"):
++                    return {"ok": False, "code": "ACCEPTED_DEBT_EXISTS",
++                            "detail": f"{path.stem} already accepts exactly this set"}
++                dependencies[path.relative_to(root).as_posix()] = hash_file_dependency(path)
++            elif not prior <= wanted:
++                return {"ok": False, "code": "ACCEPTED_DEBT_EXISTS",
++                        "detail": f"{path.stem} already accepts: " + ", ".join(sorted(overlap))}
++        debt_authority.authorize(root, record, dependencies)
++        content = debt_authority.record_bytes(record)
++        rel = f"{ACCEPTED_DEBT_DIR}/{record['record_id']}.json"
++        committed = run_mutation(
++            root, op_id=record["journal_op_id"], operation="accepted_debt.register",
++            agent=str(agent),
++            project_identity=record["project_identity"],
++            semantic_payload_hash=hashlib.sha256(content).hexdigest(),
++            targets=[{"path": rel, "role": "report", "action": "write", "content": content,
++                      "before_hash": "", "after_hash": hashlib.sha256(content).hexdigest()}],
++            preconditions={rel: ""}, read_preconditions=dependencies,
++            verification_policy="accepted_debt",
++        )
++        if not committed.get("ok"):
++            return {"ok": False, "code": committed.get("code", "VALIDATION_FAILED"),
++                    "detail": committed.get("detail", committed.get("message", "apply failed"))}
++        problems = verify_accepted_debt(root, [{"path": rel}])
++        if problems:
++            raise ValueError("acceptance postcondition failed: " + "; ".join(problems))
++        return {"ok": True, "code": "ACCEPTED_DEBT_REGISTERED", "record_id": record["record_id"],
++                "events": normalized, "journal_op_id": record["journal_op_id"],
++                "authority": authority, "authority_status": "KNOWN"}
++    except (OSError, ValueError, TypeError, KeyError, AcceptedDebtRefusal) as exc:
++        return {"ok": False, "code": getattr(exc, "code", "VALIDATION_FAILED"),
++                "detail": str(exc), "authority_status": "UNKNOWN"}
+ 
+ 
+ # T-312: the closed rebind writer.
+@@ -555,6 +521,10 @@
+     attempt to change the accepted event set.
+     """
+     root = Path(root)
++    from .capability import may_mutate, negotiate_capability
++
++    if not may_mutate(negotiate_capability()):
++        return {"ok": False, "code": "CAPABILITY_READ_ONLY", "detail": "rebind is a mutation"}
+     if not ACCEPTED_DEBT_ID_RE.match(ref or ""):
+         return {
+             "ok": False,
+@@ -583,6 +553,13 @@
+             "code": refusal.code,
+             "detail": refusal.detail,
+         }
++
++    from . import debt_authority
++
++    authority = debt_authority.status(root, record)
++    if authority["authority_status"] != "KNOWN":
++        return {"ok": False, "code": "VALIDATION_FAILED", "detail": authority["authority_reason"],
++                "authority_status": "UNKNOWN"}
+ 
+     rel = f"{ACCEPTED_DEBT_DIR}/{ref}.json"
+     path = root / rel
+--- T-1851/before/tools/saipen_engine/host_authority_broker.py
++++ tools/saipen_engine/host_authority_broker.py
+@@ -750,6 +750,10 @@
+             return self.origins.prepare_goal(payload, peer)
+         if op == "verify-origin-goal":
+             return self.origins.verify_goal(payload, peer)
++        if op == "prepare-origin-debt":
++            return self.origins.prepare_debt(payload, peer)
++        if op == "verify-origin-debt":
++            return self.origins.verify_debt(payload)
+         if op in READ_OPS:
+             self.stats.last_activity = self.clock()
+             if op == "evaluate":
+--- T-1851/before/tools/saipen_engine/host_authority_client.py
++++ tools/saipen_engine/host_authority_client.py
+@@ -754,6 +754,31 @@
+                 and reply.get("operation") == operation and reply.get("grant") == grant)
+ 
+ 
++def prepare_operator_debt(proof, *, project, record) -> dict | None:
++    """Reserve one exact Decision B registration at the existing event owner."""
++    reply = _call(
++        {"op": "prepare-origin-debt", "project": str(Path(project).resolve()),
++         "proof": proof, "record": record}, runtime=None, timeout=REQUEST_TIMEOUT,
++    )
++    return reply.get("record") if reply and reply.get("ok") is True else None
++
++
++def verify_operator_debt(proof, *, project, record, pending=False) -> bool:
++    """An existing debt reservation remains scoped to its exact lineage/history."""
++    if not isinstance(proof, dict) or proof.get("kind") != "operator-origin":
++        return False
++    reply = _call(
++        {"op": "verify-origin-debt", "project": str(Path(project).resolve()),
++         "proof": proof, "record": record, "pending": pending},
++        runtime=None, timeout=VERIFY_TIMEOUT,
++    )
++    return bool(reply and reply.get("ok") is True
++                and reply.get("kind") == "operator-debt-verdict"
++                and reply.get("operation") == record.get("registration_op_id")
++                and reply.get("scope") == record.get("authorization")
++                and (pending or reply.get("committed") is True))
++
++
+ def verify_operator_origin(
+     proof: object,
+     *,
+@@ -1055,6 +1080,7 @@
+     "mode_path",
+     "note_delivered",
+     "policy",
++    "prepare_operator_debt",
+     "prepare_operator_goal",
+     "recovery_actions",
+     "register_operator_worker",
+@@ -1066,6 +1092,7 @@
+     "status",
+     "trusted_service_entries",
+     "verify_capability",
++    "verify_operator_debt",
+     "verify_operator_goal",
+     "verify_operator_origin",
+     "verify_operator_source",
+--- T-1851/before/tools/saipen_engine/operator_origin.py
++++ tools/saipen_engine/operator_origin.py
+@@ -498,3 +498,130 @@
+                 return refused("the accepted goal operation is unreadable")
+             return {"ok": True, "code": None, "kind": "operator-goal-verdict",
+                     "operation": reserved["operation"], "grant": copy.deepcopy(reserved["grant"])}
++
++    def prepare_debt(self, payload, peer):
++        """Reserve one exact historical acceptance, independently of a journal."""
++        import hashlib
++        from datetime import datetime, timezone
++        from . import accepted_debt as debt, debt_authority as approval
++
++        proof = payload.get("proof")
++        with self.lock:
++            known = self._record(proof)
++            if not known or proof.get("action") != "resolve-gate":
++                return refused("a native Decision B intent is required")
++            try:
++                root = Path(payload.get("project")).resolve()
++                record = payload["record"]
++                if (not isinstance(record, dict) or record.get("kind") != "accepted_legacy_debt"
++                        or type(record.get("schema_version")) is not int
++                        or record["schema_version"] != debt.SCHEMA_VERSION):
++                    return refused("Decision B needs a valid accepted-debt artifact")
++                auth = approval.source_shape(root, record)
++                if (auth != record.get("authorization") or auth["operator_origin"] != proof
++                        or known["receipt"] != record["authority"]
++                        or record.get("registration_op_id") != approval.operation(record)
++                        or record.get("journal_op_id") != record["registration_op_id"]
++                        or record.get("integrity_digest") != debt._integrity_digest(
++                            {k: v for k, v in record.items() if k != "integrity_digest"})):
++                    return refused("Decision B registration differs from its original Source")
++                reservation = {"operation": record["registration_op_id"],
++                               "record_id": record["record_id"], "authorization": auth,
++                               "record_sha256": hashlib.sha256(
++                                   approval.record_bytes(record)).hexdigest(),
++                               "record": copy.deepcopy(record)}
++                old = known.get("debt_grant")
++                if old is not None:
++                    from .journal import Journal
++
++                    if approval.record_intent(old["record"]) != approval.record_intent(record):
++                        return refused("Decision B is already reserved for another effect")
++                    prior = Journal(root, old["operation"])
++                    if prior.exists() and prior.read().get("status") == "ABORTED":
++                        target = root / debt.ACCEPTED_DEBT_DIR / (record["record_id"] + ".json")
++                        if target.exists() or target.is_symlink():
++                            return refused("the aborted acceptance target is no longer absent")
++                        _events, actual, _pins = debt._event_material(
++                            root, record["accepted_missing_events"])
++                        if actual != record["evidence"]:
++                            return refused("history changed after the approved attempt aborted")
++                        retry = copy.deepcopy(old["record"])
++                        retry["registration_attempt"] = retry.get("registration_attempt", 0) + 1
++                        retry["retry_of"] = old["operation"]
++                        retry["registration_op_id"] = approval.operation(retry)
++                        retry["journal_op_id"] = retry["registration_op_id"]
++                        retry["integrity_digest"] = debt._integrity_digest(
++                            {k: v for k, v in retry.items() if k != "integrity_digest"})
++                        known.setdefault("debt_attempts", []).append(copy.deepcopy(old))
++                        old = {"operation": retry["registration_op_id"],
++                               "record_id": retry["record_id"], "authorization": auth,
++                               "record_sha256": hashlib.sha256(
++                                   approval.record_bytes(retry)).hexdigest(), "record": retry}
++                        known["debt_grant"] = copy.deepcopy(old)
++                    return {"ok": True, "code": None, "record": copy.deepcopy(old["record"])}
++                if record.get("registration_attempt", 0) != 0 or "retry_of" in record:
++                    return refused("a fresh Decision B cannot invent prior registration attempts")
++                if not self.verify({"project": str(root), "proof": proof,
++                                    "receipt": record["authority"], "existing_only": True,
++                                    "request_digest": proof["request_digest"]}, peer).get("ok"):
++                    return refused("Decision B has no current registered operator worker")
++                if (record["record_id"] != debt.next_record_id(root)
++                        or record["project_identity"] != project_identity(root)
++                        or approval._instant(auth["binding"]["expires_at"])
++                        <= datetime.now(timezone.utc)):
++                    return refused("Decision B expired or names another registration")
++                events, evidence, _pins = debt._event_material(
++                    root, record["accepted_missing_events"])
++                if events != record["accepted_missing_events"] or evidence != record["evidence"]:
++                    return refused("Decision B does not match the actual immutable history")
++                if "supersedes" in auth["binding"]:
++                    previous = auth["binding"]["supersedes"]
++                    prior = root / debt.ACCEPTED_DEBT_DIR / (previous["record_id"] + ".json")
++                    if hashlib.sha256(prior.read_bytes()).hexdigest() != previous["sha256"]:
++                        return refused("the explicitly superseded historical record changed")
++                known["debt_grant"] = copy.deepcopy(reservation)
++            except (OSError, ValueError, TypeError, KeyError, debt.AcceptedDebtRefusal):
++                return refused("native Decision B scope is unreadable or invalid")
++            return {"ok": True, "code": None, "record": copy.deepcopy(record)}
++
++    def verify_debt(self, payload):
++        """Prove the original effect; copies cannot create a new permission."""
++        from . import accepted_debt as debt, debt_authority as approval
++        from .journal import Journal
++
++        proof = payload.get("proof")
++        with self.lock:
++            known = self._record(proof)
++            reserved = known.get("debt_grant") if known else None
++            if not reserved:
++                return refused("the original Decision B reservation is unavailable")
++            try:
++                root = Path(payload.get("project")).resolve()
++                record = payload["record"]
++                auth = approval.source_shape(root, record)
++                if (auth != reserved["authorization"] or auth != record.get("authorization")
++                        or record.get("record_id") != reserved["record_id"]
++                        or record.get("registration_op_id") != reserved["operation"]
++                        or approval.operation(record) != reserved["operation"]):
++                    return refused("the acceptance no longer matches its original Decision B")
++                journal = Journal(root, reserved["operation"]).read()
++                committed = journal.get("status") == "COMMITTED"
++                if (journal.get("status") not in {"PREPARED", "APPLYING", "VERIFIED", "COMMITTED"}
++                        or (not committed and payload.get("pending") is not True)
++                        or journal.get("operation") != "accepted_debt.register"
++                        or journal.get("project_lineage") != proof["lineage"]
++                        or journal.get("semantic_payload_hash") != reserved["record_sha256"]):
++                    return refused("the original acceptance operation is absent or changed")
++                targets = journal.get("targets")
++                if (not isinstance(targets, list) or len(targets) != 1
++                        or targets[0].get("path") != (
++                            f"{debt.ACCEPTED_DEBT_DIR}/{record['record_id']}.json")
++                        or targets[0].get("action", "write") != "write"
++                        or targets[0].get("after_hash") not in {
++                            reserved["record_sha256"], reserved["record_sha256"][:16]}):
++                    return refused("the canonical acceptance target is not the reserved artifact")
++            except (OSError, ValueError, TypeError, KeyError):
++                return refused("the original Decision B operation is unreadable")
++            return {"ok": True, "code": None, "kind": "operator-debt-verdict",
++                    "operation": reserved["operation"], "scope": copy.deepcopy(auth),
++                    "committed": committed}
+--- T-1851/before/tools/test_accepted_debt.py
++++ tools/test_accepted_debt.py
+@@ -32,6 +32,9 @@
+ 
+ from saipen_engine.accepted_debt import _integrity_digest  # noqa: E402
+ from test_hermetic_env import hermetic_env, isolate_host_session  # noqa: E402
++from test_operator_origin_support import (  # noqa: E402
++    cold_command, native_operator, use_case_owner,
++)
+ 
+ SCENARIO = ROOT / "tests" / "scenarios" / "userperson-valid" / ".saipen"
+ VALIDATOR = TOOLS / "validate.py"
+@@ -56,6 +59,25 @@
+     isolate_host_session()
+ 
+ 
++def native_debt_authority(case, events, reason=REASON):
++    """Real event-owner/Source/journal logic, explicitly simulated native identity."""
++    from saipen_engine.accepted_debt import preview
++    from saipen_engine.operations import authority_capture
++
++    planned = preview(case.root, events)
++    if not planned.get("ok"):
++        # Invalid-event tests retain their original domain refusal, no issuer positive.
++        return "SRC-047"
++    capsule = planned["capsule"]
++    capsule.update(statement=reason or REASON, expires_at="2099-01-01T00:00:00Z")
++    text = json.dumps(capsule)
++    case._debt_host = use_case_owner(case, case.root)
++    with native_operator(case.root, text, action="resolve-gate"):
++        captured = authority_capture(case.root, "probe", text)
++    case.assertTrue(captured.ok, captured.to_dict())
++    return captured.data["receipt"]
++
++
+ class Fixture(unittest.TestCase):
+     def setUp(self) -> None:
+         self._tmp = tempfile.TemporaryDirectory(prefix="saipen-accepted-debt-")
+@@ -72,17 +94,21 @@
+         state = state_path.read_text(encoding="utf-8")
+         state = state.replace("last_event: 1", "last_event: 4")
+         state_path.write_text(state, encoding="utf-8")
++        from saipen_engine.journal import ensure_project_lineage
++
++        ensure_project_lineage(self.root)
+ 
+     def run_validator(self) -> subprocess.CompletedProcess:
++        command = [sys.executable, str(VALIDATOR), "--project-root", str(self.root),
++                   "--gate", "core"]
++        if getattr(self, "_debt_host", None) is not None:
++            # Read-only proof queries also work in a lineage-preserving copy.
++            import test_operator_origin_support as support
++
++            command = [sys.executable, str(Path(support.__file__)), "--cold-cli",
++                       str(self._debt_host.runtime), *command[1:]]
+         return subprocess.run(
+-            [
+-                sys.executable,
+-                str(VALIDATOR),
+-                "--project-root",
+-                str(self.root),
+-                "--gate",
+-                "core",
+-            ],
++            command,
+             capture_output=True,
+             text=True,
+             encoding="utf-8",
+@@ -94,11 +120,13 @@
+         self,
+         events: list[str],
+         *,
+-        authority: str = "SRC-047",
++        authority: str | None = None,
+         reason: str = REASON,
+     ) -> subprocess.CompletedProcess:
+-        return subprocess.run(
+-            [
++        if authority is None:
++            authority = native_debt_authority(self, events, reason)
++        environment = hermetic_env()
++        command = [
+                 sys.executable,
+                 str(REGISTRAR),
+                 "--project-root",
+@@ -109,11 +137,13 @@
+                 authority,
+                 "--reason",
+                 reason,
+-            ],
++            ]
++        return subprocess.run(
++            cold_command(self.root, command, environment),
+             capture_output=True,
+             text=True,
+             encoding="utf-8",
+-            env=hermetic_env(),
++            env=environment,
+             timeout=120,
+         )
+ 
+--- T-1851/before/tools/test_accepted_debt_rebind.py
++++ tools/test_accepted_debt_rebind.py
+@@ -107,8 +107,14 @@
+         )
+         self.ad_path = self.root / AD_DIR / "AD-000001.json"
+ 
+-    def _register(self, events: list[str], authority: str = "SRC-047") -> dict:
++    def _register(self, events: list[str], authority: str | None = None) -> dict:
+         from saipen_engine.accepted_debt import register
++        from saipen_engine.journal import ensure_project_lineage
++        from test_accepted_debt import native_debt_authority
++
++        ensure_project_lineage(self.root)
++        if authority is None:
++            authority = native_debt_authority(self, events, REASON)
+ 
+         result = register(
+             self.root, agent="probe", events=events, reason=REASON, authority=authority
+--- T-1851/before/tools/test_operator_origin_support.py
++++ tools/test_operator_origin_support.py
+@@ -31,6 +31,7 @@
+ ORIGIN_OPS = frozenset({
+     "issue-origin", "register-origin-worker", "revoke-origin", "verify-origin",
+     "verify-source-origin", "prepare-origin-goal", "verify-origin-goal",
++    "prepare-origin-debt", "verify-origin-debt",
+ })
+ 
+ 

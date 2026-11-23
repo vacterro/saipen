@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "_comment": [
+    "T-1889. Which heavy trees each focused test module reads from its sandbox.",
+    "Absent module => the run copies EVERYTHING, exactly as before this file.",
+    "An entry of [] means the module reads only the source tree.",
+    "Only '.git' or '.saipen/<child>' may be named: anything narrower would",
+    "drop part of the tested subject, so the resolver refuses it.",
+    "NEVER add an entry from import analysis or an audit hook over another",
+    "module. Declare a module only after running it in a narrowed sandbox and",
+    "seeing its own assertions pass there; that run is the evidence."
+  ],
+  "modules": {
+    "test_t1885_tag_peel.py": [],
+    "test_t1886_gate_lock_window.py": [],
+    "test_t1889_sandbox_scope.py": [],
+    "test_t1892_one_decoder.py": [],
+    "test_t1893_probe_wrappers.py": [],
+    "test_t1891_freshness_parser.py": []
+  }
+}

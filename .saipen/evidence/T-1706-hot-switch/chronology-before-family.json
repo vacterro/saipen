@@ -1,0 +1,32 @@
+{
+  "timestamp_utc": "2026-10-10T12:43:55.956126+00:00",
+  "head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+  "index_projection_sha256": "46b44c7aa50434fd5a98dd6187d436bd99a3e59f306577be8c1dc89ac7a5a33b",
+  "index_entry_count": 5679,
+  "tree_fingerprint": "405e98b5e035effc3d0f79e30fa8e9ceea30e325bdc457b22462fa3541f8df70",
+  "execution": {
+    "phase": "REVIEW",
+    "task": "T-1703",
+    "agent": "saipen-cli",
+    "execution_intent": "goal",
+    "goal_waves": 0,
+    "goal_tickets": 20,
+    "next_action": "WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue",
+    "last_event": 14235,
+    "continuation_authority": null
+  },
+  "core_sha256": {
+    "STATE.md": "14194be4ea50a9108fedb27dd7eaf7b2bea580fe074a2dcd62f5b5cfd8dfd07b",
+    "BOARD.md": "971161023b74bf9d9843b846111a2203fe2e72fd27ebb71ca5f5562ba75c9712",
+    "LOG.md": "5ccb2227b17f4ede2bd7b65ca8d0885995d1d96c7301badaded52918db4e5bb0"
+  },
+  "audit_generations": {
+    "SAIPEN_20261010_1123.md": "4a93ed6345e47792e93d86087a641933a8e91ca176d4672d42eff6f8cd609d20",
+    "SAIPEN_20261010_1136.md": "8d54708e5daccb690cc464918d4c81d7f1d2d4ed0f036a62a6e0c2f5ab0c2ce6",
+    "SAIPEN_20261010_1156.md": "e272b73351028793fd0882ab77973bf3a22493956f4aa8cd0edd36560df60d15",
+    "SAIPEN_20261010_1202.md": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9",
+    "SAIPEN_20261010_1412.md": "fdacbb8bce13646bebc911d723cf01456c58fb7eeb72c971fdc07e8370e977df",
+    "SAIPEN_20261010_1415.md": "bed49b8d192aa074e52e11be151b0ed0f7a0c5d3291ed723d734df4655091eeb",
+    "SAIPEN_fastprompter1.md": "0f8e236b2d182ed5ec6567776b02af3fba674b266d2aa1355d92324932746add"
+  }
+}

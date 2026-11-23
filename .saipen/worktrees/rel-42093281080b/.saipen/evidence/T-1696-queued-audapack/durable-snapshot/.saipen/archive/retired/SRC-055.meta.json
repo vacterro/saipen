@@ -1,0 +1,52 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-055.md",
+  "linked_work": "T-199",
+  "receipt_id": "SRC-055",
+  "received_at": "2026-09-18T11:10:43Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "a791f19e974b0ea895fd8c0a168f66c1e60d585fd61e5c1abf6a87da21ef6061",
+    "sanitized_sha256": "a791f19e974b0ea895fd8c0a168f66c1e60d585fd61e5c1abf6a87da21ef6061"
+  },
+  "request_provenance": {
+    "compared_digest": "2642b5d63833864f9c0c6138c0a17d8c320ddd6258dfcdaf7a05abd9fbf24a8a",
+    "witness": "transport_obligation"
+  },
+  "retirement": {
+    "authority_grant": "T-199 / SRC-055",
+    "authority_receipt": "SRC-061",
+    "authority_sha256": "7a314daad892bcc1b291f65560a79d1c5b6c5f54b24825b936e805f52812118e",
+    "board_record": "- [ ] T-199 [P1] 2>&1 | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-055 | claim_session: d16af02b6ba9dbfa70debadde1fd40d1",
+    "board_record_sha256": "1d4249581bf0680143bd65e82d1e7584903287169d3b8a87ccb3806e333234b8",
+    "discovery_event": null,
+    "evidence": {
+      "kind": "event",
+      "ref": "E-1602"
+    },
+    "evidence_bound_event": "E-1623",
+    "evidence_note": null,
+    "reason": "MISROUTED_PROJECT_BINDING",
+    "retired_at": "2026-09-19T23:20:48Z",
+    "retired_by": "buffy",
+    "retired_work": "T-199",
+    "retirement_event": "E-1623",
+    "schema_version": 2
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "a791f19e974b0ea895fd8c0a168f66c1e60d585fd61e5c1abf6a87da21ef6061",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "a791f19e974b0ea895fd8c0a168f66c1e60d585fd61e5c1abf6a87da21ef6061",
+  "status": "INVALID",
+  "storage_status": "ARCHIVED",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

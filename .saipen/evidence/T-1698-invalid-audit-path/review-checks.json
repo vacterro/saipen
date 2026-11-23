@@ -1,0 +1,65 @@
+[
+  {
+    "name": "focused",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "tools.test_audit_inbox",
+      "tools.test_audit_enqueue",
+      "tools.test_audit_manifest",
+      "tools.test_automation_block",
+      "tools.test_next_action_deadlock",
+      "tools.test_protocol_registry",
+      "tools.test_response_surface_contract.BudgetTests",
+      "tools.test_refusal_registry",
+      "tools.test_canonical_command_reachability",
+      "tools.test_subprocess_utf8"
+    ],
+    "exit_code": 0,
+    "output": "review-focused.txt",
+    "sha256": "6dda56e093ce40cd35cedc02ad4a1b18f356688cff1aac18c33997426b19c700"
+  },
+  {
+    "name": "ruff",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "ruff",
+      "check",
+      "tools/",
+      "tests/"
+    ],
+    "exit_code": 1,
+    "output": "review-ruff.txt",
+    "sha256": "3c572b4507ac3ad094461f512c9e481432070e814821a7d86a4045b0918aed8c"
+  },
+  {
+    "name": "whitespace",
+    "command": [
+      "git",
+      "-c",
+      "core.safecrlf=false",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "output": "review-whitespace.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "core",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "tools/validate.py",
+      "--gate",
+      "core"
+    ],
+    "exit_code": 1,
+    "output": "review-core.txt",
+    "sha256": "93d2cfa5ed3eb74c53a772c77b9f6d5625099954d6f02891eb09c1cb9e4166a3"
+  }
+]

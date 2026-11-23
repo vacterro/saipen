@@ -1,0 +1,980 @@
+--- a/extensions/schemas/state.schema.json
++++ b/extensions/schemas/state.schema.json
+@@ -83,7 +83,11 @@
+     },
+     "converge_target": {
+       "type": "string",
+-      "enum": ["done", "ship", "crew"],
++      "enum": [
++        "done",
++        "ship",
++        "crew"
++      ],
+       "description": "Optional only with execution_intent: converge. Absent or done is plain cc (A-M). ship is ccc: converge through I, SHIP, then run J-M against the shipped HEAD. crew is sc/saipen crew: the serial full-platoon convergence circuit (SC-0..SC-13, extensions/subs/crew.md) whose fixed point is the whole built-in crew; `cc` while crew is active resumes the crew. Cleared with execution_intent at closure."
+     },
+     "goal_mode": {
+@@ -175,6 +179,31 @@
+     "improve_gate": {
+       "type": "string",
+       "description": "T-1415: the named parked gate that holds AUTOMATIC improvement discovery. Written only by `saipen improve hold <T-###>` and removed by `saipen improve unhold` or deterministically when the named ticket resolves (DONE or gone from BOARD). While it names an unresolved ticket, `continue` must route to that gate / WAIT instead of starting an Improve cycle. It never blocks an explicit operator `saipen improve` invocation."
++    },
++    "continuation_authority": {
++      "type": "string",
++      "enum": [
++        "operator_required",
++        "operator_persistent"
++      ]
++    },
++    "authority_source": {
++      "type": "string",
++      "pattern": "^(E|SRC)-0*[1-9][0-9]*$"
++    },
++    "authority_until": {
++      "type": "string",
++      "enum": [
++        "budget",
++        "goal_complete"
++      ]
++    },
++    "safety_valve_mode": {
++      "type": "string",
++      "enum": [
++        "hard_wait",
++        "checkpoint"
++      ]
+     }
+   },
+   "required": [
+@@ -199,5 +228,94 @@
+       "goal_waves",
+       "goal_tickets"
+     ]
+-  }
++  },
++  "allOf": [
++    {
++      "if": {
++        "anyOf": [
++          {
++            "required": [
++              "continuation_authority"
++            ]
++          },
++          {
++            "required": [
++              "authority_source"
++            ]
++          },
++          {
++            "required": [
++              "authority_until"
++            ]
++          },
++          {
++            "required": [
++              "safety_valve_mode"
++            ]
++          }
++        ]
++      },
++      "then": {
++        "required": [
++          "continuation_authority",
++          "authority_source",
++          "authority_until",
++          "safety_valve_mode",
++          "execution_intent"
++        ],
++        "properties": {
++          "execution_intent": {
++            "const": "goal"
++          }
++        }
++      }
++    },
++    {
++      "if": {
++        "required": [
++          "continuation_authority"
++        ],
++        "properties": {
++          "continuation_authority": {
++            "const": "operator_persistent"
++          }
++        }
++      },
++      "then": {
++        "required": [
++          "goal_ingress"
++        ],
++        "properties": {
++          "authority_until": {
++            "const": "goal_complete"
++          },
++          "safety_valve_mode": {
++            "const": "checkpoint"
++          }
++        }
++      }
++    },
++    {
++      "if": {
++        "required": [
++          "continuation_authority"
++        ],
++        "properties": {
++          "continuation_authority": {
++            "const": "operator_required"
++          }
++        }
++      },
++      "then": {
++        "properties": {
++          "authority_until": {
++            "const": "budget"
++          },
++          "safety_valve_mode": {
++            "const": "hard_wait"
++          }
++        }
++      }
++    }
++  ]
+ }
+--- a/saipen/COMMANDS.md
++++ b/saipen/COMMANDS.md
+@@ -164,9 +164,8 @@
+ then open `load_path` when present and execute `action` under its owner in the
+ same turn. A successful routing response is not completion evidence. If state
+ has not been read, read it; do not ask the user to define a registered command.
+-This includes interactive Question/AskUser tools: canonical automation owns
+-whether a human decision is due (EXECUTION OPERATOR-QUESTION-01). Missing chat
+-context is recovered through project memory and `continue`, never a phase menu.
++Question/AskUser: EXECUTION OPERATOR-QUESTION-01. Recover memory, run
++`continue`; no phase menu.
+ A clean Git tree does not imply a completed BOARD.
+ 
+ `saipen continue` routes: recovery -> WAIT -> active phase-owned continuation
+--- a/saipen/CORE.md
++++ b/saipen/CORE.md
+@@ -75,8 +75,10 @@
+ - `phase`, `task`, `next_action`, `blocker`, `agent`, `saipen_version`, `mode`,
+   and `updated` are always required. `transition_from` is additionally required
+   except on fresh INIT.
+-- Goal intent requires integer `goal_waves` and `goal_tickets`. Converge intent
+-  may carry `converge_target`. Current-schema state with history requires
++- Goal intent requires integer `goal_waves` and `goal_tickets`. Its optional
++  authority quartet is all-or-none; absence means bounded, never persistent.
++  MAINTENANCE owns origin/scope proof. Converge may carry `converge_target`.
++  Current-schema state with history requires
+   `last_event`; current-schema state requires `style_contract`.
+ - `schema_version` below current is readable legacy and upgrades at the next
+   checkpoint. Incompatible future schema/major forces read-only refusal.
+--- a/saipen/MAINTENANCE.md
++++ b/saipen/MAINTENANCE.md
+@@ -112,12 +112,22 @@
+ an Entry (CORE.md § 1.10 pair carve-out): `execution_intent: goal`, both
+ counters `0`, and that `PLAN` is wave 1 with one `DEC: goal_waves 0->1`.
+ 
+-**A resume resets the counters only when the valve tripped** (at or over the
+-caps). Untripped counters carry over and no re-authorization line is written.
+-A reset MUST leave exactly
+-`DEC: goal reauthorized -- goal_waves N->0, goal_tickets M->0`
+-with the real pre-reset counts; otherwise CORE.md § 1.5's rebuild re-counts
+-the cancelled bumps and re-trips the valve.
++**Continuation authority (SRC-112).** Operator-backed goal Entry records
++`continuation_authority: operator_persistent`, `authority_source: E-<pivot>`,
++`authority_until: goal_complete`, `safety_valve_mode: checkpoint`. Its committed
++Entry journal binds that grant to `goal_ingress` and the existing operator
++provenance. Unknown, mismatched or missing proof refuses; a model receipt, CLI
++spelling, transcript, compaction or later carrier cannot upgrade an old grant.
++Absent quartet means bounded (`operator_required`, budget, hard_wait); a fresh
++operator resume records that complete bounded tuple. Goal exit clears it.
++
++**A resume resets the counters only when the valve tripped.** Untripped counts
++carry over. A fresh operator reset leaves
++`DEC: goal reauthorized -- goal_waves N->0, goal_tickets M->0`;
++a standing persistent grant leaves
++`DEC: goal checkpoint -- goal_waves N->0, goal_tickets M->0` plus its
++`authority_source` and safety-review evidence. Recovery recognizes both with
++real counts. BOOT/agent `continue` reads the grant; it creates none.
+ 
+ **A resume landing on no workable ticket** asks nothing: it falls through to
+ § 2.1 under the still-set goal intent (`HUNT`, then `ADD` if clean).
+@@ -154,10 +164,10 @@
+ **Safety valve.** One `saipen goal` invocation MUST NOT process more than
+ 3 waves or 20 tickets, whichever comes first (`goal_tickets` counts
+ VERIFY-passes, so a re-passing ticket counts again: the valve trips early,
+-never late). At the ceiling the agent MUST stop, write a full BOARD/STATE
+-checkpoint and report progress; the user re-invokes `cc` to re-authorize. A
+-tripped valve is a pause, NOT an exit: the goal intent stays set, because
+-CORE.md § 1.10 recognizes the resume only while `execution_intent: goal`.
++never late). At the ceiling checkpoint BOARD/STATE and review binding brakes.
++A proven persistent goal checkpoints and continues under its original grant.
++A bounded run waits for a fresh operator `cc` (or new goal), never a synthetic
++transport retry. A tripped valve is a budget boundary, NOT a goal exit.
+ 
+ **The tripped state has one exact shape:**
+ 
+@@ -172,10 +182,12 @@
+   Exit condition and makes the prescribed resume illegal.
+ - `blocker: none` -- a budget pause is not a session-level block.
+ 
+-An agent resuming with `goal_waves >= 3` or `goal_tickets >= 20` MUST NOT
+-continue: it restates the `WAIT:` and waits. `cc` resets both counters to `0`
+-(`reauthorize_valve`, only when tripped). Never tidy the counters without an
+-actual re-authorization.
++At `goal_waves >= 3` or `goal_tickets >= 20`, the shared route verifies the
++grant. Persistent authority exposes checkpoint-and-reroute as CONTINUE, with
++no operator action due; the physical WAIT above records the unspent boundary.
++Bounded authority exposes WAIT_USER and an agent `continue` changes nothing.
++`reauthorize_valve` resets both counters only under the proved grant or fresh
++operator carrier; other human/safety/external brakes retain their decisions.
+ 
+ **Unchanged under Goal-Driven Execution.** All caps still apply (3 dead
+ hypotheses / 2 fix cycles per ticket in VERIFY; 2 review passes per finding in
+@@ -189,7 +201,7 @@
+ `STATE.phase: BLOCKED` is reached (not a single ticket in `## BLOCKED`). A
+ tripped valve and `saipen stop` are budget pauses, not exits; an empty
+ `BOARD.md` is never an exit by itself. On exit, clear
+-`goal_waves`/`goal_tickets`.
++`goal_waves`/`goal_tickets` and the authority quartet.
+ 
+ **Final report.** Tickets done/verified/shipped, blocked ones and the next
+ action, separating the user's original ask from work picked up along the way
+--- a/saipen/REGISTRY.json
++++ b/saipen/REGISTRY.json
+@@ -89,7 +89,7 @@
+    },
+    "GOAL-01": {
+     "owner": "saipen/MAINTENANCE.md",
+-    "test": "tools/test_goal_driven.py",
++    "test": "tools/test_t1494_continuation_authority.py",
+     "subject": "goal execution and safety valve"
+    },
+    "OPERATOR-QUESTION-01": {
+@@ -512,7 +512,11 @@
+    "transition_from",
+    "stop_reason",
+    "improve_gate",
+-   "goal_ingress"
++   "goal_ingress",
++   "continuation_authority",
++   "authority_source",
++   "authority_until",
++   "safety_valve_mode"
+   ],
+   "string_fields": [
+    "task",
+@@ -529,7 +533,11 @@
+    "paused_from_phase",
+    "paused_from_na",
+    "stop_reason",
+-   "improve_gate"
++   "improve_gate",
++   "continuation_authority",
++   "authority_source",
++   "authority_until",
++   "safety_valve_mode"
+   ],
+   "integer_fields": {
+    "saipen_version": null,
+@@ -1334,5 +1342,19 @@
+    "host repair",
+    "host mode"
+   ]
++ },
++ "goal_authority": {
++  "continuation": [
++   "operator_required",
++   "operator_persistent"
++  ],
++  "until": [
++   "budget",
++   "goal_complete"
++  ],
++  "valve": [
++   "hard_wait",
++   "checkpoint"
++  ]
+  }
+ }
+--- a/tools/saipen.py
++++ b/tools/saipen.py
+@@ -1941,6 +1941,9 @@
+         "computed_reason": routed.get("reason"),
+         "blocker": state.get("blocker"),
+         "execution_intent": state.get("execution_intent"),
++        **{key: state[key] for key in (
++            "continuation_authority", "authority_source", "authority_until", "safety_valve_mode"
++        ) if key in state},
+         "claimed_ticket": doing[0]["id"] if doing else None,
+         "top_workable_ticket": top_workable,
+         "log_tail_event": snap.log_tail,
+@@ -2731,6 +2734,9 @@
+         "converge_target": state.get("converge_target"),
+         "goal_waves": state.get("goal_waves"),
+         "goal_tickets": state.get("goal_tickets"),
++        **{key: state[key] for key in (
++            "continuation_authority", "authority_source", "authority_until", "safety_valve_mode"
++        ) if key in state},
+         "recovery_pending": bool(route["pending"]),
+         "recovery_conflict": False,
+         "pending_ops": route["pending"],
+--- a/tools/saipen_engine/automation.py
++++ b/tools/saipen_engine/automation.py
+@@ -26,8 +26,8 @@
+ 
+ - EXECUTE_SELF and RECONCILE_SELF -> CONTINUE: a mechanical next action
+   exists and no human/external authority owns it (recovery is agent work,
+-  never a human question; the safety valve is re-authorized by exactly the
+-  ordinary ``cc`` its own resume key names -- R7).
++  never a human question). A proven persistent goal checkpoints its budget;
++  a bounded safety valve needs a fresh operator carrier (SRC-112).
+ - WAIT_USER -> WAIT_USER; WAIT_EXTERNAL -> WAIT_EXTERNAL; BLOCKED -> BLOCKED.
+   COMPLETE -> COMPLETE, only through the eight-condition closure gate (R5).
+   INVALID -> INVALID: the state cannot be safely interpreted, a hard stop.
+@@ -80,11 +80,11 @@
+ # pre-authorizes these -- manual verification, destructive confirmation,
+ # secrets/input the user owns, first publish, user brakes).
+ _HUMAN_WAIT_CATEGORIES = frozenset(
+-    {"user brake", "manual-verify", "destructive-op", "first-publish"}
++    {"user brake", "manual-verify", "destructive-op", "first-publish", "safety valve"}
+ )
+-# R7: only the soft safety-valve boundary (and INIT, which is mechanical
+-# bootstrapping, not a human question) keeps ordinary cc legal.
+-_PREAUTHORIZED_WAIT_CATEGORIES = frozenset({"safety valve", "init"})
++# INIT is mechanical bootstrap. The persistent goal checkpoint is an executable
++# router action; an unproven bounded safety valve remains a human boundary.
++_PREAUTHORIZED_WAIT_CATEGORIES = frozenset({"init"})
+ 
+ # T-1553: a pre-authorized WAIT keeps ROUTING legal, which is a different
+ # question from whether a HUMAN must act before the agent may hand control
+--- a/tools/saipen_engine/cold_recovery.py
++++ b/tools/saipen_engine/cold_recovery.py
+@@ -779,7 +779,19 @@
+     phase = str(state.get("phase") or "").strip().upper()
+     next_action = str(state.get("next_action") or "").strip()
+     blocker = str(state.get("blocker") or "").strip()
+-    wait = next_action.upper().startswith("WAIT")
++    from . import goal_authority
++    from .state import parse_wait
++
++    grant_errors = goal_authority.prove(root, state)
++    if grant_errors:
++        recall = {**base, "readable": False, "problem": "; ".join(grant_errors)}
++        recall["turn"] = turn_entry(recall, ingress["class"], continuation=ingress["continuation"])
++        return recall
++    checkpoint = (
++        goal_authority.persistent(state) and parse_wait(next_action) == "safety valve"
++        and phase != "BLOCKED" and blocker.lower() in ("", "none")
++    )
++    wait = next_action.upper().startswith("WAIT") and not checkpoint
+     section = (ticket or {}).get("section", "")
+     continuation_required = bool(
+         task
+@@ -787,7 +799,7 @@
+         and section == "## DOING"
+         and phase not in _NON_EXECUTING_PHASES
+         and not wait
+-        and binding_brake(state) is None
++        and (binding_brake(state) is None or checkpoint)
+     )
+     previous = str(carrier.get("previous_incarnation") or "").strip() or None
+     incarnation = base["agent_incarnation"]
+--- a/tools/saipen_engine/context.py
++++ b/tools/saipen_engine/context.py
+@@ -83,6 +83,11 @@
+         "requires",
+         "goal_waves",
+         "goal_tickets",
++        "continuation_authority",
++        "authority_source",
++        "authority_until",
++        "safety_valve_mode",
++        "goal_ingress",
+         "last_event",
+         "updated",
+     ):
+--- a/tools/saipen_engine/disposition.py
++++ b/tools/saipen_engine/disposition.py
+@@ -126,13 +126,14 @@
+         wait_text = action
+     if wait_text:
+         # The closed WAIT grammar names its category; `user brake`,
+-        # `manual-verify`, `destructive-op`, `first-publish` are genuine
+-        # human boundaries. `blocked`/`safety valve` are NOT user questions.
++        # `manual-verify`, `destructive-op`, `first-publish` and a bounded
++        # `safety valve` require a human; a proved checkpoint is executable.
+         user_owned = (
+             "user brake" in wait_text
+             or "manual-verify" in wait_text
+             or "destructive-op" in wait_text
+             or "first-publish" in wait_text
++            or "safety valve" in wait_text
+         )
+         return {
+             "disposition": WAIT_USER if user_owned else BLOCKED,
+--- a/tools/saipen_engine/entry.py
++++ b/tools/saipen_engine/entry.py
+@@ -620,7 +620,7 @@
+     reconciliation = reconcile_protocol_state(root, actor, dry_run=False)
+     valve_reauthorized = False
+     if reconciliation.get("safety_valve_tripped") and authority["reset_bounded_authority"]:
+-        reauth = reauthorize_valve(root, actor)
++        reauth = reauthorize_valve(root, actor, operator_authority_source=captured_receipt)
+         if not reauth.ok:
+             return _refuse(reauth.code, reauth.message, receipt=captured_receipt, **identity)
+         valve_reauthorized = True
+@@ -634,7 +634,7 @@
+     ):
+         # A valve already stating its own WAIT reconciles CLEAN; the new task
+         # is still the reauthorization it waits for.
+-        reauth = reauthorize_valve(root, actor)
++        reauth = reauthorize_valve(root, actor, operator_authority_source=captured_receipt)
+         if not reauth.ok:
+             return _refuse(reauth.code, reauth.message, receipt=captured_receipt, **identity)
+         valve_reauthorized = True
+--- a/tools/saipen_engine/goal_authority.py
++++ b/tools/saipen_engine/goal_authority.py
+@@ -0,0 +1,129 @@
++"""GOAL-01: one continuation grant, independent of who invokes continue.
++
++STATE records the scope. The existing source/journal owners prove its origin;
++an invocation, a remembered request or a convenient counter value proves none.
++"""
++
++from __future__ import annotations
++
++import re
++from pathlib import Path
++
++FIELDS = ("continuation_authority", "authority_source", "authority_until", "safety_valve_mode")
++
++
++def grant_fields(source: str) -> dict:
++    return dict(zip(FIELDS, ("operator_persistent", source, "goal_complete", "checkpoint")))
++
++
++def shape_errors(state: dict) -> list[str]:
++    present = [key for key in FIELDS if key in state]
++    if not present:
++        return []  # Legacy goals are bounded; absence never grants persistence.
++    if state.get("execution_intent") != "goal":
++        return ["continuation authority is legal only with execution_intent goal"]
++    if len(present) != len(FIELDS):
++        return ["continuation authority requires the complete authority family"]
++    from .registry import load_registry, require_mapping
++
++    policy = require_mapping(load_registry(), "goal_authority")
++    for field, key in ((FIELDS[0], "continuation"), (FIELDS[2], "until"), (FIELDS[3], "valve")):
++        if state.get(field) not in policy[key]:
++            return [f"{field} outside its closed enum"]
++    persistent = state[FIELDS[0]] == "operator_persistent"
++    expected = ("goal_complete", "checkpoint") if persistent else ("budget", "hard_wait")
++    if (state[FIELDS[2]], state[FIELDS[3]]) != expected:
++        return ["continuation authority has an inconsistent scope/valve tuple"]
++    source = state.get("authority_source")
++    if not isinstance(source, str) or not re.fullmatch(r"(?:E|SRC)-0*[1-9][0-9]*", source):
++        return ["authority_source must name its SRC or GOAL event"]
++    if persistent and not re.fullmatch(r"goal-[0-9a-f]{16}", str(state.get("goal_ingress") or "")):
++        return ["persistent authority requires its goal_ingress binding"]
++    return []
++
++
++def persistent(state: dict) -> bool:
++    return state.get("continuation_authority") == "operator_persistent" and not shape_errors(state)
++
++
++def prove(root: Path | str, state: dict, *, history_events=None, dependencies=None) -> list[str]:
++    """Verify the original grant, not a stronger carrier supplied on a retry."""
++    errors = shape_errors(state)
++    if errors or not persistent(state):
++        return errors
++    from . import operator_task
++
++    source = state["authority_source"]
++    if not source.startswith("E-"):
++        return ["persistent authority requires its canonical goal-entry event"]
++    from .journal import Journal, hash_file_dependency, semantic_receipts_for_operation_safe
++    from .log import read_history_snapshot
++
++    if history_events is None:
++        history_events = read_history_snapshot(Path(root), lean=True).events
++    pivots = [event for event in history_events if event.get("taxonomy") == "DEC"
++              and str(event.get("text") or "").startswith("goal pivot --")
++              and int(event.get("event") or 0) <= int(state.get("last_event") or 0)]
++    if not pivots or source != f"E-{pivots[-1]['event']}":
++        return ["persistent authority does not name the current goal pivot"]
++    records, problems = semantic_receipts_for_operation_safe(Path(root), "goal_entry")
++    if problems:
++        return ["continuation grant journal is corrupt: " + "; ".join(problems[:2])]
++    for record in records:
++        metadata = record.get("receipt_metadata")
++        grant = metadata.get("goal_authority") if isinstance(metadata, dict) else None
++        if not isinstance(grant, dict) or grant.get("authority_source") != source:
++            continue
++        if (record.get("status") != "COMMITTED"
++                or record.get("op_id") != pivots[-1].get("op_id")
++                or grant.get("goal_ingress") != state.get("goal_ingress")):
++            continue
++        if any(grant.get(key) != state[key] for key in FIELDS):
++            continue
++        if operator_task.authority_for_provenance(grant.get("request_provenance"))["goal_pivot"]:
++            if dependencies is not None:
++                journal = Journal(Path(root), record["op_id"])
++                try:
++                    before = hash_file_dependency(journal.manifest)
++                    live = journal.read()
++                    after = hash_file_dependency(journal.manifest)
++                except (OSError, ValueError):
++                    return ["continuation grant became unreadable while being read"]
++                if live != record or before != after:
++                    return ["continuation grant changed while being read"]
++                dependencies[journal.manifest.relative_to(Path(root)).as_posix()] = before
++            return []
++    return ["persistent authority has no committed operator grant for this goal"]
++
++
++def fresh_cc_provenance() -> dict | None:
++    """A declared operator carrier for the resume key, not CLI spelling."""
++    from . import operator_task
++
++    for text in ("cc", "\u0441\u0441", "saipen", "saipen continue", "saipen continue --json"):
++        provenance = operator_task.witness(text)
++        if not provenance.get("code") and operator_task.authority_for_provenance(provenance)[
++            "reset_bounded_authority"
++        ]:
++            return provenance
++    return None
++
++
++def reset_authority(root: Path | str, state: dict, source: str | None = None) -> dict:
++    """Decide whether this reset spends an existing grant or a fresh one."""
++    from . import operator_task
++
++    if source is not None and not operator_task.authority_for_receipt(
++        Path(root), source
++    )["reset_bounded_authority"]:
++        return {"mode": "wait", "detail": "the named Source has no operator reset authority"}
++    if persistent(state):
++        errors = prove(root, state)
++        return ({"mode": "wait", "detail": "; ".join(errors)} if errors
++                else {"mode": "checkpoint", "source": state["authority_source"]})
++    if source is not None:
++        return {"mode": "reauthorize", "source": source}
++    provenance = fresh_cc_provenance()
++    if provenance:
++        return {"mode": "reauthorize", "source": "operator_carrier", "provenance": provenance}
++    return {"mode": "wait", "detail": "bounded run requires a fresh operator cc"}
+--- a/tools/saipen_engine/iteration_verdict.py
++++ b/tools/saipen_engine/iteration_verdict.py
+@@ -465,6 +465,12 @@
+         return verdict
+ 
+     from .operations import GOAL_TICKET_CAP, GOAL_WAVE_CAP
++    from . import goal_authority
++
++    grant_errors = goal_authority.prove(base, state)
++    if grant_errors:
++        return _unreadable("continuation grant invalid: " + "; ".join(grant_errors))
++    checkpoint = goal_authority.persistent(state)
+ 
+     phase = str(state.get("phase") or "UNKNOWN")
+     task = state.get("task")
+@@ -473,7 +479,7 @@
+     intent = state.get("execution_intent")
+ 
+     valve_tripped = bool(
+-        intent == "goal"
++        intent == "goal" and not checkpoint
+         and (
+             int(state.get("goal_waves") or 0) >= GOAL_WAVE_CAP
+             or int(state.get("goal_tickets") or 0) >= GOAL_TICKET_CAP
+@@ -482,7 +488,11 @@
+ 
+     empty_todo = not any(t.get("section") == "## TODO" for t in tickets.values())
+     brake = binding_brake(state, empty_todo=empty_todo)
+-    operator_due = brake is not None
++    from .state import parse_wait
++
++    operator_due = brake is not None and not (
++        checkpoint and brake[0] == "wait" and parse_wait(next_action) == "safety valve"
++    )
+ 
+     recall = _recall_decision(base)
+     if recall in ("OPERATOR_WAIT", "USER_INPUT"):
+--- a/tools/saipen_engine/operations.py
++++ b/tools/saipen_engine/operations.py
+@@ -489,6 +489,14 @@
+                 code=_lifecycle_authority.CODE,
+             )
+         observed[_lifecycle_authority.OBSERVABLE] = lifecycle["detail"]
++    from . import goal_authority
++
++    authority_preconditions = {}
++    grant_errors = goal_authority.prove(
++        root, state, history_events=snapshot.events, dependencies=authority_preconditions,
++    )
++    if grant_errors:
++        raise CheckpointError("goal-authority: " + "; ".join(grant_errors))
+     log_tail = snapshot.tail
+     # ALWAYS bind the complete sealed history (`.saipen/logs` numeric segments)
+     # as a read precondition so APPLY rechecks it under the lock and refuses
+@@ -524,6 +532,7 @@
+         # lossless construction is a property of the checkpoint, not an
+         # accidental caller opt-in.
+         "_root": Path(root),
++        "_authority_preconditions": authority_preconditions,
+     }
+     if state_error:
+         # Set only on the CORE-002 tolerant path: the STRICT verdict the
+@@ -567,6 +576,7 @@
+     _ld = docs.get("_logs_digest")
+     if _ld:
+         pc[".saipen/logs"] = _ld
++    pc.update(docs.get("_authority_preconditions") or {})
+     return pc
+ 
+ 
+@@ -8563,6 +8573,9 @@
+             session_binding=host_session_binding(root),
+         )
+ 
++    from . import goal_authority
++
++    grant = goal_authority.grant_fields(f"E-{pivot_event}")
+     # --- STATE: record Entry PLAN exactly once (wave 1) --------------------
+     # CORE-009: when the current phase is a ticket-bearing phase (BUILD,
+     # VERIFY, etc.), keep it -- goal_entry only changes the intent/task,
+@@ -8589,6 +8602,7 @@
+             "task": first_id if first_id is not None else "none",
+             "next_action": next_action,
+             "goal_ingress": ingress,
++            **grant,
+             # CORE-009: only set transition_from when the phase actually changes
+             "transition_from": (
+                 (state.get("phase") or "DONE")
+@@ -8626,6 +8640,7 @@
+         "goal_tickets": 0,
+         "goal_ingress": ingress,
+         "ingress_authority": authority,
++        **grant,
+     }
+     plan = build_plan(
+         "goal_entry",
+@@ -8643,6 +8658,9 @@
+         targets,
+         expected,
+         op_id=op_id,
++        receipt_metadata={"goal_authority": {
++            **grant, "goal_ingress": ingress, "request_provenance": provenance,
++        }},
+     )
+     if isinstance(plan, Result):
+         return plan
+@@ -10396,7 +10414,10 @@
+ 
+ 
+ @_state_guard
+-def reauthorize_valve(project_root: Path | str, agent: str, dry_run: bool = False) -> Result:
++def reauthorize_valve(
++    project_root: Path | str, agent: str, dry_run: bool = False,
++    *, operator_authority_source: str | None = None,
++) -> Result:
+     """Conditional safety-valve reauthorization: reset BOTH counters to 0 only
+     when a counter has tripped its cap. Never grants a fresh budget on a run
+     that did not trip the valve."""
+@@ -10412,6 +10433,24 @@
+             "valve has not tripped; no fresh budget is owed",
+             goal_waves=waves,
+             goal_tickets=tickets,
++        )
++
++    from . import goal_authority
++    from .state import binding_brake, parse_wait
++
++    brake = binding_brake(state)
++    other_brake = bool(brake and not (
++        brake[0] == "wait" and parse_wait(state.get("next_action")) == "safety valve"
++    ))
++    authority = goal_authority.reset_authority(root, state, operator_authority_source)
++    if authority["mode"] == "checkpoint" and other_brake:
++        return _refuse("RECONCILE_REAUTH_REQUIRED", "binding brake remains: " + brake[1])
++    if authority["mode"] == "wait":
++        wait = (f"WAIT: safety valve reached ({waves} waves / {tickets} tickets) "
++                "-- run 'cc' to continue")
++        return _refuse(
++            "RECONCILE_REAUTH_REQUIRED", authority["detail"] + "; " + wait,
++            next_action=wait, operator_action_due=True,
+         )
+ 
+     def mutate(text: str, event: int) -> str:
+@@ -10428,7 +10467,12 @@
+             {
+                 "goal_waves": 0,
+                 "goal_tickets": 0,
+-                "next_action": "saipen continue",
++                **({
++                    "continuation_authority": "operator_required",
++                    "authority_source": f"E-{event}",
++                    "authority_until": "budget", "safety_valve_mode": "hard_wait",
++                } if authority["mode"] == "reauthorize" else {}),
++                "next_action": state.get("next_action") if other_brake else "saipen continue",
+                 "last_event": event,
+                 "updated": utc,
+                 "agent": agent,
+@@ -10456,7 +10500,11 @@
+         "valve",
+         agent,
+         mutate,
+-        f"goal reauthorized -- goal_waves {waves}->0, goal_tickets {tickets}->0",
++        (f"goal checkpoint -- goal_waves {waves}->0, goal_tickets {tickets}->0; "
++         f"authority_source {authority['source']}; safety review: binding brakes preserved"
++         if authority["mode"] == "checkpoint" else
++         f"goal reauthorized -- goal_waves {waves}->0, goal_tickets {tickets}->0; "
++         f"authority_source {authority['source']}"),
+         {"ok": True, "code": "VALVE_REAUTHORIZED"},
+         now,
+         utc,
+--- a/tools/saipen_engine/reconcile.py
++++ b/tools/saipen_engine/reconcile.py
+@@ -54,7 +54,7 @@
+ # CORE section 1.5: two LOG lines are goal MARKERS -- the `DEC: goal pivot`
+ # line a new objective writes, and the `DEC: goal reauthorized` line section
+ # 2.4 requires from a re-authorizing `cc`.
+-_GOAL_MARKER_RE = re.compile(r"^goal (?:pivot|reauthorized)\b")
++_GOAL_MARKER_RE = re.compile(r"^goal (?:pivot|reauthorized|checkpoint)\b")
+ # CORE section 1.5: "Only increments are completion events -- a marker's own
+ # `N->0` records the reset, it is not a wave or a ticket."
+ _GOAL_INCREMENT_RE = re.compile(r"^goal_(waves|tickets) (\d+)->(\d+)$")
+--- a/tools/saipen_engine/router.py
++++ b/tools/saipen_engine/router.py
+@@ -274,6 +274,16 @@
+     if _brake is not None:
+         _kind, _detail = _brake
+         if _kind == "wait":
++            from . import goal_authority
++            from .state import parse_wait
++
++            if parse_wait(na) == "safety valve" and goal_authority.persistent(state):
++                return {
++                    "ok": True, "action": "saipen continue", "reason": "goal-checkpoint",
++                    "executable_behavior": "CHECKPOINT_AND_REROUTE",
++                    "authority_source": state["authority_source"],
++                    "detail": "persistent goal budget checkpoint; no fresh operator grant",
++                }
+             # CORE-004: the safety valve is an AUTHORIZATION boundary, not a
+             # resumable yield. Once the 3-wave / 20-ticket budget is exhausted,
+             # the persisted WAIT is a HARD STOP (RESTATE_AND_STOP) until the
+@@ -1146,11 +1156,36 @@
+     `route_next_result` and the CLI continuation, status and explain-next
+     paths must agree on the executable action.
+     """
+-    for gate in (conformance_crew_gate, closure_finish_gate, conformance_idle_gate):
++    for gate in (goal_checkpoint_gate, conformance_crew_gate,
++                 closure_finish_gate, conformance_idle_gate):
+         rewritten = gate(project_root, routed)
+         if rewritten is not None:
+             return rewritten
+     return None
++
++
++def goal_checkpoint_gate(project_root, routed: dict) -> dict | None:
++    """Filesystem proof for the pure router's proposed persistent checkpoint."""
++    if routed.get("reason") != "goal-checkpoint":
++        return None
++    from . import codec, goal_authority
++    from .state import parse_state
++
++    try:
++        current = parse_state(codec.read_doc(Path(project_root) / ".saipen/STATE.md"))
++        errors = goal_authority.prove(project_root, current)
++        if (not goal_authority.persistent(current)
++                or current.get("authority_source") != routed.get("authority_source")):
++            errors.append("checkpoint grant no longer owns the current goal")
++    except (OSError, ValueError, TypeError) as exc:
++        errors = ["checkpoint authority unavailable: " + str(exc)]
++    if not errors:
++        return None
++    return {
++        "ok": False, "code": "VALIDATION_FAILED", "reason": "state-malformed",
++        "action": "saipen status", "detail": "; ".join(errors),
++        "canonical_next_command": "saipen status",
++    }
+ 
+ 
+ def closure_finish_gate(project_root, routed: dict) -> dict | None:
+--- a/tools/saipen_engine/state.py
++++ b/tools/saipen_engine/state.py
+@@ -688,6 +688,9 @@
+     gm = fields.get("goal_mode")
+     if gm is not None and not isinstance(gm, bool):
+         errors.append("goal_mode must be a boolean")
++    from . import goal_authority
++
++    errors.extend(goal_authority.shape_errors(fields))
+     # Execution-intent family conditionals (schema if/then + § 2.4 delegated
+     # checks): goal requires its counters; converge requires its target and
+     # forbids goal counters; every other intent forbids both families.
+@@ -1241,8 +1244,11 @@
+     if goal_waves < 0 or goal_tickets < 0:
+         raise ValueError("goal counters must be non-negative")
+ 
++    from .goal_authority import FIELDS as authority_fields
++
+     clean = remove_state_fields(
+-        text, ("execution_intent", "goal_mode", "goal_waves", "goal_tickets", "converge_target")
++        text, ("execution_intent", "goal_mode", "goal_waves", "goal_tickets",
++               "converge_target", *authority_fields)
+     )
+     owned = {"execution_intent": intent}
+     if intent == "goal":
+--- a/tools/test_automation_block.py
++++ b/tools/test_automation_block.py
+@@ -251,10 +251,12 @@
+         block = self._wait_route("WAIT: manual-verify -- double check the matrix")
+         self.assertEqual(block["disposition"], automation.WAIT_USER)
+ 
+-    def test_safety_valve_keeps_ordinary_cc_legal(self) -> None:
++    def test_bounded_safety_valve_requires_operator_cc(self) -> None:
++        # SRC-112: no persistent grant means no synthetic transport renewal.
+         block = self._wait_route("WAIT: safety valve -- 3-waves exhausted; resume with cc")
+-        self.assertEqual(block["disposition"], CONTINUE)
+-        self.assertEqual(block["next_command"], "cc")
++        self.assertEqual(block["disposition"], automation.WAIT_USER)
++        self.assertTrue(block["operator_action_due"])
++        self.assertIsNone(block["next_command"])
+ 
+     def test_blocked_wait_is_a_stop(self) -> None:
+         block = self._wait_route("WAIT: blocked -- upstream job is red")
+@@ -476,12 +478,10 @@
+         second = self.block(routed=self._idle_route(), audit_status=self.audit())
+         self.assertEqual(first, second)
+ 
+-    def test_manual_semantics_unchanged_outside_rtc(self) -> None:
+-        # SRC-023 (audit/10.md) §9 #17/#18: the block is additive. The
+-        # router's own verdict for the same state is untouched, and the
+-        # pre-authorized soft safety-valve WAIT still routes exactly as the
+-        # router always routed it (CONTINUE carrier, valve reauthorization
+-        # unchanged).
++    def test_bounded_wait_preserves_route_outside_rtc(self) -> None:
++        # SRC-112 updates the authority contract: the raw bounded WAIT stays
++        # unchanged and its projection requires an operator. A persistent
++        # checkpoint is exercised against committed Entry proof in T-1494.
+         state, _ = _parsed(_state(phase="SHIP", next_action="WAIT: safety valve -- resume with cc"))
+         routed = route_next(
+             _state(phase="SHIP", next_action="WAIT: safety valve -- resume with cc"),
+@@ -496,8 +496,8 @@
+             board=parse_board(BOARD_EMPTY),
+             audit_status=self.audit(),
+         )
+-        self.assertEqual(block["disposition"], CONTINUE)
+-        self.assertEqual(block["next_command"], "cc")
++        self.assertEqual(block["disposition"], automation.WAIT_USER)
++        self.assertIsNone(block["next_command"])
+ 
+     def test_status_json_writes_zero_project_bytes(self) -> None:
+         # SRC-023 (audit/10.md) §9 #20: `saipen status --json` mutates nothing.
+--- a/tools/test_intent_audit_fixes.py
++++ b/tools/test_intent_audit_fixes.py
+@@ -536,7 +536,9 @@
+             },
+         )
+         state_path.write_text(text, encoding="utf-8", newline="\n")
+-        rc, result = self._invoke_cli(root, "cc")
++        # SRC-112: the bounded routing control uses a fresh operator carrier.
++        with mock.patch.dict(os.environ, {"SAIPEN_TASK_SHA256": hashlib.sha256(b"cc").hexdigest()}):
++            rc, result = self._invoke_cli(root, "cc")
+         state = S.parse_state(state_path.read_text(encoding="utf-8"))
+         self.assertEqual(rc, 0, result)
+         self.assertEqual((state["goal_waves"], state["goal_tickets"]), (0, 0))
+--- a/tools/test_t1293_valve_resume_audit_route.py
++++ b/tools/test_t1293_valve_resume_audit_route.py
+@@ -15,7 +15,7 @@
+ from __future__ import annotations
+ 
+ import datetime
+-import inspect
++import hashlib
+ import os
+ import shutil
+ import sys
+@@ -94,12 +94,10 @@
+         layer.write_text("# audit\n\nfindings\n", encoding="utf-8")
+ 
+     def reauthorize(self) -> str:
+-        grant = {}
+-        if "operator_authority_source" in inspect.signature(reauthorize_valve).parameters:
+-            # T-1494 records WHICH authority reset the valve; a fresh operator
+-            # grant is the case under test there, the resume value is the one here.
+-            grant["operator_authority_source"] = "SRC-001"
+-        done = reauthorize_valve(self.root, "probe", **grant)
++        # SRC-112: this routing control spends a fresh operator resume, not
++        # an invented SRC identity. The carrier is a disposable test double.
++        with patch.dict(os.environ, {"SAIPEN_TASK_SHA256": hashlib.sha256(b"cc").hexdigest()}):
++            done = reauthorize_valve(self.root, "probe")
+         self.assertTrue(done.ok, done.to_dict())
+         state = parse_state((self.root / ".saipen" / "STATE.md").read_text(encoding="utf-8"))
+         self.assertEqual((state["goal_waves"], state["goal_tickets"]), (0, 0))
+--- a/tools/test_t1363_zero_manual_entry.py
++++ b/tools/test_t1363_zero_manual_entry.py
+@@ -1049,7 +1049,8 @@
+                 )
+ 
+     def test_continue_reauthorizes_only_a_proven_valve(self):
+-        _rc, payload, text = cli(valve_project(self), "continue", "--json")
++        # SRC-112 distinguishes a fresh operator resume from an agent retry.
++        _rc, payload, text = cli(valve_project(self), "continue", "--json", operator_text="cc")
+         self.assertIn(
+             str(payload and payload.get("code")),
+             ("VALVE_REAUTHORIZED", "REAUTHORIZED", "CONTINUE", "PHASE"),
+--- a/tools/validate.py
++++ b/tools/validate.py
+@@ -1099,7 +1099,7 @@
+ # the docstring here said the interpreted subset "is everything the schema
+ # actually uses", so `goal_waves: -1` passed the gate and handed the § 2.4
+ # safety valve a budget below its own floor.
+-SCHEMA_KEYWORDS_ENFORCED = frozenset({"type", "enum", "minimum", "items"})
++SCHEMA_KEYWORDS_ENFORCED = frozenset({"type", "enum", "minimum", "items", "pattern"})
+ # Annotations. They constrain nothing, so nothing needs to enforce them.
+ # `default` is deliberately here: JSON Schema `default` is documentation of an
+ # omitted value, never an instruction to supply one, and a validator that
+@@ -1131,6 +1131,7 @@
+     "additionalProperties": "unknown-field FAIL in check_against_schema",
+     # The required array is read directly by check_against_schema.
+     "required": "required-field FAIL in check_against_schema",
++    "allOf": "GOAL-01 authority quartet in state_contract_errors and goal_authority.prove",
+ }
+ 
+ 
+@@ -1224,6 +1225,8 @@
+             )
+         if "enum" in spec and value not in spec["enum"]:
+             fail(f"{label} field {key}: {value!r} not one of {'|'.join(spec['enum'])}")
++        if "pattern" in spec and isinstance(value, str) and not re.search(spec["pattern"], value):
++            fail(f"{label} field {key}: {value!r} does not match its schema pattern")
+         # `minimum` gates the floor of every counter STATE persists. Unenforced,
+         # `goal_waves: -1` reads as valid and hands § 2.4's safety valve four
+         # waves of budget instead of three; `last_event: 0` claims a LOG event
+@@ -2050,6 +2053,11 @@
+ # The baseline's first/last seen fields are the age data; a slug still emitted
+ # after this many consecutive releases MUST be named by a live BOARD ticket.
+ WARN_OWNER_SPAN = 3
++
++from saipen_engine import goal_authority as _goal_authority  # noqa: E402
++
++for _grant_error in _goal_authority.prove(PROJECT_ROOT, state):
++    fail("goal-authority: " + _grant_error)
+ 
+ # RFC § 2.4: execution_intent: goal requires both persisted counters.
+ if intent == "goal":
+@@ -4887,7 +4895,7 @@
+                 f"and a new one in the active log warns"
+             )
+ 
+-        _marker = re.compile(r"\]\s+DEC: goal (?:pivot|reauthorized)\b")
++        _marker = re.compile(r"\]\s+DEC: goal (?:pivot|reauthorized|checkpoint)\b")
+         _log_lines = [ln for p in log_files for ln in read_doc(p).splitlines()]
+         _last_marker = max(
+             (i for i, ln in enumerate(_log_lines) if _marker.search(ln)), default=None

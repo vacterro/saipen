@@ -1,0 +1,12 @@
+test_a_different_doing_ticket_blocks_the_reopen (test_t1609_unproven_done_recovery.UnprovenDoneRecoveryTests.test_a_different_doing_ticket_blocks_the_reopen) ... ok
+test_approval_is_bound_to_each_original_surface (test_t1609_unproven_done_recovery.UnprovenDoneRecoveryTests.test_approval_is_bound_to_each_original_surface) ... ok
+test_approved_reopen_queues_fresh_claim_and_preserves_all_original_bytes (test_t1609_unproven_done_recovery.UnprovenDoneRecoveryTests.test_approved_reopen_queues_fresh_claim_and_preserves_all_original_bytes) ... ok
+test_bare_recovery_and_every_entry_name_the_same_approval_without_writes (test_t1609_unproven_done_recovery.UnprovenDoneRecoveryTests.test_bare_recovery_and_every_entry_name_the_same_approval_without_writes) ... ok
+test_each_transaction_crash_prefix_recovers_without_manual_edits (test_t1609_unproven_done_recovery.UnprovenDoneRecoveryTests.test_each_transaction_crash_prefix_recovers_without_manual_edits) ... ok
+test_incomplete_claim_and_genuine_finish_are_not_restart_authority (test_t1609_unproven_done_recovery.UnprovenDoneRecoveryTests.test_incomplete_claim_and_genuine_finish_are_not_restart_authority) ... ok
+test_other_unprovable_shapes_stay_blocked (test_t1609_unproven_done_recovery.UnprovenDoneRecoveryTests.test_other_unprovable_shapes_stay_blocked) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 15.311s
+
+OK

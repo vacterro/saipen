@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "family": "unit",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "fingerprint": "3dcb279af19e20e05b9e143507fcef158806c91e69fddf07df4aaf0776680101",
+  "fingerprint_excludes": [
+    ".git",
+    ".saipen"
+  ],
+  "baseline_sha256": "c771e5fadeb2b293e2f867f1af3caf6d7ff6773c29a83121af33fe19bfd44cc5",
+  "head": "ff46be3521f37b96d31f88709e32531b46261b6c",
+  "finished_utc": "2026-09-27T20:54:53Z",
+  "status": "FAIL",
+  "exit_code": 1,
+  "ran": 3978,
+  "duration_s": 1765.0,
+  "timeout_s": 5400,
+  "headers": 4,
+  "unparsed": 0,
+  "tallied": 4,
+  "red": [
+    "test_inject_digest.SurfaceDigest.test_the_two_transports_agree",
+    "test_install_drift.DriftReportTests.test_line_endings_alone_are_not_drift",
+    "test_t1304_r004_transition.BaselineFailureTests.test_internal_debt_code_in_a_refusal_exception_is_normalized",
+    "test_t1304_r004_transition.BaselineFailureTests.test_internal_debt_code_is_normalized_not_a_crash"
+  ],
+  "jobs": 1,
+  "verdict": "PASS",
+  "new_red": [],
+  "fixed": [
+    "test_public_closure_cli.PublicClosureCliTests.test_control_c_d_cohort_cli_and_publication"
+  ],
+  "problems": []
+}

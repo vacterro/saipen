@@ -1,0 +1,232 @@
+{
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": " stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saiwiki` and blocks nothing else\nWARN [manifest-untracked-orphan]: untracked manifest file tools/saipen_engine/cohort_reconcile.py imports runtime that HEAD does not carry: module .focused_unit -- do NOT commit it alone; it will fail in every clone. Ship the runtime it depends on first\nWARN [manifest-untracked-orphan]: untracked manifest file tools/saipen_engine/verification_cache.py imports runtime that HEAD does not carry: .test_runner.family_environment, module .focused_unit, module .process_tree -- do NOT commit it alone; it will fail in every clone. Ship the runtime it depends on first\nWARN [manifest-untracked-orphan]: ... and 8 more like the above\nWARN [subsaipen-uncollected]: 2 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nWARN [release-ledger]: 2 release(s) have a CHANGELOG entry but no git tag: v8.0.2, v8.1.0\nWARN [xpatch-survival]: XP-000001 tools/saipen_engine/intake.py: Git history unreadable: fatal: bad object refs/codex/turn-diffs/captures/1785165795234/fb80dcb4-2cd2-4789-9618-a9409baff787/base\nWARN [xpatch-survival]: XP-000001 tools/test_source_receipts.py: Git history unreadable: fatal: bad object refs/codex/turn-diffs/captures/1785165795234/fb80dcb4-2cd2-4789-9618-a9409baff787/base\nWARN [xpatch-survival]: ... and 7 more like the above\nValidation FAILED: 13 problem(s), 26 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "stale_reason": null,
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 13,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "closure provenance does not resolve: EX-000010 was verified against installed engine generation sha256:e10a20a075aa310b... but the running engine is sha256:111153790eb38d96... -- the dependency moved ",
+            "detail_hash": "78fde918ddfceedd",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/saipen_engine/cohort_reconcile.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the f",
+            "detail_hash": "8125be4f45255e95",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/saipen_engine/verification_bootstrap.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit",
+            "detail_hash": "93ad6dfca7b8bc4d",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/saipen_engine/verification_cache.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the",
+            "detail_hash": "25fee2cb20f8987b",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/saipen_engine/verification_impact.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit th",
+            "detail_hash": "c32e0bdc36c3ead4",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1832_single_flight.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or",
+            "detail_hash": "b2dd1d7d43cc6f1b",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1833_verification_owner.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the fi",
+            "detail_hash": "4cca3bf1e062f856",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1834_tool_call_identity.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the fi",
+            "detail_hash": "ef51980a1fae816c",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1835_verification_economics.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit th",
+            "detail_hash": "d14be857c086c9a1",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1836_verification_impact.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the f",
+            "detail_hash": "868b546b35ab6114",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1837_ci_family_parity.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file",
+            "detail_hash": "1baf12d78165b425",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_t1839_cohort_reconciliation.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the",
+            "detail_hash": "218674270888e3dc",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/verification_metrics.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or dro",
+            "detail_hash": "68ba388db0d33f0d",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "d682e4a0e542976ddfe3e5518a2b4f8bc81d7eea1e4bbdcd8642a8d5c7fefc5c",
+        "ruleset_version": 2,
+        "status": "complete",
+        "warning_count": 26
+      },
+      "board_hash": "25be0b2ab328367e",
+      "canonical_next_command": null,
+      "content_hash": "e0c57713671215d2",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:805a836c460cb88e1e371d068f1e40dddea94c6f23b5bbd62fba6326167cbbb6",
+      "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "kind": "conformance_receipt",
+      "log_hash": "b332d454823bf827",
+      "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+      "receipt_id": "receipt-2ff055c8d3a2",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+      "source_tree_fingerprint": "git-delta-v1:b8fc9fbc7cdccbdd75eefce3e7d9b859a809e918cd9822db1a514fe43eb4aab8",
+      "state_hash": "e70ffa8967d557c5",
+      "timestamp_utc": "2026-10-20T19:22:47.180793Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "025bf596c683464788ab698248e8a3c5eb44dfec",
+      "source_tree_fingerprint": "git-delta-v1:b8fc9fbc7cdccbdd75eefce3e7d9b859a809e918cd9822db1a514fe43eb4aab8"
+    }
+  },
+  "install_identity": {
+    "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "persisted_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "install_fingerprint": "install-v1:805a836c460cb88e1e371d068f1e40dddea94c6f23b5bbd62fba6326167cbbb6",
+    "persisted_fingerprint": "install-v1:805a836c460cb88e1e371d068f1e40dddea94c6f23b5bbd62fba6326167cbbb6",
+    "status": "MATCH",
+    "mismatch": null
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-2ff055c8d3a2",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+  },
+  "terminal": true
+}

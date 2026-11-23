@@ -1,0 +1,60 @@
+{
+  "checked_at": "2026-10-10T01:42:39.274470+00:00",
+  "before": {
+    "live": {
+      "files_rechecked": 7,
+      "mismatches": []
+    },
+    "durable": {
+      "files_rechecked": 8041,
+      "mismatches": []
+    }
+  },
+  "after": {
+    "live": {
+      "files_rechecked": 7,
+      "mismatches": []
+    },
+    "durable": {
+      "files_rechecked": 8041,
+      "mismatches": []
+    }
+  },
+  "git": [
+    {
+      "kind": "head",
+      "exit_code": 0,
+      "sha256": "c56b4cfa1368c502bda88f185d5c5e482123e64b61a71a8245c1143bb602c994",
+      "unchanged": true
+    },
+    {
+      "kind": "dirty",
+      "exit_code": 0,
+      "sha256": "f1582a451085690e24a8f895658d3ce8f2bf0882da61940df32835c44f45e279",
+      "unchanged": true
+    },
+    {
+      "kind": "unstaged",
+      "exit_code": 0,
+      "sha256": "f0cd0e4b1a69c3627e2074a688e8a85c8368d7ffad14a6d8eff8d897b18cfffe",
+      "unchanged": true
+    },
+    {
+      "kind": "staged",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unchanged": true
+    }
+  ],
+  "current_reader_source_sha256": {
+    "tools/saipen_engine/log.py": "1298621aeef31e5d166e565ff11425ab67e5fbad587de756f3e099908d61bca8",
+    "tools/saipen_engine/journal.py": "b1987c8e1d1be15fa44ea2646ac7fb377af5facd8be03884076c348c479260fd",
+    "tools/saipen_engine/reconcile.py": "fa7555a02d98ef3b6330a6a81ff954e56a556f49ea45a9fae647b7e223521b85",
+    "tools/saipen_engine/fast_check.py": "de33aaccbaba8f0c844b8bdc9bfe82b4a2076cd25691564ca91fb75510f133db",
+    "tools/saipen_engine/subs.py": "649687ffdf8bcbee7d56ef19aa66837047dde0d121c86f49fb575c37cbc0dde4",
+    "tools/validate.py": "64355ea00c7953faed7911fe771de2c66da23ef7fec84cba15e19ddf77d0196e"
+  },
+  "target_mutations": [],
+  "reader_idempotent": true,
+  "canonical_reconciliation_performed": false
+}

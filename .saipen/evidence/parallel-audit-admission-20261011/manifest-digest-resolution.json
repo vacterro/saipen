@@ -1,0 +1,13 @@
+{
+  "kind": "immutable_manifest_digest_resolution",
+  "assigned_field": "snapshot_manifest_sha256",
+  "assigned_digest": "f6078bcd84065db839a2b0ba269447d188dbdda58b4cea77cd5d3b52f6df6f2a",
+  "canonical_compact_json_sha256": "f6078bcd84065db839a2b0ba269447d188dbdda58b4cea77cd5d3b52f6df6f2a",
+  "exact_serialized_file_sha256": "ccdd5800cea802b1215d9264c5c224d5e7fbb925c64e99a60af3ebb15d99d35a",
+  "file_hash_entries": 759,
+  "changed_inputs": [],
+  "resolved": true,
+  "cause": "Coordinator named a canonicalized content-map digest as though it were an exact serialized-file digest. Workers 002/003 correctly reported the ambiguity.",
+  "correction": "This immutable supplement binds both representations. Original assignments, snapshots and worker reports are unchanged; no second claim or rerun.",
+  "future_contract": "Name content_map_sha256 with its exact canonicalization and artifact_sha256 over exact retained bytes separately."
+}

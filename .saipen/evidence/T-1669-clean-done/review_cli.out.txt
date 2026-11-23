@@ -1,0 +1,13 @@
+utc: 2026-10-08T01:52:28Z
+=== CLEAN -> DONE, routed audit layer
+  transition : {"ok": true, "code": "TRANSITIONED", "phase": "DONE", "next_action": "PHASE SCOUT T-1304"}
+  committed next_action: PHASE SCOUT T-1304
+  status     : {"ok": true, "next_action": "PHASE SCOUT T-1304", "computed_next_action": "PHASE SCOUT T-1304"}
+  validate --gate core FAIL lines: 0 []
+=== CLEAN -> DONE, nothing routed
+  transition : {"ok": true, "code": "TRANSITIONED", "phase": "DONE", "next_action": "saipen continue"}
+  committed next_action: saipen continue
+  status     : {"ok": true, "next_action": "saipen continue", "computed_next_action": "saipen continue"}
+  validate --gate core FAIL lines: 0 []
+cases that did not hold: 0
+--- exit: 0 ---

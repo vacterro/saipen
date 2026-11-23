@@ -1,0 +1,34 @@
+{
+  "clauses": {
+    "SRC-040:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Create exactly one new repair ticket through the normal SAIPEN/SAIOPS workflow for the verified T-150 residue and claim it before editing; do not reopen T-150; use the live allocator id (expected T-168)."
+    },
+    "SRC-040:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reproduce before edit: run the focused test tests/test_fidelity.py::TestMediaSampling::test_referenced_media_outranks_the_sample_cap and record the observed case-sensitive failure; do not change the regression expectation to make it green."
+    },
+    "SRC-040:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Root cause is scan_asset_references() exact-case candidate.is_file() existence verification; the repair touches reference matching only: FileDecision identity stays exact-case and FidelityPlan.decision_for() gains no lowercase fallback."
+    },
+    "SRC-040:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement case-insensitive reference existence from the already-discovered media inventory (optional known_media_rel_lower membership input derived from media_groups, no second full source walk); add the original textual spelling to referenced_files and keep the exact candidate validation path when no known-media membership is supplied."
+    },
+    "SRC-040:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Case-distinct physical siblings keep two distinct exact-case FileDecisions; one case-insensitive reference may rank both; never choose one case twin by traversal order and never collapse decision identities."
+    }
+  },
+  "derived_at": "2026-09-07T12:36:50Z",
+  "derived_from": "SRC-040",
+  "interpretation_revision": 5,
+  "schema_version": 1,
+  "source_sha256": "f0eafd761272fafb291971705b367067624f579d77d8319d16db6fd2b8a496c7"
+}

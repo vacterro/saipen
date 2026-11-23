@@ -1,0 +1,16 @@
+..........................
+----------------------------------------------------------------------
+Ran 26 tests in 0.904s
+
+OK
+{
+  "subject": "tools\\saipen_engine\\campaign.py",
+  "subject_sha256": "ba8b701af7eedbe45c0deb50352f8c9014cf601b97fe0af055c2999ad377f5ae",
+  "subject_unchanged": true,
+  "oracle_sha256": "cc875de3083c1b40959f9916617b20889144573d70a9b464a4e58c1a76b38aa8",
+  "tests_run": 26,
+  "successful": true,
+  "failures": [],
+  "errors": [],
+  "scope": "local lifecycle contracts; no installed host or broker acceptance"
+}

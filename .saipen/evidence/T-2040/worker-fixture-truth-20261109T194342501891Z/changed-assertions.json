@@ -1,0 +1,94 @@
+{
+  "task": "T-2040",
+  "observed_at": "2026-11-09T19:59:10.869568+00:00",
+  "root_cause": "stale fixture terminal expectation: schema-2 work_exhaustion requires all twelve sources checked for verified idle",
+  "production_defect": false,
+  "changed": [
+    {
+      "file": "tools/test_t1446_supervise.py",
+      "symbol": "SuperviseFixture.assert_incomplete_discovery",
+      "change": "added shared terminal-truth assertion: stop==INCOMPLETE_DISCOVERY, ok False, operator_action None, live decide() verdict INCOMPLETE_DISCOVERY, requires_human False, assessment quiescent False, effective route terminal_classification INCOMPLETE_DISCOVERY, schema_version==2, 12 sources, >=1 source unchecked, all_checked False, exhausted False",
+      "reason": "Schema-2 (T-2040, work_exhaustion.SCHEMA_VERSION=2) narrows `exhausted` to verified, unblocked quiescence: all twelve discovery sources must carry checked, current-generation evidence. The scripted child (AGENT fixture) only bumps STATE/BOARD/LOG to DONE -- it runs no discovery owner -- so the decider's truthful terminal verdict is INCOMPLETE_DISCOVERY with ok=False and requires_human=False (observed: 5 of 12 sources unchecked: unconsumed_audit_inbox, hunt_findings, improve_candidates (BLOCKED_AUTHORITY), external_forensics, conformance_debt). IDLE would claim verified quiescence the fixture never proved; no completion/no-human truth is preserved, and no production control (process, capability, fencing, failure) was relaxed."
+    },
+    {
+      "file": "tools/test_t1446_supervise.py",
+      "symbol": "ChaosTests.test_death_freeze_and_provider_failure_never_lose_the_mission",
+      "change": "replaced [stop==IDLE, assertTrue(result[ok])] with assert_incomplete_discovery(result)",
+      "reason": "run only reaches DONE via the agent's own canonical writes; completion evidence (task: none, [x] T-1, EXPIRED fence, 8 generations, crash/backoff counters) is unchanged, but ok True was a schema-1 idle claim",
+      "reason_detail": "Schema-2 (T-2040, work_exhaustion.SCHEMA_VERSION=2) narrows `exhausted` to verified, unblocked quiescence: all twelve discovery sources must carry checked, current-generation evidence. The scripted child (AGENT fixture) only bumps STATE/BOARD/LOG to DONE -- it runs no discovery owner -- so the decider's truthful terminal verdict is INCOMPLETE_DISCOVERY with ok=False and requires_human=False (observed: 5 of 12 sources unchecked: unconsumed_audit_inbox, hunt_findings, improve_candidates (BLOCKED_AUTHORITY), external_forensics, conformance_debt). IDLE would claim verified quiescence the fixture never proved; no completion/no-human truth is preserved, and no production control (process, capability, fencing, failure) was relaxed."
+    },
+    {
+      "file": "tools/test_t1446_supervise.py",
+      "symbol": "ChaosTests.test_supervisor_restart_with_zero_memory_continues",
+      "change": "assertIn(second[stop], (IDLE,)) -> assert_incomplete_discovery(second)",
+      "reason": "Schema-2 (T-2040, work_exhaustion.SCHEMA_VERSION=2) narrows `exhausted` to verified, unblocked quiescence: all twelve discovery sources must carry checked, current-generation evidence. The scripted child (AGENT fixture) only bumps STATE/BOARD/LOG to DONE -- it runs no discovery owner -- so the decider's truthful terminal verdict is INCOMPLETE_DISCOVERY with ok=False and requires_human=False (observed: 5 of 12 sources unchecked: unconsumed_audit_inbox, hunt_findings, improve_candidates (BLOCKED_AUTHORITY), external_forensics, conformance_debt). IDLE would claim verified quiescence the fixture never proved; no completion/no-human truth is preserved, and no production control (process, capability, fencing, failure) was relaxed."
+    },
+    {
+      "file": "tools/test_t1446_supervise.py",
+      "symbol": "CapabilityTests.test_a_runtime_without_tools_moves_only_to_an_authorized_runtime",
+      "change": "stop==IDLE -> assert_incomplete_discovery(result)",
+      "reason": "Schema-2 (T-2040, work_exhaustion.SCHEMA_VERSION=2) narrows `exhausted` to verified, unblocked quiescence: all twelve discovery sources must carry checked, current-generation evidence. The scripted child (AGENT fixture) only bumps STATE/BOARD/LOG to DONE -- it runs no discovery owner -- so the decider's truthful terminal verdict is INCOMPLETE_DISCOVERY with ok=False and requires_human=False (observed: 5 of 12 sources unchecked: unconsumed_audit_inbox, hunt_findings, improve_candidates (BLOCKED_AUTHORITY), external_forensics, conformance_debt). IDLE would claim verified quiescence the fixture never proved; no completion/no-human truth is preserved, and no production control (process, capability, fencing, failure) was relaxed. The capability controls themselves stay: failures=={CAPABILITY_UNAVAILABLE:1}, model_replacement_recovery_count==1."
+    },
+    {
+      "file": "tools/test_t1446_supervise.py",
+      "symbol": "ProviderFailureTests.test_missing_model_falls_back_only_to_an_authorized_model",
+      "change": "stop==IDLE -> assert_incomplete_discovery(result)",
+      "reason": "Schema-2 (T-2040, work_exhaustion.SCHEMA_VERSION=2) narrows `exhausted` to verified, unblocked quiescence: all twelve discovery sources must carry checked, current-generation evidence. The scripted child (AGENT fixture) only bumps STATE/BOARD/LOG to DONE -- it runs no discovery owner -- so the decider's truthful terminal verdict is INCOMPLETE_DISCOVERY with ok=False and requires_human=False (observed: 5 of 12 sources unchecked: unconsumed_audit_inbox, hunt_findings, improve_candidates (BLOCKED_AUTHORITY), external_forensics, conformance_debt). IDLE would claim verified quiescence the fixture never proved; no completion/no-human truth is preserved, and no production control (process, capability, fencing, failure) was relaxed. Fallback authorisation controls stay: model trace [bad-model, good-model, good-model]."
+    },
+    {
+      "file": "tools/test_t1446_supervise.py",
+      "symbol": "QualityOverTimeTests.test_a_slow_generation_that_keeps_progressing_is_not_killed",
+      "change": "stop==IDLE -> assert_incomplete_discovery(result)",
+      "reason": "Schema-2 (T-2040, work_exhaustion.SCHEMA_VERSION=2) narrows `exhausted` to verified, unblocked quiescence: all twelve discovery sources must carry checked, current-generation evidence. The scripted child (AGENT fixture) only bumps STATE/BOARD/LOG to DONE -- it runs no discovery owner -- so the decider's truthful terminal verdict is INCOMPLETE_DISCOVERY with ok=False and requires_human=False (observed: 5 of 12 sources unchecked: unconsumed_audit_inbox, hunt_findings, improve_candidates (BLOCKED_AUTHORITY), external_forensics, conformance_debt). IDLE would claim verified quiescence the fixture never proved; no completion/no-human truth is preserved, and no production control (process, capability, fencing, failure) was relaxed. QUALITY-TIME-01 controls stay: failures=={}, crash_recovery_count==0."
+    },
+    {
+      "file": "tools/test_t1446_supervise.py",
+      "symbol": "QualityOverTimeTests.test_the_host_bound_ends_a_progressing_slice_without_failure",
+      "change": "stop==IDLE -> assert_incomplete_discovery(result)",
+      "reason": "Schema-2 (T-2040, work_exhaustion.SCHEMA_VERSION=2) narrows `exhausted` to verified, unblocked quiescence: all twelve discovery sources must carry checked, current-generation evidence. The scripted child (AGENT fixture) only bumps STATE/BOARD/LOG to DONE -- it runs no discovery owner -- so the decider's truthful terminal verdict is INCOMPLETE_DISCOVERY with ok=False and requires_human=False (observed: 5 of 12 sources unchecked: unconsumed_audit_inbox, hunt_findings, improve_candidates (BLOCKED_AUTHORITY), external_forensics, conformance_debt). IDLE would claim verified quiescence the fixture never proved; no completion/no-human truth is preserved, and no production control (process, capability, fencing, failure) was relaxed. Host-bound controls stay: slow_progress_slices==1, failures=={}, worker_generation_count==2, injected clock > 2.5."
+    },
+    {
+      "file": "tools/test_t1446_supervise.py",
+      "symbol": "QualityOverTimeTests.test_an_idle_generation_is_still_bounded",
+      "change": "stop==IDLE -> assert_incomplete_discovery(result)",
+      "reason": "Schema-2 (T-2040, work_exhaustion.SCHEMA_VERSION=2) narrows `exhausted` to verified, unblocked quiescence: all twelve discovery sources must carry checked, current-generation evidence. The scripted child (AGENT fixture) only bumps STATE/BOARD/LOG to DONE -- it runs no discovery owner -- so the decider's truthful terminal verdict is INCOMPLETE_DISCOVERY with ok=False and requires_human=False (observed: 5 of 12 sources unchecked: unconsumed_audit_inbox, hunt_findings, improve_candidates (BLOCKED_AUTHORITY), external_forensics, conformance_debt). IDLE would claim verified quiescence the fixture never proved; no completion/no-human truth is preserved, and no production control (process, capability, fencing, failure) was relaxed. Frozen-generation control stays: HOST_RUNTIME_FAILURE==1."
+    },
+    {
+      "file": "tools/test_t1446_supervise.py",
+      "symbol": "TruncatedTranscriptTests.test_a_long_read_never_stops_the_run_on_a_clean_exit",
+      "change": "stop==IDLE -> assert_incomplete_discovery(result)",
+      "reason": "Schema-2 (T-2040, work_exhaustion.SCHEMA_VERSION=2) narrows `exhausted` to verified, unblocked quiescence: all twelve discovery sources must carry checked, current-generation evidence. The scripted child (AGENT fixture) only bumps STATE/BOARD/LOG to DONE -- it runs no discovery owner -- so the decider's truthful terminal verdict is INCOMPLETE_DISCOVERY with ok=False and requires_human=False (observed: 5 of 12 sources unchecked: unconsumed_audit_inbox, hunt_findings, improve_candidates (BLOCKED_AUTHORITY), external_forensics, conformance_debt). IDLE would claim verified quiescence the fixture never proved; no completion/no-human truth is preserved, and no production control (process, capability, fencing, failure) was relaxed. T-1485 tail controls stay: history[0][failure] is None, failures=={}."
+    },
+    {
+      "file": "tools/test_t1446_supervise.py",
+      "symbol": "TruncatedTranscriptTests.test_a_killed_generation_after_a_long_read_is_a_crash",
+      "change": "stop==IDLE -> assert_incomplete_discovery(result)",
+      "reason": "Schema-2 (T-2040, work_exhaustion.SCHEMA_VERSION=2) narrows `exhausted` to verified, unblocked quiescence: all twelve discovery sources must carry checked, current-generation evidence. The scripted child (AGENT fixture) only bumps STATE/BOARD/LOG to DONE -- it runs no discovery owner -- so the decider's truthful terminal verdict is INCOMPLETE_DISCOVERY with ok=False and requires_human=False (observed: 5 of 12 sources unchecked: unconsumed_audit_inbox, hunt_findings, improve_candidates (BLOCKED_AUTHORITY), external_forensics, conformance_debt). IDLE would claim verified quiescence the fixture never proved; no completion/no-human truth is preserved, and no production control (process, capability, fencing, failure) was relaxed. Torn-event control stays: history[0][failure]==WORKER_CRASH."
+    },
+    {
+      "file": "tools/test_t1446_supervise.py",
+      "symbol": "ProcessTreeTests.test_a_frozen_generation_dies_with_every_process_it_started",
+      "change": "stop==IDLE -> assert_incomplete_discovery(result)",
+      "reason": "Schema-2 (T-2040, work_exhaustion.SCHEMA_VERSION=2) narrows `exhausted` to verified, unblocked quiescence: all twelve discovery sources must carry checked, current-generation evidence. The scripted child (AGENT fixture) only bumps STATE/BOARD/LOG to DONE -- it runs no discovery owner -- so the decider's truthful terminal verdict is INCOMPLETE_DISCOVERY with ok=False and requires_human=False (observed: 5 of 12 sources unchecked: unconsumed_audit_inbox, hunt_findings, improve_candidates (BLOCKED_AUTHORITY), external_forensics, conformance_debt). IDLE would claim verified quiescence the fixture never proved; no completion/no-human truth is preserved, and no production control (process, capability, fencing, failure) was relaxed. Kill-tree control stays: grandchild beat file stops advancing after the generation dies."
+    },
+    {
+      "file": "tools/test_t1748_worker_clock.py",
+      "symbol": "probe() window scenario (+ comment)",
+      "change": "assert result[stop]==subject.supervisor.IDLE -> case.assert_incomplete_discovery(result); \"IDLE decision\" -> \"discovery stop\"",
+      "reason": "Schema-2 (T-2040, work_exhaustion.SCHEMA_VERSION=2) narrows `exhausted` to verified, unblocked quiescence: all twelve discovery sources must carry checked, current-generation evidence. The scripted child (AGENT fixture) only bumps STATE/BOARD/LOG to DONE -- it runs no discovery owner -- so the decider's truthful terminal verdict is INCOMPLETE_DISCOVERY with ok=False and requires_human=False (observed: 5 of 12 sources unchecked: unconsumed_audit_inbox, hunt_findings, improve_candidates (BLOCKED_AUTHORITY), external_forensics, conformance_debt). IDLE would claim verified quiescence the fixture never proved; no completion/no-human truth is preserved, and no production control (process, capability, fencing, failure) was relaxed. The write-window mutation controls stay: write-window file exists, STATE nonempty, worker_generation_count==2, failures=={}."
+    },
+    {
+      "file": "tools/test_worker_turnover.py",
+      "symbol": "ColdTurnoverTests.test_every_work_blocked_is_an_answer_not_a_crash",
+      "change": "assertEqual(payload[code], supervisor.IDLE) -> INCOMPLETE_DISCOVERY plus ok False, live decide() INCOMPLETE_DISCOVERY, requires_human False, quiescent False, schema_version==2, 12 sources, all_checked False, exhausted False",
+      "reason": "A HELD ticket is still an ANSWER not a crash (EXIT_STOPPED and no checkpoint preserved), but schema-2 never certifies a drained queue as verified idle; requires_human False keeps the no-human truth."
+    }
+  ],
+  "unchanged_controls": [
+    "t1446: NO_PROGRESS_LOOP, UNKNOWN_FAILURE, QUOTA_EXHAUSTED, AUTH_FAILED, CAPABILITY_UNAVAILABLE-without-fallback, AWAIT_WORKER/AMBIGUOUS_AUTHORITY, FenceTests, TailTests, FailureChannelTests, ProviderFailureTests vocabulary, MAX_CYCLES",
+    "t1446: every real-process spawn, kill-tree, generation-overlap, lease/fence and failure-classification assertion",
+    "t1748: early/disabled red mutants (measured AssertionError: early clock 1.2 not greater than 2.5; disabled slow_progress_slices 0 != 1), starved/normal/window probe return codes",
+    "turnover: all 8 other tests incl. crash turnover, fencing BETWEEN slices, ambiguous authority, zero-RAM restart picture compare"
+  ],
+  "evidence_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\worker-fixture-truth-20261109T194342501891Z"
+}

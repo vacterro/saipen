@@ -3,10 +3,10 @@
     "SRC-342:R001": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "VERIFIED",
-      "evidence": "E-19273",
+      "disposition": "BLOCKED",
+      "evidence": "E-18923",
       "text": "Repair native action classification in the canonical shortcut/command resolver: cc stays continue, a true single-command 'gg <objective>' becomes goal, a valid explicit capsule authorization becomes authorize-goal; a multiline handoff/prose is never silently promoted into a privileged command.",
-      "verification": "python -B -m unittest tools.test_t1943_goal_objective_binding tools.test_t1943_campaign_scope_roundtrip tools.test_t1943_adapter_artifact_tracking -> 33 tests OK; declared_action on the installed adapter classifies cc/bare gg/multiline gg/prose as continue and 'gg <objective>' as goal",
+      "verification": "Substance is measured and was green on 2026-10-27, but no authentic CURRENT receipt can be minted from this seat. The journaled focused record for this clause (sha256 731732cf... in E-18919) now reports focused check tested a different tree, because the working tree moved after it. Re-minting a receipt requires an active work context (STATE.task T-1943 and a BOARD row in DOING), and claiming T-1943 is refused: it carries a blocker, and explicit priority override does not override authorization. Journaling a FOCUSED-UNIT-EVIDENCE event outside a work context to satisfy the gate would be exactly the fabricated lifecycle history the STALE_WORK_CONTEXT guard prevents, so it was not done. Operator must unblock T-1943 for the ledger to be re-settled.",
       "work": "T-1943"
     },
     "SRC-342:R002": {
@@ -40,7 +40,7 @@
       "actionable": true,
       "class": "acceptance-criterion",
       "disposition": "BLOCKED",
-      "evidence": "E-19305 + E-19308 + .saipen/evidence/T-1943-r005-native-grant/DECISION.md",
+      "evidence": "E-18924",
       "text": "An intentional native user action establishes valid operator_persistent authority for the exact selected project and maintenance goal and it is verifiable through canonical status; the normal 20-ticket / three-wave checkpoints pass mechanically only under that existing valid grant, while missing, wrong-scope, revoked and expired grants continue to stop.",
       "verification": "Mechanism half is measured and green: a campaign grant is now writable and readable, is_continuous_maintenance and continuous_maintenance_proven reach the proof path instead of failing on shape, trip_checkpoint clears a tripped cap only under a PROVEN persistent grant, an unproven claim still waits, an unreadable grant journal degrades to the human boundary, and a bounded grant still stops at its cap (goal_tickets 20 -> WAIT safety valve). What has never happened on this tree is a real 20-ticket crossing under a real operator_persistent grant, because no such grant has ever existed here. The section-6 DONE bar requires that authentic user-initiated grant to be observed through the installed native ZAICODE host.",
       "work": "T-1943"
@@ -48,10 +48,10 @@
     "SRC-342:R006": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "VERIFIED",
-      "evidence": "E-19273",
+      "disposition": "BLOCKED",
+      "evidence": "E-18924",
       "text": "Commit and verify the canonical adapter before refreshing any vendored bundle or installed hook; never publish an uncommitted working tree as the protocol source. Provide ZAICODE a stable integration contract naming supported native actions, exact expected input form, authority status response and known blocker codes.",
-      "verification": "install_host_guard zaicode --check reports installed true, current true, configured true, problems empty; the shipped adapter is committed at HEAD and the installed hook is byte-identical to that committed blob; the integration contract naming actions, input forms, authority status and blocker codes is tracked at extensions/adapters/zaicode.md",
+      "verification": "Blocked on the section-6 DONE bar: an authentic user-initiated persistent grant must be observed through the INSTALLED native ZAICODE host. Operator must (a) commit the staged T-1943 delta, (b) run saipen host repair --host zaicode, (c) send one genuine gg <objective>.",
       "work": "T-1943"
     },
     "SRC-342:R007": {
@@ -66,10 +66,10 @@
     "SRC-342:R008": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "VERIFIED",
-      "evidence": "E-18499",
+      "disposition": "BLOCKED",
+      "evidence": "E-18924",
       "text": "Reconcile the misrouted 2026-10-26 incident before creating new Work: check whether it already exists in SAIPEN's source registry, and if not enqueue a complete standalone report into SAIPEN's own canonical audit/ inbox with a stable operation ID via the public producer API, preserving the original local file and digest without deleting or manually altering accepted intake records, linking the receipt to T-424/T-1859/T-1882 rather than duplicating the campaign.",
-      "verification": "saipen source status SRC-339:CLOSED 0 unresolved, sha256 2b8979aaaeb1a65c equals the incident digest E-18499 consumed",
+      "verification": "Measured: audit/SAIHANDOFF_ZAICODE_20261026_1424_VALVE_AND_INGRESS_BLOCKER.md exists only in the ZAICODE project with sha256 2b8979aaaeb1a65cc63d2528c3b382c65adf469f7af295c282b667bd6b102d42 and is not in SAIPEN's intake registry. SRC-342 section 3 requires the authorized producer/operator workflow to enqueue it, so the original file was preserved untouched and the receipt was deliberately not produced here: minting it from this seat would be the caller-signed ingress that R005 and the section-6 bar forbid. This is a human producer action, not a code defect.",
       "work": "T-1943"
     },
     "SRC-342:R009": {

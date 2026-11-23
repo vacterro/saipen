@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-030:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Start QUICK audits for the first three projects from the UI START AUDIT action using the dedicated working Chromium audit worker"
+    },
+    "SRC-030:R0002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Observe the live pipeline and runtime logs and catch or fix any error that blocks autonomous progress"
+    }
+  },
+  "derived_at": "2026-08-31T21:42:24Z",
+  "derived_from": "SRC-030",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "e041f4dcc5a98b17ce712a0c908ba3f97750a40ff72990117774a2f6666cd4dc"
+}

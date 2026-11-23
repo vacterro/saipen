@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "code": "RESPONSE_RENDERED",
+  "text": "",
+  "reason": "final",
+  "emit": false
+}

@@ -1,0 +1,28 @@
+{
+  "observed_utc": "2026-10-11T07:08:38.881490+00:00",
+  "project_root": "V:\\___VAC\\__K\\__CODE\\_TAMPERMONKEY\\_SUNO_DOWNLOADER",
+  "observation_identity": "current diagnostic process; not AG3 impersonation",
+  "phase": "DONE",
+  "task": "none",
+  "agent": "saipen",
+  "runtime_home": "C:/ProgramData/SAI/SAIPEN/runtime/2bd10cc421aacf6a",
+  "installed_manifest_sha256": "33973fa8219482db208cd1cc33367609c9bd0e51152131657aad838d51a1771b",
+  "local_fixed_manifest_sha256": "00306d1c133841f6ff96f24a3097375f04151b5bdd2262947dd4a1cb2a50b54a",
+  "before": {
+    "STATE.md": "96f31c6bb1b40e29bd4148b9eb8565940b4af97e518ef77fb42ac9013d0cb3a4",
+    "BOARD.md": "f7677ebe7a4f9e43e618b8017ab2ed611750b612572511bb77d5b08091e7ab5d",
+    "LOG.md": "63cc282a5ed8b1015eda8360e73518b52635b11cd7f24137419134f7d00c954f",
+    "IDENTITY.md": "523125b90af60622302bf93324566888353a6df6e2079efacaa831a0f31f7b02"
+  },
+  "after": {
+    "STATE.md": "96f31c6bb1b40e29bd4148b9eb8565940b4af97e518ef77fb42ac9013d0cb3a4",
+    "BOARD.md": "f7677ebe7a4f9e43e618b8017ab2ed611750b612572511bb77d5b08091e7ab5d",
+    "LOG.md": "63cc282a5ed8b1015eda8360e73518b52635b11cd7f24137419134f7d00c954f",
+    "IDENTITY.md": "523125b90af60622302bf93324566888353a6df6e2079efacaa831a0f31f7b02"
+  },
+  "canonical_bytes_unchanged": true,
+  "validation_retries": 0,
+  "canonical_writes": 0,
+  "acl_mutations": 0,
+  "scope": "four canonical files and the exact named runtime module read only; no execution-token or host-access verdict"
+}

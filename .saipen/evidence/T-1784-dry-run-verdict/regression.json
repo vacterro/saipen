@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1784_dry_run_verdict.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap"
+  ],
+  "oracle_files": [
+    "tools/test_t1784_dry_run_verdict.py",
+    "tools/test_improve_reconcile.py",
+    "tools/test_hermetic_env.py",
+    "tools/test_fixture_support.py"
+  ],
+  "subject_files": [
+    "tools/improve.py",
+    "tools/saipen.py"
+  ],
+  "before": {
+    "tools/improve.py": ".saipen/evidence/T-1784-dry-run-verdict/before/improve.py",
+    "tools/saipen.py": ".saipen/evidence/T-1784-dry-run-verdict/before/saipen.py"
+  },
+  "timeout": 900
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-080:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: existing-but-corrupt durable audit generation state must fail closed, never infer generation 0, and never publish a generation <= prior durable N; Bridge, browser-dispatch and INAUDIT channels share one coherent semantics; missing file may bootstrap at 1; pending INAUDIT notification stays owed on publish failure; consumers adopt an explicit recovery/reset baseline lower than last observed generation."
+    }
+  },
+  "derived_at": "2026-09-22T10:41:09Z",
+  "derived_from": "SRC-080",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "1a65c43e12ee4453d6036de7216e131b95a6fb83d3d596b77ece69bdb35ef3da"
+}

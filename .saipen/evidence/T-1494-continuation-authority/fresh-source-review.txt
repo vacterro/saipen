@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "<stdin>", line 13, in <module>
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\case.py", line 715, in assertTrue
+    raise self.failureException(msg)
+AssertionError: False is not true : {'ok': False, 'code': 'RECONCILE_REAUTH_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': "the named Source has no operator reset authority; WAIT: safety valve reached (1 waves / 20 tickets) -- run 'cc' to continue", 'next_action': "WAIT: safety valve reached (1 waves / 20 tickets) -- run 'cc' to continue", 'operator_action_due': True}

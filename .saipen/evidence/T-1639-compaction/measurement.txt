@@ -1,0 +1,45 @@
+# T-1639 measurement, 2026-10-07, tree at HEAD 025bf596 plus the uncommitted work of this run
+
+## python dup_measure.py saipen
+total 334844 files 38
+    41395 OPS.md
+    34881 IMPROVE.md
+    31339 CORE.md
+    24450 SOURCES.md
+    23017 COMMANDS.md
+    19509 RUNTIME.md
+    18366 UI.md
+    12279 FUTURE.md
+    11357 MAINTENANCE.md
+    10744 CONTROLS.md
+    10278 BOOT.md
+     8697 CONVERGE.md
+     8673 phases/ship.md
+     7775 phases/verify.md
+     7279 STYLE.md
+     6315 EXECUTION.md
+verbatim duplicate long lines: 1 bytes repeated: 107
+    107 x2 SKILL.md:18, STYLE.md:50 :: Voice persistence: caveman-дед applies to every response until explicit "stop caveman" or 
+history markers (dates, T-, SRC-, E- ids) per file:
+    14 markers on   14 lines,    833 bytes  IMPROVE.md
+    22 markers on   16 lines,   1013 bytes  OPS.md
+
+## python restate_measure.py saipen 0.20
+paragraphs measured: 613
+restating pairs at or above 0.2 : 1 | bytes of the smaller side, summed: 164
+  164 0.41 UI.md:183 <-> UI.md:208
+      A: .sunken, input, select, textarea { border: 2px solid; border-color: var(--borderDark) var(--bevelLight) var(--bevelLight) var(--borderDark); backgroun
+      B: button:active { border-color: var(--borderDark) var(--bevelLight) var(--bevelLight) var(--borderDark); background: var(--surface); transform: translat
+
+## budgets (tools/protocol_budget.py)
+check: []
+{
+ "budgets": {
+  "cold": 27648,
+  "ordinary_continue": 35840,
+  "command_resolution": 54272,
+  "ordinary_phase": 40960,
+  "ship_improve": 56320,
+  "single_doc": 51200
+ }
+}

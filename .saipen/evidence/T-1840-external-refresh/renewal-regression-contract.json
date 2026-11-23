@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t1840_external_renewal.py", "-v"],
+  "format": "unittest",
+  "context": ["tools", "saipen", "extensions", "tests/scenarios/stale-state-reconciliation/.saipen", "VERSION"],
+  "oracle_files": ["tools/test_t1840_external_renewal.py", "tools/test_external_revalidation.py", "tools/test_hermetic_env.py", "tools/test_fixture_support.py"],
+  "subject_files": ["tools/saipen_engine/external.py", "tools/saipen_engine/external_renewal.py", "tools/saipen_engine/operations.py", "tools/saipen_engine/regression_execution.py", "tools/saipen_engine/test_runner.py", "tools/saipen.py"],
+  "before": {
+    "tools/saipen_engine/external.py": ".saipen/evidence/T-1840-external-refresh/prefix/external.py",
+    "tools/saipen_engine/external_renewal.py": null,
+    "tools/saipen_engine/operations.py": ".saipen/evidence/T-1840-external-refresh/prefix/operations.py",
+    "tools/saipen_engine/regression_execution.py": ".saipen/evidence/T-1840-external-refresh/spelling-prefix/regression_execution.py",
+    "tools/saipen_engine/test_runner.py": ".saipen/evidence/T-1840-external-refresh/diagnostic-prefix/test_runner.py",
+    "tools/saipen.py": ".saipen/evidence/T-1840-external-refresh/prefix/saipen.py"
+  },
+  "timeout": 180
+}

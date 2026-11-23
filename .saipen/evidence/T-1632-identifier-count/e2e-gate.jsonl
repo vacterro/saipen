@@ -1,0 +1,3 @@
+# the public CLI of each home drives a fixture ticket to VERIFY, records the LOG E-12510 shape, and asks for VERIFY -> REVIEW. pre = a home copy carrying the pre-fix log.py; _SAIPEN = this tree after the fix.
+{"home": "pre", "transition_to_REVIEW": "INCOMPLETE_TICKET", "ok": false}
+{"home": "_SAIPEN", "transition_to_REVIEW": "TRANSITIONED", "ok": true}

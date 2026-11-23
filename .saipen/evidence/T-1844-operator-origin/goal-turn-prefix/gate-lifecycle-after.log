@@ -1,0 +1,20 @@
+test_capsule_grammar_refuses_tampering (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_capsule_grammar_refuses_tampering) ... ok
+test_committed_operation_prose_cannot_discharge_the_historical_gate (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_committed_operation_prose_cannot_discharge_the_historical_gate) ... ok
+test_decision_for_another_gate_version_is_refused (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_decision_for_another_gate_version_is_refused) ... ok
+test_expired_approval_is_not_reused (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_expired_approval_is_not_reused) ... ok
+test_incorrect_carrier_digest_is_refused_at_capture (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_incorrect_carrier_digest_is_refused_at_capture) ... ok
+test_missing_operator_carrier_authorizes_nothing (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_missing_operator_carrier_authorizes_nothing) ... ok
+test_model_supplied_approval_text_grants_no_authority (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_model_supplied_approval_text_grants_no_authority) ... ok
+test_preview_names_the_capsule_and_the_executable_route_and_writes_nothing (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_preview_names_the_capsule_and_the_executable_route_and_writes_nothing) ... ok
+test_reconciliation_cannot_resurrect_a_discharged_wait (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_reconciliation_cannot_resurrect_a_discharged_wait) ... ok
+test_repeated_acceptance_is_idempotent_and_writes_nothing_second_time (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_repeated_acceptance_is_idempotent_and_writes_nothing_second_time) ... ok
+test_shared_gate_recovery_resolves_the_same_way (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_shared_gate_recovery_resolves_the_same_way) ... ok
+test_stale_state_between_read_and_apply_refuses_without_writing (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_stale_state_between_read_and_apply_refuses_without_writing) ... ok
+test_unrelated_user_brake_is_not_waived_by_a_blocked_gate_decision (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_unrelated_user_brake_is_not_waived_by_a_blocked_gate_decision) ... ok
+test_valid_authenticated_decision_resolves_exactly_its_gate (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_valid_authenticated_decision_resolves_exactly_its_gate) ... ok
+test_verb_may_only_resolve_its_own_field (test_t1729_gate_decision_lifecycle.GateLifecycleTests.test_verb_may_only_resolve_its_own_field) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 7.044s
+
+OK

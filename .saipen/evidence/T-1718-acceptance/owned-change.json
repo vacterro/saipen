@@ -1,0 +1,44 @@
+[
+  {
+    "path": "tools/saipen_engine/acceptance_contract.py",
+    "before_sha256": null,
+    "after_sha256": "adf292f03bc894b2e421c9440021fe26265b3cb5d9f79ecc7e9a042b1fc68fe6",
+    "before_ref": null
+  },
+  {
+    "path": "tools/saipen_engine/acceptance.py",
+    "before_sha256": "e22e683291e87feef73d02221235a8dc5fbbd9c6fd5a12205d64d688328c2197",
+    "after_sha256": "7c314574f8d928ff2feee091b773757122a45bc2ff8f486ad930f3d2332afcea",
+    "before_ref": ".saipen/evidence/T-1718-acceptance/before/tools/saipen_engine/acceptance.py"
+  },
+  {
+    "path": "tools/saipen_engine/operations.py",
+    "before_sha256": "fd56609e5a1806fde7a6a06dd6630841835b2419dc9720332c4223bd21b1f2af",
+    "after_sha256": "299eebcc718349527c6bc69432c1bd1ab92a855af1be5f52e262ba530d47703a",
+    "before_ref": ".saipen/evidence/T-1718-acceptance/before/tools/saipen_engine/operations.py"
+  },
+  {
+    "path": "tools/saipen.py",
+    "before_sha256": "3c2e3e7a5708b10e7200ba4315690847da7db9922e8461bc3de8410ea611d02b",
+    "after_sha256": "b3045ae7cd4e6e3ff9d348e380eab5cdeca20a130200e112aecb6a2dd1192c64",
+    "before_ref": ".saipen/evidence/T-1718-acceptance/before/tools/saipen.py"
+  },
+  {
+    "path": "tools/test_t1718_acceptance_contract.py",
+    "before_sha256": null,
+    "after_sha256": "a4cad1d8803b66d7cfc0abc14186313e3c8f98aeb1b9ced79aa6094e5512efe7",
+    "before_ref": null
+  },
+  {
+    "path": "saipen/OPS.md",
+    "before_sha256": "11f58546724d8fe76b3e7e196c6ff7e70724b83b6e60d44e2f8026cd77acb55a",
+    "after_sha256": "85c5255a8cd3931130524a22614e11939444c644a31f4f91c57ae149c1f00b04",
+    "before_ref": ".saipen/evidence/T-1718-acceptance/before/saipen/OPS.md"
+  },
+  {
+    "path": "saipen/phases/verify.md",
+    "before_sha256": "148060b89571a73899ab90119370050fd95a1d30abdb4439c7fbd9295ede5d7c",
+    "after_sha256": "d1815b4ce6ec4a5ec624526a111d0f044032db3e05507914d46a03d9e7c1e571",
+    "before_ref": ".saipen/evidence/T-1718-acceptance/before/saipen/phases/verify.md"
+  }
+]

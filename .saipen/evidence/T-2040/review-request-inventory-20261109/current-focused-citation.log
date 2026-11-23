@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 0,
+  "duration_s": 332.531,
+  "record": ".saipen/evidence/focused-unit/f48bded68d33a538-20261109T173420644426Z.json",
+  "reused": false,
+  "shared": false,
+  "request_wall_s": 339.781,
+  "problem": "focused check failed, timed out, or collected zero tests",
+  "checkpoint": "CHECKPOINTED"
+}

@@ -1,0 +1,10 @@
+[
+  "tools/test_opencode_host_smoke.py",
+  "tools/test_opencode_bound_launch_smoke.py",
+  "tools/test_t1327_live_acceptance.py",
+  "tools/test_opencode_live_session.py",
+  "tools/saipen_engine/test_runner.py",
+  "tools/saipen_engine/core_unit.py",
+  "tools/saipen_engine/process_tree.py",
+  "tools/test_t1633_process_tree.py"
+]

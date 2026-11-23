@@ -1,0 +1,26 @@
+{
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "source",
+    "disp",
+    "SRC-112",
+    "R004",
+    "VERIFIED",
+    "--work",
+    "T-1494",
+    "--evidence",
+    "E-13961",
+    "--verification",
+    "Bounded agent continuation preserves exact fixture bytes and counters; only witnessed cc resets legally with COMMITTED STATE/LOG targets. test_command_routing -> 69 PASS; test_hostile_wave_regressions -> 11 PASS; verify-oracle-pair.json A02 same-verifier 3 RED/3 GREEN.",
+    "--json"
+  ],
+  "exit_code": 0,
+  "session_capability": "no-publish",
+  "result": {
+    "ok": true,
+    "code": "COVERAGE_UPDATED",
+    "receipt": "SRC-112",
+    "rid": "SRC-112:R004",
+    "disposition": "VERIFIED"
+  }
+}

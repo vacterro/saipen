@@ -1,0 +1,14 @@
+{
+  "job_pid": 14612,
+  "status": "stopped",
+  "completed": [
+    "T1695-current-06",
+    "T1695-currentness-06",
+    "conformance-current-06",
+    "core-unit-current-06"
+  ],
+  "started_utc": "2026-10-12T21:45:50.685132+00:00",
+  "current_gate": "core-unit-current-06",
+  "reason": "RuntimeError: local verification job cancelled",
+  "finished_utc": "2026-10-12T22:14:08.336776+00:00"
+}

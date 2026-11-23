@@ -1,0 +1,665 @@
+EFEFEFEFFFEFFEEEEEEEEEEEEF.FFFEFFFFFFFFFFFFFFFFFFEFFFFFFFFFFEFF.F
+======================================================================
+ERROR: test_backend_operation_refusals_remain_failures (test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures) (code='ANALYSIS_BLOCKED', ok=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 79, in test_backend_operation_refusals_remain_failures
+    self.assertEqual(result["transport_status"], "EXITED")
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'transport_status'
+
+======================================================================
+ERROR: test_backend_operation_refusals_remain_failures (test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures) (code='AUTHORITY_REQUIRED', ok=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 79, in test_backend_operation_refusals_remain_failures
+    self.assertEqual(result["transport_status"], "EXITED")
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'transport_status'
+
+======================================================================
+ERROR: test_backend_operation_refusals_remain_failures (test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures) (code='SOURCE_NOT_ENROLLED', ok=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 79, in test_backend_operation_refusals_remain_failures
+    self.assertEqual(result["transport_status"], "EXITED")
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'transport_status'
+
+======================================================================
+ERROR: test_backend_operation_refusals_remain_failures (test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures) (code='REFUSED', ok=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 79, in test_backend_operation_refusals_remain_failures
+    self.assertEqual(result["transport_status"], "EXITED")
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'transport_status'
+
+======================================================================
+ERROR: test_bad_record_types_and_unreadable_logs_are_not_empty_success (test_t1931_saipal_boundary.SaipalBoundaryTests.test_bad_record_types_and_unreadable_logs_are_not_empty_success) (raw=b'\xff\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 339, in test_bad_record_types_and_unreadable_logs_are_not_empty_success
+    result = self.history("dispositions.jsonl")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 60, in history
+    self.adapter.get_dispositions(self.project)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1931\saipal-adapter.before.py", line 300, in get_dispositions
+    for line in f:
+  File "<frozen codecs>", line 322, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+======================================================================
+ERROR: test_command_specific_shapes_are_validated (test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated) (value={'ok': True, 'command': 'report'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 128, in test_command_specific_shapes_are_validated
+    self.assertEqual(self.adapter._run_cmd(command)["status"], "BACKEND_PROTOCOL_ERROR")
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'status'
+
+======================================================================
+ERROR: test_command_specific_shapes_are_validated (test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated) (value={'ok': True, 'command': 'report', 'findings': {}, 'counts': {}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 128, in test_command_specific_shapes_are_validated
+    self.assertEqual(self.adapter._run_cmd(command)["status"], "BACKEND_PROTOCOL_ERROR")
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'status'
+
+======================================================================
+ERROR: test_command_specific_shapes_are_validated (test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated) (value={'ok': True, 'command': 'report', 'findings': ['forged'], 'counts': {}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 128, in test_command_specific_shapes_are_validated
+    self.assertEqual(self.adapter._run_cmd(command)["status"], "BACKEND_PROTOCOL_ERROR")
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'status'
+
+======================================================================
+ERROR: test_command_specific_shapes_are_validated (test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated) (value={'ok': True, 'command': 'report', 'findings': [], 'counts': []})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 128, in test_command_specific_shapes_are_validated
+    self.assertEqual(self.adapter._run_cmd(command)["status"], "BACKEND_PROTOCOL_ERROR")
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'status'
+
+======================================================================
+ERROR: test_command_specific_shapes_are_validated (test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated) (value={'ok': True, 'command': 'status', 'findings': [], 'counts': {}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 128, in test_command_specific_shapes_are_validated
+    self.assertEqual(self.adapter._run_cmd(command)["status"], "BACKEND_PROTOCOL_ERROR")
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'status'
+
+======================================================================
+ERROR: test_command_specific_shapes_are_validated (test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated) (value={'ok': True, 'command': 'report', 'findings': [], 'counts': {}, 'schema_version': 99})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 128, in test_command_specific_shapes_are_validated
+    self.assertEqual(self.adapter._run_cmd(command)["status"], "BACKEND_PROTOCOL_ERROR")
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'status'
+
+======================================================================
+ERROR: test_command_specific_shapes_are_validated (test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated) (value={'ok': True, 'command': 'status', 'phase': 'IDLE', 'queue': []})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 128, in test_command_specific_shapes_are_validated
+    self.assertEqual(self.adapter._run_cmd(command)["status"], "BACKEND_PROTOCOL_ERROR")
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'status'
+
+======================================================================
+ERROR: test_command_specific_shapes_are_validated (test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated) (value={'ok': True, 'command': 'status', 'phase': 7, 'queue': {}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 128, in test_command_specific_shapes_are_validated
+    self.assertEqual(self.adapter._run_cmd(command)["status"], "BACKEND_PROTOCOL_ERROR")
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'status'
+
+======================================================================
+ERROR: test_command_specific_shapes_are_validated (test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated) (value={'ok': True, 'command': 'status', 'phase': 'IDLE', 'queue': {'hot': -1}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 128, in test_command_specific_shapes_are_validated
+    self.assertEqual(self.adapter._run_cmd(command)["status"], "BACKEND_PROTOCOL_ERROR")
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'status'
+
+======================================================================
+ERROR: test_command_specific_shapes_are_validated (test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated) (value={'ok': True, 'command': 'status', 'phase': 'IDLE', 'queue': {'hot': True}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 128, in test_command_specific_shapes_are_validated
+    self.assertEqual(self.adapter._run_cmd(command)["status"], "BACKEND_PROTOCOL_ERROR")
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'status'
+
+======================================================================
+ERROR: test_complete_history_preserves_all_records (test_t1931_saipal_boundary.SaipalBoundaryTests.test_complete_history_preserves_all_records) (name='dispositions.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 231, in test_complete_history_preserves_all_records
+    self.assertEqual(result["snapshot_size"], len(raw))
+                     ~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'snapshot_size'
+
+======================================================================
+ERROR: test_complete_history_preserves_all_records (test_t1931_saipal_boundary.SaipalBoundaryTests.test_complete_history_preserves_all_records) (name='saipal_receipts.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 231, in test_complete_history_preserves_all_records
+    self.assertEqual(result["snapshot_size"], len(raw))
+                     ~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'snapshot_size'
+
+======================================================================
+ERROR: test_discovery_does_not_swallow_status_or_analysis_failures (test_t1931_saipal_boundary.SaipalBoundaryTests.test_discovery_does_not_swallow_status_or_analysis_failures) (outcomes=[{'ok': False, 'status': 'ANALYSIS_BLOCKED', 'error': 'blocked'}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 172, in test_discovery_does_not_swallow_status_or_analysis_failures
+    result = self.adapter.discover(self.project)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1931\saipal-adapter.before.py", line 196, in discover
+    outcome = self._run_cmd("report")
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1185, in _execute_mock_call
+    result = next(effect)
+             ^^^^^^^^^^^^
+StopIteration
+
+======================================================================
+ERROR: test_invalid_json_encoding_constants_and_duplicate_fields_are_typed (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_json_encoding_constants_and_duplicate_fields_are_typed) (raw=b'[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 153, in test_invalid_json_encoding_constants_and_duplicate_fields_are_typed
+    result = self.adapter._run_cmd("report")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1931\saipal-adapter.before.py", line 102, in _run_cmd
+    data = json.loads(res.stdout)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\json\decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+RecursionError: maximum recursion depth exceeded while decoding a JSON array from a unicode string
+
+======================================================================
+ERROR: test_transport_failure_remains_distinct (test_t1931_saipal_boundary.SaipalBoundaryTests.test_transport_failure_remains_distinct)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 146, in test_transport_failure_remains_distinct
+    self.assertEqual(result["transport_status"], "FAILED")
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'transport_status'
+
+======================================================================
+FAIL: test_backend_operation_refusals_remain_failures (test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures) (code='ANALYSIS_BLOCKED', ok=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 77, in test_backend_operation_refusals_remain_failures
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_backend_operation_refusals_remain_failures (test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures) (code='AUTHORITY_REQUIRED', ok=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 77, in test_backend_operation_refusals_remain_failures
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_backend_operation_refusals_remain_failures (test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures) (code='SOURCE_NOT_ENROLLED', ok=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 77, in test_backend_operation_refusals_remain_failures
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_backend_operation_refusals_remain_failures (test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures) (code='REFUSED', ok=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 77, in test_backend_operation_refusals_remain_failures
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_bad_record_types_and_unreadable_logs_are_not_empty_success (test_t1931_saipal_boundary.SaipalBoundaryTests.test_bad_record_types_and_unreadable_logs_are_not_empty_success) (raw=b'[]\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 340, in test_bad_record_types_and_unreadable_logs_are_not_empty_success
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_bad_record_types_and_unreadable_logs_are_not_empty_success (test_t1931_saipal_boundary.SaipalBoundaryTests.test_bad_record_types_and_unreadable_logs_are_not_empty_success) (raw=b'null\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 340, in test_bad_record_types_and_unreadable_logs_are_not_empty_success
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_bad_record_types_and_unreadable_logs_are_not_empty_success (test_t1931_saipal_boundary.SaipalBoundaryTests.test_bad_record_types_and_unreadable_logs_are_not_empty_success) (raw=b'{"value":NaN}\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 340, in test_bad_record_types_and_unreadable_logs_are_not_empty_success
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_bad_record_types_and_unreadable_logs_are_not_empty_success (test_t1931_saipal_boundary.SaipalBoundaryTests.test_bad_record_types_and_unreadable_logs_are_not_empty_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 344, in test_bad_record_types_and_unreadable_logs_are_not_empty_success
+    self.assertEqual(self.history(path.name)["status"], "LOG_IO_ERROR")
+AssertionError: 'LOG_VALID' != 'LOG_IO_ERROR'
+- LOG_VALID
++ LOG_IO_ERROR
+
+
+======================================================================
+FAIL: test_concurrent_append_is_truncated_until_newline_commits (test_t1931_saipal_boundary.SaipalBoundaryTests.test_concurrent_append_is_truncated_until_newline_commits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 354, in test_concurrent_append_is_truncated_until_newline_commits
+    self.assertEqual(result["status"], "LOG_TRUNCATED")
+AssertionError: 'LOG_VALID' != 'LOG_TRUNCATED'
+- LOG_VALID
++ LOG_TRUNCATED
+
+
+======================================================================
+FAIL: test_corrupt_history_refuses_new_dispositions_without_touching_evidence (test_t1931_saipal_boundary.SaipalBoundaryTests.test_corrupt_history_refuses_new_dispositions_without_touching_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 249, in test_corrupt_history_refuses_new_dispositions_without_touching_evidence
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_corrupt_result_is_explicit_and_not_a_legacy_partial_list (test_t1931_saipal_boundary.SaipalBoundaryTests.test_corrupt_result_is_explicit_and_not_a_legacy_partial_list)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 236, in test_corrupt_result_is_explicit_and_not_a_legacy_partial_list
+    self.assertIsInstance(result, dict)
+AssertionError: [{'finding_id': 'PAL-1'}] is not an instance of <class 'dict'>
+
+======================================================================
+FAIL: test_deadline_preserves_uncertain_outcome (test_t1931_saipal_boundary.SaipalBoundaryTests.test_deadline_preserves_uncertain_outcome)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 211, in test_deadline_preserves_uncertain_outcome
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_discovery_does_not_swallow_status_or_analysis_failures (test_t1931_saipal_boundary.SaipalBoundaryTests.test_discovery_does_not_swallow_status_or_analysis_failures) (outcomes=[{'ok': True, 'data': {'ok': True, 'command': 'status', 'phase': 'IDLE', 'queue': {'hot': 1}}}, {'ok': False, 'status': 'ANALYSIS_BLOCKED', 'error': 'blocked'}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 174, in test_discovery_does_not_swallow_status_or_analysis_failures
+    self.assertEqual(result["status"], "ANALYSIS_BLOCKED")
+AssertionError: 'RETRYABLE_FAILURE' != 'ANALYSIS_BLOCKED'
+- RETRYABLE_FAILURE
++ ANALYSIS_BLOCKED
+
+
+======================================================================
+FAIL: test_failed_collection_is_not_an_empty_list (test_t1931_saipal_boundary.SaipalBoundaryTests.test_failed_collection_is_not_an_empty_list)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 160, in test_failed_collection_is_not_an_empty_list
+    self.assertIsInstance(result, dict)
+AssertionError: [] is not an instance of <class 'dict'>
+
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 101, in test_invalid_common_fields_are_protocol_errors
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'data': []}
+
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 101, in test_invalid_common_fields_are_protocol_errors
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'data': None}
+
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 101, in test_invalid_common_fields_are_protocol_errors
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'data': True}
+
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 101, in test_invalid_common_fields_are_protocol_errors
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'data': 7}
+
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value='result')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 101, in test_invalid_common_fields_are_protocol_errors
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'data': 'result'}
+
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 101, in test_invalid_common_fields_are_protocol_errors
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'data': {}}
+
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value={'ok': 'true'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 101, in test_invalid_common_fields_are_protocol_errors
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'data': {'ok': 'true'}}
+
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value={'ok': 1})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 101, in test_invalid_common_fields_are_protocol_errors
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'data': {'ok': 1}}
+
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value={'ok': True, 'command': 'report', 'findings': [], 'counts': {}, 'status': []})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 101, in test_invalid_common_fields_are_protocol_errors
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'data': {'ok': True, 'command': 'report', 'findings': [], 'counts': {}, 'status': []}}
+
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value={'ok': True, 'command': 'report', 'findings': [], 'counts': {}, 'code': {}})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 101, in test_invalid_common_fields_are_protocol_errors
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'data': {'ok': True, 'command': 'report', 'findings': [], 'counts': {}, 'code': {}}}
+
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value={'ok': False, 'command': 'report', 'findings': [], 'counts': {}, 'schema_version': 99})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 102, in test_invalid_common_fields_are_protocol_errors
+    self.assertEqual(result["status"], "BACKEND_PROTOCOL_ERROR")
+AssertionError: 'PERMANENT_FAILURE' != 'BACKEND_PROTOCOL_ERROR'
+- PERMANENT_FAILURE
++ BACKEND_PROTOCOL_ERROR
+
+
+======================================================================
+FAIL: test_invalid_common_fields_are_protocol_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors) (value={'ok': False, 'command': 'status', 'findings': [], 'counts': {}, 'status': 'ANALYSIS_BLOCKED'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 102, in test_invalid_common_fields_are_protocol_errors
+    self.assertEqual(result["status"], "BACKEND_PROTOCOL_ERROR")
+AssertionError: 'ANALYSIS_BLOCKED' != 'BACKEND_PROTOCOL_ERROR'
+- ANALYSIS_BLOCKED
++ BACKEND_PROTOCOL_ERROR
+
+
+======================================================================
+FAIL: test_invalid_json_encoding_constants_and_duplicate_fields_are_typed (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_json_encoding_constants_and_duplicate_fields_are_typed) (raw=b'{')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 155, in test_invalid_json_encoding_constants_and_duplicate_fields_are_typed
+    self.assertEqual(result["status"], "BACKEND_PROTOCOL_ERROR")
+AssertionError: 'PERMANENT_FAILURE' != 'BACKEND_PROTOCOL_ERROR'
+- PERMANENT_FAILURE
++ BACKEND_PROTOCOL_ERROR
+
+
+======================================================================
+FAIL: test_invalid_json_encoding_constants_and_duplicate_fields_are_typed (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_json_encoding_constants_and_duplicate_fields_are_typed) (raw=b'\xff')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 155, in test_invalid_json_encoding_constants_and_duplicate_fields_are_typed
+    self.assertEqual(result["status"], "BACKEND_PROTOCOL_ERROR")
+AssertionError: 'PERMANENT_FAILURE' != 'BACKEND_PROTOCOL_ERROR'
+- PERMANENT_FAILURE
++ BACKEND_PROTOCOL_ERROR
+
+
+======================================================================
+FAIL: test_invalid_json_encoding_constants_and_duplicate_fields_are_typed (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_json_encoding_constants_and_duplicate_fields_are_typed) (raw=b'{"ok":NaN}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 154, in test_invalid_json_encoding_constants_and_duplicate_fields_are_typed
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_invalid_json_encoding_constants_and_duplicate_fields_are_typed (test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_json_encoding_constants_and_duplicate_fields_are_typed) (raw=b'{"ok":false,"ok":true}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 154, in test_invalid_json_encoding_constants_and_duplicate_fields_are_typed
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_large_stdout_and_stderr_are_resource_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_large_stdout_and_stderr_are_resource_errors) (stderr=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 203, in test_large_stdout_and_stderr_are_resource_errors
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_large_stdout_and_stderr_are_resource_errors (test_t1931_saipal_boundary.SaipalBoundaryTests.test_large_stdout_and_stderr_are_resource_errors) (stderr=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 203, in test_large_stdout_and_stderr_are_resource_errors
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_middle_corruption_preserves_prefix_and_original_bytes (test_t1931_saipal_boundary.SaipalBoundaryTests.test_middle_corruption_preserves_prefix_and_original_bytes) (name='dispositions.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 314, in test_middle_corruption_preserves_prefix_and_original_bytes
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'status': 'LOG_VALID', 'records': [{'finding_id': 'PAL-1'}, {'finding_id': 'PAL-3'}]}
+
+======================================================================
+FAIL: test_middle_corruption_preserves_prefix_and_original_bytes (test_t1931_saipal_boundary.SaipalBoundaryTests.test_middle_corruption_preserves_prefix_and_original_bytes) (name='saipal_receipts.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 314, in test_middle_corruption_preserves_prefix_and_original_bytes
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'status': 'LOG_VALID', 'records': [{'finding_id': 'PAL-1'}, {'finding_id': 'PAL-3'}]}
+
+======================================================================
+FAIL: test_missing_and_valid_empty_logs_are_distinct (test_t1931_saipal_boundary.SaipalBoundaryTests.test_missing_and_valid_empty_logs_are_distinct) (name='dispositions.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 218, in test_missing_and_valid_empty_logs_are_distinct
+    self.assertEqual(self.history(name)["status"], "LOG_ABSENT")
+AssertionError: 'LOG_VALID' != 'LOG_ABSENT'
+- LOG_VALID
++ LOG_ABSENT
+
+
+======================================================================
+FAIL: test_missing_and_valid_empty_logs_are_distinct (test_t1931_saipal_boundary.SaipalBoundaryTests.test_missing_and_valid_empty_logs_are_distinct) (name='saipal_receipts.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 218, in test_missing_and_valid_empty_logs_are_distinct
+    self.assertEqual(self.history(name)["status"], "LOG_ABSENT")
+AssertionError: 'LOG_VALID' != 'LOG_ABSENT'
+- LOG_VALID
++ LOG_ABSENT
+
+
+======================================================================
+FAIL: test_torn_final_record_is_never_a_complete_history (test_t1931_saipal_boundary.SaipalBoundaryTests.test_torn_final_record_is_never_a_complete_history) (suffix=b'{"finding_id":', name='dispositions.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 330, in test_torn_final_record_is_never_a_complete_history
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_torn_final_record_is_never_a_complete_history (test_t1931_saipal_boundary.SaipalBoundaryTests.test_torn_final_record_is_never_a_complete_history) (suffix=b'{"finding_id":', name='saipal_receipts.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 330, in test_torn_final_record_is_never_a_complete_history
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_torn_final_record_is_never_a_complete_history (test_t1931_saipal_boundary.SaipalBoundaryTests.test_torn_final_record_is_never_a_complete_history) (suffix=b'{"finding_id":"PAL-2"}', name='dispositions.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 330, in test_torn_final_record_is_never_a_complete_history
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_torn_final_record_is_never_a_complete_history (test_t1931_saipal_boundary.SaipalBoundaryTests.test_torn_final_record_is_never_a_complete_history) (suffix=b'{"finding_id":"PAL-2"}', name='saipal_receipts.jsonl')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 330, in test_torn_final_record_is_never_a_complete_history
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_unreadable_discovery_watermark_does_not_reset_to_clean_evidence (test_t1931_saipal_boundary.SaipalBoundaryTests.test_unreadable_discovery_watermark_does_not_reset_to_clean_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 302, in test_unreadable_discovery_watermark_does_not_reset_to_clean_evidence
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_unsafe_history_node_is_refused_even_when_target_looks_absent (test_t1931_saipal_boundary.SaipalBoundaryTests.test_unsafe_history_node_is_refused_even_when_target_looks_absent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 265, in test_unsafe_history_node_is_refused_even_when_target_looks_absent
+    self.assertFalse(result["ok"])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_valid_report_preserves_utf8_under_narrow_locale (test_t1931_saipal_boundary.SaipalBoundaryTests.test_valid_report_preserves_utf8_under_narrow_locale)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1931_saipal_boundary.py", line 138, in test_valid_report_preserves_utf8_under_narrow_locale
+    self.assertEqual(result["data"]["findings"][0]["note"], text)
+AssertionError: 'õш一' != '\xf5�\u4e00'
+- õш一
++ \xf5�\u4e00
+
+
+----------------------------------------------------------------------
+Ran 22 tests in 4.118s
+
+FAILED (failures=43, errors=20)
+{
+  "subject": ".saipen\\evidence\\T-1931\\saipal-adapter.before.py",
+  "subject_sha256": "91e4fe5945f52dc0e1ac08c2a019148c9f54bd957923c533cc8becb49477c207",
+  "subject_unchanged": true,
+  "oracle_sha256": "dfcdcbfe4ac163f6a598bab0786b02c4fba3e0cada41904bb2d8dc7a27461a11",
+  "oracle_unchanged": true,
+  "tests_run": 22,
+  "successful": false,
+  "failures": [
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures (code='ANALYSIS_BLOCKED', ok=True)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures (code='AUTHORITY_REQUIRED', ok=True)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures (code='SOURCE_NOT_ENROLLED', ok=True)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures (code='REFUSED', ok=True)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_bad_record_types_and_unreadable_logs_are_not_empty_success (raw=b'[]\\n')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_bad_record_types_and_unreadable_logs_are_not_empty_success (raw=b'null\\n')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_bad_record_types_and_unreadable_logs_are_not_empty_success (raw=b'{\"value\":NaN}\\n')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_bad_record_types_and_unreadable_logs_are_not_empty_success",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_concurrent_append_is_truncated_until_newline_commits",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_corrupt_history_refuses_new_dispositions_without_touching_evidence",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_corrupt_result_is_explicit_and_not_a_legacy_partial_list",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_deadline_preserves_uncertain_outcome",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_discovery_does_not_swallow_status_or_analysis_failures (outcomes=[{'ok': True, 'data': {'ok': True, 'command': 'status', 'phase': 'IDLE', 'queue': {'hot': 1}}}, {'ok': False, 'status': 'ANALYSIS_BLOCKED', 'error': 'blocked'}])",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_failed_collection_is_not_an_empty_list",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors (value=[])",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors (value=None)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors (value=True)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors (value=7)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors (value='result')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors (value={})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors (value={'ok': 'true'})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors (value={'ok': 1})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors (value={'ok': True, 'command': 'report', 'findings': [], 'counts': {}, 'status': []})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors (value={'ok': True, 'command': 'report', 'findings': [], 'counts': {}, 'code': {}})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors (value={'ok': False, 'command': 'report', 'findings': [], 'counts': {}, 'schema_version': 99})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_common_fields_are_protocol_errors (value={'ok': False, 'command': 'status', 'findings': [], 'counts': {}, 'status': 'ANALYSIS_BLOCKED'})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_json_encoding_constants_and_duplicate_fields_are_typed (raw=b'{')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_json_encoding_constants_and_duplicate_fields_are_typed (raw=b'\\xff')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_json_encoding_constants_and_duplicate_fields_are_typed (raw=b'{\"ok\":NaN}')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_json_encoding_constants_and_duplicate_fields_are_typed (raw=b'{\"ok\":false,\"ok\":true}')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_large_stdout_and_stderr_are_resource_errors (stderr=False)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_large_stdout_and_stderr_are_resource_errors (stderr=True)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_middle_corruption_preserves_prefix_and_original_bytes (name='dispositions.jsonl')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_middle_corruption_preserves_prefix_and_original_bytes (name='saipal_receipts.jsonl')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_missing_and_valid_empty_logs_are_distinct (name='dispositions.jsonl')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_missing_and_valid_empty_logs_are_distinct (name='saipal_receipts.jsonl')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_torn_final_record_is_never_a_complete_history (suffix=b'{\"finding_id\":', name='dispositions.jsonl')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_torn_final_record_is_never_a_complete_history (suffix=b'{\"finding_id\":', name='saipal_receipts.jsonl')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_torn_final_record_is_never_a_complete_history (suffix=b'{\"finding_id\":\"PAL-2\"}', name='dispositions.jsonl')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_torn_final_record_is_never_a_complete_history (suffix=b'{\"finding_id\":\"PAL-2\"}', name='saipal_receipts.jsonl')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_unreadable_discovery_watermark_does_not_reset_to_clean_evidence",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_unsafe_history_node_is_refused_even_when_target_looks_absent",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_valid_report_preserves_utf8_under_narrow_locale"
+  ],
+  "errors": [
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures (code='ANALYSIS_BLOCKED', ok=False)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures (code='AUTHORITY_REQUIRED', ok=False)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures (code='SOURCE_NOT_ENROLLED', ok=False)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_backend_operation_refusals_remain_failures (code='REFUSED', ok=False)",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_bad_record_types_and_unreadable_logs_are_not_empty_success (raw=b'\\xff\\n')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated (value={'ok': True, 'command': 'report'})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated (value={'ok': True, 'command': 'report', 'findings': {}, 'counts': {}})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated (value={'ok': True, 'command': 'report', 'findings': ['forged'], 'counts': {}})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated (value={'ok': True, 'command': 'report', 'findings': [], 'counts': []})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated (value={'ok': True, 'command': 'status', 'findings': [], 'counts': {}})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated (value={'ok': True, 'command': 'report', 'findings': [], 'counts': {}, 'schema_version': 99})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated (value={'ok': True, 'command': 'status', 'phase': 'IDLE', 'queue': []})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated (value={'ok': True, 'command': 'status', 'phase': 7, 'queue': {}})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated (value={'ok': True, 'command': 'status', 'phase': 'IDLE', 'queue': {'hot': -1}})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_command_specific_shapes_are_validated (value={'ok': True, 'command': 'status', 'phase': 'IDLE', 'queue': {'hot': True}})",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_complete_history_preserves_all_records (name='dispositions.jsonl')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_complete_history_preserves_all_records (name='saipal_receipts.jsonl')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_discovery_does_not_swallow_status_or_analysis_failures (outcomes=[{'ok': False, 'status': 'ANALYSIS_BLOCKED', 'error': 'blocked'}])",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_invalid_json_encoding_constants_and_duplicate_fields_are_typed (raw=b'[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[')",
+    "test_t1931_saipal_boundary.SaipalBoundaryTests.test_transport_failure_remains_distinct"
+  ],
+  "scope": "local boundary contracts with real isolated CLI processes; no production SAIPAL acceptance"
+}

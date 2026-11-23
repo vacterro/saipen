@@ -1,0 +1,13 @@
+{
+  "queued_scratch_only": true,
+  "subject_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1686-strict-launch\\subjects-prep\\pre-fix",
+  "subject": "2939b7d4d02c6a517af9afd37d019d50fe6f31d94c6e02c8f24a61ef94108d34",
+  "verifier": "e32d68a1608cb517",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1686-strict-launch\\oracle.py",
+    "."
+  ],
+  "exit_code": 1
+}

@@ -1,0 +1,124 @@
+test_a_true_boundary_returns_the_surface (test_response_surface_contract.AutonomyTests.test_a_true_boundary_returns_the_surface) ... ok
+test_blocked_automation_is_a_handback_not_project_completion (test_response_surface_contract.AutonomyTests.test_blocked_automation_is_a_handback_not_project_completion) ... ok
+test_deterministic_continuation_does_not_return_to_the_user (test_response_surface_contract.AutonomyTests.test_deterministic_continuation_does_not_return_to_the_user) ... ok
+test_exhausted_route_returns_the_surface (test_response_surface_contract.AutonomyTests.test_exhausted_route_returns_the_surface) ... ok
+test_required_human_action_returns_the_surface (test_response_surface_contract.AutonomyTests.test_required_human_action_returns_the_surface) ... ok
+test_context_budget_remains_green_with_execution_in_cold (test_response_surface_contract.BudgetTests.test_context_budget_remains_green_with_execution_in_cold) ... FAIL
+test_a_inventory_cannot_replace_diagnosis (test_response_surface_contract.DiagnosisTests.test_a_inventory_cannot_replace_diagnosis) ... ok
+test_b_generic_handoff_cannot_replace_diagnosis (test_response_surface_contract.DiagnosisTests.test_b_generic_handoff_cannot_replace_diagnosis) ... ok
+test_c_rule_needs_owner_and_bound_evidence (test_response_surface_contract.DiagnosisTests.test_c_rule_needs_owner_and_bound_evidence) ... ok
+test_changed_quote_digest_path_and_request_are_rejected (test_response_surface_contract.DiagnosisTests.test_changed_quote_digest_path_and_request_are_rejected) ... ok
+test_correction_is_not_an_execution_receipt (test_response_surface_contract.DiagnosisTests.test_correction_is_not_an_execution_receipt) ... ok
+test_d_hidden_motive_is_not_observed_cause (test_response_surface_contract.DiagnosisTests.test_d_hidden_motive_is_not_observed_cause) ... ok
+test_deep_json_refuses_instead_of_crashing (test_response_surface_contract.DiagnosisTests.test_deep_json_refuses_instead_of_crashing) ... ok
+test_e_successful_recovery_cannot_be_invented (test_response_surface_contract.DiagnosisTests.test_e_successful_recovery_cannot_be_invented) ... ok
+test_f_freebuff_cannot_claim_mechanical_enforcement (test_response_surface_contract.DiagnosisTests.test_f_freebuff_cannot_claim_mechanical_enforcement) ... ok
+test_g_cited_diagnosis_with_bounded_uncertainty (test_response_surface_contract.DiagnosisTests.test_g_cited_diagnosis_with_bounded_uncertainty) ... ok
+test_h_truthful_refusal_is_not_misconduct (test_response_surface_contract.DiagnosisTests.test_h_truthful_refusal_is_not_misconduct) ... ok
+test_i_implementation_handoff_keeps_its_own_contract (test_response_surface_contract.DiagnosisTests.test_i_implementation_handoff_keeps_its_own_contract) ... ok
+test_j_compact_status_is_not_diagnosis (test_response_surface_contract.DiagnosisTests.test_j_compact_status_is_not_diagnosis) ... ok
+test_k_witnessed_detailed_artifact_is_still_allowed (test_response_surface_contract.DiagnosisTests.test_k_witnessed_detailed_artifact_is_still_allowed) ... ok
+test_l_unverified_host_is_reported_truthfully (test_response_surface_contract.DiagnosisTests.test_l_unverified_host_is_reported_truthfully) ... ok
+test_layered_gate_discloses_semantic_limit_and_preserves_admission (test_response_surface_contract.DiagnosisTests.test_layered_gate_discloses_semantic_limit_and_preserves_admission) ... ok
+test_malformed_values_refuse_instead_of_crashing (test_response_surface_contract.DiagnosisTests.test_malformed_values_refuse_instead_of_crashing) ... ok
+test_model_supplied_request_cannot_authorize_artifact (test_response_surface_contract.DiagnosisTests.test_model_supplied_request_cannot_authorize_artifact) ... ok
+test_no_caller_root_is_not_evidence (test_response_surface_contract.DiagnosisTests.test_no_caller_root_is_not_evidence) ... FAIL
+test_quoted_or_negated_request_never_grants_diagnosis (test_response_surface_contract.DiagnosisTests.test_quoted_or_negated_request_never_grants_diagnosis) ... ok
+test_request_classes_come_from_ingress (test_response_surface_contract.DiagnosisTests.test_request_classes_come_from_ingress) ... ok
+test_source_and_flattened_installs_use_the_same_owner (test_response_surface_contract.DiagnosisTests.test_source_and_flattened_installs_use_the_same_owner) ... ok
+test_a_wellformed_block_has_no_errors (test_response_surface_contract.FieldOrderTests.test_a_wellformed_block_has_no_errors) ... ok
+test_details_is_optional_and_last (test_response_surface_contract.FieldOrderTests.test_details_is_optional_and_last) ... ok
+test_mandatory_order_is_fixed (test_response_surface_contract.FieldOrderTests.test_mandatory_order_is_fixed) ... ok
+test_hush_may_suppress_details_only (test_response_surface_contract.HushParityTests.test_hush_may_suppress_details_only) ... ok
+test_hush_preserves_every_mandatory_field (test_response_surface_contract.HushParityTests.test_hush_preserves_every_mandatory_field) ... ok
+test_mandatory_kinds_are_never_discretionary (test_response_surface_contract.HushParityTests.test_mandatory_kinds_are_never_discretionary) ... ok
+test_activation_block_references_execution_without_duplicating_schema (test_response_surface_contract.PlacementTests.test_activation_block_references_execution_without_duplicating_schema) ... ok
+test_boot_loads_style_and_execution_before_first_output (test_response_surface_contract.PlacementTests.test_boot_loads_style_and_execution_before_first_output) ... ok
+test_execution_is_in_the_cold_first_response_profile (test_response_surface_contract.PlacementTests.test_execution_is_in_the_cold_first_response_profile) ... ok
+test_exact_owner_file_is_execution_not_style (test_response_surface_contract.RegistrationTests.test_exact_owner_file_is_execution_not_style) ... ok
+test_rule_is_registered_with_the_execution_owner (test_response_surface_contract.RegistrationTests.test_rule_is_registered_with_the_execution_owner) ... ok
+test_actual_text_refuses_prose_duplicates_missing_and_vague_action (test_response_surface_contract.SurfaceBehaviourTests.test_actual_text_refuses_prose_duplicates_missing_and_vague_action) ... ok
+test_autonomous_repair_is_not_a_response_boundary (test_response_surface_contract.SurfaceBehaviourTests.test_autonomous_repair_is_not_a_response_boundary) ... ok
+test_canonical_phase_task_and_operator_gate_cannot_be_hidden (test_response_surface_contract.SurfaceBehaviourTests.test_canonical_phase_task_and_operator_gate_cannot_be_hidden) ... ok
+test_details_before_a_mandatory_field_refuses (test_response_surface_contract.SurfaceBehaviourTests.test_details_before_a_mandatory_field_refuses) ... ok
+test_fresh_conformance_truth_supersedes_a_cached_pass (test_response_surface_contract.SurfaceBehaviourTests.test_fresh_conformance_truth_supersedes_a_cached_pass) ... ok
+test_missing_mandatory_field_refuses (test_response_surface_contract.SurfaceBehaviourTests.test_missing_mandatory_field_refuses) ... ok
+test_opencode_command_enforces_autonomy_on_its_followup_response (test_response_surface_contract.SurfaceBehaviourTests.test_opencode_command_enforces_autonomy_on_its_followup_response) ... ok
+test_opencode_explicit_status_request_keeps_the_control_surface (test_response_surface_contract.SurfaceBehaviourTests.test_opencode_explicit_status_request_keeps_the_control_surface) ... FAIL
+test_opencode_output_hook_rejects_operational_prose (test_response_surface_contract.SurfaceBehaviourTests.test_opencode_output_hook_rejects_operational_prose) ... FAIL
+test_operator_action_rejects_agent_commands_but_accepts_human_decisions (test_response_surface_contract.SurfaceBehaviourTests.test_operator_action_rejects_agent_commands_but_accepts_human_decisions) ... ok
+test_out_of_order_fields_refuse (test_response_surface_contract.SurfaceBehaviourTests.test_out_of_order_fields_refuse) ... ok
+test_pinned_languages_change_values_but_never_field_labels (test_response_surface_contract.SurfaceBehaviourTests.test_pinned_languages_change_values_but_never_field_labels) ... ok
+test_public_autonomy_gate_reads_current_route (test_response_surface_contract.SurfaceBehaviourTests.test_public_autonomy_gate_reads_current_route) ... ok
+test_public_runtime_renderer_and_checker_share_the_same_contract (test_response_surface_contract.SurfaceBehaviourTests.test_public_runtime_renderer_and_checker_share_the_same_contract) ... ok
+test_rendered_boundary_is_checked_after_assembly (test_response_surface_contract.SurfaceBehaviourTests.test_rendered_boundary_is_checked_after_assembly) ... ok
+test_wait_without_operator_action_refuses (test_response_surface_contract.SurfaceBehaviourTests.test_wait_without_operator_action_refuses) ... ok
+
+======================================================================
+FAIL: test_context_budget_remains_green_with_execution_in_cold (test_response_surface_contract.BudgetTests.test_context_budget_remains_green_with_execution_in_cold)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_response_surface_contract.py", line 617, in test_context_budget_remains_green_with_execution_in_cold
+    self.assertEqual(errors, [], errors)
+AssertionError: Lists differ: ['command_resolution 56349 > 56320'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'command_resolution 56349 > 56320'
+
+- ['command_resolution 56349 > 56320']
++ [] : ['command_resolution 56349 > 56320']
+
+======================================================================
+FAIL: test_no_caller_root_is_not_evidence (test_response_surface_contract.DiagnosisTests.test_no_caller_root_is_not_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_response_surface_contract.py", line 785, in test_no_caller_root_is_not_evidence
+    self.assertEqual(klass, RS.CLASS_INVALID_OPERATIONAL_PROSE)
+AssertionError: 'ORDINARY_CHAT' != 'INVALID_OPERATIONAL_PROSE'
+- ORDINARY_CHAT
++ INVALID_OPERATIONAL_PROSE
+
+
+======================================================================
+FAIL: test_opencode_explicit_status_request_keeps_the_control_surface (test_response_surface_contract.SurfaceBehaviourTests.test_opencode_explicit_status_request_keeps_the_control_surface)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_response_surface_contract.py", line 531, in test_opencode_explicit_status_request_keeps_the_control_surface
+    self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+AssertionError: 1 != 0 : file:///V:/_TEMP_/saipen-t1844-next-ph7ly19z/extensions/adapters/opencode/saipen-guard.js:1150
+      throw new Error("EXEC_RESPONSE_INVALID: eligible autonomous action remains; continue silently");
+            ^
+
+Error: EXEC_RESPONSE_INVALID: eligible autonomous action remains; continue silently
+    at checkOperationalResponse (file:///V:/_TEMP_/saipen-t1844-next-ph7ly19z/extensions/adapters/opencode/saipen-guard.js:1150:13)
+    at experimental.text.complete (file:///V:/_TEMP_/saipen-t1844-next-ph7ly19z/extensions/adapters/opencode/saipen-guard.js:1495:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async file:///V:/_TEMP_/saipen-t1844-next-ph7ly19z/[eval1]:13:1
+
+Node.js v24.15.0
+
+
+======================================================================
+FAIL: test_opencode_output_hook_rejects_operational_prose (test_response_surface_contract.SurfaceBehaviourTests.test_opencode_output_hook_rejects_operational_prose)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1844-next-ph7ly19z\tools\test_response_surface_contract.py", line 405, in test_opencode_output_hook_rejects_operational_prose
+    self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+AssertionError: 1 != 0 : file:///V:/_TEMP_/saipen-t1844-next-ph7ly19z/extensions/adapters/opencode/saipen-guard.js:1150
+      throw new Error("EXEC_RESPONSE_INVALID: eligible autonomous action remains; continue silently");
+            ^
+
+Error: EXEC_RESPONSE_INVALID: eligible autonomous action remains; continue silently
+    at checkOperationalResponse (file:///V:/_TEMP_/saipen-t1844-next-ph7ly19z/extensions/adapters/opencode/saipen-guard.js:1150:13)
+    at experimental.text.complete (file:///V:/_TEMP_/saipen-t1844-next-ph7ly19z/extensions/adapters/opencode/saipen-guard.js:1495:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async file:///V:/_TEMP_/saipen-t1844-next-ph7ly19z/[eval1]:36:1
+
+Node.js v24.15.0
+
+
+----------------------------------------------------------------------
+Ran 55 tests in 13.698s
+
+FAILED (failures=4)

@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "format": "unittest",
+  "timeout": 60,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t1850_freebuff_diagnostics.py", "-v"],
+  "context": ["tools/saipen_engine", "tools/test_t1850_freebuff_diagnostics.py"],
+  "oracle_files": ["tools/test_t1850_freebuff_diagnostics.py"],
+  "subject_files": ["tools/saipen_engine/operator_task.py", "tools/saipen_engine/host_taxonomy.py", "tools/saipen_engine/admission_doctor.py"],
+  "before": {
+    "tools/saipen_engine/operator_task.py": ".saipen/evidence/T-1850-freebuff-diagnostics/before/operator_task.py",
+    "tools/saipen_engine/host_taxonomy.py": ".saipen/evidence/T-1850-freebuff-diagnostics/before/host_taxonomy.py",
+    "tools/saipen_engine/admission_doctor.py": ".saipen/evidence/T-1850-freebuff-diagnostics/before/admission_doctor.py"
+  }
+}

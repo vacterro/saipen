@@ -1,0 +1,541 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "3a821f81232fc6be8681ee856b1ef90a1981822f373ba6c1ddf5b3847c5b53b5",
+  "verdict": "FAIL",
+  "patterns": [
+    "test_operator_ingress_matrix.py",
+    "test_protocol_registry.py",
+    "test_reconcile_valve.py",
+    "test_t1751_reconcile_surfaces.py",
+    "test_t1776_protocol_home_valve.py",
+    "test_t1858_valve_guidance.py",
+    "test_t1859_zaicode_seal.py",
+    "test_t1864_autonomous_valve.py",
+    "test_t1868_zaicode_ingress.py",
+    "test_t1880_wait_survives_phase_shortcut.py",
+    "test_t1881_authority_brake.py",
+    "test_t1933_zaicode_goal_seal.py",
+    "test_t1935_zaicode_hook_ownership.py",
+    "test_t2066_zaicode_host_policy.py",
+    "test_t2106_reauth_deadlock.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_operator_ingress_matrix.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_operator_ingress_matrix.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "duration_s": 1.61,
+      "process_create_s": 0.047,
+      "ran": 19,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_clause_a_new_handoff_with_cc_routes_to_start (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_a_new_handoff_with_cc_routes_to_start)\r\nA. New handoff containing 'cc' routes to START. ... ok\r\ntest_clause_b_standalone_cc_routes_to_continue (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_b_standalone_cc_routes_to_continue)\r\nB. Standalone operator cc routes to CONTINUE. ... ok\r\ntest_clause_c_host_prompt_reaches_canonical_admission (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_c_host_prompt_reaches_canonical_admission)\r\nC. Host prompt reaches canonical operator admission. ... ok\r\ntest_clause_d_agent_authored_text_cannot_impersonate (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_d_agent_authored_text_cannot_impersonate)\r\nD. Agent-authored text cannot impersonate the prompt. ... ok\r\ntest_clause_e_model_created_task_files_cannot_forge_authority (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_e_model_created_task_files_cannot_forge_authority)\r\nE. Model-created task files cannot forge authority. ... ok\r\ntest_clause_f_user_message_identity_survives_model_switching (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_f_user_message_identity_survives_model_switching)\r\nF. User-message identity survives model switching. ... ok\r\ntest_clause_g_multiple_queued_prompts_retain_separate_provenance (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_g_multiple_queued_prompts_retain_separate_provenance)\r\nG. Multiple queued prompts retain separate provenance. ... ok\r\ntest_clause_h_delayed_callbacks_cannot_reuse_another_prompt (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_h_delayed_callbacks_cannot_reuse_another_prompt)\r\nH. Delayed callbacks cannot reuse another prompt. ... ok\r\ntest_clause_i_renderer_reload_does_not_grant_new_authority (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_i_renderer_reload_does_not_grant_new_authority)\r\nI. Renderer reload does not grant new authority. ... ok\r\ntest_clause_j_existing_model_supplied_src_remains_unchanged (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_j_existing_model_supplied_src_remains_unchanged)\r\nJ. Existing model_supplied SRC remains unchanged. ... ok\r\ntest_clause_k_fresh_verified_ingress_authorizes_new_work (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_k_fresh_verified_ingress_authorizes_new_work)\r\nK. Fresh verified ingress can authorize new Work. ... ok\r\ntest_clause_l_tripped_bounded_valve_remains_effective (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_l_tripped_bounded_valve_remains_effective)\r\nL. Tripped bounded valve remains effective without fresh operator carrier. ... ok\r\ntest_clause_m_new_authorized_task_passes_valve_legally (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_m_new_authorized_task_passes_valve_legally)\r\nM. New authorized task can pass the valve legally. ... ok\r\ntest_clause_n_existing_ship_evidence_is_preserved (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_n_existing_ship_evidence_is_preserved)\r\nN. Existing T-91 SHIP evidence is preserved. ... ok\r\ntest_clause_o_tag_conflict_not_silently_overwritten (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_o_tag_conflict_not_silently_overwritten)\r\nO. TAG_CONFLICT is not silently overwritten. ... ok\r\ntest_clause_p_opencode_native_integration_end_to_end (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_p_opencode_native_integration_end_to_end)\r\nP. OpenCode native integration passes end-to-end. ... ok\r\ntest_clause_q_no_operator_terminal_commands_needed (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_q_no_operator_terminal_commands_needed)\r\nQ. No operator terminal commands needed in normal use. ... ok\r\ntest_clause_r_host_adapter_and_installed_plugin_match (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_clause_r_host_adapter_and_installed_plugin_match)\r\nR. Host adapter and installed plugin generation match. ... ok\r\ntest_live_acceptance_disposable_project (test_operator_ingress_matrix.TestOperatorIngressMatrix.test_live_acceptance_disposable_project)\r\nSimulated acceptance on a disposable 9router-like project; no live UI: ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 19 tests in 1.173s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_protocol_registry.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_protocol_registry.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        30480
+      ],
+      "duration_s": 0.312,
+      "process_create_s": 0.047,
+      "ran": 20,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_inventory_location_is_registry_owned (test_protocol_registry.CommandReferenceTests.test_inventory_location_is_registry_owned) ... ok\r\ntest_legacy_registry_keeps_original_inventory (test_protocol_registry.CommandReferenceTests.test_legacy_registry_keeps_original_inventory) ... ok\r\ntest_missing_declared_inventory_never_uses_legacy_prose (test_protocol_registry.CommandReferenceTests.test_missing_declared_inventory_never_uses_legacy_prose) ... ok\r\ntest_unbounded_or_non_filename_inventory_refuses (test_protocol_registry.CommandReferenceTests.test_unbounded_or_non_filename_inventory_refuses) ... ok\r\ntest_all_16_phase_documents_exist (test_protocol_registry.ProtocolRegistryTests.test_all_16_phase_documents_exist) ... ok\r\ntest_every_declared_load_budget_is_measured_from_registry (test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry) ... ok\r\ntest_golden_command_and_chain_snapshots (test_protocol_registry.ProtocolRegistryTests.test_golden_command_and_chain_snapshots) ... ok\r\ntest_missing_registry_phase_fails_instead_of_disappearing (test_protocol_registry.ProtocolRegistryTests.test_missing_registry_phase_fails_instead_of_disappearing) ... ok\r\ntest_one_rule_one_owner (test_protocol_registry.ProtocolRegistryTests.test_one_rule_one_owner) ... ok\r\ntest_phase_max_median_and_tie_break_are_deterministic (test_protocol_registry.ProtocolRegistryTests.test_phase_max_median_and_tie_break_are_deterministic) ... ok\r\ntest_phase_metrics_do_not_change_load_profile_measurement (test_protocol_registry.ProtocolRegistryTests.test_phase_metrics_do_not_change_load_profile_measurement) ... ok\r\ntest_phase_metrics_measure_all_registry_phases_and_actual_bytes (test_protocol_registry.ProtocolRegistryTests.test_phase_metrics_measure_all_registry_phases_and_actual_bytes) ... ok\r\ntest_phase_preferences_are_registry_owned_and_not_hard_failures (test_protocol_registry.ProtocolRegistryTests.test_phase_preferences_are_registry_owned_and_not_hard_failures) ... ok\r\ntest_prose_rewrite_cannot_change_shortcut_behavior (test_protocol_registry.ProtocolRegistryTests.test_prose_rewrite_cannot_change_shortcut_behavior) ... ok\r\ntest_registry_absent_fails_closed (test_protocol_registry.ProtocolRegistryTests.test_registry_absent_fails_closed) ... ok\r\ntest_registry_confusable_fixture_drives_normalizer (test_protocol_registry.ProtocolRegistryTests.test_registry_confusable_fixture_drives_normalizer) ... ok\r\ntest_registry_fixture_drives_resolver (test_protocol_registry.ProtocolRegistryTests.test_registry_fixture_drives_resolver) ... ok\r\ntest_registry_malformed_fails_closed (test_protocol_registry.ProtocolRegistryTests.test_registry_malformed_fails_closed) ... ok\r\ntest_runtime_closed_sets_derive_from_registry (test_protocol_registry.ProtocolRegistryTests.test_runtime_closed_sets_derive_from_registry) ... ok\r\ntest_semantic_facts_name_owner_and_test (test_protocol_registry.ProtocolRegistryTests.test_semantic_facts_name_owner_and_test) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 20 tests in 0.126s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_reconcile_valve.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_reconcile_valve.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        27588
+      ],
+      "duration_s": 3.953,
+      "process_create_s": 0.047,
+      "ran": 32,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_crash_after_apply_converges_without_duplicating_the_repair (test_reconcile_valve.InvalidPhaseCrashConvergenceTests.test_a_crash_after_apply_converges_without_duplicating_the_repair) ... ok\r\ntest_a_crash_before_apply_keeps_the_original_state_and_converges (test_reconcile_valve.InvalidPhaseCrashConvergenceTests.test_a_crash_before_apply_keeps_the_original_state_and_converges) ... ok\r\ntest_a_legal_state_is_a_clean_zero_write_noop_at_the_cli (test_reconcile_valve.InvalidPhaseCrashConvergenceTests.test_a_legal_state_is_a_clean_zero_write_noop_at_the_cli)\r\nPhase I: `CLEAN` is the documented idempotent no-op contract. ... ok\r\ntest_a_contradictory_board_does_not_hold_the_phase_repair_hostage (test_reconcile_valve.InvalidPhaseEndToEndTests.test_a_contradictory_board_does_not_hold_the_phase_repair_hostage)\r\nT-1382: a repair is judged on its DELTA, not on what it walked into. ... ok\r\ntest_a_legal_pair_is_left_alone (test_reconcile_valve.InvalidPhaseEndToEndTests.test_a_legal_pair_is_left_alone) ... ok\r\ntest_a_second_recovery_is_a_noop_with_no_second_artifact (test_reconcile_valve.InvalidPhaseEndToEndTests.test_a_second_recovery_is_a_noop_with_no_second_artifact) ... ok\r\ntest_an_unknown_illegal_token_is_not_special_cased (test_reconcile_valve.InvalidPhaseEndToEndTests.test_an_unknown_illegal_token_is_not_special_cased)\r\n`IMPL` is the observed example, never the rule. ... ok\r\ntest_an_unprovable_phase_refuses_with_zero_writes (test_reconcile_valve.InvalidPhaseEndToEndTests.test_an_unprovable_phase_refuses_with_zero_writes) ... ok\r\ntest_the_original_bytes_are_preserved_byte_for_byte (test_reconcile_valve.InvalidPhaseEndToEndTests.test_the_original_bytes_are_preserved_byte_for_byte) ... ok\r\ntest_the_preserved_copy_is_never_edited_afterwards (test_reconcile_valve.InvalidPhaseEndToEndTests.test_the_preserved_copy_is_never_edited_afterwards) ... ok\r\ntest_the_repair_restores_a_valid_phase_and_journals_the_drift (test_reconcile_valve.InvalidPhaseEndToEndTests.test_the_repair_restores_a_valid_phase_and_journals_the_drift) ... ok\r\ntest_the_repaired_project_is_readable_afterwards (test_reconcile_valve.InvalidPhaseEndToEndTests.test_the_repaired_project_is_readable_afterwards) ... ok\r\ntest_a_legal_phase_owns_no_repair (test_reconcile_valve.InvalidPhaseRepairTests.test_a_legal_phase_owns_no_repair) ... ok\r\ntest_a_lone_transition_event_cannot_prove_the_source (test_reconcile_valve.InvalidPhaseRepairTests.test_a_lone_transition_event_cannot_prove_the_source)\r\nThe LOG records destinations; a source needs the PREVIOUS destination. ... ok\r\ntest_an_illegal_destination_event_proves_nothing (test_reconcile_valve.InvalidPhaseRepairTests.test_an_illegal_destination_event_proves_nothing) ... ok\r\ntest_an_illegal_transition_from_blocks (test_reconcile_valve.InvalidPhaseRepairTests.test_an_illegal_transition_from_blocks) ... ok\r\ntest_an_unreachable_pair_blocks (test_reconcile_valve.InvalidPhaseRepairTests.test_an_unreachable_pair_blocks) ... ok\r\ntest_no_proof_blocks_instead_of_inventing_a_phase (test_reconcile_valve.InvalidPhaseRepairTests.test_no_proof_blocks_instead_of_inventing_a_phase) ... ok\r\ntest_non_transition_events_are_not_phase_evidence (test_reconcile_valve.InvalidPhaseRepairTests.test_non_transition_events_are_not_phase_evidence) ... ok\r\ntest_the_newest_provable_event_wins_and_last_event_bounds_it (test_reconcile_valve.InvalidPhaseRepairTests.test_the_newest_provable_event_wins_and_last_event_bounds_it) ... ok\r\ntest_the_proven_pair_replaces_the_illegal_one (test_reconcile_valve.InvalidPhaseRepairTests.test_the_proven_pair_replaces_the_illegal_one) ... ok\r\ntest_a_run_below_the_cap_is_clean (test_reconcile_valve.ReconcileEndToEndTests.test_a_run_below_the_cap_is_clean) ... ok\r\ntest_a_state_already_paused_at_the_cap_is_clean (test_reconcile_valve.ReconcileEndToEndTests.test_a_state_already_paused_at_the_cap_is_clean) ... ok\r\ntest_agreeing_counters_at_the_cap_are_not_clean (test_reconcile_valve.ReconcileEndToEndTests.test_agreeing_counters_at_the_cap_are_not_clean) ... ok\r\ntest_the_refusal_writes_nothing (test_reconcile_valve.ReconcileEndToEndTests.test_the_refusal_writes_nothing) ... ok\r\ntest_a_malformed_counter_is_not_read_as_tripped (test_reconcile_valve.TrippedValveInvariantTests.test_a_malformed_counter_is_not_read_as_tripped)\r\nA bool or a string is the counter-repair path's business, not this one. ... ok\r\ntest_a_non_goal_run_owns_no_valve (test_reconcile_valve.TrippedValveInvariantTests.test_a_non_goal_run_owns_no_valve) ... ok\r\ntest_a_state_already_stating_the_pause_needs_no_repair (test_reconcile_valve.TrippedValveInvariantTests.test_a_state_already_stating_the_pause_needs_no_repair) ... ok\r\ntest_the_counters_are_never_tidied_by_this_rule (test_reconcile_valve.TrippedValveInvariantTests.test_the_counters_are_never_tidied_by_this_rule)\r\nThey ARE the tripped condition; only `cc` clears them. ... ok\r\ntest_tickets_at_the_cap_refuses_even_when_counters_agree (test_reconcile_valve.TrippedValveInvariantTests.test_tickets_at_the_cap_refuses_even_when_counters_agree) ... ok\r\ntest_under_the_caps_is_not_a_trip (test_reconcile_valve.TrippedValveInvariantTests.test_under_the_caps_is_not_a_trip) ... ok\r\ntest_waves_at_the_cap_trips_independently (test_reconcile_valve.TrippedValveInvariantTests.test_waves_at_the_cap_trips_independently) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 32 tests in 3.730s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1751_reconcile_surfaces.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1751_reconcile_surfaces.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        30360
+      ],
+      "duration_s": 7.828,
+      "process_create_s": 0.047,
+      "ran": 12,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_clean_project_still_continues (test_t1751_reconcile_surfaces.BoundaryTests.test_a_clean_project_still_continues) ... ok\r\ntest_a_refusal_without_a_command_is_a_stop (test_t1751_reconcile_surfaces.BoundaryTests.test_a_refusal_without_a_command_is_a_stop) ... ok\r\ntest_a_route_that_already_refuses_keeps_its_refusal (test_t1751_reconcile_surfaces.BoundaryTests.test_a_route_that_already_refuses_keeps_its_refusal) ... ok\r\ntest_a_tripped_valve_alone_stays_a_continuation (test_t1751_reconcile_surfaces.BoundaryTests.test_a_tripped_valve_alone_stays_a_continuation)\r\n`cc` is itself the valve's reauthorization (CORE-001). ... ok\r\ntest_the_continuation_hands_its_verdict_over_instead_of_reconciling_twice (test_t1751_reconcile_surfaces.BoundaryTests.test_the_continuation_hands_its_verdict_over_instead_of_reconciling_twice) ... ok\r\ntest_a_modern_unverified_done_still_needs_its_approval (test_t1751_reconcile_surfaces.LegacyCarrierTests.test_a_modern_unverified_done_still_needs_its_approval) ... ok\r\ntest_attested_legacy_stays_done_on_repeated_recovery (test_t1751_reconcile_surfaces.LegacyCarrierTests.test_attested_legacy_stays_done_on_repeated_recovery) ... ok\r\ntest_continue_and_recover_refuse_with_the_plan_status_names (test_t1751_reconcile_surfaces.SurfacesAgreeTests.test_continue_and_recover_refuse_with_the_plan_status_names) ... ok\r\ntest_status_names_the_decision_continue_refuses_on (test_t1751_reconcile_surfaces.SurfacesAgreeTests.test_status_names_the_decision_continue_refuses_on) ... ok\r\ntest_the_digest_names_the_decision_instead_of_the_refused_route (test_t1751_reconcile_surfaces.SurfacesAgreeTests.test_the_digest_names_the_decision_instead_of_the_refused_route) ... ok\r\ntest_the_projection_writes_nothing (test_t1751_reconcile_surfaces.SurfacesAgreeTests.test_the_projection_writes_nothing) ... ok\r\ntest_the_question_gate_admits_that_decision_and_nothing_else (test_t1751_reconcile_surfaces.SurfacesAgreeTests.test_the_question_gate_admits_that_decision_and_nothing_else) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 12 tests in 7.366s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1776_protocol_home_valve.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1776_protocol_home_valve.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        24668
+      ],
+      "duration_s": 1.579,
+      "process_create_s": 0.047,
+      "ran": 5,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_consumer_project_keeps_the_bounded_operator_gate (test_t1776_protocol_home_valve.ProtocolHomeValveTests.test_consumer_project_keeps_the_bounded_operator_gate) ... ok\r\ntest_protocol_home_cc_clears_the_valve_without_an_operator_carrier (test_t1776_protocol_home_valve.ProtocolHomeValveTests.test_protocol_home_cc_clears_the_valve_without_an_operator_carrier) ... ok\r\ntest_protocol_home_is_lineage_equality_with_the_running_engine (test_t1776_protocol_home_valve.ProtocolHomeValveTests.test_protocol_home_is_lineage_equality_with_the_running_engine) ... ok\r\ntest_status_and_iteration_report_no_operator_action_in_the_protocol_home (test_t1776_protocol_home_valve.ProtocolHomeValveTests.test_status_and_iteration_report_no_operator_action_in_the_protocol_home) ... ok\r\ntest_status_automation_block_continues_through_the_home_valve (test_t1776_protocol_home_valve.ProtocolHomeValveTests.test_status_automation_block_continues_through_the_home_valve) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 5 tests in 1.148s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1858_valve_guidance.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1858_valve_guidance.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        22412
+      ],
+      "duration_s": 8.328,
+      "process_create_s": 0.046,
+      "ran": 9,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_all_modifier_cannot_supply_operator_authority (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_cannot_supply_operator_authority) ... ok\r\ntest_all_modifier_resumes_the_existing_goal_with_real_origin (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_resumes_the_existing_goal_with_real_origin) ... ok\r\ntest_automation_keeps_hard_wait_and_exposes_the_missing_input (test_t1858_valve_guidance.ValveGuidanceTests.test_automation_keeps_hard_wait_and_exposes_the_missing_input) ... ok\r\ntest_bounded_reset_refusal_names_missing_native_ingress (test_t1858_valve_guidance.ValveGuidanceTests.test_bounded_reset_refusal_names_missing_native_ingress) ... ok\r\ntest_declared_resume_twins_do_not_invent_other_shortcuts (test_t1858_valve_guidance.ValveGuidanceTests.test_declared_resume_twins_do_not_invent_other_shortcuts) ... ok\r\ntest_native_resume_spellings_are_equivalent_without_weakening_hard_wait (test_t1858_valve_guidance.ValveGuidanceTests.test_native_resume_spellings_are_equivalent_without_weakening_hard_wait) ... ok\r\ntest_overshot_28_ticket_budget_still_requires_native_authority (test_t1858_valve_guidance.ValveGuidanceTests.test_overshot_28_ticket_budget_still_requires_native_authority) ... ok\r\ntest_queue_length_does_not_consume_the_completed_ticket_budget (test_t1858_valve_guidance.ValveGuidanceTests.test_queue_length_does_not_consume_the_completed_ticket_budget) ... ok\r\ntest_resume_policy_rejects_malformed_argument_shapes (test_t1858_valve_guidance.ValveGuidanceTests.test_resume_policy_rejects_malformed_argument_shapes) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 9 tests in 8.055s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1859_zaicode_seal.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1859_zaicode_seal.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        12468
+      ],
+      "duration_s": 1.031,
+      "process_create_s": 0.047,
+      "ran": 8,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_pretty_printed_renewal_answer_is_read_not_dropped (test_t1859_zaicode_seal.TheHookBindsTheWorkerTheHostStarted.test_a_pretty_printed_renewal_answer_is_read_not_dropped)\r\nThe engine prints `indent=2`; a one-line reader calls that unreadable. ... ok\r\ntest_a_spent_budget_is_renewed_from_the_engine_the_hook_starts (test_t1859_zaicode_seal.TheHookBindsTheWorkerTheHostStarted.test_a_spent_budget_is_renewed_from_the_engine_the_hook_starts) ... ok\r\ntest_an_unspent_budget_runs_no_renewal (test_t1859_zaicode_seal.TheHookBindsTheWorkerTheHostStarted.test_an_unspent_budget_runs_no_renewal) ... ok\r\ntest_the_one_line_reader_is_refused_by_this_suite (test_t1859_zaicode_seal.TheHookBindsTheWorkerTheHostStarted.test_the_one_line_reader_is_refused_by_this_suite)\r\nRed control: the previous reader must fail on that same answer. ... ok\r\ntest_the_pre_fix_registration_is_refused_by_this_suite (test_t1859_zaicode_seal.TheHookBindsTheWorkerTheHostStarted.test_the_pre_fix_registration_is_refused_by_this_suite)\r\nRed control: the shipped `os.getppid()` binding must fail here. ... ok\r\ntest_the_registered_worker_is_this_hook_process_not_its_parent (test_t1859_zaicode_seal.TheHookBindsTheWorkerTheHostStarted.test_the_registered_worker_is_this_hook_process_not_its_parent) ... ok\r\ntest_the_hook_registers_nothing_when_it_cannot_seal (test_t1859_zaicode_seal.TheHookKeepsItsTransportContract.test_the_hook_registers_nothing_when_it_cannot_seal) ... ok\r\ntest_the_hook_still_reads_the_host_prompt (test_t1859_zaicode_seal.TheHookKeepsItsTransportContract.test_the_hook_still_reads_the_host_prompt) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 8 tests in 0.857s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1864_autonomous_valve.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1864_autonomous_valve.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "duration_s": 1.844,
+      "process_create_s": 0.047,
+      "ran": 15,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_consumer_bounded_grant_still_waits_for_its_operator (test_t1864_autonomous_valve.AutonomousValveTests.test_a_consumer_bounded_grant_still_waits_for_its_operator)\r\nTHE red control: the cap is authority when the budget IS the authority. ... ok\r\ntest_the_budget_still_marks_itself_as_reached (test_t1864_autonomous_valve.AutonomousValveTests.test_the_budget_still_marks_itself_as_reached)\r\nAutonomy must not silently delete the periodic look at the work. ... ok\r\ntest_the_checkpoint_agrees_with_the_counters_recovery_rebuilds (test_t1864_autonomous_valve.AutonomousValveTests.test_the_checkpoint_agrees_with_the_counters_recovery_rebuilds)\r\nA marker whose reset disagrees with STATE opens a permanent heal loop. ... ok\r\ntest_the_fix_does_not_touch_the_twentieth_ticket_count_itself (test_t1864_autonomous_valve.AutonomousValveTests.test_the_fix_does_not_touch_the_twentieth_ticket_count_itself)\r\nBoth polarities count the work; only the response to the cap differs. ... ok\r\ntest_the_result_payload_reports_the_committed_counters (test_t1864_autonomous_valve.AutonomousValveTests.test_the_result_payload_reports_the_committed_counters)\r\nT-1669's rule, at the ticket counter: the Result must not lie. ... ok\r\ntest_the_resumed_route_is_the_transition_not_a_generic_continue (test_t1864_autonomous_valve.AutonomousValveTests.test_the_resumed_route_is_the_transition_not_a_generic_continue)\r\nA mid-flight transition knows its destination; `continue` does not. ... ok\r\ntest_the_same_checkpoint_clears_the_wave_budget (test_t1864_autonomous_valve.AutonomousValveTests.test_the_same_checkpoint_clears_the_wave_budget)\r\nThe HUNT -> ADD trip site is the symmetric half of the same fix. ... ok\r\ntest_the_tripping_transition_keeps_working_in_the_same_operation (test_t1864_autonomous_valve.AutonomousValveTests.test_the_tripping_transition_keeps_working_in_the_same_operation)\r\nThe twentieth ticket clears the budget instead of ending the turn. ... ok\r\ntest_the_untripped_count_still_reports_the_increment (test_t1864_autonomous_valve.AutonomousValveTests.test_the_untripped_count_still_reports_the_increment)\r\nThe same payload field, below the cap, still reports pre + 1. ... ok\r\ntest_a_non_goal_intent_is_never_a_budget_question (test_t1864_autonomous_valve.TripCheckpointOwnerTests.test_a_non_goal_intent_is_never_a_budget_question) ... ok\r\ntest_a_proven_persistent_grant_clears_itself (test_t1864_autonomous_valve.TripCheckpointOwnerTests.test_a_proven_persistent_grant_clears_itself)\r\nThe grant already declares `safety_valve_mode: checkpoint`. ... ok\r\ntest_an_unproven_persistent_grant_still_waits (test_t1864_autonomous_valve.TripCheckpointOwnerTests.test_an_unproven_persistent_grant_still_waits)\r\nA claim of persistence that cannot be proved is not authority. ... ok\r\ntest_an_unreadable_grant_journal_degrades_to_the_human_boundary (test_t1864_autonomous_valve.TripCheckpointOwnerTests.test_an_unreadable_grant_journal_degrades_to_the_human_boundary)\r\nA crash here would kill the transition that tripped the cap. ... ok\r\ntest_an_untripped_budget_gets_no_answer (test_t1864_autonomous_valve.TripCheckpointOwnerTests.test_an_untripped_budget_gets_no_answer)\r\nNo cap, no decision: this must never pre-clear a budget. ... ok\r\ntest_the_owner_names_the_authority_it_renews (test_t1864_autonomous_valve.TripCheckpointOwnerTests.test_the_owner_names_the_authority_it_renews) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 15 tests in 1.439s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1868_zaicode_ingress.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1868_zaicode_ingress.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        25948
+      ],
+      "duration_s": 1.234,
+      "process_create_s": 0.062,
+      "ran": 8,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_the_hook_reads_the_host_prompt_and_computes_the_engine_digest (test_t1868_zaicode_ingress.HookSourceContract.test_the_hook_reads_the_host_prompt_and_computes_the_engine_digest) ... ok\r\ntest_a_continuation_prompt_stays_a_continuation (test_t1868_zaicode_ingress.HostPayloadContract.test_a_continuation_prompt_stays_a_continuation) ... ok\r\ntest_a_declared_envelope_still_wins (test_t1868_zaicode_ingress.HostPayloadContract.test_a_declared_envelope_still_wins) ... ok\r\ntest_a_real_host_event_admits_an_ingress (test_t1868_zaicode_ingress.HostPayloadContract.test_a_real_host_event_admits_an_ingress) ... ok\r\ntest_an_empty_prompt_delivers_nothing (test_t1868_zaicode_ingress.HostPayloadContract.test_an_empty_prompt_delivers_nothing) ... ok\r\ntest_an_event_with_no_prompt_delivers_nothing (test_t1868_zaicode_ingress.HostPayloadContract.test_an_event_with_no_prompt_delivers_nothing) ... ok\r\ntest_the_admitted_envelope_carries_the_engine_digest_of_the_prompt (test_t1868_zaicode_ingress.HostPayloadContract.test_the_admitted_envelope_carries_the_engine_digest_of_the_prompt) ... ok\r\ntest_the_pre_fix_hook_fails_this_suite (test_t1868_zaicode_ingress.HostPayloadContract.test_the_pre_fix_hook_fails_this_suite)\r\nRed control: run the PRE-FIX reader against the same host event. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 8 tests in 1.028s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t1880_wait_survives_phase_shortcut.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1880_wait_survives_phase_shortcut.py",
+        "-v"
+      ],
+      "status": "FAIL",
+      "exit_code": 1,
+      "processes_leaked": [
+        30520
+      ],
+      "duration_s": 0.906,
+      "process_create_s": 0.047,
+      "ran": 3,
+      "red": [
+        "test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_a_plain_continue_is_not_treated_as_a_brake",
+        "test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_an_ordinary_transition_still_writes_the_destination_route",
+        "test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_the_tripped_valve_wait_survives_the_phase_shortcut"
+      ],
+      "headers": 3,
+      "unparsed": 0,
+      "tallied": 3,
+      "sections": {
+        "test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_a_plain_continue_is_not_treated_as_a_brake": "FAIL: test_a_plain_continue_is_not_treated_as_a_brake (test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_a_plain_continue_is_not_treated_as_a_brake)\nOnly `WAIT:` is a hard stop; an ordinary route is not preserved.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"C:\\Temp\\saipen-core-unit-m39pm5ht\\project\\tools\\test_t1880_wait_survives_phase_shortcut.py\", line 119, in test_a_plain_continue_is_not_treated_as_a_brake\n    state = self._transition_to_hunt()\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Temp\\saipen-core-unit-m39pm5ht\\project\\tools\\test_t1880_wait_survives_phase_shortcut.py\", line 91, in _transition_to_hunt\n    self.assertTrue(\nAssertionError: False is not true : transition refused before the invariant could be observed: {'ok': False, 'code': 'HOME_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'home-dead: home-divergent: the RUNNING install is C:\\\\Temp\\\\saipen-core-unit-m39pm5ht\\\\project (fingerprint: install-v1:de99cbb40f6092940d7a23216568355fa59b833f8c7d4e09fedbe7f3b5e1ca3b) but STATE.saipen_home names C:\\\\ProgramData\\\\SAI\\\\SAIPEN\\\\runtime\\\\0012aaefb5fc1b95 (fingerprint: install-v1:5e8fd0693c292d2d2b96015f3fed2cf33b959ca814cfae72a6aceef05278f081) -- the installs carry different protocol or engine bytes. Evidence produced now is attributable to the running engine, not the named one. Run saipen through the install STATE names, or converge with `saipen rebind-home --auto`. -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)', 'next_action': 'saipen rebind-home --auto'}",
+        "test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_an_ordinary_transition_still_writes_the_destination_route": "FAIL: test_an_ordinary_transition_still_writes_the_destination_route (test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_an_ordinary_transition_still_writes_the_destination_route)\nThe control: without a WAIT the phase move routes as it always did.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"C:\\Temp\\saipen-core-unit-m39pm5ht\\project\\tools\\test_t1880_wait_survives_phase_shortcut.py\", line 112, in test_an_ordinary_transition_still_writes_the_destination_route\n    state = self._transition_to_hunt()\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Temp\\saipen-core-unit-m39pm5ht\\project\\tools\\test_t1880_wait_survives_phase_shortcut.py\", line 91, in _transition_to_hunt\n    self.assertTrue(\nAssertionError: False is not true : transition refused before the invariant could be observed: {'ok': False, 'code': 'HOME_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'home-dead: home-divergent: the RUNNING install is C:\\\\Temp\\\\saipen-core-unit-m39pm5ht\\\\project (fingerprint: install-v1:de99cbb40f6092940d7a23216568355fa59b833f8c7d4e09fedbe7f3b5e1ca3b) but STATE.saipen_home names C:\\\\ProgramData\\\\SAI\\\\SAIPEN\\\\runtime\\\\0012aaefb5fc1b95 (fingerprint: install-v1:5e8fd0693c292d2d2b96015f3fed2cf33b959ca814cfae72a6aceef05278f081) -- the installs carry different protocol or engine bytes. Evidence produced now is attributable to the running engine, not the named one. Run saipen through the install STATE names, or converge with `saipen rebind-home --auto`. -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)', 'next_action': 'saipen rebind-home --auto'}",
+        "test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_the_tripped_valve_wait_survives_the_phase_shortcut": "FAIL: test_the_tripped_valve_wait_survives_the_phase_shortcut (test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_the_tripped_valve_wait_survives_the_phase_shortcut)\nThe measured defect: `hh` replaced the brake with `PHASE HUNT`.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"C:\\Temp\\saipen-core-unit-m39pm5ht\\project\\tools\\test_t1880_wait_survives_phase_shortcut.py\", line 100, in test_the_tripped_valve_wait_survives_the_phase_shortcut\n    state = self._transition_to_hunt()\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Temp\\saipen-core-unit-m39pm5ht\\project\\tools\\test_t1880_wait_survives_phase_shortcut.py\", line 91, in _transition_to_hunt\n    self.assertTrue(\nAssertionError: False is not true : transition refused before the invariant could be observed: {'ok': False, 'code': 'HOME_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'home-dead: home-divergent: the RUNNING install is C:\\\\Temp\\\\saipen-core-unit-m39pm5ht\\\\project (fingerprint: install-v1:de99cbb40f6092940d7a23216568355fa59b833f8c7d4e09fedbe7f3b5e1ca3b) but STATE.saipen_home names C:\\\\ProgramData\\\\SAI\\\\SAIPEN\\\\runtime\\\\0012aaefb5fc1b95 (fingerprint: install-v1:5e8fd0693c292d2d2b96015f3fed2cf33b959ca814cfae72a6aceef05278f081) -- the installs carry different protocol or engine bytes. Evidence produced now is attributable to the running engine, not the named one. Run saipen through the install STATE names, or converge with `saipen rebind-home --auto`. -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)', 'next_action': 'saipen rebind-home --auto'}"
+      },
+      "stdout": "",
+      "stderr": "test_a_plain_continue_is_not_treated_as_a_brake (test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_a_plain_continue_is_not_treated_as_a_brake)\r\nOnly `WAIT:` is a hard stop; an ordinary route is not preserved. ... FAIL\r\ntest_an_ordinary_transition_still_writes_the_destination_route (test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_an_ordinary_transition_still_writes_the_destination_route)\r\nThe control: without a WAIT the phase move routes as it always did. ... FAIL\r\ntest_the_tripped_valve_wait_survives_the_phase_shortcut (test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_the_tripped_valve_wait_survives_the_phase_shortcut)\r\nThe measured defect: `hh` replaced the brake with `PHASE HUNT`. ... FAIL\r\n\r\n======================================================================\r\nFAIL: test_a_plain_continue_is_not_treated_as_a_brake (test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_a_plain_continue_is_not_treated_as_a_brake)\r\nOnly `WAIT:` is a hard stop; an ordinary route is not preserved.\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"C:\\Temp\\saipen-core-unit-m39pm5ht\\project\\tools\\test_t1880_wait_survives_phase_shortcut.py\", line 119, in test_a_plain_continue_is_not_treated_as_a_brake\r\n    state = self._transition_to_hunt()\r\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\Temp\\saipen-core-unit-m39pm5ht\\project\\tools\\test_t1880_wait_survives_phase_shortcut.py\", line 91, in _transition_to_hunt\r\n    self.assertTrue(\r\nAssertionError: False is not true : transition refused before the invariant could be observed: {'ok': False, 'code': 'HOME_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'home-dead: home-divergent: the RUNNING install is C:\\\\Temp\\\\saipen-core-unit-m39pm5ht\\\\project (fingerprint: install-v1:de99cbb40f6092940d7a23216568355fa59b833f8c7d4e09fedbe7f3b5e1ca3b) but STATE.saipen_home names C:\\\\ProgramData\\\\SAI\\\\SAIPEN\\\\runtime\\\\0012aaefb5fc1b95 (fingerprint: install-v1:5e8fd0693c292d2d2b96015f3fed2cf33b959ca814cfae72a6aceef05278f081) -- the installs carry different protocol or engine bytes. Evidence produced now is attributable to the running engine, not the named one. Run saipen through the install STATE names, or converge with `saipen rebind-home --auto`. -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)', 'next_action': 'saipen rebind-home --auto'}\r\n\r\n======================================================================\r\nFAIL: test_an_ordinary_transition_still_writes_the_destination_route (test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_an_ordinary_transition_still_writes_the_destination_route)\r\nThe control: without a WAIT the phase move routes as it always did.\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"C:\\Temp\\saipen-core-unit-m39pm5ht\\project\\tools\\test_t1880_wait_survives_phase_shortcut.py\", line 112, in test_an_ordinary_transition_still_writes_the_destination_route\r\n    state = self._transition_to_hunt()\r\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\Temp\\saipen-core-unit-m39pm5ht\\project\\tools\\test_t1880_wait_survives_phase_shortcut.py\", line 91, in _transition_to_hunt\r\n    self.assertTrue(\r\nAssertionError: False is not true : transition refused before the invariant could be observed: {'ok': False, 'code': 'HOME_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'home-dead: home-divergent: the RUNNING install is C:\\\\Temp\\\\saipen-core-unit-m39pm5ht\\\\project (fingerprint: install-v1:de99cbb40f6092940d7a23216568355fa59b833f8c7d4e09fedbe7f3b5e1ca3b) but STATE.saipen_home names C:\\\\ProgramData\\\\SAI\\\\SAIPEN\\\\runtime\\\\0012aaefb5fc1b95 (fingerprint: install-v1:5e8fd0693c292d2d2b96015f3fed2cf33b959ca814cfae72a6aceef05278f081) -- the installs carry different protocol or engine bytes. Evidence produced now is attributable to the running engine, not the named one. Run saipen through the install STATE names, or converge with `saipen rebind-home --auto`. -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)', 'next_action': 'saipen rebind-home --auto'}\r\n\r\n======================================================================\r\nFAIL: test_the_tripped_valve_wait_survives_the_phase_shortcut (test_t1880_wait_survives_phase_shortcut.PhaseShortcutKeepsAnEarnedWaitTests.test_the_tripped_valve_wait_survives_the_phase_shortcut)\r\nThe measured defect: `hh` replaced the brake with `PHASE HUNT`.\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"C:\\Temp\\saipen-core-unit-m39pm5ht\\project\\tools\\test_t1880_wait_survives_phase_shortcut.py\", line 100, in test_the_tripped_valve_wait_survives_the_phase_shortcut\r\n    state = self._transition_to_hunt()\r\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\Temp\\saipen-core-unit-m39pm5ht\\project\\tools\\test_t1880_wait_survives_phase_shortcut.py\", line 91, in _transition_to_hunt\r\n    self.assertTrue(\r\nAssertionError: False is not true : transition refused before the invariant could be observed: {'ok': False, 'code': 'HOME_REQUIRED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': 'home-dead: home-divergent: the RUNNING install is C:\\\\Temp\\\\saipen-core-unit-m39pm5ht\\\\project (fingerprint: install-v1:de99cbb40f6092940d7a23216568355fa59b833f8c7d4e09fedbe7f3b5e1ca3b) but STATE.saipen_home names C:\\\\ProgramData\\\\SAI\\\\SAIPEN\\\\runtime\\\\0012aaefb5fc1b95 (fingerprint: install-v1:5e8fd0693c292d2d2b96015f3fed2cf33b959ca814cfae72a6aceef05278f081) -- the installs carry different protocol or engine bytes. Evidence produced now is attributable to the running engine, not the named one. Run saipen through the install STATE names, or converge with `saipen rebind-home --auto`. -- the bootloader cannot load the protocol this checkpoint names, so ordinary mutation is refused; converge it with `saipen rebind-home --auto` (or name the replacement explicitly with `saipen rebind-home <candidate-home-path>`)', 'next_action': 'saipen rebind-home --auto'}\r\n\r\n----------------------------------------------------------------------\r\nRan 3 tests in 0.589s\r\n\r\nFAILED (failures=3)\r\n"
+    }
+  ],
+  "ran": 131,
+  "duration_s": 112.782,
+  "timings_s": {
+    "execution_wall_s": 28.625,
+    "environment_identity_wall_s": 0.032,
+    "copy_wall_s": 66.953,
+    "hash_wall_s": 0.156,
+    "cleanup_wall_s": 16.985
+  },
+  "copy_metrics": {
+    "subject_copy_s": 15.359,
+    "canonical_copy_s": 51.313,
+    "canonical_copy_attempts": 1,
+    "trees": null
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_operator_ingress_matrix.py",
+      "test_reconcile_valve.py",
+      "test_t1751_reconcile_surfaces.py",
+      "test_t1776_protocol_home_valve.py",
+      "test_t1858_valve_guidance.py",
+      "test_t1859_zaicode_seal.py",
+      "test_t1868_zaicode_ingress.py",
+      "test_t1880_wait_survives_phase_shortcut.py",
+      "test_t1881_authority_brake.py",
+      "test_t1933_zaicode_goal_seal.py",
+      "test_t1935_zaicode_hook_ownership.py",
+      "test_t2066_zaicode_host_policy.py",
+      "test_t2106_reauth_deadlock.py"
+    ],
+    "manifest_sha256": "6c43816bc6ea79df1e3f3cce5086c10665c4a681afd091a4a9efb077884064e5"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_operator_ingress_matrix.py",
+        "test_protocol_registry.py",
+        "test_reconcile_valve.py",
+        "test_t1751_reconcile_surfaces.py",
+        "test_t1776_protocol_home_valve.py",
+        "test_t1858_valve_guidance.py",
+        "test_t1859_zaicode_seal.py",
+        "test_t1864_autonomous_valve.py",
+        "test_t1868_zaicode_ingress.py",
+        "test_t1880_wait_survives_phase_shortcut.py",
+        "test_t1881_authority_brake.py",
+        "test_t1933_zaicode_goal_seal.py",
+        "test_t1935_zaicode_hook_ownership.py",
+        "test_t2066_zaicode_host_policy.py",
+        "test_t2106_reauth_deadlock.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "30888f8c2c9bd2385eb22056d39994ebfee110f946b67c87fa72278685e984a6",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "2271ca5434892f15f981f28ed5ded00314be23f853d23c8db56c527f302b0463"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "86d04f8a8d42dd8b365b33a29ca7b3cc1eacae9ddcfc2ae1b9bdbf3ee1e5e32f"
+      },
+      "core_unit_shard.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "1a22bac5140eeaf33be64413027a22c474420dbe7e3c6134af9b5e6f90942c9d"
+      },
+      "test_runner.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "e8d4d18e93abd3843f0d911071bc729c15ad767502b72c567be436e6f17545ed"
+      },
+      "verification_cache.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "70188f394bb84cc78fe2417daecf5b38b6abcd3be73956194baf1ef1911413ba"
+      },
+      "process_tree.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "798e6663a85d1906533203fe961472ad8eb8b7e645aa3961a694c1192ca5efcb"
+      },
+      "verification_bootstrap.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "8fa1c333bec82156f70bb66e7df786e99265d0b4c5f3da362a830bfc9198ab24"
+      },
+      "verification_impact.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "d2829c9de720e9b84d9dfa4056786c533bf9cff86913c5ed0546fe63e19f5a83"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "f008508f0f88d1c6a74f95d7e541a411a685b375404d7dd1ea49035ff7a5064c"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "FAIL",
+  "problem": "focused record does not cover its selected patterns"
+}

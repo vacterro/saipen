@@ -1,0 +1,8 @@
+README.md 2 False
+README.ee.md 2 False
+README.ded.md 2 False
+README.ja.md 2 False
+.saipen/saitranslate/kitchen/et/README_ET.md 2 False
+.saipen/saitranslate/kitchen/ru/README_RU.md 2 False
+.saipen/saitranslate/kitchen/ded/README_DED.md 2 False
+.saipen/saitranslate/kitchen/ja/README_JA.md 2 False

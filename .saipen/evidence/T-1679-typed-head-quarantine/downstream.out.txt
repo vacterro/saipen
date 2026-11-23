@@ -1,0 +1,53 @@
+same ___GIT_HUB__Gemini-CLI-UI: before (False, 'VALIDATION_FAILED') after (False, 'VALIDATION_FAILED')
+same __MAIN_____SAICODE: before (True, None) after (True, None)
+same __MAIN____ProTrail: before (False, 'PROTOCOL_STATE_INVALID') after (False, 'PROTOCOL_STATE_INVALID')
+same _AI_STUFF_AGENTIC____SAIMAIL__: before (True, None) after (True, None)
+same _AI_STUFF_AGENTIC____TERMISAI: before (True, None) after (True, None)
+DIFF _AI_STUFF_AGENTIC___SAICONT: before (True, None) after (False, 'VALIDATION_FAILED')
+     before: None
+     after : state-malformed
+same _AI_STUFF_AGENTIC___SAIPAL: before (True, None) after (True, None)
+DIFF _AI_STUFF_AGENTIC___SAIPET: before (True, None) after (False, 'VALIDATION_FAILED')
+     before: None
+     after : state-malformed
+DIFF _AI_STUFF_AGENTIC___SAIRELAY: before (True, None) after (False, 'VALIDATION_FAILED')
+     before: None
+     after : state-malformed
+same _AI_STUFF_AGENTIC___SAITALK: before (False, 'VALIDATION_FAILED') after (False, 'VALIDATION_FAILED')
+same _AI_STUFF_AGENTIC___SAIWORK2: before (False, 'VALIDATION_FAILED') after (False, 'VALIDATION_FAILED')
+same _AI_STUFF_AGENTIC___ZAICODE: before (True, None) after (True, None)
+same _ANDROID__ProBlipAndroid: before (False, 'VALIDATION_FAILED') after (False, 'VALIDATION_FAILED')
+same _HTML___SAI_WEBSITE: before (True, None) after (True, None)
+same _MISC__SubtitleEditContextMenu: before (False, 'VALIDATION_FAILED') after (False, 'VALIDATION_FAILED')
+same _PLUG_SCRIPT___PR Video Random Cut: before (False, 'VALIDATION_FAILED') after (False, 'VALIDATION_FAILED')
+same _PLUG_SCRIPT___yt_cm: before (False, 'VALIDATION_FAILED') after (False, 'VALIDATION_FAILED')
+same _PY___9router_extra: before (True, None) after (True, None)
+same _PY___AUDAPACK: before (False, 'VALIDATION_FAILED') after (False, 'VALIDATION_FAILED')
+same _PY___AUDAPACK-pub: before (False, 'VALIDATION_FAILED') after (False, 'VALIDATION_FAILED')
+same _PY___FastPrompter: before (True, None) after (True, None)
+DIFF _PY___LIMISAW: before (True, None) after (False, 'VALIDATION_FAILED')
+     before: None
+     after : state-malformed
+same _PY___PROBLIP: before (True, None) after (True, None)
+same _PY___SAIMASTER: before (True, None) after (True, None)
+same _PY___SAIPENVIEW: before (True, None) after (True, None)
+same _PY___SAIPLAN: before (False, 'PROTOCOL_STATE_INVALID') after (False, 'PROTOCOL_STATE_INVALID')
+same _PY___SAISENT: before (False, 'VALIDATION_FAILED') after (False, 'VALIDATION_FAILED')
+same _PY___SMART_VAC_CLEANER: before (True, None) after (True, None)
+DIFF _PY___SMART_VAC_DUPLICATE_REMOVER: before (True, None) after (False, 'VALIDATION_FAILED')
+     before: None
+     after : state-malformed
+DIFF _PY___SMART_VAC_MEDIA_COMPRESSOR: before (True, None) after (False, 'VALIDATION_FAILED')
+     before: None
+     after : state-malformed
+same _PY___VacWPlayer: before (True, None) after (True, None)
+same _PY___VACZEN_CALENDAR: before (True, None) after (True, None)
+same _TAMPERMONKEY___AICHATBUTTONS: before (False, 'VALIDATION_FAILED') after (False, 'VALIDATION_FAILED')
+same _TAMPERMONKEY___SUNO_DOWNLOADER: before (False, 'VALIDATION_FAILED') after (False, 'VALIDATION_FAILED')
+projects: 34, differing verdicts: 6
+rc=0
+
+# location control: the six DIFF rows are the engine's home check, not T-1679.
+# An unmodified copy of the live engine at a foreign path answers ok True on SAICONT and LIMISAW,
+# exactly as the before-copy does. Re-run with both engines at foreign paths (before-copy vs unmodified copy):
+projects 34 differing 0

@@ -1,0 +1,2 @@
+RED   pre-fix bytes (HEAD): exec_ok=True gate_ran=True held_during_gate=True lock_after=free
+GREEN post-fix bytes: exec_ok=True gate_ran=True held_during_gate=False lock_after=free

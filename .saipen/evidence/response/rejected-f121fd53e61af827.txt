@@ -1,0 +1,10 @@
+Deepness on nüüd vaikimisi 100 % (`4743403`, lokaalselt, tuleb järgmise releasega). Sinu profiilis oli juba 100. Vanade profiilide 40 muutub üks kord 100-ks. Testid PASS.
+
+Mootorit lahti ei võta: `battlezone2.exe` kood on Steami DRM-iga krüptitud, selle avamine oleks DRM-i möödahiilimine. See polnud ka vajalik: põhjus selgus BZ2 1.3 changelogist (`ChangeLog_pb5.txt:1482`). Vrakk ehk lennuki mudeli koopia ja killud plahvatavad kohe, kui jõuavad `ChunkExplodeHeight` kõrgusele maapinnast (vaikimisi 0, st puudutusel). Ükski ODF võti ei hoia neid kauem elus.
+
+VRV-s saab teha nii, mootorit muutmata:
+1. **Konfetti-killud:** VRV juba kopeerib ja muudab mängu alguses mängija enda ODF-e. Hävimisplahvatustesse (`xcarxpl`, `xvehxpl`) saab lisada kildude mudeleid, mis põrkavad ja pöörlevad 4–6 s. See on puhas visuaal ja multiplayeris ohutu.
+2. **Kaugemale ja kõrgemale lend:** tõstan nendes plahvatustes `kickVeloc`/`kickOmega` (praegu 3 ja 5). Kõrvalmõju: plahvatus lükkab ka lähedal olevaid elusaid üksusi tugevamini.
+3. **Veerev vrakk nagu klassikalises BZ2-s:** lülitan mootori vraki välja (`UseVehicleCrashOnDeath=false`) ja DLL tekitab hävimisel oma vraki lennuki mudeliga. See saab kiiruse ja pöörlemise, veereb mööda maad ja plahvatab 2–3 s pärast. See on kõige suurem töö ja vajab katsetusi mängus.
+
+Soovitan järjekorda 1 → 2 → 3, iga samm sinu mängu-testiga. Kas alustan 1+2-ga, ja kui palju lööki lisada, näiteks 2×?

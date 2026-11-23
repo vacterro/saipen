@@ -1,0 +1,12 @@
+utc: 2026-10-08T05:25:11Z
+recover          : {"ok": false, "code": "HISTORY_LEDGER_CORRUPT", "canonical_next_command": "saipen recover quarantine-log-tail"}
+named command    : {"ok": true, "code": "LOG_TAIL_QUARANTINED", "journal_floor": 5, "quarantined_lines": 2}
+an ordinary verb : {"ok": false, "code": "VALIDATION_FAILED"} | state-malformed: transition_from 'REPAIR' not one of INIT|PLAN|SCOUT|BUILD|VERIFY|REVIEW|S
+recover          : {"ok": false, "code": "RECONCILE_REAUTH_REQUIRED"}
+approved command : {"ok": true, "code": "REPAIRED", "event": "E-7"}
+status           : {"ok": true, "top_workable_ticket": "T-001"}
+held: True
+--- exit: 0 ---
+Ran 9 tests in 26.221s
+
+OK

@@ -1,0 +1,20 @@
+utc: 2026-10-08T01:12:35Z
+subject: the repository working tree with the T-1672 repair in place
+command: python -B -m unittest -v test_t1671_lifecycle_authority (cwd tools/)
+test_a_canonical_closure_with_a_later_typed_note_is_authorized (test_t1671_lifecycle_authority.AssessBoundaryTests.test_a_canonical_closure_with_a_later_typed_note_is_authorized) ... ok
+test_a_closure_before_a_fresh_claim_does_not_back_a_typed_completion (test_t1671_lifecycle_authority.AssessBoundaryTests.test_a_closure_before_a_fresh_claim_does_not_back_a_typed_completion) ... ok
+test_a_ticket_named_only_as_a_target_is_still_named (test_t1671_lifecycle_authority.AssessBoundaryTests.test_a_ticket_named_only_as_a_target_is_still_named) ... ok
+Measured on a sibling project, 08.10.26: a whole lifecycle typed ... ok
+test_no_ledger_and_no_resolvable_event_are_both_unavailable (test_t1671_lifecycle_authority.AssessBoundaryTests.test_no_ledger_and_no_resolvable_event_are_both_unavailable) ... ok
+test_typed_history_below_the_floor_is_never_judged (test_t1671_lifecycle_authority.AssessBoundaryTests.test_typed_history_below_the_floor_is_never_judged) ... ok
+test_ops_names_no_manual_fallback (test_t1671_lifecycle_authority.NoManualFallbackLawTests.test_ops_names_no_manual_fallback) ... ok
+test_the_activation_block_forbids_the_hand_checkpoint_it_used_to_order (test_t1671_lifecycle_authority.NoManualFallbackLawTests.test_the_activation_block_forbids_the_hand_checkpoint_it_used_to_order) ... ok
+A fresh clone carries no operation record: nothing to compare with. ... ok
+A typed note plus a hand-bumped `last_event`, nothing closed. ... ok
+test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing (test_t1671_lifecycle_authority.TypedLifecycleTests.test_a_typed_completion_is_refused_by_every_entry_and_writes_nothing) ... ok
+Negative control: untagged semantic LOG entries stay legal. ... ok
+Negative control: only lifecycle authority is guarded. ... ok
+test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte (test_t1671_lifecycle_authority.TypedLifecycleTests.test_recovery_reopens_the_typed_closure_and_keeps_every_original_byte) ... ok
+Ran 14 tests in 34.083s
+OK
+--- exit: 0 ---

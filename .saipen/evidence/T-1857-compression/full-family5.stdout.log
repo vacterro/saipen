@@ -1,0 +1,7 @@
+{
+  "ok": false,
+  "detail": "the working tree changed after the family's copy was taken, and kept changing across 3 snapshots; the record describes the copy that ran and is not cited. Remove the drift and request evidence of the stable generation.",
+  "verdict": "FAIL",
+  "record": ".saipen/evidence/core-unit/f17babcbf446a000-20261023T104707195023Z.json",
+  "attempts": 3
+}

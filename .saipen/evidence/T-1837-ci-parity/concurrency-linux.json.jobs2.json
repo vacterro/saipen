@@ -1,0 +1,304 @@
+{
+  "status": "PASS",
+  "exit_code": 0,
+  "ran": 46,
+  "red": [],
+  "headers": 0,
+  "unparsed": 0,
+  "tallied": 0,
+  "sections": {},
+  "stdout": "\n",
+  "stderr": "ermeticEnvironmentTests.test_a_child_process_sees_no_outer_binding) ... ok\ntest_every_engine_binding_carrier_is_stripped (test_hermetic_env.HermeticEnvironmentTests.test_every_engine_binding_carrier_is_stripped)\nT-1442: one owner. The engine's own list of project-binding carriers ... ok\ntest_hermetic_env_strips_every_carrier_and_keeps_overrides (test_hermetic_env.HermeticEnvironmentTests.test_hermetic_env_strips_every_carrier_and_keeps_overrides) ... ok\ntest_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone (test_t1505_core_unit_sandbox_reclaim.HeldSandboxTests.test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone) ... skipped 'an open handle blocks deletion only on Windows'\ntest_temporary_directory_raises_and_leaves_a_held_sandbox_forever (test_t1505_core_unit_sandbox_reclaim.HeldSandboxTests.test_temporary_directory_raises_and_leaves_a_held_sandbox_forever) ... skipped 'an open handle blocks deletion only on Windows'\ntest_waiting_for_a_sweep_never_reclaims_a_live_owner (test_t1505_core_unit_sandbox_reclaim.HeldSandboxTests.test_waiting_for_a_sweep_never_reclaims_a_live_owner)\nThe retry waits for the handle; it must not wait the owner away. ... skipped 'an open handle blocks deletion only on Windows'\ntest_plain_rmtree_cannot_remove_a_read_only_store (test_t1505_core_unit_sandbox_reclaim.ReclaimTests.test_plain_rmtree_cannot_remove_a_read_only_store) ... skipped 'read-only files only block deletion on Windows'\ntest_reclaim_of_a_missing_tree_is_done (test_t1505_core_unit_sandbox_reclaim.ReclaimTests.test_reclaim_of_a_missing_tree_is_done) ... ok\ntest_reclaim_removes_a_read_only_store (test_t1505_core_unit_sandbox_reclaim.ReclaimTests.test_reclaim_removes_a_read_only_store) ... ok\ntest_a_sharded_run_leaves_no_sandbox (test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_a_sharded_run_leaves_no_sandbox) ... ok\ntest_a_whole_run_leaves_no_sandbox (test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_a_whole_run_leaves_no_sandbox) ... ok\ntest_an_unreported_own_leak_is_still_detected_including_the_last_shard (test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_an_unreported_own_leak_is_still_detected_including_the_last_shard) ... ok\ntest_unrelated_sandboxes_before_and_during_a_run_are_not_its_leaks (test_t1505_core_unit_sandbox_reclaim.RunFamilyLeavesNothingTests.test_unrelated_sandboxes_before_and_during_a_run_are_not_its_leaks) ... ok\ntest_a_corrupt_stamp_is_left_alone (test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_corrupt_stamp_is_left_alone) ... ok\ntest_a_dead_owners_sandbox_is_reclaimed (test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_dead_owners_sandbox_is_reclaimed) ... ok\ntest_a_live_owners_sandbox_is_kept (test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_live_owners_sandbox_is_kept) ... ok\ntest_a_new_sandbox_names_the_project_it_belongs_to (test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_new_sandbox_names_the_project_it_belongs_to)\nT-1823: the temp root is shared, so a stamp must say whose tree it is. ... ok\ntest_a_real_family_stamps_the_child_reading_the_tree (test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_real_family_stamps_the_child_reading_the_tree) ... ok\ntest_a_sandbox_of_another_project_is_never_swept (test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_sandbox_of_another_project_is_never_swept)\nA pid is only meaningful inside one process space: a foreign stamp's ... ok\ntest_a_sandbox_of_this_project_with_no_live_reader_is_swept (test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_sandbox_of_this_project_with_no_live_reader_is_swept) ... ok\ntest_a_sandbox_whose_family_child_is_still_reading_is_kept (test_t1505_core_unit_sandbox_reclaim.SweepTests.test_a_sandbox_whose_family_child_is_still_reading_is_kept)\nThe tree is read by the family child, not by the run that copied it. ... ok\ntest_an_unstamped_sandbox_waits_for_the_legacy_age (test_t1505_core_unit_sandbox_reclaim.SweepTests.test_an_unstamped_sandbox_waits_for_the_legacy_age) ... ok\ntest_liveness_of_self_and_of_nothing (test_t1505_core_unit_sandbox_reclaim.SweepTests.test_liveness_of_self_and_of_nothing) ... ok\ntest_nothing_outside_the_prefix_is_touched (test_t1505_core_unit_sandbox_reclaim.SweepTests.test_nothing_outside_the_prefix_is_touched) ... ok\n\n----------------------------------------------------------------------\nRan 24 tests in 1.889s\n\nOK (skipped=4)\n\ntest_a_shard_that_never_reported_refuses (test_t1472_core_unit_shards.MergeTests.test_a_shard_that_never_reported_refuses) ... ok\ntest_a_timed_out_shard_times_out_the_run (test_t1472_core_unit_shards.MergeTests.test_a_timed_out_shard_times_out_the_run) ... ok\ntest_one_inconsistent_shard_refuses_a_union_that_looks_consistent (test_t1472_core_unit_shards.MergeTests.test_one_inconsistent_shard_refuses_a_union_that_looks_consistent) ... ok\ntest_shards_that_discovered_different_families_refuse (test_t1472_core_unit_shards.MergeTests.test_shards_that_discovered_different_families_refuse) ... ok\ntest_shards_that_kept_fewer_tests_than_discovered_refuse (test_t1472_core_unit_shards.MergeTests.test_shards_that_kept_fewer_tests_than_discovered_refuse) ... ok\ntest_two_consistent_shards_are_one_pass (test_t1472_core_unit_shards.MergeTests.test_two_consistent_shards_are_one_pass) ... ok\ntest_a_shard_with_no_module_is_never_planned (test_t1472_core_unit_shards.PlanTests.test_a_shard_with_no_module_is_never_planned) ... ok\ntest_every_module_lands_in_exactly_one_shard (test_t1472_core_unit_shards.PlanTests.test_every_module_lands_in_exactly_one_shard) ... ok\ntest_longest_modules_are_spread_and_the_plan_is_deterministic (test_t1472_core_unit_shards.PlanTests.test_longest_modules_are_spread_and_the_plan_is_deterministic) ... ok\ntest_only_the_declared_discovery_shape_is_sharded (test_t1472_core_unit_shards.PlanTests.test_only_the_declared_discovery_shape_is_sharded) ... ok\ntest_a_deliberate_red_in_a_sharded_run_is_a_new_red (test_t1472_core_unit_shards.RealShardedRunTests.test_a_deliberate_red_in_a_sharded_run_is_a_new_red) ... ok\ntest_a_record_of_a_sharded_run_keeps_the_partition_proof (test_t1472_core_unit_shards.RealShardedRunTests.test_a_record_of_a_sharded_run_keeps_the_partition_proof) ... ok\ntest_measured_durations_balance_the_next_run (test_t1472_core_unit_shards.RealShardedRunTests.test_measured_durations_balance_the_next_run) ... ok\ntest_shards_and_the_whole_run_agree (test_t1472_core_unit_shards.RealShardedRunTests.test_shards_and_the_whole_run_agree) ... ok\ntest_equal_counts_cannot_hide_a_duplicate_and_an_omission (test_t1830_verification_observations.ExactMembershipTests.test_equal_counts_cannot_hide_a_duplicate_and_an_omission) ... ok\ntest_equal_counts_with_different_test_inventory_refuse (test_t1830_verification_observations.ExactMembershipTests.test_equal_counts_with_different_test_inventory_refuse) ... ok\ntest_every_occurrence_exactly_once_passes (test_t1830_verification_observations.ExactMembershipTests.test_every_occurrence_exactly_once_passes) ... ok\ntest_legacy_discovery_cost_is_unknown_not_zero (test_t1830_verification_observations.ExactMembershipTests.test_legacy_discovery_cost_is_unknown_not_zero) ... ok\ntest_missing_or_invalid_membership_fails_closed (test_t1830_verification_observations.ExactMembershipTests.test_missing_or_invalid_membership_fails_closed) ... ok\ntest_actual_serial_and_sharded_runs_keep_verdict_and_timing_scope (test_t1830_verification_observations.RealObservationTests.test_actual_serial_and_sharded_runs_keep_verdict_and_timing_scope) ... ok\ntest_copy_reports_actual_phases_and_preserves_all_bytes (test_t1830_verification_observations.RealObservationTests.test_copy_reports_actual_phases_and_preserves_all_bytes) ... ok\ntest_new_test_and_import_failure_stay_in_exact_inventory (test_t1830_verification_observations.RealObservationTests.test_new_test_and_import_failure_stay_in_exact_inventory) ... ok\n\n----------------------------------------------------------------------\nRan 22 tests in 1.650s\n\nOK\n",
+  "processes_leaked": [],
+  "discovered": 46,
+  "partition_error": null,
+  "membership_required": true,
+  "membership_proof": {
+    "inventory_sha256": "fda11a63c14ef1b055c7605d444fd311e1a23d7867a46849d0d02ddf282d1e16",
+    "occurrences": 46
+  },
+  "empty_shards": [],
+  "discovery_process_s": 0.19,
+  "shards": [
+    {
+      "status": "PASS",
+      "exit_code": 0,
+      "ran": 24,
+      "selected": 24,
+      "discovered": 46,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "duration_s": 2.1,
+      "inventory_sha256": "fda11a63c14ef1b055c7605d444fd311e1a23d7867a46849d0d02ddf282d1e16",
+      "selected_indices": [
+        0,
+        1,
+        2,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37
+      ],
+      "discovery_s": 0.095967,
+      "processes_leaked": []
+    },
+    {
+      "status": "PASS",
+      "exit_code": 0,
+      "ran": 22,
+      "selected": 22,
+      "discovered": 46,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "duration_s": 1.9,
+      "inventory_sha256": "fda11a63c14ef1b055c7605d444fd311e1a23d7867a46849d0d02ddf282d1e16",
+      "selected_indices": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45
+      ],
+      "discovery_s": 0.094033,
+      "processes_leaked": []
+    }
+  ],
+  "module_durations_s": {
+    "test_hermetic_env": 0.0,
+    "test_t1472_core_unit_shards": 1.1,
+    "test_t1505_core_unit_sandbox_reclaim": 1.9,
+    "test_t1830_verification_observations": 0.5
+  },
+  "sandboxes_swept": [],
+  "sandboxes_leaked": [],
+  "fingerprint": "a6de20efb328615618b485cd1b10d8932b588f51055c43fa12dd34471f7243f0",
+  "jobs": 2,
+  "timings_s": {
+    "shard_copy_wall_s": 0.114489,
+    "environment_identity_wall_s": 0.054151,
+    "sweep_wall_s": 0.000169,
+    "copy_wall_s": 0.080824,
+    "hash_wall_s": 0.033314,
+    "execution_wall_s": 2.110041,
+    "cleanup_wall_s": 0.04304
+  },
+  "copy_metrics": {
+    "subject_copy_s": 0.080725,
+    "canonical_copy_s": 0.0,
+    "canonical_copy_attempts": 0
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "unit",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "timeout": 10800,
+      "jobs": 2,
+      "environment_tools": null
+    },
+    "python": {
+      "version": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+      "implementation": "cpython",
+      "prefix": "/usr",
+      "runtime": [
+        {
+          "path": "/usr/bin/python3.12",
+          "exists": true,
+          "sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f"
+        }
+      ]
+    },
+    "platform": {
+      "os": "posix",
+      "system": "Linux",
+      "release": "4.4.0-19041-Microsoft",
+      "machine": "x86_64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "b46299096ab7bfcea95a43cb591f477a011587fa659238791cf690362a1e86c4",
+    "toolchain": {
+      "git": {
+        "path": "/usr/bin/git",
+        "exists": true,
+        "sha256": "eb54b535467e0975c1284d4c4d08eea779aeb248a5d34b02e2ee171382e22201"
+      },
+      "node": null,
+      "npm": {
+        "path": "/mnt/c/nodejs/npm",
+        "exists": true,
+        "sha256": "d748b897a09422111351b89df2fc970b372789f12ce883b0146ae728a63c8f58"
+      },
+      "npx": {
+        "path": "/mnt/c/nodejs/npx",
+        "exists": true,
+        "sha256": "81ef6b49dc0babe420371a15c866575fedaa2afffccd76e9be0a4df2cccb6911"
+      },
+      "bash": {
+        "path": "/usr/bin/bash",
+        "exists": true,
+        "sha256": "bc5945feb8bd26203ebfafea5ce1878bb2e32cb8fb50ab7ae395cfb1e1aaaef1"
+      },
+      "pwsh": null,
+      "powershell": null,
+      "opencode": {
+        "path": "/mnt/c/nodejs/opencode",
+        "exists": true,
+        "sha256": "eb3407053e81fcc153fc7ee3584828d73bba63a4b8bce2b05a4ff5ee545e64c6"
+      },
+      "claude": null,
+      "codex": {
+        "path": "/mnt/c/nodejs/codex",
+        "exists": true,
+        "sha256": "508f6f63b9a11fbba698712e331e1667df029eac8f8559d8ef12afe455f2fafc"
+      },
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "/root/.codex/config.toml",
+        "exists": false
+      },
+      {
+        "path": "/root/.codex/hooks.json",
+        "exists": false
+      },
+      {
+        "path": "/root/.claude/settings.json",
+        "exists": false
+      },
+      {
+        "path": "/root/.config/opencode/opencode.json",
+        "exists": false
+      },
+      {
+        "path": "/root/.config/opencode/plugins/saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "/root/.config/opencode/plugin/saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "/root/.gitconfig",
+        "exists": false
+      },
+      {
+        "path": "/root/.config/git/config",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/core_unit.py",
+        "exists": true,
+        "sha256": "988c9b9cfb2c3b813b3b8f619b0889c04dc63ecdc900d51297562648837fe0ea"
+      },
+      "core_unit_shard.py": {
+        "path": "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/core_unit_shard.py",
+        "exists": true,
+        "sha256": "b31bafde4ad2f78069e8f5ef839e26c59a4cbb38c9bcc4a19ad3e7acee7b6be0"
+      },
+      "test_runner.py": {
+        "path": "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/test_runner.py",
+        "exists": true,
+        "sha256": "4f2950036436bd975be03f44f98725eac9b0cfd443a7c346680012f31fe579b3"
+      },
+      "focused_unit.py": {
+        "path": "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/focused_unit.py",
+        "exists": true,
+        "sha256": "222a2398bb19f508e94407969eae499d0af534d3ba4d313e1f01dade5312ccbf"
+      },
+      "verification_cache.py": {
+        "path": "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/verification_cache.py",
+        "exists": true,
+        "sha256": "5d724c800f1435f6c0c18ed2c79840a1b57fcd11e81d253bc13cea1ecb8d0ab2"
+      },
+      "process_tree.py": {
+        "path": "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/process_tree.py",
+        "exists": true,
+        "sha256": "e5f07f80d2a6802d95c3ccbebe4ca5f66cdbbcbb25b13450123baa896d8e8356"
+      },
+      "verification_bootstrap.py": {
+        "path": "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/verification_bootstrap.py",
+        "exists": true,
+        "sha256": "df9bdce3388bf2511ce13a5a4329219810096ac58be0323675afd78b48cb605e"
+      },
+      "verification_impact.py": {
+        "path": "/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/tools/saipen_engine/verification_impact.py",
+        "exists": true,
+        "sha256": "cf5c146ee2931cc1baa2765fa00e8bb9129d3370cb8bb8a2b7eb020dd8bba455"
+      }
+    },
+    "baseline": {
+      "path": "/tmp/saipen-ci-benchmark-azgwxgzi/corpus/tools/core_unit_baseline.json",
+      "exists": false
+    }
+  },
+  "duration_s": 2.4,
+  "timeout_s": 10800,
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "name": "unit",
+  "detail": null,
+  "failures": [],
+  "causes": {}
+}

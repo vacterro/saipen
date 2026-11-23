@@ -1,0 +1,7 @@
+# Required neighbour: python -B tools/test_audit_route.py
+...........................
+----------------------------------------------------------------------
+Ran 27 tests in 0.107s
+
+OK
+EXIT=0

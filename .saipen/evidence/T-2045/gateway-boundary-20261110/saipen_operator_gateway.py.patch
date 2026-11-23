@@ -1,0 +1,66 @@
+--- before/tools/saipen_operator_gateway.py
++++ after/tools/saipen_operator_gateway.py
+@@ -20,15 +20,35 @@
+ 
+ sys.path.insert(0, str(Path(__file__).resolve().parent))
+ 
+-from saipen_engine.state import parse_state
++from saipen_engine.paths import (
++    prove_owned_dir_chain,
++    prove_owned_regular,
++    read_bound_regular_bytes,
++)
++from saipen_engine.state import parse_state_or_error
+ 
+ 
+ def _load_state(root: Path) -> dict:
+-    return parse_state((root / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig"))
++    path = root / ".saipen" / "STATE.md"
++    prove_owned_dir_chain(path.parent, ownership_root=root, kind="gateway STATE")
++    info = prove_owned_regular(path, kind="gateway STATE")
++    text = read_bound_regular_bytes(path, info, max_bytes=32 * 1024 * 1024).decode("utf-8-sig")
++    state, error = parse_state_or_error(text)
++    if error or not state:
++        raise ValueError(error or "STATE.md is empty")
++    return state
+ 
+ 
+ def status(root: Path) -> dict:
+-    state = _load_state(root)
++    root = Path(root).absolute()
++    try:
++        state = _load_state(root)
++    except FileNotFoundError:
++        return {"ok": False, "code": "PROJECT_UNBOUND", "detail": "no STATE.md at this root"}
++    except (UnicodeDecodeError, ValueError) as exc:
++        return {"ok": False, "code": "STATE_INVALID", "detail": str(exc)}
++    except OSError as exc:
++        return {"ok": False, "code": "STATE_UNREADABLE", "detail": str(exc)}
+     return {
+         "ok": True,
+         "code": "GATEWAY_STATUS",
+@@ -36,7 +56,7 @@
+         "task": state.get("task"),
+         "phase": state.get("phase"),
+         "goal": state.get("goal_ingress"),
+-        "budget": state.get("authority_source"),
++        "budget": {key: state.get(key) for key in ("goal_tickets", "goal_waves")},
+         "authority": "READ_ONLY",
+         "real_approval_requires": "trusted host hook authenticated by the SAIPEN broker",
+         "note": "This gateway does not mint or renew authority.",
+@@ -49,13 +69,11 @@
+     parser.add_argument("--json", action="store_true")
+     args = parser.parse_args()
+ 
+-    root = args.project_root.resolve()
+-    if not (root / ".saipen" / "STATE.md").is_file():
+-        result = {"ok": False, "code": "PROJECT_UNBOUND", "detail": "no SAIPEN project at this root"}
++    result = status(args.project_root)
++    if not result["ok"]:
+         print(json.dumps(result))
+         return 1
+ 
+-    result = status(root)
+     if args.json:
+         print(json.dumps(result, indent=2))
+     else:

@@ -1,0 +1,7 @@
+T-1875 red-before-green control: each fix reverted separately in an
+isolated copy of the tree; the oracle names the defect it detects.
+
+scope    reverted -> scope-unissuable
+proof    reverted -> shape-is-not-proof
+routing  reverted -> h16-stop
+fixed    tree     -> GREEN

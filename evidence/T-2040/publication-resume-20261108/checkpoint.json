@@ -1,0 +1,31 @@
+{
+  "captured_at": "2026-11-08T08:49:31.324777+00:00",
+  "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "head": "66ef622a43ab59512735ac78ce10d1250e26f9df",
+  "index_sha256": "68b00fd9d9ef2ec51a50e0d6177207ff805874211bc2867b4492c6ca16db27de",
+  "staged_entries": 8835,
+  "staged_manifest_sha256": "56a54b445cff7d95346edb4c3147b0787e70bd9b35c12cd393fd9be124cab5d5",
+  "cached_diff_sha256": "ff824b2f87db6ac41715af137aaee3bbbd26c15850ee49c76a8668fa8e8dad17",
+  "owned_files": {
+    "tools/saipen_engine/outcome_truth.py": {
+      "sha256": "8ad47a8498aa591b635f48f4ee3a10aaba75d6b9e2113ef67c3246b7837085d1",
+      "bytes": 19798
+    },
+    "tools/saipen_engine/closure.py": {
+      "sha256": "e4120bbefa5b96c695318b42f7322bcaa7e1d35f4cbc3497890d797568036b50",
+      "bytes": 33114
+    },
+    "tools/saipen_engine/context.py": {
+      "sha256": "c3a6cb8f06108d7b696501234f3e759f4e3aab266d32f5aeb416cfa69d963909",
+      "bytes": 48271
+    },
+    "tools/test_t2040_publication_truth.py": {
+      "sha256": "0d7ab5ceee6d3e390be3df901f76e2f83672056fd3d7f52882ebd1d666288c82",
+      "bytes": 16226
+    },
+    "tools/test_release_completion.py": {
+      "sha256": "7d68bf3d1d6e59c4ff9cdafbfa577f4aa45d63e38e1e78e63fce81614e2b9a58",
+      "bytes": 9339
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "tools/test_campaign_matrix.py",
+    "tools/test_campaign_production_gates.py",
+    "tools/test_t1945_analysis_progress.py",
+    "tools/test_t1945_campaign_driver.py",
+    "tools/test_aut31_production_autonomy.py"
+  ],
+  "oracle_changed": true,
+  "started_utc": "2026-11-09T20:26:30.143290+00:00",
+  "hashes_before": {
+    "tools/test_campaign_matrix.py": "40c19eb1c3787878f8b6435fb029e15b00f17cb93650a1d34161b007aa6c8aaa",
+    "tools/test_campaign_production_gates.py": "150e802aaae68164e6ea45b19685a38ab9535a7da72def7a1f1831e3828f2d6a",
+    "tools/test_t1945_analysis_progress.py": "9e43773498792f815a404ecf674add3264018913b978b22b29495cca077031a8",
+    "tools/test_t1945_campaign_driver.py": "599704f560ce94d10c0676254e6e0a5c31b83b29b7f24f7d640533a7d9dd34e3",
+    "tools/test_aut31_production_autonomy.py": "88fbe98abd31042c2218c4eb1f6f9c07cf0e3672c56ca558516e300cfb59e59f",
+    "tools/saipen_engine/campaign.py": "fbb09c5f1f16246ef9b73c80221216ae23972afe20aacb86649d9fb8d6e167af",
+    "tools/saipen_engine/continuation_assessment.py": "e0db3c2a18ed9606f5ce442e19779b3549bd1f04afaf174eebfc60acfe8c8428",
+    "tools/saipen_engine/work_exhaustion.py": "888d765f999eac92d1591108f43ca0ce7bec84b074d1577533c2e1a989791761",
+    "tools/saipen_engine/paths.py": "69a03aeacaa4d550938261f478f99b44a1f884893444edbcfb276c3f102a2b9e",
+    "tools/saipen_engine/journal.py": "96bbbe379fa16e09319b2bf7c75f4bd37e0f0452b328a719a09b915e02d5c2ac",
+    "tools/campaign_test_support.py": "ec8e8bbeaa64b8ce4d8c4518cb367cb3ced4a63a66fb51da70d085119dcbe6e4",
+    "tools/test_fixture_support.py": "6641bb9a805bdf3de0964fdad95ec9fef292f4b73b959d61aa3154e981f2dff0",
+    "tools/test_t2040_terminal_consumer_guards.py": "a1c63c38ea768668e3ab202a56e85641b54b3062190118d3ec7a46f0f1e97dc9",
+    ".saipen/STATE.md": "bf7814d90da39a9dc7ae868e66135bb09eaba5e235cbbcc2b631096ff510f556"
+  },
+  "exit_code": 0,
+  "hashes_after": {
+    "tools/test_campaign_matrix.py": "40c19eb1c3787878f8b6435fb029e15b00f17cb93650a1d34161b007aa6c8aaa",
+    "tools/test_campaign_production_gates.py": "150e802aaae68164e6ea45b19685a38ab9535a7da72def7a1f1831e3828f2d6a",
+    "tools/test_t1945_analysis_progress.py": "9e43773498792f815a404ecf674add3264018913b978b22b29495cca077031a8",
+    "tools/test_t1945_campaign_driver.py": "599704f560ce94d10c0676254e6e0a5c31b83b29b7f24f7d640533a7d9dd34e3",
+    "tools/test_aut31_production_autonomy.py": "88fbe98abd31042c2218c4eb1f6f9c07cf0e3672c56ca558516e300cfb59e59f",
+    "tools/saipen_engine/campaign.py": "fbb09c5f1f16246ef9b73c80221216ae23972afe20aacb86649d9fb8d6e167af",
+    "tools/saipen_engine/continuation_assessment.py": "e0db3c2a18ed9606f5ce442e19779b3549bd1f04afaf174eebfc60acfe8c8428",
+    "tools/saipen_engine/work_exhaustion.py": "888d765f999eac92d1591108f43ca0ce7bec84b074d1577533c2e1a989791761",
+    "tools/saipen_engine/paths.py": "69a03aeacaa4d550938261f478f99b44a1f884893444edbcfb276c3f102a2b9e",
+    "tools/saipen_engine/journal.py": "96bbbe379fa16e09319b2bf7c75f4bd37e0f0452b328a719a09b915e02d5c2ac",
+    "tools/campaign_test_support.py": "ec8e8bbeaa64b8ce4d8c4518cb367cb3ced4a63a66fb51da70d085119dcbe6e4",
+    "tools/test_fixture_support.py": "6641bb9a805bdf3de0964fdad95ec9fef292f4b73b959d61aa3154e981f2dff0",
+    "tools/test_t2040_terminal_consumer_guards.py": "a1c63c38ea768668e3ab202a56e85641b54b3062190118d3ec7a46f0f1e97dc9",
+    ".saipen/STATE.md": "bf7814d90da39a9dc7ae868e66135bb09eaba5e235cbbcc2b631096ff510f556"
+  },
+  "finished_utc": "2026-11-09T20:26:35.369020+00:00"
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "label": "pre",
+    "verifier_sha256": "cad36cd26f0eb784d88cc9fb847cd7f4b74a45d9385006af8c634416c6f33228",
+    "subject_sha256": "3e286871204c99c02256c884a43b16b3e8959fcae7b7bdac8a7cbcd4d58b1110",
+    "exit_code": 1,
+    "output_sha256": "545e39c0838d37a273a889522aa1fd15917044ca0816601d265d60f3c225e2ce"
+  },
+  {
+    "label": "post",
+    "verifier_sha256": "cad36cd26f0eb784d88cc9fb847cd7f4b74a45d9385006af8c634416c6f33228",
+    "subject_sha256": "0e1d8e0b15a7644d8ba81c15f52e385ca6e52bfc8f3c6ace369cc52502f9adfa",
+    "exit_code": 0,
+    "output_sha256": "337fc9a3477a5b1611ad8c6b10835fec355ad17d5882de72cd775a664e39947f"
+  }
+]

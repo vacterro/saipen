@@ -1,0 +1,14 @@
+OLD carrying `source_receipts` no longer refuses outright (T-1908, SRC-323).
+Agent-written PASS fraud is prevented: each receipt's OWN request clause
+(`intake.is_request_clause`) counts `VERIFIED` only when the bound PASS event and
+successor verify contract also hold a current executed Work re-verification.
+Source identity and re-verification bytes are read preconditions; the coverage
+ledger's prior digest is compare-and-swap. All settle with Work in one journaled
+transaction. This route is NARROWER than retirement, never a bypass: any OTHER
+unresolved requirement refuses `SUPERSESSION_SOURCE_MIGRATION_REQUIRED` and names
+the exact `saipen source disp` command that settles it on its own evidence; a
+non-ACTIVE receipt owes nothing; no receipt is retired, marked INVALID or
+closed, and no publication is claimed. The cycle that deadlocked a proven
+duplicate -- Source cannot retire while Work is live, Work cannot supersede
+while Source is attached -- therefore ends at the operator's existing grant.
+

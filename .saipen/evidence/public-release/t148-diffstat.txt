@@ -1,0 +1,19 @@
+ .../MANIFEST-opencode-native-smoke-T-1327.json     |  49 +++
+ .../native-smoke-proof.json                        | 128 +++++++
+ .../MANIFEST-opencode-native-smoke-T-1327.json     |  49 +++
+ .../native-smoke-proof.json                        | 128 +++++++
+ tools/improve.py                                   |  14 +-
+ tools/saipen_engine/debt.py                        |  61 ++-
+ tools/saipen_engine/log.py                         |  34 +-
+ tools/saipen_engine/operations.py                  |  38 +-
+ tools/saipen_engine/reconcile.py                   |   4 +-
+ tools/saipen_engine/remediation.py                 |  12 +-
+ ...test_t147_generation_exit_behind_style_drift.py | 149 ++++++++
+ tools/test_t148_sweep_historical_bar.py            | 148 ++++++++
+ ...test_t149_reverify_run_records_its_directory.py |  91 +++++
+ ...est_t150_legacy_generation_evidence_boundary.py | 102 ++++++
+ ...reign_receipt_cannot_erase_a_sibling_verdict.py | 226 ++++++++++++
+ ...a_red_gate_names_the_repair_that_resolves_it.py | 261 +++++++++++++
+ tools/validate.py                                  |  44 ++-
+ tools/validator_fail_sites.json                    | 407 +++++++++++----------
+ 18 files changed, 1726 insertions(+), 219 deletions(-)

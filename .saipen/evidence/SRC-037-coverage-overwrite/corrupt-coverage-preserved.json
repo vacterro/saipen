@@ -1,0 +1,165 @@
+{
+  "requirements": {
+    "SRC-037:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["CORE-001"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-71 PASS: idle->idle close/archive succeeds with zero stop calls; red-control confirmed FAIL-then-PASS",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-71 -- all cases B..H PASS",
+      "work": "T-71",
+      "text": "Default idle cleanup is no longer permanently refused by an inverted state check; fresh-state revalidation gates the stop verb and the action plan is recomputed after the fresh read."
+    },
+    "SRC-037:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["CORE-002"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-72 PASS: validate(merged) detects invalid values; currentSettings never serves invalid config",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-72 -- cases A..G PASS",
+      "work": "T-72",
+      "text": "Invalid persisted configuration is reported as repaired AND remains valid; validation failure refuses exposure of invalid config."
+    },
+    "SRC-037:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["CORE-003"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-73 PASS: no partial final filename survives a failed write/flush/publication",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-73 -- cases A..I PASS",
+      "work": "T-73",
+      "text": "Atomic evidence publication with staging: a failed export leaves no partial file under the final evidence filename."
+    },
+    "SRC-037:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["CORE-004"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-74 PASS: rename failure is an explicit failure with the old file intact, bounded EPERM retry still saves, no copy-fileSys fallback",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-74 -- cases A..G PASS",
+      "work": "T-74",
+      "text": "Windows rename failure is an explicit failure; the old settings file stays intact, no copyFileSys fallback exposes truncated JSON."
+    },
+    "SRC-037:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["CORE-005"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-75 PASS: reset() never orphans or duplicates the interval; in-flight reservations survive",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-75 -- cases A..H PASS",
+      "work": "T-75",
+      "text": "reset() clears the interval timer via clearInterval and never orphans or duplicates scheduling; in-flight reservations survive reset."
+    },
+    "SRC-037:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["W2-001"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-76 PASS: reservation precedes the destructive call; unpersistable reservations refuse",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-76 -- cases A..F PASS",
+      "work": "T-76",
+      "text": "Transactional supervisor takeover: recordAttempt persists before execute; failed reservations never proceed to the destructive call."
+    },
+    "SRC-037:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["W2-002"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-77 PASS: clears survive stale writers and restarts; digests reconciled; failures stay fail-closed",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-77 -- cases A..I PASS",
+      "work": "T-77",
+      "text": "Journal reconciliation uses mutation revision; stale writers cannot resurrect deleted records; failures remain fail-closed."
+    },
+    "SRC-037:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["W2-003"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-79 PASS: obsolete resolvers/errors/ends open nothing; one active connection; stop() releases everything",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-79 -- cases A..H PASS",
+      "work": "T-79",
+      "text": "Generation-scoped SSE connection cancellation: a stopped generation's _connect continuation cannot revive a newer connection."
+    },
+    "SRC-037:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["W2-004"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-78 PASS: failed init leaves no self-lock; live owners preserved; mutation durable",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-78 -- cases A..G PASS",
+      "work": "T-78",
+      "text": "Lock initialization failure cleanup: a failed acquire leaves no permanent blocker; live owners are preserved and mutations are durable."
+    },
+    "SRC-037:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["W2-005"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-80 PASS: structured release outcomes correct; failed release never authorizes retry",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-80 -- cases A..B PASS",
+      "work": "T-80",
+      "text": "Structured reservation-release result is checked via released.ok === true; a failed release never retires an envelope or authorizes a retry."
+    },
+    "SRC-037:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["W2-006"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-81 PASS: dry-run/disabled outcomes do not poison in-memory deduplication after config changes",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-81 -- cases A..H PASS",
+      "work": "T-81",
+      "text": "Skip decisions are separated from deduplication fingerprints; dry-run and disabled outcomes cannot block later live decisions for the same thread."
+    },
+    "SRC-037:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["PERF-001"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-82 PASS: digest-ring Set membership eliminates O(N^2) scan; 31ms vs 2521ms",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-82 -- cases F/G/H/E PASS",
+      "work": "T-82",
+      "text": "HandledDigestRing uses an O(1) Set for membership; the previous Array.includes O(N^2) absorb path is removed."
+    },
+    "SRC-037:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["PERF-002"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-83 PASS: CDP send deadlines bounded; 100 expired with pending=0",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-83 -- cases A..F PASS",
+      "work": "T-83",
+      "text": "CdpClient.send deadlines are bounded; expired commands settle with no dangling promises."
+    },
+    "SRC-037:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["PERF-003"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-84 PASS: incremental SSE framing; size ceiling applied before dispatch",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-84 -- cases F/I PASS",
+      "work": "T-84",
+      "text": "HostEventStream._consume applies incremental framing and a size ceiling before dispatching, avoiding full-buffer rescans after each chunk."
+    },
+    "SRC-037:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["PERF-004"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-85 PASS: async streaming sendSoundFile; 262144B in 4 chunks; refusal=400",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-85 -- streaming PASS",
+      "work": "T-85",
+      "text": "sendSoundFile streams the file in chunks instead of readFileSync buffering the entire file into memory."
+    },
+    "SRC-037:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "clauses": ["PERF-005"],
+      "disposition": "VERIFIED",
+      "evidence": "tests/probe_audit_inbox_fixes.js T-86 PASS: bounded deduplicated journal diagnostics; 2 unique over 1000 failed writes",
+      "verification": "node tests/probe_audit_inbox_fixes.js T-86 -- bounded PASS",
+      "work": "T-86",
+      "text": "_atomicReplace deduplicates diagnostics on ENOTSUP; bounded warning growth under repeated failures."
+    }
+  },
+  "schema_version": 1
+}

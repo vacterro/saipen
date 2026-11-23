@@ -1,0 +1,44 @@
+{
+  "command": [
+    "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+    "checkpoint",
+    "DEC",
+    "T-1494",
+    "SHIP evidence envelope correction: E-13965 truthfully included authenticated pre-fix control tallies in an ordinary REVIEW RUN; the decisive-evidence grammar interpreted that historical subject as the current subject. Preserve E-13965. Owned release-2caf93f3f6c54211b8ab9311674122e0 recovered ABORTED with zero targets and zero canonical closure writes. Actual current verifier and implementation remain green; no source or verifier change. Record each subject in REGRESSION-EVIDENCE and current review verdict separately.",
+    "--json"
+  ],
+  "exit_code": 0,
+  "session_capability": "no-publish",
+  "result": {
+    "ok": true,
+    "code": "CHECKPOINTED",
+    "op_id": "checkpoint-5c770590fdc24a8a9581a1945abe8da3",
+    "changed_files": [
+      ".saipen/LOG.md",
+      ".saipen/BOARD.md",
+      ".saipen/STATE.md"
+    ],
+    "recovery_required": false,
+    "event_id": "E-13968"
+  },
+  "committed_operation": {
+    "path": ".saipen\\recovery\\settled\\checkpoint-5c770590fdc24a8a9581a1945abe8da3\\operation.json",
+    "status": "COMMITTED",
+    "operation": "checkpoint",
+    "progress_index": 3,
+    "targets": [
+      {
+        "path": ".saipen/LOG.md",
+        "applied": true
+      },
+      {
+        "path": ".saipen/BOARD.md",
+        "applied": true
+      },
+      {
+        "path": ".saipen/STATE.md",
+        "applied": true
+      }
+    ]
+  }
+}

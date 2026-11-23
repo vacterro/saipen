@@ -1,0 +1,79 @@
+{
+  "clauses": {
+    "SRC-042:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Canonical display title is exactly PROJECT_NAME +  \u2014  + SAIHANDOFF +  \u2014  + TOPIC; project first; no timestamp, model name, role name, brackets, SAIHANDOFF_BEGIN, [SAIPEN_HANDOFF] or HTML comment marker"
+    },
+    "SRC-042:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "TOPIC is the canonical field; TARGET is never reintroduced as a synonym; TARGET_POLICY remains a separate routing field"
+    },
+    "SRC-042:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audapack/saihandoff.py owns canonical_handoff_title(project_name, topic), parse_canonical_handoff_title(text), canonicalize_handoff_body(text), handoff_content_sha256(body), parse_saihandoff_v1(text), validate_saihandoff_v1(record) and nothing else"
+    },
+    "SRC-042:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIHANDOFF_V1 envelope is title line then SAIHANDOFF_V1, HANDOFF_ID, PROJECT_ID, PROJECT_NAME, TOPIC, KIND, ROLE, TARGET_POLICY, DELIVERY, CONTENT_SHA256, END_HEADER, blank line, body"
+    },
+    "SRC-042:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "validate_saihandoff_v1 fails closed for missing field, duplicate field, unsupported version, empty PROJECT_NAME, empty TOPIC, invalid PROJECT_ID, malformed SHA-256, empty body, body SHA mismatch, visible PROJECT_NAME mismatch, visible TOPIC mismatch, same HANDOFF_ID with incompatible content, malformed legacy-like syntax presented as V1"
+    },
+    "SRC-042:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Error vocabulary includes at least title_identity_conflict, missing_field, duplicate_field, invalid_project_id, invalid_sha256, content_sha_mismatch, empty_body, unsupported_version"
+    },
+    "SRC-042:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "The module is pure protocol logic: no persistence, no routing, no network, no DOM"
+    },
+    "SRC-042:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Exactly one authoritative protocol document: AUDAPACK \u2014 SAIHANDOFF_PROTOCOL_20260910_0502.md; bundle copies become minimal reference stubs with no independent envelope definition"
+    },
+    "SRC-042:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "M1 Archive Auto Send: drop one canonical registered project archive -> CLASSIFYING -> ARMED -> WAITING_UPLOAD -> WAITING_CHAT_IDLE -> READY_TO_SEND -> SENDING -> SENT with no second operator click; project archive only; no assistant response inspection"
+    },
+    "SRC-042:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reuse existing archive and composer primitives (handleComposerArchiveDrop, chatGPTComposerRoot, chatGPTUploadInput, chatGPTComposerAttachmentTiles, chatGPTAttachmentIsBusy, chatGPTReadyComposerAttachments, composerArchiveEntries, composerAttachedProjectIdentities, projectNameFromArtifactFilename, listRegisteredProjects, matchRegisteredProject, resolveRegisteredProjectForArchive, getChatGPTSend, waitForChatGPTSendReady, clickChatGPTSendVerified, chatGPTIsGenerating, currentConversationKey, renderAutoAuditState) and the existing observer/tick lifecycle; no second permanent document-wide MutationObserver"
+    },
+    "SRC-042:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Auto-send classification is strict: PROJECT_ARCHIVE requires exactly one ZIP candidate, canonical archive naming identity, exactly one enabled registered project match, no second different project archive, and no contradiction from the active conversation; isAudapackProjectArchiveName must not be authority for Send; fail closed on ambiguity"
+    },
+    "SRC-042:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Both entry paths observed: composer drag/drop and native upload-input change; a new candidate starts a new generation and invalidates every older pending intent; identity uses generation nonce, conversation key, project id, project name, filename, size, lastModified and the exact live tile when available; fail closed when ownership cannot be proven"
+    },
+    "SRC-042:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Persist one compact intent (version, generation, conversationKey, projectId, projectName, filename, fileSize, fileLastModified, state, armedAt, readyAt, sendPreparedAt, sendClickedAt, sentAt, lastErrorCode) through existing safe GM/session persistence; never file bytes, composer content or conversation text; one generation has one owner; conversation change or newer selection invalidates"
+    },
+    "SRC-042:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Composer safety: never modify, clear, append to or rewrite composer text; empty continues, ordinary manual text HOLDs or FAILs with manual_draft_present; no hidden receipt text"
+    }
+  },
+  "derived_at": "2026-09-10T18:53:18Z",
+  "derived_from": "SRC-042",
+  "interpretation_revision": 14,
+  "schema_version": 1,
+  "source_sha256": "db81366a626ea28c39e8102096208d3a5c66a6caec65c72ae0ea8306ad8381b1"
+}

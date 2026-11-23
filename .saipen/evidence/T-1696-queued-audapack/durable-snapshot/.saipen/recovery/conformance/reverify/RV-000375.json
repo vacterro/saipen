@@ -1,0 +1,48 @@
+{
+  "agent": "buffy",
+  "created_at": "2026-10-04T21:08:01Z",
+  "evidence_class": "executed",
+  "findings_digest": "f3991d9e7670be014a8c7d4f0d758c0a08f63607142fa32d56433182deebcaf7",
+  "gate": "core",
+  "integrity_digest": "8dee32e0ed713e42",
+  "journal_op_id": "reverify.caaceb352427",
+  "original_closure": {
+    "owner": "claude"
+  },
+  "own_problem_keys": [
+    "4d54e4fbd4c597a0"
+  ],
+  "problem_count": 89,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000375",
+  "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:0c125360ae483b4e7f1a84912ec4202fab48973a7d3607ce53407bd10e5901bb",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "python -m pytest tests/ui_qt/test_project_row_density.py -q -k \"dead_strip_at_screenshot_width or short_run_token_uses_its_own_width\"",
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK",
+      "duration_ms": 2387,
+      "executed": true,
+      "exit_code": 0,
+      "output_bytes": 113,
+      "output_digest": "3546136d8bd959e0",
+      "result": "PASS"
+    }
+  ],
+  "verification_contract": {
+    "commands": [
+      "python -m pytest tests/ui_qt/test_project_row_density.py -q -k \"dead_strip_at_screenshot_width or short_run_token_uses_its_own_width\""
+    ],
+    "findings_digest": "f3991d9e7670be014a8c7d4f0d758c0a08f63607142fa32d56433182deebcaf7",
+    "gate": "core"
+  },
+  "verification_contract_digest": "d382eb21d7f210c3",
+  "verifier": "buffy",
+  "warning_count": 95,
+  "work": "T-104"
+}

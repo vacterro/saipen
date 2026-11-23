@@ -1,0 +1,45 @@
+verifier: test_debt_gate.py as it stands in the repository
+CONTROL 1/3 unmutated copy: exit 0, Ran 93 tests
+CONTROL 2/3 unmutated copy: exit 0, Ran 93 tests
+CONTROL 3/3 unmutated copy: exit 0, Ran 93 tests
+M18 R007: baseline reuse ignores the three recorded state fingerprints: exit 1,1,1 failures=3
+      red: test_reuse_matrix_over_the_three_recorded_fingerprints
+M19 R008: the persisted snapshot loses the finding its envelope reports: exit 1,1,1 failures=2
+      red: test_corrupted_snapshot_fails_closed (test_debt_gate.py line 169,322)
+      red: test_delta_resolves_and_reports_release_blocked
+M20 R010: production latest_receipt never asks the bounded lineage: exit 1,1,1 failures=1
+      red: test_production_consumer_reads_the_bounded_lineage_not_the_legacy_scan
+M21 R010: a canonical append bootstraps the legacy inventory, not advance_append: exit 1,1,1 failures=10, errors=5
+      red: test_append_below_bound_hashes_no_sealed_receipt_bodies
+      red: test_append_does_not_rehash_sealed_history
+      red: test_append_over_a_v1_population_does_not_raise
+      red: test_appended_and_rebuilt_preconditions_are_one_lineage
+      red: test_deep_validation_proves_complete_generation_authority
+      red: test_deleted_and_duplicated_and_reordered_history_goes_deep_red
+      red: test_old_gate_latest_in_old_sealed_generation_is_authenticated_by_current_head
+      red: test_prior_token_mismatch_refuses_bounded_advance
+      red: test_production_consumer_reads_the_bounded_lineage_not_the_legacy_scan
+      red: test_rebuild_then_bounded_latest_per_gate
+      red: test_tampered_generation_manifest_refuses
+      red: test_tampered_locator_refuses
+      red: test_tampered_referenced_receipt_refuses_bounded_trust
+      red: test_unrelated_sealed_tamper_leaves_latest_clean_and_deep_red
+      red: test_update_receipt_index_creates_and_advances_v2
+M22 R010: the explicit deep validation path verifies nothing: exit 1,1,1 failures=4
+      red: test_deep_validation_proves_complete_generation_authority
+      red: test_deleted_and_duplicated_and_reordered_history_goes_deep_red
+      red: test_exact_bytes_stay_authoritative
+      red: test_unrelated_sealed_tamper_leaves_latest_clean_and_deep_red
+M23 R012: converge forgets one of its required producers: exit 1,1,1 failures=1
+      red: test_the_policy_matches_the_truth_table
+M24 R012: a collect gate hardens every producer: exit 1,1,1 failures=2
+      red: test_a_misspelled_producer_stays_a_hard_collect_gate
+      red: test_the_policy_matches_the_truth_table
+M25 R008 persisted ON-DISK record: run 1/3 exit 1, red ['test_delta_resolves_and_reports_release_blocked']
+      failed at test_debt_gate.py line 322: assert any( f["rule_id"] == "source_receipt_unresolved_work" and f["subject_id"] == "T-001" for f in mid["problems"] ), 
+M25 R008 persisted ON-DISK record: run 2/3 exit 1, red ['test_delta_resolves_and_reports_release_blocked']
+      failed at test_debt_gate.py line 322: assert any( f["rule_id"] == "source_receipt_unresolved_work" and f["subject_id"] == "T-001" for f in mid["problems"] ), 
+M25 R008 persisted ON-DISK record: run 3/3 exit 1, red ['test_delta_resolves_and_reports_release_blocked']
+      failed at test_debt_gate.py line 322: assert any( f["rule_id"] == "source_receipt_unresolved_work" and f["subject_id"] == "T-001" for f in mid["problems"] ), 
+restored; mutations 7, undetected 0, mutations with an unstable test 0, persisted-record control runs failed 0
+exit 0

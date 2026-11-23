@@ -1,0 +1,21 @@
+       proof_data = (
+                proof_obj.get("proof") if isinstance(proof_obj.get("proof"), dict) else proof_obj
+            )
+            if isinstance(proof_data, dict):
+                host_arg = proof_data.get("host")
+        ok, code, detail = self.identify(peer, host_arg or "", payload.get("home"))
+        if not ok:
+            # The identity detail is the refusal
+=====
+ration,
+            "pid": os.getpid(),
+            "saipen_root": str(self.saipen_root) if self.saipen_root else None,
+        }
+
+    def _status(self, peer, payload: dict | None = None) -> dict:
+        request = payload or {}
+        ok, code, detail = self.identify(peer, request.get("host") or "claude", request.get("home"))
+        view = {
+            "ok": True,
+         
+=====

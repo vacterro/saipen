@@ -1,0 +1,35 @@
+{
+  "paths": [
+    {
+      "path": "tools/saipen.py",
+      "matches": true
+    },
+    {
+      "path": "tools/test_t1631_argv_values.py",
+      "matches": true
+    },
+    {
+      "path": "tools/test_adaptive_runtime.py",
+      "matches": true
+    },
+    {
+      "path": "tools/test_intent_audit_fixes.py",
+      "matches": true
+    },
+    {
+      "path": "tools/test_t1327_zero_manual_recovery.py",
+      "matches": true
+    },
+    {
+      "path": "tools/test_t1557_mail_binding.py",
+      "matches": true
+    },
+    {
+      "path": "tools/test_t1363_zero_manual_entry.py",
+      "matches": true
+    }
+  ],
+  "all_match": true,
+  "oracle_rerun": "python -B -m unittest test_t1631_argv_values: 8 pass",
+  "review": "Production change preserves operand positions before global scan; four malformed carriers move formatting globals first, common helper binds and runs at fixture cwd; original assertions remain unchanged. Literal compound/help findings are attributed to T-1684."
+}

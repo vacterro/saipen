@@ -1,0 +1,8 @@
+utc: 2026-10-08T02:37:32Z
+status      : {"ok": false, "code": "VALIDATION_FAILED", "action": "saipen recover"} checkpoint invalid: BOARD proposed T-2 declares closure_mode 'duplicate_reconciled', outside own_patch|inherit
+recover     : {"ok": false, "code": "RECONCILE_REAUTH_REQUIRED"} | bytes untouched: True
+approved    : {"ok": true, "code": "REPAIRED", "event": "E-4"}
+status after: {"ok": true, "top_workable_ticket": "T-2"}
+row         : ## TODO ['verify']
+held: True
+--- exit: 0 ---

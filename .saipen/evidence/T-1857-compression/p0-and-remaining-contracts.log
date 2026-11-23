@@ -1,0 +1,34 @@
+test_all_modifier_cannot_supply_operator_authority (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_cannot_supply_operator_authority) ... ok
+test_all_modifier_resumes_the_existing_goal_with_real_origin (test_t1858_valve_guidance.ValveGuidanceTests.test_all_modifier_resumes_the_existing_goal_with_real_origin) ... ok
+test_automation_keeps_hard_wait_and_exposes_the_missing_input (test_t1858_valve_guidance.ValveGuidanceTests.test_automation_keeps_hard_wait_and_exposes_the_missing_input) ... ok
+test_bounded_reset_refusal_names_missing_native_ingress (test_t1858_valve_guidance.ValveGuidanceTests.test_bounded_reset_refusal_names_missing_native_ingress) ... ok
+test_declared_resume_twins_do_not_invent_other_shortcuts (test_t1858_valve_guidance.ValveGuidanceTests.test_declared_resume_twins_do_not_invent_other_shortcuts) ... ok
+test_native_resume_spellings_are_equivalent_without_weakening_hard_wait (test_t1858_valve_guidance.ValveGuidanceTests.test_native_resume_spellings_are_equivalent_without_weakening_hard_wait) ... ok
+test_overshot_28_ticket_budget_still_requires_native_authority (test_t1858_valve_guidance.ValveGuidanceTests.test_overshot_28_ticket_budget_still_requires_native_authority) ... ok
+test_queue_length_does_not_consume_the_completed_ticket_budget (test_t1858_valve_guidance.ValveGuidanceTests.test_queue_length_does_not_consume_the_completed_ticket_budget) ... FAIL
+test_resume_policy_rejects_malformed_argument_shapes (test_t1858_valve_guidance.ValveGuidanceTests.test_resume_policy_rejects_malformed_argument_shapes) ... ok
+test_postfinish_prose_cannot_add_an_evidence_read_dependency (test_t1839_cohort_reconciliation.ReconciliationTests.test_postfinish_prose_cannot_add_an_evidence_read_dependency) ... FAIL
+test_real_rename_preserves_read_only_history_outside_fresh_authority (test_t1581_phase_rename_knowledge.NativeHistoryFixtureTests.test_real_rename_preserves_read_only_history_outside_fresh_authority) ... ok
+test_real_tag_query_control_is_not_masked_by_copied_historical_work (test_t1581_phase_rename_knowledge.NativeHistoryFixtureTests.test_real_tag_query_control_is_not_masked_by_copied_historical_work) ... ok
+test_real_warn_ownership_control_is_not_masked_by_copied_historical_work (test_t1581_phase_rename_knowledge.NativeHistoryFixtureTests.test_real_warn_ownership_control_is_not_masked_by_copied_historical_work) ... ok
+
+======================================================================
+FAIL: test_queue_length_does_not_consume_the_completed_ticket_budget (test_t1858_valve_guidance.ValveGuidanceTests.test_queue_length_does_not_consume_the_completed_ticket_budget)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1858_valve_guidance.py", line 66, in test_queue_length_does_not_consume_the_completed_ticket_budget
+    self.assertTrue(goal_authority.budget_exhausted({"goal_waves": 0, "goal_tickets": 28}))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_postfinish_prose_cannot_add_an_evidence_read_dependency (test_t1839_cohort_reconciliation.ReconciliationTests.test_postfinish_prose_cannot_add_an_evidence_read_dependency)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1839_cohort_reconciliation.py", line 321, in test_postfinish_prose_cannot_add_an_evidence_read_dependency
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'VALIDATION_FAILED', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': "checkpoint ticket_id 'none' is not a valid T-### ref (expected T-<digits>): the ticket comes BEFORE the text", 'ticket': 'none', 'canonical_next_command': 'saipen checkpoint RUN <T-###> "<what happened>"'}
+
+----------------------------------------------------------------------
+Ran 13 tests in 37.599s
+
+FAILED (failures=2)

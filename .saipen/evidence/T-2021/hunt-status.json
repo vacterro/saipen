@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "hunt accepts no arguments; surplus: status"
+}

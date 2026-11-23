@@ -1,0 +1,29 @@
+{
+  "stage": "review-future-generation-current",
+  "root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "tools/test_t1712_manifest_runtime.py"
+  ],
+  "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "verifier_files": {
+    "tools/test_t1712_manifest_runtime.py": "1eea368ab4c57f16f63823d0bcbc26a6d07b72ba921cd56ccac3096f6f0bbf0b",
+    "tools/test_control_primitives.py": "0db4d2ea73a74bdf99e2b1db6587ad4d5503f4a2d985fad7edb3a5b75348e773",
+    "tools/test_fixture_support.py": "10831ae72daf5a4c80fd54a8f337228c682adfe70b95f9a08f89fef865f9ce36",
+    "tools/test_hermetic_env.py": "b39d8c6e04e15368d7c1753147c596eb521a3af1659da15590928e4b38dfc717"
+  },
+  "subject_files": {
+    "tools/saipen_engine/audit_manifest.py": "00306d1c133841f6ff96f24a3097375f04151b5bdd2262947dd4a1cb2a50b54a",
+    "tools/saipen_engine/paths.py": "ffe1aa85fb129db09085f4ad2273c23ef6e02140c06650dfd6f24d6c220f7a36",
+    "tools/saipen_engine/host_bootstrap.py": "bd2ec342d163e3993d5b760d141e6fa9a5cc58007cc17926032861ba79e1fd18",
+    "tools/saipen_engine/reconcile.py": "4611839620eb199b747d0aac8eaea848760c2fd8dfd71ad3b672a3107d0feefb",
+    "tools/saipen.py": "da6d0d610333114236822c4fec6142fc704753940012420df33b6aebeef9a930",
+    "tools/saipen_engine/init_project.py": "11a7119308890ab92e7da59ac98f2b5b96b0d08d742904ec07f2a7db55c0d652"
+  },
+  "verifier": "c929597071d40fc30eec9b01344b9adf3ac1b9b969c57e1ac5fa49d5702a1958",
+  "subject": "530ab7dc1d39a4f2ac619634d7fb31e455662c1ad0943522f1e99344ac9745d2",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": ".....................\n----------------------------------------------------------------------\nRan 21 tests in 1.119s\n\nOK\n"
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-043:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIHANDOFF M1 Archive Auto Send per SRC-042 (db81366a626ea28c39e8102096208d3a5c66a6caec65c72ae0ea8306ad8381b1): freeze TOPIC-first canonical handoff title, executable SAIHANDOFF_V1 envelope with fail-closed validation, one protocol doc authority, and the widget Archive Auto Send exactly-once send transaction reusing existing archive/composer primitives; activation-gated on T-185 P0 acceptance; T-185 stays VERIFY; non-goals M2, final-turn capture, Bridge queueing, agent routing, Auto Fill, Auto Submit"
+    }
+  },
+  "derived_at": "2026-09-24T05:04:19Z",
+  "derived_from": "SRC-043",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "736d204c458b6c8b202b7d141f31689495e07c198394d2e7ccb3c1178d493e6e"
+}

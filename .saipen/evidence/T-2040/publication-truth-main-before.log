@@ -1,0 +1,591 @@
+FFFFFF.FFFFFFFFFFFFFFFFFFFF                                          [100%]
+================================== FAILURES ===================================
+______ PublicationTruthTests.test_bound_no_publish_receipt_is_local_only ______
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_bound_no_publish_receipt_is_local_only>
+
+    def test_bound_no_publish_receipt_is_local_only(self):
+        self.local_receipt()
+        result = self.truth(publication_evidence=self.evidence())
+>       self.assert_publication(result, "LOCAL_NO_PUBLISH", "LOCAL_NO_PUBLISH")
+
+tools\test_t2040_publication_truth.py:284: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'LOCAL_NO_PUBLISH'
+E   - RELEASE_BLOCKED
+E   + LOCAL_NO_PUBLISH
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_claimed_published_without_owner_proof_is_unknown _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_claimed_published_without_owner_proof_is_unknown>
+
+    def test_claimed_published_without_owner_proof_is_unknown(self):
+>       self.assert_publication(self.truth(publication_state="published"), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'LOCAL_IMPLEMENTED' != 'RELEASE_UNKNOWN'
+E   - LOCAL_IMPLEMENTED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'LOCAL_IMPLEMENTED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'UNKNOWN', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'UNKNOWN', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: LOCAL_IMPLEMENTED'}
+_ PublicationTruthTests.test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof (candidate='PublicationEvidence') _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof>
+
+    def test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof(self):
+        self.local_receipt()
+        evidence = self.evidence()
+        values = {field.name: getattr(evidence, field.name) for field in dataclasses.fields(evidence)}
+        forged = [copy.copy(evidence), copy.deepcopy(evidence), dataclasses.replace(evidence), type(evidence)(**values)]
+        for candidate in forged:
+            with self.subTest(candidate=type(candidate).__name__):
+>               self.assert_publication(self.truth(publication_evidence=candidate), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof (candidate='PublicationEvidence') _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof>
+
+    def test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof(self):
+        self.local_receipt()
+        evidence = self.evidence()
+        values = {field.name: getattr(evidence, field.name) for field in dataclasses.fields(evidence)}
+        forged = [copy.copy(evidence), copy.deepcopy(evidence), dataclasses.replace(evidence), type(evidence)(**values)]
+        for candidate in forged:
+            with self.subTest(candidate=type(candidate).__name__):
+>               self.assert_publication(self.truth(publication_evidence=candidate), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof (candidate='PublicationEvidence') _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof>
+
+    def test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof(self):
+        self.local_receipt()
+        evidence = self.evidence()
+        values = {field.name: getattr(evidence, field.name) for field in dataclasses.fields(evidence)}
+        forged = [copy.copy(evidence), copy.deepcopy(evidence), dataclasses.replace(evidence), type(evidence)(**values)]
+        for candidate in forged:
+            with self.subTest(candidate=type(candidate).__name__):
+>               self.assert_publication(self.truth(publication_evidence=candidate), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof (candidate='PublicationEvidence') _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof>
+
+    def test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof(self):
+        self.local_receipt()
+        evidence = self.evidence()
+        values = {field.name: getattr(evidence, field.name) for field in dataclasses.fields(evidence)}
+        forged = [copy.copy(evidence), copy.deepcopy(evidence), dataclasses.replace(evidence), type(evidence)(**values)]
+        for candidate in forged:
+            with self.subTest(candidate=type(candidate).__name__):
+>               self.assert_publication(self.truth(publication_evidence=candidate), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof>
+
+    def test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof(self):
+        self.local_receipt()
+        evidence = self.evidence()
+        values = {field.name: getattr(evidence, field.name) for field in dataclasses.fields(evidence)}
+        forged = [copy.copy(evidence), copy.deepcopy(evidence), dataclasses.replace(evidence), type(evidence)(**values)]
+        for candidate in forged:
+            with self.subTest(candidate=type(candidate).__name__):
+                self.assert_publication(self.truth(publication_evidence=candidate), "RELEASE_UNKNOWN", "UNKNOWN")
+        object.__setattr__(evidence, "receipt_digest", "invented")
+>       self.assert_publication(self.truth(publication_evidence=evidence), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:203: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+---------------------------- Captured stdout call -----------------------------
+uuuu
+___ PublicationTruthTests.test_corrupt_or_duplicate_receipts_remain_unknown ___
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_corrupt_or_duplicate_receipts_remain_unknown>
+
+    def test_corrupt_or_duplicate_receipts_remain_unknown(self):
+        self.local_receipt()
+        path = self.root / ".saipen" / "recovery" / "ops" / ("release-" + "c" * 32) / "operation.json"
+        path.parent.mkdir(parents=True)
+        path.write_text("{", encoding="utf-8")
+>       self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:252: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+________ PublicationTruthTests.test_done_published_field_is_not_proof _________
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_done_published_field_is_not_proof>
+
+    def test_done_published_field_is_not_proof(self):
+        self.tickets["T-1"]["fields"]["publication_state"] = "published"
+>       self.assert_publication(self.truth(), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:141: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'UNKNOWN', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'UNKNOWN', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_exact_canonical_receipt_and_local_remote_prove_publication _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_exact_canonical_receipt_and_local_remote_prove_publication>
+
+    def test_exact_canonical_receipt_and_local_remote_prove_publication(self):
+        self.full_receipt()
+        before = {p.relative_to(self.root).as_posix(): p.read_bytes() for p in self.root.rglob("*") if p.is_file()}
+        evidence = self.evidence()
+>       self.assert_publication(self.truth(publication_evidence=evidence), "RELEASE_PUBLISHED", "PUBLISHED")
+
+tools\test_t2040_publication_truth.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_PUBLISHED'
+E   - RELEASE_BLOCKED
+E   ?           ^^^
+E   + RELEASE_PUBLISHED
+E   ?         ++  ^^^
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_________ PublicationTruthTests.test_explicit_unknown_remains_unknown _________
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_explicit_unknown_remains_unknown>
+
+    def test_explicit_unknown_remains_unknown(self):
+>       self.assert_publication(self.truth(publication_state="unknown"), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:144: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'LOCAL_IMPLEMENTED' != 'RELEASE_UNKNOWN'
+E   - LOCAL_IMPLEMENTED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'LOCAL_IMPLEMENTED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'UNKNOWN', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'UNKNOWN', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: LOCAL_IMPLEMENTED'}
+_ PublicationTruthTests.test_external_hold_does_not_suppress_executable_work_or_budget_veto _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_external_hold_does_not_suppress_executable_work_or_budget_veto>
+
+    def test_external_hold_does_not_suppress_executable_work_or_budget_veto(self):
+        tickets = {"T-2": {"id": "T-2", "section": "## TODO", "checkbox": " ", "blocked": False}}
+>       running = self.truth(tickets=tickets, foreign_staged=True)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_publication_truth.py:162: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_external_hold_does_not_suppress_executable_work_or_budget_veto>
+root = None, kwargs = {'foreign_staged': True}
+
+    def truth(self, root=None, **kwargs):
+>       return outcome_truth.compute_outcome_truth(root, tickets=kwargs.pop("tickets", self.tickets), **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: compute_outcome_truth() got an unexpected keyword argument 'foreign_staged'
+
+tools\test_t2040_publication_truth.py:57: TypeError
+__ PublicationTruthTests.test_fabricated_verified_release_id_never_publishes __
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_fabricated_verified_release_id_never_publishes>
+
+    def test_fabricated_verified_release_id_never_publishes(self):
+        result = self.truth(publication_state="published",
+                            publication_evidence={"verified": True, "release_id": "invented"})
+>       self.assert_publication(result, "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:134: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_PUBLISHED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_PUBLISHED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_PUBLISHED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'UNKNOWN', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'UNKNOWN', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PUBLISHED'}
+__________ PublicationTruthTests.test_foreign_root_replay_is_unknown __________
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_foreign_root_replay_is_unknown>
+
+    def test_foreign_root_replay_is_unknown(self):
+        self.local_receipt()
+        evidence = self.evidence()
+        foreign = Path(self.tmp.name) / "foreign"
+        foreign.mkdir()
+>       self.assert_publication(self.truth(foreign, publication_evidence=evidence), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_foreign_staging_context_survives_outcome_projection _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_foreign_staging_context_survives_outcome_projection>
+
+    def test_foreign_staging_context_survives_outcome_projection(self):
+>       result = self.truth(foreign_staged=True, has_continuous_maintenance=True)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_publication_truth.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_foreign_staging_context_survives_outcome_projection>
+root = None
+kwargs = {'foreign_staged': True, 'has_continuous_maintenance': True}
+
+    def truth(self, root=None, **kwargs):
+>       return outcome_truth.compute_outcome_truth(root, tickets=kwargs.pop("tickets", self.tickets), **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: compute_outcome_truth() got an unexpected keyword argument 'foreign_staged'
+
+tools\test_t2040_publication_truth.py:57: TypeError
+_ PublicationTruthTests.test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown>
+
+    def test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown(self):
+        self.local_receipt()
+        evidence = self.evidence()
+        foreign = {"T-2": {"id": "T-2", "section": "## DONE", "checkbox": "x", "fields": {}}}
+>       self.assert_publication(self.truth(tickets=foreign, publication_evidence=evidence), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_missing_or_foreign_project_binding_never_publishes _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_missing_or_foreign_project_binding_never_publishes>
+
+    def test_missing_or_foreign_project_binding_never_publishes(self):
+        record = self.full_receipt()
+        record.pop("project_lineage")
+        record["project_identity"] = ""
+        self.write_receipt(record)
+>       self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:264: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_______ PublicationTruthTests.test_missing_remote_git_proof_is_unknown ________
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_missing_remote_git_proof_is_unknown>
+
+    def test_missing_remote_git_proof_is_unknown(self):
+        record = self.full_receipt()
+        record["remote_push_endpoint"] = str(Path(self.tmp.name) / "missing.git")
+        self.write_receipt(record)
+>       self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:273: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication>
+
+    def test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication(self):
+        self.full_receipt()
+        self.tickets["T-2"] = {"id": "T-2", "section": "## DONE", "fields": {"publication_state": "pending"}}
+        result = self.truth(publication_evidence=self.evidence())
+>       self.assert_publication(result, "RELEASE_PENDING", "PENDING")
+
+tools\test_t2040_publication_truth.py:224: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_PENDING'
+E   - RELEASE_BLOCKED
+E   + RELEASE_PENDING
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_no_publish_intent_is_local_not_pending_or_published _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_no_publish_intent_is_local_not_pending_or_published>
+
+    def test_no_publish_intent_is_local_not_pending_or_published(self):
+>       self.assert_publication(self.truth(publication_state="no-publish"), "LOCAL_NO_PUBLISH", "LOCAL_NO_PUBLISH")
+
+tools\test_t2040_publication_truth.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'LOCAL_IMPLEMENTED' != 'LOCAL_NO_PUBLISH'
+E   - LOCAL_IMPLEMENTED
+E   + LOCAL_NO_PUBLISH
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'LOCAL_IMPLEMENTED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'LOCAL_NO_PUBLISH', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'LOCAL_NO_PUBLISH', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: LOCAL_IMPLEMENTED'}
+_ PublicationTruthTests.test_other_ticket_receipt_cannot_publish_this_ticket __
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_other_ticket_receipt_cannot_publish_this_ticket>
+
+    def test_other_ticket_receipt_cannot_publish_this_ticket(self):
+        record = self.full_receipt()
+        record["ticket_id"] = "T-2"
+        self.write_receipt(record)
+>       self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_PENDING", "PENDING")
+
+tools\test_t2040_publication_truth.py:235: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_PENDING'
+E   - RELEASE_BLOCKED
+E   + RELEASE_PENDING
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+__________ PublicationTruthTests.test_owner_reads_absence_as_pending __________
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_owner_reads_absence_as_pending>
+
+    def test_owner_reads_absence_as_pending(self):
+>       self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_PENDING", "PENDING")
+
+tools\test_t2040_publication_truth.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_PENDING'
+E   - RELEASE_BLOCKED
+E   + RELEASE_PENDING
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_partial_or_competing_matching_receipts_remain_unknown _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_partial_or_competing_matching_receipts_remain_unknown>
+
+    def test_partial_or_competing_matching_receipts_remain_unknown(self):
+        record = self.full_receipt()
+        record.update(op_id="release-" + "b" * 32, status="APPLYING", release_stage="BRANCH_PUBLISHED")
+        path = self.write_receipt(record, "ops")
+>       self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_______ PublicationTruthTests.test_pending_without_hold_is_not_blocked ________
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_pending_without_hold_is_not_blocked>
+
+    def test_pending_without_hold_is_not_blocked(self):
+        result = self.truth()
+>       self.assert_publication(result, "RELEASE_PENDING", "PENDING")
+
+tools\test_t2040_publication_truth.py:117: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_PENDING'
+E   - RELEASE_BLOCKED
+E   + RELEASE_PENDING
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_primary_blocker_context_survives_outcome_projection _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_primary_blocker_context_survives_outcome_projection>
+
+    def test_primary_blocker_context_survives_outcome_projection(self):
+>       result = self.truth(primary_blocker={"cause": "publication-staging", "blocker_class": "EXTERNAL"})
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_publication_truth.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_primary_blocker_context_survives_outcome_projection>
+root = None
+kwargs = {'primary_blocker': {'cause': 'publication-staging', 'blocker_class': 'EXTERNAL'}}
+
+    def truth(self, root=None, **kwargs):
+>       return outcome_truth.compute_outcome_truth(root, tickets=kwargs.pop("tickets", self.tickets), **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: compute_outcome_truth() got an unexpected keyword argument 'primary_blocker'
+
+tools\test_t2040_publication_truth.py:57: TypeError
+___ PublicationTruthTests.test_pv15_exact_old_pending_oracle_has_no_blocker ___
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_pv15_exact_old_pending_oracle_has_no_blocker>
+
+    def test_pv15_exact_old_pending_oracle_has_no_blocker(self):
+        result = self.truth(self.root, state={"phase": "DONE", "publication_state": "pending"})
+>       self.assert_publication(result, "RELEASE_PENDING", "PENDING")
+
+tools\test_t2040_publication_truth.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_PENDING'
+E   - RELEASE_BLOCKED
+E   + RELEASE_PENDING
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_pv21_executable_budgeted_work_does_not_invent_release_hold _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_pv21_executable_budgeted_work_does_not_invent_release_hold>
+
+    def test_pv21_executable_budgeted_work_does_not_invent_release_hold(self):
+        tickets = {"T-1": {"id": "T-1", "section": "## TODO", "checkbox": " ", "blocked": False}}
+        result = self.truth(self.root, tickets=tickets, state={"phase": "PLAN", "authority_until": "budget"})
+        self.assertEqual(result["queue_status"], "QUEUE_HAS_WORK")
+>       self.assert_publication(result, "RELEASE_PENDING", "PENDING")
+
+tools\test_t2040_publication_truth.py:129: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_PENDING'
+E   - RELEASE_BLOCKED
+E   + RELEASE_PENDING
+E    : {'queue_status': 'QUEUE_HAS_WORK', 'campaign_status': 'CAMPAIGN_RUNNING', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen claim T-1', 'next_wake_condition': 'ticket execution starts', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'ELIGIBLE', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'RUNNING'}, 'release_lane': 'CLEAR', 'implementation_lane': 'ELIGIBLE', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'RUNNING', 'summary': 'QUEUE: QUEUE_HAS_WORK | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_RUNNING | PUBLICATION: RELEASE_BLOCKED'}
+___ PublicationTruthTests.test_root_none_consumes_owner_carrier_without_io ____
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_root_none_consumes_owner_carrier_without_io>
+
+    def test_root_none_consumes_owner_carrier_without_io(self):
+        self.full_receipt()
+        evidence = self.evidence()
+        with mock.patch("saipen_engine.journal.semantic_receipt_snapshot", side_effect=AssertionError("IO")), \
+             mock.patch("saipen_engine.release.release_verdict", side_effect=AssertionError("IO")), \
+             mock.patch.object(Path, "read_bytes", side_effect=AssertionError("IO")), \
+             mock.patch.object(Path, "read_text", side_effect=AssertionError("IO")):
+>           self.assert_publication(self.truth(publication_evidence=evidence), "RELEASE_PUBLISHED", "PUBLISHED")
+
+tools\test_t2040_publication_truth.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_PUBLISHED'
+E   - RELEASE_BLOCKED
+E   ?           ^^^
+E   + RELEASE_PUBLISHED
+E   ?         ++  ^^^
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_ PublicationTruthTests.test_stale_git_proof_is_rejected_at_explicit_root_boundary _
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_stale_git_proof_is_rejected_at_explicit_root_boundary>
+
+    def test_stale_git_proof_is_rejected_at_explicit_root_boundary(self):
+        self.full_receipt()
+        evidence = self.evidence()
+        self.git("push", "origin", ":refs/tags/v1.0.0")
+>       self.assert_publication(self.truth(self.root, publication_evidence=evidence), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:279: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'UNKNOWN', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'UNKNOWN', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+_____ PublicationTruthTests.test_stale_local_no_publish_source_is_unknown _____
+
+self = <test_t2040_publication_truth.PublicationTruthTests testMethod=test_stale_local_no_publish_source_is_unknown>
+
+    def test_stale_local_no_publish_source_is_unknown(self):
+        self.local_receipt()
+        (self.root / "code.py").write_text("value = 2\n", encoding="utf-8")
+>       self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_UNKNOWN", "UNKNOWN")
+
+tools\test_t2040_publication_truth.py:290: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\test_t2040_publication_truth.py:65: in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+E   AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+E   - RELEASE_BLOCKED
+E   + RELEASE_UNKNOWN
+E    : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_bound_no_publish_receipt_is_local_only
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_claimed_published_without_owner_proof_is_unknown
+SUBFAILED(candidate='PublicationEvidence') tools/test_t2040_publication_truth.py::PublicationTruthTests::test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof
+SUBFAILED(candidate='PublicationEvidence') tools/test_t2040_publication_truth.py::PublicationTruthTests::test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof
+SUBFAILED(candidate='PublicationEvidence') tools/test_t2040_publication_truth.py::PublicationTruthTests::test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof
+SUBFAILED(candidate='PublicationEvidence') tools/test_t2040_publication_truth.py::PublicationTruthTests::test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_corrupt_or_duplicate_receipts_remain_unknown
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_done_published_field_is_not_proof
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_exact_canonical_receipt_and_local_remote_prove_publication
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_explicit_unknown_remains_unknown
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_external_hold_does_not_suppress_executable_work_or_budget_veto
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_fabricated_verified_release_id_never_publishes
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_foreign_root_replay_is_unknown
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_foreign_staging_context_survives_outcome_projection
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_missing_or_foreign_project_binding_never_publishes
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_missing_remote_git_proof_is_unknown
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_no_publish_intent_is_local_not_pending_or_published
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_other_ticket_receipt_cannot_publish_this_ticket
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_owner_reads_absence_as_pending
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_partial_or_competing_matching_receipts_remain_unknown
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_pending_without_hold_is_not_blocked
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_primary_blocker_context_survives_outcome_projection
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_pv15_exact_old_pending_oracle_has_no_blocker
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_pv21_executable_budgeted_work_does_not_invent_release_hold
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_root_none_consumes_owner_carrier_without_io
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_stale_git_proof_is_rejected_at_explicit_root_boundary
+FAILED tools/test_t2040_publication_truth.py::PublicationTruthTests::test_stale_local_no_publish_source_is_unknown
+30 failed, 1 passed in 6.56s

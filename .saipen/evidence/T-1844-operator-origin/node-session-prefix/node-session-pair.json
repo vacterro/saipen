@@ -1,0 +1,38 @@
+{
+  "before": {
+    "exit_code": 1,
+    "subject_sha256": "5ceb358c3af9a4ac6c9d9e7ef6a59add1c9caa275fba008eecb59abad3ebba89",
+    "oracles": {
+      "tools/test_response_delivery.py": "a12ea991519b24d21e7c47f1603aa5c416ad46ab0e7be21db69a801723457bf2",
+      "tools/test_operator_origin_support.py": "8172d9110824b742191b4555ea3beff31b9aecf002064fb215ebd218809a7f46",
+      "tools/test_opencode_adapter.py": "f1348073ea4dadf1ba261c425bc54567fd91203226abc73faba43bfa15dc834a"
+    },
+    "io": {
+      "PYTHONUTF8": "1",
+      "PYTHONIOENCODING": "utf-8"
+    },
+    "tail": [
+      "Ran 3 tests in 33.850s",
+      "",
+      "FAILED (failures=1)"
+    ]
+  },
+  "after": {
+    "exit_code": 0,
+    "subject_sha256": "8a0c6e6ac8c7ed9bc938037a4d391b460bdfda20ac02aaddaba0f9f793ff0831",
+    "oracles": {
+      "tools/test_response_delivery.py": "a12ea991519b24d21e7c47f1603aa5c416ad46ab0e7be21db69a801723457bf2",
+      "tools/test_operator_origin_support.py": "8172d9110824b742191b4555ea3beff31b9aecf002064fb215ebd218809a7f46",
+      "tools/test_opencode_adapter.py": "f1348073ea4dadf1ba261c425bc54567fd91203226abc73faba43bfa15dc834a"
+    },
+    "io": {
+      "PYTHONUTF8": "1",
+      "PYTHONIOENCODING": "utf-8"
+    },
+    "tail": [
+      "Ran 3 tests in 33.150s",
+      "",
+      "OK"
+    ]
+  }
+}

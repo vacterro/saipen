@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "code": "BLOCK",
+  "op_id": "ticket-f259ae80e5534eeabf47a4d420805c16",
+  "changed_files": [
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md"
+  ],
+  "recovery_required": false,
+  "ticket": "T-1",
+  "blocked_on": null,
+  "event_id": "E-3"
+}

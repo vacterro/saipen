@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "INIT_REFUSED",
+  "detail": "V:\\_TEMP_\\saipen-t1693-fq52y66n\\.saipen already exists; INIT does not overwrite a project"
+}

@@ -1,0 +1,71 @@
+{
+  "op_id": "board-compact-7a830abd735c41b5a68c6d627ace95d3",
+  "operation": "board_legacy_compaction",
+  "created_at": "2026-09-14T09:06:02Z",
+  "agent": "buffy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "db818a07f89422c1",
+  "preconditions": {
+    ".saipen/STATE.md": "1dbe20d01233d2d0",
+    ".saipen/BOARD.md": "1e4772407f1bc0d4",
+    ".saipen/LOG.md": "115909778fc4d7b5"
+  },
+  "read_preconditions": {
+    ".saipen/logs": "delete-tree-sha256:ccffe3625544839b1a2f22c985260a3a13612d7b0a0b80fe6cd23b76cdbe5841"
+  },
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 5,
+  "targets": [
+    {
+      "path": ".saipen/recovery/board-compaction/T-87/T-87-eeef36608ee292fe0aa623b6.BOARD.md",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "eeef36608ee292fe",
+      "applied": true
+    },
+    {
+      "path": ".saipen/recovery/board-compaction/T-87/T-87-eeef36608ee292fe0aa623b6.json",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "09ac5c9f6276240f",
+      "applied": true
+    },
+    {
+      "path": ".saipen/LOG.md",
+      "role": "log",
+      "action": "write",
+      "before_hash": "115909778fc4d7b5",
+      "after_hash": "1f97ce385262bada",
+      "applied": true
+    },
+    {
+      "path": ".saipen/BOARD.md",
+      "role": "board",
+      "action": "write",
+      "before_hash": "1e4772407f1bc0d4",
+      "after_hash": "0033c6b381d95edf",
+      "applied": true
+    },
+    {
+      "path": ".saipen/STATE.md",
+      "role": "state",
+      "action": "write",
+      "before_hash": "1dbe20d01233d2d0",
+      "after_hash": "07eb8aadffcbdbd6",
+      "applied": true
+    }
+  ],
+  "receipt_metadata": {
+    "operation": "board_legacy_compaction",
+    "status": "COMMITTED",
+    "ticket": "T-87",
+    "detail_ref": ".saipen/recovery/board-compaction/T-87/T-87-eeef36608ee292fe0aa623b6.json",
+    "original_record_sha256": "eeef36608ee292fe0aa623b613c7978fce1b01386862606b8ea065f655c3052c",
+    "event_id": "E-1372",
+    "reason": "lossless historical BOARD repair"
+  }
+}

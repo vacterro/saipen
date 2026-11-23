@@ -1,0 +1,84 @@
+.F.F..F.....FF.EF.
+======================================================================
+ERROR: test_compound_separator_and_boundary_operands_stay_literal (test_t1684_operand_grammar.StructuralValues.test_compound_separator_and_boundary_operands_stay_literal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1684-pair-4g3yqqau\project\tools\test_t1684_operand_grammar.py", line 172, in test_compound_separator_and_boundary_operands_stay_literal
+    self.assertEqual(commands.split_cli_compound_argv(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1684-pair-4g3yqqau\project\tools\saipen_engine\commands.py", line 229, in split_cli_compound_argv
+    raise ValueError("compound command has an empty segment")
+ValueError: compound command has an empty segment
+
+======================================================================
+FAIL: test_host_entry_runs_the_command_after_the_actual_boundary (test_t1684_operand_grammar.RealCLIValues.test_host_entry_runs_the_command_after_the_actual_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1684-pair-4g3yqqau\project\tools\test_t1684_operand_grammar.py", line 121, in test_host_entry_runs_the_command_after_the_actual_boundary
+    self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+AssertionError: 2 != 0 : REFUSE [VALIDATION_FAILED]
+reason: host bootstrap accepts --host ID and --project-root PATH; surplus: --host
+
+
+======================================================================
+FAIL: test_literal_help_does_not_grant_write_in_readonly_session (test_t1684_operand_grammar.RealCLIValues.test_literal_help_does_not_grant_write_in_readonly_session)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1684-pair-4g3yqqau\project\tools\test_t1684_operand_grammar.py", line 129, in test_literal_help_does_not_grant_write_in_readonly_session
+    self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+AssertionError: 0 != 1 : {
+  "ok": true,
+  "code": "USAGE",
+  "usage": "usage: saipen (init|start '<task in one line>' [--file PATH] [--hex HEX] [--receipt SRC-###]|continue|status|storage status|classify|durable|ephemeral|scratch|store|verify|promote|migrate|response render|check --stdin|next|runtime [--prelaunch [--adapter ID] [--no-resync]|--bootstrap|--check-freshness]|search [--hex HEX]|validate|recover|fleet preflight|scan|prepare|collect <producer>|claim <T-###> [--explicit]|handoff <T-###> --to <agent> [--authority SRC-###]|transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> [T-###] [text]|goal <text>|user-request <text> [--priority P#] [--verify <text>] [--needs T-X,T-Y]|ticket add <PRIORITY> <text> --verify <proof> [--needs T-X,T-Y] [--regression required]|ticket done <T-###> [--closure-mode own_patch|inherited_verified|cohort|finding_invalidated] [--closure-cohort C-###] [--implementation-source <release:<id>|T-###|SRC-###>] [--invalidated-by <E-###>] [--paths <p1,p2>]|ticket bind-cohort <T-###> --cohort <C-###> --paths <p1,p2>|ticket supersede <T-OLD> --by <T-NEW> --evidence <E-###> --authority <SRC-###>|ticket resolve-external <T-###> --authority <lineage-32hex> --implementation <T-###@commit> --reason <CLASS> --run <command>...|ticket repair-metadata <T-###> --field source_receipts (--to SRC-### | --legacy-unbound [--authority SRC-###|lineage-<32hex>])|ticket reasoning <T-###> --recurrence <text> --weak-model <text>|ticket requires <T-###> <CAP[@PHASE],...|none>|ticket compact <T-###>|ticket block <T-###> <reason> [--scope ticket|goal]|ticket block-for <parent T-###> <blocker T-###> <reason> [--scope ticket|goal]|ticket unblock <T-###> <decision>|work reverify <T-###> [--verification <cmd>:PASS]... [--run <command>]... [--timeout SECONDS]|source retire <SRC-###> --reason <CLASS> [--successor SRC-###]|source quarantine <SRC-###> [--reason CODE]|source recover|source reconcile <SRC-###> [--confirm]|source normalize [--dry-run]|cohort status <C-###>|cohort ship <C-###>|improve|improve hold <T-###> [reason]|improve unhold|improve status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> |improve sweep-queue <cycle>|improve submit <cycle> <seat> <project> <findings.json>|improve complete <cycle> <seat> <project>|improve verify <cycle>|improve cycle-complete <cycle>|improve reconcile <cycle>|improve abort <cycle>|improve clean <cycle>|ship|push|scope <T-###> <path>...|first-publish-confirm <name> <public|private>|userperson show [--project|--global|--effective]|userperson add|remove <text> [--category NAME] [--project|--global]|userperson reset [--project|--global] --confirm|authority capture [--file PATH|--hex HEX]|sub reconcile <role> --authority <SRC-###>|sub|rebind-home <candidate-home>|context cold|hot|audit|orient [--handoff JSON]|acceptance <T-###>|test suite [status]|declare -- <command>|run [T-###]|withdraw|attempt open|attempt close <RESULT> <STOP>|brief|focus [text]|build <directive>|knowledge status|index|retrieve <objective>|future status|list|refresh|next|refine <FG-####>|promote <FG-####>|add <title>|launch <host> [-- HOST-ARGS]|host doctor|repair|mode [strict|degraded|default]|cut <target>|cut confirm <CUT-ID>|undo|undo confirm <CP-ID> --reason <text>) [--dry-run] [--json] [--project-root PATH] [--agent ID] [--runtime-info JSON-FILE]"
+}
+
+
+======================================================================
+FAIL: test_model_spelling_compound_separator_is_a_value (test_t1684_operand_grammar.RealCLIValues.test_model_spelling_compound_separator_is_a_value)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1684-pair-4g3yqqau\project\tools\test_t1684_operand_grammar.py", line 143, in test_model_spelling_compound_separator_is_a_value
+    self.admit("+")
+  File "V:\_TEMP_\saipen-t1684-pair-4g3yqqau\project\tools\test_t1684_operand_grammar.py", line 66, in admit
+    self.assertEqual(proc.returncode, 1, payload)
+AssertionError: 2 != 1 : {'ok': False, 'code': 'COMPOUND_RESULT', 'segments': [{'index': 0, 'command': 'admission', 'disposition': 'FAILED', 'exit_code': 2, 'result': {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': '--model needs a value'}}, {'index': 1, 'command': '--home', 'disposition': 'NOT_RUN'}]}
+
+======================================================================
+FAIL: test_verify_boundary_is_literal_proof_text (test_t1684_operand_grammar.RealCLIValues.test_verify_boundary_is_literal_proof_text)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1684-pair-4g3yqqau\project\tools\test_t1684_operand_grammar.py", line 108, in test_verify_boundary_is_literal_proof_text
+    self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+AssertionError: 2 != 0 : {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "dangling --verify option"
+}
+
+
+======================================================================
+FAIL: test_verify_help_is_literal_proof_text (test_t1684_operand_grammar.RealCLIValues.test_verify_help_is_literal_proof_text)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1684-pair-4g3yqqau\project\tools\test_t1684_operand_grammar.py", line 102, in test_verify_help_is_literal_proof_text
+    self.assertEqual(json.loads(proc.stdout)["code"], "TICKET_ADDED")
+AssertionError: 'USAGE' != 'TICKET_ADDED'
+- USAGE
++ TICKET_ADDED
+
+
+======================================================================
+FAIL: test_help_value_does_not_change_execution_effect (test_t1684_operand_grammar.StructuralValues.test_help_value_does_not_change_execution_effect)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1684-pair-4g3yqqau\project\tools\test_t1684_operand_grammar.py", line 180, in test_help_value_does_not_change_execution_effect
+    self.assertEqual(effects.classify_invocation(
+AssertionError: 'DIAGNOSTIC' != 'EXECUTION'
+- DIAGNOSTIC
++ EXECUTION
+
+
+----------------------------------------------------------------------
+Ran 18 tests in 6.321s
+
+FAILED (failures=6, errors=1)

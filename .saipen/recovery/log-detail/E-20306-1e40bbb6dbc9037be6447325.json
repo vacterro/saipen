@@ -1,0 +1,19 @@
+{
+  "event_id": "E-20306",
+  "externalization_event": {
+    "operation_id": "ticket-9787abc007194e64bfd21743fba183ed",
+    "reason": "new LOG event exceeds the live cap; canonical detail externalization"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/log-detail/E-20306-1e40bbb6dbc9037be6447325.json",
+  "operation": "log_event_externalization",
+  "original_event_bytes": 1044,
+  "original_event_path": ".saipen/recovery/log-detail/E-20306-1e40bbb6dbc9037be6447325.LOG.md",
+  "original_event_sha256": "1e40bbb6dbc9037be64473259db471a9e64bb191c22ba620b7301c381a3dc2e9",
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "schema_version": 1,
+  "source": ".saipen/LOG.md",
+  "status": "COMMITTED",
+  "ticket_id": "T-2006"
+}

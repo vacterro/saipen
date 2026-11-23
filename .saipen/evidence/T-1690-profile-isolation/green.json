@@ -1,0 +1,14 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "test_t1690_profile_isolation",
+    "-v"
+  ],
+  "root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "verifier": "d7e1f9f24165e905",
+  "subject": "ca10e96d9dc1fe4f3a89d0a4fb05d1d15713e883de4d00b6e0909709888d33ed",
+  "exit_code": 0
+}

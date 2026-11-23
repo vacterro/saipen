@@ -1,0 +1,13 @@
+{
+  "stage": "current",
+  "method": "isolated saved production subject; same real-CLI tests",
+  "verifier": "f892d7a4e2bb74bf1859c2a9d4481574b6b3141dc64617a03c174d0909123f4e",
+  "subject": "65832fe4fc751fdf8c1eea9b23d3cd967a60ffec18d91192c1891c368672ad5e",
+  "ran": 3,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "passed": true,
+  "transcript": "...\n----------------------------------------------------------------------\nRan 3 tests in 3.715s\n\nOK\n",
+  "original_router": "pristine HEAD source; only current Work routing hunks differ"
+}

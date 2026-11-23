@@ -1,0 +1,11 @@
+control: ran 7, red [] -- as expected
+entry.py reverted to pre-fix: ran 7, red ['test_start_names_the_request_it_was_handed'] -- as expected
+operations.py reverted to pre-fix: ran 7, red ['test_a_stated_basis_is_named_instead_of_an_override', 'test_start_names_the_request_it_was_handed', 'test_the_claim_admits_what_the_router_prescribes'] -- as expected
+both subject files pre-fix: ran 7, red ['test_a_stated_basis_is_named_instead_of_an_override', 'test_start_names_the_request_it_was_handed', 'test_the_claim_admits_what_the_router_prescribes'] -- as expected
+route admits any ticket (work comparison dropped): ran 7, red ['test_the_route_admits_only_the_work_it_names'] -- as expected
+audit route never asked: ran 7, red ['test_the_claim_admits_what_the_router_prescribes'] -- as expected
+a basis no longer admits the claim: ran 7, red ['test_the_claim_admits_what_the_router_prescribes'] -- as expected
+the DEC forgets the basis: ran 7, red ['test_a_stated_basis_is_named_instead_of_an_override', 'test_start_names_the_request_it_was_handed', 'test_the_claim_admits_what_the_router_prescribes'] -- as expected
+START passes no basis: ran 7, red ['test_start_names_the_request_it_was_handed'] -- as expected
+mutations: 8, repetitions each: 3, problems: 0
+exit=0

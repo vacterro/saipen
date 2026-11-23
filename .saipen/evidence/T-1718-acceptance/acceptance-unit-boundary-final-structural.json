@@ -1,0 +1,27 @@
+{
+  "label": "acceptance-unit-boundary-final-structural",
+  "phase": "BUILD",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "test_t1326_board_compaction.CanonicalLogProducerTests.test_no_engine_module_calls_the_capped_builder_directly",
+    "test_t1465_budget_line_ends",
+    "test_t1670_route_budgets",
+    "test_response_surface_contract.BudgetTests",
+    "test_t1676_lifecycle_code.RegisteredCodeTests.test_every_route_budget_still_passes",
+    "test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry",
+    "-v"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+  "exit_code": 0,
+  "duration_s": 1.109,
+  "fingerprint": "cf59cbdd85ceb3051bb053cf2c77eaad0f3e987f6d0500adb3bb33ea54b6c741",
+  "stdout": "",
+  "stderr": "test_no_engine_module_calls_the_capped_builder_directly (test_t1326_board_compaction.CanonicalLogProducerTests.test_no_engine_module_calls_the_capped_builder_directly) ... ok\r\ntest_crlf_and_lf_copies_measure_the_same (test_t1465_budget_line_ends.LineEndTests.test_crlf_and_lf_copies_measure_the_same) ... ok\r\ntest_every_budget_holds (test_t1465_budget_line_ends.LineEndTests.test_every_budget_holds) ... ok\r\ntest_the_registry_is_one_space_indented_and_unchanged_in_meaning (test_t1465_budget_line_ends.RegistryTests.test_the_registry_is_one_space_indented_and_unchanged_in_meaning) ... ok\r\ntest_a_declared_dependency_chain_is_counted_whole (test_t1670_route_budgets.RouteBudgetTests.test_a_declared_dependency_chain_is_counted_whole) ... ok\r\ntest_a_dependency_cycle_is_a_declaration_error (test_t1670_route_budgets.RouteBudgetTests.test_a_dependency_cycle_is_a_declaration_error) ... ok\r\ntest_an_optional_reference_does_not_inflate_the_mandatory_load (test_t1670_route_budgets.RouteBudgetTests.test_an_optional_reference_does_not_inflate_the_mandatory_load) ... ok\r\ntest_mandatory_growth_past_a_route_budget_fails (test_t1670_route_budgets.RouteBudgetTests.test_mandatory_growth_past_a_route_budget_fails) ... ok\r\ntest_one_enormous_document_fails_even_where_no_route_loads_it (test_t1670_route_budgets.RouteBudgetTests.test_one_enormous_document_fails_even_where_no_route_loads_it) ... ok\r\ntest_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate (test_t1670_route_budgets.RouteBudgetTests.test_pre_fix_control_a_routed_nowhere_clause_tripped_only_the_aggregate) ... ok\r\ntest_the_command_line_summary_exits_by_the_route_verdict (test_t1670_route_budgets.RouteBudgetTests.test_the_command_line_summary_exits_by_the_route_verdict) ... ok\r\ntest_the_summary_is_one_line_per_route_and_names_the_total_informational (test_t1670_route_budgets.RouteBudgetTests.test_the_summary_is_one_line_per_route_and_names_the_total_informational) ... ok\r\ntest_unrelated_growth_raises_the_total_and_moves_no_route (test_t1670_route_budgets.RouteBudgetTests.test_unrelated_growth_raises_the_total_and_moves_no_route) ... ok\r\ntest_verify_or_future_growth_leaves_the_cold_load_byte_identical (test_t1670_route_budgets.RouteBudgetTests.test_verify_or_future_growth_leaves_the_cold_load_byte_identical) ... ok\r\ntest_context_budget_remains_green_with_execution_in_cold (test_response_surface_contract.BudgetTests.test_context_budget_remains_green_with_execution_in_cold) ... ok\r\ntest_every_route_budget_still_passes (test_t1676_lifecycle_code.RegisteredCodeTests.test_every_route_budget_still_passes) ... ok\r\ntest_every_declared_load_budget_is_measured_from_registry (test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 17 tests in 0.692s\r\n\r\nOK\r\n",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "9031373c23301d7cfdaacd29611f482fe4e513428e48e1944f0e0badf2fa1f32",
+  "source_unchanged": true,
+  "cleanup": "repository process_tree.run owns descendants"
+}

@@ -1,0 +1,342 @@
+command: python -B -m unittest test_t2040_publication_truth -v
+subject_sha256: cd716ee1efe8d3b890d7a709b1d0b4aed58dc44a374cd85d7b716e86aede26a8
+oracle_sha256: b838f7804be448bd7f2d14ca91d51e1d4dba1aa4575b88c49f44bc22dba7ada1
+exit_code: 1
+
+test_bound_no_publish_receipt_is_local_only (test_t2040_publication_truth.PublicationTruthTests.test_bound_no_publish_receipt_is_local_only) ... FAIL
+test_claimed_published_without_owner_proof_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_claimed_published_without_owner_proof_is_unknown) ... FAIL
+test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof (test_t2040_publication_truth.PublicationTruthTests.test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof) ... FAIL
+test_corrupt_or_duplicate_receipts_remain_unknown (test_t2040_publication_truth.PublicationTruthTests.test_corrupt_or_duplicate_receipts_remain_unknown) ... FAIL
+test_done_published_field_is_not_proof (test_t2040_publication_truth.PublicationTruthTests.test_done_published_field_is_not_proof) ... FAIL
+test_exact_canonical_receipt_and_local_remote_prove_publication (test_t2040_publication_truth.PublicationTruthTests.test_exact_canonical_receipt_and_local_remote_prove_publication) ... FAIL
+test_explicit_blocker_remains_blocked (test_t2040_publication_truth.PublicationTruthTests.test_explicit_blocker_remains_blocked) ... ok
+test_explicit_unknown_remains_unknown (test_t2040_publication_truth.PublicationTruthTests.test_explicit_unknown_remains_unknown) ... FAIL
+test_external_hold_does_not_suppress_executable_work_or_budget_veto (test_t2040_publication_truth.PublicationTruthTests.test_external_hold_does_not_suppress_executable_work_or_budget_veto) ... ERROR
+test_fabricated_verified_release_id_never_publishes (test_t2040_publication_truth.PublicationTruthTests.test_fabricated_verified_release_id_never_publishes) ... FAIL
+test_foreign_root_replay_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_foreign_root_replay_is_unknown) ... FAIL
+test_foreign_staging_context_survives_outcome_projection (test_t2040_publication_truth.PublicationTruthTests.test_foreign_staging_context_survives_outcome_projection) ... ERROR
+test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown) ... FAIL
+test_missing_or_foreign_project_binding_never_publishes (test_t2040_publication_truth.PublicationTruthTests.test_missing_or_foreign_project_binding_never_publishes) ... FAIL
+test_missing_remote_git_proof_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_missing_remote_git_proof_is_unknown) ... FAIL
+test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication (test_t2040_publication_truth.PublicationTruthTests.test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication) ... FAIL
+test_no_publish_intent_is_local_not_pending_or_published (test_t2040_publication_truth.PublicationTruthTests.test_no_publish_intent_is_local_not_pending_or_published) ... FAIL
+test_other_ticket_receipt_cannot_publish_this_ticket (test_t2040_publication_truth.PublicationTruthTests.test_other_ticket_receipt_cannot_publish_this_ticket) ... FAIL
+test_owner_reads_absence_as_pending (test_t2040_publication_truth.PublicationTruthTests.test_owner_reads_absence_as_pending) ... FAIL
+test_partial_or_competing_matching_receipts_remain_unknown (test_t2040_publication_truth.PublicationTruthTests.test_partial_or_competing_matching_receipts_remain_unknown) ... FAIL
+test_pending_without_hold_is_not_blocked (test_t2040_publication_truth.PublicationTruthTests.test_pending_without_hold_is_not_blocked) ... FAIL
+test_primary_blocker_context_survives_outcome_projection (test_t2040_publication_truth.PublicationTruthTests.test_primary_blocker_context_survives_outcome_projection) ... ERROR
+test_pv15_exact_old_pending_oracle_has_no_blocker (test_t2040_publication_truth.PublicationTruthTests.test_pv15_exact_old_pending_oracle_has_no_blocker) ... FAIL
+test_pv21_executable_budgeted_work_does_not_invent_release_hold (test_t2040_publication_truth.PublicationTruthTests.test_pv21_executable_budgeted_work_does_not_invent_release_hold) ... FAIL
+test_root_none_consumes_owner_carrier_without_io (test_t2040_publication_truth.PublicationTruthTests.test_root_none_consumes_owner_carrier_without_io) ... FAIL
+test_stale_git_proof_is_rejected_at_explicit_root_boundary (test_t2040_publication_truth.PublicationTruthTests.test_stale_git_proof_is_rejected_at_explicit_root_boundary) ... FAIL
+test_stale_local_no_publish_source_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_stale_local_no_publish_source_is_unknown) ... FAIL
+
+======================================================================
+ERROR: test_external_hold_does_not_suppress_executable_work_or_budget_veto (test_t2040_publication_truth.PublicationTruthTests.test_external_hold_does_not_suppress_executable_work_or_budget_veto)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 162, in test_external_hold_does_not_suppress_executable_work_or_budget_veto
+    running = self.truth(tickets=tickets, foreign_staged=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 57, in truth
+    return outcome_truth.compute_outcome_truth(root, tickets=kwargs.pop("tickets", self.tickets), **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: compute_outcome_truth() got an unexpected keyword argument 'foreign_staged'
+
+======================================================================
+ERROR: test_foreign_staging_context_survives_outcome_projection (test_t2040_publication_truth.PublicationTruthTests.test_foreign_staging_context_survives_outcome_projection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 155, in test_foreign_staging_context_survives_outcome_projection
+    result = self.truth(foreign_staged=True, has_continuous_maintenance=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 57, in truth
+    return outcome_truth.compute_outcome_truth(root, tickets=kwargs.pop("tickets", self.tickets), **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: compute_outcome_truth() got an unexpected keyword argument 'foreign_staged'
+
+======================================================================
+ERROR: test_primary_blocker_context_survives_outcome_projection (test_t2040_publication_truth.PublicationTruthTests.test_primary_blocker_context_survives_outcome_projection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 168, in test_primary_blocker_context_survives_outcome_projection
+    result = self.truth(primary_blocker={"cause": "publication-staging", "blocker_class": "EXTERNAL"})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 57, in truth
+    return outcome_truth.compute_outcome_truth(root, tickets=kwargs.pop("tickets", self.tickets), **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: compute_outcome_truth() got an unexpected keyword argument 'primary_blocker'
+
+======================================================================
+FAIL: test_bound_no_publish_receipt_is_local_only (test_t2040_publication_truth.PublicationTruthTests.test_bound_no_publish_receipt_is_local_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 283, in test_bound_no_publish_receipt_is_local_only
+    result = self.truth(publication_evidence=self.evidence())
+                                             ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_claimed_published_without_owner_proof_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_claimed_published_without_owner_proof_is_unknown)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 137, in test_claimed_published_without_owner_proof_is_unknown
+    self.assert_publication(self.truth(publication_state="published"), "RELEASE_UNKNOWN", "UNKNOWN")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 65, in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+AssertionError: 'LOCAL_IMPLEMENTED' != 'RELEASE_UNKNOWN'
+- LOCAL_IMPLEMENTED
++ RELEASE_UNKNOWN
+ : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'LOCAL_IMPLEMENTED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: LOCAL_IMPLEMENTED'}
+
+======================================================================
+FAIL: test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof (test_t2040_publication_truth.PublicationTruthTests.test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 196, in test_copied_replaced_constructed_and_mutated_carriers_are_not_owner_proof
+    evidence = self.evidence()
+               ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_corrupt_or_duplicate_receipts_remain_unknown (test_t2040_publication_truth.PublicationTruthTests.test_corrupt_or_duplicate_receipts_remain_unknown)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 252, in test_corrupt_or_duplicate_receipts_remain_unknown
+    self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_UNKNOWN", "UNKNOWN")
+                                                            ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_done_published_field_is_not_proof (test_t2040_publication_truth.PublicationTruthTests.test_done_published_field_is_not_proof)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 141, in test_done_published_field_is_not_proof
+    self.assert_publication(self.truth(), "RELEASE_UNKNOWN", "UNKNOWN")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 65, in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_UNKNOWN'
+- RELEASE_BLOCKED
++ RELEASE_UNKNOWN
+ : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+
+======================================================================
+FAIL: test_exact_canonical_receipt_and_local_remote_prove_publication (test_t2040_publication_truth.PublicationTruthTests.test_exact_canonical_receipt_and_local_remote_prove_publication)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 178, in test_exact_canonical_receipt_and_local_remote_prove_publication
+    evidence = self.evidence()
+               ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_explicit_unknown_remains_unknown (test_t2040_publication_truth.PublicationTruthTests.test_explicit_unknown_remains_unknown)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 144, in test_explicit_unknown_remains_unknown
+    self.assert_publication(self.truth(publication_state="unknown"), "RELEASE_UNKNOWN", "UNKNOWN")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 65, in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+AssertionError: 'LOCAL_IMPLEMENTED' != 'RELEASE_UNKNOWN'
+- LOCAL_IMPLEMENTED
++ RELEASE_UNKNOWN
+ : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'LOCAL_IMPLEMENTED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: LOCAL_IMPLEMENTED'}
+
+======================================================================
+FAIL: test_fabricated_verified_release_id_never_publishes (test_t2040_publication_truth.PublicationTruthTests.test_fabricated_verified_release_id_never_publishes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 134, in test_fabricated_verified_release_id_never_publishes
+    self.assert_publication(result, "RELEASE_UNKNOWN", "UNKNOWN")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 65, in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+AssertionError: 'RELEASE_PUBLISHED' != 'RELEASE_UNKNOWN'
+- RELEASE_PUBLISHED
++ RELEASE_UNKNOWN
+ : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_PUBLISHED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PUBLISHED'}
+
+======================================================================
+FAIL: test_foreign_root_replay_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_foreign_root_replay_is_unknown)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 207, in test_foreign_root_replay_is_unknown
+    evidence = self.evidence()
+               ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 214, in test_foreign_ticket_or_changed_ticket_snapshot_replay_is_unknown
+    evidence = self.evidence()
+               ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_missing_or_foreign_project_binding_never_publishes (test_t2040_publication_truth.PublicationTruthTests.test_missing_or_foreign_project_binding_never_publishes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 264, in test_missing_or_foreign_project_binding_never_publishes
+    self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_UNKNOWN", "UNKNOWN")
+                                                            ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_missing_remote_git_proof_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_missing_remote_git_proof_is_unknown)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 273, in test_missing_remote_git_proof_is_unknown
+    self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_UNKNOWN", "UNKNOWN")
+                                                            ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication (test_t2040_publication_truth.PublicationTruthTests.test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 223, in test_mixed_ticket_snapshot_cannot_borrow_or_hide_pending_publication
+    result = self.truth(publication_evidence=self.evidence())
+                                             ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_no_publish_intent_is_local_not_pending_or_published (test_t2040_publication_truth.PublicationTruthTests.test_no_publish_intent_is_local_not_pending_or_published)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 147, in test_no_publish_intent_is_local_not_pending_or_published
+    self.assert_publication(self.truth(publication_state="no-publish"), "LOCAL_NO_PUBLISH", "LOCAL_NO_PUBLISH")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 65, in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+AssertionError: 'LOCAL_IMPLEMENTED' != 'LOCAL_NO_PUBLISH'
+- LOCAL_IMPLEMENTED
++ LOCAL_NO_PUBLISH
+ : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'LOCAL_IMPLEMENTED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: LOCAL_IMPLEMENTED'}
+
+======================================================================
+FAIL: test_other_ticket_receipt_cannot_publish_this_ticket (test_t2040_publication_truth.PublicationTruthTests.test_other_ticket_receipt_cannot_publish_this_ticket)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 235, in test_other_ticket_receipt_cannot_publish_this_ticket
+    self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_PENDING", "PENDING")
+                                                            ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_owner_reads_absence_as_pending (test_t2040_publication_truth.PublicationTruthTests.test_owner_reads_absence_as_pending)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 173, in test_owner_reads_absence_as_pending
+    self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_PENDING", "PENDING")
+                                                            ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_partial_or_competing_matching_receipts_remain_unknown (test_t2040_publication_truth.PublicationTruthTests.test_partial_or_competing_matching_receipts_remain_unknown)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 241, in test_partial_or_competing_matching_receipts_remain_unknown
+    self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_UNKNOWN", "UNKNOWN")
+                                                            ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_pending_without_hold_is_not_blocked (test_t2040_publication_truth.PublicationTruthTests.test_pending_without_hold_is_not_blocked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 117, in test_pending_without_hold_is_not_blocked
+    self.assert_publication(result, "RELEASE_PENDING", "PENDING")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 65, in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_PENDING'
+- RELEASE_BLOCKED
++ RELEASE_PENDING
+ : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+
+======================================================================
+FAIL: test_pv15_exact_old_pending_oracle_has_no_blocker (test_t2040_publication_truth.PublicationTruthTests.test_pv15_exact_old_pending_oracle_has_no_blocker)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 122, in test_pv15_exact_old_pending_oracle_has_no_blocker
+    self.assert_publication(result, "RELEASE_PENDING", "PENDING")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 65, in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_PENDING'
+- RELEASE_BLOCKED
++ RELEASE_PENDING
+ : {'queue_status': 'QUEUE_DRAINED', 'campaign_status': 'CAMPAIGN_WAIT_AUTHORITY', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen status', 'next_wake_condition': 'operator grants renewed campaign authority or continued objective', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'NO_WORK', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'WAIT_AUTHORITY'}, 'release_lane': 'CLEAR', 'implementation_lane': 'NO_WORK', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'WAIT_AUTHORITY', 'summary': 'QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_BLOCKED'}
+
+======================================================================
+FAIL: test_pv21_executable_budgeted_work_does_not_invent_release_hold (test_t2040_publication_truth.PublicationTruthTests.test_pv21_executable_budgeted_work_does_not_invent_release_hold)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 129, in test_pv21_executable_budgeted_work_does_not_invent_release_hold
+    self.assert_publication(result, "RELEASE_PENDING", "PENDING")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 65, in assert_publication
+    self.assertEqual(result["publication_status"], status, result)
+AssertionError: 'RELEASE_BLOCKED' != 'RELEASE_PENDING'
+- RELEASE_BLOCKED
++ RELEASE_PENDING
+ : {'queue_status': 'QUEUE_HAS_WORK', 'campaign_status': 'CAMPAIGN_RUNNING', 'objective_status': 'OBJECTIVE_UNVERIFIED', 'publication_status': 'RELEASE_BLOCKED', 'verification_status': 'NOT_CHECKED', 'next_eligible_action': 'saipen claim T-1', 'next_wake_condition': 'ticket execution starts', 'lanes': {'RELEASE_LANE': 'CLEAR', 'IMPLEMENTATION_LANE': 'ELIGIBLE', 'DISCOVERY_LANE': 'AUTHORITY_REQUIRED', 'PUBLICATION_LANE': 'PENDING', 'CAMPAIGN': 'RUNNING'}, 'release_lane': 'CLEAR', 'implementation_lane': 'ELIGIBLE', 'discovery_lane': 'AUTHORITY_REQUIRED', 'publication_lane': 'PENDING', 'campaign_lane': 'RUNNING', 'summary': 'QUEUE: QUEUE_HAS_WORK | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_RUNNING | PUBLICATION: RELEASE_BLOCKED'}
+
+======================================================================
+FAIL: test_root_none_consumes_owner_carrier_without_io (test_t2040_publication_truth.PublicationTruthTests.test_root_none_consumes_owner_carrier_without_io)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 185, in test_root_none_consumes_owner_carrier_without_io
+    evidence = self.evidence()
+               ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_stale_git_proof_is_rejected_at_explicit_root_boundary (test_t2040_publication_truth.PublicationTruthTests.test_stale_git_proof_is_rejected_at_explicit_root_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 277, in test_stale_git_proof_is_rejected_at_explicit_root_boundary
+    evidence = self.evidence()
+               ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+======================================================================
+FAIL: test_stale_local_no_publish_source_is_unknown (test_t2040_publication_truth.PublicationTruthTests.test_stale_local_no_publish_source_is_unknown)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 290, in test_stale_local_no_publish_source_is_unknown
+    self.assert_publication(self.truth(publication_evidence=self.evidence()), "RELEASE_UNKNOWN", "UNKNOWN")
+                                                            ^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_publication_truth.py", line 61, in evidence
+    self.assertTrue(callable(reader), "read-only publication evidence owner missing")
+AssertionError: False is not true : read-only publication evidence owner missing
+
+----------------------------------------------------------------------
+Ran 27 tests in 4.350s
+
+FAILED (failures=23, errors=3)

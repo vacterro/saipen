@@ -1,0 +1,54 @@
+--- response_surface.pre.py
++++ tools/saipen_engine/response_surface.py
+@@ -23,6 +23,7 @@
+ from dataclasses import dataclass
+ 
+ from .guard_events import saipen_line_problem
++from .phases import ALL_PHASES
+ 
+ RULE_ID = "EXEC-RESPONSE-01"
+ 
+@@ -404,18 +405,38 @@
+         if first_token != current_validation:
+             errors.append(f"VALIDATION must start with current {current_validation}")
+     current_status = values.get("STATUS", "").upper()
+-    if current_phase and current_phase.upper() not in {"DONE", "BLOCKED"}:
+-        if current_phase.upper() not in current_status:
++    if current_phase:
++        raw_status = values.get("STATUS", "")
++        status_tokens = set(re.findall(r"(?<![\w-])[A-Z][A-Z_]*(?![\w-])", raw_status))
++        named_phases = status_tokens & ALL_PHASES
++        first_word = re.match(r"[A-Za-z][A-Za-z_]*", raw_status)
++        if first_word and first_word.group().upper() in ALL_PHASES:
++            named_phases.add(first_word.group().upper())
++        head = re.match(r"(?:(T-\d+)\s+)?([A-Za-z][A-Za-z_]*)(?![\w-])", raw_status)
++        leading_phase = head.group(2).upper() if head else ""
++        leading_task = head.group(1) if head else None
++        is_operator_wait = leading_task is None and leading_phase == "WAIT" and operator_due
++        valid_head = (
++            leading_phase == current_phase.upper()
++            and (leading_task is None or leading_task == current_task)
++        ) or is_operator_wait
++        phase_matches = named_phases == {current_phase.upper()} or (
++            is_operator_wait and not named_phases
++        )
++        if not valid_head or not phase_matches:
+             errors.append(f"STATUS must name current phase {current_phase}")
+-    if current_task and current_task.lower() != "none" and current_task not in current_status:
+-        errors.append(f"STATUS must name current task {current_task}")
++    if current_task and current_task.lower() != "none":
++        named_tasks = set(re.findall(r"(?<![\w-])T-\d+(?![\w-])", current_status))
++        if named_tasks != {current_task.upper()}:
++            errors.append(f"STATUS must name current task {current_task}")
+     if current_blocker and current_blocker.strip() and not _is_none(current_blocker):
+         # A project with no blocker reports the canonical `none` sentinel. That
+         # is not a blocker CODE, so demanding the response name it refused every
+         # `BLOCKER: NONE` surface on a healthy project -- the case the surface is
+         # written for. `_is_none` is the one "no blocker" test.
+         code = current_blocker.split(" -- ", 1)[0].split(":", 1)[0].strip()
+-        if code and not blocker.startswith(code):
++        rendered_code = blocker.split(" -- ", 1)[0].strip()
++        if code and rendered_code != code:
+             errors.append(f"BLOCKER must name current {code}")
+     if operator_due and _is_none(operator_action):
+         errors.append("OPERATOR ACTION is required by the current route")

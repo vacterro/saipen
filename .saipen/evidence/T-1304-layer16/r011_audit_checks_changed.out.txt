@@ -1,0 +1,26 @@
+command: python -B tools/audit_checks.py --changed tools/saipen_engine/fast_check.py
+cwd: /v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN
+utc: 2026-10-07T23:08:04Z
+--- stdout+stderr ---
+SCOPED: 0 of 272 control(s) selected by --changed (1 path(s)). This is NOT the full sweep.
+SCOPED: known limitation -- selection reads each control's DECLARED target file only. A control whose target is untouched but whose check reads a changed file indirectly -- a cross-document rule, a manifest, a schema another file is validated against -- is NOT selected and is NOT proven by this run
+SCOPED: known limitation -- the always-on probes still run; only the per-control sweep is narrowed
+PASS: a real root `nul` entry is excluded from audit snapshots
+UNPROVEN: symlink-restore -- host cannot create a symlink, so the red control was never constructed: [WinError 1314] A required privilege is not held by the client: 'V:\\_TEMP_\\audit_checks_dswj188t\\probe-symlink-restore\\symlink-restore-probe\\external.md' -> 'V:\\_TEMP_\\audit_checks_dswj188t\\probe-symlink-restore\\symlink-restore-probe\\IDENTITY.md'
+PASS: audit-tags missing-Git skip plus enumeration, nonzero, malformed, truncated, and surplus fail-closed controls behave
+PASS: every producer-OUTBOX control runs at a gate where its finding is hard
+PASS: a known-good copy of this repository is built for the mutation controls
+FAIL: release-ledger -- clean synthetic ledger is not clean: FAIL: FUTURE GATE: future gate document future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/FUTURE_GATE_DURABLE_AUTONOMOUS_RUNS.md is on disk but absent from the index
+PASS: tools/validate.py declares exactly the adjudicated fail sites, and added, removed and same-count SWAPPED sites are each named
+NOTE: 354 fail site(s) recorded by identity in tools/validator_fail_sites.json
+NOTE: known limitation -- identity binds WHICH fail sites tools/validate.py declares, so an added, removed or same-count swapped site is named -- but a BASELINE record is inherited surface that was never individually adjudicated, which is recorded per site and is NOT detected here as missing coverage
+FAIL: warn-slug-ownership -- control copy with calibrated warn_slugs is not clean: , da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this
+Validation FAILED: 4 problem(s), 4 warning(s)
+FAIL: phase-rename -- consistent SCOUT->SCOUTX rename was rejected: FAIL: FUTURE GATE: future gate document future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/FUTURE_GATE_DURABLE_AUTONOMOUS_RUNS.md is on disk but absent from the index | FAIL: FUTURE GATE: future gate document future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/MUTATION_VECTORS.md is on disk but absent from the index | FAIL: FUTURE GATE: future gate document future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/README.md is on disk but absent from the index | FAIL: FUTURE GATE: future gate document future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/REFERENCE_TRIGGERDEV_IDEAS.md is on disk but absent from the index
+FAIL: release-ledger-runtime-query -- validator control exited 1 while tag queries were observed: FAIL: FUTURE GATE: future gate document future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261
+FAIL: validator-baseline -- the validator rejects an unmodified copy -- fix the known-good control before trusting mutation results: FAIL: FUTURE GATE: future gate document future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/FUTURE_GATE_DURABLE_AUTONOMOUS_RUNS.md is on disk but absent from the index
+PASS: callable no-op mutations are rejected before validation
+PASS: every canonical mutation has its target, so the denominator holds still
+SKIP: mutation-sweep because prerequisite validator-baseline failed
+AUDIT: 7 of 14 probes passed; failed: phase-rename, release-ledger, release-ledger-runtime-query, validator-baseline, warn-slug-ownership; skipped: mutation-sweep; unproven (host capability): symlink-restore
+--- exit: 1 ---

@@ -1,0 +1,986 @@
+--- a/tools/saipen_engine/audit_manifest.py
++++ b/tools/saipen_engine/audit_manifest.py
+@@ -65,6 +65,7 @@
+ 
+ import json
+ import stat as stat_module
++from contextlib import suppress
+ from datetime import datetime, timezone
+ from pathlib import Path
+ from typing import Any
+@@ -77,6 +78,9 @@
+     LOGS_DIR,
+     SAIPEN_DIR,
+     STATE_NAME,
++    OwnedPathUnavailable,
++    prove_owned_dir_chain,
++    prove_owned_regular,
+     safe_atomic_write_bytes,
+ )
+ 
+@@ -478,12 +482,9 @@
+                 "detail": f"no real {SAIPEN_DIR}/ directory at {root}",
+                 "missing": list(MANDATORY_FILES),
+             }
+-    except OSError as exc:
+-        return {
+-            "state": LAYOUT_ABSENT,
+-            "detail": f"{SAIPEN_DIR}/ is not readable: {exc}",
+-            "missing": list(MANDATORY_FILES),
+-        }
++    except FileNotFoundError:
++        return {"state": LAYOUT_ABSENT, "detail": f"no {SAIPEN_DIR}/ at {root}",
++                "missing": list(MANDATORY_FILES)}
+ 
+     present: list[str] = []
+     missing: list[str] = []
+@@ -492,7 +493,7 @@
+         path = saipen_dir / name
+         try:
+             st = path.lstat()
+-        except OSError:
++        except FileNotFoundError:
+             missing.append(name)
+             continue
+         if path.is_symlink() or not stat_module.S_ISREG(st.st_mode):
+@@ -518,12 +519,9 @@
+                 "detail": f"{SAIPEN_DIR}/{STATE_NAME} is empty",
+                 "missing": [STATE_NAME],
+             }
+-    except OSError as exc:
+-        return {
+-            "state": LAYOUT_MALFORMED,
+-            "detail": f"{SAIPEN_DIR}/{STATE_NAME} is unreadable: {exc}",
+-            "missing": [STATE_NAME],
+-        }
++    except FileNotFoundError:
++        return {"state": LAYOUT_MALFORMED, "detail": f"{STATE_NAME} disappeared",
++                "missing": [STATE_NAME]}
+ 
+     if IDENTITY_NAME not in present:
+         return {
+@@ -555,13 +553,13 @@
+     }
+     try:
+         st = path.lstat()
+-    except OSError:
++    except FileNotFoundError:
+         return base
+     if path.is_symlink() or not stat_module.S_ISREG(st.st_mode):
+         return {**base, "state": DECLARED_MALFORMED, "detail": "not a regular file"}
+     try:
+         data = json.loads(path.read_text(encoding="utf-8"))
+-    except (OSError, ValueError, UnicodeDecodeError) as exc:
++    except (ValueError, UnicodeDecodeError) as exc:
+         return {**base, "state": DECLARED_MALFORMED, "detail": f"unreadable: {exc}"}
+     if not isinstance(data, dict) or data.get("kind") != "saipen_audit_manifest":
+         return {
+@@ -599,6 +597,22 @@
+ 
+ 
+ def ensure(
++    root: Path | str,
++    *,
++    protocol_dir: Path | str | None = None,
++    force: bool = False,
++    dry_run: bool = False,
++) -> dict[str, Any]:
++    """Contain manifest lifecycle I/O refusal without changing its authority."""
++    try:
++        return _ensure(root, protocol_dir=protocol_dir, force=force, dry_run=dry_run)
++    except (OSError, OwnedPathUnavailable) as exc:
++        from .host_bootstrap import filesystem_unavailable
++
++        return filesystem_unavailable(root, exc)
++
++
++def _ensure(
+     root: Path | str,
+     *,
+     protocol_dir: Path | str | None = None,
+@@ -681,6 +695,11 @@
+ 
+     upgrading = current["state"] in (DECLARED_STALE, DECLARED_UNSUPPORTED)
+     code = CODE_UPGRADED if upgrading else CODE_WRITTEN
++    # Read-only preflight names a denied ancestor before reconciliation can
++    # commit a checkpoint. It never creates a missing or inaccessible path.
++    prove_owned_dir_chain(path.parent, kind="audit manifest")
++    with suppress(FileNotFoundError):
++        prove_owned_regular(path, kind="audit manifest")
+     # Regeneration may legally replace a drifted document, but never narrow
+     # the declared evidence without saying which surface it removed.
+     dropped = _dropped_declarations(root, build(root, protocol_dir=protocol_dir))
+@@ -699,6 +718,8 @@
+ 
+     written = write(root, protocol_dir=protocol_dir, force=True)
+     if not written.get("ok"):
++        if written.get("code") == "SAIPEN_HOST_RUNTIME_UNAVAILABLE":
++            return written
+         return {
+             **result,
+             "reason_code": REASON_LAYOUT_MALFORMED,
+@@ -722,7 +743,7 @@
+     """`tier:path` evidence declarations on disk that `wanted` no longer makes."""
+     try:
+         on_disk = json.loads(manifest_path(root).read_text(encoding="utf-8"))
+-    except (OSError, ValueError, UnicodeDecodeError):
++    except (FileNotFoundError, ValueError, UnicodeDecodeError):
+         return []
+     evidence = on_disk.get("evidence") if isinstance(on_disk, dict) else None
+     if not isinstance(evidence, dict):
+@@ -763,6 +784,21 @@
+     protocol_dir: Path | str | None = None,
+     force: bool = False,
+ ) -> dict[str, Any]:
++    """The public low-level writer also contains genuine I/O unavailability."""
++    try:
++        return _write(root, protocol_dir=protocol_dir, force=force)
++    except (OSError, OwnedPathUnavailable) as exc:
++        from .host_bootstrap import filesystem_unavailable
++
++        return filesystem_unavailable(root, exc, operation="manifest_write")
++
++
++def _write(
++    root: Path | str,
++    *,
++    protocol_dir: Path | str | None = None,
++    force: bool = False,
++) -> dict[str, Any]:
+     """Write `.saipen/MANIFEST.json` atomically. Idempotent unless `force`.
+ 
+     The low-level writer. Callers that are NOT the operator (any lifecycle
+@@ -784,7 +820,7 @@
+     saipen_dir = root / SAIPEN_DIR
+     try:
+         valid_root = not saipen_dir.is_symlink() and saipen_dir.is_dir()
+-    except OSError:
++    except FileNotFoundError:
+         valid_root = False
+     if not valid_root:
+         return {
+@@ -804,6 +840,16 @@
+ 
+ 
+ def status(root: Path | str, *, protocol_dir: Path | str | None = None) -> dict[str, Any]:
++    """Contain read-only manifest inspection failures as runtime evidence."""
++    try:
++        return _status(root, protocol_dir=protocol_dir)
++    except (OSError, OwnedPathUnavailable) as exc:
++        from .host_bootstrap import filesystem_unavailable
++
++        return filesystem_unavailable(root, exc, operation="manifest_inspection")
++
++
++def _status(root: Path | str, *, protocol_dir: Path | str | None = None) -> dict[str, Any]:
+     """Read-only projection: what the contract declares and what exists."""
+     root = Path(root)
+     saipen_dir = root / SAIPEN_DIR
+--- a/tools/saipen_engine/paths.py
++++ b/tools/saipen_engine/paths.py
+@@ -193,6 +193,21 @@
+ _REPARSE = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+ 
+ 
++class OwnedPathUnavailable(ValueError):
++    """An ownership probe could not read a node, retaining its OS evidence.
++
++    ValueError compatibility preserves existing topology callers' refusal
++    behavior. Lifecycle boundaries can distinguish unavailable storage from
++    unsafe topology without parsing or discarding the original Windows error.
++    """
++
++    def __init__(self, message: str, path: Path, error: OSError, operation: str):
++        super().__init__(message)
++        self.path = Path(path)
++        self.os_error = error
++        self.operation = operation
++
++
+ def prove_owned_regular(path: Path, *, kind: str = "path") -> os.stat_result:
+     """Prove `path` is an owned regular non-link/non-reparse final node.
+ 
+@@ -206,7 +221,9 @@
+     except FileNotFoundError:
+         raise
+     except OSError as exc:
+-        raise ValueError(f"{kind} {path} is unreadable: {exc}") from None
++        raise OwnedPathUnavailable(
++            f"{kind} {path} is unreadable: {exc}", path, exc, "lstat"
++        ) from exc
+     if os.path.islink(path) or bool(getattr(st, "st_file_attributes", 0) & _REPARSE):
+         raise ValueError(f"{kind} {path} is a link/reparse node")
+     if not stat.S_ISREG(st.st_mode):
+@@ -241,7 +258,9 @@
+         except FileNotFoundError:
+             continue
+         except OSError as exc:
+-            raise ValueError(f"{kind} ancestor {node} unreadable: {exc}") from None
++            raise OwnedPathUnavailable(
++                f"{kind} ancestor {node} unreadable: {exc}", node, exc, "ancestor_lstat"
++            ) from exc
+         if os.path.islink(node) or bool(getattr(st, "st_file_attributes", 0) & _REPARSE):
+             raise ValueError(f"{kind} ancestor {node} is a link/reparse node")
+         if not stat.S_ISDIR(st.st_mode):
+@@ -528,7 +547,7 @@
+         st = saipen.lstat()
+         if getattr(st, "st_file_attributes", 0) & 0x400:
+             return False
+-    except OSError:
++    except (FileNotFoundError, NotADirectoryError):
+         return False
+     return True
+ 
+@@ -655,11 +674,13 @@
+         code: str | None = None,
+         lineage: str | None = None,
+         context_kind: str | None = None,
++        filesystem_failure: dict | None = None,
+     ) -> ResolvedProjectRoot:
+         inst = super().__new__(cls, (root, source))
+         inst._code = code
+         inst._lineage = lineage
+         inst._context_kind = context_kind
++        inst.filesystem_failure = filesystem_failure
+         return inst
+ 
+     @property
+@@ -726,6 +747,35 @@
+ 
+ 
+ def resolve_project_root(
++    start: Path | None = None,
++    explicit: str | Path | None = None,
++    *,
++    host_root: str | Path | None = None,
++    host_lineage: str | None = None,
++    honor_environment: bool = True,
++    authority: str = "mutation",
++) -> ResolvedProjectRoot:
++    """Resolve a binding while retaining OS denial as unavailable runtime."""
++    try:
++        return _resolve_project_root(
++            start, explicit, host_root=host_root, host_lineage=host_lineage,
++            honor_environment=honor_environment, authority=authority,
++        )
++    except OSError as exc:
++        from .host_bootstrap import filesystem_unavailable
++
++        attempted = explicit or host_root or (
++            os.environ.get(ENV_PROJECT_ROOT) if honor_environment else None
++        ) or start or Path.cwd()
++        failure = filesystem_unavailable(
++            attempted, exc, stage="before_admission", operation="project_binding"
++        )
++        return ResolvedProjectRoot(
++            None, failure["detail"], code=failure["code"], filesystem_failure=failure
++        )
++
++
++def _resolve_project_root(
+     start: Path | None = None,
+     explicit: str | Path | None = None,
+     *,
+--- a/tools/saipen_engine/host_bootstrap.py
++++ b/tools/saipen_engine/host_bootstrap.py
+@@ -48,6 +48,7 @@
+ from __future__ import annotations
+ 
+ import hashlib
++import errno
+ import json
+ import os
+ import shutil
+@@ -78,6 +79,69 @@
+ BOUNDARY_ENTRYPOINT = "direct_entrypoint"
+ BOUNDARY_BRIDGE = "host_bridge"
+ BOUNDARY_HOST = "host_registry"
++BOUNDARY_FILESYSTEM = "project_filesystem"
++
++
++def execution_identity() -> dict:
++    """Diagnostic OS identity, never an actor, admission or authorization."""
++    if os.name == "nt":
++        sid = machine_runtime._current_sid()
++        return {"sid": sid, "source": "windows_process_token" if sid else "unavailable"}
++    effective = getattr(os, "geteuid", lambda: None)()
++    return {
++        "euid": effective,
++        "source": "effective_uid" if effective is not None else "unavailable",
++    }
++
++
++def filesystem_unavailable(
++    root: Path | str,
++    exc: OSError | ValueError,
++    *,
++    stage: str = "validation",
++    operation: str = "manifest_lifecycle",
++) -> dict:
++    """One structured, operation-scoped hard refusal for unavailable storage."""
++    from .paths import OwnedPathUnavailable
++
++    error = exc.os_error if isinstance(exc, OwnedPathUnavailable) else exc
++    path = str(getattr(error, "filename", None) or getattr(exc, "path", root))
++    winerror = getattr(error, "winerror", None)
++    denied = (
++        isinstance(error, PermissionError)
++        or winerror == 5
++        or getattr(error, "errno", None) in (errno.EACCES, errno.EPERM)
++    )
++    payload = {
++        "ok": False,
++        "code": UNAVAILABLE,
++        "boundary": BOUNDARY_FILESYSTEM,
++        "stage": stage,
++        "operation": operation,
++        "probe_operation": getattr(exc, "operation", None),
++        "project_root": str(root),
++        "offending_path": path,
++        "failure_kind": "permission_denied" if denied else "filesystem_unavailable",
++        "failure_scope": "operation",
++        "execution_identity": execution_identity(),
++        "os_error": {
++            "type": type(error).__name__, "errno": getattr(error, "errno", None),
++            "winerror": winerror, "strerror": getattr(error, "strerror", None),
++            "filename": getattr(error, "filename", None),
++            "filename2": getattr(error, "filename2", None),
++        },
++        "detail": str(exc),
++        "changed": False,
++        "remediation": (
++            "Preserve account isolation. An operator must authorize the minimum access "
++            "required for this path, or provide a supported project binding or broker route. "
++            "Retry only after that prerequisite changes; then run canonical validation."
++        ),
++    }
++    payload["fingerprint"] = hashlib.sha256(
++        json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
++    ).hexdigest()
++    return payload
+ 
+ #: Files an install must carry to be a usable SAIPEN home, layout-agnostic
+ #: (`BOOT.md` at the root in a flattened install, under `saipen/` in a clone --
+@@ -443,6 +507,9 @@
+         start, explicit=project_root, honor_environment=honor_environment
+     )
+     if not resolved.ok:
++        if getattr(resolved, "filesystem_failure", None):
++            result.update(resolved.filesystem_failure)
++            return _finalize_host(result, host_refused)
+         if getattr(resolved, "code", None) == "NOT_SAIPEN_PROJECT":
+             result.update(
+                 code=NOT_SAIPEN,
+--- a/tools/saipen_engine/reconcile.py
++++ b/tools/saipen_engine/reconcile.py
+@@ -2458,11 +2458,10 @@
+ 
+     Deliberately narrow:
+       * a dry-run reconciliation writes nothing (that is what dry_run means);
+-      * a refused enrollment NEVER fails the reconciliation -- the canonical
+-        mutation is already committed when this runs, and a derived
+-        declaration may not un-commit real work -- but it IS reported, because
+-        a refusal that says nothing is the silent no-op this exists to
+-        prevent;
++      * derived declaration refusals retain their existing recovery semantics;
++      * filesystem unavailability is a hard boundary. Preflight and any required
++        manifest write run before a canonical repair commits, so a denied
++        resource never admits Work or partially advances LOG and STATE;
+       * `audit_manifest.ensure` owns every legality rule (no protocol memory,
+         unloadable checkpoint, declaration that is not this contract, a NEWER
+         contract), so there is exactly one implementation of the contract's
+@@ -2496,15 +2495,12 @@
+     try:
+         outcome = audit_manifest.ensure(project_root)
+     except OSError as exc:
+-        return {
+-            **result,
+-            "audit_manifest": {
+-                "ok": False,
+-                "code": "AUDIT_MANIFEST_REFUSED",
+-                "reason_code": "AUDIT_MANIFEST_UNWRITABLE",
+-                "detail": str(exc),
+-            },
+-        }
++        from .host_bootstrap import filesystem_unavailable
++
++        outcome = filesystem_unavailable(project_root, exc)
++    if outcome.get("code") == "SAIPEN_HOST_RUNTIME_UNAVAILABLE":
++        return {**outcome, "changed": result.get("changed", []),
++                "canonical_result": result, "audit_manifest": outcome}
+     if outcome.get("changed") or not outcome.get("ok"):
+         merged = {**result, "audit_manifest": outcome}
+         if outcome.get("changed") and result.get("code") == "CLEAN":
+@@ -2557,6 +2553,16 @@
+     decision is recorded in the LOG DEC with the original STATE archived.
+     """
+     project_root = Path(root)
++    # Detect manifest access denial before any canonical repair can commit.
++    # Other manifest refusals retain their existing recovery semantics.
++    try:
++        from . import audit_manifest
++    except ImportError:
++        audit_manifest = None  # Existing derived-module recovery semantics.
++    if audit_manifest is not None:
++        manifest_preflight = audit_manifest.ensure(project_root, dry_run=True)
++        if manifest_preflight.get("code") == "SAIPEN_HOST_RUNTIME_UNAVAILABLE":
++            return manifest_preflight
+     try:
+         from .operations import (
+             _docs_preconditions,
+@@ -3327,6 +3333,13 @@
+             "dry_run": True,
+         }
+ 
++    # Complete a required manifest write before committing a canonical repair.
++    # A denied write must not discover itself after advancing LOG and STATE.
++    contract = _ensure_audit_contract(
++        {"ok": True, "code": "CLEAN", "changed": [], "dry_run": False}, project_root
++    )
++    if contract.get("code") == "SAIPEN_HOST_RUNTIME_UNAVAILABLE":
++        return contract
+     applied = apply_plan(project_root, plan)
+     if not applied.get("ok"):
+         return {
+@@ -3336,8 +3349,7 @@
+             "changed": {"board": board_drifts, "state": state_repairs},
+             "dry_run": False,
+         }
+-    return _ensure_audit_contract(
+-        {
++    result = {
+             "ok": True,
+             "code": "REPAIRED",
+             "changed": {"board": board_drifts, "state": state_repairs},
+@@ -3349,9 +3361,10 @@
+             "agent": agent,
+             "strict_state_error": strict_state_error or None,
+             "dry_run": False,
+-        },
+-        project_root,
+-    )
++        }
++    if "audit_manifest" in contract:
++        result["audit_manifest"] = contract["audit_manifest"]
++    return result
+ 
+ 
+ #: Where a duplicate-id repair keeps the exact BOARD bytes the operator's
+--- a/tools/saipen.py
++++ b/tools/saipen.py
+@@ -4923,11 +4923,9 @@
+         return 0 if result.get("ok") else 1
+ 
+     if dry_run:
+-        _emit(
+-            audit_manifest.ensure(project_root, protocol_dir=PROTOCOL_DIR, dry_run=True),
+-            as_json,
+-        )
+-        return 0
++        result = audit_manifest.ensure(project_root, protocol_dir=PROTOCOL_DIR, dry_run=True)
++        _emit(result, as_json)
++        return 0 if result.get("ok") else 1
+     if _negotiate_capability(project_root) == "read-only":
+         return _capability_refusal(as_json)
+     result = audit_manifest.ensure(project_root, protocol_dir=PROTOCOL_DIR, force=force)
+@@ -10083,6 +10081,13 @@
+         return 0
+     try:
+         written = bootstrap_project(root, agent=seat)
++    except OSError as exc:
++        from saipen_engine.host_bootstrap import filesystem_unavailable
++
++        _emit(
++            filesystem_unavailable(root, exc, stage="before_admission", operation="init"), as_json
++        )
++        return 1
+     except InitRefused as exc:
+         _emit({"ok": False, "code": "INIT_REFUSED", "detail": str(exc)}, as_json)
+         return 1
+@@ -11777,6 +11782,9 @@
+     project_root = project_root_res.root
+     root_reason = project_root_res.source
+     if project_root is None:
++        if getattr(project_root_res, "filesystem_failure", None):
++            _emit(project_root_res.filesystem_failure, as_json)
++            return 3
+         fail_code = getattr(project_root_res, "code", None) or "NOT_SAIPEN_PROJECT"
+         _emit({"ok": False, "code": fail_code, "detail": root_reason}, as_json)
+         return 3
+--- a/tools/saipen_engine/init_project.py
++++ b/tools/saipen_engine/init_project.py
+@@ -25,6 +25,7 @@
+ 
+ import datetime as dt
+ import re
++import tempfile
+ from pathlib import Path
+ 
+ from .paths import identity_file_content, new_project_lineage
+@@ -122,13 +123,23 @@
+         },
+     )
+ 
+-    target.mkdir(parents=True)
+-    (target / "IDENTITY.md").write_text(
+-        identity_file_content(new_project_lineage()), encoding="utf-8"
+-    )
+-    (target / "STATE.md").write_text(state, encoding="utf-8")
+-    for name in ("BOARD.md", "LOG.md"):
+-        (target / name).write_text(_template(name), encoding="utf-8")
++    # Load every dependency before producing canonical bytes. Materialize in
++    # an owned sibling directory and publish the complete directory at once;
++    # a denied later write must not leave a half-created protocol project.
++    documents = {
++        "IDENTITY.md": identity_file_content(new_project_lineage()),
++        "STATE.md": state,
++        "BOARD.md": _template("BOARD.md"),
++        "LOG.md": _template("LOG.md"),
++    }
++    with tempfile.TemporaryDirectory(prefix=".saipen-init-", dir=root) as temporary:
++        staged = Path(temporary) / ".saipen"
++        staged.mkdir()
++        for name, text in documents.items():
++            (staged / name).write_text(text, encoding="utf-8")
++        if target.exists():
++            raise InitRefused(f"{target} appeared during INIT; existing memory is preserved")
++        staged.rename(target)
+     return {
+         "project_root": str(root),
+         "identity": str(target / "IDENTITY.md"),
+--- a/tools/test_t1647_machine_runtime.py
++++ b/tools/test_t1647_machine_runtime.py
+@@ -543,16 +543,21 @@
+         deny_this_account(project)
+         for command in (("continue",), ("checkpoint", "DEC", "note"), ("status",)):
+             answer = self.ask(self.engine(*command, "--project-root", str(project)), self.tmp)
+-            self.assertEqual(answer.get("code"), "PROJECT_BINDING_INVALID", (command, answer))
+-            self.assertIn("may not read", str(answer.get("detail")))
++            self.assertEqual(
++                answer.get("code"), "SAIPEN_HOST_RUNTIME_UNAVAILABLE", (command, answer)
++            )
++            self.assertEqual(answer.get("failure_kind"), "permission_denied", answer)
++            self.assertEqual(answer.get("stage"), "before_admission", answer)
++            self.assertEqual(answer["os_error"]["winerror"], 5)
+             self.assertNotIn("no .saipen", str(answer.get("detail")))
+ 
+     def test_the_session_carrier_is_answered_the_same_way(self):
+         project = self.project()
+         deny_this_account(project)
+         answer = self.ask(self.engine("continue"), self.tmp, SAIPEN_PROJECT_ROOT=str(project))
+-        self.assertEqual(answer.get("code"), "PROJECT_BINDING_INVALID", answer)
+-        self.assertIn("may not read", str(answer.get("detail")))
++        self.assertEqual(answer.get("code"), "SAIPEN_HOST_RUNTIME_UNAVAILABLE", answer)
++        self.assertEqual(answer.get("failure_kind"), "permission_denied", answer)
++        self.assertEqual(answer.get("stage"), "before_admission", answer)
+ 
+     def test_a_project_without_memory_keeps_its_own_answer(self):
+         # The control: absence is still absence.
+@@ -584,9 +589,12 @@
+         self.assertEqual(answer.get("code"), "CAPABILITY_READ_ONLY", answer)
+         self.assertIn("reading only", str(answer.get("detail")))
+         self.assertEqual(log.read_bytes(), before)
+-        # Reading still answers: the route is a read.
++        # Continue enrolls a missing manifest; that required write stays denied.
+         route = self.ask(self.engine("continue", "--project-root", str(project)), self.tmp)
+-        self.assertTrue(route.get("ok"), route)
++        self.assertFalse(route.get("ok"), route)
++        self.assertEqual(route.get("code"), "SAIPEN_HOST_RUNTIME_UNAVAILABLE", route)
++        self.assertEqual(route.get("failure_kind"), "permission_denied", route)
++        self.assertEqual(log.read_bytes(), before)
+ 
+ 
+ class WriteProbeTests(unittest.TestCase):
+@@ -1331,12 +1339,12 @@
+             f'"{project}"',
+             project=self.profile,
+         )
+-        self.assertEqual(answer.get("code"), "PROJECT_BINDING_INVALID", answer)
+-        self.assertIn("may not read", str(answer.get("detail")))
++        self.assertEqual(answer.get("code"), "SAIPEN_HOST_RUNTIME_UNAVAILABLE", answer)
++        self.assertEqual(answer.get("failure_kind"), "permission_denied", answer)
+         self.assertEqual(log.read_bytes(), before)
+ 
+-    def test_a_project_granted_for_reading_is_read_and_not_written(self):
+-        project, tid = self.project_recording(self.home)
++    def test_a_project_granted_for_reading_refuses_required_manifest_write(self):
++        project, _tid = self.project_recording(self.home)
+         only_this_account(project)
+         subprocess.run(
+             ["icacls", str(project), "/grant", f"{_USERS}:(OI)(CI)RX", "/Q"],
+@@ -1346,7 +1354,9 @@
+         log = project / ".saipen" / "LOG.md"
+         before = log.read_bytes()
+         route = self.through_machine("continue", project=project)
+-        self.assertEqual(route.get("action"), f"PHASE SCOUT {tid}", route)
++        self.assertFalse(route.get("ok"), route)
++        self.assertEqual(route.get("code"), "SAIPEN_HOST_RUNTIME_UNAVAILABLE", route)
++        self.assertEqual(route.get("failure_kind"), "permission_denied", route)
+         answer = self.through_machine("checkpoint", "DEC", "note-read-only", project=project)
+         self.assertEqual(answer.get("code"), "CAPABILITY_READ_ONLY", answer)
+         self.assertIn("reading only", str(answer.get("detail")))
+--- a/tools/test_t1712_manifest_runtime.py
++++ b/tools/test_t1712_manifest_runtime.py
+@@ -0,0 +1,362 @@
++"""Permission failures remain local hard boundaries, never CLI tracebacks."""
++
++from __future__ import annotations
++
++import contextlib
++import importlib.util
++import io
++import json
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++from unittest.mock import patch
++
++sys.path.insert(0, str(Path(__file__).resolve().parent))
++from saipen_engine import audit_manifest, paths
++from saipen_engine.reconcile import reconcile_protocol_state
++from saipen_engine.router import route_next
++from test_control_primitives import ControlFixture
++from test_hermetic_env import isolate_host_session
++
++UNAVAILABLE = "SAIPEN_HOST_RUNTIME_UNAVAILABLE"
++
++
++def setUpModule():
++    isolate_host_session()
++
++
++def digest(root):
++    return {p.relative_to(root).as_posix(): p.read_bytes() for p in root.rglob("*") if p.is_file()}
++
++
++def denied(path):
++    exc = PermissionError(13, "Access is denied", str(path))
++    exc.winerror = 5
++    return exc
++
++
++def cli_module():
++    spec = importlib.util.spec_from_file_location(
++        "cli_t1712", Path(__file__).with_name("saipen.py")
++    )
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++class ManifestRuntimeTests(ControlFixture):
++    def failure(self, result, path, stage="validation"):
++        self.assertFalse(result["ok"], result)
++        self.assertEqual(result["code"], UNAVAILABLE, result)
++        self.assertEqual(result["failure_kind"], "permission_denied", result)
++        self.assertEqual(result["stage"], stage, result)
++        self.assertEqual(result["offending_path"], str(path), result)
++        self.assertEqual(result["os_error"]["winerror"], 5, result)
++        self.assertEqual(result["os_error"]["errno"], 13, result)
++        self.assertEqual(result["os_error"]["filename"], str(path), result)
++        self.assertEqual(result["failure_scope"], "operation", result)
++        self.assertIn("execution_identity", result)
++        self.assertIn("remediation", result)
++        self.assertIn("fingerprint", result)
++        self.assertFalse(result["changed"], result)
++
++    @contextlib.contextmanager
++    def lstat_denied(self, target):
++        original = Path.lstat
++
++        def lstat(path, *args, **kwargs):
++            if path == target:
++                raise denied(target)
++            return original(path, *args, **kwargs)
++
++        with patch.object(Path, "lstat", lstat):
++            yield
++
++    def test_accessible_project_enrolls_and_second_call_writes_nothing(self):
++        project = self.make_project()
++        first = audit_manifest.ensure(project)
++        self.assertTrue(first["ok"], first)
++        before = digest(project)
++        self.assertEqual(audit_manifest.ensure(project)["code"], audit_manifest.CODE_CURRENT)
++        self.assertEqual(digest(project), before)
++
++    def test_missing_project_is_absence_without_creation(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            project = Path(tmp) / "missing"
++            result = audit_manifest.ensure(project)
++            self.assertFalse(result["ok"])
++            self.assertEqual(result["reason_code"], audit_manifest.REASON_MEMORY_ABSENT)
++            self.assertFalse(project.exists())
++
++    def test_unreadable_existing_ancestor_is_structured_and_zero_write(self):
++        project = self.make_project()
++        before = digest(project)
++        with self.lstat_denied(project.parent), patch.object(Path, "mkdir") as mkdir:
++            result = audit_manifest.ensure(project)
++        self.failure(result, project.parent)
++        mkdir.assert_not_called()
++        self.assertEqual(digest(project), before)
++
++    def test_inaccessible_child_is_not_missing_or_corrupt(self):
++        project = self.make_project()
++        before = digest(project)
++        child = project / ".saipen"
++        with self.lstat_denied(child):
++            result = audit_manifest.ensure(project)
++        self.failure(result, child)
++        self.assertEqual(digest(project), before)
++
++    def test_denied_manifest_stat_cannot_authorize_replacement(self):
++        project = self.make_project()
++        self.assertTrue(audit_manifest.ensure(project)["ok"])
++        before = digest(project)
++        manifest = audit_manifest.manifest_path(project)
++        with self.lstat_denied(manifest):
++            result = audit_manifest.ensure(project, force=True)
++        self.failure(result, manifest)
++        self.assertEqual(digest(project), before)
++
++    def test_denied_manifest_read_cannot_become_malformed_even_with_force(self):
++        project = self.make_project()
++        self.assertTrue(audit_manifest.ensure(project)["ok"])
++        before = digest(project)
++        manifest = audit_manifest.manifest_path(project)
++        original = Path.read_text
++
++        def read_text(path, *args, **kwargs):
++            if path == manifest:
++                raise denied(path)
++            return original(path, *args, **kwargs)
++
++        with patch.object(Path, "read_text", read_text):
++            result = audit_manifest.ensure(project, force=True)
++        self.failure(result, manifest)
++        self.assertEqual(digest(project), before)
++
++    def test_denied_state_read_is_availability_not_corruption(self):
++        project = self.make_project()
++        before = digest(project)
++        state = project / ".saipen/STATE.md"
++        original = Path.read_bytes
++
++        def read_bytes(path):
++            if path == state:
++                raise denied(path)
++            return original(path)
++
++        with patch.object(Path, "read_bytes", read_bytes):
++            result = audit_manifest.ensure(project)
++        self.failure(result, state)
++        self.assertEqual(digest(project), before)
++
++    def test_direct_write_contains_original_oserror(self):
++        project = self.make_project()
++        before = digest(project)
++        manifest = audit_manifest.manifest_path(project)
++        with patch.object(audit_manifest, "safe_atomic_write_bytes", side_effect=denied(manifest)):
++            result = audit_manifest.write(project, force=True)
++        self.failure(result, manifest)
++        self.assertEqual(digest(project), before)
++
++    def test_failed_atomic_replace_removes_own_temporary_and_preserves_manifest(self):
++        project = self.make_project()
++        self.assertTrue(audit_manifest.ensure(project)["ok"])
++        before = digest(project)
++        manifest = audit_manifest.manifest_path(project)
++        with patch.object(paths.os, "replace", side_effect=denied(manifest)), patch.object(
++            paths, "_REPLACE_ATTEMPTS", 1
++        ):
++            result = audit_manifest.write(project, force=True)
++        self.failure(result, manifest)
++        self.assertEqual(digest(project), before)
++
++    def test_other_oserror_preserves_its_distinct_error(self):
++        project = self.make_project()
++        manifest = audit_manifest.manifest_path(project)
++        before = digest(project)
++        with patch.object(
++            audit_manifest,
++            "safe_atomic_write_bytes",
++            side_effect=OSError(5, "I/O error", str(manifest)),
++        ):
++            result = audit_manifest.ensure(project)
++        self.assertFalse(result["ok"])
++        self.assertEqual(result["code"], UNAVAILABLE)
++        self.assertEqual(result["failure_kind"], "filesystem_unavailable")
++        self.assertEqual(result["os_error"]["errno"], 5)
++        self.assertEqual(digest(project), before)
++
++    def test_continue_json_is_hard_refusal_without_phase_or_claim_change(self):
++        project = self.make_project(active=True)
++        before = digest(project)
++        output, errors = io.StringIO(), io.StringIO()
++        cli = cli_module()
++        with self.lstat_denied(project.parent), contextlib.redirect_stdout(
++            output
++        ), contextlib.redirect_stderr(errors):
++            status = cli.main(["--project-root", str(project), "--json", "continue"])
++        result = json.loads(output.getvalue())
++        self.assertNotEqual(status, 0)
++        self.failure(result, project.parent)
++        self.assertNotIn("Traceback", errors.getvalue())
++        self.assertEqual(digest(project), before)
++
++    def test_known_denial_precedes_any_canonical_reconciliation_repair(self):
++        project = self.make_project(active=True)
++        state = project / ".saipen/STATE.md"
++        state.write_text(
++            state.read_text().replace("last_event: 1", "last_event: 0"), encoding="utf-8"
++        )
++        before = digest(project)
++        with self.lstat_denied(project.parent):
++            result = reconcile_protocol_state(project, "tester")
++        self.failure(result, project.parent)
++        self.assertEqual(digest(project), before)
++
++    def test_manifest_write_denial_precedes_canonical_reconciliation_commit(self):
++        project = self.make_project(active=True)
++        state = project / ".saipen/STATE.md"
++        state.write_text(
++            state.read_text().replace("last_event: 1", "last_event: 0"), encoding="utf-8"
++        )
++        before = digest(project)
++        manifest = audit_manifest.manifest_path(project)
++        with patch.object(audit_manifest, "safe_atomic_write_bytes", side_effect=denied(manifest)):
++            result = reconcile_protocol_state(project, "tester")
++        self.failure(result, manifest)
++        self.assertEqual(digest(project), before)
++
++    def test_read_only_manifest_cli_denial_is_parseable_hard_refusal(self):
++        project = self.make_project()
++        before = digest(project)
++        cli = cli_module()
++        output, errors = io.StringIO(), io.StringIO()
++        child = project / ".saipen"
++        with self.lstat_denied(child), contextlib.redirect_stdout(
++            output
++        ), contextlib.redirect_stderr(errors):
++            status = cli.main(["--project-root", str(project), "--json", "audit", "manifest"])
++        result = json.loads(output.getvalue())
++        self.assertNotEqual(status, 0)
++        self.failure(result, child, stage="before_admission")
++        self.assertNotIn("Traceback", errors.getvalue())
++        self.assertEqual(digest(project), before)
++
++    def test_read_only_manifest_inspection_reports_its_own_denial(self):
++        project = self.make_project()
++        self.assertTrue(audit_manifest.ensure(project)["ok"])
++        before = digest(project)
++        manifest = audit_manifest.manifest_path(project)
++        output, errors = io.StringIO(), io.StringIO()
++        cli = cli_module()
++        with self.lstat_denied(manifest), contextlib.redirect_stdout(
++            output
++        ), contextlib.redirect_stderr(errors):
++            status = cli.main(["--project-root", str(project), "--json", "audit", "manifest"])
++        result = json.loads(output.getvalue())
++        self.assertNotEqual(status, 0)
++        self.failure(result, manifest)
++        self.assertEqual(digest(project), before)
++
++    def test_manifest_dry_run_denial_has_nonzero_cli_exit(self):
++        project = self.make_project()
++        before = digest(project)
++        output, errors = io.StringIO(), io.StringIO()
++        cli = cli_module()
++        with self.lstat_denied(project.parent), contextlib.redirect_stdout(
++            output
++        ), contextlib.redirect_stderr(errors):
++            status = cli.main(
++                [
++                    "--project-root",
++                    str(project),
++                    "--json",
++                    "--dry-run",
++                    "audit",
++                    "manifest",
++                    "--write",
++                ]
++            )
++        result = json.loads(output.getvalue())
++        self.assertNotEqual(status, 0)
++        self.failure(result, project.parent)
++        self.assertEqual(digest(project), before)
++
++    def test_init_permission_failure_is_json_and_never_init_completed(self):
++        cli = cli_module()
++        with tempfile.TemporaryDirectory() as tmp:
++            project = Path(tmp)
++            output, errors = io.StringIO(), io.StringIO()
++            with patch(
++                "saipen_engine.init_project.bootstrap_project", side_effect=denied(project)
++            ), contextlib.redirect_stdout(output), contextlib.redirect_stderr(errors):
++                status = cli.main(["--project-root", str(project), "--json", "init"])
++            result = json.loads(output.getvalue())
++            self.assertNotEqual(status, 0)
++            self.failure(result, project, stage="before_admission")
++            self.assertNotIn("INIT_COMPLETED", output.getvalue())
++            self.assertNotIn("Traceback", errors.getvalue())
++            self.assertEqual(digest(project), {})
++
++    def test_init_late_materialization_denial_leaves_no_partial_canonical_files(self):
++        cli = cli_module()
++        original = Path.write_text
++        with tempfile.TemporaryDirectory() as tmp:
++            project = Path(tmp)
++            output, errors = io.StringIO(), io.StringIO()
++
++            def write_text(path, *args, **kwargs):
++                if path.name == "STATE.md":
++                    raise denied(path)
++                return original(path, *args, **kwargs)
++
++            with patch.object(Path, "write_text", write_text), contextlib.redirect_stdout(
++                output
++            ), contextlib.redirect_stderr(errors):
++                status = cli.main(["--project-root", str(project), "--json", "init"])
++            result = json.loads(output.getvalue())
++            self.assertNotEqual(status, 0)
++            self.assertEqual(result["code"], UNAVAILABLE)
++            self.assertNotIn("INIT_COMPLETED", output.getvalue())
++            self.assertEqual(digest(project), {})
++            self.assertEqual(list(project.iterdir()), [])
++
++    def test_one_denied_project_does_not_stop_a_separate_eligible_goal(self):
++        affected = self.make_project(active=True)
++        independent = self.make_project(intent="goal")
++        state = (independent / ".saipen/STATE.md").read_text(encoding="utf-8")
++        board = (
++            "## DOING\n## TODO\n- [ ] T-8 [P1] Independent Work | verify: real proof\n"
++            "## DONE\n## BLOCKED\n- [ ] T-7 [P1] Host failure | "
++            "blocker: SAIPEN_HOST_RUNTIME_UNAVAILABLE | blocker_scope: ticket\n"
++        )
++        with self.lstat_denied(affected.parent):
++            failure = audit_manifest.ensure(affected)
++            healthy = audit_manifest.ensure(independent)
++            route = route_next(state, board)
++        self.failure(failure, affected.parent)
++        self.assertTrue(healthy["ok"], healthy)
++        self.assertEqual(route["ticket"], "T-8", route)
++
++    def test_repeat_diagnostic_has_stable_fingerprint_without_writes(self):
++        project = self.make_project()
++        before = digest(project)
++        with self.lstat_denied(project.parent):
++            first = audit_manifest.ensure(project)
++            second = audit_manifest.ensure(project, dry_run=True)
++        self.failure(first, project.parent)
++        self.failure(second, project.parent)
++        self.assertEqual(first["fingerprint"], second["fingerprint"])
++        self.assertEqual(digest(project), before)
++
++    def test_topology_refusal_is_still_a_hard_security_boundary(self):
++        project = self.make_project()
++        with patch.object(
++            paths.os.path, "islink", side_effect=lambda path: Path(path) == project.parent
++        ), self.assertRaisesRegex(ValueError, "link/reparse"):
++            paths.prove_owned_dir_chain(project / ".saipen", kind="audit manifest")
++
++
++if __name__ == "__main__":
++    unittest.main()

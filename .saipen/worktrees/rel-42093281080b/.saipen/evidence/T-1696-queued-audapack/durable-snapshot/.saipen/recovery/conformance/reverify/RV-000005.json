@@ -1,0 +1,60 @@
+{
+  "agent": "opencode",
+  "created_at": "2026-09-09T08:19:25Z",
+  "findings_digest": "f3633e014bc112a4a8d7ed417475a2be7daad71973692b2075b71740379530ac",
+  "gate": "core",
+  "integrity_digest": "79357fa9bf683f2b",
+  "journal_op_id": "reverify.85a4e5fe3929",
+  "own_problem_keys": [
+    "c4fbbec8defa8ea2"
+  ],
+  "problem_count": 89,
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "receipt_id": "RV-000005",
+  "ruleset_fingerprint": "35251f00fa567709f75dae23144f35571c8a9854b5c167344995a27657e87713",
+  "ruleset_version": 1,
+  "schema_version": 1,
+  "source_head": "38a7cc48ef0ed635e6f7e6beadf13669ff2a5fe1",
+  "source_tree_fingerprint": "git-delta-v1:17ed80fda5e0fcf370469da5fe3456a513f1428ace07651c0f6d61ab1e4911ac",
+  "verdict": "PASS_WITH_CARRIED_DEBT",
+  "verification": [
+    {
+      "command": "node --test tests/widget/w6-001-auto-archive.test.js",
+      "detail": "50 tests 50 pass 0 fail",
+      "result": "PASS"
+    },
+    {
+      "command": "node --test tests/widget/*.test.js",
+      "detail": "359 tests 359 pass 0 fail",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m pytest -q tests/test_bridge_project_archive.py tests/test_freshness.py tests/test_packing.py tests/test_dnd_pipeline.py",
+      "detail": "101 passed",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m pytest -q",
+      "detail": "1407 passed 5 skipped 1 pre-existing unrelated flake (standalone green 3x)",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m ruff check audapack tests",
+      "detail": "All checks passed",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m compileall -q audapack",
+      "detail": "exit 0",
+      "result": "PASS"
+    },
+    {
+      "command": "python .saipen/kitchen/regression_t158.py",
+      "detail": "4 passed",
+      "result": "PASS"
+    }
+  ],
+  "warning_count": 117,
+  "work": "T-182"
+}

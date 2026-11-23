@@ -1,0 +1,47 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-402.md",
+  "linked_work": "T-2041",
+  "receipt_id": "SRC-402",
+  "received_at": "2026-11-07T16:57:35Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "b50f5a272edd4c4e72d221d25aea90772c97737c145edf6fb667bc9940445e6e",
+    "sanitized_sha256": "b50f5a272edd4c4e72d221d25aea90772c97737c145edf6fb667bc9940445e6e"
+  },
+  "request_provenance": {
+    "compared_digest": "21406202c22a873e8a3e8a3c8b05d029b1eb6c6c9dc3cc974a77e68f585e4be6",
+    "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+    "witness": "model_supplied"
+  },
+  "retirement": {
+    "digest_mismatch": false,
+    "measured_sha256": "b50f5a272edd4c4e72d221d25aea90772c97737c145edf6fb667bc9940445e6e",
+    "note": "",
+    "reason": "ORPHANED_RECEIPT",
+    "receipt_only": true,
+    "recorded_sha256": "b50f5a272edd4c4e72d221d25aea90772c97737c145edf6fb667bc9940445e6e",
+    "retired_at": "2026-11-12T13:29:00Z",
+    "retired_by": "saipen-cli",
+    "retirement_event": "E-19350",
+    "schema_version": 2,
+    "source_reason": "ORPHANED_RECEIPT",
+    "successor": ""
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "b50f5a272edd4c4e72d221d25aea90772c97737c145edf6fb667bc9940445e6e",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "b50f5a272edd4c4e72d221d25aea90772c97737c145edf6fb667bc9940445e6e",
+  "status": "INVALID",
+  "storage_status": "ARCHIVED",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

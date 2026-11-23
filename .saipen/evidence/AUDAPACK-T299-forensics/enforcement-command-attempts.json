@@ -1,0 +1,333 @@
+{
+  "run": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b",
+  "commands": [
+    {
+      "label": "fixture-baseline",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\baseline",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "root": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\baseline",
+      "exit_code": 0,
+      "output_sha256": "c36c6204d647c6c63f44a531455b6a0d460aeedf2de2e0676e09612f3d06b34d",
+      "payload": null,
+      "failures": [],
+      "terminal": [
+        "Validation complete. Agent is conformant. (2 warning(s))"
+      ]
+    },
+    {
+      "label": "probe-duplicate",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\duplicate",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "root": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\duplicate",
+      "exit_code": 1,
+      "output_sha256": "4ddd02dbc160fd3e95889913acc73a793b8dd1d31f38f1bb3559a9ac3bae5a81",
+      "payload": null,
+      "failures": [
+        "FAIL: source receipts -- source receipt BOARD projection unreadable: BOARD parse error: BOARD.md:5 duplicate ticket ID T-001",
+        "FAIL: BOARD.md:5 duplicate ticket ID T-001"
+      ],
+      "terminal": [
+        "Validation FAILED: 2 problem(s), 2 warning(s)"
+      ]
+    },
+    {
+      "label": "probe-unadmitted-closed",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\unadmitted-closed",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "root": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\unadmitted-closed",
+      "exit_code": 1,
+      "output_sha256": "11867308fddd3e3d07035d4eabf5294b237b51bd47612cd2083ab73522e5efa2",
+      "payload": null,
+      "failures": [
+        "FAIL: BOARD.md: T-999 has no [T-###] allocation event in the complete history (CORE-003 / SRC-026:R003)",
+        "FAIL: lifecycle authority [saio] -- canonical lifecycle state stands on no operation: T-999 sits under ## DONE after an edit of BOARD.md that no LOG event records, and no closure operation stands behind it -- the completion was typed, not run -- run `saipen recover`; it names the journaled repair (T-1671)"
+      ],
+      "terminal": [
+        "Validation FAILED: 2 problem(s), 3 warning(s)"
+      ]
+    },
+    {
+      "label": "probe-unnumbered",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\unnumbered",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "root": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\unnumbered",
+      "exit_code": 1,
+      "output_sha256": "66ef67efd2085ff1d379b3d22b422f180322cb616659b04218d5f18b7c942706",
+      "payload": null,
+      "failures": [
+        "FAIL: .saipen/LOG.md:2 violates the Event Graph skeleton (RFC \u00a7 1.2): '- 09.10.26 [T-299] [P1] Widget completed; T-299 DONE'"
+      ],
+      "terminal": [
+        "Validation FAILED: 1 problem(s), 2 warning(s)"
+      ]
+    },
+    {
+      "label": "probe-state-head",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\state-head",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "root": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\state-head",
+      "exit_code": 1,
+      "output_sha256": "e81229efc5ce428b5841adb9d48fdbc6a61069123e59000144e38e657001fc8b",
+      "payload": null,
+      "failures": [
+        "FAIL: lifecycle authority [saio] -- canonical lifecycle state stands on no operation: STATE.last_event is E-12, above E-5, the newest event an operation record stands behind -- only an operation moves that marker, so STATE was advanced by hand -- run `saipen recover`; it names the journaled repair (T-1671)"
+      ],
+      "terminal": [
+        "Validation FAILED: 1 problem(s), 3 warning(s)"
+      ]
+    },
+    {
+      "label": "probe-malformed-headings",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\malformed-headings",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "root": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\malformed-headings",
+      "exit_code": 1,
+      "output_sha256": "63823582b4192d7f25203e130ee91ae063c512d0688960e72321fa9521c823a6",
+      "payload": null,
+      "failures": [
+        "FAIL: source receipts -- source receipt BOARD projection unreadable: BOARD parse error: BOARD.md:2 ticket T-001 sits under no heading -- not one of the four RFC sections, so no operation may mutate a board built around it; BOARD.md required heading ## DOING appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash; BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+        "FAIL: FLOOR: STATE.task=T-001 but BOARD has no DOING section at the raw floor",
+        "FAIL: BOARD.md:2 ticket T-001 sits under no heading -- not one of the four RFC sections, so no operation may mutate a board built around it",
+        "FAIL: BOARD.md required heading ## DOING appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+        "FAIL: BOARD.md required heading ## TODO appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+        "FAIL: BOARD.md required heading ## DONE appears 0 time(s) -- the shared parser refuses a board whose work surface is split or missing, so no operation can mutate it into a crash",
+        "FAIL: BOARD.md missing required section heading: ## DOING",
+        "FAIL: BOARD.md missing required section heading: ## TODO",
+        "FAIL: BOARD.md missing required section heading: ## DONE",
+        "FAIL: STATE.md next_action names T-001, which is on no board section -- the pre-computed pick points at nothing, so the cold agent BOOT.md sends here has no ticket to execute (RFC \u00a7 1.2, \u00a7 1.11)",
+        "FAIL: STATE.md task T-001 is not the claimed ## DOING ticket (none) in ticket-bearing phase BUILD -- a TODO/DONE/BLOCKED ticket cannot be the active task; Recovery reconstructs the claim from BOARD and the LOG tail (RFC \u00a7 1.5, T-573)"
+      ],
+      "terminal": [
+        "Validation FAILED: 11 problem(s), 2 warning(s)"
+      ]
+    },
+    {
+      "label": "allocation-before-restore",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+        "--project-root",
+        "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\conflicting-restore",
+        "--agent",
+        "buffy",
+        "--json",
+        "ticket",
+        "add",
+        "P2",
+        "allocated identity",
+        "--verify",
+        "separate contract"
+      ],
+      "root": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\conflicting-restore",
+      "exit_code": 0,
+      "output_sha256": "96189e291834529632ca00606e801ce8878883b4e107f72b03651063213b2243",
+      "payload": {
+        "ok": true,
+        "code": "TICKET_ADDED",
+        "op_id": "ticket-49567d1881d247dc8ef98c46cdb1e605",
+        "changed_files": [
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "ticket": "T-2",
+        "event_id": "E-6"
+      },
+      "failures": [],
+      "terminal": [
+        "}"
+      ]
+    },
+    {
+      "label": "allocation-after-row-loss",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+        "--project-root",
+        "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\conflicting-restore",
+        "--agent",
+        "buffy",
+        "--json",
+        "ticket",
+        "add",
+        "P2",
+        "new identity after restore",
+        "--verify",
+        "independent contract"
+      ],
+      "root": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\conflicting-restore",
+      "exit_code": 0,
+      "output_sha256": "a88bc69c0e8026de51cde77cffc13578dc0b050a3fc91a7e78750a38c58c3104",
+      "payload": {
+        "ok": true,
+        "code": "TICKET_ADDED",
+        "op_id": "ticket-2028a19e16c8489a832d6497f50fc714",
+        "changed_files": [
+          ".saipen/LOG.md",
+          ".saipen/BOARD.md",
+          ".saipen/STATE.md"
+        ],
+        "recovery_required": false,
+        "ticket": "T-3",
+        "event_id": "E-7"
+      },
+      "failures": [],
+      "terminal": [
+        "}"
+      ]
+    },
+    {
+      "label": "probe-conflicting-restore",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\conflicting-restore",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "root": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\conflicting-restore",
+      "exit_code": 1,
+      "output_sha256": "f3116b7f4f9b9b3d62bb80efd14b34368b95bf069e4009a0288d839098883f52",
+      "payload": null,
+      "failures": [
+        "FAIL: source receipts -- source receipt BOARD projection unreadable: BOARD parse error: BOARD.md:5 ticket T-001 has unrecognized field 'notes: conflicting restoration snapshot'; BOARD.md:5 duplicate ticket ID T-001",
+        "FAIL: BOARD.md:5 ticket T-001 has unrecognized field 'notes: conflicting restoration snapshot'",
+        "FAIL: BOARD.md:5 duplicate ticket ID T-001"
+      ],
+      "terminal": [
+        "Validation FAILED: 3 problem(s), 2 warning(s)"
+      ]
+    },
+    {
+      "label": "probe-concurrent-writer",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+        "--project-root",
+        "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\concurrent",
+        "--agent",
+        "forensic-other",
+        "--json",
+        "ticket",
+        "add",
+        "P2",
+        "competing writer",
+        "--verify",
+        "must be refused"
+      ],
+      "root": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\concurrent",
+      "exit_code": 1,
+      "output_sha256": "0ccc8159560bb3091bce2065361b6c8a21bb40f4ba980e6e5417a72edd446365",
+      "payload": {
+        "ok": false,
+        "code": "WRITER_BUSY",
+        "op_id": "ticket-5c078b0cbd484e2cb49fff8455e7b738",
+        "changed_files": [],
+        "recovery_required": false,
+        "message": "another live writer holds the project lock",
+        "detail": "another live writer holds the project lock"
+      },
+      "failures": [],
+      "terminal": [
+        "}"
+      ]
+    },
+    {
+      "label": "validator-under-writer-lock",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\concurrent",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "root": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\concurrent",
+      "exit_code": 0,
+      "output_sha256": "3898cf29f9192b220bfdb2cbbb5c0aaf4ba4810efb3de68d7847ac990d83e9eb",
+      "payload": null,
+      "failures": [],
+      "terminal": [
+        "Validation complete. Agent is conformant. (2 warning(s))"
+      ]
+    },
+    {
+      "label": "probe-conflicting-claim",
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py",
+        "--project-root",
+        "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\concurrent",
+        "--agent",
+        "forensic-other",
+        "--json",
+        "claim",
+        "T-001"
+      ],
+      "root": "V:\\_TEMP_\\audapack-integrity-probes-_jwkda5b\\concurrent",
+      "exit_code": 1,
+      "output_sha256": "ffa722b5dddef0d634c8e511145688428fab5d629901b4d53e8a9f6b46b5aa3b",
+      "payload": {
+        "ok": false,
+        "code": "TICKET_NOT_WORKABLE",
+        "op_id": null,
+        "changed_files": [],
+        "recovery_required": false,
+        "message": "T-001 is actively claimed by another agent (buffy); a live foreign claim cannot be taken over. An operator-ordered switch is a handoff the owner or an operator receipt grants",
+        "ticket": "T-001",
+        "canonical_next_command": "saipen handoff T-001 --to forensic-other --authority <SRC-###>",
+        "detail": "T-001 is actively claimed by another agent (buffy); a live foreign claim cannot be taken over. An operator-ordered switch is a handoff the owner or an operator receipt grants"
+      },
+      "failures": [],
+      "terminal": [
+        "}"
+      ]
+    }
+  ]
+}

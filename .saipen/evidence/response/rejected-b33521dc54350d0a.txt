@@ -1,0 +1,1 @@
+T-1742 täispere käib, jälgimine on üleval. Teavitus tuleb siis, kui see lõpeb. Enne seda pole kanoniliselt midagi muud teha, mis ei puudutaks puud.

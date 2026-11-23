@@ -1,0 +1,38 @@
+{
+  "after": {
+    "result": "PASS",
+    "subject": "tools/saipen_engine/operator_task.py",
+    "verifier": "tools/test_freebuff_operator_provenance.py"
+  },
+  "command": [
+    "python",
+    "-m",
+    "unittest",
+    "tools/test_freebuff_operator_provenance.py"
+  ],
+  "created_at": "2026-10-18T17:26:50.000000+00:00",
+  "evidence_class": "executed",
+  "op_id": "regression-execution-t1818-001",
+  "oracle_files": [
+    "tools/test_freebuff_operator_provenance.py"
+  ],
+  "runs": [
+    {
+      "command": "python -m unittest tools/test_freebuff_operator_provenance.py",
+      "duration_ms": 190,
+      "exit_code": 0,
+      "failed": 0,
+      "output_digest": "49bf5e2270f5f3e5",
+      "passed": 17,
+      "result": "PASS"
+    }
+  ],
+  "status": "PASS",
+  "subject_files": [
+    "tools/saipen.py",
+    "extensions/adapters/registry.json",
+    "tools/saipen_engine/operator_task.py",
+    "tools/saipen_engine/admission_doctor.py"
+  ],
+  "ticket": "T-1818"
+}

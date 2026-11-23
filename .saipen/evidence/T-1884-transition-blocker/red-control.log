@@ -1,0 +1,16 @@
+red tree: V:\_TEMP_\t1884-red-8owrn62n
+
+ran 7; failing: ['test_a_causally_related_blocked_ticket_refuses', 'test_a_held_gate_refuses_and_is_preserved', 'test_a_recognised_class_token_refuses_and_is_preserved', 'test_an_unrelated_blocked_ticket_does_not_block_the_transition', 'test_e10_a_stale_blocker_is_not_inherited_by_the_next_phase', 'test_e11_leaving_blocked_clears_the_phase_own_blocker']
+
+RED CONTROL OK: 3/3 inheritance tests red, 3/3 gate-ride-over tests red, 1/1 clean-project test still green.
+{
+ "outcomes": {
+  "test_a_causally_related_blocked_ticket_refuses": "FAIL",
+  "test_a_clean_project_transitions_as_before": "PASS",
+  "test_a_held_gate_refuses_and_is_preserved": "FAIL",
+  "test_a_recognised_class_token_refuses_and_is_preserved": "FAIL",
+  "test_an_unrelated_blocked_ticket_does_not_block_the_transition": "FAIL",
+  "test_e10_a_stale_blocker_is_not_inherited_by_the_next_phase": "FAIL",
+  "test_e11_leaving_blocked_clears_the_phase_own_blocker": "FAIL"
+ }
+}

@@ -1,0 +1,308 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "8dcafa71524adc7cdcfb6564bfeb8cbf4805b701ca8225fa2f4f6f2e92b5c1e5",
+  "verdict": "PASS",
+  "patterns": [
+    "test_t1640_board_scrub.py",
+    "test_t2071_gate_pinned_row.py",
+    "test_t2096_scrub_eligibility_parity.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_t1640_board_scrub.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t1640_board_scrub.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        37432,
+        32972
+      ],
+      "duration_s": 8.625,
+      "process_create_s": 0.062,
+      "ran": 30,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_entering_clean_says_nothing_about_a_board_under_its_cap (test_t1640_board_scrub.CleanRouteTests.test_entering_clean_says_nothing_about_a_board_under_its_cap) ... ok\r\ntest_entering_clean_scrubs_a_board_past_its_cap (test_t1640_board_scrub.CleanRouteTests.test_entering_clean_scrubs_a_board_past_its_cap) ... ok\r\ntest_the_scrub_runs_before_the_seal_and_both_report (test_t1640_board_scrub.CleanRouteTests.test_the_scrub_runs_before_the_seal_and_both_report) ... ok\r\ntest_a_scrub_interrupted_at_any_point_converges (test_t1640_board_scrub.InterruptedScrubTests.test_a_scrub_interrupted_at_any_point_converges) ... ok\r\ntest_a_clause_bound_under_the_plan_refuses_the_scrub (test_t1640_board_scrub.ReceiptGuardTests.test_a_clause_bound_under_the_plan_refuses_the_scrub) ... ok\r\ntest_a_receipt_that_arrives_under_the_plan_refuses_the_scrub (test_t1640_board_scrub.ReceiptGuardTests.test_a_receipt_that_arrives_under_the_plan_refuses_the_scrub) ... ok\r\ntest_a_row_naming_an_active_receipt_is_kept_even_if_the_receipt_forgot_it (test_t1640_board_scrub.ReceiptGuardTests.test_a_row_naming_an_active_receipt_is_kept_even_if_the_receipt_forgot_it) ... ok\r\ntest_an_unreadable_receipt_refuses_the_scrub (test_t1640_board_scrub.ReceiptGuardTests.test_an_unreadable_receipt_refuses_the_scrub) ... ok\r\ntest_member_work_and_clause_work_are_named_too (test_t1640_board_scrub.ReceiptGuardTests.test_member_work_and_clause_work_are_named_too) ... ok\r\ntest_the_work_an_active_receipt_names_is_kept (test_t1640_board_scrub.ReceiptGuardTests.test_the_work_an_active_receipt_names_is_kept) ... ok\r\ntest_a_board_that_does_not_parse_is_not_scrubbed (test_t1640_board_scrub.RefusalTests.test_a_board_that_does_not_parse_is_not_scrubbed) ... ok\r\ntest_a_scrub_outside_clean_is_refused_and_names_the_way_in (test_t1640_board_scrub.RefusalTests.test_a_scrub_outside_clean_is_refused_and_names_the_way_in) ... ok\r\ntest_nothing_is_scrubbed_under_the_cap (test_t1640_board_scrub.RefusalTests.test_nothing_is_scrubbed_under_the_cap) ... ok\r\ntest_work_in_doing_refuses_a_due_scrub_and_only_a_due_one (test_t1640_board_scrub.RefusalTests.test_work_in_doing_refuses_a_due_scrub_and_only_a_due_one) ... ok\r\ntest_a_closed_record_nothing_names_is_prunable (test_t1640_board_scrub.RetentionRuleTests.test_a_closed_record_nothing_names_is_prunable) ... ok\r\ntest_a_record_a_live_ticket_needs_is_kept (test_t1640_board_scrub.RetentionRuleTests.test_a_record_a_live_ticket_needs_is_kept) ... ok\r\ntest_a_record_the_log_never_closed_is_kept (test_t1640_board_scrub.RetentionRuleTests.test_a_record_the_log_never_closed_is_kept) ... ok\r\ntest_a_small_amount_of_closed_text_is_not_due (test_t1640_board_scrub.RetentionRuleTests.test_a_small_amount_of_closed_text_is_not_due) ... ok\r\ntest_a_source_named_as_implementation_source_keeps_the_work_it_produced (test_t1640_board_scrub.RetentionRuleTests.test_a_source_named_as_implementation_source_keeps_the_work_it_produced) ... ok\r\ntest_every_edge_a_validator_resolves_is_followed (test_t1640_board_scrub.RetentionRuleTests.test_every_edge_a_validator_resolves_is_followed) ... ok\r\ntest_only_a_closing_operation_is_closing_evidence (test_t1640_board_scrub.RetentionRuleTests.test_only_a_closing_operation_is_closing_evidence) ... ok\r\ntest_the_closure_is_transitive_through_kept_records (test_t1640_board_scrub.RetentionRuleTests.test_the_closure_is_transitive_through_kept_records) ... ok\r\ntest_a_dry_run_names_the_plan_and_writes_nothing (test_t1640_board_scrub.ScrubTests.test_a_dry_run_names_the_plan_and_writes_nothing) ... ok\r\ntest_a_second_scrub_finds_nothing_due (test_t1640_board_scrub.ScrubTests.test_a_second_scrub_finds_nothing_due) ... ok\r\ntest_the_board_loses_exactly_the_pruned_lines (test_t1640_board_scrub.ScrubTests.test_the_board_loses_exactly_the_pruned_lines) ... ok\r\ntest_the_evidence_root_is_durable_and_byte_bound (test_t1640_board_scrub.ScrubTests.test_the_evidence_root_is_durable_and_byte_bound) ... ok\r\ntest_the_log_names_the_copy_and_its_digest (test_t1640_board_scrub.ScrubTests.test_the_log_names_the_copy_and_its_digest) ... ok\r\ntest_this_repository_versions_the_rows_a_scrub_keeps (test_t1640_board_scrub.ScrubTests.test_this_repository_versions_the_rows_a_scrub_keeps) ... ok\r\ntest_closed_text_a_scrub_cannot_clear_is_not_reported (test_t1640_board_scrub.ValidatorFindingTests.test_closed_text_a_scrub_cannot_clear_is_not_reported) ... ok\r\ntest_the_finding_names_the_route_and_the_route_clears_it (test_t1640_board_scrub.ValidatorFindingTests.test_the_finding_names_the_route_and_the_route_clears_it) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 30 tests in 8.057s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t2071_gate_pinned_row.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t2071_gate_pinned_row.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        23448
+      ],
+      "duration_s": 0.219,
+      "process_create_s": 0.047,
+      "ran": 8,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_promoted_gate_pins_its_slice_ticket (test_t2071_gate_pinned_row.GatePinnedRowTests.test_a_promoted_gate_pins_its_slice_ticket) ... ok\r\ntest_a_pruned_gate_row_is_recoverable_verbatim (test_t2071_gate_pinned_row.GatePinnedRowTests.test_a_pruned_gate_row_is_recoverable_verbatim) ... ok\r\ntest_an_unpromoted_gate_pins_nothing (test_t2071_gate_pinned_row.GatePinnedRowTests.test_an_unpromoted_gate_pins_nothing) ... ok\r\ntest_an_unreadable_ledger_pins_nothing (test_t2071_gate_pinned_row.GatePinnedRowTests.test_an_unreadable_ledger_pins_nothing) ... ok\r\ntest_only_ticket_ids_are_read (test_t2071_gate_pinned_row.GatePinnedRowTests.test_only_ticket_ids_are_read) ... ok\r\ntest_select_keeps_the_gated_row_under_a_gate_guard (test_t2071_gate_pinned_row.GatePinnedRowTests.test_select_keeps_the_gated_row_under_a_gate_guard) ... ok\r\ntest_the_restored_row_closes_the_original_finding (test_t2071_gate_pinned_row.GatePinnedRowTests.test_the_restored_row_closes_the_original_finding) ... ok\r\ntest_without_the_gate_set_the_same_row_is_pruned (test_t2071_gate_pinned_row.GatePinnedRowTests.test_without_the_gate_set_the_same_row_is_pruned) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 8 tests in 0.010s\r\n\r\nOK\r\n"
+    },
+    {
+      "pattern": "test_t2096_scrub_eligibility_parity.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t2096_scrub_eligibility_parity.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        13608
+      ],
+      "duration_s": 2.781,
+      "process_create_s": 0.062,
+      "ran": 18,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_a_gate_naming_a_row_absent_from_the_board_changes_no_selection (test_t2096_scrub_eligibility_parity.GatePinEligibilityTests.test_a_gate_naming_a_row_absent_from_the_board_changes_no_selection) ... ok\r\ntest_a_gate_pinned_record_past_the_cap_is_not_due (test_t2096_scrub_eligibility_parity.GatePinEligibilityTests.test_a_gate_pinned_record_past_the_cap_is_not_due) ... ok\r\ntest_a_second_scrub_is_idempotent_and_the_warning_state_is_unchanged (test_t2096_scrub_eligibility_parity.GatePinEligibilityTests.test_a_second_scrub_is_idempotent_and_the_warning_state_is_unchanged) ... ok\r\ntest_no_promoted_gate_is_left_pointing_at_a_pruned_row (test_t2096_scrub_eligibility_parity.GatePinEligibilityTests.test_no_promoted_gate_is_left_pointing_at_a_pruned_row) ... ok\r\ntest_the_clean_move_removes_only_the_unpinned_row_and_keeps_its_bytes (test_t2096_scrub_eligibility_parity.GatePinEligibilityTests.test_the_clean_move_removes_only_the_unpinned_row_and_keeps_its_bytes) ... ok\r\ntest_the_soft_cap_still_fires_on_text_nothing_pins (test_t2096_scrub_eligibility_parity.GatePinEligibilityTests.test_the_soft_cap_still_fires_on_text_nothing_pins) ... ok\r\ntest_a_promoted_gate_pins_the_same_row_for_both_sides (test_t2096_scrub_eligibility_parity.SharedInputTests.test_a_promoted_gate_pins_the_same_row_for_both_sides) ... ok\r\ntest_a_row_the_log_never_closed_is_kept_by_both_sides (test_t2096_scrub_eligibility_parity.SharedInputTests.test_a_row_the_log_never_closed_is_kept_by_both_sides) ... ok\r\ntest_an_active_receipt_is_read_once_for_both_sides (test_t2096_scrub_eligibility_parity.SharedInputTests.test_an_active_receipt_is_read_once_for_both_sides) ... ok\r\ntest_an_unpromoted_gate_pins_nothing (test_t2096_scrub_eligibility_parity.SharedInputTests.test_an_unpromoted_gate_pins_nothing) ... ok\r\ntest_references_are_followed_transitively_through_the_shared_path (test_t2096_scrub_eligibility_parity.SharedInputTests.test_references_are_followed_transitively_through_the_shared_path) ... ok\r\ntest_a_corrupt_index_refuses_the_scrub (test_t2096_scrub_eligibility_parity.UnknownLedgerTests.test_a_corrupt_index_refuses_the_scrub) ... ok\r\ntest_a_malformed_promoted_gate_refuses_the_scrub (test_t2096_scrub_eligibility_parity.UnknownLedgerTests.test_a_malformed_promoted_gate_refuses_the_scrub) ... ok\r\ntest_a_malformed_slice_record_refuses_the_scrub (test_t2096_scrub_eligibility_parity.UnknownLedgerTests.test_a_malformed_slice_record_refuses_the_scrub) ... ok\r\ntest_a_missing_index_over_a_corpus_refuses_the_scrub (test_t2096_scrub_eligibility_parity.UnknownLedgerTests.test_a_missing_index_over_a_corpus_refuses_the_scrub) ... ok\r\ntest_a_schema_drifted_index_refuses_the_scrub (test_t2096_scrub_eligibility_parity.UnknownLedgerTests.test_a_schema_drifted_index_refuses_the_scrub) ... ok\r\ntest_an_absent_index_and_absent_corpus_is_provably_empty (test_t2096_scrub_eligibility_parity.UnknownLedgerTests.test_an_absent_index_and_absent_corpus_is_provably_empty) ... ok\r\ntest_a_gate_pinned_record_produces_no_soft_cap_warning (test_t2096_scrub_eligibility_parity.ValidatorFindingTests.test_a_gate_pinned_record_produces_no_soft_cap_warning) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 18 tests in 2.224s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 56,
+  "duration_s": 29.75,
+  "timings_s": {
+    "execution_wall_s": 11.625,
+    "environment_identity_wall_s": 0.031,
+    "copy_wall_s": 14.703,
+    "hash_wall_s": 0.172,
+    "cleanup_wall_s": 3.187
+  },
+  "copy_metrics": {
+    "subject_copy_s": 14.672,
+    "canonical_copy_s": 0.031,
+    "canonical_copy_attempts": 1,
+    "trees": [
+      ".git"
+    ]
+  },
+  "sandbox_scope": {
+    "mode": "DECLARED",
+    "trees": [
+      ".git"
+    ],
+    "undeclared": [],
+    "selected": [
+      "test_t1640_board_scrub.py",
+      "test_t2071_gate_pinned_row.py",
+      "test_t2096_scrub_eligibility_parity.py"
+    ],
+    "declared_by": {
+      "test_t1640_board_scrub.py": [
+        ".git"
+      ],
+      "test_t2071_gate_pinned_row.py": [],
+      "test_t2096_scrub_eligibility_parity.py": []
+    },
+    "manifest_sha256": "33ec7587c7d3e74ef2762c6f14a450c51e683b9f87565cda75ad3530d0613e15"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_t1640_board_scrub.py",
+        "test_t2071_gate_pinned_row.py",
+        "test_t2096_scrub_eligibility_parity.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "DECLARED",
+        "trees": [
+          ".git"
+        ]
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "a7c96ea055dfd4913b850b6f50a9b57fc263f8d5d13f44d35a54b3571a44454a",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "2271ca5434892f15f981f28ed5ded00314be23f853d23c8db56c527f302b0463"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "6d51bf6ca978727f654fdccf6cd249534c0adb29e53fca7facedc0fb8d83150c"
+      },
+      "core_unit_shard.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "1a22bac5140eeaf33be64413027a22c474420dbe7e3c6134af9b5e6f90942c9d"
+      },
+      "test_runner.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "11eca655a72d976476797e3c1333714fc1e99c7c7b64dbf44d6865889d599456"
+      },
+      "verification_cache.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "70188f394bb84cc78fe2417daecf5b38b6abcd3be73956194baf1ef1911413ba"
+      },
+      "process_tree.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "798e6663a85d1906533203fe961472ad8eb8b7e645aa3961a694c1192ca5efcb"
+      },
+      "verification_bootstrap.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "8fa1c333bec82156f70bb66e7df786e99265d0b4c5f3da362a830bfc9198ab24"
+      },
+      "verification_impact.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "d2829c9de720e9b84d9dfa4056786c533bf9cff86913c5ed0546fe63e19f5a83"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "f008508f0f88d1c6a74f95d7e541a411a685b375404d7dd1ea49035ff7a5064c"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

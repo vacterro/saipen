@@ -1,0 +1,8 @@
+validate before: 1 FAIL
+measured before: {"settled_dirs": 11190, "settled_bytes": 44264622, "staged_files": 4, "staged_bytes": 87062, "ops": 0}
+compact_journal: {"ok": true, "code": "JOURNAL_COMPACTED", "op_id": null, "changed_files": [], "recovery_required": false, "message": "compacted 1 settled operation(s), dropped 87062 staged byte(s); left 0 operation(s) and 0 queued cleanup(s)", "due": true, "compacted_count": 1, "compacted": ["sub-collect-781f5f66"], "skipped_count": 0, "skipped": [], "legacy_queued": ["sub-collect-781f5f66"], "before": {"ops": 0, "queued": 1, "staged_bytes": 87062}, "after": {"ops": 0, "queued": 0, "staged_bytes": 0}}
+measured after:  {"settled_dirs": 11190, "settled_bytes": 44177560, "staged_files": 0, "staged_bytes": 0, "ops": 0}
+validate after: 1 FAIL
+second pass: {"ok": false, "code": "VALIDATION_FAILED", "op_id": null, "changed_files": [], "recovery_required": false, "message": "the operation journal holds no unsettled operation and no queued cleanup; nothing is compacted", "due": false, "before": {"ops": 0, "queued": 0, "staged_bytes": 0}}
+rc=0
+validate after staging the new test in the copy: 0 FAIL (the one FAIL above was the unstaged new test file, present before and after compaction)

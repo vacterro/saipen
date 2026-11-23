@@ -1,0 +1,21 @@
+# T-1380 supported injection after slices 5-6 (tools/autoinject.py), then read-only proof
+
+$ python tools/autoinject.py --check
+fresh: 6 agent home(s) at gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a
+exit=0
+
+$ python .saipen/evidence/T-1380-unanswerable-refusal-20260917/injection_proof.py
+source head         : 10a298979f9c8050ff82551d5870339350b9c1a9
+source generation   : gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a
+installed=6 stale=0 unknown=0 surface_unknown=0
+  .config     runtime=gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a current=True stale=False launcher_problems=0 surface_problems=0
+  .claude     runtime=gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a current=True stale=False launcher_problems=0 surface_problems=0
+  .codex      runtime=gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a current=True stale=False launcher_problems=0 surface_problems=0
+  .gemini     runtime=gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a current=True stale=False launcher_problems=0 surface_problems=0
+  .codebuddy  runtime=gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a current=True stale=False launcher_problems=0 surface_problems=0
+  .agents     runtime=gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a current=True stale=False launcher_problems=0 surface_problems=0
+verdict             : CURRENT
+exit=0
+Ran 10 tests in 48.434s
+
+OK

@@ -1,0 +1,12 @@
+test_degraded_policy_preserves_registry_fail_closed_hosts (test_t1686_launch_policy.LaunchPolicyTests.test_degraded_policy_preserves_registry_fail_closed_hosts) ... ok
+test_explicit_degraded_policy_keeps_the_warning (test_t1686_launch_policy.LaunchPolicyTests.test_explicit_degraded_policy_keeps_the_warning) ... ok
+test_invalid_policy_refuses_instead_of_silently_degrading (test_t1686_launch_policy.LaunchPolicyTests.test_invalid_policy_refuses_instead_of_silently_degrading) ... ok
+test_missing_policy_keeps_the_default_degraded_launch (test_t1686_launch_policy.LaunchPolicyTests.test_missing_policy_keeps_the_default_degraded_launch) ... ok
+test_strict_policy_allows_a_proven_runtime (test_t1686_launch_policy.LaunchPolicyTests.test_strict_policy_allows_a_proven_runtime) ... ok
+test_strict_policy_refuses_every_degrading_host_before_spawn (test_t1686_launch_policy.LaunchPolicyTests.test_strict_policy_refuses_every_degrading_host_before_spawn) ... ok
+test_unreadable_policy_refuses_instead_of_silently_degrading (test_t1686_launch_policy.LaunchPolicyTests.test_unreadable_policy_refuses_instead_of_silently_degrading) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.035s
+
+OK

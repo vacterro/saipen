@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-069:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Drive stranded T-218 into closure: claim it, verify audit/10 SRC-044 terminal, finish"
+    }
+  },
+  "derived_at": "2026-09-20T20:08:39Z",
+  "derived_from": "SRC-069",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "9ccbfa9f0c812d1e131d464646393c7f9edace03ed3d4056be3e8ec7362b67bc"
+}

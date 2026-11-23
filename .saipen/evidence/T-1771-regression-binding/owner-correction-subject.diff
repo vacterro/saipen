@@ -1,0 +1,24 @@
+--- tools/saipen_engine/regression_execution.py	2026-10-14 05:15:50.049801400 +0300
++++ V:/_TEMP_/claude/V-----VAC---K---CODE--AI-STUFF-AGENTIC--SAIPEN/2f1b6c8a-bb7a-478c-8c3b-455d4fe616ba/scratchpad/m1771/copy/tools/saipen_engine/regression_execution.py	2026-10-14 05:48:58.198202500 +0300
+@@ -541,15 +541,18 @@
+             return ops._refuse(
+                 "INCOMPLETE_TICKET", "declare the regression requirement before execution"
+             )
+-        if not dry_run and state.get("phase") == "VERIFY":
+-            if _derive_request_clauses(root, board, ticket):
+-                docs, state, board, tail = ops._read(root)
+         binding = _binding(root, ticket, agent, docs, state)
+         if state.get("phase") != "VERIFY":
+             return ops._refuse("INCOMPLETE_TICKET", "execution requires the active VERIFY phase")
+         material = _load(root, contract_path)
+         if dry_run:
+             return Result(True, "DRY_RUN", data={"ticket": ticket, "execution": "not_run"})
++        # Derived only after the binding admitted this session as the owner of
++        # the active Work and its inputs loaded: a call refused before this
++        # point writes nothing.
++        if _derive_request_clauses(root, board, ticket):
++            docs, state, board, tail = ops._read(root)
++            binding = _binding(root, ticket, agent, docs, state)
+         for _, value, relative in reversed(_records(root)):
+             if value.get("ticket") == ticket and all(
+                 value.get(key) == item for key, item in binding.items()

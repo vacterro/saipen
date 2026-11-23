@@ -1,0 +1,24 @@
+test_malformed_inventory_refuses_ingress_without_losing_request_or_seat (__main__.MaintenanceObservationTests.test_malformed_inventory_refuses_ingress_without_losing_request_or_seat) ... 
+  test_malformed_inventory_refuses_ingress_without_losing_request_or_seat (__main__.MaintenanceObservationTests.test_malformed_inventory_refuses_ingress_without_losing_request_or_seat) (command='user_request') ... FAIL
+  test_malformed_inventory_refuses_ingress_without_losing_request_or_seat (__main__.MaintenanceObservationTests.test_malformed_inventory_refuses_ingress_without_losing_request_or_seat) (command='start') ... FAIL
+
+======================================================================
+FAIL: test_malformed_inventory_refuses_ingress_without_losing_request_or_seat (__main__.MaintenanceObservationTests.test_malformed_inventory_refuses_ingress_without_losing_request_or_seat) (command='user_request')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 141, in test_malformed_inventory_refuses_ingress_without_losing_request_or_seat
+    self.assertNotIn("unregistered_code", refusal)
+AssertionError: 'unregistered_code' unexpectedly found in {'ok': False, 'code': 'GOAL_INVENTORY_UNAVAILABLE', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': "maintenance goal inventory is incomplete: V:\\_TEMP_\\t2023-4u0u2ca2\\.saipen\\goals\\self-maintenance-core.json: TypeError: unhashable type: 'list'", 'receipt': 'SRC-001', 'ticket': None, 'next_action': 'PHASE SCOUT T-1', 'unregistered_code': True, 'detail': 'refusal code missing from REGISTRY.json error_codes'}
+
+======================================================================
+FAIL: test_malformed_inventory_refuses_ingress_without_losing_request_or_seat (__main__.MaintenanceObservationTests.test_malformed_inventory_refuses_ingress_without_losing_request_or_seat) (command='start')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 141, in test_malformed_inventory_refuses_ingress_without_losing_request_or_seat
+    self.assertNotIn("unregistered_code", refusal)
+AssertionError: 'unregistered_code' unexpectedly found in {'ok': False, 'code': 'GOAL_INVENTORY_UNAVAILABLE', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': "maintenance goal inventory is incomplete: V:\\_TEMP_\\t2023-o69efcgv\\.saipen\\goals\\self-maintenance-core.json: TypeError: unhashable type: 'list'", 'receipt': 'SRC-001', 'ticket': None, 'next_action': 'PHASE SCOUT T-1', 'unregistered_code': True, 'detail': 'refusal code missing from REGISTRY.json error_codes'}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.252s
+
+FAILED (failures=2)

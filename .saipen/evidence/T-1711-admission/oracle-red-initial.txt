@@ -1,0 +1,325 @@
+FFFF..FFFFFFFFFFFFF.FFFFFFFFFF.F.
+======================================================================
+FAIL: test_a_new_attempt_invalidates_the_previous_attempt_pair (__main__.AttemptControls.test_a_new_attempt_invalidates_the_previous_attempt_pair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 70, in test_a_new_attempt_invalidates_the_previous_attempt_pair
+    self.refuse()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 48, in refuse
+    self.assertFalse(self.to_review().ok)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_an_attempt_and_absent_attempt_are_distinct (__main__.AttemptControls.test_an_attempt_and_absent_attempt_are_distinct)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 77, in test_an_attempt_and_absent_attempt_are_distinct
+    self.refuse()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 48, in refuse
+    self.assertFalse(self.to_review().ok)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_contradictory_identity_cannot_approve_review (__main__.AttemptControls.test_contradictory_identity_cannot_approve_review)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 54, in test_contradictory_identity_cannot_approve_review
+    self.refuse()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 48, in refuse
+    self.assertFalse(self.to_review().ok)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_halves_from_different_attempts_cannot_approve_review (__main__.AttemptControls.test_halves_from_different_attempts_cannot_approve_review)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 63, in test_halves_from_different_attempts_cannot_approve_review
+    self.refuse()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 48, in refuse
+    self.assertFalse(self.to_review().ok)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_a_foreign_executor_cannot_measure_or_admit_this_work (__main__.ExecutionControls.test_a_foreign_executor_cannot_measure_or_admit_this_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 272, in test_a_foreign_executor_cannot_measure_or_admit_this_work
+    self.assertIsNotNone(EXECUTION)
+AssertionError: unexpectedly None
+
+======================================================================
+FAIL: test_a_launch_error_or_zero_tests_is_not_regression_evidence (__main__.ExecutionControls.test_a_launch_error_or_zero_tests_is_not_regression_evidence) (code="raise RuntimeError('startup')\n")
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 249, in test_a_launch_error_or_zero_tests_is_not_regression_evidence
+    self.assert_refused_without_canonical_writes()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 131, in assert_refused_without_canonical_writes
+    result = self.execute(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_a_launch_error_or_zero_tests_is_not_regression_evidence (__main__.ExecutionControls.test_a_launch_error_or_zero_tests_is_not_regression_evidence) (code='import unittest; unittest.main()\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 249, in test_a_launch_error_or_zero_tests_is_not_regression_evidence
+    self.assert_refused_without_canonical_writes()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 131, in assert_refused_without_canonical_writes
+    result = self.execute(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_a_new_attempt_cannot_reuse_old_execution (__main__.ExecutionControls.test_a_new_attempt_cannot_reuse_old_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 204, in test_a_new_attempt_cannot_reuse_old_execution
+    self.assertTrue(self.execute().ok)
+                    ^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_a_new_verify_boundary_cannot_reuse_old_execution (__main__.ExecutionControls.test_a_new_verify_boundary_cannot_reuse_old_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 195, in test_a_new_verify_boundary_cannot_reuse_old_execution
+    self.assertTrue(self.execute().ok)
+                    ^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_a_newer_failure_supersedes_the_receipt (__main__.ExecutionControls.test_a_newer_failure_supersedes_the_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 186, in test_a_newer_failure_supersedes_the_receipt
+    result = self.execute()
+             ^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_a_post_fix_failure_is_not_an_approval (__main__.ExecutionControls.test_a_post_fix_failure_is_not_an_approval)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 243, in test_a_post_fix_failure_is_not_an_approval
+    self.assert_refused_without_canonical_writes()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 131, in assert_refused_without_canonical_writes
+    result = self.execute(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_actual_active_pair_is_admitted_and_typed (__main__.ExecutionControls.test_actual_active_pair_is_admitted_and_typed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 151, in test_actual_active_pair_is_admitted_and_typed
+    result = self.execute()
+             ^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_changed_receipt_cannot_approve_review (__main__.ExecutionControls.test_changed_receipt_cannot_approve_review)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 175, in test_changed_receipt_cannot_approve_review
+    result = self.execute()
+             ^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_consumer_compatible_javascript_pair_uses_the_same_active_contract (__main__.ExecutionControls.test_consumer_compatible_javascript_pair_uses_the_same_active_contract)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 301, in test_consumer_compatible_javascript_pair_uses_the_same_active_contract
+    result = self.execute()
+             ^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_dry_run_executes_nothing_and_writes_no_project_bytes (__main__.ExecutionControls.test_dry_run_executes_nothing_and_writes_no_project_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 260, in test_dry_run_executes_nothing_and_writes_no_project_bytes
+    result = self.execute(dry_run=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_exact_replay_produces_no_duplicate_authority (__main__.ExecutionControls.test_exact_replay_produces_no_duplicate_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 166, in test_exact_replay_produces_no_duplicate_authority
+    first = self.execute()
+            ^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_executed_profile_rejects_an_unknown_self_declared_digest (__main__.ExecutionControls.test_executed_profile_rejects_an_unknown_self_declared_digest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 141, in test_executed_profile_rejects_an_unknown_self_declared_digest
+    self.assertFalse(self.to_review().ok)
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_identical_subjects_are_not_a_pair (__main__.ExecutionControls.test_identical_subjects_are_not_a_pair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 239, in test_identical_subjects_are_not_a_pair
+    self.assert_refused_without_canonical_writes()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 131, in assert_refused_without_canonical_writes
+    result = self.execute(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_invalid_contracts_cannot_be_results_or_escape_the_project (__main__.ExecutionControls.test_invalid_contracts_cannot_be_results_or_escape_the_project) (key='verifier')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 232, in test_invalid_contracts_cannot_be_results_or_escape_the_project
+    self.assert_refused_without_canonical_writes()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 131, in assert_refused_without_canonical_writes
+    result = self.execute(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_invalid_contracts_cannot_be_results_or_escape_the_project (__main__.ExecutionControls.test_invalid_contracts_cannot_be_results_or_escape_the_project) (key='result')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 232, in test_invalid_contracts_cannot_be_results_or_escape_the_project
+    self.assert_refused_without_canonical_writes()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 131, in assert_refused_without_canonical_writes
+    result = self.execute(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_invalid_contracts_cannot_be_results_or_escape_the_project (__main__.ExecutionControls.test_invalid_contracts_cannot_be_results_or_escape_the_project) (key='format')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 232, in test_invalid_contracts_cannot_be_results_or_escape_the_project
+    self.assert_refused_without_canonical_writes()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 131, in assert_refused_without_canonical_writes
+    result = self.execute(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_invalid_contracts_cannot_be_results_or_escape_the_project (__main__.ExecutionControls.test_invalid_contracts_cannot_be_results_or_escape_the_project) (key='context')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 232, in test_invalid_contracts_cannot_be_results_or_escape_the_project
+    self.assert_refused_without_canonical_writes()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 131, in assert_refused_without_canonical_writes
+    result = self.execute(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_invalid_contracts_cannot_be_results_or_escape_the_project (__main__.ExecutionControls.test_invalid_contracts_cannot_be_results_or_escape_the_project) (key='timeout')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 232, in test_invalid_contracts_cannot_be_results_or_escape_the_project
+    self.assert_refused_without_canonical_writes()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 131, in assert_refused_without_canonical_writes
+    result = self.execute(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_oracle_and_subject_cannot_overlap (__main__.ExecutionControls.test_oracle_and_subject_cannot_overlap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 254, in test_oracle_and_subject_cannot_overlap
+    self.assert_refused_without_canonical_writes()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 131, in assert_refused_without_canonical_writes
+    result = self.execute(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_oracle_byte_changes_invalidate_execution (__main__.ExecutionControls.test_oracle_byte_changes_invalidate_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 218, in test_oracle_byte_changes_invalidate_execution
+    self.assertTrue(self.execute().ok)
+                    ^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_post_fix_byte_changes_invalidate_execution (__main__.ExecutionControls.test_post_fix_byte_changes_invalidate_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 211, in test_post_fix_byte_changes_invalidate_execution
+    self.assertTrue(self.execute().ok)
+                    ^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_read_only_refuses_before_execution (__main__.ExecutionControls.test_read_only_refuses_before_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 268, in test_read_only_refuses_before_execution
+    result = self.assert_refused_without_canonical_writes()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 131, in assert_refused_without_canonical_writes
+    result = self.execute(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 126, in execute
+    self.assertIsNotNone(EXECUTION, "supported active execution operation is absent")
+AssertionError: unexpectedly None : supported active execution operation is absent
+
+======================================================================
+FAIL: test_contradictory_aliases_do_not_produce_an_identity (__main__.IdentityControls.test_contradictory_aliases_do_not_produce_an_identity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1711_regression_execution.py", line 30, in test_contradictory_aliases_do_not_produce_an_identity
+    self.assertEqual(parse_identity("verifier:1111aaaa oracle:9999dddd subject:2222bbbb"), {})
+AssertionError: {'verifier': '1111aaaa', 'subject': '2222bbbb'} != {}
+- {'subject': '2222bbbb', 'verifier': '1111aaaa'}
++ {}
+
+----------------------------------------------------------------------
+Ran 28 tests in 6.161s
+
+FAILED (failures=28)

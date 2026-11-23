@@ -1,0 +1,19 @@
+PRE-REPAIR (od-tail bytes, 24 last):
+.saipen/extensions/subs/saihunt/LOG.md ends b'efect; kitchen/OUTBOX.md' (len=2906)
+.saipen/extensions/subs/saitest/LOG.md ends b'arked; kitchen/OUTBOX.md' (len=3315)
+.saipen/extensions/subs/saipython/LOG.md ends b'ution; kitchen/OUTBOX.md' (len=3381)
+
+POST-REPAIR:
+.saipen/extensions/subs/saihunt/LOG.md ends b'fect; kitchen/OUTBOX.md\n' (len=2907, +1 bytes)
+.saipen/extensions/subs/saitest/LOG.md ends b'rked; kitchen/OUTBOX.md\n' (len=3316, +1 bytes)
+.saipen/extensions/subs/saipython/LOG.md ends b'tion; kitchen/OUTBOX.md\n' (len=3382, +1 bytes)
+
+VALIDATE AFTER REPAIR: status=? problems={
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "n in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agen

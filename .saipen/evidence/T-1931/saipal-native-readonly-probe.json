@@ -1,0 +1,8 @@
+{
+  "ok": true,
+  "status": "BOUND",
+  "phase": "IDLE",
+  "episodes": 18775,
+  "events_indexed": 272978,
+  "scope": "Read-only native SAIPAL status through the adapter; no analysis, publication or production acceptance inferred"
+}

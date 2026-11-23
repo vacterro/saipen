@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-069:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-225 closed with verification evidence in LOG: verify -> PASS conf: high -- audit status clean true pending [], SRC-044 CLOSED 15/15 VERIFIED",
+      "text": "Drive stranded T-218 into closure: claim it, verify audit/10 SRC-044 terminal, finish",
+      "verification": "the Work this request created reached its own verification gate; see the T-225 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-225"
+    }
+  },
+  "schema_version": 1
+}

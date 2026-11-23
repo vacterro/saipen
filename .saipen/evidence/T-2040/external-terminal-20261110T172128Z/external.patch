@@ -1,0 +1,91 @@
+--- before/tools/saipen_engine/external.py
++++ after/tools/saipen_engine/external.py
+@@ -449,6 +449,53 @@
+     return None
+ 
+ 
++def _archived_done_ticket(root: Path, work: str) -> dict | None:
++    """Recover one exact DONE row only from intact committed scrub authority."""
++    from .board import parse_board
++    from .board_scrub import SCRUB_EVIDENCE_ROOT
++    from .journal import hash_bytes, owned_target_path, semantic_receipt_snapshot
++    from .paths import prove_owned_dir_chain, prove_owned_regular, read_bound_regular_bytes
++
++    snapshot = semantic_receipt_snapshot(root)
++    if snapshot.errors:
++        raise ValueError("external terminal journal is corrupt: " + "; ".join(snapshot.errors[:3]))
++    found = None
++    for record in snapshot.records:
++        if record.get("operation") != "scrub_board":
++            continue
++        if record.get("status") == "ABORTED":
++            continue
++        if record.get("status") != "COMMITTED":
++            raise ValueError("external terminal scrub is not COMMITTED")
++        relative = f"{SCRUB_EVIDENCE_ROOT}/{record['op_id']}/BOARD.md"
++        targets = [item for item in record["targets"] if item.get("path") == relative]
++        if (
++            len(targets) != 1
++            or not targets[0].get("applied")
++            or targets[0].get("action") != "write"
++        ):
++            raise ValueError("external terminal scrub has no exact applied archive target")
++        owned_target_path(root, relative, kind="external terminal archive")
++        path = root / relative
++        prove_owned_dir_chain(path.parent, ownership_root=root, kind="external terminal archive")
++        info = prove_owned_regular(path, kind="external terminal archive")
++        raw = read_bound_regular_bytes(path, info, max_bytes=32 * 1024 * 1024)
++        if hash_bytes(raw) != targets[0].get("after_hash"):
++            raise ValueError("external terminal archive differs from its committed target")
++        text = raw.decode("utf-8")
++        if any(line.strip() and not line.startswith("- [x] ") for line in text.splitlines()):
++            raise ValueError("external terminal archive contains non-DONE physical records")
++        archived = parse_board("## DOING\n## TODO\n## DONE\n" + text + "\n## BLOCKED\n")
++        if archived["errors"]:
++            raise ValueError("external terminal archive is malformed: " + archived["errors"][0])
++        candidate = archived["tickets"].get(work)
++        if candidate is not None:
++            if found is not None and found["raw"] != candidate["raw"]:
++                raise ValueError("external terminal archives contain conflicting Work rows")
++            found = candidate
++    return found
++
++
+ def inspect_external_dependency(
+     root: Path | str,
+     authority: str,
+@@ -509,6 +556,8 @@
+         }
+     try:
+         ext_board = parse_board(board_path.read_text(encoding="utf-8"))
++        if ext_board["errors"]:
++            raise ValueError("; ".join(ext_board["errors"][:3]))
+     except (OSError, UnicodeDecodeError, ValueError) as exc:
+         return {
+             "ok": False,
+@@ -521,10 +570,24 @@
+ 
+     ticket = ext_board.get("tickets", {}).get(ext_work)
+     if ticket is None:
++        try:
++            ticket = _archived_done_ticket(ext_root, ext_work)
++        except (OSError, ValueError) as exc:
++            return {
++                "ok": False,
++                "code": "EXTERNAL_TERMINAL_EVIDENCE_INVALID",
++                "detail": str(exc),
++                "authority": authority,
++                "implementation": implementation,
++                "external_root": str(ext_root),
++            }
++    if ticket is None:
+         return {
+             "ok": False,
+             "code": "EXTERNAL_TICKET_ABSENT",
+-            "detail": f"external ticket {ext_work} not found on external board",
++            "detail": (
++                f"external ticket {ext_work} not found on external board or committed archive"
++            ),
+             "authority": authority,
+             "implementation": implementation,
+             "external_root": str(ext_root),

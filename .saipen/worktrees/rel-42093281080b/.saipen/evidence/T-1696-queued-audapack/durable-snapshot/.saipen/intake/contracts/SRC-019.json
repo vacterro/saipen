@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-019:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement and verify every required change and test in T05 EVENT DRIVEN RUN REFRESH."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:11Z",
+  "derived_from": "SRC-019",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "a6dc801c896f10f7319b685c59885240a0a1ab17c8c22efc918a4695bb6612a9"
+}

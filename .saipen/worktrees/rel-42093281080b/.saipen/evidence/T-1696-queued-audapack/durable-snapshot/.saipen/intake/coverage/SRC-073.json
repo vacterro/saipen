@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-073:R1": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "audapack/agent_inbox.py:_PASSIVE_FRESHNESS_SECONDS=8.0 (docstring names BRIDGE_POLL_ACTIVE_MS=4000 margin), read_inbox_passive monotonic default, invalidate_inbox_cache clears both caches, _CACHE_MAX_ENTRIES bound",
+      "text": "[PERF-004] the passive inbox freshness budget must exceed the active dashboard cadence (MainWindow.BRIDGE_POLL_ACTIVE_MS=4000) by a meaningful margin so a normal 4-second repaint is served from zero-I/O passive state; the freshness age must default to time.monotonic(); expiry must perform exactly one physical probe; invalidate_inbox_cache/force must remain immediate; regressions must pin the real 4.0s cadence, timer jitter, 20s/100-root bounded scan ratio, and monotonic-vs-wall-clock isolation",
+      "verification": "pytest tests/test_agent_inbox.py 45 passed (14 PERF-004 regressions: real 4.0s cadence t=1004.1 reuse, jitter 4.05/4.2/4.5s, expiry-then-reuse, 6-repaint=>3 scans, 100 roots=>300/600, monotonic vs wall-clock); pytest tests/services/test_audit_run_service.py 84 passed; full pytest 1966 passed 5 skipped; node --test tests/widget/*.test.js 576 pass 0 fail; ruff check . clean; compileall clean",
+      "work": "T-228"
+    }
+  },
+  "schema_version": 1
+}

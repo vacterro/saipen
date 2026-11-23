@@ -1,0 +1,35 @@
+{
+  "ok": false,
+  "code": "RESIDUAL_DEFECTS",
+  "detail": "reconciliation has no repair left to make and the project is still invalid: FLOOR: STATE.task=T-271 but BOARD DOING has multiple openers at the raw floor; BOARD proposed has more than one ## DOING ticket",
+  "changed": [],
+  "residual_defects": [
+    "FLOOR: STATE.task=T-271 but BOARD DOING has multiple openers at the raw floor",
+    "BOARD proposed has more than one ## DOING ticket"
+  ],
+  "strict_state_error": null,
+  "dry_run": true,
+  "needs_local_mutation": false,
+  "safe_auto_repair_available": false,
+  "operator_decision_available": false,
+  "canonical_next_command": null,
+  "read_only": true,
+  "terminal_disposition": "RECOVERY_BLOCKED",
+  "blocking_surface": null,
+  "blocking_field": null,
+  "evidence_reference": ".saipen/BOARD.md",
+  "diagnosis": "READ_ONLY_DIAGNOSIS_ONLY",
+  "read_only_diagnosis_only": true,
+  "instruction": "READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth",
+  "forbidden_probes": [
+    "saipen stop",
+    "saipen transition",
+    "saipen goal",
+    "saipen ticket",
+    "Bash",
+    "Edit",
+    "Write"
+  ],
+  "reason_code": "RESIDUAL_DEFECTS",
+  "operator_decision": null
+}

@@ -1,0 +1,17 @@
+.F
+======================================================================
+FAIL: test_unwitnessed_append_does_not_rewrite_active_acceptance_or_rewind (test_ingress_authority.AppendAuthorityTests.test_unwitnessed_append_does_not_rewrite_active_acceptance_or_rewind)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 120, in test_unwitnessed_append_does_not_rewrite_active_acceptance_or_rewind
+    self.assertEqual(self.phase(project), "VERIFY")
+AssertionError: 'BUILD' != 'VERIFY'
+- BUILD
++ VERIFY
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 4.933s
+
+FAILED (failures=1)
+

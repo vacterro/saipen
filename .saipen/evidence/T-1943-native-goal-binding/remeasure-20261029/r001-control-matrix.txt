@@ -1,0 +1,20 @@
+T-1943 R001 control matrix on the INSTALLED adapter bytes
+
+PASS 'cc'                           -> continue  (expected continue)
+PASS 'cc all'                       -> continue  (expected continue)
+PASS 'cc please'                    -> continue  (expected continue)
+PASS '/goal cc all'                 -> continue  (expected continue)
+PASS 'gg build the thing'           -> goal  (expected goal)
+PASS 'gg <objective>'               -> goal  (expected goal)
+PASS 'saipen goal x'                -> goal  (expected goal)
+PASS '/goal gg x'                   -> goal  (expected goal)
+PASS 'gg'                           -> continue  (expected continue)
+PASS 'goal of this is X'            -> continue  (expected continue)
+PASS 'gg line one\nline two'        -> continue  (expected continue)
+PASS 'gg a\nb\nc'                   -> continue  (expected continue)
+PASS 'ggg x'                        -> continue  (expected continue)
+PASS 'hh x'                         -> continue  (expected continue)
+PASS 'hello there'                  -> continue  (expected continue)
+PASS ''                             -> continue  (expected continue)
+
+cases: 16 mismatches: 0

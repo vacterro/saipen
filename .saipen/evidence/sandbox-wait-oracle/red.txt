@@ -1,0 +1,21 @@
+test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone (sandbox_wait_subject.HeldSandboxTests.test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone) ... FAIL
+
+======================================================================
+FAIL: test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone (sandbox_wait_subject.HeldSandboxTests.test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\sandbox-wait-oracle\test_t1505_core_unit_sandbox_reclaim.before.py", line 169, in test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone
+    self.assertEqual(core_unit.sweep_stale_sandboxes(temp), [sandbox.name])
+AssertionError: Lists differ: [] != ['saipen-core-unit-held']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'saipen-core-unit-held'
+
+- []
++ ['saipen-core-unit-held']
+
+----------------------------------------------------------------------
+Ran 1 test in 3.545s
+
+FAILED (failures=1)

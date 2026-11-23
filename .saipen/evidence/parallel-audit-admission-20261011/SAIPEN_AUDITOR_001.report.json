@@ -1,0 +1,63 @@
+{
+  "worker_id": "SAIPEN_AUDITOR_001",
+  "assignment_id": "eb073c44d16d4c359723952f1160d5c93aee230864b61b18ec338a5cb0da580c",
+  "audit_sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9",
+  "boundary_probe": "PASS: executed the exact authorized probe once; pass=true, writes_performed=0, read access succeeded, write-open access was denied, bytes remained unchanged, and child-process inheritance passed.",
+  "findings": [
+    "The audit describes a plausible post-closure regression problem, but its FastPrompter incidents are assertions, not independently verified facts in this snapshot. Classification A–E remains unresolved.",
+    "Acceptance reconciliation has existing CONTESTED and escaped-defect mechanisms. Its freshness calculation follows a Work BUILD event boundary; it does not inspect current implementation bytes.",
+    "Source coverage completeness checks terminal dispositions and evidence/verification strings. Those checks establish recorded coverage, not present behavioral correctness.",
+    "An existing executed regression mechanism rechecks authority, source identity, acceptance identity, verifier, subject and context bytes. Reuse should be evaluated before introducing another state machine.",
+    "Byte mismatch is evidence of stale verification inputs, not proof of semantic regression. Formatting and behavior-preserving refactors require focused revalidation."
+  ],
+  "confirmed_root_causes": [
+    "Bounded acceptance-projection limitation: collect_evidence marks evidence stale only when its event precedes the latest BUILD boundary. reconcile receives declaration text and events, so implementation changes without corresponding events cannot independently invalidate its SATISFIED result.",
+    "Bounded receipt-coverage limitation: _coverage_summary_from_ledger determines completeness from recorded dispositions and nonempty evidence/verification strings, without executing their claimed verification or comparing implementation dependencies. This does not establish the cause of the historical incident."
+  ],
+  "source_symbols": [
+    "tools/saipen_engine/acceptance.py:176 build_boundary; :182 collect_evidence; :202 staleness assignment; :237 classify; :274 reconcile",
+    "tools/saipen_engine/intake.py:2202 set_disposition, especially :2251–2270 evidence requirements; :2401 _coverage_summary_from_ledger, especially :2452–2459 unresolved calculation",
+    "tools/saipen_engine/intake.py:3847 close_receipt; :3860 writer lock; :3872–3895 integrity, coverage and active linked-Work gates; :3902–3923 tombstone construction",
+    "tools/saipen_engine/regression_execution.py:399 evidence_gate; :431–442 binding comparisons; :443–451 verifier, subject and context comparisons"
+  ],
+  "reproduction": [
+    "EXECUTED: Get-FileHash on the copied audit returned the assigned SHA-256; the exact audit was read.",
+    "EXECUTED: read-only source searches and numbered reads in the supplied snapshot.",
+    "EXECUTED: Python -B extracted classify and witness_satisfies through AST into memory, with a minimal UNIT witness-rank fixture. A current PASS returned SATISFIED; a stale PASS returned CONTESTED; conflicting PASS/FAIL returned CONTESTED. This was an isolated function probe, not a lifecycle test.",
+    "SUGGESTED, NOT EXECUTED: in an authorized disposable fixture, close a verified requirement, change its implementation without adding a BUILD boundary or new evidence, and compare acceptance projection with a focused behavioral failure. Preserve archived evidence.",
+    "SUGGESTED, NOT EXECUTED: create a legal measured regression pair, then independently change verifier, subject or context bytes and invoke its supported evidence gate; expect STALE_REGRESSION_EVIDENCE rather than a semantic-failure verdict."
+  ],
+  "suggested_correction": [
+    "Have canonical owners evaluate dependency-scoped current validation using existing regression_execution input bindings and acceptance CONTESTED/escaped-defect records.",
+    "Keep historical closure immutable; record current suspicion separately, then require focused behavioral evidence before declaring a confirmed regression.",
+    "Resolve an existing active successor before admitting recovery Work; preserve unrelated safe engineering operations.",
+    "Measure focused detection overhead and migration behavior under the existing canonical VERIFY ownership."
+  ],
+  "negative_controls": [
+    "Required, not executed: incorrect replacement implementation, removed required dependency, deleted test, and weakened test.",
+    "Required, not executed: harmless formatting and a behavior-preserving refactor must cause at most suspicion/revalidation, not automatic confirmed failure.",
+    "Required, not executed: active successor repair must prevent duplicate recovery ownership.",
+    "Required, not executed: simultaneous reconciliation must preserve one legal ownership outcome and immutable historical evidence.",
+    "Required, not executed: stale current validation must coexist with an intact historical receipt; unrelated Work and diagnostics must remain usable.",
+    "Executed isolated controls: stale PASS and conflicting PASS/FAIL both produced CONTESTED."
+  ],
+  "evidence": [
+    "Assigned baseline commit: 025bf596c683464788ab698248e8a3c5eb44dfec.",
+    "Provided full base tree fingerprint: 41247edf69d91ef36f1e0857104ee548c76119cb6fc9761a9d43cdbe3d0fd3e9.",
+    "Provided snapshot manifest SHA-256: f6078bcd84065db839a2b0ba269447d188dbdda58b4cea77cd5d3b52f6df6f2a. Baseline identifiers are coordinator provenance; they were not independently recomputed.",
+    "Snapshot inspected: V:/_TEMP_/saipen-readonly-audit-pilot-20261011T1628Z/inputs.",
+    "Audit generation 1 matched SHA-256 534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9.",
+    "Coordinator graph evidence: Tier 2 Verify, saipen ready, generation 2026-09-01T13:16:39Z; tools descendants excluded by design and protocol documents metadata_changed. Exact source inspection supplied evidence; no MCP calls or graph-absence conclusions were made."
+  ],
+  "uncertainty": [
+    "Original FastPrompter source, SRC-101 receipt, T-1442 verification and T-1451 recovery history were not captured. Their validity, chronology and supported-protocol use cannot be determined.",
+    "The bounded reads do not prove a repository-wide absence of additional regression guards or establish every lifecycle integration of evidence_gate.",
+    "No writable lifecycle fixture, concurrency test, full suite, performance measurement or migration test was executed.",
+    "The snapshot may differ from later canonical generations. Existing code does not prove the historical incident was fixed."
+  ],
+  "potential_overlap": [
+    "T-1718 retains canonical VERIFY ownership; these findings are evaluation inputs only.",
+    "T-1717 retains the SRC-216 dependency reservation and parent audit ownership.",
+    "T-442 remains HELD. No Work, Source receipt, ticket claim, checkpoint or implementation was created."
+  ]
+}

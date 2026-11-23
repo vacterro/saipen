@@ -1,0 +1,29 @@
+{
+  "work": "T-1697",
+  "source": "SRC-202",
+  "first_refusal": {
+    "command": "SAIPEN_CAPABILITY=no-publish bin/saipen.cmd ship --json",
+    "exit_code": 1,
+    "code": "RELEASE_FAILED",
+    "stage": "SOURCE_COVERAGE",
+    "source_code": "SOURCE_UNRESOLVED",
+    "requirements": 0,
+    "contract_derived": false,
+    "canonical_next_command": "saipen source req SRC-202 R001 requirement '<what the receipt asks for>'"
+  },
+  "second_refusal": {
+    "command": "bin/saipen.cmd source disp SRC-202 R001 VERIFIED --work T-1697 --evidence E-14079 --json",
+    "exit_code": 1,
+    "code": "VALIDATION_FAILED",
+    "detail": "implemented/verified disposition requires verification"
+  },
+  "resolution": {
+    "requirement": "R001 derived from the unchanged original user request",
+    "disposition": "VERIFIED",
+    "evidence": "E-14079",
+    "verification": "python .saipen/evidence/T-1697-audit-drop-queue/review-checks.py:PASS",
+    "coverage_result": "COVERAGE_UPDATED",
+    "completion_not_asserted_by_this_file": true
+  },
+  "provenance": "Exact decisive fields transcribed from actual CLI outputs. No missing lifecycle event, operation identity or timestamp is invented."
+}

@@ -1,0 +1,258 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "fa85d6cb43a07bda80fffd387949aea9fa829d18ec50c6e12d4eabb1478f870c",
+  "verdict": "PASS",
+  "patterns": [
+    "test_audit_2026_08_28_all3.py",
+    "test_release_provenance.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_audit_2026_08_28_all3.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_audit_2026_08_28_all3.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [],
+      "duration_s": 16.188,
+      "process_create_s": 0.031,
+      "ran": 67,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "an_binds_source_authority_manifest_in_canonical (test_audit_2026_08_28_all3.CorePlanBindingAuditTests.test_release_plan_binds_source_authority_manifest_in_canonical) ... ok\r\ntest_source_authority_manifest_drift_refuses_preflight_before_writes (test_audit_2026_08_28_all3.CorePlanBindingAuditTests.test_source_authority_manifest_drift_refuses_preflight_before_writes) ... ok\r\ntest_capture_persists_exact_bytes_and_never_collapses_distinct_sources (test_audit_2026_08_28_all3.CoreSensitiveAuditTests.test_capture_persists_exact_bytes_and_never_collapses_distinct_sources)\r\nCORE-001: two bodies differing by one token must be two receipts. ... ok\r\ntest_duplicate_capture_requires_byte_identical_input (test_audit_2026_08_28_all3.CoreSensitiveAuditTests.test_duplicate_capture_requires_byte_identical_input)\r\nCORE-001: dedupe is exact-bytes only; a one-byte change is new. ... ok\r\ntest_legacy_redacted_receipt_admits_lost_original_without_inventing_bytes (test_audit_2026_08_28_all3.CoreSensitiveAuditTests.test_legacy_redacted_receipt_admits_lost_original_without_inventing_bytes)\r\nCORE-001: a pre-repair redacted receipt states the original is gone. ... ok\r\ntest_release_gate_and_validate_refuse_archived_legacy_credential (test_audit_2026_08_28_all3.CoreSensitiveAuditTests.test_release_gate_and_validate_refuse_archived_legacy_credential) ... ok\r\ntest_release_gate_refuses_legacy_sensitive_unsanitized_active_receipt (test_audit_2026_08_28_all3.CoreSensitiveAuditTests.test_release_gate_refuses_legacy_sensitive_unsanitized_active_receipt) ... ok\r\ntest_sensitive_capture_flags_without_mutating_canonical_bytes (test_audit_2026_08_28_all3.CoreSensitiveAuditTests.test_sensitive_capture_flags_without_mutating_canonical_bytes)\r\nCORE-001: detection is metadata; the receipt keeps the exact body. ... ok\r\ntest_crew_release_counting_does_not_re_inventory (test_audit_2026_08_28_all3.CrewPlanSourceAuthorityOnceTests.test_crew_release_counting_does_not_re_inventory)\r\nThe post-T-1193 invariant: one call-scoped inventory. The crew ... ok\r\ntest_plan_crew_release_reuses_passed_inventory (test_audit_2026_08_28_all3.CrewPlanSourceAuthorityOnceTests.test_plan_crew_release_reuses_passed_inventory) ... ok\r\ntest_archive_recovery_proves_bundle_before_settlement (test_audit_2026_08_28_all3.IntakeAuditTests.test_archive_recovery_proves_bundle_before_settlement) ... ok\r\ntest_archived_status_refuses_corrupt_coverage (test_audit_2026_08_28_all3.IntakeAuditTests.test_archived_status_refuses_corrupt_coverage) ... ok\r\ntest_corrupt_partial_archive_refusal_is_zero_write (test_audit_2026_08_28_all3.IntakeAuditTests.test_corrupt_partial_archive_refusal_is_zero_write) ... ok\r\ntest_release_gate_refuses_indexed_receipt_without_metadata (test_audit_2026_08_28_all3.IntakeAuditTests.test_release_gate_refuses_indexed_receipt_without_metadata) ... ok\r\ntest_release_surface_preserves_source_authority_in_fresh_clone (test_audit_2026_08_28_all3.IntakeAuditTests.test_release_surface_preserves_source_authority_in_fresh_clone) ... ok\r\ntest_source_body_limits_apply_before_write_and_during_recovery (test_audit_2026_08_28_all3.IntakeAuditTests.test_source_body_limits_apply_before_write_and_during_recovery) ... ok\r\ntest_retry_semantics_include_causal_preconditions (test_audit_2026_08_28_all3.JournalAuditTests.test_retry_semantics_include_causal_preconditions) ... ok\r\ntest_same_op_corrupt_journal_retry_preserves_evidence (test_audit_2026_08_28_all3.JournalAuditTests.test_same_op_corrupt_journal_retry_preserves_evidence) ... ok\r\ntest_no_publish_plan_reuses_passed_inventory (test_audit_2026_08_28_all3.NoPublishPlanSourceAuthorityOnceTests.test_no_publish_plan_reuses_passed_inventory) ... ok\r\ntest_no_publish_release_counting_does_not_re_inventory (test_audit_2026_08_28_all3.NoPublishPlanSourceAuthorityOnceTests.test_no_publish_release_counting_does_not_re_inventory) ... ok\r\ntest_ordinary_release_counting_does_not_re_inventory (test_audit_2026_08_28_all3.OrdinaryPlanSourceAuthorityOnceTests.test_ordinary_release_counting_does_not_re_inventory) ... ok\r\ntest_conformance_history_tamper_blocks_append_and_lookup (test_audit_2026_08_28_all3.PerformanceAuditTests.test_conformance_history_tamper_blocks_append_and_lookup) ... ok\r\ntest_conformance_index_bootstraps_once_then_appends_incrementally (test_audit_2026_08_28_all3.PerformanceAuditTests.test_conformance_index_bootstraps_once_then_appends_incrementally) ... ok\r\ntest_context_renderers_keep_full_history_capture (test_audit_2026_08_28_all3.PerformanceAuditTests.test_context_renderers_keep_full_history_capture) ... ok\r\ntest_corrupt_ready_is_preserved_instead_of_replaced (test_audit_2026_08_28_all3.PerformanceAuditTests.test_corrupt_ready_is_preserved_instead_of_replaced) ... ok\r\ntest_cross_process_writer_contention_has_stable_busy_codes (test_audit_2026_08_28_all3.PerformanceAuditTests.test_cross_process_writer_contention_has_stable_busy_codes) ... ok\r\ntest_family_host_reads_are_pinned (test_audit_2026_08_28_all3.PerformanceAuditTests.test_family_host_reads_are_pinned) ... ok\r\ntest_focus_reads_are_prebounded_and_fingerprint_streams_stably (test_audit_2026_08_28_all3.PerformanceAuditTests.test_focus_reads_are_prebounded_and_fingerprint_streams_stably) ... ok\r\ntest_lean_and_full_project_snapshot_read_each_history_segment_once (test_audit_2026_08_28_all3.PerformanceAuditTests.test_lean_and_full_project_snapshot_read_each_history_segment_once) ... ok\r\ntest_lean_project_snapshot_preserves_routing_fields_and_drops_renderings (test_audit_2026_08_28_all3.PerformanceAuditTests.test_lean_project_snapshot_preserves_routing_fields_and_drops_renderings) ... ok\r\ntest_liveness_cache_lock_contention_is_non_blocking (test_audit_2026_08_28_all3.PerformanceAuditTests.test_liveness_cache_lock_contention_is_non_blocking) ... ok\r\ntest_nonretained_log_snapshot_preserves_semantics_and_digest (test_audit_2026_08_28_all3.PerformanceAuditTests.test_nonretained_log_snapshot_preserves_semantics_and_digest) ... ok\r\ntest_parity_control_detects_a_capture_mode_dependent_projection (test_audit_2026_08_28_all3.PerformanceAuditTests.test_parity_control_detects_a_capture_mode_dependent_projection) ... ok\r\ntest_ready_publisher_and_reader_share_one_size_contract (test_audit_2026_08_28_all3.PerformanceAuditTests.test_ready_publisher_and_reader_share_one_size_contract) ... ok\r\ntest_runner_returns_bounded_utf8_replaced_tails (test_audit_2026_08_28_all3.PerformanceAuditTests.test_runner_returns_bounded_utf8_replaced_tails) ... ok\r\ntest_runner_timeout_reaps_descendant_and_returns_json_text (test_audit_2026_08_28_all3.PerformanceAuditTests.test_runner_timeout_reaps_descendant_and_returns_json_text) ... ok\r\ntest_settled_index_is_warm_and_content_authenticated (test_audit_2026_08_28_all3.PerformanceAuditTests.test_settled_index_is_warm_and_content_authenticated) ... ok\r\ntest_snapshot_history_ownership_refuses_symlink_and_directory (test_audit_2026_08_28_all3.PerformanceAuditTests.test_snapshot_history_ownership_refuses_symlink_and_directory) ... skipped 'symlink not permitted on this host'\r\ntest_stage_g_reuses_one_predecessor_lookup (test_audit_2026_08_28_all3.PerformanceAuditTests.test_stage_g_reuses_one_predecessor_lookup) ... ok\r\ntest_status_next_explain_are_identical_with_full_and_lean_capture (test_audit_2026_08_28_all3.PerformanceAuditTests.test_status_next_explain_are_identical_with_full_and_lean_capture) ... ok\r\ntest_windows_reserved_device_entries_do_not_break_test_sandbox (test_audit_2026_08_28_all3.PerformanceAuditTests.test_windows_reserved_device_entries_do_not_break_test_sandbox) ... ok\r\ntest_historical_undo_does_not_mask_later_current_restore (test_audit_2026_08_28_all3.UndoAuditTests.test_historical_undo_does_not_mask_later_current_restore) ... ok\r\ntest_unrelated_committed_receipt_never_satisfies_undo (test_audit_2026_08_28_all3.UndoAuditTests.test_unrelated_committed_receipt_never_satisfies_undo) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 67 tests in 15.630s\r\n\r\nOK (skipped=1)\r\n"
+    },
+    {
+      "pattern": "test_release_provenance.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_release_provenance.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        7452
+      ],
+      "duration_s": 7.39,
+      "process_create_s": 0.015,
+      "ran": 22,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_the_cli_refuses_a_fabricated_identity (test_release_provenance.CliTests.test_the_cli_refuses_a_fabricated_identity) ... ok\r\ntest_write_then_verify_over_the_cli (test_release_provenance.CliTests.test_write_then_verify_over_the_cli) ... ok\r\ntest_a_slot_append_leaves_the_current_receipt_alone (test_release_provenance.SlotTests.test_a_slot_append_leaves_the_current_receipt_alone) ... ok\r\ntest_a_work_id_that_is_not_one_cannot_become_a_file_name (test_release_provenance.SlotTests.test_a_work_id_that_is_not_one_cannot_become_a_file_name) ... ok\r\ntest_appending_the_same_work_twice_is_refused (test_release_provenance.SlotTests.test_appending_the_same_work_twice_is_refused) ... ok\r\ntest_two_appended_receipts_coexist_and_both_verify (test_release_provenance.SlotTests.test_two_appended_receipts_coexist_and_both_verify) ... ok\r\ntest_verify_covers_the_appended_receipts_too (test_release_provenance.SlotTests.test_verify_covers_the_appended_receipts_too)\r\nThe control on the whole point: a bad APPENDED receipt is not invisible. ... ok\r\ntest_verify_with_nothing_recorded_is_an_error_not_a_pass (test_release_provenance.SlotTests.test_verify_with_nothing_recorded_is_an_error_not_a_pass) ... ok\r\ntest_a_good_receipt_verifies (test_release_provenance.VerifyTests.test_a_good_receipt_verifies) ... ok\r\ntest_a_missing_receipt_is_an_error_not_a_pass (test_release_provenance.VerifyTests.test_a_missing_receipt_is_an_error_not_a_pass) ... ok\r\ntest_a_non_terminal_receipt_is_reported (test_release_provenance.VerifyTests.test_a_non_terminal_receipt_is_reported) ... ok\r\ntest_a_receipt_naming_a_commit_that_is_gone_fails (test_release_provenance.VerifyTests.test_a_receipt_naming_a_commit_that_is_gone_fails) ... ok\r\ntest_a_receipt_with_a_bare_commit_key_is_reported (test_release_provenance.VerifyTests.test_a_receipt_with_a_bare_commit_key_is_reported) ... ok\r\ntest_a_receipt_without_an_op_id_is_reported (test_release_provenance.VerifyTests.test_a_receipt_without_an_op_id_is_reported) ... ok\r\ntest_a_ship_shaped_receipt_with_only_a_ticket_id_still_verifies (test_release_provenance.VerifyTests.test_a_ship_shaped_receipt_with_only_a_ticket_id_still_verifies)\r\nThe artifact `saipen ship` writes carries no `work`; that is legal. ... ok\r\ntest_a_ticket_id_that_disagrees_with_the_work_is_reported (test_release_provenance.VerifyTests.test_a_ticket_id_that_disagrees_with_the_work_is_reported) ... ok\r\ntest_the_receipt_names_its_work_in_both_spellings (test_release_provenance.VerifyTests.test_the_receipt_names_its_work_in_both_spellings)\r\nThe resolver reads `ticket_id`; a receipt that only said `work` was ... ok\r\ntest_a_commit_that_does_not_exist_is_refused (test_release_provenance.WriteTests.test_a_commit_that_does_not_exist_is_refused) ... ok\r\ntest_a_no_publish_receipt_is_terminal_and_names_the_real_commit (test_release_provenance.WriteTests.test_a_no_publish_receipt_is_terminal_and_names_the_real_commit) ... ok\r\ntest_an_empty_commit_is_refused (test_release_provenance.WriteTests.test_an_empty_commit_is_refused) ... ok\r\ntest_an_unknown_mode_is_refused (test_release_provenance.WriteTests.test_an_unknown_mode_is_refused) ... ok\r\ntest_the_receipt_is_where_a_clone_can_see_it (test_release_provenance.WriteTests.test_the_receipt_is_where_a_clone_can_see_it) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 22 tests in 7.257s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 89,
+  "duration_s": 101.985,
+  "timings_s": {
+    "execution_wall_s": 23.578,
+    "environment_identity_wall_s": 0.032,
+    "copy_wall_s": 61.797,
+    "hash_wall_s": 0.156,
+    "cleanup_wall_s": 16.391
+  },
+  "copy_metrics": {
+    "subject_copy_s": 13.359,
+    "canonical_copy_s": 48.141,
+    "canonical_copy_attempts": 1,
+    "trees": null
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_audit_2026_08_28_all3.py",
+      "test_release_provenance.py"
+    ],
+    "manifest_sha256": "7e00ef6771254f78299856d2748152c8d86034a23e04046ff72bf337366e6ab1"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_audit_2026_08_28_all3.py",
+        "test_release_provenance.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "30888f8c2c9bd2385eb22056d39994ebfee110f946b67c87fa72278685e984a6",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": {
+        "path": "C:\\Windows\\System32\\bash.exe",
+        "exists": true,
+        "sha256": "10327a4e8157899e070c37882fa1d36532704b127f8b51cb183925e6a3f60116"
+      },
+      "pwsh": {
+        "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "exists": true,
+        "sha256": "fa2c8bb1e35cdd62ad15cd06a1d8f2c5961e9725a9bfa1e7cfd2c322f49e9619"
+      },
+      "powershell": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "exists": true,
+        "sha256": "9785001b0dcf755eddb8af294a373c0b87b2498660f724e76c4d53f9c217c7a3"
+      },
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\config.toml",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.codex\\hooks.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.claude\\settings.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.gitconfig",
+        "exists": true,
+        "sha256": "2271ca5434892f15f981f28ed5ded00314be23f853d23c8db56c527f302b0463"
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\SAIAG_9fabb0d5\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "86d04f8a8d42dd8b365b33a29ca7b3cc1eacae9ddcfc2ae1b9bdbf3ee1e5e32f"
+      },
+      "core_unit_shard.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "1a22bac5140eeaf33be64413027a22c474420dbe7e3c6134af9b5e6f90942c9d"
+      },
+      "test_runner.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "e8d4d18e93abd3843f0d911071bc729c15ad767502b72c567be436e6f17545ed"
+      },
+      "verification_cache.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "70188f394bb84cc78fe2417daecf5b38b6abcd3be73956194baf1ef1911413ba"
+      },
+      "process_tree.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "798e6663a85d1906533203fe961472ad8eb8b7e645aa3961a694c1192ca5efcb"
+      },
+      "verification_bootstrap.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "8fa1c333bec82156f70bb66e7df786e99265d0b4c5f3da362a830bfc9198ab24"
+      },
+      "verification_impact.py": {
+        "path": "C:\\ProgramData\\SAI\\SAIPEN\\runtime\\0012aaefb5fc1b95\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "d2829c9de720e9b84d9dfa4056786c533bf9cff86913c5ed0546fe63e19f5a83"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "f008508f0f88d1c6a74f95d7e541a411a685b375404d7dd1ea49035ff7a5064c"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

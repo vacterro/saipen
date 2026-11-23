@@ -1,0 +1,57 @@
+{
+ "verdict": {
+  "ok": true,
+  "reasons": [],
+  "stages": [
+   {
+    "stage": "E",
+    "verdict": "PASS",
+    "op_id": "convergence-fa436aff17c240b792a6e4d82eb82f1e",
+    "created_at": "2026-11-13T11:43:31Z"
+   },
+   {
+    "stage": "F",
+    "verdict": "CLEAN",
+    "op_id": "convergence-ef062d0577a84f479d15e1b2aa5859f3",
+    "created_at": "2026-11-13T11:43:55Z"
+   },
+   {
+    "stage": "G",
+    "verdict": "NOTHING_SAFE_REMAINED",
+    "op_id": "convergence-2513db2302d04212afd9436e1da43c3c",
+    "created_at": "2026-11-13T11:44:18Z"
+   },
+   {
+    "stage": "H",
+    "verdict": "PASS",
+    "op_id": "convergence-3d8fe72c245149aab351c0c9b05116d3",
+    "created_at": "2026-11-13T11:44:22Z"
+   },
+   {
+    "stage": "I",
+    "verdict": "CLEAN",
+    "op_id": "convergence-36959fd9a5f644bfb90f69199b83d4d6",
+    "created_at": "2026-11-13T11:45:14Z"
+   }
+  ],
+  "source": {
+   "source_head": "17559c20c44bea4665c83aeded368c15e39bb249",
+   "source_tree_fingerprint": "git-delta-v1:bd064f25e95b0154fedfb71b5579fc8ceb0e353f94f56440357204ce03474190"
+  },
+  "attribution_problems": []
+ },
+ "block": {
+  "schema_version": 1,
+  "disposition": "INVALID",
+  "next_command": null,
+  "operator_action_due": false,
+  "reason_code": "automation-invalid-route",
+  "reason": "route reason: none",
+  "audit_quiescent": true,
+  "audit_epoch": "audit-epoch-v1:e4e24dc608dce8b1159f5e754349784b4360199948f658c7b0d4af8c862adb40",
+  "convergence_current": true,
+  "closure_complete": false,
+  "source_fingerprint": "17559c20c44bea4665c83aeded368c15e39bb249+git-delta-v1:bd064f25e95b0154fedfb71b5579fc8ceb0e353f94f56440357204ce03474190",
+  "completed_at": null
+ }
+}

@@ -1,0 +1,13 @@
+INJECT FAILED (7 of 7 home(s) stale):
+~/.agents skills             copied (re-run after updates)
+~/.agents provenance         verified
+FreeBuff ~/.knowledge.md     block refreshed
+FreeBuff ~/.AGENTS.md        block refreshed
+Aider conf                   has own read: - add manually: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\saipen\BOOT.md + V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\saipen\STYLE.md
+Antigravity [my_custom]      copied (re-run after updates)
+Antigravity [my_custom] provenance FAILED: installed runtime identity gen-sha256:d3246428c62a1435b764cc39a431493e25bd21e18ff8f8ebbaa5d69b25f38f07 differs from source gen-sha256:376d86e4ba2705b4bebfa7cab4fe983fa2cf27722ac3d21f6dad813d0c9b12e9
+Antigravity [science]        copied (re-run after updates)
+Antigravity [science] provenance FAILED: installed runtime identity gen-sha256:d3246428c62a1435b764cc39a431493e25bd21e18ff8f8ebbaa5d69b25f38f07 differs from source gen-sha256:376d86e4ba2705b4bebfa7cab4fe983fa2cf27722ac3d21f6dad813d0c9b12e9
+Kiro                         not installed - skip
+------------------------------------------------------------
+FAILED. Fix reported errors and re-run.

@@ -1,0 +1,9 @@
+{
+  "first_ok": true,
+  "replacement_ok": true,
+  "new_grant_ok": true,
+  "old_ingress": "goal-adeb7ac3e9275e72",
+  "new_ingress": "goal-adeb7ac3e9275e72",
+  "proof_errors": [],
+  "wrong_goal_ingress_reused": true
+}

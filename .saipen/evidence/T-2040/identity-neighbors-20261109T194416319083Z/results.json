@@ -1,0 +1,33 @@
+{
+  "captured_at": "2026-11-09T20:08:42.973724+00:00",
+  "runs": {
+    "before": {
+      "tests": 44,
+      "elapsed_s": 0.469,
+      "failures": 5,
+      "passed": false,
+      "failure_ids": [
+        "test_e2e_bz_rea_sequential_lifecycle_and_distinct_successor (test_bz_rea_acceptance_fixture.BzReaAcceptanceFixtureTests.test_e2e_bz_rea_sequential_lifecycle_and_distinct_successor)",
+        "test_10_candidate_deduplication_preserves_new_evidence_generations (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_10_candidate_deduplication_preserves_new_evidence_generations)",
+        "test_11_one_verified_gap_closes_different_gap_automatically_selected (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_11_one_verified_gap_closes_different_gap_automatically_selected)",
+        "test_20_genuine_exhausted_work_produces_quiet_waiting (test_bzcc_overnight_autonomy.BZCCOvernightAutonomyTests.test_20_genuine_exhausted_work_produces_quiet_waiting)",
+        "test_blocked_first_candidate_selects_second_candidate (test_persistent_autonomy_recovery.CandidateDeduplicationAndIndependentSelectionTests.test_blocked_first_candidate_selects_second_candidate)"
+      ]
+    },
+    "after": {
+      "tests": 44,
+      "elapsed_s": 0.512,
+      "failures": 0,
+      "passed": true,
+      "failure_ids": []
+    },
+    "controls": {
+      "tests": 52,
+      "elapsed_s": 0.225,
+      "failures": 0,
+      "passed": true,
+      "failure_ids": []
+    }
+  },
+  "diff_check_returncode": 0
+}

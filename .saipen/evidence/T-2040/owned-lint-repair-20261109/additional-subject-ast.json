@@ -1,0 +1,14 @@
+[
+  {
+    "path": "tools/saipen_engine/discovery_providers.py",
+    "ast_equal": true,
+    "preimage_sha256": "b82412d9491b8743a55bee4d9f2f91329593f69b26c8ee2dabb82aacc7276a1f",
+    "current_sha256": "d9047b328ebb0a3e72ef5dae07ea4e207f47ea997484832b9517aa94c4f529c3"
+  },
+  {
+    "path": "tools/saipen_engine/outcome_truth.py",
+    "ast_equal": true,
+    "preimage_sha256": "1a00028b276570f088923ec27ae3beb584ff8b3874e79ab57971df74e7447ec5",
+    "current_sha256": "a774721cda536318aed0544f9a17560d2278e0df97c4154eb2021e8d642de209"
+  }
+]

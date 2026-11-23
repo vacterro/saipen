@@ -1,0 +1,325 @@
+{
+ "status": "CURRENT_FAIL",
+ "gate": "core",
+ "healthy": false,
+ "stale_reason": null,
+ "disposition": "REMEDIATION_REQUIRED",
+ "reason": "canonical validator reports FAIL for the current checkpoint",
+ "remediation_command": "saipen ticket add P1 \"closure_provenance_drift EX-000053\" --verify \"closure provenance does not resolve: EX-000053 was verified against installed engine generation sha256:d64ee12ee476fde8... but the running engine is sha256:d...\"",
+ "remediation_commands": [],
+ "repair_actions": [
+  {
+   "finding_key": "951519198641fb4b",
+   "rule_id": "closure_provenance_drift",
+   "subject_kind": "event",
+   "subject_id": "EX-000053",
+   "owner_class": "ENGINE_INTERNAL",
+   "operator_action_due": false,
+   "owner": null,
+   "linkage": null,
+   "route_code": "NO_OWNER",
+   "command": "saipen ticket add P1 \"closure_provenance_drift EX-000053\" --verify \"closure provenance does not resolve: EX-000053 was verified against installed engine generation sha256:d64ee12ee476fde8... but the running engine is sha256:d...\""
+  },
+  {
+   "finding_key": "76b48f23558dce11",
+   "rule_id": "unclassified",
+   "subject_kind": "global",
+   "subject_id": null,
+   "owner_class": "UNKNOWN",
+   "operator_action_due": false,
+   "owner": null,
+   "linkage": null,
+   "route_code": "OWNER_UNKNOWN",
+   "command": "saipen ticket add P1 \"FUTURE GATE: future gate FG-0046 names slice ticket T-1936, which is not on B...\" --verify \"FUTURE GATE: future gate FG-0046 names slice ticket T-1936, which is not on BOARD\""
+  },
+  {
+   "finding_key": "52e506b17ff19042",
+   "rule_id": "runtime_manifest_untracked",
+   "subject_kind": "path",
+   "subject_id": "tools/test_t10_submit_route.py",
+   "owner_class": "ENGINE_INTERNAL",
+   "operator_action_due": false,
+   "owner": null,
+   "linkage": null,
+   "route_code": "NO_OWNER",
+   "command": "saipen ticket add P1 \"runtime_manifest_untracked tools/test_t10_submit_route.py\" --verify \"runtime manifest names a file git does not track: tools/test_t10_submit_route.py -- it exists here and in no clone, so this home ships complete and every che...\""
+  },
+  {
+   "finding_key": "7e40107c99ffa968",
+   "rule_id": "runtime_manifest_untracked",
+   "subject_kind": "path",
+   "subject_id": "tools/test_t5_ratio_is_not_a_count.py",
+   "owner_class": "ENGINE_INTERNAL",
+   "operator_action_due": false,
+   "owner": null,
+   "linkage": null,
+   "route_code": "NO_OWNER",
+   "command": "saipen ticket add P1 \"runtime_manifest_untracked tools/test_t5_ratio_is_not_a_count.py\" --verify \"runtime manifest names a file git does not track: tools/test_t5_ratio_is_not_a_count.py -- it exists here and in no clone, so this home ships complete and ev...\""
+  },
+  {
+   "finding_key": "e54399132c79dc9d",
+   "rule_id": "coverage_gap",
+   "subject_kind": "global",
+   "subject_id": null,
+   "owner_class": "ENGINE_INTERNAL",
+   "operator_action_due": false,
+   "owner": null,
+   "linkage": null,
+   "route_code": "NO_OWNER",
+   "command": "saipen ticket add P1 \"coverage_gap\" --verify \"coverage gap -- 1 shipped document(s) are read by no check and declared exempt by none: tools/regression_t2089/home_extensions/subs/PROTOCOL.md. Put each und...\""
+  }
+ ],
+ "primary_action": "saipen ticket add P1 \"closure_provenance_drift EX-000053\" --verify \"closure provenance does not resolve: EX-000053 was verified against installed engine generation sha256:d64ee12ee476fde8... but the running engine is sha256:d...\"",
+ "repair_status": "ENGINEERING_REQUIRED",
+ "retry_blocked": false,
+ "retry_fingerprint": null,
+ "blocker_detail": "",
+ "diagnostic": {
+  "kind": "ENGINEERING_REQUIRED",
+  "owner": "SAIPEN conformance/remediation",
+  "receipt_id": "receipt-c03db428a1b2",
+  "findings_status": "complete",
+  "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair.",
+  "ownership": {
+   "groups": {
+    "ENGINE_INTERNAL": [
+     {
+      "rule_id": "closure_provenance_drift",
+      "subject_kind": "event",
+      "subject_id": "EX-000053",
+      "finding_key": "951519198641fb4b",
+      "owner_class": "ENGINE_INTERNAL",
+      "route": "saipen continue",
+      "operator_action_due": false,
+      "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+      "severity": "problem"
+     },
+     {
+      "rule_id": "runtime_manifest_untracked",
+      "subject_kind": "path",
+      "subject_id": "tools/test_t10_submit_route.py",
+      "finding_key": "52e506b17ff19042",
+      "owner_class": "ENGINE_INTERNAL",
+      "route": "saipen continue",
+      "operator_action_due": false,
+      "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+      "severity": "problem"
+     },
+     {
+      "rule_id": "runtime_manifest_untracked",
+      "subject_kind": "path",
+      "subject_id": "tools/test_t5_ratio_is_not_a_count.py",
+      "finding_key": "7e40107c99ffa968",
+      "owner_class": "ENGINE_INTERNAL",
+      "route": "saipen continue",
+      "operator_action_due": false,
+      "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+      "severity": "problem"
+     },
+     {
+      "rule_id": "coverage_gap",
+      "subject_kind": "global",
+      "subject_id": null,
+      "finding_key": "e54399132c79dc9d",
+      "owner_class": "ENGINE_INTERNAL",
+      "route": "saipen continue",
+      "operator_action_due": false,
+      "detail": "this protocol owes the repair; the safe move is engine Work, and no operator decision is required to start it",
+      "severity": "problem"
+     }
+    ],
+    "OPERATOR_DECISION": [],
+    "UNAVAILABLE_EXTERNAL": [],
+    "UNKNOWN": [
+     {
+      "rule_id": "unclassified",
+      "subject_kind": "global",
+      "subject_id": null,
+      "finding_key": "76b48f23558dce11",
+      "owner_class": "UNKNOWN",
+      "route": null,
+      "operator_action_due": false,
+      "detail": "ownership was not established from a known rule; treat as blocking and diagnose, never as engine-ownable or as a human action",
+      "severity": "problem"
+     }
+    ]
+   },
+   "operator_action_count": 0,
+   "engine_work_count": 4,
+   "external_count": 0,
+   "unknown_count": 1
+  },
+  "engine_work_count": 4,
+  "operator_action_count": 0,
+  "actions": [
+   {
+    "finding_key": "951519198641fb4b",
+    "rule_id": "closure_provenance_drift",
+    "subject_kind": "event",
+    "subject_id": "EX-000053",
+    "owner_class": "ENGINE_INTERNAL",
+    "operator_action_due": false,
+    "owner": null,
+    "linkage": null,
+    "route_code": "NO_OWNER",
+    "command": "saipen ticket add P1 \"closure_provenance_drift EX-000053\" --verify \"closure provenance does not resolve: EX-000053 was verified against installed engine generation sha256:d64ee12ee476fde8... but the running engine is sha256:d...\""
+   },
+   {
+    "finding_key": "76b48f23558dce11",
+    "rule_id": "unclassified",
+    "subject_kind": "global",
+    "subject_id": null,
+    "owner_class": "UNKNOWN",
+    "operator_action_due": false,
+    "owner": null,
+    "linkage": null,
+    "route_code": "OWNER_UNKNOWN",
+    "command": "saipen ticket add P1 \"FUTURE GATE: future gate FG-0046 names slice ticket T-1936, which is not on B...\" --verify \"FUTURE GATE: future gate FG-0046 names slice ticket T-1936, which is not on BOARD\""
+   },
+   {
+    "finding_key": "52e506b17ff19042",
+    "rule_id": "runtime_manifest_untracked",
+    "subject_kind": "path",
+    "subject_id": "tools/test_t10_submit_route.py",
+    "owner_class": "ENGINE_INTERNAL",
+    "operator_action_due": false,
+    "owner": null,
+    "linkage": null,
+    "route_code": "NO_OWNER",
+    "command": "saipen ticket add P1 \"runtime_manifest_untracked tools/test_t10_submit_route.py\" --verify \"runtime manifest names a file git does not track: tools/test_t10_submit_route.py -- it exists here and in no clone, so this home ships complete and every che...\""
+   },
+   {
+    "finding_key": "7e40107c99ffa968",
+    "rule_id": "runtime_manifest_untracked",
+    "subject_kind": "path",
+    "subject_id": "tools/test_t5_ratio_is_not_a_count.py",
+    "owner_class": "ENGINE_INTERNAL",
+    "operator_action_due": false,
+    "owner": null,
+    "linkage": null,
+    "route_code": "NO_OWNER",
+    "command": "saipen ticket add P1 \"runtime_manifest_untracked tools/test_t5_ratio_is_not_a_count.py\" --verify \"runtime manifest names a file git does not track: tools/test_t5_ratio_is_not_a_count.py -- it exists here and in no clone, so this home ships complete and ev...\""
+   },
+   {
+    "finding_key": "e54399132c79dc9d",
+    "rule_id": "coverage_gap",
+    "subject_kind": "global",
+    "subject_id": null,
+    "owner_class": "ENGINE_INTERNAL",
+    "operator_action_due": false,
+    "owner": null,
+    "linkage": null,
+    "route_code": "NO_OWNER",
+    "command": "saipen ticket add P1 \"coverage_gap\" --verify \"coverage gap -- 1 shipped document(s) are read by no check and declared exempt by none: tools/regression_t2089/home_extensions/subs/PROTOCOL.md. Put each und...\""
+   }
+  ],
+  "actions_total": 5
+ },
+ "status_block": {
+  "status": "CURRENT_FAIL",
+  "gate": "core",
+  "stale_reason": null,
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "retry_blocked": false,
+  "retry_fingerprint": null,
+  "receipt": {
+   "blocking_findings": {
+    "problem_count": 5,
+    "problems": [
+     {
+      "category": null,
+      "credential": false,
+      "detail": "closure provenance does not resolve: EX-000053 was verified against installed engine generation sha256:d64ee12ee476fde8... but the running engine is sha256:df039ef6c46770a9... -- the dependency moved (rollback or upgrade): re-resolve truthfully instead of inheriting a stale green -- a DONE line may record HOW it closed, never that something was published when it was not (CORE-003)",
+      "detail_hash": "3eee3592b2a09756",
+      "finding_key": "951519198641fb4b",
+      "rule_id": "closure_provenance_drift",
+      "severity": "problem",
+      "subject_id": "EX-000053",
+      "subject_kind": "event",
+      "subject_ref": null
+     },
+     {
+      "category": null,
+      "credential": false,
+      "detail": "FUTURE GATE: future gate FG-0046 names slice ticket T-1936, which is not on BOARD",
+      "detail_hash": "a93c194e5449485f",
+      "finding_key": "76b48f23558dce11",
+      "rule_id": "unclassified",
+      "severity": "problem",
+      "subject_id": null,
+      "subject_kind": "global",
+      "subject_ref": null
+     },
+     {
+      "category": null,
+      "credential": false,
+      "detail": "runtime manifest names a file git does not track: tools/test_t10_submit_route.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+      "detail_hash": "436ce4b2dafceba8",
+      "finding_key": "52e506b17ff19042",
+      "rule_id": "runtime_manifest_untracked",
+      "severity": "problem",
+      "subject_id": "tools/test_t10_submit_route.py",
+      "subject_kind": "path",
+      "subject_ref": null
+     },
+     {
+      "category": null,
+      "credential": false,
+      "detail": "runtime manifest names a file git does not track: tools/test_t5_ratio_is_not_a_count.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry",
+      "detail_hash": "666e4bea34216559",
+      "finding_key": "7e40107c99ffa968",
+      "rule_id": "runtime_manifest_untracked",
+      "severity": "problem",
+      "subject_id": "tools/test_t5_ratio_is_not_a_count.py",
+      "subject_kind": "path",
+      "subject_ref": null
+     },
+     {
+      "category": null,
+      "credential": false,
+      "detail": "coverage gap -- 1 shipped document(s) are read by no check and declared exempt by none: tools/regression_t2089/home_extensions/subs/PROTOCOL.md. Put each under a check or add it to EXEMPT with a reason",
+      "detail_hash": "5686b555b6d990f9",
+      "finding_key": "e54399132c79dc9d",
+      "rule_id": "coverage_gap",
+      "severity": "problem",
+      "subject_id": null,
+      "subject_kind": "global",
+      "subject_ref": null
+     }
+    ],
+    "ruleset_fingerprint": "9a47d608ed3f3a833348aaeeca5cd9e9076f3bf53b1ef92b6ade46958e3e3fec",
+    "ruleset_version": 2,
+    "status": "complete",
+    "warning_count": 8
+   },
+   "board_hash": "6ef6dcbb6c72aceb",
+   "canonical_next_command": null,
+   "content_hash": "a4cf2a017b1bda21",
+   "exit_code": 1,
+   "external_actions": [],
+   "gate": "core",
+   "install_fingerprint": "install-v1:a00090465b14c0426710ee2ecfa24a00af5499d3d19f064c86de8afb87f3f2fb",
+   "install_home": "C:\\Users\\vac34\\AppData\\Local\\saipen\\scheduled-source",
+   "kind": "conformance_receipt",
+   "log_hash": "614ae4a13729c6d0",
+   "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+   "receipt_id": "receipt-c03db428a1b2",
+   "remediation_commands": [],
+   "schema_version": 2,
+   "source_head": "dc39709c0c17a3272126c01a626ffcaa4176140b",
+   "source_tree_fingerprint": "git-delta-v1:9061b50df6e8bddd3ef00d7c57dd5c02ac5693efe7cc68acee1471cc45cdbde4",
+   "state_hash": "b716f59035477b66",
+   "timestamp_utc": "2026-11-19T04:41:19.089357Z",
+   "validator_protocol_version": "1",
+   "verdict": "FAIL"
+  },
+  "validator": {
+   "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+   "validator_protocol_version": "1",
+   "project_protocol_version": "8",
+   "gate": "core",
+   "source_head": "dc39709c0c17a3272126c01a626ffcaa4176140b",
+   "source_tree_fingerprint": "git-delta-v1:9061b50df6e8bddd3ef00d7c57dd5c02ac5693efe7cc68acee1471cc45cdbde4"
+  }
+ }
+}

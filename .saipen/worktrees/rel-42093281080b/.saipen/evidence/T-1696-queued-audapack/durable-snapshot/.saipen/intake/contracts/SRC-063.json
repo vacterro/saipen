@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-063:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reconcile AUDAPACK TODO queue: close T-214 as ALREADY_FIXED, externalize T-212/T-213/T-215 to SAIPEN owner, T-216 operator soak pending"
+    }
+  },
+  "derived_at": "2026-09-20T17:27:34Z",
+  "derived_from": "SRC-063",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "ba53814413ed933c7880309542e227350114d0971a801eb1dc9c1643f57df221"
+}

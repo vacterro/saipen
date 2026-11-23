@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-052:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-196 closed with verification evidence in LOG: PASS -- T-196 verification conf: high [target: T-196]: tests/test_widget_release_identity.py 12 PASS; tests/test_bridge_widget_delivery.py 6 PASS against the real GET /widget.user.js; tests/test_widget_update_probe.py 6 PASS; tests/test_browser_bridge_widget_integration.py 1 PASS; tests/test_widget_metadata_cache.py 8 PASS; tests/test_docs_consistency.py 11 PASS; tests/test_repository_hygiene.py 3",
+      "text": "AUDAPACK P0/P1 closure defect: Widget production bytes changed without userscript @version bump (0.0.59 == 0.0.59), so installed Tampermonkey may run old bytes; add version/SHA release manifest + drift regression, audit Bridge GET /widget.user.js bytes, add bounded update/install probe and real-ChatGPT acceptance record, rename synthetic integration test, correct T-194 lifecycle, verify OpenCode launch, then resume T-188",
+      "verification": "the Work this request created reached its own verification gate; see the T-196 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-196"
+    }
+  },
+  "schema_version": 1
+}

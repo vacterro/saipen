@@ -1,0 +1,7 @@
+test_diagnostic_fixture_executes_its_real_single_failure (test_t1847_fixture_contract.FixtureContract.test_diagnostic_fixture_executes_its_real_single_failure) ... ok
+test_marker_fixture_reaches_and_releases_the_real_owned_gate (test_t1847_fixture_contract.FixtureContract.test_marker_fixture_reaches_and_releases_the_real_owned_gate) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.586s
+
+OK

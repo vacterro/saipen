@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "format": "unittest",
+  "timeout": 120,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_response_delivery.py",
+    "-k",
+    "CompletedPartDelivery",
+    "-v"
+  ],
+  "context": [
+    "tools",
+    "saipen",
+    "bootstrap",
+    "extensions",
+    "tests/scenarios",
+    "tests/fixtures"
+  ],
+  "oracle_files": [
+    "tools/test_response_delivery.py",
+    "tools/test_operator_origin_support.py",
+    "tools/test_opencode_adapter.py"
+  ],
+  "subject_files": [
+    "extensions/adapters/opencode/saipen-guard.js"
+  ],
+  "before": {
+    "extensions/adapters/opencode/saipen-guard.js": ".saipen/evidence/T-1844-operator-origin/node-session-prefix/extensions/adapters/opencode/saipen-guard.js"
+  }
+}

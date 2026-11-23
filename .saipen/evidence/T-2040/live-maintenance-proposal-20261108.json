@@ -1,0 +1,6 @@
+{
+  "ok": false,
+  "code": "PROPOSAL_UNAVAILABLE",
+  "detail": "ValueError: an existing active goal is required",
+  "scope": "continuous_maintenance"
+}

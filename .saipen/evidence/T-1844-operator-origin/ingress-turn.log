@@ -1,0 +1,17 @@
+======================================================================
+FAIL: test_identical_trusted_bytes_have_different_authority (test_ingress_authority.IngressAuthorityTests.test_identical_trusted_bytes_have_different_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 93, in test_identical_trusted_bytes_have_different_authority
+    self.assertEqual(state(root)["task"], second)
+AssertionError: 'T-1' != 'T-2'
+- T-1
+?   ^
++ T-2
+?   ^
+
+
+----------------------------------------------------------------------
+Ran 13 tests in 10.635s
+
+FAILED (failures=1)

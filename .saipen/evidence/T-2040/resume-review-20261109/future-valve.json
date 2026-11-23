@@ -1,0 +1,187 @@
+{
+  "routed": {
+    "ok": true,
+    "action": "saipen status",
+    "reason": "maintain",
+    "stop_reason": "WORK_ELIGIBLE",
+    "terminal_classification": "WORK_ELIGIBLE",
+    "idle_classification": "WORK_ELIGIBLE",
+    "primary_blocker": null,
+    "unresolved_audit_count": 0,
+    "next_exact_action": "saipen status",
+    "externally_blocked": [],
+    "operator_required": [],
+    "future_gated": [],
+    "detail": "executable queue is empty; complete discovery and goal verification are not proven",
+    "work_exhaustion": {
+      "schema_version": 2,
+      "status": "WORK_ELIGIBLE",
+      "legacy_status": "WORK_ELIGIBLE",
+      "source_generation": "1",
+      "sources": [
+        {
+          "source_name": "active_work",
+          "source_generation": "1",
+          "last_checked_generation": "1",
+          "eligibility_result": "CLEAN_VERIFIED",
+          "authorized_actions": [],
+          "exact_blocker": null,
+          "next_recheck_condition": "new evidence arrives",
+          "checked": true
+        },
+        {
+          "source_name": "canonical_recovery",
+          "source_generation": "1",
+          "last_checked_generation": null,
+          "eligibility_result": "NOT_CHECKED",
+          "authorized_actions": [],
+          "exact_blocker": "provider result not supplied",
+          "next_recheck_condition": "provider supplies current evidence",
+          "checked": false
+        },
+        {
+          "source_name": "actionable_todo",
+          "source_generation": "1",
+          "last_checked_generation": "1",
+          "eligibility_result": "CLEAN_VERIFIED",
+          "authorized_actions": [],
+          "exact_blocker": null,
+          "next_recheck_condition": "new evidence arrives",
+          "checked": true
+        },
+        {
+          "source_name": "unresolved_source",
+          "source_generation": "1",
+          "last_checked_generation": null,
+          "eligibility_result": "NOT_CHECKED",
+          "authorized_actions": [],
+          "exact_blocker": "provider result not supplied",
+          "next_recheck_condition": "provider supplies current evidence",
+          "checked": false
+        },
+        {
+          "source_name": "unconsumed_audit_inbox",
+          "source_generation": "1",
+          "last_checked_generation": null,
+          "eligibility_result": "NOT_CHECKED",
+          "authorized_actions": [],
+          "exact_blocker": "provider result not supplied",
+          "next_recheck_condition": "provider supplies current evidence",
+          "checked": false
+        },
+        {
+          "source_name": "release_obligations",
+          "source_generation": "1",
+          "last_checked_generation": "1",
+          "eligibility_result": "CLEAN_VERIFIED",
+          "authorized_actions": [],
+          "exact_blocker": null,
+          "next_recheck_condition": "new evidence arrives",
+          "checked": true
+        },
+        {
+          "source_name": "future_gates",
+          "source_generation": "1",
+          "last_checked_generation": "1",
+          "eligibility_result": "WORK_AVAILABLE",
+          "authorized_actions": [
+            "saipen future promote FG-0001"
+          ],
+          "exact_blocker": null,
+          "next_recheck_condition": "new evidence arrives",
+          "checked": true
+        },
+        {
+          "source_name": "hunt_findings",
+          "source_generation": "1",
+          "last_checked_generation": null,
+          "eligibility_result": "NOT_CHECKED",
+          "authorized_actions": [],
+          "exact_blocker": "provider result not supplied",
+          "next_recheck_condition": "provider supplies current evidence",
+          "checked": false
+        },
+        {
+          "source_name": "improve_candidates",
+          "source_generation": "1",
+          "last_checked_generation": null,
+          "eligibility_result": "BLOCKED_AUTHORITY",
+          "authorized_actions": [],
+          "exact_blocker": "current continuous maintenance grant is not proven",
+          "next_recheck_condition": "authenticated grant restored within its scope",
+          "checked": false
+        },
+        {
+          "source_name": "external_forensics",
+          "source_generation": "1",
+          "last_checked_generation": null,
+          "eligibility_result": "NOT_CHECKED",
+          "authorized_actions": [],
+          "exact_blocker": "provider result not supplied",
+          "next_recheck_condition": "provider supplies current evidence",
+          "checked": false
+        },
+        {
+          "source_name": "conformance_debt",
+          "source_generation": "1",
+          "last_checked_generation": null,
+          "eligibility_result": "NOT_CHECKED",
+          "authorized_actions": [],
+          "exact_blocker": "provider result not supplied",
+          "next_recheck_condition": "provider supplies current evidence",
+          "checked": false
+        },
+        {
+          "source_name": "persistent_goals",
+          "source_generation": "1",
+          "last_checked_generation": null,
+          "eligibility_result": "NOT_CHECKED",
+          "authorized_actions": [],
+          "exact_blocker": "goal inventory or evaluation is incomplete",
+          "next_recheck_condition": "provider supplies current evidence",
+          "checked": false
+        }
+      ],
+      "exhausted": false,
+      "verified_exhausted": false,
+      "no_work_available": false,
+      "all_checked": false,
+      "blocked_sources": [
+        "improve_candidates"
+      ],
+      "blocked_obligations": [],
+      "certificate_errors": []
+    },
+    "outcome_truth": {
+      "queue_status": "QUEUE_DRAINED",
+      "campaign_status": "CAMPAIGN_WAIT_AUTHORITY",
+      "objective_status": "OBJECTIVE_UNVERIFIED",
+      "publication_status": "RELEASE_PENDING",
+      "publication_details": {
+        "tickets": [],
+        "diagnostics": []
+      },
+      "verification_status": "NOT_CHECKED",
+      "next_eligible_action": "saipen status",
+      "next_wake_condition": "operator grants renewed campaign authority or continued objective",
+      "lanes": {
+        "RELEASE_LANE": "CLEAR",
+        "IMPLEMENTATION_LANE": "NO_WORK",
+        "DISCOVERY_LANE": "AUTHORITY_REQUIRED",
+        "PUBLICATION_LANE": "PENDING",
+        "CAMPAIGN": "WAIT_AUTHORITY"
+      },
+      "release_lane": "CLEAR",
+      "implementation_lane": "NO_WORK",
+      "discovery_lane": "AUTHORITY_REQUIRED",
+      "publication_lane": "PENDING",
+      "campaign_lane": "WAIT_AUTHORITY",
+      "summary": "QUEUE: QUEUE_DRAINED | OBJECTIVE: OBJECTIVE_UNVERIFIED | CAMPAIGN: CAMPAIGN_WAIT_AUTHORITY | PUBLICATION: RELEASE_PENDING"
+    },
+    "queue_status": "QUEUE_DRAINED",
+    "campaign_status": "CAMPAIGN_WAIT_AUTHORITY",
+    "objective_status": "OBJECTIVE_UNVERIFIED"
+  },
+  "dispatch_class": "boundary",
+  "ticket_count": 0
+}

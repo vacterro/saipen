@@ -118,7 +118,12 @@ class TestSailearnConsumer(unittest.TestCase):
             self.assertEqual(res["reason"], "SAILEARN_MODULE_UNAVAILABLE")
 
     def test_soft_fallback_on_missing_index(self) -> None:
-        with mock.patch("saipen_engine.sailearn_consumer.resolve_index", return_value=None):
+        # The module's presence is host state, not this test's subject: pin it
+        # so the assertion is about the index lookup alone.
+        with (
+            mock.patch("saipen_engine.sailearn_consumer._ensure_sailearn_imported", return_value=True),
+            mock.patch("saipen_engine.sailearn_consumer.resolve_index", return_value=None),
+        ):
             stat = sc.status()
             self.assertTrue(stat["ok"])
             self.assertFalse(stat["available"])

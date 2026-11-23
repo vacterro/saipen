@@ -1,0 +1,5 @@
+fix(host): isolate Claude configuration profiles
+
+Bind hook proof to the host process's profile so another profile's
+current hook cannot grant admission. Scope repair and diagnostics to
+the selected configuration directory while preserving credentials.

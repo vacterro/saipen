@@ -1,0 +1,1 @@
+{"members":[{"created_at":"2026-10-16T10:16:37Z","manifest_sha256":"4445be36e086ac7d556f58953931514522bf165f8ad396316db58fe4576b5bfd","name":"checkpoint-a87db750c6fe41dbbdf7259055612d55","operation":"checkpoint","progress_sha256":null,"status":"COMMITTED"}],"root":"6411578b59a8521e43f8217f617d25d9ff71ae6460e30d863a02420ed0afca90","schema_version":3,"segment_id":"active"}

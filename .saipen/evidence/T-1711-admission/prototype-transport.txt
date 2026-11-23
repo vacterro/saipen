@@ -1,0 +1,5 @@
+Initial disposable prototype attempt exited 1: Oracle prototype boundary changed.
+The helper matched LF text against decoded CRLF bytes. No production bytes
+changed, and no prototype success or product-failure verdict was recorded.
+The corrected helper uses universal-newline reads for matching and retains
+exact original bytes for restoration. This is a scratch instrument correction.

@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "code": "RESPONSE_RENDERED",
+  "text": "STATUS: DONE\nRESULT: Töö säilitatud\nBLOCKER: QUEUED_SOURCE_INVALID -- unreadable queued Source\nNEXT EXACT ACTION: NONE\nVALIDATION: NOT_RUN",
+  "reason": "final",
+  "emit": true
+}

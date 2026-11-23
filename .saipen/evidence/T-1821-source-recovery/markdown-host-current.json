@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "scope": "Actual installed Streamdown component, server-rendered HTML; no desktop/input claim",
+  "streamdownVersion": "2.5.0",
+  "reactVersion": "19.2.7",
+  "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\zcode\\node_modules\\streamdown\\dist\\index.js",
+  "engineSha256": "2ed278c7390c627ae66a71245e15bcd370b14f9afe1ceb8eb917c2c06558aead",
+  "fields": 5,
+  "before": {
+    "html": "<div class=\"space-y-4 whitespace-normal [&amp;&gt;*:first-child]:mt-0 [&amp;&gt;*:last-child]:mb-0\"><p>STATUS: BLOCKED\nRESULT: Controlled rendering probe fixture\nBLOCKER: PROBE_FIXTURE -- rendering only\nNEXT EXACT ACTION: NONE\nVALIDATION: NOT_RUN</p></div>",
+    "hardBreaks": 0
+  },
+  "after": {
+    "html": "<div class=\"space-y-4 whitespace-normal [&amp;&gt;*:first-child]:mt-0 [&amp;&gt;*:last-child]:mb-0\"><p>STATUS: BLOCKED<br/>\nRESULT: Controlled rendering probe fixture<br/>\nBLOCKER: PROBE_FIXTURE -- rendering only<br/>\nNEXT EXACT ACTION: NONE<br/>\nVALIDATION: NOT_RUN</p></div>",
+    "hardBreaks": 4
+  }
+}

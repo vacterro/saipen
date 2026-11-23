@@ -1,0 +1,43 @@
+520                 f"(found {signer!r})",
+521                 host_pid=host.pid,
+522                 host_image=host.image,
+523                 hook_pid=hook.pid,
+524                 hook_root=hook_root,
+525             )
+526 
+527     # 4. The hook's own bytes are the shipped ones.
+528     script = _script(hook_argv) or ""
+529     try:
+530         current = artifact_current(script) if artifact_current else True
+531     except Exception:
+532         current = False
+533     if not current:
+534         return refuse(
+535             REASON_HOOK_ARTIFACT_MISMATCH,
+536             "the installed hook is not the shipped artifact of this SAIPEN generation",
+537             host_pid=host.pid,
+538             host_image=host.image,
+539             hook_pid=hook.pid,
+540             hook_root=hook_root,
+541         )
+542     return Proof(
+543         ok=True,
+544         detail="the request came from the host application's own hook invocation",
+545         host_pid=host.pid,
+546         host_image=host.image,
+547         host_signer=signer,
+548         hook_pid=hook.pid,
+549         hook_root=hook_root,
+550         shells=shells,
+551         chain=view,
+552         profile=(norm_path(selected_hook).rsplit("/", 2)[0] if policy.profile_hook else None),
+553     )
+554 
+555 
+556 __all__ = [
+557     "DEFAULT_ENGINE_ENTRIES",
+558     "DEFAULT_SHELLS",
+559     "HOOK_BOOTSTRAP",
+560     "REASON_HOOK_ARTIFACT_MISMATCH",
+561     "REASON_HOOK_CHAIN_UNRECOGNIZED",
+562     "REASON_HOOK_HOST_MISMATCH",

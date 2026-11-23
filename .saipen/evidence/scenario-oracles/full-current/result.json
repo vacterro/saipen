@@ -1,0 +1,12 @@
+{
+  "verdict": "PASS",
+  "exit_code": 0,
+  "completed_groups": 44,
+  "declared_groups": 44,
+  "checks": 1354,
+  "fingerprint": "54ad859af386ae71ba05cd6bd0368cad8fa11b18c546eee41f958f1b56ccb7a9",
+  "snapshot_unchanged": true,
+  "live_source_unchanged": true,
+  "output_sha256": "85b695fddcdf9b87ceef4ed3d5453b8793ef853f09f08e229c8e9fa954fb3a31",
+  "seconds": 1999.906
+}

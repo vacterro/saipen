@@ -1,0 +1,37 @@
+{
+  "scope": "preserved exact byte inventory and copy observations only",
+  "executed_suite": false,
+  "same_frozen_windows_linux_bytes_proved": true,
+  "portable_inventory": {
+    "files_or_links": 126351,
+    "bytes": 1622323227,
+    "sha256": "97ba952d4921486f74101eea92cb7cd4d8b3490762410e67e85e1717ac88db78"
+  },
+  "windows_private_clone_exact": true,
+  "all_owned_roots_removed": true,
+  "windows_stages": {
+    "first_copy_wall_s": 54.618479,
+    "private_worker_clone_wall_s": 51.302679,
+    "discovery_probe_wall_s": 3.440271
+  },
+  "linux_stages": {
+    "first_copy_wall_s": 135.860405
+  },
+  "linux_measurement_completed": false,
+  "linux_limitation": "Legacy host-dependent inventory order refused before Linux worker clone/discovery. Independently computed portable digest proves the completed first copy's bytes; it does not turn the unfinished experiment into PASS.",
+  "source_copy_errors": [
+    {
+      "type": "CalledProcessError",
+      "detail": "Command '['wsl.exe', '-d', 'saipen-ubuntu', '--exec', 'python3', '-B', '/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1829-cost-collapse/measure_sandbox.py', '--output', '/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1829-cost-collapse/sandbox-paired-corrected-20261020-linux.json', '--frozen', '/mnt/v/_TEMP_/saipen-core-unit-gusph7pq/project', '--expected', '/mnt/v/___VAC/__K/__CODE/_AI_STUFF_AGENTIC/_SAIPEN/.saipen/evidence/T-1829-cost-collapse/sandbox-paired-corrected-20261020.json']' returned non-zero exit status 1."
+    },
+    {
+      "type": "RuntimeError",
+      "detail": "native copy is not the same frozen full input"
+    }
+  ],
+  "evidence": [
+    "sandbox-paired-corrected-20261020.json",
+    "sandbox-paired-corrected-20261020-linux.json",
+    "sandbox-portable-inventory-20261020.json"
+  ]
+}

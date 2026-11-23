@@ -1,0 +1,8 @@
+{
+  "saipen/REGISTRY.json": "5ff0e325fecfeedb851bf62b4d1429cd1f654ea5adf21a26214fcd78de64c541",
+  "saipen/CLI_OPTION_VALUES.json": "c219737effeb66a4219eebc7c38052b427ec0f0a9f1125a00186eeba3b44e148",
+  "tools/saipen.py": "027be6d788532f44ed5663c69ab3835df9b9af3042602d33233541b19200c909",
+  "tools/saipen_engine/commands.py": "1b13f6887266e468237d7dfd098ffce1c53b827cc9b3b9301293f7530f4ac35b",
+  "tools/saipen_engine/command_effects.py": "612c28ae29bec853068acbee73c29737878e620f8b3c7f1c0548a4aa4c7c3417",
+  "tools/test_t1631_option_values.py": "7f80ddeb84578b48da100484848cc0ee82e4dbae1424aa2704fda6ecf4530bbb"
+}

@@ -1,0 +1,138 @@
+{
+  "verdict": "FAIL",
+  "live_subject_unchanged": true,
+  "unchanged_verifier": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+  "red_names_repeat_identically": true,
+  "runs": [
+    {
+      "subject": "good",
+      "repeat": 1,
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "tools.test_t1705_lifecycle_write_preflight",
+        "-q"
+      ],
+      "exit_code": 1,
+      "ran": 0,
+      "failures": [],
+      "errors": [
+        "setUpClass (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests)"
+      ],
+      "verifier_sha256": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+      "implementation": {
+        "tools/saipen_engine/guard_events.py": "d800ed9425c3d5450eb4d024fceb7e60587b57ec8bc989502c2116c9fc17be42",
+        "tools/saipen_engine/admission.py": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+        "extensions/adapters/opencode/saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2"
+      },
+      "output": ".saipen/evidence/T-1706-hot-switch/regression-good-1.txt",
+      "output_sha256": "f270a80655697976094f1ce2857228905ca068547925d0ad6d40fe179977dbcb"
+    },
+    {
+      "subject": "bad",
+      "repeat": 1,
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "tools.test_t1705_lifecycle_write_preflight",
+        "-q"
+      ],
+      "exit_code": 1,
+      "ran": 0,
+      "failures": [],
+      "errors": [
+        "setUpClass (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests)"
+      ],
+      "verifier_sha256": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+      "implementation": {
+        "tools/saipen_engine/guard_events.py": "403ba384450a9cdb4f484fc56a98a444dedfff9f80a717fb81c6749043223a2d",
+        "tools/saipen_engine/admission.py": "6c682c7149545ce8474d830a525de66adc48fd5a1e357e840e9fb0a80330957b",
+        "extensions/adapters/opencode/saipen-guard.js": "eb30a498ae86ecef6234f18b956403bf1fbc64dab0be8056ae52f7e8973e32e8"
+      },
+      "output": ".saipen/evidence/T-1706-hot-switch/regression-bad-1.txt",
+      "output_sha256": "594aa87b4f704516087a15b9260ac31d012789691d114914ab88e8ca77becb34"
+    },
+    {
+      "subject": "bad",
+      "repeat": 2,
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "tools.test_t1705_lifecycle_write_preflight",
+        "-q"
+      ],
+      "exit_code": 1,
+      "ran": 0,
+      "failures": [],
+      "errors": [
+        "setUpClass (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests)"
+      ],
+      "verifier_sha256": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+      "implementation": {
+        "tools/saipen_engine/guard_events.py": "403ba384450a9cdb4f484fc56a98a444dedfff9f80a717fb81c6749043223a2d",
+        "tools/saipen_engine/admission.py": "6c682c7149545ce8474d830a525de66adc48fd5a1e357e840e9fb0a80330957b",
+        "extensions/adapters/opencode/saipen-guard.js": "eb30a498ae86ecef6234f18b956403bf1fbc64dab0be8056ae52f7e8973e32e8"
+      },
+      "output": ".saipen/evidence/T-1706-hot-switch/regression-bad-2.txt",
+      "output_sha256": "594aa87b4f704516087a15b9260ac31d012789691d114914ab88e8ca77becb34"
+    },
+    {
+      "subject": "restored",
+      "repeat": 1,
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "tools.test_t1705_lifecycle_write_preflight",
+        "-q"
+      ],
+      "exit_code": 1,
+      "ran": 0,
+      "failures": [],
+      "errors": [
+        "setUpClass (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests)"
+      ],
+      "verifier_sha256": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+      "implementation": {
+        "tools/saipen_engine/guard_events.py": "d800ed9425c3d5450eb4d024fceb7e60587b57ec8bc989502c2116c9fc17be42",
+        "tools/saipen_engine/admission.py": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+        "extensions/adapters/opencode/saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2"
+      },
+      "output": ".saipen/evidence/T-1706-hot-switch/regression-restored-1.txt",
+      "output_sha256": "9ba1b625fc689132180f4b3f8feefd027744e526048a1676e97f9d9a5c5182ba"
+    },
+    {
+      "subject": "restored",
+      "repeat": 2,
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "unittest",
+        "tools.test_t1705_lifecycle_write_preflight",
+        "-q"
+      ],
+      "exit_code": 1,
+      "ran": 0,
+      "failures": [],
+      "errors": [
+        "setUpClass (test_t1705_lifecycle_write_preflight.LifecycleWritePreflightTests)"
+      ],
+      "verifier_sha256": "c43f74d3a6e458efb0a71184a8b9882ab7cdaaff41ba78a0d7ca2d15bb60d508",
+      "implementation": {
+        "tools/saipen_engine/guard_events.py": "d800ed9425c3d5450eb4d024fceb7e60587b57ec8bc989502c2116c9fc17be42",
+        "tools/saipen_engine/admission.py": "777ac7c1987255349586b3856adddd7b42c671038e7e4c8fd7f8519367407622",
+        "extensions/adapters/opencode/saipen-guard.js": "e8b8a49ef66da7f30dd385e9137509245b0582855951ce2ef54726ae96a53de2"
+      },
+      "output": ".saipen/evidence/T-1706-hot-switch/regression-restored-2.txt",
+      "output_sha256": "f4473c9d54c797e368de96970391678d94a7da2904c57e0c3973c14d5c9c3b65"
+    }
+  ]
+}

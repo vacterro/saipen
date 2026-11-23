@@ -1,0 +1,115 @@
+{
+  "database": "C:\\Users\\vac34\\.zcode\\cli\\db\\db.sqlite",
+  "query_only": true,
+  "session_id": "sess_5c7f302d-22d6-478f-b6a3-1aee5e8a3850",
+  "query_window_ms": [
+    1791536000000,
+    1791540600000
+  ],
+  "parts_scanned": 668,
+  "records": [
+    {
+      "part_id": "part_mv0qjjfw_83519ef5-4ff7-4c9a-8983-698bec643e6e",
+      "message_id": "msg_mv0qihc9_cc288c2a-ff34-4973-8f07-e77414ef8bba",
+      "timestamp_ms": 1791536444204,
+      "tool": "Bash",
+      "status": "completed",
+      "sha256": "71f90650680abbf541c8665b1176ce415451717955479a52c9bd13f702184ace",
+      "path": "zcode-part_mv0qjjfw_83519ef5-4ff7-4c9a-8983-698bec643e6e.json",
+      "input": {
+        "command": "saipen continue --json",
+        "description": "SAIPEN continue to get current action"
+      },
+      "message_metadata": {
+        "role": "assistant",
+        "agent": "zcode-agent",
+        "mode": "yolo",
+        "finish": "tool-calls"
+      }
+    },
+    {
+      "part_id": "part_mv0sw36f_853504c2-4fdb-471d-954d-f039baf6667f",
+      "message_id": "msg_mv0svwm8_9503b0db-7962-44c4-997b-20b76331d871",
+      "timestamp_ms": 1791540388887,
+      "tool": "Edit",
+      "status": "error",
+      "sha256": "4c3d0b516c32387f40b26d0829e841178be9782cd2116c40f2127e09d8ebfe76",
+      "path": "zcode-part_mv0sw36f_853504c2-4fdb-471d-954d-f039baf6667f.json",
+      "input": {
+        "replace_all": false,
+        "file_path": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK\\.saipen/STATE.md",
+        "old_string": "phase: DONE\ntask: T-299\nnext_action: idle",
+        "new_string": "phase: DONE\ntask: T-299\nnext_action: idle"
+      },
+      "message_metadata": {
+        "role": "assistant",
+        "agent": "zcode-agent",
+        "mode": "yolo",
+        "finish": "tool-calls"
+      }
+    },
+    {
+      "part_id": "part_mv0sw36i_859ef69a-f26a-4e72-a1a7-7051851bd6d0",
+      "message_id": "msg_mv0svwm8_9503b0db-7962-44c4-997b-20b76331d871",
+      "timestamp_ms": 1791540388890,
+      "tool": "Edit",
+      "status": "error",
+      "sha256": "9ecd9077d90eda98b70c31017dd0587250f6cd09bb166e931fbd42c7884bb5ff",
+      "path": "zcode-part_mv0sw36i_859ef69a-f26a-4e72-a1a7-7051851bd6d0.json",
+      "input": {
+        "replace_all": false,
+        "file_path": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK\\.saipen/LOG.md",
+        "old_string": "# Log",
+        "new_string": "# Log\n- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no longer writes canonical store (setVerifiedProjectArchive removed from manualArchiveRecordSent; receipt calls only recordSendObservation + bounded background refreshProjectArchiveMetadata); P1-B failed attachment-only Send + manual tile removal + delayed history no longer fabricates accepted Send (noteComposerAttachmentRemoved + capture-phase click/keydown listeners + tile-count check in retireStaleManualSendIntent for React remount). RED tests C1-C10 (P1-A) and D1-D11 (P1-B) proven RED pre-fix, GREEN after. Full widget suite 772/772 PASS. Targeted gates: w6-006 85/85, w6-001 50/50, w3-002 14/14, w7-011 7/7, test_bridge_project_archive.py 30/30. Release ledger 0.1.07 sha 5efa3a49fee7bdef83f63ecfa3324e2746eb12b874baad4e1bba03edd03a09fa. Evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md"
+      },
+      "message_metadata": {
+        "role": "assistant",
+        "agent": "zcode-agent",
+        "mode": "yolo",
+        "finish": "tool-calls"
+      }
+    },
+    {
+      "part_id": "part_mv0swc66_db3f560a-e71d-48a4-aaa5-da6ca8441c20",
+      "message_id": "msg_mv0sw5eb_46fbbbc6-3e9b-4c22-97e7-f797c4350df2",
+      "timestamp_ms": 1791540400542,
+      "tool": "Edit",
+      "status": "completed",
+      "sha256": "97ef8121962150fff646d93c67b81698c2423c7188580b4bd836d2e8abf316fc",
+      "path": "zcode-part_mv0swc66_db3f560a-e71d-48a4-aaa5-da6ca8441c20.json",
+      "input": {
+        "replace_all": false,
+        "file_path": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK\\.saipen/LOG.md",
+        "old_string": "# Log\n",
+        "new_string": "# Log\n- 09.10.26 [T-299] [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt no longer writes canonical store (setVerifiedProjectArchive removed from manualArchiveRecordSent; receipt calls only recordSendObservation + bounded background refreshProjectArchiveMetadata); P1-B failed attachment-only Send + manual tile removal + delayed history no longer fabricates accepted Send (noteComposerAttachmentRemoved + capture-phase click/keydown listeners + tile-count check in retireStaleManualSendIntent for React remount). RED tests C1-C10 (P1-A) and D1-D11 (P1-B) proven RED pre-fix, GREEN after. Full widget suite 772/772 PASS. Targeted gates: w6-006 85/85, w6-001 50/50, w3-002 14/14, w7-011 7/7, test_bridge_project_archive.py 30/30. Release ledger 0.1.07 sha 5efa3a49fee7bdef83f63ecfa3324e2746eb12b874baad4e1bba03edd03a09fa. Evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md\n"
+      },
+      "message_metadata": {
+        "role": "assistant",
+        "agent": "zcode-agent",
+        "mode": "yolo",
+        "finish": "tool-calls"
+      }
+    },
+    {
+      "part_id": "part_mv0swm7x_68117fba-8530-4461-9a2f-32c6139e6a61",
+      "message_id": "msg_mv0swfxv_b7d34899-854f-4cd3-9101-462c8d0fc55a",
+      "timestamp_ms": 1791540413565,
+      "tool": "Edit",
+      "status": "completed",
+      "sha256": "7bee6bbded6d9565a7d734d76dc99eb280ad0dbb26eea1520abb1d4fd56bf997",
+      "path": "zcode-part_mv0swm7x_68117fba-8530-4461-9a2f-32c6139e6a61.json",
+      "input": {
+        "replace_all": false,
+        "file_path": "V:\\___VAC\\__K\\__CODE\\_PY\\_AUDAPACK\\.saipen/BOARD.md",
+        "old_string": "## DONE\n- [x] T-299 [P2] Audit-bundle packaging",
+        "new_string": "## DONE\n- [x] T-299 [P1] Widget 0.1.07 trust-boundary hardening: P1-A receipt must not overwrite canonical archive (setVerifiedProjectArchive removed from manualArchiveRecordSent, receipt writes zero canonical-store writes), P1-B rejected attachment-only Send + manual removal + delayed history must not fabricate accepted Send (noteComposerAttachmentRemoved + capture-phase click/keydown listeners + tile-count check in retireStaleManualSendIntent for React remount) | verify: w7-016 110/110 (21 new C1-C10 D1-D11 RED->GREEN), full widget suite 772/772 PASS, w6-006 85/85, w6-001 50/50, w3-002 14/14, w7-011 7/7, test_bridge_project_archive.py 30/30, release contracts 21/21 PASS, update_widget_release.py --check OK 0.1.07 5efa3a49fee7bdef83f63ecfa3324e2746eb12b874baad4e1bba03edd03a09fa | evidence: .saipen/evidence/T-299-widget-trust-boundary-p1a-p1b.md | owner: buffy | claim_time: 2026-10-09T05:00:00Z | closure_mode: own_patch\n- [x] T-299 [P2] Audit-bundle packaging"
+      },
+      "message_metadata": {
+        "role": "assistant",
+        "agent": "zcode-agent",
+        "mode": "yolo",
+        "finish": "tool-calls"
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "method": "Remove only the two-line test-helper normalization in memory; run all original operator tests",
+  "tests_run": 16,
+  "failures": [
+    "test_t1627_operator_question.QuestionAuthorityTests.test_a_true_wait_allows_the_exact_canonical_operator_question",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_cold_real_project_route_wins_over_an_absent_provider_session",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_incompatible_executor_uses_existing_failover_and_keeps_work",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_real_claude_pretool_question_is_refused_before_ui_delivery",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_real_opencode_question_hook_is_refused_before_ui_delivery",
+    "test_t1627_operator_question.QuestionAuthorityTests.test_real_wait_projection_admits_only_its_owned_operator_action"
+  ],
+  "errors": [],
+  "skipped": [],
+  "matches_historical_six": true
+}

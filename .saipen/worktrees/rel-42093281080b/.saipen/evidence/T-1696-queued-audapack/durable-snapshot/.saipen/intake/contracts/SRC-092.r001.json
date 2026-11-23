@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-092:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Fix Wintage PACK production regression: reproduce stale SAIPEN manifest failure, repair canonical launcher discovery without weakening the authority gate, expose exact failure in UX, pass regression matrix"
+    }
+  },
+  "derived_at": "2026-09-25T11:18:32Z",
+  "derived_from": "SRC-092",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "fc5f3bed13cea1a183511afed2127b847d96627cfd024dee4e01765bab291e30"
+}

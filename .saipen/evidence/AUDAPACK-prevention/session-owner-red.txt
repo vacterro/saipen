@@ -1,0 +1,15 @@
+test_the_owner_session_mutates_its_own_work (test_session_binding.UnseatedMutationTests.test_the_owner_session_mutates_its_own_work) ... 
+  test_the_owner_session_mutates_its_own_work (test_session_binding.UnseatedMutationTests.test_the_owner_session_mutates_its_own_work) (tool='bash') ... FAIL
+
+======================================================================
+FAIL: test_the_owner_session_mutates_its_own_work (test_session_binding.UnseatedMutationTests.test_the_owner_session_mutates_its_own_work) (tool='bash')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_session_binding.py", line 139, in test_the_owner_session_mutates_its_own_work
+    self.assertTrue(_verdict(self.project, tool, OWNER)["ok"])
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 1 test in 1.095s
+
+FAILED (failures=1)

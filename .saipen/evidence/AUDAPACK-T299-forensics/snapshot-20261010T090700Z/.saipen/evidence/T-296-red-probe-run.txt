@@ -1,0 +1,44 @@
+✖ T-296 RED A1: stable UUID chat, empty DOM, delayed old history fabricates nothing (368.5983ms)
+✖ T-296 RED A2: persisted authoritative Send survives a different old turn (301.3295ms)
+✖ T-296 RED B: idle visible widget validates ZIP metadata within TTL (274.3922ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1005.9317
+
+✖ failing tests:
+
+test at tests\widget\w7-017-t296-red-probe.test.js:11:1
+✖ T-296 RED A1: stable UUID chat, empty DOM, delayed old history fabricates nothing (368.5983ms)
+  TypeError: api.clearSendTrackerStore is not a function
+      at TestContext.<anonymous> (V:\_TEMP_\redcheck\tests\widget\w7-017-t296-red-probe.test.js:13:7)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.start (node:internal/test_runner/test:1096:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17)
+
+test at tests\widget\w7-017-t296-red-probe.test.js:29:1
+✖ T-296 RED A2: persisted authoritative Send survives a different old turn (301.3295ms)
+  TypeError: api.setSendTrackerEntry is not a function
+      at TestContext.<anonymous> (V:\_TEMP_\redcheck\tests\widget\w7-017-t296-red-probe.test.js:35:7)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)
+
+test at tests\widget\w7-017-t296-red-probe.test.js:53:1
+✖ T-296 RED B: idle visible widget validates ZIP metadata within TTL (274.3922ms)
+  TypeError: api.clearVerifiedProjectArchives is not a function
+      at TestContext.<anonymous> (V:\_TEMP_\redcheck\tests\widget\w7-017-t296-red-probe.test.js:58:7)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7)

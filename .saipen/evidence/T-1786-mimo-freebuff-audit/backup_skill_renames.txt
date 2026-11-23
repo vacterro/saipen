@@ -1,0 +1,4 @@
+8efc20103c5904a8a3833cb483d8cc62531ff3c2222f35fb3fd9336a88aef8fe C:/Users/vac34/.agents/skills/.saipen-user-backup-63d689be22989a67/SKILL.md -> SKILL.md.user-backup
+8efc20103c5904a8a3833cb483d8cc62531ff3c2222f35fb3fd9336a88aef8fe C:/Users/vac34/.claude/skills/.saipen-user-backup-5dce6ea3d14f7027/SKILL.md -> SKILL.md.user-backup
+8efc20103c5904a8a3833cb483d8cc62531ff3c2222f35fb3fd9336a88aef8fe C:/Users/vac34/.codex/skills/.saipen-user-backup-3c0859e821cc1b57/SKILL.md -> SKILL.md.user-backup
+8efc20103c5904a8a3833cb483d8cc62531ff3c2222f35fb3fd9336a88aef8fe C:/Users/vac34/.config/opencode/skills/.saipen-user-backup-6f5395895075422e/SKILL.md -> SKILL.md.user-backup

@@ -1,0 +1,88 @@
+{
+  "observed_utc": "2026-10-22T01:43:29.524256+00:00",
+  "external_root": "V:\\___VAC\\__K\\__CODE\\_PY\\_SMART_VAC_MEDIA_COMPRESSOR",
+  "read_only": true,
+  "board_errors": [],
+  "tickets": {
+    "T-57": "## DONE",
+    "T-62": "## DONE"
+  },
+  "source_003_status": {
+    "ok": true,
+    "receipt": "SRC-003",
+    "status": "CLOSED",
+    "location": "archive",
+    "source_kind": "external_audit",
+    "source_sha256": "7b142fbac1b37134345a4048a368f36fbdd71751c8275adc513f676db3d9e1c1",
+    "linked_work": "T-47",
+    "linked_works": [
+      "T-47"
+    ],
+    "amends": null,
+    "closure_event": "E-357",
+    "coverage": {
+      "receipt": "SRC-003",
+      "requirements": 4,
+      "actionable": 4,
+      "terminal": 4,
+      "dispositions": {
+        "VERIFIED": 4
+      },
+      "unresolved": []
+    },
+    "distribution": {
+      "state": "DISTRIBUTABLE",
+      "receipt_id": "SRC-003",
+      "source_sha256": "7b142fbac1b37134345a4048a368f36fbdd71751c8275adc513f676db3d9e1c1"
+    }
+  },
+  "event_371": [
+    {
+      "date": "16.09.26 21:29",
+      "event": 371,
+      "parent": 370,
+      "ticket": "T-50",
+      "agent": "buffy",
+      "op_id": null,
+      "taxonomy": "DEC",
+      "text": "ticket added via SAIOPS and claimed -- T-50 [P0] [CORE-014] Quick Converter non-destructive publication, the next P0 candidate promoted from E-368/E-370. Source: SRC-003 audit/2.md CORE-014 (never previously derived into the rev-1 intake contract either). Red control: tests/test_audit_core014.py executed UNCHANGED against the pre-fix subject: 7 failed / 4 passed. Evidence: the pre-existing image destination sentinel was overwritten (sha mismatch) and the action returned the occupied path itself (V:...\\img_fail\\clip_cq512.png published onto the sentinel); a failing tool left its partial artifact at the FINAL path; Extract Frames left the existing frame set as ['%04d.jpg', 'keep.jpg'] instead of ['keep.jpg']; a second identical run returned the same destination. The new regression coverage detects the old defect."
+    }
+  ],
+  "accepted_debt": {
+    "record_id": "AD-000001",
+    "authority": "SRC-011",
+    "events": [
+      "E-371"
+    ],
+    "current_reader": {
+      "accepted": false,
+      "record_id": null,
+      "reason": "authority UNKNOWN: historical origin is not independently bound",
+      "authority_status": "UNKNOWN"
+    }
+  },
+  "authority_source": {
+    "ok": true,
+    "status": "CLOSED",
+    "request_provenance": {
+      "compared_digest": "cb61bb924f6d8a0b7849d163c310a9ba1d081149e5e0347c8e2d130a07457843",
+      "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+      "witness": "model_supplied"
+    },
+    "body": "# User request\n\npriority: P1\nverify: the requested change is present and demonstrated against the user own description of it\n\n## Request\n\nconformance: SRC-003 archive bundle invalid (missing .meta.json/.contract.json sidecars) + E-371 claims SAIOPS structural provenance without an [op:] marker; diagnose receipt-887cd5dcc5ad blocking findings and route each to its registered repair\n"
+  },
+  "before_hashes": {
+    ".saipen\\STATE.md": "27594ee295a89e6e90552c32ad8bf02f23aa42f0b534e2990607d6f9656b5953",
+    ".saipen\\BOARD.md": "5c653789d98e1cb486eeb9cec8c70ccc8f57f37d9a4e5c8734743f82a1bbcc15",
+    ".saipen\\intake\\index.json": "497a14bb10201932077472348f0180969522ecbca49b743e1f456b16888d4e42",
+    ".saipen\\LOG.md": "8ec6b7792de161eb6ae4c8b05f2a808a45215aa51a3f261b10c7afc7dc8591a0",
+    ".saipen\\archive\\source\\SRC-003.contract.json": "b4d6564d17b6a6d554d1206b56e3d4af5310445e22968f0a6bf93252a8b813c9",
+    ".saipen\\archive\\source\\SRC-003.coverage.json": "d2dfe559e30344dace208eac2a725d775ab99d9370b6ab8715cfaa501cea4dc5",
+    ".saipen\\archive\\source\\SRC-003.md": "7b142fbac1b37134345a4048a368f36fbdd71751c8275adc513f676db3d9e1c1",
+    ".saipen\\archive\\source\\SRC-003.meta.json": "1d716e7a045e5c28a5c54b3cdbac91e7664d856c7938ef16975595d8b8a904c3",
+    ".saipen\\archive\\source\\SRC-003.r001.json": "b4d6564d17b6a6d554d1206b56e3d4af5310445e22968f0a6bf93252a8b813c9",
+    ".saipen\\recovery\\conformance\\accepted_debt\\AD-000001.json": "67070589d984aa8cc4b9f30cfe30021f622841a78bf5ddd703bc25609d368d4c"
+  },
+  "observed_files_unchanged": true,
+  "limitation": "No validator execution, foreign write, new operator decision, historical writer attribution or native host acceptance. A current receipt reference does not prove historical consent."
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "label": "lifecycle",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_t1759_single_lifecycle_observer"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 1,
+    "elapsed_seconds": 7.609
+  },
+  {
+    "label": "stranded",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_recovery_reachability.StrandedClaimTests"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 1,
+    "elapsed_seconds": 2.328
+  },
+  {
+    "label": "debt",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_t1851_debt_authority.NativeDecisionTests.test_committed_operation_does_not_report_a_missing_target_repaired"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 1,
+    "elapsed_seconds": 0.484
+  },
+  {
+    "label": "receipt-wrapper",
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_t1893_probe_wrappers.LegacyProbeTests.test_second_wave_receipt_probe"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "returncode": 1,
+    "elapsed_seconds": 1.079
+  }
+]

@@ -1,0 +1,95 @@
+.FFFFFFFFF.
+======================================================================
+FAIL: test_forged_cached_proof_cannot_escape_its_project (tools.test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_forged_cached_proof_cannot_escape_its_project)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 142, in test_forged_cached_proof_cannot_escape_its_project
+    self.check_untrusted(result)
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 53, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'host_ingress', 'ingress_id': 'forged', 'message_id': None, 'session_id': 'model-session'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_matching_fields_and_declared_by_are_not_host_authentication (tools.test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_matching_fields_and_declared_by_are_not_host_authentication) (declared_by='SAIPEN_TASK_SHA256')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 88, in test_matching_fields_and_declared_by_are_not_host_authentication
+    self.check_untrusted(
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 53, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'SAIPEN_TASK_SHA256'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_matching_fields_and_declared_by_are_not_host_authentication (tools.test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_matching_fields_and_declared_by_are_not_host_authentication) (declared_by='SAIPEN_TASK_FILE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 88, in test_matching_fields_and_declared_by_are_not_host_authentication
+    self.check_untrusted(
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 53, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'SAIPEN_TASK_FILE'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_matching_fields_and_declared_by_are_not_host_authentication (tools.test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_matching_fields_and_declared_by_are_not_host_authentication) (declared_by='host_ingress')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 88, in test_matching_fields_and_declared_by_are_not_host_authentication
+    self.check_untrusted(
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 53, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'host_ingress'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_model_chosen_proof_fields_and_unkeyed_seal_are_not_authority (tools.test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_chosen_proof_fields_and_unkeyed_seal_are_not_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 97, in test_model_chosen_proof_fields_and_unkeyed_seal_are_not_authority
+    self.check_untrusted(
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 53, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'host_ingress', 'operator_origin': {'kind': 'operator-origin', 'project': 'V:\\_TEMP_\\t1844-forgery-3jc812s2', 'request_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'authenticated': True, 'seal': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'provenance': {'alg': 'sha256', 'mac': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57'}}}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_model_computed_real_digest_variable_grants_no_authority (tools.test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_computed_real_digest_variable_grants_no_authority) (markers={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 58, in test_model_computed_real_digest_variable_grants_no_authority
+    self.check_untrusted(
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 53, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'SAIPEN_TASK_SHA256'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_model_computed_real_digest_variable_grants_no_authority (tools.test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_computed_real_digest_variable_grants_no_authority) (markers={'FREEBUFF_SESSION': 'model-chosen-session'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 58, in test_model_computed_real_digest_variable_grants_no_authority
+    self.check_untrusted(
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 53, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'SAIPEN_TASK_SHA256'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_model_written_matching_cache_envelope_grants_no_authority (tools.test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_written_matching_cache_envelope_grants_no_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 81, in test_model_written_matching_cache_envelope_grants_no_authority
+    self.check_untrusted(
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 53, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'host_ingress', 'ingress_id': 'ing-228fd0dcc24ded66', 'message_id': 'model-message', 'session_id': 'model-session'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+======================================================================
+FAIL: test_model_written_real_task_file_grants_no_authority (tools.test_t1844_operator_origin.ForgedCarrierCannotAuthorize.test_model_written_real_task_file_grants_no_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 67, in test_model_written_real_task_file_grants_no_authority
+    self.check_untrusted(OT.witness(TEXT, env={OT.ENV_TASK_FILE: str(target)}, root=self.root))
+  File "V:\_TEMP_\t1844-carrier-pair-j2dwhs4i\before\tools\test_t1844_operator_origin.py", line 53, in check_untrusted
+    self.assertFalse(authority[name], (name, provenance, authority))
+AssertionError: True is not false : ('user_explicit', {'witness': 'operator_carrier', 'compared_digest': '5426400fd20381c4a3a81904aab046e9c846539a645904f8b8cf5a2c31695c57', 'declared_by': 'SAIPEN_TASK_FILE'}, {'witness': 'operator_carrier', 'capture': True, 'local_work': True, 'user_explicit': True, 'preempt_active_work': True, 'goal_pivot': True, 'reset_bounded_authority': True, 'detailed_response': True, 'external_action': False})
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.042s
+
+FAILED (failures=9)

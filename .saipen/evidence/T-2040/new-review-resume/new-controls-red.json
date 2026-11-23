@@ -1,0 +1,31 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "test_t2040_review_proof_binding"
+  ],
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+  "exit": 1,
+  "seconds": 231.094,
+  "before_sha256": {
+    "tools/saipen_engine/subs.py": "67c825377015298b7043149fbc51f2b60bb2ab49bef1a1f116f0733d4294cb65",
+    "tools/saipen_engine/crew.py": "de2f8ad1a1172b4c1171280c647f40ea243cb0ea919ebf30f7adfc2091a61e81",
+    "tools/saipen_engine/journal.py": "a59746b6682cb2507c849d92a5398bd895d68efe2c47166b534fb1fdcb169bb9",
+    "tools/saipen_engine/operations.py": "f7b5d795eb3417fc358994a680340463c304a5dd1e204c0dff742431671c0aab",
+    "tools/test_sub_dispose_after_collect.py": "40962a543529aeacb9f90ae3f6ca599209785f365789560e734a01a22ddc1129",
+    "tools/test_t2040_review_proof_binding.py": "7e024d5140c043dec4e3a3f04e795b9b80badcf4dba6799a096642c7ff8e9d7b"
+  },
+  "after_sha256": {
+    "tools/saipen_engine/subs.py": "67c825377015298b7043149fbc51f2b60bb2ab49bef1a1f116f0733d4294cb65",
+    "tools/saipen_engine/crew.py": "de2f8ad1a1172b4c1171280c647f40ea243cb0ea919ebf30f7adfc2091a61e81",
+    "tools/saipen_engine/journal.py": "a59746b6682cb2507c849d92a5398bd895d68efe2c47166b534fb1fdcb169bb9",
+    "tools/saipen_engine/operations.py": "f7b5d795eb3417fc358994a680340463c304a5dd1e204c0dff742431671c0aab",
+    "tools/test_sub_dispose_after_collect.py": "40962a543529aeacb9f90ae3f6ca599209785f365789560e734a01a22ddc1129",
+    "tools/test_t2040_review_proof_binding.py": "7e024d5140c043dec4e3a3f04e795b9b80badcf4dba6799a096642c7ff8e9d7b"
+  },
+  "stable": true,
+  "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\new-review-resume\\new-controls-red.log"
+}

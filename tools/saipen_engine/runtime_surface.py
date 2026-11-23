@@ -90,7 +90,7 @@ def normalize_content(raw: bytes) -> bytes:
     happens to decode (the same test git applies before it converts line
     endings), so two binaries differing only in a CR byte never collapse.
     """
-    if b"\0" in raw:
+    if b"\r" not in raw or b"\0" in raw:
         return raw
     try:
         raw.decode("utf-8")
@@ -131,7 +131,9 @@ def _is_link_info(info) -> bool:
     )
 
 
-def _require_plain_chain(base: Path, relative: str) -> None:
+def _require_plain_chain(
+    base: Path, relative: str, *, verified_dirs: set[Path] | None = None
+) -> None:
     """Refuse a link anywhere between `base` and `base/relative`.
 
     `manifest_source` RESOLVES a declared path, and resolution silently follows
@@ -143,11 +145,15 @@ def _require_plain_chain(base: Path, relative: str) -> None:
     current = base
     for part in PurePosixPath(relative).parts:
         current = current / part
+        if verified_dirs is not None and current in verified_dirs:
+            continue
         info = _lstat(current, "runtime surface path")
         if info is None:
             return  # absence is reported by the caller's own existence check
         if _is_link_info(info):
             raise RuntimeSurfaceError(f"runtime surface path is a link or reparse point: {current}")
+        if verified_dirs is not None and stat.S_ISDIR(info.st_mode):
+            verified_dirs.add(current)
 
 
 def _require_regular_file(path: Path, declared: str) -> None:
@@ -230,15 +236,18 @@ def runtime_surface_items(root: Path | str) -> list[tuple[str, Path]]:
         landings[landing] = declared
         surface[declared] = path
 
+    base_resolved = base.resolve()
+    verified_dirs: set[Path] = set()
+
     def locate(raw: object, kind: str) -> tuple[str, str, Path]:
         if not isinstance(raw, str) or not raw:
             raise RuntimeSurfaceError(f"runtime manifest {kind} entry invalid: {raw!r}")
         mapped = raw if source_layout else installed_relpath(raw)
         try:
-            resolved = manifest_source(base, mapped)
+            resolved = manifest_source(base, mapped, root_resolved=base_resolved)
         except RuntimeError as exc:
             raise RuntimeSurfaceError(str(exc)) from exc
-        _require_plain_chain(base, mapped)
+        _require_plain_chain(base, mapped, verified_dirs=verified_dirs)
         return raw, mapped, resolved
 
     for entry in trees:
@@ -256,7 +265,7 @@ def runtime_surface_items(root: Path | str) -> list[tuple[str, Path]]:
                 f"but its installed landing is {installed_relpath(prefix)!r}"
             )
         try:
-            source_dir, members = copy_tree_members(base, mapped)
+            source_dir, members = copy_tree_members(base, mapped, root_resolved=base_resolved)
         except RuntimeError as exc:
             raise RuntimeSurfaceError(str(exc)) from exc
         if not members:

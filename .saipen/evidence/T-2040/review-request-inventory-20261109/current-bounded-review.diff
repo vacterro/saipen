@@ -1,0 +1,158 @@
+--- .saipen\evidence\T-2040\review-input-boundaries-20261109\tools\saipen_engine\board.py
++++ tools/saipen_engine/board.py
+@@ -2283,8 +2283,6 @@
+     elif source_evidence is not None and not isinstance(source_evidence, dict):
+         problem = "source_evidence: envelope must be an object"
+ 
+-    goals = goal_inventory(persistent_goals)
+-    actor_state = {**(state or {}), "agent": current_agent} if current_agent is not None else state
+     if problem:
+         certificate = {
+             "schema_version": 2, "status": INCOMPLETE_DISCOVERY,
+@@ -2302,6 +2300,9 @@
+             "work_exhaustion": certificate, "work_exhaustion_error": problem,
+             "blocked_obligations": [], "outcome_truth_error": problem,
+         }
++
++    goals = goal_inventory(persistent_goals)
++    actor_state = {**(state or {}), "agent": current_agent} if current_agent is not None else state
+ 
+     res = _classify_idle_work(tickets, audit_inbox, future_gate, actor_state, now, goals["goals"])
+     try:
+--- .saipen\evidence\T-2040\review-input-boundaries-20261109\tools\saipen_engine\persistent_goal.py
++++ tools/saipen_engine/persistent_goal.py
+@@ -224,7 +224,7 @@
+             result["errors"].append("invalid goal inventory member")
+             continue
+         status = goal.get("current_status", STATUS_ACTIVE) if isinstance(goal, dict) else goal.current_status
+-        if status not in GOAL_STATUSES:
++        if not isinstance(status, str) or status not in GOAL_STATUSES:
+             result["errors"].append(f"unrecognized goal status: {status!r}")
+             continue
+         paused = goal.get("paused", False) if isinstance(goal, dict) else goal.paused
+--- .saipen\evidence\T-2040\review-input-boundaries-20261109\tools\saipen_engine\work_exhaustion.py
++++ tools/saipen_engine/work_exhaustion.py
+@@ -589,11 +589,10 @@
+ 
+     if not projection_fault(FUTURE_GATES, future_gate):
+         fresh = future_gate.get("index_state")
+-        # MISSING over an EMPTY corpus is the one honest "nothing to discover":
+-        # the producer counts documents as an integer, so truthiness -- not an
+-        # empty list -- is the contract (both 0 and [] mean no documents).
+-        empty = (fresh == "MISSING" and not future_gate.get("documents")
+-                 and not future_gate.get("refresh_required"))
++        documents = future_gate.get("documents")
++        # Only the owner's explicit zero count proves an empty optional corpus.
++        empty = (fresh == "MISSING" and type(documents) is int and documents == 0
++                 and future_gate.get("refresh_required") is False)
+         if fresh != "CURRENT" and not empty:
+             unknown(FUTURE_GATES, "future inventory missing, stale or unreadable", ("saipen future refresh",))
+         elif future_gate.get("eligible"):
+--- .saipen\evidence\T-2040\review-authority-hypotheses-20261109\tools\saipen_engine\goal_authority.py
++++ tools/saipen_engine/goal_authority.py
+@@ -129,12 +129,22 @@
+ 
+ 
+ def active_maintenance_goals(root: Path | str) -> list:
+-    """Every ACTIVE, unpaused MAINTENANCE PersistentGoal in this project."""
+-    from .persistent_goal import STATUS_ACTIVE, list_goals
+-
++    """Every registered, unpaused MAINTENANCE PersistentGoal in this project.
++
++    ``current_status`` is mutable provider observation, not grant policy. New
++    evidence may reactivate a satisfied or waiting goal, so status changes must
++    neither revoke nor create its standing authority. A paused goal remains an
++    explicit stop, and an incomplete inventory proves no registered goal.
++    """
++    from .persistent_goal import list_goals_report
++
++    report = list_goals_report(root)
++    if not report["complete"]:
++        detail = "; ".join(report["errors"][:3]) or "goal inventory is incomplete"
++        raise ValueError(f"maintenance goal inventory is incomplete: {detail}")
+     selected = []
+-    for goal in list_goals(root):
+-        if goal.paused or goal.current_status != STATUS_ACTIVE:
++    for goal in report["goals"]:
++        if goal.paused:
+             continue
+         if _normalize_objective(goal.authorization_scope).upper() != MAINTENANCE_GOAL_SCOPE:
+             continue
+@@ -245,7 +255,7 @@
+     test1") and the apply path wrote that old goal's authority into STATE. This
+     binds the grant to the registered PersistentGoal instead:
+ 
+-    * exactly ONE ACTIVE MAINTENANCE goal (ambiguous -> fail closed);
++    * exactly ONE unpaused MAINTENANCE goal (ambiguous -> fail closed);
+     * its canonical objective must EQUAL the current pivot objective (a test
+       pivot can never stand in for the maintenance objective);
+     * the goal must belong to this project;
+@@ -257,7 +267,7 @@
+     """
+     goals = active_maintenance_goals(root)
+     if not goals:
+-        raise ValueError("no ACTIVE maintenance goal is registered in this project")
++        raise ValueError("no unpaused maintenance goal is registered in this project")
+     if goal_id is not None:
+         goals = [goal for goal in goals if goal.goal_id == goal_id]
+         if not goals:
+--- .saipen\evidence\T-2040\review-authority-hypotheses-20261109\tools\saipen_engine\subs.py
++++ tools/saipen_engine/subs.py
+@@ -4146,7 +4146,14 @@
+         return "collect hypothesis block is not a non-empty array"
+     if any(not isinstance(item, dict) for item in hypotheses):
+         return "collect hypothesis block contains a non-object entry"
+-    unique = {tuple(sorted(item.items(), key=lambda pair: pair[0])) for item in hypotheses}
++    keys = ("producer", "package_id", "source_head", "source_tree_fingerprint",
++            "role_revision")
++    if any(set(item) != set(keys) for item in hypotheses):
++        return "collect hypothesis does not contain the exact generation fields"
++    if any(not isinstance(item[key], str) or not item[key]
++           for item in hypotheses for key in keys):
++        return "collect hypothesis generation fields must be non-empty strings"
++    unique = {tuple(item[key] for key in keys) for item in hypotheses}
+     if len(unique) != len(hypotheses):
+         return "collect hypothesis block repeats one generation"
+     producer = package.fields.get("producer") or getattr(package, "producer", "")
+@@ -4157,7 +4164,7 @@
+         "source_tree_fingerprint": package.fields.get("source_tree_fingerprint"),
+         "role_revision": package.fields.get("role_revision"),
+     }
+-    matches = [item for item in hypotheses if all(item.get(key) == value for key, value in expected.items())]
++    matches = [item for item in hypotheses if item == expected]
+     if len(matches) != 1:
+         return "collect hypotheses do not bind this exact package generation"
+     return ""
+--- .saipen\evidence\T-2040\review-request-inventory-20261109\tools\saipen_engine\operations.py
++++ tools/saipen_engine/operations.py
+@@ -17153,9 +17153,18 @@
+     if not authority.get("user_explicit"):
+         from .goal_authority import is_protected_goal_request, protected_goal_blocker
+ 
+-        protected = is_protected_goal_request(root, text)
++        try:
++            protected = is_protected_goal_request(root, text)
++            existing_blocker = (
++                protected_goal_blocker(root, protected, current_board["tickets"])
++                if protected else None
++            )
++        except ValueError as exc:
++            return _refuse(
++                "GOAL_INVENTORY_UNAVAILABLE", str(exc),
++                receipt=receipt, ticket=None, next_action=current_state.get("next_action"),
++            )
+         if protected:
+-            existing_blocker = protected_goal_blocker(root, protected, current_board["tickets"])
+             if existing_blocker is not None:
+                 linked = intake.link_work_to(root, receipt, existing_blocker)
+                 if not linked.get("ok"):
+--- .saipen\evidence\T-2040\review-request-inventory-20261109\saipen\REGISTRY.json
++++ saipen/REGISTRY.json
+@@ -1081,6 +1081,7 @@
+   "FUTURE_GATE_NOT_ELIGIBLE",
+   "FUTURE_INDEX_UNREADABLE",
+   "GIT_UNAVAILABLE",
++  "GOAL_INVENTORY_UNAVAILABLE",
+   "GOAL_NOT_FOUND",
+   "GPU_LANE_UNAVAILABLE",
+   "GPU_RECALL",

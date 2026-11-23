@@ -1,0 +1,12 @@
+{
+  "case": "ship runs its binding gate before staging",
+  "applied": true,
+  "expected": "ship-stage-before-gate",
+  "actual_matching_diagnostics": [
+    "cross-doc drift [ship-stage-before-gate] -- phases/ship.md must stage the reviewed files, THEN run the ship gate, THEN commit. Gate before staging is the SHIP/MANIFEST paradox: a required runtime file this ticket adds is untracked until it is staged, so the gate can never be satisfied and the agent has to invent an undocumented staging step (T-569)"
+  ],
+  "budget_errors": [],
+  "ship_bytes": 6380,
+  "sha256": "e1c4dc60ea2dde1d1e378dd0878ccad1a6d5b842b0b2e190d5ca9ec0a6f7d16b",
+  "semantic_note": "Remove duplicated reviewed adjective only; entry still requires verification/REVIEW green. Restore exact original LOCAL delimiter for the unchanged mutation case."
+}

@@ -1,0 +1,48 @@
+== ing-101312dc5eacdadd
+   witness = 'operator_carrier'
+   declared_by = 'host_ingress'
+   destination_op = 'start'
+   consumed = False
+   consumed_by = None
+   session_id = 'sess_53495f99-4c5d-412f-af0c-86d45222c6af'
+   created_at = '2026-11-04T05:47:01Z'
+   message_id = 'turn_74686069-0f46-4a25-9d22-9d199e8f822f'
+   operator_origin keys: ['action', 'budget', 'event_id', 'expires', 'goal', 'host', 'host_birth', 'host_pid', 'issued', 'kind', 'lineage', 'model', 'nonce', 'project', 'provenance', 'provider', 'request_digest', 'schema', 'session', 'task']
+   operator_origin: {"action": "continue", "budget": "E-18977", "event_id": "turn_74686069-0f46-4a25-9d22-9d199e8f822f", "expires": 1793772121.0034451, "goal": "", "host": "zaicode", "host_birth": 134382123703135804, "host_pid": 59540, "issued": 1793771221.0034451, "kind": "operator-origin", "lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9", "model": "", "nonce": "0cf8e6cdef6a65a68f8e8ccd970496bf", "project": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen", "provenance": {"alg": "hmac-sha256", "kid": "broker-5cebdbd2db29bf3e5f095b63", "mac": "385ff48dce07a3b8ff9f85fca83eec9fa3487587bbc79e80c009dd9cb873e
+
+== ing-a7c1a5691f6ba4ec
+   witness = 'operator_carrier'
+   declared_by = 'host_ingress'
+   destination_op = 'start'
+   consumed = False
+   consumed_by = None
+   session_id = 'sess_53495f99-4c5d-412f-af0c-86d45222c6af'
+   created_at = '2026-11-04T02:52:28Z'
+   message_id = 'turn_95dc8922-9f3b-40b1-b0e9-70c17c905cda'
+   operator_origin keys: ['action', 'budget', 'event_id', 'expires', 'goal', 'host', 'host_birth', 'host_pid', 'issued', 'kind', 'lineage', 'model', 'nonce', 'project', 'provenance', 'provider', 'request_digest', 'schema', 'session', 'task']
+   operator_origin: {"action": "continue", "budget": "E-18977", "event_id": "turn_95dc8922-9f3b-40b1-b0e9-70c17c905cda", "expires": 1793761648.2270858, "goal": "", "host": "zaicode", "host_birth": 134382123703135804, "host_pid": 59540, "issued": 1793760748.2270858, "kind": "operator-origin", "lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9", "model": "", "nonce": "e51d8441935798da86455a3db3edaf99", "project": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen", "provenance": {"alg": "hmac-sha256", "kid": "broker-5cebdbd2db29bf3e5f095b63", "mac": "bab28ea281549634e83049a83b120dfccae44109ed37ec977121c5e13d687
+
+== ing-1558edb21c8fe037
+   witness = 'operator_carrier'
+   declared_by = 'host_ingress'
+   destination_op = 'start'
+   consumed = False
+   consumed_by = None
+   session_id = 'sess_53495f99-4c5d-412f-af0c-86d45222c6af'
+   created_at = '2026-11-03T21:44:31Z'
+   message_id = 'turn_dea5bffd-5f91-4dfb-889c-e65f4d02778a'
+   operator_origin keys: ['action', 'budget', 'event_id', 'expires', 'goal', 'host', 'host_birth', 'host_pid', 'issued', 'kind', 'lineage', 'model', 'nonce', 'project', 'provenance', 'provider', 'request_digest', 'schema', 'session', 'task']
+   operator_origin: {"action": "continue", "budget": "E-18977", "event_id": "turn_dea5bffd-5f91-4dfb-889c-e65f4d02778a", "expires": 1793743171.255667, "goal": "", "host": "zaicode", "host_birth": 134382123703135804, "host_pid": 59540, "issued": 1793742271.255667, "kind": "operator-origin", "lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9", "model": "", "nonce": "9ba5f1d613f2070515b4ed7a3e998ef1", "project": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen", "provenance": {"alg": "hmac-sha256", "kid": "broker-5cebdbd2db29bf3e5f095b63", "mac": "810382219041261d35848ea1ec383431f751deaafb37d56222b27fe23b4be1b
+
+== ing-58d51eafb7b56734
+   witness = 'operator_carrier'
+   declared_by = 'host_ingress'
+   destination_op = 'start'
+   consumed = False
+   consumed_by = None
+   session_id = 'sess_53495f99-4c5d-412f-af0c-86d45222c6af'
+   created_at = '2026-11-03T20:20:05Z'
+   message_id = 'turn_d86b03c3-88f0-4a9f-a529-f21dc0c644a5'
+   operator_origin keys: ['action', 'budget', 'event_id', 'expires', 'goal', 'host', 'host_birth', 'host_pid', 'issued', 'kind', 'lineage', 'model', 'nonce', 'project', 'provenance', 'provider', 'request_digest', 'schema', 'session', 'task']
+   operator_origin: {"action": "continue", "budget": "E-18977", "event_id": "turn_d86b03c3-88f0-4a9f-a529-f21dc0c644a5", "expires": 1793738105.4272385, "goal": "", "host": "zaicode", "host_birth": 134382010546130272, "host_pid": 36496, "issued": 1793737205.4272385, "kind": "operator-origin", "lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9", "model": "", "nonce": "fdacda670433e5afe24969d3f98dca0c", "project": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen", "provenance": {"alg": "hmac-sha256", "kid": "broker-5cebdbd2db29bf3e5f095b63", "mac": "82c6478612a4812ce106c64e8d16d06ca9ca7e4d9c2d03311b334348a900f
+

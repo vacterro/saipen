@@ -1,0 +1,37 @@
+{
+  "captured_at": "20261108T090955914894Z",
+  "root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\publication-resume-20261108\\continued-before-20261108T090955914894Z",
+  "files": [
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\outcome_truth.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\publication-resume-20261108\\continued-before-20261108T090955914894Z\\tools\\saipen_engine\\outcome_truth.py",
+      "bytes": 19798,
+      "sha256": "8ad47a8498aa591b635f48f4ee3a10aaba75d6b9e2113ef67c3246b7837085d1"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\closure.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\publication-resume-20261108\\continued-before-20261108T090955914894Z\\tools\\saipen_engine\\closure.py",
+      "bytes": 33114,
+      "sha256": "e4120bbefa5b96c695318b42f7322bcaa7e1d35f4cbc3497890d797568036b50"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\context.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\publication-resume-20261108\\continued-before-20261108T090955914894Z\\tools\\saipen_engine\\context.py",
+      "bytes": 48271,
+      "sha256": "c3a6cb8f06108d7b696501234f3e759f4e3aab266d32f5aeb416cfa69d963909"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_publication_truth.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\publication-resume-20261108\\continued-before-20261108T090955914894Z\\tools\\test_t2040_publication_truth.py",
+      "bytes": 16226,
+      "sha256": "0d7ab5ceee6d3e390be3df901f76e2f83672056fd3d7f52882ebd1d666288c82"
+    },
+    {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_release_completion.py",
+      "snapshot": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-2040\\publication-resume-20261108\\continued-before-20261108T090955914894Z\\tools\\test_release_completion.py",
+      "bytes": 9339,
+      "sha256": "7d68bf3d1d6e59c4ff9cdafbfa577f4aa45d63e38e1e78e63fce81614e2b9a58"
+    }
+  ]
+}

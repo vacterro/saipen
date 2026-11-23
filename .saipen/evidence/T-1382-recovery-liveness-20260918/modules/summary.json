@@ -1,0 +1,80 @@
+{
+ "test_ledger_gap": {
+  "bound_s": 240,
+  "rc": 0,
+  "seconds": 0.1,
+  "verdict": "PASS"
+ },
+ "test_log_stamp_guard": {
+  "bound_s": 240,
+  "rc": 0,
+  "seconds": 0.1,
+  "verdict": "PASS"
+ },
+ "test_narrative_authority": {
+  "bound_s": 240,
+  "rc": 0,
+  "seconds": 0.1,
+  "verdict": "PASS"
+ },
+ "test_opencode_bound_launch_smoke": {
+  "bound_s": 600,
+  "rc": 0,
+  "seconds": 35.7,
+  "verdict": "PASS"
+ },
+ "test_opencode_live_session": {
+  "bound_s": 600,
+  "rc": 0,
+  "seconds": 0.1,
+  "verdict": "PASS"
+ },
+ "test_project_root_session_binding": {
+  "bound_s": 300,
+  "rc": 0,
+  "seconds": 1.9,
+  "verdict": "PASS"
+ },
+ "test_reconcile_legacy_output_field": {
+  "bound_s": 240,
+  "rc": 0,
+  "seconds": 0.3,
+  "verdict": "PASS"
+ },
+ "test_recovery_noop_targets": {
+  "bound_s": 240,
+  "rc": 0,
+  "seconds": 0.6,
+  "verdict": "PASS"
+ },
+ "test_settled_projection": {
+  "bound_s": 240,
+  "rc": 0,
+  "seconds": 31.1,
+  "verdict": "PASS"
+ },
+ "test_t1304_r004_transition": {
+  "bound_s": 300,
+  "rc": 0,
+  "seconds": 3.3,
+  "verdict": "PASS"
+ },
+ "test_unknown_tool_fail_closed": {
+  "bound_s": 240,
+  "rc": 0,
+  "seconds": 2.1,
+  "verdict": "PASS"
+ },
+ "test_validator_layout_parity": {
+  "bound_s": 300,
+  "rc": 0,
+  "seconds": 9.3,
+  "verdict": "PASS"
+ },
+ "test_xpatch": {
+  "bound_s": 420,
+  "rc": 0,
+  "seconds": 0.9,
+  "verdict": "PASS"
+ }
+}

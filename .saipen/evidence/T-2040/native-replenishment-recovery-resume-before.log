@@ -1,0 +1,291 @@
+.........F.F...F.F.....                                  [100%]
+================================== FAILURES ===================================
+_ ReplenishmentRecovery.test_exact_legacy_candidate_is_scoped_not_foreign_or_prefix _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_exact_legacy_candidate_is_scoped_not_foreign_or_prefix>
+
+    def test_exact_legacy_candidate_is_scoped_not_foreign_or_prefix(self):
+        candidate = CandidateTask("g-race-proc1", "g-race", "Proc 1")
+>       self.assertTrue(replenishment._matches_candidate(candidate,
+            "Proc 1 candidate: g-race-proc1"))
+E       AssertionError: False is not true
+
+tools\test_t2040_replenishment_recovery.py:111: AssertionError
+_ ReplenishmentRecovery.test_goal_policy_is_pinned_for_apply_and_recovery (recovering=False) _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_goal_policy_is_pinned_for_apply_and_recovery>
+
+    def test_goal_policy_is_pinned_for_apply_and_recovery(self):
+        for recovering in (False, True):
+            with self.subTest(recovering=recovering):
+                root, goal, _candidate, ticket, _receipt = self.fixture(native=True)
+                plan = self.plan(root)
+                if recovering:
+                    self.interrupted(root, plan)
+                path = root / f".saipen/goals/{goal.goal_id}.json"
+                data = json.loads(path.read_text(encoding="utf-8"))
+                data["success_criteria"]["new_policy"] = "fresh approval required"
+                path.write_text(json.dumps(data), encoding="utf-8")
+                result = recover(root, plan.op_id) if recovering else apply_plan(root, plan).to_dict()
+>               self.assertFalse(result["ok"], result)
+E               AssertionError: True is not false : {'ok': True, 'code': 'UNBLOCK', 'op_id': 'ticket-fa65b6df280146308a627a77367759e4', 'changed_files': ['.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'], 'recovery_required': False, 'ticket': 'T-2', 'blocked_on': None, 'event_id': 'E-12'}
+
+tools\test_t2040_replenishment_recovery.py:213: AssertionError
+_ ReplenishmentRecovery.test_goal_policy_is_pinned_for_apply_and_recovery (recovering=True) _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_goal_policy_is_pinned_for_apply_and_recovery>
+
+    def test_goal_policy_is_pinned_for_apply_and_recovery(self):
+        for recovering in (False, True):
+            with self.subTest(recovering=recovering):
+                root, goal, _candidate, ticket, _receipt = self.fixture(native=True)
+                plan = self.plan(root)
+                if recovering:
+                    self.interrupted(root, plan)
+                path = root / f".saipen/goals/{goal.goal_id}.json"
+                data = json.loads(path.read_text(encoding="utf-8"))
+                data["success_criteria"]["new_policy"] = "fresh approval required"
+                path.write_text(json.dumps(data), encoding="utf-8")
+                result = recover(root, plan.op_id) if recovering else apply_plan(root, plan).to_dict()
+>               self.assertFalse(result["ok"], result)
+E               AssertionError: True is not false : {'ok': True, 'code': 'COMMITTED', 'op_id': 'ticket-263e1ebeb3824f30b2e19536432e79bb', 'changed_files': ['.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'], 'recovery_required': True}
+
+tools\test_t2040_replenishment_recovery.py:213: AssertionError
+_ ReplenishmentRecovery.test_legacy_blocked_identity_deduplicates_but_never_restores _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_legacy_blocked_identity_deduplicates_but_never_restores>
+
+    def test_legacy_blocked_identity_deduplicates_but_never_restores(self):
+        root, _goal, candidate, ticket, _receipt = self.fixture()
+        board = root / ".saipen/BOARD.md"
+        original = rows(root)[ticket]["raw"]
+        from saipen_engine.board import escape_ticket_description
+        description = f"Bounded local repair candidate: {candidate.candidate_id}"
+        board.write_text(board.read_text(encoding="utf-8").replace(
+            original, original.replace(escape_ticket_description(rows(root)[ticket]["description"]),
+                                       escape_ticket_description(description))), encoding="utf-8")
+        self.assertEqual(rows(root)[ticket]["description"], description)
+        before = snapshot(root)
+        result = replenishment.replenish_from_goals(root, "fix", dry_run=True)
+>       self.assertFalse(result.get("replenished"), result)
+E       AssertionError: True is not false : {'ok': True, 'replenished': True, 'dry_run': True, 'status': 'TASK_REPLENISHED', 'goal_id': 'self-maintenance-core', 'candidate': {'candidate_id': 'self-maintenance-core-repair-1', 'goal_id': 'self-maintenance-core', 'title': 'Investigate semantics of Local parser [self-maintenance-core]', 'priority': 'P2', 'description': 'Investigate and document semantics for unresolved item repair-1', 'scope': 'item:repair-1', 'target_locator': 'repair-1', 'evidence_source': '.saipen/evidence/coverage_gap.json', 'verification': 'The exact local regression oracle passes', 'needs': [], 'risk': 'low', 'metadata': {'item_id': 'repair-1', 'goal_id': 'self-maintenance-core', 'rva': '', 'va': '', 'bytes': None, 'module': None, 'capture_sha256': '', 'capture_path': ''}, 'evidence_fingerprint': 'sha256:27578b27835876a0'}, 'planned_ticket': 'T-PLANNED', 'detail': 'would admit self-maintenance-core-repair-1 for goal self-maintenance-core'}
+
+tools\test_t2040_replenishment_recovery.py:141: AssertionError
+_ ReplenishmentRecovery.test_missing_board_is_invalid_not_an_empty_queue (reader=True) _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_missing_board_is_invalid_not_an_empty_queue>
+
+    def test_missing_board_is_invalid_not_an_empty_queue(self):
+        with tempfile.TemporaryDirectory(prefix="t2040-missing-board-") as name:
+            root = Path(name)
+>           with self.subTest(reader=True), self.assertRaises(ValueError):
+E           AssertionError: ValueError not raised
+
+tools\test_t2040_replenishment_recovery.py:89: AssertionError
+_ ReplenishmentRecovery.test_missing_board_is_invalid_not_an_empty_queue (entrypoint=True) _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_missing_board_is_invalid_not_an_empty_queue>
+
+    def test_missing_board_is_invalid_not_an_empty_queue(self):
+        with tempfile.TemporaryDirectory(prefix="t2040-missing-board-") as name:
+            root = Path(name)
+            with self.subTest(reader=True), self.assertRaises(ValueError):
+                replenishment._parse_board_tickets(root)
+            with self.subTest(entrypoint=True):
+>               result = replenishment.replenish_from_goals(root, "fix", dry_run=True)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tools\test_t2040_replenishment_recovery.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\saipen_engine\replenishment.py:637: in replenish_from_goals
+    parsed = parse_board((root / ".saipen/BOARD.md").read_text(encoding="utf-8"))["tickets"]
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('V:/_TEMP_/t2040-missing-board-7d2tcf1w/.saipen/BOARD.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'V:\\_TEMP_\\t2040-missing-board-7d2tcf1w\\.saipen\\BOARD.md'
+
+C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: FileNotFoundError
+_ ReplenishmentRecovery.test_native_revocation_after_plan_refuses_before_work_write _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_native_revocation_after_plan_refuses_before_work_write>
+
+    def test_native_revocation_after_plan_refuses_before_work_write(self):
+        root, _goal, _candidate, ticket, _receipt = self.fixture(native=True)
+        original = operations._ticket_targets
+    
+        def revoke_after(*args, **kwargs):
+            plan = original(*args, **kwargs)
+            self.revoke(root, plan)
+            return plan
+    
+        before = snapshot(root)
+        with mock.patch.object(operations, "_ticket_targets", side_effect=revoke_after):
+            result = replenishment.replenish_from_goals(root, "fix")
+>       self.assertFalse(result.get("replenished"), result)
+E       AssertionError: True is not false : {'ok': True, 'replenished': True, 'status': 'TASK_REPLENISHED', 'dry_run': False, 'reused_work': True, 'admitted_ticket': 'T-2', 'goal_id': 'self-maintenance-core', 'candidate': {'candidate_id': 'self-maintenance-core-repair-1', 'goal_id': 'self-maintenance-core', 'title': 'Investigate semantics of Local parser [self-maintenance-core]', 'priority': 'P2', 'description': 'Investigate and document semantics for unresolved item repair-1', 'scope': 'item:repair-1', 'target_locator': 'repair-1', 'evidence_source': '.saipen/evidence/coverage_gap.json', 'verification': 'The exact local regression oracle passes', 'needs': [], 'risk': 'low', 'metadata': {'item_id': 'repair-1', 'goal_id': 'self-maintenance-core', 'rva': '', 'va': '', 'bytes': None, 'module': None, 'capture_sha256': '', 'capture_path': ''}, 'evidence_fingerprint': 'sha256:56695519a197aa16'}, 'action': 'PHASE SCOUT T-2', 'next_action': 'PHASE SCOUT T-2', 'detail': 'restored existing Work T-2'}
+
+tools\test_t2040_replenishment_recovery.py:250: AssertionError
+_ ReplenishmentRecovery.test_prose_does_not_acquire_candidate_identity (text='Memo about Parser repair | goal: maintenance') _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_prose_does_not_acquire_candidate_identity>
+
+    def test_prose_does_not_acquire_candidate_identity(self):
+        candidate = CandidateTask("parser-gap-1", "maintenance", "Parser repair")
+        for text in ("Memo about Parser repair | goal: maintenance",
+                     "Discuss candidate: parser-gap-1 | goal: maintenance",
+                     "Mention parser-gap-1 | goal: maintenance"):
+            with self.subTest(text=text):
+>               self.assertFalse(replenishment._matches_candidate(candidate, text))
+E               AssertionError: True is not false
+
+tools\test_t2040_replenishment_recovery.py:125: AssertionError
+_ ReplenishmentRecovery.test_prose_does_not_acquire_candidate_identity (text='Discuss candidate: parser-gap-1 | goal: maintenance') _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_prose_does_not_acquire_candidate_identity>
+
+    def test_prose_does_not_acquire_candidate_identity(self):
+        candidate = CandidateTask("parser-gap-1", "maintenance", "Parser repair")
+        for text in ("Memo about Parser repair | goal: maintenance",
+                     "Discuss candidate: parser-gap-1 | goal: maintenance",
+                     "Mention parser-gap-1 | goal: maintenance"):
+            with self.subTest(text=text):
+>               self.assertFalse(replenishment._matches_candidate(candidate, text))
+E               AssertionError: True is not false
+
+tools\test_t2040_replenishment_recovery.py:125: AssertionError
+_ ReplenishmentRecovery.test_prose_does_not_acquire_candidate_identity (text='Mention parser-gap-1 | goal: maintenance') _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_prose_does_not_acquire_candidate_identity>
+
+    def test_prose_does_not_acquire_candidate_identity(self):
+        candidate = CandidateTask("parser-gap-1", "maintenance", "Parser repair")
+        for text in ("Memo about Parser repair | goal: maintenance",
+                     "Discuss candidate: parser-gap-1 | goal: maintenance",
+                     "Mention parser-gap-1 | goal: maintenance"):
+            with self.subTest(text=text):
+>               self.assertFalse(replenishment._matches_candidate(candidate, text))
+E               AssertionError: True is not false
+
+tools\test_t2040_replenishment_recovery.py:125: AssertionError
+_ ReplenishmentRecovery.test_recovery_rechecks_revoked_native_grant_before_unblock _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_recovery_rechecks_revoked_native_grant_before_unblock>
+
+    def test_recovery_rechecks_revoked_native_grant_before_unblock(self):
+        root, _goal, _candidate, ticket, _receipt = self.fixture(native=True)
+        plan = self.plan(root)
+        self.interrupted(root, plan)
+        self.revoke(root, plan)
+        before_board = (root / ".saipen/BOARD.md").read_bytes()
+        result = recover(root, plan.op_id)
+>       self.assertFalse(result.get("ok"), result)
+E       AssertionError: True is not false : {'ok': True, 'code': 'COMMITTED', 'op_id': 'ticket-0b95400b42be42219263256e86f30625', 'changed_files': ['.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'], 'recovery_required': True}
+
+tools\test_t2040_replenishment_recovery.py:261: AssertionError
+_ ReplenishmentRecovery.test_source_metadata_and_index_must_name_same_exact_receipt (change='receipt_id') _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_source_metadata_and_index_must_name_same_exact_receipt>
+
+    def test_source_metadata_and_index_must_name_same_exact_receipt(self):
+        for change in ("receipt_id", "status", "index_digest", "index_membership"):
+            with self.subTest(change=change):
+                root, _goal, _candidate, _ticket, receipt = self.fixture()
+                meta_path = root / f".saipen/intake/active/{receipt}.meta.json"
+                index_path = root / ".saipen/intake/index.json"
+                path = index_path if change.startswith("index_") else meta_path
+                data = json.loads(path.read_text(encoding="utf-8"))
+                if change == "index_digest":
+                    data["active"][receipt]["source_sha256"] = "f" * 64
+                elif change == "index_membership":
+                    data["active"][receipt]["linked_work"] = "T-1"
+                else:
+                    data[change] = "SRC-999" if change == "receipt_id" else "CLOSED"
+                path.write_text(json.dumps(data), encoding="utf-8")
+                before = snapshot(root)
+                result = replenishment.replenish_from_goals(root, "fix", dry_run=True)
+>               self.assertFalse(result.get("replenished"), result)
+E               AssertionError: True is not false : {'ok': True, 'replenished': True, 'status': 'TASK_REPLENISHED', 'dry_run': True, 'reused_work': True, 'admitted_ticket': 'T-2', 'goal_id': 'self-maintenance-core', 'candidate': {'candidate_id': 'self-maintenance-core-repair-1', 'goal_id': 'self-maintenance-core', 'title': 'Investigate semantics of Local parser [self-maintenance-core]', 'priority': 'P2', 'description': 'Investigate and document semantics for unresolved item repair-1', 'scope': 'item:repair-1', 'target_locator': 'repair-1', 'evidence_source': '.saipen/evidence/coverage_gap.json', 'verification': 'The exact local regression oracle passes', 'needs': [], 'risk': 'low', 'metadata': {'item_id': 'repair-1', 'goal_id': 'self-maintenance-core', 'rva': '', 'va': '', 'bytes': None, 'module': None, 'capture_sha256': '', 'capture_path': ''}, 'evidence_fingerprint': 'sha256:3b59c93db81db580'}, 'action': 'PHASE SCOUT T-2', 'next_action': 'PHASE SCOUT T-2', 'detail': 'would restore existing Work T-2'}
+
+tools\test_t2040_replenishment_recovery.py:185: AssertionError
+_ ReplenishmentRecovery.test_source_metadata_and_index_must_name_same_exact_receipt (change='status') _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_source_metadata_and_index_must_name_same_exact_receipt>
+
+    def test_source_metadata_and_index_must_name_same_exact_receipt(self):
+        for change in ("receipt_id", "status", "index_digest", "index_membership"):
+            with self.subTest(change=change):
+                root, _goal, _candidate, _ticket, receipt = self.fixture()
+                meta_path = root / f".saipen/intake/active/{receipt}.meta.json"
+                index_path = root / ".saipen/intake/index.json"
+                path = index_path if change.startswith("index_") else meta_path
+                data = json.loads(path.read_text(encoding="utf-8"))
+                if change == "index_digest":
+                    data["active"][receipt]["source_sha256"] = "f" * 64
+                elif change == "index_membership":
+                    data["active"][receipt]["linked_work"] = "T-1"
+                else:
+                    data[change] = "SRC-999" if change == "receipt_id" else "CLOSED"
+                path.write_text(json.dumps(data), encoding="utf-8")
+                before = snapshot(root)
+                result = replenishment.replenish_from_goals(root, "fix", dry_run=True)
+>               self.assertFalse(result.get("replenished"), result)
+E               AssertionError: True is not false : {'ok': True, 'replenished': True, 'status': 'TASK_REPLENISHED', 'dry_run': True, 'reused_work': True, 'admitted_ticket': 'T-2', 'goal_id': 'self-maintenance-core', 'candidate': {'candidate_id': 'self-maintenance-core-repair-1', 'goal_id': 'self-maintenance-core', 'title': 'Investigate semantics of Local parser [self-maintenance-core]', 'priority': 'P2', 'description': 'Investigate and document semantics for unresolved item repair-1', 'scope': 'item:repair-1', 'target_locator': 'repair-1', 'evidence_source': '.saipen/evidence/coverage_gap.json', 'verification': 'The exact local regression oracle passes', 'needs': [], 'risk': 'low', 'metadata': {'item_id': 'repair-1', 'goal_id': 'self-maintenance-core', 'rva': '', 'va': '', 'bytes': None, 'module': None, 'capture_sha256': '', 'capture_path': ''}, 'evidence_fingerprint': 'sha256:b046faff680e7234'}, 'action': 'PHASE SCOUT T-2', 'next_action': 'PHASE SCOUT T-2', 'detail': 'would restore existing Work T-2'}
+
+tools\test_t2040_replenishment_recovery.py:185: AssertionError
+_ ReplenishmentRecovery.test_source_metadata_and_index_must_name_same_exact_receipt (change='index_digest') _
+
+self = <test_t2040_replenishment_recovery.ReplenishmentRecovery testMethod=test_source_metadata_and_index_must_name_same_exact_receipt>
+
+    def test_source_metadata_and_index_must_name_same_exact_receipt(self):
+        for change in ("receipt_id", "status", "index_digest", "index_membership"):
+            with self.subTest(change=change):
+                root, _goal, _candidate, _ticket, receipt = self.fixture()
+                meta_path = root / f".saipen/intake/active/{receipt}.meta.json"
+                index_path = root / ".saipen/intake/index.json"
+                path = index_path if change.startswith("index_") else meta_path
+                data = json.loads(path.read_text(encoding="utf-8"))
+                if change == "index_digest":
+                    data["active"][receipt]["source_sha256"] = "f" * 64
+                elif change == "index_membership":
+                    data["active"][receipt]["linked_work"] = "T-1"
+                else:
+                    data[change] = "SRC-999" if change == "receipt_id" else "CLOSED"
+                path.write_text(json.dumps(data), encoding="utf-8")
+                before = snapshot(root)
+                result = replenishment.replenish_from_goals(root, "fix", dry_run=True)
+>               self.assertFalse(result.get("replenished"), result)
+E               AssertionError: True is not false : {'ok': True, 'replenished': True, 'status': 'TASK_REPLENISHED', 'dry_run': True, 'reused_work': True, 'admitted_ticket': 'T-2', 'goal_id': 'self-maintenance-core', 'candidate': {'candidate_id': 'self-maintenance-core-repair-1', 'goal_id': 'self-maintenance-core', 'title': 'Investigate semantics of Local parser [self-maintenance-core]', 'priority': 'P2', 'description': 'Investigate and document semantics for unresolved item repair-1', 'scope': 'item:repair-1', 'target_locator': 'repair-1', 'evidence_source': '.saipen/evidence/coverage_gap.json', 'verification': 'The exact local regression oracle passes', 'needs': [], 'risk': 'low', 'metadata': {'item_id': 'repair-1', 'goal_id': 'self-maintenance-core', 'rva': '', 'va': '', 'bytes': None, 'module': None, 'capture_sha256': '', 'capture_path': ''}, 'evidence_fingerprint': 'sha256:def9f4224d5755fc'}, 'action': 'PHASE SCOUT T-2', 'next_action': 'PHASE SCOUT T-2', 'detail': 'would restore existing Work T-2'}
+
+tools\test_t2040_replenishment_recovery.py:185: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_exact_legacy_candidate_is_scoped_not_foreign_or_prefix
+SUBFAILED(recovering=False) tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_goal_policy_is_pinned_for_apply_and_recovery
+SUBFAILED(recovering=True) tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_goal_policy_is_pinned_for_apply_and_recovery
+FAILED tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_legacy_blocked_identity_deduplicates_but_never_restores
+SUBFAILED(reader=True) tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_missing_board_is_invalid_not_an_empty_queue
+SUBFAILED(entrypoint=True) tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_missing_board_is_invalid_not_an_empty_queue
+FAILED tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_native_revocation_after_plan_refuses_before_work_write
+SUBFAILED(text='Memo about Parser repair | goal: maintenance') tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_prose_does_not_acquire_candidate_identity
+SUBFAILED(text='Discuss candidate: parser-gap-1 | goal: maintenance') tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_prose_does_not_acquire_candidate_identity
+SUBFAILED(text='Mention parser-gap-1 | goal: maintenance') tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_prose_does_not_acquire_candidate_identity
+FAILED tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_recovery_rechecks_revoked_native_grant_before_unblock
+SUBFAILED(change='receipt_id') tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_source_metadata_and_index_must_name_same_exact_receipt
+SUBFAILED(change='status') tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_source_metadata_and_index_must_name_same_exact_receipt
+SUBFAILED(change='index_digest') tools/test_t2040_replenishment_recovery.py::ReplenishmentRecovery::test_source_metadata_and_index_must_name_same_exact_receipt
+14 failed, 19 passed, 6 subtests passed in 14.95s

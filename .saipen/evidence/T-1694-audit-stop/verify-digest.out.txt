@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "code": "RESPONSE_RENDERED",
+  "text": "STATUS: DONE\nRESULT: Töö säilitatud; 1 blokeeritud (BLOCKED_EXTERNAL 1)\nBLOCKER: AUDIT_INBOX_UNWORKABLE -- ACTIVE audit\nNEXT EXACT ACTION: NONE\nVALIDATION: NOT_RUN",
+  "reason": "final",
+  "emit": true
+}

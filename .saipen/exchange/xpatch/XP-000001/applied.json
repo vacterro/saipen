@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "patch_id": "XP-000001",
+  "applied_at": "2026-09-07T14:22:00Z",
+  "applied_by": "target",
+  "paths": {
+    "tools/saipen_engine/intake.py": {
+      "before_sha256": "ef8cbbcbbba8e69b16a68af608645c672c324e305c8414f788d1066bdd6a00b8",
+      "after_sha256": "1f98d19f2dadb70ae9be7fd9271e04b0c07703febe04cb18e7dc26e5a87e4da1"
+    },
+    "tools/saipen.py": {
+      "before_sha256": "be5b1e2213bdc3bb4b1cd3a33b0fff0cd60bf76908ca140f3cff8f3612331a1b",
+      "after_sha256": "e507b631a9a72ff16647061655eb2017fcd0ea22e12ead619b8f9fa0c391157a"
+    },
+    "tools/test_source_receipts.py": {
+      "before_sha256": "c224df4c5ee66e91fd131501441a7a4df44b0198d9497030b6a2a17d6493b103",
+      "after_sha256": "d9b27ab622153ccb329562d6ce5f50496de2cbc90ff8efe030fc714614a9d756"
+    }
+  },
+  "verification": [
+    {
+      "command": "python -m unittest tools.test_source_receipts",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m unittest discover -s tools",
+      "result": "PASS"
+    },
+    {
+      "command": "ruff check tools/saipen_engine/intake.py tools/saipen.py tools/test_source_receipts.py",
+      "result": "PASS"
+    }
+  ]
+}

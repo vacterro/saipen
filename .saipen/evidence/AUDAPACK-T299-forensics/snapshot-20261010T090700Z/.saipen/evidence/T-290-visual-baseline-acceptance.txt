@@ -1,0 +1,19 @@
+worktree baselines before pack: 12
+pack success: True | status: PACKED
+worktree baselines after pack : 12
+archive: v:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\__TO_AUDIT\_SAI_WEBSITE_07.10.26-T06-47-12.zip
+
+baselines in archive          : 12
+missing from archive: []
+unexpected in archive: []
+sha256 mismatches vs worktree: []
+changed during the pack (before != after): []
+
+source_review_ready           : True
+test_oracle_files_total       : 12
+test_oracle_files_included    : 12
+inventory_mode / archive_scope: filesystem / auto
+archive members               : 1710
+generated test output archived: ['test-results/.last-run.json', 'test-results/visual-baseline-visual-bas-082fb-280x720-DPR-1-debug-themes-/debug-themes-actual.png', 'test-results/visual-baseline-visual-bas-4f2d8-romium-1280x720-DPR-1-docs-/docs-actual.png', 'test-results/visual-baseline-visual-bas-78b3d-different-palette-persisted/home-dracula-actual.png', 'test-results/visual-baseline-visual-bas-9c248-lt-Chromium-1280x720-DPR-1-/home-actual.png', 'test-results/visual-baseline-visual-bas-adc54-romium-1280x720-DPR-1-spec-/spec-actual.png', 'test-results/visual-baseline-visual-bas-b3e00-m-1280x720-DPR-1-ecosystem-/ecosystem-actual.png', 'test-results/visual-baseline-visual-bas-d90d8-ium-1280x720-DPR-1-pricing-/pricing-actual.png', 'test-results/visual-baseline-visual-bas-ea2d2-x720-DPR-1-debug-rendering-/debug-rendering-actual.png', 'test-results/visual-baseline-visual-bas-eb089-720-DPR-1-debug-components-/debug-components-actual.png']
+
+ACCEPTANCE: PASS

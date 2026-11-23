@@ -1,0 +1,30 @@
+test_absent_projection_falls_back_to_canonical_scan_readonly (tools.test_settled_projection.SettledProjectionTests.test_absent_projection_falls_back_to_canonical_scan_readonly) ... ok
+test_append_below_bound_never_reads_sealed_bodies (tools.test_settled_projection.SettledProjectionTests.test_append_below_bound_never_reads_sealed_bodies) ... ok
+test_bounded_records_equal_snapshot_records (tools.test_settled_projection.SettledProjectionTests.test_bounded_records_equal_snapshot_records) ... ok
+test_corrupt_projection_head_fails_closed_instead_of_legacy_scan (tools.test_settled_projection.SettledProjectionTests.test_corrupt_projection_head_fails_closed_instead_of_legacy_scan) ... ok
+test_crash_shaped_token_mismatch_fails_closed (tools.test_settled_projection.SettledProjectionTests.test_crash_shaped_token_mismatch_fails_closed)
+A receipt moved after the head's token (crash between move and ... ok
+test_direct_caller_without_token_rebuilds_canonically (tools.test_settled_projection.SettledProjectionTests.test_direct_caller_without_token_rebuilds_canonically)
+A direct caller with no pre-move token never gets the bounded fold ... ok
+test_match_query_cost_bounded_by_relevant_segments (tools.test_settled_projection.SettledProjectionTests.test_match_query_cost_bounded_by_relevant_segments) ... ok
+test_normal_append_does_not_scale_with_sealed_segment_count (tools.test_settled_projection.SettledProjectionTests.test_normal_append_does_not_scale_with_sealed_segment_count)
+R010-B red control: one normal append across growing sealed ... ok
+test_ops_namespace_matches_stay_visible_on_bounded_path (tools.test_settled_projection.SettledProjectionTests.test_ops_namespace_matches_stay_visible_on_bounded_path) ... ok
+test_population_scaling_counters (tools.test_settled_projection.SettledProjectionTests.test_population_scaling_counters)
+100 / 1,000 / 10,000 receipts: hot cost stays bounded, not lifetime. ... ok
+test_rebuild_and_advance_publish_bounded_projection (tools.test_settled_projection.SettledProjectionTests.test_rebuild_and_advance_publish_bounded_projection) ... ok
+test_seal_happens_exactly_once_at_the_bound (tools.test_settled_projection.SettledProjectionTests.test_seal_happens_exactly_once_at_the_bound) ... ok
+test_seal_relocates_only_bounded_affected_locators (tools.test_settled_projection.SettledProjectionTests.test_seal_relocates_only_bounded_affected_locators)
+Sealing the full tail relocates exactly the operations present in ... ok
+test_settlement_advances_after_stale_projection (tools.test_settled_projection.SettledProjectionTests.test_settlement_advances_after_stale_projection) ... ok
+test_stale_projection_detected_without_opening_receipts (tools.test_settled_projection.SettledProjectionTests.test_stale_projection_detected_without_opening_receipts) ... ok
+test_tampered_relevant_receipt_fails_closed (tools.test_settled_projection.SettledProjectionTests.test_tampered_relevant_receipt_fails_closed) ... ok
+test_tampered_unrelated_sealed_receipt_leaves_hot_lookup_clean_and_deep_red (tools.test_settled_projection.SettledProjectionTests.test_tampered_unrelated_sealed_receipt_leaves_hot_lookup_clean_and_deep_red) ... ok
+test_zero_match_never_enumerates_settled_namespace (tools.test_settled_projection.SettledProjectionTests.test_zero_match_never_enumerates_settled_namespace)
+R010-A red control: a hot zero-match lookup must not enumerate ... ok
+test_zero_match_query_never_decodes_or_opens_lifetime_receipts (tools.test_settled_projection.SettledProjectionTests.test_zero_match_query_never_decodes_or_opens_lifetime_receipts) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 30.969s
+
+OK

@@ -1,0 +1,640 @@
+FFFFEFFF.FFF.FFFFFF.FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF.
+======================================================================
+ERROR: test_compiled_facet_is_exactly_the_current_canonical_decision_table (test_t1628_opencode_policy.NativePolicyTests.test_compiled_facet_is_exactly_the_current_canonical_decision_table)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 302, in test_compiled_facet_is_exactly_the_current_canonical_decision_table
+    from saipen_engine.native_host_policy import BEGIN, END, fragment
+ModuleNotFoundError: No module named 'saipen_engine.native_host_policy'
+
+======================================================================
+FAIL: test_bad_policy_uses_strict_and_names_its_policy_repair (test_t1628_opencode_policy.NativePolicyTests.test_bad_policy_uses_strict_and_names_its_policy_repair) (kind='bytes')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 223, in test_bad_policy_uses_strict_and_names_its_policy_repair
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_bad_policy_uses_strict_and_names_its_policy_repair (test_t1628_opencode_policy.NativePolicyTests.test_bad_policy_uses_strict_and_names_its_policy_repair) (kind='json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 223, in test_bad_policy_uses_strict_and_names_its_policy_repair
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_bad_policy_uses_strict_and_names_its_policy_repair (test_t1628_opencode_policy.NativePolicyTests.test_bad_policy_uses_strict_and_names_its_policy_repair) (kind='mode')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 223, in test_bad_policy_uses_strict_and_names_its_policy_repair
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_bad_policy_uses_strict_and_names_its_policy_repair (test_t1628_opencode_policy.NativePolicyTests.test_bad_policy_uses_strict_and_names_its_policy_repair) (kind='directory')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 223, in test_bad_policy_uses_strict_and_names_its_policy_repair
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_default_permits_all_three_gaps_with_physical_marker_and_effect (test_t1628_opencode_policy.NativePolicyTests.test_default_permits_all_three_gaps_with_physical_marker_and_effect) (gap='missing')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 197, in test_default_permits_all_three_gaps_with_physical_marker_and_effect
+    self.allowed(gap + "-default")
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 182, in allowed
+    self.assertEqual(record["outcome"], "allowed", record)
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'missing-default', 'outcome': 'blocked', 'message': "SAIPEN_GUARD_UNINSTALLED: no saipen guard at 'V:\\_TEMP_\\saipen-t1628-policy-11e1ganx\\missing-default\\profile\\absent\\tools\\saipen.py'; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)", 'before': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.'], 'after': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']}
+
+======================================================================
+FAIL: test_default_permits_all_three_gaps_with_physical_marker_and_effect (test_t1628_opencode_policy.NativePolicyTests.test_default_permits_all_three_gaps_with_physical_marker_and_effect) (gap='python')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 197, in test_default_permits_all_three_gaps_with_physical_marker_and_effect
+    self.allowed(gap + "-default")
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 182, in allowed
+    self.assertEqual(record["outcome"], "allowed", record)
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'python-default', 'outcome': 'blocked', 'message': "SAIPEN_GUARD_UNREACHABLE: no Python runtime found; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)", 'before': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.'], 'after': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']}
+
+======================================================================
+FAIL: test_default_permits_all_three_gaps_with_physical_marker_and_effect (test_t1628_opencode_policy.NativePolicyTests.test_default_permits_all_three_gaps_with_physical_marker_and_effect) (gap='stale')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 197, in test_default_permits_all_three_gaps_with_physical_marker_and_effect
+    self.allowed(gap + "-default")
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 182, in allowed
+    self.assertEqual(record["outcome"], "allowed", record)
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'stale-default', 'outcome': 'blocked', 'message': 'SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=T-1327-zero-manual-recovery-20260914.1 sha256=126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d; installed sha256=3ae853ca0db22b527229d6a2e54d43ff0ca6adf2bebc8b52960f91d075841c9b; restart OpenCode; the host tool did not execute', 'before': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpe_w25d0w","project_lineage":"lineage-2759aed1c481463cb36ff22a1f94e3b8","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-9001", "agent_incarnation": "inc-aebd7e06b02e877c", "decision": "AUTO_KICK", "execution_epoch": "ep-6e59801552ccc7f0", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-9001", "phase": "BUILD", "replacement_detected": true, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-9001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.'], 'after': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpe_w25d0w","project_lineage":"lineage-2759aed1c481463cb36ff22a1f94e3b8","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-9001", "agent_incarnation": "inc-aebd7e06b02e877c", "decision": "AUTO_KICK", "execution_epoch": "ep-6e59801552ccc7f0", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-9001", "phase": "BUILD", "replacement_detected": false, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-9001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.']}
+
+======================================================================
+FAIL: test_explicit_degraded_permits_the_same_three_gaps (test_t1628_opencode_policy.NativePolicyTests.test_explicit_degraded_permits_the_same_three_gaps) (gap='missing')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 203, in test_explicit_degraded_permits_the_same_three_gaps
+    self.allowed(gap + "-degraded")
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 182, in allowed
+    self.assertEqual(record["outcome"], "allowed", record)
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'missing-degraded', 'outcome': 'blocked', 'message': "SAIPEN_GUARD_UNINSTALLED: no saipen guard at 'V:\\_TEMP_\\saipen-t1628-policy-11e1ganx\\missing-degraded\\profile\\absent\\tools\\saipen.py'; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)", 'before': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.'], 'after': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']}
+
+======================================================================
+FAIL: test_explicit_degraded_permits_the_same_three_gaps (test_t1628_opencode_policy.NativePolicyTests.test_explicit_degraded_permits_the_same_three_gaps) (gap='python')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 203, in test_explicit_degraded_permits_the_same_three_gaps
+    self.allowed(gap + "-degraded")
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 182, in allowed
+    self.assertEqual(record["outcome"], "allowed", record)
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'python-degraded', 'outcome': 'blocked', 'message': "SAIPEN_GUARD_UNREACHABLE: no Python runtime found; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)", 'before': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.'], 'after': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']}
+
+======================================================================
+FAIL: test_explicit_degraded_permits_the_same_three_gaps (test_t1628_opencode_policy.NativePolicyTests.test_explicit_degraded_permits_the_same_three_gaps) (gap='stale')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 203, in test_explicit_degraded_permits_the_same_three_gaps
+    self.allowed(gap + "-degraded")
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 182, in allowed
+    self.assertEqual(record["outcome"], "allowed", record)
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'stale-degraded', 'outcome': 'blocked', 'message': 'SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=T-1327-zero-manual-recovery-20260914.1 sha256=126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d; installed sha256=3ae853ca0db22b527229d6a2e54d43ff0ca6adf2bebc8b52960f91d075841c9b; restart OpenCode; the host tool did not execute', 'before': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpe_w25d0w","project_lineage":"lineage-2759aed1c481463cb36ff22a1f94e3b8","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-9001", "agent_incarnation": "inc-9c3f809aa5068c23", "decision": "AUTO_KICK", "execution_epoch": "ep-6e59801552ccc7f0", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-9001", "phase": "BUILD", "replacement_detected": true, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-9001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.'], 'after': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpe_w25d0w","project_lineage":"lineage-2759aed1c481463cb36ff22a1f94e3b8","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-9001", "agent_incarnation": "inc-9c3f809aa5068c23", "decision": "AUTO_KICK", "execution_epoch": "ep-6e59801552ccc7f0", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-9001", "phase": "BUILD", "replacement_detected": false, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-9001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.']}
+
+======================================================================
+FAIL: test_known_foreign_lineage_blocks_even_a_degradable_stale_plugin (test_t1628_opencode_policy.NativePolicyTests.test_known_foreign_lineage_blocks_even_a_degradable_stale_plugin)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 250, in test_known_foreign_lineage_blocks_even_a_degradable_stale_plugin
+    self.assertIn("PROJECT_LINEAGE_MISMATCH", record["message"])
+AssertionError: 'PROJECT_LINEAGE_MISMATCH' not found in 'SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=T-1327-zero-manual-recovery-20260914.1 sha256=126b9f72910bd1b08df359cdad2d35c55c62c73faba5168a18eba7045663687d; installed sha256=3ae853ca0db22b527229d6a2e54d43ff0ca6adf2bebc8b52960f91d075841c9b; restart OpenCode; the host tool did not execute'
+
+======================================================================
+FAIL: test_known_lineage_contradiction_blocks_without_guard_or_interpreter (test_t1628_opencode_policy.NativePolicyTests.test_known_lineage_contradiction_blocks_without_guard_or_interpreter) (case='foreign-missing-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 263, in test_known_lineage_contradiction_blocks_without_guard_or_interpreter
+    self.assertIn("PROJECT_LINEAGE_MISMATCH", record["message"])
+AssertionError: 'PROJECT_LINEAGE_MISMATCH' not found in "SAIPEN_GUARD_UNINSTALLED: no saipen guard at 'V:\\_TEMP_\\saipen-t1628-policy-11e1ganx\\foreign-missing-degraded\\profile\\absent\\tools\\saipen.py'; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)"
+
+======================================================================
+FAIL: test_known_lineage_contradiction_blocks_without_guard_or_interpreter (test_t1628_opencode_policy.NativePolicyTests.test_known_lineage_contradiction_blocks_without_guard_or_interpreter) (case='foreign-missing-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 263, in test_known_lineage_contradiction_blocks_without_guard_or_interpreter
+    self.assertIn("PROJECT_LINEAGE_MISMATCH", record["message"])
+AssertionError: 'PROJECT_LINEAGE_MISMATCH' not found in "SAIPEN_GUARD_UNINSTALLED: no saipen guard at 'V:\\_TEMP_\\saipen-t1628-policy-11e1ganx\\foreign-missing-strict\\profile\\absent\\tools\\saipen.py'; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)"
+
+======================================================================
+FAIL: test_known_lineage_contradiction_blocks_without_guard_or_interpreter (test_t1628_opencode_policy.NativePolicyTests.test_known_lineage_contradiction_blocks_without_guard_or_interpreter) (case='foreign-python-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 263, in test_known_lineage_contradiction_blocks_without_guard_or_interpreter
+    self.assertIn("PROJECT_LINEAGE_MISMATCH", record["message"])
+AssertionError: 'PROJECT_LINEAGE_MISMATCH' not found in "SAIPEN_GUARD_UNREACHABLE: no Python runtime found; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)"
+
+======================================================================
+FAIL: test_known_lineage_contradiction_blocks_without_guard_or_interpreter (test_t1628_opencode_policy.NativePolicyTests.test_known_lineage_contradiction_blocks_without_guard_or_interpreter) (case='foreign-python-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 263, in test_known_lineage_contradiction_blocks_without_guard_or_interpreter
+    self.assertIn("PROJECT_LINEAGE_MISMATCH", record["message"])
+AssertionError: 'PROJECT_LINEAGE_MISMATCH' not found in "SAIPEN_GUARD_UNREACHABLE: no Python runtime found; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)"
+
+======================================================================
+FAIL: test_legitimate_carrier_remains_degradable_and_does_not_gain_admission (test_t1628_opencode_policy.NativePolicyTests.test_legitimate_carrier_remains_degradable_and_does_not_gain_admission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 278, in test_legitimate_carrier_remains_degradable_and_does_not_gain_admission
+    self.allowed(identifier)
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 182, in allowed
+    self.assertEqual(record["outcome"], "allowed", record)
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'legitimate-missing', 'outcome': 'blocked', 'message': "SAIPEN_GUARD_UNINSTALLED: no saipen guard at 'V:\\_TEMP_\\saipen-t1628-policy-11e1ganx\\legitimate-missing\\profile\\absent\\tools\\saipen.py'; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)", 'before': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.'], 'after': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']}
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='missing-default')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='missing-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='missing-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='missing-read')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='python-default')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='python-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='python-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='python-read')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='stale-default')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpe_w25d0w","project_lineage":"lineage-2759aed1c481463cb36ff22a1f94e3b8","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-9001", "agent_incarnation": "inc-aebd7e06b02e877c", "decision": "AUTO_KICK", "execution_epoch": "ep-6e59801552ccc7f0", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-9001", "phase": "BUILD", "replacement_detected": true, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-9001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='stale-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpe_w25d0w","project_lineage":"lineage-2759aed1c481463cb36ff22a1f94e3b8","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-9001", "agent_incarnation": "inc-9c3f809aa5068c23", "decision": "AUTO_KICK", "execution_epoch": "ep-6e59801552ccc7f0", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-9001", "phase": "BUILD", "replacement_detected": true, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-9001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='stale-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpe_w25d0w","project_lineage":"lineage-2759aed1c481463cb36ff22a1f94e3b8","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-9001", "agent_incarnation": "inc-ff73444fc70c8005", "decision": "AUTO_KICK", "execution_epoch": "ep-6e59801552ccc7f0", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-9001", "phase": "BUILD", "replacement_detected": true, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-9001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='stale-read')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpe_w25d0w","project_lineage":"lineage-2759aed1c481463cb36ff22a1f94e3b8","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-9001", "agent_incarnation": "inc-b5b50c5f5fbc2436", "decision": "AUTO_KICK", "execution_epoch": "ep-6e59801552ccc7f0", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-9001", "phase": "BUILD", "replacement_detected": true, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-9001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='invalid-bytes')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='invalid-json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='invalid-mode')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='invalid-directory')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='alias-0')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='alias-1')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='live-policy')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='foreign-stale-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"PROJECT_LINEAGE_MISMATCH","project_root":null,"project_lineage":null,"provenance":null}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='malformed-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='foreign-missing-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='ambient-missing-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='foreign-python-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='ambient-python-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='foreign-stale-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"PROJECT_LINEAGE_MISMATCH","project_root":null,"project_lineage":null,"provenance":null}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='malformed-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='foreign-missing-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='ambient-missing-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='foreign-python-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='ambient-python-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='legitimate-missing')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_native_policy_reads_match_python_including_bom_and_aliases (test_t1628_opencode_policy.NativePolicyTests.test_native_policy_reads_match_python_including_bom_and_aliases) (case='legitimate-python')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 233, in test_native_policy_reads_match_python_including_bom_and_aliases
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_observed_foreign_project_contradiction_blocks_in_both_modes (test_t1628_opencode_policy.NativePolicyTests.test_observed_foreign_project_contradiction_blocks_in_both_modes) (case='ambient-missing-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 272, in test_observed_foreign_project_contradiction_blocks_in_both_modes
+    self.assertIn("PROJECT_BINDING_AMBIGUOUS", record["message"])
+AssertionError: 'PROJECT_BINDING_AMBIGUOUS' not found in "SAIPEN_GUARD_UNINSTALLED: no saipen guard at 'V:\\_TEMP_\\saipen-t1628-policy-11e1ganx\\ambient-missing-degraded\\profile\\absent\\tools\\saipen.py'; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)"
+
+======================================================================
+FAIL: test_observed_foreign_project_contradiction_blocks_in_both_modes (test_t1628_opencode_policy.NativePolicyTests.test_observed_foreign_project_contradiction_blocks_in_both_modes) (case='ambient-missing-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 272, in test_observed_foreign_project_contradiction_blocks_in_both_modes
+    self.assertIn("PROJECT_BINDING_AMBIGUOUS", record["message"])
+AssertionError: 'PROJECT_BINDING_AMBIGUOUS' not found in "SAIPEN_GUARD_UNINSTALLED: no saipen guard at 'V:\\_TEMP_\\saipen-t1628-policy-11e1ganx\\ambient-missing-strict\\profile\\absent\\tools\\saipen.py'; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)"
+
+======================================================================
+FAIL: test_observed_foreign_project_contradiction_blocks_in_both_modes (test_t1628_opencode_policy.NativePolicyTests.test_observed_foreign_project_contradiction_blocks_in_both_modes) (case='ambient-python-degraded')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 272, in test_observed_foreign_project_contradiction_blocks_in_both_modes
+    self.assertIn("PROJECT_BINDING_AMBIGUOUS", record["message"])
+AssertionError: 'PROJECT_BINDING_AMBIGUOUS' not found in "SAIPEN_GUARD_UNREACHABLE: no Python runtime found; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)"
+
+======================================================================
+FAIL: test_observed_foreign_project_contradiction_blocks_in_both_modes (test_t1628_opencode_policy.NativePolicyTests.test_observed_foreign_project_contradiction_blocks_in_both_modes) (case='ambient-python-strict')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 272, in test_observed_foreign_project_contradiction_blocks_in_both_modes
+    self.assertIn("PROJECT_BINDING_AMBIGUOUS", record["message"])
+AssertionError: 'PROJECT_BINDING_AMBIGUOUS' not found in "SAIPEN_GUARD_UNREACHABLE: no Python runtime found; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)"
+
+======================================================================
+FAIL: test_policy_change_is_seen_by_the_same_live_factory (test_t1628_opencode_policy.NativePolicyTests.test_policy_change_is_seen_by_the_same_live_factory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 243, in test_policy_change_is_seen_by_the_same_live_factory
+    self.assertEqual(self.gap("live-policy")["decision"], "ALLOW_DEGRADED")
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_recognized_aliases_do_not_become_silent_strict_policy (test_t1628_opencode_policy.NativePolicyTests.test_recognized_aliases_do_not_become_silent_strict_policy)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 239, in test_recognized_aliases_do_not_become_silent_strict_policy
+    self.allowed(identifier)
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 182, in allowed
+    self.assertEqual(record["outcome"], "allowed", record)
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'alias-0', 'outcome': 'blocked', 'message': "SAIPEN_GUARD_UNINSTALLED: no saipen guard at 'V:\\_TEMP_\\saipen-t1628-policy-11e1ganx\\alias-0\\profile\\absent\\tools\\saipen.py'; the saipen guard could not be consulted for tool 'write' (consequential mutations fail closed)", 'before': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.'], 'after': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']}
+
+======================================================================
+FAIL: test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action (test_t1628_opencode_policy.NativePolicyTests.test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action) (gap='missing')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 211, in test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action (test_t1628_opencode_policy.NativePolicyTests.test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action) (gap='python')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 211, in test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"GUARD_UNREACHABLE"}\nA claimed or discoverable SAIPEN binding did not validate. Fail closed with the returned binding_code; do not fall back to an ambient repository.']
+
+======================================================================
+FAIL: test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action (test_t1628_opencode_policy.NativePolicyTests.test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action) (gap='stale')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 211, in test_strict_refuses_all_three_gaps_with_the_single_taxonomy_action
+    marker = self.gap(identifier)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\saipen-t1628-pair-lqvca4oz\project\tools\test_t1628_opencode_policy.py", line 177, in gap
+    self.assertEqual(len(found), 1, messages)
+AssertionError: 0 != 1 : ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpe_w25d0w","project_lineage":"lineage-2759aed1c481463cb36ff22a1f94e3b8","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.', 'SAIPEN_AUTO_RECALL {"active_work": "T-9001", "agent_incarnation": "inc-ff73444fc70c8005", "decision": "AUTO_KICK", "execution_epoch": "ep-6e59801552ccc7f0", "ingress": "NONE", "last_event": "E-100", "next_action": "PHASE BUILD T-9001", "phase": "BUILD", "replacement_detected": true, "resume": "saipen continue --json"}\nCONTINUATION_REQUIRED: T-9001 is active, legal and unfinished (phase BUILD). Before writing any conversational text, run exactly `saipen continue --json` and execute the action it returns in this turn.\nEarlier user messages in this conversation (for example `cc`) were already consumed into this execution. They are evidence, not a new question: do not ask what they mean, do not ask whether to continue, do not wait for another keystroke.']
+
+----------------------------------------------------------------------
+Ran 16 tests in 11.228s
+
+FAILED (failures=58, errors=1)

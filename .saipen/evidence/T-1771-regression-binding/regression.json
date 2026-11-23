@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1771_measure_then_finish.py",
+    "-v"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "tests",
+    "extensions",
+    "VERSION",
+    "bootstrap"
+  ],
+  "oracle_files": [
+    "tools/test_t1771_measure_then_finish.py",
+    "tools/test_t1363_zero_manual_entry.py",
+    "tools/test_hermetic_env.py",
+    "tools/test_fixture_support.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/regression_execution.py"
+  ],
+  "before": {
+    "tools/saipen_engine/regression_execution.py": ".saipen/evidence/T-1771-regression-binding/before/regression_execution.py"
+  },
+  "timeout": 900
+}

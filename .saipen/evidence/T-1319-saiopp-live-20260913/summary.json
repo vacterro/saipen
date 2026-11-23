@@ -1,0 +1,57 @@
+{
+  "requested_combo_alias": "SAIOPP",
+  "requested_model_selector": "sairoute/SAIOPP",
+  "cases": [
+    {
+      "case": "I1",
+      "session_ids": [
+        "ses_f649c3414ffeAsy7At4W8ICMzL"
+      ],
+      "process_ids": [
+        2536
+      ],
+      "checks": {},
+      "final_disposition": "SAIOPP_TIMEOUT"
+    },
+    {
+      "case": "I2",
+      "session_ids": [
+        "ses_f64979c06ffeMUFqbEljY6PeKx"
+      ],
+      "process_ids": [
+        10648
+      ],
+      "checks": {
+        "one_completed_canonical_continue": false,
+        "phase_owner_loaded_after_route": false,
+        "project_truth_obtained": true,
+        "concrete_next_tool_after_route": true,
+        "no_invented_git_result": true,
+        "no_root_question": true,
+        "no_duplicate_continue": true,
+        "not_stopped_at_unconfirmed": true
+      },
+      "final_disposition": "SAIPEN_FAILURE"
+    },
+    {
+      "case": "I3",
+      "session_ids": [
+        "ses_f6494a38cffebA6g7OhNV2K4pQ"
+      ],
+      "process_ids": [
+        14696
+      ],
+      "checks": {
+        "one_completed_canonical_continue": false,
+        "phase_owner_loaded_after_route": true,
+        "project_truth_obtained": true,
+        "concrete_next_tool_after_route": true,
+        "no_invented_git_result": true,
+        "no_root_question": true,
+        "no_duplicate_continue": true,
+        "not_stopped_at_unconfirmed": true
+      },
+      "final_disposition": "SAIPEN_FAILURE"
+    }
+  ]
+}

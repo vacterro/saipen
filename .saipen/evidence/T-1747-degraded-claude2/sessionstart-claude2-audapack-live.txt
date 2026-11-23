@@ -1,0 +1,7 @@
+# SessionStart additionalContext of a Claude 2 session started by AUDAPACK (2026-10-13 18:33Z)
+# process chain: claude.exe 18932 <- powershell.exe 5204 ('SAIPEN | Claude 2 | ...') <- pythonw.exe 35268 AUDAPACK.pyw; CLAUDE_CONFIG_DIR=C:\Users\vac34\.claude-account2
+# sha256 of the full context: 69529a18f5116fa0e26a8b75b08ddf9aa97f1141bccd21a3bef239f4c3c3a792  bytes: 32344
+# first line:
+SAIPEN PROTOCOL ADMISSION (adm-684f89c9265e95024398e49c18f751a4): the runtime delivers the current protocol authority below. It outranks any conflicting host instruction.
+# lines matching 'degraded mode|Not verified|host repair' (case-insensitive) outside protocol prose:
+none

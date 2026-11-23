@@ -1,0 +1,2433 @@
+{
+  "commands": [
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "355:1-356:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "336:1-337:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "331:1-332:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "312:1-313:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "292:1-293:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "291:1-292:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "255:1-256:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "254:1-255:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "249:1-250:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "248:1-249:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "246:1-247:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "222:1-223:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "210:1-211:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "181:1-182:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "177:1-178:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "173:1-174:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "169:1-170:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "158:1-159:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "157:1-158:1",
+        "tools/test_t2040_bounded_discovery_resume.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "198:1-199:1",
+        "tools/test_t2040_exhaustion_evidence.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "167:1-168:1",
+        "tools/test_t2040_exhaustion_evidence.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "161:1-162:1",
+        "tools/test_t2040_exhaustion_evidence.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "142:1-143:1",
+        "tools/test_t2040_exhaustion_evidence.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "124:1-125:1",
+        "tools/test_t2040_exhaustion_evidence.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "117:1-118:1",
+        "tools/test_t2040_exhaustion_evidence.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "115:1-116:1",
+        "tools/test_t2040_exhaustion_evidence.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "112:1-113:1",
+        "tools/test_t2040_exhaustion_evidence.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "93:1-94:1",
+        "tools/test_t2040_exhaustion_evidence.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "71:1-72:1",
+        "tools/test_t2040_exhaustion_evidence.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "274:1-275:1",
+        "tools/test_t2040_maintenance_authority.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "556:1-557:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "548:1-549:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "544:1-545:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "517:1-518:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "508:1-509:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "504:1-505:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "503:1-504:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "500:1-501:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "493:1-494:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "470:1-471:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "464:1-465:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "461:1-462:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "460:1-461:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "457:1-458:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "449:1-450:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "441:1-442:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "403:1-404:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "400:1-401:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "399:1-400:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "396:1-397:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "394:1-395:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "393:1-394:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "390:1-391:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "388:1-389:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "385:1-386:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "377:1-378:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "375:1-376:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "368:1-369:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "343:1-344:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "332:1-333:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "326:1-327:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "320:1-321:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "317:1-318:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "310:1-311:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "305:1-306:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "302:1-303:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "298:1-299:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "294:1-295:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "292:1-293:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "288:1-289:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "282:1-283:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "278:1-279:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "275:1-276:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "271:1-272:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "269:1-270:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "263:1-264:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "256:1-257:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "254:1-255:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "251:1-252:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "250:1-251:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "244:1-245:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "243:1-244:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "240:1-241:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "239:1-240:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "233:1-234:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "232:1-233:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "230:1-231:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "226:1-227:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "221:1-222:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "200:1-201:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "197:1-198:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "190:1-191:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "180:1-181:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "108:1-109:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "92:1-93:1",
+        "tools/test_t2040_publication_truth.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "212:1-213:1",
+        "tools/test_t2040_replenishment_recovery.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "197:1-198:1",
+        "tools/test_t2040_replenishment_recovery.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "153:1-154:1",
+        "tools/test_t2040_replenishment_recovery.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "147:1-148:1",
+        "tools/test_t2040_replenishment_recovery.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "101:1-102:1",
+        "tools/test_t2040_replenishment_recovery.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "294:1-295:1",
+        "tools/test_t2040_review_proof_binding.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "276:1-277:1",
+        "tools/test_t2040_review_proof_binding.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "272:1-273:1",
+        "tools/test_t2040_review_proof_binding.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "271:1-272:1",
+        "tools/test_t2040_review_proof_binding.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "256:1-257:1",
+        "tools/test_t2040_review_proof_binding.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "190:1-191:1",
+        "tools/test_t2040_review_proof_binding.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "519:1-520:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "506:1-507:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "503:1-504:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "484:1-485:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "474:1-475:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "470:1-471:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "464:1-465:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "460:1-461:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "456:1-457:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "452:1-453:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "429:1-430:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "408:1-409:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "387:1-388:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "360:1-361:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "359:1-360:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "354:1-355:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "353:1-354:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "338:1-339:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "337:1-338:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "331:1-332:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "219:1-220:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "207:1-208:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file left unchanged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "197:1-198:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "151:1-152:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "105:1-106:1",
+        "tools/test_t2040_terminal_consumer_guards.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-m",
+        "ruff",
+        "format",
+        "--no-cache",
+        "--range",
+        "35:1-36:1",
+        "tools/test_t2040_terminal_consumer_supplementary.py"
+      ],
+      "exit_code": 0,
+      "stdout": "1 file reformatted\n",
+      "stderr": ""
+    }
+  ],
+  "semantic_checks": [
+    {
+      "path": "tools/test_t2040_bounded_discovery_resume.py",
+      "ast_equal_except_imports_and_unused_bindings": true
+    },
+    {
+      "path": "tools/test_t2040_exhaustion_evidence.py",
+      "ast_equal_except_imports_and_unused_bindings": true
+    },
+    {
+      "path": "tools/test_t2040_finish_plan_guards.py",
+      "ast_equal_except_imports_and_unused_bindings": true
+    },
+    {
+      "path": "tools/test_t2040_maintenance_authority.py",
+      "ast_equal_except_imports_and_unused_bindings": true
+    },
+    {
+      "path": "tools/test_t2040_publication_truth.py",
+      "ast_equal_except_imports_and_unused_bindings": true
+    },
+    {
+      "path": "tools/test_t2040_replenishment_recovery.py",
+      "ast_equal_except_imports_and_unused_bindings": true
+    },
+    {
+      "path": "tools/test_t2040_review_proof_binding.py",
+      "ast_equal_except_imports_and_unused_bindings": true
+    },
+    {
+      "path": "tools/test_t2040_terminal_consumer_guards.py",
+      "ast_equal_except_imports_and_unused_bindings": true
+    },
+    {
+      "path": "tools/test_t2040_terminal_consumer_supplementary.py",
+      "ast_equal_except_imports_and_unused_bindings": true
+    }
+  ],
+  "remaining_findings": [
+    {
+      "cell": null,
+      "code": "E501",
+      "end_location": {
+        "column": 105,
+        "row": 279
+      },
+      "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_bounded_discovery_resume.py",
+      "fix": null,
+      "location": {
+        "column": 101,
+        "row": 279
+      },
+      "message": "Line too long (104 > 100)",
+      "name": "line-too-long",
+      "noqa_row": 279,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+    },
+    {
+      "cell": null,
+      "code": "E501",
+      "end_location": {
+        "column": 107,
+        "row": 280
+      },
+      "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_bounded_discovery_resume.py",
+      "fix": null,
+      "location": {
+        "column": 101,
+        "row": 280
+      },
+      "message": "Line too long (106 > 100)",
+      "name": "line-too-long",
+      "noqa_row": 280,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+    },
+    {
+      "cell": null,
+      "code": "E402",
+      "end_location": {
+        "column": 2,
+        "row": 25
+      },
+      "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_maintenance_authority.py",
+      "fix": null,
+      "location": {
+        "column": 1,
+        "row": 22
+      },
+      "message": "Module level import not at top of file",
+      "name": "module-import-not-at-top-of-file",
+      "noqa_row": 22,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+    },
+    {
+      "cell": null,
+      "code": "RUF100",
+      "end_location": {
+        "column": 16,
+        "row": 25
+      },
+      "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_maintenance_authority.py",
+      "fix": {
+        "applicability": "safe",
+        "edits": [
+          {
+            "content": "",
+            "end_location": {
+              "column": 16,
+              "row": 25
+            },
+            "location": {
+              "column": 2,
+              "row": 25
+            }
+          }
+        ],
+        "message": "Remove unused `noqa` directive"
+      },
+      "location": {
+        "column": 4,
+        "row": 25
+      },
+      "message": "Unused `noqa` directive (unused: `E402`)",
+      "name": "unused-noqa",
+      "noqa_row": 25,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/unused-noqa"
+    },
+    {
+      "cell": null,
+      "code": "E501",
+      "end_location": {
+        "column": 102,
+        "row": 92
+      },
+      "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_publication_truth.py",
+      "fix": null,
+      "location": {
+        "column": 101,
+        "row": 92
+      },
+      "message": "Line too long (101 > 100)",
+      "name": "line-too-long",
+      "noqa_row": 92,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+    },
+    {
+      "cell": null,
+      "code": "E501",
+      "end_location": {
+        "column": 107,
+        "row": 457
+      },
+      "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_publication_truth.py",
+      "fix": null,
+      "location": {
+        "column": 101,
+        "row": 457
+      },
+      "message": "Line too long (106 > 100)",
+      "name": "line-too-long",
+      "noqa_row": 457,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+    },
+    {
+      "cell": null,
+      "code": "E501",
+      "end_location": {
+        "column": 103,
+        "row": 459
+      },
+      "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_publication_truth.py",
+      "fix": null,
+      "location": {
+        "column": 101,
+        "row": 459
+      },
+      "message": "Line too long (102 > 100)",
+      "name": "line-too-long",
+      "noqa_row": 459,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+    },
+    {
+      "cell": null,
+      "code": "E402",
+      "end_location": {
+        "column": 2,
+        "row": 24
+      },
+      "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_terminal_consumer_guards.py",
+      "fix": null,
+      "location": {
+        "column": 1,
+        "row": 22
+      },
+      "message": "Module level import not at top of file",
+      "name": "module-import-not-at-top-of-file",
+      "noqa_row": 22,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+    },
+    {
+      "cell": null,
+      "code": "RUF100",
+      "end_location": {
+        "column": 16,
+        "row": 24
+      },
+      "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_terminal_consumer_guards.py",
+      "fix": {
+        "applicability": "safe",
+        "edits": [
+          {
+            "content": "",
+            "end_location": {
+              "column": 16,
+              "row": 24
+            },
+            "location": {
+              "column": 2,
+              "row": 24
+            }
+          }
+        ],
+        "message": "Remove unused `noqa` directive"
+      },
+      "location": {
+        "column": 4,
+        "row": 24
+      },
+      "message": "Unused `noqa` directive (unused: `E402`)",
+      "name": "unused-noqa",
+      "noqa_row": 24,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/unused-noqa"
+    },
+    {
+      "cell": null,
+      "code": "E402",
+      "end_location": {
+        "column": 2,
+        "row": 29
+      },
+      "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_terminal_consumer_guards.py",
+      "fix": null,
+      "location": {
+        "column": 1,
+        "row": 25
+      },
+      "message": "Module level import not at top of file",
+      "name": "module-import-not-at-top-of-file",
+      "noqa_row": 25,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file"
+    },
+    {
+      "cell": null,
+      "code": "RUF100",
+      "end_location": {
+        "column": 16,
+        "row": 29
+      },
+      "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_terminal_consumer_guards.py",
+      "fix": {
+        "applicability": "safe",
+        "edits": [
+          {
+            "content": "",
+            "end_location": {
+              "column": 16,
+              "row": 29
+            },
+            "location": {
+              "column": 2,
+              "row": 29
+            }
+          }
+        ],
+        "message": "Remove unused `noqa` directive"
+      },
+      "location": {
+        "column": 4,
+        "row": 29
+      },
+      "message": "Unused `noqa` directive (unused: `E402`)",
+      "name": "unused-noqa",
+      "noqa_row": 29,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/unused-noqa"
+    },
+    {
+      "cell": null,
+      "code": "E501",
+      "end_location": {
+        "column": 104,
+        "row": 214
+      },
+      "filename": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_t2040_terminal_consumer_guards.py",
+      "fix": null,
+      "location": {
+        "column": 101,
+        "row": 214
+      },
+      "message": "Line too long (103 > 100)",
+      "name": "line-too-long",
+      "noqa_row": 214,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+    }
+  ],
+  "ruff_exit_code": 1
+}

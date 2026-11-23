@@ -1,0 +1,24 @@
+{
+  "before_source": {
+    "ok": false,
+    "code": "TICKET_NOT_FOUND",
+    "detail": "SRC-047"
+  },
+  "public_cli_exit": 0,
+  "registration": {
+    "authority": "SRC-047",
+    "code": "ACCEPTED_DEBT_REGISTERED",
+    "events": [
+      "E-3",
+      "E-4"
+    ],
+    "journal_op_id": "accepted_debt.register-4320b1facda5",
+    "ok": true,
+    "record_id": "AD-000001"
+  },
+  "log_unchanged": true,
+  "validation_exit": 0,
+  "provenance_failures": [],
+  "visible_acceptance_warning": true,
+  "scope": "disposable existing acceptance fixture; no operator Source SRC-047 exists and no native approval was issued"
+}

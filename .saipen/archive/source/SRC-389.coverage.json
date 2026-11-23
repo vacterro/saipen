@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-389:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2019 closed with verification evidence in LOG: verify -> PASS [target: T-2019] conf: high -- final exact-tree focused record .saipen/evidence/focused-unit/67ef25d5a3ddabff-20261104T033002415179Z.json ran12 PASS 170.328s; only changed test script executed. All requested feature controls and deliberate red control satisfied; diagnostic repository core/lint failures remain explicitly separate, publication not authorized by this evidence. Durable ",
+      "text": "Rakenda suite preflight: enne t\u00e4issuite muudatusest m\u00f5jutatud testid, punase j\u00e4rel ainult kukkunud skript, CLI --fail-fast ja skripti kestus rekordis; sisend V:\\_TEMP_\\claude\\b314202c553fb9a8\\7f261c8f-a0c8-4d8f-b395-c7c97a4e4b03\\scratchpad\\SAIPEN-append-suite-preflight.md",
+      "verification": "the Work this request created reached its own verification gate; see the T-2019 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2019"
+    }
+  },
+  "schema_version": 1
+}

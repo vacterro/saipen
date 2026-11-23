@@ -1,0 +1,86 @@
+{
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "col_fingerprint 'sha256:cf0287a7311430f10687706c1baf8154a2ec360335eecbcd9be9838ba95284e2' != installed protocol fingerprint 'sha256:01632e1370254414d1aaecf44574482075431a88f591ce582132690cc54f3001'; .saipen\\improve\\imp-_sairelay-20261013-1\\saipen-cli-03\\saipen_improve_SAIPEN.md: report protocol_fingerprint 'sha256:cf0287a7311430f10687706c1baf8154a2ec360335eecbcd9be9838ba95284e2' != installed protocol fingerprint 'sha256:01632e1370254414d1aaecf44574482075431a88f591ce582132690cc54f3001'; a finding is rejected, not softened; report_status: complete requires the completion bar; a partial scope can never claim full context (T-555); run saipen improve reconcile imp-_sairelay-20261013-1\nPASS: core sweep linkage valid: every disposition resolves to a real finding/ticket, no unverified or INVALID/ALREADY_FIXED finding produced a ticket, source_reports resolve exactly\nPASS: KNOWLEDGE/ clean\nPASS: KNOWLEDGE/ structured surface valid (1 card(s), 1 active, index fresh)\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\nValidation FAILED: 1 problem(s), 2 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 1,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "improve report [improve-report] -- .saipen\\improve\\imp-_sairelay-20261013-1\\saipen-cli-01\\saipen_improve_SAIPEN.md: report protocol_fingerprint 'sha256:cf0287a7311430f10687706c1baf8154a2ec360335eecbcd",
+            "detail_hash": "2d327e982c75bd5f",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 2
+      },
+      "board_hash": "7baa18a63150b198",
+      "canonical_next_command": "saipen improve reconcile imp-_sairelay-20261013-1",
+      "content_hash": "bf148cc69c67cbb1",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "install_fingerprint": "install-v1:d008ed5f12049737a26b1769aa7aa27cc19724a7ccc61eb4bd11cbd2d9f18cc8",
+      "install_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+      "kind": "conformance_receipt",
+      "log_hash": "826adb07ecf00d8f",
+      "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_sairelay",
+      "receipt_id": "receipt-a48de43d3dc5",
+      "remediation_commands": [
+        "saipen improve reconcile imp-_sairelay-20261013-1"
+      ],
+      "schema_version": 2,
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:34c012cda1c0dfd5140713cfde122684b4bb99dd16fb7fcc265e49cab4b9bf99",
+      "state_hash": "ceddc87bd55ee5be",
+      "timestamp_utc": "2026-10-15T09:36:07.060086Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "no-git",
+      "source_tree_fingerprint": "no-git-tree-v1:34c012cda1c0dfd5140713cfde122684b4bb99dd16fb7fcc265e49cab4b9bf99"
+    }
+  },
+  "install_identity": {
+    "running_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "persisted_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "install_fingerprint": "install-v1:d008ed5f12049737a26b1769aa7aa27cc19724a7ccc61eb4bd11cbd2d9f18cc8",
+    "persisted_fingerprint": "install-v1:d008ed5f12049737a26b1769aa7aa27cc19724a7ccc61eb4bd11cbd2d9f18cc8",
+    "status": "MATCH",
+    "mismatch": null
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": "saipen improve reconcile imp-_sairelay-20261013-1",
+  "repair_status": "REPAIR_AVAILABLE",
+  "diagnostic": null,
+  "terminal": false,
+  "remediation_commands": [
+    "saipen improve reconcile imp-_sairelay-20261013-1"
+  ]
+}

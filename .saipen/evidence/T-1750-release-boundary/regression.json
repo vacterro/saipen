@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "command": ["{python}", "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_t1750_release_boundary.py", "-v"],
+  "format": "unittest",
+  "context": ["tools", "saipen", "tests", "extensions", "VERSION", "bootstrap", "bin"],
+  "oracle_files": ["tools/test_t1750_release_boundary.py", "tools/test_t1746_crew_terminal_outcome.py", "tools/test_source_receipts.py", "tools/test_fixture_support.py", "tools/test_hermetic_env.py"],
+  "subject_files": ["tools/saipen_engine/release.py"],
+  "before": {"tools/saipen_engine/release.py": ".saipen/evidence/T-1750-release-boundary/before/release.py"},
+  "timeout": 900
+}

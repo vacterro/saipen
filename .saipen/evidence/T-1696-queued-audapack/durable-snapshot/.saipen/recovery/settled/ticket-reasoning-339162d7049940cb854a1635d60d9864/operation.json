@@ -1,0 +1,62 @@
+{
+  "op_id": "ticket-reasoning-339162d7049940cb854a1635d60d9864",
+  "operation": "ticket_reasoning",
+  "created_at": "2026-09-25T15:27:16Z",
+  "agent": "buffy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "20bfbb1eea9475ab",
+  "preconditions": {
+    ".saipen/STATE.md": "aa20809a30034a6d",
+    ".saipen/BOARD.md": "41e644cbe158dce6",
+    ".saipen/LOG.md": "47c85dfd4299ba1f"
+  },
+  "read_preconditions": {
+    ".saipen/logs": "delete-tree-sha256:a9fd42093948549e254dc740707438fc8f0f40f60d4d84b215297142215dcbe5"
+  },
+  "verification_policy": "core_fast",
+  "status": "COMMITTED",
+  "progress_index": 5,
+  "targets": [
+    {
+      "path": ".saipen/LOG.md",
+      "role": "log",
+      "action": "write",
+      "before_hash": "47c85dfd4299ba1f",
+      "after_hash": "37e73a3aa9810a17",
+      "applied": true
+    },
+    {
+      "path": ".saipen/recovery/board-compaction/T-213/T-213-3d7eff10c96c1aecbfe400b8.BOARD.md",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "3d7eff10c96c1aec",
+      "applied": true
+    },
+    {
+      "path": ".saipen/recovery/board-compaction/T-213/T-213-3d7eff10c96c1aecbfe400b8.json",
+      "role": "generic",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "48746b5e81de163b",
+      "applied": true
+    },
+    {
+      "path": ".saipen/BOARD.md",
+      "role": "board",
+      "action": "write",
+      "before_hash": "41e644cbe158dce6",
+      "after_hash": "250a4426645365d8",
+      "applied": true
+    },
+    {
+      "path": ".saipen/STATE.md",
+      "role": "state",
+      "action": "write",
+      "before_hash": "aa20809a30034a6d",
+      "after_hash": "ee81ade238b6d26e",
+      "applied": true
+    }
+  ]
+}

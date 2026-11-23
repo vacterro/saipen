@@ -251,10 +251,218 @@ def incompatibility(recorded: object) -> str | None:
     if rule != IDENTITY_RULE:
         return (
             f"record was captured under verification identity rule {rule or 'legacy (pre-rule)'}; "
-            f"this engine requires {IDENTITY_RULE} -- "
-            "re-run the verifier to capture a current record"
+            "this engine requires "
+            f"{IDENTITY_RULE} -- re-run the verifier to capture a current record"
         )
     return None
+
+
+#: T-2163: the identity dimensions, in the order a refusal explains them.
+#: Anything the classifier names here is a difference ``compatible`` already
+#: refuses; the classifier adds words, never permission.
+_DIMENSIONS = (
+    "schema",
+    "configuration",
+    "identity_rule",
+    "python",
+    "platform",
+    "environment_sha256",
+    "toolchain",
+    "configuration_files",
+    "baseline",
+    "verifiers",
+)
+
+
+def _sha_excerpt(value: object) -> str:
+    if (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    ):
+        return f"sha256:{value[:16]}"
+    return repr(value)
+
+
+def _leaf_diffs(current: object, recorded: object, path: str) -> list[str]:
+    """Leaf-level disagreement paths between two identity subtrees."""
+    diffs: list[str] = []
+    if isinstance(current, dict) and isinstance(recorded, dict):
+        for key in sorted(set(current) | set(recorded)):
+            diffs += _leaf_diffs(current.get(key), recorded.get(key), f"{path}.{key}")
+    elif isinstance(current, list) and isinstance(recorded, list):
+        if len(current) != len(recorded):
+            diffs.append(f"{path} length {len(recorded)} -> {len(current)}")
+        for index, (leaf_current, leaf_recorded) in enumerate(zip(current, recorded)):
+            diffs += _leaf_diffs(leaf_current, leaf_recorded, f"{path}[{index}]")
+    elif current != recorded:
+        diffs.append(
+            f"{path} {_sha_excerpt(recorded)} -> {_sha_excerpt(current)}"
+        )
+    return diffs
+
+
+def _dimension_reason(key: str, current: object, recorded: object) -> str:
+    if key == "environment_sha256":
+        return (
+            "identity environment differs: the identity-relevant host "
+            f"environment changed (recorded {_sha_excerpt(recorded)}, "
+            f"this one {_sha_excerpt(current)})"
+        )
+    if key == "identity_rule":
+        return (
+            f"identity rule differs: recorded {recorded!r}, "
+            f"this engine requires {IDENTITY_RULE!r}"
+        )
+    if key == "schema":
+        return f"identity schema differs: recorded {recorded!r}, current {current!r}"
+    if key == "configuration":
+        return "verification configuration differs: recorded "
+    if key == "python":
+        return "python runtime identity differs: "
+    if key == "platform":
+        return "host platform differs: "
+    if key == "toolchain":
+        return "toolchain identity differs: "
+    if key == "configuration_files":
+        return "host configuration files differ: "
+    if key == "baseline":
+        return "baseline file identity differs: "
+    return f"{key} differs: "
+
+
+def _resource_reasons(
+    key: str, label: str, current: object, recorded: object
+) -> list[str]:
+    diffs = _leaf_diffs(current, recorded, key)
+    return [f"{label}{'; '.join(diffs)}"] if diffs else []
+
+
+def _verifier_reasons(current: dict, recorded: dict) -> list[str]:
+    """The measured T-2162 route case gets its own words.
+
+    The same engine bytes under a different install path are still an identity
+    mismatch -- records are not reusable across routes -- but naming the route
+    turns a mystery into a routing decision instead of a re-run.
+    """
+    reasons: list[str] = []
+    route_pairs: list[tuple[str, object, object]] = []
+    other: list[str] = []
+    for name in sorted(set(current) | set(recorded)):
+        leaf_current = current.get(name)
+        leaf_recorded = recorded.get(name)
+        if leaf_current == leaf_recorded:
+            continue
+        if (
+            isinstance(leaf_current, dict)
+            and isinstance(leaf_recorded, dict)
+            and leaf_current.get("sha256") == leaf_recorded.get("sha256")
+            and leaf_current.get("path") != leaf_recorded.get("path")
+        ):
+            route_pairs.append(
+                (name, leaf_recorded.get("path"), leaf_current.get("path"))
+            )
+            continue
+        other.extend(_leaf_diffs(leaf_current, leaf_recorded, f"verifiers.{name}"))
+    if route_pairs:
+        recorded_roots = {Path(str(item[1])).parent for item in route_pairs}
+        current_roots = {Path(str(item[2])).parent for item in route_pairs}
+        if len(recorded_roots) == 1 and len(current_roots) == 1:
+            reasons.append(
+                "verifier route differs: the engine bytes agree (every sha256 "
+                f"matches) but were reached through a different install route "
+                f"-- recorded verifiers under {next(iter(recorded_roots))}, "
+                f"evaluator verifiers under {next(iter(current_roots))}; a "
+                "record is not reusable across routes: rerun the verifier "
+                "through this evaluator route, or evaluate through the "
+                "record's route by launching the canonical saipen transport "
+                f"installed from {next(iter(recorded_roots))}; a route "
+                "choice only routes the same engine bytes to the records "
+                "that route owns, it never converts this record into a "
+                "compatible one"
+            )
+        else:
+            for name, recorded_path, current_path in route_pairs:
+                reasons.append(
+                    f"verifier route differs for {name}: recorded "
+                    f"{recorded_path!r}, evaluator {current_path!r}"
+                )
+    for item in other:
+        reasons.append(f"verifier identity differs: {item}")
+    return reasons
+
+
+def dimension_mismatches(current: object, recorded: object) -> list[str]:
+    """Why two identity captures disagree, dimension by dimension.
+
+    Pure classification of an already-refused record; it never changes the
+    compatibility decision and never names keys it does not recognize.
+    Same-rule dimension differences, the failed legacy-rule case and a
+    truncated record each get their own words, so the reader's next action
+    is a routing decision, not a reflex re-run.
+    """
+    if not isinstance(current, dict):
+        return ["the evaluator captured no verification environment identity"]
+    if not isinstance(recorded, dict):
+        return ["the recorded verification environment identity is not a mapping"]
+    reasons: list[str] = []
+    for key in _DIMENSIONS:
+        if key == "verifiers":
+            if current.get("verifiers") != recorded.get("verifiers"):
+                current_verifiers = current.get("verifiers") or {}
+                recorded_verifiers = recorded.get("verifiers") or {}
+                reasons.extend(_verifier_reasons(current_verifiers, recorded_verifiers))
+            continue
+        if key not in current:
+            continue
+        if key not in recorded:
+            reasons.append(f"recorded identity is missing the {key} dimension")
+            continue
+        leaf_current = current.get(key)
+        leaf_recorded = recorded.get(key)
+        if leaf_current == leaf_recorded:
+            continue
+        label = _dimension_reason(key, leaf_current, leaf_recorded)
+        if key in ("environment_sha256", "identity_rule", "schema"):
+            reasons.append(label)
+        else:
+            reasons.extend(_resource_reasons(key, label, leaf_current, leaf_recorded))
+    for key in sorted(set(recorded) - set(_DIMENSIONS)):
+        reasons.append(f"recorded identity carries an unrecognized field {key}")
+    for key in sorted(set(current) - set(_DIMENSIONS)):
+        reasons.append(f"recorded identity is missing the {key} dimension")
+    return reasons
+
+
+def incompatibility_detail(
+    root: Path,
+    recorded: object,
+    configuration: object = None,
+    *,
+    current: dict | None = None,
+) -> str | None:
+    """A reader-actionable reason an identity cannot be accepted here.
+
+    ``incompatibility`` stays the rule owner; this adds the dimension words
+    for same-rule records. ``current`` is the calling evaluator's live
+    capture when it already holds one; the classifier only words the
+    difference, it never decides admission.
+    """
+    reason = incompatibility(recorded)
+    if reason is not None:
+        return reason
+    if current is None:
+        try:
+            current = capture(root, configuration or recorded["configuration"])
+        except (OSError, ValueError) as exc:
+            return f"this verification environment cannot be captured: {exc}"
+    if current == recorded:
+        return None
+    reasons = dimension_mismatches(current, recorded)
+    return "; ".join(reasons) if reasons else (
+        "verification environment identity differs in a way this classifier "
+        "does not name"
+    )
 
 
 def replay_supported(recorded: dict) -> bool:
@@ -461,9 +669,6 @@ def single_flight(
     request_started_ns=None,
     request_started_monotonic=None,
     consumer=None,
-    rerun_reason=None,
-    force_fresh_reason=None,
-    profiler=None,
 ):
     """One execution per compatible identity; OS death releases ownership.
 
@@ -491,21 +696,9 @@ def single_flight(
     }
     if consumer is not None:
         observation["ticket"] = consumer
-    if rerun_reason is not None:
-        observation["rerun_reason"] = rerun_reason
-    if force_fresh_reason is not None or rerun_reason is not None:
-        observation["force_fresh_reason"] = force_fresh_reason or rerun_reason
-    if profiler and isinstance(profiler, dict):
-        for k, v in profiler.get("timings", {}).items():
-            observation[k] = v
-        if "execution_trigger" in profiler:
-            observation["execution_trigger"] = profiler["execution_trigger"]
-        if "verification_decision" in profiler:
-            observation["verification_decision"] = profiler["verification_decision"]
     _observe(root, observation_path, observation)
     lock = FileWriterLock(root / ".saipen/locks" / f"verification-{key}.lock", root)
     executor = None
-    flight = None
     try:
         _acquire_observed(lock, deadline, observation)
         prior = _read_state(root, path)
@@ -577,43 +770,12 @@ def single_flight(
                 raise ValueError(
                     "verification exited without publishing a complete execution receipt"
                 )
-            rec = flight.written["record"]
-            fam = identity.get("family")
-            decision = (
-                "JOIN_IDENTICAL_IN_FLIGHT"
-                if flight.joined
-                else ("REUSE_VALID_RECORD" if flight.reused else (
-                    "RUN_TARGETED_REQUIRED" if fam == "focused-unit" else "RUN_FULL_REQUIRED"
-                ))
-            )
-            trigger = (
-                (profiler.get("execution_trigger") if profiler else None)
-                or rerun_reason
-                or ("NO_COMPATIBLE_VERIFIED_RECORD" if not flight.reused else None)
-            )
             observation.update(
                 status="COMPLETE",
                 reused=flight.reused,
                 joined=flight.joined,
-                cache_reused=flight.reused,
-                single_flight_joined=flight.joined,
-                verdict=rec.get("verdict"),
-                judged_verdict=rec.get("verdict"),
-                raw_status=rec.get("status"),
+                verdict=flight.written["record"]["verdict"],
                 record=flight.written["path"],
-                record_path=flight.written["path"],
-                record_sha256=flight.written.get("sha256"),
-                verification_decision=decision,
-                execution_trigger=trigger,
-                source_fingerprint=identity.get("fingerprint"),
-                verification_identity_digest=key,
-                single_flight_operation=key,
-                jobs=rec.get("jobs", 1),
-                selected_test_count=rec.get("ran"),
-                actual_executed_test_count=(
-                    rec.get("ran") if not (flight.reused or flight.joined) else 0
-                ),
-                source_change_generation=(identity.get("fingerprint") or "")[:16],
             )
         except BaseException:
             if flight.written is None:
@@ -623,17 +785,7 @@ def single_flight(
         finally:
             _ACTIVE.reset(token)
     finally:
-        elapsed = round(time.monotonic() - began, 6)
-        if profiler and isinstance(profiler, dict):
-            for k, v in profiler.get("timings", {}).items():
-                observation[k] = v
-        observation.update(
-            elapsed_wall_s=elapsed,
-            request_wall_s=elapsed,
-            lock_wait_wall_s=observation.get("coordination_wait_wall_s", 0.0),
-        )
-        if flight is not None and flight.joined:
-            observation["single_flight_join_wall_s"] = elapsed
+        observation.update(elapsed_wall_s=round(time.monotonic() - began, 6))
         if observation["status"] == "REQUESTED":
             observation["status"] = "INTERRUPTED"
         _observe(root, observation_path, observation)

@@ -1,0 +1,10 @@
+{
+  "restored_cache_extensions": [
+    "UNTR",
+    "FSMN"
+  ],
+  "all_8824_index_entries_byte_identical": true,
+  "TREE_extension_byte_identical": true,
+  "observed_sha256": "ffff8588d796d2cfb7cf24afc6a34412670808dd1da2bf7a8fce83cbabc44380",
+  "restored_sha256": "dcb1637b2114fe07b413565018aad079a1fcefbbffe3fff6220d22556f1a9adf"
+}

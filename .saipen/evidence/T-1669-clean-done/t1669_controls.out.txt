@@ -1,0 +1,17 @@
+utc: 2026-10-08T01:51:25Z
+CONTROL 1/3 unmutated copy: exit 0, Ran 6 tests
+CONTROL 2/3 unmutated copy: exit 0, Ran 6 tests
+CONTROL 3/3 unmutated copy: exit 0, Ran 6 tests
+M1 nothing projects the router's answer on DONE: DETECTED in 3 of 3
+      red: test_clean_to_done_commits_the_routed_scout_before_any_claim
+      red: test_the_pre_fix_value_fails_the_same_fixture
+M2 DONE plans PHASE DONE again: DETECTED in 3 of 3
+      red: test_clean_to_done_without_routed_work_matches_the_router
+M3 the result echoes the planned value, not the committed one: DETECTED in 3 of 3
+      red: test_clean_to_done_commits_the_routed_scout_before_any_claim
+command: python -B -m unittest test_t1669_clean_done_projection (cwd tools/)
+verifier:fbebd2f5010a9506  (tools/test_t1669_clean_done_projection.py, byte-identical in both trees)
+FAIL subject:cf5185e4312a753b  exit 1  red: test_clean_to_done_commits_the_routed_scout_before_any_claim, test_clean_to_done_without_routed_work_matches_the_router
+PASS subject:bb4cfb79e587e2bd  exit 0  Ran 6 tests
+mutations 3, undetected 0, with an unstable test 0
+--- exit: 0 ---

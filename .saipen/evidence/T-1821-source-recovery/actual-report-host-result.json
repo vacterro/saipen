@@ -1,0 +1,24 @@
+{
+  "observedUtc": "2026-10-21T03:21:44.156Z",
+  "scope": "Actual stored T-301 report and installed Streamdown SSR; no separate pre-transport stream, UI screenshot or physical input observation",
+  "storedPart": "part_mveqvmtd_a936c6d1-84fb-47ad-b884-54163551fe52",
+  "storedSha256": "266e2aeec04312c477e312e10d96e0730e31728c85d970bc7ff34d03b272b987",
+  "engine": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE\\zcode\\node_modules\\streamdown\\dist\\index.js",
+  "engineSha256": "2ed278c7390c627ae66a71245e15bcd370b14f9afe1ceb8eb917c2c06558aead",
+  "original": {
+    "html": "<div class=\"space-y-4 whitespace-normal [&amp;&gt;*:first-child]:mt-0 [&amp;&gt;*:last-child]:mb-0\"><p>STATUS: BLOCKED (honest; no fabricated acceptance)\nAUTHORITY: bounded operator reauthorized E-3366; review recorded E-3368\nTICKET: T-301\nINPUT ABI VERDICT: PASS (x64 KeyInput 24, MouseInput 32, INPUT 40, union offset 8)\nDESKTOP PROBE VERDICT: BLOCKED_ENVIRONMENT (interactive desktop unavailable)\nCONSOLE WINDOW OWNERSHIP: hardened (session + conhost + exact title + nonce; ambiguous rejected)\nSENDINPUT DELIVERY: return counts + GetLastError wired; physical delivery blocked\nCOPY RESULT: not proven\nPASTE RESULT: not proven\nCTRL+C RESULT: not proven\nCTRL+A RESULT: mechanism fixed via GetAsyncKeyState low bit; physical proof blocked\nUNICODE RESULT: not proven\nNEGATIVE CONTROLS: controller-off detected; input-dependent ones honestly blocked\nWINDOWS LIVE ACCEPTANCE: BLOCKED_ENVIRONMENT (7 cases)\nSTAGED BINARY HASH: 04B063A10946F64A22B32E2461BA91E52406F6A5363961D32B3207F06AF238BD\nINSTALLED BINARY HASH: 5A45188E3E4A8ED3E0CA806EB09B6557C4474BF36347F73CD007F73DBA4DB6A5\nCANONICAL VERIFY: E-3367 recorded; REVIEW -&gt; BLOCKED\nREMAINING BLOCKERS: no interactive desktop; installed binary stale; deployment authorization unverified\nNEXT EXACT ACTION: rerun on unlocked interactive Windows desktop; deploy staged binary only with verified authorization\nNEED USER: yes (interactive desktop and deployment authorization)</p></div>",
+    "breaks": 0,
+    "paragraphs": 1
+  },
+  "normalizedDiagnosticOnly": {
+    "html": "<div class=\"space-y-4 whitespace-normal [&amp;&gt;*:first-child]:mt-0 [&amp;&gt;*:last-child]:mb-0\"><p>STATUS: BLOCKED (honest; no fabricated acceptance)<br/>\nAUTHORITY: bounded operator reauthorized E-3366; review recorded E-3368<br/>\nTICKET: T-301<br/>\nINPUT ABI VERDICT: PASS (x64 KeyInput 24, MouseInput 32, INPUT 40, union offset 8)<br/>\nDESKTOP PROBE VERDICT: BLOCKED_ENVIRONMENT (interactive desktop unavailable)<br/>\nCONSOLE WINDOW OWNERSHIP: hardened (session + conhost + exact title + nonce; ambiguous rejected)<br/>\nSENDINPUT DELIVERY: return counts + GetLastError wired; physical delivery blocked<br/>\nCOPY RESULT: not proven<br/>\nPASTE RESULT: not proven<br/>\nCTRL+C RESULT: not proven<br/>\nCTRL+A RESULT: mechanism fixed via GetAsyncKeyState low bit; physical proof blocked<br/>\nUNICODE RESULT: not proven<br/>\nNEGATIVE CONTROLS: controller-off detected; input-dependent ones honestly blocked<br/>\nWINDOWS LIVE ACCEPTANCE: BLOCKED_ENVIRONMENT (7 cases)<br/>\nSTAGED BINARY HASH: 04B063A10946F64A22B32E2461BA91E52406F6A5363961D32B3207F06AF238BD<br/>\nINSTALLED BINARY HASH: 5A45188E3E4A8ED3E0CA806EB09B6557C4474BF36347F73CD007F73DBA4DB6A5<br/>\nCANONICAL VERIFY: E-3367 recorded; REVIEW -&gt; BLOCKED<br/>\nREMAINING BLOCKERS: no interactive desktop; installed binary stale; deployment authorization unverified<br/>\nNEXT EXACT ACTION: rerun on unlocked interactive Windows desktop; deploy staged binary only with verified authorization<br/>\nNEED USER: yes (interactive desktop and deployment authorization)</p></div>",
+    "breaks": 19,
+    "paragraphs": 1
+  },
+  "correctedCanonical": {
+    "html": "<div class=\"space-y-4 whitespace-normal [&amp;&gt;*:first-child]:mt-0 [&amp;&gt;*:last-child]:mb-0\"><p>STATUS: BLOCKED<br/>\nRESULT: Controlled rendering probe fixture<br/>\nBLOCKER: PROBE_FIXTURE -- rendering only<br/>\nNEXT EXACT ACTION: NONE<br/>\nVALIDATION: NOT_RUN</p></div>",
+    "breaks": 4,
+    "paragraphs": 1
+  },
+  "note": "The 20-field normalization is a diagnostic, not an authorized canonical output or a relaxed response budget."
+}

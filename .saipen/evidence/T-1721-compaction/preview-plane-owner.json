@@ -1,0 +1,74 @@
+{
+  "scope": "read-only preparation; no engineering claim or completion",
+  "command": [
+    "tests/test_plane_launch_async.py::test_b_the_verdict_is_applied_on_the_gui_thread",
+    "-q",
+    "-p",
+    "no:cacheprovider"
+  ],
+  "exit_code": 1,
+  "observations": [
+    {
+      "stage": "before unchanged test",
+      "project_ids": [
+        "p1"
+      ],
+      "config_on_disk": false,
+      "task_runner_state": "OPEN",
+      "task_inflight": false
+    },
+    {
+      "stage": "get_project: p1",
+      "project_ids": [
+        "fastprompter",
+        "saiaudit",
+        "saipen",
+        "saipet",
+        "saiwork2",
+        "saipenview",
+        "saiplan",
+        "saitalk",
+        "smart_vac_cleaner",
+        "video_downloader_yt_cm",
+        "wintage",
+        "pr_video_random_cut",
+        "vaczen_calendar_calendartask",
+        "vacwplayer",
+        "saisent",
+        "termisai"
+      ],
+      "config_on_disk": false,
+      "task_runner_state": "OPEN",
+      "task_inflight": false,
+      "found": false
+    },
+    {
+      "stage": "after unchanged test",
+      "project_ids": [
+        "fastprompter",
+        "saiaudit",
+        "saipen",
+        "saipet",
+        "saiwork2",
+        "saipenview",
+        "saiplan",
+        "saitalk",
+        "smart_vac_cleaner",
+        "video_downloader_yt_cm",
+        "wintage",
+        "pr_video_random_cut",
+        "vaczen_calendar_calendartask",
+        "vacwplayer",
+        "saisent",
+        "termisai"
+      ],
+      "config_on_disk": false,
+      "task_runner_state": "OPEN",
+      "task_inflight": false
+    }
+  ],
+  "product_files_checked": 342,
+  "product_changed": [],
+  "canonical_unchanged": true,
+  "stdout": "F                                                                        [100%]\n================================== FAILURES ===================================\n_______________ test_b_the_verdict_is_applied_on_the_gui_thread _______________\n\ninstalled = <tests.test_launch_federation.Plane object at 0x00000236A0E99850>\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000236A0ED4690>\nlaunch_env = namespace(window=<audapack.ui_qt.main_window.MainWindow(0x2369ef7ea50) at 0x00000236A3030280>, cfg=LauncherConfig(id='.../pytest-24/test_b_the_verdict_is_applied_0/Proj'), key='plane-launch:p1:sai:antigravity:windows-user:1f17624fa8051f44')\nqapp = <PySide6.QtWidgets.QApplication(0x2369ed22190) at 0x00000236A0ED47C0>\n\n    def test_b_the_verdict_is_applied_on_the_gui_thread(\n            installed, monkeypatch, launch_env, qapp):\n        env = launch_env\n        spy = _Spy()\n        monkeypatch.setattr(env.window, \"_register_agent_launch\", spy)\n        gate = _Gate(ok_verdict())\n        monkeypatch.setattr(sai, \"launch\", gate)\n    \n        env.window._launch_plane_account(\n            env.cfg, env.target, env.launch_target, env.resolution)\n        assert gate.entered.wait(5.0)\n        gate.release.set()\n>       assert spin(qapp, lambda: spy.count == 1)\nE       assert False\nE        +  where False = spin(<PySide6.QtWidgets.QApplication(0x2369ed22190) at 0x00000236A0ED47C0>, <function test_b_the_verdict_is_applied_on_the_gui_thread.<locals>.<lambda> at 0x00000236A41602C0>)\n\ntests\\test_plane_launch_async.py:218: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/test_plane_launch_async.py::test_b_the_verdict_is_applied_on_the_gui_thread\n1 failed in 13.32s\n"
+}

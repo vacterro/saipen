@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "format": "unittest",
+  "timeout": 900,
+  "command": [
+    "{python}",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_t1817_diagnostic_ownership.py",
+    "-v"
+  ],
+  "context": [
+    "tools",
+    "saipen",
+    "bootstrap",
+    "extensions",
+    "tests/scenarios",
+    "tests/fixtures",
+    "VERSION"
+  ],
+  "oracle_files": [
+    "tools/test_t1817_diagnostic_ownership.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/conformance.py"
+  ],
+  "before": {
+    "tools/saipen_engine/conformance.py": ".saipen/evidence/T-1817-finding-ownership/before/conformance.py"
+  }
+}

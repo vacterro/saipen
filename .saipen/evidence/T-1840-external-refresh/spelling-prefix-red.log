@@ -1,0 +1,14 @@
+test_receipt_and_repeat_accept_same_executable_with_different_case (test_t1840_external_renewal.ExternalRenewalTests.test_receipt_and_repeat_accept_same_executable_with_different_case) ... FAIL
+
+======================================================================
+FAIL: test_receipt_and_repeat_accept_same_executable_with_different_case (test_t1840_external_renewal.ExternalRenewalTests.test_receipt_and_repeat_accept_same_executable_with_different_case)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1840_external_renewal.py", line 175, in test_receipt_and_repeat_accept_same_executable_with_different_case
+    self.assertIsNone(external.receipt_plan(entry, root=self.root)[1])
+AssertionError: 'external verifier context/runtime/argv changed since the receipt' is not None
+
+----------------------------------------------------------------------
+Ran 1 test in 0.920s
+
+FAILED (failures=1)

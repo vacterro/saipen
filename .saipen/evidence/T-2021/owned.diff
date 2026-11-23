@@ -1,0 +1,630 @@
+--- before/tools/saipen.py
+
++++ tools/saipen.py
+
+@@ -2718,6 +2718,11 @@
+
+                 "reason": "goal-waiting-authority",
+                 "detail": replenish_res.get("detail"),
+                 "selected_candidate": replenish_res.get("selected_candidate"),
++                "operator_action": replenish_res.get("operator_action"),
++                "canonical_next_command": replenish_res.get("canonical_next_command"),
++                "required_scope": replenish_res.get("required_scope"),
++                "checkpoint_ticket_limit": replenish_res.get("checkpoint_ticket_limit"),
++                "checkpoint_wave_limit": replenish_res.get("checkpoint_wave_limit"),
+                 "dry_run": bool(dry_run),
+             })
+             return 0
+--- before/tools/saipen_engine/board.py
+
++++ tools/saipen_engine/board.py
+
+@@ -2064,20 +2064,18 @@
+
+     active_goals = [
+         g for g in (persistent_goals or [])
+         if (isinstance(g, dict) and g.get("current_status") != "SATISFIED" and not g.get("paused"))
+-        or (hasattr(g, "current_status") and g.current_status != "SATISFIED" and not getattr(g, "paused", False))
++        or (hasattr(g, "current_status") and g.current_status != "SATISFIED"
++            and not getattr(g, "paused", False))
+     ]
+ 
+-    if (
+-        not doing
+-        and not todo
+-        and not blocked
+-        and unresolved_audit_count == 0
+-        and not has_residue
+-        and not has_invalid_audit
+-    ):
++    # Queue blockers describe those tickets, not independent goal discovery.
++    # Discovery is read-only here; the filesystem/admission owners prove the
++    # selected goal's authority before any task is created.
++    if not doing and not workable_tickets(tickets, agent=(state or {}).get("agent"), now=now):
+         if active_goals:
+-            waiting_auth = any(
+-                (g.get("current_status") if isinstance(g, dict) else g.current_status) == "WAITING_AUTHORITY"
++            waiting_auth = all(
++                (g.get("current_status") if isinstance(g, dict) else g.current_status)
++                == "WAITING_AUTHORITY"
+                 for g in active_goals
+             )
+             if waiting_auth:
+@@ -2086,28 +2084,40 @@
+
+                     "stop_reason": "WAITING_AUTHORITY",
+                     "no_admissible_work": True,
+                     "all_requirements_complete": False,
+-                    "unresolved_audit_count": 0,
++                    "unresolved_audit_count": unresolved_audit_count,
+                     "next_exact_action": "saipen status",
+                     "externally_blocked": [],
+                     "operator_required": [],
+                     "future_gated": [],
+-                    "active_goals": [g.to_dict() if hasattr(g, "to_dict") else g for g in active_goals],
+-                    "detail": f"queue empty but {len(active_goals)} active persistent goal(s) require operator authority",
++                    "active_goals": [
++                        g.to_dict() if hasattr(g, "to_dict") else g for g in active_goals
++                    ],
++                    "detail": (
++                        f"no runnable Board work; {len(active_goals)} active goal(s) "
++                        "require authority"
++                    ),
+                 }
+             return {
+                 "disposition": "GOAL_GAPS_ACTIONABLE",
+                 "stop_reason": "NO_ADMISSIBLE_WORK",
+                 "no_admissible_work": True,
+                 "all_requirements_complete": False,
+-                "unresolved_audit_count": 0,
++                "unresolved_audit_count": unresolved_audit_count,
+                 "next_exact_action": "saipen continue",
+                 "externally_blocked": [],
+                 "operator_required": [],
+                 "future_gated": [],
+                 "active_goals": [g.to_dict() if hasattr(g, "to_dict") else g for g in active_goals],
+-                "detail": f"queue empty but {len(active_goals)} active persistent goal(s) have unexamined research/work gaps",
++                "detail": (
++                    f"no runnable Board work; {len(active_goals)} active goals "
++                    "need evidence discovery"
++                ),
+             }
+ 
++    if (
++        not doing and not todo and not blocked and unresolved_audit_count == 0
++        and not has_residue and not has_invalid_audit
++    ):
+         return {
+             "disposition": ALL_WORK_COMPLETE,
+             "stop_reason": ALL_REQUIREMENTS_COMPLETE,
+--- before/tools/saipen_engine/router.py
+
++++ tools/saipen_engine/router.py
+
+@@ -818,10 +818,22 @@
+
+             "detail": "active HUNT phase owns continuation",
+         }
+ 
++    from .board import classify_idle_work
++    from .persistent_goal import list_goals
++
++    goals = list_goals(project_root) if project_root else []
++    idle = classify_idle_work(
++        board["tickets"], audit_inbox=audit_inbox, future_gate=future_gate,
++        state=state, now=now, persistent_goals=goals,
++    )
++
+     # UNWORKABLE AUDIT INBOX: An ACTIVE inbox layer whose linked Work is unworkable
+     # (BLOCKED_EXTERNAL / operator decision required). It sits below eligible FUTURE GATES
+     # and active HUNT continuation so external blockers do not starve independent work.
+-    if audit_inbox and audit_inbox.get("unworkable_active_only"):
++    if (
++        audit_inbox and audit_inbox.get("unworkable_active_only")
++        and not idle.get("active_goals")
++    ):
+         idle_cls = audit_inbox.get("idle_classification") or "IDLE_BLOCKED_EXTERNAL"
+         next_act = audit_inbox.get("next_exact_action") or audit_inbox.get(
+             "action", "saipen audit status"
+@@ -856,20 +868,8 @@
+
+     # PHASE echo and never a WAIT -- a WAIT reaching here already failed the
+     # hard-stop gate above (the narrow DONE+empty-TODO exception), so it is a
+     # stale WAIT to route past, not a brake to restate.
+-    from .board import classify_idle_work
+-    from .persistent_goal import list_goals
+-
+-    goals = list_goals(project_root) if project_root else []
+-    idle = classify_idle_work(
+-        board["tickets"],
+-        audit_inbox=audit_inbox,
+-        future_gate=future_gate,
+-        state=state,
+-        now=now,
+-        persistent_goals=goals,
+-    )
+     res_action = na if (na.startswith("saipen ") or na.startswith("RUN:")) else "saipen continue"
+-    if idle.get("disposition") == "GOAL_GAPS_ACTIONABLE":
++    if idle.get("active_goals"):
+         res_action = "saipen continue"
+     if idle["no_admissible_work"]:
+         res = {
+@@ -1293,9 +1293,9 @@
+
+     Called from `route_next` (which alone sees the project root and every idle
+     branch): it PROVES the recorded claim against the live index and, when the
+     claim is uncorroborated, corrects the evidence and the operator instruction.
+-    It never unblocks publication, mutates the index or issues approval, and a
+-    corroborated claim (real foreign entries present) is returned untouched, so
+-    the protection is never weakened. Returns None when nothing changes.
++    It never unblocks publication, mutates the index or issues approval. Foreign,
++    ambiguous and sensitive entries retain their protection with current counts.
++    Returns None when no complete stable inventory can justify a reconciliation.
+     """
+     if project_root is None:
+         return None
+@@ -1329,7 +1329,23 @@
+
+ 
+     # Any foreign, ambiguous, or sensitive staged entries prevent unblocking
+     if foreign_count > 0 or ambiguous_count > 0 or sensitive_count > 0:
+-        return None
++        return {
++            **blocker,
++            "foreign_staged_count": foreign_count,
++            "ambiguous_staged_count": ambiguous_count,
++            "sensitive_staged_count": sensitive_count,
++            "live_staged_count": len(entries),
++            "inventory_status": VERIFIED_COMPLETE,
++            "recorded_claim_corroborated": foreign_count > 0,
++            "recovery_internally_authorized": False,
++            "root_cause": (
++                f"live index: {len(entries)} staged entries, {foreign_count} foreign, "
++                f"{ambiguous_count} ambiguous, {sensitive_count} publication-forbidden"
++            ),
++            "exact_missing_evidence": (
++                "Staged ownership and exact publication scope remain unapproved"
++            ),
++        }
+     live = len(entries)
+     return {
+         **blocker,
+@@ -1490,7 +1506,9 @@
+
+     action = str(routed.get("action") or "")
+     reason = str(routed.get("reason") or "")
+     idle_shape = reason in ("maintain", "audit-inbox-unworkable")
+-    if not idle_shape or routed.get("stop_reason") != "NO_ADMISSIBLE_WORK":
++    if not idle_shape or routed.get("stop_reason") not in (
++        "NO_ADMISSIBLE_WORK", "WAITING_AUTHORITY"
++    ):
+         return None
+     if action not in ("saipen continue", "saipen audit status"):
+         return None
+@@ -1501,6 +1519,21 @@
+
+ 
+         current = parse_state(codec.read_doc(Path(project_root) / ".saipen/STATE.md"))
+     except (OSError, ValueError, TypeError):
++        return None
++    goals = routed.get("active_goals") or []
++    if goals and all(
++        isinstance(goal, dict) and goal.get("authorization_scope") == "MAINTENANCE"
++        for goal in goals
++    ):
++        from .replenishment import maintenance_authority
++
++        authority = maintenance_authority(Path(project_root))
++        if not authority["authorized"]:
++            return {
++                "ok": True, "action": "saipen status", "reason": "goal-waiting-authority",
++                "code": "CONTINUATION_AUTHORITY_UNPROVEN", "active_goals": goals,
++                **authority,
++            }
+         return None
+     if not goal_authority.is_continuous_maintenance(current):
+         return None
+--- before/tools/saipen_engine/replenishment.py
+
++++ tools/saipen_engine/replenishment.py
+
+@@ -40,6 +40,10 @@
+
+ 
+ from .discovery_providers import (
+ 
++    COMPLETION_UNKNOWN,
++
++    FRESHNESS_UNMEASURED,
++
+     CandidateTask,
+ 
+     ProviderEvaluation,
+@@ -57,8 +61,6 @@
+
+     STATUS_ACTIVE,
+ 
+     STATUS_BLOCKED_BY_EVIDENCE,
+-
+-    STATUS_NO_ADMISSIBLE_WORK,
+ 
+     STATUS_SATISFIED,
+ 
+@@ -336,7 +338,11 @@
+
+ 
+                 evidence_identity="absent",
+ 
+-                satisfaction_status=STATUS_NO_ADMISSIBLE_WORK,
++                satisfaction_status=STATUS_BLOCKED_BY_EVIDENCE,
++
++                completeness_status=COMPLETION_UNKNOWN,
++
++                evidence_freshness=FRESHNESS_UNMEASURED,
+ 
+                 blockers=[f"Unknown evidence provider: {goal.evidence_provider}"],
+ 
+@@ -346,7 +352,18 @@
+
+ 
+         else:
+ 
+-            eval_res = provider.evaluate(root, goal)
++            try:
++                eval_res = provider.evaluate(root, goal)
++            except Exception as exc:
++                eval_res = ProviderEvaluation(
++                    provider_name=goal.evidence_provider,
++                    provider_kind="UNKNOWN", evidence_identity="unavailable",
++                    satisfaction_status=STATUS_BLOCKED_BY_EVIDENCE,
++                    completeness_status=COMPLETION_UNKNOWN,
++                    evidence_freshness=FRESHNESS_UNMEASURED,
++                    blockers=[f"{goal.evidence_provider}: {type(exc).__name__}: {exc}"],
++                    summary="Goal discovery failed; completeness is unverified",
++                )
+ 
+ 
+ 
+@@ -388,6 +405,33 @@
+
+ 
+ 
+ 
++def maintenance_authority(root: Path) -> dict:
++    """Read the existing grant owner; a goal's scope label is never a grant."""
++    from . import codec, goal_authority
++    from .state import parse_state
++
++    try:
++        state = parse_state(codec.read_doc(root / ".saipen/STATE.md"))
++        if goal_authority.continuous_maintenance_proven(root, state):
++            return {"authorized": True}
++        reason = "No verified standing maintenance grant is bound to the current goal"
++    except (OSError, ValueError, TypeError) as exc:
++        reason = f"Maintenance grant evidence unavailable: {type(exc).__name__}: {exc}"
++    return {
++        "authorized": False,
++        "canonical_next_command": "saipen goal authorize --file <UTF8_FILE>",
++        "operator_action": (
++            "Operaator kinnitab selle projekti ja eesmärgi kohaliku hoolduse kapsli "
++            "ning rakendab saipen goal authorize --file <UTF8_FILE>."
++        ),
++        "required_scope": "continuous_maintenance",
++        "project": str(root.resolve()),
++        "checkpoint_ticket_limit": goal_authority.GOAL_TICKET_CAP,
++        "checkpoint_wave_limit": goal_authority.GOAL_WAVE_CAP,
++        "detail": reason,
++    }
++
++
+ def replenish_from_goals(
+ 
+     project_root: Path | str,
+@@ -430,7 +474,14 @@
+
+ 
+         }
+ 
+-    if board["todo"]:
++    from .board import parse_board, ticket_is_workable
++
++    parsed = parse_board((root / ".saipen/BOARD.md").read_text(encoding="utf-8"))["tickets"]
++    runnable = [
++        row for row in board["todo"]
++        if ticket_is_workable(parsed[row["id"]], parsed, agent=agent)
++    ]
++    if runnable:
+ 
+         return {
+ 
+@@ -440,9 +491,9 @@
+
+ 
+             "status": "TODO_AVAILABLE",
+ 
+-            "next_ticket": board["todo"][0]["id"],
+-
+-            "detail": f"unclaimed ticket {board['todo'][0]['id']} waiting in TODO",
++            "next_ticket": runnable[0]["id"],
++
++            "detail": f"workable ticket {runnable[0]['id']} waiting in TODO",
+ 
+         }
+ 
+@@ -508,6 +559,16 @@
+
+ 
+                     continue
+ 
++                unresolved = [
++                    dependency for dependency in cand.needs
++                    if dependency not in parsed or parsed[dependency].get("section") != "## DONE"
++                ]
++                if unresolved:
++                    reasons_blocked.append(
++                        f"{cand.candidate_id}:WAITING_DEPENDENCY:{','.join(unresolved)}"
++                    )
++                    continue
++
+                 candidates_pool.append((goal, cand))
+ 
+ 
+@@ -564,104 +625,109 @@
+
+ 
+     candidates_pool.sort(key=lambda pair: prio_order.get(pair[1].priority.upper(), 9))
+ 
+-    selected_goal, selected_task = candidates_pool[0]
+-
+-
+-
+-    # Check authority requirements: e.g. operator_required or destructive scopes
+-
+-    auth_scope = selected_goal.authorization_scope.upper()
+-
+-    if auth_scope in ("DESTRUCTIVE", "RELEASE"):
++    # Rank permitted work, so an unrelated release candidate cannot starve it.
++    denied = []
++    maintenance = None
++    for selected_goal, selected_task in candidates_pool:
++        auth_scope = selected_goal.authorization_scope.upper()
++        if auth_scope == "MAINTENANCE":
++            if maintenance is None:
++                maintenance = maintenance_authority(root)
++            if maintenance["authorized"]:
++                break
++            authority = maintenance
++        elif auth_scope in ("RESEARCH", "IMPLEMENTATION", "TEST_CAMPAIGN"):
++            break
++        else:
++            authority = {
++                "authorized": False,
++                "detail": (
++                    f"candidate {selected_task.candidate_id} requires explicit "
++                    f"verified authority for scope {auth_scope}"
++                ),
++            }
++        denied.append({
++            "ok": True, "replenished": False, "status": "WAITING_AUTHORITY",
++            "goal_id": selected_goal.goal_id, "selected_candidate": selected_task.to_dict(),
++            **authority,
++        })
++    else:
++        return denied[0]
++
++
++
++    # Format ticket description and verify text
++
++    fp_tag = f" | evidence_fp: {selected_task.evidence_fingerprint}" if getattr(selected_task, "evidence_fingerprint", None) else ""
++
++    desc = f"{selected_task.title} | goal: {selected_goal.goal_id} | candidate: {selected_task.candidate_id}{fp_tag}"
++
++    verify_text = selected_task.verification
++
++
++
++    if dry_run:
+ 
+         return {
+ 
+             "ok": True,
+ 
++            "replenished": True,
++
++            "dry_run": True,
++
++            "status": "TASK_REPLENISHED",
++
++            "goal_id": selected_goal.goal_id,
++
++            "candidate": selected_task.to_dict(),
++
++            "planned_ticket": "T-PLANNED",
++
++            "detail": f"would admit {selected_task.candidate_id} for goal {selected_goal.goal_id}",
++
++        }
++
++
++
++    # Commit ticket admission via SAIOPS
++
++    add_res = ticket_add(
++
++        project_root=root,
++
++        agent=agent,
++
++        priority=selected_task.priority,
++
++        description=desc,
++
++        needs=selected_task.needs,
++
++        verify=verify_text,
++
++        dry_run=False,
++
++    )
++
++
++
++    if not add_res.ok:
++
++        return {
++
++            "ok": False,
++
+             "replenished": False,
+ 
+-            "status": "WAITING_AUTHORITY",
+-
+-            "detail": f"candidate {selected_task.candidate_id} requires {auth_scope} authority which must be granted explicitly",
+-
+-            "selected_candidate": selected_task.to_dict(),
++            "status": "ADMISSION_FAILED",
++
++            "detail": f"ticket_add failed: {add_res.message}",
+ 
+         }
+ 
+ 
+ 
+-    # Format ticket description and verify text
+-
+-    fp_tag = f" | evidence_fp: {selected_task.evidence_fingerprint}" if getattr(selected_task, "evidence_fingerprint", None) else ""
+-
+-    desc = f"{selected_task.title} | goal: {selected_goal.goal_id} | candidate: {selected_task.candidate_id}{fp_tag}"
+-
+-    verify_text = selected_task.verification
+-
+-
+-
+-    if dry_run:
+-
+-        return {
+-
+-            "ok": True,
+-
+-            "replenished": True,
+-
+-            "dry_run": True,
+-
+-            "status": "TASK_REPLENISHED",
+-
+-            "goal_id": selected_goal.goal_id,
+-
+-            "candidate": selected_task.to_dict(),
+-
+-            "planned_ticket": "T-PLANNED",
+-
+-            "detail": f"would admit {selected_task.candidate_id} for goal {selected_goal.goal_id}",
+-
+-        }
+-
+-
+-
+-    # Commit ticket admission via SAIOPS
+-
+-    add_res = ticket_add(
+-
+-        project_root=root,
+-
+-        agent=agent,
+-
+-        priority=selected_task.priority,
+-
+-        description=desc,
+-
+-        needs=selected_task.needs,
+-
+-        verify=verify_text,
+-
+-        dry_run=False,
+-
+-    )
+-
+-
+-
+-    if not add_res.ok:
+-
+-        return {
+-
+-            "ok": False,
+-
+-            "replenished": False,
+-
+-            "status": "ADMISSION_FAILED",
+-
+-            "detail": f"ticket_add failed: {add_res.message}",
+-
+-        }
+-
+-
+-
+     admitted_tid = str(add_res.data.get("ticket") or "")
+ 
+ 
+--- before/tools/saipen_engine/automation.py
+
++++ tools/saipen_engine/automation.py
+
+@@ -262,6 +262,7 @@
+
+     ) == "publication-staging":
+         return WAIT_USER, reason
+     named: dict[str, tuple[str, str]] = {
++        "goal-waiting-authority": (WAIT_USER, "goal-waiting-authority"),
+         "foreign-live": (WAIT_EXTERNAL, "foreign-live"),
+         "read-only-mode": (BLOCKED, "read-only-mode"),
+         "unblock": (BLOCKED, "unblock"),
+@@ -597,6 +598,10 @@
+
+             block["reconcile_code"] = (routed or {}).get("code")
+             block["operator_action"] = (routed or {}).get("operator_action")
+             block["remediation_command"] = (routed or {}).get("canonical_next_command")
++        if reason_code == "goal-waiting-authority":
++            for key in ("operator_action", "canonical_next_command", "required_scope",
++                        "checkpoint_ticket_limit", "checkpoint_wave_limit"):
++                block[key] = (routed or {}).get(key)
+         return block
+     except Exception as exc:
+         return failed_automation_block(RC_AUTOMATION_FAILURE, f"{type(exc).__name__}: {exc}")
+--- before/tools/saipen_engine/effects.py
+
++++ tools/saipen_engine/effects.py
+
+@@ -412,7 +412,7 @@
+
+     root = Path(project_root)
+     try:
+         proc = subprocess.run(
+-            ["git", "status", "--porcelain=v1", "-z"],
++            ["git", "--no-optional-locks", "status", "--porcelain=v1", "-z"],
+             cwd=str(root),
+             capture_output=True,
+             timeout=30,
+--- before/tools/autoinject.py
+
++++ tools/autoinject.py
+
+@@ -1043,6 +1043,7 @@
+
+     rc, out = _run(
+         [
+             "git",
++            "--no-optional-locks",
+             "-C",
+             str(base),
+             "status",
+@@ -1179,7 +1180,7 @@
+
+         behind, ahead = [*counts.split(), "0", "0"][:2]
+         if behind != "0" or ahead != "0":
+             drift = f", {behind} behind / {ahead} ahead of origin/main"
+-    rc, dirty = _run(["git", "status", "--porcelain"])
++    rc, dirty = _run(["git", "--no-optional-locks", "status", "--porcelain"])
+     if rc == 0:
+         n = len([ln for ln in dirty.splitlines() if ln.strip()])
+         drift += f", {n} uncommitted file(s)" if n else ", tree clean"

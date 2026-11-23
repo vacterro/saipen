@@ -1,0 +1,7 @@
+control: ran 5, red 0 -- as expected
+the CLI before this Work: ran 5, red 3 -- as expected
+no cycle line: ran 5, red 1 -- as expected
+findings without their facts: ran 5, red 1 -- as expected
+no precheck errors: ran 5, red 1 -- as expected
+the human lines reach the JSON surface: ran 0, red 1 -- as expected
+mutations: 5, repetitions each: 3, problems: 0

@@ -1,0 +1,18 @@
+T-2140 independent re-measure: producer=saihunt package=HUNT-028 (frozen_ref=42e49954dba245ed94ae515764de574ab723f68e)
+PASS: OUTBOX entry present at committed 42e49954d (frozen)
+PASS: package field status present
+PASS: package field source_head present
+PASS: package field source_tree_fingerprint present
+PASS: package field role_revision present
+PASS: package field coverage present
+PASS: package field payload present
+PASS: package field verified present
+PASS: package field instructions present
+PASS: capture _hunt028_installed_validate.json exists at committed 42e49954d
+PASS: capture _hunt028_repo_validate.txt exists at committed 42e49954d
+PASS: capture _hunt028_signals.txt exists at committed 42e49954d
+PASS: capture _hunt028_signals2.txt exists at committed 42e49954d
+PASS: capture HUNT-028.md exists at committed 42e49954d
+PASS: BOARD ticket row carries collect-receipt identity prefix
+PASS: family record 28904dfc12dd4d11-20261121T212031607891Z.json exists
+TOTAL: 16 checks, 0 FAIL

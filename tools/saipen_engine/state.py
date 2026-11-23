@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 
 from . import phases
-from .board import RECORD_SEPARATOR_NAMES, RECORD_SEPARATORS, record_separator_in, strict_iso_utc
+from .board import strict_iso_utc
 from .registry import load_registry, require_mapping, require_string_list
 
 
@@ -411,6 +411,16 @@ def goal_valve_wait_is_proven(state: dict, goal_counters: dict | None) -> bool:
     return state.get("next_action") == expected
 
 
+def safety_valve_wait_text(state: dict) -> str:
+    """Canonical WAIT text for a tripped bounded safety valve."""
+    waves = int(state.get("goal_waves") or 0)
+    tickets = int(state.get("goal_tickets") or 0)
+    return (
+        f"WAIT: safety valve reached ({waves} waves / {tickets} tickets)"
+        " -- run 'cc' to continue"
+    )
+
+
 def binding_brake(state: dict, *, empty_todo: bool = False) -> tuple[str, str] | None:
     """The ONE authoritative hard-stop truth (T-1322).
 
@@ -429,11 +439,14 @@ def binding_brake(state: dict, *, empty_todo: bool = False) -> tuple[str, str] |
         (the AUDAPACK disagreement);
       * `next_action` is a WAIT that BINDS in this exact context
         (`binding_wait`), preserving CORE's DONE + empty-TODO UNBLOCK
-        exception rather than stopping on every `WAIT:` prefix.
+        exception rather than stopping on every `WAIT:` prefix;
+      * a non-persistent bounded goal safety valve has tripped (`budget_exhausted`),
+        even if a prior DONE transition erased the persisted WAIT prefix.
 
     Returns `(kind, detail)` where `kind` is `"wait"` for a binding persisted
-    WAIT, `"blocker"` for a non-empty STATE.blocker, and `"blocked"` for
-    `phase: BLOCKED`; returns None when no brake binds.
+    WAIT or exhausted non-persistent safety valve, `"blocker"` for a non-empty
+    STATE.blocker, and `"blocked"` for `phase: BLOCKED`; returns None when no
+    brake binds.
     """
     phase = str(state.get("phase") or "")
     blocker = str(state.get("blocker") or "").strip()
@@ -455,6 +468,15 @@ def binding_brake(state: dict, *, empty_todo: bool = False) -> tuple[str, str] |
         intent=state.get("execution_intent"),
     ):
         return ("wait", f"persisted WAIT binds in this context: {na[:60]!r}")
+    from .goal_authority import budget_exhausted, persistent
+
+    if budget_exhausted(state) and not persistent(state):
+        return (
+            "wait",
+            "safety valve budget exhausted without renewal: "
+            f"goal_waves={state.get('goal_waves') or 0} "
+            f"goal_tickets={state.get('goal_tickets') or 0}",
+        )
     return None
 
 
@@ -1098,21 +1120,6 @@ def _render_value(value) -> str:
     text = str(value)
     if text == "":
         return '""'
-    # A scalar must render as exactly one frontmatter LINE. Quoting is not a
-    # refuge here: `parse_frontmatter` splits the document on every boundary
-    # `str.splitlines()` honours (LF, CR, VT, FF, NEL, U+2028, U+2029), and the
-    # decoder collapses a quoted body only after that split, so a separator
-    # inside a value reopens the record no matter how it is quoted. The only
-    # honest answer is to refuse the value (T-1606).
-    separator = record_separator_in(text)
-    if separator is not None:
-        index = RECORD_SEPARATORS.index(separator)
-        raise ValueError(
-            f"STATE scalar carries a physical record separator "
-            f"({RECORD_SEPARATOR_NAMES[index]}); one STATE field must be one "
-            f"frontmatter line -- a separator would inject a field no writer "
-            f"set"
-        )
     would_retype = re.fullmatch(r"-?\d+", text) is not None or text in ("true", "false")
     needs_quote = (
         would_retype

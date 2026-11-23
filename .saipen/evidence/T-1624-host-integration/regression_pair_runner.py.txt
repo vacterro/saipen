@@ -1,0 +1,40 @@
+"""Run one regression-pair half and print its verifier/subject identity.
+
+Usage: python pair.py <repo root>
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(sys.argv[1]).resolve()
+sys.path.insert(0, str(ROOT / "tools"))
+
+from saipen_engine import oracle  # noqa: E402
+
+HOOK_CASES = "test_t1624_host_integration.HookFailOpenTests."
+CASES = (
+    HOOK_CASES + "test_an_answer_that_is_no_admission_verdict_is_an_engine_that_did_not_answer",
+    HOOK_CASES + "test_a_host_event_without_a_session_id_reaches_the_model_through_the_real_engine",
+    HOOK_CASES + "test_a_refusal_never_reaches_the_operator_without_a_reason_and_an_action",
+    HOOK_CASES + "test_a_command_line_the_hook_cannot_read_is_never_an_exit_status_that_blocks",
+    "test_t1624_host_integration.InstallerTests.test_the_self_test_names_which_property_failed",
+)
+COMMAND = "python -B -m unittest " + " ".join(CASES)
+ORACLE = ("tools/test_t1624_host_integration.py",)
+SUBJECT = ("extensions/adapters/claude/saipen-guard.py", "tools/install_host_guard.py")
+
+proc = subprocess.run(
+    [sys.executable, "-B", "-m", "unittest", *CASES],
+    cwd=str(ROOT / "tools"),
+    capture_output=True,
+    stdin=subprocess.DEVNULL,
+    timeout=900,
+)
+tail = proc.stderr.decode("utf-8", errors="replace").strip().splitlines()
+print("\n".join(line for line in tail if line.startswith(("FAIL:", "ERROR:", "Ran ", "OK", "FAILED"))))
+print("exit", proc.returncode)
+print("verifier", oracle.verifier_identity(COMMAND, ORACLE, ROOT)[:16])
+print("subject", oracle.oracle_digest(ROOT, SUBJECT)[:16])
+if "--full" in sys.argv:
+    print("\n".join(tail[-60:]))

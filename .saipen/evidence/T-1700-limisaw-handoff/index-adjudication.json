@@ -1,0 +1,11 @@
+{
+  "historical_snapshot": ".saipen\\evidence\\T-1695-invalid-stops\\pre-index.patch",
+  "historical_raw_sha256": "b4cc8a13a141c8eec00fd66c2579c1db627b52011b3d73100dd2e4e3d2bf37bb",
+  "current_raw_sha256": "3b9db4fa29700156863dfd59fc11c702bafbb511d36ccb65fedc7fd902a08255",
+  "historical_staged_diff_sha256": "8103c569fa19a7a2daf96e968de7d2375f51a875261a6e08ad385720d05cd1a2",
+  "current_staged_diff_sha256": "8103c569fa19a7a2daf96e968de7d2375f51a875261a6e08ad385720d05cd1a2",
+  "current_index_entries_sha256": "c42371fdf6ea2e1bca9c8d1f7f83f30ecba73000e58ae62d671d790fbcdc9613",
+  "staged_blobs_and_modes_unchanged": true,
+  "raw_index_metadata_equal": false,
+  "scope": "No index was restored or staged. Raw index drift was not claimed as unchanged."
+}

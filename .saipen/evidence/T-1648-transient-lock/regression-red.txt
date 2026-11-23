@@ -1,0 +1,127 @@
+.F.EEEEE.EEEE.E
+======================================================================
+ERROR: test_any_other_code_is_a_verdict (test_t1648_transient_replace_lock.TransientClassifierTests.test_any_other_code_is_a_verdict)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 50, in test_any_other_code_is_a_verdict
+    self.assertFalse(paths._transient_replace_error(_locked(2)))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.paths' has no attribute '_transient_replace_error'
+
+======================================================================
+ERROR: test_nothing_is_a_wait_on_posix (test_t1648_transient_replace_lock.TransientClassifierTests.test_nothing_is_a_wait_on_posix)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 61, in test_nothing_is_a_wait_on_posix
+    self.assertFalse(paths._transient_replace_error(_locked(5)))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.paths' has no attribute '_transient_replace_error'
+
+======================================================================
+ERROR: test_the_two_sharing_codes_are_a_wait_on_windows (test_t1648_transient_replace_lock.TransientClassifierTests.test_the_two_sharing_codes_are_a_wait_on_windows)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 45, in test_the_two_sharing_codes_are_a_wait_on_windows
+    self.assertTrue(paths._transient_replace_error(_locked(5)))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.paths' has no attribute '_transient_replace_error'
+
+======================================================================
+ERROR: test_a_lock_that_clears_is_waited_out (test_t1648_transient_replace_lock.TransientReplaceLockTests.test_a_lock_that_clears_is_waited_out)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 122, in test_a_lock_that_clears_is_waited_out
+    self._write()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 77, in _write
+    paths.safe_atomic_write_bytes(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\paths.py", line 358, in safe_atomic_write_bytes
+    os.replace(tmp_path, path)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 118, in replace
+    raise _locked()
+PermissionError: [WinError 5] Access is denied
+
+======================================================================
+ERROR: test_a_lock_that_never_clears_still_fails_after_the_bound (test_t1648_transient_replace_lock.TransientReplaceLockTests.test_a_lock_that_never_clears_still_fails_after_the_bound)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 153, in test_a_lock_that_never_clears_still_fails_after_the_bound
+    self.assertEqual(len(calls), paths._REPLACE_ATTEMPTS)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.paths' has no attribute '_REPLACE_ATTEMPTS'
+
+======================================================================
+ERROR: test_a_real_reader_without_delete_sharing_is_waited_out (test_t1648_transient_replace_lock.TransientReplaceLockTests.test_a_real_reader_without_delete_sharing_is_waited_out)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 97, in test_a_real_reader_without_delete_sharing_is_waited_out
+    self._write()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 77, in _write
+    paths.safe_atomic_write_bytes(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\paths.py", line 358, in safe_atomic_write_bytes
+    os.replace(tmp_path, path)
+PermissionError: [WinError 5] Access is denied: 'V:\\_TEMP_\\saipen-t1648-hkg0gesa\\.STATE.md.b9807d7ad62a454386207f883724b1c3.tmp' -> 'V:\\_TEMP_\\saipen-t1648-hkg0gesa\\STATE.md'
+
+======================================================================
+ERROR: test_a_sharing_violation_is_the_same_wait (test_t1648_transient_replace_lock.TransientReplaceLockTests.test_a_sharing_violation_is_the_same_wait)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 137, in test_a_sharing_violation_is_the_same_wait
+    self._write()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 77, in _write
+    paths.safe_atomic_write_bytes(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\paths.py", line 358, in safe_atomic_write_bytes
+    os.replace(tmp_path, path)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 133, in replace
+    raise _locked(32)
+PermissionError: [WinError 32] Access is denied
+
+======================================================================
+ERROR: test_a_target_removed_between_attempts_is_refused (test_t1648_transient_replace_lock.TransientReplaceLockTests.test_a_target_removed_between_attempts_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 204, in test_a_target_removed_between_attempts_is_refused
+    self._write()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 77, in _write
+    paths.safe_atomic_write_bytes(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\paths.py", line 358, in safe_atomic_write_bytes
+    os.replace(tmp_path, path)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 199, in replace
+    raise _locked()
+PermissionError: [WinError 5] Access is denied
+
+======================================================================
+ERROR: test_a_target_swapped_between_attempts_is_refused (test_t1648_transient_replace_lock.TransientReplaceLockTests.test_a_target_swapped_between_attempts_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 187, in test_a_target_swapped_between_attempts_is_refused
+    self._write()
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 77, in _write
+    paths.safe_atomic_write_bytes(
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\paths.py", line 358, in safe_atomic_write_bytes
+    os.replace(tmp_path, path)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 182, in replace
+    raise _locked()
+PermissionError: [WinError 5] Access is denied
+
+======================================================================
+ERROR: test_the_wait_is_bounded_in_time (test_t1648_transient_replace_lock.TransientReplaceLockTests.test_the_wait_is_bounded_in_time)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 166, in test_the_wait_is_bounded_in_time
+    self.assertEqual(len(naps), paths._REPLACE_ATTEMPTS - 1)
+                                ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'saipen_engine.paths' has no attribute '_REPLACE_ATTEMPTS'
+
+======================================================================
+FAIL: test_a_lease_write_that_stays_refused_costs_one_wait_not_fifty (test_t1648_transient_replace_lock.NestedWaitTests.test_a_lease_write_that_stays_refused_costs_one_wait_not_fifty)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1648_transient_replace_lock.py", line 240, in test_a_lease_write_that_stays_refused_costs_one_wait_not_fifty
+    self.assertEqual(len(calls), 1)
+AssertionError: 50 != 1
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.021s
+
+FAILED (failures=1, errors=10)
+exit=1

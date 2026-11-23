@@ -1,0 +1,15 @@
+saipal continue --json exit=2 code=VALIDATION_FAILED {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "unknown command: saipal"
+}
+pal --json exit=2 code=VALIDATION_FAILED {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "unknown command: pal"
+}
+bogusxyz --json exit=2 code=VALIDATION_FAILED {
+  "ok": false,
+  "code": "VALIDATION_FAILED",
+  "detail": "unknown command: bogusxyz"
+}

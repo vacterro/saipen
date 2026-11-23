@@ -1,0 +1,36 @@
+FFE
+======================================================================
+ERROR: test_forged_valid_hash_chain_without_native_writer_receipt_is_blocked (__main__.ArchivedImproveTests.test_forged_valid_hash_chain_without_native_writer_receipt_is_blocked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 375, in test_forged_valid_hash_chain_without_native_writer_receipt_is_blocked
+    improve.write_sweep_entry(cycle, self._entry(seat))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1021, in write_sweep_entry
+    _require_cycle_active(cycle_dir, "write_sweep_entry")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1247, in _require_cycle_active
+    snapshot = load_valid_manifest(cycle_dir, mutator, ("active",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 1222, in load_valid_manifest
+    raise ImproveError(
+improve.ImproveError: write_sweep_entry refuses: cycle imp-t1803-20261016-1 is archived, not one of active
+
+======================================================================
+FAIL: test_successor_namespace_is_protected_from_direct_file_tools (__main__.ArchivedImproveTests.test_successor_namespace_is_protected_from_direct_file_tools)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 364, in test_successor_namespace_is_protected_from_direct_file_tools
+    self.assertFalse(decision.get("admitted"), decision)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\t1803-cfqjv89o\\project', 'target': '.saipen/improve-reconciliation/imp-t1803-20261016-1.jsonl', 'targets': ['.saipen/improve-reconciliation/imp-t1803-20261016-1.jsonl'], 'action': 'write', 'effect': 'mutating', 'provenance': 'git-worktree', 'detail': 'protocol state sound', 'duration_ms': 32.915}
+
+======================================================================
+FAIL: test_producer_cannot_write_successor_canonical_evidence (__main__.ArchivedImproveTests.test_producer_cannot_write_successor_canonical_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1803_archived_improve.py", line 371, in test_producer_cannot_write_successor_canonical_evidence
+    self.assertTrue(blocked, reason)
+AssertionError: False is not true : 
+
+----------------------------------------------------------------------
+Ran 3 tests in 3.300s
+
+FAILED (failures=2, errors=1)

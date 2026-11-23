@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-393:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "P0 repair: canonical goal-command grammar excludes all goal CLI subcommands from goal entry; bind maintenance grant to exact PersistentGoal identity instead of historic pivot"
+    }
+  },
+  "derived_at": "2026-11-05T01:21:20Z",
+  "derived_from": "SRC-393",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "5d056eb956f3ad7935910bf7708a0526102320fdeab84901385d1c276d449a92"
+}

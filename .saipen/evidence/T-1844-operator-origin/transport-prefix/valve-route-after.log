@@ -1,0 +1,8 @@
+test_a_live_doing_ticket_resumes_by_name_under_an_active_audit (test_t1293_valve_resume_audit_route.ValveResumeFollowsTheAuditRoute.test_a_live_doing_ticket_resumes_by_name_under_an_active_audit) ... ok
+test_no_live_ticket_resumes_the_routed_audit_action (test_t1293_valve_resume_audit_route.ValveResumeFollowsTheAuditRoute.test_no_live_ticket_resumes_the_routed_audit_action) ... ok
+test_without_an_audit_the_reset_still_never_persists_a_wait (test_t1293_valve_resume_audit_route.ValveResumeFollowsTheAuditRoute.test_without_an_audit_the_reset_still_never_persists_a_wait) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.377s
+
+OK

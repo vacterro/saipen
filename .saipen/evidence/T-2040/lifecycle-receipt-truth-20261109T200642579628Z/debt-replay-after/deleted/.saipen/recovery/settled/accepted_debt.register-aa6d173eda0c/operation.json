@@ -1,0 +1,36 @@
+{
+  "op_id": "accepted_debt.register-aa6d173eda0c",
+  "operation": "accepted_debt.register",
+  "created_at": "2026-11-09T20:29:09Z",
+  "agent": "probe",
+  "project_identity": "v:\\_temp_\\saipen-accepted-debt-q15lgqcx\\project",
+  "project_lineage": "lineage-13484440f8fc4b4ba70239008748bfde",
+  "semantic_payload_hash": "7b92d57250522d703b7b936c005a9c43d31a96ca2d26b8a47a127cab86c6168b",
+  "preconditions": {
+    ".saipen/recovery/conformance/accepted_debt/AD-000001.json": ""
+  },
+  "read_preconditions": {
+    ".saipen/IDENTITY.md": "e3797cec1f66b1bb",
+    ".saipen/logs": "tree-missing-v1",
+    ".saipen/LOG.md": "3a79626ed7c0716f",
+    ".saipen/intake/active/SRC-001.md": "9f0c437ec49ec500",
+    ".saipen/intake/active/SRC-001.meta.json": "db1d02a11f9d60c2",
+    ".saipen/archive/source/SRC-001.md": "file-missing-v1",
+    ".saipen/archive/source/SRC-001.meta.json": "file-missing-v1",
+    ".saipen/intake/distribution/SRC-001.json": "file-missing-v1",
+    ".saipen/quarantine/source/SRC-001.md": "file-missing-v1"
+  },
+  "verification_policy": "accepted_debt",
+  "status": "COMMITTED",
+  "progress_index": 1,
+  "targets": [
+    {
+      "path": ".saipen/recovery/conformance/accepted_debt/AD-000001.json",
+      "role": "report",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "7b92d57250522d70",
+      "applied": true
+    }
+  ]
+}

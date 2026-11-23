@@ -1,0 +1,36 @@
+{
+ "verify_help_literal_write": [
+  0,
+  "TICKET_ADDED",
+  true
+ ],
+ "verify_plus_literal_write": [
+  0,
+  "TICKET_ADDED",
+  true
+ ],
+ "verify_dashdash_literal_write": [
+  0,
+  "TICKET_ADDED",
+  true
+ ],
+ "readonly_inverse": [
+  1,
+  "CAPABILITY_DENIED",
+  true
+ ],
+ "real_help": [
+  0,
+  true,
+  true
+ ],
+ "host_entry_boundary": [
+  0,
+  true
+ ],
+ "real_compound": [
+  0,
+  true
+ ]
+}
+REVIEW-PROBE PASS {}

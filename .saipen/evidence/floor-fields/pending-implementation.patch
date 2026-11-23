@@ -1,0 +1,209 @@
+diff --git a/tests/validate.ps1 b/tests/validate.ps1
+index a7dddfe5..dd6bfdd6 100644
+--- a/tests/validate.ps1
++++ b/tests/validate.ps1
+@@ -69,7 +69,8 @@ foreach ($line in $boardLines) {
+     # check below FAILed a legal board. validate.sh always used [^|]* here;
+     # the two halves of the portable floor disagreed, and nobody noticed
+     # because this repo runs the Python validator.
+-    if ($line -match "- \[( |x|/)\] (T-\d+).*needs: ([^|]*)") {
++    # Only a delimited field declares dependencies; prose stays opaque.
++    if ($line -match "- \[( |x|/)\] (T-\d+).*\| needs: ([^|]*)") {
+         $taskId = $matches[2]
+         $needsRaw = $matches[3]
+         $needsList = $needsRaw -split "," | ForEach-Object { $_.Trim() }
+diff --git a/tests/validate.sh b/tests/validate.sh
+index 7b49b217..8456ea76 100644
+--- a/tests/validate.sh
++++ b/tests/validate.sh
+@@ -78,7 +78,7 @@ PAIRS=""
+ while IFS= read -r line; do
+     [ -z "$line" ] && continue
+     tid=$(echo "$line" | grep -oE 'T-[0-9]+' | head -1)
+-    needs=$(echo "$line" | grep -oE 'needs:[^|]*' | sed 's/needs://' | grep -oE 'T-[0-9]+' | tr '\n' ',')
++    needs=$(echo "$line" | grep -oE '\| needs:[^|]*' | sed 's/| needs://' | grep -oE 'T-[0-9]+' | tr '\n' ',')
+     PAIRS="${PAIRS}${tid}|${needs}
+ "
+ done <<< "$(grep -oE '\- \[[ x/]\] T-[0-9]+.*' .saipen/BOARD.md || true)"
+@@ -125,7 +125,7 @@ echo -e "${GREEN}PASS: BOARD.md no duplicate tickets${NC}"
+ # a needs: pointing at a T-### that doesn't exist anywhere on the board
+ # leaves the Pick Rule permanently unsatisfiable with zero diagnostic signal.
+ ALL_IDS=$(grep -oE '\- \[[ x/]\] T-[0-9]+' .saipen/BOARD.md | grep -oE 'T-[0-9]+' | sort -u)
+-NEEDS_REFS=$(grep -oE 'needs:[^|]*' .saipen/BOARD.md | sed 's/needs://' | tr ',' '\n' | grep -oE 'T-[0-9]+' | sort -u)
++NEEDS_REFS=$(grep -oE '\| needs:[^|]*' .saipen/BOARD.md | sed 's/| needs://' | tr ',' '\n' | grep -oE 'T-[0-9]+' | sort -u)
+ DANGLING=""
+ for ref in $NEEDS_REFS; do
+     echo "$ALL_IDS" | grep -qx "$ref" || DANGLING="$DANGLING $ref"
+diff --git a/tools/audit_parity.py b/tools/audit_parity.py
+index b01498ca..85bc7e0a 100644
+--- a/tools/audit_parity.py
++++ b/tools/audit_parity.py
+@@ -167,7 +167,7 @@ def main() -> int:
+             return _Result(124, "", "timeout")
+ 
+     def run_floor(root):
+-        if sys.platform == "nt":
++        if os.name == "nt":
+             try:
+                 return subprocess.run(
+                     [
+@@ -213,7 +213,9 @@ def main() -> int:
+     # keeps finding in its own checks.
+     ctl_v, ctl_f = run_validate(pristine), run_floor(pristine)
+     if ctl_v.returncode != 0 or ctl_f.returncode != 0:
+-        who = "tools/validate.py" if ctl_v.returncode != 0 else "tests/validate.sh"
++        who = "tools/validate.py" if ctl_v.returncode != 0 else (
++            "tests/validate.ps1" if os.name == "nt" else "tests/validate.sh"
++        )
+         bad = ctl_v if ctl_v.returncode != 0 else ctl_f
+         print(
+             f"FAIL: {who} rejects an UNMODIFIED copy (exit "
+diff --git a/tools/test_portable_floor_fields.py b/tools/test_portable_floor_fields.py
+new file mode 100644
+index 00000000..2ea74844
+--- /dev/null
++++ b/tools/test_portable_floor_fields.py
+@@ -0,0 +1,143 @@
++"""Portable dependency checks consume structured fields; parity uses the native floor."""
++
++from __future__ import annotations
++
++import contextlib
++import io
++import os
++import subprocess
++import sys
++import tempfile
++import types
++import unittest
++from pathlib import Path
++from unittest.mock import patch
++
++import audit_floor
++import audit_parity
++from saipen_engine.board import parse_board
++
++ROOT = Path(__file__).resolve().parents[1]
++
++
++class PortableNeedsFields(unittest.TestCase):
++    def run_floors(self, board: str, *, valid: bool, diagnostic: str = "") -> None:
++        parsed = parse_board(board)
++        self.assertEqual(parsed.get("errors"), [], parsed)
++        with tempfile.TemporaryDirectory(prefix="saipen-floor-field-") as tmp:
++            fixture = Path(tmp)
++            memory = fixture / ".saipen"
++            memory.mkdir()
++            for name, text in (
++                ("STATE.md", audit_floor.GOOD_STATE),
++                ("BOARD.md", board), ("LOG.md", audit_floor.GOOD_LOG),
++            ):
++                (memory / name).write_text(text, encoding="utf-8")
++            runners = []
++            bash = audit_floor.find_bash()
++            pwsh = audit_floor.find_pwsh()
++            if bash:
++                runners.append((
++                    "sh", [bash, str(ROOT / "tests/validate.sh")], audit_floor.bash_env(bash),
++                ))
++            if pwsh:
++                runners.append((
++                    "ps1", [pwsh, "-NoProfile", "-ExecutionPolicy", "Bypass",
++                            "-File", str(ROOT / "tests/validate.ps1")], os.environ.copy(),
++                ))
++            self.assertTrue(runners, "no portable floor is available")
++            before = {p.name: p.read_bytes() for p in memory.iterdir()}
++            for label, command, environment in runners:
++                with self.subTest(floor=label):
++                    result = subprocess.run(command, cwd=fixture, env=environment,
++                                            capture_output=True, text=True, encoding="utf-8",
++                                            errors="replace", timeout=30)
++                    output = result.stdout + result.stderr
++                    if valid:
++                        self.assertEqual(result.returncode, 0, output)
++                    else:
++                        self.assertNotEqual(result.returncode, 0, "known-bad control passed")
++                        self.assertIn(diagnostic, output)
++                    self.assertEqual({p.name: p.read_bytes() for p in memory.iterdir()}, before)
++
++    def test_description_and_blocker_prose_do_not_create_dependencies(self) -> None:
++        board = """# Board
++## DOING
++## TODO
++- [ ] T-001 Documentation example needs: T-999 | verify: prose is opaque
++- [ ] T-002 Actual dependency | needs: T-001 | verify: dependency resolves
++## DONE
++## BLOCKED
++- [ ] T-003 Parked work | blocker: narrative mentions needs: T-999 and needs: external service
++"""
++        self.run_floors(board, valid=True)
++
++    def test_narrative_self_reference_does_not_create_a_cycle(self) -> None:
++        board = audit_floor.GOOD_BOARD.replace("a ticket", "Example needs: T-001")
++        self.run_floors(board, valid=True)
++
++    def test_real_dangling_field_still_fails(self) -> None:
++        board = audit_floor.GOOD_BOARD.replace("a ticket", "a ticket | needs: T-999")
++        self.run_floors(board, valid=False, diagnostic="dangling needs:")
++
++    def test_real_cycle_still_fails(self) -> None:
++        board = audit_floor.GOOD_BOARD.replace("a ticket", "a ticket | needs: T-002")
++        board = board.replace("## DONE", "- [ ] T-002 second | needs: T-001\n## DONE")
++        self.run_floors(board, valid=False, diagnostic="cyclic needs:")
++
++
++class NativeParityTransport(unittest.TestCase):
++    def probe(self, name: str, platform: str, *, validator_return: int,
++              floor_return: int) -> tuple[list[list[str]], str]:
++        with tempfile.TemporaryDirectory(prefix="saipen-parity-native-") as tmp:
++            home = Path(tmp) / "home"
++            (home / "tools").mkdir(parents=True)
++            (home / "tools/audit_checks.py").write_text("IGNORE = None\n", encoding="utf-8")
++            fake_os = types.SimpleNamespace(name=name, path=os.path, environ={})
++            fake_sys = types.SimpleNamespace(platform=platform, executable=sys.executable,
++                                             modules=sys.modules)
++            calls = []
++
++            def run(command, **kwargs):
++                calls.append(command)
++                result = validator_return if command[0] == sys.executable else floor_return
++                return subprocess.CompletedProcess(
++                    command, result, stdout="FAIL: deliberate control\n", stderr="",
++                )
++
++            output = io.StringIO()
++            previous = sys.modules.get("audit_checks")
++            try:
++                with patch.object(audit_parity, "HOME", home), \
++                        patch.object(audit_parity, "os", fake_os), \
++                        patch.object(audit_parity, "sys", fake_sys), \
++                        patch.object(audit_parity, "find_bash", return_value="test-bash"), \
++                        patch.object(audit_parity, "bash_env", return_value={}), \
++                        patch.object(audit_parity.subprocess, "run", side_effect=run), \
++                        contextlib.redirect_stdout(output):
++                    self.assertEqual(audit_parity.main(), 1, "known-bad preflight passed")
++            finally:
++                if previous is None:
++                    sys.modules.pop("audit_checks", None)
++                else:
++                    sys.modules["audit_checks"] = previous
++            return calls, output.getvalue()
++
++    def test_win32_runtime_uses_powershell_without_changing_the_timeout(self) -> None:
++        calls, _output = self.probe("nt", "win32", validator_return=1, floor_return=0)
++        self.assertEqual(calls[1][0], "powershell.exe")
++        self.assertIn("tests/validate.ps1", calls[1])
++        self.assertEqual(audit_parity.VALIDATOR_TIMEOUT, 60)
++        self.assertEqual(audit_parity.BASELINE, 11)
++
++    def test_posix_runtime_keeps_the_bash_floor(self) -> None:
++        calls, _output = self.probe("posix", "linux", validator_return=1, floor_return=0)
++        self.assertEqual(calls[1], ["test-bash", "tests/validate.sh"])
++
++    def test_native_floor_failure_names_the_runner_that_failed(self) -> None:
++        _calls, output = self.probe("nt", "win32", validator_return=0, floor_return=1)
++        self.assertIn("tests/validate.ps1 rejects an UNMODIFIED copy", output)
++
++
++if __name__ == "__main__":
++    unittest.main()

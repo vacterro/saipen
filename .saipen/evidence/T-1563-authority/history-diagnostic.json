@@ -1,0 +1,12 @@
+{
+  "snapshot_sha256": "2783bb1fe1d13e38709288bf6db0b521995dd4f9490e45a594995168c943f3b8",
+  "prefix_bytes": 1279348,
+  "live_sha256": "5c5640b780c5a9af275e342def194715d58a08dfeb1085f855ed2722b97fca5f",
+  "live_bytes": 1281077,
+  "suffix_bytes": 1729,
+  "prefix_preserved": true,
+  "canonical_last_event": 10842,
+  "diagnostic": "HISTORY_LEDGER_CORRUPT",
+  "canonical_recovery": "READ_ONLY_DIAGNOSIS_ONLY; safe_auto_repair_available=false",
+  "canonical_state_mutated": false
+}

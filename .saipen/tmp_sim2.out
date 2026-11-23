@@ -1,0 +1,4 @@
+  File "<stdin>", line 13
+    return ProcessFact(pid,ppid,image,image.replace('\','/').rsplit('/',1)[-1].lower(),argv,created)
+                                                                      ^
+SyntaxError: unterminated string literal (detected at line 13)

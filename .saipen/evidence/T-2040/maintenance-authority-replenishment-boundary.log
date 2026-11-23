@@ -1,0 +1,6 @@
+PASS revoked proof (simulated verification refusal): NO_ADMISSIBLE_WORK
+PASS unsatisfied candidate dependency: ALREADY_BLOCKED
+PASS foreign Source membership: NO_ADMISSIBLE_WORK
+PASS corrupt detailed identity: BOARD_INVALID
+PASS Source change between plan/apply: STALE_STATE, Work stays BLOCKED
+5 boundary checks passed; fixture-only, no live project writes.

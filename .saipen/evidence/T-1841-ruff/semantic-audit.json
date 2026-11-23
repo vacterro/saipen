@@ -1,0 +1,199 @@
+{
+  "files": {
+    "tools/saipen_engine/admission_doctor.py": {
+      "sha256": "bb51957bdf60601ca12c3df6af51334bab78ff3c058923e2c6bc9e8edf4491e9",
+      "ast_equal": true,
+      "changed_functions": [],
+      "test_declarations": 0,
+      "assertions": 0
+    },
+    "tools/saipen_engine/audit_inbox.py": {
+      "sha256": "c4cbc6543d15a21505f0f2ceb7d94d533dd7eeac358c85ec15ba9c1b34d0306d",
+      "ast_equal": false,
+      "changed_functions": [
+        "projection_from_classification"
+      ],
+      "test_declarations": 0,
+      "assertions": 0
+    },
+    "tools/saipen_engine/board.py": {
+      "sha256": "0bf548f3e2051c55ae1eb8a173239af71eae58af11663230f0de868f9fa4481b",
+      "ast_equal": true,
+      "changed_functions": [],
+      "test_declarations": 0,
+      "assertions": 0
+    },
+    "tools/saipen_engine/board_compaction.py": {
+      "sha256": "8e1173e869bd1c138f27a604beb09a56af9bcc8e519cf1bdfb02e72557cf11a0",
+      "ast_equal": false,
+      "changed_functions": [],
+      "test_declarations": 0,
+      "assertions": 0
+    },
+    "tools/saipen_engine/cold_recovery.py": {
+      "sha256": "4ea8dd65b581eba4e7a1deec6e26bde308936bdb13a253865cb02bcee402f0e6",
+      "ast_equal": false,
+      "changed_functions": [
+        "is_continuation_command"
+      ],
+      "test_declarations": 0,
+      "assertions": 0
+    },
+    "tools/saipen_engine/commands.py": {
+      "sha256": "187942c23665de0ca42e72b6216d062f4a37ead8d6709a4b32caef2cc93912dc",
+      "ast_equal": false,
+      "changed_functions": [
+        "is_prose_or_handoff"
+      ],
+      "test_declarations": 0,
+      "assertions": 0
+    },
+    "tools/saipen_engine/continue_loop.py": {
+      "sha256": "66110abb852f0da4e7deb9f93d41c49509e9761cb4ae4ce1af2075e02cd15f90",
+      "ast_equal": true,
+      "changed_functions": [],
+      "test_declarations": 0,
+      "assertions": 0
+    },
+    "tools/saipen_engine/intake.py": {
+      "sha256": "0ba0abed0aaf78c634293a5328b1fdf576a04533911cd042c7fffeb25b5ca40f",
+      "ast_equal": false,
+      "changed_functions": [
+        "is_compound_request"
+      ],
+      "test_declarations": 0,
+      "assertions": 0
+    },
+    "tools/saipen_engine/operator_task.py": {
+      "sha256": "c16998ce3b17ce5cfceab93c6b378bf5b3c15760a42e4cbffdfb6f6fde3fa358",
+      "ast_equal": false,
+      "changed_functions": [
+        "is_freebuff_host"
+      ],
+      "test_declarations": 0,
+      "assertions": 0
+    },
+    "tools/saipen_engine/router.py": {
+      "sha256": "3343e1eb52267a4163b48a4d2e9f748f7fd7e8a15382006f893bca79ad126f61",
+      "ast_equal": true,
+      "changed_functions": [],
+      "test_declarations": 0,
+      "assertions": 0
+    },
+    "tools/test_command_routing.py": {
+      "sha256": "9100208b85cea604af8f646c58699194b11ea83b4af5c5d9cd2af170ecce6d3c",
+      "ast_equal": true,
+      "changed_functions": [],
+      "test_declarations": 69,
+      "assertions": 284
+    },
+    "tools/test_external_authentication_contract.py": {
+      "sha256": "f57e01dae6919e9a6240d550649a849081251b162f78048f3b234666c4f00e1b",
+      "ast_equal": false,
+      "changed_functions": [
+        "ExternalAuthenticationContractTests.test_prose_command_never_executes_even_with_a_trusted_prefix",
+        "ExternalAuthenticationContractTests.test_injection_prose_refused_without_shell_parsing",
+        "ExternalAuthenticationContractTests.test_audit_description_prose_never_executes",
+        "ExternalAuthenticationContractTests.test_sealed_contract_resolves_and_the_receipt_is_arg_authenticated",
+        "ExternalAuthenticationContractTests.test_failing_contract_never_terminalizes",
+        "ExternalAuthenticationContractTests.test_contract_outside_evidence_is_not_an_executable_authority",
+        "ExternalAuthenticationContractTests.test_tampered_contract_content_fails_digest_verification",
+        "ExternalAuthenticationContractTests.test_matching_contract_digest_verifies_and_resolves",
+        "ExternalAuthenticationContractTests.test_wait_user_decision_row_never_resolves_externally",
+        "ExternalAuthenticationContractTests.test_legacy_receipt_verification_is_never_re_shelled_after_a_generation_move",
+        "ExternalAuthenticationContractTests.test_dry_run_predicts_eligible_without_resolving_or_writing"
+      ],
+      "test_declarations": 13,
+      "assertions": 53
+    },
+    "tools/test_external_revalidation.py": {
+      "sha256": "ec41e19b072e2383da2acea9cd9fe6cbf220c2d5db333253e10f9f84ebd797d5",
+      "ast_equal": false,
+      "changed_functions": [
+        "TestExternalRevalidation.test_m_b_valid_historical_binding_reconstructed",
+        "TestExternalRevalidation.test_m_l_repeated_t1653_revalidation_without_relevant_change",
+        "TestExternalRevalidation.test_m_m_meaningful_engine_generation_change",
+        "TestExternalRevalidation.test_m_q_repeated_cc_all_reaches_stable_fixed_point",
+        "TestExternalRevalidation.test_m_s_state_consistency_after_verification_failure"
+      ],
+      "test_declarations": 34,
+      "assertions": 148
+    },
+    "tools/test_freebuff_operator_provenance.py": {
+      "sha256": "02648c3a4fb102466d7d34c572f4da11ca0146148c2207ac6f3122e182d846eb",
+      "ast_equal": false,
+      "changed_functions": [],
+      "test_declarations": 19,
+      "assertions": 44
+    },
+    "tools/test_operator_ingress_matrix.py": {
+      "sha256": "aa82f3a4363619dae429177e92a0621c63b80e71a1c1bc3543675a3acd52fd07",
+      "ast_equal": false,
+      "changed_functions": [
+        "TestOperatorIngressMatrix.test_clause_p_opencode_native_integration_end_to_end",
+        "TestOperatorIngressMatrix.test_live_acceptance_disposable_project"
+      ],
+      "test_declarations": 19,
+      "assertions": 63
+    },
+    "tools/test_source_contract_derivation.py": {
+      "sha256": "20f469bb5f6bee53d018747a7e123b1fb0a3d4cac1081d7146b5318c73dc2b79",
+      "ast_equal": false,
+      "changed_functions": [],
+      "test_declarations": 13,
+      "assertions": 64
+    },
+    "tools/test_t119_stale_complete_exit.py": {
+      "sha256": "3205aab43bf9e3b82366843bc860c6d98d507be4a4f791cc3c101b7020281f67",
+      "ast_equal": false,
+      "changed_functions": [],
+      "test_declarations": 7,
+      "assertions": 23
+    },
+    "tools/test_t1807_audit_liveness_regression.py": {
+      "sha256": "3830b7cd76b7f168f49e3a91ae847e16245d44fbc2750f5c387b87bd140fdd67",
+      "ast_equal": false,
+      "changed_functions": [],
+      "test_declarations": 13,
+      "assertions": 50
+    },
+    "tools/test_t1821_markdown_surface.py": {
+      "sha256": "92d2e7c7daa65d49f402cb5bb82ee4a33c69081f39ac00164ffc871586f05deb",
+      "ast_equal": false,
+      "changed_functions": [],
+      "test_declarations": 7,
+      "assertions": 12
+    },
+    "tools/test_t1822_carrier_binding.py": {
+      "sha256": "30cf1eb5df2ee3bdc2ec324595d8fecfed48b822eda58746336e9aae4ec3450a",
+      "ast_equal": true,
+      "changed_functions": [],
+      "test_declarations": 8,
+      "assertions": 19
+    }
+  },
+  "assertion_deltas": [
+    {
+      "path": "tools/test_external_authentication_contract.py",
+      "index": 44,
+      "before": "Call(func=Attribute(value=Name(id='self', ctx=Load()), attr='assertEqual', ctx=Load()), args=[Attribute(value=Subscript(value=Call(func=Name(id='list', ctx=Load()), args=[Call(func=Attribute(value=BinOp(left=Name(id='loc_repo', ctx=Load()), op=Div(), right=Constant(value='.saipen')), attr='rglob', ctx=Load()), args=[Constant(value='EX-*.json')], keywords=[])], keywords=[]), slice=Constant(value=0), ctx=Load()), attr='name', ctx=Load()), Constant(value='EX-000001.json')], keywords=[])",
+      "after": "Call(func=Attribute(value=Name(id='self', ctx=Load()), attr='assertEqual', ctx=Load()), args=[Attribute(value=Subscript(value=Name(id='receipt_files', ctx=Load()), slice=Constant(value=0), ctx=Load()), attr='name', ctx=Load()), Constant(value='EX-000001.json')], keywords=[])"
+    }
+  ],
+  "index_unchanged": true,
+  "duplicate_mapping_same_ordered_items": true,
+  "runtime_string_delta": {
+    "tools/saipen_engine/board_compaction.py": {
+      "verification_contract": -1,
+      "inline": -1
+    }
+  },
+  "runtime_strings_preserved_except_equivalent_duplicate": true,
+  "self_audit": {
+    "reviewer": "executing agent; no separate agent/human",
+    "scope": "exact twenty paths, five changed production functions, ordered mapping and test import/fixture/assertion preservation",
+    "result": "PASS; no unresolved finding in the final cleanup delta",
+    "validation": "full pinned Ruff zero, canonical core CURRENT_PASS, exact focused 201 pass/one explicit live-host skip reused in REVIEW in 7.219 s",
+    "remaining": "parent final full-generation, platform, source and publication gates"
+  }
+}

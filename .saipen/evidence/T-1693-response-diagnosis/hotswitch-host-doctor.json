@@ -1,0 +1,153 @@
+{
+  "ok": true,
+  "code": "HOST_DOCTOR",
+  "source": {
+    "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "kind": "source-checkout",
+    "adapter": null,
+    "canonical": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "generation": "gen-sha256:4a50b27faea80d863c506c116478d140839dbafc47a50593f7cf056c545d1f61",
+    "proven": true,
+    "detail": null,
+    "version": "8.1.0"
+  },
+  "policy": {
+    "mode": "degraded",
+    "label": "DEGRADED_ALLOWED",
+    "source": "operator",
+    "path": "C:\\Users\\vac34\\.saipen\\authority.json"
+  },
+  "authority": {
+    "running": false,
+    "pid": null,
+    "instance": null,
+    "generation": null,
+    "expected_generation": "svc-32bc6d88b4ad57403e7d93be",
+    "saipen_root": null,
+    "endpoint": "\\\\.\\pipe\\saipen-authority-336850628174a20c242c9247",
+    "log": "C:\\Users\\vac34\\.saipen\\authority\\broker.log",
+    "identity_supported": true,
+    "mode": "degraded",
+    "mode_label": "DEGRADED_ALLOWED",
+    "mode_source": "operator",
+    "mode_path": "C:\\Users\\vac34\\.saipen\\authority.json",
+    "generation_current": null,
+    "unanswered": "absent"
+  },
+  "machine_runtime": {
+    "code": "MACHINE_RUNTIME_STALE",
+    "root": "C:\\ProgramData\\SAI\\SAIPEN",
+    "saipen_runtime_ready": false,
+    "generation": "gen-sha256:2bd10cc421aacf6a65253322d366939d9328f65080bce0bc6bd029d2a8223b9f",
+    "current": false,
+    "saipen_version": "8.1.0",
+    "state_schema": 3,
+    "launcher": "C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd",
+    "python_bundled": true,
+    "source": "MACHINE_RUNTIME",
+    "reasons": [
+      "the machine runtime is not the generation of the canonical source"
+    ],
+    "action": "saipen host machine install"
+  },
+  "path_launcher": {
+    "code": "PATH_LAUNCHER_READY",
+    "directory": "C:\\Users\\vac34\\bin",
+    "files": {
+      "saipen.cmd": "owned",
+      "saipen": "owned"
+    },
+    "reasons": []
+  },
+  "hosts": [
+    {
+      "id": "freebuff",
+      "profile": null,
+      "name": "FreeBuff / generic ~/.agents skills",
+      "state": "STALE_RUNTIME",
+      "reasons": [
+        "installed runtime is not the source generation (bootstrap/inject.ps1, bootstrap/inject.sh, bootstrap/install_ownership.py)",
+        "installer record: runtime_fingerprint"
+      ],
+      "action": "saipen host repair",
+      "installed": true,
+      "host_present": true,
+      "runtime": "stale",
+      "hook": "not-applicable",
+      "instruction": "not-applicable",
+      "admission": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "last_health": null,
+      "recoverable": true,
+      "contract": {
+        "id": "freebuff",
+        "name": "FreeBuff / generic ~/.agents skills",
+        "install_surfaces": {
+          "home": "~/.agents",
+          "skill": "~/.agents/skills/saipen",
+          "bespoke": "freebuff-backstop"
+        },
+        "tool_interception": "ADVISORY",
+        "prompt_interception": "NONE",
+        "response_interception": "NONE",
+        "response_enforcement": "ADVISORY",
+        "admission_enforcement": "ADVISORY",
+        "host_authority_source": "NONE",
+        "separated_authority": false,
+        "mechanical_admission": false,
+        "prompt_blocking": false,
+        "launch": {
+          "routine": "native FreeBuff / generic ~/.agents skills launch; no SAIPEN seat, wrapper or launcher is required",
+          "mode": "NATIVE",
+          "launcher_command": null,
+          "executable": null
+        },
+        "auto_recovery": "NONE",
+        "degraded_mode": "NOT_APPLICABLE"
+      },
+      "contract_gaps": [],
+      "facts": {
+        "runtime": {
+          "declared": true,
+          "path": "C:\\Users\\vac34\\.agents\\skills\\saipen",
+          "installed": true,
+          "generation": "gen-sha256:fef421924e2238a270578e841876a2d8363f3ac1e520309c45e57b71d015d6a5",
+          "expected_generation": "gen-sha256:4a50b27faea80d863c506c116478d140839dbafc47a50593f7cf056c545d1f61",
+          "current": false,
+          "diff": [
+            "bootstrap/inject.ps1",
+            "bootstrap/inject.sh",
+            "bootstrap/install_ownership.py",
+            "bootstrap/uninstall.ps1",
+            "bootstrap/uninstall.sh",
+            "extensions/adapters/claude.md"
+          ],
+          "launcher_problems": [],
+          "provenance_problems": [
+            "runtime_fingerprint"
+          ],
+          "source": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+          "staging": [],
+          "marker": "C:\\Users\\vac34\\.agents\\skills\\saipen\\.saipen_runtime.json"
+        },
+        "hook": {
+          "declared": false,
+          "path": null,
+          "installed": false,
+          "status": "not-applicable",
+          "delegated_root": null,
+          "delegated_current": null,
+          "problems": [],
+          "installed_at": null
+        },
+        "host_home": "C:\\Users\\vac34\\.agents"
+      }
+    }
+  ],
+  "broken": [],
+  "needs_action": [
+    "freebuff"
+  ],
+  "problems": [],
+  "next_action": "saipen host repair"
+}

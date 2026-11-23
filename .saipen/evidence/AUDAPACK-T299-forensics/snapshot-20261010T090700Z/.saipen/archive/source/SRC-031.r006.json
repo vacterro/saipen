@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-031:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001: a failed pack must never remove or overwrite the previous good archive when backup establishment or later verification fails"
+    },
+    "SRC-031:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002: every non-project config mutation rebases on the latest durable state and fails closed instead of writing a stale registry"
+    },
+    "SRC-031:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003: the Windows/Ubuntu CI retry contract is green and diagnostic redaction is host-independent"
+    },
+    "SRC-031:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-004: one consistent release version, enforced by regression"
+    },
+    "SRC-031:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001: final-wave completion is published only after one verified durable campaign commit, and incomplete rollback is explicit and recoverable"
+    },
+    "SRC-031:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-002: the INAUDIT body+metadata lifecycle survives split moves and corrupt bytes without losing API access"
+    }
+  },
+  "derived_at": "2026-09-04T00:55:13Z",
+  "derived_from": "SRC-031",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "9299b24bdd09bbcbf056ea334b3d3842d563cf0d77c64ed29c8a01b044a32332"
+}

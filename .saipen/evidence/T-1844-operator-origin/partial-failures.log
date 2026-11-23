@@ -1,0 +1,27 @@
+test_a_report_request_earns_the_detailed_budget (test_claude_stop_hook.TranscriptRequestTests.test_a_report_request_earns_the_detailed_budget) ... FAIL
+test_a_tool_result_is_not_the_request (test_claude_stop_hook.TranscriptRequestTests.test_a_tool_result_is_not_the_request) ... FAIL
+test_only_a_human_origin_can_be_the_request (test_claude_stop_hook.TranscriptRequestTests.test_only_a_human_origin_can_be_the_request) ... FAIL
+test_the_request_survives_a_long_agentic_turn_of_tool_output (test_claude_stop_hook.TranscriptRequestTests.test_the_request_survives_a_long_agentic_turn_of_tool_output) ... FAIL
+test_user_request_dry_run_writes_nothing (test_closure_provenance.DryRunPurityTests.test_user_request_dry_run_writes_nothing) ... FAIL
+test_repeating_a_user_request_creates_no_second_source_or_work (test_closure_provenance.IdempotencyTests.test_repeating_a_user_request_creates_no_second_source_or_work) ... FAIL
+test_every_declared_load_budget_is_measured_from_registry (test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry) ... FAIL
+test_missing_required_skill_evidence_escaped_before_and_is_refused_now (test_protocol_admission.PreFixOracleTests.test_missing_required_skill_evidence_escaped_before_and_is_refused_now) ... FAIL
+test_a_project_without_a_key_refuses_every_transport (test_protocol_admission.TransportAuthorityTests.test_a_project_without_a_key_refuses_every_transport) ... FAIL
+test_recover_resolves_the_gate_with_recorded_authority (test_recovery_reachability.OperatorBlockerCliTests.test_recover_resolves_the_gate_with_recorded_authority) ... FAIL
+test_audit_core003_tripped_goal_cc_reauthorizes_and_clears_wait (test_intent_audit_fixes.IntentAuditTests.test_audit_core003_tripped_goal_cc_reauthorizes_and_clears_wait) ... FAIL
+CONTROL F: public `user-request` persists the new explicit request ... FAIL
+CONTROL G/H: `saipen continue` + `saipen status --json` agree that ... FAIL
+test_materially_changed_scope_is_a_new_goal (test_cold_recovery.GoalIngressIdempotenceTests.test_materially_changed_scope_is_a_new_goal) ... FAIL
+test_red_control_repeated_goal_mints_one_goal (test_cold_recovery.GoalIngressIdempotenceTests.test_red_control_repeated_goal_mints_one_goal) ... FAIL
+`WAIT: <category> -- <text>` is the canonical WAIT grammar. ... FAIL
+The DEC used to say `STATE.blocker clear` whatever was authorized. ... FAIL
+test_the_named_route_runs_from_the_state_that_names_it (test_next_action_deadlock.NextActionDeadlockTests.test_the_named_route_runs_from_the_state_that_names_it) ... FAIL
+H. Delayed callbacks cannot reuse another prompt. ... FAIL
+K. Fresh verified ingress can authorize new Work. ... FAIL
+M. New authorized task can pass the valve legally. ... FAIL
+P. OpenCode native integration passes end-to-end. ... FAIL
+Live acceptance scenario on a disposable 9router-like project: ... FAIL
+test_an_authorized_detail_request_lifts_the_line_budget (test_chat_style.ClassifierTests.test_an_authorized_detail_request_lifts_the_line_budget) ... FAIL
+test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing (test_response_delivery.CompletedPartDelivery.test_host_prompt_grants_artifacts_but_quotes_and_fences_grant_nothing) ... FAIL
+test_real_hook_replaces_three_fresh_oversized_turns (test_response_delivery.CompletedPartDelivery.test_real_hook_replaces_three_fresh_oversized_turns) ... FAIL
+test_explicit_artifact_is_bounded_even_when_the_request_is_witnessed (test_response_digest.DetailIntentTests.test_explicit_artifact_is_bounded_even_when_the_request_is_witnessed) ... FAIL

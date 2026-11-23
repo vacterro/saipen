@@ -1,0 +1,192 @@
+"""The live-ancestry identity tests hold under every way a process is not a hook (T-1687).
+
+Defect class: a test about the LIVE ancestry of the suite pinned two of the
+three refusals that ancestry can produce. `IdentityTests` asks the shipped
+proof about this interpreter, and the answer depends on where the suite was
+started and on what the operating system has done to its parents since. On
+2026-10-08 a twenty-minute family met the third answer -- a parent whose pid a
+newer process had taken over -- and two tests went red for one run:
+
+    AssertionError: 'PARENT_REUSED' not found in ('NOT_HOST_DESCENDANT', 'HOOK_NOT_FOUND')
+
+No rerun of the module reproduced it, because a rerun has a fresh ancestry.
+Here the ancestry is supplied, so each answer is met on purpose. The two tests
+are run unchanged under each one; that is the regression. The controls prove
+the widened set did not become a catch-all: an answer that is not "this is not
+a hook" still fails them, and a platform that reports nothing is still a
+different wire code.
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+import unittest
+from pathlib import Path
+from unittest import mock
+
+TOOLS = Path(__file__).resolve().parent
+ROOT = TOOLS.parent
+if str(TOOLS) not in sys.path:
+    sys.path.insert(0, str(TOOLS))
+
+import test_host_authority_broker as broker_tests  # noqa: E402
+from saipen_engine import host_authority_broker as HB  # noqa: E402
+from saipen_engine import host_authority_client as HC  # noqa: E402
+from saipen_engine import host_authority_identity as HI  # noqa: E402
+from saipen_engine import host_authority_process as HP  # noqa: E402
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+LIVE_ANCESTRY_TESTS = (
+    "test_an_arbitrary_same_user_python_client_is_refused",
+    "test_an_ordinary_process_is_not_a_hook_invocation_and_starts_nothing",
+)
+
+F = HP.ProcessFact
+PY = "c:/py/python.exe"
+BASH = "c:/program files/git/usr/bin/bash.exe"
+HOST_IMAGE = "c:/users/v/.local/bin/claude.exe"
+GUARD = "C:/Users/v/.claude/hooks/saipen-guard.py"
+RUNTIME = "C:/Users/v/.claude/skills/saipen"
+
+
+def setUpModule() -> None:
+    isolate_host_session()
+
+
+def ancestry(shape: str) -> list:
+    """This interpreter first, then the parents the shape supplies."""
+    me = F(os.getpid(), 4242, PY, "python.exe", (PY, "-m", "unittest"), 1000)
+    host = F(77, 1, HOST_IMAGE, "claude.exe", ("claude.exe",), 100)
+    shell = F(4242, 77, BASH, "bash.exe", (BASH, "-c", "python -m unittest"), 600)
+    if shape == "no host above":
+        return [me, F(4242, 1, "c:/windows/explorer.exe", "explorer.exe", ("explorer.exe",), 500)]
+    if shape == "host above, no hook":
+        return [me, shell, host]
+    if shape == "parent pid reused":
+        # Pid 4242 now belongs to a process born after its supposed child.
+        return [me, F(4242, 1, "c:/windows/notepad.exe", "notepad.exe", ("notepad.exe",), 2000)]
+    if shape == "nothing observable":
+        return []
+    if shape == "another host's hook":
+        hook = F(
+            os.getpid(), 4242, PY, "python.exe",
+            (PY, GUARD, "--host", "codex", "--saipen-root", RUNTIME), 1000,
+        )
+        return [hook, shell, host]
+    raise AssertionError(shape)
+
+
+REASON = {
+    "no host above": HI.REASON_NOT_HOST_DESCENDANT,
+    "host above, no hook": HI.REASON_HOOK_NOT_FOUND,
+    "parent pid reused": HI.REASON_PARENT_REUSED,
+}
+
+
+def run_live_ancestry_tests(shape: str, names=LIVE_ANCESTRY_TESTS) -> dict:
+    """``{test name: its failure text or ''}`` with the ancestry supplied."""
+    outcome = {}
+    with mock.patch.object(HP, "ancestry", side_effect=lambda *_a, **_k: ancestry(shape)):
+        for name in names:
+            result = unittest.TestResult()
+            unittest.TestSuite([broker_tests.IdentityTests(name)]).run(result)
+            problems = [text for _test, text in (*result.failures, *result.errors)]
+            outcome[name] = "\n".join(problems)
+            if result.testsRun != 1:
+                outcome[name] = outcome[name] or "the test did not run"
+    return outcome
+
+
+class LiveAncestryRefusalSetTests(unittest.TestCase):
+    def test_the_supplied_ancestries_produce_the_reasons_they_are_named_for(self):
+        # Instrument control: the shapes below must mean what their names say.
+        policy = HI.IdentityPolicy(
+            host="claude",
+            host_images=tuple(HB.settings().get("host_images") or ()),
+            hook_artifacts=(),
+            profile_hook="hooks/saipen-guard.py",
+        )
+        for shape, reason in {
+            **REASON,
+            "nothing observable": HI.REASON_IDENTITY_UNAVAILABLE,
+            "another host's hook": HI.REASON_HOOK_HOST_MISMATCH,
+        }.items():
+            with self.subTest(shape=shape):
+                proof = HI.prove_hook_invocation(ancestry(shape), policy)
+                self.assertFalse(proof.ok)
+                self.assertEqual(proof.reason, reason)
+
+    def test_both_tests_hold_under_every_way_this_process_is_not_a_hook(self):
+        for shape in REASON:
+            with self.subTest(shape=shape):
+                self.assertEqual(
+                    run_live_ancestry_tests(shape), {name: "" for name in LIVE_ANCESTRY_TESTS}
+                )
+
+    def test_the_accepted_set_is_exactly_the_three_named_refusals(self):
+        self.assertEqual(sorted(broker_tests.NOT_A_HOOK), sorted(REASON.values()))
+
+    def test_an_answer_that_is_not_a_missing_hook_still_fails_both(self):
+        # The set is not a catch-all: a hook of another host is a different
+        # finding, and a test that accepted it would accept anything.
+        outcome = run_live_ancestry_tests("another host's hook")
+        for name in LIVE_ANCESTRY_TESTS:
+            with self.subTest(test=name):
+                self.assertIn(HI.REASON_HOOK_HOST_MISMATCH, outcome[name])
+
+    def test_nothing_observable_stays_a_different_wire_code(self):
+        # The service refuses with its own code when the platform reports no
+        # identity, so the service-side test keeps failing on it; the caller's
+        # look at itself may legitimately see nothing and starts nothing.
+        outcome = run_live_ancestry_tests("nothing observable")
+        self.assertIn(HB.CODE_NOT_AUTHENTICATED, outcome[LIVE_ANCESTRY_TESTS[0]])
+        self.assertEqual(outcome[LIVE_ANCESTRY_TESTS[1]], "")
+
+
+class ReusedParentTests(unittest.TestCase):
+    """The exact answers when a parent pid was reused, service and caller."""
+
+    def setUp(self) -> None:
+        patcher = mock.patch.object(
+            HP, "ancestry", side_effect=lambda *_a, **_k: ancestry("parent pid reused")
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_the_service_refuses_by_name_and_writes_nothing(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            world = broker_tests.World(Path(tmp))
+            harness = broker_tests.Harness(world.runtime)
+            self.addCleanup(harness.close)
+            reply = harness.admitted(world)
+            self.assertFalse(reply["ok"])
+            self.assertEqual(reply["code"], HB.CODE_NOT_AUTHENTICATED)
+            self.assertEqual(reply["identity"]["reason"], HI.REASON_PARENT_REUSED)
+            self.assertIn("reused", reply["detail"])
+            self.assertNotIn("capability", reply)
+            self.assertFalse((world.project / broker_tests.PA.LEDGER_DIR).exists())
+            harness.close()
+
+    def test_the_caller_sees_the_same_reason_and_starts_nothing(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp) / "home"
+            home.mkdir()
+            shape = HC.hook_invocation("claude", home)
+            self.assertEqual((shape["ok"], shape["reason"]), (False, HI.REASON_PARENT_REUSED))
+            unserved = Path(tmp) / "unserved-runtime"
+            report = HC.ensure(ROOT, runtime=unserved, host="claude", home=home)
+            self.assertEqual(
+                (report["ok"], report["started"], report["state"]),
+                (False, False, "not_a_host_client"),
+            )
+            self.assertIn(HI.REASON_PARENT_REUSED, report["detail"])
+            self.assertFalse(HB.health(unserved))
+
+
+if __name__ == "__main__":
+    unittest.main()

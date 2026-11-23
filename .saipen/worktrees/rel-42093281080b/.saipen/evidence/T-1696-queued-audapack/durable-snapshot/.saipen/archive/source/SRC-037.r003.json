@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-037:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 P0: settings_dialog.py uses PROFILES and normalize_fidelity_profile; they must be imported from audapack.fidelity and a regression must actually construct SettingsWidget/MainWindow so unresolved globals are caught"
+    },
+    "SRC-037:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002 P1: DEFAULT_EXCLUDES still hides fidelity-owned media/font patterns from the fidelity planner; remove them, migrate persisted legacy defaults provenance-safely, keep config.py and config.example.json derived from one canonical default set"
+    },
+    "SRC-037:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003 P1: enforce discovered == included + excluded + failed at the traversal boundary in build_fidelity_plan, represent pruned subtrees as counts/bytes, classify links and stat failures once, assert the invariant before manifest emission"
+    }
+  },
+  "derived_at": "2026-09-05T01:24:18Z",
+  "derived_from": "SRC-037",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "6c949baaeb49a413ffa0bfb85f6a856f49d1040f2ae06ad27421ef5f8f4ed7a5"
+}

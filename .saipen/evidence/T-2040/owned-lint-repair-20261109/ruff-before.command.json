@@ -1,0 +1,30 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "ruff",
+    "check",
+    "tools/test_t2040_bounded_discovery_resume.py",
+    "tools/test_t2040_exhaustion_evidence.py",
+    "tools/test_t2040_finish_plan_guards.py",
+    "tools/test_t2040_maintenance_authority.py",
+    "tools/test_t2040_publication_truth.py",
+    "tools/test_t2040_replenishment_recovery.py",
+    "tools/test_t2040_review_proof_binding.py",
+    "tools/test_t2040_terminal_consumer_guards.py",
+    "tools/test_t2040_terminal_consumer_supplementary.py"
+  ],
+  "command_text": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -B -m ruff check tools/test_t2040_bounded_discovery_resume.py tools/test_t2040_exhaustion_evidence.py tools/test_t2040_finish_plan_guards.py tools/test_t2040_maintenance_authority.py tools/test_t2040_publication_truth.py tools/test_t2040_replenishment_recovery.py tools/test_t2040_review_proof_binding.py tools/test_t2040_terminal_consumer_guards.py tools/test_t2040_terminal_consumer_supplementary.py",
+  "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "runtime": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "executable": "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "environment_overrides": {
+    "RUFF_NO_CACHE": "1"
+  },
+  "started_at": "2026-11-09T21:44:02.836979+00:00",
+  "exit_code": 2,
+  "duration_seconds": 1.0359397999709472,
+  "stdout": "ruff-before.stdout.txt",
+  "stderr": "ruff-before.stderr.txt"
+}

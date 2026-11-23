@@ -1,0 +1,9 @@
+test_a_missing_hook_is_why_this_suite_installs_it (__main__.AdmissionTests.test_a_missing_hook_is_why_this_suite_installs_it)
+Guard against a fixture that silently has no gate at all. ... ok
+test_the_shipped_hook_accepts_the_same_file_once_its_content_is_staged (__main__.AdmissionTests.test_the_shipped_hook_accepts_the_same_file_once_its_content_is_staged) ... ok
+test_the_shipped_hook_refuses_a_commit_whose_only_runtime_file_is_intent_only (__main__.AdmissionTests.test_the_shipped_hook_refuses_a_commit_whose_only_runtime_file_is_intent_only) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 8.558s
+
+OK

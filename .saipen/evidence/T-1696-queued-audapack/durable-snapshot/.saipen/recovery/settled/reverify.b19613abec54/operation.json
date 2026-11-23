@@ -1,0 +1,26 @@
+{
+  "op_id": "reverify.b19613abec54",
+  "operation": "reverify.work",
+  "created_at": "2026-10-05T08:34:12Z",
+  "agent": "buffy",
+  "project_identity": "v:\\___vac\\__k\\__code\\_py\\_audapack",
+  "project_lineage": "lineage-79944d6c0334416ebe1001e97de6c1cc",
+  "semantic_payload_hash": "d90d911d34172eaf",
+  "preconditions": {
+    ".saipen/recovery/conformance/reverify/RV-000658.json": ""
+  },
+  "read_preconditions": {},
+  "verification_policy": "none",
+  "status": "COMMITTED",
+  "progress_index": 1,
+  "targets": [
+    {
+      "path": ".saipen/recovery/conformance/reverify/RV-000658.json",
+      "role": "report",
+      "action": "write",
+      "before_hash": "",
+      "after_hash": "353c2355ed11babd",
+      "applied": true
+    }
+  ]
+}

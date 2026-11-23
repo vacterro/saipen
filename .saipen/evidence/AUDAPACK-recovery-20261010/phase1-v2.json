@@ -1,0 +1,55 @@
+{
+  "all_pass": false,
+  "outcomes": {},
+  "failure": "Traceback (most recent call last):\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\controls.py\", line 208, in <module>\n    outcomes = run_controls()\n               ^^^^^^^^^^^^^^\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\controls.py\", line 113, in run_controls\n    assert native(a)[\"exit_code\"] == 0\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+  "commands": [
+    {
+      "argv": [
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\bin\\saipen.cmd",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v2\\A-fresh",
+        "--agent",
+        "buffy",
+        "init",
+        "--json"
+      ],
+      "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v2\\A-fresh",
+      "exit_code": 0,
+      "stdout": "{\r\n  \"ok\": true,\r\n  \"code\": \"INIT_COMPLETED\",\r\n  \"project_root\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v2\\\\A-fresh\",\r\n  \"identity\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v2\\\\A-fresh\\\\.saipen\\\\IDENTITY.md\",\r\n  \"state\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v2\\\\A-fresh\\\\.saipen\\\\STATE.md\",\r\n  \"board\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v2\\\\A-fresh\\\\.saipen\\\\BOARD.md\",\r\n  \"log\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\.saipen\\\\evidence\\\\AUDAPACK-recovery-20261010\\\\fixtures-v2\\\\A-fresh\\\\.saipen\\\\LOG.md\",\r\n  \"saipen_home\": \"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\",\r\n  \"route\": \"saipen start '<the first goal>'\",\r\n  \"mailbox\": {\r\n    \"ok\": false,\r\n    \"code\": \"MAILBOX_ATTACH_SKIPPED\",\r\n    \"detail\": \"a mailbox is already bound or SAIMAIL is not installed\"\r\n  }\r\n}\r\n",
+      "stderr": "",
+      "payload": {
+        "ok": true,
+        "code": "INIT_COMPLETED",
+        "project_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v2\\A-fresh",
+        "identity": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v2\\A-fresh\\.saipen\\IDENTITY.md",
+        "state": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v2\\A-fresh\\.saipen\\STATE.md",
+        "board": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v2\\A-fresh\\.saipen\\BOARD.md",
+        "log": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v2\\A-fresh\\.saipen\\LOG.md",
+        "saipen_home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+        "route": "saipen start '<the first goal>'",
+        "mailbox": {
+          "ok": false,
+          "code": "MAILBOX_ATTACH_SKIPPED",
+          "detail": "a mailbox is already bound or SAIMAIL is not installed"
+        }
+      }
+    },
+    {
+      "argv": [
+        "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+        "--project-root",
+        "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v2\\A-fresh",
+        "--gate",
+        "core",
+        "--no-receipt"
+      ],
+      "exit_code": 1,
+      "stdout": "saipen conformance validation starting (tools/validate.py)...\r\nProject root: V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\AUDAPACK-recovery-20261010\\fixtures-v2\\A-fresh (explicit)\r\nProject lineage: lineage-0f3ea0f911b542748332b3303e426075\r\nPASS: state.schema.json and the engine STATE contract constants agree\r\nPASS: state.schema.json states nothing the validator ignores (5 keywords enforced natively, 6 delegated, 4 types interpreted)\r\nPASS: STATE.md schema valid (checked against state.schema.json)\r\nPASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-0f3ea0f911b542748332b3303e426075)\r\nPASS: BOARD.md has all required section headings\r\nPASS: BOARD.md no duplicate tickets\r\nPASS: BOARD.md no dangling needs: references\r\nPASS: BOARD.md acyclic\r\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\r\nPASS: BOARD.md claimed tickets have their needs: satisfied\r\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\r\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\r\nFAIL: source freshness computation BLOCKED -- git rev-parse --verify HEAD failed with exit 128: fatal: Needed a single revision; no package may become ready or be collected with unknown input\r\nPASS: FUTURE-OWNER valid (rule owner registered, ladder published and ordered, 4 mutating verbs declared and published, 0 document(s) non-normative, 0 reviewed record(s) canonical)\r\nPASS: append targets end on a line boundary (3 checked)\r\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\r\nWARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\r\nWARN [translation-stale]: 32 locale README(s) carry a source digest that no longer matches README.md's normalised content (ar, bg, cs, da, de, ded, el, es, et, fi, fr, he, hi, hr, hu, id, it, ja, ko, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this\r\nValidation FAILED: 1 problem(s), 2 warning(s)\r\n",
+      "stderr": ""
+    }
+  ],
+  "canonical_init_sha256": "7a5246452c9f074b7deb1b993c446f7c0cfd8c6450d3f682fa0bb4b21eb74573",
+  "canonical_cli_sha256": "f8b930a748fdb5b8c9a4bbb081988be5829b4d0c48481a90e0b692c1d0db5412"
+}

@@ -1,0 +1,396 @@
+--- preimages/tools/test_campaign_matrix.py
++++ current/tools/test_campaign_matrix.py
+@@ -23,6 +23,7 @@
+     write_scoped_fixture_grant,
+     write_verification_receipt,
+ )
++from test_fixture_support import checked_discovery_evidence
+ 
+ from saipen_engine import (
+     audit_enqueue,
+@@ -34,6 +35,7 @@
+     lock,
+     supervisor,
+     watchdog,
++    work_exhaustion as W,
+ )
+ 
+ # T-1947: the producer-specific backend lives outside the neutral engine.
+@@ -54,6 +56,19 @@
+             close = text.index("\n---", 3)
+             text = text[:close] + "\n" + line + text[close:]
+     return text
++
++
++def _verified_quiescent_certificate(generation: str = "gen-quiescent") -> dict:
++    """Real certificate owner; explicitly simulated current, checked discovery."""
++    cert = W.certify_work_exhaustion(
++        None, tickets={}, state={}, persistent_goals=[],
++        audit_inbox={"pending": []}, future_gate={"index_state": "CURRENT"},
++        source_generation=generation,
++        source_evidence=checked_discovery_evidence(generation),
++        continuous_maintenance_authorized=True,
++    )
++    assert W.verified_quiescence(cert), cert
++    return cert
+ 
+ 
+ def _make_project(task="T-100", *, with_grant: bool = True) -> Path:
+@@ -405,6 +420,7 @@
+         self.assertEqual(st_after["campaign_state"], campaign.RUNNING)
+ 
+     def test_c35_c36_all_work_complete_legitimately_quiescent(self):
++        # Empty BOARD is not a checked discovery certificate.
+         root = _make_project()
+         (root / ".saipen" / "BOARD.md").write_text("## DOING\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8")
+         st_txt = (root / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+@@ -416,10 +432,23 @@
+             campaign_id="CAMP-QUIESCENT-TEST",
+             authority_proof_reference=".saipen/authority/grant.json",
+         )
+-        step_res = ctrl.step(worker_func=lambda r, g: {"progress_verified": True})
+-        self.assertTrue(step_res["ok"])
++
++        worker = mock.Mock(return_value={"ok": True})
++        unchecked = ctrl.step(worker_func=worker)
++        self.assertFalse(unchecked["ok"], unchecked)
++        self.assertEqual(unchecked["code"], ca.INCOMPLETE_DISCOVERY)
++        self.assertEqual(unchecked["state"]["campaign_state"], campaign.EXTERNAL_BLOCKED)
++
++        # Same campaign, now with complete schema-2 evidence, not a mocked verdict.
++        cert = _verified_quiescent_certificate()
++        with mock.patch.object(W, "certify_work_exhaustion", return_value=cert):
++            step_res = ctrl.step(worker_func=worker)
++        self.assertTrue(step_res["ok"], step_res)
++        self.assertEqual(step_res["event"], "QUIESCENT_WAIT")
+         st = campaign.load_campaign_state(root)
+-        self.assertIn(st["campaign_state"], (campaign.QUIESCENT_WAIT, campaign.OPERATOR_BLOCKED))
++        self.assertEqual(st["campaign_state"], campaign.QUIESCENT_WAIT)
++        self.assertEqual(st["wake_condition"], {"event": "new_source_or_audit"})
++        worker.assert_not_called()
+ 
+     def test_c38_cross_project_authority_missing(self):
+         root = _make_project()
+--- preimages/tools/test_campaign_production_gates.py
++++ current/tools/test_campaign_production_gates.py
+@@ -37,6 +37,7 @@
+     write_scoped_fixture_grant,
+     write_verification_receipt,
+ )
++from test_campaign_matrix import _verified_quiescent_certificate
+ 
+ from saipen_engine import (
+     audit_enqueue,
+@@ -48,6 +49,7 @@
+     lock,
+     supervisor,
+     watchdog,
++    work_exhaustion as W,
+ )
+ 
+ # T-1947: the producer-specific backend lives outside the neutral engine.
+@@ -304,7 +306,7 @@
+         self.assertEqual(disps[0]["verification_evidence"], verification_rel)
+ 
+     def test_gate_i_quiescence_and_wake(self):
+-        """GATE I: Work exhaustion enters quiescence; new work wakes controller."""
++        """GATE I: certified work exhaustion enters quiescence; new work wakes controller."""
+         root = _create_production_fixture()
+         # Mark all work complete
+         (root / ".saipen" / "BOARD.md").write_text("## DOING\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8")
+@@ -318,10 +320,14 @@
+             campaign_id="CAMP-QUIESCENCE",
+             authority_proof_reference=".saipen/authority/grant.json",
+         )
+-        step_res = ctrl.step()
+-        self.assertTrue(step_res["ok"])
++        # Explicit checked-discovery simulation; retain the real assessment.
++        cert = _verified_quiescent_certificate()
++        with mock.patch.object(W, "certify_work_exhaustion", return_value=cert):
++            step_res = ctrl.step()
++        self.assertTrue(step_res["ok"], step_res)
++        self.assertEqual(step_res["event"], "QUIESCENT_WAIT")
+         st = campaign.load_campaign_state(root)
+-        self.assertIn(st["campaign_state"], (campaign.QUIESCENT_WAIT, campaign.OPERATOR_BLOCKED))
++        self.assertEqual(st["campaign_state"], campaign.QUIESCENT_WAIT)
+ 
+         # Add new work
+         (root / ".saipen" / "BOARD.md").write_text("## DOING\n- [/] T-201 [P1] New Task\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8")
+@@ -329,8 +335,11 @@
+         st_txt2 = re.sub(r"(?m)^phase:.*$", "phase: BUILD", st_txt2)
+         (root / ".saipen" / "STATE.md").write_text(st_txt2, encoding="utf-8")
+ 
+-        wake_res = ctrl.step(worker_func=lambda r, g: {"progress_verified": True})
+-        self.assertTrue(wake_res["ok"])
++        worker = mock.Mock(return_value={"ok": True})
++        wake_res = ctrl.step(worker_func=worker)
++        self.assertTrue(wake_res["ok"], wake_res)
++        self.assertEqual(wake_res["event"], "WORKER_GENERATION_EXECUTED")
++        worker.assert_called_once_with(root, generation=1)
+         st_wake = campaign.load_campaign_state(root)
+         self.assertEqual(st_wake["campaign_state"], campaign.RUNNING)
+ 
+@@ -515,9 +524,15 @@
+                 campaign_id="CAMP-EXEC-TEST",
+                 authority_proof_reference=".saipen/authority/grant.json",
+             )
+-            # 1. Step without tools/saipen.py and without worker_func fails
+-            step_res = ctrl.step(worker_func=None)
+-            self.assertFalse(step_res["ok"])
++            # Both project-local AND installed executors must be unavailable.
++            self.assertFalse((root / "tools/saipen.py").exists())
++            with mock.patch.object(
++                campaign.paths, "resolve_tool_path",
++                side_effect=FileNotFoundError("fixture: installed executor unavailable"),
++            ) as resolve:
++                step_res = ctrl.step(worker_func=None)
++            resolve.assert_called_once_with("saipen.py")
++            self.assertFalse(step_res["ok"], step_res)
+             self.assertEqual(step_res["code"], "EXECUTOR_UNAVAILABLE")
+ 
+             # 2. Live campaign supersession refused
+--- preimages/tools/test_t1945_analysis_progress.py
++++ current/tools/test_t1945_analysis_progress.py
+@@ -22,9 +22,9 @@
+ if str(TOOLS) not in sys.path:
+     sys.path.insert(0, str(TOOLS))
+ 
+-from saipen_engine import campaign, continuation_assessment as ca  # noqa: E402
++from saipen_engine import campaign, continuation_assessment as ca, work_exhaustion as W  # noqa: E402
+ from campaign_test_support import inspect_fixture_campaign  # noqa: E402
+-from test_campaign_matrix import _make_project  # noqa: E402
++from test_campaign_matrix import _make_project, _seat_state, _verified_quiescent_certificate  # noqa: E402
+ 
+ 
+ def _read_state(root: Path) -> dict:
+@@ -108,11 +108,29 @@
+         self.assertTrue(recorded.get("at"), "the slice must carry a timestamp")
+ 
+     def test_a_completed_objective_may_still_quiesce(self) -> None:
+-        """The repair must not turn a genuine empty corpus into a hot loop."""
++        """One empty backend is not complete discovery; a full certificate is."""
++        (self.root / ".saipen/BOARD.md").write_text(
++            "## DOING\n## TODO\n## BLOCKED\n## DONE\n", encoding="utf-8",
++        )
++        state_path = self.root / ".saipen/STATE.md"
++        state_path.write_text(
++            _seat_state(state_path.read_text(encoding="utf-8"), phase="DONE", task="none",
++                        next_action='"saipen status"'),
++            encoding="utf-8",
++        )
+         result = self._step_with_discovery({"ok": True, "status": "NO_NEW_EVIDENCE"})
+-        state = _read_state(self.root)
+-        self.assertEqual(state.get("campaign_state"), campaign.QUIESCENT_WAIT)
+-        self.assertEqual(result.get("event"), "DISCOVERY_NO_NEW_FINDINGS")
++        self.assertFalse(result["ok"], result)
++        self.assertEqual(result["event"], "DISCOVERY_NO_NEW_FINDINGS")
++        self.assertEqual(_read_state(self.root)["campaign_state"], campaign.EXTERNAL_BLOCKED)
++
++        cert = _verified_quiescent_certificate()
++        with mock.patch.object(W, "certify_work_exhaustion", return_value=cert), \
++             mock.patch.object(self.controller.backend, "discover") as discover:
++            result = self.controller.step()
++        self.assertTrue(result["ok"], result)
++        self.assertEqual(result["event"], "QUIESCENT_WAIT")
++        self.assertEqual(_read_state(self.root)["campaign_state"], campaign.QUIESCENT_WAIT)
++        discover.assert_not_called()
+ 
+     def test_new_findings_still_reach_delivery(self) -> None:
+         """ANALYSIS_PROGRESS support must not swallow the findings branch."""
+--- preimages/tools/test_t1945_campaign_driver.py
++++ current/tools/test_t1945_campaign_driver.py
+@@ -24,7 +24,7 @@
+ 
+ from saipen_engine import campaign, continuation_assessment as ca  # noqa: E402
+ from campaign_test_support import inspect_fixture_campaign, write_canonical_worker_mutation  # noqa: E402
+-from test_campaign_matrix import _make_project  # noqa: E402
++from test_campaign_matrix import _make_project, _seat_state  # noqa: E402
+ 
+ 
+ class DriverBase(unittest.TestCase):
+@@ -137,15 +137,63 @@
+         for value in (
+             campaign.OPERATOR_BLOCKED,
+             campaign.AUTHORITY_BLOCKED,
+-            campaign.EXTERNAL_BLOCKED,
+             campaign.SAFETY_STOP,
+         ):
+             with self.subTest(state=value):
+                 self._set_state(value)
+-                result = self.controller.run(max_steps=4, worker_func=lambda *_: {"ok": True})
++                worker = mock.Mock(return_value={"ok": True})
++                result = self.controller.run(max_steps=4, worker_func=worker)
+                 self.assertTrue(result["ok"], result)
+                 self.assertEqual(result["steps"], [])
+                 self.assertIn("requires_operator", result["reason"])
++                worker.assert_not_called()
++
++    def test_external_block_is_rechecked_once_when_work_is_unavailable(self) -> None:
++        self._set_state(campaign.EXTERNAL_BLOCKED)
++        (self.root / ".saipen/BOARD.md").write_text(
++            "## DOING\n## TODO\n## BLOCKED\n"
++            "- [ ] T-100 [P1] Task 100 | blocker: BLOCKED_EXTERNAL -- service offline\n## DONE\n",
++            encoding="utf-8",
++        )
++        state_path = self.root / ".saipen/STATE.md"
++        state_path.write_text(
++            _seat_state(state_path.read_text(encoding="utf-8"), task="none", phase="DONE",
++                        blocker="BLOCKED_EXTERNAL -- service offline",
++                        next_action='"saipen status"'),
++            encoding="utf-8",
++        )
++        worker = mock.Mock(return_value={"ok": True})
++        result = self.controller.run(max_steps=4, worker_func=worker)
++        self.assertTrue(result["ok"], result)
++        self.assertEqual(result["reason"], "campaign_external_blocked")
++        self.assertEqual(len(result["steps"]), 1)
++        self.assertEqual(result["steps"][0]["classification"], ca.WAIT_EXTERNAL)
++        worker.assert_not_called()
++
++    def test_external_block_does_not_veto_independent_work(self) -> None:
++        self._set_state(campaign.EXTERNAL_BLOCKED)
++        board_path = self.root / ".saipen/BOARD.md"
++        board_path.write_text(
++            board_path.read_text(encoding="utf-8").replace(
++                "## BLOCKED\n",
++                "## BLOCKED\n- [ ] T-101 [P1] Other task | blocker: BLOCKED_EXTERNAL -- service offline\n",
++            ),
++            encoding="utf-8",
++        )
++        seen = []
++
++        def worker(root, generation):
++            seen.append(generation)
++            attempt = campaign.load_campaign_state(root)["worker_attempt"]
++            return write_canonical_worker_mutation(
++                root, attempt, rel_path=f"src/independent_{generation}.txt", content=f"work {generation}\n",
++            )
++
++        result = self.controller.run(max_steps=2, worker_func=worker)
++        self.assertTrue(result["ok"], result)
++        self.assertEqual(result["status"], "STEP_BOUND_REACHED")
++        self.assertEqual(seen, [1, 2])
++        self.assertEqual(campaign.load_campaign_state(self.root)["campaign_state"], campaign.RUNNING)
+ 
+     def test_a_proposal_is_not_executed_by_the_driver(self) -> None:
+         self._set_state(campaign.PROPOSED)
+--- preimages/tools/test_aut31_production_autonomy.py
++++ current/tools/test_aut31_production_autonomy.py
+@@ -1,6 +1,7 @@
+-"""SRC-352 AUT31-004: Production autonomy trace and host iteration execution.
+-
+-Mandatory live controls:
++"""SRC-352 AUT31-004: local campaign contracts with injected workers and hosts.
++
++These simulations do not prove live model turns or production acceptance.
++Modeled controls:
+ 1. Five real successive model turns.
+ 2. Two real worker generations.
+ 3. One actual implementation task verified and closed.
+@@ -16,6 +17,7 @@
+ from __future__ import annotations
+ 
+ import json
++import runpy
+ import sys
+ import unittest
+ import uuid
+@@ -33,7 +35,7 @@
+     host_iteration,
+     lock,
+ )
+-from campaign_test_support import inspect_fixture_campaign  # noqa: E402
++from campaign_test_support import inspect_fixture_campaign, write_canonical_worker_mutation  # noqa: E402
+ from test_campaign_matrix import _make_project  # noqa: E402
+ 
+ 
+@@ -57,7 +59,7 @@
+         return admitted
+ 
+     def test_control_01_five_real_successive_model_turns(self) -> None:
+-        """Control 1: Five real successive turns executed through CampaignController.run."""
++        """Control 1: Five productive injected generations request distinct host turns."""
+         dispatches: list[dict] = []
+ 
+         def mock_host_hook(payload: dict) -> dict:
+@@ -81,22 +83,28 @@
+ 
+         def stub_worker(root: Path, gen: int) -> dict:
+             step_counter[0] += 1
+-            log_path = root / ".saipen" / "LOG.md"
+-            log_path.write_text(
+-                log_path.read_text(encoding="utf-8") + f"- step {step_counter[0]} [E-{1000+step_counter[0]}]\n",
+-                encoding="utf-8",
+-            )
+-            return {"ok": True, "step": step_counter[0], "gen": gen}
++            attempt = campaign.load_campaign_state(root)["worker_attempt"]
++            return write_canonical_worker_mutation(
++                root, attempt, rel_path=f"src/work_{gen}.txt", content=f"work {gen}\n",
++            )
+ 
+         with mock.patch.object(
+             ca,
+             "assess_continuation",
+             return_value={"classification": ca.ACTIVE_WORK, "next_action": "execute_work"},
++        ), mock.patch.object(
++            # Explicit simulated host trust, as in the campaign matrix.
++            host_dispatch, "_broker_verified_receipt", return_value=True,
+         ):
+             run_res = ctrl.run(max_steps=5, worker_func=stub_worker)
+ 
+         self.assertTrue(run_res.get("ok"), run_res)
++        self.assertEqual(run_res["status"], "STEP_BOUND_REACHED")
+         self.assertEqual(len(run_res.get("steps", [])), 5)
++        for step in run_res["steps"]:
++            self.assertTrue(step["progress"]["made_progress"], step)
++            self.assertEqual(step["progress"]["progress_class"], "SOURCE_CHANGED")
++            self.assertTrue(step["dispatch"]["dispatched"], step["dispatch"])
+         self.assertEqual(step_counter[0], 5)
+         self.assertEqual(len(dispatches), 5)
+         # Ensure all iterations have distinct iteration_id / idempotency keys
+@@ -137,12 +145,19 @@
+         self.assertEqual(state.get("worker_generation"), 2)
+ 
+     def test_control_03_actual_implementation_task_verified_and_closed(self) -> None:
+-        """Control 3: One actual implementation task verified and closed on board and state."""
++        """Control 3: Verified source change accompanies simulated task closure."""
+         ctrl = campaign.CampaignController(self.root)
+         self._admit(ctrl, "CAMP-CLOSE-TASK")
+ 
+         def worker_closes_task(root: Path, gen: int) -> dict:
+-            # Advance task to SHIP and DONE
++            attempt = campaign.load_campaign_state(root)["worker_attempt"]
++            mutation = write_canonical_worker_mutation(
++                root, attempt, rel_path="src/implementation.py",
++                content="def increment(value):\n    return value + 1\n",
++            )
++            implementation = runpy.run_path(str(root / "src/implementation.py"))
++            self.assertEqual(implementation["increment"](41), 42)
++            # Closure is a simulated fixture write, never itself progress proof.
+             board_path = root / ".saipen" / "BOARD.md"
+             board_path.write_text(
+                 "## DOING\n## TODO\n## BLOCKED\n## DONE\n- [x] T-100 [P1] Task 100 closed\n",
+@@ -164,7 +179,7 @@
+                 log_path.read_text(encoding="utf-8") + "- task T-100 closed [E-9999]\n",
+                 encoding="utf-8",
+             )
+-            return {"ok": True, "closed_task": "T-100"}
++            return {**mutation, "closed_task": "T-100"}
+ 
+         with mock.patch.object(
+             ca,
+@@ -174,9 +189,13 @@
+             res = ctrl.step(worker_func=worker_closes_task)
+ 
+         self.assertTrue(res.get("ok"), res)
+-        self.assertTrue(res["progress"]["made_progress"])
++        self.assertTrue(res["progress"]["made_progress"], res)
++        self.assertEqual(res["progress"]["progress_class"], "SOURCE_CHANGED")
+         board_content = (self.root / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
+         self.assertIn("- [x] T-100", board_content)
++        state_content = (self.root / ".saipen/STATE.md").read_text(encoding="utf-8")
++        self.assertIn("phase: DONE", state_content)
++        self.assertIn("task: none", state_content)
+ 
+     def test_control_04_saipal_analysis_objective_progressed(self) -> None:
+         """Control 4: One actual SAIPAL analysis objective progressed without quiescing."""

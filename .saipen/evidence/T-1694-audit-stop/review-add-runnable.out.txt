@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "code": "TICKET_ADDED",
+  "op_id": "ticket-763ff98bb12149b3b7e1c07bedfcfefc",
+  "changed_files": [
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md"
+  ],
+  "recovery_required": false,
+  "ticket": "T-2",
+  "event_id": "E-4"
+}

@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-m",
+    "pytest",
+    "tools/test_t2066_zaicode_host_policy.py"
+  ],
+  "format": "pytest",
+  "context": [
+    "tools/saipen_engine",
+    "tools/test_t2066_zaicode_host_policy.py",
+    "tools/test_hermetic_env.py",
+    "tools/test_host_fixture.py",
+    "tools/test_protocol_admission.py",
+    "tools/test_guard_hostile_matrix.py",
+    "tools/autoinject.py",
+    "tools/install_host_guard.py",
+    "tools/authority_service.py",
+    "extensions/adapters",
+    "saipen",
+    "bootstrap",
+    "tools/test_fixture_support.py",
+    "VERSION"
+  ],
+  "oracle_files": [
+    "tools/test_t2066_zaicode_host_policy.py"
+  ],
+  "subject_files": [
+    "tools/saipen_engine/host_authority_broker.py",
+    "tools/saipen_engine/host_authority_client.py",
+    "tools/saipen_engine/operator_origin.py",
+    "saipen/REGISTRY.json"
+  ],
+  "before": {
+    "tools/saipen_engine/host_authority_broker.py": ".saipen/evidence/T-2066/pre/tools/saipen_engine/host_authority_broker.py",
+    "tools/saipen_engine/host_authority_client.py": ".saipen/evidence/T-2066/pre/tools/saipen_engine/host_authority_client.py",
+    "tools/saipen_engine/operator_origin.py": ".saipen/evidence/T-2066/pre/tools/saipen_engine/operator_origin.py",
+    "saipen/REGISTRY.json": ".saipen/evidence/T-2066/pre/saipen/REGISTRY.json"
+  },
+  "timeout": 300
+}

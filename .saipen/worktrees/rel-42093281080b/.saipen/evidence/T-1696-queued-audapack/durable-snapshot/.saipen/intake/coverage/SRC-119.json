@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-119:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-274 closed with verification evidence in LOG: transition to VERIFY -- verify -> PASS [target: T-274] conf: high -- gates on the exact tree: pytest tests/ 2556 passed 16 skipped (863s), ruff check changed modules clean, AST parse clean; REAL acceptance from a FRESH process through the normal path (ProjectService+PackingService.pack_project('zaicode')): _ZAICODE_05.10.26-T22-51-26.zip 46450200 bytes 13150 members, producer audapack_version 0.3.",
+      "text": "ZAICODE pack still emits zcode nested component included=false reason empty from normal pack path; establish runtime parity, producer identity, stale-resident protection, source-first budget, self-check and normal-path acceptance",
+      "verification": "the Work this request created reached its own verification gate; see the T-274 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-274"
+    }
+  },
+  "schema_version": 1
+}

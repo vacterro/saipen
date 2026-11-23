@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "code": "ACCEPTANCE",
+  "ticket": "T-1719",
+  "criteria": [
+    {
+      "ac": "AC-01",
+      "text": "After canonical T-442 admission and applicable T-443/T-444 authorization, one command launches two actual engineering agents on two distinct eligible real audit generations in two isolated... [detail_ref: .saipen/recovery/board-compaction/T-1719/T-1719-d586adadb3ab20b3ff08fbcc.json]",
+      "minimum_witness": "EFFECT_PATH",
+      "minimum_witness_explicit": true,
+      "state": "UNVERIFIED",
+      "evidence": [],
+      "escaped_defects": [],
+      "previously_accepted": false
+    }
+  ],
+  "undeclared_evidence": [],
+  "undeclared_escaped_defects": [],
+  "build_boundary": 0,
+  "counts": {
+    "UNVERIFIED": 1
+  },
+  "declared": 1
+}

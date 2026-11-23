@@ -1,0 +1,48 @@
+{
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "tools/test_t2040_iteration_truth.py"
+  ],
+  "oracle_sha256": "8341ee450118a1f8d62b779bfe5f4548bab02fa28b0f2ea274afaf67e00d1ea7",
+  "production": {
+    "tools/saipen_engine/iteration.py": {
+      "before": "49a3ac5a670a2b99908271aade9292f3b1157ba75c056c6c5b0f4ef0f4425ca5",
+      "after": "456dacdfc4928dccfe226eca12988d68aa8b1e3d43994517392f2366c0e6c2b7"
+    },
+    "tools/saipen_engine/iteration_verdict.py": {
+      "before": "bada873b188f3f257263c9aa1de5a0413dd7c0c5a115a31f30ec194546c40245",
+      "after": "060703ac55a8c51ad6f317f4cc1ae3072bfb187ff0a266dca1228fa9d3cd9637"
+    },
+    "tools/saipen_engine/supervisor.py": {
+      "before": "77dbb7308365dc8f183f436c1c87f10bd825262949c6ba50b47a4842e5c0e1cd",
+      "after": "8e17f004634249ad838381c66f7320b432c72e0064f0934c4212fbd85001e533"
+    },
+    "tools/saipen_engine/work_exhaustion.py": {
+      "before": "a64920437f572f7009538516cdfc72cfe09e5bcdb347c71e3d9c76bf074f64ad",
+      "after": "888d765f999eac92d1591108f43ca0ce7bec84b074d1577533c2e1a989791761"
+    },
+    "tools/saipen_engine/continuation_assessment.py": {
+      "before": "76baf40f4940001b326e6fcbfded8ccfdcd32bc215fbda40e1f38099d6f25fe4",
+      "after": "e0db3c2a18ed9606f5ce442e19779b3549bd1f04afaf174eebfc60acfe8c8428"
+    }
+  },
+  "runs": {
+    "before": {
+      "exit_code": 1,
+      "log": "matched-final-before.log",
+      "log_sha256": "74cf083f39f0dbb3c752b1cbec977c0604fb5b1d366f55e1603bf30462e64dd0",
+      "oracle_sha256": "8341ee450118a1f8d62b779bfe5f4548bab02fa28b0f2ea274afaf67e00d1ea7"
+    },
+    "after": {
+      "exit_code": 1,
+      "log": "matched-final-after.log",
+      "log_sha256": "15232cc3d9cd060dea56f846345ae556c84771f8a855f34498a3d99b278d29af",
+      "oracle_sha256": "8341ee450118a1f8d62b779bfe5f4548bab02fa28b0f2ea274afaf67e00d1ea7"
+    }
+  }
+}

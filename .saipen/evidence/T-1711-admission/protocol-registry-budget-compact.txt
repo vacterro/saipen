@@ -1,0 +1,13 @@
+.F..............
+======================================================================
+FAIL: test_every_declared_load_budget_is_measured_from_registry (test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_protocol_registry.py", line 205, in test_every_declared_load_budget_is_measured_from_registry
+    self.assertLessEqual(measured[name], limit, name)
+AssertionError: 41132 not less than or equal to 40960 : ordinary_phase
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.115s
+
+FAILED (failures=1)

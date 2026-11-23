@@ -1,0 +1,5 @@
+control: ran 4, red 0 -- as expected
+the renderer before this Work: ran 4, red 2 -- as expected
+only a nested flag counts: ran 4, red 2 -- as expected
+every answer claims a plan: ran 4, red 1 -- as expected
+mutations: 3, repetitions each: 3, problems: 0

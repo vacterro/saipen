@@ -1,0 +1,14 @@
+{
+  "state_bound_BOOT": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\BOOT.md",
+    "sha256": "1fa066b97485564f2d45dd746196f129a4b3c59090a6b81daebf23af9508cb2b",
+    "size": 10449,
+    "symlink": false
+  },
+  "AGENTS_legacy_BOOT": {
+    "path": "C:\\Users\\vac34\\.agents\\skills\\saipen\\BOOT.md",
+    "sha256": "9d3888b181f843a04636f863d52174df6f1543dcab86d2ae152d533cd0cba19c",
+    "size": 10367,
+    "symlink": false
+  }
+}

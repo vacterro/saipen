@@ -1,0 +1,22 @@
+PERF-001 [test_write_volume_is_not_quadratic_in_operation_count]
+  current  = PASS  (1 passed, 21 deselected in 42.71s)
+  reverted = FAIL  (1 failed, 21 deselected in 69.39s (0:01:09))
+  -> PROVEN
+PERF-002 [test_reparse_work_follows_new_work_not_history_size]
+  current  = PASS  (1 passed, 21 deselected in 0.80s)
+  reverted = FAIL  (1 failed, 21 deselected in 0.91s)
+  -> PROVEN
+PERF-003 [test_one_allocator_read_per_reconciliation_pass]
+  current  = PASS  (1 passed, 21 deselected in 0.29s)
+  reverted = FAIL  (1 failed, 21 deselected in 0.37s)
+  -> PROVEN
+PERF-004 [test_page_size_is_the_resident_bound]
+  current  = PASS  (1 passed, 21 deselected in 2.04s)
+  reverted = FAIL  (1 failed, 21 deselected in 2.24s)
+  -> PROVEN
+PERF-005 [test_cumulative_checkpoint_bytes_are_not_quadratic]
+  current  = PASS  (1 passed, 21 deselected in 0.49s)
+  reverted = FAIL  (1 failed, 21 deselected in 0.56s)
+  -> PROVEN
+
+5/5 red-before-green pairs measured

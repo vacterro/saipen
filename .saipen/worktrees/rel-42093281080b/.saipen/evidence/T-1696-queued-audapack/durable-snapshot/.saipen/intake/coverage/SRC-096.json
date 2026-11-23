@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-096:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-249 closed with verification evidence in LOG: verify -> PASS [target: T-249] conf: high -- python -m pytest -q reported 2295 passed, 16 skipped, 0 failed, exit 0 (incl tests/test_browser_generation_truth_integration.py 3/3, red-controlled by disabling the T-249 gate: a streaming audit read READY); node --test tests/widget/*.test.js reported 717 pass 0 fail 0 cancelled exit 0; python -m ruff check audapack tests clean; python -m compileall -q ",
+      "text": "Fix widget live audit shown READY while ChatGPT generating (state-truth defect, 0.0.80)",
+      "verification": "the Work this request created reached its own verification gate; see the T-249 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-249"
+    }
+  },
+  "schema_version": 1
+}

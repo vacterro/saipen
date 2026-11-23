@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-021:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement and verify every required change and test in T07 MANAGED WORKER CAPACITY."
+    }
+  },
+  "derived_at": "2026-08-31T08:15:11Z",
+  "derived_from": "SRC-021",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "c80b40abbc7de6835d2c324d4d002e97c696a14e782814243da3ea834b9b7e5d"
+}

@@ -580,7 +580,11 @@ class IntentAuditTests(unittest.TestCase):
                 states.append(
                     (state["execution_intent"], state["converge_target"], state["next_action"])
                 )
-        self.assertEqual(states, [("converge", "crew", "saipen crew")] * 2)
+        # T-2083: the writer stores what the ONE gate chain admits. This
+        # fixture carries no conformance receipt, so the crew route is refused
+        # and the gate names its repair (`saipen validate`); both commands
+        # establish the same intent and neither advertises a refused route.
+        self.assertEqual(states, [("converge", "crew", "saipen validate")] * 2)
 
     # ── CORE-004: pending worker tickets survive failure ──────────────────
     def test_core004_no_destruction(self):

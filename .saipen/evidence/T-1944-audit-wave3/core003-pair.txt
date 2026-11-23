@@ -1,0 +1,5 @@
+current    ran=6 failures=0 errors=0
+pre-fix vocabulary: ['budget', 'goal_complete']
+reverted   ran=6 failures=2 errors=0 first=AssertionError: False is not true
+
+CORE-003 pair: current=PASS reverted=FAIL -> PROVEN

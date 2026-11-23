@@ -1,0 +1,36 @@
+{
+  "purpose": "Resume aid; current STATE/BOARD/LOG and live inflight facts outrank this note.",
+  "task": "T-1693",
+  "source": "SRC-199",
+  "phase_at_write": "VERIFY",
+  "family": {
+    "host_exec_session": 50951,
+    "pid_at_launch": 4244,
+    "command": "python -B tools/core_unit.py evidence T-1693 --jobs 4",
+    "started_utc": "2026-10-09T12:13:21Z",
+    "restriction": "While canonical inflight is live, edit only .saipen/; no source edits or premature pass/handback. Await the same host session."
+  },
+  "evidence": {
+    "original_subject": "df41ca11085f769ba47e40de66d3819d78cd5592469a662f3ebc7561eff45100",
+    "current_subject": "3cd333c9b3c3e9ef0715c468762e28be3cda89dbd516121fb91495e8f39677b8",
+    "current_verifier": "3c44dc626c152582ba822cbe44ec6f7f00515db46aa5f90f09e51ca65546f165",
+    "typed_regression_events": ["E-13982", "E-13983", "E-13984", "E-13985"],
+    "cheap_gates_event": "E-13986",
+    "cheap_gates": "75 tests, full canonical ruff, whitespace and core validator PASS (9 inherited warnings).",
+    "diagnosis_controls": "22 PASS; original 20 method ASTs retained. Both frozen A/B examples red on authenticated previous subject, green on current; layout/deep JSON red on captured intermediate subject, green on current.",
+    "public_cli": "Disposable project: inventory refused, bound diagnosis accepted with semantic_review REQUIRED, canonical checkpoint unchanged; hotswitch-cli.json.",
+    "scope": "hotswitch-scope.json: 8 source/fixture files; recovered foreign hunks preserved; no staging/commit/tag/push.",
+    "semantic": "hotswitch-semantic-analysis.md: A's refusal supported by retained recovery diagnostic; B's transport failure remains self-reported; remote causes unknown; no original human/native host transcripts; FreeBuff advisory and stale."
+  },
+  "remaining": [
+    "Read the complete full-family result; no baseline growth. If red, preserve exact failures and follow VERIFY without false PASS.",
+    "If green, record verify -> PASS [target: T-1693] conf: high with current family and local evidence; transition REVIEW canonically (goal counter increments once).",
+    "At REVIEW rerun verify-current.py pair review and cli-control.py review; distinct names preserve original evidence. Read semantic analysis and actual fixed source; independent evidence, not a semantic machine PASS. Memory promotion NO.",
+    "Bind reviewed scope, record review -> PASS / DEC SHIP, transition SHIP. Honor existing no-publish policy; no staging, commit, tag, push or runtime injection. Complete through canonical ship/ticket lifecycle only.",
+    "Set SRC-199 R001..R005 VERIFIED only on actual completed evidence, then close/archive only through canonical source operations; use SOURCES.md.",
+    "Continue the previous goal via cc/continue; never stop just because T-1693 finished. Latest status had no workable TODO, 62 parked rows, two pending audit layers (active 23 bound to SRC-167/T-1606) and real operator/external gates.",
+    "Literal cc all is not a CLI form (continue accepts no positional arguments); the user's prose authorizes full continuation, not replacement of the persisted objective.",
+    "Final language et; use canonical compact response digest and current validation. Root goal remains active until all admitted runnable work is done or truthfully dispositioned; do not claim global project completion at a human/external boundary."
+  ],
+  "graph": "Tier 2; saipen indexed_at/generation 2026-09-01T13:16:39Z. tools/ excluded by design and docs stale/not_tracked; all relevant code was read directly. Reconfirm project/generation after compaction."
+}

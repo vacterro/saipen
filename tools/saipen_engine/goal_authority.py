@@ -477,9 +477,91 @@ def fresh_cc_provenance(root: Path | str | None = None) -> dict | None:
     return None
 
 
-def bounded_resume_requirement() -> dict:
-    """ONE missing-input description for the valve executor and its projections."""
+def _detect_session_host(env: dict | None = None) -> str | None:
+    """Identify the current host adapter conservatively for error diagnostics only.
+
+    Environment markers NEVER grant continuation or protocol-home authority;
+    they only let refusal messages state accurately when the current host lacks
+    a native prompt hook to deliver ``operator_carrier``.
+    """
+    import os
+
+    source = os.environ if env is None else env
+    explicit = str(source.get("SAIPEN_HOST") or source.get("AGENT_HOST") or "").strip().lower()
+    if explicit:
+        return explicit
+    from . import operator_task
+
+    if operator_task.is_freebuff_host(source):
+        return "freebuff"
+    if any(source.get(k) for k in ("ANTIGRAVITY_AGENT", "ANTIGRAVITY_CLI_ALIAS", "ANTIGRAVITY_SESSION")):
+        return "antigravity"
+    if any(source.get(k) for k in ("GEMINI_CLI", "GEMINI_SESSION_ID")):
+        return "gemini"
+    if any(source.get(k) for k in ("ZAICODE_HOME", "ZCODE_HOME", "ZCODE_SESSION")):
+        return "zaicode"
+    if any(source.get(k) for k in ("OPENCODE", "OPENCODE_SESSION_ID")):
+        return "opencode"
+    if any(source.get(k) for k in ("CLAUDECODE", "CLAUDE_CODE_ENTRYPOINT")):
+        return "claude"
+    return None
+
+
+def host_ingress_capability(host: str | None = None, *, env: dict | None = None) -> dict | None:
+    """Look up adapter prompt-ingress capability from extensions/adapters/registry.json."""
+    target = (host or _detect_session_host(env) or "").strip().lower()
+    if not target:
+        return None
+    from . import state as state_mod
+
+    reg_path = state_mod.running_home() / "extensions" / "adapters" / "registry.json"
+    try:
+        reg = json.loads(reg_path.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError):
+        return None
+    adapters = reg.get("adapters") if isinstance(reg, dict) else None
+    if not isinstance(adapters, list):
+        return None
+    entry = next(
+        (item for item in adapters if isinstance(item, dict) and str(item.get("id") or "").lower() == target),
+        None,
+    )
+    if entry is None:
+        return None
+    cap = entry.get("operator_ingress_capability") or {}
+    prompt_avail = bool(cap.get("host_prompt_available"))
     return {
+        "host": str(entry.get("id") or target),
+        "host_prompt_available": prompt_avail,
+        "separated_authority": bool(entry.get("separated_authority")),
+        "pre_output_interception": str(entry.get("pre_output_interception") or "NONE"),
+        "prompt_to_work_binding": str(cap.get("prompt_to_work_binding") or "NOT_INSTALLED"),
+        "can_deliver_operator_carrier": prompt_avail,
+    }
+
+
+def bounded_resume_requirement(*, host: str | None = None) -> dict:
+    """ONE missing-input description for the valve executor and its projections."""
+    cap = host_ingress_capability(host=host)
+    if cap is not None and not cap["host_prompt_available"]:
+        host_id = cap["host"]
+        return {
+            "mode": "wait",
+            "detail": (
+                "bounded run requires a fresh operator cc through authenticated native ingress; "
+                f"host adapter {host_id!r} exposes no prompt hook"
+            ),
+            "required_ingress": "operator_carrier",
+            "canonical_next_command": None,
+            "host_capability": cap,
+            "operator_action": (
+                f"Host {host_id!r} has no native prompt-hook ingress "
+                f"(host_prompt_available=false, separated_authority={str(cap['separated_authority']).lower()}), "
+                "so an agent CLI replay cannot deliver authenticated operator_carrier cc here. "
+                "Send fresh cc from a prompt-hook-capable host (such as ZAICODE, OpenCode, or Claude Code)."
+            ),
+        }
+    result = {
         "mode": "wait",
         "detail": "bounded run requires a fresh operator cc through authenticated native ingress",
         "required_ingress": "operator_carrier",
@@ -489,9 +571,14 @@ def bounded_resume_requirement() -> dict:
             "cannot renew this budget. Restore the host ingress bridge if it is unavailable."
         ),
     }
+    if cap is not None:
+        result["host_capability"] = cap
+    return result
 
 
-def reset_authority(root: Path | str, state: dict, source: str | None = None) -> dict:
+def reset_authority(
+    root: Path | str, state: dict, source: str | None = None, *, host: str | None = None
+) -> dict:
     """Decide whether this reset spends an existing grant or a fresh one."""
     from . import operator_task
 
@@ -511,7 +598,7 @@ def reset_authority(root: Path | str, state: dict, source: str | None = None) ->
     provenance = fresh_cc_provenance(root=root)
     if provenance:
         return {"mode": "reauthorize", "source": "operator_carrier", "provenance": provenance}
-    return bounded_resume_requirement()
+    return bounded_resume_requirement(host=host)
 
 
 def goal_completion_verdict(

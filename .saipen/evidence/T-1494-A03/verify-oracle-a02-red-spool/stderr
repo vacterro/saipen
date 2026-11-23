@@ -1,0 +1,162 @@
+test_bare_continue_cc_identical_on_tripped_goal_valve (test_command_routing.CommandSemanticsTests.test_bare_continue_cc_identical_on_tripped_goal_valve)
+Aliases share routing semantics; authority comes from the caller. ... FAIL
+test_tripped_goal_valve_cc_reauthorizes_keeps_objective (test_command_routing.CommandSemanticsTests.test_tripped_goal_valve_cc_reauthorizes_keeps_objective) ... FAIL
+test_safety_valve_cc_reauthorizes (test_hostile_wave_regressions.Wave2ObeyTests.test_safety_valve_cc_reauthorizes) ... FAIL
+
+======================================================================
+FAIL: test_bare_continue_cc_identical_on_tripped_goal_valve (test_command_routing.CommandSemanticsTests.test_bare_continue_cc_identical_on_tripped_goal_valve)
+Aliases share routing semantics; authority comes from the caller.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-core-unit-nhwn8irh\project\tools\test_command_routing.py", line 867, in test_bare_continue_cc_identical_on_tripped_goal_valve
+    self.assertEqual(rc, 1, label)
+AssertionError: 0 != 1 : bare
+
+======================================================================
+FAIL: test_tripped_goal_valve_cc_reauthorizes_keeps_objective (test_command_routing.CommandSemanticsTests.test_tripped_goal_valve_cc_reauthorizes_keeps_objective)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-core-unit-nhwn8irh\project\tools\test_command_routing.py", line 961, in test_tripped_goal_valve_cc_reauthorizes_keeps_objective
+    self.assertEqual(rc, 1)
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_safety_valve_cc_reauthorizes (test_hostile_wave_regressions.Wave2ObeyTests.test_safety_valve_cc_reauthorizes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-core-unit-nhwn8irh\project\tools\test_hostile_wave_regressions.py", line 178, in test_safety_valve_cc_reauthorizes
+    self.assertEqual(rc, 1, raw)
+AssertionError: 0 != 1 : {
+  "ok": true,
+  "code": "VALVE_REAUTHORIZED",
+  "op_id": "valve-43cdd0b95ad74125af3a2f07eb90817c",
+  "changed_files": [
+    ".saipen/LOG.md",
+    ".saipen/STATE.md"
+  ],
+  "recovery_required": false,
+  "event_id": "E-2",
+  "execution_intent": "goal",
+  "goal_waves": 0,
+  "goal_tickets": 0,
+  "reconciliation": {
+    "ok": false,
+    "code": "RECONCILE_REAUTH_REQUIRED",
+    "detail": "goal_waves 3->0 (goal counter is at/over the safety cap while canonical history is lower -- never silently cleared without re-authorization (CORE section 2.4)); goal_tickets 20->0 (goal counter is at/over the safety cap while canonical history is lower -- never silently cleared without re-authorization (CORE section 2.4)); next_action 'WAIT: init -- provide the first project goal or raw backlog'->\"WAIT: safety valve reached (3 waves / 20 tickets) -- run 'cc' to continue\" (safety valve tripped (goal_tickets=20, goal_waves=3) but next_action does not state the pause -- MAINTENANCE section 2.4 requires the section 1.2 WAIT form, and `cc` is the only re-authorization; reconciliation must not certify CLEAN over it)",
+    "changed": {
+      "board": [],
+      "state": [
+        {
+          "field": "goal_waves",
+          "from": 3,
+          "to": 0,
+          "surface": "state",
+          "reason": "goal counter is at/over the safety cap while canonical history is lower -- never silently cleared without re-authorization (CORE section 2.4)",
+          "refuse": true,
+          "operator_decision_available": true,
+          "canonical_next_command": "saipen continue",
+          "remediation": "SAFETY_VALVE_TRIPPED"
+        },
+        {
+          "field": "goal_tickets",
+          "from": 20,
+          "to": 0,
+          "surface": "state",
+          "reason": "goal counter is at/over the safety cap while canonical history is lower -- never silently cleared without re-authorization (CORE section 2.4)",
+          "refuse": true,
+          "operator_decision_available": true,
+          "canonical_next_command": "saipen continue",
+          "remediation": "SAFETY_VALVE_TRIPPED"
+        },
+        {
+          "field": "next_action",
+          "from": "WAIT: init -- provide the first project goal or raw backlog",
+          "to": "WAIT: safety valve reached (3 waves / 20 tickets) -- run 'cc' to continue",
+          "surface": "state",
+          "reason": "safety valve tripped (goal_tickets=20, goal_waves=3) but next_action does not state the pause -- MAINTENANCE section 2.4 requires the section 1.2 WAIT form, and `cc` is the only re-authorization; reconciliation must not certify CLEAN over it",
+          "refuse": true,
+          "operator_decision_available": true,
+          "canonical_next_command": "saipen continue",
+          "remediation": "SAFETY_VALVE_TRIPPED"
+        }
+      ]
+    },
+    "refused": [
+      {
+        "field": "goal_waves",
+        "from": 3,
+        "to": 0,
+        "surface": "state",
+        "reason": "goal counter is at/over the safety cap while canonical history is lower -- never silently cleared without re-authorization (CORE section 2.4)",
+        "refuse": true,
+        "operator_decision_available": true,
+        "canonical_next_command": "saipen continue",
+        "remediation": "SAFETY_VALVE_TRIPPED"
+      },
+      {
+        "field": "goal_tickets",
+        "from": 20,
+        "to": 0,
+        "surface": "state",
+        "reason": "goal counter is at/over the safety cap while canonical history is lower -- never silently cleared without re-authorization (CORE section 2.4)",
+        "refuse": true,
+        "operator_decision_available": true,
+        "canonical_next_command": "saipen continue",
+        "remediation": "SAFETY_VALVE_TRIPPED"
+      },
+      {
+        "field": "next_action",
+        "from": "WAIT: init -- provide the first project goal or raw backlog",
+        "to": "WAIT: safety valve reached (3 waves / 20 tickets) -- run 'cc' to continue",
+        "surface": "state",
+        "reason": "safety valve tripped (goal_tickets=20, goal_waves=3) but next_action does not state the pause -- MAINTENANCE section 2.4 requires the section 1.2 WAIT form, and `cc` is the only re-authorization; reconciliation must not certify CLEAN over it",
+        "refuse": true,
+        "operator_decision_available": true,
+        "canonical_next_command": "saipen continue",
+        "remediation": "SAFETY_VALVE_TRIPPED"
+      }
+    ],
+    "strict_state_error": null,
+    "dry_run": false,
+    "needs_local_mutation": false,
+    "safe_auto_repair_available": false,
+    "operator_decision_available": true,
+    "canonical_next_command": "saipen continue",
+    "read_only": true,
+    "terminal_disposition": null,
+    "blocking_surface": "state",
+    "blocking_field": null,
+    "evidence_reference": ".saipen/STATE.md",
+    "diagnosis": "READ_ONLY_DIAGNOSIS_ONLY",
+    "read_only_diagnosis_only": true,
+    "instruction": "READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; the only sanctioned mutation is `saipen continue`",
+    "forbidden_probes": [
+      "saipen stop",
+      "saipen transition",
+      "saipen goal",
+      "saipen ticket",
+      "Bash",
+      "Edit",
+      "Write"
+    ],
+    "reason_code": "RECONCILE_REAUTH_REQUIRED",
+    "remediation": "SAFETY_VALVE_TRIPPED",
+    "safety_valve_tripped": true,
+    "operator_decisions": []
+  },
+  "telegrams": {
+    "state": "OK",
+    "unread": 0,
+    "on_current_work": 0,
+    "complete": true,
+    "read_command": "saimail-local saipen brief --project-root V:\\_TEMP_\\saipen-obey-h0bfr3qx\\proj --workspace C:\\Users\\vac34\\AppData\\Local\\saipen\\saimail --seat tester",
+    "detail": "counts only; nothing was opened and nothing here is an instruction"
+  },
+  "route": "cc"
+}
+
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.882s
+
+FAILED (failures=3)

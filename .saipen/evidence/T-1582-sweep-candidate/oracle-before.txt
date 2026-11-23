@@ -1,0 +1,54 @@
+test_a_constructed_dead_control_is_not_softened_by_host_absence (t1582_fixed_oracle.ActualSweepCapabilityTests.test_a_constructed_dead_control_is_not_softened_by_host_absence) ... ok
+test_a_real_missing_anchor_still_fails_alongside_host_absence (t1582_fixed_oracle.ActualSweepCapabilityTests.test_a_real_missing_anchor_still_fails_alongside_host_absence) ... FAIL
+test_capability_reason_reaches_skip_and_unproven_runner (t1582_fixed_oracle.ActualSweepCapabilityTests.test_capability_reason_reaches_skip_and_unproven_runner) ... FAIL
+test_constructed_control_still_requires_the_validator_finding (t1582_fixed_oracle.ActualSweepCapabilityTests.test_constructed_control_still_requires_the_validator_finding) ... ok
+test_other_controls_continue_but_missing_capability_is_never_pass (t1582_fixed_oracle.ActualSweepCapabilityTests.test_other_controls_continue_but_missing_capability_is_never_pass) ... FAIL
+test_real_missing_anchor_alone_still_uses_generic_skip_and_fail (t1582_fixed_oracle.ActualSweepCapabilityTests.test_real_missing_anchor_alone_still_uses_generic_skip_and_fail) ... ok
+test_capability_refusal_returns_a_reason (t1582_fixed_oracle.ApplyCaseReasonTests.test_capability_refusal_returns_a_reason) ... ok
+test_missing_target_stays_a_bare_false (t1582_fixed_oracle.ApplyCaseReasonTests.test_missing_target_stays_a_bare_false) ... ok
+test_no_op_mutation_still_returns_false (t1582_fixed_oracle.ApplyCaseReasonTests.test_no_op_mutation_still_returns_false) ... ok
+test_real_symlink_still_applies (t1582_fixed_oracle.ApplyCaseReasonTests.test_real_symlink_still_applies) ... skipped 'host cannot create symlinks'
+test_reason_reuses_the_canonical_capability_test (t1582_fixed_oracle.ApplyCaseReasonTests.test_reason_reuses_the_canonical_capability_test) ... ok
+test_capability_refusal_is_named (t1582_fixed_oracle.SkipLineWordingTests.test_capability_refusal_is_named) ... ok
+test_moved_anchor_keeps_the_missing_file_wording (t1582_fixed_oracle.SkipLineWordingTests.test_moved_anchor_keeps_the_missing_file_wording) ... ok
+
+======================================================================
+FAIL: test_a_real_missing_anchor_still_fails_alongside_host_absence (t1582_fixed_oracle.ActualSweepCapabilityTests.test_a_real_missing_anchor_still_fails_alongside_host_absence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1582-sweep-candidate\test_t1582_sweep_skip_reason.py", line 190, in test_a_real_missing_anchor_still_fails_alongside_host_absence
+    self.assertIn("1 of 2 mutation control(s) no longer prove anything", text)
+AssertionError: '1 of 2 mutation control(s) no longer prove anything' not found in "FAIL: sweep -- 2 of 2 mutation control(s) no longer prove anything\nSKIP: genuine missing anchor -- the mutation changed nothing: the file is missing, or its anchor text is (a LOG anchor sealed into .saipen/logs/ is the usual cause)\nFAIL: portable project identity -- the validator did not report 'identity symlink refused'. That check no longer goes red on its own condition\n\n2 of 2 case(s) are not evidence any more."
+
+======================================================================
+FAIL: test_capability_reason_reaches_skip_and_unproven_runner (t1582_fixed_oracle.ActualSweepCapabilityTests.test_capability_reason_reaches_skip_and_unproven_runner)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1582-sweep-candidate\test_t1582_sweep_skip_reason.py", line 174, in test_capability_reason_reaches_skip_and_unproven_runner
+    self.assertEqual(verdict, "UNPROVEN", text)
+AssertionError: 'FAIL' != 'UNPROVEN'
+- FAIL
++ UNPROVEN
+ : FAIL: sweep -- 1 of 1 mutation control(s) no longer prove anything
+FAIL: portable project identity -- the validator did not report 'identity symlink refused'. That check no longer goes red on its own condition
+
+1 of 1 case(s) are not evidence any more.
+
+======================================================================
+FAIL: test_other_controls_continue_but_missing_capability_is_never_pass (t1582_fixed_oracle.ActualSweepCapabilityTests.test_other_controls_continue_but_missing_capability_is_never_pass)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1582-sweep-candidate\test_t1582_sweep_skip_reason.py", line 182, in test_other_controls_continue_but_missing_capability_is_never_pass
+    self.assertEqual(verdict, "UNPROVEN", text)
+AssertionError: 'FAIL' != 'UNPROVEN'
+- FAIL
++ UNPROVEN
+ : FAIL: sweep -- 1 of 2 mutation control(s) no longer prove anything
+FAIL: portable project identity -- the validator did not report 'identity symlink refused'. That check no longer goes red on its own condition
+
+1 of 2 case(s) are not evidence any more.
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.033s
+
+FAILED (failures=3, skipped=1)

@@ -1,0 +1,13 @@
+INJECT FAILED (7 of 7 home(s) stale):
+~/.agents skills             copied (re-run after updates)
+~/.agents provenance         verified
+FreeBuff ~/.knowledge.md     already
+FreeBuff ~/.AGENTS.md        already
+Aider conf                   has own read: - add manually: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\saipen\BOOT.md + V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\saipen\STYLE.md
+Antigravity [my_custom]      copied (re-run after updates)
+Antigravity [my_custom] provenance verified
+Antigravity [science]        copied (re-run after updates)
+Antigravity [science] provenance verified
+Kiro                         not installed - skip
+------------------------------------------------------------
+FAILED. Fix reported errors and re-run.

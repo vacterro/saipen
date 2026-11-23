@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-105:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-258 closed with verification evidence in LOG: verify -> PASS [target: T-258] conf: high -- python -m pytest -q reported 2316 passed, 16 skipped, 0 failed, exit 0; python -m pytest -q tests/test_packing_git_inventory.py reported 31 passed 1 skipped 0 failed; the Milestone I set (test_source_inventory, test_packing, test_fidelity, test_repository_hygiene, test_freshness, test_packing_git_inventory) reported 254 passed 9 skipped 0 failed; the to",
+      "text": "Fix Wintage PACK duplicate .audapack/manifest.json: build_git_inventory UNTRACKED loop has no reserved-control supersession, so an untracked non-ignored generated control enters included_entries and is written twice",
+      "verification": "the Work this request created reached its own verification gate; see the T-258 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-258"
+    }
+  },
+  "schema_version": 1
+}

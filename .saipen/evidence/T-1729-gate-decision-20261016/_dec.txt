@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "code": "CHECKPOINTED",
+  "op_id": "checkpoint-5baaae4a804d4d34b0778acdf0297af3",
+  "changed_files": [
+    ".saipen/recovery/log-detail/E-16165-39d618d23dfb3efdda1a79f8.LOG.md",
+    ".saipen/recovery/log-detail/E-16165-39d618d23dfb3efdda1a79f8.json",
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md"
+  ],
+  "recovery_required": false,
+  "event_id": "E-16165"
+}

@@ -1,0 +1,14 @@
+test_focused_current_tree_enters_ship_without_a_full_family_run (test_t1828_verification_policy.FocusedPolicyTests.test_focused_current_tree_enters_ship_without_a_full_family_run) ... FAIL
+
+======================================================================
+FAIL: test_focused_current_tree_enters_ship_without_a_full_family_run (test_t1828_verification_policy.FocusedPolicyTests.test_focused_current_tree_enters_ship_without_a_full_family_run)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1828_verification_policy.py", line 63, in test_focused_current_tree_enters_ship_without_a_full_family_run
+    self.assertTrue(result.ok, result.to_dict())
+AssertionError: False is not true : {'ok': False, 'code': 'INCOMPLETE_TICKET', 'op_id': None, 'changed_files': [], 'recovery_required': False, 'message': '-> SHIP: the current VERIFY cycle of T-7 names no run of the declared core-unit family (-B -m unittest discover -s tools -p test_*.py -v)', 'phase': 'SHIP', 'ticket': 'T-7', 'canonical_next_command': 'python tools/core_unit.py evidence T-7'}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.200s
+
+FAILED (failures=1)

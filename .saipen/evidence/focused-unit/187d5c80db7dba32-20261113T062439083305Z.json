@@ -1,0 +1,219 @@
+{
+  "schema": 1,
+  "family": "focused-unit",
+  "fingerprint": "187d5c80db7dba3275ffb6af335790bf7edf0835be16034706cec1e566304ba7",
+  "verdict": "PASS",
+  "patterns": [
+    "test_t2051_source_reindex.py"
+  ],
+  "runs": [
+    {
+      "pattern": "test_t2051_source_reindex.py",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools",
+        "-p",
+        "test_t2051_source_reindex.py",
+        "-v"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "processes_leaked": [
+        22024
+      ],
+      "duration_s": 0.281,
+      "process_create_s": 0.046,
+      "ran": 10,
+      "red": [],
+      "headers": 0,
+      "unparsed": 0,
+      "tallied": 0,
+      "sections": {},
+      "stdout": "",
+      "stderr": "test_carrier_state_reports_every_expected_name (test_t2051_source_reindex.CarrierTests.test_carrier_state_reports_every_expected_name) ... ok\r\ntest_missing_meta_is_named_precisely (test_t2051_source_reindex.CarrierTests.test_missing_meta_is_named_precisely) ... ok\r\ntest_a_known_receipt_is_not_a_reference (test_t2051_source_reindex.PlanTests.test_a_known_receipt_is_not_a_reference) ... ok\r\ntest_digest_drift_refuses_the_bundle (test_t2051_source_reindex.PlanTests.test_digest_drift_refuses_the_bundle) ... ok\r\ntest_duplicate_references_are_grouped_once (test_t2051_source_reindex.PlanTests.test_duplicate_references_are_grouped_once) ... ok\r\ntest_missing_carrier_is_no_evidence_with_the_exact_proof (test_t2051_source_reindex.PlanTests.test_missing_carrier_is_no_evidence_with_the_exact_proof) ... ok\r\ntest_plan_writes_nothing (test_t2051_source_reindex.PlanTests.test_plan_writes_nothing) ... ok\r\ntest_recoverable_bundle_is_classified_with_a_derived_tombstone (test_t2051_source_reindex.PlanTests.test_recoverable_bundle_is_classified_with_a_derived_tombstone) ... ok\r\ntest_unreadable_index_is_refused_not_emptied (test_t2051_source_reindex.PlanTests.test_unreadable_index_is_refused_not_emptied) ... ok\r\ntest_unresolved_coverage_refuses_the_bundle (test_t2051_source_reindex.PlanTests.test_unresolved_coverage_refuses_the_bundle) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 10 tests in 0.130s\r\n\r\nOK\r\n"
+    }
+  ],
+  "ran": 10,
+  "duration_s": 77.891,
+  "timings_s": {
+    "execution_wall_s": 0.281,
+    "environment_identity_wall_s": 0.078,
+    "copy_wall_s": 62.797,
+    "hash_wall_s": 0.125,
+    "cleanup_wall_s": 14.594
+  },
+  "copy_metrics": {
+    "subject_copy_s": 17.656,
+    "canonical_copy_s": 44.844,
+    "canonical_copy_attempts": 1,
+    "trees": null
+  },
+  "sandbox_scope": {
+    "mode": "FULL",
+    "trees": [],
+    "undeclared": [
+      "test_t2051_source_reindex.py"
+    ],
+    "manifest_sha256": "ef2418507c045a44738c5688300e13f8c05c04f766594d4bfd7ddbc6835f9625"
+  },
+  "verification_identity": {
+    "schema": 1,
+    "configuration": {
+      "family": "focused-unit",
+      "patterns": [
+        "test_t2051_source_reindex.py"
+      ],
+      "timeout": 300,
+      "sandbox_scope": {
+        "mode": "FULL",
+        "trees": []
+      }
+    },
+    "python": {
+      "version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "implementation": "cpython",
+      "prefix": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64",
+      "runtime": [
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python.exe",
+          "exists": true,
+          "sha256": "5f7b89a612c9b8af1d6456cdfcd1dbe5ca630849e79aebced9bee9a6694952ec"
+        },
+        {
+          "path": "C:\\ProgramData\\SAI\\SAIPEN\\python\\3.11.9-64\\python311.dll",
+          "exists": true,
+          "sha256": "0817a2a657a24c0d5fbb60df56960f42fc66b3039d522ec952dab83e2d869364"
+        }
+      ]
+    },
+    "platform": {
+      "os": "nt",
+      "system": "Windows",
+      "release": "10",
+      "machine": "AMD64",
+      "node": "DESKTOP-TTH0L52"
+    },
+    "environment_sha256": "f58b60f201e0195a0825c4977b94fee9632eae3f2493c5d6a8032007dbf7efec",
+    "identity_rule": "canonical-child-2",
+    "toolchain": {
+      "git": {
+        "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+        "exists": true,
+        "sha256": "3cbd024d9d11ef08bd6a0cb5a973613c50825b4952bc6006f3f4222f436091e5"
+      },
+      "node": null,
+      "npm": null,
+      "npx": null,
+      "bash": null,
+      "pwsh": null,
+      "powershell": null,
+      "opencode": null,
+      "claude": null,
+      "codex": null,
+      "ruff": null
+    },
+    "configuration_files": [
+      {
+        "path": "C:\\Users\\vac34\\.codex\\config.toml",
+        "exists": true,
+        "sha256": "08289aa449f312b8d9b57646f6ec2af83b2f6e970b7d49b88509e4c80699e99d"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.codex\\hooks.json",
+        "exists": true,
+        "sha256": "771c37259ec12317659435d9650925f11250961b8df9e6e8b308aecef9367c05"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.claude\\settings.json",
+        "exists": true,
+        "sha256": "9d4af62c336b771a47186824e9d9fe0b1fd585d46805714b1bdeddf9e02dedbb"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.config\\opencode\\opencode.json",
+        "exists": true,
+        "sha256": "751840e69c629b0b68219b3f3699c0c45cf1e2a6310181eda4d3053ea9fb15f0"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.config\\opencode\\plugins\\saipen-guard.js",
+        "exists": true,
+        "sha256": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.config\\opencode\\plugin\\saipen-guard.js",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\vac34\\.gitconfig",
+        "exists": true,
+        "sha256": "cba26e4c3f631dcbbe7c85ca913979ef1bd7343bfa7006b379202fb8587e00c1"
+      },
+      {
+        "path": "C:\\Users\\vac34\\.config\\git\\config",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\vac34\\AppData\\Roaming\\opencode\\opencode.json",
+        "exists": false
+      },
+      {
+        "path": "C:\\Users\\vac34\\AppData\\Roaming\\opencode\\plugins\\saipen-guard.js",
+        "exists": false
+      }
+    ],
+    "verifiers": {
+      "core_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit.py",
+        "exists": true,
+        "sha256": "86d04f8a8d42dd8b365b33a29ca7b3cc1eacae9ddcfc2ae1b9bdbf3ee1e5e32f"
+      },
+      "core_unit_shard.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\core_unit_shard.py",
+        "exists": true,
+        "sha256": "1a22bac5140eeaf33be64413027a22c474420dbe7e3c6134af9b5e6f90942c9d"
+      },
+      "test_runner.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\test_runner.py",
+        "exists": true,
+        "sha256": "f80103c32569e8852e71c09feca43115da23a53270402175ad45390ae489cd7e"
+      },
+      "focused_unit.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\focused_unit.py",
+        "exists": true,
+        "sha256": "e8d4d18e93abd3843f0d911071bc729c15ad767502b72c567be436e6f17545ed"
+      },
+      "verification_cache.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_cache.py",
+        "exists": true,
+        "sha256": "70188f394bb84cc78fe2417daecf5b38b6abcd3be73956194baf1ef1911413ba"
+      },
+      "process_tree.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\process_tree.py",
+        "exists": true,
+        "sha256": "798e6663a85d1906533203fe961472ad8eb8b7e645aa3961a694c1192ca5efcb"
+      },
+      "verification_bootstrap.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_bootstrap.py",
+        "exists": true,
+        "sha256": "8fa1c333bec82156f70bb66e7df786e99265d0b4c5f3da362a830bfc9198ab24"
+      },
+      "verification_impact.py": {
+        "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen_engine\\verification_impact.py",
+        "exists": true,
+        "sha256": "d2829c9de720e9b84d9dfa4056786c533bf9cff86913c5ed0546fe63e19f5a83"
+      }
+    },
+    "baseline": {
+      "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\core_unit_baseline.json",
+      "exists": true,
+      "sha256": "0e98ff25a686832646b69a657695281114034764d348a02cd6644ca87f203224"
+    }
+  },
+  "sandboxes_leaked": [],
+  "status": "PASS",
+  "problem": null
+}

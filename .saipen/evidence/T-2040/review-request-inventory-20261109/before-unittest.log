@@ -1,0 +1,57 @@
+test_malformed_inventory_refuses_ingress_without_losing_request_or_seat (__main__.MaintenanceObservationTests.test_malformed_inventory_refuses_ingress_without_losing_request_or_seat) ... 
+  test_malformed_inventory_refuses_ingress_without_losing_request_or_seat (__main__.MaintenanceObservationTests.test_malformed_inventory_refuses_ingress_without_losing_request_or_seat) (command='user_request') ... ERROR
+  test_malformed_inventory_refuses_ingress_without_losing_request_or_seat (__main__.MaintenanceObservationTests.test_malformed_inventory_refuses_ingress_without_losing_request_or_seat) (command='start') ... ERROR
+
+======================================================================
+ERROR: test_malformed_inventory_refuses_ingress_without_losing_request_or_seat (__main__.MaintenanceObservationTests.test_malformed_inventory_refuses_ingress_without_losing_request_or_seat) (command='user_request')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 131, in test_malformed_inventory_refuses_ingress_without_losing_request_or_seat
+    result = request()
+             ^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 128, in request
+    return operations.user_request(root, "fix", text).to_dict()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\operations.py", line 431, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\operations.py", line 17156, in user_request
+    protected = is_protected_goal_request(root, text)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\goal_authority.py", line 164, in is_protected_goal_request
+    for goal in active_maintenance_goals(root):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\goal_authority.py", line 144, in active_maintenance_goals
+    raise ValueError(f"maintenance goal inventory is incomplete: {detail}")
+ValueError: maintenance goal inventory is incomplete: V:\_TEMP_\t2023-mjnzq4za\.saipen\goals\self-maintenance-core.json: TypeError: unhashable type: 'list'
+
+======================================================================
+ERROR: test_malformed_inventory_refuses_ingress_without_losing_request_or_seat (__main__.MaintenanceObservationTests.test_malformed_inventory_refuses_ingress_without_losing_request_or_seat) (command='start')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 131, in test_malformed_inventory_refuses_ingress_without_losing_request_or_seat
+    result = request()
+             ^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t2040_review_authority_hypotheses.py", line 129, in request
+    return entry.start_work(root, "fix", actor_source="test", text=text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\entry.py", line 870, in start_work
+    projected = user_request(
+                ^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\operations.py", line 431, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\operations.py", line 17156, in user_request
+    protected = is_protected_goal_request(root, text)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\goal_authority.py", line 164, in is_protected_goal_request
+    for goal in active_maintenance_goals(root):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\goal_authority.py", line 144, in active_maintenance_goals
+    raise ValueError(f"maintenance goal inventory is incomplete: {detail}")
+ValueError: maintenance goal inventory is incomplete: V:\_TEMP_\t2023-1vidjfpf\.saipen\goals\self-maintenance-core.json: TypeError: unhashable type: 'list'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.524s
+
+FAILED (errors=2)

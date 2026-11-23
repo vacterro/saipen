@@ -1,0 +1,89 @@
+{
+  "label": "verify",
+  "verifier_sha256": "215601f4e716f0d4208da36533b54cedc71595a21440163bb9a840c7c7d3c6ae",
+  "checks": {
+    "same_public_oracle": true,
+    "behavioral_prefixed_runtime_rejected": true,
+    "current_public_control_passes": false,
+    "all_40_focused_controls_pass": false,
+    "subject_bytes_unchanged": true
+  },
+  "failures": 2,
+  "red": {
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "unittest",
+      "-v",
+      "test_log_tail_quarantine.QuarantineLogTailTests.test_public_recovery_same_damage_preserves_bytes_and_resumes"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\kitchen\\t1565-goalresume-prefix-20260930\\tools",
+    "exit_code": 1,
+    "subject_sha256": {
+      "tools/saipen_engine/log.py": "d4fe06190c3e9065792569c5d81ddf72e9fcc849f357ca9dbd4d6a017410a1fa",
+      "tools/saipen_engine/operations.py": "5b0a9730a5e685382b11e3e9cda42a47af0fc77b012b8ec4adb1de54d19da3b4",
+      "tools/saipen_engine/reconcile.py": "a16d5f5b62dbbb582ebd53ecd85e5cadba8e494a1da6e443a8a768e5709a74ac",
+      "tools/_log_append.py": "8d812ea6c9ffda3f76100c52910d50f87e5658886d973c2acfdb80564baae49b",
+      "tools/saipen_engine/runtime_namespace.py": "9a762a0eaa4ddf33c14eafcfa0ea466907c26f0339e13589803f4638cf10bb92",
+      ".gitattributes": "dfb240e7d7b4cd2cd41582f9e9eb7f450ba84a249f54186fd02e432ff36a4fc4"
+    },
+    "subject_unchanged": true,
+    "verifier_test_sha256": "71110b92d5c4c9332c4b185eeedd13b122b5c63c7f6428b1f2de8b8b8e0e46b8",
+    "output_sha256": "d3b5b475a8215f0733fb46b7aa7bede65d76fd0671d84d9e964cdf8627a43a69",
+    "output": "test_public_recovery_same_damage_preserves_bytes_and_resumes (test_log_tail_quarantine.QuarantineLogTailTests.test_public_recovery_same_damage_preserves_bytes_and_resumes)\r\nSame oracle reaches the old runtime, not an absent-API import. ... FAIL\r\n\r\n======================================================================\r\nFAIL: test_public_recovery_same_damage_preserves_bytes_and_resumes (test_log_tail_quarantine.QuarantineLogTailTests.test_public_recovery_same_damage_preserves_bytes_and_resumes)\r\nSame oracle reaches the old runtime, not an absent-API import.\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\kitchen\\t1565-goalresume-prefix-20260930\\tools\\test_log_tail_quarantine.py\", line 137, in test_public_recovery_same_damage_preserves_bytes_and_resumes\r\n    self.assertEqual(route, \"saipen recover quarantine-log-tail\", recovery)\r\nAssertionError: None != 'saipen recover quarantine-log-tail' : {'ok': False, 'code': 'HISTORY_LEDGER_CORRUPT', 'detail': 'history-void: complete LOG history fails the immutable-ledger contract -- duplicate E-ID(s) in complete history: E-1301, E-1302; E-1301 is not greater than preceding E-1302 (out of order)', 'needs_local_mutation': False, 'safe_auto_repair_available': False, 'operator_decision_available': False, 'canonical_next_command': None, 'read_only': True, 'terminal_disposition': 'FORENSICALLY_UNRECOVERABLE', 'blocking_surface': 'log', 'blocking_field': None, 'evidence_reference': '.saipen/LOG.md', 'diagnosis': 'READ_ONLY_DIAGNOSIS_ONLY', 'read_only_diagnosis_only': True, 'instruction': 'READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth', 'forbidden_probes': ['saipen stop', 'saipen transition', 'saipen goal', 'saipen ticket', 'Bash', 'Edit', 'Write'], 'reason_code': 'HISTORY_LEDGER_CORRUPT'}\r\n\r\n----------------------------------------------------------------------\r\nRan 1 test in 0.449s\r\n\r\nFAILED (failures=1)\r\n"
+  },
+  "green": {
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "unittest",
+      "-v",
+      "test_log_tail_quarantine.QuarantineLogTailTests.test_public_recovery_same_damage_preserves_bytes_and_resumes"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+    "exit_code": 0,
+    "subject_sha256": {
+      "tools/saipen_engine/log.py": "173596942090002c8d1bb0508fa0a986e1fea3e7f769d8e841f3d7c7114287e1",
+      "tools/saipen_engine/operations.py": "bb4d9c95fa10643d2bc829a1a5c972589ae3ef7e8b3eed1551ad8cd8db2c8728",
+      "tools/saipen_engine/reconcile.py": "1e7dddf50d11e4e1d3458349bbf589cfe742d6a8a996299064b450487b1e895b",
+      "tools/_log_append.py": "f0fa4117f6db742fea88d9344f7181c76eaf9db7793bb7293e77295b708c6898",
+      "tools/saipen_engine/runtime_namespace.py": "3ce5a28e36ab9ad4ba9430fecea266b9dc5fdd853181ed1b6a6d56f82c300d11",
+      ".gitattributes": "dfb240e7d7b4cd2cd41582f9e9eb7f450ba84a249f54186fd02e432ff36a4fc4"
+    },
+    "subject_unchanged": true,
+    "verifier_test_sha256": "71110b92d5c4c9332c4b185eeedd13b122b5c63c7f6428b1f2de8b8b8e0e46b8",
+    "output_sha256": "207f5fa9333ac1726f9584a50b11ee532025f57207d7dcc0764272059be4cf5a",
+    "output": "test_public_recovery_same_damage_preserves_bytes_and_resumes (test_log_tail_quarantine.QuarantineLogTailTests.test_public_recovery_same_damage_preserves_bytes_and_resumes)\r\nSame oracle reaches the old runtime, not an absent-API import. ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 1 test in 1.269s\r\n\r\nOK\r\n"
+  },
+  "focused": {
+    "command": [
+      "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "unittest",
+      "-v",
+      "test_log_tail_quarantine",
+      "test_log_stamp_guard",
+      "test_foreign_observation_authority",
+      "test_foreign_owner_terminal_route"
+    ],
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools",
+    "exit_code": 0,
+    "subject_sha256": {
+      "tools/saipen_engine/log.py": "173596942090002c8d1bb0508fa0a986e1fea3e7f769d8e841f3d7c7114287e1",
+      "tools/saipen_engine/operations.py": "bb4d9c95fa10643d2bc829a1a5c972589ae3ef7e8b3eed1551ad8cd8db2c8728",
+      "tools/saipen_engine/reconcile.py": "1e7dddf50d11e4e1d3458349bbf589cfe742d6a8a996299064b450487b1e895b",
+      "tools/_log_append.py": "f0fa4117f6db742fea88d9344f7181c76eaf9db7793bb7293e77295b708c6898",
+      "tools/saipen_engine/runtime_namespace.py": "3ce5a28e36ab9ad4ba9430fecea266b9dc5fdd853181ed1b6a6d56f82c300d11",
+      ".gitattributes": "dfb240e7d7b4cd2cd41582f9e9eb7f450ba84a249f54186fd02e432ff36a4fc4"
+    },
+    "subject_unchanged": true,
+    "verifier_test_sha256": "71110b92d5c4c9332c4b185eeedd13b122b5c63c7f6428b1f2de8b8b8e0e46b8",
+    "output_sha256": "4774e07d37507c9b621879af45da20a4a382143d4d1eb2adf76f0753f081ba69",
+    "output": "test_a_comment_only_suffix_is_not_a_tail (test_log_tail_quarantine.QuarantineLogTailTests.test_a_comment_only_suffix_is_not_a_tail) ... ok\r\ntest_a_legal_log_refuses_rather_than_writing_a_no_op (test_log_tail_quarantine.QuarantineLogTailTests.test_a_legal_log_refuses_rather_than_writing_a_no_op) ... ok\r\ntest_a_stale_last_event_is_not_a_cut_boundary (test_log_tail_quarantine.QuarantineLogTailTests.test_a_stale_last_event_is_not_a_cut_boundary)\r\nSTATE behind a legal tail means the suffix holds a real event. ... ok\r\ntest_a_suffix_id_above_the_tail_is_never_cut (test_log_tail_quarantine.QuarantineLogTailTests.test_a_suffix_id_above_the_tail_is_never_cut)\r\nIt may be a genuine event whose checkpoint never landed. ... ok\r\ntest_damage_before_the_tail_still_refuses (test_log_tail_quarantine.QuarantineLogTailTests.test_damage_before_the_tail_still_refuses) ... ok\r\ntest_every_repair_evidence_root_is_durable_and_byte_bound (test_log_tail_quarantine.QuarantineLogTailTests.test_every_repair_evidence_root_is_durable_and_byte_bound)\r\nA preserved LOG whose digest the ledger records must keep its bytes. ... ok\r\ntest_ordinary_work_resumes_and_validates (test_log_tail_quarantine.QuarantineLogTailTests.test_ordinary_work_resumes_and_validates) ... ok\r\ntest_public_recovery_same_damage_preserves_bytes_and_resumes (test_log_tail_quarantine.QuarantineLogTailTests.test_public_recovery_same_damage_preserves_bytes_and_resumes)\r\nSame oracle reaches the old runtime, not an absent-API import. ... ok\r\ntest_reconcile_never_plans_on_the_cut_ledger (test_log_tail_quarantine.QuarantineLogTailTests.test_reconcile_never_plans_on_the_cut_ledger)\r\nThe observation is the cut; only the op that writes the cut may ask. ... ok\r\ntest_recover_names_the_exit_instead_of_unrecoverable (test_log_tail_quarantine.QuarantineLogTailTests.test_recover_names_the_exit_instead_of_unrecoverable)\r\nThe measured dead end: FORENSICALLY_UNRECOVERABLE, command null. ... ok\r\ntest_recover_stays_unrecoverable_when_the_cut_is_not_provable (test_log_tail_quarantine.QuarantineLogTailTests.test_recover_stays_unrecoverable_when_the_cut_is_not_provable) ... ok\r\ntest_the_canonical_command_reaches_it (test_log_tail_quarantine.QuarantineLogTailTests.test_the_canonical_command_reaches_it) ... ok\r\ntest_the_command_takes_no_other_argument (test_log_tail_quarantine.QuarantineLogTailTests.test_the_command_takes_no_other_argument) ... ok\r\ntest_the_cut_keeps_the_ledger_and_records_itself (test_log_tail_quarantine.QuarantineLogTailTests.test_the_cut_keeps_the_ledger_and_records_itself) ... ok\r\ntest_the_fixture_really_is_the_deadlock (test_log_tail_quarantine.QuarantineLogTailTests.test_the_fixture_really_is_the_deadlock)\r\nGuard: the strict read refuses ordinary work exactly as measured. ... ok\r\ntest_the_original_bytes_are_preserved (test_log_tail_quarantine.QuarantineLogTailTests.test_the_original_bytes_are_preserved) ... ok\r\ntest_dec_at_or_after_the_inversion_covers_it (test_log_stamp_guard.AmnestyScopeTests.test_dec_at_or_after_the_inversion_covers_it) ... ok\r\ntest_dec_does_not_cover_an_inversion_written_after_it (test_log_stamp_guard.AmnestyScopeTests.test_dec_does_not_cover_an_inversion_written_after_it) ... ok\r\ntest_run_line_quoting_the_phrase_grants_no_amnesty (test_log_stamp_guard.AmnestyScopeTests.test_run_line_quoting_the_phrase_grants_no_amnesty) ... ok\r\ntest_a_well_formed_next_line_is_still_refused (test_log_stamp_guard.RetiredAppenderTests.test_a_well_formed_next_line_is_still_refused) ... ok\r\ntest_help_prints_the_notice_and_writes_nothing (test_log_stamp_guard.RetiredAppenderTests.test_help_prints_the_notice_and_writes_nothing)\r\nThe measured first line: `--help` was appended to the ledger. ... ok\r\ntest_no_code_path_opens_the_ledger_for_writing (test_log_stamp_guard.RetiredAppenderTests.test_no_code_path_opens_the_ledger_for_writing) ... ok\r\ntest_the_measured_foreign_sequence_writes_nothing (test_log_stamp_guard.RetiredAppenderTests.test_the_measured_foreign_sequence_writes_nothing) ... ok\r\ntest_mutation_against_foreign_project_is_refused (test_foreign_observation_authority.ForeignObservationCliTests.test_mutation_against_foreign_project_is_refused) ... ok\r\ntest_mutation_succeeds_with_coherent_carriers (test_foreign_observation_authority.ForeignObservationCliTests.test_mutation_succeeds_with_coherent_carriers) ... ok\r\ntest_mutation_succeeds_with_no_carriers (test_foreign_observation_authority.ForeignObservationCliTests.test_mutation_succeeds_with_no_carriers) ... ok\r\ntest_status_observes_foreign_project_with_ambient_a_carriers (test_foreign_observation_authority.ForeignObservationCliTests.test_status_observes_foreign_project_with_ambient_a_carriers) ... ok\r\ntest_validate_observes_foreign_project_with_ambient_a_carriers (test_foreign_observation_authority.ForeignObservationCliTests.test_validate_observes_foreign_project_with_ambient_a_carriers) ... ok\r\ntest_external_authority_is_stable_identity_not_a_url (test_foreign_observation_authority.ProvenanceModelTests.test_external_authority_is_stable_identity_not_a_url) ... ok\r\ntest_external_implementation_and_reason_families (test_foreign_observation_authority.ProvenanceModelTests.test_external_implementation_and_reason_families) ... ok\r\ntest_local_implementation (test_foreign_observation_authority.ProvenanceModelTests.test_local_implementation) ... ok\r\ntest_superseded_local_ticket (test_foreign_observation_authority.ProvenanceModelTests.test_superseded_local_ticket) ... ok\r\ntest_mutation_allows_coherent_explicit_root (test_foreign_observation_authority.ResolveAuthorityTests.test_mutation_allows_coherent_explicit_root) ... ok\r\ntest_mutation_refuses_foreign_explicit_root (test_foreign_observation_authority.ResolveAuthorityTests.test_mutation_refuses_foreign_explicit_root) ... ok\r\ntest_observation_may_bind_foreign_explicit_root (test_foreign_observation_authority.ResolveAuthorityTests.test_observation_may_bind_foreign_explicit_root) ... ok\r\ntest_unknown_authority_is_refused (test_foreign_observation_authority.ResolveAuthorityTests.test_unknown_authority_is_refused) ... ok\r\ntest_plain_text_ingress_still_gets_the_receipt_route (test_foreign_owner_terminal_route.ForeignOwnerTerminalRouteTests.test_plain_text_ingress_still_gets_the_receipt_route) ... ok\r\ntest_receipt_form_ingress_is_terminal_not_a_fixed_point (test_foreign_owner_terminal_route.ForeignOwnerTerminalRouteTests.test_receipt_form_ingress_is_terminal_not_a_fixed_point) ... ok\r\ntest_the_owner_is_still_exactly_where_it_was (test_foreign_owner_terminal_route.ForeignOwnerTerminalRouteTests.test_the_owner_is_still_exactly_where_it_was) ... ok\r\ntest_the_two_answers_are_not_identical (test_foreign_owner_terminal_route.ForeignOwnerTerminalRouteTests.test_the_two_answers_are_not_identical) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 40 tests in 7.636s\r\n\r\nOK\r\n"
+  },
+  "limits": [
+    "Historical source provenance is not upgraded.",
+    "The pre-fix carrier is a preserved implementation control.",
+    "Admission and remote publication remain outside this repair closure."
+  ]
+}

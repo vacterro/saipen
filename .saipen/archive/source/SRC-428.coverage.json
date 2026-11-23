@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-428:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-2094 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:71 record:.saipen/evidence/focused-unit/a7fbf8440b1ee9e2-20261118T155438941474Z.json sha256:7f2ffa75f06c7d0e0cacf00f576029549d729d25fd0d6dc82077bd18b783b103",
+      "text": "HYPERLEAN NIGHT SHIFT 9: W0 live orientation, then W1 preflight stale-timing refusal repair, W2 sandbox ownership safety, W3 pattern-aware DECLARED scope",
+      "verification": "the Work this request created reached its own verification gate; see the T-2094 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-2094"
+    }
+  },
+  "schema_version": 1
+}

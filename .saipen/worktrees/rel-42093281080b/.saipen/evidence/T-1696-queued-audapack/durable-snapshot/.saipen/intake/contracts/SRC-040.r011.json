@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-040:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Create exactly one new repair ticket through the normal SAIPEN/SAIOPS workflow for the verified T-150 residue and claim it before editing; do not reopen T-150; use the live allocator id (expected T-168)."
+    },
+    "SRC-040:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reproduce before edit: run the focused test tests/test_fidelity.py::TestMediaSampling::test_referenced_media_outranks_the_sample_cap and record the observed case-sensitive failure; do not change the regression expectation to make it green."
+    },
+    "SRC-040:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Root cause is scan_asset_references() exact-case candidate.is_file() existence verification; the repair touches reference matching only: FileDecision identity stays exact-case and FidelityPlan.decision_for() gains no lowercase fallback."
+    },
+    "SRC-040:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement case-insensitive reference existence from the already-discovered media inventory (optional known_media_rel_lower membership input derived from media_groups, no second full source walk); add the original textual spelling to referenced_files and keep the exact candidate validation path when no known-media membership is supplied."
+    },
+    "SRC-040:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Case-distinct physical siblings keep two distinct exact-case FileDecisions; one case-insensitive reference may rank both; never choose one case twin by traversal order and never collapse decision identities."
+    },
+    "SRC-040:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Source containment is preserved: traversal-like, absolute and nonexistent references must never enter referenced_files as verified project assets; keep the existing fallback containment checks."
+    },
+    "SRC-040:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Focused regressions in tests/test_fidelity.py cover: case-differing reference recorded in plan.referenced_files with the exact-case decision included and referenced-priority; exact identity API not aliased by lowercase fallback; case-distinct ambiguous reference keeps two decisions both protected (skip only if the filesystem cannot hold them); a missing reference with a media extension is not promoted; a traversal-like outside-source candidate is refused via the existing scanner grammar; and no second full walk beyond existing PERF-001 coverage."
+    },
+    "SRC-040:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Focused test passes, then the broad gate tests/test_fidelity.py tests/test_packing.py tests/test_config.py tests/test_inaudit_notification_boundary.py tests/test_single_instance.py is green with reference result 174 passed 8 skipped 22 subtests, ruff check on audapack/fidelity.py and tests/test_fidelity.py is clean, python -m compileall -q audapack is clean, and full pytest runs if PySide6 is available (record unavailability otherwise, no dependency installs)."
+    },
+    "SRC-040:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Only after T-168 DONE adjudicate SRC-009..SRC-029 (T-52) clause by clause via official saipen source verbs against the live tree: no bulk IMPLEMENTED from DONE status; SRC-028 (T14 six-run Windows release gate) and SRC-029 (T15 release cut/documentation) stay unresolved unless protocol truthfully allows otherwise; DUPLICATE only for genuine restatements with concrete evidence; leave genuinely operator-only requirements unresolved."
+    },
+    "SRC-040:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "For T01-T13 implementation clauses sample live evidence with existing targeted tests (one-click START AUDIT, coordinator ownership, composite run snapshot, audit wave progress, refresh/event propagation, six-lane run model, managed worker capacity, group/batch start if still required, AUDIT READY proof, failure/cancel/recovery UX, start-intent persistence, run history, diagnostics); on a found regression create a narrow new ticket, record the blocked source requirement, and stop closure for that requirement."
+    },
+    "SRC-040:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Adjudicate SRC-030 (T-54) from durable evidence only: use SUPERSEDED or DUPLICATE with precise references to later runs/tests only where the protocol supports it, otherwise leave unresolved; never fabricate browser interaction."
+    }
+  },
+  "derived_at": "2026-09-07T12:36:52Z",
+  "derived_from": "SRC-040",
+  "interpretation_revision": 11,
+  "schema_version": 1,
+  "source_sha256": "f0eafd761272fafb291971705b367067624f579d77d8319d16db6fd2b8a496c7"
+}

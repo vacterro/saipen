@@ -1,0 +1,7 @@
+CONTROL unmutated copy: exit 0, Ran 4 tests
+command: python -B -m unittest test_t1676_lifecycle_code (cwd tools/)
+verifier:e6bf72b2867116e0  (tools/test_t1676_lifecycle_code.py, byte-identical in both trees)
+FAIL subject:40bb7640389d4041  exit 1  red 3: test_fleet_maps_it_to_the_state_surface_as_an_operator_decision, test_status_and_every_refused_verb_return_the_class_as_the_code, test_the_code_is_registered
+PASS subject:bd3d21982788ee66  exit 0  Ran 4 tests
+held: True
+rc=0

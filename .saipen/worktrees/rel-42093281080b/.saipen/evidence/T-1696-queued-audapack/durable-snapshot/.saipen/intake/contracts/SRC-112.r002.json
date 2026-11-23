@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-112:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-22 is implemented and verified against the real audit signature cache"
+    },
+    "SRC-112:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "the cache fixture is red-controlled in both directions and green against the real cache"
+    }
+  },
+  "derived_at": "2026-10-04T14:59:49Z",
+  "derived_from": "SRC-112",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "24a669d01800c32aaf1a4e21a742bb979c0173f7dc05cc57ccf63318d1c4a680"
+}

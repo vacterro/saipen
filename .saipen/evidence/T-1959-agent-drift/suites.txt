@@ -1,0 +1,13 @@
+T-1959 suite runs, HEAD 66ef622a43ab59512735ac78ce10d1250e26f9df
+
+test_entry_answer_agrees                   Ran 9 tests in 14.523s  OK 
+test_t1363_zero_manual_entry               Ran 75 tests in 83.361s  OK (skipped=2) 
+test_automation_block                      Ran 38 tests in 3.707s  OK 
+test_capability_boundary                   Ran 10 tests in 5.120s  OK 
+test_cold_agent_truth                      Ran 21 tests in 0.439s  OK 
+test_source_contract_derivation            Ran 13 tests in 4.499s  OK 
+test_response_surface_contract             Ran 56 tests in 21.335s  OK 
+test_response_delivery                     Ran 12 tests in 53.333s  OK 
+test_response_digest                       Ran 10 tests in 0.224s  OK 
+test_response_fact_binding                 Ran 7 tests in 29.605s  OK 
+test_host_bootstrap                        Ran 25 tests in 16.278s  OK 

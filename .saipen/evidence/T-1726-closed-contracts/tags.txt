@@ -1,0 +1,9 @@
+WARN: v3.1.1a -> VERSION 3.1.1 -- known: commit is the 3.1.1a work but its VERSION was never bumped past 3.1.1
+WARN: v7.199.0 -> VERSION 7.201.0 -- known: its true release commit eae5b72 (VERSION 7.199.0) is not on origin/main -- orphaned by a later history rewrite -- so a tag pointing there would dangle on every fresh clone; the tag currently names 594a1da, which carries VERSION 7.201.0. Re-pointing would push the orphaned commit and re-run the v7.199.0 release
+WARN: v7.200.0 -> VERSION 7.201.0 -- known: same shape as v7.199.0: its true release commit ea8eef3 (VERSION 7.200.0) is not on origin/main; the tag names 594a1da (VERSION 7.201.0). Re-pointing would push the orphaned commit and re-run the v7.200.0 release
+WARN: v7.223.15 -> VERSION 7.223.14 -- known: the release executor's untracked-only scope bug created closure commit 88ddbbaa without a v7.223.15 metadata/content commit, so it retained VERSION 7.223.14. v7.223.16 explicitly shipped the omitted T-996 content and the executor fix; no truthful v7.223.15 commit exists to re-point to, and moving the published tag would re-run the defective historical release workflow
+WARN: v7.61.0 -> VERSION 7.60.0 -- known: tag landed one release behind -- the commit is v7.60.0
+WARN: v7.74.0 -> VERSION 7.75.0 -- known: tag landed one release ahead -- the commit is v7.75.0
+WARN: v7.81.0 -> VERSION 7.80.0 -- known: commit is the v7.81.0 work but its VERSION still says 7.80.0
+WARN: v7.99.0 -> VERSION 7.98.0 -- known: the incident that produced the guard: `git tag` ran after a failed commit and labelled the previous one. Its published release carries v7.98.0's notes
+PASS: 394 comparable tag(s) checked, 8 known historical mismatch(es), no new ones

@@ -1,0 +1,17 @@
+# T-1385 supported injection proof (2026-09-17T16:07:23Z)
+## python tools/autoinject.py --check
+fresh: 6 agent home(s) at gen-sha256:8ef6a7700119fadc739784102ab96f5f0a38a0994912d45a0be96f9bd3c59402
+exit=0
+
+## distribution_report (installed opencode home)
+expected_generation gen-sha256:8ef6a7700119fadc739784102ab96f5f0a38a0994912d45a0be96f9bd3c59402
+C:\Users\vac34\.config\opencode\skills\saipen runtime gen-sha256:8ef6a7700119fadc739784102ab96f5f0a38a0994912d45a0be96f9bd3c59402 current True source_head 8cd798cc5ffa2ea87470fea069bb4da68cdb0e91
+C:\Users\vac34\.claude\skills\saipen runtime gen-sha256:8ef6a7700119fadc739784102ab96f5f0a38a0994912d45a0be96f9bd3c59402 current True source_head 8cd798cc5ffa2ea87470fea069bb4da68cdb0e91
+C:\Users\vac34\.codex\skills\saipen runtime gen-sha256:8ef6a7700119fadc739784102ab96f5f0a38a0994912d45a0be96f9bd3c59402 current True source_head 8cd798cc5ffa2ea87470fea069bb4da68cdb0e91
+C:\Users\vac34\.gemini\skills\saipen runtime gen-sha256:8ef6a7700119fadc739784102ab96f5f0a38a0994912d45a0be96f9bd3c59402 current True source_head 8cd798cc5ffa2ea87470fea069bb4da68cdb0e91
+C:\Users\vac34\.codebuddy\skills\saipen runtime gen-sha256:8ef6a7700119fadc739784102ab96f5f0a38a0994912d45a0be96f9bd3c59402 current True source_head 8cd798cc5ffa2ea87470fea069bb4da68cdb0e91
+C:\Users\vac34\.agents\skills\saipen runtime gen-sha256:8ef6a7700119fadc739784102ab96f5f0a38a0994912d45a0be96f9bd3c59402 current True source_head 8cd798cc5ffa2ea87470fea069bb4da68cdb0e91
+
+## loaded plugin bytes
+a0562237015830e69d794a2e84043e8fd1d21c51030d8a9a3d0a1e01017b6743 */c/Users/vac34/.config/opencode/plugins/saipen-guard.js
+a0562237015830e69d794a2e84043e8fd1d21c51030d8a9a3d0a1e01017b6743 *extensions/adapters/opencode/saipen-guard.js

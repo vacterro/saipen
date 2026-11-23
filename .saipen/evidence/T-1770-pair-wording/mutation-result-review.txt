@@ -1,0 +1,7 @@
+control: ran 8, red 0 -- as expected
+the engine before this Work: ran 8, red 3 -- as expected
+the scope is defined and never applied: ran 8, red 3 -- as expected
+the word alone is the scope: ran 8, red 1 -- as expected
+the green twin is not required: ran 8, red 1 -- as expected
+the twin's own counts join the half: ran 8, red 1 -- as expected
+mutations: 5, repetitions each: 3, problems: 0

@@ -1,0 +1,29 @@
+test_unit_cli_uses_existing_full_engine_without_a_lifecycle_citation (test_t1837_ci_family_parity.DispatchTests.test_unit_cli_uses_existing_full_engine_without_a_lifecycle_citation) ... usage: -c [-h] [--project-root PROJECT_ROOT] [--family FAMILY] [--json]
+-c: error: unrecognized arguments: --jobs 2
+ERROR
+
+======================================================================
+ERROR: test_unit_cli_uses_existing_full_engine_without_a_lifecycle_citation (test_t1837_ci_family_parity.DispatchTests.test_unit_cli_uses_existing_full_engine_without_a_lifecycle_citation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1837_ci_family_parity.py", line 116, in test_unit_cli_uses_existing_full_engine_without_a_lifecycle_citation
+    code, report = self.cli("--family", "unit", "--jobs", "2")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1837_ci_family_parity.py", line 107, in cli
+    code = test_runner.main(["--project-root", str(self.root), *args, "--json"])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1837-ci-parity\prefix\test_runner.py", line 571, in main
+    args = parser.parse_args(argv)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ProgramData\SAI\SAIPEN\python\3.11.9-64\Lib\argparse.py", line 1877, in parse_args
+    self.error(msg % ' '.join(argv))
+  File "C:\ProgramData\SAI\SAIPEN\python\3.11.9-64\Lib\argparse.py", line 2640, in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+  File "C:\ProgramData\SAI\SAIPEN\python\3.11.9-64\Lib\argparse.py", line 2627, in exit
+    _sys.exit(status)
+SystemExit: 2
+
+----------------------------------------------------------------------
+Ran 1 test in 0.006s
+
+FAILED (errors=1)

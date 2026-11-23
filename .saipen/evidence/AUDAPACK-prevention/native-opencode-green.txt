@@ -1,0 +1,12 @@
+test_bare_generic_launch_bootstraps_reads_and_inherits_one_canonical_actor (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_bare_generic_launch_bootstraps_reads_and_inherits_one_canonical_actor) ... ok
+test_native_task_child_mutations_receive_the_same_guard (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_native_task_child_mutations_receive_the_same_guard) ... ok
+test_optional_explicit_launch_is_checked_and_does_not_leak (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_optional_explicit_launch_is_checked_and_does_not_leak) ... ok
+test_real_installed_global_plugin_accepts_bare_canonical_continuation (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_real_installed_global_plugin_accepts_bare_canonical_continuation) ... ok
+test_shell_workdir_cannot_hide_a_canonical_append (test_opencode_bound_launch_smoke.BoundOpenCodeNativeSmoke.test_shell_workdir_cannot_hide_a_canonical_append)
+T-1705: native execution cwd must survive the guard transport. ... ok
+test_other_tool_refusals_do_not_satisfy_the_expected_code (test_opencode_bound_launch_smoke.ProviderTranscriptOracleTests.test_other_tool_refusals_do_not_satisfy_the_expected_code) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 72.442s
+
+OK

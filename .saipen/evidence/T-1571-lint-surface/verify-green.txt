@@ -1,0 +1,10 @@
+test_discovery_is_every_python_file_under_tools_and_tests (test_t1571_lint_surface.CanonicalSurface.test_discovery_is_every_python_file_under_tools_and_tests) ... ok
+test_the_python_floor_is_retained (test_t1571_lint_surface.CanonicalSurface.test_the_python_floor_is_retained) ... ok
+test_an_engine_file_and_a_test_file_are_both_linted (test_t1571_lint_surface.InjectedViolations.test_an_engine_file_and_a_test_file_are_both_linted) ... ok
+test_an_excluded_fixture_is_not_linted (test_t1571_lint_surface.InjectedViolations.test_an_excluded_fixture_is_not_linted) ... ok
+test_syntax_newer_than_the_floor_is_reported (test_t1571_lint_surface.InjectedViolations.test_syntax_newer_than_the_floor_is_reported) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.195s
+
+OK

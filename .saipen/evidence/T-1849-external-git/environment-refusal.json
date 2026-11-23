@@ -1,0 +1,7 @@
+{
+  "default_environment_differences": [
+    "environment_sha256"
+  ],
+  "original_private_environment_differences": [],
+  "diagnosis": "Only the changed TEMP/TMP environment separates the private focused record from the canonical caller; no source, verifier, runtime or toolchain drift."
+}

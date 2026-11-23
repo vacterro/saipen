@@ -1,0 +1,29 @@
+{
+  "files": [
+    {
+      "path": "tools/saipen_engine/goal_authority.py",
+      "sha256": "297b69017222fb2d8f7814bcbd6d1d3cde55f1f0e47b10516a208f875c3281e9"
+    },
+    {
+      "path": "tools/saipen_engine/operations.py",
+      "sha256": "d0a3ea67cc7a1d9d168ba1d9aa9028b4c31bc71875496847aaf259d57f58c1a1"
+    },
+    {
+      "path": "tools/saipen_engine/journal.py",
+      "sha256": "b1987c8e1d1be15fa44ea2646ac7fb377af5facd8be03884076c348c479260fd"
+    },
+    {
+      "path": "tools/saipen.py",
+      "sha256": "8e43b4749f0dca94853056e90b84e0730b2f678dd5e3082b96435165bddab148"
+    },
+    {
+      "path": "saipen/MAINTENANCE.md",
+      "sha256": "29d5fc7441195b1ef05bbc9bdc2596bb5b93781ef4559e92703b66e413b7893b"
+    },
+    {
+      "path": "saipen/OPS.md",
+      "sha256": "4a89109f3d87a9c0d9a51e2d53df9286be205ff2b48592b54aa079eb5dfe2f22"
+    }
+  ],
+  "purpose": "Exact pre-transition tested source bytes, preserved beyond temporary sandbox lifetime"
+}
